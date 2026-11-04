@@ -22,6 +22,23 @@
        yazılır.
    Geri almak planı kapatır; hafta taslağı eski sırasına döner. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.hedefplan.bu-vakitle-konular':'Bu vakitle konular ',
+  'ays.core.hedefplan.sureklilik-isteyen-beceriler':'Süreklilik isteyen beceriler (ör. paragrafta çıkarım) plana konu olarak girmez; ',
+  'ays.core.hedefplan.bu-kapsamda-kapanmamis-yukse':'Bu kapsamda kapanmamış yüksek sıklıklı konu kalmadı; net artışı deneme analizinden ve yanlış defterinden gelir.',
+  'ays.core.hedefplan.hedef-programi':'Hedef programı',
+  'ays.core.hedefplan.haftalik-vakit':'Haftalık vakit',
+  'ays.core.hedefplan.deneme-gunu':'Deneme günü',
+  'ays.core.hedefplan.kontrol-noktalari':'Kontrol noktaları',
+  'ays.core.hedefplan.odak-konulari':'Odak konuları',
+  'ays.core.hedefplan.hafta-sozlesmesi-taslagi':'Hafta sözleşmesi taslağı',
+  'ays.core.hedefplan.hedeflerim-plani-uygula':'Hedeflerim › Planı uygula',
+  'ays.core.hedefplan.plan-uygulanamadi':'Plan uygulanamadı.',
+  'ays.core.hedefplan.hedefin-plani-da-kapandi':'Hedefin planı da kapandı.',
+  'ays.core.hedefplan.bugune-kadar':'Bugüne kadar ',
+  'ays.core.hedefplan.plan-yeni-basladi':'Plan yeni başladı; ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.hedefplan.gunde-ne-kadar-vakit-ayiraca':'Günde ne kadar vakit ayıracağın bilinmeden plan kurulamaz.',
   'ays.core.hedefplan.bu-hedefte-kalan-konu-yok':'Bu hedefte kalan konu yok.',
   'ays.core.hedefplan.bu-vakitle-plan-iki-yili':'Bu vakitle plan iki yılı aşıyor; günlük vakti artır ya da kapsamı daralt.',
@@ -129,13 +146,13 @@ R.HedefPlan = (function(){
     }
     const uyarilar = [];
     if(h.son_tarih && konuBitis > h.son_tarih){
-      uyarilar.push('Bu vakitle konular ' + tarihYaz(konuBitis) + ' haftasında biter; son tarihin '
+      uyarilar.push(yz('ays.core.hedefplan.bu-vakitle-konular') + tarihYaz(konuBitis) + ' haftasında biter; son tarihin '
         + tarihYaz(h.son_tarih) + '. Denemeler ve tekrarlar da vakit ister.');
     }
     const rutin = (h.dersler || []).some(id => ((R.SUBJECTS || []).find(s => s.id === id) || { topics:[] })
       .topics.some(t => /(sürekli|rutin)/i.test(t.days)));
     if(rutin){
-      uyarilar.push('Süreklilik isteyen beceriler (ör. paragrafta çıkarım) plana konu olarak girmez; '
+      uyarilar.push(yz('ays.core.hedefplan.sureklilik-isteyen-beceriler')
         + 'günlük rutinde kalır.');
     }
     return { ok:true, plan:{ id:yeniId(), hedefId:h.id, paket:'konu', kurulus:bugun, ozet:Hd().ozet(h),
@@ -171,7 +188,7 @@ R.HedefPlan = (function(){
     const odak = Hd().siraliKalan(dersler).filter(k => k.freq === 'high').slice(0, ODAK_SAYI)
       .map(k => ({ subjectId:k.subjectId, topicId:k.topicId, name:k.name, subjectName:k.subjectName }));
     const uyarilar = [];
-    if(!odak.length) uyarilar.push('Bu kapsamda kapanmamış yüksek sıklıklı konu kalmadı; net artışı deneme analizinden ve yanlış defterinden gelir.');
+    if(!odak.length) uyarilar.push(yz('ays.core.hedefplan.bu-kapsamda-kapanmamis-yukse'));
     return { ok:true, plan:{ id:yeniId(), hedefId:h.id, paket:'net', kurulus:bugun, ozet:Hd().ozet(h),
       ad:Hd().netAdi(h), baslangic:yuvarla(simdi.deger, 2), hedef:yuvarla(hedef, 2), birim:'net',
       hafta:toplam, bitis:h.son_tarih, kontroller, odak,
@@ -193,22 +210,22 @@ R.HedefPlan = (function(){
   function onizleme(p){
     const out = [];
     if(p.paket === 'konu'){
-      out.push({ alan:'Hedef programı', once:'yok', sonra:p.haftalar.length + ' hafta, ' + p.konuSayisi
+      out.push({ alan:yz('ays.core.hedefplan.hedef-programi'), once:'yok', sonra:p.haftalar.length + ' hafta, ' + p.konuSayisi
         + ' konu; konular ' + tarihYaz(p.konuBitis) + ' haftasında biter' });
-      out.push({ alan:'Haftalık vakit', once:'—', sonra:dkYaz(p.haftalikDk) + ' (günde ' + p.gunlukDk + ' dk'
+      out.push({ alan:yz('ays.core.hedefplan.haftalik-vakit'), once:'—', sonra:dkYaz(p.haftalikDk) + ' (günde ' + p.gunlukDk + ' dk'
         + (p.haftalikGun < 7 ? ', haftada ' + p.haftalikGun + ' gün' : '') + ')' });
-      if(p.deneme) out.push({ alan:'Deneme günü', once:'—', sonra:'iki haftada bir: ' + p.deneme.ad
+      if(p.deneme) out.push({ alan:yz('ays.core.hedefplan.deneme-gunu'), once:'—', sonra:'iki haftada bir: ' + p.deneme.ad
         + ' (çözüm + analiz ' + dkYaz(p.deneme.dk) + ')' });
       out.push({ alan:'Tekrar', once:'—', sonra:'biten her konu ' + p.tekrar.araliklar.join(' ve ')
         + ' hafta sonra, ' + p.tekrar.dk + ' dk' });
     }else{
       out.push({ alan:'Hedef', once:sayiYaz(p.baslangic, 2) + ' net', sonra:sayiYaz(p.hedef, 2) + ' net, '
         + tarihYaz(p.bitis) });
-      out.push({ alan:'Kontrol noktaları', once:'—', sonra:p.kontroller.length + ' kontrol, dört haftada bir' });
+      out.push({ alan:yz('ays.core.hedefplan.kontrol-noktalari'), once:'—', sonra:p.kontroller.length + ' kontrol, dört haftada bir' });
       if(p.deneme) out.push({ alan:'Deneme', once:'—', sonra:'haftada bir: ' + p.deneme.ad });
-      if(p.odak.length) out.push({ alan:'Odak konuları', once:'—', sonra:p.odak.map(x => x.name).join(' · ') });
+      if(p.odak.length) out.push({ alan:yz('ays.core.hedefplan.odak-konulari'), once:'—', sonra:p.odak.map(x => x.name).join(' · ') });
     }
-    out.push({ alan:'Hafta sözleşmesi taslağı', once:'plandaki sıra', sonra:'önce hedefin bu haftaki konuları' });
+    out.push({ alan:yz('ays.core.hedefplan.hafta-sozlesmesi-taslagi'), once:'plandaki sıra', sonra:'önce hedefin bu haftaki konuları' });
     return out;
   }
 
@@ -247,10 +264,10 @@ R.HedefPlan = (function(){
      ve iz tek yerde tutulur. */
   async function uygulaHedef(hedefId){
     const t = await R.Proposals.talep({ action:'hedef-plan', agent:'patron', source:'istek',
-      params:{ hedefId }, reason:'Hedeflerim › Planı uygula' });
-    if(!t.row) return { ok:false, why:t.why || 'Plan uygulanamadı.' };
+      params:{ hedefId }, reason:yz('ays.core.hedefplan.hedeflerim-plani-uygula') });
+    if(!t.row) return { ok:false, why:t.why || yz('ays.core.hedefplan.plan-uygulanamadi') };
     const r = await R.Proposals.approve(t.row.id);
-    if(!r || !r.ok) return { ok:false, why:(r && r.why) || 'Plan uygulanamadı.' };
+    if(!r || !r.ok) return { ok:false, why:(r && r.why) || yz('ays.core.hedefplan.plan-uygulanamadi') };
     return { ok:true, plan:aktif(hedefId) };
   }
   async function geriAlHedef(hedefId){
@@ -267,7 +284,7 @@ R.HedefPlan = (function(){
     const p = aktif(hedefId);
     if(!p) return '';
     await kaydet(Object.assign({}, p, { durum:'bitti', bitisGunu:U().todayISO() }));
-    return 'Hedefin planı da kapandı.';
+    return yz('ays.core.hedefplan.hedefin-plani-da-kapandi');
   }
 
   /* ------------------------------------------------------- takvim */
@@ -322,8 +339,8 @@ R.HedefPlan = (function(){
       const beklenen = gereken.length;
       const w = haftaOf(p, bugun);
       const durum = kapanan >= beklenen ? 'yolunda' : 'geride';
-      const metin = (beklenen ? 'Bugüne kadar ' + beklenen + ' konunun bitmesi planlanmıştı; '
-        + kapanan + ' konu kapanış kuralıyla kapandı.' : 'Plan yeni başladı; ' + kapanan + ' konu kapandı.')
+      const metin = (beklenen ? yz('ays.core.hedefplan.bugune-kadar') + beklenen + ' konunun bitmesi planlanmıştı; '
+        + kapanan + ' konu kapanış kuralıyla kapandı.' : yz('ays.core.hedefplan.plan-yeni-basladi') + kapanan + ' konu kapandı.')
         + (durum === 'geride' ? ' Plan geride: sıradaki konuları bu haftaya al ya da vakti artır.' : '');
       return { durum, kapanan, beklenen, toplam:tum.length, hafta:w, metin };
     }

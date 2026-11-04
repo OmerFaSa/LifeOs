@@ -22,6 +22,20 @@
 
    DIŞA: takvim istisnaları, TYT/AYT günü ve etkin hedeflerin son tarihleri
    tüm gün etkinliği olarak; telefonun takvimine eklenebilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.takvim.bu-bir-ics-takvim-dosyasi':'Bu bir .ics takvim dosyası değil.',
+  'ays.core.takvim.adsiz-etkinlik':'Adsız etkinlik',
+  'ays.core.takvim.ays-istisnasi-plan-bu':'AYS istisnası — plan bu günlerde yük oranında değişir.',
+  'ays.core.takvim.profildeki-sinav-tarihi':'Profildeki sınav tarihi.',
+  'ays.core.takvim.ays-hedefi-son-gun':'AYS hedefi son gün: ',
+  'ays.core.takvim.ays-sinav-takvimi':'AYS — sınav takvimi',
+  'ays.core.takvim.ays-bugunun-plani':'AYS · Bugünün planı',
+  'ays.core.takvim.gunun-bloklari-bugun-ekranin':'Günün blokları Bugün ekranında.',
+  'ays.core.takvim.ays-hedefin-son-gunu':'AYS · Hedefin son günü',
+  'ays.core.takvim.ays-hedefin-son-gunu-2':'AYS · Hedefin son günü yarın',
+  'ays.core.takvim.sinav-gunu':'Sınav günü: ',
+});
+
 
 window.R = window.R || {};
 
@@ -105,7 +119,7 @@ R.Takvim = (function(){
 
   function oku(metin, bugunISO){
     const ham = String(metin || '');
-    if(!/BEGIN:VCALENDAR/i.test(ham)) return { ok:false, why:'Bu bir .ics takvim dosyası değil.' };
+    if(!/BEGIN:VCALENDAR/i.test(ham)) return { ok:false, why:yz('ays.core.takvim.bu-bir-ics-takvim-dosyasi') };
     const bugun = bugunISO || U.todayISO();
     const bitisSinir = U.iso(U.addDays(U.parse(bugun), 365));
     const satirlar = ham.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '').split(/\r?\n/);
@@ -152,7 +166,7 @@ R.Takvim = (function(){
         x.bit = x.bas;
       }
       delete x.son;
-      if(!x.baslik) x.baslik = 'Adsız etkinlik';
+      if(!x.baslik) x.baslik = yz('ays.core.takvim.adsiz-etkinlik');
       if(!x.uid) x.uid = 'ics-' + x.bas + '-' + x.baslik.slice(0, 40);
     });
 
@@ -351,16 +365,16 @@ R.Takvim = (function(){
     (R.S.calendar || []).filter(c => (c.to || c.from) >= alt).forEach(c => l.push({
       uid:'ays-istisna-' + c.id + '@lifeos', bas:c.from, bit:c.to || c.from,
       baslik:'AYS · ' + ((K[c.kind] || {}).label || c.kind) + (c.note ? ': ' + c.note : ''),
-      aciklama:'AYS istisnası — plan bu günlerde yük oranında değişir.' }));
+      aciklama:yz('ays.core.takvim.ays-istisnasi-plan-bu') }));
     [['TYT', R.PLAN.examTytISO], ['AYT', R.PLAN.examAytISO]].forEach(x => {
       if(x[1] && x[1] >= bugun) l.push({ uid:'ays-sinav-' + x[0] + '-' + x[1] + '@lifeos', bas:x[1],
-        baslik:x[0] + ' sınav günü', aciklama:'Profildeki sınav tarihi.' });
+        baslik:x[0] + ' sınav günü', aciklama:yz('ays.core.takvim.profildeki-sinav-tarihi') });
     });
     ((R.Hedefler && R.Hedefler.aktifler()) || []).forEach(h => {
       if(h.son_tarih && h.son_tarih >= bugun) l.push({ uid:'ays-hedef-' + h.id + '@lifeos',
-        bas:h.son_tarih, baslik:'AYS hedefi son gün: ' + R.Hedefler.ozet(h) });
+        bas:h.son_tarih, baslik:yz('ays.core.takvim.ays-hedefi-son-gun') + R.Hedefler.ozet(h) });
     });
-    return { metin:yaz(l, 'AYS — sınav takvimi'), adet:l.length };
+    return { metin:yaz(l, yz('ays.core.takvim.ays-sinav-takvimi')), adet:l.length };
   }
 
   /* ------------------------------------------------------------ telefon */
@@ -405,19 +419,19 @@ R.Takvim = (function(){
       && Number(c.load != null ? c.load : (K[c.kind] || {}).load) === 0);
     for(let i = 0; i < PLAN_GUN; i++){
       const g = gun(i);
-      if(!bos(g)) ekle('plan@' + g, g, a.saat, 'AYS · Bugünün planı', 'Günün blokları Bugün ekranında.');
+      if(!bos(g)) ekle('plan@' + g, g, a.saat, yz('ays.core.takvim.ays-bugunun-plani'), yz('ays.core.takvim.gunun-bloklari-bugun-ekranin'));
     }
     ((R.Hedefler && R.Hedefler.aktifler()) || []).forEach(h => {
       const t = h.son_tarih;
       if(h.durum !== 'aktif' || !U.isISO(t) || t < bugun) return;
       const ad = R.Hedefler.ozet(h);
-      ekle('hedef@' + h.id + '@' + t, t, '09:00', 'AYS · Hedefin son günü', ad);
-      ekle('hedef-once@' + h.id + '@' + t, U.iso(U.addDays(U.parse(t), -1)), '20:00', 'AYS · Hedefin son günü yarın', ad);
+      ekle('hedef@' + h.id + '@' + t, t, '09:00', yz('ays.core.takvim.ays-hedefin-son-gunu'), ad);
+      ekle('hedef-once@' + h.id + '@' + t, U.iso(U.addDays(U.parse(t), -1)), '20:00', yz('ays.core.takvim.ays-hedefin-son-gunu-2'), ad);
     });
     [['TYT', R.PLAN.examTytISO, R.PROGRAM.examTytISO], ['AYT', R.PLAN.examAytISO, R.PROGRAM.examAytISO]].forEach(x => {
       if(!U.isISO(x[1]) || x[1] === x[2] || x[1] <= bugun) return;
       ekle('sinav@' + x[0] + '@' + x[1], U.iso(U.addDays(U.parse(x[1]), -1)), '20:00',
-        'AYS · ' + x[0] + ' yarın', 'Sınav günü: ' + U.fmtDate(x[1]) + '.');
+        'AYS · ' + x[0] + ' yarın', yz('ays.core.takvim.sinav-gunu') + U.fmtDate(x[1]) + '.');
     });
     return out;
   }

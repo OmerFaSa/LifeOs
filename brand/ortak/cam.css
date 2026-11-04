@@ -27,8 +27,8 @@
      bu dosyanın hiçbir kuralı çalışmaz; kartlar opak kalır. */
 
 :root{
-  --levha:linear-gradient(150deg, rgba(255,255,255,.42), rgba(255,255,255,.14));
-  --levha-kenar:0 0 0 7px rgba(255,255,255,.26), 0 0 0 8px rgba(255,255,255,.7);
+  --levha:linear-gradient(150deg, var(--beyaz-42), var(--beyaz-14));
+  --levha-kenar:0 0 0 7px var(--beyaz-26), 0 0 0 8px var(--beyaz-70);
   --levha-golge:24px 50px 100px -56px rgba(20,24,40,.36), 8px 12px 30px -18px rgba(20,24,40,.12), 18px 40px 70px -50px rgb(var(--sicak) / .25);
   --karo:var(--cam);                          /* tek yüzey: karolar da kartla aynı cam (2026-10-28) */
   --kenar-on:var(--mod-ink, var(--mod));
@@ -36,65 +36,65 @@
   --sicak-zemin:.55; --sicak-cizgi:.45; --sicak-yansima:.32;
   --ray:rgba(30,34,48,.07);
   --dugme:var(--mod-ink, var(--mod));
-  --levha-ic:inset 0 1.5px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.55);
-  --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.4), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.52), rgba(255,255,255,.26));
-  --cam-ince:linear-gradient(140deg, rgba(255,255,255,.5), rgba(255,255,255,.24));
-  --cam-katman:rgba(255,255,255,.72);
-  --cam-kenar:rgba(255,255,255,.6);
-  --cam-ust:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.28);
+  --levha-ic:inset 0 1.5px 0 var(--beyaz-90), inset 0 0 0 1px var(--beyaz-55);
+  --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-40), transparent 58%), linear-gradient(140deg, var(--beyaz-52), var(--beyaz-26));
+  --cam-ince:linear-gradient(140deg, var(--beyaz-50), var(--beyaz-24));
+  --cam-katman:var(--beyaz-72);
+  --cam-kenar:var(--beyaz-60);
+  --cam-ust:inset 0 1px 0 var(--beyaz-90), inset 0 0 0 1px var(--beyaz-28);
   --cam-golge:0 1px 2px rgba(20,24,40,.05), 0 10px 30px -14px rgba(20,24,40,.18);
-  --cam-girdi:rgba(255,255,255,.5);
+  --cam-girdi:var(--beyaz-50);
   /* SEÇİLİ VE ANA DÜĞME — renkli cam (kullanıcı, 2026-10-29: «seçili buton,
      kaydet, menü çok katı, sistemle uyumsuz»). Dolu koyu blok yerine modül
      renginde hafif boyanmış cam: ince renkli kenar, üstte 1 px ışık, yazı
      modülün koyu/açık tonu. Seçili çekmece, menü bölümü ve ana düğme aynı dil. */
-  --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 14%, rgba(255,255,255,.62));
+  --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 14%, var(--beyaz-62));
   --secili-yazi:var(--vurgu-ink, var(--mod-ink, var(--mod)));
-  --secili-golge:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--vurgu, var(--mod)) 60%, transparent);
-  --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 22%, rgba(255,255,255,.55));
-  --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 30%, rgba(255,255,255,.6));
+  --secili-golge:inset 0 1px 0 var(--beyaz-90), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--vurgu, var(--mod)) 60%, transparent);
+  --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 22%, var(--beyaz-55));
+  --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 30%, var(--beyaz-60));
 }
 :root[data-theme="dark"]{
-  --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:rgba(255,255,255,.08);
+  --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:var(--beyaz-08);
   --dugme:oklch(from var(--mod) .46 .14 h);
-  --levha:linear-gradient(150deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
-  --levha-kenar:0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.1);
-  --levha-golge:24px 50px 100px -46px rgba(0,0,0,.7), 18px 40px 70px -50px rgb(var(--sicak) / .2);
+  --levha:linear-gradient(150deg, var(--beyaz-07), var(--beyaz-025));
+  --levha-kenar:0 0 0 7px var(--beyaz-035), 0 0 0 8px var(--beyaz-10);
+  --levha-golge:24px 50px 100px -46px var(--siyah-70), 18px 40px 70px -50px rgb(var(--sicak) / .2);
   --karo:var(--cam);
   --kenar-on:oklch(from var(--mod) .42 .12 h);
-  --levha-ic:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.06);
-  --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.07), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
-  --cam-ince:linear-gradient(140deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  --levha-ic:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px var(--beyaz-06);
+  --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-07), transparent 58%), linear-gradient(140deg, var(--beyaz-09), var(--beyaz-035));
+  --cam-ince:linear-gradient(140deg, var(--beyaz-08), var(--beyaz-03));
   --cam-katman:rgba(28,28,34,.72);
-  --cam-kenar:rgba(255,255,255,.07);
-  --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
-  --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
-  --cam-girdi:rgba(0,0,0,.22);
-    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, #fff);
-    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
-    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, rgba(255,255,255,.08));
+  --cam-kenar:var(--beyaz-07);
+  --cam-ust:inset 0 1px 0 var(--beyaz-09), inset 0 0 0 1px var(--beyaz-03);
+  --cam-golge:0 1px 2px var(--siyah-25), 0 14px 34px -18px var(--siyah-55);
+  --cam-girdi:var(--siyah-22);
+    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, var(--beyaz-05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, var(--beyaz));
+    --secili-golge:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, var(--beyaz-06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, var(--beyaz-08));
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:rgba(255,255,255,.08);
+    --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:var(--beyaz-08);
     --dugme:oklch(from var(--mod) .46 .14 h);
-    --levha:linear-gradient(150deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
-    --levha-kenar:0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.1);
-    --levha-golge:24px 50px 100px -46px rgba(0,0,0,.7), 18px 40px 70px -50px rgb(var(--sicak) / .2);
+    --levha:linear-gradient(150deg, var(--beyaz-07), var(--beyaz-025));
+    --levha-kenar:0 0 0 7px var(--beyaz-035), 0 0 0 8px var(--beyaz-10);
+    --levha-golge:24px 50px 100px -46px var(--siyah-70), 18px 40px 70px -50px rgb(var(--sicak) / .2);
     --karo:var(--cam);
     --kenar-on:oklch(from var(--mod) .42 .12 h);
-    --levha-ic:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.06);
-  --levha-ic:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.06);
-    --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.07), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
-    --cam-ince:linear-gradient(140deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    --levha-ic:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px var(--beyaz-06);
+  --levha-ic:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px var(--beyaz-06);
+    --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-07), transparent 58%), linear-gradient(140deg, var(--beyaz-09), var(--beyaz-035));
+    --cam-ince:linear-gradient(140deg, var(--beyaz-08), var(--beyaz-03));
     --cam-katman:rgba(28,28,34,.72);
-    --cam-kenar:rgba(255,255,255,.07);
-    --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
-    --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
-    --cam-girdi:rgba(0,0,0,.22);
-    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, #fff);
-    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
-    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, rgba(255,255,255,.08));
+    --cam-kenar:var(--beyaz-07);
+    --cam-ust:inset 0 1px 0 var(--beyaz-09), inset 0 0 0 1px var(--beyaz-03);
+    --cam-golge:0 1px 2px var(--siyah-25), 0 14px 34px -18px var(--siyah-55);
+    --cam-girdi:var(--siyah-22);
+    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, var(--beyaz-05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, var(--beyaz));
+    --secili-golge:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, var(--beyaz-06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, var(--beyaz-08));
   }
 }
 
@@ -187,18 +187,18 @@ html[data-zemin="yumusak"] .king__yan{ background:transparent; }
 
 /* 7) KING küresi gözlü cam küre; ajanlar modül tonunda minik gözlü küre. */
 .king__kure::after{
-  background:radial-gradient(ellipse 9% 15% at 37% 52%, rgba(255,255,255,.96) 88%, transparent 100%),
-    radial-gradient(ellipse 9% 15% at 63% 52%, rgba(255,255,255,.96) 88%, transparent 100%),
-    radial-gradient(42% 30% at 34% 18%, rgba(255,255,255,.7), rgba(255,255,255,0) 75%),
+  background:radial-gradient(ellipse 9% 15% at 37% 52%, var(--beyaz-96) 88%, transparent 100%),
+    radial-gradient(ellipse 9% 15% at 63% 52%, var(--beyaz-96) 88%, transparent 100%),
+    radial-gradient(42% 30% at 34% 18%, var(--beyaz-70), var(--beyaz-00) 75%),
     radial-gradient(circle at 50% 46%, transparent 55%, rgba(8,10,32,.45) 100%);
 }
 .site--v5 .agentav, .agentkare{ color:transparent; border-radius:50%;
-  background:radial-gradient(circle at 34% 26%, rgba(255,255,255,.75), transparent 45%),
-    radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--mod) 70%, #fff), var(--mod));
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.4), 0 6px 14px -8px var(--mod); }
+  background:radial-gradient(circle at 34% 26%, var(--beyaz-75), transparent 45%),
+    radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--mod) 70%, var(--beyaz)), var(--mod));
+  box-shadow:inset 0 0 0 1px var(--beyaz-40), 0 6px 14px -8px var(--mod); }
 .site--v5 .agentav::after, .agentkare::after{ content:''; position:absolute; inset:0; border-radius:50%;
-  background:radial-gradient(ellipse 9% 15% at 38% 54%, #fff 88%, transparent 100%),
-    radial-gradient(ellipse 9% 15% at 62% 54%, #fff 88%, transparent 100%); }
+  background:radial-gradient(ellipse 9% 15% at 38% 54%, var(--beyaz) 88%, transparent 100%),
+    radial-gradient(ellipse 9% 15% at 62% 54%, var(--beyaz) 88%, transparent 100%); }
 
 /* 8) SICAK IŞIK (kullanıcı, 2026-10-27, örnek: «Apply Filters» kaydırıcısı ve
    Liquid Glass Kit; «sıcak ışıklar, yansımalar… tasarımı değiştirme pahasına
@@ -218,13 +218,13 @@ html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .c
 
 /* Akkor dolgu: renkten beyaza ısınan uç + iki katlı hale. */
 html[data-zemin="yumusak"] :is(.bar__fill:not(.bar__fill--warn):not(.bar__fill--danger), .esikcubuk__dolu, .donen__nokta.is-on:not([data-sistem])){
-  background:linear-gradient(90deg, var(--mod), color-mix(in oklab, var(--mod) 45%, #fff) 82%, #fff);
+  background:linear-gradient(90deg, var(--mod), color-mix(in oklab, var(--mod) 45%, var(--beyaz)) 82%, var(--beyaz));
   box-shadow:0 0 6px 0 color-mix(in oklab, var(--mod) 55%, transparent), 0 0 12px 1px rgb(var(--sicak) / .22); }
-html[data-zemin="yumusak"] .donen__nokta.is-on[data-sistem]{ box-shadow:0 0 8px 0 rgb(var(--sicak) / .5); background-image:linear-gradient(90deg, transparent 40%, rgba(255,255,255,.85)); }   /* sistem rengi kendi kuralında */
+html[data-zemin="yumusak"] .donen__nokta.is-on[data-sistem]{ box-shadow:0 0 8px 0 rgb(var(--sicak) / .5); background-image:linear-gradient(90deg, transparent 40%, var(--beyaz-85)); }   /* sistem rengi kendi kuralında */
 
 /* Ray: cam oyuk (kaydırıcıdaki gibi); hale taşabilsin diye kırpmaz. */
 html[data-zemin="yumusak"] :is(.bar, .esikcubuk__ray){ overflow:visible; background:var(--ray);
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.12), 0 1px 0 rgba(255,255,255,.35); }
+  box-shadow:inset 0 1px 2px var(--siyah-12), 0 1px 0 var(--beyaz-35); }
 html[data-zemin="yumusak"] .bar__fill{ max-width:100%; }
 
 /* Ana düğme: modül renginde dolu düğme. Üçüncü tur (kullanıcı, 2026-10-28:
@@ -240,12 +240,12 @@ html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder){
   transition:background-color .2s ease, box-shadow .2s ease, transform .12s ease; }
 html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):hover{ background:var(--ana-zemin-ust); }
 html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):active{ transform:scale(.97);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 1px 1px rgba(16,20,40,.18); }
+  box-shadow:inset 0 1px 0 var(--beyaz-18), 0 1px 1px rgba(16,20,40,.18); }
 
 /* Kart başlığındaki renkli simge kutucuğu parlak cam düğme gibi (Kit'teki kareler). */
 html[data-zemin="yumusak"] .alan-kare__simge{
-  background-image:linear-gradient(180deg, rgba(255,255,255,.6), rgba(255,255,255,0) 60%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 6px 14px -8px currentColor; }
+  background-image:linear-gradient(180deg, var(--beyaz-60), var(--beyaz-00) 60%);
+  box-shadow:inset 0 1px 0 var(--beyaz-75), 0 6px 14px -8px currentColor; }
 
 /* 9) IŞIK HER YERDE (kullanıcı, 2026-10-27: «ışıkları sisteme ekle, daha
    profesyonel»). Hepsi duran ışık; yalnız kayıt ışığı (zemin.js nabız)
@@ -262,15 +262,15 @@ html[data-zemin="yumusak"] .sheet{ border-radius:28px; }
 
 /* Sayfa seçicinin hapı: parlak cam, altında sıcak ışık. */
 html[data-zemin="yumusak"] .site--v5{
-  --seg-hap:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.72));
-  --seg-golge:inset 0 1px 0 #fff, 0 1px 2px rgba(20,24,40,.08), 0 8px 18px -10px rgb(var(--sicak) / .7); }
+  --seg-hap:linear-gradient(180deg, var(--beyaz-98), var(--beyaz-72));
+  --seg-golge:inset 0 1px 0 var(--beyaz), 0 1px 2px rgba(20,24,40,.08), 0 8px 18px -10px rgb(var(--sicak) / .7); }
 html[data-theme="dark"][data-zemin="yumusak"] .site--v5{
-  --seg-hap:linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.08));
-  --seg-golge:inset 0 1px 0 rgba(255,255,255,.25), 0 8px 18px -10px rgb(var(--sicak) / .55); }
+  --seg-hap:linear-gradient(180deg, var(--beyaz-20), var(--beyaz-08));
+  --seg-golge:inset 0 1px 0 var(--beyaz-25), 0 8px 18px -10px rgb(var(--sicak) / .55); }
 @media (prefers-color-scheme:dark){
   html:not([data-theme="light"])[data-zemin="yumusak"] .site--v5{
-    --seg-hap:linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.08));
-    --seg-golge:inset 0 1px 0 rgba(255,255,255,.25), 0 8px 18px -10px rgb(var(--sicak) / .55); }
+    --seg-hap:linear-gradient(180deg, var(--beyaz-20), var(--beyaz-08));
+    --seg-golge:inset 0 1px 0 var(--beyaz-25), 0 8px 18px -10px rgb(var(--sicak) / .55); }
 }
 
 /* Telefon bandında seçili simge modül renginde hafif parlar. */
@@ -280,7 +280,7 @@ html[data-zemin="yumusak"] .site--v5 .altbant__sekme.is-on .kbk-ic{ filter:drop-
    kartlarda bunu el ışığı yapar). */
 @media (hover:hover) and (pointer:fine){
   html[data-zemin="yumusak"] .site--v5 :is(.alan-kare, .ozet-kare):hover{
-    background-image:radial-gradient(120% 90% at 18% 0%, rgba(255,255,255,.42), transparent 60%); }
+    background-image:radial-gradient(120% 90% at 18% 0%, var(--beyaz-42), transparent 60%); }
   html[data-zemin="yumusak"] .site--v5 :is(.chip, .kisayol > button, .kisayol > a):hover{
     box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 16px -10px rgb(var(--sicak) / .5); }
 }
@@ -353,7 +353,7 @@ html[data-zemin="yumusak"] .menusayfa__bas{ background:transparent; border-botto
 .site--v5 .agentav, .site--v5 .agentkare{
   overflow:visible; color:transparent; isolation:isolate;
   border-radius:48% 52% 45% 55% / 55% 50% 50% 45%;
-  background:radial-gradient(circle at 33% 26%, rgba(255,255,255,.92), rgba(255,255,255,0) 30%),
+  background:radial-gradient(circle at 33% 26%, var(--beyaz-92), var(--beyaz-00) 30%),
     radial-gradient(circle at 50% 56%, var(--minik-1) 0%, var(--minik-2) 60%, var(--minik-3) 100%);
   box-shadow:inset 0 -3px 6px oklch(from var(--mod) .4 .15 h / .3), 0 0 14px var(--minik-hale),
     0 10px 8px -7px oklch(from var(--mod) .5 .15 h / .4);

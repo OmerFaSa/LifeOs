@@ -22,6 +22,17 @@
 
    Ses yoksa ya da bozuksa hicbir sey kirilmaz: speak() hemen cozulur. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.voice.te-ye-te':'Te Ye Te',
+  'ays.core.voice.a-ye-te':'A Ye Te',
+  'ays.core.voice.ye-ka-se':'Ye Ka Se',
+  'ays.core.voice.o-se-ye-me':'Ö Se Ye Me',
+  'ays.core.voice.ye-de-te':'Ye De Te',
+  'ays.core.voice.me-e-be':'Me E Be',
+  'ays.core.voice.se-er-se':'Se Er Se',
+  'ays.core.voice.ka-i-ye-se-de':'Ka, İ, Ye, Se, De',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.voice.hizli':'Hızlı',
   'ays.core.voice.normal':'Normal',
   'ays.core.voice.yavas':'Yavaş',
@@ -284,9 +295,9 @@ R.Voice = (function(){
   /* Harf harf okunmasi gereken kisaltmalar. Turkce harf adlariyla
      yazilir, yoksa motor Ingilizce harf adi kullanir ("ti vay ti"). */
   const SPELL = {
-    'TYT':'Te Ye Te', 'AYT':'A Ye Te', 'YKS':'Ye Ka Se', 'ÖSYM':'Ö Se Ye Me',
-    'YDT':'Ye De Te', 'MEB':'Me E Be', 'SRS':'Se Er Se',
-    'K/İ/Y/S/D':'Ka, İ, Ye, Se, De',
+    'TYT':yz('ays.core.voice.te-ye-te'), 'AYT':yz('ays.core.voice.a-ye-te'), 'YKS':yz('ays.core.voice.ye-ka-se'), 'ÖSYM':yz('ays.core.voice.o-se-ye-me'),
+    'YDT':yz('ays.core.voice.ye-de-te'), 'MEB':yz('ays.core.voice.me-e-be'), 'SRS':yz('ays.core.voice.se-er-se'),
+    'K/İ/Y/S/D':yz('ays.core.voice.ka-i-ye-se-de'),
   };
 
   function speechText(text){

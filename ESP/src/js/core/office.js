@@ -18,6 +18,60 @@
    gider, brifingin icinde degil. Fark onemli: brifing her cagride otomatik
    gider, soru yalnizca kullanici istediginde. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.office.henuz-kart-yok-i-lk-karti':'Henüz kart yok. İlk kartı eklediğinde retansiyon ölçülmeye başlar.',
+  'esp.core.office.bugun-vadesi-gelen-kart-yok':'Bugün vadesi gelen kart yok.',
+  'esp.core.office.kart-hatirlama-henuz-olculem':'Kart hatırlama henüz ölçülemedi: hiç cevaplanmış kart yok.',
+  'esp.core.office.kart-hatirlama':'Kart hatırlama ',
+  'esp.core.office.henuz-tez-girilmemis-tek-cum':'Henüz tez girilmemiş. Tek cümlelik bir tez yazmak yeterli; gerisini sorularla açarız.',
+  'esp.core.office.kaynak-listesi-bos':'Kaynak listesi boş.',
+  'esp.core.office.henuz-parca-ya-da-teknik':'Henüz parça ya da teknik girilmemiş. Bir tane ekleyip tempo kaydetmeye başlayabilirsin.',
+  'esp.core.office.hedefi-olan':'Hedefi olan ',
+  'esp.core.office.son-30-gunde-diksiyon-kaydi':'Son 30 günde diksiyon kaydı yok. Bir tekerleme, bir süre ve kendi işaretlediğin hata sayısı yeter.',
+  'esp.core.office.son':'Son ',
+  'esp.core.office.konusma-hizi-medyani':'Konuşma hızı medyanı ',
+  'esp.core.office.kendi-isaretledigin-hata-ora':'Kendi işaretlediğin hata oranı ',
+  'esp.core.office.henuz-atomik-not-yok-tek':'Henüz atomik not yok. Tek fikir taşıyan tek cümlelik bir notla başlanır.',
+  'esp.core.office.sentez-katsayisi-hesaplanama':'Sentez katsayısı hesaplanamadı: ',
+  'esp.core.office.sentez-katsayisi':'Sentez katsayısı ',
+  'esp.core.office.henuz-taslak-yok-bir-baslik':'Henüz taslak yok. Bir başlık ve bir paragraf yeter; ölçüm oradan başlar.',
+  'esp.core.office.son-7-gunde-yazi-oturumu':'Son 7 günde yazı oturumu girilmemiş.',
+  'esp.core.office.son-7-gunde':'Son 7 günde ',
+  'esp.core.office.son-taslagin-okunabilirligi':'Son taslağın okunabilirliği ',
+  'esp.core.office.kronoloji-bos-tohum-listesin':'Kronoloji boş. Tohum listesinde ',
+  'esp.core.office.hicbir-olay-neden-zinciriyle':'Hiçbir olay neden zinciriyle açıklanmamış: liste var, tarih yok.',
+  'esp.core.office.hicbir-disiplinde-olculmus-u':'Hiçbir disiplinde ölçülmüş üretim yok. Merdiven ilk ölçümle başlar; ',
+  'esp.core.office.olculmus-uretim-genel-olarak':'Ölçülmüş üretim genel olarak «',
+  'esp.core.office.haftanin-pratigi':'Haftanın pratiği ',
+  'esp.core.office.entelektuel-hacim-hesaplanam':'Entelektüel hacim hesaplanamadı: son ',
+  'esp.core.office.entelektuel-hacim':'Entelektüel hacim ',
+  'esp.core.office.seri':'Seri ',
+  'esp.core.office.sen':'Sen ',
+  'esp.core.office.alanin':'Alanın: ',
+  'esp.core.office.alanin-disi':'Alanın DIŞI: ',
+  'esp.core.office.sayi-uretme-butun-sayilar-as':'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
+  'esp.core.office.sertifika-ya-da-resmi-seviye':'Sertifika ya da resmî seviye verme. Seviye etiketini kişiye değil ÜRETİME ver ve ',
+  'esp.core.office.mutlak-yetenek-yargisi-kurma':'Mutlak yetenek yargısı kurma («yeteneklisin / yeteneksizsin»). Yalnızca süreç hakkında konuş.',
+  'esp.core.office.sonuc-garantisi-verme-yon-ve':'Sonuç garantisi verme. Yön ve olasılık söylenir, garanti verilmez.',
+  'esp.core.office.estetik-otorite-iddia-etme-k':'Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
+  'esp.core.office.bir-metrik-veri-yok-ise':'Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
+  'esp.core.office.soru-sorabilirsin-ama-ayni-a':'Soru sorabilirsin ama aynı anda en fazla bir tane.',
+  'esp.core.office.brifingde-gecmeyen-sayi':'Brifingde geçmeyen sayı: ',
+  'esp.core.office.durumu-ozetle':'Durumu özetle.',
+  'esp.core.office.vadesi-gelen-kart-yok-ve':'Vadesi gelen kart yok ve retansiyon ',
+  'esp.core.office.bir-tez-14-gundur-acik':'Bir tez 14+ gündür açık ve dokunulmamış.',
+  'esp.core.office.son-30-gunde-diksiyon-kaydi-2':'Son 30 günde diksiyon kaydı yok.',
+  'esp.core.office.hata-orani-iki-hafta-oncesin':'Hata oranı iki hafta öncesine göre düşüyor.',
+  'esp.core.office.i-stenen-sey-calismak-degil':'İstenen şey çalışmak değil ölçmek.',
+  'esp.core.office.butun-merdivenlerin-kapilari':'Bütün merdivenlerin kapıları geçilmiş görünüyor.',
+  'esp.core.office.karar':'Karar ',
+  'esp.core.office.haftalik-gozden-gecirme':'Haftalık gözden geçirme.',
+  'esp.core.office.gunun-brifingini-yaz-once-be':'Günün brifingini yaz. Önce bekleyen iş, sonra ',
+  'esp.core.office.toplanti-gundemi':'Toplantı gündemi: ',
+  'esp.core.office.uzmanlarin-katkisini-okudun':'Uzmanların katkısını okudun. Çelişki varsa ESP.PRECEDENCE sırasına göre çöz. ',
+  'esp.core.office.karari-degi-sti-rme-gerekcel':'Kararı DEĞİŞTİRME, gerekçelendir. Karar: «',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.office.merkez-modeli-cevap-vermedi':'Merkez modeli cevap vermedi: ',
   'esp.core.office.model-istemi-geri-yazdi-kura':'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.',
   'esp.core.office.model-ciktisi-ev-kurallarina':'Model çıktısı ev kurallarına takıldı: ',
@@ -382,81 +436,81 @@ ESP.Office = (function(){
     }
 
     if(agentId === 'polyglot'){
-      if(brf.cards.cert === 'missing') return 'Henüz kart yok. İlk kartı eklediğinde retansiyon ölçülmeye başlar.';
+      if(brf.cards.cert === 'missing') return yz('esp.core.office.henuz-kart-yok-i-lk-karti');
       cumle.push(brf.cards.total + ' kart var, ' + brf.cards.active + ' tanesi üretimde kullanılmış.');
       if(brf.due.overdue) cumle.push(brf.due.overdue + ' kartın vadesi geçti (en çok geciken ' + brf.due.maxOverdueDays + ' gün).');
       else if(brf.due.value) cumle.push(brf.due.value + ' kart bugün vadeli.');
-      else cumle.push('Bugün vadesi gelen kart yok.');
+      else cumle.push(yz('esp.core.office.bugun-vadesi-gelen-kart-yok'));
       cumle.push(brf.retention.cert === 'missing'
-        ? 'Kart hatırlama henüz ölçülemedi: hiç cevaplanmış kart yok.'
-        : 'Kart hatırlama ' + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
+        ? yz('esp.core.office.kart-hatirlama-henuz-olculem')
+        : yz('esp.core.office.kart-hatirlama') + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
       return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'socrates'){
-      if(brf.arguments.cert === 'missing') return 'Henüz tez girilmemiş. Tek cümlelik bir tez yazmak yeterli; gerisini sorularla açarız.';
+      if(brf.arguments.cert === 'missing') return yz('esp.core.office.henuz-tez-girilmemis-tek-cum');
       cumle.push(brf.arguments.open + ' tez açık, ' + brf.arguments.closed + ' tez kapandı.');
       if(brf.objections.unanswered) cumle.push(brf.objections.unanswered + ' itiraz cevaplanmayı bekliyor.');
       if(brf.arguments.stalled) cumle.push(brf.arguments.stalled + ' tez 14 günden uzun süredir dokunulmamış.');
       cumle.push(brf.primaryTexts.cert === 'missing'
-        ? 'Kaynak listesi boş.'
+        ? yz('esp.core.office.kaynak-listesi-bos')
         : brf.primaryTexts.value + ' primer metin kayıtlı.');
       return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'maestro'){
-      if(brf.pieces.cert === 'missing') return 'Henüz parça ya da teknik girilmemiş. Bir tane ekleyip tempo kaydetmeye başlayabilirsin.';
+      if(brf.pieces.cert === 'missing') return yz('esp.core.office.henuz-parca-ya-da-teknik');
       cumle.push(brf.pieces.total + ' parça var, ' + brf.pieces.measured + ' tanesinin temiz tempo eşiği ölçüldü.');
       if(brf.plateaus.length){
         const p = brf.plateaus[0];
         cumle.push(p.name + ' ' + p.days + ' gündür ' + p.bpm + ' BPM\'de duruyor.');
       }
       if(brf.progress.cert !== 'missing'){
-        cumle.push('Hedefi olan ' + brf.progress.n + ' parçanın ' + brf.progress.reached + ' tanesi hedef tempoda.');
+        cumle.push(yz('esp.core.office.hedefi-olan') + brf.progress.n + ' parçanın ' + brf.progress.reached + ' tanesi hedef tempoda.');
       }
       return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'demosthenes'){
-      if(brf.recordings.cert === 'missing') return 'Son 30 günde diksiyon kaydı yok. Bir tekerleme, bir süre ve kendi işaretlediğin hata sayısı yeter.';
-      cumle.push('Son ' + brf.recordings.windowDays + ' günde ' + brf.recordings.value + ' kayıt var.');
+      if(brf.recordings.cert === 'missing') return yz('esp.core.office.son-30-gunde-diksiyon-kaydi');
+      cumle.push(yz('esp.core.office.son') + brf.recordings.windowDays + ' günde ' + brf.recordings.value + ' kayıt var.');
       if(brf.wpm.cert !== 'missing'){
         const bant = brf.wpm.value >= brf.band.min && brf.wpm.value <= brf.band.max
           ? 'bandın içinde' : 'bandın dışında';
-        cumle.push('Konuşma hızı medyanı ' + brf.wpm.value + ' kelime/dakika — ' + brf.band.min + '–' + brf.band.max + ' bandına göre ' + bant + '.');
+        cumle.push(yz('esp.core.office.konusma-hizi-medyani') + brf.wpm.value + ' kelime/dakika — ' + brf.band.min + '–' + brf.band.max + ' bandına göre ' + bant + '.');
       }
       if(brf.errorRate.cert !== 'missing'){
-        cumle.push('Kendi işaretlediğin hata oranı ' + pct(brf.errorRate.value) + ' (tahmin).');
+        cumle.push(yz('esp.core.office.kendi-isaretledigin-hata-ora') + pct(brf.errorRate.value) + ' (tahmin).');
       }
       return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'aristoteles'){
-      if(brf.notes.cert === 'missing') return 'Henüz atomik not yok. Tek fikir taşıyan tek cümlelik bir notla başlanır.';
+      if(brf.notes.cert === 'missing') return yz('esp.core.office.henuz-atomik-not-yok-tek');
       cumle.push(brf.notes.total + ' not var, ' + brf.notes.linked + ' tanesi bağlı, ' + brf.notes.unlinked + ' tanesi bağsız.');
       cumle.push(brf.ssk.cert === 'missing'
-        ? 'Sentez katsayısı hesaplanamadı: ' + (brf.ssk.why || 'kaynak yok') + '.'
-        : 'Sentez katsayısı ' + U.fmtNum(Math.round(brf.ssk.value * 100) / 100)
+        ? yz('esp.core.office.sentez-katsayisi-hesaplanama') + (brf.ssk.why || 'kaynak yok') + '.'
+        : yz('esp.core.office.sentez-katsayisi') + U.fmtNum(Math.round(brf.ssk.value * 100) / 100)
           + ' (' + brf.books.value + ' kaynak, ' + brf.books.authors + ' yazar).');
       if(brf.suggestions) cumle.push(brf.suggestions + ' bağ önerisi bekliyor.');
       return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'montaigne'){
-      if(brf.drafts.cert === 'missing') return 'Henüz taslak yok. Bir başlık ve bir paragraf yeter; ölçüm oradan başlar.';
+      if(brf.drafts.cert === 'missing') return yz('esp.core.office.henuz-taslak-yok-bir-baslik');
       cumle.push(brf.drafts.value + ' taslak, toplam ' + brf.drafts.revisions + ' revizyon.');
       cumle.push(brf.words7.cert === 'missing'
-        ? 'Son 7 günde yazı oturumu girilmemiş.'
-        : 'Son 7 günde ' + U.fmtNum(brf.words7.value) + ' kelime yazıldı.');
+        ? yz('esp.core.office.son-7-gunde-yazi-oturumu')
+        : yz('esp.core.office.son-7-gunde') + U.fmtNum(brf.words7.value) + ' kelime yazıldı.');
       if(brf.readability.cert !== 'missing'){
-        cumle.push('Son taslağın okunabilirliği ' + brf.readability.value + ' (' + brf.readability.band + '), cümle başına ' + U.fmtNum(brf.readability.wordsPerSentence) + ' kelime.');
+        cumle.push(yz('esp.core.office.son-taslagin-okunabilirligi') + brf.readability.value + ' (' + brf.readability.band + '), cümle başına ' + U.fmtNum(brf.readability.wordsPerSentence) + ' kelime.');
       }
       return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'herodot'){
       if(brf.events.cert === 'missing'){
-        return 'Kronoloji boş. Tohum listesinde ' + (ESP.SEED_EVENTS || []).length
+        return yz('esp.core.office.kronoloji-bos-tohum-listesin') + (ESP.SEED_EVENTS || []).length
           + ' dönüm noktası hazır; şeridi doldurmak oradan başlayabilir.';
       }
       cumle.push(brf.events.value + ' olay var (' + ESP.yearLabel(brf.events.firstYear)
@@ -468,7 +522,7 @@ ESP.Office = (function(){
           + (brf.chains.unbalanced ? ', ' + brf.chains.unbalanced + ' tanesinde yapısal koşul yok' : '')
           + (brf.chains.unsourced ? '; ' + brf.chains.unsourced + ' halka kaynaksız' : '') + '.');
       }else{
-        cumle.push('Hiçbir olay neden zinciriyle açıklanmamış: liste var, tarih yok.');
+        cumle.push(yz('esp.core.office.hicbir-olay-neden-zinciriyle'));
       }
       if(brf.sources.total){
         cumle.push(brf.sources.total + ' kaynağın ' + brf.sources.primary + ' tanesi birincil.');
@@ -478,10 +532,10 @@ ESP.Office = (function(){
 
     if(agentId === 'mnemosyne'){
       if(brf.overall.cert === 'missing'){
-        return 'Hiçbir disiplinde ölçülmüş üretim yok. Merdiven ilk ölçümle başlar; '
+        return yz('esp.core.office.hicbir-disiplinde-olculmus-u')
           + 'kademe kişiye değil üretime verilir.';
       }
-      cumle.push('Ölçülmüş üretim genel olarak «' + brf.overall.label + '» kademesinde '
+      cumle.push(yz('esp.core.office.olculmus-uretim-genel-olarak') + brf.overall.label + '» kademesinde '
         + '(merdivenin %' + brf.overall.mastery + '\'i).');
       if(brf.due.overdue) cumle.push(brf.due.overdue + ' kartın vadesi geçti.');
       if(brf.unmeasured) cumle.push(brf.unmeasured + ' basamak ölçülemiyor: '
@@ -495,14 +549,14 @@ ESP.Office = (function(){
     const p = brf;
     cumle.push(p.next.title + '.');
     if(p.balance.skewed && p.balance.untouched.length){
-      cumle.push('Haftanın pratiği ' + p.balance.top + ' tarafına yığılmış; '
+      cumle.push(yz('esp.core.office.haftanin-pratigi') + p.balance.top + ' tarafına yığılmış; '
         + p.balance.untouched.join(' ve ') + ' hiç açılmamış.');
     }
     cumle.push(p.ehs.cert === 'missing'
-      ? 'Entelektüel hacim hesaplanamadı: son ' + p.ehs.windowDays + ' günde ölçülmüş pratik yok.'
-      : 'Entelektüel hacim ' + U.fmtNum(Math.round(p.ehs.value * 10) / 10)
+      ? yz('esp.core.office.entelektuel-hacim-hesaplanam') + p.ehs.windowDays + ' günde ölçülmüş pratik yok.'
+      : yz('esp.core.office.entelektuel-hacim') + U.fmtNum(Math.round(p.ehs.value * 10) / 10)
         + ' (' + p.ehs.windowDays + ' günün ' + p.ehs.enteredDays + '\'inden hesaplandı).');
-    if(p.streak) cumle.push('Seri ' + p.streak + ' gün.');
+    if(p.streak) cumle.push(yz('esp.core.office.seri') + p.streak + ' gün.');
     if(p.openDecisions) cumle.push(p.openDecisions + ' karar takipte.');
     return cumle.join(' ');
   }
@@ -517,22 +571,22 @@ ESP.Office = (function(){
     const a = ESP.AGENT_BY_ID[agentId] || ESP.AGENT_BY_ID.patron;
     return LIFEOS.Ofis.istem({
       modul:'esp', ajan:a, yontem:a.yontem, selam:!!e.selam, model:e.model || '',
-      kimlik:'Sen ' + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.\n'
-        + 'Alanın: ' + a.scope + '\n'
-        + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
+      kimlik:yz('esp.core.office.sen') + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.\n'
+        + yz('esp.core.office.alanin') + a.scope + '\n'
+        + yz('esp.core.office.alanin-disi') + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
       uzmanSayisi:ESP.AGENTS.filter(x => x.id !== 'patron').length,
       kurallarAdi:'KURALLAR (bunlar tartışılmaz)',
       kurallar:[
-        'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
-        'Sertifika ya da resmî seviye verme. Seviye etiketini kişiye değil ÜRETİME ver ve '
+        yz('esp.core.office.sayi-uretme-butun-sayilar-as'),
+        yz('esp.core.office.sertifika-ya-da-resmi-seviye')
           + 'daima tarih aralığıyla birlikte: «son 30 günlük üretimin şu bandın kriterlerini karşılıyor».',
-        'Mutlak yetenek yargısı kurma («yeteneklisin / yeteneksizsin»). Yalnızca süreç hakkında konuş.',
-        'Sonuç garantisi verme. Yön ve olasılık söylenir, garanti verilmez.',
-        'Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
-        'Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
+        yz('esp.core.office.mutlak-yetenek-yargisi-kurma'),
+        yz('esp.core.office.sonuc-garantisi-verme-yon-ve'),
+        yz('esp.core.office.estetik-otorite-iddia-etme-k'),
+        yz('esp.core.office.bir-metrik-veri-yok-ise'),
       ],
       uslup:'Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.\n'
-        + 'Soru sorabilirsin ama aynı anda en fazla bir tane.',
+        + yz('esp.core.office.soru-sorabilirsin-ama-ayni-a'),
       /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
       hafiza:ESP.Hafizam ? ESP.Hafizam.baglam({ ajan:'esp' }) : '',
       brifing:JSON.stringify(b || brief(agentId)),
@@ -618,7 +672,7 @@ ESP.Office = (function(){
       warnings,
       note:warnings.length
         ? warnings.map(h => h.why).join(', ') + ' tespit edildi.'
-        : (unsupported.length ? 'Brifingde geçmeyen sayı: ' + unsupported.join(', ') + '.' : ''),
+        : (unsupported.length ? yz('esp.core.office.brifingde-gecmeyen-sayi') + unsupported.join(', ') + '.' : ''),
     };
   }
 
@@ -648,7 +702,7 @@ ESP.Office = (function(){
        cevap verir, sohbet gecmisi oraya karismaz. */
     const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
     const selam = !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
-    const mesajlar = gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]);
+    const mesajlar = gecmis.concat([{ role:'user', text:question || yz('esp.core.office.durumu-ozetle') }]);
 
     try{
       let res = null;
@@ -764,16 +818,16 @@ ESP.Office = (function(){
        && d.retention.n >= ESP.Planner.RETENTION_MIN_CARDS
        && d.retention.value < ESP.Planner.RETENTION_FLOOR){
       add('polyglot', 'blocked',
-        'Kart hatırlama ' + pct(d.retention.value) + ' — olması gerekenin altında. Yeni kelime eklemek bunu daha da düşürür.', 'lang');
+        yz('esp.core.office.kart-hatirlama') + pct(d.retention.value) + ' — olması gerekenin altında. Yeni kelime eklemek bunu daha da düşürür.', 'lang');
     }
     if(d.total && !d.due && d.retention.cert !== 'missing' && d.retention.value >= 0.8){
-      add('polyglot', 'win', 'Vadesi gelen kart yok ve retansiyon ' + pct(d.retention.value) + '.', 'lang');
+      add('polyglot', 'win', yz('esp.core.office.vadesi-gelen-kart-yok-ve') + pct(d.retention.value) + '.', 'lang');
     }
 
     /* --- felsefe --- */
     const tikanan = ESP.Intellect.stalledArguments();
     if(tikanan.length === 1){
-      add('socrates', 'blocked', 'Bir tez 14+ gündür açık ve dokunulmamış.', 'symposium');
+      add('socrates', 'blocked', yz('esp.core.office.bir-tez-14-gundur-acik'), 'symposium');
     }else if(tikanan.length > 1){
       add('socrates', 'blocked', tikanan.length + ' tez 14+ gündür açık ve dokunulmamış.', 'symposium');
     }
@@ -796,11 +850,11 @@ ESP.Office = (function(){
     /* --- diksiyon --- */
     const dik = ESP.Acoustic.dictionStatus(30);
     if(dik.cert === 'missing'){
-      add('demosthenes', 'overdue', 'Son 30 günde diksiyon kaydı yok.', 'studio');
+      add('demosthenes', 'overdue', yz('esp.core.office.son-30-gunde-diksiyon-kaydi-2'), 'studio');
     }else{
       const t = ESP.Acoustic.dictionTrend();
       if(t.cert !== 'missing' && t.direction === 'iyi'){
-        add('demosthenes', 'win', 'Hata oranı iki hafta öncesine göre düşüyor.', 'studio');
+        add('demosthenes', 'win', yz('esp.core.office.hata-orani-iki-hafta-oncesin'), 'studio');
       }
     }
 
@@ -819,7 +873,7 @@ ESP.Office = (function(){
     /* --- yazi --- */
     const w = ESP.Intellect.wordsWritten(7);
     if(w.cert === 'missing'){
-      add('montaigne', 'overdue', 'Son 7 günde yazı oturumu girilmemiş.', 'writing');
+      add('montaigne', 'overdue', yz('esp.core.office.son-7-gunde-yazi-oturumu'), 'writing');
     }
     const dr = ESP.Intellect.draftRatio();
     if(dr.cert !== 'missing' && dr.drafts >= 3 && dr.value < 0.5){
@@ -838,28 +892,28 @@ ESP.Office = (function(){
       const g = ESP.Curriculum.nextGate(x.id);
       if(g && g.action === 'measure'){
         add('mnemosyne', 'info', x.label + ': «' + g.gate.label + '» kapısı ölçülemiyor. '
-          + 'İstenen şey çalışmak değil ölçmek.', x.route);
+          + yz('esp.core.office.i-stenen-sey-calismak-degil'), x.route);
       }
     });
     (function(){
       const ov = ESP.Curriculum.overall();
       if(ov.cert !== 'missing' && ov.mastery >= 100){
-        add('mnemosyne', 'win', 'Bütün merdivenlerin kapıları geçilmiş görünüyor.', 'analytics');
+        add('mnemosyne', 'win', yz('esp.core.office.butun-merdivenlerin-kapilari'), 'analytics');
       }
     })();
 
     /* --- patron --- */
     const denge = ESP.Planner.balance(7);
     if(denge.skewed){
-      add('patron', 'info', 'Haftanın pratiği ' + denge.top.label + ' tarafına yığılmış; '
+      add('patron', 'info', yz('esp.core.office.haftanin-pratigi') + denge.top.label + ' tarafına yığılmış; '
         + denge.untouched.map(x => x.label).join(', ') + ' hiç açılmamış.', 'analytics');
     }
     ESP.Model.openDecisions().forEach(dec => {
       const gun = U.diffDays(dec.openedAt.slice(0, 10), U.todayISO());
-      if(gun >= 2) add('patron', 'overdue', 'Karar ' + gun + ' gündür açık: ' + dec.text, 'meeting');
+      if(gun >= 2) add('patron', 'overdue', yz('esp.core.office.karar') + gun + ' gündür açık: ' + dec.text, 'meeting');
     });
     const seri = ESP.Model.streak();
-    if(seri >= 7) add('patron', 'win', 'Seri ' + seri + ' gün.', 'today');
+    if(seri >= 7) add('patron', 'win', yz('esp.core.office.seri') + seri + ' gün.', 'today');
 
     return out;
   }
@@ -916,7 +970,7 @@ ESP.Office = (function(){
     const r = ESP.SRS.retention();
     if(r.cert !== 'missing' && r.n >= ESP.Planner.RETENTION_MIN_CARDS
        && r.value < ESP.Planner.RETENTION_FLOOR){
-      add('retention', 90, 'Kart hatırlama ' + pct(r.value) + ' (' + r.n + ' karttan).');
+      add('retention', 90, yz('esp.core.office.kart-hatirlama') + pct(r.value) + ' (' + r.n + ' karttan).');
     }
 
     const acil = ESP.Planner.deadlines().filter(x => x.urgent);
@@ -939,7 +993,7 @@ ESP.Office = (function(){
       add('coverage', 45, (tarih.eras.empty.concat(tarih.kinds.empty))[0] + ' boş.');
     }
 
-    add('review', 10, 'Haftalık gözden geçirme.');
+    add('review', 10, yz('esp.core.office.haftalik-gozden-gecirme'));
     return out.sort((a, b) => b.score - a.score);
   }
 
@@ -952,7 +1006,7 @@ ESP.Office = (function(){
     if(S.officeBriefings[gun]) return S.officeBriefings[gun];
 
     const b = patronBrief();
-    const res = await ask('patron', 'Günün brifingini yaz. Önce bekleyen iş, sonra '
+    const res = await ask('patron', yz('esp.core.office.gunun-brifingini-yaz-once-be')
       + 'varsa dengesizlik, en son kazanım.', { brief:b, history:false, maxTokens:300 });
 
     const rec = { date:gun, text:res.text, source:res.source,
@@ -979,7 +1033,7 @@ ESP.Office = (function(){
 
     for(const a of uzmanlar){
       const b = brief(a.id);
-      const res = await ask(a.id, 'Toplantı gündemi: ' + gundem.label + '. ' + gundem.lead
+      const res = await ask(a.id, yz('esp.core.office.toplanti-gundemi') + gundem.label + '. ' + gundem.lead
         + ' Kendi masandan tek paragrafla katkı ver.',
         { brief:b, history:false, maxTokens:260 });
       const tur = { agentId:a.id, name:a.name, text:res.text, source:res.source,
@@ -991,8 +1045,8 @@ ESP.Office = (function(){
     const karar = ESP.Planner.nextAction();
     const pb = patronBrief();
     const kapanis = await ask('patron',
-      'Uzmanların katkısını okudun. Çelişki varsa ESP.PRECEDENCE sırasına göre çöz. '
-      + 'Kararı DEĞİŞTİRME, gerekçelendir. Karar: «' + karar.title + '» — ' + karar.why,
+      yz('esp.core.office.uzmanlarin-katkisini-okudun')
+      + yz('esp.core.office.karari-degi-sti-rme-gerekcel') + karar.title + '» — ' + karar.why,
       { brief:pb, history:false, maxTokens:300 });
 
     /* Toplantinin ciktisi yalniz bir CUMLE degil bir EYLEM LISTESI de olmali:

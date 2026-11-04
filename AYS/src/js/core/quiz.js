@@ -16,6 +16,13 @@
 
    Karar motoru burada da otoritedir; LLM soru üretebilir ama puanlamaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.quiz.bu-secimde-sinanacak-madde-y':'Bu seçimde sınanacak madde yok. Önce kart üret ya da ders notu ekle.',
+  'ays.core.quiz.geri-cagirma-saglam-bu-konud':'Geri çağırma sağlam. Bu konuda tekrar aralığını uzatabilirsin.',
+  'ays.core.quiz.yaridan-fazlasi-geldi-ama-bo':'Yarıdan fazlası geldi ama boşluk var. Bilinmeyenler karta düştü.',
+  'ays.core.quiz.geri-cagirma-zayif-konu-bili':'Geri çağırma zayıf. Konu "biliyorum" hissi veriyor ama üretilmiyor — kartlarla tekrar et.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.quiz.bugunun-kartlari':'Bugünün kartları',
   'ays.core.quiz.tekrar-takviminde-bugune-dus':'Tekrar takviminde bugüne düşenler',
   'ays.core.quiz.ders':'Ders',
@@ -207,7 +214,7 @@ R.Quiz = (function(){
 
     if(!items.length){
       session = null;
-      return { ok:false, reason:'Bu seçimde sınanacak madde yok. Önce kart üret ya da ders notu ekle.' };
+      return { ok:false, reason:yz('ays.core.quiz.bu-secimde-sinanacak-madde-y') };
     }
 
     if(format === 'choice'){
@@ -393,10 +400,10 @@ R.Quiz = (function(){
       weak,
       verdict:score >= 80 ? 'strong' : score >= 55 ? 'ok' : 'weak',
       note:score >= 80
-        ? 'Geri çağırma sağlam. Bu konuda tekrar aralığını uzatabilirsin.'
+        ? yz('ays.core.quiz.geri-cagirma-saglam-bu-konud')
         : score >= 55
-        ? 'Yarıdan fazlası geldi ama boşluk var. Bilinmeyenler karta düştü.'
-        : 'Geri çağırma zayıf. Konu "biliyorum" hissi veriyor ama üretilmiyor — kartlarla tekrar et.',
+        ? yz('ays.core.quiz.yaridan-fazlasi-geldi-ama-bo')
+        : yz('ays.core.quiz.geri-cagirma-zayif-konu-bili'),
       finishedAt:new Date().toISOString(),
     };
 

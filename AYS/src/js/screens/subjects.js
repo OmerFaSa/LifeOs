@@ -1,6 +1,21 @@
 /* Dersler — konu yol haritalari, durum takibi ve kapanis olcumleri.
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.subjects.gecici-kapali':'Geçici kapalı',
+  'ays.subjects.yeniden-acildi':'Yeniden açıldı',
+  'ays.subjects.hedef-2':'Hedef ',
+  'ays.subjects.konu-kapanisi':'Konu kapanışı',
+  'ays.subjects.kapandi-2':'kapandı',
+  'ays.subjects.calisiliyor':'çalışılıyor',
+  'ays.subjects.baslanmadi':'başlanmadı',
+  'ays.subjects.yks-planin-degismez':'YKS planın değişmez.',
+  'ays.subjects.profil-kaldirildi':'Profil kaldırıldı',
+  'ays.subjects.profili-ve-isaretleri-sil':'Profili ve işaretleri sil',
+  'ays.subjects.konu-kapandi-2':'Konu kapandı',
+  'ays.subjects.durum-kaydedildi':'Durum kaydedildi',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -88,8 +103,8 @@ R.Screens.subjects = (function(){
 
   const STATE_BADGE = {
     not_started:['Başlanmadı', 'muted'], learning:['Öğreniliyor', 'info'],
-    practicing:['Pratik', 'warn'], provisional:['Geçici kapalı', 'info'],
-    closed:['Kapalı', 'ok'], reopened:['Yeniden açıldı', 'danger'],
+    practicing:['Pratik', 'warn'], provisional:[yz('ays.subjects.gecici-kapali'), 'info'],
+    closed:['Kapalı', 'ok'], reopened:[yz('ays.subjects.yeniden-acildi'), 'danger'],
   };
 
   const FILTERS = [
@@ -243,7 +258,7 @@ R.Screens.subjects = (function(){
         actions:html`<div class="row-sm">${raw(UI.donut(closure.pct, closure.closed+'/'+closure.total, 72))}</div>`,
         body:html`
           ${K.Row([
-            K.Chip('Hedef '+subject.targetBand),
+            K.Chip(yz('ays.subjects.hedef-2')+subject.targetBand),
             K.Chip(subject.topics.length+' konu'),
             K.Chip(highCount+' yüksek frekans'),
             when(subject.priority === 'support', () => K.Badge({ label:yz('ays.subjects.destek-testi'), tone:'warn' })),
@@ -487,7 +502,7 @@ R.Screens.subjects = (function(){
     const madde = (ust, k) => ({ ust, sayi:sayi({ deger:k.pct, birim:'%', kesinlik:'computed', formul:'kapanan konu ÷ konu' }),
       cumle:yz('ays.subjects.kapandi'), vurgu:k.closed + ' / ' + k.total + ' konu.', sistem:'ays' });
     return raw(V.donen({ id:'ays-kapanis', ad:yz('ays.subjects.kapanis'), maddeler:[
-      madde('Konu kapanışı', C.overallClosure()), madde('TYT', C.examClosure('TYT')), madde('AYT', C.examClosure('AYT')) ] }));
+      madde(yz('ays.subjects.konu-kapanisi'), C.overallClosure()), madde('TYT', C.examClosure('TYT')), madde('AYT', C.examClosure('AYT')) ] }));
   }
 
   /* PANO KARTI (2026-10-20; brand/ortak/pano.js): açık dersin konu
@@ -503,8 +518,8 @@ R.Screens.subjects = (function(){
       govde:P.kareler({ sutun:Math.min(20, st.length), kucuk:st.length > 40,
           durumlar:st.map(s => s === 'closed' ? 'dolu' : ['learning', 'practicing', 'provisional'].indexOf(s) >= 0 ? 'yarim' : 'bos'),
           etiket:st.length + ' konudan ' + kapali + ' kapandı, ' + yarim + ' çalışılıyor' })
-        + '<div class="pk-lejant"><span><i class="pk-renk0"></i>kapandı <b>' + kapali + '</b></span><span><i class="pk-renk1"></i>çalışılıyor <b>' + yarim
-        + '</b></span><span><i class="pk-renkn"></i>başlanmadı <b>' + (st.length - kapali - yarim) + '</b></span></div>' });
+        + ('<div class="pk-lejant"><span><i class="pk-renk0"></i>' + yz('ays.subjects.kapandi-2') + ' <b>') + kapali + ('</b></span><span><i class="pk-renk1"></i>' + yz('ays.subjects.calisiliyor') + ' <b>') + yarim
+        + ('</b></span><span><i class="pk-renkn"></i>' + yz('ays.subjects.baslanmadi') + ' <b>') + (st.length - kapali - yarim) + '</b></span></div>' });
     /* İkinci kontrol: ilk testi geçen konunun 7 gün sonraki testi. */
     const bek = C.pendingSecondChecks();
     const bugun = U.todayISO();
@@ -605,12 +620,12 @@ R.Screens.subjects = (function(){
     async 'sp-sil'(el){
       const p = R.SinavProfil.bul(el.dataset.id);
       if(!p) return;
-      UI.confirmSheet('Profili kaldır', '«' + p.ad + '» profili ve konu işaretlerin silinecek. '
-        + 'YKS planın değişmez.', async () => {
+      UI.confirmSheet(yz('ays.subjects.profili-kaldir'), '«' + p.ad + '» profili ve konu işaretlerin silinecek. '
+        + yz('ays.subjects.yks-planin-degismez'), async () => {
         const r = await R.SinavProfil.sil(p.id);
-        UI.toast(r.ok ? 'Profil kaldırıldı' : r.why);
+        UI.toast(r.ok ? yz('ays.subjects.profil-kaldirildi') : r.why);
         R.App.render();
-      }, false, 'Profili ve işaretleri sil');
+      }, false, yz('ays.subjects.profili-ve-isaretleri-sil'));
     },
     async 'open-topic'(el){ topicSheet(el.dataset.subject, el.dataset.topic); },
     async 'topic-open'(el){
@@ -637,7 +652,7 @@ R.Screens.subjects = (function(){
 
       const next = await M.setTopicState(subjectId, topicId, patch);
       UI.closeSheet();
-      UI.toast(next.state === 'closed' ? 'Konu kapandı' : 'Durum kaydedildi');
+      UI.toast(next.state === 'closed' ? yz('ays.subjects.konu-kapandi-2') : yz('ays.subjects.durum-kaydedildi'));
       R.App.render();
     },
   };

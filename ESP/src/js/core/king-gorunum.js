@@ -5,6 +5,107 @@
    Parça 4/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.king-gorunum.yeni-sohbet':'Yeni sohbet',
+  'ortak.king-gorunum.gorev-panosu':'Görev panosu',
+  'ortak.king-gorunum.rutinleri-duzenle':'Rutinleri düzenle',
+  'ortak.king-gorunum.yeni-klasor':'Yeni klasör',
+  'ortak.king-gorunum.son-7-gun':'Son 7 gün',
+  'ortak.king-gorunum.son-30-gun':'Son 30 gün',
+  'ortak.king-gorunum.daha-eski':'Daha eski',
+  'ortak.king-gorunum.gecmis-sohbet-yok-yeni-sohbe':'Geçmiş sohbet yok. «Yeni sohbet» dediğinde ya da gün değişince açık sohbet buraya geçer.',
+  'ortak.king-gorunum.kayitli-sohbet':'Kayıtlı sohbet',
+  'ortak.king-gorunum.tum-isler':'‹ Tüm işler',
+  'ortak.king-gorunum.kamera-ya-da-fotograf':'Kamera ya da fotoğraf: ',
+  'ortak.king-gorunum.baglanti':'Bağlantı',
+  'ortak.king-gorunum.king':'King',
+  'ortak.king-gorunum.sorular-merkez-deki-king-e-y':'Sorular Merkez’deki King’e (yapay zekâ) gider; sayıyı yine modülün kodu üretir.',
+  'ortak.king-gorunum.merkez-bagli-degil-sorulara':'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap veririm.',
+  'ortak.king-gorunum.merkez-bagli-degil-yerel-kur':'Merkez bağlı değil; yerel kurallarla cevaplarım. Görevler, rutinler ve görüntü Merkez’le açılır.',
+  'ortak.king-gorunum.konusma':'Konuşma',
+  'ortak.king-gorunum.cevaplar':'Cevaplar',
+  'ortak.king-gorunum.konusarak-sorduguna-sesli-ya':'Konuşarak sorduğuna sesli, yazarak sorduğuna yazılı cevap',
+  'ortak.king-gorunum.yazsan-da-cevabi-sesli-okur':'Yazsan da cevabı sesli okur; yazı da görünür',
+  'ortak.king-gorunum.konussan-da-cevap-yalniz-yaz':'Konuşsan da cevap yalnız yazılı gelir',
+  'ortak.king-gorunum.tarz':'Tarz',
+  'ortak.king-gorunum.dusunme':'Düşünme',
+  'ortak.king-gorunum.ses':'Ses',
+  'ortak.king-gorunum.son-okuyan':'Son okuyan:',
+  'ortak.king-gorunum.hiz':'Hız',
+  'ortak.king-gorunum.dinleme':'Dinleme',
+  'ortak.king-gorunum.algilama':'Algılama',
+  'ortak.king-gorunum.mikrofon':'Mikrofon',
+  'ortak.king-gorunum.varsayilan-mikrofon':'Varsayılan mikrofon',
+  'ortak.king-gorunum.secili-mikrofon':'Seçili mikrofon',
+  'ortak.king-gorunum.mikrofonu-dene':'Mikrofonu dene',
+  'ortak.king-gorunum.goruntu':'Görüntü',
+  'ortak.king-gorunum.kamera':'Kamera',
+  'ortak.king-gorunum.varsayilan-kamera':'Varsayılan kamera',
+  'ortak.king-gorunum.arada-yorum':'Arada yorum',
+  'ortak.king-gorunum.ekran-ya-da-kamera-acikken':'Ekran ya da kamera açıkken arada bir kendim bakar, işine yarayacak bir şey görürsem söylerim. Görüntü saklanmaz.',
+  'ortak.king-gorunum.hafiza':'Hafıza',
+  'ortak.king-gorunum.sormadan-ekler':'Sormadan ekler:',
+  'ortak.king-gorunum.hepsini-sor':'Hepsini sor',
+  'ortak.king-gorunum.sohbeti-kaydet':'Sohbeti kaydet',
+  'ortak.king-gorunum.sohbeti-temizle':'Sohbeti temizle',
+  'ortak.king-gorunum.kayitlar':'Kayıtlar',
+  'ortak.king-gorunum.durur-hicbir-sunucuya-gitmez':'durur; hiçbir sunucuya gitmez.',
+  'ortak.king-gorunum.sil':'Sil',
+  'ortak.king-gorunum.king-hepsini-gorur-alanin-ya':'King hepsini görür; alanın yanındaki AYS · SPİ · ESP o modülün ajanlarının görüp görmediğidir.',
+  'ortak.king-gorunum.ekle':'Ekle',
+  'ortak.king-gorunum.henuz-seni-tanimiyorum-balig':'Henüz seni tanımıyorum. «Balığı sevmem», «hobim satranç» gibi söylediklerini kendiliğinden not ederim.',
+  'ortak.king-gorunum.i-ndirdigin-dosya-tarayicini':'. İndirdiğin dosya tarayıcının İndirilenler klasörüne iner.',
+  'ortak.king-gorunum.henuz-kayitli-sohbet-yok-men':'Henüz kayıtlı sohbet yok. Menüden «Sohbeti kaydet» de.',
+  'ortak.king-gorunum.dosya-olarak-indir':'Dosya olarak indir',
+  'ortak.king-gorunum.kopyala':'Kopyala',
+  'ortak.king-gorunum.emin-misin-sil':'Emin misin? Sil',
+  'ortak.king-gorunum.kamera-da-ekran-paylasimi-da':'Kamera da ekran paylaşımı da kapalı.',
+  'ortak.king-gorunum.kamerayi-ac':'Kamerayı aç',
+  'ortak.king-gorunum.ekrani-paylas':'Ekranı paylaş',
+  'ortak.king-gorunum.kameranin-onizlemesi':'Kameranın önizlemesi',
+  'ortak.king-gorunum.paylasilan-ekranin-onizlemes':'Paylaşılan ekranın önizlemesi',
+  'ortak.king-gorunum.goruntu-yalniz-sordugunda':'Görüntü yalnız sorduğunda',
+  'ortak.king-gorunum.okunur-saklanmaz-bilgisayard':'okunur; saklanmaz, bilgisayardan çıkmaz.',
+  'ortak.king-gorunum.ne-goruyorsun':'Ne görüyorsun?',
+  'ortak.king-gorunum.durdur':'Durdur',
+  'ortak.king-gorunum.bunu-biraz-daha-detaylandiri':'Bunu biraz daha detaylandırır mısın?',
+  'ortak.king-gorunum.bunu-daha-kisa-anlatir-misin':'Bunu daha kısa anlatır mısın?',
+  'ortak.king-gorunum.kartlari-goster':'Kartları göster',
+  'ortak.king-gorunum.bana-soru-sor':'Bana soru sor',
+  'ortak.king-gorunum.neye-calisayim':'Neye çalışayım?',
+  'ortak.king-gorunum.haftanin-hedefi':'Haftanın hedefi: ',
+  'ortak.king-gorunum.deneyin-bitti-deney-sonucu-d':'Deneyin bitti: «deney sonucu» de.',
+  'ortak.king-gorunum.deney':'Deney: «',
+  'ortak.king-gorunum.i-yi-ki-dogdun':'İyi ki doğdun',
+  'ortak.king-gorunum.i-yi-geceler':'İyi geceler',
+  'ortak.king-gorunum.i-yi-gunler':'İyi günler',
+  'ortak.king-gorunum.i-yi-aksamlar':'İyi akşamlar',
+  'ortak.king-gorunum.buradayim-yaz-ya-da-konus':'Buradayım. Yaz ya da konuş.',
+  'ortak.king-gorunum.oneri':'Öneri:',
+  'ortak.king-gorunum.bu-sayfa':'Bu sayfa',
+  'ortak.king-gorunum.gecmis-kutuphane-ve-butun-ar':'Geçmiş, kütüphane ve bütün araçlar',
+  'ortak.king-gorunum.birini-sec':'Birini seç',
+  'ortak.king-gorunum.dinlemeyi-bitir':'Dinlemeyi bitir',
+  'ortak.king-gorunum.konusarak-sor':'Konuşarak sor',
+  'ortak.king-gorunum.kamera-acik':'Kamera açık',
+  'ortak.king-gorunum.ekran-paylasiliyor':'Ekran paylaşılıyor',
+  'ortak.king-gorunum.baglam':'Bağlam',
+  'ortak.king-gorunum.su-an-gordugum':'Şu an gördüğüm',
+  'ortak.king-gorunum.yaz-konus-ya-da-ekranini':'Yaz, konuş ya da ekranını göster. Kaydetmeden önce her zaman sorarım.',
+  'ortak.king-gorunum.tumu':'Tümü',
+  'ortak.king-gorunum.siradan':'sıradan ·',
+  'ortak.king-gorunum.neden-simdi':'neden şimdi?',
+  'ortak.king-gorunum.eklenecek':'Eklenecek',
+  'ortak.king-gorunum.konusarak-sor-basili-tutunca':'Konuşarak sor; basılı tutunca sesli sohbet',
+  'ortak.king-gorunum.ekran-hakkinda-sor':'Ekran hakkında sor…',
+  'ortak.king-gorunum.kameradakini-sor':'Kameradakini sor…',
+  'ortak.king-gorunum.sayilari':'Sayıları ',
+  'ortak.king-gorunum.sirayi':'Sırayı ',
+  'ortak.king-gorunum.ozet-ve-oneri':'Özet ve öneri ',
+  'ortak.king-gorunum.kaydi':'Kaydı ',
+  'ortak.king-gorunum.neden':'Neden?',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.king-gorunum.sohbet':'Sohbet',
   'ortak.king-gorunum.araclar':'Araçlar',
   'ortak.king-gorunum.gorevler':'Görevler',
@@ -87,10 +188,10 @@ window.LIFEOS.PARCA.yazilar({
   function listeHtml(){
     const b = BOLUMLER.find(x => x.id === KI.bolum) || BOLUMLER[0];
     const ust = (eylem, ad, svg) => '<button type="button" class="king__yan-kapa" data-king="' + eylem + '" aria-label="' + ad + '" title="' + ad + '">' + svg + '</button>';
-    const eylem = KI.bolum === 'sohbet' ? ust('yeni-sohbet', 'Yeni sohbet', SVG_YENI)
-      : KI.bolum === 'gorev' && KI.baglanti() ? ust('ekip-ac', 'Görev panosu', SVG_PANO)
-      : KI.bolum === 'rutin' && KI.baglanti() ? ust('beceri-ac', 'Rutinleri düzenle', SVG_PANO)
-      : KI.bolum === 'kutuphane' ? ust('klasor-yeni', 'Yeni klasör', SVG_KLASOR_EKLE) : '';
+    const eylem = KI.bolum === 'sohbet' ? ust('yeni-sohbet', yz('ortak.king-gorunum.yeni-sohbet'), SVG_YENI)
+      : KI.bolum === 'gorev' && KI.baglanti() ? ust('ekip-ac', yz('ortak.king-gorunum.gorev-panosu'), SVG_PANO)
+      : KI.bolum === 'rutin' && KI.baglanti() ? ust('beceri-ac', yz('ortak.king-gorunum.rutinleri-duzenle'), SVG_PANO)
+      : KI.bolum === 'kutuphane' ? ust('klasor-yeni', yz('ortak.king-gorunum.yeni-klasor'), SVG_KLASOR_EKLE) : '';
     return '<aside class="king__yan" aria-label="' + (b.baslik || b.ad) + '"><div class="king__yan-ust"><h2 class="king__yan-baslik">' + (b.baslik || b.ad) + '</h2>'
       + eylem + KI.yanDugmeHtml('king__yan-kapa') + '</div><div class="king__yan-govde">'
       + (KI.bolum === 'gorev' ? KI.gorevListe() : KI.bolum === 'rutin' ? KI.rutinListe() : KI.bolum === 'eylem' ? KI.eylemListe() : KI.bolum === 'kutuphane' ? KI.kutDizin()
@@ -98,15 +199,15 @@ window.LIFEOS.PARCA.yazilar({
       + '</div></aside>';
   }
   /* Sohbet listesi günlere göre (2026-10-21): Bugün, Dün, Son 7 gün, Son 30 gün, Daha eski. */
-  const GUN_GRUP = ['Bugün', 'Dün', 'Son 7 gün', 'Son 30 gün', 'Daha eski'];
+  const GUN_GRUP = ['Bugün', 'Dün', yz('ortak.king-gorunum.son-7-gun'), yz('ortak.king-gorunum.son-30-gun'), yz('ortak.king-gorunum.daha-eski')];
   function gunGrupla(l){
     const gun = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     const bugun = gun(KI.ortam.simdi()), out = {};
     const ad = k => {
       const d = new Date(k.zaman);
-      if(isNaN(d)) return 'Daha eski';
+      if(isNaN(d)) return yz('ortak.king-gorunum.daha-eski');
       const f = Math.round((bugun - gun(d)) / 86400000);
-      return f <= 0 ? 'Bugün' : f === 1 ? 'Dün' : f < 7 ? 'Son 7 gün' : f < 30 ? 'Son 30 gün' : 'Daha eski';
+      return f <= 0 ? 'Bugün' : f === 1 ? 'Dün' : f < 7 ? yz('ortak.king-gorunum.son-7-gun') : f < 30 ? yz('ortak.king-gorunum.son-30-gun') : yz('ortak.king-gorunum.daha-eski');
     };
     l.slice().sort((a, b) => String(b.zaman).localeCompare(String(a.zaman))).forEach(k => { const g = ad(k); (out[g] = out[g] || []).push(k); });
     return GUN_GRUP.filter(g => out[g]).map(g => ({ ad:g, l:out[g] }));
@@ -118,7 +219,7 @@ window.LIFEOS.PARCA.yazilar({
     return (gecmis.length ? '<input class="king__ara" type="search" data-king-ara-girdi placeholder="Sohbetlerde ara" aria-label="Sohbetlerde ara" autocomplete="off"/>' : '')
       + (sabit.length ? listeGrup('Sabitlenenler', '<ul class="king__gecmis">' + sabit.map(KI.gecmisSatir).join('') + '</ul>') : '')
       + gunGrupla(gecmis.filter(k => !k.sabit)).map(g => listeGrup(g.ad, '<ul class="king__gecmis">' + g.l.map(KI.gecmisSatir).join('') + '</ul>')).join('')
-      + (gecmis.length ? '' : yanBos('Geçmiş sohbet yok. «Yeni sohbet» dediğinde ya da gün değişince açık sohbet buraya geçer.'));
+      + (gecmis.length ? '' : yanBos(yz('ortak.king-gorunum.gecmis-sohbet-yok-yeni-sohbe')));
   }
   /* Çalışma alanı: eski «···» paneli sohbetin yanında. Başlıkta geri, ad, kapat. */
   function alanBilgi(){
@@ -129,7 +230,7 @@ window.LIFEOS.PARCA.yazilar({
     if(KI.menu === 'kayitlar') return { ad:yz('ortak.king-gorunum.kayitli-sohbetler'), geri:'menu' };
     if(KI.menu === 'onizle') return { ad:KI.kameraMi() ? 'Kamera' : 'Ekran' };
     if(typeof KI.menu === 'string' && /^ars:\d+$/.test(KI.menu)) return { ad:yz('ortak.king-gorunum.arastirma') };
-    if(KI.menu && KI.menu.id){ const k = KI.kayitBul(KI.menu.id); return { ad:k ? KI.kayitBasligi(k) : 'Kayıtlı sohbet', geri:'kayitlar' }; }
+    if(KI.menu && KI.menu.id){ const k = KI.kayitBul(KI.menu.id); return { ad:k ? KI.kayitBasligi(k) : yz('ortak.king-gorunum.kayitli-sohbet'), geri:'kayitlar' }; }
     return { ad:'' };
   }
   function alanHtml(){
@@ -163,11 +264,11 @@ window.LIFEOS.PARCA.yazilar({
     const A = KI.ARAC();
     /* Söz 37: Tüm işler — üç modülün King'le yapılan işleri, modüle göre. */
     if(KI.aracSayfa === 'isler' && A && A.isler) return '<div class="king__arac-menu king__isler" role="menu" aria-label="Tüm işler">'
-      + '<button type="button" role="menuitem" class="king__arac king__isler-geri" data-king="isler-geri"><b>‹ Tüm işler</b></button>'
+      + ('<button type="button" role="menuitem" class="king__arac king__isler-geri" data-king="isler-geri"><b>' + yz('ortak.king-gorunum.tum-isler') + '</b></button>')
       + A.isler().map(g => '<div class="king__isler-grup" role="group" aria-label="' + KI.kac(g.ad) + '"><span class="king__isler-ad">' + KI.kac(g.ad)
         + (g.burada ? '' : ' · oraya geçer') + '</span>'
         + g.isler.map(x => '<button type="button" role="menuitem" class="king__arac" data-king="is-sec:' + x.i + '"><b>' + KI.kac(x.ad) + '</b><small>'
-          + KI.kac(x.tur === 'foto' ? 'Kamera ya da fotoğraf: ' + x.ne : '«' + String(x.ornek || '').trim() + '»') + '</small></button>').join('') + '</div>').join('')
+          + KI.kac(x.tur === 'foto' ? yz('ortak.king-gorunum.kamera-ya-da-fotograf') + x.ne : '«' + String(x.ornek || '').trim() + '»') + '</small></button>').join('') + '</div>').join('')
       + '</div>';
     let grup = null;
     return '<div class="king__arac-menu" role="menu" aria-label="Ekle">'
@@ -189,64 +290,64 @@ window.LIFEOS.PARCA.yazilar({
       const gorselVar = KI.gorselZincir().length > 0;
       /* G: ayarlar bölümlü (Bağlantı, Konuşma, Ses, Dinleme, Görüntü, Hafıza, Sohbet); başlıktaki «yapay zekâ · yerel» buraya geldi. */
       return '<div class="king__menu" role="group" aria-label="Sohbet ayarları">'
-        + '<h3 class="king__menu-bolum">Bağlantı</h3>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">King</span><span class="king__durum' + (KI.baglanti() ? ' is-bagli' : '') + '">'
+        + ('<h3 class="king__menu-bolum">' + yz('ortak.king-gorunum.baglanti') + '</h3>')
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.king') + '</span><span class="king__durum') + (KI.baglanti() ? ' is-bagli' : '') + '">'
         + (KI.baglanti() ? 'yapay zekâ' : gorselVar ? 'görüntü açık' : 'yerel') + '</span></div>'
-        + '<p class="king__menu-not">' + (KI.baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider; sayıyı yine modülün kodu üretir.'
-          : gorselVar ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap veririm.'
-          : 'Merkez bağlı değil; yerel kurallarla cevaplarım. Görevler, rutinler ve görüntü Merkez’le açılır.') + '</p>'
-        + '<h3 class="king__menu-bolum">Konuşma</h3>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Cevaplar</span><div class="king__secici" role="radiogroup" aria-label="Cevaplar">'
-        + sec('oto', 'Otomatik', 'Konuşarak sorduğuna sesli, yazarak sorduğuna yazılı cevap')
-        + sec('ses', 'Sesli', 'Yazsan da cevabı sesli okur; yazı da görünür')
-        + sec('yazi', 'Yazılı', 'Konuşsan da cevap yalnız yazılı gelir') + '</div></div>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Tarz</span><div class="king__secici" role="radiogroup" aria-label="Konuşma tarzı">'
+        + '<p class="king__menu-not">' + (KI.baglanti() ? yz('ortak.king-gorunum.sorular-merkez-deki-king-e-y')
+          : gorselVar ? yz('ortak.king-gorunum.merkez-bagli-degil-sorulara')
+          : yz('ortak.king-gorunum.merkez-bagli-degil-yerel-kur')) + '</p>'
+        + ('<h3 class="king__menu-bolum">' + yz('ortak.king-gorunum.konusma') + '</h3>')
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.cevaplar') + '</span><div class="king__secici" role="radiogroup" aria-label="Cevaplar">')
+        + sec('oto', 'Otomatik', yz('ortak.king-gorunum.konusarak-sorduguna-sesli-ya'))
+        + sec('ses', 'Sesli', yz('ortak.king-gorunum.yazsan-da-cevabi-sesli-okur'))
+        + sec('yazi', 'Yazılı', yz('ortak.king-gorunum.konussan-da-cevap-yalniz-yaz')) + '</div></div>'
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.tarz') + '</span><div class="king__secici" role="radiogroup" aria-label="Konuşma tarzı">')
         + TARZLAR.map(v => '<button type="button" class="king__secim' + (tarz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (tarz() === v ? 'true' : 'false') + '" data-king="tarz:' + v + '">' + TARZ_AD[v] + '</button>').join('') + '</div></div>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Düşünme</span><div class="king__secici" role="radiogroup" aria-label="Düşünme derinliği">'
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.dusunme') + '</span><div class="king__secici" role="radiogroup" aria-label="Düşünme derinliği">')
         + KI.DERIN_TERCIH.map(v => '<button type="button" class="king__secim' + (KI.derinlik() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (KI.derinlik() === v ? 'true' : 'false') + '" data-king="derinlik:' + v + '" title="' + KI.kac(KI.DERIN_IP[v]) + '">' + KI.DERIN_AD[v] + '</button>').join('') + '</div></div>'
         + '<p class="king__menu-not">' + KI.kac(KI.DERIN_IP[KI.derinlik()]) + '.' + (KI.baglanti() ? '' : ' Düşünme Merkez bağlıyken geçerli.') + '</p>'
-        + '<h3 class="king__menu-bolum">Ses</h3>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
+        + ('<h3 class="king__menu-bolum">' + yz('ortak.king-gorunum.ses') + '</h3>')
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.ses') + '</span><div class="king__secici" role="radiogroup" aria-label="Ses">')
         + KI.SES_TERCIH.map(v => '<button type="button" class="king__secim' + (KI.sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (KI.sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + KI.kac(KI.SES_IP[v]) + '">' + KI.SES_AD[v] + '</button>').join('') + '</div></div>'
-        + (KI.sonMotor ? '<p class="king__menu-not" data-king-son-ses>Son okuyan: ' + KI.kac(KI.SES_AD[KI.sonMotor] || KI.sonMotor) + '.' + (KI.sonNot ? ' ' + KI.kac(KI.sonNot) : '') + '</p>' : '')
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Hız</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">'
+        + (KI.sonMotor ? ('<p class="king__menu-not" data-king-son-ses>' + yz('ortak.king-gorunum.son-okuyan') + ' ') + KI.kac(KI.SES_AD[KI.sonMotor] || KI.sonMotor) + '.' + (KI.sonNot ? ' ' + KI.kac(KI.sonNot) : '') + '</p>' : '')
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.hiz') + '</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">')
         + KI.HIZLAR.map(v => '<button type="button" class="king__secim' + (KI.hiz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (KI.hiz() === v ? 'true' : 'false') + '" data-king="hiz:' + v + '">' + String(v).replace('.', ',') + '×</button>').join('') + '</div></div>'
-        + '<h3 class="king__menu-bolum">Dinleme</h3>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Algılama</span><div class="king__secici" role="radiogroup" aria-label="Ses algılama">'
+        + ('<h3 class="king__menu-bolum">' + yz('ortak.king-gorunum.dinleme') + '</h3>')
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.algilama') + '</span><div class="king__secici" role="radiogroup" aria-label="Ses algılama">')
         + KI.ALGILA_TERCIH.map(v => '<button type="button" class="king__secim' + (KI.algila() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (KI.algila() === v ? 'true' : 'false') + '" data-king="algila:' + v + '" title="' + KI.kac(KI.ALGILA_IP[v]) + '">' + KI.ALGILA_AD[v] + '</button>').join('') + '</div></div>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Mikrofon</span><div class="king__kisi-ekle">'
+        + ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.mikrofon') + '</span><div class="king__kisi-ekle">')
         + '<select data-king-mik aria-label="Mikrofon">'
-        + '<option value="">Varsayılan mikrofon</option>'
+        + ('<option value="">' + yz('ortak.king-gorunum.varsayilan-mikrofon') + '</option>')
         + mikler.map(d => '<option value="' + KI.kac(d.id) + '"' + (mk === d.id ? ' selected' : '') + '>' + KI.kac(d.ad) + '</option>').join('')
-        + (mk && !mikler.some(d => d.id === mk) ? '<option value="' + KI.kac(mk) + '" selected>Seçili mikrofon</option>' : '')
+        + (mk && !mikler.some(d => d.id === mk) ? '<option value="' + KI.kac(mk) + ('" selected>' + yz('ortak.king-gorunum.secili-mikrofon') + '</option>') : '')
         + '</select>'
-        + '<button type="button" class="king__geri" data-king="mik-dene">' + (KI.mikDeniyor ? 'Bitir' : 'Mikrofonu dene') + '</button></div></div>'
+        + '<button type="button" class="king__geri" data-king="mik-dene">' + (KI.mikDeniyor ? 'Bitir' : yz('ortak.king-gorunum.mikrofonu-dene')) + '</button></div></div>'
         + (KI.mikNot ? '<p class="king__menu-not" data-king-mik-not role="status">' + KI.kac(KI.mikNot) + '</p>' : '')
         + KI.uyanHtml()
-        + '<h3 class="king__menu-bolum">Görüntü</h3>'
-        + (kameralar.length > 1 ? '<div class="king__menu-satir"><span class="king__menu-ad">Kamera</span><div class="king__kisi-ekle">'
-          + '<select data-king-kam aria-label="Kamera"><option value="">Varsayılan kamera</option>'
+        + ('<h3 class="king__menu-bolum">' + yz('ortak.king-gorunum.goruntu') + '</h3>')
+        + (kameralar.length > 1 ? ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.kamera') + '</span><div class="king__kisi-ekle">')
+          + ('<select data-king-kam aria-label="Kamera"><option value="">' + yz('ortak.king-gorunum.varsayilan-kamera') + '</option>')
           + kameralar.map(d => '<option value="' + KI.kac(d.id) + '"' + (KI.kamSecili() === d.id ? ' selected' : '') + '>' + KI.kac(d.ad) + '</option>').join('')
           + '</select></div></div>' : '')
-        + '<div class="king__menu-satir king__menu-anahtar"><span class="king__menu-ad">Arada yorum</span>'
+        + ('<div class="king__menu-satir king__menu-anahtar"><span class="king__menu-ad">' + yz('ortak.king-gorunum.arada-yorum') + '</span>')
         + '<button type="button" class="king__secim" role="switch" aria-checked="' + (KI.gozAcik() ? 'true' : 'false') + '" data-king="goz:' + (KI.gozAcik() ? '0' : '1') + '" aria-label="Ekran ya da kamera açıkken arada bir bak">'
         + '<span class="king__anahtar' + (KI.gozAcik() ? ' is-acik' : '') + '" aria-hidden="true"><i></i></span></button></div>'
-        + '<p class="king__menu-not">Ekran ya da kamera açıkken arada bir kendim bakar, işine yarayacak bir şey görürsem söylerim. Görüntü saklanmaz.</p>'
-        + (KI.hafiza() && KI.KISI() || KI.sormaListesi().length ? '<h3 class="king__menu-bolum">Hafıza</h3>' : '')
-        + (KI.hafiza() && KI.KISI() ? '<button type="button" class="king__menu-is" data-king="kisi">Beni nasıl tanıyorsun<span class="king__menu-say">'
+        + ('<p class="king__menu-not">' + yz('ortak.king-gorunum.ekran-ya-da-kamera-acikken') + '</p>')
+        + (KI.hafiza() && KI.KISI() || KI.sormaListesi().length ? ('<h3 class="king__menu-bolum">' + yz('ortak.king-gorunum.hafiza') + '</h3>') : '')
+        + (KI.hafiza() && KI.KISI() ? ('<button type="button" class="king__menu-is" data-king="kisi">' + yz('ortak.king-gorunum.beni-nasil-taniyorsun') + '<span class="king__menu-say">')
           + KI.kisiKayitlari().length + '</span></button>' : '')
-        + (KI.sormaListesi().length ? '<div class="king__menu-satir"><span class="king__menu-ad">Sormadan ekler: ' + KI.kac(KI.sormaListesi().join(', '))
-          + '</span><button type="button" class="king__geri" data-king="sorma-sifirla">Hepsini sor</button></div>' : '')
-        + '<h3 class="king__menu-bolum">Sohbet</h3>'
-        + '<button type="button" class="king__menu-is" data-king="sohbet-kaydet">Sohbeti kaydet</button>'
-        + '<button type="button" class="king__menu-is" data-king="kayitlar">Kayıtlı sohbetler<span class="king__menu-say">' + n + '</span></button>'
-        + '<button type="button" class="king__menu-is king__menu-is--tehlike" data-king="temizle">Sohbeti temizle</button>'
-        + '<p class="king__menu-not">Kayıtlar ' + KI.kac(KI.YER()) + ' durur; hiçbir sunucuya gitmez.</p></div>';
+        + (KI.sormaListesi().length ? ('<div class="king__menu-satir"><span class="king__menu-ad">' + yz('ortak.king-gorunum.sormadan-ekler') + ' ') + KI.kac(KI.sormaListesi().join(', '))
+          + ('</span><button type="button" class="king__geri" data-king="sorma-sifirla">' + yz('ortak.king-gorunum.hepsini-sor') + '</button></div>') : '')
+        + ('<h3 class="king__menu-bolum">' + yz('ortak.king-gorunum.sohbet') + '</h3>')
+        + ('<button type="button" class="king__menu-is" data-king="sohbet-kaydet">' + yz('ortak.king-gorunum.sohbeti-kaydet') + '</button>')
+        + ('<button type="button" class="king__menu-is" data-king="kayitlar">' + yz('ortak.king-gorunum.kayitli-sohbetler') + '<span class="king__menu-say">') + n + '</span></button>'
+        + ('<button type="button" class="king__menu-is king__menu-is--tehlike" data-king="temizle">' + yz('ortak.king-gorunum.sohbeti-temizle') + '</button>')
+        + ('<p class="king__menu-not">' + yz('ortak.king-gorunum.kayitlar') + ' ') + KI.kac(KI.YER()) + (' ' + yz('ortak.king-gorunum.durur-hicbir-sunucuya-gitmez') + '</p></div>');
     }
     if(KI.menu === 'ekip') return KI.ekipHtml();
     if(KI.menu === 'beceri') return KI.beceriPanelHtml();
@@ -258,7 +359,7 @@ window.LIFEOS.PARCA.yazilar({
       const dolu = K.ALANLAR.filter(a => g[a.id].length).length;
       const satir = k => '<li><span><b>' + KI.kac(k.metin) + '</b><small>' + KI.kac(ETK[k.katman] || 'kayıt')
         + (k.kendi ? '' : ' · ' + KI.kac(KI.MODUL_AD[k.modul] || k.modul) + '’de öğrenildi') + '</small></span>'
-        + (k.kendi ? '<button type="button" class="king__cip king__cip--tehlike" data-king="kisi-sil:' + KI.kac(k.id) + '">Sil</button>' : '') + '</li>';
+        + (k.kendi ? '<button type="button" class="king__cip king__cip--tehlike" data-king="kisi-sil:' + KI.kac(k.id) + ('">' + yz('ortak.king-gorunum.sil') + '</button>') : '') + '</li>';
       /* Faz 5: alan başına hangi modül ajanının göreceği (King hepsini görür). */
       const izin = a => '<span class="king__izin" role="group" aria-label="' + KI.kac(a.ad) + ' için ajan izinleri">'
         + ['ays', 'spi', 'esp'].map(m => { const ac = K.izinli(a.id, m);
@@ -269,24 +370,24 @@ window.LIFEOS.PARCA.yazilar({
       return '<div class="king__menu" role="group" aria-label="Beni nasıl tanıyorsun">'
         + '<p class="king__menu-not">' + K.ALANLAR.length + ' alandan ' + dolu + '’inde bilgi var. Sohbetten öğrendiklerim «sohbetten», '
         + 'senin yazdıkların «senin sözün» diye durur. Hepsi bu bilgisayarda; sildiğin unutulur. '
-        + 'King hepsini görür; alanın yanındaki AYS · SPİ · ESP o modülün ajanlarının görüp görmediğidir.</p>'
+        + (yz('ortak.king-gorunum.king-hepsini-gorur-alanin-ya') + '</p>')
         + '<div class="king__kisi-ekle"><select data-kisi-alan aria-label="Alan">'
         + K.ALANLAR.map(a => '<option value="' + a.id + '"' + (a.id === KI.kisiYeni.alan ? ' selected' : '') + '>' + KI.kac(a.ad) + '</option>').join('')
         + '</select><input type="text" data-kisi-metin data-ayar-disi aria-label="Benim hakkımda" placeholder="Örneğin: Sabahları daha verimliyim" autocomplete="off"/>'
-        + '<button type="button" class="king__cip king__cip--ana" data-king="kisi-ekle">Ekle</button></div>'
+        + ('<button type="button" class="king__cip king__cip--ana" data-king="kisi-ekle">' + yz('ortak.king-gorunum.ekle') + '</button></div>')
         + (dolu || g.genel.length ? K.ALANLAR.map(a => bolum(a.ad, g[a.id], a)).join('') + bolum('Genel', g.genel)
-          : '<p class="king__menu-bos">Henüz seni tanımıyorum. «Balığı sevmem», «hobim satranç» gibi söylediklerini kendiliğinden not ederim.</p>')
+          : ('<p class="king__menu-bos">' + yz('ortak.king-gorunum.henuz-seni-tanimiyorum-balig') + '</p>'))
         + '</div>';
     }
     if(KI.menu === 'kayitlar'){
       const l = KI.arsivOku();
       return '<div class="king__menu" role="group" aria-label="Kayıtlı sohbetler">'
-        + '<p class="king__menu-not">' + KI.kac(KI.YER().charAt(0).toUpperCase() + KI.YER().slice(1)) + '. İndirdiğin dosya tarayıcının İndirilenler klasörüne iner.</p>'
+        + '<p class="king__menu-not">' + KI.kac(KI.YER().charAt(0).toUpperCase() + KI.YER().slice(1)) + (yz('ortak.king-gorunum.i-ndirdigin-dosya-tarayicini') + '</p>')
         + (l.length ? '<ul class="king__kayitlar">' + l.map(k => {
           const ilk = (k.mesajlar.find(m => m.kim === 'sen') || k.mesajlar[0] || {}).metin || '';
           return '<li><button type="button" class="king__kayit-ac" data-king="kayit:' + k.id + '"><b>' + KI.kac(KI.tarihYaz(k.zaman)) + '</b>'
             + '<span>' + KI.kac(ilk.slice(0, 70)) + '</span><small>' + k.mesajlar.length + ' mesaj</small></button></li>';
-        }).join('') + '</ul>' : '<p class="king__menu-bos">Henüz kayıtlı sohbet yok. Menüden «Sohbeti kaydet» de.</p>')
+        }).join('') + '</ul>' : ('<p class="king__menu-bos">' + yz('ortak.king-gorunum.henuz-kayitli-sohbet-yok-men') + '</p>'))
         + '</div>';
     }
     if(KI.menu && KI.menu.id){
@@ -296,21 +397,21 @@ window.LIFEOS.PARCA.yazilar({
         + '<p class="king__menu-not">' + KI.kac(KI.tarihYaz(k.zaman)) + ' · ' + k.mesajlar.length + ' mesaj</p>'
         + '<ol class="king__kayit">' + k.mesajlar.map(m => '<li class="' + (m.kim === 'sen' ? 'is-sen' : 'is-king') + '"><b>' + (m.kim === 'sen' ? 'Sen' : 'King')
           + '</b><p>' + KI.kac(m.metin) + '</p>' + (m.satirlar && m.satirlar.length ? '<ul>' + m.satirlar.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>' : '') + '</li>').join('') + '</ol>'
-        + '<div class="king__cipler"><button type="button" class="king__cip king__cip--ana" data-king="indir:' + k.id + '">Dosya olarak indir</button>'
-        + '<button type="button" class="king__cip" data-king="kopyala:' + k.id + '">Kopyala</button>'
-        + '<button type="button" class="king__cip king__cip--tehlike" data-king="sil:' + k.id + '">' + (KI.silOnay === k.id ? 'Emin misin? Sil' : 'Sil') + '</button></div>'
+        + '<div class="king__cipler"><button type="button" class="king__cip king__cip--ana" data-king="indir:' + k.id + ('">' + yz('ortak.king-gorunum.dosya-olarak-indir') + '</button>')
+        + '<button type="button" class="king__cip" data-king="kopyala:' + k.id + ('">' + yz('ortak.king-gorunum.kopyala') + '</button>')
+        + '<button type="button" class="king__cip king__cip--tehlike" data-king="sil:' + k.id + '">' + (KI.silOnay === k.id ? yz('ortak.king-gorunum.emin-misin-sil') : 'Sil') + '</button></div>'
         + '</div>';
     }
     /* G: kameranın ya da ekranın büyük önizlemesi (şeritteki küçük önizlemeye dokununca). */
     if(KI.menu === 'onizle'){
-      if(!KI.paylasim) return '<div class="king__menu"><p class="king__menu-bos">Kamera da ekran paylaşımı da kapalı.</p><div class="king__cipler">'
-        + (KI.KIPLER.find(x => x.id === 'kamera').kosul() ? '<button type="button" class="king__cip" data-king="kip:kamera">Kamerayı aç</button>' : '')
-        + (KI.ortam.ekranDestek() ? '<button type="button" class="king__cip" data-king="kip:ekran">Ekranı paylaş</button>' : '') + '</div></div>';
+      if(!KI.paylasim) return ('<div class="king__menu"><p class="king__menu-bos">' + yz('ortak.king-gorunum.kamera-da-ekran-paylasimi-da') + '</p><div class="king__cipler">')
+        + (KI.KIPLER.find(x => x.id === 'kamera').kosul() ? ('<button type="button" class="king__cip" data-king="kip:kamera">' + yz('ortak.king-gorunum.kamerayi-ac') + '</button>') : '')
+        + (KI.ortam.ekranDestek() ? ('<button type="button" class="king__cip" data-king="kip:ekran">' + yz('ortak.king-gorunum.ekrani-paylas') + '</button>') : '') + '</div></div>';
       return '<div class="king__menu"><div class="king__ekran-onizle king__ekran-onizle--buyuk" data-king-onizle aria-label="'
-        + (KI.kameraMi() ? 'Kameranın önizlemesi' : 'Paylaşılan ekranın önizlemesi') + '"></div>'
-        + '<p class="king__menu-not">Görüntü yalnız sorduğunda' + (KI.gozAcik() ? ' ve arada bir' : '') + ' okunur; saklanmaz, bilgisayardan çıkmaz.</p>'
-        + '<div class="king__cipler"><button type="button" class="king__cip" data-king="' + (KI.kameraMi() ? 'kamera' : 'ekran') + '-sor">Ne görüyorsun?</button>'
-        + '<button type="button" class="king__cip king__cip--dur" data-king="paylasim-bitir">Durdur</button></div></div>';
+        + (KI.kameraMi() ? yz('ortak.king-gorunum.kameranin-onizlemesi') : yz('ortak.king-gorunum.paylasilan-ekranin-onizlemes')) + '"></div>'
+        + ('<p class="king__menu-not">' + yz('ortak.king-gorunum.goruntu-yalniz-sordugunda')) + (KI.gozAcik() ? ' ve arada bir' : '') + (' ' + yz('ortak.king-gorunum.okunur-saklanmaz-bilgisayard') + '</p>')
+        + '<div class="king__cipler"><button type="button" class="king__cip" data-king="' + (KI.kameraMi() ? 'kamera' : 'ekran') + ('-sor">' + yz('ortak.king-gorunum.ne-goruyorsun') + '</button>')
+        + ('<button type="button" class="king__cip king__cip--dur" data-king="paylasim-bitir">' + yz('ortak.king-gorunum.durdur') + '</button></div></div>');
     }
     if(typeof KI.menu === 'string' && /^ars:\d+$/.test(KI.menu)){
       const n = Number(KI.menu.slice(4)), m = KI.akis[n];
@@ -357,11 +458,11 @@ window.LIFEOS.PARCA.yazilar({
   /* ---------- söz 33: öneriler, ayar komutları, odak, Merkez komutları ---------- */
   function oneriListesi(cevapSonrasi){
     const l = [];
-    if(cevapSonrasi){ l.push(['Detaylandır', 'Bunu biraz daha detaylandırır mısın?']); l.push(['Kısalt', 'Bunu daha kısa anlatır mısın?']); }
+    if(cevapSonrasi){ l.push(['Detaylandır', yz('ortak.king-gorunum.bunu-biraz-daha-detaylandiri')]); l.push(['Kısalt', yz('ortak.king-gorunum.bunu-daha-kisa-anlatir-misin')]); }
     const K = KI.ayar && KI.ayar.kartlar;
-    if(K && typeof K.istatistik === 'function') l.push(['Kartları göster', 'istatistiklerim']);
-    if(K && typeof K.soru === 'function') l.push(['Bana soru sor', 'bana soru sor']);
-    if(!cevapSonrasi && K && typeof K.oncelik === 'function') l.unshift(['Neye çalışayım?', 'neye çalışayım']);
+    if(K && typeof K.istatistik === 'function') l.push([yz('ortak.king-gorunum.kartlari-goster'), 'istatistiklerim']);
+    if(K && typeof K.soru === 'function') l.push([yz('ortak.king-gorunum.bana-soru-sor'), 'bana soru sor']);
+    if(!cevapSonrasi && K && typeof K.oncelik === 'function') l.unshift([yz('ortak.king-gorunum.neye-calisayim'), 'neye çalışayım']);
     return l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
   }
   /* GÖRÜNÜŞ (kullanıcı, 2026-10-28: «hem erkek hem kadın tarafı: pembe
@@ -433,9 +534,9 @@ window.LIFEOS.PARCA.yazilar({
       try{ l = (KI.ayar.kartlar.istatistik() || []).filter(x => x && x.ad).map(KI.kartTemiz).slice(0, 4); }catch(e){ l = []; }
     }
     const ek = [];
-    if(KI.haftaHedefi()) ek.push('Haftanın hedefi: ' + KI.haftaHedefi());
+    if(KI.haftaHedefi()) ek.push(yz('ortak.king-gorunum.haftanin-hedefi') + KI.haftaHedefi());
     const dv = KI.deneyOku();
-    if(dv){ const h = KI.deneyHesap(dv); ek.push(h.gecen >= dv.gun ? 'Deneyin bitti: «deney sonucu» de.' : 'Deney: «' + dv.kural + '» · ' + (h.gecen + 1) + '/' + dv.gun + ' gün'); }
+    if(dv){ const h = KI.deneyHesap(dv); ek.push(h.gecen >= dv.gun ? yz('ortak.king-gorunum.deneyin-bitti-deney-sonucu-d') : yz('ortak.king-gorunum.deney') + dv.kural + '» · ' + (h.gecen + 1) + '/' + dv.gun + ' gün'); }
     return { kartlar:l, satirlar:ek.concat(KI.ozetSatirlari()).slice(0, 4) };
   }
   function cizgi(seri){
@@ -462,8 +563,8 @@ window.LIFEOS.PARCA.yazilar({
     const o = (KI.L.HESAP && KI.L.HESAP.durum && KI.L.HESAP.durum().oturum) || {};
     const ad = o.hitap || o.gorunen_ad || o.ad || '';
     const gun = String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
-    if(o.dogum_gun && o.dogum_gun === gun) return 'İyi ki doğdun' + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
-    const zaman = s < 5 ? 'İyi geceler' : s < 12 ? 'Günaydın' : s < 17 ? 'İyi günler' : 'İyi akşamlar';   // eşik sayfayla aynı (karsilama.js 17)
+    if(o.dogum_gun && o.dogum_gun === gun) return yz('ortak.king-gorunum.i-yi-ki-dogdun') + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
+    const zaman = s < 5 ? yz('ortak.king-gorunum.i-yi-geceler') : s < 12 ? 'Günaydın' : s < 17 ? yz('ortak.king-gorunum.i-yi-gunler') : yz('ortak.king-gorunum.i-yi-aksamlar');   // eşik sayfayla aynı (karsilama.js 17)
     return zaman + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
   }
 
@@ -511,8 +612,8 @@ window.LIFEOS.PARCA.yazilar({
      Kartın içi eski küçük kutunun sözleşmesidir (.king__mini-son). */
   KI.deste = 0;             // ada: önden kaçıncı cevap (0 = en yeni)
   function desteKart(m){
-    if(!m) return '<div class="king__mini-son" aria-live="polite"><p>Buradayım. Yaz ya da konuş.</p>'
-      + (() => { const o = oneriListesi(false)[0]; return o ? '<p class="king__ada-oneri">Öneri: ' + KI.kac(o.ad) + '</p>' : ''; })() + '</div>';
+    if(!m) return ('<div class="king__mini-son" aria-live="polite"><p>' + yz('ortak.king-gorunum.buradayim-yaz-ya-da-konus') + '</p>')
+      + (() => { const o = oneriListesi(false)[0]; return o ? ('<p class="king__ada-oneri">' + yz('ortak.king-gorunum.oneri') + ' ') + KI.kac(o.ad) + '</p>' : ''; })() + '</div>';
     return '<div class="king__mini-son" aria-live="polite"><p>' + KI.kac(m.metin) + '</p>'
       + (m.satirlar && m.satirlar.length ? '<ul class="king__mini-liste">' + m.satirlar.slice(0, 5).map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>' : '')
       + (m.onizleme ? '<b class="king__mini-oz">' + KI.kac(m.onizleme.metin) + '</b>' : '')
@@ -526,7 +627,7 @@ window.LIFEOS.PARCA.yazilar({
      ekran önce genişler, son yaprak Genişlet; büyük pencerede Tüm işler
      yaprağı listeyi açar. */
   const YAPRAK = { R:168, r:64, bosluk:2.4 };
-  const KISA_AD = { ekran:'Bu sayfa', isler:'İşler', 'foto-sec':'Fotoğraf', 'pdf-sec':'PDF' };
+  const KISA_AD = { ekran:yz('ortak.king-gorunum.bu-sayfa'), isler:'İşler', 'foto-sec':'Fotoğraf', 'pdf-sec':'PDF' };
   function yaprakYolu(i, n){
     const { R, r, bosluk } = YAPRAK, adim = 180 / n, d = Math.PI / 180;
     const a0 = (180 + i * adim + bosluk / 2) * d, a1 = (180 + (i + 1) * adim - bosluk / 2) * d;
@@ -537,10 +638,10 @@ window.LIFEOS.PARCA.yazilar({
     if(!KI.aracAcik) return '';
     const l = KI.ARACLAR.filter(a => !(KI.mini && a.is === 'isler') && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
       .map(a => ({ is:KI.mini && /^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:KISA_AD[a.is] || a.ad, uzun:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
-      .concat(KI.mini ? [{ is:'buyut', ad:yz('ortak.king-gorunum.genislet'), uzun:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }] : []);
+      .concat(KI.mini ? [{ is:'buyut', ad:yz('ortak.king-gorunum.genislet'), uzun:'Genişlet', ip:yz('ortak.king-gorunum.gecmis-kutuphane-ve-butun-ar'), svg:YELPAZE_GENISLET }] : []);
     const n = l.length, { R, r } = YAPRAK, rm = (R + r) / 2, d = Math.PI / 180;
     return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + n + '">'
-      + '<div class="king__yelpaze-merkez" aria-hidden="true"><b>Araçlar</b><small>Birini seç</small></div>' + l.map((x, i) => {
+      + ('<div class="king__yelpaze-merkez" aria-hidden="true"><b>' + yz('ortak.king-gorunum.araclar') + '</b><small>' + yz('ortak.king-gorunum.birini-sec') + '</small></div>') + l.map((x, i) => {
         const a = (180 + (i + .5) * 180 / n) * d, cx = (R + rm * Math.cos(a)).toFixed(1) + 'px', cy = (R + rm * Math.sin(a)).toFixed(1) + 'px';
         return '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + ';--cx:' + cx + ';--cy:' + cy + ';clip-path:path(\'' + yaprakYolu(i, n) + '\')" data-king="' + x.is + '"'
           + ' aria-label="' + KI.kac(x.uzun) + '" data-ip="' + KI.kac(x.ip) + '"><span class="king__yaprak-ic" style="left:' + cx + ';top:' + cy + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + x.svg + '</svg><small>' + KI.kac(x.ad) + '</small></span></button>';
@@ -572,10 +673,10 @@ window.LIFEOS.PARCA.yazilar({
       + (anaCip(c) ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + KI.kac(c.ad) + '</button>').join('') + '</div>' : '';
     const mik = KI.konusabilir()
       ? '<button type="button" class="king__mik' + (KI.dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="' + (KI.dinleyen ? 'true' : 'false')
-        + '" aria-label="' + (KI.dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor') + '"><svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '" aria-label="' + (KI.dinleyen ? yz('ortak.king-gorunum.dinlemeyi-bitir') : yz('ortak.king-gorunum.konusarak-sor')) + '"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>' : '';
-    return bas + (KI.paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>' + (KI.kameraMi() ? 'Kamera açık' : 'Ekran paylaşılıyor') + ' · sorduğunda görürüm'
-      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + desteHtml + cip
+    return bas + (KI.paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>' + (KI.kameraMi() ? yz('ortak.king-gorunum.kamera-acik') : yz('ortak.king-gorunum.ekran-paylasiliyor')) + ' · sorduğunda görürüm'
+      + ('<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">' + yz('ortak.king-gorunum.durdur') + '</button></div>') : '') + desteHtml + cip
       + '<form class="king__yaz" data-king-form data-ayar-disi>' + KI.arkadasHtml()
       + '<div class="king__arti-yer"><button type="button" class="king__arti' + (KI.aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (KI.aracAcik ? 'true' : 'false')
       + '" aria-haspopup="menu" aria-label="Araçlar" title="Araçlar: fotoğraf, PDF, kamera, ekran, genişlet">'
@@ -600,8 +701,8 @@ window.LIFEOS.PARCA.yazilar({
     if(!kars.kartlar.length && !kars.satirlar.length && !sor.length && !ekran) return '';
     const kisim = (ad, ic) => '<section class="king__baglam-bolum"><h3>' + ad + '</h3>' + ic + '</section>';
     return '<aside class="king__baglam" aria-label="Bağlam">'
-      + '<div class="king__baglam-ust"><h2>Bağlam</h2><span class="king__yer">' + NOKTA(KI.ayar && KI.ayar.modul) + KI.kac(modul) + '</span></div>'
-      + (ekran ? '<p class="king__baglam-gor">Şu an gördüğüm <b>' + KI.kac(ekran) + '</b></p>' : '')
+      + ('<div class="king__baglam-ust"><h2>' + yz('ortak.king-gorunum.baglam') + '</h2><span class="king__yer">') + NOKTA(KI.ayar && KI.ayar.modul) + KI.kac(modul) + '</span></div>'
+      + (ekran ? ('<p class="king__baglam-gor">' + yz('ortak.king-gorunum.su-an-gordugum') + ' <b>') + KI.kac(ekran) + '</b></p>' : '')
       + (kars.kartlar.length ? kisim('Durum', KI.kartlarHtml(kars)) : '')
       + (kars.satirlar.length ? kisim('Notlar', '<ul class="king__baglam-not">' + kars.satirlar.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>') : '')
       + (sor.length ? kisim('Sorabileceklerin', '<div class="king__baglam-sor">' + sor.map(o => '<button type="button" class="king__baglam-oner" data-king="' + o.is + '">'
@@ -641,11 +742,11 @@ window.LIFEOS.PARCA.yazilar({
       + (kars.kartlar.length || kars.satirlar.length
         ? (kars.kartlar.length ? '<div class="king__bos-veri">' + KI.kartlarHtml(kars) + '</div>' : '')
           + (kars.satirlar.length ? '<ul class="king__bos-ozet">' + kars.satirlar.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>' : '')
-        : '<p class="king__bos-alt">Yaz, konuş ya da ekranını göster. Kaydetmeden önce her zaman sorarım.</p>')
+        : ('<p class="king__bos-alt">' + yz('ortak.king-gorunum.yaz-konus-ya-da-ekranini') + '</p>'))
       + '<div class="king__hazirlar" role="group" aria-label="Hazır cevaplar">' + hazirlar + '</div>'
       + '<div class="king__bos-araclar kv-izgara' + (KI.kvGiris ? ' is-giris' : '') + '" role="group" aria-label="Kartlarım">' + KI.oneCikanlar().map((x, i) => KI.miniKutu(x, i)).join('')
       + '<button type="button" class="kv-mini kv-mini--tumu" style="--i:' + KI.oneCikanlar().length + '" data-king="bolum:araclar" title="Bütün araçlar" aria-label="Bütün araçlar">'
-      + '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + KI.GRUP_SVG_MODUL + '</svg></span><span class="kv-mini-ad">Tümü</span></button></div></div>';
+      + '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + KI.GRUP_SVG_MODUL + ('</svg></span><span class="kv-mini-ad">' + yz('ortak.king-gorunum.tumu') + '</span></button></div></div>');
     /* SAHNE (kullanıcı, 2026-10-30: «King arayüzünde hâlâ devrimsel bir değişiklik;
        sistemin alışılmışlarından çık, sürekli aynı tasarım kullanıcıyı boğuyor»):
        sohbet listesi değil sahne. Tepede büyük, canlı King; son cevabı onun
@@ -654,15 +755,15 @@ window.LIFEOS.PARCA.yazilar({
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + KI.kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
         : '<div class="king__balon king__balon--sen"><p>' + KI.kac(m.metin) + '</p>'
-          + (m.sira ? '<small class="king__siradan">sıradan · ' + KI.kac(KI.tarihYaz(m.sira)) + '</small>' : '') + '</div>')
+          + (m.sira ? ('<small class="king__siradan">' + yz('ortak.king-gorunum.siradan') + ' ') + KI.kac(KI.tarihYaz(m.sira)) + '</small>' : '') + '</div>')
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div>' + adimHtml(m) + '</div>'
       : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + (m.onay && i === sonKing && KI.bekleyenYetki ? ' king__balon--onay' : '') + '" style="--yazim:' + KI.yazimSuresi(m.metin) + 'ms"><div>' + adimHtml(m) + '<p>' + KI.bicimli(m.metin) + '</p>'
-        + (m.nedenSimdi ? '<p class="king__neden-simdi"><span>neden şimdi?</span> ' + KI.kac(m.nedenSimdi) + '</p>' : '')
+        + (m.nedenSimdi ? ('<p class="king__neden-simdi"><span>' + yz('ortak.king-gorunum.neden-simdi') + '</span> ') + KI.kac(m.nedenSimdi) + '</p>' : '')
         + KI.kartlarHtml(m) + KI.yardimHtml(m, ilkSira + i) + KI.yapHtml(m) + KI.nefesHtml(m) + KI.yasaHtml(m, ilkSira + i) + KI.gunKartHtml(m, ilkSira + i) + KI.dersHtml(m, ilkSira + i) + KI.soruHtml(m, ilkSira + i) + KI.siraliHtml(m, ilkSira + i) + KI.bulunanHtml(m, ilkSira + i) + KI.arastirmaHtml(m, ilkSira + i) + KI.k2Html(m, ilkSira + i)
         + (m.onizleme
-          ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
+          ? ('<div class="king__onizle"><span class="king__onizle-ad">' + yz('ortak.king-gorunum.eklenecek') + '</span>')
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + KI.kac(x) + '</b></li>').join('') + '</ul>'
               : '<b>' + KI.kac(m.onizleme.metin) + '</b>')
             + (m.onizleme.ipucu ? '<small>' + KI.kac(m.onizleme.ipucu) + '</small>' : '') + '</div>'
@@ -680,7 +781,7 @@ window.LIFEOS.PARCA.yazilar({
     /* G: mikrofon — dokun: söyle, yazıya dökülsün; basılı tut: sesli sohbet. */
     const mik = KI.konusabilir()
       ? '<button type="button" class="king__mik' + (KI.dinleyen ? ' is-acik' : '') + (KI.sesliSohbet ? ' is-sohbet' : '') + '" data-king="dinle" aria-pressed="'
-        + (KI.dinleyen ? 'true' : 'false') + '" aria-label="' + (KI.dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor; basılı tutunca sesli sohbet')
+        + (KI.dinleyen ? 'true' : 'false') + '" aria-label="' + (KI.dinleyen ? yz('ortak.king-gorunum.dinlemeyi-bitir') : yz('ortak.king-gorunum.konusarak-sor-basili-tutunca'))
         + '" title="Dokun: söyle · Basılı tut: sesli sohbet"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>'
       : '';
@@ -697,7 +798,7 @@ window.LIFEOS.PARCA.yazilar({
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + (KI.aracSayfa === 'isler' ? aracMenu() : yelpazeHtml()) + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
       + '<input type="file" accept="application/pdf,.pdf" data-king-pdf class="sr-only"/>'
-      + '<input class="king__girdi" type="text" aria-label="' + KI.kac(adYonelme()) + ' yaz" placeholder="' + (KI.dinleyen ? 'Dinliyorum…' : KI.kip() === 'ekran' ? 'Ekran hakkında sor…' : KI.kip() === 'kamera' ? 'Kameradakini sor…' : KI.kac(adYonelme()) + ' yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + '<input class="king__girdi" type="text" aria-label="' + KI.kac(adYonelme()) + ' yaz" placeholder="' + (KI.dinleyen ? 'Dinliyorum…' : KI.kip() === 'ekran' ? yz('ortak.king-gorunum.ekran-hakkinda-sor') : KI.kip() === 'kamera' ? yz('ortak.king-gorunum.kameradakini-sor') : KI.kac(adYonelme()) + ' yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
       + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>' + baglamHtml(vitrin) + alan;
@@ -708,16 +809,16 @@ window.LIFEOS.PARCA.yazilar({
     const l = [];
     if(Array.isArray(m.neden)) m.neden.forEach(x => { if(x) l.push(String(x)); });
     else if(m.neden) l.push(String(m.neden));
-    if(m.kartlar && m.kartlar.length) l.push('Sayıları ' + ad + ' kendi koduyla hesaplar; her kart etiketini taşır (ölçüldü, hesaplandı, tahmin, veri yok).');
-    if(m.sirali && m.sirali.length) l.push('Sırayı ' + ad + ' kendi öncelik kuralıyla kurar; King yalnız gösterir.');
-    if(m.arastirma) l.push('Özet ve öneri ' + (m.arastirma.izle.length + m.arastirma.oku.length) + ' kaynaktan; her bağlantı kaynağın kendisine gider.');
-    if(m.onizleme) l.push('Kaydı ' + ad + '’nin kendi ayrıştırıcısı okudu; sen onaylamadan yazılmaz.');
+    if(m.kartlar && m.kartlar.length) l.push(yz('ortak.king-gorunum.sayilari') + ad + ' kendi koduyla hesaplar; her kart etiketini taşır (ölçüldü, hesaplandı, tahmin, veri yok).');
+    if(m.sirali && m.sirali.length) l.push(yz('ortak.king-gorunum.sirayi') + ad + ' kendi öncelik kuralıyla kurar; King yalnız gösterir.');
+    if(m.arastirma) l.push(yz('ortak.king-gorunum.ozet-ve-oneri') + (m.arastirma.izle.length + m.arastirma.oku.length) + ' kaynaktan; her bağlantı kaynağın kendisine gider.');
+    if(m.onizleme) l.push(yz('ortak.king-gorunum.kaydi') + ad + '’nin kendi ayrıştırıcısı okudu; sen onaylamadan yazılmaz.');
     return l;
   }
   function nedenHtml(m){
     const l = nedenSatirlari(m);
     if(!l.length) return '';
-    return '<details class="king__neden" data-king-neden><summary>Neden?</summary><ul>' + l.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul></details>';
+    return ('<details class="king__neden" data-king-neden><summary>' + yz('ortak.king-gorunum.neden') + '</summary><ul>') + l.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul></details>';
   }
 
   function ciz(odak){

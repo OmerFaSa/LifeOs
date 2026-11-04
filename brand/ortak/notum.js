@@ -25,6 +25,14 @@
         deposundakiler + modülün ek kaynağı, ör. AYS konu notları) tek
         pencerede listeler; arama yazdıkça süzer; nota dokununca modülün
         `ac(bağlam)`ı o ekranı açar. Paletten ve King'den («notlarım») açılır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.notum.kendi-cumlelerinle-yaz-metin':'Kendi cümlelerinle yaz. Metinde bir yeri seçip «Nota ekle»ye basarak da ekleyebilirsin.',
+  'ortak.notum.nota-ekle':'Nota ekle',
+  'ortak.notum.henuz-not-yok-ogrenme-ekranl':'Henüz not yok. Öğrenme ekranlarındaki «Notum» kutularına yazdıkların burada toplanır.',
+  'ortak.notum.gecen-not-yok':'» geçen not yok.',
+  'ortak.notum.notlarim':'Notlarım',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -90,7 +98,7 @@ window.LIFEOS.NOTUM = (function(){
       + '<span class="notum__durum" data-notum-durum aria-live="polite">' + (m ? m.length + ' / ' + SINIR : 'kendiliğinden kaydedilir') + '</span></div>'
       + '<textarea class="notum__metin" rows="' + Math.min(10, Math.max(3, m.split('\n').length + 1)) + '" maxlength="' + SINIR + '"'
       + ' data-notum="' + kac(b) + '" aria-label="' + kac(o.baslik || 'Notum') + '"'
-      + ' placeholder="' + kac(o.ipucu || 'Kendi cümlelerinle yaz. Metinde bir yeri seçip «Nota ekle»ye basarak da ekleyebilirsin.') + '">'
+      + ' placeholder="' + kac(o.ipucu || yz('ortak.notum.kendi-cumlelerinle-yaz-metin')) + '">'
       + kac(m) + '</textarea></div>';
   }
 
@@ -116,7 +124,7 @@ window.LIFEOS.NOTUM = (function(){
     let d = d0;
     if(!d){
       d = document.createElement('button');
-      d.type = 'button'; d.id = 'notum-ekle'; d.className = 'notum-ekle'; d.textContent = 'Nota ekle';
+      d.type = 'button'; d.id = 'notum-ekle'; d.className = 'notum-ekle'; d.textContent = yz('ortak.notum.nota-ekle');
       d.addEventListener('mousedown', e => e.preventDefault());
       d.addEventListener('click', async () => {
         const b = d.dataset.baglam, s = d.dataset.metin;
@@ -165,8 +173,8 @@ window.LIFEOS.NOTUM = (function(){
   function panelListeHtml(ara){
     const q = String(ara || '').toLocaleLowerCase('tr-TR').trim();
     const l = liste().filter(x => !q || (x.ad + ' ' + x.ust + ' ' + x.metin).toLocaleLowerCase('tr-TR').indexOf(q) >= 0);
-    if(!liste().length) return '<p class="notlar__bos">Henüz not yok. Öğrenme ekranlarındaki «Notum» kutularına yazdıkların burada toplanır.</p>';
-    if(!l.length) return '<p class="notlar__bos">«' + kac(ara) + '» geçen not yok.</p>';
+    if(!liste().length) return ('<p class="notlar__bos">' + yz('ortak.notum.henuz-not-yok-ogrenme-ekranl') + '</p>');
+    if(!l.length) return '<p class="notlar__bos">«' + kac(ara) + (yz('ortak.notum.gecen-not-yok') + '</p>');
     return l.map((x, i) => {
       const m = String(x.metin).replace(/\s+/g, ' ');
       return '<button type="button" class="notlar__satir" data-notlar-ac="' + kac(x.baglam) + '">'
@@ -188,7 +196,7 @@ window.LIFEOS.NOTUM = (function(){
     el.className = 'notlar';
     el.innerHTML = '<div class="notlar__perde" data-notlar-kapat></div>'
       + '<div class="notlar__kutu" role="dialog" aria-modal="true" aria-label="Notlarım">'
-      + '<div class="notlar__bas"><b>Notlarım</b><span class="notlar__say">' + liste().length + ' not</span>'
+      + ('<div class="notlar__bas"><b>' + yz('ortak.notum.notlarim') + '</b><span class="notlar__say">') + liste().length + ' not</span>'
       + '<button type="button" class="notlar__kapat" data-notlar-kapat aria-label="Kapat">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>'
       + '<input class="notlar__ara" type="search" placeholder="Notlarında ara" aria-label="Notlarında ara" autocomplete="off"/>'

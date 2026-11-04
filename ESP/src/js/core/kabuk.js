@@ -36,6 +36,46 @@
    Açılır paneller (modül menüsü, bildirimler, hızlı ekle, görünüm) tek
    katman yöneticisinden geçer: dışarı tıklayınca, Esc'de ve pencere
    boyutu değişince kapanır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.kabuk.akademik-yol-sistemi':'Akademik Yol Sistemi',
+  'ortak.kabuk.saglik-performans-i-zleyicis':'Sağlık Performans İzleyicisi',
+  'ortak.kabuk.entelektuel-seviye-planlayic':'Entelektüel Seviye Planlayıcı',
+  'ortak.kabuk.gunu-kur-gidisi-gor':'Günü kur, gidişi gör',
+  'ortak.kabuk.hayat-kontrol-merkezi':'Hayat Kontrol Merkezi',
+  'ortak.kabuk.merkez-bagli':'Merkez bağlı',
+  'ortak.kabuk.merkeze-ulasilamadi':'Merkeze ulaşılamadı',
+  'ortak.kabuk.merkez-acik-henuz-gonderim-o':'Merkez açık, henüz gönderim olmadı — her şey çalışıyor',
+  'ortak.kabuk.merkez-kapali-her-sey':'Merkez kapalı — her şey çalışıyor',
+  'ortak.kabuk.rutbe':'Rütbe ',
+  'ortak.kabuk.ara':'Ara',
+  'ortak.kabuk.ctrl-k':'Ctrl K',
+  'ortak.kabuk.bildirimler':'Bildirimler, ',
+  'ortak.kabuk.bildirimler-yok':'Bildirimler, yok',
+  'ortak.kabuk.profil-ve-gorunum':'Profil ve görünüm',
+  'ortak.kabuk.sistem':'Sistem: ',
+  'ortak.kabuk.kartlarim':'Kartlarım',
+  'ortak.kabuk.esp-spi-ays':'ESP · SPİ · AYS kartları',
+  'ortak.kabuk.menu':'Menü',
+  'ortak.kabuk.lifeos':'LifeOS',
+  'ortak.kabuk.ctrl-ctrl':'Ctrl Ctrl',
+  'ortak.kabuk.sayfa-duzeni':'Sayfa düzeni',
+  'ortak.kabuk.radyo-ve-sesler':'Radyo ve sesler',
+  'ortak.kabuk.radyo':'Radyo',
+  'ortak.kabuk.is-kaldi':'iş kaldı',
+  'ortak.kabuk.gunun':'Günün ',
+  'ortak.kabuk.sayfabasi-sayfabasi-bilgi-bi':'.sayfabasi .sayfabasi__bilgi .bilgikart',
+  'ortak.kabuk.bu-ekran-nasil-okunur':'Bu ekran nasıl okunur',
+  'ortak.kabuk.merkez-onerileri':'Merkez önerileri',
+  'ortak.kabuk.acil':'Acil',
+  'ortak.kabuk.bekleyen-bir-sey-yok':'Bekleyen bir şey yok.',
+  'ortak.kabuk.yeni-bir-sey-olunca-burada':'Yeni bir şey olunca burada görünür.',
+  'ortak.kabuk.bildirimler-2':'Bildirimler',
+  'ortak.kabuk.hepsini-gordum':'Hepsini gördüm',
+  'ortak.kabuk.temizle':'Temizle',
+  'ortak.kabuk.geri-al':'Geri al',
+  'ortak.kabuk.kenar-cubugunu':'Kenar çubuğunu ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -67,11 +107,11 @@ window.LIFEOS = window.LIFEOS || {};
      (tek sunucuyla açılınca sistemler bu kapılardadır). Başka bir yoldan
      açılmış sayfada öteki sistemin adresi BİLİNMEZ ve uydurulmaz. */
   const MODULLER = Object.freeze({
-    ays:{ harf:'A', ad:'AYS',    uzun:'Akademik Yol Sistemi',      not:'sınav hazırlığı',        kapi:4173 },
-    spi:{ harf:'S', ad:'SPİ',    uzun:'Sağlık Performans İzleyicisi', not:'uyku, beslenme, hareket', kapi:4183 },
-    esp:{ harf:'E', ad:'ESP',    uzun:'Entelektüel Seviye Planlayıcı', not:'dil, felsefe, müzik',    kapi:4193 },
-    gun:{ harf:'G', ad:'Gün',    uzun:'Günü kur, gidişi gör',      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
-  mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
+    ays:{ harf:'A', ad:'AYS',    uzun:yz('ortak.kabuk.akademik-yol-sistemi'),      not:'sınav hazırlığı',        kapi:4173 },
+    spi:{ harf:'S', ad:'SPİ',    uzun:yz('ortak.kabuk.saglik-performans-i-zleyicis'), not:'uyku, beslenme, hareket', kapi:4183 },
+    esp:{ harf:'E', ad:'ESP',    uzun:yz('ortak.kabuk.entelektuel-seviye-planlayic'), not:'dil, felsefe, müzik',    kapi:4193 },
+    gun:{ harf:'G', ad:'Gün',    uzun:yz('ortak.kabuk.gunu-kur-gidisi-gor'),      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
+  mer:{ harf:'M', ad:'Merkez', uzun:yz('ortak.kabuk.hayat-kontrol-merkezi'),     not:'üçünün özeti',            kapi:4200 },
   });
   const SIRA = ['ays', 'spi', 'esp', 'gun'];   // Merkez menude yok (arayuzu kalkti); kimligi bildirimler icin durur
 
@@ -177,10 +217,10 @@ window.LIFEOS = window.LIFEOS || {};
   function baglantiNoktasi(b){
     b = b || {};
     const d = b.durum || 'kapali';
-    const metin = d === 'bagli' ? 'Merkez bağlı' + (b.saat ? ' · ' + b.saat : '')
-      : d === 'ulasilamadi' ? 'Merkeze ulaşılamadı' + (b.saat ? ' · son deneme ' + b.saat : '') + ' — her şey çalışıyor'
-      : d === 'bekliyor' ? 'Merkez açık, henüz gönderim olmadı — her şey çalışıyor'
-      : 'Merkez kapalı — her şey çalışıyor';
+    const metin = d === 'bagli' ? yz('ortak.kabuk.merkez-bagli') + (b.saat ? ' · ' + b.saat : '')
+      : d === 'ulasilamadi' ? yz('ortak.kabuk.merkeze-ulasilamadi') + (b.saat ? ' · son deneme ' + b.saat : '') + ' — her şey çalışıyor'
+      : d === 'bekliyor' ? yz('ortak.kabuk.merkez-acik-henuz-gonderim-o')
+      : yz('ortak.kabuk.merkez-kapali-her-sey');
     return '<button class="ust__bag ust__bag--' + kac(d) + '" data-oz="118" data-act="go" data-route="'
       + kac(b.route || 'guide') + '" title="' + kac(metin) + '" aria-label="' + kac(metin) + '">'
       + '<i aria-hidden="true"></i>'
@@ -195,7 +235,7 @@ window.LIFEOS = window.LIFEOS || {};
       + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + (r.gorsel ? ';--kademe-gorsel:url(&quot;' + kac(r.gorsel) + '&quot;)' : '') + '"' : '')
       + '><span>' + kac(r.kademe == null ? '' : r.kademe) + '</span></span>';
     const ayrinti = r.tamam ? 'en üst basamak' : (r.icindeMetin || r.icinde) + '/' + (r.gerekenMetin || r.gereken);
-    const etiket = 'Rütbe ' + (r.ad || '') + ' ' + r.etiket + ', ' + ayrinti;
+    const etiket = yz('ortak.kabuk.rutbe') + (r.ad || '') + ' ' + r.etiket + ', ' + ayrinti;
     return '<button class="ust__rutbe" data-oz="140" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
       + ' aria-label="' + kac(etiket) + '" title="' + kac(etiket) + '">'
       + muhur
@@ -230,14 +270,14 @@ window.LIFEOS = window.LIFEOS || {};
       +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '">' + simge('onaylar')
       +     '<span class="ust__sayac" data-h-sayi="onay">' + kac(onay.sayi) + '</span></button>' : '')
       +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
-      +     simge('ara') + '<span class="ust__ara-yazi">Ara</span><kbd>Ctrl K</kbd></button>'
+      +     simge('ara') + ('<span class="ust__ara-yazi">' + yz('ortak.kabuk.ara') + '</span><kbd>' + yz('ortak.kabuk.ctrl-k') + '</kbd></button>')
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
+      +     ' aria-label="' + kac(bil.sayi ? yz('ortak.kabuk.bildirimler') + bil.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok')) + '">'
       +     simge('zil') + (bil.acil ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
       +   baglantiNoktasi(o.baglanti)
       +   rutbeCipi(o.rutbe)
       +   '<button class="ust__profil" data-act="open-appearance" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac('Profil ve görünüm' + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
+      +     ' aria-label="' + kac(yz('ortak.kabuk.profil-ve-gorunum') + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
       +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
       + '</div></div></header>';
   }
@@ -267,7 +307,7 @@ window.LIFEOS = window.LIFEOS || {};
     const giris = girisAdres(loc);
     return '<div class="kenar__moduller" data-oz="008 155">'
       + '<button type="button" class="kenar__modulsec" aria-expanded="false" aria-controls="' + pid + '"'
-      +   ' aria-label="' + kac('Sistem: ' + su.ad + ' — değiştir') + '" title="Sistem değiştir">'
+      +   ' aria-label="' + kac(yz('ortak.kabuk.sistem') + su.ad + ' — değiştir') + '" title="Sistem değiştir">'
       +   '<i class="kenar__nokta kenar__nokta--' + kac(modul || 'ays') + '" aria-hidden="true"></i>'
       +   '<span class="kenar__modulsec-ad">' + kac(su.ad) + '</span>'
       +   '<svg class="kenar__modulsec-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>'
@@ -283,7 +323,7 @@ window.LIFEOS = window.LIFEOS || {};
       /* Kullanıcı (2026-11-02): «3 kart seçtiğimiz yere dönülebilsin» — giriş sayfası (ESP·SPİ·AYS kartları, :4180). */
       + (giris ? '<a class="kenar__modul kenar__modul--kartlarim" href="' + kac(giris) + '">'
         + '<svg class="kenar__modul-simge" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="12.5" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v11"/></svg>'
-        + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">Kartlarım</span><span class="kenar__modul-not">ESP · SPİ · AYS kartları</span></span></a>' : '')
+        + ('<span class="kenar__modul-metin"><span class="kenar__modul-ad">' + yz('ortak.kabuk.kartlarim') + '</span><span class="kenar__modul-not">' + yz('ortak.kabuk.esp-spi-ays') + '</span></span></a>') : '')
       + '</div></div></div>';
   }
   function modulPencereKapat(haric){
@@ -357,7 +397,7 @@ window.LIFEOS = window.LIFEOS || {};
     const menuSayac = tum.filter(c => gorunen.indexOf(c) < 0).reduce((a, c) => a + (Number(c.sayac) || 0), 0);
     const menu = tum.length ? '<div class="kenar__cekmece-kap"><button class="kenar__cekmece" data-act="toggle-sidebar" data-cekmece="menu" title="Menü"'
       + ' aria-label="' + kac('Menü' + (menuSayac ? ', ' + menuSayac + ' bekleyen' : '')) + '">'
-      + simge('menu') + '<span class="kenar__ad">Menü</span>'
+      + simge('menu') + ('<span class="kenar__ad">' + yz('ortak.kabuk.menu') + '</span>')
       + (menuSayac ? '<span class="kenar__sayac" data-oz="115" aria-hidden="true">' + menuSayac + '</span>' : '') + '</button></div>' : '';
     const cek = gorunen.map(cekHtml).join('') + menu;
     /* Kenar açıkken (fare üstünde ya da odak içinde) yeniden çizilirse —
@@ -372,7 +412,7 @@ window.LIFEOS = window.LIFEOS || {};
     const tutulu = kenarTutuluMu();
     return '<aside class="kenar' + (acikKaldi ? ' kenar--acik-kaldi' : '') + (tutulu ? ' kenar--tutulu' : '') + '" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
       + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
-      +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
+      +   ('<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>' + yz('ortak.kabuk.lifeos') + '</span></button>')
       + modulGecisi(o.modul, o.loc)
       + (o.baglam ? '<p class="kenar__baglam">' + kac(o.baglam) + '</p>' : '')
       + '<nav class="kenar__nav" aria-label="Çekmeceler">' + cek + '</nav>'
@@ -416,22 +456,22 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="kenar__grup">'
       /* King (brand/ortak/king.js): her yerden sade sohbet; Ctrl iki kez. */
       + '<button class="ust__king kenar__arac" type="button" data-king-ac aria-haspopup="dialog"'
-      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket(window.LIFEOS.KING && window.LIFEOS.KING.ad ? window.LIFEOS.KING.ad() : 'King') + kisayol('Ctrl Ctrl') + '</button>'
+      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket(window.LIFEOS.KING && window.LIFEOS.KING.ad ? window.LIFEOS.KING.ad() : 'King') + kisayol(yz('ortak.kabuk.ctrl-ctrl')) + '</button>'
       + '<button class="ust__ayarlar kenar__arac" type="button" data-act="open-appearance" aria-haspopup="dialog"'
       +   ' aria-label="Ayarlar" title="Ayarlar">' + simge('ayarlar') + etiket('Ayarlar') + '</button>'
       + '</div><div class="kenar__benler">'
       + '<div class="kenar__benpencere" id="' + pid + '" role="group" aria-label="Araçlar"><div class="kenar__benliste">'
       + '<button class="ust__ara kenar__arac" type="button" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
-      +   simge('ara') + etiket('Ara') + kisayol('Ctrl K') + '</button>'
+      +   simge('ara') + etiket('Ara') + kisayol(yz('ortak.kabuk.ctrl-k')) + '</button>'
       + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
-      +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
+      +   ' aria-label="' + kac(bil.sayi ? yz('ortak.kabuk.bildirimler') + bil.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok')) + '">'
       +   simge('zil') + (zil ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
       +   (bil.sayi ? '<span class="kenar__sayi' + (bil.acil ? ' is-acil' : '') + '" aria-hidden="true">' + kac(bil.sayi) + '</span>' : '')
       + '</button>'
       + ustSes(true)
       + '<button class="ust__gizli kenar__arac" type="button" aria-haspopup="dialog" aria-expanded="false"'
       +   ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
-      +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket('Sayfa düzeni') + '</button>'
+      +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket(yz('ortak.kabuk.sayfa-duzeni')) + '</button>'
       + '</div></div>'
       + '<div class="kenar__ben">'
       + '<button class="ust__profil kenar__arac kenar__arac--profil kenar__bensec" type="button" aria-expanded="false" aria-controls="' + pid + '"'
@@ -493,26 +533,26 @@ window.LIFEOS = window.LIFEOS || {};
       +   ustSes()
       +   ustHesap()
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
+      +     ' aria-label="' + kac(bil.sayi ? yz('ortak.kabuk.bildirimler') + bil.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok')) + '">'
       +     simge('zil') + (zilNoktaVar(bil) ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
       +   (r && r.etiket && r.etiket !== '—' ? '<button class="ust__madalya ust--telefon" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
-      +     ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
+      +     ' aria-label="' + kac(yz('ortak.kabuk.rutbe') + (r.ad || '') + ' ' + r.etiket) + '">'
       +     simge('rutbe') + '</button>' : '')   /* SADE (2026-10-05): renkli daire değil, çizgi madalya */
       +   '<button class="ust__profil" data-act="open-appearance" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac('Profil ve görünüm' + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
+      +     ' aria-label="' + kac(yz('ortak.kabuk.profil-ve-gorunum') + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
       +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
       + '</div></div></header>';
   }
 
   function ustSes(kenarda){
     const S = L.SES;
-    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo', ad:'' };
+    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:yz('ortak.kabuk.radyo-ve-sesler'), ipucu:'Radyo', ad:'' };
     return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
       /* Kenarda çalan istasyonun adı (ses.js guncelle yerinde tazeler). */
-      + (kenarda ? '<span class="kenar__ad">Radyo</span><span class="kenar__ek" data-ses-ad aria-hidden="true">' + kac(d.ad || '') + '</span>' : '')
+      + (kenarda ? ('<span class="kenar__ad">' + yz('ortak.kabuk.radyo') + '</span><span class="kenar__ek" data-ses-ad aria-hidden="true">') + kac(d.ad || '') + '</span>' : '')
       + '</button>';
   }
 
@@ -560,7 +600,7 @@ window.LIFEOS = window.LIFEOS || {};
         + (s.ozet ? '<span class="gunserit__ozet">' + kac(s.ozet) + '</span>' : '')
         + '</div>';
     }).join('');
-    const kalan = o.kalan == null ? '' : '<span class="gunserit__kalan"><b>' + kac(o.kalan) + '</b> iş kaldı</span>';
+    const kalan = o.kalan == null ? '' : '<span class="gunserit__kalan"><b>' + kac(o.kalan) + ('</b> ' + yz('ortak.kabuk.is-kaldi') + '</span>');
     const acik = !!o.haftaAcik;
     const hafta = acik && o.hafta ? haftaSeridi(o.hafta) : '';
     return '<div class="gunserit' + (acik ? ' is-acik' : '') + '">'
@@ -569,7 +609,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button class="gunserit__etiket" data-oz="163 005" data-act="hafta-ac" aria-expanded="' + (acik ? 'true' : 'false') + '"'
       +   ' aria-label="' + kac((o.tarih || 'Bugün') + ' — haftayı ' + (acik ? 'kapat' : 'aç')) + '">'
       +   '<span>' + kac(o.tarih || 'Gün') + '</span>' + simge('asagi') + '</button>'
-      + '<div class="gunserit__iz" data-oz="151" role="img" aria-label="' + kac('Günün ' + bas + '–' + son + ' dilimi, şimdi ' + saat) + '">'
+      + '<div class="gunserit__iz" data-oz="151" role="img" aria-label="' + kac(yz('ortak.kabuk.gunun') + bas + '–' + son + ' dilimi, şimdi ' + saat) + '">'
       +   '<span class="gunserit__gecmis" style="width:' + yuzde + '%"></span>'
       +   '<span class="gunserit__eksen"></span>'
       +   saatler
@@ -645,7 +685,7 @@ window.LIFEOS = window.LIFEOS || {};
     /* Sayfa başı #main'in kardeşidir (aynı .sayfa içinde); başka sayfanın
        bilgi kartına taşınmasın diye yalnız orada aranır. */
     const kap = kok.parentElement;
-    const kart = kap && kap.querySelector(':scope > .sayfabasi .sayfabasi__bilgi .bilgikart');
+    const kart = kap && kap.querySelector((':scope > ' + yz('ortak.kabuk.sayfabasi-sayfabasi-bilgi-bi')));
     const serit = Array.from(kok.querySelectorAll('section.rail'));
     if(!kart || !serit.length) return false;
     let tasindi = false;
@@ -655,7 +695,7 @@ window.LIFEOS = window.LIFEOS || {};
       let liste = kart.querySelector('.bilgikart__terimler');
       if(!liste){
         const ad = r.querySelector('.rail__label');
-        const etiket = (ad && ad.textContent.trim()) || 'Bu ekran nasıl okunur';
+        const etiket = (ad && ad.textContent.trim()) || yz('ortak.kabuk.bu-ekran-nasil-okunur');
         liste = document.createElement('div');
         liste.className = 'bilgikart__terimler';
         liste.setAttribute('role', 'group');
@@ -786,7 +826,7 @@ window.LIFEOS = window.LIFEOS || {};
         + ' data-route="' + kac(b.route) + '"' + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad) + '</button>').join('')
       + '</div></section>').join('');
     return '<div class="menusayfa" role="dialog" aria-modal="true" aria-label="Menü">'
-      + '<div class="menusayfa__bas"><b>Menü</b>'
+      + ('<div class="menusayfa__bas"><b>' + yz('ortak.kabuk.menu') + '</b>')
       + '<button class="menusayfa__kapat" data-act="toggle-sidebar" aria-label="Menüyü kapat">' + simge('kapat') + '</button></div>'
       + sistemSecici(o)
       + '<nav class="menusayfa__govde" aria-label="Bütün çekmeceler">' + govde + '</nav>'
@@ -811,7 +851,7 @@ window.LIFEOS = window.LIFEOS || {};
       return '<a class="kmenu__satir" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + ic + '</a>';
     };
     return '<div class="katman kmenu" role="dialog" aria-label="Sistemler">'
-      + '<p class="kmenu__bas">LifeOS</p>'
+      + ('<p class="kmenu__bas">' + yz('ortak.kabuk.lifeos') + '</p>')
       + SIRA.map(satir).join('')
       + '</div>';
   }
@@ -902,7 +942,7 @@ window.LIFEOS = window.LIFEOS || {};
       }
       const say = b.querySelector('.kenar__sayi');
       if(say){ if(d.sayi) say.textContent = String(d.sayi); else say.remove(); }
-      b.setAttribute('aria-label', d.sayi ? 'Bildirimler, ' + d.sayi + ' tane' : 'Bildirimler, yok');
+      b.setAttribute('aria-label', d.sayi ? yz('ortak.kabuk.bildirimler') + d.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok'));
     });
     /* Profil (pencere kapalıyken bildirimi o söyler). */
     document.querySelectorAll('.kenar__bensec .kenar__avatar').forEach(av => {
@@ -929,14 +969,14 @@ window.LIFEOS = window.LIFEOS || {};
     const govde = sirali.length ? sirali.map(g => {
       const m = MODULLER[g.modul] || { ad:g.modul };
       return '<section class="kmenu__grup kmenu__grup--' + kac(g.modul) + '">'
-        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? 'Merkez önerileri' : m.ad) + '</span>'
+        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? yz('ortak.kabuk.merkez-onerileri') : m.ad) + '</span>'
         + '<small class="bildirim__grup-sayi">' + g.satirlar.length + '</small></h2>'
         + g.satirlar.map(s => {
           const veri = Object.keys(s.data || {}).map(a => ' ' + kac(a) + '="' + kac(s.data[a]) + '"').join('');
           const hedef = s.route ? ' data-act="go" data-route="' + kac(s.route) + '"' : ' data-act="' + kac(s.act) + '"';
           const satir = '<button class="kmenu__bildirim' + (s.acil ? ' is-acil' : '') + '"' + hedef + veri + '>'
             + '<span class="bildirim__metin">' + kac(s.metin) + '</span>'
-            + (s.acil ? '<span class="bildirim__acil">Acil</span>' : '')
+            + (s.acil ? ('<span class="bildirim__acil">' + yz('ortak.kabuk.acil') + '</span>') : '')
             + simge('ileri') + '</button>';
           /* Acil satır ertelenemez. */
           return '<div class="bildirim__satir">' + satir + (s.acil ? ''
@@ -946,18 +986,18 @@ window.LIFEOS = window.LIFEOS || {};
         }).join('')
         + '</section>';
     }).join('') : '<div class="kmenu__bos bildirim__bos"><span class="bildirim__bos-simge" aria-hidden="true">' + simge('zil') + '</span>'
-      + '<b>Bekleyen bir şey yok.</b><small>Yeni bir şey olunca burada görünür.</small></div>';
+      + ('<b>' + yz('ortak.kabuk.bekleyen-bir-sey-yok') + '</b><small>' + yz('ortak.kabuk.yeni-bir-sey-olunca-burada') + '</small></div>');
     return '<div class="katman kmenu kmenu--bildirim kmenu--yan" role="dialog" aria-label="Bildirimler">'
-      + '<header class="bildirim__bas"><b>Bildirimler</b>'
+      + ('<header class="bildirim__bas"><b>' + yz('ortak.kabuk.bildirimler-2') + '</b>')
       +   (toplam ? '<span class="bildirim__sayi" aria-label="' + toplam + ' bildirim">' + toplam + '</span>' : '')
-      +   (z.yeni ? '<button type="button" class="bildirim__gordu" data-zil="gordu">Hepsini gördüm</button>' : '')
-      +   (sirali.some(g => g.satirlar.some(s => !s.acil)) ? '<button type="button" class="bildirim__temizle" data-zil="temizle">Temizle</button>' : '')
+      +   (z.yeni ? ('<button type="button" class="bildirim__gordu" data-zil="gordu">' + yz('ortak.kabuk.hepsini-gordum') + '</button>') : '')
+      +   (sirali.some(g => g.satirlar.some(s => !s.acil)) ? ('<button type="button" class="bildirim__temizle" data-zil="temizle">' + yz('ortak.kabuk.temizle') + '</button>') : '')
       +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Bildirimleri kapat">' + simge('kapat') + '</button>'
       + '</header>'
       + '<div class="bildirim__liste">' + govde + '</div>'
       + (z.ertelenen || z.temizlenen ? '<p class="bildirim__ertelenen">'
         + [z.temizlenen ? z.temizlenen + ' bildirim temizlendi.' : '', z.ertelenen ? z.ertelenen + ' bildirim yarına ertelendi.' : ''].filter(Boolean).join(' ')
-        + '<button type="button" data-zil="geri">Geri al</button></p>' : '')
+        + ('<button type="button" data-zil="geri">' + yz('ortak.kabuk.geri-al') + '</button></p>') : '')
       + '</div>';
   }
 
@@ -1144,7 +1184,7 @@ window.LIFEOS = window.LIFEOS || {};
     try{ if(dar) localStorage.removeItem(KENAR_ANAHTAR); else localStorage.setItem(KENAR_ANAHTAR, 'acik'); }catch(e){}
     document.querySelectorAll('[data-kenar-ac]').forEach(b => {
       b.setAttribute('aria-expanded', dar ? 'false' : 'true');
-      b.setAttribute('aria-label', 'Kenar çubuğunu ' + (dar ? 'aç' : 'daralt'));
+      b.setAttribute('aria-label', yz('ortak.kabuk.kenar-cubugunu') + (dar ? 'aç' : 'daralt'));
     });
     return dar;
   }

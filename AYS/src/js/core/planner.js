@@ -9,6 +9,35 @@
 
    Kural motoru otoritedir: plan burada üretilir, LLM plana karışmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.planner.tani-ve-sistem-kurulumu':'Tanı ve sistem kurulumu',
+  'ays.core.planner.baslangic-netleri-sureler-ve':'Başlangıç netleri, süreler ve hata envanteri kaydedildi mi?',
+  'ays.core.planner.turkce-temel-matematik-cekir':'Türkçe + Temel Matematik çekirdeği',
+  'ays.core.planner.haftada-1-brans-denemesi':'Haftada 1 branş denemesi',
+  'ays.core.planner.konu-sonrasi-dogruluk-60-in':'Konu sonrası doğruluk %60’ın üzerinde mi?',
+  'ays.core.planner.problem-geometri-ve-fen-blog':'Problem, geometri ve fen bloğu',
+  'ays.core.planner.problem-dogrulugu-55-i-gecti':'Problem doğruluğu %55’i geçti mi?',
+  'ays.core.planner.ayt-matematik-onkosullari-ac':'AYT Matematik önkoşulları açılıyor',
+  'ays.core.planner.haftada-1-tam-tyt':'Haftada 1 tam TYT + AYT branş',
+  'ays.core.planner.ayt-fonksiyon-polinom-temeli':'AYT fonksiyon/polinom temelinde %60 doğruluk var mı?',
+  'ays.core.planner.ayt-ana-blok-tyt':'AYT ana blok + TYT koruma',
+  'ays.core.planner.haftada-1-tyt-1':'Haftada 1 TYT + 1 AYT',
+  'ays.core.planner.tyt-medyani-dusmeden-ayt-net':'TYT medyanı düşmeden AYT netleri yükseliyor mu?',
+  'ays.core.planner.kalan-konular-ve-ikinci-tur':'Kalan konular ve ikinci tur',
+  'ays.core.planner.haftada-2-tam-deneme':'Haftada 2 tam deneme',
+  'ays.core.planner.konu-kapanisi-75-i-gecti-mi':'Konu kapanışı %75’i geçti mi?',
+  'ays.core.planner.sinav-kosullarinda-tekrar':'Sınav koşullarında tekrar',
+  'ays.core.planner.haftada-2-tam-deneme-2':'Haftada 2 tam deneme + analiz',
+  'ays.core.planner.sure-yonetimi-ve-taban-skor':'Süre yönetimi ve taban skor sabitlendi mi?',
+  'ays.core.planner.hacim-duser-ritim-korunur':'Hacim düşer, ritim korunur',
+  'ays.core.planner.kisa-oturumlar-tam-deneme-yo':'Kısa oturumlar, tam deneme yok',
+  'ays.core.planner.uyku-sinav-saatine-ayarlandi':'Uyku sınav saatine ayarlandı mı, evrak hazır mı?',
+  'ays.core.planner.henuz-gecmis-hafta-yok-plan':'Henüz geçmiş hafta yok; plan ilk haftasında.',
+  'ays.core.planner.plan-gerceklikle-uyumlu-deva':'Plan gerçeklikle uyumlu. Devam.',
+  'ays.core.planner.enerji-kaydi-yetersiz-birkac':'Enerji kaydı yetersiz; birkaç gün giriş yapınca öneri çıkar.',
+  'ays.core.planner.en-yuksek-enerji':'En yüksek enerji ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.planner.sifirdan':'Sıfırdan',
   'ays.core.planner.konularin-cogu-yeni-temel-on':'Konuların çoğu yeni. Temel önce, hız sonra.',
   'ays.core.planner.temeli-var':'Temeli var',
@@ -43,30 +72,30 @@ R.Planner = (function(){
 
   /* Faz modeli — takvimin yüzdesine göre yerleşir, hafta sayısından bağımsız. */
   const PHASES = [
-    { key:'kalibrasyon', to:0.08, label:yz('ays.core.planner.kalibrasyon'), theme:'Tanı ve sistem kurulumu',
+    { key:'kalibrasyon', to:0.08, label:yz('ays.core.planner.kalibrasyon'), theme:yz('ays.core.planner.tani-ve-sistem-kurulumu'),
       focus:['tyt-turkce', 'tyt-matematik'], exam:'1 tam TYT (tanı) + süresiz AYT denemesi',
-      check:'Başlangıç netleri, süreler ve hata envanteri kaydedildi mi?', qFactor:0.55, aytRatio:0 },
-    { key:'tyt-temel', to:0.28, label:yz('ays.core.planner.tyt-temeli'), theme:'Türkçe + Temel Matematik çekirdeği',
-      focus:['tyt-turkce', 'tyt-matematik'], exam:'Haftada 1 branş denemesi',
-      check:'Konu sonrası doğruluk %60’ın üzerinde mi?', qFactor:0.75, aytRatio:0 },
-    { key:'tyt-cekirdek', to:0.45, label:yz('ays.core.planner.tyt-cekirdegi'), theme:'Problem, geometri ve fen bloğu',
+      check:yz('ays.core.planner.baslangic-netleri-sureler-ve'), qFactor:0.55, aytRatio:0 },
+    { key:'tyt-temel', to:0.28, label:yz('ays.core.planner.tyt-temeli'), theme:yz('ays.core.planner.turkce-temel-matematik-cekir'),
+      focus:['tyt-turkce', 'tyt-matematik'], exam:yz('ays.core.planner.haftada-1-brans-denemesi'),
+      check:yz('ays.core.planner.konu-sonrasi-dogruluk-60-in'), qFactor:0.75, aytRatio:0 },
+    { key:'tyt-cekirdek', to:0.45, label:yz('ays.core.planner.tyt-cekirdegi'), theme:yz('ays.core.planner.problem-geometri-ve-fen-blog'),
       focus:['tyt-matematik', 'tyt-fen', 'tyt-turkce'], exam:'2 haftada 1 tam TYT + branş',
-      check:'Problem doğruluğu %55’i geçti mi?', qFactor:0.9, aytRatio:0.1 },
-    { key:'ayt-kopru', to:0.60, label:yz('ays.core.planner.ayt-koprusu'), theme:'AYT Matematik önkoşulları açılıyor',
-      focus:['ayt-matematik', 'tyt-matematik', 'tyt-fen'], exam:'Haftada 1 tam TYT + AYT branş',
-      check:'AYT fonksiyon/polinom temelinde %60 doğruluk var mı?', qFactor:1.0, aytRatio:0.4 },
-    { key:'cift-kulvar', to:0.78, label:yz('ays.core.planner.cift-kulvar'), theme:'AYT ana blok + TYT koruma',
-      focus:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'], exam:'Haftada 1 TYT + 1 AYT',
-      check:'TYT medyanı düşmeden AYT netleri yükseliyor mu?', qFactor:1.0, aytRatio:0.65 },
-    { key:'tamamlama', to:0.90, label:yz('ays.core.planner.tamamlama'), theme:'Kalan konular ve ikinci tur',
-      focus:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji', 'tyt-sosyal'], exam:'Haftada 2 tam deneme',
-      check:'Konu kapanışı %75’i geçti mi?', qFactor:0.95, aytRatio:0.6 },
-    { key:'prova', to:0.97, label:yz('ays.core.planner.prova'), theme:'Sınav koşullarında tekrar',
-      focus:[], exam:'Haftada 2 tam deneme + analiz', qFactor:0.7, aytRatio:0.5,
-      check:'Süre yönetimi ve taban skor sabitlendi mi?' },
-    { key:'taper', to:1.01, label:yz('ays.core.planner.sprint-ve-azaltma'), theme:'Hacim düşer, ritim korunur',
-      focus:[], exam:'Kısa oturumlar, tam deneme yok', qFactor:0.4, aytRatio:0.4,
-      check:'Uyku sınav saatine ayarlandı mı, evrak hazır mı?' },
+      check:yz('ays.core.planner.problem-dogrulugu-55-i-gecti'), qFactor:0.9, aytRatio:0.1 },
+    { key:'ayt-kopru', to:0.60, label:yz('ays.core.planner.ayt-koprusu'), theme:yz('ays.core.planner.ayt-matematik-onkosullari-ac'),
+      focus:['ayt-matematik', 'tyt-matematik', 'tyt-fen'], exam:yz('ays.core.planner.haftada-1-tam-tyt'),
+      check:yz('ays.core.planner.ayt-fonksiyon-polinom-temeli'), qFactor:1.0, aytRatio:0.4 },
+    { key:'cift-kulvar', to:0.78, label:yz('ays.core.planner.cift-kulvar'), theme:yz('ays.core.planner.ayt-ana-blok-tyt'),
+      focus:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'], exam:yz('ays.core.planner.haftada-1-tyt-1'),
+      check:yz('ays.core.planner.tyt-medyani-dusmeden-ayt-net'), qFactor:1.0, aytRatio:0.65 },
+    { key:'tamamlama', to:0.90, label:yz('ays.core.planner.tamamlama'), theme:yz('ays.core.planner.kalan-konular-ve-ikinci-tur'),
+      focus:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji', 'tyt-sosyal'], exam:yz('ays.core.planner.haftada-2-tam-deneme'),
+      check:yz('ays.core.planner.konu-kapanisi-75-i-gecti-mi'), qFactor:0.95, aytRatio:0.6 },
+    { key:'prova', to:0.97, label:yz('ays.core.planner.prova'), theme:yz('ays.core.planner.sinav-kosullarinda-tekrar'),
+      focus:[], exam:yz('ays.core.planner.haftada-2-tam-deneme-2'), qFactor:0.7, aytRatio:0.5,
+      check:yz('ays.core.planner.sure-yonetimi-ve-taban-skor') },
+    { key:'taper', to:1.01, label:yz('ays.core.planner.sprint-ve-azaltma'), theme:yz('ays.core.planner.hacim-duser-ritim-korunur'),
+      focus:[], exam:yz('ays.core.planner.kisa-oturumlar-tam-deneme-yo'), qFactor:0.4, aytRatio:0.4,
+      check:yz('ays.core.planner.uyku-sinav-saatine-ayarlandi') },
   ];
 
   function levels(){ return LEVELS; }
@@ -390,8 +419,8 @@ R.Planner = (function(){
         : pct >= 85 ? 'saglikli'
         : pct >= 60 ? 'sapma'
         : 'geride',
-      note: pct == null ? 'Henüz geçmiş hafta yok; plan ilk haftasında.'
-        : pct >= 85 ? 'Plan gerçeklikle uyumlu. Devam.'
+      note: pct == null ? yz('ays.core.planner.henuz-gecmis-hafta-yok-plan')
+        : pct >= 85 ? yz('ays.core.planner.plan-gerceklikle-uyumlu-deva')
         : pct >= 60 ? behind+' konu geride kaldı (~'+behindWeeks+' hafta). Hedef hacmi bir tık kısmak yeter.'
         : behind+' konu geride kaldı (~'+behindWeeks+' hafta). Plan sıkıştırılmalı: düşük frekanslı konular çıkarılır.',
     };
@@ -517,8 +546,8 @@ R.Planner = (function(){
       best:rows[0] || null,
       worst:rows[rows.length-1] || null,
       note:rows.length < 3
-        ? 'Enerji kaydı yetersiz; birkaç gün giriş yapınca öneri çıkar.'
-        : 'En yüksek enerji ' + rows[0].label + ', en düşük ' + rows[rows.length-1].label
+        ? yz('ays.core.planner.enerji-kaydi-yetersiz-birkac')
+        : yz('ays.core.planner.en-yuksek-enerji') + rows[0].label + ', en düşük ' + rows[rows.length-1].label
           + '. Zor konuyu ' + rows[0].label + ' gününe koy.',
     };
   }

@@ -15,6 +15,17 @@
    2. PLAN DEGISTIREN HER KURAL YETKI TASIMALIDIR. audit() bunu tarar.
    3. EKSENLER GIZLENMEZ — arayuz esigi gosteriyorsa dayanagini da gosterir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.evidence.kesinlik-dusuk':'Kesinlik düşük.',
+  'ays.core.evidence.kesinlik-degerlendirilmemis':'Kesinlik değerlendirilmemiş.',
+  'ays.core.evidence.esik-bu-kullaniciya-dolayli':'Eşik bu kullanıcıya dolaylı uyuyor; kaynağın popülasyonuna ',
+  'ays.core.evidence.esik-kisiye-baglama-ozel-gen':'Eşik kişiye/bağlama özel; genel bir karar eşiği değil.',
+  'ays.core.evidence.yalniz-izler':'Yalnız izler',
+  'ays.core.evidence.bu-esik':'Bu eşik «',
+  'ays.core.evidence.ays-yetki-politikasinda-en-c':'AYS yetki politikasında en çok «',
+  'ays.core.evidence.bu-esigin-kaynagi-yazilmamis-2':'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.evidence.kaynak-yok':'kaynak yok',
   'ays.core.evidence.bu-esigin-kaynagi-yazilmamis':'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik ',
   'ays.core.evidence.kaynak-turu-cozulemedi':'Kaynak türü çözülemedi.',
@@ -111,17 +122,17 @@ R.Ev = (function(){
   function downgrades(r){
     const out = [];
     if(r.certainty === 'low'){
-      out.push({ axis:'certainty', reason:'Kesinlik düşük.' });
+      out.push({ axis:'certainty', reason:yz('ays.core.evidence.kesinlik-dusuk') });
     } else if(r.certainty === 'unknown'){
-      out.push({ axis:'certainty', reason:'Kesinlik değerlendirilmemiş.' });
+      out.push({ axis:'certainty', reason:yz('ays.core.evidence.kesinlik-degerlendirilmemis') });
     }
     if(r.applicability === 'indirect'){
       out.push({ axis:'applicability',
-        reason:'Eşik bu kullanıcıya dolaylı uyuyor; kaynağın popülasyonuna '
+        reason:yz('ays.core.evidence.esik-bu-kullaniciya-dolayli')
              + 'göre kayabilir.' });
     } else if(r.applicability === 'local' && SELF_SOURCES.indexOf(r.source) < 0){
       out.push({ axis:'applicability',
-        reason:'Eşik kişiye/bağlama özel; genel bir karar eşiği değil.' });
+        reason:yz('ays.core.evidence.esik-kisiye-baglama-ozel-gen') });
     }
     return out;
   }
@@ -162,7 +173,7 @@ R.Ev = (function(){
     const r = of(rule);
     if(!r){
       return { source:null, label:yz('ays.core.evidence.kaynak-yok'), tone:'warn', mayDirect:false,
-        authority:'observe_only', authorityLabel:'Yalnız izler',
+        authority:'observe_only', authorityLabel:yz('ays.core.evidence.yalniz-izler'),
         text:yz('ays.core.evidence.bu-esigin-kaynagi-yazilmamis')
            + 'plan değiştirmez.' };
     }
@@ -210,15 +221,15 @@ R.Ev = (function(){
       reasons:inis,
       cap:cap(rule),
       why:r
-        ? 'Bu eşik «' + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
-          + 'AYS yetki politikasında en çok «'
+        ? yz('ays.core.evidence.bu-esik') + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
+          + yz('ays.core.evidence.ays-yetki-politikasinda-en-c')
           + ((r.authorityInfo || {}).label || r.authority) + '» sayılıyor'
           + (etkin.capped
              ? '; ayrıca ' + inis.join(' ') + ' Bu yüzden etkin yetkisi «'
                + (a || {}).label + '» seviyesine indi.'
              : ': ' + (a || {}).note)
           + ' Bu yüzden burada plan değiştirilmez, gözlem bildirilir.'
-        : 'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten '
+        : yz('ays.core.evidence.bu-esigin-kaynagi-yazilmamis-2')
           + 'plan değişikliği çıkmaz.',
     };
   }

@@ -13,6 +13,51 @@
    Yetki: her ajan yalnizca kendi brifingini gorur; ham veriye erisemez.
    Gizlilik: LLM'e giden her nesne R.Tools.sanitize'dan gecer. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.office.henuz-cozum-kaydi-yok':'Henüz çözüm kaydı yok',
+  'ays.core.office.plan':'Plan %',
+  'ays.core.office.analiz-borcu-yok':'Analiz borcu yok',
+  'ays.core.office.cozdugun-sorularin-yalniz':'Çözdüğün soruların yalnız %',
+  'ays.core.office.plan-tamamlamasi':'Plan tamamlaması %',
+  'ays.core.office.tyt-medyani':'TYT medyanı ',
+  'ays.core.office.ayt-medyani':'AYT medyanı ',
+  'ays.core.office.karar':'Karar ',
+  'ays.core.office.masalarda-bekleyen-bir-uyari':'Masalarda bekleyen bir uyarı yok. Bugünün işi: ',
+  'ays.core.office.bugun-sunu-konusacagiz':'Bugün şunu konuşacağız: ',
+  'ays.core.office.konustuklarimizdan-cikan-tek':'Konuştuklarımızdan çıkan tek iş şu: ',
+  'ays.core.office.bir-itirazim-var':'Bir itirazım var: ',
+  'ays.core.office.benim-itirazim-yok':'Benim itirazım yok. ',
+  'ays.core.office.benim-tarafimda-en-somut-is':'Benim tarafımda en somut iş bu: ',
+  'ays.core.office.bana-dusen-kisim-su':'Bana düşen kısım şu: ',
+  'ays.core.office.benim-ekleyecegim-bir-sey-yo':'Benim ekleyeceğim bir şey yok.',
+  'ays.core.office.merhaba-buradayim':'Merhaba, buradayım.',
+  'ays.core.office.konuyu-anlatmayi-isterdim-am':'Konuyu anlatmayı isterdim ama ofise bir model bağlı değil; ders anlatmak ',
+  'ays.core.office.seni-duyuyorum-ama-yazdigini':'Seni duyuyorum ama yazdığını okuyabilmem için ofise bir model bağlaman ',
+  'ays.core.office.bu-sayilar-raporda-yok':'Bu sayılar raporda yok: ',
+  'ays.core.office.haftanin-kapanisi':'Haftanın kapanışı',
+  'ays.core.office.bu-ayin-degerlendirmesi':'Bu ayın değerlendirmesi',
+  'ays.core.office.tyt-medyaninda':'TYT medyanında ',
+  'ays.core.office.ayt-medyaninda':'AYT medyanında ',
+  'ays.core.office.konu-kapanisi':'Konu kapanışı %',
+  'ays.core.office.en-riskli-konu-2':'En riskli konu: ',
+  'ays.core.office.haftanin-genel-durumu':'Haftanın genel durumu',
+  'ays.core.office.kendi-alaninda-bu-konuyla-il':'Kendi alanında bu konuyla ilgili gördüğün tek şeyi söyle.',
+  'ays.core.office.ne-yapilmasini-oneriyorsun-t':'Ne yapılmasını öneriyorsun? Tek bir somut şey söyle — ',
+  'ays.core.office.masadaki-fikirlerden-biri-se':'Masadaki fikirlerden biri senin alanında tutmuyorsa söyle, nedenini de. ',
+  'ays.core.office.i-tirazin-yoksa-hangisini-de':'İtirazın yoksa hangisini desteklediğini bir cümlede söyle.',
+  'ays.core.office.fikirlerden-birini-sec-cumle':'Fikirlerden birini seç. Cümleye o fikrin NUMARASIYLA başla, sonra tek ',
+  'ays.core.office.bu-isin-sana-dusen-kismi':'Bu işin sana düşen kısmı ne? Tek cümlede söyle.',
+  'ays.core.office.plan-gercekten-tuttu-mu-yoks':'Plan gerçekten tuttu mu, yoksa analiz plana hiç yazılmadı mı?',
+  'ays.core.office.tyt-kapanisi':'TYT kapanışı %',
+  'ays.core.office.kapanmis-saydigimiz-konular':'Kapanmış saydığımız konular gerçekten kapandı mı?',
+  'ays.core.office.bu-tempo-uykudan-mi-odunc':'Bu tempo uykudan mı ödünç alıyor?',
+  'ays.core.office.kapanan-konular-tekrar-edilm':'Kapanan konular tekrar edilmiyorsa kapanış ne kadar gerçek?',
+  'ays.core.office.capraz-soru':'Çapraz soru',
+  'ays.core.office.soz-aldin':'Söz aldın',
+  'ays.core.office.gundem':'Gündem: ',
+  'ays.core.office.neden':'Neden: ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.office.en-riskli-konu':'En riskli konu ',
   'ays.core.office.derslere-git':'Derslere git',
   'ays.core.office.medyan-son-3':'Medyan (son 3)',
@@ -396,7 +441,7 @@ R.Office = (function(){
         agent:agent.id, name:agent.name, role:agent.role,
         headline:sum.toplam
           ? sum.toplam + ' soru · %' + (sum.cozumOrani == null ? '—' : sum.cozumOrani) + ' kendi çözümün'
-          : 'Henüz çözüm kaydı yok',
+          : yz('ays.core.office.henuz-cozum-kaydi-yok'),
         metrics:[
           { label:yz('ays.core.office.son-7-gun'), value:haftalik + ' soru', tone:haftalik >= 20 ? 'ok' : 'warn',
             note:yz('ays.core.office.toplam') + sum.toplam },
@@ -489,7 +534,7 @@ R.Office = (function(){
 
       return {
         agent:agent.id, name:agent.name, role:agent.role,
-        headline:'Plan %' + (comp == null ? '—' : comp) + ' · seri ' + streak.streak + ' gün',
+        headline:yz('ays.core.office.plan') + (comp == null ? '—' : comp) + ' · seri ' + streak.streak + ' gün',
         metrics:[
           { label:yz('ays.core.office.plan-tamamlama'), value:comp == null ? '—' : '%' + comp, tone:tone(comp, 85, 70), note:yz('ays.core.office.hedef-85') },
           { label:yz('ays.core.office.uyku-7-gun'), value:sleep == null ? '—' : U.fmtNet(sleep) + ' sa',
@@ -571,7 +616,7 @@ R.Office = (function(){
 
       return {
         agent:agent.id, name:agent.name, role:agent.role,
-        headline:(debt.length ? debt.length + ' analiz borcu' : 'Analiz borcu yok')
+        headline:(debt.length ? debt.length + ' analiz borcu' : yz('ays.core.office.analiz-borcu-yok'))
           + ' · kapanış %' + closure.pct,
         metrics:[
           { label:yz('ays.core.office.analiz-borcu'), value:String(debt.length), tone:debt.length ? 'danger' : 'ok',
@@ -669,7 +714,7 @@ R.Office = (function(){
 
     { id:'tekrar-borcu', agent:'analist', tone:'warn', route:'cards',
       when(){ return C.cardDebt() > 15; },
-      text(){ return 'Tekrar borcu %' + C.cardDebt() + ' — eşik %10, borç birikiyor.'; } },
+      text(){ return yz('ays.core.office.tekrar-borcu') + C.cardDebt() + ' — eşik %10, borç birikiyor.'; } },
 
     { id:'acik-yanlis', agent:'analist', tone:'warn', route:'cards',
       when(){ return C.openErrors().length >= 12; },
@@ -686,7 +731,7 @@ R.Office = (function(){
       },
       text(){
         const s = R.Solver.summary();
-        return 'Çözdüğün soruların yalnız %' + s.cozumOrani + ' tanesini kendin çözdün; '
+        return yz('ays.core.office.cozdugun-sorularin-yalniz') + s.cozumOrani + ' tanesini kendin çözdün; '
           + 'gerisinde çözüme baktın. Soru sayısı artıyor ama konu kapanmıyor.';
       } },
 
@@ -719,23 +764,23 @@ R.Office = (function(){
         const t = (S.profile && S.profile.sleepTarget) || 7.5;
         return s != null && s < t - 1;
       },
-      text(){ return 'Uyku ortalaması ' + U.fmtNet(C.sleepAverage(7)) + ' saate düştü; hacim tartışmasından önce bu.'; } },
+      text(){ return yz('ays.core.office.uyku-ortalamasi') + U.fmtNet(C.sleepAverage(7)) + ' saate düştü; hacim tartışmasından önce bu.'; } },
 
     { id:'plan', agent:'rehber', tone:'warn', route:'week',
       when(){ const c = C.planCompletion(M.currentWeek()); return c != null && c < 70; },
-      text(){ return 'Plan tamamlaması %' + C.planCompletion(M.currentWeek()) + '; sözleşme kapasitenin üstünde olabilir.'; } },
+      text(){ return yz('ays.core.office.plan-tamamlamasi') + C.planCompletion(M.currentWeek()) + '; sözleşme kapasitenin üstünde olabilir.'; } },
 
     { id:'seri', agent:'rehber', tone:'ok', route:'today',
       when(){ return C.behaviorStreak().streak >= 7; },
-      text(){ return 'Davranış serisi ' + C.behaviorStreak().streak + ' gün — bu düzen korunmaya değer.'; } },
+      text(){ return yz('ays.core.office.davranis-serisi') + C.behaviorStreak().streak + ' gün — bu düzen korunmaya değer.'; } },
 
     { id:'tyt-dusus', agent:'tyt', tone:'danger', route:'progress',
       when(){ const t = C.medianTrend('TYT'); return t.delta != null && t.delta <= -2; },
-      text(){ return 'TYT medyanı ' + U.fmtNet(Math.abs(C.medianTrend('TYT').delta)) + ' net geriledi.'; } },
+      text(){ return yz('ays.core.office.tyt-medyani') + U.fmtNet(Math.abs(C.medianTrend('TYT').delta)) + ' net geriledi.'; } },
 
     { id:'ayt-dusus', agent:'ayt', tone:'danger', route:'progress',
       when(){ const t = C.medianTrend('AYT'); return t.delta != null && t.delta <= -2; },
-      text(){ return 'AYT medyanı ' + U.fmtNet(Math.abs(C.medianTrend('AYT').delta)) + ' net geriledi.'; } },
+      text(){ return yz('ays.core.office.ayt-medyani') + U.fmtNet(Math.abs(C.medianTrend('AYT').delta)) + ' net geriledi.'; } },
 
     { id:'ikinci-olcum', agent:'tyt', tone:'warn', route:'subjects',
       when(){ return C.pendingSecondChecks().filter(p => p.overdue).length >= 2; },
@@ -747,7 +792,7 @@ R.Office = (function(){
       text(){
         const d = openDecisions()[0];
         const gun = U.diffDays(R.U.gunOf(d.at), U.todayISO());
-        return 'Karar ' + (gun > 0 ? gun + ' gündür ' : '') + 'açık: ' + d.title;
+        return yz('ays.core.office.karar') + (gun > 0 ? gun + ' gündür ' : '') + 'açık: ' + d.title;
       } },
   ];
 
@@ -789,7 +834,7 @@ R.Office = (function(){
   function ruleBriefingText(){
     const list = notes();
     const action = nextAction();
-    if(!list.length) return 'Masalarda bekleyen bir uyarı yok. Bugünün işi: ' + action.title + '.';
+    if(!list.length) return yz('ays.core.office.masalarda-bekleyen-bir-uyari') + action.title + '.';
     return list.slice(0, 2).map(n => n.name + ': ' + n.text).join(' ')
       + ' Bugünün işi: ' + action.title + '.';
   }
@@ -952,10 +997,10 @@ R.Office = (function(){
        sabit olmak zorunda ama SOGUK olmak zorunda degil: "Gundem: X." diye
        baslayan bir acilis, toplanti degil form doldurmadir. */
     if(kind === 'opening'){
-      return 'Bugün şunu konuşacağız: ' + ctx.topic + '. ' + ctx.why + ' Sizi dinliyorum.';
+      return yz('ays.core.office.bugun-sunu-konusacagiz') + ctx.topic + '. ' + ctx.why + ' Sizi dinliyorum.';
     }
     if(kind === 'closing'){
-      return 'Konuştuklarımızdan çıkan tek iş şu: ' + ctx.action.title + '. '
+      return yz('ays.core.office.konustuklarimizdan-cikan-tek') + ctx.action.title + '. '
         + (ctx.action.why || '') + ' Gerisi sıraya girsin; aynı anda iki şeye birden girmiyoruz.';
     }
 
@@ -970,16 +1015,16 @@ R.Office = (function(){
         : b.headline + '. Benden çıkacak somut bir öneri yok.';
     }else if(kind === 'turn' && round === 'itiraz'){
       body = lines[1]
-        ? 'Bir itirazım var: ' + lowerFirst(lines[1])
-        : 'Benim itirazım yok. ' + (lines[0] || b.headline);
+        ? yz('ays.core.office.bir-itirazim-var') + lowerFirst(lines[1])
+        : yz('ays.core.office.benim-itirazim-yok') + (lines[0] || b.headline);
     }else if(kind === 'turn' && round === 'oylama'){
       /* Oy kural motoru modunda nextTurn icinde secilir; burada gerekce yazilir. */
-      body = b.suggestion ? 'Benim tarafımda en somut iş bu: ' + b.suggestion.text
+      body = b.suggestion ? yz('ays.core.office.benim-tarafimda-en-somut-is') + b.suggestion.text
         : (lines[0] || b.headline);
     }else if(kind === 'turn' && (round === 'sentez' || round === 'serbest')){
       body = b.suggestion
-        ? 'Bana düşen kısım şu: ' + b.suggestion.text
-        : 'Benim ekleyeceğim bir şey yok.';
+        ? yz('ays.core.office.bana-dusen-kisim-su') + b.suggestion.text
+        : yz('ays.core.office.benim-ekleyecegim-bir-sey-yo');
     }else if(kind === 'answer'){
       body = (lines[0] || b.headline) + (lines[1] ? ' ' + lines[1] : '');
     }else if(kind === 'turn'){
@@ -1015,7 +1060,7 @@ R.Office = (function(){
       const first = !(ctx && ctx.told);
 
       if(chat === 'selam'){
-        return 'Merhaba, buradayım.'
+        return yz('ays.core.office.merhaba-buradayim')
           + (first ? ' Ama baştan söyleyeyim: ofise bir model bağlanmadığı için '
               + 'yazdığını okuyamıyorum, sohbet edemiyorum. Bağlarsan konuşuruz.' : '')
           + ' Şimdilik yalnız masamdaki tabloyu aktarabiliyorum.';
@@ -1024,11 +1069,11 @@ R.Office = (function(){
          "kisa ve sade" burada da gecerli. */
       const tek = lines[0] || b.headline;
       if(chat === 'konu'){
-        return 'Konuyu anlatmayı isterdim ama ofise bir model bağlı değil; ders anlatmak '
+        return yz('ays.core.office.konuyu-anlatmayi-isterdim-am')
           + 'için ona ihtiyacım var. Elimden gelen şu kadarı: ' + tek;
       }
       if(chat === 'hal'){
-        return 'Seni duyuyorum ama yazdığını okuyabilmem için ofise bir model bağlaman '
+        return yz('ays.core.office.seni-duyuyorum-ama-yazdigini')
           + 'gerekiyor. Masamdan görünen tek şey şu: ' + tek;
       }
       return body
@@ -1132,7 +1177,7 @@ R.Office = (function(){
     if(o.brief){
       const made = numberFidelity(text, o.brief);
       if(made.length){
-        warnings.push('Bu sayılar raporda yok: ' + made.join(', ')
+        warnings.push(yz('ays.core.office.bu-sayilar-raporda-yok') + made.join(', ')
           + '. Kural motorunun hesabına bak, metne değil.');
       }
     }
@@ -1459,7 +1504,7 @@ R.Office = (function(){
     /* Pazar aksami haftanin kapanisi gundemi one gecer: hafta bitiyor ve
        sozlesme degil GERCEKLESEN konusulur. */
     if(U.weekdayIndex(U.today()) === 6){
-      out.push({ score:92, topic:'Haftanın kapanışı',
+      out.push({ score:92, topic:yz('ays.core.office.haftanin-kapanisi'),
         why:yz('ays.core.office.hafta-bitiyor-planlanan-ile'),
         data:{ hafta:n, tamamlama:comp, soruGerceklesme:C.questionRealization(n),
           atlamaNedenleri:C.skipReasonCounts(n),
@@ -1467,7 +1512,7 @@ R.Office = (function(){
     }
 
     if(gate && !decided){
-      out.push({ score:95, topic:'Bu ayın değerlendirmesi',
+      out.push({ score:95, topic:yz('ays.core.office.bu-ayin-degerlendirmesi'),
         why:yz('ays.core.office.ayda-bir-netlerinin-ortasi-h'),
         data:{ ay:gate.month, tytBant:gate.tyt, tytGuvenli:gate.tytSafe, aytBant:gate.ayt,
           kural:gate.note, tytMedyan:num(tyt.last3), aytMedyan:num(ayt.last3) } });
@@ -1478,42 +1523,42 @@ R.Office = (function(){
         data:{ borc:debt.length, denemeler:debt.slice(0, 5).map(e => ({ tarih:e.date, tur:e.type })) } });
     }
     if(comp != null && comp < 80){
-      out.push({ score:85, topic:'Plan tamamlaması %' + comp + ' — hedefin altında',
+      out.push({ score:85, topic:yz('ays.core.office.plan-tamamlamasi') + comp + ' — hedefin altında',
         why:yz('ays.core.office.i-ki-hafta-ust-uste-80'),
         data:{ hafta:n, tamamlama:comp, atlamaNedenleri:C.skipReasonCounts(n) } });
     }
     if(tyt.delta != null && tyt.delta <= -1.5){
-      out.push({ score:80, topic:'TYT medyanında ' + U.fmtNet(Math.abs(tyt.delta)) + ' net düşüş',
+      out.push({ score:80, topic:yz('ays.core.office.tyt-medyaninda') + U.fmtNet(Math.abs(tyt.delta)) + ' net düşüş',
         why:yz('ays.core.office.dusus-tek-denemeden-degil-me'),
         data:{ son3:num(tyt.last3), onceki3:num(tyt.prev3), fark:num(tyt.delta), taban:num(C.examBase('TYT')) } });
     }
     if(sleep != null && sleep < target - 1){
-      out.push({ score:78, topic:'Uyku ortalaması ' + U.fmtNet(sleep) + ' saate düştü',
+      out.push({ score:78, topic:yz('ays.core.office.uyku-ortalamasi') + U.fmtNet(sleep) + ' saate düştü',
         why:yz('ays.core.office.uyku-bellek-pekismesinin-par'),
         data:{ ortalama:num(sleep), hedef:target } });
     }
     if(cardDebt > 10){
-      out.push({ score:70, topic:'Tekrar borcu %' + cardDebt,
+      out.push({ score:70, topic:yz('ays.core.office.tekrar-borcu') + cardDebt,
         why:yz('ays.core.office.borc-esigi-asildi-yeni-kart'),
         data:{ borc:cardDebt, gecikmis:C.overdueCards().length, due:C.dueCards().length } });
     }
     if(ayt.delta != null && ayt.delta <= -1.5){
-      out.push({ score:68, topic:'AYT medyanında ' + U.fmtNet(Math.abs(ayt.delta)) + ' net düşüş',
+      out.push({ score:68, topic:yz('ays.core.office.ayt-medyaninda') + U.fmtNet(Math.abs(ayt.delta)) + ' net düşüş',
         why:yz('ays.core.office.alan-derslerinde-dusus-siral'),
         data:{ son3:num(ayt.last3), onceki3:num(ayt.prev3), fark:num(ayt.delta) } });
     }
     if(closure.pct < 55){
-      out.push({ score:60, topic:'Konu kapanışı %' + closure.pct,
+      out.push({ score:60, topic:yz('ays.core.office.konu-kapanisi') + closure.pct,
         why:yz('ays.core.office.kapanmamis-konu-net-uretmez'),
         data:{ kapanan:closure.closed, toplam:closure.total, yuzde:closure.pct } });
     }
     if(risks.length){
-      out.push({ score:50, topic:'En riskli konu: ' + risks[0].topicName,
+      out.push({ score:50, topic:yz('ays.core.office.en-riskli-konu-2') + risks[0].topicName,
         why:yz('ays.core.office.risk-siralamasinin-basindaki'),
         data:{ ders:risks[0].subjectName, konu:risks[0].topicName, risk:risks[0].score,
           durum:risks[0].state, acikYanlis:risks[0].errors } });
     }
-    out.push({ score:10, topic:'Haftanın genel durumu',
+    out.push({ score:10, topic:yz('ays.core.office.haftanin-genel-durumu'),
       why:yz('ays.core.office.acil-bir-baslik-yok-ekip'),
       data:{ hafta:n, kapanis:closure.pct, planTamamlama:comp } });
 
@@ -1537,18 +1582,18 @@ R.Office = (function(){
      bes kisi sirayla dort cumle kurunca toplanti okunmaz hâle geliyordu. */
   const ROUNDS = [
     { key:'durum',  title:yz('ays.core.office.durum-tespiti'), sentences:2,
-      ask:'Kendi alanında bu konuyla ilgili gördüğün tek şeyi söyle.' },
+      ask:yz('ays.core.office.kendi-alaninda-bu-konuyla-il') },
     { key:'fikir',  title:yz('ays.core.office.fikir-turu'), sentences:2,
-      ask:'Ne yapılmasını öneriyorsun? Tek bir somut şey söyle — '
+      ask:yz('ays.core.office.ne-yapilmasini-oneriyorsun-t')
         + 'senden öncekilerin söylediğini tekrarlama.' },
     { key:'itiraz', title:yz('ays.core.office.i-tiraz-turu'), sentences:2,
-      ask:'Masadaki fikirlerden biri senin alanında tutmuyorsa söyle, nedenini de. '
-        + 'İtirazın yoksa hangisini desteklediğini bir cümlede söyle.' },
+      ask:yz('ays.core.office.masadaki-fikirlerden-biri-se')
+        + yz('ays.core.office.i-tirazin-yoksa-hangisini-de') },
     { key:'oylama', title:yz('ays.core.office.oylama-turu'), vote:true, sentences:2,
-      ask:'Fikirlerden birini seç. Cümleye o fikrin NUMARASIYLA başla, sonra tek '
+      ask:yz('ays.core.office.fikirlerden-birini-sec-cumle')
         + 'cümlede neden onu seçtiğini söyle. Kendi fikrini de seçebilirsin.' },
     { key:'sentez', title:yz('ays.core.office.toparlama-turu'), sentences:2,
-      ask:'Bu işin sana düşen kısmı ne? Tek cümlede söyle.' },
+      ask:yz('ays.core.office.bu-isin-sana-dusen-kismi') },
   ];
 
   function roundDef(n){ return ROUNDS[Math.min(n, ROUNDS.length) - 1] || ROUNDS[ROUNDS.length - 1]; }
@@ -1638,9 +1683,9 @@ R.Office = (function(){
         return C.analysisDebt().length > 0 && c != null && c >= 85;
       },
       ask(){
-        return 'Plan tamamlaması %' + C.planCompletion(M.currentWeek()) + ' ile tutmuş görünüyor '
+        return yz('ays.core.office.plan-tamamlamasi') + C.planCompletion(M.currentWeek()) + ' ile tutmuş görünüyor '
           + 'ama ' + C.analysisDebt().length + ' deneme analizsiz duruyor. '
-          + 'Plan gerçekten tuttu mu, yoksa analiz plana hiç yazılmadı mı?';
+          + yz('ays.core.office.plan-gercekten-tuttu-mu-yoks');
       },
     },
     {
@@ -1650,9 +1695,9 @@ R.Office = (function(){
         return C.examClosure('TYT').pct >= 60 && t.delta != null && t.delta <= -1.5;
       },
       ask(){
-        return 'TYT kapanışı %' + C.examClosure('TYT').pct + ' ama medyan '
+        return yz('ays.core.office.tyt-kapanisi') + C.examClosure('TYT').pct + ' ama medyan '
           + U.fmtNet(Math.abs(C.medianTrend('TYT').delta)) + ' net geriledi. '
-          + 'Kapanmış saydığımız konular gerçekten kapandı mı?';
+          + yz('ays.core.office.kapanmis-saydigimiz-konular');
       },
     },
     {
@@ -1664,17 +1709,17 @@ R.Office = (function(){
         return s != null && s < t - 1 && c != null && c >= 85;
       },
       ask(){
-        return 'Plan %' + C.planCompletion(M.currentWeek()) + ' tutmuş ama uyku '
+        return yz('ays.core.office.plan') + C.planCompletion(M.currentWeek()) + ' tutmuş ama uyku '
           + U.fmtNet(C.sleepAverage(7)) + ' saate düşmüş. '
-          + 'Bu tempo uykudan mı ödünç alıyor?';
+          + yz('ays.core.office.bu-tempo-uykudan-mi-odunc');
       },
     },
     {
       id:'kart-borcu', target:'analist',
       when(){ return C.cardDebt() > 15 && C.overallClosure().pct >= 50; },
       ask(){
-        return 'Konu kapanışı %' + C.overallClosure().pct + ' ama tekrar borcu %' + C.cardDebt() + '. '
-          + 'Kapanan konular tekrar edilmiyorsa kapanış ne kadar gerçek?';
+        return yz('ays.core.office.konu-kapanisi') + C.overallClosure().pct + ' ama tekrar borcu %' + C.cardDebt() + '. '
+          + yz('ays.core.office.kapanan-konular-tekrar-edilm');
       },
     },
   ];
@@ -1784,7 +1829,7 @@ R.Office = (function(){
     }, Object.assign({}, o, { maxTokens:BUDGET.cross }));
     q.round = session.round;
     q.roundKey = 'capraz';
-    q.roundTitle = 'Çapraz soru';
+    q.roundTitle = yz('ays.core.office.capraz-soru');
     q.conflict = conflict.id;
     /* Model yoksa Patron soruyu kural motorunun yazdigi hâliyle sorar. */
     if(q.mode === 'kural') q.text = conflict.name + ', ' + conflict.question;
@@ -1813,7 +1858,7 @@ R.Office = (function(){
   function userTurn(session, text){
     const turn = {
       agent:'aday', name:yz('ays.core.office.sen'), role:'aday', text:String(text || '').trim(),
-      warnings:[], mode:'kullanici', round:session.round, roundTitle:'Söz aldın',
+      warnings:[], mode:'kullanici', round:session.round, roundTitle:yz('ays.core.office.soz-aldin'),
     };
     if(!turn.text) return null;
     session.turns.push(turn);
@@ -1933,8 +1978,8 @@ R.Office = (function(){
     const r = meeting.report || {};
     const out = [];
     out.push('TOPLANTI RAPORU — ' + new Date(meeting.at).toLocaleString('tr-TR'));
-    out.push('Gündem: ' + meeting.topic);
-    if(r.why) out.push('Neden: ' + r.why);
+    out.push(yz('ays.core.office.gundem') + meeting.topic);
+    if(r.why) out.push(yz('ays.core.office.neden') + r.why);
     out.push('');
     out.push('KARAR: ' + meeting.action.title);
     if(meeting.action.why) out.push(meeting.action.why);

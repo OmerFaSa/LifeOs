@@ -15,6 +15,18 @@
 
    Ölçülemeyen basamak üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
    Orada istenen şey çalışmak değil ÖLÇMEKTİR. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.ladder.hicbir-disiplinde-olculmus-u':'Hiçbir disiplinde ölçülmüş üretim yok. ',
+  'esp.ladder.merdiven-ilk-olcumle-baslar':'Merdiven ilk ölçümle başlar.',
+  'esp.ladder.once-olc':'Önce ölç',
+  'esp.ladder.siradaki-kapi':'Sıradaki kapı',
+  'esp.ladder.ustat-kademesi-bile-bu-madde':'Üstat kademesi bile bu maddeleri kapatmaz. Merdiven bir ',
+  'esp.ladder.ne-calisilir':'Ne çalışılır',
+  'esp.ladder.merdiven-henuz-baslamadi':'Merdiven henüz başlamadı.',
+  'esp.ladder.olculmus-uretim-2':'Ölçülmüş üretim «',
+  'esp.ladder.kademe-kisiye-degil-ureti-me':'Kademe kişiye değil ÜRETİME verilir. Ölçüm dururken kademe de ',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -111,8 +123,8 @@ ESP.Screens.ladder = (function(){
       label:yz('esp.ladder.genel-kademe'), hint:'level',
       meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
       body:ov.cert === 'missing'
-        ? K.Notice({ tone:'info', body:'Hiçbir disiplinde ölçülmüş üretim yok. '
-            + 'Merdiven ilk ölçümle başlar.' })
+        ? K.Notice({ tone:'info', body:yz('esp.ladder.hicbir-disiplinde-olculmus-u')
+            + yz('esp.ladder.merdiven-ilk-olcumle-baslar') })
         : html`
           ${K.NextUp({ icon:'chart', label:yz('esp.ladder.olculmus-uretim'), title:ov.level.label,
             why:ov.level.note })}
@@ -206,7 +218,7 @@ ESP.Screens.ladder = (function(){
           body:lv.declaredWhy }))}
         ${when(kapi, () => K.NextUp({
           icon:kapi.action === 'measure' ? 'info' : 'zap',
-          label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',
+          label:kapi.action === 'measure' ? yz('esp.ladder.once-olc') : yz('esp.ladder.siradaki-kapi'),
           title:kapi.title, why:kapi.why }))}`,
     }));
 
@@ -224,7 +236,7 @@ ESP.Screens.ladder = (function(){
         body:html`
           <ul class="studylist">${map(lad.blind, x => html`<li>${x}</li>`)}</ul>
           ${K.Notice({ tone:'info',
-            body:'Üstat kademesi bile bu maddeleri kapatmaz. Merdiven bir '
+            body:yz('esp.ladder.ustat-kademesi-bile-bu-madde')
                + 'yeterlilik belgesi değil, bir çalışma düzenidir.' })}`,
       }));
     }
@@ -240,7 +252,7 @@ ESP.Screens.ladder = (function(){
         body:html`
           <div class="step__cols">
             <div>
-              ${K.SectionTitle('Ne çalışılır')}
+              ${K.SectionTitle(yz('esp.ladder.ne-calisilir'))}
               <ul class="studylist">${map(st.study, x => html`<li>${x}</li>`)}</ul>
               <p class="small muted mt-8"><b>${yz('esp.ladder.kapanis-isi')}</b> ${st.proof}</p>
             </div>
@@ -476,20 +488,20 @@ ESP.Screens.ladder = (function(){
       const G = (window.LIFEOS || {}).Gizle;
       const yol = G ? C().roadmap(S.ui.curDisc || 'lang') : null;
       const kademeler = (yol ? yol.steps : []).filter(st => st.state !== 'current')
-        .map(st => G.anahtar('Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
+        .map(st => G.anahtar(yz('esp.ladder.kademe') + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
       return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler);
     },
     title:yz('esp.ladder.merdiven'),
     headline(){
       const ov = C().overall();
-      if(ov.cert === 'missing') return 'Merdiven henüz başlamadı.';
+      if(ov.cert === 'missing') return yz('esp.ladder.merdiven-henuz-baslamadi');
       const olc = ESP.Mod.active().map(d => C().nextGate(d.id))
         .filter(g => g && g.action === 'measure').length;
       if(olc) return olc + ' kapı ölçülemiyor.';
-      return 'Ölçülmüş üretim «' + ov.level.label + '» kademesinde.';
+      return yz('esp.ladder.olculmus-uretim-2') + ov.level.label + '» kademesinde.';
     },
     lede(){
-      return 'Kademe kişiye değil ÜRETİME verilir. Ölçüm dururken kademe de '
+      return yz('esp.ladder.kademe-kisiye-degil-ureti-me')
            + 'durur; bu bir sınav sonucu değildir.';
     },
     stats(){

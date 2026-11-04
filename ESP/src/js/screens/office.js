@@ -10,6 +10,11 @@
    masanın kime ait olduğunu söyler. Durum renkleri (kırmızı/sarı/yeşil)
    kimlik şeridinde asla kullanılmaz; aciliyet yalnızca devir okuna dokunur.
    İki renk sistemi aynı yüzeyde karışmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.office.masalarda-bekleyen-bulgu-yok':'Masalarda bekleyen bulgu yok.',
+  'esp.office.dokuz-masa-patron-yedi-uzman':'Dokuz masa: Patron, yedi uzman ve bir koç. Her masa yalnızca kendi ',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -214,10 +219,10 @@ ESP.Screens.office = (function(){
       if(n) return n + ' masada tıkanma bulgusu var.';
       const d = ESP.Office.handoffs();
       if(d.length) return d.length + ' bulgu başka bir masaya düşüyor.';
-      return 'Masalarda bekleyen bulgu yok.';
+      return yz('esp.office.masalarda-bekleyen-bulgu-yok');
     },
     lede(){
-      return 'Dokuz masa: Patron, yedi uzman ve bir koç. Her masa yalnızca kendi '
+      return yz('esp.office.dokuz-masa-patron-yedi-uzman')
            + 'ölçümüne bakar; çelişkiyi Patron çözer.';
     },
     stats(){

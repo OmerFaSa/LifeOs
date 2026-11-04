@@ -1,5 +1,17 @@
 /* Arayuz parcalari: ikonlar, olcum gorselleri, grafikler, alt sayfa ve bildirimler. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.ui.henuz-hata-kaydi-yok':'Henüz hata kaydı yok.',
+  'ays.core.ui.skor':'Skor ',
+  'ays.core.ui.skor-yok':'Skor yok',
+  'ays.core.ui.grafik-icin-henuz-veri-yok':'Grafik için henüz veri yok.',
+  'ays.core.ui.veri-yok':'Veri yok.',
+  'ays.core.ui.makro-dagilimi-icin-ogun-ger':'Makro dağılımı için öğün gerekir.',
+  'ays.core.ui.bu-ekran-nasil-okunur':'Bu ekran nasıl okunur',
+  'ays.core.ui.geri-al':'Geri al',
+  'ays.core.ui.evet-devam-et':'Evet, devam et',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.ui.kapat':'Kapat',
   'ays.core.ui.vazgec':'Vazgeç',
 });
@@ -214,7 +226,7 @@ R.UI = (function(){
   /* Pareto: hangi hata türü kaç yanlışa mal oluyor. Sıralı çubuklar,
      her birinin yanında etiketi ve sayısı. */
   function paretoBars(rows){
-    if(!rows.length || !rows.some(r => r.count)) return '<p class="small dim">Henüz hata kaydı yok.</p>';
+    if(!rows.length || !rows.some(r => r.count)) return ('<p class="small dim">' + yz('ays.core.ui.henuz-hata-kaydi-yok') + '</p>');
     const max = Math.max.apply(null, rows.map(r => r.count)) || 1;
     return '<div class="stack-sm">' + rows.map(r => {
       const t = R.ERROR_TAGS[r.tag];
@@ -270,7 +282,7 @@ R.UI = (function(){
     const pct = has ? U.clamp(value / max, 0, 1) : 0;
     let out = '<div class="gauge" style="width:' + size + 'px">';
     out += '<svg viewBox="0 0 120 120" role="img" aria-label="'
-      + (has ? 'Skor ' + Math.round(value) + ' / ' + max : 'Skor yok') + '">';
+      + (has ? yz('ays.core.ui.skor') + Math.round(value) + ' / ' + max : yz('ays.core.ui.skor-yok')) + '">';
     out += arc(START, START + SWEEP, 7, 'gauge__track');
     /* Bant sinirlari — kadranin uzerindeki centikler. */
     (o.bands || []).forEach(b => {
@@ -345,7 +357,7 @@ R.UI = (function(){
     const padR = o.endLabel === false ? 16 : 62;
 
     const all = series.reduce((acc, s2) => acc.concat(s2.data.filter(v => v != null)), []);
-    if(!all.length) return '<p class="small dim">Grafik için henüz veri yok.</p>';
+    if(!all.length) return ('<p class="small dim">' + yz('ays.core.ui.grafik-icin-henuz-veri-yok') + '</p>');
 
     const maxV = Math.max.apply(null, all), minV = Math.min.apply(null, all);
     const pad = Math.max(2, (maxV - minV) * 0.2);
@@ -432,7 +444,7 @@ R.UI = (function(){
   function cubukGrafigi(rows, opts, kimlik){
     const o = opts || {};
     const w = o.gen || 640, h = o.height || 150, padL = 30, padR = 10, padT = 12, padB = 26;
-    if(!rows.length) return '<p class="small dim">Veri yok.</p>';
+    if(!rows.length) return ('<p class="small dim">' + yz('ays.core.ui.veri-yok') + '</p>');
     const top = o.max || 100;
     const bw = (w-padL-padR) / rows.length;
     let svg = '<svg class="chart"' + grafikKimligi(kimlik) + ' viewBox="0 0 '+w+' '+h+'" role="img">';
@@ -529,7 +541,7 @@ R.UI = (function(){
     const f = Math.max(0, macros.fat || 0);
     const c = Math.max(0, macros.carb || 0);
     const total = p + f + c;
-    if(!total) return '<p class="small dim">Makro dağılımı için öğün gerekir.</p>';
+    if(!total) return ('<p class="small dim">' + yz('ays.core.ui.makro-dagilimi-icin-ogun-ger') + '</p>');
     const seg = (label, v, color) => ({ label:label + ' %' + Math.round(100 * v / total), value:v, color });
     return stackBar([
       seg('Protein', p, 'var(--macro-protein)'),
@@ -570,7 +582,7 @@ R.UI = (function(){
 
   function stackBar(segments){
     const total = U.sum(segments.map(s => s.value));
-    if(!total) return '<p class="small dim">Veri yok.</p>';
+    if(!total) return ('<p class="small dim">' + yz('ays.core.ui.veri-yok') + '</p>');
     return '<div class="stackbar">'
       + segments.filter(s => s.value).map(s => '<div class="stackbar__seg" style="width:'+(100*s.value/total)+'%;background:'+s.color+'" title="'+U.esc(s.label)+'"></div>').join('')
       + '</div>'
@@ -631,7 +643,7 @@ R.UI = (function(){
     const list = keys.filter(k => R.HINTS[k]);
     if(!list.length) return '';
     const open = !!(R.S.ui && R.S.ui.railOpen);
-    const label = title === false ? 'Bu ekran nasıl okunur' : (title || 'Bu ekran nasıl okunur');
+    const label = title === false ? yz('ays.core.ui.bu-ekran-nasil-okunur') : (title || yz('ays.core.ui.bu-ekran-nasil-okunur'));
 
     const cards = list.map(k => {
       const h = R.HINTS[k];
@@ -815,7 +827,7 @@ R.UI = (function(){
     if(o.undo){
       const btn = document.createElement('button');
       btn.className = 'toast__undo';
-      btn.textContent = 'Geri al';
+      btn.textContent = yz('ays.core.ui.geri-al');
       btn.setAttribute('data-act', 'undo');
       /* `undo` bir islevse dugme gercekten geri alir; yalniz `true` ise
          eski davranis: toast kapanir. */
@@ -858,7 +870,7 @@ R.UI = (function(){
       title,
       body:String(R.h.html`<p>${message}</p>`),
       footer:String(R.h.html`${R.C.Button({ label:yz('ays.core.ui.vazgec'), act:'sheet-close' })}
-        ${R.C.Button({ label:onay || 'Evet, devam et', tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
+        ${R.C.Button({ label:onay || yz('ays.core.ui.evet-devam-et'), tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
       noFocus:true,
     });
     R.UI._confirm = onConfirm;

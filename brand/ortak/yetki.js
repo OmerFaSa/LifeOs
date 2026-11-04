@@ -45,6 +45,17 @@
       AYS bunu yapmaz; King o modüle geçmeyi önerir (kayıtlar ayrı
       kökende, ayrı depoda). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.yetki.muzik-duracak':'Müzik duracak.',
+  'ortak.yetki.muzik-calacak':'Müzik çalacak.',
+  'ortak.yetki.butun-kayitlar-silinecek':'Bütün kayıtlar silinecek.',
+  'ortak.yetki.once-donus-noktasi-alinir-do':'Önce dönüş noktası alınır; «Dönüş noktasına dön» dersen her şey geri gelir.',
+  'ortak.yetki.bu-cihazdaki-fotograflar-don':'Bu cihazdaki fotoğraflar dönüş noktasına girmez.',
+  'ortak.yetki.hesabin-oteki-moduller-ve-li':'Hesabın, öteki modüller ve LifeOS ayarların değişmez.',
+  'ortak.yetki.o-andan-sonra-girilen-kayitl':'O andan sonra girilen kayıtlar bu dönüşle silinir.',
+  'ortak.yetki.modulun-ice-aktarmasi-kendi':'Modülün içe aktarması kendi geri alma yuvasını bırakır.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.yetki.tema':'Tema',
   'ortak.yetki.tema-2':'Tema ',
   'ortak.yetki.temayi':'Temayı ',
@@ -180,7 +191,7 @@ LIFEOS.YETKI = (function(){
         if(/aç|çal(?!ıyor|dı|ıyordu)|başlat/.test(t)) return { v:'cal' };
         return null;
       },
-      onizle:p => ({ metin:p.v === 'dur' ? 'Müzik duracak.' : 'Müzik çalacak.' }),
+      onizle:p => ({ metin:p.v === 'dur' ? yz('ortak.yetki.muzik-duracak') : yz('ortak.yetki.muzik-calacak') }),
       async uygula(p){
         const S = L.SES;
         if(p.v === 'dur'){ S.durdur(); return { metin:yz('ortak.yetki.muzigi-durdurdum'), geriAl:async () => { S.cal(); } }; }
@@ -255,10 +266,10 @@ LIFEOS.YETKI = (function(){
       onizle:() => {
         const n = ayar.donus.sayi ? ayar.donus.sayi() : null;
         return { metin:MODUL_AD[ayar.modul] + ' sıfırdan başlayacak: bütün kayıtlar bu cihazdan ve hesaptan silinecek.',
-          satirlar:[(n != null ? n + ' kayıt grubu silinecek.' : 'Bütün kayıtlar silinecek.'),
-            'Önce dönüş noktası alınır; «Dönüş noktasına dön» dersen her şey geri gelir.',
-            ayar.donus.foto || 'Bu cihazdaki fotoğraflar dönüş noktasına girmez.',
-            'Hesabın, öteki modüller ve LifeOS ayarların değişmez.'] };
+          satirlar:[(n != null ? n + ' kayıt grubu silinecek.' : yz('ortak.yetki.butun-kayitlar-silinecek')),
+            yz('ortak.yetki.once-donus-noktasi-alinir-do'),
+            ayar.donus.foto || yz('ortak.yetki.bu-cihazdaki-fotograflar-don'),
+            yz('ortak.yetki.hesabin-oteki-moduller-ve-li')] };
       },
       async uygula(){
         const kopya = ayar.donus.al();
@@ -282,7 +293,7 @@ LIFEOS.YETKI = (function(){
         const d = donusNoktasi();
         if(!d) return { yok:true, metin:yz('ortak.yetki.bu-cihazda-donus-noktasi-yok') };
         return { metin:MODUL_AD[ayar.modul] + ' ' + tarihYaz(d.zaman) + ' anına dönecek.',
-          satirlar:['O andan sonra girilen kayıtlar bu dönüşle silinir.', 'Modülün içe aktarması kendi geri alma yuvasını bırakır.'] };
+          satirlar:[yz('ortak.yetki.o-andan-sonra-girilen-kayitl'), yz('ortak.yetki.modulun-ice-aktarmasi-kendi')] };
       },
       async uygula(){
         const d = donusNoktasi();
@@ -363,7 +374,7 @@ LIFEOS.YETKI = (function(){
       }
       if(e.id === 'onay-liste'){
         const l = bekleyenler();
-        return { tur:'liste', metin:l.length ? l.length + ' öneri onay bekliyor:' : 'Onay bekleyen öneri yok.', satirlar:l.slice(0, 8).map(x => x.metin), sayi:l.length };
+        return { tur:'liste', metin:l.length ? l.length + ' öneri onay bekliyor:' : yz('ortak.yetki.onay-bekleyen-oneri-yok'), satirlar:l.slice(0, 8).map(x => x.metin), sayi:l.length };
       }
       const oz = e.onizle(p);
       if(!oz) return { tur:'liste', metin:yz('ortak.yetki.onay-bekleyen-oneri-yok'), satirlar:[], sayi:0 };

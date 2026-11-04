@@ -43,6 +43,61 @@
    · Çalışma oturumu (King odak sayacı, AYS blok sayacı) başlayınca
      «Çalışırken» listesi, bitince arka plan listesine döner (ya da durur).
      Spor için olay `lifeos:spor` aynı biçimde dinlenir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.muzik.arka-plan':'Arka plan',
+  'ortak.muzik.parca-calinamadi':'Parça çalınamadı',
+  'ortak.muzik.calmak-icin-bir-yere-dokun':'Çalmak için bir yere dokun',
+  'ortak.muzik.bu-listede-parca-yok':'Bu listede parça yok',
+  'ortak.muzik.muzik-bu-bilgisayarda-lifeos':'Müzik bu bilgisayarda LifeOS açıkken çalar.',
+  'ortak.muzik.henuz-parca-yok-ayarlar':'Henüz parça yok: Ayarlar › Ses › Müzik.',
+  'ortak.muzik.acilis':'Açılış: ',
+  'ortak.muzik.muzik-durdu':'Müzik durdu',
+  'ortak.muzik.muzik':'Müzik',
+  'ortak.muzik.sonraki-parca':'Sonraki parça',
+  'ortak.muzik.arka-plan-muzigi':'Arka plan müziği',
+  'ortak.muzik.m9-18v6l11-2v12m9-18a3-3-0':'M9 18V6l11-2v12M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm11-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
+  'ortak.muzik.m3-18h18m6-18a6-6-0':'M3 18h18M6 18a6 6 0 0 1 12 0M12 4v3M4.9 8.9l2.1 2.1M19.1 8.9 17 11',
+  'ortak.muzik.m3-10c2-0-2-2-4-5-2s10':'M3 10c2 0 2-2 4.5-2S10 10 12 10s2.5-2 4.5-2S19 10 21 10M3 15c2 0 2-2 4.5-2S10 15 12 15s2.5-2 4.5-2S19 15 21 15',
+  'ortak.muzik.m5-7h14m10-7v5h4v2m7-7l1-12h':'M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12',
+  'ortak.muzik.radyo-panelindeki-cal-bu-lis':'Radyo panelindeki «Çal» bu listeyi çalar.',
+  'ortak.muzik.calisma-sayaci-baslayinca-ca':'Çalışma sayacı başlayınca çalar, bitince susar.',
+  'ortak.muzik.spor-oturumu-baslayinca-cala':'Spor oturumu başlayınca çalar.',
+  'ortak.muzik.acilistan-sonra-kisik-sesle':'Açılıştan sonra kısık sesle çalar (Arka plan müziği açıksa).',
+  'ortak.muzik.muzik-dosyalari-bu-bilgisaya':'Müzik dosyaları bu bilgisayardaki LifeOS sunucusunda durur; telefonda ve tek dosya sürümünde yoktur.',
+  'ortak.muzik.muzik-ekle':'Müzik ekle',
+  'ortak.muzik.henuz-parca-yok':'Henüz parça yok',
+  'ortak.muzik.mp3-m4a-ogg-wav-ya':'MP3, M4A, OGG, WAV ya da FLAC; dosyalar bu bilgisayarda kalır.',
+  'ortak.muzik.parca':'Parça',
+  'ortak.muzik.secilmedi':'Seçilmedi',
+  'ortak.muzik.nerede':'Nerede',
+  'ortak.muzik.i-lk-giriste':'İlk girişte',
+  'ortak.muzik.her-modulde':'Her modülde',
+  'ortak.muzik.yer-basina':'Yer başına',
+  'ortak.muzik.calmasin':'Çalmasın',
+  'ortak.muzik.ne-zaman':'Ne zaman',
+  'ortak.muzik.her-acilista':'Her açılışta',
+  'ortak.muzik.gunde-bir':'Günde bir',
+  'ortak.muzik.kesit-ve-ses':'Kesit ve ses',
+  'ortak.muzik.kesit':'Kesit',
+  'ortak.muzik.baslangic':'Başlangıç',
+  'ortak.muzik.bitis':'Bitiş',
+  'ortak.muzik.kesiti-dinle':'Kesiti dinle',
+  'ortak.muzik.acilis-muziginin-sesi':'Açılış müziğinin sesi',
+  'ortak.muzik.once-kitapliga-bir-parca-ekl':'Önce kitaplığa bir parça ekle.',
+  'ortak.muzik.arka-plan-muziginin-sesi':'Arka plan müziğinin sesi',
+  'ortak.muzik.sira':'Sıra',
+  'ortak.muzik.listede':'Listede ',
+  'ortak.muzik.kitaplikta-parcalara-arka-pl':'Kitaplıkta parçalara «Arka plan» de. ',
+  'ortak.muzik.calisma-ya-da-spor-baslayinc':'Çalışma ya da spor başlayınca o liste çalar, bitince buraya döner; radyo ya da sesli arka plan videosu açılınca susar.',
+  'ortak.muzik.muzik-kitapligi':'Müzik kitaplığı',
+  'ortak.muzik.parcalarin-ve-hangi-listede':'Parçaların ve hangi listede oldukları',
+  'ortak.muzik.acilis-muzigi':'Açılış müziği',
+  'ortak.muzik.lifeos-acilinca-bir-parcanin':'LifeOS açılınca bir parçanın seçtiğin kesiti',
+  'ortak.muzik.acilistan-sonra-kisik-sesle-2':'Açılıştan sonra kısık sesle',
+  'ortak.muzik.ekleniyor':'Ekleniyor: ',
+  'ortak.muzik.yuklenemedi-lifeos-sunucusu':'Yüklenemedi: LifeOS sunucusu yanıt vermedi.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -51,7 +106,7 @@ window.LIFEOS.MUZIK = (function(){
 
   const L = window.LIFEOS;
   const LISTELER = Object.freeze(['genel', 'calisma', 'spor', 'arka']);
-  const LISTE_AD = Object.freeze({ genel:'Genel', calisma:'Çalışırken', spor:'Sporda', arka:'Arka plan' });
+  const LISTE_AD = Object.freeze({ genel:'Genel', calisma:'Çalışırken', spor:'Sporda', arka:yz('ortak.muzik.arka-plan') });
   const ACILIS_GUN = 'lifeos.muzik.acilis.gun';
   /* Sunucuda parça var mı (son okumadan): yoksa açılışta sunucuya hiç gidilmez
      (telefon, eski sunucu, denetim sunucusu 404 vermesin). Taşınır. */
@@ -116,7 +171,7 @@ window.LIFEOS.MUZIK = (function(){
       if(kalan <= 1 && kalan > 0) ses.volume = Math.max(0, d().acilis.ses * kalan);   // son saniyede yumuşak kısılır
       if(kalan <= 0) acilisBitti();
     });
-    ses.addEventListener('error', () => { mesajMetni = 'Parça çalınamadı'; if(kip && kip !== 'acilis') sonraki(); else guncelle(); });
+    ses.addEventListener('error', () => { mesajMetni = yz('ortak.muzik.parca-calinamadi'); if(kip && kip !== 'acilis') sonraki(); else guncelle(); });
     (document.body || document.documentElement).appendChild(ses);
     return ses;
   }
@@ -125,7 +180,7 @@ window.LIFEOS.MUZIK = (function(){
     const a = oge();
     if(!a) return;
     const p = a.play && a.play();
-    if(p && p.catch) p.catch(() => { mesajMetni = 'Çalmak için bir yere dokun'; guncelle(); dokununca(); });
+    if(p && p.catch) p.catch(() => { mesajMetni = yz('ortak.muzik.calmak-icin-bir-yere-dokun'); guncelle(); dokununca(); });
   }
   let dokunusBekliyor = false;
   function dokununca(){
@@ -148,7 +203,7 @@ window.LIFEOS.MUZIK = (function(){
   /* ad: liste adı ya da 'tek' (o.id). Döner: çaldı mı. */
   function cal(ad, o){
     const ids = ad === 'tek' ? (o && parca(o.id) ? [o.id] : []) : liste(ad);
-    if(!ids.length){ mesajMetni = 'Bu listede parça yok'; guncelle(); return false; }
+    if(!ids.length){ mesajMetni = yz('ortak.muzik.bu-listede-parca-yok'); guncelle(); return false; }
     radyoSustur();
     kesitSonu = null;
     kip = ad;
@@ -230,22 +285,22 @@ window.LIFEOS.MUZIK = (function(){
   const SIMGE_DUR = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="7" y="6" width="3.5" height="12" rx="1"/><rect x="13.5" y="6" width="3.5" height="12" rx="1"/></svg>';
   function simdiMetni(){
     const u = durum();
-    if(!u.sunucu) return 'Müzik bu bilgisayarda LifeOS açıkken çalar.';
-    if(!u.varMi) return 'Henüz parça yok: Ayarlar › Ses › Müzik.';
+    if(!u.sunucu) return yz('ortak.muzik.muzik-bu-bilgisayarda-lifeos');
+    if(!u.varMi) return yz('ortak.muzik.henuz-parca-yok-ayarlar');
     if(mesajMetni) return mesajMetni;
-    if(u.caliyor) return (u.kip === 'acilis' ? 'Açılış: ' : LISTE_AD[u.kip] ? LISTE_AD[u.kip] + ' · ' : '') + u.parca;
-    return 'Müzik durdu';
+    if(u.caliyor) return (u.kip === 'acilis' ? yz('ortak.muzik.acilis') : LISTE_AD[u.kip] ? LISTE_AD[u.kip] + ' · ' : '') + u.parca;
+    return yz('ortak.muzik.muzik-durdu');
   }
   function panelHtml(){
     const u = durum();
-    return '<div class="muzik" data-muzik-panel><p class="kmenu__bas">Müzik</p>'
+    return ('<div class="muzik" data-muzik-panel><p class="kmenu__bas">' + yz('ortak.muzik.muzik') + '</p>')
       + '<p class="ses__simdi muzik__simdi' + (u.caliyor ? ' is-caliyor' : '') + '" role="status" aria-live="polite">' + kac(simdiMetni()) + '</p>'
       + (u.sunucu && u.varMi ? '<div class="ses__turler" role="group" aria-label="Liste">' + LISTELER.map(l => '<button type="button" class="ses__tur'
           + (u.kip === l ? ' is-on' : '') + '" data-muzik-liste="' + l + '" aria-pressed="' + (u.kip === l) + '"' + (liste(l).length ? '' : ' disabled') + '>'
           + LISTE_AD[l] + ' <small>' + liste(l).length + '</small></button>').join('') + '</div>'
         + '<div class="ses__eylem"><button type="button" class="ses__cal" data-muzik="cal">' + (u.caliyor ? SIMGE_DUR + 'Durdur' : SIMGE_CAL + 'Çal') + '</button>'
-        + '<button type="button" class="ses__sonraki" data-muzik="sonraki"' + (u.caliyor ? '' : ' disabled') + '>Sonraki parça</button></div>'
-        + (d().arka.acik ? '<div class="ses__satir"><span id="muzik-arka-ad">Arka plan müziği</span><button type="button" class="ses__anahtar" data-muzik="sustur" role="switch"'
+        + '<button type="button" class="ses__sonraki" data-muzik="sonraki"' + (u.caliyor ? '' : ' disabled') + ('>' + yz('ortak.muzik.sonraki-parca') + '</button></div>')
+        + (d().arka.acik ? ('<div class="ses__satir"><span id="muzik-arka-ad">' + yz('ortak.muzik.arka-plan-muzigi') + '</span><button type="button" class="ses__anahtar" data-muzik="sustur" role="switch"')
           + ' aria-labelledby="muzik-arka-ad muzik-arka-deger" aria-checked="' + (!u.susturuldu) + '"><span id="muzik-arka-deger">' + (u.susturuldu ? 'Susturuldu' : 'Açık') + '</span></button></div>' : '')
         : '')
       + '</div>';
@@ -264,10 +319,10 @@ window.LIFEOS.MUZIK = (function(){
      süresine göre (süre bilinmiyorsa 10 dakika sınırı). */
   const SVG = d => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>';
   const SIMGE = {
-    kitap:SVG('M9 18V6l11-2v12M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm11-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'),
-    acilis:SVG('M3 18h18M6 18a6 6 0 0 1 12 0M12 4v3M4.9 8.9l2.1 2.1M19.1 8.9 17 11'),
-    arka:SVG('M3 10c2 0 2-2 4.5-2S10 10 12 10s2.5-2 4.5-2S19 10 21 10M3 15c2 0 2-2 4.5-2S10 15 12 15s2.5-2 4.5-2S19 15 21 15'),
-    sil:SVG('M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12'),
+    kitap:SVG(yz('ortak.muzik.m9-18v6l11-2v12m9-18a3-3-0')),
+    acilis:SVG(yz('ortak.muzik.m3-18h18m6-18a6-6-0')),
+    arka:SVG(yz('ortak.muzik.m3-10c2-0-2-2-4-5-2s10')),
+    sil:SVG(yz('ortak.muzik.m5-7h14m10-7v5h4v2m7-7l1-12h')),
   };
   const kart = (simge, ad, not, govde, sag) => '<section class="skart"><header class="skart__bas"><span class="skart__simge">' + simge + '</span>'
     + '<span class="skart__baslik"><b>' + ad + '</b>' + (not ? '<small>' + not + '</small>' : '') + '</span>' + (sag || '') + '</header>'
@@ -296,13 +351,13 @@ window.LIFEOS.MUZIK = (function(){
     }catch(e){ /* yok */ }
   }
   let ayarOkundu = false, seciliListe = 'genel', ayrintiAcik = false;
-  const LISTE_NOT = Object.freeze({ genel:'Radyo panelindeki «Çal» bu listeyi çalar.', calisma:'Çalışma sayacı başlayınca çalar, bitince susar.',
-    spor:'Spor oturumu başlayınca çalar.', arka:'Açılıştan sonra kısık sesle çalar (Arka plan müziği açıksa).' });
+  const LISTE_NOT = Object.freeze({ genel:yz('ortak.muzik.radyo-panelindeki-cal-bu-lis'), calisma:yz('ortak.muzik.calisma-sayaci-baslayinca-ca'),
+    spor:yz('ortak.muzik.spor-oturumu-baslayinca-cala'), arka:yz('ortak.muzik.acilistan-sonra-kisik-sesle') });
   function ayarHtml(){
     if(ortam.sunucu() && !dizin && !ayarOkundu){ ayarOkundu = true; setTimeout(() => yukle().then(() => guncelle(true)), 0); }   // Ayarlar › Ses açılınca bir kez
-    if(!ortam.sunucu()) return '<div data-muzik-ayar><p class="ayarlar__bos">Müzik dosyaları bu bilgisayardaki LifeOS sunucusunda durur; telefonda ve tek dosya sürümünde yoktur.</p></div>';
+    if(!ortam.sunucu()) return ('<div data-muzik-ayar><p class="ayarlar__bos">' + yz('ortak.muzik.muzik-dosyalari-bu-bilgisaya') + '</p></div>');
     const x = d(), a = x.acilis, k = x.arka, u = durum();
-    const ekle = '<label class="btn btn--sm skart__eylem">Müzik ekle<input type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.opus,.webm,.wav,.flac" multiple data-muzik-dosya hidden></label>';
+    const ekle = ('<label class="btn btn--sm skart__eylem">' + yz('ortak.muzik.muzik-ekle') + '<input type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.opus,.webm,.wav,.flac" multiple data-muzik-dosya hidden></label>');
     /* Kitaplık sade (kullanıcı, 2026-10-30: «müzikle ilgili bazı şeyler ayarlarda kullanışsız
        ve karmaşık»): üstte tek liste seçici, altta parçalar; her parçada tek «listede» anahtarı. */
     const sl = seciliListe, uyeler = x.listeler[sl] || [];
@@ -317,32 +372,32 @@ window.LIFEOS.MUZIK = (function(){
               + '<button type="button" class="muzik__uye' + (on ? ' is-on' : '') + '" role="switch" aria-checked="' + on + '" data-muzik-ata="' + sl + '|' + p.id + '"'
               + ' aria-label="' + kac(p.ad) + ', ' + LISTE_AD[sl] + ' listesinde"><i aria-hidden="true"></i></button>'
               + '<button type="button" class="muzik__sil" data-muzik-sil="' + p.id + '" aria-label="' + kac(p.ad) + ' sil">' + SIMGE.sil + '</button></li>'; }).join('') + '</ul>'
-      : '<div class="skart__bos">' + SIMGE.kitap + '<b>Henüz parça yok</b><small>MP3, M4A, OGG, WAV ya da FLAC; dosyalar bu bilgisayarda kalır.</small></div>')
+      : '<div class="skart__bos">' + SIMGE.kitap + ('<b>' + yz('ortak.muzik.henuz-parca-yok') + '</b><small>' + yz('ortak.muzik.mp3-m4a-ogg-wav-ya') + '</small></div>'))
       + '<small class="skart__durum" data-muzik-durum role="status"></small>';
     sureOku(a.id);
     const ust = Math.min(600, Math.max(1, Math.ceil(sureler[a.id] || 600)));
-    const acilis = (x.parcalar.length ? '<label class="skart__satir"><span class="skart__etiket">Parça</span><select class="ayarlar__girdi skart__secim" data-muzik-acilis="id" aria-label="Açılış parçası">'
-        + '<option value="">Seçilmedi</option>' + x.parcalar.map(p => '<option value="' + p.id + '"' + (a.id === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>' : '')
-      + (x.parcalar.length ? '<div class="skart__satir"><span class="skart__etiket">Nerede</span>' + seg('Nerede', [['giris', 'İlk girişte'], ['her', 'Her modülde'], ['ayri', 'Yer başına']], yerKipi(), 'data-muzik-yer') + '</div>'
+    const acilis = (x.parcalar.length ? ('<label class="skart__satir"><span class="skart__etiket">' + yz('ortak.muzik.parca') + '</span><select class="ayarlar__girdi skart__secim" data-muzik-acilis="id" aria-label="Açılış parçası">')
+        + ('<option value="">' + yz('ortak.muzik.secilmedi') + '</option>') + x.parcalar.map(p => '<option value="' + p.id + '"' + (a.id === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>' : '')
+      + (x.parcalar.length ? ('<div class="skart__satir"><span class="skart__etiket">' + yz('ortak.muzik.nerede') + '</span>') + seg('Nerede', [['giris', yz('ortak.muzik.i-lk-giriste')], ['her', yz('ortak.muzik.her-modulde')], ['ayri', yz('ortak.muzik.yer-basina')]], yerKipi(), 'data-muzik-yer') + '</div>'
         + (yerKipi() === 'ayri' ? YERLER.map(y => { const v = depoAl(YER + '.' + y) || ''; return '<label class="skart__satir"><span class="skart__etiket">' + YER_AD[y] + '</span><select class="ayarlar__girdi skart__secim" data-muzik-yerparca="' + y + '" aria-label="' + YER_AD[y] + ' açılış parçası">'
-          + '<option value="">Çalmasın</option>' + x.parcalar.map(p => '<option value="' + p.id + '"' + (v === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>'; }).join('') : '') : '')
-      + '<div class="skart__satir"><span class="skart__etiket">Ne zaman</span>' + seg('Ne zaman', [['kapali', 'Kapalı'], ['her', 'Her açılışta'], ['gunde', 'Günde bir']], a.ne, 'data-muzik-acilis-ne', v => !a.id && v !== 'kapali') + '</div>'
-      + (a.id ? '<details class="skart__ayrinti" data-muzik-ayrinti' + (ayrintiAcik ? ' open' : '') + '><summary>Kesit ve ses <small>' + kac(kesitYaz(a)) + ' · %' + Math.round(a.ses * 100) + '</small></summary>'
-        + '<div class="skart__satir skart__satir--ust"><span class="skart__etiket">Kesit<small data-muzik-kesit-yazi>' + kac(kesitYaz(a)) + '</small></span><div class="skart__kesit">'
-          + '<label><span>Başlangıç</span><input type="range" min="0" max="' + ust + '" step="1" value="' + Math.min(a.bas, ust) + '" data-muzik-acilis="bas" aria-label="Kesitin başlangıcı, saniye" style="--dolu:' + (Math.min(a.bas, ust) / ust * 100) + '%"></label>'
-          + '<label><span>Bitiş</span><input type="range" min="1" max="' + ust + '" step="1" value="' + Math.min(a.bit, ust) + '" data-muzik-acilis="bit" aria-label="Kesitin bitişi, saniye" style="--dolu:' + (Math.min(a.bit, ust) / ust * 100) + '%"></label>'
-          + '<button type="button" class="btn btn--sm btn--ghost" data-muzik="acilis-dinle">' + SIMGE_CAL + 'Kesiti dinle</button></div></div>'
-        + kaydirici('Ses', 'Açılış müziğinin sesi', a.ses, 'data-muzik-acilis="ses"') + '</details>' : '')
-      + (x.parcalar.length ? '' : '<p class="skart__not">Önce kitaplığa bir parça ekle.</p>');
-    const arka = '<div class="skart__satir"><span class="skart__etiket">Arka plan müziği</span>' + seg('Arka plan müziği', [[false, 'Kapalı'], [true, 'Açık']], k.acik, 'data-muzik-arka') + '</div>'
-      + kaydirici('Ses', 'Arka plan müziğinin sesi', k.ses, 'data-muzik-arka-ses', !k.acik)
-      + '<div class="skart__satir"><span class="skart__etiket">Sıra</span>' + seg('Sıra', [[true, 'Karışık'], [false, 'Sırayla']], k.karistir, 'data-muzik-karistir') + '</div>'
-      + '<p class="skart__not">' + (liste('arka').length ? 'Listede ' + liste('arka').length + ' parça. ' : 'Kitaplıkta parçalara «Arka plan» de. ')
-      + 'Çalışma ya da spor başlayınca o liste çalar, bitince buraya döner; radyo ya da sesli arka plan videosu açılınca susar.</p>';
+          + ('<option value="">' + yz('ortak.muzik.calmasin') + '</option>') + x.parcalar.map(p => '<option value="' + p.id + '"' + (v === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>'; }).join('') : '') : '')
+      + ('<div class="skart__satir"><span class="skart__etiket">' + yz('ortak.muzik.ne-zaman') + '</span>') + seg(yz('ortak.muzik.ne-zaman'), [['kapali', 'Kapalı'], ['her', yz('ortak.muzik.her-acilista')], ['gunde', yz('ortak.muzik.gunde-bir')]], a.ne, 'data-muzik-acilis-ne', v => !a.id && v !== 'kapali') + '</div>'
+      + (a.id ? '<details class="skart__ayrinti" data-muzik-ayrinti' + (ayrintiAcik ? ' open' : '') + ('><summary>' + yz('ortak.muzik.kesit-ve-ses') + ' <small>') + kac(kesitYaz(a)) + ' · %' + Math.round(a.ses * 100) + '</small></summary>'
+        + ('<div class="skart__satir skart__satir--ust"><span class="skart__etiket">' + yz('ortak.muzik.kesit') + '<small data-muzik-kesit-yazi>') + kac(kesitYaz(a)) + '</small></span><div class="skart__kesit">'
+          + ('<label><span>' + yz('ortak.muzik.baslangic') + '</span><input type="range" min="0" max="') + ust + '" step="1" value="' + Math.min(a.bas, ust) + '" data-muzik-acilis="bas" aria-label="Kesitin başlangıcı, saniye" style="--dolu:' + (Math.min(a.bas, ust) / ust * 100) + '%"></label>'
+          + ('<label><span>' + yz('ortak.muzik.bitis') + '</span><input type="range" min="1" max="') + ust + '" step="1" value="' + Math.min(a.bit, ust) + '" data-muzik-acilis="bit" aria-label="Kesitin bitişi, saniye" style="--dolu:' + (Math.min(a.bit, ust) / ust * 100) + '%"></label>'
+          + '<button type="button" class="btn btn--sm btn--ghost" data-muzik="acilis-dinle">' + SIMGE_CAL + (yz('ortak.muzik.kesiti-dinle') + '</button></div></div>')
+        + kaydirici('Ses', yz('ortak.muzik.acilis-muziginin-sesi'), a.ses, 'data-muzik-acilis="ses"') + '</details>' : '')
+      + (x.parcalar.length ? '' : ('<p class="skart__not">' + yz('ortak.muzik.once-kitapliga-bir-parca-ekl') + '</p>'));
+    const arka = ('<div class="skart__satir"><span class="skart__etiket">' + yz('ortak.muzik.arka-plan-muzigi') + '</span>') + seg(yz('ortak.muzik.arka-plan-muzigi'), [[false, 'Kapalı'], [true, 'Açık']], k.acik, 'data-muzik-arka') + '</div>'
+      + kaydirici('Ses', yz('ortak.muzik.arka-plan-muziginin-sesi'), k.ses, 'data-muzik-arka-ses', !k.acik)
+      + ('<div class="skart__satir"><span class="skart__etiket">' + yz('ortak.muzik.sira') + '</span>') + seg('Sıra', [[true, 'Karışık'], [false, 'Sırayla']], k.karistir, 'data-muzik-karistir') + '</div>'
+      + '<p class="skart__not">' + (liste('arka').length ? yz('ortak.muzik.listede') + liste('arka').length + ' parça. ' : yz('ortak.muzik.kitaplikta-parcalara-arka-pl'))
+      + (yz('ortak.muzik.calisma-ya-da-spor-baslayinc') + '</p>');
     return '<div class="skartlar" data-muzik-ayar>'
-      + kart(SIMGE.kitap, 'Müzik kitaplığı', 'Parçaların ve hangi listede oldukları', kitaplik, ekle)
-      + kart(SIMGE.acilis, 'Açılış müziği', 'LifeOS açılınca bir parçanın seçtiğin kesiti', acilis)
-      + kart(SIMGE.arka, 'Arka plan müziği', 'Açılıştan sonra kısık sesle', arka)
+      + kart(SIMGE.kitap, yz('ortak.muzik.muzik-kitapligi'), yz('ortak.muzik.parcalarin-ve-hangi-listede'), kitaplik, ekle)
+      + kart(SIMGE.acilis, yz('ortak.muzik.acilis-muzigi'), yz('ortak.muzik.lifeos-acilinca-bir-parcanin'), acilis)
+      + kart(SIMGE.arka, yz('ortak.muzik.arka-plan-muzigi'), yz('ortak.muzik.acilistan-sonra-kisik-sesle-2'), arka)
       + '</div>';
   }
   function dosyaYukle(dosyalar, durumEl){
@@ -351,11 +406,11 @@ window.LIFEOS.MUZIK = (function(){
     const bir = () => {
       if(i >= l.length){ if(durumEl) durumEl.textContent = l.length + ' parça eklendi.'; return yukle().then(() => guncelle(true)); }
       const f = l[i++];
-      if(durumEl) durumEl.textContent = 'Ekleniyor: ' + f.name + ' (' + i + '/' + l.length + ')';
+      if(durumEl) durumEl.textContent = yz('ortak.muzik.ekleniyor') + f.name + ' (' + i + '/' + l.length + ')';
       const tur = f.type || ({ mp3:'audio/mpeg', m4a:'audio/mp4', aac:'audio/aac', ogg:'audio/ogg', opus:'audio/ogg', webm:'audio/webm', wav:'audio/wav', flac:'audio/flac' })[String(f.name).split('.').pop().toLowerCase()] || '';
       return ortam.fetch('/api/muzik/parca', { method:'POST', headers:{ 'Content-Type':tur, 'X-LifeOS':'muzik', 'X-Ad':encodeURIComponent(f.name) }, body:f })
         .then(r => r.json()).then(v => { if(v && v.hata && durumEl) durumEl.textContent = f.name + ': ' + v.hata; })
-        .catch(() => { if(durumEl) durumEl.textContent = 'Yüklenemedi: LifeOS sunucusu yanıt vermedi.'; }).then(bir);
+        .catch(() => { if(durumEl) durumEl.textContent = yz('ortak.muzik.yuklenemedi-lifeos-sunucusu'); }).then(bir);
     };
     return bir();
   }

@@ -15,6 +15,16 @@
    "Eşleşmedi" olarak isaretlenir, kullanici elle baglar. Sessizce atilan
    bir satir, kullanicinin girdigini sandigi ama sistemde olmayan bir veri
    demektir — en pahali hata turu. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.parse.ne-disiplin-ne-sure-tanindi':'Ne disiplin ne süre tanındı.',
+  'esp.core.parse.sure-var-ama-hangi-disiplin':'Süre var ama hangi disiplin olduğu anlaşılmadı.',
+  'esp.core.parse.sayinin-birimi-yok':'Sayının birimi yok: «',
+  'esp.core.parse.disiplin-tanindi-ama-sure-gi':'Disiplin tanındı ama süre girilmemiş.',
+  'esp.core.parse.karsiligi-yok-tek-kelimelik':'Karşılığı yok; tek kelimelik satırdan kart üretilmez.',
+  'esp.core.parse.ayrac-bulunamadi':'Ayraç bulunamadı (– , = ya da : bekleniyor).',
+  'esp.core.parse.tez-destek-ya-da-itiraz':'Tez, destek ya da itiraz olduğu anlaşılmadı.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -141,11 +151,11 @@ ESP.Parse = (function(){
       });
 
       if(!hit && dakika == null){
-        unmatched.push({ text:parca, why:'Ne disiplin ne süre tanındı.' });
+        unmatched.push({ text:parca, why:yz('esp.core.parse.ne-disiplin-ne-sure-tanindi') });
         return;
       }
       if(!hit){
-        unmatched.push({ text:parca, why:'Süre var ama hangi disiplin olduğu anlaşılmadı.',
+        unmatched.push({ text:parca, why:yz('esp.core.parse.sure-var-ama-hangi-disiplin'),
           minutes:dakika });
         return;
       }
@@ -158,7 +168,7 @@ ESP.Parse = (function(){
       if(kisa && hit.alias === kisa[1].trim()){
         if(/^(kelime|kart|sayfa|tekrar)$/.test(hit.alias)){
           unmatched.push({ text:parca, disc:hit.disc,
-            why:'Sayının birimi yok: «' + kisa[2] + ' dakika» mı, «' + kisa[2] + ' ' + hit.alias + '» mı?' });
+            why:yz('esp.core.parse.sayinin-birimi-yok') + kisa[2] + ' dakika» mı, «' + kisa[2] + ' ' + hit.alias + '» mı?' });
           return;
         }
         const dk = Number(kisa[2]);
@@ -167,7 +177,7 @@ ESP.Parse = (function(){
       if(dakika == null && count == null){
         /* Disiplin taniniyor ama sure yok: satir ATILMAZ, suresi eksik bir
            oneri olarak doner. Kullanici sureyi yazar. */
-        unmatched.push({ text:parca, why:'Disiplin tanındı ama süre girilmemiş.',
+        unmatched.push({ text:parca, why:yz('esp.core.parse.disiplin-tanindi-ama-sure-gi'),
           disc:hit.disc });
         return;
       }
@@ -208,8 +218,8 @@ ESP.Parse = (function(){
       if(!bulundu){
         unmatched.push({ text:satir,
           why:satir.split(/\s+/).length === 1
-            ? 'Karşılığı yok; tek kelimelik satırdan kart üretilmez.'
-            : 'Ayraç bulunamadı (– , = ya da : bekleniyor).' });
+            ? yz('esp.core.parse.karsiligi-yok-tek-kelimelik')
+            : yz('esp.core.parse.ayrac-bulunamadi') });
         return;
       }
       rows.push({
@@ -276,7 +286,7 @@ ESP.Parse = (function(){
       }
       if(!thesis && i === 0){ thesis = c; return; }
       /* Ne tez ne destek ne itiraz: kullaniciya sorulur. */
-      unmatched.push({ text:c, why:'Tez, destek ya da itiraz olduğu anlaşılmadı.' });
+      unmatched.push({ text:c, why:yz('esp.core.parse.tez-destek-ya-da-itiraz') });
     });
 
     return { thesis, supports, objections, unmatched };

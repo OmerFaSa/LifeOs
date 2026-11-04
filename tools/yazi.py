@@ -31,7 +31,7 @@ def tara():
             for mm in re.finditer(r"(title|label|sub|baslik):\s*'([^'\n]{3,90})'|^\s*'[\w.-]+':'([^'\n]{3,90})'", s, re.M):
                 t = mm.group(2) or mm.group(3)
                 # Tablodaki duz cumle baslik degildir: ornek metin, yol tarifi, kucuk harfle baslayan.
-                cumle = mm.group(3) is not None and (not t[0].isupper() or "→" in t)
+                cumle = mm.group(3) is not None and (not t[0].isupper() or "→" in t or re.search(r"[.!?;:/—]", t) is not None or "(" in t)
                 satir = s.count("\n", 0, mm.start()) + 1
                 yer = "%s:%d  %s" % (f.replace("\\", "/"), satir, t)
                 temiz = ISTISNA.sub("", t)

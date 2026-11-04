@@ -21,6 +21,11 @@
         yalnız yönü bilinen eşikte (`yon`).
      4. HTML DÖNER, OLAY YOK. Düğmeler `data-act` taşır; işleyici modülde. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.pano.one-cikan':'Öne çıkan: ',
+  'ortak.pano.henuz-kayit-yok':'Henüz kayıt yok.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.pano.surenin':'Sürenin ',
 });
 
@@ -79,13 +84,13 @@ LIFEOS.PANO = (function(){
     /* Başlık h2 (2026-10-22): kartlar sayfada çoğu kez doğrudan h1 altındadır;
        h3 bir basamak atlıyordu (a11ycheck «h1 → h3», on ekranda). */
     return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
-      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
+      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? yz('ortak.pano.one-cikan') : '') + (o.ad || '')) + '">'
       + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h2 class="pk__ad">' + kac(o.ad || '') + '</h2>'
       + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
       + (bos
-        ? '<div class="pk__govde pk__govde--bos"><p class="pk__boscumle">' + kac(o.bos.cumle || 'Henüz kayıt yok.') + '</p>'
+        ? '<div class="pk__govde pk__govde--bos"><p class="pk__boscumle">' + kac(o.bos.cumle || yz('ortak.pano.henuz-kayit-yok')) + '</p>'
           + (o.bos.dugme ? dugmeHtml(o.bos.dugme, 'pk__dugme pk__dugme--ikincil') : '') + '</div>'
         : '<div class="pk__govde">' + (o.govde || '') + '</div>')
       + (o.ayak && !bos ? '<footer class="pk__ayak">' + o.ayak + '</footer>' : '')

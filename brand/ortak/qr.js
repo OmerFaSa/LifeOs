@@ -19,6 +19,10 @@
    1-M örneğiyle, biçim ve sürüm bitleri standardın tablolarıyla, bütün
    matris testteki bağımsız bir okuyucuyla (maskeyi biçim bitlerinden
    okuyup veriyi geri çıkarır) sınanır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.qr.qr-kodu':'QR kodu',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -299,7 +303,7 @@ window.LIFEOS.QR = (function(){
     q.modul.forEach((satir, y) => satir.forEach((koyu, x) => {
       if(koyu) yol += 'M' + (x + k) + ' ' + (y + k) + 'h1v1h-1z';
     }));
-    const etiket = String((o && o.etiket) || 'QR kodu').replace(/[&<>"]/g, c =>
+    const etiket = String((o && o.etiket) || yz('ortak.qr.qr-kodu')).replace(/[&<>"]/g, c =>
       ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
     return '<svg class="qr" viewBox="0 0 ' + n + ' ' + n + '" role="img" aria-label="' + etiket + '"'
       + ' shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">'

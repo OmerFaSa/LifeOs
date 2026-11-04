@@ -25,6 +25,47 @@
    önce depoya yazılır, sonra burada okunur; `<html data-zemin>` ilk
    çizimden önce konur, zemin açılışta yanıp sönmez. Görünüş tamamen
    CSS'tedir; burası yalnız tercihi tutar. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.zemin.yumusak-renk-zemini-icerigin':'Yumuşak renk zemini, içeriğin arkasında buzlu yüzey',
+  'ortak.zemin.duz-zemin':'Düz zemin',
+  'ortak.zemin.bolumler-kart-icinde':'Bölümler kart içinde',
+  'ortak.zemin.kartsiz-bolumler-cizgi-ve-bo':'Kartsız, bölümler çizgi ve boşlukla ayrılır',
+  'ortak.zemin.hafif-tonlu-duz-bolumler-sol':'Hafif tonlu düz bölümler, solda ince şerit',
+  'ortak.zemin.saate-gore':'Saate göre',
+  'ortak.zemin.dosya-yok-modulun-fotografi':'Dosya yok · modülün fotoğrafı',
+  'ortak.zemin.modulun-fotografi':'Modülün fotoğrafı',
+  'ortak.zemin.kendi-fotografin':'Kendi fotoğrafın',
+  'ortak.zemin.kendi-videon':'Kendi videon',
+  'ortak.zemin.gece-rengi':'Gece rengi',
+  'ortak.zemin.duz-renk':'Düz renk',
+  'ortak.zemin.kartlari-goster':'Kartları göster',
+  'ortak.zemin.yalniz-gorsel':'Yalnız görsel',
+  'ortak.zemin.arka-plana-bir-video-koyunca':'Arka plana bir video koyunca (Arka plan › Kendi) sesi, kesiti ve hızı burada ayarlanır.',
+  'ortak.zemin.videonun-sesi':'Videonun sesi',
+  'ortak.zemin.duzey':'Düzey',
+  'ortak.zemin.video-sesliyken-muzik':'Video sesliyken müzik',
+  'ortak.zemin.video-sesliyken-arka-plan-mu':'Video sesliyken arka plan müziği',
+  'ortak.zemin.birlikte-calar':'Birlikte çalar',
+  'ortak.zemin.kesit':'Kesit',
+  'ortak.zemin.baslangic':'Başlangıç',
+  'ortak.zemin.bitis':'Bitiş',
+  'ortak.zemin.bastan-sona':'Baştan sona',
+  'ortak.zemin.hiz':'Hız',
+  'ortak.zemin.videonun-hizi':'Videonun hızı',
+  'ortak.zemin.video-su-anki-temada-oynamiy':'Video şu anki temada oynamıyor; süresi bilinmediği için kesit saniyeyle ayarlanır.',
+  'ortak.zemin.kendi-dosyan-icin-lifeos-bu':'Kendi dosyan için LifeOS bu bilgisayarda açık olmalı.',
+  'ortak.zemin.yalniz-jpeg-png-webp-fotogra':'Yalnız JPEG, PNG, WebP fotoğraf ya da MP4, MOV, WebM video (MKV ve AVI’yi önce MP4’e çevir).',
+  'ortak.zemin.dosya-600-mb-tan-buyuk':'Dosya 600 MB’tan büyük.',
+  'ortak.zemin.video-kaydedildi-bitince-bas':'Video kaydedildi; bitince başa döner.',
+  'ortak.zemin.fotograf-kaydedildi':'Fotoğraf kaydedildi.',
+  'ortak.zemin.yuklenemedi-lifeos-sunucusu':'Yüklenemedi: LifeOS sunucusu yanıt vermedi.',
+  'ortak.zemin.fotograf-ya-da-video-sec':'Fotoğraf ya da video seç',
+  'ortak.zemin.gunduz-arka-plani':'Gündüz arka planı',
+  'ortak.zemin.gece-arka-plani':'Gece arka planı',
+  'ortak.zemin.saate-gore-tema':'Saate göre tema',
+  'ortak.zemin.video-yukleniyor-buyuk-dosya':'Video yükleniyor… büyük dosya biraz sürer.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -35,7 +76,7 @@ window.LIFEOS = window.LIFEOS || {};
   const ANAHTAR = 'lifeos.zemin';
   const KIPLER = Object.freeze(['yumusak', 'sade']);
   const AD = { yumusak:'Yumuşak', sade:'Sade' };
-  const IPUCU = { yumusak:'Yumuşak renk zemini, içeriğin arkasında buzlu yüzey', sade:'Düz zemin' };
+  const IPUCU = { yumusak:yz('ortak.zemin.yumusak-renk-zemini-icerigin'), sade:yz('ortak.zemin.duz-zemin') };
 
   function oku(){
     let v = null;
@@ -167,7 +208,7 @@ window.LIFEOS = window.LIFEOS || {};
        serit  hafif tonlu düz yüzey, solda ince modül rengi şerit, gölge yok */
   const YUZEYLER = Object.freeze(['kart', 'ferah', 'serit']);
   const YUZEY_AD = { kart:'Kart', ferah:'Ferah', serit:'Şerit' };
-  const YUZEY_IPUCU = { kart:'Bölümler kart içinde', ferah:'Kartsız, bölümler çizgi ve boşlukla ayrılır', serit:'Hafif tonlu düz bölümler, solda ince şerit' };
+  const YUZEY_IPUCU = { kart:yz('ortak.zemin.bolumler-kart-icinde'), ferah:yz('ortak.zemin.kartsiz-bolumler-cizgi-ve-bo'), serit:yz('ortak.zemin.hafif-tonlu-duz-bolumler-sol') };
   function modulOf(){
     try{ return (document.documentElement.getAttribute('data-modul') || 'lifeos').toLowerCase(); }catch(e){ return 'lifeos'; }
   }
@@ -228,7 +269,7 @@ window.LIFEOS = window.LIFEOS || {};
   const OTOLAR = Object.freeze(['kapali', 'saat']);
   const MANZARA_AD = { acik:'Modülün', kendi:'Kendi', kapali:'Kapalı' };
   const GECE_AD = { renk:'Renk', ayni:'Gündüzün', kendi:'Kendi' };   // yuva başlığı «Gece»: kısa ad kutuya sığar
-  const OTO_AD = { kapali:'Kapalı', saat:'Saate göre' };
+  const OTO_AD = { kapali:'Kapalı', saat:yz('ortak.zemin.saate-gore') };
   const depoOku = (k, liste, vars) => { let v = null; try{ v = localStorage.getItem(k); }catch(e){} return liste.indexOf(v) >= 0 ? v : vars; };
   const depoYaz = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){ /* depo kapalı: bu sayfada geçerli */ } };
   function manzaraOku(){ return depoOku(MANZARA_ANAHTAR, MANZARALAR, 'acik'); }
@@ -272,14 +313,14 @@ window.LIFEOS = window.LIFEOS || {};
   const kacir = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   function onizleHtml(yuva){
     const o = onizle(yuva), sade = onizleSade();
-    const etiket = o.eksik ? 'Dosya yok · modülün fotoğrafı'
-      : { modul:'Modülün fotoğrafı', foto:'Kendi fotoğrafın', video:'Kendi videon', renk:yuva === 'gece' ? 'Gece rengi' : 'Düz renk' }[o.tur];
+    const etiket = o.eksik ? yz('ortak.zemin.dosya-yok-modulun-fotografi')
+      : { modul:yz('ortak.zemin.modulun-fotografi'), foto:yz('ortak.zemin.kendi-fotografin'), video:yz('ortak.zemin.kendi-videon'), renk:yuva === 'gece' ? yz('ortak.zemin.gece-rengi') : yz('ortak.zemin.duz-renk') }[o.tur];
     return '<div class="zemin-onizle zemin-onizle--' + o.tur + ' zemin-onizle--' + (yuva === 'gece' ? 'gece' : 'gunduz') + (sade ? ' is-sade' : '') + '" data-zemin-onizle="' + kacir(yuva) + '"'
       + (o.tur === 'modul' || o.tur === 'foto' ? ' style="background-image:url(&quot;' + kacir(o.adres) + '&quot;)"' : '') + '>'
       + (o.tur === 'video' ? '<video src="' + kacir(o.adres) + '" muted playsinline preload="metadata" aria-hidden="true"></video>' : '')
       + '<span class="zemin-onizle__ui" aria-hidden="true"><i class="zo-kenar"></i><i class="zo-kart"><b></b><b></b></i><i class="zo-kart zo-kart--iki"><b></b></i></span>'
       + '<small>' + kacir(etiket) + '</small>'
-      + '<button type="button" class="zemin-onizle__goz" data-zemin-onizle-sade aria-pressed="' + (sade ? 'true' : 'false') + '" aria-label="' + (sade ? 'Kartları göster' : 'Yalnız görsel') + '">'
+      + '<button type="button" class="zemin-onizle__goz" data-zemin-onizle-sade aria-pressed="' + (sade ? 'true' : 'false') + '" aria-label="' + (sade ? yz('ortak.zemin.kartlari-goster') : yz('ortak.zemin.yalniz-gorsel')) + '">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true">' + (sade ? '<rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M8 10h8M8 14h5"/>'
         : '<rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M4 15l4.5-4.5 4 4 2.5-2.5 5 5"/>') + '</svg></button></div>';
   }
@@ -355,22 +396,22 @@ window.LIFEOS = window.LIFEOS || {};
     return '<button type="button" class="' + (on ? 'is-on' : '') + '" ' + veri + '="' + v + '" aria-pressed="' + on + '">' + y + '</button>'; }).join('') + '</div>';
   /* Ayarlar › Arka plan ve Ayarlar › Ses'te aynı denetim; ikisi birlikte yenilenir. */
   function videoAyarHtml(){
-    if(!videoVar()) return '<div class="vayar" data-zemin-video-ayar><p class="skart__not">Arka plana bir video koyunca (Arka plan › Kendi) sesi, kesiti ve hızı burada ayarlanır.</p></div>';
+    if(!videoVar()) return ('<div class="vayar" data-zemin-video-ayar><p class="skart__not">' + yz('ortak.zemin.arka-plana-bir-video-koyunca') + '</p></div>');
     const a = videoAyar(), ust = Math.ceil(Math.max(videoSure || 0, a.bit, a.bas, 1));
     const y = Math.round(a.duzey * 100), bit = a.bit || ust;
     return '<div class="vayar" data-zemin-video-ayar>'
-      + '<div class="skart__satir"><span class="skart__etiket">Videonun sesi</span>' + segHtml('Videonun sesi', [[false, 'Kapalı'], [true, 'Açık']], a.ses, 'data-zv-ses') + '</div>'
-      + '<label class="skart__satir skart__kaydir' + (a.ses ? '' : ' is-pasif') + '"><span class="skart__etiket">Düzey</span>'
+      + ('<div class="skart__satir"><span class="skart__etiket">' + yz('ortak.zemin.videonun-sesi') + '</span>') + segHtml(yz('ortak.zemin.videonun-sesi'), [[false, 'Kapalı'], [true, 'Açık']], a.ses, 'data-zv-ses') + '</div>'
+      + '<label class="skart__satir skart__kaydir' + (a.ses ? '' : ' is-pasif') + ('"><span class="skart__etiket">' + yz('ortak.zemin.duzey') + '</span>')
       + '<input type="range" min="0" max="100" step="1" value="' + y + '" data-zv-duzey aria-label="Videonun ses düzeyi" aria-valuetext="%' + y + '"' + (a.ses ? '' : ' disabled') + ' style="--dolu:' + y + '%">'
       + '<output data-zv-cikti="duzey">%' + y + '</output></label>'
-      + '<div class="skart__satir"><span class="skart__etiket">Video sesliyken müzik</span>' + segHtml('Video sesliyken arka plan müziği', [['sus', 'Susar'], ['birlikte', 'Birlikte çalar']], a.muzik, 'data-zv-muzik') + '</div>'
-      + '<div class="skart__satir skart__satir--ust"><span class="skart__etiket">Kesit<small data-zv-cikti="kesit">' + kacir(kesitYaz(a)) + '</small></span>'
+      + ('<div class="skart__satir"><span class="skart__etiket">' + yz('ortak.zemin.video-sesliyken-muzik') + '</span>') + segHtml(yz('ortak.zemin.video-sesliyken-arka-plan-mu'), [['sus', 'Susar'], ['birlikte', yz('ortak.zemin.birlikte-calar')]], a.muzik, 'data-zv-muzik') + '</div>'
+      + ('<div class="skart__satir skart__satir--ust"><span class="skart__etiket">' + yz('ortak.zemin.kesit') + '<small data-zv-cikti="kesit">') + kacir(kesitYaz(a)) + '</small></span>'
       + '<div class="skart__kesit">'
-      + '<label><span>Başlangıç</span><input type="range" min="0" max="' + ust + '" step="0.5" value="' + a.bas + '" data-zv-kesit="bas" aria-label="Kesitin başlangıcı, saniye" style="--dolu:' + (a.bas / ust * 100) + '%"></label>'
-      + '<label><span>Bitiş</span><input type="range" min="0" max="' + ust + '" step="0.5" value="' + bit + '" data-zv-kesit="bit" aria-label="Kesitin bitişi, saniye" style="--dolu:' + (bit / ust * 100) + '%"></label>'
-      + (a.bas || a.bit ? '<button type="button" class="linkbtn" data-zv-tum>Baştan sona</button>' : '') + '</div></div>'
-      + '<div class="skart__satir"><span class="skart__etiket">Hız</span>' + segHtml('Videonun hızı', HIZLAR.map(h => [h, String(h).replace('.', ',') + '×']), a.hiz, 'data-zv-hiz') + '</div>'
-      + (videoSure ? '' : '<p class="skart__not">Video şu anki temada oynamıyor; süresi bilinmediği için kesit saniyeyle ayarlanır.</p>')
+      + ('<label><span>' + yz('ortak.zemin.baslangic') + '</span><input type="range" min="0" max="') + ust + '" step="0.5" value="' + a.bas + '" data-zv-kesit="bas" aria-label="Kesitin başlangıcı, saniye" style="--dolu:' + (a.bas / ust * 100) + '%"></label>'
+      + ('<label><span>' + yz('ortak.zemin.bitis') + '</span><input type="range" min="0" max="') + ust + '" step="0.5" value="' + bit + '" data-zv-kesit="bit" aria-label="Kesitin bitişi, saniye" style="--dolu:' + (bit / ust * 100) + '%"></label>'
+      + (a.bas || a.bit ? ('<button type="button" class="linkbtn" data-zv-tum>' + yz('ortak.zemin.bastan-sona') + '</button>') : '') + '</div></div>'
+      + ('<div class="skart__satir"><span class="skart__etiket">' + yz('ortak.zemin.hiz') + '</span>') + segHtml(yz('ortak.zemin.videonun-hizi'), HIZLAR.map(h => [h, String(h).replace('.', ',') + '×']), a.hiz, 'data-zv-hiz') + '</div>'
+      + (videoSure ? '' : ('<p class="skart__not">' + yz('ortak.zemin.video-su-anki-temada-oynamiy') + '</p>'))
       + '</div>';
   }
   function videoAyarYenile(){ if(typeof document !== 'undefined') document.querySelectorAll('[data-zemin-video-ayar]').forEach(el => { el.outerHTML = videoAyarHtml(); }); }
@@ -490,30 +531,30 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* Kendi dosyanı yükler: PC'deki sunucuya (yalnız bu bilgisayardan). */
   function dosyaYukle(yuva, dosya){
-    if(!sunucuVar()) return Promise.resolve({ ok:false, mesaj:'Kendi dosyan için LifeOS bu bilgisayarda açık olmalı.' });
+    if(!sunucuVar()) return Promise.resolve({ ok:false, mesaj:yz('ortak.zemin.kendi-dosyan-icin-lifeos-bu') });
     const tur = String(dosya && dosya.type || '');
-    if(!/^(image\/(jpeg|png|webp)|video\/(mp4|webm|quicktime|x-m4v))$/.test(tur)) return Promise.resolve({ ok:false, mesaj:'Yalnız JPEG, PNG, WebP fotoğraf ya da MP4, MOV, WebM video (MKV ve AVI’yi önce MP4’e çevir).' });
-    if(dosya.size > 600 * 1024 * 1024) return Promise.resolve({ ok:false, mesaj:'Dosya 600 MB’tan büyük.' });
+    if(!/^(image\/(jpeg|png|webp)|video\/(mp4|webm|quicktime|x-m4v))$/.test(tur)) return Promise.resolve({ ok:false, mesaj:yz('ortak.zemin.yalniz-jpeg-png-webp-fotogra') });
+    if(dosya.size > 600 * 1024 * 1024) return Promise.resolve({ ok:false, mesaj:yz('ortak.zemin.dosya-600-mb-tan-buyuk') });
     return fetch(new URL('/api/zemin/' + yuva, location.href).href, { method:'POST', headers:{ 'Content-Type':tur, 'X-LifeOS':'zemin' }, body:dosya })
       .then(r => r.ok ? null : r.text().then(t => { throw new Error(t || 'Yüklenemedi.'); }))
       .then(() => {
         depoYaz('lifeos.manzara.tur.' + yuva, /^video/.test(tur) ? 'video' : 'foto');
         depoYaz('lifeos.manzara.surum', String(Date.now()));
         if(yuva === 'gece') geceAyarla('kendi'); else manzaraAyarla('kendi');
-        return { ok:true, mesaj:/^video/.test(tur) ? 'Video kaydedildi; bitince başa döner.' : 'Fotoğraf kaydedildi.' };
+        return { ok:true, mesaj:/^video/.test(tur) ? yz('ortak.zemin.video-kaydedildi-bitince-bas') : yz('ortak.zemin.fotograf-kaydedildi') };
       })
-      .catch(e => ({ ok:false, mesaj:(e && e.message) || 'Yüklenemedi: LifeOS sunucusu yanıt vermedi.' }));
+      .catch(e => ({ ok:false, mesaj:(e && e.message) || yz('ortak.zemin.yuklenemedi-lifeos-sunucusu') }));
   }
   const seg = (ad, sec, sinif, liste, adlar, simdi) => '<div class="seg seg--block ' + sinif + '" role="group" aria-label="' + ad + '">'
     + liste.map(k => '<button type="button" class="' + (k === simdi ? 'is-on' : '') + '" ' + sec + '="' + k + '"'
       + ' aria-pressed="' + (k === simdi ? 'true' : 'false') + '">' + adlar[k] + '</button>').join('') + '</div>';
   /* «Fotoğraf ya da video» (kullanıcı, 2026-10-30: «yalnız resim seçeneği olmasın»): video bitince başa döner (videoKur loop). */
-  const dosyaDugmesi = yuva => sunucuVar() ? '<label class="btn btn--sm zemin-dosya">Fotoğraf ya da video seç'
+  const dosyaDugmesi = yuva => sunucuVar() ? ('<label class="btn btn--sm zemin-dosya">' + yz('ortak.zemin.fotograf-ya-da-video-sec'))
     + '<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-zemin-dosya="' + yuva + '" hidden></label>'
     + '<small class="zemin-durum" data-zemin-durum="' + yuva + '" role="status"></small>' : '';
-  function manzaraSeciciHtml(){ return '<div class="zemin-yuva">' + seg('Gündüz arka planı', 'data-manzara-sec', 'manzarasec', MANZARALAR, MANZARA_AD, manzaraSimdi) + dosyaDugmesi('gunduz') + '</div>'; }
-  function geceSeciciHtml(){ return '<div class="zemin-yuva">' + seg('Gece arka planı', 'data-gece-sec', 'gecesec', GECELER, GECE_AD, geceSimdi) + dosyaDugmesi('gece') + '</div>'; }
-  function otoSeciciHtml(){ return seg('Saate göre tema', 'data-oto-sec', 'otosec', OTOLAR, OTO_AD, otoSimdi); }
+  function manzaraSeciciHtml(){ return '<div class="zemin-yuva">' + seg(yz('ortak.zemin.gunduz-arka-plani'), 'data-manzara-sec', 'manzarasec', MANZARALAR, MANZARA_AD, manzaraSimdi) + dosyaDugmesi('gunduz') + '</div>'; }
+  function geceSeciciHtml(){ return '<div class="zemin-yuva">' + seg(yz('ortak.zemin.gece-arka-plani'), 'data-gece-sec', 'gecesec', GECELER, GECE_AD, geceSimdi) + dosyaDugmesi('gece') + '</div>'; }
+  function otoSeciciHtml(){ return seg(yz('ortak.zemin.saate-gore-tema'), 'data-oto-sec', 'otosec', OTOLAR, OTO_AD, otoSimdi); }
 
   uygula();
   yuzeyUygula();
@@ -557,7 +598,7 @@ window.LIFEOS = window.LIFEOS || {};
       if(!g || !g.files || !g.files[0]) return;
       const yuva = g.getAttribute('data-zemin-dosya');
       const durum = document.querySelector('[data-zemin-durum="' + yuva + '"]');
-      if(durum) durum.textContent = /^video/.test(g.files[0].type) ? 'Video yükleniyor… büyük dosya biraz sürer.' : 'Yükleniyor…';
+      if(durum) durum.textContent = /^video/.test(g.files[0].type) ? yz('ortak.zemin.video-yukleniyor-buyuk-dosya') : 'Yükleniyor…';
       dosyaYukle(yuva, g.files[0]).then(s => { if(durum) durum.textContent = s.mesaj; g.value = ''; });
     });
   }

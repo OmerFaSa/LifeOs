@@ -32,6 +32,60 @@
      5. KAYIT GERİ ALINIR. kaydet() önceki hâli döndürür; «Geri al» onu yazar.
 
    Depo: `haftaplan/<id>`. Yerleşik dört tür tektir; serbest plan çoğalır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.haftaplan.beslenme-plani':'Beslenme planı',
+  'spi.core.haftaplan.haftanin-ogunleri':'Haftanın öğünleri',
+  'spi.core.haftaplan.hareket-plani':'Hareket planı',
+  'spi.core.haftaplan.hangi-gun-ne-kadar':'Hangi gün ne kadar',
+  'spi.core.haftaplan.uyku-plani':'Uyku planı',
+  'spi.core.haftaplan.yatis-kalkis-ve-kisa-uykular':'Yatış, kalkış ve kısa uykular',
+  'spi.core.haftaplan.su-ve-aliskanlik':'Su ve alışkanlık',
+  'spi.core.haftaplan.gunluk-su-ve-kucuk-aliskanli':'Günlük su ve küçük alışkanlıklar',
+  'spi.core.haftaplan.kendi-planin':'Kendi planın',
+  'spi.core.haftaplan.adini-sen-koy':'Adını sen koy',
+  'spi.core.haftaplan.her-gun-ayni':'Her gün aynı',
+  'spi.core.haftaplan.hafta-ici-ve-hafta-sonu':'Hafta içi ve hafta sonu',
+  'spi.core.haftaplan.gun-gun':'Gün gün',
+  'spi.core.haftaplan.yuruyus-kaydi':'Yürüyüş kaydı',
+  'spi.core.haftaplan.kosu-kaydi':'Koşu kaydı',
+  'spi.core.haftaplan.bisiklet-kaydi':'Bisiklet kaydı',
+  'spi.core.haftaplan.yuzme-kaydi':'Yüzme kaydı',
+  'spi.core.haftaplan.her-hareket-seansi':'Her hareket seansı',
+  'spi.core.haftaplan.ogun-kaydi':'Öğün kaydı',
+  'spi.core.haftaplan.kisa-uyku-kaydi':'Kısa uyku kaydı',
+  'spi.core.haftaplan.ogle-uykusu':'Öğle uykusu',
+  'spi.core.haftaplan.bilinmeyen-plan-turu':'Bilinmeyen plan türü.',
+  'spi.core.haftaplan.plana-bir-ad-ver':'Plana bir ad ver.',
+  'spi.core.haftaplan.haftanin-yedi-gunu-olmali':'Haftanın yedi günü olmalı.',
+  'spi.core.haftaplan.her-gun':'Her gün',
+  'spi.core.haftaplan.hafta-ici':'Hafta içi',
+  'spi.core.haftaplan.hafta-sonu':'Hafta sonu',
+  'spi.core.haftaplan.kisa-uykunun-adi':'Kısa uykunun adı',
+  'spi.core.haftaplan.kisa-uyku':'Kısa uyku',
+  'spi.core.haftaplan.su-hedefi-1-ile-10-000':'Su hedefi 1 ile 10.000 ml arası olur.',
+  'spi.core.haftaplan.en-cok':'En çok ',
+  'spi.core.haftaplan.bos-madde-olmaz':'Boş madde olmaz.',
+  'spi.core.haftaplan.bugun-icin-ogun-yazilmamis':'Bugün için öğün yazılmamış',
+  'spi.core.haftaplan.bugun-dinlenme-gunu':'Bugün dinlenme günü',
+  'spi.core.haftaplan.saatler-yazilmamis':'Saatler yazılmamış',
+  'spi.core.haftaplan.su-hedefi-yazilmamis':'Su hedefi yazılmamış',
+  'spi.core.haftaplan.su':'Su ',
+  'spi.core.haftaplan.su-bugun-kayit-yok':'Su: bugün kayıt yok · hedef ',
+  'spi.core.haftaplan.bugun':'Bugün ',
+  'spi.core.haftaplan.bugun-madde-yok':'Bugün madde yok',
+  'spi.core.haftaplan.son-7-gunde-planli-gun':'Son 7 günde planlı gün yok',
+  'spi.core.haftaplan.son-7-gun':'Son 7 gün: ',
+  'spi.core.haftaplan.son-7-gunde-uyku-kaydi':'Son 7 günde uyku kaydı yok',
+  'spi.core.haftaplan.son-7-gunde-su-kaydi':'Son 7 günde su kaydı yok',
+  'spi.core.haftaplan.son-7-gunde-ogun-kaydi':'Son 7 günde öğün kaydı yok',
+  'spi.core.haftaplan.son-7-gunde-madde-yok':'Son 7 günde madde yok',
+  'spi.core.haftaplan.hareket-plani-bulunamadi':'Hareket planı bulunamadı.',
+  'spi.core.haftaplan.bugun-planda-hareket-yok':'Bugün planda hareket yok.',
+  'spi.core.haftaplan.bugunun-plani-zaten-kaydedil':'Bugünün planı zaten kaydedildi.',
+  'spi.core.haftaplan.planli-hareket':'Planlı hareket',
+  'spi.core.haftaplan.bugun-plandan-yazilmis-seans':'Bugün plandan yazılmış seans yok.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -40,11 +94,11 @@ SP.HaftaPlan = (function(){
   const GUN_KISA = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
   const GUN_AD = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
   const TURLER = Object.freeze([
-    { id:'beslenme', ad:'Beslenme planı', not:'Haftanın öğünleri', tek:true },
-    { id:'hareket',  ad:'Hareket planı',  not:'Hangi gün ne kadar', tek:true },
-    { id:'uyku',     ad:'Uyku planı',     not:'Yatış, kalkış ve kısa uykular', tek:true },
-    { id:'su',       ad:'Su ve alışkanlık', not:'Günlük su ve küçük alışkanlıklar', tek:true },
-    { id:'serbest',  ad:'Kendi planın',   not:'Adını sen koy', tek:false },
+    { id:'beslenme', ad:yz('spi.core.haftaplan.beslenme-plani'), not:yz('spi.core.haftaplan.haftanin-ogunleri'), tek:true },
+    { id:'hareket',  ad:yz('spi.core.haftaplan.hareket-plani'),  not:yz('spi.core.haftaplan.hangi-gun-ne-kadar'), tek:true },
+    { id:'uyku',     ad:yz('spi.core.haftaplan.uyku-plani'),     not:yz('spi.core.haftaplan.yatis-kalkis-ve-kisa-uykular'), tek:true },
+    { id:'su',       ad:yz('spi.core.haftaplan.su-ve-aliskanlik'), not:yz('spi.core.haftaplan.gunluk-su-ve-kucuk-aliskanli'), tek:true },
+    { id:'serbest',  ad:yz('spi.core.haftaplan.kendi-planin'),   not:yz('spi.core.haftaplan.adini-sen-koy'), tek:false },
   ]);
   const TUR_BY_ID = {};
   TURLER.forEach(t => { TUR_BY_ID[t.id] = t; });
@@ -62,9 +116,9 @@ SP.HaftaPlan = (function(){
 
   /* Uyku planının kipleri. */
   const UYKU_KIPLERI = Object.freeze([
-    { id:'her',   ad:'Her gün aynı' },
-    { id:'hafta', ad:'Hafta içi ve hafta sonu' },
-    { id:'gun',   ad:'Gün gün' },
+    { id:'her',   ad:yz('spi.core.haftaplan.her-gun-ayni') },
+    { id:'hafta', ad:yz('spi.core.haftaplan.hafta-ici-ve-hafta-sonu') },
+    { id:'gun',   ad:yz('spi.core.haftaplan.gun-gun') },
   ]);
 
   /* Maddenin simgesi — kapalı liste; çizimi ekrandadır (screens/planlar.js). */
@@ -73,10 +127,10 @@ SP.HaftaPlan = (function(){
 
   /* Maddenin bağlanabileceği kayıtlar: o gün kaç KEZ kayıt var. */
   const BAGLAR = Object.freeze([
-    { id:'yuruyus', ad:'Yürüyüş kaydı' }, { id:'kosu', ad:'Koşu kaydı' },
-    { id:'bisiklet', ad:'Bisiklet kaydı' }, { id:'yuzme', ad:'Yüzme kaydı' },
-    { id:'hareket', ad:'Her hareket seansı' }, { id:'ogun', ad:'Öğün kaydı' },
-    { id:'kestirme', ad:'Kısa uyku kaydı' },
+    { id:'yuruyus', ad:yz('spi.core.haftaplan.yuruyus-kaydi') }, { id:'kosu', ad:yz('spi.core.haftaplan.kosu-kaydi') },
+    { id:'bisiklet', ad:yz('spi.core.haftaplan.bisiklet-kaydi') }, { id:'yuzme', ad:yz('spi.core.haftaplan.yuzme-kaydi') },
+    { id:'hareket', ad:yz('spi.core.haftaplan.her-hareket-seansi') }, { id:'ogun', ad:yz('spi.core.haftaplan.ogun-kaydi') },
+    { id:'kestirme', ad:yz('spi.core.haftaplan.kisa-uyku-kaydi') },
   ]);
   const BAG_BY_ID = {};
   BAGLAR.forEach(b => { BAG_BY_ID[b.id] = b; });
@@ -143,7 +197,7 @@ SP.HaftaPlan = (function(){
       gunler:[], zaman:null, simge:null, hedef:1, bag:null };
   }
   function yeniKestirme(){
-    return { id:'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), ad:'Öğle uykusu', bas:'', dk:null, gunler:[] };
+    return { id:'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), ad:yz('spi.core.haftaplan.ogle-uykusu'), bas:'', dk:null, gunler:[] };
   }
   function kopya(p){ return JSON.parse(JSON.stringify(p)); }
 
@@ -151,16 +205,16 @@ SP.HaftaPlan = (function(){
 
   function dogrula(p){
     const h = [];
-    if(!p || !TUR_BY_ID[p.tur]) return ['Bilinmeyen plan türü.'];
+    if(!p || !TUR_BY_ID[p.tur]) return [yz('spi.core.haftaplan.bilinmeyen-plan-turu')];
     const metin = (x, ad) => { if(String(x || '').length > EN_UZUN_METIN) h.push(ad + ' en çok ' + EN_UZUN_METIN + ' harf olur.'); };
     const zamanDogru = (z, ad) => { if(z && z.saat && !SAAT.test(z.saat)) h.push(ad + ': saat 00:00–23:59 biçiminde olur.'); };
-    if(p.tur === 'serbest' && !String(p.ad || '').trim()) h.push('Plana bir ad ver.');
+    if(p.tur === 'serbest' && !String(p.ad || '').trim()) h.push(yz('spi.core.haftaplan.plana-bir-ad-ver'));
     if(p.tur === 'beslenme'){
-      if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push('Haftanın yedi günü olmalı.');
+      if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push(yz('spi.core.haftaplan.haftanin-yedi-gunu-olmali'));
       else p.gunler.forEach(g => Object.keys(g || {}).forEach(k => metin(g[k], 'Öğün')));
     }
     if(p.tur === 'hareket'){
-      if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push('Haftanın yedi günü olmalı.');
+      if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push(yz('spi.core.haftaplan.haftanin-yedi-gunu-olmali'));
       else p.gunler.forEach((g, i) => {
         if(!g) return;
         metin(g.ne, 'Hareket');
@@ -176,25 +230,25 @@ SP.HaftaPlan = (function(){
         else if(uykuDakika(x.yat, x.kalk) == null) h.push(ad + ': yatış ile kalkış aynı olamaz.');
       };
       const kip = uykuKip(p);
-      if(kip === 'her') blok(p.her, 'Her gün');
-      if(kip === 'hafta'){ blok(p.haftaici, 'Hafta içi'); blok(p.haftasonu, 'Hafta sonu'); }
+      if(kip === 'her') blok(p.her, yz('spi.core.haftaplan.her-gun'));
+      if(kip === 'hafta'){ blok(p.haftaici, yz('spi.core.haftaplan.hafta-ici')); blok(p.haftasonu, yz('spi.core.haftaplan.hafta-sonu')); }
       if(kip === 'gun'){
-        if(!Array.isArray(p.gunluk) || p.gunluk.length !== 7) h.push('Haftanın yedi günü olmalı.');
+        if(!Array.isArray(p.gunluk) || p.gunluk.length !== 7) h.push(yz('spi.core.haftaplan.haftanin-yedi-gunu-olmali'));
         else p.gunluk.forEach((x, i) => blok(x, GUN_AD[i]));
       }
       (p.kestirmeler || []).forEach(k => {
-        metin(k.ad, 'Kısa uykunun adı');
-        if(!(Number.isFinite(k.dk) && k.dk > 0 && k.dk <= 240)) h.push((k.ad || 'Kısa uyku') + ': süre 1 ile 240 dakika arası olur.');
-        if(k.bas && !SAAT.test(k.bas)) h.push((k.ad || 'Kısa uyku') + ': saat 00:00–23:59 biçiminde olur.');
+        metin(k.ad, yz('spi.core.haftaplan.kisa-uykunun-adi'));
+        if(!(Number.isFinite(k.dk) && k.dk > 0 && k.dk <= 240)) h.push((k.ad || yz('spi.core.haftaplan.kisa-uyku')) + ': süre 1 ile 240 dakika arası olur.');
+        if(k.bas && !SAAT.test(k.bas)) h.push((k.ad || yz('spi.core.haftaplan.kisa-uyku')) + ': saat 00:00–23:59 biçiminde olur.');
       });
     }
-    if(p.tur === 'su' && p.suMl != null && !(Number.isFinite(p.suMl) && p.suMl > 0 && p.suMl <= 10000)) h.push('Su hedefi 1 ile 10.000 ml arası olur.');
+    if(p.tur === 'su' && p.suMl != null && !(Number.isFinite(p.suMl) && p.suMl > 0 && p.suMl <= 10000)) h.push(yz('spi.core.haftaplan.su-hedefi-1-ile-10-000'));
     if(p.tur === 'su' || p.tur === 'serbest'){
       const l = p.maddeler || [];
-      if(l.length > EN_COK_MADDE) h.push('En çok ' + EN_COK_MADDE + ' madde olur.');
+      if(l.length > EN_COK_MADDE) h.push(yz('spi.core.haftaplan.en-cok') + EN_COK_MADDE + ' madde olur.');
       l.forEach(m => {
         metin(m && m.metin, 'Madde');
-        if(!m || !String(m.metin || '').trim()) { h.push('Boş madde olmaz.'); return; }
+        if(!m || !String(m.metin || '').trim()) { h.push(yz('spi.core.haftaplan.bos-madde-olmaz')); return; }
         const hd = m.hedef == null ? 1 : m.hedef;
         if(!(Number.isInteger(hd) && hd >= 1 && hd <= EN_COK_HEDEF)) h.push(m.metin + ': günde 1 ile ' + EN_COK_HEDEF + ' kez arası olur.');
         if(m.bag && !BAG_BY_ID[m.bag]) h.push(m.metin + ': bilinmeyen kayıt bağı.');
@@ -300,18 +354,18 @@ SP.HaftaPlan = (function(){
     if(p.tur === 'beslenme'){
       const d = (p.gunler || [])[g] || {};
       const l = ogunler(p).filter(([k]) => String(d[k] || '').trim()).map(([k, ad]) => ad + ': ' + d[k].trim());
-      return { metin:l.length ? l.join(' · ') : 'Bugün için öğün yazılmamış', etiket:null };
+      return { metin:l.length ? l.join(' · ') : yz('spi.core.haftaplan.bugun-icin-ogun-yazilmamis'), etiket:null };
     }
     if(p.tur === 'hareket'){
       const d = (p.gunler || [])[g];
       const z = d ? zamanYaz(d.zaman) : '';
-      return { metin:d ? d.ne + ' · ' + d.dk + ' dk' + (z ? ' · ' + z : '') : 'Bugün dinlenme günü', etiket:null };
+      return { metin:d ? d.ne + ' · ' + d.dk + ' dk' + (z ? ' · ' + z : '') : yz('spi.core.haftaplan.bugun-dinlenme-gunu'), etiket:null };
     }
     if(p.tur === 'uyku'){
       const x = uykuOf(p, iso) || {};
       const dk = uykuDakika(x.yat, x.kalk);
       const k = bugunKestirmeleri(p, iso).map(y => y.ad + (y.bas ? ' ' + y.bas : '') + ' · ' + y.dk + ' dk');
-      const ana = dk == null ? 'Saatler yazılmamış' : x.yat + ' yat · ' + x.kalk + ' kalk (' + sureYaz(dk) + ')';
+      const ana = dk == null ? yz('spi.core.haftaplan.saatler-yazilmamis') : x.yat + ' yat · ' + x.kalk + ' kalk (' + sureYaz(dk) + ')';
       return { metin:ana + (k.length ? ' · ' + k.join(' · ') : ''), etiket:dk == null ? null : 'hesaplandı' };
     }
     if(p.tur === 'su'){
@@ -319,14 +373,14 @@ SP.HaftaPlan = (function(){
       const ml = v && v.water != null ? Number(v.water) : null;
       const hedef = p.suMl;
       let metin;
-      if(hedef == null) metin = ml == null ? 'Su hedefi yazılmamış' : 'Su ' + binlik(ml) + ' ml';
-      else metin = ml == null ? 'Su: bugün kayıt yok · hedef ' + binlik(hedef) + ' ml' : 'Su ' + binlik(ml) + ' / ' + binlik(hedef) + ' ml';
+      if(hedef == null) metin = ml == null ? yz('spi.core.haftaplan.su-hedefi-yazilmamis') : yz('spi.core.haftaplan.su') + binlik(ml) + ' ml';
+      else metin = ml == null ? yz('spi.core.haftaplan.su-bugun-kayit-yok') + binlik(hedef) + ' ml' : yz('spi.core.haftaplan.su') + binlik(ml) + ' / ' + binlik(hedef) + ' ml';
       const m = bugunMaddeleri(p, iso);
       if(m.length) metin += ' · ' + isaretli(p, iso).filter(id => m.some(x => x.id === id)).length + ' / ' + m.length + ' alışkanlık';
       return { metin, etiket:ml == null ? 'veri yok' : 'ölçüldü' };
     }
     const m = bugunMaddeleri(p, iso);
-    return { metin:m.length ? 'Bugün ' + isaretli(p, iso).filter(id => m.some(x => x.id === id)).length + ' / ' + m.length + ' madde' : 'Bugün madde yok', etiket:null };
+    return { metin:m.length ? yz('spi.core.haftaplan.bugun') + isaretli(p, iso).filter(id => m.some(x => x.id === id)).length + ' / ' + m.length + ' madde' : yz('spi.core.haftaplan.bugun-madde-yok'), etiket:null };
   }
 
   /* ------------------------------------------------------------ uyum */
@@ -350,12 +404,12 @@ SP.HaftaPlan = (function(){
         const dk = w.reduce((a, x) => a + (Number(x.minutes) || 0), 0);
         if(dk >= plan.dk) tuttu++; else eksik++;
       });
-      if(!planli) return { planli, tuttu, eksik, kayitYok, metin:'Son 7 günde planlı gün yok', etiket:'veri yok' };
+      if(!planli) return { planli, tuttu, eksik, kayitYok, metin:yz('spi.core.haftaplan.son-7-gunde-planli-gun'), etiket:'veri yok' };
       /* Sayıya ek getirilmez («0’ında», «4’ünde» sayıya göre değişir): parçalı yazılır. */
       const parca = [planli + ' planlı gün', tuttu + ' tuttu'];
       if(eksik) parca.push(eksik + ' gün eksik');
       if(kayitYok) parca.push(kayitYok + ' gün kayıt yok');
-      return { planli, tuttu, eksik, kayitYok, metin:'Son 7 gün: ' + parca.join(' · '), etiket:planli > kayitYok ? 'ölçüldü' : 'veri yok' };
+      return { planli, tuttu, eksik, kayitYok, metin:yz('spi.core.haftaplan.son-7-gun') + parca.join(' · '), etiket:planli > kayitYok ? 'ölçüldü' : 'veri yok' };
     }
     if(p.tur === 'uyku'){
       let kayitli = 0, tuttu = 0, kPlanli = 0, kTuttu = 0;
@@ -374,8 +428,8 @@ SP.HaftaPlan = (function(){
         }
       });
       const kMetin = kPlanli ? ' · kısa uyku ' + kTuttu + ' / ' + kPlanli + ' kayıtlı' : '';
-      return kayitli ? { kayitli, tuttu, kPlanli, kTuttu, metin:'Son 7 gün: ' + kayitli + ' gece kayıtlı · ' + tuttu + ' gece hedefte' + kMetin, etiket:'ölçüldü' }
-        : { kayitli, tuttu, kPlanli, kTuttu, metin:'Son 7 günde uyku kaydı yok' + kMetin, etiket:'veri yok' };
+      return kayitli ? { kayitli, tuttu, kPlanli, kTuttu, metin:yz('spi.core.haftaplan.son-7-gun') + kayitli + ' gece kayıtlı · ' + tuttu + ' gece hedefte' + kMetin, etiket:'ölçüldü' }
+        : { kayitli, tuttu, kPlanli, kTuttu, metin:yz('spi.core.haftaplan.son-7-gunde-uyku-kaydi') + kMetin, etiket:'veri yok' };
     }
     if(p.tur === 'su'){
       let kayitli = 0, tuttu = 0;
@@ -385,14 +439,14 @@ SP.HaftaPlan = (function(){
         kayitli++;
         if(p.suMl != null && Number(v.water) >= p.suMl) tuttu++;
       });
-      if(!kayitli) return { kayitli, tuttu, metin:'Son 7 günde su kaydı yok', etiket:'veri yok' };
-      return { kayitli, tuttu, metin:p.suMl == null ? 'Son 7 gün: ' + kayitli + ' günde su kaydı var'
-        : 'Son 7 gün: ' + kayitli + ' gün kayıtlı · ' + tuttu + ' gün hedefte', etiket:'ölçüldü' };
+      if(!kayitli) return { kayitli, tuttu, metin:yz('spi.core.haftaplan.son-7-gunde-su-kaydi'), etiket:'veri yok' };
+      return { kayitli, tuttu, metin:p.suMl == null ? yz('spi.core.haftaplan.son-7-gun') + kayitli + ' günde su kaydı var'
+        : yz('spi.core.haftaplan.son-7-gun') + kayitli + ' gün kayıtlı · ' + tuttu + ' gün hedefte', etiket:'ölçüldü' };
     }
     if(p.tur === 'beslenme'){
       /* Yemeğin adı kayıtla eşleştirilmez (tahmin olurdu); yalnız öğün kaydı olan gün sayılır. */
       const kayitli = gunler.filter(d => ((S().meals || {})[d] || []).length).length;
-      return { kayitli, metin:kayitli ? 'Son 7 gün: ' + kayitli + ' günde öğün kaydı var' : 'Son 7 günde öğün kaydı yok', etiket:kayitli ? 'ölçüldü' : 'veri yok' };
+      return { kayitli, metin:kayitli ? yz('spi.core.haftaplan.son-7-gun') + kayitli + ' günde öğün kaydı var' : yz('spi.core.haftaplan.son-7-gunde-ogun-kaydi'), etiket:kayitli ? 'ölçüldü' : 'veri yok' };
     }
     let toplam = 0, yapilan = 0;
     gunler.forEach(d => {
@@ -400,7 +454,7 @@ SP.HaftaPlan = (function(){
       toplam += m.length;
       yapilan += isaretli(p, d).filter(id => m.some(x => x.id === id)).length;
     });
-    return { toplam, yapilan, metin:toplam ? 'Son 7 gün: ' + yapilan + ' / ' + toplam + ' işaretli' : 'Son 7 günde madde yok', etiket:toplam ? 'ölçüldü' : 'veri yok' };
+    return { toplam, yapilan, metin:toplam ? yz('spi.core.haftaplan.son-7-gun') + yapilan + ' / ' + toplam + ' işaretli' : yz('spi.core.haftaplan.son-7-gunde-madde-yok'), etiket:toplam ? 'ölçüldü' : 'veri yok' };
   }
 
   /* ------------------------------------------------------------ depo */
@@ -459,15 +513,15 @@ SP.HaftaPlan = (function(){
   }
   async function hareketYaptim(p, iso){
     iso = iso || bugunISO();
-    if(!p || p.tur !== 'hareket') return { ok:false, why:'Hareket planı bulunamadı.' };
+    if(!p || p.tur !== 'hareket') return { ok:false, why:yz('spi.core.haftaplan.hareket-plani-bulunamadi') };
     const d = (p.gunler || [])[gunNo(iso)];
-    if(!d) return { ok:false, why:'Bugün planda hareket yok.' };
-    if(planSeansi(p, iso)) return { ok:false, why:'Bugünün planı zaten kaydedildi.' };
+    if(!d) return { ok:false, why:yz('spi.core.haftaplan.bugun-planda-hareket-yok') };
+    if(planSeansi(p, iso)) return { ok:false, why:yz('spi.core.haftaplan.bugunun-plani-zaten-kaydedil') };
     const ne = String(d.ne || '').trim();
     const q = SP.Quick && SP.Quick.parseMove ? SP.Quick.parseMove(ne + ' ' + d.dk + ' dk') : null;
     const ex = q && q.exercise;
     const w = SP.Model.newWorkout(iso);
-    w.name = ne || 'Planlı hareket';
+    w.name = ne || yz('spi.core.haftaplan.planli-hareket');
     w.minutes = d.dk;
     w.planId = p.id;
     if(ex){
@@ -480,7 +534,7 @@ SP.HaftaPlan = (function(){
   }
   async function hareketGeriAl(p, iso){
     const w = planSeansi(p, iso);
-    if(!w) return { ok:false, why:'Bugün plandan yazılmış seans yok.' };
+    if(!w) return { ok:false, why:yz('spi.core.haftaplan.bugun-plandan-yazilmis-seans') };
     await SP.Model.deleteWorkout(w.id);
     return { ok:true };
   }

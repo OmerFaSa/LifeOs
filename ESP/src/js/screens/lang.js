@@ -8,6 +8,29 @@
    Ekranda hiçbir yerde «şu kadar kelime biliyorsun» yazmaz: bilinen kelime
    ölçülemez, hatırlanan kelime ölçülür. Bu yüzden her sayının yanında
    nereden geldiği durur. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.lang.en-cok-geciken-kart':'En çok geciken kart ',
+  'esp.lang.telaffuzumu-sina':'Telaffuzumu Sına',
+  'esp.lang.bugun-vadeli':'Bugün vadeli.',
+  'esp.lang.aramaya-uyan-kart-yok':'Aramaya uyan kart yok.',
+  'esp.lang.bu-dil-icin-tohum-deste':'Bu dil için tohum deste yok; kendi listeni yapıştırabilirsin.',
+  'esp.lang.i-lk':'İlk',
+  'esp.lang.sik-kelime-kapsami-2':'Sık kelime kapsamı: ',
+  'esp.lang.oturmus-kutu-4-5':'Oturmuş (kutu 4–5)',
+  'esp.lang.ogreniliyor':'Öğreniliyor',
+  'esp.lang.destede-yok':'Destede yok',
+  'esp.lang.hic-cevaplanmis-kart-yok-ort':'Hiç cevaplanmış kart yok; ortalama üretilmedi.',
+  'esp.lang.hic-sorulmamis-kart-bu-ortal':'Hiç sorulmamış kart bu ortalamaya girmez.',
+  'esp.lang.ne-yapabilir':'Ne yapabilir',
+  'esp.lang.ne-olur':'Ne olur',
+  'esp.lang.cumle-tamam-2':'Cümle tamam',
+  'esp.lang.kelimeye-dokun-cumleyi-kur':'Kelimeye dokun · cümleyi kur',
+  'esp.lang.siradaki-cumle':'Sıradaki cümle',
+  'esp.lang.baska-cumle':'Başka cümle',
+  'esp.lang.bugun-vadesi-gelen-kart-yok':'Bugün vadesi gelen kart yok.',
+  'esp.lang.bir-liste-yapistirdiginda-ol':'Bir liste yapıştırdığında ölçüm başlar: retansiyon, kutu dağılımı ve bant.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -292,7 +315,7 @@ ESP.Screens.lang = (function(){
         label:yz('esp.lang.calisma'), hint:'srs',
         meta:d.due + ' kartın sırası geldi' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
         /* Gecikme yoksa künye («N kart vadeli») yeter; not yalnız gecikmeyi söyler. */
-        note:d.overdue ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.' : null,
+        note:d.overdue ? yz('esp.lang.en-cok-geciken-kart') + d.maxOverdueDays + ' gündür bekliyor.' : null,
         body:html`
           ${when(dersKapagi(d), () => html`<div class="mb-12">${raw(dersKapagi(d))}</div>`)}
           ${K.Button({ label:d.due + ' kartı çalış', tone:'primary', act:'start-review' })}`,
@@ -316,7 +339,7 @@ ESP.Screens.lang = (function(){
           title:yz('esp.lang.polyglot-telaffuzu-dinle')
         })}
         ${K.Button({
-          label:st && st.status === 'listening' ? 'Durdur' : 'Telaffuzumu Sına',
+          label:st && st.status === 'listening' ? 'Durdur' : yz('esp.lang.telaffuzumu-sina'),
           size:'sm',
           tone:st && st.status === 'listening' ? 'warn' : 'ghost',
           act:st && st.status === 'listening' ? 'speech-test-stop' : 'test-pronunciation',
@@ -335,7 +358,7 @@ ESP.Screens.lang = (function(){
     return [K.Entry({
       label:yz('esp.lang.kart') + (q.pos + 1) + '/' + q.ids.length,
       meta:(ESP.LANG_BY_ID[kart.lang] || {}).label || kart.lang,
-      note:gecikme ? gecikme + ' gündür bekliyor.' : 'Bugün vadeli.',
+      note:gecikme ? gecikme + ' gündür bekliyor.' : yz('esp.lang.bugun-vadeli'),
       action:K.Button({ label:yz('esp.lang.oturumu-bitir'), size:'sm', act:'end-review', data:{ 'data-h-odak-cik':'1' } }),
       wide:true,
       /* Odak kapısı (014, hareket.css): oturum sürerken sayfanın geri kalanı
@@ -437,7 +460,7 @@ ESP.Screens.lang = (function(){
       wide:true,
       body:hepsi.length
         ? K.Table({ tight:true,
-            headers:['Ön yüz', 'Karşılık', 'Kutu', 'Vade', 'Aktif', ''],
+            headers:[yz('esp.lang.on-yuz'), 'Karşılık', 'Kutu', 'Vade', 'Aktif', ''],
             rows:hepsi.slice(0, 200).map(c => [
               c.front, c.back,
               String(c.box),
@@ -446,7 +469,7 @@ ESP.Screens.lang = (function(){
                 data:{ 'data-id':c.id }, label:'' }),
               K.Button({ label:yz('esp.lang.sil'), size:'sm', act:'del-card', data:{ 'data-id':c.id } }),
             ]) })
-        : K.Empty({ text:q ? 'Aramaya uyan kart yok.' : 'Deste boş.' }),
+        : K.Empty({ text:q ? yz('esp.lang.aramaya-uyan-kart-yok') : yz('esp.lang.deste-bos') }),
     })];
   }
 
@@ -498,7 +521,7 @@ ESP.Screens.lang = (function(){
         body:ESP.SEED_CARDS[aktifDil()]
           ? html`${K.Button({ label:yz('esp.lang.tohum-desteyi-ekle'), act:'seed-cards' })}
               <p class="small muted mt-8">${ESP.SEED_CARDS[aktifDil()].length} kart</p>`
-          : K.Notice({ tone:'info', body:'Bu dil için tohum deste yok; kendi listeni yapıştırabilirsin.' }),
+          : K.Notice({ tone:'info', body:yz('esp.lang.bu-dil-icin-tohum-deste') }),
       }),
     ];
   }
@@ -524,7 +547,7 @@ ESP.Screens.lang = (function(){
     return html`
       <div class="mt-10">
         ${when(res.rows.length, () => html`
-          ${K.Table({ tight:true, headers:['Ön yüz', 'Karşılık', 'Tür'],
+          ${K.Table({ tight:true, headers:[yz('esp.lang.on-yuz'), 'Karşılık', 'Tür'],
             rows:res.rows.slice(0, 20).map(r => [r.front, r.back,
               (ESP.CARD_KINDS.find(k => k.id === r.kind) || {}).label || r.kind]) })}
           ${when(res.rows.length > 20, () => html`<p class="small muted">
@@ -575,7 +598,7 @@ ESP.Screens.lang = (function(){
     const yuz = (x, n) => Math.round(x / n * 1000) / 10;
     const satir = b => {
       const ogr = b.destede - b.oturmus;
-      return '<div class="siklik__s"><span class="siklik__ad">İlk ' + U.fmtNum(b.ust) + '</span>'
+      return ('<div class="siklik__s"><span class="siklik__ad">' + yz('esp.lang.i-lk') + ' ') + U.fmtNum(b.ust) + '</span>'
         + '<span class="siklik__iz">'
         + (b.oturmus ? '<i class="pk-renk0" style="width:' + yuz(b.oturmus, b.ust) + '%"></i>' : '')
         + (ogr ? '<i class="pk-renk1" style="width:' + yuz(ogr, b.ust) + '%"></i>' : '')
@@ -583,12 +606,12 @@ ESP.Screens.lang = (function(){
     };
     const sr = k.bantlar.map(b => 'ilk ' + b.ust + ' kelimenin ' + b.destede + ' tanesi destede, '
       + b.oturmus + ' tanesi oturmuş').join('; ');
-    return '<div class="siklik" role="img" aria-label="' + U.esc('Sık kelime kapsamı: ' + sr + '.') + '">'
+    return '<div class="siklik" role="img" aria-label="' + U.esc(yz('esp.lang.sik-kelime-kapsami-2') + sr + '.') + '">'
       + k.bantlar.map(satir).join('') + '</div>'
       + '<div class="pk-lejant siklik__lejant" aria-hidden="true">'
-      + '<span><i class="pk-renk0"></i>Oturmuş (kutu 4–5)</span>'
-      + '<span><i class="pk-renk1"></i>Öğreniliyor</span>'
-      + '<span><i class="is-yok"></i>Destede yok</span></div>';
+      + ('<span><i class="pk-renk0"></i>' + yz('esp.lang.oturmus-kutu-4-5') + '</span>')
+      + ('<span><i class="pk-renk1"></i>' + yz('esp.lang.ogreniliyor') + '</span>')
+      + ('<span><i class="is-yok"></i>' + yz('esp.lang.destede-yok') + '</span></div>');
   }
 
   function siklikRow(){
@@ -617,9 +640,9 @@ ESP.Screens.lang = (function(){
         meta:d.retention.cert === 'missing' ? 'veri yok'
           : '%' + Math.round(d.retention.value * 100),
         note:d.retention.cert === 'missing'
-          ? 'Hiç cevaplanmış kart yok; ortalama üretilmedi.'
+          ? yz('esp.lang.hic-cevaplanmis-kart-yok-ort')
           : d.retention.total + ' kartın ' + d.retention.n + '\'inden hesaplandı. '
-            + 'Hiç sorulmamış kart bu ortalamaya girmez.',
+            + yz('esp.lang.hic-sorulmamis-kart-bu-ortal'),
         body:d.retention.cert === 'missing'
           ? K.Empty({ text:yz('esp.lang.i-lk-calisma-oturumundan-son') })
           : html`${K.Meter({ label:yz('esp.lang.ortalama-hatirlama-olasiligi'),
@@ -650,7 +673,7 @@ ESP.Screens.lang = (function(){
           ${K.Notice({ tone:bant.band ? 'info' : 'warn',
             body:bant.text || bant.why })}
           ${K.Table({ tight:true,
-            headers:['Bant', { label:yz('esp.lang.aktif-kelime'), num:true }, { label:yz('esp.lang.kart-hatirlama'), num:true }, 'Ne yapabilir'],
+            headers:['Bant', { label:yz('esp.lang.aktif-kelime'), num:true }, { label:yz('esp.lang.kart-hatirlama'), num:true }, yz('esp.lang.ne-yapabilir')],
             rows:ESP.CEFR.map(b => [
               b.label, U.fmtNum(b.activeWords), '%' + Math.round(b.retention * 100), b.can,
             ]) })}
@@ -746,7 +769,7 @@ ESP.Screens.lang = (function(){
           ${K.Field({ label:yz('esp.lang.dogrusu'),
             input:K.Input({ id:'er-right', aria:yz('esp.lang.dogru-hali') }) })}
         ${K.Button({ label:yz('esp.lang.karta-cevir'), act:'add-error', class:'mt-10' })}
-        ${K.Table({ tight:true, headers:['Tür', 'Ne olur'],
+        ${K.Table({ tight:true, headers:['Tür', yz('esp.lang.ne-olur')],
           rows:ESP.PRODUCTION_ERRORS.map(e => [e.label, e.note]) })}`,
     }));
 
@@ -827,8 +850,8 @@ ESP.Screens.lang = (function(){
     if(!d) return '';
     const bitti = d.yerlesen.length === d.hedef.length;
     return VT().cumleKurma({ yerlesen:d.yerlesen, taslar:d.taslar, bos:d.hedef.length - d.yerlesen.length, act:'cumle-tas',
-      not:bitti ? 'Cümle tamam' : 'Kelimeye dokun · cümleyi kur' })
-      + (bitti || kurulacak().length > 1 ? '<div class="mt-8">' + String(K.Button({ label:bitti ? 'Sıradaki cümle' : 'Başka cümle', size:'sm', act:'cumle-yeni' })) + '</div>' : '');
+      not:bitti ? yz('esp.lang.cumle-tamam-2') : yz('esp.lang.kelimeye-dokun-cumleyi-kur') })
+      + (bitti || kurulacak().length > 1 ? '<div class="mt-8">' + String(K.Button({ label:bitti ? yz('esp.lang.siradaki-cumle') : yz('esp.lang.baska-cumle'), size:'sm', act:'cumle-yeni' })) + '</div>' : '');
   }
 
   /* 107 METİNLİ DİNLEME: en çok altı bağlam cümlesi; tarayıcı sesi yoksa kart yok. */
@@ -1261,14 +1284,14 @@ ESP.Screens.lang = (function(){
     title:yz('esp.lang.dil-studyosu'),
     headline(){
       const d = ESP.SRS.deckStatus(aktifDil());
-      if(!d.total) return 'Deste boş.';
+      if(!d.total) return yz('esp.lang.deste-bos');
       if(d.overdue) return d.overdue + ' kartın vadesi geçti.';
       if(d.due) return d.due + ' kart bugün vadeli.';
-      return 'Bugün vadesi gelen kart yok.';
+      return yz('esp.lang.bugun-vadesi-gelen-kart-yok');
     },
     lede(){
       const d = ESP.SRS.deckStatus(aktifDil());
-      if(!d.total) return 'Bir liste yapıştırdığında ölçüm başlar: retansiyon, kutu dağılımı ve bant.';
+      if(!d.total) return yz('esp.lang.bir-liste-yapistirdiginda-ol');
       return d.retention.cert === 'missing'
         ? d.total + ' kart kayıtlı; hiçbiri henüz cevaplanmadı, retansiyon ölçülmedi.'
         : d.total + ' kart · retansiyon %' + Math.round(d.retention.value * 100)

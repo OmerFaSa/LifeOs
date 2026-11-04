@@ -13,6 +13,11 @@
    isaretledigi tekrarlar ve zamanlayicinin verdigi suredir. Bu bir eksiklik
    degil bir karardir: olmayan ses dosyasi sizamaz. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.acoustic.parca-bulunamadi':'Parça bulunamadı.',
+  'esp.core.acoustic.tempo-girilmedi':'Tempo girilmedi.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.acoustic.bu-pencerede-hicbir-tempoda':'Bu pencerede hiçbir tempoda ',
   'esp.core.acoustic.turkce-sunumda-rahat-izlenen':'Türkçe sunumda rahat izlenen bant. Kendi kayıtların bu bandı kaydırabilir.',
   'esp.core.acoustic.wpm-icin-hem-sure-hem':'WPM için hem süre hem kelime sayısı ölçülmüş olmalı.',
@@ -119,9 +124,9 @@ ESP.Acoustic = (function(){
      kullanicinindir — ikisi ayri alanlarda durur ve karistirilmaz. */
   async function logAttempt(pieceId, bpm, clean, note){
     const p = (S.pieces || []).find(x => x.id === pieceId);
-    if(!p) return { ok:false, error:'Parça bulunamadı.' };
+    if(!p) return { ok:false, error:yz('esp.core.acoustic.parca-bulunamadi') };
     const n = Number(bpm);
-    if(!isFinite(n) || n <= 0) return { ok:false, error:'Tempo girilmedi.' };
+    if(!isFinite(n) || n <= 0) return { ok:false, error:yz('esp.core.acoustic.tempo-girilmedi') };
 
     p.attempts = (p.attempts || []).concat([{
       date:U.todayISO(), bpm:Math.round(n), clean:!!clean, note:note || '',

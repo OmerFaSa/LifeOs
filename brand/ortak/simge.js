@@ -33,6 +33,12 @@
    söylüyor. Ekran okuyucuya ikinci kez okutmak, listeyi iki katı
    uzatmaktan başka bir şey yapmazdı. Dosya yoksa `onerror` düğümü
    kaldırır ve yazı olduğu gibi kalır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.simge.spi-olcum-alanlari':'SPİ ölçüm alanları',
+  'ortak.simge.esp-disiplinleri':'ESP disiplinleri',
+  'ortak.simge.ays-dersleri':'AYS dersleri',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -40,9 +46,9 @@ window.LIFEOS = window.LIFEOS || {};
    ile aynı adlar; oradaki liste dosyayı NEREYE koyacağını, buradaki
    ekranın NEYİ isteyebileceğini söyler. */
 LIFEOS.SIMGE_AILE = {
-  olcum:    'SPİ ölçüm alanları',
-  disiplin: 'ESP disiplinleri',
-  ders:     'AYS dersleri',
+  olcum:    yz('ortak.simge.spi-olcum-alanlari'),
+  disiplin: yz('ortak.simge.esp-disiplinleri'),
+  ders:     yz('ortak.simge.ays-dersleri'),
   simge:    'genel ikon seti',
 };
 

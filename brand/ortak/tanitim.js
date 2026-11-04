@@ -32,6 +32,26 @@
    `TANITIM_ADIM` doğrudan DOM'a dokunur. Sihirbazı yeniden çizmek,
    kullanıcının o ana kadar yazdığı ad, boy ve kiloyu silmek olurdu —
    bir süsü değiştirmek için formu sıfırlamak. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.tanitim.ne-olcuyoruz':'Ne ölçüyoruz?',
+  'ortak.tanitim.neye-karar-vermiyoruz':'Neye karar vermiyoruz?',
+  'ortak.tanitim.nasil-basliyoruz':'Nasıl başlıyoruz?',
+  'ortak.tanitim.bilgiyi-gorur-gelisimi-olcer':'Bilgiyi görür, gelişimi ölçeriz.',
+  'ortak.tanitim.senin-yerine-karar-vermeyiz':'Senin yerine karar vermeyiz: meslek seçmeyiz, üniversite önermeyiz, hayat planı kurmayız.',
+  'ortak.tanitim.kucuk-adimlarla-buyuk-sonucl':'Küçük adımlarla büyük sonuçlara — hesabını kur, verini gir, yola çık.',
+  'ortak.tanitim.gercek-saglik-veride-gorunur':'Gerçek sağlık veride görünür.',
+  'ortak.tanitim.teshis-koymayiz-tedavi-onerm':'Teşhis koymayız, tedavi önermeyiz, ilaç tavsiye etmeyiz, acil müdahale sağlamayız.',
+  'ortak.tanitim.kucuk-adimlarla-buyuk-bir-se':'Küçük adımlarla büyük bir sen — verini bağla, profilini kur, yola çık.',
+  'ortak.tanitim.gorunmeyeni-gorur-gelisimini':'Görünmeyeni görür, gelişimini ölçeriz.',
+  'ortak.tanitim.teshis-koymayiz-sertifika-ve':'Teşhis koymayız, sertifika vermeyiz, etiketlemeyiz, senin yerine karar almayız.',
+  'ortak.tanitim.verini-paylas-kesfetmeye-bas':'Verini paylaş, keşfetmeye başla — bağla, çözümle, sonucu gör.',
+  'ortak.tanitim.veri-karara-donusur':'Veri, karara dönüşür.',
+  'ortak.tanitim.her-seye-degil-dogru-seye':'Her şeye değil, doğru şeye karar veririz: teşhis koymaz, sertifika vermez, mutlak doğru sunmaz.',
+  'ortak.tanitim.verini-bagla-seceneklerini-k':'Verini bağla, seçeneklerini keşfet, uygulamaya başla.',
+  'ortak.tanitim.adim-1':'Adım 1 /',
+  'ortak.tanitim.adim':'Adım ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -39,16 +59,16 @@ window.LIFEOS = window.LIFEOS || {};
    üzerinde yazan cümlelerin aynısıdır: resim ile yazı ayrışırsa
    kullanıcı iki farklı şey okur. */
 LIFEOS.TANITIM = {
-  sorular:['Ne ölçüyoruz?', 'Neye karar vermiyoruz?', 'Nasıl başlıyoruz?'],
+  sorular:[yz('ortak.tanitim.ne-olcuyoruz'), yz('ortak.tanitim.neye-karar-vermiyoruz'), yz('ortak.tanitim.nasil-basliyoruz')],
   ays:[
-    'Bilgiyi görür, gelişimi ölçeriz.',
-    'Senin yerine karar vermeyiz: meslek seçmeyiz, üniversite önermeyiz, hayat planı kurmayız.',
-    'Küçük adımlarla büyük sonuçlara — hesabını kur, verini gir, yola çık.',
+    yz('ortak.tanitim.bilgiyi-gorur-gelisimi-olcer'),
+    yz('ortak.tanitim.senin-yerine-karar-vermeyiz'),
+    yz('ortak.tanitim.kucuk-adimlarla-buyuk-sonucl'),
   ],
   spi:[
-    'Gerçek sağlık veride görünür.',
-    'Teşhis koymayız, tedavi önermeyiz, ilaç tavsiye etmeyiz, acil müdahale sağlamayız.',
-    'Küçük adımlarla büyük bir sen — verini bağla, profilini kur, yola çık.',
+    yz('ortak.tanitim.gercek-saglik-veride-gorunur'),
+    yz('ortak.tanitim.teshis-koymayiz-tedavi-onerm'),
+    yz('ortak.tanitim.kucuk-adimlarla-buyuk-bir-se'),
   ],
   esp:[
     /* «Potansiyeli keşfederiz» bir yetenek YARGISIDIR — bir sonraki
@@ -58,14 +78,14 @@ LIFEOS.TANITIM = {
        yalniz OLCUYOR. ESP'ninki de oyle olmali: gorunmeyen sey
        potansiyel degil, ILERLEME — ve ilerleme olculur, tahmin
        edilmez. */
-    'Görünmeyeni görür, gelişimini ölçeriz.',
-    'Teşhis koymayız, sertifika vermeyiz, etiketlemeyiz, senin yerine karar almayız.',
-    'Verini paylaş, keşfetmeye başla — bağla, çözümle, sonucu gör.',
+    yz('ortak.tanitim.gorunmeyeni-gorur-gelisimini'),
+    yz('ortak.tanitim.teshis-koymayiz-sertifika-ve'),
+    yz('ortak.tanitim.verini-paylas-kesfetmeye-bas'),
   ],
   hkm:[
-    'Veri, karara dönüşür.',
-    'Her şeye değil, doğru şeye karar veririz: teşhis koymaz, sertifika vermez, mutlak doğru sunmaz.',
-    'Verini bağla, seçeneklerini keşfet, uygulamaya başla.',
+    yz('ortak.tanitim.veri-karara-donusur'),
+    yz('ortak.tanitim.her-seye-degil-dogru-seye'),
+    yz('ortak.tanitim.verini-bagla-seceneklerini-k'),
   ],
 };
 
@@ -171,7 +191,7 @@ LIFEOS.KURULUM_HTML = function(mod, o){
     + '<div class="kurulum__ilerleme" role="progressbar" aria-label="Kurulum adımı"'
     +   ' aria-valuemin="1" aria-valuemax="' + n + '" aria-valuenow="1" aria-valuetext="Adım 1 / ' + n + '">'
     +   '<ol class="kurulum__adimlar">' + adimlar_ + '</ol>'
-    +   '<span class="kurulum__sayac" data-kurulum-sayac>Adım 1 / ' + n + '</span>'
+    +   ('<span class="kurulum__sayac" data-kurulum-sayac>' + yz('ortak.tanitim.adim-1') + ' ') + n + '</span>'
     + '</div>'
     + '<div class="kurulum__bas">'
     +   '<h2 class="kurulum__soru" data-kurulum-soru tabindex="-1">' + kac(sorular[0]) + '</h2>'
@@ -209,11 +229,11 @@ LIFEOS.KURULUM_GIT = function(dugme, yon){
   var yazi = kok.querySelector('[data-kurulum-yazi]');
   if(yazi) yazi.textContent = cevaplar[no - 1] || '';
   var sayac = kok.querySelector('[data-kurulum-sayac]');
-  if(sayac) sayac.textContent = 'Adım ' + no + ' / ' + n;
+  if(sayac) sayac.textContent = yz('ortak.tanitim.adim') + no + ' / ' + n;
   var cubuk = kok.querySelector('[data-kurulum-cubuk]');
   if(cubuk) cubuk.style.width = Math.round(100 * no / n) + '%';
   var il = kok.querySelector('[role="progressbar"]');
-  if(il){ il.setAttribute('aria-valuenow', String(no)); il.setAttribute('aria-valuetext', 'Adım ' + no + ' / ' + n); }
+  if(il){ il.setAttribute('aria-valuenow', String(no)); il.setAttribute('aria-valuetext', yz('ortak.tanitim.adim') + no + ' / ' + n); }
 
   /* Pencerenin alt çubuğu kökün DIŞINDA: aynı pencerede aranır. */
   var pencere = kok.closest('.sheet, .overlay, [role="dialog"]') || belge;

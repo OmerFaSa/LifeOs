@@ -20,6 +20,14 @@
    kullaniciya "once bunu olc" der. `Number(x) || 0` yazmak burada butun
    merdiveni yalan yapardi. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.curriculum.hatalari-sen-isaretledin-sis':'Hataları sen işaretledin; sistem sesini dinlemedi.',
+  'esp.core.curriculum.temiz-esik-beyanindan-tureti':'Temiz eşik beyanından türetildi.',
+  'esp.core.curriculum.olculen':'Ölçülen ',
+  'esp.core.curriculum.bu-kademedeki-kapilardan-en':'Bu kademedeki kapılardan en az biri senin kendi işaretlemenle ',
+  'esp.core.curriculum.henuz-olculmedi-kayit-girdik':'Henüz ölçülmedi; kayıt girdikçe görünür.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.curriculum.bu-basamak-henuz-olculmedi':'Bu basamak henüz ölçülmedi.',
   'esp.core.curriculum.bu-kapi-senin-isaretlemeleri':'Bu kapı senin işaretlemelerine dayanıyor ve arkasında yalnızca ',
   'esp.core.curriculum.hedef':'Hedef: ',
@@ -303,9 +311,9 @@ ESP.Curriculum = (function(){
      ('unknown' döner). Eşiğin üstünde daha çok kayıt daha hızlı ilerleme
      GETİRMEZ; yalnızca ölçümün gürültüsünü düşürür. */
   const SELF_REPORTED = {
-    'diction.errorRate':'Hataları sen işaretledin; sistem sesini dinlemedi.',
+    'diction.errorRate':yz('esp.core.curriculum.hatalari-sen-isaretledin-sis'),
     'music.cleanBpm':'«Temiz» kararını sen verdin; sistem çalışını dinlemedi.',
-    'music.noPlateau':'Temiz eşik beyanından türetildi.',
+    'music.noPlateau':yz('esp.core.curriculum.temiz-esik-beyanindan-tureti'),
   };
 
   const ASGARI_BEYAN = 5;
@@ -356,8 +364,8 @@ ESP.Curriculum = (function(){
       weak:beyan, declaredWhy:beyan ? SELF_REPORTED[gate.metric] : null,
       label:gate.label,
       why:gecti ? null : (gate.max != null
-        ? 'Ölçülen ' + fmt(o.value) + ', üst sınır ' + fmt(gate.max) + '.'
-        : 'Ölçülen ' + fmt(o.value) + ', eşik ' + fmt(gate.min) + '.') };
+        ? yz('esp.core.curriculum.olculen') + fmt(o.value) + ', üst sınır ' + fmt(gate.max) + '.'
+        : yz('esp.core.curriculum.olculen') + fmt(o.value) + ', eşik ' + fmt(gate.min) + '.') };
   }
 
   function fmt(n){
@@ -447,7 +455,7 @@ ESP.Curriculum = (function(){
       disc:discId, rank:rank, level:seviye, cert:cert,
       declared:zayifBasamak,
       declaredWhy:zayifBasamak
-        ? 'Bu kademedeki kapılardan en az biri senin kendi işaretlemenle '
+        ? yz('esp.core.curriculum.bu-kademedeki-kapilardan-en')
           + 'geçildi (temiz tekrar ya da hata sayısı). Kademe durur ama '
           + '«ölçüldü» değil «beyan edildi» sayılır.'
         : null,
@@ -559,7 +567,7 @@ ESP.Curriculum = (function(){
          ölç» yeni kullanıcıya olmuş bir şey gibi okunuyordu. Şart HEDEF
          olarak söylenir; ölçülmediği ayrıca. */
       title:yz('esp.core.curriculum.hedef') + hedef.label,
-      why:hedef.why || (hedef.status === 'unknown' ? 'Henüz ölçülmedi; kayıt girdikçe görünür.' : 'Bu basamak henüz ölçülmedi.'),
+      why:hedef.why || (hedef.status === 'unknown' ? yz('esp.core.curriculum.henuz-olculmedi-kayit-girdik') : yz('esp.core.curriculum.bu-basamak-henuz-olculmedi')),
     };
   }
 

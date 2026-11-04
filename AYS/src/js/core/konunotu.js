@@ -17,6 +17,10 @@
         «Kartlara çevir» denince açılır. Aynı konudan aynı ön yüzlü kart ikinci
         kez açılmaz. Not bir ölçüm değildir; hiçbir sayıyı değiştirmez. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.konunotu.not-2':'Not «',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.konunotu.not':'Not: ',
 });
 
@@ -96,7 +100,7 @@ R.KonuNotu = (function(){
       ipucu:'«' + h.topic.name + '» konusunun notuna eklenir',
       async kaydet(){
         await ekle(h.subject.id, h.topic.id, satir);
-        return 'Not «' + h.topic.name + '» konusuna eklendi.';
+        return yz('ays.core.konunotu.not-2') + h.topic.name + '» konusuna eklendi.';
       },
     };
   }

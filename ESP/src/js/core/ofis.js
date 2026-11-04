@@ -26,23 +26,73 @@
    kimlik → konum → yöntem → ortak ilkeler → modül kuralları → üslup →
    hafıza → brifing. Boş bölüm hiç yazılmaz. Brifing EN SONDADIR: model
    veriyi, kuralları okuduktan sonra görür. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ofis.akademik-yol-sistemi':'Akademik Yol Sistemi',
+  'ortak.ofis.sonuc-garantisi-vermezsin-ke':'Sonuç garantisi vermezsin: «kesin kazanırsın» cümlesi kurulmaz.',
+  'ortak.ofis.yetenek-yargisi-kurmazsin-su':'Yetenek yargısı kurmazsın; süreç ve davranış hakkında konuşursun.',
+  'ortak.ofis.sertifika-ya-da-resmi-derece':'Sertifika ya da resmî derece vermezsin.',
+  'ortak.ofis.saglik-performans-i-zleyicis':'Sağlık Performans İzleyicisi',
+  'ortak.ofis.teshis-koymazsin':'Teşhis koymazsın.',
+  'ortak.ofis.i-lac-ya-da-doz-onermezsin':'İlaç ya da doz önermezsin; tedaviyi bırakmayı önermezsin.',
+  'ortak.ofis.kirmizi-bayrakta-yorum-yapma':'Kırmızı bayrakta yorum yapmadan hekime yönlendirirsin.',
+  'ortak.ofis.entelektuel-seviye-planlayic':'Entelektüel Seviye Planlayıcı',
+  'ortak.ofis.sertifika-ya-da-resmi-seviye':'Sertifika ya da resmî seviye vermezsin.',
+  'ortak.ofis.mutlak-yetenek-yargisi-kurma':'Mutlak yetenek yargısı kurmazsın («yeteneklisin / yeteneksizsin»).',
+  'ortak.ofis.sonuc-garantisi-vermezsin-es':'Sonuç garantisi vermezsin; estetik otorite iddia etmezsin.',
+  'ortak.ofis.kullanicinin-durumu-hakkinda':'Kullanıcının durumu hakkındaki sayıyı ve kararı kural motoru üretir; sen onu cümleye ',
+  'ortak.ofis.her-sayinin-bir-etiketi-vard':'Her sayının bir etiketi vardır: ölçüldü, tahmin, hesaplandı, veri yok. «Veri yok» ',
+  'ortak.ofis.bir-seyin-degismesi-gerekiyo':'Bir şeyin değişmesi gerekiyorsa (hedef, plan, açık bölümler) doğrudan değiştirmezsin: ',
+  'ortak.ofis.anlamadigin-bir-seyi-anlamis':'Anlamadığın bir şeyi anlamış gibi yapmazsın; belirsizse tek bir netleştirme sorusu sorarsın.',
+  'ortak.ofis.kullanicinin-hafizasina-yaza':'Kullanıcının hafızasına yazamazsın; «bunu hatırlayacağım» demezsin. Kullanıcı isterse ',
+  'ortak.ofis.karari-kullanici-verir-gerek':'Kararı kullanıcı verir. Gerekçeyi ve seçeneği açık söylersin; baskı kurmazsın, suçlamazsın, ',
+  'ortak.ofis.kendi-adinla-ve-rolunle-konu':'Kendi adınla ve rolünle konuşursun; kendini «yapay zekâ», «dil modeli» ya da «asistan» diye ',
+  'ortak.ofis.sen':'Sen ',
+  'ortak.ofis.senin-ustunde-king-var-hkm-d':'Senin üstünde King var: HKM’deki baş patron. King üç modülü (AYS, SPİ, ESP) ',
+  'ortak.ofis.king-in-ya-da-oteki-moduller':'King’in ya da öteki modüllerin notu brifingde gelirse onu hesaba katarsın. ',
+  'ortak.ofis.king-kapaliysa-karar-yine-se':'King kapalıysa karar yine sendedir; onun yokluğu ofisi durdurmaz.',
+  'ortak.ofis.profil-sinav-ya-da-uzman':'Profil, sınav ya da uzman kadrosu değişse de sen değişmezsin: uzmanlar gelir ',
+  'ortak.ofis.patron-un-ustunde-king-var-h':'Patron’un üstünde King var (HKM’deki baş patron). İki kat denetim altında ',
+  'ortak.ofis.kendi-masanin-disina-cikmazs':'Kendi masanın dışına çıkmazsın; dışındaki soruyu ilgili uzmana ya da Patron’a ',
+  'ortak.ofis.kullanicinin-ustunde-kimse-y':'Kullanıcının üstünde kimse yoktur: orta ve büyük değişiklikler onun onayı ',
+  'ortak.ofis.ortak-i-lkeler-tartisilmaz':'ORTAK İLKELER (tartışılmaz)',
+  'ortak.ofis.cumlelerini':'Cümlelerini ',
+  'ortak.ofis.hangi-modelle-calistigin-sor':'Hangi modelle çalıştığın sorulursa bunu dürüstçe söylersin.',
+  'ortak.ofis.kisa-bir-selamlasma-ya-da':'Kısa bir selamlaşma ya da sohbet. Rapor okuma, sayı söyleme. Adınla, ',
+  'ortak.ofis.bri-fi-ng-kural-motorundan-t':'BRİFİNG (kural motorundan; tek veri kaynağın)',
+  'ortak.ofis.bearer':'Bearer ',
+  'ortak.ofis.dogru':'Doğru: ',
+  'ortak.ofis.maddeler-kalite-kontrolunden':'Maddeler kalite kontrolünden geçince burada teklif olarak görünür; ',
+  'ortak.ofis.arastirma-bitince-hkm-ofis-t':'Araştırma bitince HKM › Ofis’te okursun. Kaynağa erişim henüz olmadığı ',
+  'ortak.ofis.hkm-bagli-degil':'HKM bağlı değil.',
+  'ortak.ofis.bu-ortamda-ag-istegi-yok':'Bu ortamda ağ isteği yok.',
+  'ortak.ofis.hkm-cevabi-okunamadi':'HKM cevabı okunamadı.',
+  'ortak.ofis.hkm-ye-ulasilamadi':'HKM’ye ulaşılamadı.',
+  'ortak.ofis.bunu-hkm-deki-bam-hazirlar-a':'Bunu HKM’deki BAM hazırlar ama HKM bağlı değil. ',
+  'ortak.ofis.rehber-hkm-den-baglaninca-ye':'Rehber › HKM’den bağlanınca yeniden iste.',
+  'ortak.ofis.materyal-hkm-ofis-te-hazir':'Materyal HKM › Ofis’te hazır olur; bu sistem onu henüz kart olarak alamıyor.',
+  'ortak.ofis.bam-a-ilettim-is':'BAM’a ilettim (iş #',
+  'ortak.ofis.bu-is-bam-da-zaten-acik':'Bu iş BAM’da zaten açık (#',
+  'ortak.ofis.bam-isi-acamadi':'BAM işi açamadı.',
+  'ortak.ofis.hkm-ye-ulasilamadi-is-acilma':'HKM’ye ulaşılamadı; iş açılmadı. HKM açıkken yeniden iste.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
 LIFEOS.Ofis = (function(){
   const MODULLER = {
-    ays:{ ad:'AYS', tam:'Akademik Yol Sistemi', alan:'sınav hazırlığı',
-      sinir:['Sonuç garantisi vermezsin: «kesin kazanırsın» cümlesi kurulmaz.',
-        'Yetenek yargısı kurmazsın; süreç ve davranış hakkında konuşursun.',
-        'Sertifika ya da resmî derece vermezsin.'] },
-    spi:{ ad:'SPİ', tam:'Sağlık Performans İzleyicisi', alan:'sağlık ve performans',
-      sinir:['Teşhis koymazsın.',
-        'İlaç ya da doz önermezsin; tedaviyi bırakmayı önermezsin.',
-        'Kırmızı bayrakta yorum yapmadan hekime yönlendirirsin.'] },
-    esp:{ ad:'ESP', tam:'Entelektüel Seviye Planlayıcı', alan:'entelektüel gelişim',
-      sinir:['Sertifika ya da resmî seviye vermezsin.',
-        'Mutlak yetenek yargısı kurmazsın («yeteneklisin / yeteneksizsin»).',
-        'Sonuç garantisi vermezsin; estetik otorite iddia etmezsin.'] },
+    ays:{ ad:'AYS', tam:yz('ortak.ofis.akademik-yol-sistemi'), alan:'sınav hazırlığı',
+      sinir:[yz('ortak.ofis.sonuc-garantisi-vermezsin-ke'),
+        yz('ortak.ofis.yetenek-yargisi-kurmazsin-su'),
+        yz('ortak.ofis.sertifika-ya-da-resmi-derece')] },
+    spi:{ ad:'SPİ', tam:yz('ortak.ofis.saglik-performans-i-zleyicis'), alan:'sağlık ve performans',
+      sinir:[yz('ortak.ofis.teshis-koymazsin'),
+        yz('ortak.ofis.i-lac-ya-da-doz-onermezsin'),
+        yz('ortak.ofis.kirmizi-bayrakta-yorum-yapma')] },
+    esp:{ ad:'ESP', tam:yz('ortak.ofis.entelektuel-seviye-planlayic'), alan:'entelektüel gelişim',
+      sinir:[yz('ortak.ofis.sertifika-ya-da-resmi-seviye'),
+        yz('ortak.ofis.mutlak-yetenek-yargisi-kurma'),
+        yz('ortak.ofis.sonuc-garantisi-vermezsin-es')] },
   };
 
   const KATLAR = {
@@ -54,20 +104,20 @@ LIFEOS.Ofis = (function(){
   /* Üç modülün her ajanına aynı. Modülün kendi kuralları bunların
      ÜSTÜNE eklenir, yerine geçmez. */
   const ILKELER = [
-    'Kullanıcının durumu hakkındaki sayıyı ve kararı kural motoru üretir; sen onu cümleye '
+    yz('ortak.ofis.kullanicinin-durumu-hakkinda')
       + 'çevirirsin. Brifingde olmayan bir durum sayısı yazmazsın, verilen sayıyı yeniden '
       + 'hesaplamazsın. Konu anlatırken verdiğin örnekler bunun dışındadır.',
-    'Her sayının bir etiketi vardır: ölçüldü, tahmin, hesaplandı, veri yok. «Veri yok» '
+    yz('ortak.ofis.her-sayinin-bir-etiketi-vard')
       + 'sıfır değildir; ölçülmediğini açıkça söylersin, tahmini ölçüm gibi sunmazsın.',
-    'Bir şeyin değişmesi gerekiyorsa (hedef, plan, açık bölümler) doğrudan değiştirmezsin: '
+    yz('ortak.ofis.bir-seyin-degismesi-gerekiyo')
       + 'kapalı bir katalogdan öneri yaparsın, kod doğrular, kullanıcı onaylar. Ölçülmüş ya da '
       + 'hesaplanmış bir sayıyı hiçbir koşulda değiştiremezsin.',
-    'Anlamadığın bir şeyi anlamış gibi yapmazsın; belirsizse tek bir netleştirme sorusu sorarsın.',
-    'Kullanıcının hafızasına yazamazsın; «bunu hatırlayacağım» demezsin. Kullanıcı isterse '
+    yz('ortak.ofis.anlamadigin-bir-seyi-anlamis'),
+    yz('ortak.ofis.kullanicinin-hafizasina-yaza')
       + '«hatırla: …» diye kendisi yazar.',
-    'Kararı kullanıcı verir. Gerekçeyi ve seçeneği açık söylersin; baskı kurmazsın, suçlamazsın, '
+    yz('ortak.ofis.karari-kullanici-verir-gerek')
       + 'kötü haberi iyi haberin arkasına saklamazsın.',
-    'Kendi adınla ve rolünle konuşursun; kendini «yapay zekâ», «dil modeli» ya da «asistan» diye '
+    yz('ortak.ofis.kendi-adinla-ve-rolunle-konu')
       + 'tanıtmaz, duygun olup olmadığını tartışmazsın. Kullanıcıya «sen» diye hitap edersin; '
       + '«Kullanıcı» demezsin.',
   ];
@@ -119,25 +169,25 @@ LIFEOS.Ofis = (function(){
     const o = opts || {};
     const out = [];
     if(katOf(ajan) === 'patron'){
-      out.push('Sen ' + m.ad + ' (' + m.tam + ') ofisinin Patronusun'
+      out.push(yz('ortak.ofis.sen') + m.ad + ' (' + m.tam + ') ofisinin Patronusun'
         + (o.uzmanSayisi ? ': ' + o.uzmanSayisi + ' uzmanın raporunu okur, çelişkiyi çözer '
           + 've tek karar çıkarırsın.' : '.'));
-      out.push('Senin üstünde King var: HKM’deki baş patron. King üç modülü (AYS, SPİ, ESP) '
+      out.push(yz('ortak.ofis.senin-ustunde-king-var-hkm-d')
         + 'birlikte görür ve aralarındaki bağı kurar; hiçbir modüle yazmaz, teklif bırakır. '
-        + 'King’in ya da öteki modüllerin notu brifingde gelirse onu hesaba katarsın. '
-        + 'King kapalıysa karar yine sendedir; onun yokluğu ofisi durdurmaz.');
-      out.push('Profil, sınav ya da uzman kadrosu değişse de sen değişmezsin: uzmanlar gelir '
+        + yz('ortak.ofis.king-in-ya-da-oteki-moduller')
+        + yz('ortak.ofis.king-kapaliysa-karar-yine-se'));
+      out.push(yz('ortak.ofis.profil-sinav-ya-da-uzman')
         + 'gider, Patron kalır. Ofisin sürekliliği sensin.');
     }else{
-      out.push('Sen ' + m.ad + ' ofisinde ' + (ajan.role || 'uzman') + ' masasındasın ('
+      out.push(yz('ortak.ofis.sen') + m.ad + ' ofisinde ' + (ajan.role || 'uzman') + ' masasındasın ('
         + ajan.name + '). Raporun Patron’a gider; Patron uzmanların raporlarını birleştirip '
         + 'tek karar çıkarır.');
-      out.push('Patron’un üstünde King var (HKM’deki baş patron). İki kat denetim altında '
+      out.push(yz('ortak.ofis.patron-un-ustunde-king-var-h')
         + 'konuşursun: söylediğin, Patron’un ve King’in okuyacağı bir kayıttır.');
-      out.push('Kendi masanın dışına çıkmazsın; dışındaki soruyu ilgili uzmana ya da Patron’a '
+      out.push(yz('ortak.ofis.kendi-masanin-disina-cikmazs')
         + 'yönlendirirsin. Başka bir uzmanla çelişirsen bunu saklamaz, Patron’a bırakırsın.');
     }
-    out.push('Kullanıcının üstünde kimse yoktur: orta ve büyük değişiklikler onun onayı '
+    out.push(yz('ortak.ofis.kullanicinin-ustunde-kimse-y')
       + 'olmadan uygulanmaz.');
     out.push(m.ad + ' sınırı: ' + m.sinir.join(' '));
     return out;
@@ -165,18 +215,18 @@ LIFEOS.Ofis = (function(){
     /* Selamda yontem ve kurallar gitmez: kucuk model onlari kopyaliyordu
        («son 30 günlük üretimin…»). Ortak ilkeler kalir. */
     bolum('NASIL ÇALIŞIRSIN', o.selam ? '' : liste(o.yontem, true));
-    bolum('ORTAK İLKELER (tartışılmaz)', liste(ILKELER, true));
+    bolum(yz('ortak.ofis.ortak-i-lkeler-tartisilmaz'), liste(ILKELER, true));
     bolum(o.kurallarAdi || 'KURALLAR', o.selam ? '' : liste(o.kurallar, true));
     bolum('ÜSLUP', o.uslup);
-    if(o.model) bolum('ARKADAKİ MODEL', 'Cümlelerini ' + o.model + ' dil modeli kuruyor. '
-      + 'Hangi modelle çalıştığın sorulursa bunu dürüstçe söylersin.');
+    if(o.model) bolum('ARKADAKİ MODEL', yz('ortak.ofis.cumlelerini') + o.model + ' dil modeli kuruyor. '
+      + yz('ortak.ofis.hangi-modelle-calistigin-sor'));
     if(o.hafiza && String(o.hafiza).trim()) b.push(String(o.hafiza).trim());
     if(o.selam){
-      bolum('BU MESAJ', 'Kısa bir selamlaşma ya da sohbet. Rapor okuma, sayı söyleme. Adınla, '
+      bolum('BU MESAJ', yz('ortak.ofis.kisa-bir-selamlasma-ya-da')
         + 'sıcak ve kısa karşılık ver (en fazla iki cümle); istersen ne konuşmak istediğini sor.');
       return b.join('\n\n');
     }
-    bolum('BRİFİNG (kural motorundan; tek veri kaynağın)', o.brifing);
+    bolum(yz('ortak.ofis.bri-fi-ng-kural-motorundan-t'), o.brifing);
     return b.join('\n\n');
   }
 
@@ -229,7 +279,7 @@ LIFEOS.Ofis = (function(){
         try{
           const res = await f(String(a.url).replace(/\/$/, '') + '/api/kanal/' + b.MODULE
             + '?date=' + encodeURIComponent(ortam.bugun()), {
-            headers:{ 'Authorization':'Bearer ' + a.token },
+            headers:{ 'Authorization':yz('ortak.ofis.bearer') + a.token },
             signal:ctrl ? ctrl.signal : undefined,
           });
           if(res.status !== 200) return null;
@@ -308,7 +358,7 @@ LIFEOS.Ofis = (function(){
       const i = typeof m.dogru === 'string' && m.dogru.length === 1 ? HARF.indexOf(m.dogru) : -1;
       if(i < 0) return null;
       return { front:soru + '\n\n' + sec.map((x, k) => HARF[k] + ') ' + x).join('\n'),
-        back:'Doğru: ' + HARF[i] + ') ' + sec[i] + '\n\n' + cozum };
+        back:yz('ortak.ofis.dogru') + HARF[i] + ') ' + sec[i] + '\n\n' + cozum };
     }
     if(tur === 'alistirma'){
       const y = t(m.yonerge, 300), md = t(m.madde, 500), c = t(m.cevap, 200);
@@ -322,9 +372,9 @@ LIFEOS.Ofis = (function(){
   }
 
   const BAM_SONRASI = {
-    uretim:'Maddeler kalite kontrolünden geçince burada teklif olarak görünür; '
+    uretim:yz('ortak.ofis.maddeler-kalite-kontrolunden')
       + 'onaylarsan kart olarak eklenir.',
-    arastirma:'Araştırma bitince HKM › Ofis’te okursun. Kaynağa erişim henüz olmadığı '
+    arastirma:yz('ortak.ofis.arastirma-bitince-hkm-ofis-t')
       + 'için «doğrulanmadı» diye işaretli olur.',
   };
   const OFIS_ADI = { kayit:'Kayıt', arastirma:'Araştırma', planlama:'Planlama', uretim:'Üretim' };
@@ -347,23 +397,23 @@ LIFEOS.Ofis = (function(){
     }
     async function istek(yol, govde, sureMs){
       const c = baglanti();
-      if(!c) return { ok:false, reason:'hkm-yok', note:'HKM bağlı değil.' };
+      if(!c) return { ok:false, reason:'hkm-yok', note:yz('ortak.ofis.hkm-bagli-degil') };
       const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
-      if(!f) return { ok:false, reason:'hkm-yok', note:'Bu ortamda ağ isteği yok.' };
+      if(!f) return { ok:false, reason:'hkm-yok', note:yz('ortak.ofis.bu-ortamda-ag-istegi-yok') };
       const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
       const zaman = ctrl ? setTimeout(() => ctrl.abort(), sureMs) : null;
       try{
-        const res = await f(c.url + yol, Object.assign({ headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + c.token },
+        const res = await f(c.url + yol, Object.assign({ headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.ofis.bearer') + c.token },
           signal:ctrl ? ctrl.signal : undefined }, govde ? { method:'POST', body:JSON.stringify(govde) } : {}));
         const g = await res.json();
-        return g && typeof g === 'object' ? g : { ok:false, reason:'bozuk', note:'HKM cevabı okunamadı.' };
+        return g && typeof g === 'object' ? g : { ok:false, reason:'bozuk', note:yz('ortak.ofis.hkm-cevabi-okunamadi') };
       }catch(e){
-        return { ok:false, reason:'hkm-ulasilamadi', note:'HKM’ye ulaşılamadı.' };
+        return { ok:false, reason:'hkm-ulasilamadi', note:yz('ortak.ofis.hkm-ye-ulasilamadi') };
       }finally{ if(zaman) clearTimeout(zaman); }
     }
     const modul = () => { const c = baglanti(); return c && c.b.MODULE ? String(c.b.MODULE).toLowerCase() : ''; };
     async function tazele(){
-      if(!baglanti()){ son = { ok:false, reason:'hkm-yok', note:'HKM bağlı değil.', at:Date.now() }; return son; }
+      if(!baglanti()){ son = { ok:false, reason:'hkm-yok', note:yz('ortak.ofis.hkm-bagli-degil'), at:Date.now() }; return son; }
       const r = await istek('/api/ofis/durum?modul=' + encodeURIComponent(modul()), null, 4000);
       son = Object.assign({}, r, { at:Date.now() });
       const g = await istek('/api/ofis/durum?modul=' + encodeURIComponent(modul()) + '&yetenek=gorsel', null, 4000);
@@ -402,8 +452,8 @@ LIFEOS.Ofis = (function(){
       const b = ortam.hkm ? ortam.hkm() : null;
       const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
       if(!b || !a.enabled || !a.token || !b.urlOk(a.url)){
-        return { ok:false, metin:'Bunu HKM’deki BAM hazırlar ama HKM bağlı değil. '
-          + 'Rehber › HKM’den bağlanınca yeniden iste.' };
+        return { ok:false, metin:yz('ortak.ofis.bunu-hkm-deki-bam-hazirlar-a')
+          + yz('ortak.ofis.rehber-hkm-den-baglaninca-ye') };
       }
       const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
       try{
@@ -413,7 +463,7 @@ LIFEOS.Ofis = (function(){
         try{
           res = await f(String(a.url).replace(/\/$/, '') + '/api/bam/is', {
             method:'POST',
-            headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + a.token },
+            headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.ofis.bearer') + a.token },
             body:JSON.stringify({ talep:String(talep || '').slice(0, 2000),
               hedef_modul:b.MODULE, kaynak:b.MODULE }),
             signal:ctrl ? ctrl.signal : undefined,
@@ -428,16 +478,16 @@ LIFEOS.Ofis = (function(){
              modul icin «burada gorunur» demek yalan olurdu. ESP seti yalniz
              dil ya da tarih destesine alir. */
           const sonra = istek.tur === 'uretim' && ['ays', 'esp'].indexOf(b.MODULE) < 0
-            ? 'Materyal HKM › Ofis’te hazır olur; bu sistem onu henüz kart olarak alamıyor.'
+            ? yz('ortak.ofis.materyal-hkm-ofis-te-hazir')
             : istek.tur === 'uretim' && b.MODULE === 'esp'
               ? BAM_SONRASI.uretim + ' Kartlar setin konusuna göre dil ya da tarih destesine girer.'
               : BAM_SONRASI[istek.tur];
-          return { ok:true, id:g.id, metin:(g.yeni ? 'BAM’a ilettim (iş #' + g.id + ': ' + yol + '). '
-            : 'Bu iş BAM’da zaten açık (#' + g.id + '). ') + sonra };
+          return { ok:true, id:g.id, metin:(g.yeni ? yz('ortak.ofis.bam-a-ilettim-is') + g.id + ': ' + yol + '). '
+            : yz('ortak.ofis.bu-is-bam-da-zaten-acik') + g.id + '). ') + sonra };
         }
-        return { ok:false, metin:(g && (g.soru || g.note)) || 'BAM işi açamadı.' };
+        return { ok:false, metin:(g && (g.soru || g.note)) || yz('ortak.ofis.bam-isi-acamadi') };
       }catch(e){
-        return { ok:false, metin:'HKM’ye ulaşılamadı; iş açılmadı. HKM açıkken yeniden iste.' };
+        return { ok:false, metin:yz('ortak.ofis.hkm-ye-ulasilamadi-is-acilma') };
       }
     }
     return { ilet };

@@ -11,6 +11,67 @@
    2. Yama yalnız izinli alanı taşır; aralık dışı değer HKM'ye hiç gitmez.
    3. Ölçülmemiş aylık tutar «veri yok»tur, sıfır değil.
    Kabul testi: tools/merkezayar_kabul_test.py */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.merkezayar.anthropic-claude':'Anthropic (Claude)',
+  'ortak.merkezayar.google-gemini':'Google (Gemini)',
+  'ortak.merkezayar.kendiliginden-haber-ver':'Kendiliğinden haber ver',
+  'ortak.merkezayar.kural-motoru-bir-sey-gorunce':'Kural motoru bir şey görünce King söyler',
+  'ortak.merkezayar.dusuk-riskli-isi-sormadan-ya':'Düşük riskli işi sormadan yap',
+  'ortak.merkezayar.orta-ve-ustu-her-zaman':'Orta ve üstü her zaman sorar',
+  'ortak.merkezayar.aktif-kip':'Aktif kip',
+  'ortak.merkezayar.merkez-kendi-turunu-atsin':'Merkez kendi turunu atsın',
+  'ortak.merkezayar.belli-aralikla-verileri-gozd':'Belli aralıkla verileri gözden geçirir',
+  'ortak.merkezayar.tur-araligi':'Tur aralığı',
+  'ortak.merkezayar.yapay-zeka':'Yapay zekâ',
+  'ortak.merkezayar.saglayici-anahtarlari':'Sağlayıcı anahtarları',
+  'ortak.merkezayar.anahtar-okunmaz-yalniz-kurul':'Anahtar okunmaz; yalnız kurulu olup olmadığı görünür. Yeni anahtar eskisinin yerine geçer.',
+  'ortak.merkezayar.kur-1-usd-kac-tl':'Kur (1 USD kaç TL)',
+  'ortak.merkezayar.tl-tavan-icin-elle-girilir':'TL tavan için; elle girilir',
+  'ortak.merkezayar.durdurma-esigi':'Durdurma eşiği',
+  'ortak.merkezayar.yerel-model-ve-ses':'Yerel model ve ses',
+  'ortak.merkezayar.ollama-bulununca-baglan':'Ollama bulununca bağlan',
+  'ortak.merkezayar.yerel-model-hazir-beklesin':'Yerel model hazır beklesin',
+  'ortak.merkezayar.bellekte-sicak-tutar-8-gb-ta':'Bellekte sıcak tutar; 8 GB’ta dikkat',
+  'ortak.merkezayar.gemini-sesi':'Gemini sesi',
+  'ortak.merkezayar.web-aramasi':'Web araması',
+  'ortak.merkezayar.king-web-de-arayabilsin':'King web’de arayabilsin',
+  'ortak.merkezayar.gunluk-arama-siniri':'Günlük arama sınırı',
+  'ortak.merkezayar.telefon-numarasi-kimligi':'Telefon numarası kimliği',
+  'ortak.merkezayar.erisim-jetonu':'Erişim jetonu',
+  'ortak.merkezayar.uygulama-sirri':'Uygulama sırrı',
+  'ortak.merkezayar.dogrulama-jetonu':'Doğrulama jetonu',
+  'ortak.merkezayar.i-zinli-numaralar':'İzinli numaralar',
+  'ortak.merkezayar.bot-jetonu':'Bot jetonu',
+  'ortak.merkezayar.webhook-sirri':'Webhook sırrı',
+  'ortak.merkezayar.yoklama-webhook-yerine':'Yoklama (webhook yerine)',
+  'ortak.merkezayar.i-zinli-kullanicilar':'İzinli kullanıcılar',
+  'ortak.merkezayar.zamanlanmis-mesajlar':'Zamanlanmış mesajlar',
+  'ortak.merkezayar.acik-olan':'Açık olan',
+  'ortak.merkezayar.gun-ici-yoklama':'Gün içi yoklama',
+  'ortak.merkezayar.haftalik-rapor-gunu':'Haftalık rapor günü',
+  'ortak.merkezayar.haftalik-rapor-saati':'Haftalık rapor saati',
+  'ortak.merkezayar.aylik-rapor':'Aylık rapor',
+  'ortak.merkezayar.gece-bakimi':'Gece bakımı',
+  'ortak.merkezayar.bakim-saati':'Bakım saati',
+  'ortak.merkezayar.kayit-saklama':'Kayıt saklama',
+  'ortak.merkezayar.sessiz-saatler-ve-sinirlar':'Sessiz saatler ve sınırlar',
+  'ortak.merkezayar.sessiz-baslangic':'Sessiz başlangıç',
+  'ortak.merkezayar.sessiz-bitis':'Sessiz bitiş',
+  'ortak.merkezayar.gunde-en-cok':'Günde en çok',
+  'ortak.merkezayar.onerinin-omru':'Önerinin ömrü',
+  'ortak.merkezayar.aksam-yarin-sunlar-var':'Akşam «yarın şunlar var»',
+  'ortak.merkezayar.bu-ayar-buradan-degistirilme':'Bu ayar buradan değiştirilmez.',
+  'ortak.merkezayar.bilinmeyen-model-paketi':'Bilinmeyen model paketi.',
+  'ortak.merkezayar.para-birimi-usd-ya-da':'Para birimi USD ya da TL olmalı.',
+  'ortak.merkezayar.aylik-tavan':'Aylık tavan ',
+  'ortak.merkezayar.bilinmeyen-kanal':'Bilinmeyen kanal.',
+  'ortak.merkezayar.kanal-acik-ya-da-kapali':'Kanal açık ya da kapalı olmalı.',
+  'ortak.merkezayar.bilinmeyen-esik':'Bilinmeyen eşik.',
+  'ortak.merkezayar.esik':'Eşik ',
+  'ortak.merkezayar.bearer':'Bearer ',
+  'ortak.merkezayar.merkez-degeri-kabul-etmedi':'Merkez değeri kabul etmedi.',
+});
+
 window.LIFEOS = window.LIFEOS || {};
 
 LIFEOS.MerkezAyar = (function(){
@@ -46,58 +107,58 @@ LIFEOS.MerkezAyar = (function(){
      Alan: [yol, ad, tür, not, ek] — tür: bool, sayi, metin, saat, secim, liste, sir. */
   const GUNLER = [['', 'Kapalı'], ['pazartesi', 'Pazartesi'], ['sali', 'Salı'], ['carsamba', 'Çarşamba'], ['persembe', 'Perşembe'],
     ['cuma', 'Cuma'], ['cumartesi', 'Cumartesi'], ['pazar', 'Pazar']];
-  const SAGLAYICILAR = [['openrouter', 'OpenRouter'], ['anthropic', 'Anthropic (Claude)'], ['google', 'Google (Gemini)'], ['openai', 'OpenAI']];
+  const SAGLAYICILAR = [['openrouter', 'OpenRouter'], ['anthropic', yz('ortak.merkezayar.anthropic-claude')], ['google', yz('ortak.merkezayar.google-gemini')], ['openai', 'OpenAI']];
   const SEKMELER = [
     { id:'genel', ad:'Genel', gruplar:[
       { ad:'King', alanlar:[
-        ['king.kendiliginden', 'Kendiliğinden haber ver', 'bool', 'Kural motoru bir şey görünce King söyler'],
-        ['king.sormadan_dusuk', 'Düşük riskli işi sormadan yap', 'bool', 'Orta ve üstü her zaman sorar'] ] },
-      { ad:'Aktif kip', alanlar:[
-        ['aktif.enabled', 'Merkez kendi turunu atsın', 'bool', 'Belli aralıkla verileri gözden geçirir'],
-        ['aktif.aralik_dk', 'Tur aralığı', 'sayi', 'dakika', { min:5, max:1440 }] ] } ] },
-    { id:'yz', ad:'Yapay zekâ', gruplar:[
-      { ad:'Sağlayıcı anahtarları', not:'Anahtar okunmaz; yalnız kurulu olup olmadığı görünür. Yeni anahtar eskisinin yerine geçer.',
+        ['king.kendiliginden', yz('ortak.merkezayar.kendiliginden-haber-ver'), 'bool', yz('ortak.merkezayar.kural-motoru-bir-sey-gorunce')],
+        ['king.sormadan_dusuk', yz('ortak.merkezayar.dusuk-riskli-isi-sormadan-ya'), 'bool', yz('ortak.merkezayar.orta-ve-ustu-her-zaman')] ] },
+      { ad:yz('ortak.merkezayar.aktif-kip'), alanlar:[
+        ['aktif.enabled', yz('ortak.merkezayar.merkez-kendi-turunu-atsin'), 'bool', yz('ortak.merkezayar.belli-aralikla-verileri-gozd')],
+        ['aktif.aralik_dk', yz('ortak.merkezayar.tur-araligi'), 'sayi', 'dakika', { min:5, max:1440 }] ] } ] },
+    { id:'yz', ad:yz('ortak.merkezayar.yapay-zeka'), gruplar:[
+      { ad:yz('ortak.merkezayar.saglayici-anahtarlari'), not:yz('ortak.merkezayar.anahtar-okunmaz-yalniz-kurul'),
         alanlar:SAGLAYICILAR.map(([id, ad]) => ['models.keys.' + id, ad, 'sir']) },
       { ad:'Bütçe', alanlar:[
-        ['budget.usd_try', 'Kur (1 USD kaç TL)', 'sayi', 'TL tavan için; elle girilir', { min:0, max:1000, adim:0.01 }],
-        ['budget.stop_at_pct', 'Durdurma eşiği', 'sayi', 'tavanın yüzde kaçında ücretli çağrı durur', { min:10, max:100 }] ] },
-      { ad:'Yerel model ve ses', alanlar:[
-        ['ollama.kendiligi', 'Ollama bulununca bağlan', 'bool'],
-        ['ollama.sicak', 'Yerel model hazır beklesin', 'bool', 'Bellekte sıcak tutar; 8 GB’ta dikkat'],
-        ['ses.gemini_ses', 'Gemini sesi', 'metin', 'ör. Kore'] ] },
-      { ad:'Web araması', alanlar:[
-        ['web.acik', 'King web’de arayabilsin', 'bool'],
-        ['web.gunluk_sinir', 'Günlük arama sınırı', 'sayi', '', { min:0, max:10000 }] ] } ] },
+        ['budget.usd_try', yz('ortak.merkezayar.kur-1-usd-kac-tl'), 'sayi', yz('ortak.merkezayar.tl-tavan-icin-elle-girilir'), { min:0, max:1000, adim:0.01 }],
+        ['budget.stop_at_pct', yz('ortak.merkezayar.durdurma-esigi'), 'sayi', 'tavanın yüzde kaçında ücretli çağrı durur', { min:10, max:100 }] ] },
+      { ad:yz('ortak.merkezayar.yerel-model-ve-ses'), alanlar:[
+        ['ollama.kendiligi', yz('ortak.merkezayar.ollama-bulununca-baglan'), 'bool'],
+        ['ollama.sicak', yz('ortak.merkezayar.yerel-model-hazir-beklesin'), 'bool', yz('ortak.merkezayar.bellekte-sicak-tutar-8-gb-ta')],
+        ['ses.gemini_ses', yz('ortak.merkezayar.gemini-sesi'), 'metin', 'ör. Kore'] ] },
+      { ad:yz('ortak.merkezayar.web-aramasi'), alanlar:[
+        ['web.acik', yz('ortak.merkezayar.king-web-de-arayabilsin'), 'bool'],
+        ['web.gunluk_sinir', yz('ortak.merkezayar.gunluk-arama-siniri'), 'sayi', '', { min:0, max:10000 }] ] } ] },
     { id:'kanallar', ad:'Kanallar', gruplar:[
       { ad:'WhatsApp', alanlar:[
         ['channels.whatsapp.enabled', 'Açık', 'bool'],
-        ['channels.whatsapp.phone_number_id', 'Telefon numarası kimliği', 'metin'],
-        ['channels.whatsapp.token', 'Erişim jetonu', 'sir'],
-        ['channels.whatsapp.app_secret', 'Uygulama sırrı', 'sir'],
-        ['channels.whatsapp.verify_token', 'Doğrulama jetonu', 'sir'],
-        ['channels.whatsapp.allow_from', 'İzinli numaralar', 'liste', 'virgülle ayır'] ] },
+        ['channels.whatsapp.phone_number_id', yz('ortak.merkezayar.telefon-numarasi-kimligi'), 'metin'],
+        ['channels.whatsapp.token', yz('ortak.merkezayar.erisim-jetonu'), 'sir'],
+        ['channels.whatsapp.app_secret', yz('ortak.merkezayar.uygulama-sirri'), 'sir'],
+        ['channels.whatsapp.verify_token', yz('ortak.merkezayar.dogrulama-jetonu'), 'sir'],
+        ['channels.whatsapp.allow_from', yz('ortak.merkezayar.i-zinli-numaralar'), 'liste', 'virgülle ayır'] ] },
       { ad:'Telegram', alanlar:[
         ['channels.telegram.enabled', 'Açık', 'bool'],
-        ['channels.telegram.bot_token', 'Bot jetonu', 'sir'],
-        ['channels.telegram.webhook_secret', 'Webhook sırrı', 'sir'],
-        ['channels.telegram.polling', 'Yoklama (webhook yerine)', 'bool'],
-        ['channels.telegram.allow_from', 'İzinli kullanıcılar', 'liste', 'virgülle ayır'] ] } ] },
+        ['channels.telegram.bot_token', yz('ortak.merkezayar.bot-jetonu'), 'sir'],
+        ['channels.telegram.webhook_secret', yz('ortak.merkezayar.webhook-sirri'), 'sir'],
+        ['channels.telegram.polling', yz('ortak.merkezayar.yoklama-webhook-yerine'), 'bool'],
+        ['channels.telegram.allow_from', yz('ortak.merkezayar.i-zinli-kullanicilar'), 'liste', 'virgülle ayır'] ] } ] },
     { id:'zaman', ad:'Zamanlama', gruplar:[
       { ad:'Mesajlar', alanlar:[
-        ['schedule.enabled', 'Zamanlanmış mesajlar', 'bool'],
-        ['schedule.channel', 'Kanal', 'secim', '', { secenek:[['', 'Açık olan'], ['whatsapp', 'WhatsApp'], ['telegram', 'Telegram']] }],
-        ['schedule.morning', 'Sabah', 'saat'], ['schedule.evening', 'Akşam', 'saat'], ['schedule.checkin', 'Gün içi yoklama', 'saat'],
-        ['schedule.weekly_day', 'Haftalık rapor günü', 'secim', '', { secenek:GUNLER }], ['schedule.weekly_time', 'Haftalık rapor saati', 'saat'],
-        ['schedule.monthly', 'Aylık rapor', 'bool'], ['schedule.tolerance_minutes', 'Hoşgörü', 'sayi', 'dakika', { min:0, max:720 }] ] },
+        ['schedule.enabled', yz('ortak.merkezayar.zamanlanmis-mesajlar'), 'bool'],
+        ['schedule.channel', 'Kanal', 'secim', '', { secenek:[['', yz('ortak.merkezayar.acik-olan')], ['whatsapp', 'WhatsApp'], ['telegram', 'Telegram']] }],
+        ['schedule.morning', 'Sabah', 'saat'], ['schedule.evening', 'Akşam', 'saat'], ['schedule.checkin', yz('ortak.merkezayar.gun-ici-yoklama'), 'saat'],
+        ['schedule.weekly_day', yz('ortak.merkezayar.haftalik-rapor-gunu'), 'secim', '', { secenek:GUNLER }], ['schedule.weekly_time', yz('ortak.merkezayar.haftalik-rapor-saati'), 'saat'],
+        ['schedule.monthly', yz('ortak.merkezayar.aylik-rapor'), 'bool'], ['schedule.tolerance_minutes', 'Hoşgörü', 'sayi', 'dakika', { min:0, max:720 }] ] },
       { ad:'Bakım', alanlar:[
-        ['schedule.maintenance', 'Gece bakımı', 'bool'], ['schedule.maintenance_time', 'Bakım saati', 'saat'],
-        ['schedule.keep_days', 'Kayıt saklama', 'sayi', 'gün', { min:7, max:3650 }] ] } ] },
+        ['schedule.maintenance', yz('ortak.merkezayar.gece-bakimi'), 'bool'], ['schedule.maintenance_time', yz('ortak.merkezayar.bakim-saati'), 'saat'],
+        ['schedule.keep_days', yz('ortak.merkezayar.kayit-saklama'), 'sayi', 'gün', { min:7, max:3650 }] ] } ] },
     { id:'bildirim', ad:'Bildirim', gruplar:[
-      { ad:'Sessiz saatler ve sınırlar', alanlar:[
-        ['bildirim.sessiz_bas', 'Sessiz başlangıç', 'saat'], ['bildirim.sessiz_bit', 'Sessiz bitiş', 'saat'],
-        ['bildirim.gunluk_en_cok', 'Günde en çok', 'sayi', '0 = sınırsız', { min:0, max:100 }],
-        ['bildirim.teklif_omru_gun', 'Önerinin ömrü', 'sayi', 'gün', { min:1, max:60 }],
-        ['bildirim.yarin', 'Akşam «yarın şunlar var»', 'bool'] ] } ] },
+      { ad:yz('ortak.merkezayar.sessiz-saatler-ve-sinirlar'), alanlar:[
+        ['bildirim.sessiz_bas', yz('ortak.merkezayar.sessiz-baslangic'), 'saat'], ['bildirim.sessiz_bit', yz('ortak.merkezayar.sessiz-bitis'), 'saat'],
+        ['bildirim.gunluk_en_cok', yz('ortak.merkezayar.gunde-en-cok'), 'sayi', '0 = sınırsız', { min:0, max:100 }],
+        ['bildirim.teklif_omru_gun', yz('ortak.merkezayar.onerinin-omru'), 'sayi', 'gün', { min:1, max:60 }],
+        ['bildirim.yarin', yz('ortak.merkezayar.aksam-yarin-sunlar-var'), 'bool'] ] } ] },
   ];
   const SAAT_RE = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
   const al = (o, yol) => yol.split('.').reduce((x, k) => (x && typeof x === 'object' ? x[k] : undefined), o);
@@ -128,7 +189,7 @@ LIFEOS.MerkezAyar = (function(){
   /* Saf: bir alanın yaması. Şemada olmayan yol yazılmaz. */
   function alanYama(yol, deger, cfg){
     const a = alanBul(String(yol || ''), cfg);
-    if(!a) return { ok:false, hata:'Bu ayar buradan değiştirilmez.' };
+    if(!a) return { ok:false, hata:yz('ortak.merkezayar.bu-ayar-buradan-degistirilme') };
     const ad = a[1], tur = a[2], s = a[4] || {};
     let v = deger;
     if(tur === 'bool'){ if(typeof v !== 'boolean') return { ok:false, hata:ad + ': açık ya da kapalı olmalı.' }; }
@@ -149,25 +210,25 @@ LIFEOS.MerkezAyar = (function(){
   function yama(d, cfg){
     d = nesne(d);
     const red = hata => ({ ok:false, hata });
-    if(d.tur === 'paket') return PAKETLER.indexOf(d.deger) >= 0 ? { ok:true, yama:{ models:{ paket:d.deger } } } : red('Bilinmeyen model paketi.');
+    if(d.tur === 'paket') return PAKETLER.indexOf(d.deger) >= 0 ? { ok:true, yama:{ models:{ paket:d.deger } } } : red(yz('ortak.merkezayar.bilinmeyen-model-paketi'));
     if(d.tur === 'tavan'){
       const s = TAVAN[d.birim];
-      if(!s) return red('Para birimi USD ya da TL olmalı.');
-      if(!sayi(d.deger) || d.deger < s[0] || d.deger > s[1]) return red('Aylık tavan ' + s[0] + '–' + s[1] + ' arasında bir sayı olmalı.');
+      if(!s) return red(yz('ortak.merkezayar.para-birimi-usd-ya-da'));
+      if(!sayi(d.deger) || d.deger < s[0] || d.deger > s[1]) return red(yz('ortak.merkezayar.aylik-tavan') + s[0] + '–' + s[1] + ' arasında bir sayı olmalı.');
       return { ok:true, yama:{ budget:{ ceiling_currency:d.birim, [d.birim === 'try' ? 'monthly_try' : 'monthly_usd']:d.deger } } };
     }
     if(d.tur === 'kanal'){
-      if(!KANALLAR.some(([k]) => k === d.ad)) return red('Bilinmeyen kanal.');
-      if(typeof d.acik !== 'boolean') return red('Kanal açık ya da kapalı olmalı.');
+      if(!KANALLAR.some(([k]) => k === d.ad)) return red(yz('ortak.merkezayar.bilinmeyen-kanal'));
+      if(typeof d.acik !== 'boolean') return red(yz('ortak.merkezayar.kanal-acik-ya-da-kapali'));
       return { ok:true, yama:{ channels:{ [d.ad]:{ enabled:d.acik } } } };
     }
     if(d.tur === 'esik'){
       const r = nesne(nesne(nesne(cfg).ranges)[d.grup])[d.ad];
-      if(!Array.isArray(r)) return red('Bilinmeyen eşik.');
-      if(!sayi(d.deger) || d.deger < r[0] || d.deger > r[1]) return red('Eşik ' + r[0] + '–' + r[1] + ' arasında olmalı.');
+      if(!Array.isArray(r)) return red(yz('ortak.merkezayar.bilinmeyen-esik'));
+      if(!sayi(d.deger) || d.deger < r[0] || d.deger > r[1]) return red(yz('ortak.merkezayar.esik') + r[0] + '–' + r[1] + ' arasında olmalı.');
       return { ok:true, yama:{ thresholds:{ [d.grup]:{ [d.ad]:d.deger } } } };
     }
-    return red('Bu ayar buradan değiştirilmez.');
+    return red(yz('ortak.merkezayar.bu-ayar-buradan-degistirilme'));
   }
 
   function kur(ortam){
@@ -188,7 +249,7 @@ LIFEOS.MerkezAyar = (function(){
         const f = k.f;                       // yöntem olarak çağrılmaz («Illegal invocation»)
         const res = await f(k.url + yol, {
           method:govde === undefined ? 'GET' : 'POST',
-          headers:Object.assign({ 'Authorization':'Bearer ' + k.token }, govde === undefined ? {} : { 'Content-Type':'application/json' }),
+          headers:Object.assign({ 'Authorization':yz('ortak.merkezayar.bearer') + k.token }, govde === undefined ? {} : { 'Content-Type':'application/json' }),
           body:govde === undefined ? undefined : JSON.stringify(govde),
           signal:ctrl ? ctrl.signal : undefined,
         });
@@ -219,7 +280,7 @@ LIFEOS.MerkezAyar = (function(){
       try{
         const r = await istek(k, '/api/config', y.yama);
         if(r.durum === 200) return { ok:true };
-        if(r.durum === 422) return { ok:false, hata:(nesne(r.veri).errors || []).join('; ') || 'Merkez değeri kabul etmedi.' };
+        if(r.durum === 422) return { ok:false, hata:(nesne(r.veri).errors || []).join('; ') || yz('ortak.merkezayar.merkez-degeri-kabul-etmedi') };
         return { ok:false, neden:'hata' };
       }catch(e){
         return { ok:false, neden:'hata' };

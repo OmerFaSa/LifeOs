@@ -19,6 +19,10 @@
      3. Sahibi olmayan profilde `Beacon.settings().enabled` false döner:
         özet, geçmiş, yedek, hafıza, hedef, King ve BAM kanalları hep
         oradan geçtiği için hepsi birlikte susar. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.hkmbag.hkm-baska-profile-bagli':'HKM başka profile bağlı («',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -52,7 +56,7 @@ LIFEOS.HkmBag = (function(){
   }
 
   function not(s){
-    return 'HKM başka profile bağlı («' + s + '»). HKM profil ayırt etmediği için aynı '
+    return yz('ortak.hkmbag.hkm-baska-profile-bagli') + s + '»). HKM profil ayırt etmediği için aynı '
       + 'anda tek profil bağlanabilir; bağlamak için önce o profilde işareti kapat.';
   }
 

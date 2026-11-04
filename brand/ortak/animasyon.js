@@ -54,6 +54,17 @@
    listesindeki anahtarlar taşınır; kullanıcı verisi taşınmaz, parça
    (#…) sunucuya hiç gitmez. Yer imiyle doğrudan açılan modül kendi son
    ayarıyla açılır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.animasyon.butun-gecisler-oynar':'Bütün geçişler oynar',
+  'ortak.animasyon.kayma-yok-yalniz-solma':'Kayma yok, yalnız solma',
+  'ortak.animasyon.i-sletim-sisteminin-ayarini':'İşletim sisteminin ayarını izler',
+  'ortak.animasyon.dugme-ve-dokunus':'Düğme ve dokunuş',
+  'ortak.animasyon.sayfa-gecisi':'Sayfa geçişi',
+  'ortak.animasyon.panel-ve-menu':'Panel ve menü',
+  'ortak.animasyon.gosterge-ve-sayi':'Gösterge ve sayı',
+  'ortak.animasyon.ayrinti':'Ayrıntı',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -65,9 +76,9 @@ window.LIFEOS = window.LIFEOS || {};
   const KIPLER = Object.freeze(['tam', 'az', 'sistem']);
   const AD = { tam:'Tam', az:'Az', sistem:'Sistem' };
   const IPUCU = {
-    tam:'Bütün geçişler oynar',
-    az:'Kayma yok, yalnız solma',
-    sistem:'İşletim sisteminin ayarını izler',
+    tam:yz('ortak.animasyon.butun-gecisler-oynar'),
+    az:yz('ortak.animasyon.kayma-yok-yalniz-solma'),
+    sistem:yz('ortak.animasyon.i-sletim-sisteminin-ayarini'),
   };
   const SORGU = /prefers-reduced-motion/i;
   const OZELLIK = /^\(\s*prefers-reduced-motion\s*(?::\s*([a-z-]+)\s*)?\)$/i;
@@ -659,8 +670,8 @@ window.LIFEOS = window.LIFEOS || {};
     return Math.abs(y - 1) <= .02 ? 1 : y;
   }
   const HIZ_GRUP = Object.freeze({ dugme:'ui', sayfa:'ui', panel:'ui', gosterge:'ui', minik:'ajan', king:'ajan' });
-  const HIZ_ADLAR = Object.freeze({ ui:'Arayüz', ajan:'Ajanlar', dugme:'Düğme ve dokunuş', sayfa:'Sayfa geçişi',
-    panel:'Panel ve menü', gosterge:'Gösterge ve sayı', minik:'Minikler', king:'King' });
+  const HIZ_ADLAR = Object.freeze({ ui:'Arayüz', ajan:'Ajanlar', dugme:yz('ortak.animasyon.dugme-ve-dokunus'), sayfa:yz('ortak.animasyon.sayfa-gecisi'),
+    panel:yz('ortak.animasyon.panel-ve-menu'), gosterge:yz('ortak.animasyon.gosterge-ve-sayi'), minik:'Minikler', king:'King' });
   function hizlar(){
     let v = null;
     try{ v = JSON.parse(localStorage.getItem(HIZ_ANAHTAR) || 'null'); }catch(e){ v = null; }
@@ -728,7 +739,7 @@ window.LIFEOS = window.LIFEOS || {};
   function hizSeciciHtml(){
     const satir = alan => '<div class="anihiz__satir"><span class="anihiz__ad">' + HIZ_ADLAR[alan]
       + (alan in HIZ_GRUP ? '<small class="anihiz__oran" data-anihiz-oran="' + alan + '">etkin ' + oranYaz(hizOrani(alan)) + '</small>' : '') + '</span>' + hizSeg(alan) + '</div>';
-    const grup = g => '<div class="anihiz__grup">' + satir(g) + '<details class="anihiz__ayrinti"><summary>Ayrıntı</summary>'
+    const grup = g => '<div class="anihiz__grup">' + satir(g) + ('<details class="anihiz__ayrinti"><summary>' + yz('ortak.animasyon.ayrinti') + '</summary>')
       + Object.keys(HIZ_GRUP).filter(k => HIZ_GRUP[k] === g).map(satir).join('') + '</details></div>';
     return '<div class="anihiz__kok">' + grup('ui') + grup('ajan') + '</div>';
   }

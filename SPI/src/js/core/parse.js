@@ -8,6 +8,12 @@
    Iki ayristirici da AYNI ILKEYE uyar: emin olamadigi satiri sessizce ATMAZ
    ve uydurmaz. Eslesmeyen satir "eslesmedi" olarak geri doner, kullanici
    elle baglar. Sistemin en tehlikeli hatasi yanlis veriyi dogru sanmaktir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.parse.hicbir-deger-eslesmedi-rapor':'Hiçbir değer eşleşmedi. Rapor metnini olduğu gibi yapıştırdığından emin ol.',
+  'spi.core.parse.metin-bos':'Metin boş.',
+  'spi.core.parse.hicbir-gida-eslesmedi-1-taba':'Hiçbir gıda eşleşmedi. "1 tabak mercimek çorbası" gibi yazmayı dene.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -279,7 +285,7 @@ SP.Parse = (function(){
       note:unique.length
         ? unique.length + ' değer eşleşti'
           + (unmatched.length ? ', ' + unmatched.length + ' satır eşleşmedi' : '') + '.'
-        : 'Hiçbir değer eşleşmedi. Rapor metnini olduğu gibi yapıştırdığından emin ol.',
+        : yz('spi.core.parse.hicbir-deger-eslesmedi-rapor'),
     };
   }
 
@@ -379,7 +385,7 @@ SP.Parse = (function(){
 
   function parseMeal(text){
     const raw = String(text || '').trim();
-    if(!raw) return { items:[], unmatched:[], note:'Metin boş.' };
+    if(!raw) return { items:[], unmatched:[], note:yz('spi.core.parse.metin-bos') };
 
     /* Ayiraclar: virgul, "ve", "+", satir sonu, noktali virgul.
        Ondalik virgul ayirac DEGILDIR: "0,2 kg" tek parcadir. Bolmeden once
@@ -443,7 +449,7 @@ SP.Parse = (function(){
       note:items.length
         ? items.length + ' gıda eşleşti'
           + (unmatched.length ? ', ' + unmatched.length + ' parça eşleşmedi' : '') + '.'
-        : 'Hiçbir gıda eşleşmedi. "1 tabak mercimek çorbası" gibi yazmayı dene.',
+        : yz('spi.core.parse.hicbir-gida-eslesmedi-1-taba'),
     };
   }
 

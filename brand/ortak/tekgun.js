@@ -36,6 +36,12 @@
      6. MAHREMİYET. Modül yalnız ekranda görünmesi uygun adı yazar: SPİ
         ilaç adını YAYINLAMAZ («İlaç / takviye»). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.tekgun.siradaki':'Sıradaki',
+  'ortak.tekgun.tek-gun':'Tek gün',
+  'ortak.tekgun.bugun-icin-planlanmis-bir-is':'Bugün için planlanmış bir iş yok.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.tekgun.sabah':'Sabah',
   'ortak.tekgun.ogle':'Öğle',
   'ortak.tekgun.aksam':'Akşam',
@@ -161,7 +167,7 @@ window.LIFEOS.TEKGUN = (function(){
       + '<i class="tekgun__nokta tekgun__nokta--' + b.modul + '" aria-hidden="true"></i>'
       + '<span class="tekgun__saat num">' + (b.saat ? kac(b.saat) : '') + '</span>'
       + '<span class="tekgun__ad"><b>' + kac(b.ad) + '</b>' + (b.alt ? '<small>' + kac(b.alt) + '</small>' : '') + '</span>'
-      + '<span class="tekgun__mod">' + (b.siradaki ? '<em>Sıradaki</em>' : '') + kac(MODUL_AD[b.modul]) + '</span>'
+      + '<span class="tekgun__mod">' + (b.siradaki ? ('<em>' + yz('ortak.tekgun.siradaki') + '</em>') : '') + kac(MODUL_AD[b.modul]) + '</span>'
       + '<span class="tekgun__isaret" aria-hidden="true">' + isaret + '</span>'
       + '<span class="sr-only">' + (b.durum === 'bitti' ? 'bitti' : b.durum === 'atlandi' ? 'atlandı' : 'açık') + '</span>'
       + '</button>';
@@ -174,11 +180,11 @@ window.LIFEOS.TEKGUN = (function(){
     r = r || sonuc();
     const notlar = r.notlar.slice();
     const gruplar = DILIM.map(d => ({ d, l:r.satir.filter(b => b.dl === d.id) })).filter(g => g.l.length);
-    return '<div class="tekgun__bas"><h2 class="tekgun__baslik">Tek gün</h2><span class="tekgun__ozet">' + kac(ozetMetni(r.satir)) + '</span></div>'
+    return ('<div class="tekgun__bas"><h2 class="tekgun__baslik">' + yz('ortak.tekgun.tek-gun') + '</h2><span class="tekgun__ozet">') + kac(ozetMetni(r.satir)) + '</span></div>'
       + (gruplar.length
         ? gruplar.map(g => '<div class="tekgun__grup"><div class="tekgun__dilim">' + kac(g.d.ad) + '</div>'
             + g.l.map(satirHtml).join('') + '</div>').join('')
-        : '<p class="tekgun__bos">Bugün için planlanmış bir iş yok.</p>')
+        : ('<p class="tekgun__bos">' + yz('ortak.tekgun.bugun-icin-planlanmis-bir-is') + '</p>'))
       + (notlar.length ? '<p class="tekgun__not">' + notlar.map(kac).join(' ') + '</p>' : '');
   }
 

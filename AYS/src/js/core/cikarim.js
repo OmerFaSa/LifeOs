@@ -30,6 +30,44 @@
      5. KİMLİK VERİYE BAĞLI. Çıkarımın kimliği kuralı ve vardığı sonucu
         taşır («esp-disiplin:philo»): veri değişip sonuç değişirse yeni
         çıkarım olur; aynı sonuç ikinci kez sorulmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.cikarim.son-30-gunde-gelisim-zamanin':'Son 30 günde gelişim zamanının en büyük payı ',
+  'ortak.cikarim.basladigin':'Başladığın ',
+  'ortak.cikarim.basladigi-kitabi-bitirir-isi':'Başladığı kitabı bitirir; işi sonuna götürür (onayladı)',
+  'ortak.cikarim.bircok-kitaba-baslayip-ara-v':'Birçok kitaba başlayıp ara vermişsin (',
+  'ortak.cikarim.meraki-genis-bircok-kitaba-b':'Merakı geniş; birçok kitaba başlar, odağı dağılabilir (onayladı)',
+  'ortak.cikarim.en-cok':'En çok ',
+  'ortak.cikarim.son-30-gunde':'Son 30 günde ',
+  'ortak.cikarim.muzik-calmak-hayatinin-duzen':'Müzik çalmak hayatının düzenli bir parçası; onu dinlendirir (onayladı)',
+  'ortak.cikarim.son-45-gunde-en-cok':'Son 45 günde en çok ',
+  'ortak.cikarim.son-gecelerinde-yatis-saatin':'Son gecelerinde yatış saatin genelde ',
+  'ortak.cikarim.gece-insani-gec-yatar-onayla':'Gece insanı; geç yatar (onayladı)',
+  'ortak.cikarim.sabah-insani-erken-yatar-ona':'Sabah insanı; erken yatar (onayladı)',
+  'ortak.cikarim.son-30-gunde-yediklerin-icin':'Son 30 günde yediklerin içinde ',
+  'ortak.cikarim.duzenli-hareket-eder-bedenin':'Düzenli hareket eder; bedenini önemser (onayladı)',
+  'ortak.cikarim.i-kinci-buyuk-ilgin':'İkinci büyük ilgin ',
+  'ortak.cikarim.cok-yonlu-ve-merakli-bircok':'Çok yönlü ve meraklı; birçok alanla ilgilenir (onayladı)',
+  'ortak.cikarim.hatalarinin-icinde-en-buyuk':'Hatalarının içinde en büyük pay «',
+  'ortak.cikarim.hatalarinin-cogu':'Hatalarının çoğu ',
+  'ortak.cikarim.denemelerin-istikrarla-yukse':'Denemelerin istikrarla yükseliyor (ilk yarıdan son yarıya +',
+  'ortak.cikarim.sabirli-ve-kararli-denemeler':'Sabırlı ve kararlı; denemeleri istikrarla yükselir (onayladı)',
+  'ortak.cikarim.son-denemelerin-oncekilerden':'Son denemelerin öncekilerden biraz düşük (',
+  'ortak.cikarim.son-zamanlarda-yorgun-ya-da':'Son zamanlarda yorgun ya da kafası dolu (onayladı)',
+  'ortak.cikarim.gecelerin-genelde':'Gecelerin genelde ',
+  'ortak.cikarim.uykusunu-onemser-uzun-uyur-o':'Uykusunu önemser; uzun uyur (onayladı)',
+  'ortak.cikarim.yogun-bir-donemde-az-uyuyor':'Yoğun bir dönemde; az uyuyor (onayladı)',
+  'ortak.cikarim.i-yi-uyudugun-gunlerde-kendi':'İyi uyuduğun günlerde kendini belirgin şekilde daha zinde işaretlemişsin. Uyku senin ruh hâlinin anahtarı gibi; sence de öyle mi?',
+  'ortak.cikarim.i-yi-uyudugunda-kendini-daha':'İyi uyuduğunda kendini daha zinde hisseder (onayladı)',
+  'ortak.cikarim.kahveyi-sever-neredeyse-her':'Kahveyi sever; neredeyse her gün içer (onayladı)',
+  'ortak.cikarim.ruh-hali-modelim':'Ruh hâli modelim ',
+  'ortak.cikarim.bana-genelde':'Bana genelde ',
+  'ortak.cikarim.i-letisim-uslubu':'İletişim üslubu: ',
+  'ortak.cikarim.calisirken-genelde':'Çalışırken genelde ',
+  'ortak.cikarim.sakin-bir-ortam-odaklanmana':'Sakin bir ortam odaklanmana yardım ediyor olabilir mi?',
+  'ortak.cikarim.ritimli-bir-ortam-seni-canli':'Ritimli bir ortam seni canlı tutuyor olabilir mi?',
+  'ortak.cikarim.calisirken':'Çalışırken ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -82,7 +120,7 @@ LIFEOS.CIKARIM = (function(){
       const ad = (d.adlar && d.adlar[ust]) || ust;
       const eg = DISIPLIN_EGILIM[ust] || 'bu alan senin için önemli görünüyor';
       return { id:'esp-disiplin:' + ust, alan:'gelisim',
-        soru:'Son 30 günde gelişim zamanının en büyük payı ' + ad + ': %' + pay + '. Buradan şunu çıkardım: ' + eg + '.',
+        soru:yz('ortak.cikarim.son-30-gunde-gelisim-zamanin') + ad + ': %' + pay + '. Buradan şunu çıkardım: ' + eg + '.',
         kanit:d.gun + ' gün, toplam ' + Math.round(toplam / 60) + ' saat',
         kayit:yone(ad) + ' çok zaman ayırıyor; ' + eg.replace(/ gibisin$/, '') + ' (onayladı)' };
     },
@@ -94,11 +132,11 @@ LIFEOS.CIKARIM = (function(){
       const biten = baslanan.filter(b => b.finishedAt).length;
       const oran = biten / baslanan.length;
       if(oran >= 0.75) return { id:'esp-kitap:bitiren', alan:'kisilik',
-        soru:'Başladığın ' + baslanan.length + ' kitaptan ' + biten + ' tanesini bitirmişsin. Başladığı işi sonuna kadar götüren biri gibisin.',
-        kanit:biten + '/' + baslanan.length + ' kitap', kayit:'Başladığı kitabı bitirir; işi sonuna götürür (onayladı)' };
+        soru:yz('ortak.cikarim.basladigin') + baslanan.length + ' kitaptan ' + biten + ' tanesini bitirmişsin. Başladığı işi sonuna kadar götüren biri gibisin.',
+        kanit:biten + '/' + baslanan.length + ' kitap', kayit:yz('ortak.cikarim.basladigi-kitabi-bitirir-isi') };
       if(baslanan.length >= 4 && oran <= 0.34) return { id:'esp-kitap:merakli', alan:'kisilik',
-        soru:'Birçok kitaba başlayıp ara vermişsin (' + biten + '/' + baslanan.length + ' bitti). Merakın geniş, ama odağın kolay dağılıyor olabilir mi?',
-        kanit:biten + '/' + baslanan.length + ' kitap', kayit:'Merakı geniş; birçok kitaba başlar, odağı dağılabilir (onayladı)' };
+        soru:yz('ortak.cikarim.bircok-kitaba-baslayip-ara-v') + biten + '/' + baslanan.length + ' bitti). Merakın geniş, ama odağın kolay dağılıyor olabilir mi?',
+        kanit:biten + '/' + baslanan.length + ' kitap', kayit:yz('ortak.cikarim.meraki-genis-bircok-kitaba-b') };
       return null;
     },
     /* ESP: en çok okunan yazar. */
@@ -109,7 +147,7 @@ LIFEOS.CIKARIM = (function(){
       const ust = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
       if(!ust || say[ust] < 2) return null;
       return { id:'esp-yazar:' + ust.toLocaleLowerCase('tr'), alan:'sevgi',
-        soru:'En çok ' + ust + ' okumuşsun (' + say[ust] + ' kitap). Onun düşünceleri sana yakın geliyor olabilir mi?',
+        soru:yz('ortak.cikarim.en-cok') + ust + ' okumuşsun (' + say[ust] + ' kitap). Onun düşünceleri sana yakın geliyor olabilir mi?',
         kanit:say[ust] + ' kitap', kayit:ust + ' okumayı seviyor; düşünceleri ona yakın (onayladı)' };
     },
     /* ESP: müzik çalma düzeni. */
@@ -117,8 +155,8 @@ LIFEOS.CIKARIM = (function(){
       const g = v.esp && v.esp.muzikGun;
       if(!(g >= 6)) return null;
       return { id:'esp-muzik:duzenli', alan:'hobi',
-        soru:'Son 30 günde ' + g + ' gün müzik çalışmışsın. Müzik hayatının düzenli bir parçası; seni dinlendiren bir şey gibi görünüyor.',
-        kanit:g + ' gün', kayit:'Müzik çalmak hayatının düzenli bir parçası; onu dinlendirir (onayladı)' };
+        soru:yz('ortak.cikarim.son-30-gunde') + g + ' gün müzik çalışmışsın. Müzik hayatının düzenli bir parçası; seni dinlendiren bir şey gibi görünüyor.',
+        kanit:g + ' gün', kayit:yz('ortak.cikarim.muzik-calmak-hayatinin-duzen') };
     },
     /* AYS: en çok çalışılan ve en isabetli ders. */
     function aysDers(v){
@@ -130,10 +168,10 @@ LIFEOS.CIKARIM = (function(){
       if(!isabetli) return null;
       const ib = yuzde(isabetli.correct, isabetli.solved);
       if(cok.id === isabetli.id) return { id:'ays-ders:' + cok.id, alan:'ogrenme',
-        soru:'Son 45 günde en çok ' + cok.ad + ' çalışmışsın (' + cok.solved + ' soru) ve en isabetli olduğun ders de bu (%' + ib + '). Bu dersi seviyor gibisin.',
+        soru:yz('ortak.cikarim.son-45-gunde-en-cok') + cok.ad + ' çalışmışsın (' + cok.solved + ' soru) ve en isabetli olduğun ders de bu (%' + ib + '). Bu dersi seviyor gibisin.',
         kanit:cok.solved + ' soru, %' + ib + ' doğru', kayit:cok.ad + ' dersini seviyor ve bu derste güçlü (onayladı)' };
       return { id:'ays-isabet:' + isabetli.id, alan:'ogrenme',
-        soru:'En çok ' + cok.ad + ' çalışıyorsun ama en isabetli olduğun ders ' + isabetli.ad + ' (%' + ib + '). ' + yone(isabetli.ad) + ' yatkın, belki onu daha çok seviyor olabilir misin?',
+        soru:yz('ortak.cikarim.en-cok') + cok.ad + ' çalışıyorsun ama en isabetli olduğun ders ' + isabetli.ad + ' (%' + ib + '). ' + yone(isabetli.ad) + ' yatkın, belki onu daha çok seviyor olabilir misin?',
         kanit:isabetli.solved + ' soru, %' + ib + ' doğru', kayit:yone(isabetli.ad) + ' yatkın; o dersi seviyor (onayladı)' };
     },
     /* SPİ: yatış saatinden kronotip. */
@@ -142,11 +180,11 @@ LIFEOS.CIKARIM = (function(){
       if(y.length < 6) return null;
       const m = medyan(y);
       if(m >= 24.5) return { id:'spi-kronotip:gece', alan:'ritim',
-        soru:'Son gecelerinde yatış saatin genelde ' + saatYaz(m) + '. Gece insanı gibisin; akşamları zihnin daha mı açık oluyor?',
-        kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:'Gece insanı; geç yatar (onayladı)' };
+        soru:yz('ortak.cikarim.son-gecelerinde-yatis-saatin') + saatYaz(m) + '. Gece insanı gibisin; akşamları zihnin daha mı açık oluyor?',
+        kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:yz('ortak.cikarim.gece-insani-gec-yatar-onayla') };
       if(m <= 23.25) return { id:'spi-kronotip:sabah', alan:'ritim',
-        soru:'Son gecelerinde yatış saatin genelde ' + saatYaz(m) + '. Sabah insanı gibisin; günün ilk saatleri sana daha verimli mi geliyor?',
-        kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:'Sabah insanı; erken yatar (onayladı)' };
+        soru:yz('ortak.cikarim.son-gecelerinde-yatis-saatin') + saatYaz(m) + '. Sabah insanı gibisin; günün ilk saatleri sana daha verimli mi geliyor?',
+        kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:yz('ortak.cikarim.sabah-insani-erken-yatar-ona') };
       return null;
     },
     /* SPİ: yediklerinde ağır basan kategori. */
@@ -160,7 +198,7 @@ LIFEOS.CIKARIM = (function(){
       if(!sec) return null;
       const ad = (v.spi.katAd && v.spi.katAd[sec]) || sec;
       return { id:'spi-yemek:' + sec, alan:'sevgi',
-        soru:'Son 30 günde yediklerin içinde ' + ad.toLocaleLowerCase('tr') + ' payı %' + yuzde(k[sec], toplam) + '. Buradan şunu çıkardım: ' + YEMEK_EGILIM[sec],
+        soru:yz('ortak.cikarim.son-30-gunde-yediklerin-icin') + ad.toLocaleLowerCase('tr') + ' payı %' + yuzde(k[sec], toplam) + '. Buradan şunu çıkardım: ' + YEMEK_EGILIM[sec],
         kanit:k[sec] + '/' + toplam + ' kalem', kayit:ad + ' ağırlıklı besleniyor; ' + YEMEK_EGILIM[sec].split(';')[0].replace(/ gibisin$/, '') + ' (onayladı)' };
     },
     /* SPİ: hareket düzeni. */
@@ -168,8 +206,8 @@ LIFEOS.CIKARIM = (function(){
       const n = v.spi && v.spi.antrenman30;
       if(!(n >= 5)) return null;
       return { id:'spi-hareket:duzenli', alan:'fizyoloji',
-        soru:'Son 30 günde ' + n + ' antrenman yapmışsın. Hareket senin için bir alışkanlık ve düzen; bedenini önemsiyorsun gibi görünüyor.',
-        kanit:n + ' antrenman', kayit:'Düzenli hareket eder; bedenini önemser (onayladı)' };
+        soru:yz('ortak.cikarim.son-30-gunde') + n + ' antrenman yapmışsın. Hareket senin için bir alışkanlık ve düzen; bedenini önemsiyorsun gibi görünüyor.',
+        kanit:n + ' antrenman', kayit:yz('ortak.cikarim.duzenli-hareket-eder-bedenin') };
     },
     /* ESP: ikinci büyük ilgi. */
     function espIkinci(v){
@@ -181,7 +219,7 @@ LIFEOS.CIKARIM = (function(){
       const ad = (d.adlar && d.adlar[ids[1]]) || ids[1];
       const eg = DISIPLIN_EGILIM[ids[1]] || 'bu alan da senin için önemli görünüyor';
       return { id:'esp-ikinci:' + ids[1], alan:'hobi',
-        soru:'İkinci büyük ilgin ' + ad + ' görünüyor (payı %' + yuzde(d.dakika[ids[1]], toplam) + '). ' + eg.charAt(0).toLocaleUpperCase('tr') + eg.slice(1) + '.',
+        soru:yz('ortak.cikarim.i-kinci-buyuk-ilgin') + ad + ' görünüyor (payı %' + yuzde(d.dakika[ids[1]], toplam) + '). ' + eg.charAt(0).toLocaleUpperCase('tr') + eg.slice(1) + '.',
         kanit:d.gun + ' gün', kayit:ad + ' da ilgisini çekiyor (onayladı)' };
     },
     /* ESP: çok yönlülük. */
@@ -191,8 +229,8 @@ LIFEOS.CIKARIM = (function(){
       const n = Object.keys(d.dakika || {}).filter(k => d.dakika[k] > 0).length;
       if(n < 4) return null;
       return { id:'esp-cesit:' + n, alan:'kisilik',
-        soru:'Son 30 günde ' + n + ' ayrı alanda çalışmışsın. Çok yönlü ve meraklı birisin gibi; tek bir şeyle yetinmiyorsun.',
-        kanit:n + ' alan', kayit:'Çok yönlü ve meraklı; birçok alanla ilgilenir (onayladı)' };
+        soru:yz('ortak.cikarim.son-30-gunde') + n + ' ayrı alanda çalışmışsın. Çok yönlü ve meraklı birisin gibi; tek bir şeyle yetinmiyorsun.',
+        kanit:n + ' alan', kayit:yz('ortak.cikarim.cok-yonlu-ve-merakli-bircok') };
     },
     /* AYS: seni zorlayan ders. */
     function aysZor(v){
@@ -217,8 +255,8 @@ LIFEOS.CIKARIM = (function(){
         Y:'soruyu okurken aceleci davranıyor olabilir misin?', S:'süre baskısı seni geriyor olabilir mi?', K:'bazı konular henüz eksik; sırayla tamamlamayı seviyor musun?' }[ust]
         || 'bunun bir nedeni var mı?';
       return { id:'ays-hata:' + ust, alan:'ogrenme',
-        soru:'Hatalarının içinde en büyük pay «' + h[ust].ad + '» türünde: %' + pay + '. Buradan şunu düşündüm: ' + yorum,
-        kanit:toplam + ' hata kaydı', kayit:'Hatalarının çoğu ' + h[ust].ad.toLocaleLowerCase('tr') + ' (onayladı)' };
+        soru:yz('ortak.cikarim.hatalarinin-icinde-en-buyuk') + h[ust].ad + '» türünde: %' + pay + '. Buradan şunu düşündüm: ' + yorum,
+        kanit:toplam + ' hata kaydı', kayit:yz('ortak.cikarim.hatalarinin-cogu') + h[ust].ad.toLocaleLowerCase('tr') + ' (onayladı)' };
     },
     /* AYS: deneme gidişi. */
     function aysGidis(v){
@@ -226,11 +264,11 @@ LIFEOS.CIKARIM = (function(){
       if(n.length < 4) return null;
       const ilk = medyan(n.slice(0, Math.floor(n.length / 2))), son = medyan(n.slice(-Math.floor(n.length / 2)));
       if(son - ilk >= 3) return { id:'ays-gidis:yukari', alan:'kisilik',
-        soru:'Denemelerin istikrarla yükseliyor (ilk yarıdan son yarıya +' + Math.round(son - ilk) + ' net). Sabırlı ve kararlı birisin gibi.',
-        kanit:n.length + ' deneme', kayit:'Sabırlı ve kararlı; denemeleri istikrarla yükselir (onayladı)' };
+        soru:yz('ortak.cikarim.denemelerin-istikrarla-yukse') + Math.round(son - ilk) + ' net). Sabırlı ve kararlı birisin gibi.',
+        kanit:n.length + ' deneme', kayit:yz('ortak.cikarim.sabirli-ve-kararli-denemeler') };
       if(ilk - son >= 3) return { id:'ays-gidis:asagi', alan:'ruh',
-        soru:'Son denemelerin öncekilerden biraz düşük (' + Math.round(ilk - son) + ' net). Son zamanlarda yorgun ya da kafan dolu olabilir mi?',
-        kanit:n.length + ' deneme', kayit:'Son zamanlarda yorgun ya da kafası dolu (onayladı)' };
+        soru:yz('ortak.cikarim.son-denemelerin-oncekilerden') + Math.round(ilk - son) + ' net). Son zamanlarda yorgun ya da kafan dolu olabilir mi?',
+        kanit:n.length + ' deneme', kayit:yz('ortak.cikarim.son-zamanlarda-yorgun-ya-da') };
       return null;
     },
     /* SPİ: uyku süresi. */
@@ -239,11 +277,11 @@ LIFEOS.CIKARIM = (function(){
       if(u.length < 6) return null;
       const m = medyan(u);
       if(m >= 8) return { id:'spi-uyku:uzun', alan:'fizyoloji',
-        soru:'Gecelerin genelde ' + (Math.round(m * 10) / 10) + ' saat. Uykunu önemsiyorsun; dinlenmiş olmak senin için öncelik gibi.',
-        kanit:u.length + ' gece', kayit:'Uykusunu önemser; uzun uyur (onayladı)' };
+        soru:yz('ortak.cikarim.gecelerin-genelde') + (Math.round(m * 10) / 10) + ' saat. Uykunu önemsiyorsun; dinlenmiş olmak senin için öncelik gibi.',
+        kanit:u.length + ' gece', kayit:yz('ortak.cikarim.uykusunu-onemser-uzun-uyur-o') };
       if(m <= 6.25) return { id:'spi-uyku:kisa', alan:'ruh',
-        soru:'Gecelerin genelde ' + (Math.round(m * 10) / 10) + ' saat. Yoğun ya da stresli bir dönemden geçiyor olabilir misin?',
-        kanit:u.length + ' gece', kayit:'Yoğun bir dönemde; az uyuyor (onayladı)' };
+        soru:yz('ortak.cikarim.gecelerin-genelde') + (Math.round(m * 10) / 10) + ' saat. Yoğun ya da stresli bir dönemden geçiyor olabilir misin?',
+        kanit:u.length + ' gece', kayit:yz('ortak.cikarim.yogun-bir-donemde-az-uyuyor') };
       return null;
     },
     /* SPİ: uyku ile günün hissi (birliktelik, neden değil). */
@@ -256,16 +294,16 @@ LIFEOS.CIKARIM = (function(){
       const fark = medyan(iyi) - medyan(kotu);
       if(fark < 0.5) return null;
       return { id:'spi-his-uyku:pozitif', alan:'ruh',
-        soru:'İyi uyuduğun günlerde kendini belirgin şekilde daha zinde işaretlemişsin. Uyku senin ruh hâlinin anahtarı gibi; sence de öyle mi?',
-        kanit:p.length + ' gün (birliktelik, neden değil)', kayit:'İyi uyuduğunda kendini daha zinde hisseder (onayladı)' };
+        soru:yz('ortak.cikarim.i-yi-uyudugun-gunlerde-kendi'),
+        kanit:p.length + ' gün (birliktelik, neden değil)', kayit:yz('ortak.cikarim.i-yi-uyudugunda-kendini-daha') };
     },
     /* SPİ: kahve. */
     function spiKahve(v){
       const k = v.spi && v.spi.kahveGun;
       if(!(k >= 8)) return null;
       return { id:'spi-kahve:sik', alan:'sevgi',
-        soru:'Son 30 günde ' + k + ' gün kahve içmişsin. Kahvesiz bir gün sana eksik gibi mi geliyor?',
-        kanit:k + ' gün', kayit:'Kahveyi sever; neredeyse her gün içer (onayladı)' };
+        soru:yz('ortak.cikarim.son-30-gunde') + k + ' gün kahve içmişsin. Kahvesiz bir gün sana eksik gibi mi geliyor?',
+        kanit:k + ' gün', kayit:yz('ortak.cikarim.kahveyi-sever-neredeyse-her') };
     },
     /* SPİ: kişisel tahmin ağının en etkili özelliği (yalnız model tabanı geçtiyse). */
     function spiModel(v){
@@ -274,7 +312,7 @@ LIFEOS.CIKARIM = (function(){
       const x = m.onem[0];
       const yon = x.yon > 0 ? 'arttıkça kendini daha iyi hissediyorsun' : x.yon < 0 ? 'arttıkça kendini daha kötü hissediyorsun' : 'ruh hâlinle birlikte değişiyor';
       return { id:'spi-model:' + x.ozellik + ':' + x.yon, alan:'ruh',
-        soru:'Ruh hâli modelim ' + m.n + ' gününden şunu öğrendi: «' + x.ad + '» ' + yon + '. Ruh hâlini en çok etkileyen şeylerden biri bu gibi.',
+        soru:yz('ortak.cikarim.ruh-hali-modelim') + m.n + ' gününden şunu öğrendi: «' + x.ad + '» ' + yon + '. Ruh hâlini en çok etkileyen şeylerden biri bu gibi.',
         kanit:'model tabandan %' + m.kazanc + ' iyi; birliktelik, neden değil',
         kayit:x.ad + ' ruh hâlini etkiliyor: ' + yon.replace('hissediyorsun', 'hissediyor') + ' (onayladı)' };
     },
@@ -283,9 +321,9 @@ LIFEOS.CIKARIM = (function(){
       const u = v.uslup;
       if(!u) return null;
       return { id:'uslup:' + (u.kisa ? 'kisa' : 'uzun') + ':' + (u.samimi ? 'samimi' : 'olculu'), alan:'uslup',
-        soru:'Bana genelde ' + u.ozet + ' yazıyorsun. Benimle de böyle konuşmamı ister misin?',
+        soru:yz('ortak.cikarim.bana-genelde') + u.ozet + ' yazıyorsun. Benimle de böyle konuşmamı ister misin?',
         kanit:'mesaj başına ortalama ' + u.ort + ' karakter',
-        kayit:'İletişim üslubu: ' + u.ozet + '; King de böyle konuşsun (onayladı)' };
+        kayit:yz('ortak.cikarim.i-letisim-uslubu') + u.ozet + '; King de böyle konuşsun (onayladı)' };
     },
     /* Radyo: çalışırken dinlenen tür (zayıf kanıt: soru olarak). */
     function sesTur(v){
@@ -293,8 +331,8 @@ LIFEOS.CIKARIM = (function(){
       if(!s || !s.tur || !s.dinlendi) return null;
       const sakin = /chill|lofi|klasik|jazz|piyano|ambient/i.test(s.tur);
       return { id:'ses-tur:' + s.tur, alan:'sevgi',
-        soru:'Çalışırken genelde ' + s.turAd + ' açıyorsun. ' + (sakin ? 'Sakin bir ortam odaklanmana yardım ediyor olabilir mi?' : 'Ritimli bir ortam seni canlı tutuyor olabilir mi?'),
-        kanit:'radyo tercihi', kayit:'Çalışırken ' + s.turAd + ' dinler (onayladı)' };
+        soru:yz('ortak.cikarim.calisirken-genelde') + s.turAd + ' açıyorsun. ' + (sakin ? yz('ortak.cikarim.sakin-bir-ortam-odaklanmana') : yz('ortak.cikarim.ritimli-bir-ortam-seni-canli')),
+        kanit:'radyo tercihi', kayit:yz('ortak.cikarim.calisirken') + s.turAd + ' dinler (onayladı)' };
     },
   ];
 

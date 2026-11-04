@@ -5,6 +5,41 @@
 
    Rozet önemlidir: cümle modelden mi geldi yoksa kural motorundan mı?
    Model kapalıyken ofis kapanmaz, yalnızca rozet değişir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.office.raporu-kapat':'Raporu kapat',
+  'spi.office.raporu-ac':'Raporu aç',
+  'spi.office.girilmis-olcum':'Girilmiş ölçüm',
+  'spi.office.referans-disi':'Referans dışı',
+  'spi.office.hedef-bandin-disi':'Hedef bandın dışı',
+  'spi.office.acik-kirmizi-bayrak':'Açık kırmızı bayrak',
+  'spi.office.son-tahlil':'Son tahlil',
+  'spi.office.profilde':'Profilde ',
+  'spi.office.gunluk-kalori-hedefi':'Günlük kalori hedefi',
+  'spi.office.protein-bandi':'Protein bandı',
+  'spi.office.lif-hedefi':'Lif hedefi',
+  'spi.office.kayitli-gun-7-gun':'Kayıtlı gün (7 gün)',
+  'spi.office.yuk-carpani':'Yük çarpanı',
+  'spi.office.son-hafta-son-ay':'Son hafta / son ay',
+  'spi.office.bu-hafta-yuk':'Bu hafta yük',
+  'spi.office.eksik-kalip':'Eksik kalıp',
+  'spi.office.kisi-basi':'Kişi başı',
+  'spi.office.tahmin-payi':'Tahmin payı',
+  'spi.office.toparlanma-ortalamasi':'Toparlanma ortalaması',
+  'spi.office.asgari-gun':'Asgari gün',
+  'spi.office.ogun-kaydi':'Öğün kaydı',
+  'spi.office.davranis-serisi':'Davranış serisi',
+  'spi.office.acik-karar':'Açık karar',
+  'spi.office.capraz-bag':'Çapraz bağ',
+  'spi.office.brifing-gunde-bir-kez-uretil':'Brifing günde bir kez üretilir ve tek model çağrısı harcar. ',
+  'spi.office.model-kapaliysa-kural-motoru':'Model kapalıysa kural motorunun cümlesi yazılır.',
+  'spi.office.devir-tahminden-cikmaz':'Devir tahminden çıkmaz.',
+  'spi.office.degismediyse-bu-da-bir-sonuc':'Değişmediyse bu da bir sonuçtur ve yazılması gerekir.',
+  'spi.office.masalar-sessiz':'Masalar sessiz.',
+  'spi.office.masalarda':'Masalarda ',
+  'spi.office.patron-ekibi-yonetir-kerem-l':'Patron ekibi yönetir; Kerem laboratuvara, Nesrin beslenmeye, ',
+  'spi.office.baris-harekete-sedef-ekonomi':'Barış harekete, Sedef ekonomiye bakar. Her not önce kural motorundan ',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -177,7 +212,7 @@ SP.Screens.office = (function(){
           ${deskDetail(agent, b)}
         </div>`)}
         <div class="row wrap mt-12">
-          ${K.Button({ label:open ? 'Raporu kapat' : 'Raporu aç', size:'sm',
+          ${K.Button({ label:open ? yz('spi.office.raporu-kapat') : yz('spi.office.raporu-ac'), size:'sm',
             act:'toggle-desk', data:{ 'data-id':agent.id } })}
           ${K.Button({ label:yz('spi.office.soru-sor'), size:'sm',
             act:'ask-agent', data:{ 'data-agent':agent.id } })}
@@ -190,11 +225,11 @@ SP.Screens.office = (function(){
     if(agent.id === 'lab'){
       return html`
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
-          ['Girilmiş ölçüm', b.summary.measured + ' / ' + b.summary.total],
-          ['Referans dışı', String(b.summary.out)],
-          ['Hedef bandın dışı', String(b.summary.offTarget)],
-          ['Açık kırmızı bayrak', String(b.flags.length)],
-          ['Son tahlil', b.lastLab ? U.fmtDate(b.lastLab) : 'yok'],
+          [yz('spi.office.girilmis-olcum'), b.summary.measured + ' / ' + b.summary.total],
+          [yz('spi.office.referans-disi'), String(b.summary.out)],
+          [yz('spi.office.hedef-bandin-disi'), String(b.summary.offTarget)],
+          [yz('spi.office.acik-kirmizi-bayrak'), String(b.flags.length)],
+          [yz('spi.office.son-tahlil'), b.lastLab ? U.fmtDate(b.lastLab) : 'yok'],
         ] })}
         ${when(b.attention.length, () => html`<div class="mt-10">
           ${K.Table({ tight:true, headers:['Ölçüm', { label:yz('spi.office.deger'), num:true }, 'Durum'],
@@ -203,13 +238,13 @@ SP.Screens.office = (function(){
                 : a.status === 'low' || a.status === 'high' ? 'warn' : 'info' })]) })}</div>`)}`;
     }
     if(agent.id === 'nutri'){
-      if(!b.targetsOk) return K.Notice({ tone:'warn', body:'Profilde ' + b.missingProfile.join(', ') + ' eksik.' });
+      if(!b.targetsOk) return K.Notice({ tone:'warn', body:yz('spi.office.profilde') + b.missingProfile.join(', ') + ' eksik.' });
       return html`
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
-          ['Günlük kalori hedefi', U.fmtNum(b.kcal) + ' kcal'],
-          ['Protein bandı', b.protein.min + '–' + b.protein.max + ' g'],
-          ['Lif hedefi', b.fiber + ' g'],
-          ['Kayıtlı gün (7 gün)', String(b.loggedDays)],
+          [yz('spi.office.gunluk-kalori-hedefi'), U.fmtNum(b.kcal) + ' kcal'],
+          [yz('spi.office.protein-bandi'), b.protein.min + '–' + b.protein.max + ' g'],
+          [yz('spi.office.lif-hedefi'), b.fiber + ' g'],
+          [yz('spi.office.kayitli-gun-7-gun'), String(b.loggedDays)],
           ['Bugün', b.todayMeals + ' öğün · ' + U.fmtNum(b.todayKcal) + ' kcal'],
         ] })}
         ${when(b.gaps.length, () => html`<div class="mt-10">
@@ -220,11 +255,11 @@ SP.Screens.office = (function(){
       return html`
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
           ['Toparlanma', b.readiness == null ? 'ölçüm yok' : b.readiness + '/100 · ' + b.band],
-          ['Yük çarpanı', '×' + U.fmtNet(b.factor)],
-          ['Son hafta / son ay', b.acwr.ratio != null ? U.fmtNet(b.acwr.ratio) + ' · ' + b.acwr.zone : b.acwr.note],
-          ['Bu hafta yük', U.fmtNum(b.week)],
+          [yz('spi.office.yuk-carpani'), '×' + U.fmtNet(b.factor)],
+          [yz('spi.office.son-hafta-son-ay'), b.acwr.ratio != null ? U.fmtNet(b.acwr.ratio) + ' · ' + b.acwr.zone : b.acwr.note],
+          [yz('spi.office.bu-hafta-yuk'), U.fmtNum(b.week)],
           ['Bugün', b.doneToday + ' seans · ' + U.fmtNum(b.loadToday) + ' yük'],
-          ['Eksik kalıp', b.balance.length ? b.balance.join(', ') : 'yok'],
+          [yz('spi.office.eksik-kalip'), b.balance.length ? b.balance.join(', ') : 'yok'],
         ] })}
         ${when(b.progressionReady.length, () => html`<div class="mt-10">
           ${K.Table({ tight:true, headers:['Hareket', 'Basamak'],
@@ -235,8 +270,8 @@ SP.Screens.office = (function(){
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
           ['Sepet', b.itemCount + ' kalem · ' + U.fmtNum(Math.round(b.total)) + ' TL'],
           ['Sınır', b.limit == null ? 'konmadı' : U.fmtNum(b.limit) + ' TL' + (b.over ? ' · aşıldı' : '')],
-          ['Kişi başı', U.fmtNum(Math.round(b.perPerson)) + ' TL'],
-          ['Tahmin payı', '%' + b.estimatePct],
+          [yz('spi.office.kisi-basi'), U.fmtNum(Math.round(b.perPerson)) + ' TL'],
+          [yz('spi.office.tahmin-payi'), '%' + b.estimatePct],
         ] })}
         ${when(b.swaps.length, () => html`<div class="mt-10">
           ${K.Table({ tight:true, headers:['İkame', { label:yz('spi.office.tasarruf'), num:true }, 'Korunan'],
@@ -247,15 +282,15 @@ SP.Screens.office = (function(){
     return html`
       ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
         ['Hafta', U.fmtRange(b.week.start, b.week.end)],
-        ['Toparlanma ortalaması', b.week.readiness == null ? '—' : String(b.week.readiness)],
-        ['Asgari gün', b.week.minDays + '/7'],
+        [yz('spi.office.toparlanma-ortalamasi'), b.week.readiness == null ? '—' : String(b.week.readiness)],
+        [yz('spi.office.asgari-gun'), b.week.minDays + '/7'],
         ['Seans', String(b.week.sessions)],
-        ['Öğün kaydı', b.week.loggedMeals + ' gün'],
-        ['Davranış serisi', b.streak + ' gün'],
-        ['Açık karar', String(b.openDecisions.length)],
+        [yz('spi.office.ogun-kaydi'), b.week.loggedMeals + ' gün'],
+        [yz('spi.office.davranis-serisi'), b.streak + ' gün'],
+        [yz('spi.office.acik-karar'), String(b.openDecisions.length)],
       ] })}
       ${when(b.cross.length, () => html`<div class="mt-10">
-        ${K.Table({ tight:true, headers:['Çapraz bağ', 'Bulgu'],
+        ${K.Table({ tight:true, headers:[yz('spi.office.capraz-bag'), 'Bulgu'],
           rows:b.cross.map(c => [c.title, html`<span class="small">${c.text}</span>`]) })}</div>`)}`;
   }
 
@@ -271,8 +306,8 @@ SP.Screens.office = (function(){
           ${when(b.headline && String(b.text || '').indexOf(b.headline) < 0,
             () => html`<p class="small dim mt-8">${b.headline}</p>`)}`)}
         ${when(!b, () => K.Notice({ tone:'info',
-          body:'Brifing günde bir kez üretilir ve tek model çağrısı harcar. '
-             + 'Model kapalıysa kural motorunun cümlesi yazılır.' }))}`,
+          body:yz('spi.office.brifing-gunde-bir-kez-uretil')
+             + yz('spi.office.model-kapaliysa-kural-motoru') }))}`,
       foot:K.Button({ label:yz('spi.office.tazele'), size:'sm', act:'refresh-briefing' }),
     });
   }
@@ -315,7 +350,7 @@ SP.Screens.office = (function(){
             ${when(rows.length > HANDOFF_MAX, () => html`<p class="tiny dim mt-8">
               ${rows.length - HANDOFF_MAX} ${yz('spi.office.bag-daha-masalari-ac')}</p>`)}`
         : K.Empty({ text:yz('spi.office.masalar-arasinda-devredilece')
-            + 'Devir tahminden çıkmaz.' }),
+            + yz('spi.office.devir-tahminden-cikmaz') }),
     });
   }
 
@@ -463,7 +498,7 @@ SP.Screens.office = (function(){
         title:yz('spi.office.karari-kapat'),
         subtitle:yz('spi.office.sonucu-olcuyle-yaz'),
         note:yz('spi.office.i-yi-geldi-bir-sonuc-degildi')
-          + 'Değişmediyse bu da bir sonuçtur ve yazılması gerekir.',
+          + yz('spi.office.degismediyse-bu-da-bir-sonuc'),
         body:String(K.Field({ label:yz('spi.office.sonuc'), input:K.Textarea({ id:'dec-out', rows:3,
           placeholder:yz('spi.office.ne-degisti-olcumle-hisle-deg') }) })),
         footer:String(html`${K.Button({ label:yz('spi.office.vazgec'), act:'sheet-close' })}
@@ -497,15 +532,15 @@ SP.Screens.office = (function(){
       const urgent = hand.filter(h => h.tone === 'danger');
       if(urgent.length) return urgent[0].fromName + ' masasından ' + urgent[0].toName
         + ' masasına düşen bir iş var.';
-      if(!notes.length && !hand.length) return 'Masalar sessiz.';
+      if(!notes.length && !hand.length) return yz('spi.office.masalar-sessiz');
       if(loud) return loud + ' masada dikkat isteyen not var'
         + (hand.length ? ' · ' + hand.length + ' devir bekliyor' : '') + '.';
       if(!notes.length) return hand.length + ' masalar arası bağ var.';
-      return 'Masalarda ' + notes.length + ' not var.';
+      return yz('spi.office.masalarda') + notes.length + ' not var.';
     },
     lede(){
-      return 'Patron ekibi yönetir; Kerem laboratuvara, Nesrin beslenmeye, '
-        + 'Barış harekete, Sedef ekonomiye bakar. Her not önce kural motorundan '
+      return yz('spi.office.patron-ekibi-yonetir-kerem-l')
+        + yz('spi.office.baris-harekete-sedef-ekonomi')
         + 'çıkar — model varsa onu yeniden yazar, yerine geçmez. Bir masanın '
         + 'bulgusu başka bir masanın işiyse devir satırı onu taşır.';
     },

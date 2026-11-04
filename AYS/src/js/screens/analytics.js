@@ -5,6 +5,26 @@
    uyku ne yapıyor, söylenen kapasite gerçek mi.
 
    Yazim bicimi: STIL.md. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.analytics.karsilastirma-icin-en-az-iki':'Karşılaştırma için en az iki deneme gerekir.',
+  'ays.analytics.net-artti':'Net arttı',
+  'ays.analytics.net-dustu':'Net düştü',
+  'ays.analytics.net-ayni':'Net aynı',
+  'ays.analytics.yanlis-defterine-kayit-giril':'Yanlış defterine kayıt girildikçe konu × hata haritası burada oluşur.',
+  'ays.analytics.k-kavram-i-islem-y':'K kavram, İ işlem, Y yorum, S süre, D dikkat. Bir konuda İ baskınsa çözüm ',
+  'ays.analytics.sira-gecmisi-icin-en-az':'Sıra geçmişi için en az dört tam deneme gerekir.',
+  'ays.analytics.puan-standart-sapmaya-gore-n':'Puan standart sapmaya göre normalize edilir ve aday dağılımı her yıl değişir. ',
+  'ays.analytics.buradaki-aralik-son-yillarin':'Buradaki aralık son yılların sonuçlarından çıkarılmış koçluk bandıdır.',
+  'ays.analytics.deneme-ekranindan-sureli-otu':'Deneme ekranından “Süreli oturum” ile başlatabilirsin.',
+  'ays.analytics.acilan-sinyal':'Açılan sinyal',
+  'ays.analytics.kapanan-sinyal':'Kapanan sinyal',
+  'ays.analytics.olasilik-0-1':'Olasılık (0–1)',
+  'ays.analytics.bes-alanda-da-bakim-borcu':'Beş alanda da bakım borcu görünmüyor.',
+  'ays.analytics.bu-okuma-su-an-cizilemedi':'Bu okuma şu an çizilemedi; verin yerinde duruyor.',
+  'ays.analytics.kapandi-sapma':'Kapandı — sapma ',
+  'ays.analytics.denemelerden-ve-kayitlardan':'Denemelerden ve kayıtlardan türetilen okumalar',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -176,7 +196,7 @@ R.Screens.analytics = (function(){
 
   function compareTab(){
     const list = S.exams.slice().sort((a, b) => b.date.localeCompare(a.date));
-    if(list.length < 2) return empty('Karşılaştırma için en az iki deneme gerekir.', addExam);
+    if(list.length < 2) return empty(yz('ays.analytics.karsilastirma-icin-en-az-iki'), addExam);
 
     const opts = list.map(e => ({ value:e.id, label:U.fmtShort(e.date)+' · '+e.type }));
     const a = S.ui.compareA || list[1].id;
@@ -192,7 +212,7 @@ R.Screens.analytics = (function(){
             ])}` }),
 
         when(cmp, () => K.Card({
-          title:cmp.delta > 0 ? 'Net arttı' : cmp.delta < 0 ? 'Net düştü' : 'Net aynı',
+          title:cmp.delta > 0 ? yz('ays.analytics.net-artti') : cmp.delta < 0 ? yz('ays.analytics.net-dustu') : yz('ays.analytics.net-ayni'),
           sub:U.fmtShort(cmp.a.date)+' → '+U.fmtShort(cmp.b.date),
           badge:K.Badge({ label:(cmp.delta > 0 ? '+' : '')+U.fmtNet(cmp.delta)+' net',
             tone:cmp.delta > 0 ? 'ok' : cmp.delta < 0 ? 'danger' : 'muted' }),
@@ -275,7 +295,7 @@ R.Screens.analytics = (function(){
 
   function errorsTab(){
     const h = A().errorHeatmap(14);
-    if(!h.rows.length) return empty('Yanlış defterine kayıt girildikçe konu × hata haritası burada oluşur.',
+    if(!h.rows.length) return empty(yz('ays.analytics.yanlis-defterine-kayit-giril'),
       K.Button({ label:yz('ays.analytics.yanlis-defterine-git'), size:'sm', tone:'primary', act:'go', data:{ 'data-route':'cards' } }));
 
     const cell = (v) => {
@@ -295,7 +315,7 @@ R.Screens.analytics = (function(){
             ].concat(h.tags.map(t => cell(r.cells[t])))
               .concat([html`<b class="num">${r.total}</b>`])) })}
           <div class="mt-12">${K.Notice({ tone:'info',
-            body:'K kavram, İ işlem, Y yorum, S süre, D dikkat. Bir konuda İ baskınsa çözüm '
+            body:yz('ays.analytics.k-kavram-i-islem-y')
                + 'daha çok konu tekrarı değil, işlem rutini kurmaktır.' })}</div>`,
       })),
       K.Span(4, K.Stack([leechCard(), raw(UI.rail(['pareto', 'error-tags', 'notebook']))])),
@@ -321,7 +341,7 @@ R.Screens.analytics = (function(){
 
   function rankTab(){
     const hist = A().rankHistory();
-    if(hist.length < 2) return empty('Sıra geçmişi için en az dört tam deneme gerekir.', addExam);
+    if(hist.length < 2) return empty(yz('ays.analytics.sira-gecmisi-icin-en-az'), addExam);
 
     const target = (S.profile && S.profile.targetRank) || R.PROGRAM.refRank;
     const series = hist.map(h => h.score);
@@ -370,8 +390,8 @@ R.Screens.analytics = (function(){
       ])),
       K.Span(4, K.Stack([
         K.Notice({ tone:'warn', title:yz('ays.analytics.bu-bir-osym-hesabi-degildir'),
-          body:'Puan standart sapmaya göre normalize edilir ve aday dağılımı her yıl değişir. '
-             + 'Buradaki aralık son yılların sonuçlarından çıkarılmış koçluk bandıdır.' }),
+          body:yz('ays.analytics.puan-standart-sapmaya-gore-n')
+             + yz('ays.analytics.buradaki-aralik-son-yillarin') }),
         raw(UI.rail(['rank', 'tiers', 'certainty'])),
       ])),
     ]);
@@ -423,7 +443,7 @@ R.Screens.analytics = (function(){
     if(!list.length){
       return K.Card({ title:yz('ays.analytics.sureli-oturumlar'),
         body:K.Empty({ icon:'clock', text:yz('ays.analytics.henuz-sureli-deneme-oturumu')
-          + 'Deneme ekranından “Süreli oturum” ile başlatabilirsin.' }) });
+          + yz('ays.analytics.deneme-ekranindan-sureli-otu') }) });
     }
     return K.Card({
       title:yz('ays.analytics.sureli-oturumlar'), sub:list.length+' prova',
@@ -571,14 +591,14 @@ R.Screens.analytics = (function(){
           title:yz('ays.analytics.acik-soru'), body:acik.question + ' (Bugün ekranında cevaplanabilir.)' })}</div>`)}
         <div class="mt-12">${K.Table({ tight:true,
           headers:['Zincir', { label:yz('ays.analytics.sayi'), num:true }], rows:[
-            ['Açılan sinyal', String(e.opened)],
+            [yz('ays.analytics.acilan-sinyal'), String(e.opened)],
             ['Görüldü', String(e.seen)],
             ['Cevaplandı', String(e.answered)],
             ['«Bana uymuyor» denildi', String(e.dismissed)],
             ['Kapandı', String(e.closed)],
           ] })}</div>
         ${when(e.cert === 'observed', () => html`<div class="mt-12">${K.Table({ tight:true,
-          headers:['Kapanan sinyal', { label:yz('ays.analytics.adet'), num:true }, { label:yz('ays.analytics.ayrisma-kapandi'), num:true }],
+          headers:[yz('ays.analytics.kapanan-sinyal'), { label:yz('ays.analytics.adet'), num:true }, { label:yz('ays.analytics.ayrisma-kapandi'), num:true }],
           rows:[
             ['Cevaplananlar', String(e.answeredClosed),
               e.answeredRate == null ? '—' : '%' + e.answeredRate],
@@ -678,7 +698,7 @@ R.Screens.analytics = (function(){
               ${(function(){
                 const k = R.Calib.kindOf(S.ui.calibKind || 'week-minutes');
                 return html`<p class="tiny dim">${k.ask}</p>
-                  ${K.Field({ label:k.type === 'binary' ? 'Olasılık (0–1)' : 'Tahminin'
+                  ${K.Field({ label:k.type === 'binary' ? yz('ays.analytics.olasilik-0-1') : 'Tahminin'
                       + (k.unit ? ' (' + k.unit + ')' : ''),
                     input:K.Input({ id:'ay-calib-guess', type:'number',
                       step:k.type === 'binary' ? '0.05' : 'any' }) })}`;
@@ -725,7 +745,7 @@ R.Screens.analytics = (function(){
         sub:ciddi.length ? ciddi.length + ' bulgu' : 'temiz',
         body:html`
           ${when(!ciddi.length, () => K.Notice({ tone:'ok',
-            body:'Beş alanda da bakım borcu görünmüyor.' }))}` })),
+            body:yz('ays.analytics.bes-alanda-da-bakim-borcu') }))}` })),
 
       ...R.Audit.AREAS.map(function(a){
         const bulgular = R.Audit.of(a.id);
@@ -757,7 +777,7 @@ R.Screens.analytics = (function(){
     try{ return (BODIES[t.id] || compareTab)(); }
     catch(e){
       console.error('Analiz bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu okuma şu an çizilemedi; verin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('ays.analytics.bu-okuma-su-an-cizilemedi') });
     }
   }
 
@@ -851,7 +871,7 @@ R.Screens.analytics = (function(){
       /* Burası doğruydu ama yalnız `ape` türünü gösteriyordu: net
          sapması hiç yazılmıyordu. Tek biçimlendirici üçünü de yazar. */
       const yazi = R.Calib.errorText(r.forecast);
-      UI.toast(yazi ? ('Kapandı — sapma ' + yazi) : 'Kapandı');
+      UI.toast(yazi ? (yz('ays.analytics.kapandi-sapma') + yazi) : 'Kapandı');
       R.App.render();
     },
   };
@@ -884,7 +904,7 @@ R.Screens.analytics = (function(){
         'bakım-borcu'].concat(alanlar);
     },
     title:yz('ays.analytics.ayrintili-analiz'),
-    subtitle(){ return 'Denemelerden ve kayıtlardan türetilen okumalar'; },
+    subtitle(){ return yz('ays.analytics.denemelerden-ve-kayitlardan'); },
     actions(){ return ''; },
     render, afterRender, handle, change,
   };

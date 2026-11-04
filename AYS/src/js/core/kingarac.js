@@ -11,6 +11,115 @@
    cümlesinden King'in `kayit_gir` aracıyla, AYS'nin kendi ayrıştırıcısıyla
    girer (sayı kullanıcınındır). `modelYok` eylemler (hedef planı) modelin
    seçimine kapalıdır; kullanıcı Hedeflerim'den yapar. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.kingarac.kayitli-deneme-yok':'Kayıtlı deneme yok.',
+  'ays.core.kingarac.tahmin-icin-yeterli-deneme-y':'Tahmin için yeterli deneme yok.',
+  'ays.core.kingarac.tahmini-puan-bandi':'Tahmini puan bandı: ',
+  'ays.core.kingarac.sira-bandi':'Sıra bandı: ',
+  'ays.core.kingarac.yanlis-defterinde-kayit-yok':'Yanlış defterinde kayıt yok.',
+  'ays.core.kingarac.king-sohbetinde-istendi':'King sohbetinde istendi',
+  'ays.core.kingarac.uygulanamadi':'Uygulanamadı: ',
+  'ays.core.kingarac.birden-cok':'Birden çok ',
+  'ays.core.kingarac.deneme-kaydi':'Deneme kaydı',
+  'ays.core.kingarac.deneme-sinavini-kaydeder-gun':'Deneme sınavını kaydeder, günceller ya da siler. Eklemede doğru, yanlış ve boş sayısı zorunludur.',
+  'ays.core.kingarac.tarih':'Tarih: ',
+  'ays.core.kingarac.yayinci':'Yayıncı: ',
+  'ays.core.kingarac.deneme-eklemek-icin-dogru-ya':'Deneme eklemek için doğru, yanlış ve boş sayısı belirtilmelidir; net sayısından doğru veya boş uydurulmaz.',
+  'ays.core.kingarac.deneme-kaydedilecek':'Deneme kaydedilecek: ',
+  'ays.core.kingarac.tur':'Tür: ',
+  'ays.core.kingarac.test':'Test: ',
+  'ays.core.kingarac.gecersiz-islem':'Geçersiz işlem: ',
+  'ays.core.kingarac.deneme-silindi':'Deneme silindi.',
+  'ays.core.kingarac.deneme-guncellendi':'Deneme güncellendi.',
+  'ays.core.kingarac.deneme-kaydedildi':'Deneme kaydedildi.',
+  'ays.core.kingarac.enerji-kaydi':'Enerji kaydı',
+  'ays.core.kingarac.gunun-enerji-duzeyini-1-5-ve':'Günün enerji düzeyini (1-5) ve his notunu kaydeder.',
+  'ays.core.kingarac.eski-enerji':'Eski enerji: ',
+  'ays.core.kingarac.yeni-enerji':'Yeni enerji: ',
+  'ays.core.kingarac.enerji-kaydedildi':'Enerji kaydedildi: ',
+  'ays.core.kingarac.etkinlik-mesgale-ekle':'Etkinlik / meşgale ekle',
+  'ays.core.kingarac.mesgale-kataloguna-yeni-mola':'Meşgale kataloğuna yeni mola etkinliği ekler ya da günceller.',
+  'ays.core.kingarac.sure':'Süre: ',
+  'ays.core.kingarac.yeni-etkinlik':'Yeni Etkinlik',
+  'ays.core.kingarac.etkinlik-kaydedildi':'Etkinlik kaydedildi: «',
+  'ays.core.kingarac.haftalik-degerlendirme':'Haftalık değerlendirme',
+  'ays.core.kingarac.bir-program-haftasinin-pazar':'Bir program haftasının pazar değerlendirmesini kaydeder.',
+  'ays.core.kingarac.hafta':'Hafta ',
+  'ays.core.kingarac.hafta-2':'Hafta: ',
+  'ays.core.kingarac.not':'Not: ',
+  'ays.core.kingarac.puan':'Puan: ',
+  'ays.core.kingarac.tekrar-karti':'Tekrar kartı',
+  'ays.core.kingarac.tekrar-karti-ekler-gunceller':'Tekrar kartı ekler, günceller ya da siler.',
+  'ays.core.kingarac.tekrar-karti-silinecek':'Tekrar kartı silinecek.',
+  'ays.core.kingarac.on':'Ön: ',
+  'ays.core.kingarac.arka':'Arka: ',
+  'ays.core.kingarac.tekrar-karti-guncellenecek':'Tekrar kartı güncellenecek.',
+  'ays.core.kingarac.tekrar-karti-eklenecek':'Tekrar kartı eklenecek: «',
+  'ays.core.kingarac.kart-silindi':'Kart silindi.',
+  'ays.core.kingarac.kart-guncellendi':'Kart güncellendi.',
+  'ays.core.kingarac.kart-eklendi':'Kart eklendi.',
+  'ays.core.kingarac.konu-durumu':'Konu durumu',
+  'ays.core.kingarac.bir-konunun-calisma-ve-kapan':'Bir konunun çalışma ve kapanış durumunu (not_started, provisional, practicing, closed) ayarlar.',
+  'ays.core.kingarac.eski-durum':'Eski durum: ',
+  'ays.core.kingarac.konu-durumu-guncellendi':'Konu durumu güncellendi: ',
+  'ays.core.kingarac.dikkat-dagilmasi-ekle':'Dikkat dağılması ekle',
+  'ays.core.kingarac.gunun-odak-sayacina-dikkat-d':'Günün odak sayacına dikkat dağılması / bölünme çentiği ekler.',
+  'ays.core.kingarac.su-anki-bolunme-sayisi':'Şu anki bölünme sayısı: ',
+  'ays.core.kingarac.dikkat-dagilmasi-kaydedildi':'Dikkat dağılması kaydedildi (',
+  'ays.core.kingarac.mola-kaydet':'Mola kaydet',
+  'ays.core.kingarac.gunun-kaydina-verilen-bir-mo':'Günün kaydına verilen bir molayı ve süresini kaydeder.',
+  'ays.core.kingarac.mola-kaydedildi':'Mola kaydedildi (',
+  'ays.core.kingarac.profil-kaydet-guncelle':'Profil kaydet / güncelle',
+  'ays.core.kingarac.profil-ayarlarini-gunceller':'Profil ayarlarını günceller ya da cihaza yeni aday profili ekler.',
+  'ays.core.kingarac.yeni-aday-profili-eklenecek':'Yeni aday profili eklenecek: «',
+  'ays.core.kingarac.yeni-profil':'Yeni profil',
+  'ays.core.kingarac.profil-adi':'Profil adı: ',
+  'ays.core.kingarac.profil-ayarlari-guncellenece':'Profil ayarları güncellenecek.',
+  'ays.core.kingarac.ad':'Ad: ',
+  'ays.core.kingarac.alan':'Alan: ',
+  'ays.core.kingarac.hedef-sira':'Hedef sıra: ',
+  'ays.core.kingarac.uyku-hedefi':'Uyku hedefi: ',
+  'ays.core.kingarac.koc-tonu':'Koç tonu: ',
+  'ays.core.kingarac.yeni-profil-eklendi':'Yeni profil eklendi: «',
+  'ays.core.kingarac.profil-guncellendi':'Profil güncellendi.',
+  'ays.core.kingarac.cihazda-kayitli-aday-profill':'Cihazda kayıtlı aday profillerini ve gözetmen özetlerini listeler.',
+  'ays.core.kingarac.kayitli-profil-yok':'Kayıtlı profil yok.',
+  'ays.core.kingarac.takvim-istisnasi':'Takvim istisnası',
+  'ays.core.kingarac.takvime-tatil-okul-sinavi-yo':'Takvime tatil, okul sınavı, yoğun gün gibi istisnaları ekler, günceller ya da siler.',
+  'ays.core.kingarac.takvim-kaydi-silinecek':'Takvim kaydı silinecek.',
+  'ays.core.kingarac.takvim-kaydi-guncellenecek':'Takvim kaydı güncellenecek.',
+  'ays.core.kingarac.takvim-istisnasi-kaydedilece':'Takvim istisnası kaydedilecek.',
+  'ays.core.kingarac.takvim-kaydi-silindi':'Takvim kaydı silindi.',
+  'ays.core.kingarac.takvim-kaydi-guncellendi':'Takvim kaydı güncellendi.',
+  'ays.core.kingarac.takvim-istisnasi-kaydedildi':'Takvim istisnası kaydedildi.',
+  'ays.core.kingarac.telafi-protokolu':'Telafi protokolü',
+  'ays.core.kingarac.telafi-protokolunu-hastalik':'Telafi protokolünü (hastalık, kopma, deneme düşüşü vb.) günceller ya da başlatır.',
+  'ays.core.kingarac.durum':'Durum: ',
+  'ays.core.kingarac.sonuc':'Sonuç: ',
+  'ays.core.kingarac.telafi-protokolu-guncellendi':'Telafi protokolü güncellendi.',
+  'ays.core.kingarac.video-ders-notu':'Video / ders notu',
+  'ays.core.kingarac.video-ders-notu-ekler-guncel':'Video ders notu ekler, günceller ya da siler.',
+  'ays.core.kingarac.video-notu-silinecek':'Video notu silinecek: «',
+  'ays.core.kingarac.baslik':'Başlık: ',
+  'ays.core.kingarac.video-notu-guncellenecek':'Video notu güncellenecek.',
+  'ays.core.kingarac.video-notu-kaydedilecek':'Video notu kaydedilecek: «',
+  'ays.core.kingarac.basliksiz-not':'Başlıksız not',
+  'ays.core.kingarac.ders':'Ders: ',
+  'ays.core.kingarac.video-notu-silindi':'Video notu silindi.',
+  'ays.core.kingarac.video-notu-guncellendi':'Video notu güncellendi.',
+  'ays.core.kingarac.yeni-video-notu':'Yeni Video Notu',
+  'ays.core.kingarac.video-notu-kaydedildi':'Video notu kaydedildi.',
+  'ays.core.kingarac.yanlis-defteri':'Yanlış defteri',
+  'ays.core.kingarac.yanlis-defterine-soru-hatasi':'Yanlış defterine soru hatası ekler, günceller ya da siler.',
+  'ays.core.kingarac.yanlis-kaydi-silinecek':'Yanlış kaydı silinecek.',
+  'ays.core.kingarac.yanlis-kaydi-guncellenecek':'Yanlış kaydı güncellenecek.',
+  'ays.core.kingarac.neden':'Neden: ',
+  'ays.core.kingarac.yanlis-defterine-kayit-yazil':'Yanlış defterine kayıt yazılacak.',
+  'ays.core.kingarac.yanlis-kaydi-silindi':'Yanlış kaydı silindi.',
+  'ays.core.kingarac.yanlis-kaydi-guncellendi':'Yanlış kaydı güncellendi.',
+  'ays.core.kingarac.yanlis-kaydi-eklendi':'Yanlış kaydı eklendi.',
+});
+
 
 window.R = window.R || {};
 
@@ -33,7 +142,7 @@ R.KingArac = (function(){
     /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
     denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
     konu_riski:/(risk altında|riskli konu|konu riski|net (?:kayb|kaçır))/,
-    gunler:/((?:bugün|dün) kaç (?:dakika|saat|soru)|kaç (?:dakika|saat) çalıştım|(?:hangi gün|hangi günler) kaç)/,
+    gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç)/,
     konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
     gunun_akisi:/(günün akışı|bugünün akışı)/,
     durum_ozeti:/(sınava (?:kaç gün|ne kadar)|durum özet|genel durum)/,
@@ -147,17 +256,17 @@ R.KingArac = (function(){
   function satirlar(ad, s){
     if(!s || typeof s !== 'object') return null;
     if(ad === 'denemeler' && Array.isArray(s)){
-      return s.length ? s.slice(0, 6).map(e => e.tarih + ' · ' + (e.aile || e.tur || '') + ' · ' + n2(e.toplamNet) + ' net') : ['Kayıtlı deneme yok.'];
+      return s.length ? s.slice(0, 6).map(e => e.tarih + ' · ' + (e.aile || e.tur || '') + ' · ' + n2(e.toplamNet) + ' net') : [yz('ays.core.kingarac.kayitli-deneme-yok')];
     }
     if(ad === 'puan_tahmini'){
-      if(!s.yeterliVeri) return [s.gerekce || 'Tahmin için yeterli deneme yok.'];
-      return ['Tahmini puan bandı: ' + n2(s.puanBandi && s.puanBandi[0]) + '–' + n2(s.puanBandi && s.puanBandi[1]),
-        'Sıra bandı: ' + n2(s.tahminiSiraBandi && s.tahminiSiraBandi[0]) + '–' + n2(s.tahminiSiraBandi && s.tahminiSiraBandi[1]),
+      if(!s.yeterliVeri) return [s.gerekce || yz('ays.core.kingarac.tahmin-icin-yeterli-deneme-y')];
+      return [yz('ays.core.kingarac.tahmini-puan-bandi') + n2(s.puanBandi && s.puanBandi[0]) + '–' + n2(s.puanBandi && s.puanBandi[1]),
+        yz('ays.core.kingarac.sira-bandi') + n2(s.tahminiSiraBandi && s.tahminiSiraBandi[0]) + '–' + n2(s.tahminiSiraBandi && s.tahminiSiraBandi[1]),
         s.uyari || ''].filter(Boolean);
     }
     if(ad === 'hatalar'){
       const d = s.dagilim || [];
-      return d.length ? d.map(x => x.ad + ': ' + x.adet) : ['Yanlış defterinde kayıt yok.'];
+      return d.length ? d.map(x => x.ad + ': ' + x.adet) : [yz('ays.core.kingarac.yanlis-defterinde-kayit-yok')];
     }
     return null;
   }
@@ -204,8 +313,8 @@ R.KingArac = (function(){
           return { metin:def.title + ': ' + def.summary, satirlar:(pr.rows || []).map(satir) };
         },
         uygula:async p => {
-          const r = await R.Proposals.hemen({ action:def.id, params:p, reason:'King sohbetinde istendi' });
-          if(!r || !r.ok) return { ok:false, metin:'Uygulanamadı: ' + ((r && r.why) || 'bilinmeyen neden') + '.' };
+          const r = await R.Proposals.hemen({ action:def.id, params:p, reason:yz('ays.core.kingarac.king-sohbetinde-istendi') });
+          if(!r || !r.ok) return { ok:false, metin:yz('ays.core.kingarac.uygulanamadi') + ((r && r.why) || 'bilinmeyen neden') + '.' };
           render();
           const id = r.row && r.row.id;
           return { metin:def.title + ': uygulandı.', geriAl:id ? async () => { await R.Proposals.undo(id); render(); } : null };
@@ -232,7 +341,7 @@ R.KingArac = (function(){
         return kucuk(metin).indexOf(k) >= 0;
       });
       if(!bulunan.length) return { hata:'«' + aranan + '» ile eşleşen ' + ad + ' bulunamadı.' };
-      if(bulunan.length > 1) return { hata:'Birden çok ' + ad + ' eşleşti (' + bulunan.length + ' adet); lütfen id belirtin.' };
+      if(bulunan.length > 1) return { hata:yz('ays.core.kingarac.birden-cok') + ad + ' eşleşti (' + bulunan.length + ' adet); lütfen id belirtin.' };
       return { kayit:bulunan[0] };
     }
     return { hata:ad + ' kimliği ya da adı belirtilmedi.' };
@@ -244,8 +353,8 @@ R.KingArac = (function(){
     return [
       /* 1. ays_deneme */
       {
-        ad:'ays_deneme', tur:'yaz', seviye:'orta', ozetAd:'Deneme kaydı',
-        aciklama:'Deneme sınavını kaydeder, günceller ya da siler. Eklemede doğru, yanlış ve boş sayısı zorunludur.',
+        ad:'ays_deneme', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.deneme-kaydi'),
+        aciklama:yz('ays.core.kingarac.deneme-sinavini-kaydeder-gun'),
         parametreler:{
           type:'object',
           properties:{
@@ -276,19 +385,19 @@ R.KingArac = (function(){
             if(b.hata) return { hata:b.hata };
             const ex = b.kayit;
             return { metin:'«' + (ex.publisher || ex.type || 'Deneme') + '» denemesi güncellenecek.',
-              satirlar:['Tarih: ' + (p.tarih || ex.date), 'Yayıncı: ' + (p.yayinci || ex.publisher || '—')] };
+              satirlar:[yz('ays.core.kingarac.tarih') + (p.tarih || ex.date), yz('ays.core.kingarac.yayinci') + (p.yayinci || ex.publisher || '—')] };
           }
           if(p.islem === 'ekle'){
             if(p.dogru == null || p.yanlis == null || p.bos == null){
-              return { hata:'Deneme eklemek için doğru, yanlış ve boş sayısı belirtilmelidir; net sayısından doğru veya boş uydurulmaz.' };
+              return { hata:yz('ays.core.kingarac.deneme-eklemek-icin-dogru-ya') };
             }
             const testAdi = p.testAdi || 'Genel';
             const net = Number(p.dogru) - Number(p.yanlis) / 4;
-            return { metin:'Deneme kaydedilecek: ' + (p.yayinci || p.tur || 'TYT'),
-              satirlar:['Tarih: ' + (p.tarih || R.U.todayISO()), 'Tür: ' + (p.tur || 'TYT'),
-                'Test: ' + testAdi + ' (D:' + p.dogru + ' Y:' + p.yanlis + ' B:' + p.bos + ' · net: ' + net + ')'] };
+            return { metin:yz('ays.core.kingarac.deneme-kaydedilecek') + (p.yayinci || p.tur || 'TYT'),
+              satirlar:[yz('ays.core.kingarac.tarih') + (p.tarih || R.U.todayISO()), yz('ays.core.kingarac.tur') + (p.tur || 'TYT'),
+                yz('ays.core.kingarac.test') + testAdi + ' (D:' + p.dogru + ' Y:' + p.yanlis + ' B:' + p.bos + ' · net: ' + net + ')'] };
           }
-          return { hata:'Geçersiz işlem: ' + p.islem };
+          return { hata:yz('ays.core.kingarac.gecersiz-islem') + p.islem };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
@@ -298,7 +407,7 @@ R.KingArac = (function(){
             const bagli = (R.S.errors || []).filter(e => e.examId === ex.id);
             await R.Model.deleteExam(ex.id);
             render();
-            return { metin:'Deneme silindi.', geriAl:async () => {
+            return { metin:yz('ays.core.kingarac.deneme-silindi'), geriAl:async () => {
               await R.Model.saveExam(ex);
               for(const item of bagli) await R.Model.saveError(item);
               render();
@@ -314,11 +423,11 @@ R.KingArac = (function(){
             if(p.yayinci) ex.publisher = p.yayinci;
             await R.Model.saveExam(ex);
             render();
-            return { metin:'Deneme güncellendi.', geriAl:async () => { await R.Model.saveExam(eski); render(); } };
+            return { metin:yz('ays.core.kingarac.deneme-guncellendi'), geriAl:async () => { await R.Model.saveExam(eski); render(); } };
           }
           if(p.islem === 'ekle'){
             if(p.dogru == null || p.yanlis == null || p.bos == null){
-              return { ok:false, metin:'Deneme eklemek için doğru, yanlış ve boş sayısı belirtilmelidir; net sayısından doğru veya boş uydurulmaz.' };
+              return { ok:false, metin:yz('ays.core.kingarac.deneme-eklemek-icin-dogru-ya') };
             }
             const testAdi = p.testAdi || 'Genel';
             const exam = {
@@ -331,16 +440,16 @@ R.KingArac = (function(){
             };
             await R.Model.saveExam(exam);
             render();
-            return { metin:'Deneme kaydedildi.', geriAl:async () => { await R.Model.deleteExam(exam.id); render(); } };
+            return { metin:yz('ays.core.kingarac.deneme-kaydedildi'), geriAl:async () => { await R.Model.deleteExam(exam.id); render(); } };
           }
-          return { ok:false, metin:'Geçersiz işlem: ' + p.islem };
+          return { ok:false, metin:yz('ays.core.kingarac.gecersiz-islem') + p.islem };
         }
       },
 
       /* 2. ays_enerji */
       {
-        ad:'ays_enerji', tur:'yaz', seviye:'kucuk', ozetAd:'Enerji kaydı',
-        aciklama:'Günün enerji düzeyini (1-5) ve his notunu kaydeder.',
+        ad:'ays_enerji', tur:'yaz', seviye:'kucuk', ozetAd:yz('ays.core.kingarac.enerji-kaydi'),
+        aciklama:yz('ays.core.kingarac.gunun-enerji-duzeyini-1-5-ve'),
         parametreler:{
           type:'object',
           properties:{
@@ -354,15 +463,15 @@ R.KingArac = (function(){
           const d = p.tarih || R.U.todayISO();
           const eski = R.Model.moodOf(d);
           return { metin:d + ' için enerji ' + p.enerji + '/5 olarak kaydedilecek.',
-            satirlar:['Eski enerji: ' + (eski && eski.energy != null ? eski.energy + '/5' : 'veri yok'),
-              'Yeni enerji: ' + p.enerji + '/5' + (p.not ? ' · ' + p.not : '')] };
+            satirlar:[yz('ays.core.kingarac.eski-enerji') + (eski && eski.energy != null ? eski.energy + '/5' : 'veri yok'),
+              yz('ays.core.kingarac.yeni-enerji') + p.enerji + '/5' + (p.not ? ' · ' + p.not : '')] };
         },
         uygula:async p => {
           const d = p.tarih || R.U.todayISO();
           const eski = R.Model.moodOf(d) ? Object.assign({}, R.Model.moodOf(d)) : null;
           await R.Model.saveMood(d, { energy:p.enerji, note:p.not || '' });
           render();
-          return { metin:'Enerji kaydedildi: ' + p.enerji + '/5.', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.enerji-kaydedildi') + p.enerji + '/5.', geriAl:async () => {
             if(eski) await R.Model.saveMood(d, eski);
             else { delete R.S.mood[d]; await R.Store.remove('mood/' + d); }
             render();
@@ -372,8 +481,8 @@ R.KingArac = (function(){
 
       /* 3. ays_etkinlik */
       {
-        ad:'ays_etkinlik', tur:'yaz', seviye:'orta', ozetAd:'Etkinlik / meşgale ekle',
-        aciklama:'Meşgale kataloğuna yeni mola etkinliği ekler ya da günceller.',
+        ad:'ays_etkinlik', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.etkinlik-mesgale-ekle'),
+        aciklama:yz('ays.core.kingarac.mesgale-kataloguna-yeni-mola'),
         parametreler:{
           type:'object',
           properties:{
@@ -394,7 +503,7 @@ R.KingArac = (function(){
           const tur = (p && p.tur) || (eski && eski.kind) || 'dinlenme';
           return {
             metin:'«' + ad + '» etkinliği ' + (eski ? 'güncellenecek.' : 'kataloğa kaydedilecek.'),
-            satirlar:['Süre: ' + dk + ' dk · Enerji: ' + en + ' · Tür: ' + tur]
+            satirlar:[yz('ays.core.kingarac.sure') + dk + ' dk · Enerji: ' + en + ' · Tür: ' + tur]
           };
         },
         uygula:async p => {
@@ -407,11 +516,11 @@ R.KingArac = (function(){
           if(p && p.enerji) patch.energy = p.enerji;
           if(p && p.tur) patch.kind = p.tur;
           if(p && p.not != null) patch.note = p.not;
-          const varsayilan = { id, name:(p && p.ad) || 'Yeni Etkinlik', minutes:(p && p.dakika) || 10, energy:(p && p.enerji) || 'low', kind:(p && p.tur) || 'dinlenme', note:(p && p.not) || '' };
+          const varsayilan = { id, name:(p && p.ad) || yz('ays.core.kingarac.yeni-etkinlik'), minutes:(p && p.dakika) || 10, energy:(p && p.enerji) || 'low', kind:(p && p.tur) || 'dinlenme', note:(p && p.not) || '' };
           const rec = Object.assign(varsayilan, eski || {}, patch);
           await R.Model.saveActivity(rec);
           render();
-          return { metin:'Etkinlik kaydedildi: «' + rec.name + '».', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.etkinlik-kaydedildi') + rec.name + '».', geriAl:async () => {
             if(eski) await R.Model.saveActivity(eski);
             else { R.S.activities = (R.S.activities || []).filter(a => a.id !== id); await R.Store.remove('activities/' + id); }
             render();
@@ -421,8 +530,8 @@ R.KingArac = (function(){
 
       /* 4. ays_hafta_degerlendirme */
       {
-        ad:'ays_hafta_degerlendirme', tur:'yaz', seviye:'orta', ozetAd:'Haftalık değerlendirme',
-        aciklama:'Bir program haftasının pazar değerlendirmesini kaydeder.',
+        ad:'ays_hafta_degerlendirme', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.haftalik-degerlendirme'),
+        aciklama:yz('ays.core.kingarac.bir-program-haftasinin-pazar'),
         parametreler:{
           type:'object',
           properties:{
@@ -434,8 +543,8 @@ R.KingArac = (function(){
         },
         onizle:p => {
           const n = p.hafta || R.Model.currentWeek();
-          return { metin:'Hafta ' + n + ' değerlendirmesi kaydedilecek.',
-            satirlar:['Hafta: ' + n, 'Not: ' + (p.not || '—'), 'Puan: ' + (p.puan ? p.puan + '/5' : 'belirtilmedi')] };
+          return { metin:yz('ays.core.kingarac.hafta') + n + ' değerlendirmesi kaydedilecek.',
+            satirlar:[yz('ays.core.kingarac.hafta-2') + n, yz('ays.core.kingarac.not') + (p.not || '—'), yz('ays.core.kingarac.puan') + (p.puan ? p.puan + '/5' : 'belirtilmedi')] };
         },
         uygula:async p => {
           const n = p.hafta || R.Model.currentWeek();
@@ -444,7 +553,7 @@ R.KingArac = (function(){
           const data = Object.assign({}, eski || {}, { note:p.not || (eski && eski.note) || '', rating:p.puan || (eski && eski.rating) || null, updatedAt:new Date().toISOString() });
           await R.Model.saveReview(n, data);
           render();
-          return { metin:'Hafta ' + n + ' değerlendirmesi kaydedildi.', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.hafta') + n + ' değerlendirmesi kaydedildi.', geriAl:async () => {
             if(eski) await R.Model.saveReview(n, eski);
             else { delete R.S.reviews[id]; await R.Store.remove('reviews/' + id); }
             render();
@@ -454,8 +563,8 @@ R.KingArac = (function(){
 
       /* 5. ays_kart */
       {
-        ad:'ays_kart', tur:'yaz', seviye:'orta', ozetAd:'Tekrar kartı',
-        aciklama:'Tekrar kartı ekler, günceller ya da siler.',
+        ad:'ays_kart', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.tekrar-karti'),
+        aciklama:yz('ays.core.kingarac.tekrar-karti-ekler-gunceller'),
         parametreler:{
           type:'object',
           properties:{
@@ -473,15 +582,15 @@ R.KingArac = (function(){
             const b = bul(R.S.cards, p, ['front'], 'kart');
             if(b.hata) return { hata:b.hata };
             const c = b.kayit;
-            return { metin:'Tekrar kartı silinecek.', satirlar:['Ön: ' + c.front, 'Arka: ' + (c.back || '—')] };
+            return { metin:yz('ays.core.kingarac.tekrar-karti-silinecek'), satirlar:[yz('ays.core.kingarac.on') + c.front, yz('ays.core.kingarac.arka') + (c.back || '—')] };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.cards, p, ['front'], 'kart');
             if(b.hata) return { hata:b.hata };
             const c = b.kayit;
-            return { metin:'Tekrar kartı güncellenecek.', satirlar:['Ön: ' + (p.on || c.front), 'Arka: ' + (p.arka || c.back || '—')] };
+            return { metin:yz('ays.core.kingarac.tekrar-karti-guncellenecek'), satirlar:[yz('ays.core.kingarac.on') + (p.on || c.front), yz('ays.core.kingarac.arka') + (p.arka || c.back || '—')] };
           }
-          return { metin:'Tekrar kartı eklenecek: «' + (p.on || '') + '»', satirlar:['Ön: ' + (p.on || '—'), 'Arka: ' + (p.arka || '—')] };
+          return { metin:yz('ays.core.kingarac.tekrar-karti-eklenecek') + (p.on || '') + '»', satirlar:[yz('ays.core.kingarac.on') + (p.on || '—'), yz('ays.core.kingarac.arka') + (p.arka || '—')] };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
@@ -490,7 +599,7 @@ R.KingArac = (function(){
             const c = b.kayit;
             await R.Model.deleteCard(c.id);
             render();
-            return { metin:'Kart silindi.', geriAl:async () => { await R.Model.saveCard(c); render(); } };
+            return { metin:yz('ays.core.kingarac.kart-silindi'), geriAl:async () => { await R.Model.saveCard(c); render(); } };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.cards, p, ['front'], 'kart');
@@ -503,19 +612,19 @@ R.KingArac = (function(){
             if(p.dersId) c.subjectId = p.dersId;
             await R.Model.saveCard(c);
             render();
-            return { metin:'Kart güncellendi.', geriAl:async () => { await R.Model.saveCard(eski); render(); } };
+            return { metin:yz('ays.core.kingarac.kart-guncellendi'), geriAl:async () => { await R.Model.saveCard(eski); render(); } };
           }
           const c = R.Model.newCard({ front:p.on || '', back:p.arka || '', topic:p.konu || '', subjectId:p.dersId || null });
           await R.Model.saveCard(c);
           render();
-          return { metin:'Kart eklendi.', geriAl:async () => { await R.Model.deleteCard(c.id); render(); } };
+          return { metin:yz('ays.core.kingarac.kart-eklendi'), geriAl:async () => { await R.Model.deleteCard(c.id); render(); } };
         }
       },
 
       /* 6. ays_konu_durumu */
       {
-        ad:'ays_konu_durumu', tur:'yaz', seviye:'orta', ozetAd:'Konu durumu',
-        aciklama:'Bir konunun çalışma ve kapanış durumunu (not_started, provisional, practicing, closed) ayarlar.',
+        ad:'ays_konu_durumu', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.konu-durumu'),
+        aciklama:yz('ays.core.kingarac.bir-konunun-calisma-ve-kapan'),
         parametreler:{
           type:'object',
           properties:{
@@ -529,13 +638,13 @@ R.KingArac = (function(){
         onizle:p => {
           const cur = R.Model.topicState(p.dersId, p.konuId);
           return { metin:p.dersId + ' › ' + p.konuId + ' durumu değiştirilecek.',
-            satirlar:['Eski durum: ' + (cur.state || 'not_started') + ' → Yeni durum: ' + p.durum] };
+            satirlar:[yz('ays.core.kingarac.eski-durum') + (cur.state || 'not_started') + ' → Yeni durum: ' + p.durum] };
         },
         uygula:async p => {
           const cur = Object.assign({}, R.Model.topicState(p.dersId, p.konuId));
           await R.Model.setTopicState(p.dersId, p.konuId, { state:p.durum, note:p.not || cur.note || '' });
           render();
-          return { metin:'Konu durumu güncellendi: ' + p.durum + '.', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.konu-durumu-guncellendi') + p.durum + '.', geriAl:async () => {
             await R.Model.setTopicState(p.dersId, p.konuId, cur);
             render();
           }};
@@ -544,8 +653,8 @@ R.KingArac = (function(){
 
       /* 7. ays_mesgale_ekle */
       {
-        ad:'ays_mesgale_ekle', tur:'yaz', seviye:'kucuk', ozetAd:'Dikkat dağılması ekle',
-        aciklama:'Günün odak sayacına dikkat dağılması / bölünme çentiği ekler.',
+        ad:'ays_mesgale_ekle', tur:'yaz', seviye:'kucuk', ozetAd:yz('ays.core.kingarac.dikkat-dagilmasi-ekle'),
+        aciklama:yz('ays.core.kingarac.gunun-odak-sayacina-dikkat-d'),
         parametreler:{
           type:'object',
           properties:{
@@ -557,7 +666,7 @@ R.KingArac = (function(){
           const day = R.S.days[d];
           const count = (day && day.distractions) || 0;
           return { metin:d + ' için dikkat dağılması çentiği eklenecek.',
-            satirlar:['Şu anki bölünme sayısı: ' + count + ' → ' + (count + 1)] };
+            satirlar:[yz('ays.core.kingarac.su-anki-bolunme-sayisi') + count + ' → ' + (count + 1)] };
         },
         uygula:async p => {
           const d = (p && p.tarih) || R.U.todayISO();
@@ -567,7 +676,7 @@ R.KingArac = (function(){
           const eskiTracked = day.distractionsTracked;
           await R.Model.addDistraction(d);
           render();
-          return { metin:'Dikkat dağılması kaydedildi (' + (eski + 1) + ').', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.dikkat-dagilmasi-kaydedildi') + (eski + 1) + ').', geriAl:async () => {
             day.distractions = eski;
             day.distractionsTracked = eskiTracked;
             await R.Model.saveDay(d);
@@ -578,8 +687,8 @@ R.KingArac = (function(){
 
       /* 8. ays_mola */
       {
-        ad:'ays_mola', tur:'yaz', seviye:'kucuk', ozetAd:'Mola kaydet',
-        aciklama:'Günün kaydına verilen bir molayı ve süresini kaydeder.',
+        ad:'ays_mola', tur:'yaz', seviye:'kucuk', ozetAd:yz('ays.core.kingarac.mola-kaydet'),
+        aciklama:yz('ays.core.kingarac.gunun-kaydina-verilen-bir-mo'),
         parametreler:{
           type:'object',
           properties:{
@@ -591,14 +700,14 @@ R.KingArac = (function(){
         onizle:p => {
           const min = (p && p.dakika) || 5;
           return { metin:min + ' dakikalık mola kaydedilecek.',
-            satirlar:['Süre: ' + min + ' dk' + (p && p.etkinlikId ? ' · Etkinlik: ' + p.etkinlikId : '')] };
+            satirlar:[yz('ays.core.kingarac.sure') + min + ' dk' + (p && p.etkinlikId ? ' · Etkinlik: ' + p.etkinlikId : '')] };
         },
         uygula:async p => {
           const min = (p && p.dakika) || 5;
           const d = (p && p.tarih) || R.U.todayISO();
           const rec = await R.Model.saveBreak({ dayISO:d, minutes:min, activityId:(p && p.etkinlikId) || null });
           render();
-          return { metin:'Mola kaydedildi (' + min + ' dk).', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.mola-kaydedildi') + min + ' dk).', geriAl:async () => {
             R.S.breaks = (R.S.breaks || []).filter(b => b.id !== rec.id);
             await R.Store.remove('breaks/' + rec.id);
             render();
@@ -608,8 +717,8 @@ R.KingArac = (function(){
 
       /* 9. ays_profil */
       {
-        ad:'ays_profil', tur:'yaz', seviye:'orta', ozetAd:'Profil kaydet / güncelle',
-        aciklama:'Profil ayarlarını günceller ya da cihaza yeni aday profili ekler.',
+        ad:'ays_profil', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.profil-kaydet-guncelle'),
+        aciklama:yz('ays.core.kingarac.profil-ayarlarini-gunceller'),
         parametreler:{
           type:'object',
           properties:{
@@ -624,19 +733,19 @@ R.KingArac = (function(){
         },
         onizle:p => {
           if(p && p.islem === 'yeni_profil'){
-            return { metin:'Yeni aday profili eklenecek: «' + (p.ad || 'Yeni profil') + '»',
-              satirlar:['Profil adı: ' + (p.ad || 'Yeni profil')] };
+            return { metin:yz('ays.core.kingarac.yeni-aday-profili-eklenecek') + (p.ad || yz('ays.core.kingarac.yeni-profil')) + '»',
+              satirlar:[yz('ays.core.kingarac.profil-adi') + (p.ad || yz('ays.core.kingarac.yeni-profil'))] };
           }
-          return { metin:'Profil ayarları güncellenecek.',
-            satirlar:[p && p.ad ? 'Ad: ' + p.ad : null, p && p.alan ? 'Alan: ' + p.alan : null,
-              p && p.hedefSira ? 'Hedef sıra: ' + p.hedefSira : null, p && p.uykuHedefi ? 'Uyku hedefi: ' + p.uykuHedefi + ' sa' : null,
-              p && p.kocTonu ? 'Koç tonu: ' + p.kocTonu : null].filter(Boolean) };
+          return { metin:yz('ays.core.kingarac.profil-ayarlari-guncellenece'),
+            satirlar:[p && p.ad ? yz('ays.core.kingarac.ad') + p.ad : null, p && p.alan ? yz('ays.core.kingarac.alan') + p.alan : null,
+              p && p.hedefSira ? yz('ays.core.kingarac.hedef-sira') + p.hedefSira : null, p && p.uykuHedefi ? yz('ays.core.kingarac.uyku-hedefi') + p.uykuHedefi + ' sa' : null,
+              p && p.kocTonu ? yz('ays.core.kingarac.koc-tonu') + p.kocTonu : null].filter(Boolean) };
         },
         uygula:async p => {
           if(p && p.islem === 'yeni_profil'){
-            const rec = await R.Model.saveProfileEntry({ name:(p && p.ad) || 'Yeni profil' });
+            const rec = await R.Model.saveProfileEntry({ name:(p && p.ad) || yz('ays.core.kingarac.yeni-profil') });
             render();
-            return { metin:'Yeni profil eklendi: «' + rec.name + '».', geriAl:async () => {
+            return { metin:yz('ays.core.kingarac.yeni-profil-eklendi') + rec.name + '».', geriAl:async () => {
               R.S.profiles = (R.S.profiles || []).filter(x => x.id !== rec.id);
               await R.Store.remove('profiles/' + rec.id);
               render();
@@ -651,7 +760,7 @@ R.KingArac = (function(){
           if(p && p.kocTonu) R.S.profile.coachTone = p.kocTonu;
           await R.Model.saveProfile();
           render();
-          return { metin:'Profil güncellendi.', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.profil-guncellendi'), geriAl:async () => {
             Object.assign(R.S.profile, eski);
             await R.Model.saveProfile();
             render();
@@ -661,7 +770,7 @@ R.KingArac = (function(){
 
       /* 10. ays_profiller */
       {
-        ad:'ays_profiller', tur:'oku', aciklama:'Cihazda kayıtlı aday profillerini ve gözetmen özetlerini listeler.',
+        ad:'ays_profiller', tur:'oku', aciklama:yz('ays.core.kingarac.cihazda-kayitli-aday-profill'),
         ornek:'cihazdaki profiller',
         calistir:() => {
           const list = R.Model.profileList ? R.Model.profileList() : [];
@@ -673,15 +782,15 @@ R.KingArac = (function(){
             return { id:p.id, ad:p.name, aktif:p.id === active, olusturma:p.createdAt,
               hafta:s ? s.week : null, tamamlama:s ? s.completion : null, tytMedyan:s ? s.tytMedian : null };
           });
-          const satirlar = profiller.length ? profiller.map(p => p.ad + (p.aktif ? ' (açık profil)' : '') + (p.tamamlama != null ? ' · Plan: %' + p.tamamlama : '')) : ['Kayıtlı profil yok.'];
+          const satirlar = profiller.length ? profiller.map(p => p.ad + (p.aktif ? ' (açık profil)' : '') + (p.tamamlama != null ? ' · Plan: %' + p.tamamlama : '')) : [yz('ays.core.kingarac.kayitli-profil-yok')];
           return { sonuc:{ profiller, aktifProfil:active }, satirlar };
         }
       },
 
       /* 11. ays_takvim */
       {
-        ad:'ays_takvim', tur:'yaz', seviye:'orta', ozetAd:'Takvim istisnası',
-        aciklama:'Takvime tatil, okul sınavı, yoğun gün gibi istisnaları ekler, günceller ya da siler.',
+        ad:'ays_takvim', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.takvim-istisnasi'),
+        aciklama:yz('ays.core.kingarac.takvime-tatil-okul-sinavi-yo'),
         parametreler:{
           type:'object',
           properties:{
@@ -700,17 +809,17 @@ R.KingArac = (function(){
             const b = bul(R.S.calendar, p, ['note', 'kind'], 'takvim kaydı');
             if(b.hata) return { hata:b.hata };
             const c = b.kayit;
-            return { metin:'Takvim kaydı silinecek.', satirlar:[c.from + (c.to && c.to !== c.from ? '–' + c.to : '') + ' · ' + c.kind + (c.note ? ' · ' + c.note : '')] };
+            return { metin:yz('ays.core.kingarac.takvim-kaydi-silinecek'), satirlar:[c.from + (c.to && c.to !== c.from ? '–' + c.to : '') + ' · ' + c.kind + (c.note ? ' · ' + c.note : '')] };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.calendar, p, ['note', 'kind'], 'takvim kaydı');
             if(b.hata) return { hata:b.hata };
             const c = b.kayit;
-            return { metin:'Takvim kaydı güncellenecek.', satirlar:['Tarih: ' + (p.baslangic || c.from), 'Tür: ' + (p.tur || c.kind)] };
+            return { metin:yz('ays.core.kingarac.takvim-kaydi-guncellenecek'), satirlar:[yz('ays.core.kingarac.tarih') + (p.baslangic || c.from), yz('ays.core.kingarac.tur') + (p.tur || c.kind)] };
           }
           const bg = p.baslangic || R.U.todayISO();
-          return { metin:'Takvim istisnası kaydedilecek.',
-            satirlar:['Tarih: ' + bg + (p.bitis && p.bitis !== bg ? '–' + p.bitis : ''), 'Tür: ' + (p.tur || 'tatil'), 'Not: ' + (p.not || '—')] };
+          return { metin:yz('ays.core.kingarac.takvim-istisnasi-kaydedilece'),
+            satirlar:[yz('ays.core.kingarac.tarih') + bg + (p.bitis && p.bitis !== bg ? '–' + p.bitis : ''), yz('ays.core.kingarac.tur') + (p.tur || 'tatil'), yz('ays.core.kingarac.not') + (p.not || '—')] };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
@@ -719,7 +828,7 @@ R.KingArac = (function(){
             const c = b.kayit;
             await R.Model.deleteCalendar(c.id);
             render();
-            return { metin:'Takvim kaydı silindi.', geriAl:async () => { await R.Model.saveCalendar(c); render(); } };
+            return { metin:yz('ays.core.kingarac.takvim-kaydi-silindi'), geriAl:async () => { await R.Model.saveCalendar(c); render(); } };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.calendar, p, ['note', 'kind'], 'takvim kaydı');
@@ -732,20 +841,20 @@ R.KingArac = (function(){
             if(p.not != null) c.note = p.not;
             await R.Model.saveCalendar(c);
             render();
-            return { metin:'Takvim kaydı güncellendi.', geriAl:async () => { await R.Model.saveCalendar(eski); render(); } };
+            return { metin:yz('ays.core.kingarac.takvim-kaydi-guncellendi'), geriAl:async () => { await R.Model.saveCalendar(eski); render(); } };
           }
           const bg = p.baslangic || R.U.todayISO();
           const doc = { id:p.id || R.U.uid('k'), kind:p.tur || 'tatil', from:bg, to:p.bitis || bg, note:p.not || '' };
           const eklenen = await R.Model.saveCalendar(doc);
           render();
-          return { metin:'Takvim istisnası kaydedildi.', geriAl:async () => { await R.Model.deleteCalendar(eklenen.id); render(); } };
+          return { metin:yz('ays.core.kingarac.takvim-istisnasi-kaydedildi'), geriAl:async () => { await R.Model.deleteCalendar(eklenen.id); render(); } };
         }
       },
 
       /* 12. ays_telafi */
       {
-        ad:'ays_telafi', tur:'yaz', seviye:'orta', ozetAd:'Telafi protokolü',
-        aciklama:'Telafi protokolünü (hastalık, kopma, deneme düşüşü vb.) günceller ya da başlatır.',
+        ad:'ays_telafi', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.telafi-protokolu'),
+        aciklama:yz('ays.core.kingarac.telafi-protokolunu-hastalik'),
         parametreler:{
           type:'object',
           properties:{
@@ -758,9 +867,9 @@ R.KingArac = (function(){
         onizle:p => {
           const rec = p && p.id ? (R.S.protocols || []).find(x => x.id === p.id) : ((R.Model.activeProtocols && R.Model.activeProtocols()[0]) || null);
           const def = p && p.protoId ? (R.RECOVERY_PROTOCOLS || []).find(x => x.id === p.protoId) : null;
-          const baslik = (rec && rec.title) || (def && def.title) || 'Telafi protokolü';
+          const baslik = (rec && rec.title) || (def && def.title) || yz('ays.core.kingarac.telafi-protokolu');
           return { metin:'«' + baslik + '» güncellenecek.',
-            satirlar:['Durum: ' + ((p && p.durum) || (rec && rec.status) || 'active'), (p && p.sonuc) ? 'Sonuç: ' + p.sonuc : null].filter(Boolean) };
+            satirlar:[yz('ays.core.kingarac.durum') + ((p && p.durum) || (rec && rec.status) || 'active'), (p && p.sonuc) ? yz('ays.core.kingarac.sonuc') + p.sonuc : null].filter(Boolean) };
         },
         uygula:async p => {
           let rec = p && p.id ? (R.S.protocols || []).find(x => x.id === p.id) : null;
@@ -781,7 +890,7 @@ R.KingArac = (function(){
             await R.Model.saveProtocol(rec);
           }
           render();
-          return { metin:'Telafi protokolü güncellendi.', geriAl:async () => {
+          return { metin:yz('ays.core.kingarac.telafi-protokolu-guncellendi'), geriAl:async () => {
             if(yeni && rec){
               R.S.protocols = (R.S.protocols || []).filter(x => x.id !== rec.id);
               await R.Store.remove('protocols/' + rec.id);
@@ -795,8 +904,8 @@ R.KingArac = (function(){
 
       /* 13. ays_video_notu */
       {
-        ad:'ays_video_notu', tur:'yaz', seviye:'orta', ozetAd:'Video / ders notu',
-        aciklama:'Video ders notu ekler, günceller ya da siler.',
+        ad:'ays_video_notu', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.video-ders-notu'),
+        aciklama:yz('ays.core.kingarac.video-ders-notu-ekler-guncel'),
         parametreler:{
           type:'object',
           properties:{
@@ -815,16 +924,16 @@ R.KingArac = (function(){
             const b = bul(R.S.videoNotes, p, ['title'], 'video notu');
             if(b.hata) return { hata:b.hata };
             const n = b.kayit;
-            return { metin:'Video notu silinecek: «' + n.title + '»', satirlar:['Başlık: ' + n.title + (n.url ? ' · ' + n.url : '')] };
+            return { metin:yz('ays.core.kingarac.video-notu-silinecek') + n.title + '»', satirlar:[yz('ays.core.kingarac.baslik') + n.title + (n.url ? ' · ' + n.url : '')] };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.videoNotes, p, ['title'], 'video notu');
             if(b.hata) return { hata:b.hata };
             const n = b.kayit;
-            return { metin:'Video notu güncellenecek.', satirlar:['Başlık: ' + (p.baslik || n.title), 'URL: ' + (p.url || n.url || '—')] };
+            return { metin:yz('ays.core.kingarac.video-notu-guncellenecek'), satirlar:[yz('ays.core.kingarac.baslik') + (p.baslik || n.title), 'URL: ' + (p.url || n.url || '—')] };
           }
-          return { metin:'Video notu kaydedilecek: «' + (p.baslik || 'Başlıksız not') + '»',
-            satirlar:['Başlık: ' + (p.baslik || 'Başlıksız not'), p.url ? 'URL: ' + p.url : null, p.dersId ? 'Ders: ' + p.dersId : null].filter(Boolean) };
+          return { metin:yz('ays.core.kingarac.video-notu-kaydedilecek') + (p.baslik || yz('ays.core.kingarac.basliksiz-not')) + '»',
+            satirlar:[yz('ays.core.kingarac.baslik') + (p.baslik || yz('ays.core.kingarac.basliksiz-not')), p.url ? 'URL: ' + p.url : null, p.dersId ? yz('ays.core.kingarac.ders') + p.dersId : null].filter(Boolean) };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
@@ -833,7 +942,7 @@ R.KingArac = (function(){
             const n = b.kayit;
             await R.Model.deleteVideoNote(n.id);
             render();
-            return { metin:'Video notu silindi.', geriAl:async () => { await R.Model.saveVideoNote(n); render(); } };
+            return { metin:yz('ays.core.kingarac.video-notu-silindi'), geriAl:async () => { await R.Model.saveVideoNote(n); render(); } };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.videoNotes, p, ['title'], 'video notu');
@@ -847,10 +956,10 @@ R.KingArac = (function(){
             if(p.konuId) n.topicId = p.konuId;
             await R.Model.saveVideoNote(n);
             render();
-            return { metin:'Video notu güncellendi.', geriAl:async () => { await R.Model.saveVideoNote(eski); render(); } };
+            return { metin:yz('ays.core.kingarac.video-notu-guncellendi'), geriAl:async () => { await R.Model.saveVideoNote(eski); render(); } };
           }
           const note = R.Model.newVideoNote({
-            title:p.baslik || 'Yeni Video Notu',
+            title:p.baslik || yz('ays.core.kingarac.yeni-video-notu'),
             url:p.url || '',
             subjectId:p.dersId || null,
             topicId:p.konuId || null,
@@ -858,14 +967,14 @@ R.KingArac = (function(){
           });
           await R.Model.saveVideoNote(note);
           render();
-          return { metin:'Video notu kaydedildi.', geriAl:async () => { await R.Model.deleteVideoNote(note.id); render(); } };
+          return { metin:yz('ays.core.kingarac.video-notu-kaydedildi'), geriAl:async () => { await R.Model.deleteVideoNote(note.id); render(); } };
         }
       },
 
       /* 14. ays_yanlis */
       {
-        ad:'ays_yanlis', tur:'yaz', seviye:'orta', ozetAd:'Yanlış defteri',
-        aciklama:'Yanlış defterine soru hatası ekler, günceller ya da siler.',
+        ad:'ays_yanlis', tur:'yaz', seviye:'orta', ozetAd:yz('ays.core.kingarac.yanlis-defteri'),
+        aciklama:yz('ays.core.kingarac.yanlis-defterine-soru-hatasi'),
         parametreler:{
           type:'object',
           properties:{
@@ -884,16 +993,16 @@ R.KingArac = (function(){
             const b = bul(R.S.errors, p, ['note', 'topic'], 'yanlış kaydı');
             if(b.hata) return { hata:b.hata };
             const err = b.kayit;
-            return { metin:'Yanlış kaydı silinecek.', satirlar:[(err.subjectId || '') + ' · ' + (err.topic || '') + ' · Neden: ' + (err.cause || 'belirtilmedi')] };
+            return { metin:yz('ays.core.kingarac.yanlis-kaydi-silinecek'), satirlar:[(err.subjectId || '') + ' · ' + (err.topic || '') + ' · Neden: ' + (err.cause || 'belirtilmedi')] };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.errors, p, ['note', 'topic'], 'yanlış kaydı');
             if(b.hata) return { hata:b.hata };
             const err = b.kayit;
-            return { metin:'Yanlış kaydı güncellenecek.', satirlar:['Ders: ' + (p.dersId || err.subjectId), 'Neden: ' + (p.neden || err.cause || '—')] };
+            return { metin:yz('ays.core.kingarac.yanlis-kaydi-guncellenecek'), satirlar:[yz('ays.core.kingarac.ders') + (p.dersId || err.subjectId), yz('ays.core.kingarac.neden') + (p.neden || err.cause || '—')] };
           }
-          return { metin:'Yanlış defterine kayıt yazılacak.',
-            satirlar:['Ders: ' + (p.dersId || 'mat_tyt'), 'Neden: ' + (p.neden || 'bilgi'), 'Not: ' + (p.not || '—')] };
+          return { metin:yz('ays.core.kingarac.yanlis-defterine-kayit-yazil'),
+            satirlar:[yz('ays.core.kingarac.ders') + (p.dersId || 'mat_tyt'), yz('ays.core.kingarac.neden') + (p.neden || 'bilgi'), yz('ays.core.kingarac.not') + (p.not || '—')] };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
@@ -902,7 +1011,7 @@ R.KingArac = (function(){
             const err = b.kayit;
             await R.Model.deleteError(err.id);
             render();
-            return { metin:'Yanlış kaydı silindi.', geriAl:async () => { await R.Model.saveError(err); render(); } };
+            return { metin:yz('ays.core.kingarac.yanlis-kaydi-silindi'), geriAl:async () => { await R.Model.saveError(err); render(); } };
           }
           if(p.islem === 'guncelle'){
             const b = bul(R.S.errors, p, ['note', 'topic'], 'yanlış kaydı');
@@ -915,7 +1024,7 @@ R.KingArac = (function(){
             if(p.dersId) err.subjectId = p.dersId;
             await R.Model.saveError(err);
             render();
-            return { metin:'Yanlış kaydı güncellendi.', geriAl:async () => { await R.Model.saveError(eski); render(); } };
+            return { metin:yz('ays.core.kingarac.yanlis-kaydi-guncellendi'), geriAl:async () => { await R.Model.saveError(eski); render(); } };
           }
           const err = {
             id:p.id || R.U.uid('err'),
@@ -930,7 +1039,7 @@ R.KingArac = (function(){
           };
           await R.Model.saveError(err);
           render();
-          return { metin:'Yanlış kaydı eklendi.', geriAl:async () => { await R.Model.deleteError(err.id); render(); } };
+          return { metin:yz('ays.core.kingarac.yanlis-kaydi-eklendi'), geriAl:async () => { await R.Model.deleteError(err.id); render(); } };
         }
       },
     ];

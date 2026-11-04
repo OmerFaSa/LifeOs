@@ -27,6 +27,15 @@
       çaba–sonuç ayrışmasını arar; burada aranan şey farklıdır: birikmiş
       BAKIM borcu. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.audit.bu-kadar-tekrar-eden-unutma':'Bu kadar tekrar eden unutma genelde hafızanın değil KARTIN ',
+  'esp.core.audit.bolmek-ya-da-yeniden-yazmak':'Bölmek ya da yeniden yazmak, tekrar etmekten hızlıdır.',
+  'esp.core.audit.bir-gunde-biriken-kuyruk-cog':'Bir günde biriken kuyruk çoğu zaman hiç çalışılmaz. Bugün ',
+  'esp.core.audit.ayni-metni-tekrar-olcmek-bir':'Aynı metni tekrar ölçmek bir noktadan sonra diksiyonu değil ',
+  'esp.core.audit.yalnizca-yorumla-kurulan-tar':'Yalnızca yorumla kurulan tarih, başkasının tarihidir. ',
+  'esp.core.audit.bir-belgeye-dogrudan-bakmak':'Bir belgeye doğrudan bakmak, on yorumdan farklı bir şey ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.audit.deste-kucuk':'Deste küçük',
   'esp.core.audit.denetim-icin-en-az':'Denetim için en az ',
   'esp.core.audit.bu-kartlar':'Bu kartlar ',
@@ -117,9 +126,9 @@ ESP.Audit = (function(){
       out.push(bul('lang-leech', { severity:'warn', route:'lang',
         title:suluk.length + ' sülük kart',
         note:yz('esp.core.audit.bu-kartlar') + SULUK_LAPSE + ' kez ya da daha fazla unutuldu. '
-           + 'Bu kadar tekrar eden unutma genelde hafızanın değil KARTIN '
+           + yz('esp.core.audit.bu-kadar-tekrar-eden-unutma')
            + 'sorunudur: çok uzun, belirsiz ya da tek kartta iki şey soruyor. '
-           + 'Bölmek ya da yeniden yazmak, tekrar etmekten hızlıdır.',
+           + yz('esp.core.audit.bolmek-ya-da-yeniden-yazmak'),
         items:suluk.slice(0, 5).map(c => ({ id:c.id,
           label:(c.front || '(boş)').slice(0, 40),
           meta:(c.lapses || 0) + ' kez unutuldu' })) }));
@@ -135,7 +144,7 @@ ESP.Audit = (function(){
         title:yz('esp.core.audit.tekrar-kuyrugunda-zirve-var'),
         note:U.relativeDay(zirve.date) + ' ' + zirve.count + ' kart birden '
            + 'gelecek (günlük ortalama ' + Math.round(ortalama) + '). '
-           + 'Bir günde biriken kuyruk çoğu zaman hiç çalışılmaz. Bugün '
+           + yz('esp.core.audit.bir-gunde-biriken-kuyruk-cog')
            + 'birkaçını erken çevirmek zirveyi düzler.',
         items:[{ id:zirve.date, label:U.fmtShort(zirve.date),
           meta:zirve.count + ' kart' }] }));
@@ -496,7 +505,7 @@ ESP.Audit = (function(){
         out.push(bul('diction-same-text', { severity:'info', route:'studio',
           title:yz('esp.core.audit.olcumlerin-cogu-ayni-metinle'),
           note:yz('esp.core.audit.kayitlarin') + Math.round(pay * 100) + '\'i tek bir metinden. '
-             + 'Aynı metni tekrar ölçmek bir noktadan sonra diksiyonu değil '
+             + yz('esp.core.audit.ayni-metni-tekrar-olcmek-bir')
              + 'o metni ezberlemeyi ölçer.',
           items:[{ id:enCok, label:enCok, meta:metin[enCok] + ' kayıt' }] }));
       }
@@ -557,8 +566,8 @@ ESP.Audit = (function(){
         out.push(bul('history-secondary', { severity:'info', route:'history',
           title:yz('esp.core.audit.birincil-kaynak-az'),
           note:yz('esp.core.audit.kaynaklarin') + Math.round(pay * 100) + '\'i birincil. '
-             + 'Yalnızca yorumla kurulan tarih, başkasının tarihidir. '
-             + 'Bir belgeye doğrudan bakmak, on yorumdan farklı bir şey '
+             + yz('esp.core.audit.yalnizca-yorumla-kurulan-tar')
+             + yz('esp.core.audit.bir-belgeye-dogrudan-bakmak')
              + 'öğretir.',
           items:[{ id:'oran', label:birincil + '/' + kaynaklar.length,
             meta:'birincil/toplam' }] }));

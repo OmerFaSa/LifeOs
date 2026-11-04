@@ -73,7 +73,7 @@
        sayfasında sonra); ESP.U yüklenirken okunsaydı yayın sessizce düşerdi. */
     it('yükleme sırasından bağımsız: ESP.U ve ESP.S yüklenirken okunmaz', async () => {
       const kaynak = await (await fetch('../js/core/takvim.js', { cache:'no-store' })).text();
-      const sahte = { ESP:{} };
+      const sahte = { ESP:{}, LIFEOS:{ PARCA:{ yazilar(){} } } };   // yazi kaydi zaten yapildi; okunmayan yalniz U ve S
       new Function('window', 'ESP', kaynak)(sahte, sahte.ESP);       // U ve S henüz yok
       sahte.ESP.U = ESP.U;
       sahte.ESP.S = { goals:[{ id:'g1', label:'Sınav', disc:'lang', date:'2026-10-01', done:false }], reminders:[], hedefler:[] };

@@ -45,6 +45,13 @@
    sınıfın hangi renge düştüğü T'nin jetonlarıyla `kart.css`'tedir.
    Burada verilen karar yalnız ANLAMDIR: iyi mi, kötü mü, bayat mı. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.sayi.kayit-yok':'Kayıt yok.',
+  'ortak.sayi.yenileniyor':', yenileniyor',
+  'ortak.sayi.dun':'Dün ',
+  'ortak.sayi.duzelt':'Düzelt',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.sayi.aralik':'Aralık',
   'ortak.sayi.dayanak':'Dayanak',
   'ortak.sayi.zaman':'Zaman',
@@ -235,7 +242,7 @@ window.LIFEOS = window.LIFEOS || {};
       if(sayiMi(s.dayanak)) satirlar.push({ ad:yz('ortak.sayi.dayanak'), deger:s.dayanak + ' veri' });
       if(zaman) satirlar.push({ ad:yz('ortak.sayi.zaman'), deger:zaman });
     }else if(id === 'missing'){
-      satirlar.push({ ad:yz('ortak.sayi.durum'), deger:e ? e.ozet : 'Kayıt yok.' });
+      satirlar.push({ ad:yz('ortak.sayi.durum'), deger:e ? e.ozet : yz('ortak.sayi.kayit-yok') });
     }
     return {
       tur:id,
@@ -330,7 +337,7 @@ window.LIFEOS = window.LIFEOS || {};
     const once = o.etiket ? '<span class="sr-only">' + kac(o.etiket) + ': </span>' : '';
     const sr = (ek ? '<span class="sr-only">, ' + kac(ek) + '</span>' : '')
       + (o.fark ? '<span class="sr-only">, ' + kac(fark(o.fark).sr) + '</span>' : '')
-      + (o.yenileniyor ? '<span class="sr-only">, yenileniyor</span>' : '');
+      + (o.yenileniyor ? ('<span class="sr-only">' + yz('ortak.sayi.yenileniyor') + '</span>') : '');
 
     let kart = '', odak = '';
     if(o.koken !== false && tur){
@@ -488,7 +495,7 @@ window.LIFEOS = window.LIFEOS || {};
     const b = n => birimli(bicim(n, o.ondalik == null ? (Number.isInteger(n) ? 0 : 1) : o.ondalik), o.birim);
     /* Soru eki («mı/mi/mu») birimin OKUNUŞUNA göre çekimlenir ve kodda
        güvenle kurulamaz; cümle eki gerektirmeyecek biçimde yazıldı. */
-    const soru = 'Dün ' + b(dun) + ' idi; ' + b(yeni) + ' çok farklı.'
+    const soru = yz('ortak.sayi.dun') + b(dun) + ' idi; ' + b(yeni) + ' çok farklı.'
       + (oneri != null ? ' Hangisini kaydedelim?' : ' Yine de kaydedilsin mi?');
     return { supheli:true, sapma:sapma, oran:oran, dun:dun, yeni:yeni, oneri:oneri, soru:soru,
       secenekler:(oneri != null ? [oneri] : []).concat([yeni]).map(v => ({ deger:v, etiket:b(v) + ' olarak kaydet' })) };
@@ -505,7 +512,7 @@ window.LIFEOS = window.LIFEOS || {};
         + ' data-act="suphe-kaydet" data-deger="' + kac(s.deger) + '"><span class="btn__label">'
         + kac(s.etiket) + '</span></button>').join('')
       + '<button type="button" class="btn btn--sm btn--ghost" data-act="suphe-duzelt">'
-      + '<span class="btn__label">Düzelt</span></button>'
+      + ('<span class="btn__label">' + yz('ortak.sayi.duzelt') + '</span></button>')
       + '</div></div>';
   }
 

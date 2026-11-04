@@ -15,6 +15,10 @@
    onu «basari» diye sunmaz, «beklenen» diye isaretler. Ters yonde bir
    degisim ise haberdir ve oyle yazilir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.meds.beklenen-bir-sonuc-beslenmen':'Beklenen bir sonuç; beslenmenin ya da yaşam düzeninin başarısı ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.meds.bu-degisim-iki-olcum-arasind':'Bu değişim iki ölçüm arasında başlayan ',
   'spi.core.meds.bu-olcumu-etkileyen-bir-sey':'Bu ölçümü etkileyen bir şey kullanıyorsun',
 });
@@ -112,7 +116,7 @@ SP.Meds = (function(){
     if(e.verdict === 'expected'){
       return { tone:'info', expected:true,
         text:yz('spi.core.meds.bu-degisim-iki-olcum-arasind') + liste + ' ile aynı yönde. '
-          + 'Beklenen bir sonuç; beslenmenin ya da yaşam düzeninin başarısı '
+          + yz('spi.core.meds.beklenen-bir-sonuc-beslenmen')
           + 'olarak okunmamalı.' };
     }
     return { tone:'warn', expected:false,

@@ -30,6 +30,31 @@
       «ays:konu:tyt-matematik/tm-03»), HKM anlamaz, teklifle geri getirir.
       Ürün o etiketle saklanır ve `etiketli` ile bulunur. Bekleyen istek
       ürün gelene dek «istendi» diye hatırlanır; ikinci kez istenmez. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.urun.kayit-alinamadi':'Kayıt alınamadı.',
+  'ortak.urun.bu-kayit-bir-urun-degil':'Bu kayıt bir ürün değil.',
+  'ortak.urun.kayit-kimligi-teklifle-tutmu':'Kayıt kimliği teklifle tutmuyor.',
+  'ortak.urun.urun-ailesi-taninmadi':'Ürün ailesi tanınmadı.',
+  'ortak.urun.urun-turu-teklifle-tutmuyor':'Ürün türü teklifle tutmuyor.',
+  'ortak.urun.belgenin-hic-bolumu-yok':'Belgenin hiç bölümü yok.',
+  'ortak.urun.sunumun-hic-slayti-yok':'Sunumun hiç slaytı yok.',
+  'ortak.urun.urunun-basili-hali-bir-html':'Ürünün basılı hâli bir HTML belgesi değil.',
+  'ortak.urun.urun-saklanamayacak-kadar-bu':'Ürün saklanamayacak kadar büyük.',
+  'ortak.urun.urunun-basligi-yok':'Ürünün başlığı yok.',
+  'ortak.urun.bearer':'Bearer ',
+  'ortak.urun.bunu-hkm-deki-uretim-burosu':'Bunu HKM’deki Üretim Bürosu hazırlar ama HKM bağlı değil. ',
+  'ortak.urun.hkm-ye-baglaninca-yeniden-is':'HKM’ye bağlanınca yeniden iste.',
+  'ortak.urun.i-stek-etiketi-gecersiz':'İstek etiketi geçersiz.',
+  'ortak.urun.bu-zaten-istendi-hazir-olunc':'Bu zaten istendi; hazır olunca Onaylar’a gelir.',
+  'ortak.urun.king-is-emrini-almadi':'King iş emrini almadı.',
+  'ortak.urun.bunu-bir-urun-istegi-olarak':'Bunu bir ürün isteği olarak anlamadım. ',
+  'ortak.urun.hkm-ye-ulasilamadi-is-emri-a':'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.',
+  'ortak.urun.urun-kimligi-gecersiz':'Ürün kimliği geçersiz.',
+  'ortak.urun.bu-urun-zaten-eklenmis':'Bu ürün zaten eklenmiş.',
+  'ortak.urun.hkm-baglantisi-kurulmamis-ur':'HKM bağlantısı kurulmamış; ürün alınamaz.',
+  'ortak.urun.urun-hkm-den-alinamadi-hkm-a':'Ürün HKM’den alınamadı; HKM açıkken yeniden dene.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -72,27 +97,27 @@ LIFEOS.Urun = (function(){
   /* Kaydı modülün KENDİ koduyla sınar. Dönüş { ok, why?, urun? }. */
   function sina(kayit, p, html){
     const g = kayit && kayit.govde;
-    if(!kayit || typeof kayit !== 'object' || !g) return { ok:false, why:'Kayıt alınamadı.' };
-    if(g.tur !== 'urun') return { ok:false, why:'Bu kayıt bir ürün değil.' };
+    if(!kayit || typeof kayit !== 'object' || !g) return { ok:false, why:yz('ortak.urun.kayit-alinamadi') };
+    if(g.tur !== 'urun') return { ok:false, why:yz('ortak.urun.bu-kayit-bir-urun-degil') };
     const kid = Number(kayit.id);
     if(!Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
-      return { ok:false, why:'Kayıt kimliği teklifle tutmuyor.' };
+      return { ok:false, why:yz('ortak.urun.kayit-kimligi-teklifle-tutmu') };
     }
-    if(AILELER.indexOf(g.aile) < 0) return { ok:false, why:'Ürün ailesi tanınmadı.' };
-    if(p && p.urun && g.urun !== p.urun) return { ok:false, why:'Ürün türü teklifle tutmuyor.' };
+    if(AILELER.indexOf(g.aile) < 0) return { ok:false, why:yz('ortak.urun.urun-ailesi-taninmadi') };
+    if(p && p.urun && g.urun !== p.urun) return { ok:false, why:yz('ortak.urun.urun-turu-teklifle-tutmuyor') };
     if(g.aile === 'belge' && !(Array.isArray(g.bolumler) && g.bolumler.length)){
-      return { ok:false, why:'Belgenin hiç bölümü yok.' };
+      return { ok:false, why:yz('ortak.urun.belgenin-hic-bolumu-yok') };
     }
     if(g.aile === 'sunum' && !(Array.isArray(g.slaytlar) && g.slaytlar.length)){
-      return { ok:false, why:'Sunumun hiç slaytı yok.' };
+      return { ok:false, why:yz('ortak.urun.sunumun-hic-slayti-yok') };
     }
     const h = String(html || '');
     if(!/<html[\s>]/i.test(h) || !/<\/html>\s*$/i.test(h)){
-      return { ok:false, why:'Ürünün basılı hâli bir HTML belgesi değil.' };
+      return { ok:false, why:yz('ortak.urun.urunun-basili-hali-bir-html') };
     }
-    if(h.length > HTML_SINIR) return { ok:false, why:'Ürün saklanamayacak kadar büyük.' };
+    if(h.length > HTML_SINIR) return { ok:false, why:yz('ortak.urun.urun-saklanamayacak-kadar-bu') };
     const baslik = bosluk(g.baslik || kayit.baslik).slice(0, 160);
-    if(baslik.length < 2) return { ok:false, why:'Ürünün başlığı yok.' };
+    if(baslik.length < 2) return { ok:false, why:yz('ortak.urun.urunun-basligi-yok') };
     const etiket = p && typeof p.etiket === 'string' && ETIKET_RE.test(p.etiket) ? p.etiket : null;
     return { ok:true, urun:{ id:'bam-' + kid, kayitId:kid, urun:String(g.urun || ''),
       urunAd:bosluk(g.urun_ad).slice(0, 60) || 'Ürün', aile:g.aile, baslik,
@@ -132,7 +157,7 @@ LIFEOS.Urun = (function(){
       try{
         const f = k.f;          /* fetch bir nesnenin yöntemi olarak çağrılamaz */
         return await f(k.url + yol, Object.assign({ signal:ctrl ? ctrl.signal : undefined,
-          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token } },
+          headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.urun.bearer') + k.token } },
         secenek || {}));
       }finally{
         if(t) clearTimeout(t);
@@ -172,12 +197,12 @@ LIFEOS.Urun = (function(){
     async function iste(metin, acik){
       const k = baglanti();
       if(!k){
-        return { ok:false, metin:'Bunu HKM’deki Üretim Bürosu hazırlar ama HKM bağlı değil. '
-          + 'HKM’ye bağlanınca yeniden iste.' };
+        return { ok:false, metin:yz('ortak.urun.bunu-hkm-deki-uretim-burosu')
+          + yz('ortak.urun.hkm-ye-baglaninca-yeniden-is') };
       }
-      if(acik && acik.etiket && !ETIKET_RE.test(acik.etiket)) return { ok:false, metin:'İstek etiketi geçersiz.' };
+      if(acik && acik.etiket && !ETIKET_RE.test(acik.etiket)) return { ok:false, metin:yz('ortak.urun.i-stek-etiketi-gecersiz') };
       if(acik && acik.etiket && bekleyen(acik.etiket).some(x => x.tur === acik.tur)){
-        return { ok:false, metin:'Bu zaten istendi; hazır olunca Onaylar’a gelir.' };
+        return { ok:false, metin:yz('ortak.urun.bu-zaten-istendi-hazir-olunc') };
       }
       try{
         const govde = { modul:k.modul, metin:String(metin || '').slice(0, 600) };
@@ -186,10 +211,10 @@ LIFEOS.Urun = (function(){
         const res = await cagir(k, '/api/king/urun', { method:'POST', body:JSON.stringify(govde) });
         const g = await res.json();
         if(res.status !== 200 || !g || !g.ok){
-          return { ok:false, metin:(g && (g.note || g.error)) || 'King iş emrini almadı.' };
+          return { ok:false, metin:(g && (g.note || g.error)) || yz('ortak.urun.king-is-emrini-almadi') };
         }
         if(!g.tanindi){
-          return { ok:false, tanindi:false, metin:'Bunu bir ürün isteği olarak anlamadım. '
+          return { ok:false, tanindi:false, metin:yz('ortak.urun.bunu-bir-urun-istegi-olarak')
             + '«Türev hakkında özet hazırla» ya da «fotosentez zihin haritası çiz» gibi '
             + 'yazarsan King’e iletirim.' };
         }
@@ -202,7 +227,7 @@ LIFEOS.Urun = (function(){
         }
         return { ok:true, tanindi:true, metin:g.metin };
       }catch(e){
-        return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };
+        return { ok:false, metin:yz('ortak.urun.hkm-ye-ulasilamadi-is-emri-a') };
       }
     }
 
@@ -210,10 +235,10 @@ LIFEOS.Urun = (function(){
        modülün kendi koduyla sınanır, modülün deposuna yazılır. */
     async function uygula(p){
       const kid = Number(p && p.kayit_id);
-      if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Ürün kimliği geçersiz.' };
-      if(bul('bam-' + kid)) return { ok:false, error:'Bu ürün zaten eklenmiş.' };
+      if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('ortak.urun.urun-kimligi-gecersiz') };
+      if(bul('bam-' + kid)) return { ok:false, error:yz('ortak.urun.bu-urun-zaten-eklenmis') };
       const k = baglanti();
-      if(!k) return { ok:false, error:'HKM bağlantısı kurulmamış; ürün alınamaz.' };
+      if(!k) return { ok:false, error:yz('ortak.urun.hkm-baglantisi-kurulmamis-ur') };
       let kayit = null, html = null;
       try{
         const r1 = await cagir(k, '/api/bam/kayit/' + kid, { method:'GET' });
@@ -222,7 +247,7 @@ LIFEOS.Urun = (function(){
         if(r2.status === 200) html = await r2.text();
       }catch(e){ kayit = null; }
       if(!kayit || html == null){
-        return { ok:false, error:'Ürün HKM’den alınamadı; HKM açıkken yeniden dene.' };
+        return { ok:false, error:yz('ortak.urun.urun-hkm-den-alinamadi-hkm-a') };
       }
       const s = sina(kayit, p, html);
       if(!s.ok) return { ok:false, error:s.why };

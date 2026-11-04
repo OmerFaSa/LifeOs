@@ -27,6 +27,22 @@
       hiç değerlendirilmez: 4 karttan 6 karta çıkmak %50 artıştır ve
       hiçbir şey ifade etmez. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.goodhart.kart-sayisini-mi-artirdin-yo':'Kart sayısını mı artırdın, yoksa aynı kartları mı ',
+  'esp.core.goodhart.kart-destesi-cok-mu-buyuk':'Kart destesi çok mu büyük, yoksa kartlar çok mu uzun?',
+  'esp.core.goodhart.okudugun-metin-not-almaya-de':'Okuduğun metin not almaya değmiyor mu, yoksa okuma ',
+  'esp.core.goodhart.baglanmayan-not-ikinci-kez-o':'Bağlanmayan not ikinci kez okunmaz; notları bağlamayı ',
+  'esp.core.goodhart.yazmak-ile-yaziyi-duzenlemek':'Yazmak ile yazıyı düzenlemek aynı iş değil — süre ',
+  'esp.core.goodhart.acik-kalan-arguman-bir-dusun':'Açık kalan argüman bir düşünce değil bir niyettir; ',
+  'esp.core.goodhart.tempoyu-erken-mi-actin-plato':'Tempoyu erken mi açtın? Plato kontrolüne bakmak ister misin?',
+  'esp.core.goodhart.kaydi-dinleyip-hatalari-isar':'Kaydı dinleyip hataları işaretliyor musun, yoksa aynı ',
+  'esp.core.goodhart.yerlestirilmeyen-olay-hatirl':'Yerleştirilmeyen olay hatırlanmaz; okuduklarını ',
+  'esp.core.goodhart.olculmemis-sonuc-sifir-sonuc':'Ölçülmemiş sonuç, sıfır sonuç değildir.',
+  'esp.core.goodhart.caba-artti-sonuc-da-hareket':'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin ',
+  'esp.core.goodhart.caba-da-sonuc-da-dogru':'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi ',
+  'esp.core.goodhart.bir-gosterge-ayrismis':'Bir gösterge ayrışmış',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.goodhart.bu-parametreler-pedagojik-bi':'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
   'esp.core.goodhart.yukselmesi-iyi':'yükselmesi iyi',
   'esp.core.goodhart.dusmesi-iyi':'düşmesi iyi',
@@ -178,28 +194,28 @@ ESP.Goodhart = (function(){
   const PAIRS = [
     { id:'lang-volume-vs-recall', direction:'higher_better', disc:'lang',
       effortLabel:'çalışma dakikası', outcomeLabel:'ilk denemede hatırlama',
-      question:'Kart sayısını mı artırdın, yoksa aynı kartları mı '
+      question:yz('esp.core.goodhart.kart-sayisini-mi-artirdin-yo')
              + 'tekrar ediyorsun?',
       effort:w => minutesIn('lang', w),
       outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; } },
 
     { id:'lang-reps-vs-recall', direction:'higher_better', disc:'lang',
       effortLabel:'kart tekrarı', outcomeLabel:'ilk denemede hatırlama',
-      question:'Kart destesi çok mu büyük, yoksa kartlar çok mu uzun?',
+      question:yz('esp.core.goodhart.kart-destesi-cok-mu-buyuk'),
       effort:w => cardAnswers(w).n,
       outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; },
       minEffort:40 },
 
     { id:'reading-minutes-vs-notes', direction:'higher_better', disc:'reading',
       effortLabel:'okuma dakikası', outcomeLabel:'çıkan not',
-      question:'Okuduğun metin not almaya değmiyor mu, yoksa okuma '
+      question:yz('esp.core.goodhart.okudugun-metin-not-almaya-de')
              + 'pasifleşti mi?',
       effort:w => minutesIn('reading', w),
       outcome:w => countIn(S.notes, w, 'createdAt') },
 
     { id:'reading-notes-vs-links', direction:'higher_better', disc:'reading',
       effortLabel:'not sayısı', outcomeLabel:'not başına bağ',
-      question:'Bağlanmayan not ikinci kez okunmaz; notları bağlamayı '
+      question:yz('esp.core.goodhart.baglanmayan-not-ikinci-kez-o')
              + 'mı erteliyorsun, yoksa bağlanacak bir şey mi çıkmıyor?',
       effort:w => countIn(S.notes, w, 'createdAt'),
       outcome:w => {
@@ -211,14 +227,14 @@ ESP.Goodhart = (function(){
 
     { id:'writing-minutes-vs-drafts', direction:'higher_better', disc:'writing',
       effortLabel:'yazı dakikası', outcomeLabel:'elden geçen taslak',
-      question:'Yazmak ile yazıyı düzenlemek aynı iş değil — süre '
+      question:yz('esp.core.goodhart.yazmak-ile-yaziyi-duzenlemek')
              + 'hangisine gidiyor?',
       effort:w => minutesIn('writing', w),
       outcome:w => countIn(S.drafts, w, 'updatedAt') },
 
     { id:'philo-minutes-vs-closed', direction:'higher_better', disc:'philo',
       effortLabel:'felsefe dakikası', outcomeLabel:'kapanan argüman',
-      question:'Açık kalan argüman bir düşünce değil bir niyettir; '
+      question:yz('esp.core.goodhart.acik-kalan-arguman-bir-dusun')
              + 'hangisi kapanmaya en yakın?',
       effort:w => minutesIn('philo', w),
       outcome:w => countIn(S.args, w, 'updatedAt', a => a.status === 'closed') },
@@ -226,20 +242,20 @@ ESP.Goodhart = (function(){
 
     { id:'music-minutes-vs-clean', direction:'higher_better', disc:'music',
       effortLabel:'gitar dakikası', outcomeLabel:'temiz deneme oranı',
-      question:'Tempoyu erken mi açtın? Plato kontrolüne bakmak ister misin?',
+      question:yz('esp.core.goodhart.tempoyu-erken-mi-actin-plato'),
       effort:w => minutesIn('music', w),
       outcome:w => cleanRate(w) },
 
     { id:'diction-minutes-vs-error', direction:'lower_better', disc:'diction',
       effortLabel:'diksiyon dakikası', outcomeLabel:'hata oranı',
-      question:'Kaydı dinleyip hataları işaretliyor musun, yoksa aynı '
+      question:yz('esp.core.goodhart.kaydi-dinleyip-hatalari-isar')
              + 'tekrarı mı sürdürüyorsun?',
       effort:w => minutesIn('diction', w),
       outcome:w => dictionError(w) },
 
     { id:'history-minutes-vs-events', direction:'higher_better', disc:'history',
       effortLabel:'tarih dakikası', outcomeLabel:'yerleştirilen olay',
-      question:'Yerleştirilmeyen olay hatırlanmaz; okuduklarını '
+      question:yz('esp.core.goodhart.yerlestirilmeyen-olay-hatirl')
              + 'kronolojiye taşımayı mı erteliyorsun?',
       effort:w => minutesIn('history', w),
       outcome:w => countIn(S.events, w, 'createdAt') },
@@ -288,7 +304,7 @@ ESP.Goodhart = (function(){
     if(eS == null || yS == null){
       return Object.assign(base, { status:'unknown', cert:'missing',
         note:yz('esp.core.goodhart.sonuc-tarafinda-iki-penceren')
-           + 'Ölçülmemiş sonuç, sıfır sonuç değildir.' });
+           + yz('esp.core.goodhart.olculmemis-sonuc-sifir-sonuc') });
     }
     if(!(yC >= asgari)){
       return Object.assign(base, { status:'idle', cert:'measured',
@@ -317,9 +333,9 @@ ESP.Goodhart = (function(){
       return Object.assign(base, { status:'aligned', cert:'measured',
         direction:yon.id, effortChange:dC, outcomeChange:sonucIyilesme,
         note:yon.id === 'movement_only'
-          ? 'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin '
+          ? yz('esp.core.goodhart.caba-artti-sonuc-da-hareket')
             + 'bileceği bir şey değil.'
-          : 'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+          : yz('esp.core.goodhart.caba-da-sonuc-da-dogru')
             + 'temsil ediyor.' });
     }
     return Object.assign(base, { status:'decoupled', cert:'measured',
@@ -346,7 +362,7 @@ ESP.Goodhart = (function(){
     const ilk = f[0];
     return {
       count:f.length,
-      title:f.length === 1 ? 'Bir gösterge ayrışmış' : f.length + ' gösterge ayrışmış',
+      title:f.length === 1 ? yz('esp.core.goodhart.bir-gosterge-ayrismis') : f.length + ' gösterge ayrışmış',
       body:ilk.note + ' ' + ilk.question,
       flags:f,
     };

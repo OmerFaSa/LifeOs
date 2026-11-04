@@ -26,6 +26,17 @@
       eşiğinin (`YEDEK_ASGARI_KAYIT`) altında hiçbir şey gönderilmez.
    5. KÜÇÜLME SÖYLENİR. HKM yeni yedeğin bir öncekinin yarısından küçük
       olduğunu söylerse bu kullanıcıya gösterilir: veri silinmiş olabilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.yedekag.bearer':'Bearer ',
+  'ortak.yedekag.hkm-bagli-degil-once-ayarlar':'HKM bağlı değil. Önce Ayarlar › HKM bağlantısından eşle.',
+  'ortak.yedekag.hkm-yedek-listesini-vermedi':'HKM yedek listesini vermedi (',
+  'ortak.yedekag.hkm-de-bu-modulun-yedegi-yok':'HKM’de bu modülün yedeği yok.',
+  'ortak.yedekag.yedek-indirilemedi':'Yedek indirilemedi (',
+  'ortak.yedekag.yedek-okunamadi-dosya-bozuk':'Yedek okunamadı; dosya bozuk.',
+  'ortak.yedekag.hkm-ye-ulasilamadi':'HKM’ye ulaşılamadı.',
+  'ortak.yedekag.bu-modul':'Bu modül',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -70,7 +81,7 @@ LIFEOS.YedekAg = (function(){
         const f = k.f;
         const res = await f(k.url + '/api/yedek/' + ortam.modul, {
           method:'POST',
-          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+          headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.yedekag.bearer') + k.token },
           body:metin, signal:ctrl ? ctrl.signal : undefined,
         });
         if(res.status !== 200) return null;
@@ -125,24 +136,24 @@ LIFEOS.YedekAg = (function(){
     const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
     const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
     if(!b || !a.enabled || !a.token || !b.urlOk(a.url) || !f){
-      return { ok:false, why:'HKM bağlı değil. Önce Ayarlar › HKM bağlantısından eşle.' };
+      return { ok:false, why:yz('ortak.yedekag.hkm-bagli-degil-once-ayarlar') };
     }
     const url = String(a.url).replace(/\/$/, '');
-    const h = { 'Authorization':'Bearer ' + a.token };
+    const h = { 'Authorization':yz('ortak.yedekag.bearer') + a.token };
     try{
       const l = await f(url + '/api/yedek', { headers:h });
-      if(l.status !== 200) return { ok:false, why:'HKM yedek listesini vermedi (' + l.status + ').' };
+      if(l.status !== 200) return { ok:false, why:yz('ortak.yedekag.hkm-yedek-listesini-vermedi') + l.status + ').' };
       const son = (((await l.json()) || {}).moduller || {})[ortam.modul];
-      if(!Array.isArray(son) || !son.length) return { ok:false, why:'HKM’de bu modülün yedeği yok.' };
+      if(!Array.isArray(son) || !son.length) return { ok:false, why:yz('ortak.yedekag.hkm-de-bu-modulun-yedegi-yok') };
       const y = son[0];
       const r = await f(url + '/api/yedek/' + encodeURIComponent(ortam.modul) + '/'
         + encodeURIComponent(y.tarih), { headers:h });
-      if(r.status !== 200) return { ok:false, why:'Yedek indirilemedi (' + r.status + ').' };
+      if(r.status !== 200) return { ok:false, why:yz('ortak.yedekag.yedek-indirilemedi') + r.status + ').' };
       let obj;
-      try{ obj = JSON.parse(await r.text()); }catch(e){ return { ok:false, why:'Yedek okunamadı; dosya bozuk.' }; }
+      try{ obj = JSON.parse(await r.text()); }catch(e){ return { ok:false, why:yz('ortak.yedekag.yedek-okunamadi-dosya-bozuk') }; }
       return { ok:true, tarih:y.tarih, tarihYazi:y.tarih_yazi || y.tarih, boyut:y.boyut || '', obj };
     }catch(e){
-      return { ok:false, why:'HKM’ye ulaşılamadı.' };
+      return { ok:false, why:yz('ortak.yedekag.hkm-ye-ulasilamadi') };
     }
   }
 
@@ -152,7 +163,7 @@ LIFEOS.YedekAg = (function(){
      yedek olarak HKM'ye yolluyor (belgeler/ekip/HATALAR.md Y-8, B-2). Anahtarın
      neyi açtığı, açılmadan önce eksiksiz söylenir. */
   function kartNotu(ad){
-    const a = String(ad || 'Bu modül');
+    const a = String(ad || yz('ortak.yedekag.bu-modul'));
     return a + ', HKM\'nin varlığını bilir ama ona bağımlı değildir: HKM kapalıyken, '
       + 'yavaşken ya da hata verirken ' + a + ' olduğu gibi çalışır. Bu anahtar iki şeyi '
       + 'birlikte açar: günün özeti (aşağıdaki tablo) ve günde bir kez ' + a + '\'nin '

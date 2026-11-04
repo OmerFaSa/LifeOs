@@ -29,6 +29,38 @@
    + geri dönüş noktası. Katalogda `plan-uygula` (core/proposals.js);
    model bu eylemi ÖNEREMEZ. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.plan.hekim-talimatin-proteini-sin':'Hekim talimatın proteini sınırlıyor: protein bandı yükseltilmedi.',
+  'spi.core.plan.hekim-talimatin-enerjiden-so':'Hekim talimatın enerjiden söz ediyor: enerji hedefini ben kurmam, ',
+  'spi.core.plan.hekim-kapisindasin':'Hekim kapısındasın (',
+  'spi.core.plan.hekim-talimatin-enerjiden-so-2':'Hekim talimatın enerjiden söz ediyor; enerji hedefi hekiminle kurulur.',
+  'spi.core.plan.boy-dogum-yili-ya-da':'Boy, doğum yılı ya da cinsiyet eksik: enerji hesaplanamadı.',
+  'spi.core.plan.enerji-bazal-metabolizmanin':'Enerji bazal metabolizmanın (',
+  'spi.core.plan.hekim-talimatin-proteini-sin-2':'Hekim talimatın proteini sınırlıyor; bant yükseltilmedi.',
+  'spi.core.plan.beslenme-hedefi':'Beslenme hedefi',
+  'spi.core.plan.gunluk-enerji-hedefi':'Günlük enerji hedefi',
+  'spi.core.plan.gunluk-protein':'Günlük protein',
+  'spi.core.plan.tarti-gunu':'Tartı günü',
+  'spi.core.plan.kontrol-noktalari':'Kontrol noktaları',
+  'spi.core.plan.hekim-talimatlari':'Hekim talimatları',
+  'spi.core.plan.hedefin-plani-da-kapandi-bes':'Hedefin planı da kapandı; beslenme hedefin plandan önceki haline döndü.',
+  'spi.core.plan.plan-yolunda':'Plan yolunda',
+  'spi.core.plan.planin-onundesin':'Planın önündesin',
+  'spi.core.plan.planin-gerisindesin':'Planın gerisindesin',
+  'spi.core.plan.kilo-plani':'Kilo planı: ',
+  'spi.core.plan.hedefin-plani-spi-de-uygulan':'Hedefin planı SPİ’de uygulandı; haftalık program ve simülasyon isteniyor.',
+  'spi.core.plan.bearer':'Bearer ',
+  'spi.core.plan.king-onayladi':'King onayladı',
+  'spi.core.plan.king-kismen-onayladi':'King kısmen onayladı',
+  'spi.core.plan.king-reddetti':'King reddetti',
+  'spi.core.plan.bu-is-emri-zaten-acik':'Bu iş emri zaten açık (#',
+  'spi.core.plan.king-cevap-verdi':'King cevap verdi',
+  'spi.core.plan.bu-teklifin-hedefinde-uygula':'Bu teklifin hedefinde uygulanmış bir plan yok; önce planı uygula.',
+  'spi.core.plan.program-eklenmedi':'Program eklenmedi: ',
+  'spi.core.plan.bu-program-daha-once-islendi':'Bu program daha önce işlendi.',
+  'spi.core.plan.hedeflerim-de-bu-hafta-olara':'Hedeflerim’de «Bu hafta» olarak görünür.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.plan.hedef-bulunamadi':'Hedef bulunamadı.',
   'spi.core.plan.bu-hedef-icin-plan-motoru':'Bu hedef için plan motoru henüz yok.',
   'spi.core.plan.plan-yalniz-aktif-bir-hedef':'Plan yalnız aktif bir hedef için kurulur.',
@@ -103,11 +135,11 @@ SP.Plan = (function(){
       const k = kucuk(t.metin);
       if(PROTEIN_KISIT.test(k) && KISIT.test(k)){
         out.proteinKisitli = true;
-        out.notlar.push('Hekim talimatın proteini sınırlıyor: protein bandı yükseltilmedi.');
+        out.notlar.push(yz('spi.core.plan.hekim-talimatin-proteini-sin'));
       }
       if(ENERJI_TALIMAT.test(k)){
         out.enerjiHekimle = true;
-        out.notlar.push('Hekim talimatın enerjiden söz ediyor: enerji hedefini ben kurmam, '
+        out.notlar.push(yz('spi.core.plan.hekim-talimatin-enerjiden-so')
           + 'hekiminle konuş.');
       }
     });
@@ -158,14 +190,14 @@ SP.Plan = (function(){
     let goal = null, enerji = null, enerjiNeden = null;
     const onceGoal = p.goal || 'health';
     if(kapi.gerekli){
-      enerjiNeden = 'Hekim kapısındasın (' + kapi.nedenler.join(', ') + '): enerji ve beslenme '
+      enerjiNeden = yz('spi.core.plan.hekim-kapisindasin') + kapi.nedenler.join(', ') + '): enerji ve beslenme '
         + 'hedefi hekiminle kurulur. Plan yalnız tartı ve kontrol noktalarını kurar.';
     }else if(etki.enerjiHekimle){
-      enerjiNeden = 'Hekim talimatın enerjiden söz ediyor; enerji hedefi hekiminle kurulur.';
+      enerjiNeden = yz('spi.core.plan.hekim-talimatin-enerjiden-so-2');
     }else{
       const tdee = SP.Nutri.tdee(kisi), bmr = SP.Nutri.bmr(kisi);
       if(tdee == null || bmr == null){
-        enerjiNeden = 'Boy, doğum yılı ya da cinsiyet eksik: enerji hesaplanamadı.';
+        enerjiNeden = yz('spi.core.plan.boy-dogum-yili-ya-da');
       }else{
         /* Günlük ihtiyaç günden güne değişir (BMR + o gün GİRİLEN hareket,
            SP.Nutri.dayNeed). Plan sabit kcal değil günlük FARK yazar; burada
@@ -176,7 +208,7 @@ SP.Plan = (function(){
         const kcal = Math.max(bmr, Math.round(tdee + fark));
         const taban = yon === 'azalt' && tdee + fark < bmr;
         if(taban){
-          uyarilar.push('Enerji bazal metabolizmanın (' + kcalYaz(bmr) + ') altına inmez. Hareket '
+          uyarilar.push(yz('spi.core.plan.enerji-bazal-metabolizmanin') + kcalYaz(bmr) + ') altına inmez. Hareket '
             + 'girmediğin günde hedef bazal metabolizmada kalır; açık o gün girdiğin hareketten '
             + 'gelir. Hedef tarihi kayabilir.');
         }
@@ -192,7 +224,7 @@ SP.Plan = (function(){
       const t = SP.Nutri.targets(Object.assign({}, kisi, { goal:goal ? goal.sonra : onceGoal,
         kcalHedef:null }));
       protein = t && t.protein ? { min:t.protein.min, max:t.protein.max } : null;
-      if(etki.proteinKisitli) proteinNeden = 'Hekim talimatın proteini sınırlıyor; bant yükseltilmedi.';
+      if(etki.proteinKisitli) proteinNeden = yz('spi.core.plan.hekim-talimatin-proteini-sin-2');
     }
 
     const kontrol = [];
@@ -226,26 +258,26 @@ SP.Plan = (function(){
     const p = SP.S.profile || {};
     const simdiki = SP.Nutri.targets(p);
     const rows = [];
-    rows.push({ alan:'Beslenme hedefi', once:goalAdi(p.goal || 'health'),
+    rows.push({ alan:yz('spi.core.plan.beslenme-hedefi'), once:goalAdi(p.goal || 'health'),
       sonra:plan.goal ? goalAdi(plan.goal.sonra) + ': haftada ' + sayi(plan.tempo, 2) + ' kg'
         : 'değişmez — ' + (plan.enerjiNeden || 'hekimle kurulur') });
-    rows.push({ alan:'Günlük enerji hedefi', once:simdiki && simdiki.ok ? kcalYaz(simdiki.kcal) : '—',
+    rows.push({ alan:yz('spi.core.plan.gunluk-enerji-hedefi'), once:simdiki && simdiki.ok ? kcalYaz(simdiki.kcal) : '—',
       sonra:plan.enerji ? (plan.enerji.fark != null
         ? 'günlük ihtiyacın ' + (plan.enerji.fark < 0 ? '−' : '+') + kcalYaz(Math.abs(plan.enerji.fark))
           + ' (bugün ' + kcalYaz(plan.enerji.kcal) + ', tahmin)'
         : kcalYaz(plan.enerji.kcal) + ' (tahmin)') : 'yazılmaz' });
-    rows.push({ alan:'Günlük protein',
+    rows.push({ alan:yz('spi.core.plan.gunluk-protein'),
       once:simdiki && simdiki.protein ? simdiki.protein.min + '–' + simdiki.protein.max + ' g' : '—',
       sonra:plan.protein ? plan.protein.min + '–' + plan.protein.max + ' g'
         + (plan.proteinNeden ? ' (değişmedi: hekim talimatı)' : '') : 'yazılmaz' });
-    rows.push({ alan:'Tartı günü', once:'—',
+    rows.push({ alan:yz('spi.core.plan.tarti-gunu'), once:'—',
       sonra:plan.tartiGunu.ad + ', ' + plan.tartiGunu.not });
     const ilk = plan.kontrol[0];
-    rows.push({ alan:'Kontrol noktaları', once:'yok',
+    rows.push({ alan:yz('spi.core.plan.kontrol-noktalari'), once:'yok',
       sonra:plan.hafta + ' hafta · ilk ' + U().fmtDate(ilk.tarih) + ': ' + sayi(ilk.beklenen)
         + ' kg (beklenen)' });
     if(plan.hekim.talimatlar.length){
-      rows.push({ alan:'Hekim talimatları', once:'—',
+      rows.push({ alan:yz('spi.core.plan.hekim-talimatlari'), once:'—',
         sonra:plan.hekim.talimatlar.length + ' talimata uyulur' });
     }
     return rows;
@@ -317,7 +349,7 @@ SP.Plan = (function(){
     if(u && u.undo) await geriAl(u.undo, 'kapandi');
     else await kaydet(Object.assign({}, plan, { durum:'kapandi', kapanis:new Date().toISOString() }));
     if(u){ u.status = 'undone'; await SP.Proposals.save(); }
-    return 'Hedefin planı da kapandı; beslenme hedefin plandan önceki haline döndü.';
+    return yz('spi.core.plan.hedefin-plani-da-kapandi-bes');
   }
 
   /* ------------------------------------------------------ ilerleme
@@ -354,7 +386,7 @@ SP.Plan = (function(){
     const degisim = yuvarla(deger - plan.simdi.deger, 1);
     const kalan = yuvarla(Math.abs(plan.hedefKilo - deger), 1);
     return { durum, sonraki, son:{ tarih:son.tarih, deger }, beklenen, sapma, degisim, kalan,
-      metin:{ yolunda:'Plan yolunda', onde:'Planın önündesin', geride:'Planın gerisindesin' }[durum]
+      metin:{ yolunda:yz('spi.core.plan.plan-yolunda'), onde:yz('spi.core.plan.planin-onundesin'), geride:yz('spi.core.plan.planin-gerisindesin') }[durum]
         + ': ' + U().fmtDate(son.tarih) + ' tartısı ' + sayi(deger) + ' kg, beklenen ' + sayi(beklenen)
         + ' kg. Başlangıçtan bu yana ' + (degisim > 0 ? '+' : '') + sayi(degisim) + ' kg; hedefe '
         + sayi(kalan) + ' kg kaldı.' };
@@ -374,9 +406,9 @@ SP.Plan = (function(){
     if(Number.isInteger(kap.haftalik_gun)) kapasite.haftalik_gun = kap.haftalik_gun;
     return {
       modul:'spi', tur:'hedef.plan',
-      konu:(h.cumle || ('Kilo planı: ' + sayi(plan.simdi.deger) + ' → ' + sayi(plan.hedefKilo) + ' kg'))
+      konu:(h.cumle || (yz('spi.core.plan.kilo-plani') + sayi(plan.simdi.deger) + ' → ' + sayi(plan.hedefKilo) + ' kg'))
         .slice(0, 200),
-      neden:'Hedefin planı SPİ’de uygulandı; haftalık program ve simülasyon isteniyor.',
+      neden:yz('spi.core.plan.hedefin-plani-spi-de-uygulan'),
       govde:{ plan:{
         paket:'kilo', yon:plan.yon, hedef_id:String(plan.hedefId).slice(0, 40),
         baslangic:plan.baslangic, bitis:plan.bitis, hafta:plan.hafta, tempo:plan.tempo,
@@ -405,7 +437,7 @@ SP.Plan = (function(){
     try{
       const res = await fetch(k.url + yol, {
         method:govde === undefined ? 'GET' : 'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('spi.core.plan.bearer') + k.token },
         body:govde === undefined ? undefined : JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });
@@ -419,7 +451,7 @@ SP.Plan = (function(){
     }
   }
 
-  const KARAR_METNI = { onay:'King onayladı', kismi:'King kısmen onayladı', ret:'King reddetti' };
+  const KARAR_METNI = { onay:yz('spi.core.plan.king-onayladi'), kismi:yz('spi.core.plan.king-kismen-onayladi'), ret:yz('spi.core.plan.king-reddetti') };
 
   async function kingeIlet(hedefId){
     const plan = aktif(hedefId);
@@ -438,8 +470,8 @@ SP.Plan = (function(){
       tahmin:e.tahmin || null, tarih:new Date().toISOString() } }));
     const t = e.tahmin;
     const ret = (e.kontrol || []).filter(m => !m.ok).map(m => m.not).join('; ');
-    return { ok:true, karar:g.karar, metin:(g.yeni === false ? 'Bu iş emri zaten açık (#' + e.id + ').'
-      : (KARAR_METNI[g.karar] || 'King cevap verdi') + ' (iş emri #' + e.id + ').')
+    return { ok:true, karar:g.karar, metin:(g.yeni === false ? yz('spi.core.plan.bu-is-emri-zaten-acik') + e.id + ').'
+      : (KARAR_METNI[g.karar] || yz('spi.core.plan.king-cevap-verdi')) + ' (iş emri #' + e.id + ').')
       + (t && t.metin ? ' Tahmini süre ' + t.metin + ' (tahmin).' : '')
       + (ret ? ' ' + ret : '') };
   }
@@ -517,19 +549,19 @@ SP.Plan = (function(){
   async function programUygula(n){
     const pay = (n && n.payload) || {};
     const plan = aktif(String(pay.hedef_id || ''));
-    if(!plan) return { ok:false, error:'Bu teklifin hedefinde uygulanmış bir plan yok; önce planı uygula.' };
+    if(!plan) return { ok:false, error:yz('spi.core.plan.bu-teklifin-hedefinde-uygula') };
     const k = await kayitCek(pay.kayit_id);
     if(!k.ok) return { ok:false, error:k.why };
     const s = programSina(plan, k.kayit);
-    if(!s.ok) return { ok:false, error:'Program eklenmedi: ' + s.why };
+    if(!s.ok) return { ok:false, error:yz('spi.core.plan.program-eklenmedi') + s.why };
     const P = SP.Proposals;
     const row = await P.propose({ action:'program-ekle', params:{ hedefId:plan.hedefId, program:s.program },
       source:'kural', anahtar:'hkm-program-' + n.id,
       iz:[{ tur:'niyet', id:n.id }, { tur:'kayit', id:pay.kayit_id }], metin:yz('spi.core.plan.planlama-ofisi-programi') });
-    if(!row) return { ok:false, error:'Bu program daha önce işlendi.' };
+    if(!row) return { ok:false, error:yz('spi.core.plan.bu-program-daha-once-islendi') };
     const r = await P.approve(row.id);
     return r.ok ? { ok:true, note:s.program.haftalar.length + ' haftalık program planına eklendi; '
-      + 'Hedeflerim’de «Bu hafta» olarak görünür.' } : { ok:false, error:r.why };
+      + yz('spi.core.plan.hedeflerim-de-bu-hafta-olara') } : { ok:false, error:r.why };
   }
 
   function buHafta(plan, bugunISO){

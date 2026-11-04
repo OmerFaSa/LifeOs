@@ -14,6 +14,14 @@
      4. KÖR TAHMİN KORUNUR. Form doldurulduktan sonra yazılan net tahmini
         «kör değil» sayılır (screens/exams.js). */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.denemefoto.bu-bir-deneme-sinavi-sonuc':'Bu bir deneme sınavı sonuç kâğıdı. Her test için doğru, yanlış ve boş ',
+  'ays.core.denemefoto.okuyamadigin-sayiyi-null-yaz':'Okuyamadığın sayıyı null yaz, tahmin etme. Net, puan, sıralama ve kişisel bilgi yazma.',
+  'ays.core.denemefoto.d-y-b':'D + Y + B soru sayısını (',
+  'ays.core.denemefoto.sen-bir-sinav-sonuc-kagidi':'Sen bir sınav sonuç kâğıdı okuyucususun. Yalnız JSON döndürürsün.',
+  'ays.core.denemefoto.okunan-satirlarin-hicbiri-do':'Okunan satırların hiçbiri doğrulamadan geçmedi; elle yaz.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.denemefoto.fotograf-secilmedi':'Fotoğraf seçilmedi.',
   'ays.core.denemefoto.bu-bir-goruntu-dosyasi-degil':'Bu bir görüntü dosyası değil.',
   'ays.core.denemefoto.fotograf-cok-buyuk-en-fazla':'Fotoğraf çok büyük (en fazla 8 MB).',
@@ -27,9 +35,9 @@ window.R = window.R || {};
 
 R.DenemeFoto = (function(){
   const MAX_BYTES = 8 * 1024 * 1024;
-  const PROMPT = 'Bu bir deneme sınavı sonuç kâğıdı. Her test için doğru, yanlış ve boş '
+  const PROMPT = yz('ays.core.denemefoto.bu-bir-deneme-sinavi-sonuc')
     + 'sayısını oku. Yalnız JSON dizisi döndür: [{"test":"Türkçe","dogru":31,"yanlis":5,"bos":4}]. '
-    + 'Okuyamadığın sayıyı null yaz, tahmin etme. Net, puan, sıralama ve kişisel bilgi yazma.';
+    + yz('ays.core.denemefoto.okuyamadigin-sayiyi-null-yaz');
 
   function tamSayi(x){
     if(x == null || x === '') return null;
@@ -69,7 +77,7 @@ R.DenemeFoto = (function(){
         atlanan.push({ ad:t.name, neden:'doğru ya da yanlış okunamadı' }); return;
       }
       if(c + w + (b || 0) > t.q){
-        atlanan.push({ ad:t.name, neden:'D + Y + B soru sayısını (' + t.q + ') aşıyor' }); return;
+        atlanan.push({ ad:t.name, neden:yz('ays.core.denemefoto.d-y-b') + t.q + ') aşıyor' }); return;
       }
       dolu[i] = true;
       satirlar.push({ i, ad:t.name, c, w, b, q:t.q });
@@ -90,7 +98,7 @@ R.DenemeFoto = (function(){
     try{
       const im = await R.Solver.prepareImage(file);
       res = await R.LLM.complete(R.Solver.chainFor(true), {
-        system:'Sen bir sınav sonuç kâğıdı okuyucususun. Yalnız JSON döndürürsün.',
+        system:yz('ays.core.denemefoto.sen-bir-sinav-sonuc-kagidi'),
         messages:[{ role:'user', text:PROMPT + ' Testler: '
           + tmpl.tests.map(t => t.name + ' (' + t.q + ' soru)').join(', ') + '.',
           images:[{ mime:im.mime, data:im.data }] }],
@@ -105,7 +113,7 @@ R.DenemeFoto = (function(){
     if(!Array.isArray(ham)) return { ok:false, note:yz('ays.core.denemefoto.fotograftan-sonuc-cikarilama') };
     const d = dogrula(ham, tmpl);
     return Object.assign({ ok:d.satirlar.length > 0,
-      note:d.satirlar.length ? '' : 'Okunan satırların hiçbiri doğrulamadan geçmedi; elle yaz.' }, d);
+      note:d.satirlar.length ? '' : yz('ays.core.denemefoto.okunan-satirlarin-hicbiri-do') }, d);
   }
 
   return { dogrula, oku, hazir, eslestir };

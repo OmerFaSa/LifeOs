@@ -5,6 +5,46 @@
 
    Model çıktısı ev kurallarına takılırsa cümle basılmaz; yerine kural
    motorunun cümlesi geçer ve neden engellendiği yazılır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.team.sustugunda-sira-ona-gececek':'Sustuğunda sıra ona geçecek',
+  'spi.team.brifingi-okuyor-ve-cumleyi-k-2':'Brifingi okuyor ve cümleyi kuruyor',
+  'spi.team.bu-tarayicida-sesli-cevap-yo':'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.',
+  'spi.team.cihazda-turkce-ses-bulunamad':'Cihazda Türkçe ses bulunamadı. Cevap yabancı bir sesle okunur; ',
+  'spi.team.cumleleri-bagli-model-kuruyo':'Cümleleri bağlı model kuruyor; sayılar yine kural motorundan.',
+  'spi.team.model-bagli-degil-cevaplar-h':'Model bağlı değil: cevaplar hazır kurallardan gelir.',
+  'spi.team.alan-disinda':'Alan dışında',
+  'spi.team.bu-hafta-neye-odaklanmaliyim':'Bu hafta neye odaklanmalıyım?',
+  'spi.team.celiski-varsa-hangisi-onceli':'Çelişki varsa hangisi öncelikli?',
+  'spi.team.butce-ile-saglik-hedefi-caki':'Bütçe ile sağlık hedefi çakışıyor mu?',
+  'spi.team.hangi-olcumum-en-cok-dikkat':'Hangi ölçümüm en çok dikkat istiyor?',
+  'spi.team.egilimi-kotuye-giden-bir-deg':'Eğilimi kötüye giden bir değer var mı?',
+  'spi.team.hangi-paneli-yenilemeliyim':'Hangi paneli yenilemeliyim?',
+  'spi.team.en-buyuk-acigim-hangisi':'En büyük açığım hangisi?',
+  'spi.team.demir-emilimimi-ne-bozuyor':'Demir emilimimi ne bozuyor?',
+  'spi.team.bugunku-ogunlerim-hedefi-tut':'Bugünkü öğünlerim hedefi tutturdu mu?',
+  'spi.team.bugun-ne-kadar-yuklenmeliyim':'Bugün ne kadar yüklenmeliyim?',
+  'spi.team.asiri-yukleniyor-muyum':'Aşırı yükleniyor muyum?',
+  'spi.team.hangi-harekette-ust-basamaga':'Hangi harekette üst basamağa geçebilirim?',
+  'spi.team.nereden-tasarruf-edebilirim':'Nereden tasarruf edebilirim?',
+  'spi.team.sepetim-besin-ihtiyacimi-kar':'Sepetim besin ihtiyacımı karşılıyor mu?',
+  'spi.team.toplu-alim-yapmali-miyim':'Toplu alım yapmalı mıyım?',
+  'spi.team.geri-alinacak-bir-degisiklig':'Geri alınacak bir değişikliğin yok.',
+  'spi.team.geri-aldim':'Geri aldım: ',
+  'spi.team.geri-alamadim':'Geri alamadım: ',
+  'spi.team.tamam-vazgectim-hicbir-sey-d':'Tamam, vazgeçtim; hiçbir şey değişmedi.',
+  'spi.team.uyguladim-geri-almak-isterse':'Uyguladım. Geri almak istersen «geri al» de.',
+  'spi.team.uygulayamadim':'Uygulayamadım: ',
+  'spi.team.bunu-yapamadim':'Bunu yapamadım: ',
+  'spi.team.yaptim':'Yaptım: ',
+  'spi.team.anladigim-su':'Anladığım şu: ',
+  'spi.team.onayliyor-musun-evet-de-ya':'Onaylıyor musun? «evet» de ya da aşağıdaki kartta onayla.',
+  'spi.team.bir-kayit':'Bir kayıt',
+  'spi.team.sunu-cozemedim':'Şunu çözemedim: «',
+  'spi.team.sesli-sohbet-baslatilamadi':'Sesli sohbet başlatılamadı',
+  'spi.team.geri-alindi-2':'Geri alındı',
+  'spi.team.geri-alinamadi':'Geri alınamadı',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -56,8 +96,8 @@ SP.Screens.team = (function(){
   let sesli = { acik:false, durum:'kapalı', metin:'', hata:null };
 
   const DURUM_METNI = {
-    'dinliyor':  { t:'Dinliyorum', a:'Sustuğunda sıra ona geçecek' },
-    'düşünüyor': { t:'Düşünüyor',  a:'Brifingi okuyor ve cümleyi kuruyor' },
+    'dinliyor':  { t:'Dinliyorum', a:yz('spi.team.sustugunda-sira-ona-gececek') },
+    'düşünüyor': { t:'Düşünüyor',  a:yz('spi.team.brifingi-okuyor-ve-cumleyi-k-2') },
     'konuşuyor': { t:'Konuşuyor',  a:'Kesmek için Kes\'e bas ya da boşluk tuşu' },
     'kapalı':    { t:'Kapalı',     a:'' },
   };
@@ -91,9 +131,9 @@ SP.Screens.team = (function(){
         </div>
         ${when(sesli.hata, () => K.Notice({ tone:'warn', class:'mt-10', body:sesli.hata }))}
         ${when(!sesli.acik && sessizCevap, () => K.Notice({ tone:'info', class:'mt-10',
-          body:'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.' }))}
+          body:yz('spi.team.bu-tarayicida-sesli-cevap-yo') }))}
         ${when(!sesli.acik && yabanci, () => K.Notice({ tone:'info', class:'mt-10',
-          body:'Cihazda Türkçe ses bulunamadı. Cevap yabancı bir sesle okunur; '
+          body:yz('spi.team.cihazda-turkce-ses-bulunamad')
              + 'anlaşılmazsa sesli sohbeti kapat.' }))}`,
       foot:html`
         ${when(!sesli.acik, () => K.Button({ label:yz('spi.team.sesli-sohbeti-baslat'),
@@ -212,8 +252,8 @@ SP.Screens.team = (function(){
     return OS().pencereHtml({
       anahtar:'spi:' + a.id, ad:a.name, rol:a.role,
       durum:hazir ? 'yapay zekâ' : 'hazır kurallar',
-      durumNot:hazir ? 'Cümleleri bağlı model kuruyor; sayılar yine kural motorundan.'
-        : 'Model bağlı değil: cevaplar hazır kurallardan gelir.',
+      durumNot:hazir ? yz('spi.team.cumleleri-bagli-model-kuruyo')
+        : yz('spi.team.model-bagli-degil-cevaplar-h'),
       gecmisHtml:G ? G.listeHtml('spi', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
       akisHtml:String(chatBody(a)),
       ustHtml:mentionYeri(),
@@ -237,7 +277,7 @@ SP.Screens.team = (function(){
         ${K.Table({ tight:true, headers:['Alan', 'Kapsam'], rows:[
           ['Bakar', a.scope],
           ['Bakmaz', a.notScope],
-          ['Alan dışında', a.redirect],
+          [yz('spi.team.alan-disinda'), a.redirect],
         ] })}
         ${K.Notice({ tone:'info', class:'mt-10', title:yz('spi.team.modele-ne-gider'),
           body:SP.PRIVACY.model })}`,
@@ -257,16 +297,16 @@ SP.Screens.team = (function(){
 
   function sorular(a){
     return ({
-      patron:['Bu hafta neye odaklanmalıyım?', 'Çelişki varsa hangisi öncelikli?',
-        'Bütçe ile sağlık hedefi çakışıyor mu?'],
-      lab:['Hangi ölçümüm en çok dikkat istiyor?', 'Eğilimi kötüye giden bir değer var mı?',
-        'Hangi paneli yenilemeliyim?'],
-      nutri:['En büyük açığım hangisi?', 'Demir emilimimi ne bozuyor?',
-        'Bugünkü öğünlerim hedefi tutturdu mu?'],
-      move:['Bugün ne kadar yüklenmeliyim?', 'Aşırı yükleniyor muyum?',
-        'Hangi harekette üst basamağa geçebilirim?'],
-      money:['Nereden tasarruf edebilirim?', 'Sepetim besin ihtiyacımı karşılıyor mu?',
-        'Toplu alım yapmalı mıyım?'],
+      patron:[yz('spi.team.bu-hafta-neye-odaklanmaliyim'), yz('spi.team.celiski-varsa-hangisi-onceli'),
+        yz('spi.team.butce-ile-saglik-hedefi-caki')],
+      lab:[yz('spi.team.hangi-olcumum-en-cok-dikkat'), yz('spi.team.egilimi-kotuye-giden-bir-deg'),
+        yz('spi.team.hangi-paneli-yenilemeliyim')],
+      nutri:[yz('spi.team.en-buyuk-acigim-hangisi'), yz('spi.team.demir-emilimimi-ne-bozuyor'),
+        yz('spi.team.bugunku-ogunlerim-hedefi-tut')],
+      move:[yz('spi.team.bugun-ne-kadar-yuklenmeliyim'), yz('spi.team.asiri-yukleniyor-muyum'),
+        yz('spi.team.hangi-harekette-ust-basamaga')],
+      money:[yz('spi.team.nereden-tasarruf-edebilirim'), yz('spi.team.sepetim-besin-ihtiyacimi-kar'),
+        yz('spi.team.toplu-alim-yapmali-miyim')],
     })[a.id] || [];
   }
 
@@ -402,10 +442,10 @@ SP.Screens.team = (function(){
     if(kisa === 'geri'){
       const son = P.all().filter(p => p.source === 'istek' && p.status === 'applied')
         .sort((x, y) => String(y.appliedAt || '').localeCompare(String(x.appliedAt || '')))[0];
-      if(!son){ await sohbeteYaz(a, t, 'Geri alınacak bir değişikliğin yok.'); return true; }
+      if(!son){ await sohbeteYaz(a, t, yz('spi.team.geri-alinacak-bir-degisiklig')); return true; }
       const u = await P.undo(son.id);
       const e = P.eylem(son.action);
-      await sohbeteYaz(a, t, u.ok ? 'Geri aldım: ' + (e ? e.label : son.action) + '.' : 'Geri alamadım: ' + u.why);
+      await sohbeteYaz(a, t, u.ok ? yz('spi.team.geri-aldim') + (e ? e.label : son.action) + '.' : yz('spi.team.geri-alamadim') + u.why);
       return true;
     }
     if(kisa === 'evet' || kisa === 'hayir'){
@@ -413,13 +453,13 @@ SP.Screens.team = (function(){
       if(bek.length){
         if(kisa === 'hayir'){
           for(const p of bek) await P.reject(p.id);
-          await sohbeteYaz(a, t, 'Tamam, vazgeçtim; hiçbir şey değişmedi.');
+          await sohbeteYaz(a, t, yz('spi.team.tamam-vazgectim-hicbir-sey-d'));
           return true;
         }
         let n = 0; const why = [];
         for(const p of bek){ const r = await P.approve(p.id); if(r.ok) n++; else if(r.why) why.push(r.why); }
-        await sohbeteYaz(a, t, n ? 'Uyguladım. Geri almak istersen «geri al» de.'
-          : 'Uygulayamadım: ' + (why.join(' · ') || 'istek geçersizleşmiş.'));
+        await sohbeteYaz(a, t, n ? yz('spi.team.uyguladim-geri-almak-isterse')
+          : yz('spi.team.uygulayamadim') + (why.join(' · ') || 'istek geçersizleşmiş.'));
         return true;
       }
     }
@@ -438,13 +478,13 @@ SP.Screens.team = (function(){
     for(const o of b.oneriler){
       const r = await P.talep(Object.assign({ source:'istek' }, o));
       const bl = SP.Bolum.BY_ID[o.params.bolum] || {};
-      if(!r.row) parca.push('Bunu yapamadım: ' + (r.why || 'geçersiz'));
-      else if(r.otomatik) parca.push('Yaptım: ' + bl.ad + (o.params.acik ? ' açıldı.' : ' gizlendi.'));
+      if(!r.row) parca.push(yz('spi.team.bunu-yapamadim') + (r.why || 'geçersiz'));
+      else if(r.otomatik) parca.push(yz('spi.team.yaptim') + bl.ad + (o.params.acik ? ' açıldı.' : ' gizlendi.'));
       else bekleyen.push(bl.ad + (o.params.acik ? ' açılsın' : ' gizlensin'));
     }
     if(bekleyen.length){
-      parca.push('Anladığım şu: ' + bekleyen.join(' · ') + '. Verisi silinmez; istediğinde geri açılır. '
-        + 'Onaylıyor musun? «evet» de ya da aşağıdaki kartta onayla.');
+      parca.push(yz('spi.team.anladigim-su') + bekleyen.join(' · ') + '. Verisi silinmez; istediğinde geri açılır. '
+        + yz('spi.team.onayliyor-musun-evet-de-ya'));
     }
     b.sorular.forEach(s => parca.push(s.soru));
     await sohbeteYaz(a, t, parca.join('\n\n'));
@@ -486,12 +526,12 @@ SP.Screens.team = (function(){
         }
 
         const parca = [];
-        if(yazilan) parca.push((yazilan === 1 ? 'Bir kayıt' : yazilan + ' kayıt')
+        if(yazilan) parca.push((yazilan === 1 ? yz('spi.team.bir-kayit') : yazilan + ' kayıt')
           + ' yazdım; yanlışsa aşağıdan geri al.');
-        if(bekleyen) parca.push((bekleyen === 1 ? 'Bir kayıt' : bekleyen + ' kayıt')
+        if(bekleyen) parca.push((bekleyen === 1 ? yz('spi.team.bir-kayit') : bekleyen + ' kayıt')
           + ' hazırladım, onayına bakıyor.');
         if(dusen) parca.push(dusen + ' kaydı uygulayamadım.');
-        if(r.anlasilmayan.length) parca.push('Şunu çözemedim: «' + r.anlasilmayan.join('», «') + '».');
+        if(r.anlasilmayan.length) parca.push(yz('spi.team.sunu-cozemedim') + r.anlasilmayan.join('», «') + '».');
         /* Ölçüm olmayan cümle yazılmaz, nedeni söylenir (belgeler/ekip/HATALAR.md KR-1). */
         engel.forEach(e => parca.push(e.soru));
         list.push({ role:'agent', source:'rules', at:new Date().toISOString(),
@@ -533,7 +573,7 @@ SP.Screens.team = (function(){
            tazele ama mikrofon oturumunu koparma. */
         onTurn(){ sohbetTazele(); },
       });
-      if(!r.ok){ UI.toast(r.message || 'Sesli sohbet başlatılamadı'); return; }
+      if(!r.ok){ UI.toast(r.message || yz('spi.team.sesli-sohbet-baslatilamadi')); return; }
       sesli.acik = true;
       SP.App.render();
     },
@@ -561,7 +601,7 @@ SP.Screens.team = (function(){
     },
     async 'oneri-geri'(el){
       const r = await SP.Proposals.undo(el.dataset.id);
-      UI.toast(r.ok ? 'Geri alındı' : (r.why || 'Geri alınamadı'));
+      UI.toast(r.ok ? yz('spi.team.geri-alindi-2') : (r.why || yz('spi.team.geri-alinamadi')));
       SP.App.render();
     },
 

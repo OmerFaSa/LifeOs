@@ -1,5 +1,60 @@
 /* Uygulama kabugu: gezinme, yonlendirme, olay dagitimi ve acilis. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.app.kalan':'Kalan ',
+  'ays.app.plani-yeniden-hesapla':'Planı yeniden hesapla',
+  'ays.app.oteki-ekranlar-menuden-acilm':'Öteki ekranlar menüden açılmaya devam eder.',
+  'ays.app.yeniden-yukle':'Yeniden yükle',
+  'ays.app.ornek-veriye-gec':'Örnek veriye geç',
+  'ays.app.ornek-bir-profil-acilir-gerc':'Örnek bir profil açılır. Gerçek verin ayrı anahtarda durur, ',
+  'ays.app.ornek-veriden-cik':'Örnek veriden çık',
+  'ays.app.ornek-kayitlar-silinir-ve-ge':'Örnek kayıtlar silinir ve gerçek profiline dönersin.',
+  'ays.app.bu-cihaz-yerel':'Bu cihaz (yerel)',
+  'ays.app.hesaba-bagli-kopya':'Hesaba bağlı kopya',
+  'ays.app.son-hata':'Son hata',
+  'ays.app.verilerin-bu-cihazda-tutulma':'Verilerin bu cihazda tutulmaya devam ediyor. ',
+  'ays.app.guvende-olmak-icin-rehber':'Güvende olmak için Rehber → Ayarlar bölümünden yedek al.',
+  'ays.app.taslak-uretilemedi':'Taslak üretilemedi',
+  'ays.app.konular-plandan-ve-risk-sira':'Konular plandan ve risk sıralamasından geldi. ',
+  'ays.app.i-stedigini-degistirebilirsi':'İstediğini değiştirebilirsin; bu taslak imza değildir.',
+  'ays.app.sozlesme-dolduruldu-gozden-g':'Sözleşme dolduruldu — gözden geçir ve imzala',
+  'ays.app.baglanacak-blok-yok':'Bağlanacak blok yok',
+  'ays.app.uygulama-kuruldu':'Uygulama kuruldu',
+  'ays.app.kurulum-iptal-edildi':'Kurulum iptal edildi',
+  'ays.app.ne-degisir':'Ne değişir',
+  'ays.app.yeni-konu-acilmaz':'Yeni konu açılmaz',
+  'ays.app.son-iki-haftada-acilan-konu':'Son iki haftada açılan konu sınavda net üretmez',
+  'ays.app.hacim-duser':'Hacim düşer',
+  'ays.app.yorgunluk-sinav-gunu-isabeti':'Yorgunluk sınav günü isabeti bozar',
+  'ays.app.tekrar-ve-prova-one-cikar':'Tekrar ve prova öne çıkar',
+  'ays.app.bilinen-bilgiyi-hizli-uretme':'Bilinen bilgiyi hızlı üretmek tek kalan kazanç',
+  'ays.app.uyku-sinav-saatine-ayarlanir':'Uyku sınav saatine ayarlanır',
+  'ays.app.kalkis-saati-kademeli-one-ce':'Kalkış saati kademeli öne çekilir',
+  'ays.app.gecmis-haftalar-korunur-kapa':'Geçmiş haftalar korunur; kapanmamış konular öne alınır, kalan haftalar yeniden dizilir.',
+  'ays.app.yeni-rozet':'Yeni rozet',
+  'ays.app.kademe':'Kademe ',
+  'ays.app.yeni-kademe':'Yeni kademe',
+  'ays.app.yeni-rutbe-2':'Yeni rütbe',
+  'ays.app.kayit-sorunu':'Kayıt sorunu',
+  'ays.app.senkronizasyon-sorunu':'Senkronizasyon sorunu',
+  'ays.app.rota':'Rota — ',
+  'ays.app.kisisel-yks-calisma-sistemi':'Kişisel YKS çalışma sistemi',
+  'ays.app.karar':'Karar ',
+  'ays.app.rota-ofisten':'Rota — ofisten',
+  'ays.app.gunu-kapat-kurulmadi':'Günü kapat kurulmadı.',
+  'ays.app.son-7-gunde-calisma-artti':'Son 7 günde çalışma arttı ama doğruluk düştü; bir hafif gün düşünebilirsin.',
+  'ays.app.ofiste-uzmanlar-toplantisini':'Ofiste uzmanlar toplantısını başlatır (yapay zekâ çağrıları yapılır).',
+  'ays.app.bu-cihazdaki-soru-fotografla':'Bu cihazdaki soru fotoğraflarına dokunulmaz.',
+  'ays.app.saati-bilinen-20-soru-biriki':'Saati bilinen 20 soru birikince ölçülür',
+  'ays.app.bugunun-plani-henuz-kurulmad':'Bugünün planı henüz kurulmadı; Bugün ekranı açılınca kurulur.',
+  'ays.app.fotograf-okunamadi-daha-kucu':'Fotoğraf okunamadı; daha küçük ya da net bir kırpma dener misin?',
+  'ays.app.soru-coz-e-koydum-coz-ve':'Soru çöz’e koydum. «Çöz ve anlat»a bas.',
+  'ays.app.soru-coz-e-koydum-ama-fotogr':'Soru çöz’e koydum, ama fotoğraf okuyan bir yapay zekâ bağlı değil. Ofis ayarlarından ücretsiz bir sağlayıcı bağlayınca çözebilirim.',
+  'ays.app.bugun-sirasi-gelen-tekrar-ka':'Bugün sırası gelen tekrar kartı yok',
+  'ays.app.ogren':'Öğren: ',
+  'ays.app.yeniden-dene':'Yeniden dene',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.app.bu-haftanin-sozlesmesi-imzal':'Bu haftanın sözleşmesi imzalanmadı',
   'ays.app.kayit-sorunu-var':'Kayıt sorunu var',
   'ays.app.menu':'Menü',
@@ -526,14 +581,14 @@ R.App = (function(){
      yeniden dizileceği. Sayı bilinmiyorsa eylemin adı. */
   function replanEtiketi(h){
     const n = h && h.weeksLeft;
-    return n > 0 ? 'Kalan ' + n + ' haftayı yeniden diz' : 'Planı yeniden hesapla';
+    return n > 0 ? yz('ays.app.kalan') + n + ' haftayı yeniden diz' : yz('ays.app.plani-yeniden-hesapla');
   }
 
   /* Ekranın kendi hatası: sakin hata (011). Menü ve öteki ekranlar çalışır. */
   function errorPanel(err){
     const msg = (err && err.message) ? err.message : String(err);
     return String(R.C.SakinHata({ ayrinti:msg,
-      not:'Öteki ekranlar menüden açılmaya devam eder.' }));
+      not:yz('ays.app.oteki-ekranlar-menuden-acilm') }));
   }
 
 
@@ -718,7 +773,7 @@ R.App = (function(){
       console.error('Render hatası:', err);
       const kutu = document.getElementById('app');
       if(kutu) kutu.innerHTML = String(html`<div class="content">
-        ${R.C.SakinHata({ baslik:yz('ays.app.ekran-cizilemedi'), dugme:'Yeniden yükle',
+        ${R.C.SakinHata({ baslik:yz('ays.app.ekran-cizilemedi'), dugme:yz('ays.app.yeniden-yukle'),
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }finally{
@@ -839,14 +894,14 @@ R.App = (function(){
     /* 172: geçiş sayfa yenilenerek olur; depo profili açılışta okur. */
     async 'ornek-gir'(){
       if(!R.Ornek) return;
-      UI.confirmSheet('Örnek veriye geç', 'Örnek bir profil açılır. Gerçek verin ayrı anahtarda durur, '
+      UI.confirmSheet(yz('ays.app.ornek-veriye-gec'), yz('ays.app.ornek-bir-profil-acilir-gerc')
         + 'değişmez ve Merkez’e gitmez; çıkınca örnek kayıtlar silinir.',
-        () => { if(R.Ornek.gir()) location.reload(); }, false, 'Örnek veriye geç');
+        () => { if(R.Ornek.gir()) location.reload(); }, false, yz('ays.app.ornek-veriye-gec'));
     },
     async 'ornek-cik'(){
       if(!R.Ornek) return;
-      UI.confirmSheet('Örnek veriden çık', 'Örnek kayıtlar silinir ve gerçek profiline dönersin.',
-        () => { if(R.Ornek.cik()) location.reload(); }, false, 'Örnek veriden çık');
+      UI.confirmSheet(yz('ays.app.ornek-veriden-cik'), yz('ays.app.ornek-kayitlar-silinir-ve-ge'),
+        () => { if(R.Ornek.cik()) location.reload(); }, false, yz('ays.app.ornek-veriden-cik'));
     },
     /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
     async 'ayar-git'(el){
@@ -1016,13 +1071,13 @@ R.App = (function(){
         body:String(K.Stack([
           K.Notice({ tone:sh.error.scope.indexOf('local') === 0 ? 'danger' : 'warn', body:sh.error.message }),
           K.Table({ tight:true, headers:['Alan', 'Durum'], rows:[
-            ['Bu cihaz (yerel)', state(h.local, 'çalışıyor')],
-            ['Hesaba bağlı kopya', state(h.cloud, 'çalışıyor')],
-            ['Son hata', html`<span class="small">${sh.error.scope} · ${sh.error.code}</span>`],
+            [yz('ays.app.bu-cihaz-yerel'), state(h.local, 'çalışıyor')],
+            [yz('ays.app.hesaba-bagli-kopya'), state(h.cloud, 'çalışıyor')],
+            [yz('ays.app.son-hata'), html`<span class="small">${sh.error.scope} · ${sh.error.code}</span>`],
             ['Zaman', html`<span class="small">${new Date(sh.error.at).toLocaleString('tr-TR')}</span>`],
           ] }),
-          K.Notice({ tone:'info', body:'Verilerin bu cihazda tutulmaya devam ediyor. '
-            + 'Güvende olmak için Rehber → Ayarlar bölümünden yedek al.' }),
+          K.Notice({ tone:'info', body:yz('ays.app.verilerin-bu-cihazda-tutulma')
+            + yz('ays.app.guvende-olmak-icin-rehber') }),
         ])),
         footer:String(html`${K.Button({ label:yz('ays.app.kapat'), act:'sheet-close' })}
           ${K.Button({ label:yz('ays.app.ayarlara-git'), tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
@@ -1032,13 +1087,13 @@ R.App = (function(){
     async 'auto-draft-week'(){
       const n = M.currentWeek();
       const draft = R.Auto.draftWeek(n);
-      if(!draft || !draft.ok){ UI.toast(draft ? draft.reason : 'Taslak üretilemedi'); return; }
+      if(!draft || !draft.ok){ UI.toast(draft ? draft.reason : yz('ays.app.taslak-uretilemedi')); return; }
       UI.sheet({
         title:yz('ays.app.haftalik-sozlesme-taslagi'), subtitle:yz('ays.app.hafta')+n+' · onayladıktan sonra imzalayabilirsin',
         wide:true,
         body:String(R.C.Stack([
-          R.C.Notice({ tone:'info', body:'Konular plandan ve risk sıralamasından geldi. '
-            + 'İstediğini değiştirebilirsin; bu taslak imza değildir.' }),
+          R.C.Notice({ tone:'info', body:yz('ays.app.konular-plandan-ve-risk-sira')
+            + yz('ays.app.i-stedigini-degistirebilirsi') }),
           R.C.Table({ tight:true, headers:['Konu', 'Neden', { label:yz('ays.app.soru'), num:true }],
             rows:draft.topics.map(t => [t.name, html`<span class="small dim">${t.why}</span>`, t.questionTarget]) }),
           html`<div class="cols-2">
@@ -1058,17 +1113,17 @@ R.App = (function(){
       if(behavior && draft && draft.ok) draft.behaviorGoal = behavior.value;
       const ok = await R.Auto.applyDraft(n, draft);
       UI.closeSheet();
-      UI.toast(ok ? 'Sözleşme dolduruldu — gözden geçir ve imzala' : 'Yazılamadı');
+      UI.toast(ok ? yz('ays.app.sozlesme-dolduruldu-gozden-g') : 'Yazılamadı');
       go('week');
     },
     async 'auto-sync-blocks'(){
       const n = await R.Auto.syncDayBlocks();
-      UI.toast(n ? n+' blok haftanın konularına bağlandı' : 'Bağlanacak blok yok');
+      UI.toast(n ? n+' blok haftanın konularına bağlandı' : yz('ays.app.baglanacak-blok-yok'));
       render();
     },
     async 'pwa-install'(){
       const ok = await promptInstall();
-      UI.toast(ok ? 'Uygulama kuruldu' : 'Kurulum iptal edildi');
+      UI.toast(ok ? yz('ays.app.uygulama-kuruldu') : yz('ays.app.kurulum-iptal-edildi'));
       render();
     },
     async 'auto-close-week'(){
@@ -1091,11 +1146,11 @@ R.App = (function(){
         title:yz('ays.app.sinav-haftasi-modu'), subtitle:ew.daysLeft + ' gün kaldı',
         body:String(R.C.Stack([
           R.C.Notice({ tone:'warn', body:ew.note }),
-          R.C.Table({ tight:true, headers:['Ne değişir', 'Neden'], rows:[
-            ['Yeni konu açılmaz', 'Son iki haftada açılan konu sınavda net üretmez'],
-            ['Hacim düşer', 'Yorgunluk sınav günü isabeti bozar'],
-            ['Tekrar ve prova öne çıkar', 'Bilinen bilgiyi hızlı üretmek tek kalan kazanç'],
-            ['Uyku sınav saatine ayarlanır', 'Kalkış saati kademeli öne çekilir'],
+          R.C.Table({ tight:true, headers:[yz('ays.app.ne-degisir'), 'Neden'], rows:[
+            [yz('ays.app.yeni-konu-acilmaz'), yz('ays.app.son-iki-haftada-acilan-konu')],
+            [yz('ays.app.hacim-duser'), yz('ays.app.yorgunluk-sinav-gunu-isabeti')],
+            [yz('ays.app.tekrar-ve-prova-one-cikar'), yz('ays.app.bilinen-bilgiyi-hizli-uretme')],
+            [yz('ays.app.uyku-sinav-saatine-ayarlanir'), yz('ays.app.kalkis-saati-kademeli-one-ce')],
           ] }),
         ])),
         footer:String(R.C.Button({ label:yz('ays.app.anladim'), tone:'primary', act:'sheet-close' })),
@@ -1103,8 +1158,8 @@ R.App = (function(){
     },
     async 'auto-replan'(){
       const h = M.planHealth();
-      UI.confirmSheet('Planı yeniden hesapla',
-        (h ? h.note+' ' : '')+'Geçmiş haftalar korunur; kapanmamış konular öne alınır, kalan haftalar yeniden dizilir.',
+      UI.confirmSheet(yz('ays.app.plani-yeniden-hesapla'),
+        (h ? h.note+' ' : '')+yz('ays.app.gecmis-haftalar-korunur-kapa'),
         async () => {
           await M.replanFrom(M.currentWeek());
           UI.closeSheet();
@@ -1162,7 +1217,7 @@ R.App = (function(){
       const adlar = rozetBirikim;
       rozetBirikim = [];
       if(!adlar.length) return;
-      const ust = adlar.length === 1 ? 'Yeni rozet' : adlar.length + ' yeni rozet';
+      const ust = adlar.length === 1 ? yz('ays.app.yeni-rozet') : adlar.length + ' yeni rozet';
       const ad = adlar.length === 1 ? adlar[0] : adlar[0] + ' · +' + (adlar.length - 1);
       const V = (window.LIFEOS || {}).VITRIN;
       if(!(rozetSakin && V && V.sakinGoster && V.sakinGoster({ ust, ad, sistem:'AYS' })))
@@ -1193,11 +1248,11 @@ R.App = (function(){
       .then(() => R.XP.tazele()).catch(() => {});
     const sonuc = R.Perde.kutla(y, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
-      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
+      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || (yz('ays.app.kademe') + y.kademe);
       /* 143: sakin seçildiyse kısa parlama; yoksa (hareket azaltma) toast. */
       const V = (window.LIFEOS || {}).VITRIN;
       const renkAd = (y.kademeBilgi && y.kademeBilgi.id) || '';
-      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
+      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? yz('ays.app.yeni-kademe') : yz('ays.app.yeni-rutbe-2'),
         ad:ad + ' ' + y.etiket, sistem:'AYS', renk:renkAd })))
         UI.toast(yz('ays.app.yeni-rutbe') + ad + ' ' + y.etiket);
       damgala();
@@ -1426,7 +1481,7 @@ R.App = (function(){
     const sh = S.storeHealth;
     if(!sh || !sh.error) return '';
     const isLocal = sh.error.scope.indexOf('local') === 0;
-    return R.C.Button({ label:isLocal ? 'Kayıt sorunu' : 'Senkronizasyon sorunu', icon:'warn',
+    return R.C.Button({ label:isLocal ? yz('ays.app.kayit-sorunu') : yz('ays.app.senkronizasyon-sorunu'), icon:'warn',
       size:'sm', tone:'danger', block:true, act:'show-store-error', data:{ id:'store-health' } });
   }
 
@@ -1440,7 +1495,7 @@ R.App = (function(){
   function installManifest(){
     const el = document.getElementById('pwa-manifest');
     if(!el) return;
-    const name = (S.profile && S.profile.name) ? 'Rota — ' + S.profile.name : 'Rota';
+    const name = (S.profile && S.profile.name) ? yz('ays.app.rota') + S.profile.name : 'Rota';
     /* Once "R" harfi ureten bir SVG'ydi; artik gercek marka gorseli
        (img/brand/favicon.png: modülün kimlik logosu,
        brand/medya/kimlik/, 192 px kareye yerleştirilmiş). Dosya degisirse ikon
@@ -1458,7 +1513,7 @@ R.App = (function(){
       /* Göreli kapsam gömülü (data:) manifestte çözülemez ve yok sayılır. */
       scope:new URL('./', location.href).href,
       display:'standalone', background_color:'#F7F8FA', theme_color:'#3D3F8F',
-      lang:'tr', description:'Kişisel YKS çalışma sistemi',
+      lang:'tr', description:yz('ays.app.kisisel-yks-calisma-sistemi'),
       icons:[{ src:icon, sizes:'192x192', type:'image/png', purpose:'any maskable' }],
     };
     try{
@@ -1500,9 +1555,9 @@ R.App = (function(){
 
       const body = urgent.length
         ? urgent[0].name + ': ' + urgent[0].text
-        : 'Karar ' + U.diffDays(R.U.gunOf(stale[0].at), today) + ' gündür açık: ' + stale[0].title;
+        : yz('ays.app.karar') + U.diffDays(R.U.gunOf(stale[0].at), today) + ' gündür açık: ' + stale[0].title;
 
-      new Notification('Rota — ofisten', { body, tag:'rota-office', lang:'tr' });
+      new Notification(yz('ays.app.rota-ofisten'), { body, tag:'rota-office', lang:'tr' });
       localStorage.setItem(NOTIFY_KEY, today);
       return true;
     }catch(e){ return false; }
@@ -1669,7 +1724,7 @@ R.App = (function(){
      çağrı boyunca açıktır. */
   function gunuKapat(gun, metin, alanlar){
     const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
-    if(!G || !G.kuruluMu()) return Promise.resolve({ ok:false, neden:'Günü kapat kurulmadı.' });
+    if(!G || !G.kuruluMu()) return Promise.resolve({ ok:false, neden:yz('ays.app.gunu-kapat-kurulmadi') });
     const t = String(metin || '').trim();
     const reddet = red => {
       document.querySelectorAll('[data-gunukapat]').forEach(k => {
@@ -1724,7 +1779,7 @@ R.App = (function(){
     ];
     let sinyal = '';
     if(a.var_ && o.var_ && a.dk > o.dk * 1.3 && a.oran != null && o.oran != null && a.oran < o.oran - 5)
-      sinyal = 'Son 7 günde çalışma arttı ama doğruluk düştü; bir hafif gün düşünebilirsin.';
+      sinyal = yz('ays.app.son-7-gunde-calisma-artti');
     return { kartlar:kart, sinyal };
   }
 
@@ -1830,7 +1885,7 @@ R.App = (function(){
           /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
              kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
           eylemler:[{ id:'toplanti', seviye:'orta', ad:yz('ays.app.toplanti-baslat'),
-            aciklama:'Ofiste uzmanlar toplantısını başlatır (yapay zekâ çağrıları yapılır).',
+            aciklama:yz('ays.app.ofiste-uzmanlar-toplantisini'),
             anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
             onizle:() => ({ metin:yz('ays.app.ofiste-toplanti-baslayacak-u') }),
             uygula:async () => {
@@ -1849,7 +1904,7 @@ R.App = (function(){
           },
           donus:{ al:() => R.Store.exportAll(), yukle:v => R.Store.importAll(v), sil:() => R.Store.clear(),
             sayi:() => Object.keys(R.Store.exportAll().data || {}).length,
-            foto:'Bu cihazdaki soru fotoğraflarına dokunulmaz.' } });
+            foto:yz('ays.app.bu-cihazdaki-soru-fotografla') } });
       }
       /* ARAÇ KATALOĞU (brand/ortak/arac.js, King 2.0): AYS'nin okuma araçları
          ve plan eylemleri (core/kingarac.js); King sohbetten çağırır, yazan
@@ -1901,7 +1956,7 @@ R.App = (function(){
               return [
                 { ad:yz('ays.app.cozulen-soru-45-gun'), deger:solved || null, etiket:yz('ays.app.olculdu') },
                 { ad:yz('ays.app.en-verimli-saat-dilimi'), deger:enIyi != null ? saatAd(enIyi) : null, etiket:yz('ays.app.hesaplandi'),
-                  alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : 'Saati bilinen 20 soru birikince ölçülür' },
+                  alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : yz('ays.app.saati-bilinen-20-soru-biriki') },
                 { ad:yz('ays.app.dogru-orani-45-gun'), deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:yz('ays.app.hesaplandi'),
                   alt:solved ? correct + ' / ' + solved : '' },
                 { ad:yz('ays.app.bugun-sirasi-gelen-tekrar'), deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:yz('ays.app.hesaplandi') },
@@ -1918,7 +1973,7 @@ R.App = (function(){
                kaydından (bitti, atlandı, sayaç çalışıyorsa şimdi). King yazmaz. */
             gun:() => {
               const d = S.days[U.todayISO()];
-              if(!d) return { ogeler:[], not:'Bugünün planı henüz kurulmadı; Bugün ekranı açılınca kurulur.' };
+              if(!d) return { ogeler:[], not:yz('ays.app.bugunun-plani-henuz-kurulmad') };
               const calisan = S.timer && S.timer.dayISO === d.date ? S.timer.blockId : null;
               return { ogeler:(d.blocks || []).filter(b => b.slot !== 'Dinlenme').map(b => ({
                 ad:b.topic || b.subject, alt:[b.slot, b.topic && b.topic !== b.subject ? b.subject : ''].filter(Boolean).join(' · '),
@@ -1948,9 +2003,9 @@ R.App = (function(){
             go('solve');
             await new Promise(r => setTimeout(r, 80));
             const ok = R.Screens.solve.fotoKoy ? await R.Screens.solve.fotoKoy(f) : false;
-            if(!ok) return 'Fotoğraf okunamadı; daha küçük ya da net bir kırpma dener misin?';
-            return R.Solver.ready(true) ? 'Soru çöz’e koydum. «Çöz ve anlat»a bas.'
-              : 'Soru çöz’e koydum, ama fotoğraf okuyan bir yapay zekâ bağlı değil. Ofis ayarlarından ücretsiz bir sağlayıcı bağlayınca çözebilirim.';
+            if(!ok) return yz('ays.app.fotograf-okunamadi-daha-kucu');
+            return R.Solver.ready(true) ? yz('ays.app.soru-coz-e-koydum-coz-ve')
+              : yz('ays.app.soru-coz-e-koydum-ama-fotogr');
           } }], hkm:() => R.Beacon, git:route => go(route),
           /* Özet: bugünün cümlesi, tekrar borcu ve Öğren'de sıradaki adım —
              hepsi kodun sayısı (King yalnız okur). */
@@ -1960,10 +2015,10 @@ R.App = (function(){
             const s = h && h !== 'Bugün' ? [h] : [];
             try{
               const vade = R.Calc.dueCards(R.U.todayISO()).length;
-              s.push(vade ? vade + ' tekrar kartının bugün sırası geldi' : 'Bugün sırası gelen tekrar kartı yok');
+              s.push(vade ? vade + ' tekrar kartının bugün sırası geldi' : yz('ays.app.bugun-sirasi-gelen-tekrar-ka'));
               const x = R.Ogren.sonAcilan();
               const sr = x ? R.Ogren.sirada(x.subject.id, x.topic.id) : null;
-              if(sr) s.push('Öğren: ' + x.topic.name + ' — ' + sr.ad);
+              if(sr) s.push(yz('ays.app.ogren') + x.topic.name + ' — ' + sr.ad);
             }catch(e){ /* özetin ek satırları düşer, ilk cümle kalır */ }
             return s;
           },
@@ -2172,7 +2227,7 @@ R.App = (function(){
       console.error('Açılış hatası:', err);
       const kutu = document.getElementById('app');
       if(kutu) kutu.innerHTML = String(html`<div class="content">
-        ${R.C.SakinHata({ baslik:yz('ays.app.uygulama-acilamadi'), dugme:'Yeniden dene',
+        ${R.C.SakinHata({ baslik:yz('ays.app.uygulama-acilamadi'), dugme:yz('ays.app.yeniden-dene'),
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }

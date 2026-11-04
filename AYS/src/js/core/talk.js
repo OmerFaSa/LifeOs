@@ -34,6 +34,11 @@
    R.Voice.speak() konuşmanın bittiğini haber verir ve üç tuzağı
    (uzun metin kesilmesi, gelmeyen onend, iptal) zaten kapatır;
    döngü onu bekleyerek ilerler. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.talk.cevap-uretilemedi':'Cevap üretilemedi.',
+  'ays.core.talk.ses-tanima-yok':'Ses tanıma yok.',
+});
+
 
 window.R = window.R || {};
 
@@ -143,7 +148,7 @@ R.Talk = (function(){
       /* Ekranın kendi gönderme yolu — ses ikinci bir kapı açmaz. */
       cevap = await oturum.gonder(soru);
     }catch(e){
-      cevap = 'Cevap üretilemedi.';
+      cevap = yz('ays.core.talk.cevap-uretilemedi');
     }
     if(!oturum || oturum.kapandi) return;
 
@@ -172,7 +177,7 @@ R.Talk = (function(){
   function start(agentId, opts){
     const o = opts || {};
     if(!supported()) return { ok:false, reason:'unsupported',
-      message:R.Listen ? R.Listen.message('unsupported') : 'Ses tanıma yok.' };
+      message:R.Listen ? R.Listen.message('unsupported') : yz('ays.core.talk.ses-tanima-yok') };
     if(typeof o.gonder !== 'function') return { ok:false, reason:'no-send' };
     stop();
     oturum = {

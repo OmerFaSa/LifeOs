@@ -5,6 +5,23 @@
    gerekiyor; bu ekran o dördünü birleştirir.
 
    Yazim bicimi: STIL.md. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.topic.bu-konu-dahil-turlerin':'· bu konu dahil, türlerin toplamı',
+  'ays.topic.kesik-sutun-kaynakta-o-yil':'Kesik sütun: kaynakta o yıl yok. İkincil kaynak (',
+  'ays.topic.etiket-tahmin-oncelik-sirasi':'), etiket «tahmin»; öncelik sırasını değiştirmez.',
+  'ays.topic.once-konunun-kendisi-ogren':'Önce konunun kendisi: Öğren › Anlatım’da oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
+  'ays.topic.ogrendigini-karta-cevir-kart':'Öğrendiğini karta çevir: kart, unutmadan önce sana geri sorar.',
+  'ays.topic.bugun-ekraninda-bir-blogu-bu':'Bugün ekranında bir bloğu bu konuya bağla; çözdüğün soru ve doğruluk buraya sayılır.',
+  'ays.topic.bu-konudan-acik-yanlis-var':'Bu konudan açık yanlış var: kök nedenini yaz, ilkesini çıkar, kapat.',
+  'ays.topic.konu-testi-ilk-olcum-kapanis':'Konu testi: ilk ölçüm kapanışın yarısıdır.',
+  'ays.topic.ayni-konuyu-bir-hafta-sonra':'Aynı konuyu bir hafta sonra yeniden ölç: tek ölçüm kapanış saymaz.',
+  'ays.topic.butun-adimlar-tamam-konu-iki':'Bütün adımlar tamam: konu iki ölçümle kapandı. Kartlar tekrar zamanında yine sorar.',
+  'ays.topic.baskin-hata':'Baskın hata ',
+  'ays.topic.acik-yanlis':'Açık yanlış',
+  'ays.topic.gecikmis-kart':'Gecikmiş kart',
+  'ays.topic.konu-ozeti':'Konu özeti',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -123,15 +140,15 @@ R.Screens.topic = (function(){
     const seri = x => {
       const metin = SS.yillar.map((y, i) => y + ' ' + (x.seri[i] == null ? 'veri yok' : x.seri[i] + ' soru')).join(', ');
       return '<div class="soru-siklik__s"><p class="small"><b>' + U.esc(x.ad) + '</b>'
-        + (x.ortak ? ' <span class="muted">· bu konu dahil, türlerin toplamı</span>' : '') + '</p>'
+        + (x.ortak ? (' <span class="muted">' + yz('ays.topic.bu-konu-dahil-turlerin') + '</span>') : '') + '</p>'
         + P.sutun({ degerler:x.seri, yukseklik:36, gunler:SS.yillar.map(yil),
             etiket:SS.sinav + ', ' + x.ad + ': ' + metin }) + '</div>';
     };
     return '<div class="soru-siklik mt-12" data-oz="soru-siklik"><p class="small muted">' + U.esc(SS.sinav)
       + '’te yıllara göre soru · ' + SS.yillar[0] + '–' + SS.yillar[SS.yillar.length - 1] + '</p>'
       + l.map(seri).join('')
-      + '<p class="small muted">Kesik sütun: kaynakta o yıl yok. İkincil kaynak (<a href="' + U.esc(SS.kaynak)
-      + '" target="_blank" rel="noopener">ozeldersalani.com</a>), etiket «tahmin»; öncelik sırasını değiştirmez.</p></div>';
+      + ('<p class="small muted">' + yz('ays.topic.kesik-sutun-kaynakta-o-yil') + '<a href="') + U.esc(SS.kaynak)
+      + ('" target="_blank" rel="noopener">ozeldersalani.com</a>' + yz('ays.topic.etiket-tahmin-oncelik-sirasi') + '</p></div>');
   }
 
   /* ÖĞRENME YOLU (core/ogrenyolu.js): altı adım, sıradaki adım ve eylemi.
@@ -174,12 +191,12 @@ R.Screens.topic = (function(){
     pekistir:() => K.Button({ label:yz('ays.topic.testi-gir'), icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
   };
   const YOL_NEDEN = {
-    ogren:'Önce konunun kendisi: Öğren › Anlatım’da oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
-    kartla:'Öğrendiğini karta çevir: kart, unutmadan önce sana geri sorar.',
-    coz:'Bugün ekranında bir bloğu bu konuya bağla; çözdüğün soru ve doğruluk buraya sayılır.',
-    duzelt:'Bu konudan açık yanlış var: kök nedenini yaz, ilkesini çıkar, kapat.',
-    olc:'Konu testi: ilk ölçüm kapanışın yarısıdır.',
-    pekistir:'Aynı konuyu bir hafta sonra yeniden ölç: tek ölçüm kapanış saymaz.',
+    ogren:yz('ays.topic.once-konunun-kendisi-ogren'),
+    kartla:yz('ays.topic.ogrendigini-karta-cevir-kart'),
+    coz:yz('ays.topic.bugun-ekraninda-bir-blogu-bu'),
+    duzelt:yz('ays.topic.bu-konudan-acik-yanlis-var'),
+    olc:yz('ays.topic.konu-testi-ilk-olcum-kapanis'),
+    pekistir:yz('ays.topic.ayni-konuyu-bir-hafta-sonra'),
   };
   function yolCard(subject, topic, st){
     const Y = R.OgrenYolu;
@@ -192,7 +209,7 @@ R.Screens.topic = (function(){
       title:yz('ays.topic.ogrenme-yolu'), sub:tamam + ' / ' + l.length + ' adım', wide:true,
       badge:when(!s, () => K.Badge({ label:yz('ays.topic.tamamlandi'), tone:'ok' })),
       body:html`
-        ${!s ? K.Notice({ tone:'ok', body:'Bütün adımlar tamam: konu iki ölçümle kapandı. Kartlar tekrar zamanında yine sorar.' })
+        ${!s ? K.Notice({ tone:'ok', body:yz('ays.topic.butun-adimlar-tamam-konu-iki') })
           : s.bekle ? K.NextUp({ icon:'clock', calm:true, label:yz('ays.topic.siradaki-adim'), title:s.ad + ' · ' + s.ayrinti,
               why:yz('ays.topic.bu-arada-kartlarini-tekrar-e') })
           : K.NextUp({ icon:'target', label:yz('ays.topic.siradaki-adim'), title:s.ad, why:YOL_NEDEN[s.id] + ' ' + s.ayrinti,
@@ -313,7 +330,7 @@ R.Screens.topic = (function(){
             </div>
           </div>`)}</div>
         ${when(top, () => html`<div class="mt-12">${K.Notice({ tone:'info',
-          body:'Baskın hata ' + top + ' — ' + R.ERROR_TAGS[top].name + '. Reçete: ' + R.ERROR_TAGS[top].recipe })}</div>`)}`,
+          body:yz('ays.topic.baskin-hata') + top + ' — ' + R.ERROR_TAGS[top].name + '. Reçete: ' + R.ERROR_TAGS[top].recipe })}</div>`)}`,
     });
   }
 
@@ -322,8 +339,8 @@ R.Screens.topic = (function(){
     const parts = [
       ['Frekans', risk.parts.freq],
       ['Kapanış', risk.parts.closure],
-      ['Açık yanlış', risk.parts.errors],
-      ['Gecikmiş kart', risk.parts.cards],
+      [yz('ays.topic.acik-yanlis'), risk.parts.errors],
+      [yz('ays.topic.gecikmis-kart'), risk.parts.cards],
       ['Tazelik', risk.parts.stale],
       ['Pratik', risk.parts.practice || 0],
     ];
@@ -444,7 +461,7 @@ R.Screens.topic = (function(){
     title:yz('ays.topic.konu'),
     subtitle(){
       const { subject, topic } = ctx();
-      return topic ? subject.name + ' · ' + topic.name : 'Konu özeti';
+      return topic ? subject.name + ' · ' + topic.name : yz('ays.topic.konu-ozeti');
     },
     actions(){ return ''; },
     render, handle,

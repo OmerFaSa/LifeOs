@@ -1,6 +1,18 @@
 /* Ilerleme — KPI panosu, grafikler ve aylik karar kapisi.
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.progress.veri-yok':'Veri yok',
+  'ays.progress.taban-yok':'Taban yok.',
+  'ays.progress.taban':'Taban ',
+  'ays.progress.karar-kapisi':'Karar kapısı',
+  'ays.progress.recete':'Reçete: ',
+  'ays.progress.bu-ayin-secili-mudahalesi-si':'Bu ayın seçili müdahalesi silinecek ve yeniden seçebileceksin.',
+  'ays.progress.mudahaleyi-kaldir':'Müdahaleyi kaldır',
+  'ays.progress.henuz-tam-deneme-medyani-yok':'Henüz tam deneme medyanı yok',
+  'ays.progress.tyt-medyani':'TYT medyanı ',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -133,14 +145,14 @@ R.Screens.progress = (function(){
     const m = kpiValues().map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
       .sort((a, b) => (sira(a.c.tone) - sira(b.c.tone)) || a.i - b.i)
       .map(({ c, def }) => c.num == null
-        ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : 'Veri yok') + '.',
+        ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : yz('ays.progress.veri-yok')) + '.',
             vurgu:yz('ays.progress.hedef') + def.target + '.', sistem:'ays' }
         : { ust:def.name, sayi:sayi({ deger:c.num, birim:c.birim, ondalik:c.ondalik, kesinlik:'computed', formul:def.formula }),
             cumle:c.tone === 'ok' ? 'hedefte.' : c.tone ? 'hedefin dışında.' : '',
             vurgu:yz('ays.progress.hedef') + def.target + (c.note ? ' · ' + c.note : '') + '.', sistem:'ays' });
     const ayt = C.medianTrend('AYT'), ab = C.examBase('AYT');
     if(ayt.last3 != null) m.push({ ust:yz('ays.progress.ayt-medyani'), sayi:sayi({ deger:ayt.last3, birim:'net', ondalik:2, kesinlik:'computed',
-      formul:'son 3 tam AYT denemesinin medyanı' }), cumle:yz('ays.progress.son-3-tam-deneme'), vurgu:ab == null ? 'Taban yok.' : 'Taban ' + U.fmtNet(ab) + '.', sistem:'ays' });
+      formul:'son 3 tam AYT denemesinin medyanı' }), cumle:yz('ays.progress.son-3-tam-deneme'), vurgu:ab == null ? yz('ays.progress.taban-yok') : yz('ays.progress.taban') + U.fmtNet(ab) + '.', sistem:'ays' });
     /* Özet'teki Bugün'ün «Gidişat»ından ayrı kimlik ve ad (aynı sayfada iki kart). */
     return raw(V.donen({ id:'ays-kpi', ad:yz('ays.progress.gostergeler'), maddeler:m }));
   }
@@ -278,7 +290,7 @@ R.Screens.progress = (function(){
     return K.Collapsible({
       title:yz('ays.progress.aylik-net-gelisim-egrisi'), meta:'koçluk bandı', act:'toggle-month-curve', open:!!S.ui.monthCurveOpen,
       body:K.Table({ tight:true, rows, headers:['Ay', { label:yz('ays.progress.tyt-gozlenen'), num:true }, { label:yz('ays.progress.tyt-guvenli'), num:true },
-        { label:yz('ays.progress.ayt-gozlenen'), num:true }, { label:yz('ays.progress.ayt-guvenli'), num:true }, 'Karar kapısı'] }),
+        { label:yz('ays.progress.ayt-gozlenen'), num:true }, { label:yz('ays.progress.ayt-guvenli'), num:true }, yz('ays.progress.karar-kapisi')] }),
     });
   }
 
@@ -347,7 +359,7 @@ R.Screens.progress = (function(){
     return K.Card({ hint:'pareto', title:yz('ays.progress.hata-paretosu'), body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
-            body:'Reçete: '+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` });
+            body:yz('ays.progress.recete')+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` });
   } });
   LIFEOS.PARCA.blok({ id:'progress.surec-gostergeleri', sayfa:'progress', yer:'y8', sira:20, ad:'Süreç göstergeleri', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return K.Card({ hint:'not-surec-gostergeleri', title:yz('ays.progress.surec-gostergeleri'), body:K.Stack([
@@ -413,12 +425,12 @@ R.Screens.progress = (function(){
       R.App.render();
     },
     async 'clear-decision'(el){
-      UI.confirmSheet('Müdahaleyi değiştir', 'Bu ayın seçili müdahalesi silinecek ve yeniden seçebileceksin.', async () => {
+      UI.confirmSheet(yz('ays.progress.mudahaleyi-degistir'), yz('ays.progress.bu-ayin-secili-mudahalesi-si'), async () => {
         delete S.decisions[el.dataset.key];
         await R.Store.remove('decisions/'+el.dataset.key);
         UI.closeSheet();
         R.App.render();
-      }, false, 'Müdahaleyi kaldır');
+      }, false, yz('ays.progress.mudahaleyi-kaldir'));
     },
   };
 
@@ -434,13 +446,13 @@ R.Screens.progress = (function(){
       const gate = C.currentGate();
       const verildi = gate && S.decisions[U.monthKey(U.today())];
       return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
-        .concat(G && verildi ? [G.anahtar('Aylık değerlendirme — ' + gate.month)] : []);
+        .concat(G && verildi ? [G.anahtar(yz('ays.progress.aylik-degerlendirme') + gate.month)] : []);
     },
     title:yz('ays.progress.i-lerleme'),
     subtitle(){
       const t = C.medianTrend('TYT');
-      return t.last3 == null ? 'Henüz tam deneme medyanı yok'
-        : 'TYT medyanı '+U.fmtNet(t.last3)+' · taban '+U.fmtNet(C.examBase('TYT'));
+      return t.last3 == null ? yz('ays.progress.henuz-tam-deneme-medyani-yok')
+        : yz('ays.progress.tyt-medyani')+U.fmtNet(t.last3)+' · taban '+U.fmtNet(C.examBase('TYT'));
     },
     actions(){ return ''; },
     render, handle,

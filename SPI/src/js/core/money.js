@@ -9,6 +9,21 @@
    en ucuz yolu bulmaktir — hedefi kucultmek degil. Bunun kod karsiligi
    costPerNutrient(): "bu ogeyi en ucuz hangi gidadan alirim" sorusudur. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.money.sepet-bos-haftalik-alisveris':'Sepet boş. Haftalık alışverişi girince maliyet ve besin kapsaması hesaplanır.',
+  'spi.core.money.haftalik-sepet':'Haftalık sepet ',
+  'spi.core.money.sepet-butceye-uyuyor-ama':'Sepet bütçeye uyuyor ama ',
+  'spi.core.money.sepet':'Sepet ',
+  'spi.core.money.sepet-bos-haftalik-alisveris-2':'Sepet boş — haftalık alışveriş girilmedi',
+  'spi.core.money.hesabin':'Hesabın %',
+  'spi.core.money.vadesi-gecmis-panel-yok':'Vadesi geçmiş panel yok',
+  'spi.core.money.panel-ucreti-girilmedi-bu-ka':'Panel ücreti girilmedi; bu kalem toplama katılmadı.',
+  'spi.core.money.alti-ayda-bir-tekrarlanacak':'Altı ayda bir tekrarlanacak varsayımıyla aylığa bölündü.',
+  'spi.core.money.eksik':'Eksik: ',
+  'spi.core.money.ek-ekipman-gerekmiyor':'Ek ekipman gerekmiyor',
+  'spi.core.money.ekipman-fiyati-sistemde-tutu':'Ekipman fiyatı sistemde tutulmaz. Vücut ağırlığı hareketleri ekipmansız çalışır.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.money.kendi-fisin':'kendi fişin',
   'spi.core.money.bam-arastirmasi-tahmin':'BAM araştırması (tahmin)',
   'spi.core.money.fiyat-yok':'fiyat yok',
@@ -243,16 +258,16 @@ SP.Money = (function(){
     let tone = 'ok', text;
     if(!b.rows.length){
       tone = 'muted';
-      text = 'Sepet boş. Haftalık alışverişi girince maliyet ve besin kapsaması hesaplanır.';
+      text = yz('spi.core.money.sepet-bos-haftalik-alisveris');
     }else if(b.over){
       tone = 'warn';
-      text = 'Haftalık sepet ' + U.fmtNum(Math.round(b.total)) + ' TL — sınırın '
+      text = yz('spi.core.money.haftalik-sepet') + U.fmtNum(Math.round(b.total)) + ' TL — sınırın '
         + U.fmtNum(Math.round(b.total - b.limit)) + ' TL üstünde.';
     }else if(cov.ok && cov.gaps.length){
       tone = 'warn';
-      text = 'Sepet bütçeye uyuyor ama ' + cov.gaps.length + ' besin öğesini karşılamıyor.';
+      text = yz('spi.core.money.sepet-butceye-uyuyor-ama') + cov.gaps.length + ' besin öğesini karşılamıyor.';
     }else{
-      text = 'Sepet ' + U.fmtNum(Math.round(b.total)) + ' TL'
+      text = yz('spi.core.money.sepet') + U.fmtNum(Math.round(b.total)) + ' TL'
         + (b.limit ? ' · sınırın altında' : '') + '.';
     }
     if(stale && b.rows.length){
@@ -283,11 +298,11 @@ SP.Money = (function(){
       id:'gida', agent:'nutri', label:yz('spi.core.money.gida'),
       detail:b.rows.length
         ? b.rows.length + ' kalem haftalık sepet'
-        : 'Sepet boş — haftalık alışveriş girilmedi',
+        : yz('spi.core.money.sepet-bos-haftalik-alisveris-2'),
       monthly:b.rows.length ? U.round(b.total * 4.33, 0) : null,
       cert:!b.rows.length ? 'missing' : (b.estimate.pct >= 50 ? 'estimated' : 'measured'),
       note:b.rows.length && b.estimate.pct
-        ? 'Hesabın %' + b.estimate.pct + '\'i tahmin fiyatıyla.' : null,
+        ? yz('spi.core.money.hesabin') + b.estimate.pct + '\'i tahmin fiyatıyla.' : null,
       route:'basket',
     });
 
@@ -298,12 +313,12 @@ SP.Money = (function(){
       id:'test', agent:'lab', label:yz('spi.core.money.test'),
       detail:overdue.length
         ? overdue.length + ' panelin ölçüm borcu var'
-        : 'Vadesi geçmiş panel yok',
+        : yz('spi.core.money.vadesi-gecmis-panel-yok'),
       monthly:overdue.length && testFee != null ? U.round(overdue.length * testFee / 6, 0) : null,
       cert:!overdue.length ? 'measured' : (testFee == null ? 'missing' : 'estimated'),
       note:overdue.length && testFee == null
-        ? 'Panel ücreti girilmedi; bu kalem toplama katılmadı.'
-        : (overdue.length ? 'Altı ayda bir tekrarlanacak varsayımıyla aylığa bölündü.' : null),
+        ? yz('spi.core.money.panel-ucreti-girilmedi-bu-ka')
+        : (overdue.length ? yz('spi.core.money.alti-ayda-bir-tekrarlanacak') : null),
       route:'labs',
     });
 
@@ -316,11 +331,11 @@ SP.Money = (function(){
     });
     rows.push({
       id:'ekipman', agent:'move', label:yz('spi.core.money.ekipman'),
-      detail:needed.length ? 'Eksik: ' + needed.join(', ') : 'Ek ekipman gerekmiyor',
+      detail:needed.length ? yz('spi.core.money.eksik') + needed.join(', ') : yz('spi.core.money.ek-ekipman-gerekmiyor'),
       monthly:needed.length ? null : 0,
       cert:needed.length ? 'missing' : 'measured',
       note:needed.length
-        ? 'Ekipman fiyatı sistemde tutulmaz. Vücut ağırlığı hareketleri ekipmansız çalışır.'
+        ? yz('spi.core.money.ekipman-fiyati-sistemde-tutu')
         : null,
       route:'move',
     });

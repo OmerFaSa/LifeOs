@@ -392,6 +392,72 @@
       basılı tut: sesli sohbet), gönder. Önerinin altında «Neden?» yalnız
       bilinen kaynağı söyler. PDF'in metnini Merkez çıkarır (model yok). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.king.kolay-gelsin':'Kolay gelsin.',
+  'ortak.king.afiyet-olsun':'Afiyet olsun.',
+  'ortak.king.keyifli-okumalar':'Keyifli okumalar.',
+  'ortak.king.kamera':'Kamera ',
+  'ortak.king.mikrofon':'Mikrofon ',
+  'ortak.king.kenar-cubugunu-kapat':'Kenar çubuğunu kapat',
+  'ortak.king.sohbet-gecmisini-ac':'Sohbet geçmişini aç',
+  'ortak.king.turkce-kisa-ve-net-cevap':'Türkçe, kısa ve net cevap ver (en çok beş cümle). Görüntüde görmediğin bir sayıyı ya da bilgiyi uydurma; ',
+  'ortak.king.yardimci-olabilecegin-sonrak':'Yardımcı olabileceğin sonraki adımı tek cümleyle öner.',
+  'ortak.king.kullanicinin-ekranina-arada':'Kullanıcının ekranına arada bir bakıyorsun; kendisi bir şey sormadı. Ekranda o an yaptığı işle ilgili, ',
+  'ortak.king.soylenecek-degerli-bir-sey-y':'Söylenecek değerli bir şey yoksa yalnız PAS yaz. Ekranda görmediğin hiçbir şeyi uydurma.',
+  'ortak.king.kullanicinin-masasindaki-kam':'Kullanıcının masasındaki kameraya arada bir bakıyorsun; kendisi bir şey sormadı. Görüntüde ders çalışmayla ',
+  'ortak.king.i-nternet-varsa-gemini-yoksa':'İnternet varsa Gemini, yoksa bilgisayardaki EMA, sonra Piper, en son cihazın sesi',
+  'ortak.king.bilgisayardaki-ema-dogal-tur':'Bilgisayardaki EMA: doğal Türkçe ses, ücretsiz; metin bilgisayardan çıkmaz',
+  'ortak.king.gemini-nin-turkce-sesi-metin':'Gemini’nin Türkçe sesi; metin Google’a gider',
+  'ortak.king.bilgisayardaki-piper-metin-b':'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
+  'ortak.king.yalniz-bu-cihazin-kendi-sesi':'Yalnız bu cihazın kendi sesi',
+  'ortak.king.gemma-4':'Gemma 4',
+  'ortak.king.once-bilgisayardaki-gemma-4':'Önce bilgisayardaki Gemma 4, uzun kayıtta ya da olmazsa Whisper, en son Gemini',
+  'ortak.king.gemma-4-sesi-dogrudan-anlar':'Gemma 4 sesi doğrudan anlar: hızlı, ücretsiz, ses bilgisayardan çıkmaz (uzun kayıtta Whisper)',
+  'ortak.king.yalniz-whisper-ucretsiz-ses':'Yalnız Whisper: ücretsiz, ses bilgisayardan çıkmaz',
+  'ortak.king.yalniz-gemini-internet-ister':'Yalnız Gemini: internet ister, ücretli, ses Google’a gider',
+  'ortak.king.uygulamanin-tarayicinin-kend':'Uygulamanın (tarayıcının) kendi tanıması',
+  'ortak.king.mesaja-gore-king-secer':'Mesaja göre King seçer',
+  'ortak.king.kisa-ve-cabuk-cevap':'Kısa ve çabuk cevap',
+  'ortak.king.oneri-ve-yorum-orta-uzunlukt':'Öneri ve yorum, orta uzunlukta',
+  'ortak.king.secenekleri-tartar-gerekceli':'Seçenekleri tartar, gerekçeli öneri; biraz daha uzun sürer',
+  'ortak.king.afiyet-olsun-2':'Afiyet olsun!',
+  'ortak.king.afiyet-seker-olsun':'Afiyet şeker olsun!',
+  'ortak.king.simdiden-afiyet-olsun':'Şimdiden afiyet olsun!',
+  'ortak.king.ogunlerine-ekleyeyim-mi':'Öğünlerine ekleyeyim mi?',
+  'ortak.king.bugunun-suyuna-ekleyeyim-mi':'Bugünün suyuna ekleyeyim mi?',
+  'ortak.king.eline-saglik-helal-olsun':'Eline sağlık, helal olsun!',
+  'ortak.king.eline-saglik-guzel-is':'Eline sağlık, güzel iş!',
+  'ortak.king.kolay-gelsin-iyi-antrenmanla':'Kolay gelsin, iyi antrenmanlar!',
+  'ortak.king.antrenmanlarina-ekleyeyim-mi':'Antrenmanlarına ekleyeyim mi?',
+  'ortak.king.gunaydin-uykunu-not-edelim':'Günaydın! Uykunu not edelim.',
+  'ortak.king.tamam-uykunu-not-edelim':'Tamam, uykunu not edelim.',
+  'ortak.king.i-yi-uykular':'İyi uykular!',
+  'ortak.king.uyku-kaydina-ekleyeyim-mi':'Uyku kaydına ekleyeyim mi?',
+  'ortak.king.tamam-gordum':'Tamam, gördüm.',
+  'ortak.king.gunluk-olcumune-ekleyeyim-mi':'Günlük ölçümüne ekleyeyim mi?',
+  'ortak.king.gecmis-olsun-sonuclari-gordu':'Geçmiş olsun, sonuçları gördüm.',
+  'ortak.king.tahlillerine-ekleyeyim-mi':'Tahlillerine ekleyeyim mi?',
+  'ortak.king.eline-saglik-emegine-saglik':'Eline sağlık, emeğine sağlık!',
+  'ortak.king.helal-olsun-guzel-calisma':'Helal olsun, güzel çalışma!',
+  'ortak.king.kolay-gelsin-basarilar':'Kolay gelsin, başarılar!',
+  'ortak.king.calisma-kaydina-ekleyeyim-mi':'Çalışma kaydına ekleyeyim mi?',
+  'ortak.king.eline-saglik-guzel-calisma':'Eline sağlık, güzel çalışma!',
+  'ortak.king.emegine-saglik':'Emeğine sağlık!',
+  'ortak.king.kolay-gelsin-keyifli-calisma':'Kolay gelsin, keyifli çalışmalar!',
+  'ortak.king.bugunun-oturumlarina-ekleyey':'Bugünün oturumlarına ekleyeyim mi?',
+  'ortak.king.guzel-bir-not':'Güzel bir not.',
+  'ortak.king.notlarina-ekleyeyim-mi':'Notlarına ekleyeyim mi?',
+  'ortak.king.eline-saglik':'Eline sağlık!',
+  'ortak.king.kolay-gelsin-2':'Kolay gelsin!',
+  'ortak.king.verilerine-ekleyeyim-mi':'Verilerine ekleyeyim mi?',
+  'ortak.king.geri-alinacak-bir-kayit-yok':'Geri alınacak bir kayıt yok.',
+  'ortak.king.geri-aldim':'Geri aldım.',
+  'ortak.king.geri-alamadim':'Geri alamadım: ',
+  'ortak.king.i-lettim':'İlettim. ',
+  'ortak.king.i-letemedim':'İletemedim: ',
+  'ortak.king.bearer':'Bearer ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.king.antrenman-yapacagim':'Antrenman yapacağım',
   'ortak.king.besin-girecegim':'Besin gireceğim',
   'ortak.king.test-cozecegim':'Test çözeceğim',
@@ -424,10 +490,10 @@ window.LIFEOS.KING_IC = {};
 
   /* Hazır cevaplar — kullanıcının örnekleri, sırasıyla. */
   const HAZIR = [
-    { ad:yz('ortak.king.antrenman-yapacagim'), modul:'spi', route:'move', ek:{ sekme:'kuvvet' }, cevap:'Kolay gelsin.' },
-    { ad:yz('ortak.king.besin-girecegim'),     modul:'spi', route:'meals', cevap:'Afiyet olsun.' },
-    { ad:yz('ortak.king.test-cozecegim'),      modul:'ays', route:'solve', cevap:'Kolay gelsin.' },
-    { ad:yz('ortak.king.dil-calisacagim'),     modul:'esp', route:'lang',  cevap:'Kolay gelsin.' },
+    { ad:yz('ortak.king.antrenman-yapacagim'), modul:'spi', route:'move', ek:{ sekme:'kuvvet' }, cevap:yz('ortak.king.kolay-gelsin') },
+    { ad:yz('ortak.king.besin-girecegim'),     modul:'spi', route:'meals', cevap:yz('ortak.king.afiyet-olsun') },
+    { ad:yz('ortak.king.test-cozecegim'),      modul:'ays', route:'solve', cevap:yz('ortak.king.kolay-gelsin') },
+    { ad:yz('ortak.king.dil-calisacagim'),     modul:'esp', route:'lang',  cevap:yz('ortak.king.kolay-gelsin') },
     { ad:yz('ortak.king.bugunun-ozeti'),       ozet:true },
   ];
 
@@ -436,18 +502,18 @@ window.LIFEOS.KING_IC = {};
   const B = '(?:^|\\s)';
   const NIYET = [
     { es:new RegExp(B + '(tahlil|kan testi|laboratuvar)'), modul:'spi', route:'labs', cevap:'Tamam.' },
-    { es:new RegExp(B + '(antrenman|egzersiz|idman|spor|ağırlık|kuvvet)'), modul:'spi', route:'move', ek:{ sekme:'kuvvet' }, cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(koş|yürüyüş|bisiklet|kardiyo)'), modul:'spi', route:'move', ek:{ sekme:'kardiyo' }, cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(besin|yemek|öğün|kahvaltı|yedim|yiyeceğim)'), modul:'spi', route:'meals', cevap:'Afiyet olsun.' },
-    { es:new RegExp(B + '(deneme)'), modul:'ays', route:'exams', cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(test|soru)'), modul:'ays', route:'solve', cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(konu|ders)'), modul:'ays', route:'subjects', cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(tekrar|kart)'), modul:'ays', route:'cards', cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(dil|ingilizce|almanca|fransızca|kelime)'), modul:'esp', route:'lang', cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(kitap|okuma|okuyacağım)'), modul:'esp', route:'library', cevap:'Keyifli okumalar.' },
-    { es:new RegExp(B + '(yazı|yazacağım)'), modul:'esp', route:'writing', cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(felsefe)'), modul:'esp', route:'symposium', cevap:'Kolay gelsin.' },
-    { es:new RegExp(B + '(müzik|diksiyon)'), modul:'esp', route:'studio', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(antrenman|egzersiz|idman|spor|ağırlık|kuvvet)'), modul:'spi', route:'move', ek:{ sekme:'kuvvet' }, cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(koş|yürüyüş|bisiklet|kardiyo)'), modul:'spi', route:'move', ek:{ sekme:'kardiyo' }, cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(besin|yemek|öğün|kahvaltı|yedim|yiyeceğim)'), modul:'spi', route:'meals', cevap:yz('ortak.king.afiyet-olsun') },
+    { es:new RegExp(B + '(deneme)'), modul:'ays', route:'exams', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(test|soru)'), modul:'ays', route:'solve', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(konu|ders)'), modul:'ays', route:'subjects', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(tekrar|kart)'), modul:'ays', route:'cards', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(dil|ingilizce|almanca|fransızca|kelime)'), modul:'esp', route:'lang', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(kitap|okuma|okuyacağım)'), modul:'esp', route:'library', cevap:yz('ortak.king.keyifli-okumalar') },
+    { es:new RegExp(B + '(yazı|yazacağım)'), modul:'esp', route:'writing', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(felsefe)'), modul:'esp', route:'symposium', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(müzik|diksiyon)'), modul:'esp', route:'studio', cevap:yz('ortak.king.kolay-gelsin') },
   ];
 
   const ortam = {
@@ -502,7 +568,7 @@ window.LIFEOS.KING_IC = {};
         const l = await navigator.mediaDevices.enumerateDevices();
         /* İzin verilmeden önce kimlik ve ad boş gelir; kamera yine «var» sayılır. */
         return (l || []).filter(d => d && d.kind === 'videoinput')
-          .map((d, i) => ({ id:d.deviceId || '', ad:String(d.label || '').trim() || ('Kamera ' + (i + 1)) }));
+          .map((d, i) => ({ id:d.deviceId || '', ad:String(d.label || '').trim() || (yz('ortak.king.kamera') + (i + 1)) }));
       }catch(e){ return []; }
     },
     kameraBaslat:async (bitince, cihazId) => {
@@ -532,7 +598,7 @@ window.LIFEOS.KING_IC = {};
       try{
         const l = await navigator.mediaDevices.enumerateDevices();
         return (l || []).filter(d => d && d.kind === 'audioinput' && d.deviceId)
-          .map((d, i) => ({ id:d.deviceId, ad:String(d.label || '').trim() || ('Mikrofon ' + (i + 1)) }));
+          .map((d, i) => ({ id:d.deviceId, ad:String(d.label || '').trim() || (yz('ortak.king.mikrofon') + (i + 1)) }));
       }catch(e){ return []; }
     },
     kayitAc:(typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
@@ -721,7 +787,7 @@ window.LIFEOS.KING_IC = {};
      ince bir çıkıntı açar. İkisi aynı işi yapar, aynı durumu söyler. */
   function yanDugmeHtml(sinif){
     const gorunur = ortam.genis() ? !yanDar() : KI.yanAcik;
-    const ad = gorunur ? 'Kenar çubuğunu kapat' : 'Sohbet geçmişini aç';
+    const ad = gorunur ? yz('ortak.king.kenar-cubugunu-kapat') : yz('ortak.king.sohbet-gecmisini-ac');
     const yol = sinif === 'king__cikinti' ? '<path d="M10 7l5 5-5 5"/>' : '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>';
     return '<button type="button" class="' + sinif + '" data-king="yan" aria-expanded="' + (gorunur ? 'true' : 'false')
       + '" aria-label="' + ad + '" title="' + ad + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + yol + '</svg></button>';
@@ -743,9 +809,9 @@ window.LIFEOS.KING_IC = {};
   const EKRAN_EN_COK = 2500;
   const KARE_EN_GENIS = 1280;
   const GORSEL_SISTEM = 'Sen LifeOS\'un asistanı King\'sin. Kullanıcı sana ekranını ya da bir fotoğrafı gösteriyor. '
-    + 'Türkçe, kısa ve net cevap ver (en çok beş cümle). Görüntüde görmediğin bir sayıyı ya da bilgiyi uydurma; '
+    + yz('ortak.king.turkce-kisa-ve-net-cevap')
     + 'okuyamadığın ya da emin olmadığın yeri açıkça söyle. Sağlıkla ilgili görüntülerde teşhis koyma, ilaç ya da doz önerme. '
-    + 'Yardımcı olabileceğin sonraki adımı tek cümleyle öner.';
+    + yz('ortak.king.yardimci-olabilecegin-sonrak');
   KI.paylasim = null;       // söz 16: { tur:'ekran'|'kamera', kare() → { mime, data }, bitir() }
   /* Her açılış ve kapanış bir öncekini geçersiz kılar: izin beklenirken King
      kapanırsa ya da kipe iki kez basılırsa gelen akış sahipsiz kalmaz, durur. */
@@ -781,10 +847,10 @@ window.LIFEOS.KING_IC = {};
      ve King susar. Kapatılabilir (lifeos.king.goz = false). */
   const GOZ = 'lifeos.king.goz';
   const GOZ_ILK = 3 * 60 * 1000, GOZ_ARA = 6 * 60 * 1000;
-  const GOZ_SORU = 'Kullanıcının ekranına arada bir bakıyorsun; kendisi bir şey sormadı. Ekranda o an yaptığı işle ilgili, '
+  const GOZ_SORU = yz('ortak.king.kullanicinin-ekranina-arada')
     + 'gerçekten işine yarayacak TEK kısa bir soru ya da öneri varsa yalnız onu yaz (en çok iki cümle, samimi, «sen» diye). '
-    + 'Söylenecek değerli bir şey yoksa yalnız PAS yaz. Ekranda görmediğin hiçbir şeyi uydurma.';
-  const GOZ_KAMERA = 'Kullanıcının masasındaki kameraya arada bir bakıyorsun; kendisi bir şey sormadı. Görüntüde ders çalışmayla '
+    + yz('ortak.king.soylenecek-degerli-bir-sey-y');
+  const GOZ_KAMERA = yz('ortak.king.kullanicinin-masasindaki-kam')
     + 'ilgili bir şey (kâğıtta ya da kitapta bir soru, defter) varsa ve bir yerde takılmış görünüyorsa yardım teklif eden TEK kısa '
     + 'cümle yaz (en çok iki cümle, samimi, «sen» diye). Kişinin yüzü, görünüşü, kıyafeti, duygusu ya da odadaki biri hakkında '
     + 'hiçbir şey söyleme. Söylenecek değerli bir şey yoksa ya da emin değilsen yalnız PAS yaz. Görmediğin hiçbir şeyi uydurma.';
@@ -796,20 +862,20 @@ window.LIFEOS.KING_IC = {};
   /* EMA (2026-10-21): King 2.0 A'nın yerel Türkçe sesi (HKM/core/ses.py «ema»); seçilebilir olmalıydı. */
   const SES_TERCIH = ['oto', 'ema', 'gemini', 'piper', 'cihaz'];
   const SES_AD = { oto:'Otomatik', ema:'EMA', gemini:'Gemini', piper:'Piper', cihaz:'Cihaz' };
-  const SES_IP = { oto:'İnternet varsa Gemini, yoksa bilgisayardaki EMA, sonra Piper, en son cihazın sesi',
-    ema:'Bilgisayardaki EMA: doğal Türkçe ses, ücretsiz; metin bilgisayardan çıkmaz',
-    gemini:'Gemini’nin Türkçe sesi; metin Google’a gider', piper:'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
-    cihaz:'Yalnız bu cihazın kendi sesi' };
+  const SES_IP = { oto:yz('ortak.king.i-nternet-varsa-gemini-yoksa'),
+    ema:yz('ortak.king.bilgisayardaki-ema-dogal-tur'),
+    gemini:yz('ortak.king.gemini-nin-turkce-sesi-metin'), piper:yz('ortak.king.bilgisayardaki-piper-metin-b'),
+    cihaz:yz('ortak.king.yalniz-bu-cihazin-kendi-sesi') };
   const SES_PARCA = 420;
   const ALGILA = 'lifeos.king.algila';   // soz 29: 'oto' | 'whisper' | 'ai' | 'tarayici'; TASINAN'da
   /* Gemma 4 (2026-10-21): ana yerel model sesi doğrudan anlar (HKM dinle.py kural 7). «Yapay zekâ» adı Gemini'yi
      saklıyordu; adı artık ne olduğunu söyler. */
   const ALGILA_TERCIH = ['oto', 'gemma', 'whisper', 'ai', 'tarayici'];
-  const ALGILA_AD = { oto:'Otomatik', gemma:'Gemma 4', whisper:'Whisper', ai:'Gemini', tarayici:'Uygulama' };
-  const ALGILA_IP = { oto:'Önce bilgisayardaki Gemma 4, uzun kayıtta ya da olmazsa Whisper, en son Gemini',
-    gemma:'Gemma 4 sesi doğrudan anlar: hızlı, ücretsiz, ses bilgisayardan çıkmaz (uzun kayıtta Whisper)',
-    whisper:'Yalnız Whisper: ücretsiz, ses bilgisayardan çıkmaz', ai:'Yalnız Gemini: internet ister, ücretli, ses Google’a gider',
-    tarayici:'Uygulamanın (tarayıcının) kendi tanıması' };
+  const ALGILA_AD = { oto:'Otomatik', gemma:yz('ortak.king.gemma-4'), whisper:'Whisper', ai:'Gemini', tarayici:'Uygulama' };
+  const ALGILA_IP = { oto:yz('ortak.king.once-bilgisayardaki-gemma-4'),
+    gemma:yz('ortak.king.gemma-4-sesi-dogrudan-anlar'),
+    whisper:yz('ortak.king.yalniz-whisper-ucretsiz-ses'), ai:yz('ortak.king.yalniz-gemini-internet-ister'),
+    tarayici:yz('ortak.king.uygulamanin-tarayicinin-kend') };
   function algila(){ const v = ortam.depo.oku(ALGILA); return ALGILA_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
   const MIK = 'lifeos.king.mik';         // soz 29: secili mikrofon (deviceId); TASINAN'da
   KI.mikListe = [];                     // [{ id, ad }]
@@ -832,8 +898,8 @@ window.LIFEOS.KING_IC = {};
   const DERIN = 'lifeos.king.derinlik';   // söz 31: 'oto' | 'hizli' | 'dengeli' | 'derin'; TASINAN'da
   const DERIN_TERCIH = ['oto', 'hizli', 'dengeli', 'derin'];
   const DERIN_AD = { oto:'Otomatik', hizli:'Hızlı', dengeli:'Dengeli', derin:'Derin' };
-  const DERIN_IP = { oto:'Mesaja göre King seçer', hizli:'Kısa ve çabuk cevap',
-    dengeli:'Öneri ve yorum, orta uzunlukta', derin:'Seçenekleri tartar, gerekçeli öneri; biraz daha uzun sürer' };
+  const DERIN_IP = { oto:yz('ortak.king.mesaja-gore-king-secer'), hizli:yz('ortak.king.kisa-ve-cabuk-cevap'),
+    dengeli:yz('ortak.king.oneri-ve-yorum-orta-uzunlukt'), derin:yz('ortak.king.secenekleri-tartar-gerekceli') };
   KI.kipAcik = false;                   // başlıktaki kip menüsü açık mı (2026-10-19)
   function derinlik(){ const v = ortam.depo.oku(DERIN); return DERIN_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
   function derinlikSec(v){
@@ -1036,16 +1102,16 @@ window.LIFEOS.KING_IC = {};
      cümleden tahmin edilir. Seçim cümleye göre sabittir (aynı cümle, aynı
      karşılık): rastgele değil, testle sınanır. */
   const SOHBET = {
-    ogun:    { gecti:['Afiyet olsun!', 'Afiyet şeker olsun!'], gelecek:['Şimdiden afiyet olsun!'], soru:'Öğünlerine ekleyeyim mi?' },
-    su:      { gecti:['Afiyet olsun!'], gelecek:['Afiyet olsun!'], soru:'Bugünün suyuna ekleyeyim mi?' },
-    hareket: { gecti:['Eline sağlık, helal olsun!', 'Eline sağlık, güzel iş!'], gelecek:['Kolay gelsin, iyi antrenmanlar!'], soru:'Antrenmanlarına ekleyeyim mi?' },
-    uyku:    { gecti:['Günaydın! Uykunu not edelim.', 'Tamam, uykunu not edelim.'], gelecek:['İyi uykular!'], soru:'Uyku kaydına ekleyeyim mi?' },
-    olcum:   { gecti:['Tamam, gördüm.'], gelecek:['Tamam.'], soru:'Günlük ölçümüne ekleyeyim mi?' },
-    tahlil:  { gecti:['Geçmiş olsun, sonuçları gördüm.'], gelecek:['Tamam.'], soru:'Tahlillerine ekleyeyim mi?' },
-    calisma: { gecti:['Eline sağlık, emeğine sağlık!', 'Helal olsun, güzel çalışma!'], gelecek:['Kolay gelsin, başarılar!'], soru:'Çalışma kaydına ekleyeyim mi?' },
-    oturum:  { gecti:['Eline sağlık, güzel çalışma!', 'Emeğine sağlık!'], gelecek:['Kolay gelsin, keyifli çalışmalar!'], soru:'Bugünün oturumlarına ekleyeyim mi?' },
-    not:     { gecti:['Güzel bir not.'], gelecek:['Güzel bir not.'], soru:'Notlarına ekleyeyim mi?' },
-    veri:    { gecti:['Eline sağlık!'], gelecek:['Kolay gelsin!'], soru:'Verilerine ekleyeyim mi?' },
+    ogun:    { gecti:[yz('ortak.king.afiyet-olsun-2'), yz('ortak.king.afiyet-seker-olsun')], gelecek:[yz('ortak.king.simdiden-afiyet-olsun')], soru:yz('ortak.king.ogunlerine-ekleyeyim-mi') },
+    su:      { gecti:[yz('ortak.king.afiyet-olsun-2')], gelecek:[yz('ortak.king.afiyet-olsun-2')], soru:yz('ortak.king.bugunun-suyuna-ekleyeyim-mi') },
+    hareket: { gecti:[yz('ortak.king.eline-saglik-helal-olsun'), yz('ortak.king.eline-saglik-guzel-is')], gelecek:[yz('ortak.king.kolay-gelsin-iyi-antrenmanla')], soru:yz('ortak.king.antrenmanlarina-ekleyeyim-mi') },
+    uyku:    { gecti:[yz('ortak.king.gunaydin-uykunu-not-edelim'), yz('ortak.king.tamam-uykunu-not-edelim')], gelecek:[yz('ortak.king.i-yi-uykular')], soru:yz('ortak.king.uyku-kaydina-ekleyeyim-mi') },
+    olcum:   { gecti:[yz('ortak.king.tamam-gordum')], gelecek:['Tamam.'], soru:yz('ortak.king.gunluk-olcumune-ekleyeyim-mi') },
+    tahlil:  { gecti:[yz('ortak.king.gecmis-olsun-sonuclari-gordu')], gelecek:['Tamam.'], soru:yz('ortak.king.tahlillerine-ekleyeyim-mi') },
+    calisma: { gecti:[yz('ortak.king.eline-saglik-emegine-saglik'), yz('ortak.king.helal-olsun-guzel-calisma')], gelecek:[yz('ortak.king.kolay-gelsin-basarilar')], soru:yz('ortak.king.calisma-kaydina-ekleyeyim-mi') },
+    oturum:  { gecti:[yz('ortak.king.eline-saglik-guzel-calisma'), yz('ortak.king.emegine-saglik')], gelecek:[yz('ortak.king.kolay-gelsin-keyifli-calisma')], soru:yz('ortak.king.bugunun-oturumlarina-ekleyey') },
+    not:     { gecti:[yz('ortak.king.guzel-bir-not')], gelecek:[yz('ortak.king.guzel-bir-not')], soru:yz('ortak.king.notlarina-ekleyeyim-mi') },
+    veri:    { gecti:[yz('ortak.king.eline-saglik')], gelecek:[yz('ortak.king.kolay-gelsin-2')], soru:yz('ortak.king.verilerine-ekleyeyim-mi') },
   };
   function turTahmin(t){
     if(/(ye(dim|di|yeceğim|rim)|iç(tim|eceğim)|kahvaltı|öğle yemeği|akşam yemeği|yemek|tabak|porsiyon)/.test(t)) return 'ogun';
@@ -1073,9 +1139,9 @@ window.LIFEOS.KING_IC = {};
   async function geriAlYap(){
     const g = KI.sonGeriAl;
     KI.sonGeriAl = null; KI.cipler = null;
-    if(!g){ KI.soyle('Geri alınacak bir kayıt yok.'); return false; }
-    try{ await g(); if(KI.eylemGeriAlindi) KI.eylemGeriAlindi(g); KI.soyle('Geri aldım.'); return true; }
-    catch(e){ KI.soyle('Geri alamadım: ' + ((e && e.message) || 'bilinmeyen hata')); return false; }
+    if(!g){ KI.soyle(yz('ortak.king.geri-alinacak-bir-kayit-yok')); return false; }
+    try{ await g(); if(KI.eylemGeriAlindi) KI.eylemGeriAlindi(g); KI.soyle(yz('ortak.king.geri-aldim')); return true; }
+    catch(e){ KI.soyle(yz('ortak.king.geri-alamadim') + ((e && e.message) || 'bilinmeyen hata')); return false; }
   }
 
   async function ilet(){
@@ -1084,9 +1150,9 @@ window.LIFEOS.KING_IC = {};
     if(!x) return;
     try{
       const r = await L.HESAP.gelenBirak(x.modul, x.metin);
-      KI.soyle('İlettim. ' + ((r && r.mesaj) || ''));
+      KI.soyle(yz('ortak.king.i-lettim') + ((r && r.mesaj) || ''));
     }catch(e){
-      KI.soyle('İletemedim: ' + ((e && e.message) || 'sunucuya ulaşılamadı') + '. ' + MODUL_AD[x.modul] + '’yi açıp orada yazabilirsin.');
+      KI.soyle(yz('ortak.king.i-letemedim') + ((e && e.message) || 'sunucuya ulaşılamadı') + '. ' + MODUL_AD[x.modul] + '’yi açıp orada yazabilirsin.');
     }
   }
 
@@ -1170,7 +1236,7 @@ window.LIFEOS.KING_IC = {};
       if(ek && ek.dongu) govde.dongu = ek.dongu;   // A4: çok adımlı araç döngüsü (HKM en çok 4 adım, 30 sn)
       const istek = yol => f(k.url + yol, {
         method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king.bearer') + k.token },
         body:JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });

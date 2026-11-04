@@ -31,6 +31,24 @@
       `ogeler`'de kalır.
 
    Kayıt: { [kavram]: { n, sonraki:'YYYY-AA-GG' | bitti:'YYYY-AA-GG', ogeler?:[soruId], y?:yanlış sayısı, eski? } } */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ogret.kendine-sor':'Kendine sor: «',
+  'ortak.ogret.i-slemi-adim-adim-yeniden-ya':'İşlemi adım adım yeniden yap: hangi adımda',
+  'ortak.ogret.soru-kokunu-yeniden-oku-ne':'Soru kökünü yeniden oku: ne soruluyor, sen neyi cevapladın?',
+  'ortak.ogret.once-konunun-ozetine-kisaca':'Önce konunun özetine kısaca bak, sonra benzer soruyu yeniden dene.',
+  'ortak.ogret.teshis':'Teşhis: ',
+  'ortak.ogret.yarin-bu-konudan-benzer-bir':'Yarın bu konudan benzer bir soru soracağım.',
+  'ortak.ogret.tekrarlari-tamamladin-bu-kon':'Tekrarları tamamladın; bu konu kapandı.',
+  'ortak.ogret.bugunku-tekrarlar':'Bugünkü tekrarlar',
+  'ortak.ogret.ogretme-motorunun-bugunku-te':'Öğretme motorunun bugünkü tekrarları: yanlış yapılan konular 1, 3 ve 7 gün sonra benzer soruyla sorulur; vadesi gelen ve kapanan konular.',
+  'ortak.ogret.bugun':'Bugün ',
+  'ortak.ogret.bugun-vadesi-gelen-tekrarin':'Bugün vadesi gelen tekrarın yok',
+  'ortak.ogret.son-yanlisin-teshisi':'Son yanlışın teşhisi',
+  'ortak.ogret.son-yanlis-cevabin-teshisi-k':'Son yanlış cevabın teşhisi: kavram, işlem, dikkat ya da bilmiyor; doğru cevap modülün verisi. Sokratik yöntem: önce yönlendiren soru; doğru cevabı değiştirme.',
+  'ortak.ogret.senin-cevabin':'Senin cevabın ',
+  'ortak.ogret.sokratik-once-bir-yonlendire':'Sokratik: önce bir yönlendiren soru, sonra kısa açıklama; doğru cevabı ve sayıları aynen kullan',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -117,12 +135,12 @@ window.LIFEOS.OGRET = (function(){
     if(!ts.tur) return [];
     const konu = String(g.konu || 'bu konu').trim(), sec = String(g.secMetin == null ? '' : g.secMetin).trim();
     const soru = {
-      kavram:'Kendine sor: «' + konu + '» konusunun temel kuralı bu soruda neyi söylüyor?',
-      islem:'İşlemi adım adım yeniden yap: hangi adımda' + (sec ? ' «' + sec + '»' : ' farklı bir sonuç') + ' çıktı?',
-      dikkat:'Soru kökünü yeniden oku: ne soruluyor, sen neyi cevapladın?',
-      bilmiyor:'Önce konunun özetine kısaca bak, sonra benzer soruyu yeniden dene.',
+      kavram:yz('ortak.ogret.kendine-sor') + konu + '» konusunun temel kuralı bu soruda neyi söylüyor?',
+      islem:yz('ortak.ogret.i-slemi-adim-adim-yeniden-ya') + (sec ? ' «' + sec + '»' : ' farklı bir sonuç') + ' çıktı?',
+      dikkat:yz('ortak.ogret.soru-kokunu-yeniden-oku-ne'),
+      bilmiyor:yz('ortak.ogret.once-konunun-ozetine-kisaca'),
     }[ts.tur];
-    return ['Teşhis: ' + ts.ad + ' (' + ts.neden + ').', soru];
+    return [yz('ortak.ogret.teshis') + ts.ad + ' (' + ts.neden + ').', soru];
   }
 
   /* ---------- kayıt (söz 3, 4) ---------- */
@@ -167,11 +185,11 @@ window.LIFEOS.OGRET = (function(){
     let not = '', kapandi = false;
     if(!isabet){
       v[kavram] = { n:0, sonraki:gunEkle(bugun, ARALIK[0]), ogeler:birlesim(k && k.ogeler, oge == null ? [] : [oge]), y:((k && k.y) || 0) + 1 };
-      not = 'Yarın bu konudan benzer bir soru soracağım.';
+      not = yz('ortak.ogret.yarin-bu-konudan-benzer-bir');
     }else if(k && !k.bitti){
       const n = (k.n || 0) + 1;
       const ek = Object.assign({ ogeler:k.ogeler || [] }, k.y ? { y:k.y } : {});
-      if(n >= ARALIK.length){ v[kavram] = Object.assign({ n, bitti:bugun }, ek); kapandi = true; not = 'Tekrarları tamamladın; bu konu kapandı.'; }
+      if(n >= ARALIK.length){ v[kavram] = Object.assign({ n, bitti:bugun }, ek); kapandi = true; not = yz('ortak.ogret.tekrarlari-tamamladin-bu-kon'); }
       else{ v[kavram] = Object.assign({ n, sonraki:gunEkle(bugun, ARALIK[n]) }, ek); not = ARALIK[n] + ' gün sonra bir kez daha soracağım.'; }
     }else return { kayit:k || null, not, kapandi };
     d.yaz(v);
@@ -223,30 +241,30 @@ window.LIFEOS.OGRET = (function(){
     const adi = k => { try{ return (o.ad && o.ad(k)) || k; }catch(e){ return k; } };
     return [
       /* «bugünkü tekrarlarım» kartlar sayfasını açmasın: dar `es` hızlı yolu sayfa tahmininden önce. */
-      { ad:o.modul + '_tekrarlarim', tur:'oku', ozetAd:'Bugünkü tekrarlar', ornek:'bugünkü tekrarlarım',
+      { ad:o.modul + '_tekrarlarim', tur:'oku', ozetAd:yz('ortak.ogret.bugunku-tekrarlar'), ornek:'bugünkü tekrarlarım',
         es:/(?:^|\s)tekrarlar[ıi]m[ıi]?(?=\s|[?.!,]|$)/,
         anahtar:'tekrarlarım tekrarlarımı vadesi gelen konular',
-        aciklama:'Öğretme motorunun bugünkü tekrarları: yanlış yapılan konular 1, 3 ve 7 gün sonra benzer soruyla sorulur; vadesi gelen ve kapanan konular.',
+        aciklama:yz('ortak.ogret.ogretme-motorunun-bugunku-te'),
         calistir:() => {
           const b = bugun(), l = vade(o.tekrar, b), oz = ozet(o.tekrar, b);
           const satirlar = l.slice(0, 8).map(x => adi(x.kavram) + ' · ' + (x.n + 1) + '. tekrar');
           return { sonuc:{ bugun:b, vadesi_gelen:l.map(x => ({ konu:adi(x.kavram), tekrar:x.n + 1 })), acik:oz.acik, kapanan:oz.kapanan },
-            cevap:l.length ? 'Bugün ' + l.length + ' konunun tekrarı var; «bana soru sor» dersen sırayla sorarım.'
-              : 'Bugün vadesi gelen tekrarın yok' + (oz.acik ? ' (' + oz.acik + ' konu takvimde bekliyor).' : '.'),
+            cevap:l.length ? yz('ortak.ogret.bugun') + l.length + ' konunun tekrarı var; «bana soru sor» dersen sırayla sorarım.'
+              : yz('ortak.ogret.bugun-vadesi-gelen-tekrarin') + (oz.acik ? ' (' + oz.acik + ' konu takvimde bekliyor).' : '.'),
             satirlar:satirlar.length ? satirlar : null };
         } },
       /* Genel «neden / ne zaman» soruları buraya düşmesin (sınav: «… temel nedenleri nelerdi»):
          ad, örnek ve anahtar «yanlış» ve «teşhis» üzerine. */
-      { ad:o.modul + '_yanlis_teshis', tur:'oku', ozetAd:'Son yanlışın teşhisi', ornek:'yanlış yaptığım sorunun teşhisi',
+      { ad:o.modul + '_yanlis_teshis', tur:'oku', ozetAd:yz('ortak.ogret.son-yanlisin-teshisi'), ornek:'yanlış yaptığım sorunun teşhisi',
         anahtar:'yanlış yaptım yanlışım yanlışımı teşhis',
-        aciklama:'Son yanlış cevabın teşhisi: kavram, işlem, dikkat ya da bilmiyor; doğru cevap modülün verisi. Sokratik yöntem: önce yönlendiren soru; doğru cevabı değiştirme.',
+        aciklama:yz('ortak.ogret.son-yanlis-cevabin-teshisi-k'),
         calistir:() => {
           const s = o.son.oku();
           if(!s || !s.id) return { cevap:'King\'le çözdüğün yanlış bir soru yok; önce «bana soru sor» de.' };
-          const satirlar = [s.konu ? s.konu + ': ' + s.soru : s.soru, 'Senin cevabın ' + s.secilen + (s.secMetin ? ' («' + s.secMetin + '»)' : '') + ', doğrusu ' + s.dogru + (s.dogruMetin ? ' («' + s.dogruMetin + '»)' : '') + '.']
-            .concat(s.satirlar && s.satirlar.length ? s.satirlar : ['Teşhis: ' + s.neden + '.']).concat(s.cozum || []);
+          const satirlar = [s.konu ? s.konu + ': ' + s.soru : s.soru, yz('ortak.ogret.senin-cevabin') + s.secilen + (s.secMetin ? ' («' + s.secMetin + '»)' : '') + ', doğrusu ' + s.dogru + (s.dogruMetin ? ' («' + s.dogruMetin + '»)' : '') + '.']
+            .concat(s.satirlar && s.satirlar.length ? s.satirlar : [yz('ortak.ogret.teshis') + s.neden + '.']).concat(s.cozum || []);
           return { sonuc:{ konu:s.konu, soru:s.soru, senin_cevabin:s.secilen, dogru_cevap:s.dogru, tur:s.tur, neden:s.neden, cozum:s.cozum, gun:s.gun,
-            yontem:'Sokratik: önce bir yönlendiren soru, sonra kısa açıklama; doğru cevabı ve sayıları aynen kullan' }, satirlar };
+            yontem:yz('ortak.ogret.sokratik-once-bir-yonlendire') }, satirlar };
         } },
     ];
   }

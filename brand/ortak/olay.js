@@ -21,6 +21,10 @@
       denenir. HKM de kimliği tekrar saymaz.
    4. AÇILIŞTA VE ON BEŞ DAKİKADA BİR. Tur boşta başlar (açılışı yavaşlatmaz);
       sekme gizliyken tur atılmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.olay.bearer':'Bearer ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -77,7 +81,7 @@ LIFEOS.OLAY = (function(){
       let t = null;
       const zaman = new Promise(ok => { t = setTimeout(() => { if(ctrl) ctrl.abort(); ok(false); }, ortam.zamanAsimi || ZAMAN_ASIMI); });
       const istek = Promise.resolve(k.f(k.url + '/api/olay', { method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.olay.bearer') + k.token },
         body:JSON.stringify(o), signal:ctrl ? ctrl.signal : undefined }))
         .then(r => !!(r && r.status >= 200 && r.status < 300), () => false);
       try{ return await Promise.race([istek, zaman]); }

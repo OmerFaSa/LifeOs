@@ -5,6 +5,13 @@
    dosyadan da takilir, bu dosyaya dokunmak gerekmez. Silmek: o bloğu sil.
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.target.tahmini-siralama':'Tahmini sıralama',
+  'ays.target.hedefe-kalan-net':'Hedefe kalan net',
+  'ays.target.obp-katkisi':'OBP katkısı',
+  'ays.target.hedef-ozeti':'Hedef özeti',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -64,9 +71,9 @@ R.Screens.target = (function(){
 
   /* ---------- bilgiler: King ve Gun buradan okuyabilir ---------- */
 
-  P.bilgi({ id:'ays.tahmini-sira', ad:'Tahmini sıralama', etiket:'tahmin', oku(){ const e = C.estimateScore(); return e.ok ? e.rank : null; } });
-  P.bilgi({ id:'ays.hedefe-kalan-net', ad:'Hedefe kalan net', etiket:'tahmin', oku(){ const g = C.netGapToTarget(); return g ? Math.max(0, g.netDiff) : null; } });
-  P.bilgi({ id:'ays.obp-katkisi', ad:'OBP katkısı', etiket:'hesaplandı', oku(){ return C.obp().contribution; } });
+  P.bilgi({ id:'ays.tahmini-sira', ad:yz('ays.target.tahmini-siralama'), etiket:'tahmin', oku(){ const e = C.estimateScore(); return e.ok ? e.rank : null; } });
+  P.bilgi({ id:'ays.hedefe-kalan-net', ad:yz('ays.target.hedefe-kalan-net'), etiket:'tahmin', oku(){ const g = C.netGapToTarget(); return g ? Math.max(0, g.netDiff) : null; } });
+  P.bilgi({ id:'ays.obp-katkisi', ad:yz('ays.target.obp-katkisi'), etiket:'hesaplandı', oku(){ return C.obp().contribution; } });
 
   /* ---------- donen ust kart ---------- */
 
@@ -74,7 +81,7 @@ R.Screens.target = (function(){
      hedefe kalan küçük dönen kartta. Kesinlik açıklama satırı (ⓘ'de) ve
      medyan tekrarı (tahmini sıra kartında yazıyor) kalktı; ara sıra
      açılanlar şerit, başvuru tabloları gizli (app.js SADE_GIZLI). */
-  P.blok({ id:'hedef.donen', sayfa:'target', yer:'ust', ad:'Hedef özeti', ciz(){
+  P.blok({ id:'hedef.donen', sayfa:'target', yer:'ust', ad:yz('ays.target.hedef-ozeti'), ciz(){
     const V = (window.LIFEOS || {}).VITRIN;
     if(!V || !V.donen) return '';
     const L = window.LIFEOS || {};

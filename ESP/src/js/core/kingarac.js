@@ -18,6 +18,145 @@
    «görsel model okudu, doğrulanmadı» diye gösterilir ve yalnız onayla
    alıntı olarak kaydolur. Kelime kartı kullanıcının seçtiği kelimeyle
    (`esp_kart_ekle`) girer; model kelime seçmez. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.kingarac.bu-gun-icin-oturum-kaydi':'Bu gün için oturum kaydı yok.',
+  'esp.core.kingarac.son':'Son ',
+  'esp.core.kingarac.kutuphanede-kitap-yok':'Kütüphanede kitap yok.',
+  'esp.core.kingarac.toplam-kart':'Toplam kart: ',
+  'esp.core.kingarac.bugun-sirasi-gelen':'Bugün sırası gelen: ',
+  'esp.core.kingarac.yazi-taslagi-yok':'Yazı taslağı yok.',
+  'esp.core.kingarac.merdiven-verisi-yok-veri-yok':'Merdiven verisi yok (veri yok).',
+  'esp.core.kingarac.henuz-olculmus-uretim-yok-ve':'Henüz ölçülmüş üretim yok (veri yok).',
+  'esp.core.kingarac.genel-kademe':'Genel kademe: ',
+  'esp.core.kingarac.acik':'Açık: ',
+  'esp.core.kingarac.kapali':'Kapalı: ',
+  'esp.core.kingarac.sempozyumda-kayitli-tez-yok':'Sempozyumda kayıtlı tez yok (veri yok).',
+  'esp.core.kingarac.kronolojide-olay-kaydi-yok-v':'Kronolojide olay kaydı yok (veri yok).',
+  'esp.core.kingarac.repertuarda-kayit-yok-veri-y':'Repertuarda kayıt yok (veri yok).',
+  'esp.core.kingarac.bu-bir-kitap-sayfasi-sayfada':'Bu bir kitap sayfası. Sayfadaki metni satır satır, aynen yaz; düzeltme, özet ve yorum ekleme. Okunamayan yere […] koy.',
+  'esp.core.kingarac.sayfayi-okumak-icin-merkez-i':'Sayfayı okumak için Merkez’in görsel modeli gerekiyor; Merkez açıkken yeniden dene.',
+  'esp.core.kingarac.sayfadan-okunabilir-bir-meti':'Sayfadan okunabilir bir metin çıkmadı',
+  'esp.core.kingarac.sayfadan-okudum-gorsel-model':'Sayfadan okudum (görsel model, doğrulanmadı).',
+  'esp.core.kingarac.bir-kelimeyi-karta-eklemek-i':'Bir kelimeyi karta eklemek için «… kelimesini kart yap: anlamı» yaz.',
+  'esp.core.kingarac.bir-gunun-esp-calisma-oturum':'Bir günün ESP çalışma oturumları (alan ve dakika).',
+  'esp.core.kingarac.son-gunlerde-hangi-alanda-ka':'Son günlerde hangi alanda kaç dakika çalışıldığı.',
+  'esp.core.kingarac.kutuphanedeki-kitaplar-ve-du':'Kütüphanedeki kitaplar ve durumları (okunuyor, bitti, başlanmadı).',
+  'esp.core.kingarac.dil-kartlari-toplam-bugun-si':'Dil kartları: toplam, bugün sırası gelen, dillere göre.',
+  'esp.core.kingarac.yazi-taslaklari-ve-kelime-sa':'Yazı taslakları ve kelime sayıları.',
+  'esp.core.kingarac.esp-merdiveni-yedi-disiplini':'ESP merdiveni: yedi disiplinin kademesi, ustalık yüzdesi ve ölçülen disiplinler.',
+  'esp.core.kingarac.sempozyumdaki-felsefi-tezler':'Sempozyumdaki felsefi tezler ve argümanlar (açık ve kapalı tezler).',
+  'esp.core.kingarac.kronolojideki-tarih-olaylari':'Kronolojideki tarih olayları (yıl, dönem ve bölge).',
+  'esp.core.kingarac.muzik-studyosundaki-parca-ve':'Müzik stüdyosundaki parça ve teknikler (temiz BPM eşikleri).',
+  'esp.core.kingarac.dil-karti-ekle':'Dil kartı ekle',
+  'esp.core.kingarac.dil-destesine-yeni-kelime-ka':'Dil destesine yeni kelime kartı ekler (ön yüz ve karşılığı).',
+  'esp.core.kingarac.dil-destesine-kart-eklenecek':'Dil destesine kart eklenecek: «',
+  'esp.core.kingarac.karti-ekledim':'Kartı ekledim.',
+  'esp.core.kingarac.alinti-kaydet':'Alıntı kaydet',
+  'esp.core.kingarac.bir-kitaptan-alintiyi-ya-da':'Bir kitaptan alıntıyı ya da kitap notunu kaydeder; kitap verilmezse okunmakta olan tek kitaba bağlanır.',
+  'esp.core.kingarac.kitaba-baglanmamis-not':'Kitaba bağlanmamış not',
+  'esp.core.kingarac.notu-kaydettim':'Notu kaydettim.',
+  'esp.core.kingarac.kitabi-bitir':'Kitabı bitir',
+  'esp.core.kingarac.suc-ve-ceza-yi-bitirdim':'Suç ve Ceza’yı bitirdim',
+  'esp.core.kingarac.kutuphanedeki-bir-kitabi-bug':'Kütüphanedeki bir kitabı bugün bitmiş olarak işaretler.',
+  'esp.core.kingarac.kitap-bulunamadi-ya-da-zaten':'Kitap bulunamadı ya da zaten bitmiş.',
+  'esp.core.kingarac.calisma-oturumunu-guncelle-v':'Çalışma oturumunu güncelle veya sil',
+  'esp.core.kingarac.esp-calisma-oturumunu-guncel':'ESP çalışma oturumunu günceller ya da siler.',
+  'esp.core.kingarac.oturumu-sildim':'Oturumu sildim.',
+  'esp.core.kingarac.oturumu-guncelledim':'Oturumu güncelledim.',
+  'esp.core.kingarac.tez-ekle-guncelle-veya-sil':'Tez ekle, güncelle veya sil',
+  'esp.core.kingarac.sempozyuma-tez-ekler-guncell':'Sempozyuma tez ekler, günceller ya da siler.',
+  'esp.core.kingarac.yeni-tez-eklenecek':'Yeni tez eklenecek: «',
+  'esp.core.kingarac.tez-silinecek':'Tez silinecek: «',
+  'esp.core.kingarac.tez-guncellenecek':'Tez güncellenecek: «',
+  'esp.core.kingarac.tezi-ekledim':'Tezi ekledim: «',
+  'esp.core.kingarac.tezi-sildim':'Tezi sildim.',
+  'esp.core.kingarac.tezi-guncelledim':'Tezi güncelledim.',
+  'esp.core.kingarac.ek-dosya-ekle-veya-sil':'Ek dosya ekle veya sil',
+  'esp.core.kingarac.bolume-ek-dosya-not-belge':'Bölüme ek dosya (not, belge, bağlantı, ses) ekler ya da siler.',
+  'esp.core.kingarac.ek-dosya-kaydedilecek':'Ek dosya kaydedilecek: «',
+  'esp.core.kingarac.ek-dosya-silinecek':'Ek dosya silinecek: «',
+  'esp.core.kingarac.bolum-alan-belirtmelisin':'Bölüm (alan) belirtmelisin.',
+  'esp.core.kingarac.ek-dosyayi-kaydettim':'Ek dosyayı kaydettim.',
+  'esp.core.kingarac.ek-dosyayi-sildim':'Ek dosyayı sildim.',
+  'esp.core.kingarac.parca-veya-teknik-ekle-gunce':'Parça veya teknik ekle, güncelle veya sil',
+  'esp.core.kingarac.muzik-studyosuna-parca-veya':'Müzik stüdyosuna parça veya teknik ekler, günceller ya da siler.',
+  'esp.core.kingarac.yeni-parca-teknik-eklenecek':'Yeni parça/teknik eklenecek: «',
+  'esp.core.kingarac.parca-teknik-silinecek':'Parça/teknik silinecek: «',
+  'esp.core.kingarac.parca-teknik-guncellenecek':'Parça/teknik güncellenecek: «',
+  'esp.core.kingarac.parcayi-ekledim':'Parçayı ekledim: «',
+  'esp.core.kingarac.parcayi-sildim':'Parçayı sildim.',
+  'esp.core.kingarac.parcayi-guncelledim':'Parçayı güncelledim.',
+  'esp.core.kingarac.hatirlatici-ekle-veya-sil':'Hatırlatıcı ekle veya sil',
+  'esp.core.kingarac.disipline-bagli-hatirlatici':'Disipline bağlı hatırlatıcı ekler ya da siler.',
+  'esp.core.kingarac.hatirlatici-eklenecek':'Hatırlatıcı eklenecek: «',
+  'esp.core.kingarac.hatirlatici-silinecek':'Hatırlatıcı silinecek: «',
+  'esp.core.kingarac.hatirlaticiyi-kaydettim':'Hatırlatıcıyı kaydettim.',
+  'esp.core.kingarac.hatirlaticiyi-sildim':'Hatırlatıcıyı sildim.',
+  'esp.core.kingarac.hedef-ekle-veya-sil':'Hedef ekle veya sil',
+  'esp.core.kingarac.zamana-bagli-hedef-ekler-ya':'Zamana bağlı hedef ekler ya da siler.',
+  'esp.core.kingarac.hedef-eklenecek':'Hedef eklenecek: «',
+  'esp.core.kingarac.hedef-silinecek':'Hedef silinecek: «',
+  'esp.core.kingarac.hedefi-kaydettim':'Hedefi kaydettim.',
+  'esp.core.kingarac.hedefi-sildim':'Hedefi sildim.',
+  'esp.core.kingarac.karari-kapat':'Kararı kapat',
+  'esp.core.kingarac.ofiste-alinan-acik-bir-karar':'Ofiste alınan açık bir kararı sonuçlandırarak kapatır.',
+  'esp.core.kingarac.karar-kapatilacak':'Karar kapatılacak: «',
+  'esp.core.kingarac.king-ile-kapatildi':'King ile kapatıldı',
+  'esp.core.kingarac.karari-kapattim':'Kararı kapattım: «',
+  'esp.core.kingarac.dil-kartini-sil':'Dil kartını sil',
+  'esp.core.kingarac.dil-destesinden-kelime-karti':'Dil destesinden kelime kartını siler.',
+  'esp.core.kingarac.dil-karti-silinecek':'Dil kartı silinecek: «',
+  'esp.core.kingarac.karti-sildim':'Kartı sildim: «',
+  'esp.core.kingarac.kaynak-ekle-veya-sil':'Kaynak ekle veya sil',
+  'esp.core.kingarac.tarih-masasina-kaynak-ekler':'Tarih masasına kaynak ekler ya da siler.',
+  'esp.core.kingarac.tarih-kaynagi-eklenecek':'Tarih kaynağı eklenecek: «',
+  'esp.core.kingarac.tarih-kaynagi-silinecek':'Tarih kaynağı silinecek: «',
+  'esp.core.kingarac.kaynagi-kaydettim':'Kaynağı kaydettim.',
+  'esp.core.kingarac.kaynagi-sildim':'Kaynağı sildim.',
+  'esp.core.kingarac.kitabi-guncelle-veya-sil':'Kitabı güncelle veya sil',
+  'esp.core.kingarac.kutuphanedeki-kitabi-guncell':'Kütüphanedeki kitabı günceller ya da siler (eklemek için eylem_kitap_ekle eylemini kullan).',
+  'esp.core.kingarac.kitap-silinecek':'Kitap silinecek: «',
+  'esp.core.kingarac.kitap-guncellenecek':'Kitap güncellenecek: «',
+  'esp.core.kingarac.kitap-eklemek-icin-eylem-kit':'Kitap eklemek için eylem_kitap_ekle eylemi kullanılmalı.',
+  'esp.core.kingarac.kitabi-sildim':'Kitabı sildim.',
+  'esp.core.kingarac.kitabi-guncelledim':'Kitabı güncelledim.',
+  'esp.core.kingarac.notu-sil':'Notu sil',
+  'esp.core.kingarac.kutuphanedeki-bir-atomik-not':'Kütüphanedeki bir atomik notu veya alıntıyı siler.',
+  'esp.core.kingarac.not-silinecek':'Not silinecek: «',
+  'esp.core.kingarac.notu-sildim':'Notu sildim.',
+  'esp.core.kingarac.tarih-olayi-ekle-guncelle-ve':'Tarih olayı ekle, güncelle veya sil',
+  'esp.core.kingarac.kronolojiye-tarih-olayi-ekle':'Kronolojiye tarih olayı ekler, günceller ya da siler.',
+  'esp.core.kingarac.tarih-olayi-eklenecek':'Tarih olayı eklenecek: «',
+  'esp.core.kingarac.tarih-olayi-silinecek':'Tarih olayı silinecek: «',
+  'esp.core.kingarac.tarih-olayi-guncellenecek':'Tarih olayı güncellenecek: «',
+  'esp.core.kingarac.olayi-kaydettim':'Olayı kaydettim.',
+  'esp.core.kingarac.olayi-sildim':'Olayı sildim.',
+  'esp.core.kingarac.olayi-guncelledim':'Olayı güncelledim.',
+  'esp.core.kingarac.diksiyon-olcumu-ekle-veya-si':'Diksiyon ölçümü ekle veya sil',
+  'esp.core.kingarac.diksiyon-calisma-olcumunu-su':'Diksiyon çalışma ölçümünü (süre, kelime, hata) kaydeder ya da siler.',
+  'esp.core.kingarac.diksiyon-olcum-kaydi-eklenec':'Diksiyon ölçüm kaydı eklenecek: ',
+  'esp.core.kingarac.diksiyon-olcum-kaydi-silinec':'Diksiyon ölçüm kaydı silinecek: ',
+  'esp.core.kingarac.diksiyon-olcumunu-kaydettim':'Diksiyon ölçümünü kaydettim.',
+  'esp.core.kingarac.diksiyon-olcumunu-sildim':'Diksiyon ölçümünü sildim.',
+  'esp.core.kingarac.yazi-taslagi-ekle-guncelle-v':'Yazı taslağı ekle, güncelle veya sil',
+  'esp.core.kingarac.yazi-laboratuvarina-taslak-e':'Yazı laboratuvarına taslak ekler, günceller ya da siler.',
+  'esp.core.kingarac.yazi-taslagi-eklenecek':'Yazı taslağı eklenecek: «',
+  'esp.core.kingarac.yazi-taslagi-silinecek':'Yazı taslağı silinecek: «',
+  'esp.core.kingarac.yazi-taslagi-guncellenecek':'Yazı taslağı güncellenecek: «',
+  'esp.core.kingarac.yazi-taslagini-ekledim':'Yazı taslağını ekledim: «',
+  'esp.core.kingarac.yazi-taslagini-sildim':'Yazı taslağını sildim.',
+  'esp.core.kingarac.yazi-taslagini-guncelledim':'Yazı taslağını güncelledim.',
+  'esp.core.kingarac.neden-zinciri-ekle-guncelle':'Neden zinciri ekle, güncelle veya sil',
+  'esp.core.kingarac.tarih-olayina-neden-sonuc-zi':'Tarih olayına neden-sonuç zinciri ekler, günceller ya da siler.',
+  'esp.core.kingarac.neden-zinciri-eklenecek':'Neden zinciri eklenecek: «',
+  'esp.core.kingarac.neden-zinciri-silinecek-id':'Neden zinciri silinecek (ID: ',
+  'esp.core.kingarac.neden-zinciri-guncellenecek':'Neden zinciri güncellenecek (ID: ',
+  'esp.core.kingarac.zincir-bir-olaya-baglanmadan':'Zincir bir olaya bağlanmadan kaydedilmez.',
+  'esp.core.kingarac.neden-zincirini-kaydettim':'Neden zincirini kaydettim.',
+  'esp.core.kingarac.neden-zincirini-sildim':'Neden zincirini sildim.',
+  'esp.core.kingarac.neden-zincirini-guncelledim':'Neden zincirini güncelledim.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -111,7 +250,7 @@ ESP.KingArac = (function(){
     const d = tarihMi(p.tarih) ? p.tarih : U().todayISO();
     const l = M().sessionsOf(d).filter(s => s.minutes > 0).map(s => ({ alan:alanAd(s.disc), dakika:s.minutes, not:s.note || '' }));
     return { sonuc:{ tarih:d, oturumlar:l, toplam_dakika:l.length ? l.reduce((a, s) => a + s.dakika, 0) : null },
-      satirlar:l.length ? l.map(s => s.alan + ' · ' + s.dakika + ' dk') : ['Bu gün için oturum kaydı yok.'] };
+      satirlar:l.length ? l.map(s => s.alan + ' · ' + s.dakika + ' dk') : [yz('esp.core.kingarac.bu-gun-icin-oturum-kaydi')] };
   }
 
   function hafta(p){
@@ -124,13 +263,13 @@ ESP.KingArac = (function(){
     });
     const l = Object.keys(dk).sort((a, b) => dk[b] - dk[a]).map(k => ({ alan:alanAd(k), dakika:dk[k] }));
     return { sonuc:{ gun:n, calisilan_gun:kayitli, alanlar:l },
-      satirlar:l.length ? ['Son ' + n + ' gün: ' + kayitli + ' gün çalışıldı'].concat(l.map(x => x.alan + ' · ' + x.dakika + ' dk')) : ['Son ' + n + ' günde oturum kaydı yok.'] };
+      satirlar:l.length ? [yz('esp.core.kingarac.son') + n + ' gün: ' + kayitli + ' gün çalışıldı'].concat(l.map(x => x.alan + ' · ' + x.dakika + ' dk')) : [yz('esp.core.kingarac.son') + n + ' günde oturum kaydı yok.'] };
   }
 
   function kitaplar(){
     const l = (S().books || []).map(b => ({ ad:b.title, yazar:b.author || '', durum:(M().bookStatus ? (M().bookStatus(b) || {}).label : '') || '',
       baslangic:b.startedAt || null, bitis:b.finishedAt || null }));
-    return { sonuc:{ kitaplar:l.slice(0, 40) }, satirlar:l.length ? l.slice(0, 8).map(b => b.ad + (b.yazar ? ' — ' + b.yazar : '') + (b.durum ? ' · ' + b.durum : '')) : ['Kütüphanede kitap yok.'] };
+    return { sonuc:{ kitaplar:l.slice(0, 40) }, satirlar:l.length ? l.slice(0, 8).map(b => b.ad + (b.yazar ? ' — ' + b.yazar : '') + (b.durum ? ' · ' + b.durum : '')) : [yz('esp.core.kingarac.kutuphanede-kitap-yok')] };
   }
 
   function kartlar(){
@@ -139,17 +278,17 @@ ESP.KingArac = (function(){
     const dil = {};
     l.forEach(c => { dil[c.lang || '?'] = (dil[c.lang || '?'] || 0) + 1; });
     return { sonuc:{ toplam:l.length, bugun_sirasi_gelen:vade, dillere_gore:dil },
-      satirlar:['Toplam kart: ' + l.length, 'Bugün sırası gelen: ' + (vade == null ? 'veri yok' : vade)] };
+      satirlar:[yz('esp.core.kingarac.toplam-kart') + l.length, yz('esp.core.kingarac.bugun-sirasi-gelen') + (vade == null ? 'veri yok' : vade)] };
   }
 
   function yazilar(){
     const l = (S().drafts || []).map(d => ({ baslik:d.title || 'Başlıksız', kelime:String(d.text || '').split(/\s+/).filter(Boolean).length, guncel:String(d.updatedAt || '').slice(0, 10) }));
-    return { sonuc:{ taslaklar:l.slice(0, 30) }, satirlar:l.length ? l.slice(0, 8).map(d => d.baslik + ' · ' + d.kelime + ' kelime') : ['Yazı taslağı yok.'] };
+    return { sonuc:{ taslaklar:l.slice(0, 30) }, satirlar:l.length ? l.slice(0, 8).map(d => d.baslik + ' · ' + d.kelime + ' kelime') : [yz('esp.core.kingarac.yazi-taslagi-yok')] };
   }
 
   function merdiven(){
     const C = ESP.Curriculum;
-    if(!C || !C.overall) return { sonuc:{ kademe:null, etiket:'veri yok' }, satirlar:['Merdiven verisi yok (veri yok).'] };
+    if(!C || !C.overall) return { sonuc:{ kademe:null, etiket:'veri yok' }, satirlar:[yz('esp.core.kingarac.merdiven-verisi-yok-veri-yok')] };
     const ov = C.overall();
     const hepsi = (C.all ? C.all() : []).filter(Boolean).map(lv => ({
       alan:alanAd(lv.disc), kademe:(lv.level || {}).label || '', basamak:(lv.level || {}).short || '',
@@ -164,8 +303,8 @@ ESP.KingArac = (function(){
         olculen_disiplin:ov ? ov.measuredDisciplines : 0,
         disiplinler:hepsi
       },
-      satirlar:yok ? ['Henüz ölçülmüş üretim yok (veri yok).'] : [
-        'Genel kademe: ' + (ov.level || {}).label + ' (%' + ov.mastery + ')',
+      satirlar:yok ? [yz('esp.core.kingarac.henuz-olculmus-uretim-yok-ve')] : [
+        yz('esp.core.kingarac.genel-kademe') + (ov.level || {}).label + ' (%' + ov.mastery + ')',
         ov.measuredDisciplines + '/' + ov.disciplines + ' disiplinde ölçülmüş üretim var.'
       ].concat(hepsi.slice(0, 6).map(d => d.alan + ': ' + d.kademe + ' (%' + d.ustalik + ')'))
     };
@@ -178,7 +317,7 @@ ESP.KingArac = (function(){
     const ozet = l.map(a => ({ id:a.id, tez:a.thesis, durum:a.status, itiraz_sayisi:(a.objections || []).length }));
     return {
       sonuc:{ toplam:(S().args || []).length, filtreli:l.length, argumanlar:ozet.slice(0, 30) },
-      satirlar:l.length ? l.slice(0, 6).map(a => (a.status === 'open' ? 'Açık: ' : 'Kapalı: ') + a.thesis.slice(0, 60)) : ['Sempozyumda kayıtlı tez yok (veri yok).']
+      satirlar:l.length ? l.slice(0, 6).map(a => (a.status === 'open' ? yz('esp.core.kingarac.acik') : yz('esp.core.kingarac.kapali')) + a.thesis.slice(0, 60)) : [yz('esp.core.kingarac.sempozyumda-kayitli-tez-yok')]
     };
   }
 
@@ -188,7 +327,7 @@ ESP.KingArac = (function(){
     const ozet = l.map(e => ({ id:e.id, baslik:e.title, yil:e.year, donem:e.era, bolge:e.region }));
     return {
       sonuc:{ toplam:(S().events || []).length, filtreli:l.length, olaylar:ozet.slice(0, 40) },
-      satirlar:l.length ? l.slice(0, 6).map(e => (e.year != null ? e.year + ': ' : '') + e.title) : ['Kronolojide olay kaydı yok (veri yok).']
+      satirlar:l.length ? l.slice(0, 6).map(e => (e.year != null ? e.year + ': ' : '') + e.title) : [yz('esp.core.kingarac.kronolojide-olay-kaydi-yok-v')]
     };
   }
 
@@ -198,7 +337,7 @@ ESP.KingArac = (function(){
     const ozet = l.map(x => ({ id:x.id, ad:x.name, tur:x.kind, temiz_bpm:x.cleanBpm, hedef_bpm:x.targetBpm }));
     return {
       sonuc:{ toplam:(S().pieces || []).length, filtreli:l.length, parcalar:ozet.slice(0, 30) },
-      satirlar:ozet.length ? ozet.slice(0, 8).map(x => x.ad + ' · ' + (x.tur === 'piece' ? 'parça' : 'teknik') + (x.temiz_bpm ? ' · ' + x.temiz_bpm + ' BPM' : '')) : ['Repertuarda kayıt yok (veri yok).']
+      satirlar:ozet.length ? ozet.slice(0, 8).map(x => x.ad + ' · ' + (x.tur === 'piece' ? 'parça' : 'teknik') + (x.temiz_bpm ? ' · ' + x.temiz_bpm + ' BPM' : '')) : [yz('esp.core.kingarac.repertuarda-kayit-yok-veri-y')]
     };
   }
 
@@ -216,67 +355,67 @@ ESP.KingArac = (function(){
     const l = (S().books || []).filter(b => M().bookStatus && (M().bookStatus(b) || {}).id === 'okunuyor');
     return l.length === 1 ? l[0] : null;
   }
-  const SAYFA_SORU = 'Bu bir kitap sayfası. Sayfadaki metni satır satır, aynen yaz; düzeltme, özet ve yorum ekleme. Okunamayan yere […] koy.';
+  const SAYFA_SORU = yz('esp.core.kingarac.bu-bir-kitap-sayfasi-sayfada');
   async function sayfaOku(f, y){
-    if(!y || typeof y.gorsel !== 'function') return 'Sayfayı okumak için Merkez’in görsel modeli gerekiyor; Merkez açıkken yeniden dene.';
+    if(!y || typeof y.gorsel !== 'function') return yz('esp.core.kingarac.sayfayi-okumak-icin-merkez-i');
     let r = null;
     try{ r = await y.gorsel(SAYFA_SORU, 'gorsel'); }catch(e){ r = null; }
     const metin = r && r.ok ? String(r.text || '').replace(/[ \t]+\n/g, '\n').trim() : '';
-    if(!metin || metin.length < 8) return 'Sayfadan okunabilir bir metin çıkmadı' + (r && r.note ? ' (' + r.note + ')' : '') + '; daha yakından ve düz çek.';
+    if(!metin || metin.length < 8) return yz('esp.core.kingarac.sayfadan-okunabilir-bir-meti') + (r && r.note ? ' (' + r.note + ')' : '') + '; daha yakından ve düz çek.';
     const b = alintiKitabi('');
-    return { metin:'Sayfadan okudum (görsel model, doğrulanmadı).',
-      satirlar:['Bir kelimeyi karta eklemek için «… kelimesini kart yap: anlamı» yaz.'],
+    return { metin:yz('esp.core.kingarac.sayfadan-okudum-gorsel-model'),
+      satirlar:[yz('esp.core.kingarac.bir-kelimeyi-karta-eklemek-i')],
       arac:{ ad:'esp_alinti_ekle', param:Object.assign({ metin:metin.slice(0, 1000) }, b ? { kitap:b.title } : {}) } };
   }
 
   function liste(){
     const temel = [
-      { ad:'esp_gun', tur:'oku', aciklama:'Bir günün ESP çalışma oturumları (alan ve dakika).', ornek:'günün oturumları', anahtar:'entelektüel pratik süresi seans oturum gündelik günlük',
+      { ad:'esp_gun', tur:'oku', aciklama:yz('esp.core.kingarac.bir-gunun-esp-calisma-oturum'), ornek:'günün oturumları', anahtar:'entelektüel pratik süresi seans oturum gündelik günlük',
         parametreler:{ type:'object', properties:{ tarih:{ type:'string', maxLength:10, description:'gün (YYYY-AA-GG); boşsa bugün' } } }, calistir:gun },
-      { ad:'esp_hafta', tur:'oku', aciklama:'Son günlerde hangi alanda kaç dakika çalışıldığı.', ornek:'haftalık süre', anahtar:'haftalık disiplin vakit dağılımı toplam süre saat',
+      { ad:'esp_hafta', tur:'oku', aciklama:yz('esp.core.kingarac.son-gunlerde-hangi-alanda-ka'), ornek:'haftalık süre', anahtar:'haftalık disiplin vakit dağılımı toplam süre saat',
         parametreler:{ type:'object', properties:{ gun:{ type:'integer', minimum:1, maximum:60 } } }, calistir:hafta },
-      { ad:'esp_kitaplar', tur:'oku', aciklama:'Kütüphanedeki kitaplar ve durumları (okunuyor, bitti, başlanmadı).', ornek:'kütüphanedeki eserler', anahtar:'okuduklarım bitirdiklerim liste kütüphanemdeki eserler',
+      { ad:'esp_kitaplar', tur:'oku', aciklama:yz('esp.core.kingarac.kutuphanedeki-kitaplar-ve-du'), ornek:'kütüphanedeki eserler', anahtar:'okuduklarım bitirdiklerim liste kütüphanemdeki eserler',
         calistir:kitaplar },
-      { ad:'esp_kartlar', tur:'oku', aciklama:'Dil kartları: toplam, bugün sırası gelen, dillere göre.', ornek:'kartlarımın durumu',
+      { ad:'esp_kartlar', tur:'oku', aciklama:yz('esp.core.kingarac.dil-kartlari-toplam-bugun-si'), ornek:'kartlarımın durumu',
         calistir:kartlar },
-      { ad:'esp_yazilar', tur:'oku', aciklama:'Yazı taslakları ve kelime sayıları.', ornek:'yazı taslaklarım', calistir:yazilar },
-      { ad:'esp_merdiven', tur:'oku', aciklama:'ESP merdiveni: yedi disiplinin kademesi, ustalık yüzdesi ve ölçülen disiplinler.', ornek:'seviyem nedir',
+      { ad:'esp_yazilar', tur:'oku', aciklama:yz('esp.core.kingarac.yazi-taslaklari-ve-kelime-sa'), ornek:'yazı taslaklarım', calistir:yazilar },
+      { ad:'esp_merdiven', tur:'oku', aciklama:yz('esp.core.kingarac.esp-merdiveni-yedi-disiplini'), ornek:'seviyem nedir',
         parametreler:{ type:'object', properties:{} }, calistir:merdiven },
-      { ad:'esp_argumanlar', tur:'oku', aciklama:'Sempozyumdaki felsefi tezler ve argümanlar (açık ve kapalı tezler).', ornek:'açık tezlerim',
+      { ad:'esp_argumanlar', tur:'oku', aciklama:yz('esp.core.kingarac.sempozyumdaki-felsefi-tezler'), ornek:'açık tezlerim',
         parametreler:{ type:'object', properties:{ durum:{ type:'string', enum:['acik', 'kapali', 'hepsi'], description:'tez durumu' } } }, calistir:argumanlar },
-      { ad:'esp_olaylar', tur:'oku', aciklama:'Kronolojideki tarih olayları (yıl, dönem ve bölge).', ornek:'kronolojide ne var',
+      { ad:'esp_olaylar', tur:'oku', aciklama:yz('esp.core.kingarac.kronolojideki-tarih-olaylari'), ornek:'kronolojide ne var',
         parametreler:{ type:'object', properties:{ donem:{ type:'string', maxLength:30, description:'tarih dönemi' } } }, calistir:olaylar },
-      { ad:'esp_repertuvar', tur:'oku', aciklama:'Müzik stüdyosundaki parça ve teknikler (temiz BPM eşikleri).', ornek:'repertuarım',
+      { ad:'esp_repertuvar', tur:'oku', aciklama:yz('esp.core.kingarac.muzik-studyosundaki-parca-ve'), ornek:'repertuarım',
         parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['piece', 'technique'], description:'parça veya teknik' } } }, calistir:repertuvar },
 
-      { ad:'esp_kart_ekle', tur:'yaz', ozetAd:'Dil kartı ekle', ornek:'pragmatik kelimesini kart yap: faydacı',
-        aciklama:'Dil destesine yeni kelime kartı ekler (ön yüz ve karşılığı).',
+      { ad:'esp_kart_ekle', tur:'yaz', ozetAd:yz('esp.core.kingarac.dil-karti-ekle'), ornek:'pragmatik kelimesini kart yap: faydacı',
+        aciklama:yz('esp.core.kingarac.dil-destesine-yeni-kelime-ka'),
         parametreler:{ type:'object', properties:{ on:{ type:'string', maxLength:120, description:'kelime ya da ifade' },
           arka:{ type:'string', maxLength:240, description:'karşılığı' }, dil:{ type:'string', enum:['en', 'de', 'fr', 'es', 'it', 'ru', 'ar', 'ja'] } },
           required:['on', 'arka'] },
-        onizle:p => ({ metin:'Dil destesine kart eklenecek: «' + p.on + '» → «' + p.arka + '»' + (p.dil ? ' (' + p.dil + ')' : '') + '.' }),
+        onizle:p => ({ metin:yz('esp.core.kingarac.dil-destesine-kart-eklenecek') + p.on + '» → «' + p.arka + '»' + (p.dil ? ' (' + p.dil + ')' : '') + '.' }),
         uygula:async p => {
           const c = await M().saveCard(M().newCard({ front:p.on, back:p.arka, lang:p.dil || (S().ui && S().ui.deckLang) || 'en' }));
           render();
-          return { metin:'Kartı ekledim.', geriAl:c && c.id ? async () => { await M().deleteCard(c.id); render(); } : null };
+          return { metin:yz('esp.core.kingarac.karti-ekledim'), geriAl:c && c.id ? async () => { await M().deleteCard(c.id); render(); } : null };
         } },
-      { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:'Alıntı kaydet', ornek:'alıntı: Düşünüyorum öyleyse varım',
-        aciklama:'Bir kitaptan alıntıyı ya da kitap notunu kaydeder; kitap verilmezse okunmakta olan tek kitaba bağlanır.',
+      { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:yz('esp.core.kingarac.alinti-kaydet'), ornek:'alıntı: Düşünüyorum öyleyse varım',
+        aciklama:yz('esp.core.kingarac.bir-kitaptan-alintiyi-ya-da'),
         parametreler:{ type:'object', properties:{ metin:{ type:'string', maxLength:1000, description:'alıntının metni, aynen' },
           kitap:{ type:'string', maxLength:120, description:'kitabın adı ya da adının bir parçası' } }, required:['metin'] },
         onizle:p => {
           const b = alintiKitabi(p.kitap);
           if(p.kitap && !b) return { hata:'kütüphanede «' + p.kitap + '» adıyla tek bir kitap bulamadım' };
-          return { metin:(b ? '«' + b.title + '» için alıntı' : 'Kitaba bağlanmamış not') + ' kaydedilecek.', satirlar:[String(p.metin).slice(0, 280) + (p.metin.length > 280 ? '…' : '')] };
+          return { metin:(b ? '«' + b.title + '» için alıntı' : yz('esp.core.kingarac.kitaba-baglanmamis-not')) + ' kaydedilecek.', satirlar:[String(p.metin).slice(0, 280) + (p.metin.length > 280 ? '…' : '')] };
         },
         uygula:async p => {
           const b = alintiKitabi(p.kitap);
           const n = await M().saveNote(M().newNote({ text:p.metin, bookId:b ? b.id : null }));
           render();
-          return { metin:b ? '«' + b.title + '» için alıntıyı kaydettim.' : 'Notu kaydettim.', geriAl:n && n.id ? async () => { await M().deleteNote(n.id); render(); } : null };
+          return { metin:b ? '«' + b.title + '» için alıntıyı kaydettim.' : yz('esp.core.kingarac.notu-kaydettim'), geriAl:n && n.id ? async () => { await M().deleteNote(n.id); render(); } : null };
         } },
-      { ad:'esp_kitap_bitir', tur:'yaz', ozetAd:'Kitabı bitir', ornek:'Suç ve Ceza’yı bitirdim',
-        aciklama:'Kütüphanedeki bir kitabı bugün bitmiş olarak işaretler.',
+      { ad:'esp_kitap_bitir', tur:'yaz', ozetAd:yz('esp.core.kingarac.kitabi-bitir'), ornek:yz('esp.core.kingarac.suc-ve-ceza-yi-bitirdim'),
+        aciklama:yz('esp.core.kingarac.kutuphanedeki-bir-kitabi-bug'),
         parametreler:{ type:'object', properties:{ kitap:{ type:'string', maxLength:120, description:'kitabın adı ya da adının bir parçası' } }, required:['kitap'] },
         onizle:p => { const b = kitapBul(p.kitap);
           if(!b) return { hata:'kütüphanede «' + p.kitap + '» adıyla tek bir kitap bulamadım' };
@@ -284,14 +423,14 @@ ESP.KingArac = (function(){
           return { metin:'«' + b.title + '» bugün bitmiş olarak işaretlenecek.' }; },
         uygula:async p => {
           const b = kitapBul(p.kitap);
-          if(!b || b.finishedAt) return { ok:false, metin:'Kitap bulunamadı ya da zaten bitmiş.' };
+          if(!b || b.finishedAt) return { ok:false, metin:yz('esp.core.kingarac.kitap-bulunamadi-ya-da-zaten') };
           await M().saveBook(Object.assign({}, b, { finishedAt:U().todayISO() }));
           render();
           return { metin:'«' + b.title + '» bitti olarak işaretlendi.', geriAl:async () => { await M().saveBook(Object.assign({}, b, { finishedAt:null })); render(); } };
         } },
 
-      { ad:'esp_oturum', tur:'yaz', ozetAd:'Çalışma oturumunu güncelle veya sil',
-        aciklama:'ESP çalışma oturumunu günceller ya da siler.',
+      { ad:'esp_oturum', tur:'yaz', ozetAd:yz('esp.core.kingarac.calisma-oturumunu-guncelle-v'),
+        aciklama:yz('esp.core.kingarac.esp-calisma-oturumunu-guncel'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'oturum kimliği' },
@@ -321,7 +460,7 @@ ESP.KingArac = (function(){
             await M().deleteSession(d, s.id);
             render();
             return {
-              metin: 'Oturumu sildim.',
+              metin: yz('esp.core.kingarac.oturumu-sildim'),
               geriAl:async () => {
                 const day = M().ensureDay(d);
                 day.sessions.push(M().normSession(eski));
@@ -337,7 +476,7 @@ ESP.KingArac = (function(){
           await M().updateSession(d, s.id, patch);
           render();
           return {
-            metin: 'Oturumu güncelledim.',
+            metin: yz('esp.core.kingarac.oturumu-guncelledim'),
             geriAl:async () => {
               await M().updateSession(d, s.id, eski);
               render();
@@ -345,8 +484,8 @@ ESP.KingArac = (function(){
           };
         } },
 
-      { ad:'esp_arguman', tur:'yaz', ozetAd:'Tez ekle, güncelle veya sil',
-        aciklama:'Sempozyuma tez ekler, günceller ya da siler.',
+      { ad:'esp_arguman', tur:'yaz', ozetAd:yz('esp.core.kingarac.tez-ekle-guncelle-veya-sil'),
+        aciklama:yz('esp.core.kingarac.sempozyuma-tez-ekler-guncell'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'tez kimliği' },
@@ -358,13 +497,13 @@ ESP.KingArac = (function(){
         onizle:p => {
           if(p.islem === 'ekle'){
             if(!p.tez) return { hata: 'tez cümlesi gerekir' };
-            return { metin: 'Yeni tez eklenecek: «' + p.tez + '»' };
+            return { metin: yz('esp.core.kingarac.yeni-tez-eklenecek') + p.tez + '»' };
           }
           const bul = adlaBul(S().args, p.id, 'thesis', p.tez, 'tez');
           if(bul.hata) return bul;
           const a = bul.oge;
-          if(p.islem === 'sil') return { metin: 'Tez silinecek: «' + a.thesis + '»' };
-          return { metin: 'Tez güncellenecek: «' + a.thesis + '»' };
+          if(p.islem === 'sil') return { metin: yz('esp.core.kingarac.tez-silinecek') + a.thesis + '»' };
+          return { metin: yz('esp.core.kingarac.tez-guncellenecek') + a.thesis + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
@@ -376,7 +515,7 @@ ESP.KingArac = (function(){
             }));
             render();
             return {
-              metin: 'Tezi ekledim: «' + a.thesis + '».',
+              metin: yz('esp.core.kingarac.tezi-ekledim') + a.thesis + '».',
               geriAl:async () => { await M().deleteArgument(a.id); render(); }
             };
           }
@@ -388,7 +527,7 @@ ESP.KingArac = (function(){
             await M().deleteArgument(a.id);
             render();
             return {
-              metin: 'Tezi sildim.',
+              metin: yz('esp.core.kingarac.tezi-sildim'),
               geriAl:async () => { await M().saveArgument(eski); render(); }
             };
           }
@@ -400,13 +539,13 @@ ESP.KingArac = (function(){
           await M().saveArgument(guncel);
           render();
           return {
-            metin: 'Tezi güncelledim.',
+            metin: yz('esp.core.kingarac.tezi-guncelledim'),
             geriAl:async () => { await M().saveArgument(eski); render(); }
           };
         } },
 
-      { ad:'esp_dosya', tur:'yaz', ozetAd:'Ek dosya ekle veya sil',
-        aciklama:'Bölüme ek dosya (not, belge, bağlantı, ses) ekler ya da siler.',
+      { ad:'esp_dosya', tur:'yaz', ozetAd:yz('esp.core.kingarac.ek-dosya-ekle-veya-sil'),
+        aciklama:yz('esp.core.kingarac.bolume-ek-dosya-not-belge'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'dosya kimliği' },
@@ -421,15 +560,15 @@ ESP.KingArac = (function(){
           if(p.islem === 'ekle'){
             if(!p.alan) return { hata: 'bölüm (alan) belirtmelisin' };
             if(!p.baslik && !p.metin) return { hata: 'başlık ya da metin gerekir' };
-            return { metin: 'Ek dosya kaydedilecek: «' + (p.baslik || p.metin) + '» (' + alanAd(p.alan) + ').' };
+            return { metin: yz('esp.core.kingarac.ek-dosya-kaydedilecek') + (p.baslik || p.metin) + '» (' + alanAd(p.alan) + ').' };
           }
           const bul = adlaBul(S().assets, p.id, 'title', p.baslik, 'dosya');
           if(bul.hata) return bul;
-          return { metin: 'Ek dosya silinecek: «' + bul.oge.title + '»' };
+          return { metin: yz('esp.core.kingarac.ek-dosya-silinecek') + bul.oge.title + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
-            if(!p.alan) return { ok:false, metin:'Bölüm (alan) belirtmelisin.' };
+            if(!p.alan) return { ok:false, metin:yz('esp.core.kingarac.bolum-alan-belirtmelisin') };
             const res = await M().saveAsset(M().newAsset({
               disc: p.alan,
               kind: p.tur || 'note',
@@ -442,7 +581,7 @@ ESP.KingArac = (function(){
             const a = res.asset;
             render();
             return {
-              metin: 'Ek dosyayı kaydettim.',
+              metin: yz('esp.core.kingarac.ek-dosyayi-kaydettim'),
               geriAl:async () => { await M().deleteAsset(a.id); render(); }
             };
           }
@@ -453,13 +592,13 @@ ESP.KingArac = (function(){
           await M().deleteAsset(a.id);
           render();
           return {
-            metin: 'Ek dosyayı sildim.',
+            metin: yz('esp.core.kingarac.ek-dosyayi-sildim'),
             geriAl:async () => { await M().saveAsset(eski); render(); }
           };
         } },
 
-      { ad:'esp_eser', tur:'yaz', ozetAd:'Parça veya teknik ekle, güncelle veya sil',
-        aciklama:'Müzik stüdyosuna parça veya teknik ekler, günceller ya da siler.',
+      { ad:'esp_eser', tur:'yaz', ozetAd:yz('esp.core.kingarac.parca-veya-teknik-ekle-gunce'),
+        aciklama:yz('esp.core.kingarac.muzik-studyosuna-parca-veya'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'eser kimliği' },
@@ -471,13 +610,13 @@ ESP.KingArac = (function(){
         onizle:p => {
           if(p.islem === 'ekle'){
             if(!p.ad) return { hata: 'eser adı gerekir' };
-            return { metin: 'Yeni parça/teknik eklenecek: «' + p.ad + '»' + (p.hedef_bpm ? ' (Hedef: ' + p.hedef_bpm + ' BPM)' : '') + '.' };
+            return { metin: yz('esp.core.kingarac.yeni-parca-teknik-eklenecek') + p.ad + '»' + (p.hedef_bpm ? ' (Hedef: ' + p.hedef_bpm + ' BPM)' : '') + '.' };
           }
           const bul = adlaBul(S().pieces, p.id, 'name', p.ad, 'eser');
           if(bul.hata) return bul;
           const pc = bul.oge;
-          if(p.islem === 'sil') return { metin: 'Parça/teknik silinecek: «' + pc.name + '»' };
-          return { metin: 'Parça/teknik güncellenecek: «' + pc.name + '»' };
+          if(p.islem === 'sil') return { metin: yz('esp.core.kingarac.parca-teknik-silinecek') + pc.name + '»' };
+          return { metin: yz('esp.core.kingarac.parca-teknik-guncellenecek') + pc.name + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
@@ -489,7 +628,7 @@ ESP.KingArac = (function(){
             }));
             render();
             return {
-              metin: 'Parçayı ekledim: «' + pc.name + '».',
+              metin: yz('esp.core.kingarac.parcayi-ekledim') + pc.name + '».',
               geriAl:async () => { await M().deletePiece(pc.id); render(); }
             };
           }
@@ -501,7 +640,7 @@ ESP.KingArac = (function(){
             await M().deletePiece(pc.id);
             render();
             return {
-              metin: 'Parçayı sildim.',
+              metin: yz('esp.core.kingarac.parcayi-sildim'),
               geriAl:async () => { await M().savePiece(eski); render(); }
             };
           }
@@ -513,13 +652,13 @@ ESP.KingArac = (function(){
           await M().savePiece(guncel);
           render();
           return {
-            metin: 'Parçayı güncelledim.',
+            metin: yz('esp.core.kingarac.parcayi-guncelledim'),
             geriAl:async () => { await M().savePiece(eski); render(); }
           };
         } },
 
-      { ad:'esp_hatirlatma', tur:'yaz', ozetAd:'Hatırlatıcı ekle veya sil',
-        aciklama:'Disipline bağlı hatırlatıcı ekler ya da siler.',
+      { ad:'esp_hatirlatma', tur:'yaz', ozetAd:yz('esp.core.kingarac.hatirlatici-ekle-veya-sil'),
+        aciklama:yz('esp.core.kingarac.disipline-bagli-hatirlatici'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'hatırlatıcı kimliği' },
@@ -532,15 +671,15 @@ ESP.KingArac = (function(){
           if(p.islem === 'ekle'){
             if(!p.alan) return { hata: 'bölüm (alan) belirtmelisin' };
             if(!p.metin) return { hata: 'hatırlatma metni gerekir' };
-            return { metin: 'Hatırlatıcı eklenecek: «' + p.metin + '» (' + alanAd(p.alan) + (p.tarih ? ', ' + p.tarih : '') + ').' };
+            return { metin: yz('esp.core.kingarac.hatirlatici-eklenecek') + p.metin + '» (' + alanAd(p.alan) + (p.tarih ? ', ' + p.tarih : '') + ').' };
           }
           const bul = adlaBul(S().reminders, p.id, 'text', p.metin, 'hatırlatıcı');
           if(bul.hata) return bul;
-          return { metin: 'Hatırlatıcı silinecek: «' + bul.oge.text + '»' };
+          return { metin: yz('esp.core.kingarac.hatirlatici-silinecek') + bul.oge.text + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
-            if(!p.alan) return { ok:false, metin:'Bölüm (alan) belirtmelisin.' };
+            if(!p.alan) return { ok:false, metin:yz('esp.core.kingarac.bolum-alan-belirtmelisin') };
             const res = await M().saveReminder(M().newReminder({
               disc: p.alan,
               text: p.metin,
@@ -551,7 +690,7 @@ ESP.KingArac = (function(){
             const r = res.reminder;
             render();
             return {
-              metin: 'Hatırlatıcıyı kaydettim.',
+              metin: yz('esp.core.kingarac.hatirlaticiyi-kaydettim'),
               geriAl:async () => { await M().deleteReminder(r.id); render(); }
             };
           }
@@ -562,13 +701,13 @@ ESP.KingArac = (function(){
           await M().deleteReminder(r.id);
           render();
           return {
-            metin: 'Hatırlatıcıyı sildim.',
+            metin: yz('esp.core.kingarac.hatirlaticiyi-sildim'),
             geriAl:async () => { await M().saveReminder(eski); render(); }
           };
         } },
 
-      { ad:'esp_hedef', tur:'yaz', ozetAd:'Hedef ekle veya sil',
-        aciklama:'Zamana bağlı hedef ekler ya da siler.',
+      { ad:'esp_hedef', tur:'yaz', ozetAd:yz('esp.core.kingarac.hedef-ekle-veya-sil'),
+        aciklama:yz('esp.core.kingarac.zamana-bagli-hedef-ekler-ya'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'hedef kimliği' },
@@ -581,15 +720,15 @@ ESP.KingArac = (function(){
           if(p.islem === 'ekle'){
             if(!p.alan) return { hata: 'bölüm (alan) belirtmelisin' };
             if(!p.hedef) return { hata: 'hedef tanımı gerekir' };
-            return { metin: 'Hedef eklenecek: «' + p.hedef + '» (' + alanAd(p.alan) + (p.tarih ? ', ' + p.tarih : '') + ').' };
+            return { metin: yz('esp.core.kingarac.hedef-eklenecek') + p.hedef + '» (' + alanAd(p.alan) + (p.tarih ? ', ' + p.tarih : '') + ').' };
           }
           const bul = adlaBul(S().goals, p.id, 'label', p.hedef, 'hedef');
           if(bul.hata) return bul;
-          return { metin: 'Hedef silinecek: «' + bul.oge.label + '»' };
+          return { metin: yz('esp.core.kingarac.hedef-silinecek') + bul.oge.label + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
-            if(!p.alan) return { ok:false, metin:'Bölüm (alan) belirtmelisin.' };
+            if(!p.alan) return { ok:false, metin:yz('esp.core.kingarac.bolum-alan-belirtmelisin') };
             const g = await M().saveGoal(M().newGoal({
               disc: p.alan,
               label: p.hedef,
@@ -598,7 +737,7 @@ ESP.KingArac = (function(){
             }));
             render();
             return {
-              metin: 'Hedefi kaydettim.',
+              metin: yz('esp.core.kingarac.hedefi-kaydettim'),
               geriAl:async () => { await M().deleteGoal(g.id); render(); }
             };
           }
@@ -609,13 +748,13 @@ ESP.KingArac = (function(){
           await M().deleteGoal(g.id);
           render();
           return {
-            metin: 'Hedefi sildim.',
+            metin: yz('esp.core.kingarac.hedefi-sildim'),
             geriAl:async () => { await M().saveGoal(eski); render(); }
           };
         } },
 
-      { ad:'esp_karar_kapat', tur:'yaz', ozetAd:'Kararı kapat',
-        aciklama:'Ofiste alınan açık bir kararı sonuçlandırarak kapatır.',
+      { ad:'esp_karar_kapat', tur:'yaz', ozetAd:yz('esp.core.kingarac.karari-kapat'),
+        aciklama:yz('esp.core.kingarac.ofiste-alinan-acik-bir-karar'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['kapat'], description:'işlem' },
           id:{ type:'string', maxLength:40, description:'karar kimliği' },
@@ -625,23 +764,23 @@ ESP.KingArac = (function(){
         onizle:p => {
           const bul = kararBul(p);
           if(bul.hata) return bul;
-          return { metin: 'Karar kapatılacak: «' + bul.oge.text + '»' + (p && p.sonuc ? ' (Sonuç: ' + p.sonuc + ')' : '') + '.' };
+          return { metin: yz('esp.core.kingarac.karar-kapatilacak') + bul.oge.text + '»' + (p && p.sonuc ? ' (Sonuç: ' + p.sonuc + ')' : '') + '.' };
         },
         uygula:async p => {
           const bul = kararBul(p);
           if(bul.hata) return { ok:false, metin: bul.hata };
           const d = bul.oge;
           const eski = Object.assign({}, d);
-          await M().closeDecision(d.id, (p && p.sonuc) || 'King ile kapatıldı');
+          await M().closeDecision(d.id, (p && p.sonuc) || yz('esp.core.kingarac.king-ile-kapatildi'));
           render();
           return {
-            metin: 'Kararı kapattım: «' + d.text + '».',
+            metin: yz('esp.core.kingarac.karari-kapattim') + d.text + '».',
             geriAl:async () => { await M().saveDecision(eski); render(); }
           };
         } },
 
-      { ad:'esp_kart_sil', tur:'yaz', ozetAd:'Dil kartını sil',
-        aciklama:'Dil destesinden kelime kartını siler.',
+      { ad:'esp_kart_sil', tur:'yaz', ozetAd:yz('esp.core.kingarac.dil-kartini-sil'),
+        aciklama:yz('esp.core.kingarac.dil-destesinden-kelime-karti'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['sil'], description:'işlem' },
           id:{ type:'string', maxLength:40, description:'kart kimliği' },
@@ -651,7 +790,7 @@ ESP.KingArac = (function(){
           const bul = adlaBul(S().cards, p && p.id, 'front', p && p.on, 'kart');
           if(bul.hata) return bul;
           const c = bul.oge;
-          return { metin: 'Dil kartı silinecek: «' + c.front + '» → «' + c.back + '»' + (c.lang ? ' (' + c.lang + ')' : '') + '.' };
+          return { metin: yz('esp.core.kingarac.dil-karti-silinecek') + c.front + '» → «' + c.back + '»' + (c.lang ? ' (' + c.lang + ')' : '') + '.' };
         },
         uygula:async p => {
           const bul = adlaBul(S().cards, p && p.id, 'front', p && p.on, 'kart');
@@ -661,13 +800,13 @@ ESP.KingArac = (function(){
           await M().deleteCard(c.id);
           render();
           return {
-            metin: 'Kartı sildim: «' + c.front + '».',
+            metin: yz('esp.core.kingarac.karti-sildim') + c.front + '».',
             geriAl:async () => { await M().saveCard(eski); render(); }
           };
         } },
 
-      { ad:'esp_kaynak', tur:'yaz', ozetAd:'Kaynak ekle veya sil',
-        aciklama:'Tarih masasına kaynak ekler ya da siler.',
+      { ad:'esp_kaynak', tur:'yaz', ozetAd:yz('esp.core.kingarac.kaynak-ekle-veya-sil'),
+        aciklama:yz('esp.core.kingarac.tarih-masasina-kaynak-ekler'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'kaynak kimliği' },
@@ -679,11 +818,11 @@ ESP.KingArac = (function(){
         onizle:p => {
           if(p.islem === 'ekle'){
             if(!p.baslik) return { hata: 'kaynak başlığı gerekir' };
-            return { metin: 'Tarih kaynağı eklenecek: «' + p.baslik + '»' + (p.yazar ? ' — ' + p.yazar : '') + '.' };
+            return { metin: yz('esp.core.kingarac.tarih-kaynagi-eklenecek') + p.baslik + '»' + (p.yazar ? ' — ' + p.yazar : '') + '.' };
           }
           const bul = adlaBul(S().sources, p.id, 'title', p.baslik, 'kaynak');
           if(bul.hata) return bul;
-          return { metin: 'Tarih kaynağı silinecek: «' + bul.oge.title + '»' };
+          return { metin: yz('esp.core.kingarac.tarih-kaynagi-silinecek') + bul.oge.title + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
@@ -697,7 +836,7 @@ ESP.KingArac = (function(){
             const s = res.source;
             render();
             return {
-              metin: 'Kaynağı kaydettim.',
+              metin: yz('esp.core.kingarac.kaynagi-kaydettim'),
               geriAl:async () => { await M().deleteSource(s.id); render(); }
             };
           }
@@ -708,13 +847,13 @@ ESP.KingArac = (function(){
           await M().deleteSource(s.id);
           render();
           return {
-            metin: 'Kaynağı sildim.',
+            metin: yz('esp.core.kingarac.kaynagi-sildim'),
             geriAl:async () => { await M().saveSource(eski); render(); }
           };
         } },
 
-      { ad:'esp_kitap', tur:'yaz', ozetAd:'Kitabı güncelle veya sil',
-        aciklama:'Kütüphanedeki kitabı günceller ya da siler (eklemek için eylem_kitap_ekle eylemini kullan).',
+      { ad:'esp_kitap', tur:'yaz', ozetAd:yz('esp.core.kingarac.kitabi-guncelle-veya-sil'),
+        aciklama:yz('esp.core.kingarac.kutuphanedeki-kitabi-guncell'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'kitap kimliği' },
@@ -727,11 +866,11 @@ ESP.KingArac = (function(){
           const bul = adlaBul(S().books, p.id, 'title', p.ad, 'kitap');
           if(bul.hata) return bul;
           const b = bul.oge;
-          if(p.islem === 'sil') return { metin: 'Kitap silinecek: «' + b.title + '»' };
-          return { metin: 'Kitap güncellenecek: «' + b.title + '»' };
+          if(p.islem === 'sil') return { metin: yz('esp.core.kingarac.kitap-silinecek') + b.title + '»' };
+          return { metin: yz('esp.core.kingarac.kitap-guncellenecek') + b.title + '»' };
         },
         uygula:async p => {
-          if(p.islem === 'ekle') return { ok:false, metin:'Kitap eklemek için eylem_kitap_ekle eylemi kullanılmalı.' };
+          if(p.islem === 'ekle') return { ok:false, metin:yz('esp.core.kingarac.kitap-eklemek-icin-eylem-kit') };
           const bul = adlaBul(S().books, p.id, 'title', p.ad, 'kitap');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const b = bul.oge;
@@ -740,7 +879,7 @@ ESP.KingArac = (function(){
             await M().deleteBook(b.id);
             render();
             return {
-              metin: 'Kitabı sildim.',
+              metin: yz('esp.core.kingarac.kitabi-sildim'),
               geriAl:async () => { await M().saveBook(eski); render(); }
             };
           }
@@ -751,13 +890,13 @@ ESP.KingArac = (function(){
           await M().saveBook(guncel);
           render();
           return {
-            metin: 'Kitabı güncelledim.',
+            metin: yz('esp.core.kingarac.kitabi-guncelledim'),
             geriAl:async () => { await M().saveBook(eski); render(); }
           };
         } },
 
-      { ad:'esp_not_sil', tur:'yaz', ozetAd:'Notu sil',
-        aciklama:'Kütüphanedeki bir atomik notu veya alıntıyı siler.',
+      { ad:'esp_not_sil', tur:'yaz', ozetAd:yz('esp.core.kingarac.notu-sil'),
+        aciklama:yz('esp.core.kingarac.kutuphanedeki-bir-atomik-not'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['sil'], description:'işlem' },
           id:{ type:'string', maxLength:40, description:'not kimliği' },
@@ -767,7 +906,7 @@ ESP.KingArac = (function(){
           const bul = adlaBul(S().notes, p && p.id, 'text', p && p.metin, 'not');
           if(bul.hata) return bul;
           const n = bul.oge;
-          return { metin: 'Not silinecek: «' + n.text.slice(0, 100) + (n.text.length > 100 ? '…' : '') + '»' };
+          return { metin: yz('esp.core.kingarac.not-silinecek') + n.text.slice(0, 100) + (n.text.length > 100 ? '…' : '') + '»' };
         },
         uygula:async p => {
           const bul = adlaBul(S().notes, p && p.id, 'text', p && p.metin, 'not');
@@ -777,13 +916,13 @@ ESP.KingArac = (function(){
           await M().deleteNote(n.id);
           render();
           return {
-            metin: 'Notu sildim.',
+            metin: yz('esp.core.kingarac.notu-sildim'),
             geriAl:async () => { await M().saveNote(eski); render(); }
           };
         } },
 
-      { ad:'esp_olay', tur:'yaz', ozetAd:'Tarih olayı ekle, güncelle veya sil',
-        aciklama:'Kronolojiye tarih olayı ekler, günceller ya da siler.',
+      { ad:'esp_olay', tur:'yaz', ozetAd:yz('esp.core.kingarac.tarih-olayi-ekle-guncelle-ve'),
+        aciklama:yz('esp.core.kingarac.kronolojiye-tarih-olayi-ekle'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'olay kimliği' },
@@ -797,13 +936,13 @@ ESP.KingArac = (function(){
           if(p.islem === 'ekle'){
             if(!p.baslik) return { hata: 'olay başlığı gerekir' };
             if(p.yil == null) return { hata: 'olay yılı gerekir' };
-            return { metin: 'Tarih olayı eklenecek: «' + p.baslik + '» (' + p.yil + ').' };
+            return { metin: yz('esp.core.kingarac.tarih-olayi-eklenecek') + p.baslik + '» (' + p.yil + ').' };
           }
           const bul = adlaBul(S().events, p.id, 'title', p.baslik, 'olay');
           if(bul.hata) return bul;
           const e = bul.oge;
-          if(p.islem === 'sil') return { metin: 'Tarih olayı silinecek: «' + e.title + '»' };
-          return { metin: 'Tarih olayı güncellenecek: «' + e.title + '»' };
+          if(p.islem === 'sil') return { metin: yz('esp.core.kingarac.tarih-olayi-silinecek') + e.title + '»' };
+          return { metin: yz('esp.core.kingarac.tarih-olayi-guncellenecek') + e.title + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
@@ -818,7 +957,7 @@ ESP.KingArac = (function(){
             const e = res.event;
             render();
             return {
-              metin: 'Olayı kaydettim.',
+              metin: yz('esp.core.kingarac.olayi-kaydettim'),
               geriAl:async () => { await M().deleteEvent(e.id); render(); }
             };
           }
@@ -830,7 +969,7 @@ ESP.KingArac = (function(){
             await M().deleteEvent(e.id);
             render();
             return {
-              metin: 'Olayı sildim.',
+              metin: yz('esp.core.kingarac.olayi-sildim'),
               geriAl:async () => { await M().saveEvent(eski); render(); }
             };
           }
@@ -844,13 +983,13 @@ ESP.KingArac = (function(){
           if(!res.ok) return { ok:false, metin: res.error || 'Güncellenemedi.' };
           render();
           return {
-            metin: 'Olayı güncelledim.',
+            metin: yz('esp.core.kingarac.olayi-guncelledim'),
             geriAl:async () => { await M().saveEvent(eski); render(); }
           };
         } },
 
-      { ad:'esp_ses_kaydi', tur:'yaz', ozetAd:'Diksiyon ölçümü ekle veya sil',
-        aciklama:'Diksiyon çalışma ölçümünü (süre, kelime, hata) kaydeder ya da siler.',
+      { ad:'esp_ses_kaydi', tur:'yaz', ozetAd:yz('esp.core.kingarac.diksiyon-olcumu-ekle-veya-si'),
+        aciklama:yz('esp.core.kingarac.diksiyon-calisma-olcumunu-su'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'kayıt kimliği' },
@@ -862,12 +1001,12 @@ ESP.KingArac = (function(){
         }, required:['islem'] },
         onizle:p => {
           if(p.islem === 'ekle'){
-            return { metin: 'Diksiyon ölçüm kaydı eklenecek: ' + (p.saniye ? p.saniye + ' sn' : '') + (p.kelime ? ' · ' + p.kelime + ' kelime' : '') + (p.hata != null ? ' · ' + p.hata + ' hata' : '') + '.' };
+            return { metin: yz('esp.core.kingarac.diksiyon-olcum-kaydi-eklenec') + (p.saniye ? p.saniye + ' sn' : '') + (p.kelime ? ' · ' + p.kelime + ' kelime' : '') + (p.hata != null ? ' · ' + p.hata + ' hata' : '') + '.' };
           }
           const bul = kayitBul(p);
           if(bul.hata) return bul;
           const r = bul.oge;
-          return { metin: 'Diksiyon ölçüm kaydı silinecek: ' + r.date + (r.seconds ? ' · ' + r.seconds + ' sn' : '') + '.' };
+          return { metin: yz('esp.core.kingarac.diksiyon-olcum-kaydi-silinec') + r.date + (r.seconds ? ' · ' + r.seconds + ' sn' : '') + '.' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
@@ -883,7 +1022,7 @@ ESP.KingArac = (function(){
             }));
             render();
             return {
-              metin: 'Diksiyon ölçümünü kaydettim.',
+              metin: yz('esp.core.kingarac.diksiyon-olcumunu-kaydettim'),
               geriAl:async () => { await M().deleteRecording(rec.id); render(); }
             };
           }
@@ -894,13 +1033,13 @@ ESP.KingArac = (function(){
           await M().deleteRecording(r.id);
           render();
           return {
-            metin: 'Diksiyon ölçümünü sildim.',
+            metin: yz('esp.core.kingarac.diksiyon-olcumunu-sildim'),
             geriAl:async () => { await M().saveRecording(eski); render(); }
           };
         } },
 
-      { ad:'esp_taslak', tur:'yaz', ozetAd:'Yazı taslağı ekle, güncelle veya sil',
-        aciklama:'Yazı laboratuvarına taslak ekler, günceller ya da siler.',
+      { ad:'esp_taslak', tur:'yaz', ozetAd:yz('esp.core.kingarac.yazi-taslagi-ekle-guncelle-v'),
+        aciklama:yz('esp.core.kingarac.yazi-laboratuvarina-taslak-e'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'taslak kimliği' },
@@ -910,13 +1049,13 @@ ESP.KingArac = (function(){
         onizle:p => {
           if(p.islem === 'ekle'){
             if(!p.baslik) return { hata: 'taslak başlığı gerekir' };
-            return { metin: 'Yazı taslağı eklenecek: «' + p.baslik + '»' };
+            return { metin: yz('esp.core.kingarac.yazi-taslagi-eklenecek') + p.baslik + '»' };
           }
           const bul = adlaBul(S().drafts, p.id, 'title', p.baslik, 'taslak');
           if(bul.hata) return bul;
           const d = bul.oge;
-          if(p.islem === 'sil') return { metin: 'Yazı taslağı silinecek: «' + d.title + '»' };
-          return { metin: 'Yazı taslağı güncellenecek: «' + d.title + '»' };
+          if(p.islem === 'sil') return { metin: yz('esp.core.kingarac.yazi-taslagi-silinecek') + d.title + '»' };
+          return { metin: yz('esp.core.kingarac.yazi-taslagi-guncellenecek') + d.title + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
@@ -926,7 +1065,7 @@ ESP.KingArac = (function(){
             }));
             render();
             return {
-              metin: 'Yazı taslağını ekledim: «' + d.title + '».',
+              metin: yz('esp.core.kingarac.yazi-taslagini-ekledim') + d.title + '».',
               geriAl:async () => { await M().deleteDraft(d.id); render(); }
             };
           }
@@ -938,7 +1077,7 @@ ESP.KingArac = (function(){
             await M().deleteDraft(d.id);
             render();
             return {
-              metin: 'Yazı taslağını sildim.',
+              metin: yz('esp.core.kingarac.yazi-taslagini-sildim'),
               geriAl:async () => { await M().saveDraft(eski); render(); }
             };
           }
@@ -948,13 +1087,13 @@ ESP.KingArac = (function(){
           await M().saveDraft(guncel);
           render();
           return {
-            metin: 'Yazı taslağını güncelledim.',
+            metin: yz('esp.core.kingarac.yazi-taslagini-guncelledim'),
             geriAl:async () => { await M().saveDraft(eski); render(); }
           };
         } },
 
-      { ad:'esp_zincir', tur:'yaz', ozetAd:'Neden zinciri ekle, güncelle veya sil',
-        aciklama:'Tarih olayına neden-sonuç zinciri ekler, günceller ya da siler.',
+      { ad:'esp_zincir', tur:'yaz', ozetAd:yz('esp.core.kingarac.neden-zinciri-ekle-guncelle'),
+        aciklama:yz('esp.core.kingarac.tarih-olayina-neden-sonuc-zi'),
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'zincir kimliği' },
@@ -975,13 +1114,13 @@ ESP.KingArac = (function(){
               ev = evRes.oge;
             }
             if(!ev && !p.olay_id) return { hata: 'zincirin bağlanacağı olay belirtilmeli (olay_id veya olay_baslik)' };
-            return { metin: 'Neden zinciri eklenecek: «' + (ev ? ev.title : p.olay_id) + '» için.' };
+            return { metin: yz('esp.core.kingarac.neden-zinciri-eklenecek') + (ev ? ev.title : p.olay_id) + '» için.' };
           }
           const bul = zincirBul(p);
           if(bul.hata) return bul;
           const c = bul.oge;
-          if(p.islem === 'sil') return { metin: 'Neden zinciri silinecek (ID: ' + c.id + ').' };
-          return { metin: 'Neden zinciri güncellenecek (ID: ' + c.id + ').' };
+          if(p.islem === 'sil') return { metin: yz('esp.core.kingarac.neden-zinciri-silinecek-id') + c.id + ').' };
+          return { metin: yz('esp.core.kingarac.neden-zinciri-guncellenecek') + c.id + ').' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
@@ -993,7 +1132,7 @@ ESP.KingArac = (function(){
               ev = evRes.oge;
             }
             const eventId = p.olay_id || (ev ? ev.id : null);
-            if(!eventId) return { ok:false, metin: 'Zincir bir olaya bağlanmadan kaydedilmez.' };
+            if(!eventId) return { ok:false, metin: yz('esp.core.kingarac.zincir-bir-olaya-baglanmadan') };
             const links = p.halka ? [{ id: U().uid('l'), kind: p.halka_tur || 'yapisal', text: p.halka, sourceId: null }] : [];
             const res = await M().saveChain(M().newChain({
               eventId: eventId,
@@ -1005,7 +1144,7 @@ ESP.KingArac = (function(){
             const c = res.chain;
             render();
             return {
-              metin: 'Neden zincirini kaydettim.',
+              metin: yz('esp.core.kingarac.neden-zincirini-kaydettim'),
               geriAl:async () => { await M().deleteChain(c.id); render(); }
             };
           }
@@ -1017,7 +1156,7 @@ ESP.KingArac = (function(){
             await M().deleteChain(c.id);
             render();
             return {
-              metin: 'Neden zincirini sildim.',
+              metin: yz('esp.core.kingarac.neden-zincirini-sildim'),
               geriAl:async () => { await M().saveChain(eski); render(); }
             };
           }
@@ -1029,7 +1168,7 @@ ESP.KingArac = (function(){
           if(!res.ok) return { ok:false, metin: res.error || 'Güncellenemedi.' };
           render();
           return {
-            metin: 'Neden zincirini güncelledim.',
+            metin: yz('esp.core.kingarac.neden-zincirini-guncelledim'),
             geriAl:async () => { await M().saveChain(eski); render(); }
           };
         } },
@@ -1041,7 +1180,7 @@ ESP.KingArac = (function(){
   /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; kart, alıntı ve bitirme cümleden okunur
      (yazan araç yine önizlenir, onayla yazılır). */
   const KURAL = {
-    esp_gun:{ es:/^bugün (?:neler|ne) çalıştım/ },
+    esp_gun:{ es:/^bugün (?:neler|ne) çalıştım|^dün .*hangi alan.*çalıştım/ },
     esp_hafta:{ es:/(?:bu hafta|son bir hafta|haftada).*(?:çalış|vakit|saat)/ },
     esp_kitaplar:{ es:/(^kitaplarım|kütüphanemde ne var|hangi kitapları okuyorum)/ },
     esp_kartlar:{ es:/(kaç (?:kelime )?kart|kelime kartlarım)/ },

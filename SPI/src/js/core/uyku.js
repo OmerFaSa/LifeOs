@@ -14,6 +14,11 @@
      4. GÜNÜN TOPLAMI HESAPLANIR. gece + kestirmeler; gece girilmediyse
         toplam «veri yok» kalır, kestirmeler ayrıca söylenir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.uyku.kisa-uykunun-suresini-dakika':'Kısa uykunun süresini dakika olarak yaz.',
+  'spi.core.uyku.saat-00-00-23-59-biciminde-o':'Saat 00:00–23:59 biçiminde olur.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.uyku.bir-gunde-en-cok':'Bir günde en çok ',
 });
 
@@ -31,9 +36,9 @@ SP.Uyku = (function(){
 
   function dogrula(k){
     const dk = Number(k && k.dk);
-    if(!isFinite(dk) || dk <= 0) return 'Kısa uykunun süresini dakika olarak yaz.';
+    if(!isFinite(dk) || dk <= 0) return yz('spi.core.uyku.kisa-uykunun-suresini-dakika');
     if(dk > EN_COK_DK) return dk + ' dakika kısa uyku için fazla; gece uykusuysa «Uyku (saat)» alanına yaz.';
-    if(k.bas && !SAAT.test(k.bas)) return 'Saat 00:00–23:59 biçiminde olur.';
+    if(k.bas && !SAAT.test(k.bas)) return yz('spi.core.uyku.saat-00-00-23-59-biciminde-o');
     return null;
   }
 

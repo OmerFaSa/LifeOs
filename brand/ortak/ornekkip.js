@@ -16,6 +16,16 @@
       düğme: «Örnek veriden çık». Çıkış örnek profilin anahtarlarını siler
       ve önceki profile döner.
    Geçiş sayfa yenilenerek olur: depo profil anahtarını açılışta okur. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ornekkip.ornek-veri':'Örnek veri.',
+  'ortak.ornekkip.gordugun-kayitlar-gercek-deg':'Gördüğün kayıtlar gerçek değil; gerçek verin ayrı durur,',
+  'ortak.ornekkip.degismez-ve-merkez-e-gitmez':'değişmez ve Merkez’e gitmez.',
+  'ortak.ornekkip.ornek-veriden-cik':'Örnek veriden çık',
+  'ortak.ornekkip.su-an-ornek-verideysin-cikin':'Şu an örnek verideysin. Çıkınca örnek kayıtlar silinir, gerçek profiline dönersin.',
+  'ortak.ornekkip.sistemi-dolu-haliyle-gormek':'Sistemi dolu hâliyle görmek için örnek bir profil açılır. Gerçek verin ayrı anahtarda durur; ',
+  'ortak.ornekkip.ornek-veriye-gec':'Örnek veriye geç',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -54,9 +64,9 @@ LIFEOS.OrnekKip = (function(){
 
   function seritHtml(){
     return '<div class="ornek-serit" role="status" data-oz="172">'
-      + '<p class="ornek-serit__metin"><b>Örnek veri.</b> Gördüğün kayıtlar gerçek değil; gerçek verin ayrı durur, '
-      + 'değişmez ve Merkez’e gitmez.</p>'
-      + '<button type="button" class="btn btn--sm" data-act="ornek-cik">Örnek veriden çık</button></div>';
+      + ('<p class="ornek-serit__metin"><b>' + yz('ortak.ornekkip.ornek-veri') + '</b> ' + yz('ortak.ornekkip.gordugun-kayitlar-gercek-deg') + ' ')
+      + (yz('ortak.ornekkip.degismez-ve-merkez-e-gitmez') + '</p>')
+      + ('<button type="button" class="btn btn--sm" data-act="ornek-cik">' + yz('ortak.ornekkip.ornek-veriden-cik') + '</button></div>');
   }
 
   function filigranHtml(){
@@ -67,11 +77,11 @@ LIFEOS.OrnekKip = (function(){
      düğme; etiketi sonucu söyler (022). */
   function ayarHtml(acik){
     return '<div class="ornek-ayar" data-oz="172"><p class="small muted">' + (acik
-        ? 'Şu an örnek verideysin. Çıkınca örnek kayıtlar silinir, gerçek profiline dönersin.'
-        : 'Sistemi dolu hâliyle görmek için örnek bir profil açılır. Gerçek verin ayrı anahtarda durur; '
+        ? yz('ortak.ornekkip.su-an-ornek-verideysin-cikin')
+        : yz('ortak.ornekkip.sistemi-dolu-haliyle-gormek')
           + 'örnek veri ona hiçbir yolla karışmaz ve Merkez’e gitmez.') + '</p>'
       + '<div class="mt-10"><button type="button" class="btn btn--sm" data-act="' + (acik ? 'ornek-cik' : 'ornek-gir') + '">'
-      + (acik ? 'Örnek veriden çık' : 'Örnek veriye geç') + '</button></div></div>';
+      + (acik ? yz('ortak.ornekkip.ornek-veriden-cik') : yz('ortak.ornekkip.ornek-veriye-gec')) + '</button></div></div>';
   }
 
   return { kur, seritHtml, filigranHtml, ayarHtml, PROFIL };

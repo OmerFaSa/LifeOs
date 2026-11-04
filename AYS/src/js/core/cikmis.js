@@ -18,6 +18,17 @@
         defterine ekle» ile deftere yazılır (yayıncı ÖSYM, test «2023 TYT»,
         soru no); oradan Tamir kuyruğuna ve tekrara geçer.
      4. HİÇBİR KARAR BAKMAZ. Plan, kapanış, yol ve risk bu cevaplara bakmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.cikmis.konu-bulunamadi':'Konu bulunamadı.',
+  'ays.core.cikmis.sinav-tyt-ya-da-ayt':'Sınav TYT ya da AYT olmalı.',
+  'ays.core.cikmis.yil-anlasilmadi':'Yıl anlaşılmadı.',
+  'ays.core.cikmis.soru-numarasi-sayi-olmali':'Soru numarası sayı olmalı.',
+  'ays.core.cikmis.baglanti-http-ya-da-https':'Bağlantı http:// ya da https:// ile başlamalı.',
+  'ays.core.cikmis.dogru-cevap-a-e-olmali':'Doğru cevap A–E olmalı.',
+  'ays.core.cikmis.bu-soru-bu-konuya-zaten':'Bu soru bu konuya zaten bağlı.',
+  'ays.core.cikmis.cikmis-soru':'Çıkmış soru: ',
+});
+
 
 window.R = window.R || {};
 
@@ -48,17 +59,17 @@ R.Cikmis = (function(){
   /* Girdiyi doğrular: { ok, kayit } ya da { ok:false, neden }. */
   function dogrula(g){
     const konu = String(g.konu || '');
-    if(!R.Ogren || !R.Ogren.konuyuBul(konu).topic) return { ok:false, neden:'Konu bulunamadı.' };
+    if(!R.Ogren || !R.Ogren.konuyuBul(konu).topic) return { ok:false, neden:yz('ays.core.cikmis.konu-bulunamadi') };
     const sinav = SINAVLAR.indexOf(g.sinav) >= 0 ? g.sinav : null;
-    if(!sinav) return { ok:false, neden:'Sınav TYT ya da AYT olmalı.' };
+    if(!sinav) return { ok:false, neden:yz('ays.core.cikmis.sinav-tyt-ya-da-ayt') };
     const yil = Number(g.yil);
-    if(!(yil >= 1990 && yil <= new Date().getFullYear() + 1)) return { ok:false, neden:'Yıl anlaşılmadı.' };
+    if(!(yil >= 1990 && yil <= new Date().getFullYear() + 1)) return { ok:false, neden:yz('ays.core.cikmis.yil-anlasilmadi') };
     const no = String(g.soruNo || '').trim();
-    if(!/^\d{1,3}$/.test(no)) return { ok:false, neden:'Soru numarası sayı olmalı.' };
+    if(!/^\d{1,3}$/.test(no)) return { ok:false, neden:yz('ays.core.cikmis.soru-numarasi-sayi-olmali') };
     const url = baglanti(g.url);
-    if(url === null) return { ok:false, neden:'Bağlantı http:// ya da https:// ile başlamalı.' };
+    if(url === null) return { ok:false, neden:yz('ays.core.cikmis.baglanti-http-ya-da-https') };
     const dogru = g.dogru ? String(g.dogru).toUpperCase() : null;
-    if(dogru && HARF.indexOf(dogru) < 0) return { ok:false, neden:'Doğru cevap A–E olmalı.' };
+    if(dogru && HARF.indexOf(dogru) < 0) return { ok:false, neden:yz('ays.core.cikmis.dogru-cevap-a-e-olmali') };
     return { ok:true, kayit:{ konu, sinav, yil, soruNo:no, url, dogru,
       test:String(g.test || '').trim().slice(0, 60), not:String(g.not || '').trim().slice(0, 200) } };
   }
@@ -68,7 +79,7 @@ R.Cikmis = (function(){
     if(!r.ok) return r;
     const ayni = doc.kayitlar.find(k => k.konu === r.kayit.konu && k.sinav === r.kayit.sinav && k.yil === r.kayit.yil
       && k.soruNo === r.kayit.soruNo && (k.test || '') === r.kayit.test);
-    if(ayni) return { ok:false, neden:'Bu soru bu konuya zaten bağlı.' };
+    if(ayni) return { ok:false, neden:yz('ays.core.cikmis.bu-soru-bu-konuya-zaten') };
     const k = Object.assign({ id:R.U.uid('ck'), at:simdi(), cevap:null }, r.kayit);
     doc.kayitlar.push(k);
     await yaz();
@@ -137,7 +148,7 @@ R.Cikmis = (function(){
       testName:(k.yil + ' ' + k.sinav + (k.test ? ' ' + k.test : '')).slice(0, 160), questionNo:k.soruNo,
       status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'', recipe:'', topicRef:'',
       subjectId:x.subject.id, topicId:x.topic.id, topic:x.topic.name,
-      soru:'Çıkmış soru: ' + kunye(k) + (k.url ? ' — ' + k.url : '') + (k.not ? ' — ' + k.not : ''),
+      soru:yz('ays.core.cikmis.cikmis-soru') + kunye(k) + (k.url ? ' — ' + k.url : '') + (k.not ? ' — ' + k.not : ''),
       senin:k.cevap.h, anahtar:k.dogru, kaynak:{ tur:'cikmis', id:k.id },
     };
     await R.Model.saveError(err);

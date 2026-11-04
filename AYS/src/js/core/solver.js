@@ -15,6 +15,11 @@
 
    Neden: bu kayitlar konu takibini ve kaynak zorlugunu besliyor.
    Uydurulmus tek bir konu adi butun o hesabi sessizce bozar. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.solver.gorsel-okuyabilen-bir-model':'Görsel okuyabilen bir model bağlı değil',
+  'ays.core.solver.model-bagli-degil':'Model bağlı değil',
+});
+
 
 window.R = window.R || {};
 
@@ -298,8 +303,8 @@ R.Solver = (function(){
 
     if(!chain.length){
       throw Object.assign(new Error(withImage
-        ? 'Görsel okuyabilen bir model bağlı değil'
-        : 'Model bağlı değil'), { code:withImage ? 'no_vision' : 'unavailable' });
+        ? yz('ays.core.solver.gorsel-okuyabilen-bir-model')
+        : yz('ays.core.solver.model-bagli-degil')), { code:withImage ? 'no_vision' : 'unavailable' });
     }
     if(!withImage && !String(r.question || '').trim()){
       throw Object.assign(new Error('soru yok'), { code:'empty' });

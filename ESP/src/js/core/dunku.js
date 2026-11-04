@@ -11,6 +11,13 @@
    kayıtlarından gelir (uydurulmaz) ama tahmin sayılır; sayım ve kalite kopyalanmaz — o günün
    ölçümüdür. Bugün aynı disipline oturum girildiyse işaretli görünür,
    yine eklenebilir (ikinci oturum). En çok dört. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.dunku.dunun-oturumu-bulunamadi':'Dünün oturumu bulunamadı.',
+  'esp.core.dunku.bugun-bu-disipline-zaten-otu':'Bugün bu disipline zaten oturum girilmiş.',
+  'esp.core.dunku.dunun-aynisi':'Dünün aynısı',
+  'esp.core.dunku.bu-oturum-sik-oturumlarda-yo':'Bu oturum sık oturumlarda yok.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -31,9 +38,9 @@ ESP.Dunku = (function(){
 
   async function kopyala(bugun, id){
     const s = ESP.Model.sessionsOf(dun(bugun)).find(x => x.id === id);
-    if(!s) return { ok:false, why:'Dünün oturumu bulunamadı.' };
-    if(!adaylar(bugun).oturumlar.some(x => x.id === id)) return { ok:false, why:'Bugün bu disipline zaten oturum girilmiş.' };
-    const yeni = await ESP.Model.addSession(bugun, { disc:s.disc, minutes:s.minutes, minutesCert:'estimated', note:'Dünün aynısı' });
+    if(!s) return { ok:false, why:yz('esp.core.dunku.dunun-oturumu-bulunamadi') };
+    if(!adaylar(bugun).oturumlar.some(x => x.id === id)) return { ok:false, why:yz('esp.core.dunku.bugun-bu-disipline-zaten-otu') };
+    const yeni = await ESP.Model.addSession(bugun, { disc:s.disc, minutes:s.minutes, minutesCert:'estimated', note:yz('esp.core.dunku.dunun-aynisi') });
     const disc = ESP.DISCIPLINE_BY_ID[s.disc];
     return { ok:true, id:yeni.id, ad:disc ? disc.label : s.disc };
   }
@@ -58,7 +65,7 @@ ESP.Dunku = (function(){
   }
   async function sikEkle(bugun, disc, dk){
     const x = sik(bugun).find(s => s.disc === disc && s.dk === Number(dk));
-    if(!x) return { ok:false, why:'Bu oturum sık oturumlarda yok.' };
+    if(!x) return { ok:false, why:yz('esp.core.dunku.bu-oturum-sik-oturumlarda-yo') };
     const yeni = await ESP.Model.addSession(bugun, { disc:x.disc, minutes:x.dk, minutesCert:'estimated', note:'' });
     return { ok:true, id:yeni.id, ad:x.ad, dk:x.dk };
   }

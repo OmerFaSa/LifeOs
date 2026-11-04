@@ -140,7 +140,7 @@ async function portMuhafizi(portlar){
 }
 
 (async () => {
-  await portMuhafizi(Object.values(MODUL).map(m => m[1]));
+  await portMuhafizi(Object.keys(MODUL).filter(m => !YALNIZ || m === YALNIZ).map(m => MODUL[m][1]));
   const sinav = JSON.parse(fs.readFileSync(path.join(__dirname, 'king_sinav.json'), 'utf8'));
   const sonuc = [];
   let browser;

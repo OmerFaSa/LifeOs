@@ -28,6 +28,35 @@
    geri dönüşü yok sayılabilir. ESP'in verisi ESP'te kalır; HKM'ye giden
    şey günün ÖZETİDİR. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.beacon.esleme-penceresi-kapali-hkm':'Eşleme penceresi kapalı. HKM yüzünde ',
+  'esp.core.beacon.govde-sozlesmeyi-gecmedi':'Gövde sözleşmeyi geçmedi: ',
+  'esp.core.beacon.bearer':'Bearer ',
+  'esp.core.beacon.hkm-govdeyi-reddetti-etiket':'HKM gövdeyi reddetti (etiket ya da biçim).',
+  'esp.core.beacon.jeton-kabul-edilmedi':'Jeton kabul edilmedi.',
+  'esp.core.beacon.beklenmeyen-yanit':'Beklenmeyen yanıt: ',
+  'esp.core.beacon.gonderim':'Gönderim ',
+  'esp.core.beacon.gecersiz-durum':'Geçersiz durum.',
+  'esp.core.beacon.esp-bu-kayittan-yazilacak-bi':'ESP bu kayıttan yazılacak bir şey çıkaramadı.',
+  'esp.core.beacon.materyal-kimligi-gecersiz':'Materyal kimliği geçersiz.',
+  'esp.core.beacon.bu-set-zaten-eklenmis':'Bu set zaten eklenmiş.',
+  'esp.core.beacon.hkm-baglantisi-kurulmamis-ma':'HKM bağlantısı kurulmamış; materyal alınamaz.',
+  'esp.core.beacon.materyal-hkm-den-alinamadi-h':'Materyal HKM’den alınamadı; HKM açıkken yeniden dene.',
+  'esp.core.beacon.bu-setin-hangi-desteye-girec':'Bu setin hangi desteye gireceğini anlayamadım: başlığında bir dil ',
+  'esp.core.beacon.setteki-maddelerin-hicbiri-e':'Setteki maddelerin hiçbiri ESP’nin denetimini geçmedi.',
+  'esp.core.beacon.belge-modulu-yuklenmedi':'Belge modülü yüklenmedi.',
+  'esp.core.beacon.unite-modulu-yuklenmedi':'Ünite modülü yüklenmedi.',
+  'esp.core.beacon.urun-modulu-yuklenmedi':'Ürün modülü yüklenmedi.',
+  'esp.core.beacon.bu-teklif-turu-uygulanmaz':'Bu teklif türü uygulanmaz.',
+  'esp.core.beacon.tarih-gecersiz':'Tarih geçersiz.',
+  'esp.core.beacon.sure-gecersiz-5-480-dakika-b':'Süre geçersiz (5–480 dakika bekleniyor).',
+  'esp.core.beacon.hatirlatici-yazilamadi':'Hatırlatıcı yazılamadı.',
+  'esp.core.beacon.teklif-bulunamadi':'Teklif bulunamadı.',
+  'esp.core.beacon.bilinmeyen-islem':'Bilinmeyen işlem.',
+  'esp.core.beacon.bu-teklif-isleniyor':'Bu teklif işleniyor.',
+  'esp.core.beacon.bu-teklif-daha-once-uygulanm':'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.beacon.ozet':'Özet',
   'esp.core.beacon.yalniz-yuk-kararini-etkileye':'Yalnız yük kararını etkileyen çekirdek ölçümler.',
   'esp.core.beacon.gelismis':'Gelişmiş',
@@ -372,7 +401,7 @@ ESP.Beacon = (function(){
     try{ govde = await res.json(); }catch(e){ govde = null; }
     if(res.status !== 200 || !govde || !govde.token){
       return { ok:false, status:res.status,
-        note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
+        note:(govde && govde.note) || yz('esp.core.beacon.esleme-penceresi-kapali-hkm')
            + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
     }
     const son = await save({ url:adres, token:govde.token, enabled:true, lastStatus:null });
@@ -464,7 +493,7 @@ ESP.Beacon = (function(){
     const hata = contract(body);
     if(hata.length){
       await save({ lastAt:new Date().toISOString(), lastStatus:0,
-        lastNote:'Gövde sözleşmeyi geçmedi: ' + hata[0] });
+        lastNote:yz('esp.core.beacon.govde-sozlesmeyi-gecmedi') + hata[0] });
       return { ok:false, reason:'contract', errors:hata,
         note:yz('esp.core.beacon.etiketsiz-ya-da-bozuk-alan') };
     }
@@ -475,16 +504,16 @@ ESP.Beacon = (function(){
       const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('esp.core.beacon.bearer') + a.token },
         body:JSON.stringify(body),
         signal:ctrl ? ctrl.signal : undefined,
       });
       if(zaman) clearTimeout(zaman);
       durum = res.status;
       not = durum === 202 ? 'Gönderildi.'
-        : durum === 422 ? 'HKM gövdeyi reddetti (etiket ya da biçim).'
-        : durum === 401 ? 'Jeton kabul edilmedi.'
-        : 'Beklenmeyen yanıt: ' + durum;
+        : durum === 422 ? yz('esp.core.beacon.hkm-govdeyi-reddetti-etiket')
+        : durum === 401 ? yz('esp.core.beacon.jeton-kabul-edilmedi')
+        : yz('esp.core.beacon.beklenmeyen-yanit') + durum;
     }catch(e){
       durum = 0;
       not = 'HKM\'ye ulaşılamadı. Bu bir hata değil bir DURUMDUR: HKM '
@@ -528,7 +557,7 @@ ESP.Beacon = (function(){
         res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
           method:'POST',
           headers:{ 'Content-Type':'application/json',
-            'Authorization':'Bearer ' + a.token },
+            'Authorization':yz('esp.core.beacon.bearer') + a.token },
           body:JSON.stringify(govde),
         });
         durum = res.status;
@@ -556,7 +585,7 @@ ESP.Beacon = (function(){
         return r.date + ' (' + r.status + (r.why ? ': ' + r.why : '') + ')';
       }).join('; ') + (reddedilen.length > 3 ? '; …' : '') + '.');
     }
-    if(hata != null) not.push('Gönderim ' + (hata || 'ağ hatası') + ' ile durdu.');
+    if(hata != null) not.push(yz('esp.core.beacon.gonderim') + (hata || 'ağ hatası') + ' ile durdu.');
     const durumSon = hata != null ? hata : reddedilen.length ? reddedilen[0].status : 202;
     await save({ lastAt:new Date().toISOString(), lastStatus:durumSon, lastNote:not.join(' ') });
     return { ok:hata == null && !reddedilen.length, sent:gonderilen, empty:bos,
@@ -684,7 +713,7 @@ ESP.Beacon = (function(){
         + MODULE + '/take', {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('esp.core.beacon.bearer') + a.token },
       });
     }catch(e){ return []; }
     if(res.status !== 200) return [];
@@ -743,7 +772,7 @@ ESP.Beacon = (function(){
     const a = settings();
     const durum = _durumAdi(applied);
     if(['applied', 'acknowledged', 'dismissed', 'unknown'].indexOf(durum) < 0){
-      return { ok:false, error:'Geçersiz durum.' };
+      return { ok:false, error:yz('esp.core.beacon.gecersiz-durum') };
     }
     if(!a.enabled || !a.token || !urlOk(a.url)) return { ok:false };
     try{
@@ -751,7 +780,7 @@ ESP.Beacon = (function(){
         + id + '/' + durum, {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('esp.core.beacon.bearer') + a.token },
       });
       return { ok:res.status === 200, status:res.status };
     }catch(e){ return { ok:false }; }
@@ -840,7 +869,7 @@ ESP.Beacon = (function(){
   async function kayitUygula(n){
     const o = kayitOku(n);     /* onay aninda YENIDEN okunur */
     if(!o.yazilacak.length){
-      return { ok:false, error:'ESP bu kayıttan yazılacak bir şey çıkaramadı.' };
+      return { ok:false, error:yz('esp.core.beacon.esp-bu-kayittan-yazilacak-bi') };
     }
     const yazilan = [];
     for(const y of o.yazilacak){
@@ -881,36 +910,36 @@ ESP.Beacon = (function(){
 
   async function materyalUygula(p){
     const kid = Number(p.kayit_id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Materyal kimliği geçersiz.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('esp.core.beacon.materyal-kimligi-gecersiz') };
     const etiket = 'bam:' + kid;
     if((ESP.S.cards || []).some(function(c){ return (c.tags || []).indexOf(etiket) >= 0; })){
-      return { ok:false, error:'Bu set zaten eklenmiş.' };
+      return { ok:false, error:yz('esp.core.beacon.bu-set-zaten-eklenmis') };
     }
     const a = settings();
-    if(!a.token || !urlOk(a.url)) return { ok:false, error:'HKM bağlantısı kurulmamış; materyal alınamaz.' };
+    if(!a.token || !urlOk(a.url)) return { ok:false, error:yz('esp.core.beacon.hkm-baglantisi-kurulmamis-ma') };
     let kayit = null;
     try{
       const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
       const zaman = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
       const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/bam/kayit/' + kid, {
-        headers:{ 'Authorization':'Bearer ' + a.token },
+        headers:{ 'Authorization':yz('esp.core.beacon.bearer') + a.token },
         signal:ctrl ? ctrl.signal : undefined,
       });
       if(zaman) clearTimeout(zaman);
       if(res.status === 200){ const g = await res.json(); kayit = g && g.kayit; }
     }catch(e){ kayit = null; }
     if(!kayit || kayit.tur !== 'materyal' || !kayit.govde){
-      return { ok:false, error:'Materyal HKM’den alınamadı; HKM açıkken yeniden dene.' };
+      return { ok:false, error:yz('esp.core.beacon.materyal-hkm-den-alinamadi-h') };
     }
     const deste = desteOf(kayit);
     if(!deste){
-      return { ok:false, error:'Bu setin hangi desteye gireceğini anlayamadım: başlığında bir dil '
+      return { ok:false, error:yz('esp.core.beacon.bu-setin-hangi-desteye-girec')
         + 'ya da tarih konusu yok. ESP şimdilik yalnız dil ve tarih destelerine kart alır.' };
     }
     const tur = kayit.govde.tur;
     const kartlar = (Array.isArray(kayit.govde.maddeler) ? kayit.govde.maddeler : [])
       .slice(0, 50).map(function(m){ return window.LIFEOS.Ofis.bamMadde(tur, m); }).filter(Boolean);
-    if(!kartlar.length) return { ok:false, error:'Setteki maddelerin hiçbiri ESP’nin denetimini geçmedi.' };
+    if(!kartlar.length) return { ok:false, error:yz('esp.core.beacon.setteki-maddelerin-hicbiri-e') };
     for(const k of kartlar){
       await ESP.Model.saveCard(ESP.Model.newCard({ front:k.front, back:k.back, lang:deste.deck,
         context:'BAM #' + kid + ' — kaynağı doğrulanmadı', tags:['bam', etiket] }));
@@ -925,11 +954,11 @@ ESP.Beacon = (function(){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
     if(n && n.kind === 'kart.add') return await kartUygula(n);
     if(n && n.kind === 'belge.add'){
-      if(!ESP.Belge) return { ok:false, error:'Belge modülü yüklenmedi.' };
+      if(!ESP.Belge) return { ok:false, error:yz('esp.core.beacon.belge-modulu-yuklenmedi') };
       return await ESP.Belge.uygula(n.payload || {});
     }
     if(n && n.kind === 'unite.add'){
-      if(!ESP.Unite) return { ok:false, error:'Ünite modülü yüklenmedi.' };
+      if(!ESP.Unite) return { ok:false, error:yz('esp.core.beacon.unite-modulu-yuklenmedi') };
       return await ESP.Unite.uygula(n.payload || {});
     }
     if(n && n.kind === 'urun.add'){
@@ -938,18 +967,18 @@ ESP.Beacon = (function(){
          (core/urun.js, ortak). Ofis ekranındaki BAM ürünlerinden açılır. */
       ESP.Urunler = ESP.Urunler || (window.LIFEOS && LIFEOS.Urun
         ? LIFEOS.Urun.kur({ store:() => ESP.Store, hkm:() => ESP.Beacon }) : null);
-      if(!ESP.Urunler) return { ok:false, error:'Ürün modülü yüklenmedi.' };
+      if(!ESP.Urunler) return { ok:false, error:yz('esp.core.beacon.urun-modulu-yuklenmedi') };
       return await ESP.Urunler.uygula(n.payload || {});
     }
-    if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    if(!canApply(n)) return { ok:false, error:yz('esp.core.beacon.bu-teklif-turu-uygulanmaz') };
     if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     const p = n.payload || {};
-    if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
+    if(!U.isISO(String(p.date || ''))) return { ok:false, error:yz('esp.core.beacon.tarih-gecersiz') };
     /* Gecersiz sure sinirlandirilmaz, REDDEDILIR: -5 dakikayi 5 dakikaya
        cekmek, teklifi sessizce baska bir teklife cevirmektir. */
     const dk = Number(p.minutes);
     if(!isFinite(dk) || dk <= 0 || dk > 480){
-      return { ok:false, error:'Süre geçersiz (5–480 dakika bekleniyor).' };
+      return { ok:false, error:yz('esp.core.beacon.sure-gecersiz-5-480-dakika-b') };
     }
     const disc = (ESP.DISCIPLINES || []).some(function(d){ return d.id === p.disc; })
       ? p.disc : 'lang';
@@ -957,7 +986,7 @@ ESP.Beacon = (function(){
       disc:disc, due:p.date, repeat:'none',
       text:Math.round(dk) + ' dakika ' + disc + ' (HKM teklifi)',
     });
-    if(!r.ok) return { ok:false, error:r.error || 'Hatırlatıcı yazılamadı.' };
+    if(!r.ok) return { ok:false, error:r.error || yz('esp.core.beacon.hatirlatici-yazilamadi') };
     return { ok:true, note:p.date + ' için hatırlatıcı eklendi — ölçülmüş bir '
       + 'oturum olarak DEĞİL: yapılmamış bir çalışma ölçülmüş görünmemeli.' };
   }
@@ -976,13 +1005,13 @@ ESP.Beacon = (function(){
   const ISLEMDE = {};
 
   async function resolveIntent(n, action){
-    if(!n || n.id == null) return { ok:false, error:'Teklif bulunamadı.' };
+    if(!n || n.id == null) return { ok:false, error:yz('esp.core.beacon.teklif-bulunamadi') };
     const anahtar = String(n.id);
     if(['apply', 'seen', 'dismiss'].indexOf(action) < 0){
-      return { ok:false, error:'Bilinmeyen işlem.' };
+      return { ok:false, error:yz('esp.core.beacon.bilinmeyen-islem') };
     }
     /* Cift tiklama: es zamanli iki cagri tek is olur. */
-    if(ISLEMDE[anahtar]) return { ok:false, error:'Bu teklif işleniyor.' };
+    if(ISLEMDE[anahtar]) return { ok:false, error:yz('esp.core.beacon.bu-teklif-isleniyor') };
     ISLEMDE[anahtar] = true;
     try{
       const defter = await intentLog();
@@ -996,7 +1025,7 @@ ESP.Beacon = (function(){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
              olabilecek) bir teklif tekrar plana yazilmaz. */
-          not = 'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.';
+          not = yz('esp.core.beacon.bu-teklif-daha-once-uygulanm');
         }else{
           await markIntent(n.id, 'applying', false, '');
           const r = await applyIntent(n);

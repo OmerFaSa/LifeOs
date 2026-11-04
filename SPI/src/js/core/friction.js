@@ -18,6 +18,11 @@
    yapilan gunlerde ikincil bir oran gosterilir ve acikca "yalnizca
    antrenman suresine gore" diye etiketlenir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.friction.toplu-reddetmek-de-bir-karar':'Toplu reddetmek de bir karardır.',
+  'spi.core.friction.gunun-tek-isini-yapip-kapatm':'Günün tek işini yapıp kapatmak yeterli.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.friction.surtunme-olculmedi':'Sürtünme ölçülmedi',
   'spi.core.friction.bu-pencerede-kayit-yok-siste':'Bu pencerede kayıt yok. Sistem kendi maliyetini bilmiyorsa ',
   'spi.core.friction.takip-isin-onune-geciyor-ola':'Takip, işin önüne geçiyor olabilir',
@@ -177,7 +182,7 @@ SP.Friction = (function(){
     if(bekleyen > 4){
       out.push({ id:'proposals', label:bekleyen + ' bekleyen öneri',
         note:yz('spi.core.friction.karar-bekleyen-her-oneri-her')
-           + 'Toplu reddetmek de bir karardır.', route:'onaylar' });
+           + yz('spi.core.friction.toplu-reddetmek-de-bir-karar'), route:'onaylar' });
       /* 2026-10-25: 'office'e gidiyordu; bekleyen öneriler Onaylar'dadır. */
     }
     const ilac = (S.meds || []).filter(m => m.active !== false).length;
@@ -194,7 +199,7 @@ SP.Friction = (function(){
     if(!out.length){
       out.push({ id:'shorter', label:yz('spi.core.friction.ziyaretler-uzun'),
         note:yz('spi.core.friction.kayit-yuku-makul-gorunuyor-s')
-           + 'Günün tek işini yapıp kapatmak yeterli.', route:'today' });
+           + yz('spi.core.friction.gunun-tek-isini-yapip-kapatm'), route:'today' });
     }
     return out;
   }

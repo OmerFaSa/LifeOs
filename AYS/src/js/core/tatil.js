@@ -13,6 +13,11 @@
    ile geri döner, geçmişe yazılmaz (core/istisna.js). Tatil erken
    bitirilirse ara dünde biter, dönüş bugüne kayar. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.tatil.tatil-modu':'Tatil modu',
+  'ays.core.tatil.tatil-donusu-kademeli':'Tatil dönüşü: kademeli',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.tatil.tatil-modu-yuklenmedi':'Tatil modu yüklenmedi.',
   'ays.core.tatil.tatil-1-21-gun-olabilir':'Tatil 1–21 gün olabilir.',
 });
@@ -22,8 +27,8 @@ window.R = window.R || {};
 
 R.Tatil = (function(){
   const DONUS_GUN = 2;
-  const NEDEN_TATIL = 'Tatil modu';
-  const NEDEN_DONUS = 'Tatil dönüşü: kademeli';
+  const NEDEN_TATIL = yz('ays.core.tatil.tatil-modu');
+  const NEDEN_DONUS = yz('ays.core.tatil.tatil-donusu-kademeli');
   const U = () => R.U;
   function gun(iso, n){ return U().iso(U().addDays(U().parse(iso), n)); }
 

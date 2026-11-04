@@ -42,6 +42,18 @@
        onizle(param)    (yaz) → { metin, satirlar? } | { veri } | { yetki } | { hata }
        uygula(param)    (yaz) → { metin, geriAl? } } */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.arac.sinav-hazirligi':'Sınav hazırlığı',
+  'ortak.arac.saglik-ve-performans':'Sağlık ve performans',
+  'ortak.arac.kisisel-gelisim':'Kişisel gelişim',
+  'ortak.arac.merkez-ve-yapay-zeka':'Merkez ve yapay zekâ',
+  'ortak.arac.king-in-yapay-zekasi-ve-mode':'King’in yapay zekâsı ve modeller',
+  'ortak.arac.ays-sinav':'AYS · sınav',
+  'ortak.arac.spi-saglik':'SPİ · sağlık',
+  'ortak.arac.esp-gelisim':'ESP · gelişim',
+  'ortak.arac.king-her-modulde':'King · her modülde',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.arac.ays':'AYS',
   'ortak.arac.spi':'SPİ',
   'ortak.arac.esp':'ESP',
@@ -87,13 +99,13 @@ window.LIFEOS.ARAC = (function(){
   /* Modüllerin işleri — sistem haritası (söz 5). Kodun cümlesi; model
      uydurmaz. Ayrıntı her modülün kendi kataloğundadır. */
   const HARITA = [
-    { modul:'ays', ad:yz('ortak.arac.ays'), is:'Sınav hazırlığı', alanlar:['günün planı ve blokları', 'soru, süre, paragraf, problem kaydı',
+    { modul:'ays', ad:yz('ortak.arac.ays'), is:yz('ortak.arac.sinav-hazirligi'), alanlar:['günün planı ve blokları', 'soru, süre, paragraf, problem kaydı',
       'konu kapanışı ve konu öğrenme', 'deneme ve yanlış defteri', 'tekrar kartları', 'hafta programı ve hedefler', 'ilerleme ve analiz'] },
-    { modul:'spi', ad:yz('ortak.arac.spi'), is:'Sağlık ve performans', alanlar:['uyku, su, kilo gibi günlük ölçümler', 'öğün ve besin',
+    { modul:'spi', ad:yz('ortak.arac.spi'), is:yz('ortak.arac.saglik-ve-performans'), alanlar:['uyku, su, kilo gibi günlük ölçümler', 'öğün ve besin',
       'antrenman ve hareket', 'tahliller ve ilaçlar', 'mutfak ve market bütçesi', 'haftalık planlar ve hatırlatmalar'] },
-    { modul:'esp', ad:yz('ortak.arac.esp'), is:'Kişisel gelişim', alanlar:['dil ve kelime kartları', 'okuma ve kitaplar', 'yazı taslakları',
+    { modul:'esp', ad:yz('ortak.arac.esp'), is:yz('ortak.arac.kisisel-gelisim'), alanlar:['dil ve kelime kartları', 'okuma ve kitaplar', 'yazı taslakları',
       'felsefe argümanları', 'tarih olayları', 'müzik ve diksiyon çalışmaları', 'günlük çalışma oturumları'] },
-    { modul:'hkm', ad:yz('ortak.arac.hkm-merkez'), is:'Merkez ve yapay zekâ', alanlar:['King’in yapay zekâsı ve modeller', 'haftalık değerlendirme ve çapraz bulgular',
+    { modul:'hkm', ad:yz('ortak.arac.hkm-merkez'), is:yz('ortak.arac.merkez-ve-yapay-zeka'), alanlar:[yz('ortak.arac.king-in-yapay-zekasi-ve-mode'), 'haftalık değerlendirme ve çapraz bulgular',
       'araştırma ve program işleri', 'para kaydı', 'bildirim ve Telegram'] },
   ];
 
@@ -122,7 +134,7 @@ window.LIFEOS.ARAC = (function(){
     { modul:'king', tur:'cumle', ad:yz('ortak.arac.gorunum'), ornek:'koyu temaya geç' },
     { modul:'king', tur:'cumle', ad:yz('ortak.arac.haftalik-degerlendirme'), ornek:'haftalık değerlendirme' },
   ];
-  const GRUP_AD = { ays:'AYS · sınav', spi:'SPİ · sağlık', esp:'ESP · gelişim', king:'King · her modülde' };
+  const GRUP_AD = { ays:yz('ortak.arac.ays-sinav'), spi:yz('ortak.arac.spi-saglik'), esp:yz('ortak.arac.esp-gelisim'), king:yz('ortak.arac.king-her-modulde') };
   /* Modüle göre gruplu liste; bulunulan modül önce, King'in ortak işleri sonda. */
   function isler(){
     const sira = [modul].concat(['ays', 'spi', 'esp']).filter((m, i, a) => m && a.indexOf(m) === i && m !== 'king').concat(['king']);
@@ -321,7 +333,7 @@ window.LIFEOS.ARAC = (function(){
      («… çözdüm») girmez, o giriş kapısının işi. Eşiğin altı ya da başa baş
      null döner: model ya da sayfa karar verir. Yazan araç yine önizlenir ve
      onay ister (söz 3). */
-  const NIYET_DIS = /^(sayfa_ac|kayit_gir|odak_baslat|odak_durdur)$/;
+  const NIYET_DIS = /^(sayfa_ac|kayit_gir|odak_baslat|odak_durdur|modul_bilgileri)$/;
   /* Danışma ve bilgi sorusu («ne yesem», «nasıl korurum», «… nedir») araç değil, Merkez'in işi. */
   const NIYET_DANIS = /(\S(?:ay[ıi]m|ey[ıi]m|mal[ıi]y[ıi]m|mel[ıi]y[ıi]m|s[ae]m)(?=$|\s|[?.!])|ne önerirsin|nasıl .*(?:[ae]b[iı]l[iı]r[iı]m|r[ıiuü]m|n[ıiuü]r)(?=$|\s|[?.!])|nedir|tavsiye|bir şey söyle)/;
   const NIYET_DOLGU = new Set(('ve ile veya bu şu o bir de da ne neler nasıl kaç hangi hangileri için gibi daha en çok az şey '

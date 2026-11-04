@@ -12,6 +12,95 @@
    Modele giden sey de sinirlidir (SP.PRIVACY.model): yalnizca sayilar ve
    durum etiketleri. Ad, dogum tarihi ve ham tahlil belgesi gonderilmez. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.office.en-cok-dikkat-isteyen':'En çok dikkat isteyen: ',
+  'spi.core.office.son-oturum-tok-karnina-alinm':'Son oturum tok karnına alınmış; açlık glukozu, insülin ve ',
+  'spi.core.office.son-30-gunun':'Son 30 günün ',
+  'spi.core.office.kullanilanlar':'Kullanılanlar: ',
+  'spi.core.office.dikkat-isteyen-bir-olcum-yok':'Dikkat isteyen bir ölçüm yok.',
+  'spi.core.office.hedef-hesaplanamiyor-profild':'Hedef hesaplanamıyor: profilde ',
+  'spi.core.office.bu-ucu-olmadan-kalori-ve':'Bu üçü olmadan kalori ve protein hedefi tahmin edilmez.',
+  'spi.core.office.gunluk-hedef':'Günlük hedef ',
+  'spi.core.office.laboratuvara-gore':'Laboratuvara göre ',
+  'spi.core.office.son-7-gunde-hic-ogun':'Son 7 günde hiç öğün girilmemiş; açık hesaplanamıyor.',
+  'spi.core.office.en-buyuk-acik':'En büyük açık ',
+  'spi.core.office.son-7-gunun-ortalamasi-butun':'Son 7 günün ortalaması bütün hedefleri karşılıyor.',
+  'spi.core.office.toparlanma-skoru-hesaplanami':'Toparlanma skoru hesaplanamıyor: bugün ölçüm girilmemiş.',
+  'spi.core.office.toparlanma':'Toparlanma ',
+  'spi.core.office.eksik-girdi':'Eksik girdi: ',
+  'spi.core.office.akut-kronik-yuk-orani':'Akut/kronik yük oranı ',
+  'spi.core.office.bu-hafta-hic-calisilmayan-ka':'Bu hafta hiç çalışılmayan kalıp: ',
+  'spi.core.office.sepet-bos-haftalik-alisveris':'Sepet boş. Haftalık alışverişi girince maliyet ve besin kapsaması hesaplanır.',
+  'spi.core.office.haftalik-sepet':'Haftalık sepet ',
+  'spi.core.office.sinir':'Sınır ',
+  'spi.core.office.sinirin-altinda':'Sınırın altında.',
+  'spi.core.office.hesabin':'Hesabın %',
+  'spi.core.office.sepet':'Sepet ',
+  'spi.core.office.siradaki-hamle':'Sıradaki hamle: ',
+  'spi.core.office.asgari-gun':'Asgari gün ',
+  'spi.core.office.i-yi-aksamlar':'İyi akşamlar',
+  'spi.core.office.son-gece':'Son gece ',
+  'spi.core.office.henuz-uyku-girilmemis-bu-sab':'Henüz uyku girilmemiş. Bu sabah «7 saat uyudum» yazman yeter; kısa uykuyu da «öğlen 30 dakika uyudum» diye girebilirsin.',
+  'spi.core.office.son':'Son ',
+  'spi.core.office.hedefi-hesaplamam-icin-profi':'Hedefi hesaplamam için profilde ',
+  'spi.core.office.bugunku-ihtiyacin':'Bugünkü ihtiyacın ',
+  'spi.core.office.bugun':'Bugün ',
+  'spi.core.office.bugun-hareket-girilmedi':'Bugün hareket girilmedi.',
+  'spi.core.office.rica-ederim':'Rica ederim',
+  'spi.core.office.ben':'Ben ',
+  'spi.core.office.uyku-beslenme-hareket-tahlil':'Uyku, beslenme, hareket, tahlil ve bütçe masalarının söylediklerini birleştiririm; sayıları kural motoru hesaplar, ben anlatırım.',
+  'spi.core.office.kendi-alanimdaki-kayitlarina':'Kendi alanımdaki kayıtlarına bakarım; sayıları kural motoru hesaplar.',
+  'spi.core.office.i-yiyim-sag-ol':'İyiyim, sağ ol',
+  'spi.core.office.tamam-baska-bir-sey-sormak':'Tamam. Başka bir şey sormak istersen buradayım.',
+  'spi.core.office.bunu-duyduguma-uzuldum-boyle':'Bunu duyduğuma üzüldüm; böyle günler oluyor.',
+  'spi.core.office.anliyorum-boyle-hissetmen-on':'Anlıyorum, böyle hissetmen önemli bir bilgi.',
+  'spi.core.office.i-stersen-neyin-zorladigini':'İstersen neyin zorladığını biraz anlat; ya da «ne yapayım» de, kayıtlarına bakıp birlikte düşünelim.',
+  'spi.core.office.bunu-kendi-cumlelerimle-anla':'Bunu kendi cümlelerimle anlatmam için bir dil modeli bağlı olmalı; kural motoru kavram anlatmaz, uydurmam da. ',
+  'spi.core.office.kutuphanem-anlatimlar-da-kal':'Kütüphanem › Anlatımlar’da kalori, protein ve uyku gibi konular adım adım anlatılıyor.',
+  'spi.core.office.su-an-one-cikan-bir':'Şu an öne çıkan bir iş yok: bayrak yok, ölçüm güncel. Bugünü olduğu gibi sürdürmen yeterli.',
+  'spi.core.office.onerim-su':'Önerim şu: ',
+  'spi.core.office.su-an-one-cikan':'Şu an öne çıkan: ',
+  'spi.core.office.asgari-gun-bugun':'Asgari gün bugün ',
+  'spi.core.office.neye-bakmami-istersin-uyku-b':'Neye bakmamı istersin: uyku, beslenme, hareket, tahlil ya da bütçe?',
+  'spi.core.office.brifingde-gecmeyen-sayi':'Brifingde geçmeyen sayı: ',
+  'spi.core.office.sen':'Sen ',
+  'spi.core.office.alanin':'Alanın: ',
+  'spi.core.office.alanin-disi':'Alanın DIŞI: ',
+  'spi.core.office.sayi-uretme-butun-sayilar-as':'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
+  'spi.core.office.teshis-koyma-i-lac-ya-da':'Teşhis koyma. İlaç ya da doz önerme. Tedaviyi bırakmayı önerme. Sonuç garantisi verme.',
+  'spi.core.office.bilmedigin-bir-sey-sorulursa':'Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
+  'spi.core.office.turkce-yaz-bir-insanla-sohbe':'Türkçe yaz; bir insanla sohbet eder gibi, sıcak ve doğal konuş. Kısa cümle kur, en fazla 4 cümle. ',
+  'spi.core.office.rapor-dokme-yalniz-sorulan-s':'Rapor dökme: yalnız sorulan şeye cevap ver. Her cevapta öneri, plan ya da «sıradaki hamle» sunma; ',
+  'spi.core.office.kullanici-nasil-hissettigini':'Kullanıcı nasıl hissettiğini anlatıyor: önce dinle ve anla, öneri sıralama; istersen tek bir soru sor. ',
+  'spi.core.office.kullanici-ne-yapacagini-soru':'Kullanıcı ne yapacağını soruyor: brifingdeki sıradaki işi gerekçesiyle tek öneri olarak söyle. ',
+  'spi.core.office.kullanici-bir-kavram-soruyor':'Kullanıcı bir kavram soruyor: kısaca anlat; kendi durumuna dair sayı yazma. ',
+  'spi.core.office.durumu-ozetle':'Durumu özetle.',
+  'spi.core.office.sepetin':'Sepetin %',
+  'spi.core.office.asgari-gun-serisi':'Asgari gün serisi ',
+  'spi.core.office.karar':'Karar ',
+  'spi.core.office.ayni-besin-ogesi-tabloda-da':'Aynı besin öğesi tabloda da açık: ',
+  'spi.core.office.besin-degeri-tablosu':'Besin değeri tablosu',
+  'spi.core.office.tabloda-acik-gorunmuyor-alim':'Tabloda açık görünmüyor: alım tutuyorsa sorun emilimde olabilir.',
+  'spi.core.office.acigi-kapatan-en-ucuz-kaynag':'Açığı kapatan en ucuz kaynağı Sedef bulur; hedef inmez, yolu değişir.',
+  'spi.core.office.i-kame-tablosu':'İkame tablosu',
+  'spi.core.office.bayrak-kapanana-kadar-yuk-ar':'Bayrak kapanana kadar yük artırılmaz. Program durmaz, tavan konur.',
+  'spi.core.office.bugunun-recetesi':'Bugünün reçetesi',
+  'spi.core.office.haftalik-yuk':'Haftalık yük %',
+  'spi.core.office.protein-hedefin':'Protein hedefin %',
+  'spi.core.office.oneri-tablosu':'Öneri tablosu',
+  'spi.core.office.toparlanma-skoru-uretilemiyo':'Toparlanma skoru üretilemiyor: HRV ve istirahat nabzı hiç girilmemiş.',
+  'spi.core.office.i-kisi-de-evde-olculur-olcum':'İkisi de evde ölçülür. Ölçüm gelmeden yük reçetesi tahmine düşer.',
+  'spi.core.office.vital-girisi':'Vital girişi',
+  'spi.core.office.birliktelik-iki-masayi-da-il':'Birliktelik iki masayı da ilgilendiriyor; karar ',
+  'spi.core.office.capraz-bag-tablosu':'Çapraz bağ tablosu',
+  'spi.core.office.oran':'Oran ',
+  'spi.core.office.acik-bir-sorun-yok-hedefler':'Açık bir sorun yok; hedefler gözden geçirilebilir.',
+  'spi.core.office.bugunun-durumunu-dort-masada':'Bugünün durumunu dört masadan gelen rapora göre özetle. Çelişki varsa hangi kuralın ',
+  'spi.core.office.gundem':'Gündem: ',
+  'spi.core.office.kendi-alanindan-bu-gundeme-n':'Kendi alanından bu gündeme ne söylüyorsun? Alanın dışına çıkma. En fazla 3 cümle.',
+  'spi.core.office.butce-ve-tek-bir-karar':'bütçe) ve TEK bir karar yaz. Kararı gerekçelendir.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.office.merkez-modeli-cevap-vermedi':'Merkez modeli cevap vermedi: ',
   'spi.core.office.model-istemi-geri-yazdi-kura':'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.',
   'spi.core.office.model-ciktisi-ev-kurallarina':'Model çıktısı ev kurallarına takıldı: ',
@@ -250,7 +339,7 @@ SP.Office = (function(){
         + d.summary.offTarget + ' tanesi hedef bandın dışında.');
       if(d.attention.length){
         const a = d.attention[0];
-        lines.push('En çok dikkat isteyen: ' + a.marker + ' ' + U.fmtNum(a.value) + ' ' + a.unit
+        lines.push(yz('spi.core.office.en-cok-dikkat-isteyen') + a.marker + ' ' + U.fmtNum(a.value) + ' ' + a.unit
           + ' (' + a.statusLabel + '). ' + (a.verdict || ''));
       }
       /* Bir oruntu, tek bir olcumun durumundan daha cok sey soyler:
@@ -261,16 +350,16 @@ SP.Office = (function(){
       /* Tok olcum bir uyaridir, dipnot degil: sirali cumlelerin
          basinda durur. */
       if(d.fasting === 'no'){
-        lines.push('Son oturum tok karnına alınmış; açlık glukozu, insülin ve '
+        lines.push(yz('spi.core.office.son-oturum-tok-karnina-alinm')
           + 'trigliserit yorumlanmadı.');
       }
       if(d.symptoms && d.symptoms.length){
         const en = d.symptoms[0];
-        lines.push('Son 30 günün ' + en.of + ' gününde giriş var; en sık '
+        lines.push(yz('spi.core.office.son-30-gunun') + en.of + ' gününde giriş var; en sık '
           + en.name.toLocaleLowerCase('tr-TR') + ' (' + en.days + ' gün).');
       }
       if(d.meds && d.meds.length){
-        lines.push('Kullanılanlar: ' + d.meds.map(m => m.name).join(', ')
+        lines.push(yz('spi.core.office.kullanilanlar') + d.meds.map(m => m.name).join(', ')
           + '. Bir ölçümdeki değişim bunlardan biriyle aynı yönde olabilir.');
       }
       if(d.overdue.length){
@@ -278,29 +367,29 @@ SP.Office = (function(){
         lines.push((/paneli$/i.test(pn) ? pn : pn + ' paneli') + ' '
           + d.overdue[0].note.toLocaleLowerCase('tr-TR'));
       }
-      if(!d.attention.length && !d.flags.length) lines.push('Dikkat isteyen bir ölçüm yok.');
+      if(!d.attention.length && !d.flags.length) lines.push(yz('spi.core.office.dikkat-isteyen-bir-olcum-yok'));
       return lines.join(' ');
     }
 
     if(agentId === 'nutri'){
       if(!d.targetsOk){
-        return 'Hedef hesaplanamıyor: profilde ' + d.missingProfile.join(', ') + ' eksik. '
-          + 'Bu üçü olmadan kalori ve protein hedefi tahmin edilmez.';
+        return yz('spi.core.office.hedef-hesaplanamiyor-profild') + d.missingProfile.join(', ') + ' eksik. '
+          + yz('spi.core.office.bu-ucu-olmadan-kalori-ve');
       }
-      lines.push('Günlük hedef ' + U.fmtNum(d.kcal) + ' kcal, protein '
+      lines.push(yz('spi.core.office.gunluk-hedef') + U.fmtNum(d.kcal) + ' kcal, protein '
         + d.protein.min + '–' + d.protein.max + ' g, lif ' + d.fiber + ' g.');
       if(d.adjustments.length){
-        lines.push('Laboratuvara göre ' + d.adjustments.length + ' hedef yükseltildi: '
+        lines.push(yz('spi.core.office.laboratuvara-gore') + d.adjustments.length + ' hedef yükseltildi: '
           + d.adjustments.map(a => a.nutrient).join(', ') + '.');
       }
       if(!d.loggedDays){
-        lines.push('Son 7 günde hiç öğün girilmemiş; açık hesaplanamıyor.');
+        lines.push(yz('spi.core.office.son-7-gunde-hic-ogun'));
       }else if(d.gaps.length){
         const g = d.gaps[0];
-        lines.push('En büyük açık ' + g.nutrient + ': hedefin %' + g.pct + '\'i. '
+        lines.push(yz('spi.core.office.en-buyuk-acik') + g.nutrient + ': hedefin %' + g.pct + '\'i. '
           + (g.why ? g.why : '') );
       }else{
-        lines.push('Son 7 günün ortalaması bütün hedefleri karşılıyor.');
+        lines.push(yz('spi.core.office.son-7-gunun-ortalamasi-butun'));
       }
       if(d.absorbNotes.length){
         const blockers = d.absorbNotes.filter(n => n.kind === 'block');
@@ -312,16 +401,16 @@ SP.Office = (function(){
     if(agentId === 'move'){
       if(d.override) lines.push(d.override);
       if(d.readiness == null){
-        lines.push('Toparlanma skoru hesaplanamıyor: bugün ölçüm girilmemiş.');
+        lines.push(yz('spi.core.office.toparlanma-skoru-hesaplanami'));
       }else{
-        lines.push('Toparlanma ' + d.readiness + '/100 — ' + d.band + '. ' + d.order);
+        lines.push(yz('spi.core.office.toparlanma') + d.readiness + '/100 — ' + d.band + '. ' + d.order);
         if(d.missingInputs && d.missingInputs.length){
-          lines.push('Eksik girdi: ' + d.missingInputs.join(', ') + '. Ağırlığı kalanlara dağıtıldı.');
+          lines.push(yz('spi.core.office.eksik-girdi') + d.missingInputs.join(', ') + '. Ağırlığı kalanlara dağıtıldı.');
         }
       }
-      if(d.acwr.ratio != null) lines.push('Akut/kronik yük oranı ' + U.fmtNet(d.acwr.ratio) + '. ' + d.acwr.note);
+      if(d.acwr.ratio != null) lines.push(yz('spi.core.office.akut-kronik-yuk-orani') + U.fmtNet(d.acwr.ratio) + '. ' + d.acwr.note);
       if(d.deload) lines.push(d.deload.week + '. hafta indirme haftası.');
-      if(d.balance.length) lines.push('Bu hafta hiç çalışılmayan kalıp: ' + d.balance.join(', ') + '.');
+      if(d.balance.length) lines.push(yz('spi.core.office.bu-hafta-hic-calisilmayan-ka') + d.balance.join(', ') + '.');
       if(d.progressionReady.length){
         const p = d.progressionReady[0];
         lines.push(p.exercise + ' için üst basamak açık: ' + p.from + ' → ' + p.to + '.');
@@ -330,16 +419,16 @@ SP.Office = (function(){
     }
 
     if(agentId === 'money'){
-      if(!d.itemCount) return 'Sepet boş. Haftalık alışverişi girince maliyet ve besin kapsaması hesaplanır.';
-      lines.push('Haftalık sepet ' + U.fmtNum(Math.round(d.total)) + ' TL'
+      if(!d.itemCount) return yz('spi.core.office.sepet-bos-haftalik-alisveris');
+      lines.push(yz('spi.core.office.haftalik-sepet') + U.fmtNum(Math.round(d.total)) + ' TL'
         + (d.householdSize > 1 ? ', kişi başı ' + U.fmtNum(Math.round(d.perPerson)) + ' TL' : '') + '.');
       if(d.limit != null){
-        lines.push(d.over ? 'Sınır ' + U.fmtNum(Math.round(d.limit)) + ' TL — aşıldı.'
-                          : 'Sınırın altında.');
+        lines.push(d.over ? yz('spi.core.office.sinir') + U.fmtNum(Math.round(d.limit)) + ' TL — aşıldı.'
+                          : yz('spi.core.office.sinirin-altinda'));
       }
-      if(d.estimatePct >= 50) lines.push('Hesabın %' + d.estimatePct + '\'i hâlâ tahmin fiyatıyla; kendi fişini gir.');
+      if(d.estimatePct >= 50) lines.push(yz('spi.core.office.hesabin') + d.estimatePct + '\'i hâlâ tahmin fiyatıyla; kendi fişini gir.');
       if(d.coverageGaps.length){
-        lines.push('Sepet ' + d.coverageGaps[0].nutrient + ' ihtiyacının yalnızca %'
+        lines.push(yz('spi.core.office.sepet') + d.coverageGaps[0].nutrient + ' ihtiyacının yalnızca %'
           + d.coverageGaps[0].pct + '\'ini karşılıyor.');
       }
       if(d.swaps.length){
@@ -354,10 +443,10 @@ SP.Office = (function(){
     /* patron */
     lines.push(d.headline);
     if(d.next && !d.next.calm){
-      lines.push('Sıradaki hamle: ' + d.next.title + '. ' + d.next.why);
+      lines.push(yz('spi.core.office.siradaki-hamle') + d.next.title + '. ' + d.next.why);
     }
     if(d.cross.length) lines.push(d.cross[0].text);
-    lines.push('Asgari gün ' + d.minimum.done + '/' + d.minimum.total
+    lines.push(yz('spi.core.office.asgari-gun') + d.minimum.done + '/' + d.minimum.total
       + ', seri ' + d.streak + ' gün.');
     if(d.openDecisions.length) lines.push(d.openDecisions.length + ' karar takipte.');
     return lines.join(' ');
@@ -419,7 +508,7 @@ SP.Office = (function(){
   }
   function gunSelami(){
     const h = new Date().getHours();
-    return h < 11 ? 'Günaydın' : h < 18 ? 'Merhaba' : 'İyi akşamlar';
+    return h < 11 ? 'Günaydın' : h < 18 ? 'Merhaba' : yz('spi.core.office.i-yi-aksamlar');
   }
 
   /* Uykunun ölçülmüş kısa özeti (son gece + kısa uykular). Yoksa null. */
@@ -429,7 +518,7 @@ SP.Office = (function(){
     const g = SP.Uyku ? SP.Uyku.gun(d) : null;
     const v = SP.S.vitals[d] && SP.S.vitals[d].sleep != null ? SP.S.vitals[d] : SP.S.vitals[dun];
     if(!v || v.sleep == null) return null;
-    let c = 'Son gece ' + U.fmtNet(v.sleep) + ' saat uyku girmişsin (ölçüldü)';
+    let c = yz('spi.core.office.son-gece') + U.fmtNet(v.sleep) + ' saat uyku girmişsin (ölçüldü)';
     if(g && g.kestirme.length) c += ', bugün ' + g.kestirmeDk + ' dakika kısa uyku da var';
     return c + '.';
   }
@@ -440,16 +529,16 @@ SP.Office = (function(){
       const u = uykuCumlesi();
       const yedi = [];
       for(let i = 1; i <= 7; i++){ const v = SP.S.vitals[U.iso(U.addDays(U.today(), -i))]; if(v && v.sleep != null) yedi.push(Number(v.sleep)); }
-      if(!u && !yedi.length) return 'Henüz uyku girilmemiş. Bu sabah «7 saat uyudum» yazman yeter; kısa uykuyu da «öğlen 30 dakika uyudum» diye girebilirsin.';
-      return [u, yedi.length >= 3 ? 'Son ' + yedi.length + ' gecenin ortalaması ' + U.fmtNet(U.round(U.sum(yedi) / yedi.length, 1)) + ' saat (hesaplandı).' : null]
+      if(!u && !yedi.length) return yz('spi.core.office.henuz-uyku-girilmemis-bu-sab');
+      return [u, yedi.length >= 3 ? yz('spi.core.office.son') + yedi.length + ' gecenin ortalaması ' + U.fmtNet(U.round(U.sum(yedi) / yedi.length, 1)) + ' saat (hesaplandı).' : null]
         .filter(Boolean).join(' ');
     }
     if(alan === 'beslenme'){
       const t = SP.Nutri.targets();
-      if(!t.ok) return 'Hedefi hesaplamam için profilde ' + t.missing.join(', ') + ' eksik; tahmin etmem.';
+      if(!t.ok) return yz('spi.core.office.hedefi-hesaplamam-icin-profi') + t.missing.join(', ') + ' eksik; tahmin etmem.';
       const tot = SP.Nutri.dayTotals(U.todayISO());
       const n = t.need;
-      const ihtiyac = 'Bugünkü ihtiyacın ' + U.fmtNum(t.tdee) + ' kcal: bazal metabolizma ' + U.fmtNum(t.bmr)
+      const ihtiyac = yz('spi.core.office.bugunku-ihtiyacin') + U.fmtNum(t.tdee) + ' kcal: bazal metabolizma ' + U.fmtNum(t.bmr)
         + (n && !n.hareketYok ? ' ve girdiğin hareket ' + U.fmtNum(n.hareket) + ' kcal' : '; hareket girmedin, o yüzden eklenmedi') + '.';
       return ihtiyac + (tot.empty ? ' Bugün öğün girilmedi.' : ' Şu ana kadar ' + U.fmtNum(Math.round(tot.kcal)) + ' kcal ve '
         + Math.round(tot.protein) + ' g protein girildi; hedef ' + U.fmtNum(t.kcal) + ' kcal.');
@@ -458,7 +547,7 @@ SP.Office = (function(){
       const d = U.todayISO();
       const dk = U.sum(SP.Model.workoutsOf(d).map(w => Number(w.minutes) || 0));
       const r = SP.Move.readiness(d);
-      return (dk ? 'Bugün ' + dk + ' dakika hareket girdin (' + SP.Model.workoutsOf(d).length + ' seans).' : 'Bugün hareket girilmedi.')
+      return (dk ? yz('spi.core.office.bugun') + dk + ' dakika hareket girdin (' + SP.Model.workoutsOf(d).length + ' seans).' : yz('spi.core.office.bugun-hareket-girilmedi'))
         + (r.ok ? ' Toparlanman ' + r.score + '/100, ' + r.band.label.toLocaleLowerCase('tr-TR') + '.' : ' Toparlanma için uyku bekleniyor.');
     }
     if(alan === 'tahlil') return ruleText('lab', labBrief());
@@ -473,32 +562,32 @@ SP.Office = (function(){
     const guvenlik = bayrak.length ? ' Bir şeyi atlamayayım: ' + bayrak[0].label + ' için açık bir kırmızı bayrak var; hekime danışmanı öneririm.' : '';
     const q = String(text || '').toLocaleLowerCase('tr');
     if(tur === 'selam'){
-      if(/(teşekkür|sağol|sağ ol|tşk|tsk|eyvallah)/.test(q)) return 'Rica ederim' + adiyla() + '. Ne zaman istersen buradayım.';
+      if(/(teşekkür|sağol|sağ ol|tşk|tsk|eyvallah)/.test(q)) return yz('spi.core.office.rica-ederim') + adiyla() + '. Ne zaman istersen buradayım.';
       if(/(görüşürüz|hoşça)/.test(q)) return 'Görüşürüz' + adiyla() + '. Kendine iyi bak.';
-      if(/(kimsin|ne iş yaparsın)/.test(q)) return 'Ben ' + a.name + ', ' + a.role.toLocaleLowerCase('tr-TR') + '. '
-        + (agentId === 'patron' ? 'Uyku, beslenme, hareket, tahlil ve bütçe masalarının söylediklerini birleştiririm; sayıları kural motoru hesaplar, ben anlatırım.'
-          : 'Kendi alanımdaki kayıtlarına bakarım; sayıları kural motoru hesaplar.');
-      if(/(nasılsın|naber|ne haber)/.test(q)) return 'İyiyim, sağ ol' + adiyla() + '. Sen nasılsın, bugün nasıl geçiyor?' + guvenlik;
-      if(/^(tamam|peki|süper|harika|anladım)/.test(q)) return 'Tamam. Başka bir şey sormak istersen buradayım.';
+      if(/(kimsin|ne iş yaparsın)/.test(q)) return yz('spi.core.office.ben') + a.name + ', ' + a.role.toLocaleLowerCase('tr-TR') + '. '
+        + (agentId === 'patron' ? yz('spi.core.office.uyku-beslenme-hareket-tahlil')
+          : yz('spi.core.office.kendi-alanimdaki-kayitlarina'));
+      if(/(nasılsın|naber|ne haber)/.test(q)) return yz('spi.core.office.i-yiyim-sag-ol') + adiyla() + '. Sen nasılsın, bugün nasıl geçiyor?' + guvenlik;
+      if(/^(tamam|peki|süper|harika|anladım)/.test(q)) return yz('spi.core.office.tamam-baska-bir-sey-sormak');
       return gunSelami() + adiyla() + '. Bugün nasılsın? Uykundan, öğünlerinden ya da aklındaki bir sorudan konuşabiliriz.' + guvenlik;
     }
     if(tur === 'hal'){
       const ek = /(yorgun|yoruldum|halsiz|bitkin|uykusuz)/.test(q) ? uykuCumlesi() : null;
       const dinle = /(moral|sıkıldım|bunaldım|stres|gergin|kaygı|endişe|canım sıkkın|keyfim yok|bıktım)/.test(q)
-        ? 'Bunu duyduğuma üzüldüm; böyle günler oluyor.' : 'Anlıyorum, böyle hissetmen önemli bir bilgi.';
-      return [dinle, ek, 'İstersen neyin zorladığını biraz anlat; ya da «ne yapayım» de, kayıtlarına bakıp birlikte düşünelim.']
+        ? yz('spi.core.office.bunu-duyduguma-uzuldum-boyle') : yz('spi.core.office.anliyorum-boyle-hissetmen-on');
+      return [dinle, ek, yz('spi.core.office.i-stersen-neyin-zorladigini')]
         .filter(Boolean).join(' ') + guvenlik;
     }
     if(tur === 'konu'){
-      return 'Bunu kendi cümlelerimle anlatmam için bir dil modeli bağlı olmalı; kural motoru kavram anlatmaz, uydurmam da. '
-        + 'Kütüphanem › Anlatımlar’da kalori, protein ve uyku gibi konular adım adım anlatılıyor.' + guvenlik;
+      return yz('spi.core.office.bunu-kendi-cumlelerimle-anla')
+        + yz('spi.core.office.kutuphanem-anlatimlar-da-kal') + guvenlik;
     }
     if(tur === 'oneri'){
       const n = (b && b.next) || SP.Calc.nextAction();
-      if(!n || n.calm) return 'Şu an öne çıkan bir iş yok: bayrak yok, ölçüm güncel. Bugünü olduğu gibi sürdürmen yeterli.';
+      if(!n || n.calm) return yz('spi.core.office.su-an-one-cikan-bir');
       const kucuk = s => String(s || '').charAt(0).toLocaleLowerCase('tr-TR') + String(s || '').slice(1);
       const neden = kucuk(n.title).replace(/[.]$/, '') + '; ' + kucuk(n.why);
-      return n.action ? 'Önerim şu: ' + n.action + ' Çünkü ' + neden : 'Şu an öne çıkan: ' + n.title + '. ' + n.why;
+      return n.action ? yz('spi.core.office.onerim-su') + n.action + ' Çünkü ' + neden : yz('spi.core.office.su-an-one-cikan') + n.title + '. ' + n.why;
     }
     /* veri: sorulan alan; alan yoksa uzmanın kendi özeti (Patron'da
        «sıradaki hamle» olmadan, yalnız durum). */
@@ -507,8 +596,8 @@ SP.Office = (function(){
     if(c) return c + guvenlik;
     if(agentId !== 'patron') return ruleText(agentId, b);
     const d = b || patronBrief();
-    return [d.headline, 'Asgari gün bugün ' + d.minimum.done + '/' + d.minimum.total + '.',
-      'Neye bakmamı istersin: uyku, beslenme, hareket, tahlil ya da bütçe?'].join(' ') + guvenlik;
+    return [d.headline, yz('spi.core.office.asgari-gun-bugun') + d.minimum.done + '/' + d.minimum.total + '.',
+      yz('spi.core.office.neye-bakmami-istersin-uyku-b')].join(' ') + guvenlik;
   }
 
   /* Metindeki sayilari cikarir (bkz. R.Office.numbersIn, AYS ile ayni
@@ -604,7 +693,7 @@ SP.Office = (function(){
     const notes = hits.map(h => h.why).concat(scope);
     const note = notes.length
       ? notes.join(', ') + ' tespit edildi.'
-      : (unsupported.length ? 'Brifingde geçmeyen sayı: ' + unsupported.join(', ') + '.' : '');
+      : (unsupported.length ? yz('spi.core.office.brifingde-gecmeyen-sayi') + unsupported.join(', ') + '.' : '');
 
     return {
       ok:hits.length === 0 && scope.length === 0 && unsupported.length === 0,
@@ -625,23 +714,23 @@ SP.Office = (function(){
     const a = SP.AGENT_BY_ID[agentId] || SP.AGENT_BY_ID.patron;
     return LIFEOS.Ofis.istem({
       modul:'spi', ajan:a, yontem:a.yontem, selam:!!e.selam, model:e.model || '',
-      kimlik:'Sen ' + a.name + ' adında bir sağlık asistanı ajanısın. Rolün: ' + a.role + '.\n'
-        + 'Alanın: ' + a.scope + '\n'
-        + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
+      kimlik:yz('spi.core.office.sen') + a.name + ' adında bir sağlık asistanı ajanısın. Rolün: ' + a.role + '.\n'
+        + yz('spi.core.office.alanin') + a.scope + '\n'
+        + yz('spi.core.office.alanin-disi') + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
       uzmanSayisi:SP.AGENTS.filter(x => x.id !== 'patron').length,
       kurallarAdi:'KURALLAR (bunlar tartışılmaz)',
       kurallar:[
-        'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
-        'Teşhis koyma. İlaç ya da doz önerme. Tedaviyi bırakmayı önerme. Sonuç garantisi verme.',
+        yz('spi.core.office.sayi-uretme-butun-sayilar-as'),
+        yz('spi.core.office.teshis-koyma-i-lac-ya-da'),
         SP.CLINICAL.disclaimer,
-        'Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
+        yz('spi.core.office.bilmedigin-bir-sey-sorulursa'),
       ],
-      uslup:'Türkçe yaz; bir insanla sohbet eder gibi, sıcak ve doğal konuş. Kısa cümle kur, en fazla 4 cümle. '
-        + 'Rapor dökme: yalnız sorulan şeye cevap ver. Her cevapta öneri, plan ya da «sıradaki hamle» sunma; '
+      uslup:yz('spi.core.office.turkce-yaz-bir-insanla-sohbe')
+        + yz('spi.core.office.rapor-dokme-yalniz-sorulan-s')
         + 'öneriyi yalnız kullanıcı ne yapacağını sorarsa ya da güvenlik (kırmızı bayrak) gerektirirse yap. '
-        + (e.tur === 'hal' ? 'Kullanıcı nasıl hissettiğini anlatıyor: önce dinle ve anla, öneri sıralama; istersen tek bir soru sor. '
-          : e.tur === 'oneri' ? 'Kullanıcı ne yapacağını soruyor: brifingdeki sıradaki işi gerekçesiyle tek öneri olarak söyle. '
-          : e.tur === 'konu' ? 'Kullanıcı bir kavram soruyor: kısaca anlat; kendi durumuna dair sayı yazma. ' : ''),
+        + (e.tur === 'hal' ? yz('spi.core.office.kullanici-nasil-hissettigini')
+          : e.tur === 'oneri' ? yz('spi.core.office.kullanici-ne-yapacagini-soru')
+          : e.tur === 'konu' ? yz('spi.core.office.kullanici-bir-kavram-soruyor') : ''),
       /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
       hafiza:SP.Hafizam ? SP.Hafizam.baglam({ ajan:'spi' }) : '',
       brifing:JSON.stringify(b),
@@ -693,7 +782,7 @@ SP.Office = (function(){
     const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
     const selam = tur ? tur === 'selam'
       : !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
-    const mesajlar = gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]);
+    const mesajlar = gecmis.concat([{ role:'user', text:question || yz('spi.core.office.durumu-ozetle') }]);
 
     try{
       let res = null;
@@ -806,15 +895,15 @@ SP.Office = (function(){
     const m = SP.Money.status();
     if(m.basket.over) add('money', 'debt', m.text);
     if(m.stale && m.basket.rows.length) add('money', 'info',
-      'Sepetin %' + m.basket.estimate.pct + '\'i tahmin fiyatıyla hesaplandı.');
+      yz('spi.core.office.sepetin') + m.basket.estimate.pct + '\'i tahmin fiyatıyla hesaplandı.');
     SP.Money.swapOpportunities().slice(0, 1).forEach(s => add('money', 'win',
       s.from.name + ' yerine ' + s.to.name + ': haftada ' + U.fmtNum(Math.round(s.saveTotal)) + ' TL.'));
 
     const streak = SP.Calc.streak();
-    if(streak >= 7) add('patron', 'win', 'Asgari gün serisi ' + streak + ' gün.');
+    if(streak >= 7) add('patron', 'win', yz('spi.core.office.asgari-gun-serisi') + streak + ' gün.');
     SP.Model.openDecisions().forEach(d => {
       const age = U.diffDays(SP.U.gunOf(d.at), U.todayISO());
-      if(age >= 2) add('patron', 'debt', 'Karar ' + age + ' gündür açık: ' + d.title);
+      if(age >= 2) add('patron', 'debt', yz('spi.core.office.karar') + age + ' gündür açık: ' + d.title);
     });
 
     return out;
@@ -909,10 +998,10 @@ SP.Office = (function(){
         finding:(acikli.length === 1 ? olcumAd(acikli[0]) + ' bandın altında'
           : acikli.length + ' ölçüm bandın altında: ' + acikli.map(olcumAd).join(', '))
           + ' (ölçüldü, ' + sonTarih(acikli) + ').',
-        ask:'Aynı besin öğesi tabloda da açık: '
+        ask:yz('spi.core.office.ayni-besin-ogesi-tabloda-da')
           + gaps.map(n => nutAd(n) + ' %' + gapById[n].pct).join(', ')
           + '. İki masa aynı şeyi söylüyor.',
-        route:'meals', ui:{ mealTab:'deger' }, cta:'Besin değeri tablosu',
+        route:'meals', ui:{ mealTab:'deger' }, cta:yz('spi.core.office.besin-degeri-tablosu'),
       });
     }
     if(aciksiz.length){
@@ -926,8 +1015,8 @@ SP.Office = (function(){
           : aciksiz.length + ' ölçüm bandın altında: ' + aciksiz.map(olcumAd).join(', '))
           + ' (ölçüldü, ' + sonTarih(aciksiz) + ').',
         ask:hedefler.map(nutAd).join(', ') + ' hedefini bu ölçümler belirler. '
-          + 'Tabloda açık görünmüyor: alım tutuyorsa sorun emilimde olabilir.',
-        route:'meals', ui:{ mealTab:'deger' }, cta:'Besin değeri tablosu',
+          + yz('spi.core.office.tabloda-acik-gorunmuyor-alim'),
+        route:'meals', ui:{ mealTab:'deger' }, cta:yz('spi.core.office.besin-degeri-tablosu'),
       });
     }
 
@@ -956,8 +1045,8 @@ SP.Office = (function(){
         push({
           id:'nutri-money-' + id, from:'nutri', to:'money', tone:'warn',
           finding:(n ? n.name : id) + ' hedefin %' + gapById[id].pct + '\'inde ve sepet de karşılamıyor.',
-          ask:'Açığı kapatan en ucuz kaynağı Sedef bulur; hedef inmez, yolu değişir.',
-          route:'basket', ui:{ basketTab:'ikame' }, cta:'İkame tablosu',
+          ask:yz('spi.core.office.acigi-kapatan-en-ucuz-kaynag'),
+          route:'basket', ui:{ basketTab:'ikame' }, cta:yz('spi.core.office.i-kame-tablosu'),
         });
       });
     }
@@ -969,8 +1058,8 @@ SP.Office = (function(){
       push({
         id:'lab-move-flag', from:'lab', to:'move', tone:'danger',
         finding:flags.length + ' açık kırmızı bayrak: ' + flags.map(f => f.label).join(', ') + '.',
-        ask:'Bayrak kapanana kadar yük artırılmaz. Program durmaz, tavan konur.',
-        route:'move', ui:{ moveTab:'bugun' }, cta:'Bugünün reçetesi',
+        ask:yz('spi.core.office.bayrak-kapanana-kadar-yuk-ar'),
+        route:'move', ui:{ moveTab:'bugun' }, cta:yz('spi.core.office.bugunun-recetesi'),
       });
     }
 
@@ -981,9 +1070,9 @@ SP.Office = (function(){
     if(prot && growth && growth.ok && growth.growth > 0){
       push({
         id:'move-nutri-protein', from:'move', to:'nutri', tone:'warn',
-        finding:'Haftalık yük %' + Math.round(growth.growth * 100) + ' arttı (hesaplandı).',
-        ask:'Protein hedefin %' + prot.pct + '\'inde. Artan yükün karşılığı masada yok.',
-        route:'meals', ui:{ mealTab:'oneri' }, cta:'Öneri tablosu',
+        finding:yz('spi.core.office.haftalik-yuk') + Math.round(growth.growth * 100) + ' arttı (hesaplandı).',
+        ask:yz('spi.core.office.protein-hedefin') + prot.pct + '\'inde. Artan yükün karşılığı masada yok.',
+        route:'meals', ui:{ mealTab:'oneri' }, cta:yz('spi.core.office.oneri-tablosu'),
       });
     }
 
@@ -993,9 +1082,9 @@ SP.Office = (function(){
     if(need.length === 2){
       push({
         id:'move-lab-vital', from:'move', to:'lab', tone:'info',
-        finding:'Toparlanma skoru üretilemiyor: HRV ve istirahat nabzı hiç girilmemiş.',
-        ask:'İkisi de evde ölçülür. Ölçüm gelmeden yük reçetesi tahmine düşer.',
-        route:'labs', ui:{ labTab:'giris', labFilter:'vital' }, cta:'Vital girişi',
+        finding:yz('spi.core.office.toparlanma-skoru-uretilemiyo'),
+        ask:yz('spi.core.office.i-kisi-de-evde-olculur-olcum'),
+        route:'labs', ui:{ labTab:'giris', labFilter:'vital' }, cta:yz('spi.core.office.vital-girisi'),
       });
     }
 
@@ -1011,8 +1100,8 @@ SP.Office = (function(){
         push({
           id:'cross-' + c.link.id, from, to, tone:c.tone === 'warn' ? 'warn' : 'info',
           finding:c.link.title + ' — ' + c.text,
-          ask:'Birliktelik iki masayı da ilgilendiriyor; karar ' + (SP.AGENT_BY_ID[to] || {}).name + '\'de.',
-          route:'analytics', ui:{ analyticsTab:'capraz' }, cta:'Çapraz bağ tablosu',
+          ask:yz('spi.core.office.birliktelik-iki-masayi-da-il') + (SP.AGENT_BY_ID[to] || {}).name + '\'de.',
+          route:'analytics', ui:{ analyticsTab:'capraz' }, cta:yz('spi.core.office.capraz-bag-tablosu'),
         });
       });
     })();
@@ -1049,21 +1138,21 @@ SP.Office = (function(){
     if(g.ok) g.rows.filter(r => r.pct < 80).slice(0, 2)
       .forEach(r => push('nutri-gap', (r.nutrient ? r.nutrient.name : r.id) + ' hedefin %' + r.pct + '\'inde'));
     const a = SP.Move.acwr();
-    if(a.ok && a.zone === 'high') push('overreach', 'Oran ' + U.fmtNet(a.ratio) + '. ' + a.note);
+    if(a.ok && a.zone === 'high') push('overreach', yz('spi.core.office.oran') + U.fmtNet(a.ratio) + '. ' + a.note);
     const rec = [];
     for(let i = 0; i < 5; i++){
       const r = SP.Move.readiness(U.iso(U.addDays(U.today(), -i)));
       if(r.ok) rec.push(r.score);
     }
     if(rec.length >= 3 && U.sum(rec) / rec.length < 55){
-      push('recovery-debt', 'Son ' + rec.length + ' günün toparlanma ortalaması '
+      push('recovery-debt', yz('spi.core.office.son') + rec.length + ' günün toparlanma ortalaması '
         + Math.round(U.sum(rec) / rec.length) + '.');
     }
     const m = SP.Money.status();
     if(m.basket.over) push('budget-over', m.text);
     if(m.stale && m.basket.rows.length) push('price-stale',
-      'Sepetin %' + m.basket.estimate.pct + '\'i tahmin fiyatıyla.');
-    if(!out.length) push('goal-review', 'Açık bir sorun yok; hedefler gözden geçirilebilir.');
+      yz('spi.core.office.sepetin') + m.basket.estimate.pct + '\'i tahmin fiyatıyla.');
+    if(!out.length) push('goal-review', yz('spi.core.office.acik-bir-sorun-yok-hedefler'));
 
     return out.sort((x, y) => y.score - x.score);
   }
@@ -1077,7 +1166,7 @@ SP.Office = (function(){
 
     const b = patronBrief();
     const res = await ask('patron',
-      'Bugünün durumunu dört masadan gelen rapora göre özetle. Çelişki varsa hangi kuralın '
+      yz('spi.core.office.bugunun-durumunu-dort-masada')
       + 'öncelikli olduğunu söyle. En fazla dört cümle.', { brief:b });
 
     const rec = { date:d, text:res.text, source:res.source, at:new Date().toISOString(),
@@ -1099,8 +1188,8 @@ SP.Office = (function(){
     for(const id of order){
       const b = brief(id);
       const res = await ask(id,
-        'Gündem: ' + agenda.label + ' — ' + agenda.detail + '\n'
-        + 'Kendi alanından bu gündeme ne söylüyorsun? Alanın dışına çıkma. En fazla 3 cümle.',
+        yz('spi.core.office.gundem') + agenda.label + ' — ' + agenda.detail + '\n'
+        + yz('spi.core.office.kendi-alanindan-bu-gundeme-n'),
         /* Toplanti sohbet degil: her uzman gundeme tek basina cevap
            verir, danisma ekranindaki sohbet gecmisi buraya karismaz. */
         { brief:b, maxTokens:400, history:false });
@@ -1111,11 +1200,11 @@ SP.Office = (function(){
 
     const pb = patronBrief();
     const closing = await ask('patron',
-      'Gündem: ' + agenda.label + '\n'
+      yz('spi.core.office.gundem') + agenda.label + '\n'
       + 'Uzmanların söyledikleri:\n'
       + turns.map(t => '- ' + t.name + ': ' + t.text).join('\n') + '\n\n'
       + 'Çelişki varsa öncelik sırasına göre çöz (kırmızı bayrak > güvenlik > laboratuvar > '
-      + 'beslenme > antrenman > bütçe) ve TEK bir karar yaz. Kararı gerekçelendir.',
+      + ('beslenme > antrenman > ' + yz('spi.core.office.butce-ve-tek-bir-karar')),
       { brief:pb, maxTokens:500, history:false });
 
     const rec = {

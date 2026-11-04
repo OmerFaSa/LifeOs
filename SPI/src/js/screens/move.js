@@ -17,11 +17,80 @@
 
    Ekranın kuralı: sistem yükü kendiliğinden azaltabilir ama asla
    kendiliğinden artıramaz. Artırma kararı hep kullanıcınındır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.move.modul-3':'Modül 3',
+  'spi.move.bu-bir-geri-adim-degil':'Bu bir geri adım değil, planın parçası. Asgari gün yine geçerli: ',
+  'spi.move.bugun-henuz-seans-kaydi-yok':'Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.',
+  'spi.move.toparlanma':'Toparlanma ',
+  'spi.move.bu-kalipta-tanimli-hareket-y':'Bu kalıpta tanımlı hareket yok.',
+  'spi.move.bu-hafta-gecen-haftanin-10':'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.',
+  'spi.move.gecen-hafta-kardiyo-kaydi-yo':'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.',
+  'spi.move.kayit-suruyor':'Kayıt sürüyor',
+  'spi.move.kaydedilmemis-rota':'Kaydedilmemiş rota',
+  'spi.move.kayit-yarida-kaldi':'Kayıt yarıda kaldı',
+  'spi.move.ekran-kapaliyken-de-kaydeder':'Ekran kapalıyken de kaydeder; telefon cebinde olabilir.',
+  'spi.move.ekran-acik-kalmali-kilitli-e':'Ekran açık kalmalı; kilitli ekranda konum gelmez.',
+  'spi.move.ort-hiz':'Ort. hız',
+  'spi.move.ort-tempo':'Ort. tempo',
+  'spi.move.hareket-bekleniyor':'Hareket bekleniyor…',
+  'spi.move.konum-bekleniyor':'Konum bekleniyor…',
+  'spi.move.sayfa-kapandigi-icin-kayit-d':'Sayfa kapandığı için kayıt durdu.',
+  'spi.move.duraklatildi-aradaki-yol-say':'Duraklatıldı; aradaki yol sayılmaz.',
+  'spi.move.ekrani-acik-tut-kilitli-ekra':'Ekranı açık tut; kilitli ekranda konum gelmez.',
+  'spi.move.gps-noktalari-arasi-mesafele':'GPS noktaları arası mesafelerin toplamı',
+  'spi.move.kaydi-kaydet':'Kaydı kaydet',
+  'spi.move.rotayi-ekle':'Rotayı ekle',
+  'spi.move.hangi-hareket-oldugunu-sec':'Hangi hareket olduğunu seç.',
+  'spi.move.dosyada-tur-yazmiyor':'Dosyada tür yazmıyor',
+  'spi.move.tam-dinlenme-gunu-de-bos':'Tam dinlenme günü de boş değildir: asgari gün geçerli — ',
+  'spi.move.gecen-haftaya-gore-degisim':'Geçen haftaya göre değişim %',
+  'spi.move.fotograftan-analiz-icin-hkm':'Fotoğraftan analiz için HKM › Modeller’de «SPİ · Görsel» (ya da King) için ',
+  'spi.move.fotografi-buraya-birak-ya-da':'Fotoğrafı buraya bırak ya da seçmek için tıkla',
+  'spi.move.bu-analiz-tibbi-bir-teshis':'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler ',
+  'spi.move.bu-analiz-tibbi-bir-teshis-2':'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir. Tanı ve tedavi için hekiminize danışınız.',
+  'spi.move.beden-kitle-indeksi':'Beden kitle indeksi',
+  'spi.move.bel-boy-orani':'Bel / boy oranı',
+  'spi.move.yag-orani':'Yağ oranı',
+  'spi.move.yagsiz-kutle':'Yağsız kütle',
+  'spi.move.yag-kutlesi':'Yağ kütlesi ',
+  'spi.move.kilo-egilimi':'Kilo eğilimi',
+  'spi.move.son-7-tartinin-ortalamasi':'Son 7 tartının ortalaması ',
+  'spi.move.gunluk-harcama-kaba':'Günlük harcama (kaba)',
+  'spi.move.henuz-seans-kaydi-yok':'Henüz seans kaydı yok.',
+  'spi.move.seansi-duzenle':'Seansı düzenle',
+  'spi.move.tum-vucut':'Tüm vücut',
+  'spi.move.kalip':'Kalıp: ',
+  'spi.move.genel-kondisyon':'Genel kondisyon',
+  'spi.move.setler':'Setler · ',
+  'spi.move.bu-hafta-hareket':'Bu hafta hareket',
+  'spi.move.antrenman-haftasi':'Antrenman haftası',
+  'spi.move.uyku-suresini-yazman-bile-ye':'Uyku süresini yazman bile yeter.',
+  'spi.move.yogunluk-son-28-gun':'Yoğunluk · son 28 gün',
+  'spi.move.seansin-zorlugu-yazilmadi-ba':'seansın zorluğu yazılmadı; banda girmedi.',
+  'spi.move.bu-bolum-su-an-cizilemedi':'Bu bölüm şu an çizilemedi; verin yerinde duruyor.',
+  'spi.move.yuk-orani-icin-gecmis-yetmiy':'Yük oranı için geçmiş yetmiyor.',
+  'spi.move.analiz-basarisiz':'Analiz başarısız',
+  'spi.move.fotograf-bugunun-kaydina-ekl':'Fotoğraf bugünün kaydına eklendi',
+  'spi.move.duzeltici-mobilite':'Düzeltici Mobilite',
+  'spi.move.kaydi-sil':'Kaydı sil',
+  'spi.move.bu-canli-kayit-ve-butun':'Bu canlı kayıt ve bütün konum noktaları silinir; geri alınamaz.',
+  'spi.move.seansi-sil':'Seansı sil',
+  'spi.move.bu-seans-ve-urettigi-yuk':'Bu seans ve ürettiği yük kaydından silinir.',
+  'spi.move.yeni-basamak':'Yeni basamak: ',
+  'spi.move.toparlanma-olcumu-bekliyor':'Toparlanma ölçümü bekliyor.',
+  'spi.move.bugun-dinlenme-gunu':'Bugün dinlenme günü.',
+  'spi.move.bugun-tam-yuk-yapilabilir':'Bugün tam yük yapılabilir.',
+  'spi.move.bugun-yuk-hafifletilmeli':'Bugün yük hafifletilmeli.',
+  'spi.move.uyku-ve-nabiz-girilince-gunu':'Uyku ve nabız girilince günün yük emri hesaplanır. ',
+  'spi.move.olcum-olmadan-yuk-korlemesin':'Ölçüm olmadan yük körlemesine verilmez.',
+  'spi.move.olcum-bekliyor-2':'Ölçüm bekliyor',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'spi', sira:50, id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle', route:'move',
-  hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
+  hint:yz('spi.move.modul-3'), run:() => { SP.App.go('move'); setTimeout(() => {
     const fn = SP.Screens.move.handle['start-session'];
     if(fn) fn({ dataset:{ id:'' } }); }, 120); } });
 window.LIFEOS.PARCA.yazilar({
@@ -265,7 +334,7 @@ SP.Screens.move = (function(){
         ${map(rx.reasons.filter(x => !(r.ok && x.id === 'readiness')),
           x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, body:x.text }))}
         ${when(rx.kind === 'rest', () => K.Notice({ tone:'info',
-          body:'Bu bir geri adım değil, planın parçası. Asgari gün yine geçerli: '
+          body:yz('spi.move.bu-bir-geri-adim-degil')
             + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş.' }))}`,
     });
   }
@@ -342,7 +411,7 @@ SP.Screens.move = (function(){
     const rows = M.workoutsOf(d);
     if(!rows.length){
       return K.Entry({ label:yz('spi.move.bugunun-seanslari'), meta:'kayıt yok',
-        body:P.empty('Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.') });
+        body:P.empty(yz('spi.move.bugun-henuz-seans-kaydi-yok')) });
     }
     return K.Entry({
       label:yz('spi.move.bugunun-seanslari'),
@@ -432,7 +501,7 @@ SP.Screens.move = (function(){
       when(areaId === 'esneklik' && rx.kind !== 'full', () => K.Entry({
         label:yz('spi.move.bugun-icin'), meta:'toparlanma bandı',
         body:K.Notice({ tone:'info',
-          body:'Toparlanma ' + (rx.readiness.ok ? rx.readiness.band.label.toLocaleLowerCase('tr-TR')
+          body:yz('spi.move.toparlanma') + (rx.readiness.ok ? rx.readiness.band.label.toLocaleLowerCase('tr-TR')
             : 'ölçülmedi') + '. Esneklik akışı ağır antrenmanın yerine geçebilir; '
             + 'yük üretmez ama zinciri kırmaz.' }),
       })),
@@ -444,7 +513,7 @@ SP.Screens.move = (function(){
           act:'start-area', data:{ 'data-area':areaId } }),
         body:html`
           ${when(areaId === 'kuvvet', () => desenSuzgeci())}
-          ${when(!list.length, () => P.empty('Bu kalıpta tanımlı hareket yok.'))}
+          ${when(!list.length, () => P.empty(yz('spi.move.bu-kalipta-tanimli-hareket-y')))}
           <div class="ladders">${map(list, ladderBlock)}</div>`,
       }),
 
@@ -483,9 +552,9 @@ SP.Screens.move = (function(){
       ${K.Notice({ tone:lastWeek && thisWeek > cap ? 'warn' : 'info',
         body:lastWeek
           ? (thisWeek > cap
-            ? 'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.'
+            ? yz('spi.move.bu-hafta-gecen-haftanin-10')
             : SP.LOAD_RULES.weeklyGrowth.note)
-          : 'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.' })}`;
+          : yz('spi.move.gecen-hafta-kardiyo-kaydi-yo') })}`;
   }
 
   /* ------------------------------------------------------------ rotalar
@@ -573,8 +642,8 @@ SP.Screens.move = (function(){
 
   function canliKartMetni(c){
     const R = Ro(), o = SP.Canli.ozet();
-    const ad = c.hal === 'kayitta' ? 'Kayıt sürüyor' : c.hal === 'bitti' ? 'Kaydedilmemiş rota'
-      : c.geriGeldi ? 'Kayıt yarıda kaldı' : 'Duraklatıldı';
+    const ad = c.hal === 'kayitta' ? yz('spi.move.kayit-suruyor') : c.hal === 'bitti' ? yz('spi.move.kaydedilmemis-rota')
+      : c.geriGeldi ? yz('spi.move.kayit-yarida-kaldi') : 'Duraklatıldı';
     const km = o ? R.km(o.mesafe) + ' km' : c.nokta ? '0,00 km' : 'konum bekleniyor';
     return String(html`<i class="${cls('canli-kart__isaret', c.hal === 'kayitta' && 'is-canli')}" aria-hidden="true"></i>
       <b class="small">${ad}</b> <span class="small dim num">${R.sureMetni(c.sure)} · ${km}</span>`);
@@ -598,8 +667,8 @@ SP.Screens.move = (function(){
       title:yz('spi.move.kayda-basla'),
       body:String(html`${turSecici('canli-tur', canliTur)}
         <p class="tiny dim">${SP.Canli._ortam.arkaPlan()
-          ? 'Ekran kapalıyken de kaydeder; telefon cebinde olabilir.'
-          : 'Ekran açık kalmalı; kilitli ekranda konum gelmez.'}</p>`),
+          ? yz('spi.move.ekran-kapaliyken-de-kaydeder')
+          : yz('spi.move.ekran-acik-kalmali-kilitli-e')}</p>`),
       footer:String(html`${K.Button({ label:yz('spi.move.vazgec'), act:'sheet-close' })}
         ${K.Button({ label:yz('spi.move.baslat'), icon:'play', tone:'primary', act:'canli-basla' })}`),
       noFocus:true,
@@ -616,23 +685,23 @@ SP.Screens.move = (function(){
     return kutu('Süre', { deger:R.sureMetni(c.sure), kesinlik:'measured' })
       + kutu('Mesafe', o ? hesap(o.mesafe / 1000, 'km', { ondalik:2 }) : yok)
       + (bisiklet
-        ? kutu('Ort. hız', hiz == null ? yok : hesap(Math.round(hiz * 10) / 10, 'km/sa'))
-        : kutu('Ort. tempo', tempo == null ? yok : hesap(R.sureMetni(tempo), 'dk/km')));
+        ? kutu(yz('spi.move.ort-hiz'), hiz == null ? yok : hesap(Math.round(hiz * 10) / 10, 'km/sa'))
+        : kutu(yz('spi.move.ort-tempo'), tempo == null ? yok : hesap(R.sureMetni(tempo), 'dk/km')));
   }
   function canliHarita(c){
     const o = SP.Canli.ozet();
     const h = o ? SP.Harita.ciz([Ro().sakla(o.iz)], { gen:640, yuk:360, etiket:yz('spi.move.canli-rota') }).html : '';
     return h || '<div class="harita canli__bos" style="aspect-ratio:640 / 360"><span class="small dim">'
-      + (c.nokta ? 'Hareket bekleniyor…' : 'Konum bekleniyor…') + '</span></div>';
+      + (c.nokta ? yz('spi.move.hareket-bekleniyor') : yz('spi.move.konum-bekleniyor')) + '</span></div>';
   }
   /* Durum satırı yalnız DİKKAT gerekince konuşur; her şey yolundaysa boş. */
   function canliDurumMetni(c){
     if(c.hal !== 'kayitta'){
-      return c.hata || (c.geriGeldi ? 'Sayfa kapandığı için kayıt durdu.' : 'Duraklatıldı; aradaki yol sayılmaz.');
+      return c.hata || (c.geriGeldi ? yz('spi.move.sayfa-kapandigi-icin-kayit-d') : yz('spi.move.duraklatildi-aradaki-yol-say'));
     }
     if(c.hata) return c.hata;
-    if(!c.nokta) return c.bekleme || 'Konum bekleniyor…';
-    return c.ekran === 'acik' || c.ekran === 'arka-plan' ? '' : 'Ekranı açık tut; kilitli ekranda konum gelmez.';
+    if(!c.nokta) return c.bekleme || yz('spi.move.konum-bekleniyor');
+    return c.ekran === 'acik' || c.ekran === 'arka-plan' ? '' : yz('spi.move.ekrani-acik-tut-kilitli-ekra');
   }
   function canliDugmeleri(c){
     return String(html`${c.hal === 'kayitta'
@@ -733,7 +802,7 @@ SP.Screens.move = (function(){
         ${raw(SP.Harita.ciz([rotaIzi(w)], { gen:640, yuk:360, etiket:yz('spi.move.rota') + rotaAdi(w) }).html)}
         <div class="cols-4 mt-16">
           ${K.Stat({ label:yz('spi.move.mesafe'), value:raw(sayiHtml(Object.assign(hesap(r.mesafe / 1000, 'km',
-            'GPS noktaları arası mesafelerin toplamı'), { ondalik:2 }))) })}
+            yz('spi.move.gps-noktalari-arasi-mesafele')), { ondalik:2 }))) })}
           ${K.Stat({ label:yz('spi.move.hareket-suresi'), value:raw(sayiHtml({ deger:R.sureMetni(r.hareket), kesinlik:'computed',
             zaman, formul:'hızın ' + U.fmtNum(R.HAREKET_MS) + ' m/sn üstünde olduğu süre' })),
             note:r.sure - r.hareket >= 60 ? 'toplam ' + R.sureMetni(r.sure) : null })}
@@ -803,15 +872,15 @@ SP.Screens.move = (function(){
     const bas = new Date(r.bas);
     const saat = String(bas.getHours()).padStart(2, '0') + ':' + String(bas.getMinutes()).padStart(2, '0');
     UI.sheet({
-      title:t.canli ? 'Kaydı kaydet' : 'Rotayı ekle', wide:true,
+      title:t.canli ? yz('spi.move.kaydi-kaydet') : yz('spi.move.rotayi-ekle'), wide:true,
       subtitle:U.fmtDate(U.iso(bas)) + ' · ' + saat,
       body:String(html`
         ${raw(SP.Harita.ciz([R.coz(r.iz)], { gen:640, yuk:340, etiket:yz('spi.move.eklenecek-rota') }).html)}
         <p class="small num mt-12">${rotaSatiri(r, t.tur)}${r.tirmanis != null
           ? ' · ↑ ' + U.fmtNum(r.tirmanis) + ' m' : ''}</p>
         <div class="mt-16">${turSecici('rota-tur', t.tur)}</div>
-        ${when(!t.tur, () => html`<p class="tiny dim mt-8">${t.canli ? 'Hangi hareket olduğunu seç.'
-          : 'Dosyada tür yazmıyor' + (t.turYazi ? ' («' + t.turYazi + '» tanınmadı)' : '')
+        ${when(!t.tur, () => html`<p class="tiny dim mt-8">${t.canli ? yz('spi.move.hangi-hareket-oldugunu-sec')
+          : yz('spi.move.dosyada-tur-yazmiyor') + (t.turYazi ? ' («' + t.turYazi + '» tanınmadı)' : '')
             + '; hangisi olduğunu seç.'}</p>`)}
         ${when(r.atlanan, () => html`<p class="tiny dim mt-8">${r.atlanan} ${yz('spi.move.bozuk-gps-noktasi-atlandi')}</p>`)}
         ${when(r.zayif, () => html`<p class="tiny dim mt-8">${r.zayif} ${yz('spi.move.zayif-konum')}${SP.Canli.DOGRULUK_M} m'den kötü) ize alınmadı.</p>`)}
@@ -851,7 +920,7 @@ SP.Screens.move = (function(){
           </div>`)}
           ${when(!r.ok, () => K.Notice({ tone:'info', body:r.note }))}
           ${when(rx.kind === 'rest', () => K.Notice({ tone:'info',
-            body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
+            body:yz('spi.move.tam-dinlenme-gunu-de-bos')
               + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
       }),
 
@@ -902,7 +971,7 @@ SP.Screens.move = (function(){
       </div>
       ${K.Notice({ tone:a.ok ? a.tone : 'info', body:a.note })}
       ${when(g.ok, () => K.Notice({ tone:g.over ? 'warn' : 'info',
-        body:'Geçen haftaya göre değişim %' + Math.round(g.growth * 100) + '. ' + g.note }))}
+        body:yz('spi.move.gecen-haftaya-gore-degisim') + Math.round(g.growth * 100) + '. ' + g.note }))}
       ${when(dl.due, () => K.Notice({ tone:'warn', body:dl.note }))}`;
   }
 
@@ -917,10 +986,10 @@ SP.Screens.move = (function(){
       body:String(K.Stack([
         when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
           title:yz('spi.move.model-bagli-degil'),
-          body:'Fotoğraftan analiz için HKM › Modeller’de «SPİ · Görsel» (ya da King) için '
+          body:yz('spi.move.fotograftan-analiz-icin-hkm')
             + 'görüntü okuyan bir model ata.' })),
         K.Drop({ act:'body-photo-file', label:yz('spi.move.boydan-vucut-fotografi'), icon:'camera',
-          accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
+          accept:'image/*', hint:yz('spi.move.fotografi-buraya-birak-ya-da') }),
         html`<div id="body-photo-name" class="small dim">${bodyPhotoFile ? bodyPhotoFile.name : ''}</div>`,
         html`<div class="cols-2">
           ${K.Field({ label:yz('spi.move.boyun-cm'), hint:'isteğe bağlı',
@@ -930,7 +999,7 @@ SP.Screens.move = (function(){
         </div>`,
         K.Field({ label:yz('spi.move.ek-not-odaklanilacak-alan'), hint:'örn: omuz düşüklüğü, boyun duruşu vb.',
           input:K.Input({ id:'bp-note', placeholder:yz('spi.move.one-dogru-hafif-kambur-durus') }) }),
-        K.Notice({ tone:'info', body:'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler '
+        K.Notice({ tone:'info', body:yz('spi.move.bu-analiz-tibbi-bir-teshis')
           + 'her zaman «tahmin» olarak etiketlenir.' }),
       ])),
       footer:String(html`${K.Button({ label:yz('spi.move.vazgec'), act:'sheet-close' })}
@@ -1035,7 +1104,7 @@ SP.Screens.move = (function(){
         K.Notice({
           tone:'warn',
           title:yz('spi.move.5-tibbi-guvenlik-uyarisi-tah'),
-          body: tg.uyari || 'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir. Tanı ve tedavi için hekiminize danışınız.'
+          body: tg.uyari || yz('spi.move.bu-analiz-tibbi-bir-teshis-2')
         }),
       ])),
       footer:String(html`${K.Button({ label:yz('spi.move.kapat'), act:'sheet-close' })}
@@ -1074,17 +1143,17 @@ SP.Screens.move = (function(){
     return K.Entry({
       wide:true, label:yz('spi.move.vucut-analizi'), hint:'vucut-analizi', meta:a.eksik.length ? a.eksik.length + ' ölçü eksik' : 'güncel',
       body:html`<div class="list">
-        ${when(a.bki, () => satir('Beden kitle indeksi', vg(a.bki.deger) + ' · ' + a.bki.bant, 'derived', a.bki.not))}
-        ${when(a.belBoy, () => satir('Bel / boy oranı', String(a.belBoy.deger).replace('.', ','), 'derived', a.belBoy.not))}
-        ${when(a.yag, () => satir('Yağ oranı', '%' + String(a.yag.deger).replace('.', ','), a.yag.etiket === 'ölçüldü' ? 'measured' : 'estimated',
+        ${when(a.bki, () => satir(yz('spi.move.beden-kitle-indeksi'), vg(a.bki.deger) + ' · ' + a.bki.bant, 'derived', a.bki.not))}
+        ${when(a.belBoy, () => satir(yz('spi.move.bel-boy-orani'), String(a.belBoy.deger).replace('.', ','), 'derived', a.belBoy.not))}
+        ${when(a.yag, () => satir(yz('spi.move.yag-orani'), '%' + String(a.yag.deger).replace('.', ','), a.yag.etiket === 'ölçüldü' ? 'measured' : 'estimated',
           a.yag.yontem + (a.yag.not ? ' · ' + a.yag.not : '')))}
-        ${when(a.yagsiz, () => satir('Yağsız kütle', vg(a.yagsiz.kutle) + ' kg · FFMI ' + vg(a.yagsiz.ffmiDuz), a.yag && a.yag.etiket === 'ölçüldü' ? 'derived' : 'estimated',
-          'Yağ kütlesi ' + vg(a.yagsiz.yagKg) + ' kg; FFMI boya göre düzeltilmiş.'))}
+        ${when(a.yagsiz, () => satir(yz('spi.move.yagsiz-kutle'), vg(a.yagsiz.kutle) + ' kg · FFMI ' + vg(a.yagsiz.ffmiDuz), a.yag && a.yag.etiket === 'ölçüldü' ? 'derived' : 'estimated',
+          yz('spi.move.yag-kutlesi') + vg(a.yagsiz.yagKg) + ' kg; FFMI boya göre düzeltilmiş.'))}
         ${a.egilim.ok
-          ? satir('Kilo eğilimi', (a.egilim.haftalik > 0 ? '+' : '') + String(a.egilim.haftalik).replace('.', ',') + ' kg/hafta · ' + a.egilim.yon, 'derived',
-              'Son 7 tartının ortalaması ' + vg(a.egilim.ortalama7) + ' kg; günlük oynama ayıklandı (' + a.egilim.tarti + ' tartı).')
-          : satir('Kilo eğilimi', '—', 'missing', a.egilim.why)}
-        ${when(a.enerji, () => satir('Günlük harcama (kaba)', a.enerji.harcama + ' kcal', 'estimated', a.enerji.not))}
+          ? satir(yz('spi.move.kilo-egilimi'), (a.egilim.haftalik > 0 ? '+' : '') + String(a.egilim.haftalik).replace('.', ',') + ' kg/hafta · ' + a.egilim.yon, 'derived',
+              yz('spi.move.son-7-tartinin-ortalamasi') + vg(a.egilim.ortalama7) + ' kg; günlük oynama ayıklandı (' + a.egilim.tarti + ' tartı).')
+          : satir(yz('spi.move.kilo-egilimi'), '—', 'missing', a.egilim.why)}
+        ${when(a.enerji, () => satir(yz('spi.move.gunluk-harcama-kaba'), a.enerji.harcama + ' kcal', 'estimated', a.enerji.not))}
       </div>
       ${when(a.eksik.length, () => html`<p class="tiny dim mt-8">Eksik: ${a.eksik.join(', ')}${yz('spi.move.eksik-olcu-sifir-sayilmaz')}</p>`)}
       <div class="cols-3 mt-8">
@@ -1115,7 +1184,7 @@ SP.Screens.move = (function(){
 
   function historyBody(){
     const rows = S.workouts.slice(-20).reverse();
-    if(!rows.length) return P.empty('Henüz seans kaydı yok.');
+    if(!rows.length) return P.empty(yz('spi.move.henuz-seans-kaydi-yok'));
     return K.Table({ tight:true,
       headers:['Tarih', 'Seans', { label:yz('spi.move.dakika'), num:true }, { label:yz('spi.move.yuk-2'), num:true }],
       rows:rows.map(w => [U.fmtShort(w.date), w.name, String(w.minutes),
@@ -1131,7 +1200,7 @@ SP.Screens.move = (function(){
     const isNew = !S.workouts.some(w => w.id === rec.id);
     const chosen = (rec.items || []).map(i => i.exId);
     UI.sheet({
-      title:isNew ? 'Seans ekle' : 'Seansı düzenle', subtitle:rec.name, wide:true,
+      title:isNew ? yz('spi.move.seans-ekle') : yz('spi.move.seansi-duzenle'), subtitle:rec.name, wide:true,
       body:String(K.Stack([
         html`<div class="cols-2">
           ${K.Field({ label:yz('spi.move.sure-dakika'),
@@ -1169,7 +1238,7 @@ SP.Screens.move = (function(){
     const ex = SP.EX_BY_ID[id];
     if(!ex) return;
     const card = (SP.EXERCISE_CARD_BY_ID || {})[id] || {};
-    const muscles = (ex.muscles && ex.muscles.length) ? ex.muscles.join(', ') : 'Tüm vücut';
+    const muscles = (ex.muscles && ex.muscles.length) ? ex.muscles.join(', ') : yz('spi.move.tum-vucut');
     const steps = (ex.steps && ex.steps.length) ? ex.steps : (card.steps_tr || []);
     const setup = ex.setup || card.setup_check || '';
     const summary = ex.cue || card.summary || '';
@@ -1180,7 +1249,7 @@ SP.Screens.move = (function(){
       wide: true,
       body: String(K.Stack([
         html`<div class="row wrap gap-6 mb-8">
-          <span class="badge badge--info">${ex.pattern ? ('Kalıp: ' + ex.pattern) : (ex.kind === 'cardio' ? 'Kardiyo' : 'Mobilite')}</span>
+          <span class="badge badge--info">${ex.pattern ? (yz('spi.move.kalip') + ex.pattern) : (ex.kind === 'cardio' ? 'Kardiyo' : 'Mobilite')}</span>
           <span class="badge badge--muted">${yz('spi.move.hedef-kaslar')} ${U.esc(muscles)}</span>
           ${when(ex.met, () => html`<span class="badge badge--muted">MET: ${ex.met}</span>`)}
         </div>`,
@@ -1218,7 +1287,7 @@ SP.Screens.move = (function(){
             <div class="ogrenme">
               <div class="row between gap-8 mb-4">
                 <b class="small" style="color:var(--text)">${U.esc(prog.title)}</b>
-                <span class="tiny dim">${prog.focus || 'Genel kondisyon'}</span>
+                <span class="tiny dim">${prog.focus || yz('spi.move.genel-kondisyon')}</span>
               </div>
               <p class="small dim mb-8" style="line-height:1.4">${U.esc(prog.description || '')}</p>
               ${when(prog.exercises && prog.exercises.length, () => html`
@@ -1311,7 +1380,7 @@ SP.Screens.move = (function(){
     if(!VT()) return '';
     const w = M.workoutsOf(U.todayISO()).slice(-1)[0];
     if(!w || !(w.items || []).length) return '';
-    return vkutu('Setler · ' + w.name, 'ölçüldü', VT().setKutucuklari({ act:'set-bitti', data:{ 'data-w':w.id },
+    return vkutu(yz('spi.move.setler') + w.name, 'ölçüldü', VT().setKutucuklari({ act:'set-bitti', data:{ 'data-w':w.id },
       hareketler:w.items.map((it, i) => ({ i, ad:exAd(it.exId), set:Number(it.sets) || 0, biten:Number(it.setsDone) || 0,
         etiket:it.reps ? String(it.reps) : it.minutes ? it.minutes + 'dk' : null })) }));
   }
@@ -1326,7 +1395,7 @@ SP.Screens.move = (function(){
       const kayit = M.workoutsOf(d).length || S.vitals[d] || M.mealsOf(d).length;
       return { ad:GUN_AD[k], bugun:d === bugun, gelecek:d > bugun, yok:d < bugun && !kayit, p:esik ? 100 * dk / esik : null };
     });
-    return vkutu('Bu hafta hareket', 'asgari gün ' + esik + ' dk', VT().haftaHalkalari({ gunler }));
+    return vkutu(yz('spi.move.bu-hafta-hareket'), 'asgari gün ' + esik + ' dk', VT().haftaHalkalari({ gunler }));
   }
 
   /* 086 ANTRENMAN HAFTASI: yapılan seans dolu; kaydı olmayan geçmiş gün
@@ -1334,7 +1403,7 @@ SP.Screens.move = (function(){
   function haftaKutusu(){
     if(!VT()) return '';
     const bugun = U.todayISO();
-    return vkutu('Antrenman haftası', 'ölçüldü', VT().antrenmanHaftasi({ gunler:haftaGunleri().map((d, k) => {
+    return vkutu(yz('spi.move.antrenman-haftasi'), 'ölçüldü', VT().antrenmanHaftasi({ gunler:haftaGunleri().map((d, k) => {
       const w = M.workoutsOf(d);
       return { ad:GUN_AD[k], bugun:d === bugun, gecti:d < bugun, yapilan:w.length ? w.map(x => x.name).join(' + ') : null };
     }) }));
@@ -1361,7 +1430,7 @@ SP.Screens.move = (function(){
             formul:'toparlanma: girilen ölçümlerin ağırlıklı ortalaması',
             girdiler:r.parts.filter(p => p.score != null).map(p => ({ ad:p.label, deger:p.value, kesinlik:'measured' })) }),
           cumle:r.band.label.toLocaleLowerCase('tr-TR') + ' · ' + yuk + '.', vurgu:onemli ? onemli.short : r.band.order, sistem:'spi' }
-      : { ust:yz('spi.move.gunun-yuk-emri'), cumle:yz('spi.move.olcum-bekliyor'), vurgu:onemli ? onemli.short : 'Uyku süresini yazman bile yeter.', sistem:'spi',
+      : { ust:yz('spi.move.gunun-yuk-emri'), cumle:yz('spi.move.olcum-bekliyor'), vurgu:onemli ? onemli.short : yz('spi.move.uyku-suresini-yazman-bile-ye'), sistem:'spi',
           dugme:{ label:yz('spi.move.veri-gir'), act:'go', data:{ 'data-route':'today' } } }];
     const bugun = U.todayISO(), esik = SP.LOAD_RULES.minDay.minutes;
     const gunler = haftaGunleri();
@@ -1398,8 +1467,8 @@ SP.Screens.move = (function(){
     if(!VT()) return '';
     const y = yogunlukBantlari(28);
     if(!y.toplam) return '';
-    return vkutu('Yoğunluk · son 28 gün', 'senin zorluk beyanın', VT().yogunlukBolgeleri({ bolgeler:y.bantlar })
-      + (y.zorluksuz ? '<p class="tiny dim mt-6">' + y.zorluksuz + ' seansın zorluğu yazılmadı; banda girmedi.</p>' : ''));
+    return vkutu(yz('spi.move.yogunluk-son-28-gun'), 'senin zorluk beyanın', VT().yogunlukBolgeleri({ bolgeler:y.bantlar })
+      + (y.zorluksuz ? '<p class="tiny dim mt-6">' + y.zorluksuz + (' ' + yz('spi.move.seansin-zorlugu-yazilmadi-ba') + '</p>') : ''));
   }
 
   /* --------------------------------------------------------------- ekran */
@@ -1432,7 +1501,7 @@ SP.Screens.move = (function(){
           : ['progression', 'load', 'deload']))}</div>`;
     }catch(e){
       console.error('Hareket bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('spi.move.bu-bolum-su-an-cizilemedi') });
     }
   }
 
@@ -1465,7 +1534,7 @@ SP.Screens.move = (function(){
   function yukKarti(P){
     const a = SP.Move.acwr(U.todayISO());
     const r = SP.LOAD_RULES.acwr;
-    if(!a.ok) return P.kart({ tur:'yuk-orani', ad:yz('spi.move.yuk-orani'), simge:'cubuk', bos:{ cumle:a.note || 'Yük oranı için geçmiş yetmiyor.' } });
+    if(!a.ok) return P.kart({ tur:'yuk-orani', ad:yz('spi.move.yuk-orani'), simge:'cubuk', bos:{ cumle:a.note || yz('spi.move.yuk-orani-icin-gecmis-yetmiy') } });
     const v = x => String(x).replace('.', ',');
     return P.kart({ tur:'yuk-orani', ad:yz('spi.move.yuk-orani'), simge:'cubuk', yuva:'hesaplandı',
       govde:P.deger(v(a.ratio), '', a.zone === 'ok' ? 'denge aralığında' : a.zone === 'high' ? 'son hafta ağır' : 'son hafta hafif')
@@ -1527,14 +1596,14 @@ SP.Screens.move = (function(){
       };
       UI.toast(yz('spi.move.beden-ve-durus-analiz-ediliy'));
       const res = await SP.Extract.fromBodyPhoto(bodyPhotoFile, hints);
-      if(!res.ok){ UI.toast(res.note || 'Analiz başarısız'); return; }
+      if(!res.ok){ UI.toast(res.note || yz('spi.move.analiz-basarisiz')); return; }
       bodyPhotoResultSheet(res);
     },
     async 'save-body-photo-today'(){
       if(!bodyPhotoFile) return;
       const r = await SP.Foto.kaydet('vucut:' + U.todayISO(), bodyPhotoFile);
       UI.closeSheet();
-      UI.toast(r.ok ? 'Fotoğraf bugünün kaydına eklendi' : (r.why || 'Kaydedilemedi'));
+      UI.toast(r.ok ? yz('spi.move.fotograf-bugunun-kaydina-ekl') : (r.why || 'Kaydedilemedi'));
       SP.App.render();
     },
     async 'save-body-vitals'(){
@@ -1557,7 +1626,7 @@ SP.Screens.move = (function(){
       if(!lastBodyAnalysis) return;
       const dh = lastBodyAnalysis.duzelticiHareketRecetesi || lastBodyAnalysis.duzelticiHareket || {};
       const bugun = U.todayISO();
-      const egList = Array.isArray(dh.egzersizler) && dh.egzersizler.length ? dh.egzersizler : ['Düzeltici Mobilite'];
+      const egList = Array.isArray(dh.egzersizler) && dh.egzersizler.length ? dh.egzersizler : [yz('spi.move.duzeltici-mobilite')];
       const w = {
         id: U.uid(),
         date: bugun,
@@ -1607,8 +1676,8 @@ SP.Screens.move = (function(){
       canliOnizle(r.rota);
     },
     async 'canli-sil'(){
-      UI.confirmSheet('Kaydı sil', 'Bu canlı kayıt ve bütün konum noktaları silinir; geri alınamaz.',
-        async () => { SP.Canli.sil(); UI.closeSheet(); }, true, 'Kaydı sil');
+      UI.confirmSheet(yz('spi.move.kaydi-sil'), yz('spi.move.bu-canli-kayit-ve-butun'),
+        async () => { SP.Canli.sil(); UI.closeSheet(); }, true, yz('spi.move.kaydi-sil'));
     },
     async 'rota-isi'(){ isiKagidi(); },
     async 'rota-tur'(el){
@@ -1744,12 +1813,12 @@ SP.Screens.move = (function(){
     },
     async 'del-session'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Seansı sil', 'Bu seans ve ürettiği yük kaydından silinir.',
-        async () => { await M.deleteWorkout(id); UI.closeSheet(); SP.App.render(); }, true, 'Seansı sil');
+      UI.confirmSheet(yz('spi.move.seansi-sil'), yz('spi.move.bu-seans-ve-urettigi-yuk'),
+        async () => { await M.deleteWorkout(id); UI.closeSheet(); SP.App.render(); }, true, yz('spi.move.seansi-sil'));
     },
     async advance(el){
       const res = await M.advanceLevel(el.dataset.id);
-      UI.toast(res.ok ? 'Yeni basamak: ' + res.level.name : res.error);
+      UI.toast(res.ok ? yz('spi.move.yeni-basamak') + res.level.name : res.error);
       SP.App.render();
     },
     async 'pick-level'(el){
@@ -1832,16 +1901,16 @@ SP.Screens.move = (function(){
     kucukVarsayilan:['seans-geçmişi'],
     headline(){
       const rx = SP.Move.prescription();
-      if(!rx.readiness.ok) return 'Toparlanma ölçümü bekliyor.';
-      if(rx.kind === 'rest') return 'Bugün dinlenme günü.';
-      if(rx.kind === 'full') return 'Bugün tam yük yapılabilir.';
-      return 'Bugün yük hafifletilmeli.';
+      if(!rx.readiness.ok) return yz('spi.move.toparlanma-olcumu-bekliyor');
+      if(rx.kind === 'rest') return yz('spi.move.bugun-dinlenme-gunu');
+      if(rx.kind === 'full') return yz('spi.move.bugun-tam-yuk-yapilabilir');
+      return yz('spi.move.bugun-yuk-hafifletilmeli');
     },
     lede(){
       const rx = SP.Move.prescription();
       if(!rx.readiness.ok){
-        return 'Uyku ve nabız girilince günün yük emri hesaplanır. '
-          + 'Ölçüm olmadan yük körlemesine verilmez.';
+        return yz('spi.move.uyku-ve-nabiz-girilince-gunu')
+          + yz('spi.move.olcum-olmadan-yuk-korlemesin');
       }
       return rx.readiness.band.order
         + ' Kardiyo, kuvvet, esneklik ve dinlenme ayrı sayfalardır.';
@@ -1861,7 +1930,7 @@ SP.Screens.move = (function(){
     },
     subtitle(){
       const rx = SP.Move.prescription();
-      if(!rx.readiness.ok) return 'Ölçüm bekliyor';
+      if(!rx.readiness.ok) return yz('spi.move.olcum-bekliyor-2');
       return rx.readiness.band.label + (rx.factor >= 1 ? ' · tam yük'
         : ' · yükün %' + Math.round(rx.factor * 100) + '\u2019i');
     },

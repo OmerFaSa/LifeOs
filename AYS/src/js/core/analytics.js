@@ -5,6 +5,38 @@
 
    Hepsi saf okuma: hiçbiri state değiştirmez. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.analytics.en-buyuk-degisim':'En büyük değişim ',
+  'ays.core.analytics.karsilastirilabilir-test-yok':'Karşılaştırılabilir test yok.',
+  'ays.core.analytics.bos-sayisi-bilinen-en-az':'Boş sayısı bilinen en az 3 tam deneme gerekir; ',
+  'ays.core.analytics.en-az-3-tam-deneme':'En az 3 tam deneme gerekir.',
+  'ays.core.analytics.az-bos-biraktigin-denemelerd':'Az boş bıraktığın denemelerde medyan netin ',
+  'ays.core.analytics.cok-bos-biraktigin-denemeler':'Çok boş bıraktığın denemelerde medyan netin ',
+  'ays.core.analytics.yon-soylemek-icin-bos-sayisi':'Yön söylemek için boş sayısı farklı en az dört deneme gerekir; şimdilik yalnız ortalama.',
+  'ays.core.analytics.bos-sayisi-ile-net-arasinda':'Boş sayısı ile net arasında belirgin ilişki yok; sorun hızda ya da isabette olabilir.',
+  'ays.core.analytics.gidisten-arindirinca-yayinla':'Gidişten arındırınca yayınlar arası fark ',
+  'ays.core.analytics.gidisten-arindirinca-yayinla-2':'Gidişten arındırınca yayınlar arası fark küçük; netler karşılaştırılabilir.',
+  'ays.core.analytics.hizli-ama-isabetsiz-okuma':'Hızlı ama isabetsiz — okuma ve kontrol adımı ekle.',
+  'ays.core.analytics.dogru-ama-yavas-sure':'Doğru ama yavaş — süre baskısı altında çalış.',
+  'ays.core.analytics.hiz-ve-isabet-dengede':'Hız ve isabet dengede.',
+  'ays.core.analytics.karisik-daha-cok-sure-kaydi':'Karışık; daha çok süre kaydı gerek.',
+  'ays.core.analytics.yeterli-tekrar-gecmisi-yok-b':'Yeterli tekrar geçmişi yok; birkaç hafta sonra anlamlı olur.',
+  'ays.core.analytics.her-aralikta-besten-az-tekra':'Her aralıkta beşten az tekrar var; hüküm için birkaç hafta daha gerek.',
+  'ays.core.analytics.yeterli-tekrari-olan-aralikl':'Yeterli tekrarı olan aralıklarda hatırlama %70 üzerinde; tekrar takvimi sana uyuyor.',
+  'ays.core.analytics.yeterli-uyudugun-denemelerde':'Yeterli uyuduğun denemelerde medyanın ',
+  'ays.core.analytics.bu-veri-setinde-beklenen-ili':'Bu veri setinde beklenen ilişki görünmüyor; örnek sayısı az olabilir.',
+  'ays.core.analytics.fark':'Fark ',
+  'ays.core.analytics.girdigin-kapasite-gercege-uy':'Girdiğin kapasite gerçeğe uyuyor.',
+  'ays.core.analytics.kapasiteyi-haftada':'Kapasiteyi haftada ',
+  'ays.core.analytics.i-lk-20-dakikada-isabet':'İlk 20 dakikada isabet %',
+  'ays.core.analytics.isinma-sorunu-gorunmuyor-den':'Isınma sorunu görünmüyor; deneme boyunca isabet dengeli.',
+  'ays.core.analytics.sayacin-acik-oldugu-gunlerde':'Sayacın açık olduğu günlerde ortalama ',
+  'ays.core.analytics.telefonu-baska-odaya-koymak':'Telefonu başka odaya koymak tek en etkili müdahale.',
+  'ays.core.analytics.blok-basinda-bildirimleri-ka':'Blok başında bildirimleri kapatmak yeterli olabilir.',
+  'ays.core.analytics.sayacin-acik-oldugu-gunlerde-2':'Sayacın açık olduğu günlerde bölünme düşük.',
+  'ays.core.analytics.en-cok-net-biraktigin-ders':'En çok net bıraktığın ders ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.analytics.en-az-4-tam-deneme':'En az 4 tam deneme gerekir.',
   'ays.core.analytics.sure-kaydi-olan-tam-deneme':'Süre kaydı olan tam deneme gerekir.',
   'ays.core.analytics.sure-kaydi-olan-test-yok':'Süre kaydı olan test yok.',
@@ -83,9 +115,9 @@ R.Analytics = (function(){
       rows, delta:U.round(totalB - totalA, 2),
       biggest:moved[0] || null,
       note:moved.length
-        ? 'En büyük değişim ' + moved[0].name + ': '
+        ? yz('ays.core.analytics.en-buyuk-degisim') + moved[0].name + ': '
           + (moved[0].delta > 0 ? '+' : '') + U.fmtNet(moved[0].delta) + ' net.'
-        : 'Karşılaştırılabilir test yok.',
+        : yz('ays.core.analytics.karsilastirilabilir-test-yok'),
     };
   }
 
@@ -106,9 +138,9 @@ R.Analytics = (function(){
     if(list.length < 3){
       return { ok:false, disarida,
         why:disarida
-          ? 'Boş sayısı bilinen en az 3 tam deneme gerekir; '
+          ? yz('ays.core.analytics.bos-sayisi-bilinen-en-az')
             + disarida + ' denemede boş alanı doldurulmamış.'
-          : 'En az 3 tam deneme gerekir.' };
+          : yz('ays.core.analytics.en-az-3-tam-deneme') };
     }
 
     const points = list.map(e => ({
@@ -143,12 +175,12 @@ R.Analytics = (function(){
         : list.length + ' denemeden hesaplandı.',
       fark,
       note:dir === 'less'
-        ? 'Az boş bıraktığın denemelerde medyan netin ' + U.fmtNet(fark) + ' net yüksek. Daha çok soruya girmek sana net kazandırıyor olabilir.'
+        ? yz('ays.core.analytics.az-bos-biraktigin-denemelerd') + U.fmtNet(fark) + ' net yüksek. Daha çok soruya girmek sana net kazandırıyor olabilir.'
         : dir === 'more'
-        ? 'Çok boş bıraktığın denemelerde medyan netin ' + U.fmtNet(-fark) + ' net yüksek. Emin olmadığını boş bırakmak sana yarıyor olabilir.'
+        ? yz('ays.core.analytics.cok-bos-biraktigin-denemeler') + U.fmtNet(-fark) + ' net yüksek. Emin olmadığını boş bırakmak sana yarıyor olabilir.'
         : dir === 'az-veri'
-        ? 'Yön söylemek için boş sayısı farklı en az dört deneme gerekir; şimdilik yalnız ortalama.'
-        : 'Boş sayısı ile net arasında belirgin ilişki yok; sorun hızda ya da isabette olabilir.',
+        ? yz('ays.core.analytics.yon-soylemek-icin-bos-sayisi')
+        : yz('ays.core.analytics.bos-sayisi-ile-net-arasinda'),
     };
   }
 
@@ -238,8 +270,8 @@ R.Analytics = (function(){
     return {
       ok:true, overall:U.round(overall, 2), rows, spread,
       note:spread >= 6
-        ? 'Gidişten arındırınca yayınlar arası fark ' + U.fmtNet(spread) + ' net. Trendi tek yayın içinde okumak daha güvenilir.'
-        : 'Gidişten arındırınca yayınlar arası fark küçük; netler karşılaştırılabilir.',
+        ? yz('ays.core.analytics.gidisten-arindirinca-yayinla') + U.fmtNet(spread) + ' net. Trendi tek yayın içinde okumak daha güvenilir.'
+        : yz('ays.core.analytics.gidisten-arindirinca-yayinla-2'),
       egimDeneme:U.round(egim, 2),
     };
   }
@@ -275,10 +307,10 @@ R.Analytics = (function(){
         : 'mixed';
       return {
         test:k, secPerQ:U.round(sec, 1), hedefSn:Math.round(hedef), accuracy:Math.round(acc), profile,
-        note:profile === 'fast-wrong' ? 'Hızlı ama isabetsiz — okuma ve kontrol adımı ekle.'
-          : profile === 'slow-right' ? 'Doğru ama yavaş — süre baskısı altında çalış.'
-          : profile === 'ideal' ? 'Hız ve isabet dengede.'
-          : 'Karışık; daha çok süre kaydı gerek.',
+        note:profile === 'fast-wrong' ? yz('ays.core.analytics.hizli-ama-isabetsiz-okuma')
+          : profile === 'slow-right' ? yz('ays.core.analytics.dogru-ama-yavas-sure')
+          : profile === 'ideal' ? yz('ays.core.analytics.hiz-ve-isabet-dengede')
+          : yz('ays.core.analytics.karisik-daha-cok-sure-kaydi'),
       };
     }).sort((a, b) => a.accuracy - b.accuracy);
 
@@ -345,12 +377,12 @@ R.Analytics = (function(){
     return {
       ok:rows.length > 0, rows,
       note:!rows.length
-        ? 'Yeterli tekrar geçmişi yok; birkaç hafta sonra anlamlı olur.'
+        ? yz('ays.core.analytics.yeterli-tekrar-gecmisi-yok-b')
         : weak
         ? weak.gap + ' aralığında hatırlama %' + weak.rate + ' (' + weak.total + ' tekrar). Bu aralıktaki kartlar yeniden yazılmalı olabilir.'
         : rows.every(r => r.az)
-        ? 'Her aralıkta beşten az tekrar var; hüküm için birkaç hafta daha gerek.'
-        : 'Yeterli tekrarı olan aralıklarda hatırlama %70 üzerinde; tekrar takvimi sana uyuyor.',
+        ? yz('ays.core.analytics.her-aralikta-besten-az-tekra')
+        : yz('ays.core.analytics.yeterli-tekrari-olan-aralikl'),
     };
   }
 
@@ -384,10 +416,10 @@ R.Analytics = (function(){
       ok:true, points, goodMedian:U.round(gm, 2), badMedian:U.round(bm, 2), diff,
       goodCount:good.length, badCount:bad.length,
       note:diff >= 2
-        ? 'Yeterli uyuduğun denemelerde medyanın ' + U.fmtNet(diff) + ' net yüksek. Bu senin verin.'
+        ? yz('ays.core.analytics.yeterli-uyudugun-denemelerde') + U.fmtNet(diff) + ' net yüksek. Bu senin verin.'
         : diff <= -2
-        ? 'Bu veri setinde beklenen ilişki görünmüyor; örnek sayısı az olabilir.'
-        : 'Fark ' + U.fmtNet(diff) + ' net — belirgin değil. Daha çok kayıt gerek.',
+        ? yz('ays.core.analytics.bu-veri-setinde-beklenen-ili')
+        : yz('ays.core.analytics.fark') + U.fmtNet(diff) + ' net — belirgin değil. Daha çok kayıt gerek.',
     };
   }
 
@@ -411,8 +443,8 @@ R.Analytics = (function(){
       ok:true, rows, claimed, actualAvg, ratio,
       status:ratio >= 85 ? 'gercekci' : ratio >= 60 ? 'iyimser' : 'hayali',
       note:ratio >= 85
-        ? 'Girdiğin kapasite gerçeğe uyuyor.'
-        : 'Kapasiteyi haftada ' + claimed + ' saat yazdın, fiilen ' + actualAvg + ' saat çalışıyorsun (%'
+        ? yz('ays.core.analytics.girdigin-kapasite-gercege-uy')
+        : yz('ays.core.analytics.kapasiteyi-haftada') + claimed + ' saat yazdın, fiilen ' + actualAvg + ' saat çalışıyorsun (%'
           + ratio + '). Planı gerçek sayıya göre kurmak tamamlama oranını anlamlı kılar.',
     };
   }
@@ -438,9 +470,9 @@ R.Analytics = (function(){
     return {
       ok:true, sessions:rows.length, early, late, diff:late - early,
       note:late - early >= 15
-        ? 'İlk 20 dakikada isabet %' + early + ', sonrasında %' + late + '. Isınma sorunu var: '
+        ? yz('ays.core.analytics.i-lk-20-dakikada-isabet') + early + ', sonrasında %' + late + '. Isınma sorunu var: '
           + 'denemeye başlamadan 5 dakikalık kolay set çöz.'
-        : 'Isınma sorunu görünmüyor; deneme boyunca isabet dengeli.',
+        : yz('ays.core.analytics.isinma-sorunu-gorunmuyor-den'),
     };
   }
 
@@ -487,12 +519,12 @@ R.Analytics = (function(){
       kapsam:rows.length + '/' + gunKaydi + ' günde sayaç kullanıldı; '
         + 'ortalama yalnızca o günlerden hesaplandı.',
       note:avg >= 5
-        ? 'Sayacın açık olduğu günlerde ortalama ' + avg + ' bölünme. '
-          + 'Telefonu başka odaya koymak tek en etkili müdahale.'
+        ? yz('ays.core.analytics.sayacin-acik-oldugu-gunlerde') + avg + ' bölünme. '
+          + yz('ays.core.analytics.telefonu-baska-odaya-koymak')
         : avg >= 2
-        ? 'Sayacın açık olduğu günlerde ortalama ' + avg + ' bölünme. '
-          + 'Blok başında bildirimleri kapatmak yeterli olabilir.'
-        : 'Sayacın açık olduğu günlerde bölünme düşük.',
+        ? yz('ays.core.analytics.sayacin-acik-oldugu-gunlerde') + avg + ' bölünme. '
+          + yz('ays.core.analytics.blok-basinda-bildirimleri-ka')
+        : yz('ays.core.analytics.sayacin-acik-oldugu-gunlerde-2'),
     };
   }
 
@@ -539,7 +571,7 @@ R.Analytics = (function(){
     const dusen = rows.filter(r => r.egim != null && r.egim <= -0.5).map(r => r.test);
     return {
       ok:true, rows, deneme:list.length,
-      note:(en ? 'En çok net bıraktığın ders ' + en.test + ' (son denemelerde ~' + U.fmtNet(en.kayip) + ' net).' : '')
+      note:(en ? yz('ays.core.analytics.en-cok-net-biraktigin-ders') + en.test + ' (son denemelerde ~' + U.fmtNet(en.kayip) + ' net).' : '')
         + (yukselen.length ? ' Yükselen: ' + yukselen.join(', ') + '.' : '')
         + (dusen.length ? ' Düşen: ' + dusen.join(', ') + '.' : ''),
     };

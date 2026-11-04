@@ -17,6 +17,19 @@
    Kurallar aynen korunur: nobetci hukum vermez soru sorar; caba dususte
    uyari uretmez; iki tarafta da olcum yoksa 'unknown' doner. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.goodhart.kilo-tansiyon-hrv-ve-laborat':'Kilo, tansiyon, HRV ve laboratuvar değerleri kısa vadede çok ',
+  'spi.core.goodhart.daha-cok-gun-kayit-tutuyorsu':'Daha çok gün kayıt tutuyorsun ama hedefe ulaşılan gün oranı ',
+  'spi.core.goodhart.antrenman-suresi-artti-topar':'Antrenman süresi arttı, toparlanma skoru yerinde ya da ',
+  'spi.core.goodhart.daha-sik-tartiliyorsun-ama-t':'Daha sık tartılıyorsun ama tartı hareket etmiyor. Tartılmak ',
+  'spi.core.goodhart.d-vitamini-duzeyi':'D vitamini düzeyi',
+  'spi.core.goodhart.takviye-kaydi-artti-ama-olcu':'Takviye kaydı arttı ama ölçülen düzey yerinde. Emilim ',
+  'spi.core.goodhart.olculmemis-sonuc-sifir-sonuc':'Ölçülmemiş sonuç, sıfır sonuç değildir.',
+  'spi.core.goodhart.caba-artti-sonuc-da-hareket':'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin ',
+  'spi.core.goodhart.caba-da-sonuc-da-dogru':'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi ',
+  'spi.core.goodhart.bir-gosterge-ayrismis':'Bir gösterge ayrışmış',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.goodhart.bu-parametreler-bilimsel-bir':'Bu parametreler bilimsel bir eşik değil, bu yazılımın ayarıdır.',
   'spi.core.goodhart.yukselmesi-iyi':'yükselmesi iyi',
   'spi.core.goodhart.dusmesi-iyi':'düşmesi iyi',
@@ -49,7 +62,7 @@ SP.Goodhart = (function(){
     windowDays:56,
     effortRiseThreshold:0.35,
     stagnationThreshold:0.05,
-    rationale:'Kilo, tansiyon, HRV ve laboratuvar değerleri kısa vadede çok '
+    rationale:yz('spi.core.goodhart.kilo-tansiyon-hrv-ve-laborat')
       + 'dalgalanır. İki 28 günlük pencereyi karşılaştırmak, gürültüyü bulgu '
       + 'sanmaktır; bu yüzden pencere iki katına çıkarıldı ve çaba artışının '
       + '«belirgin» sayılması için gereken eşik yükseltildi. Başka sayılar da '
@@ -156,13 +169,13 @@ SP.Goodhart = (function(){
   const PAIRS = [
     { id:'logging-vs-protein', direction:'higher_better',
       effortLabel:'öğün kaydedilen gün', outcomeLabel:'protein hedefine ulaşılan gün oranı',
-      question:'Daha çok gün kayıt tutuyorsun ama hedefe ulaşılan gün oranı '
+      question:yz('spi.core.goodhart.daha-cok-gun-kayit-tutuyorsu')
              + 'yerinde. Kayıt tutmak ile yemeği değiştirmek aynı şey mi oldu?',
       effort:loggedDays, outcome:proteinHitRate, minEffort:20 },
 
     { id:'training-vs-readiness', direction:'higher_better',
       effortLabel:'antrenman dakikası', outcomeLabel:'toparlanma skoru',
-      question:'Antrenman süresi arttı, toparlanma skoru yerinde ya da '
+      question:yz('spi.core.goodhart.antrenman-suresi-artti-topar')
              + 'geriledi. Yük artışı taşınabiliyor mu, yoksa uyku ve '
              + 'beslenme mi geride kaldı?',
       effort:trainingMinutes, outcome:readinessAvg, minEffort:400 },
@@ -172,7 +185,7 @@ SP.Goodhart = (function(){
       /* Kilo YONU hedefe gore degerlendirilemez: hedefin ne oldugunu
          sistem bilmez. Bu yuzden yalnizca DEGISIM olculur ve degismemek
          ayrisma sayilir — daha sik tartilmak tek basina bir sey degistirmez. */
-      question:'Daha sık tartılıyorsun ama tartı hareket etmiyor. Tartılmak '
+      question:yz('spi.core.goodhart.daha-sik-tartiliyorsun-ama-t')
              + 'bir ölçüm, bir müdahale değil — bu dönemde ne değişti?',
       effort:w => Object.keys(S.vitals || {}).filter(function(d){
         return inWin(d, w) && (S.vitals[d] || {}).weight != null;
@@ -180,8 +193,8 @@ SP.Goodhart = (function(){
       outcome:w => markerMedian('weight', w), minEffort:20 },
 
     { id:'supplements-vs-marker', direction:'higher_better',
-      effortLabel:'takviye kaydı', outcomeLabel:'D vitamini düzeyi',
-      question:'Takviye kaydı arttı ama ölçülen düzey yerinde. Emilim '
+      effortLabel:'takviye kaydı', outcomeLabel:yz('spi.core.goodhart.d-vitamini-duzeyi'),
+      question:yz('spi.core.goodhart.takviye-kaydi-artti-ama-olcu')
              + 'koşulları (yağlı öğünle eşleştirme) sağlanıyor mu?',
       effort:w => (S.meds || []).filter(function(m){
         const tur = SP.MED_BY_ID[m.kindId];
@@ -225,7 +238,7 @@ SP.Goodhart = (function(){
     if(eS == null || yS == null){
       return Object.assign(base, { status:'unknown', cert:'missing',
         note:yz('spi.core.goodhart.sonuc-tarafinda-iki-penceren')
-           + 'Ölçülmemiş sonuç, sıfır sonuç değildir.' });
+           + yz('spi.core.goodhart.olculmemis-sonuc-sifir-sonuc') });
     }
     if(!(yC >= def.minEffort)){
       return Object.assign(base, { status:'idle', cert:'measured',
@@ -255,9 +268,9 @@ SP.Goodhart = (function(){
       return Object.assign(base, { status:'aligned', cert:'measured',
         direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
         note:yon.id === 'movement_only'
-          ? 'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin '
+          ? yz('spi.core.goodhart.caba-artti-sonuc-da-hareket')
             + 'bileceği bir şey değil — hedefini sen biliyorsun.'
-          : 'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+          : yz('spi.core.goodhart.caba-da-sonuc-da-dogru')
             + 'temsil ediyor.' });
     }
     /* Sonuc TERS yone gittiyse bu "yerinde saymak" degildir ve oyle
@@ -276,7 +289,7 @@ SP.Goodhart = (function(){
     const f = flags();
     if(!f.length) return null;
     return { count:f.length,
-      title:f.length === 1 ? 'Bir gösterge ayrışmış' : f.length + ' gösterge ayrışmış',
+      title:f.length === 1 ? yz('spi.core.goodhart.bir-gosterge-ayrismis') : f.length + ' gösterge ayrışmış',
       body:f[0].note + ' ' + f[0].question, flags:f };
   }
 

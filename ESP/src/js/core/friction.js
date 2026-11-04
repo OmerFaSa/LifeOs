@@ -28,6 +28,10 @@
       SPİ'deki antrenman yükü kuralının aynısıdır: kendi lehine karar
       veren bir ölçü, ölçü değildir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.friction.toplu-reddetmek-de-bir-karar':'Toplu reddetmek de bir karardır.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.friction.surtunme-olculmedi':'Sürtünme ölçülmedi',
   'esp.core.friction.bu-pencerede-yeterli-kayit-y':'Bu pencerede yeterli kayıt yok. Sistem kendi maliyetini ',
   'esp.core.friction.calisma-suresi-girilmemis':'Çalışma süresi girilmemiş',
@@ -265,7 +269,7 @@ ESP.Friction = (function(){
     if(bek > 4){
       out.push({ id:'clear-proposals', label:bek + ' bekleyen teklif',
         note:yz('esp.core.friction.karar-bekleyen-her-teklif-he')
-           + 'Toplu reddetmek de bir karardır.', act:'go-office' });
+           + yz('esp.core.friction.toplu-reddetmek-de-bir-karar'), act:'go-office' });
     }
     if(!out.length){
       out.push({ id:'shorter-visits', label:yz('esp.core.friction.ziyaretler-uzun'),

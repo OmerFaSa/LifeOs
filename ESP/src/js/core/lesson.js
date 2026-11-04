@@ -29,6 +29,21 @@
    İngilizce'de «i», Türkçe'de «ı»dır ve bu ayrım sessizce yanlış cevap
    üretir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.lesson.unite-henuz-desteye-eklenmed':'Ünite henüz desteye eklenmedi.',
+  'esp.core.lesson.bu-unitenin-bu-dilde-malzeme-2':'Bu ünitenin bu dilde malzemesi yok.',
+  'esp.core.lesson.bu-dort-olayi-eskiden-yeniye':'Bu dört olayı eskiden yeniye sırala.',
+  'esp.core.lesson.bu-destede-kart-yok':'Bu destede kart yok.',
+  'esp.core.lesson.oturum-kapali':'Oturum kapalı.',
+  'esp.core.lesson.soru-yok':'Soru yok.',
+  'esp.core.lesson.bu-kart-artik-yok-soru':'Bu kart artık yok; soru atlandı.',
+  'esp.core.lesson.unite-bulunamadi':'Ünite bulunamadı.',
+  'esp.core.lesson.unite-sinavi-icin-bu-uniteni':'Ünite sınavı için bu ünitenin destede en az ',
+  'esp.core.lesson.cevaplanmis-soru-yok':'Cevaplanmış soru yok.',
+  'esp.core.lesson.esp-ogrenme-karti':'ESP öğrenme kartı',
+  'esp.core.lesson.cevabini-yazdiktan-sonra-bak':'Cevabını yazdıktan sonra bak: ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.lesson.bu-unitenin-bu-dilde-malzeme':'Bu ünitenin bu dilde malzemesi yok; kartını kendin yazarsın.',
   'esp.core.lesson.pratik':'pratik · ',
   'esp.core.lesson.aciklama':'Açıklama',
@@ -127,7 +142,7 @@ ESP.Lesson = (function(){
       total:ogeler.length, added:kartlar.length, known:bilinen,
       pct:Math.round(100 * bilinen / ogeler.length),
       cert:kartlar.length ? 'derived' : 'missing',
-      why:kartlar.length ? null : 'Ünite henüz desteye eklenmedi.',
+      why:kartlar.length ? null : yz('esp.core.lesson.unite-henuz-desteye-eklenmed'),
     };
   }
 
@@ -135,7 +150,7 @@ ESP.Lesson = (function(){
      aynı olan kart varsa atlanır ve kaç tanesinin atlandığı söylenir. */
   async function addUnit(unit, lang){
     const ogeler = itemsOf(unit, lang);
-    if(!ogeler.length) return { ok:false, error:'Bu ünitenin bu dilde malzemesi yok.' };
+    if(!ogeler.length) return { ok:false, error:yz('esp.core.lesson.bu-unitenin-bu-dilde-malzeme-2') };
     let eklenen = 0, atlanan = 0;
     for(const o of ogeler){
       const var_ = (S.cards || []).some(function(c){
@@ -303,7 +318,7 @@ ESP.Lesson = (function(){
       const dogru = secilen.slice().sort(function(a, b){ return yilOf(a) - yilOf(b); })
         .map(function(c){ return c.front; });
       return { kind:'order', cardId:card.id,
-        prompt:'Bu dört olayı eskiden yeniye sırala.',
+        prompt:yz('esp.core.lesson.bu-dort-olayi-eskiden-yeniye'),
         options:shuffle(secilen.map(function(c){ return c.front; }), seed + 'r'),
         answer:dogru.join(' | ') };
     }
@@ -319,7 +334,7 @@ ESP.Lesson = (function(){
     const bugun = o.today || U.todayISO();
     const deste = deck || ((S.profile && S.profile.langs && S.profile.langs[0]) || 'en');
     const hepsi = (S.cards || []).filter(function(c){ return c.lang === deste; });
-    if(hepsi.length < 1) return { ok:false, error:'Bu destede kart yok.' };
+    if(hepsi.length < 1) return { ok:false, error:yz('esp.core.lesson.bu-destede-kart-yok') };
 
     /* Ünite sınavı (fikir 41) kendi kart listesini verir: vade önceliği
        yoktur, ünitenin bütün kartları karışık sorulur. */
@@ -349,9 +364,9 @@ ESP.Lesson = (function(){
      ölçüm değil bir denemedir ve kullanıcının «kolaydı» demesi burada
      sorulmaz. Kolaylık, aralığın kendisinden okunur. */
   async function answer(session, given){
-    if(!session || session.done) return { ok:false, error:'Oturum kapalı.' };
+    if(!session || session.done) return { ok:false, error:yz('esp.core.lesson.oturum-kapali') };
     const q = session.questions[session.pos];
-    if(!q) return { ok:false, error:'Soru yok.' };
+    if(!q) return { ok:false, error:yz('esp.core.lesson.soru-yok') };
 
     const dogru = q.kind === 'recall'
       ? correct(given, q.answer)
@@ -364,7 +379,7 @@ ESP.Lesson = (function(){
     if(!yazildi.ok){
       session.pos++;
       if(session.pos >= session.questions.length) session.done = true;
-      return { ok:false, error:'Bu kart artık yok; soru atlandı.',
+      return { ok:false, error:yz('esp.core.lesson.bu-kart-artik-yok-soru'),
         skipped:true, done:session.done };
     }
 
@@ -396,10 +411,10 @@ ESP.Lesson = (function(){
   }
 
   function uniteSinavi(unit, lang){
-    if(!unit) return { ok:false, error:'Ünite bulunamadı.' };
+    if(!unit) return { ok:false, error:yz('esp.core.lesson.unite-bulunamadi') };
     const kartlar = cardsOf(unit, lang);
     if(kartlar.length < SINAV_EN_AZ){
-      return { ok:false, error:'Ünite sınavı için bu ünitenin destede en az ' + SINAV_EN_AZ
+      return { ok:false, error:yz('esp.core.lesson.unite-sinavi-icin-bu-uniteni') + SINAV_EN_AZ
         + ' kartı olmalı; şu an ' + kartlar.length + '. Önce üniteyi desteye ekle.' };
     }
     const deste = unit.disc === 'history' ? ESP.HISTORY_DECK : kartlar[0].lang;
@@ -449,7 +464,7 @@ ESP.Lesson = (function(){
      XP'ye olculmus gibi giriyordu. */
   async function log(session, minutes){
     const r = result(session);
-    if(!r || !r.asked) return { ok:false, error:'Cevaplanmış soru yok.' };
+    if(!r || !r.asked) return { ok:false, error:yz('esp.core.lesson.cevaplanmis-soru-yok') };
     const disc = session.deck === ESP.HISTORY_DECK ? 'history' : 'lang';
     const gercekSure = minutes != null;
     await ESP.Model.addSession(session.today || U.todayISO(), {
@@ -473,13 +488,13 @@ ESP.Lesson = (function(){
     const disc = ESP.DISCIPLINE_BY_ID && ESP.DISCIPLINE_BY_ID[c.discipline];
     const p = c.practice || {};
     return { id:c.id, baslik:c.title, alt:(disc ? disc.label : 'ESP') + (c.original_topic_items && c.original_topic_items.length ? ' · ' + c.original_topic_items.slice(0, 3).join(', ') : ''),
-      giris:c.goal || '', etiket:c.ready_for_app ? 'ESP öğrenme kartı' : 'doğrulanmadı · öğretmen incelemesi bekliyor',
+      giris:c.goal || '', etiket:c.ready_for_app ? yz('esp.core.lesson.esp-ogrenme-karti') : 'doğrulanmadı · öğretmen incelemesi bekliyor',
       sorgu:c.title, soruVar:false,
       bolumler:[{ baslik:yz('esp.core.lesson.aciklama'), metin:c.explanation },
         { baslik:yz('esp.core.lesson.ornek'), metin:c.worked_example && c.worked_example.text },
         { baslik:yz('esp.core.lesson.sik-yanlis'), metin:c.common_misinterpretation },
         { baslik:yz('esp.core.lesson.alistirma'), metin:p.prompt, liste:p.steps || [] },
-        { baslik:yz('esp.core.lesson.kendini-sina'), metin:p.expected_answer ? 'Cevabını yazdıktan sonra bak: ' + p.expected_answer : '' }].filter(b => b.metin) };
+        { baslik:yz('esp.core.lesson.kendini-sina'), metin:p.expected_answer ? yz('esp.core.lesson.cevabini-yazdiktan-sonra-bak') + p.expected_answer : '' }].filter(b => b.metin) };
   }
 
   return { kingDers, units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,

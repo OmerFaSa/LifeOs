@@ -1,6 +1,15 @@
 /* Program — tum programin zaman cizgisi ve yogunluk haritasi.
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.plan.kisisel-plan-henuz-uretilmed':'Kişisel plan henüz üretilmedi. Rehber → Ayarlar’dan ',
+  'ays.plan.takvimin-tum-konulara-yetiyo':'Takvimin tüm konulara yetiyor; plan müfredatın tamamını kapsıyor.',
+  'ays.plan.tyt-tarihi-bugun':'TYT tarihi − bugün',
+  'ays.plan.tyt-tahmini-tarih':'TYT, tahmini tarih.',
+  'ays.plan.yalniz-siradaki-haftalar':'Yalnız sıradaki haftalar',
+  'ays.plan.tum-program':'Tüm program · ',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -179,7 +188,7 @@ R.Screens.plan = (function(){
   function planCard(){
     const plan = M.activePlan();
     if(!plan) return K.Card({ title:yz('ays.plan.program'), sub:yz('ays.plan.sabit-mufredat-kullaniliyor'),
-      body:K.Notice({ tone:'info', body:'Kişisel plan henüz üretilmedi. Rehber → Ayarlar’dan '
+      body:K.Notice({ tone:'info', body:yz('ays.plan.kisisel-plan-henuz-uretilmed')
         + 'takvimini ve kapasiteni gir; program sana göre yeniden dizilir.' }) });
 
     const m = plan.meta;
@@ -211,7 +220,7 @@ R.Screens.plan = (function(){
             ${sureTeklifi(m)}` }))}
 
         ${when(!dropped.length, () => K.Notice({ tone:'ok',
-          body:'Takvimin tüm konulara yetiyor; plan müfredatın tamamını kapsıyor.' }))}
+          body:yz('ays.plan.takvimin-tum-konulara-yetiyo') }))}
 
         <p class="tiny dim mt-10">${yz('ays.plan.plan-sabit-degildir-takvimi')}</p>`,
     });
@@ -252,8 +261,8 @@ R.Screens.plan = (function(){
       { ust:yz('ays.plan.i-lerleme'), sayi:sayi({ deger:M.programProgress(), birim:'%', kesinlik:'computed', formul:'geçen hafta ÷ program haftası' }),
         cumle:yz('ays.plan.tamamlandi-2'), vurgu:yz('ays.plan.hafta') + cur + ' / ' + R.PLAN.totalWeeks + '.', sistem:'ays' },
       { ust:yz('ays.plan.sinava-kalan'), sayi:sayi({ deger:U.diffDays(U.todayISO(), R.PLAN.examTytISO), birim:'gün',
-          kesinlik:profilTarihi ? 'computed' : 'estimated', formul:'TYT tarihi − bugün' }),
-        cumle:yz('ays.plan.kaldi'), vurgu:profilTarihi ? 'TYT.' : 'TYT, tahmini tarih.', sistem:'ays' },
+          kesinlik:profilTarihi ? 'computed' : 'estimated', formul:yz('ays.plan.tyt-tarihi-bugun') }),
+        cumle:yz('ays.plan.kaldi'), vurgu:profilTarihi ? 'TYT.' : yz('ays.plan.tyt-tahmini-tarih'), sistem:'ays' },
       { ust:yz('ays.plan.planlanan-soru'), sayi:sayi({ deger:totalQ, birim:'soru', kesinlik:'computed', formul:'haftaların soru hedefi toplamı' }),
         cumle:'toplam.', vurgu:U.fmtNum(doneQ) + ' soru geride kaldı.', sistem:'ays' },
     ] }));
@@ -262,7 +271,7 @@ R.Screens.plan = (function(){
   function zamanCizgisi(gateWeeks){
     const cur = M.currentWeek();
     const tumu = !!S.ui.programTumu;
-    const dugme = K.Button({ label:tumu ? 'Yalnız sıradaki haftalar' : 'Tüm program · ' + R.PLAN.totalWeeks + ' hafta',
+    const dugme = K.Button({ label:tumu ? yz('ays.plan.yalniz-siradaki-haftalar') : yz('ays.plan.tum-program') + R.PLAN.totalWeeks + ' hafta',
       size:'sm', tone:'ghost', act:'program-tumu' });
     if(tumu){
       return K.Card({
@@ -360,7 +369,7 @@ R.Screens.plan = (function(){
     kucukVarsayilan:['bu-plan-sana-göre-üretildi'],
     title:yz('ays.plan.program'),
     subtitle(){
-      return 'Hafta '+M.currentWeek()+' / '+R.PLAN.totalWeeks+' · '
+      return yz('ays.plan.hafta')+M.currentWeek()+' / '+R.PLAN.totalWeeks+' · '
         + U.fmtDate(R.PLAN.startISO)+' – '+U.fmtDate(U.iso(M.weekEnd(R.PLAN.totalWeeks)));
     },
     /* «Bu haftayı aç» bölümlü seçicide zaten var (Hafta); sayfa başı sade. */

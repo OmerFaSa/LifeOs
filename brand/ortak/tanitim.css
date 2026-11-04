@@ -68,9 +68,9 @@
   border-radius:14px;
   overflow:hidden;
   border:1px solid var(--line, var(--border));
-  box-shadow:0 10px 30px rgba(0,0,0,.22);
-  -webkit-mask-image:linear-gradient(to bottom, #000 78%, transparent 100%);
-  mask-image:linear-gradient(to bottom, #000 78%, transparent 100%);
+  box-shadow:0 10px 30px var(--siyah-22);
+  -webkit-mask-image:linear-gradient(to bottom, var(--siyah) 78%, transparent 100%);
+  mask-image:linear-gradient(to bottom, var(--siyah) 78%, transparent 100%);
 }
 
 .tanitim__afis{
@@ -193,7 +193,7 @@
 .kurulum__adimlar li[data-hal="simdi"]{ border-top-color:var(--primary, var(--text)); color:var(--text); }
 .kurulum__no{ flex:none; width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
   font-size:11px; font-weight:700; background:var(--surface-2); color:var(--text-2); }
-.kurulum__adimlar li[data-hal="simdi"] .kurulum__no{ background:var(--primary, var(--text)); color:#fff; }
+.kurulum__adimlar li[data-hal="simdi"] .kurulum__no{ background:var(--primary, var(--text)); color:var(--beyaz); }
 .kurulum__adimlar li[data-hal="bitti"] .kurulum__no{ background:var(--text-2); color:var(--surface); }
 .kurulum__ad{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .kurulum--sade .kurulum__sayac{ flex:none; font-size:11.5px; color:var(--text-3); font-variant-numeric:tabular-nums; }

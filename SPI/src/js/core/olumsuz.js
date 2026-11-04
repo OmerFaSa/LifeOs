@@ -31,6 +31,12 @@
    `neden`: 'olumsuz' | 'gelecek' | 'istek' | 'soru' | 'belirsiz'.
    `kelime` cümlede geçtiği biçimiyle (küçük harf); `soru` kullanıcıya
    gidecek cümledir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.olumsuz.yaptiktan-sonra-soylersen-ka':'Yaptıktan sonra söylersen kaydederim.',
+  'ortak.olumsuz.bu-bir-soru-gibi-duruyor':'Bu bir soru gibi duruyor; ölçüm diye yazmadım. Kaydetmemi istiyorsan ',
+  'ortak.olumsuz.emin-olunca-soyler-misin':'Emin olunca söyler misin?',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -135,19 +141,19 @@ LIFEOS.Olumsuz = (function(){
     },
     gelecek:function(k){
       return '«' + k + '» ileriye dönük; henüz olmamış bir şeyi ölçüm diye yazmam. '
-        + 'Yaptıktan sonra söylersen kaydederim.';
+        + yz('ortak.olumsuz.yaptiktan-sonra-soylersen-ka');
     },
     istek:function(k){
       return '«' + k + '» bir istek ya da hedef; bunu ölçüm diye yazmadım. '
-        + 'Yaptıktan sonra söylersen kaydederim.';
+        + yz('ortak.olumsuz.yaptiktan-sonra-soylersen-ka');
     },
     soru:function(){
-      return 'Bu bir soru gibi duruyor; ölçüm diye yazmadım. Kaydetmemi istiyorsan '
+      return yz('ortak.olumsuz.bu-bir-soru-gibi-duruyor')
         + 'düz bir cümleyle söyler misin?';
     },
     belirsiz:function(k){
       return '«' + k + '» dedin; emin olmadığın bir sayıyı ölçüm diye yazmam. '
-        + 'Emin olunca söyler misin?';
+        + yz('ortak.olumsuz.emin-olunca-soyler-misin');
     },
     eylem:function(k){
       return '«' + k + '» olumsuz bir söz; istediğinin tersini yapmamak için hiçbir şeyi '

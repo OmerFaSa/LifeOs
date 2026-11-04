@@ -27,6 +27,13 @@
      · Tırmanış, beş noktalık ortalamayla yumuşatılmış yükseklikte 3 metre
        eşikle sayılır. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.rota.i-zde-hareket-yok-kayit-basl':'İzde hareket yok: kayıt başladığı yerde kalmış.',
+  'spi.core.rota.bu-dosya-planlanmis-bir-rota':'Bu dosya planlanmış bir rota: içinde kaydedilmiş bir aktivite yok.',
+  'spi.core.rota.dosyada-gps-noktasi-yok':'Dosyada GPS noktası yok.',
+  'spi.core.rota.planlanmis-bir-rota-degil-ka':'Planlanmış bir rota değil, kaydedilmiş bir aktivite seç.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.rota.dosya-bos':'Dosya boş.',
   'spi.core.rota.dosya-okunamadi':'Dosya okunamadı.',
   'spi.core.rota.bu-bir-gpx-dosyasi-degil':'Bu bir GPX dosyası değil.',
@@ -46,7 +53,7 @@ SP.Rota = (function(){
   const PROFIL_NOKTA = 100;
   const EN_COK_IZ = 600;            /* saklanan izin nokta tavanı */
   const SON_DILIM_M = 50;           /* bundan kısa son dilim gösterilmez */
-  const HAREKET_YOK = 'İzde hareket yok: kayıt başladığı yerde kalmış.';
+  const HAREKET_YOK = yz('spi.core.rota.i-zde-hareket-yok-kayit-basl');
 
   /* GPX tür yazısı → SPİ hareketi. Yalnız YAZIYLA gelen türler; sayı
      kodları (bazı servisler «9» yazar) burada doğrulanmadığı için
@@ -125,8 +132,8 @@ SP.Rota = (function(){
     if(!noktalar.length){
       const plan = doc.getElementsByTagNameNS('*', 'rtept').length;
       return { ok:false, why:plan
-        ? 'Bu dosya planlanmış bir rota: içinde kaydedilmiş bir aktivite yok.'
-        : 'Dosyada GPS noktası yok.' };
+        ? yz('spi.core.rota.bu-dosya-planlanmis-bir-rota')
+        : yz('spi.core.rota.dosyada-gps-noktasi-yok') };
     }
     return { ok:true, ad:ad || null, turYazi:turYazi || null, tur:turOf(turYazi), noktalar, atlanan };
   }
@@ -165,7 +172,7 @@ SP.Rota = (function(){
        değil «hareket yok»tur. */
     if(zamanli.length < tum.length / 2 || (tum.length >= 2 && zamanli.length < 2)){
       return { ok:false, why:yz('spi.core.rota.dosyada-zaman-bilgisi-yok-su')
-        + 'Planlanmış bir rota değil, kaydedilmiş bir aktivite seç.' };
+        + yz('spi.core.rota.planlanmis-bir-rota-degil-ka') };
     }
     if(zamanli.length < 2) return { ok:false, why:HAREKET_YOK };
     const iz = [];

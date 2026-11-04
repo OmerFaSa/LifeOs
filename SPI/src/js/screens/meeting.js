@@ -8,6 +8,13 @@
    karşılaştırmalar (fikir), belirgin bulgular, planların uyumu ve tek karar.
    Model bağlıysa Patron yalnız bu incelemeyi özetler; sayıyı o üretmez.
    Eski toplantı tutanakları silinmez, en altta okunur. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.meeting.patron-ozetlesin':'Patron özetlesin',
+  'spi.meeting.bu-incelemeyi-kullaniciya-uc':'Bu incelemeyi kullanıcıya üç dört cümlede özetle: önce haftanın durumu, ',
+  'spi.meeting.gundem-2':'Gündem: ',
+  'spi.meeting.gundem-yok':'Gündem yok',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -114,7 +121,7 @@ SP.Screens.meeting = (function(){
         ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">Patron'un özeti · ${P.sourceBadge(ozet.source)}</span><p>${ozet.text}</p></div>`)}`,
       ayak:html`${when(!k.calm && k.route, () => K.Button({ label:yz('spi.meeting.oraya-git'), size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
         ${when(!k.calm, () => K.Button({ label:yz('spi.meeting.karari-takibe-al'), size:'sm', act:'inceleme-takip' }))}
-        ${when(SP.Office.ready && SP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : 'Patron özetlesin', size:'sm', tone:'ghost',
+        ${when(SP.Office.ready && SP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : yz('spi.meeting.patron-ozetlesin'), size:'sm', tone:'ghost',
           act:'inceleme-ozet', disabled:ozetleniyor }))}` });
   }
 
@@ -270,7 +277,7 @@ SP.Screens.meeting = (function(){
           fikirler:r.fikirler.filter(f => f.acik).map(f => f.baslik + ': ' + f.metin),
           bulgular:r.bulgular.belirgin.map(f => f.link.title + ': ' + f.text),
           karar:r.karar.calm ? null : r.karar.title + ' — ' + r.karar.why } });
-        const res = await SP.Office.ask('patron', 'Bu incelemeyi kullanıcıya üç dört cümlede özetle: önce haftanın durumu, '
+        const res = await SP.Office.ask('patron', yz('spi.meeting.bu-incelemeyi-kullaniciya-uc')
           + 'sonra en anlamlı karşılaştırma, en sonda tek karar. Sayıları yalnız brifingden al; birlikteliği neden gibi sunma.',
           { brief:b, history:false, maxTokens:500 });
         S.ui.incelemeOzet = { tarih:r.tarih, text:res.text, source:res.source };
@@ -310,7 +317,7 @@ SP.Screens.meeting = (function(){
     title:yz('spi.meeting.i-nceleme'),
     subtitle(){
       const rows = SP.Office.agendaCandidates();
-      return rows.length ? 'Gündem: ' + rows[0].label : 'Gündem yok';
+      return rows.length ? yz('spi.meeting.gundem-2') + rows[0].label : yz('spi.meeting.gundem-yok');
     },
     actions(){ return ''; },
     render, handle,

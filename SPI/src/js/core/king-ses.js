@@ -5,6 +5,82 @@
    Parça 2/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.king-ses.bu-bir-fotograf-degil-yalniz':'Bu bir fotoğraf değil; yalnız görsel alabilirim.',
+  'ortak.king-ses.fotograf-cok-buyuk-en-cok':'Fotoğraf çok büyük (en çok 15 MB). Daha küçük bir kırpma dener misin?',
+  'ortak.king-ses.fotografi-aldim-ama':'Fotoğrafı aldım ama ',
+  'ortak.king-ses.fotografi-aldim-bu-cihazda-k':'Fotoğrafı aldım; bu cihazda kalıyor. Ne yapalım?',
+  'ortak.king-ses.bu-bir-pdf-degil-pdf':'Bu bir PDF değil; PDF dosyası seç.',
+  'ortak.king-ses.pdf-cok-buyuk-en-cok':'PDF çok büyük (en çok 8 MB).',
+  'ortak.king-ses.pdf-in-metnini-bilgisayardak':'PDF’in metnini bilgisayardaki Merkez çıkarır; Merkez bağlı değil. Bağlanınca yeniden dene.',
+  'ortak.king-ses.bearer':'Bearer ',
+  'ortak.king-ses.merkez-in-bu-surumu-pdf-okum':'Merkez’in bu sürümü PDF okumuyor; güncelleyince okurum.',
+  'ortak.king-ses.pdf-okunamadi':'PDF okunamadı: ',
+  'ortak.king-ses.merkez-cevap-vermedi':'Merkez cevap vermedi',
+  'ortak.king-ses.metni-bilgisayardaki-merkez':'Metni bilgisayardaki Merkez çıkardı (model yok); özeti King yazdı.',
+  'ortak.king-ses.kullanici-bir-pdf-verdi':'Kullanıcı bir PDF verdi: «',
+  'ortak.king-ses.pdf-in-metnini-okudum':'PDF’in metnini okudum (',
+  'ortak.king-ses.fotograf-islenemedi':'Fotoğraf işlenemedi: ',
+  'ortak.king-ses.tamam-fotografi-yerine-koydu':'Tamam, fotoğrafı yerine koydum.',
+  'ortak.king-ses.kameranin-karesi-alinamadi':'Kameranın karesi alınamadı: ',
+  'ortak.king-ses.kamera-acik':'Kamera açık. ',
+  'ortak.king-ses.kullanici-bana-bulundugu-ekr':'Kullanıcı bana bulunduğu ekranı gösteriyor (',
+  'ortak.king-ses.bu-ekranda':'Bu ekranda:',
+  'ortak.king-ses.goruntuyu-yorumlamak-icin-me':'Görüntüyü yorumlamak için Merkez’e (HKM) bağlı olmam gerekiyor. Merkez açıkken fotoğrafını ve ',
+  'ortak.king-ses.bu-goruntude-ne-var':'Bu görüntüde ne var?',
+  'ortak.king-ses.merkez-goruntuye-cevap-verme':'Merkez görüntüye cevap vermedi.',
+  'ortak.king-ses.gorsel-model-zamaninda-cevap':'Görsel model zamanında cevap vermedi.',
+  'ortak.king-ses.merkez-e-ulasilamadi':'Merkez’e ulaşılamadı.',
+  'ortak.king-ses.goruntuyu-yorumlayamadim':'Görüntüyü yorumlayamadım: ',
+  'ortak.king-ses.goruntuden-bir-sey-okuyamadi':'Görüntüden bir şey okuyamadım.',
+  'ortak.king-ses.bu-cihazda-tarayici-ekran-pa':'Bu cihazda tarayıcı ekran paylaşamıyor (telefonda tarayıcılar buna izin vermiyor). Ekran görüntüsü alıp ',
+  'ortak.king-ses.ekran-paylasimi-bitti':'Ekran paylaşımı bitti.',
+  'ortak.king-ses.ekran-paylasimi-iptal-edildi':'Ekran paylaşımı iptal edildi.',
+  'ortak.king-ses.ekran-paylasilamadi':'Ekran paylaşılamadı: ',
+  'ortak.king-ses.ekranini-goruyorum-ne-sorars':'Ekranını görüyorum. Ne sorarsan o anki ekranı yorumlarım; ',
+  'ortak.king-ses.bu-cihazda-kameraya-ulasilam':'Bu cihazda kameraya ulaşılamıyor.',
+  'ortak.king-ses.kamera-kapandi':'Kamera kapandı.',
+  'ortak.king-ses.kameraya-izin-verilmedi':'Kameraya izin verilmedi.',
+  'ortak.king-ses.kamera-bulunamadi-takili-old':'Kamera bulunamadı; takılı olduğundan emin ol.',
+  'ortak.king-ses.kamera-baska-bir-uygulamada':'Kamera başka bir uygulamada açık görünüyor.',
+  'ortak.king-ses.kamera-acilamadi':'Kamera açılamadı: ',
+  'ortak.king-ses.kamerayi-goruyorum-masandaki':'Kamerayı görüyorum. Masandaki kâğıdı ya da kitabı gösterip sorabilirsin; ',
+  'ortak.king-ses.kamerayi-kapattim':'Kamerayı kapattım.',
+  'ortak.king-ses.ekran-paylasimini-durdurdum':'Ekran paylaşımını durdurdum.',
+  'ortak.king-ses.fotograf-okunamadi':'Fotoğraf okunamadı.',
+  'ortak.king-ses.bu-fotografta-ne-var-kisaca':'Bu fotoğrafta ne var? Kısaca söyle; LifeOS’ta işime yarayacak bir şey (soru, öğün, ölçüm, plan) varsa belirt.',
+  'ortak.king-ses.bu-tarayici-konusmayi-tanimi':'Bu tarayıcı konuşmayı tanımıyor; yazarak devam edebilirsin.',
+  'ortak.king-ses.sesli-sohbeti-bitirdim':'Sesli sohbeti bitirdim.',
+  'ortak.king-ses.seni-dinliyorum-bitirmek-ici':'Seni dinliyorum. Bitirmek için «tamam» de.',
+  'ortak.king-ses.dinlemeyi-bitir':'Dinlemeyi bitir',
+  'ortak.king-ses.konusarak-sor':'Konuşarak sor',
+  'ortak.king-ses.tamam-sesli-sohbeti-bitirdim':'Tamam, sesli sohbeti bitirdim. Yazarak devam edebilirsin.',
+  'ortak.king-ses.sesini-duyamadim-sesli-sohbe':'Sesini duyamadım; sesli sohbeti durdurdum.',
+  'ortak.king-ses.mikrofon-izni-verilmedi-tara':'Mikrofon izni verilmedi. Tarayıcının adres çubuğundan izin verebilir ya da yazabilirsin.',
+  'ortak.king-ses.ses-taninamadi-sesli-sohbeti':'Ses tanınamadı; sesli sohbeti durdurdum. Yazarak devam edebilirsin.',
+  'ortak.king-ses.bir-sey-duyamadim-yeniden-de':'Bir şey duyamadım. Yeniden dener misin?',
+  'ortak.king-ses.ses-taninamadi-yazarak-da-so':'Ses tanınamadı; yazarak da sorabilirsin.',
+  'ortak.king-ses.wavefmt':'WAVEfmt ',
+  'ortak.king-ses.yaziya-dokuluyor':'Yazıya dökülüyor…',
+  'ortak.king-ses.hkm-sesi-yaziya-dokemedi':'HKM sesi yazıya dökemedi',
+  'ortak.king-ses.ses-yaziya-dokulemedi':'Ses yazıya dökülemedi',
+  'ortak.king-ses.bu-tarayicida-dogrudan-mikro':'Bu tarayıcıda doğrudan mikrofon kaydı desteklenmiyor.',
+  'ortak.king-ses.ses-duyulmadi-mikrofona-konu':'Ses duyulmadı — mikrofona konuşup tekrar dene ya da başka bir mikrofon seç.',
+  'ortak.king-ses.ses-alindi-yaziya-dokuluyor':'Ses alındı · yazıya dökülüyor…',
+  'ortak.king-ses.mikrofon-calisiyor':'Mikrofon çalışıyor · «',
+  'ortak.king-ses.mikrofon-ses-aldi-ancak-konu':'Mikrofon ses aldı, ancak konuşma seçilemedi.',
+  'ortak.king-ses.mikrofon-ses-aldi-ancak-hkm':'Mikrofon ses aldı, ancak HKM yazıya dökemedi.',
+  'ortak.king-ses.mikrofon-calisiyor-ses-alind':'Mikrofon çalışıyor · ses alındı.',
+  'ortak.king-ses.dinliyorum-bir-cumle-soyle-d':'Dinliyorum… bir cümle söyle (durunca ya da Bitir’e basınca biter).',
+  'ortak.king-ses.mikrofon-acilamadi-tarayici':'Mikrofon açılamadı — tarayıcı iznini ya da seçili mikrofonu kontrol et.',
+  'ortak.king-ses.mikrofon-acilamadi-king-ile':'Mikrofon açılamadı; «King» ile uyanma şimdilik çalışmıyor.',
+  'ortak.king-ses.kapali-acinca-mikrofon-dinle':'Kapalı. Açınca mikrofon dinlemede kalır; «King» dediğin kısa cümle yalnız bu bilgisayardaki Merkez’de yazıya dökülür, başka yere gitmez.',
+  'ortak.king-ses.yalniz-bu-bilgisayarda-merke':'Yalnız bu bilgisayarda, Merkez açıkken çalışır.',
+  'ortak.king-ses.dinliyor-king-de-ya-da':'Dinliyor. «King» de ya da «King, bugün ne var?» diye sor.',
+  'ortak.king-ses.king-konusurken-ya-da-dinler':'King konuşurken ya da dinlerken bekler.',
+  'ortak.king-ses.king-deyince-uyan':'«King» deyince uyan',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.king-ses.fotograf':'(fotoğraf)',
   'ortak.king-ses.ne-gordugunu-soyle':'Ne gördüğünü söyle',
   'ortak.king-ses.vazgec':'Vazgeç',
@@ -30,8 +106,8 @@ window.LIFEOS.PARCA.yazilar({
   function fotoIsleri(){ return (KI.ayar && Array.isArray(KI.ayar.foto)) ? KI.ayar.foto.filter(x => x && x.ad && typeof x.is === 'function') : []; }
   function fotoAl(file){
     if(!KI.acik || !file) return false;
-    if(!/^image\//.test(file.type || '')){ KI.soyle('Bu bir fotoğraf değil; yalnız görsel alabilirim.'); return false; }
-    if(file.size > KI.FOTO_EN_BUYUK){ KI.soyle('Fotoğraf çok büyük (en çok 15 MB). Daha küçük bir kırpma dener misin?'); return false; }
+    if(!/^image\//.test(file.type || '')){ KI.soyle(yz('ortak.king-ses.bu-bir-fotograf-degil-yalniz')); return false; }
+    if(file.size > KI.FOTO_EN_BUYUK){ KI.soyle(yz('ortak.king-ses.fotograf-cok-buyuk-en-cok')); return false; }
     const fotoUrl = KI.ortam.nesneUrl(file);
     KI.akis.push({ kim:'sen', foto:fotoUrl, metin:yz('ortak.king-ses.fotograf') });
     KI.gorselSakla(fotoUrl);
@@ -42,14 +118,14 @@ window.LIFEOS.PARCA.yazilar({
     KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
     if(!l.length && !gorur){
       KI.bekleyenFoto = null; KI.cipler = null;
-      KI.soyle('Fotoğrafı aldım ama ' + (KI.MODUL_AD[KI.ayar.modul] || 'bu modül') + '’de fotoğrafla yapılan bir iş yok. AYS’de soru çözdürebilir, SPİ’de öğün okutabilirim.');
+      KI.soyle(yz('ortak.king-ses.fotografi-aldim-ama') + (KI.MODUL_AD[KI.ayar.modul] || 'bu modül') + '’de fotoğrafla yapılan bir iş yok. AYS’de soru çözdürebilir, SPİ’de öğün okutabilirim.');
       return true;
     }
     KI.bekleyenFoto = file;
     KI.cipler = l.map((x, i) => ({ ad:x.ad, is:'foto:' + i }))
       .concat(gorur ? [{ ad:yz('ortak.king-ses.ne-gordugunu-soyle'), is:'foto-yorum' }] : [])
       .concat([{ ad:yz('ortak.king-ses.vazgec'), is:'vazgec' }]);
-    KI.soyle('Fotoğrafı aldım; bu cihazda kalıyor. Ne yapalım?');
+    KI.soyle(yz('ortak.king-ses.fotografi-aldim-bu-cihazda-k'));
     return true;
   }
   /* G: PDF — metnini bilgisayardaki Merkez çıkarır (HKM/core/belge.py, model
@@ -57,34 +133,34 @@ window.LIFEOS.PARCA.yazilar({
   const PDF_EN_BUYUK = 8 * 1024 * 1024, PDF_METIN = 6000;
   async function pdfAl(file){
     if(!KI.acik || !file) return false;
-    if(!/pdf$/i.test(file.type || '') && !/\.pdf$/i.test(file.name || '')){ KI.soyle('Bu bir PDF değil; PDF dosyası seç.'); return false; }
+    if(!/pdf$/i.test(file.type || '') && !/\.pdf$/i.test(file.name || '')){ KI.soyle(yz('ortak.king-ses.bu-bir-pdf-degil-pdf')); return false; }
     const ad = String(file.name || 'belge.pdf').slice(0, 120);
     KI.akis.push({ kim:'sen', metin:yz('ortak.king-ses.pdf') + ad });
-    if(file.size > PDF_EN_BUYUK){ KI.soyle('PDF çok büyük (en çok 8 MB).'); return false; }
+    if(file.size > PDF_EN_BUYUK){ KI.soyle(yz('ortak.king-ses.pdf-cok-buyuk-en-cok')); return false; }
     const k = KI.baglanti();
-    if(!k){ KI.soyle('PDF’in metnini bilgisayardaki Merkez çıkarır; Merkez bağlı değil. Bağlanınca yeniden dene.'); return false; }
+    if(!k){ KI.soyle(yz('ortak.king-ses.pdf-in-metnini-bilgisayardak')); return false; }
     const bek = { kim:'king', bekliyor:true, metin:'' };
     KI.akis.push(bek); KI.ciz(false);
     let g = null, durum = 0;
     try{
       const veri = await KI.ortam.dosyaB64(file);
       const res = await KI.ortam.fetch(k.url + '/api/king/belge', { method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ ad, veri }) });
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king-ses.bearer') + k.token }, body:JSON.stringify({ ad, veri }) });
       durum = res.status;
       try{ g = await res.json(); }catch(e){ g = null; }
     }catch(e){ g = null; }
     if(!g || !g.ok){
       KI.akis = KI.akis.filter(m => m !== bek);
-      KI.soyle(durum === 404 ? 'Merkez’in bu sürümü PDF okumuyor; güncelleyince okurum.' : 'PDF okunamadı: ' + String((g && g.note) || 'Merkez cevap vermedi').replace(/[.]$/, '') + '.');
+      KI.soyle(durum === 404 ? yz('ortak.king-ses.merkez-in-bu-surumu-pdf-okum') : yz('ortak.king-ses.pdf-okunamadi') + String((g && g.note) || yz('ortak.king-ses.merkez-cevap-vermedi')).replace(/[.]$/, '') + '.');
       return false;
     }
-    const neden = ['Metni bilgisayardaki Merkez çıkardı (model yok); özeti King yazdı.' + (g.kesildi || String(g.metin || '').length > PDF_METIN ? ' Belge uzundu; baş kısmı okundu.' : '')];
-    const r = await KI.merkezeSor('Kullanıcı bir PDF verdi: «' + ad + '»' + (g.sayfa ? ' (' + g.sayfa + ' sayfa)' : '') + '. Metni aşağıda. Türkçe, kısa özetle '
+    const neden = [yz('ortak.king-ses.metni-bilgisayardaki-merkez') + (g.kesildi || String(g.metin || '').length > PDF_METIN ? ' Belge uzundu; baş kısmı okundu.' : '')];
+    const r = await KI.merkezeSor(yz('ortak.king-ses.kullanici-bir-pdf-verdi') + ad + '»' + (g.sayfa ? ' (' + g.sayfa + ' sayfa)' : '') + '. Metni aşağıda. Türkçe, kısa özetle '
       + '(en çok beş madde) ve LifeOS’ta işine yarayacak sonraki adımı tek cümleyle öner; metinde olmayan sayıyı yazma.\n\n' + String(g.metin || '').slice(0, PDF_METIN));
     KI.akis = KI.akis.filter(m => m !== bek);
     KI.kaynakMetin = { ad, metin:String(g.metin || '') };
     KI.cipler = [{ ad:yz('ortak.king-ses.derse-cevir'), is:'derse-cevir' }];
-    KI.soyle(r.ok ? r.text : 'PDF’in metnini okudum (' + (Number(g.kelime) || 0) + ' kelime) ama Merkez özetleyemedi.', null, null, null, { neden });
+    KI.soyle(r.ok ? r.text : yz('ortak.king-ses.pdf-in-metnini-okudum') + (Number(g.kelime) || 0) + ' kelime) ama Merkez özetleyemedi.', null, null, null, { neden });
     return true;
   }
   /* Söz 37: işe görüntü okuma yardımı gider (Merkez'in görsel modeli); iş
@@ -98,9 +174,9 @@ window.LIFEOS.PARCA.yazilar({
     KI.akis.push(bek); KI.ciz(false);
     let r = null;
     try{ r = await x.is(f, { gorsel:(soru, yetenek) => gorselOku(f, soru, yetenek), kamera:!!dosya }); }
-    catch(e){ KI.akis = KI.akis.filter(m => m !== bek); KI.soyle('Fotoğraf işlenemedi: ' + ((e && e.message) || 'bilinmeyen hata')); return; }
+    catch(e){ KI.akis = KI.akis.filter(m => m !== bek); KI.soyle(yz('ortak.king-ses.fotograf-islenemedi') + ((e && e.message) || 'bilinmeyen hata')); return; }
     KI.akis = KI.akis.filter(m => m !== bek);
-    if(!r || typeof r !== 'object'){ KI.kucult(); KI.soyle((r && String(r)) || 'Tamam, fotoğrafı yerine koydum.'); return; }
+    if(!r || typeof r !== 'object'){ KI.kucult(); KI.soyle((r && String(r)) || yz('ortak.king-ses.tamam-fotografi-yerine-koydu')); return; }
     const on = String(r.metin || '').trim();
     if(r.arac && KI.ARAC()){
       const o = await KI.ARAC().onizle(r.arac.ad, r.arac.param, { metin:'' });
@@ -134,7 +210,7 @@ window.LIFEOS.PARCA.yazilar({
     const x = fotoIsleri()[i];
     if(!x || !KI.kameraMi()) return null;
     let kare;
-    try{ kare = KI.paylasim.kare(); }catch(e){ KI.soyle('Kameranın karesi alınamadı: ' + ((e && e.message) || 'bilinmeyen hata')); return null; }
+    try{ kare = KI.paylasim.kare(); }catch(e){ KI.soyle(yz('ortak.king-ses.kameranin-karesi-alinamadi') + ((e && e.message) || 'bilinmeyen hata')); return null; }
     KI.akis.push({ kim:'sen', metin:yz('ortak.king-ses.kameradan') + x.ad });
     return fotoIsle(i, kareDosya(kare, x.id));
   }
@@ -155,7 +231,7 @@ window.LIFEOS.PARCA.yazilar({
     if(!KI.kameraMi()) return;
     KI.fotoHedef = i;
     KI.cipler = [{ ad:x.ad, is:'kam-is:' + i }, { ad:yz('ortak.king-ses.vazgec'), is:'vazgec' }];
-    KI.soyle('Kamera açık. ' + x.ad + ' için hazır olunca düğmeye dokun.');
+    KI.soyle(yz('ortak.king-ses.kamera-acik') + x.ad + ' için hazır olunca düğmeye dokun.');
   }
   /* Söz 37: «Tüm işler»den bir iş. Başka modülün işi o modülde açılır. */
   function isSec(n){
@@ -193,12 +269,12 @@ window.LIFEOS.PARCA.yazilar({
     if(KI.baglanti()){
       const bek = { kim:'king', bekliyor:true, metin:'' };
       KI.akis.push(bek); KI.ciz(false);
-      const r = await KI.merkezeSor('Kullanıcı bana bulunduğu ekranı gösteriyor (' + KI.MODUL_AD[KI.ayar.modul] + (e.ad ? ' · ' + e.ad : '')
+      const r = await KI.merkezeSor(yz('ortak.king-ses.kullanici-bana-bulundugu-ekr') + KI.MODUL_AD[KI.ayar.modul] + (e.ad ? ' · ' + e.ad : '')
         + '). Ekrandaki yazılar: «' + e.metin + '». Kısaca ne gördüğünü ve sıradaki en mantıklı adımı söyle; sayı uydurma, ekrandakini kullan.');
       KI.akis = KI.akis.filter(m => m !== bek);
       if(r.ok){ KI.soyle(r.text); return r; }
     }
-    KI.soyle((e.ad ? e.ad + ' ekranındasın.' : 'Bu ekranda:') + (e.basliklar.length ? ' Gördüklerim:' : ' Okuyabildiğim bir başlık yok.'),
+    KI.soyle((e.ad ? e.ad + ' ekranındasın.' : yz('ortak.king-ses.bu-ekranda')) + (e.basliklar.length ? ' Gördüklerim:' : ' Okuyabildiğim bir başlık yok.'),
       e.basliklar.slice(0, 8));
     return e;
   }
@@ -215,7 +291,7 @@ window.LIFEOS.PARCA.yazilar({
      (<modül>.gorsel, ör. yerel qwen3-vl) gider: /api/ofis/cevap, yetenek
      «gorsel». Bağlı değilse modülde eski bir zincir varsa o denenir. */
   function gorebilir(){ return !!KI.baglanti() || gorselZincir().length > 0; }
-  const GORSEL_YOK = 'Görüntüyü yorumlamak için Merkez’e (HKM) bağlı olmam gerekiyor. Merkez açıkken fotoğrafını ve '
+  const GORSEL_YOK = yz('ortak.king-ses.goruntuyu-yorumlamak-icin-me')
     + 'ekranını bilgisayardaki görsel modelle okurum; görüntü internete çıkmaz.';
   const GORSEL_ZAMAN = 120000;   // görsel model ilk istekte belleğe yüklenir
   async function merkezGorsel(k, soru, resim, yetenek, tekrar){
@@ -225,10 +301,10 @@ window.LIFEOS.PARCA.yazilar({
       const f = KI.ortam.fetch;
       const res = await f(k.url + '/api/ofis/cevap', {
         method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king-ses.bearer') + k.token },
         body:JSON.stringify({ modul:KI.ayar.modul, yetenek:yetenek || 'gorsel',
           sistem:KI.GORSEL_SISTEM + (KI.kameraMi() ? KI.KAMERA_NOT : '') + (KI.kisiOzeti() ? '\n\n' + KI.kisiOzeti() : ''),
-          mesajlar:[{ role:'user', text:String(soru || 'Bu görüntüde ne var?') }], gorseller:[resim] }),
+          mesajlar:[{ role:'user', text:String(soru || yz('ortak.king-ses.bu-goruntude-ne-var')) }], gorseller:[resim] }),
         signal:ctrl ? ctrl.signal : undefined,
       });
       /* Eski jeton (401, sahada 2026-10-21): modül Merkez'e yeniden bağlanır, bir kez daha denenir. */
@@ -242,9 +318,9 @@ window.LIFEOS.PARCA.yazilar({
       let g = null;
       try{ g = await res.json(); }catch(e){ g = null; }
       if(res.status === 200 && g && g.ok && String(g.text || '').trim()) return { ok:true, text:String(g.text).trim() };
-      return { ok:false, note:(g && g.note) || 'Merkez görüntüye cevap vermedi.' };
+      return { ok:false, note:(g && g.note) || yz('ortak.king-ses.merkez-goruntuye-cevap-verme') };
     }catch(e){
-      return { ok:false, note:e && e.name === 'AbortError' ? 'Görsel model zamanında cevap vermedi.' : 'Merkez’e ulaşılamadı.' };
+      return { ok:false, note:e && e.name === 'AbortError' ? yz('ortak.king-ses.gorsel-model-zamaninda-cevap') : yz('ortak.king-ses.merkez-e-ulasilamadi') };
     }finally{
       if(t) clearTimeout(t);
     }
@@ -259,21 +335,21 @@ window.LIFEOS.PARCA.yazilar({
       const r = await merkezGorsel(k, soru, resim, yetenek);
       if(r.ok || !zincir.length){
         KI.akis = KI.akis.filter(m => m !== bek);
-        KI.soyle(r.ok ? r.text : 'Görüntüyü yorumlayamadım: ' + r.note);
+        KI.soyle(r.ok ? r.text : yz('ortak.king-ses.goruntuyu-yorumlayamadim') + r.note);
         return r.ok ? r : null;
       }
     }
     try{
       const M = modelKatmani();
       const r = await M.complete(zincir, { system:KI.GORSEL_SISTEM + (KI.kameraMi() ? KI.KAMERA_NOT : '') + (KI.kisiOzeti() ? '\n\n' + KI.kisiOzeti() : ''), temperature:0.3, maxTokens:700,
-        messages:[{ role:'user', text:String(soru || 'Bu görüntüde ne var?'), images:[resim] }] });
+        messages:[{ role:'user', text:String(soru || yz('ortak.king-ses.bu-goruntude-ne-var')), images:[resim] }] });
       KI.akis = KI.akis.filter(m => m !== bek);
-      KI.soyle(String((r && r.text) || '').trim() || 'Görüntüden bir şey okuyamadım.');
+      KI.soyle(String((r && r.text) || '').trim() || yz('ortak.king-ses.goruntuden-bir-sey-okuyamadi'));
       return r;
     }catch(e){
       KI.akis = KI.akis.filter(m => m !== bek);
       const M = modelKatmani();
-      KI.soyle('Görüntüyü yorumlayamadım: ' + ((M && M.errorText && e && e.code) ? M.errorText(e.code) : ((e && e.message) || 'model yanıt vermedi')));
+      KI.soyle(yz('ortak.king-ses.goruntuyu-yorumlayamadim') + ((M && M.errorText && e && e.code) ? M.errorText(e.code) : ((e && e.message) || 'model yanıt vermedi')));
       return null;
     }
   }
@@ -281,38 +357,38 @@ window.LIFEOS.PARCA.yazilar({
     if(KI.paylasim && !KI.kameraMi()){ paylasimBitir(); return false; }
     if(KI.paylasim) paylasimKapat();                // ekran ile kamera aynı anda açık olmaz
     if(!KI.ortam.ekranDestek()){
-      KI.soyle('Bu cihazda tarayıcı ekran paylaşamıyor (telefonda tarayıcılar buna izin vermiyor). Ekran görüntüsü alıp '
+      KI.soyle(yz('ortak.king-ses.bu-cihazda-tarayici-ekran-pa')
         + 'fotoğraf olarak gönderirsen ne gördüğümü söylerim.');
       return false;
     }
     if(!gorebilir()){ KI.soyle(GORSEL_YOK); return false; }
     const no = ++KI.paylasimNo;
     try{
-      const p = await KI.ortam.ekranBaslat(() => { if(KI.paylasim && KI.paylasim === p){ paylasimKapat(); KI.soyle('Ekran paylaşımı bitti.'); } });
+      const p = await KI.ortam.ekranBaslat(() => { if(KI.paylasim && KI.paylasim === p){ paylasimKapat(); KI.soyle(yz('ortak.king-ses.ekran-paylasimi-bitti')); } });
       if(no !== KI.paylasimNo || !KI.acik){ try{ p.bitir(); }catch(e){ /* durmuş */ } return false; }   // bu arada kapandı
       p.tur = 'ekran';
       KI.paylasim = p;
     }catch(e){
       if(no !== KI.paylasimNo) return false;
       KI.paylasim = null;
-      KI.soyle(e && e.name === 'NotAllowedError' ? 'Ekran paylaşımı iptal edildi.' : 'Ekran paylaşılamadı: ' + ((e && e.message) || 'bilinmeyen hata'));
+      KI.soyle(e && e.name === 'NotAllowedError' ? yz('ortak.king-ses.ekran-paylasimi-iptal-edildi') : yz('ortak.king-ses.ekran-paylasilamadi') + ((e && e.message) || 'bilinmeyen hata'));
       return false;
     }
     KI.gozSonIz = '';
     gozKur(KI.GOZ_ILK);
-    KI.soyle('Ekranını görüyorum. Ne sorarsan o anki ekranı yorumlarım; ' + (KI.gozAcik() ? 'arada bir de kendim bakıp '
+    KI.soyle(yz('ortak.king-ses.ekranini-goruyorum-ne-sorars') + (KI.gozAcik() ? 'arada bir de kendim bakıp '
       + 'işine yarayacak bir şey görürsem söylerim.' : 'görüntü yalnız sorduğunda yapay zekâya gider, saklanmaz.'));
     return true;
   }
   async function kameraAc(){
     if(KI.kameraMi()){ paylasimBitir(); return false; }
     if(KI.paylasim) paylasimKapat();
-    if(!KI.ortam.kameraDestek()){ KI.soyle('Bu cihazda kameraya ulaşılamıyor.'); return false; }
+    if(!KI.ortam.kameraDestek()){ KI.soyle(yz('ortak.king-ses.bu-cihazda-kameraya-ulasilam')); return false; }
     /* Söz 37: modülün fotoğraf işi varsa (barkod cihazda okunur) Merkez'siz de açılır. */
     if(!gorebilir() && !fotoIsleri().length){ KI.soyle(GORSEL_YOK); return false; }
     const no = ++KI.paylasimNo;
     try{
-      const p = await KI.ortam.kameraBaslat(() => { if(KI.paylasim && KI.paylasim === p){ paylasimKapat(); KI.soyle('Kamera kapandı.'); } }, KI.kamSecili());
+      const p = await KI.ortam.kameraBaslat(() => { if(KI.paylasim && KI.paylasim === p){ paylasimKapat(); KI.soyle(yz('ortak.king-ses.kamera-kapandi')); } }, KI.kamSecili());
       if(no !== KI.paylasimNo || !KI.acik){ try{ p.bitir(); }catch(e){ /* durmuş */ } return false; }   // bu arada kapandı
       p.tur = 'kamera';
       KI.paylasim = p;
@@ -320,15 +396,15 @@ window.LIFEOS.PARCA.yazilar({
       if(no !== KI.paylasimNo) return false;
       KI.paylasim = null;
       const ad = e && e.name;
-      KI.soyle(ad === 'NotAllowedError' ? 'Kameraya izin verilmedi.' : ad === 'NotFoundError' || ad === 'OverconstrainedError'
-        ? 'Kamera bulunamadı; takılı olduğundan emin ol.' : ad === 'NotReadableError' ? 'Kamera başka bir uygulamada açık görünüyor.'
-        : 'Kamera açılamadı: ' + ((e && e.message) || 'bilinmeyen hata'));
+      KI.soyle(ad === 'NotAllowedError' ? yz('ortak.king-ses.kameraya-izin-verilmedi') : ad === 'NotFoundError' || ad === 'OverconstrainedError'
+        ? yz('ortak.king-ses.kamera-bulunamadi-takili-old') : ad === 'NotReadableError' ? yz('ortak.king-ses.kamera-baska-bir-uygulamada')
+        : yz('ortak.king-ses.kamera-acilamadi') + ((e && e.message) || 'bilinmeyen hata'));
       return false;
     }
     KI.kamTazele();                                 // izinden sonra kameraların adları gelir
     KI.gozSonIz = '';
     gozKur(KI.GOZ_ILK);
-    KI.soyle('Kamerayı görüyorum. Masandaki kâğıdı ya da kitabı gösterip sorabilirsin; ' + (KI.gozAcik() ? 'arada bir de kendim bakıp '
+    KI.soyle(yz('ortak.king-ses.kamerayi-goruyorum-masandaki') + (KI.gozAcik() ? 'arada bir de kendim bakıp '
       + 'takıldığın bir yer görürsem yardım teklif ederim.' : 'görüntü yalnız sorduğunda okunur.') + ' Görüntü saklanmaz, bilgisayardan çıkmaz.');
     return true;
   }
@@ -372,15 +448,15 @@ window.LIFEOS.PARCA.yazilar({
   }
   function paylasimBitir(){
     const p = paylasimKapat();
-    if(KI.acik) KI.soyle(p && p.tur === 'kamera' ? 'Kamerayı kapattım.' : 'Ekran paylaşımını durdurdum.');
+    if(KI.acik) KI.soyle(p && p.tur === 'kamera' ? yz('ortak.king-ses.kamerayi-kapattim') : yz('ortak.king-ses.ekran-paylasimini-durdurdum'));
   }
   async function fotoYorumla(){
     const f = KI.bekleyenFoto;
     KI.bekleyenFoto = null; KI.cipler = null;
     if(!f) return null;
     let resim = null;
-    try{ resim = await KI.ortam.dosyaKare(f); }catch(e){ KI.soyle('Fotoğraf okunamadı.'); return null; }
-    return gorselCevap('Bu fotoğrafta ne var? Kısaca söyle; LifeOS’ta işime yarayacak bir şey (soru, öğün, ölçüm, plan) varsa belirt.', resim);
+    try{ resim = await KI.ortam.dosyaKare(f); }catch(e){ KI.soyle(yz('ortak.king-ses.fotograf-okunamadi')); return null; }
+    return gorselCevap(yz('ortak.king-ses.bu-fotografta-ne-var-kisaca'), resim);
   }
 
   /* ---------- söz 13: sesli sohbet ---------- */
@@ -391,12 +467,12 @@ window.LIFEOS.PARCA.yazilar({
     dinle();
   }
   function sesliSohbetAc(){
-    if(!KI.konusabilir()){ KI.soyle('Bu tarayıcı konuşmayı tanımıyor; yazarak devam edebilirsin.'); return false; }
+    if(!KI.konusabilir()){ KI.soyle(yz('ortak.king-ses.bu-tarayici-konusmayi-tanimi')); return false; }
     KI.sesliSohbet = !KI.sesliSohbet;
     KI.sessizSay = 0;
-    if(!KI.sesliSohbet){ if(KI.dinleyen){ try{ KI.dinleyen.stop(); }catch(e){ /* kapalı */ } } KI.soyle('Sesli sohbeti bitirdim.'); return false; }
+    if(!KI.sesliSohbet){ if(KI.dinleyen){ try{ KI.dinleyen.stop(); }catch(e){ /* kapalı */ } } KI.soyle(yz('ortak.king-ses.sesli-sohbeti-bitirdim')); return false; }
     KI.sesli = true;
-    KI.soyle('Seni dinliyorum. Bitirmek için «tamam» de.');
+    KI.soyle(yz('ortak.king-ses.seni-dinliyorum-bitirmek-ici'));
     return true;
   }
 
@@ -432,7 +508,7 @@ window.LIFEOS.PARCA.yazilar({
     if(m){
       m.classList.toggle('is-acik', !!KI.dinleyen);
       m.setAttribute('aria-pressed', KI.dinleyen ? 'true' : 'false');
-      m.setAttribute('aria-label', KI.dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor');
+      m.setAttribute('aria-label', KI.dinleyen ? yz('ortak.king-ses.dinlemeyi-bitir') : yz('ortak.king-ses.konusarak-sor'));
     }
   }
   function sus(){
@@ -468,7 +544,7 @@ window.LIFEOS.PARCA.yazilar({
       const f = KI.ortam.fetch;
       const istek = yol => f(k.url + yol, {
         method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king-ses.bearer') + k.token },
         body:JSON.stringify({ metin, tercih:tercih || sesTercihi() }),
         signal:ctrl ? ctrl.signal : undefined,
       });
@@ -629,22 +705,22 @@ window.LIFEOS.PARCA.yazilar({
         KI.sessizSay = 0;
         /* Söz 13: «tamam», «görüşürüz» sesli sohbeti bitirir. */
         if(KI.sesliSohbet && /^(tamam|teşekkürler|teşekkür ederim|görüşürüz|dur|bitti|kapat sesi|yeter)[.!]?$/i.test(KI.kucuk(son))){
-          KI.sesliSohbet = false; KI.akis.push({ kim:'sen', metin:son }); KI.soyle('Tamam, sesli sohbeti bitirdim. Yazarak devam edebilirsin.'); return;
+          KI.sesliSohbet = false; KI.akis.push({ kim:'sen', metin:son }); KI.soyle(yz('ortak.king-ses.tamam-sesli-sohbeti-bitirdim')); return;
         }
         KI.isle(son);
       }else if(KI.sesliSohbet && (!hata || hata === 'no-speech')){
         KI.sessizSay++;
-        if(KI.sessizSay >= 2){ KI.sesliSohbet = false; KI.sessizSay = 0; KI.soyle('Sesini duyamadım; sesli sohbeti durdurdum.'); }
+        if(KI.sessizSay >= 2){ KI.sesliSohbet = false; KI.sessizSay = 0; KI.soyle(yz('ortak.king-ses.sesini-duyamadim-sesli-sohbe')); }
         else KI.ortam.zamanla(sohbetDevam, 400);
       }else if(hata === 'not-allowed' || hata === 'service-not-allowed'){
         KI.sesliSohbet = false;
-        KI.soyle('Mikrofon izni verilmedi. Tarayıcının adres çubuğundan izin verebilir ya da yazabilirsin.');
+        KI.soyle(yz('ortak.king-ses.mikrofon-izni-verilmedi-tara'));
       }else if(hata && hata !== 'aborted'){
         /* Sesli sohbette gerçek hata döngüyü DURDURUR (sahada, 2026-10-19:
            masaüstünde tarayıcı tanıması her seferinde hata veriyor, King
            yeniden dinliyor ve «Ses tanınamadı» üst üste yığılıyordu). */
-        if(KI.sesliSohbet){ KI.sesliSohbet = false; KI.sessizSay = 0; KI.soyle('Ses tanınamadı; sesli sohbeti durdurdum. Yazarak devam edebilirsin.'); return; }
-        KI.soyle(hata === 'no-speech' ? 'Bir şey duyamadım. Yeniden dener misin?' : 'Ses tanınamadı; yazarak da sorabilirsin.');
+        if(KI.sesliSohbet){ KI.sesliSohbet = false; KI.sessizSay = 0; KI.soyle(yz('ortak.king-ses.ses-taninamadi-sesli-sohbeti')); return; }
+        KI.soyle(hata === 'no-speech' ? yz('ortak.king-ses.bir-sey-duyamadim-yeniden-de') : yz('ortak.king-ses.ses-taninamadi-yazarak-da-so'));
       }
   }
 
@@ -668,7 +744,7 @@ window.LIFEOS.PARCA.yazilar({
     const ORAN = 16000, n = Math.max(0, Math.floor(pcm.length * ORAN / hz));
     const v = new DataView(new ArrayBuffer(44 + n * 2));
     const yaz = (o, m) => { for(let i = 0; i < m.length; i++) v.setUint8(o + i, m.charCodeAt(i)); };
-    yaz(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); yaz(8, 'WAVEfmt '); v.setUint32(16, 16, true);
+    yaz(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); yaz(8, yz('ortak.king-ses.wavefmt')); v.setUint32(16, 16, true);
     v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, ORAN, true); v.setUint32(28, ORAN * 2, true);
     v.setUint16(32, 2, true); v.setUint16(34, 16, true); yaz(36, 'data'); v.setUint32(40, n * 2, true);
     for(let i = 0; i < n; i++){
@@ -684,7 +760,7 @@ window.LIFEOS.PARCA.yazilar({
     try{
       const f = KI.ortam.fetch;
       const gonder = () => f(k.url + '/api/dinle', { method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav, tercih:KI.algila() }) });
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king-ses.bearer') + k.token }, body:JSON.stringify({ wav, tercih:KI.algila() }) });
       let res = await gonder();
       if(res.status === 503) res = await gonder();   // Whisper anlık düşebilir (GPU dolu); bir kez daha
       let g = null;
@@ -711,14 +787,14 @@ window.LIFEOS.PARCA.yazilar({
       if(!r || !r.konustu){ tanindi('', 'no-speech'); return; }
       const g = typeof document !== 'undefined' ? document.querySelector('.king__girdi') : null;
       const eski = g ? g.placeholder : '';
-      if(g) g.placeholder = 'Yazıya dökülüyor…';
+      if(g) g.placeholder = yz('ortak.king-ses.yaziya-dokuluyor');
       const t = await yaziyaDok(k, wavYap(r.pcm, r.hz));
       if(g) g.placeholder = eski;
       if(t === null){
         const neden = KI.dinleNot ? ' (' + KI.dinleNot.replace(/[.\s]+$/, '') + ')' : '';
-        KI.soyle(hkmDinlemez() ? 'HKM sesi yazıya dökemedi' + neden + '; birkaç dakika tarayıcının tanımasını deneyeceğim.'
-          : masaustu() ? 'Ses yazıya dökülemedi' + neden + '. Yeniden konuşabilir ya da yazabilirsin.'
-          : 'Ses yazıya dökülemedi' + neden + '; yazarak da sorabilirsin.');
+        KI.soyle(hkmDinlemez() ? yz('ortak.king-ses.hkm-sesi-yaziya-dokemedi') + neden + '; birkaç dakika tarayıcının tanımasını deneyeceğim.'
+          : masaustu() ? yz('ortak.king-ses.ses-yaziya-dokulemedi') + neden + '. Yeniden konuşabilir ya da yazabilirsin.'
+          : yz('ortak.king-ses.ses-yaziya-dokulemedi') + neden + '; yazarak da sorabilirsin.');
         return;
       }
       tanindi(t, t ? '' : 'no-speech');
@@ -733,7 +809,7 @@ window.LIFEOS.PARCA.yazilar({
   async function mikDene(){
     if(KI.mikDeniyor){ const d = KI.mikDeniyor; KI.mikDeniyor = null; d.dur(); return; }
     if(!KI.ortam.kayitAc){
-      KI.mikNot = 'Bu tarayıcıda doğrudan mikrofon kaydı desteklenmiyor.';
+      KI.mikNot = yz('ortak.king-ses.bu-tarayicida-dogrudan-mikro');
       KI.ciz(false);
       return;
     }
@@ -746,20 +822,20 @@ window.LIFEOS.PARCA.yazilar({
       KI.mikDeniyor = null;
       const r = kayit ? kayit.bitir() : null;
       if(!r || !r.konustu){
-        KI.mikNot = 'Ses duyulmadı — mikrofona konuşup tekrar dene ya da başka bir mikrofon seç.';
+        KI.mikNot = yz('ortak.king-ses.ses-duyulmadi-mikrofona-konu');
         KI.ciz(false);
         return;
       }
       const hk = KI.algila() !== 'tarayici' ? KI.baglanti() : null;
       if(hk){
-        KI.mikNot = 'Ses alındı · yazıya dökülüyor…';
+        KI.mikNot = yz('ortak.king-ses.ses-alindi-yaziya-dokuluyor');
         KI.ciz(false);
         const t = await yaziyaDok(hk, wavYap(r.pcm, r.hz));
-        KI.mikNot = t ? 'Mikrofon çalışıyor · «' + t + '»'
-          : t === '' ? 'Mikrofon ses aldı, ancak konuşma seçilemedi.'
-          : 'Mikrofon ses aldı, ancak HKM yazıya dökemedi.';
+        KI.mikNot = t ? yz('ortak.king-ses.mikrofon-calisiyor') + t + '»'
+          : t === '' ? yz('ortak.king-ses.mikrofon-ses-aldi-ancak-konu')
+          : yz('ortak.king-ses.mikrofon-ses-aldi-ancak-hkm');
       }else{
-        KI.mikNot = 'Mikrofon çalışıyor · ses alındı.';
+        KI.mikNot = yz('ortak.king-ses.mikrofon-calisiyor-ses-alind');
       }
       KI.ciz(false);
     };
@@ -771,7 +847,7 @@ window.LIFEOS.PARCA.yazilar({
       if(kayit) try{ kayit.bitir(); }catch(e){ /* durmus */ }
     };
     KI.mikDeniyor = { dur:sonlandir, iptal };
-    KI.mikNot = 'Dinliyorum… bir cümle söyle (durunca ya da Bitir’e basınca biter).';
+    KI.mikNot = yz('ortak.king-ses.dinliyorum-bir-cumle-soyle-d');
     KI.ciz(false);
     try{
       kayit = await KI.ortam.kayitAc(() => { sonlandir(); }, KI.mikSecili());
@@ -781,7 +857,7 @@ window.LIFEOS.PARCA.yazilar({
       bitti = true;
       if(sayac) clearTimeout(sayac);
       KI.mikDeniyor = null;
-      KI.mikNot = 'Mikrofon açılamadı — tarayıcı iznini ya da seçili mikrofonu kontrol et.';
+      KI.mikNot = yz('ortak.king-ses.mikrofon-acilamadi-tarayici');
       KI.ciz(false);
     }
     if(bitti && kayit) try{ kayit.bitir(); }catch(e){ /* durmus */ }
@@ -890,7 +966,7 @@ window.LIFEOS.PARCA.yazilar({
       if(uyanGerek() && !KI.uyanik){ KI.uyanik = u; KI.uyanNot = ''; } else u.bitir();
     }catch(e){
       KI.uyanHata = KI.ortam.simdi().getTime() + 60000;        // izin yoksa her saniye sorulmaz
-      KI.uyanNot = 'Mikrofon açılamadı; «King» ile uyanma şimdilik çalışmıyor.';
+      KI.uyanNot = yz('ortak.king-ses.mikrofon-acilamadi-king-ile');
     }
     uyanAciliyor = false;
   }
@@ -901,7 +977,7 @@ window.LIFEOS.PARCA.yazilar({
     let metin = null;
     try{
       const res = await KI.ortam.fetch(k.url + '/api/dinle', { method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king-ses.bearer') + k.token },
         body:JSON.stringify({ wav:wavYap(pcm, hz), tercih:KI.algila() === 'whisper' ? 'whisper' : 'gemma' }) });
       const g = res.status === 200 ? await res.json() : null;
       metin = g && typeof g.metin === 'string' ? g.metin : null;
@@ -952,10 +1028,10 @@ window.LIFEOS.PARCA.yazilar({
   function uyanHtml(){
     if(!KI.ortam.uyanikAc) return '';
     const a = uyanAcikMi(), k = KI.baglanti();
-    const not = !a ? 'Kapalı. Açınca mikrofon dinlemede kalır; «King» dediğin kısa cümle yalnız bu bilgisayardaki Merkez’de yazıya dökülür, başka yere gitmez.'
-      : !k || !uyanYerel(k) ? 'Yalnız bu bilgisayarda, Merkez açıkken çalışır.'
-      : KI.uyanNot || (KI.uyanik ? 'Dinliyor. «King» de ya da «King, bugün ne var?» diye sor.' : 'King konuşurken ya da dinlerken bekler.');
-    return '<div class="king__menu-satir king__menu-anahtar"><span class="king__menu-ad">«King» deyince uyan</span>'
+    const not = !a ? yz('ortak.king-ses.kapali-acinca-mikrofon-dinle')
+      : !k || !uyanYerel(k) ? yz('ortak.king-ses.yalniz-bu-bilgisayarda-merke')
+      : KI.uyanNot || (KI.uyanik ? yz('ortak.king-ses.dinliyor-king-de-ya-da') : yz('ortak.king-ses.king-konusurken-ya-da-dinler'));
+    return ('<div class="king__menu-satir king__menu-anahtar"><span class="king__menu-ad">' + yz('ortak.king-ses.king-deyince-uyan') + '</span>')
       + '<button type="button" class="king__secim" role="switch" aria-checked="' + (a ? 'true' : 'false') + '" data-king="uyan:' + (a ? '0' : '1') + '" aria-label="«King» deyince uyan">'
       + '<span class="king__anahtar' + (a ? ' is-acik' : '') + '" aria-hidden="true"><i></i></span></button></div>'
       + '<p class="king__menu-not" data-king-uyan-not>' + KI.kac(not) + '</p>';

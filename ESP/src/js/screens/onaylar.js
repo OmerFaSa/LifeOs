@@ -11,6 +11,26 @@
    kural «onaylar tek çekmecede». Bugün'ün Öneri alanı yalnız EN ÖNDEKİ
    kartı gösterir, gerisi burada bekler (`oneriAlani`). Uygulayan ESP'nin
    kendi kodudur; `prop-accept` / `prop-decline` app.js'te geneldir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.onaylar.onerim':'Önerim: ',
+  'esp.onaylar.bir-teklif-uygulanirken-isle':'Bir teklif uygulanırken işlem ',
+  'esp.onaylar.hatirlaticilarina-bakip-dogr':'Hatırlatıcılarına bakıp doğrula.',
+  'esp.onaylar.goruldu-olarak-isaretlendi':'Görüldü olarak işaretlendi',
+  'esp.onaylar.i-stenmedi-olarak-isaretlend':'İstenmedi olarak işaretlendi',
+  'esp.onaylar.gunun-kaydi':'Günün kaydı',
+  'esp.onaylar.calisma-blogu':'Çalışma bloğu',
+  'esp.onaylar.gunun-odagi':'Günün odağı',
+  'esp.onaylar.bam-materyali':'BAM materyali',
+  'esp.onaylar.bam-urunu':'BAM ürünü',
+  'esp.onaylar.bam-unitesi':'BAM ünitesi',
+  'esp.onaylar.bam-belgesi':'BAM belgesi',
+  'esp.onaylar.kelime-karti':'Kelime kartı',
+  'esp.onaylar.bekleyen-teklif-yok':'Bekleyen teklif yok.',
+  'esp.onaylar.kapatildi-merkeze-belirsiz-d':'Kapatıldı; merkeze «belirsiz» diye bildirildi.',
+  'esp.onaylar.kapatildi-merkeze-simdilik-b':'Kapatıldı; merkeze şimdilik bildirilemedi.',
+  'esp.onaylar.onerilen-her-degisiklik-bura':'Önerilen her değişiklik burada bekler; sen onaylamadan hiçbiri uygulanmaz.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -79,7 +99,7 @@ ESP.Screens.onaylar = (function(){
           <div><b>${t.konu}</b> <span class="tiny dim">${yz('esp.onaylar.is-emri')}${t.id}</span></div>
           ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
           ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
-            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
+            body:yz('esp.onaylar.onerim') + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
               + ' — ' + t.neden + '.' }))}
           <div class="row wrap gap-8 mt-8">
             ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
@@ -105,9 +125,9 @@ ESP.Screens.onaylar = (function(){
         ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
               soyleriz. Ne tekrar uygulanir ne de olmus sayilir. */''}
         ${map(supheli, d => html`<div class="mt-8">
-          ${K.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem '
+          ${K.Notice({ tone:'warn', body:yz('esp.onaylar.bir-teklif-uygulanirken-isle')
             + 'yarıda kaldı; kaydına yazılıp yazılmadığı bilinmiyor. '
-            + 'Hatırlatıcılarına bakıp doğrula.' })}
+            + yz('esp.onaylar.hatirlaticilarina-bakip-dogr') })}
           <div class="row gap-8 mt-8">
             ${K.Button({ label:yz('esp.onaylar.kontrol-ettim'), size:'sm',
               act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
@@ -206,8 +226,8 @@ ESP.Screens.onaylar = (function(){
     if(!r.ok){ ESP.UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
-      : (r.state === 'acknowledged' ? 'Görüldü olarak işaretlendi'
-        : 'İstenmedi olarak işaretlendi');
+      : (r.state === 'acknowledged' ? yz('esp.onaylar.goruldu-olarak-isaretlendi')
+        : yz('esp.onaylar.i-stenmedi-olarak-isaretlend'));
     const metin = r.reported ? bas
       : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.';
     /* BAM ünitesi ve belgesi geri alınır; kullanıcının üzerinde çalıştığı
@@ -235,9 +255,9 @@ ESP.Screens.onaylar = (function(){
      katalogdan gelir. Uzman önerileri «Plan ve ayar»dadır ve disipline göre
      gruplu kalır (2026-10-16 kararı). Bugün'ün öneri alanı aynı kalır. */
   const ON = () => (window.LIFEOS || {}).ONERI;
-  const HKM_AD = { 'kayit.add':'Günün kaydı', 'plan.add':'Çalışma bloğu', 'focus.set':'Günün odağı',
-    'material.add':'BAM materyali', 'urun.add':'BAM ürünü', 'unite.add':'BAM ünitesi', 'belge.add':'BAM belgesi',
-    'kart.add':'Kelime kartı' };
+  const HKM_AD = { 'kayit.add':yz('esp.onaylar.gunun-kaydi'), 'plan.add':yz('esp.onaylar.calisma-blogu'), 'focus.set':yz('esp.onaylar.gunun-odagi'),
+    'material.add':yz('esp.onaylar.bam-materyali'), 'urun.add':yz('esp.onaylar.bam-urunu'), 'unite.add':yz('esp.onaylar.bam-unitesi'), 'belge.add':yz('esp.onaylar.bam-belgesi'),
+    'kart.add':yz('esp.onaylar.kelime-karti') };
 
   function onaySatir(o){
     return html`<div class="onay-satir">
@@ -256,13 +276,13 @@ ESP.Screens.onaylar = (function(){
     return onaySatir({ baslik:t.konu, seviye:'orta', ust:yz('esp.onaylar.i-s-emri') + t.id + ' · ücretli iş',
       govde:html`${map(t.secenekler, (x, i) => html`<p class="small mt-6">${i + 1}) ${x.metin}</p>`)}
         ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
-          body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
+          body:yz('esp.onaylar.onerim') + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
       eylem:html`${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla', size:'sm',
           tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla', data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
         ${K.Button({ label:yz('esp.onaylar.i-ptal'), size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
   }
   function hkmSatir(n, seviye){
-    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:yz('esp.onaylar.merkez-teklifi'),
+    return onaySatir({ baslik:HKM_AD[n.kind] || yz('esp.onaylar.merkez-teklifi'), seviye, ust:yz('esp.onaylar.merkez-teklifi'),
       govde:html`<p class="small mt-6">${n.note}</p>
         ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
         ${when(n.kind === 'unite.add', () => uniteOnizleme(n.unite))}
@@ -293,7 +313,7 @@ ESP.Screens.onaylar = (function(){
       g.l.push(p);
     });
     const ad = d => ((ESP.DISCIPLINE_BY_ID || {})[d] || {}).label || 'Genel';
-    return gruplar.length < 2 ? ESP.Parts.proposalList(l, 'Bekleyen teklif yok.')
+    return gruplar.length < 2 ? ESP.Parts.proposalList(l, yz('esp.onaylar.bekleyen-teklif-yok'))
       : html`<div class="oneri-gruplar">${map(gruplar, g => html`<section class="oneri-grup" data-disc="${g.disc}">
           <h2 class="oneri-grup__ad">${ad(g.disc)}</h2>
           ${ESP.Parts.proposalList(g.l.slice(0, 1))}
@@ -476,8 +496,8 @@ ESP.Screens.onaylar = (function(){
       const r = await ESP.Beacon.clearDoubt(el.dataset.id);
       S.ui.hkmDoubts = (S.ui.hkmDoubts || [])
         .filter(x => String(x.id) !== el.dataset.id);
-      ESP.UI.toast(r.reported ? 'Kapatıldı; merkeze «belirsiz» diye bildirildi.'
-        : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
+      ESP.UI.toast(r.reported ? yz('esp.onaylar.kapatildi-merkeze-belirsiz-d')
+        : yz('esp.onaylar.kapatildi-merkeze-simdilik-b'));
       ESP.App.render();
     },
 
@@ -494,7 +514,7 @@ ESP.Screens.onaylar = (function(){
       const n = bekleyen();
       return n ? n + ' öneri onayını bekliyor' : 'bekleyen öneri yok';
     },
-    lede(){ return 'Önerilen her değişiklik burada bekler; sen onaylamadan hiçbiri uygulanmaz.'; },
+    lede(){ return yz('esp.onaylar.onerilen-her-degisiklik-bura'); },
     actions(){ return ''; },
     render, handle, bekleyen, oneriAlani,
   };

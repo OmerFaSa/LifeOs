@@ -29,6 +29,10 @@
      5. HKM'YE YALNIZ TATİLİN TARİHİ GİDER (hedefag.js): tatildeyken HKM
         soru sormaz; dönüşte yük azaltma teklifi bırakır. Neden gitmez. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.seri.bu-ay':'Bu ay',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.seri.yillik-tatil-siniri-0-ile':'Yıllık tatil sınırı 0 ile 365 arasında tam gün olmalı.',
   'ortak.seri.tarih-gecersiz':'Tarih geçersiz.',
   'ortak.seri.neden-hasta-izin-ya-da':'Neden hasta, izin ya da tatil olmalı.',
@@ -133,7 +137,7 @@ LIFEOS.Seri = (function(){
         const aylar = donemler(bas, bit, 7);
         for(const ay of Object.keys(aylar)){
           if(donemGunu(ay, false) + aylar[ay] > AYLIK_HASTA){
-            const ad = ay === bas.slice(0, 7) ? 'Bu ay' : AY_AD[Number(ay.slice(5, 7)) - 1] + ' ayında';
+            const ad = ay === bas.slice(0, 7) ? yz('ortak.seri.bu-ay') : AY_AD[Number(ay.slice(5, 7)) - 1] + ' ayında';
             return { ok:false, why:ad + ' en çok ' + AYLIK_HASTA + ' hasta/izin günü dondurulabilir.' };
           }
         }

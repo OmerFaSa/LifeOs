@@ -22,6 +22,13 @@
    4. ÖNBELLEK. Aynı gün içinde 15 dakikada bir sorulur; arada son cevap
       yeniden kullanılır. Hata önbelleği düşürür: bilmediğimiz bir haftayı
       eski cevapla göstermeyiz. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.haftaozet.bearer':'Bearer ',
+  'ortak.haftaozet.bekleyen-oneri-yok':'Bekleyen öneri yok.',
+  'ortak.haftaozet.oneri-onayini-bekliyor':'öneri onayını bekliyor',
+  'ortak.haftaozet.haftalik-merkez-ozeti':'Haftalık Merkez özeti',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -84,7 +91,7 @@ LIFEOS.HaftaOzet = (function(){
       const istek = (async () => {
         const f = k.f;
         const res = await f(k.url + '/api/merkez/hafta?date=' + gun, {
-          headers:{ 'Authorization':'Bearer ' + k.token },
+          headers:{ 'Authorization':yz('ortak.haftaozet.bearer') + k.token },
           signal:ctrl ? ctrl.signal : undefined,
         });
         if(!res || res.status !== 200) return null;
@@ -139,8 +146,8 @@ LIFEOS.HaftaOzet = (function(){
     b = b || {};
     const m = b.moduller || {};
     const parca = ['ays', 'spi', 'esp'].filter(k => m[k]).map(k => MODUL_ADI[k] + ' ' + m[k]);
-    if(!b.toplam) return 'Bekleyen öneri yok.';
-    return '<b>' + kac(b.toplam) + ' öneri onayını bekliyor</b>'
+    if(!b.toplam) return yz('ortak.haftaozet.bekleyen-oneri-yok');
+    return '<b>' + kac(b.toplam) + (' ' + yz('ortak.haftaozet.oneri-onayini-bekliyor') + '</b>')
       + (parca.length ? ' · modüllerde ' + kac(parca.join(' · ')) : '')
       + (b.king ? ' · King’de ' + kac(b.king) + ' iş' : '');
   }
@@ -151,7 +158,7 @@ LIFEOS.HaftaOzet = (function(){
     const satir = s => '<li class="hozet__satir"><b class="hozet__modul">' + kac(s.modul_adi || MODUL_ADI[s.modul] || s.modul)
       + '</b><span class="hozet__cumle">' + kac(s.cumle) + '</span>' + cip(s.kesinlik) + '</li>';
     return '<section class="kutu hozet" data-oz="120">'
-      + '<header class="kutu__bas"><h2 class="kutu__ad">Haftalık Merkez özeti</h2>'
+      + ('<header class="kutu__bas"><h2 class="kutu__ad">' + yz('ortak.haftaozet.haftalik-merkez-ozeti') + '</h2>')
       + '<span class="kutu__yuva">' + kac(kisaTarih(v.from)) + ' – ' + kac(kisaTarih(v.to)) + '</span></header>'
       + '<div class="kutu__govde">'
       + '<ul class="hozet__liste">' + v.satirlar.map(satir).join('') + '</ul>'

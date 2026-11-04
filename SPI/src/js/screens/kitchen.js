@@ -6,6 +6,32 @@
 
    Porsiyon çarpanı gizli bir sabit değildir: bu öğünün günlük hedefin
    yüzde kaçını taşıdığı ekranda yazar ve değiştirilebilir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.kitchen.tencere-hanenin-bu-ogun-icin':'Tencere hanenin bu öğün için ihtiyacının altında: yaklaşık ',
+  'spi.kitchen.bu-ogun-gunluk-hedefin':'Bu öğün günlük hedefin %',
+  'spi.kitchen.eksik-profiller-paylastirmay':'Eksik profiller paylaştırmaya girmez — tahmin edilmez.',
+  'spi.kitchen.henuz-kendi-gidan-yok':'Henüz kendi gıdan yok.',
+  'spi.kitchen.bam-kaynakli':'BAM · kaynaklı · ',
+  'spi.kitchen.bam-dogrulanmadi-ambalaj':'BAM · doğrulanmadı — ambalaj etiketiyle karşılaştır',
+  'spi.kitchen.etiket-okundu':'Etiket okundu:',
+  'spi.kitchen.eksik-alan-var':'Eksik alan var:',
+  'spi.kitchen.kalori-kcal':'Kalori (kcal)',
+  'spi.kitchen.protein-g':'Protein (g)',
+  'spi.kitchen.yag-g':'Yağ (g)',
+  'spi.kitchen.doymus-yag-g':'Doymuş yağ (g)',
+  'spi.kitchen.karbonhidrat-g':'Karbonhidrat (g)',
+  'spi.kitchen.seker-g':'Şeker (g)',
+  'spi.kitchen.lif-g':'Lif (g)',
+  'spi.kitchen.bos-biraktigin-alan-sifir-sa':'Boş bıraktığın alan sıfır sayılmaz; o besin öğesi bu gıda için ',
+  'spi.kitchen.yeni-gida':'Yeni gıda',
+  'spi.kitchen.mutfak-tencereden-pay':'Mutfak · tencereden pay',
+  'spi.kitchen.tablodaki-degerler-okunur-ve':'Tablodaki değerler okunur ve sana gösterilir; onaylamadan ',
+  'spi.kitchen.etiket-okunuyor':'Etiket okunuyor',
+  'spi.kitchen.tek-tencere-tek-porsiyon':'Tek tencere, tek porsiyon.',
+  'spi.kitchen.tek-tencere':'Tek tencere, ',
+  'spi.kitchen.ayni-yemek-herkese-piser-kim':'Aynı yemek herkese pişer; kimin tabağına ne kadar gireceği ',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -139,10 +165,10 @@ SP.Screens.kitchen = (function(){
               data:{ 'data-id':res.food.id } })}</span>`)}
           </div>`)}
         ${when(res.short, () => K.Notice({ tone:'warn', class:'mt-12',
-          body:'Tencere hanenin bu öğün için ihtiyacının altında: yaklaşık '
+          body:yz('spi.kitchen.tencere-hanenin-bu-ogun-icin')
             + res.short + ' gram daha gerekiyor. Yan gıda (yoğurt, salata, ekmek) farkı kapatır.' }))}
         ${K.Notice({ tone:'info', class:'mt-10',
-          body:'Bu öğün günlük hedefin %' + Math.round(res.mealShare * 100)
+          body:yz('spi.kitchen.bu-ogun-gunluk-hedefin') + Math.round(res.mealShare * 100)
             + '\'i sayıldı. Ana öğün varsayımıdır; kahvaltı için pay daha küçüktür.' })}`,
     });
   }
@@ -163,7 +189,7 @@ SP.Screens.kitchen = (function(){
           ]) })}
         ${when(missing.length, () => K.Notice({ tone:'info', class:'mt-10',
           body:missing.length + ' profilde kilo, boy ya da doğum yılı eksik. '
-            + 'Eksik profiller paylaştırmaya girmez — tahmin edilmez.' }))}`,
+            + yz('spi.kitchen.eksik-profiller-paylastirmay') }))}`,
       foot:K.Button({ label:yz('spi.kitchen.profilleri-duzenle'), size:'sm', act:'go', data:{ 'data-route':'family' } }),
     });
   }
@@ -238,7 +264,7 @@ SP.Screens.kitchen = (function(){
     return K.Card({
       title:yz('spi.kitchen.kendi-gidalarin'), hint:'custom-food', sub:liste.length + ' kayıt',
       body:html`
-        ${when(!liste.length, () => P.empty('Henüz kendi gıdan yok.'))}
+        ${when(!liste.length, () => P.empty(yz('spi.kitchen.henuz-kendi-gidan-yok')))}
         ${when(liste.length, () => html`<div class="list mt-10">${map(liste, f => html`
           <div class="listitem">
             ${raw(String(SP.FotoUI.kutu({ sahip:'besin:' + f.id, ad:f.name })))}
@@ -246,8 +272,8 @@ SP.Screens.kitchen = (function(){
               <b class="small">${f.name}</b>
               <div class="tiny dim">${yz('spi.kitchen.100-g')} ${U.fmtNum(f.kcal)} ${yz('spi.kitchen.kcal-p')} ${U.fmtNum(f.p)} ${yz('spi.kitchen.y')} ${U.fmtNum(f.f)} ${yz('spi.kitchen.k')} ${U.fmtNum(f.c)}</div>
               ${when(f.bam, () => html`<div class="tiny dim">${f.bam && f.bam.dogruluk === 'kaynakli'
-                ? 'BAM · kaynaklı · ' + f.bam.at
-                : 'BAM · doğrulanmadı — ambalaj etiketiyle karşılaştır'}</div>`)}
+                ? yz('spi.kitchen.bam-kaynakli') + f.bam.at
+                : yz('spi.kitchen.bam-dogrulanmadi-ambalaj')}</div>`)}
             </div>
             ${K.Button({ label:yz('spi.kitchen.duzelt'), size:'sm', act:'edit-food',
               data:{ 'data-id':f.id } })}
@@ -270,21 +296,21 @@ SP.Screens.kitchen = (function(){
         value:rec[id] == null ? '' : rec[id] }) });
     return String(K.Stack([
       when(okundu, () => K.Notice({ tone:okundu.ok ? 'ok' : 'warn',
-        title:okundu.ok ? 'Etiket okundu:' : 'Eksik alan var:', body:okundu.note })),
+        title:okundu.ok ? yz('spi.kitchen.etiket-okundu') : yz('spi.kitchen.eksik-alan-var'), body:okundu.note })),
       K.Field({ label:yz('spi.kitchen.ad'), input:K.Input({ id:'fd-name', value:rec.name,
         placeholder:yz('spi.kitchen.urunun-adi') }) }),
       html`<p class="small muted">${yz('spi.kitchen.butun-degerler')} <b>${yz('spi.kitchen.100-gram')}</b> ${yz('spi.kitchen.icindir')}</p>`,
       html`<div class="grid-form">
-        ${alan('kcal', 'Kalori (kcal)')}
-        ${alan('p', 'Protein (g)')}
-        ${alan('f', 'Yağ (g)')}
-        ${alan('sat', 'Doymuş yağ (g)', 'isteğe bağlı')}
-        ${alan('c', 'Karbonhidrat (g)')}
-        ${alan('sugar', 'Şeker (g)', 'isteğe bağlı')}
-        ${alan('fib', 'Lif (g)', 'isteğe bağlı')}
+        ${alan('kcal', yz('spi.kitchen.kalori-kcal'))}
+        ${alan('p', yz('spi.kitchen.protein-g'))}
+        ${alan('f', yz('spi.kitchen.yag-g'))}
+        ${alan('sat', yz('spi.kitchen.doymus-yag-g'), 'isteğe bağlı')}
+        ${alan('c', yz('spi.kitchen.karbonhidrat-g'))}
+        ${alan('sugar', yz('spi.kitchen.seker-g'), 'isteğe bağlı')}
+        ${alan('fib', yz('spi.kitchen.lif-g'), 'isteğe bağlı')}
       </div>`,
       K.Notice({ tone:'info',
-        body:'Boş bıraktığın alan sıfır sayılmaz; o besin öğesi bu gıda için '
+        body:yz('spi.kitchen.bos-biraktigin-alan-sifir-sa')
           + 'hesaba hiç girmez. Kalori, protein, yağ ve karbonhidrat zorunludur.' }),
     ]));
   }
@@ -325,7 +351,7 @@ SP.Screens.kitchen = (function(){
 
   function openFoodSheet(rec, okundu){
     foodDraft = rec;
-    UI.sheet({ title:rec.name || 'Yeni gıda', subtitle:yz('spi.kitchen.100-gram-icin'), wide:true,
+    UI.sheet({ title:rec.name || yz('spi.kitchen.yeni-gida'), subtitle:yz('spi.kitchen.100-gram-icin'), wide:true,
       body:foodSheetBody(rec, okundu),
       footer:String(html`${K.Button({ label:yz('spi.kitchen.vazgec'), act:'sheet-close' })}
         ${K.Button({ label:yz('spi.kitchen.kaydet'), tone:'primary', act:'save-food' })}`) });
@@ -347,7 +373,7 @@ SP.Screens.kitchen = (function(){
       const slot = S.ui.mealSlot || (SP.Ogun ? SP.Ogun.simdiki() : 'aksam');
       const yeni = M.newMeal(slot);
       yeni.items = [{ foodId:res.food.id, g, cert:'estimated', portion:'tencereden pay' }];
-      yeni.note = 'Mutfak · tencereden pay';
+      yeni.note = yz('spi.kitchen.mutfak-tencereden-pay');
       await M.addMeal(d, yeni);
       SP.App.render();
       const ad = SP.Ogun ? SP.Ogun.ad(slot) : slot;
@@ -383,7 +409,7 @@ SP.Screens.kitchen = (function(){
             accept:'image/*' }),
           html`<div id="label-name" class="small dim"></div>`,
           K.Notice({ tone:'info',
-            body:'Tablodaki değerler okunur ve sana gösterilir; onaylamadan '
+            body:yz('spi.kitchen.tablodaki-degerler-okunur-ve')
               + 'hiçbir şey kaydedilmez. Etikette olmayan bir alan uydurulmaz, '
               + 'boş bırakılır.' }),
         ])),
@@ -393,7 +419,7 @@ SP.Screens.kitchen = (function(){
 
     async 'run-label'(){
       if(!labelFile){ UI.toast(yz('spi.kitchen.once-bir-fotograf-sec')); return; }
-      const r = await UI.withBusy('Etiket okunuyor',
+      const r = await UI.withBusy(yz('spi.kitchen.etiket-okunuyor'),
         'değerler «ölçüldü» sayılacak: üretici beyanı',
         () => SP.Extract.fromFoodLabel(labelFile));
       if(!r.food){ UI.toast(r.note); return; }
@@ -456,11 +482,11 @@ SP.Screens.kitchen = (function(){
     title:yz('spi.kitchen.mutfak'),
     headline(){
       const list = SP.Model.householdList();
-      if(list.length < 2) return 'Tek tencere, tek porsiyon.';
-      return 'Tek tencere, ' + list.length + ' ayrı porsiyon.';
+      if(list.length < 2) return yz('spi.kitchen.tek-tencere-tek-porsiyon');
+      return yz('spi.kitchen.tek-tencere') + list.length + ' ayrı porsiyon.';
     },
     lede(){
-      return 'Aynı yemek herkese pişer; kimin tabağına ne kadar gireceği '
+      return yz('spi.kitchen.ayni-yemek-herkese-piser-kim')
         + 'hedeflerden hesaplanır. Herkese ayrı yemek pişirme zorunluluğu kalkar.';
     },
     subtitle(){

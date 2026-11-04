@@ -21,6 +21,12 @@
    Değişmez: EN AZ BİR disiplin açık kalmak zorundadır. Hepsi kapalı bir
    ESP, açılış ekranından ibaret bir kabuktur; sistem kendi kendini
    kullanılamaz hâle getiremez. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.modules.bilinmeyen-bolum':'Bilinmeyen bölüm.',
+  'esp.core.modules.en-az-bir-bolum-acik':'En az bir bölüm açık kalmalı. Önce başka bir bölümü aç.',
+  'esp.core.modules.en-az-bir-bolum-secilmeli':'En az bir bölüm seçilmeli.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -90,13 +96,13 @@ ESP.Mod = (function(){
      bir hata değil bir REDDİR: sebebi söylenir, işlem yapılmaz. */
   async function set(discId, on){
     const m = map();
-    if(!(discId in m)) return { ok:false, error:'Bilinmeyen bölüm.' };
+    if(!(discId in m)) return { ok:false, error:yz('esp.core.modules.bilinmeyen-bolum') };
     if(!on){
       const kalan = Object.keys(m).filter(function(id){
         return id !== discId && m[id] !== false; });
       if(!kalan.length){
         return { ok:false,
-          error:'En az bir bölüm açık kalmalı. Önce başka bir bölümü aç.' };
+          error:yz('esp.core.modules.en-az-bir-bolum-acik') };
       }
     }
     m[discId] = !!on;
@@ -109,7 +115,7 @@ ESP.Mod = (function(){
   async function setAll(ids){
     const secilen = (ids || []).filter(function(id){
       return (ESP.DISCIPLINE_BY_ID || {})[id]; });
-    if(!secilen.length) return { ok:false, error:'En az bir bölüm seçilmeli.' };
+    if(!secilen.length) return { ok:false, error:yz('esp.core.modules.en-az-bir-bolum-secilmeli') };
     const m = defaults();
     Object.keys(m).forEach(function(id){ m[id] = secilen.indexOf(id) >= 0; });
     await ESP.Model.savePrefs(Object.assign({}, S.prefs || {}, { modules:m }));

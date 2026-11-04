@@ -20,6 +20,18 @@
      HEKİM TALİMATI kullanıcının getirdiği talimat en yüksek öncelikli
                     kısıttır (belgeler/ekip/PLAN.md §3.0); plan ona uyar. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.hedefler.su-anki-kilon-bilinmeden-guv':'Şu anki kilon bilinmeden güvenli hız hesaplanamaz.',
+  'spi.core.hedefler.vki-hedefini-kiloya-cevirmem':'VKİ hedefini kiloya çevirmem için boyunu bilmem gerek. ',
+  'spi.core.hedefler.boyun-kac-santimetre':'Boyun kaç santimetre?',
+  'spi.core.hedefler.bilinen-bir-saglik-durumun-k':'Bilinen bir sağlık durumun, kullandığın bir ilaç ya da ',
+  'spi.core.hedefler.bu-hedefin-planini-hekiminle':'Bu hedefin planını hekiminle birlikte kurmalıyız (',
+  'spi.core.hedefler.hekimin-bir-talimat-verdiyse':'Hekimin bir talimat verdiyse «Tahliller › Hekim talimatları»na ekle; plan ona uyar. ',
+  'spi.core.hedefler.teshis-koymam-ilac-ya-da':'Teşhis koymam, ilaç ya da doz önermem.',
+  'spi.core.hedefler.kayitli':'Kayıtlı ',
+  'spi.core.hedefler.kilo-hedefi':'Kilo hedefi: ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.hedefler.kilo':'Kilo',
   'spi.core.hedefler.hareket':'Hareket',
   'spi.core.hedefler.talimat-metni-bos':'Talimat metni boş.',
@@ -112,7 +124,7 @@ SP.Hedefler = (function(){
 
     hiz(h){
       const s = h.simdi || sonKilo();
-      if(!s || s.deger == null) return { neden:'Şu anki kilon bilinmeden güvenli hız hesaplanamaz.' };
+      if(!s || s.deger == null) return { neden:yz('spi.core.hedefler.su-anki-kilon-bilinmeden-guv') };
       const kayip = yonOf(h, s) === 'azalt';
       const b = kayip ? KAYIP : ALIM;
       return { tipik:yuvarla(s.deger * b.tipik), ust:yuvarla(s.deger * b.ust), birim:'kg/hafta',
@@ -152,10 +164,10 @@ SP.Hedefler = (function(){
     ekSorular(h){
       const out = [];
       if(h.hedefHam && h.hedefDeger == null && !boyCm(h)){
-        out.push({ alan:'boy', soru:'VKİ hedefini kiloya çevirmem için boyunu bilmem gerek. '
-          + 'Boyun kaç santimetre?' });
+        out.push({ alan:'boy', soru:yz('spi.core.hedefler.vki-hedefini-kiloya-cevirmem')
+          + yz('spi.core.hedefler.boyun-kac-santimetre') });
       }
-      out.push({ alan:'saglik', soru:'Bilinen bir sağlık durumun, kullandığın bir ilaç ya da '
+      out.push({ alan:'saglik', soru:yz('spi.core.hedefler.bilinen-bir-saglik-durumun-k')
         + 'hekiminin verdiği bir talimat var mı? Yoksa «yok» yaz.' });
       return out;
     },
@@ -234,13 +246,13 @@ SP.Hedefler = (function(){
     }
     const k = hekimKapisi(h);
     if(k.gerekli){
-      out.push('Bu hedefin planını hekiminle birlikte kurmalıyız (' + k.nedenler.join(', ') + '). '
-        + 'Hekimin bir talimat verdiyse «Tahliller › Hekim talimatları»na ekle; plan ona uyar. '
-        + 'Teşhis koymam, ilaç ya da doz önermem.');
+      out.push(yz('spi.core.hedefler.bu-hedefin-planini-hekiminle') + k.nedenler.join(', ') + '). '
+        + yz('spi.core.hedefler.hekimin-bir-talimat-verdiyse')
+        + yz('spi.core.hedefler.teshis-koymam-ilac-ya-da'));
     }
     const t = talimatlar();
     if(t.length){
-      out.push('Kayıtlı ' + t.length + ' hekim talimatın var; hazırlanacak plan onlara uyar.');
+      out.push(yz('spi.core.hedefler.kayitli') + t.length + ' hekim talimatın var; hazırlanacak plan onlara uyar.');
     }
     return out;
   }
@@ -269,7 +281,7 @@ SP.Hedefler = (function(){
     if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.ozet(h);
     const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
       : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
-    return h.paket === 'kilo' ? 'Kilo hedefi: ' + ne : h.cumle || ne;
+    return h.paket === 'kilo' ? yz('spi.core.hedefler.kilo-hedefi') + ne : h.cumle || ne;
   }
 
   function liste(){ return (SP.S.hedefler || []).slice(); }

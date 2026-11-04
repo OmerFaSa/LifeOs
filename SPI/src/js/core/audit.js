@@ -18,6 +18,13 @@
    4. NÖBETÇİYLE AYNI ŞEY SÖYLENMEZ — o çaba–sonuç ayrışmasını arar,
       bu birikmiş bakım borcunu. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.audit.mutfaga-kendi-gidani-eklemek':'Mutfağa kendi gıdanı eklemek, bu boşluğu tek seferde kapatır.',
+  'spi.core.audit.ama-tek-kaynaga-bagli-bir':'Ama tek kaynağa bağlı bir öğün düzeni, o kaynak kesildiğinde ',
+  'spi.core.audit.bu-etkilesim-yok-demek-degil':'Bu "etkileşim yok" demek değildir.',
+  'spi.core.audit.sistem-hangisi-oldugunu-bilm':'Sistem hangisi olduğunu bilmez ve varsaymaz.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.audit.tahlil-yok':'Tahlil yok',
   'spi.core.audit.hic-tahlil-girilmemis-bu-her':'Hiç tahlil girilmemiş. Bu "her şey yolunda" demek değil, ',
   'spi.core.audit.son-tahlil':'Son tahlil ',
@@ -177,7 +184,7 @@ SP.Audit = (function(){
       out.push(bul('meal-unknown', { severity:'warn', route:'kitchen',
         title:bilinmeyen + ' kalem tanınmadı',
         note:yz('spi.core.audit.taninmayan-gida-hesaba-gi-rm')
-           + 'Mutfağa kendi gıdanı eklemek, bu boşluğu tek seferde kapatır.',
+           + yz('spi.core.audit.mutfaga-kendi-gidani-eklemek'),
         items:ornek.map(k => ({ id:k, label:k, meta:'tanınmadı' })) }));
     }
 
@@ -201,7 +208,7 @@ SP.Audit = (function(){
           title:yz('spi.core.audit.kalemlerin') + Math.round(100 * yemekSay[enCok] / toplam)
             + '\'i tek gıdadan',
           note:yz('spi.core.audit.cesitlilik-bir-hedef-degildi')
-             + 'Ama tek kaynağa bağlı bir öğün düzeni, o kaynak kesildiğinde '
+             + yz('spi.core.audit.ama-tek-kaynaga-bagli-bir')
              + 'bütün hedefleri birden düşürür.',
           items:[{ id:enCok, label:enCok, meta:yemekSay[enCok] + ' kez' }] }));
       }
@@ -274,7 +281,7 @@ SP.Audit = (function(){
       return [bul('med-veri', { severity:'none', cert:'missing', route:'today',
         title:yz('spi.core.audit.i-lac-takviye-kaydi-yok'),
         note:yz('spi.core.audit.kayit-yoksa-etkilesim-ve-emi')
-           + 'Bu "etkileşim yok" demek değildir.' })];
+           + yz('spi.core.audit.bu-etkilesim-yok-demek-degil') })];
     }
 
     /* 1 — Bitis tarihi gecmis ama listede duran kayit. */
@@ -309,7 +316,7 @@ SP.Audit = (function(){
         title:uzun.length + ' kayıt bir yıldır açık',
         note:yz('spi.core.audit.bir-yildir-bitis-tarihi-giri')
            + 'sürüyor olabilir — ya da bitirilip kapatılmamış olabilir. '
-           + 'Sistem hangisi olduğunu bilmez ve varsaymaz.',
+           + yz('spi.core.audit.sistem-hangisi-oldugunu-bilm'),
         items:uzun.slice(0, 5).map(m => ({ id:m.id, label:m.name || '(adsız)',
           meta:gunFark(m.startDate) + ' gün' })) }));
     }

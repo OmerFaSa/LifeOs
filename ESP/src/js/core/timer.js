@@ -21,6 +21,16 @@
       «şüpheli» işaretlenir: sistem 9 saatlik bir oturumu sessizce
       kaydetmez, kullanıcıya sorar. Uydurulmuş büyük bir sayı, hiç sayı
       olmamasından kötüdür — bu depodaki en eski kural. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.timer.bilinmeyen-bolum':'Bilinmeyen bölüm.',
+  'esp.core.timer.bu-bolum-kapali':'Bu bölüm kapalı.',
+  'esp.core.timer.zamanlayici-zaten-duruyor':'Zamanlayıcı zaten duruyor.',
+  'esp.core.timer.zamanlayici-zaten-calisiyor':'Zamanlayıcı zaten çalışıyor.',
+  'esp.core.timer.acik-zamanlayici-yok':'Açık zamanlayıcı yok.',
+  'esp.core.timer.bir-dakikanin-altindaki-saya':'Bir dakikanın altındaki sayaç kaydedilmez.',
+  'esp.core.timer.sureyi-kendin-yazabilir-ya-d':'Süreyi kendin yazabilir ya da ısrar edebilirsin.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -77,8 +87,8 @@ ESP.Timer = (function(){
      KAYBOLMAZ — çağırana geri verilir. */
   async function start(discId){
     const d = (ESP.DISCIPLINE_BY_ID || {})[discId] ? discId : null;
-    if(!d) return { ok:false, error:'Bilinmeyen bölüm.' };
-    if(!ESP.Mod.isOn(d)) return { ok:false, error:'Bu bölüm kapalı.' };
+    if(!d) return { ok:false, error:yz('esp.core.timer.bilinmeyen-bolum') };
+    if(!ESP.Mod.isOn(d)) return { ok:false, error:yz('esp.core.timer.bu-bolum-kapali') };
 
     const t = state();
     let devreden = null;
@@ -93,7 +103,7 @@ ESP.Timer = (function(){
 
   async function pause(){
     const t = state();
-    if(!t.running) return { ok:false, error:'Zamanlayıcı zaten duruyor.' };
+    if(!t.running) return { ok:false, error:yz('esp.core.timer.zamanlayici-zaten-duruyor') };
     t.accumulatedMs = elapsedMs(t);
     t.running = false;
     t.startedAt = null;
@@ -103,8 +113,8 @@ ESP.Timer = (function(){
 
   async function resume(){
     const t = state();
-    if(t.running) return { ok:false, error:'Zamanlayıcı zaten çalışıyor.' };
-    if(!t.disc) return { ok:false, error:'Açık zamanlayıcı yok.' };
+    if(t.running) return { ok:false, error:yz('esp.core.timer.zamanlayici-zaten-calisiyor') };
+    if(!t.disc) return { ok:false, error:yz('esp.core.timer.acik-zamanlayici-yok') };
     t.startedAt = now();
     t.running = true;
     await save();
@@ -127,18 +137,18 @@ ESP.Timer = (function(){
   async function stop(opts){
     const o = opts || {};
     const t = state();
-    if(!t.disc) return { ok:false, error:'Açık zamanlayıcı yok.' };
+    if(!t.disc) return { ok:false, error:yz('esp.core.timer.acik-zamanlayici-yok') };
 
     const dk = o.minutes != null ? o.minutes : minutes(t);
     if(!(dk >= 1)){
       await reset();
-      return { ok:false, error:'Bir dakikanın altındaki sayaç kaydedilmez.',
+      return { ok:false, error:yz('esp.core.timer.bir-dakikanin-altindaki-saya'),
         discarded:true };
     }
     if(suspicious(t) && !o.force){
       return { ok:false, suspicious:true, minutes:dk,
         error:SUPHE_SAAT + ' saatten uzun bir sayaç muhtemelen unutuldu. '
-          + 'Süreyi kendin yazabilir ya da ısrar edebilirsin.' };
+          + yz('esp.core.timer.sureyi-kendin-yazabilir-ya-d') };
     }
 
     const s = await ESP.Model.addSession(o.date || U.todayISO(), {

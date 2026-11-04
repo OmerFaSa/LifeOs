@@ -9,6 +9,22 @@
    modelin degil — bu yuzden onay kutusundan gecmez; ama YAZILMADAN ONCE
    ne kaydedilecegi gosterilir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.palette.bugune-yazilir':'Bugüne yazılır',
+  'esp.core.palette.bu-satirlar-yazilmayacak-ell':'Bu satırlar yazılmayacak; elle girebilirsin.',
+  'esp.core.palette.eslesen-komut-yok':'Eşleşen komut yok.',
+  'esp.core.palette.gez-enter-ac':'↑↓ gez · Enter aç · Esc kapat',
+  'esp.core.palette.veri-de-yazabilirsin-45-dk':'Veri de yazabilirsin: «45 dk gitar»',
+  'esp.core.palette.ctrl-k':'Ctrl / ⌘ + K',
+  'esp.core.palette.komut-paletini-ac':'Komut paletini aç',
+  'esp.core.palette.bu-listeyi-ac':'Bu listeyi aç',
+  'esp.core.palette.sirayla-palet-ipucu':'Sırayla: palet → ipucu → alt sayfa → kenar çubuğu',
+  'esp.core.palette.palette-gez':'Palette gez',
+  'esp.core.palette.secili-komutu-calistir':'Seçili komutu çalıştır',
+  'esp.core.palette.listede-satir-satir-gez':'Listede satır satır gez',
+  'esp.core.palette.palete-oturum-da-yazabilirsi':'Palete oturum da yazabilirsin',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.palette.bugune-yazilacak':'Bugüne yazılacak',
   'esp.core.palette.eslesmeyen-satir':'Eşleşmeyen satır',
   'esp.core.palette.kaydet':'Kaydet',
@@ -79,7 +95,7 @@ ESP.Palette = (function(){
 
     return {
       id:'quick:save', kind:'Kayıt', label:ozet + ' kaydet',
-      hint:res.unmatched.length ? res.unmatched.length + ' satır eşleşmedi' : 'Bugüne yazılır',
+      hint:res.unmatched.length ? res.unmatched.length + ' satır eşleşmedi' : yz('esp.core.palette.bugune-yazilir'),
       run:() => { bekleyen = res; onayGoster(res); },
     };
   }
@@ -99,7 +115,7 @@ ESP.Palette = (function(){
         + (res.unmatched.length
           ? String(K.Notice({ tone:'warn', title:yz('esp.core.palette.eslesmeyen-satir'),
               body:res.unmatched.map(u => u.text + ' — ' + u.why).join('<br/>')
-                + '<br/><br/>Bu satırlar yazılmayacak; elle girebilirsin.' }))
+                + ('<br/><br/>' + yz('esp.core.palette.bu-satirlar-yazilmayacak-ell')) }))
           : ''),
       footer:String(K.Button({ label:yz('esp.core.palette.kaydet'), tone:'primary', act:'quick-save' }))
         + String(K.Button({ label:yz('esp.core.palette.vazgec'), act:'sheet-close' })),
@@ -160,10 +176,10 @@ ESP.Palette = (function(){
           + '<span class="cmdk__text"><span class="cmdk__label">' + U.esc(c.label) + '</span>'
           + '<span class="cmdk__sub">' + U.esc(c.kind) + '</span></span>'
           + '<span class="cmdk__hintrow">' + U.esc(c.hint || '') + '</span></button>').join('')
-        : '<p class="cmdk__empty">Eşleşen komut yok.</p>')
+        : ('<p class="cmdk__empty">' + yz('esp.core.palette.eslesen-komut-yok') + '</p>'))
       + '</div>'
-      + '<div class="cmdk__foot"><span>↑↓ gez · Enter aç · Esc kapat</span>'
-      + '<span class="cmdk__tip">Veri de yazabilirsin: «45 dk gitar»</span></div>'
+      + ('<div class="cmdk__foot"><span>' + yz('esp.core.palette.gez-enter-ac') + '</span>')
+      + ('<span class="cmdk__tip">' + yz('esp.core.palette.veri-de-yazabilirsin-45-dk') + '</span></div>')
       + '</div>';
 
     const input = document.getElementById('cmdk-input');
@@ -211,13 +227,13 @@ ESP.Palette = (function(){
     ESP.UI.sheet({
       title:yz('esp.core.palette.klavye-kisayollari'),
       body:String(ESP.C.Table({ tight:true, headers:['Tuş', 'İş'], rows:[
-        ['Ctrl / ⌘ + K', 'Komut paletini aç'],
-        ['?', 'Bu listeyi aç'],
-        ['Esc', 'Sırayla: palet → ipucu → alt sayfa → kenar çubuğu'],
-        ['↑ ↓', 'Palette gez'],
-        ['Enter', 'Seçili komutu çalıştır'],
-        ['j / k', 'Listede satır satır gez'],
-        ['45 dk gitar', 'Palete oturum da yazabilirsin'],
+        [yz('esp.core.palette.ctrl-k'), yz('esp.core.palette.komut-paletini-ac')],
+        ['?', yz('esp.core.palette.bu-listeyi-ac')],
+        ['Esc', yz('esp.core.palette.sirayla-palet-ipucu')],
+        ['↑ ↓', yz('esp.core.palette.palette-gez')],
+        ['Enter', yz('esp.core.palette.secili-komutu-calistir')],
+        ['j / k', yz('esp.core.palette.listede-satir-satir-gez')],
+        ['45 dk gitar', yz('esp.core.palette.palete-oturum-da-yazabilirsi')],
       ].concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.metinSatirlari() : []) })),
       footer:String(ESP.C.Button({ label:yz('esp.core.palette.kapat'), act:'sheet-close' })),
       noFocus:true,

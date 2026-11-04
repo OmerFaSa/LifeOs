@@ -2,6 +2,65 @@
 
    Yazim bicimi: STIL.md / DONUSTURME.md. String birlestirme yok,
    etkilesim yalniz data-act / data-change ile baglanir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.office.raporu-ac':'Raporu aç',
+  'ays.office.patron-masalari-henuz-ozetle':'Patron masaları henüz özetlemedi',
+  'ays.office.brifing-al':'Brifing al',
+  'ays.office.masalardaki-notlar-brifing-y':'Masalardaki notlar brifing yazıldıktan sonra değişti. ',
+  'ays.office.asagidaki-notlar-gunceldir-b':'Aşağıdaki notlar günceldir; brifingi yenileyebilirsin.',
+  'ays.office.siradaki-is':'Sıradaki iş',
+  'ays.office.ajanlar-veriyi-okuyup-bulgul':'Ajanlar veriyi okuyup bulgularını yazıyor ama cümleleri sabit. ',
+  'ays.office.ucretsiz-bir-anahtar-baglars':'Ücretsiz bir anahtar bağlarsan aynı bulguları kendi cümleleriyle tartışırlar.',
+  'ays.office.uygulama-claude-icinde-yayim':'Uygulama Claude içinde yayımlanmış bir sayfa olarak açıldığında dış API çağrıları ',
+  'ays.office.her-gun-sectigin-saatte-gunu':'Her gün seçtiğin saatte günün planı, hedefin son günü ve profilde yazdığın sınav gününden bir gün önce. ',
+  'ays.office.onumuzdeki':'Önümüzdeki ',
+  'ays.office.tamamen-kapatmak-icin-telefo':'Tamamen kapatmak için «Telefon bildirimi»ni Kapalı yap.',
+  'ays.office.bildirim-acik-ofis-acil-bir':'Bildirim açık. Ofis acil bir not bulduğunda ',
+  'ays.office.liste-uygulamayla-birlikte-g':'Liste uygulamayla birlikte gelen katalogdan; ücretsiz model kimlikleri ',
+  'ays.office.toplanti-sessiz-akar-chrome':'Toplantı sessiz akar. Chrome ya da Edge’de Türkçe ses paketi kuruluysa ',
+  'ays.office.turkce-metin-yabanci-bir-ses':'Türkçe metin yabancı bir sesle bozuk duyulur. Cihazına Türkçe konuşma ',
+  'ays.office.elde-olan-en-iyi-ses':'Elde olan en iyi ses seçildi ama gömülü (robotik) bir motor. Chrome’da ',
+  'ays.office.api-anahtari-gerekiyorsa':'API anahtarı (gerekiyorsa)',
+  'ays.office.baska-bir-anahtar-ekle':'Başka bir anahtar ekle',
+  'ays.office.anahtari-yapistir':'Anahtarı yapıştır',
+  'ays.office.uc-adresi':'Uç adresi',
+  'ays.office.i-stek-siniri':'İstek sınırı',
+  'ays.office.ofis-davranisi':'Ofis davranışı',
+  'ays.office.kucuk-tek-gunu-ya-da':'Küçük: tek günü ya da tek kaydı değiştiren, geri alınabilen iş. ',
+  'ays.office.orta-ve-buyuk-degisiklikler':'Orta ve büyük değişiklikler her zaman önce sorulur.',
+  'ays.office.uygulama-claude-icinde-yayim-2':'Uygulama Claude içinde yayımlanmış bir sayfa olarak çalışıyor. Bu ortamda dış API ',
+  'ays.office.ucretsiz-saglayicilari-kulla':'Ücretsiz sağlayıcıları kullanmak için uygulamayı kendi tarayıcında aç.',
+  'ays.office.bu-saglayici-icin-api-anahta':'Bu sağlayıcı için API anahtarı gerekiyor. Ücretsiz anahtarı bağlantıdan alabilirsin.',
+  'ays.office.ozel-uc-icin-adres-gerekiyor':'Özel uç için adres gerekiyor (OpenAI uyumlu bir adres yeter: …/v1).',
+  'ays.office.model-secilmedi-listeden-sec':'Model seçilmedi. Listeden seç ya da model kimliğini elle yaz.',
+  'ays.office.her-adim-calisiyor':'Her adım çalışıyor.',
+  'ays.office.zincir-burada-kiriliyor':'Zincir burada kırılıyor:',
+  'ays.office.bu-yapilandirma-ofiste-kulla':'Bu yapılandırma ofiste kullanılabilir.',
+  'ays.office.asagidaki-ilk-kirmizi-satir':'Aşağıdaki ilk kırmızı satır sorunun kendisidir; sonrakiler onun sonucudur.',
+  'ays.office.dogrulanmadi-kaynaksiz-model':'Doğrulanmadı: kaynaksız, modelin bilgisidir. ',
+  'ays.office.karar-vermeden-once-bir-kayn':'Karar vermeden önce bir kaynağa bak.',
+  'ays.office.urunu-sil':'Ürünü sil',
+  'ays.office.urun-yalniz-bu-cihazdan-sili':'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
+  'ays.office.urunu-bu-cihazdan-sil':'Ürünü bu cihazdan sil',
+  'ays.office.saglayicinin-listesi-cekiliy':'Sağlayıcının listesi çekiliyor…',
+  'ays.office.zincir-sinaniyor-ortam-adres':'Zincir sınanıyor: ortam, adres, anahtar, ',
+  'ays.office.deneniyor-ucretsiz-modellerd':'Deneniyor… (ücretsiz modellerde 5–30 sn sürebilir)',
+  'ays.office.ofis-modeli-baglandi':'Ofis modeli bağlandı',
+  'ays.office.ayarlar-kaydedildi':'Ayarlar kaydedildi',
+  'ays.office.ofis-her-seyi-yerinde-buldu':'Ofis her şeyi yerinde buldu',
+  'ays.office.karar-kapandi':'Karar kapandı',
+  'ays.office.karar-devredildi':'Karar devredildi',
+  'ays.office.bildirim-izni-kapali-iphone':'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.',
+  'ays.office.bildirim-izni-alinamadi':'Bildirim izni alınamadı.',
+  'ays.office.acik-2':'Açık · ',
+  'ays.office.telefon-bildirimi-kapandi':'Telefon bildirimi kapandı',
+  'ays.office.bu-tur-sormadan-uygulanacak':'Bu tür sormadan uygulanacak; geri alınabilir',
+  'ays.office.bu-tur-her-zaman-once':'Bu tür her zaman önce sorulacak',
+  'ays.office.her-degisiklik-once-sorulaca':'Her değişiklik önce sorulacak',
+  'ays.office.ajanlarin-kucuk-onerileri-de':'Ajanların küçük önerileri de sormadan uygulanacak',
+  'ays.office.yalniz-senin-istedigin-kucuk':'Yalnız senin istediğin küçük değişiklikler sormadan uygulanacak',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -223,7 +282,7 @@ R.Screens.office = (function(){
         <div class="row wrap gap-6 mt-10">
           ${K.Button({ label:yz('ays.office.konus'), icon:'zap', size:'sm',
             act:'office-talk', data:{ 'data-agent':agent.id } })}
-          ${K.Button({ label:open ? 'Kapat' : 'Raporu aç', size:'sm', tone:'ghost',
+          ${K.Button({ label:open ? 'Kapat' : yz('ays.office.raporu-ac'), size:'sm', tone:'ghost',
             act:'office-desk', data:{ 'data-agent':agent.id } })}
           ${when(b.suggestion && b.suggestion.route, () => K.Button({ label:b.suggestion.label, size:'sm',
             act:'go', data:{ 'data-route':b.suggestion.route } }))}
@@ -250,9 +309,9 @@ R.Screens.office = (function(){
       title:yz('ays.office.bugunun-ozeti'),
       sub:b ? new Date(b.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })
             + ' · günde bir kez üretilir'
-            : 'Patron masaları henüz özetlemedi',
+            : yz('ays.office.patron-masalari-henuz-ozetle'),
       badge:when(notes.length, () => K.Badge({ label:notes.length + ' not', tone:'warn' })),
-      actions:K.Button({ label:b ? 'Yenile' : 'Brifing al', icon:'refresh', size:'sm',
+      actions:K.Button({ label:b ? 'Yenile' : yz('ays.office.brifing-al'), icon:'refresh', size:'sm',
         act:'office-briefing' }),
       body:html`
         <div id="office-briefing">
@@ -260,8 +319,8 @@ R.Screens.office = (function(){
             ? html`<p class="prose">${b.text}</p>
                 ${when(b.stale, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
                   title:yz('ays.office.bu-brifing-eskidi'),
-                  body:'Masalardaki notlar brifing yazıldıktan sonra değişti. '
-                     + 'Aşağıdaki notlar günceldir; brifingi yenileyebilirsin.' })}</div>`)}
+                  body:yz('ays.office.masalardaki-notlar-brifing-y')
+                     + yz('ays.office.asagidaki-notlar-gunceldir-b') })}</div>`)}
                 ${/* Model kapalıyken sayfanın üstündeki «Dil modeli kapalı» şeridi
                      bunu zaten söylüyor; satır yalnız model açıkken (brifing kurala
                      düştüyse) çizilir. */
@@ -301,7 +360,7 @@ R.Screens.office = (function(){
         </div>
 
         <div class="mt-12">
-          ${K.NextUp({ icon:action.icon || 'zap', label:action.label || 'Sıradaki iş',
+          ${K.NextUp({ icon:action.icon || 'zap', label:action.label || yz('ays.office.siradaki-is'),
             title:action.title, why:action.why, hint:'next-action',
             action:K.Button({ label:yz('ays.office.simdi-yap'), size:'sm', act:'go',
               data:{ 'data-route':action.route || 'today' } }) })}
@@ -354,8 +413,8 @@ R.Screens.office = (function(){
         hint:'not-ofis-modeli', title:yz('ays.office.ofis-modeli'),         actions:K.Button({ label:yz('ays.office.bagla'), icon:'gear', size:'sm', act:'office-settings' }),
         body:html`
           ${K.Notice({ tone:'info', title:yz('ays.office.su-an-kural-motoru-modundasi'),
-            body:'Ajanlar veriyi okuyup bulgularını yazıyor ama cümleleri sabit. '
-               + 'Ücretsiz bir anahtar bağlarsan aynı bulguları kendi cümleleriyle tartışırlar.' })}
+            body:yz('ays.office.ajanlar-veriyi-okuyup-bulgul')
+               + yz('ays.office.ucretsiz-bir-anahtar-baglars') })}
           <div class="row wrap gap-6 mt-10">
             ${map(['openrouter', 'groq', 'gemini'], id => K.Chip({ label:R.PROVIDERS[id].label,
               act:'office-settings', data:{ 'data-provider':id } }))}
@@ -368,7 +427,7 @@ R.Screens.office = (function(){
       actions:K.Button({ label:yz('ays.office.ayarlar'), icon:'gear', size:'sm', act:'office-settings' }),
       body:html`
         ${when(sandbox, () => K.Notice({ tone:'warn', title:yz('ays.office.bu-ortamda-dis-model-calisma'),
-          body:'Uygulama Claude içinde yayımlanmış bir sayfa olarak açıldığında dış API çağrıları '
+          body:yz('ays.office.uygulama-claude-icinde-yayim')
              + 'engellenir. Yerleşik modeli seç ya da uygulamayı kendi tarayıcında aç.' }))}
 
         ${when(q.known, () => html`
@@ -432,14 +491,14 @@ R.Screens.office = (function(){
     const a = R.Takvim.bildirimAyari();
     const V = (window.LIFEOS || {}).VITRIN;
     return html`<div class="mt-12">${K.Field({ label:yz('ays.office.telefon-bildirimi'),
-        hint:'Her gün seçtiğin saatte günün planı, hedefin son günü ve profilde yazdığın sınav gününden bir gün önce. '
-          + 'Önümüzdeki ' + R.Takvim.PLAN_GUN + ' gün kurulur, AYS kapalıyken de gelir.',
+        hint:yz('ays.office.her-gun-sectigin-saatte-gunu')
+          + yz('ays.office.onumuzdeki') + R.Takvim.PLAN_GUN + ' gün kurulur, AYS kapalıyken de gelir.',
         input:K.Select({ id:'office-telbildirim', value:a.acik ? 'acik' : 'kapali', change:'office-telbildirim', options:[
           { value:'kapali', label:yz('ays.office.kapali') }, { value:'acik', label:yz('ays.office.acik') } ] }) })}
       ${when(a.acik, () => html`<div class="mt-10">${K.Field({ label:yz('ays.office.gunun-plani-saati'),
         input:K.Input({ id:'office-telsaat', type:'time', value:a.saat, change:'office-telsaat' }) })}</div>
         <div class="mt-10">${K.Button({ label:yz('ays.office.kurulu-bildirimler'), size:'sm',
-          data:{ 'data-tb-ac':'1', 'data-tb-not':'Tamamen kapatmak için «Telefon bildirimi»ni Kapalı yap.' } })}</div>
+          data:{ 'data-tb-ac':'1', 'data-tb-not':yz('ays.office.tamamen-kapatmak-icin-telefo') } })}</div>
         ${when(V && V.bildirimKutusu, () => raw('<div class="mt-10">' + V.bildirimKutusu({ modul:'ays',
           turler:[{ id:'plan', ad:yz('ays.office.ays-gunun-plani-ve') }] }) + '</div>'))}`)}</div>`;
   }
@@ -455,7 +514,7 @@ R.Screens.office = (function(){
     }
     if(state === 'granted'){
       const V = (window.LIFEOS || {}).VITRIN;
-      return html`${K.Notice({ tone:'ok', body:'Bildirim açık. Ofis acil bir not bulduğunda '
+      return html`${K.Notice({ tone:'ok', body:yz('ays.office.bildirim-acik-ofis-acil-bir')
         + 'ya da karar iki gündür açık kaldığında günde en fazla bir kez haber verir.' })}
         ${when(V && V.bildirimKutusu, () => raw('<div class="mt-10">' + V.bildirimKutusu({ modul:'ays',
           turler:[{ id:'ofis', ad:yz('ays.office.ays-ofis-uyarisi') }] }) + '</div>'))}`;
@@ -488,7 +547,7 @@ R.Screens.office = (function(){
 
   function catalogNote(providerId){
     const live = R.LLM.cachedModels(providerId);
-    if(!live) return 'Liste uygulamayla birlikte gelen katalogdan; ücretsiz model kimlikleri '
+    if(!live) return yz('ays.office.liste-uygulamayla-birlikte-g')
       + 'sık değişir. “Modelleri yenile” ile sağlayıcının güncel listesini çek.';
     return live.models.length + ' model · ' + U.relativeDay(R.U.gunOf(live.at)) + ' güncellendi.';
   }
@@ -519,17 +578,17 @@ R.Screens.office = (function(){
         act:'office-voices' })),
 
       when(!list.length, () => K.Notice({ tone:'warn', title:yz('ays.office.bu-cihazda-konusma-sesi-bulu'),
-        body:'Toplantı sessiz akar. Chrome ya da Edge’de Türkçe ses paketi kuruluysa '
+        body:yz('ays.office.toplanti-sessiz-akar-chrome')
            + '“Sesleri tazele”ye bas; mobilde sistem dili ayarlarından Türkçe TTS kurulabilir.' })),
 
       when(list.length && !q.turkish, () => K.Notice({ tone:'warn',
         title:yz('ays.office.turkce-ses-yok-yabanci-bir'),
-        body:'Türkçe metin yabancı bir sesle bozuk duyulur. Cihazına Türkçe konuşma '
+        body:yz('ays.office.turkce-metin-yabanci-bir-ses')
            + 'paketi kurarsan belirgin düzelir.' })),
 
       when(list.length && q.turkish && q.level === 'dusuk', () => K.Notice({ tone:'info',
         title:yz('ays.office.bu-cihazdaki-sesler-temel-se'),
-        body:'Elde olan en iyi ses seçildi ama gömülü (robotik) bir motor. Chrome’da '
+        body:yz('ays.office.elde-olan-en-iyi-ses')
            + '“Google Türkçe”, Edge’de “Natural/Neural” sesleri belirgin daha doğaldır.' })),
 
       when(list.length, () => html`<p class="tiny dim">${list.length} ${yz('ays.office.ses-bulundu-en-iyisi-secilip')}</p>`),
@@ -574,7 +633,7 @@ R.Screens.office = (function(){
          olan kurulumlar anahtar bekler, alan gizlenince baglanmalarinin
          yolu kalmiyordu. */
       when(p.needsKey || p.keyOptional, () => K.Stack([
-        K.SectionTitle(p.needsKey ? '1. API anahtarı' : 'API anahtarı (gerekiyorsa)'),
+        K.SectionTitle(p.needsKey ? '1. API anahtarı' : yz('ays.office.api-anahtari-gerekiyorsa')),
         when(keys.length, () => html`<div class="stack-xs">${map(keys, (masked, i) => html`
           <div class="keyrow">
             <span class="keyrow__mask">${masked}</span>
@@ -582,7 +641,7 @@ R.Screens.office = (function(){
             ${K.Button({ label:yz('ays.office.sil'), size:'sm', tone:'ghost', act:'office-forget',
               data:{ 'data-provider':providerId, 'data-index':i } })}
           </div>`)}</div>`),
-        K.Field({ label:keys.length ? 'Başka bir anahtar ekle' : 'Anahtarı yapıştır',
+        K.Field({ label:keys.length ? yz('ays.office.baska-bir-anahtar-ekle') : yz('ays.office.anahtari-yapistir'),
           hint:p.keyHint,
           input:K.Input({ id:'llm-key', type:'password', placeholder:p.keyHint,
             aria:yz('ays.office.api-anahtari'), change:'office-key' }) }),
@@ -594,7 +653,7 @@ R.Screens.office = (function(){
 
       /* --- 2. uc adresi (yalniz ozel) --- */
       when(p.editableEndpoint, () => K.Stack([
-        K.SectionTitle('Uç adresi'),
+        K.SectionTitle(yz('ays.office.uc-adresi')),
         K.Field({ label:yz('ays.office.openai-uyumlu-chat-completio'),
           hint:p.endpoint ? 'varsayılan: ' + p.endpoint : null,
           input:K.Input({ id:'llm-endpoint',
@@ -622,7 +681,7 @@ R.Screens.office = (function(){
 
       /* --- 4. istek siniri --- */
       when(p.needsKey, () => K.Stack([
-        K.SectionTitle(p.editableEndpoint ? 'İstek sınırı' : '3. İstek sınırı'),
+        K.SectionTitle(p.editableEndpoint ? yz('ays.office.i-stek-siniri') : '3. İstek sınırı'),
         html`<p class="small muted">${yz('ays.office.motor-bu-siniri-hic-asmaz')}
           ${when(p.checked, () => html`<span class="tiny dim">(katalog: ${p.checked})</span>`)}</p>`,
         html`<div class="cols-2">
@@ -642,14 +701,14 @@ R.Screens.office = (function(){
 
       /* --- 6. ofis davranisi --- */
       K.Stack([
-        K.SectionTitle('Ofis davranışı'),
+        K.SectionTitle(yz('ays.office.ofis-davranisi')),
         K.Checkbox({ label:yz('ays.office.model-duserse-yedege-gec-one'), checked:st.fallback !== false,
           act:'office-toggle-fallback' }),
         K.Checkbox({ label:yz('ays.office.sabah-gunun-brifingini-kendi'),
           checked:st.autoBriefing !== false, act:'office-toggle-briefing' }),
         K.Field({ label:yz('ays.office.kucuk-degisiklikler-sormadan'),
-          hint:'Küçük: tek günü ya da tek kaydı değiştiren, geri alınabilen iş. '
-            + 'Orta ve büyük değişiklikler her zaman önce sorulur.',
+          hint:yz('ays.office.kucuk-tek-gunu-ya-da')
+            + yz('ays.office.orta-ve-buyuk-degisiklikler'),
           input:K.Select({ id:'office-otomatik', value:st.otomatikUygula || 'istek',
             change:'office-otomatik', options:[
               { value:'istek', label:yz('ays.office.yalniz-benim-istediklerim-on') },
@@ -678,9 +737,9 @@ R.Screens.office = (function(){
       wide:true,
       body:String(K.Stack([
         when(sandbox, () => K.Notice({ tone:'warn', title:yz('ays.office.dikkat-bu-ortam-disa-kapali'),
-          body:'Uygulama Claude içinde yayımlanmış bir sayfa olarak çalışıyor. Bu ortamda dış API '
+          body:yz('ays.office.uygulama-claude-icinde-yayim-2')
              + 'çağrıları engellenir; "Yerleşik" sağlayıcı çalışır, diğerleri çalışmayabilir. '
-             + 'Ücretsiz sağlayıcıları kullanmak için uygulamayı kendi tarayıcında aç.' })),
+             + yz('ays.office.ucretsiz-saglayicilari-kulla') })),
         K.Field({ label:yz('ays.office.saglayici'), input:K.Select({ id:'llm-provider', change:'office-provider',
           value:pid,
           options:R.PROVIDER_ORDER.map(id => ({ value:id,
@@ -730,16 +789,16 @@ R.Screens.office = (function(){
   function validate(cfg){
     const p = R.PROVIDERS[cfg.provider];
     if(p.needsKey && !cfg.key && !R.LLM.getKeys(cfg.provider).length){
-      return 'Bu sağlayıcı için API anahtarı gerekiyor. Ücretsiz anahtarı bağlantıdan alabilirsin.';
+      return yz('ays.office.bu-saglayici-icin-api-anahta');
     }
     /* Bicim uyarisi engellemez ama anahtar acikca BASKA bir saglayiciya
        aitse kaydetmenin tek sonucu 401'dir: burada durdurulur. */
     const problem = R.LLM.keyProblem(cfg.provider, cfg.key);
     if(problem && problem.level === 'wrong') return problem.text;
     if(p.editableEndpoint && !cfg.endpoint){
-      return 'Özel uç için adres gerekiyor (OpenAI uyumlu bir adres yeter: …/v1).';
+      return yz('ays.office.ozel-uc-icin-adres-gerekiyor');
     }
-    if(!cfg.model) return 'Model seçilmedi. Listeden seç ya da model kimliğini elle yaz.';
+    if(!cfg.model) return yz('ays.office.model-secilmedi-listeden-sec');
     return null;
   }
 
@@ -762,9 +821,9 @@ R.Screens.office = (function(){
   function diagList(res){
     return K.Stack([
       K.Notice({ tone:res.ok ? 'ok' : 'danger',
-        title:res.ok ? 'Her adım çalışıyor.' : 'Zincir burada kırılıyor:',
-        body:res.ok ? 'Bu yapılandırma ofiste kullanılabilir.'
-          : 'Aşağıdaki ilk kırmızı satır sorunun kendisidir; sonrakiler onun sonucudur.' }),
+        title:res.ok ? yz('ays.office.her-adim-calisiyor') : yz('ays.office.zincir-burada-kiriliyor'),
+        body:res.ok ? yz('ays.office.bu-yapilandirma-ofiste-kulla')
+          : yz('ays.office.asagidaki-ilk-kirmizi-satir') }),
       html`<div class="stack-xs mt-8">${map(res.steps, st => html`
         <div class="finding">
           <span class="${'finding__dot finding__dot--' + (st.ok ? 'ok' : 'danger')}"></span>
@@ -865,14 +924,14 @@ R.Screens.office = (function(){
       if(!u) return;
       UI.sheet({ title:u.baslik, wide:true,
         subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
-        note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
-          + 'Karar vermeden önce bir kaynağa bak.' : null,
+        note:u.dogruluk === 'dogrulanmadi' ? yz('ays.office.dogrulanmadi-kaynaksiz-model')
+          + yz('ays.office.karar-vermeden-once-bir-kayn') : null,
         body:LIFEOS.Urun.cerceve(u) });
     },
     async 'urun-sil'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await R.Urunler.sil(id); UI.toast(yz('ays.office.silindi')); R.App.render(); }, true, 'Ürünü bu cihazdan sil');
+      UI.confirmSheet(yz('ays.office.urunu-sil'), yz('ays.office.urun-yalniz-bu-cihazdan-sili'),
+        async () => { await R.Urunler.sil(id); UI.toast(yz('ays.office.silindi')); R.App.render(); }, true, yz('ays.office.urunu-bu-cihazdan-sil'));
     },
 
     async 'office-desk'(el){
@@ -967,7 +1026,7 @@ R.Screens.office = (function(){
       const endEl = document.getElementById('llm-endpoint');
 
       const note = document.getElementById('llm-model-note');
-      if(note) note.textContent = 'Sağlayıcının listesi çekiliyor…';
+      if(note) note.textContent = yz('ays.office.saglayicinin-listesi-cekiliy');
       el.disabled = true;
       try{
         const res = await R.LLM.listModels({ provider,
@@ -991,7 +1050,7 @@ R.Screens.office = (function(){
       /* Tanilama gercek anahtarla calisir; alandaki anahtar once havuza alinir. */
       if(cfg.key) R.LLM.addKey(cfg.provider, cfg.key);
       el.disabled = true;
-      testOutput(K.Notice({ tone:'info', body:'Zincir sınanıyor: ortam, adres, anahtar, '
+      testOutput(K.Notice({ tone:'info', body:yz('ays.office.zincir-sinaniyor-ortam-adres')
         + 'model listesi ve gerçek bir çağrı…' }));
       try{
         const res = await R.LLM.diagnose(cfg);
@@ -1009,7 +1068,7 @@ R.Screens.office = (function(){
       applyForm(cfg);
 
       el.disabled = true;
-      testOutput(K.Notice({ tone:'info', body:'Deneniyor… (ücretsiz modellerde 5–30 sn sürebilir)' }));
+      testOutput(K.Notice({ tone:'info', body:yz('ays.office.deneniyor-ucretsiz-modellerd') }));
       try{
         const res = await R.LLM.test({ provider:cfg.provider, model:cfg.model, endpoint:cfg.endpoint });
         const q = R.Quota.status({ provider:cfg.provider, model:cfg.model });
@@ -1047,7 +1106,7 @@ R.Screens.office = (function(){
         provider:cfg.provider, model:cfg.model, endpoint:cfg.endpoint, perAgent,
       });
       UI.closeSheet();
-      UI.toast(O.mode() === 'llm' ? 'Ofis modeli bağlandı' : 'Ayarlar kaydedildi');
+      UI.toast(O.mode() === 'llm' ? yz('ays.office.ofis-modeli-baglandi') : yz('ays.office.ayarlar-kaydedildi'));
       R.App.render();
     },
 
@@ -1076,7 +1135,7 @@ R.Screens.office = (function(){
         const added = await R.Proposals.refresh();
         UI.toast(added.length
           ? added.length + ' yeni öneri masaya bırakıldı'
-          : 'Ofis her şeyi yerinde buldu');
+          : yz('ays.office.ofis-her-seyi-yerinde-buldu'));
       }finally{
         el.disabled = false;
         R.App.render();
@@ -1085,7 +1144,7 @@ R.Screens.office = (function(){
 
     async 'office-decision'(el){
       await O.closeDecision(el.dataset.id, el.dataset.state);
-      UI.toast(el.dataset.state === 'done' ? 'Karar kapandı' : 'Karar devredildi');
+      UI.toast(el.dataset.state === 'done' ? yz('ays.office.karar-kapandi') : yz('ays.office.karar-devredildi'));
       R.App.render();
     },
   };
@@ -1112,14 +1171,14 @@ R.Screens.office = (function(){
         const izin = await B.izin();
         if(izin !== 'izin'){
           el.value = 'kapali';
-          UI.toast(izin === 'red' ? 'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.'
-            : 'Bildirim izni alınamadı.', { life:5000 });
+          UI.toast(izin === 'red' ? yz('ays.office.bildirim-izni-kapali-iphone')
+            : yz('ays.office.bildirim-izni-alinamadi'), { life:5000 });
           return;
         }
       }
       await R.Office.saveSettings({ telefonBildirim:el.value === 'acik' });
       const r = await R.Takvim.planla();
-      UI.toast(el.value === 'acik' ? 'Açık · ' + ((r && r.kurulan) || 0) + ' bildirim kuruldu' : 'Telefon bildirimi kapandı');
+      UI.toast(el.value === 'acik' ? yz('ays.office.acik-2') + ((r && r.kurulan) || 0) + ' bildirim kuruldu' : yz('ays.office.telefon-bildirimi-kapandi'));
       const box = document.getElementById('office-telefon');
       if(box) box.innerHTML = String(telefonRow());
     },
@@ -1145,14 +1204,14 @@ R.Screens.office = (function(){
     async 'otomatik-tur'(el){
       const turler = Object.assign({}, O.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
       await O.saveSettings({ otomatikTurler:turler });
-      UI.toast(el.checked ? 'Bu tür sormadan uygulanacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
+      UI.toast(el.checked ? yz('ays.office.bu-tur-sormadan-uygulanacak') : yz('ays.office.bu-tur-her-zaman-once'));
     },
     async 'office-otomatik'(el){
       const v = R.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
       await O.saveSettings({ otomatikUygula:v });
-      UI.toast(v === 'hicbiri' ? 'Her değişiklik önce sorulacak'
-        : v === 'hepsi' ? 'Ajanların küçük önerileri de sormadan uygulanacak'
-        : 'Yalnız senin istediğin küçük değişiklikler sormadan uygulanacak');
+      UI.toast(v === 'hicbiri' ? yz('ays.office.her-degisiklik-once-sorulaca')
+        : v === 'hepsi' ? yz('ays.office.ajanlarin-kucuk-onerileri-de')
+        : yz('ays.office.yalniz-senin-istedigin-kucuk'));
     },
 
     async 'office-voice'(el){

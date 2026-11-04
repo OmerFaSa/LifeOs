@@ -5,11 +5,54 @@
 
    Ekranın ayırt edici tarafı emilim sütunudur: aynı öğünde çay varsa demir
    emilimi yarıya iner ve bu ekranda görünür. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.meals.modul-2':'Modül 2',
+  'spi.meals.fotograftan-ogun-okumak-icin':'Fotoğraftan öğün okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için ',
+  'spi.meals.fotografi-buraya-birak-ya-da':'Fotoğrafı buraya bırak ya da seçmek için tıkla',
+  'spi.meals.fotograftan-gelen-gramaj-her':'Fotoğraftan gelen gramaj her zaman «tahmin» ',
+  'spi.meals.bu-gune-henuz-ogun-girilmedi':'Bu güne henüz öğün girilmedi.',
+  'spi.meals.ogun-cizelgesi':'Öğün çizelgesi',
+  'spi.meals.hazir-ogunler':'Hazır öğünler',
+  'spi.meals.ogun-girilmedi':'Öğün girilmedi.',
+  'spi.meals.gram-girilmedi':'Gram girilmedi.',
+  'spi.meals.kalem-taninmadi':'Kalem tanınmadı.',
+  'spi.meals.ev-olcusunden-tahmin':'Ev ölçüsünden tahmin.',
+  'spi.meals.tartilan-gramdan':'Tartılan gramdan.',
+  'spi.meals.hedef-hesaplanmadi':'Hedef hesaplanmadı.',
+  'spi.meals.son-7-gunde-hic-ogun':'Son 7 günde hiç öğün girilmemiş; açık hesaplanamıyor. ',
+  'spi.meals.girilmemis-gun-sifir-sayilma':'Girilmemiş gün sıfır sayılmaz, ortalamaya katılmaz.',
+  'spi.meals.son-7-gunun-ortalamasi-butun':'Son 7 günün ortalaması bütün hedefleri karşılıyor.',
+  'spi.meals.taban-referans':'Taban referans',
+  'spi.meals.ust-sinir':'Üst sınır',
+  'spi.meals.i-lgili-olcum':'İlgili ölçüm',
+  'spi.meals.barkodu-yakindan-cek-ya-da':'Barkodu yakından çek ya da fotoğraf seç',
+  'spi.meals.bu-tarayici-fotograftan-bark':'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.',
+  'spi.meals.bu-gun-hareket-girilmedi-iht':'Bu gün hareket girilmedi; ihtiyaca eklenmedi.',
+  'spi.meals.uygulanan-planin-gunluk-fark':'Uygulanan planın günlük farkı',
+  'spi.meals.su-an-hicbir-tahlil-sonucu':'Şu an hiçbir tahlil sonucu beslenme hedefini değiştirmiyor. ',
+  'spi.meals.olcumler-hedef-bandin-icinde':'Ölçümler hedef bandın içinde.',
+  'spi.meals.henuz-test-girilmedi-tahlil':'Henüz test girilmedi. Tahlil sonucu girildiğinde beslenme hedefi ',
+  'spi.meals.oneri-icin-en-az-birkac':'Öneri için en az birkaç günlük öğün kaydı gerekir. ',
+  'spi.meals.kayit-yoksa-eksik-hesaplanam':'Kayıt yoksa eksik hesaplanamaz — sıfır sayılmaz.',
+  'spi.meals.son-yedi-gunun-ortalamasi-bu':'Son yedi günün ortalaması bütün besin ',
+  'spi.meals.bu-bolum-su-an-cizilemedi':'Bu bölüm şu an çizilemedi; verin yerinde duruyor.',
+  'spi.meals.siradaki':'Sıradaki: ',
+  'spi.meals.butun-ogunler-girildi':'Bütün öğünler girildi.',
+  'spi.meals.fotograf-okunuyor':'Fotoğraf okunuyor',
+  'spi.meals.taninmadi':'Tanınmadı: ',
+  'spi.meals.barkod-okunuyor':'Barkod okunuyor',
+  'spi.meals.hedef-icin-profil-eksik':'Hedef için profil eksik.',
+  'spi.meals.bugun-hic-ogun-girilmedi':'Bugün hiç öğün girilmedi.',
+  'spi.meals.bugun-hedefin-ustundesin':'Bugün hedefin üstündesin.',
+  'spi.meals.bugun-hedefin-icindesin':'Bugün hedefin içindesin.',
+  'spi.meals.gunun':'Günün ',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'spi', sira:30, id:'act:meal', kind:'Eylem', label:'Öğün ekle', route:'meals',
-  hint:'Modül 2', run:() => { SP.App.go('meals'); setTimeout(() => {
+  hint:yz('spi.meals.modul-2'), run:() => { SP.App.go('meals'); setTimeout(() => {
     const el = document.getElementById('meal-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
   'spi.meals.geri-alindi':'Geri alındı',
@@ -342,11 +385,11 @@ SP.Screens.meals = (function(){
       body:String(K.Stack([
         when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
           title:yz('spi.meals.model-bagli-degil'),
-          body:'Fotoğraftan öğün okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için '
+          body:yz('spi.meals.fotograftan-ogun-okumak-icin')
             + 'görüntü okuyan bir model ata. Öğünü tek satır yazarak '
             + 'modelsiz de girebilirsin.' })),
         K.Drop({ act:'meal-photo', label:yz('spi.meals.yemek-fotografi'), icon:'camera', kamera:{},
-          accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
+          accept:'image/*', hint:yz('spi.meals.fotografi-buraya-birak-ya-da') }),
         html`<div id="photo-name" class="small dim">${photoFile ? photoFile.name : ''}</div>`,
         html`<div class="cols-2">
           ${K.Field({ label:yz('spi.meals.ne-kadari-yendi'),
@@ -359,7 +402,7 @@ SP.Screens.meals = (function(){
             ${K.Input({ id:'ph-extra', placeholder:yz('spi.meals.zeytinyagli-sekerli-tereyagi') })}
             ${K.Mic({ target:'ph-extra' })}
           </div>` }),
-        K.Notice({ tone:'info', body:'Fotoğraftan gelen gramaj her zaman «tahmin» '
+        K.Notice({ tone:'info', body:yz('spi.meals.fotograftan-gelen-gramaj-her')
           + 'olarak işaretlenir. Tartıp düzeltirsen «ölçüldü» olur.' }),
       ])),
       footer:String(html`${K.Button({ label:yz('spi.meals.vazgec'), act:'sheet-close' })}
@@ -482,7 +525,7 @@ SP.Screens.meals = (function(){
       ] }),
       body:rows.length
         ? html`${map(sorted, mealCard)}`
-        : P.empty('Bu güne henüz öğün girilmedi.', 'Öğün ekle', 'focus-meal', null, true),
+        : P.empty(yz('spi.meals.bu-gune-henuz-ogun-girilmedi'), yz('spi.meals.ogun-ekle'), 'focus-meal', null, true),
     });
   }
 
@@ -515,7 +558,7 @@ SP.Screens.meals = (function(){
         kucuk:/^ara/.test(m.slot) };
     });
     const n = new Date();
-    return vkutu('Öğün çizelgesi', 'girildiği saat', VT().ogunCizelgesi({ ogunler:og,
+    return vkutu(yz('spi.meals.ogun-cizelgesi'), 'girildiği saat', VT().ogunCizelgesi({ ogunler:og,
       simdi:d === U.todayISO() ? n.getHours() + n.getMinutes() / 60 : null }));
   }
 
@@ -565,7 +608,7 @@ SP.Screens.meals = (function(){
       return { ad:SP.Ogun ? SP.Ogun.ad(x.slot) : (sl ? sl.label : x.slot), icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
     }) }) : '';
-    return vkutu('Hazır öğünler', '', ust + liste + dunkuHtml + sikHtml);
+    return vkutu(yz('spi.meals.hazir-ogunler'), '', ust + liste + dunkuHtml + sikHtml);
   }
   function hazirOgunSheet(meal){
     UI.sheet({
@@ -589,7 +632,7 @@ SP.Screens.meals = (function(){
     if(!t.ok){
       return K.Card({ title:yz('spi.meals.gunluk-hedef'),
         body:K.Notice({ tone:'warn', title:yz('spi.meals.hesaplanamiyor'),
-          body:'Profilde ' + t.missing.join(', ') + ' eksik. Bu üçü olmadan kalori '
+          body:yz('spi.meals.profilde') + t.missing.join(', ') + ' eksik. Bu üçü olmadan kalori '
              + 've protein hedefi tahmin edilmez.' }),
         foot:K.Button({ label:yz('spi.meals.profili-ac'), size:'sm',
           act:'go', data:{ 'data-route':'family' } }) });
@@ -641,8 +684,8 @@ SP.Screens.meals = (function(){
     const tahmin = gramli.some(it => it.cert !== 'measured');
     const m = [];
     if(!gramli.length){
-      m.push({ ust:yz('spi.meals.kalori') + gun, cumle:t.empty ? 'Öğün girilmedi.' : kalemler.length ? 'Gram girilmedi.' : 'Kalem tanınmadı.',
-        vurgu:eksik ? eksik + '.' : tg.ok ? 'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.' : '', sistem:'spi' });
+      m.push({ ust:yz('spi.meals.kalori') + gun, cumle:t.empty ? yz('spi.meals.ogun-girilmedi') : kalemler.length ? yz('spi.meals.gram-girilmedi') : yz('spi.meals.kalem-taninmadi'),
+        vurgu:eksik ? eksik + '.' : tg.ok ? yz('spi.meals.hedef') + U.fmtNum(tg.kcal) + ' kcal.' : '', sistem:'spi' });
       if(tg.ok) m.push({ ust:yz('spi.meals.protein') + gun, cumle:yz('spi.meals.hedef') + tg.protein.min + '–' + tg.protein.max + ' g.',
         vurgu:yz('spi.meals.ogun-girilince-hesaplanir'), sistem:'spi' });
     }else{
@@ -653,10 +696,10 @@ SP.Screens.meals = (function(){
             girdiler:[{ ad:yz('spi.meals.tartilan-kalem'), deger:gramli.length, birim:'kalem', kesinlik:'measured' }] };
       m.push({ ust:yz('spi.meals.kalori') + gun, sayi:sayi(Object.assign({ deger:Math.round(t.kcal), birim:'kcal' }, kes)), cumle:yz('spi.meals.alindi'),
         vurgu:eksik ? eksik + '; toplama girmedi.'
-          : tg.ok ? 'Hedef ' + U.fmtNum(tg.kcal) + ' kcal' + (tahmin ? ' · tahmin.' : '.')
-          : tahmin ? 'Ev ölçüsünden tahmin.' : 'Tartılan gramdan.', sistem:'spi' });
+          : tg.ok ? yz('spi.meals.hedef') + U.fmtNum(tg.kcal) + ' kcal' + (tahmin ? ' · tahmin.' : '.')
+          : tahmin ? yz('spi.meals.ev-olcusunden-tahmin') : yz('spi.meals.tartilan-gramdan'), sistem:'spi' });
       m.push({ ust:yz('spi.meals.protein') + gun, sayi:sayi(Object.assign({ deger:Math.round(t.protein), birim:'g' }, kes)), cumle:yz('spi.meals.alindi'),
-        vurgu:tg.ok ? 'Hedef ' + tg.protein.min + '–' + tg.protein.max + ' g.' : 'Hedef hesaplanmadı.', sistem:'spi' });
+        vurgu:tg.ok ? yz('spi.meals.hedef') + tg.protein.min + '–' + tg.protein.max + ' g.' : yz('spi.meals.hedef-hesaplanmadi'), sistem:'spi' });
     }
     if(!tg.ok){
       m.push({ ust:yz('spi.meals.gunluk-hedef'), cumle:yz('spi.meals.hedef-yok'), vurgu:yz('spi.meals.profilde') + tg.missing.join(', ') + ' eksik.', sistem:'spi',
@@ -712,13 +755,13 @@ SP.Screens.meals = (function(){
     const g = SP.Nutri.gaps(7);
     if(!g.ok){
       return K.Card({ title:yz('spi.meals.son-7-gun'), hint:'nutri-gap',
-        body:K.Notice({ tone:'info', body:'Son 7 günde hiç öğün girilmemiş; açık hesaplanamıyor. '
-          + 'Girilmemiş gün sıfır sayılmaz, ortalamaya katılmaz.' }) });
+        body:K.Notice({ tone:'info', body:yz('spi.meals.son-7-gunde-hic-ogun')
+          + yz('spi.meals.girilmemis-gun-sifir-sayilma') }) });
     }
     if(!g.rows.length){
       return K.Card({ title:yz('spi.meals.son-7-gun'), hint:'nutri-gap',
         badge:K.Badge({ label:g.avg.days + ' gün kayıt', tone:'ok' }),
-        body:K.Notice({ tone:'ok', body:'Son 7 günün ortalaması bütün hedefleri karşılıyor.' }) });
+        body:K.Notice({ tone:'ok', body:yz('spi.meals.son-7-gunun-ortalamasi-butun') }) });
     }
     return K.Card({
       title:yz('spi.meals.aciklar'), hint:'nutri-gap',
@@ -752,11 +795,11 @@ SP.Screens.meals = (function(){
       title:n.name, subtitle:n.note, wide:true,
       body:String(K.Stack([
         when(tg, () => K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
-          ['Günlük hedef', U.fmtNum(tg.target) + ' ' + n.unit],
-          ['Taban referans', U.fmtNum(tg.base) + ' ' + n.unit],
+          [yz('spi.meals.gunluk-hedef'), U.fmtNum(tg.target) + ' ' + n.unit],
+          [yz('spi.meals.taban-referans'), U.fmtNum(tg.base) + ' ' + n.unit],
           ['Çarpan', tg.mult === 1 ? 'yok' : '×' + U.fmtNet(tg.mult) + (tg.why ? ' — ' + tg.why : '')],
-          ['Üst sınır', n.ul ? U.fmtNum(n.ul) + ' ' + n.unit : 'tanımlı değil'],
-          ['İlgili ölçüm', n.marker && SP.BIO_BY_ID[n.marker] ? SP.BIO_BY_ID[n.marker].name : '—'],
+          [yz('spi.meals.ust-sinir'), n.ul ? U.fmtNum(n.ul) + ' ' + n.unit : 'tanımlı değil'],
+          [yz('spi.meals.i-lgili-olcum'), n.marker && SP.BIO_BY_ID[n.marker] ? SP.BIO_BY_ID[n.marker].name : '—'],
         ] })),
         K.Notice({ tone:'info', title:'Emilim:', body:n.absorb.note }),
         html`<h3 class="section-h">${yz('spi.meals.en-yogun-kaynaklar')}</h3>`,
@@ -815,9 +858,9 @@ SP.Screens.meals = (function(){
       title:yz('spi.meals.barkod'), subtitle:yz('spi.meals.ilk-okutmada-bir-gidaya-bagl'),
       body:String(K.Stack([
         when(SP.Barkod.fotoVar(), () => K.Drop({ act:'barkod-foto', label:yz('spi.meals.barkodun-fotografi'), kamera:{},
-          icon:'file', accept:'image/*', hint:'Barkodu yakından çek ya da fotoğraf seç' })),
+          icon:'file', accept:'image/*', hint:yz('spi.meals.barkodu-yakindan-cek-ya-da') })),
         when(!SP.Barkod.fotoVar(), () => K.Notice({ tone:'info',
-          body:'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.' })),
+          body:yz('spi.meals.bu-tarayici-fotograftan-bark') })),
         K.Field({ label:yz('spi.meals.barkod-numarasi'), hint:'8 ya da 13 hane',
           input:K.Input({ id:'barkod-kod', numeric:true, placeholder:'8690000000000' }) }),
         html`<div id="barkod-hata" class="small" role="alert">${hata || ''}</div>`,
@@ -926,7 +969,7 @@ SP.Screens.meals = (function(){
     if(!tg.ok){
       return K.Card({ title:yz('spi.meals.gunluk-enerji'),
         body:K.Notice({ tone:'warn', title:yz('spi.meals.hesaplanamiyor'),
-          body:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan bazal '
+          body:yz('spi.meals.profilde') + tg.missing.join(', ') + ' eksik. Bu üçü olmadan bazal '
              + 'metabolizma tahmin edilmez; uydurulmuş bir sayı yazılmaz.' }),
         foot:K.Button({ label:yz('spi.meals.profili-tamamla'), size:'sm',
           act:'go', data:{ 'data-route':'family' } }) });
@@ -951,7 +994,7 @@ SP.Screens.meals = (function(){
           <div class="chain__step">
             <span class="chain__label">${yz('spi.meals.girilen-hareket')}</span>
             <span class="chain__value num">${n.hareketYok ? '—' : U.fmtNum(n.hareket)}<small>kcal</small></span>
-            <span class="chain__note">${n.hareketYok ? 'Bu gün hareket girilmedi; ihtiyaca eklenmedi.'
+            <span class="chain__note">${n.hareketYok ? yz('spi.meals.bu-gun-hareket-girilmedi-iht')
               : seans + ' · net MET (hesaplandı)'}${when(n.eksik.length, () => html` <b>${yz('spi.meals.hesaba-girmeyen')} ${n.eksik.join(', ')}.</b>`)}</span>
           </div>
           <div class="chain__op">=</div>
@@ -965,7 +1008,7 @@ SP.Screens.meals = (function(){
           <div class="chain__step chain__step--end">
             <span class="chain__label">${yz('spi.meals.hedef-2')}</span>
             <span class="chain__value num">${U.fmtNum(tg.kcal)}<small>kcal</small></span>
-            <span class="chain__note">${tg.kcalKaynak === 'plan' ? 'Uygulanan planın günlük farkı' : tg.goal.note}${when(tg.bmrTaban, () => ' · bazal metabolizmanın altına inmez')}</span>
+            <span class="chain__note">${tg.kcalKaynak === 'plan' ? yz('spi.meals.uygulanan-planin-gunluk-fark') : tg.goal.note}${when(tg.bmrTaban, () => ' · bazal metabolizmanın altına inmez')}</span>
           </div>
         </div>
         <div class="cols-3 mt-16">
@@ -988,9 +1031,9 @@ SP.Screens.meals = (function(){
       return K.Card({ title:yz('spi.meals.tahlil-bagi'), hint:'lab-linked-food',
         body:K.Notice({ tone:'info',
           body:SP.Bio.summary().measured
-            ? 'Şu an hiçbir tahlil sonucu beslenme hedefini değiştirmiyor. '
-              + 'Ölçümler hedef bandın içinde.'
-            : 'Henüz test girilmedi. Tahlil sonucu girildiğinde beslenme hedefi '
+            ? yz('spi.meals.su-an-hicbir-tahlil-sonucu')
+              + yz('spi.meals.olcumler-hedef-bandin-icinde')
+            : yz('spi.meals.henuz-test-girilmedi-tahlil')
               + 'kendiliğinden ona göre ayarlanır.' }),
         foot:K.Button({ label:yz('spi.meals.testler-bolumune-git'), size:'sm',
           act:'go', data:{ 'data-route':'labs' } }) });
@@ -1033,15 +1076,15 @@ SP.Screens.meals = (function(){
     if(!g.ok){
       return K.Card({ title:yz('spi.meals.bugun-ne-yenmeli'),
         body:K.Notice({ tone:'info',
-          body:'Öneri için en az birkaç günlük öğün kaydı gerekir. '
-            + 'Kayıt yoksa eksik hesaplanamaz — sıfır sayılmaz.' }),
+          body:yz('spi.meals.oneri-icin-en-az-birkac')
+            + yz('spi.meals.kayit-yoksa-eksik-hesaplanam') }),
         foot:K.Button({ label:yz('spi.meals.ogun-ekle'), size:'sm',
           act:'meal-tab', data:{ 'data-tab':'gunluk' } }) });
     }
     const under = g.rows.filter(r => r.kind === 'under').slice(0, 4);
     if(!under.length){
       return K.Card({ title:yz('spi.meals.bugun-ne-yenmeli'),
-        body:K.Notice({ tone:'ok', body:'Son yedi günün ortalaması bütün besin '
+        body:K.Notice({ tone:'ok', body:yz('spi.meals.son-yedi-gunun-ortalamasi-bu')
           + 'öğelerinde hedefi karşılıyor. Öneri üretilmedi.' }) });
     }
     return K.Card({
@@ -1117,7 +1160,7 @@ SP.Screens.meals = (function(){
     try{ return BODIES[t.id](); }
     catch(e){
       console.error('Öğün bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('spi.meals.bu-bolum-su-an-cizilemedi') });
     }
   }
 
@@ -1139,7 +1182,7 @@ SP.Screens.meals = (function(){
     const sira = noktalar.find(n => !n.dolu);
     const sirada = sira ? slotlar[noktalar.indexOf(sira)] : null;
     const ogunKart = P.kart({ tur:'ogunlerim', ad:yz('spi.meals.ogunlerim'), simge:'ogun', yuva:girilen + ' / ' + slotlar.length,
-      govde:P.cizgi({ noktalar }) + P.not(sirada ? 'Sıradaki: ' + sirada.label + (sirada.saat ? ' · ' + sirada.saat : '') : 'Bütün öğünler girildi.') });
+      govde:P.cizgi({ noktalar }) + P.not(sirada ? yz('spi.meals.siradaki') + sirada.label + (sirada.saat ? ' · ' + sirada.saat : '') : yz('spi.meals.butun-ogunler-girildi')) });
     const t = SP.Nutri.dayTotals(d);
     const tg = SP.Nutri.targets(null, d);
     const g = x => Math.round(Number(x) || 0);
@@ -1263,7 +1306,7 @@ SP.Screens.meals = (function(){
         vessel:(document.getElementById('ph-vessel') || {}).value || '',
         extra:(document.getElementById('ph-extra') || {}).value || '',
       };
-      photoRes = await UI.withBusy('Fotoğraf okunuyor',
+      photoRes = await UI.withBusy(yz('spi.meals.fotograf-okunuyor'),
         'gramaj tahmin edilecek, ölçüm değil',
         () => SP.Extract.fromMealPhoto(photoFile, hints));
       photoPreviewSheet(photoRes);
@@ -1327,7 +1370,7 @@ SP.Screens.meals = (function(){
       const parsed = SP.Parse.parseMeal(metin);
       const kalan = (parsed.unmatched || []).join(', ');
       if(!parsed.items.length){
-        UI.toast(kalan ? 'Tanınmadı: ' + kalan + '. «1 tabak mercimek çorbası» gibi yazmayı dene.' : parsed.note);
+        UI.toast(kalan ? yz('spi.meals.taninmadi') + kalan + '. «1 tabak mercimek çorbası» gibi yazmayı dene.' : parsed.note);
         return;
       }
       const r = await pushItems(parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion })),
@@ -1499,7 +1542,7 @@ SP.Screens.meals = (function(){
     async 'barkod-foto'(el){
       const f = el.files && el.files[0];
       if(!f) return;
-      await barkodSonuc(await UI.withBusy('Barkod okunuyor', 'fotoğraf bu cihazda okunur',
+      await barkodSonuc(await UI.withBusy(yz('spi.meals.barkod-okunuyor'), 'fotoğraf bu cihazda okunur',
         () => SP.Barkod.fotodan(f)));
     },
   };
@@ -1516,18 +1559,18 @@ SP.Screens.meals = (function(){
     title:yz('spi.meals.ogunler'),
     headline(){
       const tg = SP.Nutri.targets();
-      if(!tg.ok) return 'Hedef için profil eksik.';
+      if(!tg.ok) return yz('spi.meals.hedef-icin-profil-eksik');
       const t = SP.Nutri.dayTotals(shownDate());
-      if(t.empty) return 'Bugün hiç öğün girilmedi.';
+      if(t.empty) return yz('spi.meals.bugun-hic-ogun-girilmedi');
       const pct = U.pct(t.kcal, tg.kcal);
-      if(pct > 115) return 'Bugün hedefin üstündesin.';
-      if(pct >= 85) return 'Bugün hedefin içindesin.';
-      return 'Günün ' + Math.round(pct) + '%\u2019i tamam.';
+      if(pct > 115) return yz('spi.meals.bugun-hedefin-ustundesin');
+      if(pct >= 85) return yz('spi.meals.bugun-hedefin-icindesin');
+      return yz('spi.meals.gunun') + Math.round(pct) + '%\u2019i tamam.';
     },
     lede(){
       const tg = SP.Nutri.targets();
       if(!tg.ok){
-        return 'Profilde ' + tg.missing.join(', ') + ' girilince bazal metabolizma ve '
+        return yz('spi.meals.profilde') + tg.missing.join(', ') + ' girilince bazal metabolizma ve '
           + 'hedef hesaplanır. Eksik veriden sayı uydurulmaz.';
       }
       const adj = Object.keys(tg.adjustments || {}).length;

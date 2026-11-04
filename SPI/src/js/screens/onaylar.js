@@ -12,6 +12,29 @@
    çekmecede». Bugün'ün Öneri alanı yalnız EN ÖNDEKİ kartı gösterir, gerisi
    burada bekler (`oneriAlani`). Hiçbir şey kullanıcı görmeden uygulanmaz;
    uygulayan SPİ'nin kendi kodudur. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.onaylar.onerim':'Önerim: ',
+  'spi.onaylar.sinif-maliyet-ve-sure-king-i':'Sınıf, maliyet ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da ',
+  'spi.onaylar.bir-teklif-uygulanirken-isle':'Bir teklif uygulanırken işlem yarıda kaldı; kaydına ',
+  'spi.onaylar.planina-ekle':'Planına ekle',
+  'spi.onaylar.onaylarsan-spi-kendi-kaydina':'Onaylarsan SPİ kendi kaydına yazar; reddedersen HKM kaydı silmez, «istenmedi» ',
+  'spi.onaylar.geri-alindi':'Geri alındı.',
+  'spi.onaylar.geri-alinamadi':'Geri alınamadı.',
+  'spi.onaylar.goruldu-olarak-isaretlendi':'Görüldü olarak işaretlendi',
+  'spi.onaylar.i-stenmedi-olarak-isaretlend':'İstenmedi olarak işaretlendi',
+  'spi.onaylar.bir-kayit-onayini-bekliyor':'Bir kayıt onayını bekliyor',
+  'spi.onaylar.onaylanana-kadar-hicbiri-yaz':'Onaylanana kadar hiçbiri yazılmadı',
+  'spi.onaylar.gunun-kaydi':'Günün kaydı',
+  'spi.onaylar.haftalik-program':'Haftalık program',
+  'spi.onaylar.bam-urunu':'BAM ürünü',
+  'spi.onaylar.besin-bilgisi':'Besin bilgisi',
+  'spi.onaylar.fiyat-bilgisi':'Fiyat bilgisi',
+  'spi.onaylar.yer-bilgisi':'Yer bilgisi',
+  'spi.onaylar.kapatildi-merkeze-belirsiz-d':'Kapatıldı; merkeze «belirsiz» diye bildirildi.',
+  'spi.onaylar.kapatildi-merkeze-simdilik-b':'Kapatıldı; merkeze şimdilik bildirilemedi.',
+  'spi.onaylar.onerilen-her-degisiklik-bura':'Önerilen her değişiklik burada bekler; sen onaylamadan hiçbiri uygulanmaz.',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -85,7 +108,7 @@ SP.Screens.onaylar = (function(){
           <div><b>${t.konu}</b> <span class="tiny dim">${yz('spi.onaylar.is-emri')}${t.id}</span></div>
           ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
           ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
-            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
+            body:yz('spi.onaylar.onerim') + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
               + ' — ' + t.neden + '.' }))}
           <div class="row wrap gap-8 mt-8">
             ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
@@ -98,7 +121,7 @@ SP.Screens.onaylar = (function(){
           </div>
         </div>`)}
         ${K.Ayrinti({ ozet:yz('spi.onaylar.king-ucretli-bir-isi-onayin'),
-          govde:'Sınıf, maliyet ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da '
+          govde:yz('spi.onaylar.sinif-maliyet-ve-sure-king-i')
             + 'başlar ve sonucu teklif olarak buraya gelir.' })}` });
   }
 
@@ -121,7 +144,7 @@ SP.Screens.onaylar = (function(){
         : supheli.length + ' teklifin sonucu belirsiz',
       govde:html`
         ${map(supheli, d => html`<div class="mt-8">
-          ${K.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem yarıda kaldı; kaydına '
+          ${K.Notice({ tone:'warn', body:yz('spi.onaylar.bir-teklif-uygulanirken-isle')
             + 'yazılıp yazılmadığı bilinmiyor. Kaydına bakıp doğrula.' })}
           <div class="row gap-8 mt-8">
             ${K.Button({ label:yz('spi.onaylar.kontrol-ettim'), size:'sm',
@@ -142,7 +165,7 @@ SP.Screens.onaylar = (function(){
                   yapılabilen eylemle aynı olmalı. */''}
             ${SP.Beacon.canApply(n)
               ? K.Button({ label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'besin.add':'Ekle',
-                'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || 'Planına ekle',
+                'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || yz('spi.onaylar.planina-ekle'),
                 size:'sm', tone:'primary',
                 act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
               : K.Button({ label:yz('spi.onaylar.gordum'), size:'sm', tone:'primary',
@@ -152,7 +175,7 @@ SP.Screens.onaylar = (function(){
           </div>
         </div>`)}
         ${K.Ayrinti({ ozet:yz('spi.onaylar.bu-satirlar-birer-tekliftir'),
-          govde:'Onaylarsan SPİ kendi kaydına yazar; reddedersen HKM kaydı silmez, «istenmedi» '
+          govde:yz('spi.onaylar.onaylarsan-spi-kendi-kaydina')
             + 'diye işaretler — görülmemiş bir teklifle reddedilmiş bir teklif ayrı şeylerdir.' })}` });
   }
 
@@ -250,7 +273,7 @@ SP.Screens.onaylar = (function(){
       if(r && r.ok) n++;
     }
     const kalan = idler.length - n;
-    UI.toast(idler.length === 1 ? (n ? 'Geri alındı.' : 'Geri alınamadı.')
+    UI.toast(idler.length === 1 ? (n ? yz('spi.onaylar.geri-alindi') : yz('spi.onaylar.geri-alinamadi'))
       : n + ' ölçüm geri alındı' + (kalan ? ', ' + kalan + ' tanesi geri alınamadı.' : '.'));
     SP.App.render();
   }
@@ -306,8 +329,8 @@ SP.Screens.onaylar = (function(){
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
       : r.state === 'acknowledged'
-        ? (r.note || 'Görüldü olarak işaretlendi')
-        : 'İstenmedi olarak işaretlendi';
+        ? (r.note || yz('spi.onaylar.goruldu-olarak-isaretlendi'))
+        : yz('spi.onaylar.i-stenmedi-olarak-isaretlend');
     const metin = r.reported ? bas
       : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.';
     /* BAM bilgisi geri alınır: gıda silinir, tahmin fiyat eski hâline döner. */
@@ -384,8 +407,8 @@ SP.Screens.onaylar = (function(){
         <p class="okart__kim">${kim}</p>`)}</div>`;
     }) : [];
     if(k && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
-    return K.Kutu({ ad:liste.length === 1 ? 'Bir kayıt onayını bekliyor'
-      : liste.length + ' kayıt onayını bekliyor', yuva:'Onaylanana kadar hiçbiri yazılmadı',
+    return K.Kutu({ ad:liste.length === 1 ? yz('spi.onaylar.bir-kayit-onayini-bekliyor')
+      : liste.length + ' kayıt onayını bekliyor', yuva:yz('spi.onaylar.onaylanana-kadar-hicbiri-yaz'),
       govde:html`<div class="bekleyen">${map(liste, o => {
         const e = SP.Proposals.eylem(o.action);
         const pv = SP.Proposals.preview(o);
@@ -408,8 +431,8 @@ SP.Screens.onaylar = (function(){
      katalogdan gelir. SPİ'nin bekleyen kaydı katalogda ölçümse (olcum:true)
      «Kayıt», değilse «Plan ve ayar». Bugün'ün öneri alanı aynı kalır. */
   const ON = () => (window.LIFEOS || {}).ONERI;
-  const HKM_AD = { 'kayit.add':'Günün kaydı', 'plan.apply':'Haftalık program', 'urun.add':'BAM ürünü',
-    'besin.add':'Besin bilgisi', 'fiyat.add':'Fiyat bilgisi', 'yer.add':'Yer bilgisi' };
+  const HKM_AD = { 'kayit.add':yz('spi.onaylar.gunun-kaydi'), 'plan.apply':yz('spi.onaylar.haftalik-program'), 'urun.add':yz('spi.onaylar.bam-urunu'),
+    'besin.add':yz('spi.onaylar.besin-bilgisi'), 'fiyat.add':yz('spi.onaylar.fiyat-bilgisi'), 'yer.add':yz('spi.onaylar.yer-bilgisi') };
 
   function onaySatir(o){
     return html`<div class="onay-satir">
@@ -428,19 +451,19 @@ SP.Screens.onaylar = (function(){
     return onaySatir({ baslik:t.konu, seviye:'orta', ust:yz('spi.onaylar.i-s-emri') + t.id + ' · ücretli iş',
       govde:html`${map(t.secenekler, (x, i) => html`<p class="small mt-6">${i + 1}) ${x.metin}</p>`)}
         ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
-          body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
+          body:yz('spi.onaylar.onerim') + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
       eylem:html`${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla', size:'sm',
           tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla', data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
         ${K.Button({ label:yz('spi.onaylar.i-ptal'), size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
   }
   function hkmSatir(n, seviye){
-    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:yz('spi.onaylar.merkez-teklifi'),
+    return onaySatir({ baslik:HKM_AD[n.kind] || yz('spi.onaylar.merkez-teklifi'), seviye, ust:yz('spi.onaylar.merkez-teklifi'),
       govde:html`<p class="small mt-6">${n.note}</p>
         ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
         ${when(SP.Bilgi && SP.Bilgi.NIYET[n.kind], () => bilgiOnizleme(n))}`,
       eylem:html`${SP.Beacon.canApply(n)
           ? K.Button({ label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'besin.add':'Ekle',
-            'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || 'Planına ekle',
+            'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || yz('spi.onaylar.planina-ekle'),
             size:'sm', tone:'primary', act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
           : K.Button({ label:yz('spi.onaylar.gordum'), size:'sm', tone:'primary', act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
         ${K.Button({ label:yz('spi.onaylar.i-stemiyorum'), size:'sm', act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}` });
@@ -654,8 +677,8 @@ SP.Screens.onaylar = (function(){
     async 'hkm-doubt-ok'(el){
       const r = await SP.Beacon.clearDoubt(el.dataset.id);
       S.ui.hkmDoubts = (S.ui.hkmDoubts || []).filter(x => String(x.id) !== el.dataset.id);
-      UI.toast(r && r.reported ? 'Kapatıldı; merkeze «belirsiz» diye bildirildi.'
-        : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
+      UI.toast(r && r.reported ? yz('spi.onaylar.kapatildi-merkeze-belirsiz-d')
+        : yz('spi.onaylar.kapatildi-merkeze-simdilik-b'));
       SP.App.render();
     },
     /* Tek onayda da «Geri al» (2026-10-25): küçük aksiyon geri alınabilir
@@ -683,7 +706,7 @@ SP.Screens.onaylar = (function(){
       const n = bekleyen();
       return n ? n + ' öneri onayını bekliyor' : 'bekleyen öneri yok';
     },
-    lede(){ return 'Önerilen her değişiklik burada bekler; sen onaylamadan hiçbiri uygulanmaz.'; },
+    lede(){ return yz('spi.onaylar.onerilen-her-degisiklik-bura'); },
     actions(){ return ''; },
     render, handle, bekleyen, oneriAlani,
   };

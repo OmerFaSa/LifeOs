@@ -43,6 +43,20 @@
    kodudur (`core/proposals.js` ve eşleri). HKM modüle yazmaz, teklif
    yazar; teklifi bu kart gösterir. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.oneri.esik':'eşik',
+  'ortak.oneri.neden':'Neden?',
+  'ortak.oneri.once-sonra':'Önce / sonra',
+  'ortak.oneri.merkez-onerisi':'Merkez önerisi',
+  'ortak.oneri.i-kisi-de':'İkisi de ',
+  'ortak.oneri.ne-kadar-sure':'Ne kadar süre?',
+  'ortak.oneri.neden-geciyorsun':'Neden geçiyorsun?',
+  'ortak.oneri.istege-bagli':'isteğe bağlı',
+  'ortak.oneri.degisiklik-yok':'Değişiklik yok',
+  'ortak.oneri.once':'Önce',
+  'ortak.oneri.sonra':'Sonra',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.oneri.uygula':'Uygula',
   'ortak.oneri.gec':'Geç',
   'ortak.oneri.cozumu-onizle':'Çözümü önizle',
@@ -278,7 +292,7 @@ window.LIFEOS = window.LIFEOS || {};
         + '<span class="gerekce__dolu" style="width:' + yuzde(g.deger) + '%"></span>'
         + '<span class="gerekce__esik" style="left:' + yuzde(g.esik) + '%"></span></span>';
     }
-    const esikMetni = sayiMi(g.esik) ? '<span class="gerekce__ek">eşik ' + kac(birimli(bicim(g.esik), g.birim)) + '</span>' : '';
+    const esikMetni = sayiMi(g.esik) ? ('<span class="gerekce__ek">' + yz('ortak.oneri.esik') + ' ') + kac(birimli(bicim(g.esik), g.birim)) + '</span>' : '';
     const notMetni = g.not ? '<span class="gerekce__ek">' + kac(g.not) + '</span>' : '';
     const cm = cumle && cumle.metin
       ? '<p class="gerekce__cumle" data-kaynak="' + kac(cumle.kaynak === 'kural' ? 'kural' : 'model') + '">'
@@ -304,7 +318,7 @@ window.LIFEOS = window.LIFEOS || {};
   function kuralIziHtml(kurallar){
     const ks = (kurallar || []).filter(k => k && k.no);
     if(!ks.length) return '';
-    return '<details class="kuralizi" data-oz="121"><summary>Neden?</summary><ol class="kuralizi__l">'
+    return ('<details class="kuralizi" data-oz="121"><summary>' + yz('ortak.oneri.neden') + '</summary><ol class="kuralizi__l">')
       + ks.map(k => '<li class="kuralizi__k"><span class="kuralizi__no">' + kac(k.no) + '</span>'
         + '<span class="kuralizi__ad">' + kac(k.ad || '') + '</span>'
         + '<span class="kuralizi__deger">' + kac(kuralMetni(k)) + '</span></li>').join('')
@@ -342,7 +356,7 @@ window.LIFEOS = window.LIFEOS || {};
       eylem = dugme({ etiket:yz('ortak.oneri.uygula'), act:'oneri-uygula', data:{ oneri:oneri.id } })
         + dugme({ etiket:yz('ortak.oneri.gec'), ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
     }else{
-      eylem = dugme({ etiket:k.seviye === 'buyuk' ? 'Önce / sonra' : 'Önizle', act:'oneri-onizle',
+      eylem = dugme({ etiket:k.seviye === 'buyuk' ? yz('ortak.oneri.once-sonra') : 'Önizle', act:'oneri-onizle',
         data:{ oneri:oneri.id, seviye:k.seviye } })
         + dugme({ etiket:yz('ortak.oneri.gec'), ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
     }
@@ -358,7 +372,7 @@ window.LIFEOS = window.LIFEOS || {};
       /* Simge kutusu (2026-10-30, kullanıcı görseli: «bazı kartlar profesyonelce değil, çok dandirik»):
          seviyeyi bir bakışta söyler; adı yine rozette. */
       + '<span class="okart__simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + (OKART_SIMGE[merkez ? 'merkez' : k.seviye] || OKART_SIMGE.kucuk) + '</svg></span>'
-      + '<div class="okart__bas">' + (merkez ? '<span class="okart__kaynak">Merkez önerisi</span>' : '') + seviyeRozeti(k.seviye) + '</div>'
+      + '<div class="okart__bas">' + (merkez ? ('<span class="okart__kaynak">' + yz('ortak.oneri.merkez-onerisi') + '</span>') : '') + seviyeRozeti(k.seviye) + '</div>'
       + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
       /* Başlık seviyesi kartın durduğu yere göre: kutu içinde h3 (kutunun
          adı h2), doğrudan sayfada h2 (h1 → h3 atlaması erişilebilirlik hatası). */
@@ -429,7 +443,7 @@ window.LIFEOS = window.LIFEOS || {};
     }else if(!r){
       const d = dilimCakisma(c.a, c.b);
       if(!d || !d.ayni) return '';
-      bas = 'İkisi de ' + DILIM_ADI[d.dilim] + ' dilimini istiyor';
+      bas = yz('ortak.oneri.i-kisi-de') + DILIM_ADI[d.dilim] + ' dilimini istiyor';
       etiket = DILIM_ADI[d.dilim] + ' dilimi';
       zamanOf = x => DILIM_ADI[x.dilim] + (x.gunluk_dk > 0 ? ' · günde ' + x.gunluk_dk + ' dk' : '');
     }else return '';
@@ -438,7 +452,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<b class="cakisma__ad">' + kac(x.ad || '') + '</b>'
       + '<span class="cakisma__saat">' + kac(zamanOf(x)) + '</span></div>';
     const cozum = c.cozum && c.cozum.baslik
-      ? '<div class="cakisma__cozum"><span class="okart__kaynak">Merkez önerisi</span>'
+      ? ('<div class="cakisma__cozum"><span class="okart__kaynak">' + yz('ortak.oneri.merkez-onerisi') + '</span>')
         + '<p class="cakisma__cozum-metin">' + kac(c.cozum.baslik) + '</p>'
         + dugme({ etiket:yz('ortak.oneri.cozumu-onizle'), act:'cakisma-onizle', data:{ cozum:c.cozum.id || '' } })
         + '</div>'
@@ -536,7 +550,7 @@ window.LIFEOS = window.LIFEOS || {};
   function kapsamHtml(oneri, katalog, secili){
     if(!kalip(oneri, katalog)) return '';
     const ad = 'kapsam-' + String((oneri && (oneri.id || oneri.eylem)) || 'x').replace(/[^a-zA-Z0-9_-]/g, '');
-    return '<fieldset class="kapsam" data-oz="127"><legend class="kapsam__bas">Ne kadar süre?</legend>'
+    return ('<fieldset class="kapsam" data-oz="127"><legend class="kapsam__bas">' + yz('ortak.oneri.ne-kadar-sure') + '</legend>')
       + KAPSAMLAR.map(kp => {
         const sev = kapsamSeviyesi(oneri, katalog, kp.id);
         const id = ad + '-' + kp.id;
@@ -563,7 +577,7 @@ window.LIFEOS = window.LIFEOS || {};
   function gecmeHtml(oneri){
     const id = oneri && oneri.id != null ? String(oneri.id) : '';
     return '<div class="gecme" data-oz="123" role="group" aria-label="Neden geçiyorsun? (isteğe bağlı)">'
-      + '<p class="gecme__bas">Neden geçiyorsun? <span class="gecme__ek">isteğe bağlı</span></p><div class="gecme__cipler">'
+      + ('<p class="gecme__bas">' + yz('ortak.oneri.neden-geciyorsun') + ' <span class="gecme__ek">' + yz('ortak.oneri.istege-bagli') + '</span></p><div class="gecme__cipler">')
       + GECME_NEDENLERI.map(n => '<button type="button" class="chip chip--tap" data-act="oneri-gec-neden"'
         + ' data-oneri="' + kac(id) + '" data-neden="' + n.id + '">' + kac(n.ad) + '</button>').join('')
       + '</div>' + dugme({ etiket:yz('ortak.oneri.nedensiz-gec'), ton:'ghost', boy:'sm', act:'oneri-gec-neden', data:{ oneri:id, neden:'' } })
@@ -619,7 +633,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(r.eklenen.length) parca.push(r.eklenen.length + ' eklendi');
     if(r.silinen.length) parca.push(r.silinen.length + ' silindi');
     parca.push(r.ayni.length + ' aynı');
-    r.ozet = (r.degisen.length + r.eklenen.length + r.silinen.length) ? parca.join(' · ') : 'Değişiklik yok';
+    r.ozet = (r.degisen.length + r.eklenen.length + r.silinen.length) ? parca.join(' · ') : yz('ortak.oneri.degisiklik-yok');
     return r;
   }
 
@@ -640,8 +654,8 @@ window.LIFEOS = window.LIFEOS || {};
       satir(b, ekl[String(b.id)] ? 'eklenen' : degisenId[String(b.id)] ? 'degisen' : 'ayni')).join('');
     return '<div class="oncesonra" data-oz="113">'
       + '<p class="oncesonra__ozet">' + kac(r.ozet) + '</p><div class="oncesonra__iki">'
-      + '<section class="oncesonra__yan"><h4 class="oncesonra__bas">Önce</h4><ol class="oncesonra__l">' + sol + '</ol></section>'
-      + '<section class="oncesonra__yan"><h4 class="oncesonra__bas">Sonra</h4><ol class="oncesonra__l">' + sag + '</ol></section>'
+      + ('<section class="oncesonra__yan"><h4 class="oncesonra__bas">' + yz('ortak.oneri.once') + '</h4><ol class="oncesonra__l">') + sol + '</ol></section>'
+      + ('<section class="oncesonra__yan"><h4 class="oncesonra__bas">' + yz('ortak.oneri.sonra') + '</h4><ol class="oncesonra__l">') + sag + '</ol></section>'
       + '</div></div>';
   }
 

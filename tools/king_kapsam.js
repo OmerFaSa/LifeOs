@@ -64,7 +64,7 @@ async function portMuhafizi(portlar){
 }
 
 (async () => {
-  await portMuhafizi(Object.values(MODUL).map(m => m[1]));
+  await portMuhafizi(Object.keys(MODUL).filter(m => !TEK || m === TEK).map(m => MODUL[m][1]));
   const esleme = ISKELET ? {} : JSON.parse(fs.readFileSync(path.join(__dirname, 'king_kapsam.json'), 'utf8'));
   const eksik = [], iskelet = {};
   let browser;

@@ -28,6 +28,37 @@
    geri dönüşü yok sayılabilir. AYS'in verisi AYS'te kalır; HKM'ye giden
    şey günün ÖZETİDİR. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.beacon.esleme-penceresi-kapali-hkm':'Eşleme penceresi kapalı. HKM yüzünde ',
+  'ays.core.beacon.govde-sozlesmeyi-gecmedi':'Gövde sözleşmeyi geçmedi: ',
+  'ays.core.beacon.bearer':'Bearer ',
+  'ays.core.beacon.hkm-govdeyi-reddetti-etiket':'HKM gövdeyi reddetti (etiket ya da biçim).',
+  'ays.core.beacon.jeton-kabul-edilmedi':'Jeton kabul edilmedi.',
+  'ays.core.beacon.beklenmeyen-yanit':'Beklenmeyen yanıt: ',
+  'ays.core.beacon.gonderim':'Gönderim ',
+  'ays.core.beacon.gecersiz-durum':'Geçersiz durum.',
+  'ays.core.beacon.ays-bu-kayittan-yazilacak-bi':'AYS bu kayıttan yazılacak bir şey çıkaramadı.',
+  'ays.core.beacon.hkm-aksam-kaydi':'HKM akşam kaydı: ',
+  'ays.core.beacon.kayit-yazilamadi-veriler-ara':'Kayıt yazılamadı; veriler arada değişmiş olabilir.',
+  'ays.core.beacon.materyal-kimligi-gecersiz':'Materyal kimliği geçersiz.',
+  'ays.core.beacon.bu-set-zaten-eklenmis':'Bu set zaten eklenmiş.',
+  'ays.core.beacon.hkm-baglantisi-kurulmamis-ma':'HKM bağlantısı kurulmamış; materyal alınamaz.',
+  'ays.core.beacon.materyal-hkm-den-alinamadi-h':'Materyal HKM’den alınamadı; HKM açıkken yeniden dene.',
+  'ays.core.beacon.setteki-maddelerin-hicbiri-a':'Setteki maddelerin hiçbiri AYS’nin denetimini geçmedi.',
+  'ays.core.beacon.urun-modulu-yuklenmedi':'Ürün modülü yüklenmedi.',
+  'ays.core.beacon.bu-teklif-turu-uygulanmaz':'Bu teklif türü uygulanmaz.',
+  'ays.core.beacon.sinav-profili-modulu-yuklenm':'Sınav profili modülü yüklenmedi.',
+  'ays.core.beacon.test-kitabi-modulu-yuklenmed':'Test kitabı modülü yüklenmedi.',
+  'ays.core.beacon.tarih-gecersiz':'Tarih geçersiz.',
+  'ays.core.beacon.i-stisna-modulu-yuklenmedi':'İstisna modülü yüklenmedi.',
+  'ays.core.beacon.sure-gecersiz-5-480-dakika-b':'Süre geçersiz (5–480 dakika bekleniyor).',
+  'ays.core.beacon.hkm-teklifi':'HKM teklifi',
+  'ays.core.beacon.teklif-bulunamadi':'Teklif bulunamadı.',
+  'ays.core.beacon.bilinmeyen-islem':'Bilinmeyen işlem.',
+  'ays.core.beacon.bu-teklif-isleniyor':'Bu teklif işleniyor.',
+  'ays.core.beacon.bu-teklif-daha-once-uygulanm':'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.beacon.ozet':'Özet',
   'ays.core.beacon.yalniz-yuk-kararini-etkileye':'Yalnız yük kararını etkileyen çekirdek ölçümler.',
   'ays.core.beacon.gelismis':'Gelişmiş',
@@ -389,7 +420,7 @@ R.Beacon = (function(){
     try{ govde = await res.json(); }catch(e){ govde = null; }
     if(res.status !== 200 || !govde || !govde.token){
       return { ok:false, status:res.status,
-        note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
+        note:(govde && govde.note) || yz('ays.core.beacon.esleme-penceresi-kapali-hkm')
            + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
     }
     const son = await save({ url:adres, token:govde.token, enabled:true, lastStatus:null });
@@ -481,7 +512,7 @@ R.Beacon = (function(){
     const hata = contract(body);
     if(hata.length){
       await save({ lastAt:new Date().toISOString(), lastStatus:0,
-        lastNote:'Gövde sözleşmeyi geçmedi: ' + hata[0] });
+        lastNote:yz('ays.core.beacon.govde-sozlesmeyi-gecmedi') + hata[0] });
       return { ok:false, reason:'contract', errors:hata,
         note:yz('ays.core.beacon.etiketsiz-ya-da-bozuk-alan') };
     }
@@ -492,16 +523,16 @@ R.Beacon = (function(){
       const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('ays.core.beacon.bearer') + a.token },
         body:JSON.stringify(body),
         signal:ctrl ? ctrl.signal : undefined,
       });
       if(zaman) clearTimeout(zaman);
       durum = res.status;
       not = durum === 202 ? 'Gönderildi.'
-        : durum === 422 ? 'HKM gövdeyi reddetti (etiket ya da biçim).'
-        : durum === 401 ? 'Jeton kabul edilmedi.'
-        : 'Beklenmeyen yanıt: ' + durum;
+        : durum === 422 ? yz('ays.core.beacon.hkm-govdeyi-reddetti-etiket')
+        : durum === 401 ? yz('ays.core.beacon.jeton-kabul-edilmedi')
+        : yz('ays.core.beacon.beklenmeyen-yanit') + durum;
     }catch(e){
       durum = 0;
       not = 'HKM\'ye ulaşılamadı. Bu bir hata değil bir DURUMDUR: HKM '
@@ -545,7 +576,7 @@ R.Beacon = (function(){
         res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
           method:'POST',
           headers:{ 'Content-Type':'application/json',
-            'Authorization':'Bearer ' + a.token },
+            'Authorization':yz('ays.core.beacon.bearer') + a.token },
           body:JSON.stringify(govde),
         });
         durum = res.status;
@@ -573,7 +604,7 @@ R.Beacon = (function(){
         return r.date + ' (' + r.status + (r.why ? ': ' + r.why : '') + ')';
       }).join('; ') + (reddedilen.length > 3 ? '; …' : '') + '.');
     }
-    if(hata != null) not.push('Gönderim ' + (hata || 'ağ hatası') + ' ile durdu.');
+    if(hata != null) not.push(yz('ays.core.beacon.gonderim') + (hata || 'ağ hatası') + ' ile durdu.');
     const durumSon = hata != null ? hata : reddedilen.length ? reddedilen[0].status : 202;
     await save({ lastAt:new Date().toISOString(), lastStatus:durumSon, lastNote:not.join(' ') });
     return { ok:hata == null && !reddedilen.length, sent:gonderilen, empty:bos,
@@ -701,7 +732,7 @@ R.Beacon = (function(){
         + MODULE + '/take', {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('ays.core.beacon.bearer') + a.token },
       });
     }catch(e){ return []; }
     if(res.status !== 200) return [];
@@ -748,7 +779,7 @@ R.Beacon = (function(){
     const a = settings();
     const durum = _durumAdi(applied);
     if(['applied', 'acknowledged', 'dismissed', 'unknown'].indexOf(durum) < 0){
-      return { ok:false, error:'Geçersiz durum.' };
+      return { ok:false, error:yz('ays.core.beacon.gecersiz-durum') };
     }
     if(!a.enabled || !a.token || !urlOk(a.url)) return { ok:false };
     try{
@@ -756,7 +787,7 @@ R.Beacon = (function(){
         + id + '/' + durum, {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('ays.core.beacon.bearer') + a.token },
       });
       return { ok:res.status === 200, status:res.status };
     }catch(e){ return { ok:false }; }
@@ -827,7 +858,7 @@ R.Beacon = (function(){
        olabilir (blok bitmis, gun acilmis). */
     const o = await kayitOku(n);
     if(!o.yazilacak.length){
-      return { ok:false, error:'AYS bu kayıttan yazılacak bir şey çıkaramadı.' };
+      return { ok:false, error:yz('ays.core.beacon.ays-bu-kayittan-yazilacak-bi') };
     }
     const yazilan = [];
     for(let i = 0; i < o.yazilacak.length; i++){
@@ -835,14 +866,14 @@ R.Beacon = (function(){
       /* Tek uygulama anahtari: ag yuzunden ikinci kez gelen ayni kayit
          ikinci kez yazilmaz. */
       const row = await R.Proposals.propose({ action:y.action, agent:'patron', source:'istek',
-        params:y.params, reason:'HKM akşam kaydı: ' + y.metin,
+        params:y.params, reason:yz('ays.core.beacon.hkm-aksam-kaydi') + y.metin,
         anahtar:'hkm-kayit:' + n.id + ':' + i, iz:[{ tur:'hkm-niyet', id:n.id }] });
       if(!row) continue;
       const r = await R.Proposals.approve(row.id);
       if(r && r.ok) yazilan.push(y.baslik);
     }
     if(!yazilan.length){
-      return { ok:false, error:'Kayıt yazılamadı; veriler arada değişmiş olabilir.' };
+      return { ok:false, error:yz('ays.core.beacon.kayit-yazilamadi-veriler-ara') };
     }
     return { ok:true, note:yazilan.length + ' kayıt yazıldı (' + o.gun + ': ' + yazilan.join(', ')
       + '). Ofis ekranından geri alabilirsin.' };
@@ -860,32 +891,32 @@ R.Beacon = (function(){
 
   async function materyalUygula(p){
     const kid = Number(p.kayit_id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Materyal kimliği geçersiz.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('ays.core.beacon.materyal-kimligi-gecersiz') };
     const ref = 'bam:' + kid;
-    if(R.S.cards.some(c => c.sourceRef === ref)) return { ok:false, error:'Bu set zaten eklenmiş.' };
+    if(R.S.cards.some(c => c.sourceRef === ref)) return { ok:false, error:yz('ays.core.beacon.bu-set-zaten-eklenmis') };
     const a = settings();
     if(!a.token || !urlOk(a.url)){
-      return { ok:false, error:'HKM bağlantısı kurulmamış; materyal alınamaz.' };
+      return { ok:false, error:yz('ays.core.beacon.hkm-baglantisi-kurulmamis-ma') };
     }
     let kayit = null;
     try{
       const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
       const zaman = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
       const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/bam/kayit/' + kid, {
-        headers:{ 'Authorization':'Bearer ' + a.token },
+        headers:{ 'Authorization':yz('ays.core.beacon.bearer') + a.token },
         signal:ctrl ? ctrl.signal : undefined,
       });
       if(zaman) clearTimeout(zaman);
       if(res.status === 200){ const g = await res.json(); kayit = g && g.kayit; }
     }catch(e){ kayit = null; }
     if(!kayit || kayit.tur !== 'materyal' || !kayit.govde){
-      return { ok:false, error:'Materyal HKM’den alınamadı; HKM açıkken yeniden dene.' };
+      return { ok:false, error:yz('ays.core.beacon.materyal-hkm-den-alinamadi-h') };
     }
     const tur = kayit.govde.tur;
     const kartlar = (Array.isArray(kayit.govde.maddeler) ? kayit.govde.maddeler : [])
       .slice(0, 50).map(m => bamMadde(tur, m)).filter(Boolean);
     if(!kartlar.length){
-      return { ok:false, error:'Setteki maddelerin hiçbiri AYS’nin denetimini geçmedi.' };
+      return { ok:false, error:yz('ays.core.beacon.setteki-maddelerin-hicbiri-a') };
     }
     const konu = String(kayit.govde.konu || kayit.baslik || '').slice(0, 80);
     for(const k of kartlar){
@@ -904,30 +935,30 @@ R.Beacon = (function(){
          (core/urun.js, ortak). Ofis ekranındaki BAM ürünlerinden açılır. */
       R.Urunler = R.Urunler || (window.LIFEOS && LIFEOS.Urun
         ? LIFEOS.Urun.kur({ store:() => R.Store, hkm:() => R.Beacon }) : null);
-      if(!R.Urunler) return { ok:false, error:'Ürün modülü yüklenmedi.' };
+      if(!R.Urunler) return { ok:false, error:yz('ays.core.beacon.urun-modulu-yuklenmedi') };
       return await R.Urunler.uygula(n.payload || {});
     }
-    if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    if(!canApply(n)) return { ok:false, error:yz('ays.core.beacon.bu-teklif-turu-uygulanmaz') };
     if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     /* BAM'ın müfredat raporu → sınav profili (core/sinavprofil.js). Kayıt
        HKM'den çekilir ve AYS'nin kendi sınırlarıyla süzülür. */
     if(n.kind === 'mufredat.add'){
-      if(!R.SinavProfil) return { ok:false, error:'Sınav profili modülü yüklenmedi.' };
+      if(!R.SinavProfil) return { ok:false, error:yz('ays.core.beacon.sinav-profili-modulu-yuklenm') };
       return await R.SinavProfil.teklifUygula(n.payload || {});
     }
     /* BAM'ın bölümlü test kitabı (core/testkitabi.js): her soru AYS'nin
        kendi koduyla yeniden sınanır. */
     if(n.kind === 'kitap.add'){
-      if(!R.TestKitabi) return { ok:false, error:'Test kitabı modülü yüklenmedi.' };
+      if(!R.TestKitabi) return { ok:false, error:yz('ays.core.beacon.test-kitabi-modulu-yuklenmed') };
       return await R.TestKitabi.teklifUygula(n.payload || {});
     }
     const p = n.payload || {};
-    if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
+    if(!U.isISO(String(p.date || ''))) return { ok:false, error:yz('ays.core.beacon.tarih-gecersiz') };
 
     /* Yük azaltma («yarın hafif», tatil dönüşü): ne kadar azalacağına AYS
        karar verir — tek günlük süre istisnası (core/istisna.js hafiflet). */
     if(n.kind === 'load.reduce'){
-      if(!R.Istisna) return { ok:false, error:'İstisna modülü yüklenmedi.' };
+      if(!R.Istisna) return { ok:false, error:yz('ays.core.beacon.i-stisna-modulu-yuklenmedi') };
       const h = await R.Istisna.hafiflet(p.date, p.ratio, p.why ? 'HKM: ' + p.why : null);
       if(!h.ok) return { ok:false, error:h.why };
       return { ok:true, geriAl:h.id, note:p.date + ' hafifletildi: ders günü ' + h.temel
@@ -939,7 +970,7 @@ R.Beacon = (function(){
        plana yazmak, teklifi sessizce baska bir teklife cevirmektir. */
     const dk = Number(p.minutes);
     if(!isFinite(dk) || dk <= 0 || dk > 480){
-      return { ok:false, error:'Süre geçersiz (5–480 dakika bekleniyor).' };
+      return { ok:false, error:yz('ays.core.beacon.sure-gecersiz-5-480-dakika-b') };
     }
 
     /* Konu ile DERS ayri alanlardir. Onceki hal ikisine de dersi yazip
@@ -949,7 +980,7 @@ R.Beacon = (function(){
     const gun = await R.Model.ensureDay(p.date);
     gun.blocks = (gun.blocks || []).concat([{
       id:U.uid('b'),
-      slot:'HKM teklifi',
+      slot:yz('ays.core.beacon.hkm-teklifi'),
       subject:ders,
       topic:konu,
       targetMin:Math.round(dk), targetQ:0, status:'pending',
@@ -976,13 +1007,13 @@ R.Beacon = (function(){
   const ISLEMDE = {};
 
   async function resolveIntent(n, action){
-    if(!n || n.id == null) return { ok:false, error:'Teklif bulunamadı.' };
+    if(!n || n.id == null) return { ok:false, error:yz('ays.core.beacon.teklif-bulunamadi') };
     const anahtar = String(n.id);
     if(['apply', 'seen', 'dismiss'].indexOf(action) < 0){
-      return { ok:false, error:'Bilinmeyen işlem.' };
+      return { ok:false, error:yz('ays.core.beacon.bilinmeyen-islem') };
     }
     /* Cift tiklama: es zamanli iki cagri tek is olur. */
-    if(ISLEMDE[anahtar]) return { ok:false, error:'Bu teklif işleniyor.' };
+    if(ISLEMDE[anahtar]) return { ok:false, error:yz('ays.core.beacon.bu-teklif-isleniyor') };
     ISLEMDE[anahtar] = true;
     try{
       const defter = await intentLog();
@@ -996,7 +1027,7 @@ R.Beacon = (function(){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
              olabilecek) bir teklif tekrar plana yazilmaz. */
-          not = 'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.';
+          not = yz('ays.core.beacon.bu-teklif-daha-once-uygulanm');
         }else{
           await markIntent(n.id, 'applying', false, '');
           const r = await applyIntent(n);

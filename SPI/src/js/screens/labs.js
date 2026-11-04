@@ -14,11 +14,61 @@
 
    Panel artık bir yapı değil, bir SÜZGEÇtir: listeyi daraltır, listeyi
    bölmez. Girişte ise hiç yoktur — arama kutusu onun yerini alır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.labs.modul-1':'Modül 1',
+  'spi.labs.referans-araligi':'Referans aralığı',
+  'spi.labs.hedef-bant':'Hedef bant',
+  'spi.labs.kirmizi-bayrak':'Kırmızı bayrak',
+  'spi.labs.henuz-hic-test-girilmedi':'Henüz hiç test girilmedi.',
+  'spi.labs.bu-suzgecle-eslesen-olcum-yo':'Bu süzgeçle eşleşen ölçüm yok.',
+  'spi.labs.aclik-glukozu-insulin-trigli-2':'Açlık glukozu, insülin, trigliserit ve onlardan ',
+  'spi.labs.sayilar-kaydedilir-yorum-yap':'Sayılar kaydedilir; yorum yapılmaz.',
+  'spi.labs.bilinmiyorsa-degerler-ac-kar':'Bilinmiyorsa değerler aç karnına alınmış varsayılır ve bu ölçüm ',
+  'spi.labs.bu-adla-bir-olcum-bulunamadi':'Bu adla bir ölçüm bulunamadı.',
+  'spi.labs.henuz-deger-yazilmadi':'Henüz değer yazılmadı',
+  'spi.labs.grafik-icin-en-az-iki':'Grafik için en az iki ölçüm gerekir. Şu an ',
+  'spi.labs.olcum-sayisi':'Ölçüm sayısı',
+  'spi.labs.kaynak-kesinlik-ve-uygulanab':'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; ',
+  'spi.labs.aclik-durumu-bilinmiyor':'Açlık durumu bilinmiyor:',
+  'spi.labs.sacilman-1-ss':'Saçılman (± 1 SS)',
+  'spi.labs.en-dusuk-en-yuksek':'En düşük / en yüksek',
+  'spi.labs.son-degisim-gercek':'Son değişim gerçek:',
+  'spi.labs.son-degisim-gurultu-sayilir':'Son değişim gürültü sayılır:',
+  'spi.labs.onceki-olcume-gore':'Önceki ölçüme göre ',
+  'spi.labs.kac-gun':'Kaç gün',
+  'spi.labs.ortalama-siddet':'Ortalama şiddet',
+  'spi.labs.henuz-test-girilmedi':'Henüz test girilmedi.',
+  'spi.labs.su-an-kullandigin-bir-sey':'Şu an kullandığın bir şey kayıtlı değil.',
+  'spi.labs.burada-tutulan-kayit-yalnizc':'Burada tutulan kayıt yalnızca ÖLÇÜM YORUMU içindir: bir değerdeki ',
+  'spi.labs.kayitli-hekim-talimati-yok':'Kayıtlı hekim talimatı yok.',
+  'spi.labs.en-az-iki-test-oturumu':'En az iki test oturumu gerekir.',
+  'spi.labs.i-ki-oturumda-da-ortak-olcum':'İki oturumda da ortak ölçüm yok.',
+  'spi.labs.aclik-durumu':'Açlık durumu',
+  'spi.labs.bu-oturumdaki-aclik-glukozu':'Bu oturumdaki açlık glukozu, insülin, trigliserit ve onlardan ',
+  'spi.labs.metin-dosyasi-modelsiz-okunu':'Metin dosyası modelsiz okunur · fotoğraf için model gerekir',
+  'spi.labs.ayiklayici-emin-olamadigi-sa':'Ayıklayıcı emin olamadığı satırı atmaz. ',
+  'spi.labs.sonraki-adimda-tarihi-ve-acl':'Sonraki adımda tarihi ve açlık durumunu denetlersin; eşleşmeyen ',
+  'spi.labs.aclik-glukozu-insulin-trigli-3':'Açlık glukozu, insülin, trigliserit ve onlardan hesaplanan değerler ',
+  'spi.labs.birimi-uyusmayan-satirlar-is':'Birimi uyuşmayan satırlar işaretsiz geldi. Birimi kendin denetleyip ',
+  'spi.labs.bu-tarihteki-test-farkli-bir':'Bu tarihteki test farklı bir açlık durumuyla kaydedilmiş. ',
+  'spi.labs.bu-tarihte-birden-cok-test':'Bu tarihte birden çok test var ve hangisine ekleneceği açlık durumundan anlaşılmıyor. ',
+  'spi.labs.degerler-ayni-tarihte-ayri-t':'Değerler aynı tarihte ayrı test olarak kaydedilir; önceki test değişmez.',
+  'spi.labs.bu-testte-degeri-kayitli':'Bu testte değeri kayıtlı ',
+  'spi.labs.i-saretlersen-kayitli-degeri':'İşaretlersen kayıtlı değerin yerine yenisi yazılır.',
+  'spi.labs.bu-bolum-su-an-cizilemedi':'Bu bölüm şu an çizilemedi; verin yerinde duruyor.',
+  'spi.labs.hekim-talimati-eklendi':'Hekim talimatı eklendi',
+  'spi.labs.sabitlemeyi-kaldir':'Sabitlemeyi kaldır',
+  'spi.labs.rapor-okunuyor':'Rapor okunuyor',
+  'spi.labs.olcumlerin-tamami-hedef-band':'Ölçümlerin tamamı hedef bandın içinde.',
+  'spi.labs.herhangi-bir-kapsamli-hastan':'Herhangi bir kapsamlı hastane testinin sonucunu tek seferde girebilirsin. ',
+  'spi.labs.raporun-metnini-yapistirman':'Raporun metnini yapıştırman yeterli; değerler kendiliğinden şemaya oturur.',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'spi', sira:20, id:'act:paste', kind:'Eylem', label:'Tahlil raporu yapıştır',
-  hint:'Modül 1', run:() => { SP.App.go('labs'); setTimeout(() => {
+  hint:yz('spi.labs.modul-1'), run:() => { SP.App.go('labs'); setTimeout(() => {
     const fn = SP.Screens.labs.handle['open-paste']; if(fn) fn({ dataset:{} }); }, 120); } });
 window.LIFEOS.PARCA.komut({ modul:'spi', sira:80, uret(){
   return SP.BIOMARKERS.map(b => ({ id:'bio:' + b.id, kind:'Ölçüm', label:b.name, hint:b.unit,
@@ -209,7 +259,7 @@ SP.Screens.labs = (function(){
   /* Eşiğin dayanağı — tabloda tek kelimelik özet, ayrıntısı altındaki
      kartta. Derece gizlenmez: kullanıcının «bu sayı nereden geliyor»
      sorusunun cevabı bir tık uzakta olmalıdır. */
-  const ALAN_ADI = { ref:'Referans aralığı', optimal:'Hedef bant', red:'Kırmızı bayrak' };
+  const ALAN_ADI = { ref:yz('spi.labs.referans-araligi'), optimal:yz('spi.labs.hedef-bant'), red:yz('spi.labs.kirmizi-bayrak') };
 
   function dayanak(markerId, field){
     const e = SP.Ev.line(markerId, field);
@@ -379,7 +429,7 @@ SP.Screens.labs = (function(){
       return K.Ledger([K.Entry({
         label:yz('spi.labs.sonuclar'), hint:'lab-paste', meta:'kayıt yok',
         action:K.Button({ label:yz('spi.labs.rapor-yapistir'), act:'open-paste' }),
-        body:P.empty('Henüz hiç test girilmedi.'),
+        body:P.empty(yz('spi.labs.henuz-hic-test-girilmedi')),
       })]);
     }
 
@@ -402,7 +452,7 @@ SP.Screens.labs = (function(){
           ${when(panelFilter(), () => raw(String(panelFilter())))}
           ${raw(etkinSuzgec(rows.length))}
           ${when(!rows.length, () => K.Notice({ tone:'info',
-            body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
+            body:yz('spi.labs.bu-suzgecle-eslesen-olcum-yo') }))}
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
             const tr = SP.Bio.trendOf(r.marker.id);
             /* Tok karnına alınmış bir ölçüme durum etiketi basılmaz:
@@ -538,11 +588,11 @@ SP.Screens.labs = (function(){
                 change:'entry-time' }) })}
           </div>
           ${when(draft.fasting === 'no', () => K.Notice({ tone:'warn', class:'mt-10',
-            title:yz('spi.labs.tok-olcum'), body:'Açlık glukozu, insülin, trigliserit ve onlardan '
+            title:yz('spi.labs.tok-olcum'), body:yz('spi.labs.aclik-glukozu-insulin-trigli-2')
               + 'hesaplanan TyG, TG/HDL ve LDL için durum etiketi basılmayacak. '
-              + 'Sayılar kaydedilir; yorum yapılmaz.' }))}
+              + yz('spi.labs.sayilar-kaydedilir-yorum-yap') }))}
           ${when(draft.fasting === 'unknown', () => K.Notice({ tone:'info', class:'mt-10',
-            body:'Bilinmiyorsa değerler aç karnına alınmış varsayılır ve bu ölçüm '
+            body:yz('spi.labs.bilinmiyorsa-degerler-ac-kar')
               + 'sayfasında açıkça yazılır. Sistem sessizce varsaymaz.' }))}`,
       }),
 
@@ -553,7 +603,7 @@ SP.Screens.labs = (function(){
           placeholder:yz('spi.labs.olcum-ara'), aria:yz('spi.labs.test-girisinde-olcum-ara'), change:'lab-query', debounce:200 }),
         body:html`
           ${when(!list.length, () => K.Notice({ tone:'info',
-            body:'Bu adla bir ölçüm bulunamadı.' }))}
+            body:yz('spi.labs.bu-adla-bir-olcum-bulunamadi') }))}
           <div class="entrygrid">${map(list, b => {
             const has = draft.values[b.id] != null;
             const lastv = M.latestOf(b.id);
@@ -569,7 +619,7 @@ SP.Screens.labs = (function(){
               </label>`;
           })}</div>
           <div class="entrybar">
-            <span class="small">${filled ? filled + ' değer yazıldı' : 'Henüz değer yazılmadı'}
+            <span class="small">${filled ? filled + ' değer yazıldı' : yz('spi.labs.henuz-deger-yazilmadi')}
               ${when(filled, () => html`<span class="dim"> ${yz('spi.labs.kaydedilene-kadar-hicbir-sey')}</span>`)}</span>
             <span class="row-sm">
               ${when(filled, () => K.Button({ label:yz('spi.labs.temizle'), size:'sm', act:'entry-clear' }))}
@@ -602,7 +652,7 @@ SP.Screens.labs = (function(){
         action:K.Select({ value:id, change:'pick-marker', aria:yz('spi.labs.egilimi-gosterilecek-olcum'), options }),
         body:html`
           ${when(series.length < 2, () => K.Notice({ tone:'info',
-            body:'Grafik için en az iki ölçüm gerekir. Şu an ' + series.length + ' var.' }))}
+            body:yz('spi.labs.grafik-icin-en-az-iki') + series.length + ' var.' }))}
           ${when(series.length >= 2, () => html`
             ${raw(UI.lineChart([{ data:series.map(s2 => s2.v) }], {
               labels:series.map(s2 => U.fmtShort(s2.date)),
@@ -657,16 +707,16 @@ SP.Screens.labs = (function(){
         <p class="markerrow__note">${SP.Bio.statusNote(id, last.v)}</p>
       </div>`),
       K.Table({ tight:true, headers:['Alan', 'Değer', 'Dayanak'], rows:[
-        ['Referans aralığı', r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit
+        [yz('spi.labs.referans-araligi'), r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit
           : r.cinsiyetGerek ? html`${yz('spi.labs.veri-yok')} ${K.Button({ label:yz('spi.labs.cinsiyet-sec'), size:'sm', act:'go', data:{ 'data-route':'family' } })}` : '—',
           dayanak(id, 'ref')],
-        ['Hedef bant', r.optimal ? U.fmtNum(r.optimal[0]) + ' – ' + U.fmtNum(r.optimal[1]) + ' ' + b.unit : 'tanımlı değil',
+        [yz('spi.labs.hedef-bant'), r.optimal ? U.fmtNum(r.optimal[0]) + ' – ' + U.fmtNum(r.optimal[1]) + ' ' + b.unit : 'tanımlı değil',
           r.optimal ? dayanak(id, 'optimal') : '—'],
-        ['Kırmızı bayrak', [r.red.below != null ? '< ' + r.red.below : null,
+        [yz('spi.labs.kirmizi-bayrak'), [r.red.below != null ? '< ' + r.red.below : null,
           r.red.above != null ? '> ' + r.red.above : null].filter(Boolean).join(' · ') || 'tanımlı değil',
           (r.red.below != null || r.red.above != null) ? dayanak(id, 'red') : '—'],
         ['Eğilim', tr.ok ? vd.text : tr.note, '—'],
-        ['Ölçüm sayısı', String(series.length), '—'],
+        [yz('spi.labs.olcum-sayisi'), String(series.length), '—'],
       ] }),
 
       /* Eşiğin KAYNAĞI. Bir sayının nereden geldiği, sayının kendisi kadar
@@ -697,7 +747,7 @@ SP.Screens.labs = (function(){
                ${when(x.e.note, () => html`<p class="tiny dim">${x.e.note}</p>`)}
              </div>`)}
            ${K.Notice({ tone:'info',
-             body:'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; '
+             body:yz('spi.labs.kaynak-kesinlik-ve-uygulanab')
                 + '«yetki» ise SPİ\'nin kararıdır — hangi kaynağa dayanarak '
                 + 'ne yapmasına izin verildiğini söyler. Bu bir kanıt '
                 + 'hiyerarşisi değildir.' })}`,
@@ -747,7 +797,7 @@ SP.Screens.labs = (function(){
         body:bozan.text })),
       when(yorum.state === 'no' || yorum.state === 'unknown', () => K.Notice({
         tone:yorum.state === 'no' ? 'warn' : 'info',
-        title:yorum.state === 'no' ? 'Tok ölçüm:' : 'Açlık durumu bilinmiyor:',
+        title:yorum.state === 'no' ? yz('spi.labs.tok-olcum') : yz('spi.labs.aclik-durumu-bilinmiyor'),
         body:yorum.note })),
 
       /* KİŞİSEL TABAN ÇİZGİ. Referans aralığı nüfusun, hedef bandı
@@ -759,13 +809,13 @@ SP.Screens.labs = (function(){
         body:html`
           ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
             ['Ortalaman', U.fmtNum(base.mean) + ' ' + b.unit],
-            ['Saçılman (± 1 SS)', U.fmtNum(base.low) + ' – ' + U.fmtNum(base.high) + ' ' + b.unit],
-            ['En düşük / en yüksek', U.fmtNum(base.min) + ' – ' + U.fmtNum(base.max) + ' ' + b.unit],
+            [yz('spi.labs.sacilman-1-ss'), U.fmtNum(base.low) + ' – ' + U.fmtNum(base.high) + ' ' + b.unit],
+            [yz('spi.labs.en-dusuk-en-yuksek'), U.fmtNum(base.min) + ' – ' + U.fmtNum(base.max) + ' ' + b.unit],
           ] })}
           ${when(chg && chg.ok, () => K.Notice({
             tone:chg.meaningful ? (chg.good === false ? 'warn' : 'info') : 'info',
-            title:chg.meaningful ? 'Son değişim gerçek:' : 'Son değişim gürültü sayılır:',
-            body:'Önceki ölçüme göre ' + (chg.diff > 0 ? '+' : '') + U.fmtNum(chg.diff)
+            title:chg.meaningful ? yz('spi.labs.son-degisim-gercek') : yz('spi.labs.son-degisim-gurultu-sayilir'),
+            body:yz('spi.labs.onceki-olcume-gore') + (chg.diff > 0 ? '+' : '') + U.fmtNum(chg.diff)
               + ' ' + b.unit + '. ' + chg.note }))}
           <p class="small muted mt-8">${yz('spi.labs.bir-degisim-kendi-sacilmanda')}</p>`,
       })),
@@ -875,7 +925,7 @@ SP.Screens.labs = (function(){
       ${when(semptomOzet.ok && semptomOzet.rows.length, () => html`
         <h3 class="printdoc__h">${yz('spi.labs.son-30-gunun-sikayetleri')}</h3>
         <div class="tabloKap">${K.Table({ tight:true,
-          headers:['Şikâyet', 'Kaç gün', 'Ortalama şiddet'],
+          headers:['Şikâyet', yz('spi.labs.kac-gun'), yz('spi.labs.ortalama-siddet')],
           rows:semptomOzet.rows.map(r => [r.symptom.name,
             r.days + ' / ' + semptomOzet.loggedDays + ' gün',
             (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
@@ -947,7 +997,7 @@ SP.Screens.labs = (function(){
       return K.Ledger([K.Entry({
         label:yz('spi.labs.paneller'), hint:'paneller', meta:'kayıt yok',
         action:K.Button({ label:yz('spi.labs.rapor-yapistir'), act:'open-paste' }),
-        body:P.empty('Henüz test girilmedi.'),
+        body:P.empty(yz('spi.labs.henuz-test-girilmedi')),
       })]);
     }
 
@@ -1037,7 +1087,7 @@ SP.Screens.labs = (function(){
         label:yz('spi.labs.kullandiklarin'), hint:'ilac', meta:etkin.length + ' etkin',
         action:K.Button({ label:yz('spi.labs.ekle'), act:'add-med' }),
         body:html`
-          ${when(!etkin.length, () => P.empty('Şu an kullandığın bir şey kayıtlı değil.'))}
+          ${when(!etkin.length, () => P.empty(yz('spi.labs.su-an-kullandigin-bir-sey')))}
           ${when(etkin.length, () => html`<div class="medlist">${map(etkin, r => satir(r, true))}</div>`)}`,
       }),
 
@@ -1051,7 +1101,7 @@ SP.Screens.labs = (function(){
       K.Entry({
         label:yz('spi.labs.sinir'), meta:'ne yapar, ne yapmaz',
         body:K.Notice({ tone:'warn', title:yz('spi.labs.sistem-doz-onermez'),
-          body:'Burada tutulan kayıt yalnızca ÖLÇÜM YORUMU içindir: bir değerdeki '
+          body:yz('spi.labs.burada-tutulan-kayit-yalnizc')
             + 'değişimin sebebini aramak için. Sistem ilaç başlatmaz, kestirmez, '
             + 'dozunu değiştirmez ve bunları önermez. İlaç kararları hekimindir.' }),
       }),
@@ -1067,7 +1117,7 @@ SP.Screens.labs = (function(){
     return K.Entry({
       label:yz('spi.labs.hekim-talimatlari'), hint:'hekim', meta:l.length ? l.length + ' kayıt' : 'yok',
       body:html`
-        ${when(!l.length, () => P.empty('Kayıtlı hekim talimatı yok.'))}
+        ${when(!l.length, () => P.empty(yz('spi.labs.kayitli-hekim-talimati-yok')))}
         ${when(l.length, () => html`<div class="medlist">${map(l, t => html`
           <div class="medrow">
             <div class="medrow__ana"><div class="tiny dim">${U.fmtDate(t.tarih)}</div>
@@ -1184,7 +1234,7 @@ SP.Screens.labs = (function(){
       return K.Ledger([K.Entry({
         label:yz('spi.labs.karsilastir'), hint:'karsilastir', meta:S.labs.length + ' oturum',
         action:K.Button({ label:yz('spi.labs.rapor-yapistir'), act:'open-paste' }),
-        body:P.empty('En az iki test oturumu gerekir.'),
+        body:P.empty(yz('spi.labs.en-az-iki-test-oturumu')),
       })]);
     }
 
@@ -1234,7 +1284,7 @@ SP.Screens.labs = (function(){
               + 'başlayan bir ilaç ya da takviyenin beklenen yönünde. Beklenen bir '
               + 'sonuç haber değildir; beslenmenin ya da yaşam düzeninin başarısı '
               + 'olarak okunmamalı.' }))}
-          ${when(!rows.length, () => P.empty('İki oturumda da ortak ölçüm yok.'))}
+          ${when(!rows.length, () => P.empty(yz('spi.labs.i-ki-oturumda-da-ortak-olcum')))}
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
             const c = r.change;
             const isim = r.marker.name;
@@ -1292,7 +1342,7 @@ SP.Screens.labs = (function(){
       return K.Ledger([K.Entry({
         label:yz('spi.labs.gecmis'), meta:'kayıt yok',
         action:K.Button({ label:yz('spi.labs.rapor-yapistir'), act:'open-paste' }),
-        body:P.empty('Henüz test girilmedi.'),
+        body:P.empty(yz('spi.labs.henuz-test-girilmedi')),
       })]);
     }
     return K.Ledger([K.Entry({
@@ -1327,10 +1377,10 @@ SP.Screens.labs = (function(){
       K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
         ['Tarih', U.fmtDate(l.date) + (l.time ? ' · ' + l.time : '')],
         ['Laboratuvar', l.lab || '—'],
-        ['Açlık durumu', FASTING_LABEL[ac] || ac],
+        [yz('spi.labs.aclik-durumu'), FASTING_LABEL[ac] || ac],
       ] }),
       when(ac === 'no', () => K.Notice({ tone:'warn', title:yz('spi.labs.tok-olcum'),
-        body:'Bu oturumdaki açlık glukozu, insülin, trigliserit ve onlardan '
+        body:yz('spi.labs.bu-oturumdaki-aclik-glukozu')
           + 'hesaplanan değerler yorumlanmaz.' })),
       K.Table({ tight:true, headers:['Ölçüm', { label:yz('spi.labs.deger-2'), num:true }, 'Durum', 'Kaynak'], rows }),
       when(l.note, () => html`<p class="small">${l.note}</p>`),
@@ -1347,13 +1397,13 @@ SP.Screens.labs = (function(){
       body:String(K.Stack([
         K.Drop({ act:'lab-file', label:yz('spi.labs.rapor-dosyasi-ya-da-fotograf'), kamera:{},
           icon:'file', accept:'.txt,.csv,.md,image/*',
-          hint:'Metin dosyası modelsiz okunur · fotoğraf için model gerekir' }),
+          hint:yz('spi.labs.metin-dosyasi-modelsiz-okunu') }),
         /* 2026-10-25: tarih ve laboratuvar alanı buradan önizlemeye taşındı.
            Dosya bırakma kutusu tarihin üstünde duruyordu ve tarih dosya
            seçildiği an okunuyordu: önce dosyayı bırakan bugünün tarihine
            yazıyordu. Tarih artık önizlemede, kaydetme anında okunur. */
-        K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '
-          + 'Sonraki adımda tarihi ve açlık durumunu denetlersin; eşleşmeyen '
+        K.Notice({ tone:'info', body:yz('spi.labs.ayiklayici-emin-olamadigi-sa')
+          + yz('spi.labs.sonraki-adimda-tarihi-ve-acl')
           + 'satırları istersen bir ölçüme bağlarsın.' }),
         K.Field({ label:yz('spi.labs.rapor-metni'),
           input:html`<div class="withmic">
@@ -1431,10 +1481,10 @@ SP.Screens.labs = (function(){
             items:ACLIK_SECENEK })}
         </div>`,
         when(ac === 'no', () => K.Notice({ tone:'warn', title:yz('spi.labs.tok-olcum'),
-          body:'Açlık glukozu, insülin, trigliserit ve onlardan hesaplanan değerler '
+          body:yz('spi.labs.aclik-glukozu-insulin-trigli-3')
             + 'kaydedilir ama yorumlanmaz.' })),
         when(p.rows.some(r => r.mismatch), () => K.Notice({ tone:'warn',
-          body:'Birimi uyuşmayan satırlar işaretsiz geldi. Birimi kendin denetleyip '
+          body:yz('spi.labs.birimi-uyusmayan-satirlar-is')
             + 'işaretlersen sayı olduğu gibi, gördüğün birimle yazılır; çevrilmez.' })),
         /* 2026-10-25: aynı tarihte test varsa ne olacağı kayıttan önce
            söylenir; kayıtlı değerin üstüne yazmak bilinçli bir seçimdir. */
@@ -1443,12 +1493,12 @@ SP.Screens.labs = (function(){
             + (plan.aclikYazilir ? ' Testin açlık durumu «' + FASTING_LABEL[plan.ac] + '» olarak yazılır.' : '') })),
         when(plan.ayri, () => K.Notice({ tone:'warn',
           body:(plan.neden === 'aclik'
-            ? 'Bu tarihteki test farklı bir açlık durumuyla kaydedilmiş. '
-            : 'Bu tarihte birden çok test var ve hangisine ekleneceği açlık durumundan anlaşılmıyor. ')
-            + 'Değerler aynı tarihte ayrı test olarak kaydedilir; önceki test değişmez.' })),
+            ? yz('spi.labs.bu-tarihteki-test-farkli-bir')
+            : yz('spi.labs.bu-tarihte-birden-cok-test'))
+            + yz('spi.labs.degerler-ayni-tarihte-ayri-t') })),
         when(degisen, () => K.Notice({ tone:'warn',
-          body:'Bu testte değeri kayıtlı ' + degisen + ' ölçüm işaretsiz geldi. '
-            + 'İşaretlersen kayıtlı değerin yerine yenisi yazılır.' })),
+          body:yz('spi.labs.bu-testte-degeri-kayitli') + degisen + ' ölçüm işaretsiz geldi. '
+            + yz('spi.labs.i-saretlersen-kayitli-degeri') })),
         when(p.rows.length, () => html`<div>${map(p.rows, (r, i) => {
           const s = plan.satirlar[i];
           const birim = r.mismatch && !r.converted ? r.mismatch : r.marker.unit;
@@ -1514,7 +1564,7 @@ SP.Screens.labs = (function(){
     try{ return BODIES[t.id](); }
     catch(e){
       console.error('Testler bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('spi.labs.bu-bolum-su-an-cizilemedi') });
     }
   }
 
@@ -1550,7 +1600,7 @@ SP.Screens.labs = (function(){
       const m = document.getElementById('hk-metin');
       const t = document.getElementById('hk-tarih');
       const r = await SP.Hedefler.talimatEkle(m ? m.value : '', t ? t.value : '');
-      UI.toast(r.ok ? 'Hekim talimatı eklendi' : r.why);
+      UI.toast(r.ok ? yz('spi.labs.hekim-talimati-eklendi') : r.why);
       if(r.ok) SP.App.render();
     },
     async 'hekim-sil'(el){
@@ -1569,7 +1619,7 @@ SP.Screens.labs = (function(){
       UI.sheet({ title:b.name, subtitle:b.unit, wide:true,
         body:markerSheetBody(b.id), noFocus:true,
         footer:String(html`${K.Button({ label:yz('spi.labs.kapat'), act:'sheet-close' })}
-          ${K.Button({ label:M.isPinned(b.id) ? 'Sabitlemeyi kaldır' : 'Sabitle',
+          ${K.Button({ label:M.isPinned(b.id) ? yz('spi.labs.sabitlemeyi-kaldir') : 'Sabitle',
             act:'toggle-pin', data:{ 'data-id':b.id } })}
           ${K.Button({ label:yz('spi.labs.egilimi-ac'), tone:'primary', act:'goto-trend', data:{ 'data-id':b.id } })}`) });
     },
@@ -1832,7 +1882,7 @@ SP.Screens.labs = (function(){
     async 'lab-file'(el){
       const file = el.files && el.files[0];
       if(!file) return;
-      preview = await UI.withBusy('Rapor okunuyor', file.name,
+      preview = await UI.withBusy(yz('spi.labs.rapor-okunuyor'), file.name,
         () => SP.Extract.fromLabFile(file));
       /* 2026-10-25: tarih burada okunmaz; önizlemede durur ve kaydetmede
          alınır. Bağlanabilir satır varsa önizleme yine açılır. */
@@ -1887,7 +1937,7 @@ SP.Screens.labs = (function(){
       el.closest('.entryrow').classList.toggle('is-filled', draft.values[id] != null);
       const bar = document.querySelector('.entrybar .small');
       const n2 = Object.keys(draft.values).length;
-      if(bar) bar.textContent = n2 ? n2 + ' değer yazıldı' : 'Henüz değer yazılmadı';
+      if(bar) bar.textContent = n2 ? n2 + ' değer yazıldı' : yz('spi.labs.henuz-deger-yazilmadi');
       const save = document.querySelector('[data-act="entry-save"]');
       if(save) save.disabled = !n2;
     },
@@ -1907,16 +1957,16 @@ SP.Screens.labs = (function(){
       const f = M.openFlags().filter(x => !x.ack).length;
       if(f) return f + ' kırmızı bayrak açık.';
       const s = SP.Bio.summary();
-      if(!s.measured) return 'Henüz test girilmedi.';
+      if(!s.measured) return yz('spi.labs.henuz-test-girilmedi');
       if(s.out) return s.out + ' ölçüm referans aralığının dışında.';
       if(s.offTarget) return s.offTarget + ' ölçüm hedef bandın dışında.';
-      return 'Ölçümlerin tamamı hedef bandın içinde.';
+      return yz('spi.labs.olcumlerin-tamami-hedef-band');
     },
     lede(){
       const s = SP.Bio.summary();
       if(!s.measured){
-        return 'Herhangi bir kapsamlı hastane testinin sonucunu tek seferde girebilirsin. '
-          + 'Raporun metnini yapıştırman yeterli; değerler kendiliğinden şemaya oturur.';
+        return yz('spi.labs.herhangi-bir-kapsamli-hastan')
+          + yz('spi.labs.raporun-metnini-yapistirman');
       }
       return s.measured + ' ölçüm kayıtlı. Değerler organa göre bölünmez; '
         + 'tek listede, önem sırasına göre durur.';

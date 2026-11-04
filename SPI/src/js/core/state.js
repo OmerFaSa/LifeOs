@@ -20,6 +20,16 @@
 
    Hane profil listesi profile OZEL DEGILDIR: cihaz genelinde tek yerde,
    ayri bir localStorage anahtarinda durur (bkz. householdList). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.state.bu-adla-bir-profil-zaten':'Bu adla bir profil zaten var.',
+  'spi.core.state.acik-olan-profil-silinemez':'Açık olan profil silinemez.',
+  'spi.core.state.boyle-bir-olcum-yok':'Böyle bir ölçüm yok.',
+  'spi.core.state.en-fazla':'En fazla ',
+  'spi.core.state.serbest-antrenman':'Serbest antrenman',
+  'spi.core.state.hareket-bulunamadi':'Hareket bulunamadı.',
+  'spi.core.state.bu-merdivenin-son-basamagind':'Bu merdivenin son basamağındasın.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -258,7 +268,7 @@ SP.Model = (function(){
     const o = opts || {};
     const id = U.slug(name) || U.uid('p');
     const list = householdList();
-    if(list.some(x => x.id === id)) return { ok:false, error:'Bu adla bir profil zaten var.' };
+    if(list.some(x => x.id === id)) return { ok:false, error:yz('spi.core.state.bu-adla-bir-profil-zaten') };
     list.push({ id, name, role:o.role || 'family', sex:o.sex || null,
       birthYear:o.birthYear || null, seenAt:null });
     writeHousehold(list);
@@ -267,7 +277,7 @@ SP.Model = (function(){
   }
 
   function removeHouseholdMember(id){
-    if(id === activeProfileId()) return { ok:false, error:'Açık olan profil silinemez.' };
+    if(id === activeProfileId()) return { ok:false, error:yz('spi.core.state.acik-olan-profil-silinemez') };
     const list = householdList().filter(x => x.id !== id);
     writeHousehold(list);
     /* Silinen profil HKM bagini tutuyorsa birakir (HATALAR Y-7). */
@@ -368,7 +378,7 @@ SP.Model = (function(){
   function isPinned(id){ return pinnedIds().indexOf(id) >= 0; }
 
   async function togglePin(id){
-    if(!SP.BIO_BY_ID[id]) return { ok:false, note:'Böyle bir ölçüm yok.' };
+    if(!SP.BIO_BY_ID[id]) return { ok:false, note:yz('spi.core.state.boyle-bir-olcum-yok') };
     const liste = pinnedIds();
     const i = liste.indexOf(id);
     if(i >= 0){
@@ -378,7 +388,7 @@ SP.Model = (function(){
     }
     if(liste.length >= PIN_MAX){
       return { ok:false, full:true,
-        note:'En fazla ' + PIN_MAX + ' ölçüm sabitlenebilir. Birini kaldır.' };
+        note:yz('spi.core.state.en-fazla') + PIN_MAX + ' ölçüm sabitlenebilir. Birini kaldır.' };
     }
     liste.push(id);
     await saveProfile({ pinned:liste });
@@ -676,7 +686,7 @@ SP.Model = (function(){
     return {
       id:U.uid('w'), date:dateISO || U.todayISO(),
       templateId:templateId || null,
-      name:tpl ? tpl.name : 'Serbest antrenman',
+      name:tpl ? tpl.name : yz('spi.core.state.serbest-antrenman'),
       kind:tpl ? tpl.kind : 'strength',
       items:tpl ? tpl.items.map(exId => ({ exId, levelId:currentLevel(exId), sets:3, reps:null, minutes:null })) : [],
       minutes:tpl ? tpl.minutes : 40,
@@ -726,9 +736,9 @@ SP.Model = (function(){
      Sistem basamak atlatmaz; asiri yuklenmenin en yaygin sebebi budur. */
   async function advanceLevel(exId){
     const ex = SP.EX_BY_ID[exId];
-    if(!ex) return { ok:false, error:'Hareket bulunamadı.' };
+    if(!ex) return { ok:false, error:yz('spi.core.state.hareket-bulunamadi') };
     const i = levelIndex(exId);
-    if(i >= ex.levels.length - 1) return { ok:false, error:'Bu merdivenin son basamağındasın.' };
+    if(i >= ex.levels.length - 1) return { ok:false, error:yz('spi.core.state.bu-merdivenin-son-basamagind') };
     SP.S.progress[exId] = { levelId:ex.levels[i + 1].id, achievedAt:new Date().toISOString() };
     await SP.Store.set('progress', SP.S.progress);
     return { ok:true, level:ex.levels[i + 1] };

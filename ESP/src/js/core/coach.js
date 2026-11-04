@@ -20,6 +20,14 @@
 
    Koç bir ajan DEĞİLDİR: model çağırmaz, cümle üretmez. Mnemosyne masası
    bu motorun çıktısını okur — tersi değil. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.coach.siradaki-basamak-olculemiyor':'Sıradaki basamak ölçülemiyor: «',
+  'esp.core.coach.bu-recete-o-olcumu-uretir':'Bu reçete o ölçümü üretir.',
+  'esp.core.coach.siradaki-kapi':'Sıradaki kapı: «',
+  'esp.core.coach.bu-merdivenin-butun-kapilari':'Bu merdivenin bütün kapıları geçilmiş görünüyor; reçete korumaya çalışıyor.',
+  'esp.core.coach.bilinmeyen-egzersiz':'Bilinmeyen egzersiz.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -126,10 +134,10 @@ ESP.Coach = (function(){
       items:secilen, minutes:toplam, budget:butce,
       why:kapi
         ? (kapi.action === 'measure'
-            ? 'Sıradaki basamak ölçülemiyor: «' + kapi.gate.label + '». '
-              + 'Bu reçete o ölçümü üretir.'
-            : 'Sıradaki kapı: «' + kapi.gate.label + '». Reçete oraya çalışıyor.')
-        : 'Bu merdivenin bütün kapıları geçilmiş görünüyor; reçete korumaya çalışıyor.',
+            ? yz('esp.core.coach.siradaki-basamak-olculemiyor') + kapi.gate.label + '». '
+              + yz('esp.core.coach.bu-recete-o-olcumu-uretir')
+            : yz('esp.core.coach.siradaki-kapi') + kapi.gate.label + '». Reçete oraya çalışıyor.')
+        : yz('esp.core.coach.bu-merdivenin-butun-kapilari'),
       done:doneToday(discId, bugun),
     };
   }
@@ -180,7 +188,7 @@ ESP.Coach = (function(){
   async function logDrill(drillId, opts){
     const o = opts || {};
     const d = ESP.DRILL_BY_ID[drillId];
-    if(!d) return { ok:false, error:'Bilinmeyen egzersiz.' };
+    if(!d) return { ok:false, error:yz('esp.core.coach.bilinmeyen-egzersiz') };
     const gun = o.date || U.todayISO();
     const gercekSure = o.minutes != null;
     const dakika = gercekSure ? o.minutes : d.minutes;

@@ -14,6 +14,22 @@
    Belirsiz cümle tahmin edilmez, sorulur (AGENTS.md §1.7): «bu bölümü
    kapat» hangi bölüm? Bir disiplin hakkında konuşmak («diksiyonda neden
    zorlanıyorum») bir istek değildir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.komut.hangi-bolumu':'Hangi bölümü ',
+  'esp.core.komut.yaptim':'Yaptım: ',
+  'esp.core.komut.anladigim-su':'Anladığım şu: ',
+  'esp.core.komut.verisi-silinmez-istediginde':'Verisi silinmez; istediğinde geri açılır. ',
+  'esp.core.komut.onayliyor-musun-evet-de-ya':'Onaylıyor musun? «evet» de ya da teklif listesinden onayla.',
+  'esp.core.komut.bunu-yapamadim':'Bunu yapamadım: ',
+  'esp.core.komut.patron-a-ilettim':'Patron’a ilettim. ',
+  'esp.core.komut.geri-alinacak-bir-degisiklig':'Geri alınacak bir değişikliğin yok.',
+  'esp.core.komut.geri-aldim':'Geri aldım: ',
+  'esp.core.komut.geri-alamadim':'Geri alamadım: ',
+  'esp.core.komut.tamam-vazgectim-hicbir-sey-d':'Tamam, vazgeçtim; hiçbir şey değişmedi.',
+  'esp.core.komut.uyguladim-geri-almak-isterse':'Uyguladım. Geri almak istersen «geri al» de.',
+  'esp.core.komut.uygulayamadim':'Uygulayamadım: ',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -92,7 +108,7 @@ ESP.Komut = (function(){
     if(kapat || ac){
       if(!discler.length){
         if(BOLUM_RE.test(t)){
-          out.sorular.push({ metin, soru:'Hangi bölümü ' + (kapat ? 'kapatayım' : 'açayım')
+          out.sorular.push({ metin, soru:yz('esp.core.komut.hangi-bolumu') + (kapat ? 'kapatayım' : 'açayım')
             + '? «diksiyon», «gitar», «felsefe» gibi adını söyler misin?' });
         }
         return out;
@@ -144,17 +160,17 @@ ESP.Komut = (function(){
   function yanit(islem){
     const p = [];
     if(islem.yapilan.length){
-      p.push('Yaptım: ' + islem.yapilan.map(function(k){ return k.baslik; }).join(' · ')
+      p.push(yz('esp.core.komut.yaptim') + islem.yapilan.map(function(k){ return k.baslik; }).join(' · ')
         + '. Geri almak istersen «geri al» de.');
     }
     if(islem.bekleyen.length){
       const bolum = islem.bekleyen.some(function(k){ return k.row && k.row.kind === 'bolum'; });
-      p.push('Anladığım şu: ' + islem.bekleyen.map(function(k){ return k.baslik; }).join(' · ') + '. '
-        + (bolum ? 'Verisi silinmez; istediğinde geri açılır. ' : '')
-        + 'Onaylıyor musun? «evet» de ya da teklif listesinden onayla.');
+      p.push(yz('esp.core.komut.anladigim-su') + islem.bekleyen.map(function(k){ return k.baslik; }).join(' · ') + '. '
+        + (bolum ? yz('esp.core.komut.verisi-silinmez-istediginde') : '')
+        + yz('esp.core.komut.onayliyor-musun-evet-de-ya'));
     }
     if(islem.dusen.length){
-      p.push('Bunu yapamadım: ' + islem.dusen.map(function(k){ return k.why || 'geçersiz'; }).join(' · '));
+      p.push(yz('esp.core.komut.bunu-yapamadim') + islem.dusen.map(function(k){ return k.why || 'geçersiz'; }).join(' · '));
     }
     (islem.sorular || []).forEach(function(s){ p.push(s.soru); });
     return p.join('\n\n');
@@ -186,7 +202,7 @@ ESP.Komut = (function(){
       const hd = await ESP.Hedefler.sohbet.isle(text);
       if(hd) return { text:hd.text, source:'rules', oneriIds:[] };
     }
-    const onEk = agentId === 'patron' ? '' : 'Patron’a ilettim. ';
+    const onEk = agentId === 'patron' ? '' : yz('esp.core.komut.patron-a-ilettim');
     const cevap = function(m, ids){ return { text:onEk + m, source:'rules', oneriIds:ids || [] }; };
     const kisa = kisaCevap(text);
 
@@ -194,24 +210,24 @@ ESP.Komut = (function(){
       const son = (ESP.S.proposals || [])
         .filter(function(p){ return p.source === 'istek' && p.state === 'accepted'; })
         .sort(function(a, b){ return String(b.decidedAt || '').localeCompare(String(a.decidedAt || '')); })[0];
-      if(!son) return cevap('Geri alınacak bir değişikliğin yok.');
+      if(!son) return cevap(yz('esp.core.komut.geri-alinacak-bir-degisiklig'));
       const r = await ESP.Plans.geriAl(son.id);
-      return cevap(r.ok ? 'Geri aldım: ' + son.title + '.' : 'Geri alamadım: ' + r.error);
+      return cevap(r.ok ? yz('esp.core.komut.geri-aldim') + son.title + '.' : yz('esp.core.komut.geri-alamadim') + r.error);
     }
     if(kisa === 'evet' || kisa === 'hayir'){
       const bek = ESP.Plans.istekler();
       if(bek.length){
         if(kisa === 'hayir'){
           for(const p of bek) await ESP.Plans.decline(p.id);
-          return cevap('Tamam, vazgeçtim; hiçbir şey değişmedi.');
+          return cevap(yz('esp.core.komut.tamam-vazgectim-hicbir-sey-d'));
         }
         let n = 0; const why = [];
         for(const p of bek){
           const r = await ESP.Plans.accept(p.id);
           if(r.ok) n++; else if(r.error) why.push(r.error);
         }
-        return cevap(n ? 'Uyguladım. Geri almak istersen «geri al» de.'
-          : 'Uygulayamadım: ' + (why.join(' · ') || 'istek geçersizleşmiş.'));
+        return cevap(n ? yz('esp.core.komut.uyguladim-geri-almak-isterse')
+          : yz('esp.core.komut.uygulayamadim') + (why.join(' · ') || 'istek geçersizleşmiş.'));
       }
     }
 

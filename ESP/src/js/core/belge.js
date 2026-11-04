@@ -20,6 +20,25 @@
         olay, desteği/itirazı yazılmış argüman) geri almada KALIR ve bu
         söylenir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.belge.bearer':'Bearer ',
+  'esp.core.belge.rehber-dayanak':'Rehber › Dayanak',
+  'esp.core.belge.studyo-diksiyon':'Stüdyo › Diksiyon',
+  'esp.core.belge.bu-istek-zaten-acik-is':'Bu istek zaten açık (iş emri #',
+  'esp.core.belge.king-teklif-hazirladi-is-emr':'King teklif hazırladı (iş emri #',
+  'esp.core.belge.web-kaynagi':'Web kaynağı',
+  'esp.core.belge.eserler-okuma-kaynaklar-a-ba':'Eserler Okuma › Kaynaklar’a «başlanmadı» olarak girer.',
+  'esp.core.belge.tezler-acik-tartisma-olarak':'Tezler açık tartışma olarak açılır: destek ve itirazı sen yazarsın. Eserler Kütüphane’ye ',
+  'esp.core.belge.kurallar-studyo-diksiyon-da':'Kurallar Stüdyo › Diksiyon’da kaynağıyla durur; parçalar çalışma metinlerine katılır.',
+  'esp.core.belge.kaynak':'Kaynak: ',
+  'esp.core.belge.karar-yine-tahmin-dir-degise':'Karar yine «tahmin»dir; değişen dayanaktır.',
+  'esp.core.belge.kitap-basina-sure-bu-hizdan':'Kitap başına süre bu hızdan hesaplanır; kitap uzunluğu (≈ 80 bin kelime) yine ',
+  'esp.core.belge.kayit-kimligi-gecersiz':'Kayıt kimliği geçersiz.',
+  'esp.core.belge.hkm-baglantisi-kurulmamis-be':'HKM bağlantısı kurulmamış; belge alınamaz.',
+  'esp.core.belge.cefr-saat-tablosu-2':'CEFR saat tablosu',
+  'esp.core.belge.okuma-hizi':'Okuma hızı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.belge.alan-tarih-felsefe-okuma-yaz':'Alan tarih, felsefe, okuma, yazı ya da diksiyon olmalı.',
   'esp.core.belge.konu-2-80-karakter-olmali':'Konu 2–80 karakter olmalı.',
   'esp.core.belge.yazi':'Yazı',
@@ -73,7 +92,7 @@ ESP.Belge = (function(){
     try{
       const res = await fetch(k.url + yol, {
         method:govde === undefined ? 'GET' : 'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('esp.core.belge.bearer') + k.token },
         body:govde === undefined ? undefined : JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });
@@ -100,7 +119,7 @@ ESP.Belge = (function(){
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.belge', konu:'',
       neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:yz('esp.core.belge.yazi'),
-        cefr:'Rehber › Dayanak', okuma_hizi:'Rehber › Dayanak', diksiyon:'Stüdyo › Diksiyon' })[t.belge.alan] + ' ekranından belge istendi.',
+        cefr:yz('esp.core.belge.rehber-dayanak'), okuma_hizi:yz('esp.core.belge.rehber-dayanak'), diksiyon:yz('esp.core.belge.studyo-diksiyon') })[t.belge.alan] + ' ekranından belge istendi.',
       govde:{ belge:t.belge } });
     if(!r.bagli) return { ok:false, metin:yz('esp.core.belge.belgeyi-hkm-deki-arastirma-b')
       + 'bağlı değil. Rehber › HKM’den bağlanınca yeniden iste.' };
@@ -112,8 +131,8 @@ ESP.Belge = (function(){
     if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
     const e = g.emir || {};
     return { ok:true, emir:e.id, metin:g.yeni === false
-      ? 'Bu istek zaten açık (iş emri #' + e.id + ').'
-      : 'King teklif hazırladı (iş emri #' + e.id + '). Onaylarsan Araştırma Bürosu kaynakları '
+      ? yz('esp.core.belge.bu-istek-zaten-acik-is') + e.id + ').'
+      : yz('esp.core.belge.king-teklif-hazirladi-is-emr') + e.id + '). Onaylarsan Araştırma Bürosu kaynakları '
         + 'tarar; belge Bugün’e teklif olarak gelir. Web kapalıysa belge yazılmaz.' };
   }
 
@@ -125,7 +144,7 @@ ESP.Belge = (function(){
   /* ------------------------------------------------------------ sınama (saf) */
 
   function kaynakKaydi(k, kid){
-    return ESP.Model.newSource({ title:metin(k.baslik, 2, 160) || String(k.url || 'Web kaynağı').slice(0, 160),
+    return ESP.Model.newSource({ title:metin(k.baslik, 2, 160) || String(k.url || yz('esp.core.belge.web-kaynagi')).slice(0, 160),
       author:'', year:null, kind:k.tur === 'ansiklopedi' ? 'tertiary' : 'secondary',
       url:String(k.url || '').slice(0, 400), bam:{ kayitId:kid, n:k.n } });
   }
@@ -196,7 +215,7 @@ ESP.Belge = (function(){
       const uyari = [];
       if(dusen) uyari.push(dusen + ' eser ESP’nin denetimini geçmedi (yazar, ad, yıl ya da kaynak).');
       if(atlanan) uyari.push(atlanan + ' eser Kütüphane’de zaten var; yeniden eklenmeyecek.');
-      uyari.push('Eserler Okuma › Kaynaklar’a «başlanmadı» olarak girer.');
+      uyari.push(yz('esp.core.belge.eserler-okuma-kaynaklar-a-ba'));
       return { ok:true, tur:g.tur, books:yeni, args:[], kayitId:kid,
         onizleme:{ baslik:bosluk(g.konu) + ' — ' + yeni.length + ' eser (' + (g.tur === 'okuma'
             ? 'okuma listesi' : 'yazı örnekleri') + ', kaynaklı)',
@@ -227,7 +246,7 @@ ESP.Belge = (function(){
     const uyari = [];
     if(dusen) uyari.push(dusen + ' düşünür ESP’nin denetimini geçmedi (ad, eser, tez ya da kaynak).');
     if(atlanan) uyari.push(atlanan + ' tez Sempozyum’da zaten var; yeniden eklenmeyecek.');
-    uyari.push('Tezler açık tartışma olarak açılır: destek ve itirazı sen yazarsın. Eserler Kütüphane’ye '
+    uyari.push(yz('esp.core.belge.tezler-acik-tartisma-olarak')
       + '«henüz başlanmadı» olarak girer.');
     return { ok:true, tur:'felsefe', books, args, kayitId:kid,
       onizleme:{ baslik:bosluk(g.konu) + ' — ' + args.length + ' tez, ' + books.length + ' yeni eser (kaynaklı)',
@@ -281,7 +300,7 @@ ESP.Belge = (function(){
     const uyari = [];
     if(dusen) uyari.push(dusen + ' satır ESP’nin denetimini geçmedi (uzunluk ya da kaynak).');
     if(atlanan) uyari.push(atlanan + ' satır zaten var; yeniden eklenmeyecek.');
-    uyari.push('Kurallar Stüdyo › Diksiyon’da kaynağıyla durur; parçalar çalışma metinlerine katılır.');
+    uyari.push(yz('esp.core.belge.kurallar-studyo-diksiyon-da'));
     return { ok:true, tur:'diksiyon', kurallar, parcalar, kayitId:kid,
       onizleme:{ baslik:bosluk(g.konu) + ' — ' + kurallar.length + ' kural, ' + parcalar.length + ' okuma parçası (kaynaklı)',
         satirlar:kurallar.map(k => k.kural + (k.ornek ? ' (örnek: ' + k.ornek + ')' : ''))
@@ -333,8 +352,8 @@ ESP.Belge = (function(){
         deger:{ saat, kaynak:ilk, at, kayitId:kid },
         onizleme:{ baslik:yz('esp.core.belge.cefr-saat-tablosu') + sv.length + '/6 seviye kaynaklı',
           satirlar:sv.map(s => s + ': ' + saat[s] + ' saat (kaynağın üst ucu)'),
-          uyari:['Kaynak: ' + ilk.baslik + '. Kaynakta olmayan seviyeler varsayılan tabloda kalır. '
-            + 'Karar yine «tahmin»dir; değişen dayanaktır.'] } };
+          uyari:[yz('esp.core.belge.kaynak') + ilk.baslik + '. Kaynakta olmayan seviyeler varsayılan tabloda kalır. '
+            + yz('esp.core.belge.karar-yine-tahmin-dir-degise')] } };
     }
     const hizlar = (Array.isArray(g.hizlar) ? g.hizlar : [])
       .filter(x => x && Number.isInteger(x.kelime_dk) && x.kelime_dk >= 50 && x.kelime_dk <= 1000 && kaynakAdi(g, x.kaynak));
@@ -345,7 +364,7 @@ ESP.Belge = (function(){
       deger:{ kelimeDk:Math.round(d), kaynak:k, at, kayitId:kid },
       onizleme:{ baslik:yz('esp.core.belge.okuma-hizi-dakikada') + Math.round(d) + ' kelime (kaynaklı, ' + hizlar.length + ' değerin ortancası)',
         satirlar:hizlar.map(x => x.kelime_dk + ' kelime/dk' + (x.ne ? ' — ' + x.ne : '')),
-        uyari:['Kitap başına süre bu hızdan hesaplanır; kitap uzunluğu (≈ 80 bin kelime) yine '
+        uyari:[yz('esp.core.belge.kitap-basina-sure-bu-hizdan')
           + 'varsayımdır. Birkaç kitap bitirince kendi ölçümün bunun yerine geçer.'] } };
   }
 
@@ -367,10 +386,10 @@ ESP.Belge = (function(){
 
   async function uygula(p){
     const kid = Number(p && p.kayit_id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Kayıt kimliği geçersiz.' };
-    if(!baglanti()) return { ok:false, error:'HKM bağlantısı kurulmamış; belge alınamaz.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('esp.core.belge.kayit-kimligi-gecersiz') };
+    if(!baglanti()) return { ok:false, error:yz('esp.core.belge.hkm-baglantisi-kurulmamis-be') };
     const kayit = await kayitCek(kid);
-    if(!kayit) return { ok:false, error:'Belge HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    if(!kayit) return { ok:false, error:yz('esp.core.belge.belge-hkm-den-alinamadi-hkm') };
     const s = sina(kayit, p);
     if(!s.ok) return { ok:false, error:s.why };
     if(s.tur === 'dayanak'){
@@ -378,7 +397,7 @@ ESP.Belge = (function(){
       const onceki = ESP.S.dayanaklar[s.anahtar] || null;
       ESP.S.dayanaklar[s.anahtar] = s.deger;
       await ESP.Store.set(DAYANAK_ANAHTAR, ESP.S.dayanaklar);
-      return { ok:true, note:(s.anahtar === 'cefr' ? 'CEFR saat tablosu' : 'Okuma hızı')
+      return { ok:true, note:(s.anahtar === 'cefr' ? yz('esp.core.belge.cefr-saat-tablosu-2') : yz('esp.core.belge.okuma-hizi'))
         + ' artık kaynaklı; dil ve okuma hedefleri bu dayanakla hesaplanır.',
         geriAl:{ kayitId:kid, dayanak:s.anahtar, onceki } };
     }

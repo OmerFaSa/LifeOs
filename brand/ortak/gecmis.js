@@ -20,6 +20,13 @@
         ilk dokunuş düğmeyi «Silinsin mi?»ye çevirir.
      5. ÇİZİM YALNIZ İŞARETLEME ÜRETİR. Uygulayan modülün kendi kodudur
         (Office.setChat / clearChat); bu dosya modüle yazmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.gecmis.henuz-gecmis-sohbet-yok-yeni':'Henüz geçmiş sohbet yok. «Yeni sohbet» dediğinde açık konuşma buraya geçer.',
+  'ortak.gecmis.silinsin-mi-bir-daha-dokun':'Silinsin mi? Bir daha dokun',
+  'ortak.gecmis.bu-sohbeti-sil':'Bu sohbeti sil',
+  'ortak.gecmis.silinsin-mi':'Silinsin mi?',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -83,14 +90,14 @@ LIFEOS.GECMIS = (function(){
   /* Kenar listesi. act: { ac, sil } eylem adları (modülün handle'ı). */
   function listeHtml(modul, ajan, act){
     const l = liste(modul, ajan);
-    if(!l.length) return '<p class="gecmis__bos">Henüz geçmiş sohbet yok. «Yeni sohbet» dediğinde açık konuşma buraya geçer.</p>';
+    if(!l.length) return ('<p class="gecmis__bos">' + yz('ortak.gecmis.henuz-gecmis-sohbet-yok-yeni') + '</p>');
     return '<ul class="gecmis">' + l.map(k => '<li class="gecmis__satir">'
       + '<button type="button" class="gecmis__ac" data-act="' + kac(act.ac) + '" data-id="' + kac(k.id) + '">'
       + '<span class="gecmis__ad">' + kac(baslik(k)) + '</span><small class="gecmis__zaman">' + kac(zaman(k.zaman))
       + ' · ' + k.mesajlar.length + ' mesaj</small></button>'
       + '<button type="button" class="gecmis__sil' + (silOnay === k.id ? ' is-onay' : '') + '" data-act="' + kac(act.sil) + '" data-id="' + kac(k.id)
-      + '" aria-label="' + (silOnay === k.id ? 'Silinsin mi? Bir daha dokun' : 'Bu sohbeti sil') + '" title="' + (silOnay === k.id ? 'Silinsin mi?' : 'Sil') + '">'
-      + (silOnay === k.id ? 'Silinsin mi?' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>')
+      + '" aria-label="' + (silOnay === k.id ? yz('ortak.gecmis.silinsin-mi-bir-daha-dokun') : yz('ortak.gecmis.bu-sohbeti-sil')) + '" title="' + (silOnay === k.id ? yz('ortak.gecmis.silinsin-mi') : 'Sil') + '">'
+      + (silOnay === k.id ? yz('ortak.gecmis.silinsin-mi') : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>')
       + '</button></li>').join('') + '</ul>';
   }
 

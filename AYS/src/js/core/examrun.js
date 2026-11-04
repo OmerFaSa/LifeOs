@@ -6,6 +6,12 @@
    Kural motoru otoritedir: burada yalnız süre ve işaret toplanır; net,
    medyan ve karar hesabı her zaman R.Calc'te kalır. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.examrun.sablon-bulunamadi':'Şablon bulunamadı.',
+  'ays.core.examrun.isinma-sorunu-ilk-20-dakikad':'Isınma sorunu: ilk 20 dakikada isabet %',
+  'ays.core.examrun.denemeye-baslamadan-once-5-d':'Denemeye başlamadan önce 5 dakikalık kolay set çöz.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.examrun.yaptim':'Yaptım',
   'ays.core.examrun.zorlandim':'Zorlandım',
   'ays.core.examrun.atladim':'Atladım',
@@ -85,7 +91,7 @@ R.ExamRun = (function(){
     const tmpl = typeof template === 'string'
       ? R.EXAM_TEMPLATES.find(t => t.id === template)
       : template;
-    if(!tmpl) return { ok:false, reason:'Şablon bulunamadı.' };
+    if(!tmpl) return { ok:false, reason:yz('ays.core.examrun.sablon-bulunamadi') };
 
     run = {
       templateId:tmpl.id,
@@ -240,8 +246,8 @@ R.ExamRun = (function(){
       slowest:marks.slice().sort((a, b) => b.spent - a.spent).slice(0, 5),
       earlyRate, lateRate,
       warmup:(earlyRate != null && lateRate != null && lateRate - earlyRate >= 15)
-        ? 'Isınma sorunu: ilk 20 dakikada isabet %'+earlyRate+', sonrasında %'+lateRate+'. '
-          + 'Denemeye başlamadan önce 5 dakikalık kolay set çöz.'
+        ? yz('ays.core.examrun.isinma-sorunu-ilk-20-dakikad')+earlyRate+', sonrasında %'+lateRate+'. '
+          + yz('ays.core.examrun.denemeye-baslamadan-once-5-d')
         : null,
     };
   }

@@ -3,6 +3,17 @@
    «Kütüphane» adı Okuma'nın kendi bölümünde kalır (ad çakışması yok):
    burası BAM'dan gelenlerin dizinidir. Ürünler (özet, rapor, sunum) Ofis'ten
    taşındı; dil üniteleri burada listelenir, üzerinde çalışmak Dil'dedir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.kutuphane.dogrulanmadi-kaynaksiz-model':'Doğrulanmadı: kaynaksız, modelin bilgisidir. ',
+  'esp.kutuphane.karar-vermeden-once-bir-kayn':'Karar vermeden önce bir kaynağa bak.',
+  'esp.kutuphane.urunu-sil':'Ürünü sil',
+  'esp.kutuphane.urun-yalniz-bu-cihazdan-sili':'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
+  'esp.kutuphane.urunu-bu-cihazdan-sil':'Ürünü bu cihazdan sil',
+  'esp.kutuphane.bam-in-urettikleri':'BAM’ın ürettikleri',
+  'esp.kutuphane.bam-dan-gelen-urun-ve-unitel':'BAM’dan gelen ürün ve üniteler; kaynağı ve doğruluğu yanında yazar.',
+  'esp.kutuphane.defter-bu-acilista-yukleneme':'Defter bu açılışta yüklenemedi.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -66,14 +77,14 @@ ESP.Screens.kutuphane = (function(){
       if(!u) return;
       ESP.UI.sheet({ title:u.baslik, wide:true,
         subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
-        note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
-          + 'Karar vermeden önce bir kaynağa bak.' : null,
+        note:u.dogruluk === 'dogrulanmadi' ? yz('esp.kutuphane.dogrulanmadi-kaynaksiz-model')
+          + yz('esp.kutuphane.karar-vermeden-once-bir-kayn') : null,
         body:LIFEOS.Urun.cerceve(u) });
     },
     async 'urun-sil'(el){
       const id = el.dataset.id;
-      ESP.UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await ESP.Urunler.sil(id); ESP.UI.toast(yz('esp.kutuphane.silindi')); ESP.App.render(); }, true, 'Ürünü bu cihazdan sil');
+      ESP.UI.confirmSheet(yz('esp.kutuphane.urunu-sil'), yz('esp.kutuphane.urun-yalniz-bu-cihazdan-sili'),
+        async () => { await ESP.Urunler.sil(id); ESP.UI.toast(yz('esp.kutuphane.silindi')); ESP.App.render(); }, true, yz('esp.kutuphane.urunu-bu-cihazdan-sil'));
     },
   };
 
@@ -93,8 +104,8 @@ ESP.Screens.kutuphane = (function(){
   return {
     id:'kutuphane',
     title:yz('esp.kutuphane.kutuphanem'),
-    subtitle(){ return 'BAM’ın ürettikleri'; },
-    lede(){ return 'BAM’dan gelen ürün ve üniteler; kaynağı ve doğruluğu yanında yazar.'; },
+    subtitle(){ return yz('esp.kutuphane.bam-in-urettikleri'); },
+    lede(){ return yz('esp.kutuphane.bam-dan-gelen-urun-ve-unitel'); },
     actions(){ return ''; },
     render, handle,
   };
@@ -111,7 +122,7 @@ ESP.Screens.notlar = (function(){
   const D = () => (window.LIFEOS || {}).DEFTER;
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
   LIFEOS.PARCA.blok({ id:'notlar.kapali', sayfa:'notlar', yer:'ana', ad:'Notlar', kosul:() => !hazir(),
-    ciz:() => String(K.Kutu({ ad:yz('esp.kutuphane.notlar'), govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('esp.kutuphane.notlar'), govde:raw(('<p class="small muted">' + yz('esp.kutuphane.defter-bu-acilista-yukleneme') + '</p>')) })) });
   LIFEOS.PARCA.blok({ id:'notlar.pano', sayfa:'notlar', yer:'ana', sira:10, ad:'Defter özeti', kosul:() => hazir(),
     ciz:() => '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>' });
   LIFEOS.PARCA.blok({ id:'notlar.raf', sayfa:'notlar', yer:'ana', sira:20, ad:'Notlar ve belgeler', kosul:() => hazir(),

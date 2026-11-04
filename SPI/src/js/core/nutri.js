@@ -8,6 +8,12 @@
    hedefi kendiliginden yukselir ve C vitamini eslesmesi zorunlu hale gelir.
    Bu, Modul 1 ile Modul 2 arasindaki tek yonlu bagdir (labAdjust). */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.nutri.profilde-kilo-yok':'Profilde kilo yok',
+  'spi.core.nutri.yemek-bulunamadi':'Yemek bulunamadı.',
+  'spi.core.nutri.porsiyon-hesabi-icin-en-az':'Porsiyon hesabı için en az bir profilde kilo, boy ve doğum yılı gerekir.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.nutri.hesaplandi':'hesaplandı',
   'spi.core.nutri.ferritin-referans-araliginin':'Ferritin referans aralığının altında — demir deposu boşalmış.',
   'spi.core.nutri.ferritin-hedef-bandin-altind':'Ferritin hedef bandın altında.',
@@ -92,7 +98,7 @@ SP.Nutri = (function(){
     const kg = (SP.Model.kiloOf(p) || {}).kg || null;
     const list = SP.Model && SP.Model.workoutsOf ? SP.Model.workoutsOf(d) : [];
     const out = { date:d, seanslar:[], kcal:0, dakika:0, eksik:[], kayitVar:list.length > 0 };
-    if(!kg){ out.kcal = null; out.neden = 'Profilde kilo yok'; return out; }
+    if(!kg){ out.kcal = null; out.neden = yz('spi.core.nutri.profilde-kilo-yok'); return out; }
     list.forEach(w => {
       const items = (w.items || []).filter(Boolean);
       const dkToplam = Number(w.minutes) > 0 ? Number(w.minutes) : null;
@@ -609,9 +615,9 @@ SP.Nutri = (function(){
      yemek pisirme zorunlulugu boylece kalkar. */
   function householdSplit(foodId, totalGrams, members){
     const f = SP.FOOD_BY_ID[foodId];
-    if(!f) return { ok:false, error:'Yemek bulunamadı.' };
+    if(!f) return { ok:false, error:yz('spi.core.nutri.yemek-bulunamadi') };
     const list = (members || []).filter(m => SP.Model.kiloOf(m) && m.heightCm && m.birthYear);
-    if(!list.length) return { ok:false, error:'Porsiyon hesabı için en az bir profilde kilo, boy ve doğum yılı gerekir.' };
+    if(!list.length) return { ok:false, error:yz('spi.core.nutri.porsiyon-hesabi-icin-en-az') };
 
     /* Her uye icin gunluk kalori hedefi; bu ogunun payi hedefin %35'i sayilir
        (ana ogun varsayimi). Oran acikca yazilir, gizli sabit degildir. */

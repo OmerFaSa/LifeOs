@@ -21,6 +21,11 @@
    4. İSTEK SONRASI TAZELENİR. Modül King'e iş verdiğinde `lifeos:king`
       olayını yayar; kart hemen tazelenir. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.kingteklif.bearer':'Bearer ',
+  'ortak.kingteklif.teklif-onaylanamadi':'Teklif onaylanamadı (',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.kingteklif.hkm-bagli-degil-teklif-onayl':'HKM bağlı değil; teklif onaylanamadı.',
   'ortak.kingteklif.onayladin-ama-is-acilamadi':'Onayladın ama iş açılamadı: ',
   'ortak.kingteklif.onaylandi-is-emri':'Onaylandı: iş emri #',
@@ -59,7 +64,7 @@ LIFEOS.KingTeklif = (function(){
         const f = k.f;
         const res = await f(k.url + yol, {
           method:govde === undefined ? 'GET' : 'POST',
-          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+          headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.kingteklif.bearer') + k.token },
           body:govde === undefined ? undefined : JSON.stringify(govde),
           signal:ctrl ? ctrl.signal : undefined,
         });
@@ -89,7 +94,7 @@ LIFEOS.KingTeklif = (function(){
       if(!r.baglanti) return { ok:false, metin:yz('ortak.kingteklif.hkm-bagli-degil-teklif-onayl') };
       const g = r.govde || {};
       if(r.status !== 200 || !g.ok){
-        return { ok:false, metin:g.note || 'Teklif onaylanamadı (' + (r.status || 'bağlantı') + ').' };
+        return { ok:false, metin:g.note || yz('ortak.kingteklif.teklif-onaylanamadi') + (r.status || 'bağlantı') + ').' };
       }
       son = son.filter(x => String(x.id) !== String(id));
       const e = g.emir || {};

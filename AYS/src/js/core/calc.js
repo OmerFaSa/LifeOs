@@ -1,4 +1,100 @@
 /* KPI hesaplari, karar kapisi mantigi ve tetikleyiciler. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.calc.bu-ayin-degerlendirme-kurali':'Bu ayın değerlendirme kuralı',
+  'ays.core.calc.en-baskin-hata-etiketi':'En baskın hata etiketi ',
+  'ays.core.calc.hata-paretosunun-ilk-sirasi':'Hata paretosunun ilk sırası',
+  'ays.core.calc.konu-kapanisi':'Konu kapanışı %',
+  'ays.core.calc.konu-kapanis-orani-dusuk':'Konu kapanış oranı düşük',
+  'ays.core.calc.taban-skor-medyanin-belirgin':'Taban skor medyanın belirgin altında (',
+  'ays.core.calc.kotu-gun-dayanikliligi-zayif':'Kötü gün dayanıklılığı zayıf',
+  'ays.core.calc.kaynak-degistirmeden-mevcut':'Kaynak değiştirmeden mevcut hata paretosuna göre bir hafta hacmi %20 azalt ve analiz kalitesini artır.',
+  'ays.core.calc.varsayilan-guvenli-mudahale':'Varsayılan güvenli müdahale',
+  'ays.core.calc.son-iki-hafta':'Son iki hafta: %',
+  'ays.core.calc.ayt-medyani':'AYT medyanı ',
+  'ays.core.calc.temel-matematik':'Temel Matematik',
+  'ays.core.calc.tyt-matematik-medyani':'TYT Matematik medyanı ',
+  'ays.core.calc.ayt-matematik-medyani':'AYT Matematik medyanı ',
+  'ays.core.calc.son-3-medyan-ile-onceki':'Son 3 medyan ile önceki 3 medyan farkı ',
+  'ays.core.calc.hafta':'Hafta ',
+  'ays.core.calc.plan-tamamlama':'Plan tamamlama: ',
+  'ays.core.calc.soru':'Soru: ',
+  'ays.core.calc.tyt-medyan-son-3':'TYT medyan (son 3): ',
+  'ays.core.calc.davranis-serisi':'Davranış serisi: ',
+  'ays.core.calc.analiz-borcu':'Analiz borcu: ',
+  'ays.core.calc.konu-kapanisi-2':'Konu kapanışı: %',
+  'ays.core.calc.hiz-olculemiyor-son-4-haftad':'Hız ölçülemiyor: son 4 haftada ',
+  'ays.core.calc.kapanan-konu-arttikca-bu-hiz':'Kapanan konu arttıkça «bu hızla» tahmini açılır.',
+  'ays.core.calc.bu-hizla-haftada':'Bu hızla (haftada ',
+  'ays.core.calc.verimli-saat-icin-en-az':'Verimli saat için en az iki saat bandında ',
+  'ays.core.calc.en-isabetli-bandin':'En isabetli bandın ',
+  'ays.core.calc.saat-bantlari-arasinda-belir':'Saat bantları arasında belirgin fark yok (%',
+  'ays.core.calc.bir-yanlis':'Bir yanlış',
+  'ays.core.calc.acik-yanlisin-recetesi':'Açık yanlışın reçetesi: «',
+  'ays.core.calc.gunun-paragraf-cipasindan':'Günün paragraf çıpasından ',
+  'ays.core.calc.gunun-problem-cipasindan':'Günün problem çıpasından ',
+  'ays.core.calc.bugun-vadesi-gelen':'Bugün vadesi gelen ',
+  'ays.core.calc.siradaki-blogun-ilk':'Sıradaki bloğun ilk ',
+  'ays.core.calc.bugunun-isi-bitti':'Bugünün işi bitti',
+  'ays.core.calc.sureye-sigan-acik-is-yok':'Süreye sığan açık iş yok. Dinlenmek de plandır.',
+  'ays.core.calc.analiz-borcu-2':'Analiz borcu',
+  'ays.core.calc.denemenin-analizini-bitir':'Denemenin analizini bitir',
+  'ays.core.calc.analiz-edilmemis-deneme-anal':'Analiz edilmemiş deneme, analiz edilenden daha düşük değerlidir.',
+  'ays.core.calc.tekrar-borcu':'Tekrar borcu',
+  'ays.core.calc.borc-10-u-asti-yeni-kart':'Borç %10’u aştı; yeni kart üretmeden önce borcu sadeleştir.',
+  'ays.core.calc.pazartesi-ritueli':'Pazartesi ritüeli',
+  'ays.core.calc.haftalik-sozlesmeyi-imzala':'Haftalık sözleşmeyi imzala',
+  'ays.core.calc.gecen-haftanin-verisi-gorulm':'Geçen haftanın verisi görülmeden yeni hedef yazılmaz — 15 dakika.',
+  'ays.core.calc.pazar-ritueli':'Pazar ritüeli',
+  'ays.core.calc.haftalik-degerlendirmeyi-dol':'Haftalık değerlendirmeyi doldur',
+  'ays.core.calc.planlandi-yapildi-neden':'Planlandı / yapıldı / neden sapıldı / düzeltme — 30–40 dakika.',
+  'ays.core.calc.cumartesi-ritueli':'Cumartesi ritüeli',
+  'ays.core.calc.bugunun-denemesini-gir':'Bugünün denemesini gir',
+  'ays.core.calc.deneme-yalniz-skor-uretmez-g':'Deneme yalnız skor üretmez; gelecek haftanın ders dağılımını belirler.',
+  'ays.core.calc.bekleyen-olcum':'Bekleyen ölçüm',
+  'ays.core.calc.i-kinci-olcum-yapilmadan-kon':'İkinci ölçüm yapılmadan konu kapanmaz',
+  'ays.core.calc.devam-eden-blok':'Devam eden blok',
+  'ays.core.calc.zamanlayici-calisiyor-odak-m':'Zamanlayıcı çalışıyor — odak modunda kal.',
+  'ays.core.calc.siradaki-blok':'Sıradaki blok',
+  'ays.core.calc.gunluk-cipa':'Günlük çıpa',
+  'ays.core.calc.paragraf-cipasini-tamamla':'Paragraf çıpasını tamamla',
+  'ays.core.calc.problem-cipasini-tamamla':'Problem çıpasını tamamla',
+  'ays.core.calc.gunun-son-isi-due-kartlar':'Günün son işi: due kartlar.',
+  'ays.core.calc.hafiza-yoklamasi':'Hafıza yoklaması',
+  'ays.core.calc.aralikli-tekrar-dunlosky-201':'Aralıklı tekrar (Dunlosky 2013): Yanlış çözülen soruları zihinde kalıcılaştır.',
+  'ays.core.calc.gunun-isi-tamam':'Günün işi tamam',
+  'ays.core.calc.bloklar-cipalar-ve-kartlar-k':'Bloklar, çıpalar ve kartlar kapandı. Erken uyku bugünün son maddesi.',
+  'ays.core.calc.en-az-3-tam-tyt':'En az 3 tam TYT denemesi gerekir; öncesinde tahmin yanıltıcı olur.',
+  'ays.core.calc.bu-bant-yalniz-tyt-netinden':'Bu bant yalnız TYT netinden çıktı; AYT netinin TYT ile aynı ',
+  'ays.core.calc.i-zle-ve-not-al':'İzle ve not al',
+  'ays.core.calc.devam-eden-ders':'Devam eden ders',
+  'ays.core.calc.yarim-kalan-ders-kapanmamis':'Yarım kalan ders, kapanmamış konu demektir.',
+  'ays.core.calc.nottan-kart-uret':'Nottan kart üret',
+  'ays.core.calc.not-tek-basina-tekrar-degild':'Not tek başına tekrar değildir; geri çağırma kartı olmadan unutulur.',
+  'ays.core.calc.soru-coz':'Soru çöz',
+  'ays.core.calc.konuyu-bilmek-ile-soruda-tan':'Konuyu bilmek ile soruda tanımak farklı becerilerdir.',
+  'ays.core.calc.tekrari-kapat':'Tekrarı kapat',
+  'ays.core.calc.bugunun-kartlari-bitti':'Bugünün kartları bitti',
+  'ays.core.calc.aralikli-tekrar-konu-kapanis':'Aralıklı tekrar, konu kapanışının tek ucuz yoludur.',
+  'ays.core.calc.analizi-bitir':'Analizi bitir',
+  'ays.core.calc.analiz-edilmemis-deneme-anal-2':'Analiz edilmemiş deneme, analiz edilenden daha az değerlidir.',
+  'ays.core.calc.mola-ver':'Mola ver',
+  'ays.core.calc.bugun-mola-alinmadi':'Bugün mola alınmadı',
+  'ays.core.calc.mola-dinlenme-degil-pekisme':'Mola dinlenme değil, pekişme aralığıdır. Blok arası 5–15 dakika.',
+  'ays.core.calc.bugun':'Bugün ',
+  'ays.core.calc.uygun-mesgale-bulunamadi':'Uygun meşgale bulunamadı.',
+  'ays.core.calc.uzun-blok-sonrasi':'Uzun blok sonrası ',
+  'ays.core.calc.kisa-blok-sonrasi':'Kısa blok sonrası ',
+  'ays.core.calc.minimum-gun-tutuldu':'Minimum gün tutuldu',
+  'ays.core.calc.uyku-hedefi-tutuldu':'Uyku hedefi tutuldu',
+  'ays.core.calc.analiz-borcu-yok':'Analiz borcu yok',
+  'ays.core.calc.tekrar-kapandi':'Tekrar kapandı',
+  'ays.core.calc.gun-tam-kapandi':'Gün tam kapandı',
+  'ays.core.calc.bugun-kazanilan':'Bugün kazanılan',
+  'ays.core.calc.henuz-kazanilmadi':'Henüz kazanılmadı',
+  'ays.core.calc.dort-davranisin-dordu-de-tut':'Dört davranışın dördü de tuttu. Ödül nete değil bu düzene bağlıdır.',
+  'ays.core.calc.odul-nete-degil-davranisa-ba':'Ödül nete değil davranışa bağlıdır: düzen, analizin zamanında bitmesi, uyku.',
+});
+
 
 window.R = window.R || {};
 
@@ -266,7 +362,7 @@ R.Calc = (function(){
     out.push({
       id:'gate-rule',
       text:gate.note,
-      why:'Bu ayın değerlendirme kuralı' + (tytStatus === 'below' ? ' — TYT medyanı gözlenen bandın altında.' : '.'),
+      why:yz('ays.core.calc.bu-ayin-degerlendirme-kurali') + (tytStatus === 'below' ? ' — TYT medyanı gözlenen bandın altında.' : '.'),
     });
 
     const tags = topTags(2);
@@ -274,19 +370,19 @@ R.Calc = (function(){
       const t = tags[0];
       out.push({
         id:'tag-block',
-        text:'En baskın hata etiketi '+t.tag+' ('+R.ERROR_TAGS[t.tag].name+', '+t.count+' kayıt, %'+t.pct+') → gelecek haftaya 2 ek blok: '+R.ERROR_TAGS[t.tag].recipe+'.',
-        why:'Hata paretosunun ilk sırası',
+        text:yz('ays.core.calc.en-baskin-hata-etiketi')+t.tag+' ('+R.ERROR_TAGS[t.tag].name+', '+t.count+' kayıt, %'+t.pct+') → gelecek haftaya 2 ek blok: '+R.ERROR_TAGS[t.tag].recipe+'.',
+        why:yz('ays.core.calc.hata-paretosunun-ilk-sirasi'),
       });
     }
 
     const closure = overallClosure();
     const base = examBase('TYT');
     if(closure.pct < 55 && closure.total){
-      out.push({ id:'closure', text:'Konu kapanışı %'+closure.pct+' — yeni kaynak açma; açık konuları plana taşı ve ikinci ölçümleri tamamla.', why:'Konu kapanış oranı düşük' });
+      out.push({ id:'closure', text:yz('ays.core.calc.konu-kapanisi')+closure.pct+' — yeni kaynak açma; açık konuları plana taşı ve ikinci ölçümleri tamamla.', why:yz('ays.core.calc.konu-kapanis-orani-dusuk') });
     }else if(base != null && tyt.last3 != null && base < tyt.last3 - 6){
-      out.push({ id:'base', text:'Taban skor medyanın belirgin altında ('+base+' / '+tyt.last3+') — bir hafta hacmi %20 azalt, uyku ve analiz kalitesini düzelt.', why:'Kötü gün dayanıklılığı zayıf' });
+      out.push({ id:'base', text:yz('ays.core.calc.taban-skor-medyanin-belirgin')+base+' / '+tyt.last3+') — bir hafta hacmi %20 azalt, uyku ve analiz kalitesini düzelt.', why:yz('ays.core.calc.kotu-gun-dayanikliligi-zayif') });
     }else{
-      out.push({ id:'volume', text:'Kaynak değiştirmeden mevcut hata paretosuna göre bir hafta hacmi %20 azalt ve analiz kalitesini artır.', why:'Varsayılan güvenli müdahale' });
+      out.push({ id:'volume', text:yz('ays.core.calc.kaynak-degistirmeden-mevcut'), why:yz('ays.core.calc.varsayilan-guvenli-mudahale') });
     }
 
     return { suggestions:out.slice(0,3), tytStatus, aytStatus, tyt, ayt };
@@ -304,26 +400,26 @@ R.Calc = (function(){
 
     const p1 = planCompletion(cur-1), p2 = planCompletion(cur-2);
     if(p1 != null && p2 != null && p1 < 80 && p2 < 80){
-      hits.push({ id:'two-weeks-behind', detail:'Son iki hafta: %'+p1+' ve %'+p2+' plan tamamlama.' });
+      hits.push({ id:'two-weeks-behind', detail:yz('ays.core.calc.son-iki-hafta')+p1+' ve %'+p2+' plan tamamlama.' });
     }
 
     const ayt = medianTrend('AYT');
     const month = U.monthName(U.today());
     if((month === 'Mart' || month === 'Nisan') && ayt.last3 != null && ayt.last3 < 20){
-      hits.push({ id:'ayt-late', detail:'AYT medyanı '+ayt.last3+' — 20 netin altında.' });
+      hits.push({ id:'ayt-late', detail:yz('ays.core.calc.ayt-medyani')+ayt.last3+' — 20 netin altında.' });
     }
 
-    const tytMath = testMedian('Temel Matematik','TYT');
+    const tytMath = testMedian(yz('ays.core.calc.temel-matematik'),'TYT');
     const aytMath = testMedian('Matematik','AYT');
     if((month === 'Ekim' || month === 'Kasım') && tytMath != null && tytMath < 8){
-      hits.push({ id:'math-weak', detail:'TYT Matematik medyanı '+U.fmtNet(tytMath)+' — 8 netin altında.' });
+      hits.push({ id:'math-weak', detail:yz('ays.core.calc.tyt-matematik-medyani')+U.fmtNet(tytMath)+' — 8 netin altında.' });
     }else if((month === 'Mart' || month === 'Nisan') && aytMath != null && aytMath < 10){
-      hits.push({ id:'math-weak', detail:'AYT Matematik medyanı '+U.fmtNet(aytMath)+' — 10 netin altında.' });
+      hits.push({ id:'math-weak', detail:yz('ays.core.calc.ayt-matematik-medyani')+U.fmtNet(aytMath)+' — 10 netin altında.' });
     }
 
     const tyt = medianTrend('TYT');
     if(tyt.count >= 4 && tyt.delta != null && Math.abs(tyt.delta) < 1.5){
-      hits.push({ id:'flat-nets', detail:'Son 3 medyan ile önceki 3 medyan farkı '+tyt.delta+' net.' });
+      hits.push({ id:'flat-nets', detail:yz('ays.core.calc.son-3-medyan-ile-onceki')+tyt.delta+' net.' });
     }
 
     let gap = 0;
@@ -425,13 +521,13 @@ R.Calc = (function(){
     const qr = questionRealization(n);
     const tyt = medianTrend('TYT');
     return [
-      'Hafta ' + n + ' özeti',
-      'Plan tamamlama: ' + (comp == null ? '—' : '%' + comp),
-      'Soru: ' + (qr ? qr.solved + ' / ' + qr.target : '—'),
-      'TYT medyan (son 3): ' + (tyt.last3 == null ? '—' : U.fmtNet(tyt.last3)),
-      'Davranış serisi: ' + behaviorStreak().streak + ' gün',
-      'Analiz borcu: ' + analysisDebt().length,
-      'Konu kapanışı: %' + overallClosure().pct,
+      yz('ays.core.calc.hafta') + n + ' özeti',
+      yz('ays.core.calc.plan-tamamlama') + (comp == null ? '—' : '%' + comp),
+      yz('ays.core.calc.soru') + (qr ? qr.solved + ' / ' + qr.target : '—'),
+      yz('ays.core.calc.tyt-medyan-son-3') + (tyt.last3 == null ? '—' : U.fmtNet(tyt.last3)),
+      yz('ays.core.calc.davranis-serisi') + behaviorStreak().streak + ' gün',
+      yz('ays.core.calc.analiz-borcu') + analysisDebt().length,
+      yz('ays.core.calc.konu-kapanisi-2') + overallClosure().pct,
     ].join('\n');
   }
 
@@ -454,15 +550,15 @@ R.Calc = (function(){
     const kalanGun = U.diffDays(bugun, R.PLAN.examTytISO);
     if(son4 < 2 || !(kalanGun > 0)){
       return { etiket:'veri yok', kapali, toplam, kalanGun,
-        metin:'Hız ölçülemiyor: son 4 haftada ' + son4 + ' konu kapandı (en az 2 gerekir). '
-          + 'Kapanan konu arttıkça «bu hızla» tahmini açılır.' };
+        metin:yz('ays.core.calc.hiz-olculemiyor-son-4-haftad') + son4 + ' konu kapandı (en az 2 gerekir). '
+          + yz('ays.core.calc.kapanan-konu-arttikca-bu-hiz') };
     }
     const hiz = son4 / 4;
     const hafta = kalanGun / 7;
     const beklenen = Math.min(toplam, Math.round(kapali + hiz * hafta));
     const yuzde = Math.round(100 * beklenen / toplam);
     return { etiket:'tahmin', hiz, kapali, toplam, kalanGun, beklenen, yuzde,
-      metin:'Bu hızla (haftada ' + U.round(hiz, 1) + ' konu, son 4 hafta) sınava kadar ~'
+      metin:yz('ays.core.calc.bu-hizla-haftada') + U.round(hiz, 1) + ' konu, son 4 hafta) sınava kadar ~'
         + beklenen + '/' + toplam + ' konu kapanır, %' + yuzde + ' (tahmin; hız değişirse değişir).' };
   }
 
@@ -511,7 +607,7 @@ R.Calc = (function(){
     const olcu = bantlar.filter(b => b.isabet != null).sort((a, c) => c.isabet - a.isabet);
     if(olcu.length < 2){
       return { etiket:'veri yok', bantlar, enIyi:null,
-        metin:'Verimli saat için en az iki saat bandında ' + VS_BLOK + ' blok ve ' + VS_SORU
+        metin:yz('ays.core.calc.verimli-saat-icin-en-az') + VS_BLOK + ' blok ve ' + VS_SORU
           + ' soru gerekir (son ' + VS_GUN + ' gün). Bloğu zamanlayıcıyla çalışıp doğru sayısını '
           + 'girdikçe ölçülür.' };
     }
@@ -519,10 +615,10 @@ R.Calc = (function(){
     const enIyi = fark >= VS_FARK ? olcu[0] : null;
     return { etiket:'hesaplandı', bantlar, enIyi, fark,
       metin:enIyi
-        ? 'En isabetli bandın ' + enIyi.ad + ': %' + enIyi.isabet + ' (' + enIyi.soru + ' soru); '
+        ? yz('ays.core.calc.en-isabetli-bandin') + enIyi.ad + ': %' + enIyi.isabet + ' (' + enIyi.soru + ' soru); '
           + olcu[1].ad + ' %' + olcu[1].isabet + '. Zor dersi bu banda koymak isabeti artırabilir '
           + '(son ' + VS_GUN + ' gün, hesaplandı).'
-        : 'Saat bantları arasında belirgin fark yok (%' + olcu[0].isabet + ' ve %' + olcu[1].isabet
+        : yz('ays.core.calc.saat-bantlari-arasinda-belir') + olcu[0].isabet + ' ve %' + olcu[1].isabet
           + '); saat seçimi isabeti değiştirmiyor görünüyor.' };
   }
 
@@ -554,8 +650,8 @@ R.Calc = (function(){
     const recete = openErrors().filter(e => !e.repairDoneAt && e.recipe);
     if(recete.length){
       return { key:'onbes-recete', icon:'edit', label:sure + ' dakikam var',
-        title:(recete[0].topic || 'Bir yanlış') + ': reçeteyi yap', dk:10,
-        why:'Açık yanlışın reçetesi: «' + String(recete[0].recipe).slice(0, 80) + '» (~10 dakika, tahmin).',
+        title:(recete[0].topic || yz('ays.core.calc.bir-yanlis')) + ': reçeteyi yap', dk:10,
+        why:yz('ays.core.calc.acik-yanlisin-recetesi') + String(recete[0].recipe).slice(0, 80) + '» (~10 dakika, tahmin).',
         route:'cards', tone:'normal' };
     }
     const pa = day && (Number(day.paragraphActual) || 0), qa = day && (Number(day.problemActual) || 0);
@@ -563,32 +659,32 @@ R.Calc = (function(){
       const n = Math.min(day.paragraphTarget - pa, Math.floor(sure / 3));
       return Object.assign({ key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
         title:n + ' paragraf sorusu çöz', dk:n * 3,
-        why:'Günün paragraf çıpasından ' + (day.paragraphTarget - pa)
+        why:yz('ays.core.calc.gunun-paragraf-cipasindan') + (day.paragraphTarget - pa)
           + ' kaldı; soru başı ~3 dakika (tahmin).' + paragrafSeti().not, tone:'normal' }, paragrafSeti().yol);
     }
     if(day && qa < day.problemTarget){
       const n = Math.min(day.problemTarget - qa, Math.floor(sure / 3));
       return { key:'onbes-problem', icon:'chart', label:sure + ' dakikam var',
         title:n + ' problem sorusu çöz', dk:n * 3,
-        why:'Günün problem çıpasından ' + (day.problemTarget - qa) + ' kaldı.', tone:'normal' };
+        why:yz('ays.core.calc.gunun-problem-cipasindan') + (day.problemTarget - qa) + ' kaldı.', tone:'normal' };
     }
     const vade = dueCards();
     if(vade.length){
       const n = kart(vade.length);
       return { key:'onbes-kart', icon:'cards', label:sure + ' dakikam var',
         title:n + ' kart tekrar et', dk:n,
-        why:'Bugün vadesi gelen ' + vade.length + ' kart var; kart başı ~1 dakika (tahmin).',
+        why:yz('ays.core.calc.bugun-vadesi-gelen') + vade.length + ' kart var; kart başı ~1 dakika (tahmin).',
         route:'cards', tone:'normal' };
     }
     const next = day && day.blocks.find(b => b.status === 'pending' && b.slot !== 'Dinlenme');
     if(next){
       return { key:'onbes-blok', icon:'play', label:sure + ' dakikam var',
         title:next.topic, dk:sure, blockId:next.id, act:'timer-start',
-        why:'Sıradaki bloğun ilk ' + sure + ' dakikası; bitmezse blok kaldığı yerden sürer.', tone:'normal' };
+        why:yz('ays.core.calc.siradaki-blogun-ilk') + sure + ' dakikası; bitmezse blok kaldığı yerden sürer.', tone:'normal' };
     }
     return { key:'onbes-yok', icon:'check', label:sure + ' dakikam var',
-      title:'Bugünün işi bitti', dk:0,
-      why:'Süreye sığan açık iş yok. Dinlenmek de plandır.', tone:'calm' };
+      title:yz('ays.core.calc.bugunun-isi-bitti'), dk:0,
+      why:yz('ays.core.calc.sureye-sigan-acik-is-yok'), tone:'calm' };
   }
 
   function nextAction(){
@@ -601,71 +697,71 @@ R.Calc = (function(){
 
     const debt = analysisDebt();
     if(debt.length){
-      return { key:'analysis', icon:'exam', label:'Analiz borcu',
-        title:debt.length === 1 ? 'Denemenin analizini bitir' : debt.length+' denemenin analizini bitir',
-        why:'Analiz edilmemiş deneme, analiz edilenden daha düşük değerlidir.',
+      return { key:'analysis', icon:'exam', label:yz('ays.core.calc.analiz-borcu-2'),
+        title:debt.length === 1 ? yz('ays.core.calc.denemenin-analizini-bitir') : debt.length+' denemenin analizini bitir',
+        why:yz('ays.core.calc.analiz-edilmemis-deneme-anal'),
         route:'exams', tone:'urgent' };
     }
 
     const overdue = overdueCards();
     if(overdue.length >= 5 || cardDebt() > 10){
-      return { key:'cards', icon:'cards', label:'Tekrar borcu',
+      return { key:'cards', icon:'cards', label:yz('ays.core.calc.tekrar-borcu'),
         title:overdue.length+' gecikmiş kartı çöz',
-        why:'Borç %10’u aştı; yeni kart üretmeden önce borcu sadeleştir.',
+        why:yz('ays.core.calc.borc-10-u-asti-yeni-kart'),
         route:'cards', tone:'urgent' };
     }
 
     if(!beforeStart && dow === 0 && week && !week.signedAt){
-      return { key:'contract', icon:'week', label:'Pazartesi ritüeli',
-        title:'Haftalık sözleşmeyi imzala',
-        why:'Geçen haftanın verisi görülmeden yeni hedef yazılmaz — 15 dakika.',
+      return { key:'contract', icon:'week', label:yz('ays.core.calc.pazartesi-ritueli'),
+        title:yz('ays.core.calc.haftalik-sozlesmeyi-imzala'),
+        why:yz('ays.core.calc.gecen-haftanin-verisi-gorulm'),
         route:'week', tone:'ritual' };
     }
     if(!beforeStart && dow === 6 && !S.reviews[M.weekId(n)]){
-      return { key:'review', icon:'check', label:'Pazar ritüeli',
-        title:'Haftalık değerlendirmeyi doldur',
-        why:'Planlandı / yapıldı / neden sapıldı / düzeltme — 30–40 dakika.',
+      return { key:'review', icon:'check', label:yz('ays.core.calc.pazar-ritueli'),
+        title:yz('ays.core.calc.haftalik-degerlendirmeyi-dol'),
+        why:yz('ays.core.calc.planlandi-yapildi-neden'),
         route:'week', act:'open-review', tone:'ritual' };
     }
     if(!beforeStart && dow === 5 && !S.exams.some(e => e.date === todayISO)){
-      return { key:'exam', icon:'exam', label:'Cumartesi ritüeli',
-        title:'Bugünün denemesini gir',
-        why:'Deneme yalnız skor üretmez; gelecek haftanın ders dağılımını belirler.',
+      return { key:'exam', icon:'exam', label:yz('ays.core.calc.cumartesi-ritueli'),
+        title:yz('ays.core.calc.bugunun-denemesini-gir'),
+        why:yz('ays.core.calc.deneme-yalniz-skor-uretmez-g'),
         route:'exams', act:'new-exam', tone:'ritual' };
     }
 
     const pending = pendingSecondChecks().filter(p => p.overdue);
     if(pending.length){
-      return { key:'second-check', icon:'book', label:'Bekleyen ölçüm',
+      return { key:'second-check', icon:'book', label:yz('ays.core.calc.bekleyen-olcum'),
         title:pending[0].topicName+' için 7. gün testi',
-        why:'İkinci ölçüm yapılmadan konu kapanmaz'+(pending.length > 1 ? ' — '+pending.length+' konu bekliyor.' : '.'),
+        why:yz('ays.core.calc.i-kinci-olcum-yapilmadan-kon')+(pending.length > 1 ? ' — '+pending.length+' konu bekliyor.' : '.'),
         route:'subjects', tone:'normal' };
     }
 
     if(day){
       const running = day.blocks.find(b => b.startedAt);
       if(running){
-        return { key:'running', icon:'clock', label:'Devam eden blok',
-          title:running.topic, why:'Zamanlayıcı çalışıyor — odak modunda kal.',
+        return { key:'running', icon:'clock', label:yz('ays.core.calc.devam-eden-blok'),
+          title:running.topic, why:yz('ays.core.calc.zamanlayici-calisiyor-odak-m'),
           act:'focus-open', tone:'active' };
       }
       const next = day.blocks.find(b => b.status === 'pending' && b.slot !== 'Dinlenme');
       if(next){
-        return { key:'block', icon:'play', label:'Sıradaki blok',
+        return { key:'block', icon:'play', label:yz('ays.core.calc.siradaki-blok'),
           title:next.topic,
           why:next.slot+' · '+next.targetMin+' dakika'+(next.targetQ ? ' · '+next.targetQ+' soru hedefi' : ''),
           act:'timer-start', blockId:next.id, tone:'normal' };
       }
       const pa = Number(day.paragraphActual) || 0, qa = Number(day.problemActual) || 0;
       if(pa < day.paragraphTarget){
-        return Object.assign({ key:'anchor', icon:'book', label:'Günlük çıpa',
-          title:'Paragraf çıpasını tamamla',
+        return Object.assign({ key:'anchor', icon:'book', label:yz('ays.core.calc.gunluk-cipa'),
+          title:yz('ays.core.calc.paragraf-cipasini-tamamla'),
           why:(day.paragraphTarget - pa)+' paragraf kaldı — çıpa konudan bağımsız düşmez.' + paragrafSeti().not,
           tone:'normal' }, paragrafSeti().yol);
       }
       if(qa < day.problemTarget){
-        return { key:'anchor2', icon:'chart', label:'Günlük çıpa',
-          title:'Problem çıpasını tamamla',
+        return { key:'anchor2', icon:'chart', label:yz('ays.core.calc.gunluk-cipa'),
+          title:yz('ays.core.calc.problem-cipasini-tamamla'),
           why:(day.problemTarget - qa)+' soru kaldı.',
           tone:'normal' };
       }
@@ -674,19 +770,19 @@ R.Calc = (function(){
     const due = dueCards();
     if(due.length){
       return { key:'due', icon:'cards', label:'Tekrar', title:due.length+' kart seni bekliyor',
-        why:'Günün son işi: due kartlar.', route:'cards', tone:'normal' };
+        why:yz('ays.core.calc.gunun-son-isi-due-kartlar'), route:'cards', tone:'normal' };
     }
 
     const yanlislar = R.OgrenTest ? R.OgrenTest.yanlislar() : [];
     if(yanlislar.length){
-      return { key:'hafiza', icon:'refresh', label:'Hafıza yoklaması',
+      return { key:'hafiza', icon:'refresh', label:yz('ays.core.calc.hafiza-yoklamasi'),
         title:yanlislar.length + ' yanlış soruyu yeniden çöz',
-        why:'Aralıklı tekrar (Dunlosky 2013): Yanlış çözülen soruları zihinde kalıcılaştır.',
+        why:yz('ays.core.calc.aralikli-tekrar-dunlosky-201'),
         route:'sorular', tab:'yanlis', tone:'normal' };
     }
 
-    return { key:'done', icon:'check', label:'Bugün', title:'Günün işi tamam',
-      why:'Bloklar, çıpalar ve kartlar kapandı. Erken uyku bugünün son maddesi.', tone:'calm' };
+    return { key:'done', icon:'check', label:'Bugün', title:yz('ays.core.calc.gunun-isi-tamam'),
+      why:yz('ays.core.calc.bloklar-cipalar-ve-kartlar-k'), tone:'calm' };
   }
 
   /* ---------- davranis serisi ----------
@@ -772,7 +868,7 @@ R.Calc = (function(){
     if(tyt.last3 == null){
       return {
         ok:false, position:'unknown', samples,
-        why:'En az 3 tam TYT denemesi gerekir; öncesinde tahmin yanıltıcı olur.',
+        why:yz('ays.core.calc.en-az-3-tam-tyt'),
       };
     }
 
@@ -811,7 +907,7 @@ R.Calc = (function(){
          hemen ustunde duran rozet ("Hedef bandinda" gibi) yine de kesin
          bir hukum kuruyordu. Ekran bu alani acikca gostermeli. */
       assumption:raw.kind === 'TYT'
-        ? 'Bu bant yalnız TYT netinden çıktı; AYT netinin TYT ile aynı '
+        ? yz('ays.core.calc.bu-bant-yalniz-tyt-netinden')
           + 'düzeyde geleceği varsayıldı. AYT denemesi eklenince bant '
           + 'gerçek karşılığını alır.'
         : null,
@@ -978,42 +1074,42 @@ R.Calc = (function(){
 
     // 1) izle / not al
     if(openNotes.length){
-      steps.push({ key:'watch', icon:'play', route:'learn', label:'İzle ve not al',
-        title:openNotes[0].title || 'Devam eden ders',
-        why:'Yarım kalan ders, kapanmamış konu demektir.', done:false });
+      steps.push({ key:'watch', icon:'play', route:'learn', label:yz('ays.core.calc.i-zle-ve-not-al'),
+        title:openNotes[0].title || yz('ays.core.calc.devam-eden-ders'),
+        why:yz('ays.core.calc.yarim-kalan-ders-kapanmamis'), done:false });
     }
     // 2) nottan kart
     if(noteNoCards.length){
-      steps.push({ key:'note-cards', icon:'cards', route:'learn', label:'Nottan kart üret',
+      steps.push({ key:'note-cards', icon:'cards', route:'learn', label:yz('ays.core.calc.nottan-kart-uret'),
         title:noteNoCards.length+' dersin notu karta dönüşmedi',
-        why:'Not tek başına tekrar değildir; geri çağırma kartı olmadan unutulur.', done:false });
+        why:yz('ays.core.calc.not-tek-basina-tekrar-degild'), done:false });
     }
     // 3) bloklar
     const blocks = day ? day.blocks.filter(b => b.slot !== 'Dinlenme') : [];
     const doneBlocks = blocks.filter(b => b.status === 'done').length;
     if(blocks.length){
-      steps.push({ key:'blocks', icon:'today', route:'today', label:'Soru çöz',
+      steps.push({ key:'blocks', icon:'today', route:'today', label:yz('ays.core.calc.soru-coz'),
         title:doneBlocks+'/'+blocks.length+' blok tamam',
-        why:'Konuyu bilmek ile soruda tanımak farklı becerilerdir.',
+        why:yz('ays.core.calc.konuyu-bilmek-ile-soruda-tan'),
         done:doneBlocks >= blocks.length });
     }
     // 4) due kartlar
     const due = dueCards().length;
-    steps.push({ key:'cards', icon:'cards', route:'cards', label:'Tekrarı kapat',
-      title:due ? due+' kart bekliyor' : 'Bugünün kartları bitti',
-      why:'Aralıklı tekrar, konu kapanışının tek ucuz yoludur.', done:due === 0 });
+    steps.push({ key:'cards', icon:'cards', route:'cards', label:yz('ays.core.calc.tekrari-kapat'),
+      title:due ? due+' kart bekliyor' : yz('ays.core.calc.bugunun-kartlari-bitti'),
+      why:yz('ays.core.calc.aralikli-tekrar-konu-kapanis'), done:due === 0 });
     // 5) analiz borcu
     const debt = analysisDebt();
     if(debt.length){
-      steps.push({ key:'analysis', icon:'exam', route:'exams', label:'Analizi bitir',
+      steps.push({ key:'analysis', icon:'exam', route:'exams', label:yz('ays.core.calc.analizi-bitir'),
         title:debt.length+' deneme analiz bekliyor',
-        why:'Analiz edilmemiş deneme, analiz edilenden daha az değerlidir.', done:false });
+        why:yz('ays.core.calc.analiz-edilmemis-deneme-anal-2'), done:false });
     }
     // 6) mola
     const taken = M.breaksOf(todayISO).length;
-    steps.push({ key:'break', icon:'moon', route:'today', label:'Mola ver',
-      title:taken ? taken+' mola alındı' : 'Bugün mola alınmadı',
-      why:'Mola dinlenme değil, pekişme aralığıdır. Blok arası 5–15 dakika.',
+    steps.push({ key:'break', icon:'moon', route:'today', label:yz('ays.core.calc.mola-ver'),
+      title:taken ? taken+' mola alındı' : yz('ays.core.calc.bugun-mola-alinmadi'),
+      why:yz('ays.core.calc.mola-dinlenme-degil-pekisme'),
       done:taken > 0 });
 
     const doneCount = steps.filter(s => s.done).length;
@@ -1034,7 +1130,7 @@ R.Calc = (function(){
     const running = day ? day.blocks.find(b => b.startedAt) : null;
 
     if(taken.length >= R.BREAK_RULE.maxPerDay){
-      return { ok:false, reason:'Bugün '+taken.length+' mola verildi. Bundan sonrası mola değil kaçınmadır.' };
+      return { ok:false, reason:yz('ays.core.calc.bugun')+taken.length+' mola verildi. Bundan sonrası mola değil kaçınmadır.' };
     }
 
     const longBlock = running && running.targetMin >= R.BREAK_RULE.shortAfterMin;
@@ -1052,7 +1148,7 @@ R.Calc = (function(){
     const fresh = pool.filter(a => usedIds.indexOf(a.id) < 0);
     const list = (fresh.length ? fresh : pool);
 
-    if(!list.length) return { ok:false, reason:'Uygun meşgale bulunamadı.' };
+    if(!list.length) return { ok:false, reason:yz('ays.core.calc.uygun-mesgale-bulunamadi') };
 
     // Gunun tarihine gore dondur — her acilista degismesin, gunluk sabit kalsin.
     const seed = (U.diffDays('2026-01-01', todayISO) + taken.length) % list.length;
@@ -1063,8 +1159,8 @@ R.Calc = (function(){
       ok:true, minutes, energy,
       picks,
       why:longBlock
-        ? 'Uzun blok sonrası '+minutes+' dakikalık mola pekişmeyi artırır.'
-        : 'Kısa blok sonrası '+minutes+' dakika yeter; uzun mola ritmi kırar.',
+        ? yz('ays.core.calc.uzun-blok-sonrasi')+minutes+' dakikalık mola pekişmeyi artırır.'
+        : yz('ays.core.calc.kisa-blok-sonrasi')+minutes+' dakika yeter; uzun mola ritmi kırar.',
     };
   }
 
@@ -1080,18 +1176,18 @@ R.Calc = (function(){
     const cardsClean = dueCards().length === 0;
 
     const earned = [];
-    if(min) earned.push({ key:'minimum', label:'Minimum gün tutuldu', icon:'check' });
-    if(sleep != null && sleep >= target - 0.5) earned.push({ key:'sleep', label:'Uyku hedefi tutuldu', icon:'moon' });
-    if(analysisClean) earned.push({ key:'analysis', label:'Analiz borcu yok', icon:'exam' });
-    if(cardsClean) earned.push({ key:'cards', label:'Tekrar kapandı', icon:'cards' });
+    if(min) earned.push({ key:'minimum', label:yz('ays.core.calc.minimum-gun-tutuldu'), icon:'check' });
+    if(sleep != null && sleep >= target - 0.5) earned.push({ key:'sleep', label:yz('ays.core.calc.uyku-hedefi-tutuldu'), icon:'moon' });
+    if(analysisClean) earned.push({ key:'analysis', label:yz('ays.core.calc.analiz-borcu-yok'), icon:'exam' });
+    if(cardsClean) earned.push({ key:'cards', label:yz('ays.core.calc.tekrar-kapandi'), icon:'cards' });
 
     const all = earned.length >= 4;
     return {
       earned, streak, all,
-      title: all ? 'Gün tam kapandı' : earned.length ? 'Bugün kazanılan' : 'Henüz kazanılmadı',
+      title: all ? yz('ays.core.calc.gun-tam-kapandi') : earned.length ? yz('ays.core.calc.bugun-kazanilan') : yz('ays.core.calc.henuz-kazanilmadi'),
       note: all
-        ? 'Dört davranışın dördü de tuttu. Ödül nete değil bu düzene bağlıdır.'
-        : 'Ödül nete değil davranışa bağlıdır: düzen, analizin zamanında bitmesi, uyku.',
+        ? yz('ays.core.calc.dort-davranisin-dordu-de-tut')
+        : yz('ays.core.calc.odul-nete-degil-davranisa-ba'),
     };
   }
 

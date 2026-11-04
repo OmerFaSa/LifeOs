@@ -24,6 +24,23 @@
    öneremez. Geri alma yalnız planın yazdığını geri alır: kullanıcı arada
    odağı ya da tabanı kendisi değiştirdiyse ezilmez. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.hedefplan.gereken-sure-hesaplanamadi':'Gereken süre hesaplanamadı.',
+  'esp.core.hedefplan.studyo-da-metronomla-olc':'Stüdyo’da metronomla ölç.',
+  'esp.core.hedefplan.hedefin-karari':'Hedefin kararı «',
+  'esp.core.hedefplan.bu-hedef-gunde-ortalama':'Bu hedef günde ortalama ',
+  'esp.core.hedefplan.gunluk-vakit':'Günlük vakit',
+  'esp.core.hedefplan.gunluk-taban':'Günlük taban',
+  'esp.core.hedefplan.kontrol-noktalari':'Kontrol noktaları',
+  'esp.core.hedefplan.tarihli-hedef':'Tarihli hedef',
+  'esp.core.hedefplan.hedefin-plani-da-kapandi-oda':'Hedefin planı da kapandı; odak ve günlük taban plandan önceki haline döndü.',
+  'esp.core.hedefplan.plan-basladigindan-beri-temi':'Plan başladığından beri temiz tempo kaydı yok; ilerleme ölçülemiyor.',
+  'esp.core.hedefplan.plan-basladigindan-beri-olcu':'Plan başladığından beri ölçülmüş çalışma yok; ilerleme ölçülemiyor.',
+  'esp.core.hedefplan.plan-yolunda':'Plan yolunda',
+  'esp.core.hedefplan.planin-onundesin':'Planın önündesin',
+  'esp.core.hedefplan.planin-gerisindesin':'Planın gerisindesin',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.hedefplan.hedef-bulunamadi':'Hedef bulunamadı.',
   'esp.core.hedefplan.bu-hedef-icin-plan-motoru':'Bu hedef için plan motoru henüz yok.',
   'esp.core.hedefplan.plan-yalniz-aktif-bir-hedef':'Plan yalnız aktif bir hedef için kurulur.',
@@ -127,7 +144,7 @@ ESP.HedefPlan = (function(){
     let bas = 0, hedefDeger = null, birim = null, saat = null;
     if(h.paket === 'dil'){
       const g = paket.gerekenSaat(h, {});
-      if(!(g.saat > 0)) return { ok:false, why:g.neden || 'Gereken süre hesaplanamadı.' };
+      if(!(g.saat > 0)) return { ok:false, why:g.neden || yz('esp.core.hedefplan.gereken-sure-hesaplanamadi') };
       hedefDeger = g.saat; birim = 'saat'; saat = g.saat;
     }else if(h.paket === 'okuma'){
       hedefDeger = h.fark != null ? h.fark : h.hedefDeger; birim = 'kitap';
@@ -136,7 +153,7 @@ ESP.HedefPlan = (function(){
     }else{
       const s = h.simdi && h.simdi.deger;
       if(!(s > 0)) return { ok:false, why:yz('esp.core.hedefplan.su-anki-temiz-tempon-bilinme')
-        + 'Stüdyo’da metronomla ölç.' };
+        + yz('esp.core.hedefplan.studyo-da-metronomla-olc') };
       if(!(h.hedefDeger > s)) return { ok:false, why:yz('esp.core.hedefplan.hedef-tempo-su-anki-temiz') };
       bas = s; hedefDeger = h.hedefDeger; birim = 'BPM';
     }
@@ -156,11 +173,11 @@ ESP.HedefPlan = (function(){
     const sonraki = seviye ? ESP.Curriculum.stepOf(disc, Math.min(5, seviye.rank + 1)) : null;
     const uyarilar = [];
     if(h.gerceklik && h.gerceklik.bant && h.gerceklik.bant !== 'gercekci'){
-      uyarilar.push('Hedefin kararı «' + (window.LIFEOS.Hedef.BANT_ADI[h.gerceklik.bant] || h.gerceklik.bant)
+      uyarilar.push(yz('esp.core.hedefplan.hedefin-karari') + (window.LIFEOS.Hedef.BANT_ADI[h.gerceklik.bant] || h.gerceklik.bant)
         + '» idi; plan senin tarihinle kuruldu.');
     }
     if(dk * gunler / 7 > taban){
-      uyarilar.push('Bu hedef günde ortalama ' + Math.round(dk * gunler / 7) + ' dakika istiyor; günlük '
+      uyarilar.push(yz('esp.core.hedefplan.bu-hedef-gunde-ortalama') + Math.round(dk * gunler / 7) + ' dakika istiyor; günlük '
         + 'taban ' + taban + ' dakikadan yükseltilir. Taban bütün disiplinlerin ortak vaktidir.');
     }
 
@@ -188,18 +205,18 @@ ESP.HedefPlan = (function(){
   function onizleme(plan){
     const rows = [
       { alan:'Hedef', once:'—', sonra:plan.ozet + ' · ' + U().fmtDate(plan.bitis) },
-      { alan:'Günlük vakit', once:'—', sonra:plan.gunlukDk + ' dk'
+      { alan:yz('esp.core.hedefplan.gunluk-vakit'), once:'—', sonra:plan.gunlukDk + ' dk'
         + (plan.haftalikGun < 7 ? ', haftada ' + plan.haftalikGun + ' gün' : ', her gün')
         + ' (haftada ' + sayiYaz(plan.haftalikSaat) + ' saat)' },
       { alan:'Odak', once:focusAdi(plan.odak.once), sonra:focusAdi(plan.odak.sonra) },
-      { alan:'Günlük taban', once:plan.taban.once + ' dk', sonra:plan.taban.sonra + ' dk'
+      { alan:yz('esp.core.hedefplan.gunluk-taban'), once:plan.taban.once + ' dk', sonra:plan.taban.sonra + ' dk'
         + (plan.taban.sonra === plan.taban.once ? ' (değişmez)' : '') },
     ];
     if(plan.bolumAc) rows.push({ alan:discAdi(plan.disc) + ' bölümü', once:'kapalı', sonra:'açık' });
     const ilk = plan.kontrol[0];
-    rows.push({ alan:'Kontrol noktaları', once:'yok', sonra:plan.kontrol.length + ' nokta · ilk '
+    rows.push({ alan:yz('esp.core.hedefplan.kontrol-noktalari'), once:'yok', sonra:plan.kontrol.length + ' nokta · ilk '
       + U().fmtDate(ilk.tarih) + ': beklenen ' + sayiYaz(ilk.beklenen) + ' ' + plan.birim });
-    rows.push({ alan:'Tarihli hedef', once:'—', sonra:U().fmtDate(plan.bitis) + ' (öncelik sırasına girer)' });
+    rows.push({ alan:yz('esp.core.hedefplan.tarihli-hedef'), once:'—', sonra:U().fmtDate(plan.bitis) + ' (öncelik sırasına girer)' });
     return rows;
   }
 
@@ -281,7 +298,7 @@ ESP.HedefPlan = (function(){
       u.state = 'undone'; u.undoneAt = new Date().toISOString();
       await ESP.Store.set('proposals/' + encodeURIComponent(u.id), u);
     }
-    return 'Hedefin planı da kapandı; odak ve günlük taban plandan önceki haline döndü.';
+    return yz('esp.core.hedefplan.hedefin-plani-da-kapandi-oda');
   }
 
   /* -------------------------------------------------------- ilerleme */
@@ -293,14 +310,14 @@ ESP.HedefPlan = (function(){
     const gecen = U().diffDays(plan.baslangic, bugun);
     if(!o || (plan.paket === 'okuma' && gecen <= 0)){
       return { durum:'veri_yok', sonraki, metin:plan.paket === 'enstruman'
-        ? 'Plan başladığından beri temiz tempo kaydı yok; ilerleme ölçülemiyor.'
-        : 'Plan başladığından beri ölçülmüş çalışma yok; ilerleme ölçülemiyor.' };
+        ? yz('esp.core.hedefplan.plan-basladigindan-beri-temi')
+        : yz('esp.core.hedefplan.plan-basladigindan-beri-olcu') };
     }
     const beklenen = beklenenAt(plan, bugun);
     const fark = yuvarla(o.deger - beklenen, 1);
     const tol = plan.paket === 'enstruman' ? 3 : plan.paket === 'okuma' ? 0.5 : Math.max(0.5, plan.haftalikSaat * 0.25);
     const durum = Math.abs(fark) <= tol ? 'yolunda' : fark > 0 ? 'onde' : 'geride';
-    const ad = { yolunda:'Plan yolunda', onde:'Planın önündesin', geride:'Planın gerisindesin' }[durum];
+    const ad = { yolunda:yz('esp.core.hedefplan.plan-yolunda'), onde:yz('esp.core.hedefplan.planin-onundesin'), geride:yz('esp.core.hedefplan.planin-gerisindesin') }[durum];
     const ne = plan.paket === 'dil' ? 'ölçülen pratik ' + sayiYaz(o.deger) + ' saat'
       : plan.paket === 'okuma' ? 'bitirilen kitap ' + o.deger
         : 'en yüksek temiz tempo ' + o.deger + ' BPM (beyan)';

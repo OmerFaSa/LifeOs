@@ -29,6 +29,19 @@
    çizer, kararı (düğme açık mı) verir. Silen ve yedek alan modülün kendi
    kodudur. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.guven.henuz-yedek-yok':'Henüz yedek yok',
+  'ortak.guven.son-yedek':'Son yedek',
+  'ortak.guven.son':'Son ',
+  'ortak.guven.simdi-yedek-al':'Şimdi yedek al',
+  'ortak.guven.donus-noktasi-alindi':'Dönüş noktası alındı',
+  'ortak.guven.once-donus-noktasi-al-siline':'Önce dönüş noktası al: silinen geri getirilemez, yalnız bu noktaya dönülebilir.',
+  'ortak.guven.donus-noktasi-al':'Dönüş noktası al',
+  'ortak.guven.onaylamak-icin-silinecek-say':'Onaylamak için silinecek sayıyı yaz:',
+  'ortak.guven.bu-kaydin-degisiklik-gecmisi':'Bu kaydın değişiklik geçmişi yok.',
+  'ortak.guven.kalici-sil':'Kalıcı sil',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.guven.sen':'Sen',
   'ortak.guven.merkez-onerisi':'Merkez önerisi',
   'ortak.guven.ofis-onerisi':'Ofis önerisi',
@@ -94,18 +107,18 @@ window.LIFEOS = window.LIFEOS || {};
     const r = yedekDurumu(d);
     let govde;
     if(!r.var){
-      govde = '<p class="yedek__bas">Henüz yedek yok</p>';
+      govde = ('<p class="yedek__bas">' + yz('ortak.guven.henuz-yedek-yok') + '</p>');
     }else{
-      govde = '<p class="yedek__bas">Son yedek ' + kac(r.yasMetni) + '</p>'
+      govde = ('<p class="yedek__bas">' + yz('ortak.guven.son-yedek') + ' ') + kac(r.yasMetni) + '</p>'
         + '<p class="yedek__alt">' + kac(r.zaman) + ' · '
         + (r.boyut ? kac(r.boyut) : 'boyut kayıtlı değil') + '</p>';
     }
     const iz = r.var ? yedekIzi(d.iz, d.bugun) : null;
-    const izHtml = iz ? '<div class="yedek__iz" role="img" aria-label="' + kac('Son ' + iz.gun + ' günde '
+    const izHtml = iz ? '<div class="yedek__iz" role="img" aria-label="' + kac(yz('ortak.guven.son') + iz.gun + ' günde '
       + iz.dolu + ' yedek günü') + '">' + iz.kutular.map(k => '<i class="doluluk__k'
       + (k.dolu ? ' doluluk__k--dolu' : '') + '" data-tarih="' + k.tarih + '"></i>').join('') + '</div>' : '';
     return '<div class="yedek' + (r.gerekli ? ' yedek--gerekli' : '') + '" data-oz="173">' + govde + izHtml
-      + '<button type="button" class="btn btn--sm" data-act="yedek-al"><span class="btn__label">Şimdi yedek al</span></button>'
+      + ('<button type="button" class="btn btn--sm" data-act="yedek-al"><span class="btn__label">' + yz('ortak.guven.simdi-yedek-al') + '</span></button>')
       + '</div>';
   }
 
@@ -142,12 +155,12 @@ window.LIFEOS = window.LIFEOS || {};
     const id = 'silme-' + String(o.id || 'k').replace(/[^a-zA-Z0-9_-]/g, '');
     const say = sayiMi(o.sayi) ? bicim(o.sayi) : '—';
     const d1 = o.donusNoktasi
-      ? '<li class="silme__adim silme__adim--tamam">Dönüş noktası alındı'
+      ? ('<li class="silme__adim silme__adim--tamam">' + yz('ortak.guven.donus-noktasi-alindi'))
         + (o.donusNoktasi.zaman ? ' · ' + kac(zamanMetni(o.donusNoktasi.zaman)) : '') + '</li>'
-      : '<li class="silme__adim">Önce dönüş noktası al: silinen geri getirilemez, yalnız bu noktaya dönülebilir.'
-        + ' <button type="button" class="btn btn--sm" data-act="silme-donus"><span class="btn__label">Dönüş noktası al</span></button></li>';
+      : ('<li class="silme__adim">' + yz('ortak.guven.once-donus-noktasi-al-siline'))
+        + (' <button type="button" class="btn btn--sm" data-act="silme-donus"><span class="btn__label">' + yz('ortak.guven.donus-noktasi-al') + '</span></button></li>');
     const d2 = '<li class="silme__adim' + (r.eksik.indexOf('onay') < 0 ? ' silme__adim--tamam' : '') + '">'
-      + '<label for="' + id + '">Onaylamak için silinecek sayıyı yaz: <b>' + kac(say) + '</b></label>'
+      + '<label for="' + id + ('">' + yz('ortak.guven.onaylamak-icin-silinecek-say') + ' <b>') + kac(say) + '</b></label>'
       + '<input class="silme__giris" id="' + id + '" inputmode="numeric" autocomplete="off" data-act="silme-yaz"'
       + (o.donusNoktasi ? '' : ' disabled') + ' value="' + kac(o.yazilan || '') + '"></li>';
     const dugme = (L.ONERI && L.ONERI.yikiciDugme)
@@ -196,7 +209,7 @@ window.LIFEOS = window.LIFEOS || {};
   function gecmisHtml(olaylar, o){
     o = o || {};
     const liste = gecmis(olaylar);
-    if(!liste.length) return '<p class="gecmis gecmis--bos" data-oz="179">Bu kaydın değişiklik geçmişi yok.</p>';
+    if(!liste.length) return ('<p class="gecmis gecmis--bos" data-oz="179">' + yz('ortak.guven.bu-kaydin-degisiklik-gecmisi') + '</p>');
     return '<ol class="gecmis" data-oz="179">' + liste.map(x => {
       const k = kaynakMetni(x);
       return '<li class="gecmis__s"' + (k.uyari ? ' data-uyari="' + k.uyari + '"' : '')
@@ -223,7 +236,7 @@ window.LIFEOS = window.LIFEOS || {};
        cihazlara da gider — brand/ortak/hesap.js). */
     const not = o.not ? '<p class="small silme-not">' + String(o.not).replace(/[&<>"']/g, c =>
       ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]) + '</p>' : '';
-    o.sheet({ title:o.baslik || 'Kalıcı sil', body:not + '<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
+    o.sheet({ title:o.baslik || yz('ortak.guven.kalici-sil'), body:not + '<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
     const kap = typeof document !== 'undefined' ? document.getElementById('silme-kap') : null;
     if(!kap) return null;
     kap.addEventListener('click', async e => {

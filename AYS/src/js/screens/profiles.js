@@ -4,6 +4,22 @@
    göremez. Gözetmen özeti yalnız özet sayıları okur, ham kaydı değil.
 
    Yazim bicimi: STIL.md. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.profiles.disa-aktarim-tum-calisma-ver':'Dışa aktarım tüm çalışma verini içerir. Başka birine ',
+  'ays.profiles.kiyas-motivasyon-aracidir-ka':'Kıyas motivasyon aracıdır, karar aracı değil. Kendi medyanın ve kendi konu ',
+  'ays.profiles.yeni-profil-bos-baslar-ve':'Yeni profil boş başlar ve kurulum sihirbazı açılır. ',
+  'ays.profiles.mevcut-profilin-verisi-etkil':'Mevcut profilin verisi etkilenmez.',
+  'ays.profiles.yeni-profil':'Yeni profil',
+  'ays.profiles.profil-degistir':'Profil değiştir',
+  'ays.profiles.sayfa-yeniden-yuklenecek-ve':'Sayfa yeniden yüklenecek ve o profilin verisi açılacak. Bu profilin verisi silinmez.',
+  'ays.profiles.profile-gec':'Profile geç',
+  'ays.profiles.ozet-guncellendi':'Özet güncellendi',
+  'ays.profiles.ozet-yazilamadi':'Özet yazılamadı',
+  'ays.profiles.bu-islem-mevcut-kurulumunu-d':'Bu işlem mevcut kurulumunu değiştirir ve planı yeniden üretir. ',
+  'ays.profiles.deneme-hata-ve-kart-kayitlar':'Deneme, hata ve kart kayıtların korunur.',
+  'ays.profiles.coklu-kullanim-aktarim-ve-go':'Çoklu kullanım, aktarım ve gözetmen özeti',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -128,7 +144,7 @@ R.Screens.profiles = (function(){
     return K.Card({
       title:yz('ays.profiles.profil-aktarimi'), sub:yz('ays.profiles.plani-ve-ayarlari-baska-ciha'),
       body:html`
-        ${K.Notice({ tone:'info', body:'Dışa aktarım tüm çalışma verini içerir. Başka birine '
+        ${K.Notice({ tone:'info', body:yz('ays.profiles.disa-aktarim-tum-calisma-ver')
           + 'yalnız planı vermek istersen “Yalnız kurulum” seçeneğini kullan: hedef, takvim, '
           + 'kapasite ve seviye gider; deneme ve hata kayıtların gitmez.' })}
         ${K.Row([
@@ -227,7 +243,7 @@ R.Screens.profiles = (function(){
               (x.b.diff > 0 ? '+' : '') + x.b.diff}${x.r.unit}</span>`,
           ]) })}
         ${K.Notice({ tone:'info', class:'mt-12',
-          body:'Kıyas motivasyon aracıdır, karar aracı değil. Kendi medyanın ve kendi konu '
+          body:yz('ays.profiles.kiyas-motivasyon-aracidir-ka')
              + 'kapanışın tek bağlayıcı ölçüdür; başkasının hızı seninkini geçersiz kılmaz.' })}`,
     });
   }
@@ -273,8 +289,8 @@ R.Screens.profiles = (function(){
       UI.sheet({
         title:yz('ays.profiles.profil-ekle'), subtitle:yz('ays.profiles.yeni-adayin-verisi-ayri-tutu'),
         body:String(K.Stack([
-          K.Notice({ tone:'info', body:'Yeni profil boş başlar ve kurulum sihirbazı açılır. '
-            + 'Mevcut profilin verisi etkilenmez.' }),
+          K.Notice({ tone:'info', body:yz('ays.profiles.yeni-profil-bos-baslar-ve')
+            + yz('ays.profiles.mevcut-profilin-verisi-etkil') }),
           K.Field({ label:yz('ays.profiles.profil-adi'), input:K.Input({ id:'pf-name', placeholder:yz('ays.profiles.or-kardesim') }) }),
         ])),
         footer:String(html`${K.Button({ label:yz('ays.profiles.vazgec'), act:'sheet-close' })}
@@ -282,7 +298,7 @@ R.Screens.profiles = (function(){
       });
     },
     async 'prof-create'(){
-      const name = (document.getElementById('pf-name').value || '').trim() || 'Yeni profil';
+      const name = (document.getElementById('pf-name').value || '').trim() || yz('ays.profiles.yeni-profil');
       const rec = await M.saveProfileEntry({ name });
       writeSnapshot();
       UI.closeSheet();
@@ -290,16 +306,16 @@ R.Screens.profiles = (function(){
     },
     async 'prof-switch'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Profil değiştir',
-        'Sayfa yeniden yüklenecek ve o profilin verisi açılacak. Bu profilin verisi silinmez.',
+      UI.confirmSheet(yz('ays.profiles.profil-degistir'),
+        yz('ays.profiles.sayfa-yeniden-yuklenecek-ve'),
         async () => {
           writeSnapshot();
           M.switchProfile(id);
-        }, false, 'Profile geç');
+        }, false, yz('ays.profiles.profile-gec'));
     },
     async 'prof-snapshot'(){
       const ok = writeSnapshot();
-      UI.toast(ok ? 'Özet güncellendi' : 'Özet yazılamadı');
+      UI.toast(ok ? yz('ays.profiles.ozet-guncellendi') : yz('ays.profiles.ozet-yazilamadi'));
       R.App.render();
     },
     async 'prof-export-setup'(){
@@ -322,8 +338,8 @@ R.Screens.profiles = (function(){
       UI.sheet({
         title:yz('ays.profiles.kurulum-yukle'), subtitle:yz('ays.profiles.yalniz-hedef-takvim-kapasite'),
         body:String(K.Stack([
-          K.Notice({ tone:'warn', body:'Bu işlem mevcut kurulumunu değiştirir ve planı yeniden üretir. '
-            + 'Deneme, hata ve kart kayıtların korunur.' }),
+          K.Notice({ tone:'warn', body:yz('ays.profiles.bu-islem-mevcut-kurulumunu-d')
+            + yz('ays.profiles.deneme-hata-ve-kart-kayitlar') }),
           K.Field({ label:yz('ays.profiles.kurulum-json-u'), input:K.Textarea({ id:'pf-in', rows:10,
             placeholder:yz('ays.profiles.disa-aktarilan-kurulum-metni') }) }),
         ])),
@@ -359,7 +375,7 @@ R.Screens.profiles = (function(){
     title:yz('ays.profiles.profiller'),
     subtitle(){
       const n = M.profileList().length;
-      return n > 1 ? n + ' profil · gözetmen ve kıyas' : 'Çoklu kullanım, aktarım ve gözetmen özeti';
+      return n > 1 ? n + ' profil · gözetmen ve kıyas' : yz('ays.profiles.coklu-kullanim-aktarim-ve-go');
     },
     actions(){ return ''; },
     render, handle, writeSnapshot,

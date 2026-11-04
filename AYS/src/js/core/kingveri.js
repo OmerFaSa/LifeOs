@@ -1,5 +1,18 @@
 /* KING VERISI — KING-4 §C olaylari ve §H yardim saglayicilari (gorev 040, belgeler/ekip/gorevler).
    Olay bicimi belgeler/ekip/KING-OLAY.md; tasiyici brand/ortak/olay.js. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.kingveri.calisma-suresi':'Çalışma süresi',
+  'ays.core.kingveri.soru-sayisi':'Soru sayısı',
+  'ays.core.kingveri.tamamlanan-blok':'Tamamlanan blok',
+  'ays.core.kingveri.gecersiz-kayit-kimligi':'Geçersiz kayıt kimliği.',
+  'ays.core.kingveri.kayit-bulunamadi':'Kayıt bulunamadı.',
+  'ays.core.kingveri.bilinmeyen-alan':'Bilinmeyen alan: ',
+  'ays.core.kingveri.deger-tam-sayi-olmalidir':'Değer tam sayı olmalıdır.',
+  'ays.core.kingveri.sure-1-ile-600-dakika':'Süre 1 ile 600 dakika arasında olmalıdır.',
+  'ays.core.kingveri.soru-sayisi-0-ile-1000':'Soru sayısı 0 ile 1000 arasında olmalıdır.',
+  'ays.core.kingveri.kaydedilemedi':'Kaydedilemedi: ',
+});
+
 
 window.R = window.R || {};
 
@@ -80,7 +93,7 @@ R.KingVeri = (function(){
         satirlar: [
           {
             id: 'calisma_dk',
-            ad: 'Çalışma süresi',
+            ad: yz('ays.core.kingveri.calisma-suresi'),
             deger: null,
             birim: 'dk',
             etiket: 'veri yok',
@@ -88,14 +101,14 @@ R.KingVeri = (function(){
           },
           {
             id: 'soru',
-            ad: 'Soru sayısı',
+            ad: yz('ays.core.kingveri.soru-sayisi'),
             deger: null,
             etiket: 'veri yok',
             onceki: null
           },
           {
             id: 'blok',
-            ad: 'Tamamlanan blok',
+            ad: yz('ays.core.kingveri.tamamlanan-blok'),
             deger: null,
             etiket: 'veri yok',
             onceki: null
@@ -158,7 +171,7 @@ R.KingVeri = (function(){
     const satirlar = [
       {
         id: 'calisma_dk',
-        ad: 'Çalışma süresi',
+        ad: yz('ays.core.kingveri.calisma-suresi'),
         deger: bu.calisma,
         birim: 'dk',
         etiket: bu.calisma != null ? 'ölçüldü' : 'veri yok',
@@ -166,14 +179,14 @@ R.KingVeri = (function(){
       },
       {
         id: 'soru',
-        ad: 'Soru sayısı',
+        ad: yz('ays.core.kingveri.soru-sayisi'),
         deger: bu.soru,
         etiket: bu.soru != null ? 'ölçüldü' : 'veri yok',
         onceki: once.soru
       },
       {
         id: 'blok',
-        ad: 'Tamamlanan blok',
+        ad: yz('ays.core.kingveri.tamamlanan-blok'),
         deger: bu.blok,
         etiket: bu.blok != null ? 'ölçüldü' : 'veri yok',
         onceki: once.blok
@@ -344,41 +357,41 @@ R.KingVeri = (function(){
   // 5) Düzelt (KING-4 §H)
   async function duzelt(id, alan, deger){
     if(!id || typeof id !== 'string'){
-      return { ok: false, why: 'Geçersiz kayıt kimliği.' };
+      return { ok: false, why: yz('ays.core.kingveri.gecersiz-kayit-kimligi') };
     }
 
     const parcalar = id.includes('/') ? id.split('/') : id.split(':');
     if(parcalar.length !== 2){
-      return { ok: false, why: 'Kayıt bulunamadı.' };
+      return { ok: false, why: yz('ays.core.kingveri.kayit-bulunamadi') };
     }
     const [gun, blokId] = parcalar;
 
     const days = (R.S && R.S.days) || {};
     const day = days[gun];
     if(!day || !day.blocks){
-      return { ok: false, why: 'Kayıt bulunamadı.' };
+      return { ok: false, why: yz('ays.core.kingveri.kayit-bulunamadi') };
     }
 
     const block = day.blocks.find(b => b.id === blokId);
     if(!block){
-      return { ok: false, why: 'Kayıt bulunamadı.' };
+      return { ok: false, why: yz('ays.core.kingveri.kayit-bulunamadi') };
     }
 
     if(alan !== 'dk' && alan !== 'soru'){
-      return { ok: false, why: 'Bilinmeyen alan: ' + alan };
+      return { ok: false, why: yz('ays.core.kingveri.bilinmeyen-alan') + alan };
     }
 
     if(typeof deger !== 'number' || !Number.isInteger(deger) || isNaN(deger)){
-      return { ok: false, why: 'Değer tam sayı olmalıdır.' };
+      return { ok: false, why: yz('ays.core.kingveri.deger-tam-sayi-olmalidir') };
     }
 
     if(alan === 'dk'){
       if(deger < 1 || deger > 600){
-        return { ok: false, why: 'Süre 1 ile 600 dakika arasında olmalıdır.' };
+        return { ok: false, why: yz('ays.core.kingveri.sure-1-ile-600-dakika') };
       }
     }else if(alan === 'soru'){
       if(deger < 0 || deger > 1000){
-        return { ok: false, why: 'Soru sayısı 0 ile 1000 arasında olmalıdır.' };
+        return { ok: false, why: yz('ays.core.kingveri.soru-sayisi-0-ile-1000') };
       }
     }
 
@@ -400,7 +413,7 @@ R.KingVeri = (function(){
           block.actualQ = once;
         }
         const msg = (err && err.message) ? err.message : String(err);
-        return { ok: false, why: 'Kaydedilemedi: ' + msg };
+        return { ok: false, why: yz('ays.core.kingveri.kaydedilemedi') + msg };
       }
     }
 
@@ -420,7 +433,7 @@ R.KingVeri = (function(){
             block.actualQ = deger;
           }
           const msg = (err && err.message) ? err.message : String(err);
-          return { ok: false, why: 'Kaydedilemedi: ' + msg };
+          return { ok: false, why: yz('ays.core.kingveri.kaydedilemedi') + msg };
         }
       }
       return { ok: true };

@@ -9,6 +9,19 @@
    Okunabilirlik için Ateşman formülü kullanılır. Flesch Türkçede yanlış
    sonuç verir: Türkçe sondan eklemeli bir dildir, kelime başına hece sayısı
    doğal olarak yüksektir ve Flesch her Türkçe metni «çok zor» gösterir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.writing.ne-yapar':'Ne yapar',
+  'esp.writing.neden-ise-yarar':'Neden işe yarar',
+  'esp.writing.olcum-icin-en-az-bir':'Ölçüm için en az bir tam cümle gerekir.',
+  'esp.writing.son-7-gunde-yazi-oturumu':'Son 7 günde yazı oturumu girilmemiş. Taslağı açıp kapatmak üretim sayılmaz; ',
+  'esp.writing.son-14-gunde-yazi-oturumu':'Son 14 günde yazı oturumu yok.',
+  'esp.writing.girilmemis-gun-ortalamaya-ka':'Girilmemiş gün ortalamaya katılmaz.',
+  'esp.writing.son-7-gunde-yazi-oturumu-2':'Son 7 günde yazı oturumu girilmemiş.',
+  'esp.writing.son-7-gunde':'Son 7 günde ',
+  'esp.writing.bir-baslik-ve-bir-paragraf':'Bir başlık ve bir paragraf yeter; ölçüm oradan başlar.',
+  'esp.writing.olculen-sey-uslup-degil-uzun':'Ölçülen şey üslup değil: uzunluk, tekrar, akış.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -135,7 +148,7 @@ ESP.Screens.writing = (function(){
         label:yz('esp.writing.retorik-figurler'), hint:'rhetoric',
         meta:ESP.RHETORIC.length + ' figür',
         wide:true,
-        body:K2.Table({ tight:true, headers:['Figür', 'Ne yapar', 'Neden işe yarar', 'Örnek'],
+        body:K2.Table({ tight:true, headers:['Figür', yz('esp.writing.ne-yapar'), yz('esp.writing.neden-ise-yarar'), 'Örnek'],
           rows:ESP.RHETORIC.map(r => [r.label, r.what, r.why, r.ex]) }),
       }),
     ];
@@ -158,7 +171,7 @@ ESP.Screens.writing = (function(){
       rows.push(K.Entry({
         label:yz('esp.writing.taslak'),
         meta:acik.title || 'başlıksız',
-        note:ok.cert === 'missing' ? 'Ölçüm için en az bir tam cümle gerekir.'
+        note:ok.cert === 'missing' ? yz('esp.writing.olcum-icin-en-az-bir')
           : ok.words + ' kelime · ' + ok.sentences + ' cümle · cümle başına '
             + U.fmtNum(ok.wordsPerSentence) + ' kelime',
         action:html`${K.Button({ label:yz('esp.writing.kapat'), size:'sm', act:'close-draft' })}
@@ -239,7 +252,7 @@ ESP.Screens.writing = (function(){
         label:yz('esp.writing.haftalik-uretim'),
         meta:w.cert === 'missing' ? 'veri yok' : U.fmtNum(w.value) + ' kelime',
         note:w.cert === 'missing'
-          ? 'Son 7 günde yazı oturumu girilmemiş. Taslağı açıp kapatmak üretim sayılmaz; '
+          ? yz('esp.writing.son-7-gunde-yazi-oturumu')
             + 'oturumu Bugün ekranından ya da taslak sayfasından yazarsın.'
           : w.windowDays + ' günün ' + w.enteredDays + '\'inde yazı oturumu var.',
         body:w.cert === 'missing'
@@ -280,9 +293,9 @@ ESP.Screens.writing = (function(){
         label:yz('esp.writing.pratik-suresi'),
         meta:h.cert === 'missing' ? 'veri yok' : U.fmtMin(h.minutes),
         note:h.cert === 'missing'
-          ? 'Son 14 günde yazı oturumu yok.'
+          ? yz('esp.writing.son-14-gunde-yazi-oturumu')
           : h.windowDays + ' günün ' + h.enteredDays + '\'inde kayıt var. '
-            + 'Girilmemiş gün ortalamaya katılmaz.',
+            + yz('esp.writing.girilmemis-gun-ortalamaya-ka'),
         body:h.cert === 'missing'
           ? K.Empty({ text:yz('esp.writing.oturum-girildiginde-olculmey') })
           : K.Meter({ label:yz('esp.writing.son-14-gun'), value:Math.min(100, h.minutes / 420 * 100),
@@ -427,16 +440,16 @@ ESP.Screens.writing = (function(){
     title:yz('esp.writing.yazi-laboratuvari'),
     headline(){
       const w = ESP.Intellect.wordsWritten(7);
-      if(!(S.drafts || []).length) return 'Henüz taslak yok.';
-      if(w.cert === 'missing') return 'Son 7 günde yazı oturumu girilmemiş.';
-      return 'Son 7 günde ' + U.fmtNum(w.value) + ' kelime yazıldı.';
+      if(!(S.drafts || []).length) return yz('esp.writing.henuz-taslak-yok');
+      if(w.cert === 'missing') return yz('esp.writing.son-7-gunde-yazi-oturumu-2');
+      return yz('esp.writing.son-7-gunde') + U.fmtNum(w.value) + ' kelime yazıldı.';
     },
     lede(){
       const r = ESP.Intellect.draftRatio();
-      if(r.cert === 'missing') return 'Bir başlık ve bir paragraf yeter; ölçüm oradan başlar.';
+      if(r.cert === 'missing') return yz('esp.writing.bir-baslik-ve-bir-paragraf');
       return r.drafts + ' taslak, taslak başına '
         + U.fmtNum(Math.round(r.value * 10) / 10) + ' revizyon. '
-        + 'Ölçülen şey üslup değil: uzunluk, tekrar, akış.';
+        + yz('esp.writing.olculen-sey-uslup-degil-uzun');
     },
     stats(){
       const w = ESP.Intellect.wordsWritten(7);

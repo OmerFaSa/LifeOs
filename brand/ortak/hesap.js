@@ -145,6 +145,399 @@
       günü de kapsar). Erişim anahtarı «özeti de okusun» seçilerek açılırsa
       Kısayollar `ozet.txt`'yi okur, Siri söyler. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.hesap.android-telefon':'Android telefon',
+  'ortak.hesap.android-tablet':'Android tablet',
+  'ortak.hesap.windows-pc':'Windows PC',
+  'ortak.hesap.bearer':'Bearer ',
+  'ortak.hesap.ornek-profil-esitlenmez':'Örnek profil eşitlenmez.',
+  'ortak.hesap.bilgisayarin-adresi-bilinmiy':'Bilgisayarın adresi bilinmiyor; yeniden giriş yap.',
+  'ortak.hesap.bu-cihazdaki':'Bu cihazdaki ',
+  'ortak.hesap.oturum-kapandi-yeniden-giris':'Oturum kapandı; yeniden giriş yap. Bu cihazdaki değişiklikler sırada bekliyor.',
+  'ortak.hesap.arka-plan':'Arka plan',
+  'ortak.hesap.acilis-videosu':'Açılış videosu',
+  'ortak.hesap.acilis-muzigi':'Açılış müziği',
+  'ortak.hesap.ayar-cakismasi-son-yazan-kaz':'Ayar çakışması: son yazan kazanır',
+  'ortak.hesap.kazandi':'kazandı',
+  'ortak.hesap.bilgisayara-ulasilamiyor':'Bilgisayara ulaşılamıyor',
+  'ortak.hesap.giris-yapilmadi':'Giriş yapılmadı',
+  'ortak.hesap.bu-sayfa-lifeos-sunucusundan':'Bu sayfa LifeOS sunucusundan açılmadı; hesap kullanılamıyor.',
+  'ortak.hesap.beta-yalniz-bu-cihazda':'Beta · yalnız bu cihazda',
+  'ortak.hesap.ornek-profil':'Örnek profil',
+  'ortak.hesap.esitleme-durdu':'Eşitleme durdu',
+  'ortak.hesap.hesap-giris-yapilmadi':'Hesap: giriş yapılmadı',
+  'ortak.hesap.bu-cihaz':'Bu cihaz «',
+  'ortak.hesap.buyuk-harf-kilidi-acik':'Büyük harf kilidi açık',
+  'ortak.hesap.en-az-8-karakter':'En az 8 karakter',
+  'ortak.hesap.telefonda-ve-tablette-bilgis':'Telefonda ve tablette bilgisayarın adresi:',
+  'ortak.hesap.ya-da':'ya da',
+  'ortak.hesap.tablette-tarayicida':'. Tablette tarayıcıda',
+  'ortak.hesap.acilir':'açılır.',
+  'ortak.hesap.telefon-ve-tablet-icin-ev':'Telefon ve tablet için ev ağı kapalı. Bilgisayarda bir kez',
+  'ortak.hesap.python-sistem-telefon-py':'python sistem/telefon.py',
+  'ortak.hesap.bilgisayarin-adresi':'Bilgisayarın adresi',
+  'ortak.hesap.bilgisayara-ulasilamadi-life':'Bilgisayara ulaşılamadı; LifeOS açık mı?',
+  'ortak.hesap.bilgisayara-ulasilamiyor-bet':'Bilgisayara ulaşılamıyor. Beta girişiyle bu cihazda devam edebilirsin.',
+  'ortak.hesap.i-lk-hesap-admin-olur':'İlk hesap admin olur.',
+  'ortak.hesap.i-lk-hesap-bilgisayarin-kend':'İlk hesap bilgisayarın kendisinde açılır.',
+  'ortak.hesap.sinav-hazirligi':'Sınav hazırlığı',
+  'ortak.hesap.saglik-ve-toparlanma':'Sağlık ve toparlanma',
+  'ortak.hesap.dil-muzik-okuma':'Dil, müzik, okuma',
+  'ortak.hesap.gunu-kur-gidisi-gor':'Günü kur, gidişi gör',
+  'ortak.hesap.pc-telefon-ve-tablet-ayni':'PC, telefon ve tablet aynı hesapla',
+  'ortak.hesap.verin-hicbir-sirketin-sunucu':'Verin hiçbir şirketin sunucusuna gitmez',
+  'ortak.hesap.bilgisayar-kapaliyken-de-cal':'Bilgisayar kapalıyken de çalışır',
+  'ortak.hesap.lifeos':'LifeOS',
+  'ortak.hesap.sinav-saglik-ve-gelisim-tek':'Sınav, sağlık ve gelişim tek yerde.',
+  'ortak.hesap.baska-hesapla-giris-yap':'Başka hesapla giriş yap',
+  'ortak.hesap.giris-yap':'Giriş yap',
+  'ortak.hesap.hesap-olustur':'Hesap oluştur',
+  'ortak.hesap.hos-geldin':'Hoş geldin',
+  'ortak.hesap.i-lk-hesabi-ac-dort-sistem':'İlk hesabı aç, dört sistem birlikte açılsın.',
+  'ortak.hesap.hesabini-sec-kaldigin-yerden':'Hesabını seç, kaldığın yerden devam et.',
+  'ortak.hesap.tek-hesap-dort-sistem':'Tek hesap, dört sistem.',
+  'ortak.hesap.kodla-baglan':'Kodla bağlan',
+  'ortak.hesap.girisli-cihazindan-sifre-yaz':'· girişli cihazından, şifre yazmadan',
+  'ortak.hesap.beta-girisi':'Beta girişi',
+  'ortak.hesap.hesapsiz-yalniz-bu-cihazda':'· hesapsız, yalnız bu cihazda',
+  'ortak.hesap.girise-don':'Girişe dön',
+  'ortak.hesap.ana-menuye-don':'Ana menüye dön',
+  'ortak.hesap.yedek-kod':'Yedek kod',
+  'ortak.hesap.dogrulama-kodu':'Doğrulama kodu',
+  'ortak.hesap.kaydettigin-yedek-kodlardan':'Kaydettiğin yedek kodlardan birini yaz; her biri bir kez geçer.',
+  'ortak.hesap.dogrulayici-uygulamandaki-6':'Doğrulayıcı uygulamandaki 6 haneli kodu yaz.',
+  'ortak.hesap.uygulamadaki-kodu-kullan':'Uygulamadaki kodu kullan',
+  'ortak.hesap.telefonun-yaninda-degil-mi-y':'Telefonun yanında değil mi? Yedek kod kullan',
+  'ortak.hesap.girisli-cihazinda-hesap-ciha':'Girişli cihazında Hesap › Cihazlar › Yeni cihaz bağla’ya dokun.',
+  'ortak.hesap.baglama-kodu':'Bağlama kodu',
+  'ortak.hesap.kod-5-dakika-gecerli-ve':'Kod 5 dakika geçerli ve tek kullanımlık.',
+  'ortak.hesap.kullanici-adi':'Kullanıcı adı',
+  'ortak.hesap.sifre-tekrar':'Şifre (tekrar)',
+  'ortak.hesap.sifreni-unutursan':'Şifreni unutursan',
+  'ortak.hesap.kendine-bir-soru':'Kendine bir soru',
+  'ortak.hesap.sifreni-yenile':'Şifreni yenile',
+  'ortak.hesap.kullanici-adini-yaz':'Kullanıcı adını yaz',
+  'ortak.hesap.kendi-sorunu-cevapla':'Kendi sorunu cevapla',
+  'ortak.hesap.yeni-sifre':'Yeni şifre',
+  'ortak.hesap.yeni-sifre-tekrar':'Yeni şifre (tekrar)',
+  'ortak.hesap.sifreyi-yenile':'Şifreyi yenile',
+  'ortak.hesap.sifremi-unuttum':'Şifremi unuttum',
+  'ortak.hesap.baska-hesap':'Başka hesap',
+  'ortak.hesap.hesap-silindi-bu-cihazdaki-v':'Hesap silindi. Bu cihazdaki veri yerinde duruyor.',
+  'ortak.hesap.hesap-deposu-yedekten-geri-y':'Hesap deposu yedekten geri yüklendi; yeniden giriş yap. Bu cihazdaki kayıtlar yerinde, girince eşitlenir.',
+  'ortak.hesap.yeni-giris':'Yeni giriş',
+  'ortak.hesap.kodla-baglanan-cihaz':'Kodla bağlanan cihaz',
+  'ortak.hesap.sifre-kurtarildi':'Şifre kurtarıldı',
+  'ortak.hesap.yanlis-sifre-denemesi':'Yanlış şifre denemesi',
+  'ortak.hesap.yanlis-kurtarma-cevabi':'Yanlış kurtarma cevabı',
+  'ortak.hesap.yanlis-dogrulama-kodu':'Yanlış doğrulama kodu',
+  'ortak.hesap.sifre-degisti':'Şifre değişti',
+  'ortak.hesap.i-ki-adimli-dogrulama-kapand':'İki adımlı doğrulama kapandı',
+  'ortak.hesap.sifre-ve-dogrulama-koduyla':'Şifre ve doğrulama koduyla',
+  'ortak.hesap.sifre-ve-yedek-kodla':'Şifre ve yedek kodla',
+  'ortak.hesap.baglama-koduyla':'Bağlama koduyla',
+  'ortak.hesap.kurtarma-sorusuyla':'Kurtarma sorusuyla',
+  'ortak.hesap.hesap-acilirken':'Hesap açılırken',
+  'ortak.hesap.i-lk-kurulumda':'İlk kurulumda',
+  'ortak.hesap.bu-bilgisayar':'Bu bilgisayar',
+  'ortak.hesap.guvenlik-olayi':'Güvenlik olayı',
+  'ortak.hesap.bendim':'Bendim',
+  'ortak.hesap.i-ncele':'İncele',
+  'ortak.hesap.yanlis-sifre':'Yanlış şifre',
+  'ortak.hesap.hesap-acildi':'Hesap açıldı',
+  'ortak.hesap.sifre-soruyla-yenilendi':'Şifre soruyla yenilendi',
+  'ortak.hesap.kurtarma-cevabi-yanlis':'Kurtarma cevabı yanlış',
+  'ortak.hesap.kurtarma-sorusu-degisti':'Kurtarma sorusu değişti',
+  'ortak.hesap.cihazdan-cikildi':'Cihazdan çıkıldı',
+  'ortak.hesap.oteki-cihazlardan-cikildi':'Öteki cihazlardan çıkıldı',
+  'ortak.hesap.admin-degisikligi':'Admin değişikliği',
+  'ortak.hesap.i-ki-adimli-dogrulama-acildi':'İki adımlı doğrulama açıldı',
+  'ortak.hesap.yedek-kodlar-yenilendi':'Yedek kodlar yenilendi',
+  'ortak.hesap.kodla-cihaz-baglandi':'Kodla cihaz bağlandı',
+  'ortak.hesap.erisim-anahtari-acildi':'Erişim anahtarı açıldı',
+  'ortak.hesap.erisim-anahtari-silindi':'Erişim anahtarı silindi',
+  'ortak.hesap.takvim-aboneligi-kapandi':'Takvim aboneliği kapandı',
+  'ortak.hesap.depo-yedekten-geri-yuklendi':'Depo yedekten geri yüklendi',
+  'ortak.hesap.yedek-dosya-olarak-indirildi':'Yedek dosya olarak indirildi',
+  'ortak.hesap.yedek-dosyadan-yuklendi':'Yedek dosyadan yüklendi',
+  'ortak.hesap.ayarli-degil':'Ayarlı değil',
+  'ortak.hesap.yanlis-deneme-yok':'Yanlış deneme yok',
+  'ortak.hesap.henuz-yok':'Henüz yok',
+  'ortak.hesap.i-ki-adim-acik':'İki adım açık',
+  'ortak.hesap.son-yedek-alinamadi':'Son yedek alınamadı',
+  'ortak.hesap.i-kinci-yere-yazilamadi':'İkinci yere yazılamadı',
+  'ortak.hesap.kopyala':'Kopyala',
+  'ortak.hesap.yedek-kodlarin':'Yedek kodların',
+  'ortak.hesap.telefonun-yaninda-degilken-h':'Telefonun yanında değilken her biri girişi bir kez açar. Bir yere yaz ya da indir; bir daha gösterilmez.',
+  'ortak.hesap.i-ndir':'İndir',
+  'ortak.hesap.kaydettim':'Kaydettim',
+  'ortak.hesap.adres':'Adres',
+  'ortak.hesap.yontem':'Yöntem',
+  'ortak.hesap.post':'POST',
+  'ortak.hesap.baslik':'Başlık',
+  'ortak.hesap.authorization-bearer':'Authorization: Bearer',
+  'ortak.hesap.govde-json':'Gövde (JSON)',
+  'ortak.hesap.ays-ya-da-esp-icin':'AYS ya da ESP için',
+  'ortak.hesap.ekle-yazilmazsa-spi':'ekle; yazılmazsa SPİ.',
+  'ortak.hesap.once-dene':'Önce dene',
+  'ortak.hesap.ayni-adrese-ayni-baslikla-go':'Aynı adrese aynı başlıkla gövdesiz',
+  'ortak.hesap.get':'GET',
+  'ortak.hesap.baglanti-tamam-doner-satir':': «Bağlantı tamam» döner, satır bırakmaz.',
+  'ortak.hesap.sorun-var':'Sorun var',
+  'ortak.hesap.yukleniyor':'Yükleniyor…',
+  'ortak.hesap.i-yi-ki-dogdun':'İyi ki doğdun!',
+  'ortak.hesap.kisisel-bilgiler-istege-bagl':'Kişisel bilgiler · isteğe bağlı',
+  'ortak.hesap.king-sana-nasil-seslensin':'King sana nasıl seslensin',
+  'ortak.hesap.dogum-gunu':'Doğum günü',
+  'ortak.hesap.hicbiri-bir-yere-gonderilmez':'Hiçbiri bir yere gönderilmez; yalnız bilgisayarındaki LifeOS’ta durur.',
+  'ortak.hesap.gorunen-ad':'Görünen ad',
+  'ortak.hesap.renk':'Renk',
+  'ortak.hesap.kaydet':'Kaydet',
+  'ortak.hesap.su-anki-planin':'Şu anki planın',
+  'ortak.hesap.odeme-yok-hicbir-ozellik-pla':'Ödeme yok; hiçbir özellik plana bağlı değil.',
+  'ortak.hesap.bu-cihaz-2':'Bu cihaz',
+  'ortak.hesap.son-gorulme':'Son görülme: ',
+  'ortak.hesap.cikar':'Çıkar',
+  'ortak.hesap.oteki':'Öteki',
+  'ortak.hesap.orada-yeniden-giris-gerekir':'orada yeniden giriş gerekir. Kayıtlar silinmez.',
+  'ortak.hesap.hepsinden-cik':'Hepsinden çık',
+  'ortak.hesap.bir-oneri-var':'Bir öneri var',
+  'ortak.hesap.hesabin-iyi-korunuyor':'Hesabın iyi korunuyor',
+  'ortak.hesap.kirmizi-satirlara-bir-bak':'Kırmızı satırlara bir bak.',
+  'ortak.hesap.kontrol-listesindeki-her-sey':'Kontrol listesindeki her şey yolunda.',
+  'ortak.hesap.sifreyi-degistir':'Şifreyi değiştir',
+  'ortak.hesap.simdiki-sifre':'Şimdiki şifre',
+  'ortak.hesap.soru-kendin-yaz':'Soru (kendin yaz)',
+  'ortak.hesap.sifre-degisince-oteki-cihazl':'Şifre değişince öteki cihazlarda yeniden giriş gerekir.',
+  'ortak.hesap.bu-cihaz-artik-listede-yok':'Bu cihaz artık listede yok.',
+  'ortak.hesap.cihazin-adi':'Cihazın adı',
+  'ortak.hesap.i-lk-giris':'İlk giriş',
+  'ortak.hesap.son-gorulme-2':'Son görülme',
+  'ortak.hesap.son-esitleme':'Son eşitleme',
+  'ortak.hesap.son-adres':'Son adres',
+  'ortak.hesap.bu-cihazda-cikis-yap':'Bu cihazda çıkış yap',
+  'ortak.hesap.oturumu-kapat':'Oturumu kapat',
+  'ortak.hesap.kayitlar-bu-cihazda-kalir-ye':'Kayıtlar bu cihazda kalır; yeniden girince eşitlenir.',
+  'ortak.hesap.oturum-kapaninca-o-cihazda-y':'Oturum kapanınca o cihazda yeniden giriş gerekir; kayıtlar silinmez.',
+  'ortak.hesap.dogrulayici-uygulamayi-ac':'Doğrulayıcı uygulamayı aç',
+  'ortak.hesap.google-authenticator-microso':'Google Authenticator, Microsoft Authenticator ya da iPhone’da Ayarlar › Şifreler. Hepsi ücretsiz.',
+  'ortak.hesap.qr-kodunu-okut':'QR kodunu okut',
+  'ortak.hesap.dogrulayicida-ac':'Doğrulayıcıda aç',
+  'ortak.hesap.acilmazsa-uygulamada-anahtar':'Açılmazsa uygulamada «anahtarı elle gir» ile bunu yaz:',
+  'ortak.hesap.okutamiyorsan-anahtari-elle':'Okutamıyorsan anahtarı elle yaz:',
+  'ortak.hesap.uygulamadaki-kodu-yaz':'Uygulamadaki kodu yaz',
+  'ortak.hesap.dogrula-ve-ac':'Doğrula ve aç',
+  'ortak.hesap.sifreye-ikinci-bir-kilit':'Şifreye ikinci bir kilit',
+  'ortak.hesap.giriste-sifreden-sonra-telef':'Girişte şifreden sonra telefonundaki doğrulayıcı uygulamanın ',
+  'ortak.hesap.google-authenticator':'Google Authenticator',
+  'ortak.hesap.microsoft-authenticator':'Microsoft Authenticator',
+  'ortak.hesap.ayarlar-sifreler-ios-15':'Ayarlar › Şifreler, iOS 15 ve sonrası',
+  'ortak.hesap.ucretsiz':'Ücretsiz',
+  'ortak.hesap.baslamak-icin-sifren':'Başlamak için şifren',
+  'ortak.hesap.kurulumu-baslat':'Kurulumu başlat',
+  'ortak.hesap.acik':'Açık',
+  'ortak.hesap.giriste-kod-sorulur':'Girişte kod sorulur',
+  'ortak.hesap.yedek-kodlar':'Yedek kodlar',
+  'ortak.hesap.yeni-yedek-kodlar':'Yeni yedek kodlar',
+  'ortak.hesap.eski-yedek-kodlar-hemen-gece':'Eski yedek kodlar hemen geçersiz olur.',
+  'ortak.hesap.yeni-kodlari-goster':'Yeni kodları göster',
+  'ortak.hesap.i-ki-adimi-kapat':'İki adımı kapat',
+  'ortak.hesap.uygulamadaki-kod-ya-da-bir':'Uygulamadaki kod ya da bir yedek kod',
+  'ortak.hesap.kapat':'Kapat',
+  'ortak.hesap.telefonunu-ve-yedek-kodlarin':'Telefonunu ve yedek kodlarını birlikte kaybedersen:',
+  'ortak.hesap.python-sistem-hesap-py-iki-a':'python sistem/hesap.py --iki-adim-kapat',
+  'ortak.hesap.takvim':'Takvim',
+  'ortak.hesap.giris':'Giriş',
+  'ortak.hesap.hepsi-bilgisayarindaki-lifeo':'Hepsi bilgisayarındaki LifeOS’ta çalışır: şirket hesabı, ücret ya da internet gerekmez.',
+  'ortak.hesap.i-cinde':'İçinde',
+  'ortak.hesap.ays':'AYS',
+  'ortak.hesap.sinav-gunleri-istisnalar-hed':'Sınav günleri, istisnalar, hedef son günleri',
+  'ortak.hesap.ays-yi-bir-kez-ac':'AYS’yi bir kez aç',
+  'ortak.hesap.sinav-gunlerin-takviminde':'Sınav günlerin takviminde',
+  'ortak.hesap.takvim-uygulaman-bu-adrese-a':'Takvim uygulaman bu adrese abone olur; AYS’de bir tarih ',
+  'ortak.hesap.aboneligi-ac':'Aboneliği aç',
+  'ortak.hesap.iphone-ve-ipad':'iPhone ve iPad',
+  'ortak.hesap.takvim-adresini':'Takvim adresini',
+  'ortak.hesap.ayarlar-takvim-hesaplar':'Ayarlar › Takvim › Hesaplar › Hesap Ekle › Diğer',
+  'ortak.hesap.telefon-evdeki-wi-fi-dayken':'Telefon evdeki Wi-Fi’dayken güncellenir; LifeOS kök sertifikası telefonda kurulu olmalı.',
+  'ortak.hesap.ev-agi-kapali-bilgisayarda-b':'Ev ağı kapalı. Bilgisayarda bir kez',
+  'ortak.hesap.calistirip-lifeos-u-yeniden':'çalıştırıp LifeOS’u yeniden başlat.',
+  'ortak.hesap.thunderbird-ya-da-klasik-out':'Thunderbird ya da klasik Outlook’ta «İnternet takvimi ekle».',
+  'ortak.hesap.google-takvim':'Google Takvim',
+  'ortak.hesap.google-adresi':'Google adresi',
+  'ortak.hesap.internetten-ceker-evdeki-bil':'internetten çeker; evdeki bilgisayarına ulaşamaz. Dosyayı indirip Google Takvim’de «İçe aktar»la bir kez ekleyebilirsin.',
+  'ortak.hesap.dosyayi-indir-ics':'Dosyayı indir (.ics)',
+  'ortak.hesap.eski-adres-hemen-calismaz-ta':'Eski adres hemen çalışmaz; takvim uygulamalarına yenisini eklemen gerekir.',
+  'ortak.hesap.takvim-en-son':'Takvim en son ',
+  'ortak.hesap.henuz-hicbir-takvim-bakmadi':'Henüz hiçbir takvim bakmadı.',
+  'ortak.hesap.adres-bir-anahtardir-yalniz':'Adres bir anahtardır: yalnız kendi cihazlarına ekle.',
+  'ortak.hesap.hazir':'» hazır.',
+  'ortak.hesap.simdi-kopyala-bir-daha-goste':'Şimdi kopyala; bir daha gösterilmez.',
+  'ortak.hesap.sil':'Sil',
+  'ortak.hesap.telefonundan-tek-satir':'Telefonundan tek satır',
+  'ortak.hesap.anahtar-olustur':'Anahtar oluştur',
+  'ortak.hesap.gunun-ozetini-de-okuyabilsin':'Günün özetini de okuyabilsin',
+  'ortak.hesap.siri-bugun-ne-var':'Siri: «Bugün ne var?» — AYS, SPİ ve ESP’nin bugün cümlesi',
+  'ortak.hesap.olustur':'Oluştur',
+  'ortak.hesap.tarifler':'Tarifler',
+  'ortak.hesap.her-tarif-bu-tek-istegi':'Her tarif bu tek isteği gönderir.',
+  'ortak.hesap.bu-bilgisayardaki-bir-uygula':'Bu bilgisayardaki bir uygulama için adres:',
+  'ortak.hesap.kisayollar-da-yeni-kisayol-g':'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
+  'ortak.hesap.adini-lifeos-a-yaz-koy-siri':'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.',
+  'ortak.hesap.siri-bugun-ne-var-2':'Siri: «Bugün ne var?»',
+  'ortak.hesap.anahtari-gunun-ozetini-de-ok':'Anahtarı «Günün özetini de okuyabilsin» seçerek oluştur.',
+  'ortak.hesap.kisayollar-da-yeni-kisayol-u':'Kısayollar’da yeni kısayol › «URL’nin İçeriğini Al»: adres',
+  'ortak.hesap.yontem-get-baslik':'yöntem GET, başlık',
+  'ortak.hesap.authorization':'Authorization',
+  'ortak.hesap.bearer-2':'Bearer',
+  'ortak.hesap.adini-bugun-ne-var-koy':'Adını «Bugün ne var» koy. Siri’ye «Bugün ne var» de.',
+  'ortak.hesap.ozeti-her-sistem-kendi-kural':'Özeti her sistem kendi kuralıyla yazar. Bugün hiç açılmamış bir sistemin dünkü sayısı',
+  'ortak.hesap.bugunmus-gibi-okunmaz-bugun':'bugünmüş gibi okunmaz: «bugün henüz açılmadı» denir.',
+  'ortak.hesap.ays-ve-esp-ye':'AYS ve ESP’ye',
+  'ortak.hesap.ayni-istek-govdeye':'Aynı istek; gövdeye',
+  'ortak.hesap.ays-anlar':'AYS anlar:',
+  'ortak.hesap.soru-40-matematik':'soru 40 matematik',
+  'ortak.hesap.2-saat-fizik':'2 saat fizik',
+  'ortak.hesap.paragraf-20':'paragraf 20',
+  'ortak.hesap.uyku-7':'uyku 7',
+  'ortak.hesap.esp-anlar':'ESP anlar:',
+  'ortak.hesap.30-dk-gitar':'30 dk gitar',
+  'ortak.hesap.45-dakika-felsefe-okudum':'45 dakika felsefe okudum',
+  'ortak.hesap.20-dk-diksiyon':'20 dk diksiyon',
+  'ortak.hesap.kisayollar-da-her-sistem-ici':'Kısayollar’da her sistem için ayrı kısayol aç: «AYS’ye yaz», «ESP’ye yaz».',
+  'ortak.hesap.her-satiri-yalniz-kendi-sist':'Her satırı yalnız kendi sistemi alır; o gün o dersin bloğu yoksa ya da süre yazılmadıysa',
+  'ortak.hesap.satir-anlasilmadi-diye-neden':'satır «anlaşılmadı» diye nedeniyle döner, uydurulmaz.',
+  'ortak.hesap.apple-saglik-tan-her-sabah':'Apple Sağlık’tan her sabah',
+  'ortak.hesap.kisayollar-otomasyon-gunun':'Kısayollar › Otomasyon › Günün Saati (ör. 08:00) › Hemen Çalıştır.',
+  'ortak.hesap.metin':'«Metin»:',
+  'ortak.hesap.ve-bulunan-deger-sonra-url-n':'ve bulunan değer; sonra «URL’nin İçeriğini Al» ile gönder.',
+  'ortak.hesap.uyku-icin-uyku-analizi-nin-s':'Uyku için «Uyku Analizi»nin süresi toplanır; SPİ',
+  'ortak.hesap.uyku-7-2':'uyku 7,2',
+  'ortak.hesap.gibi-saat-bekler':'gibi saat bekler.',
+  'ortak.hesap.gelenler-spi-onaylar-da-bekl':'Gelenler SPİ › Onaylar’da bekler; tek dokunuşla kaydedersin. Ölçüm onaysız yazılmaz.',
+  'ortak.hesap.android-http-shortcuts':'Android: HTTP Shortcuts',
+  'ortak.hesap.ucretsiz-http-shortcuts-uygu':'Ücretsiz «HTTP Shortcuts» uygulamasında yeni kısayol › Normal.',
+  'ortak.hesap.yontem-post-adres-yukaridaki':'Yöntem POST, adres yukarıdaki; Başlıklar’a',
+  'ortak.hesap.govde-ozel-metin-tur':'Gövde: Özel metin, tür',
+  'ortak.hesap.icerik':', içerik',
+  'ortak.hesap.metin-i-soran-bir-degisken':'; «metin»i soran bir değişken ekle.',
+  'ortak.hesap.home-assistant':'Home Assistant',
+  'ortak.hesap.home-assistant-lifeos-kok-se':'Home Assistant LifeOS kök sertifikasını tanımazsa sertifikayı ona ekle.',
+  'ortak.hesap.anahtar-yalniz-satir-birakir':'Anahtar yalnız satır bırakır; verini okuyamaz, hesabına giremez. Kaybolursa sil, yenisini aç.',
+  'ortak.hesap.henuz-bir-satir-gelmedi':'Henüz bir satır gelmedi',
+  'ortak.hesap.kisayol-ya-da-otomasyon-bir':'Kısayol ya da otomasyon bir satır gönderince burada görünür.',
+  'ortak.hesap.son':'Son',
+  'ortak.hesap.satir-olcum-sen-onaylar-da-k':'satır. Ölçüm, sen Onaylar’da kaydedene dek yazılmaz.',
+  'ortak.hesap.girdi-kayitlar-ilk-esitlemey':'Girdi; kayıtlar ilk eşitlemeyle iner.',
+  'ortak.hesap.tamam':'Tamam',
+  'ortak.hesap.kodun-suresi-doldu':'Kodun süresi doldu',
+  'ortak.hesap.guvenlik-icin-kod-5-dakika':'Güvenlik için kod 5 dakika geçerli.',
+  'ortak.hesap.yeni-kod':'Yeni kod',
+  'ortak.hesap.baglama-kodu-2':'Bağlama kodu ',
+  'ortak.hesap.yeni-cihazda-lifeos-u-ac':'Yeni cihazda LifeOS’u aç',
+  'ortak.hesap.tablette-kamerayla-qr-i-okut':'Tablette kamerayla QR’ı okutmak da olur.',
+  'ortak.hesap.kod-tek-kullanimlik-baglanan':'Kod tek kullanımlık; bağlanan cihaz Cihazlar’da görünür, oradan çıkarılabilir.',
+  'ortak.hesap.simdi-esitle':'Şimdi eşitle',
+  'ortak.hesap.bilgisayardaki-kopya':'Bilgisayardaki kopya',
+  'ortak.hesap.cihazlarin-son-esitlemesi':'Cihazların son eşitlemesi',
+  'ortak.hesap.bu-cihaz-3':'Bu cihaz:',
+  'ortak.hesap.yeni-hesap-acilabilir':'Yeni hesap açılabilir',
+  'ortak.hesap.herkes-kendi-hesabini-acar':'Herkes kendi hesabını açar.',
+  'ortak.hesap.kapali-hesabi-sen-eklersin':'Kapalı: hesabı sen eklersin.',
+  'ortak.hesap.kullanicilar':'Kullanıcılar',
+  'ortak.hesap.kullanici-ekle':'Kullanıcı ekle',
+  'ortak.hesap.gecici-sifre':'Geçici şifre',
+  'ortak.hesap.ekle':'Ekle',
+  'ortak.hesap.henuz-kayitli-etkinlik-yok':'Henüz kayıtlı etkinlik yok.',
+  'ortak.hesap.son-7-gunde':'Son 7 günde',
+  'ortak.hesap.yanlis-deneme':'yanlış deneme',
+  'ortak.hesap.sen-degilsen-sifreni-degisti':'. Sen değilsen şifreni değiştir.',
+  'ortak.hesap.olay-sifre-ve-cevaplar-defte':'olay. Şifre ve cevaplar deftere hiç yazılmaz.',
+  'ortak.hesap.her-gun-kendiliginden':'Her gün kendiliğinden · ',
+  'ortak.hesap.verimi-indir':'Verimi indir',
+  'ortak.hesap.bilgisayardaki-kopyanin-tama':'Bilgisayardaki kopyanın tamamı',
+  'ortak.hesap.tek-json-dosyasi':'· tek JSON dosyası',
+  'ortak.hesap.hesabin-kalici-olarak-silini':'Hesabın kalıcı olarak silinir.',
+  'ortak.hesap.geri-alinamaz':'Geri alınamaz.',
+  'ortak.hesap.silinir-bilgisayardaki-kopya':'Silinir: bilgisayardaki kopya',
+  'ortak.hesap.etkinlik-ve-kisisel-bilgiler':', etkinlik ve kişisel bilgiler.',
+  'ortak.hesap.kalir-her-cihazdaki-veri-o':'Kalır: her cihazdaki veri, o cihazın kendi deposunda.',
+  'ortak.hesap.onay-icin-sifren':'Onay için şifren',
+  'ortak.hesap.hesabi-kalici-olarak-sil':'Hesabı kalıcı olarak sil',
+  'ortak.hesap.i-stersen-once-indir-her-sis':'İstersen önce indir. Her sistemin kendi yedeği de o sistemin Ayarlar’ında durur.',
+  'ortak.hesap.yedegini-indir':'yedeğini indir',
+  'ortak.hesap.dosya-butun-hesaplari-sifre':'Dosya bütün hesapları, şifre özetlerini ve iki adım sırlarını taşır;',
+  'ortak.hesap.guvendigin-bir-yerde-sakla-s':'güvendiğin bir yerde sakla (şifreli disk, kendi bulutun).',
+  'ortak.hesap.geri-yuklemek-icin-bu-sayfad':'Geri yüklemek için bu sayfadaki «Dosyadan yükle»yi kullan.',
+  'ortak.hesap.hesap-deposu':'Hesap deposu',
+  'ortak.hesap.haline-doner':'hâline döner.',
+  'ortak.hesap.yedekte':'Yedekte',
+  'ortak.hesap.once-simdiki-halin-yedegi-al':'Önce şimdiki hâlin yedeği alınır; istersen ona geri dönersin.',
+  'ortak.hesap.butun-cihazlar-bu-cihaz-da':'Bütün cihazlar (bu cihaz da) yeniden giriş yapar. Yedekten sonra değişen şifre ve ayarlar eski hâline döner.',
+  'ortak.hesap.cihazlardaki-kayitlar-silinm':'Cihazlardaki kayıtlar silinmez: yedekten sonraki değişiklikler eşitlemeyle geri gelir.',
+  'ortak.hesap.yedekten-sonra-silinen-bir-k':'Yedekten sonra silinen bir kayıt geri gelebilir.',
+  'ortak.hesap.geri-yukle':'Geri yükle',
+  'ortak.hesap.elle-alindi':'Elle alındı',
+  'ortak.hesap.geri-yuklemeden-once':'Geri yüklemeden önce',
+  'ortak.hesap.dosyadan-yuklendi':'Dosyadan yüklendi',
+  'ortak.hesap.kapali-baska-bir-disk':'Kapalı · başka bir disk ya da USB seç',
+  'ortak.hesap.son-kopya':'Son kopya ',
+  'ortak.hesap.henuz-kopya-yok':'Henüz kopya yok',
+  'ortak.hesap.son-yedek':'Son yedek',
+  'ortak.hesap.henuz-yedek-yok':'Henüz yedek yok',
+  'ortak.hesap.simdi-yedekle':'Şimdi yedekle',
+  'ortak.hesap.i-kinci-yer':'İkinci yer',
+  'ortak.hesap.i-kinci-yer-asil-yedekle-ayn':'İkinci yer asıl yedekle aynı diskte: disk bozulursa ikisi birden gider.',
+  'ortak.hesap.i-kinci-yeri-degistir':'İkinci yeri değiştir',
+  'ortak.hesap.i-kinci-yeri-ayarla':'İkinci yeri ayarla',
+  'ortak.hesap.kaydet-ve-kopyala':'Kaydet ve kopyala',
+  'ortak.hesap.her-yedek-oraya-da-yazilir':'Her yedek oraya da yazılır; son',
+  'ortak.hesap.kopya-kalir-bilgisayarin-dis':'kopya kalır. Bilgisayarın diski bozulursa geri dönüş buradan.',
+  'ortak.hesap.dosyadan-yukle':'Dosyadan yükle',
+  'ortak.hesap.yedek-dosyasi-db':'Yedek dosyası (.db)',
+  'ortak.hesap.yukle':'Yükle',
+  'ortak.hesap.dosya-once-denetlenir-bozuks':'Dosya önce denetlenir; bozuksa ya da LifeOS yedeği değilse alınmaz. Yüklenen yedek listeye',
+  'ortak.hesap.girer-geri-yuklemek-icin-yan':'girer; geri yüklemek için yanındaki «Geri yükle…».',
+  'ortak.hesap.geri-yukle-2':'Geri yükle…',
+  'ortak.hesap.yedekler-bu-bilgisayarda':'Yedekler bu bilgisayarda: ',
+  'ortak.hesap.i-kinci-yer-ve-geri-yukleme':'İkinci yer ve geri yükleme yalnız bilgisayarın kendisinden yapılır.',
+  'ortak.hesap.rol':'Rol',
+  'ortak.hesap.i-ki-adimli-dogrulama-acik':'İki adımlı doğrulama açık',
+  'ortak.hesap.telefonunu-kaybettiyse-kapat':'Telefonunu kaybettiyse kapat; sonra yeniden kurar.',
+  'ortak.hesap.bilgisayara-ulasilamiyor-son':'Bilgisayara ulaşılamıyor; son bilinen bilgiler gösteriliyor.',
+  'ortak.hesap.kod-acilamadi':'Kod açılamadı.',
+  'ortak.hesap.i-slem-yapilamadi':'İşlem yapılamadı.',
+  'ortak.hesap.beta-girisindesin-kayitlar-y':'Beta girişindesin: kayıtlar yalnız bu cihazda.',
+  'ortak.hesap.hesap-bilgisayardaki-lifeos':'Hesap, bilgisayardaki LifeOS üzerinden çalışır. Bu sayfayı LifeOS uygulamasından',
+  'ortak.hesap.ya-da-ev-agindaki-https':'(ya da ev ağındaki https adresinden) aç.',
+  'ortak.hesap.hesap-ayarlari':'Hesap ayarları — ',
+  'ortak.hesap.hesap':'Hesap',
+  'ortak.hesap.hesap-2':'Hesap — ',
+  'ortak.hesap.i-ki-adimli-dogrulama-acildi-2':'İki adımlı doğrulama açıldı.',
+  'ortak.hesap.i-ki-adimli-dogrulama-kapand-2':'İki adımlı doğrulama kapandı.',
+  'ortak.hesap.cihazin-adi-kaydedildi':'Cihazın adı kaydedildi.',
+  'ortak.hesap.sifre-degisti-oteki-cihazlar':'Şifre değişti. Öteki cihazlarda yeniden giriş gerekir.',
+  'ortak.hesap.kurtarma-sorusu-kaydedildi':'Kurtarma sorusu kaydedildi.',
+  'ortak.hesap.profil-kaydedildi':'Profil kaydedildi.',
+  'ortak.hesap.yedek-eklendi':'Yedek eklendi (',
+  'ortak.hesap.i-kinci-yer-ayarlandi-son-ye':'İkinci yer ayarlandı; son yedek oraya da yazıldı.',
+  'ortak.hesap.sifreyi-gizle':'Şifreyi gizle',
+  'ortak.hesap.sifreyi-goster':'Şifreyi göster',
+  'ortak.hesap.oturum-kapatildi':'Oturum kapatıldı.',
+  'ortak.hesap.oteki-cihaz-yoktu':'Öteki cihaz yoktu.',
+  'ortak.hesap.yeni-hesap-acma-acik':'Yeni hesap açma açık.',
+  'ortak.hesap.yeni-hesap-acma-kapali':'Yeni hesap açma kapalı.',
+  'ortak.hesap.lifeos-yedek-kodlari':'LifeOS yedek kodları (',
+  'ortak.hesap.yedek-alindi':'Yedek alındı',
+  'ortak.hesap.i-kinci-yer-kapandi-yedekler':'İkinci yer kapandı; yedekler yalnız bu bilgisayarda.',
+  'ortak.hesap.abonelik-acik-adresi-takvim':'Abonelik açık. Adresi takvim uygulamana ekle.',
+  'ortak.hesap.adres-yenilendi-eskisi-artik':'Adres yenilendi; eskisi artık çalışmaz.',
+  'ortak.hesap.abonelik-kapandi-adres-artik':'Abonelik kapandı; adres artık çalışmaz.',
+  'ortak.hesap.takvim-dosyasi-hazir-google':'Takvim dosyası hazır. Google Takvim › Ayarlar › İçe aktar.',
+  'ortak.hesap.anahtar-silindi-onu-kullanan':'Anahtar silindi; onu kullanan kısayol artık çalışmaz.',
+  'ortak.hesap.i-ki-adimli-dogrulamasi-kapa':'İki adımlı doğrulaması kapandı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.hesap-ve-esitleme':'Hesap ve eşitleme',
   'ortak.hesap.i-ki-adimli-dogrulama':'İki adımlı doğrulama',
   'ortak.hesap.kurtarma-sorusu':'Kurtarma sorusu',
@@ -343,8 +736,8 @@ window.LIFEOS.HESAP = (function(){
   function cihazAdi(){
     const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
     const tur = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad'
-      : /Android/.test(ua) ? (/Mobile/.test(ua) ? 'Android telefon' : 'Android tablet')
-      : /Windows/.test(ua) ? 'Windows PC' : /Macintosh/.test(ua) ? 'Mac' : 'Cihaz';
+      : /Android/.test(ua) ? (/Mobile/.test(ua) ? yz('ortak.hesap.android-telefon') : yz('ortak.hesap.android-tablet'))
+      : /Windows/.test(ua) ? yz('ortak.hesap.windows-pc') : /Macintosh/.test(ua) ? 'Mac' : 'Cihaz';
     return tur + (ortam.yerelUygulama() ? ' · uygulama' : '');
   }
 
@@ -430,7 +823,7 @@ window.LIFEOS.HESAP = (function(){
     try{
       const baslik = {};
       if(govde){ baslik['Content-Type'] = 'application/json'; baslik['X-LifeOS'] = 'hesap'; }
-      if(jeton) baslik.Authorization = 'Bearer ' + jeton;
+      if(jeton) baslik.Authorization = yz('ortak.hesap.bearer') + jeton;
       const r = await ortam.fetch(base + yol, {
         method:govde ? 'POST' : 'GET', headers:baslik,
         body:govde ? JSON.stringify(govde) : undefined,
@@ -506,7 +899,7 @@ window.LIFEOS.HESAP = (function(){
 
   async function tur(){
     if(!ayar || !ayar.depo) return hal;
-    if(ornekMi()) return durumYaz('ornek', 'Örnek profil eşitlenmez.');
+    if(ornekMi()) return durumYaz('ornek', yz('ortak.hesap.ornek-profil-esitlenmez'));
     let o = oturum();
     const base = sunucuAdresi(), a = alan();
     if(!o) return durumYaz(sunucu || ortam.yerelUygulama() ? 'giris' : 'yok', '');
@@ -515,7 +908,7 @@ window.LIFEOS.HESAP = (function(){
       try{ await ben(); }catch(e){ /* tur kendi hatasını görür */ }
       o = oturum() || o;
     }
-    if(base === null) return durumYaz('adres', 'Bilgisayarın adresi bilinmiyor; yeniden giriş yap.');
+    if(base === null) return durumYaz('adres', yz('ortak.hesap.bilgisayarin-adresi-bilinmiy'));
     if(!a) return hal;
     let bagli = sahip(a);
     const hk = ortam.depo.oku(anahtar('hesap', a));
@@ -529,7 +922,7 @@ window.LIFEOS.HESAP = (function(){
       if(gitti){ baglantiCoz(a); bagli = null; }
     }
     if(bagli && !adEsit(bagli, o.a)){
-      return durumYaz('baska', 'Bu cihazdaki ' + (MODUL_AD[ayar.modul] || '') + ' verisi «' + bagli
+      return durumYaz('baska', yz('ortak.hesap.bu-cihazdaki') + (MODUL_AD[ayar.modul] || '') + ' verisi «' + bagli
         + '» hesabına bağlı; «' + o.a + '» ile eşitlenmez.');
     }
     if(bagli && o.h && typeof hk !== 'string') ortam.depo.yaz(anahtar('hesap', a), o.h);   // eski bağa kimlik
@@ -610,7 +1003,7 @@ window.LIFEOS.HESAP = (function(){
     }catch(e){
       if(e.kod === 401){
         cerezSil(CEREZ);
-        durumYaz('giris', 'Oturum kapandı; yeniden giriş yap. Bu cihazdaki değişiklikler sırada bekliyor.');
+        durumYaz('giris', yz('ortak.hesap.oturum-kapandi-yeniden-giris'));
       }else if(!e.kod){
         durumYaz('cevrimdisi', '');
       }else{
@@ -714,8 +1107,8 @@ window.LIFEOS.HESAP = (function(){
   }
   /* Ayar adı ekranda iç terim olmadan (AGENTS kural 8). */
   function ayarAdi(k){
-    const t = [[/^lifeos\.tema/, 'Tema'], [/^lifeos\.(zemin|manzara)/, 'Arka plan'], [/^lifeos\.acilis\.video/, 'Açılış videosu'],
-      [/^lifeos\.muzik/, 'Açılış müziği'], [/^lifeos\.(ses|sessiz)/, 'Ses'], [/^lifeos\.minik/, 'Minikler'], [/^lifeos\.king/, 'King'],
+    const t = [[/^lifeos\.tema/, 'Tema'], [/^lifeos\.(zemin|manzara)/, yz('ortak.hesap.arka-plan')], [/^lifeos\.acilis\.video/, yz('ortak.hesap.acilis-videosu')],
+      [/^lifeos\.muzik/, yz('ortak.hesap.acilis-muzigi')], [/^lifeos\.(ses|sessiz)/, 'Ses'], [/^lifeos\.minik/, 'Minikler'], [/^lifeos\.king/, 'King'],
       [/^lifeos\.profil/, 'Profil'], [/^lifeos\.(hareket)/, 'Hareket'], [/^lifeos\.(yazi|boyut|satir)/, 'Yazı']].find(x => x[0].test(k));
     return t ? t[1] : 'Görünüm';
   }
@@ -723,8 +1116,8 @@ window.LIFEOS.HESAP = (function(){
     const l = ortam.depo.oku(anahtar('ayar', 'cakisma'));
     if(!Array.isArray(l) || !l.length) return '';
     const saat = z => { const d = new Date(Number(z) || 0); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); };
-    return '<div class="hesap__cakisma" role="group" aria-label="Ayar çakışmaları"><p class="hesap__not">Ayar çakışması: son yazan kazanır</p><ul>'
-      + l.slice(0, 3).map(x => '<li><b>' + kac(ayarAdi(String(x.k || ''))) + '</b><span>' + kac(String(x.kazanan || '')) + ' kazandı</span><small>' + saat(x.z) + '</small></li>').join('')
+    return ('<div class="hesap__cakisma" role="group" aria-label="Ayar çakışmaları"><p class="hesap__not">' + yz('ortak.hesap.ayar-cakismasi-son-yazan-kaz') + '</p><ul>')
+      + l.slice(0, 3).map(x => '<li><b>' + kac(ayarAdi(String(x.k || ''))) + '</b><span>' + kac(String(x.kazanan || '')) + (' ' + yz('ortak.hesap.kazandi') + '</span><small>') + saat(x.z) + '</small></li>').join('')
       + '</ul></div>';
   }
 
@@ -1032,10 +1425,10 @@ window.LIFEOS.HESAP = (function(){
         return 'Eşitlendi' + (s ? ' · ' + s : '') + (n ? ' · ' + sira : '');
       }
       case 'esitleniyor': return 'Eşitleniyor…';
-      case 'cevrimdisi': return 'Bilgisayara ulaşılamıyor' + (n ? ' · ' + sira + '; bağlanınca gider' : ' · bağlanınca eşitlenir');
-      case 'giris': return hal.mesaj || ('Giriş yapılmadı' + (n ? ' · ' + sira : ''));
+      case 'cevrimdisi': return yz('ortak.hesap.bilgisayara-ulasilamiyor') + (n ? ' · ' + sira + '; bağlanınca gider' : ' · bağlanınca eşitlenir');
+      case 'giris': return hal.mesaj || (yz('ortak.hesap.giris-yapilmadi') + (n ? ' · ' + sira : ''));
       case 'adres': case 'baska': case 'hata': case 'ornek': return hal.mesaj;
-      case 'yok': return 'Bu sayfa LifeOS sunucusundan açılmadı; hesap kullanılamıyor.';
+      case 'yok': return yz('ortak.hesap.bu-sayfa-lifeos-sunucusundan');
       default: return '';
     }
   }
@@ -1050,7 +1443,7 @@ window.LIFEOS.HESAP = (function(){
      Hesap ayrı satır değil: tek bakışta «Eşitlendi · 14:20». */
   function kisaDurum(){
     if(gizliMi()) return '';
-    if(!oturum() && betaMi()) return 'Beta · yalnız bu cihazda';
+    if(!oturum() && betaMi()) return yz('ortak.hesap.beta-yalniz-bu-cihazda');
     const n = bekleyen(), sira = n ? ' · ' + n + ' sırada' : '';
     switch(hal.durum){
       case 'tamam': {
@@ -1059,10 +1452,10 @@ window.LIFEOS.HESAP = (function(){
       }
       case 'esitleniyor': return 'Eşitleniyor…';
       case 'cevrimdisi': return 'Çevrimdışı' + sira;
-      case 'giris': return 'Giriş yapılmadı';
-      case 'ornek': return 'Örnek profil';
+      case 'giris': return yz('ortak.hesap.giris-yapilmadi');
+      case 'ornek': return yz('ortak.hesap.ornek-profil');
       case 'yok': case 'bilinmiyor': return '';
-      default: return 'Eşitleme durdu';
+      default: return yz('ortak.hesap.esitleme-durdu');
     }
   }
 
@@ -1075,7 +1468,7 @@ window.LIFEOS.HESAP = (function(){
     return {
       sinif, gizli:gizliMi(), kisa:kisaDurum(), hal:hal.durum,
       etiket:yz('ortak.hesap.hesap-ve-esitleme') + (o ? ' — ' + o.a : '') + (metin ? ': ' + metin : ''),
-      ipucu:o ? o.a + (metin ? ' · ' + metin : '') : 'Hesap: giriş yapılmadı',
+      ipucu:o ? o.a + (metin ? ' · ' + metin : '') : yz('ortak.hesap.hesap-giris-yapilmadi'),
     };
   }
 
@@ -1091,7 +1484,7 @@ window.LIFEOS.HESAP = (function(){
   function silmeNotu(){
     const o = oturum(), a = alan();
     if(!o || !a || !sahip(a)) return null;
-    return 'Bu cihaz «' + o.a + '» hesabına bağlı: silme bilgisayardaki kopyaya ve öteki cihazlara da gider.';
+    return yz('ortak.hesap.bu-cihaz') + o.a + '» hesabına bağlı: silme bilgisayardaki kopyaya ve öteki cihazlara da gider.';
   }
 
   function dinle(fn){
@@ -1202,8 +1595,8 @@ window.LIFEOS.HESAP = (function(){
       + (guc ? '<span class="hesap__guc" data-guc="0" hidden><i></i><i></i><i></i><small></small></span>' : '')
       + '</label>';
   }
-  const CAPS = '<p class="hesap__caps" hidden>Büyük harf kilidi açık</p>';
-  const GUC_AD = ['En az 8 karakter', 'Zayıf', 'İyi', 'Güçlü'];
+  const CAPS = ('<p class="hesap__caps" hidden>' + yz('ortak.hesap.buyuk-harf-kilidi-acik') + '</p>');
+  const GUC_AD = [yz('ortak.hesap.en-az-8-karakter'), 'Zayıf', 'İyi', 'Güçlü'];
   function sifreGucu(s){
     s = String(s || '');
     if(s.length < 8) return 0;
@@ -1253,17 +1646,17 @@ window.LIFEOS.HESAP = (function(){
     if(ortam.yerelUygulama() || !sunucu || !sunucu.yerel) return '';
     const l = Array.isArray(sunucu.ev_agi) ? sunucu.ev_agi : [];
     if(l.length){
-      return '<p class="hesap__not">Telefonda ve tablette bilgisayarın adresi: <b>' + l.map(kac).join('</b> ya da <b>')
-        + '</b>. Tablette tarayıcıda <b>https://' + kac(l[0]) + ':' + TELEFON_KAPI + '</b> açılır.</p>';
+      return ('<p class="hesap__not">' + yz('ortak.hesap.telefonda-ve-tablette-bilgis') + ' <b>') + l.map(kac).join(('</b> ' + yz('ortak.hesap.ya-da') + ' <b>'))
+        + ('</b>' + yz('ortak.hesap.tablette-tarayicida') + ' <b>https://') + kac(l[0]) + ':' + TELEFON_KAPI + ('</b> ' + yz('ortak.hesap.acilir') + '</p>');
     }
-    return '<p class="hesap__not">Telefon ve tablet için ev ağı kapalı. Bilgisayarda bir kez '
-      + '<code>python sistem/telefon.py</code> çalıştırıp LifeOS\'u yeniden başlat.</p>';
+    return ('<p class="hesap__not">' + yz('ortak.hesap.telefon-ve-tablet-icin-ev') + ' ')
+      + ('<code>' + yz('ortak.hesap.python-sistem-telefon-py') + '</code> çalıştırıp LifeOS\'u yeniden başlat.</p>');
   }
 
   function adresAlani(){
     if(!ortam.yerelUygulama()) return '';
     const adres = cerezOku(SUNUCU) || '';
-    return alanHtml('hesap-adres', 'Bilgisayarın adresi', 'text',
+    return alanHtml('hesap-adres', yz('ortak.hesap.bilgisayarin-adresi'), 'text',
       'inputmode="url" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="192.168.0.10" value="'
       + kac(String(adres).replace(/^https:\/\//, '').replace(':' + TELEFON_KAPI, '')) + '"');
   }
@@ -1272,7 +1665,7 @@ window.LIFEOS.HESAP = (function(){
     return ortam.yerelUygulama()
       ? 'Bilgisayara ulaşılamadı. Aynı Wi-Fi\'da mısınız, LifeOS açık mı, adres doğru mu? '
         + 'iPhone\'da LifeOS kök sertifikası kurulu ve «tam güven» açık olmalı.'
-      : 'Bilgisayara ulaşılamadı; LifeOS açık mı?';
+      : yz('ortak.hesap.bilgisayara-ulasilamadi-life');
   }
 
   function mesajYaz(m){
@@ -1314,9 +1707,9 @@ window.LIFEOS.HESAP = (function(){
     if(!sunucu){
       return ortam.yerelUygulama()
         ? 'Telefon ve bilgisayar aynı Wi-Fi\'da olmalı. Adres, bilgisayardaki LifeOS\'ta Hesap › Cihazlar\'da yazar.'
-        : 'Bilgisayara ulaşılamıyor. Beta girişiyle bu cihazda devam edebilirsin.';
+        : yz('ortak.hesap.bilgisayara-ulasilamiyor-bet');
     }
-    if(sunucu.kurulum) return sunucu.yerel ? 'İlk hesap admin olur.' : 'İlk hesap bilgisayarın kendisinde açılır.';
+    if(sunucu.kurulum) return sunucu.yerel ? yz('ortak.hesap.i-lk-hesap-admin-olur') : yz('ortak.hesap.i-lk-hesap-bilgisayarin-kend');
     return '';
   }
 
@@ -1335,17 +1728,17 @@ window.LIFEOS.HESAP = (function(){
      tanıtım: işaret, tek cümle, dört sistem, üç söz. Kaydırma yok;
      telefonda form açılınca tanıtım çekilir, form tek işe kalır. */
   const SISTEMLER = [
-    ['AYS', 'Sınav hazırlığı', '<rect x="5" y="5" width="14" height="14" rx="3.5"/>', '#4F86FF'],
-    ['SPİ', 'Sağlık ve toparlanma', '<circle cx="12" cy="12" r="7.5"/>', '#2EC4A9'],
-    ['ESP', 'Dil, müzik, okuma', '<rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4" transform="rotate(45 12 12)"/>', '#F2A93B'],
-    ['Gün', 'Günü kur, gidişi gör', '<path d="M5 18.5a7 7 0 0 1 14 0z"/>', '#9A86FF'],
+    ['AYS', yz('ortak.hesap.sinav-hazirligi'), '<rect x="5" y="5" width="14" height="14" rx="3.5"/>', '#4F86FF'],
+    ['SPİ', yz('ortak.hesap.saglik-ve-toparlanma'), '<circle cx="12" cy="12" r="7.5"/>', '#2EC4A9'],
+    ['ESP', yz('ortak.hesap.dil-muzik-okuma'), '<rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4" transform="rotate(45 12 12)"/>', '#F2A93B'],
+    ['Gün', yz('ortak.hesap.gunu-kur-gidisi-gor'), '<path d="M5 18.5a7 7 0 0 1 14 0z"/>', '#9A86FF'],
   ];
-  const SOZLER = ['PC, telefon ve tablet aynı hesapla', 'Verin hiçbir şirketin sunucusuna gitmez',
-    'Bilgisayar kapalıyken de çalışır'];
+  const SOZLER = [yz('ortak.hesap.pc-telefon-ve-tablet-ayni'), yz('ortak.hesap.verin-hicbir-sirketin-sunucu'),
+    yz('ortak.hesap.bilgisayar-kapaliyken-de-cal')];
   function tanitimHtml(){
     return '<section class="hesap-kapi__tanitim" aria-label="LifeOS">' + isaret(true)
-      + '<p class="hesap-kapi__ad">LifeOS</p>'
-      + '<p class="hesap-kapi__slogan">Sınav, sağlık ve gelişim tek yerde.</p>'
+      + ('<p class="hesap-kapi__ad">' + yz('ortak.hesap.lifeos') + '</p>')
+      + ('<p class="hesap-kapi__slogan">' + yz('ortak.hesap.sinav-saglik-ve-gelisim-tek') + '</p>')
       + '<ul class="hesap-kapi__sistemler">' + SISTEMLER.map(([ad, acik, sekil, renk], i) =>
           '<li style="--renk:' + renk + ';--sira:' + i + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + sekil + '</svg>'
           + '<b>' + kac(ad) + '</b><span>' + kac(acik) + '</span></li>').join('') + '</ul>'
@@ -1369,22 +1762,22 @@ window.LIFEOS.HESAP = (function(){
     const dugmeler = [];
     if(!kurulum){
       dugmeler.push('<button type="button" class="' + (l.length ? 'hesap__ikinci' : 'hesap__ana') + ' hesap__tam"'
-        + ' data-hesap="gorunum" data-gorunum="giris">' + (l.length ? 'Başka hesapla giriş yap' : 'Giriş yap') + '</button>');
+        + ' data-hesap="gorunum" data-gorunum="giris">' + (l.length ? yz('ortak.hesap.baska-hesapla-giris-yap') : yz('ortak.hesap.giris-yap')) + '</button>');
     }
     if(kayitVar){
       dugmeler.push('<button type="button" class="' + (kurulum ? 'hesap__ana' : 'hesap__ikinci') + ' hesap__tam"'
-        + ' data-hesap="gorunum" data-gorunum="kayit">Hesap oluştur</button>');
+        + (' data-hesap="gorunum" data-gorunum="kayit">' + yz('ortak.hesap.hesap-olustur') + '</button>'));
     }
     return '<div class="hesap-kapi__marka hesap-kapi__marka--ana">'
-      + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">Hoş geldin</h1>'
-      + '<p class="hesap-kapi__alt">' + (kurulum ? 'İlk hesabı aç, dört sistem birlikte açılsın.'
-        : l.length ? 'Hesabını seç, kaldığın yerden devam et.' : 'Tek hesap, dört sistem.') + '</p></div>'
+      + ('<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + yz('ortak.hesap.hos-geldin') + '</h1>')
+      + '<p class="hesap-kapi__alt">' + (kurulum ? yz('ortak.hesap.i-lk-hesabi-ac-dort-sistem')
+        : l.length ? yz('ortak.hesap.hesabini-sec-kaldigin-yerden') : yz('ortak.hesap.tek-hesap-dort-sistem')) + '</p></div>'
       + (not ? '<p class="hesap__not hesap-kapi__not">' + kac(not) + '</p>' : '')
       + hesaplar
       + (dugmeler.length ? '<div class="hesap-kapi__menu">' + dugmeler.join('') + '</div>' : '')
       + (kurulum ? '' : '<button type="button" class="hesap-kapi__kodla" data-hesap="gorunum" data-gorunum="bagla">'
-        + ikon('qr', 'hesap-ikon') + '<span><b>Kodla bağlan</b> · girişli cihazından, şifre yazmadan</span></button>')
-      + '<button type="button" class="hesap-kapi__beta" data-hesap="beta"><b>Beta girişi</b> · hesapsız, yalnız bu cihazda</button>';
+        + ikon('qr', 'hesap-ikon') + ('<span><b>' + yz('ortak.hesap.kodla-baglan') + '</b> ' + yz('ortak.hesap.girisli-cihazindan-sifre-yaz') + '</span></button>'))
+      + ('<button type="button" class="hesap-kapi__beta" data-hesap="beta"><b>' + yz('ortak.hesap.beta-girisi') + '</b> ' + yz('ortak.hesap.hesapsiz-yalniz-bu-cihazda') + '</button>');
   }
 
   /* Altı haneli kod alanı (doğrulayıcı ya da bağlama kodu): tek alan,
@@ -1398,7 +1791,7 @@ window.LIFEOS.HESAP = (function(){
 
   function kapiBaslik(baslik, alt, geri){
     return '<button type="button" class="hesap-kapi__geri" data-hesap="gorunum" data-gorunum="' + (geri || 'karsila') + '"'
-      + ' aria-label="' + (geri === 'giris' ? 'Girişe dön' : 'Ana menüye dön') + '">' + ikon('geri') + '</button>'
+      + ' aria-label="' + (geri === 'giris' ? yz('ortak.hesap.girise-don') : yz('ortak.hesap.ana-menuye-don')) + '">' + ikon('geri') + '</button>'
       + '<div class="hesap-kapi__marka">'
       + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + kac(baslik) + '</h1>'
       + (alt ? '<p class="hesap-kapi__alt">' + kac(alt) + '</p>' : '') + '</div>';
@@ -1416,52 +1809,52 @@ window.LIFEOS.HESAP = (function(){
         + ikon('geri') + '</button>'
         + '<div class="hesap-kapi__marka">'
         + (s ? avatar(s.g || s.a, s.k, 56) : '<span class="hesap-kapi__rozet">' + ikon('kalkan') + '</span>')
-        + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + (yedek ? 'Yedek kod' : 'Doğrulama kodu') + '</h1>'
-        + '<p class="hesap-kapi__alt">' + (yedek ? 'Kaydettiğin yedek kodlardan birini yaz; her biri bir kez geçer.'
-          : 'Doğrulayıcı uygulamandaki 6 haneli kodu yaz.') + '</p></div>'
+        + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + (yedek ? yz('ortak.hesap.yedek-kod') : yz('ortak.hesap.dogrulama-kodu')) + '</h1>'
+        + '<p class="hesap-kapi__alt">' + (yedek ? yz('ortak.hesap.kaydettigin-yedek-kodlardan')
+          : yz('ortak.hesap.dogrulayici-uygulamandaki-6')) + '</p></div>'
         + '<form class="hesap__form" data-hesap-form="kod" data-ayar-disi>'
-        + (yedek ? alanHtml('hesap-kod', 'Yedek kod', 'text', 'class="hesap__kod hesap__kod--yedek" autocomplete="off" '
+        + (yedek ? alanHtml('hesap-kod', yz('ortak.hesap.yedek-kod'), 'text', 'class="hesap__kod hesap__kod--yedek" autocomplete="off" '
             + 'autocapitalize="characters" autocorrect="off" spellcheck="false" required minlength="8" maxlength="9" placeholder="XXXX-XXXX"')
           : kodAlani('hesap-kod', 'Kod'))
         + mesaj + ana('Doğrula') + '</form>'
         + '<div class="hesap-kapi__baglar"><button type="button" class="hesap-kapi__bag" data-hesap="yedek-kip">'
-        + (yedek ? 'Uygulamadaki kodu kullan' : 'Telefonun yanında değil mi? Yedek kod kullan') + '</button></div>';
+        + (yedek ? yz('ortak.hesap.uygulamadaki-kodu-kullan') : yz('ortak.hesap.telefonun-yaninda-degil-mi-y')) + '</button></div>';
     }
     /* KODLA BAĞLAN (söz 18). Telefon uygulamasında bilgisayarın adresi de. */
     if(g === 'bagla'){
-      return kapiBaslik('Kodla bağlan', 'Girişli cihazında Hesap › Cihazlar › Yeni cihaz bağla’ya dokun.')
+      return kapiBaslik(yz('ortak.hesap.kodla-baglan'), yz('ortak.hesap.girisli-cihazinda-hesap-ciha'))
         + '<form class="hesap__form" data-hesap-form="bagla" data-ayar-disi>' + adresAlani()
-        + kodAlani('hesap-kod', 'Bağlama kodu', kapi.kod)
+        + kodAlani('hesap-kod', yz('ortak.hesap.baglama-kodu'), kapi.kod)
         + mesaj + ana('Bağlan') + '</form>'
-        + '<p class="hesap__not hesap-kapi__not">Kod 5 dakika geçerli ve tek kullanımlık.</p>';
+        + ('<p class="hesap__not hesap-kapi__not">' + yz('ortak.hesap.kod-5-dakika-gecerli-ve') + '</p>');
     }
     if(g === 'kayit'){
-      return kapiBaslik('Hesap oluştur', kurulumMu() ? kapiNotu() : '')
+      return kapiBaslik(yz('ortak.hesap.hesap-olustur'), kurulumMu() ? kapiNotu() : '')
         + '<form class="hesap__form" data-hesap-form="kayit" data-ayar-disi>' + adresAlani()
-        + alanHtml('hesap-ad', 'Kullanıcı adı', 'text', 'autocomplete="username" ' + AD_EK)
+        + alanHtml('hesap-ad', yz('ortak.hesap.kullanici-adi'), 'text', 'autocomplete="username" ' + AD_EK)
         + sifreAlani('hesap-parola', 'Şifre', 'new-password', true)
-        + sifreAlani('hesap-parola2', 'Şifre (tekrar)', 'new-password')
+        + sifreAlani('hesap-parola2', yz('ortak.hesap.sifre-tekrar'), 'new-password')
         + CAPS
-        + '<p class="hesap-kapi__ara">Şifreni unutursan</p>'
-        + alanHtml('hesap-soru', 'Kendine bir soru', 'text',
+        + ('<p class="hesap-kapi__ara">' + yz('ortak.hesap.sifreni-unutursan') + '</p>')
+        + alanHtml('hesap-soru', yz('ortak.hesap.kendine-bir-soru'), 'text',
           'required minlength="4" maxlength="120" autocomplete="off" placeholder="Örn. İlk öğretmenimin adı?"')
         + alanHtml('hesap-cevap', 'Cevabın', 'text', CEVAP_EK)
-        + mesaj + ana('Hesap oluştur') + '</form>';
+        + mesaj + ana(yz('ortak.hesap.hesap-olustur')) + '</form>';
     }
     if(g === 'unuttum' && !kapi.soru){
-      return kapiBaslik('Şifreni yenile', 'Kullanıcı adını yaz', 'giris')
+      return kapiBaslik(yz('ortak.hesap.sifreni-yenile'), yz('ortak.hesap.kullanici-adini-yaz'), 'giris')
         + '<form class="hesap__form" data-hesap-form="soru" data-ayar-disi>' + adresAlani()
-        + alanHtml('hesap-ad', 'Kullanıcı adı', 'text', 'autocomplete="username" ' + AD_EK + ' value="' + kac(kapi.ad) + '"')
+        + alanHtml('hesap-ad', yz('ortak.hesap.kullanici-adi'), 'text', 'autocomplete="username" ' + AD_EK + ' value="' + kac(kapi.ad) + '"')
         + mesaj + ana('Devam') + '</form>';
     }
     if(g === 'unuttum'){
-      return kapiBaslik('Şifreni yenile', 'Kendi sorunu cevapla', 'giris')
+      return kapiBaslik(yz('ortak.hesap.sifreni-yenile'), yz('ortak.hesap.kendi-sorunu-cevapla'), 'giris')
         + '<p class="hesap-kapi__soru">' + kac(kapi.soru) + '</p>'
         + '<form class="hesap__form" data-hesap-form="kurtar" data-ayar-disi>'
         + alanHtml('hesap-cevap', 'Cevabın', 'text', CEVAP_EK)
-        + sifreAlani('hesap-parola', 'Yeni şifre', 'new-password', true)
-        + sifreAlani('hesap-parola2', 'Yeni şifre (tekrar)', 'new-password')
-        + CAPS + mesaj + ana('Şifreyi yenile') + '</form>';
+        + sifreAlani('hesap-parola', yz('ortak.hesap.yeni-sifre'), 'new-password', true)
+        + sifreAlani('hesap-parola2', yz('ortak.hesap.yeni-sifre-tekrar'), 'new-password')
+        + CAPS + mesaj + ana(yz('ortak.hesap.sifreyi-yenile')) + '</form>';
     }
     /* Giriş. Hatırlanan hesap seçildiyse ad sorulmaz: monogram ve ad. */
     const s = kapi.secili;
@@ -1471,16 +1864,16 @@ window.LIFEOS.HESAP = (function(){
         + '<div class="hesap-kapi__marka">' + avatar(s.g || s.a, s.k, 64)
         + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + kac(s.g || s.a) + '</h1>'
         + '<p class="hesap-kapi__alt">@' + kac(s.a) + '</p></div>'
-      : kapiBaslik('Giriş yap', '');
+      : kapiBaslik(yz('ortak.hesap.giris-yap'), '');
     return bas
       + '<form class="hesap__form" data-hesap-form="giris" data-ayar-disi>' + adresAlani()
       + (s ? '<input id="hesap-ad" type="hidden" autocomplete="username" value="' + kac(s.a) + '"/>'
-        : alanHtml('hesap-ad', 'Kullanıcı adı', 'text', 'autocomplete="username" ' + AD_EK))
+        : alanHtml('hesap-ad', yz('ortak.hesap.kullanici-adi'), 'text', 'autocomplete="username" ' + AD_EK))
       + sifreAlani('hesap-parola', 'Şifre', 'current-password')
-      + CAPS + mesaj + ana('Giriş yap') + '</form>'
+      + CAPS + mesaj + ana(yz('ortak.hesap.giris-yap')) + '</form>'
       + '<div class="hesap-kapi__baglar">'
-      +   '<button type="button" class="hesap-kapi__bag" data-hesap="unuttum">Şifremi unuttum</button>'
-      +   (s ? '<button type="button" class="hesap-kapi__bag" data-hesap="gorunum" data-gorunum="giris">Başka hesap</button>' : '')
+      +   ('<button type="button" class="hesap-kapi__bag" data-hesap="unuttum">' + yz('ortak.hesap.sifremi-unuttum') + '</button>')
+      +   (s ? ('<button type="button" class="hesap-kapi__bag" data-hesap="gorunum" data-gorunum="giris">' + yz('ortak.hesap.baska-hesap') + '</button>') : '')
       + '</div>';
   }
 
@@ -1710,7 +2103,7 @@ window.LIFEOS.HESAP = (function(){
     if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik(PANEL)) L.KABUK.katmanKapat();
     sunucu = Object.assign({}, sunucu);
     await yokla();
-    durumYaz('giris', 'Hesap silindi. Bu cihazdaki veri yerinde duruyor.');
+    durumYaz('giris', yz('ortak.hesap.hesap-silindi-bu-cihazdaki-v'));
     if(kapiGerekli()) kapiAc();
   }
   async function cihazlar(){ return (await api('/api/hesap/cihazlar')).cihazlar || []; }
@@ -1734,7 +2127,7 @@ window.LIFEOS.HESAP = (function(){
     let r;
     try{
       r = await ortam.fetch(base + yol, Object.assign({ method:'POST', cache:'no-store', credentials:'omit' }, secenek,
-        { headers:Object.assign({ 'X-LifeOS':'hesap', Authorization:'Bearer ' + o.j }, secenek.headers || {}) }));
+        { headers:Object.assign({ 'X-LifeOS':'hesap', Authorization:yz('ortak.hesap.bearer') + o.j }, secenek.headers || {}) }));
     }catch(e){ const h = new Error('Sunucuya ulaşılamadı.'); h.kod = 0; throw h; }
     if(!r.ok){
       let v = null;
@@ -1764,7 +2157,7 @@ window.LIFEOS.HESAP = (function(){
     cerezSil(CEREZ);
     merkezKapat();
     if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik(PANEL)) L.KABUK.katmanKapat();
-    durumYaz('giris', 'Hesap deposu yedekten geri yüklendi; yeniden giriş yap. Bu cihazdaki kayıtlar yerinde, girince eşitlenir.');
+    durumYaz('giris', yz('ortak.hesap.hesap-deposu-yedekten-geri-y'));
     if(kapiGerekli()) kapiAc();
     return v;
   }
@@ -1848,9 +2241,9 @@ window.LIFEOS.HESAP = (function(){
      Bu cihaz ilk kez bakıyorsa eskiler görülmüş sayılır: geçmiş için
      alarm çalınmaz, bundan sonrası söylenir. */
   const UYARI_ARALIK = 300000;
-  const UYARI_TUR = { giris:'Yeni giriş', bag:'Kodla bağlanan cihaz', kurtar:'Şifre kurtarıldı',
-    yanlis:'Yanlış şifre denemesi', 'kurtar-yanlis':'Yanlış kurtarma cevabı', 'kod-yanlis':'Yanlış doğrulama kodu',
-    parola:'Şifre değişti', 'iki-adim-kapat':'İki adımlı doğrulama kapandı' };
+  const UYARI_TUR = { giris:yz('ortak.hesap.yeni-giris'), bag:yz('ortak.hesap.kodla-baglanan-cihaz'), kurtar:yz('ortak.hesap.sifre-kurtarildi'),
+    yanlis:yz('ortak.hesap.yanlis-sifre-denemesi'), 'kurtar-yanlis':yz('ortak.hesap.yanlis-kurtarma-cevabi'), 'kod-yanlis':yz('ortak.hesap.yanlis-dogrulama-kodu'),
+    parola:yz('ortak.hesap.sifre-degisti'), 'iki-adim-kapat':yz('ortak.hesap.i-ki-adimli-dogrulama-kapand') };
   /* «Görüldü» kapıya bakmayan çerezdedir (lifeos_gordu = { hesap: olay no }):
      modüller ayrı kapıda, depoları ayrı; aynı uyarıya dört kapıda ayrı
      «Bendim» denmesin. Yalnız bu cihazdadır, sunucuya gitmez. */
@@ -1891,7 +2284,7 @@ window.LIFEOS.HESAP = (function(){
   /* Oturum sunucuda kapanmış (başka cihazdan çıkarıldı, süresi doldu). */
   function oturumKapandi(){
     cerezSil(CEREZ);
-    durumYaz('giris', 'Oturum kapandı; yeniden giriş yap. Bu cihazdaki değişiklikler sırada bekliyor.');
+    durumYaz('giris', yz('ortak.hesap.oturum-kapandi-yeniden-giris'));
     merkezKapat();
     if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik(PANEL)) L.KABUK.katmanKapat();
     if(kapiGerekli()) kapiAc();
@@ -1906,17 +2299,17 @@ window.LIFEOS.HESAP = (function(){
      içindeki alanlar modülün «yazıyor mu?» denetimine sayılmaz. */
   const SAYFA_AD = { kok:'Hesap', profil:'Profil', plan:'Plan', cihazlar:'Cihazlar', guvenlik:'Güvenlik',
     esitleme:'Eşitleme', yonetim:'Yönetim', kisi:'Kullanıcı', etkinlik:'Etkinlik', verin:'Verin',
-    baglantilar:'Bağlantılar', ikiadim:'İki adımlı doğrulama', takvim:'Takvim aboneliği',
-    anahtarlar:'Kısayollar ve otomasyon', gelen:'Gelen kutusu', bagla:'Yeni cihaz bağla', cihaz:'Cihaz', yedek:'Yedekler' };
+    baglantilar:'Bağlantılar', ikiadim:yz('ortak.hesap.i-ki-adimli-dogrulama'), takvim:yz('ortak.hesap.takvim-aboneligi'),
+    anahtarlar:yz('ortak.hesap.kisayollar-ve-otomasyon'), gelen:yz('ortak.hesap.gelen-kutusu'), bagla:yz('ortak.hesap.yeni-cihaz-bagla'), cihaz:'Cihaz', yedek:'Yedekler' };
   /* Oturumun nasıl açıldığı (sunucu sözü 18). */
-  const YONTEM_AD = { sifre:'Şifreyle', 'iki-adim':'Şifre ve doğrulama koduyla', yedek:'Şifre ve yedek kodla',
-    kod:'Bağlama koduyla', kurtar:'Kurtarma sorusuyla', kayit:'Hesap açılırken', kur:'İlk kurulumda' };
+  const YONTEM_AD = { sifre:'Şifreyle', 'iki-adim':yz('ortak.hesap.sifre-ve-dogrulama-koduyla'), yedek:yz('ortak.hesap.sifre-ve-yedek-kodla'),
+    kod:yz('ortak.hesap.baglama-koduyla'), kurtar:yz('ortak.hesap.kurtarma-sorusuyla'), kayit:yz('ortak.hesap.hesap-acilirken'), kur:yz('ortak.hesap.i-lk-kurulumda') };
   function tarihSaat(ms){
     if(!ms) return '';
     const d = new Date(ms);
     return d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + d.getFullYear() + ' · ' + saatMetni(ms);
   }
-  const adresAd = ip => (!ip ? '' : ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' ? 'Bu bilgisayar' : ip);
+  const adresAd = ip => (!ip ? '' : ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' ? yz('ortak.hesap.bu-bilgisayar') : ip);
   function cihazBul(){
     return merkez && merkez.cihazlar ? merkez.cihazlar.find(c => c.id === merkez.cihaz) || null : null;
   }
@@ -1928,28 +2321,28 @@ window.LIFEOS.HESAP = (function(){
     const u = l[0], yanlis = /yanlis/.test(u.tur);
     return '<div class="hesap-olaykart' + (yanlis ? ' is-dikkat' : '') + '" role="status">'
       + ikon(yanlis ? 'uyari' : 'giris', 'hesap-olaykart__ikon')
-      + '<div class="hesap-olaykart__metin"><b>' + kac(UYARI_TUR[u.tur] || 'Güvenlik olayı') + (u.cihaz_ad ? ': ' + kac(u.cihaz_ad) : '') + '</b>'
+      + '<div class="hesap-olaykart__metin"><b>' + kac(UYARI_TUR[u.tur] || yz('ortak.hesap.guvenlik-olayi')) + (u.cihaz_ad ? ': ' + kac(u.cihaz_ad) : '') + '</b>'
       + '<small>' + kac([sonMetni(u.zaman), adresAd(u.ip)].filter(Boolean).join(' · '))
       + (l.length > 1 ? ' · ' + (l.length - 1) + ' olay daha' : '') + '</small>'
       + '<span class="hesap-olaykart__eylem">'
-      + '<button type="button" class="hesap__ikinci" data-hesap="uyari-gordum">Bendim</button>'
-      + '<button type="button" class="hesap__ikinci" data-hesap="uyari-incele" data-oturum="' + (u.oturum == null ? '' : Number(u.oturum)) + '">İncele</button>'
+      + ('<button type="button" class="hesap__ikinci" data-hesap="uyari-gordum">' + yz('ortak.hesap.bendim') + '</button>')
+      + '<button type="button" class="hesap__ikinci" data-hesap="uyari-incele" data-oturum="' + (u.oturum == null ? '' : Number(u.oturum)) + ('">' + yz('ortak.hesap.i-ncele') + '</button>')
       + '</span></div></div>';
   }
 
   /* Etkinlik defterindeki olay türleri (sunucu sözleri 11, 14–17). */
   const OLAY = {
-    giris:['giris', 'Giriş'], yanlis:['uyari', 'Yanlış şifre'], kayit:['ekle', 'Hesap açıldı'],
-    kurtar:['soru', 'Şifre soruyla yenilendi'], 'kurtar-yanlis':['uyari', 'Kurtarma cevabı yanlış'],
-    parola:['anahtar', 'Şifre değişti'], soru:['soru', 'Kurtarma sorusu değişti'], cikis:['cikis', 'Çıkış'],
-    cihaz:['cihazlar', 'Cihazdan çıkıldı'], otekiler:['cihazlar', 'Öteki cihazlardan çıkıldı'],
-    yonetim:['yonetim', 'Admin değişikliği'],
-    'iki-adim':['kalkan', 'İki adımlı doğrulama açıldı'], 'iki-adim-kapat':['kalkan', 'İki adımlı doğrulama kapandı'],
-    yedek:['anahtar', 'Yedek kodlar yenilendi'], 'kod-yanlis':['uyari', 'Yanlış doğrulama kodu'],
-    bag:['qr', 'Kodla cihaz bağlandı'], anahtar:['kisayol', 'Erişim anahtarı açıldı'],
-    'anahtar-sil':['kisayol', 'Erişim anahtarı silindi'], takvim:['takvim', 'Takvim aboneliği'],
-    'takvim-kapat':['takvim', 'Takvim aboneliği kapandı'], 'geri-yukle':['yedek', 'Depo yedekten geri yüklendi'],
-    'yedek-indir':['indir', 'Yedek dosya olarak indirildi'], 'yedek-yukle':['yedek', 'Yedek dosyadan yüklendi'],
+    giris:['giris', 'Giriş'], yanlis:['uyari', yz('ortak.hesap.yanlis-sifre')], kayit:['ekle', yz('ortak.hesap.hesap-acildi')],
+    kurtar:['soru', yz('ortak.hesap.sifre-soruyla-yenilendi')], 'kurtar-yanlis':['uyari', yz('ortak.hesap.kurtarma-cevabi-yanlis')],
+    parola:['anahtar', yz('ortak.hesap.sifre-degisti')], soru:['soru', yz('ortak.hesap.kurtarma-sorusu-degisti')], cikis:['cikis', 'Çıkış'],
+    cihaz:['cihazlar', yz('ortak.hesap.cihazdan-cikildi')], otekiler:['cihazlar', yz('ortak.hesap.oteki-cihazlardan-cikildi')],
+    yonetim:['yonetim', yz('ortak.hesap.admin-degisikligi')],
+    'iki-adim':['kalkan', yz('ortak.hesap.i-ki-adimli-dogrulama-acildi')], 'iki-adim-kapat':['kalkan', yz('ortak.hesap.i-ki-adimli-dogrulama-kapand')],
+    yedek:['anahtar', yz('ortak.hesap.yedek-kodlar-yenilendi')], 'kod-yanlis':['uyari', yz('ortak.hesap.yanlis-dogrulama-kodu')],
+    bag:['qr', yz('ortak.hesap.kodla-cihaz-baglandi')], anahtar:['kisayol', yz('ortak.hesap.erisim-anahtari-acildi')],
+    'anahtar-sil':['kisayol', yz('ortak.hesap.erisim-anahtari-silindi')], takvim:['takvim', yz('ortak.hesap.takvim-aboneligi')],
+    'takvim-kapat':['takvim', yz('ortak.hesap.takvim-aboneligi-kapandi')], 'geri-yukle':['yedek', yz('ortak.hesap.depo-yedekten-geri-yuklendi')],
+    'yedek-indir':['indir', yz('ortak.hesap.yedek-dosya-olarak-indirildi')], 'yedek-yukle':['yedek', yz('ortak.hesap.yedek-dosyadan-yuklendi')],
   };
   const YANLIS = { yanlis:1, 'kurtar-yanlis':1, 'kod-yanlis':1 };
   const AY_MS = 30 * 86400000;
@@ -1965,7 +2358,7 @@ window.LIFEOS.HESAP = (function(){
     }
     if(typeof ben.soru_var === 'boolean'){
       satirlar.push({ ikon:'soru', ad:yz('ortak.hesap.kurtarma-sorusu'), ac:'soru', dikkat:!ben.soru_var && !(iki && iki.acik),
-        detay:ben.soru_var ? 'Ayarlı' : 'Ayarlı değil' });
+        detay:ben.soru_var ? 'Ayarlı' : yz('ortak.hesap.ayarli-degil') });
     }
     if(m.cihazlar){
       const eski = m.cihazlar.filter(c => !c.bu && ortam.simdi() - (Number(c.son) || 0) > AY_MS).length;
@@ -1975,14 +2368,14 @@ window.LIFEOS.HESAP = (function(){
     if(m.etkinlik){
       const y = yanlisSayisi(m.etkinlik);
       satirlar.push({ ikon:'etkinlik', ad:yz('ortak.hesap.son-7-gun'), sayfa:'etkinlik', dikkat:y > 0,
-        detay:y ? y + ' yanlış deneme' : 'Yanlış deneme yok' });
+        detay:y ? y + ' yanlış deneme' : yz('ortak.hesap.yanlis-deneme-yok') });
     }
     /* Deponun yedeği (sunucu sözü 20) yalnız admine. */
     const yd = ben.yedek;
     if(yd && ben.kullanici && ben.kullanici.rol === 'admin'){
       const h = yedekHatasi(yd);
       satirlar.push({ ikon:'yedek', ad:yz('ortak.hesap.hesap-deposunun-yedegi'), sayfa:'yedek', dikkat:!!h,
-        detay:h || (yd.son ? sonMetni(yd.son) : 'Henüz yok') });
+        detay:h || (yd.son ? sonMetni(yd.son) : yz('ortak.hesap.henuz-yok')) });
     }
     return satirlar;
   }
@@ -1993,16 +2386,16 @@ window.LIFEOS.HESAP = (function(){
     const iki = m.ben && m.ben.iki_adim;
     if(!l.length) return { detay:'' };
     if(n) return { detay:n === 1 ? '1 öneri' : n + ' öneri', sinif:'is-dikkat' };
-    return { detay:iki && iki.acik ? 'İki adım açık' : 'Yolunda' };
+    return { detay:iki && iki.acik ? yz('ortak.hesap.i-ki-adim-acik') : 'Yolunda' };
   }
   /* Yedekte dikkat gereken ne var? Yedek henüz hiç alınmadıysa (ilk
      istekte arkada alınıyor) dikkat değildir; eski ya da alınamadıysa. */
   const YEDEK_ESKI_MS = 2 * 86400000;
   function yedekHatasi(yd){
     if(!yd) return '';
-    if(yd.hata) return 'Son yedek alınamadı';
+    if(yd.hata) return yz('ortak.hesap.son-yedek-alinamadi');
     if(yd.son && ortam.simdi() - yd.son > YEDEK_ESKI_MS) return Math.floor((ortam.simdi() - yd.son) / 86400000) + ' gündür yedek yok';
-    if(yd.ikinci_hata) return 'İkinci yere yazılamadı';
+    if(yd.ikinci_hata) return yz('ortak.hesap.i-kinci-yere-yazilamadi');
     return '';
   }
   function yedekSatiri(m){
@@ -2038,7 +2431,7 @@ window.LIFEOS.HESAP = (function(){
   function kopyaKutusu(metin, etiket){
     return '<div class="hesap-kopya"><code class="hesap-kopya__metin">' + kac(metin) + '</code>'
       + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="kopyala" data-metin="' + kac(metin) + '"'
-      + ' aria-label="' + kac((etiket || 'Metni') + ' kopyala') + '">' + ikon('kopyala', 'hesap-ikon') + '<span>Kopyala</span></button></div>';
+      + ' aria-label="' + kac((etiket || 'Metni') + ' kopyala') + '">' + ikon('kopyala', 'hesap-ikon') + ('<span>' + yz('ortak.hesap.kopyala') + '</span></button></div>');
   }
   function tanit(ikonAd, baslik, metin){
     return '<div class="hesap-tanit">' + ikon(ikonAd, 'hesap-tanit__ikon')
@@ -2049,13 +2442,13 @@ window.LIFEOS.HESAP = (function(){
   }
   function yedekHtml(l){
     return '<div class="hesap-yedek" role="status">'
-      + tanit('anahtar', 'Yedek kodların', 'Telefonun yanında değilken her biri girişi bir kez açar. Bir yere yaz ya da indir; bir daha gösterilmez.')
+      + tanit('anahtar', yz('ortak.hesap.yedek-kodlarin'), yz('ortak.hesap.telefonun-yaninda-degilken-h'))
       + '<ol class="hesap-yedek__liste">' + l.map(x => '<li><code>' + kac(x) + '</code></li>').join('') + '</ol>'
       + '<div class="hesap__eylem hesap-yedek__eylem">'
       + '<button type="button" class="hesap__ikinci" data-hesap="kopyala" data-metin="' + kac(l.join('\n')) + '">'
-      + ikon('kopyala', 'hesap-ikon') + 'Kopyala</button>'
-      + '<button type="button" class="hesap__ikinci" data-hesap="yedek-indir">' + ikon('indir', 'hesap-ikon') + 'İndir</button></div>'
-      + '<button type="button" class="hesap__ana hesap__tam" data-hesap="yedek-tamam">Kaydettim</button></div>';
+      + ikon('kopyala', 'hesap-ikon') + (yz('ortak.hesap.kopyala') + '</button>')
+      + '<button type="button" class="hesap__ikinci" data-hesap="yedek-indir">' + ikon('indir', 'hesap-ikon') + (yz('ortak.hesap.i-ndir') + '</button></div>')
+      + ('<button type="button" class="hesap__ana hesap__tam" data-hesap="yedek-tamam">' + yz('ortak.hesap.kaydettim') + '</button></div>');
   }
   /* Tariflerde kullanılan istek: adres, başlık, gövde. Anahtar az önce
      açıldıysa (söz 19) içine yazılır, yoksa yer tutucu. */
@@ -2066,12 +2459,12 @@ window.LIFEOS.HESAP = (function(){
   }
   function istekKutusu(t){
     return '<dl class="hesap-istek">'
-      + '<div><dt>Adres</dt><dd>' + kopyaKutusu(t.url, 'Adresi') + '</dd></div>'
-      + '<div><dt>Yöntem</dt><dd><code>POST</code></dd></div>'
-      + '<div><dt>Başlık</dt><dd><code>Authorization: Bearer ' + kac(t.a) + '</code></dd></div>'
-      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code><small>AYS ya da ESP için '
-      +   '<code>"modul": "ays"</code> ya da <code>"esp"</code> ekle; yazılmazsa SPİ.</small></dd></div>'
-      + '<div><dt>Önce dene</dt><dd>Aynı adrese aynı başlıkla gövdesiz <code>GET</code>: «Bağlantı tamam» döner, satır bırakmaz.</dd></div></dl>';
+      + ('<div><dt>' + yz('ortak.hesap.adres') + '</dt><dd>') + kopyaKutusu(t.url, 'Adresi') + '</dd></div>'
+      + ('<div><dt>' + yz('ortak.hesap.yontem') + '</dt><dd><code>' + yz('ortak.hesap.post') + '</code></dd></div>')
+      + ('<div><dt>' + yz('ortak.hesap.baslik') + '</dt><dd><code>' + yz('ortak.hesap.authorization-bearer') + ' ') + kac(t.a) + '</code></dd></div>'
+      + ('<div><dt>' + yz('ortak.hesap.govde-json') + '</dt><dd><code>{"metin": "su 250"}</code><small>' + yz('ortak.hesap.ays-ya-da-esp-icin') + ' ')
+      +   ('<code>"modul": "ays"</code> ' + yz('ortak.hesap.ya-da') + ' <code>"esp"</code> ' + yz('ortak.hesap.ekle-yazilmazsa-spi') + '</small></dd></div>')
+      + ('<div><dt>' + yz('ortak.hesap.once-dene') + '</dt><dd>' + yz('ortak.hesap.ayni-adrese-ayni-baslikla-go') + ' <code>' + yz('ortak.hesap.get') + '</code>' + yz('ortak.hesap.baglanti-tamam-doner-satir') + '</dd></div></dl>');
   }
   const HAFTA_MS = 7 * 86400000;
   function yanlisSayisi(l){
@@ -2124,7 +2517,7 @@ window.LIFEOS.HESAP = (function(){
       case 'tamam': return n ? n + ' sırada' : 'Eşitlendi';
       case 'esitleniyor': return 'Eşitleniyor…';
       case 'cevrimdisi': return 'Çevrimdışı';
-      case 'hata': case 'baska': return 'Sorun var';
+      case 'hata': case 'baska': return yz('ortak.hesap.sorun-var');
       default: return '';
     }
   }
@@ -2135,7 +2528,7 @@ window.LIFEOS.HESAP = (function(){
     return '<ul class="hesap-liste hesap-iskelet" aria-busy="true">' + [62, 44, 54].map(g =>
       '<li class="hesap-oge"><i class="hesap-iskelet__daire"></i><span class="hesap-oge__metin">'
       + '<i class="hesap-iskelet__cizgi" style="width:' + g + '%"></i><i class="hesap-iskelet__cizgi is-kisa"></i></span></li>').join('')
-      + '</ul><p class="hesap__gizli" role="status">Yükleniyor…</p>';
+      + ('</ul><p class="hesap__gizli" role="status">' + yz('ortak.hesap.yukleniyor') + '</p>');
   }
   function bilgi(dt, dd){ return '<div><dt>' + kac(dt) + '</dt><dd>' + kac(dd) + '</dd></div>'; }
   /* o.alt: adın altında küçük açıklama (Bağlantılar'da hangi uygulamalar). */
@@ -2176,13 +2569,13 @@ window.LIFEOS.HESAP = (function(){
         + '<div class="hesap-kimlik">' + avatar(k.g, k.k, 76)
         + '<p class="hesap-kimlik__ad">' + kac(k.g) + '</p>'
         + '<p class="hesap-kimlik__alt">@' + kac(k.ad) + ' · ' + ROL_AD(k.r) + '</p>'
-        + (o.dg && o.dg === bugunGun() ? '<p class="hesap-kimlik__kutla">İyi ki doğdun!</p>' : '')
+        + (o.dg && o.dg === bugunGun() ? ('<p class="hesap-kimlik__kutla">' + yz('ortak.hesap.i-yi-ki-dogdun') + '</p>') : '')
         /* Kimliğin altında durum hapları: plan ve (açıksa) iki adım. */
         + '<div class="hesap-haplar">'
         + (k.pa ? '<button type="button" class="hesap-hap" data-hesap="sayfa" data-sayfa="plan">'
           + kac(k.pa) + (p && p.etiket ? ' · ' + kac(p.etiket) : '') + '</button>' : '')
         + (iki && iki.acik ? '<button type="button" class="hesap-hap hesap-hap--simge" data-hesap="sayfa" data-sayfa="ikiadim">'
-          + ikon('kalkan', 'hesap-ikon') + 'İki adım açık</button>' : '')
+          + ikon('kalkan', 'hesap-ikon') + (yz('ortak.hesap.i-ki-adim-acik') + '</button>') : '')
         + '</div></div>'
         + '<div class="hesap-sayilar">'
         +   say(uye == null ? null : (uye + 1).toLocaleString('tr-TR'), 'gündür üye')
@@ -2215,25 +2608,25 @@ window.LIFEOS.HESAP = (function(){
       const bugun = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       /* Kişisel alanlar yalnız sunucunun cevabıyla çizilir (söz 14). */
       const kisisel = ku
-        ? '<p class="hesap-bolum hesap-bolum--form">Kişisel bilgiler · isteğe bağlı</p>'
-          + alanHtml('hesap-hitap', 'King sana nasıl seslensin', 'text', 'maxlength="30" autocomplete="off" placeholder="'
+        ? ('<p class="hesap-bolum hesap-bolum--form">' + yz('ortak.hesap.kisisel-bilgiler-istege-bagl') + '</p>')
+          + alanHtml('hesap-hitap', yz('ortak.hesap.king-sana-nasil-seslensin'), 'text', 'maxlength="30" autocomplete="off" placeholder="'
             + kac(k.g) + '" value="' + kac(ku.hitap || '') + '"')
-          + alanHtml('hesap-dogum', 'Doğum günü', 'date', 'min="1900-01-01" max="' + bugun + '" value="' + kac(ku.dogum || '') + '"')
+          + alanHtml('hesap-dogum', yz('ortak.hesap.dogum-gunu'), 'date', 'min="1900-01-01" max="' + bugun + '" value="' + kac(ku.dogum || '') + '"')
           + alanHtml('hesap-eposta', 'E-posta', 'email', 'maxlength="200" autocomplete="email" value="' + kac(ku.eposta || '') + '"')
-          + '<p class="hesap__not hesap__not--form">Hiçbiri bir yere gönderilmez; yalnız bilgisayarındaki LifeOS’ta durur.</p>'
+          + ('<p class="hesap__not hesap__not--form">' + yz('ortak.hesap.hicbiri-bir-yere-gonderilmez') + '</p>')
         : '';
       return '<div class="hesap-kimlik hesap-kimlik--kucuk" data-hesap-onizleme>' + avatar(k.g, k.k, 64) + '</div>'
         + '<form class="hesap__form" data-hesap-form="profil" data-ayar-disi>'
-        +   alanHtml('hesap-gorunen', 'Görünen ad', 'text', 'maxlength="40" autocomplete="nickname" value="' + kac(k.g) + '"')
-        +   '<fieldset class="hesap-renkler"><legend>Renk</legend><div class="hesap-renkler__liste">' + renkler.map(r =>
+        +   alanHtml('hesap-gorunen', yz('ortak.hesap.gorunen-ad'), 'text', 'maxlength="40" autocomplete="nickname" value="' + kac(k.g) + '"')
+        +   ('<fieldset class="hesap-renkler"><legend>' + yz('ortak.hesap.renk') + '</legend><div class="hesap-renkler__liste">') + renkler.map(r =>
               '<label class="hesap-renk" style="--renk:' + RENK[r] + '" title="' + kac(RENK_AD[r]) + '">'
               + '<input type="radio" name="hesap-renk" value="' + r + '"' + (r === k.k ? ' checked' : '') + '/>'
               + '<span class="hesap-renk__ad">' + kac(RENK_AD[r]) + '</span></label>').join('') + '</div></fieldset>'
         +   kisisel
         +   formMesaj
-        +   '<button type="submit" class="hesap__ana hesap__tam">Kaydet</button>'
+        +   ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.kaydet') + '</button>')
         + '</form>'
-        + '<dl class="hesap-bilgi">' + bilgi('Kullanıcı adı', '@' + k.ad) + bilgi('Rol', ROL_AD(k.r))
+        + '<dl class="hesap-bilgi">' + bilgi(yz('ortak.hesap.kullanici-adi'), '@' + k.ad) + bilgi('Rol', ROL_AD(k.r))
         +   (k.olusturma ? bilgi('Üyelik', tarihMetni(k.olusturma)) : '') + '</dl>';
     },
 
@@ -2249,10 +2642,10 @@ window.LIFEOS.HESAP = (function(){
           + '<span class="hesap-plan__etiket' + (p.durum === 'yakinda' ? ' is-yakinda' : '') + '">' + kac(p.etiket) + '</span></header>'
           + '<p class="hesap-plan__ozet">' + kac(p.ozet) + '</p>'
           + '<ul class="hesap-plan__liste">' + (p.ozellik || []).map(x => '<li>' + ikon('tamam') + '<span>' + kac(x) + '</span></li>').join('') + '</ul>'
-          + (simdi ? '<p class="hesap-plan__durum">' + ikon('tamam') + 'Şu anki planın</p>' : '')
+          + (simdi ? '<p class="hesap-plan__durum">' + ikon('tamam') + (yz('ortak.hesap.su-anki-planin') + '</p>') : '')
           + '</article>';
       }).join('') + '</div>'
-      + '<p class="hesap__not">Ödeme yok; hiçbir özellik plana bağlı değil.</p>';
+      + ('<p class="hesap__not">' + yz('ortak.hesap.odeme-yok-hicbir-ozellik-pla') + '</p>');
     },
 
     cihazlar(m){
@@ -2266,15 +2659,15 @@ window.LIFEOS.HESAP = (function(){
           + '<button type="button" class="hesap-oge__ac" data-hesap="cihaz" data-id="' + Number(c.id) + '"'
           + ' aria-label="' + kac(c.cihaz_ad + ' — ayrıntı') + '">' + ikon(cihazTuru(c.cihaz_ad), 'hesap-satir__ikon')
           + '<span class="hesap-oge__metin"><b>' + kac(c.cihaz_ad) + '</b><small>'
-          + (c.bu ? 'Bu cihaz' : 'Son görülme: ' + kac(sonMetni(c.son))) + '</small></span></button>'
+          + (c.bu ? yz('ortak.hesap.bu-cihaz-2') : yz('ortak.hesap.son-gorulme') + kac(sonMetni(c.son))) + '</small></span></button>'
           + (c.bu ? '' : '<button type="button" class="hesap__kucuk" data-hesap="cihaz-cikar" data-id="' + Number(c.id) + '"'
-            + ' aria-label="' + kac(c.cihaz_ad + ' oturumunu kapat') + '">Çıkar</button>')
+            + ' aria-label="' + kac(c.cihaz_ad + ' oturumunu kapat') + ('">' + yz('ortak.hesap.cikar') + '</button>'))
           + '</li>').join('') + '</ul>'
         + (!oteki ? '' : m.onay
-          ? '<div class="hesap-onay" role="group" aria-label="Onay"><p>Öteki ' + oteki + ' cihazda oturum kapanır; '
-            + 'orada yeniden giriş gerekir. Kayıtlar silinmez.</p><div class="hesap__eylem">'
-            + '<button type="button" class="hesap__tehlike" data-hesap="otekiler-evet">Hepsinden çık</button>'
-            + '<button type="button" class="hesap__ikinci" data-hesap="otekiler-vazgec">Vazgeç</button></div></div>'
+          ? ('<div class="hesap-onay" role="group" aria-label="Onay"><p>' + yz('ortak.hesap.oteki') + ' ') + oteki + ' cihazda oturum kapanır; '
+            + (yz('ortak.hesap.orada-yeniden-giris-gerekir') + '</p><div class="hesap__eylem">')
+            + ('<button type="button" class="hesap__tehlike" data-hesap="otekiler-evet">' + yz('ortak.hesap.hepsinden-cik') + '</button>')
+            + ('<button type="button" class="hesap__ikinci" data-hesap="otekiler-vazgec">' + yz('ortak.hesap.vazgec') + '</button></div></div>')
           : '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.oteki-cihazlarin-hepsinden-c'), eylem:'otekiler', sinif:'is-tehlike' }) + '</ul>')
         + adresNotu();
     },
@@ -2286,52 +2679,52 @@ window.LIFEOS.HESAP = (function(){
       const l = kontrol(m), n = l.filter(x => x.dikkat).length;
       const ozet = !l.length ? '' : '<div class="hesap-kontrol' + (n ? ' is-dikkat' : '') + '" role="status">'
         + ikon(n ? 'uyari' : 'kalkan', 'hesap-kontrol__ikon')
-        + '<div><p class="hesap-kontrol__baslik">' + (n ? (n === 1 ? 'Bir öneri var' : n + ' öneri var') : 'Hesabın iyi korunuyor')
-        + '</p><p class="hesap-kontrol__alt">' + (n ? 'Kırmızı satırlara bir bak.' : 'Kontrol listesindeki her şey yolunda.')
+        + '<div><p class="hesap-kontrol__baslik">' + (n ? (n === 1 ? yz('ortak.hesap.bir-oneri-var') : n + ' öneri var') : yz('ortak.hesap.hesabin-iyi-korunuyor'))
+        + '</p><p class="hesap-kontrol__alt">' + (n ? yz('ortak.hesap.kirmizi-satirlara-bir-bak') : yz('ortak.hesap.kontrol-listesindeki-her-sey'))
         + '</p></div></div>';
       return ozet
         + (l.length ? '<ul class="hesap-liste">' + l.filter(x => x.sayfa).map(x => satir({ ikon:x.ikon, ad:x.ad,
             detay:x.detay, sayfa:x.sayfa, sinif:x.dikkat ? 'is-dikkat' : '' })).join('') + '</ul>' : '')
         + '<div class="hesap-liste hesap-liste--ac">'
-        + acilir('parola', 'anahtar', 'Şifreyi değiştir', '',
+        + acilir('parola', 'anahtar', yz('ortak.hesap.sifreyi-degistir'), '',
             '<form class="hesap__form" data-hesap-form="parola" data-ayar-disi>'
-            + sifreAlani('hesap-eski', 'Şimdiki şifre', 'current-password')
-            + sifreAlani('hesap-yeni', 'Yeni şifre', 'new-password', true)
-            + sifreAlani('hesap-yeni2', 'Yeni şifre (tekrar)', 'new-password')
-            + CAPS + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Şifreyi değiştir</button></form>')
-        + acilir('soru', 'soru', 'Kurtarma sorusu', soruVar === true ? 'Ayarlı' : soruVar === false ? 'Ayarlı değil' : '',
+            + sifreAlani('hesap-eski', yz('ortak.hesap.simdiki-sifre'), 'current-password')
+            + sifreAlani('hesap-yeni', yz('ortak.hesap.yeni-sifre'), 'new-password', true)
+            + sifreAlani('hesap-yeni2', yz('ortak.hesap.yeni-sifre-tekrar'), 'new-password')
+            + CAPS + formMesaj + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.sifreyi-degistir') + '</button></form>'))
+        + acilir('soru', 'soru', yz('ortak.hesap.kurtarma-sorusu'), soruVar === true ? 'Ayarlı' : soruVar === false ? yz('ortak.hesap.ayarli-degil') : '',
             '<form class="hesap__form" data-hesap-form="soru-ayarla" data-ayar-disi>'
-            + alanHtml('hesap-yeni-soru', 'Soru (kendin yaz)', 'text', 'required minlength="4" maxlength="120" autocomplete="off"')
+            + alanHtml('hesap-yeni-soru', yz('ortak.hesap.soru-kendin-yaz'), 'text', 'required minlength="4" maxlength="120" autocomplete="off"')
             + alanHtml('hesap-yeni-cevap', 'Cevabın', 'text', CEVAP_EK)
             + sifreAlani('hesap-soru-sifre', 'Şifren', 'current-password')
-            + CAPS + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Kaydet</button></form>',
+            + CAPS + formMesaj + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.kaydet') + '</button></form>'),
             l.some(x => x.ac === 'soru' && x.dikkat) ? 'is-dikkat' : '')
         + '</div>'
-        + '<p class="hesap__not">Şifre değişince öteki cihazlarda yeniden giriş gerekir.</p>';
+        + ('<p class="hesap__not">' + yz('ortak.hesap.sifre-degisince-oteki-cihazl') + '</p>');
     },
 
     /* CİHAZ (söz 21): kendi adı, nasıl girdiği, ne zaman, nereden. Ad
        cihaza bağlıdır; çıkıp yeniden girse de kalır. */
     cihaz(m){
       const c = cihazBul();
-      if(!c) return m.cihazlar ? '<p class="hesap__not">Bu cihaz artık listede yok.</p>' : yukleniyor(m);
+      if(!c) return m.cihazlar ? ('<p class="hesap__not">' + yz('ortak.hesap.bu-cihaz-artik-listede-yok') + '</p>') : yukleniyor(m);
       return '<div class="hesap-kimlik hesap-kimlik--kucuk"><span class="hesap-cihaz-simge">'
         + ikon(cihazTuru(c.cihaz_ad), 'hesap-ikon') + '</span>'
-        + '<p class="hesap-kimlik__alt">' + (c.bu ? 'Bu cihaz' : 'Son görülme: ' + kac(sonMetni(c.son))) + '</p></div>'
+        + '<p class="hesap-kimlik__alt">' + (c.bu ? yz('ortak.hesap.bu-cihaz-2') : yz('ortak.hesap.son-gorulme') + kac(sonMetni(c.son))) + '</p></div>'
         + '<form class="hesap__form" data-hesap-form="cihaz-ad" data-ayar-disi>'
-        + alanHtml('hesap-cihaz-ad', 'Cihazın adı', 'text', 'required maxlength="40" autocomplete="off" value="' + kac(c.cihaz_ad) + '"')
-        + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Kaydet</button></form>'
+        + alanHtml('hesap-cihaz-ad', yz('ortak.hesap.cihazin-adi'), 'text', 'required maxlength="40" autocomplete="off" value="' + kac(c.cihaz_ad) + '"')
+        + formMesaj + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.kaydet') + '</button></form>')
         + '<dl class="hesap-bilgi">'
         + bilgi('Giriş', YONTEM_AD[c.yontem] || 'Bilinmiyor')
-        + bilgi('İlk giriş', tarihSaat(c.olusturma))
-        + bilgi('Son görülme', c.bu ? 'Şimdi' : sonMetni(c.son))
-        + bilgi('Son eşitleme', c.esitleme ? sonMetni(c.esitleme) : 'Henüz yok')
-        + bilgi('Son adres', adresAd(c.ip) || 'Bilinmiyor')
+        + bilgi(yz('ortak.hesap.i-lk-giris'), tarihSaat(c.olusturma))
+        + bilgi(yz('ortak.hesap.son-gorulme-2'), c.bu ? 'Şimdi' : sonMetni(c.son))
+        + bilgi(yz('ortak.hesap.son-esitleme'), c.esitleme ? sonMetni(c.esitleme) : yz('ortak.hesap.henuz-yok'))
+        + bilgi(yz('ortak.hesap.son-adres'), adresAd(c.ip) || 'Bilinmiyor')
         + '</dl>'
-        + '<ul class="hesap-liste">' + satir({ ad:c.bu ? 'Bu cihazda çıkış yap' : 'Oturumu kapat', eylem:'cihaz-kapat',
+        + '<ul class="hesap-liste">' + satir({ ad:c.bu ? yz('ortak.hesap.bu-cihazda-cikis-yap') : yz('ortak.hesap.oturumu-kapat'), eylem:'cihaz-kapat',
           sinif:'is-tehlike' }) + '</ul>'
-        + '<p class="hesap__not">' + (c.bu ? 'Kayıtlar bu cihazda kalır; yeniden girince eşitlenir.'
-          : 'Oturum kapanınca o cihazda yeniden giriş gerekir; kayıtlar silinmez.') + '</p>';
+        + '<p class="hesap__not">' + (c.bu ? yz('ortak.hesap.kayitlar-bu-cihazda-kalir-ye')
+          : yz('ortak.hesap.oturum-kapaninca-o-cihazda-y')) + '</p>';
     },
 
     /* İKİ ADIMLI DOĞRULAMA (söz 17). Dört hâl: kapalı (şifreyle başlat),
@@ -2343,73 +2736,73 @@ window.LIFEOS.HESAP = (function(){
         const k = m.ikiKurulum, qr = L.QR ? L.QR.svg(k.uri, { etiket:yz('ortak.hesap.dogrulayici-uygulama-icin-qr') }) : '';
         const tel = /iPhone|iPad|Android/.test((typeof navigator !== 'undefined' && navigator.userAgent) || '');
         return adimlar([
-          '<b>Doğrulayıcı uygulamayı aç</b><span>Google Authenticator, Microsoft Authenticator ya da iPhone’da Ayarlar › Şifreler. Hepsi ücretsiz.</span>',
-          '<b>' + (tel ? 'Ekle' : 'QR kodunu okut') + '</b>'
+          ('<b>' + yz('ortak.hesap.dogrulayici-uygulamayi-ac') + '</b><span>' + yz('ortak.hesap.google-authenticator-microso') + '</span>'),
+          '<b>' + (tel ? 'Ekle' : yz('ortak.hesap.qr-kodunu-okut')) + '</b>'
             + (qr && !tel ? '<div class="hesap-qr">' + qr + '</div>' : '')
             + (tel ? '<a class="hesap__ikinci hesap-adimlar__dugme" href="' + kac(k.uri) + '" target="_blank" rel="noopener">'
-              + ikon('kalkan', 'hesap-ikon') + 'Doğrulayıcıda aç</a>' : '')
-            + '<span>' + (tel ? 'Açılmazsa uygulamada «anahtarı elle gir» ile bunu yaz:' : 'Okutamıyorsan anahtarı elle yaz:') + '</span>'
+              + ikon('kalkan', 'hesap-ikon') + (yz('ortak.hesap.dogrulayicida-ac') + '</a>') : '')
+            + '<span>' + (tel ? yz('ortak.hesap.acilmazsa-uygulamada-anahtar') : yz('ortak.hesap.okutamiyorsan-anahtari-elle')) + '</span>'
             + kopyaKutusu(k.sir.replace(/(.{4})(?=.)/g, '$1 '), 'Anahtarı'),
-          '<b>Uygulamadaki kodu yaz</b>'
+          ('<b>' + yz('ortak.hesap.uygulamadaki-kodu-yaz') + '</b>')
             + '<form class="hesap__form" data-hesap-form="iki-onayla" data-ayar-disi>' + kodAlani('hesap-iki-kod', 'Kod')
-            + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Doğrula ve aç</button></form>',
+            + formMesaj + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.dogrula-ve-ac') + '</button></form>'),
         ])
         + '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.vazgec'), eylem:'iki-vazgec', sinif:'is-tehlike' }) + '</ul>';
       }
       if(!d) return yukleniyor(m);
       if(!d.acik){
-        return tanit('kalkan', 'Şifreye ikinci bir kilit', 'Girişte şifreden sonra telefonundaki doğrulayıcı uygulamanın '
+        return tanit('kalkan', yz('ortak.hesap.sifreye-ikinci-bir-kilit'), yz('ortak.hesap.giriste-sifreden-sonra-telef')
             + '6 haneli kodu sorulur. Şifren başkasına geçse bile hesabın açılmaz.')
           + '<ul class="hesap-liste hesap-liste--duz hesap-uygulamalar">'
-          + [['Google Authenticator', 'iPhone ve Android'], ['Microsoft Authenticator', 'iPhone ve Android'],
-            ['iPhone Şifreler', 'Ayarlar › Şifreler, iOS 15 ve sonrası']].map(([ad, alt]) =>
+          + [[yz('ortak.hesap.google-authenticator'), 'iPhone ve Android'], [yz('ortak.hesap.microsoft-authenticator'), 'iPhone ve Android'],
+            ['iPhone Şifreler', yz('ortak.hesap.ayarlar-sifreler-ios-15')]].map(([ad, alt]) =>
             '<li class="hesap-oge">' + ikon('kalkan', 'hesap-satir__ikon') + '<span class="hesap-oge__metin"><b>' + kac(ad)
-            + '</b><small>' + kac(alt) + '</small></span><span class="hesap-satir__detay">Ücretsiz</span></li>').join('') + '</ul>'
+            + '</b><small>' + kac(alt) + ('</small></span><span class="hesap-satir__detay">' + yz('ortak.hesap.ucretsiz') + '</span></li>')).join('') + '</ul>'
           + '<form class="hesap__form" data-hesap-form="iki-baslat" data-ayar-disi>'
-          + sifreAlani('hesap-iki-sifre', 'Başlamak için şifren', 'current-password') + CAPS + formMesaj
-          + '<button type="submit" class="hesap__ana hesap__tam">Kurulumu başlat</button></form>';
+          + sifreAlani('hesap-iki-sifre', yz('ortak.hesap.baslamak-icin-sifren'), 'current-password') + CAPS + formMesaj
+          + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.kurulumu-baslat') + '</button></form>');
       }
       const az = d.yedek_kalan <= 2;
       return '<ul class="hesap-liste hesap-liste--duz">'
-        + '<li class="hesap-oge">' + ikon('kalkan', 'hesap-satir__ikon') + '<span class="hesap-oge__metin"><b>Açık</b><small>'
-        + (d.olusturma ? sonMetni(d.olusturma) + ' kuruldu' : 'Girişte kod sorulur') + '</small></span></li>'
+        + '<li class="hesap-oge">' + ikon('kalkan', 'hesap-satir__ikon') + ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.acik') + '</b><small>')
+        + (d.olusturma ? sonMetni(d.olusturma) + ' kuruldu' : yz('ortak.hesap.giriste-kod-sorulur')) + '</small></span></li>'
         + '<li class="hesap-oge' + (az ? ' hesap-olay is-dikkat' : '') + '">' + ikon('anahtar', 'hesap-satir__ikon')
-        + '<span class="hesap-oge__metin"><b>Yedek kodlar</b><small>' + d.yedek_kalan + ' kod kaldı'
+        + ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.yedek-kodlar') + '</b><small>') + d.yedek_kalan + ' kod kaldı'
         + (az ? ' · yenilerini al' : '') + '</small></span></li></ul>'
         + '<div class="hesap-liste hesap-liste--ac">'
-        + acilir('yedek', 'anahtar', 'Yeni yedek kodlar', '',
+        + acilir('yedek', 'anahtar', yz('ortak.hesap.yeni-yedek-kodlar'), '',
             '<form class="hesap__form" data-hesap-form="yedek-yenile" data-ayar-disi>'
             + sifreAlani('hesap-yedek-sifre', 'Şifren', 'current-password') + CAPS + formMesaj
-            + '<p class="hesap__not hesap__not--form">Eski yedek kodlar hemen geçersiz olur.</p>'
-            + '<button type="submit" class="hesap__ana hesap__tam">Yeni kodları göster</button></form>')
-        + acilir('iki-kapat', 'kalkan', 'İki adımı kapat', '',
+            + ('<p class="hesap__not hesap__not--form">' + yz('ortak.hesap.eski-yedek-kodlar-hemen-gece') + '</p>')
+            + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.yeni-kodlari-goster') + '</button></form>'))
+        + acilir('iki-kapat', 'kalkan', yz('ortak.hesap.i-ki-adimi-kapat'), '',
             '<form class="hesap__form" data-hesap-form="iki-kapat" data-ayar-disi>'
             + sifreAlani('hesap-kapat-sifre', 'Şifren', 'current-password')
-            + alanHtml('hesap-kapat-kod', 'Uygulamadaki kod ya da bir yedek kod', 'text',
+            + alanHtml('hesap-kapat-kod', yz('ortak.hesap.uygulamadaki-kod-ya-da-bir'), 'text',
               'autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required minlength="6" maxlength="9"')
-            + CAPS + formMesaj + '<button type="submit" class="hesap__tehlike hesap__tam">Kapat</button></form>')
+            + CAPS + formMesaj + ('<button type="submit" class="hesap__tehlike hesap__tam">' + yz('ortak.hesap.kapat') + '</button></form>'))
         + '</div>'
-        + '<p class="hesap__not">Telefonunu ve yedek kodlarını birlikte kaybedersen: ' + (kim().r === 'admin'
-          ? 'bilgisayarda <code>python sistem/hesap.py --iki-adim-kapat ' + kac(kim().ad) + '</code>.'
+        + ('<p class="hesap__not">' + yz('ortak.hesap.telefonunu-ve-yedek-kodlarin') + ' ') + (kim().r === 'admin'
+          ? ('bilgisayarda <code>' + yz('ortak.hesap.python-sistem-hesap-py-iki-a') + ' ') + kac(kim().ad) + '</code>.'
           : 'admin Yönetim’den kapatır.') + '</p>';
     },
 
     /* BAĞLANTILAR: ücretsiz uygulamalar, gruplu (iOS Ayarlar gibi). */
     baglantilar(m){
       const oz = (m.ben && m.ben.baglantilar) || {}, iki = m.ben && m.ben.iki_adim;
-      return '<p class="hesap-bolum">Takvim</p><ul class="hesap-liste">'
+      return ('<p class="hesap-bolum">' + yz('ortak.hesap.takvim') + '</p><ul class="hesap-liste">')
         + satir({ ikon:'takvim', ad:yz('ortak.hesap.takvim-aboneligi'), alt:yz('ortak.hesap.iphone-takvim-outlook-thunde'),
           detay:m.ben ? (oz.takvim ? 'Açık' : 'Kapalı') : '', sayfa:'takvim' }) + '</ul>'
-        + '<p class="hesap-bolum">Kısayollar ve otomasyon</p><ul class="hesap-liste">'
+        + ('<p class="hesap-bolum">' + yz('ortak.hesap.kisayollar-ve-otomasyon') + '</p><ul class="hesap-liste">')
         + satir({ ikon:'kisayol', ad:yz('ortak.hesap.erisim-anahtarlari'), alt:yz('ortak.hesap.iphone-kisayollar-apple-sagl'),
           detay:oz.anahtar ? String(oz.anahtar) : '', sayfa:'anahtarlar' })
         + satir({ ikon:'gelen', ad:yz('ortak.hesap.gelen-kutusu'), alt:yz('ortak.hesap.gelen-satirlar-spi-onaylar-a'),
           detay:oz.gelen_bekleyen ? oz.gelen_bekleyen + ' bekliyor' : '', sayfa:'gelen' }) + '</ul>'
-        + '<p class="hesap-bolum">Giriş</p><ul class="hesap-liste">'
+        + ('<p class="hesap-bolum">' + yz('ortak.hesap.giris') + '</p><ul class="hesap-liste">')
         + satir({ ikon:'kalkan', ad:yz('ortak.hesap.dogrulayici-uygulama'), alt:yz('ortak.hesap.google-ve-microsoft-authenti'),
           detay:iki ? (iki.acik ? 'Açık' : 'Kapalı') : '', sayfa:'ikiadim' })
         + satir({ ikon:'qr', ad:yz('ortak.hesap.kodla-cihaz-bagla'), alt:yz('ortak.hesap.tablet-ya-da-telefon-sifresi'), sayfa:'bagla' }) + '</ul>'
-        + '<p class="hesap__not">Hepsi bilgisayarındaki LifeOS’ta çalışır: şirket hesabı, ücret ya da internet gerekmez.</p>';
+        + ('<p class="hesap__not">' + yz('ortak.hesap.hepsi-bilgisayarindaki-lifeo') + '</p>');
     },
 
     /* TAKVİM ABONELİĞİ (sunucu sözü 17). */
@@ -2417,34 +2810,34 @@ window.LIFEOS.HESAP = (function(){
       const t = m.baglanti && m.baglanti.takvim;
       if(!t) return yukleniyor(m);
       const ays = (t.yayinlar || []).find(y => y.ad === 'ays/takvim');
-      const kaynak = '<p class="hesap-bolum">İçinde</p><ul class="hesap-liste hesap-liste--duz"><li class="hesap-oge">'
-        + ikon('takvim', 'hesap-satir__ikon') + '<span class="hesap-oge__metin"><b>AYS</b><small>Sınav günleri, istisnalar, hedef son günleri</small></span>'
-        + '<span class="hesap-satir__detay">' + (ays ? (ays.adet == null ? '' : ays.adet + ' etkinlik') : 'AYS’yi bir kez aç') + '</span></li></ul>';
+      const kaynak = ('<p class="hesap-bolum">' + yz('ortak.hesap.i-cinde') + '</p><ul class="hesap-liste hesap-liste--duz"><li class="hesap-oge">')
+        + ikon('takvim', 'hesap-satir__ikon') + ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.ays') + '</b><small>' + yz('ortak.hesap.sinav-gunleri-istisnalar-hed') + '</small></span>')
+        + '<span class="hesap-satir__detay">' + (ays ? (ays.adet == null ? '' : ays.adet + ' etkinlik') : yz('ortak.hesap.ays-yi-bir-kez-ac')) + '</span></li></ul>';
       if(!t.acik){
-        return tanit('takvim', 'Sınav günlerin takviminde', 'Takvim uygulaman bu adrese abone olur; AYS’de bir tarih '
+        return tanit('takvim', yz('ortak.hesap.sinav-gunlerin-takviminde'), yz('ortak.hesap.takvim-uygulaman-bu-adrese-a')
             + 'değişince takvimin de kendiliğinden güncellenir.')
-          + kaynak + '<button type="button" class="hesap__ana hesap__tam" data-hesap="takvim-ac">Aboneliği aç</button>';
+          + kaynak + ('<button type="button" class="hesap__ana hesap__tam" data-hesap="takvim-ac">' + yz('ortak.hesap.aboneligi-ac') + '</button>');
       }
       const ev = evAdresleri().map(b => b + t.yol);
       return kaynak
-        + '<p class="hesap-bolum">iPhone ve iPad</p>'
-        + (ev.length ? '<div class="hesap-kutu">' + kopyaKutusu(ev[0], 'Takvim adresini')
-            + adimlar(['Ayarlar › Takvim › Hesaplar › Hesap Ekle › Diğer', '«Abone Olunan Takvim Ekle»ye bu adresi yapıştır'])
-            + '<p class="hesap__not">Telefon evdeki Wi-Fi’dayken güncellenir; LifeOS kök sertifikası telefonda kurulu olmalı.</p></div>'
-          : '<p class="hesap__not hesap-kutu">Ev ağı kapalı. Bilgisayarda bir kez <code>python sistem/telefon.py</code> çalıştırıp LifeOS’u yeniden başlat.</p>')
-        + (pcMi() ? '<p class="hesap-bolum">Bu bilgisayar</p><div class="hesap-kutu">' + kopyaKutusu(PC_KOK + t.yol, 'Takvim adresini')
-            + '<p class="hesap__not">Thunderbird ya da klasik Outlook’ta «İnternet takvimi ekle».</p></div>' : '')
-        + '<p class="hesap-bolum">Google Takvim</p><div class="hesap-kutu"><p class="hesap__not hesap__not--ilk">Google adresi '
-        + 'internetten çeker; evdeki bilgisayarına ulaşamaz. Dosyayı indirip Google Takvim’de «İçe aktar»la bir kez ekleyebilirsin.</p>'
-        + '<button type="button" class="hesap__ikinci" data-hesap="takvim-indir">' + ikon('indir', 'hesap-ikon') + 'Dosyayı indir (.ics)</button></div>'
+        + ('<p class="hesap-bolum">' + yz('ortak.hesap.iphone-ve-ipad') + '</p>')
+        + (ev.length ? '<div class="hesap-kutu">' + kopyaKutusu(ev[0], yz('ortak.hesap.takvim-adresini'))
+            + adimlar([yz('ortak.hesap.ayarlar-takvim-hesaplar'), '«Abone Olunan Takvim Ekle»ye bu adresi yapıştır'])
+            + ('<p class="hesap__not">' + yz('ortak.hesap.telefon-evdeki-wi-fi-dayken') + '</p></div>')
+          : ('<p class="hesap__not hesap-kutu">' + yz('ortak.hesap.ev-agi-kapali-bilgisayarda-b') + ' <code>' + yz('ortak.hesap.python-sistem-telefon-py') + '</code> ' + yz('ortak.hesap.calistirip-lifeos-u-yeniden') + '</p>'))
+        + (pcMi() ? ('<p class="hesap-bolum">' + yz('ortak.hesap.bu-bilgisayar') + '</p><div class="hesap-kutu">') + kopyaKutusu(PC_KOK + t.yol, yz('ortak.hesap.takvim-adresini'))
+            + ('<p class="hesap__not">' + yz('ortak.hesap.thunderbird-ya-da-klasik-out') + '</p></div>') : '')
+        + ('<p class="hesap-bolum">' + yz('ortak.hesap.google-takvim') + '</p><div class="hesap-kutu"><p class="hesap__not hesap__not--ilk">' + yz('ortak.hesap.google-adresi') + ' ')
+        + (yz('ortak.hesap.internetten-ceker-evdeki-bil') + '</p>')
+        + '<button type="button" class="hesap__ikinci" data-hesap="takvim-indir">' + ikon('indir', 'hesap-ikon') + (yz('ortak.hesap.dosyayi-indir-ics') + '</button></div>')
         + (m.takvimOnay
-          ? '<div class="hesap-onay"><p>Eski adres hemen çalışmaz; takvim uygulamalarına yenisini eklemen gerekir.</p>'
-            + '<div class="hesap__eylem"><button type="button" class="hesap__tehlike" data-hesap="takvim-yenile">Adresi yenile</button>'
-            + '<button type="button" class="hesap__ikinci" data-hesap="takvim-vazgec">Vazgeç</button></div></div>'
+          ? ('<div class="hesap-onay"><p>' + yz('ortak.hesap.eski-adres-hemen-calismaz-ta') + '</p>')
+            + ('<div class="hesap__eylem"><button type="button" class="hesap__tehlike" data-hesap="takvim-yenile">' + yz('ortak.hesap.adresi-yenile') + '</button>')
+            + ('<button type="button" class="hesap__ikinci" data-hesap="takvim-vazgec">' + yz('ortak.hesap.vazgec') + '</button></div></div>')
           : '<ul class="hesap-liste">' + satir({ ikon:'yenile', ad:yz('ortak.hesap.adresi-yenile'), eylem:'takvim-yenile-sor' }) + '</ul>'
             + '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.aboneligi-kapat'), eylem:'takvim-kapat', sinif:'is-tehlike' }) + '</ul>')
-        + '<p class="hesap__not">' + (t.son ? 'Takvim en son ' + sonMetni(t.son) + ' baktı.' : 'Henüz hiçbir takvim bakmadı.')
-        + ' Adres bir anahtardır: yalnız kendi cihazlarına ekle.</p>';
+        + '<p class="hesap__not">' + (t.son ? yz('ortak.hesap.takvim-en-son') + sonMetni(t.son) + ' baktı.' : yz('ortak.hesap.henuz-hicbir-takvim-bakmadi'))
+        + (' ' + yz('ortak.hesap.adres-bir-anahtardir-yalniz') + '</p>');
     },
 
     /* KISAYOLLAR VE OTOMASYON (sunucu sözü 16, söz 19). */
@@ -2453,64 +2846,64 @@ window.LIFEOS.HESAP = (function(){
       if(!b) return yukleniyor(m);
       const y = m.yeniAnahtar, t = tarifIstek(m);
       const l = b.anahtarlar || [];
-      return (y ? '<div class="hesap-yeni" role="status"><p>' + ikon('tamam') + '<span><b>«' + kac(y.ad) + '» hazır.</b> '
-            + 'Şimdi kopyala; bir daha gösterilmez.</span></p>'
+      return (y ? '<div class="hesap-yeni" role="status"><p>' + ikon('tamam') + '<span><b>«' + kac(y.ad) + (yz('ortak.hesap.hazir') + '</b> ')
+            + (yz('ortak.hesap.simdi-kopyala-bir-daha-goste') + '</span></p>')
             + kopyaKutusu(y.anahtar, 'Anahtarı') + '</div>' : '')
         + (l.length ? '<ul class="hesap-liste">' + l.map(x => '<li class="hesap-oge">' + ikon('kisayol', 'hesap-satir__ikon')
             + '<span class="hesap-oge__metin"><b>' + kac(x.ad) + '</b><small>' + kac(x.on_ek) + '… · '
             + (String(x.yetki || '').split(',').indexOf('oku') >= 0 ? 'özeti de okur · ' : '')
             + (x.son ? 'son kullanım ' + kac(sonMetni(x.son)) : 'hiç kullanılmadı') + '</small></span>'
             + '<button type="button" class="hesap__kucuk" data-hesap="anahtar-sil" data-id="' + Number(x.id) + '"'
-            + ' aria-label="' + kac('«' + x.ad + '» anahtarını sil') + '">Sil</button></li>').join('') + '</ul>'
-          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant tek satır '
+            + ' aria-label="' + kac('«' + x.ad + '» anahtarını sil') + ('">' + yz('ortak.hesap.sil') + '</button></li>')).join('') + '</ul>'
+          : (y ? '' : tanit('kisayol', yz('ortak.hesap.telefonundan-tek-satir'), 'iPhone Kısayollar, Android ya da Home Assistant tek satır '
             + 'gönderir: SPİ’ye «su 250», AYS’ye «paragraf 20», ESP’ye «30 dk gitar». O sistem satırı Onaylar’a bırakır, '
             + 'sen onaylayınca yazılır.')))
-        + '<div class="hesap-liste hesap-liste--ac">' + acilir('anahtar-ekle', 'ekle', 'Anahtar oluştur', '',
+        + '<div class="hesap-liste hesap-liste--ac">' + acilir('anahtar-ekle', 'ekle', yz('ortak.hesap.anahtar-olustur'), '',
             '<form class="hesap__form" data-hesap-form="anahtar" data-ayar-disi>'
             + alanHtml('hesap-anahtar-ad', 'Ad', 'text', 'required maxlength="40" autocomplete="off" placeholder="iPhone Kısayollar"')
             + '<label class="hesap__secim" for="hesap-anahtar-oku"><input type="checkbox" id="hesap-anahtar-oku">'
-            + '<span>Günün özetini de okuyabilsin<small>Siri: «Bugün ne var?» — AYS, SPİ ve ESP’nin bugün cümlesi</small></span></label>'
+            + ('<span>' + yz('ortak.hesap.gunun-ozetini-de-okuyabilsin') + '<small>' + yz('ortak.hesap.siri-bugun-ne-var') + '</small></span></label>')
             + sifreAlani('hesap-anahtar-sifre', 'Şifren', 'current-password') + CAPS + formMesaj
-            + '<button type="submit" class="hesap__ana hesap__tam">Oluştur</button></form>') + '</div>'
-        + '<p class="hesap-bolum">Tarifler</p><div class="hesap-liste hesap-liste--ac">'
-        + acilir('t-istek', 'baglanti', 'İstek', '', '<p class="hesap__not hesap__not--ilk">Her tarif bu tek isteği gönderir.'
+            + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.olustur') + '</button></form>')) + '</div>'
+        + ('<p class="hesap-bolum">' + yz('ortak.hesap.tarifler') + '</p><div class="hesap-liste hesap-liste--ac">')
+        + acilir('t-istek', 'baglanti', 'İstek', '', ('<p class="hesap__not hesap__not--ilk">' + yz('ortak.hesap.her-tarif-bu-tek-istegi'))
             + (t.a === 'lifeos_…' ? ' Anahtar oluşturunca burada görünür.' : '') + '</p>' + istekKutusu(t)
-            + (pcMi() ? '<p class="hesap__not">Bu bilgisayardaki bir uygulama için adres: <code>' + kac(t.pc) + '</code></p>' : ''))
+            + (pcMi() ? ('<p class="hesap__not">' + yz('ortak.hesap.bu-bilgisayardaki-bir-uygula') + ' <code>') + kac(t.pc) + '</code></p>' : ''))
         + acilir('t-ios', 'telefon', 'iPhone Kısayollar', '', adimlar([
-            'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
+            yz('ortak.hesap.kisayollar-da-yeni-kisayol-g'),
             '«URL’nin İçeriğini Al» (Get Contents of URL) ekle; adres, POST, başlık ve gövde yukarıdaki «İstek»teki gibi; «metin» alanına «Sağlanan Girdi»yi koy.',
-            'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.']))
-        + acilir('t-siri', 'telefon', 'Siri: «Bugün ne var?»', '', adimlar([
-            'Anahtarı «Günün özetini de okuyabilsin» seçerek oluştur.',
-            'Kısayollar’da yeni kısayol › «URL’nin İçeriğini Al»: adres <code>' + kac(t.url.replace(/\/gelen$/, '/ozet.txt')) + '</code>, '
-              + 'yöntem GET, başlık <code>Authorization</code> = <code>Bearer ' + kac(t.a) + '</code>.',
+            yz('ortak.hesap.adini-lifeos-a-yaz-koy-siri')]))
+        + acilir('t-siri', 'telefon', yz('ortak.hesap.siri-bugun-ne-var-2'), '', adimlar([
+            yz('ortak.hesap.anahtari-gunun-ozetini-de-ok'),
+            (yz('ortak.hesap.kisayollar-da-yeni-kisayol-u') + ' <code>') + kac(t.url.replace(/\/gelen$/, '/ozet.txt')) + '</code>, '
+              + (yz('ortak.hesap.yontem-get-baslik') + ' <code>' + yz('ortak.hesap.authorization') + '</code> = <code>' + yz('ortak.hesap.bearer-2') + ' ') + kac(t.a) + '</code>.',
             '«Metni Konuş» (Speak Text) ekle; girdi önceki adımın sonucu.',
-            'Adını «Bugün ne var» koy. Siri’ye «Bugün ne var» de.'])
-          + '<p class="hesap__not">Özeti her sistem kendi kuralıyla yazar. Bugün hiç açılmamış bir sistemin dünkü sayısı '
-          + 'bugünmüş gibi okunmaz: «bugün henüz açılmadı» denir.</p>')
-        + acilir('t-modul', 'baglanti', 'AYS ve ESP’ye', '', adimlar([
-            'Aynı istek; gövdeye <code>"modul"</code> ekle: <code>{"metin": "paragraf 20", "modul": "ays"}</code>.',
-            'AYS anlar: <code>soru 40 matematik</code>, <code>2 saat fizik</code>, <code>paragraf 20</code>, <code>uyku 7</code>.',
-            'ESP anlar: <code>30 dk gitar</code>, <code>45 dakika felsefe okudum</code>, <code>20 dk diksiyon</code>.',
-            'Kısayollar’da her sistem için ayrı kısayol aç: «AYS’ye yaz», «ESP’ye yaz».'])
-          + '<p class="hesap__not">Her satırı yalnız kendi sistemi alır; o gün o dersin bloğu yoksa ya da süre yazılmadıysa '
-          + 'satır «anlaşılmadı» diye nedeniyle döner, uydurulmaz.</p>')
-        + acilir('t-saglik', 'kalp', 'Apple Sağlık’tan her sabah', '', adimlar([
-            'Kısayollar › Otomasyon › Günün Saati (ör. 08:00) › Hemen Çalıştır.',
+            yz('ortak.hesap.adini-bugun-ne-var-koy')])
+          + ('<p class="hesap__not">' + yz('ortak.hesap.ozeti-her-sistem-kendi-kural') + ' ')
+          + (yz('ortak.hesap.bugunmus-gibi-okunmaz-bugun') + '</p>'))
+        + acilir('t-modul', 'baglanti', yz('ortak.hesap.ays-ve-esp-ye'), '', adimlar([
+            (yz('ortak.hesap.ayni-istek-govdeye') + ' <code>"modul"</code> ekle: <code>{"metin": "paragraf 20", "modul": "ays"}</code>.'),
+            (yz('ortak.hesap.ays-anlar') + ' <code>' + yz('ortak.hesap.soru-40-matematik') + '</code>, <code>' + yz('ortak.hesap.2-saat-fizik') + '</code>, <code>' + yz('ortak.hesap.paragraf-20') + '</code>, <code>' + yz('ortak.hesap.uyku-7') + '</code>.'),
+            (yz('ortak.hesap.esp-anlar') + ' <code>' + yz('ortak.hesap.30-dk-gitar') + '</code>, <code>' + yz('ortak.hesap.45-dakika-felsefe-okudum') + '</code>, <code>' + yz('ortak.hesap.20-dk-diksiyon') + '</code>.'),
+            yz('ortak.hesap.kisayollar-da-her-sistem-ici')])
+          + ('<p class="hesap__not">' + yz('ortak.hesap.her-satiri-yalniz-kendi-sist') + ' ')
+          + (yz('ortak.hesap.satir-anlasilmadi-diye-neden') + '</p>'))
+        + acilir('t-saglik', 'kalp', yz('ortak.hesap.apple-saglik-tan-her-sabah'), '', adimlar([
+            yz('ortak.hesap.kisayollar-otomasyon-gunun'),
             '«Sağlık Örneklerini Bul» (Find Health Samples): Kilo, son 1 gün, en yeni 1 örnek.',
-            '«Metin»: <code>kilo</code> ve bulunan değer; sonra «URL’nin İçeriğini Al» ile gönder.',
-            'Uyku için «Uyku Analizi»nin süresi toplanır; SPİ <code>uyku 7,2</code> gibi saat bekler.'])
-          + '<p class="hesap__not">Gelenler SPİ › Onaylar’da bekler; tek dokunuşla kaydedersin. Ölçüm onaysız yazılmaz.</p>')
-        + acilir('t-android', 'telefon', 'Android: HTTP Shortcuts', '', adimlar([
-            'Ücretsiz «HTTP Shortcuts» uygulamasında yeni kısayol › Normal.',
-            'Yöntem POST, adres yukarıdaki; Başlıklar’a <code>Authorization</code> = <code>Bearer ' + kac(t.a) + '</code>.',
-            'Gövde: Özel metin, tür <code>application/json</code>, içerik <code>{"metin": "{metin}"}</code>; «metin»i soran bir değişken ekle.']))
-        + acilir('t-ha', 'ev', 'Home Assistant', '', '<pre class="hesap-kod-blok"><code>' + kac('rest_command:\n  lifeos_yaz:\n'
+            (yz('ortak.hesap.metin') + ' <code>kilo</code> ' + yz('ortak.hesap.ve-bulunan-deger-sonra-url-n')),
+            (yz('ortak.hesap.uyku-icin-uyku-analizi-nin-s') + ' <code>' + yz('ortak.hesap.uyku-7-2') + '</code> ' + yz('ortak.hesap.gibi-saat-bekler'))])
+          + ('<p class="hesap__not">' + yz('ortak.hesap.gelenler-spi-onaylar-da-bekl') + '</p>'))
+        + acilir('t-android', 'telefon', yz('ortak.hesap.android-http-shortcuts'), '', adimlar([
+            yz('ortak.hesap.ucretsiz-http-shortcuts-uygu'),
+            (yz('ortak.hesap.yontem-post-adres-yukaridaki') + ' <code>' + yz('ortak.hesap.authorization') + '</code> = <code>' + yz('ortak.hesap.bearer-2') + ' ') + kac(t.a) + '</code>.',
+            (yz('ortak.hesap.govde-ozel-metin-tur') + ' <code>application/json</code>' + yz('ortak.hesap.icerik') + ' <code>{"metin": "{metin}"}</code>' + yz('ortak.hesap.metin-i-soran-bir-degisken'))]))
+        + acilir('t-ha', 'ev', yz('ortak.hesap.home-assistant'), '', '<pre class="hesap-kod-blok"><code>' + kac('rest_command:\n  lifeos_yaz:\n'
             + '    url: "' + t.url + '"\n    method: POST\n    headers:\n      Authorization: "Bearer ' + t.a + '"\n'
             + '    content_type: "application/json"\n    payload: \'{"metin": "{{ metin }}"}\'\n') + '</code></pre>'
-            + '<p class="hesap__not">Home Assistant LifeOS kök sertifikasını tanımazsa sertifikayı ona ekle.</p>')
+            + ('<p class="hesap__not">' + yz('ortak.hesap.home-assistant-lifeos-kok-se') + '</p>'))
         + '</div>'
-        + '<p class="hesap__not">Anahtar yalnız satır bırakır; verini okuyamaz, hesabına giremez. Kaybolursa sil, yenisini aç.</p>';
+        + ('<p class="hesap__not">' + yz('ortak.hesap.anahtar-yalniz-satir-birakir') + '</p>');
     },
 
     /* GELEN KUTUSU: dışarıdan gelen satırlar ve SPİ'nin onlarla ne yaptığı. */
@@ -2518,7 +2911,7 @@ window.LIFEOS.HESAP = (function(){
       const l = m.baglanti && m.baglanti.gelen;
       if(!l) return yukleniyor(m);
       if(!l.length){
-        return tanit('gelen', 'Henüz bir satır gelmedi', 'Kısayol ya da otomasyon bir satır gönderince burada görünür.')
+        return tanit('gelen', yz('ortak.hesap.henuz-bir-satir-gelmedi'), yz('ortak.hesap.kisayol-ya-da-otomasyon-bir'))
           + '<ul class="hesap-liste">' + satir({ ikon:'kisayol', ad:yz('ortak.hesap.kisayollar-ve-otomasyon'), sayfa:'anahtarlar' }) + '</ul>';
       }
       /* Satırı yalnız kendi sistemi alır (sunucu GELEN_MODULLER). */
@@ -2538,7 +2931,7 @@ window.LIFEOS.HESAP = (function(){
           + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, ne].filter(Boolean).join(' · '))
           + '</small></span><span class="hesap-satir__detay">' + saatMetni(o.zaman) + '</span></li>';
       });
-      return html + '</ul><p class="hesap__not">Son ' + l.length + ' satır. Ölçüm, sen Onaylar’da kaydedene dek yazılmaz.</p>';
+      return html + ('</ul><p class="hesap__not">' + yz('ortak.hesap.son') + ' ') + l.length + (' ' + yz('ortak.hesap.satir-olcum-sen-onaylar-da-k') + '</p>');
     },
 
     /* YENİ CİHAZ BAĞLA (söz 18): altı haneli kod, QR, geri sayım. */
@@ -2546,25 +2939,25 @@ window.LIFEOS.HESAP = (function(){
       const b = m.bag;
       if(!b) return yukleniyor(m);
       if(b.durum === 'baglandi'){
-        return tanit('tamam', (b.cihaz_ad || 'Cihaz') + ' bağlandı', 'Girdi; kayıtlar ilk eşitlemeyle iner.')
-          + '<button type="button" class="hesap__ana hesap__tam" data-hesap="geri">Tamam</button>';
+        return tanit('tamam', (b.cihaz_ad || 'Cihaz') + ' bağlandı', yz('ortak.hesap.girdi-kayitlar-ilk-esitlemey'))
+          + ('<button type="button" class="hesap__ana hesap__tam" data-hesap="geri">' + yz('ortak.hesap.tamam') + '</button>');
       }
       if(b.durum === 'bitti'){
-        return tanit('etkinlik', 'Kodun süresi doldu', 'Güvenlik için kod 5 dakika geçerli.')
-          + '<button type="button" class="hesap__ana hesap__tam" data-hesap="bag-yeni">Yeni kod</button>';
+        return tanit('etkinlik', yz('ortak.hesap.kodun-suresi-doldu'), yz('ortak.hesap.guvenlik-icin-kod-5-dakika'))
+          + ('<button type="button" class="hesap__ana hesap__tam" data-hesap="bag-yeni">' + yz('ortak.hesap.yeni-kod') + '</button>');
       }
       const ev = evAdresleri()[0];
       const adres = ev ? ev + '/?bagla=' + b.kod : '';
       const qr = adres && L.QR && !ortam.yerelUygulama() ? L.QR.svg(adres, { etiket:yz('ortak.hesap.tabletin-kamerasiyla-okutula') }) : '';
       return '<div class="hesap-bag">'
-        + '<p class="hesap-bag__kod" aria-label="' + kac('Bağlama kodu ' + b.kod.split('').join(' ')) + '">'
+        + '<p class="hesap-bag__kod" aria-label="' + kac(yz('ortak.hesap.baglama-kodu-2') + b.kod.split('').join(' ')) + '">'
         + kac(b.kod.slice(0, 3)) + '<span></span>' + kac(b.kod.slice(3)) + '</p>'
         + '<p class="hesap-bag__sure" data-hesap-sure>' + kac(kalanMetni(b.bitis)) + '</p>'
         + (qr ? '<div class="hesap-qr hesap-qr--kucuk">' + qr + '</div>' : '') + '</div>'
-        + adimlar(['Yeni cihazda LifeOS’u aç', '«Kodla bağlan»a dokun ve bu kodu yaz'
-          + (qr ? '<span>Tablette kamerayla QR’ı okutmak da olur.</span>' : '')])
+        + adimlar([yz('ortak.hesap.yeni-cihazda-lifeos-u-ac'), '«Kodla bağlan»a dokun ve bu kodu yaz'
+          + (qr ? ('<span>' + yz('ortak.hesap.tablette-kamerayla-qr-i-okut') + '</span>') : '')])
         + '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.vazgec'), eylem:'bag-vazgec', sinif:'is-tehlike' }) + '</ul>'
-        + '<p class="hesap__not">Kod tek kullanımlık; bağlanan cihaz Cihazlar’da görünür, oradan çıkarılabilir.</p>';
+        + ('<p class="hesap__not">' + yz('ortak.hesap.kod-tek-kullanimlik-baglanan') + '</p>');
     },
 
     esitleme(m){
@@ -2579,19 +2972,19 @@ window.LIFEOS.HESAP = (function(){
       });
       return (modulde
           ? '<div class="hesap-esit"><p class="hesap__durum is-' + kac(hal.durum) + '" id="hesap-durum" role="status" aria-live="polite">'
-            + kac(durumMetni()) + '</p><button type="button" class="hesap__ana" data-hesap="esitle">Şimdi eşitle</button></div>'
+            + kac(durumMetni()) + ('</p><button type="button" class="hesap__ana" data-hesap="esitle">' + yz('ortak.hesap.simdi-esitle') + '</button></div>')
           : '')
-        + (ay ? '<p class="hesap-bolum">Bilgisayardaki kopya</p><ul class="hesap-liste hesap-liste--duz">' + ['ays', 'spi', 'esp'].map(k =>
+        + (ay ? ('<p class="hesap-bolum">' + yz('ortak.hesap.bilgisayardaki-kopya') + '</p><ul class="hesap-liste hesap-liste--duz">') + ['ays', 'spi', 'esp'].map(k =>
             '<li class="hesap-oge"><span class="hesap-oge__metin"><b>' + MODUL_AD[k] + '</b><small>'
             + (sayi[k].n ? sayi[k].n.toLocaleString('tr-TR') + ' kayıt · ' + boyut(sayi[k].b) : 'kayıt yok') + '</small></span>'
             + (sayi[k].son ? '<span class="hesap-satir__detay">' + kac(sonMetni(sayi[k].son)) + '</span>' : '') + '</li>').join('')
             + '</ul>' : yukleniyor(m))
-        + (m.cihazlar && m.cihazlar.length ? '<p class="hesap-bolum">Cihazların son eşitlemesi</p><ul class="hesap-liste">'
+        + (m.cihazlar && m.cihazlar.length ? ('<p class="hesap-bolum">' + yz('ortak.hesap.cihazlarin-son-esitlemesi') + '</p><ul class="hesap-liste">')
             + m.cihazlar.map(c => '<li class="hesap-oge">' + ikon(cihazTuru(c.cihaz_ad), 'hesap-satir__ikon')
-              + '<span class="hesap-oge__metin"><b>' + kac(c.cihaz_ad) + '</b><small>' + (c.bu ? 'Bu cihaz' : 'Cihaz') + '</small></span>'
+              + '<span class="hesap-oge__metin"><b>' + kac(c.cihaz_ad) + '</b><small>' + (c.bu ? yz('ortak.hesap.bu-cihaz-2') : 'Cihaz') + '</small></span>'
               + '<span class="hesap-satir__detay">' + (c.esitleme ? kac(sonMetni(c.esitleme)) : 'henüz yok') + '</span></li>').join('')
             + '</ul>' : '')
-        + '<p class="hesap__not">Bu cihaz: ' + kac(cihazAdi()) + '. Kayıtlar bilgisayardaki LifeOS ile eşitlenir; '
+        + ('<p class="hesap__not">' + yz('ortak.hesap.bu-cihaz-3') + ' ') + kac(cihazAdi()) + '. Kayıtlar bilgisayardaki LifeOS ile eşitlenir; '
         + 'fotoğraflar çekildiği cihazda kalır.' + (modulde ? '' : ' Eşitleme her sistemin içinde kendiliğinden olur.') + '</p>';
     },
 
@@ -2599,27 +2992,27 @@ window.LIFEOS.HESAP = (function(){
       const l = m.kullanicilar;
       const kayit = typeof m.kayit === 'boolean' ? m.kayit : !(sunucu && sunucu.kayit === false);
       return '<ul class="hesap-liste hesap-liste--duz"><li class="hesap-oge">'
-        + '<span class="hesap-oge__metin"><b id="hesap-kayit-ad">Yeni hesap açılabilir</b><small>'
-        + (kayit ? 'Herkes kendi hesabını açar.' : 'Kapalı: hesabı sen eklersin.') + '</small></span>'
+        + ('<span class="hesap-oge__metin"><b id="hesap-kayit-ad">' + yz('ortak.hesap.yeni-hesap-acilabilir') + '</b><small>')
+        + (kayit ? yz('ortak.hesap.herkes-kendi-hesabini-acar') : yz('ortak.hesap.kapali-hesabi-sen-eklersin')) + '</small></span>'
         + '<button type="button" class="hesap-anahtar" role="switch" aria-checked="' + (kayit ? 'true' : 'false') + '"'
         + ' aria-labelledby="hesap-kayit-ad" data-hesap="kayit-ayar"></button></li></ul>'
-        + (l ? '<p class="hesap-bolum">Kullanıcılar</p><ul class="hesap-liste">' + l.map(u =>
+        + (l ? ('<p class="hesap-bolum">' + yz('ortak.hesap.kullanicilar') + '</p><ul class="hesap-liste">') + l.map(u =>
             '<li><button type="button" class="hesap-satir hesap-satir--kisi" data-hesap="kisi" data-id="' + Number(u.id) + '">'
             + avatar(u.gorunen_ad, u.renk, 34)
             + '<span class="hesap-oge__metin"><b>' + kac(u.gorunen_ad) + '</b><small>@' + kac(u.ad) + ' · ' + ROL_AD(u.rol)
             + ' · ' + kac(u.plan_ad) + '</small></span>' + ikon('ileri', 'hesap-satir__ok') + '</button></li>').join('') + '</ul>'
           : yukleniyor(m))
-        + '<div class="hesap-liste hesap-liste--ac">' + acilir('ekle', 'ekle', 'Kullanıcı ekle', '',
+        + '<div class="hesap-liste hesap-liste--ac">' + acilir('ekle', 'ekle', yz('ortak.hesap.kullanici-ekle'), '',
             '<form class="hesap__form" data-hesap-form="kullanici-ekle" data-ayar-disi>'
-            + alanHtml('hesap-yeni-ad', 'Kullanıcı adı', 'text', 'autocomplete="off" ' + AD_EK)
-            + sifreAlani('hesap-yeni-sifre', 'Geçici şifre', 'new-password', true)
-            + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Ekle</button></form>') + '</div>';
+            + alanHtml('hesap-yeni-ad', yz('ortak.hesap.kullanici-adi'), 'text', 'autocomplete="off" ' + AD_EK)
+            + sifreAlani('hesap-yeni-sifre', yz('ortak.hesap.gecici-sifre'), 'new-password', true)
+            + formMesaj + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.ekle') + '</button></form>')) + '</div>';
     },
 
     etkinlik(m){
       const l = m.etkinlik;
       if(!l) return yukleniyor(m);
-      if(!l.length) return '<p class="hesap__not">Henüz kayıtlı etkinlik yok.</p>';
+      if(!l.length) return ('<p class="hesap__not">' + yz('ortak.hesap.henuz-kayitli-etkinlik-yok') + '</p>');
       const yanlis = yanlisSayisi(l);
       let gun = '', html = '';
       l.forEach(o => {
@@ -2637,10 +3030,10 @@ window.LIFEOS.HESAP = (function(){
           + '<span class="hesap-oge__metin"><b>' + kac(t[1]) + '</b>' + (alt ? '<small>' + kac(alt) + '</small>' : '') + '</span>'
           + '<span class="hesap-satir__detay">' + saatMetni(o.zaman) + '</span></li>';
       });
-      return (yanlis ? '<div class="hesap-uyari" role="status">' + ikon('uyari') + '<p>Son 7 günde <b>' + yanlis
-          + ' yanlış deneme</b>. Sen değilsen şifreni değiştir.</p>'
-          + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="sayfa" data-sayfa="guvenlik">Güvenlik</button></div>' : '')
-        + html + '</ul><p class="hesap__not">Son ' + l.length + ' olay. Şifre ve cevaplar deftere hiç yazılmaz.</p>';
+      return (yanlis ? '<div class="hesap-uyari" role="status">' + ikon('uyari') + ('<p>' + yz('ortak.hesap.son-7-gunde') + ' <b>') + yanlis
+          + (' ' + yz('ortak.hesap.yanlis-deneme') + '</b>' + yz('ortak.hesap.sen-degilsen-sifreni-degisti') + '</p>')
+          + ('<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="sayfa" data-sayfa="guvenlik">' + yz('ortak.hesap.guvenlik') + '</button></div>') : '')
+        + html + ('</ul><p class="hesap__not">' + yz('ortak.hesap.son') + ' ') + l.length + (' ' + yz('ortak.hesap.olay-sifre-ve-cevaplar-defte') + '</p>');
     },
 
     /* VERİN (sunucu sözü 13): indir ya da hesabı sil. Silme geri
@@ -2648,27 +3041,27 @@ window.LIFEOS.HESAP = (function(){
     verin(m){
       const t = toplam(m), n = m.cihazlar ? m.cihazlar.length : null;
       const yd = m.ben && m.ben.yedek, admin = kim().r === 'admin';
-      const yedekMetni = yd ? 'Her gün kendiliğinden · ' + (yd.son ? 'son: ' + sonMetni(yd.son) : 'ilk yedek bugün alınır') : '';
+      const yedekMetni = yd ? yz('ortak.hesap.her-gun-kendiliginden') + (yd.son ? 'son: ' + sonMetni(yd.son) : 'ilk yedek bugün alınır') : '';
       return (yd ? '<ul class="hesap-liste">' + (admin
           ? satir({ ikon:'yedek', ad:yz('ortak.hesap.bilgisayardaki-yedek'), detay:yd.son ? sonMetni(yd.son) : '', sayfa:'yedek' })
-          : '<li class="hesap-oge">' + ikon('yedek', 'hesap-satir__ikon') + '<span class="hesap-oge__metin"><b>Bilgisayardaki yedek</b><small>'
+          : '<li class="hesap-oge">' + ikon('yedek', 'hesap-satir__ikon') + ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.bilgisayardaki-yedek') + '</b><small>')
             + kac(yedekMetni) + '</small></span></li>') + '</ul>' : '')
         + '<ul class="hesap-liste"><li class="hesap-oge">' + ikon('indir', 'hesap-satir__ikon')
-        + '<span class="hesap-oge__metin"><b>Verimi indir</b><small>Bilgisayardaki kopyanın tamamı'
-        + (t ? ' · ' + t.n.toLocaleString('tr-TR') + ' kayıt' + (t.b ? ' · ' + boyut(t.b) : '') : '') + ' · tek JSON dosyası</small></span>'
-        + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="indir">İndir</button></li></ul>'
+        + ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.verimi-indir') + '</b><small>' + yz('ortak.hesap.bilgisayardaki-kopyanin-tama'))
+        + (t ? ' · ' + t.n.toLocaleString('tr-TR') + ' kayıt' + (t.b ? ' · ' + boyut(t.b) : '') : '') + (' ' + yz('ortak.hesap.tek-json-dosyasi') + '</small></span>')
+        + ('<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="indir">' + yz('ortak.hesap.i-ndir') + '</button></li></ul>')
         + (!m.silOnay
           ? '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.hesabi-sil'), eylem:'sil-ac', sinif:'is-tehlike' }) + '</ul>'
-          : '<div class="hesap-onay"><p><b>Hesabın kalıcı olarak silinir.</b> Geri alınamaz.</p>'
+          : ('<div class="hesap-onay"><p><b>' + yz('ortak.hesap.hesabin-kalici-olarak-silini') + '</b> ' + yz('ortak.hesap.geri-alinamaz') + '</p>')
             + '<ul class="hesap-onay__liste">'
-            + '<li>Silinir: bilgisayardaki kopya' + (t ? ' (' + t.n.toLocaleString('tr-TR') + ' kayıt)' : '') + ', '
-            + (n == null ? 'oturumlar' : n + ' cihazdaki oturum') + ', etkinlik ve kişisel bilgiler.</li>'
-            + '<li>Kalır: her cihazdaki veri, o cihazın kendi deposunda.</li></ul>'
+            + ('<li>' + yz('ortak.hesap.silinir-bilgisayardaki-kopya')) + (t ? ' (' + t.n.toLocaleString('tr-TR') + ' kayıt)' : '') + ', '
+            + (n == null ? 'oturumlar' : n + ' cihazdaki oturum') + (yz('ortak.hesap.etkinlik-ve-kisisel-bilgiler') + '</li>')
+            + ('<li>' + yz('ortak.hesap.kalir-her-cihazdaki-veri-o') + '</li></ul>')
             + '<form class="hesap__form" data-hesap-form="sil" data-ayar-disi>'
-            + sifreAlani('hesap-sil-sifre', 'Onay için şifren', 'current-password') + CAPS + formMesaj
-            + '<div class="hesap__eylem"><button type="submit" class="hesap__tehlike">Hesabı kalıcı olarak sil</button>'
-            + '<button type="button" class="hesap__ikinci" data-hesap="sil-vazgec">Vazgeç</button></div></form></div>')
-        + '<p class="hesap__not">İstersen önce indir. Her sistemin kendi yedeği de o sistemin Ayarlar’ında durur.</p>';
+            + sifreAlani('hesap-sil-sifre', yz('ortak.hesap.onay-icin-sifren'), 'current-password') + CAPS + formMesaj
+            + ('<div class="hesap__eylem"><button type="submit" class="hesap__tehlike">' + yz('ortak.hesap.hesabi-kalici-olarak-sil') + '</button>')
+            + ('<button type="button" class="hesap__ikinci" data-hesap="sil-vazgec">' + yz('ortak.hesap.vazgec') + '</button></div></form></div>'))
+        + ('<p class="hesap__not">' + yz('ortak.hesap.i-stersen-once-indir-her-sis') + '</p>');
     },
 
     /* YEDEKLER (sunucu sözü 20, admin): son yedek, ikinci yer, liste.
@@ -2680,68 +3073,68 @@ window.LIFEOS.HESAP = (function(){
       const l = v.yedekler || [], son = l[0], ik = v.ikinci || {}, pc = !!v.yerel;
       const ind = m.indirOnay;
       if(ind){
-        return '<div class="hesap-onay hesap-onay--notr"><p><b>' + kac(tarihSaat(ind.zaman)) + ' yedeğini indir</b></p>'
-          + '<ul class="hesap-onay__liste"><li>Dosya bütün hesapları, şifre özetlerini ve iki adım sırlarını taşır; '
-          + 'güvendiğin bir yerde sakla (şifreli disk, kendi bulutun).</li>'
-          + '<li>Geri yüklemek için bu sayfadaki «Dosyadan yükle»yi kullan.</li></ul>'
+        return '<div class="hesap-onay hesap-onay--notr"><p><b>' + kac(tarihSaat(ind.zaman)) + (' ' + yz('ortak.hesap.yedegini-indir') + '</b></p>')
+          + ('<ul class="hesap-onay__liste"><li>' + yz('ortak.hesap.dosya-butun-hesaplari-sifre') + ' ')
+          + (yz('ortak.hesap.guvendigin-bir-yerde-sakla-s') + '</li>')
+          + ('<li>' + yz('ortak.hesap.geri-yuklemek-icin-bu-sayfad') + '</li></ul>')
           + '<form class="hesap__form" data-hesap-form="kopya-indir" data-ayar-disi>'
-          + sifreAlani('hesap-indir-sifre', 'Onay için şifren', 'current-password') + CAPS + formMesaj
-          + '<div class="hesap__eylem"><button type="submit" class="hesap__ana">İndir</button>'
-          + '<button type="button" class="hesap__ikinci" data-hesap="kopya-indir-vazgec">Vazgeç</button></div></form></div>';
+          + sifreAlani('hesap-indir-sifre', yz('ortak.hesap.onay-icin-sifren'), 'current-password') + CAPS + formMesaj
+          + ('<div class="hesap__eylem"><button type="submit" class="hesap__ana">' + yz('ortak.hesap.i-ndir') + '</button>')
+          + ('<button type="button" class="hesap__ikinci" data-hesap="kopya-indir-vazgec">' + yz('ortak.hesap.vazgec') + '</button></div></form></div>');
       }
       const g = m.geriOnay;
       if(g){
         const sayi = (x, ad) => Number(x || 0).toLocaleString('tr-TR') + ' ' + ad;
-        return '<div class="hesap-onay"><p><b>Hesap deposu ' + kac(tarihSaat(g.zaman)) + ' hâline döner.</b></p>'
+        return ('<div class="hesap-onay"><p><b>' + yz('ortak.hesap.hesap-deposu') + ' ') + kac(tarihSaat(g.zaman)) + (' ' + yz('ortak.hesap.haline-doner') + '</b></p>')
           + '<ul class="hesap-onay__liste">'
-          + '<li>Yedekte ' + sayi(g.yedek.kullanici, 'kullanıcı') + ', ' + sayi(g.yedek.kayit, 'kayıt') + '; şimdi '
+          + ('<li>' + yz('ortak.hesap.yedekte') + ' ') + sayi(g.yedek.kullanici, 'kullanıcı') + ', ' + sayi(g.yedek.kayit, 'kayıt') + '; şimdi '
           +   sayi(g.simdi.kullanici, 'kullanıcı') + ', ' + sayi(g.simdi.kayit, 'kayıt') + '.</li>'
-          + '<li>Önce şimdiki hâlin yedeği alınır; istersen ona geri dönersin.</li>'
-          + '<li>Bütün cihazlar (bu cihaz da) yeniden giriş yapar. Yedekten sonra değişen şifre ve ayarlar eski hâline döner.</li>'
-          + '<li>Cihazlardaki kayıtlar silinmez: yedekten sonraki değişiklikler eşitlemeyle geri gelir. '
-          +   'Yedekten sonra silinen bir kayıt geri gelebilir.</li></ul>'
+          + ('<li>' + yz('ortak.hesap.once-simdiki-halin-yedegi-al') + '</li>')
+          + ('<li>' + yz('ortak.hesap.butun-cihazlar-bu-cihaz-da') + '</li>')
+          + ('<li>' + yz('ortak.hesap.cihazlardaki-kayitlar-silinm') + ' ')
+          +   (yz('ortak.hesap.yedekten-sonra-silinen-bir-k') + '</li></ul>')
           + '<form class="hesap__form" data-hesap-form="geri-yukle" data-ayar-disi>'
-          + sifreAlani('hesap-geri-sifre', 'Onay için şifren', 'current-password') + CAPS + formMesaj
-          + '<div class="hesap__eylem"><button type="submit" class="hesap__tehlike">Geri yükle</button>'
-          + '<button type="button" class="hesap__ikinci" data-hesap="geri-vazgec">Vazgeç</button></div></form></div>';
+          + sifreAlani('hesap-geri-sifre', yz('ortak.hesap.onay-icin-sifren'), 'current-password') + CAPS + formMesaj
+          + ('<div class="hesap__eylem"><button type="submit" class="hesap__tehlike">' + yz('ortak.hesap.geri-yukle') + '</button>')
+          + ('<button type="button" class="hesap__ikinci" data-hesap="geri-vazgec">' + yz('ortak.hesap.vazgec') + '</button></div></form></div>');
       }
-      const TUR = { gunluk:'Günlük', elle:'Elle alındı', once:'Geri yüklemeden önce', dis:'Dosyadan yüklendi' };
-      const ikinciAlt = !ik.acik ? 'Kapalı · başka bir disk ya da USB seç'
-        : ik.hata ? ik.hata : (ik.son ? 'Son kopya ' + sonMetni(ik.son) : 'Henüz kopya yok') + (ik.yol ? ' · ' + ik.yol : '');
+      const TUR = { gunluk:'Günlük', elle:yz('ortak.hesap.elle-alindi'), once:yz('ortak.hesap.geri-yuklemeden-once'), dis:yz('ortak.hesap.dosyadan-yuklendi') };
+      const ikinciAlt = !ik.acik ? yz('ortak.hesap.kapali-baska-bir-disk')
+        : ik.hata ? ik.hata : (ik.son ? yz('ortak.hesap.son-kopya') + sonMetni(ik.son) : yz('ortak.hesap.henuz-kopya-yok')) + (ik.yol ? ' · ' + ik.yol : '');
       return '<ul class="hesap-liste hesap-liste--duz">'
         + '<li class="hesap-oge' + (v.hata ? ' is-dikkat' : '') + '">' + ikon('yedek', 'hesap-satir__ikon')
-        +   '<span class="hesap-oge__metin"><b>' + (son ? 'Son yedek' : 'Henüz yedek yok') + '</b><small>'
+        +   '<span class="hesap-oge__metin"><b>' + (son ? yz('ortak.hesap.son-yedek') : yz('ortak.hesap.henuz-yedek-yok')) + '</b><small>'
         +   kac(v.hata || ((son ? sonMetni(son.zaman) + ' · ' : '') + 'her gün kendiliğinden, son ' + v.saklama.gunluk + ' gün')) + '</small></span>'
-        +   '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="yedekle">Şimdi yedekle</button></li>'
+        +   ('<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="yedekle">' + yz('ortak.hesap.simdi-yedekle') + '</button></li>')
         + '<li class="hesap-oge' + (ik.acik && ik.hata ? ' is-dikkat' : '') + '">' + ikon('disk', 'hesap-satir__ikon')
-        +   '<span class="hesap-oge__metin"><b>İkinci yer</b><small>' + kac(ikinciAlt) + '</small></span>'
-        +   (ik.acik && pc ? '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="ikinci-kapat">Kapat</button>' : '')
+        +   ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.i-kinci-yer') + '</b><small>') + kac(ikinciAlt) + '</small></span>'
+        +   (ik.acik && pc ? ('<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="ikinci-kapat">' + yz('ortak.hesap.kapat') + '</button>') : '')
         + '</li></ul>'
-        + (ik.ayni_disk ? '<p class="hesap__not">İkinci yer asıl yedekle aynı diskte: disk bozulursa ikisi birden gider.</p>' : '')
-        + (pc ? '<div class="hesap-liste hesap-liste--ac">' + acilir('ikinci', 'disk', ik.acik ? 'İkinci yeri değiştir' : 'İkinci yeri ayarla', '',
+        + (ik.ayni_disk ? ('<p class="hesap__not">' + yz('ortak.hesap.i-kinci-yer-asil-yedekle-ayn') + '</p>') : '')
+        + (pc ? '<div class="hesap-liste hesap-liste--ac">' + acilir('ikinci', 'disk', ik.acik ? yz('ortak.hesap.i-kinci-yeri-degistir') : yz('ortak.hesap.i-kinci-yeri-ayarla'), '',
             '<form class="hesap__form" data-hesap-form="yedek-ikinci" data-ayar-disi>'
             + alanHtml('hesap-ikinci', 'Klasör (örnek: E:\\LifeOS-yedek)', 'text', 'autocomplete="off" spellcheck="false" maxlength="260" required'
               + (ik.yol ? ' value="' + kac(ik.yol) + '"' : ''))
-            + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Kaydet ve kopyala</button>'
-            + '<p class="hesap__not">Her yedek oraya da yazılır; son ' + 7 + ' kopya kalır. Bilgisayarın diski bozulursa geri dönüş buradan.</p>'
+            + formMesaj + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.kaydet-ve-kopyala') + '</button>')
+            + ('<p class="hesap__not">' + yz('ortak.hesap.her-yedek-oraya-da-yazilir') + ' ') + 7 + (' ' + yz('ortak.hesap.kopya-kalir-bilgisayarin-dis') + '</p>')
             + '</form>')
-          + acilir('kopya-yukle', 'yedek', 'Dosyadan yükle', '',
+          + acilir('kopya-yukle', 'yedek', yz('ortak.hesap.dosyadan-yukle'), '',
             '<form class="hesap__form" data-hesap-form="kopya-yukle" data-ayar-disi>'
-            + '<label class="hesap__alan" for="hesap-yedek-dosya"><span>Yedek dosyası (.db)</span>'
+            + ('<label class="hesap__alan" for="hesap-yedek-dosya"><span>' + yz('ortak.hesap.yedek-dosyasi-db') + '</span>')
             + '<input id="hesap-yedek-dosya" type="file" accept=".db,application/octet-stream" required/></label>'
-            + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Yükle</button>'
-            + '<p class="hesap__not">Dosya önce denetlenir; bozuksa ya da LifeOS yedeği değilse alınmaz. Yüklenen yedek listeye '
-            + 'girer; geri yüklemek için yanındaki «Geri yükle…».</p></form>') + '</div>' : '')
-        + (l.length ? '<p class="hesap-bolum">Yedekler</p><ul class="hesap-liste">' + l.map(x =>
+            + formMesaj + ('<button type="submit" class="hesap__ana hesap__tam">' + yz('ortak.hesap.yukle') + '</button>')
+            + ('<p class="hesap__not">' + yz('ortak.hesap.dosya-once-denetlenir-bozuks') + ' ')
+            + (yz('ortak.hesap.girer-geri-yuklemek-icin-yan') + '</p></form>')) + '</div>' : '')
+        + (l.length ? ('<p class="hesap-bolum">' + yz('ortak.hesap.yedekler') + '</p><ul class="hesap-liste">') + l.map(x =>
             '<li class="hesap-oge">' + ikon(x.tur === 'once' ? 'kalkan' : 'yedek', 'hesap-satir__ikon')
             + '<span class="hesap-oge__metin"><b>' + kac(tarihSaat(x.zaman)) + '</b><small>' + kac(TUR[x.tur] || x.tur) + ' · ' + boyut(x.bayt) + '</small></span>'
             + (pc ? '<span class="hesap-oge__eylem"><button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="kopya-indir-sor"'
               + ' data-ad="' + kac(x.ad) + '" aria-label="' + kac(tarihSaat(x.zaman) + ' yedeğini indir') + '">' + ikon('indir', 'hesap-ikon') + '</button>'
-              + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="geri-sor" data-ad="' + kac(x.ad) + '">Geri yükle…</button></span>' : '')
+              + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="geri-sor" data-ad="' + kac(x.ad) + ('">' + yz('ortak.hesap.geri-yukle-2') + '</button></span>') : '')
             + '</li>').join('') + '</ul>' : '')
         + '<p class="hesap__not">' + (pc
-          ? 'Yedekler bu bilgisayarda: ' + kac(v.klasor) + '. Sunucu açılamazsa: python sistem/hesap.py --geri-yukle.'
-          : 'İkinci yer ve geri yükleme yalnız bilgisayarın kendisinden yapılır.') + '</p>';
+          ? yz('ortak.hesap.yedekler-bu-bilgisayarda') + kac(v.klasor) + '. Sunucu açılamazsa: python sistem/hesap.py --geri-yukle.'
+          : yz('ortak.hesap.i-kinci-yer-ve-geri-yukleme')) + '</p>';
     },
 
     kisi(m){
@@ -2753,17 +3146,17 @@ window.LIFEOS.HESAP = (function(){
           + ' aria-pressed="' + (d === simdiki ? 'true' : 'false') + '">' + kac(ad) + '</button>').join('') + '</div>';
       return '<div class="hesap-kimlik hesap-kimlik--kucuk">' + avatar(u.gorunen_ad, u.renk, 64)
         + '<p class="hesap-kimlik__alt">@' + kac(u.ad) + '</p></div>'
-        + '<div class="hesap-ayar"><p class="hesap-ayar__ad" id="hesap-kisi-rol">Rol</p>'
+        + ('<div class="hesap-ayar"><p class="hesap-ayar__ad" id="hesap-kisi-rol">' + yz('ortak.hesap.rol') + '</p>')
         +   seg('rol', 'hesap-kisi-rol', [['uye', 'Üye'], ['admin', 'Admin']], u.rol) + '</div>'
-        + (planlar.length ? '<div class="hesap-ayar"><p class="hesap-ayar__ad" id="hesap-kisi-plan">Plan</p>'
+        + (planlar.length ? ('<div class="hesap-ayar"><p class="hesap-ayar__ad" id="hesap-kisi-plan">' + yz('ortak.hesap.plan') + '</p>')
           + seg('plan', 'hesap-kisi-plan', planlar.map(p => [p.id, p.ad]), u.plan) + '</div>' : '')
         /* Telefonunu ve yedek kodlarını kaybeden üye için (sunucu sözü 14). */
         + (u.iki_adim && u.id !== (m.ben && m.ben.kullanici && m.ben.kullanici.id)
           ? '<ul class="hesap-liste"><li class="hesap-oge">' + ikon('kalkan', 'hesap-satir__ikon')
-            + '<span class="hesap-oge__metin"><b>İki adımlı doğrulama açık</b><small>Telefonunu kaybettiyse kapat; sonra yeniden kurar.</small></span>'
-            + '<button type="button" class="hesap__kucuk" data-hesap="kisi-iki-kapat">Kapat</button></li></ul>' : '')
+            + ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.i-ki-adimli-dogrulama-acik') + '</b><small>' + yz('ortak.hesap.telefonunu-kaybettiyse-kapat') + '</small></span>')
+            + ('<button type="button" class="hesap__kucuk" data-hesap="kisi-iki-kapat">' + yz('ortak.hesap.kapat') + '</button></li></ul>') : '')
         + '<p class="hesap__mesaj" role="alert" hidden data-hesap-kisi-mesaj></p>'
-        + '<dl class="hesap-bilgi">' + bilgi('Cihaz', String(u.cihaz || 0)) + bilgi('Son görülme', sonMetni(u.son))
+        + '<dl class="hesap-bilgi">' + bilgi('Cihaz', String(u.cihaz || 0)) + bilgi(yz('ortak.hesap.son-gorulme-2'), sonMetni(u.son))
         +   bilgi('Üyelik', tarihMetni(u.olusturma)) + '</dl>';
     },
   };
@@ -2830,7 +3223,7 @@ window.LIFEOS.HESAP = (function(){
     if(merkez !== m) return;
     const hata = sonuc.find(Boolean);
     if(hata && hata.kod === 401 && !m.ben) return oturumKapandi();
-    m.uyari = !hata ? '' : hata.kod === 0 ? 'Bilgisayara ulaşılamıyor; son bilinen bilgiler gösteriliyor.' : (hata.message || '');
+    m.uyari = !hata ? '' : hata.kod === 0 ? yz('ortak.hesap.bilgisayara-ulasilamiyor-son') : (hata.message || '');
     if(!merkezKirli()) merkezTazele();
   }
 
@@ -2952,7 +3345,7 @@ window.LIFEOS.HESAP = (function(){
     }, e => {
       if(merkez !== m) return;
       if(e && e.kod === 401) return oturumKapandi();
-      m.uyari = e && e.kod === 0 ? baglantiHatasi() : ((e && e.message) || 'Kod açılamadı.');
+      m.uyari = e && e.kod === 0 ? baglantiHatasi() : ((e && e.message) || yz('ortak.hesap.kod-acilamadi'));
       merkezTazele();
     });
   }
@@ -2980,7 +3373,7 @@ window.LIFEOS.HESAP = (function(){
     fn().then(() => { if(merkez === m && !merkezKirli()) merkezTazele(); }, e => {
       if(merkez !== m) return;
       if(e && e.kod === 401) return oturumKapandi();
-      m.uyari = e && e.kod === 0 ? 'Bilgisayara ulaşılamıyor; son bilinen bilgiler gösteriliyor.' : ((e && e.message) || '');
+      m.uyari = e && e.kod === 0 ? yz('ortak.hesap.bilgisayara-ulasilamiyor-son') : ((e && e.message) || '');
       if(!merkezKirli()) merkezTazele();
     });
   }
@@ -2995,7 +3388,7 @@ window.LIFEOS.HESAP = (function(){
     }catch(e){
       if(merkez !== m) return;
       if(e && e.kod === 401 && /^Oturum/.test(e.message || '')) return oturumKapandi();
-      const metin = e && e.kod === 0 ? baglantiHatasi() : (e && e.message) || 'İşlem yapılamadı.';
+      const metin = e && e.kod === 0 ? baglantiHatasi() : (e && e.message) || yz('ortak.hesap.i-slem-yapilamadi');
       const el = hataYeri && document.querySelector(hataYeri);
       if(el){ el.textContent = metin; el.hidden = false; }
       else{ m.mesaj = ''; m.uyari = metin; merkezTazele(); }
@@ -3011,24 +3404,24 @@ window.LIFEOS.HESAP = (function(){
       + kac(durumMetni()) + '</p>';
     if(!o){
       return durumSatiri
-        + (betaMi() ? '<p class="hesap__not">Beta girişindesin: kayıtlar yalnız bu cihazda.</p>' : '')
-        + '<p class="hesap__not">Hesap, bilgisayardaki LifeOS üzerinden çalışır. Bu sayfayı LifeOS uygulamasından '
-        + '(ya da ev ağındaki https adresinden) aç.</p>';
+        + (betaMi() ? ('<p class="hesap__not">' + yz('ortak.hesap.beta-girisindesin-kayitlar-y') + '</p>') : '')
+        + ('<p class="hesap__not">' + yz('ortak.hesap.hesap-bilgisayardaki-lifeos') + ' ')
+        + (yz('ortak.hesap.ya-da-ev-agindaki-https') + '</p>');
     }
-    return '<button type="button" class="hesap-kisa" data-hesap="merkez" aria-label="' + kac('Hesap ayarları — ' + (o.g || o.a)) + '">'
+    return '<button type="button" class="hesap-kisa" data-hesap="merkez" aria-label="' + kac(yz('ortak.hesap.hesap-ayarlari') + (o.g || o.a)) + '">'
       + avatar(o.g || o.a, o.k, 40)
       + '<span class="hesap-oge__metin"><b>' + kac(o.g || o.a) + '</b><small>@' + kac(o.a) + (o.pa ? ' · ' + kac(o.pa) : '') + '</small></span>'
       + ikon('ileri', 'hesap-satir__ok') + '</button>'
       + durumSatiri + mesaj
       + '<div class="hesap__eylem">'
-      +   '<button type="button" class="hesap__ana" data-hesap="esitle">Şimdi eşitle</button>'
-      +   '<button type="button" class="hesap__ikinci" data-hesap="cikis">Çıkış yap</button>'
+      +   ('<button type="button" class="hesap__ana" data-hesap="esitle">' + yz('ortak.hesap.simdi-esitle') + '</button>')
+      +   ('<button type="button" class="hesap__ikinci" data-hesap="cikis">' + yz('ortak.hesap.cikis-yap') + '</button>')
       + '</div>' + cakismaHtml();
   }
 
   function panelHtml(){
     return '<div class="katman kmenu kmenu--hesap" role="dialog" aria-label="Hesap ve eşitleme" data-hesap-panel>'
-      + '<div class="hesap__bas"><p class="kmenu__bas">Hesap</p>'
+      + ('<div class="hesap__bas"><p class="kmenu__bas">' + yz('ortak.hesap.hesap') + '</p>')
       + '<button type="button" class="hesap__kapat" data-katman-kapat aria-label="Hesabı kapat">'
       + ikon('kapat') + '</button></div>'
       + panelGovde() + '</div>';
@@ -3063,14 +3456,14 @@ window.LIFEOS.HESAP = (function(){
     if(!el) return;
     const o = oturum();
     el.hidden = !o && !(sunucu || ortam.yerelUygulama());
-    const html = o ? avatar(o.g || o.a, o.k, 28) + '<span>' + kac(o.g || o.a) + '</span>' : '<span>Giriş yap</span>';
+    const html = o ? avatar(o.g || o.a, o.k, 28) + '<span>' + kac(o.g || o.a) + '</span>' : ('<span>' + yz('ortak.hesap.giris-yap') + '</span>');
     if(el.getAttribute('data-cizim') !== html){
       el.innerHTML = html;
       el.setAttribute('data-cizim', html);
     }
     el.classList.toggle('is-girisli', !!o);
     el.classList.toggle('is-uyari', !!(o && uyari.yeni.length));
-    el.setAttribute('aria-label', o ? 'Hesap — ' + (o.g || o.a) + (uyari.yeni.length ? ' · yeni güvenlik olayı' : '') : 'Giriş yap');
+    el.setAttribute('aria-label', o ? yz('ortak.hesap.hesap-2') + (o.g || o.a) + (uyari.yeni.length ? ' · yeni güvenlik olayı' : '') : yz('ortak.hesap.giris-yap'));
   }
 
   function deger(id){ const e = document.getElementById(id); return e ? e.value : ''; }
@@ -3106,7 +3499,7 @@ window.LIFEOS.HESAP = (function(){
           merkez.yedekler = y;
           if(merkez.ben) merkez.ben.iki_adim = { acik:true, olusturma:ortam.simdi(), yedek_kalan:y.length };
         }
-        mesaj = 'İki adımlı doğrulama açıldı.';
+        mesaj = yz('ortak.hesap.i-ki-adimli-dogrulama-acildi-2');
       }else if(tur === 'yedek-yenile'){
         const y = await yedekYenile(deger('hesap-yedek-sifre'));
         if(merkez){
@@ -3116,11 +3509,11 @@ window.LIFEOS.HESAP = (function(){
       }else if(tur === 'iki-kapat'){
         await ikiAdimKapat(deger('hesap-kapat-sifre'), deger('hesap-kapat-kod'));
         if(merkez && merkez.ben) merkez.ben.iki_adim = { acik:false, olusturma:null, yedek_kalan:0 };
-        mesaj = 'İki adımlı doğrulama kapandı.';
+        mesaj = yz('ortak.hesap.i-ki-adimli-dogrulama-kapand-2');
       }else if(tur === 'cihaz-ad'){
         const l = await cihazAdlandir(merkez && merkez.cihaz, deger('hesap-cihaz-ad'));
         if(merkez) merkez.cihazlar = l;
-        mesaj = 'Cihazın adı kaydedildi.';
+        mesaj = yz('ortak.hesap.cihazin-adi-kaydedildi');
       }else if(tur === 'anahtar'){
         const okuEl = document.getElementById('hesap-anahtar-oku');
         const a = await anahtarAc(deger('hesap-anahtar-sifre'), deger('hesap-anahtar-ad'), !!(okuEl && okuEl.checked));
@@ -3147,11 +3540,11 @@ window.LIFEOS.HESAP = (function(){
       }else if(tur === 'parola'){
         if(deger('hesap-yeni') !== deger('hesap-yeni2')) throw new Error('İki şifre aynı değil.');
         await parolaDegistir(deger('hesap-eski'), deger('hesap-yeni'));
-        mesaj = 'Şifre değişti. Öteki cihazlarda yeniden giriş gerekir.';
+        mesaj = yz('ortak.hesap.sifre-degisti-oteki-cihazlar');
       }else if(tur === 'soru-ayarla'){
         await soruAyarla(deger('hesap-soru-sifre'), deger('hesap-yeni-soru'), deger('hesap-yeni-cevap'));
         if(merkez && merkez.ben) merkez.ben.soru_var = true;
-        mesaj = 'Kurtarma sorusu kaydedildi.';
+        mesaj = yz('ortak.hesap.kurtarma-sorusu-kaydedildi');
       }else if(tur === 'profil'){
         const r = form.querySelector('input[name="hesap-renk"]:checked');
         /* Kişisel alanlar formda yoksa (sunucu cevabı gelmedi) gönderilmez. */
@@ -3159,7 +3552,7 @@ window.LIFEOS.HESAP = (function(){
           ? { hitap:deger('hesap-hitap'), dogum:deger('hesap-dogum'), eposta:deger('hesap-eposta') } : {};
         const k = await profilAyarla(deger('hesap-gorunen'), r ? r.value : null, ek);
         if(merkez && merkez.ben) merkez.ben.kullanici = k;
-        mesaj = 'Profil kaydedildi.';
+        mesaj = yz('ortak.hesap.profil-kaydedildi');
       }else if(tur === 'kullanici-ekle'){
         const u = await kullaniciEkle(deger('hesap-yeni-ad').trim(), deger('hesap-yeni-sifre'));
         if(merkez){ const v = await kullanicilar(); merkez.kullanicilar = v.kullanicilar || []; }
@@ -3180,16 +3573,16 @@ window.LIFEOS.HESAP = (function(){
         const el = document.getElementById('hesap-yedek-dosya');
         const v = await yedekYukle(el && el.files && el.files[0]);
         if(merkez) merkez.yedek = v;
-        mesaj = 'Yedek eklendi (' + v.eklenen + '). Geri yüklemek için listeden «Geri yükle…».';
+        mesaj = yz('ortak.hesap.yedek-eklendi') + v.eklenen + '). Geri yüklemek için listeden «Geri yükle…».';
       }else if(tur === 'yedek-ikinci'){
         const v = await yedekAyar(deger('hesap-ikinci').trim());
         if(merkez) merkez.yedek = v;
         if(v.ikinci && v.ikinci.hata) throw new Error(v.ikinci.hata);
-        mesaj = 'İkinci yer ayarlandı; son yedek oraya da yazıldı.';
+        mesaj = yz('ortak.hesap.i-kinci-yer-ayarlandi-son-ye');
       }
     }catch(e){
       hata = true;
-      mesaj = e && e.kod === 0 ? baglantiHatasi() : (e && e.message) || 'İşlem yapılamadı.';
+      mesaj = e && e.kod === 0 ? baglantiHatasi() : (e && e.message) || yz('ortak.hesap.i-slem-yapilamadi');
     }finally{
       if(dugmeEl) dugmeEl.disabled = false;
     }
@@ -3250,7 +3643,7 @@ window.LIFEOS.HESAP = (function(){
       const ac = inp.type === 'password';
       inp.type = ac ? 'text' : 'password';
       is.setAttribute('aria-pressed', ac ? 'true' : 'false');
-      is.setAttribute('aria-label', ac ? 'Şifreyi gizle' : 'Şifreyi göster');
+      is.setAttribute('aria-label', ac ? yz('ortak.hesap.sifreyi-gizle') : yz('ortak.hesap.sifreyi-goster'));
     }else if(ad === 'merkez') merkezAc();
     else if(ad === 'merkez-kapat') merkezKapat();
     else if(ad === 'sayfa') merkezGit(is.getAttribute('data-sayfa'));
@@ -3262,7 +3655,7 @@ window.LIFEOS.HESAP = (function(){
       merkezIs(async () => {
         await cihazCikar(id);
         if(merkez) merkez.cihazlar = await cihazlar();
-        return 'Oturum kapatıldı.';
+        return yz('ortak.hesap.oturum-kapatildi');
       });
     }else if(ad === 'otekiler' || ad === 'otekiler-vazgec'){
       if(merkez){ merkez.onay = ad === 'otekiler'; merkez.mesaj = ''; merkezTazele(); }
@@ -3273,7 +3666,7 @@ window.LIFEOS.HESAP = (function(){
       merkezIs(async () => {
         const n = await otekilerdenCik();
         if(merkez){ merkez.onay = false; merkez.cihazlar = await cihazlar(); }
-        return n ? n + ' cihazda oturum kapandı.' : 'Öteki cihaz yoktu.';
+        return n ? n + ' cihazda oturum kapandı.' : yz('ortak.hesap.oteki-cihaz-yoktu');
       });
     }else if(ad === 'indir'){
       is.disabled = true;
@@ -3294,7 +3687,7 @@ window.LIFEOS.HESAP = (function(){
       merkezIs(async () => {
         const v = await kayitAyarla(yeni);
         if(merkez) merkez.kayit = v;
-        return v ? 'Yeni hesap açma açık.' : 'Yeni hesap açma kapalı.';
+        return v ? yz('ortak.hesap.yeni-hesap-acma-acik') : yz('ortak.hesap.yeni-hesap-acma-kapali');
       });
     }else if(ad === 'cihaz'){
       merkezGit('cihaz', { cihaz:Number(is.getAttribute('data-id')) });
@@ -3337,7 +3730,7 @@ window.LIFEOS.HESAP = (function(){
       if(!y) return;
       const o = oturum() || {};
       Promise.resolve(ortam.indir('lifeos-yedek-kodlar-' + String(o.a || 'hesap').replace(/[^0-9A-Za-zÇĞİÖŞÜçğıöşü_.-]/g, '') + '.txt',
-        'LifeOS yedek kodları (' + (o.a || '') + ')\r\nHer biri girişi bir kez açar.\r\n\r\n' + y.join('\r\n') + '\r\n', 'text/plain')).catch(() => {});
+        yz('ortak.hesap.lifeos-yedek-kodlari') + (o.a || '') + ')\r\nHer biri girişi bir kez açar.\r\n\r\n' + y.join('\r\n') + '\r\n', 'text/plain')).catch(() => {});
     }else if(ad === 'yedekle'){
       is.disabled = true;
       merkezIs(async () => {
@@ -3347,7 +3740,7 @@ window.LIFEOS.HESAP = (function(){
           if(merkez.ben && merkez.ben.yedek) merkez.ben.yedek = Object.assign({}, merkez.ben.yedek, { son:ortam.simdi(), hata:'' });
         }
         const x = (v.yedekler || []).find(y => y.ad === v.alinan);
-        return 'Yedek alındı' + (x ? ' · ' + boyut(x.bayt) : '') + (v.ikinci && v.ikinci.acik && !v.ikinci.hata ? '; ikinci yere de yazıldı.' : '.');
+        return yz('ortak.hesap.yedek-alindi') + (x ? ' · ' + boyut(x.bayt) : '') + (v.ikinci && v.ikinci.acik && !v.ikinci.hata ? '; ikinci yere de yazıldı.' : '.');
       });
     }else if(ad === 'geri-sor'){
       const yad = is.getAttribute('data-ad');
@@ -3377,7 +3770,7 @@ window.LIFEOS.HESAP = (function(){
       merkezIs(async () => {
         const v = await yedekAyar('');
         if(merkez) merkez.yedek = v;
-        return 'İkinci yer kapandı; yedekler yalnız bu bilgisayarda.';
+        return yz('ortak.hesap.i-kinci-yer-kapandi-yedekler');
       });
     }else if(ad === 'yedek-tamam'){
       if(merkez){ merkez.yedekler = null; merkez.mesaj = ''; merkezTazele(); }
@@ -3392,7 +3785,7 @@ window.LIFEOS.HESAP = (function(){
           merkez.baglanti = Object.assign({}, merkez.baglanti, { takvim:t });
           if(merkez.ben && merkez.ben.baglantilar) merkez.ben.baglantilar.takvim = true;
         }
-        return ad === 'takvim-ac' ? 'Abonelik açık. Adresi takvim uygulamana ekle.' : 'Adres yenilendi; eskisi artık çalışmaz.';
+        return ad === 'takvim-ac' ? yz('ortak.hesap.abonelik-acik-adresi-takvim') : yz('ortak.hesap.adres-yenilendi-eskisi-artik');
       });
     }else if(ad === 'takvim-yenile-sor' || ad === 'takvim-vazgec'){
       if(merkez){ merkez.takvimOnay = ad === 'takvim-yenile-sor'; merkez.mesaj = ''; merkezTazele(); }
@@ -3404,7 +3797,7 @@ window.LIFEOS.HESAP = (function(){
           merkez.baglanti = Object.assign({}, merkez.baglanti, { takvim:t });
           if(merkez.ben && merkez.ben.baglantilar) merkez.ben.baglantilar.takvim = false;
         }
-        return 'Abonelik kapandı; adres artık çalışmaz.';
+        return yz('ortak.hesap.abonelik-kapandi-adres-artik');
       });
     }else if(ad === 'takvim-indir'){
       const t = merkez && merkez.baglanti && merkez.baglanti.takvim, base = sunucuAdresi();
@@ -3416,7 +3809,7 @@ window.LIFEOS.HESAP = (function(){
         catch(e){ const h = new Error('Sunucuya ulaşılamadı.'); h.kod = 0; throw h; }
         if(!r.ok) throw new Error('Takvim alınamadı (' + r.status + ').');
         await ortam.indir('lifeos-takvim.ics', await r.text(), 'text/calendar');
-        return 'Takvim dosyası hazır. Google Takvim › Ayarlar › İçe aktar.';
+        return yz('ortak.hesap.takvim-dosyasi-hazir-google');
       });
     }else if(ad === 'anahtar-sil'){
       const id = Number(is.getAttribute('data-id'));
@@ -3424,7 +3817,7 @@ window.LIFEOS.HESAP = (function(){
       merkezIs(async () => {
         await anahtarSil(id);
         if(merkez){ merkez.baglanti = await baglantilar(); merkez.yeniAnahtar = null; }
-        return 'Anahtar silindi; onu kullanan kısayol artık çalışmaz.';
+        return yz('ortak.hesap.anahtar-silindi-onu-kullanan');
       });
     }else if(ad === 'bag-vazgec'){
       merkezGeri();
@@ -3439,7 +3832,7 @@ window.LIFEOS.HESAP = (function(){
         if(merkez && merkez.kullanicilar){
           merkez.kullanicilar = merkez.kullanicilar.map(x => (x.id === u.id ? Object.assign({}, x, u, { iki_adim:false }) : x));
         }
-        return 'İki adımlı doğrulaması kapandı.';
+        return yz('ortak.hesap.i-ki-adimli-dogrulamasi-kapa');
       }, '[data-hesap-kisi-mesaj]');
     }else if(ad === 'yonet'){
       const alan = is.getAttribute('data-alan'), d = is.getAttribute('data-deger');
@@ -3571,7 +3964,7 @@ window.LIFEOS.HESAP = (function(){
     if(ayar.depo) ayar.depo.onDegisim = degisti;
     bagla();
     const bagKod = bagSorgu();
-    if(ornekMi()){ durumYaz('ornek', 'Örnek profil eşitlenmez.'); return; }
+    if(ornekMi()){ durumYaz('ornek', yz('ortak.hesap.ornek-profil-esitlenmez')); return; }
     durumYaz('bilinmiyor', '');
     const giris = ayar.modul === 'giris';
     /* Söz 15: ağ beklemeden verilebilen karar hemen verilir. */

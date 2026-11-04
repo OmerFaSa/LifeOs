@@ -17,6 +17,17 @@
       da sonuç tahmini değildir; bu sayfada yazar. «Bu hızla» varsa
       «tahmin» etiketiyle ve dayanağıyla durur. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.haftarapor.plan-tamamlama':'Plan tamamlama',
+  'ays.core.haftarapor.cozulen-soru':'Çözülen soru',
+  'ays.core.haftarapor.kayit-girilen-gun':'Kayıt girilen gün',
+  'ays.core.haftarapor.tyt-medyani-son-3-tam':'TYT medyanı (son 3 tam deneme)',
+  'ays.core.haftarapor.ayt-medyani-son-3-tam':'AYT medyanı (son 3 tam deneme)',
+  'ays.core.haftarapor.konu-kapanisi':'Konu kapanışı',
+  'ays.core.haftarapor.davranis-serisi':'Davranış serisi',
+  'ays.core.haftarapor.analizi-bekleyen-deneme':'Analizi bekleyen deneme',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.haftarapor.haftalik-calisma-raporu':'Haftalık çalışma raporu',
   'ays.core.haftarapor.hafta':'Hafta',
   'ays.core.haftarapor.tarihinde-hazirlandi':'tarihinde hazırlandı',
@@ -72,14 +83,14 @@ R.HaftaRapor = (function(){
     const borc = C.analysisDebt().length;
 
     const satirlar = [
-      satir('Plan tamamlama', comp == null ? null : '%' + comp, 'derived'),
-      satir('Çözülen soru', qr ? qr.solved + (qr.target ? ' / ' + qr.target + ' hedef' : '') : null, 'measured'),
-      satir('Kayıt girilen gün', kayitli.length ? kayitli.length + ' / 7' : null, 'measured'),
-      satir('TYT medyanı (son 3 tam deneme)', tyt.last3 == null ? null : U.fmtNet(tyt.last3) + ' net', 'derived'),
-      satir('AYT medyanı (son 3 tam deneme)', ayt.last3 == null ? null : U.fmtNet(ayt.last3) + ' net', 'derived'),
-      satir('Konu kapanışı', kap.total ? '%' + kap.pct + ' (' + kap.closed + ' / ' + kap.total + ' konu)' : null, 'derived'),
-      satir('Davranış serisi', C.behaviorStreak().streak + ' gün', 'derived'),
-      satir('Analizi bekleyen deneme', String(borc), 'derived'),
+      satir(yz('ays.core.haftarapor.plan-tamamlama'), comp == null ? null : '%' + comp, 'derived'),
+      satir(yz('ays.core.haftarapor.cozulen-soru'), qr ? qr.solved + (qr.target ? ' / ' + qr.target + ' hedef' : '') : null, 'measured'),
+      satir(yz('ays.core.haftarapor.kayit-girilen-gun'), kayitli.length ? kayitli.length + ' / 7' : null, 'measured'),
+      satir(yz('ays.core.haftarapor.tyt-medyani-son-3-tam'), tyt.last3 == null ? null : U.fmtNet(tyt.last3) + ' net', 'derived'),
+      satir(yz('ays.core.haftarapor.ayt-medyani-son-3-tam'), ayt.last3 == null ? null : U.fmtNet(ayt.last3) + ' net', 'derived'),
+      satir(yz('ays.core.haftarapor.konu-kapanisi'), kap.total ? '%' + kap.pct + ' (' + kap.closed + ' / ' + kap.total + ' konu)' : null, 'derived'),
+      satir(yz('ays.core.haftarapor.davranis-serisi'), C.behaviorStreak().streak + ' gün', 'derived'),
+      satir(yz('ays.core.haftarapor.analizi-bekleyen-deneme'), String(borc), 'derived'),
     ];
 
     const denemeler = (R.S.exams || [])

@@ -21,6 +21,11 @@
         görsel modeli numarayı okur (`modelden`); kontrol hanesi tutmayan
         okuma yine reddedilir: model numara uyduramaz. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.barkod.goruntudeki-barkodun-altinda':'Görüntüdeki barkodun altındaki rakamları aynen yaz. Yalnız rakamlar; barkod yoksa «yok» yaz.',
+  'spi.core.barkod.open-food-facts-dogrulanmadi':'Open Food Facts · doğrulanmadı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.barkod.barkod-numarasini-yaz':'Barkod numarasını yaz.',
   'spi.core.barkod.barkod-8-12-ya-da':'Barkod 8, 12 ya da 13 haneli olur; «',
   'spi.core.barkod.bu-numaranin-kontrol-hanesi':'Bu numaranın kontrol hanesi tutmuyor; yanlış okunmuş olabilir. Yeniden okut ya da kontrol et.',
@@ -136,7 +141,7 @@ SP.Barkod = (function(){
   async function modelden(gorsel){
     if(typeof gorsel !== 'function') return { ok:false, why:yz('spi.core.barkod.bu-tarayici-barkod-okuyamiyo') };
     let r = null;
-    try{ r = await gorsel('Görüntüdeki barkodun altındaki rakamları aynen yaz. Yalnız rakamlar; barkod yoksa «yok» yaz.', 'gorsel'); }catch(e){ r = null; }
+    try{ r = await gorsel(yz('spi.core.barkod.goruntudeki-barkodun-altinda'), 'gorsel'); }catch(e){ r = null; }
     if(!r || !r.ok) return { ok:false, why:yz('spi.core.barkod.gorsel-model-barkodu-okuyama') + (r && r.note ? ' (' + r.note + ')' : '') + '; numarayı yaz.' };
     const k = metindenKod(r.text);
     return k.ok ? coz(k.kod) : k;
@@ -181,7 +186,7 @@ SP.Barkod = (function(){
     const g = sayi(p.serving_quantity);
     return { ok:true, kod:d.kod, urun:{ ad:ad.slice(0, 80), marka:String(p.brands || '').split(',')[0].trim().slice(0, 40),
       v, porsiyon:g && g > 0 && g <= 2000 ? { g, ad:String(p.serving_size || '').trim().slice(0, 30) } : null,
-      kaynak:'Open Food Facts · doğrulanmadı' } };
+      kaynak:yz('spi.core.barkod.open-food-facts-dogrulanmadi') } };
   }
   /* Open Food Facts ürünü kişisel tabloya girecek gıda (kaydı çağıran yapar). */
   function gidaYap(urun, kod){

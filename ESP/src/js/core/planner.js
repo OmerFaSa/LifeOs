@@ -17,6 +17,22 @@
    daha dogru" degil "hangisi beklerse otekileri cokertir" sorusuna gore
    dizilir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.planner.kronolojiye-yeni-olay-ekleme':'Kronolojiye yeni olay eklemek bu tabanı daha da düşürür.',
+  'esp.core.planner.ayni-calisma-ayni-sonucu-ver':'Aynı çalışma aynı sonucu veriyorsa değişmesi gereken çalışmanın kendisi.',
+  'esp.core.planner.hedef-bugun':'Hedef bugün.',
+  'esp.core.planner.unutma-egrisi-beklemez-gecik':'Unutma eğrisi beklemez; geciken her gün kartı bir adım geriye atar.',
+  'esp.core.planner.son':'Son ',
+  'esp.core.planner.henuz-oturum-kaydi-yok-ilk':'Henüz oturum kaydı yok; ilk oturumla başlar.',
+  'esp.core.planner.yeni-icerik-bu-basamak-henuz':'Yeni içerik: bu basamak henüz ölçülmedi; önce kısa bir ölçüm yap.',
+  'esp.core.planner.yeni-icerik-temel-saglamken':'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
+  'esp.core.planner.asgari-gunu-yapip-birakmak-d':'Asgari günü yapıp bırakmak da bir seçenektir.',
+  'esp.core.planner.not-yigini-yazilana-kadar-se':'Not yığını, yazılana kadar sermaye sayılmıyor.',
+  'esp.core.planner.bir-tez-cogu-zaman-yazilirke':'Bir tez çoğu zaman yazılırken kapanır.',
+  'esp.core.planner.kaynaksiz-kronoloji-bir-list':'Kaynaksız kronoloji bir liste; liste tarih değildir.',
+  'esp.core.planner.i-kisi-ayni-ayrimi-kullaniyo':'İkisi aynı ayrımı kullanıyor: öncül ile sonuç.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.planner.kartlari-hatirlama-orani-dus':'Kartları hatırlama oranı düşük',
   'esp.core.planner.kartlarin-hatirlanma-olasili':'Kartların hatırlanma olasılığı ortalaması %',
   'esp.core.planner.tarih-kartlarini-hatirlama-o':'Tarih kartlarını hatırlama oranı düşük',
@@ -92,7 +108,7 @@ ESP.Planner = (function(){
         label:yz('esp.core.planner.tarih-kartlarini-hatirlama-o'),
         detail:yz('esp.core.planner.tarih-destesinin-hatirlanma')
              + Math.round(rh.value * 100) + ' (' + rh.n + ' karttan). '
-             + 'Kronolojiye yeni olay eklemek bu tabanı daha da düşürür.',
+             + yz('esp.core.planner.kronolojiye-yeni-olay-ekleme'),
         route:'history', tab:'calisma',
         metric:{ value:rh.value, cert:rh.cert },
       });
@@ -103,7 +119,7 @@ ESP.Planner = (function(){
         id:'plateau:' + p.piece.id, disc:'music', agent:'maestro',
         label:p.piece.name + ' platoda',
         detail:p.days + ' gündür temiz tempo eşiği ' + p.bpm + ' BPM\'de duruyor. '
-             + 'Aynı çalışma aynı sonucu veriyorsa değişmesi gereken çalışmanın kendisi.',
+             + yz('esp.core.planner.ayni-calisma-ayni-sonucu-ver'),
         route:'studio', tab:'muzik', ref:p.piece.id,
         metric:{ value:p.bpm, cert:'measured' },
       });
@@ -203,7 +219,7 @@ ESP.Planner = (function(){
       return {
         rank:2, id:'goal:' + acil.goal.id, agent:d ? d.agent : 'patron', disc:acil.goal.disc,
         title:acil.goal.label,
-        detail:acil.daysLeft === 0 ? 'Hedef bugün.'
+        detail:acil.daysLeft === 0 ? yz('esp.core.planner.hedef-bugun')
           : acil.daysLeft + ' gün kaldı. ' + (acil.goal.note || ''),
         route:d ? d.route : 'today', tab:null, ref:acil.goal.id,
         why:yz('esp.core.planner.zamana-bagli-hedef-dis-dunya'),
@@ -224,7 +240,7 @@ ESP.Planner = (function(){
         title:o.overdue.length + ' kartın vadesi geçti',
         detail:yz('esp.core.planner.en-cok-geciken-kart') + o.maxDays + ' gündür bekliyor; '
              + 'çoğunluk ' + desteAdi + ' destesinde. '
-             + 'Unutma eğrisi beklemez; geciken her gün kartı bir adım geriye atar.',
+             + yz('esp.core.planner.unutma-egrisi-beklemez-gecik'),
         route:o.route, tab:o.tab,
         why:yz('esp.core.planner.vadesi-gecmis-tekrar-gecikme'),
       };
@@ -289,20 +305,20 @@ ESP.Planner = (function(){
          gec". Kapi olculemiyorsa istenen sey calismak degil OLCMEKTIR. */
       const kapi = ESP.Curriculum ? ESP.Curriculum.nextGate(d.id) : null;
       const taban = aday.cert === 'missing'
-        ? 'Son ' + BALANCE_WINDOW + ' günde hiç girilmemiş.'
-        : 'Son ' + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '.';
+        ? yz('esp.core.planner.son') + BALANCE_WINDOW + ' günde hiç girilmemiş.'
+        : yz('esp.core.planner.son') + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '.';
       /* Hiç kayıt yoksa «temel sağlam» bir iddia olurdu (2026-10-16). */
       const hicKayit = denge.rows.every(r => r.cert === 'missing');
       return {
         rank:5, id:'expand:' + d.id, agent:d.agent, disc:d.id,
         title:kapi ? (d.label + ' — ' + kapi.title)
           : (d.label + ' bu hafta en az çalışılan alan'),
-        detail:(hicKayit ? 'Henüz oturum kaydı yok; ilk oturumla başlar.'
+        detail:(hicKayit ? yz('esp.core.planner.henuz-oturum-kaydi-yok-ilk')
           : taban + ' Temel sağlam; şimdi genişletme zamanı.' + (kapi ? ' ' + kapi.why : '')),
         route:d.route, tab:null,
         why:kapi && kapi.action === 'measure'
-          ? 'Yeni içerik: bu basamak henüz ölçülmedi; önce kısa bir ölçüm yap.'
-          : 'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
+          ? yz('esp.core.planner.yeni-icerik-bu-basamak-henuz')
+          : yz('esp.core.planner.yeni-icerik-temel-saglamken'),
       };
     }
 
@@ -310,7 +326,7 @@ ESP.Planner = (function(){
       rank:0, id:'none', agent:'patron', disc:null,
       title:yz('esp.core.planner.bugun-icin-bekleyen-bir-is'),
       detail:yz('esp.core.planner.sirasi-gelen-kart-yok-tikanm')
-           + 'Asgari günü yapıp bırakmak da bir seçenektir.',
+           + yz('esp.core.planner.asgari-gunu-yapip-birakmak-d'),
       route:'today', tab:null,
       why:yz('esp.core.planner.oncelik-sirasindaki-bes-kura'),
     };
@@ -387,7 +403,7 @@ ESP.Planner = (function(){
       focus:odak,
       cert:denge.cert,
       note:denge.cert === 'missing'
-        ? 'Son ' + BALANCE_WINDOW + ' günde hiç kayıt yok; rota yalnızca disiplin '
+        ? yz('esp.core.planner.son') + BALANCE_WINDOW + ' günde hiç kayıt yok; rota yalnızca disiplin '
           + 'listesinden kuruldu.'
         : null,
     };
@@ -422,7 +438,7 @@ ESP.Planner = (function(){
     if(ss.total >= 5 && yazi.cert === 'missing'){
       out.push({ id:'notes-no-writing', from:'aristoteles', to:'montaigne',
         text:ss.total + ' atomik not var ama son 14 günde yazı oturumu yok. '
-           + 'Not yığını, yazılana kadar sermaye sayılmıyor.',
+           + yz('esp.core.planner.not-yigini-yazilana-kadar-se'),
         route:'writing' });
     }
 
@@ -442,7 +458,7 @@ ESP.Planner = (function(){
     if(acikTezler.length && yazi.cert === 'missing'){
       out.push({ id:'args-no-writing', from:'socrates', to:'montaigne',
         text:acikTezler.length + ' tez 14+ gündür açık ve yazı oturumu yok. '
-           + 'Bir tez çoğu zaman yazılırken kapanır.',
+           + yz('esp.core.planner.bir-tez-cogu-zaman-yazilirke'),
         route:'writing' });
     }
 
@@ -452,7 +468,7 @@ ESP.Planner = (function(){
     if(th && th.cert !== 'missing' && th.events >= 20 && !th.sources.total){
       out.push({ id:'events-no-sources', from:'herodot', to:'aristoteles',
         text:th.events + ' olay girilmiş ama hiçbir kaynak değerlendirilmemiş. '
-           + 'Kaynaksız kronoloji bir liste; liste tarih değildir.',
+           + yz('esp.core.planner.kaynaksiz-kronoloji-bir-list'),
         route:'history' });
     }
 
@@ -461,7 +477,7 @@ ESP.Planner = (function(){
     if(th && th.chains.total >= 3 && !(S.args || []).length){
       out.push({ id:'chains-no-args', from:'herodot', to:'socrates',
         text:th.chains.total + ' neden zinciri kurulmuş ama hiç tez yazılmamış. '
-           + 'İkisi aynı ayrımı kullanıyor: öncül ile sonuç.',
+           + yz('esp.core.planner.i-kisi-ayni-ayrimi-kullaniyo'),
         route:'symposium' });
     }
 

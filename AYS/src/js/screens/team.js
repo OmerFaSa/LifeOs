@@ -3,6 +3,25 @@
    Her ajan yalnizca kendi brifingini gorur; alan disi soruda kendi
    arkadasina yonlendirir. Model bagli degilse yanit kural motoru
    metninden gelir — ekran her kosulda calisir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.team.patron-a-ilettim':'Patron’a ilettim. ',
+  'ays.team.geri-aldim':'Geri aldım: ',
+  'ays.team.geri-alinacak-bir-degisiklig':'Geri alınacak bir değişikliğin yok.',
+  'ays.team.uyguladim-geri-almak-isterse':'Uyguladım. Geri almak istersen «geri al» de.',
+  'ays.team.uygulayamadim':'Uygulayamadım: ',
+  'ays.team.tamam-vazgectim-hicbir-sey-d':'Tamam, vazgeçtim; hiçbir şey değişmedi.',
+  'ays.team.sustugunda-sira-ona-gececek':'Sustuğunda sıra ona geçecek',
+  'ays.team.raporuna-bakiyor-ve-cumleyi':'Raporuna bakıyor ve cümleyi kuruyor',
+  'ays.team.bu-tarayicida-sesli-cevap-yo':'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.',
+  'ays.team.model-bagli-degil-ajan-verin':'Model bağlı değil: ajan verine bakıp yanıtlıyor ama cümleler kural motorundan geliyor.',
+  'ays.team.cumleleri-bagli-model-kuruyo':'Cümleleri bağlı model kuruyor; sayılar yine kural motorundan.',
+  'ays.team.raporuna-bakiyor':'Raporuna bakıyor…',
+  'ays.team.brifingi-hazirliyor':'Brifingi hazırlıyor…',
+  'ays.team.sesli-sohbet-baslatilamadi':'Sesli sohbet başlatılamadı',
+  'ays.team.sohbeti-temizle':'Sohbeti temizle',
+  'ays.team.sohbeti-sil':'Sohbeti sil',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -110,7 +129,7 @@ R.Screens.team = (function(){
   }
 
   async function cevapYaz(agent, text, meta){
-    const onEk = agent.id === 'patron' ? '' : 'Patron’a ilettim. ';
+    const onEk = agent.id === 'patron' ? '' : yz('ays.team.patron-a-ilettim');
     await O.pushChat(agent.id, 'agent', onEk + text, Object.assign({ mode:'kural' }, meta || {}));
   }
 
@@ -142,8 +161,8 @@ R.Screens.team = (function(){
     const kisa = R.Komut.kisaCevap(question);
     if(kisa === 'geri'){
       const g = await R.Komut.geriAl();
-      await cevapYaz(agent, g ? 'Geri aldım: ' + ((R.ACTION_BY_ID[g.action] || {}).title || g.action) + '.'
-        : 'Geri alınacak bir değişikliğin yok.');
+      await cevapYaz(agent, g ? yz('ays.team.geri-aldim') + ((R.ACTION_BY_ID[g.action] || {}).title || g.action) + '.'
+        : yz('ays.team.geri-alinacak-bir-degisiklig'));
       return true;
     }
     if(kisa === 'evet' || kisa === 'hayir'){
@@ -152,11 +171,11 @@ R.Screens.team = (function(){
         const ids = bekleyenIds(son);
         if(kisa === 'evet'){
           const r = await R.Komut.onayla(ids);
-          await cevapYaz(agent, r.n ? 'Uyguladım. Geri almak istersen «geri al» de.'
-            : 'Uygulayamadım: ' + (r.why.join(' · ') || 'öneri geçersizleşmiş.'));
+          await cevapYaz(agent, r.n ? yz('ays.team.uyguladim-geri-almak-isterse')
+            : yz('ays.team.uygulayamadim') + (r.why.join(' · ') || 'öneri geçersizleşmiş.'));
         }else{
           await R.Komut.reddet(ids);
-          await cevapYaz(agent, 'Tamam, vazgeçtim; hiçbir şey değişmedi.');
+          await cevapYaz(agent, yz('ays.team.tamam-vazgectim-hicbir-sey-d'));
         }
         return true;
       }
@@ -237,8 +256,8 @@ R.Screens.team = (function(){
   let sesli = { acik:false, durum:'kapalı', metin:'', hata:null };
 
   const DURUM_METNI = {
-    'dinliyor':  { t:'Dinliyorum', a:'Sustuğunda sıra ona geçecek' },
-    'düşünüyor': { t:'Düşünüyor',  a:'Raporuna bakıyor ve cümleyi kuruyor' },
+    'dinliyor':  { t:'Dinliyorum', a:yz('ays.team.sustugunda-sira-ona-gececek') },
+    'düşünüyor': { t:'Düşünüyor',  a:yz('ays.team.raporuna-bakiyor-ve-cumleyi') },
     'konuşuyor': { t:'Konuşuyor',  a:'Kesmek için Kes\'e bas ya da boşluk tuşu' },
     'kapalı':    { t:'Kapalı',     a:'' },
   };
@@ -262,7 +281,7 @@ R.Screens.team = (function(){
         </div>
         ${when(sesli.hata, () => K.Notice({ tone:'warn', class:'mt-10', body:sesli.hata }))}
         ${when(!sesli.acik && !R.Talk.sesliCevapVar(), () => K.Notice({ tone:'info', class:'mt-10',
-          body:'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.' }))}
+          body:yz('ays.team.bu-tarayicida-sesli-cevap-yo') }))}
         <div class="row mt-10">
           ${when(!sesli.acik, () => K.Button({ label:yz('ays.team.sesli-sohbeti-baslat'),
             icon:'mic', act:'talk-start' }))}
@@ -353,8 +372,8 @@ R.Screens.team = (function(){
     const pencere = OS() ? raw(OS().pencereHtml({
       anahtar:'ays:' + agent.id, ad:agent.name, rol:agent.role + ' — ' + agent.desk,
       durum:ruleMode ? 'hazır kurallar' : 'yapay zekâ',
-      durumNot:ruleMode ? 'Model bağlı değil: ajan verine bakıp yanıtlıyor ama cümleler kural motorundan geliyor.'
-        : 'Cümleleri bağlı model kuruyor; sayılar yine kural motorundan.',
+      durumNot:ruleMode ? yz('ays.team.model-bagli-degil-ajan-verin')
+        : yz('ays.team.cumleleri-bagli-model-kuruyo'),
       gecmisHtml:G ? G.listeHtml('ays', agent.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
       mesajlarHtml:msgs.length ? String(map(msgs, m => Bubble(agent, m))) : '',
       bos:{ alt:agent.name + ' masasındaki raporu okudu. ' + agent.scope,
@@ -413,7 +432,7 @@ R.Screens.team = (function(){
       }
       await R.App.render();
     }
-    pendingBox(agent, kind === 'ask' ? 'Raporuna bakıyor…' : 'Brifingi hazırlıyor…');
+    pendingBox(agent, kind === 'ask' ? yz('ays.team.raporuna-bakiyor') : yz('ays.team.brifingi-hazirliyor'));
 
     try{
       const opts = {
@@ -448,15 +467,15 @@ R.Screens.team = (function(){
     async 'chat-onayla'(el){
       const ids = String(el.dataset.ids || '').split(',').filter(Boolean);
       const r = await R.Komut.onayla(ids);
-      await cevapYaz(current(), r.n ? 'Uyguladım. Geri almak istersen «geri al» de.'
-        : 'Uygulayamadım: ' + (r.why.join(' · ') || 'öneri geçersizleşmiş.'));
+      await cevapYaz(current(), r.n ? yz('ays.team.uyguladim-geri-almak-isterse')
+        : yz('ays.team.uygulayamadim') + (r.why.join(' · ') || 'öneri geçersizleşmiş.'));
       await R.App.render();
       scrollLog();
     },
     async 'chat-vazgec'(el){
       const ids = String(el.dataset.ids || '').split(',').filter(Boolean);
       await R.Komut.reddet(ids);
-      await cevapYaz(current(), 'Tamam, vazgeçtim; hiçbir şey değişmedi.');
+      await cevapYaz(current(), yz('ays.team.tamam-vazgectim-hicbir-sey-d'));
       await R.App.render();
       scrollLog();
     },
@@ -481,7 +500,7 @@ R.Screens.team = (function(){
           return son && son.role === 'agent' ? son.text : '';
         },
       });
-      if(!r.ok){ UI.toast(r.message || 'Sesli sohbet başlatılamadı'); return; }
+      if(!r.ok){ UI.toast(r.message || yz('ays.team.sesli-sohbet-baslatilamadi')); return; }
       sesli.acik = true;
       R.App.render();
     },
@@ -521,12 +540,12 @@ R.Screens.team = (function(){
     },
     async 'team-clear'(){
       const agent = current();
-      UI.confirmSheet('Sohbeti temizle',
+      UI.confirmSheet(yz('ays.team.sohbeti-temizle'),
         agent.name + ' ile yaptığın konuşma silinecek. Çalışma verilerin etkilenmez.', async () => {
           await O.clearChat(agent.id);
           UI.closeSheet();
           R.App.render();
-        }, false, 'Sohbeti sil');
+        }, false, yz('ays.team.sohbeti-sil'));
     },
   };
 

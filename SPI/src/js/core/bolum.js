@@ -15,6 +15,11 @@
    core/proposals.js `bolum-ac-kapa`). Konuşarak da istenebilir: «finans
    bölümünü kapat»; hangi bölüm olduğu belli değilse SORULUR. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.bolum.bu-bolum-gizlenemez':'Bu bölüm gizlenemez.',
+  'spi.core.bolum.hangi-bolumu':'Hangi bölümü ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.bolum.ogunler':'Öğünler',
   'spi.core.bolum.mutfak':'Mutfak',
   'spi.core.bolum.hareket':'Hareket',
@@ -55,7 +60,7 @@ SP.Bolum = (function(){
   }
 
   async function set(route, acik){
-    if(!BY_ID[route]) return { ok:false, error:'Bu bölüm gizlenemez.' };
+    if(!BY_ID[route]) return { ok:false, error:yz('spi.core.bolum.bu-bolum-gizlenemez') };
     const m = Object.assign({}, harita());
     if(acik) delete m[route]; else m[route] = true;
     SP.S.bolumGizli = m;
@@ -83,7 +88,7 @@ SP.Bolum = (function(){
     const idler = GIZLENEBILIR.filter(b => b.takma.some(a => t.indexOf(a) >= 0)).map(b => b.id);
     if(!idler.length){
       if(/bölüm/.test(t)){
-        out.sorular.push({ metin, soru:'Hangi bölümü ' + (kapat ? 'gizleyeyim' : 'açayım')
+        out.sorular.push({ metin, soru:yz('spi.core.bolum.hangi-bolumu') + (kapat ? 'gizleyeyim' : 'açayım')
           + '? «Öğünler», «Mutfak», «Hareket», «Finans» ya da «Rütbe» diyebilirsin.' });
         out.komut = true;
       }

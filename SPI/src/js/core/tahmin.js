@@ -26,6 +26,28 @@
      5. TAHMİN ETİKETLİ. Her çıktı «tahmin»dir; ölçümün yerine geçmez,
         hiçbir kayda yazılmaz, hiçbir kararı vermez (§1.1). */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.tahmin.uyku-suresi':'Uyku süresi',
+  'spi.core.tahmin.son-uc-gecenin-uykusu':'Son üç gecenin uykusu',
+  'spi.core.tahmin.yatis-saati':'Yatış saati',
+  'spi.core.tahmin.i-stirahat-nabzi':'İstirahat nabzı',
+  'spi.core.tahmin.dunku-antrenman':'Dünkü antrenman',
+  'spi.core.tahmin.ogun-sayisi':'Öğün sayısı',
+  'spi.core.tahmin.sebze-ve-meyve':'Sebze ve meyve',
+  'spi.core.tahmin.kilo-degisimi':'Kilo değişimi',
+  'spi.core.tahmin.cozulen-soru-ays':'Çözülen soru (AYS)',
+  'spi.core.tahmin.calisma-suresi-ays':'Çalışma süresi (AYS)',
+  'spi.core.tahmin.dogru-orani-ays':'Doğru oranı (AYS)',
+  'spi.core.tahmin.gelisim-suresi-esp':'Gelişim süresi (ESP)',
+  'spi.core.tahmin.muzik-esp':'Müzik (ESP)',
+  'spi.core.tahmin.felsefe-esp':'Felsefe (ESP)',
+  'spi.core.tahmin.yabanci-dil-esp':'Yabancı dil (ESP)',
+  'spi.core.tahmin.derin-okuma-esp':'Derin okuma (ESP)',
+  'spi.core.tahmin.yazi-esp':'Yazı (ESP)',
+  'spi.core.tahmin.tarih-esp':'Tarih (ESP)',
+  'spi.core.tahmin.hafta-sonu':'Hafta sonu',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.tahmin.ruh-hali-modelini-egitmek-ic':'Ruh hâli modelini eğitmek için en az ',
   'spi.core.tahmin.sinamak-icin-en-az-5':'Sınamak için en az 5 gün ayrılamadı.',
 });
@@ -45,13 +67,13 @@ SP.Tahmin = (function(){
 
   /* ----------------------------------------------------------- özellikler */
   const OZELLIK_AD = {
-    uyku:'Uyku süresi', uyku3:'Son üç gecenin uykusu', yatis:'Yatış saati', hrv:'HRV', rhr:'İstirahat nabzı',
-    su:'Su', antrenman:'Antrenman', antrenmanDun:'Dünkü antrenman', kcal:'Kalori', protein:'Protein',
-    tatli:'Tatlı', kahve:'Kahve', ogun:'Öğün sayısı', sebze:'Sebze ve meyve', kiloFark:'Kilo değişimi',
-    aysSoru:'Çözülen soru (AYS)', aysDakika:'Çalışma süresi (AYS)', aysDogru:'Doğru oranı (AYS)',
-    espToplam:'Gelişim süresi (ESP)', espMuzik:'Müzik (ESP)', espFelsefe:'Felsefe (ESP)', espDil:'Yabancı dil (ESP)',
-    espOkuma:'Derin okuma (ESP)', espYazi:'Yazı (ESP)', espTarih:'Tarih (ESP)',
-    haftasonu:'Hafta sonu', pzt:'Pazartesi', sali:'Salı', car:'Çarşamba', per:'Perşembe', cum:'Cuma', cmt:'Cumartesi', paz:'Pazar',
+    uyku:yz('spi.core.tahmin.uyku-suresi'), uyku3:yz('spi.core.tahmin.son-uc-gecenin-uykusu'), yatis:yz('spi.core.tahmin.yatis-saati'), hrv:'HRV', rhr:yz('spi.core.tahmin.i-stirahat-nabzi'),
+    su:'Su', antrenman:'Antrenman', antrenmanDun:yz('spi.core.tahmin.dunku-antrenman'), kcal:'Kalori', protein:'Protein',
+    tatli:'Tatlı', kahve:'Kahve', ogun:yz('spi.core.tahmin.ogun-sayisi'), sebze:yz('spi.core.tahmin.sebze-ve-meyve'), kiloFark:yz('spi.core.tahmin.kilo-degisimi'),
+    aysSoru:yz('spi.core.tahmin.cozulen-soru-ays'), aysDakika:yz('spi.core.tahmin.calisma-suresi-ays'), aysDogru:yz('spi.core.tahmin.dogru-orani-ays'),
+    espToplam:yz('spi.core.tahmin.gelisim-suresi-esp'), espMuzik:yz('spi.core.tahmin.muzik-esp'), espFelsefe:yz('spi.core.tahmin.felsefe-esp'), espDil:yz('spi.core.tahmin.yabanci-dil-esp'),
+    espOkuma:yz('spi.core.tahmin.derin-okuma-esp'), espYazi:yz('spi.core.tahmin.yazi-esp'), espTarih:yz('spi.core.tahmin.tarih-esp'),
+    haftasonu:yz('spi.core.tahmin.hafta-sonu'), pzt:'Pazartesi', sali:'Salı', car:'Çarşamba', per:'Perşembe', cum:'Cuma', cmt:'Cumartesi', paz:'Pazar',
   };
   const GUN_KEY = ['paz', 'pzt', 'sali', 'car', 'per', 'cum', 'cmt'];
 

@@ -38,6 +38,28 @@
      6. KALIP ÖLÇÜLÜR, UYDURULMAZ. «Her zamanki» önerisi yalnız son 7 günün
         en az 4'ünde aynı kayıttan gelir (kalip(); KOLAY §2.4). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.gunukapat.olcum-toplu-yazilmaz':'ölçüm · toplu yazılmaz',
+  'ortak.gunukapat.ornegin':'Örneğin: ',
+  'ortak.gunukapat.olctugunu-yaz':'Ölçtüğünü yaz',
+  'ortak.gunukapat.dogru-olani-tek-dokunusla-ka':'Doğru olanı tek dokunuşla kaydet.',
+  'ortak.gunukapat.onerisi-yok-girmezsen-bos-ka':'Önerisi yok, girmezsen boş kalır:',
+  'ortak.gunukapat.bugun-icin-onerilecek-bir-se':'Bugün için önerilecek bir şey yok.',
+  'ortak.gunukapat.baska-olcum':'Başka ölçüm',
+  'ortak.gunukapat.hepsi-dogru-kaydet':'Hepsi doğru · kaydet (',
+  'ortak.gunukapat.gunu-kapat-kurulmadi':'Günü kapat kurulmadı.',
+  'ortak.gunukapat.kayit-suruyor':'Kayıt sürüyor.',
+  'ortak.gunukapat.olcum-satiri-bu-modulde-okun':'Ölçüm satırı bu modülde okunamıyor; hiçbir şey yazılmadı.',
+  'ortak.gunukapat.olcum-satirini-anlayamadim-h':'Ölçüm satırını anlayamadım; hiçbir şey yazılmadı.',
+  'ortak.gunukapat.anlasilmadi':'Anlaşılmadı: «',
+  'ortak.gunukapat.kaydedilecek-bir-sey-yok':'Kaydedilecek bir şey yok.',
+  'ortak.gunukapat.hicbir-sey-yazilmadi':'Hiçbir şey yazılmadı.',
+  'ortak.gunukapat.yazilanin-bir-kismi-geri-ali':'Yazılanın bir kısmı geri alınamadı.',
+  'ortak.gunukapat.yazilan-geri-alindi':'Yazılan geri alındı.',
+  'ortak.gunukapat.kaydedilemedi':'Kaydedilemedi: ',
+  'ortak.gunukapat.gun-kapatildi':'Gün kapatıldı: ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.gunukapat.bir-kismi-geri-alinamadi':'Bir kısmı geri alınamadı.',
   'ortak.gunukapat.geri-alindi':'Geri alındı.',
 });
@@ -112,7 +134,7 @@ window.LIFEOS.GUNUKAPAT = (function(){
       return '<li class="gk__satir gk__satir--olcum">'
         + '<span class="gk__ad">' + kac(s.ad) + '</span>'
         + '<span class="gk__oneri">' + kac(s.ipucu || 'ölçtüysen aşağıya yaz') + '</span>'
-        + (s.yazildi ? '<span class="gk__durum">girildi</span>' : '<span class="gk__kaynak">ölçüm · toplu yazılmaz</span>')
+        + (s.yazildi ? '<span class="gk__durum">girildi</span>' : ('<span class="gk__kaynak">' + yz('ortak.gunukapat.olcum-toplu-yazilmaz') + '</span>'))
         + '</li>';
     }
     if(s.yazildi){
@@ -140,23 +162,23 @@ window.LIFEOS.GUNUKAPAT = (function(){
     const l = satirlar(gun);
     const n = yazilacaklar(gun).length;
     const m = sonMesaj[gun];
-    const ornek = ayar.olcumOrnek ? 'Örneğin: ' + ayar.olcumOrnek : 'Ölçtüğünü yaz';
+    const ornek = ayar.olcumOrnek ? yz('ortak.gunukapat.ornegin') + ayar.olcumOrnek : yz('ortak.gunukapat.olctugunu-yaz');
     /* Önerisi olmayan beyanlar tek sessiz satırda (ekranı boş satırla doldurmaz). */
     const bos = l.filter(s => s.tur !== 'olcum' && !s.yazildi && (!s.oneri || typeof s.yaz !== 'function'));
     const gorunen = l.filter(s => bos.indexOf(s) < 0);
     const kutulu = gorunen.some(s => s.tur === 'olcum' && !s.yazildi && s.alanlar);
     return '<section class="gunukapat" data-gunukapat data-gun="' + kac(gun) + '" aria-label="Günü kapat">'
-      + '<p class="gk__not">Doğru olanı tek dokunuşla kaydet.' + (n ? ' Farklı olanın işaretini kaldır.' : '')
+      + ('<p class="gk__not">' + yz('ortak.gunukapat.dogru-olani-tek-dokunusla-ka')) + (n ? ' Farklı olanın işaretini kaldır.' : '')
       + (kutulu ? ' Ölçtüklerini kutulara yaz.' : '') + '</p>'
       + (l.length ? '<ul class="gk__liste">' + gorunen.map(s => satirHtml(s, gun)).join('')
-          + (bos.length ? '<li class="gk__satir is-bos"><span class="gk__oneri">Önerisi yok, girmezsen boş kalır: '
+          + (bos.length ? ('<li class="gk__satir is-bos"><span class="gk__oneri">' + yz('ortak.gunukapat.onerisi-yok-girmezsen-bos-ka') + ' ')
             + kac(bos.map(s => s.ad).join(', ')) + '</span></li>' : '') + '</ul>'
-        : '<p class="gk__bos">Bugün için önerilecek bir şey yok.</p>')
+        : ('<p class="gk__bos">' + yz('ortak.gunukapat.bugun-icin-onerilecek-bir-se') + '</p>'))
       + '<form class="gk__form" data-gk-form data-ayar-disi>'
-      + '<label class="gk__etiket" for="gk-olcum">' + (kutulu ? 'Başka ölçüm' : 'Ölçümler') + '</label>'
+      + '<label class="gk__etiket" for="gk-olcum">' + (kutulu ? yz('ortak.gunukapat.baska-olcum') : 'Ölçümler') + '</label>'
       + '<input class="gk__girdi" id="gk-olcum" type="text" autocomplete="off" enterkeyhint="done" placeholder="' + kac(ornek) + '"/>'
       + '<button type="submit" class="btn btn--primary gk__kapat" data-gk="kapat"><span class="btn__label">'
-      + (n ? 'Hepsi doğru · kaydet (' + n + ')' : 'Kaydet') + '</span></button>'
+      + (n ? yz('ortak.gunukapat.hepsi-dogru-kaydet') + n + ')' : 'Kaydet') + '</span></button>'
       + '</form>'
       + '<div class="gk__sonuc" data-gk-sonuc aria-live="polite">'
       + (m ? '<p class="gk__mesaj gk__mesaj--' + m.tur + '" role="status">' + kac(m.metin) + '</p>' : '') + '</div>'
@@ -166,8 +188,8 @@ window.LIFEOS.GUNUKAPAT = (function(){
   /* Söz 1–4. olcumMetni boşsa yalnız beyanlar yazılır. Aynı gün için
      ikinci çağrı birincisi bitmeden yazmaz (çift Enter iki kez eklerdi). */
   async function kapat(gun, o){
-    if(!ayar) return { ok:false, neden:'Günü kapat kurulmadı.' };
-    if(suruyor[gun]) return { ok:false, neden:'Kayıt sürüyor.' };
+    if(!ayar) return { ok:false, neden:yz('ortak.gunukapat.gunu-kapat-kurulmadi') };
+    if(suruyor[gun]) return { ok:false, neden:yz('ortak.gunukapat.kayit-suruyor') };
     suruyor[gun] = true;
     try{ return await kapatIc(gun, o || {}); }finally{ delete suruyor[gun]; }
   }
@@ -202,15 +224,15 @@ window.LIFEOS.GUNUKAPAT = (function(){
     const G = window.LIFEOS.GIRIS;
     let p = null;
     if(metin){
-      if(!G || !G.kuruluMu || !G.kuruluMu()) return sonuc(gun, { ok:false, neden:'Ölçüm satırı bu modülde okunamıyor; hiçbir şey yazılmadı.' });
+      if(!G || !G.kuruluMu || !G.kuruluMu()) return sonuc(gun, { ok:false, neden:yz('ortak.gunukapat.olcum-satiri-bu-modulde-okun') });
       p = G.onizle(metin);
-      if(!p) return sonuc(gun, { ok:false, neden:'Ölçüm satırını anlayamadım; hiçbir şey yazılmadı.' });
+      if(!p) return sonuc(gun, { ok:false, neden:yz('ortak.gunukapat.olcum-satirini-anlayamadim-h') });
       if(p.kalan && p.kalan.length){
-        return sonuc(gun, { ok:false, neden:'Anlaşılmadı: «' + p.kalan.join('», «') + '». Hiçbir şey yazılmadı; düzeltip yeniden kaydet.' });
+        return sonuc(gun, { ok:false, neden:yz('ortak.gunukapat.anlasilmadi') + p.kalan.join('», «') + '». Hiçbir şey yazılmadı; düzeltip yeniden kaydet.' });
       }
     }
     const beyanlar = yazilacaklar(gun);
-    if(!p && !beyanlar.length) return sonuc(gun, { ok:false, neden:'Kaydedilecek bir şey yok.' });
+    if(!p && !beyanlar.length) return sonuc(gun, { ok:false, neden:yz('ortak.gunukapat.kaydedilecek-bir-sey-yok') });
     try{
       if(p){
         const r = await p.kaydet();
@@ -231,16 +253,16 @@ window.LIFEOS.GUNUKAPAT = (function(){
     }catch(e){
       /* Söz 3: yarıda kalan yazım geri alınır. */
       const bozuk = await hepsiniGeriAl(geri);
-      const durum = !geri.length && !geriAlinamaz ? 'Hiçbir şey yazılmadı.'
-        : bozuk || geriAlinamaz ? 'Yazılanın bir kısmı geri alınamadı.' : 'Yazılan geri alındı.';
-      return sonuc(gun, { ok:false, neden:'Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata') + '. ' + durum });
+      const durum = !geri.length && !geriAlinamaz ? yz('ortak.gunukapat.hicbir-sey-yazilmadi')
+        : bozuk || geriAlinamaz ? yz('ortak.gunukapat.yazilanin-bir-kismi-geri-ali') : yz('ortak.gunukapat.yazilan-geri-alindi');
+      return sonuc(gun, { ok:false, neden:yz('ortak.gunukapat.kaydedilemedi') + ((e && e.message) || 'bilinmeyen hata') + '. ' + durum });
     }
     const geriAl = geri.length ? async () => {
       const bozuk = await hepsiniGeriAl(geri);
       sonMesaj[gun] = bozuk ? { tur:'uyari', metin:yz('ortak.gunukapat.bir-kismi-geri-alinamadi') } : { tur:'ok', metin:yz('ortak.gunukapat.geri-alindi') };
       if(ayar && typeof ayar.yenile === 'function') ayar.yenile();
     } : null;
-    const yazi = 'Gün kapatıldı: ' + yazilan.length + ' kayıt.' + (geriAlinamaz ? ' Bir kısmı geri alınamaz.' : '');
+    const yazi = yz('ortak.gunukapat.gun-kapatildi') + yazilan.length + ' kayıt.' + (geriAlinamaz ? ' Bir kısmı geri alınamaz.' : '');
     return sonuc(gun, { ok:true, metin:yazi, yazilan, geriAl });
   }
   function sonuc(gun, r){
@@ -261,7 +283,7 @@ window.LIFEOS.GUNUKAPAT = (function(){
       if(s) s.innerHTML = m ? '<p class="gk__mesaj gk__mesaj--' + m.tur + '" role="status">' + kac(m.metin) + '</p>' : '';
       const b = k.querySelector('.gk__kapat .btn__label');
       const n = yazilacaklar(gun).length;
-      if(b) b.textContent = n ? 'Hepsi doğru · kaydet (' + n + ')' : 'Kaydet';
+      if(b) b.textContent = n ? yz('ortak.gunukapat.hepsi-dogru-kaydet') + n + ')' : 'Kaydet';
     });
   }
 

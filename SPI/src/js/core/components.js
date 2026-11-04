@@ -10,6 +10,16 @@
    Not: eski SP.UI yardimcilari bu setin ustune ince sarmalayici olarak durur;
    ekranlar kademeli olarak C.* API'sine gecirilir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.components.bu-sayfada':'Bu sayfada',
+  'spi.core.components.bu-ekran-acilamadi':'Bu ekran açılamadı.',
+  'spi.core.components.yeniden-yukle':'Yeniden yükle',
+  'spi.core.components.dinlemeyi-durdur':'Dinlemeyi durdur',
+  'spi.core.components.sesle-yaz':'Sesle yaz',
+  'spi.core.components.dinliyor-durdurmak-icin-tikl':'Dinliyor — durdurmak için tıkla',
+  'spi.core.components.dosyayi-buraya-birak-ya-da':'Dosyayı buraya bırak ya da seçmek için tıkla',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.components.ays':'AYS',
   'spi.core.components.spi':'SPİ',
   'spi.core.components.esp':'ESP',
@@ -203,7 +213,7 @@ SP.C = (function(){
     const aktif = b.some(x => x.id === secili) ? secili : (b[0] && b[0].id);
     return html`
       ${when(b.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
-        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
+        aria-label="${o.aria || yz('spi.core.components.bu-sayfada')}">${map(b, x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
           ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':x.id === aktif ? 'true' : null })}>${x.ad}${when(x.sayi != null,
           () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`)}</nav>`)}
       <div class="${cls('sayfabolumler', b.length > 1 && 'sayfabolumler--kat')}">${map(b, x => html`
@@ -257,12 +267,12 @@ SP.C = (function(){
 
   function SakinHata(o){
     o = o || {};
-    return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || 'Bu ekran açılamadı.',
+    return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || yz('spi.core.components.bu-ekran-acilamadi'),
       govde:html`<p class="sakinhata__veri">${yz('spi.core.components.verin-yerinde-hicbir-kayit-s')}</p>
         ${when(o.not, () => html`<p class="small muted">${o.not}</p>`)}
         ${when(o.ayrinti, () => Ayrinti({ etiket:yz('spi.core.components.teknik-ayrinti'),
           govde:html`<code class="sakinhata__kod">${o.ayrinti}</code>` }))}
-        <div class="sakinhata__eylem">${Button({ label:o.dugme || 'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}</div>`;
+        <div class="sakinhata__eylem">${Button({ label:o.dugme || yz('spi.core.components.yeniden-yukle'), size:'sm', act:'reload' })}</div>` })}</div>`;
   }
 
   /* KATMANLI METİN: koddan kurulan (uzunluğu veriye bağlı) bir açıklama 30
@@ -456,9 +466,9 @@ SP.C = (function(){
     return html`<button type="button"
       class="${cls('mic', on && 'is-on', o.size === 'sm' && 'mic--sm')}"
       data-act="dictate" data-target="${o.target}"
-      aria-label="${on ? 'Dinlemeyi durdur' : 'Sesle yaz'}"
+      aria-label="${on ? yz('spi.core.components.dinlemeyi-durdur') : yz('spi.core.components.sesle-yaz')}"
       aria-pressed="${on ? 'true' : 'false'}"
-      title="${on ? 'Dinliyor — durdurmak için tıkla' : 'Sesle yaz'}">
+      title="${on ? yz('spi.core.components.dinliyor-durdurmak-icin-tikl') : yz('spi.core.components.sesle-yaz')}">
       ${raw(SP.UI.icon('mic'))}
       ${when(on, () => html`<span class="mic__pulse" aria-hidden="true"></span>`)}
     </button>`;
@@ -476,7 +486,7 @@ SP.C = (function(){
       <span class="drop__icon" aria-hidden="true">${raw(SP.UI.icon(o.icon || 'upload'))}</span>
       <span class="drop__text">
         <b>${o.label}</b>
-        <span>${o.hint || 'Dosyayı buraya bırak ya da seçmek için tıkla'}</span>
+        <span>${o.hint || yz('spi.core.components.dosyayi-buraya-birak-ya-da')}</span>
       </span>
     </label>`;
     if(!o.kamera) return kutu;

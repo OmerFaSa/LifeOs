@@ -4,6 +4,25 @@
    Sonunda plan üretilir; iki farklı aday aynı planı almaz.
    Sonradan Rehber → Ayarlar’dan tek tek değiştirilebilir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.setup.sinav-tarihi-baslangictan-so-2':'Sınav tarihi başlangıçtan sonra olmalı.',
+  'ays.core.setup.takvimde-yalniz':'Takvimde yalnız ',
+  'ays.core.setup.plan-bu-sureye-sikistirilir':'Plan bu süreye sıkıştırılır; yüksek frekanslı konular öne alınır, gerisi düşer.',
+  'ays.core.setup.tam-mufredat':'Tam müfredat ',
+  'ays.core.setup.ad-ve-sehir-yalniz-bu':'Ad ve şehir yalnız bu cihazda tutulur. ',
+  'ays.core.setup.ai-koca-gonderilen-verilerde':'AI koça gönderilen verilerden bu alanlar otomatik çıkarılır.',
+  'ays.core.setup.obp-hesabi-icin':'OBP hesabı için',
+  'ays.core.setup.sira-hedefi-puandan-daha-guv':'Sıra hedefi puandan daha güvenilirdir: aynı net farklı yıllarda ',
+  'ays.core.setup.bu-pazartesi':'Bu pazartesi',
+  'ays.core.setup.osym-duyurusuyla-guncelle':'ÖSYM duyurusuyla güncelle',
+  'ays.core.setup.kapasiteyi-oldugundan-yuksek':'Kapasiteyi olduğundan yüksek yazma. Plan bu sayıya göre kurulur; ',
+  'ays.core.setup.gunde':'Günde ',
+  'ays.core.setup.takvim-gecersiz-geri-donup-d':'Takvim geçersiz; geri dönüp düzelt.',
+  'ays.core.setup.adim':'Adım ',
+  'ays.core.setup.plani-uret-ve-basla':'Planı üret ve başla',
+  'ays.core.setup.kaydet-ve-plani-guncelle':'Kaydet ve planı güncelle',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.setup.seni-taniyalim':'Seni tanıyalım',
   'ays.core.setup.bu-bilgiler-cihazda-kalir-ko':'Bu bilgiler cihazda kalır, koça gönderilmez',
   'ays.core.setup.hedefin-ne':'Hedefin ne?',
@@ -90,11 +109,11 @@ R.Setup = (function(){
 
   function previewHtml(startISO, examISO){
     const p = preview(startISO, examISO);
-    if(p.days <= 0) return K.Notice({ tone:'danger', body:'Sınav tarihi başlangıçtan sonra olmalı.' });
-    if(p.tooShort) return K.Notice({ tone:'warn', body:'Takvimde yalnız '+p.weeks+' hafta var. '
-      + 'Plan bu süreye sıkıştırılır; yüksek frekanslı konular öne alınır, gerisi düşer.' });
+    if(p.days <= 0) return K.Notice({ tone:'danger', body:yz('ays.core.setup.sinav-tarihi-baslangictan-so-2') });
+    if(p.tooShort) return K.Notice({ tone:'warn', body:yz('ays.core.setup.takvimde-yalniz')+p.weeks+' hafta var. '
+      + yz('ays.core.setup.plan-bu-sureye-sikistirilir') });
     if(p.compressed) return K.Notice({ tone:'warn', title:p.weeks+' haftalık program.',
-      body:'Tam müfredat '+R.PROGRAM.totalWeeks+' haftaya göre yazılmıştır. Bu takvimde plan '
+      body:yz('ays.core.setup.tam-mufredat')+R.PROGRAM.totalWeeks+' haftaya göre yazılmıştır. Bu takvimde plan '
         + 'sıkıştırılır: düşük frekanslı konular plana girmez, hangileri olduğunu Program ekranında görürsün.' });
     return K.Notice({ tone:'ok', body:p.weeks+' haftalık tam program. Haftalar '
       + U.fmtDate(startISO)+' gününden itibaren sayılır.' });
@@ -155,8 +174,8 @@ R.Setup = (function(){
 
   function bodyKim(){
     return K.Stack([
-      K.Notice({ tone:'info', body:'Ad ve şehir yalnız bu cihazda tutulur. '
-        + 'AI koça gönderilen verilerden bu alanlar otomatik çıkarılır.' }),
+      K.Notice({ tone:'info', body:yz('ays.core.setup.ad-ve-sehir-yalniz-bu')
+        + yz('ays.core.setup.ai-koca-gonderilen-verilerde') }),
       K.Cols(2, [
         K.Field({ label:yz('ays.core.setup.ad'), input:K.Input({ id:'sw-name', value:draft.name, placeholder:yz('ays.core.setup.adin') }) }),
         K.Field({ label:yz('ays.core.setup.sehir'), hint:'isteğe bağlı', input:K.Input({ id:'sw-city', value:draft.city }) }),
@@ -172,10 +191,10 @@ R.Setup = (function(){
         K.Field({ label:yz('ays.core.setup.hedef-basari-sirasi'), hint:'geçen yılın taban sırası',
           input:K.Input({ id:'sw-rank', type:'number', numeric:true, value:draft.targetRank,
             placeholder:yz('ays.core.setup.or-84285') }) }),
-        K.Field({ label:yz('ays.core.setup.diploma-notu'), hint:'OBP hesabı için',
+        K.Field({ label:yz('ays.core.setup.diploma-notu'), hint:yz('ays.core.setup.obp-hesabi-icin'),
           input:K.Input({ id:'sw-diploma', type:'number', numeric:true, min:0, max:100, value:draft.diplomaGrade }) }),
       ]),
-      K.Notice({ tone:'info', body:'Sıra hedefi puandan daha güvenilirdir: aynı net farklı yıllarda '
+      K.Notice({ tone:'info', body:yz('ays.core.setup.sira-hedefi-puandan-daha-guv')
         + 'farklı puana döner ama sıra karşılaştırılabilir kalır. YÖK Atlas’tan bakabilirsin.' }),
     ]);
   }
@@ -183,7 +202,7 @@ R.Setup = (function(){
   function bodyTakvim(){
     const todayMon = nextMonday(U.todayISO());
     const picks = [
-      { start:todayMon, label:todayMon === U.todayISO() ? 'Bugün' : 'Bu pazartesi' },
+      { start:todayMon, label:todayMon === U.todayISO() ? 'Bugün' : yz('ays.core.setup.bu-pazartesi') },
       { start:U.iso(U.addDays(U.parse(todayMon), 7)), label:yz('ays.core.setup.gelecek-pazartesi') },
       { start:U.todayISO(), label:yz('ays.core.setup.hemen-bugunden') },
     ];
@@ -194,7 +213,7 @@ R.Setup = (function(){
       K.Cols(2, [
         K.Field({ label:yz('ays.core.setup.baslangic'), hint:'pazartesi önerilir',
           input:K.Input({ id:'sw-start', type:'date', value:draft.startDate }) }),
-        K.Field({ label:yz('ays.core.setup.tyt-sinav-tarihi'), hint:'ÖSYM duyurusuyla güncelle',
+        K.Field({ label:yz('ays.core.setup.tyt-sinav-tarihi'), hint:yz('ays.core.setup.osym-duyurusuyla-guncelle'),
           input:K.Input({ id:'sw-exam', type:'date', value:draft.examTytISO }) }),
       ]),
       html`<div id="su-preview">${previewHtml(draft.startDate, draft.examTytISO)}</div>`,
@@ -215,7 +234,7 @@ R.Setup = (function(){
           numeric:true, step:0.5, min:5, max:11, value:draft.sleepTarget }) }),
       ]),
       html`<div id="sw-caphint">${capacityHint(cap, draft.studyDaysPerWeek)}</div>`,
-      K.Notice({ tone:'warn', body:'Kapasiteyi olduğundan yüksek yazma. Plan bu sayıya göre kurulur; '
+      K.Notice({ tone:'warn', body:yz('ays.core.setup.kapasiteyi-oldugundan-yuksek')
         + 'gerçekçi olmayan kapasite, tamamlama oranını da anlamsız kılar.' }),
     ]);
   }
@@ -224,10 +243,10 @@ R.Setup = (function(){
     const perDay = U.round(cap / (days || 6), 1);
     const tone = perDay > 7 ? 'danger' : perDay > 5.5 ? 'warn' : 'ok';
     const note = perDay > 7
-      ? 'Günde '+perDay+' saat sürdürülebilir değil. İki hafta sonra plan çöker.'
+      ? yz('ays.core.setup.gunde')+perDay+' saat sürdürülebilir değil. İki hafta sonra plan çöker.'
       : perDay > 5.5
-      ? 'Günde '+perDay+' saat yoğun. Okul ve dershane varsa gerçekçi mi, iki kez düşün.'
-      : 'Günde '+perDay+' saat · '+days+' gün. Sürdürülebilir görünüyor.';
+      ? yz('ays.core.setup.gunde')+perDay+' saat yoğun. Okul ve dershane varsa gerçekçi mi, iki kez düşün.'
+      : yz('ays.core.setup.gunde')+perDay+' saat · '+days+' gün. Sürdürülebilir görünüyor.';
     return K.Notice({ tone, body:note });
   }
 
@@ -253,7 +272,7 @@ R.Setup = (function(){
   /* Son adımda planın ne olacağını önceden göster. */
   function planPreview(){
     const p = preview(draft.startDate, draft.examTytISO);
-    if(p.days <= 0) return K.Notice({ tone:'danger', body:'Takvim geçersiz; geri dönüp düzelt.' });
+    if(p.days <= 0) return K.Notice({ tone:'danger', body:yz('ays.core.setup.takvim-gecersiz-geri-donup-d') });
     const plan = R.Planner.generate(draft, p.weeks);
     const m = plan.meta;
     return K.Card({ flat:true, pad:'sm', body:html`
@@ -294,8 +313,8 @@ R.Setup = (function(){
            görünür; ekran okuyucu `progressbar`dan duyar. */
         html`<div class="kurulum__ilerleme" role="progressbar" aria-label="Kurulum adımı"
           aria-valuemin="1" aria-valuemax="${STEPS.length}" aria-valuenow="${step + 1}"
-          aria-valuetext="${'Adım ' + (step + 1) + ' / ' + STEPS.length}">
-          <span class="kurulum__sayac">${'Adım ' + (step + 1) + ' / ' + STEPS.length}</span>
+          aria-valuetext="${yz('ays.core.setup.adim') + (step + 1) + ' / ' + STEPS.length}">
+          <span class="kurulum__sayac">${yz('ays.core.setup.adim') + (step + 1) + ' / ' + STEPS.length}</span>
           <span class="kurulum__cubuk" aria-hidden="true"><i style="${'width:' + Math.round(100 * (step + 1) / STEPS.length) + '%'}"></i></span>
         </div>`,
         /* TANITIM AFISI — yalniz ILK kurulumun ILK adiminda. Ayarlardan
@@ -312,7 +331,7 @@ R.Setup = (function(){
         ${when(!first, () => K.Button({ label:yz('ays.core.setup.geri'), act:'setup-back' }))}
         ${when(first && !isFirstRun, () => K.Button({ label:yz('ays.core.setup.vazgec'), act:'sheet-close' }))}
         ${last
-          ? K.Button({ label:isFirstRun ? 'Planı üret ve başla' : 'Kaydet ve planı güncelle',
+          ? K.Button({ label:isFirstRun ? yz('ays.core.setup.plani-uret-ve-basla') : yz('ays.core.setup.kaydet-ve-plani-guncelle'),
               tone:'primary', act:'setup-save' })
           : K.Button({ label:yz('ays.core.setup.devam'), tone:'primary', act:'setup-next' })}`),
       noFocus:true,

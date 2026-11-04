@@ -2,6 +2,20 @@
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz.
    Karar motoru R.Quiz'dedir; ekran yalnizca cizer ve olay tasir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.quiz.olcumden':'Ölçümden: ',
+  'ays.quiz.bu-secimde-sinanacak-madde-y':'Bu seçimde sınanacak madde yok. Ders notu ekle, kart üret ya da ',
+  'ays.quiz.bos-biraktin':'Boş bıraktın.',
+  'ays.quiz.senin-cevabin':'Senin cevabın ',
+  'ays.quiz.hatali-isaretli-geri-al':'Hatalı işaretli — geri al',
+  'ays.quiz.bu-soru-hatali':'Bu soru hatalı',
+  'ays.quiz.dogru-sik':'Doğru şık',
+  'ays.quiz.yanlis-sik-dogrusu-isaretlen':'Yanlış şık — doğrusu işaretlendi',
+  'ays.quiz.yarim-oturum-kaydedilmez-ver':'Yarım oturum kaydedilmez; verdiğin cevaplar kart aralıklarına zaten işlendi.',
+  'ays.quiz.kaydetmeden-bitir':'Kaydetmeden bitir',
+  'ays.quiz.once-kart-veya-ders-notu':'Önce kart veya ders notu üret',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -131,7 +145,7 @@ R.Screens.quiz = (function(){
           title:yz('ays.quiz.sinama-kur'), hint:'quiz',
           body:html`
             ${K.Field({ label:yz('ays.quiz.kaynak'), hint:mode === 'zayif' && Q.zayifKonular(3).length
-              ? 'Ölçümden: ' + Q.zayifKonular(3).map(x => x.konu + ' (' + x.acikYanlis + ' açık yanlış)').join(', ')
+              ? yz('ays.quiz.olcumden') + Q.zayifKonular(3).map(x => x.konu + ' (' + x.acikYanlis + ' açık yanlış)').join(', ')
               : Q.MODES[mode].note,
               input:K.Select({ id:'qz-mode', options:modeItems, value:mode, change:'quiz-mode' }) })}
             ${when(mode === 'subject' || mode === 'topic', () => K.Cols(2, [
@@ -169,7 +183,7 @@ R.Screens.quiz = (function(){
               ? K.Button({ label:yz('ays.quiz.sinamayi-baslat'), icon:'play', tone:'primary', block:true,
                   class:'mt-12', act:'quiz-start' })
               : K.Notice({ tone:'warn', class:'mt-12',
-                  body:'Bu seçimde sınanacak madde yok. Ders notu ekle, kart üret ya da '
+                  body:yz('ays.quiz.bu-secimde-sinanacak-madde-y')
                      + 'yanlış defterine kök neden yaz.' })}`,
         }),
 
@@ -311,7 +325,7 @@ R.Screens.quiz = (function(){
   function soruSeridi(m){
     return html`<nav class="kitap-serit mb-10" aria-label="Sorular">${map(m.cevaplar, (c, i) => html`<button
       class="${(c != null ? 'is-cevapli' : '') + (i === m.index ? ' is-simdi' : '')}"
-      data-act="kitap-no" data-i="${i}" aria-label="${'Soru ' + (i + 1) + (c != null ? ', cevaplı' : ', boş')}"
+      data-act="kitap-no" data-i="${i}" aria-label="${yz('ays.quiz.soru') + (i + 1) + (c != null ? ', cevaplı' : ', boş')}"
       ${i === m.index ? raw('aria-current="step"') : ''}>${i + 1}</button>`)}</nav>`;
   }
 
@@ -387,10 +401,10 @@ R.Screens.quiz = (function(){
             <div class="choices mt-6">${map(s.secenekler, (x, j) => html`<button disabled
               class="${'choice' + (j === s.dogru ? ' is-correct' : j === c ? ' is-wrong' : ' is-off')}">
               <span class="choice__key">${HARF[j]}</span><span class="choice__text">${x}</span></button>`)}</div>
-            <p class="tiny dim mt-6">${c == null ? 'Boş bıraktın.' : c === s.dogru ? 'Doğru.'
-              : 'Senin cevabın ' + HARF[c] + ', anahtar ' + HARF[s.dogru] + '.'}${s.cozum
+            <p class="tiny dim mt-6">${c == null ? yz('ays.quiz.bos-biraktin') : c === s.dogru ? 'Doğru.'
+              : yz('ays.quiz.senin-cevabin') + HARF[c] + ', anahtar ' + HARF[s.dogru] + '.'}${s.cozum
               ? ' Çözüm: ' + s.cozum : ''}</p>
-            ${K.Chip({ label:isaretli ? 'Hatalı işaretli — geri al' : 'Bu soru hatalı',
+            ${K.Chip({ label:isaretli ? yz('ays.quiz.hatali-isaretli-geri-al') : yz('ays.quiz.bu-soru-hatali'),
               act:'kitap-hatali', on:isaretli,
               data:{ 'data-id':kitap.id, 'data-no':String(bolum.no), 'data-i':String(i) } })}
           </div>`;
@@ -413,7 +427,7 @@ R.Screens.quiz = (function(){
     async 'quiz-voice'(el){ S.ui.quizVoice = el.dataset.value === '1'; R.App.render(); },
     async 'quiz-pick'(el){
       const res = Q.pick(Number(el.dataset.i));
-      if(res) UI.toast(res.correct ? 'Doğru şık' : 'Yanlış şık — doğrusu işaretlendi');
+      if(res) UI.toast(res.correct ? yz('ays.quiz.dogru-sik') : yz('ays.quiz.yanlis-sik-dogrusu-isaretlen'));
       R.App.render();
     },
     async 'quiz-say'(){ speak(); },
@@ -447,7 +461,7 @@ R.Screens.quiz = (function(){
       const m = TK().mevcut();
       const bos = m ? m.toplam - m.cevapli : 0;
       const bitir = async () => { await TK().bitir(); R.App.render(); };
-      if(bos) UI.confirmSheet('Bölümü bitir', bos + ' soru boş. Yine de bitirilsin mi? Boşlar '
+      if(bos) UI.confirmSheet(yz('ays.quiz.bolumu-bitir'), bos + ' soru boş. Yine de bitirilsin mi? Boşlar '
         + 'boş olarak sayılır.', bitir, false, bos + ' boşla bitir');
       else await bitir();
     },
@@ -483,12 +497,12 @@ R.Screens.quiz = (function(){
     },
     async 'quiz-skip'(){ await Q.skip(); R.App.render(); },
     async 'quiz-cancel'(){
-      UI.confirmSheet('Oturumu bitir',
-        'Yarım oturum kaydedilmez; verdiğin cevaplar kart aralıklarına zaten işlendi.', async () => {
+      UI.confirmSheet(yz('ays.quiz.oturumu-bitir'),
+        yz('ays.quiz.yarim-oturum-kaydedilmez-ver'), async () => {
           Q.cancel();
           UI.closeSheet();
           R.App.render();
-        }, false, 'Kaydetmeden bitir');
+        }, false, yz('ays.quiz.kaydetmeden-bitir'));
     },
   };
 
@@ -577,7 +591,7 @@ R.Screens.quiz = (function(){
       const p = Q.progress();
       if(p) return p.index + 1 + ' / ' + p.total + ' · geri çağırma testi';
       const av = Q.availability();
-      return av.mixed ? U.fmtNum(av.mixed) + ' madde sınanabilir' : 'Önce kart veya ders notu üret';
+      return av.mixed ? U.fmtNum(av.mixed) + ' madde sınanabilir' : yz('ays.quiz.once-kart-veya-ders-notu');
     },
     actions(){ return ''; },
     render, afterRender, handle, change, onKey,

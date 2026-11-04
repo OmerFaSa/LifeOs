@@ -10,6 +10,17 @@
    Socrates cevap yazmaz, soru sorar. Model kapalıyken de sorar: sorular
    data/canon.js içindeki kalıplardan gelir ve kural motorunun kendi
    çıktısıdır. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.symposium.ne-yapilir':'Ne yapılır',
+  'esp.symposium.cevaplanmamis-itiraz-yok-kap':'Cevaplanmamış itiraz yok — kapatılabilir.',
+  'esp.symposium.bu-bir-yargi-degil-bir':'Bu bir yargı değil bir bulgudur: kalıbın yakalanması',
+  'esp.symposium.kaydedersen-bu-cumleler-dest':'Kaydedersen bu cümleler destek sayılır;',
+  'esp.symposium.tezim':'Tezim: «',
+  'esp.symposium.henuz-tez-yok':'Henüz tez yok.',
+  'esp.symposium.bir-tez-ancak-cevaplanmamis':'Bir tez ancak cevaplanmamış itirazı kalmadığında kapanır. ',
+  'esp.symposium.socrates-cevap-yazmaz-soru-s':'Socrates cevap yazmaz, soru sorar.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -148,7 +159,7 @@ ESP.Screens.symposium = (function(){
         label:yz('esp.symposium.arguman-alistirmalari'), hint:'argument-drill',
         meta:ESP.ARGUMENT_DRILLS.length + ' alıştırma',
         wide:true,
-        body:K.Table({ tight:true, headers:['Alıştırma', 'Ne yapılır', 'Neden'],
+        body:K.Table({ tight:true, headers:['Alıştırma', yz('esp.symposium.ne-yapilir'), 'Neden'],
           rows:ESP.ARGUMENT_DRILLS.map(d => [d.label, d.task, d.note]) }),
       }),
     ];
@@ -178,7 +189,7 @@ ESP.Screens.symposium = (function(){
         + (yas >= 14 && a.status === 'open' ? ' · ' + yas + ' gündür sessiz' : ''),
       note:acikItiraz.length
         ? acikItiraz.length + ' itiraz cevaplanmadı; tez bu yüzden kapanamaz.'
-        : (a.status === 'open' ? 'Cevaplanmamış itiraz yok — kapatılabilir.' : ''),
+        : (a.status === 'open' ? yz('esp.symposium.cevaplanmamis-itiraz-yok-kap') : ''),
       action:html`${when(a.status === 'open' && !acikItiraz.length,
           () => K.Button({ label:yz('esp.symposium.kapat'), size:'sm', tone:'primary', act:'close-arg',
             data:{ 'data-id':a.id } }))}
@@ -231,7 +242,7 @@ ESP.Screens.symposium = (function(){
 
         ${when(safsata.length, () => K.Notice({ tone:'info', title:yz('esp.symposium.safsata-denetimi'),
           body:safsata.map(f => '<b>' + f.label + '</b> — ' + f.note).join('<br/>')
-            + '<br/><br/>Bu bir yargı değil bir bulgudur: kalıbın yakalanması '
+            + ('<br/><br/>' + yz('esp.symposium.bu-bir-yargi-degil-bir') + ' ')
             + 'argümanın yanlış olduğunu göstermez, bakmaya değer olduğunu gösterir.' }))}
 
         <div class="row mt-12">
@@ -291,7 +302,7 @@ ESP.Screens.symposium = (function(){
               ${when(res.unmatched.length, () => K.Notice({ tone:'warn',
                 title:yz('esp.symposium.nereye-koyacagimi-anlamadim'),
                 body:res.unmatched.map(u => '«' + U.esc(u.text) + '»').join('<br/>')
-                  + '<br/><br/>Kaydedersen bu cümleler destek sayılır; '
+                  + ('<br/><br/>' + yz('esp.symposium.kaydedersen-bu-cumleler-dest') + ' ')
                   + 'istersen metni düzenleyip yeniden çözebilirsin.' }))}
               <div class="row mt-8">
                 ${K.Button({ label:yz('esp.symposium.kaydet'), tone:'primary', size:'sm', act:'save-arg' })}
@@ -554,7 +565,7 @@ ESP.Screens.symposium = (function(){
       const a = S.args.find(x => x.id === el.dataset.id);
       if(!a) return;
       S.ui.officeAgent = 'socrates';
-      const soru = 'Tezim: «' + a.thesis + '»'
+      const soru = yz('esp.symposium.tezim') + a.thesis + '»'
         + ((a.supports || []).length ? '\nDesteklerim: ' + a.supports.join(' · ') : '')
         + ((a.objections || []).length ? '\nİtirazlar: '
             + a.objections.map(o => o.text + (o.answered ? ' (cevapladım)' : ' (açık)')).join(' · ') : '')
@@ -604,15 +615,15 @@ ESP.Screens.symposium = (function(){
     headline(){
       const acik = ESP.Intellect.openArguments();
       const tikanan = ESP.Intellect.stalledArguments();
-      if(!(S.args || []).length) return 'Henüz tez yok.';
+      if(!(S.args || []).length) return yz('esp.symposium.henuz-tez-yok');
       if(tikanan.length) return tikanan.length + ' tez 14 günden uzun süredir sessiz.';
       const itiraz = acik.reduce((a, x) => a + (x.objections || []).filter(o => !o.answered).length, 0);
       if(itiraz) return itiraz + ' itiraz cevaplanmayı bekliyor.';
       return acik.length + ' tez açık.';
     },
     lede(){
-      return 'Bir tez ancak cevaplanmamış itirazı kalmadığında kapanır. '
-           + 'Socrates cevap yazmaz, soru sorar.';
+      return yz('esp.symposium.bir-tez-ancak-cevaplanmamis')
+           + yz('esp.symposium.socrates-cevap-yazmaz-soru-s');
     },
     stats(){
       const acik = ESP.Intellect.openArguments();

@@ -1,5 +1,13 @@
 /* KING VERISI — KING-4 §C olayları ve §H yardım sağlayıcıları (görev 041).
    Olay biçimi belgeler/ekip/KING-OLAY.md; taşıyıcı brand/ortak/olay.js. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.kingveri.hareket-suresi':'Hareket süresi',
+  'spi.core.kingveri.i-lac-takviye':'İlaç / takviye',
+  'spi.core.kingveri.bilinmeyen-alan-yalnizca-dk':'Bilinmeyen alan; yalnızca «dk» düzeltilebilir.',
+  'spi.core.kingveri.sure-1-ile-600-dakika':'Süre 1 ile 600 dakika arasında bir tam sayı olmalıdır.',
+  'spi.core.kingveri.antrenman-kaydi-bulunamadi':'Antrenman kaydı bulunamadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -187,7 +195,7 @@ SP.KingVeri = (function(){
     const hareketOnceki = hasDkOnce ? dkTopOnce : null;
     const hareketSatir = {
       id: 'hareket_dk',
-      ad: 'Hareket süresi',
+      ad: yz('spi.core.kingveri.hareket-suresi'),
       deger: hasDk ? dkTop : null,
       birim: 'dk',
       etiket: hasDk ? 'ölçüldü' : 'veri yok',
@@ -255,7 +263,7 @@ SP.KingVeri = (function(){
       if(!gecerliMi(h, bugun)) continue;
 
       const saatler = Array.isArray(h.saatler) ? h.saatler : [];
-      const ad = h.tur === 'ilac' ? 'İlaç / takviye' : ((SP.Hatirlat && SP.Hatirlat.TUR && SP.Hatirlat.TUR[h.tur] && SP.Hatirlat.TUR[h.tur].ad) || h.tur || 'Hatırlatma');
+      const ad = h.tur === 'ilac' ? yz('spi.core.kingveri.i-lac-takviye') : ((SP.Hatirlat && SP.Hatirlat.TUR && SP.Hatirlat.TUR[h.tur] && SP.Hatirlat.TUR[h.tur].ad) || h.tur || 'Hatırlatma');
 
       for(const saat of saatler){
         const anahtar = h.id + '@' + saat;
@@ -335,15 +343,15 @@ SP.KingVeri = (function(){
   /* -------------------------------------------------------------- 5. duzelt */
   async function duzelt(id, alan, deger){
     if(alan !== 'dk'){
-      return { ok:false, why:'Bilinmeyen alan; yalnızca «dk» düzeltilebilir.' };
+      return { ok:false, why:yz('spi.core.kingveri.bilinmeyen-alan-yalnizca-dk') };
     }
     if(typeof deger !== 'number' || !Number.isInteger(deger) || deger < 1 || deger > 600){
-      return { ok:false, why:'Süre 1 ile 600 dakika arasında bir tam sayı olmalıdır.' };
+      return { ok:false, why:yz('spi.core.kingveri.sure-1-ile-600-dakika') };
     }
     const workouts = (SP.S && SP.S.workouts) || [];
     const w = workouts.find(x => x && x.id === id);
     if(!w){
-      return { ok:false, why:'Antrenman kaydı bulunamadı.' };
+      return { ok:false, why:yz('spi.core.kingveri.antrenman-kaydi-bulunamadi') };
     }
 
     const once = typeof w.minutes === 'number' && !isNaN(w.minutes) ? w.minutes : null;

@@ -4,6 +4,25 @@
    diye vardır. Fare ile gezinmek zorunda kalmadan sistemin herhangi bir
    yerine gitmek, günlük kullanımın sürtünmesini belirgin düşürür. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.palette.hizli-giris':'Hızlı giriş',
+  'spi.core.palette.bunu-mu-demek-istedin':'Bunu mu demek istedin?',
+  'spi.core.palette.anlasilmayan-satir-atilmaz-s':'Anlaşılmayan satır atılmaz, söylenir.',
+  'spi.core.palette.hepsini-kaydet':'Hepsini kaydet',
+  'spi.core.palette.eslesen-komut-yok':'Eşleşen komut yok.',
+  'spi.core.palette.gez-enter-ac':'↑↓ gez · Enter aç · Esc kapat',
+  'spi.core.palette.veri-de-yazabilirsin-ferriti':'Veri de yazabilirsin: «ferritin 26»',
+  'spi.core.palette.ctrl-k':'Ctrl / ⌘ + K',
+  'spi.core.palette.komut-paletini-ac':'Komut paletini aç',
+  'spi.core.palette.bu-listeyi-ac':'Bu listeyi aç',
+  'spi.core.palette.sirayla-palet-ipucu':'Sırayla: palet → ipucu → alt sayfa → kenar çubuğu',
+  'spi.core.palette.palette-gez':'Palette gez',
+  'spi.core.palette.secili-komutu-calistir':'Seçili komutu çalıştır',
+  'spi.core.palette.listede-satir-satir-gez':'Listede satır satır gez',
+  'spi.core.palette.odaktaki-satiri-ac':'Odaktaki satırı aç',
+  'spi.core.palette.palete-veri-de-yazabilirsin':'Palete veri de yazabilirsin',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.palette.bir-sey-sormam-gerek':'Bir şey sormam gerek',
   'spi.core.palette.geri-alindi':'Geri alındı',
   'spi.core.palette.bu-satirlar-yorumlandi-kayde':'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve ',
@@ -77,7 +96,7 @@ SP.Palette = (function(){
     /* Ölçüm olmayan cümle («7 saat uyumadım») yazılmaz ama sessizce de
        düşmez: neden yazılmadığı söylenir (belgeler/ekip/HATALAR.md KR-1). */
     if(!r.oneriler.length && r.engellenen.length){
-      return { id:'quick:sor', kind:'Hızlı giriş', label:yz('spi.core.palette.bir-sey-sormam-gerek'),
+      return { id:'quick:sor', kind:yz('spi.core.palette.hizli-giris'), label:yz('spi.core.palette.bir-sey-sormam-gerek'),
         hint:'yazılmadı · nedenini gör', run:() => confirmQuick(r, t) };
     }
     if(!r.oneriler.length) return null;
@@ -95,7 +114,7 @@ SP.Palette = (function(){
       { level:(P.eylem(o.action) || {}).level, source:'istek', action:o.action }, P.ayar()));
     return {
       id:'quick:' + r.oneriler.map(o => o.action).join('+'),
-      kind:'Hızlı giriş',
+      kind:yz('spi.core.palette.hizli-giris'),
       label:adlar.join(' · '),
       hint:(r.oneriler.length === 1 ? '1 kayıt' : r.oneriler.length + ' kayıt')
         + (hemen ? ' · hemen yazılır, geri alınabilir' : ' · önce önizleme'),
@@ -160,8 +179,8 @@ SP.Palette = (function(){
     const gunler = Array.from(new Set(r.oneriler.map(o => (o.params && o.params.date) || U.todayISO())));
     acilisTarihi = gunler.length === 1 ? gunler[0] : U.todayISO();
     SP.UI.sheet({
-      title:!r.oneriler.length ? 'Bir şey sormam gerek'
-        : r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
+      title:!r.oneriler.length ? yz('spi.core.palette.bir-sey-sormam-gerek')
+        : r.oneriler.length === 1 ? yz('spi.core.palette.bunu-mu-demek-istedin')
         : r.oneriler.length + ' kayıt anladım',
       subtitle:metin, wide:true,
       note:yz('spi.core.palette.bu-satirlar-yorumlandi-kayde')
@@ -171,7 +190,7 @@ SP.Palette = (function(){
         when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
           title:yz('spi.core.palette.cozemedigim-kisim'),
           body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
-            + 'Anlaşılmayan satır atılmaz, söylenir.' })),
+            + yz('spi.core.palette.anlasilmayan-satir-atilmaz-s') })),
         when(engel.length, () => K.Notice({ tone:'warn',
           title:yz('spi.core.palette.olcum-diye-yazmadigim-kisim'),
           body:engel.map(e => '«' + e.metin + '» — ' + e.soru).join(' ') })),
@@ -179,7 +198,7 @@ SP.Palette = (function(){
           input:K.Input({ id:'qe-date', type:'date', value:acilisTarihi }) })),
       ])),
       footer:String(html`${K.Button({ label:r.oneriler.length ? 'Vazgeç' : 'Tamam', act:'sheet-close' })}
-        ${when(r.oneriler.length, () => K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
+        ${when(r.oneriler.length, () => K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : yz('spi.core.palette.hepsini-kaydet'),
           tone:'primary', act:'quick-save' }))}`),
     });
     bekleyen = r;
@@ -258,10 +277,10 @@ SP.Palette = (function(){
           + '<span class="cmdk__text"><span class="cmdk__label">' + U.esc(c.label) + '</span>'
           + '<span class="cmdk__sub">' + U.esc(c.kind) + '</span></span>'
           + '<span class="cmdk__hintrow">' + U.esc(c.hint || '') + '</span></button>').join('')
-        : '<p class="cmdk__empty">Eşleşen komut yok.</p>')
+        : ('<p class="cmdk__empty">' + yz('spi.core.palette.eslesen-komut-yok') + '</p>'))
       + '</div>'
-      + '<div class="cmdk__foot"><span>↑↓ gez · Enter aç · Esc kapat</span>'
-      + '<span class="cmdk__tip">Veri de yazabilirsin: «ferritin 26»</span></div>'
+      + ('<div class="cmdk__foot"><span>' + yz('spi.core.palette.gez-enter-ac') + '</span>')
+      + ('<span class="cmdk__tip">' + yz('spi.core.palette.veri-de-yazabilirsin-ferriti') + '</span></div>')
       + '</div>';
 
     const input = document.getElementById('cmdk-input');
@@ -308,14 +327,14 @@ SP.Palette = (function(){
     SP.UI.sheet({
       title:yz('spi.core.palette.klavye-kisayollari'),
       body:String(SP.C.Table({ tight:true, headers:['Tuş', 'İş'], rows:[
-        ['Ctrl / ⌘ + K', 'Komut paletini aç'],
-        ['?', 'Bu listeyi aç'],
-        ['Esc', 'Sırayla: palet → ipucu → alt sayfa → kenar çubuğu'],
-        ['↑ ↓', 'Palette gez'],
-        ['Enter', 'Seçili komutu çalıştır'],
-        ['j / k', 'Listede satır satır gez'],
-        ['Enter', 'Odaktaki satırı aç'],
-        ['ferritin 26', 'Palete veri de yazabilirsin'],
+        [yz('spi.core.palette.ctrl-k'), yz('spi.core.palette.komut-paletini-ac')],
+        ['?', yz('spi.core.palette.bu-listeyi-ac')],
+        ['Esc', yz('spi.core.palette.sirayla-palet-ipucu')],
+        ['↑ ↓', yz('spi.core.palette.palette-gez')],
+        ['Enter', yz('spi.core.palette.secili-komutu-calistir')],
+        ['j / k', yz('spi.core.palette.listede-satir-satir-gez')],
+        ['Enter', yz('spi.core.palette.odaktaki-satiri-ac')],
+        ['ferritin 26', yz('spi.core.palette.palete-veri-de-yazabilirsin')],
       ].concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.metinSatirlari() : []) })),
       footer:String(SP.C.Button({ label:yz('spi.core.palette.kapat'), act:'sheet-close' })),
       noFocus:true,

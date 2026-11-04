@@ -1,6 +1,29 @@
 /* Komut paleti (Ctrl/Cmd+K) ve odak modu.
    Amac: gunluk kullanimda tikla-gezin yerine tek kisayolla is baslatmak. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.palette.ders-notu':'Ders notu',
+  'ays.core.palette.adsiz-ders':'Adsız ders',
+  'ays.core.palette.bir-sey-sormam-gerek':'Bir şey sormam gerek',
+  'ays.core.palette.uygulanamadi':'Uygulanamadı: ',
+  'ays.core.palette.cozulen-soru':'Çözülen soru',
+  'ays.core.palette.calisma-suresi':'Çalışma süresi',
+  'ays.core.palette.sormam-gereken':'Sormam gereken: ',
+  'ays.core.palette.kaydedilmeyecek':'Kaydedilmeyecek: «',
+  'ays.core.palette.bos-soru-soylenmedigi-icin-d':'Boş soru söylenmediği için doğru = çözülen − yanlış sayıldı',
+  'ays.core.palette.kaydet-deyince-yazilir-her-b':'Kaydet deyince yazılır; her biri geri alınabilir.',
+  'ays.core.palette.bunu-mu-demek-istedin':'Bunu mu demek istedin?',
+  'ays.core.palette.anlasilmayan-satir-atilmaz-s':'Anlaşılmayan satır atılmaz, söylenir.',
+  'ays.core.palette.bu-satirlar-yorumlandi-kayde':'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve ',
+  'ays.core.palette.hepsini-onayla':'Hepsini onayla',
+  'ays.core.palette.komut-paleti':'Komut paleti',
+  'ays.core.palette.odak-modu-blok-calisiyorsa':'Odak modu (blok çalışıyorsa)',
+  'ays.core.palette.tekrar-ekraninda-karti-cevir':'Tekrar ekranında kartı çevir',
+  'ays.core.palette.hatirlamadim-zorlandim-hatir':'Hatırlamadım / Zorlandım / Hatırladım',
+  'ays.core.palette.bu-listeyi-ac':'Bu listeyi aç',
+  'ays.core.palette.acik-pencereyi-kapat':'Açık pencereyi kapat',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.palette.hafta':'Hafta ',
   'ays.core.palette.sec':'seç',
   'ays.core.palette.geri-alindi':'Geri alındı',
@@ -136,7 +159,7 @@ R.Palette = (function(){
     S2.videoNotes.forEach(n => {
       const segHit = n.segments.find(seg => hit(seg.text));
       if(hit(n.title) || segHit){
-        out.push({ group:'Ders notu', label:n.title || 'Adsız ders',
+        out.push({ group:yz('ays.core.palette.ders-notu'), label:n.title || yz('ays.core.palette.adsiz-ders'),
           sub:segHit ? M2.fmtTs(segHit.ts)+' · '+segHit.text.slice(0,60) : M2.noteTopicName(n),
           icon:'play', weight:5,
           run(){ S2.ui.noteOpen = n.id; R.App.go('learn'); } });
@@ -223,7 +246,7 @@ R.Palette = (function(){
         R.Proposals.ayar()));
     return {
       group:'Kayıt', icon:'zap',
-      label:adlar.length ? adlar.join(' · ') : 'Bir şey sormam gerek',
+      label:adlar.length ? adlar.join(' · ') : yz('ays.core.palette.bir-sey-sormam-gerek'),
       sub:r.sorular.length ? 'anlamadığım kısım var'
         : r.oneriler.length + ' kayıt' + (hemen ? ' · hemen uygulanır, geri alınabilir' : ' · önce önizleme'),
       hint:'Enter',
@@ -239,7 +262,7 @@ R.Palette = (function(){
     UI.toast(ids.length
       ? (ids.length === 1 ? islem.yapilan[0].baslik : ids.length + ' kayıt') + ' uygulandı'
         + (dusen ? ' · ' + dusen + ' tanesi uygulanamadı' : '')
-      : 'Uygulanamadı: ' + (islem.dusen.map(k => k.why).filter(Boolean).join(' · ') || 'geçersiz'),
+      : yz('ays.core.palette.uygulanamadi') + (islem.dusen.map(k => k.why).filter(Boolean).join(' · ') || 'geçersiz'),
       ids.length ? { undo:async () => {
         for(const id of ids) await R.Proposals.undo(id);
         UI.toast(yz('ays.core.palette.geri-alindi'));
@@ -249,8 +272,8 @@ R.Palette = (function(){
   }
 
   const ETIKET = {
-    'soru-yaz':'Çözülen soru', 'paragraf-yaz':'Paragraf', 'problem-yaz':'Problem',
-    'uyku-yaz':'Uyku', 'sure-yaz':'Çalışma süresi',
+    'soru-yaz':yz('ays.core.palette.cozulen-soru'), 'paragraf-yaz':'Paragraf', 'problem-yaz':'Problem',
+    'uyku-yaz':'Uyku', 'sure-yaz':yz('ays.core.palette.calisma-suresi'),
   };
 
   /* King'in veri önizlemesi (brand/ortak/king.js söz 3). Paletle AYNI
@@ -274,15 +297,15 @@ R.Palette = (function(){
       return ad + (deg ? ': ' + deg : '');
     });
     const notlar = [];
-    if(r.sorular.length) notlar.push('Sormam gereken: ' + r.sorular.map(s => s.soru).join(' '));
-    if(r.anlasilmayan.length) notlar.push('Kaydedilmeyecek: «' + r.anlasilmayan.join('», «') + '»');
-    if(r.oneriler.some(o => o.bosVarsayim)) notlar.push('Boş soru söylenmediği için doğru = çözülen − yanlış sayıldı');
+    if(r.sorular.length) notlar.push(yz('ays.core.palette.sormam-gereken') + r.sorular.map(s => s.soru).join(' '));
+    if(r.anlasilmayan.length) notlar.push(yz('ays.core.palette.kaydedilmeyecek') + r.anlasilmayan.join('», «') + '»');
+    if(r.oneriler.some(o => o.bosVarsayim)) notlar.push(yz('ays.core.palette.bos-soru-soylenmedigi-icin-d'));
     /* tur: King'in sohbet karşılığı (king.js söz 8). */
     const tur = r.oneriler.every(o => o.action === 'uyku-yaz') ? 'uyku' : 'calisma';
     return {
       tur,
       metin:satirlar.join(' · '),
-      ipucu:notlar.join(' · ') || 'Kaydet deyince yazılır; her biri geri alınabilir.',
+      ipucu:notlar.join(' · ') || yz('ays.core.palette.kaydet-deyince-yazilir-her-b'),
       async kaydet(){
         const islem = await R.Komut.isle(r, { metin:t });
         const onay = await R.Komut.onayla(islem.bekleyen.map(k => k.row.id));
@@ -321,8 +344,8 @@ R.Palette = (function(){
     const sorular = r.sorular || [];
     close();
     UI.sheet({
-      title:!r.oneriler.length ? 'Bir şey sormam gerek'
-        : r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
+      title:!r.oneriler.length ? yz('ays.core.palette.bir-sey-sormam-gerek')
+        : r.oneriler.length === 1 ? yz('ays.core.palette.bunu-mu-demek-istedin')
         : r.oneriler.length + ' kayıt anladım',
       subtitle:metin,
       body:String(html`
@@ -331,13 +354,13 @@ R.Palette = (function(){
         ${when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
           title:yz('ays.core.palette.cozemedigim-kisim'),
           body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
-            + 'Anlaşılmayan satır atılmaz, söylenir.' }))}
+            + yz('ays.core.palette.anlasilmayan-satir-atilmaz-s') }))}
         ${when(r.oneriler.length, () => K.Notice({ tone:'info',
-          body:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
+          body:yz('ays.core.palette.bu-satirlar-yorumlandi-kayde')
             + 'her biri tek tek geri alınabilir.' }))}`),
       footer:String(r.oneriler.length
         ? html`${K.Button({ label:yz('ays.core.palette.vazgec'), act:'sheet-close' })}
-          ${K.Button({ label:r.oneriler.length === 1 ? 'Onayla' : 'Hepsini onayla',
+          ${K.Button({ label:r.oneriler.length === 1 ? 'Onayla' : yz('ays.core.palette.hepsini-onayla'),
             tone:'primary', act:'veri-kaydet' })}`
         : K.Button({ label:yz('ays.core.palette.tamam'), act:'sheet-close' })),
     });
@@ -452,12 +475,12 @@ R.Palette = (function(){
   function isOpen(){ return !!document.getElementById('cmdk'); }
 
   const SHORTCUTS = [
-    [['ctrl', 'k'], 'Komut paleti'],
-    [['f'], 'Odak modu (blok çalışıyorsa)'],
-    [['space'], 'Tekrar ekranında kartı çevir'],
-    [['1', '2', '3'], 'Hatırlamadım / Zorlandım / Hatırladım'],
-    [['?'], 'Bu listeyi aç'],
-    [['esc'], 'Açık pencereyi kapat'],
+    [['ctrl', 'k'], yz('ays.core.palette.komut-paleti')],
+    [['f'], yz('ays.core.palette.odak-modu-blok-calisiyorsa')],
+    [['space'], yz('ays.core.palette.tekrar-ekraninda-karti-cevir')],
+    [['1', '2', '3'], yz('ays.core.palette.hatirlamadim-zorlandim-hatir')],
+    [['?'], yz('ays.core.palette.bu-listeyi-ac')],
+    [['esc'], yz('ays.core.palette.acik-pencereyi-kapat')],
   ];
 
   function showShortcuts(){

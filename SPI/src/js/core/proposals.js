@@ -43,6 +43,36 @@
    Uygulama sırası kasıtlıdır: önce anlık görüntü alınır (geri alma),
    sonra değişiklik yazılır. Böylece geri alma her zaman mümkündür. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.proposals.boyle-bir-gunluk-olcum-alani':'Böyle bir günlük ölçüm alanı yok.',
+  'spi.core.proposals.deger-sayi-degil':'Değer sayı değil.',
+  'spi.core.proposals.gida-yok':'Gıda yok.',
+  'spi.core.proposals.hicbir-gida-taninmadi':'Hiçbir gıda tanınmadı: ',
+  'spi.core.proposals.sure-yok':'Süre yok.',
+  'spi.core.proposals.bu-hareket-sistemde-yok':'Bu hareket sistemde yok.',
+  'spi.core.proposals.serbest-seans':'Serbest seans',
+  'spi.core.proposals.olcum-yok':'Ölçüm yok.',
+  'spi.core.proposals.hicbir-olcum-taninmadi':'Hiçbir ölçüm tanınmadı: ',
+  'spi.core.proposals.bu-bolum-gizlenemez-ya-da':'Bu bölüm gizlenemez ya da sistemde yok.',
+  'spi.core.proposals.plan-motoru-yuklu-degil':'Plan motoru yüklü değil.',
+  'spi.core.proposals.hedef-bulunamadi':'Hedef bulunamadı.',
+  'spi.core.proposals.bu-hedefin-uygulanmis-bir-pl':'Bu hedefin uygulanmış bir planı var; önce onu geri al.',
+  'spi.core.proposals.bu-hedefin-uygulanmis-bir-pl-2':'Bu hedefin uygulanmış bir planı yok.',
+  'spi.core.proposals.program-bu-planla-tutmuyor':'Program bu planla tutmuyor.',
+  'spi.core.proposals.haftalik-program':'Haftalık program',
+  'spi.core.proposals.boyle-bir-sikayet-sozlukte-y':'Böyle bir şikâyet sözlükte yok.',
+  'spi.core.proposals.siddet-1-ile-3-arasinda':'Şiddet 1 ile 3 arasında olmalı.',
+  'spi.core.proposals.hazir-kayitlar-yuklu-degil':'Hazır kayıtlar yüklü değil.',
+  'spi.core.proposals.bilinmeyen-hazir-kayit-turu':'Bilinmeyen hazır kayıt türü.',
+  'spi.core.proposals.hazir-kayit-bulunamadi-silin':'Hazır kayıt bulunamadı; silinmiş olabilir.',
+  'spi.core.proposals.bilinmeyen-eylem':'Bilinmeyen eylem: ',
+  'spi.core.proposals.dogrulanamadi':'Doğrulanamadı: ',
+  'spi.core.proposals.json-cozulemedi':'JSON çözülemedi.',
+  'spi.core.proposals.bos-satir':'Boş satır',
+  'spi.core.proposals.spi-onaylar-da-bekliyor':'SPİ › Onaylar’da bekliyor',
+  'spi.core.proposals.spi-bu-satiri-anlamadi':'SPİ bu satırı anlamadı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.proposals.gunluk-olcum':'Günlük ölçüm',
   'spi.core.proposals.ogun':'Öğün',
   'spi.core.proposals.antrenman':'Antrenman',
@@ -166,9 +196,9 @@ SP.Proposals = (function(){
       alanlar:['field', 'value', 'date', 'ekle'],
       check(p, sanal){
         const f = SP.Quick.VITAL_FIELDS[p.field];
-        if(!f) return fail('Böyle bir günlük ölçüm alanı yok.');
+        if(!f) return fail(yz('spi.core.proposals.boyle-bir-gunluk-olcum-alani'));
         const v = Number(p.value);
-        if(!isFinite(v)) return fail('Değer sayı değil.');
+        if(!isFinite(v)) return fail(yz('spi.core.proposals.deger-sayi-degil'));
         const once = tabanOf(p.date, f.id, sanal);
         if(p.ekle === true && f.ekle){
           if(v <= 0) return fail(f.label + ' için eklenecek miktar yok.');
@@ -214,7 +244,7 @@ SP.Proposals = (function(){
       label:yz('spi.core.proposals.ogun'),
       alanlar:['items', 'slot', 'date'],
       check(p){
-        if(!Array.isArray(p.items) || !p.items.length) return fail('Gıda yok.');
+        if(!Array.isArray(p.items) || !p.items.length) return fail(yz('spi.core.proposals.gida-yok'));
         const cozulen = [], eksik = [];
         p.items.forEach(it => {
           const f = SP.FOOD_BY_ID[it.foodId];
@@ -223,7 +253,7 @@ SP.Proposals = (function(){
           if(!isFinite(g) || g <= 0){ eksik.push(f.name + ' (miktar yok)'); return; }
           cozulen.push({ food:f, g:Math.round(g), cert:it.cert || 'estimated' });
         });
-        if(!cozulen.length) return fail('Hiçbir gıda tanınmadı: ' + eksik.join(', '));
+        if(!cozulen.length) return fail(yz('spi.core.proposals.hicbir-gida-taninmadi') + eksik.join(', '));
         return pass({ cozulen, eksik });
       },
       preview(p, ctx){
@@ -249,14 +279,14 @@ SP.Proposals = (function(){
       alanlar:['minutes', 'exerciseId', 'date'],
       check(p){
         const dk = Number(p.minutes);
-        if(!isFinite(dk) || dk <= 0) return fail('Süre yok.');
+        if(!isFinite(dk) || dk <= 0) return fail(yz('spi.core.proposals.sure-yok'));
         if(dk > 600) return fail(dk + ' dakika bir seans için fazla; yanlış anlaşılmış olabilir.');
         const ex = p.exerciseId ? SP.EX_BY_ID[p.exerciseId] : null;
-        if(p.exerciseId && !ex) return fail('Bu hareket sistemde yok.');
+        if(p.exerciseId && !ex) return fail(yz('spi.core.proposals.bu-hareket-sistemde-yok'));
         return pass({ dk:Math.round(dk), ex });
       },
       preview(p, ctx){
-        return [{ alan:ctx.ex ? ctx.ex.name : 'Serbest seans',
+        return [{ alan:ctx.ex ? ctx.ex.name : yz('spi.core.proposals.serbest-seans'),
           once:'—', sonra:ctx.dk + ' dakika' }];
       },
       async apply(p, ctx){
@@ -286,7 +316,7 @@ SP.Proposals = (function(){
         return h ? fail(h) : pass({ dk:Math.round(Number(p.dk)), bas:p.bas || null });
       },
       preview(p, ctx){
-        return [{ alan:'Kısa uyku', once:'—', sonra:ctx.dk + ' dakika' + (ctx.bas ? ' · ' + ctx.bas : '') }];
+        return [{ alan:yz('spi.core.proposals.kisa-uyku'), once:'—', sonra:ctx.dk + ' dakika' + (ctx.bas ? ' · ' + ctx.bas : '') }];
       },
       async apply(p, ctx){
         const r = await SP.Uyku.ekle(p.date, { dk:ctx.dk, bas:ctx.bas });
@@ -303,7 +333,7 @@ SP.Proposals = (function(){
       label:yz('spi.core.proposals.tahlil-olcumu'),
       alanlar:['rows', 'date'],
       check(p){
-        if(!Array.isArray(p.rows) || !p.rows.length) return fail('Ölçüm yok.');
+        if(!Array.isArray(p.rows) || !p.rows.length) return fail(yz('spi.core.proposals.olcum-yok'));
         const cozulen = [], eksik = [];
         p.rows.forEach(r => {
           const b = SP.BIO_BY_ID[r.markerId];
@@ -312,7 +342,7 @@ SP.Proposals = (function(){
           if(!isFinite(v)){ eksik.push(b.name); return; }
           cozulen.push({ b, v });
         });
-        if(!cozulen.length) return fail('Hiçbir ölçüm tanınmadı: ' + eksik.join(', '));
+        if(!cozulen.length) return fail(yz('spi.core.proposals.hicbir-olcum-taninmadi') + eksik.join(', '));
         return pass({ cozulen, eksik });
       },
       preview(p, ctx){
@@ -354,7 +384,7 @@ SP.Proposals = (function(){
       alanlar:['bolum', 'acik'],
       check(p){
         const b = SP.Bolum && SP.Bolum.BY_ID[p.bolum];
-        if(!b) return fail('Bu bölüm gizlenemez ya da sistemde yok.');
+        if(!b) return fail(yz('spi.core.proposals.bu-bolum-gizlenemez-ya-da'));
         const acik = Number(p.acik) === 1;
         if(acik === !SP.Bolum.gizli(p.bolum)) return fail(b.ad + ' zaten ' + (acik ? 'açık.' : 'gizli.'));
         return pass({ b, acik });
@@ -385,10 +415,10 @@ SP.Proposals = (function(){
       alanlar:['hedefId'],
       modelYok:true,
       check(p){
-        if(!SP.Plan || !SP.Hedefler) return fail('Plan motoru yüklü değil.');
+        if(!SP.Plan || !SP.Hedefler) return fail(yz('spi.core.proposals.plan-motoru-yuklu-degil'));
         const h = SP.Hedefler.liste().find(x => x.id === p.hedefId);
-        if(!h) return fail('Hedef bulunamadı.');
-        if(SP.Plan.aktif(h.id)) return fail('Bu hedefin uygulanmış bir planı var; önce onu geri al.');
+        if(!h) return fail(yz('spi.core.proposals.hedef-bulunamadi'));
+        if(SP.Plan.aktif(h.id)) return fail(yz('spi.core.proposals.bu-hedefin-uygulanmis-bir-pl'));
         const r = SP.Plan.kur(h, U.todayISO());
         if(!r.ok) return fail(r.why);
         return pass({ plan:r.plan });
@@ -412,15 +442,15 @@ SP.Proposals = (function(){
       modelYok:true,
       check(p){
         const plan = SP.Plan && SP.Plan.aktif(p.hedefId);
-        if(!plan) return fail('Bu hedefin uygulanmış bir planı yok.');
+        if(!plan) return fail(yz('spi.core.proposals.bu-hedefin-uygulanmis-bir-pl-2'));
         const pr = p.program;
         if(!pr || !Array.isArray(pr.haftalar) || pr.haftalar.length !== plan.kontrol.length){
-          return fail('Program bu planla tutmuyor.');
+          return fail(yz('spi.core.proposals.program-bu-planla-tutmuyor'));
         }
         return pass({ plan, pr });
       },
       preview(p, ctx){
-        return [{ alan:'Haftalık program', once:ctx.plan.program ? 'sürüm ' + ctx.plan.program.surum : 'yok',
+        return [{ alan:yz('spi.core.proposals.haftalik-program'), once:ctx.plan.program ? 'sürüm ' + ctx.plan.program.surum : 'yok',
           sonra:ctx.pr.haftalar.length + ' hafta · tartı günü ' + (ctx.pr.tartiGunu || ctx.plan.tartiGunu.ad) }];
       },
       async apply(p, ctx){
@@ -447,10 +477,10 @@ SP.Proposals = (function(){
       check(p){
         if(p.yok === true) return pass({ yok:true });
         const s = SP.SYMPTOM_BY_ID[p.symptomId];
-        if(!s) return fail('Böyle bir şikâyet sözlükte yok.');
+        if(!s) return fail(yz('spi.core.proposals.boyle-bir-sikayet-sozlukte-y'));
         if(p.severity == null || p.severity === '') return fail(SP.Quick.SIDDET_YOK);
         const sd = Number(p.severity);
-        if(!isFinite(sd) || sd < 1 || sd > 3) return fail('Şiddet 1 ile 3 arasında olmalı.');
+        if(!isFinite(sd) || sd < 1 || sd > 3) return fail(yz('spi.core.proposals.siddet-1-ile-3-arasinda'));
         return pass({ s, sd:Math.round(sd) });
       },
       preview(p, ctx){
@@ -508,11 +538,11 @@ SP.Proposals = (function(){
       label:yz('spi.core.proposals.hazir-ogun-ya-da-antrenman'),
       alanlar:['tur', 'hazirId', 'date', 'slot'],
       check(p){
-        if(!SP.Hazir) return fail('Hazır kayıtlar yüklü değil.');
+        if(!SP.Hazir) return fail(yz('spi.core.proposals.hazir-kayitlar-yuklu-degil'));
         const l = p.tur === 'ogun' ? SP.Hazir.ogunler() : p.tur === 'antrenman' ? SP.Hazir.antrenmanlar() : null;
-        if(!l) return fail('Bilinmeyen hazır kayıt türü.');
+        if(!l) return fail(yz('spi.core.proposals.bilinmeyen-hazir-kayit-turu'));
         const h = l.find(x => x.id === p.hazirId);
-        if(!h) return fail('Hazır kayıt bulunamadı; silinmiş olabilir.');
+        if(!h) return fail(yz('spi.core.proposals.hazir-kayit-bulunamadi-silin'));
         return pass({ h });
       },
       preview(p, ctx){
@@ -555,9 +585,9 @@ SP.Proposals = (function(){
 
   function check(p, sanal){
     const e = eylem(p && p.action);
-    if(!e) return fail('Bilinmeyen eylem: ' + (p && p.action));
+    if(!e) return fail(yz('spi.core.proposals.bilinmeyen-eylem') + (p && p.action));
     try{ return e.check(p.params || {}, sanal); }
-    catch(err){ return fail('Doğrulanamadı: ' + (err && err.message || err)); }
+    catch(err){ return fail(yz('spi.core.proposals.dogrulanamadi') + (err && err.message || err)); }
   }
 
   function onizle(p, c){
@@ -735,7 +765,7 @@ SP.Proposals = (function(){
     const date = o.date || U.todayISO();
     let veri = raw;
     if(typeof raw === 'string'){
-      try{ veri = JSON.parse(raw); }catch(e){ return { oneriler:[], hata:'JSON çözülemedi.' }; }
+      try{ veri = JSON.parse(raw); }catch(e){ return { oneriler:[], hata:yz('spi.core.proposals.json-cozulemedi') }; }
     }
     const liste = Array.isArray(veri) ? veri : (veri && veri.actions) || [];
     const oneriler = [], dusen = [];
@@ -940,7 +970,7 @@ SP.Proposals = (function(){
      Dönüş hesap.js'e: { durum:'onayda'|'anlasilmadi', sonuc }. */
   async function disaridan(oge){
     const metin = String((oge && oge.metin) || '').trim();
-    if(!metin) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    if(!metin) return { durum:'anlasilmadi', sonuc:yz('spi.core.proposals.bos-satir') };
     const z = Number(oge.zaman), bugun = U.todayISO();
     const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
     const v = fromText(metin, { date:gonderilen > bugun ? bugun : gonderilen });
@@ -957,9 +987,9 @@ SP.Proposals = (function(){
         anahtar, iz:[{ tur:'gelen', id:String(oge.id) }] });
       if(row) n++;
     }
-    if(n) return { durum:'onayda', sonuc:n === 1 ? 'SPİ › Onaylar’da bekliyor' : n + ' kayıt SPİ › Onaylar’da' };
+    if(n) return { durum:'onayda', sonuc:n === 1 ? yz('spi.core.proposals.spi-onaylar-da-bekliyor') : n + ' kayıt SPİ › Onaylar’da' };
     const e = (v.engellenen || [])[0];
-    return { durum:'anlasilmadi', sonuc:neden[0] || (e && e.soru) || 'SPİ bu satırı anlamadı' };
+    return { durum:'anlasilmadi', sonuc:neden[0] || (e && e.soru) || yz('spi.core.proposals.spi-bu-satiri-anlamadi') };
   }
 
   async function clearResolved(){

@@ -26,6 +26,23 @@
    4. OTOMATİKLEŞME SÜRESİ SÖZ DEĞİLDİR. Kişiden kişiye çok değişir; hedef
       tarihi gelince alışkanlık «oldu» sayılmaz, sürdürülür. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.aliskanlik.hangi-aliskanlik-oldugu-bili':'Hangi alışkanlık olduğu bilinmeden karar verilemez.',
+  'ortak.aliskanlik.haftada-kac-gun-oldugu-bilin':'Haftada kaç gün olduğu bilinmeden karar verilemez.',
+  'ortak.aliskanlik.her-seferin-suresi-bilinmede':'Her seferin süresi bilinmeden karar verilemez.',
+  'ortak.aliskanlik.hedef-tarihi-gecmiste':'Hedef tarihi geçmişte.',
+  'ortak.aliskanlik.son-2':'Son ',
+  'ortak.aliskanlik.bu-aliskanlik-gercekci-gorun':'Bu alışkanlık gerçekçi görünüyor (',
+  'ortak.aliskanlik.bu-aliskanlik-zorlayici':'Bu alışkanlık zorlayıcı (',
+  'ortak.aliskanlik.birden-bu-kadar-artis-zor':'Birden bu kadar artış zor (',
+  'ortak.aliskanlik.bu-hafta':'Bu hafta ',
+  'ortak.aliskanlik.aliskanlik-2':'Alışkanlık: ',
+  'ortak.aliskanlik.aliskanligin-kendiliginden-o':'Alışkanlığın kendiliğinden olması kişiden kişiye çok değişir (bir çalışmada ortanca 66 gün, ',
+  'ortak.aliskanlik.bu-aliskanligi-ne-zamana-kad':'Bu alışkanlığı ne zamana kadar sürdürmek istiyorsun? «8 hafta» ya da «3 ay» gibi yazabilirsin.',
+  'ortak.aliskanlik.hangi-aliskanlik':'Hangi alışkanlık? ',
+  'ortak.aliskanlik.haftada-kac-gun-her-gun':'Haftada kaç gün? «her gün» ya da «haftada 4 gün» gibi yazabilirsin.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.aliskanlik.son':'son ',
   'ortak.aliskanlik.haftada':'Haftada ',
   'ortak.aliskanlik.aliskanligin-alani-ya-da-sik':'Alışkanlığın alanı ya da sıklığı eksik.',
@@ -141,15 +158,15 @@ LIFEOS.Aliskanlik = (function(){
 
     function karar(h, durum, bugun){
       const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
-      if(!alan) return { bant:null, etiket:'veri_yok', neden:'Hangi alışkanlık olduğu bilinmeden karar verilemez.' };
-      if(!n) return { bant:null, etiket:'veri_yok', neden:'Haftada kaç gün olduğu bilinmeden karar verilemez.' };
-      if(!dk) return { bant:null, etiket:'veri_yok', neden:'Her seferin süresi bilinmeden karar verilemez.' };
-      if(h.son_tarih && h.son_tarih <= bugun) return { bant:null, etiket:'veri_yok', hata:'Hedef tarihi geçmişte.' };
+      if(!alan) return { bant:null, etiket:'veri_yok', neden:yz('ortak.aliskanlik.hangi-aliskanlik-oldugu-bili') };
+      if(!n) return { bant:null, etiket:'veri_yok', neden:yz('ortak.aliskanlik.haftada-kac-gun-oldugu-bilin') };
+      if(!dk) return { bant:null, etiket:'veri_yok', neden:yz('ortak.aliskanlik.her-seferin-suresi-bilinmede') };
+      if(h.son_tarih && h.son_tarih <= bugun) return { bant:null, etiket:'veri_yok', hata:yz('ortak.aliskanlik.hedef-tarihi-gecmiste') };
       const t = taban(alan, dk, bugun);
       const ne = alan.ad + ': haftada ' + n + ' gün, her seferinde ' + dk + ' dakika';
       if(!t.kayitli){
         return { mod:'aliskanlik', bant:null, etiket:'veri_yok',
-          neden:'Son ' + PENCERE_HAFTA + ' haftada ' + alan.ad + ' kaydın yok; tabanını bilmeden karar '
+          neden:yz('ortak.aliskanlik.son-2') + PENCERE_HAFTA + ' haftada ' + alan.ad + ' kaydın yok; tabanını bilmeden karar '
             + 'vermem (kayıt olmaması «hiç yapmadım» demek değildir). ' + ne + ' olarak kaydedebilirim; '
             + 'birkaç gün kayıt girince ilerlemeyi ölçerim.' };
       }
@@ -158,9 +175,9 @@ LIFEOS.Aliskanlik = (function(){
       const tabanMetni = 'son ' + PENCERE_HAFTA + ' haftada ' + dk + '+ dakikalık kaydın haftada '
         + sayiYaz(t.gunHafta) + ' gün';
       const metin = {
-        gercekci:'Bu alışkanlık gerçekçi görünüyor (' + ne + '): ' + tabanMetni + ', artış küçük.',
-        zorlayici:'Bu alışkanlık zorlayıcı (' + ne + '): ' + tabanMetni + '. Kademeli başlamak daha kolay olabilir.',
-        gercekci_degil:'Birden bu kadar artış zor (' + ne + '): ' + tabanMetni + '. Daha az günle başlayıp '
+        gercekci:yz('ortak.aliskanlik.bu-aliskanlik-gercekci-gorun') + ne + '): ' + tabanMetni + ', artış küçük.',
+        zorlayici:yz('ortak.aliskanlik.bu-aliskanlik-zorlayici') + ne + '): ' + tabanMetni + '. Kademeli başlamak daha kolay olabilir.',
+        gercekci_degil:yz('ortak.aliskanlik.birden-bu-kadar-artis-zor') + ne + '): ' + tabanMetni + '. Daha az günle başlayıp '
           + 'artırmak daha gerçekçi.',
       }[bant] + ' Bu karar tahmindir (dayanak: ' + dayanak(t, alan, dk).metin + ').';
       return { mod:'aliskanlik', bant, gerekli:n, tipik:t.gunHafta, ust:yuvarla(t.gunHafta + UST, 1),
@@ -203,7 +220,7 @@ LIFEOS.Aliskanlik = (function(){
       for(const c of onceki){ if(c >= n) seri++; else break; }
       const kalan = 6 - hg;
       const durum = bu >= n ? 'onde' : bu + kalan >= n ? 'yolunda' : 'geride';
-      const metin = 'Bu hafta ' + bu + '/' + n + ' gün (' + dk + '+ dakikalık kayıt)'
+      const metin = yz('ortak.aliskanlik.bu-hafta') + bu + '/' + n + ' gün (' + dk + '+ dakikalık kayıt)'
         + (durum === 'geride' ? '; bu hafta hedef tutmayacak' : durum === 'onde' ? '; bu haftanın hedefi tuttu'
           : '; ' + (n - bu) + ' gün daha, ' + kalan + ' gün kaldı')
         + '. Önceki haftalar: ' + onceki.join(', ') + ' gün.'
@@ -213,12 +230,12 @@ LIFEOS.Aliskanlik = (function(){
 
     function ozet(h){
       const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
-      return 'Alışkanlık: ' + (alan ? alan.ad : 'alan belirsiz') + (n ? ' · haftada ' + n + ' gün' : '')
+      return yz('ortak.aliskanlik.aliskanlik-2') + (alan ? alan.ad : 'alan belirsiz') + (n ? ' · haftada ' + n + ' gün' : '')
         + (dk ? ' × ' + dk + ' dk' : '');
     }
 
     function notlar(h){
-      return ['Alışkanlığın kendiliğinden olması kişiden kişiye çok değişir (bir çalışmada ortanca 66 gün, '
+      return [yz('ortak.aliskanlik.aliskanligin-kendiliginden-o')
         + '18–254 gün aralığı; Lally ve ark., 2010 — kaynak henüz depoya bağlanmadı). Hedef tarihi '
         + 'gelince «oldu» sayılmaz; sürdürmek asıl iştir.'];
     }
@@ -234,15 +251,15 @@ LIFEOS.Aliskanlik = (function(){
         return { yon:'aliskanlik', alan:alan ? alan.id : null, birim:'gün/hafta',
           kapasite:Object.keys(kap).length ? kap : null };
       },
-      tarihSoru:'Bu alışkanlığı ne zamana kadar sürdürmek istiyorsun? «8 hafta» ya da «3 ay» gibi yazabilirsin.',
+      tarihSoru:yz('ortak.aliskanlik.bu-aliskanligi-ne-zamana-kad'),
       ekSorular(h){
         const out = [];
         if(!alanOf(h)){
-          out.push({ alan:'alan', soru:'Hangi alışkanlık? ' + alanlar.map(a => a.ad).join(', ')
+          out.push({ alan:'alan', soru:yz('ortak.aliskanlik.hangi-aliskanlik') + alanlar.map(a => a.ad).join(', ')
             + ' gibi yazabilirsin.' });
         }
         if(!siklikOf(h)){
-          out.push({ alan:'siklik', soru:'Haftada kaç gün? «her gün» ya da «haftada 4 gün» gibi yazabilirsin.' });
+          out.push({ alan:'siklik', soru:yz('ortak.aliskanlik.haftada-kac-gun-her-gun') });
         }
         return out;
       },

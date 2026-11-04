@@ -1,6 +1,32 @@
 /* Tekrar — aralikli tekrar oturumu, kart yonetimi ve yanlis defteri.
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.cards.yanlis-notu':'Yanlış notu',
+  'ays.cards.arka-yuz':'Arka yüz',
+  'ays.cards.on-yuz':'Ön yüz',
+  'ays.cards.yanlis-tekrar-gunleri':'Yanlış · tekrar günleri',
+  'ays.cards.tekrar-gunleri':'Tekrar günleri',
+  'ays.cards.paketi-baslat':'Paketi başlat',
+  'ays.cards.recete':'Reçete: ',
+  'ays.cards.benzer':'Benzer: ',
+  'ays.cards.kapanmis-kayitlar':'Kapanmış kayıtlar (',
+  'ays.cards.acik-kayitlar':'Açık kayıtlar (',
+  'ays.cards.aciklari-goster':'Açıkları göster (',
+  'ays.cards.kapanmislari-goster':'Kapanmışları göster (',
+  'ays.cards.henuz-kapanmis-kayit-yok':'Henüz kapanmış kayıt yok.',
+  'ays.cards.acik-yanlis-yok-deneme-anali':'Açık yanlış yok. Deneme analizinde etiketlenen her hata buraya düşer.',
+  'ays.cards.yazilacak-bilgi':'Yazılacak bilgi',
+  'ays.cards.kart-geri-cagirma-gerektirme':'Kart geri çağırma gerektirmeli: “Mitokondri nedir?” yerine ',
+  'ays.cards.karti-duzenle-2':'Kartı düzenle',
+  'ays.cards.kart-olustur':'Kart oluştur',
+  'ays.cards.gecikmis':'Gecikmiş ',
+  'ays.cards.kart-guncellendi':'Kart güncellendi',
+  'ays.cards.kart-eklendi':'Kart eklendi',
+  'ays.cards.yanlis-defterinden-tek-dokun':'Yanlış defterinden tek dokunuş.',
+  'ays.cards.kart-uretilemedi':'Kart üretilemedi',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -100,9 +126,9 @@ R.Screens.cards = (function(){
     const hata = card.source === 'error';
     if(VT()) return raw(VT().yanlisKarti({ on:card.front, arka:card.back || '—',
       ust:(hata ? 'Yanlış' : 'Kart') + (card.topic ? ' · ' + card.topic : ''),
-      arkaAd:hata ? 'Yanlış notu' : 'Cevap', cevrik:flipped, act:'flip', data:{ 'data-id':card.id } }));
+      arkaAd:hata ? yz('ays.cards.yanlis-notu') : 'Cevap', cevrik:flipped, act:'flip', data:{ 'data-id':card.id } }));
     return html`<div class="flashcard" data-act="flip" data-id="${card.id}">
-      <span class="flashcard__side">${(flipped ? 'Arka yüz' : 'Ön yüz') + (card.topic ? ' · '+card.topic : '')}</span>
+      <span class="flashcard__side">${(flipped ? yz('ays.cards.arka-yuz') : yz('ays.cards.on-yuz')) + (card.topic ? ' · '+card.topic : '')}</span>
       <span class="flashcard__text">${flipped ? (card.back || '—') : card.front}</span></div>`;
   }
 
@@ -113,7 +139,7 @@ R.Screens.cards = (function(){
     const gun = card.dueAt ? U.diffDays(U.todayISO(), card.dueAt) : null;
     const not = gun == null ? '' : gun <= 0 ? 'sıradaki tekrar bugün' : 'sıradaki tekrar ' + gun + ' gün sonra';
     return '<div class="mt-12">' + VT().tekrarTakvimi({ adimlar:R.SRS_INTERVALS, asama:Math.min(card.stage || 0, R.SRS_INTERVALS.length),
-      baslik:card.source === 'error' ? 'Yanlış · tekrar günleri' : 'Tekrar günleri', etiket:card.topic || '', not }) + '</div>';
+      baslik:card.source === 'error' ? yz('ays.cards.yanlis-tekrar-gunleri') : yz('ays.cards.tekrar-gunleri'), etiket:card.topic || '', not }) + '</div>';
   }
 
   /* 059 TEKRAR PAKETİ: bugünün vadeli kartları konu konu. Süre TAHMİNDİR:
@@ -128,7 +154,7 @@ R.Screens.cards = (function(){
     const kalan = due.length - konular.reduce((a, x) => a + x.n, 0);
     if(kalan > 0) konular.push({ ad:yz('ays.cards.diger'), n:kalan, dk:Math.max(1, Math.round(kalan * KART_SN / 60)) });
     return K.Kutu({ ad:yz('ays.cards.tekrar-paketi'), yuva:'tahmin', class:'vkutu', govde:raw(VT().tekrarPaketi({ konular,
-      dakika:Math.max(1, Math.round(due.length * KART_SN / 60)), act:'paket-baslat', dugme:'Paketi başlat' })) });
+      dakika:Math.max(1, Math.round(due.length * KART_SN / 60)), act:'paket-baslat', dugme:yz('ays.cards.paketi-baslat') })) });
   }
 
   /* ---------- due oturumu ---------- */
@@ -244,8 +270,8 @@ R.Screens.cards = (function(){
       ${when(e.topicRef || e.topicId, () => html`<div class="row-sm">${K.Button({ label:yz('ays.cards.konuyu-calis'),
         icon:'book', size:'sm', tone:'ghost', act:'study-topic', data:{ 'data-id':e.id } })}</div>`)}
       ${K.Row([
-        K.Chip('Reçete: ' + (e.recipe || '—')),
-        when(e.similar, () => K.Chip('Benzer: ' + e.similar)),
+        K.Chip(yz('ays.cards.recete') + (e.recipe || '—')),
+        when(e.similar, () => K.Chip(yz('ays.cards.benzer') + e.similar)),
         when(e.seconds, () => K.Chip(e.seconds + ' sn')),
       ], { wrap:true })}
       <div class="tiny dim">${yz('ays.cards.tekrar-tarihleri')} ${dueDates}</div>
@@ -278,20 +304,20 @@ R.Screens.cards = (function(){
     return K.Grid([
       K.Span(8, K.Stack([
         html`<div class="row between wrap"><span class="small muted">${showClosed
-          ? 'Kapanmış kayıtlar (' + closed.length + ')' : 'Açık kayıtlar (' + open.length + ')'}</span>
-          ${K.Button({ label:showClosed ? 'Açıkları göster (' + open.length + ')'
-            : 'Kapanmışları göster (' + closed.length + ')', size:'sm', tone:'ghost',
+          ? yz('ays.cards.kapanmis-kayitlar') + closed.length + ')' : yz('ays.cards.acik-kayitlar') + open.length + ')'}</span>
+          ${K.Button({ label:showClosed ? yz('ays.cards.aciklari-goster') + open.length + ')'
+            : yz('ays.cards.kapanmislari-goster') + closed.length + ')', size:'sm', tone:'ghost',
             act:'notebook-filter', data:{ 'data-value':showClosed ? '0' : '1' } })}</div>`,
         list.length
           ? html`${K.Stack(map(pg.items, NotebookItem), 'sm')}
                  ${K.Pager({ page:pg.page, pages:pg.pages, total:pg.total, act:'nb-page' })}`
           : K.Card({ body:K.Empty({ icon:'list',
-              text:showClosed ? 'Henüz kapanmış kayıt yok.'
-                : 'Açık yanlış yok. Deneme analizinde etiketlenen her hata buraya düşer.' }) }),
+              text:showClosed ? yz('ays.cards.henuz-kapanmis-kayit-yok')
+                : yz('ays.cards.acik-yanlis-yok-deneme-anali') }) }),
       ])),
       K.Span(4, K.Stack([
         K.Card({ title:yz('ays.cards.defter-alanlari'), hint:'notebook', sub:yz('ays.cards.her-kayitta-doldurulacak-ala'),
-          body:K.Table({ tight:true, headers:['Alan', 'Yazılacak bilgi'],
+          body:K.Table({ tight:true, headers:['Alan', yz('ays.cards.yazilacak-bilgi')],
             rows:R.NOTEBOOK_FIELDS.map(f => [html`<b class="small">${f[0]}</b>`, html`<span class="small muted">${f[1]}</span>`]) }) }),
         K.Card({ title:yz('ays.cards.kapanis-olcutu'), body:html`<p class="small muted">${yz('ays.cards.soru-cozume-bakilmadan-dogru')}</p>` }),
       ])),
@@ -305,7 +331,7 @@ R.Screens.cards = (function(){
     const subjectOptions = [{ value:'', label:yz('ays.cards.ders') }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
 
     const body = K.Stack([
-      K.Notice({ tone:'info', body:'Kart geri çağırma gerektirmeli: “Mitokondri nedir?” yerine '
+      K.Notice({ tone:'info', body:yz('ays.cards.kart-geri-cagirma-gerektirme')
         + '“Oksijenli solunum basamaklarını yer ve ürünle eşleştir”.' }),
       K.Field({ label:yz('ays.cards.on-yuz-soru'),
         input:K.Textarea({ id:'cf-front', rows:2, value:card ? card.front : '', placeholder:yz('ays.cards.geri-cagirma-gerektiren-soru') }) }),
@@ -323,7 +349,7 @@ R.Screens.cards = (function(){
     ]);
 
     UI.sheet({
-      title:card ? 'Kartı düzenle' : 'Kart oluştur',
+      title:card ? yz('ays.cards.karti-duzenle-2') : yz('ays.cards.kart-olustur'),
       body:String(body),
       footer:String(html`
         ${when(card, () => K.Button({ label:yz('ays.cards.sil'), tone:'danger', act:'delete-card', data:{ 'data-id':card.id } }))}
@@ -366,7 +392,7 @@ R.Screens.cards = (function(){
     const overdue = C.overdueCards().length;
     if(debt <= 10) return '';
     return K.Span(12, K.Notice({ tone:'warn', title:yz('ays.cards.tekrar-borcu')+debt+'.',
-      body:'Gecikmiş '+overdue+' kart var. %10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.' }));
+      body:yz('ays.cards.gecikmis')+overdue+' kart var. %10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.' }));
   }
 
   function sidebar(){
@@ -448,7 +474,7 @@ R.Screens.cards = (function(){
       }
       await M.saveCard(card);
       UI.closeSheet();
-      UI.toast(existing ? 'Kart güncellendi' : 'Kart eklendi');
+      UI.toast(existing ? yz('ays.cards.kart-guncellendi') : yz('ays.cards.kart-eklendi'));
       R.App.render();
     },
     async 'delete-card'(el){
@@ -479,8 +505,8 @@ R.Screens.cards = (function(){
        AYNI eylem; doğrulanır, yazılır, «Geri al» ile geri alınır. */
     async 'error-card'(el){
       const r = await R.Proposals.hemen({ action:'card-from-error', agent:'analist',
-        params:{ errorId:el.dataset.id }, reason:'Yanlış defterinden tek dokunuş.' });
-      if(!r.ok){ UI.toast(r.why || 'Kart üretilemedi'); return; }
+        params:{ errorId:el.dataset.id }, reason:yz('ays.cards.yanlis-defterinden-tek-dokun') });
+      if(!r.ok){ UI.toast(r.why || yz('ays.cards.kart-uretilemedi')); return; }
       UI.toast(yz('ays.cards.tekrar-karti-eklendi-ilk-tek'), { undo:async () => {
         await R.Proposals.undo(r.row.id);
         UI.toast(yz('ays.cards.kart-geri-alindi'));

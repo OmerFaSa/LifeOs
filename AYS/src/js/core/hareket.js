@@ -25,6 +25,12 @@
    Sözleşme: hareket BİLGİ taşımaz, yalnız değişikliği gösterir. Azaltılmış
    harekette hiçbiri çalışmaz; çalışmaması hiçbir işlevi bozmaz. Ekran
    hangi öğenin hareket edeceğini yalnız `data-h-*` ile söyler. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.hareket.lrow-side-lrow-label-kutu-ad':'.lrow__side .lrow__label, .kutu__ad, .card__title, h2, h3',
+  'ortak.hareket.tamamini-goster':'Tamamını göster',
+  'ortak.hareket.lrow-side-lrow-label':'.lrow__side .lrow__label',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -241,7 +247,7 @@ window.LIFEOS.HAREKET = (function(){
   const UZUN_PX = 1000, KISA_PX = 560, DUGME_PX = 56, KAZANC_PX = 200;
   const acikKutular = new Set();
   function kutuAnahtari(k){
-    const ad = k.querySelector(':scope > .lrow__side .lrow__label, .kutu__ad, .card__title, h2, h3');
+    const ad = k.querySelector((':scope > ' + yz('ortak.hareket.lrow-side-lrow-label-kutu-ad')));
     return (location.hash || '') + '|' + (ad ? ad.textContent.trim().slice(0, 60) : '');
   }
   function kutuSifirla(k){
@@ -260,7 +266,7 @@ window.LIFEOS.HAREKET = (function(){
     b.className = 'raf-ac';
     const yaz = acik => {
       b.setAttribute('aria-expanded', acik ? 'true' : 'false');
-      b.textContent = acik ? 'Kısalt' : 'Tamamını göster';
+      b.textContent = acik ? 'Kısalt' : yz('ortak.hareket.tamamini-goster');
     };
     yaz(k.classList.contains('raf-acik'));
     b.addEventListener('click', () => {
@@ -285,7 +291,7 @@ window.LIFEOS.HAREKET = (function(){
      gözden gizlenir (ekran okuyucu için kalır): aynı ad üst üste iki kez
      yazılmaz. */
   function ikizBaslik(k){
-    const et = k.querySelector(':scope > .lrow__side .lrow__label');
+    const et = k.querySelector((':scope > ' + yz('ortak.hareket.lrow-side-lrow-label')));
     if(!et) return;
     const ad = Array.from(et.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
     if(!ad) return;

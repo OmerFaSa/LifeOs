@@ -35,6 +35,16 @@
    Çizim SVG'dir ve dize olarak üretilir: çerçeve yok, tuval yok,
    bağımlılık yok (AGENTS.md §1.3). Renk yazılmaz; sınıf yazılır. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.grafik.veri-yok':'veri yok',
+  'ortak.grafik.gun-veri':'gün veri',
+  'ortak.grafik.ortalama-hesaplandi':'ortalama · hesaplandı',
+  'ortak.grafik.olcum':'ölçüm)',
+  'ortak.grafik.bu-hizla-hedefe-yaklasilmiyo':'Bu hızla hedefe yaklaşılmıyor',
+  'ortak.grafik.bu-hizla':'Bu hızla ',
+  'ortak.grafik.gecen-donem':'Geçen dönem',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.grafik.egilim-icin':'Eğilim için ',
   'ortak.grafik.hedef-yazilmamis':'Hedef yazılmamış',
   'ortak.grafik.tahmin-icin':'Tahmin için ',
@@ -282,9 +292,9 @@ window.LIFEOS = window.LIFEOS || {};
     if(!vs.length){
       return '<div class="metrik metrik--bos"><div class="metrik__bas">'
         + '<div class="metrik__asil"><span class="metrik__sayi">—</span></div>'
-        + '<div class="metrik__yan"><span>veri yok</span><span class="metrik__cipler">'
+        + ('<div class="metrik__yan"><span>' + yz('ortak.grafik.veri-yok') + '</span><span class="metrik__cipler">')
         + egilimHtml(s.map(x => x.deger), { yon:o.yon || 'artis-iyi', birim })
-        + '<span class="metrik__cip">0/' + n + ' gün veri</span></span></div></div>'
+        + '<span class="metrik__cip">0/' + n + (' ' + yz('ortak.grafik.gun-veri') + '</span></span></div></div>')
         + cizgiSvg(s, { gen:o.gen || 560, yuk:o.yuk || 140, etiket, birim })
         + cumleHtml(s, { etiket, birim, ondalik:od }) + '</div>';
     }
@@ -302,9 +312,9 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="metrik__bas">'
       +   '<div class="metrik__asil"><span class="metrik__sayi">' + kac(bicim(ort, od)) + '</span>'
       +     (birim ? '<span class="metrik__birim">' + kac(birim) + '</span>' : '') + '</div>'
-      +   '<div class="metrik__yan"><span>ortalama · hesaplandı</span>'
+      +   ('<div class="metrik__yan"><span>' + yz('ortak.grafik.ortalama-hesaplandi') + '</span>')
       +     '<span class="metrik__cipler">' + egilimHtml(s.map(x => x.deger), { yon:o.yon || 'artis-iyi', birim })
-      +     '<span class="metrik__cip">' + vs.length + '/' + n + ' gün veri</span></span></div>'
+      +     '<span class="metrik__cip">' + vs.length + '/' + n + (' ' + yz('ortak.grafik.gun-veri') + '</span></span></div>')
       + '</div>'
       + '<div class="metrik__grafik">'
       +   '<div class="metrik__y" aria-hidden="true"><span>' + b(max) + '</span><span>' + b(min) + '</span></div>'
@@ -421,7 +431,7 @@ window.LIFEOS = window.LIFEOS || {};
     return '<span class="egilim egilim--' + e.anlam + '" data-oz="037" data-yon="' + e.yonu + '">'
       + '<svg class="egilim__ok" viewBox="0 0 14 14" aria-hidden="true">' + OK[e.yonu] + '</svg>'
       + '<span>' + kac(e.metin) + '</span>'
-      + '<span class="sr-only"> (' + e.n + ' ölçüm)</span></span>';
+      + '<span class="sr-only"> (' + e.n + (' ' + yz('ortak.grafik.olcum') + '</span></span>');
   }
 
   /* --------------------------------------------- 041 veri doluluğu */
@@ -650,10 +660,10 @@ window.LIFEOS = window.LIFEOS || {};
       yeterli:true, ulasti:false, n:nk.length, egim:egim, se:se, son:son.t,
       olasi:tarih(olasi), erken:tarih(erken), gec:tarih(gec),
       yaklasmiyor:olasi == null,
-      metin:olasi == null ? 'Bu hızla hedefe yaklaşılmıyor'
+      metin:olasi == null ? yz('ortak.grafik.bu-hizla-hedefe-yaklasilmiyo')
         : erken === gec
-          ? 'Bu hızla ' + tarihMetni(tarih(olasi)) + ' (tahmin, ' + nk.length + ' ölçüm)'
-          : 'Bu hızla ' + (gec != null ? aralikMetni(tarih(erken), tarih(gec)) : tarihMetni(tarih(erken)) + ' ya da daha geç')
+          ? yz('ortak.grafik.bu-hizla') + tarihMetni(tarih(olasi)) + ' (tahmin, ' + nk.length + ' ölçüm)'
+          : yz('ortak.grafik.bu-hizla') + (gec != null ? aralikMetni(tarih(erken), tarih(gec)) : tarihMetni(tarih(erken)) + ' ya da daha geç')
             + '; en olası ' + tarihMetni(tarih(olasi)) + ' (tahmin, ' + nk.length + ' ölçüm)',
     };
   }
@@ -711,7 +721,7 @@ window.LIFEOS = window.LIFEOS || {};
   /* Katman D: gölge grafik başındaki anahtarla açılır (EKIP-PLANI Ek A 32). */
   function gecenDonemDugmesi(acik){
     return '<button type="button" class="chip chip--tap' + (acik ? ' chip--on' : '') + '" data-oz="032"'
-      + ' data-act="grafik-gecen-donem" aria-pressed="' + (acik ? 'true' : 'false') + '">Geçen dönem</button>';
+      + ' data-act="grafik-gecen-donem" aria-pressed="' + (acik ? 'true' : 'false') + ('">' + yz('ortak.grafik.gecen-donem') + '</button>');
   }
 
   /* --------------------------------------------- 036 dağılım şeridi */

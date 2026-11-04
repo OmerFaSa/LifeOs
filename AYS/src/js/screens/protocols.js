@@ -1,6 +1,14 @@
 /* Telafi — durum tespiti, protokol baslatma ve takip.
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.protocols.telafi-gerektiren-sapma-yok':'Telafi gerektiren sapma yok.',
+  'ays.protocols.telafi-protokolleri':'Telafi protokolleri',
+  'ays.protocols.motivasyon-ve-dalgalanma':'Motivasyon ve dalgalanma',
+  'ays.protocols.sinav-kaygisi':'Sınav kaygısı',
+  'ays.protocols.aktif-telafi-yok':'Aktif telafi yok',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -122,10 +130,10 @@ R.Screens.protocols = (function(){
     return triggers.length
         ? K.Notice({ tone:'warn', title:triggers.length+' tetikleyici aktif.',
             body:triggers.map(t => t.detail).join(' · ')+' — aşağıdaki protokoller öneriliyor.' })
-        : K.Notice({ tone:'ok', body:'Telafi gerektiren sapma yok.' });
+        : K.Notice({ tone:'ok', body:yz('ays.protocols.telafi-gerektiren-sapma-yok') });
   } });
   LIFEOS.PARCA.blok({ id:'protocols.telafi-protokolleri', sayfa:'protocols', yer:'y2', sira:10, ad:'Telafi protokolleri', ciz({ triggers, active, triggerMap, activeMap }){
-    return K.SectionTitle('Telafi protokolleri');
+    return K.SectionTitle(yz('ays.protocols.telafi-protokolleri'));
   } });
   LIFEOS.PARCA.blok({ id:'protocols.protocolcard', sayfa:'protocols', yer:'y2', sira:20, ad:'Protokol', ciz({ triggers, active, triggerMap, activeMap }){
     return map(R.RECOVERY_PROTOCOLS, def => protocolCard(def, triggerMap[def.id], activeMap[def.id]));
@@ -140,10 +148,10 @@ R.Screens.protocols = (function(){
     return sleepCard();
   } });
   LIFEOS.PARCA.blok({ id:'protocols.routinecard', sayfa:'protocols', yer:'y3', sira:30, ad:'Rutin', ciz({ triggers, active, triggerMap, activeMap }){
-    return routineCard('Motivasyon ve dalgalanma', R.ROUTINES.motivation, 'motivation');
+    return routineCard(yz('ays.protocols.motivasyon-ve-dalgalanma'), R.ROUTINES.motivation, 'motivation');
   } });
   LIFEOS.PARCA.blok({ id:'protocols.routinecard-2', sayfa:'protocols', yer:'y3', sira:40, ad:'Rutin', ciz({ triggers, active, triggerMap, activeMap }){
-    return routineCard('Sınav kaygısı', R.ROUTINES.anxiety, 'anxiety');
+    return routineCard(yz('ays.protocols.sinav-kaygisi'), R.ROUTINES.anxiety, 'anxiety');
   } });
   LIFEOS.PARCA.blok({ id:'protocols.aciklamalar', sayfa:'protocols', yer:'y4', sira:10, ad:'Açıklamalar', ciz({ triggers, active, triggerMap, activeMap }){
     return raw(UI.rail(['protocol', 'trigger', 'minimum-day', 'sleep', 'anxiety']));
@@ -224,7 +232,7 @@ R.Screens.protocols = (function(){
     title:yz('ays.protocols.telafi'),
     subtitle(){
       const a = M.activeProtocols().length, t = C.protocolTriggers().length;
-      return a ? a+' protokol aktif' : t ? t+' tetikleyici bekliyor' : 'Aktif telafi yok';
+      return a ? a+' protokol aktif' : t ? t+' tetikleyici bekliyor' : yz('ays.protocols.aktif-telafi-yok');
     },
     actions(){ return ''; },
     render, handle,

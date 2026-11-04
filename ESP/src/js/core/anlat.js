@@ -14,6 +14,10 @@
      4. SES CİHAZDA KALIR: dikte tarayıcının kendi tanımasıdır (core/voice),
         kaydedilen yalnız sayılar ve tarihtir, anlatımın metni değil. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.anlat.olcu-yok':'Ölçü yok.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.anlat.veri-yok':'veri yok',
   'esp.core.anlat.bu-kaynagin-notlarinda-en-az':'Bu kaynağın notlarında en az ',
   'esp.core.anlat.anlatim-cok-kisa-en-az':'Anlatım çok kısa; en az birkaç cümle anlat.',
@@ -77,7 +81,7 @@ ESP.Anlat = (function(){
 
   /* Kaydedilen: kaynak, tarih, kaç kavram geçti. Metin kaydedilmez. */
   async function kaydet(bookId, k){
-    if(!k || !k.ok) return { ok:false, why:(k && k.why) || 'Ölçü yok.' };
+    if(!k || !k.ok) return { ok:false, why:(k && k.why) || yz('esp.core.anlat.olcu-yok') };
     kayitlar().push({ at:new Date().toISOString(), gun:U().todayISO(), bookId,
       gecen:k.gecen.length, toplam:k.toplam });
     ESP.S.anlatim = kayitlar().slice(-SAKLA);

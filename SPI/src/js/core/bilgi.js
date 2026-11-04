@@ -17,6 +17,25 @@
      4. GERİ ALINIR. Her yazım kimliğiyle silinir.
      5. İSTEĞE SAĞLIK VERİSİ GİTMEZ: tür, ad, semt, şehir — o kadar. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.bilgi.bearer':'Bearer ',
+  'spi.core.bilgi.spi-mutfak-tan':'SPİ Mutfak’tan ',
+  'spi.core.bilgi.rehber-hkm-den-baglaninca-ye':'Rehber › HKM’den bağlanınca yeniden iste.',
+  'spi.core.bilgi.bu-istek-zaten-acik-is':'Bu istek zaten açık (iş emri #',
+  'spi.core.bilgi.king-teklif-hazirladi-is-emr':'King teklif hazırladı (iş emri #',
+  'spi.core.bilgi.doymus-yag-toplam-yagi-asiyo':'Doymuş yağ toplam yağı aşıyordu; boş bırakıldı.',
+  'spi.core.bilgi.seker-karbonhidrati-asiyordu':'Şeker karbonhidratı aşıyordu; boş bırakıldı.',
+  'spi.core.bilgi.tabloda-ayni-adli':'Tabloda aynı adlı «',
+  'spi.core.bilgi.kaynaksiz-ya-da-dogrulanmadi':'Kaynaksız ya da doğrulanmadı: ambalajdaki besin etiketiyle karşılaştır.',
+  'spi.core.bilgi.etiket-bam-kaynakli':'Etiket: BAM · kaynaklı (',
+  'spi.core.bilgi.etiket-bam-dogrulanmadi':'Etiket: BAM · doğrulanmadı',
+  'spi.core.bilgi.kendi-fisin':'Kendi fişin (',
+  'spi.core.bilgi.gram-protein-basina':'Gram protein başına ',
+  'spi.core.bilgi.yer-listesi':'Yer listesi',
+  'spi.core.bilgi.kayit-kimligi-gecersiz':'Kayıt kimliği geçersiz.',
+  'spi.core.bilgi.hkm-baglantisi-kurulmamis-ka':'HKM bağlantısı kurulmamış; kayıt alınamaz.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.bilgi.tur-besin-fiyat-ya-da':'Tür besin, fiyat ya da yer olmalı.',
   'spi.core.bilgi.ad-2-60-karakter-olmali':'Ad 2–60 karakter olmalı.',
   'spi.core.bilgi.yer-listesi-icin-semt-ya':'Yer listesi için semt ya da şehir gerekli.',
@@ -80,7 +99,7 @@ SP.Bilgi = (function(){
     try{
       const res = await fetch(k.url + yol, {
         method:govde === undefined ? 'GET' : 'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('spi.core.bilgi.bearer') + k.token },
         body:govde === undefined ? undefined : JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });
@@ -113,9 +132,9 @@ SP.Bilgi = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'spi', tur:'spi.bilgi',
-      konu:'', neden:'SPİ Mutfak’tan ' + TUR_AD[t.bilgi.tur] + ' istendi.', govde:{ bilgi:t.bilgi } });
+      konu:'', neden:yz('spi.core.bilgi.spi-mutfak-tan') + TUR_AD[t.bilgi.tur] + ' istendi.', govde:{ bilgi:t.bilgi } });
     if(!r.bagli) return { ok:false, metin:yz('spi.core.bilgi.bunu-hkm-deki-arastirma-buro')
-      + 'Rehber › HKM’den bağlanınca yeniden iste.' };
+      + yz('spi.core.bilgi.rehber-hkm-den-baglaninca-ye') };
     if(r.ag) return { ok:false, metin:yz('spi.core.bilgi.hkm-ye-ulasilamadi-is-emri-a') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
@@ -124,8 +143,8 @@ SP.Bilgi = (function(){
     if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
     const e = g.emir || {};
     return { ok:true, emir:e.id, metin:g.yeni === false
-      ? 'Bu istek zaten açık (iş emri #' + e.id + ').'
-      : 'King teklif hazırladı (iş emri #' + e.id + '). Onaylarsan Araştırma Bürosu başlar; '
+      ? yz('spi.core.bilgi.bu-istek-zaten-acik-is') + e.id + ').'
+      : yz('spi.core.bilgi.king-teklif-hazirladi-is-emr') + e.id + '). Onaylarsan Araştırma Bürosu başlar; '
         + 'sonuç Bugün’e teklif olarak gelir.' };
   }
 
@@ -150,8 +169,8 @@ SP.Bilgi = (function(){
         + ' kcal, makrolardan ' + Math.round(hesap) + ' kcal).' };
     }
     const uyari = [];
-    if(v.sat != null && v.sat > v.f + 0.5){ v.sat = null; uyari.push('Doymuş yağ toplam yağı aşıyordu; boş bırakıldı.'); }
-    if(v.sugar != null && v.sugar > v.c + 0.5){ v.sugar = null; uyari.push('Şeker karbonhidratı aşıyordu; boş bırakıldı.'); }
+    if(v.sat != null && v.sat > v.f + 0.5){ v.sat = null; uyari.push(yz('spi.core.bilgi.doymus-yag-toplam-yagi-asiyo')); }
+    if(v.sugar != null && v.sugar > v.c + 0.5){ v.sugar = null; uyari.push(yz('spi.core.bilgi.seker-karbonhidrati-asiyordu')); }
     const ham = g.micro && typeof g.micro === 'object' ? g.micro : {};
     const micro = {};
     Object.keys(MIKRO).forEach(k => { const x = sayi(ham[k], MIKRO[k]); if(x != null) micro[k] = x; });
@@ -221,8 +240,8 @@ SP.Bilgi = (function(){
       }
       const uyari = s.uyari.slice();
       const ayni = (SP.FOODS || []).find(f => U().norm(f.name) === U().norm(s.ad));
-      if(ayni) uyari.push('Tabloda aynı adlı «' + ayni.name + '» var; bu ayrı bir gıda olarak eklenir.');
-      if(!dogrulandi) uyari.push('Kaynaksız ya da doğrulanmadı: ambalajdaki besin etiketiyle karşılaştır.');
+      if(ayni) uyari.push(yz('spi.core.bilgi.tabloda-ayni-adli') + ayni.name + '» var; bu ayrı bir gıda olarak eklenir.');
+      if(!dogrulandi) uyari.push(yz('spi.core.bilgi.kaynaksiz-ya-da-dogrulanmadi'));
       const food = Object.assign(SP.Model.newFood(), { name:s.ad, cat:'diger',
         kcal:s.v.kcal, p:s.v.p, f:s.v.f, c:s.v.c, sat:s.v.sat, sugar:s.v.sugar, fib:s.v.fib,
         micro:s.micro, portions:s.portions,
@@ -239,7 +258,7 @@ SP.Bilgi = (function(){
             + ' g · karbonhidrat ' + yaz(s.v.c) + ' g',
           (Object.keys(s.micro).length + ' mikro besin kaynaklı; ' + s.eksikMikro
             + ' tanesi bilinmiyor (sıfır sayılmaz)'),
-          dogrulandi ? 'Etiket: BAM · kaynaklı (' + kaynak + ' kaynak)' : 'Etiket: BAM · doğrulanmadı']),
+          dogrulandi ? yz('spi.core.bilgi.etiket-bam-kaynakli') + kaynak + ' kaynak)' : yz('spi.core.bilgi.etiket-bam-dogrulanmadi')]),
         uyari } };
     }
 
@@ -255,10 +274,10 @@ SP.Bilgi = (function(){
       }
       const uyari = [];
       const kendi = SP.S.prices && SP.S.prices[foodId];
-      if(kendi && kendi.tl) uyari.push('Kendi fişin (' + yaz(kendi.tl) + ' TL/kg) önce gelir; bu tahmin onun altında durur.');
+      if(kendi && kendi.tl) uyari.push(yz('spi.core.bilgi.kendi-fisin') + yaz(kendi.tl) + ' TL/kg) önce gelir; bu tahmin onun altında durur.');
       /* Gram protein başına maliyet (8c-3): «en ucuz protein» listesiyle aynı
          formül (money.js costPerNutrient): TL/kg ÷ (100 g'daki protein × 10). */
-      const proteinTl = food.p > 0 ? ['Gram protein başına ' + U().fmtNet(U().round(s.tlKg / (food.p * 10), 3))
+      const proteinTl = food.p > 0 ? [yz('spi.core.bilgi.gram-protein-basina') + U().fmtNet(U().round(s.tlKg / (food.p * 10), 3))
         + ' TL (hesaplandı; fiyat tahmin)'] : [];
       return { ok:true, tur, yazilacak:{ foodId, fiyat:{ tl:s.tlKg, at:s.tarih || at, kayitId:kid,
           n:s.satir.length, source:'bam' } },
@@ -271,7 +290,7 @@ SP.Bilgi = (function(){
     const s = yerSina(g);
     if(!s.ok) return s;
     if((SP.S.yerler || []).some(y => y.kayitId === kid)) return { ok:false, why:yz('spi.core.bilgi.bu-yer-listesi-zaten-eklenmi') };
-    const baslik = metin(g.ad, 2, 60) || 'Yer listesi';
+    const baslik = metin(g.ad, 2, 60) || yz('spi.core.bilgi.yer-listesi');
     const konum = [metin(g.semt, 2, 60), metin(g.sehir, 2, 60)].filter(Boolean).join(', ');
     return { ok:true, tur, yazilacak:{ yer:{ id:'bam-' + kid, kayitId:kid, baslik, konum,
         yerler:s.yerler, at, etiket:'tahmin' } },
@@ -324,12 +343,12 @@ SP.Bilgi = (function(){
 
   /* Onay: YENİDEN çekilir, YENİDEN sınanır, sonra yazılır. */
   async function uygula(kind, p){
-    if(!NIYET[kind]) return { ok:false, error:'Bilinmeyen teklif türü.' };
+    if(!NIYET[kind]) return { ok:false, error:yz('spi.core.bilgi.bilinmeyen-teklif-turu') };
     const kid = Number(p && p.kayit_id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Kayıt kimliği geçersiz.' };
-    if(!baglanti()) return { ok:false, error:'HKM bağlantısı kurulmamış; kayıt alınamaz.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('spi.core.bilgi.kayit-kimligi-gecersiz') };
+    if(!baglanti()) return { ok:false, error:yz('spi.core.bilgi.hkm-baglantisi-kurulmamis-ka') };
     const kayit = await kayitCek(kid);
-    if(!kayit) return { ok:false, error:'Kayıt HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    if(!kayit) return { ok:false, error:yz('spi.core.bilgi.kayit-hkm-den-alinamadi-hkm') };
     const s = sina(kind, kayit, p);
     if(!s.ok) return { ok:false, error:s.why };
     const r = await yazSonuc(s);

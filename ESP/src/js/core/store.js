@@ -1,6 +1,10 @@
 /* Kalici depolama: ortak depo katmanina (brand/ortak/depo.js) bu modulun ayarlari.
    Davranis orada; burada yalniz anahtarlar, ad ve sema surumu durur. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.store.ayarlar-rehber-veri':'Ayarlar → Rehber → Veri',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.store.esp':'ESP',
 });
 
@@ -17,5 +21,5 @@ ESP.Store = LIFEOS.Depo.kur({
   yerelAnahtar:p => 'esp.v1.' + p,
   ad:yz('esp.core.store.esp'),
   alan:'esp',
-  veriYeri:'Ayarlar → Rehber → Veri',
+  veriYeri:yz('esp.core.store.ayarlar-rehber-veri'),
 });

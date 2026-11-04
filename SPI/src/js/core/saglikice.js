@@ -27,6 +27,22 @@
      5. GERİ ALINIR. Yazılan her (gün, alan) kaydedilir; «Geri al» o alanı
         yalnız hâlâ içe aktarılan değeri taşıyorsa boşaltır. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.saglikice.uyku-saat':'Uyku (saat)',
+  'spi.core.saglikice.i-stirahat-nabzi':'İstirahat nabzı',
+  'spi.core.saglikice.buyuk-tansiyon':'Büyük tansiyon',
+  'spi.core.saglikice.kucuk-tansiyon':'Küçük tansiyon',
+  'spi.core.saglikice.oksijen':'Oksijen (%)',
+  'spi.core.saglikice.kilo-kg':'Kilo (kg)',
+  'spi.core.saglikice.bel-cm':'Bel (cm)',
+  'spi.core.saglikice.yag-orani':'Yağ oranı (%)',
+  'spi.core.saglikice.su-ml':'Su (ml)',
+  'spi.core.saglikice.yatis-saati':'Yatış saati',
+  'spi.core.saglikice.kalkis-saati':'Kalkış saati',
+  'spi.core.saglikice.adim-spi-de-adim-alani-yok':'Adım (SPİ’de adım alanı yok)',
+  'spi.core.saglikice.dosyadan-spi-ye-yazilacak-ye':'Dosyadan SPİ’ye yazılacak yeni bir ölçüm çıkmadı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.saglikice.zip-okunamadi':'Zip okunamadı.',
   'spi.core.saglikice.bu-zip-cok-buyuk-zip64':'Bu zip çok büyük (ZIP64). Zip’i telefonda açıp içindeki export.xml’i seç.',
   'spi.core.saglikice.zip-te-export-xml-yok-iphone':'Zip’te export.xml yok. iPhone Sağlık › dışa aktar dosyasını seç.',
@@ -49,9 +65,9 @@ SP.SaglikIce = (function(){
      telefonun uyku kaydından gelir; süreden saat uydurulmaz. */
   const ARALIK = { sleep:[0.5, 16], rhr:[30, 140], sbp:[60, 250], dbp:[30, 160], spo2:[70, 100],
     weight:[20, 250], waist:[40, 200], bodyfat:[3, 60], water:[1, 8000], yatis:[16, 32], kalkis:[24, 40] };
-  const AD = { sleep:'Uyku (saat)', rhr:'İstirahat nabzı', sbp:'Büyük tansiyon', dbp:'Küçük tansiyon',
-    spo2:'Oksijen (%)', weight:'Kilo (kg)', waist:'Bel (cm)', bodyfat:'Yağ oranı (%)', water:'Su (ml)',
-    yatis:'Yatış saati', kalkis:'Kalkış saati' };
+  const AD = { sleep:yz('spi.core.saglikice.uyku-saat'), rhr:yz('spi.core.saglikice.i-stirahat-nabzi'), sbp:yz('spi.core.saglikice.buyuk-tansiyon'), dbp:yz('spi.core.saglikice.kucuk-tansiyon'),
+    spo2:yz('spi.core.saglikice.oksijen'), weight:yz('spi.core.saglikice.kilo-kg'), waist:yz('spi.core.saglikice.bel-cm'), bodyfat:yz('spi.core.saglikice.yag-orani'), water:yz('spi.core.saglikice.su-ml'),
+    yatis:yz('spi.core.saglikice.yatis-saati'), kalkis:yz('spi.core.saglikice.kalkis-saati') };
   /* Günlük özetin kuralı: toplam (su), son (kilo, bel, yağ), ortanca (diğerleri). */
   const OZET = { water:'toplam', weight:'son', waist:'son', bodyfat:'son' };
 
@@ -69,7 +85,7 @@ SP.SaglikIce = (function(){
   };
   const ALINMAYAN = {
     HKQuantityTypeIdentifierHeartRateVariabilitySDNN:'HRV (Apple SDNN verir; SPİ’nin HRV’si RMSSD — aynı ölçü değil)',
-    HKQuantityTypeIdentifierStepCount:'Adım (SPİ’de adım alanı yok)',
+    HKQuantityTypeIdentifierStepCount:yz('spi.core.saglikice.adim-spi-de-adim-alani-yok'),
   };
   const UYKU = 'HKCategoryTypeIdentifierSleepAnalysis';
 
@@ -212,7 +228,7 @@ SP.SaglikIce = (function(){
     return { ok:yaz.length > 0, yaz, cakisma, aralikDisi:disi, satir:t.satir,
       alanlar:Object.keys(alanlar).map(k => alanlar[k]),
       alinmayan:Object.keys(t.alinmayan).map(k => ({ ad:ALINMAYAN[k] || ('«' + k + '» (tanınmayan ölçü)'), adet:t.alinmayan[k] })),
-      why:yaz.length ? null : 'Dosyadan SPİ’ye yazılacak yeni bir ölçüm çıkmadı.' };
+      why:yaz.length ? null : yz('spi.core.saglikice.dosyadan-spi-ye-yazilacak-ye') };
   }
 
   function altSinir(gun){ return gun ? U().iso(U().addDays(U().today(), -gun)) : null; }

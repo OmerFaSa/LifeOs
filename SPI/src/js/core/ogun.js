@@ -18,6 +18,13 @@
    Depo: `prefs.ogunler`. SP.MEAL_SLOTS aynı dizi olarak tazelenir: onu
    okuyan bütün ekranlar (öğün kartı, şablon, dünkü) değişmeden yeni adı görür. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.ogun.ogun-listesi-bozuk':'Öğün listesi bozuk.',
+  'spi.core.ogun.en-az-bir-ogun-kalmali':'En az bir öğün kalmalı.',
+  'spi.core.ogun.en-cok':'En çok ',
+  'spi.core.ogun.ogunun-adi-bos-olamaz':'Öğünün adı boş olamaz.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.ogun.kahvalti':'Kahvaltı',
   'spi.core.ogun.ara-ogun':'Ara öğün',
   'spi.core.ogun.ogle':'Öğle',
@@ -63,7 +70,7 @@ SP.Ogun = (function(){
   function bul(id){ return kayitli().find(x => x.id === id) || null; }
   /* «ara» hiçbir zaman bir öğün kimliği olmadı ama hızlı giriş ve öneriler
      onu yazıyordu (kartta «ara» görünüyordu): eski kayıt «Ara öğün» okunur. */
-  const ESKI = { ara:'Ara öğün' };
+  const ESKI = { ara:yz('spi.core.ogun.ara-ogun') };
   function ad(id){ const s = bul(id); return s ? s.label : ESKI[id] || (YERLESIK.find(x => x.id === id) || { label:id }).label; }
 
   /* SP.MEAL_SLOTS'u yerinde tazeler (aynı dizi nesnesi). */
@@ -100,14 +107,14 @@ SP.Ogun = (function(){
 
   function dogrula(l){
     const h = [];
-    if(!Array.isArray(l)) return ['Öğün listesi bozuk.'];
+    if(!Array.isArray(l)) return [yz('spi.core.ogun.ogun-listesi-bozuk')];
     const acik = l.filter(x => !x.gizli);
-    if(!acik.length) h.push('En az bir öğün kalmalı.');
-    if(acik.length > EN_COK) h.push('En çok ' + EN_COK + ' öğün olur.');
+    if(!acik.length) h.push(yz('spi.core.ogun.en-az-bir-ogun-kalmali'));
+    if(acik.length > EN_COK) h.push(yz('spi.core.ogun.en-cok') + EN_COK + ' öğün olur.');
     const adlar = {};
     acik.forEach(x => {
       const a = String(x.label || '').trim();
-      if(!a) h.push('Öğünün adı boş olamaz.');
+      if(!a) h.push(yz('spi.core.ogun.ogunun-adi-bos-olamaz'));
       else if(a.length > EN_UZUN) h.push('«' + a.slice(0, 12) + '…» en çok ' + EN_UZUN + ' harf olur.');
       const k = a.toLocaleLowerCase('tr');
       if(a && adlar[k]) h.push('«' + a + '» iki kez yazılmış.');

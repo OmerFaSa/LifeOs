@@ -8,6 +8,28 @@
    Sistem bağ KURMAZ, bağ ÖNERİR: iki notun ortak kavramı varsa satır düşer,
    bağın nedenini kullanıcı yazar. Nedeni uydurmak, uydurulmuş sayı kadar
    zararlıdır — matris görünür ama anlamsız olur. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.library.ne-yapilir':'Ne yapılır',
+  'esp.library.ne-zaman':'Ne zaman',
+  'esp.library.suzgece-uyan-not-yok':'Süzgece uyan not yok.',
+  'esp.library.henuz-atomik-not-yok-okudugu':'Henüz atomik not yok. Okuduğun tek bir fikri tek cümleyle yaz.',
+  'esp.library.yalniz-son':'Yalnız son ',
+  'esp.library.tumu':'Tümü · ',
+  'esp.library.baglanacak-baska-not-yok':'Bağlanacak başka not yok.',
+  'esp.library.not-ve-kaynak-girildiginde-k':'Not ve kaynak girildiğinde katsayı hesaplanmaya başlar.',
+  'esp.library.ortak-kavram-bulunamadi-notl':'Ortak kavram bulunamadı. Notlara kavram etiketi eklemek öneri açar.',
+  'esp.library.baglanmamis-not-yok':'Bağlanmamış not yok.',
+  'esp.library.notlara-kavram-ekledikce-bur':'Notlara kavram ekledikçe burası açılır.',
+  'esp.library.kaydedildi-yalniz-kavram-say':'Kaydedildi · yalnız kavram sayısı',
+  'esp.library.not-eklendi':'Not eklendi · ',
+  'esp.library.not-eklendi-kavram-bulunamad':'Not eklendi · kavram bulunamadı',
+  'esp.library.kullanicinin-bir-kaynaktan-a':'Kullanıcının bir kaynaktan aldığı notları üç maddeye indir. Yalnız notlarda geçen bilgiyi kullan; ',
+  'esp.library.henuz-atomik-not-yok':'Henüz atomik not yok.',
+  'esp.library.i-ki-not-ayni-kavramda-bulus':'İki not aynı kavramda buluşuyor.',
+  'esp.library.kac-sayfa-okudugun-degil-kac':'Kaç sayfa okuduğun değil, kaç bağ kurduğun sayılır. ',
+  'esp.library.baglanmamis-not-henuz-sermay':'Bağlanmamış not henüz sermaye değildir.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -143,7 +165,7 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:yz('esp.library.okuma-protokolu'), hint:'protocol',
         meta:ESP.READING_PROTOCOL.length + ' adım',
-        body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
+        body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', yz('esp.library.ne-yapilir')],
           rows:ESP.READING_PROTOCOL.map(p => [String(p.step), p.label, p.do]) }),
       }),
 
@@ -151,7 +173,7 @@ ESP.Screens.library = (function(){
         label:yz('esp.library.not-sablonlari'), hint:'note-template',
         meta:ESP.NOTE_TEMPLATES.length + ' şablon',
         wide:true,
-        body:K.Table({ tight:true, headers:['Şablon', 'Biçim', 'Ne zaman'],
+        body:K.Table({ tight:true, headers:['Şablon', 'Biçim', yz('esp.library.ne-zaman')],
           rows:ESP.NOTE_TEMPLATES.map(t => [t.label, t.form, t.use]) }),
       }),
 
@@ -197,8 +219,8 @@ ESP.Screens.library = (function(){
 
     if(!hepsi.length){
       rows.push(K.Entry({ label:yz('esp.library.notlar'), meta:'yok',
-        body:K.Empty({ text:q || kavram ? 'Süzgece uyan not yok.'
-          : 'Henüz atomik not yok. Okuduğun tek bir fikri tek cümleyle yaz.' }) }));
+        body:K.Empty({ text:q || kavram ? yz('esp.library.suzgece-uyan-not-yok')
+          : yz('esp.library.henuz-atomik-not-yok-okudugu') }) }));
       return rows;
     }
 
@@ -243,7 +265,7 @@ ESP.Screens.library = (function(){
           </div>`;
       })}
       ${when(!suzgec && hepsi.length > NOT_ILK, () => K.Button({ size:'sm', tone:'ghost', act:'not-tumu', class:'mt-8',
-        label:S.ui.notTumu ? 'Yalnız son ' + NOT_ILK : 'Tümü · ' + hepsi.length + ' not' }))}`,
+        label:S.ui.notTumu ? yz('esp.library.yalniz-son') + NOT_ILK : yz('esp.library.tumu') + hepsi.length + ' not' }))}`,
     }));
 
     return rows;
@@ -254,7 +276,7 @@ ESP.Screens.library = (function(){
     const adaylar = (S.notes || []).filter(x => x.id !== n.id
       && !(n.links || []).some(l => l.to === x.id));
     if(!adaylar.length){
-      return K.Notice({ tone:'info', body:'Bağlanacak başka not yok.' });
+      return K.Notice({ tone:'info', body:yz('esp.library.baglanacak-baska-not-yok') });
     }
     return html`
       <div class="linkform">
@@ -304,7 +326,7 @@ ESP.Screens.library = (function(){
             + ss.authors + ' yazar)',
         body:ss.cert === 'missing'
           ? K.Notice({ tone:'info', body:ss.why
-              || 'Not ve kaynak girildiğinde katsayı hesaplanmaya başlar.' })
+              || yz('esp.library.not-ve-kaynak-girildiginde-k') })
           : html`
             ${K.Meter({ label:yz('esp.library.baglanmis-not-orani'), value:ss.linkedRatio * 100,
               text:ss.linked + '/' + ss.total })}`,
@@ -330,8 +352,8 @@ ESP.Screens.library = (function(){
                 </div>
               </div>`)}`
           : K.Empty({ text:bagsiz.length
-              ? 'Ortak kavram bulunamadı. Notlara kavram etiketi eklemek öneri açar.'
-              : 'Bağlanmamış not yok.' }),
+              ? yz('esp.library.ortak-kavram-bulunamadi-notl')
+              : yz('esp.library.baglanmamis-not-yok') }),
       }),
 
       K.Entry({
@@ -380,7 +402,7 @@ ESP.Screens.library = (function(){
       wide:true,
       body:!uygun.length
         ? K.Empty({ text:yz('esp.library.notlarinda-en-az') + ESP.Anlat.EN_AZ_KAVRAM + ' kavram etiketi olan bir kaynak yok. '
-            + 'Notlara kavram ekledikçe burası açılır.' })
+            + yz('esp.library.notlara-kavram-ekledikce-bur') })
         : html`
           <div class="row gap-8 wrap">
             ${K.Select({ id:'anlat-kitap', value:secili.id, aria:yz('esp.library.anlatilacak-kaynak'), change:'anlat-kitap',
@@ -607,7 +629,7 @@ ESP.Screens.library = (function(){
     },
     async 'anlat-kaydet'(){
       const r = await ESP.Anlat.kaydet(S.ui.anlatKitap, S.ui.anlatSonuc);
-      ESP.UI.toast(r.ok ? 'Kaydedildi · yalnız kavram sayısı' : r.why);
+      ESP.UI.toast(r.ok ? yz('esp.library.kaydedildi-yalniz-kavram-say') : r.why);
       S.ui.anlatSonuc = null;
       S.ui.anlatMetin = '';
       ESP.App.render();
@@ -628,8 +650,8 @@ ESP.Screens.library = (function(){
         concepts:kavramlar }));
       ESP.Memo.bitir();
       ESP.UI.toast(kavramlar.length
-        ? 'Not eklendi · ' + kavramlar.length + ' kavram bulundu'
-        : 'Not eklendi · kavram bulunamadı');
+        ? yz('esp.library.not-eklendi') + kavramlar.length + ' kavram bulundu'
+        : yz('esp.library.not-eklendi-kavram-bulunamad'));
       ESP.App.render();
     },
 
@@ -679,7 +701,7 @@ ESP.Screens.library = (function(){
       ESP.UI.toast(yz('esp.library.notlarin-ozetleniyor'));
       try{
         const r = await ESP.Office.tamamla(OZET_AJAN, {
-          system:'Kullanıcının bir kaynaktan aldığı notları üç maddeye indir. Yalnız notlarda geçen bilgiyi kullan; '
+          system:yz('esp.library.kullanicinin-bir-kaynaktan-a')
             + 'yorum, dış bilgi ve yeni sayı ekleme. Türkçe, her madde tek cümle. '
             + 'ÇIKTI yalnız JSON: {"maddeler":["…","…","…"]}',
           messages:[{ role:'user', text:yz('esp.library.kaynak') + b.title + '\nNotlar:\n- ' + notlar.slice(0, 40).join('\n- ') }],
@@ -734,16 +756,16 @@ ESP.Screens.library = (function(){
     title:yz('esp.library.kutuphane'),
     headline(){
       const ss = ESP.Intellect.syntopic();
-      if(!ss.total) return 'Henüz atomik not yok.';
+      if(!ss.total) return yz('esp.library.henuz-atomik-not-yok');
       const bagsiz = ss.total - ss.linked;
       if(bagsiz >= 3) return bagsiz + ' not hiçbir yere bağlı değil.';
       const oneri = ESP.Intellect.linkSuggestions(1);
-      if(oneri.length) return 'İki not aynı kavramda buluşuyor.';
+      if(oneri.length) return yz('esp.library.i-ki-not-ayni-kavramda-bulus');
       return ss.linked + ' not bağlı.';
     },
     lede(){
-      return 'Kaç sayfa okuduğun değil, kaç bağ kurduğun sayılır. '
-           + 'Bağlanmamış not henüz sermaye değildir.';
+      return yz('esp.library.kac-sayfa-okudugun-degil-kac')
+           + yz('esp.library.baglanmamis-not-henuz-sermay');
     },
     stats(){
       const ss = ESP.Intellect.syntopic();

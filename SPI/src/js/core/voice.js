@@ -12,6 +12,15 @@
    Tarayicinin kendi konusma motoru kullanilir. Desteklenmeyen tarayicida
    katman sessizce yok olur -- mikrofon dugmesi hic cizilmez, elle giris
    yolu zaten her yerde durur. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.voice.bu-tarayici-ses-tanimayi-des':'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
+  'spi.core.voice.mikrofon-izni-verilmedi':'Mikrofon izni verilmedi.',
+  'spi.core.voice.mikrofon-bulunamadi':'Mikrofon bulunamadı.',
+  'spi.core.voice.ses-tanima-icin-baglanti-ger':'Ses tanıma için bağlantı gerekiyor.',
+  'spi.core.voice.mikrofon-baslatilamadi':'Mikrofon başlatılamadı.',
+  'spi.core.voice.ses-tanima-calismadi':'Ses tanıma çalışmadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -116,14 +125,14 @@ SP.Voice = (function(){
   }
 
   const MESSAGES = {
-    unsupported:'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
-    'not-allowed':'Mikrofon izni verilmedi.',
-    'service-not-allowed':'Mikrofon izni verilmedi.',
-    'audio-capture':'Mikrofon bulunamadı.',
-    network:'Ses tanıma için bağlantı gerekiyor.',
-    start:'Mikrofon başlatılamadı.',
+    unsupported:yz('spi.core.voice.bu-tarayici-ses-tanimayi-des'),
+    'not-allowed':yz('spi.core.voice.mikrofon-izni-verilmedi'),
+    'service-not-allowed':yz('spi.core.voice.mikrofon-izni-verilmedi'),
+    'audio-capture':yz('spi.core.voice.mikrofon-bulunamadi'),
+    network:yz('spi.core.voice.ses-tanima-icin-baglanti-ger'),
+    start:yz('spi.core.voice.mikrofon-baslatilamadi'),
   };
-  function message(code){ return MESSAGES[code] || 'Ses tanıma çalışmadı.'; }
+  function message(code){ return MESSAGES[code] || yz('spi.core.voice.ses-tanima-calismadi'); }
 
   return { supported, start, stop, isActive, activeTarget, dictateInto, message };
 })();

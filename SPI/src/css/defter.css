@@ -15,7 +15,7 @@
   color:var(--text); border-radius:28px; overflow:hidden;
   background:var(--buz-ust, color-mix(in oklab, var(--surface) 84%, transparent));
   -webkit-backdrop-filter:blur(28px) saturate(1.4); backdrop-filter:blur(28px) saturate(1.4);
-  box-shadow:var(--buz-isik, inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.4)), 0 1px 2px rgba(20,24,40,.05), 0 24px 64px -24px rgba(20,24,40,.35);
+  box-shadow:var(--buz-isik, inset 0 1px 0 var(--beyaz-70), inset 0 0 0 1px var(--beyaz-40)), 0 1px 2px rgba(20,24,40,.05), 0 24px 64px -24px rgba(20,24,40,.35);
   animation:defter-gir .32s cubic-bezier(.32,.72,0,1) both; }
 @keyframes defter-gir{ from{ opacity:0; transform:translateY(10px) scale(.985); } }
 @media (prefers-reduced-motion:reduce){ .defter__kutu{ animation:none; } }
@@ -40,7 +40,7 @@
 .defter__oge{ display:grid; grid-template-columns:1fr auto; gap:2px 8px; width:100%; padding:10px 12px; border:0; border-radius:14px; background:transparent;
   color:var(--text); font:inherit; text-align:left; cursor:pointer; transition:background .15s ease; }
 .defter__oge:hover{ background:color-mix(in oklab, var(--surface) 55%, transparent); }
-.defter__oge.is-secili{ background:var(--surface); box-shadow:var(--kart-golge, 0 1px 2px rgba(0,0,0,.06)); }
+.defter__oge.is-secili{ background:var(--surface); box-shadow:var(--kart-golge, 0 1px 2px var(--siyah-06)); }
 .defter__oge b{ font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .defter__oge span{ grid-column:1; font-size:12.5px; color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .defter__oge small{ grid-column:2; grid-row:1; font-size:11px; color:var(--text-2); }
@@ -58,17 +58,17 @@
 /* Oku | Yaz — sistemin bölümlü seçicisi gibi. */
 .defter__kip{ display:inline-flex; padding:3px; border-radius:999px; background:var(--seg-ray, var(--surface-2)); gap:2px; flex:none; }
 .defter__kip button{ min-height:30px; padding:0 14px; border:0; border-radius:999px; background:transparent; color:var(--text-2); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
-.defter__kip button.is-secili{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.defter__kip button.is-secili{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px var(--siyah-12); }
 
 /* Kâğıt: opak kart; okunan ve yazılan burada. */
 .defter__kagit{ flex:1; min-height:360px; display:flex; flex-direction:column; border-radius:22px; background:var(--surface);
   box-shadow:var(--kart-golge, 0 1px 2px rgba(20,24,40,.04), 0 12px 32px -20px rgba(20,24,40,.18)); overflow:hidden; }
-.defter__araclar{ display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center; padding:8px 12px; border-bottom:1px solid color-mix(in oklab, var(--border, #000) 60%, transparent); }
+.defter__araclar{ display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center; padding:8px 12px; border-bottom:1px solid color-mix(in oklab, var(--border, var(--siyah)) 60%, transparent); }
 .defter__grup{ display:inline-flex; gap:2px; }
-.defter__grup + .defter__grup{ padding-left:12px; border-left:1px solid color-mix(in oklab, var(--border, #000) 60%, transparent); }
+.defter__grup + .defter__grup{ padding-left:12px; border-left:1px solid color-mix(in oklab, var(--border, var(--siyah)) 60%, transparent); }
 .defter__simge{ width:34px; height:34px; display:grid; place-items:center; border:0; border-radius:10px; background:transparent; color:var(--text-2); cursor:pointer; transition:transform 120ms ease, background .15s ease; }
 .defter__simge:hover{ background:var(--surface-2); color:var(--text); }
-.defter__simge.is-kayit{ background:var(--danger, #e5484d); color:#fff; }
+.defter__simge.is-kayit{ background:var(--danger, #e5484d); color:var(--beyaz); }
 .defter__sablonlar{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:10px 16px 0; font-size:12.5px; color:var(--text-2); }
 .defter__sablon{ min-height:28px; padding:0 12px; border:0; border-radius:999px; background:var(--surface-2); color:var(--text); font:inherit; font-size:12.5px; cursor:pointer; }
 .defter__govde{ flex:1; min-height:320px; width:100%; resize:none; border:0; background:transparent; color:var(--text);
@@ -82,7 +82,7 @@
 .defter__oku mark{ background:color-mix(in oklab, #ffd84d 55%, transparent); color:inherit; border-radius:4px; padding:0 2px; }
 .defter__oku del{ color:var(--text-2); }
 .defter__oku blockquote{ margin:10px 0; padding:4px 0 4px 14px; border-left:3px solid color-mix(in oklab, var(--primary) 50%, transparent); color:var(--text-2); }
-.defter__oku hr{ border:0; border-top:1px solid var(--border, rgba(0,0,0,.1)); margin:18px 0; }
+.defter__oku hr{ border:0; border-top:1px solid var(--border, var(--siyah-10)); margin:18px 0; }
 .defter__oku a{ color:var(--primary); }
 .defter__bag{ text-decoration:none; border-bottom:1px dashed currentColor; }
 .defter__etiket{ padding:1px 8px; border-radius:999px; background:var(--surface-2); color:var(--text-2); font-size:.86em; cursor:pointer; }
@@ -110,12 +110,12 @@
 .defter-ciz{ position:fixed; inset:0; z-index:95; display:grid; place-items:center; background:color-mix(in oklab, var(--bg) 50%, transparent);
   -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
 .defter-ciz__kutu{ width:min(1160px, calc(100vw - 24px)); max-height:calc(100vh - 24px); display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:24px;
-  background:var(--surface); box-shadow:0 30px 80px -30px rgba(0,0,0,.45); }
+  background:var(--surface); box-shadow:0 30px 80px -30px var(--siyah-45); }
 .defter-ciz__arac, .defter-ciz__alt{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
 .defter-ciz__grup{ display:inline-flex; gap:3px; padding:3px; border-radius:999px; background:var(--surface-2); }
 .defter-ciz__alt{ justify-content:flex-end; }
 .defter-ciz__arac button, .defter-ciz__alt button{ min-height:30px; min-width:30px; padding:0 12px; border:0; border-radius:999px; background:transparent; color:var(--text); font:inherit; font-size:13px; cursor:pointer; }
-.defter-ciz__arac button.is-secili{ background:var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.14); font-weight:600; }
+.defter-ciz__arac button.is-secili{ background:var(--surface); box-shadow:0 1px 3px var(--siyah-14); font-weight:600; }
 .defter-ciz__renk{ width:26px; min-width:26px !important; height:26px; min-height:26px !important; padding:0 !important; margin:2px; border-radius:50% !important; }
 .defter-ciz__arac .defter-ciz__renk.is-secili{ box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--primary); }
 .defter-ciz__alt button{ background:var(--surface-2); }
@@ -157,8 +157,8 @@
 .defter-raf__eylem:hover{ background:var(--surface-3, var(--surface-2)); }
 .defter-raf__eylem:active{ transform:scale(.97); }
 .defter-raf__eylem svg, .defter-raf__simge svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.defter-raf__eylem:first-child{ background:var(--sec, var(--primary)); color:var(--primary-ink, #fff); }
-.defter-raf__eylem:first-child:hover{ background:color-mix(in srgb, var(--sec, var(--primary)) 86%, #000); }
+.defter-raf__eylem:first-child{ background:var(--sec, var(--primary)); color:var(--primary-ink, var(--beyaz)); }
+.defter-raf__eylem:first-child:hover{ background:color-mix(in srgb, var(--sec, var(--primary)) 86%, var(--siyah)); }
 .defter-raf__liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
 .defter-raf__liste li + li{ border-top:1px solid color-mix(in oklab, var(--border, #ddd) 70%, transparent); }
 .defter-raf__oge{ width:100%; display:grid; grid-template-columns:32px 1fr; grid-template-rows:auto auto; column-gap:12px; align-items:center;
@@ -202,7 +202,7 @@
 .defter-ag__dug{ min-height:30px; padding:0 12px; border:1px solid var(--border); border-radius:999px; background:none; color:var(--text-2); font:inherit; font-size:12.5px; cursor:pointer; }
 .defter-ag__dug.is-secili{ background:var(--text); color:var(--surface); border-color:var(--text); }
 .defter-ag__bosluk{ flex:1; }
-.defter .defter-ag__tuval{ flex:1; min-height:320px; width:100%; height:auto; border-radius:18px; background:var(--surface); box-shadow:var(--kart-golge, 0 1px 2px rgba(0,0,0,.06));
+.defter .defter-ag__tuval{ flex:1; min-height:320px; width:100%; height:auto; border-radius:18px; background:var(--surface); box-shadow:var(--kart-golge, 0 1px 2px var(--siyah-06));
   cursor:grab; touch-action:none; user-select:none; }
 .defter-ag__tuval.is-surukle{ cursor:grabbing; }
 .defter-ag__kenar{ stroke:color-mix(in oklab, var(--text-3) 55%, transparent); stroke-width:1.4; }

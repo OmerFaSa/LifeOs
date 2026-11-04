@@ -18,6 +18,14 @@
      3. AKSIYON SEVIYESI (AGENTS §1.9): tek gun KUCUK (sormadan, «Geri al»),
         birden cok gun ORTA (onizleme + onay). Seviyeyi bu modul soyler. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.gunsure.tarih-gecersiz':'Tarih geçersiz.',
+  'esp.core.gunsure.bitis-tarihi-baslangictan-on':'Bitiş tarihi başlangıçtan önce olamaz.',
+  'esp.core.gunsure.gecmis-bir-gunun-suresi-sonr':'Geçmiş bir günün süresi sonradan değiştirilmez.',
+  'esp.core.gunsure.tek-seferde-en-cok':'Tek seferde en çok ',
+  'esp.core.gunsure.sure':'Süre ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.gunsure.kayit-bulunamadi':'Kayıt bulunamadı.',
 });
 
@@ -80,13 +88,13 @@ ESP.GunSure = (function(){
 
   function denetle(bas, bit, dakika){
     bit = bit || bas;
-    if(!ISO.test(String(bas)) || !ISO.test(String(bit))) return 'Tarih geçersiz.';
-    if(bas > bit) return 'Bitiş tarihi başlangıçtan önce olamaz.';
-    if(bas < U().todayISO()) return 'Geçmiş bir günün süresi sonradan değiştirilmez.';
-    if(gunFarki(bas, bit) + 1 > EN_UZUN) return 'Tek seferde en çok ' + EN_UZUN + ' gün.';
+    if(!ISO.test(String(bas)) || !ISO.test(String(bit))) return yz('esp.core.gunsure.tarih-gecersiz');
+    if(bas > bit) return yz('esp.core.gunsure.bitis-tarihi-baslangictan-on');
+    if(bas < U().todayISO()) return yz('esp.core.gunsure.gecmis-bir-gunun-suresi-sonr');
+    if(gunFarki(bas, bit) + 1 > EN_UZUN) return yz('esp.core.gunsure.tek-seferde-en-cok') + EN_UZUN + ' gün.';
     const dk = Number(dakika);
     if(!isFinite(dk) || dk < DAKIKA.min || dk > DAKIKA.max) {
-      return 'Süre ' + DAKIKA.min + '–' + DAKIKA.max + ' dakika arasında olmalı.';
+      return yz('esp.core.gunsure.sure') + DAKIKA.min + '–' + DAKIKA.max + ' dakika arasında olmalı.';
     }
     return null;
   }

@@ -24,6 +24,10 @@
    Manifest ayrı dosya değildir: `app.js › installManifest` onu gömülü
    üretir (tek dosya sürümüyle aynı yol). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.pwa.bildirimde':'Bildirimde «',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.pwa.saat-ss-dd-biciminde-olmali':'Saat «SS:DD» biçiminde olmalı.',
   'ortak.pwa.tercih-bu-cihaza-yazilamadi':'Tercih bu cihaza yazılamadı.',
 });
@@ -225,7 +229,7 @@ window.LIFEOS.PARCA.yazilar({
   function bildirimSorusu(d){
     d = d || {};
     const ad = String(d.ad || d.eylem || '').trim();
-    return ad ? 'Bildirimde «' + ad + '» dedin; şimdi uygulansın mı?' : '';
+    return ad ? yz('ortak.pwa.bildirimde') + ad + '» dedin; şimdi uygulansın mı?' : '';
   }
 
   /* ------------------------------------------------ 180 · 122 bildirim ayarı

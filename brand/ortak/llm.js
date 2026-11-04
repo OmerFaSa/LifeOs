@@ -18,6 +18,46 @@
    ESP eski, 737 satirlik bir kopyayi tasiyordu. 2026-09-24'te AYS'ninki
    tek kaynak oldu: bir duzeltme artik ucune birden gider. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.llm.yanitin-uzunluk-siniri-yuzun':'Yanıtın uzunluk sınırı yüzünden yarıda kesildi. Yukarıdaki metnin ',
+  'ortak.llm.devamini-yaz-bastan-baslama':'DEVAMINI yaz: baştan başlama, yazdıklarını tekrar etme, selamlama ekleme. ',
+  'ortak.llm.model-saglayici-secilmedi-of':'Model sağlayıcı seçilmedi. Ofis → Ayarlar bölümünden bir sağlayıcı seç.',
+  'ortak.llm.bu-saglayici-icin-api-anahta':'Bu sağlayıcı için API anahtarı girilmedi.',
+  'ortak.llm.model-secilmedi':'Model seçilmedi.',
+  'ortak.llm.ozel-uc-icin-adres-girilmedi':'Özel uç için adres girilmedi.',
+  'ortak.llm.api-anahtari-kabul-edilmedi':'API anahtarı kabul edilmedi. Anahtarı kontrol et ya da yenisini üret.',
+  'ortak.llm.bu-anahtar-turu-gemini-api-d':'Bu anahtar türü Gemini API’de kabul edilmiyor. Google AI Studio’da anahtarı ',
+  'ortak.llm.bu-hesapta-kredi-kalmamis-uc':'Bu hesapta kredi kalmamış. Ücretsiz bir model seç ya da başka sağlayıcı ekle.',
+  'ortak.llm.model-bulunamadi-ucretsiz-mo':'Model bulunamadı. Ücretsiz model kimlikleri sık değişir: Ayarlar’da ',
+  'ortak.llm.bu-model-gorsel-okuyamiyor-f':'Bu model görsel okuyamıyor. Fotoğraflı istek için görsel destekleyen bir model ',
+  'ortak.llm.ya-da-soruyu-metin-olarak':'Ya da soruyu metin olarak yazabilirsin.',
+  'ortak.llm.i-stek-sinirina-takildin-bir':'İstek sınırına takıldın. Birkaç dakika bekle ya da başka sağlayıcı dene.',
+  'ortak.llm.saglayici-su-an-yanit-vermiy':'Sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene.',
+  'ortak.llm.i-stek-reddedildi-model-kiml':'İstek reddedildi. Model kimliği ya da uç adresi hatalı olabilir.',
+  'ortak.llm.i-stek-bu-model-icin-fazla':'İstek bu model için fazla uzun. Daha kısa bir soru sor ya da geniş bağlamlı bir model seç.',
+  'ortak.llm.baglanti-kurulamadi-i-nterne':'Bağlantı kurulamadı. İnternetini ve uç adresini kontrol et.',
+  'ortak.llm.kendi-bilgisayarindaki-sunuc':'Kendi bilgisayarındaki sunucuya erişilemedi. Sunucu açık mı, adres doğru mu, ',
+  'ortak.llm.yanit-zaman-asimina-ugradi-d':'Yanıt zaman aşımına uğradı. Daha hızlı bir model dene.',
+  'ortak.llm.i-ptal-edildi':'İptal edildi.',
+  'ortak.llm.model-bos-yanit-dondurdu-tek':'Model boş yanıt döndürdü. Tekrar dene.',
+  'ortak.llm.bu-model-yalnizca-kendi-dusu':'Bu model yalnızca kendi düşünme metnini döndürdü, cevabı yazmadı. ',
+  'ortak.llm.akil-yuruten-modeller-r1-qwe':'Akıl yürüten modeller (R1, Qwen3 gibi) kısa yanıtlarda bunu sık yapar: ',
+  'ortak.llm.yerlesik-model-bu-ortamda-ka':'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
+  'ortak.llm.baglanti-yok-cevrimici-olunc':'Bağlantı yok. Çevrimiçi olunca kaldığın yerden devam edersin; kural motoru bu sırada çalışmayı sürdürüyor.',
+  'ortak.llm.bu-modelin-gunluk-ucretsiz-h':'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
+  'ortak.llm.dakikalik-sira-cok-uzun-birk':'Dakikalık sıra çok uzun. Birkaç dakika sonra tekrar dene ya da dakikalık sınırı daha yüksek bir sağlayıcı seç.',
+  'ortak.llm.bu-ortam-dis-servislere-bagl':'Bu ortam dış servislere bağlanmaya izin vermiyor. Uygulama Claude içinde yayımlanmış bir sayfa olarak ',
+  'ortak.llm.model-su-an-yanit-veremedi':'Model şu an yanıt veremedi.',
+  'ortak.llm.bearer':'Bearer ',
+  'ortak.llm.yalnizca-istenen-kelimeyi-ya':'Yalnızca istenen kelimeyi yaz, başka hiçbir şey yazma.',
+  'ortak.llm.yerlesik-yetenek':'Yerleşik yetenek',
+  'ortak.llm.uc-adresi':'Uç adresi',
+  'ortak.llm.api-anahtari':'API anahtarı',
+  'ortak.llm.model-listesi':'Model listesi',
+  'ortak.llm.secili-model':'Seçili model',
+  'ortak.llm.sohbet-cagrisi':'Sohbet çağrısı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.llm.bu-anahtar':'Bu anahtar ',
   'ortak.llm.tek-kelimeyle-yanitla-hazir':'Tek kelimeyle yanıtla: hazır',
 });
@@ -98,8 +138,8 @@ __NS__.LLM = (function(){
   /* Kesilen yaniti tamamlatma istemi. Tekrar, kesik cumleden daha kotu
      bir bozulmadir; acikca yasaklanir. */
   function continueAsk(tail){
-    return 'Yanıtın uzunluk sınırı yüzünden yarıda kesildi. Yukarıdaki metnin '
-      + 'DEVAMINI yaz: baştan başlama, yazdıklarını tekrar etme, selamlama ekleme. '
+    return yz('ortak.llm.yanitin-uzunluk-siniri-yuzun')
+      + yz('ortak.llm.devamini-yaz-bastan-baslama')
       + 'Yalnızca eksik kalan kısmı yaz ve cümleyi tamamla.\n\n'
       + 'KESİLDİĞİ YER: …' + tail;
   }
@@ -400,41 +440,41 @@ __NS__.LLM = (function(){
   }
 
   const ERRORS = {
-    no_provider:'Model sağlayıcı seçilmedi. Ofis → Ayarlar bölümünden bir sağlayıcı seç.',
-    no_key:'Bu sağlayıcı için API anahtarı girilmedi.',
-    no_model:'Model seçilmedi.',
-    no_endpoint:'Özel uç için adres girilmedi.',
-    unauthorized:'API anahtarı kabul edilmedi. Anahtarı kontrol et ya da yenisini üret.',
-    key_type:'Bu anahtar türü Gemini API’de kabul edilmiyor. Google AI Studio’da anahtarı '
+    no_provider:yz('ortak.llm.model-saglayici-secilmedi-of'),
+    no_key:yz('ortak.llm.bu-saglayici-icin-api-anahta'),
+    no_model:yz('ortak.llm.model-secilmedi'),
+    no_endpoint:yz('ortak.llm.ozel-uc-icin-adres-girilmedi'),
+    unauthorized:yz('ortak.llm.api-anahtari-kabul-edilmedi'),
+    key_type:yz('ortak.llm.bu-anahtar-turu-gemini-api-d')
       + 'sil ve yeni bir tane üret; hesabın hâlâ eski “AIza…” anahtarı veriyorsa onu kullan.',
-    no_credit:'Bu hesapta kredi kalmamış. Ücretsiz bir model seç ya da başka sağlayıcı ekle.',
-    bad_model:'Model bulunamadı. Ücretsiz model kimlikleri sık değişir: Ayarlar’da '
+    no_credit:yz('ortak.llm.bu-hesapta-kredi-kalmamis-uc'),
+    bad_model:yz('ortak.llm.model-bulunamadi-ucretsiz-mo')
       + '“Modelleri yenile” ile sağlayıcının güncel listesini çek ve oradan seç.',
-    no_vision:'Bu model görsel okuyamıyor. Fotoğraflı istek için görsel destekleyen bir model '
+    no_vision:yz('ortak.llm.bu-model-gorsel-okuyamiyor-f')
       + 'gerekir — Google AI Studio’nun Gemini modelleri ücretsiz katmanda bunu yapar. '
-      + 'Ya da soruyu metin olarak yazabilirsin.',
-    rate_limited:'İstek sınırına takıldın. Birkaç dakika bekle ya da başka sağlayıcı dene.',
-    server:'Sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene.',
-    bad_request:'İstek reddedildi. Model kimliği ya da uç adresi hatalı olabilir.',
-    too_long:'İstek bu model için fazla uzun. Daha kısa bir soru sor ya da geniş bağlamlı bir model seç.',
-    network:'Bağlantı kurulamadı. İnternetini ve uç adresini kontrol et.',
-    local_cors:'Kendi bilgisayarındaki sunucuya erişilemedi. Sunucu açık mı, adres doğru mu, '
+      + yz('ortak.llm.ya-da-soruyu-metin-olarak'),
+    rate_limited:yz('ortak.llm.i-stek-sinirina-takildin-bir'),
+    server:yz('ortak.llm.saglayici-su-an-yanit-vermiy'),
+    bad_request:yz('ortak.llm.i-stek-reddedildi-model-kiml'),
+    too_long:yz('ortak.llm.i-stek-bu-model-icin-fazla'),
+    network:yz('ortak.llm.baglanti-kurulamadi-i-nterne'),
+    local_cors:yz('ortak.llm.kendi-bilgisayarindaki-sunuc')
       + 've tarayıcıdan erişime izin verdin mi? (Ollama için OLLAMA_ORIGINS="*" ile başlat.)',
-    timeout:'Yanıt zaman aşımına uğradı. Daha hızlı bir model dene.',
-    cancelled:'İptal edildi.',
-    empty:'Model boş yanıt döndürdü. Tekrar dene.',
-    thinking_only:'Bu model yalnızca kendi düşünme metnini döndürdü, cevabı yazmadı. '
-      + 'Akıl yürüten modeller (R1, Qwen3 gibi) kısa yanıtlarda bunu sık yapar: '
+    timeout:yz('ortak.llm.yanit-zaman-asimina-ugradi-d'),
+    cancelled:yz('ortak.llm.i-ptal-edildi'),
+    empty:yz('ortak.llm.model-bos-yanit-dondurdu-tek'),
+    thinking_only:yz('ortak.llm.bu-model-yalnizca-kendi-dusu')
+      + yz('ortak.llm.akil-yuruten-modeller-r1-qwe')
       + 'listeden akıl yürütmeyen bir model seç.',
-    unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
-    offline:'Bağlantı yok. Çevrimiçi olunca kaldığın yerden devam edersin; kural motoru bu sırada çalışmayı sürdürüyor.',
-    daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
-    rate_wait:'Dakikalık sıra çok uzun. Birkaç dakika sonra tekrar dene ya da dakikalık sınırı daha yüksek bir sağlayıcı seç.',
-    sandboxed:'Bu ortam dış servislere bağlanmaya izin vermiyor. Uygulama Claude içinde yayımlanmış bir sayfa olarak '
+    unavailable:yz('ortak.llm.yerlesik-model-bu-ortamda-ka'),
+    offline:yz('ortak.llm.baglanti-yok-cevrimici-olunc'),
+    daily_quota:yz('ortak.llm.bu-modelin-gunluk-ucretsiz-h'),
+    rate_wait:yz('ortak.llm.dakikalik-sira-cok-uzun-birk'),
+    sandboxed:yz('ortak.llm.bu-ortam-dis-servislere-bagl')
       + 'çalışırken dış API çağrıları engellenir: burada yerleşik modeli kullan, ücretsiz sağlayıcılar için uygulamayı '
       + 'kendi tarayıcında (dosyadan ya da kendi sunucundan) aç.',
   };
-  function errorText(code){ return ERRORS[code] || 'Model şu an yanıt veremedi.'; }
+  function errorText(code){ return ERRORS[code] || yz('ortak.llm.model-su-an-yanit-veremedi'); }
 
   /* Yeniden denenebilir hatalar: yedek modele gecmek anlamli olanlar. */
   /* no_vision yeniden denenebilir: zincirde gorsel okuyan bir model varsa
@@ -497,7 +537,7 @@ __NS__.LLM = (function(){
   function authHeaders(provider, key){
     if(!key) return {};
     if(provider.auth === 'google') return { 'x-goog-api-key':key };
-    return { 'Authorization':'Bearer ' + key };
+    return { 'Authorization':yz('ortak.llm.bearer') + key };
   }
 
   /* ---------- ortak yardimcilar ---------- */
@@ -1254,7 +1294,7 @@ __NS__.LLM = (function(){
   async function test(cfg){
     const started = Date.now();
     const res = await chat(cfg, {
-      system:'Yalnızca istenen kelimeyi yaz, başka hiçbir şey yazma.',
+      system:yz('ortak.llm.yalnizca-istenen-kelimeyi-ya'),
       messages:[{ role:'user', text:yz('ortak.llm.tek-kelimeyle-yanitla-hazir') }],
       maxTokens:16,
       temperature:0,
@@ -1284,7 +1324,7 @@ __NS__.LLM = (function(){
 
     if(provider.kind === 'builtin'){
       const ready = builtinReady() || await initBuiltin();
-      add('Yerleşik yetenek', ready, ready ? 'açık' : errorText('unavailable'), ready ? null : 'unavailable');
+      add(yz('ortak.llm.yerlesik-yetenek'), ready, ready ? 'açık' : errorText('unavailable'), ready ? null : 'unavailable');
       return { ok:ready, steps };
     }
 
@@ -1298,22 +1338,22 @@ __NS__.LLM = (function(){
     }
 
     /* 2. adres */
-    if(!endpoint){ add('Uç adresi', false, errorText('no_endpoint'), 'no_endpoint'); return { ok:false, steps }; }
-    add('Uç adresi', true, endpoint);
+    if(!endpoint){ add(yz('ortak.llm.uc-adresi'), false, errorText('no_endpoint'), 'no_endpoint'); return { ok:false, steps }; }
+    add(yz('ortak.llm.uc-adresi'), true, endpoint);
 
     /* 3. anahtar (bicim) */
     const keys = getKeys(provider.id);
     if(provider.needsKey && !keys.length){
-      add('API anahtarı', false, errorText('no_key'), 'no_key');
+      add(yz('ortak.llm.api-anahtari'), false, errorText('no_key'), 'no_key');
       return { ok:false, steps };
     }
     if(keys.length){
       const problem = keyProblem(provider.id, keys[0]);
-      add('API anahtarı', !problem || problem.level !== 'wrong',
+      add(yz('ortak.llm.api-anahtari'), !problem || problem.level !== 'wrong',
         problem ? problem.text : keys.length + ' anahtar bağlı · biçim tanıdık',
         problem && problem.level === 'wrong' ? 'unauthorized' : null);
     }else{
-      add('API anahtarı', true, 'gerekmiyor');
+      add(yz('ortak.llm.api-anahtari'), true, 'gerekmiyor');
     }
 
     /* 4. model listesi — anahtari da dogrular, kotadan dusmez */
@@ -1321,10 +1361,10 @@ __NS__.LLM = (function(){
     try{
       const res = await listModels(cfg, { signal:o.signal });
       known = res.models.map(m => m.id);
-      add('Model listesi', true, res.models.length + ' model çekildi');
+      add(yz('ortak.llm.model-listesi'), true, res.models.length + ' model çekildi');
     }catch(err){
       const code = err && err.code;
-      add('Model listesi', false, errorText(code)
+      add(yz('ortak.llm.model-listesi'), false, errorText(code)
         + (err && err.message && err.message !== code ? ' — ' + String(err.message).slice(0, 120) : ''), code);
       /* Anahtar reddedildiyse ileriye bakmanin anlami yok. */
       if(code === 'unauthorized' || code === 'key_type') return { ok:false, steps };
@@ -1333,7 +1373,7 @@ __NS__.LLM = (function(){
     /* 5. secili model gercekten listede mi */
     if(known && cfg.model){
       const has = known.indexOf(cfg.model) >= 0;
-      add('Seçili model', has, has ? cfg.model
+      add(yz('ortak.llm.secili-model'), has, has ? cfg.model
         : cfg.model + ' bu listede yok. “Modelleri yenile” ile listeyi güncelle ve oradan seç.',
         has ? null : 'bad_model');
     }
@@ -1341,11 +1381,11 @@ __NS__.LLM = (function(){
     /* 6. gercek cagri */
     try{
       const res = await test(cfg);
-      add('Sohbet çağrısı', true, res.ms + ' ms · yanıt: “' + res.text + '”');
+      add(yz('ortak.llm.sohbet-cagrisi'), true, res.ms + ' ms · yanıt: “' + res.text + '”');
       return { ok:true, steps };
     }catch(err){
       const code = err && err.code;
-      add('Sohbet çağrısı', false, errorText(code)
+      add(yz('ortak.llm.sohbet-cagrisi'), false, errorText(code)
         + (err && err.message && err.message !== code ? ' — ' + String(err.message).slice(0, 120) : ''), code);
       return { ok:false, steps };
     }

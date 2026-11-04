@@ -24,6 +24,20 @@
    tekrarından açılır (core/acoustic.js). Geri almada, üzerinde deneme
    kaydı olan alıştırma kalır: o kayıt kullanıcının ölçümüdür. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.unite.bearer':'Bearer ',
+  'esp.core.unite.esp-studyo-dan-gitar-alistir':'ESP Stüdyo’dan gitar alıştırma paketi istendi.',
+  'esp.core.unite.esp-dil-ogren-den-unite':'ESP Dil › Öğren’den ünite istendi.',
+  'esp.core.unite.rehber-hkm-den-baglaninca-ye':'Rehber › HKM’den bağlanınca yeniden iste.',
+  'esp.core.unite.bu-istek-zaten-acik-is':'Bu istek zaten açık (iş emri #',
+  'esp.core.unite.king-teklif-hazirladi-is-emr':'King teklif hazırladı (iş emri #',
+  'esp.core.unite.bugun-e-teklif-olarak-gelir':'Bugün’e teklif olarak gelir.',
+  'esp.core.unite.tempolar-referanstir-esik-se':'Tempolar referanstır: eşik senin temiz tekrarından açılır. Kaynaksız, model bilgisi.',
+  'esp.core.unite.kaynaksiz-model-bilgisi-yanl':'Kaynaksız, model bilgisi: yanlış bulduğun kartı sil. Pratik sorularını ESP ',
+  'esp.core.unite.kayit-kimligi-gecersiz':'Kayıt kimliği geçersiz.',
+  'esp.core.unite.hkm-baglantisi-kurulmamis-un':'HKM bağlantısı kurulmamış; ünite alınamaz.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.unite.duzey-baslangic-orta-ya-da':'Düzey başlangıç, orta ya da ileri olmalı.',
   'esp.core.unite.konu-2-80-karakter-olmali':'Konu 2–80 karakter olmalı.',
   'esp.core.unite.dil-esp-nin-dillerinden-biri':'Dil ESP’nin dillerinden biri olmalı.',
@@ -81,7 +95,7 @@ ESP.Unite = (function(){
     try{
       const res = await fetch(k.url + yol, {
         method:govde === undefined ? 'GET' : 'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('esp.core.unite.bearer') + k.token },
         body:govde === undefined ? undefined : JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });
@@ -116,10 +130,10 @@ ESP.Unite = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.unite', konu:'',
-      neden:t.unite.alan === 'gitar' ? 'ESP Stüdyo’dan gitar alıştırma paketi istendi.'
-        : 'ESP Dil › Öğren’den ünite istendi.', govde:{ unite:t.unite } });
+      neden:t.unite.alan === 'gitar' ? yz('esp.core.unite.esp-studyo-dan-gitar-alistir')
+        : yz('esp.core.unite.esp-dil-ogren-den-unite'), govde:{ unite:t.unite } });
     if(!r.bagli) return { ok:false, metin:yz('esp.core.unite.uniteyi-hkm-deki-uretim-buro')
-      + 'Rehber › HKM’den bağlanınca yeniden iste.' };
+      + yz('esp.core.unite.rehber-hkm-den-baglaninca-ye') };
     if(r.ag) return { ok:false, metin:yz('esp.core.unite.hkm-ye-ulasilamadi-is-emri-a') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
@@ -128,9 +142,9 @@ ESP.Unite = (function(){
     if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
     const e = g.emir || {};
     return { ok:true, emir:e.id, metin:g.yeni === false
-      ? 'Bu istek zaten açık (iş emri #' + e.id + ').'
-      : 'King teklif hazırladı (iş emri #' + e.id + '). Onaylarsan Üretim Bürosu başlar; ünite '
-        + 'Bugün’e teklif olarak gelir.' };
+      ? yz('esp.core.unite.bu-istek-zaten-acik-is') + e.id + ').'
+      : yz('esp.core.unite.king-teklif-hazirladi-is-emr') + e.id + '). Onaylarsan Üretim Bürosu başlar; ünite '
+        + yz('esp.core.unite.bugun-e-teklif-olarak-gelir') };
   }
 
   async function kayitCek(kid){
@@ -170,7 +184,7 @@ ESP.Unite = (function(){
         tags:['bam', 'bam:' + kid] }));
     });
     if(!pieces.length) return { ok:false, why:yz('esp.core.unite.paketten-studyo-ya-eklenecek') };
-    const uyari = ['Tempolar referanstır: eşik senin temiz tekrarından açılır. Kaynaksız, model bilgisi.'];
+    const uyari = [yz('esp.core.unite.tempolar-referanstir-esik-se')];
     if(dusen) uyari.push(dusen + ' alıştırma ESP’nin denetimini geçmedi (tempo, ton ya da derece).');
     if(atlanan) uyari.push(atlanan + ' alıştırma Stüdyo’da zaten var; yeniden eklenmeyecek.');
     const duzey = GITAR_DUZEY.indexOf(g.duzey) >= 0 ? g.duzey : '';
@@ -224,7 +238,7 @@ ESP.Unite = (function(){
     if(!uniteler.length) return { ok:false, why:yz('esp.core.unite.hicbir-unite-esp-nin-denetim')
       + OGE[0] + ' geçerli öğe gerekir).' };
     const toplam = uniteler.reduce((n, u) => n + u.items[dil].length, 0);
-    const uyari = ['Kaynaksız, model bilgisi: yanlış bulduğun kartı sil. Pratik sorularını ESP '
+    const uyari = [yz('esp.core.unite.kaynaksiz-model-bilgisi-yanl')
       + 'kendi destenden kurar.'];
     if(dusen) uyari.push(dusen + ' öğe ESP’nin denetimini geçmedi, eklenmeyecek.');
     return { ok:true, uniteler, dil,
@@ -260,10 +274,10 @@ ESP.Unite = (function(){
      desteye girer (Lesson.addUnit: aynı ön yüz iki kez eklenmez). */
   async function uygula(p){
     const kid = Number(p && p.kayit_id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Kayıt kimliği geçersiz.' };
-    if(!baglanti()) return { ok:false, error:'HKM bağlantısı kurulmamış; ünite alınamaz.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('esp.core.unite.kayit-kimligi-gecersiz') };
+    if(!baglanti()) return { ok:false, error:yz('esp.core.unite.hkm-baglantisi-kurulmamis-un') };
     const kayit = await kayitCek(kid);
-    if(!kayit) return { ok:false, error:'Ünite HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    if(!kayit) return { ok:false, error:yz('esp.core.unite.unite-hkm-den-alinamadi-hkm') };
     const s = sina(kayit, p);
     if(!s.ok) return { ok:false, error:s.why };
     if(s.tur === 'gitar'){

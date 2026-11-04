@@ -19,6 +19,144 @@
    ikisi de yoksa yalnız gıda tabloya girer ve barkod bağlanır; gram
    uydurulmaz. Fotoğraf ve kamera bu araca SPİ'nin «Barkodu oku» işinden
    (app.js `foto`) gelir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.kingarac.uyku':'Uyku: ',
+  'spi.core.kingarac.su':'Su: ',
+  'spi.core.kingarac.ogun':'Öğün: ',
+  'spi.core.kingarac.antrenman':'Antrenman: ',
+  'spi.core.kingarac.son':'Son ',
+  'spi.core.kingarac.ortalama':'Ortalama: ',
+  'spi.core.kingarac.deger-ve-referans-araligidir':'Değer ve referans aralığıdır; yorum ve teşhis değildir.',
+  'spi.core.kingarac.kayitli-tahlil-yok':'Kayıtlı tahlil yok.',
+  'spi.core.kingarac.spi-de-bir-bolumu-gezinmeden':'SPİ’de bir bölümü gezinmeden kaldırır ya da geri getirir; verisi silinmez.',
+  'spi.core.kingarac.king-sohbetinde-istendi':'King sohbetinde istendi',
+  'spi.core.kingarac.barkod':'Barkod ',
+  'spi.core.kingarac.spi-ogun-barkod-dan':'SPİ › Öğün › Barkod’dan bir gıdaya bağlayabilirsin; sonra doğrudan gelir.',
+  'spi.core.kingarac.porsiyon-veri-yok':'Porsiyon: veri yok',
+  'spi.core.kingarac.kaynak':'Kaynak: ',
+  'spi.core.kingarac.spi-tablosu':'SPİ tablosu',
+  'spi.core.kingarac.bu-miktar':'Bu miktar: ≈ ',
+  'spi.core.kingarac.gida-tablona-eklenir-barkod':'Gıda tablona eklenir, barkod bağlanır; sonraki okutmada doğrudan gelir.',
+  'spi.core.kingarac.spi-nin-gida-tablosunda-bir':'SPİ’nin gıda tablosunda bir gıdanın 100 gramlık besin değeri ve ev ölçüleri.',
+  'spi.core.kingarac.barkod-numarasiyla-urunun-be':'Barkod numarasıyla ürünün besin değeri: önce kişisel barkod defteri, yoksa Open Food Facts (kaynak etiketiyle).',
+  'spi.core.kingarac.barkodlu-urunu-ogune-ekle':'Barkodlu ürünü öğüne ekle',
+  'spi.core.kingarac.barkodlu-urunu-bugunun-ogunu':'Barkodlu ürünü bugünün öğününe ekler; gram kullanıcının cümlesinden ya da etiketteki porsiyondan. Ürün tabloda yoksa gıda olarak eklenir ve barkod bağlanır.',
+  'spi.core.kingarac.antrenman-kaydi-sil':'Antrenman kaydı sil',
+  'spi.core.kingarac.bir-antrenman-kaydini-siler':'Bir antrenman kaydını siler; kimlikle ya da tarih ve adla bulur.',
+  'spi.core.kingarac.silinecek-antrenman-kaydi-bu':'Silinecek antrenman kaydı bulunamadı.',
+  'spi.core.kingarac.hangi-antrenman-tarih-ya-da':'Hangi antrenman? Tarih ya da ad söyleyin.',
+  'spi.core.kingarac.birden-cok-antrenman-eslesti':'Birden çok antrenman eşleşti (',
+  'spi.core.kingarac.birden-cok-antrenman-eslesti-2':'Birden çok antrenman eşleşti; id belirtin.',
+  'spi.core.kingarac.antrenman-bulunamadi':'Antrenman bulunamadı.',
+  'spi.core.kingarac.ogun-kaydi-sil':'Öğün kaydı sil',
+  'spi.core.kingarac.bir-ogun-kaydini-siler-tarih':'Bir öğün kaydını siler; tarih ve öğün türüyle (kahvaltı, öğle...) ya da id ile bulur.',
+  'spi.core.kingarac.silinecek-ogun-bulunamadi':'Silinecek öğün bulunamadı.',
+  'spi.core.kingarac.hangi-ogun-ogun-turu-ya':'Hangi öğün? Öğün türü ya da id belirtin.',
+  'spi.core.kingarac.birden-cok-ogun-eslesti':'Birden çok öğün eşleşti (',
+  'spi.core.kingarac.birden-cok-ogun-eslesti-id':'Birden çok öğün eşleşti; id belirtin.',
+  'spi.core.kingarac.ogun-bulunamadi':'Öğün bulunamadı.',
+  'spi.core.kingarac.tahlil-oturumu-sil':'Tahlil oturumu sil',
+  'spi.core.kingarac.bir-tahlil-oturumunu-ve-dege':'Bir tahlil oturumunu ve değerlerini siler; tarihle ya da id ile bulur.',
+  'spi.core.kingarac.silinecek-tahlil-oturumu-bul':'Silinecek tahlil oturumu bulunamadı.',
+  'spi.core.kingarac.hangi-tahlil-tarih-ya-da':'Hangi tahlil? Tarih ya da id belirtin.',
+  'spi.core.kingarac.bu-tarihte-birden-cok-tahlil':'Bu tarihte birden çok tahlil var (',
+  'spi.core.kingarac.birden-cok-tahlil-eslesti-id':'Birden çok tahlil eşleşti; id belirtin.',
+  'spi.core.kingarac.tahlil-bulunamadi':'Tahlil bulunamadı.',
+  'spi.core.kingarac.i-lac-ve-takviye-yonetimi':'İlaç ve takviye yönetimi',
+  'spi.core.kingarac.kullanilan-ilac-ya-da-takviy':'Kullanılan ilaç ya da takviyeyi kaydeder, günceller ya da siler. Doz önermez; yalnız kullanıcının söylediğini yazar.',
+  'spi.core.kingarac.silinecek-ilac-bulunamadi':'Silinecek ilaç bulunamadı.',
+  'spi.core.kingarac.hangi-ilac-ad-ya-da':'Hangi ilaç? Ad ya da id belirtin.',
+  'spi.core.kingarac.birden-cok-ilac-eslesti':'Birden çok ilaç eşleşti (',
+  'spi.core.kingarac.i-lac-adi-gerekli':'İlaç adı gerekli.',
+  'spi.core.kingarac.guncellenecek-ilac-bulunamad':'Güncellenecek ilaç bulunamadı.',
+  'spi.core.kingarac.bilinmeyen-islem':'Bilinmeyen işlem: ',
+  'spi.core.kingarac.birden-cok-ilac-eslesti-id':'Birden çok ilaç eşleşti; id belirtin.',
+  'spi.core.kingarac.i-lac-bulunamadi':'İlaç bulunamadı.',
+  'spi.core.kingarac.gecersiz-islem':'Geçersiz işlem.',
+  'spi.core.kingarac.kisisel-gida-ve-sabitleme':'Kişisel gıda ve sabitleme',
+  'spi.core.kingarac.kisisel-gida-tablosuna-gida':'Kişisel gıda tablosuna gıda ekler, günceller ya da siler; veya önemli bir ölçümü sabitler/kaldırır.',
+  'spi.core.kingarac.sabitlenecek-olcum-kimligi-i':'Sabitlenecek ölçüm kimliği (id) gerekli.',
+  'spi.core.kingarac.silinecek-kullanici-gidasi-b':'Silinecek kullanıcı gıdası bulunamadı.',
+  'spi.core.kingarac.hangi-gida-ad-ya-da':'Hangi gıda? Ad ya da id belirtin.',
+  'spi.core.kingarac.birden-cok-gida-eslesti':'Birden çok gıda eşleşti (',
+  'spi.core.kingarac.gida-adi-gerekli':'Gıda adı gerekli.',
+  'spi.core.kingarac.degerler-sonra-girilebilir':'Değerler sonra girilebilir',
+  'spi.core.kingarac.guncellenecek-kullanici-gida':'Güncellenecek kullanıcı gıdası bulunamadı.',
+  'spi.core.kingarac.sabitleme-kaldirildi':'Sabitleme kaldırıldı.',
+  'spi.core.kingarac.birden-cok-gida-eslesti-id':'Birden çok gıda eşleşti; id belirtin.',
+  'spi.core.kingarac.gida-bulunamadi':'Gıda bulunamadı.',
+  'spi.core.kingarac.hane-uyesi-ekle-ya-da':'Hane üyesi ekle ya da çıkar',
+  'spi.core.kingarac.hane-profil-listesine-yeni-p':'Hane profil listesine yeni profil ekler ya da var olan bir profili haneden çıkarır.',
+  'spi.core.kingarac.profil-adi-gerekli':'Profil adı gerekli.',
+  'spi.core.kingarac.rol':'Rol: ',
+  'spi.core.kingarac.haneden-cikarilacak-profil-b':'Haneden çıkarılacak profil bulunamadı.',
+  'spi.core.kingarac.hangi-profil-profil-adi-ya':'Hangi profil? Profil adı ya da id belirtin.',
+  'spi.core.kingarac.birden-cok-profil-eslesti':'Birden çok profil eşleşti (',
+  'spi.core.kingarac.acik-olan-aktif-profil-silin':'Açık olan aktif profil silinemez.',
+  'spi.core.kingarac.birden-cok-profil-eslesti-id':'Birden çok profil eşleşti; id belirtin.',
+  'spi.core.kingarac.profil-bulunamadi':'Profil bulunamadı.',
+  'spi.core.kingarac.aktif-profil-silinemez':'Aktif profil silinemez.',
+  'spi.core.kingarac.hane-profilleri':'Hane profilleri',
+  'spi.core.kingarac.cihazda-kayitli-hane-uyeleri':'Cihazda kayıtlı hane üyeleri, rolleri ve aktif olan profil.',
+  'spi.core.kingarac.kayitli-hane-uyesi-yok-veri':'Kayıtlı hane üyesi yok (veri yok).',
+  'spi.core.kingarac.sepet-ve-market-fiyati':'Sepet ve market fiyatı',
+  'spi.core.kingarac.haftalik-sepete-urun-ekler-c':'Haftalık sepete ürün ekler, çıkarır, fiyatını kaydeder ya da haftalık bütçe sınırını ayarlar.',
+  'spi.core.kingarac.sinir-degeri-tl-gerekli':'Sınır değeri (TL) gerekli.',
+  'spi.core.kingarac.haftalik-market-butce-siniri':'Haftalık market bütçe sınırı ',
+  'spi.core.kingarac.kac-kg':'Kaç kg?',
+  'spi.core.kingarac.fiyat-degeri-tl-gerekli':'Fiyat değeri (TL) gerekli.',
+  'spi.core.kingarac.sinir-gerekli':'Sınır gerekli.',
+  'spi.core.kingarac.haftalik-butce-siniri-ayarla':'Haftalık bütçe sınırı ayarlandı: ',
+  'spi.core.kingarac.saglik-ve-market-butcesi':'Sağlık ve market bütçesi',
+  'spi.core.kingarac.haftalik-sepet-maliyeti-kisi':'Haftalık sepet maliyeti, kişi başı tutar ve belirlenen bütçe sınırına göre durum.',
+  'spi.core.kingarac.haftalik-sepet-bos-veri-yok':'Haftalık sepet boş (veri yok).',
+  'spi.core.kingarac.haftalik-sinir':'Haftalık sınır: ',
+  'spi.core.kingarac.butce-siniri-belirlenmemis':'Bütçe sınırı belirlenmemiş.',
+  'spi.core.kingarac.haftalik-sepet':'Haftalık sepet: ',
+  'spi.core.kingarac.kisi-basi':'Kişi başı: ',
+  'spi.core.kingarac.sinir-asildi':'Sınır aşıldı!',
+  'spi.core.kingarac.butce-sinirinin-altinda':'Bütçe sınırının altında.',
+  'spi.core.kingarac.butce-siniri-yok':'Bütçe sınırı yok.',
+  'spi.core.kingarac.ofis-kararini-kapat-ya-da':'Ofis kararını kapat ya da kaydet',
+  'spi.core.kingarac.danisma-ve-ofis-kararlarini':'Danışma ve ofis kararlarını kapatır veya yeni karar kaydeder.',
+  'spi.core.kingarac.yeni-ofis-karari-kaydedilece':'Yeni ofis kararı kaydedilecek: «',
+  'spi.core.kingarac.acik-karar-bulunamadi':'Açık karar bulunamadı.',
+  'spi.core.kingarac.birden-cok-acik-karar-var':'Birden çok açık karar var (',
+  'spi.core.kingarac.karar-kapatilacak':'Karar kapatılacak: «',
+  'spi.core.kingarac.sonuc':'Sonuç: ',
+  'spi.core.kingarac.durum-kapali':'Durum: kapalı',
+  'spi.core.kingarac.karar-kaydedildi':'Karar kaydedildi.',
+  'spi.core.kingarac.birden-cok-karar-var-id':'Birden çok karar var; id belirtin.',
+  'spi.core.kingarac.karar-bulunamadi':'Karar bulunamadı.',
+  'spi.core.kingarac.karar-kapatildi':'Karar kapatıldı.',
+  'spi.core.kingarac.profil-ve-hareket-seviyesi':'Profil ve hareket seviyesi',
+  'spi.core.kingarac.kullanici-profilini-kilo-boy':'Kullanıcı profilini (kilo, boy, doğum yılı vb.) günceller ya da hareket merdivenindeki basamağı belirler.',
+  'spi.core.kingarac.kilo':'Kilo: ',
+  'spi.core.kingarac.boy':'Boy: ',
+  'spi.core.kingarac.dogum-yili':'Doğum yılı: ',
+  'spi.core.kingarac.cinsiyet':'Cinsiyet: ',
+  'spi.core.kingarac.profil-bilgileri-guncellenec':'Profil bilgileri güncellenecek.',
+  'spi.core.kingarac.profil-guncellenecek':'Profil güncellenecek.',
+  'spi.core.kingarac.hareket-seviyesi-ayarlandi':'Hareket seviyesi ayarlandı.',
+  'spi.core.kingarac.profil-guncellendi':'Profil güncellendi.',
+  'spi.core.kingarac.haftalik-planlar':'Haftalık planlar',
+  'spi.core.kingarac.kullanicinin-haftalik-planla':'Kullanıcının haftalık planları (beslenme, hareket, uyku, su, alışkanlıklar) ve bugünkü uyum durumu.',
+  'spi.core.kingarac.kayitli-haftalik-plan-yok-ve':'Kayıtlı haftalık plan yok (veri yok).',
+  'spi.core.kingarac.saglik-hedefleri':'Sağlık hedefleri',
+  'spi.core.kingarac.kullanicinin-etkin-saglik-ve':'Kullanıcının etkin sağlık ve kilo hedefleri, yönü ve durumu.',
+  'spi.core.kingarac.kayitli-hedef-yok-veri-yok':'Kayıtlı hedef yok (veri yok).',
+  'spi.core.kingarac.hane-mutfak-porsiyon-paylasi':'Hane mutfak porsiyon paylaşımı',
+  'spi.core.kingarac.tek-tencere-yemegin-hane-bir':'Tek tencere yemeğin hane bireylerinin kalori ve protein ihtiyacına göre porsiyon paylaşımı.',
+  'spi.core.kingarac.secili-yemek-yok-veri-yok':'Seçili yemek yok (veri yok).',
+  'spi.core.kingarac.tencere-toplam-grami-belirti':'Tencere toplam gramı belirtilmemiş (veri yok; kaç gram?).',
+  'spi.core.kingarac.nutri-modulu-yok':'Nutri modülü yok',
+  'spi.core.kingarac.mutfak-paylastirmasi':'Mutfak paylaştırması: ',
+  'spi.core.kingarac.bir-gunun-spi-kaydi-uyku':'Bir günün SPİ kaydı: uyku, su, kilo, his, öğünler ve antrenmanlar.',
+  'spi.core.kingarac.son-gunlerin-uyku-saatleri-v':'Son günlerin uyku saatleri ve ortalaması (kaydı olmayan gece boş kalır).',
+  'spi.core.kingarac.son-gunlerin-antrenman-kayit':'Son günlerin antrenman kayıtları.',
+  'spi.core.kingarac.son-tahlillerin-degerleri-ve':'Son tahlillerin değerleri ve referans aralıkları (yorum ve teşhis yok).',
+});
+
 
 window.SP = window.SP || {};
 
@@ -42,10 +180,10 @@ SP.KingArac = (function(){
     const sonuc = { tarih:d, uyku_saat:v.sleep != null ? Number(v.sleep) : null, su_ml:v.water != null ? Number(v.water) : null,
       kilo_kg:v.weight != null ? Number(v.weight) : null, his_1_5:v.soreness != null ? Number(v.soreness) : null, ogunler:ogun, antrenmanlar:ant };
     return { sonuc, satirlar:[
-      'Uyku: ' + (sonuc.uyku_saat != null ? n1(sonuc.uyku_saat) + ' sa' : 'veri yok'),
-      'Su: ' + (sonuc.su_ml != null ? n1(sonuc.su_ml / 1000) + ' L' : 'veri yok'),
-      'Öğün: ' + (ogun.length ? ogun.length + ' (' + ogun.map(o => o.besinler.slice(0, 2).join(', ')).filter(Boolean).join(' · ') + ')' : 'veri yok'),
-      'Antrenman: ' + (ant.length ? ant.map(a => a.ad + (a.dakika ? ' ' + a.dakika + ' dk' : '')).join(' · ') : 'veri yok'),
+      yz('spi.core.kingarac.uyku') + (sonuc.uyku_saat != null ? n1(sonuc.uyku_saat) + ' sa' : 'veri yok'),
+      yz('spi.core.kingarac.su') + (sonuc.su_ml != null ? n1(sonuc.su_ml / 1000) + ' L' : 'veri yok'),
+      yz('spi.core.kingarac.ogun') + (ogun.length ? ogun.length + ' (' + ogun.map(o => o.besinler.slice(0, 2).join(', ')).filter(Boolean).join(' · ') + ')' : 'veri yok'),
+      yz('spi.core.kingarac.antrenman') + (ant.length ? ant.map(a => a.ad + (a.dakika ? ' ' + a.dakika + ' dk' : '')).join(' · ') : 'veri yok'),
     ] };
   }
 
@@ -55,7 +193,7 @@ SP.KingArac = (function(){
     const var_ = l.filter(x => x.saat != null);
     const ort = var_.length ? Math.round(var_.reduce((a, x) => a + x.saat, 0) / var_.length * 10) / 10 : null;
     return { sonuc:{ gun:n, kayitli_gece:var_.length, ortalama_saat:ort, geceler:l },
-      satirlar:['Son ' + n + ' gün: ' + var_.length + ' gece kayıtlı', 'Ortalama: ' + (ort != null ? n1(ort) + ' sa (hesaplandı)' : 'veri yok')] };
+      satirlar:[yz('spi.core.kingarac.son') + n + ' gün: ' + var_.length + ' gece kayıtlı', yz('spi.core.kingarac.ortalama') + (ort != null ? n1(ort) + ' sa (hesaplandı)' : 'veri yok')] };
   }
 
   function antrenmanlar(p){
@@ -63,7 +201,7 @@ SP.KingArac = (function(){
     const l = [];
     gunler(n).forEach(d => (M().workoutsOf(d) || []).forEach(w => l.push({ tarih:d, ad:egzersizAdi(w), dakika:Number(w.minutes) || null })));
     return { sonuc:{ gun:n, adet:l.length, antrenmanlar:l.slice(0, 30) },
-      satirlar:l.length ? l.slice(0, 6).map(x => x.tarih + ' · ' + x.ad + (x.dakika ? ' · ' + x.dakika + ' dk' : '')) : ['Son ' + n + ' günde antrenman kaydı yok.'] };
+      satirlar:l.length ? l.slice(0, 6).map(x => x.tarih + ' · ' + x.ad + (x.dakika ? ' · ' + x.dakika + ' dk' : '')) : [yz('spi.core.kingarac.son') + n + ' günde antrenman kaydı yok.'] };
   }
 
   function tahliller(p){
@@ -73,8 +211,8 @@ SP.KingArac = (function(){
       const b = bm(k), c = l.values[k] || {};
       return { ad:b.name || k, deger:c.v != null ? Number(c.v) : null, birim:b.unit || '', referans:Array.isArray(b.ref) ? b.ref.join('–') : null };
     }) }));
-    return { sonuc:{ tahliller:out, not:'Değer ve referans aralığıdır; yorum ve teşhis değildir.' },
-      satirlar:out.length ? out.map(t => t.tarih + ' · ' + t.degerler.length + ' değer') : ['Kayıtlı tahlil yok.'] };
+    return { sonuc:{ tahliller:out, not:yz('spi.core.kingarac.deger-ve-referans-araligidir') },
+      satirlar:out.length ? out.map(t => t.tarih + ' · ' + t.degerler.length + ' değer') : [yz('spi.core.kingarac.kayitli-tahlil-yok')] };
   }
 
   function bolum(){
@@ -82,13 +220,13 @@ SP.KingArac = (function(){
     if(!K) return [];
     const satir = r => (r.alan || r.label || '') + ': ' + (r.once != null ? r.once : r.before || '—') + ' → ' + (r.sonra != null ? r.sonra : r.after || '—');
     return [{ ad:'spi_bolum_ac_kapa', tur:'yaz', seviye:'orta', ozetAd:K.label,
-      aciklama:'SPİ’de bir bölümü gezinmeden kaldırır ya da geri getirir; verisi silinmez.',
+      aciklama:yz('spi.core.kingarac.spi-de-bir-bolumu-gezinmeden'),
       parametreler:{ type:'object', properties:{ bolum:{ type:'string', maxLength:30, description:'bölümün kimliği' },
         acik:{ type:'integer', enum:[0, 1], description:'1 aç, 0 gizle' } }, required:['bolum', 'acik'] },
       onizle:p => { const pr = SP.Proposals.preview({ action:'bolum-ac-kapa', params:p });
         return pr.ok ? { metin:K.label + ' — onayla uygulanır.', satirlar:(pr.rows || []).map(satir) } : { hata:pr.why || 'uygulanamaz' }; },
       uygula:async p => {
-        const row = await SP.Proposals.propose({ action:'bolum-ac-kapa', params:p, source:'istek', reason:'King sohbetinde istendi' });
+        const row = await SP.Proposals.propose({ action:'bolum-ac-kapa', params:p, source:'istek', reason:yz('spi.core.kingarac.king-sohbetinde-istendi') });
         const r = row ? await SP.Proposals.approve(row.id) : null;
         if(!r || r.ok === false) return { ok:false, metin:'Uygulanamadı' + (r && r.why ? ': ' + r.why : '.') };
         if(SP.App && SP.App.render) SP.App.render();
@@ -123,16 +261,16 @@ SP.KingArac = (function(){
   async function barkodOku(p){
     const b = await barkodBul(p.kod);
     if(!b.ok) return { hata:b.why };
-    if(b.yok) return { sonuc:{ barkod:b.kod, urun:null, etiket:'veri yok' }, cevap:'Barkod ' + b.kod + ': ne kişisel defterde ne Open Food Facts’te var (veri yok).',
-      satirlar:['SPİ › Öğün › Barkod’dan bir gıdaya bağlayabilirsin; sonra doğrudan gelir.'] };
+    if(b.yok) return { sonuc:{ barkod:b.kod, urun:null, etiket:'veri yok' }, cevap:yz('spi.core.kingarac.barkod') + b.kod + ': ne kişisel defterde ne Open Food Facts’te var (veri yok).',
+      satirlar:[yz('spi.core.kingarac.spi-ogun-barkod-dan')] };
     return { sonuc:{ barkod:b.kod, ad:b.ad, marka:b.marka || '', yuz_gram:b.v, porsiyon_g:b.porsiyon ? b.porsiyon.g : null, kaynak:b.kaynak },
-      satirlar:[b.ad + (b.marka ? ' · ' + b.marka : ''), degerSatiri(b.v), b.porsiyon ? b.porsiyon.label + ' = ' + yaz1(b.porsiyon.g) + ' g' : 'Porsiyon: veri yok', 'Kaynak: ' + b.kaynak] };
+      satirlar:[b.ad + (b.marka ? ' · ' + b.marka : ''), degerSatiri(b.v), b.porsiyon ? b.porsiyon.label + ' = ' + yaz1(b.porsiyon.g) + ' g' : yz('spi.core.kingarac.porsiyon-veri-yok'), yz('spi.core.kingarac.kaynak') + b.kaynak] };
   }
   function besin(p){
     const id = SP.Parse && SP.Parse.matchFood ? SP.Parse.matchFood(p.besin) : null;
     const f = id && SP.FOOD_BY_ID[id];
     if(!f) return { cevap:'«' + p.besin + '» SPİ’nin gıda tablosunda yok; barkodu varsa okut ya da Öğün’den kendi gıdanı ekle.' };
-    return { sonuc:{ ad:f.name, yuz_gram:gidaDeger(f), porsiyonlar:(f.portions || []).slice(0, 4), kaynak:f.custom ? (f.kaynak ? f.kaynak.ad : 'senin eklediğin') : 'SPİ tablosu' },
+    return { sonuc:{ ad:f.name, yuz_gram:gidaDeger(f), porsiyonlar:(f.portions || []).slice(0, 4), kaynak:f.custom ? (f.kaynak ? f.kaynak.ad : 'senin eklediğin') : yz('spi.core.kingarac.spi-tablosu') },
       satirlar:[f.name, degerSatiri(f)].concat((f.portions || []).slice(0, 3).map(x => x.label + ' = ' + x.g + ' g')) };
   }
   function slotBul(ad){
@@ -155,9 +293,9 @@ SP.KingArac = (function(){
   async function barkodOnizle(p, b){
     const x = await barkodPlan(p, b);
     if(x.hata) return x;
-    const satir = [degerSatiri(x.v), 'Kaynak: ' + x.kaynak];
-    if(x.g != null && x.v.kcal != null) satir.unshift('Bu miktar: ≈ ' + yaz1(x.g * x.v.kcal / 100) + ' kcal (hesaplandı)');
-    if(!x.gida) satir.push('Gıda tablona eklenir, barkod bağlanır; sonraki okutmada doğrudan gelir.');
+    const satir = [degerSatiri(x.v), yz('spi.core.kingarac.kaynak') + x.kaynak];
+    if(x.g != null && x.v.kcal != null) satir.unshift(yz('spi.core.kingarac.bu-miktar') + yaz1(x.g * x.v.kcal / 100) + ' kcal (hesaplandı)');
+    if(!x.gida) satir.push(yz('spi.core.kingarac.gida-tablona-eklenir-barkod'));
     return { metin:x.g != null ? '«' + x.ad + '» öğüne eklenecek: ' + yaz1(x.g) + ' g' + (x.cert === 'measured' ? '.' : ' (' + x.portion + ', etiketten tahmin).')
       : '«' + x.ad + '» gıda tablona eklenecek. Porsiyonu bilinmiyor; öğüne eklemek için sonra «' + x.ad + ' 150 gram yedim» gibi yaz.', satirlar:satir };
   }
@@ -197,12 +335,12 @@ SP.KingArac = (function(){
       } };
   }
   const barkodAraclari = () => [
-    { ad:'spi_besin', tur:'oku', aciklama:'SPİ’nin gıda tablosunda bir gıdanın 100 gramlık besin değeri ve ev ölçüleri.', ornek:'100 gram ceviz kaç kalori',
+    { ad:'spi_besin', tur:'oku', aciklama:yz('spi.core.kingarac.spi-nin-gida-tablosunda-bir'), ornek:'100 gram ceviz kaç kalori',
       parametreler:{ type:'object', properties:{ besin:{ type:'string', maxLength:60 } }, required:['besin'] }, calistir:besin },
-    { ad:'spi_barkod', tur:'oku', aciklama:'Barkod numarasıyla ürünün besin değeri: önce kişisel barkod defteri, yoksa Open Food Facts (kaynak etiketiyle).',
+    { ad:'spi_barkod', tur:'oku', aciklama:yz('spi.core.kingarac.barkod-numarasiyla-urunun-be'),
       ornek:'8690504033324 besin değerleri', parametreler:{ type:'object', properties:{ kod:kodSema }, required:['kod'] }, calistir:barkodOku },
-    { ad:'spi_barkod_ogun', tur:'yaz', ozetAd:'Barkodlu ürünü öğüne ekle', ornek:'4006381333931 barkodlu üründen 40 gram yedim',
-      aciklama:'Barkodlu ürünü bugünün öğününe ekler; gram kullanıcının cümlesinden ya da etiketteki porsiyondan. Ürün tabloda yoksa gıda olarak eklenir ve barkod bağlanır.',
+    { ad:'spi_barkod_ogun', tur:'yaz', ozetAd:yz('spi.core.kingarac.barkodlu-urunu-ogune-ekle'), ornek:'4006381333931 barkodlu üründen 40 gram yedim',
+      aciklama:yz('spi.core.kingarac.barkodlu-urunu-bugunun-ogunu'),
       parametreler:{ type:'object', properties:{ kod:kodSema, gram:{ type:'number', minimum:1, maximum:2000, description:'yenen gram (kullanıcı söylediyse)' },
         ogun:{ type:'string', maxLength:20, description:'öğün (kahvaltı, öğle, akşam…); boşsa şu anki' } }, required:['kod'] },
       onizle:barkodOnizle, uygula:barkodUygula },
@@ -221,8 +359,8 @@ SP.KingArac = (function(){
       return l[0];
     }
     return {
-      ad:'spi_antrenman_sil', tur:'yaz', ozetAd:'Antrenman kaydı sil',
-      aciklama:'Bir antrenman kaydını siler; kimlikle ya da tarih ve adla bulur.',
+      ad:'spi_antrenman_sil', tur:'yaz', ozetAd:yz('spi.core.kingarac.antrenman-kaydi-sil'),
+      aciklama:yz('spi.core.kingarac.bir-antrenman-kaydini-siler'),
       parametreler:{ type:'object', properties:{
         id:{ type:'string', maxLength:40, description:'antrenman kimliği (id)' },
         tarih:{ type:'string', maxLength:10, description:'tarih (YYYY-AA-GG)' },
@@ -230,16 +368,16 @@ SP.KingArac = (function(){
       } },
       onizle:p => {
         const w = bulAnt(p);
-        if(!w) return { hata:'Silinecek antrenman kaydı bulunamadı.' };
-        if(w.eksik) return { hata:'Hangi antrenman? Tarih ya da ad söyleyin.' };
-        if(w.cok) return { hata:'Birden çok antrenman eşleşti (' + w.sayi + ' adet); id belirtin.' };
+        if(!w) return { hata:yz('spi.core.kingarac.silinecek-antrenman-kaydi-bu') };
+        if(w.eksik) return { hata:yz('spi.core.kingarac.hangi-antrenman-tarih-ya-da') };
+        if(w.cok) return { hata:yz('spi.core.kingarac.birden-cok-antrenman-eslesti') + w.sayi + ' adet); id belirtin.' };
         const ad = w.name || egzersizAdi(w);
         return { metin:'«' + ad + '» antrenmanı silinecek (' + w.date + (w.minutes ? ', ' + w.minutes + ' dk' : '') + ').',
           satirlar:[w.date + ' · ' + ad + (w.minutes ? ' · ' + w.minutes + ' dk' : '')] };
       },
       uygula:async p => {
         const w = bulAnt(p);
-        if(!w || w.eksik || w.cok) return { ok:false, metin:(w && w.eksik) ? 'Hangi antrenman? Tarih ya da ad söyleyin.' : ((w && w.cok) ? 'Birden çok antrenman eşleşti; id belirtin.' : 'Antrenman bulunamadı.') };
+        if(!w || w.eksik || w.cok) return { ok:false, metin:(w && w.eksik) ? yz('spi.core.kingarac.hangi-antrenman-tarih-ya-da') : ((w && w.cok) ? yz('spi.core.kingarac.birden-cok-antrenman-eslesti-2') : yz('spi.core.kingarac.antrenman-bulunamadi')) };
         const silinen = Object.assign({}, w, { items:(w.items || []).map(it => Object.assign({}, it)) });
         await M().deleteWorkout(silinen.id);
         render();
@@ -268,8 +406,8 @@ SP.KingArac = (function(){
       return null;
     }
     return {
-      ad:'spi_ogun_sil', tur:'yaz', ozetAd:'Öğün kaydı sil',
-      aciklama:'Bir öğün kaydını siler; tarih ve öğün türüyle (kahvaltı, öğle...) ya da id ile bulur.',
+      ad:'spi_ogun_sil', tur:'yaz', ozetAd:yz('spi.core.kingarac.ogun-kaydi-sil'),
+      aciklama:yz('spi.core.kingarac.bir-ogun-kaydini-siler-tarih'),
       parametreler:{ type:'object', properties:{
         id:{ type:'string', maxLength:40, description:'öğün kimliği (id)' },
         tarih:{ type:'string', maxLength:10, description:'tarih (YYYY-AA-GG); boşsa bugün' },
@@ -277,16 +415,16 @@ SP.KingArac = (function(){
       } },
       onizle:p => {
         const r = bulOgun(p);
-        if(!r) return { hata:'Silinecek öğün bulunamadı.' };
-        if(r.eksik) return { hata:'Hangi öğün? Öğün türü ya da id belirtin.' };
-        if(r.cok) return { hata:'Birden çok öğün eşleşti (' + r.sayi + ' adet); id belirtin.' };
+        if(!r) return { hata:yz('spi.core.kingarac.silinecek-ogun-bulunamadi') };
+        if(r.eksik) return { hata:yz('spi.core.kingarac.hangi-ogun-ogun-turu-ya') };
+        if(r.cok) return { hata:yz('spi.core.kingarac.birden-cok-ogun-eslesti') + r.sayi + ' adet); id belirtin.' };
         const b = (r.m.items || []).map(yemekAdi);
         return { metin:r.d + ' tarihindeki «' + r.m.slot + '» öğünü silinecek (' + b.length + ' besin).',
           satirlar:b.length ? b.map(x => '· ' + x) : ['(boş öğün)'] };
       },
       uygula:async p => {
         const r = bulOgun(p);
-        if(!r || r.eksik || r.cok) return { ok:false, metin:(r && r.eksik) ? 'Hangi öğün? Öğün türü ya da id belirtin.' : ((r && r.cok) ? 'Birden çok öğün eşleşti; id belirtin.' : 'Öğün bulunamadı.') };
+        if(!r || r.eksik || r.cok) return { ok:false, metin:(r && r.eksik) ? yz('spi.core.kingarac.hangi-ogun-ogun-turu-ya') : ((r && r.cok) ? yz('spi.core.kingarac.birden-cok-ogun-eslesti-id') : yz('spi.core.kingarac.ogun-bulunamadi')) };
         const silinen = Object.assign({}, r.m, { items:(r.m.items || []).map(it => Object.assign({}, it)) });
         await M().deleteMeal(r.d, silinen.id);
         render();
@@ -309,24 +447,24 @@ SP.KingArac = (function(){
       return null;
     }
     return {
-      ad:'spi_tahlil_sil', tur:'yaz', ozetAd:'Tahlil oturumu sil',
-      aciklama:'Bir tahlil oturumunu ve değerlerini siler; tarihle ya da id ile bulur.',
+      ad:'spi_tahlil_sil', tur:'yaz', ozetAd:yz('spi.core.kingarac.tahlil-oturumu-sil'),
+      aciklama:yz('spi.core.kingarac.bir-tahlil-oturumunu-ve-dege'),
       parametreler:{ type:'object', properties:{
         id:{ type:'string', maxLength:40, description:'tahlil oturum kimliği (id)' },
         tarih:{ type:'string', maxLength:10, description:'tahlil tarihi (YYYY-AA-GG)' }
       } },
       onizle:p => {
         const l = bulLab(p);
-        if(!l) return { hata:'Silinecek tahlil oturumu bulunamadı.' };
-        if(l.eksik) return { hata:'Hangi tahlil? Tarih ya da id belirtin.' };
-        if(l.cok) return { hata:'Bu tarihte birden çok tahlil var (' + l.sayi + ' adet); id belirtin.' };
+        if(!l) return { hata:yz('spi.core.kingarac.silinecek-tahlil-oturumu-bul') };
+        if(l.eksik) return { hata:yz('spi.core.kingarac.hangi-tahlil-tarih-ya-da') };
+        if(l.cok) return { hata:yz('spi.core.kingarac.bu-tarihte-birden-cok-tahlil') + l.sayi + ' adet); id belirtin.' };
         const sayi = Object.keys(l.values || {}).length;
         return { metin:l.date + ' tarihli tahlil oturumu silinecek (' + sayi + ' değer).',
           satirlar:[l.date + (l.lab ? ' · ' + l.lab : '') + ' · ' + sayi + ' ölçüm'] };
       },
       uygula:async p => {
         const l = bulLab(p);
-        if(!l || l.eksik || l.cok) return { ok:false, metin:(l && l.eksik) ? 'Hangi tahlil? Tarih ya da id belirtin.' : ((l && l.cok) ? 'Birden çok tahlil eşleşti; id belirtin.' : 'Tahlil bulunamadı.') };
+        if(!l || l.eksik || l.cok) return { ok:false, metin:(l && l.eksik) ? yz('spi.core.kingarac.hangi-tahlil-tarih-ya-da') : ((l && l.cok) ? yz('spi.core.kingarac.birden-cok-tahlil-eslesti-id') : yz('spi.core.kingarac.tahlil-bulunamadi')) };
         const silinen = Object.assign({}, l, { values:Object.assign({}, l.values) });
         await M().deleteLab(silinen.id);
         render();
@@ -350,8 +488,8 @@ SP.KingArac = (function(){
       return null;
     }
     return {
-      ad:'spi_ilac', tur:'yaz', ozetAd:'İlaç ve takviye yönetimi',
-      aciklama:'Kullanılan ilaç ya da takviyeyi kaydeder, günceller ya da siler. Doz önermez; yalnız kullanıcının söylediğini yazar.',
+      ad:'spi_ilac', tur:'yaz', ozetAd:yz('spi.core.kingarac.i-lac-ve-takviye-yonetimi'),
+      aciklama:yz('spi.core.kingarac.kullanilan-ilac-ya-da-takviy'),
       parametreler:{ type:'object', properties:{
         islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'], description:'yapılacak işlem' },
         id:{ type:'string', maxLength:40, description:'ilaç kimliği' },
@@ -365,35 +503,35 @@ SP.KingArac = (function(){
       onizle:p => {
         if(p.islem === 'sil'){
           const m = bulIlac(p);
-          if(!m) return { hata:'Silinecek ilaç bulunamadı.' };
-          if(m.eksik) return { hata:'Hangi ilaç? Ad ya da id belirtin.' };
-          if(m.cok) return { hata:'Birden çok ilaç eşleşti (' + m.sayi + ' adet); id belirtin.' };
+          if(!m) return { hata:yz('spi.core.kingarac.silinecek-ilac-bulunamadi') };
+          if(m.eksik) return { hata:yz('spi.core.kingarac.hangi-ilac-ad-ya-da') };
+          if(m.cok) return { hata:yz('spi.core.kingarac.birden-cok-ilac-eslesti') + m.sayi + ' adet); id belirtin.' };
           return { metin:'«' + m.name + '» ilacı/takviyesi silinecek.', satirlar:[m.name + (m.dose ? ' · ' + m.dose : '') + ' · Başlangıç: ' + (m.startDate || '—')] };
         }
         if(p.islem === 'ekle'){
-          if(!p.ad) return { hata:'İlaç adı gerekli.' };
+          if(!p.ad) return { hata:yz('spi.core.kingarac.i-lac-adi-gerekli') };
           return { metin:'«' + p.ad + '» ilaç/takviye olarak kaydedilecek.', satirlar:[p.ad + (p.doz ? ' · doz: ' + p.doz : '') + (p.baslangic ? ' · başlama: ' + p.baslangic : '')] };
         }
         if(p.islem === 'guncelle'){
           const m = bulIlac(p);
-          if(!m) return { hata:'Güncellenecek ilaç bulunamadı.' };
-          if(m.eksik) return { hata:'Hangi ilaç? Ad ya da id belirtin.' };
-          if(m.cok) return { hata:'Birden çok ilaç eşleşti (' + m.sayi + ' adet); id belirtin.' };
+          if(!m) return { hata:yz('spi.core.kingarac.guncellenecek-ilac-bulunamad') };
+          if(m.eksik) return { hata:yz('spi.core.kingarac.hangi-ilac-ad-ya-da') };
+          if(m.cok) return { hata:yz('spi.core.kingarac.birden-cok-ilac-eslesti') + m.sayi + ' adet); id belirtin.' };
           return { metin:'«' + m.name + '» ilacı/takviyesi güncellenecek.', satirlar:[m.name + ' → ' + (p.ad || m.name) + (p.doz ? ' · doz: ' + p.doz : '')] };
         }
-        return { hata:'Bilinmeyen işlem: ' + p.islem };
+        return { hata:yz('spi.core.kingarac.bilinmeyen-islem') + p.islem };
       },
       uygula:async p => {
         if(p.islem === 'sil'){
           const m = bulIlac(p);
-          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? 'Hangi ilaç? Ad ya da id belirtin.' : ((m && m.cok) ? 'Birden çok ilaç eşleşti; id belirtin.' : 'İlaç bulunamadı.') };
+          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? yz('spi.core.kingarac.hangi-ilac-ad-ya-da') : ((m && m.cok) ? yz('spi.core.kingarac.birden-cok-ilac-eslesti-id') : yz('spi.core.kingarac.i-lac-bulunamadi')) };
           const eski = Object.assign({}, m);
           await M().deleteMed(m.id);
           render();
           return { metin:'«' + eski.name + '» silindi.', geriAl:async () => { await M().saveMed(eski); render(); } };
         }
         if(p.islem === 'ekle'){
-          if(!p.ad) return { ok:false, metin:'İlaç adı gerekli.' };
+          if(!p.ad) return { ok:false, metin:yz('spi.core.kingarac.i-lac-adi-gerekli') };
           const m = M().newMed();
           m.name = p.ad;
           if(p.doz) m.dose = p.doz;
@@ -407,7 +545,7 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'guncelle'){
           const m = bulIlac(p);
-          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? 'Hangi ilaç? Ad ya da id belirtin.' : ((m && m.cok) ? 'Birden çok ilaç eşleşti; id belirtin.' : 'İlaç bulunamadı.') };
+          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? yz('spi.core.kingarac.hangi-ilac-ad-ya-da') : ((m && m.cok) ? yz('spi.core.kingarac.birden-cok-ilac-eslesti-id') : yz('spi.core.kingarac.i-lac-bulunamadi')) };
           const eski = Object.assign({}, m);
           const guncel = Object.assign({}, m);
           if(p.ad) guncel.name = p.ad;
@@ -420,7 +558,7 @@ SP.KingArac = (function(){
           render();
           return { metin:'«' + guncel.name + '» güncellendi.', geriAl:async () => { await M().saveMed(eski); render(); } };
         }
-        return { ok:false, metin:'Geçersiz işlem.' };
+        return { ok:false, metin:yz('spi.core.kingarac.gecersiz-islem') };
       }
     };
   }
@@ -439,8 +577,8 @@ SP.KingArac = (function(){
       return null;
     }
     return {
-      ad:'spi_gida', tur:'yaz', ozetAd:'Kişisel gıda ve sabitleme',
-      aciklama:'Kişisel gıda tablosuna gıda ekler, günceller ya da siler; veya önemli bir ölçümü sabitler/kaldırır.',
+      ad:'spi_gida', tur:'yaz', ozetAd:yz('spi.core.kingarac.kisisel-gida-ve-sabitleme'),
+      aciklama:yz('spi.core.kingarac.kisisel-gida-tablosuna-gida'),
       parametreler:{ type:'object', properties:{
         islem:{ type:'string', enum:['ekle', 'guncelle', 'sil', 'sabitle'], description:'yapılacak işlem' },
         id:{ type:'string', maxLength:40, description:'gıda kimliği veya sabitlenecek ölçüm kimliği' },
@@ -454,7 +592,7 @@ SP.KingArac = (function(){
       }, required:['islem'] },
       onizle:p => {
         if(p.islem === 'sabitle'){
-          if(!p.id) return { hata:'Sabitlenecek ölçüm kimliği (id) gerekli.' };
+          if(!p.id) return { hata:yz('spi.core.kingarac.sabitlenecek-olcum-kimligi-i') };
           const bm = SP.BIO_BY_ID && SP.BIO_BY_ID[p.id];
           if(!bm) return { hata:'«' + p.id + '» adında bir biyobelirteç ölçümü yok.' };
           const pinli = M().isPinned(p.id);
@@ -462,40 +600,40 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'sil'){
           const f = bulGida(p);
-          if(!f) return { hata:'Silinecek kullanıcı gıdası bulunamadı.' };
-          if(f.eksik) return { hata:'Hangi gıda? Ad ya da id belirtin.' };
-          if(f.cok) return { hata:'Birden çok gıda eşleşti (' + f.sayi + ' adet); id belirtin.' };
+          if(!f) return { hata:yz('spi.core.kingarac.silinecek-kullanici-gidasi-b') };
+          if(f.eksik) return { hata:yz('spi.core.kingarac.hangi-gida-ad-ya-da') };
+          if(f.cok) return { hata:yz('spi.core.kingarac.birden-cok-gida-eslesti') + f.sayi + ' adet); id belirtin.' };
           return { metin:'«' + f.name + '» gıdası tablodan silinecek.', satirlar:[degerSatiri(f)] };
         }
         if(p.islem === 'ekle'){
-          if(!p.ad) return { hata:'Gıda adı gerekli.' };
-          return { metin:'«' + p.ad + '» gıda tablosuna eklenecek.', satirlar:[p.kalori != null ? '100 g: ' + p.kalori + ' kcal' : 'Değerler sonra girilebilir'] };
+          if(!p.ad) return { hata:yz('spi.core.kingarac.gida-adi-gerekli') };
+          return { metin:'«' + p.ad + '» gıda tablosuna eklenecek.', satirlar:[p.kalori != null ? '100 g: ' + p.kalori + ' kcal' : yz('spi.core.kingarac.degerler-sonra-girilebilir')] };
         }
         if(p.islem === 'guncelle'){
           const f = bulGida(p);
-          if(!f) return { hata:'Güncellenecek kullanıcı gıdası bulunamadı.' };
-          if(f.eksik) return { hata:'Hangi gıda? Ad ya da id belirtin.' };
-          if(f.cok) return { hata:'Birden çok gıda eşleşti (' + f.sayi + ' adet); id belirtin.' };
+          if(!f) return { hata:yz('spi.core.kingarac.guncellenecek-kullanici-gida') };
+          if(f.eksik) return { hata:yz('spi.core.kingarac.hangi-gida-ad-ya-da') };
+          if(f.cok) return { hata:yz('spi.core.kingarac.birden-cok-gida-eslesti') + f.sayi + ' adet); id belirtin.' };
           return { metin:'«' + f.name + '» gıdası güncellenecek.' };
         }
-        return { hata:'Bilinmeyen işlem: ' + p.islem };
+        return { hata:yz('spi.core.kingarac.bilinmeyen-islem') + p.islem };
       },
       uygula:async p => {
         if(p.islem === 'sabitle'){
           const r = await M().togglePin(p.id);
           render();
-          return { metin:r.note || (r.pinned ? 'Sabitlendi.' : 'Sabitleme kaldırıldı.'), geriAl:async () => { await M().togglePin(p.id); render(); } };
+          return { metin:r.note || (r.pinned ? 'Sabitlendi.' : yz('spi.core.kingarac.sabitleme-kaldirildi')), geriAl:async () => { await M().togglePin(p.id); render(); } };
         }
         if(p.islem === 'sil'){
           const f = bulGida(p);
-          if(!f || f.eksik || f.cok) return { ok:false, metin:(f && f.eksik) ? 'Hangi gıda? Ad ya da id belirtin.' : ((f && f.cok) ? 'Birden çok gıda eşleşti; id belirtin.' : 'Gıda bulunamadı.') };
+          if(!f || f.eksik || f.cok) return { ok:false, metin:(f && f.eksik) ? yz('spi.core.kingarac.hangi-gida-ad-ya-da') : ((f && f.cok) ? yz('spi.core.kingarac.birden-cok-gida-eslesti-id') : yz('spi.core.kingarac.gida-bulunamadi')) };
           const eski = Object.assign({}, f);
           await M().deleteFood(f.id);
           render();
           return { metin:'«' + eski.name + '» silindi.', geriAl:async () => { await M().saveFood(eski); render(); } };
         }
         if(p.islem === 'ekle'){
-          if(!p.ad) return { ok:false, metin:'Gıda adı gerekli.' };
+          if(!p.ad) return { ok:false, metin:yz('spi.core.kingarac.gida-adi-gerekli') };
           const f = M().newFood();
           f.name = p.ad;
           if(p.kategori) f.cat = p.kategori;
@@ -510,7 +648,7 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'guncelle'){
           const f = bulGida(p);
-          if(!f || f.eksik || f.cok) return { ok:false, metin:(f && f.eksik) ? 'Hangi gıda? Ad ya da id belirtin.' : ((f && f.cok) ? 'Birden çok gıda eşleşti; id belirtin.' : 'Gıda bulunamadı.') };
+          if(!f || f.eksik || f.cok) return { ok:false, metin:(f && f.eksik) ? yz('spi.core.kingarac.hangi-gida-ad-ya-da') : ((f && f.cok) ? yz('spi.core.kingarac.birden-cok-gida-eslesti-id') : yz('spi.core.kingarac.gida-bulunamadi')) };
           const eski = Object.assign({}, f);
           const guncel = Object.assign({}, f);
           if(p.ad) guncel.name = p.ad;
@@ -524,7 +662,7 @@ SP.KingArac = (function(){
           render();
           return { metin:'«' + guncel.name + '» güncellendi.', geriAl:async () => { await M().saveFood(eski); render(); } };
         }
-        return { ok:false, metin:'Geçersiz işlem.' };
+        return { ok:false, metin:yz('spi.core.kingarac.gecersiz-islem') };
       }
     };
   }
@@ -544,8 +682,8 @@ SP.KingArac = (function(){
       return null;
     }
     const haneYaz = {
-      ad:'spi_hane', tur:'yaz', ozetAd:'Hane üyesi ekle ya da çıkar',
-      aciklama:'Hane profil listesine yeni profil ekler ya da var olan bir profili haneden çıkarır.',
+      ad:'spi_hane', tur:'yaz', ozetAd:yz('spi.core.kingarac.hane-uyesi-ekle-ya-da'),
+      aciklama:yz('spi.core.kingarac.hane-profil-listesine-yeni-p'),
       parametreler:{ type:'object', properties:{
         islem:{ type:'string', enum:['ekle', 'sil'], description:'işlem' },
         ad:{ type:'string', maxLength:60, description:'profil adı' },
@@ -556,22 +694,22 @@ SP.KingArac = (function(){
       }, required:['islem'] },
       onizle:p => {
         if(p.islem === 'ekle'){
-          if(!p.ad) return { hata:'Profil adı gerekli.' };
-          return { metin:'«' + p.ad + '» hane üyesi olarak eklenecek.', satirlar:['Rol: ' + (p.rol || 'family') + (p.dogumYili ? ' · Doğum: ' + p.dogumYili : '')] };
+          if(!p.ad) return { hata:yz('spi.core.kingarac.profil-adi-gerekli') };
+          return { metin:'«' + p.ad + '» hane üyesi olarak eklenecek.', satirlar:[yz('spi.core.kingarac.rol') + (p.rol || 'family') + (p.dogumYili ? ' · Doğum: ' + p.dogumYili : '')] };
         }
         if(p.islem === 'sil'){
           const m = bulUye(p);
-          if(!m) return { hata:'Haneden çıkarılacak profil bulunamadı.' };
-          if(m.eksik) return { hata:'Hangi profil? Profil adı ya da id belirtin.' };
-          if(m.cok) return { hata:'Birden çok profil eşleşti (' + m.sayi + ' adet); id belirtin.' };
-          if(m.id === M().activeProfileId()) return { hata:'Açık olan aktif profil silinemez.' };
+          if(!m) return { hata:yz('spi.core.kingarac.haneden-cikarilacak-profil-b') };
+          if(m.eksik) return { hata:yz('spi.core.kingarac.hangi-profil-profil-adi-ya') };
+          if(m.cok) return { hata:yz('spi.core.kingarac.birden-cok-profil-eslesti') + m.sayi + ' adet); id belirtin.' };
+          if(m.id === M().activeProfileId()) return { hata:yz('spi.core.kingarac.acik-olan-aktif-profil-silin') };
           return { metin:'«' + m.name + '» profili haneden çıkarılacak.' };
         }
-        return { hata:'Bilinmeyen işlem: ' + p.islem };
+        return { hata:yz('spi.core.kingarac.bilinmeyen-islem') + p.islem };
       },
       uygula:async p => {
         if(p.islem === 'ekle'){
-          if(!p.ad) return { ok:false, metin:'Profil adı gerekli.' };
+          if(!p.ad) return { ok:false, metin:yz('spi.core.kingarac.profil-adi-gerekli') };
           const r = M().addHouseholdMember(p.ad, { role:p.rol, sex:p.cinsiyet, birthYear:p.dogumYili });
           if(!r.ok) return { ok:false, metin:r.error };
           render();
@@ -579,8 +717,8 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'sil'){
           const m = bulUye(p);
-          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? 'Hangi profil? Profil adı ya da id belirtin.' : ((m && m.cok) ? 'Birden çok profil eşleşti; id belirtin.' : 'Profil bulunamadı.') };
-          if(m.id === M().activeProfileId()) return { ok:false, metin:'Aktif profil silinemez.' };
+          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? yz('spi.core.kingarac.hangi-profil-profil-adi-ya') : ((m && m.cok) ? yz('spi.core.kingarac.birden-cok-profil-eslesti-id') : yz('spi.core.kingarac.profil-bulunamadi')) };
+          if(m.id === M().activeProfileId()) return { ok:false, metin:yz('spi.core.kingarac.aktif-profil-silinemez') };
           const eski = Object.assign({}, m);
           const r = M().removeHouseholdMember(m.id);
           if(!r.ok) return { ok:false, metin:r.error };
@@ -593,17 +731,17 @@ SP.KingArac = (function(){
             render();
           } };
         }
-        return { ok:false, metin:'Geçersiz işlem.' };
+        return { ok:false, metin:yz('spi.core.kingarac.gecersiz-islem') };
       }
     };
     const haneOku = {
-      ad:'spi_hane_oku', tur:'oku', ozetAd:'Hane profilleri',
-      aciklama:'Cihazda kayıtlı hane üyeleri, rolleri ve aktif olan profil.',
+      ad:'spi_hane_oku', tur:'oku', ozetAd:yz('spi.core.kingarac.hane-profilleri'),
+      aciklama:yz('spi.core.kingarac.cihazda-kayitli-hane-uyeleri'),
       parametreler:{ type:'object', properties:{} },
       calistir:() => {
         const list = M().householdList() || [];
         const aktif = M().activeProfileId();
-        if(!list.length) return { sonuc:{ toplam_uye:0, uyeler:[], etiket:'veri yok' }, satirlar:['Kayıtlı hane üyesi yok (veri yok).'] };
+        if(!list.length) return { sonuc:{ toplam_uye:0, uyeler:[], etiket:'veri yok' }, satirlar:[yz('spi.core.kingarac.kayitli-hane-uyesi-yok-veri')] };
         const out = list.map(m => ({ id:m.id, ad:m.name, rol:m.role || 'family', aktif:m.id === aktif }));
         return { sonuc:{ aktif_profil:aktif, toplam_uye:out.length, uyeler:out },
           satirlar:out.map(m => m.ad + ' (' + m.rol + ')' + (m.aktif ? ' · aktif profil' : '')) };
@@ -625,8 +763,8 @@ SP.KingArac = (function(){
       return f ? f.id : null;
     }
     return {
-      ad:'spi_market', tur:'yaz', ozetAd:'Sepet ve market fiyatı',
-      aciklama:'Haftalık sepete ürün ekler, çıkarır, fiyatını kaydeder ya da haftalık bütçe sınırını ayarlar.',
+      ad:'spi_market', tur:'yaz', ozetAd:yz('spi.core.kingarac.sepet-ve-market-fiyati'),
+      aciklama:yz('spi.core.kingarac.haftalik-sepete-urun-ekler-c'),
       parametreler:{ type:'object', properties:{
         islem:{ type:'string', enum:['sepet_ekle', 'sepet_sil', 'fiyat_gir', 'sinir_koy'], description:'işlem' },
         gida:{ type:'string', maxLength:60, description:'gıda adı ya da kimliği' },
@@ -636,38 +774,38 @@ SP.KingArac = (function(){
       }, required:['islem'] },
       onizle:p => {
         if(p.islem === 'sinir_koy'){
-          if(p.sinir == null) return { hata:'Sınır değeri (TL) gerekli.' };
-          return { metin:'Haftalık market bütçe sınırı ' + p.sinir + ' TL olarak ayarlanacak.' };
+          if(p.sinir == null) return { hata:yz('spi.core.kingarac.sinir-degeri-tl-gerekli') };
+          return { metin:yz('spi.core.kingarac.haftalik-market-butce-siniri') + p.sinir + ' TL olarak ayarlanacak.' };
         }
         const fid = p.gida && gidaBul(p.gida);
         if(!fid) return { hata:'«' + p.gida + '» gıdası tablolarda bulunamadı.' };
         const fname = (SP.FOOD_BY_ID[fid] || {}).name || fid;
         if(p.islem === 'sepet_ekle'){
-          if(p.kg == null || p.kg <= 0) return { hata:'Kaç kg?' };
+          if(p.kg == null || p.kg <= 0) return { hata:yz('spi.core.kingarac.kac-kg') };
           return { metin:'«' + fname + '» sepete eklenecek: ' + p.kg + ' kg.' };
         }
         if(p.islem === 'sepet_sil'){
           return { metin:'«' + fname + '» sepetten çıkarılacak.' };
         }
         if(p.islem === 'fiyat_gir'){
-          if(p.fiyat == null) return { hata:'Fiyat değeri (TL) gerekli.' };
+          if(p.fiyat == null) return { hata:yz('spi.core.kingarac.fiyat-degeri-tl-gerekli') };
           return { metin:'«' + fname + '» için kullanıcı fiyatı kaydedilecek: ' + p.fiyat + ' TL/kg.' };
         }
-        return { hata:'Bilinmeyen işlem: ' + p.islem };
+        return { hata:yz('spi.core.kingarac.bilinmeyen-islem') + p.islem };
       },
       uygula:async p => {
         if(p.islem === 'sinir_koy'){
-          if(p.sinir == null) return { ok:false, metin:'Sınır gerekli.' };
+          if(p.sinir == null) return { ok:false, metin:yz('spi.core.kingarac.sinir-gerekli') };
           const eski = SP.S.basket ? SP.S.basket.weeklyLimit : null;
           await M().saveBasket({ weeklyLimit:p.sinir });
           render();
-          return { metin:'Haftalık bütçe sınırı ayarlandı: ' + p.sinir + ' TL.', geriAl:async () => { await M().saveBasket({ weeklyLimit:eski }); render(); } };
+          return { metin:yz('spi.core.kingarac.haftalik-butce-siniri-ayarla') + p.sinir + ' TL.', geriAl:async () => { await M().saveBasket({ weeklyLimit:eski }); render(); } };
         }
         const fid = p.gida && gidaBul(p.gida);
-        if(!fid) return { ok:false, metin:'Gıda bulunamadı.' };
+        if(!fid) return { ok:false, metin:yz('spi.core.kingarac.gida-bulunamadi') };
         const fname = (SP.FOOD_BY_ID[fid] || {}).name || fid;
         if(p.islem === 'sepet_ekle'){
-          if(p.kg == null || p.kg <= 0) return { ok:false, metin:'Kaç kg?' };
+          if(p.kg == null || p.kg <= 0) return { ok:false, metin:yz('spi.core.kingarac.kac-kg') };
           const items = (SP.S.basket && SP.S.basket.items) || [];
           const onceki = items.find(x => x.foodId === fid);
           const oncekiKg = onceki ? onceki.kg : 0;
@@ -689,27 +827,27 @@ SP.KingArac = (function(){
           render();
           return { metin:'«' + fname + '» fiyatı kaydedildi: ' + p.fiyat + ' TL.', geriAl:async () => { await M().setPrice(fid, onceki); render(); } };
         }
-        return { ok:false, metin:'Geçersiz işlem.' };
+        return { ok:false, metin:yz('spi.core.kingarac.gecersiz-islem') };
       }
     };
   }
 
   function butceAraci(){
     return {
-      ad:'spi_butce', tur:'oku', ozetAd:'Sağlık ve market bütçesi',
-      aciklama:'Haftalık sepet maliyeti, kişi başı tutar ve belirlenen bütçe sınırına göre durum.',
+      ad:'spi_butce', tur:'oku', ozetAd:yz('spi.core.kingarac.saglik-ve-market-butcesi'),
+      aciklama:yz('spi.core.kingarac.haftalik-sepet-maliyeti-kisi'),
       parametreler:{ type:'object', properties:{} },
       calistir:() => {
         const b = SP.Money && SP.Money.basketTotal ? SP.Money.basketTotal() : { rows:[] };
         if(!b.rows || !b.rows.length){
           return { sonuc:{ sepet_kalem:0, haftalik_toplam_tl:null, sinir_tl:b.limit, kisi_basi_tl:null, etiket:'veri yok' },
-            satirlar:['Haftalık sepet boş (veri yok).', b.limit ? 'Haftalık sınır: ' + b.limit + ' TL' : 'Bütçe sınırı belirlenmemiş.'] };
+            satirlar:[yz('spi.core.kingarac.haftalik-sepet-bos-veri-yok'), b.limit ? yz('spi.core.kingarac.haftalik-sinir') + b.limit + ' TL' : yz('spi.core.kingarac.butce-siniri-belirlenmemis')] };
         }
         return { sonuc:{ sepet_kalem:b.rows.length, haftalik_toplam_tl:b.total, sinir_tl:b.limit, kisi_basi_tl:b.perPerson, hane_kisi:b.householdSize, sinir_asildi:b.over },
           satirlar:[
-            'Haftalık sepet: ' + b.rows.length + ' kalem · ' + yaz1(b.total) + ' TL' + (b.limit ? ' / ' + b.limit + ' TL' : ''),
-            'Kişi başı: ' + yaz1(b.perPerson) + ' TL (' + b.householdSize + ' kişi)',
-            b.over ? 'Sınır aşıldı!' : (b.limit ? 'Bütçe sınırının altında.' : 'Bütçe sınırı yok.')
+            yz('spi.core.kingarac.haftalik-sepet') + b.rows.length + ' kalem · ' + yaz1(b.total) + ' TL' + (b.limit ? ' / ' + b.limit + ' TL' : ''),
+            yz('spi.core.kingarac.kisi-basi') + yaz1(b.perPerson) + ' TL (' + b.householdSize + ' kişi)',
+            b.over ? yz('spi.core.kingarac.sinir-asildi') : (b.limit ? yz('spi.core.kingarac.butce-sinirinin-altinda') : yz('spi.core.kingarac.butce-siniri-yok'))
           ] };
       }
     };
@@ -724,36 +862,36 @@ SP.KingArac = (function(){
       return aciklar[0];
     }
     return {
-      ad:'spi_karar_kapat', tur:'yaz', ozetAd:'Ofis kararını kapat ya da kaydet',
-      aciklama:'Danışma ve ofis kararlarını kapatır veya yeni karar kaydeder.',
+      ad:'spi_karar_kapat', tur:'yaz', ozetAd:yz('spi.core.kingarac.ofis-kararini-kapat-ya-da'),
+      aciklama:yz('spi.core.kingarac.danisma-ve-ofis-kararlarini'),
       parametreler:{ type:'object', properties:{
         id:{ type:'string', maxLength:40, description:'karar kimliği' },
         sonuc:{ type:'string', maxLength:200, description:'karar sonucu veya gerekçe' },
         konu:{ type:'string', maxLength:200, description:'yeni karar konusu' }
       } },
       onizle:p => {
-        if(p.konu) return { metin:'Yeni ofis kararı kaydedilecek: «' + p.konu + '»' };
+        if(p.konu) return { metin:yz('spi.core.kingarac.yeni-ofis-karari-kaydedilece') + p.konu + '»' };
         const d = bulKarar(p);
-        if(!d) return { hata:'Açık karar bulunamadı.' };
-        if(d.cok) return { hata:'Birden çok açık karar var (' + d.sayi + ' adet); karar id belirtin.' };
-        return { metin:'Karar kapatılacak: «' + (d.topic || d.text || d.id) + '»', satirlar:[p.sonuc ? 'Sonuç: ' + p.sonuc : 'Durum: kapalı'] };
+        if(!d) return { hata:yz('spi.core.kingarac.acik-karar-bulunamadi') };
+        if(d.cok) return { hata:yz('spi.core.kingarac.birden-cok-acik-karar-var') + d.sayi + ' adet); karar id belirtin.' };
+        return { metin:yz('spi.core.kingarac.karar-kapatilacak') + (d.topic || d.text || d.id) + '»', satirlar:[p.sonuc ? yz('spi.core.kingarac.sonuc') + p.sonuc : yz('spi.core.kingarac.durum-kapali')] };
       },
       uygula:async p => {
         if(p.konu){
           const d = await M().saveDecision({ topic:p.konu, text:p.sonuc || p.konu });
           render();
-          return { metin:'Karar kaydedildi.', geriAl:async () => {
+          return { metin:yz('spi.core.kingarac.karar-kaydedildi'), geriAl:async () => {
             SP.S.decisions = (SP.S.decisions || []).filter(x => x.id !== d.id);
             await SP.Store.remove('decisions/' + d.id);
             render();
           } };
         }
         const d = bulKarar(p);
-        if(!d || d.cok) return { ok:false, metin:(d && d.cok) ? 'Birden çok karar var; id belirtin.' : 'Karar bulunamadı.' };
+        if(!d || d.cok) return { ok:false, metin:(d && d.cok) ? yz('spi.core.kingarac.birden-cok-karar-var-id') : yz('spi.core.kingarac.karar-bulunamadi') };
         const eski = Object.assign({}, d);
         await M().closeDecision(d.id, p.sonuc || 'kapatıldı');
         render();
-        return { metin:'Karar kapatıldı.', geriAl:async () => {
+        return { metin:yz('spi.core.kingarac.karar-kapatildi'), geriAl:async () => {
           const idx = (SP.S.decisions || []).findIndex(x => x.id === eski.id);
           if(idx >= 0) SP.S.decisions[idx] = eski;
           await SP.Store.set('decisions/' + eski.id, eski);
@@ -765,8 +903,8 @@ SP.KingArac = (function(){
 
   function profilAraci(){
     return {
-      ad:'spi_profil', tur:'yaz', ozetAd:'Profil ve hareket seviyesi',
-      aciklama:'Kullanıcı profilini (kilo, boy, doğum yılı vb.) günceller ya da hareket merdivenindeki basamağı belirler.',
+      ad:'spi_profil', tur:'yaz', ozetAd:yz('spi.core.kingarac.profil-ve-hareket-seviyesi'),
+      aciklama:yz('spi.core.kingarac.kullanici-profilini-kilo-boy'),
       parametreler:{ type:'object', properties:{
         islem:{ type:'string', enum:['profil', 'seviye'], description:'işlem (profil veya seviye)' },
         ad:{ type:'string', maxLength:60, description:'ad' },
@@ -785,11 +923,11 @@ SP.KingArac = (function(){
           return { metin:'«' + p.hareketId + '» hareketi için seviye «' + p.seviyeId + '» olarak ayarlanacak.' };
         }
         const satirlar = [];
-        if(p.kilo != null) satirlar.push('Kilo: ' + p.kilo + ' kg');
-        if(p.boy != null) satirlar.push('Boy: ' + p.boy + ' cm');
-        if(p.dogumYili != null) satirlar.push('Doğum yılı: ' + p.dogumYili);
-        if(p.cinsiyet) satirlar.push('Cinsiyet: ' + p.cinsiyet);
-        return { metin:'Profil bilgileri güncellenecek.', satirlar:satirlar.length ? satirlar : ['Profil güncellenecek.'] };
+        if(p.kilo != null) satirlar.push(yz('spi.core.kingarac.kilo') + p.kilo + ' kg');
+        if(p.boy != null) satirlar.push(yz('spi.core.kingarac.boy') + p.boy + ' cm');
+        if(p.dogumYili != null) satirlar.push(yz('spi.core.kingarac.dogum-yili') + p.dogumYili);
+        if(p.cinsiyet) satirlar.push(yz('spi.core.kingarac.cinsiyet') + p.cinsiyet);
+        return { metin:yz('spi.core.kingarac.profil-bilgileri-guncellenec'), satirlar:satirlar.length ? satirlar : [yz('spi.core.kingarac.profil-guncellenecek')] };
       },
       uygula:async p => {
         if(p.islem === 'seviye' || p.hareketId){
@@ -797,7 +935,7 @@ SP.KingArac = (function(){
           const onceki = SP.S.progress && SP.S.progress[p.hareketId] ? Object.assign({}, SP.S.progress[p.hareketId]) : null;
           await M().setLevel(p.hareketId, p.seviyeId);
           render();
-          return { metin:'Hareket seviyesi ayarlandı.', geriAl:async () => {
+          return { metin:yz('spi.core.kingarac.hareket-seviyesi-ayarlandi'), geriAl:async () => {
             if(onceki) await M().setLevel(p.hareketId, onceki.levelId);
             else { delete SP.S.progress[p.hareketId]; await SP.Store.set('progress', SP.S.progress); }
             render();
@@ -814,15 +952,15 @@ SP.KingArac = (function(){
         if(p.hedef) patch.goal = p.hedef;
         await M().saveProfile(patch);
         render();
-        return { metin:'Profil güncellendi.', geriAl:async () => { await M().saveProfile(onceki); render(); } };
+        return { metin:yz('spi.core.kingarac.profil-guncellendi'), geriAl:async () => { await M().saveProfile(onceki); render(); } };
       }
     };
   }
 
   function planlarAraci(){
     return {
-      ad:'spi_planlar', tur:'oku', ozetAd:'Haftalık planlar',
-      aciklama:'Kullanıcının haftalık planları (beslenme, hareket, uyku, su, alışkanlıklar) ve bugünkü uyum durumu.',
+      ad:'spi_planlar', tur:'oku', ozetAd:yz('spi.core.kingarac.haftalik-planlar'),
+      aciklama:yz('spi.core.kingarac.kullanicinin-haftalik-planla'),
       parametreler:{ type:'object', properties:{
         tur:{ type:'string', enum:['beslenme', 'hareket', 'uyku', 'su', 'serbest'], description:'plan türü' }
       } },
@@ -831,7 +969,7 @@ SP.KingArac = (function(){
         const iso = U().todayISO();
         const filtre = p.tur ? list.filter(x => x.tur === p.tur) : list;
         if(!filtre.length){
-          return { sonuc:{ toplam:0, planlar:[], etiket:'veri yok' }, satirlar:['Kayıtlı haftalık plan yok (veri yok).'] };
+          return { sonuc:{ toplam:0, planlar:[], etiket:'veri yok' }, satirlar:[yz('spi.core.kingarac.kayitli-haftalik-plan-yok-ve')] };
         }
         const out = filtre.map(x => {
           const b = SP.HaftaPlan.bugun ? SP.HaftaPlan.bugun(x, iso) : null;
@@ -845,15 +983,15 @@ SP.KingArac = (function(){
 
   function hedeflerAraci(){
     return {
-      ad:'spi_hedefler', tur:'oku', ozetAd:'Sağlık hedefleri',
-      aciklama:'Kullanıcının etkin sağlık ve kilo hedefleri, yönü ve durumu.',
+      ad:'spi_hedefler', tur:'oku', ozetAd:yz('spi.core.kingarac.saglik-hedefleri'),
+      aciklama:yz('spi.core.kingarac.kullanicinin-etkin-saglik-ve'),
       parametreler:{ type:'object', properties:{
         durum:{ type:'string', enum:['aktif', 'hepsi'], description:'aktif hedefler veya tümü' }
       } },
       calistir:p => {
         const l = SP.Hedefler ? (p.durum === 'hepsi' ? SP.Hedefler.liste() : SP.Hedefler.aktifler()) : [];
         if(!l.length){
-          return { sonuc:{ toplam:0, hedefler:[], etiket:'veri yok' }, satirlar:['Kayıtlı hedef yok (veri yok).'] };
+          return { sonuc:{ toplam:0, hedefler:[], etiket:'veri yok' }, satirlar:[yz('spi.core.kingarac.kayitli-hedef-yok-veri-yok')] };
         }
         const out = l.map(h => ({
           id:h.id,
@@ -868,8 +1006,8 @@ SP.KingArac = (function(){
 
   function mutfakAraci(){
     return {
-      ad:'spi_mutfak', tur:'oku', ozetAd:'Hane mutfak porsiyon paylaşımı',
-      aciklama:'Tek tencere yemeğin hane bireylerinin kalori ve protein ihtiyacına göre porsiyon paylaşımı.',
+      ad:'spi_mutfak', tur:'oku', ozetAd:yz('spi.core.kingarac.hane-mutfak-porsiyon-paylasi'),
+      aciklama:yz('spi.core.kingarac.tek-tencere-yemegin-hane-bir'),
       parametreler:{ type:'object', properties:{
         yemek:{ type:'string', maxLength:60, description:'yemeğin adı veya kimliği' },
         gram:{ type:'number', minimum:100, maximum:10000, description:'toplam tencere gramı' }
@@ -884,7 +1022,7 @@ SP.KingArac = (function(){
         } else {
           fid = (SP.S.ui && SP.S.ui.kitchenDish) || null;
           if(!fid){
-            return { sonuc:{ yemek:null, paylar:[], etiket:'veri yok' }, satirlar:['Seçili yemek yok (veri yok).'] };
+            return { sonuc:{ yemek:null, paylar:[], etiket:'veri yok' }, satirlar:[yz('spi.core.kingarac.secili-yemek-yok-veri-yok')] };
           }
         }
         const f = SP.FOOD_BY_ID && SP.FOOD_BY_ID[fid];
@@ -892,15 +1030,15 @@ SP.KingArac = (function(){
 
         const totalGrams = p.gram || (SP.S.ui && SP.S.ui.kitchenGrams) || null;
         if(!totalGrams || totalGrams <= 0){
-          return { sonuc:{ yemek:f.name, toplam_gram:null, paylar:[], etiket:'veri yok' }, satirlar:['Tencere toplam gramı belirtilmemiş (veri yok; kaç gram?).'] };
+          return { sonuc:{ yemek:f.name, toplam_gram:null, paylar:[], etiket:'veri yok' }, satirlar:[yz('spi.core.kingarac.tencere-toplam-grami-belirti')] };
         }
 
         const list = M().householdList();
         const me = SP.S.profile;
         const members = list.map(row => row.id === (me && me.id) ? Object.assign({}, me, { self:true, weightKg:(M().kiloOf(me) || {}).kg || null }) : Object.assign({ self:false, weightKg:null, heightCm:null }, row));
-        const res = SP.Nutri && SP.Nutri.householdSplit ? SP.Nutri.householdSplit(fid, totalGrams, members) : { ok:false, error:'Nutri modülü yok' };
+        const res = SP.Nutri && SP.Nutri.householdSplit ? SP.Nutri.householdSplit(fid, totalGrams, members) : { ok:false, error:yz('spi.core.kingarac.nutri-modulu-yok') };
         if(!res.ok){
-          return { sonuc:{ yemek:f.name, toplam_gram:totalGrams, paylar:[], hata:res.error, etiket:'veri yok' }, satirlar:['Mutfak paylaştırması: ' + res.error + ' (veri yok)'] };
+          return { sonuc:{ yemek:f.name, toplam_gram:totalGrams, paylar:[], hata:res.error, etiket:'veri yok' }, satirlar:[yz('spi.core.kingarac.mutfak-paylastirmasi') + res.error + ' (veri yok)'] };
         }
         const paylar = res.rows.map(r => ({ ad:r.member.name || 'Adsız', gram:r.share, kcal:Math.round(r.gets.kcal), protein:Math.round(r.gets.protein) }));
         return {
@@ -913,17 +1051,17 @@ SP.KingArac = (function(){
 
   function liste(){
     return [
-      { ad:'spi_gun_kaydi', tur:'oku', aciklama:'Bir günün SPİ kaydı: uyku, su, kilo, his, öğünler ve antrenmanlar.',
+      { ad:'spi_gun_kaydi', tur:'oku', aciklama:yz('spi.core.kingarac.bir-gunun-spi-kaydi-uyku'),
         ornek:'dünün özet kaydı', anahtar:'günlük günlüğüm döküm ajanda kaydettiklerim özet',
         parametreler:{ type:'object', properties:{ tarih:gun } }, calistir:gunKaydi },
-      { ad:'spi_uyku', tur:'oku', aciklama:'Son günlerin uyku saatleri ve ortalaması (kaydı olmayan gece boş kalır).',
+      { ad:'spi_uyku', tur:'oku', aciklama:yz('spi.core.kingarac.son-gunlerin-uyku-saatleri-v'),
         es:/(uykum nasıl|uyku ortalamam|kaç saat uyu(?:dum|muşum)|ortalama .*uyu|uyku.*dağılım)/, ornek:'haftalık uyku ortalamam',
         anahtar:'süre dağılım uykular dinlenme gece saat',
         parametreler:{ type:'object', properties:{ gun:sayiGun(60, 7) } }, calistir:uyku },
-      { ad:'spi_antrenmanlar', tur:'oku', aciklama:'Son günlerin antrenman kayıtları.', ornek:'son antrenmanlarım',
+      { ad:'spi_antrenmanlar', tur:'oku', aciklama:yz('spi.core.kingarac.son-gunlerin-antrenman-kayit'), ornek:'son antrenmanlarım',
         anahtar:'koşu koşular idman egzersiz seans spor hafta yapılan',
         parametreler:{ type:'object', properties:{ gun:sayiGun(90, 14) } }, calistir:antrenmanlar },
-      { ad:'spi_tahliller', tur:'oku', aciklama:'Son tahlillerin değerleri ve referans aralıkları (yorum ve teşhis yok).', ornek:'son tahlillerim',
+      { ad:'spi_tahliller', tur:'oku', aciklama:yz('spi.core.kingarac.son-tahlillerin-degerleri-ve'), ornek:'son tahlillerim',
         parametreler:{ type:'object', properties:{ limit:{ type:'integer', minimum:1, maximum:10 } } }, calistir:tahliller },
     ].concat(
       barkodAraclari(),

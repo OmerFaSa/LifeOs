@@ -53,6 +53,19 @@
         durur (küçük aksiyon, AGENTS §1.9); King de aynı işlevi kullanır.
         Çok kayıtlı cümlede her parçanın geri alması sondan başa koşar. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.giris.anlasilmadi-yazilmayacak':'Anlaşılmadı, yazılmayacak: «',
+  'ortak.giris.sunu-kaydedeyim-mi':'Şunu kaydedeyim mi?',
+  'ortak.giris.kaydet':'Kaydet',
+  'ortak.giris.vazgec':'Vazgeç',
+  'ortak.giris.ya-da-yeniden-enter':'ya da yeniden Enter',
+  'ortak.giris.geri-al':'Geri al',
+  'ortak.giris.ornegin':'Örneğin: ',
+  'ortak.giris.yaz-ya-da-soyle-once':'Yaz ya da söyle; önce gösteririm, onaylarsan kaydederim',
+  'ortak.giris.ne-yaptin':'Ne yaptın?',
+  'ortak.giris.bunu-anlayamadim-tahminle-ka':'Bunu anlayamadım; tahminle kaydetmiyorum.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.giris.kaydedilemedi':'Kaydedilemedi: ',
   'ortak.giris.mikrofon-izni-verilmedi-yaza':'Mikrofon izni verilmedi; yazarak da girebilirsin.',
   'ortak.giris.geri-alinacak-bir-kayit-yok':'Geri alınacak bir kayıt yok.',
@@ -167,7 +180,7 @@ window.LIFEOS.GIRIS = (function(){
          habersiz hesaplanır; «Su +500 ml · toplam 1.500 ml» iki su parçasında
          ikincinin toplamını yanlış söylerdi (2026-10-25). */
       metin:parcalar.map(p => (parcalar.length > 1 && p.metinKisa) || p.metin).join(' · '),
-      ipucu:kalan.length ? 'Anlaşılmadı, yazılmayacak: «' + kalan.join('», «') + '»'
+      ipucu:kalan.length ? yz('ortak.giris.anlasilmadi-yazilmayacak') + kalan.join('», «') + '»'
         : (parcalar.length > 1 ? parcalar.length + ' kayıt birlikte yazılır.' : (parcalar[0].ipucu || '')),
       async kaydet(){
         let n = 0;
@@ -192,19 +205,19 @@ window.LIFEOS.GIRIS = (function(){
     if(bekleyen){
       const p = bekleyen.p;
       return '<div class="giris__onizle" role="group" aria-label="Kaydedilecek">'
-        + '<span class="giris__onizle-ad">Şunu kaydedeyim mi?</span>'
+        + ('<span class="giris__onizle-ad">' + yz('ortak.giris.sunu-kaydedeyim-mi') + '</span>')
         + (p.parcalar && p.parcalar.length > 1
           ? '<ul class="giris__liste">' + p.parcalar.map(x => '<li><b>' + kac(x.metin) + '</b></li>').join('') + '</ul>'
           : '<b>' + kac(p.metin) + '</b>')
         + (p.ipucu ? '<small>' + kac(p.ipucu) + '</small>' : '')
         + '<div class="giris__dugmeler">'
-        + '<button type="button" class="btn btn--sm btn--primary" data-giris="kaydet"><span class="btn__label">Kaydet</span></button>'
-        + '<button type="button" class="btn btn--sm btn--ghost" data-giris="vazgec"><span class="btn__label">Vazgeç</span></button>'
-        + '<span class="giris__kisa">ya da yeniden Enter</span>'
+        + ('<button type="button" class="btn btn--sm btn--primary" data-giris="kaydet"><span class="btn__label">' + yz('ortak.giris.kaydet') + '</span></button>')
+        + ('<button type="button" class="btn btn--sm btn--ghost" data-giris="vazgec"><span class="btn__label">' + yz('ortak.giris.vazgec') + '</span></button>')
+        + ('<span class="giris__kisa">' + yz('ortak.giris.ya-da-yeniden-enter') + '</span>')
         + '</div></div>';
     }
     if(mesaj) return '<p class="giris__mesaj giris__mesaj--' + mesaj.tur + '" role="status">' + kac(mesaj.kisa || mesaj.metin)
-      + (mesaj.tur === 'ok' && sonGeriAl ? ' <button type="button" class="btn btn--sm btn--ghost giris__geri" data-giris="geri-al"><span class="btn__label">Geri al</span></button>' : '')
+      + (mesaj.tur === 'ok' && sonGeriAl ? (' <button type="button" class="btn btn--sm btn--ghost giris__geri" data-giris="geri-al"><span class="btn__label">' + yz('ortak.giris.geri-al') + '</span></button>') : '')
       + '</p>'
       + (mesaj.tur === 'uyari' && mesaj.ornekli ? ornekHtml() : '');
     return '';
@@ -220,7 +233,7 @@ window.LIFEOS.GIRIS = (function(){
 
   function yerTutucu(){
     const o = (ayar && ayar.ornekler) || [];
-    return o.length ? 'Örneğin: ' + o[0] : 'Yaz ya da söyle; önce gösteririm, onaylarsan kaydederim';
+    return o.length ? yz('ortak.giris.ornegin') + o[0] : yz('ortak.giris.yaz-ya-da-soyle-once');
   }
   /* Kısa yollar (kisayol.js) kutunun içinde, örneklerin yerinde (söz 6). */
   function seritHtml(){
@@ -240,7 +253,7 @@ window.LIFEOS.GIRIS = (function(){
       : '';
     return '<div class="giris" data-giris-kutu data-modul="' + kac(ayar.modul || '') + '">'
       + '<form class="giris__satir" data-giris-form data-ayar-disi>'
-      + '<label class="giris__etiket" for="giris-girdi">Ne yaptın?</label>'
+      + ('<label class="giris__etiket" for="giris-girdi">' + yz('ortak.giris.ne-yaptin') + '</label>')
       + '<input class="giris__girdi" id="giris-girdi" type="text" autocomplete="off" enterkeyhint="send"'
       + ' placeholder="' + kac(yerTutucu()) + '"/>'
       + mik
@@ -271,7 +284,7 @@ window.LIFEOS.GIRIS = (function(){
     else{
       bekleyen = null;
       const o = (ayar && ayar.ornekler) || [];
-      const bas = 'Bunu anlayamadım; tahminle kaydetmiyorum.';
+      const bas = yz('ortak.giris.bunu-anlayamadim-tahminle-ka');
       /* metin tam cümle (durum() okuyanlar için); ekranda örnekler çip olur */
       mesaj = { tur:'uyari', ornekli:o.length > 0, kisa:o.length ? bas + ' Şöyle yazabilirsin:' : bas,
         metin:bas + (o.length ? ' Şöyle yazabilirsin: «' + o.slice(0, 3).join('», «') + '».' : '') };

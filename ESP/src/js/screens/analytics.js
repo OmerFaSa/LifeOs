@@ -8,6 +8,33 @@
 
    Haftalık rapor iyi haberi kötü haberin arkasına saklamaz: kötü olan önce
    söylenir, sonra «fakat» gelir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.analytics.son':'Son ',
+  'esp.analytics.girilmemis-gun-toplama-girme':'Girilmemiş gün toplama girmez.',
+  'esp.analytics.dis-halka-bu-penceredeki':'Dış halka = bu penceredeki en yüksek disiplin.',
+  'esp.analytics.katsayinin-kaynagi':'Katsayının kaynağı',
+  'esp.analytics.pratik-2':'Pratik ',
+  'esp.analytics.bu-bir-bulgudur-bir-hata':'Bu bir bulgudur, bir hata değil.',
+  'esp.analytics.neden-onde':'Neden önde',
+  'esp.analytics.son-7-gunde-hic-acilmadi':'Son 7 günde hiç açılmadı',
+  'esp.analytics.tikanma-ya-da-yaklasan-hedef':'Tıkanma ya da yaklaşan hedef',
+  'esp.analytics.sure-payi-dusuk':'Süre payı düşük',
+  'esp.analytics.yeniden-uret':'Yeniden üret',
+  'esp.analytics.ne-arar':'Ne arar',
+  'esp.analytics.acilan-sinyal':'Açılan sinyal',
+  'esp.analytics.kapanan-sinyal':'Kapanan sinyal',
+  'esp.analytics.olasilik-0-1':'Olasılık (0–1)',
+  'esp.analytics.ayrintili-okumalari-gizle':'Ayrıntılı okumaları gizle',
+  'esp.analytics.ayrintili-okumalar-radar-ser':'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik',
+  'esp.analytics.brifing-uretiliyor':'Brifing üretiliyor',
+  'esp.analytics.kapandi-sapma':'Kapandı — sapma %',
+  'esp.analytics.olculecek-veri-yok':'Ölçülecek veri yok.',
+  'esp.analytics.haftanin-pratigi':'Haftanın pratiği ',
+  'esp.analytics.dagilim-dengeli':'Dağılım dengeli.',
+  'esp.analytics.son-14-gunde-olculmus-pratik':'Son 14 günde ölçülmüş pratik yok; hacim hesaplanmadı.',
+  'esp.analytics.entelektuel-hacim':'Entelektüel hacim ',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -154,9 +181,9 @@ ESP.Screens.analytics = (function(){
         meta:ehs.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ehs.value * 10) / 10) + ' hacim',
         note:ehs.cert === 'missing'
-          ? 'Son ' + pencere + ' günde ölçülmüş pratik yok.'
+          ? yz('esp.analytics.son') + pencere + ' günde ölçülmüş pratik yok.'
           : pencere + ' günün ' + ehs.enteredDays + '\'inden hesaplandı. '
-            + 'Girilmemiş gün toplama girmez.',
+            + yz('esp.analytics.girilmemis-gun-toplama-girme'),
         action:K.Select({ value:String(pencere), change:'radar-window', size:'sm',
           aria:yz('esp.analytics.olcum-penceresi'),
           options:[{ value:'7', label:yz('esp.analytics.7-gun') }, { value:'14', label:yz('esp.analytics.14-gun') },
@@ -165,10 +192,10 @@ ESP.Screens.analytics = (function(){
         /* Geniş ekranda radar ile tablo yan yana (esp.css .radarcift):
            radar ortada dar duruyordu, iki yanı boştu (iPhone §8 «boy»). */
         body:html`<div class="radarcift">
-          ${P.radar(eksenler, { scale:'Dış halka = bu penceredeki en yüksek disiplin.' })}
+          ${P.radar(eksenler, { scale:yz('esp.analytics.dis-halka-bu-penceredeki') })}
           ${K.Table({ tight:true,
             headers:['Disiplin', { label:yz('esp.analytics.sure'), num:true }, { label:yz('esp.analytics.gun'), num:true },
-              { label:yz('esp.analytics.katsayi'), num:true }, 'Katsayının kaynağı'],
+              { label:yz('esp.analytics.katsayi'), num:true }, yz('esp.analytics.katsayinin-kaynagi')],
             rows:ehs.rows.map(r => [
               r.disc.label,
               r.cert === 'missing' ? P.cert('missing') : U.fmtMin(Math.round(r.hours * 60)),
@@ -194,9 +221,9 @@ ESP.Screens.analytics = (function(){
               value:r.share == null ? 0 : r.share * 100,
               text:r.cert === 'missing' ? 'veri yok' : U.fmtMin(r.minutes) }))}
             ${when(b.skewed, () => K.Notice({ tone:'info',
-              body:'Pratik ' + b.top.label + ' tarafına yığılmış ve '
+              body:yz('esp.analytics.pratik-2') + b.top.label + ' tarafına yığılmış ve '
                 + b.untouched.map(d => d.label).join(', ') + ' hiç açılmamış. '
-                + 'Bu bir bulgudur, bir hata değil.' }))}`;
+                + yz('esp.analytics.bu-bir-bulgudur-bir-hata') }))}`;
         })(),
       }),
 
@@ -206,11 +233,11 @@ ESP.Screens.analytics = (function(){
         body:(function(){
           const r = ESP.Planner.weeklyRoute();
           return html`
-            ${K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Disiplin', 'Neden önde'],
+            ${K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Disiplin', yz('esp.analytics.neden-onde')],
               rows:r.rows.map((x, i) => [String(i + 1), x.disc.label,
-                x.score >= 100 ? 'Son 7 günde hiç açılmadı'
-                  : x.score >= 80 ? 'Tıkanma ya da yaklaşan hedef'
-                  : 'Süre payı düşük']) })}
+                x.score >= 100 ? yz('esp.analytics.son-7-gunde-hic-acilmadi')
+                  : x.score >= 80 ? yz('esp.analytics.tikanma-ya-da-yaklasan-hedef')
+                  : yz('esp.analytics.sure-payi-dusuk')]) })}
             ${when(r.note, () => K.Notice({ tone:'info', body:r.note }))}`;
         })(),
       }),
@@ -324,7 +351,7 @@ ESP.Screens.analytics = (function(){
       K.Entry({
         hint:'not-gunun-brifingi', label:yz('esp.analytics.gunun-brifingi'),
         meta:gunluk ? (gunluk.source === 'model' ? 'model' : 'kural motoru') : 'üretilmedi',
-        action:K.Button({ label:gunluk ? 'Yeniden üret' : 'Üret', size:'sm',
+        action:K.Button({ label:gunluk ? yz('esp.analytics.yeniden-uret') : 'Üret', size:'sm',
           act:'gen-briefing' }),
         body:gunluk
           ? html`<p class="rulesay">${gunluk.text}</p>`
@@ -336,7 +363,7 @@ ESP.Screens.analytics = (function(){
         meta:'ne söylenmez',
         body:html`
           ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
-          ${K.Table({ tight:true, headers:['Denetim', 'Ne arar'],
+          ${K.Table({ tight:true, headers:['Denetim', yz('esp.analytics.ne-arar')],
             rows:ESP.PEDAGOGIC.never.map(n => [n.label, n.note]) })}`,
       }),
     ];
@@ -385,7 +412,7 @@ ESP.Screens.analytics = (function(){
           body:acik.question + ' (Bugün ekranında cevaplanabilir.)' }))}
 
         ${K.Table({ tight:true, headers:['Zincir', { label:yz('esp.analytics.sayi'), num:true }], rows:[
-          ['Açılan sinyal', String(e.opened)],
+          [yz('esp.analytics.acilan-sinyal'), String(e.opened)],
           ['Görüldü', String(e.seen)],
           ['Cevaplandı', String(e.answered)],
           ['«Bana uymuyor» denildi', String(e.dismissed)],
@@ -393,7 +420,7 @@ ESP.Screens.analytics = (function(){
         ] })}
 
         ${when(e.cert === 'observed', () => K.Table({ tight:true,
-          headers:['Kapanan sinyal', { label:yz('esp.analytics.adet'), num:true },
+          headers:[yz('esp.analytics.kapanan-sinyal'), { label:yz('esp.analytics.adet'), num:true },
             { label:yz('esp.analytics.ayrisma-kapandi'), num:true }],
           rows:[
             ['Cevaplananlar', String(e.answeredClosed),
@@ -507,7 +534,7 @@ ESP.Screens.analytics = (function(){
               const k = ESP.Calib.kindOf(S.ui.calibKind || 'minutes');
               return html`
                 <p class="lrow__note">${k.ask}</p>
-                ${K.Field({ label:k.type === 'binary' ? 'Olasılık (0–1)' : 'Tahminin' + (k.unit ? ' (' + k.unit + ')' : ''),
+                ${K.Field({ label:k.type === 'binary' ? yz('esp.analytics.olasilik-0-1') : 'Tahminin' + (k.unit ? ' (' + k.unit + ')' : ''),
                   input:K.Input({ id:'calib-guess', type:'number', numeric:true,
                     step:k.type === 'binary' ? '0.05' : '1',
                     placeholder:k.type === 'binary' ? '0,70' : '0' }) })}`;
@@ -833,7 +860,7 @@ ESP.Screens.analytics = (function(){
   } });
   LIFEOS.PARCA.blok({ id:'analytics.ayrinti-dugmesi', sayfa:'analytics', yer:'y2', sira:10, ad:'Ayrıntı düğmesi', ciz({ acik }){
     return K.Span(12, html`<div class="analiz-ayrinti">
-        ${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik', size:'sm', tone:'ghost',
+        ${K.Button({ label:acik ? yz('esp.analytics.ayrintili-okumalari-gizle') : yz('esp.analytics.ayrintili-okumalar-radar-ser'), size:'sm', tone:'ghost',
           act:'analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } })}</div>`);
   } });
   LIFEOS.PARCA.blok({ id:'analytics.analiz-basligi', sayfa:'analytics', yer:'y3', sira:10, ad:'Analiz başlığı', ciz({ acik }){
@@ -882,7 +909,7 @@ ESP.Screens.analytics = (function(){
 
     async 'gen-briefing'(){
       delete S.officeBriefings[U.todayISO()];
-      await ESP.UI.withBusy('Brifing üretiliyor', null, async () => {
+      await ESP.UI.withBusy(yz('esp.analytics.brifing-uretiliyor'), null, async () => {
         await ESP.Office.dailyBriefing();
       });
       ESP.App.render();
@@ -909,7 +936,7 @@ ESP.Screens.analytics = (function(){
       if(!r.ok){ ESP.UI.toast(r.error); return; }
       const h = ESP.Calib.error(r.forecast);
       ESP.UI.toast(h && h.type === 'ape'
-        ? 'Kapandı — sapma %' + Math.round(h.value * 100)
+        ? yz('esp.analytics.kapandi-sapma') + Math.round(h.value * 100)
         : 'Kapandı.');
       ESP.App.render();
     },
@@ -947,17 +974,17 @@ ESP.Screens.analytics = (function(){
     title:yz('esp.analytics.analiz'),
     headline(){
       const b = ESP.Planner.balance(7);
-      if(b.cert === 'missing') return 'Ölçülecek veri yok.';
-      if(b.skewed) return 'Haftanın pratiği ' + b.top.label + ' tarafına yığılmış.';
+      if(b.cert === 'missing') return yz('esp.analytics.olculecek-veri-yok');
+      if(b.skewed) return yz('esp.analytics.haftanin-pratigi') + b.top.label + ' tarafına yığılmış.';
       const c = ESP.Planner.crossFindings();
       if(c.length) return c.length + ' çapraz bulgu var.';
-      return 'Dağılım dengeli.';
+      return yz('esp.analytics.dagilim-dengeli');
     },
     lede(){
       const ehs = ESP.Intellect.ehs(14);
       return ehs.cert === 'missing'
-        ? 'Son 14 günde ölçülmüş pratik yok; hacim hesaplanmadı.'
-        : 'Entelektüel hacim ' + U.fmtNum(Math.round(ehs.value * 10) / 10)
+        ? yz('esp.analytics.son-14-gunde-olculmus-pratik')
+        : yz('esp.analytics.entelektuel-hacim') + U.fmtNum(Math.round(ehs.value * 10) / 10)
           + ' — 14 günün ' + ehs.enteredDays + '\'inden hesaplandı.';
     },
     stats(){

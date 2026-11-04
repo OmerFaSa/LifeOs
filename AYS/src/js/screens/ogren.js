@@ -12,6 +12,73 @@
    burada yalnız okunur.
 
    Yazım biçimi: STIL.md. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.ogren.onceki-konu':'Önceki konu',
+  'ays.ogren.kaldigin-yer':'Kaldığın yer',
+  'ays.ogren.devam-et':'Devam et',
+  'ays.ogren.konuyu-sec-anlatim-ornek-sor':'Konuyu seç; anlatım, örnek soru ve koç aynı konuya bakar',
+  'ays.ogren.sinavda-nasil-sorulur':'Sınavda nasıl sorulur',
+  'ays.ogren.bu-konunun-ayrintili-anlatim':'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.',
+  'ays.ogren.kartlara-cevir':'Kartlara çevir (',
+  'ays.ogren.kartlara-cevir-2':'Kartlara çevir',
+  'ays.ogren.yazdigin-kendiliginden-kayde':'Yazdığın kendiliğinden kaydedilir.',
+  'ays.ogren.nota-ekle':'Nota ekle',
+  'ays.ogren.henuz-not-yok':'Henüz not yok.',
+  'ays.ogren.youtube-uygulamada-acilir':'YouTube · uygulamada açılır',
+  'ays.ogren.bugunun-seti-bitti-2':'Bugünün seti bitti',
+  'ays.ogren.sete-devam-et':'Sete devam et · ',
+  'ays.ogren.bugunun-setini-coz':'Bugünün setini çöz',
+  'ays.ogren.bam-bu-konu-icin-kaynakli':'BAM bu konu için kaynaklı yazar',
+  'ays.ogren.konu-anlatimi-iste':'Konu anlatımı iste',
+  'ays.ogren.youtube-baglantisi-ogrenme-d':'YouTube bağlantısı Öğrenme’de gömülü açılır',
+  'ays.ogren.soru-metni-kopyalanmaz-soruy':'Soru metni kopyalanmaz: soruyu kitapçıktan çözersin, harfini burada girersin.',
+  'ays.ogren.dogru-olculdu':'Doğru · ölçüldü',
+  'ays.ogren.yanlis-olculdu':'Yanlış · ölçüldü',
+  'ays.ogren.cevabin-girildi-anahtar-giri':'Cevabın girildi · anahtar girilince ölçülür',
+  'ays.ogren.yanlis-defterine-eklendi-kok':'Yanlış defterine eklendi · kök nedenini orada yaz',
+  'ays.ogren.king-e-iletildi':'King’e iletildi.',
+  'ays.ogren.dogrulanmadi-kaynaksiz-model':'Doğrulanmadı: kaynaksız, modelin bilgisidir. ',
+  'ays.ogren.karar-vermeden-once-bir-kayn':'Karar vermeden önce bir kaynağa bak.',
+  'ays.ogren.dunlosky-2013':'Dunlosky 2013',
+  'ays.ogren.bu-satirlarin-karti-zaten-va':'Bu satırların kartı zaten var',
+  'ays.ogren.cozume-bakildi-dogru-cevap':'Çözüme bakıldı · doğru cevap ',
+  'ays.ogren.yanlis-senin-cevabin':'Yanlış · senin cevabın ',
+  'ays.ogren.ornek-sorular':'Örnek sorular',
+  'ays.ogren.sinav-provasi-2':'Sınav provası · ',
+  'ays.ogren.konular-karisik-gelir-her-so':'Konular karışık gelir; her sorunun ilk cevabı sayılır',
+  'ays.ogren.provayi-simdi-bitir':'Provayı şimdi bitir',
+  'ays.ogren.testi-simdi-bitir':'Testi şimdi bitir',
+  'ays.ogren.bu-soru-icerikten-kaldirildi':'Bu soru içerikten kaldırıldı; boş sayılır.',
+  'ays.ogren.test-sonucu':'Test sonucu',
+  'ays.ogren.gercek-sinavin-sirasi-orani':'Gerçek sınavın sırası, oranı ve temposu; sonuç bitince',
+  'ays.ogren.havuzda-2':'Havuzda ',
+  'ays.ogren.prova-sonucu':'Prova sonucu',
+  'ays.ogren.suren-bir-karma-test-var':'Süren bir karma test var; prova için önce onu bitir ya da vazgeç.',
+  'ays.ogren.suren-bir-sinav-provasi-var':'Süren bir sınav provası var.',
+  'ays.ogren.bu-derste-yanlisin-yok':'Bu derste yanlışın yok.',
+  'ays.ogren.yanlisin-yok-konu-sorularind':'Yanlışın yok. Konu sorularında ya da karma testte yanlış çözdüğün, çözümüne baktığın sorular burada toplanır.',
+  'ays.ogren.yeniden-coz':'Yeniden çöz',
+  'ays.ogren.bugunun-paragraf-cipasi':'Bugünün paragraf çıpası: ',
+  'ays.ogren.konular-karisik-sonuc-konu-k':'Konular karışık; sonuç konu konu',
+  'ays.ogren.gercek-sinavin-temposu-sonuc':'Gerçek sınavın temposu; sonuç bitince',
+  'ays.ogren.yanlis-cozduklerini-yeniden':'Yanlış çözdüklerini yeniden çöz',
+  'ays.ogren.her-gun-birkac-paragraf-biti':'Her gün birkaç paragraf; bitince gün kaydına',
+  'ays.ogren.deftere-ekle':'Deftere ekle',
+  'ays.ogren.bu-konudaki-ornek-soru-cevap':'Bu konudaki örnek soru cevapların silinir; yeniden çözdüğünde yeni ilk cevabın sayılır.',
+  'ays.ogren.bu-sorunun-cozumunu-anlamadi':'Bu sorunun çözümünü anlamadım; adım adım, başka bir yoldan anlat.',
+  'ays.ogren.uygulamadaki-cevap-degismez-2':'Uygulamadaki cevap değişmez. Soru karma testten çıkar ve Yanlışlarım’ın altında ',
+  'ays.ogren.bildirildi-soru-karma-testte':'Bildirildi · soru karma testten çıktı',
+  'ays.ogren.bugunun-paragraf-sayisina':'Bugünün paragraf sayısına +',
+  'ays.ogren.testten-vazgec':'Testten vazgeç',
+  'ays.ogren.bu-test-silinir-gecmise-hicb':'Bu test silinir; geçmişe hiçbir şey yazılmaz.',
+  'ays.ogren.ofis-ayarlarindan-ucretsiz-b':'Ofis ayarlarından ücretsiz bir sağlayıcı bağlarsan koç bu konunun içinde, anlamadığın yeri anlatır. ',
+  'ays.ogren.anlatim-ve-ornek-sorular-mod':'Anlatım ve örnek sorular modelsiz de çalışır.',
+  'ays.ogren.neyi-anlamadin':'Neyi anlamadın?',
+  'ays.ogren.konunun-kocu':'Konunun koçu',
+  'ays.ogren.karta-cevrildi-modelin-anlat':'Karta çevrildi · modelin anlatımı, yanlışsa düzelt',
+  'ays.ogren.kart-yapilamadi':'Kart yapılamadı',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -276,14 +343,14 @@ window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', i
           aria:ad + ': ' + k.topic.name, title:ad + ': ' + k.topic.name })
       : html`<span class="ogr-cubuk__bos" aria-hidden="true"></span>`;
     return html`<div class="ogr-cubuk" role="group" aria-label="Konu seçimi">
-      ${ok(once, -1, 'Önceki konu')}
+      ${ok(once, -1, yz('ays.ogren.onceki-konu'))}
       <span class="ogr-cubuk__secim">
         ${K.Select({ id:'ogren-ders', options:R.SUBJECTS.map(s => ({ value:s.id, label:kisaAd(s) })),
           value:subject.id, change:'ogren-ders', aria:yz('ays.ogren.ders') })}
         ${K.Select({ id:'ogren-konu', options:subject.topics.map(t => ({ value:t.id, label:t.order + '. ' + t.name })),
           value:topic.id, change:'ogren-konu', aria:yz('ays.ogren.konu') })}
       </span>
-      ${ok(sonra, 1, 'Sonraki konu')}
+      ${ok(sonra, 1, yz('ays.ogren.sonraki-konu'))}
     </div>`;
   }
 
@@ -348,9 +415,9 @@ window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', i
     const hedef = s && s.sonraki ? s.sonraki : x;
     const a = R.OgrenTest && R.OgrenTest.aktif();
     const y = Object.keys(yanlisSay).reduce((t, k) => t + yanlisSay[k], 0);
-    return html`<div class="ogr-devam">${K.NextUp({ icon:'book', label:son ? 'Kaldığın yer' : 'Başla',
+    return html`<div class="ogr-devam">${K.NextUp({ icon:'book', label:son ? yz('ays.ogren.kaldigin-yer') : 'Başla',
       title:x.topic.name, why:x.subject.name + (s ? ' · sırada: ' + s.ad.toLocaleLowerCase('tr-TR') : ' · bütün adımlar tamam'),
-      action:K.Button({ label:son ? 'Devam et' : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
+      action:K.Button({ label:son ? yz('ays.ogren.devam-et') : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
         data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
       ${when(a || y, () => html`<div class="row wrap gap-6 mt-10">
         ${/* Sade (2026-10-16): «Günlük paragraf» ve «Karma test» düğmeleri
@@ -454,7 +521,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
   R.Screens.ogren = {
     id:'ogren',
     title:yz('ays.ogren.konular'),
-    subtitle(){ return 'Konuyu seç; anlatım, örnek soru ve koç aynı konuya bakar'; },
+    subtitle(){ return yz('ays.ogren.konuyu-sec-anlatim-ornek-sor'); },
     actions(){ return ''; },
     async render(){
       const x = O().secili();
@@ -607,8 +674,8 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
       </section>`)}
       ${when(an, () => akilliNotHtml(an))}
       ${when(d && d.ornekler && d.ornekler.length, () => orneklerHtml(d))}
-      ${when(d && d.kaliplar && d.kaliplar.length, () => listeBlogu('ders-kaliplar', 'Sınavda nasıl sorulur', d.kaliplar))}
-      ${when(d && d.hatalar && d.hatalar.length, () => listeBlogu('ders-hatalar', 'Sık yapılan hatalar', d.hatalar, 'ders__hatalar'))}
+      ${when(d && d.kaliplar && d.kaliplar.length, () => listeBlogu('ders-kaliplar', yz('ays.ogren.sinavda-nasil-sorulur'), d.kaliplar))}
+      ${when(d && d.hatalar && d.hatalar.length, () => listeBlogu('ders-hatalar', yz('ays.ogren.sik-yapilan-hatalar'), d.hatalar, 'ders__hatalar'))}
       ${when(kr && kr.length, () => kaynaklarHtml(kr))}
     </div>`;
   }
@@ -621,10 +688,10 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
     const an = O().akilliNot(x.topic.id);
     const kr = O().kaynaklar(x.topic.id);
     const ek = [
-      ['ders-akilli', 'Akıllı Taktik', an ? [1] : null],
-      ['ders-ornekler', 'Çözümlü örnekler', d.ornekler],
-      ['ders-kaliplar', 'Sınavda nasıl sorulur', d.kaliplar],
-      ['ders-hatalar', 'Sık yapılan hatalar', d.hatalar],
+      ['ders-akilli', yz('ays.ogren.akilli-taktik'), an ? [1] : null],
+      ['ders-ornekler', yz('ays.ogren.cozumlu-ornekler'), d.ornekler],
+      ['ders-kaliplar', yz('ays.ogren.sinavda-nasil-sorulur'), d.kaliplar],
+      ['ders-hatalar', yz('ays.ogren.sik-yapilan-hatalar'), d.hatalar],
       ['ders-kaynaklar', 'Kaynaklar', kr && kr.length ? [1] : null],
     ].filter(y => y[2] && y[2].length);
     return html`<nav class="ders__icindekiler" aria-label="Bu konuda">
@@ -679,7 +746,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
             </div>`)}
           </header>
           ${a ? dersHtml(a, O().derin(topic.id), topic) : html`<div class="mb-10">${K.Notice({ tone:'info',
-            body:'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.' })}</div>`}
+            body:yz('ays.ogren.bu-konunun-ayrintili-anlatim') })}</div>`}
           ${akildaKarti(topic)}
           <div class="ders__ayak">${eylem}
             <p class="tiny dim mt-10">${yz('ays.ogren.ders-kitabinin-yerini-tutmaz')}</p></div>
@@ -693,7 +760,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
      `note` alanıdır; yazınca kendiliğinden kaydolur. Anlatımda bir cümleyi
      seçince çıkan «Nota ekle» onu sona ekler; «ön :: arka» satırları
      «Kartlara çevir» ile tekrar kartı olur. */
-  function kartDugmeEtiketi(n){ return n ? 'Kartlara çevir (' + n + ')' : 'Kartlara çevir'; }
+  function kartDugmeEtiketi(n){ return n ? yz('ays.ogren.kartlara-cevir') + n + ')' : yz('ays.ogren.kartlara-cevir-2'); }
   function notumKarti(subject, topic){
     const N = R.KonuNotu;
     if(!N) return '';
@@ -707,7 +774,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
       body:html`<textarea class="input konu-notu" id="konu-notu" rows="${Math.min(14, Math.max(4, metin.split('\n').length + 1))}"
           maxlength="${N.SINIR}" data-change="konu-notu" data-debounce="600" aria-label="${topic.name + ' konusu için notum'}"
           placeholder="Kendi cümlelerinle yaz. «soru :: cevap» satırı tekrar kartı olur.">${metin}</textarea>
-        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : 'Yazdığın kendiliğinden kaydedilir.'}</p>` });
+        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : yz('ays.ogren.yazdigin-kendiliginden-kayde')}</p>` });
   }
 
   /* Anlatımda seçili metin → «Nota ekle» (belge düzeyinde BİR KEZ bağlanır). */
@@ -728,7 +795,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
       if(!d){
         d = document.createElement('button');
         d.type = 'button'; d.id = 'nota-ekle'; d.className = 'nota-ekle';
-        d.textContent = 'Nota ekle';
+        d.textContent = yz('ays.ogren.nota-ekle');
         d.addEventListener('mousedown', e => e.preventDefault());   // seçim kaybolmasın
         d.addEventListener('click', async () => {
           const x = O().secili();
@@ -755,7 +822,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
   function notDurumu(metin){
     const N = R.KonuNotu;
     const p = document.getElementById('konu-notu-durum');
-    if(p) p.textContent = metin ? metin.length + ' / ' + N.SINIR + ' karakter · kaydedildi' : 'Henüz not yok.';
+    if(p) p.textContent = metin ? metin.length + ' / ' + N.SINIR + ' karakter · kaydedildi' : yz('ays.ogren.henuz-not-yok');
     const b = document.getElementById('konu-notu-kart');
     if(b){
       const n = N.kartAdaylari(metin).length;
@@ -786,7 +853,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
       body:notlar.length ? html`<div class="stack-sm">
           <div class="list list--sik">${map(notlar, n => html`<div class="listitem">
             <span class="grow minw0"><span class="small strong">${videoAdi(n)}</span>
-              <span class="tiny dim">${n.provider === 'youtube' ? 'YouTube · uygulamada açılır' : 'bağlantı'}${(n.segments || []).length ? ' · ' + n.segments.length + ' not' : ''}</span></span>
+              <span class="tiny dim">${n.provider === 'youtube' ? yz('ays.ogren.youtube-uygulamada-acilir') : 'bağlantı'}${(n.segments || []).length ? ' · ' + n.segments.length + ' not' : ''}</span></span>
             ${K.Button({ label:yz('ays.ogren.ac-2'), icon:'play', size:'sm', tone:'ghost', act:'ogren-video-ac', data:{ 'data-id':n.id } })}
             ${when(guvenli(n.url), () => html`<a class="btn btn--sm btn--ghost" href="${n.url}" target="_blank" rel="noopener noreferrer">${yz('ays.ogren.tarayicida')}</a>`)}
           </div>`)}</div>
@@ -835,7 +902,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
     const g = P_.gunu(), o = g ? P_.ozet() : null;
     return K.Card({ title:yz('ays.ogren.gunluk-paragraf'), sub:yz('ays.ogren.bu-konudan-havuzda') + n + ' soru',
       body:html`<p class="small">${yz('ays.ogren.paragraf-her-gun-calisilan-b')}</p>
-        <div class="row wrap gap-6 mt-10">${K.Button({ label:o && o.bitti ? 'Bugünün seti bitti' : o && o.cevaplanan ? 'Sete devam et · ' + o.cevaplanan + '/' + o.toplam : 'Bugünün setini çöz',
+        <div class="row wrap gap-6 mt-10">${K.Button({ label:o && o.bitti ? yz('ays.ogren.bugunun-seti-bitti-2') : o && o.cevaplanan ? yz('ays.ogren.sete-devam-et') + o.cevaplanan + '/' + o.toplam : yz('ays.ogren.bugunun-setini-coz'),
           icon:'book', size:'sm', tone:o && o.bitti ? 'ghost' : 'primary', act:'sorular-kip', data:{ 'data-tab':'paragraf' } })}</div>` });
   }
 
@@ -863,7 +930,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
     const istendi = tur => m.bekleyen.some(y => y.tur === tur);
     const eksik = MALZEME.filter(y => !var_(y.tur));
     return K.Card({ title:yz('ays.ogren.daha-derin'), hint:'ogren-bam',
-      sub:m.urunler.length ? m.urunler.length + ' malzeme · internetsiz de açılır' : 'BAM bu konu için kaynaklı yazar',
+      sub:m.urunler.length ? m.urunler.length + ' malzeme · internetsiz de açılır' : yz('ays.ogren.bam-bu-konu-icin-kaynakli'),
       body:html`
         ${when(m.urunler.length, () => html`<div class="stack-xs">${map(m.urunler, u => html`
           <div class="row between gap-8">
@@ -873,7 +940,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
           </div>`)}</div>`)}
         ${when(eksik.length, () => html`<div class="row wrap gap-6 ${m.urunler.length ? 'mt-12' : ''}">${map(eksik, y => istendi(y.tur)
           ? K.Chip(y.ad + ' · istendi')
-          : K.Button({ label:y.tur === 'ders_notu' ? 'Konu anlatımı iste' : y.ad, icon:y.tur === 'ders_notu' ? 'book' : null,
+          : K.Button({ label:y.tur === 'ders_notu' ? yz('ays.ogren.konu-anlatimi-iste') : y.ad, icon:y.tur === 'ders_notu' ? 'book' : null,
               size:'sm', tone:'ghost', act:'konu-malzeme', data:{ 'data-tur':y.tur } }))}</div>`)}`,
     });
   }
@@ -890,7 +957,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     /* Sade anlatım: sayfa «Notum»da biter; ara sıra açılan kartlar küçük başlar. */
     kucukVarsayilan:['çıkmış-sorular', 'videolar-ve-notların', 'daha-derin'],
     title:yz('ays.ogren.anlatim'),
-    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Konu anlatımı'; },
+    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : yz('ays.ogren.konu-anlatimi'); },
     actions(){ return ''; },
     async render(){
       const x = await hazirla();
@@ -926,7 +993,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
         if(!x.topic) return;
         UI.sheet({ title:yz('ays.ogren.konuya-video-ekle'), subtitle:x.subject.name + ' · ' + x.topic.name,
           body:String(K.Stack([
-            K.Field({ label:yz('ays.ogren.video-baglantisi'), hint:'YouTube bağlantısı Öğrenme’de gömülü açılır',
+            K.Field({ label:yz('ays.ogren.video-baglantisi'), hint:yz('ays.ogren.youtube-baglantisi-ogrenme-d'),
               input:K.Input({ id:'ov-url', placeholder:'https://www.youtube.com/watch?v=…' }) }),
             K.Field({ label:yz('ays.ogren.baslik-istege-bagli'), input:K.Input({ id:'ov-title', placeholder:yz('ays.ogren.or') + x.topic.name + ' konu anlatımı' }) }),
           ])),
@@ -965,7 +1032,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
             K.Field({ label:yz('ays.ogren.cevap-anahtarindaki-harf-bil'), input:K.Select({ id:'ck-dogru', value:'',
               options:[{ value:'', label:yz('ays.ogren.bilmiyorum') }].concat(O().HARFLER.map(h => ({ value:h, label:h }))) }) }),
             K.Field({ label:yz('ays.ogren.not-istege-bagli'), input:K.Input({ id:'ck-not', placeholder:yz('ays.ogren.or-sekilli-soru-ikinci-oturu') }) }),
-            K.Notice({ tone:'info', body:'Soru metni kopyalanmaz: soruyu kitapçıktan çözersin, harfini burada girersin.' }),
+            K.Notice({ tone:'info', body:yz('ays.ogren.soru-metni-kopyalanmaz-soruy') }),
           ])),
           footer:String(html`${K.Button({ label:yz('ays.ogren.vazgec'), act:'sheet-close' })}
             ${K.Button({ label:yz('ays.ogren.bagla'), tone:'primary', act:'cikmis-kaydet' })}`) });
@@ -982,7 +1049,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
       },
       async 'cikmis-cevap'(el){
         const r = await R.Cikmis.cevapla(el.dataset.id, el.dataset.harf);
-        if(r.ok) UI.toast(r.durum === 'dogru' ? 'Doğru · ölçüldü' : r.durum === 'yanlis' ? 'Yanlış · ölçüldü' : 'Cevabın girildi · anahtar girilince ölçülür');
+        if(r.ok) UI.toast(r.durum === 'dogru' ? yz('ays.ogren.dogru-olculdu') : r.durum === 'yanlis' ? yz('ays.ogren.yanlis-olculdu') : yz('ays.ogren.cevabin-girildi-anahtar-giri'));
         R.App.render();
       },
       async 'cikmis-anahtar'(el){
@@ -999,7 +1066,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
       },
       async 'cikmis-defter'(el){
         const e = await R.Cikmis.deftereEkle(el.dataset.id);
-        UI.toast(e ? 'Yanlış defterine eklendi · kök nedenini orada yaz' : 'Eklenemedi');
+        UI.toast(e ? yz('ays.ogren.yanlis-defterine-eklendi-kok') : 'Eklenemedi');
         R.App.render();
       },
       async 'cikmis-sil'(el){
@@ -1026,7 +1093,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
           + ' › ' + topic.name + '. Lise düzeyinde; tanımlar, adım adım çözülmüş örnekler, sık yapılan hatalar '
           + 've ÖSYM soru tarzına uygun kısa alıştırmalar.';
         const r = await R.Urunler.iste(m.ad + ': ' + konu, { tur:m.tur, konu, ayrinti, etiket:etiketOf(subject, topic) });
-        UI.toast(r.metin || (r.ok ? 'King’e iletildi.' : 'İletilemedi.'), { life:r.ok ? 5000 : 6000 });
+        UI.toast(r.metin || (r.ok ? yz('ays.ogren.king-e-iletildi') : 'İletilemedi.'), { life:r.ok ? 5000 : 6000 });
         R.App.render();
       },
       /* Malzeme KUTUDA açılır (brand/ortak/urun.js söz 2): betik çalışmaz. */
@@ -1035,8 +1102,8 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
         if(!u) return;
         UI.sheet({ title:u.baslik, wide:true,
           subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
-          note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
-            + 'Karar vermeden önce bir kaynağa bak.' : null,
+          note:u.dogruluk === 'dogrulanmadi' ? yz('ays.ogren.dogrulanmadi-kaynaksiz-model')
+            + yz('ays.ogren.karar-vermeden-once-bir-kayn') : null,
           body:LIFEOS.Urun.cerceve(u) });
       },
       async 'ogren-strateji'(){
@@ -1049,7 +1116,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
             html`<div class="stack-sm">${map(l, y => html`<div class="ogr-strateji">
               <div class="row between gap-8 mb-4">
                 <b class="small">${y.ad}</b>
-                <span class="tiny dim">${y.dayanak === 'ogrenme-dunlosky-2013' ? 'Dunlosky 2013' : 'IES 2007'}</span>
+                <span class="tiny dim">${y.dayanak === 'ogrenme-dunlosky-2013' ? yz('ays.ogren.dunlosky-2013') : 'IES 2007'}</span>
               </div>
               <p class="small mb-6">${y.kullanim}</p>
               <p class="tiny dim mb-0"><b>Kontrol:</b> ${y.kontrol}</p>
@@ -1066,7 +1133,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
         if(kutu) await R.KonuNotu.yaz(x.subject.id, x.topic.id, kutu.value);
         const r = await R.KonuNotu.kartlaraCevir(x.subject.id, x.topic.id);
         UI.toast(r.acilan ? r.acilan + ' tekrar kartı açıldı' + (r.vardi ? ' · ' + r.vardi + ' tanesi zaten vardı' : '')
-          : r.vardi ? 'Bu satırların kartı zaten var' : '«ön :: arka» biçiminde satır yok');
+          : r.vardi ? yz('ays.ogren.bu-satirlarin-karti-zaten-va') : '«ön :: arka» biçiminde satır yok');
       },
     }),
     change:Object.assign({}, ortakChange, {
@@ -1097,7 +1164,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
 
   /* Sorunun ekrandaki adı: konu sorusu «Soru 3», günlük paragraf
      havuzunun sorusu «Paragraf 14» (core/paragraf.js). */
-  function soruAdi(s){ return typeof s.i === 'string' ? 'Paragraf ' + Number(String(s.i).slice(1)) : 'Soru ' + (Number(s.i) + 1); }
+  function soruAdi(s){ return typeof s.i === 'string' ? yz('ays.ogren.paragraf') + Number(String(s.i).slice(1)) : yz('ays.ogren.soru') + (Number(s.i) + 1); }
 
   function soruNo(x){
     const l = O().sorular(x.topic.id);
@@ -1118,7 +1185,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     return html`<div class="ogr-noktalar" role="group" aria-label="Sorular">${map(l, k => {
       const d = durum(k);
       return html`<button class="${cls('ogr-nokta', 'is-' + d, k === i && 'is-sirada')}" data-act="${act}"
-        data-i="${k}" aria-label="${'Soru ' + (k + 1) + ': ' + DURUM_AD[d]}" aria-current="${k === i ? 'true' : 'false'}">${k + 1}</button>`;
+        data-i="${k}" aria-label="${yz('ays.ogren.soru') + (k + 1) + ': ' + DURUM_AD[d]}" aria-current="${k === i ? 'true' : 'false'}">${k + 1}</button>`;
     })}</div>`;
   }
 
@@ -1233,8 +1300,8 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
       </button>`;
     };
     const d = durumOf(q, v);
-    const sonuc = (d === 'bakildi' ? 'Çözüme bakıldı · doğru cevap ' + q.dogru
-      : d === 'dogru' ? 'Doğru' : 'Yanlış · senin cevabın ' + (v && v.h) + ', doğrusu ' + q.dogru) + (v && v.ip ? ' · ipucuyla' : '');
+    const sonuc = (d === 'bakildi' ? yz('ays.ogren.cozume-bakildi-dogru-cevap') + q.dogru
+      : d === 'dogru' ? 'Doğru' : yz('ays.ogren.yanlis-senin-cevabin') + (v && v.h) + ', doğrusu ' + q.dogru) + (v && v.ip ? ' · ipucuyla' : '');
     return html`<div class="ogr-soru" aria-live="polite" data-raf-tam>
       <div class="row between gap-8 mb-6">
         <span class="ders__etiket tiny">${o.etiket}</span>
@@ -1297,7 +1364,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const { l, i } = soruNo(x);
     if(!l.length){
       return K.Card({ wide:true,
-        body:html`${kartBasi('Örnek sorular')}${K.Empty({ icon:'search', text:yz('ays.ogren.bu-konunun-ornek-sorulari-he'),
+        body:html`${kartBasi(yz('ays.ogren.ornek-sorular'))}${K.Empty({ icon:'search', text:yz('ays.ogren.bu-konunun-ornek-sorulari-he'),
           action:K.Button({ label:yz('ays.ogren.koc-bir-soru-sorsun'), size:'sm', act:'ogren-git',
             data:{ 'data-route':'koc', 'data-subject':subject.id, 'data-topic':topic.id } }) })}` });
     }
@@ -1308,7 +1375,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const sonraki = O().komsu(subject.id, topic.id, 1);
     return K.Card({ wide:true,
       body:html`
-        ${kartBasi('Örnek sorular', sk.cevaplanan ? sk.dogru + ' / ' + sk.toplam + ' doğru · ölçüldü' : sk.toplam + ' soru · ilk cevabın sayılır',
+        ${kartBasi(yz('ays.ogren.ornek-sorular'), sk.cevaplanan ? sk.dogru + ' / ' + sk.toplam + ' doğru · ölçüldü' : sk.toplam + ' soru · ilk cevabın sayılır',
           when(sk.cevaplanan, () => K.Button({ label:yz('ays.ogren.bastan-coz'), icon:'refresh', size:'sm', tone:'ghost', act:'soru-sifirla' })))}
         ${noktalar(l.length, i, k => durumOf(l[k], c[k]), 'soru-git')}
         ${soruGovdesi(q, v, { etiket:yz('ays.ogren.soru') + (i + 1) + ' / ' + l.length, seviye:O().seviye(topic.id, i),
@@ -1330,9 +1397,9 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
   /* ---------- Karma test ---------- */
 
   function kapsamAdi(k){
-    if(k && k.prova) return 'Sınav provası · ' + ((T().PROVA[k.prova] || {}).ad || k.prova);
+    if(k && k.prova) return yz('ays.ogren.sinav-provasi-2') + ((T().PROVA[k.prova] || {}).ad || k.prova);
     const s = R.SUBJECTS.find(x => x.id === (k && k.ders));
-    return (s ? s.name : 'Bütün dersler') + ' · ' + (k && k.konular === 'okunan' ? 'okuduğum konular' : 'bütün konular')
+    return (s ? s.name : yz('ays.ogren.butun-dersler')) + ' · ' + (k && k.konular === 'okunan' ? 'okuduğum konular' : 'bütün konular')
       + (k && k.seviye === 'sinav' ? ' · sınav tarzı' : '');
   }
   const tarihAdi = iso => { try{ return U.fmtShort(String(iso).slice(0, 10)); }catch(e){ return String(iso).slice(0, 10); } };
@@ -1350,7 +1417,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const hepsi = T().havuz({ ders:k.ders, konular:'hepsi' }).length;
     const boy = T().BOYLAR.indexOf(Number(S.ui.karmaBoy)) >= 0 ? Number(S.ui.karmaBoy) : T().BOYLAR[0];
     return K.Card({ wide:true,
-      body:html`${kartBasi('Karma test', 'Konular karışık gelir; her sorunun ilk cevabı sayılır')}
+      body:html`${kartBasi(yz('ays.ogren.karma-test'), yz('ays.ogren.konular-karisik-gelir-her-so'))}
         <div class="ogr-kurulum">
           ${K.Field({ label:yz('ays.ogren.ders'), input:K.Select({ id:'karma-ders', options:DERSLER(), value:k.ders, change:'karma-ders', aria:yz('ays.ogren.ders') }) })}
           <div><span class="ders__etiket tiny">${yz('ays.ogren.konular')}</span>${K.Segmented({ act:'karma-konular', value:k.konular, aria:yz('ays.ogren.konular'), items:[
@@ -1395,17 +1462,17 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const prova = !!a.prova;
     const sonMu = y.sira === y.toplam - 1;
     const durum = k => { const s = T().soruOf(a.sorular[k]); return !s ? 'bos' : prova ? (a.cevaplar[k] ? 'isaretli' : 'bos') : durumOf(s.q, a.cevaplar[k]); };
-    const bas = html`${kartBasi(prova ? 'Sınav provası' : 'Karma test', kapsamAdi(a.kapsam) + ' · ' + sy.cevaplanan + ' / ' + sy.toplam + (prova ? ' işaretlendi' : ' cevaplandı'),
+    const bas = html`${kartBasi(prova ? yz('ays.ogren.sinav-provasi') : yz('ays.ogren.karma-test'), kapsamAdi(a.kapsam) + ' · ' + sy.cevaplanan + ' / ' + sy.toplam + (prova ? ' işaretlendi' : ' cevaplandı'),
       K.Button({ label:yz('ays.ogren.vazgec'), size:'sm', tone:'ghost', act:'karma-vazgec' }))}${prova ? provaUst(a, sy) : ''}`;
     const nav = html`<div class="row between wrap gap-6 mt-16">
       ${y.sira > 0 ? K.Button({ label:yz('ays.ogren.onceki'), icon:'left', size:'sm', tone:'ghost', act:'test-git', data:{ 'data-i':String(y.sira - 1) } }) : html`<span></span>`}
       ${!sonMu ? K.Button({ label:yz('ays.ogren.sonraki-soru'), icon:'right', size:'sm', tone:y.v ? 'primary' : null, act:'test-git', data:{ 'data-i':String(y.sira + 1) } })
         : K.Button({ label:yz('ays.ogren.testi-bitir'), icon:'check', size:'sm', tone:'primary', act:'karma-bitir' })}
     </div>`;
-    const erken = when(!sonMu, () => html`<div class="mt-10">${K.Button({ label:prova ? 'Provayı şimdi bitir' : 'Testi şimdi bitir', size:'sm', tone:'ghost', act:'karma-bitir' })}</div>`);
+    const erken = when(!sonMu, () => html`<div class="mt-10">${K.Button({ label:prova ? yz('ays.ogren.provayi-simdi-bitir') : yz('ays.ogren.testi-simdi-bitir'), size:'sm', tone:'ghost', act:'karma-bitir' })}</div>`);
     if(!y.s){
       return K.Card({ wide:true, body:html`${bas}${noktalar(y.toplam, y.sira, durum, 'test-git')}
-        ${K.Notice({ tone:'info', body:'Bu soru içerikten kaldırıldı; boş sayılır.' })}${nav}${erken}` });
+        ${K.Notice({ tone:'info', body:yz('ays.ogren.bu-soru-icerikten-kaldirildi') })}${nav}${erken}` });
     }
     const ust = y.v && !prova ? html`<p class="tiny dim mt-6">Konu: ${y.s.subject.name} · ${y.s.topic.name}</p>` : '';
     return K.Card({ wide:true,
@@ -1422,7 +1489,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
 
   function karmaSonucKarti(oz){
     return K.Card({ wide:true,
-      body:html`${kartBasi('Test sonucu', tarihAdi(oz.at) + ' · ' + kapsamAdi(oz.kapsam) + ' · ölçüldü',
+      body:html`${kartBasi(yz('ays.ogren.test-sonucu'), tarihAdi(oz.at) + ' · ' + kapsamAdi(oz.kapsam) + ' · ölçüldü',
           K.Button({ label:yz('ays.ogren.yeni-test'), size:'sm', tone:'ghost', act:'karma-yeni' }))}
         <div class="ogr-sayilar">
           ${K.Stat({ label:yz('ays.ogren.dogru-2'), value:oz.dogru, unit:' / ' + oz.toplam })}
@@ -1452,7 +1519,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const boy = T().PROVA_BOY.indexOf(Number(S.ui.provaBoy)) >= 0 ? Number(S.ui.provaBoy) : T().PROVA_BOY[0];
     const p = T().provaPlani(sinav, boy), P = T().PROVA[sinav];
     return K.Card({ wide:true,
-      body:html`${kartBasi('Sınav provası', 'Gerçek sınavın sırası, oranı ve temposu; sonuç bitince')}
+      body:html`${kartBasi(yz('ays.ogren.sinav-provasi'), yz('ays.ogren.gercek-sinavin-sirasi-orani'))}
         <div class="ogr-kurulum">
           <div><span class="ders__etiket tiny">${yz('ays.ogren.sinav')}</span>${K.Segmented({ act:'prova-sinav', value:sinav, aria:yz('ays.ogren.sinav'),
             items:Object.keys(T().PROVA).map(k => ({ value:k, label:T().PROVA[k].ad })) })}</div>
@@ -1460,7 +1527,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
             items:T().PROVA_BOY.map(n => ({ value:n, label:String(n) })) })}</div>
         </div>
         <div class="ogr-prova-plan mt-12">${map(p.dersler, d => html`<span class="${cls('ogr-prova-ders', d.havuz < d.n && 'is-eksik')}"
-          title="${d.havuz < d.n ? 'Havuzda ' + d.havuz + ' soru var' : ''}"><b>${d.n}</b> ${d.ad}</span>`)}
+          title="${d.havuz < d.n ? yz('ays.ogren.havuzda-2') + d.havuz + ' soru var' : ''}"><b>${d.n}</b> ${d.ad}</span>`)}
           <span class="ogr-prova-ders"><b>${p.sureDk}</b> dk</span></div>
         <div class="mt-16">${K.Button({ label:yz('ays.ogren.provayi-baslat'), icon:'right', tone:'primary', act:'prova-baslat' })}</div>
         <p class="tiny dim mt-12">${yz('ays.ogren.sure-gercek-sinavin-soru-bas')}${P.ad}: ${P.dk} ${yz('ays.ogren.dk')} ${P.soru} ${yz('ays.ogren.soru-osym-sinavda-dogru-yanl')}</p>` });
@@ -1470,7 +1537,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const virgul = x => String(x).replace('.', ',');
     const satir = d => ({ ad:d.ad, oran:d.n ? d.dogru / d.n : null, metin:yz('ays.ogren.net') + virgul(d.net) });
     return K.Card({ wide:true,
-      body:html`${kartBasi('Prova sonucu', tarihAdi(oz.at) + ' · ' + p.ad + ' · ' + oz.toplam + ' soru',
+      body:html`${kartBasi(yz('ays.ogren.prova-sonucu'), tarihAdi(oz.at) + ' · ' + p.ad + ' · ' + oz.toplam + ' soru',
           K.Button({ label:yz('ays.ogren.yeni-prova'), size:'sm', tone:'ghost', act:'prova-yeni' }))}
         <div class="ogr-sayilar">
           ${K.Stat({ label:yz('ays.ogren.net-hesaplandi'), value:virgul(p.net), unit:' / ' + oz.toplam })}
@@ -1487,7 +1554,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
   function provaKip(){
     const a = T().aktif();
     if(a && a.prova) return [karmaSoruKarti()];
-    if(a) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:'Süren bir karma test var; prova için önce onu bitir ya da vazgeç.' })}
+    if(a) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:yz('ays.ogren.suren-bir-karma-test-var') })}
       <div class="mt-10">${K.Button({ label:yz('ays.ogren.karma-teste-don'), size:'sm', tone:'primary', act:'sorular-kip', data:{ 'data-tab':'karma' } })}</div>` })];
     const oz = S.ui.provaSonuc ? T().gecmis().find(t => t.id === S.ui.provaSonuc) : null;
     const gecmis = T().gecmis().filter(t => t.prova);
@@ -1501,7 +1568,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
 
   function karmaKip(){
     const ak = T().aktif();
-    if(ak && ak.prova) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:'Süren bir sınav provası var.' })}
+    if(ak && ak.prova) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:yz('ays.ogren.suren-bir-sinav-provasi-var') })}
       <div class="mt-10">${K.Button({ label:yz('ays.ogren.provaya-don'), size:'sm', tone:'primary', act:'sorular-kip', data:{ 'data-tab':'prova' } })}</div>` })];
     if(ak) return [karmaSoruKarti()];
     const sid = S.ui.karmaSonuc;
@@ -1535,8 +1602,8 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
               <span class="tiny dim">${y.subject.name} · ${y.son.bak ? 'çözüme bakıldı' : 'cevabın ' + y.son.h} · ${KAYNAK_AD[y.son.kaynak]} · ${tarihAdi(y.son.at)}</span></span>
             <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span></button>`)}</div>
           <p class="tiny dim">${yz('ays.ogren.bir-soru-yeniden-dogru-cozul')}</p></div>`
-        : K.Empty({ icon:'check', text:hepsi ? 'Bu derste yanlışın yok.'
-            : 'Yanlışın yok. Konu sorularında ya da karma testte yanlış çözdüğün, çözümüne baktığın sorular burada toplanır.' }) });
+        : K.Empty({ icon:'check', text:hepsi ? yz('ays.ogren.bu-derste-yanlisin-yok')
+            : yz('ays.ogren.yanlisin-yok-konu-sorularind') }) });
   }
 
   function tekrarKarti(){
@@ -1546,7 +1613,7 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const v = t.h ? { h:t.h, ip:t.ip, sure:t.sure } : null;
     const kalan = T().yanlislar(S.ui.yanlisDers || 'hepsi').filter(y => y.k !== t.k);
     return K.Card({ wide:true,
-      body:html`${kartBasi('Yeniden çöz', s.subject.name + ' · ' + s.topic.name + (kalan.length ? ' · ' + kalan.length + ' yanlış daha' : ''),
+      body:html`${kartBasi(yz('ays.ogren.yeniden-coz'), s.subject.name + ' · ' + s.topic.name + (kalan.length ? ' · ' + kalan.length + ' yanlış daha' : ''),
           K.Button({ label:yz('ays.ogren.listeye-don'), size:'sm', tone:'ghost', act:'tekrar-kapat' }))}
         ${soruGovdesi(s.q, v, { etiket:soruAdi(s), seviye:O().seviye(s.topic.id, s.i), ipucu:'tekrar:' + s.k, cevapAct:'tekrar-cevap',
           ders:s.subject.id,
@@ -1588,18 +1655,18 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     const g = P() && P().gunu();
     const l = g ? g.sorular.map(id => P().bul(id)).filter(Boolean) : [];
     if(!l.length){
-      return K.Card({ wide:true, body:html`${kartBasi('Günlük paragraf')}${K.Empty({ icon:'book', text:yz('ays.ogren.paragraf-havuzu-henuz-bos') })}` });
+      return K.Card({ wide:true, body:html`${kartBasi(yz('ays.ogren.gunluk-paragraf'))}${K.Empty({ icon:'book', text:yz('ays.ogren.paragraf-havuzu-henuz-bos') })}` });
     }
     const i = Math.max(0, Math.min(l.length - 1, Number(S.ui.parSira) || 0));
     const q = l[i], v = g.cevaplar[q.id] || null, o = P().ozet(), du = P().durum(), yazim = P().yazim();
     const x = O().konuyuBul(q.konu), ak = P().anahtar(q);
     const day = S.days[U.todayISO()];
     const cipa = day && Number(day.paragraphTarget) > 0
-      ? 'Bugünün paragraf çıpası: ' + (day.paragraphActual == null ? '—' : day.paragraphActual) + ' / ' + day.paragraphTarget : null;
+      ? yz('ays.ogren.bugunun-paragraf-cipasi') + (day.paragraphActual == null ? '—' : day.paragraphActual) + ' / ' + day.paragraphTarget : null;
     const sonMu = i === l.length - 1;
     return K.Card({ wide:true,
       body:html`
-        ${kartBasi('Günlük paragraf', (o.cevaplanan ? o.dogru + ' / ' + o.toplam + ' doğru · ölçüldü' : o.toplam + ' soru · ilk cevabın sayılır')
+        ${kartBasi(yz('ays.ogren.gunluk-paragraf'), (o.cevaplanan ? o.dogru + ' / ' + o.toplam + ' doğru · ölçüldü' : o.toplam + ' soru · ilk cevabın sayılır')
           + (cipa ? ' · ' + cipa : ''))}
         ${when(!o.cevaplanan && !yazim, () => html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Günlük soru sayısı">
           <span class="tiny dim">${yz('ays.ogren.gunde')}</span>
@@ -1664,11 +1731,11 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
     title:yz('ays.ogren.sorular'),
     subtitle(){
       const kip = kipOf();
-      if(kip === 'karma') return 'Konular karışık; sonuç konu konu';
-      if(kip === 'prova') return 'Gerçek sınavın temposu; sonuç bitince';
-      if(kip === 'yanlis') return 'Yanlış çözdüklerini yeniden çöz';
-      if(kip === 'paragraf') return 'Her gün birkaç paragraf; bitince gün kaydına';
-      const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular';
+      if(kip === 'karma') return yz('ays.ogren.konular-karisik-sonuc-konu-k');
+      if(kip === 'prova') return yz('ays.ogren.gercek-sinavin-temposu-sonuc');
+      if(kip === 'yanlis') return yz('ays.ogren.yanlis-cozduklerini-yeniden');
+      if(kip === 'paragraf') return yz('ays.ogren.her-gun-birkac-paragraf-biti');
+      const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : yz('ays.ogren.ornek-sorular');
     },
     actions(){ return ''; },
     async render(){
@@ -1706,7 +1773,7 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
         if(!D || !k) return;
         const H = O().HARFLER;
         const ust = U.esc(k.soru) + (k.sec.length ? '<br/>' + k.sec.map((s, j) => '<b>' + H[j] + ')</b> ' + U.esc(s)).join(' · ') : '');
-        D.tuval({ baslik:k.baslik, ust, kagit:'kareli', dugme:'Deftere ekle', kaydet:async b => {
+        D.tuval({ baslik:k.baslik, ust, kagit:'kareli', dugme:yz('ays.ogren.deftere-ekle'), kaydet:async b => {
           const n = await D.notOlustur({ baslik:k.baslik, ekle:true,
             govde:'> ' + k.soru.replace(/\s+/g, ' ').slice(0, 400) + '\n{{ekler}}\n\n#soru', ekler:[{ blob:b, ad:'karalama.png', tur:'cizim' }] });
           UI.toast(yz('ays.ogren.karalaman-deftere-eklendi-no'), { undo:async () => { /* not birikir; yalnız tek karalamalıysa sil */ if((n.govde.match(/medya:/g) || []).length === 1) await D.sil(n.id); } });
@@ -1721,8 +1788,8 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
       },
       async 'soru-sifirla'(){
         const x = O().secili();
-        UI.confirmSheet('Baştan çöz', 'Bu konudaki örnek soru cevapların silinir; yeniden çözdüğünde yeni ilk cevabın sayılır.',
-          async () => { await O().sifirla(x.subject.id, x.topic.id); S.ui.ogrenSoru = 0; soruSifirlaSure(); R.App.render(); }, false, 'Baştan çöz');
+        UI.confirmSheet(yz('ays.ogren.bastan-coz'), yz('ays.ogren.bu-konudaki-ornek-soru-cevap'),
+          async () => { await O().sifirla(x.subject.id, x.topic.id); S.ui.ogrenSoru = 0; soruSifirlaSure(); R.App.render(); }, false, yz('ays.ogren.bastan-coz'));
       },
       /* Üç kipte ortak: soruyu koça, karta, deftere. */
       async 'soru-koca'(el){
@@ -1733,7 +1800,7 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
         S.ui.kocParca = { etiket:soruAdi(r), metin:d(q.soru) + (O().ekMetni(q) ? '\n' + O().ekMetni(q) : '') + '\n'
           + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
           + '\nDoğru cevap: ' + q.dogru + '\nUygulamadaki çözüm: ' + dizi(q.cozum).map(d).join(' ') };
-        S.ui.kocTaslak = 'Bu sorunun çözümünü anlamadım; adım adım, başka bir yoldan anlat.';
+        S.ui.kocTaslak = yz('ays.ogren.bu-sorunun-cozumunu-anlamadi');
         R.App.go('koc');
       },
       async 'soru-kart'(el){
@@ -1750,7 +1817,7 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
           body:String(K.Stack([
             K.Field({ label:yz('ays.ogren.ne-yanlis-istege-bagli'), input:K.Textarea({ id:'isaret-not', rows:3,
               placeholder:yz('ays.ogren.or-b-de-dogru-cozumde') }) }),
-            K.Notice({ tone:'info', body:'Uygulamadaki cevap değişmez. Soru karma testten çıkar ve Yanlışlarım’ın altında '
+            K.Notice({ tone:'info', body:yz('ays.ogren.uygulamadaki-cevap-degismez-2')
               + '«Bildirdiğin hatalar»da durur; oradan listeyi kopyalayıp iletebilirsin.' }),
           ])),
           footer:String(html`${K.Button({ label:yz('ays.ogren.vazgec'), act:'sheet-close' })}
@@ -1760,7 +1827,7 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
         const n = document.getElementById('isaret-not');
         const r = await T().isaretle(el.dataset.k, n ? n.value : '');
         UI.closeSheet();
-        UI.toast(r.ok ? 'Bildirildi · soru karma testten çıktı' : 'Bildirilemedi');
+        UI.toast(r.ok ? yz('ays.ogren.bildirildi-soru-karma-testte') : 'Bildirilemedi');
         R.App.render();
       },
       async 'soru-isaret-kaldir'(el){
@@ -1780,7 +1847,7 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
         const r = soruRef(el);
         if(!r) return;
         const e = await O().yanlisaEkle(r.subject.id, r.topic.id, r.i, el.dataset.h || null);
-        UI.toast(e ? 'Yanlış defterine eklendi · kök nedenini orada yaz' : 'Eklenemedi');
+        UI.toast(e ? yz('ays.ogren.yanlis-defterine-eklendi-kok') : 'Eklenemedi');
         R.App.render();
       },
       /* Karma test */
@@ -1828,7 +1895,7 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
       async 'par-boy'(el){ await P().boyAyarla(Number(el.dataset.n)); S.ui.parSira = 0; soruSifirlaSure(); R.App.render(); },
       async 'par-yaz'(){
         const r = await P().gunKaydinaYaz();
-        UI.toast(r.ok ? 'Bugünün paragraf sayısına +' + r.n + ' yazıldı · Onaylar’dan geri alınabilir' : r.why);
+        UI.toast(r.ok ? yz('ays.ogren.bugunun-paragraf-sayisina') + r.n + ' yazıldı · Onaylar’dan geri alınabilir' : r.why);
         R.App.render();
       },
       async 'karma-bitir'(){
@@ -1837,10 +1904,10 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
         const bos = T().say(a).bos, prova = !!a.prova;
         const bitir = async () => { const oz = await T().bitir(); S.ui[prova ? 'provaSonuc' : 'karmaSonuc'] = oz ? oz.id : null; window.scrollTo(0, 0); R.App.render(); };
         if(!bos) return bitir();
-        UI.confirmSheet('Testi bitir', U.plural(bos, 'soru', 'soru') + ' cevapsız: boş sayılır, yanlış sayılmaz.', bitir, false, 'Bitir');
+        UI.confirmSheet(yz('ays.ogren.testi-bitir'), U.plural(bos, 'soru', 'soru') + ' cevapsız: boş sayılır, yanlış sayılmaz.', bitir, false, 'Bitir');
       },
       async 'karma-vazgec'(){
-        UI.confirmSheet('Testten vazgeç', 'Bu test silinir; geçmişe hiçbir şey yazılmaz.',
+        UI.confirmSheet(yz('ays.ogren.testten-vazgec'), yz('ays.ogren.bu-test-silinir-gecmise-hicb'),
           async () => { await T().vazgec(); R.App.render(); }, true, 'Vazgeç');
       },
       async 'prova-sinav'(el){ S.ui.provaSinav = el.dataset.value; R.App.render(); },
@@ -1896,8 +1963,8 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
     if(!KS || !KS.hazir()){
       return K.Card({ title:yz('ays.ogren.koc'), wide:true,
         body:html`${K.Notice({ tone:'info', title:yz('ays.ogren.model-bagli-degil'),
-          body:'Ofis ayarlarından ücretsiz bir sağlayıcı bağlarsan koç bu konunun içinde, anlamadığın yeri anlatır. '
-            + 'Anlatım ve örnek sorular modelsiz de çalışır.' })}
+          body:yz('ays.ogren.ofis-ayarlarindan-ucretsiz-b')
+            + yz('ays.ogren.anlatim-ve-ornek-sorular-mod') })}
           <div class="row wrap gap-6 mt-12">
             ${K.Button({ label:yz('ays.ogren.ofis-ayarlarini-ac'), icon:'gear', size:'sm', tone:'primary', act:'koc-ayar' })}
             ${K.Button({ label:yz('ays.ogren.anlatima-don'), size:'sm', tone:'ghost', act:'ogren-git',
@@ -1926,7 +1993,7 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
           K.Chip({ label:h.ad, act:'koc-hazir', data:{ 'data-i':String(k) } }))}</div>
         ${when(parca, () => html`<div class="ogr-parca mt-12"><span class="tiny dim">${yz('ays.ogren.baglam')} ${parca.etiket}</span>
           <button type="button" class="linkbtn tiny" data-act="koc-parca-kaldir">${yz('ays.ogren.kaldir-2')}</button></div>`)}
-        <div class="mt-12">${K.Field({ label:ciftler.length ? 'Devam et' : 'Neyi anlamadın?',
+        <div class="mt-12">${K.Field({ label:ciftler.length ? yz('ays.ogren.devam-et') : yz('ays.ogren.neyi-anlamadin'),
           input:K.Textarea({ id:'konusor-soru', rows:3, aria:yz('ays.ogren.anlamadigin-yer'), value:S.ui.kocTaslak || '',
             placeholder:yz('ays.ogren.anlamadigin-yeri-yaz-ya-da-2') }) })}</div>
         <div class="row wrap gap-6 mt-10">
@@ -1958,7 +2025,7 @@ LIFEOS.PARCA.blok({ id:'koc.kockarti', sayfa:'koc', yer:'ana', sira:20, ad:'Koç
   R.Screens.koc = {
     id:'koc',
     title:yz('ays.ogren.koc'),
-    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Konunun koçu'; },
+    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : yz('ays.ogren.konunun-kocu'); },
     actions(){ return ''; },
     async render(){
       const x = await hazirla();
@@ -1984,7 +2051,7 @@ LIFEOS.PARCA.blok({ id:'koc.kockarti', sayfa:'koc', yer:'ana', sira:20, ad:'Koç
         const x = O().secili();
         if(!x.topic) return;
         const k = await R.KonuSor.kartYap(x.subject.id, x.topic.id, Number(el.dataset.i) || 0);
-        UI.toast(k ? 'Karta çevrildi · modelin anlatımı, yanlışsa düzelt' : 'Kart yapılamadı');
+        UI.toast(k ? yz('ays.ogren.karta-cevrildi-modelin-anlat') : yz('ays.ogren.kart-yapilamadi'));
         R.App.render();
       },
       async 'konusor-unut'(){

@@ -24,7 +24,7 @@ esit("localStorage", J.calistir("", [], "localStorage.setItem('k', 1); [localSto
 esit("hazirlik once kosar", J.calistir("", [], "y * 2", hazirlik="var y = 21"), 42)
 # gercek modul dosyasi: SPI'nin yardimcilari yuklenir, tarih islevi kosar
 esit("utils oncesi cekirdek", J.on_cekirdek(["src/js/core/tarih.js", "src/js/core/utils.js", "x.js"]),
-     ["src/js/core/tarih.js", "src/js/core/bicim.js", "src/js/core/utils.js", "x.js"])
+     ["src/js/core/parca.js", "src/js/core/tarih.js", "src/js/core/bicim.js", "src/js/core/utils.js", "x.js"])
 esit("SPI utils", J.calistir("SPI", ["src/js/core/utils.js"], "SP.U.iso(SP.U.addDays(SP.U.parse('2026-10-31'), 1))"), "2026-11-01")
 for ad, ifade, dosyalar in (("atilan hata", "throw new Error('bozuk')", []), ("reddedilen promise", "Promise.reject(new Error('red'))", []),
                             ("olmayan dosya", "1", ["yok/yok.js"])):

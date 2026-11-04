@@ -40,6 +40,19 @@
    modelleri ve sinirlari gorur (2.0 Flash emekli olunca SPI ve ESP'de
    eski liste kalmisti). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.providers.openrouter-anahtarlari-sk-or':'OpenRouter anahtarları "sk-or-" ile başlar.',
+  'ortak.providers.ucretsiz-model-listesi-sik-d':'Ücretsiz model listesi sık değişir: "Modelleri yenile" ile güncelini çek.',
+  'ortak.providers.groq-anahtarlari-gsk-ile-bas':'Groq anahtarları "gsk_" ile başlar.',
+  'ortak.providers.aiza-ya-da-aq':'AIza… ya da AQ.…',
+  'ortak.providers.google-ai-studio-anahtarlari':'Google AI Studio anahtarları "AIza" (eski) ya da "AQ." (yeni) ile başlar.',
+  'ortak.providers.yeni-anahtarlar-aq-ile-basla':'Yeni anahtarlar "AQ." ile başlar; ikisi de çalışır. ',
+  'ortak.providers.soru-fotografi-okuyabilen-te':'Soru fotoğrafı okuyabilen tek ücretsiz seçenek burasıdır.',
+  'ortak.providers.tarayicidan-erisebilmek-icin':'Tarayıcıdan erişebilmek için Ollama’yı OLLAMA_ORIGINS="*" ile başlatman gerekir. ',
+  'ortak.providers.turkce-icin-7b-ve-ustu':'Türkçe için 7B ve üstü bir model seç.',
+  'ortak.providers.model-kimligini-modelleri-ye':'Model kimliğini "Modelleri yenile" ile doğrudan LM Studio’dan çekebilirsin.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.providers.yerlesik-bu-uygulama':'Yerleşik (bu uygulama)',
   'ortak.providers.uygulama-claude-icinde-calis':'Uygulama Claude içinde çalışıyorsa açıktır. Anahtar istemez, ayar gerektirmez.',
   'ortak.providers.varsayilan':'Varsayılan',
@@ -116,10 +129,10 @@ SP.PROVIDERS = {
     keyUrl:'https://openrouter.ai/keys',
     keyHint:'sk-or-v1-…',
     keyPattern:/^sk-or-/,
-    keyShape:'OpenRouter anahtarları "sk-or-" ile başlar.',
+    keyShape:yz('ortak.providers.openrouter-anahtarlari-sk-or'),
     note:yz('ortak.providers.ucretsiz-modellerin-cogu-bur')
        + 'günlük hak hesabında hiç kredi yoksa 50, bir kez 10 $ yüklediysen 1000 istektir. '
-       + 'Ücretsiz model listesi sık değişir: "Modelleri yenile" ile güncelini çek.',
+       + yz('ortak.providers.ucretsiz-model-listesi-sik-d'),
     checked:'2026-09 · openrouter.ai/docs/api-reference/limits',
     /* Tum ucretsiz modeller ayni havuzu paylasir. */
     limits:{ rpm:20, rpd:50 },
@@ -151,7 +164,7 @@ SP.PROVIDERS = {
     keyUrl:'https://console.groq.com/keys',
     keyHint:'gsk_…',
     keyPattern:/^gsk_/,
-    keyShape:'Groq anahtarları "gsk_" ile başlar.',
+    keyShape:yz('ortak.providers.groq-anahtarlari-gsk-ile-bas'),
     note:yz('ortak.providers.ucretsiz-katmani-cok-hizlidi')
        + '1000 ile 14 400 arasında değişir. Toplantı için en akıcı seçenek.',
     checked:'2026-09 · console.groq.com/docs/rate-limits',
@@ -183,17 +196,17 @@ SP.PROVIDERS = {
     endpoint:'https://generativelanguage.googleapis.com/v1beta/models',
     modelsUrl:'https://generativelanguage.googleapis.com/v1beta/models',
     keyUrl:'https://aistudio.google.com/apikey',
-    keyHint:'AIza… ya da AQ.…',
+    keyHint:yz('ortak.providers.aiza-ya-da-aq'),
     /* Google Eylul 2026'da anahtar bicimini degistirdi: yeni "auth key"ler
        AQ. ile baslar, eski "standard key"ler AIza ile. Ikisi de gecerlidir
        ve ikisi de ayni baslikla gonderilir. Yalniz AIza'yi kabul eden eski
        denetim, yeni anahtar alan herkesi kapida durduruyordu. */
     keyPattern:/^(AIza[\w-]{8,}|AQ\.[\w.\-]{8,})$/,
-    keyShape:'Google AI Studio anahtarları "AIza" (eski) ya da "AQ." (yeni) ile başlar.',
+    keyShape:yz('ortak.providers.google-ai-studio-anahtarlari'),
     note:yz('ortak.providers.ucretsiz-katmanda-gunde-1000')
        + 'modele göre 10 ile 30 istek arasındadır. Uzun toplantılar için uygun. '
-       + 'Yeni anahtarlar "AQ." ile başlar; ikisi de çalışır. '
-       + 'Soru fotoğrafı okuyabilen tek ücretsiz seçenek burasıdır.',
+       + yz('ortak.providers.yeni-anahtarlar-aq-ile-basla')
+       + yz('ortak.providers.soru-fotografi-okuyabilen-te'),
     checked:'2026-09 · ai.google.dev/gemini-api/docs/rate-limits',
     /* Model bilinmiyorsa buraya duser — dar tutulur, kota asilmasin. */
     limits:{ rpm:10, rpd:1000 },
@@ -227,8 +240,8 @@ SP.PROVIDERS = {
     editableEndpoint:true,
     keyUrl:'https://ollama.com/download',
     note:yz('ortak.providers.modeli-kendi-bilgisayarinda')
-       + 'Tarayıcıdan erişebilmek için Ollama’yı OLLAMA_ORIGINS="*" ile başlatman gerekir. '
-       + 'Türkçe için 7B ve üstü bir model seç.',
+       + yz('ortak.providers.tarayicidan-erisebilmek-icin')
+       + yz('ortak.providers.turkce-icin-7b-ve-ustu'),
     checked:'2026-09 · ollama.com/blog/openai-compatibility',
     models:[
       { id:'llama3.1:8b',   label:yz('ortak.providers.llama-3-1-8b'),   free:true, strength:'denge' },
@@ -251,7 +264,7 @@ SP.PROVIDERS = {
     editableEndpoint:true,
     keyUrl:'https://lmstudio.ai',
     note:yz('ortak.providers.lm-studio-da-yerel-sunucuyu')
-       + 'Model kimliğini "Modelleri yenile" ile doğrudan LM Studio’dan çekebilirsin.',
+       + yz('ortak.providers.model-kimligini-modelleri-ye'),
     checked:'2026-09 · lmstudio.ai/docs/local-server',
     models:[],
   },

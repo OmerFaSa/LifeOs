@@ -32,6 +32,27 @@
      · şikâyet işaretleme (şiddet yalnız açık sözle; teşhis yok);
      · «dün» günü, «kahvaltıda / öğlen / akşam / ara öğün» öğünü belirler;
      · birimi uyuşmayan tahlil satırı sessizce yazılmaz (SP.Parse.rowsToSave). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.quickentry.i-stirahat-nabzi':'İstirahat nabzı',
+  'spi.core.quickentry.buyuk-tansiyon':'Büyük tansiyon',
+  'spi.core.quickentry.kucuk-tansiyon':'Küçük tansiyon',
+  'spi.core.quickentry.bel-cevresi':'Bel çevresi',
+  'spi.core.quickentry.yag-orani':'Yağ oranı',
+  'spi.core.quickentry.boyun-cevresi':'Boyun çevresi',
+  'spi.core.quickentry.kalca-cevresi':'Kalça çevresi',
+  'spi.core.quickentry.kisa-uyku':'Kısa uyku · ',
+  'spi.core.quickentry.tansiyon':'Tansiyon ',
+  'spi.core.quickentry.gunluk-olcum':'Günlük ölçüm',
+  'spi.core.quickentry.sikayet-yok':'Şikâyet yok',
+  'spi.core.quickentry.serbest-seans':'Serbest seans',
+  'spi.core.quickentry.kisa-uyku-kaydedildi':'Kısa uyku kaydedildi',
+  'spi.core.quickentry.sikayet-yok-olarak-kaydedild':'Şikâyet yok olarak kaydedildi',
+  'spi.core.quickentry.seans-kaydedildi':'Seans kaydedildi',
+  'spi.core.quickentry.yazilmadi':'Yazılmadı: ',
+  'spi.core.quickentry.ogun-eklendi':'Öğün eklendi',
+  'spi.core.quickentry.siddet-belirtilmedi-hafif-or':'Şiddet belirtilmedi: «hafif», «orta» ya da «şiddetli» diye ekle.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -43,7 +64,7 @@ SP.Quick = (function(){
   const VITAL_FIELDS = {
     sleep:{ id:'sleep', label:'Uyku', unit:'saat', min:0, max:20,
       aliases:['uyku', 'uyudum', 'sleep'] },
-    rhr:{ id:'rhr', label:'İstirahat nabzı', unit:'atım/dk', min:25, max:200,
+    rhr:{ id:'rhr', label:yz('spi.core.quickentry.i-stirahat-nabzi'), unit:'atım/dk', min:25, max:200,
       aliases:['nabiz', 'istirahat nabzi', 'rhr'] },
     hrv:{ id:'hrv', label:'HRV', unit:'ms', min:1, max:300,
       aliases:['hrv', 'rmssd'] },
@@ -67,21 +88,21 @@ SP.Quick = (function(){
        FIELDS) ve vücut analizi (core/vucut.js, move.js vucutVerisi) bunları
        GÜNLÜKTE okur. Alan adları ve sınırlar oradakiyle aynı; boyun ve kalça
        move.js'in vücut formundaki sınırla. */
-    sbp:{ id:'sbp', label:'Büyük tansiyon', unit:'mmHg', min:60, max:250,
+    sbp:{ id:'sbp', label:yz('spi.core.quickentry.buyuk-tansiyon'), unit:'mmHg', min:60, max:250,
       aliases:['buyuk tansiyon', 'sistolik', 'sbp'] },
-    dbp:{ id:'dbp', label:'Küçük tansiyon', unit:'mmHg', min:30, max:160,
+    dbp:{ id:'dbp', label:yz('spi.core.quickentry.kucuk-tansiyon'), unit:'mmHg', min:30, max:160,
       aliases:['kucuk tansiyon', 'diyastolik', 'dbp'] },
     spo2:{ id:'spo2', label:'Oksijen', unit:'%', min:70, max:100,
       aliases:['oksijen saturasyonu', 'spo2', 'oksijen', 'saturasyon'] },
     temp:{ id:'temp', label:'Ateş', unit:'°C', min:33, max:43,
       aliases:['vucut sicakligi', 'ates', 'atesim'] },
-    waist:{ id:'waist', label:'Bel çevresi', unit:'cm', min:40, max:200,
+    waist:{ id:'waist', label:yz('spi.core.quickentry.bel-cevresi'), unit:'cm', min:40, max:200,
       aliases:['bel cevresi', 'bel', 'belim'] },
-    bodyfat:{ id:'bodyfat', label:'Yağ oranı', unit:'%', min:3, max:60,
+    bodyfat:{ id:'bodyfat', label:yz('spi.core.quickentry.yag-orani'), unit:'%', min:3, max:60,
       aliases:['yag orani', 'yag oranim', 'vucut yagi', 'bodyfat'] },
-    neck:{ id:'neck', label:'Boyun çevresi', unit:'cm', min:20, max:70,
+    neck:{ id:'neck', label:yz('spi.core.quickentry.boyun-cevresi'), unit:'cm', min:20, max:70,
       aliases:['boyun cevresi', 'boyun'] },
-    hip:{ id:'hip', label:'Kalça çevresi', unit:'cm', min:50, max:200,
+    hip:{ id:'hip', label:yz('spi.core.quickentry.kalca-cevresi'), unit:'cm', min:50, max:200,
       aliases:['kalca cevresi', 'kalca'] },
   };
 
@@ -478,24 +499,24 @@ SP.Quick = (function(){
 
   function parseIc(t){
     const kz = parseNap(t);
-    if(kz) return { kind:'nap', data:kz, label:'Kısa uyku · ' + kz.dk + ' dk' + (kz.bas ? ' (' + kz.bas + ')' : ''),
+    if(kz) return { kind:'nap', data:kz, label:yz('spi.core.quickentry.kisa-uyku') + kz.dk + ' dk' + (kz.bas ? ' (' + kz.bas + ')' : ''),
       hint:'Uyku' };
 
     const v = parseVital(t);
     if(v) return { kind:'vital', data:v,
-      label:v.ikinci ? 'Tansiyon ' + v.value + '/' + v.ikinci.value + ' ' + v.field.unit
+      label:v.ikinci ? yz('spi.core.quickentry.tansiyon') + v.value + '/' + v.ikinci.value + ' ' + v.field.unit
         : v.field.label + ' ' + (v.ekle ? '+' : '') + U.fmtNum(v.value) + ' ' + v.field.unit,
-      hint:'Günlük ölçüm' };
+      hint:yz('spi.core.quickentry.gunluk-olcum') };
 
     const sk = parseSymptom(t);
     if(sk) return { kind:'symptom', data:sk,
-      label:sk.yok ? 'Şikâyet yok'
+      label:sk.yok ? yz('spi.core.quickentry.sikayet-yok')
         : sk.symptom.name + ' · ' + (sk.severity ? SP.SYMPTOM_SEVERITY[sk.severity - 1].label : 'şiddet belirtilmedi'),
       hint:'Şikâyet' };
 
     const mv = parseMove(t);
     if(mv) return { kind:'move', data:mv,
-      label:(mv.exercise ? mv.exercise.name : 'Serbest seans') + ' · ' + mv.minutes + ' dk',
+      label:(mv.exercise ? mv.exercise.name : yz('spi.core.quickentry.serbest-seans')) + ' · ' + mv.minutes + ' dk',
       hint:'Antrenman' };
 
     const lb = parseLabLine(t);
@@ -555,14 +576,14 @@ SP.Quick = (function(){
 
     if(parsed.kind === 'nap'){
       const r = await SP.Uyku.ekle(gun, parsed.data);
-      return r.ok ? { ok:true, text:'Kısa uyku kaydedildi', route:'today', kayit:r.kayit } : { ok:false, text:r.why };
+      return r.ok ? { ok:true, text:yz('spi.core.quickentry.kisa-uyku-kaydedildi'), route:'today', kayit:r.kayit } : { ok:false, text:r.why };
     }
 
     if(parsed.kind === 'symptom'){
       const d = parsed.data;
       if(d.yok){
         await SP.Model.saveVitals(gun, { symptoms:{}, symptomsLogged:true });
-        return { ok:true, text:'Şikâyet yok olarak kaydedildi', route:'today' };
+        return { ok:true, text:yz('spi.core.quickentry.sikayet-yok-olarak-kaydedild'), route:'today' };
       }
       if(!d.severity) return { ok:false, text:SIDDET_YOK };
       await SP.Symptom.setSymptom(gun, d.symptom.id, d.severity);
@@ -580,13 +601,13 @@ SP.Quick = (function(){
           reps:null, minutes:parsed.data.minutes }];
       }
       await SP.Model.saveWorkout(w);
-      return { ok:true, text:'Seans kaydedildi', route:'move' };
+      return { ok:true, text:yz('spi.core.quickentry.seans-kaydedildi'), route:'move' };
     }
 
     if(parsed.kind === 'lab'){
       /* Yalniz rowsToSave'in gecirdigi satir (yukarida parseLabLine). */
       const rows = SP.Parse.rowsToSave ? SP.Parse.rowsToSave(parsed.data) : parsed.data.rows;
-      if(!rows.length) return { ok:false, text:'Yazılmadı: ' + uyusmazNotu(parsed.data.uyusmaz) + '.' };
+      if(!rows.length) return { ok:false, text:yz('spi.core.quickentry.yazilmadi') + uyusmazNotu(parsed.data.uyusmaz) + '.' };
       /* Ayni gune ikinci bir oturum acilmaz; var olanin ustune yazilir. */
       const mevcut = (SP.S.labs || []).find(l => l.date === gun);
       const rec = mevcut || SP.Model.newLab(gun);
@@ -606,13 +627,13 @@ SP.Quick = (function(){
       meal.items = parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g,
         cert:i.cert || 'estimated' }));
       await SP.Model.addMeal(gun, meal);
-      return { ok:true, text:'Öğün eklendi', route:'meals' };
+      return { ok:true, text:yz('spi.core.quickentry.ogun-eklendi'), route:'meals' };
     }
 
     return { ok:false, text:'Anlaşılmadı' };
   }
 
-  const SIDDET_YOK = 'Şiddet belirtilmedi: «hafif», «orta» ya da «şiddetli» diye ekle.';
+  const SIDDET_YOK = yz('spi.core.quickentry.siddet-belirtilmedi-hafif-or');
 
   return { parse, parseHam, apply, parseVital, vitalBol, parseMove, parseNap, parseSymptom, parseSure, VITAL_FIELDS,
     BARDAK_ML, gunSozu, ogunSozu, tarih, onizleme, olcumEngeli, uyusmazNotu, SIDDET_YOK };

@@ -7,6 +7,31 @@
    için tek «Hepsini aldım» (her satır yine kendi «Geri al»ını taşır);
    hazır antrenmana bağlı hareket hatırlatmasında «Yaptım» o seansı ekler
    ve «Geri al» bırakır (core/hatirlat.js söz 5, 6). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.hatirlatui.geri-al':'Geri al',
+  'spi.hatirlatui.hepsini-aldim':'Hepsini aldım',
+  'spi.hatirlatui.hepsini-isaretle':'Hepsini işaretle',
+  'spi.hatirlatui.yalniz-senin-yazdigin-saatle':'Yalnız senin yazdığın saatler. Sistem saat ya da doz önermez.',
+  'spi.hatirlatui.hatirlatma-ekle':'Hatırlatma ekle',
+  'spi.hatirlatui.hareket-molasi':'Hareket molası',
+  'spi.hatirlatui.sabah-tartisi':'Sabah tartısı',
+  'spi.hatirlatui.i-lac-takviye':'İlaç / takviye — ',
+  'spi.hatirlatui.ne-icin':'Ne için',
+  'spi.hatirlatui.hicbiri-yalniz-isaret':'Hiçbiri — yalnız işaret',
+  'spi.hatirlatui.telefon-bildirimi-aciksa-saa':'Telefon bildirimi açıksa saatler önümüzdeki ',
+  'spi.hatirlatui.uygulamayi-bir-hafta-acmazsa':'Uygulamayı bir hafta açmazsan susar. ',
+  'spi.hatirlatui.hatirlatma-yalniz-spi-acikke':'Hatırlatma yalnız SPİ açıkken gelir: Bugün ekranında görünür, izin verirsen tarayıcı bildirimi de olur. ',
+  'spi.hatirlatui.kurulu-bildirimler':'Kurulu bildirimler',
+  'spi.hatirlatui.tamamen-kapatmak-icin-telefo':'Tamamen kapatmak için «Telefon bildirimini kapat».',
+  'spi.hatirlatui.spi-hatirlatma':'SPİ · hatırlatma',
+  'spi.hatirlatui.hatirlatma-kaydedildi':'Hatırlatma kaydedildi · ',
+  'spi.hatirlatui.hatirlatma-silindi':'Hatırlatma silindi',
+  'spi.hatirlatui.i-saret-ve-eklenen-seans-kal':'İşaret ve eklenen seans kaldırıldı',
+  'spi.hatirlatui.bildirim-acik-saatinde-gelir':'Bildirim açık · saatinde gelir, SPİ kapalıyken de',
+  'spi.hatirlatui.bildirim-acik-spi-acikken':'Bildirim açık · SPİ açıkken saatinde gelir',
+  'spi.hatirlatui.bildirim-kapatildi':'Bildirim kapatıldı',
+});
+
 
 window.SP = window.SP || {};
 
@@ -20,7 +45,7 @@ SP.HatirlatUI = (function(){
   function satirDugme(r){
     return r.durum === 'yapildi'
       ? html`<span class="tiny dim">${r.eylem.toLocaleLowerCase('tr')} ·
-          ${K.Button({ label:'Geri al', size:'sm', act:'ht-isaret',
+          ${K.Button({ label:yz('spi.hatirlatui.geri-al'), size:'sm', act:'ht-isaret',
             data:{ 'data-k':r.anahtar, 'data-v':'0' } })}</span>`
       : K.Button({ label:r.eylem, size:'sm', tone:r.durum === 'vakti' ? 'primary' : '',
           act:'ht-isaret', data:{ 'data-k':r.anahtar, 'data-v':'1' } });
@@ -39,7 +64,7 @@ SP.HatirlatUI = (function(){
   function hepsiDugme(saat, l){
     const bekleyen = l.filter(r => r.durum !== 'yapildi');
     if(bekleyen.length < 2) return '';
-    const etiket = bekleyen.every(r => r.tur === 'ilac') ? 'Hepsini aldım' : 'Hepsini işaretle';
+    const etiket = bekleyen.every(r => r.tur === 'ilac') ? yz('spi.hatirlatui.hepsini-aldim') : yz('spi.hatirlatui.hepsini-isaretle');
     return html`<div class="row between wrap gap-6 mt-6">
       <span class="tiny dim"><b class="num">${saat}</b> · ${bekleyen.length} hatırlatma</span>
       ${K.Button({ label:etiket, size:'sm', tone:bekleyen.some(r => r.durum === 'vakti') ? 'primary' : '', act:'ht-hepsi',
@@ -69,8 +94,8 @@ SP.HatirlatUI = (function(){
     if(!SP.Hatirlat) return null;
     const l = H().bugun();
     return K.Entry({ label:'Hatırlatmalar', meta:l.length ? l.length + ' saat' : 'yok',
-      note:'Yalnız senin yazdığın saatler. Sistem saat ya da doz önermez.',
-      action:K.Button({ label:l.length ? 'Düzenle' : 'Hatırlatma ekle', size:'sm', act:'ht-ac' }),
+      note:yz('spi.hatirlatui.yalniz-senin-yazdigin-saatle'),
+      action:K.Button({ label:l.length ? 'Düzenle' : yz('spi.hatirlatui.hatirlatma-ekle'), size:'sm', act:'ht-ac' }),
       body:l.length ? satirlar(l)
         : html`<p class="small dim">İlaç ya da takviye, su ve hareket için saat koyabilirsin.</p>` });
   }
@@ -81,8 +106,8 @@ SP.HatirlatUI = (function(){
   function sayfa(){
     const d = H().durum();
     const ilaclar = SP.Meds.activeList();
-    const secenek = [{ value:'su', label:'Su' }, { value:'hareket', label:'Hareket molası' }, { value:'olcum', label:'Sabah tartısı' }]
-      .concat(ilaclar.map(m => ({ value:'ilac:' + m.id, label:'İlaç / takviye — ' + (m.name || SP.Meds.kindOf(m).name) })));
+    const secenek = [{ value:'su', label:'Su' }, { value:'hareket', label:yz('spi.hatirlatui.hareket-molasi') }, { value:'olcum', label:yz('spi.hatirlatui.sabah-tartisi') }]
+      .concat(ilaclar.map(m => ({ value:'ilac:' + m.id, label:yz('spi.hatirlatui.i-lac-takviye') + (m.name || SP.Meds.kindOf(m).name) })));
     const deger = taslak.tur === 'ilac' ? 'ilac:' + taslak.medId : taslak.tur;
     const onceki = d.liste.find(h => h.tur === taslak.tur && (taslak.tur !== 'ilac' || h.medId === taslak.medId));
     UI.sheet({
@@ -92,7 +117,7 @@ SP.HatirlatUI = (function(){
           rows:d.liste.map(h => [H().adOf(h), h.saatler.join(', '),
             K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
               act:'ht-sil', data:{ 'data-id':h.id } })]) })),
-        K.Field({ label:'Ne için',
+        K.Field({ label:yz('spi.hatirlatui.ne-icin'),
           input:K.Select({ id:'ht-tur', value:deger, change:'ht-tur', options:secenek }) }),
         K.Field({ label:'Saatler', hint:'virgülle ayır — örn. 08:00, 21:00',
           input:K.Input({ id:'ht-saat', value:onceki ? onceki.saatler.join(', ') : '',
@@ -101,14 +126,14 @@ SP.HatirlatUI = (function(){
         when(taslak.tur === 'hareket' && hazirlar().length, () => K.Field({ label:'«Yaptım» deyince ekle',
           hint:'Seçersen Bugün\'de «Yaptım» bu antrenmanı bugüne ekler; «Geri al» kaldırır.',
           input:K.Select({ id:'ht-hazir', value:(onceki && onceki.hazirId) || '',
-            options:[{ value:'', label:'Hiçbiri — yalnız işaret' }].concat(hazirlar().map(a => ({ value:a.id, label:a.ad }))) }) })),
+            options:[{ value:'', label:yz('spi.hatirlatui.hicbiri-yalniz-isaret') }].concat(hazirlar().map(a => ({ value:a.id, label:a.ad }))) }) })),
         html`<div id="ht-hata" class="small" role="alert"></div>`,
         when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
           Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
         K.Notice({ tone:'info', body:(H().telefonMu()
-            ? 'Telefon bildirimi açıksa saatler önümüzdeki ' + H().PLAN_GUN + ' güne kurulur: SPİ kapalıyken de gelir. '
-              + 'Uygulamayı bir hafta açmazsan susar. '
-            : 'Hatırlatma yalnız SPİ açıkken gelir: Bugün ekranında görünür, izin verirsen tarayıcı bildirimi de olur. ')
+            ? yz('spi.hatirlatui.telefon-bildirimi-aciksa-saa') + H().PLAN_GUN + ' güne kurulur: SPİ kapalıyken de gelir. '
+              + yz('spi.hatirlatui.uygulamayi-bir-hafta-acmazsa')
+            : yz('spi.hatirlatui.hatirlatma-yalniz-spi-acikke'))
           + 'İlaç adı HKM\'ye gitmediği için Telegram\'dan '
           + 'hatırlatılmaz. «Aldım» bir işarettir; işaretlenmeyen saat «alınmadı» sayılmaz.' }),
         when(H().bildirimSorunu(), () => K.Notice({ tone:'warn', body:H().bildirimSorunu() })),
@@ -117,11 +142,11 @@ SP.HatirlatUI = (function(){
             ? K.Button({ label:(H().telefonMu() ? 'Telefon' : 'Tarayıcı') + ' bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })
             : K.Button({ label:(H().telefonMu() ? 'Telefon' : 'Tarayıcı') + ' bildirimini aç', size:'sm', act:'ht-bildirim', data:{ 'data-v':'1' } })}</div>`),
         /* Telefonda kurulu bildirimler (brand/ortak/bildirim.js söz 8). */
-        when(H().telefonMu() && d.bildirim, () => html`<div class="row wrap gap-6">${K.Button({ label:'Kurulu bildirimler', size:'sm',
-          data:{ 'data-tb-ac':'1', 'data-tb-not':'Tamamen kapatmak için «Telefon bildirimini kapat».' } })}</div>`),
+        when(H().telefonMu() && d.bildirim, () => html`<div class="row wrap gap-6">${K.Button({ label:yz('spi.hatirlatui.kurulu-bildirimler'), size:'sm',
+          data:{ 'data-tb-ac':'1', 'data-tb-not':yz('spi.hatirlatui.tamamen-kapatmak-icin-telefo') } })}</div>`),
         /* 180/122: tür anahtarı ve sessiz saatler (brand/ortak/pwa.js). */
         when(d.bildirim && H().bildirimIzinli() && VT() && VT().bildirimKutusu, () => raw(VT().bildirimKutusu({ modul:'spi',
-          turler:[{ id:'hatirlatma', ad:'SPİ · hatırlatma' }] }))),
+          turler:[{ id:'hatirlatma', ad:yz('spi.hatirlatui.spi-hatirlatma') }] }))),
       ])),
       footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'ht-kaydet' })}`),
@@ -148,7 +173,7 @@ SP.HatirlatUI = (function(){
         if(h) h.textContent = r.why;
         return;
       }
-      UI.toast('Hatırlatma kaydedildi · ' + r.saatler.join(', '));
+      UI.toast(yz('spi.hatirlatui.hatirlatma-kaydedildi') + r.saatler.join(', '));
       sayfa();
       yenile();
     },
@@ -157,7 +182,7 @@ SP.HatirlatUI = (function(){
       if(!r.ok) return;
       sayfa();
       yenile();
-      UI.toast('Hatırlatma silindi', { undo:async () => { await H().geriKoy(r.geri); yenile(); } });
+      UI.toast(yz('spi.hatirlatui.hatirlatma-silindi'), { undo:async () => { await H().geriKoy(r.geri); yenile(); } });
     },
     async 'ht-isaret'(el){
       if(el.dataset.v === '1'){
@@ -168,7 +193,7 @@ SP.HatirlatUI = (function(){
       }
       const kalkti = await H().isaretle(el.dataset.k, false);
       yenile();
-      if(kalkti) UI.toast('İşaret ve eklenen seans kaldırıldı');
+      if(kalkti) UI.toast(yz('spi.hatirlatui.i-saret-ve-eklenen-seans-kal'));
     },
     async 'ht-hepsi'(el){
       const l = String(el.dataset.k || '').split(',').filter(Boolean);
@@ -183,11 +208,11 @@ SP.HatirlatUI = (function(){
     async 'ht-bildirim'(el){
       if(el.dataset.v === '1'){
         const r = await H().bildirimAc();
-        UI.toast(r.ok ? (r.telefon ? 'Bildirim açık · saatinde gelir, SPİ kapalıyken de' : 'Bildirim açık · SPİ açıkken saatinde gelir')
+        UI.toast(r.ok ? (r.telefon ? yz('spi.hatirlatui.bildirim-acik-saatinde-gelir') : yz('spi.hatirlatui.bildirim-acik-spi-acikken'))
           : r.why, { life:r.ok ? 2000 : 5000 });
       }else{
         await H().bildirimKapat();
-        UI.toast('Bildirim kapatıldı');
+        UI.toast(yz('spi.hatirlatui.bildirim-kapatildi'));
       }
       sayfa();
     },

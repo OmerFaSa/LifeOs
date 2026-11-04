@@ -27,6 +27,13 @@
       başlık gider. Tam metin, belge içeriği ve ses hiçbir zaman modele
       gitmez — `ESP.PRIVACY.model` bunu zaten söylüyordu, burası uyguluyor. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.desk.bu-tarayici-desteklemiyor':'Bu tarayıcı desteklemiyor.',
+  'esp.core.desk.siradaki-basamak-olculemiyor':'Sıradaki basamak ölçülemiyor: ',
+  'esp.core.desk.siradaki-kapi':'Sıradaki kapı: ',
+  'esp.core.desk.bu-merdivenin-butun-kapilari':'Bu merdivenin bütün kapıları geçilmiş görünüyor.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.desk.recete':'Reçete',
   'esp.core.desk.koc':'Koç',
   'esp.core.desk.harita':'Harita',
@@ -119,7 +126,7 @@ ESP.Desk = (function(){
     const a = agentOf(discId);
     if(!ESP.Talk || !ESP.Talk.supported()){
       return { ok:false, reason:'unsupported',
-        message:ESP.Voice ? ESP.Voice.message('unsupported') : 'Bu tarayıcı desteklemiyor.' };
+        message:ESP.Voice ? ESP.Voice.message('unsupported') : yz('esp.core.desk.bu-tarayici-desteklemiyor') };
     }
     if(ESP.Talk.isActive()){ ESP.Talk.stop(); return { ok:true, stopped:true }; }
     return ESP.Talk.start(a.id);
@@ -208,9 +215,9 @@ ESP.Desk = (function(){
     if(r.due) return r.due + ' hatırlatma bugüne düştü.';
     const kapi = ESP.Curriculum.nextGate(discId);
     if(kapi) return kapi.action === 'measure'
-      ? 'Sıradaki basamak ölçülemiyor: ' + kapi.gate.label + '.'
-      : 'Sıradaki kapı: ' + kapi.gate.label + '.';
-    return 'Bu merdivenin bütün kapıları geçilmiş görünüyor.';
+      ? yz('esp.core.desk.siradaki-basamak-olculemiyor') + kapi.gate.label + '.'
+      : yz('esp.core.desk.siradaki-kapi') + kapi.gate.label + '.';
+    return yz('esp.core.desk.bu-merdivenin-butun-kapilari');
   }
 
   /* Bu masanın teklifleri. Teklif bir cümle değil TİPLİ bir nesnedir ve

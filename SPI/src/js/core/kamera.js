@@ -19,6 +19,17 @@
 
    Kullanım: `const blob = await SP.Kamera.cek({ baslik, yon })` —
    vazgeçilirse null. `yon`: 'user' (ön, kendin) ya da 'environment'. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.kamera.durdurmak-icin-dokun':'Durdurmak için dokun',
+  'spi.core.kamera.yeniden':'Yeniden',
+  'spi.core.kamera.kullan':'Kullan',
+  'spi.core.kamera.telefonun-kamerasiyla-cek':'Telefonun kamerasıyla çek',
+  'spi.core.kamera.kamera-bu-baglantida-acilami':'Kamera bu bağlantıda açılamıyor: tarayıcı kamerayı yalnız güvenli bağlantıda (https) verir.',
+  'spi.core.kamera.bu-tarayici-uygulama-icinden':'Bu tarayıcı uygulama içinden kamera açamıyor.',
+  'spi.core.kamera.kamera-izni-verilmedi-tarayi':'Kamera izni verilmedi. Tarayıcının site ayarlarından kameraya izin ver.',
+  'spi.core.kamera.kamera-acilamadi':'Kamera açılamadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -95,7 +106,7 @@ SP.Kamera = (function(){
       + '<img class="kamera__onizleme" alt="" hidden/>'
       + '<div class="kamera__mesaj" hidden></div>'
       + '<div class="kamera__sayi" aria-live="assertive"></div>'
-      + '<div class="kamera__ipucu">Durdurmak için dokun</div>'
+      + ('<div class="kamera__ipucu">' + yz('spi.core.kamera.durdurmak-icin-dokun') + '</div>')
       + '<div class="kamera__flas"></div>'
       + '<div class="kamera__ust">'
       +   '<span class="kamera__baslik">' + esc(o.baslik || '') + '</span>'
@@ -112,8 +123,8 @@ SP.Kamera = (function(){
       +     '<button type="button" class="kamera__dug" data-k="cevir" aria-label="Kamerayı çevir">' + ikon('refresh') + '</button>'
       +   '</div>'
       +   '<div class="kamera__satir kamera__satir--sonuc" hidden>'
-      +     '<button type="button" class="kamera__metin" data-k="yeniden">Yeniden</button>'
-      +     '<button type="button" class="kamera__metin kamera__metin--ana" data-k="kullan">Kullan</button>'
+      +     ('<button type="button" class="kamera__metin" data-k="yeniden">' + yz('spi.core.kamera.yeniden') + '</button>')
+      +     ('<button type="button" class="kamera__metin kamera__metin--ana" data-k="kullan">' + yz('spi.core.kamera.kullan') + '</button>')
       +   '</div>'
       + '</div>';
     document.body.appendChild(el);
@@ -151,7 +162,7 @@ SP.Kamera = (function(){
       izleriDurdur();
       mesaj.hidden = false;
       mesaj.innerHTML = '<p>' + esc(neden) + '</p>'
-        + '<label class="kamera__metin kamera__metin--ana">Telefonun kamerasıyla çek'
+        + ('<label class="kamera__metin kamera__metin--ana">' + yz('spi.core.kamera.telefonun-kamerasiyla-cek'))
         + '<input type="file" accept="image/*" capture="' + (yon === 'user' ? 'user' : 'environment')
         + '" class="sr-only" data-k="galeri"/></label>';
       $('.kamera__deklansor').disabled = true;
@@ -161,9 +172,9 @@ SP.Kamera = (function(){
 
     async function baslat(){
       izleriDurdur();
-      if(!ortam.guvenli()){ kameraYok('Kamera bu bağlantıda açılamıyor: tarayıcı kamerayı yalnız güvenli bağlantıda (https) verir.'); return; }
+      if(!ortam.guvenli()){ kameraYok(yz('spi.core.kamera.kamera-bu-baglantida-acilami')); return; }
       const m = ortam.medya();
-      if(!m){ kameraYok('Bu tarayıcı uygulama içinden kamera açamıyor.'); return; }
+      if(!m){ kameraYok(yz('spi.core.kamera.bu-tarayici-uygulama-icinden')); return; }
       try{
         akis = await m.getUserMedia({ audio:false,
           video:{ facingMode:{ ideal:yon }, width:{ ideal:1920 }, height:{ ideal:1440 } } });
@@ -171,8 +182,8 @@ SP.Kamera = (function(){
         kameraYok(e && e.name === 'NotAllowedError'
           ? (ortam.uygulama()
             ? 'Kamera izni verilmedi. Telefonun Ayarlar\'ında LifeOS › Kamera\'yı aç.'
-            : 'Kamera izni verilmedi. Tarayıcının site ayarlarından kameraya izin ver.')
-          : 'Kamera açılamadı.');
+            : yz('spi.core.kamera.kamera-izni-verilmedi-tarayi'))
+          : yz('spi.core.kamera.kamera-acilamadi'));
         return;
       }
       if(bitti){ izleriDurdur(); return; }

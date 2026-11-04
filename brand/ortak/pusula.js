@@ -22,6 +22,17 @@
      2. HEDEF YAZILIR, YARGI YOK. «Hedef ≤ 2 dk · ≥ %90» yanında durur;
         renk ya da uyarı yoktur — pusula yön gösterir, azarlamaz.
      3. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa satır boş. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.pusula.dk-gun':'dk/gün',
+  'ortak.pusula.gunden-olculdu':'günden ölçüldü)',
+  'ortak.pusula.veri-yok':'veri yok',
+  'ortak.pusula.pusula':'Pusula',
+  'ortak.pusula.yonetim':'Yönetim',
+  'ortak.pusula.hedef':'hedef ≤',
+  'ortak.pusula.doluluk':'Doluluk',
+  'ortak.pusula.hedef-2':'hedef ≥ %',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -73,12 +84,12 @@ window.LIFEOS.PUSULA = (function(){
   function satirHtml(){
     const o = olc();
     if(!o) return '';
-    const p1 = o.p1 ? '<b>' + o.p1.dk + ' dk/gün</b> <small>(' + o.p1.gun + ' günden ölçüldü)</small>' : '<b>veri yok</b>';
-    const p2 = o.p2 ? '<b>%' + Math.round(o.p2.oran * 100) + '</b> <small>(' + o.p2.gun + ' günün ' + o.p2.girilen + '’i)</small>' : '<b>veri yok</b>';
+    const p1 = o.p1 ? '<b>' + o.p1.dk + (' ' + yz('ortak.pusula.dk-gun') + '</b> <small>(') + o.p1.gun + (' ' + yz('ortak.pusula.gunden-olculdu') + '</small>') : ('<b>' + yz('ortak.pusula.veri-yok') + '</b>');
+    const p2 = o.p2 ? '<b>%' + Math.round(o.p2.oran * 100) + '</b> <small>(' + o.p2.gun + ' günün ' + o.p2.girilen + '’i)</small>' : ('<b>' + yz('ortak.pusula.veri-yok') + '</b>');
     return '<div class="pusula" data-pusula role="group" aria-label="Pusula">'
-      + '<span class="pusula__ad">Pusula</span>'
-      + '<span class="pusula__s">Yönetim ' + p1 + ' <small class="pusula__h">hedef ≤ ' + HEDEF.p1 + ' dk</small></span>'
-      + '<span class="pusula__s">Doluluk ' + p2 + ' <small class="pusula__h">hedef ≥ %' + Math.round(HEDEF.p2 * 100) + '</small></span>'
+      + ('<span class="pusula__ad">' + yz('ortak.pusula.pusula') + '</span>')
+      + ('<span class="pusula__s">' + yz('ortak.pusula.yonetim') + ' ') + p1 + (' <small class="pusula__h">' + yz('ortak.pusula.hedef') + ' ') + HEDEF.p1 + ' dk</small></span>'
+      + ('<span class="pusula__s">' + yz('ortak.pusula.doluluk') + ' ') + p2 + (' <small class="pusula__h">' + yz('ortak.pusula.hedef-2')) + Math.round(HEDEF.p2 * 100) + '</small></span>'
       + '</div>';
   }
 

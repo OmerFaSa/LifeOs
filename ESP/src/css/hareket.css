@@ -156,9 +156,9 @@ html::view-transition-old(h-kart), html::view-transition-new(h-kart){ height:100
 
 .h-isik{ position:relative; }
 .h-isik::before{ content:''; position:absolute; inset:0; border-radius:inherit; padding:1.5px; pointer-events:none;
-  background:linear-gradient(110deg, transparent 35%, color-mix(in oklab, var(--mod, var(--primary)) 75%, #fff) 50%, transparent 65%)
+  background:linear-gradient(110deg, transparent 35%, color-mix(in oklab, var(--mod, var(--primary)) 75%, var(--beyaz)) 50%, transparent 65%)
     0 0 / 260% 100% no-repeat;
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:linear-gradient(var(--siyah) 0 0) content-box, linear-gradient(var(--siyah) 0 0);
   -webkit-mask-composite:xor; mask-composite:exclude;
   animation:h-isik-gec .95s cubic-bezier(.32,.72,0,1) both; }
 @keyframes h-isik-gec{ from{ background-position:120% 0; opacity:1; } 85%{ opacity:1; } to{ background-position:-20% 0; opacity:0; } }

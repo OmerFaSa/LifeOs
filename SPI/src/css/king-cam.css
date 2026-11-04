@@ -15,8 +15,8 @@
 :root{ --king-vurgu:#3f6fe8; --king-a1:#dfe9ff; --king-a2:#a8c3ff; --king-a3:#4f7cff; --king-tac:#ffd25a; --king-tac-kenar:#d9a225; }
 html[data-king-gorunus="pembe"]{ --king-vurgu:#e0508f; --king-a1:#ffe1ee; --king-a2:#ffadd0; --king-a3:#e2669d; --king-tac:#ffd6e6; --king-tac-kenar:#e889b0; }
 .king .king__gonder, .king .king__cipler .king__cip--ana, .king .king__cipler--akis .king__cip--ana{
-  background:var(--king-vurgu) !important; color:#fff; border-color:transparent;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.28), 0 6px 16px -10px var(--king-vurgu) !important; }
+  background:var(--king-vurgu) !important; color:var(--beyaz); border-color:transparent;
+  box-shadow:inset 0 1px 0 var(--beyaz-28), 0 6px 16px -10px var(--king-vurgu) !important; }
 .king__arkadas .minik{ --g1:var(--king-a1); --g2:var(--king-a2); --g3:var(--king-a3); }
 .king__arkadas .minik[data-tip="tac"] .minik__sus{ filter:drop-shadow(0 0 .6px var(--king-tac-kenar)); }
 html[data-king-gorunus="pembe"] .king__arkadas .minik[data-tip="tac"] .minik__sus{ background:linear-gradient(180deg, #fff3f8, var(--king-tac)); }
@@ -70,12 +70,12 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu :is(.king__kart, .kin
 /* Ton: yuva ve yüz King'in görünüşünden (Mavi/Pembe); minik King renginde. */
 .king{ --yuva:color-mix(in oklab, var(--king-vurgu) 17%, var(--surface-2, #f1f2f5));
   --yuva-kenar:color-mix(in oklab, var(--king-vurgu) 22%, transparent); }
-.king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 rgba(255,255,255,.5); }
-html[data-theme="dark"] .king{ --yuva:color-mix(in oklab, var(--king-vurgu) 14%, rgba(255,255,255,.04)); }
-html[data-theme="dark"] .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 rgba(255,255,255,.06); }
+.king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 var(--beyaz-50); }
+html[data-theme="dark"] .king{ --yuva:color-mix(in oklab, var(--king-vurgu) 14%, var(--beyaz-04)); }
+html[data-theme="dark"] .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 var(--beyaz-06); }
 @media (prefers-color-scheme:dark){
-  html:not([data-theme="light"]) .king{ --yuva:color-mix(in oklab, var(--king-vurgu) 14%, rgba(255,255,255,.04)); }
-  html:not([data-theme="light"]) .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 rgba(255,255,255,.06); }
+  html:not([data-theme="light"]) .king{ --yuva:color-mix(in oklab, var(--king-vurgu) 14%, var(--beyaz-04)); }
+  html:not([data-theme="light"]) .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 var(--beyaz-06); }
 }
 html[data-zemin="yumusak"] .king:has(.king__arkadas) .king__akis{ padding-bottom:0; }
 .king__yuz .minik{ --g1:var(--king-a1); --g2:var(--king-a2); --g3:var(--king-a3); }

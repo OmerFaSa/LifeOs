@@ -14,6 +14,32 @@
         Bu, PDF'teki "tekil referans araliklari yerine bireysel trend"
         ilkesinin kod karsiligidir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.bio.sistemin-yorum-yaptigi-esigi':'Sistemin yorum yaptığı eşiğin ötesinde. Bu bir teşhis değil, hekime yönlendirmedir.',
+  'spi.core.bio.referans-araliginin-altinda':'Referans aralığının altında (',
+  'spi.core.bio.referans-araliginin-ustunde':'Referans aralığının üstünde (',
+  'spi.core.bio.referans-icinde-ama-hedef-ba':'Referans içinde ama hedef bandın altında. Uyarı değil, iyileştirme alanı.',
+  'spi.core.bio.referans-icinde-ama-hedef-ba-2':'Referans içinde ama hedef bandın üstünde.',
+  'spi.core.bio.hedef-bandin-icinde':'Hedef bandın içinde.',
+  'spi.core.bio.referans-araliginin-icinde':'Referans aralığının içinde.',
+  'spi.core.bio.bu-olcum-hic-girilmemis-sifi':'Bu ölçüm hiç girilmemiş. Sıfır sayılmaz.',
+  'spi.core.bio.egilim-icin-en-az':'Eğilim için en az ',
+  'spi.core.bio.henuz-olcum-yok':'Henüz ölçüm yok.',
+  'spi.core.bio.aclik-glukozu-tanim-geregi-a':'Açlık glukozu tanım gereği aç karnına ölçülür.',
+  'spi.core.bio.aclik-insulini-tanim-geregi':'Açlık insülini tanım gereği aç karnına ölçülür.',
+  'spi.core.bio.trigliserit-yemekten-sonra-s':'Trigliserit yemekten sonra saatlerce yüksek kalır.',
+  'spi.core.bio.aclik-glukozu-ve-insulininde':'Açlık glukozu ve insülininden hesaplanır.',
+  'spi.core.bio.trigliseritten-hesaplanir':'Trigliseritten hesaplanır.',
+  'spi.core.bio.trigliserit-ve-aclik-glukozu':'Trigliserit ve açlık glukozundan hesaplanır.',
+  'spi.core.bio.friedewald-formulu-trigliser':'Friedewald formülü trigliserite dayanır.',
+  'spi.core.bio.kendi-sacilmanin':'Kendi saçılmanın ',
+  'spi.core.bio.kendi-sacilmanin-altinda-kal':'Kendi saçılmanın altında kaldı; ölçüm gürültüsünden ayırt edilemez.',
+  'spi.core.bio.tsh-hipofizin-istegidir-tiro':'TSH hipofizin isteğidir, tiroidin ürettiği hormon değildir; ',
+  'spi.core.bio.tek-bir-gunun-kani-yaniltabi':'Tek bir günün kanı yanıltabilir, ortalama yanıltmaz.',
+  'spi.core.bio.kreatinin-kas-kutlesinden-ve':'Kreatinin kas kütlesinden ve sıvı durumundan etkilenir; kas ',
+  'spi.core.bio.tek-basina-hicbiri-tani-degi':'Tek başına hiçbiri tanı değildir.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.bio.referans-alti':'referans altı',
   'spi.core.bio.referans-ustu':'referans üstü',
   'spi.core.bio.hedefin-alti':'hedefin altı',
@@ -132,20 +158,20 @@ SP.Bio = (function(){
     const unit = b.unit ? ' ' + b.unit : '';
     switch(st.id){
       case 'red':
-        return 'Sistemin yorum yaptığı eşiğin ötesinde. Bu bir teşhis değil, hekime yönlendirmedir.';
+        return yz('spi.core.bio.sistemin-yorum-yaptigi-esigi');
       case 'low':
-        return 'Referans aralığının altında (' + U.fmtNum(r.ref[0]) + unit + ' beklenir).';
+        return yz('spi.core.bio.referans-araliginin-altinda') + U.fmtNum(r.ref[0]) + unit + ' beklenir).';
       case 'high':
-        return 'Referans aralığının üstünde (' + U.fmtNum(r.ref[1]) + unit + ' beklenir).';
+        return yz('spi.core.bio.referans-araliginin-ustunde') + U.fmtNum(r.ref[1]) + unit + ' beklenir).';
       case 'belowOpt':
-        return 'Referans içinde ama hedef bandın altında. Uyarı değil, iyileştirme alanı.';
+        return yz('spi.core.bio.referans-icinde-ama-hedef-ba');
       case 'aboveOpt':
-        return 'Referans içinde ama hedef bandın üstünde.';
+        return yz('spi.core.bio.referans-icinde-ama-hedef-ba-2');
       case 'ok':
-        return r.optimal ? 'Hedef bandın içinde.' : 'Referans aralığının içinde.';
+        return r.optimal ? yz('spi.core.bio.hedef-bandin-icinde') : yz('spi.core.bio.referans-araliginin-icinde');
       default:
         if(r.cinsiyetGerek && value != null) return 'Referans aralığı cinsiyete bağlı: Profil\'de cinsiyet seç.';
-        return 'Bu ölçüm hiç girilmemiş. Sıfır sayılmaz.';
+        return yz('spi.core.bio.bu-olcum-hic-girilmemis-sifi');
     }
   }
 
@@ -167,8 +193,8 @@ SP.Bio = (function(){
 
     if(pts.length < MIN_POINTS){
       return { ok:false, n:pts.length, dir:'flat',
-        note:pts.length ? 'Eğilim için en az ' + MIN_POINTS + ' ölçüm gerekir; ' + pts.length + ' var.'
-                        : 'Henüz ölçüm yok.' };
+        note:pts.length ? yz('spi.core.bio.egilim-icin-en-az') + MIN_POINTS + ' ölçüm gerekir; ' + pts.length + ' var.'
+                        : yz('spi.core.bio.henuz-olcum-yok') };
     }
 
     const t0 = U.parse(pts[0].date);
@@ -342,13 +368,13 @@ SP.Bio = (function(){
        unknown  yorumlanir ama bunu SOYLER — sessizce varsaymaz */
 
   const FASTING_MARKERS = {
-    glucose:'Açlık glukozu tanım gereği aç karnına ölçülür.',
-    insulin:'Açlık insülini tanım gereği aç karnına ölçülür.',
-    trig:'Trigliserit yemekten sonra saatlerce yüksek kalır.',
-    homa:'Açlık glukozu ve insülininden hesaplanır.',
-    tg_hdl:'Trigliseritten hesaplanır.',
-    tyg:'Trigliserit ve açlık glukozundan hesaplanır.',
-    ldl:'Friedewald formülü trigliserite dayanır.',
+    glucose:yz('spi.core.bio.aclik-glukozu-tanim-geregi-a'),
+    insulin:yz('spi.core.bio.aclik-insulini-tanim-geregi'),
+    trig:yz('spi.core.bio.trigliserit-yemekten-sonra-s'),
+    homa:yz('spi.core.bio.aclik-glukozu-ve-insulininde'),
+    tg_hdl:yz('spi.core.bio.trigliseritten-hesaplanir'),
+    tyg:yz('spi.core.bio.trigliserit-ve-aclik-glukozu'),
+    ldl:yz('spi.core.bio.friedewald-formulu-trigliser'),
   };
 
   function needsFasting(markerId){ return !!FASTING_MARKERS[markerId]; }
@@ -447,8 +473,8 @@ SP.Bio = (function(){
     return Object.assign(out, {
       ok:true, sd:base.sd, ratio:U.round(kat, 2), meaningful:anlamli, good:iyi,
       note:anlamli
-        ? 'Kendi saçılmanın ' + U.fmtNum(U.round(kat, 1)) + ' katı — gerçek bir değişim.'
-        : 'Kendi saçılmanın altında kaldı; ölçüm gürültüsünden ayırt edilemez.',
+        ? yz('spi.core.bio.kendi-sacilmanin') + U.fmtNum(U.round(kat, 1)) + ' katı — gerçek bir değişim.'
+        : yz('spi.core.bio.kendi-sacilmanin-altinda-kal'),
       yon,
     });
   }
@@ -492,7 +518,7 @@ SP.Bio = (function(){
       tone:'info',
       title:yz('spi.core.bio.tsh-tek-basina-tiroit-durumu'),
       text:'TSH {tsh} mIU/L bandın dışında ama serbest T4 ölçülmemiş. '
-        + 'TSH hipofizin isteğidir, tiroidin ürettiği hormon değildir; '
+        + yz('spi.core.bio.tsh-hipofizin-istegidir-tiro')
         + 'ikisi birlikte okunur.',
     },
     {
@@ -503,7 +529,7 @@ SP.Bio = (function(){
       title:yz('spi.core.bio.aclik-glukozu-ile-hba1c-ayni'),
       text:'Açlık glukozu {glucose} mg/dL, HbA1c %{hba1c}. Biri bandın '
         + 'içinde diğeri dışında; biri o anı, diğeri son üç ayı ölçer. '
-        + 'Tek bir günün kanı yanıltabilir, ortalama yanıltmaz.',
+        + yz('spi.core.bio.tek-bir-gunun-kani-yaniltabi'),
     },
     {
       id:'kreatinin-egfr',
@@ -512,7 +538,7 @@ SP.Bio = (function(){
       tone:'info',
       title:yz('spi.core.bio.yuksek-kreatinin-normal-suzm'),
       text:'Kreatinin {creat} mg/dL yüksek ama eGFR {egfr} normal sınırda. '
-        + 'Kreatinin kas kütlesinden ve sıvı durumundan etkilenir; kas '
+        + yz('spi.core.bio.kreatinin-kas-kutlesinden-ve')
         + 'kütlesi fazla olanda ya da susuz kalındığında yüksek çıkar.',
     },
     {
@@ -523,7 +549,7 @@ SP.Bio = (function(){
       title:yz('spi.core.bio.alt-yuksek-ve-ast-alt-orani'),
       text:'ALT {alt} U/L yüksek, AST/ALT oranı {deritis}. Bu ikisi '
         + 'birlikte en sık yağlanmayla giden karaciğer tablosunda görülür. '
-        + 'Tek başına hiçbiri tanı değildir.',
+        + yz('spi.core.bio.tek-basina-hicbiri-tani-degi'),
     },
     {
       id:'b12-folat',

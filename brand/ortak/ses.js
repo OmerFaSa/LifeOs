@@ -49,6 +49,29 @@
    türün sonraki istasyonuna geçer; hepsi düşerse bir kez radio-browser'a
    sorulur, o da vermezse «Bu türde şu an çalan istasyon yok». */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.ses.simdi':'Şimdi: ',
+  'ortak.ses.baglaniyor-2':'Bağlanıyor: ',
+  'ortak.ses.dokun-sursun':'Dokun, sürsün: ',
+  'ortak.ses.bu-turde-su-an-calan':'Bu türde şu an çalan istasyon yok',
+  'ortak.ses.baglanti-yok':'Bağlantı yok',
+  'ortak.ses.radyo-ve-sesler-caliyor':'Radyo ve sesler — çalıyor: ',
+  'ortak.ses.radyo-bekliyor-dokun-sursun':'Radyo bekliyor — dokun, sürsün',
+  'ortak.ses.radyo-ve-sesler':'Radyo ve sesler',
+  'ortak.ses.dokun-sursun-2':'Dokun, sürsün',
+  'ortak.ses.radyo':'Radyo',
+  'ortak.ses.sonraki-istasyon':'Sonraki istasyon',
+  'ortak.ses.ses':'Ses',
+  'ortak.ses.tik-sesleri':'Tık sesleri',
+  'ortak.ses.ajanlar-ve-king':'Ajanlar ve King',
+  'ortak.ses.gecis-ve-sayfa':'Geçiş ve sayfa',
+  'ortak.ses.onay-ve-uyari':'Onay ve uyarı',
+  'ortak.ses.minik-konusmasi-ve-gidik':'Minik konuşması ve gıdık',
+  'ortak.ses.minik-adimlari':'Minik adımları',
+  'ortak.ses.king-in-sesi':'King’in sesi',
+  'ortak.ses.ayrinti':'Ayrıntı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.ses.chill':'Chill',
   'ortak.ses.somafm-groove-salad':'SomaFM Groove Salad',
   'ortak.ses.fluxfm-chillhop':'FluxFM Chillhop',
@@ -448,11 +471,11 @@ window.LIFEOS = window.LIFEOS || {};
   function mesaj(){
     const ad = aktif ? aktif.ad : '';
     switch(hal){
-      case 'caliyor':     return 'Şimdi: ' + ad;
-      case 'baglaniyor':  return ad ? 'Bağlanıyor: ' + ad : yz('ortak.ses.baglaniyor');
-      case 'dokun':       return 'Dokun, sürsün: ' + ad;
-      case 'yok':         return 'Bu türde şu an çalan istasyon yok';
-      case 'baglantiyok': return 'Bağlantı yok';
+      case 'caliyor':     return yz('ortak.ses.simdi') + ad;
+      case 'baglaniyor':  return ad ? yz('ortak.ses.baglaniyor-2') + ad : yz('ortak.ses.baglaniyor');
+      case 'dokun':       return yz('ortak.ses.dokun-sursun') + ad;
+      case 'yok':         return yz('ortak.ses.bu-turde-su-an-calan');
+      case 'baglantiyok': return yz('ortak.ses.baglanti-yok');
       default:            return 'Kapalı';
     }
   }
@@ -464,10 +487,10 @@ window.LIFEOS = window.LIFEOS || {};
   /* Kabuğun ♪ düğmesi için: sınıf, erişilebilir ad, ipucu. */
   function dugme(){
     const sinif = hal === 'caliyor' ? ' is-caliyor' : hal === 'baglaniyor' ? ' is-baglaniyor' : hal === 'dokun' ? ' is-dokun' : '';
-    const etiket = hal === 'caliyor' ? 'Radyo ve sesler — çalıyor: ' + (aktif ? aktif.ad : '')
-      : hal === 'dokun' ? 'Radyo bekliyor — dokun, sürsün'
-      : 'Radyo ve sesler';
-    const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Radyo') : hal === 'dokun' ? 'Dokun, sürsün' : 'Radyo';
+    const etiket = hal === 'caliyor' ? yz('ortak.ses.radyo-ve-sesler-caliyor') + (aktif ? aktif.ad : '')
+      : hal === 'dokun' ? yz('ortak.ses.radyo-bekliyor-dokun-sursun')
+      : yz('ortak.ses.radyo-ve-sesler');
+    const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Radyo') : hal === 'dokun' ? yz('ortak.ses.dokun-sursun-2') : 'Radyo';
     /* Kenarda «Radyo» satırının yanında çalan istasyon (2026-10-06). */
     const ad = hal === 'caliyor' && aktif ? aktif.ad : '';
     return { sinif, etiket, ipucu, ad };
@@ -478,7 +501,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   function panelHtml(){
     return '<div class="katman kmenu kmenu--ses" role="dialog" aria-label="Radyo ve sesler" data-ses-panel>'
-      + '<p class="kmenu__bas">Radyo</p>'
+      + ('<p class="kmenu__bas">' + yz('ortak.ses.radyo') + '</p>')
       + '<div class="ses__turler" role="group" aria-label="Tür">'
       +   TURLER.map(t => '<button type="button" class="ses__tur' + (t.id === tercih.tur ? ' is-on' : '') + '" data-ses-tur="' + t.id + '"'
           + ' aria-pressed="' + (t.id === tercih.tur ? 'true' : 'false') + '">' + kac(t.ad) + '</button>').join('')
@@ -486,11 +509,11 @@ window.LIFEOS = window.LIFEOS || {};
       + '<p class="ses__simdi' + (hal === 'caliyor' ? ' is-caliyor' : '') + '" role="status" aria-live="polite">' + kac(mesaj()) + '</p>'
       + '<div class="ses__eylem">'
       +   '<button type="button" class="ses__cal" data-ses="cal">' + (calarMi() ? SIMGE_DUR + 'Durdur' : SIMGE_CAL + 'Çal') + '</button>'
-      +   '<button type="button" class="ses__sonraki" data-ses="sonraki">Sonraki istasyon</button>'
+      +   ('<button type="button" class="ses__sonraki" data-ses="sonraki">' + yz('ortak.ses.sonraki-istasyon') + '</button>')
       + '</div>'
-      + '<label class="ses__duzey"><span>Ses</span>'
+      + ('<label class="ses__duzey"><span>' + yz('ortak.ses.ses') + '</span>')
       +   '<input type="range" min="0" max="100" step="1" value="' + Math.round(tercih.ses * 100) + '" data-ses="duzey" aria-label="Ses düzeyi"></label>'
-      + '<div class="ses__satir"><span id="ses-tik-ad">Tık sesleri</span>'
+      + ('<div class="ses__satir"><span id="ses-tik-ad">' + yz('ortak.ses.tik-sesleri') + '</span>')
       +   '<button type="button" class="ses__anahtar" data-ses="tik" role="switch" aria-labelledby="ses-tik-ad ses-tik-deger"'
       +     ' aria-checked="' + (tercih.tik ? 'true' : 'false') + '"><span id="ses-tik-deger">' + (tercih.tik ? 'Açık' : 'Kapalı') + '</span></button>'
       + '</div>'
@@ -607,8 +630,8 @@ window.LIFEOS = window.LIFEOS || {};
      genel arasında bir çarpan daha. Düzey = genel × grup × aile. */
   const GRUP = Object.freeze({ dokunus:'arayuz', gecis:'arayuz', onay:'arayuz', karakter:'ajan', ortam:'ajan', king:'ajan' });
   const DUZEY_VARSAYILAN = Object.freeze({ genel:1, arayuz:1, ajan:1, dokunus:1, gecis:1, onay:1, karakter:.8, ortam:.7, king:1 });
-  const DUZEY_AD = Object.freeze({ genel:'Genel', arayuz:'Arayüz', ajan:'Ajanlar ve King', dokunus:'Dokunuş', gecis:'Geçiş ve sayfa', onay:'Onay ve uyarı',
-    karakter:'Minik konuşması ve gıdık', ortam:'Minik adımları', king:'King’in sesi' });
+  const DUZEY_AD = Object.freeze({ genel:'Genel', arayuz:'Arayüz', ajan:yz('ortak.ses.ajanlar-ve-king'), dokunus:'Dokunuş', gecis:yz('ortak.ses.gecis-ve-sayfa'), onay:yz('ortak.ses.onay-ve-uyari'),
+    karakter:yz('ortak.ses.minik-konusmasi-ve-gidik'), ortam:yz('ortak.ses.minik-adimlari'), king:yz('ortak.ses.king-in-sesi') });
   function duzeyler(){
     let v = null;
     try{ v = JSON.parse(localStorage.getItem(DUZEY_ANAHTAR) || 'null'); }catch(e){ v = null; }
@@ -669,7 +692,7 @@ window.LIFEOS = window.LIFEOS || {};
     };
     /* Ana kaydırıcı görünür; ailelerin tek tek düzeyi kapalı «Ayrıntı»da. */
     const grup = g => '<div class="sesduzey__grup">' + satir(g)
-      + '<details class="sesduzey__ayrinti"><summary>Ayrıntı</summary>'
+      + ('<details class="sesduzey__ayrinti"><summary>' + yz('ortak.ses.ayrinti') + '</summary>')
       + Object.keys(GRUP).filter(k => GRUP[k] === g).map(satir).join('') + '</details></div>';
     return '<div class="sesduzey" role="group" aria-label="Ses düzeyleri">' + satir('genel') + grup('arayuz') + grup('ajan') + '</div>';
   }

@@ -7,6 +7,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import parca
 
+ONEMLI_TAVAN = 176  # dusurulur, artirilmaz
+
 k = parca.kayit_oku("""# yorum
 [bas]
 css/a.css
@@ -69,5 +71,15 @@ for _d, _ic in ((["js/b.js"], "R.A=1"), (["js/a.js"], "foo()"), (["js/a.js"], "R
         raise AssertionError(_d)
     except SystemExit:
         pass
+# CSS: beyaz ve siyah jetondan gelir; !important sayisi artmaz (tools/css_onemli.js olcer)
+_ham = _re.compile(r"rgba?\(\s*(255|0)\s*,\s*\1\s*,\s*\1\b|#(?:fff|ffffff|000|000000)\b", _re.I)
+_onemli = 0
+for _f in sorted((parca.KOK / "brand" / "ortak").glob("*.css")):
+    _s = _re.sub(r"/\*.*?\*/|url\([^)]*\)|\"[^\"]*\"", "", _f.read_text(encoding="utf-8"), flags=_re.S)
+    if _f.name not in ("jeton.css", "vitrin.css", "fonts.css", "hesap.css"):
+        assert not _ham.search(_s), (_f.name, _ham.search(_s).group(0))
+    if _f.name != "vitrin.css":
+        _onemli += _s.count("!important")
+assert _onemli <= ONEMLI_TAVAN, "!important %d > %d" % (_onemli, ONEMLI_TAVAN)
 assert parca.denetle() == 0
 print("parca_test: tamam")

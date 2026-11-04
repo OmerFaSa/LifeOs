@@ -18,6 +18,11 @@
    yalnız KULLANICININ GÖRDÜĞÜ şeyi söyler; «refaktör» madde değildir.
    `moduller` verilmezse madde üç arayüz için de doğrudur. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.yenilik.ne-degisti':'Ne değişti?',
+  'ortak.yenilik.kapat':'Kapat',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.yenilik.sekiz-cekmece-bugun-plan-cal':'Sekiz çekmece: Bugün, Plan, Çalışma, Analiz, Onaylar, Ofis, Kütüphanem, Ayarlar. Her ekranın yolu sayfanın başında yazar.',
   'ortak.yenilik.onaylar-bekleyen-butun-oneri':'Onaylar: bekleyen bütün öneriler tek yerde; Bugün yalnız en öndekini gösterir.',
   'ortak.yenilik.bugun-uc-alan-simdi-durum':'Bugün üç alan: şimdi, durum ve tek öneri. Geri kalan satırlar «Ayrıntı»da.',
@@ -76,8 +81,8 @@ window.LIFEOS.YENILIK = (function(){
         + '<ul>' + l.map(x => '<li>' + kac(x.metin) + '</li>').join('') + '</ul></div>';
     }).join('');
     return '<section class="yenilik" data-yenilik data-oz="017" aria-labelledby="yenilik-ad">'
-      + '<header class="yenilik__bas"><h2 class="yenilik__ad" id="yenilik-ad">Ne değişti?</h2>'
-      + '<button type="button" class="btn btn--sm" data-yenilik-kapat>Kapat</button></header>'
+      + ('<header class="yenilik__bas"><h2 class="yenilik__ad" id="yenilik-ad">' + yz('ortak.yenilik.ne-degisti') + '</h2>')
+      + ('<button type="button" class="btn btn--sm" data-yenilik-kapat>' + yz('ortak.yenilik.kapat') + '</button></header>')
       + '<div class="yenilik__govde">' + grup + '</div></section>';
   }
 

@@ -43,17 +43,35 @@
      «hatırla: …» · «bunu hatırla: …» · «unutma: …» · «aklında tut: …»
      «hafızam» · «neyi hatırlıyorsun» · «benim hakkımda ne biliyorsun»
      «3 unut» · «#3 unut» · «3 numarayı unut» */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.hafiza.senin-sozun':'Senin sözün',
+  'ortak.hafiza.senin-yazdigin-hicbir-ajan-d':'Senin yazdığın. Hiçbir ajan değiştiremez.',
+  'ortak.hafiza.secimlerinden-ve-konusmalari':'Seçimlerinden ve konuşmalarından kural motorunun kaydettiği tercih.',
+  'ortak.hafiza.kural-motorunun-oruntu-bulgu':'Kural motorunun örüntü bulgusu. Tahmindir; yanlışsa sil.',
+  'ortak.hafiza.hatirlanacak-bir-sey-yazilma':'Hatırlanacak bir şey yazılmamış.',
+  'ortak.hafiza.hafiza-kaydi':'Hafıza kaydı ',
+  'ortak.hafiza.model-hafizaya-yazamaz-yalni':'Model hafızaya yazamaz; yalnız sen ve kural motoru yazar.',
+  'ortak.hafiza.bu-katmana-bu-kaynak-yazamaz':'Bu katmana bu kaynak yazamaz.',
+  'ortak.hafiza.bunu-zaten-hatirliyorum':'Bunu zaten hatırlıyorum.',
+  'ortak.hafiza.boyle-bir-hafiza-kaydi-yok':'Böyle bir hafıza kaydı yok.',
+  'ortak.hafiza.kullanici-hakkinda-hatirlana':'KULLANICI HAKKINDA HATIRLANANLAR (etiketiyle; «tahmin» kesin değildir, ',
+  'ortak.hafiza.henuz-hatirladigim-bir-sey-y':'Henüz hatırladığım bir şey yok. «hatırla: …» diye yazarsan tutarım.',
+  'ortak.hafiza.bearer':'Bearer ',
+  'ortak.hafiza.hatirliyorum':'Hatırlıyorum: «',
+  'ortak.hafiza.unuttum':'Unuttum: «',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
 LIFEOS.Hafiza = (function(){
   const KATMANLAR = {
-    soz:{ ad:'Senin sözün', etiket:'senin sözün',
-      not:'Senin yazdığın. Hiçbir ajan değiştiremez.' },
+    soz:{ ad:yz('ortak.hafiza.senin-sozun'), etiket:'senin sözün',
+      not:yz('ortak.hafiza.senin-yazdigin-hicbir-ajan-d') },
     sohbet:{ ad:'Sohbetten', etiket:'sohbetten',
-      not:'Seçimlerinden ve konuşmalarından kural motorunun kaydettiği tercih.' },
+      not:yz('ortak.hafiza.secimlerinden-ve-konusmalari') },
     cikarim:{ ad:'Çıkarım', etiket:'tahmin',
-      not:'Kural motorunun örüntü bulgusu. Tahmindir; yanlışsa sil.' },
+      not:yz('ortak.hafiza.kural-motorunun-oruntu-bulgu') },
   };
   const KAYNAK_IZNI = { soz:['kullanici'], sohbet:['kullanici', 'kural'], cikarim:['kural'] };
   const MAX_METIN = 600;
@@ -78,16 +96,16 @@ LIFEOS.Hafiza = (function(){
     const metin = temizMetin(k.metin);
     const katman = KATMANLAR[k.katman] ? k.katman : 'soz';
     const kaynak = k.kaynak || 'kullanici';
-    if(!metin) return { ok:false, why:'Hatırlanacak bir şey yazılmamış.' };
-    if(metin.length > MAX_METIN) return { ok:false, why:'Hafıza kaydı ' + MAX_METIN + ' karakteri geçemez.' };
+    if(!metin) return { ok:false, why:yz('ortak.hafiza.hatirlanacak-bir-sey-yazilma') };
+    if(metin.length > MAX_METIN) return { ok:false, why:yz('ortak.hafiza.hafiza-kaydi') + MAX_METIN + ' karakteri geçemez.' };
     if(KAYNAK_IZNI[katman].indexOf(kaynak) < 0){
       return { ok:false, why:kaynak === 'model'
-        ? 'Model hafızaya yazamaz; yalnız sen ve kural motoru yazar.'
-        : 'Bu katmana bu kaynak yazamaz.' };
+        ? yz('ortak.hafiza.model-hafizaya-yazamaz-yalni')
+        : yz('ortak.hafiza.bu-katmana-bu-kaynak-yazamaz') };
     }
     const ayni = l.filter(x => x.durum !== 'unutuldu' && x.katman === katman
       && x.metin.toLocaleLowerCase('tr') === metin.toLocaleLowerCase('tr'))[0];
-    if(ayni) return { ok:false, why:'Bunu zaten hatırlıyorum.', kayit:ayni };
+    if(ayni) return { ok:false, why:yz('ortak.hafiza.bunu-zaten-hatirliyorum'), kayit:ayni };
     const yeni = {
       id:k.id || yeniId(), metin, katman, kaynak,
       kapsam:String(k.kapsam || 'hepsi').slice(0, 24),
@@ -111,7 +129,7 @@ LIFEOS.Hafiza = (function(){
   function unut(liste, id){
     const l = (liste || []).filter(gecerli);
     const k = l.filter(x => x.id === id && x.durum !== 'unutuldu')[0];
-    if(!k) return { ok:false, why:'Böyle bir hafıza kaydı yok.' };
+    if(!k) return { ok:false, why:yz('ortak.hafiza.boyle-bir-hafiza-kaydi-yok') };
     return { ok:true, liste:l.filter(x => x.id !== id), kayit:k };
   }
 
@@ -130,7 +148,7 @@ LIFEOS.Hafiza = (function(){
     const K = (window.LIFEOS || {}).KISI;
     const l = etkin(liste, o.kapsam).filter(x => !o.ajan || !x.alan || !K || K.izinli(x.alan, o.ajan)).slice(-(o.limit || 12));
     if(!l.length) return '';
-    return 'KULLANICI HAKKINDA HATIRLANANLAR (etiketiyle; «tahmin» kesin değildir, '
+    return yz('ortak.hafiza.kullanici-hakkinda-hatirlana')
       + '«senin sözün» kullanıcının kendi cümlesidir, değiştirme):\n'
       + l.map(x => '- (' + KATMANLAR[x.katman].etiket + ') ' + x.metin).join('\n');
   }
@@ -156,7 +174,7 @@ LIFEOS.Hafiza = (function(){
 
   function listeMetni(liste){
     const l = etkin(liste);
-    if(!l.length) return 'Henüz hatırladığım bir şey yok. «hatırla: …» diye yazarsan tutarım.';
+    if(!l.length) return yz('ortak.hafiza.henuz-hatirladigim-bir-sey-y');
     return l.map((x, i) => (i + 1) + '. (' + KATMANLAR[x.katman].etiket + ') ' + x.metin).join('\n')
       + '\n\nBirini silmek için «3 unut» gibi yaz.';
   }
@@ -208,7 +226,7 @@ LIFEOS.Hafiza = (function(){
         try{
           const res = await f(String(a.url).replace(/\/$/, '') + '/api/memory/sync/' + b.MODULE, {
             method:'POST',
-            headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + a.token },
+            headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.hafiza.bearer') + a.token },
             body:JSON.stringify({ items, oturum, sira }),
             signal:ctrl ? ctrl.signal : undefined,
           });
@@ -238,14 +256,14 @@ LIFEOS.Hafiza = (function(){
       if(c.tur === 'liste') return { text:listeMetni(liste()) };
       if(c.tur === 'ekle'){
         const r = await ekleK(c.metin, Object.assign({ katman:'soz', kaynak:'kullanici' }, opts || {}));
-        return { text:r.ok ? 'Hatırlıyorum: «' + r.kayit.metin + '». Silmek istersen «hafızam» de.'
+        return { text:r.ok ? yz('ortak.hafiza.hatirliyorum') + r.kayit.metin + '». Silmek istersen «hafızam» de.'
           : r.why, kayit:r.kayit || null };
       }
       if(c.tur === 'unut'){
         const k = etkin(liste())[c.sira - 1];
         if(!k) return { text:c.sira + ' numaralı bir hafıza kaydı yok. «hafızam» diye bakabilirsin.' };
         await unutK(k.id);
-        return { text:'Unuttum: «' + k.metin + '».' };
+        return { text:yz('ortak.hafiza.unuttum') + k.metin + '».' };
       }
       return null;
     }

@@ -1,6 +1,10 @@
 /* Kalici depolama: ortak depo katmanina (brand/ortak/depo.js) bu modulun ayarlari.
    Davranis orada; burada yalniz anahtarlar, ad ve sema surumu durur. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.store.ayarlar-rehber-veri':'Ayarlar → Rehber → Veri',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.store.spi':'SPİ',
 });
 
@@ -17,5 +21,5 @@ SP.Store = LIFEOS.Depo.kur({
   yerelAnahtar:p => 'spi.v1.' + p,
   ad:yz('spi.core.store.spi'),
   alan:'spi',
-  veriYeri:'Ayarlar → Rehber → Veri',
+  veriYeri:yz('spi.core.store.ayarlar-rehber-veri'),
 });

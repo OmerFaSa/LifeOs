@@ -32,6 +32,25 @@
 
    «Nereden XP kazanırım» bölümü bir GÖREV LİSTESİ DEĞİLDİR: bir
    fiyat listesidir. Aradaki fark, birinin emir kipi kullanması. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.rutbe.kademe-yolu':'Kademe yolu',
+  'esp.rutbe.rutbe-galerisi':'Rütbe galerisi',
+  'esp.rutbe.bugunku-xp':'Bugünkü XP',
+  'esp.rutbe.on-iki-ay':'On iki ay',
+  'esp.rutbe.kusursuz-gunler':'Kusursuz günler',
+  'esp.rutbe.xp-birikmeye-devam-ediyor':'XP birikmeye devam ediyor.',
+  'esp.rutbe.en-ust-rutbe':'En üst rütbe',
+  'esp.rutbe.su-anki-rutben':'Şu anki rütben',
+  'esp.rutbe.ekrani-kapatmaz-isi-bolmez-u':'Ekranı kapatmaz, işi bölmez; üç saniye sonra çekilir.',
+  'esp.rutbe.tam-ekran-kutlama-gec-ve':'Tam ekran kutlama; «Geç» ve Esc her an kapatır. Hareket azaltma açıksa perde hiç açılmaz.',
+  'esp.rutbe.gunluk-tavan-doldu-bu':'Günlük tavan doldu — bu işten bugün daha fazla puan çıkmaz',
+  'esp.rutbe.xp-hicbir-karari-vermez-ne':'XP hiçbir kararı vermez: ne plan, ne uyarı, ne teşhis ona ',
+  'esp.rutbe.bu-bolum-su-an-cizilemedi':'Bu bölüm şu an çizilemedi; defterin yerinde duruyor.',
+  'esp.rutbe.kademe-atlama-sakin-parlamay':'Kademe atlama sakin parlamayla gösterilecek.',
+  'esp.rutbe.kademe-atlama-tam-ekran-perd':'Kademe atlama tam ekran perdeyle gösterilecek.',
+  'esp.rutbe.kademe-merdiven-ve-xp-kaynak':'Kademe, merdiven ve XP kaynakları',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -192,19 +211,19 @@ ESP.Screens.rutbe = (function(){
   /* 142 KADEME YOLU ve 145 GALERİ: katalogdaki altı kademe. */
   function kademeYoluKarti(d){
     if(!VT() || !d || !d.kademeBilgi) return '';
-    return vkutu('Kademe yolu', 'görünürlük', VT().kademeYolu({ kademeler:L().KADEMELER || [], simdi:d.kademe,
+    return vkutu(yz('esp.rutbe.kademe-yolu'), 'görünürlük', VT().kademeYolu({ kademeler:L().KADEMELER || [], simdi:d.kademe,
       etiket:d.kademeBilgi.ad + ' ' + d.etiket + (d.tamam ? '' : ' · ' + tr(d.icinde) + ' / ' + tr(d.gereken)) }));
   }
   function galeriKarti(d){
     if(!VT() || !d || !d.kademe) return '';
-    return vkutu('Rütbe galerisi', 'görünürlük', VT().rutbeGalerisi({ kademeler:L().KADEMELER || [], simdi:d.kademe }));
+    return vkutu(yz('esp.rutbe.rutbe-galerisi'), 'görünürlük', VT().rutbeGalerisi({ kademeler:L().KADEMELER || [], simdi:d.kademe }));
   }
 
   /* 141 XP DÖKÜMÜ: bugünkü XP iş iş (defterin kendi satırları). */
   function xpDokumuKarti(){
     if(!VT()) return '';
     const liste = XP().bugunku().filter(r => r.kazanilan > 0).sort((a, b) => b.kazanilan - a.kazanilan);
-    return vkutu('Bugünkü XP', 'görünürlük', VT().xpDokumu({ sistem:MOD_ADI, satirlar:liste.map(r => ({ ad:r.ad,
+    return vkutu(yz('esp.rutbe.bugunku-xp'), 'görünürlük', VT().xpDokumu({ sistem:MOD_ADI, satirlar:liste.map(r => ({ ad:r.ad,
       adet:r.adet ? r.adet + ' ' + (r.birim || '') : '', xp:r.kazanilan })) }));
   }
 
@@ -237,7 +256,7 @@ ESP.Screens.rutbe = (function(){
         gun:x ? x.gun || 0 : 0, dakika:x ? x.dakika : null,
         gunSayisi:new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate() });
     }
-    return vkutu('On iki ay', 'ölçüldü', VT().ayOzeti({ aylar, modul:MOD_ADI }));
+    return vkutu(yz('esp.rutbe.on-iki-ay'), 'ölçüldü', VT().ayOzeti({ aylar, modul:MOD_ADI }));
   }
 
   /* 148 KUSURSUZ GÜNLER: ayın sayısı ay özetinden; takvim penceredeki günler. */
@@ -254,7 +273,7 @@ ESP.Screens.rutbe = (function(){
       const x = g[iso];
       pencere.push({ ad:iso, aktif:!!(x && (x.dakika || x.gorev)), kusursuz:!!(x && x.kusursuz), bugun:i === 0 });
     }
-    return vkutu('Kusursuz günler', 'ölçüldü', VT().kusursuzGunler({ sayi:bu.kusursuz || 0, aktif:bu.gun || 0,
+    return vkutu(yz('esp.rutbe.kusursuz-gunler'), 'ölçüldü', VT().kusursuzGunler({ sayi:bu.kusursuz || 0, aktif:bu.gun || 0,
       ay:AY_UZUN[n.getMonth()], gunler:pencere, modul:MOD_ADI }));
   }
 
@@ -275,7 +294,7 @@ ESP.Screens.rutbe = (function(){
 
     const ilerleme = d.tamam
       ? K.Notice({ tone:'ok', title:yz('esp.rutbe.en-ust-basamaktasin'),
-          body:'XP birikmeye devam ediyor.' })
+          body:yz('esp.rutbe.xp-birikmeye-devam-ediyor') })
       : K.Meter({ label:yz('esp.rutbe.bu-basamakta'), value:Math.round(d.oran * 100),
           text:tr(d.icinde) + ' / ' + tr(d.gereken) + ' XP',
           note:yz('esp.rutbe.bir-sonraki-basamaga') + tr(d.kalan) + ' XP' });
@@ -312,7 +331,7 @@ ESP.Screens.rutbe = (function(){
             <span class="rutbe-kart__no" aria-hidden="true">${d.etiket}</span>
           </div>
           <div class="rutbe-kart__sag">
-            <span class="rutbe-kart__ust">${d.tamam ? 'En üst rütbe' : 'Şu anki rütben'}</span>
+            <span class="rutbe-kart__ust">${d.tamam ? yz('esp.rutbe.en-ust-rutbe') : yz('esp.rutbe.su-anki-rutben')}</span>
             <!-- h2, h3 degil: ustunde ekranin h1'inden baska baslik yok.
                  K.Card kendi basligini h3 yazar; burasi h3 olsaydi
                  h1'den h3'e atlardik ve a11ycheck bunu yakalar. -->
@@ -372,8 +391,8 @@ ESP.Screens.rutbe = (function(){
         items:[{ value:'perde', label:yz('esp.rutbe.tam-ekran-perde') }, { value:'sakin', label:yz('esp.rutbe.sakin-parlama') }] })}
         ${when(t === 'sakin' && V && V.sakinSeviye && k, () => html`<div class="rutbe-sakin-ornek mt-12">${raw(V.sakinSeviye({
           ust:yz('esp.rutbe.ornek'), ad:k.ad + ' ' + d.etiket, sistem:'esp', renk:k.id }).replace('vk vk-sakin', 'vk'))}</div>`)}
-        <p class="tiny dim mt-8">${t === 'sakin' ? 'Ekranı kapatmaz, işi bölmez; üç saniye sonra çekilir.'
-          : 'Tam ekran kutlama; «Geç» ve Esc her an kapatır. Hareket azaltma açıksa perde hiç açılmaz.'}</p>` });
+        <p class="tiny dim mt-8">${t === 'sakin' ? yz('esp.rutbe.ekrani-kapatmaz-isi-bolmez-u')
+          : yz('esp.rutbe.tam-ekran-kutlama-gec-ve')}</p>` });
   }
 
   /* BU KADEMEDE NEREDESİN — kademenin kendi basamakları, tek şeritte.
@@ -506,7 +525,7 @@ ESP.Screens.rutbe = (function(){
         label:r.ad + (r.adet ? ' · ' + r.adet + ' ' + r.birim : ''),
         value:Math.round(r.oran * 100),
         text:tr(r.kazanilan) + ' / ' + tr(r.tavan) + ' XP',
-        note:r.doldu ? 'Günlük tavan doldu — bu işten bugün daha fazla puan çıkmaz' : null,
+        note:r.doldu ? yz('esp.rutbe.gunluk-tavan-doldu-bu') : null,
         tone:r.doldu ? 'ok' : null,
       })), 'sm') });
   }
@@ -916,7 +935,7 @@ ESP.Screens.rutbe = (function(){
     return K.Stack([
       K.Notice({ tone:'info',
         title:yz('esp.rutbe.bu-bir-fiyat-listesidir-gore'),
-        body:'XP hiçbir kararı vermez: ne plan, ne uyarı, ne teşhis ona '
+        body:yz('esp.rutbe.xp-hicbir-karari-vermez-ne')
            + 'bakar. Aşağıdakiler yalnızca «hangi iş ne kazandırır» '
            + 'sorusunun cevabıdır.' }),
 
@@ -1028,7 +1047,7 @@ ESP.Screens.rutbe = (function(){
     try{ return (TAB_BODY[t.id] || simdiTab)(); }
     catch(e){
       console.error('Rütbe bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; defterin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('esp.rutbe.bu-bolum-su-an-cizilemedi') });
     }
   }
 
@@ -1047,7 +1066,7 @@ ESP.Screens.rutbe = (function(){
       if(!P || !P.kutlamaYaz) return;
       const once = P.kutlamaTercihi();
       P.kutlamaYaz(el.dataset.value);
-      ESP.UI.toast(el.dataset.value === 'sakin' ? 'Kademe atlama sakin parlamayla gösterilecek.' : 'Kademe atlama tam ekran perdeyle gösterilecek.',
+      ESP.UI.toast(el.dataset.value === 'sakin' ? yz('esp.rutbe.kademe-atlama-sakin-parlamay') : yz('esp.rutbe.kademe-atlama-tam-ekran-perd'),
         { undo:() => { P.kutlamaYaz(once); ESP.App.render(); } });
       ESP.App.render();
     },
@@ -1071,7 +1090,7 @@ ESP.Screens.rutbe = (function(){
     title:yz('esp.rutbe.rutbe'),
     subtitle(){
       const d = ESP.XP && ESP.XP.durum();
-      if(!d || !d.kademeBilgi) return 'Kademe, merdiven ve XP kaynakları';
+      if(!d || !d.kademeBilgi) return yz('esp.rutbe.kademe-merdiven-ve-xp-kaynak');
       return d.kademeBilgi.ad + ' ' + d.etiket + ' · ' + tr(d.toplam) + ' XP';
     },
     actions(){ return ''; },

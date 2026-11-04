@@ -16,6 +16,57 @@
 
    Korelasyon nedensellik degildir ve oyle sunulmaz: bulgu daima "birlikte
    hareket ediyor" diliyle yazilir, "sebep oldu" diliyle degil. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.calc.profilde-kilo-yok':'Profilde kilo yok',
+  'spi.core.calc.kirmizi-bayrak':'Kırmızı bayrak',
+  'spi.core.calc.hekime-basvur-ve-bayragi-gor':'Hekime başvur ve bayrağı gördüğünü işaretle.',
+  'spi.core.calc.bugun-antrenman-yok':'Bugün antrenman yok',
+  'spi.core.calc.yuku-sifirla-dinlen':'Yükü sıfırla, dinlen.',
+  'spi.core.calc.yuk-alistiginin-ustunde':'Yük alıştığının üstünde',
+  'spi.core.calc.bu-hafta-yuku-indir':'Bu hafta yükü indir.',
+  'spi.core.calc.bugunun-olcumu-girilmedi':'Bugünün ölçümü girilmedi',
+  'spi.core.calc.toparlanma-skoru-en-az-uyku':'Toparlanma skoru en az uyku süresiyle hesaplanır; onsuz günün yükü körlemesine verilir.',
+  'spi.core.calc.uyku-ve-nabzi-gir':'Uyku ve nabzı gir.',
+  'spi.core.calc.tahlil-sonucunu-gir':'Tahlil sonucunu gir.',
+  'spi.core.calc.son-7-gunun-ortalamasi-hedef':'Son 7 günün ortalaması hedefin altında.',
+  'spi.core.calc.kaynaklari-gor-ve-ogune-ekle':'Kaynakları gör ve öğüne ekle.',
+  'spi.core.calc.bugun-hic-ogun-girilmedi':'Bugün hiç öğün girilmedi',
+  'spi.core.calc.girilmemis-gun-ortalamaya-ka':'Girilmemiş gün ortalamaya katılmaz; kayıt olmadan açık da görülmez.',
+  'spi.core.calc.ogunu-sesli-ya-da-yazarak':'Öğünü sesli ya da yazarak ekle.',
+  'spi.core.calc.bugunun-antrenmani':'Bugünün antrenmanı',
+  'spi.core.calc.toparlanma-uygun':'Toparlanma uygun.',
+  'spi.core.calc.seansi-baslat':'Seansı başlat.',
+  'spi.core.calc.sepet-gozden-gecirilmeli':'Sepet gözden geçirilmeli',
+  'spi.core.calc.i-kame-onerilerine-bak':'İkame önerilerine bak.',
+  'spi.core.calc.siradaki-hamle-yok':'Sıradaki hamle yok',
+  'spi.core.calc.bayrak-yok-olcum-guncel-acik':'Bayrak yok, ölçüm güncel, açık yok ve günün yükü tamam.',
+  'spi.core.calc.serilerden-biri-hic-degismiy':'Serilerden biri hiç değişmiyor.',
+  'spi.core.calc.uyku-ve-toparlanma':'Uyku ve toparlanma',
+  'spi.core.calc.uzun-uyudugun-gunlerde-hrv-y':'Uzun uyuduğun günlerde HRV yükseliyor.',
+  'spi.core.calc.uyku-suresiyle-hrv-ters-hare':'Uyku süresiyle HRV ters hareket ediyor; ölçüm saatini kontrol et.',
+  'spi.core.calc.yuk-ve-ertesi-gun-toparlanma':'Yük ve ertesi gün toparlanması',
+  'spi.core.calc.agir-yuklenilen-gunlerde-top':'Ağır yüklenilen günlerde toparlanma skoru da yüksek — yük taşınıyor.',
+  'spi.core.calc.agir-gunlerde-toparlanma-bel':'Ağır günlerde toparlanma belirgin düşüyor; yük bandın üstünde.',
+  'spi.core.calc.protein-ve-toparlanma':'Protein ve toparlanma',
+  'spi.core.calc.protein-aldigin-gunlerde-top':'Protein aldığın günlerde toparlanma daha iyi.',
+  'spi.core.calc.protein-ile-toparlanma-arasi':'Protein ile toparlanma arasında ters bir hareket var.',
+  'spi.core.calc.sodyum-ve-tansiyon':'Sodyum ve tansiyon',
+  'spi.core.calc.tuz-aliminin-yuksek-oldugu-g':'Tuz alımının yüksek olduğu günlerde sistolik tansiyon da yükseliyor.',
+  'spi.core.calc.sodyum-ile-tansiyon-arasinda':'Sodyum ile tansiyon arasında beklenen yönde bir hareket görünmüyor.',
+  'spi.core.calc.kalori-ve-kilo':'Kalori ve kilo',
+  'spi.core.calc.kalori-alimi-ile-kilo-ayni':'Kalori alımı ile kilo aynı yönde hareket ediyor.',
+  'spi.core.calc.kalori-ile-kilo-ters-hareket':'Kalori ile kilo ters hareket ediyor; tartım koşulları değişiyor olabilir.',
+  'spi.core.calc.uyku-ve-istah':'Uyku ve iştah',
+  'spi.core.calc.az-uyudugun-gunlerde-kalori':'Az uyuduğun günlerde kalori alımı artıyor.',
+  'spi.core.calc.uyku-ile-kalori-arasinda-bel':'Uyku ile kalori arasında belirgin bir bağ yok.',
+  'spi.core.calc.ortak-gun-sayisi-yetersiz':'Ortak gün sayısı yetersiz (',
+  'spi.core.calc.i-ki-olcum-de-ayni-gunlerde':'İki ölçüm de aynı günlerde girilmeli.',
+  'spi.core.calc.belirgin-bir-birliktelik-yok':'Belirgin bir birliktelik yok (r=',
+  'spi.core.calc.hafta-icin-yeterli-kayit-yok':'Hafta için yeterli kayıt yok.',
+  'spi.core.calc.hafta-temiz':'Hafta temiz: ',
+  'spi.core.calc.hafta-zorlandi':'Hafta zorlandı: ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -38,7 +89,7 @@ SP.Calc = (function(){
       { id:'protein', label:SP.MINIMUM_DAY.protein,
         ok:proteinFloor != null && totals.protein >= proteinFloor,
         known:proteinFloor != null && !totals.empty,
-        detail:proteinFloor == null ? 'Profilde kilo yok'
+        detail:proteinFloor == null ? yz('spi.core.calc.profilde-kilo-yok')
           : Math.round(totals.protein) + ' / ' + proteinFloor + ' g' },
       { id:'water', label:SP.MINIMUM_DAY.water,
         ok:(v.water || 0) >= 2000, known:v.water != null,
@@ -98,33 +149,33 @@ SP.Calc = (function(){
     const flags = SP.Model.openFlags().filter(f => !f.ack);
     if(flags.length){
       return { id:'flag', rank:1, tone:'danger', icon:'warn',
-        label:'Kırmızı bayrak', title:flags[0].label,
+        label:yz('spi.core.calc.kirmizi-bayrak'), title:flags[0].label,
         why:flags[0].detail, route:'labs',
-        action:'Hekime başvur ve bayrağı gördüğünü işaretle.' };
+        action:yz('spi.core.calc.hekime-basvur-ve-bayragi-gor') };
     }
 
     /* 2 — guvenlik: asiri yuklenme ve ates */
     const rx = SP.Move.prescription(d);
     if(rx.readiness.ok && rx.readiness.override){
       return { id:'override', rank:2, tone:'danger', icon:'heart',
-        label:'Güvenlik', title:'Bugün antrenman yok',
+        label:'Güvenlik', title:yz('spi.core.calc.bugun-antrenman-yok'),
         why:rx.readiness.override.why, route:'move',
-        action:'Yükü sıfırla, dinlen.' };
+        action:yz('spi.core.calc.yuku-sifirla-dinlen') };
     }
     if(rx.acwr.ok && rx.acwr.zone === 'high'){
       return { id:'overreach', rank:2, tone:'warn', icon:'dumbbell',
-        label:'Güvenlik', title:'Yük alıştığının üstünde',
+        label:'Güvenlik', title:yz('spi.core.calc.yuk-alistiginin-ustunde'),
         why:rx.acwr.note + ' Oran ' + U.fmtNet(rx.acwr.ratio) + '.', route:'move',
-        action:'Bu hafta yükü indir.' };
+        action:yz('spi.core.calc.bu-hafta-yuku-indir') };
     }
 
     /* 3 — olcum borcu */
     const v = SP.S.vitals[d];
     if(!v || v.sleep == null){
       return { id:'vitals', rank:3, tone:'info', icon:'pulse',
-        label:'Ölçüm', title:'Bugünün ölçümü girilmedi',
-        why:'Toparlanma skoru en az uyku süresiyle hesaplanır; onsuz günün yükü körlemesine verilir.',
-        route:'today', action:'Uyku ve nabzı gir.' };
+        label:'Ölçüm', title:yz('spi.core.calc.bugunun-olcumu-girilmedi'),
+        why:yz('spi.core.calc.toparlanma-skoru-en-az-uyku'),
+        route:'today', action:yz('spi.core.calc.uyku-ve-nabzi-gir') };
     }
     const due = SP.Bio.overdue();
     if(due.length){
@@ -132,7 +183,7 @@ SP.Calc = (function(){
         label:'Ölçüm', title:(/paneli$/i.test(due[0].panel.name)
           ? due[0].panel.name : due[0].panel.name + ' paneli') + ' bekliyor',
         why:due[0].note + ' Eğilim okumak için düzenli aralık gerekir.',
-        route:'labs', action:'Tahlil sonucunu gir.' };
+        route:'labs', action:yz('spi.core.calc.tahlil-sonucunu-gir') };
     }
 
     /* 4 — besin acigi */
@@ -141,36 +192,36 @@ SP.Calc = (function(){
       const worst = g.rows[0];
       return { id:'gap', rank:4, tone:'warn', icon:'leaf',
         label:'Beslenme', title:worst.nutrient.name + ' hedefin %' + worst.pct + '\'inde',
-        why:(worst.why ? worst.why + ' ' : '') + 'Son 7 günün ortalaması hedefin altında.',
-        route:'meals', action:'Kaynakları gör ve öğüne ekle.' };
+        why:(worst.why ? worst.why + ' ' : '') + yz('spi.core.calc.son-7-gunun-ortalamasi-hedef'),
+        route:'meals', action:yz('spi.core.calc.kaynaklari-gor-ve-ogune-ekle') };
     }
     if(!SP.Model.mealsOf(d).length){
       return { id:'meal', rank:4, tone:'info', icon:'meal',
-        label:'Beslenme', title:'Bugün hiç öğün girilmedi',
-        why:'Girilmemiş gün ortalamaya katılmaz; kayıt olmadan açık da görülmez.',
-        route:'meals', action:'Öğünü sesli ya da yazarak ekle.' };
+        label:'Beslenme', title:yz('spi.core.calc.bugun-hic-ogun-girilmedi'),
+        why:yz('spi.core.calc.girilmemis-gun-ortalamaya-ka'),
+        route:'meals', action:yz('spi.core.calc.ogunu-sesli-ya-da-yazarak') };
     }
 
     /* 5 — antrenman */
     if(rx.kind !== 'rest' && !rx.done){
       const t = rx.suggest[0];
       return { id:'workout', rank:5, tone:'ok', icon:'dumbbell',
-        label:'Hareket', title:t ? t.name : 'Bugünün antrenmanı',
-        why:rx.reasons.length ? rx.reasons[0].text : 'Toparlanma uygun.',
-        route:'move', action:'Seansı başlat.' };
+        label:'Hareket', title:t ? t.name : yz('spi.core.calc.bugunun-antrenmani'),
+        why:rx.reasons.length ? rx.reasons[0].text : yz('spi.core.calc.toparlanma-uygun'),
+        route:'move', action:yz('spi.core.calc.seansi-baslat') };
     }
 
     /* 6 — butce */
     const m = SP.Money.status();
     if(m.tone === 'warn'){
       return { id:'budget', rank:6, tone:'warn', icon:'wallet',
-        label:'Bütçe', title:'Sepet gözden geçirilmeli',
-        why:m.text, route:'basket', action:'İkame önerilerine bak.' };
+        label:'Bütçe', title:yz('spi.core.calc.sepet-gozden-gecirilmeli'),
+        why:m.text, route:'basket', action:yz('spi.core.calc.i-kame-onerilerine-bak') };
     }
 
     return { id:'calm', rank:99, tone:'ok', icon:'check', calm:true,
-      label:'Bugün', title:'Sıradaki hamle yok',
-      why:'Bayrak yok, ölçüm güncel, açık yok ve günün yükü tamam.',
+      label:'Bugün', title:yz('spi.core.calc.siradaki-hamle-yok'),
+      why:yz('spi.core.calc.bayrak-yok-olcum-guncel-acik'),
       route:'today', action:'' };
   }
 
@@ -191,7 +242,7 @@ SP.Calc = (function(){
       const a = xs[i] - mx, b = ys[i] - my;
       num += a * b; dx += a * a; dy += b * b;
     }
-    if(!dx || !dy) return { ok:false, n, note:'Serilerden biri hiç değişmiyor.' };
+    if(!dx || !dy) return { ok:false, n, note:yz('spi.core.calc.serilerden-biri-hic-degismiy') };
     const r = num / Math.sqrt(dx * dy);
     /* BELİRGİNLİK GÜN SAYISINA BAĞLI (analiz denetimi, 2026-10-17). Eşik
        sabit 0,3 idi: birbirinden bağımsız iki ölçümde |r| ≥ 0,3, 10 günde
@@ -242,31 +293,31 @@ SP.Calc = (function(){
      yonu ve bulgunun nasil yazilacagini tasir. */
   const LINKS = [
     { id:'sleep-hrv', a:'sleep', b:'hrv', expect:'+',
-      title:'Uyku ve toparlanma',
-      pos:'Uzun uyuduğun günlerde HRV yükseliyor.',
-      neg:'Uyku süresiyle HRV ters hareket ediyor; ölçüm saatini kontrol et.' },
+      title:yz('spi.core.calc.uyku-ve-toparlanma'),
+      pos:yz('spi.core.calc.uzun-uyudugun-gunlerde-hrv-y'),
+      neg:yz('spi.core.calc.uyku-suresiyle-hrv-ters-hare') },
     /* gecikme 1: başlık «ertesi gün» diyor; önce aynı günün toparlanması
        (sabah, yükten ÖNCE ölçülen) ile o günün yükü karşılaştırılıyordu. */
     { id:'load-readiness', a:'load', b:'readiness', expect:'-', gecikme:1,
-      title:'Yük ve ertesi gün toparlanması',
-      pos:'Ağır yüklenilen günlerde toparlanma skoru da yüksek — yük taşınıyor.',
-      neg:'Ağır günlerde toparlanma belirgin düşüyor; yük bandın üstünde.' },
+      title:yz('spi.core.calc.yuk-ve-ertesi-gun-toparlanma'),
+      pos:yz('spi.core.calc.agir-yuklenilen-gunlerde-top'),
+      neg:yz('spi.core.calc.agir-gunlerde-toparlanma-bel') },
     { id:'protein-readiness', a:'protein', b:'readiness', expect:'+',
-      title:'Protein ve toparlanma',
-      pos:'Protein aldığın günlerde toparlanma daha iyi.',
-      neg:'Protein ile toparlanma arasında ters bir hareket var.' },
+      title:yz('spi.core.calc.protein-ve-toparlanma'),
+      pos:yz('spi.core.calc.protein-aldigin-gunlerde-top'),
+      neg:yz('spi.core.calc.protein-ile-toparlanma-arasi') },
     { id:'sodium-bp', a:'sodium', b:'sbp', expect:'+',
-      title:'Sodyum ve tansiyon',
-      pos:'Tuz alımının yüksek olduğu günlerde sistolik tansiyon da yükseliyor.',
-      neg:'Sodyum ile tansiyon arasında beklenen yönde bir hareket görünmüyor.' },
+      title:yz('spi.core.calc.sodyum-ve-tansiyon'),
+      pos:yz('spi.core.calc.tuz-aliminin-yuksek-oldugu-g'),
+      neg:yz('spi.core.calc.sodyum-ile-tansiyon-arasinda') },
     { id:'kcal-weight', a:'kcal', b:'weight', expect:'+',
-      title:'Kalori ve kilo',
-      pos:'Kalori alımı ile kilo aynı yönde hareket ediyor.',
-      neg:'Kalori ile kilo ters hareket ediyor; tartım koşulları değişiyor olabilir.' },
+      title:yz('spi.core.calc.kalori-ve-kilo'),
+      pos:yz('spi.core.calc.kalori-alimi-ile-kilo-ayni'),
+      neg:yz('spi.core.calc.kalori-ile-kilo-ters-hareket') },
     { id:'sleep-kcal', a:'sleep', b:'kcal', expect:'-',
-      title:'Uyku ve iştah',
-      pos:'Az uyuduğun günlerde kalori alımı artıyor.',
-      neg:'Uyku ile kalori arasında belirgin bir bağ yok.' },
+      title:yz('spi.core.calc.uyku-ve-istah'),
+      pos:yz('spi.core.calc.az-uyudugun-gunlerde-kalori'),
+      neg:yz('spi.core.calc.uyku-ile-kalori-arasinda-bel') },
   ];
 
   function crossFindings(days){
@@ -280,13 +331,13 @@ SP.Calc = (function(){
       const c = correlate(pairs);
       if(!c.ok){
         return { link, ok:false, n:c.n,
-          note:'Ortak gün sayısı yetersiz (' + c.n + '/' + MIN_PAIRS + '). '
-             + 'İki ölçüm de aynı günlerde girilmeli.' };
+          note:yz('spi.core.calc.ortak-gun-sayisi-yetersiz') + c.n + '/' + MIN_PAIRS + '). '
+             + yz('spi.core.calc.i-ki-olcum-de-ayni-gunlerde') };
       }
       /* Zayif ya da gun sayisina gore rastlanti duzeyindeki katsayi bulgu sayilmaz. */
       if(!c.belirgin){
         return { link, ok:true, weak:true, r:c.r, n:c.n,
-          tone:'muted', text:'Belirgin bir birliktelik yok (r=' + U.fmtNet(c.r) + ', ' + c.n + ' gün; '
+          tone:'muted', text:yz('spi.core.calc.belirgin-bir-birliktelik-yok') + U.fmtNet(c.r) + ', ' + c.n + ' gün; '
             + c.n + ' günde rastlantıdan ayırmak için |r| ≥ ' + U.fmtNet(c.esik) + ' gerekir).' };
       }
       const matches = link.expect === '+' ? c.r > 0 : c.r < 0;
@@ -354,15 +405,15 @@ SP.Calc = (function(){
     }
     (r.discipline.minDays >= 5 ? wins : losses).push('asgari gün ' + r.discipline.minDays + '/7');
 
-    if(!wins.length && !losses.length) return 'Hafta için yeterli kayıt yok.';
+    if(!wins.length && !losses.length) return yz('spi.core.calc.hafta-icin-yeterli-kayit-yok');
     if(wins.length && losses.length){
       /* Celiskiyi tek cumlede tut: once kaybedilen, sonra "fakat" ile kazanilan.
          Rapor iyi haberi kotu haberin arkasina saklamaz. */
       const lead = losses[0].charAt(0).toLocaleUpperCase('tr-TR') + losses[0].slice(1);
       return lead + ' fakat ' + wins.join(' ve ') + '.';
     }
-    if(wins.length) return 'Hafta temiz: ' + wins.join(' · ') + '.';
-    return 'Hafta zorlandı: ' + losses.join(' · ') + '.';
+    if(wins.length) return yz('spi.core.calc.hafta-temiz') + wins.join(' · ') + '.';
+    return yz('spi.core.calc.hafta-zorlandi') + losses.join(' · ') + '.';
   }
 
   return {

@@ -30,6 +30,15 @@
       duzeldi" denmez. Iki pencere arasinda bir suru sey degisir. Sistem
       yalnizca sirayi gosterir; yorumu kullaniciya birakir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.signals.son-iki-haftada-gunde':'Son iki haftada günde ',
+  'ays.core.signals.acik-sinyal-bulunamadi':'Açık sinyal bulunamadı.',
+  'ays.core.signals.kullanici-bu-soruyu-gecerli':'Kullanıcı bu soruyu geçerli bulmadı.',
+  'ays.core.signals.kapanmis':'Kapanmış ',
+  'ays.core.signals.cevaplanan':'Cevaplanan ',
+  'ays.core.signals.gorulmeyen-bir-denetim-denet':'Görülmeyen bir denetim, denetim değildir.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.signals.sistemde-gecen-sure':'Sistemde geçen süre',
   'ays.core.signals.henuz-yeterli-sinyal-uretilm':'Henüz yeterli sinyal üretilmedi; bu sayfanın gerekliliği ',
   'ays.core.signals.uretilen':'Üretilen ',
@@ -154,7 +163,7 @@ R.Signals = (function(){
         || sonKapanis('friction') >= SOGUMA_GUN)){
       const sig = norm({ kind:'friction', ref:'friction',
         title:yz('ays.core.signals.sistemde-gecen-sure'),
-        question:'Son iki haftada günde ' + f.window.perDay + ' dakika sistemi '
+        question:yz('ays.core.signals.son-iki-haftada-gunde') + f.window.perDay + ' dakika sistemi '
           + 'yönetmekle geçti. Hangi kaydı bırakmak çalışmanı bozmaz?',
         snapshot:{ perDay:f.window.perDay, ratio:f.window.ratio } });
       await save(sig);
@@ -181,7 +190,7 @@ R.Signals = (function(){
      bir sonraki pencerede ölçülecek. Cevap yalnızca zincire yazılır. */
   async function answer(id, text){
     const s = open().filter(x => x.id === id)[0];
-    if(!s) return { ok:false, error:'Açık sinyal bulunamadı.' };
+    if(!s) return { ok:false, error:yz('ays.core.signals.acik-sinyal-bulunamadi') };
     s.answeredAt = new Date().toISOString();
     s.answer = String(text || '').slice(0, 400);
     s.status = 'open';
@@ -196,7 +205,7 @@ R.Signals = (function(){
     if(!s) return { ok:false };
     s.status = 'resolved';
     s.answeredAt = s.answeredAt || new Date().toISOString();
-    s.answer = String(why || 'Kullanıcı bu soruyu geçerli bulmadı.').slice(0, 400);
+    s.answer = String(why || yz('ays.core.signals.kullanici-bu-soruyu-gecerli')).slice(0, 400);
     s.closedAt = new Date().toISOString();
     s.outcome = 'dismissed';
     await save(s);
@@ -239,7 +248,7 @@ R.Signals = (function(){
        yapmaktir. */
     const ASGARI = 5;
     if(kapali.length < ASGARI){
-      out.note = 'Kapanmış ' + kapali.length + ' sinyal var; karşılaştırma için '
+      out.note = yz('ays.core.signals.kapanmis') + kapali.length + ' sinyal var; karşılaştırma için '
         + ASGARI + ' gerekir. Nöbetçinin işe yarayıp yaramadığı henüz ölçülmedi '
         + '— ve ölçülmeden «yarıyor» denmez.';
       return out;
@@ -248,7 +257,7 @@ R.Signals = (function(){
     const oran = (a, n) => n ? Math.round(100 * a / n) : null;
     out.answeredRate = oran(out.realignedAfterAnswer, cevaplanan.length);
     out.unansweredRate = oran(out.realignedWithoutAnswer, cevapsiz.length);
-    out.note = 'Cevaplanan ' + cevaplanan.length + ' sinyalin %'
+    out.note = yz('ays.core.signals.cevaplanan') + cevaplanan.length + ' sinyalin %'
       + (out.answeredRate == null ? '—' : out.answeredRate) + '\'inde ayrışma '
       + 'sonraki pencerede kapandı; cevaplanmayan ' + cevapsiz.length
       + ' sinyalde bu oran %' + (out.unansweredRate == null ? '—' : out.unansweredRate)
@@ -271,7 +280,7 @@ R.Signals = (function(){
     if(e.seen === 0){
       return { level:'unused',
         text:yz('ays.core.signals.uretilen') + e.opened + ' sinyalin hiçbiri görülmemiş. '
-           + 'Görülmeyen bir denetim, denetim değildir.' };
+           + yz('ays.core.signals.gorulmeyen-bir-denetim-denet') };
     }
     if(e.answered === 0){
       return { level:'ignored',

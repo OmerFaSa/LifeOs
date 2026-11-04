@@ -5,6 +5,233 @@
    Parça 5/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.king-kart.konu-anlat':'Konu anlat',
+  'ortak.king-kart.modulun-anlatimi-bolum-bolum':'Modülün anlatımı bölüm bölüm; sonunda soru',
+  'ortak.king-kart.i-statistik-kartlari':'İstatistik kartları',
+  'ortak.king-kart.modulun-sayilari-kart-olarak':'Modülün sayıları kart olarak',
+  'ortak.king-kart.bana-soru-sor':'Bana soru sor',
+  'ortak.king-kart.modulun-bankasindan-soru-kar':'Modülün bankasından soru kartı; şıklar düğme',
+  'ortak.king-kart.konudan-soru':'Konudan soru',
+  'ortak.king-kart.belirli-bir-konudan-soru':'Belirli bir konudan soru',
+  'ortak.king-kart.neye-calisayim':'Neye çalışayım',
+  'ortak.king-kart.oncelik-sirasi-ve-nedeni':'Öncelik sırası ve nedeni',
+  'ortak.king-kart.yuk-durumum':'Yük durumum',
+  'ortak.king-kart.son-7-gun-ile-onceki':'Son 7 gün ile önceki 7 gün',
+  'ortak.king-kart.kaynakli-ozet-videolar-okuna':'Kaynaklı özet, videolar, okunacaklar',
+  'ortak.king-kart.arka-planda-arastir':'Arka planda araştır',
+  'ortak.king-kart.ekibe-verilir-sen-konusmaya':'Ekibe verilir, sen konuşmaya devam edersin',
+  'ortak.king-kart.notlarimda-ara':'Notlarımda ara',
+  'ortak.king-kart.defter-deki-notlarina-dayana':'Defter’deki notlarına dayanarak',
+  'ortak.king-kart.derse-cevir':'Derse çevir',
+  'ortak.king-kart.pdf-ya-da-metinden-kaynakli':'PDF ya da metinden kaynaklı ders ve sorular',
+  'ortak.king-kart.derslerimden-soru':'Derslerimden soru',
+  'ortak.king-kart.kendi-derslerinden-tekrar-ta':'Kendi derslerinden, tekrar takvimiyle',
+  'ortak.king-kart.bugunun-ozeti':'Bugünün özeti',
+  'ortak.king-kart.bu-modulde-bugun-ne-var':'Bu modülde bugün ne var',
+  'ortak.king-kart.odak-sayaci':'Odak sayacı',
+  'ortak.king-kart.baslikta-kalan-sure-bitince':'Başlıkta kalan süre; bitince kaydet',
+  'ortak.king-kart.sesli-ozet':'Sesli özet',
+  'ortak.king-kart.bugunu-sesli-dinle-kutuphane':'Bugünü sesli dinle; Kütüphane’de kalır',
+  'ortak.king-kart.bugunun-maddeleri-siradakini':'Bugünün maddeleri; sıradakini tek dokunuşla başlat',
+  'ortak.king-kart.gunu-kapat':'Günü kapat',
+  'ortak.king-kart.kalanlar-ve-sesli-ozet':'Kalanlar ve sesli özet',
+  'ortak.king-kart.kisisel-yasalar':'Kişisel yasalar',
+  'ortak.king-kart.olculerinden-senin-kurallari':'Ölçülerinden senin kuralların; ilişki, neden değil',
+  'ortak.king-kart.sinav-yolculugu':'Sınav yolculuğu',
+  'ortak.king-kart.bu-gidisle-sinav-gunu-ve':'Bu gidişle sınav günü ve «ne olursa» (AYS › Gelecek)',
+  'ortak.king-kart.gorev-kur':'Görev kur',
+  'ortak.king-kart.king-adim-adim-plan-kurar':'King adım adım plan kurar; sen başlatırsın',
+  'ortak.king-kart.haftalik-degerlendirme':'Haftalık değerlendirme',
+  'ortak.king-kart.merkez-in-hafta-raporu':'Merkez’in hafta raporu',
+  'ortak.king-kart.capraz-bulgu':'Çapraz bulgu',
+  'ortak.king-kart.moduller-birbirini-nasil-etk':'Modüller birbirini nasıl etkiliyor',
+  'ortak.king-kart.haftalik-gozden-gecirme':'Haftalık gözden geçirme',
+  'ortak.king-kart.uc-soru-cevaplar-defter-e':'Üç soru; cevaplar Defter’e',
+  'ortak.king-kart.kisisel-deney':'Kişisel deney',
+  'ortak.king-kart.bir-kurali-dene-once-ve':'Bir kuralı dene; önce ve sonra karşılaştırılır',
+  'ortak.king-kart.bekleyen-oneriler':'Bekleyen öneriler',
+  'ortak.king-kart.onaylar-da-bekleyenler':'Onaylar’da bekleyenler',
+  'ortak.king-kart.anlattigin-defter-e-gunluk-o':'Anlattığın Defter’e günlük olur',
+  'ortak.king-kart.deftere-not':'Deftere not',
+  'ortak.king-kart.tek-satir-not':'Tek satır not',
+  'ortak.king-kart.beceri-ogret':'Beceri öğret',
+  'ortak.king-kart.tekrarlanan-isi-king-ustleni':'Tekrarlanan işi King üstlenir',
+  'ortak.king-kart.zamani-gelince-nasil-gectigi':'Zamanı gelince nasıl geçtiğini sorar',
+  'ortak.king-kart.ekip-ne-yapiyor':'Ekip ne yapıyor',
+  'ortak.king-kart.arka-plandaki-isler':'Arka plandaki işler',
+  'ortak.king-kart.beni-nasil-taniyorsun':'Beni nasıl tanıyorsun',
+  'ortak.king-kart.king-in-seni-tanidigi-her-se':'King’in seni tanıdığı her şey; sil ya da ekle',
+  'ortak.king-kart.kisilik-envanteri':'Kişilik envanteri',
+  'ortak.king-kart.i-slem-yuzde-us-parantez':'İşlem, yüzde, üs, parantez',
+  'ortak.king-kart.birim-cevir':'Birim çevir',
+  'ortak.king-kart.uzunluk-kutle-hacim-sure-sic':'Uzunluk, kütle, hacim, süre, sıcaklık',
+  'ortak.king-kart.gun-hesapla':'Gün hesapla',
+  'ortak.king-kart.kac-gun-sonra-hangi-tarih':'Kaç gün sonra hangi tarih',
+  'ortak.king-kart.kac-gun-kaldi':'Kaç gün kaldı',
+  'ortak.king-kart.bir-tarihe-kalan-gun-ve':'Bir tarihe kalan gün ve hafta',
+  'ortak.king-kart.listeni-gor-dokunarak-isaret':'Listeni gör, dokunarak işaretle',
+  'ortak.king-kart.listeye-ekle':'Listeye ekle',
+  'ortak.king-kart.birden-cok-madde-icin':'Birden çok madde için ; ile ayır',
+  'ortak.king-kart.sure-ya-da-saatle-zamani':'Süre ya da saatle; zamanı gelince bildirim',
+  'ortak.king-kart.bekleyenler-ve-iptal':'Bekleyenler ve iptal',
+  'ortak.king-kart.karar-ver':'Karar ver',
+  'ortak.king-kart.secenekler-arasindan-rastgel':'Seçenekler arasından rastgele',
+  'ortak.king-kart.nefes-egzersizi':'Nefes egzersizi',
+  'ortak.king-kart.kutu-nefesi-yaklasik-bir-dak':'Kutu nefesi, yaklaşık bir dakika',
+  'ortak.king-kart.zar-at':'Zar at',
+  'ortak.king-kart.bir-ya-da-birkac-zar':'Bir ya da birkaç zar',
+  'ortak.king-kart.yazi-tura':'Yazı tura',
+  'ortak.king-kart.para-at':'Para at',
+  'ortak.king-kart.rastgele-sayi':'Rastgele sayı',
+  'ortak.king-kart.i-ki-sayi-arasinda':'İki sayı arasında',
+  'ortak.king-kart.hesabi-bol':'Hesabı böl',
+  'ortak.king-kart.kisi-basi-tutar':'Kişi başı tutar',
+  'ortak.king-kart.kelime-say':'Kelime say',
+  'ortak.king-kart.kelime-karakter-okuma-suresi':'Kelime, karakter, okuma süresi',
+  'ortak.king-kart.bugun-guzel-bir-gun':'Bugün güzel bir gün.',
+  'ortak.king-kart.yas-hesapla':'Yaş hesapla',
+  'ortak.king-kart.yas-ve-sonraki-dogum-gunune':'Yaş ve sonraki doğum gününe kalan',
+  'ortak.king-kart.beden-kitle-indeksi-dso-aral':'Beden kitle indeksi; DSÖ aralığıyla',
+  'ortak.king-kart.sifre-uret':'Şifre üret',
+  'ortak.king-kart.guclu-rastgele-cihazda-ureti':'Güçlü, rastgele; cihazda üretilir',
+  'ortak.king-kart.kart-yap':'Kart yap',
+  'ortak.king-kart.bir-cumleyi-kartlarim-a-ekle':'Bir cümleyi Kartlarım’a ekle',
+  'ortak.king-kart.herhangi-bir-dile':'Herhangi bir dile',
+  'ortak.king-kart.uzun-metni-uc-maddede':'Uzun metni üç maddede',
+  'ortak.king-kart.basitce-anlat':'Basitçe anlat',
+  'ortak.king-kart.karisik-bir-seyi-sade-dille':'Karışık bir şeyi sade dille',
+  'ortak.king-kart.yazimi-duzelt':'Yazımı düzelt',
+  'ortak.king-kart.yazim-ve-noktalama':'Yazım ve noktalama',
+  'ortak.king-kart.mesaj-taslagi':'Mesaj taslağı',
+  'ortak.king-kart.kisa-ve-nazik-bir-mesaj':'Kısa ve nazik bir mesaj',
+  'ortak.king-kart.fikir-uret':'Fikir üret',
+  'ortak.king-kart.bir-konuda-bes-fikir':'Bir konuda beş fikir',
+  'ortak.king-kart.e-posta-yaz':'E-posta yaz',
+  'ortak.king-kart.resmi-ve-kisa':'Resmî ve kısa',
+  'ortak.king-kart.metni-maddeler-halinde':'Metni maddeler halinde',
+  'ortak.king-kart.yari-uzunluga':'Yarı uzunluğa',
+  'ortak.king-kart.tonu-degistir':'Tonu değiştir',
+  'ortak.king-kart.daha-samimi-ya-da-daha':'Daha samimi ya da daha resmî',
+  'ortak.king-kart.karsi-gorus':'Karşı görüş',
+  'ortak.king-kart.bir-fikre-en-guclu-uc':'Bir fikre en güçlü üç itiraz',
+  'ortak.king-kart.soru-cevap-kartlari':'Soru-cevap kartları',
+  'ortak.king-kart.metinden-bes-soru-ve-cevabi':'Metinden beş soru ve cevabı',
+  'ortak.king-kart.bu-sistemde-ne-var':'Bu sistemde ne var',
+  'ortak.king-kart.moduller-sayfalar-ve-araclar':'Modüller, sayfalar ve araçlar',
+  'ortak.king-kart.tema-ve-gorunum':'Tema ve görünüm',
+  'ortak.king-kart.derin-dengeli-ya-da-hizli':'Derin, dengeli ya da hızlı',
+  'ortak.king-kart.cevaplari-sesli-oku':'Cevapları sesli oku',
+  'ortak.king-kart.yazsan-da-sesli-cevap':'Yazsan da sesli cevap',
+  'ortak.king-kart.kendi-kartin':'Kendi kartın · ',
+  'ortak.king-kart.kartlarimdan-cikar':'Kartlarımdan çıkar',
+  'ortak.king-kart.kartlarima-ekle':'Kartlarıma ekle',
+  'ortak.king-kart.m6-12h12':'M6 12h12',
+  'ortak.king-kart.m12-6v12m6-12h12':'M12 6v12M6 12h12',
+  'ortak.king-kart.renk':'Renk',
+  'ortak.king-kart.simge':'Simge',
+  'ortak.king-kart.geriye-al':'Geriye al →',
+  'ortak.king-kart.ozgun-gorunum':'Özgün görünüm',
+  'ortak.king-kart.karti-sil':'Kartı sil',
+  'ortak.king-kart.yeni-kart':'Yeni kart',
+  'ortak.king-kart.bir-konu-bir-soru-ya':'Bir konu, bir soru ya da sık yazdığın bir istek. Kartlarım’a eklenir; rengini ve simgesini sonra seçersin.',
+  'ortak.king-kart.ad':'Ad',
+  'ortak.king-kart.metin':'Metin',
+  'ortak.king-kart.dokununca-hemen-sor':'Dokununca hemen sor',
+  'ortak.king-kart.yazi-alanina-koy-ben-tamamla':'Yazı alanına koy, ben tamamlarım',
+  'ortak.king-kart.karti-ekle':'Kartı ekle',
+  'ortak.king-kart.vazgec':'Vazgeç',
+  'ortak.king-kart.araclar':'Araçlar',
+  'ortak.king-kart.karti-sec-rengini-ve-simgesi':'Kartı seç: rengini ve simgesini değiştir.',
+  'ortak.king-kart.kartlarim-a-ekler':'Kartlarım’a ekler,',
+  'ortak.king-kart.cikarir':'çıkarır.',
+  'ortak.king-kart.kartlarimi-varsayilana-dondu':'Kartlarımı varsayılana döndür',
+  'ortak.king-kart.kartlarim':'Kartlarım',
+  'ortak.king-kart.kartlarim-bos-duzenle-yi-ac':'Kartlarım boş. «Düzenle»yi aç, istediğin aracın',
+  'ortak.king-kart.sina-dokun-ya-da-yeni':'’sına dokun ya da «Yeni kart» ekle.',
+  'ortak.king-kart.dokun-hemen-yapar-ya-da':'Dokun: hemen yapar ya da örneği yazı alanına koyar. Sayıları her zaman modülün kendi kodu üretir.',
+  'ortak.king-kart.gorevler-merkez-de-hkm-calis':'Görevler Merkez’de (HKM) çalışır; Merkez bağlı değil.',
+  'ortak.king-kart.yukleniyor':'Yükleniyor…',
+  'ortak.king-kart.gorev-yok-bu-hafta-b1-e':'Görev yok. «Bu hafta B1’e hazırla beni» gibi yaz; King adım adım kurar, sen başlatmadan başlamaz.',
+  'ortak.king-kart.arka-planda':'Arka planda',
+  'ortak.king-kart.arka-planda-is-yok-arka':'Arka planda iş yok. «Arka planda … araştır» dersen ekibe veririm, sen konuşmaya devam edersin.',
+  'ortak.king-kart.beceriler-ve-sozler-merkez-d':'Beceriler ve sözler Merkez’de (HKM) durur; Merkez bağlı değil.',
+  'ortak.king-kart.beceri-yok-her-pazartesi-ban':'Beceri yok. «Her pazartesi bana deneme hatırlat» ya da «‘ders bitti’ deyince mola aç» diye öğret.',
+  'ortak.king-kart.acik-soz-yok-yarin-fizik':'Açık söz yok. «Yarın fizik sınavım var» dersen zamanı gelince nasıl geçtiğini sorarım.',
+  'ortak.king-kart.klasorsuz':'Klasörsüz',
+  'ortak.king-kart.ekle':'Ekle',
+  'ortak.king-kart.klasoru-kaldir-sohbetler-sil':'Klasörü kaldır; sohbetler silinmez',
+  'ortak.king-kart.bos-bir-sohbeti-kartindaki-s':'Boş. Bir sohbeti kartındaki seçimle buraya taşı.',
+  'ortak.king-kart.gorseli-sil':'Görseli sil',
+  'ortak.king-kart.siradan-cikar':'Sıradan çıkar',
+  'ortak.king-kart.kutuphane':'Kütüphane',
+  'ortak.king-kart.yeni-klasor':'Yeni klasör',
+  'ortak.king-kart.kutuphane-henuz-bos':'Kütüphane henüz boş',
+  'ortak.king-kart.kayitli-sohbetler-derslerim':'Kayıtlı sohbetler, Derslerim, sesli özetler, araştırmaların videoları ve okumaları, gönderdiğin fotoğraflar burada toplanır.',
+  'ortak.king-kart.hepsi-bu-cihazda-fotograflar':'Hepsi bu cihazda. Fotoğrafların küçük bir kopyası saklanır (en çok',
+  'ortak.king-kart.istedigini-silebilirsin':'); istediğini silebilirsin.',
+  'ortak.king-kart.henuz-bir-sey-yok':'Henüz bir şey yok.',
+  'ortak.king-kart.bu-modul':'Bu modül',
+  'ortak.king-kart.soru-bankasi-ays-de-ays-yi-a':'Soru bankası AYS’de; AYS’yi açıp «bana soru sor» diyebilirsin.',
+  'ortak.king-kart.su-an-sorabilecegim-bir-soru':'Şu an sorabileceğim bir soru bulamadım.',
+  'ortak.king-kart.dogru-cevap':'Doğru cevap ',
+  'ortak.king-kart.cevabi-kaydedemedim-soruyu-m':'Cevabı kaydedemedim; soruyu modülün kendi ekranında deneyebilirsin.',
+  'ortak.king-kart.ozet':'Özet',
+  'ortak.king-kart.dinle':'Dinle',
+  'ortak.king-kart.kaynaklardan-dogrulanmis-kis':'Kaynaklardan doğrulanmış kısa bir özet çıkaramadım; aşağıdaki kaynaklara bakabilirsin.',
+  'ortak.king-kart.i-zle':'İzle',
+  'ortak.king-kart.oku':'Oku',
+  'ortak.king-kart.siradaki-adim':'Sıradaki adım',
+  'ortak.king-kart.defter-e-kaynak-olarak-eklen':'» Defter’e kaynak olarak eklenebilir; onaylamadan eklenmez.',
+  'ortak.king-kart.defter-e-ekle':'Defter’e ekle',
+  'ortak.king-kart.kaynak':'Kaynak: ',
+  'ortak.king-kart.defter-e-ekleyemedim':'Defter’e ekleyemedim: ',
+  'ortak.king-kart.bearer':'Bearer ',
+  'ortak.king-kart.geri-alamadim':'Geri alamadım: ',
+  'ortak.king-kart.merkez-cevap-vermedi':'Merkez cevap vermedi',
+  'ortak.king-kart.geri-aldim':'Geri aldım: ',
+  'ortak.king-kart.daha-eski':'Daha eski',
+  'ortak.king-kart.geri-alindi':'geri alındı',
+  'ortak.king-kart.kalici':'kalıcı',
+  'ortak.king-kart.bugun':'Bugün ',
+  'ortak.king-kart.bugun-model-cagrisi-yok':'Bugün model çağrısı yok.',
+  'ortak.king-kart.cagri':'çağrı',
+  'ortak.king-kart.bugun-harcanan':'Bugün harcanan',
+  'ortak.king-kart.henuz-bir-sey-yapmadim-onayl':'Henüz bir şey yapmadım. Onayladığın her değişiklik burada görünür; çoğu tek dokunuşla geri alınır.',
+  'ortak.king-kart.sinava':'Sınava ',
+  'ortak.king-kart.bir-plan-maddesi':'Bir plan maddesi ',
+  'ortak.king-kart.i-lk-is':'İlk iş: ',
+  'ortak.king-kart.bugunun-plani':'Bugünün planı: ',
+  'ortak.king-kart.dun':'Dün ',
+  'ortak.king-kart.oneri-konusu':'Öneri konusu: ',
+  'ortak.king-kart.bugun-icin-plan-yok':'Bugün için plan yok.',
+  'ortak.king-kart.bu-modulde-sabah-brifingi-ve':'Bu modülde sabah brifingi verisi henüz yok.',
+  'ortak.king-kart.sayilari':'Sayıları ',
+  'ortak.king-kart.king-in-modelinden':'King’in modelinden.',
+  'ortak.king-kart.bugun-eksik-kayit-gorunmuyor':'Bugün eksik kayıt görünmüyor.',
+  'ortak.king-kart.bu-hafta-icin-rapor-verisi':'Bu hafta için rapor verisi yok.',
+  'ortak.king-kart.haftan-tek-sayfada-sayilar':'Haftan tek sayfada; sayılar ',
+  'ortak.king-kart.merkez-kapali-yorum-yok':'Merkez kapalı, yorum yok.',
+  'ortak.king-kart.takip-ettigim-bir-aliskanlik':'Takip ettiğim bir alışkanlık hatırlatması yok.',
+  'ortak.king-kart.hatirlatmayi-aliskanliginin':'Hatırlatmayı alışkanlığının gerçek saatine göre yaparım; dün kaçtıysa bugün yumuşakça yinelerim.',
+  'ortak.king-kart.duzeltebilecegim-sureli-bir':'Düzeltebileceğim süreli bir son kayıt yok.',
+  'ortak.king-kart.sure-1-ile-600-dakika':'Süre 1 ile 600 dakika arasında olmalı.',
+  'ortak.king-kart.sunu-duzelteyim-mi':'Şunu düzelteyim mi?',
+  'ortak.king-kart.tamam-dokunmadim':'Tamam, dokunmadım.',
+  'ortak.king-kart.duzeltemedim':'Düzeltemedim: ',
+  'ortak.king-kart.duzelttim':'Düzelttim: ',
+  'ortak.king-kart.dun-2':'Dün «',
+  'ortak.king-kart.lifeos-hatirlatma':'LifeOS · hatırlatma',
+  'ortak.king-kart.bugun-2':'Bugün',
+  'ortak.king-kart.plan-yok':'Plan yok',
+  'ortak.king-kart.dun-3':'Dün',
+  'ortak.king-kart.dun-kayit-yok':'Dün kayıt yok',
+  'ortak.king-kart.oneri':'Öneri',
+  'ortak.king-kart.onceki-hafta':'önceki hafta',
+  'ortak.king-kart.son-kayit':'Son kayıt',
+  'ortak.king-kart.onayla':'Onayla',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.king-kart.kart-ve-soru':'Kart ve soru',
   'ortak.king-kart.arastir-ve-oku':'Araştır ve oku',
   'ortak.king-kart.gor':'Gör',
@@ -55,88 +282,88 @@ window.LIFEOS.PARCA.yazilar({
     const ek = id => { const a = sec.find(x => x.is === id); return a ? s(a.ad, a.ip, { is:a.is }) : null; };
     const gruplar = [
       { ad:yz('ortak.king-kart.kart-ve-soru'), l:[
-        fn('ders') && s('Konu anlat', 'Modülün anlatımı bölüm bölüm; sonunda soru', { doldur:String(K.dersOrnek || 'bu konuyu anlat') }),
-        fn('istatistik') && s('İstatistik kartları', 'Modülün sayıları kart olarak', { calis:'istatistiklerim' }),
-        fn('soru') && s('Bana soru sor', 'Modülün bankasından soru kartı; şıklar düğme', { calis:'bana soru sor' }),
-        fn('soru') && s('Konudan soru', 'Belirli bir konudan soru', { doldur:'türev hakkında soru sor' }),
-        fn('oncelik') && s('Neye çalışayım', 'Öncelik sırası ve nedeni', { calis:'neye çalışayım' }),
-        fn('yuk') && s('Yük durumum', 'Son 7 gün ile önceki 7 gün', { calis:'yük durumum' }),
+        fn('ders') && s(yz('ortak.king-kart.konu-anlat'), yz('ortak.king-kart.modulun-anlatimi-bolum-bolum'), { doldur:String(K.dersOrnek || 'bu konuyu anlat') }),
+        fn('istatistik') && s(yz('ortak.king-kart.i-statistik-kartlari'), yz('ortak.king-kart.modulun-sayilari-kart-olarak'), { calis:'istatistiklerim' }),
+        fn('soru') && s(yz('ortak.king-kart.bana-soru-sor'), yz('ortak.king-kart.modulun-bankasindan-soru-kar'), { calis:'bana soru sor' }),
+        fn('soru') && s(yz('ortak.king-kart.konudan-soru'), yz('ortak.king-kart.belirli-bir-konudan-soru'), { doldur:'türev hakkında soru sor' }),
+        fn('oncelik') && s(yz('ortak.king-kart.neye-calisayim'), yz('ortak.king-kart.oncelik-sirasi-ve-nedeni'), { calis:'neye çalışayım' }),
+        fn('yuk') && s(yz('ortak.king-kart.yuk-durumum'), yz('ortak.king-kart.son-7-gun-ile-onceki'), { calis:'yük durumum' }),
       ] },
       { ad:yz('ortak.king-kart.arastir-ve-oku'), l:[
-        s('Araştır', 'Kaynaklı özet, videolar, okunacaklar', { doldur:'fotosentezi araştır', merkez:true }),
-        s('Arka planda araştır', 'Ekibe verilir, sen konuşmaya devam edersin', { doldur:'arka planda yapay zekâ tarihini araştır', merkez:true }),
+        s('Araştır', yz('ortak.king-kart.kaynakli-ozet-videolar-okuna'), { doldur:'fotosentezi araştır', merkez:true }),
+        s(yz('ortak.king-kart.arka-planda-arastir'), yz('ortak.king-kart.ekibe-verilir-sen-konusmaya'), { doldur:'arka planda yapay zekâ tarihini araştır', merkez:true }),
         ek('pdf-sec'),
-        KI.D() && s('Notlarımda ara', 'Defter’deki notlarına dayanarak', { doldur:'notlarımda türev' }),
-        s('Derse çevir', 'PDF ya da metinden kaynaklı ders ve sorular', { doldur:'derse çevir: ', merkez:true }),
-        KI.kdDersler().length && s('Derslerimden soru', 'Kendi derslerinden, tekrar takvimiyle', { calis:'derslerimden soru sor' }),
+        KI.D() && s(yz('ortak.king-kart.notlarimda-ara'), yz('ortak.king-kart.defter-deki-notlarina-dayana'), { doldur:'notlarımda türev' }),
+        s(yz('ortak.king-kart.derse-cevir'), yz('ortak.king-kart.pdf-ya-da-metinden-kaynakli'), { doldur:'derse çevir: ', merkez:true }),
+        KI.kdDersler().length && s(yz('ortak.king-kart.derslerimden-soru'), yz('ortak.king-kart.kendi-derslerinden-tekrar-ta'), { calis:'derslerimden soru sor' }),
       ] },
       { ad:yz('ortak.king-kart.gor'), l:[ek('foto-sec'), ek('kip:kamera'), ek('kip:ekran'), ek('ekran'), ek('barkod')] },
       { ad:yz('ortak.king-kart.planla-ve-takip-et'), l:[
-        s('Bugünün özeti', 'Bu modülde bugün ne var', { hazir:KI.HAZIR.findIndex(h => h.ozet) }),
-        s('Odak sayacı', 'Başlıkta kalan süre; bitince kaydet', { doldur:'25 dakika matematik çalışalım' }),
-        s('Sesli özet', 'Bugünü sesli dinle; Kütüphane’de kalır', { calis:'sesli özet' }),
-        fn('gun') && s('Günüm', 'Bugünün maddeleri; sıradakini tek dokunuşla başlat', { calis:'günüm' }),
-        fn('gun') && s('Günü kapat', 'Kalanlar ve sesli özet', { calis:'günü kapat' }),
-        K.olcu && s('Kişisel yasalar', 'Ölçülerinden senin kuralların; ilişki, neden değil', { calis:'yasalarım' }),
-        s('Sınav yolculuğu', 'Bu gidişle sınav günü ve «ne olursa» (AYS › Gelecek)', { calis:'gelecek sayfasını aç' }),
-        s('Görev kur', 'King adım adım plan kurar; sen başlatırsın', { doldur:'bu hafta B1’e hazırla beni', merkez:true }),
-        s('Haftalık değerlendirme', 'Merkez’in hafta raporu', { calis:'haftalık değerlendirme', merkez:true }),
-        s('Çapraz bulgu', 'Modüller birbirini nasıl etkiliyor', { calis:'çapraz bulgu', merkez:true }),
-        KI.D() && s('Haftalık gözden geçirme', 'Üç soru; cevaplar Defter’e', { calis:'haftalık gözden geçirme' }),
-        s('Kişisel deney', 'Bir kuralı dene; önce ve sonra karşılaştırılır', { doldur:'deney başlat: her gün 10 dakika yürüyüş' }),
-        KI.yetkiKatalog() && KI.yetkiKatalog().bekleyenler && s('Bekleyen öneriler', 'Onaylar’da bekleyenler', { calis:'bekleyen öneriler' }),
+        s(yz('ortak.king-kart.bugunun-ozeti'), yz('ortak.king-kart.bu-modulde-bugun-ne-var'), { hazir:KI.HAZIR.findIndex(h => h.ozet) }),
+        s(yz('ortak.king-kart.odak-sayaci'), yz('ortak.king-kart.baslikta-kalan-sure-bitince'), { doldur:'25 dakika matematik çalışalım' }),
+        s(yz('ortak.king-kart.sesli-ozet'), yz('ortak.king-kart.bugunu-sesli-dinle-kutuphane'), { calis:'sesli özet' }),
+        fn('gun') && s('Günüm', yz('ortak.king-kart.bugunun-maddeleri-siradakini'), { calis:'günüm' }),
+        fn('gun') && s(yz('ortak.king-kart.gunu-kapat'), yz('ortak.king-kart.kalanlar-ve-sesli-ozet'), { calis:'günü kapat' }),
+        K.olcu && s(yz('ortak.king-kart.kisisel-yasalar'), yz('ortak.king-kart.olculerinden-senin-kurallari'), { calis:'yasalarım' }),
+        s(yz('ortak.king-kart.sinav-yolculugu'), yz('ortak.king-kart.bu-gidisle-sinav-gunu-ve'), { calis:'gelecek sayfasını aç' }),
+        s(yz('ortak.king-kart.gorev-kur'), yz('ortak.king-kart.king-adim-adim-plan-kurar'), { doldur:'bu hafta B1’e hazırla beni', merkez:true }),
+        s(yz('ortak.king-kart.haftalik-degerlendirme'), yz('ortak.king-kart.merkez-in-hafta-raporu'), { calis:'haftalık değerlendirme', merkez:true }),
+        s(yz('ortak.king-kart.capraz-bulgu'), yz('ortak.king-kart.moduller-birbirini-nasil-etk'), { calis:'çapraz bulgu', merkez:true }),
+        KI.D() && s(yz('ortak.king-kart.haftalik-gozden-gecirme'), yz('ortak.king-kart.uc-soru-cevaplar-defter-e'), { calis:'haftalık gözden geçirme' }),
+        s(yz('ortak.king-kart.kisisel-deney'), yz('ortak.king-kart.bir-kurali-dene-once-ve'), { doldur:'deney başlat: her gün 10 dakika yürüyüş' }),
+        KI.yetkiKatalog() && KI.yetkiKatalog().bekleyenler && s(yz('ortak.king-kart.bekleyen-oneriler'), yz('ortak.king-kart.onaylar-da-bekleyenler'), { calis:'bekleyen öneriler' }),
       ] },
       { ad:yz('ortak.king-kart.kaydet'), l:[
-        KI.D() && s('Günlük', 'Anlattığın Defter’e günlük olur', { calis:'günlük yazalım' }),
-        KI.D() && s('Deftere not', 'Tek satır not', { doldur:'deftere not: ' }),
+        KI.D() && s('Günlük', yz('ortak.king-kart.anlattigin-defter-e-gunluk-o'), { calis:'günlük yazalım' }),
+        KI.D() && s(yz('ortak.king-kart.deftere-not'), yz('ortak.king-kart.tek-satir-not'), { doldur:'deftere not: ' }),
       ] },
       { ad:yz('ortak.king-kart.rutin-ve-hafiza'), l:[
-        s('Beceri öğret', 'Tekrarlanan işi King üstlenir', { doldur:'her pazartesi bana deneme hatırlat', merkez:true }),
-        s('Söz', 'Zamanı gelince nasıl geçtiğini sorar', { doldur:'yarın fizik sınavım var', merkez:true }),
-        s('Ekip ne yapıyor', 'Arka plandaki işler', { calis:'ekip ne yapıyor', merkez:true }),
-        s('Beni nasıl tanıyorsun', 'King’in seni tanıdığı her şey; sil ya da ekle', { is:'kisi' }),
-        s('Kişilik envanteri', '20 cümle; sonuç senin sözün olur', { calis:'kişilik testi' }),
+        s(yz('ortak.king-kart.beceri-ogret'), yz('ortak.king-kart.tekrarlanan-isi-king-ustleni'), { doldur:'her pazartesi bana deneme hatırlat', merkez:true }),
+        s('Söz', yz('ortak.king-kart.zamani-gelince-nasil-gectigi'), { doldur:'yarın fizik sınavım var', merkez:true }),
+        s(yz('ortak.king-kart.ekip-ne-yapiyor'), yz('ortak.king-kart.arka-plandaki-isler'), { calis:'ekip ne yapıyor', merkez:true }),
+        s(yz('ortak.king-kart.beni-nasil-taniyorsun'), yz('ortak.king-kart.king-in-seni-tanidigi-her-se'), { is:'kisi' }),
+        s(yz('ortak.king-kart.kisilik-envanteri'), '20 cümle; sonuç senin sözün olur', { calis:'kişilik testi' }),
       ] },
       { ad:yz('ortak.king-kart.arac-kutusu'), l:[
-        s('Hesapla', 'İşlem, yüzde, üs, parantez', { doldur:'hesapla: 1250*%18+40' }),
-        s('Birim çevir', 'Uzunluk, kütle, hacim, süre, sıcaklık', { doldur:'5 km kaç mil' }),
-        s('Gün hesapla', 'Kaç gün sonra hangi tarih', { doldur:'45 gün sonra hangi gün' }),
-        s('Kaç gün kaldı', 'Bir tarihe kalan gün ve hafta', { doldur:'19 haziran kaç gün kaldı' }),
-        s('Yapılacaklar', 'Listeni gör, dokunarak işaretle', { calis:'yapılacaklarım' }),
-        s('Listeye ekle', 'Birden çok madde için ; ile ayır', { doldur:'yapılacak: fatura öde; markete git' }),
-        s('Hatırlatıcı', 'Süre ya da saatle; zamanı gelince bildirim', { doldur:'20 dakika sonra hatırlat: çamaşırı as' }),
-        s('Hatırlatmalarım', 'Bekleyenler ve iptal', { calis:'hatırlatmalarım' }),
-        s('Karar ver', 'Seçenekler arasından rastgele', { doldur:'karar ver: pizza, makarna, çorba' }),
-        s('Nefes egzersizi', 'Kutu nefesi, yaklaşık bir dakika', { calis:'nefes egzersizi' }),
-        s('Zar at', 'Bir ya da birkaç zar', { calis:'2 zar at' }),
-        s('Yazı tura', 'Para at', { calis:'yazı tura' }),
-        s('Rastgele sayı', 'İki sayı arasında', { doldur:'1 ile 100 arası sayı' }),
-        s('Hesabı böl', 'Kişi başı tutar', { doldur:'hesabı böl: 850 / 4' }),
-        s('Kelime say', 'Kelime, karakter, okuma süresi', { doldur:'kelime say: ' + 'Bugün güzel bir gün.' }),
-        s('Yaş hesapla', 'Yaş ve sonraki doğum gününe kalan', { doldur:'yaş hesapla: 14.03.2005' }),
-        s('VKİ', 'Beden kitle indeksi; DSÖ aralığıyla', { doldur:'vki 70 kg 175 cm' }),
-        s('Şifre üret', 'Güçlü, rastgele; cihazda üretilir', { calis:'şifre üret' }),
-        s('Kart yap', 'Bir cümleyi Kartlarım’a ekle', { doldur:'kart yap: bugün ne öğrendim, birlikte değerlendirelim' }),
+        s('Hesapla', yz('ortak.king-kart.i-slem-yuzde-us-parantez'), { doldur:'hesapla: 1250*%18+40' }),
+        s(yz('ortak.king-kart.birim-cevir'), yz('ortak.king-kart.uzunluk-kutle-hacim-sure-sic'), { doldur:'5 km kaç mil' }),
+        s(yz('ortak.king-kart.gun-hesapla'), yz('ortak.king-kart.kac-gun-sonra-hangi-tarih'), { doldur:'45 gün sonra hangi gün' }),
+        s(yz('ortak.king-kart.kac-gun-kaldi'), yz('ortak.king-kart.bir-tarihe-kalan-gun-ve'), { doldur:'19 haziran kaç gün kaldı' }),
+        s('Yapılacaklar', yz('ortak.king-kart.listeni-gor-dokunarak-isaret'), { calis:'yapılacaklarım' }),
+        s(yz('ortak.king-kart.listeye-ekle'), yz('ortak.king-kart.birden-cok-madde-icin'), { doldur:'yapılacak: fatura öde; markete git' }),
+        s('Hatırlatıcı', yz('ortak.king-kart.sure-ya-da-saatle-zamani'), { doldur:'20 dakika sonra hatırlat: çamaşırı as' }),
+        s('Hatırlatmalarım', yz('ortak.king-kart.bekleyenler-ve-iptal'), { calis:'hatırlatmalarım' }),
+        s(yz('ortak.king-kart.karar-ver'), yz('ortak.king-kart.secenekler-arasindan-rastgel'), { doldur:'karar ver: pizza, makarna, çorba' }),
+        s(yz('ortak.king-kart.nefes-egzersizi'), yz('ortak.king-kart.kutu-nefesi-yaklasik-bir-dak'), { calis:'nefes egzersizi' }),
+        s(yz('ortak.king-kart.zar-at'), yz('ortak.king-kart.bir-ya-da-birkac-zar'), { calis:'2 zar at' }),
+        s(yz('ortak.king-kart.yazi-tura'), yz('ortak.king-kart.para-at'), { calis:'yazı tura' }),
+        s(yz('ortak.king-kart.rastgele-sayi'), yz('ortak.king-kart.i-ki-sayi-arasinda'), { doldur:'1 ile 100 arası sayı' }),
+        s(yz('ortak.king-kart.hesabi-bol'), yz('ortak.king-kart.kisi-basi-tutar'), { doldur:'hesabı böl: 850 / 4' }),
+        s(yz('ortak.king-kart.kelime-say'), yz('ortak.king-kart.kelime-karakter-okuma-suresi'), { doldur:'kelime say: ' + yz('ortak.king-kart.bugun-guzel-bir-gun') }),
+        s(yz('ortak.king-kart.yas-hesapla'), yz('ortak.king-kart.yas-ve-sonraki-dogum-gunune'), { doldur:'yaş hesapla: 14.03.2005' }),
+        s('VKİ', yz('ortak.king-kart.beden-kitle-indeksi-dso-aral'), { doldur:'vki 70 kg 175 cm' }),
+        s(yz('ortak.king-kart.sifre-uret'), yz('ortak.king-kart.guclu-rastgele-cihazda-ureti'), { calis:'şifre üret' }),
+        s(yz('ortak.king-kart.kart-yap'), yz('ortak.king-kart.bir-cumleyi-kartlarim-a-ekle'), { doldur:'kart yap: bugün ne öğrendim, birlikte değerlendirelim' }),
       ] },
       { ad:yz('ortak.king-kart.yazi-ve-dil'), l:[
-        s('Çevir', 'Herhangi bir dile', { doldur:'şunu İngilizceye çevir: ', merkez:true }),
-        s('Özetle', 'Uzun metni üç maddede', { doldur:'şunu üç maddede özetle: ', merkez:true }),
-        s('Basitçe anlat', 'Karışık bir şeyi sade dille', { doldur:'bunu basitçe açıkla: ', merkez:true }),
-        s('Yazımı düzelt', 'Yazım ve noktalama', { doldur:'yazım ve noktalamayı düzelt: ', merkez:true }),
-        s('Mesaj taslağı', 'Kısa ve nazik bir mesaj', { doldur:'kısa ve nazik bir mesaj yaz: ', merkez:true }),
-        s('Fikir üret', 'Bir konuda beş fikir', { doldur:'şu konuda beş fikir ver: ', merkez:true }),
-        s('E-posta yaz', 'Resmî ve kısa', { doldur:'resmî ve kısa bir e-posta yaz: ', merkez:true }),
-        s('Maddele', 'Metni maddeler halinde', { doldur:'şunu madde madde yaz: ', merkez:true }),
-        s('Kısalt', 'Yarı uzunluğa', { doldur:'şunu yarı uzunluğa kısalt: ', merkez:true }),
-        s('Tonu değiştir', 'Daha samimi ya da daha resmî', { doldur:'şunu daha samimi yaz: ', merkez:true }),
-        s('Karşı görüş', 'Bir fikre en güçlü üç itiraz', { doldur:'şu fikre en güçlü üç itirazı yaz: ', merkez:true }),
-        s('Soru-cevap kartları', 'Metinden beş soru ve cevabı', { doldur:'şu metinden beş soru-cevap kartı çıkar: ', merkez:true }),
+        s('Çevir', yz('ortak.king-kart.herhangi-bir-dile'), { doldur:'şunu İngilizceye çevir: ', merkez:true }),
+        s('Özetle', yz('ortak.king-kart.uzun-metni-uc-maddede'), { doldur:'şunu üç maddede özetle: ', merkez:true }),
+        s(yz('ortak.king-kart.basitce-anlat'), yz('ortak.king-kart.karisik-bir-seyi-sade-dille'), { doldur:'bunu basitçe açıkla: ', merkez:true }),
+        s(yz('ortak.king-kart.yazimi-duzelt'), yz('ortak.king-kart.yazim-ve-noktalama'), { doldur:'yazım ve noktalamayı düzelt: ', merkez:true }),
+        s(yz('ortak.king-kart.mesaj-taslagi'), yz('ortak.king-kart.kisa-ve-nazik-bir-mesaj'), { doldur:'kısa ve nazik bir mesaj yaz: ', merkez:true }),
+        s(yz('ortak.king-kart.fikir-uret'), yz('ortak.king-kart.bir-konuda-bes-fikir'), { doldur:'şu konuda beş fikir ver: ', merkez:true }),
+        s(yz('ortak.king-kart.e-posta-yaz'), yz('ortak.king-kart.resmi-ve-kisa'), { doldur:'resmî ve kısa bir e-posta yaz: ', merkez:true }),
+        s('Maddele', yz('ortak.king-kart.metni-maddeler-halinde'), { doldur:'şunu madde madde yaz: ', merkez:true }),
+        s('Kısalt', yz('ortak.king-kart.yari-uzunluga'), { doldur:'şunu yarı uzunluğa kısalt: ', merkez:true }),
+        s(yz('ortak.king-kart.tonu-degistir'), yz('ortak.king-kart.daha-samimi-ya-da-daha'), { doldur:'şunu daha samimi yaz: ', merkez:true }),
+        s(yz('ortak.king-kart.karsi-gorus'), yz('ortak.king-kart.bir-fikre-en-guclu-uc'), { doldur:'şu fikre en güçlü üç itirazı yaz: ', merkez:true }),
+        s(yz('ortak.king-kart.soru-cevap-kartlari'), yz('ortak.king-kart.metinden-bes-soru-ve-cevabi'), { doldur:'şu metinden beş soru-cevap kartı çıkar: ', merkez:true }),
       ] },
       { ad:yz('ortak.king-kart.sistem'), l:[
-        s('Bu sistemde ne var', 'Modüller, sayfalar ve araçlar', { calis:'bu sistemde ne var' }),
-        s('Görünüm', 'Tema ve görünüm', { doldur:'koyu temaya geç' }),
-        s('Düşünme', 'Derin, dengeli ya da hızlı', { doldur:'derin düşün', merkez:true }),
-        s('Cevapları sesli oku', 'Yazsan da sesli cevap', { calis:'cevapları sesli oku' }),
+        s(yz('ortak.king-kart.bu-sistemde-ne-var'), yz('ortak.king-kart.moduller-sayfalar-ve-araclar'), { calis:'bu sistemde ne var' }),
+        s('Görünüm', yz('ortak.king-kart.tema-ve-gorunum'), { doldur:'koyu temaya geç' }),
+        s('Düşünme', yz('ortak.king-kart.derin-dengeli-ya-da-hizli'), { doldur:'derin düşün', merkez:true }),
+        s(yz('ortak.king-kart.cevaplari-sesli-oku'), yz('ortak.king-kart.yazsan-da-sesli-cevap'), { calis:'cevapları sesli oku' }),
       ] },
     ].map(g => ({ ad:g.ad, l:g.l.filter(Boolean) })).filter(g => g.l.length);
     /* Şimdi: saat, gün ve bu modülün sunduklarından en çok üç öneri (öbür modülün işi girmez). */
@@ -148,11 +375,11 @@ window.LIFEOS.PARCA.yazilar({
         .map(x => s(x.ad, x.tur === 'foto' ? x.ne : '«' + String(x.ornek || '').trim() + '»', { is:'is-sec:' + x.i })) }))
       .filter(g => g.l.length);
     const bul = ad => hepsi.find(x => x.ad === ad);
-    const simdi = [saat < 12 && bul('Bugünün özeti'), bul('Neye çalışayım'), bul('Konu anlat'), bul('Bana soru sor'),
-      t.getDay() === 0 && bul('Haftalık gözden geçirme'), saat >= 19 && bul('Günlük'), KI.odak() ? null : bul('Odak sayacı')]
+    const simdi = [saat < 12 && bul(yz('ortak.king-kart.bugunun-ozeti')), bul(yz('ortak.king-kart.neye-calisayim')), bul(yz('ortak.king-kart.konu-anlat')), bul(yz('ortak.king-kart.bana-soru-sor')),
+      t.getDay() === 0 && bul(yz('ortak.king-kart.haftalik-gozden-gecirme')), saat >= 19 && bul('Günlük'), KI.odak() ? null : bul(yz('ortak.king-kart.odak-sayaci'))]
       .filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 3);
     const sistem = gruplar.pop();               // «Sistem» en sonda kalır
-    const ozel = kartAyar().ozel.map(o => s(o.ad, 'Kendi kartın · ' + (o.gonder ? 'dokununca sorar' : 'yazı alanına koyar'),
+    const ozel = kartAyar().ozel.map(o => s(o.ad, yz('ortak.king-kart.kendi-kartin') + (o.gonder ? 'dokununca sorar' : 'yazı alanına koyar'),
       Object.assign({ ozel:o.id }, o.gonder ? { calis:o.metin } : { doldur:o.metin })));
     return (simdi.length ? [{ ad:yz('ortak.king-kart.simdi'), l:simdi }] : []).concat(ozel.length ? [{ ad:yz('ortak.king-kart.kendi-kartlarim'), l:ozel }] : [], gruplar, modulGruplari, [sistem]);
   }
@@ -163,7 +390,7 @@ window.LIFEOS.PARCA.yazilar({
      olarak (title, aria-label). Merkez isteyen kutunun simgesinde nokta.
      Dokunmak sohbete döner ve aracı çalıştırır. Boş sohbette öne çıkanlar
      da aynı kutularla durur. Liste sütunu grupların dizinidir. */
-  const ONE_CIKAN = ['Kişisel yasalar', 'Günüm', 'Derse çevir', 'Sınav yolculuğu', 'Konu anlat'];
+  const ONE_CIKAN = [yz('ortak.king-kart.kisisel-yasalar'), 'Günüm', yz('ortak.king-kart.derse-cevir'), yz('ortak.king-kart.sinav-yolculugu'), yz('ortak.king-kart.konu-anlat')];
   const S_ = (...l) => l.join('');
   const ARAC_SIMGE = {
     'Kişisel yasalar':S_('<path d="M12 4v16M5 20h14"/>', '<path d="M6 8h12M6 8l-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/>'),
@@ -305,7 +532,7 @@ window.LIFEOS.PARCA.yazilar({
   KI.kvDuzen = false; KI.kvSecili = null; KI.kvYeni = false; KI.kvTaslak = ''; KI.kvGiris = true;
   function kartSimge(x, emoji){
     return emoji ? '<span class="kv-mini-simge kv-mini-simge--emoji" aria-hidden="true">' + KI.kac(emoji) + '</span>'
-      : '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + (ARAC_SIMGE[x.ad] || (x.ozel ? ARAC_SIMGE['Kart yap'] : GRUP_SVG_MODUL)) + '</svg>'
+      : '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + (ARAC_SIMGE[x.ad] || (x.ozel ? ARAC_SIMGE[yz('ortak.king-kart.kart-yap')] : GRUP_SVG_MODUL)) + '</svg>'
         + (x.merkez && !KI.baglanti() ? '<i class="kv-mini-merkez"></i>' : '') + '</span>';
   }
   function miniKutu(x, i, duzen){
@@ -320,8 +547,8 @@ window.LIFEOS.PARCA.yazilar({
       return '<div class="kv-mini is-duzen' + (KI.kvSecili === key ? ' is-secili' : '') + '"' + rk + ara + st + '>'
         + '<button type="button" class="kv-mini-sec" data-king="kv-sec:' + KI.kac(key) + '" aria-pressed="' + (KI.kvSecili === key) + '" aria-label="' + KI.kac(x.ad) + ': rengini ve simgesini düzenle">'
         + kartSimge(x, emoji) + '<span class="kv-mini-ad">' + KI.kac(x.ad) + '</span></button>'
-        + '<button type="button" class="kv-mini-rozet' + (sabit ? ' is-sabit' : '') + '" data-king="kv-sabit:' + KI.kac(key) + '" aria-label="' + (sabit ? 'Kartlarımdan çıkar' : 'Kartlarıma ekle') + ': ' + KI.kac(x.ad) + '" title="' + (sabit ? 'Kartlarımdan çıkar' : 'Kartlarıma ekle') + '">'
-        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (sabit ? 'M6 12h12' : 'M12 6v12M6 12h12') + '"/></svg></button></div>';
+        + '<button type="button" class="kv-mini-rozet' + (sabit ? ' is-sabit' : '') + '" data-king="kv-sabit:' + KI.kac(key) + '" aria-label="' + (sabit ? yz('ortak.king-kart.kartlarimdan-cikar') : yz('ortak.king-kart.kartlarima-ekle')) + ': ' + KI.kac(x.ad) + '" title="' + (sabit ? yz('ortak.king-kart.kartlarimdan-cikar') : yz('ortak.king-kart.kartlarima-ekle')) + '">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (sabit ? yz('ortak.king-kart.m6-12h12') : yz('ortak.king-kart.m12-6v12m6-12h12')) + '"/></svg></button></div>';
     }
     return '<button type="button" class="kv-mini' + (sonuk ? ' is-sonuk' : '') + '"' + rk + ara + st
       + (x.hazir != null ? ' data-king-hazir="' + x.hazir + '" data-king="hazir"' : ' data-king="' + KI.kac(e.eylem) + '"')
@@ -340,31 +567,31 @@ window.LIFEOS.PARCA.yazilar({
     return '<div class="kv-panel" role="group" aria-label="' + KI.kac(x.ad) + ' kartını düzenle" data-renk="' + renk + '">'
       + '<div class="kv-panel-bas">' + kartSimge(x, emoji) + '<div><b>' + KI.kac(x.ad) + '</b><small>' + KI.kac(x.ip) + '</small></div>'
       + '<button type="button" class="king__yan-kapa" data-king="kv-sec:" aria-label="Kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>'
-      + '<div class="kv-panel-satir"><span>Renk</span><div class="kv-renkler">' + KART_RENK.map(r => '<button type="button" class="kv-renk' + (r === renk ? ' is-secili' : '')
+      + ('<div class="kv-panel-satir"><span>' + yz('ortak.king-kart.renk') + '</span><div class="kv-renkler">') + KART_RENK.map(r => '<button type="button" class="kv-renk' + (r === renk ? ' is-secili' : '')
         + '" data-renk="' + r + '" data-king="kv-renk:' + r + '" aria-pressed="' + (r === renk) + '" aria-label="' + KART_RENK_AD[r] + '" title="' + KART_RENK_AD[r] + '"></button>').join('') + '</div></div>'
-      + '<div class="kv-panel-satir"><span>Simge</span><div class="kv-emojiler">'
+      + ('<div class="kv-panel-satir"><span>' + yz('ortak.king-kart.simge') + '</span><div class="kv-emojiler">')
       + '<button type="button" class="kv-emoji kv-emoji--ozgun' + (emoji ? '' : ' is-secili') + '" data-king="kv-emoji:" aria-pressed="' + !emoji + '" aria-label="Özgün simge" title="Özgün simge"><svg viewBox="0 0 24 24" aria-hidden="true">'
-      + (ARAC_SIMGE[x.ad] || (x.ozel ? ARAC_SIMGE['Kart yap'] : GRUP_SVG_MODUL)) + '</svg></button>'
+      + (ARAC_SIMGE[x.ad] || (x.ozel ? ARAC_SIMGE[yz('ortak.king-kart.kart-yap')] : GRUP_SVG_MODUL)) + '</svg></button>'
       + KART_EMOJI.map(m => '<button type="button" class="kv-emoji' + (m === emoji ? ' is-secili' : '') + '" data-king="kv-emoji:' + m + '" aria-pressed="' + (m === emoji) + '" aria-label="' + m + '">' + m + '</button>').join('')
       + '<input class="kv-emoji-gir" data-king-kv-emoji maxlength="8" placeholder="Başka" aria-label="Kendi emojin" value="' + (emoji && KART_EMOJI.indexOf(emoji) < 0 ? KI.kac(emoji) : '') + '"/></div></div>'
       + '<div class="kv-panel-eylem">'
-      + (sabit ? dg('kv-tasi:-1', '← Öne al') + dg('kv-tasi:1', 'Geriye al →') : '')
-      + dg('kv-sabit:' + key, sabit ? 'Kartlarımdan çıkar' : 'Kartlarıma ekle', sabit ? '' : ' kv-dugme--birincil')
-      + ((A.renk[key] || A.emoji[key]) ? dg('kv-varsayilan', 'Özgün görünüm') : '')
-      + (x.ozel ? dg('kv-sil:' + x.ozel, 'Kartı sil', ' kv-dugme--tehlike') : '')
+      + (sabit ? dg('kv-tasi:-1', '← Öne al') + dg('kv-tasi:1', yz('ortak.king-kart.geriye-al')) : '')
+      + dg('kv-sabit:' + key, sabit ? yz('ortak.king-kart.kartlarimdan-cikar') : yz('ortak.king-kart.kartlarima-ekle'), sabit ? '' : ' kv-dugme--birincil')
+      + ((A.renk[key] || A.emoji[key]) ? dg('kv-varsayilan', yz('ortak.king-kart.ozgun-gorunum')) : '')
+      + (x.ozel ? dg('kv-sil:' + x.ozel, yz('ortak.king-kart.karti-sil'), ' kv-dugme--tehlike') : '')
       + '</div></div>';
   }
   function kvYeniForm(){
     return '<form class="kv-panel kv-yeni" data-king-kv-form aria-label="Yeni kart">'
-      + '<div class="kv-panel-bas"><span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + ARAC_SIMGE['Kart yap'] + '</svg></span>'
-      + '<div><b>Yeni kart</b><small>Bir konu, bir soru ya da sık yazdığın bir istek. Kartlarım’a eklenir; rengini ve simgesini sonra seçersin.</small></div>'
+      + '<div class="kv-panel-bas"><span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + ARAC_SIMGE[yz('ortak.king-kart.kart-yap')] + '</svg></span>'
+      + ('<div><b>' + yz('ortak.king-kart.yeni-kart') + '</b><small>' + yz('ortak.king-kart.bir-konu-bir-soru-ya') + '</small></div>')
       + '<button type="button" class="king__yan-kapa" data-king="kv-yeni-kapat" aria-label="Vazgeç"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>'
-      + '<label class="kv-alan"><span>Ad</span><input name="ad" maxlength="28" required placeholder="Örn. Akşam değerlendirmesi" autocomplete="off"/></label>'
-      + '<label class="kv-alan"><span>Metin</span><textarea name="metin" rows="3" maxlength="600" required placeholder="Örn. Bugün ne öğrendim, birlikte değerlendirelim">' + KI.kac(KI.kvTaslak) + '</textarea></label>'
-      + '<div class="kv-secim" role="radiogroup" aria-label="Dokununca"><label><input type="radio" name="gonder" value="1" checked/><span>Dokununca hemen sor</span></label>'
-      + '<label><input type="radio" name="gonder" value="0"/><span>Yazı alanına koy, ben tamamlarım</span></label></div>'
-      + '<div class="kv-panel-eylem"><button type="submit" class="kv-dugme kv-dugme--birincil">Kartı ekle</button>'
-      + '<button type="button" class="kv-dugme" data-king="kv-yeni-kapat">Vazgeç</button></div></form>';
+      + ('<label class="kv-alan"><span>' + yz('ortak.king-kart.ad') + '</span><input name="ad" maxlength="28" required placeholder="Örn. Akşam değerlendirmesi" autocomplete="off"/></label>')
+      + ('<label class="kv-alan"><span>' + yz('ortak.king-kart.metin') + '</span><textarea name="metin" rows="3" maxlength="600" required placeholder="Örn. Bugün ne öğrendim, birlikte değerlendirelim">') + KI.kac(KI.kvTaslak) + '</textarea></label>'
+      + ('<div class="kv-secim" role="radiogroup" aria-label="Dokununca"><label><input type="radio" name="gonder" value="1" checked/><span>' + yz('ortak.king-kart.dokununca-hemen-sor') + '</span></label>')
+      + ('<label><input type="radio" name="gonder" value="0"/><span>' + yz('ortak.king-kart.yazi-alanina-koy-ben-tamamla') + '</span></label></div>')
+      + ('<div class="kv-panel-eylem"><button type="submit" class="kv-dugme kv-dugme--birincil">' + yz('ortak.king-kart.karti-ekle') + '</button>')
+      + ('<button type="button" class="kv-dugme" data-king="kv-yeni-kapat">' + yz('ortak.king-kart.vazgec') + '</button></div></form>');
   }
   function vitrinHtml(){
     const gruplar = yetenekler(), one = oneCikanlar(gruplar), d = KI.kvDuzen;
@@ -373,23 +600,23 @@ window.LIFEOS.PARCA.yazilar({
     const panel = l => { if(panelYok && l.some(x => kartAnahtar(x) === KI.kvSecili)){ panelYok = false; return kvPanel(secili); } return ''; };
     const giris = KI.kvGiris ? ' is-giris' : '';
     return '<section class="king__vitrin' + giris + (d ? ' is-duzen' : '') + '" data-king-vitrin aria-label="Araçlar">'
-      + '<header class="kv-bas"><h2 class="kv-baslik">Araçlar</h2>'
+      + ('<header class="kv-bas"><h2 class="kv-baslik">' + yz('ortak.king-kart.araclar') + '</h2>')
       + '<input class="king__ara kv-ara" type="search" data-king-ara-girdi placeholder="Ara: ders, uyku, hesap…" aria-label="Araçlarda ara" autocomplete="off"/>'
-      + '<button type="button" class="kv-dugme" data-king="kv-yeni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Yeni kart</button>'
+      + ('<button type="button" class="kv-dugme" data-king="kv-yeni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' + yz('ortak.king-kart.yeni-kart') + '</button>')
       + '<button type="button" class="kv-dugme' + (d ? ' kv-dugme--birincil' : '') + '" data-king="kv-duzen" aria-pressed="' + d + '">' + (d ? 'Bitti' : 'Düzenle') + '</button></header>'
       + (KI.kvYeni ? kvYeniForm() : '')
-      + (d ? '<p class="kv-ipucu">Kartı seç: rengini ve simgesini değiştir. <b>+</b> Kartlarım’a ekler, <b>−</b> çıkarır.'
-        + (kartAyar().sabit ? ' <button type="button" class="kv-bag" data-king="kv-sifirla">Kartlarımı varsayılana döndür</button>' : '') + '</p>' : '')
-      + '<div class="kv-grup kv-grup--one" style="--g:0"><h3 class="kv-grup-ad">Kartlarım<small>' + one.length + '</small></h3><div class="kv-izgara">'
+      + (d ? ('<p class="kv-ipucu">' + yz('ortak.king-kart.karti-sec-rengini-ve-simgesi') + ' <b>+</b> ' + yz('ortak.king-kart.kartlarim-a-ekler') + ' <b>−</b> ' + yz('ortak.king-kart.cikarir'))
+        + (kartAyar().sabit ? (' <button type="button" class="kv-bag" data-king="kv-sifirla">' + yz('ortak.king-kart.kartlarimi-varsayilana-dondu') + '</button>') : '') + '</p>' : '')
+      + ('<div class="kv-grup kv-grup--one" style="--g:0"><h3 class="kv-grup-ad">' + yz('ortak.king-kart.kartlarim') + '<small>') + one.length + '</small></h3><div class="kv-izgara">'
         + one.map((x, i) => miniKutu(x, i, d)).join('')
-        + (one.length ? '' : '<p class="kv-bos">Kartlarım boş. «Düzenle»yi aç, istediğin aracın <b>+</b>’sına dokun ya da «Yeni kart» ekle.</p>')
+        + (one.length ? '' : ('<p class="kv-bos">' + yz('ortak.king-kart.kartlarim-bos-duzenle-yi-ac') + ' <b>+</b>' + yz('ortak.king-kart.sina-dokun-ya-da-yeni') + '</p>'))
         + '</div>' + panel(one) + '</div>'
       + gruplar.map((g, gi) => {
         const l = g.l.map(x => Object.assign({ renk:renkOf(g) }, x));
         return '<div class="kv-grup" id="kv-' + gi + '" data-renk="' + renkOf(g) + '" style="--g:' + (gi + 1) + '"><h3 class="kv-grup-ad"><i class="kv-grup-nokta" aria-hidden="true"></i>' + KI.kac(g.ad) + '<small>' + g.l.length + '</small></h3>'
           + '<div class="kv-izgara">' + l.map((x, i) => miniKutu(x, i, d)).join('') + '</div>' + panel(l) + '</div>';
       }).join('')
-      + '<p class="kv-not">Dokun: hemen yapar ya da örneği yazı alanına koyar. Sayıları her zaman modülün kendi kodu üretir.</p>'
+      + ('<p class="kv-not">' + yz('ortak.king-kart.dokun-hemen-yapar-ya-da') + '</p>')
       + '</section>';
   }
   /* Sol dizin (kullanıcı, 2026-10-23: «sol tarafı bayağı küçült, sadece yazılar»): dar sütun, renk noktası ve ad. */
@@ -404,8 +631,8 @@ window.LIFEOS.PARCA.yazilar({
       + (alt ? '<small>' + KI.kac(alt) + '</small>' : '') + (ek || '') + '</button></li>';
   }
   function gorevListe(){
-    if(!KI.baglanti()) return KI.yanBos('Görevler Merkez’de (HKM) çalışır; Merkez bağlı değil.');
-    if(!KI.ekip.yuklu) return '<p class="king__yan-bos" role="status">Yükleniyor…</p>';
+    if(!KI.baglanti()) return KI.yanBos(yz('ortak.king-kart.gorevler-merkez-de-hkm-calis'));
+    if(!KI.ekip.yuklu) return ('<p class="king__yan-bos" role="status">' + yz('ortak.king-kart.yukleniyor') + '</p>');
     const sira = { suruyor:0, taslak:1, bitti:2, iptal:3 };
     const gorevler = KI.ekip.gorevler.slice().sort((a, b) => (sira[a.durum] - sira[b.durum]) || (b.id - a.id)).slice(0, 12);
     const isler = KI.ekip.isler.filter(i => i.tur !== 'gorev_adim' || KI.ACIK_IS.indexOf(i.durum) >= 0).slice(0, 12);
@@ -413,15 +640,15 @@ window.LIFEOS.PARCA.yazilar({
         const il = g.ilerleme || {}, oran = (il.bitti || 0) + '/' + (il.toplam || 0);
         return listeSatir('ekip-ac', g.hedef, oran + ' adım · ' + (g.durum_ad || g.durum), KI.cubukHtml(il.yuzde, oran + ' adım bitti'), g.durum === 'suruyor');
       }).join('') + '</ul>'
-      : KI.yanBos('Görev yok. «Bu hafta B1’e hazırla beni» gibi yaz; King adım adım kurar, sen başlatmadan başlamaz.'))
-      + KI.listeGrup('Arka planda', isler.length ? '<ul class="king__gecmis">' + isler.map(i => listeSatir('ekip-ac', i.baslik,
+      : KI.yanBos(yz('ortak.king-kart.gorev-yok-bu-hafta-b1-e')))
+      + KI.listeGrup(yz('ortak.king-kart.arka-planda'), isler.length ? '<ul class="king__gecmis">' + isler.map(i => listeSatir('ekip-ac', i.baslik,
           KI.isAjanAd(i) + ' · ' + (i.durum_ad || i.durum), i.durum === 'calisiyor' ? KI.cubukHtml(i.ilerleme, i.baslik + ': yüzde ' + (Number(i.ilerleme) || 0)) : '',
           KI.ACIK_IS.indexOf(i.durum) >= 0)).join('') + '</ul>'
-        : KI.yanBos('Arka planda iş yok. «Arka planda … araştır» dersen ekibe veririm, sen konuşmaya devam edersin.'));
+        : KI.yanBos(yz('ortak.king-kart.arka-planda-is-yok-arka')));
   }
   function rutinListe(){
-    if(!KI.baglanti()) return KI.yanBos('Beceriler ve sözler Merkez’de (HKM) durur; Merkez bağlı değil.');
-    if(!KI.beceriV.yuklu) return '<p class="king__yan-bos" role="status">Yükleniyor…</p>';
+    if(!KI.baglanti()) return KI.yanBos(yz('ortak.king-kart.beceriler-ve-sozler-merkez-d'));
+    if(!KI.beceriV.yuklu) return ('<p class="king__yan-bos" role="status">' + yz('ortak.king-kart.yukleniyor') + '</p>');
     const sozler = KI.beceriV.sozler.filter(s => s.durum === 'bekliyor' || s.durum === 'soruldu');
     return KI.listeGrup('Beceriler', KI.beceriV.beceriler.length ? '<ul class="king__gecmis">' + KI.beceriV.beceriler.map(b => {
         const id = Number(b.id);
@@ -430,10 +657,10 @@ window.LIFEOS.PARCA.yazilar({
           + '<button type="button" class="king__secim" role="switch" aria-checked="' + (b.acik ? 'true' : 'false') + '" data-king="beceri-' + (b.acik ? 'kapat' : 'ac') + ':' + id
           + '" aria-label="' + KI.kac(b.ad) + (b.acik ? ' açık' : ' kapalı') + '"><span class="king__anahtar' + (b.acik ? ' is-acik' : '') + '" aria-hidden="true"><i></i></span></button></li>';
       }).join('') + '</ul>'
-      : KI.yanBos('Beceri yok. «Her pazartesi bana deneme hatırlat» ya da «‘ders bitti’ deyince mola aç» diye öğret.'))
+      : KI.yanBos(yz('ortak.king-kart.beceri-yok-her-pazartesi-ban')))
       + KI.listeGrup('Sözler', sozler.length ? '<ul class="king__gecmis">' + sozler.map(s => listeSatir('beceri-ac', s.metin,
           (s.durum_ad || s.durum) + (s.vade_metin ? ' · ' + s.vade_metin : ''))).join('') + '</ul>'
-        : KI.yanBos('Açık söz yok. «Yarın fizik sınavım var» dersen zamanı gelince nasıl geçtiğini sorarım.'));
+        : KI.yanBos(yz('ortak.king-kart.acik-soz-yok-yarin-fizik')));
   }
   /* KÜTÜPHANE SAYFASI (kullanıcı, 2026-10-23: «soldan açılan bir sayfa değil, karşımıza
      gelen bir sayfa; resimler, videolar, sesler, arşivlenmiş sohbetler»). Araçlar gibi
@@ -505,7 +732,7 @@ window.LIFEOS.PARCA.yazilar({
       : '<span class="kt-ana">' + ic + '</span>') + (o.ek ? '<span class="kt-ek">' + o.ek + '</span>' : '') + '</div>';
   }
   function ktSohbet(k, i, kls){
-    const tasi = kls.length ? '<select class="kt-tasi" data-king-kt-tasi="' + KI.kac(k.id) + '" aria-label="Klasöre taşı" title="Klasöre taşı"><option value="">Klasörsüz</option>'
+    const tasi = kls.length ? '<select class="kt-tasi" data-king-kt-tasi="' + KI.kac(k.id) + ('" aria-label="Klasöre taşı" title="Klasöre taşı"><option value="">' + yz('ortak.king-kart.klasorsuz') + '</option>')
       + kls.map(f => '<option value="' + KI.kac(f.id) + '"' + (k.klasor === f.id ? ' selected' : '') + '>' + KI.kac(f.ad) + '</option>').join('') + '</select>' : '';
     return ktKart({ i, svg:KT_SVG.sohbet, bas:KI.kayitBasligi(k), alt:KI.tarihYaz(k.zaman) + ' · ' + k.mesajlar.length + ' mesaj' + (k.modul && KI.MODUL_AD[k.modul] ? ' · ' + KI.MODUL_AD[k.modul] : ''),
       eylem:'kayit-ac:' + k.id, sohbete:true, ek:ktUfak('kayit:' + k.id, 'Önizle', KT_SVG.goz) + tasi });
@@ -518,42 +745,42 @@ window.LIFEOS.PARCA.yazilar({
     const izgara = ic => '<div class="kt-izgara">' + ic + '</div>';
     const icerik = {
       sohbet:() => (KI.klasorYeni ? '<form class="king__klasor-form kt-klasor-form" data-king-klasor><input class="king__ara" type="text" maxlength="40" placeholder="Klasör adı" aria-label="Klasör adı" data-king-klasor-ad/>'
-          + '<button type="submit" class="kv-dugme kv-dugme--birincil">Ekle</button></form>' : '')
+          + ('<button type="submit" class="kv-dugme kv-dugme--birincil">' + yz('ortak.king-kart.ekle') + '</button></form>') : '')
         + kls.map(fl => {
           const ic = v.sohbet.filter(k => k.klasor === fl.id);
           return '<div class="king__klasor kt-klasor"><div class="kt-klasor-bas"><svg viewBox="0 0 24 24" aria-hidden="true">' + KT_SVG.klasor + '</svg><span>' + KI.kac(fl.ad) + '</span><small>' + ic.length + '</small>'
-            + ktUfak('klasor-sil:' + fl.id, 'Klasörü kaldır; sohbetler silinmez', KT_X) + '</div>'
-            + (ic.length ? izgara(ic.map((k, i) => ktSohbet(k, i, kls)).join('')) : '<p class="kt-not">Boş. Bir sohbeti kartındaki seçimle buraya taşı.</p>') + '</div>';
+            + ktUfak('klasor-sil:' + fl.id, yz('ortak.king-kart.klasoru-kaldir-sohbetler-sil'), KT_X) + '</div>'
+            + (ic.length ? izgara(ic.map((k, i) => ktSohbet(k, i, kls)).join('')) : ('<p class="kt-not">' + yz('ortak.king-kart.bos-bir-sohbeti-kartindaki-s') + '</p>')) + '</div>';
         }).join('')
         + izgara(v.sohbet.filter(k => !k.klasor || !kls.some(fl => fl.id === k.klasor)).map((k, i) => ktSohbet(k, i, kls)).join('')),
       ders:() => izgara(v.ders.map((d, i) => ktKart({ i, svg:KT_SVG.ders, bas:d.baslik, alt:d.kaynak + ' · ' + d.bolumler.length + ' bölüm · ' + d.sorular.length + ' soru', eylem:'kd-ac:' + i, sohbete:true })).join('')),
-      ses:() => izgara(v.ses.map((x, i) => ktKart({ i, svg:KT_SVG.ses, bas:(KI.MODUL_AD[x.modul] || 'Sesli özet') + ' · ' + KI.tarihYaz(x.zaman), alt:x.satirlar[0] || '', eylem:'sozet-dinle:' + i })).join('')),
+      ses:() => izgara(v.ses.map((x, i) => ktKart({ i, svg:KT_SVG.ses, bas:(KI.MODUL_AD[x.modul] || yz('ortak.king-kart.sesli-ozet')) + ' · ' + KI.tarihYaz(x.zaman), alt:x.satirlar[0] || '', eylem:'sozet-dinle:' + i })).join('')),
       video:() => izgara(v.video.map((x, i) => ktKart({ i, svg:KT_SVG.video, bas:x.baslik, alt:[x.alt, x.konu].filter(Boolean).join(' · '), href:x.link })).join('')),
       okuma:() => izgara(v.okuma.map((x, i) => ktKart({ i, svg:KT_SVG.okuma, bas:x.baslik, alt:[x.alt, x.konu].filter(Boolean).join(' · '), href:x.link })).join('')),
       gorsel:() => '<div class="kt-galeri">' + v.gorsel.map((x, i) => '<figure class="kt-gorsel" style="--i:' + i + '" data-king-ara="' + KI.kac(KI.tarihYaz(x.zaman).toLocaleLowerCase('tr')) + '">'
           + '<button type="button" class="kt-gorsel-ac" data-king="gorsel-buyut:' + KI.kac(x.id) + '" aria-label="Büyüt: ' + KI.kac(KI.tarihYaz(x.zaman)) + '"><img src="' + x.src + '" alt="Gönderdiğin fotoğraf, ' + KI.kac(KI.tarihYaz(x.zaman)) + '" loading="lazy"/></button>'
-          + ktUfak('gorsel-sil:' + x.id, 'Görseli sil', KT_X) + '<figcaption>' + KI.kac(KI.tarihYaz(x.zaman)) + '</figcaption></figure>').join('') + '</div>',
+          + ktUfak('gorsel-sil:' + x.id, yz('ortak.king-kart.gorseli-sil'), KT_X) + '<figcaption>' + KI.kac(KI.tarihYaz(x.zaman)) + '</figcaption></figure>').join('') + '</div>',
       arastirma:() => izgara(v.arastirma.map((x, i) => ktKart({ i, svg:KT_SVG.arastirma, bas:x.m.arastirma.konu, alt:(x.m.arastirma.izle.length + x.m.arastirma.oku.length) + ' kaynak · bu sohbette', eylem:'ars-ac:' + x.n })).join('')),
-      sira:() => izgara(v.sira.map((x, i) => ktKart({ i, svg:KT_SVG.sira, bas:x.metin, alt:KI.tarihYaz(x.zaman) + ' · Merkez bekleniyor', ek:ktUfak('sira-sil:' + i, 'Sıradan çıkar', KT_X) })).join('')),
+      sira:() => izgara(v.sira.map((x, i) => ktKart({ i, svg:KT_SVG.sira, bas:x.metin, alt:KI.tarihYaz(x.zaman) + ' · Merkez bekleniyor', ek:ktUfak('sira-sil:' + i, yz('ortak.king-kart.siradan-cikar'), KT_X) })).join('')),
     };
     const buyuk = KI.kutBuyuk && v.gorsel.find(x => x.id === KI.kutBuyuk);
     const toplam = l.reduce((a, b) => a + say(b.id), 0);
     return '<section class="king__kutuphane' + (KI.kvGiris ? ' is-giris' : '') + '" data-king-kutuphane aria-label="Kütüphane">'
-      + '<header class="kv-bas"><h2 class="kv-baslik">Kütüphane</h2>'
+      + ('<header class="kv-bas"><h2 class="kv-baslik">' + yz('ortak.king-kart.kutuphane') + '</h2>')
       + '<input class="king__ara kv-ara" type="search" data-king-ara-girdi placeholder="Kütüphanede ara" aria-label="Kütüphanede ara" autocomplete="off"/>'
-      + '<button type="button" class="kv-dugme" data-king="klasor-yeni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Yeni klasör</button></header>'
+      + ('<button type="button" class="kv-dugme" data-king="klasor-yeni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' + yz('ortak.king-kart.yeni-klasor') + '</button></header>')
       + (l.length > 1 ? '<div class="kt-filtre" role="group" aria-label="Süz">'
         + [{ id:'hepsi', ad:yz('ortak.king-kart.tumu'), n:toplam }].concat(l.map(b => ({ id:b.id, ad:b.ad, n:say(b.id), renk:b.renk }))).map(c => '<button type="button" class="kt-cip' + (f === c.id ? ' is-secili' : '') + '"'
           + (c.renk ? ' data-renk="' + c.renk + '"' : '') + ' data-king="kut-filtre:' + c.id + '" aria-pressed="' + (f === c.id) + '">'
           + (c.renk ? '<i class="kv-grup-nokta" aria-hidden="true"></i>' : '') + c.ad + '<small>' + c.n + '</small></button>').join('') + '</div>' : '')
       + (l.length ? l.filter(b => f === 'hepsi' || f === b.id).map((b, gi) => '<section class="kt-bolum" id="kut-' + b.id + '" data-renk="' + b.renk + '" style="--g:' + gi + '">'
           + '<h3 class="kv-grup-ad"><i class="kv-grup-nokta" aria-hidden="true"></i>' + b.ad + '<small>' + say(b.id) + '</small></h3>' + icerik[b.id]() + '</section>').join('')
-        : '<div class="kt-bos"><span class="kt-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + KT_SVG.okuma + '</svg></span><b>Kütüphane henüz boş</b>'
-          + '<p>Kayıtlı sohbetler, Derslerim, sesli özetler, araştırmaların videoları ve okumaları, gönderdiğin fotoğraflar burada toplanır.</p></div>')
-      + '<p class="kv-not">Hepsi bu cihazda. Fotoğrafların küçük bir kopyası saklanır (en çok ' + GORSEL_EN_COK + '); istediğini silebilirsin.</p>'
+        : '<div class="kt-bos"><span class="kt-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + KT_SVG.okuma + ('</svg></span><b>' + yz('ortak.king-kart.kutuphane-henuz-bos') + '</b>')
+          + ('<p>' + yz('ortak.king-kart.kayitli-sohbetler-derslerim') + '</p></div>'))
+      + ('<p class="kv-not">' + yz('ortak.king-kart.hepsi-bu-cihazda-fotograflar') + ' ') + GORSEL_EN_COK + (yz('ortak.king-kart.istedigini-silebilirsin') + '</p>')
       + (buyuk ? '<div class="kt-buyuk" role="dialog" aria-label="Görsel"><button type="button" class="kt-buyuk-perde" data-king="gorsel-buyut:" aria-label="Kapat"></button>'
         + '<figure><img src="' + buyuk.src + '" alt="Gönderdiğin fotoğraf, ' + KI.kac(KI.tarihYaz(buyuk.zaman)) + '"/><figcaption>' + KI.kac(KI.tarihYaz(buyuk.zaman))
-        + ktUfak('gorsel-sil:' + buyuk.id, 'Görseli sil', KT_X) + ktUfak('gorsel-buyut:', 'Kapat', KT_X) + '</figcaption></figure></div>' : '')
+        + ktUfak('gorsel-sil:' + buyuk.id, yz('ortak.king-kart.gorseli-sil'), KT_X) + ktUfak('gorsel-buyut:', 'Kapat', KT_X) + '</figcaption></figure></div>' : '')
       + '</section>';
   }
   function kutDizin(){
@@ -561,7 +788,7 @@ window.LIFEOS.PARCA.yazilar({
     return '<nav class="kv-dizin" aria-label="Kütüphane bölümleri">' + (l.length
       ? [{ id:'hepsi', ad:yz('ortak.king-kart.tumu') }].concat(l).map(b => '<button type="button" class="kv-dizin-is' + (KI.kutFiltre === b.id ? ' is-secili' : '') + '"' + (b.renk ? ' data-renk="' + b.renk + '"' : '')
         + ' data-king="kut-filtre:' + b.id + '"><i class="kv-grup-nokta" aria-hidden="true"></i><span>' + b.ad + '</span>' + (b.renk ? '<small>' + v[b.id].length + '</small>' : '') + '</button>').join('')
-      : KI.yanBos('Henüz bir şey yok.')) + '</nav>';
+      : KI.yanBos(yz('ortak.king-kart.henuz-bir-sey-yok'))) + '</nav>';
   }
 
   /* ---------- söz 32: kartlar ---------- */
@@ -587,7 +814,7 @@ window.LIFEOS.PARCA.yazilar({
     KI.akis.push({ kim:'sen', metin:String(metin).trim() });
     KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
     const K = KI.ayar && KI.ayar.kartlar ? KI.ayar.kartlar : null;
-    const ad = KI.MODUL_AD[KI.ayar && KI.ayar.modul] || 'Bu modül';
+    const ad = KI.MODUL_AD[KI.ayar && KI.ayar.modul] || yz('ortak.king-kart.bu-modul');
     if(n.tur === 'istatistik'){
       let l = [];
       try{ l = (K && typeof K.istatistik === 'function' ? K.istatistik() : []) || []; }catch(e){ l = []; }
@@ -597,13 +824,13 @@ window.LIFEOS.PARCA.yazilar({
       return { tur:'kart-istatistik', kartlar:l.length };
     }
     if(!K || typeof K.soru !== 'function' || typeof K.cevapla !== 'function'){
-      KI.soyle('Soru bankası AYS’de; AYS’yi açıp «bana soru sor» diyebilirsin.');
+      KI.soyle(yz('ortak.king-kart.soru-bankasi-ays-de-ays-yi-a'));
       return { tur:'kart-yok' };
     }
     let q = null;
     try{ q = await K.soru(n.konu || ''); }catch(e){ q = null; }
     if(!q || !q.soru || !Array.isArray(q.sec) || !q.sec.length){
-      KI.soyle(n.konu ? '«' + n.konu + '» için soru bulamadım; başka bir konu dener misin?' : 'Şu an sorabileceğim bir soru bulamadım.');
+      KI.soyle(n.konu ? '«' + n.konu + '» için soru bulamadım; başka bir konu dener misin?' : yz('ortak.king-kart.su-an-sorabilecegim-bir-soru'));
       return { tur:'kart-yok' };
     }
     const soru = { id:String(q.id), konu:String(q.konu || ''), soru:String(q.soru), sec:q.sec.slice(0, 5).map(String),
@@ -618,13 +845,13 @@ window.LIFEOS.PARCA.yazilar({
       if(!c) return null;
       KI.cipler = [{ ad:yz('ortak.king-kart.bir-soru-daha'), is:'oner-metin:derslerimden soru sor' }];
       KI.sakla(); KI.ciz(false);
-      if(KI.sesleMi()) KI.seslendir(c.isabet ? 'Doğru.' : 'Doğru cevap ' + c.dogru + '.');
+      if(KI.sesleMi()) KI.seslendir(c.isabet ? 'Doğru.' : yz('ortak.king-kart.dogru-cevap') + c.dogru + '.');
       return c;
     }
     if(!m || !m.soru || m.soru.cevap || !K || typeof K.cevapla !== 'function') return null;
     let r = null;
     try{ r = await K.cevapla(m.soru.id, harf); }catch(e){ r = null; }
-    if(!r || !r.dogru){ KI.soyle('Cevabı kaydedemedim; soruyu modülün kendi ekranında deneyebilirsin.'); return null; }
+    if(!r || !r.dogru){ KI.soyle(yz('ortak.king-kart.cevabi-kaydedemedim-soruyu-m')); return null; }
     m.soru.cevap = { harf, dogru:String(r.dogru), isabet:harf === r.dogru,
       cozum:(r.cozum || []).map(String).slice(0, 6), not:String(r.not || '') };
     KI.cipler = [{ ad:yz('ortak.king-kart.bir-soru-daha'), is:'soru-yeni:' + n }];
@@ -633,7 +860,7 @@ window.LIFEOS.PARCA.yazilar({
     if(dn >= 0) KI.cipler.unshift({ ad:yz('ortak.king-kart.konuyu-yeniden-anlat'), is:'ders-tekrar:' + dn });
     KI.sakla();
     KI.ciz(false);
-    if(KI.sesleMi()) KI.seslendir(m.soru.cevap.isabet ? 'Doğru.' : 'Doğru cevap ' + m.soru.cevap.dogru + '.');
+    if(KI.sesleMi()) KI.seslendir(m.soru.cevap.isabet ? 'Doğru.' : yz('ortak.king-kart.dogru-cevap') + m.soru.cevap.dogru + '.');
     return m.soru.cevap;
   }
   /* ---------- söz 38: araştırma kartı (HKM arastirma.v1) ---------- */
@@ -662,16 +889,16 @@ window.LIFEOS.PARCA.yazilar({
       + (x.no ? '<span class="king__ars-no">' + x.no + '</span>' : '') + KI.kac(x.baslik) + '</a>'
       + (alt ? '<small>' + KI.kac(alt) + '</small>' : '') + (x.neden ? '<span>' + KI.kac(x.neden) + '</span>' : '') + '</li>';
     return '<div class="king__ars" role="group" aria-label="Araştırma: ' + KI.kac(a.konu) + '">'
-      + '<div class="king__ars-bolum"><div class="king__ars-bas"><span class="king__ars-ad">Özet</span>'
-      + (a.ozet ? '<button type="button" class="king__cip" data-king="ars-dinle:' + n + '">Dinle</button>' : '') + '</div>'
-      + '<p>' + KI.kac(a.ozet || 'Kaynaklardan doğrulanmış kısa bir özet çıkaramadım; aşağıdaki kaynaklara bakabilirsin.') + '</p></div>'
-      + (a.izle.length ? '<div class="king__ars-bolum"><span class="king__ars-ad">İzle</span><ul class="king__ars-liste">'
+      + ('<div class="king__ars-bolum"><div class="king__ars-bas"><span class="king__ars-ad">' + yz('ortak.king-kart.ozet') + '</span>')
+      + (a.ozet ? '<button type="button" class="king__cip" data-king="ars-dinle:' + n + ('">' + yz('ortak.king-kart.dinle') + '</button>') : '') + '</div>'
+      + '<p>' + KI.kac(a.ozet || yz('ortak.king-kart.kaynaklardan-dogrulanmis-kis')) + '</p></div>'
+      + (a.izle.length ? ('<div class="king__ars-bolum"><span class="king__ars-ad">' + yz('ortak.king-kart.i-zle') + '</span><ul class="king__ars-liste">')
         + a.izle.map(v => bag(v, v.bilgi)).join('') + '</ul></div>' : '')
-      + (a.oku.length ? '<div class="king__ars-bolum"><span class="king__ars-ad">Oku</span><ul class="king__ars-liste">'
+      + (a.oku.length ? ('<div class="king__ars-bolum"><span class="king__ars-ad">' + yz('ortak.king-kart.oku') + '</span><ul class="king__ars-liste">')
         + a.oku.map(k => bag(k, k.site)).join('') + '</ul></div>' : '')
-      + (a.hedef && KI.D() ? '<div class="king__ars-bolum king__ars-sonraki"><span class="king__ars-ad">Sıradaki adım</span>'
-        + '<p>«' + KI.kac(a.hedef.baslik) + '» Defter’e kaynak olarak eklenebilir; onaylamadan eklenmez.</p>'
-        + '<button type="button" class="king__cip" data-king="ars-ekle:' + n + '">Defter’e ekle</button></div>' : '')
+      + (a.hedef && KI.D() ? ('<div class="king__ars-bolum king__ars-sonraki"><span class="king__ars-ad">' + yz('ortak.king-kart.siradaki-adim') + '</span>')
+        + '<p>«' + KI.kac(a.hedef.baslik) + (yz('ortak.king-kart.defter-e-kaynak-olarak-eklen') + '</p>')
+        + '<button type="button" class="king__cip" data-king="ars-ekle:' + n + ('">' + yz('ortak.king-kart.defter-e-ekle') + '</button></div>') : '')
       + '</div>';
   }
   /* «Defter’e ekle»: King'in not aracı, onay kartıyla (söz 36). */
@@ -679,9 +906,9 @@ window.LIFEOS.PARCA.yazilar({
     const a = KI.akis[n] && KI.akis[n].arastirma, A = KI.ARAC();
     if(!a || !a.hedef || !A) return null;
     const h = a.hedef;
-    const o = await A.onizle('not_ekle', { baslik:('Kaynak: ' + h.baslik).slice(0, 120),
+    const o = await A.onizle('not_ekle', { baslik:(yz('ortak.king-kart.kaynak') + h.baslik).slice(0, 120),
       metin:(a.konu + ' için' + (h.kanal ? ' · ' + h.kanal : '') + '\n' + h.link).slice(0, 2000) }, { metin:'' });
-    if(!o.ok){ KI.soyle('Defter’e ekleyemedim: ' + o.hata + '.'); return null; }
+    if(!o.ok){ KI.soyle(yz('ortak.king-kart.defter-e-ekleyemedim') + o.hata + '.'); return null; }
     return KI.aracKart(o);
   }
   function kartlarHtml(m){
@@ -703,7 +930,7 @@ window.LIFEOS.PARCA.yazilar({
         return '<button type="button" class="king__soru-sik' + cls + '"' + (c ? ' disabled' : '') + ' data-king="soru-cevap:' + n + ':' + h + '">'
           + '<b>' + h + '</b><span>' + KI.kac(s) + '</span></button>';
       }).join('') + '</div>'
-      + (c ? '<p class="king__soru-sonuc' + (c.isabet ? ' is-dogru' : '') + '">' + (c.isabet ? 'Doğru.' : 'Doğru cevap ' + KI.kac(c.dogru) + '.')
+      + (c ? '<p class="king__soru-sonuc' + (c.isabet ? ' is-dogru' : '') + '">' + (c.isabet ? 'Doğru.' : yz('ortak.king-kart.dogru-cevap') + KI.kac(c.dogru) + '.')
         + (c.not ? ' ' + KI.kac(c.not) : '') + '</p>'
         + (c.cozum.length ? '<ul class="king__soru-cozum">' + c.cozum.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>' : '') : '')
       + (q.not && !c ? '<small class="king__soru-kaynak">' + KI.kac(q.not) + '</small>' : '')
@@ -736,7 +963,7 @@ window.LIFEOS.PARCA.yazilar({
     const k = KI.baglanti();
     if(!k) return null;
     try{
-      const o = { headers:{ 'Authorization':'Bearer ' + k.token } };
+      const o = { headers:{ 'Authorization':yz('ortak.king-kart.bearer') + k.token } };
       if(govde){ o.method = 'POST'; o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(govde); }
       const res = await KI.ortam.fetch(k.url + yol, o);
       return res.status === 200 ? await res.json() : null;
@@ -780,16 +1007,16 @@ window.LIFEOS.PARCA.yazilar({
       if(e.geriAl) await e.geriAl();
       const r = e.id != null ? await hkmIstek('/api/eylem/' + e.id + '/geri', {}) : null;
       if(!e.geriAl){
-        if(!r || !r.ok){ KI.soyle('Geri alamadım: ' + ((r && r.note) || 'Merkez cevap vermedi') + '.'); return false; }
+        if(!r || !r.ok){ KI.soyle(yz('ortak.king-kart.geri-alamadim') + ((r && r.note) || yz('ortak.king-kart.merkez-cevap-vermedi')) + '.'); return false; }
         /* HKM'nin tersi bir istemci aracıysa (modülün aracı) burada uygulanır. */
         const t = r.istemci, A = KI.ARAC(), d = t && A ? A.dogrula(t.ad, t.param) : null;
         if(d && d.ok && d.arac.tur === 'yaz') await d.arac.uygula(d.param);
       }
-    }catch(x){ KI.soyle('Geri alamadım: ' + ((x && x.message) || 'bilinmeyen hata')); return false; }
+    }catch(x){ KI.soyle(yz('ortak.king-kart.geri-alamadim') + ((x && x.message) || 'bilinmeyen hata')); return false; }
     const y = KI.eylemler.find(x => x.anahtar === anahtar || (e.id != null && x.id === e.id));
     if(y) y.durum = 'geri_alindi';
     if(KI.sonGeriAl && KI.sonGeriAl === e.geriAl){ KI.sonGeriAl = null; KI.cipler = null; }
-    KI.soyle('Geri aldım: ' + (e.ozet || e.arac) + '.');
+    KI.soyle(yz('ortak.king-kart.geri-aldim') + (e.ozet || e.arac) + '.');
     eylemTazele();
     return true;
   }
@@ -803,15 +1030,15 @@ window.LIFEOS.PARCA.yazilar({
   const saatYaz = z => { const d = new Date(z); return isNaN(d) ? '' : String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
   function gunAdi(z){
     const d = new Date(z), b = KI.ortam.simdi();
-    if(isNaN(d)) return 'Daha eski';
+    if(isNaN(d)) return yz('ortak.king-kart.daha-eski');
     const f = Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()) - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5);
     return f <= 0 ? 'Bugün' : f === 1 ? 'Dün' : d.toLocaleDateString('tr-TR', { day:'numeric', month:'long' });
   }
   function eylemSatir(e){
     const yer = (e.modul ? KI.MODUL_AD[e.modul] : 'Merkez') + (e.kaynak === 'istemci' ? ' · sen onayladın' : '');
-    const sag = e.durum === 'geri_alindi' ? '<span class="king__eylem-durum">geri alındı</span>'
-      : e.geriYolu ? '<button type="button" class="king__eylem-geri" data-king="eylem-geri:' + KI.kac(e.anahtar) + '" aria-label="Geri al: ' + KI.kac(e.ozet || e.arac) + '">Geri al</button>'
-      : '<span class="king__eylem-durum" title="Bu eylemin geri alma yolu yok">kalıcı</span>';
+    const sag = e.durum === 'geri_alindi' ? ('<span class="king__eylem-durum">' + yz('ortak.king-kart.geri-alindi') + '</span>')
+      : e.geriYolu ? '<button type="button" class="king__eylem-geri" data-king="eylem-geri:' + KI.kac(e.anahtar) + '" aria-label="Geri al: ' + KI.kac(e.ozet || e.arac) + ('">' + yz('ortak.king-kart.geri-al') + '</button>')
+      : ('<span class="king__eylem-durum" title="Bu eylemin geri alma yolu yok">' + yz('ortak.king-kart.kalici') + '</span>');
     return '<li class="king__eylem' + (e.durum === 'geri_alindi' ? ' is-geri' : '') + '"><i class="king__nokta king__nokta--' + (e.modul || 'mer') + '" aria-hidden="true"></i>'
       + '<div class="king__eylem-ic"><span class="king__eylem-ozet">' + KI.kac(e.ozet || e.arac) + '</span>'
       + '<small><time datetime="' + KI.kac(e.zaman) + '">' + saatYaz(e.zaman) + '</time> · ' + KI.kac(yer) + '</small></div>' + sag + '</li>';
@@ -828,26 +1055,26 @@ window.LIFEOS.PARCA.yazilar({
     const sira = ['mer', 'ays', 'spi', 'esp'].filter(g => grup[g]);
     const jeton = (Number(t.giris) || 0) + (Number(t.cikis) || 0) + (Number(t.dusunme) || 0);
     const usd = Number(t.usd) || 0, cagri = Number(t.cagri) || 0;
-    const cumle = cagri ? 'Bugün ' + cagri + ' model çağrısı, ' + sayiYaz(jeton) + ' jeton' + (usd ? ', ' + usd.toFixed(2).replace('.', ',') + ' dolar' : '')
-      + (t.ort_ms != null ? ', ortalama ' + sayiYaz(t.ort_ms) + ' ms' : '') + '. ' + sira.map(g => HARCAMA_AD[g] + ' ' + grup[g]).join(', ') + '.' : 'Bugün model çağrısı yok.';
+    const cumle = cagri ? yz('ortak.king-kart.bugun') + cagri + ' model çağrısı, ' + sayiYaz(jeton) + ' jeton' + (usd ? ', ' + usd.toFixed(2).replace('.', ',') + ' dolar' : '')
+      + (t.ort_ms != null ? ', ortalama ' + sayiYaz(t.ort_ms) + ' ms' : '') + '. ' + sira.map(g => HARCAMA_AD[g] + ' ' + grup[g]).join(', ') + '.' : yz('ortak.king-kart.bugun-model-cagrisi-yok');
     return { cagri, jeton, usd, ort:t.ort_ms, grup, sira, cumle };
   }
   function harcamaHtml(){
     const o = harcamaOzet(KI.harcama);
     if(!o) return '';
-    if(!o.cagri) return '<div class="king__harcama"><p class="king__harcama-bos">Bugün model çağrısı yok.</p></div>';
+    if(!o.cagri) return ('<div class="king__harcama"><p class="king__harcama-bos">' + yz('ortak.king-kart.bugun-model-cagrisi-yok') + '</p></div>');
     const ort = o.ort == null ? '—' : o.ort >= 1000 ? (o.ort / 1000).toFixed(1).replace('.', ',') + ' sn' : o.ort + ' ms';
     return '<div class="king__harcama" role="group" aria-label="King bugün ne harcadı">'
-      + '<div class="king__harcama-sayilar"><span><b>' + sayiYaz(o.cagri) + '</b><small>çağrı</small></span><span><b>' + sayiYaz(o.jeton) + '</b><small>jeton</small></span>'
+      + '<div class="king__harcama-sayilar"><span><b>' + sayiYaz(o.cagri) + ('</b><small>' + yz('ortak.king-kart.cagri') + '</small></span><span><b>') + sayiYaz(o.jeton) + '</b><small>jeton</small></span>'
       + '<span><b>$' + o.usd.toFixed(o.usd < 1 ? 3 : 2) + '</b><small>maliyet</small></span><span><b>' + ort + '</b><small>ortalama</small></span></div>'
       + '<div class="king__harcama-cubuk" role="img" aria-label="' + KI.kac(o.cumle) + '">' + o.sira.map(g => '<i class="king__nokta--' + g + '" style="flex:' + o.grup[g] + '"></i>').join('') + '</div>'
       + '<ul class="king__harcama-anahtar" aria-hidden="true">' + o.sira.map(g => '<li><i class="king__nokta king__nokta--' + g + '"></i>' + HARCAMA_AD[g] + ' ' + o.grup[g] + '</li>').join('') + '</ul></div>';
   }
   function eylemListe(){
     const l = eylemListesi();
-    const ust = KI.baglanti() ? KI.listeGrup('Bugün harcanan', KI.harcama ? harcamaHtml() : '<p class="king__yan-bos" role="status">Yükleniyor…</p>') : '';
+    const ust = KI.baglanti() ? KI.listeGrup(yz('ortak.king-kart.bugun-harcanan'), KI.harcama ? harcamaHtml() : ('<p class="king__yan-bos" role="status">' + yz('ortak.king-kart.yukleniyor') + '</p>')) : '';
     if(!l.length) return ust + KI.yanBos(KI.baglanti() && KI.eylemHkm === null ? 'Yükleniyor…'
-      : 'Henüz bir şey yapmadım. Onayladığın her değişiklik burada görünür; çoğu tek dokunuşla geri alınır.');
+      : yz('ortak.king-kart.henuz-bir-sey-yapmadim-onayl'));
     const gruplar = [];
     l.forEach(e => { const g = gunAdi(e.zaman); const s = gruplar[gruplar.length - 1]; if(s && s.ad === g) s.l.push(e); else gruplar.push({ ad:g, l:[e] }); });
     return ust + gruplar.map(g => KI.listeGrup(g.ad, '<ol class="king__eylemler">' + g.l.map(eylemSatir).join('') + '</ol>')).join('');
@@ -875,26 +1102,26 @@ window.LIFEOS.PARCA.yazilar({
   function oneriYaz(o){
     if(!o) return '';
     const s = o.sayilar || {}, d = k => s[k] && s[k].deger != null ? sayiTr(s[k].deger) : null;
-    if(o.id === 'sinav_yaklasti' && d('kalan_gun') != null) return 'Sınava ' + d('kalan_gun') + ' gün var';
+    if(o.id === 'sinav_yaklasti' && d('kalan_gun') != null) return yz('ortak.king-kart.sinava') + d('kalan_gun') + ' gün var';
     if(o.id === 'uyku_dustu' && d('ort7') != null) return '7 günlük uyku ortalaman ' + d('ort7') + ' saat' + (d('ort28') != null ? ', 28 günlük ' + d('ort28') : '');
-    if(o.id === 'plan_kacti') return (o.konu ? '«' + o.konu + '» ' : 'Bir plan maddesi ') + (d('gecikme_dk') != null ? d('gecikme_dk') + ' dk gecikti' : 'gecikti');
+    if(o.id === 'plan_kacti') return (o.konu ? '«' + o.konu + '» ' : yz('ortak.king-kart.bir-plan-maddesi')) + (d('gecikme_dk') != null ? d('gecikme_dk') + ' dk gecikti' : 'gecikti');
     if(o.id === 'tekrar_gunu' && d('adet') != null) return d('adet') + ' tekrar kartı bugün vadeli';
-    if(o.id === 'ilk_madde' && o.konu) return 'İlk iş: ' + o.konu;
+    if(o.id === 'ilk_madde' && o.konu) return yz('ortak.king-kart.i-lk-is') + o.konu;
     return '';
   }
   /* Modelin bağlamı: her sayı etiketiyle tek satır; kodun cümlesi yedek. */
   function brifingSatirlari(b){
     const l = [], acik = (b.plan || []).filter(x => !x.tamam);
-    l.push('Bugünün planı: ' + (b.plan && b.plan.length ? b.plan.length + ' madde, ' + acik.length + ' açık' + (acik[0] ? '; ilki ' + acik[0].ad + (acik[0].saat ? ' ' + acik[0].saat : '') : '') : 'plan yok'));
-    if(b.bulgu) l.push('Dün ' + b.bulgu.ad + ': ' + olcuYaz(b.bulgu) + ' (' + b.bulgu.etiket + ')' + (b.bulgu.ort && b.bulgu.ort.deger != null
+    l.push(yz('ortak.king-kart.bugunun-plani') + (b.plan && b.plan.length ? b.plan.length + ' madde, ' + acik.length + ' açık' + (acik[0] ? '; ilki ' + acik[0].ad + (acik[0].saat ? ' ' + acik[0].saat : '') : '') : 'plan yok'));
+    if(b.bulgu) l.push(yz('ortak.king-kart.dun') + b.bulgu.ad + ': ' + olcuYaz(b.bulgu) + ' (' + b.bulgu.etiket + ')' + (b.bulgu.ort && b.bulgu.ort.deger != null
       ? '; önceki 7 günün ortalaması ' + olcuYaz({ deger:b.bulgu.ort.deger, birim:b.bulgu.birim }) + ' (' + b.bulgu.ort.etiket + ')' : ''));
     const o = oneriYaz(b.oneri);
-    if(o) l.push('Öneri konusu: ' + o);
+    if(o) l.push(yz('ortak.king-kart.oneri-konusu') + o);
     return l;
   }
   function brifingKodCumlesi(b){
     const acik = (b.plan || []).filter(x => !x.tamam);
-    const p = b.plan && b.plan.length ? 'Bugün ' + b.plan.length + ' madde var' + (acik[0] ? '; ilki ' + acik[0].ad + (acik[0].saat ? ', ' + acik[0].saat : '') : ', hepsi tamam') + '.' : 'Bugün için plan yok.';
+    const p = b.plan && b.plan.length ? yz('ortak.king-kart.bugun') + b.plan.length + ' madde var' + (acik[0] ? '; ilki ' + acik[0].ad + (acik[0].saat ? ', ' + acik[0].saat : '') : ', hepsi tamam') + '.' : yz('ortak.king-kart.bugun-icin-plan-yok');
     const d = b.bulgu ? ' Dün ' + String(b.bulgu.ad).toLocaleLowerCase('tr') + ' ' + olcuYaz(b.bulgu)
       + (b.bulgu.ort && b.bulgu.ort.deger != null ? ', önceki haftanın ortalaması ' + olcuYaz({ deger:b.bulgu.ort.deger, birim:b.bulgu.birim }) : '') + '.' : '';
     const o = oneriYaz(b.oneri);
@@ -909,11 +1136,11 @@ window.LIFEOS.PARCA.yazilar({
   const BRIFING_GUN = 'lifeos.king.brifing-gun';
   async function brifingGoster(istendi){
     const b = yardimK('brifing', KI.ortam.simdi());
-    if(!b){ if(istendi) KI.soyle('Bu modülde sabah brifingi verisi henüz yok.'); return { tur:'yardim-yok' }; }
+    if(!b){ if(istendi) KI.soyle(yz('ortak.king-kart.bu-modulde-sabah-brifingi-ve')); return { tur:'yardim-yok' }; }
     KI.ortam.depo.yaz(BRIFING_GUN, KI.bugunISO());
     const kod = brifingKodCumlesi(b), model = await modelCumlesi('brifing', brifingSatirlari(b));
     KI.soyle(model || kod, null, null, null, { yardim:{ tur:'brifing', plan:(b.plan || []).slice(0, 8), bulgu:b.bulgu || null, oneri:oneriYaz(b.oneri) },
-      neden:['Sayıları ' + modulAd() + ' kendi koduyla hesapladı; cümle ' + (model ? 'King’in modelinden.' : 'kodun şablonundan.')] });
+      neden:[yz('ortak.king-kart.sayilari') + modulAd() + ' kendi koduyla hesapladı; cümle ' + (model ? yz('ortak.king-kart.king-in-modelinden') : 'kodun şablonundan.')] });
     return { tur:'yardim-brifing', model:!!model };
   }
   /* Sabah ilk açılışta günde bir kez (05–12). */
@@ -929,31 +1156,31 @@ window.LIFEOS.PARCA.yazilar({
     if(n.tur === 'brifing') return brifingGoster(true);
     if(n.tur === 'eksik'){
       const l = (yardimK('eksik', KI.bugunISO()) || []).filter(x => x && x.ad).slice(0, 8).map(x => ({ id:String(x.id || x.ad), ad:String(x.ad) }));
-      if(!l.length){ KI.soyle('Bugün eksik kayıt görünmüyor.'); return { tur:'yardim-eksik', n:0 }; }
-      KI.soyle('Bugün ' + l.length + ' kayıt eksik. Birine dokun, söyle; ben yazayım.', null, null, null, { yardim:{ tur:'eksik', l } });
+      if(!l.length){ KI.soyle(yz('ortak.king-kart.bugun-eksik-kayit-gorunmuyor')); return { tur:'yardim-eksik', n:0 }; }
+      KI.soyle(yz('ortak.king-kart.bugun') + l.length + ' kayıt eksik. Birine dokun, söyle; ben yazayım.', null, null, null, { yardim:{ tur:'eksik', l } });
       return { tur:'yardim-eksik', n:l.length };
     }
     if(n.tur === 'hafta'){
       const h = yardimK('hafta', KI.bugunISO());
       const l = h && Array.isArray(h.satirlar) ? h.satirlar.filter(x => x && x.ad) : [];
-      if(!l.length){ KI.soyle('Bu hafta için rapor verisi yok.'); return { tur:'yardim-yok' }; }
+      if(!l.length){ KI.soyle(yz('ortak.king-kart.bu-hafta-icin-rapor-verisi')); return { tur:'yardim-yok' }; }
       const satir = l.map(x => x.ad + ': ' + (x.deger == null ? 'veri yok' : olcuYaz(x) + ' (' + x.etiket + ')') + (x.onceki != null ? '; önceki hafta ' + sayiTr(x.onceki) : ''));
       const model = await modelCumlesi('hafta', satir);
-      KI.soyle(model || 'Haftan tek sayfada; sayılar ' + modulAd() + '’nin kendi hesabı.', null, null, null,
-        { yardim:{ tur:'hafta', bas:h.bas, bit:h.bit, l:l.slice(0, 8) }, neden:['Sayıları ' + modulAd() + ' hesapladı; ' + (model ? 'yorum King’in modelinden.' : 'Merkez kapalı, yorum yok.')] });
+      KI.soyle(model || yz('ortak.king-kart.haftan-tek-sayfada-sayilar') + modulAd() + '’nin kendi hesabı.', null, null, null,
+        { yardim:{ tur:'hafta', bas:h.bas, bit:h.bit, l:l.slice(0, 8) }, neden:[yz('ortak.king-kart.sayilari') + modulAd() + ' hesapladı; ' + (model ? 'yorum King’in modelinden.' : yz('ortak.king-kart.merkez-kapali-yorum-yok'))] });
       return { tur:'yardim-hafta', model:!!model };
     }
     if(n.tur === 'hatirlat'){
       const l = (yardimK('hatirlat', KI.ortam.simdi()) || []).filter(x => x && x.ad).slice(0, 8);
-      if(!l.length){ KI.soyle('Takip ettiğim bir alışkanlık hatırlatması yok.'); return { tur:'yardim-yok' }; }
-      KI.soyle('Hatırlatmayı alışkanlığının gerçek saatine göre yaparım; dün kaçtıysa bugün yumuşakça yinelerim.', null, null, null, { yardim:{ tur:'hatirlat', l } });
+      if(!l.length){ KI.soyle(yz('ortak.king-kart.takip-ettigim-bir-aliskanlik')); return { tur:'yardim-yok' }; }
+      KI.soyle(yz('ortak.king-kart.hatirlatmayi-aliskanliginin'), null, null, null, { yardim:{ tur:'hatirlat', l } });
       return { tur:'yardim-hatirlat', n:l.length };
     }
     const k = yardimK('sonKayit');
     const a = k && Array.isArray(k.alanlar) ? k.alanlar.find(x => x && x.ad === 'dk') : null;
-    if(!a){ KI.soyle('Düzeltebileceğim süreli bir son kayıt yok.'); return { tur:'yardim-yok' }; }
-    if(!(n.deger >= 1 && n.deger <= 600)){ KI.soyle('Süre 1 ile 600 dakika arasında olmalı.'); return { tur:'yardim-yok' }; }
-    KI.soyle('Şunu düzelteyim mi?', null, null, null, { yardim:{ tur:'duzelt', id:k.id, ad:k.ad || k.tur, gun:k.gun, once:a.deger, sonra:n.deger, durum:'bekliyor' } });
+    if(!a){ KI.soyle(yz('ortak.king-kart.duzeltebilecegim-sureli-bir')); return { tur:'yardim-yok' }; }
+    if(!(n.deger >= 1 && n.deger <= 600)){ KI.soyle(yz('ortak.king-kart.sure-1-ile-600-dakika')); return { tur:'yardim-yok' }; }
+    KI.soyle(yz('ortak.king-kart.sunu-duzelteyim-mi'), null, null, null, { yardim:{ tur:'duzelt', id:k.id, ad:k.ad || k.tur, gun:k.gun, once:a.deger, sonra:n.deger, durum:'bekliyor' } });
     return { tur:'yardim-duzelt' };
   }
   async function yardimTikla(is){
@@ -969,16 +1196,16 @@ window.LIFEOS.PARCA.yazilar({
       return;
     }
     if(y.tur !== 'duzelt' || y.durum !== 'bekliyor') return;
-    if(p[0] === 'duzelt-vazgec'){ y.durum = 'vazgecildi'; KI.soyle('Tamam, dokunmadım.'); return; }
+    if(p[0] === 'duzelt-vazgec'){ y.durum = 'vazgecildi'; KI.soyle(yz('ortak.king-kart.tamam-dokunmadim')); return; }
     y.durum = 'yaziliyor'; KI.ciz(false);
     let r = null;
     try{ r = await yardimK('duzelt', y.id, 'dk', y.sonra); }catch(e){ r = null; }
-    if(!r || !r.ok){ y.durum = 'bekliyor'; KI.soyle('Düzeltemedim: ' + ((r && r.why) || 'modül cevap vermedi') + '.'); return; }
+    if(!r || !r.ok){ y.durum = 'bekliyor'; KI.soyle(yz('ortak.king-kart.duzeltemedim') + ((r && r.why) || 'modül cevap vermedi') + '.'); return; }
     y.durum = 'yazildi';
     const ozet = (y.ad || 'Kayıt') + ' ' + sayiTr(r.once) + ' → ' + sayiTr(r.sonra) + ' dk';
     if(typeof r.geriAl === 'function'){ KI.sonGeriAl = r.geriAl; KI.cipler = [{ is:'geri-al', ad:yz('ortak.king-kart.geri-al') }]; }
     eylemYaz({ arac:'duzelt', ozet, geriAl:r.geriAl, param:{ id:y.id, alan:'dk', deger:y.sonra } });
-    KI.soyle('Düzelttim: ' + ozet + '.');
+    KI.soyle(yz('ortak.king-kart.duzelttim') + ozet + '.');
   }
   /* Akıllı hatırlatma: alışkanlığın 14 günlük gerçek saat ortancası (modül
      hesaplar); dün işaretlenmediyse dil yumuşar. Günde anahtar başına bir kez,
@@ -986,7 +1213,7 @@ window.LIFEOS.PARCA.yazilar({
   const ALISKANLIK = 'lifeos.king.aliskanlik';
   const dakika = s => /^\d\d:\d\d$/.test(String(s)) ? Number(s.slice(0, 2)) * 60 + Number(s.slice(3)) : null;
   function aliskanlikMetni(x){
-    return x.dun === 'isaretlenmedi' ? 'Dün «' + x.ad + '» kaçtı, sorun değil. Genelde ' + x.gercek + '’de yapıyorsun; bugün bir dene?'
+    return x.dun === 'isaretlenmedi' ? yz('ortak.king-kart.dun-2') + x.ad + '» kaçtı, sorun değil. Genelde ' + x.gercek + '’de yapıyorsun; bugün bir dene?'
       : '«' + x.ad + '» zamanı: son günlerde genelde ' + x.gercek + '’de yapıyorsun.';
   }
   function aliskanlikKur(){
@@ -999,7 +1226,7 @@ window.LIFEOS.PARCA.yazilar({
       KI.ortam.depo.yaz(ALISKANLIK, { gun, l:atilan.concat(gelen.map(x => x.anahtar)) });
       gelen.forEach(x => {
         const t = aliskanlikMetni(x);
-        KI.ortam.bildir('LifeOS · hatırlatma', t);
+        KI.ortam.bildir(yz('ortak.king-kart.lifeos-hatirlatma'), t);
         if(KI.acik) KI.soyle(t); else{ KI.akis.push({ kim:'king', metin:t }); KI.sakla(); }
       });
     }
@@ -1015,26 +1242,26 @@ window.LIFEOS.PARCA.yazilar({
     if(y.tur === 'brifing'){
       const b = y.bulgu;
       return '<div class="king__yardim king__brifing" role="group" aria-label="Sabah brifingi">'
-        + '<section><h4>Bugün</h4>' + (y.plan.length ? '<ol class="king__plan">' + y.plan.map(x => '<li' + (x.tamam ? ' class="is-tamam"' : '') + '><time>' + KI.kac(x.saat || '·') + '</time><span>' + KI.kac(x.ad) + '</span></li>').join('') + '</ol>' : '<p class="king__yardim-bos">Plan yok</p>') + '</section>'
-        + '<section><h4>Dün</h4>' + (b ? '<b class="king__kart-deger">' + deger(b) + '</b><small class="king__kart-alt">' + KI.kac(b.ad)
-          + (b.ort && b.ort.deger != null ? ' · 7 gün ort. ' + KI.kac(sayiTr(b.ort.deger)) : '') + '</small>' + et(b.etiket) : '<p class="king__yardim-bos">Dün kayıt yok</p>') + '</section>'
-        + (y.oneri ? '<section class="king__brifing-oneri"><h4>Öneri</h4><p>' + KI.kac(y.oneri) + '</p></section>' : '')
-        + '<button type="button" class="king__cip king__yardim-dinle" data-king="yardim:dinle:' + n + '" aria-label="Brifingi sesli dinle">Dinle</button></div>';
+        + ('<section><h4>' + yz('ortak.king-kart.bugun-2') + '</h4>') + (y.plan.length ? '<ol class="king__plan">' + y.plan.map(x => '<li' + (x.tamam ? ' class="is-tamam"' : '') + '><time>' + KI.kac(x.saat || '·') + '</time><span>' + KI.kac(x.ad) + '</span></li>').join('') + '</ol>' : ('<p class="king__yardim-bos">' + yz('ortak.king-kart.plan-yok') + '</p>')) + '</section>'
+        + ('<section><h4>' + yz('ortak.king-kart.dun-3') + '</h4>') + (b ? '<b class="king__kart-deger">' + deger(b) + '</b><small class="king__kart-alt">' + KI.kac(b.ad)
+          + (b.ort && b.ort.deger != null ? ' · 7 gün ort. ' + KI.kac(sayiTr(b.ort.deger)) : '') + '</small>' + et(b.etiket) : ('<p class="king__yardim-bos">' + yz('ortak.king-kart.dun-kayit-yok') + '</p>')) + '</section>'
+        + (y.oneri ? ('<section class="king__brifing-oneri"><h4>' + yz('ortak.king-kart.oneri') + '</h4><p>') + KI.kac(y.oneri) + '</p></section>' : '')
+        + '<button type="button" class="king__cip king__yardim-dinle" data-king="yardim:dinle:' + n + ('" aria-label="Brifingi sesli dinle">' + yz('ortak.king-kart.dinle') + '</button></div>');
     }
     if(y.tur === 'eksik') return '<div class="king__yardim king__eksik" role="list" aria-label="Eksik kayıtlar">' + y.l.map((x, i) => '<button type="button" class="king__cip" role="listitem" data-king="yardim:eksik:' + n + ':' + i + '"><i aria-hidden="true"></i>' + KI.kac(x.ad) + '</button>').join('') + '</div>';
     if(y.tur === 'hafta'){
       const fark = x => x.deger == null || x.onceki == null ? '' : x.deger > x.onceki ? ' is-art' : x.deger < x.onceki ? ' is-az' : '';
       return '<div class="king__yardim king__hafta" role="group" aria-label="Haftalık rapor ' + KI.kac(y.bas || '') + ' – ' + KI.kac(y.bit || '') + '"><div class="king__kartlar">'
         + y.l.map(x => '<div class="king__kart"><span class="king__kart-ad">' + KI.kac(x.ad) + '</span><b class="king__kart-deger">' + deger(x) + '</b>'
-          + (x.onceki != null ? '<small class="king__kart-alt king__fark' + fark(x) + '">önceki hafta ' + KI.kac(sayiTr(x.onceki)) + '</small>' : '') + et(x.etiket) + '</div>').join('') + '</div></div>';
+          + (x.onceki != null ? '<small class="king__kart-alt king__fark' + fark(x) + ('">' + yz('ortak.king-kart.onceki-hafta') + ' ') + KI.kac(sayiTr(x.onceki)) + '</small>' : '') + et(x.etiket) + '</div>').join('') + '</div></div>';
     }
     if(y.tur === 'hatirlat') return '<ul class="king__yardim king__aliskanlik">' + y.l.map(x => {
       const kay = dakika(x.kurulu) != null && dakika(x.gercek) != null ? dakika(x.gercek) - dakika(x.kurulu) : null;
       return '<li><span>' + KI.kac(x.ad) + '</span><span class="king__aliskanlik-saat">' + (kay != null && Math.abs(kay) >= 30 ? '<s>' + KI.kac(x.kurulu) + '</s>' : '') + '<b>' + KI.kac(x.gercek || '—') + '</b></span>'
         + '<small>' + (x.gercek ? x.n + ' kaydın ortancası' : 'veri yok') + (x.dun === 'isaretlenmedi' ? ' · dün kaçtı' : x.dun === 'yapildi' ? ' · dün yapıldı' : '') + '</small></li>'; }).join('') + '</ul>';
-    if(y.tur === 'duzelt') return '<div class="king__yardim king__duzelt' + (y.durum !== 'bekliyor' ? ' is-' + y.durum : '') + '"><span class="king__onizle-ad">' + KI.kac(y.ad || 'Son kayıt') + (y.gun ? ' · ' + KI.kac(gunAdi(y.gun + 'T12:00')) : '') + '</span>'
+    if(y.tur === 'duzelt') return '<div class="king__yardim king__duzelt' + (y.durum !== 'bekliyor' ? ' is-' + y.durum : '') + '"><span class="king__onizle-ad">' + KI.kac(y.ad || yz('ortak.king-kart.son-kayit')) + (y.gun ? ' · ' + KI.kac(gunAdi(y.gun + 'T12:00')) : '') + '</span>'
       + '<p><s>' + KI.kac(sayiTr(y.once)) + ' dk</s><b>' + KI.kac(sayiTr(y.sonra)) + ' dk</b></p>'
-      + (y.durum === 'bekliyor' ? '<div class="king__duzelt-dugme"><button type="button" class="king__cip king__cip--ana" data-king="yardim:duzelt-onay:' + n + '">Onayla</button><button type="button" class="king__cip" data-king="yardim:duzelt-vazgec:' + n + '">Vazgeç</button></div>' : '') + '</div>';
+      + (y.durum === 'bekliyor' ? '<div class="king__duzelt-dugme"><button type="button" class="king__cip king__cip--ana" data-king="yardim:duzelt-onay:' + n + ('">' + yz('ortak.king-kart.onayla') + '</button><button type="button" class="king__cip" data-king="yardim:duzelt-vazgec:') + n + ('">' + yz('ortak.king-kart.vazgec') + '</button></div>') : '') + '</div>';
     return '';
   }
 

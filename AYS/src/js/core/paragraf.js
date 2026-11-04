@@ -32,6 +32,10 @@
         yazım düşer ve yeniden yazılabilir (her yazımın öneri anahtarı
         ayrıdır: 'ogren-paragraf:<gün>:<setin kurulduğu an>:<sıra>'). */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.paragraf.ogren-gunluk-paragraf':'Öğren › Günlük paragraf: ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.paragraf.set-bitmeden-yazilmaz':'Set bitmeden yazılmaz.',
   'ays.core.paragraf.bugunun-seti-zaten-yazildi':'Bugünün seti zaten yazıldı.',
   'ays.core.paragraf.cozulen-soru-yok-cozumune-ba':'Çözülen soru yok: çözümüne bakılan sorular sayılmaz.',
@@ -228,7 +232,7 @@ R.Paragraf = (function(){
     if(R.Model.ensureDay) await R.Model.ensureDay(R.U.today());
     const sira = (Number(g.yazimSayisi) || 0) + 1;
     const r = await R.Proposals.hemen({ action:'paragraf-yaz', params:{ count:o.cozulen, date:gun },
-      anahtar:'ogren-paragraf:' + gun + ':' + (g.kuruldu || '') + ':' + sira, reason:'Öğren › Günlük paragraf: ' + o.cozulen + ' soru çözüldü (ölçüldü)',
+      anahtar:'ogren-paragraf:' + gun + ':' + (g.kuruldu || '') + ':' + sira, reason:yz('ays.core.paragraf.ogren-gunluk-paragraf') + o.cozulen + ' soru çözüldü (ölçüldü)',
       iz:[{ tur:'ogren-paragraf', id:gun }] });
     if(!r || !r.ok) return { ok:false, why:(r && r.why) || 'Yazılamadı.' };
     g.yazimSayisi = sira;

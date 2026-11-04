@@ -6,6 +6,72 @@
    - Yapısal HTML gerektiğinde h.raw() ile işaretlenir.
    - Etkileşim yalnız data-act / data-change ile bağlanır; inline onclick yok.
    - render() tek bir C.Grid döndürür; kolonlar C.Span ile verilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.today.odak-moduna-don':'Odak moduna dön — ',
+  'ays.today.blogu-bitir':'Bloğu bitir',
+  'ays.today.baslat-2':'Başlat: ',
+  'ays.today.minimum-standardi-tutturunca':'Minimum standardı tutturunca seri başlar.',
+  'ays.today.odul-nete-degil-duzene-bagli':'Ödül nete değil düzene bağlı.',
+  'ays.today.plandan-sonra':'Plandan sonra',
+  'ays.today.bu-tarihe-hala-yetisilebilir':'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.',
+  'ays.today.adimlari-gor':'Adımları gör',
+  'ays.today.henuz-hic-yedek-almadin':'Henüz hiç yedek almadın.',
+  'ays.today.son-yedegin':'Son yedeğin ',
+  'ays.today.yedek-al':'Yedek al',
+  'ays.today.analize-git':'Analize git',
+  'ays.today.i-lk-esik':'İlk eşik',
+  'ays.today.bugun-paragraf-ve-problem-yo-2':'Bugün paragraf ve problem yok; seri dakika ve kartla korunuyor.',
+  'ays.today.hedef-minimuma-indi-seri-kor':'Hedef minimuma indi, seri korunuyor.',
+  'ays.today.gecici-sure-ders-gunlerinde':'Geçici süre: ders günlerinde ',
+  'ays.today.bugun-ara-gunu-plan-bos':'Bugün ara günü: plan boş.',
+  'ays.today.sinava-kalan':'Sınava kalan',
+  'ays.today.tyt-tarihi-tahmini':'TYT tarihi tahmini',
+  'ays.today.tyt-tarihine':'TYT tarihine',
+  'ays.today.plan-disi-2':'Plan dışı: ',
+  'ays.today.unutma-egrisi-yanlis-cozulen':'Unutma eğrisi: yanlış çözülen soruları aralıklı tekrarla kalıcılaştır.',
+  'ays.today.acik-yanlis-soru-yok-hafiza':'Açık yanlış soru yok; hafıza taze.',
+  'ays.today.hedef':'Hedef ',
+  'ays.today.paragraf-ve-problem-girilmed':'Paragraf ve problem girilmedi.',
+  'ays.today.i-lk-tam-deneme':'İlk tam deneme.',
+  'ays.today.esigin-ustunde':'Eşiğin üstünde.',
+  'ays.today.esik-10':'Eşik %10.',
+  'ays.today.tyt-tahmini-tarih':'TYT, tahmini tarih.',
+  'ays.today.plana-bak':'Plana bak',
+  'ays.today.bugun-ara-gunu-plan-bos-2':'Bugün ara günü; plan boş.',
+  'ays.today.bugunun':'Bugünün ',
+  'ays.today.tyt-tarihi-bugun':'TYT tarihi − bugün',
+  'ays.today.programini-kuralim':'Programını kuralım.',
+  'ays.today.bugun-icin-plan-yok':'Bugün için plan yok.',
+  'ays.today.tam-plan':'Tam plan',
+  'ays.today.simdi':'Şimdi: ',
+  'ays.today.sirada':'Sırada: ',
+  'ays.today.bugunun-bloklari-kapandi':'Bugünün blokları kapandı.',
+  'ays.today.blok-bitince-cozulen-soru-gi':'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.',
+  'ays.today.gunun-soru-hedefi-tamam':'Günün soru hedefi tamam.',
+  'ays.today.her-blogu-adiyla-ayri-yaz':'Her bloğu adıyla ayrı yaz.',
+  'ays.today.bu-gunun-kaydi-acilmamis-hic':'Bu günün kaydı açılmamış; hiçbir şey yazılmadı.',
+  'ays.today.olcum-satiri-bu-surumde-okun':'Ölçüm satırı bu sürümde okunamıyor; hiçbir şey yazılmadı.',
+  'ays.today.satiri-okuyamadim-hicbir-sey':'Satırı okuyamadım; hiçbir şey yazılmadı.',
+  'ays.today.anlasilmadi':'Anlaşılmadı: «',
+  'ays.today.bu-satirda-olcum-bulamadim-o':'Bu satırda ölçüm bulamadım. Örneğin ',
+  'ays.today.bu-satir-yalniz-olcum-icindi':'Bu satır yalnız ölçüm içindir; «',
+  'ays.today.uyku-2':'Uyku: ',
+  'ays.today.paragraf-2':'Paragraf: ',
+  'ays.today.problem-2':'Problem: ',
+  'ays.today.tatil-bitti-bugunden-kademel':'Tatil bitti; bugünden kademeli dönüş',
+  'ays.today.bugun-ve-sonraki-gunler-yeni':'Bugün ve sonraki günler yeniden plana göre kurulur. Geçmiş ara günleri ara olarak kalır.',
+  'ays.today.ara-bitti-bugunun-plani-kuru':'Ara bitti; bugünün planı kuruldu',
+  'ays.today.hedef-guncellendi':'Hedef güncellendi',
+  'ays.today.plan-uygulandi-geri-almak-is':'Plan uygulandı. Geri almak istersen «Planı geri al».',
+  'ays.today.eski-plan-geri-alinamadi-hed':'Eski plan geri alınamadı; hedef değişmedi.',
+  'ays.today.plan-geri-alindi-hafta-tasla':'Plan geri alındı; hafta taslağı eski sırasına döndü.',
+  'ays.today.geri-alinamadi':'Geri alınamadı',
+  'ays.today.gonderilemedi':'Gönderilemedi — ',
+  'ays.today.bugunun-hedefi-minimum-gune':'Bugünün hedefi minimum güne iner, kalan bloklar “kötü gün” nedeniyle atlanır ve ',
+  'ays.today.bugunu-minimuma-indir':'Bugünü minimuma indir',
+  'ays.today.bloklar-sayaclar-ve-gunun-bu':'Bloklar, sayaçlar ve günün bütün kartları',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -15,10 +81,10 @@ window.LIFEOS.PARCA.komut({ modul:'ays', sira:300, uret(){
   if(!day) return [];
   const running = day.blocks.find(b => b.startedAt);
   if(running) return [
-    { group:'Odak', label:'Odak moduna dön — '+running.topic, icon:'clock', run(){ R.Palette.openFocus(); } },
-    { group:'Odak', label:'Bloğu bitir', icon:'stop', run(){ R.Screens.today.handle['timer-stop']({ dataset:{ block:running.id } }); } },
+    { group:'Odak', label:yz('ays.today.odak-moduna-don')+running.topic, icon:'clock', run(){ R.Palette.openFocus(); } },
+    { group:'Odak', label:yz('ays.today.blogu-bitir'), icon:'stop', run(){ R.Screens.today.handle['timer-stop']({ dataset:{ block:running.id } }); } },
   ];
-  return day.blocks.filter(b => b.status === 'pending' && b.slot !== 'Dinlenme').map(b => ({ group:'Odak', label:'Başlat: '+b.topic, icon:'play', run(){
+  return day.blocks.filter(b => b.status === 'pending' && b.slot !== 'Dinlenme').map(b => ({ group:'Odak', label:yz('ays.today.baslat-2')+b.topic, icon:'play', run(){
     R.App.go('today');
     setTimeout(()=>R.Screens.today.handle['timer-start']({ dataset:{ block:b.id } }), 60);
   }}));
@@ -496,7 +562,7 @@ R.Screens.today = (function(){
             title="${U.fmtShort(d.iso)}${d.met ? ' · tamam' : ''}"></span>`)}
         </div>
       </div>
-      <p class="tiny dim">${s.streak === 0 ? 'Minimum standardı tutturunca seri başlar.' : 'Ödül nete değil düzene bağlı.'}</p>
+      <p class="tiny dim">${s.streak === 0 ? yz('ays.today.minimum-standardi-tutturunca') : yz('ays.today.odul-nete-degil-duzene-bagli')}</p>
       ${SeriKontrol()}` });
   }
 
@@ -674,7 +740,7 @@ R.Screens.today = (function(){
     const p = r.plan;
     return html`<div class="mt-8">
       <p class="tiny dim"><b>${yz('ays.today.plan-onizlemesi')}</b> ${yz('ays.today.onaylanana-kadar-hicbir-sey')}</p>
-      ${c.Table({ tight:true, headers:['', 'Şimdi', 'Plandan sonra'],
+      ${c.Table({ tight:true, headers:['', 'Şimdi', yz('ays.today.plandan-sonra')],
         rows:R.HedefPlan.onizleme(p).map(x => [x.alan, x.once, x.sonra]) })}
       ${when(p.paket === 'konu' && p.haftalar.length, () => html`<p class="tiny mt-8"><b>${yz('ays.today.i-lk-hafta')}</b>
         (${U.fmtShort(p.haftalar[0].bas)} – ${U.fmtShort(p.haftalar[0].bit)})</p>${haftaSatiri(p.haftalar[0])}`)}
@@ -706,7 +772,7 @@ R.Screens.today = (function(){
         c.Button({ label:x.ad + ' · ' + H.tarihYaz(x.son_tarih), size:'sm', act:'hedef-uyarla-sec',
           data:{ 'data-id':h.id, 'data-i':String(i) } }))}</div>
         <p class="tiny dim mt-8">${yz('ays.today.secince-eski-plan-geri-alini')}</p>`
-        : c.Notice({ tone:'info', body:'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.' })}
+        : c.Notice({ tone:'info', body:yz('ays.today.bu-tarihe-hala-yetisilebilir') })}
       <div class="row gap-8 mt-8">${c.Button({ label:yz('ays.today.kapat'), size:'sm', act:'hedef-uyarla-kapat' })}</div>
     </div>`;
   }
@@ -836,7 +902,7 @@ R.Screens.today = (function(){
         body:html`${yz('ays.today.program')} ${U.fmtDate(R.PLAN.startISO)} ${yz('ays.today.tarihinde-basliyor-hafta-1-i')}` });
     }
     M.activeProtocols().forEach(p => {
-      ekle('warn', { body:html`<b>${p.title}</b> ${yz('ays.today.protokolu')} ${U.fmtShort(p.endsAt)} ${yz('ays.today.tarihine-kadar-aktif')} ${goBtn('Adımları gör','protocols')}` });
+      ekle('warn', { body:html`<b>${p.title}</b> ${yz('ays.today.protokolu')} ${U.fmtShort(p.endsAt)} ${yz('ays.today.tarihine-kadar-aktif')} ${goBtn(yz('ays.today.adimlari-gor'),'protocols')}` });
     });
     const triggers = C.protocolTriggers();
     if(triggers.length){
@@ -847,12 +913,12 @@ R.Screens.today = (function(){
     if(M.backupDue()){
       const age = M.backupAgeDays();
       ekle('info', { title:'Yedekleme.',
-        body:html`${age === null ? 'Henüz hiç yedek almadın.' : 'Son yedeğin '+age+' gün önce alındı.'} ${yz('ays.today.tarayici-verisi-silinirse-ca')} ${goBtn('Yedek al','guide')}` }, true);
+        body:html`${age === null ? yz('ays.today.henuz-hic-yedek-almadin') : yz('ays.today.son-yedegin')+age+' gün önce alındı.'} ${yz('ays.today.tarayici-verisi-silinirse-ca')} ${goBtn(yz('ays.today.yedek-al'),'guide')}` }, true);
     }
     const debt = C.analysisDebt();
     if(debt.length){
       ekle('danger', { title:yz('ays.today.analiz-borcu'),
-        body:html`${debt.length} ${yz('ays.today.denemenin-analizi-24-saati-a')} ${goBtn('Analize git','exams')}` });
+        body:html`${debt.length} ${yz('ays.today.denemenin-analizi-24-saati-a')} ${goBtn(yz('ays.today.analize-git'),'exams')}` });
     }
     return out;
   }
@@ -975,7 +1041,7 @@ R.Screens.today = (function(){
         ${when(tier.current || tier.next, () => html`
           <div class="stack-xs mt-12">
             <div class="row between">
-              <span class="small">${tier.current ? tier.current.name + ' eşiği geçildi' : 'İlk eşik'}</span>
+              <span class="small">${tier.current ? tier.current.name + ' eşiği geçildi' : yz('ays.today.i-lk-esik')}</span>
               ${when(tier.next, () => html`<span class="tiny dim num">${tier.next.name}’e ${tier.toNext} ${yz('ays.today.gun')}</span>`)}
             </div>
             ${c.Bar({ value:tier.next ? U.pct(tier.streak, tier.next.days) : 100,
@@ -994,7 +1060,7 @@ R.Screens.today = (function(){
         <div class="row between wrap gap-8">
           <div class="minw0">
             <b class="small">${yz('ays.today.bugun-kotu-gun-olarak-isaret')}</b>
-            <div class="tiny dim">${day.badDaySoruYok ? 'Bugün paragraf ve problem yok; seri dakika ve kartla korunuyor.' : 'Hedef minimuma indi, seri korunuyor.'}</div>
+            <div class="tiny dim">${day.badDaySoruYok ? yz('ays.today.bugun-paragraf-ve-problem-yo-2') : yz('ays.today.hedef-minimuma-indi-seri-kor')}</div>
           </div>
           <div class="row gap-8">
             ${day.badDaySoruYok ? '' : c.Button({ label:yz('ays.today.soru-da-yok'), size:'sm', act:'bad-day-soru-yok' })}
@@ -1143,7 +1209,7 @@ R.Screens.today = (function(){
     }
     if(ist.tur === 'sure' && day.istisnaId === ist.id){
       return c.Notice({ tone:'info',
-        title:(takvim ? R.Istisna.tanim(ist).split(' · ')[0] + ': bugün ' : 'Geçici süre: ders günlerinde ')
+        title:(takvim ? R.Istisna.tanim(ist).split(' · ')[0] + ': bugün ' : yz('ays.today.gecici-sure-ders-gunlerinde'))
           + ist.dakika + ' dk',
         body:R.Istisna.tanim(ist) + '. Tarih bitince temel plana döner; deneme ve '
           + 'kapanış günleri değişmez.' });
@@ -1209,7 +1275,7 @@ R.Screens.today = (function(){
       bitisik:true,
       govde:bloklar.length
         ? html`<ol class="akis" data-oz="001">${map(bloklar, b => AkisSatiri(b, sira))}</ol>${raw(VT() && bloklar.some(b => b.status === 'pending' && !b.startedAt) ? VT().kaydirIpucu() : '')}`
-        : html`<p class="akis__bos small muted">${day.ara ? 'Bugün ara günü: plan boş.' : 'Bugün için blok yok.'}</p>`,
+        : html`<p class="akis__bos small muted">${day.ara ? yz('ays.today.bugun-ara-gunu-plan-bos') : yz('ays.today.bugun-icin-blok-yok')}</p>`,
       /* «Günü kapat» (KOLAY Faz 1): ortak çekirdek kuruluysa; ince düğme,
          Bugün'ün tek dolu düğmesi kahramanda kalır. Günü düzenle yerinde. */
       ayak:html`${window.LIFEOS && window.LIFEOS.GUNUKAPAT && window.LIFEOS.GUNUKAPAT.kuruluMu()
@@ -1234,7 +1300,7 @@ R.Screens.today = (function(){
        kart sayisi bir de «%0» diyerek «veri yok» ile celisiyordu. */
     const yuva = SAYI ? html`${raw(SAYI.kutuGlifi([z.kalan, z.seri]))}<span>${yz('ays.today.bugun')}</span>` : 'bugün';
     return c.Kutu({ ad:yz('ays.today.ozet'), yuva, bitisik:true, govde:html`<div class="ozet">
-      ${hucre('Sınava kalan', z.kalan, z.kalan.kesinlik === 'estimated' ? 'TYT tarihi tahmini' : 'TYT tarihine')}
+      ${hucre(yz('ays.today.sinava-kalan'), z.kalan, z.kalan.kesinlik === 'estimated' ? yz('ays.today.tyt-tarihi-tahmini') : yz('ays.today.tyt-tarihine'))}
       ${hucre('Seri', z.seri, seri.streak ? 'minimum gün tutuldu' : 'minimum gün başlatır')}
     </div>` });
   }
@@ -1258,7 +1324,7 @@ R.Screens.today = (function(){
     return c.Kutu({ ad:yz('ays.today.gunluk-sayac'), yuva:day.ara ? 'ara günü' : html`${terim('minimum-gun', 'minimum')} ${minMet ? 'tamam' : 'açık'}`,
       govde:html`${satir('Paragraf', day.paragraphActual, day.paragraphTarget)}
         ${satir('Problem', day.problemActual, day.problemTarget)}`,
-      ayak:serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : null });
+      ayak:serbest > 0 ? yz('ays.today.plan-disi-2') + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : null });
   }
 
   /* v5 DURUM KARTLARI (Tasarım Dili «AYS · Bugün»): günlük sayaç, son
@@ -1443,7 +1509,7 @@ R.Screens.today = (function(){
     const borc = kartVar ? C.cardDebt() : null;
     const cubuk = borc != null && L.GRAFIK
       ? raw(L.GRAFIK.esikCubukHtml({ etiket:yz('ays.today.tekrar-borcu'), deger:borc, esik, olcek:Math.max(50, borc), birim:'%', yon:'azalis-iyi' })) : '';
-    return c.Kutu({ ad:terim('tekrar-borcu', 'Tekrar borcu'), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'sırası gelen kart yok', class:'durumkart',
+    return c.Kutu({ ad:terim('tekrar-borcu', yz('ays.today.tekrar-borcu')), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'sırası gelen kart yok', class:'durumkart',
       govde:html`<div class="durumkart__sayi">${sayiH({ deger:borc, birim:'%', kesinlik:kartVar ? 'computed' : 'missing',
           formul:'geciken kart ÷ vadeli kart', girdiler:kartVar ? [{ ad:'geciken', deger:geciken, kesinlik:'measured' },
             { ad:'vadeli', deger:vadeli, kesinlik:'measured' }] : [] })}
@@ -1461,7 +1527,7 @@ R.Screens.today = (function(){
     return c.Kutu({ ad:yz('ays.today.hafiza-yoklamasi'), yuva:n ? n + ' soru bekliyor' : 'temiz', class:'durumkart',
       govde:html`<div class="durumkart__sayi">${sayiH({ deger:n, birim:'soru', kesinlik:'measured' })}
           ${when(n > 0, () => html`<span class="durumkart__fark is-azaldi">${yz('ays.today.tekrar-bekliyor')}</span>`)}</div>
-        <p class="durumkart__not">${n ? 'Unutma eğrisi: yanlış çözülen soruları aralıklı tekrarla kalıcılaştır.' : 'Açık yanlış soru yok; hafıza taze.'}</p>`,
+        <p class="durumkart__not">${n ? yz('ays.today.unutma-egrisi-yanlis-cozulen') : yz('ays.today.acik-yanlis-soru-yok-hafiza')}</p>`,
       ayak:n ? c.Button({ label:yz('ays.today.yanlislari-coz'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'sorular', 'data-tab':'yanlis' } }) : null });
   }
 
@@ -1489,11 +1555,11 @@ R.Screens.today = (function(){
          kaybolmuş sanılır. */
       const serbest = Number(day.freeQ) || 0;
       const dogru = day.freeCorrect == null ? null : Number(day.freeCorrect);
-      const planDisi = serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : '';
+      const planDisi = serbest > 0 ? yz('ays.today.plan-disi-2') + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : '';
       m.push(p + q > 0
         ? { ust:yz('ays.today.gunluk-sayac'), sayi:sayi({ deger:p + q, birim:'soru', kesinlik:'measured' }), cumle:yz('ays.today.cozuldu'),
-            vurgu:planDisi || (hedef ? 'Hedef ' + hedef + '.' : ''), sistem:'ays', dugme:git('Sayaçlar', 'gun') }
-        : { ust:yz('ays.today.gunluk-sayac'), cumle:yz('ays.today.bugun-sayac-bos'), vurgu:planDisi || 'Paragraf ve problem girilmedi.', sistem:'ays', dugme:git('Sayaçlar', 'gun') });
+            vurgu:planDisi || (hedef ? yz('ays.today.hedef') + hedef + '.' : ''), sistem:'ays', dugme:git('Sayaçlar', 'gun') }
+        : { ust:yz('ays.today.gunluk-sayac'), cumle:yz('ays.today.bugun-sayac-bos'), vurgu:planDisi || yz('ays.today.paragraf-ve-problem-girilmed'), sistem:'ays', dugme:git('Sayaçlar', 'gun') });
     }
 
     const tyt = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full')
@@ -1503,7 +1569,7 @@ R.Screens.today = (function(){
       const once = tyt.length > 1 ? M.examNet(tyt[tyt.length - 2]) : null;
       const fark = once == null ? null : Math.round((net - once) * 100) / 100;
       m.push({ ust:yz('ays.today.son-deneme'), sayi:sayi({ deger:net, birim:'net', ondalik:2, kesinlik:'computed', formul:'doğru − yanlış ÷ 4' }),
-        cumle:'', vurgu:fark == null ? 'İlk tam deneme.' : (fark > 0 ? '+' : '') + U.fmtNet(fark) + ' öncekinden.',
+        cumle:'', vurgu:fark == null ? yz('ays.today.i-lk-tam-deneme') : (fark > 0 ? '+' : '') + U.fmtNet(fark) + ' öncekinden.',
         sistem:'ays', dugme:git('Denemeler', 'exams') });
     }else{
       m.push({ ust:yz('ays.today.son-deneme'), cumle:yz('ays.today.henuz-tam-deneme-yok'), vurgu:yz('ays.today.net-ilk-denemeyle-cikar'), sistem:'ays', dugme:git('Denemeler', 'exams') });
@@ -1513,9 +1579,9 @@ R.Screens.today = (function(){
     if((S.cards || []).length){
       const borc = C.cardDebt();
       m.push({ ust:yz('ays.today.tekrar-borcu'), sayi:sayi({ deger:borc, birim:'%', kesinlik:'computed', formul:'geciken kart ÷ vadeli kart' }),
-        cumle:yz('ays.today.tekrar-borcu-2'), vurgu:borc > 10 ? 'Eşiğin üstünde.' : 'Eşik %10.', sistem:'ays',
+        cumle:yz('ays.today.tekrar-borcu-2'), vurgu:borc > 10 ? yz('ays.today.esigin-ustunde') : yz('ays.today.esik-10'), sistem:'ays',
         gorsel:(window.LIFEOS || {}).GRAFIK && borc != null ? window.LIFEOS.GRAFIK.esikCubukHtml({ etiket:yz('ays.today.tekrar-borcu'), deger:borc, esik:10, olcek:Math.max(50, borc), birim:'%', yon:'azalis-iyi' }) : '',
-        dugme:vadeli ? git('Tekrara git', 'cards') : null });
+        dugme:vadeli ? git(yz('ays.today.tekrara-git'), 'cards') : null });
     }else{
       m.push({ ust:yz('ays.today.tekrar-borcu'), cumle:yz('ays.today.tekrar-karti-yok'), vurgu:yz('ays.today.borc-ilk-kartla-olculur'), sistem:'ays' });
     }
@@ -1528,8 +1594,8 @@ R.Screens.today = (function(){
     }
 
     const z = ozetSayilari(day, dateISO);
-    m.push({ ust:yz('ays.today.sinav'), sayi:sayi(z.kalan), cumle:yz('ays.today.kaldi'), vurgu:z.kalan.kesinlik === 'estimated' ? 'TYT, tahmini tarih.' : 'TYT.',
-      sistem:'ays', dugme:git('Plana bak', 'plan') });
+    m.push({ ust:yz('ays.today.sinav'), sayi:sayi(z.kalan), cumle:yz('ays.today.kaldi'), vurgu:z.kalan.kesinlik === 'estimated' ? yz('ays.today.tyt-tahmini-tarih') : 'TYT.',
+      sistem:'ays', dugme:git(yz('ays.today.plana-bak'), 'plan') });
     const seri = C.behaviorStreak();
     /* Sıfır seri bir sayı değil, henüz başlamamış bir seridir («0 gün, hesaplandı seri» okunuyordu). */
     m.push(seri.streak
@@ -1538,10 +1604,10 @@ R.Screens.today = (function(){
 
     /* İki küçük widget yan yana (iOS gibi): «Bugün» günün kendisi, «Gidişat»
        haftaların toplamı. Her biri kendi başına döner. */
-    const bugunAd = ['Günlük sayaç', 'Seri', 'Hafıza yoklaması'];
+    const bugunAd = [yz('ays.today.gunluk-sayac'), 'Seri', yz('ays.today.hafiza-yoklamasi')];
     /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
     const ozet = R.Ornek && R.Ornek.acik() ? null : 'ays';
-    const m2 = analiz ? m.filter(x => ['Seri', 'Tekrar borcu', 'Sınav'].indexOf(x.ust) < 0) : m;
+    const m2 = analiz ? m.filter(x => ['Seri', yz('ays.today.tekrar-borcu'), 'Sınav'].indexOf(x.ust) < 0) : m;
     const bugun = m2.filter(x => bugunAd.indexOf(x.ust) >= 0), gidisat = m2.filter(x => bugunAd.indexOf(x.ust) < 0);
     /* yalnizOzet: kart çizilmez, yalnız seçim sayfasının özeti yazılır (Bugün). */
     if(yalnizOzet){
@@ -1560,9 +1626,9 @@ R.Screens.today = (function(){
      çekimden kaçınılır («1/3 blok bitti»). */
   function bugunCumlesi(day, dateISO){
     if(!day || (R.Setup && R.Setup.needed && R.Setup.needed())) return '';
-    if(day.ara) return 'Bugün ara günü; plan boş.';
+    if(day.ara) return yz('ays.today.bugun-ara-gunu-plan-bos-2');
     const bloklar = (day.blocks || []).filter(b => b.slot !== 'Dinlenme');
-    if(!bloklar.length) return 'Bugün için blok yok.';
+    if(!bloklar.length) return yz('ays.today.bugun-icin-blok-yok');
     const n = bloklar.length;
     const bitti = bloklar.filter(b => b.status === 'done').length;
     const suren = bloklar.find(b => b.startedAt);
@@ -1570,7 +1636,7 @@ R.Screens.today = (function(){
     const ad = b => b.topic || b.subject || b.slot;
     let cumle;
     if(suren) cumle = ad(suren) + ' bloğu sürüyor; ' + bitti + '/' + n + ' blok bitti';
-    else if(!sira) cumle = 'Bugünün ' + n + ' bloğu da kapandı'
+    else if(!sira) cumle = yz('ays.today.bugunun') + n + ' bloğu da kapandı'
       + (C.minimumDayMet(dateISO) ? '; minimum gün tutuldu' : '');
     else cumle = bitti + '/' + n + ' blok bitti; sırada ' + ad(sira);
     const borc = C.cardDebt();
@@ -1582,7 +1648,7 @@ R.Screens.today = (function(){
      sayfa «Bugün»; tarih bilgi taşımaz. Satır başlığın yanındaki bilgi
      kartında durur (kabuk sayfaBasi). */
   function tarihSatiri(){
-    return 'Hafta ' + M.currentWeek() + '/' + R.PLAN.totalWeeks;
+    return yz('ays.today.hafta') + M.currentWeek() + '/' + R.PLAN.totalWeeks;
   }
 
   /* Özet kutusunun sayıları (024): her sayı kesinlik etiketi ve köken kartı
@@ -1598,7 +1664,7 @@ R.Screens.today = (function(){
     return {
       kalan:{ deger:U.diffDays(dateISO, R.PLAN.examTytISO), birim:'gün',
         kesinlik:profilTarihi ? 'computed' : 'estimated',
-        formul:'TYT tarihi − bugün', girdiler:[{ ad:yz('ays.today.tyt-tarihi'), deger:R.PLAN.examTytISO,
+        formul:yz('ays.today.tyt-tarihi-bugun'), girdiler:[{ ad:yz('ays.today.tyt-tarihi'), deger:R.PLAN.examTytISO,
           kesinlik:profilTarihi ? 'measured' : 'estimated' }],
         kaynak:profilTarihi ? 'profildeki sınav tarihi' : 'planın varsayılan tarihi; ÖSYM duyurusuyla güncellenir' },
       blok:{ deger:bitti + '/' + bloklar.length, kesinlik:'computed',
@@ -1626,13 +1692,13 @@ R.Screens.today = (function(){
     const kur = R.Setup && R.Setup.needed && R.Setup.needed();
     const kisa = !kur && !!S.ui.onbesDk;
     const a = kur ? null : kisa ? C.onbesDakika(15) : C.nextAction();
-    const cumle = kur ? 'Programını kuralım.' : kisa ? '15 dakikan var: ' + a.title + '.'
-      : ((day && bugunCumlesi(day, dateISO)) || 'Bugün için plan yok.');
+    const cumle = kur ? yz('ays.today.programini-kuralim') : kisa ? '15 dakikan var: ' + a.title + '.'
+      : ((day && bugunCumlesi(day, dateISO)) || yz('ays.today.bugun-icin-plan-yok'));
     const eylem = kur ? String(c.Button({ label:yz('ays.today.kuruluma-basla'), tone:'primary', act:'setup-open' }))
       : a && (a.route || a.act) ? String(c.Button({ label:yz('ays.today.basla'), tone:'primary', act:'next-action',
         data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '', 'data-tab':a.tab || '' } })) : '';
     return K.kapakHtml({ modul:'ays', selam:K.acilis('ays').selam, cumle, sayilar:[], eylem,
-      ikincil:kur ? '' : String(c.Button({ label:kisa ? 'Tam plan' : '15 dakikam var', tone:'ghost', act:'onbes-dk' })) });
+      ikincil:kur ? '' : String(c.Button({ label:kisa ? yz('ays.today.tam-plan') : '15 dakikam var', tone:'ghost', act:'onbes-dk' })) });
   }
 
   /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).
@@ -1653,20 +1719,20 @@ R.Screens.today = (function(){
       ? P.kart({ tur:'bloklar', ad:yz('ays.today.gunun-bloklari'), simge:'blok', yuva:bitti + ' / ' + bloklar.length + ' bitti',
           govde:P.serit({ parcalar:bloklar.map(b => ({ ad:ad(b), sure:Number(b.targetMin) || 1, durum:durum(b) })),
               etiket:bloklar.length + ' blok: ' + bitti + ' bitti' + (suren ? ', ' + ad(suren) + ' sürüyor' : '') })
-            + P.not(suren ? 'Şimdi: ' + ad(suren) : sira ? 'Sırada: ' + ad(sira) + (sira.targetMin ? ' · ' + sira.targetMin + ' dk' : '') : 'Bugünün blokları kapandı.') })
-      : P.kart({ tur:'bloklar', ad:yz('ays.today.gunun-bloklari'), simge:'blok', bos:{ cumle:yz('ays.today.bugun-icin-blok-yok'), dugme:git('Plana bak', 'plan') } });
+            + P.not(suren ? yz('ays.today.simdi') + ad(suren) : sira ? yz('ays.today.sirada') + ad(sira) + (sira.targetMin ? ' · ' + sira.targetMin + ' dk' : '') : yz('ays.today.bugunun-bloklari-kapandi')) })
+      : P.kart({ tur:'bloklar', ad:yz('ays.today.gunun-bloklari'), simge:'blok', bos:{ cumle:yz('ays.today.bugun-icin-blok-yok'), dugme:git(yz('ays.today.plana-bak'), 'plan') } });
     const kalan = U.diffDays(dateISO, R.PLAN.examTytISO);
     const hafta = M.currentWeek(), topHafta = R.PLAN.totalWeeks;
     const tahmini = !(S.profile && S.profile.examTytISO);
     const sinavKart = P.kart({ tur:'sinav', ad:'TYT’ye', simge:'takvim', yuva:tahmini ? 'tahmini tarih' : 'hesaplandı',
-      govde:P.deger(String(kalan), 'gün', 'Hafta ' + hafta + ' / ' + topHafta)
+      govde:P.deger(String(kalan), 'gün', yz('ays.today.hafta') + hafta + ' / ' + topHafta)
         + P.esik({ deger:hafta, esik:hafta, olcek:topHafta, etiket:yz('ays.today.programin') + hafta + '. haftası, toplam ' + topHafta })
         + P.not('programın %' + Math.round(hafta / topHafta * 100) + '’i geçti') });
     const vadeli = C.dueCards().length;
     const borc = (S.cards || []).length ? C.cardDebt() : null;
     const kartKart = borc == null
       ? P.kart({ tur:'tekrar', ad:yz('ays.today.tekrar-kartlari'), simge:'kart', bos:{ cumle:yz('ays.today.tekrar-karti-yok-borc-ilk') } })
-      : P.kart({ tur:'tekrar', ad:yz('ays.today.tekrar-kartlari'), simge:'kart', yuva:'hesaplandı', dugme:vadeli ? git('Tekrara git', 'cards') : null,
+      : P.kart({ tur:'tekrar', ad:yz('ays.today.tekrar-kartlari'), simge:'kart', yuva:'hesaplandı', dugme:vadeli ? git(yz('ays.today.tekrara-git'), 'cards') : null,
           govde:P.deger(String(vadeli), 'vadeli', 'tekrar borcu %' + borc)
             + P.esik({ deger:borc, esik:10, olcek:Math.max(50, borc), yon:'azalis-iyi', etiket:yz('ays.today.tekrar-borcu-yuzde') + borc + ', eşik yüzde 10' })
             + P.not(borc > 10 ? 'eşik %10 · ' + (borc - 10) + ' puan üstünde' : 'eşik %10 · altında') });
@@ -1687,7 +1753,7 @@ R.Screens.today = (function(){
           govde:(hedefQ <= 60
             ? P.segment({ hedef:hedefQ, yapilan:yapilanQ, etiket:yz('ays.today.gunun-sorusu'), sutun:Math.min(12, hedefQ) })
             : P.esik({ deger:yapilanQ || 0, esik:hedefQ, yon:'artis-iyi', etiket:(yapilanQ || 0) + ' soru, hedef ' + hedefQ }))
-            + P.not(yapilanQ == null ? 'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.' : yapilanQ >= hedefQ ? 'Günün soru hedefi tamam.' : (hedefQ - yapilanQ) + ' soru kaldı.') })
+            + P.not(yapilanQ == null ? yz('ays.today.blok-bitince-cozulen-soru-gi') : yapilanQ >= hedefQ ? yz('ays.today.gunun-soru-hedefi-tamam') : (hedefQ - yapilanQ) + ' soru kaldı.') })
       : '';
     /* Günün sorusu (yıldız): son yanlış çözülen sorulardan biri, tarihe bağlı
        seçilir (gün içinde değişmez). Yanlış yoksa kart yok. */
@@ -1723,7 +1789,7 @@ R.Screens.today = (function(){
     await M.ensureWeek(n);
     const day = await M.ensureDay(U.today());
     /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
-    if(window.LIFEOS && window.LIFEOS.KARSILAMA) window.LIFEOS.KARSILAMA.notYaz(bugunCumlesi(day, dateISO) || 'Bugün için plan yok.', dateISO);
+    if(window.LIFEOS && window.LIFEOS.KARSILAMA) window.LIFEOS.KARSILAMA.notYaz(bugunCumlesi(day, dateISO) || yz('ays.today.bugun-icin-plan-yok'), dateISO);
     /* Dönen kart İlerleme › Özet'te; seçim sayfasının özeti yine Bugün'le tazelenir. */
     DonenKutu(day, dateISO, true);
 
@@ -2010,7 +2076,7 @@ R.Screens.today = (function(){
     if(bl.length === 1) return { blok:bl[0] };
     if(!bl.length) return { planDisi:true };
     return { red:'«' + o.metin + '»: bugün ' + bl.length + ' blok var (' + adlar + '); toplamı bloklara bölüştürmem. '
-      + 'Her bloğu adıyla ayrı yaz.' + ornek };
+      + yz('ays.today.her-blogu-adiyla-ayri-yaz') + ornek };
   }
 
   /* Satırın tamamı yazılabilir mi? { plan:[…] } ya da { red:'neden' }. */
@@ -2018,18 +2084,18 @@ R.Screens.today = (function(){
     const t = String(metin || '').trim();
     if(!t) return { plan:[] };
     const day = S.days[gun];
-    if(!day) return { red:'Bu günün kaydı açılmamış; hiçbir şey yazılmadı.' };
-    if(!R.Komut || !R.Entry) return { red:'Ölçüm satırı bu sürümde okunamıyor; hiçbir şey yazılmadı.' };
+    if(!day) return { red:yz('ays.today.bu-gunun-kaydi-acilmamis-hic') };
+    if(!R.Komut || !R.Entry) return { red:yz('ays.today.olcum-satiri-bu-surumde-okun') };
     /* Soru sayısı olmadan doğru: çözülen uydurulmaz. */
     const yalnizDogru = t.split(/[,;\n]/).find(p => /\d\s*(?:tane\s*)?dogru/.test(gkNorm(p)) && !/soru|paragraf|problem/.test(gkNorm(p)));
     if(yalnizDogru) return { red:'«' + yalnizDogru.trim() + '»: doğru tek başına yazılmaz; kaç soru çözdüğünü de yaz, örneğin ' + GK_ORNEK + '.' };
     let r;
-    try{ r = R.Komut.anla(t, { date:gun }); }catch(e){ return { red:'Satırı okuyamadım; hiçbir şey yazılmadı.' }; }
+    try{ r = R.Komut.anla(t, { date:gun }); }catch(e){ return { red:yz('ays.today.satiri-okuyamadim-hicbir-sey') }; }
     if((r.sorular || []).length) return { red:r.sorular.map(x => x.soru).join(' ') };
-    if((r.anlasilmayan || []).length) return { red:'Anlaşılmadı: «' + r.anlasilmayan.join('», «') + '». Örneğin ' + GK_ORNEK + '.' };
-    if(!r.oneriler.length) return { red:'Bu satırda ölçüm bulamadım. Örneğin ' + GK_ORNEK + '.' };
+    if((r.anlasilmayan || []).length) return { red:yz('ays.today.anlasilmadi') + r.anlasilmayan.join('», «') + '». Örneğin ' + GK_ORNEK + '.' };
+    if(!r.oneriler.length) return { red:yz('ays.today.bu-satirda-olcum-bulamadim-o') + GK_ORNEK + '.' };
     const disi = r.oneriler.filter(o => !GK_OLCUM[o.action]);
-    if(disi.length) return { red:'Bu satır yalnız ölçüm içindir; «' + (disi[0].metin || t) + '» bir plan değişikliği. Onu «Ne yaptın?» kutusuna yaz.' };
+    if(disi.length) return { red:yz('ays.today.bu-satir-yalniz-olcum-icindi') + (disi[0].metin || t) + '» bir plan değişikliği. Onu «Ne yaptın?» kutusuna yaz.' };
     const gruplar = {};
     r.oneriler.forEach(o => { const m = o.metin || t; (gruplar[m] = gruplar[m] || []).push(o.action); });
     for(const m of Object.keys(gruplar)){
@@ -2054,10 +2120,10 @@ R.Screens.today = (function(){
     const p = x.o.params || {};
     const sr = (n, d) => n + ' soru' + (d != null ? ', ' + d + ' doğru' : '');
     if(x.tur === 'blok') return gkAd(x.blok) + ': ' + sr(p.count, p.correct);
-    if(x.o.action === 'soru-yaz') return 'Plan dışı: ' + sr(p.count, p.correct);
-    if(x.o.action === 'uyku-yaz') return 'Uyku: ' + p.hours + ' saat';
-    if(x.o.action === 'paragraf-yaz') return 'Paragraf: ' + p.count;
-    if(x.o.action === 'problem-yaz') return 'Problem: ' + p.count;
+    if(x.o.action === 'soru-yaz') return yz('ays.today.plan-disi-2') + sr(p.count, p.correct);
+    if(x.o.action === 'uyku-yaz') return yz('ays.today.uyku-2') + p.hours + ' saat';
+    if(x.o.action === 'paragraf-yaz') return yz('ays.today.paragraf-2') + p.count;
+    if(x.o.action === 'problem-yaz') return yz('ays.today.problem-2') + p.count;
     const s = (R.SUBJECTS || []).find(y => y.id === p.subjectId);
     return (s ? s.name : 'Süre') + ': ' + p.minutes + ' dk';
   }
@@ -2172,20 +2238,20 @@ R.Screens.today = (function(){
     },
     async 'seri-tatil-bitir'(){
       const r = await R.Tatil.bitir();
-      UI.toast(r.ok ? 'Tatil bitti; bugünden kademeli dönüş' + (r.donus ? ' (' + r.donus.dakika + ' dk)' : '')
+      UI.toast(r.ok ? yz('ays.today.tatil-bitti-bugunden-kademel') + (r.donus ? ' (' + r.donus.dakika + ' dk)' : '')
         : r.why, { life:5000 });
       if(R.Hedefler && R.Hedefler.ag) R.Hedefler.ag.planla();
       R.App.render();
     },
     'istisna-bitir'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Arayı bugün bitir',
-        'Bugün ve sonraki günler yeniden plana göre kurulur. Geçmiş ara günleri ara olarak kalır.',
+      UI.confirmSheet(yz('ays.today.arayi-bugun-bitir'),
+        yz('ays.today.bugun-ve-sonraki-gunler-yeni'),
         async () => {
           const r = await R.Istisna.bitir(id);
-          UI.toast(r.ok ? 'Ara bitti; bugünün planı kuruldu' : r.why);
+          UI.toast(r.ok ? yz('ays.today.ara-bitti-bugunun-plani-kuru') : r.why);
           R.App.render();
-        }, false, 'Arayı bugün bitir');
+        }, false, yz('ays.today.arayi-bugun-bitir'));
     },
 
     /* HKM teklifleri: uygulayan AYS'in kendi kodudur. */
@@ -2194,7 +2260,7 @@ R.Screens.today = (function(){
        bildirilemedi» hali yutulmaz, SOYLENIR. */
     async 'hedef-durum'(el){
       const r = await R.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
-      UI.toast(r.ok ? 'Hedef güncellendi' + (r.not ? '. ' + r.not : '') : r.why);
+      UI.toast(r.ok ? yz('ays.today.hedef-guncellendi') + (r.not ? '. ' + r.not : '') : r.why);
       R.App.render();
     },
     async 'hedef-plan-onizle'(el){ S.ui.planOnizle = el.dataset.id; R.App.render(); },
@@ -2203,7 +2269,7 @@ R.Screens.today = (function(){
       const r = await R.HedefPlan.uygulaHedef(el.dataset.id);
       S.ui.planOnizle = null;
       if(r.ok) R.UI.onayMuhru();
-      UI.toast(r.ok ? 'Plan uygulandı. Geri almak istersen «Planı geri al».' : r.why);
+      UI.toast(r.ok ? yz('ays.today.plan-uygulandi-geri-almak-is') : r.why);
       R.App.render();
     },
     async 'hedef-uyarla-ac'(el){ S.ui.uyarla = el.dataset.id; R.App.render(); },
@@ -2218,7 +2284,7 @@ R.Screens.today = (function(){
       const x = u.senaryolar[Number(el.dataset.i)];
       if(!x){ UI.toast(yz('ays.today.bu-secenek-artik-gecerli-deg')); return; }
       const g = await R.HedefPlan.geriAlHedef(h.id);
-      if(!g.ok && R.HedefPlan.aktif(h.id)){ UI.toast(g.why || 'Eski plan geri alınamadı; hedef değişmedi.'); return; }
+      if(!g.ok && R.HedefPlan.aktif(h.id)){ UI.toast(g.why || yz('ays.today.eski-plan-geri-alinamadi-hed')); return; }
       await R.Hedefler.kaydet(H.uyarlamaUygula(u.hedef, x, paket, {}, bugun));
       S.ui.uyarla = null;
       S.ui.planOnizle = h.id;
@@ -2227,7 +2293,7 @@ R.Screens.today = (function(){
     },
     async 'hedef-plan-geri'(el){
       const r = await R.HedefPlan.geriAlHedef(el.dataset.id);
-      UI.toast(r.ok ? 'Plan geri alındı; hafta taslağı eski sırasına döndü.' : (r.why || 'Geri alınamadı'));
+      UI.toast(r.ok ? yz('ays.today.plan-geri-alindi-hafta-tasla') : (r.why || yz('ays.today.geri-alinamadi')));
       R.App.render();
     },
 
@@ -2240,7 +2306,7 @@ R.Screens.today = (function(){
       UI.toast(yz('ays.today.hkm-u2019ye-gonderiliyor'));
       const r = await R.Beacon.send({ reason:'manual' });
       UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
-        : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
+        : (yz('ays.today.gonderilemedi') + (r.note || r.reason || 'sebep bilinmiyor')));
       R.App.render();
     },
 
@@ -2260,13 +2326,13 @@ R.Screens.today = (function(){
 
     async 'bad-day'(){
       UI.confirmSheet(R.BAD_DAY.label,
-        'Bugünün hedefi minimum güne iner, kalan bloklar “kötü gün” nedeniyle atlanır ve '
+        yz('ays.today.bugunun-hedefi-minimum-gune')
         + 'davranış serin kırılmaz. Yarın normal plana dönersin.', async () => {
           await M.badDay();
           UI.closeSheet();
           UI.toast(yz('ays.today.bugun-minimuma-indi-seri'));
           R.App.render();
-        }, false, 'Bugünü minimuma indir');
+        }, false, yz('ays.today.bugunu-minimuma-indir'));
     },
     async 'bad-day-soru-yok'(){
       await M.badDay(null, { soruYok:true });
@@ -2550,7 +2616,7 @@ R.Screens.today = (function(){
        metni, model yok. Plan yoksa bu söylenir. */
     sesli(){
       const d = S.days[U.todayISO()];
-      return (d && bugunCumlesi(d, U.todayISO())) || 'Bugün için plan yok.';
+      return (d && bugunCumlesi(d, U.todayISO())) || yz('ays.today.bugun-icin-plan-yok');
     },
     lede(){ return ''; },
     kapak,
@@ -2576,7 +2642,7 @@ R.Screens.today = (function(){
          altinda («/ 18 soru») zaten yazili (iPhone §8 «boy»). */
       kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü', 'öbür-kayıtlar', 'günlük-hedef'],
       title:yz('ays.today.gunu-duzenle'),
-      subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
+      subtitle(){ return yz('ays.today.bloklar-sayaclar-ve-gunun-bu'); },
       actions(){
         return String(html`
           ${c.Button({ label:yz('ays.today.ozeti-paylas'), icon:'upload', size:'sm', act:'share-week' })}

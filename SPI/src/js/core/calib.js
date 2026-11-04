@@ -38,6 +38,29 @@
 
    4. BESIN ALTINDA KAYIT HUKUM VERMEZ. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.calib.sonucu-acmadan-once-bu-deger':'Sonucu açmadan önce: bu değer kaç çıkacak?',
+  'spi.core.calib.tartiya-cikmadan-once-kac-ge':'Tartıya çıkmadan önce: kaç geleceğini tahmin ediyorsun?',
+  'spi.core.calib.olcumleri-girmeden-once-bugu':'Ölçümleri girmeden önce: bugünkü toparlanman 100 üzerinden kaç?',
+  'spi.core.calib.kaydina-bakmadan-dun-gece-ka':'Kaydına bakmadan: dün gece kaç saat uyudun?',
+  'spi.core.calib.hesabi-gormeden-bugun-kac-gr':'Hesabı görmeden: bugün kaç gram protein aldın?',
+  'spi.core.calib.bu-tahlilde-kirmizi-bayrak-c':'Bu tahlilde kırmızı bayrak çıkma olasılığı nedir?',
+  'spi.core.calib.bilinmeyen-tahmin-turu':'Bilinmeyen tahmin türü.',
+  'spi.core.calib.tahmin-bir-sayi-olmali':'Tahmin bir sayı olmalı.',
+  'spi.core.calib.olasilik-0-ile-1-arasinda':'Olasılık 0 ile 1 arasında olmalı.',
+  'spi.core.calib.tahmin-negatif-olamaz':'Tahmin negatif olamaz.',
+  'spi.core.calib.tahmin-bulunamadi':'Tahmin bulunamadı.',
+  'spi.core.calib.bu-tahmin-zaten-kapandi':'Bu tahmin zaten kapandı.',
+  'spi.core.calib.gercek-deger-bir-sayi-olmali':'Gerçek değer bir sayı olmalı.',
+  'spi.core.calib.bu-tahmin':'Bu tahmin ',
+  'spi.core.calib.degerlerini-oldugundan-yukse':'Değerlerini olduğundan yüksek tahmin etme eğilimindesin. Bu bir sağlık yargısı değil, bir okuma alışkanlığı bulgusudur.',
+  'spi.core.calib.degerlerini-oldugundan-dusuk':'Değerlerini olduğundan düşük tahmin etme eğilimindesin. Kendini olduğundan kötü okumak da bir sapmadır.',
+  'spi.core.calib.sistemli-bir-yanlilik-gorunm':'Sistemli bir yanlılık görünmüyor.',
+  'spi.core.calib.kapanmis':'Kapanmış ',
+  'spi.core.calib.brier':'Brier ',
+  'spi.core.calib.son':'Son ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.calib.tahlil-degerin':'Tahlil değerin',
   'spi.core.calib.tarti':'Tartı',
   'spi.core.calib.toparlanma-skorun':'Toparlanma skorun',
@@ -59,22 +82,22 @@ SP.Calib = (function(){
   SP.CALIB_KINDS = [
     { id:'lab-value', type:'number', unit:'', err:'ape',
       label:yz('spi.core.calib.tahlil-degerin'),
-      ask:'Sonucu açmadan önce: bu değer kaç çıkacak?' },
+      ask:yz('spi.core.calib.sonucu-acmadan-once-bu-deger') },
     { id:'weight', type:'number', unit:'kg', err:'abs', bands:[0.5, 1.5, 3],
       label:yz('spi.core.calib.tarti'),
-      ask:'Tartıya çıkmadan önce: kaç geleceğini tahmin ediyorsun?' },
+      ask:yz('spi.core.calib.tartiya-cikmadan-once-kac-ge') },
     { id:'readiness', type:'number', unit:'puan', err:'abs', bands:[7, 15, 30],
       label:yz('spi.core.calib.toparlanma-skorun'),
-      ask:'Ölçümleri girmeden önce: bugünkü toparlanman 100 üzerinden kaç?' },
+      ask:yz('spi.core.calib.olcumleri-girmeden-once-bugu') },
     { id:'sleep', type:'number', unit:'saat', err:'abs', bands:[0.5, 1, 2],
       label:yz('spi.core.calib.uyku-suren'),
-      ask:'Kaydına bakmadan: dün gece kaç saat uyudun?' },
+      ask:yz('spi.core.calib.kaydina-bakmadan-dun-gece-ka') },
     { id:'protein', type:'number', unit:'g', err:'ape',
       label:yz('spi.core.calib.gunluk-proteinin'),
-      ask:'Hesabı görmeden: bugün kaç gram protein aldın?' },
+      ask:yz('spi.core.calib.hesabi-gormeden-bugun-kac-gr') },
     { id:'flag', type:'binary', unit:'', err:'brier',
       label:yz('spi.core.calib.kirmizi-bayrak'),
-      ask:'Bu tahlilde kırmızı bayrak çıkma olasılığı nedir?' },
+      ask:yz('spi.core.calib.bu-tahlilde-kirmizi-bayrak-c') },
   ];
 
   const KIND_BY_ID = SP.CALIB_KINDS.reduce((m, k) => { m[k.id] = k; return m; }, {});
@@ -106,14 +129,14 @@ SP.Calib = (function(){
   async function open(kindId, guess, opts){
     const o = opts || {};
     const k = kindOf(kindId);
-    if(!k) return { ok:false, error:'Bilinmeyen tahmin türü.' };
+    if(!k) return { ok:false, error:yz('spi.core.calib.bilinmeyen-tahmin-turu') };
     const g = Number(guess);
-    if(!isFinite(g)) return { ok:false, error:'Tahmin bir sayı olmalı.' };
+    if(!isFinite(g)) return { ok:false, error:yz('spi.core.calib.tahmin-bir-sayi-olmali') };
     if(k.type === 'binary' && (g < 0 || g > 1)){
-      return { ok:false, error:'Olasılık 0 ile 1 arasında olmalı.' };
+      return { ok:false, error:yz('spi.core.calib.olasilik-0-ile-1-arasinda') };
     }
     if(k.type === 'number' && g < 0){
-      return { ok:false, error:'Tahmin negatif olamaz.' };
+      return { ok:false, error:yz('spi.core.calib.tahmin-negatif-olamaz') };
     }
     const kayit = norm({ kind:kindId, guess:g, ref:o.ref || null, note:o.note,
       dueAt:o.dueAt || null, blind:o.blind !== false });
@@ -124,13 +147,13 @@ SP.Calib = (function(){
 
   async function settle(id, actual){
     const f = list().filter(x => x.id === id)[0];
-    if(!f) return { ok:false, error:'Tahmin bulunamadı.' };
-    if(f.actual != null) return { ok:false, error:'Bu tahmin zaten kapandı.' };
+    if(!f) return { ok:false, error:yz('spi.core.calib.tahmin-bulunamadi') };
+    if(f.actual != null) return { ok:false, error:yz('spi.core.calib.bu-tahmin-zaten-kapandi') };
     const a = Number(actual);
-    if(!isFinite(a)) return { ok:false, error:'Gerçek değer bir sayı olmalı.' };
+    if(!isFinite(a)) return { ok:false, error:yz('spi.core.calib.gercek-deger-bir-sayi-olmali') };
     if(f.dueAt && U.todayISO() < f.dueAt){
       return { ok:false, early:true,
-        error:'Bu tahmin ' + f.dueAt + ' tarihinden önce kapanmaz.' };
+        error:yz('spi.core.calib.bu-tahmin') + f.dueAt + ' tarihinden önce kapanmaz.' };
     }
     f.actual = a;
     f.settledAt = new Date().toISOString();
@@ -240,9 +263,9 @@ SP.Calib = (function(){
     const ESIK = 0.25;
     return { cert:'measured', n:kayitlar.length, value:v, unit:'bant',
       direction:v > ESIK ? 'over' : v < -ESIK ? 'under' : 'even',
-      note:(v > ESIK ? 'Değerlerini olduğundan yüksek tahmin etme eğilimindesin. Bu bir sağlık yargısı değil, bir okuma alışkanlığı bulgusudur.'
-        : v < -ESIK ? 'Değerlerini olduğundan düşük tahmin etme eğilimindesin. Kendini olduğundan kötü okumak da bir sapmadır.'
-        : 'Sistemli bir yanlılık görünmüyor.')
+      note:(v > ESIK ? yz('spi.core.calib.degerlerini-oldugundan-yukse')
+        : v < -ESIK ? yz('spi.core.calib.degerlerini-oldugundan-dusuk')
+        : yz('spi.core.calib.sistemli-bir-yanlilik-gorunm'))
         + (Math.abs(v) > ESIK
            ? ' Ortalama sapman, kendi «makul» bandının '
              + ondalik(Math.abs(v)) + ' katı kadar tek yöne kayıyor.'
@@ -263,7 +286,7 @@ SP.Calib = (function(){
       bias:bias() };
 
     if(hepsi.length < ASGARI){
-      out.note = 'Kapanmış ' + hepsi.length + ' tahmin var; puan için '
+      out.note = yz('spi.core.calib.kapanmis') + hepsi.length + ' tahmin var; puan için '
         + ASGARI + ' gerekir. Az sayıda tahmin hüküm vermez.';
       return out;
     }
@@ -296,10 +319,10 @@ SP.Calib = (function(){
       return g.label + ': ' + (g.type === 'ape'
         ? '%' + Math.round(g.mean * 100) + ' sapma'
         : g.type === 'brier'
-        ? 'Brier ' + ondalik(g.mean)
+        ? yz('spi.core.calib.brier') + ondalik(g.mean)
         : ondalik(g.mean) + (g.unit ? ' ' + g.unit : '') + ' sapma');
     });
-    out.note = 'Son ' + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
+    out.note = yz('spi.core.calib.son') + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
       + '. Ortanca bant: ' + (out.grade || '—') + '. Farklı birimler tek '
       + 'ortalamada toplanmaz; karşılaştırılan şey banttır.';
     return out;

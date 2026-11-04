@@ -23,6 +23,18 @@
         doğrulanmadı» yazar.
      2. METİN ÖNCE KAÇIRILIR, sonra işaretler açılır; başka HTML geçmez.
      3. «Okudum» bu cihazda kalır (modülün deposu); hiçbir ölçüme yazılmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.rehber.ornek':'Örnek',
+  'ortak.rehber.cozumu-goster':'Çözümü göster',
+  'ortak.rehber.dikkat':'Dikkat:',
+  'ortak.rehber.konular':'‹ Konular',
+  'ortak.rehber.elle-yazildi-dogrulanmadi':'· elle yazıldı · doğrulanmadı',
+  'ortak.rehber.bu-konunun-sonunda':'Bu konunun sonunda',
+  'ortak.rehber.akilda-kalsin':'Akılda kalsın',
+  'ortak.rehber.dayanak':'Dayanak:',
+  'ortak.rehber.konu-anlatimi':'Konu anlatımı',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -99,9 +111,9 @@ LIFEOS.REHBER = (function(){
       + para(b.metin)
       + (b.liste && b.liste.length ? '<ul class="rehber__madde">' + b.liste.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul>' : '')
       + (b.formul && b.formul.length ? '<div class="rehber__formul">' + b.formul.map(x => '<div>' + metinHtml(x) + '</div>').join('') + '</div>' : '')
-      + (b.ornek ? '<div class="rehber__ornek"><p class="rehber__ornek-etiket">Örnek</p><p>' + metinHtml(b.ornek.soru) + '</p>'
-        + '<details><summary>Çözümü göster</summary><ol>' + (b.ornek.cozum || []).map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ol></details></div>' : '')
-      + (b.dikkat ? '<p class="rehber__dikkat"><b>Dikkat:</b> ' + metinHtml(b.dikkat) + '</p>' : '')
+      + (b.ornek ? ('<div class="rehber__ornek"><p class="rehber__ornek-etiket">' + yz('ortak.rehber.ornek') + '</p><p>') + metinHtml(b.ornek.soru) + '</p>'
+        + ('<details><summary>' + yz('ortak.rehber.cozumu-goster') + '</summary><ol>') + (b.ornek.cozum || []).map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ol></details></div>' : '')
+      + (b.dikkat ? ('<p class="rehber__dikkat"><b>' + yz('ortak.rehber.dikkat') + '</b> ') + metinHtml(b.dikkat) + '</p>' : '')
       + '</section>';
   }
   function konuHtml(id){
@@ -111,14 +123,14 @@ LIFEOS.REHBER = (function(){
     const onceki = l[i - 1], sonraki = l[i + 1];
     const okundu = okunduMu(k.id);
     return '<article class="rehber rehber__konu">'
-      + '<p class="rehber__ust"><button type="button" class="rehber__geri" data-rehber="geri">‹ Konular</button>'
-      + '<span>' + kac(k.alan) + (k.sure ? ' · ' + kac(k.sure) + ' dk' : '') + ' · elle yazıldı · doğrulanmadı</span></p>'
+      + ('<p class="rehber__ust"><button type="button" class="rehber__geri" data-rehber="geri">' + yz('ortak.rehber.konular') + '</button>')
+      + '<span>' + kac(k.alan) + (k.sure ? ' · ' + kac(k.sure) + ' dk' : '') + (' ' + yz('ortak.rehber.elle-yazildi-dogrulanmadi') + '</span></p>')
       + '<h1 class="rehber__ad">' + kac(k.ad) + '</h1>'
       + '<p class="rehber__giris">' + metinHtml(k.giris) + '</p>'
-      + (k.kazanim && k.kazanim.length ? '<div class="rehber__kazanim"><p>Bu konunun sonunda</p><ul>' + k.kazanim.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
+      + (k.kazanim && k.kazanim.length ? ('<div class="rehber__kazanim"><p>' + yz('ortak.rehber.bu-konunun-sonunda') + '</p><ul>') + k.kazanim.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
       + (k.bolumler || []).map(bolumHtml).join('')
-      + (k.akilda && k.akilda.length ? '<div class="rehber__akilda"><p>Akılda kalsın</p><ul>' + k.akilda.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
-      + (k.kaynaklar && k.kaynaklar.length ? '<p class="rehber__kaynak"><b>Dayanak:</b> ' + k.kaynaklar.map(kac).join(' · ') + '</p>' : '')
+      + (k.akilda && k.akilda.length ? ('<div class="rehber__akilda"><p>' + yz('ortak.rehber.akilda-kalsin') + '</p><ul>') + k.akilda.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
+      + (k.kaynaklar && k.kaynaklar.length ? ('<p class="rehber__kaynak"><b>' + yz('ortak.rehber.dayanak') + '</b> ') + k.kaynaklar.map(kac).join(' · ') + '</p>' : '')
       + (ayar && ayar.sinir ? '<p class="rehber__sinir">' + kac(ayar.sinir) + '</p>' : '')
       + '<div class="rehber__ayak">'
       +   '<button type="button" class="btn ' + (okundu ? 'btn--ghost' : 'btn--primary') + '" data-rehber="okudum:' + kac(k.id) + '" aria-pressed="' + okundu + '">' + (okundu ? '✓ Okundu' : 'Okudum') + '</button>'
@@ -135,7 +147,7 @@ LIFEOS.REHBER = (function(){
     const l = konular().filter(k => discler.indexOf(k.disc) >= 0);
     if(!l.length) return '';
     return '<section class="rehber-alan" aria-label="Konu anlatımı">'
-      + '<h2 class="rehber-alan__ad">Konu anlatımı</h2><ul class="rehber__konular">'
+      + ('<h2 class="rehber-alan__ad">' + yz('ortak.rehber.konu-anlatimi') + '</h2><ul class="rehber__konular">')
       + l.map(k => '<li><button type="button" class="rehber__satir" data-rehber="git:' + kac(k.id) + '">'
         + '<span class="rehber__satir-ad">' + kac(k.ad) + '</span><span class="rehber__satir-yan">'
         + (k.sure ? kac(k.sure) + ' dk' : '') + (okunduMu(k.id) ? '<i class="rehber__okundu" aria-label="okundu">✓</i>' : '') + ' ›</span></button></li>').join('')

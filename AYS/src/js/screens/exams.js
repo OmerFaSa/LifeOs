@@ -2,6 +2,64 @@
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz; metin h`` icinde
    otomatik kacirilir, yapisal parcalar C.* bilesenlerinden gelir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.exams.hedef-bandin-ustundesin-band':'Hedef bandın üstündesin; bandı koru',
+  'ays.exams.deneme-takvimi':'Deneme takvimi',
+  'ays.exams.onceki-denemeyle':'Önceki denemeyle',
+  'ays.exams.hiz-seridi':'Hız şeridi',
+  'ays.exams.fotografi-degistir':'Fotoğrafı değiştir',
+  'ays.exams.fotograf-ekle':'Fotoğraf ekle',
+  'ays.exams.yeniden-coz':'Yeniden çöz',
+  'ays.exams.goruntu-okuyabilen-bir-model':'Görüntü okuyabilen bir model gerekir (Ayarlar › Model)',
+  'ays.exams.anahtari-duzenle':'Anahtarı düzenle',
+  'ays.exams.cevap-anahtarini-gir':'Cevap anahtarını gir',
+  'ays.exams.anahtar-girildi-kendi-cevapl':'Anahtar girildi; kendi cevaplarını da yazınca yanlış ve boş sorular tek tek listelenir.',
+  'ays.exams.cevap-anahtarini-ve-kendi-ce':'Cevap anahtarını ve kendi cevaplarını girersen yanlış ve boş sorular tek tek listelenir: fotoğrafını ekleyip çözdürebilir, konusunu bulup hata kaydına atabilirsin.',
+  'ays.exams.anahtardan-hesaplanan-sonuc':'Anahtardan hesaplanan sonuç kayıttaki sayılardan farklı. Kayıt kendiliğinden değişmez; istersen anahtara göre güncelle.',
+  'ays.exams.harfleri-yan-yana-yaz-ya':'Harfleri yan yana yaz ya da yayının sayfasından «1-A 2-C …» biçiminde yapıştır; boşluklar yok sayılır. ',
+  'ays.exams.bos-biraktigin-soru-icin-nok-2':'Boş bıraktığın soru için nokta (.), iptal edilen soru için anahtara yıldız (*) yaz. Bir testte hata varsa hiçbir test kaydedilmez ve nedeni yazılır.',
+  'ays.exams.analiz':'Analiz ',
+  'ays.exams.devam-et':'Devam et',
+  'ays.exams.her-soruyu-bitirdiginde-bir':'Her soruyu bitirdiğinde bir tuşa bas: 1 yaptım, 2 zorlandım, 3 atladım. ',
+  'ays.exams.sistem-soru-basina-sureyi-ke':'Sistem soru başına süreyi kendisi hesaplar; sonunda dakikaları elle girmene gerek kalmaz.',
+  'ays.exams.oturum-baslayinca-kronometre':'Oturum başlayınca kronometre işler. Her soruyu bitirdiğinde ',
+  'ays.exams.dogru-yanlis-bos-okunur-kayd':'Doğru/yanlış/boş okunur; kaydetmeden önce kontrol edersin',
+  'ays.exams.net-otomatik-hesaplanir-dogr':'Net otomatik hesaplanır: doğru − yanlış/4. Boş bırakılan testler kaydedilmez.',
+  'ays.exams.kaydedince-tekrar-karti-otom':'Kaydedince tekrar kartı otomatik oluşur ve +1 gün / +3 gün / +1 hafta / +1 ay takvimine girer.',
+  'ays.exams.hatayi-duzenle-2':'Hatayı düzenle',
+  'ays.exams.hedef-bandin-ustundesin':'Hedef bandın üstündesin.',
+  'ays.exams.haftada':'Haftada +',
+  'ays.exams.son-deneme-rekor':'Son deneme rekor.',
+  'ays.exams.son-denemeyle-fark':'Son denemeyle fark ',
+  'ays.exams.analiz-yanlislari-kart-ve-ko':'Analiz yanlışları kart ve konuya çevirir; bekleyen deneme ders vermez.',
+  'ays.exams.oturumu-iptal-et':'Oturumu iptal et',
+  'ays.exams.olculen-sureler-kaydedilmeye':'Ölçülen süreler kaydedilmeyecek.',
+  'ays.exams.sureleri-kaydetmeden-kapat':'Süreleri kaydetmeden kapat',
+  'ays.exams.denemeyi-sil-2':'Denemeyi sil',
+  'ays.exams.bu-deneme-ve-bagli-hata':'Bu deneme ve bağlı hata kayıtları silinecek. Bu işlem geri alınamaz.',
+  'ays.exams.denemeyi-ve':'Denemeyi ve ',
+  'ays.exams.hata-kaydi-yok':'Hata kaydı yok',
+  'ays.exams.hic-hata-etiketlenmedi-yine':'Hiç hata etiketlenmedi. Yine de analizi tamamlandı olarak işaretlemek istiyor musun?',
+  'ays.exams.analizi-tamamlandi-say':'Analizi tamamlandı say',
+  'ays.exams.hata-guncellendi':'Hata güncellendi',
+  'ays.exams.hata-ve-tekrar-karti-kaydedi':'Hata ve tekrar kartı kaydedildi',
+  'ays.exams.kaydedilmedi':'Kaydedilmedi — ',
+  'ays.exams.anahtar-kaydedildi-cevaplari':'Anahtar kaydedildi; cevaplarını da yazınca sorular listelenir',
+  'ays.exams.guncellenecek-fark-yok':'Güncellenecek fark yok',
+  'ays.exams.geri-alinacak-guncelleme-yok':'Geri alınacak güncelleme yok',
+  'ays.exams.onceki-sayilar-geri-geldi-el':'Önceki sayılar geri geldi; elle düzelttiğin ',
+  'ays.exams.onceki-sayilar-geri-geldi':'Önceki sayılar geri geldi',
+  'ays.exams.soru-cozuluyor':'Soru çözülüyor',
+  'ays.exams.cozum-anahtarla-tutuyor':'Çözüm anahtarla tutuyor',
+  'ays.exams.model-sik-bildirmedi-karsila':'Model şık bildirmedi; karşılaştırılamadı',
+  'ays.exams.bu-soru-zaten-hata-kaydinda':'Bu soru zaten hata kaydında',
+  'ays.exams.hata-ve-tekrar-karti-kaydedi-2':'Hata ve tekrar kartı kaydedildi · etiketini ve kök nedenini Hata analizinden yaz',
+  'ays.exams.eklenecek-soru-yok':'Eklenecek soru yok',
+  'ays.exams.sonuc-kagidi-okunuyor':'Sonuç kâğıdı okunuyor',
+  'ays.exams.elle-yazilacak':'Elle yazılacak: ',
+  'ays.exams.fotograf-bu-cihaza-kaydedild':'Fotoğraf bu cihaza kaydedildi',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -253,9 +311,9 @@ R.Screens.exams = (function(){
     const simdi = r2(M.examNet(tyt[tyt.length - 1]));
     const hafta = Math.max(1, Math.ceil(U.diffDays(U.todayISO(), R.PLAN.examTytISO) / 7));
     const kalan = Math.max(0, gap.netDiff);
-    return kutu('Hedefe kalan', 'tahmin', VT().hedefeKalan({ ad:yz('ays.exams.hedef-net'), simdi, hedef:r2(simdi + kalan),
+    return kutu(yz('ays.exams.hedefe-kalan'), 'tahmin', VT().hedefeKalan({ ad:yz('ays.exams.hedef-net'), simdi, hedef:r2(simdi + kalan),
       kalanHafta:hafta, haftalik:gap.reached ? null : r2(kalan / hafta), birim:'net', kesinlik:'estimated',
-      not:gap.reached ? 'Hedef bandın üstündesin; bandı koru' : '' }));
+      not:gap.reached ? yz('ays.exams.hedef-bandin-ustundesin-band') : '' }));
   }
 
   /* 057 DENEME TAKVİMİ: son deneme netiyle, sonraki üç deneme günü PLANDAN
@@ -287,7 +345,7 @@ R.Screens.exams = (function(){
     const ogeler = gecmis.map(e => ({ ad:e.type || 'Deneme', yer:yer(e.date), not:U.fmtNet(M.examNet(e)) + ' net', durum:'g' }))
       .concat(plan.map((d, i) => ({ ad:U.fmtShort(d), yer:yer(d), not:ne(d), durum:i === 0 ? 'y' : '' })));
     if(ogeler.length < 2) return '';
-    return kutu('Deneme takvimi', 'planlı', VT().denemeTakvimi({ ogeler, bugun:yer(bugun), kesinlik:'computed', etiketAd:'planlı' }));
+    return kutu(yz('ays.exams.deneme-takvimi'), 'planlı', VT().denemeTakvimi({ ogeler, bugun:yer(bugun), kesinlik:'computed', etiketAd:'planlı' }));
   }
 
   function listView(){
@@ -412,7 +470,7 @@ R.Screens.exams = (function(){
       const o = onceki.tests.find(x => x.name === t.name);
       return { ad:t.name, once:o ? r2(M.testNet(o)) : null, sonra:r2(M.testNet(t)) };
     });
-    return kutu('Önceki denemeyle', 'hesaplandı', VT().denemeKarsilastirma({ onceAd:U.fmtShort(onceki.date), sonraAd:U.fmtShort(exam.date),
+    return kutu(yz('ays.exams.onceki-denemeyle'), 'hesaplandı', VT().denemeKarsilastirma({ onceAd:U.fmtShort(onceki.date), sonraAd:U.fmtShort(exam.date),
       satirlar, toplam:{ once:r2(M.examNet(onceki)), sonra:r2(M.examNet(exam)) } }));
   }
 
@@ -421,7 +479,7 @@ R.Screens.exams = (function(){
     if(!VT() || !M.sessionForExam) return '';
     const ses = M.sessionForExam(exam.id);
     const sureler = ses && (ses.marks || []).map(m => Number(m.spent)).filter(x => x > 0);
-    return sureler && sureler.length >= 3 ? kutu('Hız şeridi', 'ölçüldü', VT().hizSeridi({ sureler })) : '';
+    return sureler && sureler.length >= 3 ? kutu(yz('ays.exams.hiz-seridi'), 'ölçüldü', VT().hizSeridi({ sureler })) : '';
   }
 
   /* 056 YANLIŞ NEDENLERİ: hata etiketlerinin dağılımı; etiketi kullanıcı
@@ -476,12 +534,12 @@ R.Screens.exams = (function(){
             ${when(foto, () => html`<a class="dsoru__foto" href="${foto}" target="_blank" rel="noopener"
               aria-label="${x.test + ' ' + x.no + '. sorunun fotoğrafını büyüt'}"><img src="${foto}" alt=""/></a>`)}
             <label class="btn btn--sm dsoru__dosya">
-              <span class="btn__label">${foto ? 'Fotoğrafı değiştir' : 'Fotoğraf ekle'}</span>
+              <span class="btn__label">${foto ? yz('ays.exams.fotografi-degistir') : yz('ays.exams.fotograf-ekle')}</span>
               <input type="file" accept="image/*" capture="environment" data-change="da-foto" data-key="${x.key}"
                 aria-label="${x.test + ' ' + x.no + '. sorunun fotoğrafı'}"/>
             </label>
-            ${when(foto, () => K.Button({ label:a.cozuldu || cozum ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'da-coz',
-              disabled:!hazir, title:hazir ? '' : 'Görüntü okuyabilen bir model gerekir (Ayarlar › Model)', data:{ 'data-key':x.key } }))}
+            ${when(foto, () => K.Button({ label:a.cozuldu || cozum ? yz('ays.exams.yeniden-coz') : 'Çöz', size:'sm', act:'da-coz',
+              disabled:!hazir, title:hazir ? '' : yz('ays.exams.goruntu-okuyabilen-bir-model'), data:{ 'data-key':x.key } }))}
             ${x.hata ? K.Badge({ label:yz('ays.exams.hata-kaydinda'), tone:'ok' })
               : K.Button({ label:yz('ays.exams.hata-kaydina-ekle'), size:'sm', act:'da-hata', data:{ 'data-key':x.key } })}
           </div>
@@ -507,14 +565,14 @@ R.Screens.exams = (function(){
     const A = R.DenemeAnaliz;
     if(!A) return '';
     const oz = A.ozet(exam);
-    const giris = K.Button({ label:oz.analizli ? 'Anahtarı düzenle' : 'Cevap anahtarını gir', icon:oz.analizli ? 'edit' : 'plus',
+    const giris = K.Button({ label:oz.analizli ? yz('ays.exams.anahtari-duzenle') : yz('ays.exams.cevap-anahtarini-gir'), icon:oz.analizli ? 'edit' : 'plus',
       size:'sm', tone:oz.analizli ? 'ghost' : 'primary', act:'da-giris', data:{ 'data-id':exam.id } });
     if(!oz.analizli){
       const yalnizAnahtar = oz.testler.some(t => t.anahtarVar);
       return K.Card({ title:yz('ays.exams.soru-analizi'), sub:yz('ays.exams.cevap-anahtariyla-soru-soru'), actions:giris,
         body:K.Empty({ icon:'list', text:yalnizAnahtar
-          ? 'Anahtar girildi; kendi cevaplarını da yazınca yanlış ve boş sorular tek tek listelenir.'
-          : 'Cevap anahtarını ve kendi cevaplarını girersen yanlış ve boş sorular tek tek listelenir: fotoğrafını ekleyip çözdürebilir, konusunu bulup hata kaydına atabilirsin.' }) });
+          ? yz('ays.exams.anahtar-girildi-kendi-cevapl')
+          : yz('ays.exams.cevap-anahtarini-ve-kendi-ce') }) });
     }
     const liste = A.yanlislar(exam);
     const hazir = A.hazir();
@@ -533,7 +591,7 @@ R.Screens.exams = (function(){
         <div class="stack-xs">${map(oz.testler.filter(t => t.sonuc), ozetSatiri)}</div>
         ${when(oz.testler.some(t => t.anahtarVar && !t.cevapVar), () => html`<p class="tiny dim mt-8">${yz('ays.exams.cevaplari-girilmeyen-testler')} ${oz.testler.filter(t => t.anahtarVar && !t.cevapVar).map(t => t.ad).join(', ')}.</p>`)}
         ${when(oz.fark, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
-          body:'Anahtardan hesaplanan sonuç kayıttaki sayılardan farklı. Kayıt kendiliğinden değişmez; istersen anahtara göre güncelle.' })}
+          body:yz('ays.exams.anahtardan-hesaplanan-sonuc') })}
           <div class="row-sm mt-8">${K.Button({ label:yz('ays.exams.kaydi-anahtara-gore-guncelle'), size:'sm', act:'da-guncelle', data:{ 'data-id':exam.id } })}</div></div>`)}
         ${when(exam.anahtarOncesi, () => html`<div class="row-sm mt-8">${K.Button({ label:yz('ays.exams.guncellemeyi-geri-al'), size:'sm', tone:'ghost',
           act:'da-geri', data:{ 'data-id':exam.id } })}<span class="tiny dim">${yz('ays.exams.onceki-sayilar-sakli')}</span></div>`)}
@@ -568,8 +626,8 @@ R.Screens.exams = (function(){
     UI.sheet({
       title:yz('ays.exams.cevap-anahtari-ve-cevaplarin'), subtitle:exam.type + (exam.publisher ? ' · ' + exam.publisher : ''), wide:true,
       body:String(K.Stack([
-        K.Notice({ tone:'info', body:'Harfleri yan yana yaz ya da yayının sayfasından «1-A 2-C …» biçiminde yapıştır; boşluklar yok sayılır. '
-          + 'Boş bıraktığın soru için nokta (.), iptal edilen soru için anahtara yıldız (*) yaz. Bir testte hata varsa hiçbir test kaydedilmez ve nedeni yazılır.' }),
+        K.Notice({ tone:'info', body:yz('ays.exams.harfleri-yan-yana-yaz-ya')
+          + yz('ays.exams.bos-biraktigin-soru-icin-nok-2') }),
         html`<div class="stack-sm">${map(alanlar, x => x)}</div>`,
         raw('<div id="da-not" class="small" role="status"></div>'),
       ])),
@@ -651,7 +709,7 @@ R.Screens.exams = (function(){
             ${protocolList(steps)}
             ${exam.analysisCompletedAt
               ? html`<div class="mt-12">${K.Notice({ tone:'ok',
-                  body:'Analiz '+U.fmtDate(exam.analysisCompletedAt.slice(0, 10))+' tarihinde tamamlandı.' })}</div>`
+                  body:yz('ays.exams.analiz')+U.fmtDate(exam.analysisCompletedAt.slice(0, 10))+' tarihinde tamamlandı.' })}</div>`
               : K.Button({ label:yz('ays.exams.analizi-tamamla'), icon:'check', tone:'primary', block:true,
                   class:'mt-12', act:'complete-analysis', data:{ 'data-id':exam.id } })}`,
         }),
@@ -721,7 +779,7 @@ R.Screens.exams = (function(){
         K.Row([
           K.Button({ label:yz('ays.exams.geri-al'), size:'sm', tone:'ghost', act:'run-undo', disabled:!run.marks.length }),
           K.Row([
-            K.Button({ label:paused ? 'Devam et' : 'Duraklat', size:'sm',
+            K.Button({ label:paused ? yz('ays.exams.devam-et') : 'Duraklat', size:'sm',
               icon:paused ? 'play' : 'pause', act:'run-pause' }),
             K.Button({ label:yz('ays.exams.sonraki-test'), size:'sm', act:'run-next',
               disabled:run.index >= run.tests.length - 1 }),
@@ -740,8 +798,8 @@ R.Screens.exams = (function(){
 
       K.Span(4, K.Stack([
         K.Notice({ tone:'info', title:yz('ays.exams.nasil-kullanilir'),
-          body:'Her soruyu bitirdiğinde bir tuşa bas: 1 yaptım, 2 zorlandım, 3 atladım. '
-             + 'Sistem soru başına süreyi kendisi hesaplar; sonunda dakikaları elle girmene gerek kalmaz.' }),
+          body:yz('ays.exams.her-soruyu-bitirdiginde-bir')
+             + yz('ays.exams.sistem-soru-basina-sureyi-ke') }),
         K.Card({ title:yz('ays.exams.son-isaretler'), sub:U.plural(run.marks.length, 'işaret', 'işaret'),
           body:run.marks.length
             ? html`<div class="stack-xs">${map(run.marks.slice(-8).reverse(), m => html`
@@ -760,7 +818,7 @@ R.Screens.exams = (function(){
     UI.sheet({
       title:yz('ays.exams.sureli-oturum'), subtitle:yz('ays.exams.sinav-kosullarinda-prova-sur'),
       body:String(K.Stack([
-        K.Notice({ tone:'info', body:'Oturum başlayınca kronometre işler. Her soruyu bitirdiğinde '
+        K.Notice({ tone:'info', body:yz('ays.exams.oturum-baslayinca-kronometre')
           + 'bir tuşa basarsın; sistem soru başına süreyi hesaplar.' }),
         K.Cols(2, [
           K.Field({ label:yz('ays.exams.sablon'), input:K.Select({ id:'rn-tmpl', options:opts, value:'tyt-full' }) }),
@@ -838,11 +896,11 @@ R.Screens.exams = (function(){
          (core/denemefoto.js). Tahmin alanının altında: önce kör tahmin. */
       R.DenemeFoto && R.DenemeFoto.hazir()
         ? K.Drop({ act:'ex-foto', label:yz('ays.exams.sonuc-kagidinin-fotografinda'), icon:'file',
-            accept:'image/*', hint:'Doğru/yanlış/boş okunur; kaydetmeden önce kontrol edersin' })
+            accept:'image/*', hint:yz('ays.exams.dogru-yanlis-bos-okunur-kayd') })
         : '',
       raw('<div id="ex-foto-not" class="small" role="status"></div>'),
       raw('<div id="ex-tests" class="stack-sm"></div>'),
-      K.Notice({ tone:'info', body:'Net otomatik hesaplanır: doğru − yanlış/4. Boş bırakılan testler kaydedilmez.' }),
+      K.Notice({ tone:'info', body:yz('ays.exams.net-otomatik-hesaplanir-dogr') }),
     ]);
 
     UI.sheet({
@@ -929,11 +987,11 @@ R.Screens.exams = (function(){
           input:K.Input({ id:'er-similar', value:v('similar'), placeholder:yz('ays.exams.or-345-tyt-mat-test') }) }),
         K.Field({ label:yz('ays.exams.tamir-recetesi'), input:K.Input({ id:'er-recipe', value:v('recipe', R.ERROR_TAGS.K.recipe) }) }),
       ]),
-      K.Notice({ tone:'info', body:'Kaydedince tekrar kartı otomatik oluşur ve +1 gün / +3 gün / +1 hafta / +1 ay takvimine girer.' }),
+      K.Notice({ tone:'info', body:yz('ays.exams.kaydedince-tekrar-karti-otom') }),
     ]);
 
     UI.sheet({
-      title:err ? 'Hatayı düzenle' : 'Hata ekle',
+      title:err ? yz('ays.exams.hatayi-duzenle-2') : yz('ays.exams.hata-ekle'),
       subtitle:exam.type+' · '+U.fmtDate(exam.date),
       body:String(body), wide:true,
       footer:String(html`
@@ -971,7 +1029,7 @@ R.Screens.exams = (function(){
       const hafta = Math.max(1, Math.ceil(U.diffDays(U.todayISO(), R.PLAN.examTytISO) / 7));
       const kalan = Math.max(0, gap.netDiff);
       m.push({ ust:yz('ays.exams.hedefe-kalan'), sayi:sayi({ deger:r2(kalan), birim:'net', ondalik:2, kesinlik:'estimated' }), cumle:yz('ays.exams.kaldi'),
-        vurgu:gap.reached ? 'Hedef bandın üstündesin.' : 'Haftada +' + U.fmtNet(r2(kalan / hafta)) + ' net yeter.', sistem:'ays' });
+        vurgu:gap.reached ? yz('ays.exams.hedef-bandin-ustundesin') : yz('ays.exams.haftada') + U.fmtNet(r2(kalan / hafta)) + ' net yeter.', sistem:'ays' });
     }
     const plan = sonrakiDenemeler();
     if(plan.length){
@@ -1008,12 +1066,12 @@ R.Screens.exams = (function(){
     const enIyi = tam.reduce((m, x) => M.examNet(x) > M.examNet(m) ? x : m, tam[0]);
     const rekor = P.kart({ tur:'net-rekoru', ad:yz('ays.exams.en-iyi-tyt'), yildiz:'rekor',
       govde:P.deger(v(U.round(M.examNet(enIyi), 2)), 'net', (U.fmtShort ? U.fmtShort(enIyi.date) : enIyi.date) + (enIyi.publisher ? ' · ' + enIyi.publisher : ''))
-        + P.not(enIyi === e ? 'Son deneme rekor.' : 'Son denemeyle fark ' + v(U.round(M.examNet(enIyi) - M.examNet(e), 2)) + ' net.') });
+        + P.not(enIyi === e ? yz('ays.exams.son-deneme-rekor') : yz('ays.exams.son-denemeyle-fark') + v(U.round(M.examNet(enIyi) - M.examNet(e), 2)) + ' net.') });
     const borc = C.analysisDebt();
     const borcKart = borc.length ? P.kart({ tur:'analiz-borcu', ad:yz('ays.exams.analiz-bekleyen'), simge:'satir', yuva:borc.length + ' deneme',
       govde:P.liste({ satirlar:borc.slice(0, 4).map(x => ({ sol:U.fmtShort ? U.fmtShort(x.date) : x.date, ad:(x.family || '') + ' ' + (x.kind === 'full' ? 'tam' : 'branş'),
         not:U.diffDays(x.date, U.todayISO()) + ' gün önce', nokta:U.diffDays(x.date, U.todayISO()) >= 3 ? 2 : 0 })) })
-        + P.not('Analiz yanlışları kart ve konuya çevirir; bekleyen deneme ders vermez.') }) : '';
+        + P.not(yz('ays.exams.analiz-yanlislari-kart-ve-ko')) }) : '';
     return '<div class="pk-ust">' + P.izgara([netKart, rekor, dersKart, borcKart], 'pk-izgara--iki') + '</div>';
   }
 
@@ -1056,11 +1114,11 @@ R.Screens.exams = (function(){
     async 'run-goto'(el){ R.ExamRun.gotoTest(Number(el.dataset.i)); R.App.render(); },
     async 'run-finish'(){ R.ExamRun.pause(); finishSheet(); },
     async 'run-cancel'(){
-      UI.confirmSheet('Oturumu iptal et', 'Ölçülen süreler kaydedilmeyecek.', async () => {
+      UI.confirmSheet(yz('ays.exams.oturumu-iptal-et'), yz('ays.exams.olculen-sureler-kaydedilmeye'), async () => {
         R.ExamRun.cancel();
         UI.closeSheet();
         R.App.render();
-      }, true, 'Süreleri kaydetmeden kapat');
+      }, true, yz('ays.exams.sureleri-kaydetmeden-kapat'));
     },
     async 'run-save'(){
       const scores = [];
@@ -1146,7 +1204,7 @@ R.Screens.exams = (function(){
     async 'delete-exam'(el){
       const id = el.dataset.id;
       const bagli = S.errors.filter(e => e.examId === id).length;
-      UI.confirmSheet('Denemeyi sil', 'Bu deneme ve bağlı hata kayıtları silinecek. Bu işlem geri alınamaz.', async () => {
+      UI.confirmSheet(yz('ays.exams.denemeyi-sil-2'), yz('ays.exams.bu-deneme-ve-bagli-hata'), async () => {
         await M.deleteExam(id);
         /* Soru fotoğrafları da cihazdan gider (core/sorufoto.js). */
         if(R.SoruFoto) await R.SoruFoto.onekSil('deneme:' + id + ':');
@@ -1154,7 +1212,7 @@ R.Screens.exams = (function(){
         UI.closeSheet();
         UI.toast(yz('ays.exams.deneme-silindi'));
         R.App.render();
-      }, true, bagli ? 'Denemeyi ve ' + bagli + ' hata kaydını sil' : 'Denemeyi sil');
+      }, true, bagli ? yz('ays.exams.denemeyi-ve') + bagli + ' hata kaydını sil' : yz('ays.exams.denemeyi-sil-2'));
     },
     async 'protocol-step'(el){
       const exam = S.exams.find(e => e.id === S.ui.examOpen);
@@ -1167,11 +1225,11 @@ R.Screens.exams = (function(){
       const exam = S.exams.find(e => e.id === el.dataset.id);
       const errs = S.errors.filter(e => e.examId === exam.id);
       if(!errs.length){
-        UI.confirmSheet('Hata kaydı yok', 'Hiç hata etiketlenmedi. Yine de analizi tamamlandı olarak işaretlemek istiyor musun?', async () => {
+        UI.confirmSheet(yz('ays.exams.hata-kaydi-yok'), yz('ays.exams.hic-hata-etiketlenmedi-yine'), async () => {
           exam.analysisCompletedAt = new Date().toISOString();
           await M.saveExam(exam);
           UI.closeSheet(); R.App.render();
-        }, false, 'Analizi tamamlandı say');
+        }, false, yz('ays.exams.analizi-tamamlandi-say'));
         return;
       }
       exam.analysisCompletedAt = new Date().toISOString();
@@ -1222,7 +1280,7 @@ R.Screens.exams = (function(){
         await M.saveCard(card);
       }
       UI.closeSheet();
-      UI.toast(existing ? 'Hata güncellendi' : 'Hata ve tekrar kartı kaydedildi');
+      UI.toast(existing ? yz('ays.exams.hata-guncellendi') : yz('ays.exams.hata-ve-tekrar-karti-kaydedi'));
       R.App.render();
     },
     async 'delete-error'(el){
@@ -1244,40 +1302,40 @@ R.Screens.exams = (function(){
       const r = await A.girdileriYaz(exam, exam.tests.map((t, i) => ({ test:t.name, anahtar:deger('da-a-' + i), cevap:deger('da-c-' + i) })));
       if(!r.ok){
         const not = document.getElementById('da-not');
-        if(not) not.textContent = 'Kaydedilmedi — ' + r.hatalar.join(' · ');
+        if(not) not.textContent = yz('ays.exams.kaydedilmedi') + r.hatalar.join(' · ');
         return;
       }
       UI.closeSheet();
       UI.toast(A.ozet(exam).analizli ? U.plural(A.yanlislar(exam).length, 'yanlış ya da boş soru', 'yanlış ya da boş soru') + ' listelendi'
-        : 'Anahtar kaydedildi; cevaplarını da yazınca sorular listelenir');
+        : yz('ays.exams.anahtar-kaydedildi-cevaplari'));
       R.App.render();
     },
     async 'da-guncelle'(el){
       const exam = S.exams.find(e => e.id === el.dataset.id);
       if(!exam) return;
       const n = await R.DenemeAnaliz.kaydiGuncelle(exam);
-      UI.toast(n ? n + ' testin sayıları anahtara göre güncellendi · geri alabilirsin' : 'Güncellenecek fark yok');
+      UI.toast(n ? n + ' testin sayıları anahtara göre güncellendi · geri alabilirsin' : yz('ays.exams.guncellenecek-fark-yok'));
       R.App.render();
     },
     async 'da-geri'(el){
       const exam = S.exams.find(e => e.id === el.dataset.id);
       if(!exam) return;
       const r = await R.DenemeAnaliz.geriAl(exam);
-      UI.toast(!r.ok ? 'Geri alınacak güncelleme yok'
-        : r.atlanan.length ? 'Önceki sayılar geri geldi; elle düzelttiğin ' + r.atlanan.join(', ') + ' olduğu gibi kaldı'
-        : 'Önceki sayılar geri geldi');
+      UI.toast(!r.ok ? yz('ays.exams.geri-alinacak-guncelleme-yok')
+        : r.atlanan.length ? yz('ays.exams.onceki-sayilar-geri-geldi-el') + r.atlanan.join(', ') + ' olduğu gibi kaldı'
+        : yz('ays.exams.onceki-sayilar-geri-geldi'));
       R.App.render();
     },
     async 'da-coz'(el){
       const A = R.DenemeAnaliz, exam = S.exams.find(e => e.id === S.ui.examOpen);
       if(!exam) return;
-      const r = await UI.withBusy('Soru çözülüyor', 'model anahtarı görmeden çözer; tutup tutmadığına kod bakar',
+      const r = await UI.withBusy(yz('ays.exams.soru-cozuluyor'), 'model anahtarı görmeden çözer; tutup tutmadığına kod bakar',
         () => A.coz(exam, el.dataset.key));
       if(!r.ok){ UI.toast(r.note); R.App.render(); return; }
       const konu = r.topicRef ? A.konuBul(r.topicRef) : null;
-      const parca = [r.tutar === true ? 'Çözüm anahtarla tutuyor'
-        : r.tutar === false ? 'Modelin cevabı (' + r.harf + ') anahtarla (' + r.dogru + ') tutmuyor'
-        : 'Model şık bildirmedi; karşılaştırılamadı'];
+      const parca = [r.tutar === true ? yz('ays.exams.cozum-anahtarla-tutuyor')
+        : r.tutar === false ? yz('ays.exams.modelin-cevabi') + r.harf + ') anahtarla (' + r.dogru + ') tutmuyor'
+        : yz('ays.exams.model-sik-bildirmedi-karsila')];
       if(konu) parca.push('konu: ' + konu.topic.name);
       if(r.konuNotu) parca.push(r.konuNotu);
       UI.toast(parca.join(' · '));
@@ -1287,15 +1345,15 @@ R.Screens.exams = (function(){
       const exam = S.exams.find(e => e.id === S.ui.examOpen);
       if(!exam) return;
       const r = await R.DenemeAnaliz.hatayaEkle(exam, el.dataset.key);
-      UI.toast(!r.ok ? r.note : r.vardi ? 'Bu soru zaten hata kaydında'
-        : 'Hata ve tekrar kartı kaydedildi · etiketini ve kök nedenini Hata analizinden yaz');
+      UI.toast(!r.ok ? r.note : r.vardi ? yz('ays.exams.bu-soru-zaten-hata-kaydinda')
+        : yz('ays.exams.hata-ve-tekrar-karti-kaydedi-2'));
       R.App.render();
     },
     async 'da-hepsi'(el){
       const exam = S.exams.find(e => e.id === el.dataset.id);
       if(!exam) return;
       const n = await R.DenemeAnaliz.hepsiniEkle(exam);
-      UI.toast(n ? n + ' hata ve tekrar kartı kaydedildi' : 'Eklenecek soru yok');
+      UI.toast(n ? n + ' hata ve tekrar kartı kaydedildi' : yz('ays.exams.eklenecek-soru-yok'));
       R.App.render();
     },
   };
@@ -1307,7 +1365,7 @@ R.Screens.exams = (function(){
       const tmpl = R.EXAM_TEMPLATES.find(t => t.id === (sel && sel.value));
       const not = document.getElementById('ex-foto-not');
       if(!f || !tmpl) return;
-      const r = await UI.withBusy('Sonuç kâğıdı okunuyor', 'sayıları kod doğrular, kaydetmek sende',
+      const r = await UI.withBusy(yz('ays.exams.sonuc-kagidi-okunuyor'), 'sayıları kod doğrular, kaydetmek sende',
         () => R.DenemeFoto.oku(f, tmpl));
       const satirlar = Array.prototype.slice.call(document.querySelectorAll('#ex-tests [data-test-row]'));
       (r.satirlar || []).forEach(x => {
@@ -1320,7 +1378,7 @@ R.Screens.exams = (function(){
         const parca = [];
         if(r.satirlar && r.satirlar.length) parca.push(r.satirlar.length + ' test fotoğraftan dolduruldu — kaydetmeden önce kontrol et.');
         (r.atlanan || []).forEach(a => parca.push(a.ad + ': ' + a.neden + '.'));
-        if(r.eksik && r.eksik.length && r.satirlar && r.satirlar.length) parca.push('Elle yazılacak: ' + r.eksik.join(', ') + '.');
+        if(r.eksik && r.eksik.length && r.satirlar && r.satirlar.length) parca.push(yz('ays.exams.elle-yazilacak') + r.eksik.join(', ') + '.');
         if(!r.ok && r.note) parca.push(r.note);
         not.textContent = parca.join(' ');
       }
@@ -1341,7 +1399,7 @@ R.Screens.exams = (function(){
       const f = el.files && el.files[0];
       if(!exam || !f || !R.SoruFoto) return;
       const r = await R.SoruFoto.kaydet(R.DenemeAnaliz.sahip(exam, el.dataset.key), f);
-      UI.toast(r.ok ? 'Fotoğraf bu cihaza kaydedildi' : r.why);
+      UI.toast(r.ok ? yz('ays.exams.fotograf-bu-cihaza-kaydedild') : r.why);
       R.App.render();
     },
     async 'da-konu'(el){

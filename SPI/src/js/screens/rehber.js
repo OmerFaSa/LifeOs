@@ -3,6 +3,10 @@
    spor, kilo, kalori, diyet, koşu, yürüyüş, kalistenik, sağlıklı beslenme».
    Anlatım bilgidir: hiçbir sayıyı ya da planı değiştirmez; sınır notu her
    sayfanın sonundadır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.rehber.anlatimlar-bu-acilista-yukle':'Anlatımlar bu açılışta yüklenemedi.',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -24,7 +28,7 @@ SP.Screens.rehber = (function(){
   }
   LIFEOS.PARCA.blok({ id:'rehber.okuyucu', sayfa:'rehber', yer:'ana', ad:'Anlatımlar', ciz(){
     const r = hazirla();
-    if(!r) return '<p class="small muted">Anlatımlar bu açılışta yüklenemedi.</p>';
+    if(!r) return ('<p class="small muted">' + yz('spi.rehber.anlatimlar-bu-acilista-yukle') + '</p>');
     return r.html();
   } });
   function render(){ return LIFEOS.PARCA.yer('rehber', 'ana', SP.C); }

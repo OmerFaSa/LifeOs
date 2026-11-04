@@ -6,6 +6,17 @@
    Kural motoru (R.Calc) ve plan üreteci (R.Planner) otoritedir; burası
    yalnız onların çıktısını eyleme çevirir. LLM burada yer almaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.auto.hafta-imzali-once-revize-et':'Hafta imzalı; önce revize et.',
+  'ays.core.auto.her-denemenin-analizi-24-saa':'Her denemenin analizi 24 saat içinde biter',
+  'ays.core.auto.her-gun-due-kartlari-sifirla':'Her gün due kartları sıfırla',
+  'ays.core.auto.hafta-sozlesmesi-bos-kaldi':'Hafta sözleşmesi boş kaldı.',
+  'ays.core.auto.olculebilir-cikti-kaydedilme':'Ölçülebilir çıktı kaydedilmedi.',
+  'ays.core.auto.en-sik-sapma-nedeni':'En sık sapma nedeni: ',
+  'ays.core.auto.belirgin-sapma-yok':'Belirgin sapma yok.',
+  'ays.core.auto.sapma-nedeni-isaretlenmemis':'Sapma nedeni işaretlenmemiş.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.auto.haftalik-sozlesmeyi-doldur':'Haftalık sözleşmeyi doldur',
   'ays.core.auto.plandaki-konular-ve-risk-sir':'Plandaki konular ve risk sıralaması hazır; taslak tek tıkla yazılır.',
   'ays.core.auto.bloklari-haftanin-konularina':'Blokları haftanın konularına bağla',
@@ -34,7 +45,7 @@ R.Auto = (function(){
   function draftWeek(n){
     const week = S.weeks[M.weekId(n)];
     if(!week) return null;
-    if(week.signedAt) return { ok:false, reason:'Hafta imzalı; önce revize et.' };
+    if(week.signedAt) return { ok:false, reason:yz('ays.core.auto.hafta-imzali-once-revize-et') };
 
     const plan = M.curriculumFor(n);
     /* Plan haftaya 3'ten fazla konu yazdiysa (kapasite + kullanicinin
@@ -98,9 +109,9 @@ R.Auto = (function(){
     const debt = C.analysisDebt().length;
 
     if(sleep != null && sleep < target - 0.75) return '6 gün ' + target + ' saat uyku';
-    if(debt) return 'Her denemenin analizi 24 saat içinde biter';
+    if(debt) return yz('ays.core.auto.her-denemenin-analizi-24-saa');
     if(streak < 3) return '6 gün minimum standardı tuttur';
-    if(C.cardDebt() > 10) return 'Her gün due kartları sıfırla';
+    if(C.cardDebt() > 10) return yz('ays.core.auto.her-gun-due-kartlari-sifirla');
     return '6 gün planlanan blokların en az beşini tamamla';
   }
 
@@ -287,14 +298,14 @@ R.Auto = (function(){
 
     const planned = week && week.mainTopics.length
       ? week.mainTopics.map(t => t.name + ' (' + t.questionTarget + ' soru)').join(', ')
-      : 'Hafta sözleşmesi boş kaldı.';
+      : yz('ays.core.auto.hafta-sozlesmesi-bos-kaldi');
     const done = qr
       ? qr.solved + ' soru çözüldü (hedef ' + qr.target + '), plan tamamlama %' + (comp == null ? '—' : comp) + '.'
         + (acc != null ? ' Doğruluk %' + acc + '.' : '')
-      : 'Ölçülebilir çıktı kaydedilmedi.';
+      : yz('ays.core.auto.olculebilir-cikti-kaydedilme');
     const why = topReason
-      ? 'En sık sapma nedeni: ' + topReason + ' (' + reasons[topReason] + ' blok).'
-      : (comp != null && comp >= 85 ? 'Belirgin sapma yok.' : 'Sapma nedeni işaretlenmemiş.');
+      ? yz('ays.core.auto.en-sik-sapma-nedeni') + topReason + ' (' + reasons[topReason] + ' blok).'
+      : (comp != null && comp >= 85 ? yz('ays.core.auto.belirgin-sapma-yok') : yz('ays.core.auto.sapma-nedeni-isaretlenmemis'));
 
     /* Devir: kapanmamış plan konuları. */
     const carry = [];

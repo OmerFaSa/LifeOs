@@ -19,6 +19,11 @@
         (Welch–Satterthwaite serbestlik derecesi ve t tablosu); aralık sıfırı
         içermiyorsa sonuç 'anlamli'dır.
 */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.deney.gecersiz-deney-tanimi':'Geçersiz deney tanımı.',
+  'ays.core.deney.her-kosul-icin-en-az':'Her koşul için en az ',
+});
+
 
 window.R = window.R || {};
 
@@ -107,7 +112,7 @@ R.Deney = (function(){
   /* SAF. Ölçümleri analiz eder; fark, Welch %95 güven aralığı ve etiket üretir. */
   function sonuc(deney, olcumler, bugun){
     if(!deney || !Array.isArray(deney.kosullar) || deney.kosullar.length < 2){
-      return { durum:'yetersiz', n:{}, fark:null, aralik:null, anlamli:false, etiket:null, neden:'Geçersiz deney tanımı.' };
+      return { durum:'yetersiz', n:{}, fark:null, aralik:null, anlamli:false, etiket:null, neden:yz('ays.core.deney.gecersiz-deney-tanimi') };
     }
     const a = deney.kosullar[0];
     const b = deney.kosullar[1];
@@ -135,7 +140,7 @@ R.Deney = (function(){
         aralik: null,
         anlamli: false,
         etiket: null,
-        neden: 'Her koşul için en az ' + MIN_KOL + ' geçerli ölçüm gerekir.'
+        neden: yz('ays.core.deney.her-kosul-icin-en-az') + MIN_KOL + ' geçerli ölçüm gerekir.'
       };
     }
 

@@ -249,3 +249,74 @@
 @media (prefers-reduced-motion:reduce){
   :root{ --dur-press:0ms; --dur:0ms; --dur-lg:0ms; --dur-in:0ms; }
 }
+
+/* BEYAZ VE SIYAH — bütün yüzeyler buradan okur; tema (ör. pixel art) bu satırları değiştirir.
+   Ad değeri söyler: --beyaz-06 = %6 beyaz. Hep aynı renktir, açık ve koyuda değişmez. */
+:root{
+  --beyaz:#fff;
+  --beyaz-00:rgba(255,255,255,0);
+  --beyaz-025:rgba(255,255,255,.025);
+  --beyaz-03:rgba(255,255,255,.03);
+  --beyaz-035:rgba(255,255,255,.035);
+  --beyaz-04:rgba(255,255,255,.04);
+  --beyaz-05:rgba(255,255,255,.05);
+  --beyaz-055:rgba(255,255,255,.055);
+  --beyaz-06:rgba(255,255,255,.06);
+  --beyaz-07:rgba(255,255,255,.07);
+  --beyaz-08:rgba(255,255,255,.08);
+  --beyaz-09:rgba(255,255,255,.09);
+  --beyaz-10:rgba(255,255,255,.10);
+  --beyaz-12:rgba(255,255,255,.12);
+  --beyaz-13:rgba(255,255,255,.13);
+  --beyaz-14:rgba(255,255,255,.14);
+  --beyaz-18:rgba(255,255,255,.18);
+  --beyaz-20:rgba(255,255,255,.2);
+  --beyaz-22:rgba(255,255,255,.22);
+  --beyaz-24:rgba(255,255,255,.24);
+  --beyaz-25:rgba(255,255,255,.25);
+  --beyaz-26:rgba(255,255,255,.26);
+  --beyaz-28:rgba(255,255,255,.28);
+  --beyaz-35:rgba(255,255,255,.35);
+  --beyaz-40:rgba(255,255,255,.4);
+  --beyaz-42:rgba(255,255,255,.42);
+  --beyaz-50:rgba(255,255,255,.5);
+  --beyaz-52:rgba(255,255,255,.52);
+  --beyaz-55:rgba(255,255,255,.55);
+  --beyaz-60:rgba(255,255,255,.6);
+  --beyaz-62:rgba(255,255,255,.62);
+  --beyaz-65:rgba(255,255,255,.65);
+  --beyaz-70:rgba(255,255,255,.7);
+  --beyaz-72:rgba(255,255,255,.72);
+  --beyaz-75:rgba(255,255,255,.75);
+  --beyaz-78:rgba(255,255,255,.78);
+  --beyaz-80:rgba(255,255,255,.8);
+  --beyaz-85:rgba(255,255,255,.85);
+  --beyaz-86:rgba(255,255,255,.86);
+  --beyaz-90:rgba(255,255,255,.9);
+  --beyaz-92:rgba(255,255,255,.92);
+  --beyaz-95:rgba(255,255,255,.95);
+  --beyaz-96:rgba(255,255,255,.96);
+  --beyaz-98:rgba(255,255,255,.98);
+  --siyah:#000;
+  --siyah-04:rgba(0,0,0,.04);
+  --siyah-06:rgba(0,0,0,.06);
+  --siyah-08:rgba(0,0,0,.08);
+  --siyah-10:rgba(0,0,0,.10);
+  --siyah-12:rgba(0,0,0,.12);
+  --siyah-14:rgba(0,0,0,.14);
+  --siyah-15:rgba(0,0,0,.15);
+  --siyah-16:rgba(0,0,0,.16);
+  --siyah-18:rgba(0,0,0,.18);
+  --siyah-20:rgba(0,0,0,.2);
+  --siyah-22:rgba(0,0,0,.22);
+  --siyah-25:rgba(0,0,0,.25);
+  --siyah-30:rgba(0,0,0,.3);
+  --siyah-32:rgba(0,0,0,.32);
+  --siyah-35:rgba(0,0,0,.35);
+  --siyah-42:rgba(0,0,0,.42);
+  --siyah-45:rgba(0,0,0,.45);
+  --siyah-50:rgba(0,0,0,.5);
+  --siyah-55:rgba(0,0,0,.55);
+  --siyah-60:rgba(0,0,0,.6);
+  --siyah-70:rgba(0,0,0,.7);
+}

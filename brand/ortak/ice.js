@@ -16,6 +16,32 @@
    gün başına izlenen video ve en çok izlenen kanallar). Modüller Analiz'de
    gösterir: takvim üçünde; adım SPİ'de, YouTube ESP'de. Hiçbir ölçüm
    kendiliğinden kayda yazılmaz (§1.4). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ice.kaydedilemedi-lifeos-sunucus':'Kaydedilemedi: LifeOS sunucusu yanıt vermedi.',
+  'ortak.ice.bu-dosya-taninmadi-daily-act':'Bu dosya tanınmadı. «Daily activity metrics.csv» (Fit) ya da «watch-history.json» (YouTube) seç.',
+  'ortak.ice.dosya-okunamadi':'Dosya okunamadı.',
+  'ortak.ice.google-verisi-bu-bilgisayard':'Google verisi bu bilgisayardaki LifeOS sunucusunda durur; telefonda ve tek dosya sürümünde yoktur.',
+  'ortak.ice.1-google-takvim':'1 · Google Takvim',
+  'ortak.ice.google-takvim-ayarlar':'Google Takvim › Ayarlar › takvimin adı › «Gizli adres, iCal biçiminde» bağlantısını kopyala, buraya yapıştır. Yarım saatte bir okunur.',
+  'ortak.ice.kayitli-degistirmek-icin-yen':'Kayıtlı · değiştirmek için yeni adres',
+  'ortak.ice.kaydet':'Kaydet',
+  'ortak.ice.kaldir':'Kaldır',
+  'ortak.ice.onumuzdeki-14-gunde':'Önümüzdeki 14 günde ',
+  'ortak.ice.onumuzdeki-14-gunde-etkinlik':'Önümüzdeki 14 günde etkinlik yok.',
+  'ortak.ice.2-google-takeout':'2 · Google Takeout',
+  'ortak.ice.da-yalniz-fit-ve-youtube':'’da yalnız «Fit» ve «YouTube ve YouTube Music › geçmiş»i seç, indir, zip’i aç;',
+  'ortak.ice.daily-activity-metrics-csv-a':'«Daily activity metrics.csv» (adımlar, SPİ) ya da «watch-history.json» (izlediklerin, ESP) dosyasını seç. Dosya bu tarayıcıda okunur; yalnız günlük özet kaydedilir.',
+  'ortak.ice.dosya-sec':'Dosya seç',
+  'ortak.ice.adim':'Adım:',
+  'ortak.ice.gun-aktarildi':'gün aktarıldı.',
+  'ortak.ice.youtube':'YouTube:',
+  'ortak.ice.gunluk-gecmis-aktarildi':'günlük geçmiş aktarıldı.',
+  'ortak.ice.google-dan-gelen':'Google’dan gelen',
+  'ortak.ice.takvimde':'Takvimde',
+  'ortak.ice.adim-google-fit-olculdu':'Adım · Google Fit (ölçüldü, kayda yazılmadı)',
+  'ortak.ice.youtube-son':'YouTube · son',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -42,7 +68,7 @@ window.LIFEOS.ICE = (function(){
   function gonder(yol, govde){
     return ortam.fetch(yol, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ice' }, body:JSON.stringify(govde) })
       .then(r => r.json()).then(v => { if(v && v.takvim){ veri = v; mesaj = ''; isaretle(); } else mesaj = (v && v.hata) || 'Kaydedilemedi.'; guncelle(true); return v; })
-      .catch(() => { mesaj = 'Kaydedilemedi: LifeOS sunucusu yanıt vermedi.'; guncelle(true); });
+      .catch(() => { mesaj = yz('ortak.ice.kaydedilemedi-lifeos-sunucus'); guncelle(true); });
   }
 
   /* ---------------------------------------------------- Takeout çözücüleri */
@@ -84,52 +110,52 @@ window.LIFEOS.ICE = (function(){
       if(fit) return gonder('/api/ice/veri', { tur:'adim', ozet:fit }).then(() => 'adim');
       const yt = youtubeCoz(m);
       if(yt) return gonder('/api/ice/veri', { tur:'youtube', ozet:yt }).then(() => 'youtube');
-      mesaj = 'Bu dosya tanınmadı. «Daily activity metrics.csv» (Fit) ya da «watch-history.json» (YouTube) seç.';
+      mesaj = yz('ortak.ice.bu-dosya-taninmadi-daily-act');
       guncelle(true);
       return null;
-    }).catch(() => { mesaj = 'Dosya okunamadı.'; guncelle(true); return null; });
+    }).catch(() => { mesaj = yz('ortak.ice.dosya-okunamadi'); guncelle(true); return null; });
   }
 
   /* ------------------------------------------------------------ görünüm */
   const saatYaz = o => o.tum_gun ? 'tüm gün' : o.bas.slice(11, 16);
   const gunYaz = s => { try{ return new Date(s.slice(0, 10) + 'T12:00').toLocaleDateString('tr-TR', { weekday:'short', day:'numeric', month:'short' }); }catch(e){ return s.slice(0, 10); } };
   function ayarHtml(){
-    if(!ortam.sunucu()) return '<div data-ice-ayar><p class="ayarlar__bos">Google verisi bu bilgisayardaki LifeOS sunucusunda durur; telefonda ve tek dosya sürümünde yoktur.</p></div>';
+    if(!ortam.sunucu()) return ('<div data-ice-ayar><p class="ayarlar__bos">' + yz('ortak.ice.google-verisi-bu-bilgisayard') + '</p></div>');
     if(!veri && !ayarOkundu){ ayarOkundu = true; setTimeout(() => yukle(true).then(() => guncelle(true)), 0); }   // Bağlantılar açılınca bir kez
     const t = veri ? veri.takvim : { var:false, olaylar:[] }, v = (veri && veri.veri) || {};
     return '<div class="ice" data-ice-ayar>'
-      + '<h5 class="plan__alt">1 · Google Takvim</h5>'
-      + '<p class="plan__not">Google Takvim › Ayarlar › takvimin adı › «Gizli adres, iCal biçiminde» bağlantısını kopyala, buraya yapıştır. Yarım saatte bir okunur.</p>'
-      + '<div class="ice__satir"><input class="ayarlar__girdi" type="url" data-ice-adres placeholder="' + (t.var ? 'Kayıtlı · değiştirmek için yeni adres' : 'https://calendar.google.com/…/basic.ics') + '" aria-label="Takvimin gizli iCal adresi">'
-      + '<button type="button" class="btn btn--sm" data-ice="takvim-kaydet">Kaydet</button>' + (t.var ? '<button type="button" class="btn btn--sm btn--ghost" data-ice="takvim-sil">Kaldır</button>' : '') + '</div>'
-      + (t.var ? '<p class="plan__not">' + (t.olaylar.length ? 'Önümüzdeki 14 günde ' + t.olaylar.length + ' etkinlik.' : 'Önümüzdeki 14 günde etkinlik yok.') + (t.hata ? ' ' + kac(t.hata) : '') + '</p>' : '')
-      + '<h5 class="plan__alt">2 · Google Takeout</h5>'
-      + '<p class="plan__not"><a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a>’da yalnız «Fit» ve «YouTube ve YouTube Music › geçmiş»i seç, indir, zip’i aç; '
-      + '«Daily activity metrics.csv» (adımlar, SPİ) ya da «watch-history.json» (izlediklerin, ESP) dosyasını seç. Dosya bu tarayıcıda okunur; yalnız günlük özet kaydedilir.</p>'
-      + '<div class="ice__satir"><label class="btn btn--sm">Dosya seç<input type="file" accept=".csv,.json,text/csv,application/json" data-ice-dosya hidden></label>'
+      + ('<h5 class="plan__alt">' + yz('ortak.ice.1-google-takvim') + '</h5>')
+      + ('<p class="plan__not">' + yz('ortak.ice.google-takvim-ayarlar') + '</p>')
+      + '<div class="ice__satir"><input class="ayarlar__girdi" type="url" data-ice-adres placeholder="' + (t.var ? yz('ortak.ice.kayitli-degistirmek-icin-yen') : 'https://calendar.google.com/…/basic.ics') + '" aria-label="Takvimin gizli iCal adresi">'
+      + ('<button type="button" class="btn btn--sm" data-ice="takvim-kaydet">' + yz('ortak.ice.kaydet') + '</button>') + (t.var ? ('<button type="button" class="btn btn--sm btn--ghost" data-ice="takvim-sil">' + yz('ortak.ice.kaldir') + '</button>') : '') + '</div>'
+      + (t.var ? '<p class="plan__not">' + (t.olaylar.length ? yz('ortak.ice.onumuzdeki-14-gunde') + t.olaylar.length + ' etkinlik.' : yz('ortak.ice.onumuzdeki-14-gunde-etkinlik')) + (t.hata ? ' ' + kac(t.hata) : '') + '</p>' : '')
+      + ('<h5 class="plan__alt">' + yz('ortak.ice.2-google-takeout') + '</h5>')
+      + ('<p class="plan__not"><a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a>' + yz('ortak.ice.da-yalniz-fit-ve-youtube') + ' ')
+      + (yz('ortak.ice.daily-activity-metrics-csv-a') + '</p>')
+      + ('<div class="ice__satir"><label class="btn btn--sm">' + yz('ortak.ice.dosya-sec') + '<input type="file" accept=".csv,.json,text/csv,application/json" data-ice-dosya hidden></label>')
       + '<small class="muzik-ayar__durum" role="status">' + kac(mesaj) + '</small></div>'
-      + (v.adim ? '<p class="plan__not">Adım: ' + Object.keys(v.adim.gunler || {}).length + ' gün aktarıldı.</p>' : '')
-      + (v.youtube ? '<p class="plan__not">YouTube: ' + Object.keys(v.youtube.gunler || {}).length + ' günlük geçmiş aktarıldı.</p>' : '')
+      + (v.adim ? ('<p class="plan__not">' + yz('ortak.ice.adim') + ' ') + Object.keys(v.adim.gunler || {}).length + (' ' + yz('ortak.ice.gun-aktarildi') + '</p>') : '')
+      + (v.youtube ? ('<p class="plan__not">' + yz('ortak.ice.youtube') + ' ') + Object.keys(v.youtube.gunler || {}).length + (' ' + yz('ortak.ice.gunluk-gecmis-aktarildi') + '</p>') : '')
       + '</div>';
   }
   /* Analiz kartı: modül ne gösterecekse. Veri yoksa boş (kart çizilmez). */
   function kartHtml(modul){
     const ic = icerik(modul);
-    return '<div data-ice-kart="' + kac(modul) + '">' + (ic ? '<section class="kutu ice-kart" aria-label="Google’dan gelen"><h2 class="kutu__ad">Google’dan gelen</h2>' + ic + '</section>' : '') + '</div>';
+    return '<div data-ice-kart="' + kac(modul) + '">' + (ic ? ('<section class="kutu ice-kart" aria-label="Google’dan gelen"><h2 class="kutu__ad">' + yz('ortak.ice.google-dan-gelen') + '</h2>') + ic + '</section>' : '') + '</div>';
   }
   function icerik(modul){
     if(!veri) return '';
     let h = '';
     const ol = (veri.takvim && veri.takvim.olaylar) || [];
-    if(ol.length) h += '<h3 class="ice-kart__alt">Takvimde</h3><ul class="ice-kart__liste">' + ol.slice(0, 5).map(o => '<li><span>' + kac(gunYaz(o.bas)) + ' · ' + kac(saatYaz(o)) + '</span><b>' + kac(o.ad) + '</b></li>').join('') + '</ul>';
+    if(ol.length) h += ('<h3 class="ice-kart__alt">' + yz('ortak.ice.takvimde') + '</h3><ul class="ice-kart__liste">') + ol.slice(0, 5).map(o => '<li><span>' + kac(gunYaz(o.bas)) + ' · ' + kac(saatYaz(o)) + '</span><b>' + kac(o.ad) + '</b></li>').join('') + '</ul>';
     const v = veri.veri || {};
     if(modul === 'spi' && v.adim){
       const g = v.adim.gunler || {}, son = Object.keys(g).sort().slice(-7);
-      if(son.length) h += '<h3 class="ice-kart__alt">Adım · Google Fit (ölçüldü, kayda yazılmadı)</h3><ul class="ice-kart__liste">' + son.reverse().map(k => '<li><span>' + kac(gunYaz(k)) + '</span><b>' + g[k].toLocaleString('tr-TR') + '</b></li>').join('') + '</ul>';
+      if(son.length) h += ('<h3 class="ice-kart__alt">' + yz('ortak.ice.adim-google-fit-olculdu') + '</h3><ul class="ice-kart__liste">') + son.reverse().map(k => '<li><span>' + kac(gunYaz(k)) + '</span><b>' + g[k].toLocaleString('tr-TR') + '</b></li>').join('') + '</ul>';
     }
     if(modul === 'esp' && v.youtube){
       const g = v.youtube.gunler || {}, son = Object.keys(g).sort().slice(-30), toplam = son.reduce((t, k) => t + g[k], 0);
-      h += '<h3 class="ice-kart__alt">YouTube · son ' + son.length + ' gün, ' + toplam + ' video</h3><ul class="ice-kart__liste">'
+      h += ('<h3 class="ice-kart__alt">' + yz('ortak.ice.youtube-son') + ' ') + son.length + ' gün, ' + toplam + ' video</h3><ul class="ice-kart__liste">'
         + (v.youtube.kanallar || []).slice(0, 5).map(x => '<li><span>' + kac(x[0]) + '</span><b>' + x[1] + '</b></li>').join('') + '</ul>';
     }
     return h;

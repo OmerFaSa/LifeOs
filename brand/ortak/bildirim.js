@@ -45,6 +45,18 @@
         geri kurar. Silmek işi yapılmış saymaz; hiçbir kayda yazılmaz.
    Model hiçbir aşamada yoktur; metin modülün kural metnidir. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.bildirim.bugun':'Bugün ',
+  'ortak.bildirim.yarin':'Yarın ',
+  'ortak.bildirim.kurulu-bildirim-yok':'Kurulu bildirim yok.',
+  'ortak.bildirim.bu-modul-telefonda-su-an':'Bu modül telefonda şu an hiçbir şey hatırlatmayacak.',
+  'ortak.bildirim.kurulu-bildirimler':'Kurulu bildirimler',
+  'ortak.bildirim.hepsini-sil':'Hepsini sil',
+  'ortak.bildirim.bildirim-silindi':'bildirim silindi.',
+  'ortak.bildirim.geri-al':'Geri al',
+  'ortak.bildirim.yeni-gunlerin-bildirimleri-y':'Yeni günlerin bildirimleri yine kurulur.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.bildirim.bildirim-yalniz-telefon-uygu':'Bildirim yalnız telefon uygulamasında kurulur.',
   'ortak.bildirim.telefon-cevap-vermedi':'Telefon cevap vermedi.',
 });
@@ -228,8 +240,8 @@ window.LIFEOS.BILDIRIM = (function(){
     const gun = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
     const fark = Math.round((gun(d) - gun(n)) / GUN_MS);
     const saat = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    if(fark === 0) return 'Bugün ' + saat;
-    if(fark === 1) return 'Yarın ' + saat;
+    if(fark === 0) return yz('ortak.bildirim.bugun') + saat;
+    if(fark === 1) return yz('ortak.bildirim.yarin') + saat;
     return GUNLER[d.getDay()] + ' ' + d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + saat;
   }
   const PANEL = 'tel-bildirim';
@@ -244,16 +256,16 @@ window.LIFEOS.BILDIRIM = (function(){
         + '<button type="button" class="bildirim__ertele" data-tb="atla" data-tb-a="' + kac(x.anahtar) + '" data-tb-z="' + kac(x.zaman) + '"'
         + ' aria-label="' + kac(zamanYaz(x.zaman, simdi) + ', ' + x.baslik + ': bunu sil') + '" title="Bunu sil">' + s('kapat') + '</button></div>').join('')
       : '<div class="kmenu__bos bildirim__bos"><span class="bildirim__bos-simge" aria-hidden="true">' + s('zil') + '</span>'
-        + '<b>Kurulu bildirim yok.</b><small>Bu modül telefonda şu an hiçbir şey hatırlatmayacak.</small></div>';
+        + ('<b>' + yz('ortak.bildirim.kurulu-bildirim-yok') + '</b><small>' + yz('ortak.bildirim.bu-modul-telefonda-su-an') + '</small></div>');
     return '<div class="katman kmenu kmenu--bildirim kmenu--yan" role="dialog" aria-label="Telefonda kurulu bildirimler">'
-      + '<header class="bildirim__bas"><b>Kurulu bildirimler</b>'
+      + ('<header class="bildirim__bas"><b>' + yz('ortak.bildirim.kurulu-bildirimler') + '</b>')
       +   (l.length ? '<span class="bildirim__sayi bildirim__sayi--notr" aria-label="' + l.length + ' bildirim">' + l.length + '</span>'
-          + '<button type="button" class="bildirim__gordu" data-tb="hepsi">Hepsini sil</button>' : '')
+          + ('<button type="button" class="bildirim__gordu" data-tb="hepsi">' + yz('ortak.bildirim.hepsini-sil') + '</button>') : '')
       +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Kapat">' + s('kapat') + '</button>'
       + '</header>'
       + '<div class="bildirim__liste">' + govde + '</div>'
-      + (silinen ? '<p class="bildirim__ertelenen">' + silinen + ' bildirim silindi.<button type="button" data-tb="geri">Geri al</button></p>' : '')
-      + '<p class="tb__not">Yeni günlerin bildirimleri yine kurulur.' + (panelNot ? ' ' + kac(panelNot) : '') + '</p>'
+      + (silinen ? '<p class="bildirim__ertelenen">' + silinen + (' ' + yz('ortak.bildirim.bildirim-silindi') + '<button type="button" data-tb="geri">' + yz('ortak.bildirim.geri-al') + '</button></p>') : '')
+      + ('<p class="tb__not">' + yz('ortak.bildirim.yeni-gunlerin-bildirimleri-y')) + (panelNot ? ' ' + kac(panelNot) : '') + '</p>'
       + '</div>';
   }
   async function listeAc(capa, not){

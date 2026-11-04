@@ -9,6 +9,27 @@
    Bu ekran ses DİNLEMEZ. Metronom ses ÜRETİR (Web Audio), ama mikrofon hiç
    açılmaz ve hiçbir kayıt dosyası oluşmaz. Diksiyonda saklanan şey süre,
    kelime sayısı ve kendi işaretlediğin hata sayısıdır. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.studio.ne-yapilir':'Ne yapılır',
+  'esp.studio.ne-olculur':'Ne ölçülür',
+  'esp.studio.son-calinma':'Son çalınma',
+  'esp.studio.bu-parcada-olculmus-temiz-es':'Bu parçada ölçülmüş temiz eşik yok. ',
+  'esp.studio.tempo-girip-temiz-isaretledi':'Tempo girip «temiz» işaretlediğinde ölçüm başlar.',
+  'esp.studio.yalniz-ilk':'Yalnız ilk ',
+  'esp.studio.tumu':'Tümü · ',
+  'esp.studio.kok-i':'Kök (I)',
+  'esp.studio.wpm-icin-hem-sure-hem':'WPM için hem süre hem kelime sayısı ölçülmüş olmalı.',
+  'esp.studio.hicbir-teknik':'Hiçbir teknik ',
+  'esp.studio.hic-calisilmamis-parca-plato':'Hiç çalışılmamış parça plato sayılmaz — plato çalışan bir şeyin durmasıdır.',
+  'esp.studio.hata-orani':'Hata oranı %',
+  'esp.studio.yeni-temiz-esik':'Yeni temiz eşik: ',
+  'esp.studio.temiz-tekrar-kaydedildi':'Temiz tekrar kaydedildi',
+  'esp.studio.tekrar-kaydedildi':'Tekrar kaydedildi',
+  'esp.studio.henuz-parca-ya-da-teknik-2':'Henüz parça ya da teknik yok.',
+  'esp.studio.diksiyon-30-gundur-hic-acilm':'Diksiyon 30 gündür hiç açılmadı.',
+  'esp.studio.hiz-bir-sonuctur-hedef-degil':'Hız bir sonuçtur, hedef değil. Temiz çalınan tempo, hızlı çalınan ',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -151,7 +172,7 @@ ESP.Screens.studio = (function(){
         meta:ESP.EAR_DRILLS.length + ' egzersiz',
         wide:true,
         body:K.Table({ tight:true,
-          headers:[{ label:yz('esp.studio.kademe'), num:true }, 'Egzersiz', 'Ne yapılır', 'Ne ölçülür'],
+          headers:[{ label:yz('esp.studio.kademe'), num:true }, 'Egzersiz', yz('esp.studio.ne-yapilir'), yz('esp.studio.ne-olculur')],
           rows:ESP.EAR_DRILLS.map(d => [String(d.level), d.label, d.task, d.measures]) }),
       }),
 
@@ -182,7 +203,7 @@ ESP.Screens.studio = (function(){
         label:yz('esp.studio.repertuar-bakimi'), hint:'repertoire',
         meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
         body:eskiyen.length
-          ? K.Table({ tight:true, headers:['Parça', 'Son çalınma'],
+          ? K.Table({ tight:true, headers:['Parça', yz('esp.studio.son-calinma')],
               rows:eskiyen.map(p => {
                 const son = (p.attempts || []).slice(-1)[0];
                 return [p.name, son ? son.date : '—'];
@@ -270,8 +291,8 @@ ESP.Screens.studio = (function(){
               ? ' · ' + p.progression.join('–') : ''}${p.startBpm ? ' · başlangıç ' + p.startBpm + ' BPM' : ''}
             ${yz('esp.studio.tempolar-referans')}${p.note ? ' ' + p.note : ''}</p>`)}
           ${t.cert === 'missing'
-            ? K.Notice({ tone:'info', body:t.why || 'Bu parçada ölçülmüş temiz eşik yok. '
-                + 'Tempo girip «temiz» işaretlediğinde ölçüm başlar.' })
+            ? K.Notice({ tone:'info', body:t.why || yz('esp.studio.bu-parcada-olculmus-temiz-es')
+                + yz('esp.studio.tempo-girip-temiz-isaretledi') })
             : html`${K.Meter({ label:yz('esp.studio.temiz-esik'),
                 value:p.targetBpm ? Math.min(100, t.value / p.targetBpm * 100) : 50,
                 text:t.value + ' BPM' + (p.targetBpm ? ' / ' + p.targetBpm : ''),
@@ -290,7 +311,7 @@ ESP.Screens.studio = (function(){
       label:yz('esp.studio.parcalar'), hint:'clean-bpm', meta:parcalar.length + ' parça', wide:true,
       body:html`<div class="parcalar">${map(gosterilen, satir)}</div>
         ${when(parcalar.length > PARCA_ILK, () => K.Button({ size:'sm', tone:'ghost', act:'parca-tumu', class:'mt-8',
-          label:tumu ? 'Yalnız ilk ' + PARCA_ILK : 'Tümü · ' + parcalar.length + ' parça' }))}`,
+          label:tumu ? yz('esp.studio.yalniz-ilk') + PARCA_ILK : yz('esp.studio.tumu') + parcalar.length + ' parça' }))}`,
     });
   }
 
@@ -415,7 +436,7 @@ ESP.Screens.studio = (function(){
           <div class="row wrap gap-6 my-8">
             ${map(notlar, (n, idx) => html`
               <div class="text-center ogrenme__kutu" style="min-width:44px">
-                <div class="tiny dim mb-2">${idx === 0 ? 'Kök (I)' : (idx + 1) + '. der'}</div>
+                <div class="tiny dim mb-2">${idx === 0 ? yz('esp.studio.kok-i') : (idx + 1) + '. der'}</div>
                 <b class="small" style="color:var(--primary)">${n}</b>
                 <div class="tiny dim">${ESP.NOTE_TR[n] || n}</div>
               </div>`)}
@@ -504,7 +525,7 @@ ESP.Screens.studio = (function(){
           ? K.Empty({ text:yz('esp.studio.son-30-gunde-kayit-yok') })
           : html`
             ${d.wpm.cert === 'missing'
-              ? K.Notice({ tone:'warn', body:'WPM için hem süre hem kelime sayısı ölçülmüş olmalı.' })
+              ? K.Notice({ tone:'warn', body:yz('esp.studio.wpm-icin-hem-sure-hem') })
               : K.Meter({ label:yz('esp.studio.medyan-hiz') + d.wpm.n + ' kayıttan)',
                   value:Math.min(100, d.wpm.value / 200 * 100),
                   text:d.wpm.value + ' kelime/dk',
@@ -564,9 +585,9 @@ ESP.Screens.studio = (function(){
         body:plato.length
           ? K.Table({ tight:true, headers:['Parça', { label:yz('esp.studio.gun'), num:true }, { label:yz('esp.studio.bpm-2'), num:true }],
               rows:plato.map(p => [p.piece.name, String(p.days), String(p.bpm)]) })
-          : K.Notice({ tone:'ok', body:'Hiçbir teknik '
+          : K.Notice({ tone:'ok', body:yz('esp.studio.hicbir-teknik')
               + ESP.Acoustic.PLATEAU_DAYS + ' gündür takılı değil. '
-              + 'Hiç çalışılmamış parça plato sayılmaz — plato çalışan bir şeyin durmasıdır.' }),
+              + yz('esp.studio.hic-calisilmamis-parca-plato') }),
       }),
 
       K.Entry({
@@ -586,7 +607,7 @@ ESP.Screens.studio = (function(){
         body:t.cert === 'missing'
           ? K.Notice({ tone:'info', body:t.why })
           : K.Notice({ tone:t.direction === 'iyi' ? 'ok' : t.direction === 'kotu' ? 'warn' : 'info',
-              body:'Hata oranı %' + Math.round(t.before * 100) + ' → %'
+              body:yz('esp.studio.hata-orani') + Math.round(t.before * 100) + ' → %'
                 + Math.round(t.now * 100) + '. Bu bir tahmindir: hataları sen işaretledin.' }),
       }),
 
@@ -785,8 +806,8 @@ ESP.Screens.studio = (function(){
     if(!res.ok){ ESP.UI.toast(res.error); return; }
     ESP.Memo.bitir();
     ESP.UI.toast(res.raised
-      ? 'Yeni temiz eşik: ' + res.piece.cleanBpm + ' BPM'
-      : (clean ? 'Temiz tekrar kaydedildi' : 'Tekrar kaydedildi'));
+      ? yz('esp.studio.yeni-temiz-esik') + res.piece.cleanBpm + ' BPM'
+      : (clean ? yz('esp.studio.temiz-tekrar-kaydedildi') : yz('esp.studio.tekrar-kaydedildi')));
     ESP.App.render();
   }
 
@@ -818,13 +839,13 @@ ESP.Screens.studio = (function(){
       const plato = ESP.Acoustic.plateaus();
       if(plato.length) return plato[0].piece.name + ' ' + plato[0].days + ' gündür platoda.';
       const m = ESP.Acoustic.musicStatus();
-      if(m.cert === 'missing') return 'Henüz parça ya da teknik yok.';
+      if(m.cert === 'missing') return yz('esp.studio.henuz-parca-ya-da-teknik-2');
       const d = ESP.Acoustic.dictionStatus(30);
-      if(d.cert === 'missing') return 'Diksiyon 30 gündür hiç açılmadı.';
+      if(d.cert === 'missing') return yz('esp.studio.diksiyon-30-gundur-hic-acilm');
       return m.measured + ' parçanın temiz eşiği ölçülü.';
     },
     lede(){
-      return 'Hız bir sonuçtur, hedef değil. Temiz çalınan tempo, hızlı çalınan '
+      return yz('esp.studio.hiz-bir-sonuctur-hedef-degil')
            + 'tempodan önce gelir — diksiyonda da öyle.';
     },
     stats(){

@@ -31,6 +31,72 @@
    Animations ile zincirlenir; sürekli döngü yok, göz yönü yalnız fare
    kıpırdarken karede bir kez hesaplanır. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.minik.sik-sik-esner-uyuklar':'Sık sık esner, uyuklar',
+  'ortak.minik.her-firsatta-laf-atar':'Her fırsatta laf atar',
+  'ortak.minik.kartlari-kurcalar':'Kartları kurcalar',
+  'ortak.minik.ziplar-guler':'Zıplar, güler',
+  'ortak.minik.bulutlara-dalar':'Bulutlara dalar',
+  'ortak.minik.agir-agir-yurur':'Ağır ağır yürür',
+  'ortak.minik.dokununca-saklanir':'Dokununca saklanır',
+  'ortak.minik.pek-kipirdamaz':'Pek kıpırdamaz',
+  'ortak.minik.arada-sarki-mirildanir':'Arada şarkı mırıldanır',
+  'ortak.minik.kosturur-oynar':'Koşturur, oynar',
+  'ortak.minik.yuksek-kartlara-atlar':'Yüksek kartlara atlar',
+  'ortak.minik.arada-tokezler':'Arada tökezler',
+  'ortak.minik.yanina-gelene-sokulur':'Yanına gelene sokulur',
+  'ortak.minik.uzaklara-bakar':'Uzaklara bakar',
+  'ortak.minik.hic-yerinde-durmaz':'Hiç yerinde durmaz',
+  'ortak.minik.yavas-ve-sakin':'Yavaş ve sakin',
+  'ortak.minik.selam-verir-tesekkur-eder':'Selam verir, teşekkür eder',
+  'ortak.minik.hep-bir-yere-yetisir':'Hep bir yere yetişir',
+  'ortak.minik.bak-bulut':'Bak, bulut!',
+  'ortak.minik.ne-guluyorsun':'Ne gülüyorsun?',
+  'ortak.minik.sarki-soyle':'Şarkı söyle',
+  'ortak.minik.la-la-la':'La la la ♪',
+  'ortak.minik.bugun-guzel':'Bugün güzel',
+  'ortak.minik.evet-ya':'Evet ya!',
+  'ortak.minik.sir-mi':'Sır mı?',
+  'ortak.minik.kimseye-deme':'Kimseye deme',
+  'ortak.minik.hazir-basla':'Hazır… başla!',
+  'ortak.minik.bunu-gordun-mu':'Bunu gördün mü?',
+  'ortak.minik.degil-mi':'Değil mi?',
+  'ortak.minik.rapor-hazir-mi':'Rapor hazır mı?',
+  'ortak.minik.az-kaldi':'Az kaldı!',
+  'ortak.minik.toplanti-kacta':'Toplantı kaçta?',
+  'ortak.minik.cifte-sekerli':'Çifte şekerli',
+  'ortak.minik.plan-nasil':'Plan nasıl?',
+  'ortak.minik.grafige-bak':'Grafiğe bak',
+  'ortak.minik.not-aldin-mi':'Not aldın mı?',
+  'ortak.minik.patron-geliyor':'Patron geliyor',
+  'ortak.minik.cabuk-calis':'Çabuk çalış!',
+  'ortak.minik.bes-dakika':'Beş dakika',
+  'ortak.minik.yeni-gorev':'Yeni görev',
+  'ortak.minik.veri-geldi':'Veri geldi',
+  'ortak.minik.harika-is':'Harika iş',
+  'ortak.minik.sag-ol':'Sağ ol!',
+  'ortak.minik.sunum-hazir':'Sunum hazır',
+  'ortak.minik.goster-bakalim':'Göster bakalım',
+  'ortak.minik.gunaydin':'Günaydın ☀',
+  'ortak.minik.erken-kalktin':'Erken kalktın',
+  'ortak.minik.yeni-gun':'Yeni gün!',
+  'ortak.minik.i-yi-geceler':'İyi geceler',
+  'ortak.minik.tatli-ruyalar':'Tatlı rüyalar',
+  'ortak.minik.uykum-var':'Uykum var…',
+  'ortak.minik.bende-de':'Bende de',
+  'ortak.minik.ne-guzel':'Ne güzel',
+  'ortak.minik.biraz-bekle':'Biraz bekle',
+  'ortak.minik.dokun-sevindir':'Dokun, sevindir',
+  'ortak.minik.dokun-uyandir':'Dokun, uyandır',
+  'ortak.minik.sayfada-en-cok':'Sayfada en çok ',
+  'ortak.minik.minik-yok':'Minik yok',
+  'ortak.minik.sayfadan-cikar':'Sayfadan çıkar',
+  'ortak.minik.sayfaya-ekle':'Sayfaya ekle',
+  'ortak.minik.ofis-calisanlari':'Ofis çalışanları · ',
+  'ortak.minik.ofis':'Ofis',
+  'ortak.minik.dokun-gidikla':'Dokun, gıdıkla',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.minik.pofuduk':'Pofuduk',
   'ortak.minik.bicir':'Bıcır',
   'ortak.minik.filiz':'Filiz',
@@ -142,25 +208,25 @@ window.LIFEOS.MINIK = (function(){
     utangac:'utangaç', tembel:'tembel', sarkici:'şarkıcı', oyuncu:'oyuncu', cesur:'cesur', sakar:'sakar',
     sevecen:'sevecen', dalgin:'dalgın', enerjik:'enerjik', sakin:'sakin', nazik:'nazik', telasli:'telaşlı' });
   /* Galerideki tek cümle: huy ne yapar (yalnız görünüş; hiçbir karara girmez). */
-  const HUY_NOT = Object.freeze({ uykucu:'Sık sık esner, uyuklar', konuskan:'Her fırsatta laf atar', merakli:'Kartları kurcalar',
-    neseli:'Zıplar, güler', hayalci:'Bulutlara dalar', bilge:'Ağır ağır yürür', utangac:'Dokununca saklanır', tembel:'Pek kıpırdamaz',
-    sarkici:'Arada şarkı mırıldanır', oyuncu:'Koşturur, oynar', cesur:'Yüksek kartlara atlar', sakar:'Arada tökezler',
-    sevecen:'Yanına gelene sokulur', dalgin:'Uzaklara bakar', enerjik:'Hiç yerinde durmaz', sakin:'Yavaş ve sakin',
-    nazik:'Selam verir, teşekkür eder', telasli:'Hep bir yere yetişir' });
+  const HUY_NOT = Object.freeze({ uykucu:yz('ortak.minik.sik-sik-esner-uyuklar'), konuskan:yz('ortak.minik.her-firsatta-laf-atar'), merakli:yz('ortak.minik.kartlari-kurcalar'),
+    neseli:yz('ortak.minik.ziplar-guler'), hayalci:yz('ortak.minik.bulutlara-dalar'), bilge:yz('ortak.minik.agir-agir-yurur'), utangac:yz('ortak.minik.dokununca-saklanir'), tembel:yz('ortak.minik.pek-kipirdamaz'),
+    sarkici:yz('ortak.minik.arada-sarki-mirildanir'), oyuncu:yz('ortak.minik.kosturur-oynar'), cesur:yz('ortak.minik.yuksek-kartlara-atlar'), sakar:yz('ortak.minik.arada-tokezler'),
+    sevecen:yz('ortak.minik.yanina-gelene-sokulur'), dalgin:yz('ortak.minik.uzaklara-bakar'), enerjik:yz('ortak.minik.hic-yerinde-durmaz'), sakin:yz('ortak.minik.yavas-ve-sakin'),
+    nazik:yz('ortak.minik.selam-verir-tesekkur-eder'), telasli:yz('ortak.minik.hep-bir-yere-yetisir') });
   /* Sohbet senaryoları (kullanıcı, 2026-10-28: «aralarındaki konuşmaları
      daha çeşitli yap»): soru–cevap; Ofis'in kendi işi, sabahın ve gecenin
      kendi lafı. Her satır balona sığar (en çok 18 harf). */
   const DIYALOG = Object.freeze({
-    genel:[['Hey!', 'Selam!'], ['Nasılsın?', 'Süperim!'], ['Bak, bulut!', 'Pofuduk!'], ['Oyun?', 'Olur!'],
-      ['Acıktım…', 'Kurabiye?'], ['Hihi', 'Ne gülüyorsun?'], ['Şarkı söyle', 'La la la ♪'], ['Sıkıldım', 'Zıplayalım!'],
-      ['Bugün güzel', 'Evet ya!'], ['Sır mı?', 'Kimseye deme'], ['Yarış?', 'Hazır… başla!'], ['Hmm?', 'Düşünüyorum'],
-      ['Bunu gördün mü?', 'Vay!', 'Değil mi?']],
-    ofis:[['Rapor hazır mı?', 'Az kaldı!'], ['Toplantı kaçta?', 'Beşte'], ['Kahve?', 'Çifte şekerli'], ['Plan nasıl?', 'Yolunda'],
-      ['Grafiğe bak', 'Yükseliyor!'], ['Not aldın mı?', 'Hepsini'], ['Patron geliyor', 'Çabuk çalış!'], ['Mola?', 'Beş dakika'],
-      ['Hedef?', 'Tutturacağız'], ['Yeni görev', 'Hallederim'], ['Veri geldi', 'Bakıyorum'], ['Harika iş', 'Sağ ol!'],
-      ['Sunum hazır', 'Göster bakalım', 'Bayıldım!']],
-    sabah:[['Günaydın!', 'Günaydın ☀'], ['Kahvaltı?', 'Simit!'], ['Erken kalktın', 'Yeni gün!']],
-    gece:[['İyi geceler', 'Tatlı rüyalar'], ['Uykum var…', 'Bende de'], ['Yıldızlar!', 'Ne güzel']]
+    genel:[['Hey!', 'Selam!'], ['Nasılsın?', 'Süperim!'], [yz('ortak.minik.bak-bulut'), 'Pofuduk!'], ['Oyun?', 'Olur!'],
+      ['Acıktım…', 'Kurabiye?'], ['Hihi', yz('ortak.minik.ne-guluyorsun')], [yz('ortak.minik.sarki-soyle'), yz('ortak.minik.la-la-la')], ['Sıkıldım', 'Zıplayalım!'],
+      [yz('ortak.minik.bugun-guzel'), yz('ortak.minik.evet-ya')], [yz('ortak.minik.sir-mi'), yz('ortak.minik.kimseye-deme')], ['Yarış?', yz('ortak.minik.hazir-basla')], ['Hmm?', 'Düşünüyorum'],
+      [yz('ortak.minik.bunu-gordun-mu'), 'Vay!', yz('ortak.minik.degil-mi')]],
+    ofis:[[yz('ortak.minik.rapor-hazir-mi'), yz('ortak.minik.az-kaldi')], [yz('ortak.minik.toplanti-kacta'), 'Beşte'], ['Kahve?', yz('ortak.minik.cifte-sekerli')], [yz('ortak.minik.plan-nasil'), 'Yolunda'],
+      [yz('ortak.minik.grafige-bak'), 'Yükseliyor!'], [yz('ortak.minik.not-aldin-mi'), 'Hepsini'], [yz('ortak.minik.patron-geliyor'), yz('ortak.minik.cabuk-calis')], ['Mola?', yz('ortak.minik.bes-dakika')],
+      ['Hedef?', 'Tutturacağız'], [yz('ortak.minik.yeni-gorev'), 'Hallederim'], [yz('ortak.minik.veri-geldi'), 'Bakıyorum'], [yz('ortak.minik.harika-is'), yz('ortak.minik.sag-ol')],
+      [yz('ortak.minik.sunum-hazir'), yz('ortak.minik.goster-bakalim'), 'Bayıldım!']],
+    sabah:[['Günaydın!', yz('ortak.minik.gunaydin')], ['Kahvaltı?', 'Simit!'], [yz('ortak.minik.erken-kalktin'), yz('ortak.minik.yeni-gun')]],
+    gece:[[yz('ortak.minik.i-yi-geceler'), yz('ortak.minik.tatli-ruyalar')], [yz('ortak.minik.uykum-var'), yz('ortak.minik.bende-de')], ['Yıldızlar!', yz('ortak.minik.ne-guzel')]]
   });
   function diyalogSec(ofis, saat, rnd){
     const r = rnd(), sec = l => l[Math.min(l.length - 1, Math.floor(rnd() * l.length))];
@@ -213,7 +279,7 @@ window.LIFEOS.MINIK = (function(){
      uykulu > özlem (üzgün) > huyun kendi hâli. */
   const RUH = Object.freeze({ SIK:5, PENCERE:4000, KIZ:8000, KUS:20000, MUTLU:15000, OZLEM:30 * 60000 });
   const RUH_AD = Object.freeze({ mutlu:'mutlu', uzgun:'üzgün', uykulu:'uykulu', kizgin:'kızgın' });
-  const RUH_IPUCU = Object.freeze({ kizgin:'Biraz bekle', uzgun:'Dokun, sevindir', uykulu:'Dokun, uyandır' });
+  const RUH_IPUCU = Object.freeze({ kizgin:yz('ortak.minik.biraz-bekle'), uzgun:yz('ortak.minik.dokun-sevindir'), uykulu:yz('ortak.minik.dokun-uyandir') });
 
   /* Sayfadaki sayı (kullanıcı, 2026-10-28: «bir sayfada görünebilecek
      sayıyı değiştirebilelim»): Görünüm › Minikler, Yok ya da 1–6. Tercih
@@ -234,7 +300,7 @@ window.LIFEOS.MINIK = (function(){
     let h = '<div class="seg seg--block miniksec" role="group" aria-label="Minikler">';
     for(let i = 0; i <= EN_COK; i++){
       h += '<button type="button" class="' + (i === s ? 'is-on' : '') + '" data-minik-sec="' + i + '" aria-pressed="' + (i === s ? 'true' : 'false') + '"'
-        + ' title="' + (i ? 'Sayfada en çok ' + i + ' minik' : 'Minik yok') + '">' + (i ? i : 'Yok') + '</button>';
+        + ' title="' + (i ? yz('ortak.minik.sayfada-en-cok') + i + ' minik' : yz('ortak.minik.minik-yok')) + '">' + (i ? i : 'Yok') + '</button>';
     }
     return h + '</div>';
   }
@@ -379,7 +445,7 @@ window.LIFEOS.MINIK = (function(){
   function galeriHtml(){
     const k = kapalilar();
     const kart = (ad, alt, govde, on) => '<button type="button" class="minikgal__kart' + (on ? ' is-on' : '') + '" data-minik-kadro="' + ad + '"'
-      + ' aria-pressed="' + (on ? 'true' : 'false') + '" title="' + (on ? 'Sayfadan çıkar' : 'Sayfaya ekle') + '">'
+      + ' aria-pressed="' + (on ? 'true' : 'false') + '" title="' + (on ? yz('ortak.minik.sayfadan-cikar') : yz('ortak.minik.sayfaya-ekle')) + '">'
       + '<span class="minikgal__sahne" aria-hidden="true">' + govde + '</span><b>' + ad + '</b><small>' + alt + '</small></button>';
     const kisi = x => '<span class="minik" data-tip="' + x.tip + '" data-bicim="' + x.bicim + '" data-desen="' + x.desen + '" data-huy="' + x.huy + '"'
       + ' data-aile="' + aileOf(x) + '" data-yon="sag" data-sanat=""' + (sanat(x).sus ? ' data-sanat-sus=""' : '') + ' style="' + renkStil(x) + '">' + sanatIcerik(x) + '</span>';
@@ -389,9 +455,9 @@ window.LIFEOS.MINIK = (function(){
     const liste = KISILER.filter(x => t === 'karma' || aileOf(x) === t);
     return '<div class="minikgal" role="group" aria-label="Minikler: sayfada kimler gezsin">' + sec
       + liste.map(x => kart(x.ad, HUY_AD[x.huy] + ' · ' + HUY_NOT[x.huy], kisi(x), !k.has(x.ad))).join('')
-      + (ofis.length ? kart('ofis', 'Ofis çalışanları · ' + ofis.length + ' kişi, işinin başında',
+      + (ofis.length ? kart('ofis', yz('ortak.minik.ofis-calisanlari') + ofis.length + ' kişi, işinin başında',
         '<span class="minik" data-ofis="" data-tip="' + ofis[0].tip + '" data-bicim="' + ofis[0].bicim + '" data-desen="yok" data-yon="sag" style="--ton:' + ofis[0].ton + '">' + ICERIK + '</span>', !k.has('ofis'))
-        .replace('<b>ofis</b>', '<b>Ofis</b>') : '')
+        .replace('<b>ofis</b>', ('<b>' + yz('ortak.minik.ofis') + '</b>')) : '')
       + '</div>';
   }
 
@@ -496,7 +562,7 @@ window.LIFEOS.MINIK = (function(){
     const r = ruhNe(mk);
     if((mk.el.dataset.ruh || '') !== r){ if(r) mk.el.dataset.ruh = r; else delete mk.el.dataset.ruh; }
     mk.el.querySelector('.minik__ad i').textContent = r ? RUH_AD[r] : mk.rol || HUY_AD[mk.huy] || mk.huy;
-    mk.el.querySelector('.minik__ad small').textContent = RUH_IPUCU[r] || 'Dokun, gıdıkla';
+    mk.el.querySelector('.minik__ad small').textContent = RUH_IPUCU[r] || yz('ortak.minik.dokun-gidikla');
     return r;
   }
 
@@ -552,7 +618,7 @@ window.LIFEOS.MINIK = (function(){
       + '<i class="minik__kol minik__kol--sol"></i><i class="minik__kol minik__kol--sag"></i>'
       + '<span class="minik__govde"><i class="minik__deri"></i><b class="minik__isik"></b><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i><i class="minik__kravat"></i><i class="minik__kart"></i><i class="minik__esya"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
-      + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
+      + ('<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>' + yz('ortak.minik.dokun-gidikla') + '</small></span>');
 
   /* ÇİZİM (kullanıcı, 2026-10-30: «minikler hâlâ çok amatör; pofuduk
      görünmekten çok kod yoğunluğu karman çormanına dönmüş; yüksek yoğunlukta

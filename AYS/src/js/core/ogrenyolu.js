@@ -25,6 +25,23 @@
      pekistir  gapDays gün sonra ikinci test ≥ %R.CLOSURE_RULE.second
                (zamanı gelmediyse «bekle» denir, tarih yazılır) */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.ogrenyolu.soru-coz':'Soru çöz',
+  'ays.core.ogrenyolu.yanlislari-kapat':'Yanlışları kapat',
+  'ays.core.ogrenyolu.konu-testi':'Konu testi',
+  'ays.core.ogrenyolu.tekrar-test':'Tekrar test',
+  'ays.core.ogrenyolu.okudum-dedin':'Okudum dedin (',
+  'ays.core.ogrenyolu.konuyu-bir-kaynaktan-ogren-d':'Konuyu bir kaynaktan öğren: ders notu ekle ya da okuduğunu işaretle.',
+  'ays.core.ogrenyolu.bu-konuya-bagli-blokta-soru':'Bu konuya bağlı blokta soru yok.',
+  'ays.core.ogrenyolu.bu-konudan-yanlis-kaydi-yok':'Bu konudan yanlış kaydı yok.',
+  'ays.core.ogrenyolu.acik-yanlis-kalmadi':'Açık yanlış kalmadı.',
+  'ays.core.ogrenyolu.konu-yeniden-acildi-testi-ye':'Konu yeniden açıldı: testi yenile (eşik %',
+  'ays.core.ogrenyolu.konu-testini-gir-esik':'Konu testini gir (eşik %',
+  'ays.core.ogrenyolu.konu-yeniden-acildi':'Konu yeniden açıldı.',
+  'ays.core.ogrenyolu.zamani-geldi-esik':'Zamanı geldi (eşik %',
+  'ays.core.ogrenyolu.i-lk-testten':'İlk testten ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.ogrenyolu.olculdu':'ölçüldü',
 });
 
@@ -33,8 +50,8 @@ window.R = window.R || {};
 
 R.OgrenYolu = (function(){
   const KURAL = Object.freeze({ kartEnAz:3, pratikEnAz:20, pratikDogruluk:70 });
-  const ADLAR = { ogren:'Öğren', kartla:'Kartla', coz:'Soru çöz', duzelt:'Yanlışları kapat',
-    olc:'Konu testi', pekistir:'Tekrar test' };
+  const ADLAR = { ogren:'Öğren', kartla:'Kartla', coz:yz('ays.core.ogrenyolu.soru-coz'), duzelt:yz('ays.core.ogrenyolu.yanlislari-kapat'),
+    olc:yz('ays.core.ogrenyolu.konu-testi'), pekistir:yz('ays.core.ogrenyolu.tekrar-test') };
 
   function bul(subjectId, topicId){
     const subject = (R.SUBJECTS || []).find(s => s.id === subjectId);
@@ -73,8 +90,8 @@ R.OgrenYolu = (function(){
       { id:'ogren', ad:ADLAR.ogren, tamam:!!(notlar || st.okunduAt),
         etiket:notlar ? 'ölçüldü' : st.okunduAt ? 'beyan' : null,
         ayrinti:notlar ? notlar + ' ders notu'
-          : st.okunduAt ? 'Okudum dedin (' + U.fmtShort(st.okunduAt.slice(0, 10)) + ').'
-          : 'Konuyu bir kaynaktan öğren: ders notu ekle ya da okuduğunu işaretle.' },
+          : st.okunduAt ? yz('ays.core.ogrenyolu.okudum-dedin') + U.fmtShort(st.okunduAt.slice(0, 10)) + ').'
+          : yz('ays.core.ogrenyolu.konuyu-bir-kaynaktan-ogren-d') },
       { id:'kartla', ad:ADLAR.kartla, tamam:kart >= KURAL.kartEnAz, etiket:yz('ays.core.ogrenyolu.olculdu'),
         ayrinti:kart + ' / ' + KURAL.kartEnAz + ' kart' },
       { id:'coz', ad:ADLAR.coz,
@@ -82,20 +99,20 @@ R.OgrenYolu = (function(){
         etiket:p.solved ? 'hesaplandı' : null,
         ayrinti:p.solved ? p.solved + ' / ' + KURAL.pratikEnAz + ' soru · doğruluk %' + p.accuracy
             + ' (eşik %' + KURAL.pratikDogruluk + ')'
-          : 'Bu konuya bağlı blokta soru yok.' },
+          : yz('ays.core.ogrenyolu.bu-konuya-bagli-blokta-soru') },
       { id:'duzelt', ad:ADLAR.duzelt, tamam:acik === 0, etiket:yz('ays.core.ogrenyolu.olculdu'),
-        ayrinti:!yanlis.length ? 'Bu konudan yanlış kaydı yok.' : acik ? acik + ' açık yanlış' : 'Açık yanlış kalmadı.' },
+        ayrinti:!yanlis.length ? yz('ays.core.ogrenyolu.bu-konudan-yanlis-kaydi-yok') : acik ? acik + ' açık yanlış' : yz('ays.core.ogrenyolu.acik-yanlis-kalmadi') },
       { id:'olc', ad:ADLAR.olc, tamam:birinci, etiket:st.first != null ? 'ölçüldü' : null,
-        ayrinti:yeniden ? 'Konu yeniden açıldı: testi yenile (eşik %' + rule.first + ').'
+        ayrinti:yeniden ? yz('ays.core.ogrenyolu.konu-yeniden-acildi-testi-ye') + rule.first + ').'
           : st.first != null ? '%' + st.first + ' (eşik %' + rule.first + ')'
-          : 'Konu testini gir (eşik %' + rule.first + ').' },
+          : yz('ays.core.ogrenyolu.konu-testini-gir-esik') + rule.first + ').' },
       { id:'pekistir', ad:ADLAR.pekistir, tamam:ikinci, etiket:st.second != null ? 'ölçüldü' : null,
         bekle:!ikinci && birinci && st.second == null && !!ikinciGun && ikinciGun > bugun,
-        ayrinti:yeniden ? 'Konu yeniden açıldı.'
+        ayrinti:yeniden ? yz('ays.core.ogrenyolu.konu-yeniden-acildi')
           : st.second != null ? '%' + st.second + ' (eşik %' + rule.second + ')'
           : ikinciGun ? (ikinciGun > bugun ? U.fmtShort(ikinciGun) + ' günü (ilk testten ' + rule.gapDays + ' gün sonra)'
-            : 'Zamanı geldi (eşik %' + rule.second + ').')
-          : 'İlk testten ' + rule.gapDays + ' gün sonra.' },
+            : yz('ays.core.ogrenyolu.zamani-geldi-esik') + rule.second + ').')
+          : yz('ays.core.ogrenyolu.i-lk-testten') + rule.gapDays + ' gün sonra.' },
     ];
   }
 

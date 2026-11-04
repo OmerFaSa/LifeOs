@@ -33,6 +33,52 @@
    Dört kesinlik etiketinin tanımı BURADA YAZILMAZ: `LIFEOS.KESINLIK`'ten
    okunur. İki yerde yazılsaydı bir gün ayrışırdı. */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.sozluk.tekrar-borcu':'Tekrar borcu',
+  'ortak.sozluk.vadesi-gelen-tekrar-kartlari':'Vadesi gelen tekrar kartlarından gecikmiş olanların oranı.',
+  'ortak.sozluk.vadesi-gelen-20-karttan-5-i':'Vadesi gelen 20 karttan 5’i gecikmişse borç %25’tir. Eşik %10; bu bir bulgu değil, sistemin seçimidir.',
+  'ortak.sozluk.ays-core-calc-js-carddebt-co':'AYS core/calc.js cardDebt · core/audit.js',
+  'ortak.sozluk.dogru-sayisindan-yanlislarin':'Doğru sayısından yanlışların dörtte biri çıkarılarak bulunur; testler ayrı ayrı hesaplanıp toplanır.',
+  'ortak.sozluk.ays-data-hints-js-net-data-e':'AYS data/hints.js net · data/evidence.js',
+  'ortak.sozluk.minimum-gun':'Minimum gün',
+  'ortak.sozluk.kotu-gunun-alt-siniri-45':'Kötü günün alt sınırı: 45 dakika, 10 paragraf ve vadesi gelen kartlar.',
+  'ortak.sozluk.hicbir-sey-yapamadigin-gun-b':'Hiçbir şey yapamadığın gün bu üçünü tutturursan seri kırılmaz.',
+  'ortak.sozluk.ays-data-hints-js-minimum-da':'AYS data/hints.js minimum-day',
+  'ortak.sozluk.gunluk-alt-siniri-tutturdugu':'Günlük alt sınırı tutturduğun ardışık gün sayısı; ödül nete değil davranışa bağlıdır.',
+  'ortak.sozluk.dondurulan-gun-hastalik-tati':'Dondurulan gün (hastalık, tatil) seriyi bozmaz ama sayılmaz da.',
+  'ortak.sozluk.ays-data-hints-js-streak-bra':'AYS data/hints.js streak · brand/ortak/seri.js',
+  'ortak.sozluk.hkm-nin-modullere-oneri-yaza':'HKM’nin modüllere öneri yazan katmanı; modüle yazmaz, öneriyi modül kendi koduyla ve senin onayınla uygular.',
+  'ortak.sozluk.agents-md-1-4-hkm-core-inten':'AGENTS.md §1.4 · HKM/core/intents.py',
+  'ortak.sozluk.kucuk-aksiyon':'Küçük aksiyon',
+  'ortak.sozluk.tek-gun-tek-kayit-degistiren':'Tek gün, tek kayıt değiştiren iş; istersen sormadan uygulanır, «Geri al» ekranda kalır.',
+  'ortak.sozluk.bugunku-bir-blogun-saatini-k':'Bugünkü bir bloğun saatini kaydırmak.',
+  'ortak.sozluk.agents-md-1-9':'AGENTS.md §1.9',
+  'ortak.sozluk.orta-aksiyon':'Orta aksiyon',
+  'ortak.sozluk.bir-hafta-ya-da-bir':'Bir hafta ya da bir dönemi etkileyen iş; önce önizleme gösterilir, tek onayla uygulanır.',
+  'ortak.sozluk.ara-haftasi-gecici-sure-degi':'Ara haftası, geçici süre değişikliği, bir bölümü kapatmak.',
+  'ortak.sozluk.buyuk-aksiyon':'Büyük aksiyon',
+  'ortak.sozluk.sinavi-degistirmek-ya-da-pla':'Sınavı değiştirmek ya da planı baştan kurmak gibi iş; önce ve sonrası gösterilir, onaydan önce dönüş noktası alınır.',
+  'ortak.sozluk.hedef-sinavi-yks-den-baska-b':'Hedef sınavı YKS’den başka bir sınava çevirmek.',
+  'ortak.sozluk.donus-noktasi':'Dönüş noktası',
+  'ortak.sozluk.buyuk-bir-aksiyon-uygulanmad':'Büyük bir aksiyon uygulanmadan önce alınan önceki hâl; geri alınınca veri bu noktaya döner.',
+  'ortak.sozluk.spi-core-plan-js-uygula-agen':'SPİ core/plan.js uygula · AGENTS.md §1.9',
+  'ortak.sozluk.bir-kuralin-tetiklendigi-sin':'Bir kuralın tetiklendiği sınır değer; eşiklerin çoğu bir bulgu değil, sistemin seçimidir.',
+  'ortak.sozluk.tekrar-borcu-10-u-gecince-uy':'Tekrar borcu %10’u geçince uyarı çıkar.',
+  'ortak.sozluk.ays-core-audit-js-data-hints':'AYS core/audit.js · data/hints.js evidence',
+  'ortak.sozluk.kural-izi':'Kural izi',
+  'ortak.sozluk.bir-onerinin-dayandigi-kural':'Bir önerinin dayandığı kurallar: numarası ve sağlanan değerle.',
+  'ortak.sozluk.r-12-tekrar-borcu-34':'R-12 · tekrar borcu %34 ≥ %10.',
+  'ortak.sozluk.ekip-plani-ek-a-121':'EKIP-PLANI Ek A 121',
+  'ortak.sozluk.veri-tazeligi':'Veri tazeliği',
+  'ortak.sozluk.olcumun-yasi-esigi-gecen-deg':'Ölçümün yaşı; eşiği geçen değer soluk yazılır ve kaç gün önce ölçüldüğünü söyler.',
+  'ortak.sozluk.kullanimin-gorunur-izi-hicbi':'Kullanımın görünür izi; hiçbir plan, öneri ya da uyarı rütbeye bakmaz.',
+  'ortak.sozluk.agents-md-1-6':'AGENTS.md §1.6',
+  'ortak.sozluk.hazir-cumle':'hazır cümle',
+  'ortak.sozluk.dil-modeli-kapali':'Dil modeli kapalı',
+  'ortak.sozluk.uzmanlar-hazir-cumlelerle-ko':'Uzmanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.',
+  'ortak.sozluk.tanimsiz-veri':'tanımsız veri',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.sozluk.durum-ozeti':'Durum özeti',
   'ortak.sozluk.konu-riski':'Konu riski',
   'ortak.sozluk.puan-tahmini':'Puan tahmini',
@@ -71,55 +117,55 @@ window.LIFEOS = window.LIFEOS || {};
   /* modul: terimin ait olduğu sistem ('ays' | 'spi' | 'esp'); yazılmamışsa
      üç sistemde aynı anlamdadır. */
   const TERIMLER = {
-    'tekrar-borcu':{ terim:'Tekrar borcu', modul:'ays',
-      tanim:'Vadesi gelen tekrar kartlarından gecikmiş olanların oranı.',
-      ornek:'Vadesi gelen 20 karttan 5’i gecikmişse borç %25’tir. Eşik %10; bu bir bulgu değil, sistemin seçimidir.',
-      kaynak:'AYS core/calc.js cardDebt · core/audit.js' },
+    'tekrar-borcu':{ terim:yz('ortak.sozluk.tekrar-borcu'), modul:'ays',
+      tanim:yz('ortak.sozluk.vadesi-gelen-tekrar-kartlari'),
+      ornek:yz('ortak.sozluk.vadesi-gelen-20-karttan-5-i'),
+      kaynak:yz('ortak.sozluk.ays-core-calc-js-carddebt-co') },
     'net':{ terim:'Net', modul:'ays',
-      tanim:'Doğru sayısından yanlışların dörtte biri çıkarılarak bulunur; testler ayrı ayrı hesaplanıp toplanır.',
+      tanim:yz('ortak.sozluk.dogru-sayisindan-yanlislarin'),
       ornek:'40 doğru, 8 yanlış: 40 − 8 ÷ 4 = 38 net.',
-      kaynak:'AYS data/hints.js net · data/evidence.js' },
-    'minimum-gun':{ terim:'Minimum gün', modul:'ays',
-      tanim:'Kötü günün alt sınırı: 45 dakika, 10 paragraf ve vadesi gelen kartlar.',
-      ornek:'Hiçbir şey yapamadığın gün bu üçünü tutturursan seri kırılmaz.',
-      kaynak:'AYS data/hints.js minimum-day' },
+      kaynak:yz('ortak.sozluk.ays-data-hints-js-net-data-e') },
+    'minimum-gun':{ terim:yz('ortak.sozluk.minimum-gun'), modul:'ays',
+      tanim:yz('ortak.sozluk.kotu-gunun-alt-siniri-45'),
+      ornek:yz('ortak.sozluk.hicbir-sey-yapamadigin-gun-b'),
+      kaynak:yz('ortak.sozluk.ays-data-hints-js-minimum-da') },
     'seri':{ terim:'Seri',
-      tanim:'Günlük alt sınırı tutturduğun ardışık gün sayısı; ödül nete değil davranışa bağlıdır.',
-      ornek:'Dondurulan gün (hastalık, tatil) seriyi bozmaz ama sayılmaz da.',
-      kaynak:'AYS data/hints.js streak · brand/ortak/seri.js' },
+      tanim:yz('ortak.sozluk.gunluk-alt-siniri-tutturdugu'),
+      ornek:yz('ortak.sozluk.dondurulan-gun-hastalik-tati'),
+      kaynak:yz('ortak.sozluk.ays-data-hints-js-streak-bra') },
     'merkez':{ terim:'Merkez',
-      tanim:'HKM’nin modüllere öneri yazan katmanı; modüle yazmaz, öneriyi modül kendi koduyla ve senin onayınla uygular.',
+      tanim:yz('ortak.sozluk.hkm-nin-modullere-oneri-yaza'),
       ornek:'«Akşam bloğu tekrara ayrılsın» bir Merkez önerisidir; «Uygula» demeden hiçbir şey değişmez.',
-      kaynak:'AGENTS.md §1.4 · HKM/core/intents.py' },
-    'kucuk-aksiyon':{ terim:'Küçük aksiyon',
-      tanim:'Tek gün, tek kayıt değiştiren iş; istersen sormadan uygulanır, «Geri al» ekranda kalır.',
-      ornek:'Bugünkü bir bloğun saatini kaydırmak.',
-      kaynak:'AGENTS.md §1.9' },
-    'orta-aksiyon':{ terim:'Orta aksiyon',
-      tanim:'Bir hafta ya da bir dönemi etkileyen iş; önce önizleme gösterilir, tek onayla uygulanır.',
-      ornek:'Ara haftası, geçici süre değişikliği, bir bölümü kapatmak.',
-      kaynak:'AGENTS.md §1.9' },
-    'buyuk-aksiyon':{ terim:'Büyük aksiyon',
-      tanim:'Sınavı değiştirmek ya da planı baştan kurmak gibi iş; önce ve sonrası gösterilir, onaydan önce dönüş noktası alınır.',
-      ornek:'Hedef sınavı YKS’den başka bir sınava çevirmek.',
-      kaynak:'AGENTS.md §1.9' },
-    'donus-noktasi':{ terim:'Dönüş noktası',
-      tanim:'Büyük bir aksiyon uygulanmadan önce alınan önceki hâl; geri alınınca veri bu noktaya döner.',
-      kaynak:'SPİ core/plan.js uygula · AGENTS.md §1.9' },
+      kaynak:yz('ortak.sozluk.agents-md-1-4-hkm-core-inten') },
+    'kucuk-aksiyon':{ terim:yz('ortak.sozluk.kucuk-aksiyon'),
+      tanim:yz('ortak.sozluk.tek-gun-tek-kayit-degistiren'),
+      ornek:yz('ortak.sozluk.bugunku-bir-blogun-saatini-k'),
+      kaynak:yz('ortak.sozluk.agents-md-1-9') },
+    'orta-aksiyon':{ terim:yz('ortak.sozluk.orta-aksiyon'),
+      tanim:yz('ortak.sozluk.bir-hafta-ya-da-bir'),
+      ornek:yz('ortak.sozluk.ara-haftasi-gecici-sure-degi'),
+      kaynak:yz('ortak.sozluk.agents-md-1-9') },
+    'buyuk-aksiyon':{ terim:yz('ortak.sozluk.buyuk-aksiyon'),
+      tanim:yz('ortak.sozluk.sinavi-degistirmek-ya-da-pla'),
+      ornek:yz('ortak.sozluk.hedef-sinavi-yks-den-baska-b'),
+      kaynak:yz('ortak.sozluk.agents-md-1-9') },
+    'donus-noktasi':{ terim:yz('ortak.sozluk.donus-noktasi'),
+      tanim:yz('ortak.sozluk.buyuk-bir-aksiyon-uygulanmad'),
+      kaynak:yz('ortak.sozluk.spi-core-plan-js-uygula-agen') },
     'esik':{ terim:'Eşik',
-      tanim:'Bir kuralın tetiklendiği sınır değer; eşiklerin çoğu bir bulgu değil, sistemin seçimidir.',
-      ornek:'Tekrar borcu %10’u geçince uyarı çıkar.',
-      kaynak:'AYS core/audit.js · data/hints.js evidence' },
-    'kural-izi':{ terim:'Kural izi',
-      tanim:'Bir önerinin dayandığı kurallar: numarası ve sağlanan değerle.',
-      ornek:'R-12 · tekrar borcu %34 ≥ %10.',
-      kaynak:'EKIP-PLANI Ek A 121' },
-    'veri-tazeligi':{ terim:'Veri tazeliği',
-      tanim:'Ölçümün yaşı; eşiği geçen değer soluk yazılır ve kaç gün önce ölçüldüğünü söyler.',
+      tanim:yz('ortak.sozluk.bir-kuralin-tetiklendigi-sin'),
+      ornek:yz('ortak.sozluk.tekrar-borcu-10-u-gecince-uy'),
+      kaynak:yz('ortak.sozluk.ays-core-audit-js-data-hints') },
+    'kural-izi':{ terim:yz('ortak.sozluk.kural-izi'),
+      tanim:yz('ortak.sozluk.bir-onerinin-dayandigi-kural'),
+      ornek:yz('ortak.sozluk.r-12-tekrar-borcu-34'),
+      kaynak:yz('ortak.sozluk.ekip-plani-ek-a-121') },
+    'veri-tazeligi':{ terim:yz('ortak.sozluk.veri-tazeligi'),
+      tanim:yz('ortak.sozluk.olcumun-yasi-esigi-gecen-deg'),
       kaynak:'brand/ortak/sayi.js TAZELIK' },
     'rutbe':{ terim:'Rütbe',
-      tanim:'Kullanımın görünür izi; hiçbir plan, öneri ya da uyarı rütbeye bakmaz.',
-      kaynak:'AGENTS.md §1.6' },
+      tanim:yz('ortak.sozluk.kullanimin-gorunur-izi-hicbi'),
+      kaynak:yz('ortak.sozluk.agents-md-1-6') },
   };
   Object.keys(TERIMLER).forEach(k => Object.freeze(TERIMLER[k]));
   Object.freeze(TERIMLER);
@@ -207,7 +253,7 @@ window.LIFEOS = window.LIFEOS || {};
   function hazirHtml(c){
     if(!c || !c.metin) return '';
     return '<p class="hazir" data-oz="139" data-kaynak="kural">'
-      + '<span class="hazir__etiket">hazır cümle</span> ' + kac(c.metin) + '</p>';
+      + ('<span class="hazir__etiket">' + yz('ortak.sozluk.hazir-cumle') + '</span> ') + kac(c.metin) + '</p>';
   }
 
   /* Gri durum şeridi. `acik` true ise şerit yok. Neden yazılırsa şeritte
@@ -216,8 +262,8 @@ window.LIFEOS = window.LIFEOS || {};
     durum = durum || {};
     if(durum.acik) return '';
     return '<div class="modelsiz" data-oz="139" role="status">'
-      + '<b class="modelsiz__bas">Dil modeli kapalı</b>'
-      + '<span class="modelsiz__metin">Uzmanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
+      + ('<b class="modelsiz__bas">' + yz('ortak.sozluk.dil-modeli-kapali') + '</b>')
+      + ('<span class="modelsiz__metin">' + yz('ortak.sozluk.uzmanlar-hazir-cumlelerle-ko'))
       + (durum.neden ? ' Neden: ' + kac(durum.neden) + '.' : '') + '</span></div>';
   }
 
@@ -271,7 +317,7 @@ window.LIFEOS = window.LIFEOS || {};
   function veriCipleriHtml(liste){
     const cip = (liste || []).map(k => {
       const v = veriBul(k);
-      if(!v) return '<li class="chip vericip__c vericip__c--yok" data-veri-yok="' + kac(k) + '">tanımsız veri</li>';
+      if(!v) return '<li class="chip vericip__c vericip__c--yok" data-veri-yok="' + kac(k) + ('">' + yz('ortak.sozluk.tanimsiz-veri') + '</li>');
       return '<li class="chip vericip__c" data-veri="' + kac(v.kimlik) + '">'
         + (L.KESINLIK_HTML ? L.KESINLIK_HTML(v.kesinlik) : '') + '<span class="vericip__ad">' + kac(v.ad) + '</span></li>';
     }).join('');

@@ -38,6 +38,20 @@
 
    Hâller: (yok) → kayitta ⇄ duraklat → bitti → kaydedilir ya da silinir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.canli.konum-bu-baglantida-kullanil':'Konum bu bağlantıda kullanılamıyor: tarayıcı konumu yalnız ',
+  'spi.core.canli.bu-tarayici-konum-vermiyor':'Bu tarayıcı konum vermiyor.',
+  'spi.core.canli.konum-izni-verilmedi-tarayic':'Konum izni verilmedi. Tarayıcının site ayarlarından konuma izin ver.',
+  'spi.core.canli.konum-alinamadi':'Konum alınamadı.',
+  'spi.core.canli.konum-zayif':'Konum zayıf (±',
+  'spi.core.canli.konum-zayif-2':'Konum zayıf',
+  'spi.core.canli.gps-sinyali-yok':'GPS sinyali yok',
+  'spi.core.canli.telefonun-konum-servisi-ceva':'Telefonun konum servisi cevap vermedi. Uygulamayı tamamen kapatıp yeniden aç.',
+  'spi.core.canli.telefon-konum-iznini-henuz-s':'Telefon konum iznini henüz sormadı.',
+  'spi.core.canli.telefon-konum-izni-soruyor-c':'Telefon konum izni soruyor: çıkan pencerede «Uygulamayı Kullanırken»i seç.',
+  'spi.core.canli.gps-acik-ilk-konum-bekleniyo':'GPS açık, ilk konum bekleniyor; açık havada birkaç saniye sürer.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.canli.bir-kayit-zaten-var-once':'Bir kayıt zaten var; önce onu bitir ya da sil.',
   'spi.core.canli.duraklatilmis-bir-kayit-yok':'Duraklatılmış bir kayıt yok.',
   'spi.core.canli.kayit-yok':'Kayıt yok.',
@@ -56,10 +70,10 @@ SP.Canli = (function(){
   const SEYREK_MS = 30000;
   const SECENEK = { enableHighAccuracy:true, maximumAge:0, timeout:30000 };
 
-  const GUVENSIZ = 'Konum bu bağlantıda kullanılamıyor: tarayıcı konumu yalnız '
+  const GUVENSIZ = yz('spi.core.canli.konum-bu-baglantida-kullanil')
     + 'güvenli bağlantıda (https) verir.';
-  const KONUM_YOK = 'Bu tarayıcı konum vermiyor.';
-  const IZIN_YOK = 'Konum izni verilmedi. Tarayıcının site ayarlarından konuma izin ver.';
+  const KONUM_YOK = yz('spi.core.canli.bu-tarayici-konum-vermiyor');
+  const IZIN_YOK = yz('spi.core.canli.konum-izni-verilmedi-tarayic');
   /* Uygulamada tarayıcı yok; izin telefonun Ayarlar'ındadır. */
   const IZIN_YOK_UYGULAMA = 'Konum izni verilmedi. Telefonun Ayarlar\'ında LifeOS › Konum › '
     + '«Uygulamayı Kullanırken»i seç.';
@@ -208,7 +222,7 @@ SP.Canli = (function(){
   function izle(k){
     birak();
     try{ izNo = k.watchPosition(konum, hata, SECENEK); }
-    catch(e){ d.hata = 'Konum alınamadı.'; }
+    catch(e){ d.hata = yz('spi.core.canli.konum-alinamadi'); }
   }
   function birak(){
     const k = ortam.kaynak();
@@ -232,7 +246,7 @@ SP.Canli = (function(){
     d.sonGelis = t;
     if(!(c.accuracy <= DOGRULUK_M)){
       d.kotu++;
-      d.hata = isFinite(c.accuracy) ? 'Konum zayıf (±' + Math.round(c.accuracy) + ' m)' : 'Konum zayıf';
+      d.hata = isFinite(c.accuracy) ? yz('spi.core.canli.konum-zayif') + Math.round(c.accuracy) + ' m)' : yz('spi.core.canli.konum-zayif-2');
       return false;
     }
     d.hata = null;
@@ -260,7 +274,7 @@ SP.Canli = (function(){
       bildir({ tip:'hata', why });
       return;
     }
-    d.hata = 'GPS sinyali yok';
+    d.hata = yz('spi.core.canli.gps-sinyali-yok');
     bildir();
   }
 
@@ -395,14 +409,14 @@ SP.Canli = (function(){
     const k = ortam.cihaz();
     if(!k){
       return d.aktifBas != null && ortam.saat() - d.aktifBas >= BEKLEME_MS
-        ? 'Telefonun konum servisi cevap vermedi. Uygulamayı tamamen kapatıp yeniden aç.' : null;
+        ? yz('spi.core.canli.telefonun-konum-servisi-ceva') : null;
     }
     if(k.servis === false) return "Telefonun konum servisi kapalı: Ayarlar › Gizlilik ve Güvenlik › Konum Servisleri'ni aç.";
     if(k.izin === 'reddedildi' || k.izin === 'kisitli') return IZIN_YOK_UYGULAMA;
-    if(k.izin === 'sorulmadi') return 'Telefon konum iznini henüz sormadı.';
-    if(k.izin !== 'izinli') return 'Telefon konum izni soruyor: çıkan pencerede «Uygulamayı Kullanırken»i seç.';
+    if(k.izin === 'sorulmadi') return yz('spi.core.canli.telefon-konum-iznini-henuz-s');
+    if(k.izin !== 'izinli') return yz('spi.core.canli.telefon-konum-izni-soruyor-c');
     if(k.kesin === false) return "Kesin Konum kapalı; yaklaşık konumla rota çizilemez. Ayarlar › LifeOS › Konum › Kesin Konum'u aç.";
-    if(!k.gelen) return 'GPS açık, ilk konum bekleniyor; açık havada birkaç saniye sürer.';
+    if(!k.gelen) return yz('spi.core.canli.gps-acik-ilk-konum-bekleniyo');
     return null;
   }
 

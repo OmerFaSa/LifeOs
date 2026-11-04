@@ -1,5 +1,14 @@
 /* KING VERISI — KING-4 §C olaylari ve §H yardim saglayicilari (gorev 042, belgeler/ekip/gorevler).
    Olay bicimi belgeler/ekip/KING-OLAY.md; tasiyici brand/ortak/olay.js. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.kingveri.calisma-suresi':'Çalışma süresi',
+  'esp.core.kingveri.calisilan-gun':'Çalışılan gün',
+  'esp.core.kingveri.bilinmeyen-alan-yalnizca-dk':'Bilinmeyen alan; yalnızca «dk» düzeltilebilir.',
+  'esp.core.kingveri.sure-1-ile-600-dakika':'Süre 1 ile 600 dakika arasında bir tam sayı olmalıdır.',
+  'esp.core.kingveri.gecersiz-oturum-kimligi':'Geçersiz oturum kimliği.',
+  'esp.core.kingveri.oturum-kaydi-bulunamadi':'Oturum kaydı bulunamadı.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -112,7 +121,7 @@ ESP.KingVeri = (function(){
 
     const calismaSatir = {
       id: 'calisma_dk',
-      ad: 'Çalışma süresi',
+      ad: yz('esp.core.kingveri.calisma-suresi'),
       deger: bu.degerDk,
       birim: 'dk',
       etiket: bu.degerDk !== null ? (bu.hasEstimated ? 'tahmin' : 'ölçüldü') : 'veri yok',
@@ -129,7 +138,7 @@ ESP.KingVeri = (function(){
 
     const gunSatir = {
       id: 'gun',
-      ad: 'Çalışılan gün',
+      ad: yz('esp.core.kingveri.calisilan-gun'),
       deger: bu.gun,
       etiket: bu.gun !== null ? 'ölçüldü' : 'veri yok',
       onceki: once.gun
@@ -289,13 +298,13 @@ ESP.KingVeri = (function(){
   /* ------------------------------------------------------------- 5. duzelt */
   async function duzelt(id, alan, deger){
     if(alan !== 'dk'){
-      return { ok: false, why: 'Bilinmeyen alan; yalnızca «dk» düzeltilebilir.' };
+      return { ok: false, why: yz('esp.core.kingveri.bilinmeyen-alan-yalnizca-dk') };
     }
     if(typeof deger !== 'number' || !Number.isInteger(deger) || isNaN(deger) || deger < 1 || deger > 600){
-      return { ok: false, why: 'Süre 1 ile 600 dakika arasında bir tam sayı olmalıdır.' };
+      return { ok: false, why: yz('esp.core.kingveri.sure-1-ile-600-dakika') };
     }
     if(!id || typeof id !== 'string'){
-      return { ok: false, why: 'Geçersiz oturum kimliği.' };
+      return { ok: false, why: yz('esp.core.kingveri.gecersiz-oturum-kimligi') };
     }
 
     let gun = null, sessId = id;
@@ -315,14 +324,14 @@ ESP.KingVeri = (function(){
     }
 
     if(!gun || !sessId){
-      return { ok: false, why: 'Oturum kaydı bulunamadı.' };
+      return { ok: false, why: yz('esp.core.kingveri.oturum-kaydi-bulunamadi') };
     }
 
     const days = (ESP.S && ESP.S.days) || {};
     const day = days[gun];
     const sess = day && Array.isArray(day.sessions) && day.sessions.find(s => s && s.id === sessId);
     if(!day || !sess){
-      return { ok: false, why: 'Oturum kaydı bulunamadı.' };
+      return { ok: false, why: yz('esp.core.kingveri.oturum-kaydi-bulunamadi') };
     }
 
     const once = typeof sess.minutes === 'number' && !isNaN(sess.minutes) ? sess.minutes : null;

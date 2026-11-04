@@ -10,6 +10,32 @@
    ESP'nin alti disiplinidir — jenerik bir grafik degil, alana bagli bir
    sekildir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.parts.disiplin-dengesi-radari':'Disiplin dengesi radarı',
+  'esp.core.parts.dis-halka-penceredeki-en':'Dış halka = penceredeki en yüksek değer.',
+  'esp.core.parts.sesli-sohbeti-bitir':'Sesli sohbeti bitir',
+  'esp.core.parts.sesli-sohbet':'Sesli sohbet',
+  'esp.core.parts.sesi-durdur':'Sesi durdur',
+  'esp.core.parts.son-cevabi-dinle':'Son cevabı dinle',
+  'esp.core.parts.sesli-sohbet-acik-ajan-konus':'Sesli sohbet açık. Ajan konuşurken mikrofon kapalıdır: sözü ',
+  'esp.core.parts.once-olc':'Önce ölç',
+  'esp.core.parts.siradaki-kapi':'Sıradaki kapı',
+  'esp.core.parts.ham-ses-dosyasi-ve-belge':'Ham ses dosyası ve belge içeriği TUTULMAZ: ses için süresi ve ',
+  'esp.core.parts.eksikleri-desteye-ekle':'Eksikleri desteye ekle',
+  'esp.core.parts.desteye-ekle':'Desteye ekle',
+  'esp.core.parts.unite-sinavi-bitti':'Ünite sınavı bitti',
+  'esp.core.parts.oturum-bitti':'Oturum bitti',
+  'esp.core.parts.dogrusu':'Doğrusu: ',
+  'esp.core.parts.geri-alindi':'Geri alındı',
+  'esp.core.parts.gecildi-bu-teklif-tekrar':'Geçildi — bu teklif tekrar sorulmaz',
+  'esp.core.parts.bekleyen-teklif-yok':'Bekleyen teklif yok.',
+  'esp.core.parts.bakim-borcu-gorunmuyor':'Bakım borcu görünmüyor.',
+  'esp.core.parts.koc-dogrudan-yazmaz-teklif-e':'Koç doğrudan yazmaz: teklif eder, sen onaylarsın, uygulamayı ',
+  'esp.core.parts.bu-masada-bekleyen-teklif-yo':'Bu masada bekleyen teklif yok.',
+  'esp.core.parts.karar-verilenler':'Karar verilenler',
+  'esp.core.parts.bu-bolum-su-an-cizilemedi':'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.radar-icin-en-az-uc':'Radar için en az üç eksen gerekir.',
   'esp.core.parts.kesikli-nokta-olculmemis-eks':'Kesikli nokta: ölçülmemiş eksen — sıfır değil.',
   'esp.core.parts.bu-kademede-tanimli-egzersiz':'Bu kademede tanımlı egzersiz yok.',
@@ -209,10 +235,10 @@ ESP.Parts = (function(){
     return html`
       <figure class="radar">
         ${raw('<svg viewBox="0 0 200 184" role="img" aria-label="'
-          + U.esc(o.aria || 'Disiplin dengesi radarı') + '">'
+          + U.esc(o.aria || yz('esp.core.parts.disiplin-dengesi-radari')) + '">'
           + halkalar + eksenler + poly + isaretler + etiketler + '</svg>')}
         <figcaption class="radar__cap">
-          ${o.scale || 'Dış halka = penceredeki en yüksek değer.'}
+          ${o.scale || yz('esp.core.parts.dis-halka-penceredeki-en')}
           ${when(rows.some(r => r.cert === 'missing'), () => html`
             <span class="radar__none">${yz('esp.core.parts.kesikli-nokta-olculmemis-eks')}</span>`)}
         </figcaption>
@@ -334,11 +360,11 @@ ESP.Parts = (function(){
 
         <div class="row wrap mt-8">
           ${when(sesVar, () => K.Button({
-            label:konusuyor ? 'Sesli sohbeti bitir' : 'Sesli sohbet',
+            label:konusuyor ? yz('esp.core.parts.sesli-sohbeti-bitir') : yz('esp.core.parts.sesli-sohbet'),
             tone:konusuyor ? 'danger' : null, size:'sm',
             act:'desk-talk', data:{ 'data-disc':discId } }))}
           ${when(okuyabilir && son, () => K.Button({
-            label:ESP.Speak.isSpeaking() ? 'Sesi durdur' : 'Son cevabı dinle', size:'sm',
+            label:ESP.Speak.isSpeaking() ? yz('esp.core.parts.sesi-durdur') : yz('esp.core.parts.son-cevabi-dinle'), size:'sm',
             act:'desk-listen', data:{ 'data-disc':discId } }))}
           ${K.Button({ label:yz('esp.core.parts.danisma-ekrani'), size:'sm', act:'desk-open-team',
             data:{ 'data-disc':discId } })}
@@ -347,7 +373,7 @@ ESP.Parts = (function(){
         </div>
 
         ${when(konusuyor, () => K.Notice({ tone:'info',
-          body:'Sesli sohbet açık. Ajan konuşurken mikrofon kapalıdır: sözü '
+          body:yz('esp.core.parts.sesli-sohbet-acik-ajan-konus')
             + 'boşluk tuşuyla ya da düğmeyle kesersin — sesle kesilemez.' }))}
         ${when(!sesVar, () => html`<p class="tiny dim mt-8">${yz('esp.core.parts.bu-tarayici-sesli-sohbeti-de')}</p>`)}
       </div>`;
@@ -382,7 +408,7 @@ ESP.Parts = (function(){
 
         ${when(kapi, () => K.NextUp({
           icon:kapi.action === 'measure' ? 'info' : 'zap',
-          label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',
+          label:kapi.action === 'measure' ? yz('esp.core.parts.once-olc') : yz('esp.core.parts.siradaki-kapi'),
           title:kapi.title, why:kapi.why }))}
 
         ${K.Button({ label:yz('esp.core.parts.tam-haritayi-ac'), size:'sm', act:'desk-ladder',
@@ -414,7 +440,7 @@ ESP.Parts = (function(){
         </div>
 
         ${K.Notice({ tone:'info',
-          body:'Ham ses dosyası ve belge içeriği TUTULMAZ: ses için süresi ve '
+          body:yz('esp.core.parts.ham-ses-dosyasi-ve-belge')
             + 'notun, belge için özetin saklanır. Koç bu eklerin sayısını, '
             + 'türünü ve başlığını görür; içeriğini görmez.' })}
 
@@ -524,7 +550,7 @@ ESP.Parts = (function(){
                 <ul class="unit__items">${map(ESP.Lesson.itemsOf(u, lang).slice(0, 12),
                   it => html`<li><b>${it.front}</b><span>${it.back}</span></li>`)}</ul>
                 <div class="row wrap gap-8">
-                  ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
+                  ${K.Button({ label:p.added ? yz('esp.core.parts.eksikleri-desteye-ekle') : yz('esp.core.parts.desteye-ekle'),
                     tone:'primary', size:'sm', act:'unit-add',
                     data:{ 'data-id':u.id, 'data-disc':discId } })}
                   ${when(p.added >= ESP.Lesson.SINAV_EN_AZ, () => K.Button({ label:yz('esp.core.parts.unite-sinavi'),
@@ -623,7 +649,7 @@ ESP.Parts = (function(){
       const r = ESP.Lesson.result(s);
       return html`
         <div class="pracend">
-          ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:s.unitId ? 'Ünite sınavı bitti' : 'Oturum bitti',
+          ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:s.unitId ? yz('esp.core.parts.unite-sinavi-bitti') : yz('esp.core.parts.oturum-bitti'),
             title:r.right + '/' + r.asked + ' doğru',
             why:yz('esp.core.parts.i-sabet-bir-not-degil-bir') })}
           ${when(r.missed.length, () => html`
@@ -682,7 +708,7 @@ ESP.Parts = (function(){
             </div>`}
 
         ${when(gosterildi, () => K.Notice({ tone:'info',
-          body:'Doğrusu: ' + q.answer }))}
+          body:yz('esp.core.parts.dogrusu') + q.answer }))}
         <div class="row wrap mt-10">
           ${K.Button({ label:yz('esp.core.parts.bilmiyorum'), size:'sm', act:'prac-skip' })}
           ${K.Button({ label:yz('esp.core.parts.oturumu-bitir'), size:'sm', act:'prac-close' })}
@@ -728,11 +754,11 @@ ESP.Parts = (function(){
         const res = await ESP.Plans.accept(id);
         if(!res.ok){ ESP.UI.toast(res.error); return; }
         ESP.UI.toast(yz('esp.core.parts.onaylandi-kural-motoru-uygul'), { undo:async () => {
-          const g = await ESP.Plans.geriAl(id); ESP.UI.toast(g.ok ? 'Geri alındı' : g.error); ESP.App.render(); } });
+          const g = await ESP.Plans.geriAl(id); ESP.UI.toast(g.ok ? yz('esp.core.parts.geri-alindi') : g.error); ESP.App.render(); } });
         ESP.App.render();
       },
       gec:async (id, kayit) => { const r = await ESP.Plans.decline(id, kayit);
-        ESP.UI.toast(r && r.ok === false ? r.error : 'Geçildi — bu teklif tekrar sorulmaz'); ESP.App.render(); },
+        ESP.UI.toast(r && r.ok === false ? r.error : yz('esp.core.parts.gecildi-bu-teklif-tekrar')); ESP.App.render(); },
       pencere:o => ESP.UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
       kapat:() => ESP.UI.closeSheet(),
     });
@@ -750,7 +776,7 @@ ESP.Parts = (function(){
   }
 
   function proposalList(list, bos){
-    if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
+    if(!list.length) return K.Empty({ text:bos || yz('esp.core.parts.bekleyen-teklif-yok') });
     const kk = kopru();
     const kartlar = kk ? list.map(p => {
       const kart = kk.kart(p);
@@ -793,7 +819,7 @@ ESP.Parts = (function(){
     const ciddi = bulgular.filter(f => f.severity !== 'none');
     return html`
       ${when(!ciddi.length, () => K.Notice({ tone:'ok',
-        body:'Bakım borcu görünmüyor.' }))}
+        body:yz('esp.core.parts.bakim-borcu-gorunmuyor') }))}
       ${map(bulgular, f => html`
         <div class="mt-12">
           ${K.Notice({ tone:f.severity === 'warn' ? 'warn'
@@ -811,12 +837,12 @@ ESP.Parts = (function(){
     return html`
       <div class="deskplan">
         ${K.Notice({ tone:'info',
-          body:'Koç doğrudan yazmaz: teklif eder, sen onaylarsın, uygulamayı '
+          body:yz('esp.core.parts.koc-dogrudan-yazmaz-teklif-e')
             + 'kural motoru yapar. Reddedilen bir teklif yarın tekrar sorulmaz.' })}
-        ${proposalList(list, 'Bu masada bekleyen teklif yok.')}
+        ${proposalList(list, yz('esp.core.parts.bu-masada-bekleyen-teklif-yo'))}
         ${when(gecmis.length, () => html`
           <div class="mt-10">
-            ${K.SectionTitle('Karar verilenler')}
+            ${K.SectionTitle(yz('esp.core.parts.karar-verilenler'))}
             ${K.Table({ tight:true, headers:['Teklif', 'Karar', 'Uygulanan'],
               rows:gecmis.slice(0, 8).map(p => [
                 p.title,
@@ -914,7 +940,7 @@ ESP.Parts = (function(){
       try{ return K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)); }
       catch(e){
         console.error('Bölüm çizilemedi (' + discId + '/' + id + '):', e);
-        return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' });
+        return K.Notice({ tone:'warn', body:yz('esp.core.parts.bu-bolum-su-an-cizilemedi') });
       }
     };
     const b = o.tabs.map(t => ({ id:t.id, ad:t.label, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));

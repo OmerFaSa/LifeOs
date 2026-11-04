@@ -14,6 +14,10 @@
    hesaplanmaz, "henuz yeterli kayit yok" denir. Uydurma bir zorluk
    etiketi, etiketsiz birakmaktan kotudur. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.sources.bu-kaynak':'Bu kaynak',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.sources.konu-kapanisin':'Konu kapanışın %',
 });
 
@@ -135,7 +139,7 @@ R.Sources = (function(){
   function sentence(id){
     const r = relative(id);
     const src = byId(id);
-    const ad = src ? src.name : 'Bu kaynak';
+    const ad = src ? src.name : yz('ays.core.sources.bu-kaynak');
     if(r.durum === 'bilinmiyor'){
       const m = r.olcum;
       return m.soru

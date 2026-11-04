@@ -4,6 +4,10 @@
    anlatım». Çalışma'daki her alan bölümünün sonunda o alanın kartı durur
    (app.js); kart konuyu burada açar. ESP öğretmen değildir (ESP.PEDAGOGIC):
    anlatım seviye ya da yeterlilik yargısı kurmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.rehber.anlatimlar-bu-acilista-yukle':'Anlatımlar bu açılışta yüklenemedi.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -22,7 +26,7 @@ ESP.Screens.rehber = (function(){
   }
   LIFEOS.PARCA.blok({ id:'rehber.okuyucu', sayfa:'rehber', yer:'ana', ad:'Anlatımlar', ciz(){
     const r = hazirla();
-    if(!r) return '<p class="small muted">Anlatımlar bu açılışta yüklenemedi.</p>';
+    if(!r) return ('<p class="small muted">' + yz('esp.rehber.anlatimlar-bu-acilista-yukle') + '</p>');
     return r.html();
   } });
   function render(){ return LIFEOS.PARCA.yer('rehber', 'ana', ESP.C); }

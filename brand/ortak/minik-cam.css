@@ -13,15 +13,15 @@
    (.minik__isik) çok yavaş döner ve kayar; yalnız transform. */
 .minik__deri{
   background:
-    radial-gradient(58% 42% at 33% 24%, rgba(255,255,255,.92), rgba(255,255,255,0) 72%),
+    radial-gradient(58% 42% at 33% 24%, var(--beyaz-92), var(--beyaz-00) 72%),
     radial-gradient(16% 10% at 23% 70%, rgba(255,120,160,.5), transparent),
     radial-gradient(16% 10% at 77% 70%, rgba(255,120,160,.5), transparent),
-    radial-gradient(75% 60% at 50% 108%, color-mix(in oklab, var(--g1) 65%, #fff), transparent 74%),
-    radial-gradient(110% 110% at 45% 35%, color-mix(in oklab, var(--g1) 90%, #fff) 0%, color-mix(in oklab, var(--g2) 92%, transparent) 58%,
+    radial-gradient(75% 60% at 50% 108%, color-mix(in oklab, var(--g1) 65%, var(--beyaz)), transparent 74%),
+    radial-gradient(110% 110% at 45% 35%, color-mix(in oklab, var(--g1) 90%, var(--beyaz)) 0%, color-mix(in oklab, var(--g2) 92%, transparent) 58%,
       color-mix(in oklab, var(--g3) 78%, var(--g2)) 100%) !important;
-  box-shadow:inset 0 -3px 7px color-mix(in oklab, var(--g3) 40%, transparent), inset 0 2px 4px rgba(255,255,255,.65); }
+  box-shadow:inset 0 -3px 7px color-mix(in oklab, var(--g3) 40%, transparent), inset 0 2px 4px var(--beyaz-65); }
 .minik__isik{ position:absolute; inset:14% 12% 22% 14%; border-radius:50%; pointer-events:none; z-index:0;
-  background:radial-gradient(45% 40% at 35% 40%, color-mix(in oklab, var(--g2) 55%, #fff) 0%, transparent 70%),
+  background:radial-gradient(45% 40% at 35% 40%, color-mix(in oklab, var(--g2) 55%, var(--beyaz)) 0%, transparent 70%),
     radial-gradient(40% 36% at 68% 62%, color-mix(in oklab, var(--g3) 35%, transparent) 0%, transparent 72%);
   opacity:.75; mix-blend-mode:soft-light; }
 .minik[data-bicim="ucgen"] .minik__isik{ inset:34% 26% 20% 26%; }
@@ -31,7 +31,7 @@
 }
 @keyframes mk-ic-isik{ from{ transform:rotate(-10deg) translate(-3%, 2%) scale(.96); } to{ transform:rotate(14deg) translate(4%, -3%) scale(1.04); } }
 /* Fotoğraf zeminde net ayrışsın: yumuşak, renkli gölge (filtre canlandırılmaz). */
-.minikkat .minik{ --hat-filtre:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 3px 5px color-mix(in oklab, var(--g3) 40%, rgba(20,24,40,.25))); }
+.minikkat .minik{ --hat-filtre:drop-shadow(0 0 .6px var(--beyaz-90)) drop-shadow(0 3px 5px color-mix(in oklab, var(--g3) 40%, rgba(20,24,40,.25))); }
 
 /* 2) Sekme gizliyken hareket durur (minik.js is-durgun). */
 .minikkat.is-durgun *, .minikkat.is-durgun{ animation-play-state:paused !important; }
@@ -44,9 +44,9 @@
    kalitesini arttır»). Süsler dosyasız: renk geçişi ve kesme yolu.
    Bere (ponponlu), hilal, alev perçemi, bulut, kalp anteni, damla. */
 .minik[data-tip="bere"] .minik__sus{ left:10%; right:10%; top:-14%; height:30%; border-radius:50% 50% 12% 12% / 80% 80% 20% 20%;
-  background:repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 2px, transparent 2px 6px), linear-gradient(#ff8fa3, #e2577a); }
+  background:repeating-linear-gradient(90deg, var(--beyaz-18) 0 2px, transparent 2px 6px), linear-gradient(#ff8fa3, #e2577a); }
 .minik[data-tip="bere"] .minik__sus::after{ content:''; position:absolute; left:40%; top:-34%; width:22%; aspect-ratio:1; border-radius:50%;
-  background:radial-gradient(circle at 35% 35%, #fff, #f3e6ec); }
+  background:radial-gradient(circle at 35% 35%, var(--beyaz), #f3e6ec); }
 .minik[data-bicim="ucgen"][data-tip="bere"] .minik__sus{ left:22%; right:22%; top:-4%; }
 .minik[data-tip="ay"] .minik__sus{ left:60%; top:-24%; width:30%; height:30%; rotate:-18deg; border-radius:50%;
   background:radial-gradient(circle at 68% 38%, transparent 0 40%, #ffe7a3 41%, #f6c453 70%); filter:drop-shadow(0 0 3px rgba(255,214,120,.6)); }
@@ -54,16 +54,16 @@
   background:radial-gradient(60% 50% at 50% 78%, #fff3b0, transparent 70%), linear-gradient(180deg, #ff9f43, #ff5e3a);
   clip-path:polygon(50% 0, 66% 30%, 82% 18%, 84% 56%, 100% 72%, 76% 100%, 24% 100%, 0 72%, 16% 56%, 20% 22%, 36% 34%); }
 .minik[data-tip="bulut"] .minik__sus{ left:20%; right:20%; top:-10%; height:20%; border-radius:999px;
-  background:linear-gradient(#fff, #e6eefc); filter:drop-shadow(0 1px 1.5px rgba(110,130,180,.35)); }
+  background:linear-gradient(var(--beyaz), #e6eefc); filter:drop-shadow(0 1px 1.5px rgba(110,130,180,.35)); }
 .minik[data-tip="bulut"] .minik__sus::before, .minik[data-tip="bulut"] .minik__sus::after{ content:""; position:absolute; border-radius:50%; aspect-ratio:1;
-  background:radial-gradient(circle at 40% 35%, #fff 0 55%, #eef3fd); }
+  background:radial-gradient(circle at 40% 35%, var(--beyaz) 0 55%, #eef3fd); }
 .minik[data-tip="bulut"] .minik__sus::before{ left:8%; bottom:28%; width:46%; }
 .minik[data-tip="bulut"] .minik__sus::after{ left:44%; bottom:18%; width:38%; }
 .minik[data-tip="kalp"] .minik__sus{ left:47%; width:6%; top:-30%; height:32%; border-radius:2px; background:var(--g3); }
 .minik[data-tip="kalp"] .minik__sus::after{ content:''; position:absolute; left:-180%; top:-60%; width:460%; aspect-ratio:1;
   background:linear-gradient(#ff8fb1, #ff4f7e); clip-path:path('M5 9 C1 6 0 4 1.6 2.2 C3 .8 4.6 1.4 5 2.8 C5.4 1.4 7 .8 8.4 2.2 C10 4 9 6 5 9 Z'); scale:1.8; transform-origin:0 0; }
 .minik[data-tip="damla"] .minik__sus{ left:62%; top:-26%; width:22%; height:30%;
-  background:radial-gradient(circle at 40% 62%, #fff 0 12%, transparent 14%), linear-gradient(180deg, #a8e3ff, #3fa9f5);
+  background:radial-gradient(circle at 40% 62%, var(--beyaz) 0 12%, transparent 14%), linear-gradient(180deg, #a8e3ff, #3fa9f5);
   border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; clip-path:polygon(50% 0, 100% 62%, 92% 88%, 50% 100%, 8% 88%, 0 62%); }
 @media (prefers-reduced-motion:no-preference){
   .minik[data-tip="alev"] .minik__sus{ animation:mk-alev 1.6s ease-in-out infinite alternate; transform-origin:50% 100%; }
@@ -113,22 +113,22 @@
 /* Pofuduk emoji: üstte geniş yumuşak ışık, altta kendi renginde gölge; alevin
    içinde açık çekirdek, damla ve kalpte parıltı, yaprakta damar ve sap, buzda
    parlak kenar. */
-.minik[data-aile="emoji"] .minik__deri{ background:radial-gradient(52% 40% at 38% 24%, rgba(255,255,255,.75), rgba(255,255,255,.18) 58%, rgba(255,255,255,0) 80%),
+.minik[data-aile="emoji"] .minik__deri{ background:radial-gradient(52% 40% at 38% 24%, var(--beyaz-75), var(--beyaz-18) 58%, var(--beyaz-00) 80%),
   radial-gradient(17% 11% at 26% 70%, rgba(255,110,150,.5), transparent), radial-gradient(17% 11% at 74% 70%, rgba(255,110,150,.5), transparent),
   radial-gradient(80% 60% at 50% 100%, var(--g3), transparent 70%), linear-gradient(172deg, var(--g1), var(--g2) 62%, var(--g3)); }
 .minik[data-bicim="alev"] .minik__deri::before{ background:radial-gradient(30% 34% at 50% 76%, rgba(255,252,220,.95), rgba(255,240,170,0) 100%); }
-.minik[data-desen="parilti"] .minik__deri::before{ background:radial-gradient(ellipse 7% 11% at 30% 40%, rgba(255,255,255,.95) 85%, transparent 100%),
-  radial-gradient(circle at 37% 30%, rgba(255,255,255,.9) 0 2.6%, transparent 3.4%); }
+.minik[data-desen="parilti"] .minik__deri::before{ background:radial-gradient(ellipse 7% 11% at 30% 40%, var(--beyaz-95) 85%, transparent 100%),
+  radial-gradient(circle at 37% 30%, var(--beyaz-90) 0 2.6%, transparent 3.4%); }
 .minik[data-desen="damar"] .minik__deri::before{ background:linear-gradient(rgba(50,110,40,.3), rgba(50,110,40,.3)) 50% 100% / 2px 26% no-repeat,
   linear-gradient(35deg, transparent 47%, rgba(50,110,40,.22) 48% 51%, transparent 52%) 30% 92% / 22% 14% no-repeat,
   linear-gradient(-35deg, transparent 47%, rgba(50,110,40,.22) 48% 51%, transparent 52%) 70% 92% / 22% 14% no-repeat; }
 .minik[data-tip="sap"] .minik__sus{ z-index:-1; left:47%; width:6%; top:-10%; height:18%; border-radius:3px; background:#6b9b3e; rotate:8deg; }
-.minik[data-desen="buz"] .minik__deri::before{ background:linear-gradient(135deg, rgba(255,255,255,.95) 0 10%, transparent 10% 16%, rgba(255,255,255,.6) 16% 20%, transparent 20%),
+.minik[data-desen="buz"] .minik__deri::before{ background:linear-gradient(135deg, var(--beyaz-95) 0 10%, transparent 10% 16%, var(--beyaz-60) 16% 20%, transparent 20%),
   radial-gradient(70% 70% at 50% 50%, transparent 70%, rgba(120,200,235,.45) 100%); }
 /* Güneş: gövdenin arkasında kısa, yuvarlak uçlu ışınlar (duran, oynamaz). */
 .minik[data-tip="isin"] .minik__sus{ z-index:-1; left:-20%; top:-20%; width:140%; height:140%;
   background:repeating-conic-gradient(from 6deg, var(--g2) 0 12deg, transparent 12deg 30deg);
-  -webkit-mask:radial-gradient(circle, transparent 54%, #000 55% 66%, transparent 67%); mask:radial-gradient(circle, transparent 54%, #000 55% 66%, transparent 67%); }
+  -webkit-mask:radial-gradient(circle, transparent 54%, var(--siyah) 55% 66%, transparent 67%); mask:radial-gradient(circle, transparent 54%, var(--siyah) 55% 66%, transparent 67%); }
 
 /* Hayvanlar: kulaklar (süs, gövdenin arkasında). */
 .minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus{ z-index:-1; left:8%; right:8%; top:-15%; height:36%; }
@@ -142,7 +142,7 @@
 .minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus::after{ right:0; rotate:12deg; }
 .minik[data-tip="kopek"] .minik__sus{ z-index:-1; left:-10%; right:-10%; top:4%; height:52%; }
 .minik[data-tip="kopek"] .minik__sus::before, .minik[data-tip="kopek"] .minik__sus::after{ content:''; position:absolute; top:0; width:30%; height:100%;
-  border-radius:50% 50% 46% 46% / 36% 36% 64% 64%; background:linear-gradient(var(--g3), color-mix(in oklab, var(--g3) 80%, #000)); }
+  border-radius:50% 50% 46% 46% / 36% 36% 64% 64%; background:linear-gradient(var(--g3), color-mix(in oklab, var(--g3) 80%, var(--siyah))); }
 .minik[data-tip="kopek"] .minik__sus::before{ left:0; rotate:16deg; } .minik[data-tip="kopek"] .minik__sus::after{ right:0; rotate:-16deg; }
 .minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus{ z-index:-1; left:4%; right:4%; top:-10%; height:32%; }
 .minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus::before, .minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus::after{
@@ -173,7 +173,7 @@
   linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 8% 60% / 16% 1.6px no-repeat, linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 8% 67% / 16% 1.6px no-repeat,
   linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 92% 60% / 16% 1.6px no-repeat, linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 92% 67% / 16% 1.6px no-repeat; }
 .minik[data-desen="tavsan"] .minik__deri::before{ background:radial-gradient(ellipse 5% 3.6% at 50% 54%, #ff8fab 90%, transparent 100%),
-  radial-gradient(ellipse 18% 13% at 50% 59%, #ffffff 92%, transparent 100%); }
+  radial-gradient(ellipse 18% 13% at 50% 59%, var(--beyaz) 92%, transparent 100%); }
 .minik[data-desen="panda"] .minik__deri::before{ background:radial-gradient(ellipse 6% 4% at 50% 56%, #2c2d36 90%, transparent 100%),
   radial-gradient(ellipse 13% 16% at 36% 44%, #2c2d36 92%, transparent 100%), radial-gradient(ellipse 13% 16% at 64% 44%, #2c2d36 92%, transparent 100%); }
 .minik[data-desen="penguen"] .minik__deri::before{ background:radial-gradient(ellipse 33% 42% at 50% 64%, #fdfdff 95%, transparent 100%); }

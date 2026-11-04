@@ -5,6 +5,12 @@
    çekmecesindeler. Kitabı ÇÖZMEK hâlâ Sınama'nın işidir (sınav biçimi,
    core/testkitabi.js): «Çöz» Sınama'ya geçer ve o ekranın kendi
    işleyicisini çağırır — iki ekranda iki ayrı çözme akışı yoktur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.kutuphane.bastan-basla':'Baştan başla',
+  'ays.kutuphane.yeniden-coz':'Yeniden çöz',
+  'ays.kutuphane.defter-bu-acilista-yukleneme':'Defter bu açılışta yüklenemedi.',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -67,7 +73,7 @@ R.Screens.kutuphane = (function(){
               tone:'ghost', act:'kitap-ozet', data:{ 'data-id':k.id, 'data-no':String(b.no) } }))}
             ${when(yarimBu, () => c.Button({ label:yz('ays.kutuphane.devam-et-soru') + (y.index + 1) + '/' + y.toplam + ')',
               size:'sm', tone:'primary', act:'kitap-devam' }))}
-            ${c.Button({ label:yarimBu ? 'Baştan başla' : s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
+            ${c.Button({ label:yarimBu ? yz('ays.kutuphane.bastan-basla') : s ? yz('ays.kutuphane.yeniden-coz') : 'Çöz', size:'sm', act:'kitap-baslat',
               data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</span></div>`;
         })}</div>`;
       })}</div>` });
@@ -119,7 +125,7 @@ R.Screens.notlar = (function(){
   const D = () => (window.LIFEOS || {}).DEFTER;
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
   LIFEOS.PARCA.blok({ id:'notlar.kapali', sayfa:'notlar', yer:'ana', ad:'Notlar', kosul:() => !hazir(),
-    ciz:() => String(K.Kutu({ ad:yz('ays.kutuphane.notlar'), govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('ays.kutuphane.notlar'), govde:raw(('<p class="small muted">' + yz('ays.kutuphane.defter-bu-acilista-yukleneme') + '</p>')) })) });
   LIFEOS.PARCA.blok({ id:'notlar.pano', sayfa:'notlar', yer:'ana', sira:10, ad:'Defter özeti', kosul:() => hazir(),
     ciz:() => '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>' });
   LIFEOS.PARCA.blok({ id:'notlar.raf', sayfa:'notlar', yer:'ana', sira:20, ad:'Notlar ve belgeler', kosul:() => hazir(),

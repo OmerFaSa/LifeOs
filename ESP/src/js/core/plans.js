@@ -32,6 +32,39 @@
       (`applied`) kaydeder; geri alınamayacak bir iş teklif edilmez. Bu
       yüzden hiçbir teklif SİLME işlemi önermez. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.plans.bu-hedef-henuz-olculmedi-olc':'Bu hedef henüz ölçülmedi; ölçüm olmadan kademe kanıtlanmaz.',
+  'esp.core.plans.bu-unitenin-malzemesi-var-am':'Bu ünitenin malzemesi var ama hiçbir kartı destede değil.',
+  'esp.core.plans.bugunun-recetesinde-duruyor':'Bugünün reçetesinde duruyor ve gün kaydına henüz yazılmadı.',
+  'esp.core.plans.kademenin-kapanis-isi-bu-tar':'Kademenin kapanış işi bu; tarihi olmayan iş ertelenir.',
+  'esp.core.plans.haftanin-kalanina-plan-kurul':'Haftanın kalanına plan kurulsun',
+  'esp.core.plans.gunluk-taban':'Günlük taban ',
+  'esp.core.plans.son-7-gunun-olculmus-ortalam':'Son 7 günün ölçülmüş ortalaması ',
+  'esp.core.plans.son-7-gunun-ortalamasi-taban':'Son 7 günün ortalaması tabanın bir buçuk katı; reçete olduğundan ',
+  'esp.core.plans.bilinmeyen-teklif-turu':'Bilinmeyen teklif türü.',
+  'esp.core.plans.bu-masa-bu-teklifi-veremez':'Bu masa bu teklifi veremez.',
+  'esp.core.plans.bilinmeyen-bolum':'Bilinmeyen bölüm.',
+  'esp.core.plans.en-az-bir-bolum-acik':'En az bir bölüm açık kalmalı. Önce başka bir bölümü aç.',
+  'esp.core.plans.gunluk-taban-10-600-dakika-a':'Günlük taban 10–600 dakika arasında olmalı.',
+  'esp.core.plans.gunluk-taban-zaten':'Günlük taban zaten ',
+  'esp.core.plans.kapali-bir-bolum-odak-olamaz':'Kapalı bir bölüm odak olamaz; önce aç.',
+  'esp.core.plans.sure-1-600-dakika-arasinda-o':'Süre 1–600 dakika arasında olmalı.',
+  'esp.core.plans.oturum-ancak-bugune-ya-da':'Oturum ancak bugüne ya da geçmiş bir güne yazılır.',
+  'esp.core.plans.teklif-bulunamadi':'Teklif bulunamadı.',
+  'esp.core.plans.hedef-plani-yalniz-senin-ona':'Hedef planı yalnız senin onayınla uygulanır.',
+  'esp.core.plans.hedef-bulunamadi':'Hedef bulunamadı.',
+  'esp.core.plans.bu-hedefin-uygulanmis-bir-pl':'Bu hedefin uygulanmış bir planı var; önce onu geri al.',
+  'esp.core.plans.geri-alinacak-bir-sey-yok':'Geri alınacak bir şey yok.',
+  'esp.core.plans.bu-is-geri-alinamaz-elle':'Bu iş geri alınamaz; elle düzeltmen gerekir.',
+  'esp.core.plans.odak':'Odak ',
+  'esp.core.plans.senin-istegin':'Senin isteğin: «',
+  'esp.core.plans.senin-istegin-2':'Senin isteğin.',
+  'esp.core.plans.bos-satir':'Boş satır',
+  'esp.core.plans.bu-bir-olcum-degil-yazilmadi':'Bu bir ölçüm değil; yazılmadı.',
+  'esp.core.plans.esp-onaylar-da-bekliyor':'ESP › Onaylar’da bekliyor',
+  'esp.core.plans.esp-bu-satiri-anlamadi':'ESP bu satırı anlamadı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.plans.hatirlatici-kur':'Hatırlatıcı kur',
   'esp.core.plans.bir-tarihe-bagli-hatirlatma':'Bir tarihe bağlı hatırlatma. Kaçırılırsa ceza üretmez.',
   'esp.core.plans.zamana-bagli-hedef':'Zamana bağlı hedef',
@@ -157,7 +190,7 @@ ESP.Plans = (function(){
          içindir. */
       if(kapi && kapi.action === 'measure'){
         ekle('reminder', d.label + ': «' + kapi.gate.label + '» için hatırlatıcı',
-          'Bu hedef henüz ölçülmedi; ölçüm olmadan kademe kanıtlanmaz.',
+          yz('esp.core.plans.bu-hedef-henuz-olculmedi-olc'),
           { key:'gate', text:kapi.gate.label + ' için ölçüm gir',
             due:U.iso(U.addDays(U.parse(bugun), 1)), repeat:'none' });
       }
@@ -170,7 +203,7 @@ ESP.Plans = (function(){
       })[0];
       if(eksik){
         ekle('unit', eksik.title + ' ünitesi desteye eklensin',
-          'Bu ünitenin malzemesi var ama hiçbir kartı destede değil.',
+          yz('esp.core.plans.bu-unitenin-malzemesi-var-am'),
           { key:eksik.id, unitId:eksik.id, disc:disc });
       }
 
@@ -180,7 +213,7 @@ ESP.Plans = (function(){
         return (r.done || []).indexOf(it.drill.id) < 0; })[0];
       if(yapilmamis){
         ekle('drill', yapilmamis.drill.label + ' işlensin',
-          'Bugünün reçetesinde duruyor ve gün kaydına henüz yazılmadı.',
+          yz('esp.core.plans.bugunun-recetesinde-duruyor'),
           { key:yapilmamis.drill.id, drillId:yapilmamis.drill.id });
       }
 
@@ -189,7 +222,7 @@ ESP.Plans = (function(){
       const lv = ESP.Curriculum.levelOf(disc);
       if(!hedefVar && lv && lv.next && lv.next.step){
         ekle('goal', lv.next.step.proof,
-          'Kademenin kapanış işi bu; tarihi olmayan iş ertelenir.',
+          yz('esp.core.plans.kademenin-kapanis-isi-bu-tar'),
           { key:'proof', label:lv.next.step.proof, disc:disc,
             date:U.iso(U.addDays(U.parse(bugun), 30)) });
       }
@@ -199,7 +232,7 @@ ESP.Plans = (function(){
     if(allowed(agentId, 'weekplan')){
       const denge = ESP.Planner.balance(7, bugun);
       if(denge.untouched.length){
-        ekle('weekplan', 'Haftanın kalanına plan kurulsun',
+        ekle('weekplan', yz('esp.core.plans.haftanin-kalanina-plan-kurul'),
           denge.untouched.map(function(d){ return d.label; }).join(', ')
             + ' bu hafta hiç açılmadı.',
           { key:'week' });
@@ -209,14 +242,14 @@ ESP.Plans = (function(){
       if(r7.cert !== 'missing' && r7.enteredDays >= 4){
         const ort = r7.minutes / r7.enteredDays;
         if(ort < taban * 0.6){
-          ekle('base', 'Günlük taban ' + Math.max(15, Math.round(ort / 5) * 5)
+          ekle('base', yz('esp.core.plans.gunluk-taban') + Math.max(15, Math.round(ort / 5) * 5)
             + ' dakikaya çekilsin',
-            'Son 7 günün ölçülmüş ortalaması ' + Math.round(ort) + ' dakika; '
+            yz('esp.core.plans.son-7-gunun-olculmus-ortalam') + Math.round(ort) + ' dakika; '
               + 'taban ' + taban + '. Tutulmayan bir taban, reçeteyi okunmaz yapar.',
             { key:'down', minutes:Math.max(15, Math.round(ort / 5) * 5) });
         }else if(ort > taban * 1.5){
-          ekle('base', 'Günlük taban ' + Math.round(ort / 5) * 5 + ' dakikaya çıksın',
-            'Son 7 günün ortalaması tabanın bir buçuk katı; reçete olduğundan '
+          ekle('base', yz('esp.core.plans.gunluk-taban') + Math.round(ort / 5) * 5 + ' dakikaya çıksın',
+            yz('esp.core.plans.son-7-gunun-ortalamasi-taban')
               + 'küçük yazılıyor.',
             { key:'up', minutes:Math.round(ort / 5) * 5 });
         }
@@ -333,44 +366,44 @@ ESP.Plans = (function(){
   /* Kullanıcı isteğinin ve bölüm/taban/odak tekliflerinin UYGULANMADAN
      ÖNCE denetimi. Hata değil RED: nedeni söylenir, hiçbir şey yazılmaz. */
   function dogrula(p){
-    if(!p || !KIND_BY_ID[p.kind]) return { ok:false, error:'Bilinmeyen teklif türü.' };
-    if(!allowed(p.agentId, p.kind)) return { ok:false, error:'Bu masa bu teklifi veremez.' };
+    if(!p || !KIND_BY_ID[p.kind]) return { ok:false, error:yz('esp.core.plans.bilinmeyen-teklif-turu') };
+    if(!allowed(p.agentId, p.kind)) return { ok:false, error:yz('esp.core.plans.bu-masa-bu-teklifi-veremez') };
     const y = p.payload || {};
     if(p.kind === 'bolum'){
       const d = (ESP.DISCIPLINE_BY_ID || {})[y.disc];
-      if(!d) return { ok:false, error:'Bilinmeyen bölüm.' };
+      if(!d) return { ok:false, error:yz('esp.core.plans.bilinmeyen-bolum') };
       const acik = ESP.Mod.isOn(y.disc);
       if(acik === !!y.on) return { ok:false, error:d.label + ' zaten ' + (acik ? 'açık.' : 'kapalı.') };
       if(!y.on){
         const kalan = ESP.Mod.activeIds().filter(id => id !== y.disc);
-        if(!kalan.length) return { ok:false, error:'En az bir bölüm açık kalmalı. Önce başka bir bölümü aç.' };
+        if(!kalan.length) return { ok:false, error:yz('esp.core.plans.en-az-bir-bolum-acik') };
       }
     }
     if(p.kind === 'base'){
       const dk = Number(y.minutes);
-      if(!isFinite(dk) || dk < 10 || dk > 600) return { ok:false, error:'Günlük taban 10–600 dakika arasında olmalı.' };
-      if(S.profile && S.profile.dailyMinutes === Math.round(dk)) return { ok:false, error:'Günlük taban zaten ' + Math.round(dk) + ' dakika.' };
+      if(!isFinite(dk) || dk < 10 || dk > 600) return { ok:false, error:yz('esp.core.plans.gunluk-taban-10-600-dakika-a') };
+      if(S.profile && S.profile.dailyMinutes === Math.round(dk)) return { ok:false, error:yz('esp.core.plans.gunluk-taban-zaten') + Math.round(dk) + ' dakika.' };
     }
     if(p.kind === 'focus'){
-      if(!(ESP.DISCIPLINE_BY_ID || {})[y.focus]) return { ok:false, error:'Bilinmeyen bölüm.' };
-      if(!ESP.Mod.isOn(y.focus)) return { ok:false, error:'Kapalı bir bölüm odak olamaz; önce aç.' };
+      if(!(ESP.DISCIPLINE_BY_ID || {})[y.focus]) return { ok:false, error:yz('esp.core.plans.bilinmeyen-bolum') };
+      if(!ESP.Mod.isOn(y.focus)) return { ok:false, error:yz('esp.core.plans.kapali-bir-bolum-odak-olamaz') };
     }
     if(p.kind === 'oturum'){
       const d = (ESP.DISCIPLINE_BY_ID || {})[y.disc];
-      if(!d) return { ok:false, error:'Bilinmeyen bölüm.' };
+      if(!d) return { ok:false, error:yz('esp.core.plans.bilinmeyen-bolum') };
       if(!ESP.Mod.isOn(y.disc)) return { ok:false, error:d.label + ' bölümü kapalı; önce aç.' };
       const dk = Number(y.minutes);
-      if(!isFinite(dk) || dk < 1 || dk > 600) return { ok:false, error:'Süre 1–600 dakika arasında olmalı.' };
-      if(!U.isISO(y.date) || y.date > U.todayISO()) return { ok:false, error:'Oturum ancak bugüne ya da geçmiş bir güne yazılır.' };
+      if(!isFinite(dk) || dk < 1 || dk > 600) return { ok:false, error:yz('esp.core.plans.sure-1-600-dakika-arasinda-o') };
+      if(!U.isISO(y.date) || y.date > U.todayISO()) return { ok:false, error:yz('esp.core.plans.oturum-ancak-bugune-ya-da') };
     }
     return { ok:true };
   }
 
   async function accept(prop){
     const p = typeof prop === 'string' ? (record(prop) || bul(prop)) : prop;
-    if(!p) return { ok:false, error:'Teklif bulunamadı.' };
+    if(!p) return { ok:false, error:yz('esp.core.plans.teklif-bulunamadi') };
     if(!allowed(p.agentId, p.kind)){
-      return { ok:false, error:'Bu masa bu teklifi veremez.' };
+      return { ok:false, error:yz('esp.core.plans.bu-masa-bu-teklifi-veremez') };
     }
     if(p.kind === 'bolum' || p.kind === 'base' || p.kind === 'focus' || p.kind === 'oturum'){
       const v = dogrula(p);
@@ -430,10 +463,10 @@ ESP.Plans = (function(){
     }else if(p.kind === 'hedefplan'){
       /* Plan UYGULAMA ANINDA yeniden kurulur: önizlemeden bu yana veri
          değişmiş olabilir. */
-      if(p.source !== 'istek') return { ok:false, error:'Hedef planı yalnız senin onayınla uygulanır.' };
+      if(p.source !== 'istek') return { ok:false, error:yz('esp.core.plans.hedef-plani-yalniz-senin-ona') };
       const h = ESP.Hedefler && ESP.Hedefler.liste().find(function(x){ return x.id === (p.payload || {}).hedefId; });
-      if(!h || !ESP.HedefPlan) return { ok:false, error:'Hedef bulunamadı.' };
-      if(ESP.HedefPlan.aktif(h.id)) return { ok:false, error:'Bu hedefin uygulanmış bir planı var; önce onu geri al.' };
+      if(!h || !ESP.HedefPlan) return { ok:false, error:yz('esp.core.plans.hedef-bulunamadi') };
+      if(ESP.HedefPlan.aktif(h.id)) return { ok:false, error:yz('esp.core.plans.bu-hedefin-uygulanmis-bir-pl') };
       const kr = ESP.HedefPlan.kur(h, U.todayISO());
       if(!kr.ok) return { ok:false, error:kr.why };
       try{ uygulanan = await ESP.HedefPlan.uygula(kr.plan); }
@@ -446,7 +479,7 @@ ESP.Plans = (function(){
       uygulanan = { kind:'weekplan', days:yeni.days.length, oncekiPlan };
 
     }else{
-      return { ok:false, error:'Bilinmeyen teklif türü.' };
+      return { ok:false, error:yz('esp.core.plans.bilinmeyen-teklif-turu') };
     }
 
     await write(Object.assign({}, p, { state:'accepted',
@@ -463,7 +496,7 @@ ESP.Plans = (function(){
      yüzden ünite ORTA seviyededir ve hiçbir koşulda sormadan uygulanmaz. */
   async function geriAl(id){
     const p = record(id);
-    if(!p || p.state !== 'accepted' || !p.applied) return { ok:false, error:'Geri alınacak bir şey yok.' };
+    if(!p || p.state !== 'accepted' || !p.applied) return { ok:false, error:yz('esp.core.plans.geri-alinacak-bir-sey-yok') };
     const a = p.applied;
     if(a.kind === 'reminder') await ESP.Model.deleteReminder(a.id);
     else if(a.kind === 'goal') await ESP.Model.deleteGoal(a.id);
@@ -476,7 +509,7 @@ ESP.Plans = (function(){
       const res = await ESP.Mod.set(a.disc, !!a.onceki);
       if(!res.ok) return res;
     }
-    else return { ok:false, error:'Bu iş geri alınamaz; elle düzeltmen gerekir.' };
+    else return { ok:false, error:yz('esp.core.plans.bu-is-geri-alinamaz-elle') };
     await write(Object.assign({}, p, { state:'undone', undoneAt:new Date().toISOString() }));
     if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
     return { ok:true, kind:a.kind };
@@ -523,8 +556,8 @@ ESP.Plans = (function(){
   function baslik(kind, y){
     const d = (ESP.DISCIPLINE_BY_ID || {})[y.disc || y.focus] || {};
     if(kind === 'bolum') return (d.label || 'Bölüm') + ' bölümü ' + (y.on ? 'açılsın' : 'kapansın');
-    if(kind === 'base') return 'Günlük taban ' + Math.round(Number(y.minutes)) + ' dakika olsun';
-    if(kind === 'focus') return 'Odak ' + (d.label || y.focus) + ' olsun';
+    if(kind === 'base') return yz('esp.core.plans.gunluk-taban') + Math.round(Number(y.minutes)) + ' dakika olsun';
+    if(kind === 'focus') return yz('esp.core.plans.odak') + (d.label || y.focus) + ' olsun';
     if(kind === 'oturum') return (d.label || 'Oturum') + ': ' + U.fmtMin(Number(y.minutes))
       + (y.count != null ? ' · ' + U.fmtNum(y.count) + ' ' + (y.countWhat || '') : '');
     return (KIND_BY_ID[kind] || {}).label || kind;
@@ -537,7 +570,7 @@ ESP.Plans = (function(){
     const p = {
       id:'i:' + U.uid('t'), agentId:r.agentId || 'patron', kind:r.kind,
       disc:y.disc || null, title:baslik(r.kind, y),
-      why:r.metin ? 'Senin isteğin: «' + String(r.metin).slice(0, 120) + '»' : 'Senin isteğin.',
+      why:r.metin ? yz('esp.core.plans.senin-istegin') + String(r.metin).slice(0, 120) + '»' : yz('esp.core.plans.senin-istegin-2'),
       payload:y, at:U.todayISO(), source:'istek', level:kind ? kind.level : 'orta',
     };
     const v = dogrula(p);
@@ -564,14 +597,14 @@ ESP.Plans = (function(){
      (anahtar). Dönüş hesap.js'e: { durum:'onayda'|'anlasilmadi', sonuc }. */
   async function disaridan(oge){
     const metin = String((oge && oge.metin) || '').trim();
-    if(!metin || !ESP.Parse) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    if(!metin || !ESP.Parse) return { durum:'anlasilmadi', sonuc:yz('esp.core.plans.bos-satir') };
     const z = Number(oge.zaman), bugun = U.todayISO();
     const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
     const gun = gonderilen > bugun ? bugun : gonderilen;
     /* «gitar çalışmadım» ölçüm değildir: yazılmaz, sorulur (KR-1). */
     const O = window.LIFEOS && window.LIFEOS.Olumsuz;
     const engel = O && O.olcumEngeli ? O.olcumEngeli(metin) : null;
-    if(engel) return { durum:'anlasilmadi', sonuc:engel.soru || 'Bu bir ölçüm değil; yazılmadı.' };
+    if(engel) return { durum:'anlasilmadi', sonuc:engel.soru || yz('esp.core.plans.bu-bir-olcum-degil-yazilmadi') };
     const r = ESP.Parse.parseSession(metin);
     const kaynak = String(oge.kaynak || '').slice(0, 40);
     let n = 0;
@@ -591,9 +624,9 @@ ESP.Plans = (function(){
       n++;
     }
     if(n && ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
-    if(n) return { durum:'onayda', sonuc:n === 1 ? 'ESP › Onaylar’da bekliyor' : n + ' oturum ESP › Onaylar’da' };
+    if(n) return { durum:'onayda', sonuc:n === 1 ? yz('esp.core.plans.esp-onaylar-da-bekliyor') : n + ' oturum ESP › Onaylar’da' };
     const u = (r.unmatched || [])[0];
-    return { durum:'anlasilmadi', sonuc:neden[0] || (u && u.why) || 'ESP bu satırı anlamadı' };
+    return { durum:'anlasilmadi', sonuc:neden[0] || (u && u.why) || yz('esp.core.plans.esp-bu-satiri-anlamadi') };
   }
 
   /* Onay bekleyen kullanıcı istekleri — teklif listesinde görünür. */
@@ -605,7 +638,7 @@ ESP.Plans = (function(){
   /* `gecme`: vitrin 123 — kullanıcının söylediği neden (isteğe bağlı). */
   async function decline(prop, gecme){
     const p = typeof prop === 'string' ? (record(prop) || bul(prop)) : prop;
-    if(!p) return { ok:false, error:'Teklif bulunamadı.' };
+    if(!p) return { ok:false, error:yz('esp.core.plans.teklif-bulunamadi') };
     await write(Object.assign({}, p, { state:'declined',
       decidedAt:new Date().toISOString() }, gecme ? { gecme } : {}));
     return { ok:true };

@@ -6,6 +6,30 @@
    Konusmalar ard arda degil SIRAYLA akar: her tur bir model cagrisidir ve
    kota yoneticisi aralarina bosluk koyar, boylece dakikalik sinir asilmaz.
    Gundemi ve karari kural motoru belirler; ajanlar yalnizca gerekcelendirir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.meeting.ses-acik':'Ses açık',
+  'ays.meeting.sesli-dinle':'Sesli dinle',
+  'ays.meeting.tur':'Tur ',
+  'ays.meeting.toplanti-duraklatildi':'Toplantı duraklatıldı',
+  'ays.meeting.sesi-kapat':'Sesi kapat',
+  'ays.meeting.capraz-soru':'Çapraz soru',
+  'ays.meeting.kim-ne-dedi':'Kim ne dedi',
+  'ays.meeting.dayandigi-veri':'Dayandığı veri',
+  'ays.meeting.program-haftasi':'Program haftası',
+  'ays.meeting.plan-tamamlama':'Plan tamamlama',
+  'ays.meeting.konu-kapanisi':'Konu kapanışı',
+  'ays.meeting.tyt-medyan':'TYT medyan',
+  'ays.meeting.analiz-borcu':'Analiz borcu',
+  'ays.meeting.tekrar-borcu':'Tekrar borcu',
+  'ays.meeting.sirasini-bekliyor':'Sırasını bekliyor — ',
+  'ays.meeting.soz-aliyor':'Söz alıyor…',
+  'ays.meeting.capraz-soru-soruyor':'Çapraz soru soruyor…',
+  'ays.meeting.karari-ve-raporu-yaziyor':'Kararı ve raporu yazıyor…',
+  'ays.meeting.bu-toplanti-kaydi-ve-raporu':'Bu toplantı kaydı ve raporu silinecek. Çalışma verilerin etkilenmez.',
+  'ays.meeting.son-toplanti':'Son toplantı ',
+  'ays.meeting.ekip-5-kisi-gundemi':'Ekip 5 kişi · gündemi kural motoru seçer, bitişi sen',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -188,7 +212,7 @@ R.Screens.meeting = (function(){
           ${K.Segmented({ aria:yz('ays.meeting.toplanti-akis-hizi'), value:paceId(), act:'meet-pace',
             items:R.Voice.PACE_ORDER.map(id => ({ value:id, label:R.Voice.PACE[id].label })) })}
           ${when(voiceAvailable(), () => K.Button({
-            label:S.ui.meetingVoice ? 'Ses açık' : 'Sesli dinle',
+            label:S.ui.meetingVoice ? yz('ays.meeting.ses-acik') : yz('ays.meeting.sesli-dinle'),
             icon:S.ui.meetingVoice ? 'pause' : 'play', size:'sm',
             tone:S.ui.meetingVoice ? 'primary' : 'ghost', act:'meet-voice' }))}
           ${K.Button({ label:yz('ays.meeting.ofise-don'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'office' } })}
@@ -233,7 +257,7 @@ R.Screens.meeting = (function(){
       <div class="meetbar">
         <div class="meetbar__state">
           ${when(running, () => html`<span class="meetbar__live"></span>`)}
-          <b>${running ? 'Tur ' + round + '/' + maxRounds() : 'Toplantı duraklatıldı'}</b>
+          <b>${running ? yz('ays.meeting.tur') + round + '/' + maxRounds() : yz('ays.meeting.toplanti-duraklatildi')}</b>
           <span class="dim">${session ? session.turns.length + ' konuşma' : ''}</span>
           ${when(S.ui.meetingVoice && voiceAvailable(), () => html`<span class="dim">${
             R.Voice.voiceCount() === 0 ? '· cihazda ses yok'
@@ -246,7 +270,7 @@ R.Screens.meeting = (function(){
             aria:yz('ays.meeting.toplanti-akis-hizi'), value:paceId(), act:'meet-pace',
             items:R.Voice.PACE_ORDER.map(id => ({ value:id, label:R.Voice.PACE[id].label })) }))}
           ${when(voiceAvailable(), () => K.Button({
-            label:S.ui.meetingVoice ? 'Sesi kapat' : 'Sesli dinle',
+            label:S.ui.meetingVoice ? yz('ays.meeting.sesi-kapat') : yz('ays.meeting.sesli-dinle'),
             icon:S.ui.meetingVoice ? 'pause' : 'play', size:'sm',
             tone:S.ui.meetingVoice ? 'primary' : 'ghost', act:'meet-voice' }))}
           ${K.Button({ label:yz('ays.meeting.soz-al'), icon:'edit', size:'sm', act:'meet-say' })}
@@ -304,14 +328,14 @@ R.Screens.meeting = (function(){
           <p class="tiny dim mt-8">${yz('ays.meeting.agirlik-ajanin-guven-skorund')}</p>`)}
 
         ${when((r.crossed || []).length, () => html`
-          <div class="mt-12">${K.SectionTitle('Çapraz soru')}</div>
+          <div class="mt-12">${K.SectionTitle(yz('ays.meeting.capraz-soru'))}</div>
           <div class="stack-xs">${map(r.crossed, c => html`
             <div class="finding">
               <span class="finding__dot finding__dot--warn"></span>
               <span><b>${c.ajan}:</b> ${c.yanit}</span>
             </div>`)}</div>`)}
 
-        <div class="mt-12">${K.SectionTitle('Kim ne dedi')}</div>
+        <div class="mt-12">${K.SectionTitle(yz('ays.meeting.kim-ne-dedi'))}</div>
         <div class="stack-sm">${map(Object.keys(r.byAgent || {}), id => {
           const a = r.byAgent[id];
           const agent = R.AGENT_BY_ID[id];
@@ -330,13 +354,13 @@ R.Screens.meeting = (function(){
           ${K.Notice({ tone:'warn', title:yz('ays.meeting.kural-motoru-duzeltmesi'), body:r.warnings.join(' ') })}</div>`)}
 
         <div class="mt-12">
-          ${K.Table({ tight:true, headers:['Dayandığı veri', { label:yz('ays.meeting.deger'), num:true }], rows:[
-            ['Program haftası', r.basis.hafta],
-            ['Plan tamamlama', r.basis.planTamamlama == null ? '—' : '%' + r.basis.planTamamlama],
-            ['Konu kapanışı', '%' + r.basis.konuKapanisi],
-            ['TYT medyan', r.basis.tytMedyan == null ? '—' : U.fmtNet(r.basis.tytMedyan)],
-            ['Analiz borcu', r.basis.analizBorcu],
-            ['Tekrar borcu', '%' + r.basis.tekrarBorcu],
+          ${K.Table({ tight:true, headers:[yz('ays.meeting.dayandigi-veri'), { label:yz('ays.meeting.deger'), num:true }], rows:[
+            [yz('ays.meeting.program-haftasi'), r.basis.hafta],
+            [yz('ays.meeting.plan-tamamlama'), r.basis.planTamamlama == null ? '—' : '%' + r.basis.planTamamlama],
+            [yz('ays.meeting.konu-kapanisi'), '%' + r.basis.konuKapanisi],
+            [yz('ays.meeting.tyt-medyan'), r.basis.tytMedyan == null ? '—' : U.fmtNet(r.basis.tytMedyan)],
+            [yz('ays.meeting.analiz-borcu'), r.basis.analizBorcu],
+            [yz('ays.meeting.tekrar-borcu'), '%' + r.basis.tekrarBorcu],
           ] })}
         </div>
 
@@ -467,7 +491,7 @@ R.Screens.meeting = (function(){
     clearInterval(waitTimer);
     let left = Math.ceil(ms/1000);
     const tick = () => {
-      setPending(pendingTurn(agentId, 'Sırasını bekliyor — ' + left + ' sn '
+      setPending(pendingTurn(agentId, yz('ays.meeting.sirasini-bekliyor') + left + ' sn '
         + '(istek sınırı aşılmasın diye)'));
       if(--left < 0) clearInterval(waitTimer);
     };
@@ -578,7 +602,7 @@ R.Screens.meeting = (function(){
         return;
       }
 
-      setPending(pendingTurn(agentId, 'Söz alıyor…'));
+      setPending(pendingTurn(agentId, yz('ays.meeting.soz-aliyor')));
       try{
         await O.nextTurn(session, turnIndex, {
           signal:controller.signal,
@@ -634,7 +658,7 @@ R.Screens.meeting = (function(){
       /* Tur bitti: kural motoru celiski bulduysa Patron takip sorusu sorar.
          Toplantiyi yoklamadan tartismaya cikaran adim budur. */
       if(running && !stopAsked && turnIndex % PER_ROUND === 0 && O.nextConflict(session)){
-        setPending(pendingTurn('patron', 'Çapraz soru soruyor…'));
+        setPending(pendingTurn('patron', yz('ays.meeting.capraz-soru-soruyor')));
         try{
           await O.askCross(session, {
             signal:controller.signal,
@@ -696,7 +720,7 @@ R.Screens.meeting = (function(){
     stopWait();
     if(!session) return;
 
-    setPending(pendingTurn('patron', 'Kararı ve raporu yazıyor…'));
+    setPending(pendingTurn('patron', yz('ays.meeting.karari-ve-raporu-yaziyor')));
     try{
       closed = await O.closeMeeting(session, {
         signal:controller ? controller.signal : null,
@@ -860,13 +884,13 @@ R.Screens.meeting = (function(){
 
     async 'meet-delete'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Tutanağı sil', 'Bu toplantı kaydı ve raporu silinecek. Çalışma verilerin etkilenmez.',
+      UI.confirmSheet(yz('ays.meeting.tutanagi-sil'), yz('ays.meeting.bu-toplanti-kaydi-ve-raporu'),
         async () => {
           await O.deleteMeeting(id);
           if(closed && closed.id === id) closed = null;
           UI.closeSheet();
           R.App.render();
-        }, true, 'Tutanağı sil');
+        }, true, yz('ays.meeting.tutanagi-sil'));
     },
 
     async 'meet-talk'(el){
@@ -904,8 +928,8 @@ R.Screens.meeting = (function(){
           + ' · ' + session.turns.length + ' konuşma';
       }
       const last = O.lastMeeting();
-      return last ? 'Son toplantı ' + U.relativeDay(R.U.gunOf(last.at)) + ' · ' + last.topic
-        : 'Ekip 5 kişi · gündemi kural motoru seçer, bitişi sen';
+      return last ? yz('ays.meeting.son-toplanti') + U.relativeDay(R.U.gunOf(last.at)) + ' · ' + last.topic
+        : yz('ays.meeting.ekip-5-kisi-gundemi');
     },
     actions(){
       return String(K.Button({ label:yz('ays.meeting.ofis'), icon:'guide', size:'sm', act:'go',

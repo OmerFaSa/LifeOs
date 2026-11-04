@@ -17,6 +17,12 @@
    yüksek yakınlıkta dünya pikseli on milyonları bulur ve bazı çiziciler
    SVG'yi tek duyarlıkla hesaplar (çizgi titrer, karolar arasında aralık
    açılır). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.harita.rota-haritasi':'Rota haritası',
+  'spi.core.harita.rotayi-ac':'Rotayı aç',
+  'spi.core.harita.openstreetmap-katkicilari':'© OpenStreetMap katkıcıları',
+});
+
 
 window.SP = window.SP || {};
 
@@ -100,17 +106,17 @@ SP.Harita = (function(){
     const d = o.dugme;
     const svg = '<svg class="harita__svg" viewBox="0 0 ' + W + ' ' + H + '"'
       + (d ? ' aria-hidden="true" focusable="false">'
-        : ' role="img" aria-label="' + esc(o.etiket || 'Rota haritası') + '">')
+        : ' role="img" aria-label="' + esc(o.etiket || yz('spi.core.harita.rota-haritasi')) + '">')
       + '<rect class="harita__taban" width="' + W + '" height="' + H + '"/>'
       + (karolar ? '<g class="harita__karolar">' + karolar + '</g>' : '')
       + govde + '</svg>';
     const ic = d
       ? '<button type="button" class="harita__dugme" data-act="' + esc(d.act) + '" data-id="' + esc(d.id)
-        + '" aria-label="' + esc(d.aria || o.etiket || 'Rotayı aç') + '">' + svg + '</button>'
+        + '" aria-label="' + esc(d.aria || o.etiket || yz('spi.core.harita.rotayi-ac')) + '">' + svg + '</button>'
       : svg;
     const kunye = zemin
       ? '<span class="harita__kunye"><a href="' + KUNYE_ADRES + '" target="_blank" rel="noopener">'
-        + '© OpenStreetMap katkıcıları</a></span>'
+        + (yz('spi.core.harita.openstreetmap-katkicilari') + '</a></span>')
       : '';
     return {
       html:'<div class="' + ['harita', o.isi && 'harita--isi', o.sinif].filter(Boolean).join(' ')

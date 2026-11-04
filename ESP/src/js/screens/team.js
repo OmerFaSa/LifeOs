@@ -6,6 +6,13 @@
 
    Brifingin ham JSON'u açılabilir. Kullanıcı ajanın ne gördüğünü tam olarak
    görebilmelidir; görmediği bir şeye dayanarak konuşamaz. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.team.model-bagli-her-cumlenin-alt':'Model bağlı. Her cümlenin altında kaynağı yazar.',
+  'esp.team.yapay-zeka-bagli-degil-cevap':'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.',
+  'esp.team.yanit-bekleniyor':'Yanıt bekleniyor',
+  'esp.team.model-bagli-degil-cevaplar-d':'Model bağlı değil: cevaplar doğrudan kural motorundan gelir ve ',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -156,8 +163,8 @@ ESP.Screens.team = (function(){
     const pencere = OS() ? OS().pencereHtml({
       anahtar:'esp:' + a.id, ad:a.name, rol:a.role,
       durum:hazir ? 'yapay zekâ' : 'kural motoru',
-      durumNot:hazir ? 'Model bağlı. Her cümlenin altında kaynağı yazar.'
-        : 'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.',
+      durumNot:hazir ? yz('esp.team.model-bagli-her-cumlenin-alt')
+        : yz('esp.team.yapay-zeka-bagli-degil-cevap'),
       gecmisHtml:G ? G.listeHtml('esp', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
       mesajlarHtml:mesajlar.length ? String(map(mesajlar.slice(-20), m => msgRow(m, a))) : '',
       bos:{ alt:a.opening },
@@ -203,7 +210,7 @@ ESP.Screens.team = (function(){
       const a = agent();
       /* withBusy(etiket, ipucu, fn) — once ters sirayla cagriliyordu ve
          «Gonder» hicbir mesaji iletmiyordu. */
-      await ESP.UI.withBusy('Yanıt bekleniyor', null, async () => {
+      await ESP.UI.withBusy(yz('esp.team.yanit-bekleniyor'), null, async () => {
         await ESP.Office.send(a.id, soru);
       });
       ESP.App.render();
@@ -252,8 +259,8 @@ ESP.Screens.team = (function(){
     lede(){
       const a = agent();
       return ESP.Office.ready(a.id)
-        ? 'Model bağlı. Her cümlenin altında kaynağı yazar.'
-        : 'Model bağlı değil: cevaplar doğrudan kural motorundan gelir ve '
+        ? yz('esp.team.model-bagli-her-cumlenin-alt')
+        : yz('esp.team.model-bagli-degil-cevaplar-d')
           + '«kural motoru» rozetiyle durur.';
     },
     stats(){

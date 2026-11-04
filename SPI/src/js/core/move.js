@@ -9,6 +9,14 @@
    HRV ve istirahat nabzi mutlak degil KISISEL olcektir: kendi 30 gunluk
    ortalamana gore okunur. Baskasinin HRV'siyle karsilastirma yapilmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.move.olcum-ince-yuk-artirilmadi':'Ölçüm ince; yük artırılmadı.',
+  'spi.core.move.akut-kronik-yuk-orani':'Akut/kronik yük oranı ',
+  'spi.core.move.kotu-gun-modu-yuk-hafifletil':'Kötü gün modu: yük hafifletildi. Bugün asgari gün yeter.',
+  'spi.core.move.bu-merdivenin-son-basamagind':'Bu merdivenin son basamağındasın.',
+  'spi.core.move.ust-basamak-icin':'Üst basamak için ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.move.bugun-hic-olcum-girilmemis-t':'Bugün hiç ölçüm girilmemiş. Toparlanma skoru için dört ',
   'spi.core.move.ates':'Ateş ',
   'spi.core.move.oksijen-saturasyonu':'Oksijen satürasyonu %',
@@ -323,7 +331,7 @@ SP.Move = (function(){
           text:yz('spi.core.move.toparlanma-skoru-bugun-yalni') + r.parts.filter(p => p.score != null)
                .map(p => p.label).join(', ') + ' ölçümünden türedi; yükü '
              + 'artırmak için yeterli değil. Planlanan yük olduğu gibi kaldı.',
-          short:'Ölçüm ince; yük artırılmadı.' });
+          short:yz('spi.core.move.olcum-ince-yuk-artirilmadi') });
       }
       reasons.push({ id:'readiness', kind:r.band.tone,
         text:yz('spi.core.move.toparlanma') + r.score + '/100 — ' + r.band.label + '. ' + r.band.order,
@@ -338,7 +346,7 @@ SP.Move = (function(){
     }
     if(a.ok && a.zone === 'high'){
       factor = Math.min(factor, 0.7);
-      const t = 'Akut/kronik yük oranı ' + U.fmtNet(a.ratio) + '. ' + a.note;
+      const t = yz('spi.core.move.akut-kronik-yuk-orani') + U.fmtNet(a.ratio) + '. ' + a.note;
       reasons.push({ id:'acwr', kind:'danger', text:t, short:t });
     }
     if(dl.due){
@@ -351,7 +359,7 @@ SP.Move = (function(){
        dinlenme bırakır. */
     if(SP.KotuGun && SP.KotuGun.aktif(d)){
       factor = Math.min(factor, SP.KotuGun.CARPAN);
-      const t = 'Kötü gün modu: yük hafifletildi. Bugün asgari gün yeter.';
+      const t = yz('spi.core.move.kotu-gun-modu-yuk-hafifletil');
       reasons.push({ id:'kotu-gun', kind:'warn', text:t, short:t });
     }
 
@@ -394,10 +402,10 @@ SP.Move = (function(){
       ok:true, exercise:ex, level, next, levelId,
       sessions:hits, needed:ADVANCE_SESSIONS, window:ADVANCE_WINDOW,
       ready:!!next && hits >= ADVANCE_SESSIONS,
-      note:!next ? 'Bu merdivenin son basamağındasın.'
+      note:!next ? yz('spi.core.move.bu-merdivenin-son-basamagind')
         : hits >= ADVANCE_SESSIONS
           ? level.name + ' basamağında son ' + ADVANCE_WINDOW + ' günde ' + hits + ' seans var — üst basamak açık.'
-          : 'Üst basamak için ' + ADVANCE_WINDOW + ' gün içinde ' + ADVANCE_SESSIONS + ' seans gerekir; ' + hits + ' var.',
+          : yz('spi.core.move.ust-basamak-icin') + ADVANCE_WINDOW + ' gün içinde ' + ADVANCE_SESSIONS + ' seans gerekir; ' + hits + ' var.',
     };
   }
 

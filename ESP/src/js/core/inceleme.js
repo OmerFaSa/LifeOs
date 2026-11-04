@@ -19,6 +19,10 @@
      3. BİRLİKTELİK, NEDEN DEĞİL. Her fikir bunu söyler.
      4. KARAR KURAL MOTORUNDAN. Model yalnız istenirse özetler. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.inceleme.birliktelik-neden-degil-bask':'Birliktelik, neden değil: başka şeyler de aynı günlerde değişmiş olabilir.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.inceleme.hesaplandi':'hesaplandı',
   'esp.core.inceleme.birden-cok-alan-acilan-gunle':'Birden çok alan açılan günler',
   'esp.core.inceleme.iki-ve-daha-cok-alan':'iki ve daha çok alan',
@@ -74,7 +78,7 @@ ESP.Inceleme = (function(){
       a:{ ad:o.a.ad, ort:ma, n:na }, b:{ ad:o.b.ad, ort:mb, n:nb }, fark, birim:o.birim,
       metin:o.a.ad + ' ' + yaz(ma) + ' (' + na + ' gün), ' + o.b.ad + ' ' + yaz(mb) + ' (' + nb + ' gün)'
         + '; fark ' + (fark >= 0 ? '+' : '−') + (o.birim === '%' ? sayi(Math.abs(fark)) + ' puan' : yaz(Math.abs(fark))) + '.',
-      not:'Birliktelik, neden değil: başka şeyler de aynı günlerde değişmiş olabilir.' };
+      not:yz('esp.core.inceleme.birliktelik-neden-degil-bask') };
   }
 
   function fikirler(){

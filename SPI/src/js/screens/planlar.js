@@ -12,6 +12,28 @@
    sistemle uyumlu küçük ikonlar, daha geniş bir pencerede takip». Satırda
    bugünün maddeleri küçük karolardır (simge, ad, zaman, n / hedef); «Takip»
    geniş pencereyi açar: her madde için bugünkü sayaç ve son yedi gün. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.planlar.i-lac-ya-da-takviye':'İlaç ya da takviye',
+  'spi.planlar.ne-yapacaksin':'Ne yapacaksın',
+  'spi.planlar.yuruyus-kosu-salon':'Yürüyüş, koşu, salon…',
+  'spi.planlar.ne-zaman':'Ne zaman',
+  'spi.planlar.sure-saatler-girilince-hesap':'Süre saatler girilince hesaplanır.',
+  'spi.planlar.sure':'Süre ',
+  'spi.planlar.her-gun':'Her gün',
+  'spi.planlar.hafta-ici':'Hafta içi',
+  'spi.planlar.hafta-sonu-cumartesi-pazar':'Hafta sonu (Cumartesi, Pazar)',
+  'spi.planlar.ogle-uykusu':'Öğle uykusu',
+  'spi.planlar.sabah-esneme':'Sabah esneme',
+  'spi.planlar.gunde-kac-kez':'Günde kaç kez',
+  'spi.planlar.kayittan-say':'Kayıttan say',
+  'spi.planlar.gunluk-su-hedefin-ml':'Günlük su hedefin (ml)',
+  'spi.planlar.planin-adi':'Planın adı',
+  'spi.planlar.sabah-rutini':'Sabah rutini',
+  'spi.planlar.yeni-plan':'Yeni plan',
+  'spi.planlar.emin-misin-sil':'Emin misin? Sil',
+  'spi.planlar.plan-seansi-silindi':'Plan seansı silindi',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -95,7 +117,7 @@ SP.Screens.planlar = (function(){
     ekran:'<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M4 4l16 16"/>',
     kahve:'<path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.5 1 1.5 1 3M12 3.5c0 1.5 1 1.5 1 3"/>',
   };
-  const SIMGE_AD = { yildiz:'Yıldız', su:'Su', yuruyus:'Yürüyüş', kosu:'Koşu', esneme:'Esneme', kitap:'Kitap', ilac:'İlaç ya da takviye',
+  const SIMGE_AD = { yildiz:'Yıldız', su:'Su', yuruyus:'Yürüyüş', kosu:'Koşu', esneme:'Esneme', kitap:'Kitap', ilac:yz('spi.planlar.i-lac-ya-da-takviye'),
     meyve:'Meyve', sebze:'Sebze', gunes:'Güneş', uyku:'Uyku', nefes:'Nefes', dis:'Diş', ekran:'Ekransız', kahve:'Kahve' };
   const svg = p => raw('<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>');
   const simge = tur => raw('<span class="hp-satir__simge hp-satir__simge--' + tur + '" aria-hidden="true"><svg viewBox="0 0 24 24">' + SIMGE[tur] + '</svg></span>');
@@ -190,7 +212,7 @@ SP.Screens.planlar = (function(){
         <span class="num"><b>${s.n}</b> / ${s.hedef}</span>
         ${when(!bagli, () => html`<span class="row gap-4">
           ${when(s.hedef > 1 && s.n > 0, () => K.Button({ label:'−', size:'sm', tone:'ghost', act:'hp-takip-isaret', data:{ 'data-id':p.id, 'data-madde':m.id, 'data-fark':'-1' }, aria:m.metin + ' bir azalt' }))}
-          ${K.Button({ label:s.hedef > 1 ? '+1' : (s.tamam ? 'Geri al' : 'Yaptım'), size:'sm', tone:s.tamam ? 'ghost' : 'primary',
+          ${K.Button({ label:s.hedef > 1 ? '+1' : (s.tamam ? yz('spi.planlar.geri-al') : 'Yaptım'), size:'sm', tone:s.tamam ? 'ghost' : 'primary',
             act:'hp-takip-isaret', data:{ 'data-id':p.id, 'data-madde':m.id, 'data-fark':'1' } })}</span>`)}
       </div>
     </div>`;
@@ -253,9 +275,9 @@ SP.Screens.planlar = (function(){
     const g = p.gunler[gun];
     return html`${gunSecici(gun)}
       <div class="row wrap gap-8 mt-12 hp-hareket">
-        ${alan('Ne yapacaksın', metinAlan('g.ne', g && g.ne, 'Yürüyüş, koşu, salon…', HP().GUN_AD[gun] + ' hareket'))}
+        ${alan(yz('spi.planlar.ne-yapacaksin'), metinAlan('g.ne', g && g.ne, yz('spi.planlar.yuruyus-kosu-salon'), HP().GUN_AD[gun] + ' hareket'))}
         ${alan('Dakika', K.Input({ type:'number', numeric:true, min:1, max:600, value:g ? g.dk : '', placeholder:'dk', aria:HP().GUN_AD[gun] + ' dakika', data:{ 'data-hp':'g.dk' } }))}
-        ${alan('Ne zaman', zamanAlani('g.zaman', g && g.zaman, HP().GUN_AD[gun] + ' hareket'))}
+        ${alan(yz('spi.planlar.ne-zaman'), zamanAlani('g.zaman', g && g.zaman, HP().GUN_AD[gun] + ' hareket'))}
       </div>
       <p class="mt-10">${K.Button({ label:yz('spi.planlar.bu-gunu-butun-haftaya-kopyal'), size:'sm', tone:'ghost', act:'hp-kopyala' })}
         ${K.Button({ label:yz('spi.planlar.dinlenme-gunu-yap'), size:'sm', tone:'ghost', act:'hp-dinlen' })}</p>`;
@@ -268,19 +290,19 @@ SP.Screens.planlar = (function(){
         ${alan('Yatış', K.Input({ type:'time', value:x.yat || '', aria:ad + ' yatış', data:{ 'data-hp':yol + '.yat' } }))}
         ${alan('Kalkış', K.Input({ type:'time', value:x.kalk || '', aria:ad + ' kalkış', data:{ 'data-hp':yol + '.kalk' } }))}
       </div>
-      <p class="tiny muted">${dk == null ? 'Süre saatler girilince hesaplanır.' : 'Süre ' + HP().sureYaz(dk) + ' (hesaplandı)'}</p></div>`;
+      <p class="tiny muted">${dk == null ? yz('spi.planlar.sure-saatler-girilince-hesap') : yz('spi.planlar.sure') + HP().sureYaz(dk) + ' (hesaplandı)'}</p></div>`;
   }
   function govdeUyku(p){
     const kip = HP().uykuKip(p);
-    const bloklar = kip === 'her' ? uykuBlok('her', p.her, 'Her gün')
+    const bloklar = kip === 'her' ? uykuBlok('her', p.her, yz('spi.planlar.her-gun'))
       : kip === 'gun' ? html`<div class="hp-uyku-gunler">${map(HP().GUN_AD, (ad, i) => uykuBlok('gunluk.' + i, (p.gunluk || [])[i], ad))}</div>`
-      : html`${uykuBlok('haftaici', p.haftaici, 'Hafta içi')}${uykuBlok('haftasonu', p.haftasonu, 'Hafta sonu (Cumartesi, Pazar)')}`;
+      : html`${uykuBlok('haftaici', p.haftaici, yz('spi.planlar.hafta-ici'))}${uykuBlok('haftasonu', p.haftasonu, yz('spi.planlar.hafta-sonu-cumartesi-pazar'))}`;
     return html`<div class="stack">
       ${K.Segmented({ items:HP().UYKU_KIPLERI.map(k => ({ value:k.id, label:k.ad })), value:kip, act:'hp-uyku-kip', aria:yz('spi.planlar.uyku-plani-duzeni'), block:true })}
       ${bloklar}
       <div><b class="small">${yz('spi.planlar.kisa-uykular')}</b>
         <div class="stack-sm mt-6">${map(p.kestirmeler || [], (k, i) => html`<div class="hp-madde-satir">
-          ${metinAlan('k.' + i + '.ad', k.ad, 'Öğle uykusu', 'Kısa uyku ' + (i + 1) + ' adı')}
+          ${metinAlan('k.' + i + '.ad', k.ad, yz('spi.planlar.ogle-uykusu'), yz('spi.planlar.kisa-uyku') + (i + 1) + ' adı')}
           ${K.Input({ type:'time', value:k.bas || '', aria:yz('spi.planlar.kisa-uyku') + (i + 1) + ' saati', data:{ 'data-hp':'k.' + i + '.bas' } })}
           ${K.Input({ type:'number', numeric:true, min:1, max:240, value:k.dk == null ? '' : k.dk, placeholder:'dk', aria:yz('spi.planlar.kisa-uyku') + (i + 1) + ' süresi', data:{ 'data-hp':'k.' + i + '.dk' } })}
           ${gunCipleri('hp-k-gun', i, k.gunler)}
@@ -296,7 +318,7 @@ SP.Screens.planlar = (function(){
       aria-pressed="${(gunler || []).indexOf(j) >= 0 ? 'true' : 'false'}">${g}</button>`)}</div>`;
   }
   function simgeSecici(i, sec){
-    return html`<div class="hp-simgeler" role="radiogroup" aria-label="${'Madde ' + (i + 1) + ' simgesi'}">${map(HP().SIMGELER, s => html`<button type="button"
+    return html`<div class="hp-simgeler" role="radiogroup" aria-label="${yz('spi.planlar.madde') + (i + 1) + ' simgesi'}">${map(HP().SIMGELER, s => html`<button type="button"
       class="${'hp-simge-sec' + (s === (sec || 'yildiz') ? ' is-on' : '')}" role="radio" aria-checked="${s === (sec || 'yildiz') ? 'true' : 'false'}"
       data-act="hp-simge" data-i="${i}" data-simge="${s}" title="${SIMGE_AD[s]}" aria-label="${SIMGE_AD[s]}">${svg(MADDE_SIMGE[s])}</button>`)}</div>`;
   }
@@ -304,13 +326,13 @@ SP.Screens.planlar = (function(){
     return html`<div class="stack-sm">${map(p.maddeler, (m, i) => html`<div class="hp-madde-kart">
         <div class="hp-madde-satir">
           <span class="hp-karo__simge">${svg(maddeSimgesi(m))}</span>
-          ${metinAlan('m.' + i, m.metin, 'Sabah esneme', 'Madde ' + (i + 1))}
+          ${metinAlan('m.' + i, m.metin, yz('spi.planlar.sabah-esneme'), yz('spi.planlar.madde') + (i + 1))}
           ${K.Button({ label:yz('spi.planlar.sil'), size:'sm', tone:'ghost', act:'hp-madde-sil', data:{ 'data-i':String(i) } })}
         </div>
         <div class="hp-madde-ayar">
-          ${alan('Ne zaman', zamanAlani('m.' + i + '.zaman', m.zaman, 'Madde ' + (i + 1)))}
-          ${alan('Günde kaç kez', K.Input({ type:'number', numeric:true, min:1, max:20, value:HP().hedefOf(m), aria:yz('spi.planlar.madde') + (i + 1) + ' günde kaç kez', data:{ 'data-hp':'m.' + i + '.hedef' } }))}
-          ${alan('Kayıttan say', K.Select({ value:m.bag || '', aria:yz('spi.planlar.madde') + (i + 1) + ' kayıt bağı', data:{ 'data-hp':'m.' + i + '.bag' },
+          ${alan(yz('spi.planlar.ne-zaman'), zamanAlani('m.' + i + '.zaman', m.zaman, yz('spi.planlar.madde') + (i + 1)))}
+          ${alan(yz('spi.planlar.gunde-kac-kez'), K.Input({ type:'number', numeric:true, min:1, max:20, value:HP().hedefOf(m), aria:yz('spi.planlar.madde') + (i + 1) + ' günde kaç kez', data:{ 'data-hp':'m.' + i + '.hedef' } }))}
+          ${alan(yz('spi.planlar.kayittan-say'), K.Select({ value:m.bag || '', aria:yz('spi.planlar.madde') + (i + 1) + ' kayıt bağı', data:{ 'data-hp':'m.' + i + '.bag' },
             options:[{ value:'', label:yz('spi.planlar.hayir-ben-isaretlerim') }].concat(HP().BAGLAR.map(b => ({ value:b.id, label:b.ad }))) }))}
         </div>
         ${gunCipleri('hp-madde-gun', i, m.gunler)}
@@ -321,12 +343,12 @@ SP.Screens.planlar = (function(){
   }
   function govdeSu(p){
     return html`<div class="stack">
-      ${alan('Günlük su hedefin (ml)', K.Input({ type:'number', numeric:true, min:1, max:10000, step:50, value:p.suMl == null ? '' : p.suMl, placeholder:yz('spi.planlar.kendi-hedefin'), aria:yz('spi.planlar.gunluk-su-hedefi'), data:{ 'data-hp':'suMl' } }))}
+      ${alan(yz('spi.planlar.gunluk-su-hedefin-ml'), K.Input({ type:'number', numeric:true, min:1, max:10000, step:50, value:p.suMl == null ? '' : p.suMl, placeholder:yz('spi.planlar.kendi-hedefin'), aria:yz('spi.planlar.gunluk-su-hedefi'), data:{ 'data-hp':'suMl' } }))}
       <div><b class="small">${yz('spi.planlar.kucuk-aliskanliklar')}</b>${maddeListesi(p)}</div></div>`;
   }
   function govdeSerbest(p){
     return html`<div class="stack">
-      ${alan('Planın adı', metinAlan('ad', p.ad, 'Sabah rutini', 'Planın adı'))}
+      ${alan(yz('spi.planlar.planin-adi'), metinAlan('ad', p.ad, yz('spi.planlar.sabah-rutini'), yz('spi.planlar.planin-adi')))}
       <div><b class="small">${yz('spi.planlar.maddeler')}</b>${maddeListesi(p)}</div></div>`;
   }
 
@@ -336,7 +358,7 @@ SP.Screens.planlar = (function(){
     const p = t.plan, tur = HP().TUR_BY_ID[p.tur];
     const govde = { beslenme:() => govdeBeslenme(p, t.gun), hareket:() => govdeHareket(p, t.gun), uyku:() => govdeUyku(p),
       su:() => govdeSu(p), serbest:() => govdeSerbest(p) }[p.tur]();
-    UI.sheet({ title:p.tur === 'serbest' ? (p.ad || 'Yeni plan') : tur.ad, subtitle:tur.not, wide:p.tur !== 'beslenme',
+    UI.sheet({ title:p.tur === 'serbest' ? (p.ad || yz('spi.planlar.yeni-plan')) : tur.ad, subtitle:tur.not, wide:p.tur !== 'beslenme',
       body:String(html`<div data-hp-kok>${govde}${when(t.hata, () => html`<p class="small hp-hata" role="alert">${t.hata}</p>`)}</div>`),
       footer:String(html`${when(t.varMi, () => K.Button({ label:yz('spi.planlar.plani-sil'), tone:'ghost', act:'hp-sil' }))}
         ${K.Button({ label:yz('spi.planlar.vazgec'), act:'sheet-close' })}
@@ -452,7 +474,7 @@ SP.Screens.planlar = (function(){
     async 'hp-sil'(el){
       const t = taslak();
       if(!t || !t.varMi) return;
-      if(el.dataset.onay !== '1'){ el.dataset.onay = '1'; el.textContent = 'Emin misin? Sil'; return; }
+      if(el.dataset.onay !== '1'){ el.dataset.onay = '1'; el.textContent = yz('spi.planlar.emin-misin-sil'); return; }
       const eski = await HP().sil(t.plan.id);
       S.ui.hpTaslak = null;
       UI.closeSheet();
@@ -469,7 +491,7 @@ SP.Screens.planlar = (function(){
     async 'hp-hareket-geri'(el){
       const r = await HP().hareketGeriAl(HP().bulId(el.dataset.id), SP.U.todayISO());
       SP.App.render();
-      UI.toast(r.ok ? 'Plan seansı silindi' : r.why);
+      UI.toast(r.ok ? yz('spi.planlar.plan-seansi-silindi') : r.why);
     },
     async 'hp-isaret'(el){
       const p = HP().bulId(el.dataset.id);

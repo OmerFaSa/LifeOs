@@ -23,6 +23,15 @@
    2026-10-16 («kalabalık, kafa karıştırıyor»): Bugün'de ikinci bir yazı
    kutusu açık durmaz. Soru ve iki düğme görünür: «Cevapla» kutuyu açar,
    «Uymuyor» kapatır. Cevap yine isteğe bağlıdır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.sorukart.sana-bir-soru':'Sana bir soru',
+  'ortak.sorukart.cevabin':'Cevabın:',
+  'ortak.sorukart.bir-sonraki-olcumde-bu-ayris':'Bir sonraki ölçümde bu ayrışmanın kapanıp kapanmadığına bakılacak.',
+  'ortak.sorukart.cevapla':'Cevapla',
+  'ortak.sorukart.kaydet':'Kaydet',
+  'ortak.sorukart.uymuyor':'Uymuyor',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -38,18 +47,18 @@ window.LIFEOS.SORUKART = (function(){
     const ipucu = (sig.kind === 'friction' ? 'Sürtünme' : 'Gösterge') + (sig.title ? ': ' + sig.title : '');
     const id = kac(sig.id || '');
     return '<div class="sorukart" data-sorukart="' + id + '">'
-      + '<div class="sorukart__bas" title="' + kac(ipucu) + '">Sana bir soru</div>'
+      + '<div class="sorukart__bas" title="' + kac(ipucu) + ('">' + yz('ortak.sorukart.sana-bir-soru') + '</div>')
       + '<p class="sorukart__soru">' + kac(sig.question) + '</p>'
       + (sig.answeredAt
-        ? '<p class="sorukart__cevap">Cevabın: ' + kac(sig.answer || '—') + '</p>'
-          + '<p class="sorukart__not">Bir sonraki ölçümde bu ayrışmanın kapanıp kapanmadığına bakılacak.</p>'
+        ? ('<p class="sorukart__cevap">' + yz('ortak.sorukart.cevabin') + ' ') + kac(sig.answer || '—') + '</p>'
+          + ('<p class="sorukart__not">' + yz('ortak.sorukart.bir-sonraki-olcumde-bu-ayris') + '</p>')
         : '<div class="sorukart__satir">'
-          + '<details class="sorukart__ac"><summary class="btn btn--sm btn--primary"><span class="btn__label">Cevapla</span></summary>'
+          + ('<details class="sorukart__ac"><summary class="btn btn--sm btn--primary"><span class="btn__label">' + yz('ortak.sorukart.cevapla') + '</span></summary>')
           + '<div class="sorukart__acik">'
           + '<input class="sorukart__girdi" id="sig-answer" type="text" autocomplete="off" placeholder="Kısa cevabın (isteğe bağlı)" aria-label="Kısa cevabın"/>'
-          + '<button type="button" class="btn btn--sm btn--primary" data-act="signal-answer" data-id="' + id + '"><span class="btn__label">Kaydet</span></button>'
+          + '<button type="button" class="btn btn--sm btn--primary" data-act="signal-answer" data-id="' + id + ('"><span class="btn__label">' + yz('ortak.sorukart.kaydet') + '</span></button>')
           + '</div></details>'
-          + '<button type="button" class="btn btn--sm btn--ghost" data-act="signal-dismiss" data-id="' + id + '"><span class="btn__label">Uymuyor</span></button>'
+          + '<button type="button" class="btn btn--sm btn--ghost" data-act="signal-dismiss" data-id="' + id + ('"><span class="btn__label">' + yz('ortak.sorukart.uymuyor') + '</span></button>')
           + '</div>')
       + '</div>';
   }

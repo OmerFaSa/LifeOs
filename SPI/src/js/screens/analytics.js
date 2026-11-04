@@ -3,6 +3,32 @@
    Bu ekranın tek dürüstlük kuralı: KORELASYON NEDENSELLİK DEĞİLDİR.
    Bulgu daima «birlikte hareket ediyor» diliyle yazılır, «sebep oldu»
    diliyle değil. Ortak gün sayısı yetersizse bulgu hiç üretilmez. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.analytics.toparlanma-skoru-uyku-hrv-ve':'Toparlanma skoru uyku, HRV ve istirahat nabzından hesaplanır; bu ikisinin bağı hesabın kendisidir, bulgu değil.',
+  'spi.analytics.ortak-gun-sayisi-yetersiz':'Ortak gün sayısı yetersiz (',
+  'spi.analytics.i-ki-olcum-de-ayni-gunlerde':'İki ölçüm de aynı günlerde girilmiş olmalı.',
+  'spi.analytics.i-stirahat-nabzi':'İstirahat nabzı',
+  'spi.analytics.buyuk-tansiyon':'Büyük tansiyon',
+  'spi.analytics.antrenman-yuku':'Antrenman yükü',
+  'spi.analytics.en-az-iki-olcum-gerekir':'En az iki ölçüm gerekir; şu an ',
+  'spi.analytics.acilan-sinyal':'Açılan sinyal',
+  'spi.analytics.kapanan-sinyal':'Kapanan sinyal',
+  'spi.analytics.olasilik-0-1':'Olasılık (0–1)',
+  'spi.analytics.bes-alanda-da-bakim-borcu':'Beş alanda da bakım borcu görünmüyor. Veri eşiğin ',
+  'spi.analytics.kendi-cumlelerinle-yaz-yukar':'Kendi cümlelerinle yaz. Yukarıda bir tanımı seçip «Nota ekle»ye basarak da ekleyebilirsin.',
+  'spi.analytics.celiski-varsa-oncelik-sirasi':'Çelişki varsa öncelik sırası uygulanır ve hangi kuralın kazandığı yazılır.',
+  'spi.analytics.bu-okuma-su-an-cizilemedi':'Bu okuma şu an çizilemedi; verin yerinde duruyor.',
+  'spi.analytics.son-7-gunde-kayit-yok':'Son 7 günde kayıt yok',
+  'spi.analytics.dinlenik-nabiz':'Dinlenik nabız',
+  'spi.analytics.yatis-ve-kalkis-saatleri':'Yatış ve kalkış saatleri',
+  'spi.analytics.ayrintili-okumalari-gizle':'Ayrıntılı okumaları gizle',
+  'spi.analytics.ayrintili-okumalar-kavramlar':'Ayrıntılı okumalar: kavramlar ve dürüstlük',
+  'spi.analytics.kapandi-sapma':'Kapandı — sapma %',
+  'spi.analytics.belirgin-bir-bag-bulunamadi':'Belirgin bir bağ bulunamadı.',
+  'spi.analytics.birlikte-hareket-eden-iki-ol':'Birlikte hareket eden iki ölçüm, birinin diğerine sebep olduğu ',
+  'spi.analytics.belirgin-bag-yok':'Belirgin bağ yok',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -191,7 +217,7 @@ SP.Screens.analytics = (function(){
         </div>
         <div class="mt-12">
           ${when(turev, () => K.Notice({ tone:'info',
-            body:'Toparlanma skoru uyku, HRV ve istirahat nabzından hesaplanır; bu ikisinin bağı hesabın kendisidir, bulgu değil.' }))}
+            body:yz('spi.analytics.toparlanma-skoru-uyku-hrv-ve') }))}
           ${when(c.ok && !turev, () => html`
             ${K.Stat({ label:yz('spi.analytics.katsayi'), value:U.fmtNet(c.r),
               note:c.n + ' ortak gün · ' + (!c.belirgin ? 'rastlantı düzeyinde (|r| ≥ ' + U.fmtNet(c.esik) + ' gerekir)'
@@ -203,15 +229,15 @@ SP.Screens.analytics = (function(){
             ${raw(UI.legend([{ label:seriesLabel(a), color:'var(--primary)' },
               { label:seriesLabel(b), color:'var(--accent)' }]))}`)}
           ${when(!c.ok, () => K.Notice({ tone:'info',
-            body:'Ortak gün sayısı yetersiz (' + c.n + '/' + SP.Calc.MIN_PAIRS + '). '
-              + 'İki ölçüm de aynı günlerde girilmiş olmalı.' }))}
+            body:yz('spi.analytics.ortak-gun-sayisi-yetersiz') + c.n + '/' + SP.Calc.MIN_PAIRS + '). '
+              + yz('spi.analytics.i-ki-olcum-de-ayni-gunlerde') }))}
         </div>`,
     });
   }
 
   function seriesLabel(id){
-    return ({ sleep:'Uyku', hrv:'HRV', rhr:'İstirahat nabzı', weight:'Kilo', sbp:'Büyük tansiyon',
-      readiness:'Toparlanma', load:'Antrenman yükü', protein:'Protein', kcal:'Kalori',
+    return ({ sleep:'Uyku', hrv:'HRV', rhr:yz('spi.analytics.i-stirahat-nabzi'), weight:'Kilo', sbp:yz('spi.analytics.buyuk-tansiyon'),
+      readiness:'Toparlanma', load:yz('spi.analytics.antrenman-yuku'), protein:'Protein', kcal:'Kalori',
       fiber:'Lif', sodium:'Sodyum' })[id] || id;
   }
 
@@ -285,7 +311,7 @@ SP.Screens.analytics = (function(){
         options:(measured.length ? measured : SP.BIOMARKERS).map(x => ({ value:x.id, label:x.name })) }),
       body:html`
         ${when(series.length < 2, () => K.Notice({ tone:'info',
-          body:'En az iki ölçüm gerekir; şu an ' + series.length + ' var.' }))}
+          body:yz('spi.analytics.en-az-iki-olcum-gerekir') + series.length + ' var.' }))}
         ${when(series.length >= 2, () => html`
           ${raw(UI.lineChart([{ data:series.map(s => s.v) }], {
             labels:series.map(s => U.fmtShort(s.date)),
@@ -329,14 +355,14 @@ SP.Screens.analytics = (function(){
         ${when(acik, () => K.Notice({ tone:'info', title:yz('spi.analytics.acik-soru'),
           body:acik.question + ' (Bugün ekranında cevaplanabilir.)' }))}
         ${K.Table({ tight:true, headers:['Zincir', { label:yz('spi.analytics.sayi'), num:true }], rows:[
-          ['Açılan sinyal', String(e.opened)],
+          [yz('spi.analytics.acilan-sinyal'), String(e.opened)],
           ['Görüldü', String(e.seen)],
           ['Cevaplandı', String(e.answered)],
           ['«Bana uymuyor» denildi', String(e.dismissed)],
           ['Kapandı', String(e.closed)],
         ] })}
         ${when(e.cert === 'observed', () => K.Table({ tight:true,
-          headers:['Kapanan sinyal', { label:yz('spi.analytics.adet'), num:true }, { label:yz('spi.analytics.ayrisma-kapandi'), num:true }],
+          headers:[yz('spi.analytics.kapanan-sinyal'), { label:yz('spi.analytics.adet'), num:true }, { label:yz('spi.analytics.ayrisma-kapandi'), num:true }],
           rows:[
             ['Cevaplananlar', String(e.answeredClosed),
               e.answeredRate == null ? '—' : '%' + e.answeredRate],
@@ -430,7 +456,7 @@ SP.Screens.analytics = (function(){
           ${(function(){
             const k = SP.Calib.kindOf(S.ui.calibKind || 'weight');
             return html`<p class="tiny dim">${k.ask}</p>
-              ${K.Field({ label:k.type === 'binary' ? 'Olasılık (0–1)' : 'Tahminin'
+              ${K.Field({ label:k.type === 'binary' ? yz('spi.analytics.olasilik-0-1') : 'Tahminin'
                   + (k.unit ? ' (' + k.unit + ')' : ''),
                 input:K.Input({ id:'sp-calib-guess', type:'number', step:'any' }) })}`;
           })()}
@@ -474,7 +500,7 @@ SP.Screens.analytics = (function(){
       wide:true,
       body:html`
         ${when(!ciddi.length, () => K.Notice({ tone:'ok',
-          body:'Beş alanda da bakım borcu görünmüyor. Veri eşiğin '
+          body:yz('spi.analytics.bes-alanda-da-bakim-borcu')
              + 'altındaysa bu «temiz» değil «ölçülmedi» demektir.' }))}
         ${map(SP.Audit.AREAS, a => {
           const bulgular = SP.Audit.of(a.id);
@@ -547,7 +573,7 @@ SP.Screens.analytics = (function(){
             </div>`)}
         </div>
         ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('kavramlar', { baslik:yz('spi.analytics.kavram-notlarim'),
-          ipucu:'Kendi cümlelerinle yaz. Yukarıda bir tanımı seçip «Nota ekle»ye basarak da ekleyebilirsin.' }) : '')}`,
+          ipucu:yz('spi.analytics.kendi-cumlelerinle-yaz-yukar') }) : '')}`,
     });
   }
 
@@ -576,7 +602,7 @@ SP.Screens.analytics = (function(){
     hafta:() => html`${K.Ledger(() => [reportCard(), disciplineCard(),
         K.Entry({ label:yz('spi.analytics.raporun-mantigi'), meta:'sayı nereden gelir',
           note:yz('spi.analytics.sayilar-kural-motorundan-gel')
-            + 'Çelişki varsa öncelik sırası uygulanır ve hangi kuralın kazandığı yazılır.',
+            + yz('spi.analytics.celiski-varsa-oncelik-sirasi'),
           body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
       ])}
@@ -594,7 +620,7 @@ SP.Screens.analytics = (function(){
     try{ return BODIES[t.id](); }
     catch(e){
       console.error('Analiz bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu okuma şu an çizilemedi; verin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('spi.analytics.bu-okuma-su-an-cizilemedi') });
     }
   }
 
@@ -621,7 +647,7 @@ SP.Screens.analytics = (function(){
       <span class="ozet-kare__ad">${o.ad}</span>
       <span class="ozet-kare__deger num">${deger == null ? '—' : deger}<small>${deger == null ? ' veri yok' : ' ' + o.birim}</small></span>
       ${raw(miniSutun(o.seri, o.renk))}
-      <span class="ozet-kare__not">${yedi.length ? o.not + ' · ' + yedi.length + '/7 gün kayıtlı' : 'Son 7 günde kayıt yok'}</span>
+      <span class="ozet-kare__not">${yedi.length ? o.not + ' · ' + yedi.length + '/7 gün kayıtlı' : yz('spi.analytics.son-7-gunde-kayit-yok')}</span>
     </button>`;
   }
   function ozetHtml(){
@@ -683,7 +709,7 @@ SP.Screens.analytics = (function(){
         govde:P.deger(String(Math.round(d[d.length - 1])), birim, not + ' · 14 günün ortalaması ' + Math.round(d.reduce((a, b) => a + b, 0) / d.length))
           + P.sutun({ degerler:l, yukseklik:40, etiket:ad + ', son 14 gün' }) });
     };
-    kartlar.push(izKart(rhr, 'Dinlenik nabız', 'atım/dk', 'son ölçüm'), izKart(hrv, 'HRV', 'ms', 'son ölçüm'));
+    kartlar.push(izKart(rhr, yz('spi.analytics.dinlenik-nabiz'), 'atım/dk', 'son ölçüm'), izKart(hrv, 'HRV', 'ms', 'son ölçüm'));
     /* Kısa uykular: son 14 günün gündüz uykusu dakikası (core/uyku.js). */
     if(SP.Uyku){
       const kd = g14.map(t => { const l = SP.Uyku.liste(t); return l.length ? l.reduce((a, k) => a + (Number(k.dk) || 0), 0) : null; });
@@ -739,7 +765,7 @@ SP.Screens.analytics = (function(){
     const geceler = gunler.map(t => { const v = S.vitals[t] || {};
       return { ad:t, yatis:v.yatis != null ? Number(v.yatis) : null, kalkis:v.kalkis != null ? Number(v.kalkis) : null }; });
     const h = V.uykuDuzeni({ geceler });
-    return h ? '<details class="hiz-ac"><summary>Yatış ve kalkış saatleri</summary>' + h + '</details>' : '';
+    return h ? ('<details class="hiz-ac"><summary>' + yz('spi.analytics.yatis-ve-kalkis-saatleri') + '</summary>') + h + '</details>' : '';
   }
 
   /* Öne çıkan dört okuma görünür (denetim klinik sınırı taşır, AGENTS §1.5);
@@ -766,7 +792,7 @@ SP.Screens.analytics = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'analytics.ayrinti-dugmesi', sayfa:'analytics', yer:'y1', sira:10, ad:'Ayrıntı düğmesi', ciz({ acik, bolumler, bugun }){
-    return K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: kavramlar ve dürüstlük',
+    return K.Button({ label:acik ? yz('spi.analytics.ayrintili-okumalari-gizle') : yz('spi.analytics.ayrintili-okumalar-kavramlar'),
         size:'sm', tone:'ghost', act:'spi-analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } });
   } });
   LIFEOS.PARCA.blok({ id:'analytics.kategorilerhtml', sayfa:'analytics', yer:'y2', sira:10, ad:'Kategoriler', ciz({ acik, bolumler, bugun }){
@@ -840,7 +866,7 @@ SP.Screens.analytics = (function(){
       if(!r.ok){ UI.toast(r.error); return; }
       const h = SP.Calib.error(r.forecast);
       UI.toast(h && h.type === 'ape'
-        ? 'Kapandı — sapma %' + Math.round(h.value * 100) : 'Kapandı');
+        ? yz('spi.analytics.kapandi-sapma') + Math.round(h.value * 100) : 'Kapandı');
       SP.App.render();
     },
   };
@@ -871,17 +897,17 @@ SP.Screens.analytics = (function(){
     title:yz('spi.analytics.analiz'),
     headline(){
       const rows = SP.Calc.crossFindings(60).filter(r => r.ok && !r.weak);
-      if(!rows.length) return 'Belirgin bir bağ bulunamadı.';
+      if(!rows.length) return yz('spi.analytics.belirgin-bir-bag-bulunamadi');
       return rows.length + ' belirgin bağ bulundu.';
     },
     lede(){
-      return 'Birlikte hareket eden iki ölçüm, birinin diğerine sebep olduğu '
+      return yz('spi.analytics.birlikte-hareket-eden-iki-ol')
         + 'anlamına gelmez. Bağ en az ' + SP.Calc.MIN_PAIRS + ' eşleşen gün olduğunda '
         + 'yazılır; altında hiç yazılmaz.';
     },
     subtitle(){
       const rows = SP.Calc.crossFindings(60).filter(r => r.ok && !r.weak);
-      return rows.length ? rows.length + ' belirgin bağ bulundu' : 'Belirgin bağ yok';
+      return rows.length ? rows.length + ' belirgin bağ bulundu' : yz('spi.analytics.belirgin-bag-yok');
     },
     actions(){ return ''; },
     render, afterRender, handle, change,

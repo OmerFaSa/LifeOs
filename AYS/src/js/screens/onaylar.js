@@ -10,6 +10,27 @@
    kural «onaylar tek çekmecede». Bugün'ün Öneri alanı yalnız EN ÖNDEKİ
    kartı gösterir, gerisi burada bekler (`oneriAlani`). Hiçbir şey
    kullanıcı görmeden uygulanmaz; uygulayan AYS'nin kendi kodudur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.onaylar.onerim':'Önerim: ',
+  'ays.onaylar.bir-teklif-uygulanirken-isle':'Bir teklif uygulanırken işlem ',
+  'ays.onaylar.goruldu-olarak-isaretlendi':'Görüldü olarak işaretlendi',
+  'ays.onaylar.i-stenmedi-olarak-isaretlend':'İstenmedi olarak işaretlendi',
+  'ays.onaylar.gunun-kaydi':'Günün kaydı',
+  'ays.onaylar.calisma-blogu':'Çalışma bloğu',
+  'ays.onaylar.gunun-odagi':'Günün odağı',
+  'ays.onaylar.gunu-hafiflet':'Günü hafiflet',
+  'ays.onaylar.bam-materyali':'BAM materyali',
+  'ays.onaylar.test-kitabi':'Test kitabı',
+  'ays.onaylar.bam-urunu':'BAM ürünü',
+  'ays.onaylar.yalniz-bugun-icin':'Yalnız bugün için',
+  'ays.onaylar.bu-hafta-icin':'Bu hafta için',
+  'ays.onaylar.kalici-olarak':'Kalıcı olarak',
+  'ays.onaylar.kapatildi-merkeze-belirsiz-d':'Kapatıldı; merkeze «belirsiz» diye bildirildi.',
+  'ays.onaylar.kapatildi-merkeze-simdilik-b':'Kapatıldı; merkeze şimdilik bildirilemedi.',
+  'ays.onaylar.uygulandi-istersen-geri-alab':'Uygulandı — istersen geri alabilirsin',
+  'ays.onaylar.onerilen-her-degisiklik-bura':'Önerilen her değişiklik burada bekler; sen onaylamadan hiçbiri uygulanmaz.',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -93,7 +114,7 @@ R.Screens.onaylar = (function(){
           <div><b>${t.konu}</b> <span class="tiny dim">${yz('ays.onaylar.is-emri')}${t.id}</span></div>
           ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
           ${when(t.neden, () => c.Notice({ tone:'info', class:'mt-8',
-            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
+            body:yz('ays.onaylar.onerim') + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
               + ' — ' + t.neden + '.' }))}
           <div class="row wrap gap-8 mt-8">
             ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
@@ -119,7 +140,7 @@ R.Screens.onaylar = (function(){
         ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
               soyleriz. Ne tekrar uygulanir ne de olmus sayilir. */''}
         ${map(supheli, d => html`<div class="mt-8">
-          ${c.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem '
+          ${c.Notice({ tone:'warn', body:yz('ays.onaylar.bir-teklif-uygulanirken-isle')
             + 'yarıda kaldı; plana yazılıp yazılmadığı bilinmiyor. Planına '
             + 'bakıp doğrula — bu satır, olmamış bir işi olmuş göstermemek '
             + 'için duruyor.' })}
@@ -207,8 +228,8 @@ R.Screens.onaylar = (function(){
     if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
-      : (r.state === 'acknowledged' ? 'Görüldü olarak işaretlendi'
-        : 'İstenmedi olarak işaretlendi');
+      : (r.state === 'acknowledged' ? yz('ays.onaylar.goruldu-olarak-isaretlendi')
+        : yz('ays.onaylar.i-stenmedi-olarak-isaretlend'));
     /* Merkeze ulasilamadiysa bunu SOYLE: kayit yerelde duruyor ve bir
        sonraki baglantida tekrar denenecek. */
     /* Yük azaltma bir istisna yazar; «Geri al» onu kaldırır (gün temele döner). */
@@ -351,9 +372,9 @@ R.Screens.onaylar = (function(){
      Sistem) ve seviyesi katalogdan gelir. Üstte bölümlü seçici; uygulananlar
      ve son kararlar «Geçmiş» sekmesinde. Bugün'ün öneri alanı aynı kalır. */
   const ON = () => (window.LIFEOS || {}).ONERI;
-  const HKM_AD = { 'kayit.add':'Günün kaydı', 'plan.add':'Çalışma bloğu', 'focus.set':'Günün odağı',
-    'load.reduce':'Günü hafiflet', 'material.add':'BAM materyali', 'kitap.add':'Test kitabı',
-    'urun.add':'BAM ürünü', 'mufredat.add':'Müfredat' };
+  const HKM_AD = { 'kayit.add':yz('ays.onaylar.gunun-kaydi'), 'plan.add':yz('ays.onaylar.calisma-blogu'), 'focus.set':yz('ays.onaylar.gunun-odagi'),
+    'load.reduce':yz('ays.onaylar.gunu-hafiflet'), 'material.add':yz('ays.onaylar.bam-materyali'), 'kitap.add':yz('ays.onaylar.test-kitabi'),
+    'urun.add':yz('ays.onaylar.bam-urunu'), 'mufredat.add':'Müfredat' };
 
   function onaySatir(o){
     return html`<div class="onay-satir">
@@ -372,13 +393,13 @@ R.Screens.onaylar = (function(){
     return onaySatir({ baslik:t.konu, seviye:'orta', ust:yz('ays.onaylar.i-s-emri') + t.id + ' · ücretli iş',
       govde:html`${map(t.secenekler, (x, i) => html`<p class="small mt-6">${i + 1}) ${x.metin}</p>`)}
         ${when(t.neden, () => c.Notice({ tone:'info', class:'mt-8',
-          body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
+          body:yz('ays.onaylar.onerim') + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
       eylem:html`${map(t.secenekler, (x, i) => c.Button({ label:(i + 1) + '. seçeneği onayla', size:'sm',
           tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla', data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
         ${c.Button({ label:yz('ays.onaylar.i-ptal'), size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
   }
   function hkmSatir(n, seviye){
-    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:yz('ays.onaylar.merkez-teklifi'),
+    return onaySatir({ baslik:HKM_AD[n.kind] || yz('ays.onaylar.merkez-teklifi'), seviye, ust:yz('ays.onaylar.merkez-teklifi'),
       govde:html`<p class="small mt-6">${n.note}</p>${when(n.kind === 'kayit.add', () => KayitOkuma(n))}`,
       eylem:html`${when(R.Beacon.canApply(n), () => c.Button({
           label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'load.reduce':'Hafiflet' })[n.kind] || 'Uygula',
@@ -542,7 +563,7 @@ R.Screens.onaylar = (function(){
       const id = String(el.name || '').replace(/^kapsam-/, '');
       const r = await R.Proposals.kapsamla(id, el.value);
       if(!r.ok){ UI.toast(r.why); return; }
-      UI.toast({ bugun:'Yalnız bugün için', hafta:'Bu hafta için', kalici:'Kalıcı olarak' }[el.value]
+      UI.toast({ bugun:yz('ays.onaylar.yalniz-bugun-icin'), hafta:yz('ays.onaylar.bu-hafta-icin'), kalici:yz('ays.onaylar.kalici-olarak') }[el.value]
         + ' önerildi; onaylamadan uygulanmaz.');
       R.App.render();
     },
@@ -579,15 +600,15 @@ R.Screens.onaylar = (function(){
       const r = await R.Beacon.clearDoubt(el.dataset.id);
       S.ui.hkmDoubts = (S.ui.hkmDoubts || [])
         .filter(x => String(x.id) !== el.dataset.id);
-      UI.toast(r.reported ? 'Kapatıldı; merkeze «belirsiz» diye bildirildi.'
-        : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
+      UI.toast(r.reported ? yz('ays.onaylar.kapatildi-merkeze-belirsiz-d')
+        : yz('ays.onaylar.kapatildi-merkeze-simdilik-b'));
       R.App.render();
     },
     /* Onay kapisi: uygulama YALNIZ buradan gecer. */
     async 'office-approve'(el){
       const res = await R.Proposals.approve(el.dataset.id);
       if(!res) return;
-      UI.toast(res.ok ? 'Uygulandı — istersen geri alabilirsin' : res.why);
+      UI.toast(res.ok ? yz('ays.onaylar.uygulandi-istersen-geri-alab') : res.why);
       R.App.render();
     },
 
@@ -617,7 +638,7 @@ R.Screens.onaylar = (function(){
       const n = bekleyen();
       return n ? n + ' öneri onayını bekliyor' : 'bekleyen öneri yok';
     },
-    lede(){ return 'Önerilen her değişiklik burada bekler; sen onaylamadan hiçbiri uygulanmaz.'; },
+    lede(){ return yz('ays.onaylar.onerilen-her-degisiklik-bura'); },
     actions(){ return ''; },
     render, handle, bekleyen, oneriAlani,
   };

@@ -15,6 +15,15 @@
 
    Desteklenmeyen tarayıcıda katman sessizce yok olur: düğme
    çizilmez, elle giriş yolu zaten her yerde durur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.listen.bu-tarayici-ses-tanimayi-des':'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
+  'ays.core.listen.mikrofon-izni-verilmedi':'Mikrofon izni verilmedi.',
+  'ays.core.listen.mikrofon-bulunamadi':'Mikrofon bulunamadı.',
+  'ays.core.listen.ses-tanima-icin-baglanti-ger':'Ses tanıma için bağlantı gerekiyor.',
+  'ays.core.listen.mikrofon-baslatilamadi':'Mikrofon başlatılamadı.',
+  'ays.core.listen.ses-tanima-calismadi':'Ses tanıma çalışmadı.',
+});
+
 
 window.R = window.R || {};
 
@@ -106,14 +115,14 @@ R.Listen = (function(){
   }
 
   const MESAJ = {
-    unsupported:'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
-    'not-allowed':'Mikrofon izni verilmedi.',
-    'service-not-allowed':'Mikrofon izni verilmedi.',
-    'audio-capture':'Mikrofon bulunamadı.',
-    network:'Ses tanıma için bağlantı gerekiyor.',
-    start:'Mikrofon başlatılamadı.',
+    unsupported:yz('ays.core.listen.bu-tarayici-ses-tanimayi-des'),
+    'not-allowed':yz('ays.core.listen.mikrofon-izni-verilmedi'),
+    'service-not-allowed':yz('ays.core.listen.mikrofon-izni-verilmedi'),
+    'audio-capture':yz('ays.core.listen.mikrofon-bulunamadi'),
+    network:yz('ays.core.listen.ses-tanima-icin-baglanti-ger'),
+    start:yz('ays.core.listen.mikrofon-baslatilamadi'),
   };
-  function message(kod){ return MESAJ[kod] || 'Ses tanıma çalışmadı.'; }
+  function message(kod){ return MESAJ[kod] || yz('ays.core.listen.ses-tanima-calismadi'); }
 
   return { supported, start, stop, isActive, activeTarget, dictateInto, message };
 })();

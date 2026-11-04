@@ -49,6 +49,13 @@
         ilk işaret kilitlenir, boş yanlış sayılmaz, yanlışlar Yanlışlarım'a
         düşer, plan ve kapanış bu sonuca bakmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.ogrentest.okudugun-konularda-yalniz':'Okuduğun konularda yalnız ',
+  'ays.core.ogrentest.henuz-okudum-dedigin-konu-yo':'Henüz «Okudum» dediğin konu yok; «bütün konular»ı seç ya da önce bir konu oku.',
+  'ays.core.ogrentest.bu-secimde-yeterli-soru-yok':'Bu seçimde yeterli soru yok.',
+  'ays.core.ogrentest.uygulamadaki-cevap':'Uygulamadaki cevap: ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.ogrentest.tyt':'TYT',
   'ays.core.ogrentest.ayt-sayisal':'AYT · sayısal',
   'ays.core.ogrentest.boyle-bir-sinav-yok':'Böyle bir sınav yok.',
@@ -166,9 +173,9 @@ R.OgrenTest = (function(){
     if(h.length < EN_AZ){
       return { ok:false, neden:'az', n:h.length,
         metin:k.konular === 'okunan'
-          ? (h.length ? 'Okuduğun konularda yalnız ' + h.length + ' soru var; «bütün konular»ı seç ya da birkaç konu daha oku.'
-            : 'Henüz «Okudum» dediğin konu yok; «bütün konular»ı seç ya da önce bir konu oku.')
-          : 'Bu seçimde yeterli soru yok.' };
+          ? (h.length ? yz('ays.core.ogrentest.okudugun-konularda-yalniz') + h.length + ' soru var; «bütün konular»ı seç ya da birkaç konu daha oku.'
+            : yz('ays.core.ogrentest.henuz-okudum-dedigin-konu-yo'))
+          : yz('ays.core.ogrentest.bu-secimde-yeterli-soru-yok') };
     }
     const secilen = serpistir(karistir(h).slice(0, n));
     doc.aktif = { id:R.U.uid('ot'), kapsam:k, sorular:secilen.map(x => x.k), cevaplar:{}, sira:0, basladi:simdi() };
@@ -416,7 +423,7 @@ R.OgrenTest = (function(){
     return isaretliler().map((x, j) => (j + 1) + '. ' + x.subject.name + ' · ' + x.topic.name + ' · ' + x.k + '\n'
       + d(x.q.soru).replace(/\n/g, ' ') + (O().ekMetni(x.q) ? ' ' + O().ekMetni(x.q) : '') + '\n'
       + x.q.sec.map((m, i) => O().HARFLER[i] + ') ' + d(m)).join('  ') + '\n'
-      + 'Uygulamadaki cevap: ' + x.q.dogru + (x.isaret.not ? '\nNot: ' + x.isaret.not : '')).join('\n\n');
+      + yz('ays.core.ogrentest.uygulamadaki-cevap') + x.q.dogru + (x.isaret.not ? '\nNot: ' + x.isaret.not : '')).join('\n\n');
   }
 
   return { STORE, BOYLAR, EN_AZ, PROVA, PROVA_BOY, provaPlani, provaBaslat, kalanSn, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,

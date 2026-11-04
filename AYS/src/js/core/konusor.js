@@ -20,6 +20,11 @@
         arka yüze yazar (kaynak «konusor»); kart düzeltilir ya da silinir.
    Çağrı soru çözümündeki koç zinciriyle yapılır (core/solver.js talk). */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.konusor.ders':'Ders: ',
+  'ays.core.konusor.model-su-an-yanit-veremedi':'Model şu an yanıt veremedi.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.konusor.konu-bulunamadi':'Konu bulunamadı.',
   'ays.core.konusor.neyi-anlamadigini-bir-cumley':'Neyi anlamadığını bir cümleyle yaz.',
   'ays.core.konusor.model-bagli-degil-ofis':'Model bağlı değil. Ofis › Ofis ayarlarından ücretsiz bir sağlayıcı ',
@@ -53,7 +58,7 @@ R.KonuSor = (function(){
     const oz = (R.KONU_OZET || {})[topic.id];
     const duz = R.Ogren ? R.Ogren.duzMetin : String;
     const ozet = oz ? oz.ana.map(m => '- ' + duz(m)).join('\n').slice(0, 900) : '';
-    return 'Ders: ' + subject.name + (topic.group ? '\nBölüm: ' + topic.group : '') + '\nKonu: ' + topic.name
+    return yz('ays.core.konusor.ders') + subject.name + (topic.group ? '\nBölüm: ' + topic.group : '') + '\nKonu: ' + topic.name
       + (ozet ? '\nUygulamadaki kısa özet (bununla aynı dili kullan):\n' + ozet : '')
       + (parca ? '\nAnlamadığım parça:\n«' + String(parca).slice(0, 1200) + '»' : '');
   }
@@ -85,7 +90,7 @@ R.KonuSor = (function(){
     }catch(err){
       const kod = err && err.code;
       if(kod === 'cancelled') return { ok:false, neden:'iptal', metin:yz('ays.core.konusor.vazgecildi') };
-      return { ok:false, neden:'hata', metin:R.LLM.errorText ? R.LLM.errorText(kod) : 'Model şu an yanıt veremedi.' };
+      return { ok:false, neden:'hata', metin:R.LLM.errorText ? R.LLM.errorText(kod) : yz('ays.core.konusor.model-su-an-yanit-veremedi') };
     }
   }
 

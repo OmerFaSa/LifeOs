@@ -16,11 +16,15 @@
    Kural: yalnız `file://` ile açılışta ve yalnız bir KİMLİK görseli
    gerçekten yüklenemediğinde, oturum başına BİR KEZ söylenir. Sunucuyla
    (BASLAT.bat) açılışta hiçbir şey yapılmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.gorsel.gorseller-bu-dosyanin-yanind':'Görseller bu dosyanın yanında değil: rütbe resimleri, ajan portreleri ve ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
 LIFEOS.Gorsel = (function(){
-  const METIN = 'Görseller bu dosyanın yanında değil: rütbe resimleri, ajan portreleri ve '
+  const METIN = yz('ortak.gorsel.gorseller-bu-dosyanin-yanind')
     + 'logolar img klasöründe durur. Hepsini görmek için sistemi BASLAT.bat ile aç ya da '
     + 'bu klasörde «python3 build.py» çalıştır.';
   const ANAHTAR = 'lifeos.gorselUyarisi';

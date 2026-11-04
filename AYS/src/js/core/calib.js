@@ -33,6 +33,28 @@
 
    4. BEŞİN ALTINDA KAYIT HÜKÜM VERMEZ. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.calib.bu-denemeyi-okumadan-once-ka':'Bu denemeyi okumadan önce: kaç net çıkardığını tahmin ediyorsun?',
+  'ays.core.calib.bu-testte-kac-net-yaptigini':'Bu testte kaç net yaptığını tahmin ediyorsun?',
+  'ays.core.calib.bu-konu-testinden-yuzde-kac':'Bu konu testinden yüzde kaç çıkaracaksın?',
+  'ays.core.calib.bu-hafta-bloklara-kac-dakika':'Bu hafta bloklara kaç dakika gerçekleşen süre yazacaksın?',
+  'ays.core.calib.bu-haftanin-planini-tamamlam':'Bu haftanın planını tamamlama olasılığın nedir?',
+  'ays.core.calib.bilinmeyen-tahmin-turu':'Bilinmeyen tahmin türü.',
+  'ays.core.calib.tahmin-bir-sayi-olmali':'Tahmin bir sayı olmalı.',
+  'ays.core.calib.olasilik-0-ile-1-arasinda':'Olasılık 0 ile 1 arasında olmalı.',
+  'ays.core.calib.tahmin-negatif-olamaz':'Tahmin negatif olamaz.',
+  'ays.core.calib.tahmin-bulunamadi':'Tahmin bulunamadı.',
+  'ays.core.calib.bu-tahmin-zaten-kapandi':'Bu tahmin zaten kapandı.',
+  'ays.core.calib.gercek-deger-bir-sayi-olmali':'Gerçek değer bir sayı olmalı.',
+  'ays.core.calib.bu-tahmin':'Bu tahmin ',
+  'ays.core.calib.kendini-oldugundan-iyi-tahmi':'Kendini olduğundan iyi tahmin etme eğilimindesin.',
+  'ays.core.calib.kendini-oldugundan-kotu-tahm':'Kendini olduğundan kötü tahmin etme eğilimindesin.',
+  'ays.core.calib.sistemli-bir-yanlilik-gorunm':'Sistemli bir yanlılık görünmüyor.',
+  'ays.core.calib.kapanmis':'Kapanmış ',
+  'ays.core.calib.brier':'Brier ',
+  'ays.core.calib.son':'Son ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.calib.deneme-netin':'Deneme netin',
   'ays.core.calib.tek-testin-neti':'Tek testin neti',
   'ays.core.calib.konu-testi-yuzden':'Konu testi yüzden',
@@ -53,19 +75,19 @@ R.Calib = (function(){
   R.CALIB_KINDS = [
     { id:'exam-net', type:'number', unit:'net', err:'abs', bands:[3, 7, 14],
       label:yz('ays.core.calib.deneme-netin'),
-      ask:'Bu denemeyi okumadan önce: kaç net çıkardığını tahmin ediyorsun?' },
+      ask:yz('ays.core.calib.bu-denemeyi-okumadan-once-ka') },
     { id:'test-net', type:'number', unit:'net', err:'abs', bands:[1.5, 3, 6],
       label:yz('ays.core.calib.tek-testin-neti'),
-      ask:'Bu testte kaç net yaptığını tahmin ediyorsun?' },
+      ask:yz('ays.core.calib.bu-testte-kac-net-yaptigini') },
     { id:'topic-test', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
       label:yz('ays.core.calib.konu-testi-yuzden'),
-      ask:'Bu konu testinden yüzde kaç çıkaracaksın?' },
+      ask:yz('ays.core.calib.bu-konu-testinden-yuzde-kac') },
     { id:'week-minutes', type:'number', unit:'dk', err:'ape',
       label:yz('ays.core.calib.haftalik-calisma-suren'),
-      ask:'Bu hafta bloklara kaç dakika gerçekleşen süre yazacaksın?' },
+      ask:yz('ays.core.calib.bu-hafta-bloklara-kac-dakika') },
     { id:'week-plan', type:'binary', unit:'', err:'brier',
       label:yz('ays.core.calib.hafta-plani'),
-      ask:'Bu haftanın planını tamamlama olasılığın nedir?' },
+      ask:yz('ays.core.calib.bu-haftanin-planini-tamamlam') },
   ];
 
   const KIND_BY_ID = R.CALIB_KINDS.reduce((m, k) => { m[k.id] = k; return m; }, {});
@@ -97,14 +119,14 @@ R.Calib = (function(){
   async function open(kindId, guess, opts){
     const o = opts || {};
     const k = kindOf(kindId);
-    if(!k) return { ok:false, error:'Bilinmeyen tahmin türü.' };
+    if(!k) return { ok:false, error:yz('ays.core.calib.bilinmeyen-tahmin-turu') };
     const g = Number(guess);
-    if(!isFinite(g)) return { ok:false, error:'Tahmin bir sayı olmalı.' };
+    if(!isFinite(g)) return { ok:false, error:yz('ays.core.calib.tahmin-bir-sayi-olmali') };
     if(k.type === 'binary' && (g < 0 || g > 1)){
-      return { ok:false, error:'Olasılık 0 ile 1 arasında olmalı.' };
+      return { ok:false, error:yz('ays.core.calib.olasilik-0-ile-1-arasinda') };
     }
     if(k.type === 'number' && g < 0){
-      return { ok:false, error:'Tahmin negatif olamaz.' };
+      return { ok:false, error:yz('ays.core.calib.tahmin-negatif-olamaz') };
     }
     const kayit = norm({ kind:kindId, guess:g, ref:o.ref || null, note:o.note,
       dueAt:o.dueAt || null, blind:o.blind !== false });
@@ -115,13 +137,13 @@ R.Calib = (function(){
 
   async function settle(id, actual){
     const f = list().filter(x => x.id === id)[0];
-    if(!f) return { ok:false, error:'Tahmin bulunamadı.' };
-    if(f.actual != null) return { ok:false, error:'Bu tahmin zaten kapandı.' };
+    if(!f) return { ok:false, error:yz('ays.core.calib.tahmin-bulunamadi') };
+    if(f.actual != null) return { ok:false, error:yz('ays.core.calib.bu-tahmin-zaten-kapandi') };
     const a = Number(actual);
-    if(!isFinite(a)) return { ok:false, error:'Gerçek değer bir sayı olmalı.' };
+    if(!isFinite(a)) return { ok:false, error:yz('ays.core.calib.gercek-deger-bir-sayi-olmali') };
     if(f.dueAt && U.todayISO() < f.dueAt){
       return { ok:false, early:true,
-        error:'Bu tahmin ' + f.dueAt + ' tarihinden önce kapanmaz.' };
+        error:yz('ays.core.calib.bu-tahmin') + f.dueAt + ' tarihinden önce kapanmaz.' };
     }
     f.actual = a;
     f.settledAt = new Date().toISOString();
@@ -254,9 +276,9 @@ R.Calib = (function(){
     const ESIK = 0.25;
     return { cert:'measured', n:kayitlar.length, value:v, unit:'bant',
       direction:v > ESIK ? 'over' : v < -ESIK ? 'under' : 'even',
-      note:(v > ESIK ? 'Kendini olduğundan iyi tahmin etme eğilimindesin.'
-        : v < -ESIK ? 'Kendini olduğundan kötü tahmin etme eğilimindesin.'
-        : 'Sistemli bir yanlılık görünmüyor.')
+      note:(v > ESIK ? yz('ays.core.calib.kendini-oldugundan-iyi-tahmi')
+        : v < -ESIK ? yz('ays.core.calib.kendini-oldugundan-kotu-tahm')
+        : yz('ays.core.calib.sistemli-bir-yanlilik-gorunm'))
         + (Math.abs(v) > ESIK
            ? ' Ortalama sapman, kendi «makul» bandının '
              + ondalik(Math.abs(v)) + ' katı kadar tek yöne kayıyor.'
@@ -277,7 +299,7 @@ R.Calib = (function(){
       bias:bias() };
 
     if(hepsi.length < ASGARI){
-      out.note = 'Kapanmış ' + hepsi.length + ' tahmin var; puan için '
+      out.note = yz('ays.core.calib.kapanmis') + hepsi.length + ' tahmin var; puan için '
         + ASGARI + ' gerekir. Az sayıda tahmin hüküm vermez.';
       return out;
     }
@@ -310,10 +332,10 @@ R.Calib = (function(){
       return g.label + ': ' + (g.type === 'ape'
         ? '%' + Math.round(g.mean * 100) + ' sapma'
         : g.type === 'brier'
-        ? 'Brier ' + ondalik(g.mean)
+        ? yz('ays.core.calib.brier') + ondalik(g.mean)
         : ondalik(g.mean) + (g.unit ? ' ' + g.unit : '') + ' sapma');
     });
-    out.note = 'Son ' + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
+    out.note = yz('ays.core.calib.son') + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
       + '. Ortanca bant: ' + (out.grade || '—') + '. Farklı birimler tek '
       + 'ortalamada toplanmaz; karşılaştırılan şey banttır.';
     return out;

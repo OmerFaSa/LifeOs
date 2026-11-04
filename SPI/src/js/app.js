@@ -4,6 +4,39 @@
    SP.S'yi okur. Bir ekranın çizilirken hata vermesi diğerlerini kapatmaz:
    hata paneline düşer, kenar çubuğu açılmaya devam eder. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.app.oteki-ekranlar-menuden-acilm':'Öteki ekranlar menüden açılmaya devam eder.',
+  'spi.app.yeniden-yukle':'Yeniden yükle',
+  'spi.app.ornek-veriye-gec':'Örnek veriye geç',
+  'spi.app.ornek-bir-profil-acilir-gerc':'Örnek bir profil açılır. Gerçek verin ayrı anahtarda durur, ',
+  'spi.app.ornek-veriden-cik':'Örnek veriden çık',
+  'spi.app.ornek-kayitlar-silinir-ve-ge':'Örnek kayıtlar silinir ve gerçek profiline dönersin.',
+  'spi.app.bu-cihaz-yerel':'Bu cihaz (yerel)',
+  'spi.app.hesaba-bagli-kopya':'Hesaba bağlı kopya',
+  'spi.app.son-hata':'Son hata',
+  'spi.app.verilerin-bu-cihazda-tutulma':'Verilerin bu cihazda tutulmaya devam ediyor. ',
+  'spi.app.guvende-olmak-icin-rehber':'Güvende olmak için Rehber → Veri bölümünden yedek al.',
+  'spi.app.yeni-rozet':'Yeni rozet',
+  'spi.app.kademe':'Kademe ',
+  'spi.app.yeni-kademe':'Yeni kademe',
+  'spi.app.yeni-rutbe-2':'Yeni rütbe',
+  'spi.app.kayit-sorunu':'Kayıt sorunu',
+  'spi.app.senkronizasyon-sorunu':'Senkronizasyon sorunu',
+  'spi.app.kisisel-ve-aile-odakli-sagli':'Kişisel ve aile odaklı sağlık performans izleyicisi',
+  'spi.app.ofis-i-nceleme-yi-acar-hafta':'Ofis › İnceleme’yi açar: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.',
+  'spi.app.bu-cihazdaki-ogun-ve-vucut':'Bu cihazdaki öğün ve vücut fotoğraflarına dokunulmaz.',
+  'spi.app.bugun-icin-plan-maddesi-yok':'Bugün için plan maddesi yok; Planlar’dan rutin ekleyebilirsin.',
+  'spi.app.uykun-son-7-gecede-ortalama':'Uykun son 7 gecede ortalama ',
+  'spi.app.fotograf-acilamadi':'Fotoğraf açılamadı.',
+  'spi.app.fotograftan-ogun-penceresini':'Fotoğraftan öğün penceresini bu fotoğrafla açtım; «Oku»ya bas.',
+  'spi.app.uyku-2':'Uyku ',
+  'spi.app.uyku-girilmedi':'Uyku girilmedi',
+  'spi.app.su':'Su ',
+  'spi.app.ogun-yok':'Öğün yok',
+  'spi.app.i-lac-takviye':'İlaç / takviye',
+  'spi.app.yeniden-dene':'Yeniden dene',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.app.bugunun-olcumu-girilmedi':'Bugünün ölçümü girilmedi',
   'spi.app.haftalik-butce-asildi':'Haftalık bütçe aşıldı',
   'spi.app.yedek-alma-zamani':'Yedek alma zamanı',
@@ -535,7 +568,7 @@ SP.App = (function(){
   function errorPanel(err){
     const msg = (err && err.message) ? err.message : String(err);
     return String(SP.C.SakinHata({ ayrinti:msg,
-      not:'Öteki ekranlar menüden açılmaya devam eder.' }));
+      not:yz('spi.app.oteki-ekranlar-menuden-acilm') }));
   }
 
 
@@ -877,7 +910,7 @@ SP.App = (function(){
       console.error('Render hatası:', err);
       const govde = document.getElementById('app');
       if(govde) govde.innerHTML = String(html`<div class="wrapc content">
-        ${SP.C.SakinHata({ baslik:yz('spi.app.ekran-cizilemedi'), dugme:'Yeniden yükle',
+        ${SP.C.SakinHata({ baslik:yz('spi.app.ekran-cizilemedi'), dugme:yz('spi.app.yeniden-yukle'),
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }finally{
@@ -982,14 +1015,14 @@ SP.App = (function(){
     /* 172: geçiş sayfa yenilenerek olur; depo profili açılışta okur. */
     async 'ornek-gir'(){
       if(!SP.Ornek) return;
-      UI.confirmSheet('Örnek veriye geç', 'Örnek bir profil açılır. Gerçek verin ayrı anahtarda durur, '
+      UI.confirmSheet(yz('spi.app.ornek-veriye-gec'), yz('spi.app.ornek-bir-profil-acilir-gerc')
         + 'değişmez ve Merkez’e gitmez; çıkınca örnek kayıtlar silinir.',
-        () => { if(SP.Ornek.gir()) location.reload(); }, false, 'Örnek veriye geç');
+        () => { if(SP.Ornek.gir()) location.reload(); }, false, yz('spi.app.ornek-veriye-gec'));
     },
     async 'ornek-cik'(){
       if(!SP.Ornek) return;
-      UI.confirmSheet('Örnek veriden çık', 'Örnek kayıtlar silinir ve gerçek profiline dönersin.',
-        () => { if(SP.Ornek.cik()) location.reload(); }, false, 'Örnek veriden çık');
+      UI.confirmSheet(yz('spi.app.ornek-veriden-cik'), yz('spi.app.ornek-kayitlar-silinir-ve-ge'),
+        () => { if(SP.Ornek.cik()) location.reload(); }, false, yz('spi.app.ornek-veriden-cik'));
     },
     /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
     async 'ayar-git'(el){
@@ -1129,13 +1162,13 @@ SP.App = (function(){
         body:String(K.Stack([
           K.Notice({ tone:sh.error.scope.indexOf('local') === 0 ? 'danger' : 'warn', body:sh.error.message }),
           K.Table({ tight:true, headers:['Alan', 'Durum'], rows:[
-            ['Bu cihaz (yerel)', state(h.local, 'çalışıyor')],
-            ['Hesaba bağlı kopya', state(h.cloud, 'çalışıyor')],
-            ['Son hata', html`<span class="small">${sh.error.scope} · ${sh.error.code}</span>`],
+            [yz('spi.app.bu-cihaz-yerel'), state(h.local, 'çalışıyor')],
+            [yz('spi.app.hesaba-bagli-kopya'), state(h.cloud, 'çalışıyor')],
+            [yz('spi.app.son-hata'), html`<span class="small">${sh.error.scope} · ${sh.error.code}</span>`],
             ['Zaman', html`<span class="small">${new Date(sh.error.at).toLocaleString('tr-TR')}</span>`],
           ] }),
-          K.Notice({ tone:'info', body:'Verilerin bu cihazda tutulmaya devam ediyor. '
-            + 'Güvende olmak için Rehber → Veri bölümünden yedek al.' }),
+          K.Notice({ tone:'info', body:yz('spi.app.verilerin-bu-cihazda-tutulma')
+            + yz('spi.app.guvende-olmak-icin-rehber') }),
         ])),
         footer:String(html`${K.Button({ label:yz('spi.app.kapat'), act:'sheet-close' })}
           ${K.Button({ label:yz('spi.app.rehbere-git'), tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
@@ -1219,7 +1252,7 @@ SP.App = (function(){
       const adlar = rozetBirikim;
       rozetBirikim = [];
       if(!adlar.length) return;
-      const ust = adlar.length === 1 ? 'Yeni rozet' : adlar.length + ' yeni rozet';
+      const ust = adlar.length === 1 ? yz('spi.app.yeni-rozet') : adlar.length + ' yeni rozet';
       const ad = adlar.length === 1 ? adlar[0] : adlar[0] + ' · +' + (adlar.length - 1);
       const V = (window.LIFEOS || {}).VITRIN;
       if(!(rozetSakin && V && V.sakinGoster && V.sakinGoster({ ust, ad, sistem:'SPİ' })))
@@ -1250,11 +1283,11 @@ SP.App = (function(){
       .then(() => SP.XP.tazele()).catch(() => {});
     const sonuc = SP.Perde.kutla(y, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
-      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
+      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || (yz('spi.app.kademe') + y.kademe);
       /* 143: sakin seçildiyse kısa parlama; yoksa (hareket azaltma) toast. */
       const V = (window.LIFEOS || {}).VITRIN;
       const renkAd = (y.kademeBilgi && y.kademeBilgi.id) || '';
-      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
+      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? yz('spi.app.yeni-kademe') : yz('spi.app.yeni-rutbe-2'),
         ad:ad + ' ' + y.etiket, sistem:'SPİ', renk:renkAd })))
         UI.toast(yz('spi.app.yeni-rutbe') + ad + ' ' + y.etiket);
       damgala();
@@ -1578,7 +1611,7 @@ SP.App = (function(){
     const sh = S.storeHealth;
     if(!sh || !sh.error) return '';
     const isLocal = sh.error.scope.indexOf('local') === 0;
-    return SP.C.Button({ label:isLocal ? 'Kayıt sorunu' : 'Senkronizasyon sorunu', icon:'warn',
+    return SP.C.Button({ label:isLocal ? yz('spi.app.kayit-sorunu') : yz('spi.app.senkronizasyon-sorunu'), icon:'warn',
       size:'sm', tone:'danger', block:true, act:'show-store-error', data:{ id:'store-health' } });
   }
 
@@ -1608,7 +1641,7 @@ SP.App = (function(){
       /* Göreli kapsam gömülü (data:) manifestte çözülemez ve yok sayılır. */
       scope:new URL('./', location.href).href,
       display:'standalone', background_color:'#F7F8FA', theme_color:'#3D3F8F',
-      lang:'tr', description:'Kişisel ve aile odaklı sağlık performans izleyicisi',
+      lang:'tr', description:yz('spi.app.kisisel-ve-aile-odakli-sagli'),
       icons:[{ src:icon, sizes:'192x192', type:'image/png', purpose:'any maskable' }],
     };
     try{
@@ -1827,7 +1860,7 @@ SP.App = (function(){
           /* Toplantı İnceleme'ye dönüştü (2026-10-20): model çağrısı yok,
              ekran kendi verisinden kurulur; bu yüzden küçük seviye. */
           eylemler:[{ id:'inceleme', seviye:'kucuk', ad:yz('spi.app.veri-incelemesini-ac'),
-            aciklama:'Ofis › İnceleme’yi açar: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.',
+            aciklama:yz('spi.app.ofis-i-nceleme-yi-acar-hafta'),
             anla:t => /(toplant|incele)/.test(t) && /(başlat|başla|aç|yap|topla|kur|göster)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
             onizle:() => ({ metin:yz('spi.app.ofis-i-nceleme-acilacak-haft') }),
             uygula:async () => {
@@ -1844,7 +1877,7 @@ SP.App = (function(){
           },
           donus:{ al:() => SP.Store.exportAll(), yukle:v => SP.Store.importAll(v), sil:() => SP.Store.clear(),
             sayi:() => Object.keys(SP.Store.exportAll().data || {}).length,
-            foto:'Bu cihazdaki öğün ve vücut fotoğraflarına dokunulmaz.' } });
+            foto:yz('spi.app.bu-cihazdaki-ogun-ve-vucut') } });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
@@ -1902,7 +1935,7 @@ SP.App = (function(){
                   durum:s.tamam ? 'bitti' : 'sirada', route:'planlar', an:H.zamanAn(m.zaman) });
               }));
               og.sort((a, b) => a.an - b.an);
-              return { ogeler:og, not:og.length ? '' : 'Bugün için plan maddesi yok; Planlar’dan rutin ekleyebilirsin.' };
+              return { ogeler:og, not:og.length ? '' : yz('spi.app.bugun-icin-plan-maddesi-yok') };
             },
             istatistik:() => {
               const uyku = [];
@@ -1938,7 +1971,7 @@ SP.App = (function(){
                 return l.length >= 3 ? Math.round(l.reduce((a, b) => a + b, 0) / l.length * 10) / 10 : null; };
               const a = ort(0), o = ort(7);
               return { kartlar:[{ ad:yz('spi.app.uyku-son-7-gece'), deger:a, birim:'sa', etiket:yz('spi.app.hesaplandi'), alt:o != null ? 'önceki 7 gece: ' + o + ' sa' : '' }],
-                sinyal:a != null && o != null && a < o - 0.7 ? 'Uykun son 7 gecede ortalama ' + String(Math.round((o - a) * 10) / 10).replace('.', ',') + ' saat azaldı.' : '' };
+                sinyal:a != null && o != null && a < o - 0.7 ? yz('spi.app.uykun-son-7-gecede-ortalama') + String(Math.round((o - a) * 10) / 10).replace('.', ',') + ' saat azaldı.' : '' };
             },
             olcu:{
               liste:[{ id:'uyku', ad:yz('spi.app.uyku'), birim:'sa' }, { id:'his', ad:yz('spi.app.gunun-hissi'), birim:'/5' }, { id:'yatis', ad:yz('spi.app.yatis-saati'), birim:'' }],
@@ -1961,8 +1994,8 @@ SP.App = (function(){
             go('meals');
             await new Promise(r => setTimeout(r, 80));
             const ok = SP.Screens.meals.fotoKoy ? SP.Screens.meals.fotoKoy(f) : false;
-            if(!ok) return 'Fotoğraf açılamadı.';
-            return 'Fotoğraftan öğün penceresini bu fotoğrafla açtım; «Oku»ya bas.'
+            if(!ok) return yz('spi.app.fotograf-acilamadi');
+            return yz('spi.app.fotograftan-ogun-penceresini')
               + (SP.Extract && SP.Extract.modelReady && SP.Extract.modelReady() ? '' : ' Görüntü okuyan bir yapay zekâ bağlı değil; bağlayınca okuyabilirim.');
           } }], hkm:() => SP.Beacon,
           git:(route, ek) => { if(route === 'move' && ek && ek.sekme) S.ui.moveTab = ek.sekme; go(route); },
@@ -1970,9 +2003,9 @@ SP.App = (function(){
             const d = U.todayISO(), v = M.vitalsOf(d) || {}, og = (M.mealsOf(d) || []).length;
             const dk = (M.workoutsOf(d) || []).reduce((a, w) => a + (Number(w.minutes) || 0), 0);
             return [SP.Screens.today.headline(),
-              [v.sleep != null ? 'Uyku ' + U.fmtNum(v.sleep) + ' sa' : 'Uyku girilmedi',
-                v.water != null ? 'Su ' + U.fmtNum(Math.round(v.water / 100) / 10) + ' L' : null,
-                og ? og + ' öğün' : 'Öğün yok', dk ? dk + ' dk hareket' : null].filter(Boolean).join(' · ')];
+              [v.sleep != null ? yz('spi.app.uyku-2') + U.fmtNum(v.sleep) + ' sa' : yz('spi.app.uyku-girilmedi'),
+                v.water != null ? yz('spi.app.su') + U.fmtNum(Math.round(v.water / 100) / 10) + ' L' : null,
+                og ? og + ' öğün' : yz('spi.app.ogun-yok'), dk ? dk + ' dk hareket' : null].filter(Boolean).join(' · ')];
           },
           /* Veri kapısı ortak giriş kapısıdır (aşağıda GIRIS.kur). */ });
       }
@@ -2012,7 +2045,7 @@ SP.App = (function(){
           /* Saatli hatırlatmalar ve bugün girilen öğünler. İlaç adı yayınlanmaz
              (core/hatirlat.js söz 3): yalnız «İlaç / takviye». */
           const l = (SP.Hatirlat ? SP.Hatirlat.bugun() : []).map(h => ({ id:h.anahtar,
-            ad:h.tur === 'ilac' ? 'İlaç / takviye' : h.ad, saat:h.saat,
+            ad:h.tur === 'ilac' ? yz('spi.app.i-lac-takviye') : h.ad, saat:h.saat,
             durum:h.durum === 'yapildi' ? 'bitti' : h.durum === 'vakti' ? 'vakti' : 'bekliyor', rota:'today' }));
           const DL = { kahvalti:'sabah', ara1:'sabah', ogle:'ogle', ara2:'ogle', aksam:'aksam', gece:'gece' };
           (SP.S.meals[SP.U.todayISO()] || []).forEach(o => {
@@ -2166,7 +2199,7 @@ SP.App = (function(){
     }catch(err){
       console.error('Açılış hatası:', err);
       const markup = String(html`<div class="content">
-        ${SP.C.SakinHata({ baslik:yz('spi.app.uygulama-acilamadi'), dugme:'Yeniden dene',
+        ${SP.C.SakinHata({ baslik:yz('spi.app.uygulama-acilamadi'), dugme:yz('spi.app.yeniden-dene'),
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }

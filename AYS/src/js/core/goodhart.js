@@ -22,6 +22,15 @@
 
    4. KÜÇÜK HACİMDE GÜRÜLTÜ VARDIR; eşiğin altındaki hacim değerlendirilmez. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.goodhart.soru-sayisi-artarken-net-yer':'Soru sayısı artarken net yerinde sayıyor — kolay soruları mı ',
+  'ays.core.goodhart.daha-cok-soru-cozup-ayni':'Daha çok soru çözüp aynı oranda yanlış yapmak, hatayı ',
+  'ays.core.goodhart.sure-artiyor-ama-konu-kapanm':'Süre artıyor ama konu kapanmıyor. Konu testlerini erteliyor ',
+  'ays.core.goodhart.deneme-sayisi-artti-net-yeri':'Deneme sayısı arttı, net yerinde. Analiz edilmeyen deneme ',
+  'ays.core.goodhart.hata-biriktiriyorsun-ama-uze':'Hata biriktiriyorsun ama üzerinden geçilmiyor. İncelenmeyen ',
+  'ays.core.goodhart.bir-gosterge-ayrismis':'Bir gösterge ayrışmış',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.goodhart.bu-parametreler-pedagojik-bi':'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
   'ays.core.goodhart.yukselmesi-iyi':'yükselmesi iyi',
   'ays.core.goodhart.dusmesi-iyi':'düşmesi iyi',
@@ -165,31 +174,31 @@ R.Goodhart = (function(){
   const PAIRS = [
     { id:'questions-vs-net', direction:'higher_better',
       effortLabel:'çözülen soru', outcomeLabel:'deneme medyan neti',
-      question:'Soru sayısı artarken net yerinde sayıyor — kolay soruları mı '
+      question:yz('ays.core.goodhart.soru-sayisi-artarken-net-yer')
              + 'seçiyorsun, yoksa yanlışların üzerinden geçmiyor musun?',
       effort:questionsIn, outcome:examMedianIn, minEffort:300 },
 
     { id:'questions-vs-accuracy', direction:'higher_better',
       effortLabel:'çözülen soru', outcomeLabel:'doğruluk oranı',
-      question:'Daha çok soru çözüp aynı oranda yanlış yapmak, hatayı '
+      question:yz('ays.core.goodhart.daha-cok-soru-cozup-ayni')
              + 'pekiştirmek olabilir. Yanlışlarını etiketliyor musun?',
       effort:questionsIn, outcome:accuracyIn, minEffort:300 },
 
     { id:'minutes-vs-closed', direction:'higher_better',
       effortLabel:'çalışma dakikası', outcomeLabel:'kapanan konu',
-      question:'Süre artıyor ama konu kapanmıyor. Konu testlerini erteliyor '
+      question:yz('ays.core.goodhart.sure-artiyor-ama-konu-kapanm')
              + 'musun, yoksa konular kapanış eşiğini geçemiyor mu?',
       effort:minutesIn, outcome:closedTopicsIn, minEffort:600 },
 
     { id:'exams-vs-net', direction:'higher_better',
       effortLabel:'çözülen deneme', outcomeLabel:'medyan net',
-      question:'Deneme sayısı arttı, net yerinde. Analiz edilmeyen deneme '
+      question:yz('ays.core.goodhart.deneme-sayisi-artti-net-yeri')
              + 'bir ölçüm değil, bir yorgunluktur — kaç tanesinin analizi bitti?',
       effort:w => examsIn(w).length, outcome:examMedianIn, minEffort:4 },
 
     { id:'errors-vs-analysis', direction:'higher_better',
       effortLabel:'işaretlenen hata', outcomeLabel:'analizi biten hata oranı',
-      question:'Hata biriktiriyorsun ama üzerinden geçilmiyor. İncelenmeyen '
+      question:yz('ays.core.goodhart.hata-biriktiriyorsun-ama-uze')
              + 'hata, tekrar edeceğin hatadır — hangisiyle başlarsın?',
       effort:w => errorsIn(w).length,
       outcome:w => {
@@ -282,7 +291,7 @@ R.Goodhart = (function(){
     if(!f.length) return null;
     return {
       count:f.length,
-      title:f.length === 1 ? 'Bir gösterge ayrışmış' : f.length + ' gösterge ayrışmış',
+      title:f.length === 1 ? yz('ays.core.goodhart.bir-gosterge-ayrismis') : f.length + ' gösterge ayrışmış',
       body:f[0].note + ' ' + f[0].question,
       flags:f,
     };

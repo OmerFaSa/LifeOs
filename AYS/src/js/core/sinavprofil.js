@@ -16,6 +16,21 @@
    4. PROFİL EKLEMEK PLANI DEĞİŞTİRMEZ. Ek profil konu takibi ve materyal
       isteği içindir; YKS planına dokunmaz ve kaldırılabilir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.sinavprofil.puan-ekranindaki-yerlesik-he':'Puan ekranındaki yerleşik hesap.',
+  'ays.core.sinavprofil.bearer':'Bearer ',
+  'ays.core.sinavprofil.bu-mufredat-zaten-eklenmis':'Bu müfredat zaten eklenmiş.',
+  'ays.core.sinavprofil.mufredat-hkm-den-alinamadi-h':'Müfredat HKM’den alınamadı; HKM açıkken yeniden dene.',
+  'ays.core.sinavprofil.king-onayladi':'King onayladı',
+  'ays.core.sinavprofil.king-kismen-onayladi':'King kısmen onayladı',
+  'ays.core.sinavprofil.king-reddetti':'King reddetti',
+  'ays.core.sinavprofil.kullanici-bu-sinavin-mufreda':'Kullanıcı bu sınavın müfredatını istedi.',
+  'ays.core.sinavprofil.bam-cikarmadan-profil-kurulm':'BAM çıkarmadan profil kurulmaz. Rehber › HKM’den bağlanınca yeniden iste.',
+  'ays.core.sinavprofil.bugun-de-teklif-olarak-gorun':'Bugün’de teklif olarak görünür; onaylarsan profil eklenir.',
+  'ays.core.sinavprofil.bu-is-zaten-acik-is':'Bu iş zaten açık (iş emri #',
+  'ays.core.sinavprofil.king-cevap-verdi':'King cevap verdi',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.sinavprofil.yks-say':'YKS · SAY',
   'ays.core.sinavprofil.kayit-bir-mufredat-raporu-de':'Kayıt bir müfredat raporu değil.',
   'ays.core.sinavprofil.kayit-kimligi-gecersiz':'Kayıt kimliği geçersiz.',
@@ -51,7 +66,7 @@ R.SinavProfil = (function(){
     return { id:YERLESIK, ad:yz('ays.core.sinavprofil.yks-say'), kaynak:'yerlesik', dogruluk:'yerlesik',
       dersler:(R.SUBJECTS || []).map(s => ({ id:s.id, ad:s.name, soru:s.questions || null,
         konular:s.topics.map(t => ({ id:t.id, ad:t.name })) })),
-      puanlama:'Puan ekranındaki yerleşik hesap.', bitenler:null };
+      puanlama:yz('ays.core.sinavprofil.puan-ekranindaki-yerlesik-he'), bitenler:null };
   }
   function ekler(){ return (R.S.sinavProfilleri || []).slice(); }
   function liste(){ return [yerlesik()].concat(ekler()); }
@@ -202,7 +217,7 @@ R.SinavProfil = (function(){
     try{
       const res = await fetch(k.url + yol, {
         method:govde === undefined ? 'GET' : 'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ays.core.sinavprofil.bearer') + k.token },
         body:govde === undefined ? undefined : JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });
@@ -225,10 +240,10 @@ R.SinavProfil = (function(){
      Aynı rapor iki kez eklenmez. `cek` testte yerine konur. */
   async function teklifUygula(p, cek){
     const kid = Number(p && p.kayit_id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Kayıt kimliği geçersiz.' };
-    if(ekler().some(x => x.kayitId === kid)) return { ok:false, error:'Bu müfredat zaten eklenmiş.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('ays.core.sinavprofil.kayit-kimligi-gecersiz') };
+    if(ekler().some(x => x.kayitId === kid)) return { ok:false, error:yz('ays.core.sinavprofil.bu-mufredat-zaten-eklenmis') };
     const kayit = await (cek || kayitCek)(kid);
-    if(!kayit) return { ok:false, error:'Müfredat HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    if(!kayit) return { ok:false, error:yz('ays.core.sinavprofil.mufredat-hkm-den-alinamadi-h') };
     const r = kayittan(kayit);
     if(!r.ok) return { ok:false, error:r.why };
     if(ekler().some(x => kucuk(x.ad) === kucuk(r.profil.ad) && x.bolum === r.profil.bolum)){
@@ -242,7 +257,7 @@ R.SinavProfil = (function(){
 
   /* King'e iş emri: «şu sınavın müfredatını çıkar». HKM yoksa profil
      KURULMAZ: müfredat uydurulmaz. */
-  const KARAR = { onay:'King onayladı', kismi:'King kısmen onayladı', ret:'King reddetti' };
+  const KARAR = { onay:yz('ays.core.sinavprofil.king-onayladi'), kismi:yz('ays.core.sinavprofil.king-kismen-onayladi'), ret:yz('ays.core.sinavprofil.king-reddetti') };
 
   async function iste(sinav, bolum){
     const ad = bosluk(sinav);
@@ -253,9 +268,9 @@ R.SinavProfil = (function(){
     const mf = { sinav:ad };
     if(bosluk(bolum)) mf.bolum = bosluk(bolum).slice(0, 80);
     const r = await istek('/api/king/emir', { modul:'ays', tur:'sinav.mufredat', govde:{ mufredat:mf },
-      neden:'Kullanıcı bu sınavın müfredatını istedi.' });
+      neden:yz('ays.core.sinavprofil.kullanici-bu-sinavin-mufreda') });
     if(!r.bagli) return { ok:false, metin:yz('ays.core.sinavprofil.hkm-bagli-degil-mufredat-ist')
-      + 'BAM çıkarmadan profil kurulmaz. Rehber › HKM’den bağlanınca yeniden iste.' };
+      + yz('ays.core.sinavprofil.bam-cikarmadan-profil-kurulm') };
     if(r.ag) return { ok:false, metin:yz('ays.core.sinavprofil.hkm-ye-ulasilamadi-hkm-acikk') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
@@ -269,13 +284,13 @@ R.SinavProfil = (function(){
       return { ok:true, karar:g.karar, emirId:e.id, teklif:true,
         metin:yz('ays.core.sinavprofil.king-bu-is-icin-teklif') + e.id + '). Bugün’deki King teklifi '
           + 'kartında maliyeti ve süreyi görüp onayla; onaylamadan iş açılmaz. Rapor gelince '
-          + 'Bugün’de teklif olarak görünür; onaylarsan profil eklenir.' };
+          + yz('ays.core.sinavprofil.bugun-de-teklif-olarak-gorun') };
     }
     const hazir = e.durum === 'bitti';
     const eksik = (e.kontrol || []).filter(m => !m.ok).map(m => m.not).join('; ');
     return { ok:g.karar !== 'ret', karar:g.karar, emirId:e.id,
-      metin:(g.yeni === false ? 'Bu iş zaten açık (iş emri #' + e.id + ').'
-        : (KARAR[g.karar] || 'King cevap verdi') + ' (iş emri #' + e.id + ').')
+      metin:(g.yeni === false ? yz('ays.core.sinavprofil.bu-is-zaten-acik-is') + e.id + ').'
+        : (KARAR[g.karar] || yz('ays.core.sinavprofil.king-cevap-verdi')) + ' (iş emri #' + e.id + ').')
         + (hazir ? ' Müfredat depoda hazırdı; teklif olarak geliyor.'
           : (e.tahmin && e.tahmin.metin ? ' Tahmini süre ' + e.tahmin.metin + ' (tahmin).' : ''))
         + (eksik ? ' ' + eksik : '')

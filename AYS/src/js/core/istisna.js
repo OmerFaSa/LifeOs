@@ -39,6 +39,25 @@
    «yogun gun» isaretinden daha ozgul bir sozdur. Takvim kaydi burada
    SAKLANMAZ; kaydi R.Model.saveCalendar tutar, bu modul yalniz okur. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.istisna.bilinmeyen-istisna-turu':'Bilinmeyen istisna türü.',
+  'ays.core.istisna.baslangic-ve-bitis-tarihi-an':'Başlangıç ve bitiş tarihi anlaşılmadı.',
+  'ays.core.istisna.bitis-tarihi-baslangictan-on':'Bitiş tarihi başlangıçtan önce olamaz.',
+  'ays.core.istisna.gecmis-gunler-degistirilemez':'Geçmiş günler değiştirilemez; istisna bugünden ya da sonrasından başlamalı.',
+  'ays.core.istisna.gunluk-sure-yazilmamis':'Günlük süre yazılmamış.',
+  'ays.core.istisna.gunluk-sure':'Günlük süre ',
+  'ays.core.istisna.one-alinan':'Öne alınan',
+  'ays.core.istisna.i-stisna-bulunamadi':'İstisna bulunamadı.',
+  'ays.core.istisna.tarih-anlasilmadi':'Tarih anlaşılmadı.',
+  'ays.core.istisna.gecmis-bir-gun-hafifletileme':'Geçmiş bir gün hafifletilemez.',
+  'ays.core.istisna.bu-gun':'Bu gün',
+  'ays.core.istisna.o-gunde-girilmis-calisma-var':'O günde girilmiş çalışma var; plan yeniden kurulmaz, girdiğin kaybolmasın.',
+  'ays.core.istisna.o-gun-zaten-ara-gunu':'O gün zaten ara günü; yükü sıfır, hafifletilecek bir şey yok.',
+  'ays.core.istisna.bu-oran-gunu':'Bu oran günü ',
+  'ays.core.istisna.ara-2':'Ara · ',
+  'ays.core.istisna.gunde':'Günde ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.istisna.ara':'Ara',
   'ays.core.istisna.gecici-sure':'Geçici süre',
   'ays.core.istisna.takvim':'Takvim',
@@ -87,11 +106,11 @@ R.Istisna = (function(){
   function dogrula(ist){
     const x = ist || {};
     const tur = TURLER[x.tur];
-    if(!tur) return fail('Bilinmeyen istisna türü.');
-    if(!U.isISO(x.from) || !U.isISO(x.to)) return fail('Başlangıç ve bitiş tarihi anlaşılmadı.');
-    if(x.to < x.from) return fail('Bitiş tarihi başlangıçtan önce olamaz.');
+    if(!tur) return fail(yz('ays.core.istisna.bilinmeyen-istisna-turu'));
+    if(!U.isISO(x.from) || !U.isISO(x.to)) return fail(yz('ays.core.istisna.baslangic-ve-bitis-tarihi-an'));
+    if(x.to < x.from) return fail(yz('ays.core.istisna.bitis-tarihi-baslangictan-on'));
     if(x.from < U.todayISO()){
-      return fail('Geçmiş günler değiştirilemez; istisna bugünden ya da sonrasından başlamalı.');
+      return fail(yz('ays.core.istisna.gecmis-gunler-degistirilemez'));
     }
     const gun = U.diffDays(x.from, x.to) + 1;
     if(gun > tur.maxGun){
@@ -100,9 +119,9 @@ R.Istisna = (function(){
     }
     if(x.tur === 'sure'){
       const dk = Number(x.dakika);
-      if(x.dakika == null || x.dakika === '' || !isFinite(dk)) return fail('Günlük süre yazılmamış.');
+      if(x.dakika == null || x.dakika === '' || !isFinite(dk)) return fail(yz('ays.core.istisna.gunluk-sure-yazilmamis'));
       if(dk < DAKIKA.min || dk > DAKIKA.max){
-        return fail('Günlük süre ' + DAKIKA.min + '–' + DAKIKA.max + ' dakika arasında olmalı.');
+        return fail(yz('ays.core.istisna.gunluk-sure') + DAKIKA.min + '–' + DAKIKA.max + ' dakika arasında olmalı.');
       }
     }
     return { ok:true, gun };
@@ -264,7 +283,7 @@ R.Istisna = (function(){
     const soru = ilk && Number(ilk.targetQ) > 0
       ? Math.round(Number(ilk.targetQ) * dk / Number(ilk.targetMin) / 5) * 5 : 0;
     return {
-      id:'b' + day.blocks.length, slot:'Öne alınan',
+      id:'b' + day.blocks.length, slot:yz('ays.core.istisna.one-alinan'),
       subject:ders ? ders.name : (konu.subjectName || ''), topic:konu.name,
       targetMin:dk, targetQ:soru, status:'pending',
       subjectId:konu.subjectId, topicId:konu.topicId, oneAlindi:true,
@@ -399,7 +418,7 @@ R.Istisna = (function(){
 
   async function kaldir(id){
     const rec = liste().find(x => x.id === id);
-    if(!rec) return fail('İstisna bulunamadı.');
+    if(!rec) return fail(yz('ays.core.istisna.i-stisna-bulunamadi'));
     R.S.istisnalar = liste().filter(x => x.id !== id);
     await kaydet();
     const e = await araligiYenile(rec.from, rec.to);
@@ -414,7 +433,7 @@ R.Istisna = (function(){
      bitirilince tamamen kalkar. */
   async function bitir(id){
     const rec = liste().find(x => x.id === id);
-    if(!rec) return fail('İstisna bulunamadı.');
+    if(!rec) return fail(yz('ays.core.istisna.i-stisna-bulunamadi'));
     const bugun = U.todayISO();
     if(rec.from >= bugun) return await kaldir(id);
     if(rec.to < bugun) return { ok:true, yenilenen:[], korunan:[] };
@@ -432,22 +451,22 @@ R.Istisna = (function(){
      Rehber › İstisnalar'da görünür, kaldırılınca gün temele döner.
      Deneme ve kapanış günü kısaltılmaz; ilerlemesi başlamış gün korunur. */
   async function hafiflet(iso, oran, neden){
-    if(!U.isISO(String(iso || ''))) return fail('Tarih anlaşılmadı.');
-    if(iso < U.todayISO()) return fail('Geçmiş bir gün hafifletilemez.');
+    if(!U.isISO(String(iso || ''))) return fail(yz('ays.core.istisna.tarih-anlasilmadi'));
+    if(iso < U.todayISO()) return fail(yz('ays.core.istisna.gecmis-bir-gun-hafifletileme'));
     const w = (R.WEEKDAYS || [])[U.weekdayIndex(iso)] || {};
     if(SABIT_RITUEL.indexOf(w.ritual) >= 0){
-      return fail((w.label || 'Bu gün') + ' deneme ya da kapanış günüdür; kısaltılmaz. '
+      return fail((w.label || yz('ays.core.istisna.bu-gun')) + ' deneme ya da kapanış günüdür; kısaltılmaz. '
         + 'İstersen o günü Rehber › İstisnalar\'dan ara yapabilirsin.');
     }
     if(etki(iso, iso).korunan.length){
-      return fail('O günde girilmiş çalışma var; plan yeniden kurulmaz, girdiğin kaybolmasın.');
+      return fail(yz('ays.core.istisna.o-gunde-girilmis-calisma-var'));
     }
     /* Ara gunu zaten yuksuzdur; «son eklenen kazanir» kurali yuzunden bir
        sure istisnasi arayi ezip gunu calisma gunune ceviriyordu
        (belgeler/ekip/HATALAR.md O-11). */
     const var_ = gunIcin(iso);
     if(var_ && var_.tur === 'ara'){
-      return fail('O gün zaten ara günü; yükü sıfır, hafifletilecek bir şey yok.');
+      return fail(yz('ays.core.istisna.o-gun-zaten-ara-gunu'));
     }
     const temel = temelDakika(iso) || sablonDakikasi() || 120;
     const r = Number(oran);
@@ -455,7 +474,7 @@ R.Istisna = (function(){
     if(oran != null && isFinite(r) && r > 0 && r <= 1){
       dakika = Math.round(temel * (1 - r));
       if(dakika < DAKIKA.min){
-        return fail('Bu oran günü ' + dakika + ' dakikaya indirir; en az ' + DAKIKA.min
+        return fail(yz('ays.core.istisna.bu-oran-gunu') + dakika + ' dakikaya indirir; en az ' + DAKIKA.min
           + ' dakika. O günü ara yapmak istersen Rehber › İstisnalar.');
       }
     }else{
@@ -511,8 +530,8 @@ R.Istisna = (function(){
       return takvimTuru(x.kind).label + (x.tur === 'sure' ? ' · yük %' + Math.round(x.carpan * 100) : '')
         + ' · ' + tarih;
     }
-    return x.tur === 'ara' ? 'Ara · ' + tarih
-      : 'Günde ' + x.dakika + ' dk · ' + tarih;
+    return x.tur === 'ara' ? yz('ays.core.istisna.ara-2') + tarih
+      : yz('ays.core.istisna.gunde') + x.dakika + ' dk · ' + tarih;
   }
 
   return {

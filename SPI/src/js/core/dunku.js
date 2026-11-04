@@ -11,6 +11,14 @@
      4. GERİ ALINIR: kopyanın kimliği döner, «Geri al» onu siler.
    İlaç kopyalanmaz: SPİ'de ilaç günlük doz değil, başlangıç–bitiş tarihli
    bir süreçtir (core/meds.js); zaten her gün etkindir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.dunku.dunun-ogunu-bulunamadi':'Dünün öğünü bulunamadı.',
+  'spi.core.dunku.bugun-bu-ogun-zaten-girilmis':'Bugün bu öğün zaten girilmiş.',
+  'spi.core.dunku.dunun-aynisi':'Dünün aynısı',
+  'spi.core.dunku.dunun-antrenmani-bulunamadi':'Dünün antrenmanı bulunamadı.',
+  'spi.core.dunku.bugun-bu-antrenman-zaten-gir':'Bugün bu antrenman zaten girilmiş.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -37,20 +45,20 @@ SP.Dunku = (function(){
 
   async function ogunKopyala(bugun, mealId){
     const m = SP.Model.mealsOf(dun(bugun)).find(x => x.id === mealId);
-    if(!m) return { ok:false, why:'Dünün öğünü bulunamadı.' };
-    if(!adaylar(bugun).ogunler.some(x => x.id === mealId)) return { ok:false, why:'Bugün bu öğün zaten girilmiş.' };
+    if(!m) return { ok:false, why:yz('spi.core.dunku.dunun-ogunu-bulunamadi') };
+    if(!adaylar(bugun).ogunler.some(x => x.id === mealId)) return { ok:false, why:yz('spi.core.dunku.bugun-bu-ogun-zaten-girilmis') };
     const yeni = Object.assign(SP.Model.newMeal(m.slot), {
-      items:m.items.map(it => Object.assign({}, it)), note:'Dünün aynısı' });
+      items:m.items.map(it => Object.assign({}, it)), note:yz('spi.core.dunku.dunun-aynisi') });
     await SP.Model.addMeal(bugun, yeni);
     return { ok:true, id:yeni.id, ad:slotAd(m.slot) };
   }
 
   async function antrenmanKopyala(bugun, wId){
     const w = SP.Model.workoutsOf(dun(bugun)).find(x => x.id === wId);
-    if(!w) return { ok:false, why:'Dünün antrenmanı bulunamadı.' };
-    if(!adaylar(bugun).antrenmanlar.some(x => x.id === wId)) return { ok:false, why:'Bugün bu antrenman zaten girilmiş.' };
+    if(!w) return { ok:false, why:yz('spi.core.dunku.dunun-antrenmani-bulunamadi') };
+    if(!adaylar(bugun).antrenmanlar.some(x => x.id === wId)) return { ok:false, why:yz('spi.core.dunku.bugun-bu-antrenman-zaten-gir') };
     const yeni = JSON.parse(JSON.stringify(w));
-    Object.assign(yeni, { id:U().uid('w'), date:bugun, rpe:null, note:'Dünün aynısı',
+    Object.assign(yeni, { id:U().uid('w'), date:bugun, rpe:null, note:yz('spi.core.dunku.dunun-aynisi'),
       createdAt:new Date().toISOString() });
     await SP.Model.saveWorkout(yeni);
     return { ok:true, id:yeni.id, ad:w.name };

@@ -26,6 +26,28 @@
    DEGILDIR. Bir gun icin oturum yoksa o gun "0 dakika" degil "veri yok"tur
    ve hicbir ortalamaya girmez. Fonksiyon adlarinda bu ayrim gorunur:
    `dayHasEntry` (hic girildi mi) ile `minutesOf` (kac dakika) ayri sorulardir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.state.kaydedilemedi-tarayici-depol':'Kaydedilemedi: tarayıcı depolama alanı dolu olabilir. ',
+  'esp.core.state.rehber-veri-bolumunden-yedek':'Rehber → Veri bölümünden yedek alıp eski kayıtları temizle.',
+  'esp.core.state.profil-adi-bos-olamaz':'Profil adı boş olamaz.',
+  'esp.core.state.bu-adla-bir-profil-zaten':'Bu adla bir profil zaten var.',
+  'esp.core.state.acik-olan-profil-silinemez':'Açık olan profil silinemez.',
+  'esp.core.state.bir-not-kendine-baglanmaz':'Bir not kendine bağlanmaz.',
+  'esp.core.state.not-bulunamadi':'Not bulunamadı.',
+  'esp.core.state.bu-bag-zaten-var':'Bu bağ zaten var.',
+  'esp.core.state.yeniden-ac':'Yeniden aç',
+  'esp.core.state.baslik-ya-da-metin-gerekir':'Başlık ya da metin gerekir.',
+  'esp.core.state.baglanti-adresi-bos-olamaz':'Bağlantı adresi boş olamaz.',
+  'esp.core.state.hatirlatma-metni-bos-olamaz':'Hatırlatma metni boş olamaz.',
+  'esp.core.state.hatirlatici-bulunamadi':'Hatırlatıcı bulunamadı.',
+  'esp.core.state.olayin-adi-bos-olamaz':'Olayın adı boş olamaz.',
+  'esp.core.state.yil-girilmeden-olay-kronoloj':'Yıl girilmeden olay kronolojiye giremez.',
+  'esp.core.state.kaynagin-adi-bos-olamaz':'Kaynağın adı boş olamaz.',
+  'esp.core.state.zincirde-halka-yok':'Zincirde halka yok.',
+  'esp.core.state.zincirde-yapisal-ya-da-kurum':'Zincirde yapısal ya da kurumsal bir koşul yok: ',
+  'esp.core.state.zincir-bir-olaya-baglanmadan':'Zincir bir olaya bağlanmadan kaydedilmez.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -166,8 +188,8 @@ ESP.Model = (function(){
   async function write(path, doc){
     const ok = await ESP.Store.set(path, doc);
     return ok === false
-      ? { ok:false, error:'Kaydedilemedi: tarayıcı depolama alanı dolu olabilir. '
-        + 'Rehber → Veri bölümünden yedek alıp eski kayıtları temizle.' }
+      ? { ok:false, error:yz('esp.core.state.kaydedilemedi-tarayici-depol')
+        + yz('esp.core.state.rehber-veri-bolumunden-yedek') }
       : { ok:true };
   }
 
@@ -300,17 +322,17 @@ ESP.Model = (function(){
 
   function addProfile(name){
     const clean = String(name || '').trim();
-    if(!clean) return { ok:false, error:'Profil adı boş olamaz.' };
+    if(!clean) return { ok:false, error:yz('esp.core.state.profil-adi-bos-olamaz') };
     const id = U.slug(clean) || ('p' + Date.now().toString(36));
     const list = profileList();
-    if(list.some(x => x.id === id)) return { ok:false, error:'Bu adla bir profil zaten var.' };
+    if(list.some(x => x.id === id)) return { ok:false, error:yz('esp.core.state.bu-adla-bir-profil-zaten') };
     list.push({ id, name:clean });
     writeProfileList(list);
     return { ok:true, id };
   }
 
   function removeProfile(id){
-    if(id === activeProfileId()) return { ok:false, error:'Açık olan profil silinemez.' };
+    if(id === activeProfileId()) return { ok:false, error:yz('esp.core.state.acik-olan-profil-silinemez') };
     writeProfileList(profileList().filter(x => x.id !== id));
     try{ localStorage.removeItem('esp.v1.' + id); }catch(e){}
     /* Silinen profil HKM bagini tutuyorsa birakir (HATALAR Y-7). */
@@ -696,10 +718,10 @@ ESP.Model = (function(){
   /* Iki notu birbirine baglar. Bag CIFT YONLUDUR: sentopik okuma "A, B'yi
      soyle goruyor" degil "A ile B su kavramda bulusuyor" der. */
   async function linkNotes(aId, bId, why){
-    if(aId === bId) return { ok:false, error:'Bir not kendine bağlanmaz.' };
+    if(aId === bId) return { ok:false, error:yz('esp.core.state.bir-not-kendine-baglanmaz') };
     const a = S.notes.find(n => n.id === aId), b = S.notes.find(n => n.id === bId);
-    if(!a || !b) return { ok:false, error:'Not bulunamadı.' };
-    if(a.links.some(l => l.to === bId)) return { ok:false, error:'Bu bağ zaten var.' };
+    if(!a || !b) return { ok:false, error:yz('esp.core.state.not-bulunamadi') };
+    if(a.links.some(l => l.to === bId)) return { ok:false, error:yz('esp.core.state.bu-bag-zaten-var') };
     a.links.push({ to:bId, why:why || '' });
     b.links.push({ to:aId, why:why || '' });
     await saveNote(a); await saveNote(b);
@@ -726,7 +748,7 @@ ESP.Model = (function(){
      başlanmadan girer (core/belge.js); okumadığın kitap okunuyor sayılmaz. */
   function bookStatus(b){
     if(!b) return null;
-    if(b.finishedAt) return { id:'bitti', label:'bitti', action:'Yeniden aç' };
+    if(b.finishedAt) return { id:'bitti', label:'bitti', action:yz('esp.core.state.yeniden-ac') };
     if(b.startedAt) return { id:'okunuyor', label:'okunuyor', action:'Bitir' };
     return { id:'baslanmadi', label:'başlanmadı', action:'Başla' };
   }
@@ -976,10 +998,10 @@ ESP.Model = (function(){
   async function saveAsset(rec){
     const a = normAsset(rec);
     if(!String(a.title || '').trim() && !String(a.text || '').trim()){
-      return { ok:false, error:'Başlık ya da metin gerekir.' };
+      return { ok:false, error:yz('esp.core.state.baslik-ya-da-metin-gerekir') };
     }
     if(a.kind === 'link' && !String(a.url || '').trim()){
-      return { ok:false, error:'Bağlantı adresi boş olamaz.' };
+      return { ok:false, error:yz('esp.core.state.baglanti-adresi-bos-olamaz') };
     }
     if(!a.title) a.title = String(a.text).slice(0, 60);
     const i = S.assets.findIndex(x => x.id === a.id);
@@ -1025,7 +1047,7 @@ ESP.Model = (function(){
 
   async function saveReminder(rec){
     const r = Object.assign(newReminder(), obj(rec));
-    if(!String(r.text || '').trim()) return { ok:false, error:'Hatırlatma metni boş olamaz.' };
+    if(!String(r.text || '').trim()) return { ok:false, error:yz('esp.core.state.hatirlatma-metni-bos-olamaz') };
     if(!(r.repeat in REPEATS)) r.repeat = 'none';
     const i = S.reminders.findIndex(x => x.id === r.id);
     if(i >= 0) S.reminders[i] = r; else S.reminders.unshift(r);
@@ -1051,7 +1073,7 @@ ESP.Model = (function(){
   /* Tamamla. Tekrarlı olan bir sonraki tarihe taşınır ve AÇIK KALIR. */
   async function completeReminder(id, todayISO){
     const r = S.reminders.find(x => x.id === id);
-    if(!r) return { ok:false, error:'Hatırlatıcı bulunamadı.' };
+    if(!r) return { ok:false, error:yz('esp.core.state.hatirlatici-bulunamadi') };
     const bildirimAnahtari = r.id + '@' + r.due;      // ESP.Takvim bildirimListesi
     const bugun = todayISO || U.todayISO();
     const adim = REPEATS[r.repeat] || 0;
@@ -1136,8 +1158,8 @@ ESP.Model = (function(){
 
   async function saveEvent(rec){
     const e = normEvent(rec);
-    if(!String(e.title || '').trim()) return { ok:false, error:'Olayın adı boş olamaz.' };
-    if(e.year == null) return { ok:false, error:'Yıl girilmeden olay kronolojiye giremez.' };
+    if(!String(e.title || '').trim()) return { ok:false, error:yz('esp.core.state.olayin-adi-bos-olamaz') };
+    if(e.year == null) return { ok:false, error:yz('esp.core.state.yil-girilmeden-olay-kronoloj') };
     const i = S.events.findIndex(x => x.id === e.id);
     if(i >= 0) S.events[i] = e; else S.events.push(e);
     S.events.sort((a, b) => (a.year || 0) - (b.year || 0));
@@ -1182,7 +1204,7 @@ ESP.Model = (function(){
 
   async function saveSource(rec){
     const s = normSource(rec);
-    if(!String(s.title || '').trim()) return { ok:false, error:'Kaynağın adı boş olamaz.' };
+    if(!String(s.title || '').trim()) return { ok:false, error:yz('esp.core.state.kaynagin-adi-bos-olamaz') };
     const i = S.sources.findIndex(x => x.id === s.id);
     if(i >= 0) S.sources[i] = s; else S.sources.unshift(s);
     const w = await write('sources/' + s.id, s);
@@ -1241,15 +1263,15 @@ ESP.Model = (function(){
       structural:yapisal,
       sourced:kaynakli,
       balanced:l.length >= 3 && yapisal >= 1,
-      why:!l.length ? 'Zincirde halka yok.'
-        : (yapisal ? null : 'Zincirde yapısal ya da kurumsal bir koşul yok: '
+      why:!l.length ? yz('esp.core.state.zincirde-halka-yok')
+        : (yapisal ? null : yz('esp.core.state.zincirde-yapisal-ya-da-kurum')
             + 'yalnızca kıvılcım var, zemin yok.'),
     };
   }
 
   async function saveChain(rec){
     const c = normChain(rec);
-    if(!c.eventId) return { ok:false, error:'Zincir bir olaya bağlanmadan kaydedilmez.' };
+    if(!c.eventId) return { ok:false, error:yz('esp.core.state.zincir-bir-olaya-baglanmadan') };
     c.updatedAt = new Date().toISOString();
     const i = S.chains.findIndex(x => x.id === c.id);
     if(i >= 0) S.chains[i] = c; else S.chains.unshift(c);

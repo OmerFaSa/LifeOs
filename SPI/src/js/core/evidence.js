@@ -24,6 +24,17 @@
    3. EKSENLER GIZLENMEZ. Arayuz esigi gosteriyorsa kaynagini, kesinligini,
       uygulanabilirligini ve yetkisini de gosterir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.evidence.kesinlik-dusuk':'Kesinlik düşük.',
+  'spi.core.evidence.kesinlik-degerlendirilmemis':'Kesinlik değerlendirilmemiş.',
+  'spi.core.evidence.esik-bu-kullaniciya-dolayli':'Eşik bu kullanıcıya dolaylı uyuyor; popülasyona göre kayabilir.',
+  'spi.core.evidence.esik-kisiye-cihaza-ozel-gene':'Eşik kişiye/cihaza özel; genel bir karar eşiği değil.',
+  'spi.core.evidence.yalniz-izler':'Yalnız izler',
+  'spi.core.evidence.bu-esik':'Bu eşik «',
+  'spi.core.evidence.spi-yetki-politikasinda':'SPİ yetki politikasında «',
+  'spi.core.evidence.bu-esigin-kaynagi-yazilmamis-2':'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.evidence.kaynak-yok':'kaynak yok',
   'spi.core.evidence.bu-esigin-kaynagi-yazilmamis':'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik ',
   'spi.core.evidence.kirmizi-bayrak-esiginin-kayn':'Kırmızı bayrak eşiğinin kaynağı yazılmamış.',
@@ -150,16 +161,16 @@ SP.Ev = (function(){
   function downgrades(r){
     const out = [];
     if(r.certainty === 'low'){
-      out.push({ axis:'certainty', reason:'Kesinlik düşük.' });
+      out.push({ axis:'certainty', reason:yz('spi.core.evidence.kesinlik-dusuk') });
     } else if(r.certainty === 'unknown'){
-      out.push({ axis:'certainty', reason:'Kesinlik değerlendirilmemiş.' });
+      out.push({ axis:'certainty', reason:yz('spi.core.evidence.kesinlik-degerlendirilmemis') });
     }
     if(r.applicability === 'indirect'){
       out.push({ axis:'applicability',
-        reason:'Eşik bu kullanıcıya dolaylı uyuyor; popülasyona göre kayabilir.' });
+        reason:yz('spi.core.evidence.esik-bu-kullaniciya-dolayli') });
     } else if(r.applicability === 'local' && SELF_SOURCES.indexOf(r.source) < 0){
       out.push({ axis:'applicability',
-        reason:'Eşik kişiye/cihaza özel; genel bir karar eşiği değil.' });
+        reason:yz('spi.core.evidence.esik-kisiye-cihaza-ozel-gene') });
     }
     return out;
   }
@@ -199,7 +210,7 @@ SP.Ev = (function(){
     if(!r){
       return { source:null, label:yz('spi.core.evidence.kaynak-yok'), tone:'warn', mayDirect:false,
         certainty:'unknown', applicability:null, authority:'observe_only',
-        authorityLabel:'Yalnız izler',
+        authorityLabel:yz('spi.core.evidence.yalniz-izler'),
         text:yz('spi.core.evidence.bu-esigin-kaynagi-yazilmamis')
            + 'yönlendirme üretmez.' };
     }
@@ -244,15 +255,15 @@ SP.Ev = (function(){
       source:r ? r.source : null, authority:r ? r.authority : 'observe_only',
       cap:cap(markerId, field),
       why:r
-        ? 'Bu eşik «' + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
-          + 'SPİ yetki politikasında «' + (a || {}).label + '» sayılıyor: '
+        ? yz('spi.core.evidence.bu-esik') + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
+          + yz('spi.core.evidence.spi-yetki-politikasinda') + (a || {}).label + '» sayılıyor: '
           + (a || {}).note
           + (etkin.capped
               ? ' Yetki tavandan indirildi — ' + etkin.reasons.map(function(x){
                   return x.reason; }).join(' ')
               : '')
           + ' Bu yüzden burada yönlendirme değil gözlem bildirilir.'
-        : 'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten '
+        : yz('spi.core.evidence.bu-esigin-kaynagi-yazilmamis-2')
           + 'yönlendirme çıkmaz.',
     };
   }

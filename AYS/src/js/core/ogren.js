@@ -29,6 +29,16 @@
         defteri kaydı ya da test denemesi başka bir soruya aittir: ölçüm
         sayılmaz, silinmez de (gecerli()). */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.ogren.gunluk-paragraf':'Günlük paragraf · ',
+  'ays.core.ogren.ornek-soru':'Örnek soru · ',
+  'ays.core.ogren.ays-ogren':'AYS · Öğren · ',
+  'ays.core.ogren.bu-konudaki-sorularin-hepsin':'Bu konudaki soruların hepsini cevapladın; bu cevap ölçüme yazılmaz.',
+  'ays.core.ogren.tekrar':'Tekrar (',
+  'ays.core.ogren.oncelikli-konundan':'Öncelikli konundan: ',
+  'ays.core.ogren.bu-soruyu-daha-once-cevaplam':'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.ogren.anlatimi-oku':'Anlatımı oku',
   'ays.core.ogren.ornek-sorulari-coz':'Örnek soruları çöz',
   'ays.core.ogren.sonraki-konu':'Sonraki konu: ',
@@ -329,7 +339,7 @@ R.Ogren = (function(){
     const err = {
       id:R.U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
       examId:null, examDate:R.U.todayISO(), publisher:'Öğren',
-      testName:((havuz ? 'Günlük paragraf · ' : 'Örnek soru · ') + topic.name).slice(0, 160),
+      testName:((havuz ? yz('ays.core.ogren.gunluk-paragraf') : yz('ays.core.ogren.ornek-soru')) + topic.name).slice(0, 160),
       questionNo:havuz ? 'P' + Number(i.slice(1)) : String(i + 1),
       status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
       recipe:'', topicRef:'', subjectId, topicId, topic:topic.name,
@@ -393,13 +403,13 @@ R.Ogren = (function(){
     if(!q) return null;
     return { id:x.subject.id + '|' + x.topic.id + '|' + i, konu:x.topic.name,
       soru:duzMetin(q.soru) + (ekMetni(q) ? ' ' + ekMetni(q) : ''), sec:(q.sec || []).map(m => duzMetin(m)),
-      kaynak:'AYS · Öğren · ' + x.subject.name + ' (elle yazıldı, doğrulanmadı)', not:not || '' };
+      kaynak:yz('ays.core.ogren.ays-ogren') + x.subject.name + ' (elle yazıldı, doğrulanmadı)', not:not || '' };
   }
   function ilkCevapsiz(x, yalnizCevapsiz){
     const l = sorular(x.topic.id), c = cevaplar(x.subject.id, x.topic.id);
     const i = l.findIndex((q, k) => q && !c[k]);
     if(i >= 0) return soruNesnesi(x, i, '');
-    return yalnizCevapsiz ? null : soruNesnesi(x, 0, 'Bu konudaki soruların hepsini cevapladın; bu cevap ölçüme yazılmaz.');
+    return yalnizCevapsiz ? null : soruNesnesi(x, 0, yz('ays.core.ogren.bu-konudaki-sorularin-hepsin'));
   }
   function kingSoru(konuMetni){
     const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
@@ -421,14 +431,14 @@ R.Ogren = (function(){
       const p = v.kavram.split('|');
       const x = adaylar.find(a => a.subject.id === p[0] && a.topic.id === p[1]);
       const id = x ? OG().benzer(sorular(x.topic.id).map((q, i) => q ? v.kavram + '|' + i : null), v) : null;
-      const s = id ? soruNesnesi(x, Number(id.split('|')[2]), 'Tekrar (' + (v.n + 1) + '. tur): '
+      const s = id ? soruNesnesi(x, Number(id.split('|')[2]), yz('ays.core.ogren.tekrar') + (v.n + 1) + '. tur): '
         + ((v.ogeler || []).indexOf(id) >= 0 ? 'yanlış yaptığın soru; ilk cevabın ölçümde kaldı, bu tur hafızan için.' : 'aynı konudan benzer bir soru.')) : null;
       if(s) return s;
     }
     for(const o of oncelikler(10)){
       const x = adaylar.find(a => a.topic.id === o.topicId);
       const s = x ? ilkCevapsiz(x, true) : null;
-      if(s){ s.not = 'Öncelikli konundan: ' + o.neden + '.'; return s; }
+      if(s){ s.not = yz('ays.core.ogren.oncelikli-konundan') + o.neden + '.'; return s; }
     }
     const son = sonAcilan();
     return ilkCevapsiz((son && adaylar.find(k => k.topic.id === son.topic.id)) || adaylar[0]);
@@ -468,7 +478,7 @@ R.Ogren = (function(){
       id, kavram:kavramOf(id), konu:x.topic ? x.topic.name : '', soru:duzMetin(q.soru), secilen:H, dogru:q.dogru,
       secMetin:metin(H), dogruMetin:metin(q.dogru), oncekiDogru:!!(onceki && onceki.d === true),
       konuYanlis:Object.keys(c).filter(k => c[k] && c[k].d === false && !c[k].bak).length, cozum }, konuEtiketi(p[1])));
-    const not = o.not || (o.isabet && r && r.neden === 'kilitli' ? 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.' : '');
+    const not = o.not || (o.isabet && r && r.neden === 'kilitli' ? yz('ays.core.ogren.bu-soruyu-daha-once-cevaplam') : '');
     return { dogru:q.dogru, cozum:o.satirlar.concat(cozum), not };
   }
   return { HARFLER, SEVIYE, kingSoru, kingCevapla, kingDers, oncelikler, TEKRAR, tekrarDepo, ogretAraclar, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,

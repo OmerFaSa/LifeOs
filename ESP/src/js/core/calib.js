@@ -41,6 +41,28 @@
       puan hesaplanmaz. Üç tahminle kalibrasyon ölçmek, üç soruyla sınav
       yapmaktır. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.calib.son-30-gunde-kartlarinin-yuz':'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?',
+  'esp.core.calib.bu-hafta-toplam-kac-dakika':'Bu hafta toplam kaç dakika çalıştın?',
+  'esp.core.calib.bu-hafta-kac-oturum-kaydetti':'Bu hafta kaç oturum kaydettin?',
+  'esp.core.calib.bu-ayin-sonunda-siradaki-kap':'Bu ayın sonunda sıradaki kapıyı geçmiş olacak mısın?',
+  'esp.core.calib.bu-taslagin-atesman-puani-ka':'Bu taslağın Ateşman puanı kaç çıkar?',
+  'esp.core.calib.bilinmeyen-tahmin-turu':'Bilinmeyen tahmin türü.',
+  'esp.core.calib.tahmin-bir-sayi-olmali':'Tahmin bir sayı olmalı.',
+  'esp.core.calib.olasilik-0-ile-1-arasinda':'Olasılık 0 ile 1 arasında olmalı.',
+  'esp.core.calib.tahmin-negatif-olamaz':'Tahmin negatif olamaz.',
+  'esp.core.calib.tahmin-bulunamadi':'Tahmin bulunamadı.',
+  'esp.core.calib.bu-tahmin-zaten-kapandi':'Bu tahmin zaten kapandı.',
+  'esp.core.calib.gercek-deger-bir-sayi-olmali':'Gerçek değer bir sayı olmalı.',
+  'esp.core.calib.bu-tahmin':'Bu tahmin ',
+  'esp.core.calib.kendini-oldugundan-iyi-tahmi':'Kendini olduğundan iyi tahmin etme eğilimindesin.',
+  'esp.core.calib.kendini-oldugundan-kotu-tahm':'Kendini olduğundan kötü tahmin etme eğilimindesin.',
+  'esp.core.calib.sistemli-bir-yanlilik-gorunm':'Sistemli bir yanlılık görünmüyor.',
+  'esp.core.calib.kapanmis':'Kapanmış ',
+  'esp.core.calib.brier':'Brier ',
+  'esp.core.calib.son':'Son ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.calib.kart-hatirlama-oranin':'Kart hatırlama oranın',
   'esp.core.calib.haftalik-calisma-suren':'Haftalık çalışma süren',
   'esp.core.calib.haftalik-oturum-sayin':'Haftalık oturum sayın',
@@ -71,15 +93,15 @@ ESP.Calib = (function(){
      Böylece defter, neyi ölçtüğünden bağımsız kalır. */
   ESP.CALIB_KINDS = [
     { id:'retention', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
-      label:yz('esp.core.calib.kart-hatirlama-oranin'), ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
+      label:yz('esp.core.calib.kart-hatirlama-oranin'), ask:yz('esp.core.calib.son-30-gunde-kartlarinin-yuz') },
     { id:'minutes', type:'number', unit:'dk', err:'ape',
-      label:yz('esp.core.calib.haftalik-calisma-suren'), ask:'Bu hafta toplam kaç dakika çalıştın?' },
+      label:yz('esp.core.calib.haftalik-calisma-suren'), ask:yz('esp.core.calib.bu-hafta-toplam-kac-dakika') },
     { id:'sessions', type:'number', unit:'oturum', err:'abs', bands:[1, 2, 4],
-      label:yz('esp.core.calib.haftalik-oturum-sayin'), ask:'Bu hafta kaç oturum kaydettin?' },
+      label:yz('esp.core.calib.haftalik-oturum-sayin'), ask:yz('esp.core.calib.bu-hafta-kac-oturum-kaydetti') },
     { id:'gate', type:'binary', unit:'', err:'brier',
-      label:yz('esp.core.calib.siradaki-kapi'), ask:'Bu ayın sonunda sıradaki kapıyı geçmiş olacak mısın?' },
+      label:yz('esp.core.calib.siradaki-kapi'), ask:yz('esp.core.calib.bu-ayin-sonunda-siradaki-kap') },
     { id:'readability', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
-      label:yz('esp.core.calib.yazinin-okunabilirligi'), ask:'Bu taslağın Ateşman puanı kaç çıkar?' },
+      label:yz('esp.core.calib.yazinin-okunabilirligi'), ask:yz('esp.core.calib.bu-taslagin-atesman-puani-ka') },
   ];
 
   const KIND_BY_ID = ESP.CALIB_KINDS.reduce((m, k) => { m[k.id] = k; return m; }, {});
@@ -121,15 +143,15 @@ ESP.Calib = (function(){
   async function open(kindId, guess, opts){
     const o = opts || {};
     const k = kindOf(kindId);
-    if(!k) return { ok:false, error:'Bilinmeyen tahmin türü.' };
+    if(!k) return { ok:false, error:yz('esp.core.calib.bilinmeyen-tahmin-turu') };
 
     const g = Number(guess);
-    if(!isFinite(g)) return { ok:false, error:'Tahmin bir sayı olmalı.' };
+    if(!isFinite(g)) return { ok:false, error:yz('esp.core.calib.tahmin-bir-sayi-olmali') };
     if(k.type === 'binary' && (g < 0 || g > 1)){
-      return { ok:false, error:'Olasılık 0 ile 1 arasında olmalı.' };
+      return { ok:false, error:yz('esp.core.calib.olasilik-0-ile-1-arasinda') };
     }
     if(k.type === 'number' && g < 0){
-      return { ok:false, error:'Tahmin negatif olamaz.' };
+      return { ok:false, error:yz('esp.core.calib.tahmin-negatif-olamaz') };
     }
 
     const kayit = norm({ kind:kindId, guess:g, ref:o.ref || null,
@@ -147,13 +169,13 @@ ESP.Calib = (function(){
      karşılığıdır. */
   async function settle(id, actual){
     const f = list().filter(x => x.id === id)[0];
-    if(!f) return { ok:false, error:'Tahmin bulunamadı.' };
-    if(f.actual != null) return { ok:false, error:'Bu tahmin zaten kapandı.' };
+    if(!f) return { ok:false, error:yz('esp.core.calib.tahmin-bulunamadi') };
+    if(f.actual != null) return { ok:false, error:yz('esp.core.calib.bu-tahmin-zaten-kapandi') };
 
     const a = Number(actual);
-    if(!isFinite(a)) return { ok:false, error:'Gerçek değer bir sayı olmalı.' };
+    if(!isFinite(a)) return { ok:false, error:yz('esp.core.calib.gercek-deger-bir-sayi-olmali') };
     if(f.dueAt && U.todayISO() < f.dueAt){
-      return { ok:false, error:'Bu tahmin ' + f.dueAt + ' tarihinden önce kapanmaz.',
+      return { ok:false, error:yz('esp.core.calib.bu-tahmin') + f.dueAt + ' tarihinden önce kapanmaz.',
         early:true };
     }
 
@@ -267,9 +289,9 @@ ESP.Calib = (function(){
     const ESIK = 0.25;
     return { cert:'measured', n:kayitlar.length, value:v, unit:'bant',
       direction:v > ESIK ? 'over' : v < -ESIK ? 'under' : 'even',
-      note:(v > ESIK ? 'Kendini olduğundan iyi tahmin etme eğilimindesin.'
-        : v < -ESIK ? 'Kendini olduğundan kötü tahmin etme eğilimindesin.'
-        : 'Sistemli bir yanlılık görünmüyor.')
+      note:(v > ESIK ? yz('esp.core.calib.kendini-oldugundan-iyi-tahmi')
+        : v < -ESIK ? yz('esp.core.calib.kendini-oldugundan-kotu-tahm')
+        : yz('esp.core.calib.sistemli-bir-yanlilik-gorunm'))
         + (Math.abs(v) > ESIK
            ? ' Ortalama sapman, kendi «makul» bandının '
              + ondalik(Math.abs(v)) + ' katı kadar tek yöne kayıyor.'
@@ -290,7 +312,7 @@ ESP.Calib = (function(){
       bias:bias() };
 
     if(hepsi.length < ASGARI){
-      out.note = 'Kapanmış ' + hepsi.length + ' tahmin var; puan için '
+      out.note = yz('esp.core.calib.kapanmis') + hepsi.length + ' tahmin var; puan için '
         + ASGARI + ' gerekir. Az sayıda tahmin hüküm vermez.';
       return out;
     }
@@ -323,10 +345,10 @@ ESP.Calib = (function(){
       return g.label + ': ' + (g.type === 'ape'
         ? '%' + Math.round(g.mean * 100) + ' sapma'
         : g.type === 'brier'
-        ? 'Brier ' + ondalik(g.mean)
+        ? yz('esp.core.calib.brier') + ondalik(g.mean)
         : ondalik(g.mean) + (g.unit ? ' ' + g.unit : '') + ' sapma');
     });
-    out.note = 'Son ' + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
+    out.note = yz('esp.core.calib.son') + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
       + '. Ortanca bant: ' + (out.grade || '—') + '. Farklı birimler tek '
       + 'ortalamada toplanmaz; karşılaştırılan şey banttır.';
     return out;

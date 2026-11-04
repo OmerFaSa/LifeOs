@@ -42,6 +42,11 @@
      5. ŞERİT HİÇBİR ŞEY YAZMAZ. «doldur» yalnız kutuya metin koyar; kayıt
         her zamanki gibi önizleme + «Kaydet» ile olur (giris.js söz 1). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.kisayol.komut-paleti':'Komut paleti',
+  'ortak.kisayol.g-sonra':'G sonra ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.kisayol.notlarim':'Notlarım',
 });
 
@@ -114,7 +119,7 @@ window.LIFEOS.KISAYOL = (function(){
 
   function satirlar(){
     if(!ayar) return [];
-    const l = [[['N'], '«Ne yaptın?» kutusuna git'], [['Shift', 'N'], 'Notlarım'], [['/'], 'Komut paleti']];
+    const l = [[['N'], '«Ne yaptın?» kutusuna git'], [['Shift', 'N'], 'Notlarım'], [['/'], yz('ortak.kisayol.komut-paleti')]];
     const h = harita();
     Object.keys(h).forEach(k => {
       l.push([['G', k.toLocaleUpperCase('tr-TR')], ADLAR[k] + ' çekmecesine git']);
@@ -123,7 +128,7 @@ window.LIFEOS.KISAYOL = (function(){
   }
   /* SPİ ve ESP penceresi düz metin satır ister: ['G sonra B', 'Bugün …'] */
   function metinSatirlari(){
-    return satirlar().map(s => [s[0][0] === 'G' ? 'G sonra ' + s[0][1] : s[0].join(' + '), s[1]]);
+    return satirlar().map(s => [s[0][0] === 'G' ? yz('ortak.kisayol.g-sonra') + s[0][1] : s[0].join(' + '), s[1]]);
   }
 
   function kur(o){

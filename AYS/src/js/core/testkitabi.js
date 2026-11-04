@@ -17,6 +17,20 @@
    4. HATALI SORU İŞARETLENİR ve sonuca sayılmaz: kaynaksız bir sorunun
       yanlış anahtarı, senin yanlışın değildir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.testkitabi.king-onayladi':'King onayladı',
+  'ays.core.testkitabi.king-kismen-onayladi':'King kısmen onayladı',
+  'ays.core.testkitabi.king-reddetti':'King reddetti',
+  'ays.core.testkitabi.kullanici-bu-profil-icin-tes':'Kullanıcı bu profil için test kitabı istedi.',
+  'ays.core.testkitabi.bam-da-uretilip-denetlenir-h':'BAM’da üretilip denetlenir; HKM olmadan kitap kurulmaz.',
+  'ays.core.testkitabi.bu-kitap-zaten-hazirlaniyor':'Bu kitap zaten hazırlanıyor (iş emri #',
+  'ays.core.testkitabi.king-cevap-verdi':'King cevap verdi',
+  'ays.core.testkitabi.test-kitabi':'Test kitabı',
+  'ays.core.testkitabi.bu-kitap-zaten-eklenmis':'Bu kitap zaten eklenmiş.',
+  'ays.core.testkitabi.kitap-hkm-den-alinamadi-hkm':'Kitap HKM’den alınamadı; HKM açıkken yeniden dene.',
+  'ays.core.testkitabi.bam-test-kitabi':'BAM test kitabı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.testkitabi.once-sinav-profilini-sec-ya':'Önce sınav profilini seç ya da müfredatını iste.',
   'ays.core.testkitabi.hkm-bagli-degil-test-kitabi':'HKM bağlı değil; test kitabı istenemedi. Sorular ',
   'ays.core.testkitabi.hkm-ye-ulasilamadi-hkm-acikk':'HKM’ye ulaşılamadı; HKM açıkken yeniden dene.',
@@ -74,16 +88,16 @@ R.TestKitabi = (function(){
       zorluk:Object.assign({}, VARSAYILAN) };
   }
 
-  const KARAR = { onay:'King onayladı', kismi:'King kısmen onayladı', ret:'King reddetti' };
+  const KARAR = { onay:yz('ays.core.testkitabi.king-onayladi'), kismi:yz('ays.core.testkitabi.king-kismen-onayladi'), ret:yz('ays.core.testkitabi.king-reddetti') };
 
   async function iste(profilId){
     const p = R.SinavProfil && R.SinavProfil.bul(profilId);
     if(!p) return { ok:false, metin:yz('ays.core.testkitabi.once-sinav-profilini-sec-ya') };
     const govde = istekGovdesi(p);
     const r = await R.SinavProfil.istek('/api/king/emir', { modul:'ays', tur:'test.kitabi',
-      govde:{ kitap:govde }, neden:'Kullanıcı bu profil için test kitabı istedi.' });
+      govde:{ kitap:govde }, neden:yz('ays.core.testkitabi.kullanici-bu-profil-icin-tes') });
     if(!r.bagli) return { ok:false, metin:yz('ays.core.testkitabi.hkm-bagli-degil-test-kitabi')
-      + 'BAM’da üretilip denetlenir; HKM olmadan kitap kurulmaz.' };
+      + yz('ays.core.testkitabi.bam-da-uretilip-denetlenir-h') };
     if(r.ag) return { ok:false, metin:yz('ays.core.testkitabi.hkm-ye-ulasilamadi-hkm-acikk') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
@@ -102,8 +116,8 @@ R.TestKitabi = (function(){
     const eksik = (e.kontrol || []).filter(m => !m.ok).map(m => m.not).join('; ');
     const soru = govde.bolumler.reduce((a, b) => a + b.adet, 0);
     return { ok:g.karar !== 'ret', karar:g.karar, emirId:e.id,
-      metin:(g.yeni === false ? 'Bu kitap zaten hazırlanıyor (iş emri #' + e.id + ').'
-        : (KARAR[g.karar] || 'King cevap verdi') + ' (iş emri #' + e.id + '): '
+      metin:(g.yeni === false ? yz('ays.core.testkitabi.bu-kitap-zaten-hazirlaniyor') + e.id + ').'
+        : (KARAR[g.karar] || yz('ays.core.testkitabi.king-cevap-verdi')) + ' (iş emri #' + e.id + '): '
           + govde.bolumler.length + ' bölüm, ' + soru + ' soru istendi.')
         + (e.durum === 'bitti' ? ' Kitap depoda hazırdı; teklif olarak geliyor.'
           : (e.tahmin && e.tahmin.metin ? ' Tahmini süre ' + e.tahmin.metin + ' (tahmin).' : ''))
@@ -154,7 +168,7 @@ R.TestKitabi = (function(){
     });
     if(!bolumler.length) return { ok:false, why:yz('ays.core.testkitabi.kitabin-hicbir-sorusu-ays-ni') };
     return { ok:true, kitap:{ id:'kitap-' + kid, kayitId:kid,
-      baslik:bosluk(g.baslik || kayit.baslik).slice(0, 120) || 'Test kitabı',
+      baslik:bosluk(g.baslik || kayit.baslik).slice(0, 120) || yz('ays.core.testkitabi.test-kitabi'),
       dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
       bolumler, sonuclar:{}, hatali:[], eklenme:R.U.todayISO(), dusen,
       maliyet:maliyetOku(kayit.maliyet) } };
@@ -216,14 +230,14 @@ R.TestKitabi = (function(){
 
   async function teklifUygula(p, cek){
     const kid = Number(p && p.kayit_id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Kayıt kimliği geçersiz.' };
-    if(kitaplar().some(k => k.kayitId === kid)) return { ok:false, error:'Bu kitap zaten eklenmiş.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:yz('ays.core.testkitabi.kayit-kimligi-gecersiz') };
+    if(kitaplar().some(k => k.kayitId === kid)) return { ok:false, error:yz('ays.core.testkitabi.bu-kitap-zaten-eklenmis') };
     const kayit = await (cek || (async id => {
       const r = await R.SinavProfil.istek('/api/bam/kayit/' + id);
       const k = r.ok && r.govde ? r.govde.kayit || null : null;
       return k ? Object.assign({}, k, { maliyet:(r.govde.depo || {}).maliyet || null }) : null;
     }))(kid);
-    if(!kayit) return { ok:false, error:'Kitap HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    if(!kayit) return { ok:false, error:yz('ays.core.testkitabi.kitap-hkm-den-alinamadi-hkm') };
     const r = kayittan(kayit);
     if(!r.ok) return { ok:false, error:r.why };
     await kaydet(r.kitap);
@@ -367,7 +381,7 @@ R.TestKitabi = (function(){
     for(const x of yeni){
       const err = {
         id:R.U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
-        examId:null, examDate:s.tarih || R.U.todayISO(), publisher:'BAM test kitabı',
+        examId:null, examDate:s.tarih || R.U.todayISO(), publisher:yz('ays.core.testkitabi.bam-test-kitabi'),
         testName:(k.baslik + ' · ' + b.ad).slice(0, 160), questionNo:String(x.i + 1),
         status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
         recipe:'', topicRef:'', subjectId:null, topicId:null,

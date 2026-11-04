@@ -28,6 +28,25 @@
         seans da kalkar. Bağ yoksa ya da hazır antrenman silindiyse düz
         işarettir. Telefon bildirimindeki düğme seans YAZMAZ: orada «Geri al»
         yok. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.hatirlat.i-lac-takviye':'İlaç / takviye',
+  'spi.core.hatirlat.hareket-molasi':'Hareket molası',
+  'spi.core.hatirlat.sabah-olcumu':'Sabah ölçümü',
+  'spi.core.hatirlat.sabah-tartisi':'Sabah tartısı',
+  'spi.core.hatirlat.en-az-bir-saat-yaz':'En az bir saat yaz (örn. 08:00).',
+  'spi.core.hatirlat.bir-hatirlatmaya-en-cok':'Bir hatırlatmaya en çok ',
+  'spi.core.hatirlat.silinmis-ilac-kaydi':'Silinmiş ilaç kaydı',
+  'spi.core.hatirlat.hatirlatma-turu-secilmedi':'Hatırlatma türü seçilmedi.',
+  'spi.core.hatirlat.hangi-ilac-ya-da-takviye':'Hangi ilaç ya da takviye olduğu seçilmedi.',
+  'spi.core.hatirlat.baglanacak-hazir-antrenman-b':'Bağlanacak hazır antrenman bulunamadı.',
+  'spi.core.hatirlat.hatirlatma-bulunamadi':'Hatırlatma bulunamadı.',
+  'spi.core.hatirlat.bildirim-izni-kapali-iphone':'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.',
+  'spi.core.hatirlat.bildirim-izni-alinamadi-hati':'Bildirim izni alınamadı; hatırlatmalar yalnız Bugün ekranında görünür.',
+  'spi.core.hatirlat.bu-tarayici-bildirim-gosterm':'Bu tarayıcı bildirim göstermiyor.',
+  'spi.core.hatirlat.bildirim-izni-verilmedi-hati':'Bildirim izni verilmedi; hatırlatmalar yalnız Bugün ekranında görünür.',
+  'spi.core.hatirlat.bu-tarayici-bildirimi-goster':'Bu tarayıcı bildirimi gösteremedi (Android Chrome gibi). Hatırlatmalar ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -40,12 +59,12 @@ SP.Hatirlat = (function(){
   const PLAN_GUN = 7;                       // telefonda kaç günün saati kurulur
 
   const TUR = {
-    ilac:{ ad:'İlaç / takviye', eylem:'Aldım' },
+    ilac:{ ad:yz('spi.core.hatirlat.i-lac-takviye'), eylem:'Aldım' },
     su:{ ad:'Su', eylem:'İçtim', metin:'Su' },
-    hareket:{ ad:'Hareket', eylem:'Yaptım', metin:'Hareket molası' },
+    hareket:{ ad:'Hareket', eylem:'Yaptım', metin:yz('spi.core.hatirlat.hareket-molasi') },
     /* 088 ÖLÇÜM HATIRLATICISI: sabah tartısı. «Ölçtüm» bir işarettir;
        tartının kendisi ölçüm formundan girilir, işaret kilo yazmaz. */
-    olcum:{ ad:'Sabah ölçümü', eylem:'Ölçtüm', metin:'Sabah tartısı' },
+    olcum:{ ad:yz('spi.core.hatirlat.sabah-olcumu'), eylem:'Ölçtüm', metin:yz('spi.core.hatirlat.sabah-tartisi') },
   };
 
   function bos(){ return { liste:[], yapildi:{}, seans:{}, bildirim:false }; }
@@ -80,7 +99,7 @@ SP.Hatirlat = (function(){
      parça TAHMİN EDİLMEZ, sorulur (AGENTS §1.7). */
   function saatOku(metin){
     const parca = String(metin || '').split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
-    if(!parca.length) return { ok:false, why:'En az bir saat yaz (örn. 08:00).' };
+    if(!parca.length) return { ok:false, why:yz('spi.core.hatirlat.en-az-bir-saat-yaz') };
     const out = [];
     for(const p of parca){
       const m = /^(\d{1,2})[:.](\d{2})$/.exec(p);
@@ -89,7 +108,7 @@ SP.Hatirlat = (function(){
       const hhmm = String(s).padStart(2, '0') + ':' + String(d).padStart(2, '0');
       if(out.indexOf(hhmm) < 0) out.push(hhmm);
     }
-    if(out.length > EN_COK_SAAT) return { ok:false, why:'Bir hatırlatmaya en çok ' + EN_COK_SAAT + ' saat yazılır.' };
+    if(out.length > EN_COK_SAAT) return { ok:false, why:yz('spi.core.hatirlat.bir-hatirlatmaya-en-cok') + EN_COK_SAAT + ' saat yazılır.' };
     return { ok:true, saatler:out.sort() };
   }
 
@@ -103,7 +122,7 @@ SP.Hatirlat = (function(){
   function adOf(h){
     if(h.tur === 'ilac'){
       const m = ilacOf(h);
-      return m ? (m.name || SP.Meds.kindOf(m).name) : 'Silinmiş ilaç kaydı';
+      return m ? (m.name || SP.Meds.kindOf(m).name) : yz('spi.core.hatirlat.silinmis-ilac-kaydi');
     }
     return TUR[h.tur].metin;
   }
@@ -117,16 +136,16 @@ SP.Hatirlat = (function(){
 
   async function ekle(g){
     const x = g || {};
-    if(!TUR[x.tur]) return { ok:false, why:'Hatırlatma türü seçilmedi.' };
+    if(!TUR[x.tur]) return { ok:false, why:yz('spi.core.hatirlat.hatirlatma-turu-secilmedi') };
     if(x.tur === 'ilac' && !(SP.S.meds || []).some(m => m.id === x.medId)){
-      return { ok:false, why:'Hangi ilaç ya da takviye olduğu seçilmedi.' };
+      return { ok:false, why:yz('spi.core.hatirlat.hangi-ilac-ya-da-takviye') };
     }
     /* Söz 6: `hazirId` verilmezse (undefined) var olan bağ kalır; boş
        verilirse bağ kalkar. Olmayan antrenmana bağ kurulmaz. */
     const bagVar = x.tur === 'hareket' && x.hazirId !== undefined;
     const bag = bagVar && x.hazirId ? String(x.hazirId) : null;
     if(bag && !(SP.Hazir && SP.Hazir.antrenmanlar().some(a => a.id === bag))){
-      return { ok:false, why:'Bağlanacak hazır antrenman bulunamadı.' };
+      return { ok:false, why:yz('spi.core.hatirlat.baglanacak-hazir-antrenman-b') };
     }
     const s = saatOku(x.saatler);
     if(!s.ok) return s;
@@ -144,7 +163,7 @@ SP.Hatirlat = (function(){
   async function sil(id){
     const d = durum();
     const h = d.liste.find(x => x.id === id);
-    if(!h) return { ok:false, why:'Hatırlatma bulunamadı.' };
+    if(!h) return { ok:false, why:yz('spi.core.hatirlat.hatirlatma-bulunamadi') };
     d.liste = d.liste.filter(x => x.id !== id);
     await kaydet();
     return { ok:true, geri:h };
@@ -223,7 +242,7 @@ SP.Hatirlat = (function(){
   async function yaptim(anahtar, gunISO){
     const gun = gunISO || U().todayISO();
     const h = hatOf(anahtar);
-    if(!h) return { ok:false, why:'Hatırlatma bulunamadı.' };
+    if(!h) return { ok:false, why:yz('spi.core.hatirlat.hatirlatma-bulunamadi') };
     const zaten = !!(durum().yapildi[gun] || {})[anahtar];
     const seans = zaten ? null : await seansEkle(h, anahtar, gun);
     await isaretle(anahtar, true, gun);
@@ -283,17 +302,17 @@ SP.Hatirlat = (function(){
       const izin = await B().izin();
       if(izin !== 'izin'){
         return { ok:false, why:izin === 'red'
-          ? 'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.'
-          : 'Bildirim izni alınamadı; hatırlatmalar yalnız Bugün ekranında görünür.' };
+          ? yz('spi.core.hatirlat.bildirim-izni-kapali-iphone')
+          : yz('spi.core.hatirlat.bildirim-izni-alinamadi-hati') };
       }
       durum().bildirim = true;
       await kaydet();
       return { ok:true, telefon:true };
     }
-    if(!bildirimVar()) return { ok:false, why:'Bu tarayıcı bildirim göstermiyor.' };
+    if(!bildirimVar()) return { ok:false, why:yz('spi.core.hatirlat.bu-tarayici-bildirim-gosterm') };
     let izin = window.Notification.permission;
     if(izin !== 'granted') izin = await window.Notification.requestPermission();
-    if(izin !== 'granted') return { ok:false, why:'Bildirim izni verilmedi; hatırlatmalar yalnız Bugün ekranında görünür.' };
+    if(izin !== 'granted') return { ok:false, why:yz('spi.core.hatirlat.bildirim-izni-verilmedi-hati') };
     durum().bildirim = true;
     await kaydet();
     return { ok:true };
@@ -364,7 +383,7 @@ SP.Hatirlat = (function(){
      gerekir. Hata yutuluyor, izin verilmiş görünürken hiçbir hatırlatma
      gelmiyordu (belgeler/ekip/HATALAR.md O-8). İkisi de olmazsa bu SÖYLENİR. */
   let sorun = null;
-  const SORUN = 'Bu tarayıcı bildirimi gösteremedi (Android Chrome gibi). Hatırlatmalar '
+  const SORUN = yz('spi.core.hatirlat.bu-tarayici-bildirimi-goster')
     + 'yalnız Bugün ekranında görünür.';
   function goster(baslik, secenek){
     try{ new window.Notification(baslik, secenek); sorun = null; return true; }

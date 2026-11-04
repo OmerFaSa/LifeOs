@@ -6,6 +6,28 @@
 
    Profil geçişi sayfayı yeniden yükler: yarım kalmış bir yazma işleminin
    yanlış profile düşmesi böylece imkânsızdır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.family.eksik-alan':'Eksik alan: ',
+  'spi.family.bazal-metabolizma':'Bazal metabolizma',
+  'spi.family.bugunku-hareket':'Bugünkü hareket',
+  'spi.family.bugunku-ihtiyac':'Bugünkü ihtiyaç',
+  'spi.family.hedef-kalori':'Hedef kalori',
+  'spi.family.her-profil-kendi-depo-anahta':'Her profil kendi depo anahtarında durur. ',
+  'spi.family.profil-degistirdiginde-butun':'Profil değiştirdiğinde bütün veri seti değişir; veriler karışmaz.',
+  'spi.family.tema-secildigi-anda-uygulani':'Tema seçildiği anda uygulanır. «Kaydet» yalnız hanedeki kişi ',
+  'spi.family.profil-eklendikten-sonra-ona':'Profil eklendikten sonra ona geçip kilo, boy ve hedefini ',
+  'spi.family.profili-degistir':'Profili değiştir',
+  'spi.family.sayfa-yeniden-yuklenir-ve-bu':'Sayfa yeniden yüklenir ve bu profilin verileri açılır. Kaydedilmemiş bir alan varsa kaybolur.',
+  'spi.family.profile-gec':'Profile geç',
+  'spi.family.profil-listeden-cikar-ama-ve':'Profil listeden çıkar ama VERİSİ SİLİNMEZ; kendi anahtarında durmaya devam eder. ',
+  'spi.family.ayni-adla-yeniden-eklersen-v':'Aynı adla yeniden eklersen veriler geri gelir.',
+  'spi.family.listeden-cikarildi':'Listeden çıkarıldı',
+  'spi.family.profil-eksik':'Profil eksik.',
+  'spi.family.profil-hazir':'Profil hazır.',
+  'spi.family.kilo-boy-dogum-yili-ve':'Kilo, boy, doğum yılı ve cinsiyet girilince bütün hedefler ',
+  'spi.family.hedefler-gorunum-ve-hane-uye':'Hedefler, görünüm ve hane üyeleri burada. Her profil kendi ',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -87,7 +109,7 @@ SP.Screens.family = (function(){
               options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
         </div>
         ${when(!t.ok, () => K.Notice({ tone:'warn', class:'mt-12',
-          body:'Eksik alan: ' + t.missing.join(', ') + '. Bunlar olmadan kalori ve protein '
+          body:yz('spi.family.eksik-alan') + t.missing.join(', ') + '. Bunlar olmadan kalori ve protein '
              + 'hedefi hesaplanmaz — tahmin edilmez.' }))}`,
       foot:K.Button({ label:yz('spi.family.kaydet'), tone:'primary', act:'save-profile' }),
     });
@@ -102,11 +124,11 @@ SP.Screens.family = (function(){
       sub:t.goal.label,
       body:html`
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
-          ['Bazal metabolizma', U.fmtNum(t.bmr) + ' kcal'],
-          ['Bugünkü hareket', n && !n.hareketYok ? '+' + U.fmtNum(n.hareket) + ' kcal · ' + n.dakika + ' dk (hesaplandı)'
+          [yz('spi.family.bazal-metabolizma'), U.fmtNum(t.bmr) + ' kcal'],
+          [yz('spi.family.bugunku-hareket'), n && !n.hareketYok ? '+' + U.fmtNum(n.hareket) + ' kcal · ' + n.dakika + ' dk (hesaplandı)'
             : 'girilmedi — ihtiyaca eklenmedi'],
-          ['Bugünkü ihtiyaç', U.fmtNum(t.tdee) + ' kcal (hesaplandı)'],
-          ['Hedef kalori', U.fmtNum(t.kcal) + ' kcal' + (t.goal.deficit ? ' · ' + t.goal.note : '')
+          [yz('spi.family.bugunku-ihtiyac'), U.fmtNum(t.tdee) + ' kcal (hesaplandı)'],
+          [yz('spi.family.hedef-kalori'), U.fmtNum(t.kcal) + ' kcal' + (t.goal.deficit ? ' · ' + t.goal.note : '')
             + (t.bmrTaban ? ' · bazal metabolizmanın altına inmez' : '')],
           ['Protein', t.protein.min + '–' + t.protein.max + ' g'],
           ['Yağ', t.fat.min + '–' + t.fat.max + ' g'],
@@ -130,8 +152,8 @@ SP.Screens.family = (function(){
       title:yz('spi.family.hanedeki-profiller'), hint:'profiles',
       sub:list.length + ' profil',
       body:html`
-        ${K.Notice({ tone:'info', body:'Her profil kendi depo anahtarında durur. '
-          + 'Profil değiştirdiğinde bütün veri seti değişir; veriler karışmaz.' })}
+        ${K.Notice({ tone:'info', body:yz('spi.family.her-profil-kendi-depo-anahta')
+          + yz('spi.family.profil-degistirdiginde-butun') })}
         <div class="list mt-12">${map(list, row => html`
           <div class="listitem">
             <div class="grow">
@@ -174,7 +196,7 @@ SP.Screens.family = (function(){
               value:p.householdSize || 1 }) })}
         </div>
         ${K.Notice({ tone:'info', class:'mt-10',
-          body:'Tema seçildiği anda uygulanır. «Kaydet» yalnız hanedeki kişi '
+          body:yz('spi.family.tema-secildigi-anda-uygulani')
             + 'sayısı için. Tek tasarım: renk modülü söyler.' })}`,
       foot:K.Button({ label:yz('spi.family.kaydet'), size:'sm', act:'save-prefs' }),
     });
@@ -256,7 +278,7 @@ SP.Screens.family = (function(){
             { value:'female', label:yz('spi.family.kadin') }, { value:'male', label:yz('spi.family.erkek') }] }) }),
           K.Field({ label:yz('spi.family.dogum-yili'),
             input:K.Input({ id:'np-birth', type:'number', numeric:true, min:1900, max:2026 }) }),
-          K.Notice({ tone:'info', body:'Profil eklendikten sonra ona geçip kilo, boy ve hedefini '
+          K.Notice({ tone:'info', body:yz('spi.family.profil-eklendikten-sonra-ona')
             + 'girmen gerekir. Eksik profil porsiyon paylaştırmasına girmez.' }),
         ])),
         footer:String(html`${K.Button({ label:yz('spi.family.vazgec'), act:'sheet-close' })}
@@ -277,21 +299,21 @@ SP.Screens.family = (function(){
     },
     async 'switch-profile'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Profili değiştir',
-        'Sayfa yeniden yüklenir ve bu profilin verileri açılır. Kaydedilmemiş bir alan varsa kaybolur.',
-        () => M.switchProfile(id), false, 'Profile geç');
+      UI.confirmSheet(yz('spi.family.profili-degistir'),
+        yz('spi.family.sayfa-yeniden-yuklenir-ve-bu'),
+        () => M.switchProfile(id), false, yz('spi.family.profile-gec'));
     },
     async 'remove-profile'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Listeden çıkar',
-        'Profil listeden çıkar ama VERİSİ SİLİNMEZ; kendi anahtarında durmaya devam eder. '
-        + 'Aynı adla yeniden eklersen veriler geri gelir.',
+      UI.confirmSheet(yz('spi.family.listeden-cikar'),
+        yz('spi.family.profil-listeden-cikar-ama-ve')
+        + yz('spi.family.ayni-adla-yeniden-eklersen-v'),
         async () => {
           const res = M.removeHouseholdMember(id);
           UI.closeSheet();
-          UI.toast(res.ok ? 'Listeden çıkarıldı' : res.error);
+          UI.toast(res.ok ? yz('spi.family.listeden-cikarildi') : res.error);
           SP.App.render();
-        }, false, 'Listeden çıkar');
+        }, false, yz('spi.family.listeden-cikar'));
     },
   };
 
@@ -300,15 +322,15 @@ SP.Screens.family = (function(){
     title:yz('spi.family.hane'),
     headline(){
       const t = SP.Nutri.targets();
-      if(!t.ok) return 'Profil eksik.';
+      if(!t.ok) return yz('spi.family.profil-eksik');
       const list = M.householdList();
-      return list.length > 1 ? list.length + ' kişilik hane.' : 'Profil hazır.';
+      return list.length > 1 ? list.length + ' kişilik hane.' : yz('spi.family.profil-hazir');
     },
     lede(){
       const t = SP.Nutri.targets();
-      if(!t.ok) return 'Kilo, boy, doğum yılı ve cinsiyet girilince bütün hedefler '
+      if(!t.ok) return yz('spi.family.kilo-boy-dogum-yili-ve')
         + 'kendiliğinden hesaplanır. Bunlar olmadan hiçbir sayı tahmin edilmez.';
-      return 'Hedefler, görünüm ve hane üyeleri burada. Her profil kendi '
+      return yz('spi.family.hedefler-gorunum-ve-hane-uye')
         + 'temasını ve hedefini taşır.';
     },
     subtitle(){

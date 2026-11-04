@@ -28,6 +28,43 @@
    acilirken PDF'ten kimlik alanlarini kesme ve fotograftan EXIF silme
    adimi TEK BIR YERE, oraya takilir. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.extract.asagidaki-tahlil-raporundan':'Asagidaki tahlil raporundan olcum adi, degeri ve birimini cikar. ',
+  'spi.core.extract.yalniz-json-dizisi-dondur-ba':'Yalniz JSON dizisi dondur, baska hicbir sey yazma. Bicim: ',
+  'spi.core.extract.emin-olmadigin-satiri-atla-d':'Emin olmadigin satiri ATLA. Deger okunamiyorsa o satiri hic yazma. ',
+  'spi.core.extract.tarihi-hasta-bilgisini-ve-yo':'Tarihi, hasta bilgisini ve yorumu dondurme.',
+  'spi.core.extract.bu-dosya-turu-okunamiyor-pdf':'Bu dosya türü okunamıyor. PDF, görüntü ya da metin dosyası ver.',
+  'spi.core.extract.goruntu-ve-pdf-okumak-icin':'Görüntü ve PDF okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için ',
+  'spi.core.extract.pdf-dogrudan-okunamiyor-rapo':'PDF doğrudan okunamıyor. Raporun ekran görüntüsünü ver ya da ',
+  'spi.core.extract.sen-bir-tahlil-raporu-okuyuc':'Sen bir tahlil raporu okuyucususun. Yalniz JSON dondurursun.',
+  'spi.core.extract.goruntuden-olcum-cikarilamad':'Görüntüden ölçüm çıkarılamadı. Rapor metnini yapıştırmayı dene.',
+  'spi.core.extract.fotograftaki-yemegi-asagidak':'Fotograftaki yemegi asagidaki listeden SEC ve gram olarak tahmin et. ',
+  'spi.core.extract.tabagin':'Tabagin ',
+  'spi.core.extract.kabin-olcusu':'Kabin olcusu: ',
+  'spi.core.extract.ek-bilgi':'Ek bilgi: ',
+  'spi.core.extract.ogunu-tek-satir-yazarak-mode':'Öğünü tek satır yazarak modelsiz de girebilirsin.',
+  'spi.core.extract.sen-bir-yemek-fotografi-okuy':'Sen bir yemek fotografi okuyucususun. Yalniz JSON dondurursun.',
+  'spi.core.extract.taninan-gida-listemizde-yok':'Tanınan gıda listemizde yok.',
+  'spi.core.extract.bu-bir-vucut-boy':'Bu bir vücut / boy fotoğrafı. Fotoğraftaki duruşu (postür) ve tahmini beden kompozisyonunu 5 bölüt halinde incele. ',
+  'spi.core.extract.asla-tibbi-teshis-koyma':'Asla tıbbi teşhis koyma. ',
+  'spi.core.extract.yalniz-ve-kesinlikle-asagida':'Yalnız ve kesinlikle aşağıdaki şemaya uyan geçerli bir JSON nesnesi döndür: ',
+  'spi.core.extract.kullanici-boyu':'Kullanıcı boyu: ',
+  'spi.core.extract.kullanici-kilosu':'Kullanıcı kilosu: ',
+  'spi.core.extract.cinsiyet':'Cinsiyet: ',
+  'spi.core.extract.kullanici-notu':'Kullanıcı notu: ',
+  'spi.core.extract.sen-bir-spor-ve-durus':'Sen bir spor ve duruş analizi gözlemcisisin. Tıbbi teşhis koymazsın. Yalnız JSON döndürürsün.',
+  'spi.core.extract.bu-analiz-tibbi-bir-teshis':'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir.',
+  'spi.core.extract.asagidaki-market-fisinden-ur':'Asagidaki market fisinden urun adi ve KILOGRAM BASINA fiyati cikar. ',
+  'spi.core.extract.fis-toplam-fiyat-ve-agirlik':'Fis toplam fiyat ve agirlik veriyorsa kilogram fiyatini hesapla. ',
+  'spi.core.extract.emin-olmadigin-satiri-atla-t':'Emin olmadigin satiri atla. Toplam, kdv ve kasa satirlarini yazma.',
+  'spi.core.extract.sen-bir-market-fisi-okuyucus':'Sen bir market fisi okuyucususun. Yalniz JSON dondurursun.',
+  'spi.core.extract.eslesen-urun-yok':'Eşleşen ürün yok.',
+  'spi.core.extract.bu-bir-gida-ambalajinin-besi':'Bu bir gida ambalajinin BESIN DEGERLERI TABLOSU fotografi. ',
+  'spi.core.extract.sen-bir-besin-degerleri-tabl':'Sen bir besin degerleri tablosu okuyucususun. Yalniz JSON dondurursun.',
+  'spi.core.extract.etiketten-okunamayan-zorunlu':'Etiketten okunamayan zorunlu alan var; elle tamamlaman gerekiyor.',
+  'spi.core.extract.etiket-okundu-degerler-olcul':'Etiket okundu. Değerler «ölçüldü» sayılır: üretici beyanı ambalajda yazılı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.extract.fotograf-secilmedi':'Fotoğraf seçilmedi.',
   'spi.core.extract.fotograf-cok-buyuk-en-fazla':'Fotoğraf çok büyük (en fazla 8 MB).',
   'spi.core.extract.bu-bir-goruntu-dosyasi-degil':'Bu bir görüntü dosyası değil.',
@@ -143,15 +180,15 @@ SP.Extract = (function(){
      girer. Bu sira kasitlidir: calisan bir ayristiriciyi varken modele
      para ve saniye harcamak dogru degil. */
   const LAB_PROMPT =
-    'Asagidaki tahlil raporundan olcum adi, degeri ve birimini cikar. '
-    + 'Yalniz JSON dizisi dondur, baska hicbir sey yazma. Bicim: '
+    yz('spi.core.extract.asagidaki-tahlil-raporundan')
+    + yz('spi.core.extract.yalniz-json-dizisi-dondur-ba')
     + '[{"ad":"Ferritin","deger":26,"birim":"ng/mL"}]. '
-    + 'Emin olmadigin satiri ATLA. Deger okunamiyorsa o satiri hic yazma. '
-    + 'Tarihi, hasta bilgisini ve yorumu dondurme.';
+    + yz('spi.core.extract.emin-olmadigin-satiri-atla-d')
+    + yz('spi.core.extract.tarihi-hasta-bilgisini-ve-yo');
 
   async function fromLabFile(file){
-    if(!file) return empty('Dosya seçilmedi.');
-    if(file.size > MAX_BYTES) return empty('Dosya çok büyük (en fazla 8 MB).');
+    if(!file) return empty(yz('spi.core.extract.dosya-secilmedi'));
+    if(file.size > MAX_BYTES) return empty(yz('spi.core.extract.dosya-cok-buyuk-en-fazla'));
 
     /* 1. Metin dosyasi: dogrudan ayristirici. */
     if(isText(file)){
@@ -163,33 +200,33 @@ SP.Extract = (function(){
 
     /* 2. Goruntu ya da PDF: model gerekir. */
     if(!isImage(file) && !isPdf(file)){
-      return empty('Bu dosya türü okunamıyor. PDF, görüntü ya da metin dosyası ver.');
+      return empty(yz('spi.core.extract.bu-dosya-turu-okunamiyor-pdf'));
     }
     if(!modelReady()){
-      return empty('Görüntü ve PDF okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için '
+      return empty(yz('spi.core.extract.goruntu-ve-pdf-okumak-icin')
         + 'bir model atanmalı. Rapor metnini yapıştırarak modelsiz de girebilirsin.');
     }
     if(isPdf(file)){
-      return empty('PDF doğrudan okunamıyor. Raporun ekran görüntüsünü ver ya da '
+      return empty(yz('spi.core.extract.pdf-dogrudan-okunamiyor-rapo')
         + 'metnini yapıştır.');
     }
 
     const parts = splitDataUrl(await readDataUrl(file));
-    if(!parts) return empty('Görüntü okunamadı.');
+    if(!parts) return empty(yz('spi.core.extract.goruntu-okunamadi'));
 
     let out;
     try{
       out = await send({
-        system:'Sen bir tahlil raporu okuyucususun. Yalniz JSON dondurursun.',
+        system:yz('spi.core.extract.sen-bir-tahlil-raporu-okuyuc'),
         messages:[{ role:'user', text:LAB_PROMPT, images:[parts] }],
       });
     }catch(e){
-      return empty('Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+      return empty(yz('spi.core.extract.model-yanit-vermedi') + (e && e.message ? e.message : 'bilinmeyen hata'));
     }
 
     const rows = parseJson(out && out.text);
     if(!Array.isArray(rows) || !rows.length){
-      return empty('Görüntüden ölçüm çıkarılamadı. Rapor metnini yapıştırmayı dene.');
+      return empty(yz('spi.core.extract.goruntuden-olcum-cikarilamad'));
     }
 
     /* Model satirlarini BIZIM ayristiricimiza geri veriyoruz: takma ad
@@ -212,14 +249,14 @@ SP.Extract = (function(){
      sey bu uc bilgidir ve sorulmadan verilmez. */
   function mealPrompt(hints){
     const names = SP.FOODS.map(f => f.id + '=' + f.name).join(', ');
-    let p = 'Fotograftaki yemegi asagidaki listeden SEC ve gram olarak tahmin et. '
+    let p = yz('spi.core.extract.fotograftaki-yemegi-asagidak')
       + 'Yalniz JSON dizisi dondur: [{"id":"pilav","gram":180}]. '
       + 'Listede olmayan bir sey icin id yerine ad yaz: [{"ad":"lahmacun","gram":120}]. '
       + 'Emin olmadigin seyi yazma.\n\nListe: ' + names;
     const h = [];
-    if(hints && hints.amount) h.push('Tabagin ' + hints.amount + ' kadari yendi.');
-    if(hints && hints.vessel) h.push('Kabin olcusu: ' + hints.vessel + '.');
-    if(hints && hints.extra)  h.push('Ek bilgi: ' + hints.extra + '.');
+    if(hints && hints.amount) h.push(yz('spi.core.extract.tabagin') + hints.amount + ' kadari yendi.');
+    if(hints && hints.vessel) h.push(yz('spi.core.extract.kabin-olcusu') + hints.vessel + '.');
+    if(hints && hints.extra)  h.push(yz('spi.core.extract.ek-bilgi') + hints.extra + '.');
     if(h.length) p += '\n\nKullanicinin notu: ' + h.join(' ');
     return p;
   }
@@ -235,7 +272,7 @@ SP.Extract = (function(){
     if(!modelReady()){
       return { ok:false, items:[], unmatched:[],
         note:yz('spi.core.extract.fotograftan-ogun-okumak-icin')
-          + 'Öğünü tek satır yazarak modelsiz de girebilirsin.' };
+          + yz('spi.core.extract.ogunu-tek-satir-yazarak-mode') };
     }
 
     const parts = splitDataUrl(await readDataUrl(file));
@@ -244,7 +281,7 @@ SP.Extract = (function(){
     let out;
     try{
       out = await send({
-        system:'Sen bir yemek fotografi okuyucususun. Yalniz JSON dondurursun.',
+        system:yz('spi.core.extract.sen-bir-yemek-fotografi-okuy'),
         messages:[{ role:'user', text:mealPrompt(hints), images:[parts] }],
       });
     }catch(e){
@@ -279,7 +316,7 @@ SP.Extract = (function(){
       ok:items.length > 0, items, unmatched,
       note:items.length
         ? items.length + ' gıda tanındı · gramaj tahmin'
-        : 'Tanınan gıda listemizde yok.',
+        : yz('spi.core.extract.taninan-gida-listemizde-yok'),
     };
   }
 
@@ -296,9 +333,9 @@ SP.Extract = (function(){
        2. Sayı her zaman 'estimated' (tahmin) olarak işaretlenir.
        3. Kullanıcının boy/kilo girdisi varsa onu referans alır. */
   function bodyPrompt(hints){
-    let p = 'Bu bir vücut / boy fotoğrafı. Fotoğraftaki duruşu (postür) ve tahmini beden kompozisyonunu 5 bölüt halinde incele. '
-      + 'Asla tıbbi teşhis koyma. '
-      + 'Yalnız ve kesinlikle aşağıdaki şemaya uyan geçerli bir JSON nesnesi döndür: '
+    let p = yz('spi.core.extract.bu-bir-vucut-boy')
+      + yz('spi.core.extract.asla-tibbi-teshis-koyma')
+      + yz('spi.core.extract.yalniz-ve-kesinlikle-asagida')
       + '{\n'
       + '  "biyometrikKompozisyon": {\n'
       + '    "bki": 23.4,\n'
@@ -331,10 +368,10 @@ SP.Extract = (function(){
       + '  }\n'
       + '}';
     const h = [];
-    if(hints && hints.boy) h.push('Kullanıcı boyu: ' + hints.boy + ' cm.');
-    if(hints && hints.kilo) h.push('Kullanıcı kilosu: ' + hints.kilo + ' kg.');
-    if(hints && hints.cinsiyet) h.push('Cinsiyet: ' + hints.cinsiyet + '.');
-    if(hints && hints.not) h.push('Kullanıcı notu: ' + hints.not + '.');
+    if(hints && hints.boy) h.push(yz('spi.core.extract.kullanici-boyu') + hints.boy + ' cm.');
+    if(hints && hints.kilo) h.push(yz('spi.core.extract.kullanici-kilosu') + hints.kilo + ' kg.');
+    if(hints && hints.cinsiyet) h.push(yz('spi.core.extract.cinsiyet') + hints.cinsiyet + '.');
+    if(hints && hints.not) h.push(yz('spi.core.extract.kullanici-notu') + hints.not + '.');
     if(h.length) p += '\n\nKullanıcı bilgileri: ' + h.join(' ');
     return p;
   }
@@ -358,7 +395,7 @@ SP.Extract = (function(){
     let out;
     try{
       out = await send({
-        system:'Sen bir spor ve duruş analizi gözlemcisisin. Tıbbi teşhis koymazsın. Yalnız JSON döndürürsün.',
+        system:yz('spi.core.extract.sen-bir-spor-ve-durus'),
         messages:[{ role:'user', text:bodyPrompt(hints), images:[parts] }],
       });
     }catch(e){
@@ -400,7 +437,7 @@ SP.Extract = (function(){
     const suHedefi = String(bh.suHedefi || bh.su_hedefi || '');
     const oneriBeslenme = String(bh.oneri || res.oneriler || res.oneri || '');
 
-    const uyari = String(tg.uyari || 'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir.');
+    const uyari = String(tg.uyari || yz('spi.core.extract.bu-analiz-tibbi-bir-teshis'));
 
     const biyometrikKompozisyon = { bki, kategori, yagAralik, bedenTipi, belKalca };
     const posturSegmentasyonu = { basBoyun, omuzSimetri, omurga, pelvis };
@@ -439,10 +476,10 @@ SP.Extract = (function(){
      Market fisi fiyat tablosunun curumesini cozer: tohum tahminler
      kullanicinin gercek fiyatiyla degisir ve "olculdu" olur. */
   const RECEIPT_PROMPT =
-    'Asagidaki market fisinden urun adi ve KILOGRAM BASINA fiyati cikar. '
+    yz('spi.core.extract.asagidaki-market-fisinden-ur')
     + 'Yalniz JSON dizisi dondur: [{"ad":"kuru fasulye","tlKg":120}]. '
-    + 'Fis toplam fiyat ve agirlik veriyorsa kilogram fiyatini hesapla. '
-    + 'Emin olmadigin satiri atla. Toplam, kdv ve kasa satirlarini yazma.';
+    + yz('spi.core.extract.fis-toplam-fiyat-ve-agirlik')
+    + yz('spi.core.extract.emin-olmadigin-satiri-atla-t');
 
   async function fromReceipt(file){
     if(!file) return { ok:false, rows:[], unmatched:[], note:yz('spi.core.extract.dosya-secilmedi') };
@@ -471,7 +508,7 @@ SP.Extract = (function(){
 
     let out;
     try{
-      out = await send({ system:'Sen bir market fisi okuyucususun. Yalniz JSON dondurursun.',
+      out = await send({ system:yz('spi.core.extract.sen-bir-market-fisi-okuyucus'),
         messages:[msg] });
     }catch(e){
       return { ok:false, rows:[], unmatched:[],
@@ -497,7 +534,7 @@ SP.Extract = (function(){
 
     return {
       ok:rows.length > 0, rows, unmatched,
-      note:rows.length ? rows.length + ' ürün eşleşti' : 'Eşleşen ürün yok.',
+      note:rows.length ? rows.length + ' ürün eşleşti' : yz('spi.core.extract.eslesen-urun-yok'),
     };
   }
 
@@ -519,7 +556,7 @@ SP.Extract = (function(){
      doner ve o alan bos kalir — sifir yazilmaz. */
 
   function labelPrompt(){
-    return 'Bu bir gida ambalajinin BESIN DEGERLERI TABLOSU fotografi. '
+    return yz('spi.core.extract.bu-bir-gida-ambalajinin-besi')
       + 'Tablodaki degerleri oku ve JSON dondur. Yalniz JSON, baska hicbir sey.\n\n'
       + 'Bicim:\n'
       + '{"name":"urun adi","per":100,'
@@ -556,7 +593,7 @@ SP.Extract = (function(){
     let out;
     try{
       out = await send({
-        system:'Sen bir besin degerleri tablosu okuyucususun. Yalniz JSON dondurursun.',
+        system:yz('spi.core.extract.sen-bir-besin-degerleri-tabl'),
         messages:[{ role:'user', text:labelPrompt(), images:[parts] }],
       });
     }catch(e){
@@ -595,8 +632,8 @@ SP.Extract = (function(){
       food:gida,
       missing:eksik,
       note:eksik.length
-        ? 'Etiketten okunamayan zorunlu alan var; elle tamamlaman gerekiyor.'
-        : 'Etiket okundu. Değerler «ölçüldü» sayılır: üretici beyanı ambalajda yazılı.',
+        ? yz('spi.core.extract.etiketten-okunamayan-zorunlu')
+        : yz('spi.core.extract.etiket-okundu-degerler-olcul'),
     };
   }
 

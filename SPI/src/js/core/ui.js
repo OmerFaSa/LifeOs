@@ -1,5 +1,16 @@
 /* Arayuz parcalari: ikonlar, olcum gorselleri, grafikler, alt sayfa ve bildirimler. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.ui.skor':'Skor ',
+  'spi.core.ui.skor-yok':'Skor yok',
+  'spi.core.ui.grafik-icin-henuz-veri-yok':'Grafik için henüz veri yok.',
+  'spi.core.ui.veri-yok':'Veri yok.',
+  'spi.core.ui.makro-dagilimi-icin-ogun-ger':'Makro dağılımı için öğün gerekir.',
+  'spi.core.ui.bu-ekran-nasil-okunur':'Bu ekran nasıl okunur',
+  'spi.core.ui.geri-al':'Geri al',
+  'spi.core.ui.evet-devam-et':'Evet, devam et',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.ui.kapat':'Kapat',
   'spi.core.ui.vazgec':'Vazgeç',
 });
@@ -225,7 +236,7 @@ SP.UI = (function(){
     const pct = has ? U.clamp(value / max, 0, 1) : 0;
     let out = '<div class="gauge" style="width:' + size + 'px">';
     out += '<svg viewBox="0 0 120 120" role="img" aria-label="'
-      + (has ? 'Skor ' + Math.round(value) + ' / ' + max : 'Skor yok') + '">';
+      + (has ? yz('spi.core.ui.skor') + Math.round(value) + ' / ' + max : yz('spi.core.ui.skor-yok')) + '">';
     out += arc(START, START + SWEEP, 7, 'gauge__track');
     /* Bant sinirlari — kadranin uzerindeki centikler. */
     (o.bands || []).forEach(b => {
@@ -311,7 +322,7 @@ SP.UI = (function(){
     const padR = o.endLabel === false ? 16 : 62;
 
     const all = series.reduce((acc, s2) => acc.concat(s2.data.filter(v => v != null)), []);
-    if(!all.length) return '<p class="small dim">Grafik için henüz veri yok.</p>';
+    if(!all.length) return ('<p class="small dim">' + yz('spi.core.ui.grafik-icin-henuz-veri-yok') + '</p>');
 
     const maxV = Math.max.apply(null, all), minV = Math.min.apply(null, all);
     const pad = Math.max(2, (maxV - minV) * 0.2);
@@ -400,7 +411,7 @@ SP.UI = (function(){
   function cubukGrafigi(rows, opts, kimlik){
     const o = opts || {};
     const w = o.gen || 640, h = o.height || 150, padL = 30, padR = 10, padT = 12, padB = 26;
-    if(!rows.length) return '<p class="small dim">Veri yok.</p>';
+    if(!rows.length) return ('<p class="small dim">' + yz('spi.core.ui.veri-yok') + '</p>');
     const top = o.max || 100;
     const bw = (w-padL-padR) / rows.length;
     let svg = '<svg class="chart"' + grafikKimligi(kimlik) + ' viewBox="0 0 '+w+' '+h+'" role="img">';
@@ -497,7 +508,7 @@ SP.UI = (function(){
     const f = Math.max(0, macros.fat || 0);
     const c = Math.max(0, macros.carb || 0);
     const total = p + f + c;
-    if(!total) return '<p class="small dim">Makro dağılımı için öğün gerekir.</p>';
+    if(!total) return ('<p class="small dim">' + yz('spi.core.ui.makro-dagilimi-icin-ogun-ger') + '</p>');
     const seg = (label, v, color) => ({ label:label + ' %' + Math.round(100 * v / total), value:v, color });
     return stackBar([
       seg('Protein', p, 'var(--macro-protein)'),
@@ -538,7 +549,7 @@ SP.UI = (function(){
 
   function stackBar(segments){
     const total = U.sum(segments.map(s => s.value));
-    if(!total) return '<p class="small dim">Veri yok.</p>';
+    if(!total) return ('<p class="small dim">' + yz('spi.core.ui.veri-yok') + '</p>');
     return '<div class="stackbar">'
       + segments.filter(s => s.value).map(s => '<div class="stackbar__seg" style="width:'+(100*s.value/total)+'%;background:'+s.color+'" title="'+U.esc(s.label)+'"></div>').join('')
       + '</div>'
@@ -599,7 +610,7 @@ SP.UI = (function(){
     const list = keys.filter(k => SP.HINTS[k]);
     if(!list.length) return '';
     const open = !!(SP.S.ui && SP.S.ui.railOpen);
-    const label = title === false ? 'Bu ekran nasıl okunur' : (title || 'Bu ekran nasıl okunur');
+    const label = title === false ? yz('spi.core.ui.bu-ekran-nasil-okunur') : (title || yz('spi.core.ui.bu-ekran-nasil-okunur'));
 
     const cards = list.map(k => {
       const h = SP.HINTS[k];
@@ -783,7 +794,7 @@ SP.UI = (function(){
     if(o.undo){
       const btn = document.createElement('button');
       btn.className = 'toast__undo';
-      btn.textContent = 'Geri al';
+      btn.textContent = yz('spi.core.ui.geri-al');
       btn.setAttribute('data-act', 'undo');
       /* `undo` bir islevse dugme gercekten geri alir; yalniz `true` ise
          eski davranis: toast kapanir. */
@@ -826,7 +837,7 @@ SP.UI = (function(){
       title,
       body:String(SP.h.html`<p>${message}</p>`),
       footer:String(SP.h.html`${SP.C.Button({ label:yz('spi.core.ui.vazgec'), act:'sheet-close' })}
-        ${SP.C.Button({ label:onay || 'Evet, devam et', tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
+        ${SP.C.Button({ label:onay || yz('spi.core.ui.evet-devam-et'), tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
       noFocus:true,
     });
     SP.UI._confirm = onConfirm;

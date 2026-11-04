@@ -20,6 +20,15 @@
    DOKTRIN: hic calisilmamis kart ortalamaya GIRMEZ. Bir gun ara vermek
    retansiyonu cokmus gibi gosterirdi; oysa hic sorulmamis kart hakkinda
    soylenecek sey "veri yok"tur, "sifir" degil. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.srs.hatirlamadim-kart-basa-doner':'Hatırlamadım. Kart başa döner.',
+  'esp.core.srs.hatirladim-ama-zorlandim-ara':'Hatırladım ama zorlandım. Aralık az uzar.',
+  'esp.core.srs.hatirladim-aralik-normal-uza':'Hatırladım. Aralık normal uzar.',
+  'esp.core.srs.aninda-geldi-aralik-daha-cok':'Anında geldi. Aralık daha çok uzar.',
+  'esp.core.srs.kart-bulunamadi':'Kart bulunamadı.',
+  'esp.core.srs.boyle-bir-cevap-yok':'Böyle bir cevap yok.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -44,10 +53,10 @@ ESP.SRS = (function(){
   /* Cevap kalitesi — dort dugme. Bes ve uzeri secenek kullaniciyi karsilastirma
      yapmaya zorluyor ve cevap suresini uzatiyordu; dordu yeter. */
   const GRADES = [
-    { id:'again', label:'Yine',  quality:0, note:'Hatırlamadım. Kart başa döner.' },
-    { id:'hard',  label:'Zor',   quality:3, note:'Hatırladım ama zorlandım. Aralık az uzar.' },
-    { id:'good',  label:'İyi',   quality:4, note:'Hatırladım. Aralık normal uzar.' },
-    { id:'easy',  label:'Kolay', quality:5, note:'Anında geldi. Aralık daha çok uzar.' },
+    { id:'again', label:'Yine',  quality:0, note:yz('esp.core.srs.hatirlamadim-kart-basa-doner') },
+    { id:'hard',  label:'Zor',   quality:3, note:yz('esp.core.srs.hatirladim-ama-zorlandim-ara') },
+    { id:'good',  label:'İyi',   quality:4, note:yz('esp.core.srs.hatirladim-aralik-normal-uza') },
+    { id:'easy',  label:'Kolay', quality:5, note:yz('esp.core.srs.aninda-geldi-aralik-daha-cok') },
   ];
 
   const GRADE_BY_ID = GRADES.reduce(function(m, g){ m[g.id] = g; return m; }, {});
@@ -111,9 +120,9 @@ ESP.SRS = (function(){
      retansiyon hesabinin tek girdisidir. */
   async function answer(cardId, gradeId){
     const card = S.cards.find(c => c.id === cardId);
-    if(!card) return { ok:false, error:'Kart bulunamadı.' };
+    if(!card) return { ok:false, error:yz('esp.core.srs.kart-bulunamadi') };
     const next = schedule(card, gradeId);
-    if(!next) return { ok:false, error:'Böyle bir cevap yok.' };
+    if(!next) return { ok:false, error:yz('esp.core.srs.boyle-bir-cevap-yok') };
 
     const onceki = { box:card.box, ease:card.ease, due:card.due };
     Object.assign(card, next);

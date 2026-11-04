@@ -28,6 +28,20 @@
       "su kadar yer su kadarda acilir" yazmayan bir uyari, kaygi uretir
       ve cozum uretmez. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.storage.buyume-hizi-icin-en-az':'Büyüme hızı için en az iki ölçüm günü gerekir. ',
+  'spi.core.storage.olculmemis-hiz-sifir-hiz-deg':'Ölçülmemiş hız, sıfır hız değildir.',
+  'spi.core.storage.olcumler-arasinda-en-az':'Ölçümler arasında en az ',
+  'spi.core.storage.depo-bu-pencerede-buyumemis':'Depo bu pencerede büyümemiş. Hiç büyümeyen bir depo ',
+  'spi.core.storage.son':'Son ',
+  'spi.core.storage.bu-hizla-dokuz-ay-sonunda':'Bu hızla dokuz ay sonunda ~',
+  'spi.core.storage.bu-hizla-dokuz-ay-dolmadan':'Bu hızla dokuz ay dolmadan sınır aşılır (~',
+  'spi.core.storage.bu-kayitlar-budanamaz':'Bu kayıtlar budanamaz: ',
+  'spi.core.storage.budanacak-bir-sey-secilmedi':'Budanacak bir şey seçilmedi.',
+  'spi.core.storage.bu-hizla':'Bu hızla ',
+  'spi.core.storage.buyume-hizi-henuz-olculmedi':'Büyüme hızı henüz ölçülmedi.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.storage.surtunme-gunlugu':'Sürtünme günlüğü',
   'spi.core.storage.sistemin-kendi-maliyet-olcum':'Sistemin kendi maliyet ölçümü. Silinince geçmiş sürtünme ',
   'spi.core.storage.ofis-sohbet-gecmisi':'Ofis sohbet geçmişi',
@@ -150,14 +164,14 @@ SP.Storage = (function(){
       perDay:null, daysLeft:null, cert:'missing' };
 
     if(n < 2){
-      base.note = 'Büyüme hızı için en az iki ölçüm günü gerekir. '
-        + 'Ölçülmemiş hız, sıfır hız değildir.';
+      base.note = yz('spi.core.storage.buyume-hizi-icin-en-az')
+        + yz('spi.core.storage.olculmemis-hiz-sifir-hiz-deg');
       return base;
     }
     const ilk = st.samples[0], son = st.samples[n - 1];
     const gun = U.diffDays(ilk.date, son.date);
     if(gun == null || gun < ASGARI_ARALIK){
-      base.note = 'Ölçümler arasında en az ' + ASGARI_ARALIK + ' gün olmalı; '
+      base.note = yz('spi.core.storage.olcumler-arasinda-en-az') + ASGARI_ARALIK + ' gün olmalı; '
         + 'daha kısa aralık günlük hız vermez.';
       return base;
     }
@@ -169,12 +183,12 @@ SP.Storage = (function(){
     const kalan = (kota.limit || 0) - bytes;
     if(perDay <= 0){
       base.daysLeft = null;
-      base.note = 'Depo bu pencerede büyümemiş. Hiç büyümeyen bir depo '
+      base.note = yz('spi.core.storage.depo-bu-pencerede-buyumemis')
         + 'dolmaz — ama bu, büyümeyeceği anlamına gelmez.';
       return base;
     }
     base.daysLeft = Math.max(0, Math.floor(kalan / perDay));
-    base.note = 'Son ' + gun + ' günde günde ~' + fmtBytes(Math.round(perDay))
+    base.note = yz('spi.core.storage.son') + gun + ' günde günde ~' + fmtBytes(Math.round(perDay))
       + ' büyüdü. Bu hızla ' + base.daysLeft + ' gün sonra dolar.';
     return base;
   }
@@ -197,9 +211,9 @@ SP.Storage = (function(){
       cert:g.cert, days:UFUK_GUN, projected:tahmin, limit:kota.limit || null,
       willFit:sigar, perDay:g.perDay,
       note:sigar
-        ? 'Bu hızla dokuz ay sonunda ~' + fmtBytes(tahmin) + ' olur; '
+        ? yz('spi.core.storage.bu-hizla-dokuz-ay-sonunda') + fmtBytes(tahmin) + ' olur; '
           + 'sınıra takılmaz.'
-        : 'Bu hızla dokuz ay dolmadan sınır aşılır (~' + fmtBytes(tahmin)
+        : yz('spi.core.storage.bu-hizla-dokuz-ay-dolmadan') + fmtBytes(tahmin)
           + '). Yedek alıp budamak ya da eski dönemleri dışa aktarmak gerekir.',
     };
   }
@@ -236,10 +250,10 @@ SP.Storage = (function(){
     const yasak = istenen.filter(c => izinli.indexOf(c) < 0);
     if(yasak.length){
       return { ok:false, refused:yasak,
-        error:'Bu kayıtlar budanamaz: ' + yasak.join(', ')
+        error:yz('spi.core.storage.bu-kayitlar-budanamaz') + yasak.join(', ')
           + '. Kullanıcının girdiği veri, yer açmak için silinmez.' };
     }
-    if(!istenen.length) return { ok:false, error:'Budanacak bir şey seçilmedi.' };
+    if(!istenen.length) return { ok:false, error:yz('spi.core.storage.budanacak-bir-sey-secilmedi') };
 
     const once = SP.Store.localSize();
     for(const c of istenen){
@@ -275,8 +289,8 @@ SP.Storage = (function(){
     if(q.near){
       return { level:'near', title:yz('spi.core.storage.depo-doluyor') + q.pct + ')',
         note:g.daysLeft != null
-          ? 'Bu hızla ' + g.daysLeft + ' gün sonra dolar.'
-          : 'Büyüme hızı henüz ölçülmedi.' };
+          ? yz('spi.core.storage.bu-hizla') + g.daysLeft + ' gün sonra dolar.'
+          : yz('spi.core.storage.buyume-hizi-henuz-olculmedi') };
     }
     if(h.cert !== 'missing' && h.willFit === false){
       return { level:'watch', title:yz('spi.core.storage.dokuz-ay-sigmayabilir'),

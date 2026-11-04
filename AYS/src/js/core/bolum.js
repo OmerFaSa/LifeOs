@@ -16,6 +16,10 @@
    ESP'nin `modules.js`inin AYS karşılığı. Açıp kapamak ORTA seviyeli bir
    aksiyondur (AGENTS.md §1.9, data/actions.js `bolum-ac-kapa`). */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.bolum.bu-bolum-gizlenemez':'Bu bölüm gizlenemez.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.bolum.ogrenme':'Öğrenme',
   'ays.core.bolum.sinama':'Sınama',
   'ays.core.bolum.soru-coz':'Soru çöz',
@@ -60,7 +64,7 @@ R.Bolum = (function(){
 
   /* Açar ya da gizler. Çekirdek ya da bilinmeyen bölüm bir RED'dir. */
   async function set(route, acik){
-    if(!BY_ID[route]) return { ok:false, error:'Bu bölüm gizlenemez.' };
+    if(!BY_ID[route]) return { ok:false, error:yz('ays.core.bolum.bu-bolum-gizlenemez') };
     const m = Object.assign({}, harita());
     if(acik) delete m[route]; else m[route] = true;
     R.S.bolumGizli = m;

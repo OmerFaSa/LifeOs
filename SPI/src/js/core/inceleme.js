@@ -22,6 +22,10 @@
      4. KARAR KURAL MOTORUNDAN. Tek karar Calc.nextAction'dır; model
         yalnız istenirse özetler. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.inceleme.birliktelik-neden-degil-bask':'Birliktelik, neden değil: başka şeyler de aynı günlerde değişmiş olabilir.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.inceleme.hesaplandi':'hesaplandı',
   'spi.core.inceleme.kisa-geceden-sonra-toparlanm':'Kısa geceden sonra toparlanma',
   'spi.core.inceleme.7-saatten-az-uyunan-geceleri':'7 saatten az uyunan gecelerin ertesi',
@@ -90,7 +94,7 @@ SP.Inceleme = (function(){
       a:{ ad:o.a.ad, ort:ma, n:na }, b:{ ad:o.b.ad, ort:mb, n:nb }, fark, birim:o.birim,
       metin:o.a.ad + ' ' + yaz(ma) + ' ' + o.birim + ' (' + na + ' gün), ' + o.b.ad + ' ' + yaz(mb) + ' ' + o.birim + ' (' + nb + ' gün)'
         + '; fark ' + (fark >= 0 ? '+' : '−') + yaz(Math.abs(fark)) + ' ' + o.birim + '.',
-      not:'Birliktelik, neden değil: başka şeyler de aynı günlerde değişmiş olabilir.' };
+      not:yz('spi.core.inceleme.birliktelik-neden-degil-bask') };
   }
 
   /* Fikirler: kullanıcının kendi kaydından karşılaştırmalar. */

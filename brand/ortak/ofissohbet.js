@@ -35,6 +35,12 @@
      </div>
    Bu dosya modüle yazmaz: gönderme, modülün kendi düğmesine (data-act)
    tıklanarak olur. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ofissohbet.yeni-sohbet':'Yeni sohbet',
+  'ortak.ofissohbet.gecmis-sohbetler':'Geçmiş sohbetler',
+  'ortak.ofissohbet.cevabi-kopyala':'Cevabı kopyala',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -184,8 +190,8 @@ LIFEOS.OFISSOHBET = (function(){
     const bos = !String(o.mesajlarHtml || '').trim();
     return '<section class="opencere" data-osohbet-pencere="' + kac(o.anahtar || '') + '" aria-label="' + kac((o.ad || '') + ' ile sohbet') + '">'
       + '<aside class="opencere__yan" aria-label="Sohbet geçmişi">'
-      + '<button type="button" class="opencere__yeni" data-act="' + kac(o.yeniAct || 'sohbet-yeni') + '">' + SVG_ARTI + 'Yeni sohbet</button>'
-      + '<p class="opencere__yan-ad">Geçmiş sohbetler</p>' + (o.gecmisHtml || '') + '</aside>'
+      + '<button type="button" class="opencere__yeni" data-act="' + kac(o.yeniAct || 'sohbet-yeni') + '">' + SVG_ARTI + (yz('ortak.ofissohbet.yeni-sohbet') + '</button>')
+      + ('<p class="opencere__yan-ad">' + yz('ortak.ofissohbet.gecmis-sohbetler') + '</p>') + (o.gecmisHtml || '') + '</aside>'
       + '<div class="opencere__ana">'
       + '<div class="opencere__bas">'
       + '<button type="button" class="opencere__yan-dugme" data-osohbet-yan aria-expanded="false" aria-label="Sohbet geçmişi" title="Sohbet geçmişi">' + SVG_YAN + '</button>'
@@ -252,7 +258,7 @@ LIFEOS.OFISSOHBET = (function(){
       Promise.resolve(panoya(metin)).then(ok => {
         if(!ok) return;
         c.classList.add('is-kopyalandi'); c.setAttribute('aria-label', 'Kopyalandı');
-        setTimeout(() => { c.classList.remove('is-kopyalandi'); c.setAttribute('aria-label', 'Cevabı kopyala'); }, 1400);
+        setTimeout(() => { c.classList.remove('is-kopyalandi'); c.setAttribute('aria-label', yz('ortak.ofissohbet.cevabi-kopyala')); }, 1400);
       });
     });
     /* Modüller ekranı baştan çizer: yeni gelen sohbet kutusu yakalanır. */

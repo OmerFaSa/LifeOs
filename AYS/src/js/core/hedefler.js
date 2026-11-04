@@ -19,6 +19,26 @@
    söz değildir. Olamayacak hedef (TYT'de 120'den fazla net) karara
    gitmeden söylenir (motorun `dogrula` kancası). */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.hedefler.hangi-dersi-kastettigini-anl':'Hangi dersi kastettiğini anlayamadım; «TYT Fen Bilimleri» ya da «AYT Fizik» gibi ',
+  'ays.core.hedefler.ne-zamana-kadar-100-gunde':'Ne zamana kadar? «100 günde», «sınava kadar» ya da «31 Mart’a kadar» gibi yazabilirsin.',
+  'ays.core.hedefler.butun-konular':'Bütün konular',
+  'ays.core.hedefler.bu-kapsamda-bitirilecek-konu':'Bu kapsamda bitirilecek konu bulamadım.',
+  'ays.core.hedefler.kalan-konu-yok':'Kalan konu yok.',
+  'ays.core.hedefler.temel-matematik':'Temel Matematik',
+  'ays.core.hedefler.fen-bilimleri':'Fen Bilimleri',
+  'ays.core.hedefler.sosyal-bilimler':'Sosyal Bilimler',
+  'ays.core.hedefler.yalniz':'Yalnız ',
+  'ays.core.hedefler.hic':'Hiç ',
+  'ays.core.hedefler.denemelerin':'Denemelerin ',
+  'ays.core.hedefler.son':'Son ',
+  'ays.core.hedefler.son-denemelerinde':'Son denemelerinde ',
+  'ays.core.hedefler.neti-anlayamadim-sayiyla-yaz':'Neti anlayamadım; sayıyla yaz (ör. 72,5) ya da «bilmiyorum» de.',
+  'ays.core.hedefler.net-hedefi-tek-bir-ders':'Net hedefi tek bir ders ya da TYT/AYT toplamı için kurulur; «',
+  'ays.core.hedefler.toplam-calisma-kapasiten-haf':'Toplam çalışma kapasiten haftada ',
+  'ays.core.hedefler.net-bir-olcumdur-bir-soz':'Net bir ölçümdür, bir söz değildir: puan ya da sıra garantisi vermem.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.hedefler.konu-bitirme':'Konu bitirme',
   'ays.core.hedefler.kapanan-konu':'kapanan konu',
   'ays.core.hedefler.ays-mufredatindaki':'AYS müfredatındaki ',
@@ -101,7 +121,7 @@ R.Hedefler = (function(){
     if(!dersler.length && /konu/.test(kucuk(k))) dersler = (R.SUBJECTS || []).map(s => s.id);
     return dersler.length ? { dersler } : null;
   }
-  const BELIRSIZ = 'Hangi dersi kastettiğini anlayamadım; «TYT Fen Bilimleri» ya da «AYT Fizik» gibi '
+  const BELIRSIZ = yz('ays.core.hedefler.hangi-dersi-kastettigini-anl')
     + 'dersin adıyla yazar mısın?';
   function aliasDesen(){
     return (R.SUBJECT_ALIASES || []).map(a => takmaDesen(a.alias)).join('|');
@@ -118,7 +138,7 @@ R.Hedefler = (function(){
     const t = sinavTarihi(aile);
     return t && t > bugun ? t : null;
   }
-  const TARIH_SORU = 'Ne zamana kadar? «100 günde», «sınava kadar» ya da «31 Mart’a kadar» gibi yazabilirsin.';
+  const TARIH_SORU = yz('ays.core.hedefler.ne-zamana-kadar-100-gunde');
 
   /* ======================================================== KONU BİTİRME */
 
@@ -177,7 +197,7 @@ R.Hedefler = (function(){
       return hepsi.length === l.length && hepsi.every(id => dersler.indexOf(id) >= 0);
     });
     if(aile) return aile + ' konuları';
-    if(l.length === (R.SUBJECTS || []).length) return 'Bütün konular';
+    if(l.length === (R.SUBJECTS || []).length) return yz('ays.core.hedefler.butun-konular');
     return l.map(s => s.name).join(', ');
   }
 
@@ -211,7 +231,7 @@ R.Hedefler = (function(){
     dogrula(h){
       if(h.belirsiz) return BELIRSIZ;
       const l = konular(h.dersler);
-      if(!l.length) return 'Bu kapsamda bitirilecek konu bulamadım.';
+      if(!l.length) return yz('ays.core.hedefler.bu-kapsamda-bitirilecek-konu');
       const kalan = l.filter(k => durumOf(k) !== 'closed').length;
       if(h.fark != null && h.fark > kalan && kalan > 0){
         return h.kapsam + ' içinde ' + kalan + ' konu kaldı; ' + h.fark + ' konu bitirilemez.';
@@ -226,7 +246,7 @@ R.Hedefler = (function(){
     tarihOku(k, h, bugun){ return sinavaKadar(k, h.aile, bugun); },
     gerekenSaat(h){
       const kalan = siraliKalan(h.dersler);
-      if(!kalan.length) return { neden:'Kalan konu yok.' };
+      if(!kalan.length) return { neden:yz('ays.core.hedefler.kalan-konu-yok') };
       /* Sayı söylendiyse SIRADAKİ o kadar konu (ders içi önkoşul sırası). */
       const l = h.fark != null ? kalan.slice(0, h.fark) : kalan;
       const saat = yuvarla(l.reduce((a, k) => a + konuSaati(k), 0) + l.length * TEKRAR_SAAT, 1);
@@ -248,8 +268,8 @@ R.Hedefler = (function(){
   /* ========================================================= NET HEDEFİ */
 
   /* Deneme testlerinin adları (data/reference.js, R.EXAM_TEMPLATES). */
-  const DERS_TEST = { 'tyt-turkce':'Türkçe', 'tyt-matematik':'Temel Matematik', 'tyt-fen':'Fen Bilimleri',
-    'tyt-sosyal':'Sosyal Bilimler', 'ayt-matematik':'Matematik', 'ayt-fizik':'Fizik',
+  const DERS_TEST = { 'tyt-turkce':'Türkçe', 'tyt-matematik':yz('ays.core.hedefler.temel-matematik'), 'tyt-fen':yz('ays.core.hedefler.fen-bilimleri'),
+    'tyt-sosyal':yz('ays.core.hedefler.sosyal-bilimler'), 'ayt-matematik':'Matematik', 'ayt-fizik':'Fizik',
     'ayt-kimya':'Kimya', 'ayt-biyoloji':'Biyoloji' };
   const EN_AZ_DENEME = 4;
   const EN_AZ_GUN = 21;
@@ -283,11 +303,11 @@ R.Hedefler = (function(){
   function netHizi(h){
     const l = seri(h).slice(-PENCERE);
     if(l.length < EN_AZ_DENEME){
-      return { neden:(l.length ? 'Yalnız ' + l.length + ' ' + (h.brans ? '' : 'tam ') + 'denemen var'
-        : 'Hiç ' + (h.brans ? '' : 'tam ') + netAdi(h) + ' denemen yok') };
+      return { neden:(l.length ? yz('ays.core.hedefler.yalniz') + l.length + ' ' + (h.brans ? '' : 'tam ') + 'denemen var'
+        : yz('ays.core.hedefler.hic') + (h.brans ? '' : 'tam ') + netAdi(h) + ' denemen yok') };
     }
     const gun = U().diffDays(l[0].date, l[l.length - 1].date);
-    if(gun < EN_AZ_GUN) return { neden:'Denemelerin ' + gun + ' günü kapsıyor; en az üç hafta gerekir' };
+    if(gun < EN_AZ_GUN) return { neden:yz('ays.core.hedefler.denemelerin') + gun + ' günü kapsıyor; en az üç hafta gerekir' };
     const egimler = [];
     for(let i = 0; i < l.length; i++){
       for(let j = i + 1; j < l.length; j++){
@@ -297,7 +317,7 @@ R.Hedefler = (function(){
     }
     const hiz = yuvarla(U().median(egimler), 2);
     if(!(hiz > 0)){
-      return { neden:'Son ' + l.length + ' denemende netin artmadı (haftada ' + sayiYaz(hiz, 2)
+      return { neden:yz('ays.core.hedefler.son') + l.length + ' denemende netin artmadı (haftada ' + sayiYaz(hiz, 2)
         + ' net); bu gidişle bir tarih hesaplanamaz' };
     }
     return { hiz, deneme:l.length, hafta:yuvarla(gun / 7, 1) };
@@ -345,7 +365,7 @@ R.Hedefler = (function(){
         kaynak:'son ' + son.length + ' denemenin medyanı' };
     },
     simdiSoru(h){
-      return 'Son denemelerinde ' + netAdi(h) + ' netin kaç civarı? Deneme girmediysen «bilmiyorum» yaz.';
+      return yz('ays.core.hedefler.son-denemelerinde') + netAdi(h) + ' netin kaç civarı? Deneme girmediysen «bilmiyorum» yaz.';
     },
     simdiOku(metin, h){
       const k = kucuk(metin);
@@ -359,11 +379,11 @@ R.Hedefler = (function(){
       if(/(bilmiyorum|bilmem|girmedim|yok)/.test(k)) return { deger:null, birim:'net', etiket:'veri_yok' };
       return null;
     },
-    simdiHata:'Neti anlayamadım; sayıyla yaz (ör. 72,5) ya da «bilmiyorum» de.',
+    simdiHata:yz('ays.core.hedefler.neti-anlayamadim-sayiyla-yaz'),
     dogrula(h){
       if(h.belirsiz) return BELIRSIZ;
       if(h.cokDers){
-        return 'Net hedefi tek bir ders ya da TYT/AYT toplamı için kurulur; «'
+        return yz('ays.core.hedefler.net-hedefi-tek-bir-ders')
           + h.cokDers.map(id => ders(id).name).join(', ') + '» için ayrı ayrı yazabilirsin.';
       }
       const ust = azami(h);
@@ -425,10 +445,10 @@ R.Hedefler = (function(){
       const cap = Number(R.S.profile && R.S.profile.capacityHoursPerWeek);
       out.push(kalan + ' konu kaldı; «kapandı» sayılması için kapanış kuralı geçer (ilk test ≥ %'
         + R.CLOSURE_RULE.first + ', ' + R.CLOSURE_RULE.gapDays + ' gün sonra ≥ %' + R.CLOSURE_RULE.second + ').');
-      if(cap > 0) out.push('Toplam çalışma kapasiten haftada ' + sayiYaz(cap) + ' saat; bu hedefe ayırdığın vakit onun bir parçasıdır.');
+      if(cap > 0) out.push(yz('ays.core.hedefler.toplam-calisma-kapasiten-haf') + sayiYaz(cap) + ' saat; bu hedefe ayırdığın vakit onun bir parçasıdır.');
     }
     if(h.paket === 'net' && g && g.bant){
-      out.push('Net bir ölçümdür, bir söz değildir: puan ya da sıra garantisi vermem.');
+      out.push(yz('ays.core.hedefler.net-bir-olcumdur-bir-soz'));
     }
     return out;
   }

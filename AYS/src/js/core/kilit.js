@@ -27,6 +27,30 @@
    kalır (`lifeos.kilit.<modül>.iz`): Ayarlar'daki kutu kilidin ne zaman
    «Kodu unuttum» ile kaldırıldığını söyler; kilit yeniden kurulunca silinir.
    Sessizce kalkan perde, sahibinin haberi olmadan açılmış perdedir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.kilit.kod-dort-rakam-olmali':'Kod dört rakam olmalı.',
+  'ortak.kilit.bu-tarayici-kilidi-saklayami':'Bu tarayıcı kilidi saklayamıyor (site verisi kapalı).',
+  'ortak.kilit.dort-haneli-kod':'Dört haneli kod',
+  'ortak.kilit.kodu-unuttum':'Kodu unuttum',
+  'ortak.kilit.uc-kez-yanlis':'Üç kez yanlış. ',
+  'ortak.kilit.kod-yanlis':'Kod yanlış.',
+  'ortak.kilit.kilit':'Kilit ',
+  'ortak.kilit.acilista-dort-haneli-kod-sor':'Açılışta dört haneli kod sorar. Veriyi şifrelemez: yanındaki birinin gözünden korur.',
+  'ortak.kilit.su-an':'Şu an',
+  'ortak.kilit.yeni-kod':'Yeni kod',
+  'ortak.kilit.yeniden':'Yeniden',
+  'ortak.kilit.kodu-degistir':'Kodu değiştir',
+  'ortak.kilit.kilidi-kaldir':'Kilidi kaldır',
+  'ortak.kilit.kilidi-kur':'Kilidi kur',
+  'ortak.kilit.kodu-kaydet':'Kodu kaydet',
+  'ortak.kilit.vazgec':'Vazgeç',
+  'ortak.kilit.kilit-kodu-unuttum-ile-kaldi':'Kilit «Kodu unuttum» ile kaldırıldı ·',
+  'ortak.kilit.sen-degilsen-kodu-yeniden':'. Sen değilsen kodu yeniden kur.',
+  'ortak.kilit.kodu-unutursan-kilit-ekranin':'Kodu unutursan kilit ekranındaki «Kodu unuttum» beş dakika sonra kilidi kaldırır; kaldırıldığı burada yazar.',
+  'ortak.kilit.gizlilik-kilidi':'Gizlilik kilidi',
+  'ortak.kilit.i-ki-kod-ayni-degil':'İki kod aynı değil.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -71,11 +95,11 @@ window.LIFEOS.KILIT = (function(){
 
   function aktifMi(modul){ const v = oku(modul); return !!(v && v.ozet); }
   async function kur(modul, kod){
-    if(!gecerliMi(kod)) return { ok:false, neden:'Kod dört rakam olmalı.' };
+    if(!gecerliMi(kod)) return { ok:false, neden:yz('ortak.kilit.kod-dort-rakam-olmali') };
     const tuz = tuzUret();
     const ok = yaz(modul, { surum:1, tuz, ozet:await ozetle(tuz, kod) });
     if(ok) izSil(modul);
-    return ok ? { ok:true } : { ok:false, neden:'Bu tarayıcı kilidi saklayamıyor (site verisi kapalı).' };
+    return ok ? { ok:true } : { ok:false, neden:yz('ortak.kilit.bu-tarayici-kilidi-saklayami') };
   }
   function kaldir(modul){ try{ window.localStorage.removeItem(anahtar(modul)); }catch(e){} }
 
@@ -121,11 +145,11 @@ window.LIFEOS.KILIT = (function(){
       + '<div class="kilit__kutu">'
       +   '<div class="kilit__isaret" aria-hidden="true">' + (isaret || '') + '</div>'
       +   '<h1 class="kilit__ad" id="kilit-ad">' + kac(AD[modul] || modul) + ' kilitli</h1>'
-      +   '<label class="kilit__etiket" for="kilit-kod">Dört haneli kod</label>'
+      +   ('<label class="kilit__etiket" for="kilit-kod">' + yz('ortak.kilit.dort-haneli-kod') + '</label>')
       +   '<input class="input kilit__kod" id="kilit-kod" type="password" inputmode="numeric"'
       +     ' autocomplete="off" maxlength="' + UZUNLUK + '" pattern="\\d*" aria-describedby="kilit-not">'
       +   '<p class="kilit__not" id="kilit-not" role="status" aria-live="polite"></p>'
-      +   '<button type="button" class="linkbtn kilit__unuttum" data-kilit="unuttum">Kodu unuttum</button>'
+      +   ('<button type="button" class="linkbtn kilit__unuttum" data-kilit="unuttum">' + yz('ortak.kilit.kodu-unuttum') + '</button>')
       + '</div></div>';
   }
 
@@ -160,10 +184,10 @@ window.LIFEOS.KILIT = (function(){
         el.classList.remove('is-yanlis'); void el.offsetWidth; el.classList.add('is-yanlis');
         if(yanlis >= 3){
           beklemede = true; kod.disabled = true;
-          not.textContent = 'Üç kez yanlış. ' + BEKLE_SN + ' saniye bekle.';
+          not.textContent = yz('ortak.kilit.uc-kez-yanlis') + BEKLE_SN + ' saniye bekle.';
           setTimeout(() => { beklemede = false; yanlis = 0; kod.disabled = false; not.textContent = ''; kod.focus(); }, BEKLE_SN * 1000);
         }else{
-          not.textContent = 'Kod yanlış.';
+          not.textContent = yz('ortak.kilit.kod-yanlis');
         }
       });
       el.addEventListener('click', e => {
@@ -171,7 +195,7 @@ window.LIFEOS.KILIT = (function(){
         if(!b || sayac) return;
         let kalan = UNUTTUM_SN;
         b.disabled = true;
-        const yaz = () => { not.textContent = 'Kilit ' + sureMetni(kalan) + ' sonra kalkacak; uygulama açılacak, kilit yeniden kurulana kadar kapalı kalacak ve Ayarlar kaldırıldığını yazacak.'; };
+        const yaz = () => { not.textContent = yz('ortak.kilit.kilit') + sureMetni(kalan) + ' sonra kalkacak; uygulama açılacak, kilit yeniden kurulana kadar kapalı kalacak ve Ayarlar kaldırıldığını yazacak.'; };
         yaz();
         sayac = setInterval(() => {
           kalan--;
@@ -194,28 +218,28 @@ window.LIFEOS.KILIT = (function(){
     const iz = izOku(modul);
     const m = kac(modul);
     const govde = '<div class="kilit-ayar" data-kilit-ayar="' + m + '"' + (o.govde ? ' data-kilit-govde' : '') + '>'
-      + '<p class="small">Açılışta dört haneli kod sorar. Veriyi şifrelemez: yanındaki birinin gözünden korur.'
-      +   ' Şu an <b>' + (acik ? 'açık' : 'kapalı') + '</b>.</p>'
+      + ('<p class="small">' + yz('ortak.kilit.acilista-dort-haneli-kod-sor'))
+      +   (' ' + yz('ortak.kilit.su-an') + ' <b>') + (acik ? 'açık' : 'kapalı') + '</b>.</p>'
       + '<div class="kilit-ayar__form" hidden>'
-      +   '<label class="field"><span>Yeni kod</span><input class="input" id="kilit-yeni-' + m + '" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>'
-      +   '<label class="field"><span>Yeniden</span><input class="input" id="kilit-tekrar-' + m + '" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>'
+      +   ('<label class="field"><span>' + yz('ortak.kilit.yeni-kod') + '</span><input class="input" id="kilit-yeni-') + m + '" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>'
+      +   ('<label class="field"><span>' + yz('ortak.kilit.yeniden') + '</span><input class="input" id="kilit-tekrar-') + m + '" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>'
       +   '<p class="small kilit-ayar__not" role="status" aria-live="polite"></p>'
       + '</div>'
       + '<div class="row wrap gap-8 mt-8">'
       +   (acik
-        ? '<button type="button" class="btn btn--sm" data-kilit="degistir">Kodu değiştir</button>'
-          + '<button type="button" class="btn btn--sm" data-kilit="kaldir">Kilidi kaldır</button>'
-        : '<button type="button" class="btn btn--sm" data-kilit="kur">Kilidi kur</button>')
-      +   '<button type="button" class="btn btn--sm" data-kilit="kaydet" hidden>Kodu kaydet</button>'
-      +   '<button type="button" class="btn btn--sm" data-kilit="vazgec" hidden>Vazgeç</button>'
+        ? ('<button type="button" class="btn btn--sm" data-kilit="degistir">' + yz('ortak.kilit.kodu-degistir') + '</button>')
+          + ('<button type="button" class="btn btn--sm" data-kilit="kaldir">' + yz('ortak.kilit.kilidi-kaldir') + '</button>')
+        : ('<button type="button" class="btn btn--sm" data-kilit="kur">' + yz('ortak.kilit.kilidi-kur') + '</button>'))
+      +   ('<button type="button" class="btn btn--sm" data-kilit="kaydet" hidden>' + yz('ortak.kilit.kodu-kaydet') + '</button>')
+      +   ('<button type="button" class="btn btn--sm" data-kilit="vazgec" hidden>' + yz('ortak.kilit.vazgec') + '</button>')
       + '</div>'
       + (!acik && iz && iz.tur === 'unutuldu'
-        ? '<p class="small kilit-ayar__iz mt-8" data-kilit-iz>Kilit «Kodu unuttum» ile kaldırıldı · ' + kac(zamanMetni(iz.zaman)) + '. Sen değilsen kodu yeniden kur.</p>'
+        ? ('<p class="small kilit-ayar__iz mt-8" data-kilit-iz>' + yz('ortak.kilit.kilit-kodu-unuttum-ile-kaldi') + ' ') + kac(zamanMetni(iz.zaman)) + (yz('ortak.kilit.sen-degilsen-kodu-yeniden') + '</p>')
         : '')
-      + '<p class="tiny dim mt-8">Kodu unutursan kilit ekranındaki «Kodu unuttum» beş dakika sonra kilidi kaldırır; kaldırıldığı burada yazar.</p>'
+      + ('<p class="tiny dim mt-8">' + yz('ortak.kilit.kodu-unutursan-kilit-ekranin') + '</p>')
       + '</div>';
     if(o.govde) return govde;
-    return '<section class="kutu" data-oz="176"><header class="kutu__bas"><h2 class="kutu__ad">Gizlilik kilidi</h2>'
+    return ('<section class="kutu" data-oz="176"><header class="kutu__bas"><h2 class="kutu__ad">' + yz('ortak.kilit.gizlilik-kilidi') + '</h2>')
       + '<span class="kutu__yuva"></span></header><div class="kutu__govde">' + govde + '</div></section>';
   }
 
@@ -244,8 +268,8 @@ window.LIFEOS.KILIT = (function(){
     if(ne === 'kaldir'){ kaldir(modul); ayarYenile(kutu); return true; }
     if(ne === 'kaydet'){
       const a = form.querySelectorAll('input')[0].value, t = form.querySelectorAll('input')[1].value;
-      if(!gecerliMi(a)){ not.textContent = 'Kod dört rakam olmalı.'; return false; }
-      if(a !== t){ not.textContent = 'İki kod aynı değil.'; return false; }
+      if(!gecerliMi(a)){ not.textContent = yz('ortak.kilit.kod-dort-rakam-olmali'); return false; }
+      if(a !== t){ not.textContent = yz('ortak.kilit.i-ki-kod-ayni-degil'); return false; }
       const r = await kur(modul, a);
       if(!r.ok){ not.textContent = r.neden; return false; }
       ayarYenile(kutu);

@@ -25,6 +25,10 @@
    üstüne gelince. Bir kümenin üstüne gelince öbürleri solar (CSS).
    Veri yoksa harita çizilmez, ne yapılırsa belireceği söylenir (§1.2:
    eksik veri sıfır değildir). Hareket yok; süs deseni yok (§1.10). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.agharita.henuz-haritada-gosterilecek':'Henüz haritada gösterilecek bir şey yok.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -70,7 +74,7 @@ window.LIFEOS.AGHARITA = (function(){
     const v = veri || {};
     const kumeler = (v.kumeler || []).filter(k => k && k.dugumler && k.dugumler.length)
       .map(k => Object.assign({}, k, { dugumler:siraIsaretle(k.dugumler) }));
-    if(!kumeler.length) return '<div class="agh agh--bos"><p>' + kac(v.bos || 'Henüz haritada gösterilecek bir şey yok.') + '</p></div>';
+    if(!kumeler.length) return '<div class="agh agh--bos"><p>' + kac(v.bos || yz('ortak.agharita.henuz-haritada-gosterilecek')) + '</p></div>';
     const s = sayim(kumeler);
     const hepsiEtiket = s.toplam <= 24;
     const n = kumeler.length, dilim = 2 * Math.PI / n;

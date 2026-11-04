@@ -4,6 +4,15 @@
    Metin data/ogrenme.js'teki kavramın kendisidir (tanım, dikkat, örnek); King
    yazmaz, model çağrılmaz. Kavramın inceleme durumu etikette durur. SPİ teşhis
    koymaz ve doz önermez (AGENTS §1.5): ders ve soru yalnız kavram bilgisidir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.kingders.spi-kavram':'SPİ · kavram',
+  'spi.core.kingders.spi-ogrenme-kavrami':'SPİ öğrenme kavramı',
+  'spi.core.kingders.tekrar':'Tekrar (',
+  'spi.core.kingders.hangi-kavramin-tanimi':'Hangi kavramın tanımı: «',
+  'spi.core.kingders.spi-ogrenme-kavrami-2':'SPİ · öğrenme kavramı',
+  'spi.core.kingders.tanim':'Tanım: ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -32,9 +41,9 @@ SP.KingDers = (function(){
     return {
       id: c.id,
       baslik: c.title,
-      alt: 'SPİ · kavram',
+      alt: yz('spi.core.kingders.spi-kavram'),
       giris: '',
-      etiket: c.ready_for_app ? 'SPİ öğrenme kavramı' : 'doğrulanmadı · uzman incelemesi bekliyor',
+      etiket: c.ready_for_app ? yz('spi.core.kingders.spi-ogrenme-kavrami') : 'doğrulanmadı · uzman incelemesi bekliyor',
       sorgu: c.title,
       soruVar: adayKavramlar().length >= 4,
       bolumler: [
@@ -64,7 +73,7 @@ SP.KingDers = (function(){
       const gecerli = vadeliler.find(v => adaylar.some(a => a.id === v.kavram));
       if(gecerli){
         c = adaylar.find(a => a.id === gecerli.kavram);
-        not = 'Tekrar (' + ((gecerli.n || 0) + 1) + '. tur): aynı kavram.';
+        not = yz('spi.core.kingders.tekrar') + ((gecerli.n || 0) + 1) + '. tur): aynı kavram.';
       }else{
         const tk = td ? td.oku() : {};
         c = adaylar.find(a => !tk[a.id]);
@@ -88,9 +97,9 @@ SP.KingDers = (function(){
     return {
       id,
       konu: c.title,
-      soru: 'Hangi kavramın tanımı: «' + c.definition + '»',
+      soru: yz('spi.core.kingders.hangi-kavramin-tanimi') + c.definition + '»',
       sec: secenekSonuc.sec,
-      kaynak: 'SPİ · öğrenme kavramı' + (c.ready_for_app ? '' : ' · doğrulanmadı, uzman incelemesi bekliyor'),
+      kaynak: yz('spi.core.kingders.spi-ogrenme-kavrami-2') + (c.ready_for_app ? '' : ' · doğrulanmadı, uzman incelemesi bekliyor'),
       not
     };
   }
@@ -124,17 +133,17 @@ SP.KingDers = (function(){
       id,
       kavram: c.id,
       konu: c.title,
-      soru: 'Hangi kavramın tanımı: «' + c.definition + '»',
+      soru: yz('spi.core.kingders.hangi-kavramin-tanimi') + c.definition + '»',
       secilen: harf,
       dogru: dogruHarf,
       secMetin,
       dogruMetin: c.title,
-      cozum: ['Tanım: ' + c.definition]
+      cozum: [yz('spi.core.kingders.tanim') + c.definition]
     });
 
     return {
       dogru: dogruHarf,
-      cozum: (res.satirlar || []).concat(['Tanım: ' + c.definition]),
+      cozum: (res.satirlar || []).concat([yz('spi.core.kingders.tanim') + c.definition]),
       not: res.not
     };
   }

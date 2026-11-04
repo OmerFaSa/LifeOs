@@ -28,6 +28,26 @@
    geri dönüşü yok sayılabilir. SPİ'in verisi SPİ'te kalır; HKM'ye giden
    şey günün ÖZETİDİR. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.beacon.esleme-penceresi-kapali-hkm':'Eşleme penceresi kapalı. HKM yüzünde ',
+  'spi.core.beacon.govde-sozlesmeyi-gecmedi':'Gövde sözleşmeyi geçmedi: ',
+  'spi.core.beacon.bearer':'Bearer ',
+  'spi.core.beacon.hkm-govdeyi-reddetti-etiket':'HKM gövdeyi reddetti (etiket ya da biçim).',
+  'spi.core.beacon.jeton-kabul-edilmedi':'Jeton kabul edilmedi.',
+  'spi.core.beacon.beklenmeyen-yanit':'Beklenmeyen yanıt: ',
+  'spi.core.beacon.gonderim':'Gönderim ',
+  'spi.core.beacon.gecersiz-durum':'Geçersiz durum.',
+  'spi.core.beacon.spi-bu-kayittan-yazilacak-bi':'SPİ bu kayıttan yazılacak bir şey çıkaramadı.',
+  'spi.core.beacon.kayit-yazilamadi-veriler-ara':'Kayıt yazılamadı; veriler arada değişmiş olabilir.',
+  'spi.core.beacon.teklif-yok':'Teklif yok.',
+  'spi.core.beacon.urun-modulu-yuklenmedi':'Ürün modülü yüklenmedi.',
+  'spi.core.beacon.spi-bir-teklifi-kendiliginde':'SPİ bir teklifi kendiliğinden uygulamaz: ölçüm de yük de senin ',
+  'spi.core.beacon.teklif-bulunamadi':'Teklif bulunamadı.',
+  'spi.core.beacon.bilinmeyen-islem':'Bilinmeyen işlem.',
+  'spi.core.beacon.bu-teklif-isleniyor':'Bu teklif işleniyor.',
+  'spi.core.beacon.bu-teklif-daha-once-uygulanm':'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.beacon.ozet':'Özet',
   'spi.core.beacon.yalniz-yuk-kararini-etkileye':'Yalnız yük kararını etkileyen çekirdek ölçümler.',
   'spi.core.beacon.gelismis':'Gelişmiş',
@@ -372,7 +392,7 @@ SP.Beacon = (function(){
     try{ govde = await res.json(); }catch(e){ govde = null; }
     if(res.status !== 200 || !govde || !govde.token){
       return { ok:false, status:res.status,
-        note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
+        note:(govde && govde.note) || yz('spi.core.beacon.esleme-penceresi-kapali-hkm')
            + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
     }
     const son = await save({ url:adres, token:govde.token, enabled:true, lastStatus:null });
@@ -464,7 +484,7 @@ SP.Beacon = (function(){
     const hata = contract(body);
     if(hata.length){
       await save({ lastAt:new Date().toISOString(), lastStatus:0,
-        lastNote:'Gövde sözleşmeyi geçmedi: ' + hata[0] });
+        lastNote:yz('spi.core.beacon.govde-sozlesmeyi-gecmedi') + hata[0] });
       return { ok:false, reason:'contract', errors:hata,
         note:yz('spi.core.beacon.etiketsiz-ya-da-bozuk-alan') };
     }
@@ -475,16 +495,16 @@ SP.Beacon = (function(){
       const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('spi.core.beacon.bearer') + a.token },
         body:JSON.stringify(body),
         signal:ctrl ? ctrl.signal : undefined,
       });
       if(zaman) clearTimeout(zaman);
       durum = res.status;
       not = durum === 202 ? 'Gönderildi.'
-        : durum === 422 ? 'HKM gövdeyi reddetti (etiket ya da biçim).'
-        : durum === 401 ? 'Jeton kabul edilmedi.'
-        : 'Beklenmeyen yanıt: ' + durum;
+        : durum === 422 ? yz('spi.core.beacon.hkm-govdeyi-reddetti-etiket')
+        : durum === 401 ? yz('spi.core.beacon.jeton-kabul-edilmedi')
+        : yz('spi.core.beacon.beklenmeyen-yanit') + durum;
     }catch(e){
       durum = 0;
       not = 'HKM\'ye ulaşılamadı. Bu bir hata değil bir DURUMDUR: HKM '
@@ -528,7 +548,7 @@ SP.Beacon = (function(){
         res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
           method:'POST',
           headers:{ 'Content-Type':'application/json',
-            'Authorization':'Bearer ' + a.token },
+            'Authorization':yz('spi.core.beacon.bearer') + a.token },
           body:JSON.stringify(govde),
         });
         durum = res.status;
@@ -556,7 +576,7 @@ SP.Beacon = (function(){
         return r.date + ' (' + r.status + (r.why ? ': ' + r.why : '') + ')';
       }).join('; ') + (reddedilen.length > 3 ? '; …' : '') + '.');
     }
-    if(hata != null) not.push('Gönderim ' + (hata || 'ağ hatası') + ' ile durdu.');
+    if(hata != null) not.push(yz('spi.core.beacon.gonderim') + (hata || 'ağ hatası') + ' ile durdu.');
     const durumSon = hata != null ? hata : reddedilen.length ? reddedilen[0].status : 202;
     await save({ lastAt:new Date().toISOString(), lastStatus:durumSon, lastNote:not.join(' ') });
     return { ok:hata == null && !reddedilen.length, sent:gonderilen, empty:bos,
@@ -684,7 +704,7 @@ SP.Beacon = (function(){
         + MODULE + '/take', {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('spi.core.beacon.bearer') + a.token },
       });
     }catch(e){ return []; }
     if(res.status !== 200) return [];
@@ -736,7 +756,7 @@ SP.Beacon = (function(){
     const a = settings();
     const durum = _durumAdi(applied);
     if(['applied', 'acknowledged', 'dismissed', 'unknown'].indexOf(durum) < 0){
-      return { ok:false, error:'Geçersiz durum.' };
+      return { ok:false, error:yz('spi.core.beacon.gecersiz-durum') };
     }
     if(!a.enabled || !a.token || !urlOk(a.url)) return { ok:false };
     try{
@@ -744,7 +764,7 @@ SP.Beacon = (function(){
         + id + '/' + durum, {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
-          'Authorization':'Bearer ' + a.token },
+          'Authorization':yz('spi.core.beacon.bearer') + a.token },
       });
       return { ok:res.status === 200, status:res.status };
     }catch(e){ return { ok:false }; }
@@ -814,7 +834,7 @@ SP.Beacon = (function(){
   async function kayitUygula(n){
     const o = kayitOku(n);     /* onay aninda YENIDEN okunur */
     if(!o.yazilacak.length){
-      return { ok:false, error:'SPİ bu kayıttan yazılacak bir şey çıkaramadı.' };
+      return { ok:false, error:yz('spi.core.beacon.spi-bu-kayittan-yazilacak-bi') };
     }
     const yazilan = [];
     for(let i = 0; i < o.yazilacak.length; i++){
@@ -827,14 +847,14 @@ SP.Beacon = (function(){
       if(r && r.ok) yazilan.push(y.baslik);
     }
     if(!yazilan.length){
-      return { ok:false, error:'Kayıt yazılamadı; veriler arada değişmiş olabilir.' };
+      return { ok:false, error:yz('spi.core.beacon.kayit-yazilamadi-veriler-ara') };
     }
     return { ok:true, note:yazilan.length + ' kayıt yazıldı (' + o.gun + ': ' + yazilan.join(', ')
       + '). Danışma ekranından geri alabilirsin.' };
   }
 
   async function acknowledgeIntent(n){
-    if(!n) return { ok:false, error:'Teklif yok.' };
+    if(!n) return { ok:false, error:yz('spi.core.beacon.teklif-yok') };
     return { ok:true, acknowledged:true,
       note:yz('spi.core.beacon.goruldu-olarak-isaretlendi-s')
          + 'ölçüm de yük de senin kararın.' };
@@ -849,12 +869,12 @@ SP.Beacon = (function(){
          (core/urun.js, ortak). Ofis ekranındaki BAM ürünlerinden açılır. */
       SP.Urunler = SP.Urunler || (window.LIFEOS && LIFEOS.Urun
         ? LIFEOS.Urun.kur({ store:() => SP.Store, hkm:() => SP.Beacon }) : null);
-      if(!SP.Urunler) return { ok:false, error:'Ürün modülü yüklenmedi.' };
+      if(!SP.Urunler) return { ok:false, error:yz('spi.core.beacon.urun-modulu-yuklenmedi') };
       return await SP.Urunler.uygula(n.payload || {});
     }
     if(canApply(n) && n.kind === 'plan.apply' && SP.Plan) return await SP.Plan.programUygula(n);
     return { ok:false,
-      error:'SPİ bir teklifi kendiliğinden uygulamaz: ölçüm de yük de senin '
+      error:yz('spi.core.beacon.spi-bir-teklifi-kendiliginde')
           + 'kararın. Teklif gösterildi, gerisi sende.' };
   }
 
@@ -872,13 +892,13 @@ SP.Beacon = (function(){
   const ISLEMDE = {};
 
   async function resolveIntent(n, action){
-    if(!n || n.id == null) return { ok:false, error:'Teklif bulunamadı.' };
+    if(!n || n.id == null) return { ok:false, error:yz('spi.core.beacon.teklif-bulunamadi') };
     const anahtar = String(n.id);
     if(['apply', 'seen', 'dismiss'].indexOf(action) < 0){
-      return { ok:false, error:'Bilinmeyen işlem.' };
+      return { ok:false, error:yz('spi.core.beacon.bilinmeyen-islem') };
     }
     /* Cift tiklama: es zamanli iki cagri tek is olur. */
-    if(ISLEMDE[anahtar]) return { ok:false, error:'Bu teklif işleniyor.' };
+    if(ISLEMDE[anahtar]) return { ok:false, error:yz('spi.core.beacon.bu-teklif-isleniyor') };
     ISLEMDE[anahtar] = true;
     try{
       const defter = await intentLog();
@@ -892,7 +912,7 @@ SP.Beacon = (function(){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
              olabilecek) bir teklif tekrar plana yazilmaz. */
-          not = 'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.';
+          not = yz('spi.core.beacon.bu-teklif-daha-once-uygulanm');
         }else{
           await markIntent(n.id, 'applying', false, '');
           const r = await applyIntent(n);

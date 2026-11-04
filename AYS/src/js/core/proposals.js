@@ -36,6 +36,52 @@
    Uygulama sirasi kasitlidir: once anlik goruntu alinir (undo), sonra
    degisiklik yazilir. Boylece geri alma her zaman mumkundur. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.proposals.bu-ders-sistemde-yok':'Bu ders sistemde yok.',
+  'ays.core.proposals.bu-konu-bu-derste-yok':'Bu konu bu derste yok.',
+  'ays.core.proposals.konu-zaten-kapali-sayilmiyor':'Konu zaten kapalı sayılmıyor; tekrara almanın etkisi olmaz.',
+  'ays.core.proposals.blok-suresi-15-120-dakika-ar':'Blok süresi 15–120 dakika arasında olmalı.',
+  'ays.core.proposals.bugunun-plani-henuz-acilmadi':'Bugünün planı henüz açılmadı.',
+  'ays.core.proposals.ek-tekrar':'Ek tekrar',
+  'ays.core.proposals.kart-sayisi-1-50-arasinda-ol':'Kart sayısı 1–50 arasında olmalı.',
+  'ays.core.proposals.geciken-tekrar-karti-yok':'Geciken tekrar kartı yok.',
+  'ays.core.proposals.bu-yanlis-kaydi-bulunamadi':'Bu yanlış kaydı bulunamadı.',
+  'ays.core.proposals.bu-yanlis-zaten-kapanmis':'Bu yanlış zaten kapanmış.',
+  'ays.core.proposals.kayitta-ilke-ya-da-recete':'Kayıtta ilke ya da reçete yazılmamış; karta dönüştürülemez.',
+  'ays.core.proposals.bu-yanlistan-zaten-kart-uret':'Bu yanlıştan zaten kart üretilmiş.',
+  'ays.core.proposals.hedef-motoru-yuklenmedi':'Hedef motoru yüklenmedi.',
+  'ays.core.proposals.hedef-bulunamadi':'Hedef bulunamadı.',
+  'ays.core.proposals.bu-hedefin-uygulanmis-bir-pl':'Bu hedefin uygulanmış bir planı var; önce onu geri al.',
+  'ays.core.proposals.hafta-numarasi-plan-disinda':'Hafta numarası plan dışında.',
+  'ays.core.proposals.haftalik-hedef-100-3000-soru':'Haftalık hedef 100–3000 soru arasında olmalı.',
+  'ays.core.proposals.hedef-zaten-bu-degerde':'Hedef zaten bu değerde.',
+  'ays.core.proposals.bu-karar-acik-degil-ya':'Bu karar açık değil ya da bulunamadı.',
+  'ays.core.proposals.gunluk-sure':'Günlük süre ',
+  'ays.core.proposals.gunluk-sure-zaten':'Günlük süre zaten ',
+  'ays.core.proposals.bu-bolum-gizlenemez-ya-da':'Bu bölüm gizlenemez ya da sistemde yok.',
+  'ays.core.proposals.soru-sayisi-yok':'Soru sayısı yok.',
+  'ays.core.proposals.dogru-sayisi-cozulenden-fazl':'Doğru sayısı çözülenden fazla olamaz.',
+  'ays.core.proposals.o-gunun-kaydi-henuz-acilmami':'O günün kaydı henüz açılmamış.',
+  'ays.core.proposals.plan-disi-gunun-toplami':'Plan dışı (günün toplamı)',
+  'ays.core.proposals.paragraf-sayisi-anlasilmadi':'Paragraf sayısı anlaşılmadı.',
+  'ays.core.proposals.problem-sayisi-anlasilmadi':'Problem sayısı anlaşılmadı.',
+  'ays.core.proposals.uyku-suresi-anlasilmadi':'Uyku süresi anlaşılmadı.',
+  'ays.core.proposals.sure-yok':'Süre yok.',
+  'ays.core.proposals.bilinmeyen-eylem':'Bilinmeyen eylem.',
+  'ays.core.proposals.bu-eylemin-uygulamasi-yok':'Bu eylemin uygulaması yok.',
+  'ays.core.proposals.oneri-dogrulanamadi':'Öneri doğrulanamadı.',
+  'ays.core.proposals.bu-oneride-sure-secilemez':'Bu öneride süre seçilemez.',
+  'ays.core.proposals.bu-ajan':'Bu ajan',
+  'ays.core.proposals.oneri-kurulamadi':'Öneri kurulamadı.',
+  'ays.core.proposals.kok-nedeni-yazilmis-bu-yanli':'Kök nedeni yazılmış bu yanlış karta dönmemiş; tekrar edilmezse yine yapılır.',
+  'ays.core.proposals.asagidaki-eylemlerden-biri-d':'Aşağıdaki eylemlerden biri durumu düzeltecekse yanıtının SONUNA tek bir ',
+  'ays.core.proposals.json-nesnesi-ekleyebilirsin':'JSON nesnesi ekleyebilirsin. Eylem uydurma, listede olmayanı yazma; ',
+  'ays.core.proposals.gerek-yoksa-json-yazma':'Gerek yoksa JSON yazma.',
+  'ays.core.proposals.bos-satir':'Boş satır',
+  'ays.core.proposals.ays-onaylar-da-bekliyor':'AYS › Onaylar’da bekliyor',
+  'ays.core.proposals.ays-bu-satiri-anlamadi':'AYS bu satırı anlamadı',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.proposals.konu':'Konu',
   'ays.core.proposals.durum':'Durum',
   'ays.core.proposals.eklenecek-blok':'Eklenecek blok',
@@ -179,12 +225,12 @@ R.Proposals = (function(){
     'topic-review':{
       check(p){
         const subject = subjectOf(p.subjectId);
-        if(!subject) return fail('Bu ders sistemde yok.');
+        if(!subject) return fail(yz('ays.core.proposals.bu-ders-sistemde-yok'));
         const topic = topicOf(subject, p.topicId);
-        if(!topic) return fail('Bu konu bu derste yok.');
+        if(!topic) return fail(yz('ays.core.proposals.bu-konu-bu-derste-yok'));
         const st = M.topicState(p.subjectId, p.topicId);
         if(st.state !== 'closed' && st.state !== 'provisional'){
-          return fail('Konu zaten kapalı sayılmıyor; tekrara almanın etkisi olmaz.');
+          return fail(yz('ays.core.proposals.konu-zaten-kapali-sayilmiyor'));
         }
         return pass({ subject, topic, from:st.state });
       },
@@ -206,13 +252,13 @@ R.Proposals = (function(){
     'block-add':{
       check(p){
         const subject = subjectOf(p.subjectId);
-        if(!subject) return fail('Bu ders sistemde yok.');
+        if(!subject) return fail(yz('ays.core.proposals.bu-ders-sistemde-yok'));
         const topic = topicOf(subject, p.topicId);
-        if(!topic) return fail('Bu konu bu derste yok.');
+        if(!topic) return fail(yz('ays.core.proposals.bu-konu-bu-derste-yok'));
         const min = Math.round(Number(p.minutes) || 0);
-        if(!(min >= 15 && min <= 120)) return fail('Blok süresi 15–120 dakika arasında olmalı.');
+        if(!(min >= 15 && min <= 120)) return fail(yz('ays.core.proposals.blok-suresi-15-120-dakika-ar'));
         const day = M.dayOf(U.todayISO());
-        if(!day) return fail('Bugünün planı henüz açılmadı.');
+        if(!day) return fail(yz('ays.core.proposals.bugunun-plani-henuz-acilmadi'));
         return pass({ subject, topic, min, day });
       },
       preview(p, ctx){
@@ -229,7 +275,7 @@ R.Proposals = (function(){
         const day = await M.ensureDay(date);
         const id = U.uid('b');
         day.blocks.push({
-          id, slot:'Ek tekrar',
+          id, slot:yz('ays.core.proposals.ek-tekrar'),
           subject:ctx.subject.name, topic:ctx.topic.name,
           targetMin:ctx.min, targetQ:0, status:'pending',
           subjectId:p.subjectId, topicId:p.topicId,
@@ -252,13 +298,13 @@ R.Proposals = (function(){
     'cards-due-today':{
       check(p){
         const limit = Math.round(Number(p.limit) || 0);
-        if(!(limit >= 1 && limit <= 50)) return fail('Kart sayısı 1–50 arasında olmalı.');
+        if(!(limit >= 1 && limit <= 50)) return fail(yz('ays.core.proposals.kart-sayisi-1-50-arasinda-ol'));
         const today = U.todayISO();
         const late = (S.cards || [])
           .filter(c => c.dueAt && c.dueAt < today)
           .sort((a, b) => String(a.dueAt).localeCompare(String(b.dueAt)))
           .slice(0, limit);
-        if(!late.length) return fail('Geciken tekrar kartı yok.');
+        if(!late.length) return fail(yz('ays.core.proposals.geciken-tekrar-karti-yok'));
         return pass({ late, today });
       },
       preview(p, ctx){
@@ -291,12 +337,12 @@ R.Proposals = (function(){
     'card-from-error':{
       check(p){
         const err = (S.errors || []).find(e => e.id === p.errorId);
-        if(!err) return fail('Bu yanlış kaydı bulunamadı.');
-        if(err.closedAt) return fail('Bu yanlış zaten kapanmış.');
+        if(!err) return fail(yz('ays.core.proposals.bu-yanlis-kaydi-bulunamadi'));
+        if(err.closedAt) return fail(yz('ays.core.proposals.bu-yanlis-zaten-kapanmis'));
         const back = String(err.principle || err.recipe || '').trim();
-        if(!back) return fail('Kayıtta ilke ya da reçete yazılmamış; karta dönüştürülemez.');
+        if(!back) return fail(yz('ays.core.proposals.kayitta-ilke-ya-da-recete'));
         const already = (S.cards || []).some(c => c.sourceRef === err.id);
-        if(already) return fail('Bu yanlıştan zaten kart üretilmiş.');
+        if(already) return fail(yz('ays.core.proposals.bu-yanlistan-zaten-kart-uret'));
         return pass({ err, back });
       },
       preview(p, ctx){
@@ -325,10 +371,10 @@ R.Proposals = (function(){
        bugünün verisiyle); önizleme onu gösterir, apply onu yazar. */
     'hedef-plan':{
       check(p){
-        if(!R.Hedefler || !R.HedefPlan) return fail('Hedef motoru yüklenmedi.');
+        if(!R.Hedefler || !R.HedefPlan) return fail(yz('ays.core.proposals.hedef-motoru-yuklenmedi'));
         const h = R.Hedefler.liste().find(x => x.id === p.hedefId);
-        if(!h) return fail('Hedef bulunamadı.');
-        if(R.HedefPlan.aktif(h.id)) return fail('Bu hedefin uygulanmış bir planı var; önce onu geri al.');
+        if(!h) return fail(yz('ays.core.proposals.hedef-bulunamadi'));
+        if(R.HedefPlan.aktif(h.id)) return fail(yz('ays.core.proposals.bu-hedefin-uygulanmis-bir-pl'));
         const r = R.HedefPlan.kur(h, U.todayISO());
         if(!r.ok) return fail(r.why);
         return pass({ hedef:h, plan:r.plan });
@@ -349,11 +395,11 @@ R.Proposals = (function(){
       check(p){
         const n = Math.round(Number(p.weekN) || 0);
         const q = Math.round(Number(p.questionTarget) || 0);
-        if(!(n >= 1 && n <= R.PLAN.totalWeeks)) return fail('Hafta numarası plan dışında.');
-        if(!(q >= 100 && q <= 3000)) return fail('Haftalık hedef 100–3000 soru arasında olmalı.');
+        if(!(n >= 1 && n <= R.PLAN.totalWeeks)) return fail(yz('ays.core.proposals.hafta-numarasi-plan-disinda'));
+        if(!(q >= 100 && q <= 3000)) return fail(yz('ays.core.proposals.haftalik-hedef-100-3000-soru'));
         const week = S.weeks[M.weekId(n)];
         if(!week) return fail(n + '. hafta henüz açılmadı.');
-        if(Number(week.questionTarget) === q) return fail('Hedef zaten bu değerde.');
+        if(Number(week.questionTarget) === q) return fail(yz('ays.core.proposals.hedef-zaten-bu-degerde'));
         return pass({ week, n, q });
       },
       preview(p, ctx){
@@ -400,7 +446,7 @@ R.Proposals = (function(){
       check(p){
         const state = p.state === 'carried' ? 'carried' : 'done';
         const d = R.Office.openDecisions().find(x => x.id === p.decisionId);
-        if(!d) return fail('Bu karar açık değil ya da bulunamadı.');
+        if(!d) return fail(yz('ays.core.proposals.bu-karar-acik-degil-ya'));
         return pass({ d, state });
       },
       preview(p, ctx){
@@ -486,11 +532,11 @@ R.Proposals = (function(){
       check(p){
         const dk = Math.round(Number(p.dakika));
         if(!R.Istisna.dakikaGecerli(dk)){
-          return fail('Günlük süre ' + R.Istisna.DAKIKA.min + '–' + R.Istisna.DAKIKA.max
+          return fail(yz('ays.core.proposals.gunluk-sure') + R.Istisna.DAKIKA.min + '–' + R.Istisna.DAKIKA.max
             + ' dakika arasında olmalı.');
         }
         const simdi = R.Istisna.temelDakika() || R.Istisna.sablonDakikasi();
-        if(simdi === dk) return fail('Günlük süre zaten ' + dk + ' dakika.');
+        if(simdi === dk) return fail(yz('ays.core.proposals.gunluk-sure-zaten') + dk + ' dakika.');
         const yeniKapasite = R.Istisna.kapasiteSaati(dk);
         /* Plana girmeyen konu sayisi once/sonra: yeniden planlama ayni
            ureteci ayni kapasiteyle calistirir (Planner.replan → generate),
@@ -547,7 +593,7 @@ R.Proposals = (function(){
     'bolum-ac-kapa':{
       check(p){
         const b = R.Bolum && R.Bolum.BY_ID[p.bolum];
-        if(!b) return fail('Bu bölüm gizlenemez ya da sistemde yok.');
+        if(!b) return fail(yz('ays.core.proposals.bu-bolum-gizlenemez-ya-da'));
         const acik = Number(p.acik) === 1;
         if(acik === !R.Bolum.gizli(p.bolum)) return fail(b.ad + ' zaten ' + (acik ? 'açık.' : 'gizli.'));
         return pass({ b, acik });
@@ -580,15 +626,15 @@ R.Proposals = (function(){
     'soru-yaz':{
       check(p){
         const n = Number(p.count);
-        if(!isFinite(n) || n <= 0) return fail('Soru sayısı yok.');
+        if(!isFinite(n) || n <= 0) return fail(yz('ays.core.proposals.soru-sayisi-yok'));
         if(n > 1000) return fail(n + ' soru bir gün için fazla; yanlış anlaşılmış olabilir.');
         let dogru = p.correct == null ? null : Number(p.correct);
         if(dogru != null && (!isFinite(dogru) || dogru < 0)) dogru = null;
-        if(dogru != null && dogru > n) return fail('Doğru sayısı çözülenden fazla olamaz.');
+        if(dogru != null && dogru > n) return fail(yz('ays.core.proposals.dogru-sayisi-cozulenden-fazl'));
         const subject = p.subjectId ? (R.SUBJECTS || []).find(x => x.id === p.subjectId) : null;
-        if(p.subjectId && !subject) return fail('Bu ders sistemde yok.');
+        if(p.subjectId && !subject) return fail(yz('ays.core.proposals.bu-ders-sistemde-yok'));
         const day = R.S.days[p.date];
-        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        if(!day) return fail(yz('ays.core.proposals.o-gunun-kaydi-henuz-acilmami'));
         /* Derse bagli bir blok varsa oraya yazilir; yoksa gunun
            serbest sorusuna eklenir. Uydurma blok ACILMAZ. */
         const blok = subject
@@ -599,7 +645,7 @@ R.Proposals = (function(){
           subject, blok, day });
       },
       preview(p, ctx){
-        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Plan dışı (günün toplamı)';
+        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : yz('ays.core.proposals.plan-disi-gunun-toplami');
         const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
           : ctx.day.freeQ == null ? 'girilmemiş' : String(ctx.day.freeQ);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
@@ -665,9 +711,9 @@ R.Proposals = (function(){
     'paragraf-yaz':{
       check(p){
         const n = Number(p.count);
-        if(!isFinite(n) || n < 0 || n > 500) return fail('Paragraf sayısı anlaşılmadı.');
+        if(!isFinite(n) || n < 0 || n > 500) return fail(yz('ays.core.proposals.paragraf-sayisi-anlasilmadi'));
         const day = R.S.days[p.date];
-        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        if(!day) return fail(yz('ays.core.proposals.o-gunun-kaydi-henuz-acilmami'));
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
@@ -693,9 +739,9 @@ R.Proposals = (function(){
     'problem-yaz':{
       check(p){
         const n = Number(p.count);
-        if(!isFinite(n) || n < 0 || n > 500) return fail('Problem sayısı anlaşılmadı.');
+        if(!isFinite(n) || n < 0 || n > 500) return fail(yz('ays.core.proposals.problem-sayisi-anlasilmadi'));
         const day = R.S.days[p.date];
-        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        if(!day) return fail(yz('ays.core.proposals.o-gunun-kaydi-henuz-acilmami'));
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
@@ -721,9 +767,9 @@ R.Proposals = (function(){
     'uyku-yaz':{
       check(p){
         const h = Number(p.hours);
-        if(!isFinite(h) || h <= 0 || h > 24) return fail('Uyku süresi anlaşılmadı.');
+        if(!isFinite(h) || h <= 0 || h > 24) return fail(yz('ays.core.proposals.uyku-suresi-anlasilmadi'));
         const day = R.S.days[p.date];
-        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        if(!day) return fail(yz('ays.core.proposals.o-gunun-kaydi-henuz-acilmami'));
         return pass({ h, day });
       },
       preview(p, ctx){
@@ -751,12 +797,12 @@ R.Proposals = (function(){
     'sure-yaz':{
       check(p){
         const dk = Number(p.minutes);
-        if(!isFinite(dk) || dk <= 0) return fail('Süre yok.');
+        if(!isFinite(dk) || dk <= 0) return fail(yz('ays.core.proposals.sure-yok'));
         if(dk > 960) return fail(dk + ' dakika bir blok için fazla.');
         const subject = (R.SUBJECTS || []).find(x => x.id === p.subjectId);
-        if(!subject) return fail('Bu ders sistemde yok.');
+        if(!subject) return fail(yz('ays.core.proposals.bu-ders-sistemde-yok'));
         const day = R.S.days[p.date];
-        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        if(!day) return fail(yz('ays.core.proposals.o-gunun-kaydi-henuz-acilmami'));
         const blok = (day.blocks || []).find(b => b.subjectId === subject.id
           || (b.subject && R.U.norm(b.subject) === R.U.norm(subject.name)));
         if(!blok) return fail(subject.name + ' için bugün planlanmış bir blok yok.');
@@ -831,14 +877,14 @@ R.Proposals = (function(){
      her cizimde yeniden gecer: arada veri degismis olabilir. */
   function check(p){
     const def = R.ACTION_BY_ID[p && p.action];
-    if(!def) return fail('Bilinmeyen eylem.');
+    if(!def) return fail(yz('ays.core.proposals.bilinmeyen-eylem'));
     if(def.agents.indexOf(p.agent) < 0){
       return fail(agentName(p.agent) + ' bu eylemi öneremez; alanı dışında.');
     }
     const impl = IMPL[def.id];
-    if(!impl) return fail('Bu eylemin uygulaması yok.');
+    if(!impl) return fail(yz('ays.core.proposals.bu-eylemin-uygulamasi-yok'));
     try{ return impl.check(p.params || {}); }
-    catch(e){ return fail('Öneri doğrulanamadı.'); }
+    catch(e){ return fail(yz('ays.core.proposals.oneri-dogrulanamadi')); }
   }
 
   /* Ne degisecek — onaydan ONCE gosterilir. */
@@ -868,7 +914,7 @@ R.Proposals = (function(){
   }
   async function kapsamla(id, kapsam){
     const p = (S.officeProposals || []).find(x => x.id === id && x.status === 'pending');
-    if(!p || !kapsamOf(p) || !KAPSAM_EYLEM[kapsam]) return fail('Bu öneride süre seçilemez.');
+    if(!p || !kapsamOf(p) || !KAPSAM_EYLEM[kapsam]) return fail(yz('ays.core.proposals.bu-oneride-sure-secilemez'));
     const bugun = U.todayISO();
     const gunler = M.weekDates(M.currentWeek());
     const son = U.iso(gunler[gunler.length - 1]);
@@ -890,7 +936,7 @@ R.Proposals = (function(){
 
   function agentName(id){
     const a = R.AGENT_BY_ID[id];
-    return a ? a.name : 'Bu ajan';
+    return a ? a.name : yz('ays.core.proposals.bu-ajan');
   }
 
   /* ==================== depo ==================== */
@@ -1076,7 +1122,7 @@ R.Proposals = (function(){
     }
     if(!row){
       const c = check(istek);
-      return { ok:false, why:c.ok ? 'Öneri kurulamadı.' : c.why };
+      return { ok:false, why:c.ok ? yz('ays.core.proposals.oneri-kurulamadi') : c.why };
     }
     const r = await approve(row.id);
     return r && r.ok ? { ok:true, row:r.row } : { ok:false, why:(r && r.why) || 'Uygulanamadı.' };
@@ -1135,7 +1181,7 @@ R.Proposals = (function(){
       out.push({
         action:'card-from-error', agent:'analist', source:'kural',
         params:{ errorId:orphan.id },
-        reason:'Kök nedeni yazılmış bu yanlış karta dönmemiş; tekrar edilmezse yine yapılır.',
+        reason:yz('ays.core.proposals.kok-nedeni-yazilmis-bu-yanli'),
       });
     }
 
@@ -1217,13 +1263,13 @@ R.Proposals = (function(){
     const list = R.actionsFor(agentId).filter(a => !a.modelYok);
     if(!list.length) return '';
     return 'SİSTEME MÜDAHALE (isteğe bağlı):\n'
-      + 'Aşağıdaki eylemlerden biri durumu düzeltecekse yanıtının SONUNA tek bir '
-      + 'JSON nesnesi ekleyebilirsin. Eylem uydurma, listede olmayanı yazma; '
+      + yz('ays.core.proposals.asagidaki-eylemlerden-biri-d')
+      + yz('ays.core.proposals.json-nesnesi-ekleyebilirsin')
       + 'yazdığın şey doğrudan uygulanmaz, kullanıcının onayına düşer.\n'
       + list.map(a => '- ' + a.id + ' (' + a.title + ') · parametreler: '
           + Object.keys(a.params).join(', ')).join('\n') + '\n'
       + 'Biçim: {"eylem":"<id>","parametreler":{…},"gerekce":"tek cümle"}\n'
-      + 'Gerek yoksa JSON yazma.';
+      + yz('ays.core.proposals.gerek-yoksa-json-yazma');
   }
 
   /* Akis sirasinda yarim kalmis JSON kullaniciya gorunmesin. Yalniz eylem
@@ -1270,7 +1316,7 @@ R.Proposals = (function(){
      kez öneri olmaz (anahtar). Dönüş hesap.js'e: { durum, sonuc }. */
   async function disaridan(oge){
     const metin = String((oge && oge.metin) || '').trim();
-    if(!metin || !R.Entry) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    if(!metin || !R.Entry) return { durum:'anlasilmadi', sonuc:yz('ays.core.proposals.bos-satir') };
     const z = Number(oge.zaman), bugun = U.todayISO();
     const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
     const gun = gonderilen > bugun ? bugun : gonderilen;
@@ -1290,9 +1336,9 @@ R.Proposals = (function(){
         iz:[{ tur:'gelen', id:String(oge.id) }] }));
       if(row) n++;
     }
-    if(n) return { durum:'onayda', sonuc:n === 1 ? 'AYS › Onaylar’da bekliyor' : n + ' kayıt AYS › Onaylar’da' };
+    if(n) return { durum:'onayda', sonuc:n === 1 ? yz('ays.core.proposals.ays-onaylar-da-bekliyor') : n + ' kayıt AYS › Onaylar’da' };
     const e = (v.engellenen || [])[0];
-    return { durum:'anlasilmadi', sonuc:neden[0] || (e && e.soru) || 'AYS bu satırı anlamadı' };
+    return { durum:'anlasilmadi', sonuc:neden[0] || (e && e.soru) || yz('ays.core.proposals.ays-bu-satiri-anlamadi') };
   }
 
   return {

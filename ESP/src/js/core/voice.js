@@ -13,6 +13,15 @@
    katman sessizce yok olur -- mikrofon dugmesi hic cizilmez, elle giris
    yolu zaten her yerde durur. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.voice.bu-tarayici-ses-tanimayi-des':'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
+  'esp.core.voice.mikrofon-izni-verilmedi':'Mikrofon izni verilmedi.',
+  'esp.core.voice.mikrofon-bulunamadi':'Mikrofon bulunamadı.',
+  'esp.core.voice.ses-tanima-icin-baglanti-ger':'Ses tanıma için bağlantı gerekiyor.',
+  'esp.core.voice.mikrofon-baslatilamadi':'Mikrofon başlatılamadı.',
+  'esp.core.voice.ses-tanima-calismadi':'Ses tanıma çalışmadı.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.voice.bu-tarayici-mikrofonun-sesin':'Bu tarayıcı mikrofonun sesini ölçemiyor.',
   'esp.core.voice.mikrofon-acilamadi-ya-da-izi':'Mikrofon açılamadı ya da izin verilmedi.',
 });
@@ -121,14 +130,14 @@ ESP.Voice = (function(){
   }
 
   const MESSAGES = {
-    unsupported:'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
-    'not-allowed':'Mikrofon izni verilmedi.',
-    'service-not-allowed':'Mikrofon izni verilmedi.',
-    'audio-capture':'Mikrofon bulunamadı.',
-    network:'Ses tanıma için bağlantı gerekiyor.',
-    start:'Mikrofon başlatılamadı.',
+    unsupported:yz('esp.core.voice.bu-tarayici-ses-tanimayi-des'),
+    'not-allowed':yz('esp.core.voice.mikrofon-izni-verilmedi'),
+    'service-not-allowed':yz('esp.core.voice.mikrofon-izni-verilmedi'),
+    'audio-capture':yz('esp.core.voice.mikrofon-bulunamadi'),
+    network:yz('esp.core.voice.ses-tanima-icin-baglanti-ger'),
+    start:yz('esp.core.voice.mikrofon-baslatilamadi'),
   };
-  function message(code){ return MESSAGES[code] || 'Ses tanıma çalışmadı.'; }
+  function message(code){ return MESSAGES[code] || yz('esp.core.voice.ses-tanima-calismadi'); }
 
   /* ------------------------------------------------ 099 konuşma ölçümü
 

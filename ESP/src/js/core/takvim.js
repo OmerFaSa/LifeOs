@@ -21,6 +21,14 @@
         RRULE bunu yanlış söylerdi. Yalnız sıradaki gün yazılır, tamamlanınca
         yayın yenisini taşır.
      4. Satır 75 OKTETTE katlanır (karakter değil): Türkçe harf iki bayttır. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.takvim.esp-hedefi-son-gun':'ESP hedefi son gün: ',
+  'esp.core.takvim.hedefin-son-tarihi':'Hedefin son tarihi.',
+  'esp.core.takvim.hedef-planinin-bitisi':'Hedef planının bitişi.',
+  'esp.core.takvim.vadesi':'Vadesi ',
+  'esp.core.takvim.esp-gelisim-takvimi':'ESP — gelişim takvimi',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -74,8 +82,8 @@ ESP.Takvim = (function(){
       const p = ESP.HedefPlan && ESP.HedefPlan.aktif ? ESP.HedefPlan.aktif(h.id) : null;
       const son = h.son_tarih || (p && p.bitis) || null;
       if(U().isISO(son) && son >= bugun) l.push({ uid:'esp-hedef-' + h.id + '@lifeos', bas:son,
-        baslik:'ESP hedefi son gün: ' + H.ozet(h),
-        aciklama:h.son_tarih ? 'Hedefin son tarihi.' : 'Hedef planının bitişi.' });
+        baslik:yz('esp.core.takvim.esp-hedefi-son-gun') + H.ozet(h),
+        aciklama:h.son_tarih ? yz('esp.core.takvim.hedefin-son-tarihi') : yz('esp.core.takvim.hedef-planinin-bitisi') });
     });
     (S().goals || []).forEach(g => {
       if(g.done || !U().isISO(g.date) || g.date < bugun) return;
@@ -87,10 +95,10 @@ ESP.Takvim = (function(){
       const gecikti = r.due < bugun;
       l.push({ uid:'esp-hatirlatici-' + r.id + '@lifeos', bas:gecikti ? bugun : r.due,
         baslik:'ESP · ' + (r.text || 'Hatırlatıcı') + (ad(r.disc) ? ' (' + ad(r.disc) + ')' : ''),
-        aciklama:gecikti ? 'Vadesi ' + r.due + ' idi; tamamlanana dek bekler.' : '' });
+        aciklama:gecikti ? yz('esp.core.takvim.vadesi') + r.due + ' idi; tamamlanana dek bekler.' : '' });
     });
     l.sort((a, b) => (a.bas < b.bas ? -1 : a.bas > b.bas ? 1 : 0));
-    return { metin:yaz(l, 'ESP — gelişim takvimi'), adet:l.length };
+    return { metin:yaz(l, yz('esp.core.takvim.esp-gelisim-takvimi')), adet:l.length };
   }
 
   /* TELEFON BİLDİRİMİ (iOS kabuğu, brand/ortak/bildirim.js; 2026-10-09).

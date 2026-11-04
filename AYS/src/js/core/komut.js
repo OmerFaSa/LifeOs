@@ -28,6 +28,19 @@
 
    ZAMAN KİPİ. «4 saat çalıştım» bir RAPORDUR (geçmiş), «4 saat
    çalışacağım» bir PLANDIR. Geçmiş zaman plan komutu sayılmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.komut.arayi-ne-zaman-vermek-istiyo':'Arayı ne zaman vermek istiyorsun? «bu hafta», «yarın», «3 gün» ya da ',
+  'ays.core.komut.yalniz-bir-dersi-mi-birakiyo':'Yalnız bir dersi mi bırakıyorsun, yoksa bütün günü mü? Bütün gün için ',
+  'ays.core.komut.hangi-gunler-i-ki-tarih-ifad':'Hangi günler? İki tarih ifadesi birlikte olunca hangisini kastettiğini ',
+  'ays.core.komut.kac-saat-gunde-4-saat':'Kaç saat? «günde 4 saat» ya da «gelecek hafta günde 3 saat» gibi söyler misin?',
+  'ays.core.komut.hangi-bolumu':'Hangi bölümü ',
+  'ays.core.komut.hedef-kac-soru-olsun':'Hedef kaç soru olsun?',
+  'ays.core.komut.sadece-bugun-mu-yoksa-bundan':'Sadece bugün mü, yoksa bundan sonra her gün mü ',
+  'ays.core.komut.yaptim':'Yaptım: ',
+  'ays.core.komut.anladigim-su':'Anladığım şu: ',
+  'ays.core.komut.bunu-uygulayamadim':'Bunu uygulayamadım: ',
+});
+
 
 window.R = window.R || {};
 
@@ -195,13 +208,13 @@ R.Komut = (function(){
   /* ---------------------------------------------------- tek komut */
 
   const SORU = {
-    araNe:'Arayı ne zaman vermek istiyorsun? «bu hafta», «yarın», «3 gün» ya da '
+    araNe:yz('ays.core.komut.arayi-ne-zaman-vermek-istiyo')
       + '«perşembeden cumartesiye kadar» diyebilirsin.',
-    tekDers:'Yalnız bir dersi mi bırakıyorsun, yoksa bütün günü mü? Bütün gün için '
+    tekDers:yz('ays.core.komut.yalniz-bir-dersi-mi-birakiyo')
       + '«bugün çalışmayacağım» de; tek dersi bugünün bloğundan atlayabilirsin.',
-    hangiGun:'Hangi günler? İki tarih ifadesi birlikte olunca hangisini kastettiğini '
+    hangiGun:yz('ays.core.komut.hangi-gunler-i-ki-tarih-ifad')
       + 'bilemiyorum; «perşembe ve cuma» ya da «yarından itibaren 2 gün» gibi söyler misin?',
-    sureNe:'Kaç saat? «günde 4 saat» ya da «gelecek hafta günde 3 saat» gibi söyler misin?',
+    sureNe:yz('ays.core.komut.kac-saat-gunde-4-saat'),
   };
 
   function gunlerdenAralik(gunler){
@@ -233,7 +246,7 @@ R.Komut = (function(){
       const idler = bolumBul(t);
       const kapat = BOLUM_KAPAT_RE.test(t);
       if(!idler.length){
-        out.sorular.push({ metin, soru:'Hangi bölümü ' + (kapat ? 'gizleyeyim' : 'açayım')
+        out.sorular.push({ metin, soru:yz('ays.core.komut.hangi-bolumu') + (kapat ? 'gizleyeyim' : 'açayım')
           + '? «Sınama», «Öğrenme», «Soru çöz», «Telafi», «Analiz» ya da «Rütbe» diyebilirsin.' });
         return out;
       }
@@ -250,7 +263,7 @@ R.Komut = (function(){
         const m = t.slice(d).match(/\d+/);
         if(m) q = Number(m[0]);
       }
-      if(q == null){ out.sorular.push({ metin, soru:'Hedef kaç soru olsun?' }); return out; }
+      if(q == null){ out.sorular.push({ metin, soru:yz('ays.core.komut.hedef-kac-soru-olsun') }); return out; }
       const n = R.Model.currentWeek() + (/(gelecek|önümüzdeki|sonraki) hafta|haftaya/.test(t) ? 1 : 0);
       out.oneriler.push({ action:'week-target', params:{ weekN:n, questionTarget:q }, metin });
       return out;
@@ -280,7 +293,7 @@ R.Komut = (function(){
         out.oneriler.push({ action:'gunluk-sure', params:{ dakika:dk }, metin });
         return out;
       }
-      out.sorular.push({ metin, soru:'Sadece bugün mü, yoksa bundan sonra her gün mü '
+      out.sorular.push({ metin, soru:yz('ays.core.komut.sadece-bugun-mu-yoksa-bundan')
         + dk + ' dakika? «bugün ' + Math.round(dk / 6) / 10 + ' saat» ya da «günde '
         + Math.round(dk / 6) / 10 + ' saat» diyebilirsin.' });
       return out;
@@ -387,15 +400,15 @@ R.Komut = (function(){
   function yanit(islem){
     const p = [];
     if(islem.yapilan.length){
-      p.push('Yaptım: ' + islem.yapilan.map(satir).join(' · ')
+      p.push(yz('ays.core.komut.yaptim') + islem.yapilan.map(satir).join(' · ')
         + '. Geri almak istersen «geri al» de.');
     }
     if(islem.bekleyen.length){
-      p.push('Anladığım şu: ' + islem.bekleyen.map(satir).join(' · ')
+      p.push(yz('ays.core.komut.anladigim-su') + islem.bekleyen.map(satir).join(' · ')
         + '. Onaylıyor musun? «evet» de ya da aşağıdan onayla.');
     }
     if(islem.dusen.length){
-      p.push('Bunu uygulayamadım: ' + islem.dusen.map(k => k.baslik + ' — '
+      p.push(yz('ays.core.komut.bunu-uygulayamadim') + islem.dusen.map(k => k.baslik + ' — '
         + (k.why || 'geçersiz')).join(' · '));
     }
     (islem.sorular || []).forEach(s => p.push(s.soru));

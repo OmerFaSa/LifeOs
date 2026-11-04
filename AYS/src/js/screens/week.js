@@ -1,6 +1,48 @@
 /* Hafta — kapasite sozlesmesi, 7 gunluk izgara ve weekly review.
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.week.hafta-2':'Hafta ',
+  'ays.week.planlanan-sure-kapasitenin-1':'Planlanan süre kapasitenin %110’unu aşıyor. İmzadan önce blok azalt veya kapasiteyi gerçekçi yaz.',
+  'ays.week.plan-tamamlama-hedefte':'Plan tamamlama hedefte.',
+  'ays.week.plan-tamamlama-hedefin-altin':'Plan tamamlama hedefin altında ama toparlanabilir.',
+  'ays.week.plan-tamamlama-dusuk-hedef-h':'Plan tamamlama düşük; hedef hacmi gerçekçi değil olabilir.',
+  'ays.week.cozulen-soruda-dogruluk':'Çözülen soruda doğruluk %',
+  'ays.week.en-sik-sapma-nedeni':'En sık sapma nedeni: ',
+  'ays.week.planlanan-surenin':'Planlanan sürenin %',
+  'ays.week.bu-hafta-icin-kayda-deger':'Bu hafta için kayda değer sapma yok.',
+  'ays.week.degerlendirmeyi-guncelle':'Değerlendirmeyi güncelle',
+  'ays.week.degerlendirmeyi-doldur':'Değerlendirmeyi doldur',
+  'ays.week.dort-sutun-doldurulur-planla':'Dört sütun doldurulur: planlandı / yapıldı / neden sapıldı / düzeltme. ',
+  'ays.week.yeni-haftaya-yalniz-en-yukse':'Yeni haftaya yalnız en yüksek etkili iki eksik taşınır.',
+  'ays.week.bu-hafta-ne-planlanmisti':'Bu hafta ne planlanmıştı?',
+  'ays.week.fiilen-ne-yapildi':'Fiilen ne yapıldı?',
+  'ays.week.neden-sapildi':'Neden sapıldı',
+  'ays.week.kok-neden-vakit-yoktu':'Kök neden — “vakit yoktu” değil, hangi blok hangi engelle düştü?',
+  'ays.week.gelecek-hafta-ne-degisecek-t':'Gelecek hafta ne değişecek? Tek somut değişiklik.',
+  'ays.week.bu-gun-henuz-acilmadi-gun':'Bu gün henüz açılmadı. Gün geldiğinde plan otomatik oluşturulur; ',
+  'ays.week.gecici-gunluk-sure':'Geçici günlük süre',
+  'ays.week.gunluk-calisma-suresi':'Günlük çalışma süresi',
+  'ays.week.sectigin-gunlerde-plan-bos-k':'Seçtiğin günlerde plan boş kalır; ara bitince kaldığı yerden sürer.',
+  'ays.week.ders-gunlerinin-suresi-yalni':'Ders günlerinin süresi yalnız bu tarihlerde değişir; sonra temel plana döner.',
+  'ays.week.kalici-degisiklik-kapasite-v':'Kalıcı değişiklik: kapasite ve plan bu haftadan itibaren yeniden dağıtılır.',
+  'ays.week.sinava-kadar':'Sınava kadar',
+  'ays.week.ek-blok':'Ek blok',
+  'ays.week.bugune-onerilen-blok':'Bugüne önerilen blok',
+  'ays.week.plan-izgarasi':'Plan ızgarası',
+  'ays.week.dagilim-plana-uyuyor':'Dağılım plana uyuyor',
+  'ays.week.ders-dengesi':'Ders dengesi',
+  'ays.week.hafta-ekranindan':'Hafta ekranından.',
+  'ays.week.plan-guncellendi-ofiste-geri':'Plan güncellendi · ofiste geri alınabilir',
+  'ays.week.i-stisnayi-bugun-bitir':'İstisnayı bugün bitir',
+  'ays.week.i-stisnayi-kaldir':'İstisnayı kaldır',
+  'ays.week.bugun-ve-sonraki-gunler-teme':'Bugün ve sonraki günler temel plana göre yeniden kurulur. Geçmiş günler olduğu gibi kalır.',
+  'ays.week.bu-istisna-hic-uygulanmamis':'Bu istisna hiç uygulanmamış gibi kalkar.',
+  'ays.week.plan-temel-duzenine-dondu':'Plan temel düzenine döndü',
+  'ays.week.i-mzali-bir-hafta-degistiril':'İmzalı bir hafta değiştirildiğinde neden kaydedilir; ',
+  'ays.week.neden-belirtilmedi':'Neden belirtilmedi',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -8,7 +50,7 @@ window.LIFEOS.PARCA.komut({ modul:'ays', sira:20, group:'Git', label:'Hafta — 
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:260, group:'Kayıt', label:'Haftalık değerlendirmeyi aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:330, uret(){
   const cur = R.Model.currentWeek();
-  return [cur-1, cur, cur+1].filter(n => n >= 1 && n <= R.PLAN.totalWeeks).map(n => ({ group:'Hafta', label:'Hafta '+n+' — '+R.Model.curriculumFor(n).title, icon:'week',
+  return [cur-1, cur, cur+1].filter(n => n >= 1 && n <= R.PLAN.totalWeeks).map(n => ({ group:'Hafta', label:yz('ays.week.hafta-2')+n+' — '+R.Model.curriculumFor(n).title, icon:'week',
     run(){ R.S.ui.weekView = n; R.App.go('week'); } }));
 } });
 window.LIFEOS.PARCA.yazilar({
@@ -209,7 +251,7 @@ R.Screens.week = (function(){
           text:U.fmtMin(cap.planned)+' / '+U.fmtMin(cap.capacity),
           tone:over ? 'danger' : cap.pct > 95 ? 'warn' : '' })}</div>`)}
         ${when(over, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
-          body:'Planlanan süre kapasitenin %110’unu aşıyor. İmzadan önce blok azalt veya kapasiteyi gerçekçi yaz.' })}</div>`)}`,
+          body:yz('ays.week.planlanan-sure-kapasitenin-1') })}</div>`)}`,
       foot:K.Row(signed
         ? html`<span class="small muted">${U.fmtDate(week.signedAt.slice(0, 10))} ${yz('ays.week.tarihinde-imzalandi')}</span>
                <span class="grow"></span>
@@ -255,13 +297,13 @@ R.Screens.week = (function(){
     const topReason = Object.keys(reasons).sort((a, b) => reasons[b] - reasons[a])[0];
 
     const lines = [];
-    if(comp != null) lines.push(comp >= 85 ? 'Plan tamamlama hedefte.'
-      : comp >= 70 ? 'Plan tamamlama hedefin altında ama toparlanabilir.'
-      : 'Plan tamamlama düşük; hedef hacmi gerçekçi değil olabilir.');
-    if(acc != null && acc < 70) lines.push('Çözülen soruda doğruluk %'+acc+' — hız değil isabet sorunu.');
-    if(topReason) lines.push('En sık sapma nedeni: '+topReason+' ('+reasons[topReason]+' blok).');
-    if(time.target && time.pct < 70) lines.push('Planlanan sürenin %'+time.pct+'’i çalışıldı.');
-    if(!lines.length) lines.push('Bu hafta için kayda değer sapma yok.');
+    if(comp != null) lines.push(comp >= 85 ? yz('ays.week.plan-tamamlama-hedefte')
+      : comp >= 70 ? yz('ays.week.plan-tamamlama-hedefin-altin')
+      : yz('ays.week.plan-tamamlama-dusuk-hedef-h'));
+    if(acc != null && acc < 70) lines.push(yz('ays.week.cozulen-soruda-dogruluk')+acc+' — hız değil isabet sorunu.');
+    if(topReason) lines.push(yz('ays.week.en-sik-sapma-nedeni')+topReason+' ('+reasons[topReason]+' blok).');
+    if(time.target && time.pct < 70) lines.push(yz('ays.week.planlanan-surenin')+time.pct+'’i çalışıldı.');
+    if(!lines.length) lines.push(yz('ays.week.bu-hafta-icin-kayda-deger'));
 
     return K.Card({
       title:yz('ays.week.haftanin-ozeti'), hint:'review', sub:yz('ays.week.pazar-degerlendirmesi-30-40'),
@@ -285,7 +327,7 @@ R.Screens.week = (function(){
         <ul class="bullets small muted mt-10">${map(lines, l => html`<li>${l}</li>`)}</ul>
         ${reasonChips(reasons) || ''}
         ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:yz('ays.week.duzeltme'), body:rev.decision })}</div>`)}
-        ${K.Button({ label:rev ? 'Değerlendirmeyi güncelle' : 'Değerlendirmeyi doldur', block:true,
+        ${K.Button({ label:rev ? yz('ays.week.degerlendirmeyi-guncelle') : yz('ays.week.degerlendirmeyi-doldur'), block:true,
           class:'mt-12', act:'open-review' })}`,
     });
   }
@@ -301,8 +343,8 @@ R.Screens.week = (function(){
       input:K.Textarea({ id, rows:2, value, placeholder }) });
 
     const body = K.Stack([
-      K.Notice({ tone:'info', body:'Dört sütun doldurulur: planlandı / yapıldı / neden sapıldı / düzeltme. '
-        + 'Yeni haftaya yalnız en yüksek etkili iki eksik taşınır.' }),
+      K.Notice({ tone:'info', body:yz('ays.week.dort-sutun-doldurulur-planla')
+        + yz('ays.week.yeni-haftaya-yalniz-en-yukse') }),
       K.Cols(4, [
         K.Stat({ label:yz('ays.week.plan-2'), value:comp == null ? '—' : '%'+comp }),
         K.Stat({ label:yz('ays.week.soru'), value:qr && qr.pct != null ? '%'+qr.pct : '—' }),
@@ -310,10 +352,10 @@ R.Screens.week = (function(){
         K.Stat({ label:yz('ays.week.taban'), value:base == null ? '—' : U.fmtNet(base) }),
       ]),
       reasonChips(C.skipReasonCounts(n)),
-      area('Planlandı', 'rv-planned', rev.planned, 'Bu hafta ne planlanmıştı?'),
-      area('Yapıldı', 'rv-done', rev.done, 'Fiilen ne yapıldı?'),
-      area('Neden sapıldı', 'rv-why', rev.why, 'Kök neden — “vakit yoktu” değil, hangi blok hangi engelle düştü?'),
-      area('Düzeltme', 'rv-decision', rev.decision, 'Gelecek hafta ne değişecek? Tek somut değişiklik.'),
+      area('Planlandı', 'rv-planned', rev.planned, yz('ays.week.bu-hafta-ne-planlanmisti')),
+      area('Yapıldı', 'rv-done', rev.done, yz('ays.week.fiilen-ne-yapildi')),
+      area(yz('ays.week.neden-sapildi'), 'rv-why', rev.why, yz('ays.week.kok-neden-vakit-yoktu')),
+      area('Düzeltme', 'rv-decision', rev.decision, yz('ays.week.gelecek-hafta-ne-degisecek-t')),
       K.Field({ label:yz('ays.week.yeni-haftaya-tasinacak-en-fa'),
         input:K.Input({ id:'rv-carry', value:(rev.carry || []).join(', '),
           placeholder:yz('ays.week.or-ayt-fonksiyon-tekrari-ucg') }) }),
@@ -336,7 +378,7 @@ R.Screens.week = (function(){
     if(!day){
       UI.sheet({
         title:U.fmtDate(dateISO), subtitle:wd.label, noFocus:true,
-        body:String(K.Notice({ tone:'info', body:'Bu gün henüz açılmadı. Gün geldiğinde plan otomatik oluşturulur; '
+        body:String(K.Notice({ tone:'info', body:yz('ays.week.bu-gun-henuz-acilmadi-gun')
           + 'şimdiden açmak istersen aşağıdaki düğmeyi kullan.' })),
         footer:String(html`${K.Button({ label:yz('ays.week.kapat'), act:'sheet-close' })}
           ${K.Button({ label:yz('ays.week.gunu-olustur'), tone:'primary', act:'create-day', data:{ 'data-date':dateISO } })}`),
@@ -446,10 +488,10 @@ R.Screens.week = (function(){
   }
 
   function istisnaSheet(tur, p, pv){
-    const baslik = { ara:'Ara ver', sure:'Geçici günlük süre', gunluk:'Günlük çalışma süresi' }[tur];
-    const alt = { ara:'Seçtiğin günlerde plan boş kalır; ara bitince kaldığı yerden sürer.',
-      sure:'Ders günlerinin süresi yalnız bu tarihlerde değişir; sonra temel plana döner.',
-      gunluk:'Kalıcı değişiklik: kapasite ve plan bu haftadan itibaren yeniden dağıtılır.' }[tur];
+    const baslik = { ara:yz('ays.week.ara-ver'), sure:yz('ays.week.gecici-gunluk-sure'), gunluk:yz('ays.week.gunluk-calisma-suresi') }[tur];
+    const alt = { ara:yz('ays.week.sectigin-gunlerde-plan-bos-k'),
+      sure:yz('ays.week.ders-gunlerinin-suresi-yalni'),
+      gunluk:yz('ays.week.kalici-degisiklik-kapasite-v') }[tur];
     UI.sheet({ title:baslik, subtitle:alt,
       body:String(html`${istisnaForm(tur, p || {})}
         ${when(pv && !pv.ok, () => html`<div class="mt-10">${K.Notice({ tone:'warn', body:pv.why })}</div>`)}
@@ -481,7 +523,7 @@ R.Screens.week = (function(){
     if(R.Istisna) for(let h = 1; h <= R.PLAN.totalWeeks; h++){
       if(M.weekDates(h).every(d => { const x = R.Istisna.gunIcin(U.iso(d)); return x && x.tur === 'ara'; })) ara.push(h);
     }
-    return kutu('Sınava kadar', 'planlı', VT().haftaCizgisi({ hafta:n, toplam:R.PLAN.totalWeeks, ara }));
+    return kutu(yz('ays.week.sinava-kadar'), 'planlı', VT().haftaCizgisi({ hafta:n, toplam:R.PLAN.totalWeeks, ara }));
   }
 
   /* 125 TAKVİMDE HAYALET ÖNERİ: bugüne blok ekleyen bekleyen öneri,
@@ -494,10 +536,10 @@ R.Screens.week = (function(){
     const gun = M.dayOf(U.todayISO());
     const bloklar = ((gun && gun.blocks) || []).filter(b => b.slot !== 'Dinlenme');
     const konu = (() => { try{ const s = R.SUBJECTS.find(x => x.id === p.params.subjectId);
-      const t = s && (s.topics || []).find(x => x.id === p.params.topicId); return t ? t.name : s ? s.name : 'Ek blok'; }catch(e){ return 'Ek blok'; } })();
+      const t = s && (s.topics || []).find(x => x.id === p.params.topicId); return t ? t.name : s ? s.name : yz('ays.week.ek-blok'); }catch(e){ return yz('ays.week.ek-blok'); } })();
     const satirlar = bloklar.map((b, i) => ({ saat:String(i + 1), ad:b.topic || b.subject || b.slot, modul:'ays' }))
       .concat([{ saat:String(bloklar.length + 1), ad:konu + ' · ' + (Number(p.params.minutes) || '—') + ' dk', hayalet:true }]);
-    return kutu('Bugüne önerilen blok', 'öneri', VT().hayaletOneri({ satirlar, act:'office-approve', data:{ 'data-id':p.id } }));
+    return kutu(yz('ays.week.bugune-onerilen-blok'), 'öneri', VT().hayaletOneri({ satirlar, act:'office-approve', data:{ 'data-id':p.id } }));
   }
 
   /* 052 PLAN IZGARASI: yedi gün × günün blokları. Bloklara saat yazılmaz;
@@ -522,7 +564,7 @@ R.Screens.week = (function(){
     });
     if(!bloklar.length) return '';
     const yuvalar = Array.from({ length:enCok }, (_, i) => (i + 1) + '. blok');
-    return kutu('Plan ızgarası', 'planlı', VT().planIzgarasi({ gunler:tarihler.map(iso => R.WEEKDAYS[U.weekdayIndex(iso)].short),
+    return kutu(yz('ays.week.plan-izgarasi'), 'planlı', VT().planIzgarasi({ gunler:tarihler.map(iso => R.WEEKDAYS[U.weekdayIndex(iso)].short),
       bugun:tarihler.indexOf(bugun) >= 0 ? tarihler.indexOf(bugun) : null, yuvalar, bloklar }));
   }
 
@@ -550,8 +592,8 @@ R.Screens.week = (function(){
     let en = 0;
     harfler.forEach((h, i) => { if(Math.abs(G[i].pay - P[i].pay) > Math.abs(G[en].pay - P[en].pay)) en = i; });
     const fark = Math.round(G[en].pay - P[en].pay);
-    const not = fark === 0 ? 'Dağılım plana uyuyor' : AILE_AD[harfler[en]] + ' planın ' + (fark > 0 ? 'üstünde' : 'altında');
-    return kutu('Ders dengesi', 'hesaplandı', VT().dersDengesi({ baslik:yz('ays.week.haftalik-ders-dengesi-dakika'), plan:P, gercek:G, not, fark })
+    const not = fark === 0 ? yz('ays.week.dagilim-plana-uyuyor') : AILE_AD[harfler[en]] + ' planın ' + (fark > 0 ? 'üstünde' : 'altında');
+    return kutu(yz('ays.week.ders-dengesi'), 'hesaplandı', VT().dersDengesi({ baslik:yz('ays.week.haftalik-ders-dengesi-dakika'), plan:P, gercek:G, not, fark })
       + VT().dersIsaretleri({ dersler:harfler.map(h => ({ harf:h, ad:AILE_AD[h] })) }));
   }
 
@@ -691,7 +733,7 @@ R.Screens.week = (function(){
          bekler; kullanici onizlemeyi gorup «Uygula»ya bastigi icin burada
          onaylanir. */
       const t = await R.Proposals.talep({ action:ISTISNA_EYLEM[tur], agent:'patron',
-        source:'istek', params:p, reason:'Hafta ekranından.' });
+        source:'istek', params:p, reason:yz('ays.week.hafta-ekranindan') });
       let ok = false, why = t.why;
       if(t.row){
         const r = t.otomatik ? { ok:true } : await R.Proposals.approve(t.row.id);
@@ -700,7 +742,7 @@ R.Screens.week = (function(){
       }
       istisnaTaslak = null;
       UI.closeSheet();
-      UI.toast(ok ? 'Plan güncellendi · ofiste geri alınabilir' : (why || 'Uygulanamadı'));
+      UI.toast(ok ? yz('ays.week.plan-guncellendi-ofiste-geri') : (why || 'Uygulanamadı'));
       R.App.render();
     },
     'istisna-bitir'(el){
@@ -708,14 +750,14 @@ R.Screens.week = (function(){
       const x = R.Istisna.liste().find(i => i.id === id);
       if(!x) return;
       const basladi = x.from <= U.todayISO();
-      UI.confirmSheet(basladi ? 'İstisnayı bugün bitir' : 'İstisnayı kaldır',
-        basladi ? 'Bugün ve sonraki günler temel plana göre yeniden kurulur. Geçmiş günler olduğu gibi kalır.'
-          : 'Bu istisna hiç uygulanmamış gibi kalkar.',
+      UI.confirmSheet(basladi ? yz('ays.week.i-stisnayi-bugun-bitir') : yz('ays.week.i-stisnayi-kaldir'),
+        basladi ? yz('ays.week.bugun-ve-sonraki-gunler-teme')
+          : yz('ays.week.bu-istisna-hic-uygulanmamis'),
         async () => {
           const r = await R.Istisna.bitir(id);
-          UI.toast(r.ok ? 'Plan temel düzenine döndü' : r.why);
+          UI.toast(r.ok ? yz('ays.week.plan-temel-duzenine-dondu') : r.why);
           R.App.render();
-        }, false, basladi ? 'İstisnayı bugün bitir' : 'İstisnayı kaldır');
+        }, false, basladi ? yz('ays.week.i-stisnayi-bugun-bitir') : yz('ays.week.i-stisnayi-kaldir'));
     },
     async 'week-nav'(el){
       S.ui.weekView = U.clamp(Number(el.dataset.n), 1, R.PLAN.totalWeeks);
@@ -734,7 +776,7 @@ R.Screens.week = (function(){
       UI.sheet({
         title:yz('ays.week.sozlesmeyi-revize-et'),
         body:String(html`
-          ${K.Notice({ tone:'info', body:'İmzalı bir hafta değiştirildiğinde neden kaydedilir; '
+          ${K.Notice({ tone:'info', body:yz('ays.week.i-mzali-bir-hafta-degistiril')
             + 'bu, sonraki değerlendirmede sapma analizini mümkün kılar.' })}
           ${K.Field({ label:yz('ays.week.revizyon-nedeni'), input:K.Textarea({ id:'rev-reason', rows:2,
             placeholder:yz('ays.week.or-hastalik-nedeniyle-soru-h') }) })}`),
@@ -745,7 +787,7 @@ R.Screens.week = (function(){
     async 'week-revise-save'(el){
       const n = Number(el.dataset.n);
       const week = weekOf(n);
-      const reason = document.getElementById('rev-reason').value.trim() || 'Neden belirtilmedi';
+      const reason = document.getElementById('rev-reason').value.trim() || yz('ays.week.neden-belirtilmedi');
       week.revisions = (week.revisions || []).concat([{ at:new Date().toISOString(), reason }]);
       week.signedAt = null;
       await M.saveWeek(n);
@@ -852,7 +894,7 @@ R.Screens.week = (function(){
     get kucukVarsayilan(){ return kucukler(); },
     subtitle(){
       const n = viewN();
-      return 'Hafta '+n+'/'+R.PLAN.totalWeeks+' · '+U.fmtRange(M.weekStart(n), M.weekEnd(n));
+      return yz('ays.week.hafta-2')+n+'/'+R.PLAN.totalWeeks+' · '+U.fmtRange(M.weekStart(n), M.weekEnd(n));
     },
     /* Değerlendirme düğmesi kartın içinde («Değerlendirmeyi doldur»);
        sayfa başı sade kalır. */

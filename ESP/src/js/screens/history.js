@@ -9,6 +9,29 @@
    Boş bir kronoloji «%0 kapsam» diye çizilmez: ölçülmemiş bir şeyi ölçülmüş
    gibi göstermek, bu depodaki en pahalı hatanın ta kendisi. Boşken ekran
    yalnızca tohumu önerir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.history.bos':'Boş: ',
+  'esp.history.butun-donemlerde-olay-var':'Bütün dönemlerde olay var.',
+  'esp.history.butun-alanlarda-olay-var':'Bütün alanlarda olay var.',
+  'esp.history.butun-bolgelerde-olay-var':'Bütün bölgelerde olay var.',
+  'esp.history.mo-icin-eksi-yaz-753':'MÖ için eksi yaz: -753',
+  'esp.history.yalniz-son':'Yalnız son ',
+  'esp.history.tumu':'Tümü · ',
+  'esp.history.kart-hatirlama-henuz-olculem':'Kart hatırlama henüz ölçülemedi: taban için ',
+  'esp.history.ne-yapar':'Ne yapar',
+  'esp.history.neye-bakar':'Neye bakar',
+  'esp.history.ne-yapilir':'Ne yapılır',
+  'esp.history.sesli-not-kaydedildi':'Sesli not kaydedildi',
+  'esp.history.sesli-not-temizlendi':'Sesli not temizlendi',
+  'esp.history.olay-silinsin-mi':'Olay silinsin mi?',
+  'esp.history.olayi-ve':'Olayı ve ',
+  'esp.history.olayi-sil':'Olayı sil',
+  'esp.history.kartlar-zaten-vardi':'Kartlar zaten vardı',
+  'esp.history.zaman-seridi-bos':'Zaman şeridi boş.',
+  'esp.history.kac-olay-bildigin-degil-kaci':'Kaç olay bildiğin değil, kaçını kaynağıyla açıklayabildiğin sayılır. ',
+  'esp.history.kronoloji-iskelet-zincir-ve':'Kronoloji iskelet, zincir ve kaynak ettir.',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -273,11 +296,11 @@ ESP.Screens.history = (function(){
     const girdiler = [{ ad:yz('esp.history.olay'), deger:st.events, birim:'olay', kesinlik:'measured' }];
     const oran = (o, ad) => sayi({ deger:o.covered + '/' + o.total, kesinlik:'computed',
       formul:'olayı olan ' + ad + ' / ' + ad, girdiler, zaman:U.todayISO() });
-    const bos = (o, tam) => o.empty.length ? 'Boş: ' + o.empty.join(', ') + '.' : tam;
+    const bos = (o, tam) => o.empty.length ? yz('esp.history.bos') + o.empty.join(', ') + '.' : tam;
     return raw(V.donen({ id:'esp-kapsam', ad:yz('esp.history.kapsam'), maddeler:[
-      { ust:yz('esp.history.donem'), sayi:oran(st.eras, 'dönem'), cumle:yz('esp.history.donem-kapsandi'), vurgu:bos(st.eras, 'Bütün dönemlerde olay var.'), sistem:'esp' },
-      { ust:yz('esp.history.alan'), sayi:oran(st.kinds, 'alan'), cumle:'alan.', vurgu:bos(st.kinds, 'Bütün alanlarda olay var.'), sistem:'esp' },
-      { ust:yz('esp.history.bolge'), sayi:oran(st.regions, 'bölge'), cumle:yz('esp.history.bolge-2'), vurgu:bos(st.regions, 'Bütün bölgelerde olay var.'), sistem:'esp' },
+      { ust:yz('esp.history.donem'), sayi:oran(st.eras, 'dönem'), cumle:yz('esp.history.donem-kapsandi'), vurgu:bos(st.eras, yz('esp.history.butun-donemlerde-olay-var')), sistem:'esp' },
+      { ust:yz('esp.history.alan'), sayi:oran(st.kinds, 'alan'), cumle:'alan.', vurgu:bos(st.kinds, yz('esp.history.butun-alanlarda-olay-var')), sistem:'esp' },
+      { ust:yz('esp.history.bolge'), sayi:oran(st.regions, 'bölge'), cumle:yz('esp.history.bolge-2'), vurgu:bos(st.regions, yz('esp.history.butun-bolgelerde-olay-var')), sistem:'esp' },
       st.gaps.length
         ? { ust:yz('esp.history.yuzyil-boslugu'), sayi:sayi({ deger:st.gaps.length, birim:'boşluk', kesinlik:'computed',
               formul:'üst üste üç yüzyıldan uzun boş aralık', girdiler, zaman:U.todayISO() }),
@@ -327,7 +350,7 @@ ESP.Screens.history = (function(){
           ${K.Field({ label:yz('esp.history.olay'),
             input:K.Input({ id:'ev-title', placeholder:yz('esp.history.malazgirt-savasi'),
               aria:yz('esp.history.olayin-adi') }) })}
-          ${K.Field({ label:yz('esp.history.yil'), hint:'MÖ için eksi yaz: -753',
+          ${K.Field({ label:yz('esp.history.yil'), hint:yz('esp.history.mo-icin-eksi-yaz-753'),
             input:K.Input({ id:'ev-year', type:'number', numeric:true,
               placeholder:'1071', aria:yz('esp.history.olayin-yili') }) })}
         </div>
@@ -376,7 +399,7 @@ ESP.Screens.history = (function(){
                   tone:a.state === 'balanced' ? 'ok' : (a.state === 'thin' ? 'warn' : 'muted') })}
                 ${when(e.voiceNote, () => K.Button({ label:yz('esp.history.dinle'), size:'sm', act:'listen-voice-note',
                   data:{ 'data-id':e.id } }))}
-                ${K.Button({ label:e.voiceNote ? 'Düzenle' : 'Sesli Not', size:'sm', act:'edit-voice-note',
+                ${K.Button({ label:e.voiceNote ? 'Düzenle' : yz('esp.history.sesli-not-3'), size:'sm', act:'edit-voice-note',
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:yz('esp.history.eszamanli'), size:'sm', act:'contemp',
                   data:{ 'data-id':e.id } })}
@@ -392,7 +415,7 @@ ESP.Screens.history = (function(){
           </div>`;
       })}
       ${when(!suzgec && list.length > ILK_OLAY, () => K.Button({ size:'sm', tone:'ghost', act:'olay-tumu', class:'mt-8',
-        label:S.ui.olayTumu ? 'Yalnız son ' + ILK_OLAY : 'Tümü · ' + list.length + ' olay' }))}`,
+        label:S.ui.olayTumu ? yz('esp.history.yalniz-son') + ILK_OLAY : yz('esp.history.tumu') + list.length + ' olay' }))}`,
     }));
 
     return rows;
@@ -604,7 +627,7 @@ ESP.Screens.history = (function(){
       meta:due.length ? due.length + ' kartın sırası geldi' : 'vadesi gelen yok',
       body:html`
         ${r.cert === 'missing'
-          ? K.Notice({ tone:'info', body:'Kart hatırlama henüz ölçülemedi: taban için '
+          ? K.Notice({ tone:'info', body:yz('esp.history.kart-hatirlama-henuz-olculem')
               + 'en az ' + ESP.Planner.RETENTION_MIN_CARDS + ' cevaplanmış kart gerekir.' })
           : K.Meter({ label:yz('esp.history.kart-hatirlama'), value:Math.round(r.value * 100),
               text:'%' + Math.round(r.value * 100),
@@ -617,7 +640,7 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:yz('esp.history.anakronizm-tuzaklari'), hint:'anachronism',
       meta:ESP.ANACHRONISMS.length + ' tuzak',
-      body:K.Table({ tight:true, headers:['Tuzak', 'Ne yapar'],
+      body:K.Table({ tight:true, headers:['Tuzak', yz('esp.history.ne-yapar')],
         rows:ESP.ANACHRONISMS.map(a => [a.label, a.note]) }),
     }));
 
@@ -625,7 +648,7 @@ ESP.Screens.history = (function(){
       label:yz('esp.history.tarih-yazimi-okullari'), hint:'school',
       meta:ESP.HISTORIOGRAPHY.length + ' okul',
       wide:true,
-      body:K.Table({ tight:true, headers:['Okul', 'Neye bakar', 'Sorusu'],
+      body:K.Table({ tight:true, headers:['Okul', yz('esp.history.neye-bakar'), 'Sorusu'],
         rows:ESP.HISTORIOGRAPHY.map(h => [h.label, h.note, h.asks]) }),
     }));
 
@@ -634,7 +657,7 @@ ESP.Screens.history = (function(){
       meta:ESP.HISTORY_DRILLS.length + ' egzersiz',
       wide:true,
       body:K.Table({ tight:true,
-        headers:[{ label:yz('esp.history.kademe'), num:true }, 'Egzersiz', 'Ne yapılır'],
+        headers:[{ label:yz('esp.history.kademe'), num:true }, 'Egzersiz', yz('esp.history.ne-yapilir')],
         rows:ESP.HISTORY_DRILLS.slice().sort((a, b) => a.level - b.level)
           .map(d => [String(d.level), d.label, d.task]) }),
     }));
@@ -758,7 +781,7 @@ ESP.Screens.history = (function(){
       await M.saveEvent(Object.assign({}, e, { voiceNote:text }));
       ESP.Memo.bitir();
       ESP.UI.closeSheet();
-      ESP.UI.toast(text ? 'Sesli not kaydedildi' : 'Sesli not temizlendi');
+      ESP.UI.toast(text ? yz('esp.history.sesli-not-kaydedildi') : yz('esp.history.sesli-not-temizlendi'));
       ESP.App.render();
     },
 
@@ -803,13 +826,13 @@ ESP.Screens.history = (function(){
       const id = el.dataset.id;
       const e = eventOf(id);
       const zincir = chs().filter(c => c.eventId === id).length;
-      ESP.UI.confirmSheet('Olay silinsin mi?',
+      ESP.UI.confirmSheet(yz('esp.history.olay-silinsin-mi'),
         (e ? '«' + e.title + '» ' : '') + 've bu olaya bağlı neden zincirleri kalkar.',
         async () => {
           await M.deleteEvent(id);
           ESP.Memo.bitir();
           ESP.App.render();
-        }, true, zincir ? 'Olayı ve ' + zincir + ' zinciri sil' : 'Olayı sil');
+        }, true, zincir ? yz('esp.history.olayi-ve') + zincir + ' zinciri sil' : yz('esp.history.olayi-sil'));
     },
 
     async 'contemp'(el){
@@ -832,7 +855,7 @@ ESP.Screens.history = (function(){
         eklenen++;
       }
       ESP.Memo.bitir();
-      ESP.UI.toast(eklenen ? eklenen + ' kart eklendi' : 'Kartlar zaten vardı');
+      ESP.UI.toast(eklenen ? eklenen + ' kart eklendi' : yz('esp.history.kartlar-zaten-vardi'));
       ESP.App.render();
     },
 
@@ -944,15 +967,15 @@ ESP.Screens.history = (function(){
     title:yz('esp.history.kronoloji'),
     headline(){
       const st = ESP.Chrono.status();
-      if(st.cert === 'missing') return 'Zaman şeridi boş.';
+      if(st.cert === 'missing') return yz('esp.history.zaman-seridi-bos');
       if(st.chains.unbalanced) return st.chains.unbalanced + ' zincirde yapısal koşul yok.';
       if(!st.chains.total) return st.events + ' olay var, hiçbiri zincirle açıklanmamış.';
       if(st.kinds.empty.length) return st.kinds.empty.join(', ') + ' alanından olay yok.';
       return st.events + ' olay, ' + st.chains.total + ' zincir.';
     },
     lede(){
-      return 'Kaç olay bildiğin değil, kaçını kaynağıyla açıklayabildiğin sayılır. '
-           + 'Kronoloji iskelet, zincir ve kaynak ettir.';
+      return yz('esp.history.kac-olay-bildigin-degil-kaci')
+           + yz('esp.history.kronoloji-iskelet-zincir-ve');
     },
     stats(){
       const st = ESP.Chrono.status();

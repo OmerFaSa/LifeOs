@@ -7,6 +7,39 @@
 
    Ekranın etik kuralı görünürdür: tahmin fiyatı her yerde «tahmin» rozetiyle
    durur ve hesabın yüzde kaçının tahmine dayandığı yazılır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.basket.bu-hesabin':'Bu hesabın %',
+  'spi.basket.uygulama-market-taramaz-gerc':'Uygulama market taramaz; gerçeğe yaklaşmak için kendi fişindeki fiyatı gir.',
+  'spi.basket.sepet-bos':'Sepet boş.',
+  'spi.basket.karsilanmayan-oge':'Karşılanmayan öğe',
+  'spi.basket.sepetteki-gidalar-hanenin-ha':'Sepetteki gıdalar hanenin haftalık besin hedeflerini karşılıyor.',
+  'spi.basket.sepetteki-kalemler-icin-tani':'Sepetteki kalemler için tanımlı bir ikame yok. ',
+  'spi.basket.somon-badem-ceviz-dana-eti':'Somon, badem, ceviz, dana eti ve süzme yoğurt gibi kalemlerde öneri çıkar.',
+  'spi.basket.bu-tablo-butce-ile-saglik':'Bu tablo bütçe ile sağlık hedefini aynı yerde buluşturur: ',
+  'spi.basket.cizgi-aylik-sinir':'Çizgi = aylık sınır · aşım yalnız çizgide',
+  'spi.basket.talep-sinirin':'Talep sınırın ',
+  'spi.basket.siralama-geregi-once-guvenli':'Sıralama gereği önce güvenlik ve tahlil korunur; kısıntı ',
+  'spi.basket.talep-aylik-sinirin-icinde':'Talep aylık sınırın içinde.',
+  'spi.basket.bu-uc-sayi-yalniz-bu':'Bu üç sayı yalnız bu cihazda tutulur ve ',
+  'spi.basket.fis-okumak-icin-hkm':'Fiş okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için görüntü okuyan bir model ',
+  'spi.basket.fisi-buraya-birak-ya-da':'Fişi buraya bırak ya da seçmek için tıkla',
+  'spi.basket.okunan-fiyat-kilogram-basina':'Okunan fiyat kilogram başınadır. Fişte toplam ',
+  'spi.basket.son-gunlerde-yedigin-her-sey':'Son günlerde yediğin her şey sepette yeterli miktarda var.',
+  'spi.basket.secilenlerin-tutari':'Seçilenlerin tutarı ',
+  'spi.basket.bu-bolum-su-an-cizilemedi':'Bu bölüm şu an çizilemedi; verin yerinde duruyor.',
+  'spi.basket.fis-okunuyor':'Fiş okunuyor',
+  'spi.basket.sepete-eklendi':'Sepete eklendi',
+  'spi.basket.sepetten-cikarildi':'Sepetten çıkarıldı',
+  'spi.basket.sinir-asildiginda-sistem-sag':'Sınır aşıldığında sistem sağlık hedefini indirmez; ',
+  'spi.basket.fiyat-kaldirildi':'Fiyat kaldırıldı',
+  'spi.basket.fiyat-kaydedildi-olculdu':'Fiyat kaydedildi · ölçüldü',
+  'spi.basket.butce-icin-henuz-veri-yok':'Bütçe için henüz veri yok.',
+  'spi.basket.talep-aylik-sinirin-ustunde':'Talep aylık sınırın üstünde.',
+  'spi.basket.aylik-talep':'Aylık talep ',
+  'spi.basket.butce-tek-basina-uretilmez-n':'Bütçe tek başına üretilmez: Nesrin gıdayı, Kerem testi, ',
+  'spi.basket.baris-ekipmani-ister-sedef-t':'Barış ekipmanı ister; Sedef toplar.',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -147,8 +180,8 @@ SP.Screens.basket = (function(){
             text:U.fmtNum(Math.round(b.total)) + ' / ' + U.fmtNum(b.limit) + ' TL',
             tone:b.over ? 'danger' : '' })}</div>`)}
         ${when(b.estimate.pct >= 50 && b.rows.length, () => K.Notice({ tone:'warn', class:'mt-12',
-          body:'Bu hesabın %' + b.estimate.pct + '\'i başlangıç tahminiyle yapıldı. '
-            + 'Uygulama market taramaz; gerçeğe yaklaşmak için kendi fişindeki fiyatı gir.' }))}`,
+          body:yz('spi.basket.bu-hesabin') + b.estimate.pct + '\'i başlangıç tahminiyle yapıldı. '
+            + yz('spi.basket.uygulama-market-taramaz-gerc') }))}`,
       foot:html`${K.Button({ label:yz('spi.basket.kalem-ekle'), size:'sm', act:'open-add' })}
         ${K.Button({ label:yz('spi.basket.ogunlerimden-liste'), size:'sm', act:'open-ogun-liste' })}
         ${K.Button({ label:yz('spi.basket.haftalik-sinir'), size:'sm', act:'open-limit' })}`,
@@ -159,7 +192,7 @@ SP.Screens.basket = (function(){
     const b = SP.Money.basketTotal();
     if(!b.rows.length){
       return K.Card({ title:yz('spi.basket.kalemler'),
-        body:P.empty('Sepet boş.', 'Kalem ekle', 'open-add', null, true) });
+        body:P.empty(yz('spi.basket.sepet-bos'), yz('spi.basket.kalem-ekle'), 'open-add', null, true) });
     }
     return K.Card({
       title:yz('spi.basket.kalemler'), sub:yz('spi.basket.maliyete-gore-sirali'),
@@ -195,14 +228,14 @@ SP.Screens.basket = (function(){
           ${map(macro, m => P.nutCell({ label:m.label, got:m.o.got, target:m.o.need, unit:m.unit }))}
         </div>
         ${when(c.gaps.length, () => html`<div class="mt-12">
-          ${K.Table({ tight:true, headers:['Karşılanmayan öğe', { label:yz('spi.basket.kapsama'), num:true }, ''],
+          ${K.Table({ tight:true, headers:[yz('spi.basket.karsilanmayan-oge'), { label:yz('spi.basket.kapsama'), num:true }, ''],
             rows:c.gaps.map(id => [
               SP.NUTRI_BY_ID[id] ? SP.NUTRI_BY_ID[id].name : id,
               '%' + c.micro[id].pct,
               K.Button({ label:yz('spi.basket.en-ucuz-kaynak'), size:'sm', act:'open-cheap', data:{ 'data-id':id } }),
             ]) })}</div>`)}
         ${when(!c.gaps.length, () => K.Notice({ tone:'ok', class:'mt-10',
-          body:'Sepetteki gıdalar hanenin haftalık besin hedeflerini karşılıyor.' }))}`,
+          body:yz('spi.basket.sepetteki-gidalar-hanenin-ha') }))}`,
     });
   }
 
@@ -212,8 +245,8 @@ SP.Screens.basket = (function(){
     const rows = SP.Money.swapOpportunities();
     if(!rows.length){
       return K.Card({ title:yz('spi.basket.i-kame-firsatlari'), hint:'substitute',
-        body:K.Notice({ tone:'info', body:'Sepetteki kalemler için tanımlı bir ikame yok. '
-          + 'Somon, badem, ceviz, dana eti ve süzme yoğurt gibi kalemlerde öneri çıkar.' }) });
+        body:K.Notice({ tone:'info', body:yz('spi.basket.sepetteki-kalemler-icin-tani')
+          + yz('spi.basket.somon-badem-ceviz-dana-eti') }) });
     }
     return K.Card({
       title:yz('spi.basket.i-kame-firsatlari'), hint:'substitute',
@@ -338,7 +371,7 @@ SP.Screens.basket = (function(){
           rows:rows.map(r => [r.food.name, U.fmtNet(r.tlPerUnit) + ' TL',
             U.fmtNum(U.round(r.per100, 2)) + ' ' + n.unit,
             html`${U.fmtNum(r.price.tl)} TL/kg ${P.cert(r.cert)}`]) }),
-        K.Notice({ tone:'info', body:'Bu tablo bütçe ile sağlık hedefini aynı yerde buluşturur: '
+        K.Notice({ tone:'info', body:yz('spi.basket.bu-tablo-butce-ile-saglik')
           + 'hedefi indirmeden, aynı öğeyi daha ucuz taşıyan gıdayı gösterir.' }),
       ])),
       footer:String(K.Button({ label:yz('spi.basket.kapat'), act:'sheet-close' })),
@@ -359,7 +392,7 @@ SP.Screens.basket = (function(){
     const V = (window.LIFEOS || {}).VITRIN;
     if(!V || b.limit == null) return '';
     const ic = V.harcamaSeritleri({ limit:b.limit, satirlar:b.rows.map(r => ({ ad:r.label, tutar:r.monthly })),
-      not:'Çizgi = aylık sınır · aşım yalnız çizgide' });
+      not:yz('spi.basket.cizgi-aylik-sinir') });
     return ic ? K.Kutu({ ad:yz('spi.basket.harcama-seritleri'), yuva:'aylık', class:'vkutu', govde:raw(ic) }) : '';
   }
 
@@ -416,10 +449,10 @@ SP.Screens.basket = (function(){
                 tone:b.over ? 'danger' : '' })}
                 ${K.Notice({ tone:b.over ? 'warn' : 'ok', class:'mt-12',
                   body:b.over
-                    ? 'Talep sınırın ' + U.fmtNum(b.total - b.limit) + ' TL üstünde. '
-                      + 'Sıralama gereği önce güvenlik ve tahlil korunur; kısıntı '
+                    ? yz('spi.basket.talep-sinirin') + U.fmtNum(b.total - b.limit) + ' TL üstünde. '
+                      + yz('spi.basket.siralama-geregi-once-guvenli')
                       + 'gıda kaleminde ikame ile yapılır.'
-                    : 'Talep aylık sınırın içinde.' })}` }))}
+                    : yz('spi.basket.talep-aylik-sinirin-icinde') })}` }))}
           </div></div>
 
           <div class="span-5"><div class="stack">
@@ -460,7 +493,7 @@ SP.Screens.basket = (function(){
           hint:'ölçüm borcu olan panellerin maliyeti bundan hesaplanır',
           input:K.Input({ id:'lim-test', type:'number', numeric:true, step:'any',
             value:bk.testFee == null ? '' : bk.testFee }) }),
-        K.Notice({ tone:'info', body:'Bu üç sayı yalnız bu cihazda tutulur ve '
+        K.Notice({ tone:'info', body:yz('spi.basket.bu-uc-sayi-yalniz-bu')
           + 'hiçbir modele gönderilmez.' }),
       ])),
       footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
@@ -484,13 +517,13 @@ SP.Screens.basket = (function(){
       body:String(K.Stack([
         when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
           title:yz('spi.basket.model-bagli-degil'),
-          body:'Fiş okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için görüntü okuyan bir model '
+          body:yz('spi.basket.fis-okumak-icin-hkm')
             + 'ata. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
         K.Drop({ act:'receipt-file', label:yz('spi.basket.fis-fotografi-ya-da-metni'), kamera:{},
           icon:'file', accept:'image/*,.txt,.csv',
-          hint:'Fişi buraya bırak ya da seçmek için tıkla' }),
+          hint:yz('spi.basket.fisi-buraya-birak-ya-da') }),
         html`<div id="receipt-name" class="small dim">${receiptFile ? receiptFile.name : ''}</div>`,
-        K.Notice({ tone:'info', body:'Okunan fiyat kilogram başınadır. Fişte toplam '
+        K.Notice({ tone:'info', body:yz('spi.basket.okunan-fiyat-kilogram-basina')
           + 'fiyat ve ağırlık varsa kilogram fiyatı hesaplanır.' }),
       ])),
       footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
@@ -557,9 +590,9 @@ SP.Screens.basket = (function(){
               : U.fmtNum(Math.round(r.cost)) + ' TL · ' + SP.CERTAINTY[r.price.cert].label}</span>
           </div>`)}</div>`),
         when(!l.satirlar.length, () => K.Notice({ tone:'ok',
-          body:'Son günlerde yediğin her şey sepette yeterli miktarda var.' })),
+          body:yz('spi.basket.son-gunlerde-yedigin-her-sey') })),
         when(l.satirlar.length, () => K.Notice({ tone:'info',
-          body:'Seçilenlerin tutarı ' + U.fmtNum(Math.round(tl)) + ' TL'
+          body:yz('spi.basket.secilenlerin-tutari') + U.fmtNum(Math.round(tl)) + ' TL'
             + (l.fiyatsiz ? ' (' + l.fiyatsiz + ' kalemin fiyatı yok, tutara girmedi)' : '') + '.' })),
         when(l.yeterli, () => html`<p class="tiny dim">${l.yeterli} ${yz('spi.basket.kalem-sepette-zaten-yeterli')}</p>`),
         when(l.bilinmeyen, () => html`<p class="tiny dim">${l.bilinmeyen} ${yz('spi.basket.ogun-kalemi-gida-listesinde')}</p>`),
@@ -598,7 +631,7 @@ SP.Screens.basket = (function(){
     try{ return BODIES[t.id](); }
     catch(e){
       console.error('Sepet bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('spi.basket.bu-bolum-su-an-cizilemedi') });
     }
   }
 
@@ -622,7 +655,7 @@ SP.Screens.basket = (function(){
     async 'open-receipt'(){ receiptFile = null; receiptRes = null; receiptSheet(); },
     async 'run-receipt'(){
       if(!receiptFile) return;
-      receiptRes = await UI.withBusy('Fiş okunuyor',
+      receiptRes = await UI.withBusy(yz('spi.basket.fis-okunuyor'),
         'fiyatlar «ölçüldü» olarak kaydedilecek',
         () => SP.Extract.fromReceipt(receiptFile));
       receiptPreviewSheet(receiptRes);
@@ -687,7 +720,7 @@ SP.Screens.basket = (function(){
       const kg = input ? Number(String(input.value).replace(',', '.')) : 0;
       await M.setBasketItem(el.dataset.id, kg);
       UI.closeSheet();
-      UI.toast(kg > 0 ? 'Sepete eklendi' : 'Sepetten çıkarıldı');
+      UI.toast(kg > 0 ? yz('spi.basket.sepete-eklendi') : yz('spi.basket.sepetten-cikarildi'));
       SP.App.render();
     },
     async 'del-item'(el){
@@ -704,7 +737,7 @@ SP.Screens.basket = (function(){
           K.Field({ label:yz('spi.basket.hanedeki-kisi-sayisi'),
             input:K.Input({ id:'limit-size', type:'number', numeric:true, step:'1', min:1,
               value:(S.prefs && S.prefs.householdSize) || 1 }) }),
-          K.Notice({ tone:'info', body:'Sınır aşıldığında sistem sağlık hedefini indirmez; '
+          K.Notice({ tone:'info', body:yz('spi.basket.sinir-asildiginda-sistem-sag')
             + 'ikame önerisi çıkarır. Bütçe öncelik sırasında en sonda gelir.' }),
         ])),
         footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
@@ -742,7 +775,7 @@ SP.Screens.basket = (function(){
     async 'set-price'(el){
       const v = String(el.value).trim();
       await M.setPrice(el.dataset.id, v === '' ? null : Number(v.replace(',', '.')));
-      UI.toast(v === '' ? 'Fiyat kaldırıldı' : 'Fiyat kaydedildi · ölçüldü');
+      UI.toast(v === '' ? yz('spi.basket.fiyat-kaldirildi') : yz('spi.basket.fiyat-kaydedildi-olculdu'));
       SP.App.render();
     },
     async 'price-query'(el){ S.ui.foodQuery = el.value; S.ui.foodPage = 1; SP.App.render(); },
@@ -758,16 +791,16 @@ SP.Screens.basket = (function(){
     title:yz('spi.basket.finans'),
     headline(){
       const b = SP.Money.budget();
-      if(!b.rows.filter(r => r.monthly).length) return 'Bütçe için henüz veri yok.';
-      if(b.over) return 'Talep aylık sınırın üstünde.';
-      if(b.limit != null) return 'Talep aylık sınırın içinde.';
-      return 'Aylık talep ' + U.fmtNum(b.total) + ' TL.';
+      if(!b.rows.filter(r => r.monthly).length) return yz('spi.basket.butce-icin-henuz-veri-yok');
+      if(b.over) return yz('spi.basket.talep-aylik-sinirin-ustunde');
+      if(b.limit != null) return yz('spi.basket.talep-aylik-sinirin-icinde');
+      return yz('spi.basket.aylik-talep') + U.fmtNum(b.total) + ' TL.';
     },
     lede(){
       const b = SP.Money.budget();
       const est = SP.Money.estimateShare();
-      const base = 'Bütçe tek başına üretilmez: Nesrin gıdayı, Kerem testi, '
-        + 'Barış ekipmanı ister; Sedef toplar.';
+      const base = yz('spi.basket.butce-tek-basina-uretilmez-n')
+        + yz('spi.basket.baris-ekipmani-ister-sedef-t');
       if(b.unknown) return base + ' Şu an ' + b.unknown + ' kalemin fiyatı bilinmiyor '
         + 've toplamın dışında duruyor — sıfır sayılmadı.';
       return base + (est.pct ? ' Hesabın %' + est.pct + '\u2019i tahmin fiyatıyla.' : '');

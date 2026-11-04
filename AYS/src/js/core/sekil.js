@@ -42,6 +42,10 @@
      ['pil',x,y,'y'|'d','ε']         üreteç (yatay ya da dikey kabloda; uzun levha +)
      ['mr', x,y,h,'ince'|'kalin']    mercek (dikey; ince kenarlı yakınsak, kalın kenarlı ıraksak)
    Bayraklar (b, isteğe bağlı yazı): k kesik, v vurgu, i ince, g gölge, f dolu. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.sekil.sekil-cizilemedi':'Şekil çizilemedi: ',
+});
+
 
 window.R = window.R || {};
 
@@ -227,7 +231,7 @@ R.Sekil = (function(){
   function svg(s){
     if(!s) return '';
     const kusur = denetle(s);
-    if(kusur.length) return '<p class="sekil sekil--kusur small dim">' + esc('Şekil çizilemedi: ' + String((s && s.alt) || kusur[0])) + '</p>';
+    if(kusur.length) return '<p class="sekil sekil--kusur small dim">' + esc(yz('ays.core.sekil.sekil-cizilemedi') + String((s && s.alt) || kusur[0])) + '</p>';
     const ic = s.o.map(o => OGE[o[0]](o)).join('');
     return '<figure class="sekil"><svg class="sekil__svg" viewBox="0 0 ' + sayi(s.w) + ' ' + sayi(s.h) + '" width="' + sayi(s.w * 1.4)
       + '" role="img" aria-label="' + esc(s.alt) + '" focusable="false">' + ic + '</svg></figure>';

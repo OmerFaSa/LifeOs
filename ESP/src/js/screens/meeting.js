@@ -7,6 +7,17 @@
    karar (Planner.nextAction). Model bağlıysa Patron yalnız bu incelemeyi
    özetler; sayıyı o üretmez. Takipteki kararlar ve eski toplantı
    tutanakları silinmez, altta durur. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.meeting.patron-ozetlesin':'Patron özetlesin',
+  'esp.meeting.bu-incelemeyi-kullaniciya-uc':'Bu incelemeyi kullanıcıya üç dört cümlede özetle: önce haftanın durumu, ',
+  'esp.meeting.bekleyen-bir-is-yok':'Bekleyen bir iş yok.',
+  'esp.meeting.karar':'Karar: ',
+  'esp.meeting.son-yedi-gunun-sayilari-kayi':'Son yedi günün sayıları, kayıttan karşılaştırmalar ve tek karar. ',
+  'esp.meeting.her-sayi-kayittan-gelir-az':'Her sayı kayıttan gelir; az veriden fikir açılmaz.',
+  'esp.meeting.gundem-3':'Gündem: ',
+  'esp.meeting.gundem-yok':'Gündem yok',
+});
+
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -108,7 +119,7 @@ ESP.Screens.meeting = (function(){
         ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">${yz('esp.meeting.patron-un-ozeti')} ${ozet.source === 'model' ? 'model' : 'kural motoru'}</span><p>${ozet.text}</p></div>`)}`,
       ayak:html`${when(!sakin && k.route, () => K.Button({ label:yz('esp.meeting.oraya-git'), size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
         ${when(!sakin, () => K.Button({ label:yz('esp.meeting.karari-takibe-al'), size:'sm', act:'inceleme-takip' }))}
-        ${when(ESP.Office.ready && ESP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : 'Patron özetlesin', size:'sm', tone:'ghost',
+        ${when(ESP.Office.ready && ESP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : yz('esp.meeting.patron-ozetlesin'), size:'sm', tone:'ghost',
           act:'inceleme-ozet', disabled:ozetleniyor }))}` });
   }
 
@@ -216,7 +227,7 @@ ESP.Screens.meeting = (function(){
           fikirler:r.fikirler.filter(f => f.acik).map(f => f.baslik + ': ' + f.metin),
           bulgular:r.bulgular.map(f => f.text),
           karar:r.karar.id === 'none' ? null : r.karar.title + ' — ' + r.karar.why } });
-        const res = await ESP.Office.ask('patron', 'Bu incelemeyi kullanıcıya üç dört cümlede özetle: önce haftanın durumu, '
+        const res = await ESP.Office.ask('patron', yz('esp.meeting.bu-incelemeyi-kullaniciya-uc')
           + 'sonra en anlamlı karşılaştırma, en sonda tek karar. Sayıları yalnız brifingden al; birlikteliği neden gibi sunma.',
           { brief:b, history:false, maxTokens:500 });
         S.ui.incelemeOzet = { tarih:r.tarih, text:res.text, source:res.source };
@@ -249,11 +260,11 @@ ESP.Screens.meeting = (function(){
     title:yz('esp.meeting.i-nceleme'),
     headline(){
       const k = ESP.Planner.nextAction();
-      return k.id === 'none' ? 'Bekleyen bir iş yok.' : 'Karar: ' + k.title.toLocaleLowerCase('tr-TR') + '.';
+      return k.id === 'none' ? yz('esp.meeting.bekleyen-bir-is-yok') : yz('esp.meeting.karar') + k.title.toLocaleLowerCase('tr-TR') + '.';
     },
     lede(){
-      return 'Son yedi günün sayıları, kayıttan karşılaştırmalar ve tek karar. '
-           + 'Her sayı kayıttan gelir; az veriden fikir açılmaz.';
+      return yz('esp.meeting.son-yedi-gunun-sayilari-kayi')
+           + yz('esp.meeting.her-sayi-kayittan-gelir-az');
     },
     stats(){
       const r = ESP.Inceleme.rapor();
@@ -265,7 +276,7 @@ ESP.Screens.meeting = (function(){
     },
     subtitle(){
       const a = ESP.Office.agendaCandidates()[0];
-      return a ? 'Gündem: ' + a.label : 'Gündem yok';
+      return a ? yz('esp.meeting.gundem-3') + a.label : yz('esp.meeting.gundem-yok');
     },
     actions(){ return ''; },
     render, handle, change,

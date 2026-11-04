@@ -24,6 +24,10 @@
       artan bir `sira` taşır; HKM aynı oturumda eskisini yok sayar (HKM
       core/goruntu.py, hafiza.js ile aynı kural). Sıra, hedefler ve tatil
       AYNI ANDA, ilk beklemeden önce alınır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.hedefag.bearer':'Bearer ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -79,7 +83,7 @@ LIFEOS.HedefAg = (function(){
         const f = k.f;
         const res = await f(k.url + yol, {
           method:govde === undefined ? 'GET' : 'POST',
-          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+          headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.hedefag.bearer') + k.token },
           body:govde === undefined ? undefined : JSON.stringify(govde),
           signal:ctrl ? ctrl.signal : undefined,
         });

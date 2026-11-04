@@ -11,6 +11,22 @@
    Sözler: saat uydurulmaz (tekgun.js söz 2); bayat plan çizilmez, söylenir;
    karnede «kayıt yok» (modül yayınladı, o gün iş yok) ile «veri yok» (modülden
    bilgi yok) ayrıdır; tarih yerel saatle. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.gunveri.on-dakika-yuru':'On dakika yürü',
+  'ortak.gunveri.bir-bardak-su-ic':'Bir bardak su iç',
+  'ortak.gunveri.pencereyi-ac-bes-derin-nefes':'Pencereyi aç, beş derin nefes',
+  'ortak.gunveri.masani-topla':'Masanı topla',
+  'ortak.gunveri.birine-iyi-bir-mesaj-yaz':'Birine iyi bir mesaj yaz',
+  'ortak.gunveri.yirmi-dakika-kitap-oku':'Yirmi dakika kitap oku',
+  'ortak.gunveri.yarim-saat-odakli-calis':'Yarım saat odaklı çalış',
+  'ortak.gunveri.kisa-bir-antrenman-yap':'Kısa bir antrenman yap',
+  'ortak.gunveri.sik-yaptigin-bir-kart':'Sık yaptığın bir kart',
+  'ortak.gunveri.bir-kez-daha-denemeye-deger':'Bir kez daha denemeye değer',
+  'ortak.gunveri.henuz-denemedigin-bir-kart':'Henüz denemediğin bir kart',
+  'ortak.gunveri.enerjin-dusuk-az-enerji-iste':'Enerjin düşük; az enerji isteyen bir kart',
+  'ortak.gunveri.enerjin-yuksek-hareketli-bir':'Enerjin yüksek; hareketli bir kart',
+});
+
 window.LIFEOS = window.LIFEOS || {};
 
 LIFEOS.GunVeri = (function(){
@@ -144,18 +160,18 @@ LIFEOS.GunVeri = (function(){
 
   /* «Ne yapsam?» destesi. Kural secer (rastgele degil): Laplace orani (evet+1)/(evet+gec+2);
      enerji 1-2 ise az enerjili kart 1,5 kat, cok enerjili yari; 4-5 ise tersi. Esitlikte destedeki sira. */
-  const BASLANGIC = [['On dakika yürü', 'az'], ['Bir bardak su iç', 'az'], ['Pencereyi aç, beş derin nefes', 'az'],
-    ['Masanı topla', 'az'], ['Birine iyi bir mesaj yaz', 'az'], ['Yirmi dakika kitap oku', null],
-    ['Yarım saat odaklı çalış', 'cok'], ['Kısa bir antrenman yap', 'cok']].map(([ad, enerji]) => ({ ad, enerji, evet:0, gec:0 }));
+  const BASLANGIC = [[yz('ortak.gunveri.on-dakika-yuru'), 'az'], [yz('ortak.gunveri.bir-bardak-su-ic'), 'az'], [yz('ortak.gunveri.pencereyi-ac-bes-derin-nefes'), 'az'],
+    [yz('ortak.gunveri.masani-topla'), 'az'], [yz('ortak.gunveri.birine-iyi-bir-mesaj-yaz'), 'az'], [yz('ortak.gunveri.yirmi-dakika-kitap-oku'), null],
+    [yz('ortak.gunveri.yarim-saat-odakli-calis'), 'cok'], [yz('ortak.gunveri.kisa-bir-antrenman-yap'), 'cok']].map(([ad, enerji]) => ({ ad, enerji, evet:0, gec:0 }));
   function kartCek(deste, enerji, haric){
     const h = haric || [];
     let en = null;
     (Array.isArray(deste) ? deste : []).forEach((k, i) => {
       if(!k || !k.ad || h.indexOf(k.ad) >= 0) return;
       const ev = k.evet || 0, ge = k.gec || 0;
-      let p = (ev + 1) / (ev + ge + 2), neden = ev ? 'Sık yaptığın bir kart' : ge ? 'Bir kez daha denemeye değer' : 'Henüz denemediğin bir kart';
-      if(enerji && enerji <= 2 && k.enerji){ p *= k.enerji === 'az' ? 1.5 : 0.5; if(k.enerji === 'az') neden = 'Enerjin düşük; az enerji isteyen bir kart'; }
-      if(enerji && enerji >= 4 && k.enerji){ p *= k.enerji === 'cok' ? 1.5 : 0.5; if(k.enerji === 'cok') neden = 'Enerjin yüksek; hareketli bir kart'; }
+      let p = (ev + 1) / (ev + ge + 2), neden = ev ? yz('ortak.gunveri.sik-yaptigin-bir-kart') : ge ? yz('ortak.gunveri.bir-kez-daha-denemeye-deger') : yz('ortak.gunveri.henuz-denemedigin-bir-kart');
+      if(enerji && enerji <= 2 && k.enerji){ p *= k.enerji === 'az' ? 1.5 : 0.5; if(k.enerji === 'az') neden = yz('ortak.gunveri.enerjin-dusuk-az-enerji-iste'); }
+      if(enerji && enerji >= 4 && k.enerji){ p *= k.enerji === 'cok' ? 1.5 : 0.5; if(k.enerji === 'cok') neden = yz('ortak.gunveri.enerjin-yuksek-hareketli-bir'); }
       if(!en || p > en.puan) en = { kart:k, sira:i, puan:Math.round(p * 1000) / 1000, neden };
     });
     return en;

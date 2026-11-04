@@ -5,6 +5,134 @@
    Parça 6/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.king-arac.oncelik-listesi-ays-de-ays-d':'Öncelik listesi AYS’de; AYS’de «neye çalışayım» diyebilirsin.',
+  'ortak.king-arac.henuz-oncelik-cikaracak-veri':'Henüz öncelik çıkaracak veri yok: deneme yanlışı ya da çözülmüş soru kaydı gerekiyor.',
+  'ortak.king-arac.su-konular-en-cok-puan':'Şu konular en çok puan kurtarır (sınavda çıkma sıklığı × senin hatan; AYS’nin hesabı):',
+  'ortak.king-arac.ogren-de-ac':'Öğren’de aç',
+  'ortak.king-arac.defter-bu-modulde-kurulu-deg':'Defter bu modülde kurulu değil; notlarına buradan bakamam.',
+  'ortak.king-arac.notlarinda-neyi-arayayim-orn':'Notlarında neyi arayayım? Örneğin «notlarımda türev».',
+  'ortak.king-arac.kaynak':'Kaynak: ',
+  'ortak.king-arac.basliksiz-not':'Başlıksız not',
+  'ortak.king-arac.notlarinda-bunlari-buldum':'Notlarında bunları buldum:',
+  'ortak.king-arac.merkez-cevap-vermedi-buldugu':'Merkez cevap vermedi; bulduğum notlar:',
+  'ortak.king-arac.bu-hafta-ne-iyi-gitti':'Bu hafta ne iyi gitti?',
+  'ortak.king-arac.ne-zorladi':'Ne zorladı?',
+  'ortak.king-arac.gelecek-haftanin-tek-hedefi':'Gelecek haftanın tek hedefi ne olsun?',
+  'ortak.king-arac.haftalik-rapor':'Haftalık rapor',
+  'ortak.king-arac.tamam-gozden-gecirmeyi-birak':'Tamam, gözden geçirmeyi bıraktım.',
+  'ortak.king-arac.haftalik-gozden-gecirme':'Haftalık gözden geçirme · ',
+  'ortak.king-arac.bu-modulde-yuk-gostergesi-yo':'Bu modülde yük göstergesi yok; AYS ve SPİ’de var.',
+  'ortak.king-arac.son-7-gun-onceki-7':'Son 7 gün, önceki 7 güne göre belirgin bir yük artışı görünmüyor.',
+  'ortak.king-arac.tamam-gunlugu-biraktim':'Tamam, günlüğü bıraktım.',
+  'ortak.king-arac.not-aldim-bugunku-hissin-1':'Not aldım. Bugünkü hissin 1 ile 5 arasında kaç? (5 çok iyi; istersen geç.)',
+  'ortak.king-arac.gunluk':'Günlük · ',
+  'ortak.king-arac.gunluge-yazdim-defter':'Günlüğe yazdım (Defter).',
+  'ortak.king-arac.gunlugu-kaydedemedim':'Günlüğü kaydedemedim.',
+  'ortak.king-arac.bu-modulde-deney-icin-olcu':'Bu modülde deney için ölçü yok.',
+  'ortak.king-arac.suren-bir-deney-var-once':'Süren bir deney var; önce «deneyi bitir» de.',
+  'ortak.king-arac.deney-2':'Deney: «',
+  'ortak.king-arac.basladi':'Başladı: ',
+  'ortak.king-arac.suren-bir-deney-yok-deney':'Süren bir deney yok. «deney başlat 23:00’te yatacağım» gibi başlatabilirsin.',
+  'ortak.king-arac.deney-bitti':'Deney bitti',
+  'ortak.king-arac.deney-suruyor':'Deney sürüyor (',
+  'ortak.king-arac.bu-bir-gozlem-tek-kisilik':'Bu bir gözlem; tek kişilik deney neden-sonuç kanıtı değildir.',
+  'ortak.king-arac.karsilastirma-icin-veri-yete':'Karşılaştırma için veri yetersiz (her dönemde en az ',
+  'ortak.king-arac.liste-bos-yapilacak-diye':'Liste boş. «yapılacak: …» diye ekle.',
+  'ortak.king-arac.lifeos-hatirlatma':'LifeOS · hatırlatma',
+  'ortak.king-arac.al':'Al',
+  'ortak.king-arac.tut':'Tut',
+  'ortak.king-arac.ver':'Ver',
+  'ortak.king-arac.4-al-4-tut':'4 al · 4 tut · 4 ver · 4 tut · dört tur, yaklaşık bir dakika',
+  'ortak.king-arac.listeye-ekledim':'Listeye ekledim.',
+  'ortak.king-arac.yapilacaklar':'Yapılacaklar · ',
+  'ortak.king-arac.tamam':'Tamam, ',
+  'ortak.king-arac.bekleyen-hatirlatma-yok':'Bekleyen hatırlatma yok.',
+  'ortak.king-arac.sectim':'Seçtim: ',
+  'ortak.king-arac.kutu-nefesi-daireyle-birlikt':'Kutu nefesi: daireyle birlikte nefes al, tut, ver, tut.',
+  'ortak.king-arac.zar':'Zar: ',
+  'ortak.king-arac.dogum-gunun-bugun-kutlu-olsu':'Doğum günün bugün, kutlu olsun!',
+  'ortak.king-arac.dogum-gunune':'Doğum gününe ',
+  'ortak.king-arac.cihazda-uretildi-hicbir-yere':'Cihazda üretildi, hiçbir yere gönderilmedi. Sohbette kalır; kullandıktan sonra sohbeti silebilirsin.',
+  'ortak.king-arac.kartlarim-a-ekledim':'Kartlarım’a ekledim: «',
+  'ortak.king-arac.bilgisayarda-baslat-menusund':'Bilgisayarda Başlat menüsündeki bir uygulamayı adıyla başlatır. Geri al zorlamadan kapatır.',
+  'ortak.king-arac.bilgisayarin-ekranindaki-met':'Bilgisayarın ekranındaki metni okur (Windows OCR). Hiçbir şeyi değiştirmez ama ekran içeriği King’e girer.',
+  'ortak.king-arac.telefona-telegram-mesaj-ya-d':'Telefona (Telegram) mesaj ya da sesli özet gönderir; 60 sn içinde geri alınırsa gitmez. ozet: true ise metin bugünün özetidir (sesli özet). sesli: ses dosyası olarak.',
+  'ortak.king-arac.dis-dunya-izinlerinden-birin':'Dış dünya izinlerinden birini açar ya da kapatır: dosya (dosya ve klasör açma), uygulama, ekran (ekran okuma), telefon. Her izin ayrıdır.',
+  'ortak.king-arac.selam-bugun-neye-bakalim':'Selam! Bugün neye bakalım?',
+  'ortak.king-arac.merhaba-size-nasil-yardimci':'Merhaba. Size nasıl yardımcı olabilirim?',
+  'ortak.king-arac.nasil-konussun':'Nasıl konuşsun',
+  'ortak.king-arac.ne-kadar-dusunsun':'Ne kadar düşünsün',
+  'ortak.king-arac.yaziyla-mi-sesle-mi':'Yazıyla mı, sesle mi',
+  'ortak.king-arac.hangi-ses-okusun':'Hangi ses okusun',
+  'ortak.king-arac.sesini-dene':'Sesini dene',
+  'ortak.king-arac.okuma-hizi':'Okuma hızı',
+  'ortak.king-arac.sesli-okurken':'Sesli okurken',
+  'ortak.king-arac.bu-modul':'Bu modül',
+  'ortak.king-arac.sayfasi':'Sayfası: ',
+  'ortak.king-arac.lifeos-ta-dort-bolum-var':'LifeOS’ta dört bölüm var; ',
+  'ortak.king-arac.king-le':'King’le ',
+  'ortak.king-arac.king-her-modulde':'King — her modülde: ',
+  'ortak.king-arac.gun-un-bugunku-kaydi-kullani':'Gün’ün bugünkü kaydı: kullanıcının yazdığı niyet, enerji (1–5) ve iç hava (Gün sayfasıyla aynı kayıt).',
+  'ortak.king-arac.gun-kaydi-hesap-sunucusunda':'Gün kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.',
+  'ortak.king-arac.bugun-icin-niyet-enerji-ya':'Bugün için niyet, enerji ya da iç hava girilmemiş. «bugünün niyeti: …» ya da «enerjim 4» yazabilirsin.',
+  'ortak.king-arac.bugun-senin-girdigin':'Bugün senin girdiğin: ',
+  'ortak.king-arac.gun-un-bugunku-kaydini-yazar':'Gün’ün bugünkü kaydını yazar: niyet (en çok 120 karakter), enerji (1–5), iç hava (gunes, parcali, bulut, yagmur, firtina). Verilmeyen alan değişmez.',
+  'ortak.king-arac.gun-kaydi-hesap-sunucusunda-2':'Gün kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış',
+  'ortak.king-arac.gun-sen-kaydini-okur':'Gün › Sen kaydını okur: kullanıcının kendine koyduğu ilke, onu besleyen ve yoran şeyler, destedeki kartlar (Gün sayfasıyla aynı kayıt).',
+  'ortak.king-arac.sen-kaydi-hesap-sunucusunda':'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.',
+  'ortak.king-arac.kendi-sozun':'Kendi sözün: «',
+  'ortak.king-arac.enerji-veren':'Enerji veren: ',
+  'ortak.king-arac.enerji-calan':'Enerji çalan: ',
+  'ortak.king-arac.destende':'Destende ',
+  'ortak.king-arac.sen-bolumu-bos-sozum':'Sen bölümü boş: «sözüm: …», «enerji veren: …» ya da «desteye ekle: …» yazabilirsin.',
+  'ortak.king-arac.gun-sen-kaydina-yazar':'Gün › Sen kaydına yazar: kendi söz (en çok 160 karakter), enerji veren ya da çalan bir şey (en çok 40, listede en çok 12), desteye kart (en çok 60, destede en çok 30; enerjisi az ya da cok). Var olanlar silinmez.',
+  'ortak.king-arac.sen-kaydi-hesap-sunucusunda-2':'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış',
+  'ortak.king-arac.deste-hesap-sunucusunda-bu-c':'Deste hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.',
+  'ortak.king-arac.deste-bos':'Deste boş.',
+  'ortak.king-arac.kartin':'Kartın: «',
+  'ortak.king-arac.hayat-karnesi-son-7-ya':'Hayat karnesi: son 7 ya da 30 günde çalışma (AYS) ve gelişim (ESP) dakikaları ve etkin gün sayısı (ölçüldü); SPİ alanları veri yok.',
+  'ortak.king-arac.karne-hesap-sunucusundaki-gu':'Karne hesap sunucusundaki günlük özetten gelir; bu cihazda hesapla giriş yapılmamış.',
+  'ortak.king-arac.son':'Son ',
+  'ortak.king-arac.lifeos-ta-ne-var-hangi-is':'LifeOS’ta ne var: hangi iş hangi modülde, hangi sayfada ve King’den nasıl yapılır. «Ne var», «nerede», «nasıl yapılır» sorularında çağır.',
+  'ortak.king-arac.bir-modulun-sayfasini-acar-v':'Bir modülün sayfasını açar; veri değiştirmez. Sayfalar: ',
+  'ortak.king-arac.bu-modulun-kayitli-sayilari':'Bu modülün kayıtlı sayıları, kesinlik etiketiyle (ölçüldü, tahmin, hesaplandı, veri yok). Sayıyı modülün kuralı üretir; değer «veri yok» ise sayı söyleme.',
+  'ortak.king-arac.kullanicinin-yaptigi-bir-isi':'Kullanıcının YAPTIĞI bir işi (soru, süre, uyku, su, öğün, antrenman, çalışma oturumu, not) bu modülün kendi ayrıştırıcısıyla kayda çevirir; önizleme gösterilir, onayla yazılır. metin: kullanıcının cümlesi, sayıları aynen.',
+  'ortak.king-arac.bu-modulde-bugunun-ozeti-mod':'Bu modülde bugünün özeti (modülün kendi cümleleri).',
+  'ortak.king-arac.bugun-icin-henuz-bir-sey':'Bugün için henüz bir şey yok.',
+  'ortak.king-arac.bu-modulun-istatistik-kartla':'Bu modülün istatistik kartları (sayıları modül hesaplar).',
+  'ortak.king-arac.modulun-bankasindan-bir-soru':'Modülün bankasından bir soru kartı getirir.',
+  'ortak.king-arac.puan-getirecek-oncelikli-kon':'Puan getirecek öncelikli konular (modülün hesabı: çıkma sıklığı × hata).',
+  'ortak.king-arac.son-7-gun-ile-onceki':'Son 7 gün ile önceki 7 günün karşılaştırması ve yük sinyali.',
+  'ortak.king-arac.defter-notlarinda-arar-bulun':'Defter notlarında arar; bulunan notlara dayanarak cevaplar.',
+  'ortak.king-arac.defter-e-yeni-bir-not-yazar':'Defter’e yeni bir not yazar.',
+  'ortak.king-arac.onaylar-da-bekleyen-oneriler':'Onaylar’da bekleyen öneriler (sıra numarasıyla).',
+  'ortak.king-arac.onay-bekleyen-oneri-yok':'Onay bekleyen öneri yok.',
+  'ortak.king-arac.onaylar-daki-bir-oneriyi-ona':'Onaylar’daki bir öneriyi onaylar; modülün kendi kodu uygular.',
+  'ortak.king-arac.onaylar-daki-bir-oneriyi-gec':'Onaylar’daki bir öneriyi geçer; uygulanmaz.',
+  'ortak.king-arac.bekleyen-butun-onerileri-ona':'Bekleyen bütün önerileri onaylar ya da geçer.',
+  'ortak.king-arac.lifeos-gorunum-ayari-tema-ko':'LifeOS görünüm ayarı: tema (koyu, acik, sistem), animasyon (tam, az, sistem), zemin (sade, canli), muzik (cal, dur).',
+  'ortak.king-arac.king-in-kendi-tercihi-cevap':'King’in kendi tercihi: cevap (oto, ses, yazi), derinlik (oto, hizli, dengeli, derin), tarz (samimi, resmi, kisa), ses (oto, gemini, piper, cihaz).',
+  'ortak.king-arac.king-in-odak-sayacini-baslat':'King’in odak sayacını başlatır (kayıt yazmaz; bitince kaydetmeyi sorar).',
+  'ortak.king-arac.calisan-odak-sayacini-durdur':'Çalışan odak sayacını durdurur.',
+  'ortak.king-arac.odak-sayacini-durdurdum':'Odak sayacını durdurdum.',
+  'ortak.king-arac.calisan-bir-odak-sayaci-yok':'Çalışan bir odak sayacı yok.',
+  'ortak.king-arac.king-in-bugunku-model-kullan':'King’in bugünkü model kullanımı: çağrı, jeton, maliyet ve süre (Merkez’in defterinden; sayıyı HKM ölçer).',
+  'ortak.king-arac.merkez-den-harcama-okunamadi':'Merkez’den harcama okunamadı',
+  'ortak.king-arac.merkez-in-raporu-hafta-hafta':'Merkez’in raporu: hafta (haftalık değerlendirme) ya da capraz (modüller arası bulgular); sayıları kural motoru yazar.',
+  'ortak.king-arac.haftalik-degerlendirme':'Haftalık değerlendirme',
+  'ortak.king-arac.moduller-arasi-bulgular':'Modüller arası bulgular',
+  'ortak.king-arac.donus-noktasi-al-ve-uygula':'Dönüş noktası al ve uygula',
+  'ortak.king-arac.bilgisayarina-ya-da-telefonu':'Bilgisayarına ya da telefonuna dokunur: düğmeye dokun ya da «Onaylıyorum» yaz.',
+  'ortak.king-arac.buyuk-degisiklik-onayliyorum':'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.',
+  'ortak.king-arac.onayliyor-musun':'Onaylıyor musun?',
+  'ortak.king-arac.bunu-yapmak-istedim-ama-olma':'Bunu yapmak istedim ama olmadı: ',
+  'ortak.king-arac.sistemden-okudum':'Sistemden okudum:',
+  'ortak.king-arac.sistemden-okudum-ama-merkez':'Sistemden okudum ama Merkez cümleye çeviremedi; ilgili sayfadan bakabilirsin.',
+  'ortak.king-arac.bunu-yapamadim-sayfasindan-y':'Bunu yapamadım; sayfasından ya da tam cümleyle dener misin?',
+  'ortak.king-arac.kolay-gelsin':'Kolay gelsin.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ortak.king-arac.defteri-ac':'Defteri aç',
   'ortak.king-arac.gec':'Geç',
   'ortak.king-arac.once':'Önce · ',
@@ -55,12 +183,12 @@ window.LIFEOS.PARCA.yazilar({
   async function oncelikIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const K = KI.ayar && KI.ayar.kartlar;
-    if(!K || typeof K.oncelik !== 'function'){ KI.soyle('Öncelik listesi AYS’de; AYS’de «neye çalışayım» diyebilirsin.'); return { tur:'oncelik-yok' }; }
+    if(!K || typeof K.oncelik !== 'function'){ KI.soyle(yz('ortak.king-arac.oncelik-listesi-ays-de-ays-d')); return { tur:'oncelik-yok' }; }
     let l = [];
     try{ l = (await K.oncelik()) || []; }catch(e){ l = []; }
     l = l.filter(x => x && x.ad).slice(0, 5);
-    if(!l.length){ KI.soyle('Henüz öncelik çıkaracak veri yok: deneme yanlışı ya da çözülmüş soru kaydı gerekiyor.'); return { tur:'oncelik-bos' }; }
-    KI.soyle('Şu konular en çok puan kurtarır (sınavda çıkma sıklığı × senin hatan; AYS’nin hesabı):', null, null, null,
+    if(!l.length){ KI.soyle(yz('ortak.king-arac.henuz-oncelik-cikaracak-veri')); return { tur:'oncelik-bos' }; }
+    KI.soyle(yz('ortak.king-arac.su-konular-en-cok-puan'), null, null, null,
       { sirali:l.map(x => ({ ad:String(x.ad), ust:String(x.ders || ''), alt:String(x.neden || ''), puan:x.puan, ham:x })) });
     return { tur:'oncelik', n:l.length };
   }
@@ -71,7 +199,7 @@ window.LIFEOS.PARCA.yazilar({
       + '<span class="king__sira-no">' + (i + 1) + '</span>'
       + '<div class="king__sira-govde"><b>' + KI.kac(x.ad) + '</b>' + (x.ust ? '<small>' + KI.kac(x.ust) + '</small>' : '')
       + (x.alt ? '<span>' + KI.kac(x.alt) + '</span>' : '') + '</div>'
-      + (acilir ? '<button type="button" class="king__cip" data-king="sira-ac:' + n + ':' + i + '">Öğren’de aç</button>' : '')
+      + (acilir ? '<button type="button" class="king__cip" data-king="sira-ac:' + n + ':' + i + ('">' + yz('ortak.king-arac.ogren-de-ac') + '</button>') : '')
       + '</li>').join('') + '</ol>';
   }
   /* Not arama: Defter'in kendi deposu; puan = sorgu sözcüklerinin geçişi. */
@@ -96,34 +224,34 @@ window.LIFEOS.PARCA.yazilar({
   async function notAra(metin, t0){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const Df = D();
-    if(!Df){ KI.soyle('Defter bu modülde kurulu değil; notlarına buradan bakamam.'); return { tur:'not-yok' }; }
+    if(!Df){ KI.soyle(yz('ortak.king-arac.defter-bu-modulde-kurulu-deg')); return { tur:'not-yok' }; }
     const kelimeler = t0.replace(/[.,!?;:«»"']/g, ' ').replace(NOT_DOLGU, ' ').replace(NOT_DOLGU, ' ').split(/\s+/).filter(w => w.length >= 3);
     let liste = [];
     try{ liste = (await Df.yukle()) || []; }catch(e){ liste = []; }
     const bulunan = kelimeler.length ? notPuanla(liste, kelimeler) : [];
-    if(!bulunan.length){ KI.soyle(kelimeler.length ? '«' + kelimeler.join(' ') + '» geçen bir not bulamadım.' : 'Notlarında neyi arayayım? Örneğin «notlarımda türev».'); return { tur:'not-bos' }; }
-    const kaynak = bulunan.map(n => 'Kaynak: ' + (n.baslik || 'Başlıksız not'));
+    if(!bulunan.length){ KI.soyle(kelimeler.length ? '«' + kelimeler.join(' ') + '» geçen bir not bulamadım.' : yz('ortak.king-arac.notlarinda-neyi-arayayim-orn')); return { tur:'not-bos' }; }
+    const kaynak = bulunan.map(n => yz('ortak.king-arac.kaynak') + (n.baslik || yz('ortak.king-arac.basliksiz-not')));
     KI.cipler = [{ ad:yz('ortak.king-arac.defteri-ac'), is:'defter-ac' }];
     if(!KI.baglanti()){
-      KI.soyle('Notlarında bunları buldum:', bulunan.map(n => (n.baslik || 'Başlıksız not') + ' — ' + parcaOf(n.govde, kelimeler, 140)));
+      KI.soyle(yz('ortak.king-arac.notlarinda-bunlari-buldum'), bulunan.map(n => (n.baslik || yz('ortak.king-arac.basliksiz-not')) + ' — ' + parcaOf(n.govde, kelimeler, 140)));
       return { tur:'not-liste', n:bulunan.length };
     }
     const bek = { kim:'king', bekliyor:true, metin:'' };
     KI.akis.push(bek); KI.ciz(false);
     const istem = 'Kullanıcının kendi notlarından parçalar aşağıda. YALNIZ bu notlara dayanarak cevap ver; notlarda olmayanı «notlarında yok» de, uydurma.\n\n'
-      + bulunan.map((n, i) => '[' + (i + 1) + '] ' + (n.baslik || 'Başlıksız not') + ': ' + parcaOf(n.govde, kelimeler, 600)).join('\n\n')
+      + bulunan.map((n, i) => '[' + (i + 1) + '] ' + (n.baslik || yz('ortak.king-arac.basliksiz-not')) + ': ' + parcaOf(n.govde, kelimeler, 600)).join('\n\n')
       + '\n\nSoru: ' + String(metin).trim();
     const r = await KI.merkezeSor(istem, bek);
     KI.akis = KI.akis.filter(m => m !== bek);
     if(r.ok) KI.soyle(r.text, kaynak, null, null, r.akti ? { yeni:false, okunan:r.okunan } : null);
-    else KI.soyle('Merkez cevap vermedi; bulduğum notlar:', bulunan.map(n => (n.baslik || 'Başlıksız not') + ' — ' + parcaOf(n.govde, kelimeler, 140)));
+    else KI.soyle(yz('ortak.king-arac.merkez-cevap-vermedi-buldugu'), bulunan.map(n => (n.baslik || yz('ortak.king-arac.basliksiz-not')) + ' — ' + parcaOf(n.govde, kelimeler, 140)));
     KI.cipler = [{ ad:yz('ortak.king-arac.defteri-ac'), is:'defter-ac' }];
     KI.ciz(false);
     return { tur:'not-cevap', n:bulunan.length };
   }
   /* Haftalık ritüel: rapor + üç soru; cevaplar Defter'e, hedef açılışa. */
   const RITIM_RE = /(haftalık gözden geçirme|haftayı gözden geçir|haftalık ritüel|hafta sonu değerlendirmesi)/;
-  const RITIM_SORU = ['Bu hafta ne iyi gitti?', 'Ne zorladı?', 'Gelecek haftanın tek hedefi ne olsun?'];
+  const RITIM_SORU = [yz('ortak.king-arac.bu-hafta-ne-iyi-gitti'), yz('ortak.king-arac.ne-zorladi'), yz('ortak.king-arac.gelecek-haftanin-tek-hedefi')];
   const HEDEF = 'lifeos.king.hafta-hedef';
   KI.ritim = null;
   function haftaBasi(){
@@ -134,13 +262,13 @@ window.LIFEOS.PARCA.yazilar({
   function haftaHedefi(){ const v = KI.ortam.depo.oku(HEDEF); return v && v.metin && v.hafta >= haftaBasi() ? String(v.metin) : ''; }
   async function ritimBaslat(metin){
     KI.ritim = { cevaplar:[] };
-    await KI.merkezKomut(metin, 'hafta', 'Haftalık rapor');
+    await KI.merkezKomut(metin, 'hafta', yz('ortak.king-arac.haftalik-rapor'));
     KI.soyle(RITIM_SORU[0] + ' (Üç kısa soru; «vazgeç» dersen bırakırım.)');
     return { tur:'ritim' };
   }
   async function ritimIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
-    if(/^(vazgeç|bırak|iptal|sonra)/.test(KI.kucuk(metin))){ KI.ritim = null; KI.soyle('Tamam, gözden geçirmeyi bıraktım.'); return { tur:'ritim-dur' }; }
+    if(/^(vazgeç|bırak|iptal|sonra)/.test(KI.kucuk(metin))){ KI.ritim = null; KI.soyle(yz('ortak.king-arac.tamam-gozden-gecirmeyi-birak')); return { tur:'ritim-dur' }; }
     KI.ritim.cevaplar.push(String(metin).trim());
     if(KI.ritim.cevaplar.length < RITIM_SORU.length){ KI.soyle(RITIM_SORU[KI.ritim.cevaplar.length]); return { tur:'ritim' }; }
     const c = KI.ritim.cevaplar;
@@ -150,7 +278,7 @@ window.LIFEOS.PARCA.yazilar({
     let notOldu = false;
     const Df = D();
     if(Df){
-      try{ await Df.yeni('Haftalık gözden geçirme · ' + KI.bugunISO(), RITIM_SORU.map((q, i) => '## ' + q + '\n' + c[i]).join('\n\n'), 'not'); notOldu = true; }catch(e){ notOldu = false; }
+      try{ await Df.yeni(yz('ortak.king-arac.haftalik-gozden-gecirme') + KI.bugunISO(), RITIM_SORU.map((q, i) => '## ' + q + '\n' + c[i]).join('\n\n'), 'not'); notOldu = true; }catch(e){ notOldu = false; }
     }
     KI.soyle('Kaydettim' + (notOldu ? ' (Defter’e not oldu)' : '') + '. Haftanın hedefi: «' + hedef + '». Her sabah açılışta hatırlatacağım.');
     return { tur:'ritim-bitti' };
@@ -167,9 +295,9 @@ window.LIFEOS.PARCA.yazilar({
     const K = KI.ayar && KI.ayar.kartlar;
     let y = null;
     try{ y = K && typeof K.yuk === 'function' ? K.yuk() : null; }catch(e){ y = null; }
-    if(!y || !Array.isArray(y.kartlar) || !y.kartlar.length){ KI.soyle('Bu modülde yük göstergesi yok; AYS ve SPİ’de var.'); return { tur:'yuk-yok' }; }
+    if(!y || !Array.isArray(y.kartlar) || !y.kartlar.length){ KI.soyle(yz('ortak.king-arac.bu-modulde-yuk-gostergesi-yo')); return { tur:'yuk-yok' }; }
     const l = y.kartlar.filter(x => x && x.ad).map(KI.kartTemiz);
-    KI.soyle(y.sinyal || 'Son 7 gün, önceki 7 güne göre belirgin bir yük artışı görünmüyor.', null, null, null, { kartlar:l, bulgu:!!y.sinyal });
+    KI.soyle(y.sinyal || yz('ortak.king-arac.son-7-gun-onceki-7'), null, null, null, { kartlar:l, bulgu:!!y.sinyal });
     return { tur:'yuk', sinyal:!!y.sinyal };
   }
   /* Günlük: anlattığın Defter'e; his (1–5) senin beyanın. */
@@ -178,11 +306,11 @@ window.LIFEOS.PARCA.yazilar({
   async function gunlukIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() });
     const t = KI.kucuk(metin);
-    if(/^(vazgeç|bırak|iptal)/.test(t)){ KI.gunlukBekle = false; KI.gunlukMetin = ''; KI.cipler = null; KI.soyle('Tamam, günlüğü bıraktım.'); return { tur:'gunluk-dur' }; }
+    if(/^(vazgeç|bırak|iptal)/.test(t)){ KI.gunlukBekle = false; KI.gunlukMetin = ''; KI.cipler = null; KI.soyle(yz('ortak.king-arac.tamam-gunlugu-biraktim')); return { tur:'gunluk-dur' }; }
     if(!KI.gunlukMetin){
       KI.gunlukMetin = String(metin).trim();
       KI.cipler = [1, 2, 3, 4, 5].map(n => ({ ad:String(n), is:'gunluk-his:' + n })).concat([{ ad:yz('ortak.king-arac.gec'), is:'gunluk-his:0' }]);
-      KI.soyle('Not aldım. Bugünkü hissin 1 ile 5 arasında kaç? (5 çok iyi; istersen geç.)');
+      KI.soyle(yz('ortak.king-arac.not-aldim-bugunku-hissin-1'));
       return { tur:'gunluk-his' };
     }
     return gunlukBitir(/^[1-5]$/.test(t) ? Number(t) : 0);
@@ -193,9 +321,9 @@ window.LIFEOS.PARCA.yazilar({
     let ok = false;
     const Df = D();
     if(Df && metin){
-      try{ await Df.yeni('Günlük · ' + KI.bugunISO(), metin + (his ? '\n\nHis: ' + his + '/5 (benim beyanım)' : ''), 'not'); ok = true; }catch(e){ ok = false; }
+      try{ await Df.yeni(yz('ortak.king-arac.gunluk') + KI.bugunISO(), metin + (his ? '\n\nHis: ' + his + '/5 (benim beyanım)' : ''), 'not'); ok = true; }catch(e){ ok = false; }
     }
-    KI.soyle(ok ? 'Günlüğe yazdım (Defter).' + (his ? ' Hissin: ' + his + '/5.' : '') : 'Günlüğü kaydedemedim.');
+    KI.soyle(ok ? yz('ortak.king-arac.gunluge-yazdim-defter') + (his ? ' Hissin: ' + his + '/5.' : '') : yz('ortak.king-arac.gunlugu-kaydedemedim'));
     return { tur:'gunluk-bitti', his };
   }
   /* Kişisel deney: önceki dönem ile deney dönemi, modülün günlük ölçüsüyle. */
@@ -210,11 +338,11 @@ window.LIFEOS.PARCA.yazilar({
   function deneyBaslat(metin, kural){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const O = KI.ayar && KI.ayar.kartlar && KI.ayar.kartlar.olcu;
-    if(!O || !Array.isArray(O.liste) || !O.liste.length){ KI.soyle('Bu modülde deney için ölçü yok.'); return { tur:'deney-yok' }; }
-    if(deneyOku()){ KI.soyle('Süren bir deney var; önce «deneyi bitir» de.'); return { tur:'deney-var' }; }
+    if(!O || !Array.isArray(O.liste) || !O.liste.length){ KI.soyle(yz('ortak.king-arac.bu-modulde-deney-icin-olcu')); return { tur:'deney-yok' }; }
+    if(deneyOku()){ KI.soyle(yz('ortak.king-arac.suren-bir-deney-var-once')); return { tur:'deney-var' }; }
     KI.deneyTaslak = { kural:String(kural || '').trim().slice(0, 160) || 'kendi kuralın' };
     KI.cipler = O.liste.map(o => ({ ad:o.ad, is:'deney-olcu:' + o.id }));
-    KI.soyle('Deney: «' + KI.deneyTaslak.kural + '». ' + DENEY_GUN + ' gün süreceğim. Neyle ölçelim?');
+    KI.soyle(yz('ortak.king-arac.deney-2') + KI.deneyTaslak.kural + '». ' + DENEY_GUN + ' gün süreceğim. Neyle ölçelim?');
     return { tur:'deney-olcu' };
   }
   function deneyOlcuSec(id){
@@ -224,7 +352,7 @@ window.LIFEOS.PARCA.yazilar({
     const v = { kural:KI.deneyTaslak.kural, olcu:o.id, olcuAd:o.ad, birim:o.birim || '', baslangic:KI.bugunISO(), gun:DENEY_GUN };
     KI.deneyTaslak = null; KI.cipler = null;
     KI.ortam.depo.yaz(DENEY(), v);
-    KI.soyle('Başladı: ' + v.gun + ' gün «' + v.kural + '», ölçü ' + v.olcuAd + '. Sonunda önceki ' + v.gun + ' günle karşılaştıracağım.');
+    KI.soyle(yz('ortak.king-arac.basladi') + v.gun + ' gün «' + v.kural + '», ölçü ' + v.olcuAd + '. Sonunda önceki ' + v.gun + ' günle karşılaştıracağım.');
     return true;
   }
   function deneyHesap(v){
@@ -239,7 +367,7 @@ window.LIFEOS.PARCA.yazilar({
   function deneyDurum(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const v = deneyOku();
-    if(!v){ KI.soyle('Süren bir deney yok. «deney başlat 23:00’te yatacağım» gibi başlatabilirsin.'); return { tur:'deney-yok' }; }
+    if(!v){ KI.soyle(yz('ortak.king-arac.suren-bir-deney-yok-deney')); return { tur:'deney-yok' }; }
     const h = deneyHesap(v), bitir = /bitir/.test(KI.kucuk(metin)) || h.gecen >= v.gun;
     const fark = h.once.ort != null && h.sira.ort != null ? Math.round((h.sira.ort - h.once.ort) * 10) / 10 : null;
     const yeter = h.once.n >= DENEY_EN_AZ && h.sira.n >= DENEY_EN_AZ;
@@ -249,8 +377,8 @@ window.LIFEOS.PARCA.yazilar({
       { ad:yz('ortak.king-arac.fark'), deger:fark != null ? (fark > 0 ? '+' : '') + fark : null, birim:v.birim, etiket:yz('ortak.king-arac.hesaplandi') },
     ].map(KI.kartTemiz);
     if(bitir) KI.ortam.depo.sil(DENEY());
-    KI.soyle((bitir ? 'Deney bitti' : 'Deney sürüyor (' + Math.min(h.gecen + 1, v.gun) + '/' + v.gun + ' gün)') + ': «' + v.kural + '». '
-      + (yeter ? 'Bu bir gözlem; tek kişilik deney neden-sonuç kanıtı değildir.' : 'Karşılaştırma için veri yetersiz (her dönemde en az ' + DENEY_EN_AZ + ' gün gerekir).'),
+    KI.soyle((bitir ? yz('ortak.king-arac.deney-bitti') : yz('ortak.king-arac.deney-suruyor') + Math.min(h.gecen + 1, v.gun) + '/' + v.gun + ' gün)') + ': «' + v.kural + '». '
+      + (yeter ? yz('ortak.king-arac.bu-bir-gozlem-tek-kisilik') : yz('ortak.king-arac.karsilastirma-icin-veri-yete') + DENEY_EN_AZ + ' gün gerekir).'),
       null, null, null, { kartlar:kart, bulgu:true });
     return { tur:bitir ? 'deney-bitti' : 'deney-durum', yeter };
   }
@@ -331,7 +459,7 @@ window.LIFEOS.PARCA.yazilar({
   function yapHtml(m){
     if(!m.yap) return '';
     const l = yapilacaklar();
-    if(!l.length) return '<p class="king__gunum-not">Liste boş. «yapılacak: …» diye ekle.</p>';
+    if(!l.length) return ('<p class="king__gunum-not">' + yz('ortak.king-arac.liste-bos-yapilacak-diye') + '</p>');
     return '<ul class="king__yap">' + l.map(x => '<li><button type="button" class="king__yap-is' + (x.bitti ? ' is-bitti' : '') + '" data-king="yap:' + KI.kac(x.id)
       + '" aria-pressed="' + (x.bitti ? 'true' : 'false') + '"><i aria-hidden="true"></i><span>' + KI.kac(x.metin) + '</span></button></li>').join('') + '</ul>';
   }
@@ -351,8 +479,8 @@ window.LIFEOS.PARCA.yazilar({
     if(gelen.length){
       hatirYaz(l.filter(x => gelen.indexOf(x) < 0));
       gelen.forEach(x => {
-        KI.ortam.bildir('LifeOS · hatırlatma', x.metin);
-        if(KI.acik) KI.soyle('Hatırlatma: ' + x.metin);
+        KI.ortam.bildir(yz('ortak.king-arac.lifeos-hatirlatma'), x.metin);
+        if(KI.acik) KI.soyle(yz('ortak.king-arac.hatirlatma') + x.metin);
         else{ KI.akis.push({ kim:'king', metin:yz('ortak.king-arac.hatirlatma') + x.metin }); KI.sakla(); }
       });
     }
@@ -368,8 +496,8 @@ window.LIFEOS.PARCA.yazilar({
     if(!m.nefes) return '';
     return '<div class="king__nefes" role="img" aria-label="Kutu nefesi: 4 saniye al, 4 tut, 4 ver, 4 tut; dört tur">'
       + '<span class="king__nefes-daire" aria-hidden="true"></span>'
-      + '<span class="king__nefes-yazi" aria-hidden="true"><b>Al</b><b>Tut</b><b>Ver</b><b>Tut</b></span>'
-      + '<small>4 al · 4 tut · 4 ver · 4 tut · dört tur, yaklaşık bir dakika</small></div>';
+      + ('<span class="king__nefes-yazi" aria-hidden="true"><b>' + yz('ortak.king-arac.al') + '</b><b>' + yz('ortak.king-arac.tut') + '</b><b>' + yz('ortak.king-arac.ver') + '</b><b>' + yz('ortak.king-arac.tut') + '</b></span>')
+      + ('<small>' + yz('ortak.king-arac.4-al-4-tut') + '</small></div>');
   }
   const ZAR_RE = /^(?:([1-6])\s*)?zar at\s*[?.!]*$/;
   const YT_RE = /^(?:yazı tura(?: at)?|yazı mı tura mı|para at)\s*[?.!]*$/;
@@ -418,10 +546,10 @@ window.LIFEOS.PARCA.yazilar({
       const yeni = m[1].split(/\s*;\s*/).map(x => x.trim()).filter(Boolean).slice(0, 10)
         .map((x, i) => ({ id:'y' + KI.ortam.simdi().getTime().toString(36) + i, metin:x.slice(0, 160), bitti:false }));
       yapYaz(l.concat(yeni)); sen();
-      KI.soyle(yeni.length === 1 ? 'Listeye ekledim.' : yeni.length + ' madde ekledim.', null, null, null, { yap:true });
+      KI.soyle(yeni.length === 1 ? yz('ortak.king-arac.listeye-ekledim') : yeni.length + ' madde ekledim.', null, null, null, { yap:true });
       return { tur:'yap', n:yeni.length };
     }
-    if(YAP_LISTE_RE.test(t0)){ sen(); KI.soyle('Yapılacaklar · ' + yapilacaklar().filter(x => !x.bitti).length + ' açık', null, null, null, { yap:true }); return { tur:'yap', n:yapilacaklar().length }; }
+    if(YAP_LISTE_RE.test(t0)){ sen(); KI.soyle(yz('ortak.king-arac.yapilacaklar') + yapilacaklar().filter(x => !x.bitti).length + ' açık', null, null, null, { yap:true }); return { tur:'yap', n:yapilacaklar().length }; }
     if(YAP_TEMIZ_RE.test(t0)){ const l = yapilacaklar(); yapYaz(l.filter(x => !x.bitti)); sen(); KI.soyle((l.length - yapilacaklar().length) + ' biten maddeyi sildim.', null, null, null, { yap:true }); return { tur:'yap' }; }
     m = t0.match(HATIR_SURE_RE) || t0.match(HATIR_SAAT_RE);
     if(m){
@@ -432,7 +560,7 @@ window.LIFEOS.PARCA.yazilar({
       const ne = (m[3] || '').trim() || 'Hatırlatma';
       if(!(Number(m[1]) > 0 || m.length === 4 && !/^(dk|dakika|sa|saat)$/.test(m[2])) || isNaN(z)){ return null; }
       hatirYaz(hatirlatmalar().concat([{ id:'h' + d.getTime().toString(36), zaman:z.toISOString(), metin:ne.slice(0, 160) }]));
-      sen(); KI.soyle('Tamam, ' + String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0') + (z.getDate() !== d.getDate() ? ' (yarın)' : '')
+      sen(); KI.soyle(yz('ortak.king-arac.tamam') + String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0') + (z.getDate() !== d.getDate() ? ' (yarın)' : '')
         + '’de hatırlatacağım: ' + ne + '. Sayfa açıksa bildirim gelir; kapalıysa açtığında söylerim.');
       hatirlatKur();
       return { tur:'hatirlat' };
@@ -440,7 +568,7 @@ window.LIFEOS.PARCA.yazilar({
     if(HATIR_LISTE_RE.test(t0)){
       const l = hatirlatmalar().sort((a, b) => String(a.zaman).localeCompare(String(b.zaman)));
       sen(); KI.cipler = l.slice(0, 4).map(x => ({ ad:yz('ortak.king-arac.i-ptal') + x.metin.slice(0, 18), is:'hat-sil:' + x.id }));
-      KI.soyle(l.length ? l.length + ' hatırlatma bekliyor:' : 'Bekleyen hatırlatma yok.', l.map(x => KI.tarihYaz(x.zaman) + ' · ' + x.metin));
+      KI.soyle(l.length ? l.length + ' hatırlatma bekliyor:' : yz('ortak.king-arac.bekleyen-hatirlatma-yok'), l.map(x => KI.tarihYaz(x.zaman) + ' · ' + x.metin));
       return { tur:'hatirlat', n:l.length };
     }
     m = String(metin || '').trim().match(KARAR_RE);
@@ -448,16 +576,16 @@ window.LIFEOS.PARCA.yazilar({
       const l = m[1].split(/\s*(?:,|;|\bya da\b|\bveya\b|\byoksa\b)\s*/).map(x => x.trim()).filter(Boolean);
       if(l.length >= 2){
         sen(); KI.cipler = [{ ad:yz('ortak.king-arac.yeniden-sec'), is:'oner-metin:' + String(metin).trim() }];
-        KI.soyle('Seçtim: ' + l[rastgele(l.length)] + '.', null, null, 'rastgele, ' + l.length + ' seçenek arasından');
+        KI.soyle(yz('ortak.king-arac.sectim') + l[rastgele(l.length)] + '.', null, null, 'rastgele, ' + l.length + ' seçenek arasından');
         return { tur:'karar' };
       }
     }
-    if(NEFES_RE.test(t0)){ sen(); KI.soyle('Kutu nefesi: daireyle birlikte nefes al, tut, ver, tut.', null, null, null, { nefes:true }); return { tur:'nefes' }; }
+    if(NEFES_RE.test(t0)){ sen(); KI.soyle(yz('ortak.king-arac.kutu-nefesi-daireyle-birlikt'), null, null, null, { nefes:true }); return { tur:'nefes' }; }
     m = t0.match(ZAR_RE);
     if(m){
       const n = Number(m[1] || 1), l = Array.from({ length:n }, () => rastgele(6) + 1);
       sen(); KI.cipler = [{ ad:yz('ortak.king-arac.yeniden-at'), is:'oner-metin:' + n + ' zar at' }];
-      KI.soyle(n === 1 ? 'Zar: ' + l[0] + '.' : n + ' zar: ' + l.join(' + ') + ' = ' + l.reduce((a, b) => a + b, 0) + '.', null, null, 'rastgele');
+      KI.soyle(n === 1 ? yz('ortak.king-arac.zar') + l[0] + '.' : n + ' zar: ' + l.join(' + ') + ' = ' + l.reduce((a, b) => a + b, 0) + '.', null, null, 'rastgele');
       return { tur:'zar', l };
     }
     if(YT_RE.test(t0)){ sen(); KI.cipler = [{ ad:yz('ortak.king-arac.yeniden-at'), is:'oner-metin:yazı tura' }]; KI.soyle(rastgele(2) ? 'Yazı.' : 'Tura.', null, null, 'rastgele'); return { tur:'yazitura' }; }
@@ -489,7 +617,7 @@ window.LIFEOS.PARCA.yazilar({
         let son = new Date(b.getFullYear(), a, g);
         if(gunFarki(b, son) < 0) son = new Date(b.getFullYear() + 1, a, g);
         const kalan = gunFarki(b, son);
-        sen(); KI.soyle(yas + ' yaşındasın. ' + (kalan === 0 ? 'Doğum günün bugün, kutlu olsun!' : 'Doğum gününe ' + kalan + ' gün var.') + ' Bugüne kadar ' + sayiTr(gunFarki(d, b)) + ' gün.', null, null, 'hesaplandı');
+        sen(); KI.soyle(yas + ' yaşındasın. ' + (kalan === 0 ? yz('ortak.king-arac.dogum-gunun-bugun-kutlu-olsu') : yz('ortak.king-arac.dogum-gunune') + kalan + ' gün var.') + ' Bugüne kadar ' + sayiTr(gunFarki(d, b)) + ' gün.', null, null, 'hesaplandı');
         return { tur:'yas', yas };
       }
     }
@@ -508,7 +636,7 @@ window.LIFEOS.PARCA.yazilar({
       const n = Math.min(64, Math.max(8, Number(m[1] || 16))), H = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?-_';
       const sf = Array.from({ length:n }, () => H[rastgele(H.length)]).join('');
       sen(); KI.cipler = [{ ad:yz('ortak.king-arac.yenisini-uret'), is:'oner-metin:şifre üret ' + n }];
-      KI.soyle(sf, ['Cihazda üretildi, hiçbir yere gönderilmedi. Sohbette kalır; kullandıktan sonra sohbeti silebilirsin.'], null, 'rastgele · ' + n + ' karakter');
+      KI.soyle(sf, [yz('ortak.king-arac.cihazda-uretildi-hicbir-yere')], null, 'rastgele · ' + n + ' karakter');
       return { tur:'sifre', n };
     }
     m = String(metin || '').trim().match(KART_YAP_RE);
@@ -516,7 +644,7 @@ window.LIFEOS.PARCA.yazilar({
       const mt = m[1].trim(), ad = mt.split(/\s+/).slice(0, 4).join(' ').replace(/[,.;:!?]+$/, '');
       KI.kartEkle(ad.length > 28 ? ad.slice(0, 27) + '…' : ad, mt, true);
       sen(); KI.cipler = [{ ad:yz('ortak.king-arac.kartlarimi-ac'), is:'bolum:araclar' }];
-      KI.soyle('Kartlarım’a ekledim: «' + ad + '». Dokununca bu cümleyi sorar; rengini ve simgesini Araçlar › Düzenle’den seçersin.');
+      KI.soyle(yz('ortak.king-arac.kartlarim-a-ekledim') + ad + '». Dokununca bu cümleyi sorar; rengini ve simgesini Araçlar › Düzenle’den seçersin.');
       return { tur:'kart' };
     }
     return null;
@@ -549,17 +677,17 @@ window.LIFEOS.PARCA.yazilar({
       dis('pc_dosya_ac', 'masaüstündeki rapor.pdf dosyasını aç', 'Bilgisayarda bir dosyayı ya da klasörü varsayılan programıyla açar. yol: tam yol (C:\…). Çalıştırılabilir dosya açılmaz. Geri al pencereyi kapatır.',
         { type:'object', properties:{ yol:{ type:'string', maxLength:400 } }, required:['yol'] },
         p => ({ metin:yz('ortak.king-arac.bilgisayarda-acacagim') + p.yol }), p => disIstek('ac', { yol:p.yol })),
-      dis('pc_uygulama_baslat', 'hesap makinesini başlat', 'Bilgisayarda Başlat menüsündeki bir uygulamayı adıyla başlatır. Geri al zorlamadan kapatır.',
+      dis('pc_uygulama_baslat', 'hesap makinesini başlat', yz('ortak.king-arac.bilgisayarda-baslat-menusund'),
         { type:'object', properties:{ ad:{ type:'string', maxLength:80 } }, required:['ad'] },
         p => ({ metin:yz('ortak.king-arac.bilgisayarda-baslatacagim') + p.ad }), p => disIstek('baslat', { ad:p.ad })),
-      dis('pc_ekran_oku', 'ekranda ne yazıyor', 'Bilgisayarın ekranındaki metni okur (Windows OCR). Hiçbir şeyi değiştirmez ama ekran içeriği King’e girer.',
+      dis('pc_ekran_oku', 'ekranda ne yazıyor', yz('ortak.king-arac.bilgisayarin-ekranindaki-met'),
         undefined, () => ({ metin:yz('ortak.king-arac.bilgisayarin-ekranini-okuyac') }), () => disIstek('ekran', {})),
-      dis('telefona_gonder', 'günün özetini telefonuma sesli gönder', 'Telefona (Telegram) mesaj ya da sesli özet gönderir; 60 sn içinde geri alınırsa gitmez. ozet: true ise metin bugünün özetidir (sesli özet). sesli: ses dosyası olarak.',
+      dis('telefona_gonder', 'günün özetini telefonuma sesli gönder', yz('ortak.king-arac.telefona-telegram-mesaj-ya-d'),
         { type:'object', properties:{ metin:{ type:'string', maxLength:1500 }, sesli:{ type:'boolean' }, ozet:{ type:'boolean' } } },
         p => { const m = p.ozet ? KI.ozetSatirlari().join(' ') : String(p.metin || '').trim();
           return m ? { metin:yz('ortak.king-arac.telefona') + (p.sesli ? 'sesli ' : '') + (p.ozet ? 'özet' : 'mesaj') + ' göndereceğim.', satirlar:[m.slice(0, 160)] } : { hata:p.ozet ? 'bugün için özet yok' : 'gönderilecek metin yok' }; },
         p => disIstek('telefon', { metin:p.ozet ? KI.ozetSatirlari().join(' ') : p.metin, sesli:p.sesli === true })),
-      dis('dis_izin', 'dosya açma iznini ver', 'Dış dünya izinlerinden birini açar ya da kapatır: dosya (dosya ve klasör açma), uygulama, ekran (ekran okuma), telefon. Her izin ayrıdır.',
+      dis('dis_izin', 'dosya açma iznini ver', yz('ortak.king-arac.dis-dunya-izinlerinden-birin'),
         { type:'object', properties:{ izin:{ type:'string', enum:Object.keys(DIS_IZIN) }, acik:{ type:'boolean' } }, required:['izin', 'acik'] },
         p => ({ metin:'«' + DIS_IZIN[p.izin] + '» izni ' + (p.acik ? 'verilecek: King bunu her seferinde yine onayınla yapar.' : 'kapatılacak.') }),
         async p => { const r = await KI.hkmIstek('/api/dis/izin', { ad:p.izin, acik:p.acik });
@@ -612,9 +740,9 @@ window.LIFEOS.PARCA.yazilar({
      ve özellik bakımından»). Üstte canlı önizleme: King'in yüzü, adı ve seçilen
      tarzda bir selam; «Sesini dene» seçilen sesle okur. Altında King'in kendi
      tercihleri (KING_AYAR) ve okuma hızı: King penceresindekilerle aynı kayıt. */
-  const AYAR_SELAM = Object.freeze({ samimi:'Selam! Bugün neye bakalım?', resmi:'Merhaba. Size nasıl yardımcı olabilirim?', kisa:'Hazırım.' });
+  const AYAR_SELAM = Object.freeze({ samimi:yz('ortak.king-arac.selam-bugun-neye-bakalim'), resmi:yz('ortak.king-arac.merhaba-size-nasil-yardimci'), kisa:'Hazırım.' });
   const AYAR_SIRA = ['tarz', 'derinlik', 'cevap', 'ses', 'gorunus'];
-  const AYAR_NOT = { tarz:'Nasıl konuşsun', derinlik:'Ne kadar düşünsün', cevap:'Yazıyla mı, sesle mi', ses:'Hangi ses okusun', gorunus:'Rengi' };
+  const AYAR_NOT = { tarz:yz('ortak.king-arac.nasil-konussun'), derinlik:yz('ortak.king-arac.ne-kadar-dusunsun'), cevap:yz('ortak.king-arac.yaziyla-mi-sesle-mi'), ses:yz('ortak.king-arac.hangi-ses-okusun'), gorunus:'Rengi' };
   function ayarHtml(){
     const seg = (ad, liste, simdi, veri, adlar) => '<div class="seg" role="group" aria-label="' + KI.kac(ad) + '">' + liste.map(d => {
       const on = String(d) === String(simdi);
@@ -622,11 +750,11 @@ window.LIFEOS.PARCA.yazilar({
     return '<div class="kingayar" data-king-tercih-kok>'
       + '<div class="kingayar__onizle">' + KI.yuzHtml(true)
       + '<div class="kingayar__metin"><b>' + KI.kac(KI.ad()) + '</b><p>«' + KI.kac(AYAR_SELAM[KI.tarz()]) + '»</p><small>' + KI.kac(KI.DERIN_IP[KI.derinlik()]) + '</small></div>'
-      + '<button type="button" class="btn btn--sm btn--ghost" data-king-tercih="dene:1">Sesini dene</button></div>'
+      + ('<button type="button" class="btn btn--sm btn--ghost" data-king-tercih="dene:1">' + yz('ortak.king-arac.sesini-dene') + '</button></div>')
       + AYAR_SIRA.map(k => { const x = KING_AYAR[k];
         return '<div class="kingayar__satir"><span class="kingayar__ad">' + KI.kac(x.ad) + '<small>' + KI.kac(AYAR_NOT[k]) + '</small></span>' + seg(x.ad, x.degerler, x.oku(), k, x.adlar) + '</div>'; }).join('')
-      + '<div class="kingayar__satir"><span class="kingayar__ad">Okuma hızı<small>Sesli okurken</small></span>'
-      + seg('Okuma hızı', KI.HIZLAR, KI.hiz(), 'hiz', KI.HIZLAR.reduce((o, v) => { o[v] = String(v).replace('.', ',') + '×'; return o; }, {})) + '</div>'
+      + ('<div class="kingayar__satir"><span class="kingayar__ad">' + yz('ortak.king-arac.okuma-hizi') + '<small>' + yz('ortak.king-arac.sesli-okurken') + '</small></span>')
+      + seg(yz('ortak.king-arac.okuma-hizi'), KI.HIZLAR, KI.hiz(), 'hiz', KI.HIZLAR.reduce((o, v) => { o[v] = String(v).replace('.', ',') + '×'; return o; }, {})) + '</div>'
       + '</div>';
   }
   function ayarYenile(){ if(typeof document !== 'undefined') document.querySelectorAll('[data-king-tercih-kok]').forEach(el => { el.outerHTML = ayarHtml(); }); }
@@ -662,11 +790,11 @@ window.LIFEOS.PARCA.yazilar({
     + (x.tur === 'foto' ? ' — kamera ya da fotoğraf: + › Tüm işler' : ' — King’e «' + String(x.ornek || '').trim() + '» yaz');
   function haritaCevap(konu){
     const v = haritaVeri(konu);
-    const ad = KI.MODUL_AD[KI.ayar && KI.ayar.modul] || 'Bu modül';
+    const ad = KI.MODUL_AD[KI.ayar && KI.ayar.modul] || yz('ortak.king-arac.bu-modul');
     if(v.konu){
       const l = (v.isler || []).slice(0, 3).map(isSatiri)
         .concat((v.araclar || []).map(a => a.ne.replace(/[.]$/, '') + (a.ornek ? ' — King’e «' + a.ornek + '» yaz' : '')));
-      if(v.sayfa) l.push('Sayfası: ' + v.sayfa.ad + ' (' + v.sayfa.modul + ')');
+      if(v.sayfa) l.push(yz('ortak.king-arac.sayfasi') + v.sayfa.ad + ' (' + v.sayfa.modul + ')');
       if(!l.length){
         const m = v.moduller.find(x => x.alanlar.some(a => KI.kucuk(a).indexOf(v.konu.split(' ')[0].slice(0, 5)) >= 0));
         return { sonuc:v, cevap:m ? '«' + konu + '» ' + m.ad + '’nin işi; orada King’e sorabilir ya da sayfasından yapabilirsin.'
@@ -678,11 +806,11 @@ window.LIFEOS.PARCA.yazilar({
     const isler = v.isler || [];
     const grup = m => (isler.find(g => g.modul === m) || { isler:[] }).isler.map(x => x.ad + (x.tur === 'foto' ? ' (kamera)' : '')).join(', ');
     const ortak = grup('king');
-    return { sonuc:v, cevap:'LifeOS’ta dört bölüm var; ' + ad + ' içinde King’le ' + v.okuma.length + ' okuma ve ' + v.yazma.length
+    return { sonuc:v, cevap:yz('ortak.king-arac.lifeos-ta-dort-bolum-var') + ad + ' içinde King’le ' + v.okuma.length + ' okuma ve ' + v.yazma.length
       + ' değişiklik işi yapabilirsin. Hepsi + › Tüm işler’de, modüle göre:',
       satirlar:v.moduller.map(x => { const m = Object.keys(KI.MODUL_AD).find(k => KI.MODUL_AD[k] === x.ad), g = m ? grup(m) : '';
-        return x.ad + ' — ' + x.is + ': ' + (g ? 'King’le ' + g : x.alanlar.slice(0, 4).join(', ')) + (x.sayfalar.length ? ' · sayfalar: ' + x.sayfalar.join(', ') : ''); })
-        .concat(ortak ? ['King — her modülde: ' + ortak] : []) };
+        return x.ad + ' — ' + x.is + ': ' + (g ? yz('ortak.king-arac.king-le') + g : x.alanlar.slice(0, 4).join(', ')) + (x.sayfalar.length ? ' · sayfalar: ' + x.sayfalar.join(', ') : ''); })
+        .concat(ortak ? [yz('ortak.king-arac.king-her-modulde') + ortak] : []) };
   }
   function haritaIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -714,22 +842,22 @@ window.LIFEOS.PARCA.yazilar({
   const gunOturum = () => !!(KI.L.HESAP && KI.L.HESAP.durum && KI.L.HESAP.durum().oturum && KI.L.HESAP.gunKayit);
   function gunAraclari(){
     return [
-      { ad:'gun_kaydi', tur:'oku', ornek:'bugünkü niyetim ne', aciklama:'Gün’ün bugünkü kaydı: kullanıcının yazdığı niyet, enerji (1–5) ve iç hava (Gün sayfasıyla aynı kayıt).',
+      { ad:'gun_kaydi', tur:'oku', ornek:'bugünkü niyetim ne', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydi-kullani'),
         kural:t => GUN_OKU_RE.test(t),
         calistir:async () => {
-          if(!gunOturum()) return { cevap:'Gün kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          if(!gunOturum()) return { cevap:yz('ortak.king-arac.gun-kaydi-hesap-sunucusunda') };
           const v = await KI.L.HESAP.gunKayit();
-          if(!v || v.bayat || !(v.niyet || v.enerji || v.hava || (v.bloklar || []).length)) return { sonuc:v, cevap:'Bugün için niyet, enerji ya da iç hava girilmemiş. «bugünün niyeti: …» ya da «enerjim 4» yazabilirsin.' };
+          if(!v || v.bayat || !(v.niyet || v.enerji || v.hava || (v.bloklar || []).length)) return { sonuc:v, cevap:yz('ortak.king-arac.bugun-icin-niyet-enerji-ya') };
           const b = Array.isArray(v.bloklar) ? v.bloklar : [];
-          return { sonuc:v, cevap:'Bugün senin girdiğin: ' + gunKaydiMetin(v) + '.'
+          return { sonuc:v, cevap:yz('ortak.king-arac.bugun-senin-girdigin') + gunKaydiMetin(v) + '.'
             + (b.length ? ' Gün planında ' + b.length + ' iş, ' + b.filter(x => x.bitti).length + ' tanesi bitti.' : '') };
         } },
-      { ad:'gun_kaydi_yaz', tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:'Gün’ün bugünkü kaydını yazar: niyet (en çok 120 karakter), enerji (1–5), iç hava (gunes, parcali, bulut, yagmur, firtina). Verilmeyen alan değişmez.',
+      { ad:'gun_kaydi_yaz', tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydini-yazar'),
         parametreler:{ type:'object', properties:{ niyet:{ type:'string', maxLength:120 }, enerji:{ type:'integer', minimum:1, maximum:5 },
           hava:{ type:'string', enum:Object.keys(HAVA_AD) } } },
         kural:(t, ham) => gunKaydiCoz(t, ham),
         onizle:p => {
-          if(!gunOturum()) return { hata:'Gün kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış' };
+          if(!gunOturum()) return { hata:yz('ortak.king-arac.gun-kaydi-hesap-sunucusunda-2') };
           const m = gunKaydiMetin(p || {});
           return m ? { metin:yz('ortak.king-arac.gun-e-yazilacak') + m + '.' } : { hata:'yazılacak bir şey yok' };
         },
@@ -764,21 +892,21 @@ window.LIFEOS.PARCA.yazilar({
   const dk = m => m >= 60 ? Math.floor(m / 60) + ' sa' + (m % 60 ? ' ' + (m % 60) + ' dk' : '') : m + ' dk';
   function senAraclari(){
     return [
-      { ad:'gun_sen', tur:'oku', ornek:'beni ne besliyor', aciklama:'Gün › Sen kaydını okur: kullanıcının kendine koyduğu ilke, onu besleyen ve yoran şeyler, destedeki kartlar (Gün sayfasıyla aynı kayıt).',
+      { ad:'gun_sen', tur:'oku', ornek:'beni ne besliyor', aciklama:yz('ortak.king-arac.gun-sen-kaydini-okur'),
         kural:t => SEN_OKU_RE.test(t),
         calistir:async () => {
-          if(!senOturum()) return { cevap:'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          if(!senOturum()) return { cevap:yz('ortak.king-arac.sen-kaydi-hesap-sunucusunda') };
           const v = await KI.L.HESAP.gunSen() || {};
-          const l = [v.soz ? 'Kendi sözün: «' + v.soz + '».' : '', (v.veren || []).length ? 'Enerji veren: ' + v.veren.join(', ') + '.' : '',
-            (v.calan || []).length ? 'Enerji çalan: ' + v.calan.join(', ') + '.' : '', (v.deste || []).length ? 'Destende ' + v.deste.length + ' kart var.' : ''].filter(Boolean);
-          return { sonuc:v, cevap:l.length ? l.join(' ') : 'Sen bölümü boş: «sözüm: …», «enerji veren: …» ya da «desteye ekle: …» yazabilirsin.' };
+          const l = [v.soz ? yz('ortak.king-arac.kendi-sozun') + v.soz + '».' : '', (v.veren || []).length ? yz('ortak.king-arac.enerji-veren') + v.veren.join(', ') + '.' : '',
+            (v.calan || []).length ? yz('ortak.king-arac.enerji-calan') + v.calan.join(', ') + '.' : '', (v.deste || []).length ? yz('ortak.king-arac.destende') + v.deste.length + ' kart var.' : ''].filter(Boolean);
+          return { sonuc:v, cevap:l.length ? l.join(' ') : yz('ortak.king-arac.sen-bolumu-bos-sozum') };
         } },
-      { ad:'gun_sen_yaz', tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:'Gün › Sen kaydına yazar: kendi söz (en çok 160 karakter), enerji veren ya da çalan bir şey (en çok 40, listede en çok 12), desteye kart (en çok 60, destede en çok 30; enerjisi az ya da cok). Var olanlar silinmez.',
+      { ad:'gun_sen_yaz', tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:yz('ortak.king-arac.gun-sen-kaydina-yazar'),
         parametreler:{ type:'object', properties:{ soz:{ type:'string', maxLength:160 }, veren:{ type:'string', maxLength:40 }, calan:{ type:'string', maxLength:40 },
           kart:{ type:'string', maxLength:60 }, kart_enerji:{ type:'string', enum:['az', 'cok'] } } },
         kural:(t, ham) => senCoz(t, ham),
         onizle:p => {
-          if(!senOturum()) return { hata:'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış' };
+          if(!senOturum()) return { hata:yz('ortak.king-arac.sen-kaydi-hesap-sunucusunda-2') };
           const m = senMetin(p || {});
           return m ? { metin:yz('ortak.king-arac.gun-sen-e-yazilacak') + m + '.' } : { hata:'yazılacak bir şey yok' };
         },
@@ -799,18 +927,18 @@ window.LIFEOS.PARCA.yazilar({
       { ad:'gun_kart_cek', tur:'oku', ornek:'bir kart çek', aciklama:'«Ne yapsam?» destesinden kuralla bir kart çeker: sık yapılan ve bugünkü enerjiye uyan öne çıkar. Kayıt yazmaz.',
         kural:t => KART_RE.test(t),
         calistir:async () => {
-          if(!senOturum() || !GV()) return { cevap:'Deste hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          if(!senOturum() || !GV()) return { cevap:yz('ortak.king-arac.deste-hesap-sunucusunda-bu-c') };
           const H = KI.L.HESAP, v = await H.gunSen() || {}, g = await H.gunKayit();
           const enerji = g && !g.bayat ? g.enerji || null : null, d = (v.deste || []).length ? v.deste : GV().BASLANGIC;
           const c = GV().kartCek(d, enerji, []);
-          if(!c) return { cevap:'Deste boş.' };
-          return { sonuc:c, cevap:'Kartın: «' + c.kart.ad + '». ' + c.neden + (enerji ? ' (enerjin ' + enerji + '/5)' : '') + '. Yaptıysan Gün › Sen’de «Yaptım» de; deste öğrenir.' };
+          if(!c) return { cevap:yz('ortak.king-arac.deste-bos') };
+          return { sonuc:c, cevap:yz('ortak.king-arac.kartin') + c.kart.ad + '». ' + c.neden + (enerji ? ' (enerjin ' + enerji + '/5)' : '') + '. Yaptıysan Gün › Sen’de «Yaptım» de; deste öğrenir.' };
         } },
-      { ad:'gun_karne', tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:'Hayat karnesi: son 7 ya da 30 günde çalışma (AYS) ve gelişim (ESP) dakikaları ve etkin gün sayısı (ölçüldü); SPİ alanları veri yok.',
+      { ad:'gun_karne', tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:yz('ortak.king-arac.hayat-karnesi-son-7-ya'),
         parametreler:{ type:'object', properties:{ gun:{ type:'integer', enum:[7, 30] } } },
         kural:t => { const m = t.match(KARNE_RE); return m ? { gun:(m[1] || m[2]) === 'ay' ? 30 : 7 } : null; },
         calistir:async p => {
-          if(!gunOturum() || !GV() || !KI.L.HESAP.gunluk) return { cevap:'Karne hesap sunucusundaki günlük özetten gelir; bu cihazda hesapla giriş yapılmamış.' };
+          if(!gunOturum() || !GV() || !KI.L.HESAP.gunluk) return { cevap:yz('ortak.king-arac.karne-hesap-sunucusundaki-gu') };
           const n = p && p.gun === 30 ? 30 : 7, H = KI.L.HESAP, d = GV().donem(await H.gunluk(), bugunIso(), n);
           const s = H.gunSen ? await H.gunSen() : null, z = GV().izDizi(s && s.iz, bugunIso(), n);
           const a = {}; d.satirlar.forEach(x => { a[x.alan] = x; });
@@ -818,7 +946,7 @@ window.LIFEOS.PARCA.yazilar({
           const l = [satir(a.calisma, 'Çalışma', 'AYS'), satir(a.gelisim, 'Gelişim', 'ESP'),
             z.ortalama == null ? 'enerji: veri yok' : 'enerji ortalaması ' + String(z.ortalama).replace('.', ',') + '/5 (senin girdiğin, ' + z.girilen + ' gün)', 'uyku, beslenme, hareket: veri yok'];
           return { sonuc:{ gun:n, satirlar:d.satirlar.map(x => ({ alan:x.alan, toplam:x.toplam, etkin:x.etkin, bilinen:x.bilinen })), enerji:z.ortalama },
-            cevap:'Son ' + n + ' gün: ' + l.join('; ') + '.' };
+            cevap:yz('ortak.king-arac.son') + n + ' gün: ' + l.join('; ') + '.' };
         } },
     ];
   }
@@ -831,11 +959,11 @@ window.LIFEOS.PARCA.yazilar({
     const oneri = p => { const y = Y(); const l = y && y.bekleyenler ? y.bekleyenler() : []; return l[p.sira - 1] || null; };
     const l = [
       { ad:'sistem_haritasi', tur:'oku', ornek:'bu sistemde neler var?',
-        aciklama:'LifeOS’ta ne var: hangi iş hangi modülde, hangi sayfada ve King’den nasıl yapılır. «Ne var», «nerede», «nasıl yapılır» sorularında çağır.',
+        aciklama:yz('ortak.king-arac.lifeos-ta-ne-var-hangi-is'),
         parametreler:{ type:'object', properties:{ konu:{ type:'string', maxLength:80, description:'aranan iş (ör. «uyku girmek»); boşsa genel harita' } } },
         calistir:p => haritaCevap(p.konu || '') },
       { ad:'sayfa_ac', tur:'oku', ornek:'deneme sayfasını aç',
-        aciklama:'Bir modülün sayfasını açar; veri değiştirmez. Sayfalar: ' + KI.SAYFALAR.map(s => s.modul + '/' + s.route + ' ' + s.ad).join(', ') + '.',
+        aciklama:yz('ortak.king-arac.bir-modulun-sayfasini-acar-v') + KI.SAYFALAR.map(s => s.modul + '/' + s.route + ' ' + s.ad).join(', ') + '.',
         parametreler:{ type:'object', properties:{ modul:{ type:'string', enum:['ays', 'spi', 'esp'] }, sayfa:{ type:'string', enum:rotalar } }, required:['modul', 'sayfa'] },
         calistir:p => {
           if(!KI.SAYFALAR.some(s => s.modul === p.modul && s.route === p.sayfa)) return { hata:'bu modülde böyle bir sayfa yok' };
@@ -844,7 +972,8 @@ window.LIFEOS.PARCA.yazilar({
           return { cevap:eylemCumlesi(h, 'Tamam.') };
         } },
       { ad:'modul_bilgileri', tur:'oku', ornek:'bu modülde sayılarım ne durumda?',
-        aciklama:'Bu modülün kayıtlı sayıları, kesinlik etiketiyle (ölçüldü, tahmin, hesaplandı, veri yok). Sayıyı modülün kuralı üretir; değer «veri yok» ise sayı söyleme.',
+        aciklama:yz('ortak.king-arac.bu-modulun-kayitli-sayilari'),
+        kural:t => /(?:^|\s)sayılarım[ıa]?(?:$|\s|[?.!])/.test(t) || null,
         kullanilir:() => !!(KI.L.PARCA && KI.ayar && KI.L.PARCA.bilgiler(KI.ayar.modul + '.').length),
         calistir:() => {
           const l = KI.L.PARCA.bilgiler(KI.ayar.modul + '.');
@@ -852,7 +981,7 @@ window.LIFEOS.PARCA.yazilar({
             satirlar:l.map(b => b.ad + ': ' + (b.deger == null ? 'veri yok' : String(b.deger).replace('.', ',') + (b.birim ? ' ' + b.birim : '') + ' (' + b.etiket + ')')) };
         } },
       { ad:'kayit_gir', tur:'yaz', ornek:({ ays:'matematikten 40 soru çözdüm', spi:'7 saat uyudum', esp:'45 dk gitar' })[KI.ayar && KI.ayar.modul] || '7 saat uyudum',
-        aciklama:'Kullanıcının YAPTIĞI bir işi (soru, süre, uyku, su, öğün, antrenman, çalışma oturumu, not) bu modülün kendi ayrıştırıcısıyla kayda çevirir; önizleme gösterilir, onayla yazılır. metin: kullanıcının cümlesi, sayıları aynen.',
+        aciklama:yz('ortak.king-arac.kullanicinin-yaptigi-bir-isi'),
         parametreler:{ type:'object', properties:{ metin:{ type:'string', maxLength:300 } }, required:['metin'] },
         kullanilir:() => !!KI.veriKapisi(),
         onizle:(p, b) => {
@@ -873,22 +1002,22 @@ window.LIFEOS.PARCA.yazilar({
           return { hata:'modül bu cümleyi kayıt olarak anlamadı' };
         },
         uygula:() => ({ ok:false, metin:yz('ortak.king-arac.kayit-onizlemeden-yazilir') }) },
-      { ad:'bugun_ozeti', tur:'oku', ornek:'bugünün özeti', aciklama:'Bu modülde bugünün özeti (modülün kendi cümleleri).',
+      { ad:'bugun_ozeti', tur:'oku', ornek:'bugünün özeti', aciklama:yz('ortak.king-arac.bu-modulde-bugunun-ozeti-mod'),
         kullanilir:() => !!(KI.ayar && typeof KI.ayar.ozet === 'function'),
-        calistir:() => { const s = KI.ozetSatirlari(); return { sonuc:{ satirlar:s }, cevap:s.length ? (KI.MODUL_AD[KI.ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', satirlar:s }; } },
-      { ad:'istatistikler', tur:'oku', ornek:'istatistiklerim', aciklama:'Bu modülün istatistik kartları (sayıları modül hesaplar).',
+        calistir:() => { const s = KI.ozetSatirlari(); return { sonuc:{ satirlar:s }, cevap:s.length ? (KI.MODUL_AD[KI.ayar.modul] || '') + '’de bugün:' : yz('ortak.king-arac.bugun-icin-henuz-bir-sey'), satirlar:s }; } },
+      { ad:'istatistikler', tur:'oku', ornek:'istatistiklerim', aciklama:yz('ortak.king-arac.bu-modulun-istatistik-kartla'),
         kullanilir:() => typeof K().istatistik === 'function', calistir:() => akisla(m => KI.kartIsle({ tur:'istatistik' }, m)) },
-      { ad:'soru_sor', tur:'oku', ornek:'türev hakkında soru sor', aciklama:'Modülün bankasından bir soru kartı getirir.',
+      { ad:'soru_sor', tur:'oku', ornek:'türev hakkında soru sor', aciklama:yz('ortak.king-arac.modulun-bankasindan-bir-soru'),
         parametreler:{ type:'object', properties:{ konu:{ type:'string', maxLength:60 } } },
         kullanilir:() => typeof K().soru === 'function', calistir:p => akisla(m => KI.kartIsle({ tur:'soru', konu:p.konu || '' }, m)) },
-      { ad:'oncelik_listesi', tur:'oku', ornek:'neye çalışayım', aciklama:'Puan getirecek öncelikli konular (modülün hesabı: çıkma sıklığı × hata).',
+      { ad:'oncelik_listesi', tur:'oku', ornek:'neye çalışayım', aciklama:yz('ortak.king-arac.puan-getirecek-oncelikli-kon'),
         kullanilir:() => typeof K().oncelik === 'function', calistir:() => akisla(m => oncelikIsle(m)) },
-      { ad:'yuk_durumu', tur:'oku', ornek:'yük durumum', aciklama:'Son 7 gün ile önceki 7 günün karşılaştırması ve yük sinyali.',
+      { ad:'yuk_durumu', tur:'oku', ornek:'yük durumum', aciklama:yz('ortak.king-arac.son-7-gun-ile-onceki'),
         kullanilir:() => typeof K().yuk === 'function', calistir:() => akisla(m => yukIsle(m)) },
-      { ad:'not_ara', tur:'oku', ornek:'notlarımda türev', aciklama:'Defter notlarında arar; bulunan notlara dayanarak cevaplar.',
+      { ad:'not_ara', tur:'oku', ornek:'notlarımda türev', aciklama:yz('ortak.king-arac.defter-notlarinda-arar-bulun'),
         parametreler:{ type:'object', properties:{ sorgu:{ type:'string', maxLength:80 } }, required:['sorgu'] },
         kullanilir:() => !!D(), calistir:p => akisla(m => notAra(m || p.sorgu, KI.kucuk(p.sorgu))) },
-      { ad:'not_ekle', tur:'yaz', ornek:'deftere not: üslülerde tabanlar aynıysa üsler toplanır', aciklama:'Defter’e yeni bir not yazar.',
+      { ad:'not_ekle', tur:'yaz', ornek:'deftere not: üslülerde tabanlar aynıysa üsler toplanır', aciklama:yz('ortak.king-arac.defter-e-yeni-bir-not-yazar'),
         kural:(t, m) => { const x = /^(?:\S+ )?defter(?:e|ine) not\s*[:,]\s*(\S[\s\S]{1,1999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; },
         parametreler:{ type:'object', properties:{ baslik:{ type:'string', maxLength:120 }, metin:{ type:'string', maxLength:2000 } }, required:['metin'] },
         kullanilir:() => !!D(),
@@ -897,48 +1026,48 @@ window.LIFEOS.PARCA.yazilar({
           const n = await D().yeni(p.baslik || String(p.metin).split(/[.\n]/)[0].slice(0, 60), p.metin, 'not');
           return { metin:yz('ortak.king-arac.defter-e-yazdim'), geriAl:n && n.id && D().sil ? async () => { await D().sil(n.id); } : null };
         } },
-      { ad:'onaylari_listele', tur:'oku', ornek:'bekleyen öneriler', aciklama:'Onaylar’da bekleyen öneriler (sıra numarasıyla).',
+      { ad:'onaylari_listele', tur:'oku', ornek:'bekleyen öneriler', aciklama:yz('ortak.king-arac.onaylar-da-bekleyen-oneriler'),
         kullanilir:() => !!(Y() && Y().bekleyenler),
         calistir:() => { const b = Y().bekleyenler(); return { sonuc:{ bekleyen:b.map((x, i) => ({ sira:i + 1, metin:x.metin })) },
-          cevap:b.length ? b.length + ' öneri onay bekliyor:' : 'Onay bekleyen öneri yok.', satirlar:b.slice(0, 8).map((x, i) => (i + 1) + '. ' + x.metin) }; } },
-      { ad:'oneri_onayla', tur:'yaz', ornek:'ikinci öneriyi onayla', aciklama:'Onaylar’daki bir öneriyi onaylar; modülün kendi kodu uygular.', parametreler:sira,
+          cevap:b.length ? b.length + ' öneri onay bekliyor:' : yz('ortak.king-arac.onay-bekleyen-oneri-yok'), satirlar:b.slice(0, 8).map((x, i) => (i + 1) + '. ' + x.metin) }; } },
+      { ad:'oneri_onayla', tur:'yaz', ornek:'ikinci öneriyi onayla', aciklama:yz('ortak.king-arac.onaylar-daki-bir-oneriyi-ona'), parametreler:sira,
         kullanilir:() => !!(Y() && Y().bekleyenler), onizle:p => { const x = oneri(p); return x ? yetkiNiyet('onay-tek', { id:x.id, metin:x.metin }) : { hata:'o sırada öneri yok' }; }, uygula:() => ({ ok:false }) },
-      { ad:'oneri_gec', tur:'yaz', ornek:'ilk öneriyi geç', aciklama:'Onaylar’daki bir öneriyi geçer; uygulanmaz.', parametreler:sira,
+      { ad:'oneri_gec', tur:'yaz', ornek:'ilk öneriyi geç', aciklama:yz('ortak.king-arac.onaylar-daki-bir-oneriyi-gec'), parametreler:sira,
         kullanilir:() => !!(Y() && Y().bekleyenler), onizle:p => { const x = oneri(p); return x ? yetkiNiyet('red-tek', { id:x.id, metin:x.metin }) : { hata:'o sırada öneri yok' }; }, uygula:() => ({ ok:false }) },
-      { ad:'onerilerin_hepsi', tur:'yaz', ornek:'hepsini onayla', aciklama:'Bekleyen bütün önerileri onaylar ya da geçer.',
+      { ad:'onerilerin_hepsi', tur:'yaz', ornek:'hepsini onayla', aciklama:yz('ortak.king-arac.bekleyen-butun-onerileri-ona'),
         parametreler:{ type:'object', properties:{ karar:{ type:'string', enum:['onayla', 'gec'] } }, required:['karar'] },
         kullanilir:() => !!(Y() && Y().bekleyenler), onizle:p => yetkiNiyet(p.karar === 'onayla' ? 'onay-hepsi' : 'red-hepsi', {}), uygula:() => ({ ok:false }) },
       { ad:'ayar_degistir', tur:'yaz', ornek:'koyu temaya geç',
-        aciklama:'LifeOS görünüm ayarı: tema (koyu, acik, sistem), animasyon (tam, az, sistem), zemin (sade, canli), muzik (cal, dur).',
+        aciklama:yz('ortak.king-arac.lifeos-gorunum-ayari-tema-ko'),
         parametreler:{ type:'object', properties:{ ayar:{ type:'string', enum:Object.keys(YETKI_AYAR) }, deger:{ type:'string', maxLength:12 } }, required:['ayar', 'deger'] },
         kullanilir:() => !!Y(),
         onizle:p => { const a = YETKI_AYAR[p.ayar], v = a && a.degerler[KI.kucuk(p.deger).replace(/ı/g, 'i').replace('açık', 'acik').replace('canlı', 'canli')];
           return v ? yetkiNiyet(a.id, { v }) : { hata:p.ayar + ' için bu değer yok' }; }, uygula:() => ({ ok:false }) },
       { ad:'king_ayari', tur:'yaz', ornek:'cevapları sesli oku',
-        aciklama:'King’in kendi tercihi: cevap (oto, ses, yazi), derinlik (oto, hizli, dengeli, derin), tarz (samimi, resmi, kisa), ses (oto, gemini, piper, cihaz).',
+        aciklama:yz('ortak.king-arac.king-in-kendi-tercihi-cevap'),
         parametreler:{ type:'object', properties:{ ayar:{ type:'string', enum:Object.keys(KING_AYAR) }, deger:{ type:'string', maxLength:12 } }, required:['ayar', 'deger'] },
         onizle:p => { const a = KING_AYAR[p.ayar];
           return a && a.degerler.indexOf(p.deger) >= 0 ? { metin:a.ad + ' «' + (a.adlar[p.deger] || p.deger) + '» olacak (şu an «' + (a.adlar[a.oku()] || a.oku()) + '»).' } : { hata:'bu değer yok' }; },
         uygula:p => { const a = KING_AYAR[p.ayar], eski = a.oku(); a.yaz(p.deger);
           return { metin:a.ad + ' artık «' + (a.adlar[p.deger] || p.deger) + '».', geriAl:async () => { a.yaz(eski); } }; } },
-      { ad:'odak_baslat', tur:'oku', ornek:'25 dakika matematik çalışalım', aciklama:'King’in odak sayacını başlatır (kayıt yazmaz; bitince kaydetmeyi sorar).',
+      { ad:'odak_baslat', tur:'oku', ornek:'25 dakika matematik çalışalım', aciklama:yz('ortak.king-arac.king-in-odak-sayacini-baslat'),
         parametreler:{ type:'object', properties:{ dakika:{ type:'integer', minimum:1, maximum:180 }, konu:{ type:'string', maxLength:60 } }, required:['dakika'] },
         calistir:p => { KI.odakBaslat(p.dakika, p.konu || ''); return { cevap:p.dakika + ' dakikalık odak başladı' + (p.konu ? ' (' + p.konu + ')' : '') + '. Süre dolunca haber vereceğim.' }; } },
-      { ad:'odak_durdur', tur:'oku', ornek:'sayacı durdur', aciklama:'Çalışan odak sayacını durdurur.',
-        calistir:() => { const v = KI.odak(); KI.odakTemizle(); KI.ortam.depo.sil(KI.ODAK); return { cevap:v ? 'Odak sayacını durdurdum.' : 'Çalışan bir odak sayacı yok.' }; } },
+      { ad:'odak_durdur', tur:'oku', ornek:'sayacı durdur', aciklama:yz('ortak.king-arac.calisan-odak-sayacini-durdur'),
+        calistir:() => { const v = KI.odak(); KI.odakTemizle(); KI.ortam.depo.sil(KI.ODAK); return { cevap:v ? yz('ortak.king-arac.odak-sayacini-durdurdum') : yz('ortak.king-arac.calisan-bir-odak-sayaci-yok') }; } },
       { ad:'king_harcama', tur:'oku', ornek:'bugün ne harcadın', es:/((?:bugün )?ne (?:kadar )?harcad[ıi]n|harcaman(?:ı| ne)|kaç (?:jeton|token)|model çağrı)/,
-        aciklama:'King’in bugünkü model kullanımı: çağrı, jeton, maliyet ve süre (Merkez’in defterinden; sayıyı HKM ölçer).',
+        aciklama:yz('ortak.king-arac.king-in-bugunku-model-kullan'),
         kullanilir:() => !!KI.baglanti(),
         calistir:async () => { await KI.eylemTazele(); const o = KI.harcamaOzet(KI.harcama);
-          return o ? { sonuc:KI.harcama, cevap:o.cumle } : { hata:'Merkez’den harcama okunamadı' }; } },
+          return o ? { sonuc:KI.harcama, cevap:o.cumle } : { hata:yz('ortak.king-arac.merkez-den-harcama-okunamadi') }; } },
       /* KING-4 §E dış dünya: her yetenek ayrı izinli (HKM `dis_dunya`, varsayılan kapalı), her eylem onaylı
          («Onaylıyorum»), HKM deftere yazar ve geri alır (core/disdunya.py). Ekran okuma bir şey değiştirmese de
          ekran içeriği dışarı çıktığı için bu kapıdan geçer (§G kademesi «dış»). */
       ...disAraclar(),
       ...gunAraclari(),
-      { ad:'merkez_raporu', tur:'oku', ornek:'haftalık değerlendirme', aciklama:'Merkez’in raporu: hafta (haftalık değerlendirme) ya da capraz (modüller arası bulgular); sayıları kural motoru yazar.',
+      { ad:'merkez_raporu', tur:'oku', ornek:'haftalık değerlendirme', aciklama:yz('ortak.king-arac.merkez-in-raporu-hafta-hafta'),
         parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['hafta', 'capraz'] } }, required:['tur'] },
-        calistir:p => akisla(m => KI.merkezKomut(m, p.tur, p.tur === 'hafta' ? 'Haftalık değerlendirme' : 'Modüller arası bulgular')) },
+        calistir:p => akisla(m => KI.merkezKomut(m, p.tur, p.tur === 'hafta' ? yz('ortak.king-arac.haftalik-degerlendirme') : yz('ortak.king-arac.moduller-arasi-bulgular'))) },
     ];
     /* Modülün yetki eylemleri (toplantı, inceleme, kitap ekle; yetki.js söz 8–9). */
     const y = Y();
@@ -956,9 +1085,9 @@ window.LIFEOS.PARCA.yazilar({
   }
   /* Yazan aracın önizlemesi onay kartı olur (model seçimi ve söz 37'nin fotoğraf işi aynı kart). */
   /* Onay kartı tek dokunuş (KING-4 §F); dış dünya (§G) dönüş noktası değil, dışarıya dokunur. */
-  const onayAdi = n => n.dis ? 'Onaylıyorum' : n.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla';
-  const onaySorusu = n => n.dis ? 'Bilgisayarına ya da telefonuna dokunur: düğmeye dokun ya da «Onaylıyorum» yaz.'
-    : n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?';
+  const onayAdi = n => n.dis ? 'Onaylıyorum' : n.seviye === 'buyuk' ? yz('ortak.king-arac.donus-noktasi-al-ve-uygula') : 'Onayla';
+  const onaySorusu = n => n.dis ? yz('ortak.king-arac.bilgisayarina-ya-da-telefonu')
+    : n.seviye === 'buyuk' ? yz('ortak.king-arac.buyuk-degisiklik-onayliyorum') : yz('ortak.king-arac.onayliyor-musun');
   function aracKart(o, onMetin, ekSatir){
     if(o.onizle.veri){
       /* Kayıt: yerel veri önizlemesiyle aynı kart (söz 3, 8). */
@@ -997,7 +1126,7 @@ window.LIFEOS.PARCA.yazilar({
     if(yazma){
       const o = await A.onizle(yazma.arac.ad, yazma.param, { metin });
       if(!o.ok){
-        KI.soyle('Bunu yapmak istedim ama olmadı: ' + o.hata + '. Kendi cümlenle yazarsan ya da sayfasından yaparsan olur.');
+        KI.soyle(yz('ortak.king-arac.bunu-yapmak-istedim-ama-olma') + o.hata + '. Kendi cümlenle yazarsan ya da sayfasından yaparsan olur.');
         return { tur:'arac-red' };
       }
       return aracKart(o);
@@ -1032,7 +1161,7 @@ window.LIFEOS.PARCA.yazilar({
       const satir = [].concat.apply([], sonuclar.map(x => x.satirlar || []));
       const adimEk = adimlar.length > 1 ? { adimlar } : {};
       if(r2.ok && !r2.arac) KI.soyle(r2.text, satir.length ? satir : null, null, null, Object.assign(adimEk, r2.akti ? { yeni:false, okunan:r2.okunan } : {}));
-      else KI.soyle(satir.length ? 'Sistemden okudum:' : 'Sistemden okudum ama Merkez cümleye çeviremedi; ilgili sayfadan bakabilirsin.', satir.length ? satir : null, null, null, adimEk);
+      else KI.soyle(satir.length ? yz('ortak.king-arac.sistemden-okudum') : yz('ortak.king-arac.sistemden-okudum-ama-merkez'), satir.length ? satir : null, null, null, adimEk);
       KI.cipler = KI.oneriListesi(true);
       KI.ciz(false);
       return { tur:'arac-oku', n:sonuclar.length };
@@ -1062,7 +1191,7 @@ window.LIFEOS.PARCA.yazilar({
     KI.cipler = null;
     const r = await aracIsle({ arac:[{ ad:b.ad, param:Object.assign({}, b.param, { [b.k]:String(metin).trim().slice(0, 120) }) }] }, metin);
     if(r) return r;
-    KI.soyle('Bunu yapamadım; sayfasından ya da tam cümleyle dener misin?');
+    KI.soyle(yz('ortak.king-arac.bunu-yapamadim-sayfasindan-y'));
     return { tur:'arac-red' };
   }
 
@@ -1078,7 +1207,7 @@ window.LIFEOS.PARCA.yazilar({
     const h = KI.HAZIR[i];
     if(!h) return;
     KI.akis.push({ kim:'sen', metin:h.ad });
-    if(h.ozet){ KI.cipler = null; const s = KI.ozetSatirlari(); KI.soyle(s.length ? (KI.MODUL_AD[KI.ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s); return; }
+    if(h.ozet){ KI.cipler = null; const s = KI.ozetSatirlari(); KI.soyle(s.length ? (KI.MODUL_AD[KI.ayar.modul] || '') + '’de bugün:' : yz('ortak.king-arac.bugun-icin-henuz-bir-sey'), s); return; }
     KI.soyle(eylemCumlesi(h, h.cevap));
     KI.ortam.zamanla(() => KI.git(h), KI.sesli ? 1100 : 650);
   }
@@ -1087,7 +1216,7 @@ window.LIFEOS.PARCA.yazilar({
   function eylemCumlesi(h, cevap){
     const s = h && KI.SAYFALAR.find(x => x.modul === h.modul && x.route === h.route);
     const yer = s ? s.ad + (h.modul !== (KI.ayar && KI.ayar.modul) ? ' (' + KI.MODUL_AD[h.modul] + ')' : '') : '';
-    return (cevap || 'Kolay gelsin.') + (yer ? ' ' + yer + ' açılıyor.' : '');
+    return (cevap || yz('ortak.king-arac.kolay-gelsin')) + (yer ? ' ' + yer + ' açılıyor.' : '');
   }
 
   Object.assign(KI, { onayAdi, onaySorusu, D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });

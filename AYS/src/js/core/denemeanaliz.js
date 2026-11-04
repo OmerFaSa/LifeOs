@@ -52,6 +52,15 @@
         yayınıdır: Öğren, çıkmış soru ve test kitabı hataları ne bu yayına ne
         «öteki yayınlar»a karışır (bir denemenin yayını «ÖSYM» yazılsa bile). */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.denemeanaliz.i-ki-testin-adi-ayni':'İki testin adı aynı (',
+  'ays.core.denemeanaliz.dogru-cevap':'Doğru cevap: ',
+  'ays.core.denemeanaliz.nereden-baslanir':'Nereden başlanır: ',
+  'ays.core.denemeanaliz.cozumu-ve-ilkeyi-hata-kaydin':'Çözümü ve ilkeyi hata kaydına yaz.',
+  'ays.core.denemeanaliz.model-baska-bir-dersten-konu':'Model başka bir dersten konu söyledi; yazılmadı.',
+  'ays.core.denemeanaliz.modelin-soyledigi-konu':'Modelin söylediği konu («',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.denemeanaliz.konu':'— konu —',
   'ays.core.denemeanaliz.bu-konu-katalogda-yok':'Bu konu katalogda yok.',
   'ays.core.denemeanaliz.bu-konu':'Bu konu ',
@@ -229,7 +238,7 @@ R.DenemeAnaliz = (function(){
 
   async function girdileriYaz(exam, girdiler){
     const ayni = ayniAdlar(exam);
-    if(ayni.length) return { ok:false, hatalar:['İki testin adı aynı (' + ayni.map(a => '«' + a + '»').join(', ')
+    if(ayni.length) return { ok:false, hatalar:[yz('ays.core.denemeanaliz.i-ki-testin-adi-ayni') + ayni.map(a => '«' + a + '»').join(', ')
       + '); anahtarları karışır. Denemeyi düzenleyip test adlarını ayır.'] };
     const sonuc = (girdiler || []).map(g => Object.assign({ test:g.test }, dogrula(exam, g.test, g.anahtar, g.cevap)));
     const hatalar = sonuc.filter(x => !x.ok).map(x => x.hata);
@@ -406,7 +415,7 @@ R.DenemeAnaliz = (function(){
 
   function kartArkasi(exam, key, dogru){
     const fikir = tutarOf(exam, key) === true ? baslangicFikri(cozumOf(exam, key)) : '';
-    return 'Doğru cevap: ' + dogru + '. ' + (fikir ? 'Nereden başlanır: ' + fikir : 'Çözümü ve ilkeyi hata kaydına yaz.');
+    return yz('ays.core.denemeanaliz.dogru-cevap') + dogru + '. ' + (fikir ? yz('ays.core.denemeanaliz.nereden-baslanir') + fikir : yz('ays.core.denemeanaliz.cozumu-ve-ilkeyi-hata-kaydin'));
   }
 
   async function coz(exam, key, opts){
@@ -443,10 +452,10 @@ R.DenemeAnaliz = (function(){
     let konuNotu = '';
     if(m.subjectId && m.topicId){
       const ids = dersler(test, exam.family);
-      if(ids.length && ids.indexOf(m.subjectId) < 0) konuNotu = 'Model başka bir dersten konu söyledi; yazılmadı.';
+      if(ids.length && ids.indexOf(m.subjectId) < 0) konuNotu = yz('ays.core.denemeanaliz.model-baska-bir-dersten-konu');
       else if(!(a.topicRef && a.konuKaynak === 'elle')){ a.topicRef = m.subjectId + '::' + m.topicId; a.konuKaynak = 'tahmin'; }
     }else if(m.rawTopic){
-      konuNotu = 'Modelin söylediği konu («' + m.rawTopic + '») katalogda yok; konuyu elle seç.';
+      konuNotu = yz('ays.core.denemeanaliz.modelin-soyledigi-konu') + m.rawTopic + '») katalogda yok; konuyu elle seç.';
     }
     await M().saveExam(exam);
     if(a.topicRef !== eski) await hataKonusunuEsle(exam, key, eski);

@@ -31,6 +31,15 @@
    DSÖ bant adıdır ve bant olarak gösterilir, kişiye hüküm olarak değil
    (§1.5). */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.vucut.bki-kas-ile-yagi-ayirmaz':'BKİ kas ile yağı ayırmaz; kaslı bedende yüksek çıkabilir.',
+  'spi.core.vucut.bel-boyun-yarisini-gecmis-ya':'Bel, boyun yarısını geçmiş: yaygın kullanılan dikkat eşiği (teşhis değil).',
+  'spi.core.vucut.bel-boyun-yarisinin-altinda':'Bel, boyun yarısının altında.',
+  'spi.core.vucut.abd-donanmasi-cevre-yontemi':'ABD Donanması çevre yöntemi',
+  'spi.core.vucut.tipik-hata-3-4-puan':'Tipik hata ±3–4 puan.',
+  'spi.core.vucut.girdigin-ogunler-eksikse-bu':'Girdiğin öğünler eksikse bu tahmin düşük çıkar.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.vucut.zayif-dso':'Zayıf (DSÖ)',
   'spi.core.vucut.normal-dso':'Normal (DSÖ)',
   'spi.core.vucut.fazla-kilolu-dso':'Fazla kilolu (DSÖ)',
@@ -60,14 +69,14 @@ SP.Vucut = (function(){
     const m = cm / 100, v = kg / (m * m);
     const b = BKI_BANT.find(x => v < x.ust);
     return { deger:yuvarla(v, 1), bant:b.ad, ton:b.ton, etiket:yz('spi.core.vucut.hesaplandi'),
-      not:'BKİ kas ile yağı ayırmaz; kaslı bedende yüksek çıkabilir.' };
+      not:yz('spi.core.vucut.bki-kas-ile-yagi-ayirmaz') };
   }
   function belBoy(bel, cm){
     bel = sayi(bel); cm = sayi(cm);
     if(!bel || !cm) return null;
     const v = bel / cm;
     return { deger:yuvarla(v, 2), dikkat:v >= 0.5, etiket:yz('spi.core.vucut.hesaplandi'),
-      not:v >= 0.5 ? 'Bel, boyun yarısını geçmiş: yaygın kullanılan dikkat eşiği (teşhis değil).' : 'Bel, boyun yarısının altında.' };
+      not:v >= 0.5 ? yz('spi.core.vucut.bel-boyun-yarisini-gecmis-ya') : yz('spi.core.vucut.bel-boyun-yarisinin-altinda') };
   }
   function navyYag(cins, cm, boyun, bel, kalca){
     cm = sayi(cm); boyun = sayi(boyun); bel = sayi(bel); kalca = sayi(kalca);
@@ -81,7 +90,7 @@ SP.Vucut = (function(){
       v = 495 / (1.0324 - 0.19077 * Math.log10(bel - boyun) + 0.15456 * Math.log10(cm)) - 450;
     }
     if(!isFinite(v) || v < 2 || v > 70) return null;
-    return { deger:yuvarla(v, 1), etiket:'tahmin', yontem:'ABD Donanması çevre yöntemi', not:'Tipik hata ±3–4 puan.' };
+    return { deger:yuvarla(v, 1), etiket:'tahmin', yontem:yz('spi.core.vucut.abd-donanmasi-cevre-yontemi'), not:yz('spi.core.vucut.tipik-hata-3-4-puan') };
   }
   function yagsiz(kg, yagYuzde, cm){
     kg = sayi(kg); yagYuzde = sayi(yagYuzde); cm = sayi(cm);
@@ -117,7 +126,7 @@ SP.Vucut = (function(){
     const harcama = ortKcal - eg.haftalik * 7700 / 7;
     if(!isFinite(harcama) || harcama < 1000 || harcama > 6000) return null;
     return { harcama:Math.round(harcama / 10) * 10, etiket:'tahmin',
-      not:'Girdiğin öğünler eksikse bu tahmin düşük çıkar.' };
+      not:yz('spi.core.vucut.girdigin-ogunler-eksikse-bu') };
   }
 
   /* Ekranın tek çağrısı: profil + son ölçüler + seriler → tablo satırları. */

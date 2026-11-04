@@ -3,6 +3,81 @@
    Dört sekme: kullanım, model ayarları, veri (yedek) ve sınırlar.
    Sınırlar sekmesi süs değildir: sistemin ne yapmayacağı, verinin nereye
    gittiği ve kırmızı bayrak protokolü orada açıkça yazar. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.guide.ogun-girmek':'Öğün girmek',
+  'spi.guide.besin-ogunler-sayfasinda-tek':'Besin → Öğünler sayfasında tek satır yaz: «1 tabak etli kuru fasulye, 1 bardak ayran». ',
+  'spi.guide.ev-olcusu-taninir-ve-gramaj':'Ev ölçüsü tanınır ve gramaj tahmin olarak işaretlenir.',
+  'spi.guide.test-girmek':'Test girmek',
+  'spi.guide.testler-rapor-yapistir-ya':'Testler → Rapor yapıştır ya da Test gir. Laboratuvar metnini olduğu gibi yapıştır; ',
+  'spi.guide.gunluk-olcum':'Günlük ölçüm',
+  'spi.guide.gunluk-olcum-ekraninda-uyku':'Günlük ölçüm ekranında uyku, nabız ve hissettiğin hâl. ',
+  'spi.guide.hepsi-zorunlu-degil-eksik-gi':'Hepsi zorunlu değil: eksik girdi sıfır sayılmaz.',
+  'spi.guide.hareket-bolumu-kardiyo-kuvve':'Hareket bölümü kardiyo, kuvvet, esneklik ve dinlenme sayfalarına ayrılır; Bugün sayfası günün yük emrini verir. Emri toparlanma belirler, istek değil.',
+  'spi.guide.finans-sepet-sayfasina-hafta':'Finans → Sepet sayfasına haftalık alışverişi gir; Bütçe sayfası koçların talebini toplar. Fiyatı kendi fişinden düzeltince ',
+  'spi.guide.bes-ajan-kendi-alanina-bakar':'Beş ajan kendi alanına bakar. Danışma ekranından birine doğrudan soru sorabilirsin.',
+  'spi.guide.hkm-bagli-degil-ofis-kural':'HKM bağlı değil. Ofis kural motoruyla çalışıyor; HKM’ye bağlanınca oradaki model kullanılır.',
+  'spi.guide.hkm-ye-soruluyor':'HKM’ye soruluyor…',
+  'spi.guide.model':'Model: ',
+  'spi.guide.king-in-ayarindan':'King’in ayarından',
+  'spi.guide.merkezde-model-yok':'Merkezde model yok.',
+  'spi.guide.kucuk-tek-olcum-bir-ogun':'Küçük: tek ölçüm, bir öğün, bir seans. Tahlil değerleri her zaman önce sorulur.',
+  'spi.guide.su-anki-boyut':'Şu anki boyut',
+  'spi.guide.gunluk-buyume':'Günlük büyüme',
+  'spi.guide.olcum-gunu':'Ölçüm günü',
+  'spi.guide.dolmaya-kalan':'Dolmaya kalan',
+  'spi.guide.ne-buyuyor':'Ne büyüyor',
+  'spi.guide.yer-ac':'Yer aç',
+  'spi.guide.son-gonderim-basarili':'Son gönderim başarılı',
+  'spi.guide.son-deneme-basarisiz':'Son deneme başarısız',
+  'spi.guide.henuz-hic-gonderilmedi':'Henüz hiç gönderilmedi.',
+  'spi.guide.bu-adrese-gonderim-yapilmaz':'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http ',
+  'spi.guide.bugun-ne-gidiyor':'Bugün ne gidiyor',
+  'spi.guide.govde-sozlesmeyi-gecmiyor':'Gövde sözleşmeyi geçmiyor: ',
+  'spi.guide.tahlil-oturumu':'Tahlil oturumu',
+  'spi.guide.ogun-gunu':'Öğün günü',
+  'spi.guide.kapladigi-alan':'Kapladığı alan',
+  'spi.guide.fotograf-yedege-girmez':'Fotoğraf · yedeğe girmez',
+  'spi.guide.tarayici-depolama-alaninin':'Tarayıcı depolama alanının %',
+  'spi.guide.henuz-yedek-alinmadi':'Henüz yedek alınmadı.',
+  'spi.guide.son-yedek':'Son yedek ',
+  'spi.guide.bu-cihaz':'Bu cihaz',
+  'spi.guide.profil-anahtari':'Profil anahtarı',
+  'spi.guide.kaynak-turu':'Kaynak türü',
+  'spi.guide.tanimli-esik':'Tanımlı eşik',
+  'spi.guide.kaynagi-yazilmis':'Kaynağı yazılmış',
+  'spi.guide.yonlendirmeye-yetkili':'Yönlendirmeye yetkili',
+  'spi.guide.kaynagi-eksik':'Kaynağı eksik',
+  'spi.guide.her-kirmizi-bayrak-en-az':'Her kırmızı bayrak en az uzlaşı derecesinde bir dayanağa ',
+  'spi.guide.ne-demek':'Ne demek',
+  'spi.guide.model-egitimi':'Model eğitimi',
+  'spi.guide.modele-giden':'Modele giden',
+  'spi.guide.yedek-dosyasi':'Yedek dosyası',
+  'spi.guide.model-yoksa':'Model yoksa',
+  'spi.guide.ne-arar':'Ne arar',
+  'spi.guide.bu-bolum-su-an-cizilemedi':'Bu bölüm şu an çizilemedi; verin yerinde duruyor.',
+  'spi.guide.dosya-okunuyor':'Dosya okunuyor',
+  'spi.guide.hkm-isareti-acildi':'HKM işareti açıldı',
+  'spi.guide.hkm-isareti-kapatildi':'HKM işareti kapatıldı',
+  'spi.guide.gonderilemedi':'Gönderilemedi (',
+  'spi.guide.gecersiz-yedek':'Geçersiz yedek',
+  'spi.guide.hkm-deki-yedek-yuklensin-mi':'HKM’deki yedek yüklensin mi?',
+  'spi.guide.tamamini-degistirir-yanlissa':'TAMAMINI değiştirir. Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.',
+  'spi.guide.bu-cihazdaki-veriyi-yedekle':'Bu cihazdaki veriyi yedekle değiştir',
+  'spi.guide.yedek-okunamadi':'Yedek okunamadı',
+  'spi.guide.aradan-gecen-surede-ekledigi':'Aradan geçen sürede eklediğin her şey kaybolur.',
+  'spi.guide.i-ce-aktarma-oncesine-don':'İçe aktarma öncesine dön',
+  'spi.guide.bu-profildeki-tahliller-olcu':'Bu profildeki tahliller, ölçümler, öğünler, antrenmanlar ve fotoğraflar silinir. ',
+  'spi.guide.geri-alinamaz-once-yedek-al':'Geri alınamaz. Önce yedek al.',
+  'spi.guide.bu-tur-sormadan-yazilacak-ge':'Bu tür sormadan yazılacak; geri alınabilir',
+  'spi.guide.bu-tur-her-zaman-once':'Bu tür her zaman önce sorulacak',
+  'spi.guide.her-kayit-once-sorulacak':'Her kayıt önce sorulacak',
+  'spi.guide.modelin-okudugu-kucuk-kayitl-2':'Modelin okuduğu küçük kayıtlar da sormadan yazılacak',
+  'spi.guide.yalniz-senin-yazdigin-kucuk':'Yalnız senin yazdığın küçük kayıtlar sormadan yazılacak',
+  'spi.guide.model-merkez-de-acik':'Model Merkez’de açık',
+  'spi.guide.model-acik':'Model açık',
+  'spi.guide.model-kapali-kural-motoru':'Model kapalı · kural motoru çalışıyor',
+});
+
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -157,16 +232,16 @@ SP.Screens.guide = (function(){
 
   function howCard(){
     const rows = [
-      ['Öğün girmek', 'Besin → Öğünler sayfasında tek satır yaz: «1 tabak etli kuru fasulye, 1 bardak ayran». '
-        + 'Ev ölçüsü tanınır ve gramaj tahmin olarak işaretlenir.'],
-      ['Test girmek', 'Testler → Rapor yapıştır ya da Test gir. Laboratuvar metnini olduğu gibi yapıştır; '
+      [yz('spi.guide.ogun-girmek'), yz('spi.guide.besin-ogunler-sayfasinda-tek')
+        + yz('spi.guide.ev-olcusu-taninir-ve-gramaj')],
+      [yz('spi.guide.test-girmek'), yz('spi.guide.testler-rapor-yapistir-ya')
         + 'eşleşen değerler listelenir, eşleşmeyen satırlar da gösterilir.'],
-      ['Günlük ölçüm', 'Günlük ölçüm ekranında uyku, nabız ve hissettiğin hâl. '
-        + 'Hepsi zorunlu değil: eksik girdi sıfır sayılmaz.'],
-      ['Antrenman', 'Hareket bölümü kardiyo, kuvvet, esneklik ve dinlenme sayfalarına ayrılır; Bugün sayfası günün yük emrini verir. Emri toparlanma belirler, istek değil.'],
-      ['Bütçe', 'Finans → Sepet sayfasına haftalık alışverişi gir; Bütçe sayfası koçların talebini toplar. Fiyatı kendi fişinden düzeltince '
+      [yz('spi.guide.gunluk-olcum'), yz('spi.guide.gunluk-olcum-ekraninda-uyku')
+        + yz('spi.guide.hepsi-zorunlu-degil-eksik-gi')],
+      ['Antrenman', yz('spi.guide.hareket-bolumu-kardiyo-kuvve')],
+      ['Bütçe', yz('spi.guide.finans-sepet-sayfasina-hafta')
         + 'hesap tahminden ölçüme geçer.'],
-      ['Ofis', 'Beş ajan kendi alanına bakar. Danışma ekranından birine doğrudan soru sorabilirsin.'],
+      ['Ofis', yz('spi.guide.bes-ajan-kendi-alanina-bakar')],
     ];
     return K.Card({ title:yz('spi.guide.nasil-kullanilir'), body:K.Table({ tight:true,
       headers:['İş', 'Yol'], rows:rows.map(r => [html`<b>${r[0]}</b>`, html`<span class="small">${r[1]}</span>`]) }) });
@@ -214,11 +289,11 @@ SP.Screens.guide = (function(){
     const d = MM ? MM.durum() : null;
     const bagli = !!(MM && MM.bagli());
     const hazir = bagli && d && d.ok;
-    const durum = !bagli ? 'HKM bağlı değil. Ofis kural motoruyla çalışıyor; HKM’ye bağlanınca oradaki model kullanılır.'
-      : !d ? 'HKM’ye soruluyor…'
-      : d.ok ? 'Model: ' + (d.model || '—') + (d.provider ? ' (' + d.provider + ')' : '')
-        + (d.inherited ? ' · ' + (d.from === 'king' ? 'King’in ayarından' : 'üst kademeden') + ' geliyor' : ' · SPİ’ye özel atama')
-      : (d.note || 'Merkezde model yok.') + ' Ofis kural motoruyla çalışıyor.';
+    const durum = !bagli ? yz('spi.guide.hkm-bagli-degil-ofis-kural')
+      : !d ? yz('spi.guide.hkm-ye-soruluyor')
+      : d.ok ? yz('spi.guide.model') + (d.model || '—') + (d.provider ? ' (' + d.provider + ')' : '')
+        + (d.inherited ? ' · ' + (d.from === 'king' ? yz('spi.guide.king-in-ayarindan') : 'üst kademeden') + ' geliyor' : ' · SPİ’ye özel atama')
+      : (d.note || yz('spi.guide.merkezde-model-yok')) + ' Ofis kural motoruyla çalışıyor.';
     return K.Card({
       title:yz('spi.guide.ofis-modeli'), hint:'no-model',
       sub:yz('spi.guide.ayar-hkm-de-ofis-modelsiz'),
@@ -231,7 +306,7 @@ SP.Screens.guide = (function(){
             <div class="mt-8">${K.Button({ label:yz('spi.guide.eski-ayari-sil'), size:'sm', tone:'ghost', act:'eski-model-sil' })}</div>` }))}
         ${K.Notice({ tone:'info', class:'mt-12', body:SP.GROUNDING.noModel + ' ' + SP.GROUNDING.authority })}
         <div class="mt-12">${K.Field({ label:yz('spi.guide.kucuk-kayitlar-sormadan-yazi'),
-          hint:'Küçük: tek ölçüm, bir öğün, bir seans. Tahlil değerleri her zaman önce sorulur.',
+          hint:yz('spi.guide.kucuk-tek-olcum-bir-ogun'),
           input:K.Select({ id:'m-otomatik', value:s.otomatikUygula || 'istek', change:'pick-otomatik',
             options:[
               { value:'istek', label:yz('spi.guide.yalniz-benim-yazdiklarim-one') },
@@ -309,25 +384,25 @@ SP.Screens.guide = (function(){
           title:hukum.title, body:hukum.note })}
 
         ${K.Table({ tight:true, headers:['Ölçüm', 'Değer'], rows:[
-          ['Şu anki boyut', dp.fmtBytes(buyume.bytes)],
-          ['Günlük büyüme', buyume.perDay == null ? 'veri yok'
+          [yz('spi.guide.su-anki-boyut'), dp.fmtBytes(buyume.bytes)],
+          [yz('spi.guide.gunluk-buyume'), buyume.perDay == null ? 'veri yok'
             : dp.fmtBytes(buyume.perDay) + '/gün'],
-          ['Ölçüm günü', String(buyume.samples)
+          [yz('spi.guide.olcum-gunu'), String(buyume.samples)
             + (buyume.cert === 'measured' ? ' (ölçüldü)'
               : buyume.cert === 'estimated' ? ' (tahmin)' : '')],
-          ['Dolmaya kalan', buyume.daysLeft == null ? '—' : buyume.daysLeft + ' gün'],
+          [yz('spi.guide.dolmaya-kalan'), buyume.daysLeft == null ? '—' : buyume.daysLeft + ' gün'],
           ['270 gün sonra', ufuk.cert === 'missing' ? 'veri yok'
             : dp.fmtBytes(ufuk.projected) + (ufuk.willFit ? ' (sığar)' : ' (sığmaz)')],
         ] })}
 
-        <div class="mt-12">${K.SectionTitle('Ne büyüyor')}</div>
+        <div class="mt-12">${K.SectionTitle(yz('spi.guide.ne-buyuyor'))}</div>
         ${K.Table({ tight:true,
           headers:['Kayıt', { label:yz('spi.guide.boyut'), num:true }, { label:yz('spi.guide.adet'), num:true }, 'Tür'],
           rows:dagilim.slice(0, 10).map(r => [r.label, dp.fmtBytes(r.bytes),
             String(r.count), r.content ? 'içerik' : (r.prunable ? 'budanabilir' : 'sistem')]) })}
 
         ${when(budanabilir.length, () => html`
-          <div class="mt-12">${K.SectionTitle('Yer aç')}</div>
+          <div class="mt-12">${K.SectionTitle(yz('spi.guide.yer-ac'))}</div>
           <p class="tiny dim">${yz('spi.guide.yalnizca-sistemin-kendi-uret')}</p>
           ${map(budanabilir, b => html`
             <label class="row wrap gap-8 mt-8">
@@ -351,10 +426,10 @@ SP.Screens.guide = (function(){
     const a = SP.Beacon.settings();
     const on = SP.Beacon.preview();
     const durum = a.lastAt
-      ? (a.lastStatus === 202 ? 'Son gönderim başarılı' : 'Son deneme başarısız')
+      ? (a.lastStatus === 202 ? yz('spi.guide.son-gonderim-basarili') : yz('spi.guide.son-deneme-basarisiz'))
         + ' — ' + String(a.lastAt).slice(0, 16).replace('T', ' ') + '. '
         + (a.lastNote || '')
-      : 'Henüz hiç gönderilmedi.';
+      : yz('spi.guide.henuz-hic-gonderilmedi');
     return K.Card({
       title:yz('spi.guide.hkm-isareti'), hint:'hkm',
       sub:yz('spi.guide.i-stege-bagli-dorduncu-katma'),
@@ -392,7 +467,7 @@ SP.Screens.guide = (function(){
         </div>
 
         ${when(!SP.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn', class:'mt-10',
-          body:'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http '
+          body:yz('spi.guide.bu-adrese-gonderim-yapilmaz')
              + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
 
         <div class="mt-12">
@@ -404,7 +479,7 @@ SP.Screens.guide = (function(){
           <p class="tiny dim">${yz('spi.guide.gunun-ozetinde-gelismis-kaps')}</p>
         </div>
 
-        <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
+        <div class="mt-12">${K.SectionTitle(yz('spi.guide.bugun-ne-gidiyor'))}</div>
         ${K.Table({ tight:true, headers:['Alan', { label:yz('spi.guide.deger'), num:true }, 'Kaynak'],
           rows:on.rows.map(r => [r.key,
             r.value == null ? '—' : U.fmtNum(r.value),
@@ -416,7 +491,7 @@ SP.Screens.guide = (function(){
         <p class="tiny dim mt-8">${yz('spi.guide.gunun-ozetinde-tahlil-degeri')}</p>
 
         ${when(on.errors.length, () => K.Notice({ tone:'warn', class:'mt-10',
-          body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
+          body:yz('spi.guide.govde-sozlesmeyi-gecmiyor') + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
         <p class="tiny dim mt-10">«Bağlan», jetonu HKM'den doğrudan alır:
           önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
@@ -442,22 +517,22 @@ SP.Screens.guide = (function(){
           damga:(SP.S.meta || {}).lastBackupAt, boyut:f.bytes, bugun:U.todayISO(),
           kayit:f.total, iz:(SP.S.meta || {}).yedekIzi })))}
         ${K.Table({ tight:true, headers:['Kayıt', { label:yz('spi.guide.adet'), num:true }], rows:[
-          ['Tahlil oturumu', String(f.labs)],
-          ['Ölçüm günü', String(f.vitalDays)],
-          ['Öğün günü', String(f.mealDays)],
+          [yz('spi.guide.tahlil-oturumu'), String(f.labs)],
+          [yz('spi.guide.olcum-gunu'), String(f.vitalDays)],
+          [yz('spi.guide.ogun-gunu'), String(f.mealDays)],
           ['Antrenman', String(f.workouts)],
-          ['Kapladığı alan', U.fmtNum(Math.round(f.bytes / 1024)) + ' KB · %' + f.pct],
+          [yz('spi.guide.kapladigi-alan'), U.fmtNum(Math.round(f.bytes / 1024)) + ' KB · %' + f.pct],
         ].concat(SP.Foto && SP.Foto.sahipler('').length
           /* Fotoğraflar ayrı depoda (core/foto.js): yedeğe girmediği söylenir. */
-          ? [['Fotoğraf · yedeğe girmez', String(SP.Foto.sahipler('').length)]] : []) })}
+          ? [[yz('spi.guide.fotograf-yedege-girmez'), String(SP.Foto.sahipler('').length)]] : []) })}
         ${when(VT(), () => raw('<div class="mt-10">' + VT().veriNerede({
           merkezNot:(SP.Beacon && SP.Beacon.settings().enabled) ? 'bağlı · teklif yazar, modüle yazmaz' : 'isteğe bağlı · şu an kapalı' })
           + '</div><div class="mt-10">' + VT().disaAktar({ act:'backup', sistem:'SPİ', not:'tüm kayıt · tek dosya', kayit:f.total,
             kb:Math.round(f.bytes / 1024) }) + '</div>'))}
         ${when(f.near, () => K.Notice({ tone:'warn', class:'mt-10',
-          body:'Tarayıcı depolama alanının %' + f.pct + '\'i dolu. Yedek al ve eski kayıtları temizle.' }))}
+          body:yz('spi.guide.tarayici-depolama-alaninin') + f.pct + '\'i dolu. Yedek al ve eski kayıtları temizle.' }))}
         ${K.Notice({ tone:'info', class:'mt-10',
-          body:age == null ? 'Henüz yedek alınmadı.' : 'Son yedek ' + age + ' gün önce.' })}
+          body:age == null ? yz('spi.guide.henuz-yedek-alinmadi') : yz('spi.guide.son-yedek') + age + ' gün önce.' })}
         ${when(undo, () => K.Notice({ tone:'warn', class:'mt-10',
           body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
              + 'verinin üzerine yazdı. Yanlışsa bir önceki duruma dönebilirsin — bu imkan yalnız '
@@ -507,12 +582,12 @@ SP.Screens.guide = (function(){
       title:yz('spi.guide.kayit-durumu'),
       body:K.Table({ tight:true, headers:['Alan', 'Durum'], rows:[
         ['Kip', h.mode === 'cloud' ? 'hesaba bağlı kopya açık' : 'bu cihaz'],
-        ['Bu cihaz', h.local === 'ok' ? K.Badge({ label:yz('spi.guide.calisiyor'), tone:'ok' })
+        [yz('spi.guide.bu-cihaz'), h.local === 'ok' ? K.Badge({ label:yz('spi.guide.calisiyor'), tone:'ok' })
           : K.Badge({ label:'hata', tone:'danger' })],
         ['Bulut', h.cloud === 'ok' ? K.Badge({ label:yz('spi.guide.calisiyor'), tone:'ok' })
           : h.cloud === 'off' ? K.Badge({ label:yz('spi.guide.kapali'), tone:'muted' })
           : K.Badge({ label:'hata', tone:'danger' })],
-        ['Profil anahtarı', M.activeProfileId()],
+        [yz('spi.guide.profil-anahtari'), M.activeProfileId()],
       ] }),
     });
   }
@@ -539,7 +614,7 @@ SP.Screens.guide = (function(){
         ${K.Notice({ tone:'warn', title:yz('spi.guide.bu-bir-kanit-hiyerarsisi-deg'),
           body:K.Katmanli({ metin:SP.Ev.policy().disclaimer }) })}
 
-        ${K.Table({ tight:true, headers:['Kaynak türü', 'SPİ\'nin tanıdığı yetki'],
+        ${K.Table({ tight:true, headers:[yz('spi.guide.kaynak-turu'), 'SPİ\'nin tanıdığı yetki'],
           rows:SP.EVIDENCE_SOURCES.map(src => {
             const y = SP.AUTHORITY_BY_ID[SP.Ev.policy().defaults[src.id]];
             return [src.label, y.label + ' — ' + y.note];
@@ -549,17 +624,17 @@ SP.Screens.guide = (function(){
           + SP.Ev.policy().version + ' (' + SP.Ev.policy().changedAt + '). ' + SP.Ev.policy().rationale })}</div>
 
         ${K.Table({ tight:true, headers:['Ölçüm', { label:yz('spi.guide.sayi'), num:true }], rows:[
-          ['Tanımlı eşik', String(k.total)],
-          ['Kaynağı yazılmış', String(k.sourced)],
-          ['Yönlendirmeye yetkili', String(k.mayDirect)],
-          ['Kaynağı eksik', String(k.missing.length)],
+          [yz('spi.guide.tanimli-esik'), String(k.total)],
+          [yz('spi.guide.kaynagi-yazilmis'), String(k.sourced)],
+          [yz('spi.guide.yonlendirmeye-yetkili'), String(k.mayDirect)],
+          [yz('spi.guide.kaynagi-eksik'), String(k.missing.length)],
         ] })}
 
         ${denetim.length
           ? K.Notice({ tone:'danger', title:yz('spi.guide.dayanaksiz-kirmizi-bayrak'),
               body:denetim.map(d => d.name).join(', ') })
           : K.Notice({ tone:'ok', title:yz('spi.guide.denetim-temiz'),
-              body:'Her kırmızı bayrak en az uzlaşı derecesinde bir dayanağa '
+              body:yz('spi.guide.her-kirmizi-bayrak-en-az')
                  + 'oturuyor. Bu denetim testte de koşar; bozulursa test kırılır.' })}
 
         ${when(ayrisan.length, () => K.Notice({ tone:'info',
@@ -597,7 +672,7 @@ SP.Screens.guide = (function(){
       body:html`
         <p class="small">${SP.RED_FLAGS.lead}</p>
         <h3 class="section-h mt-12">${yz('spi.guide.birden-fazla-olcumle-tetikle')}</h3>
-        ${K.Table({ tight:true, headers:['Örüntü', 'Ne demek'],
+        ${K.Table({ tight:true, headers:['Örüntü', yz('spi.guide.ne-demek')],
           rows:SP.RED_FLAGS.patterns.map(p => [html`<b>${p.label}</b>`,
             html`<span class="small">${p.detail}</span>`]) })}
         <p class="small muted mt-10">${yz('spi.guide.tek-olcumle-tetiklenen-esikl')}
@@ -610,9 +685,9 @@ SP.Screens.guide = (function(){
       title:yz('spi.guide.veri-mahremiyeti'), hint:'privacy',
       body:K.Table({ tight:true, headers:['Alan', 'Kural'], rows:[
         ['Saklama', SP.PRIVACY.storage],
-        ['Model eğitimi', SP.PRIVACY.training],
-        ['Modele giden', SP.PRIVACY.model],
-        ['Yedek dosyası', SP.PRIVACY.export],
+        [yz('spi.guide.model-egitimi'), SP.PRIVACY.training],
+        [yz('spi.guide.modele-giden'), SP.PRIVACY.model],
+        [yz('spi.guide.yedek-dosyasi'), SP.PRIVACY.export],
       ] }),
     });
   }
@@ -625,11 +700,11 @@ SP.Screens.guide = (function(){
           ['Otorite', SP.GROUNDING.authority],
           ['Karar', SP.GROUNDING.decision],
           ['Kaynak', SP.GROUNDING.sources],
-          ['Model yoksa', SP.GROUNDING.noModel],
+          [yz('spi.guide.model-yoksa'), SP.GROUNDING.noModel],
         ] })}
         <h3 class="section-h mt-12">${yz('spi.guide.cikti-denetimi')}</h3>
         <p class="small muted">${yz('spi.guide.model-ciktisi-basilmadan-onc')}</p>
-        ${K.Table({ tight:true, headers:['Denetim', 'Ne arar'],
+        ${K.Table({ tight:true, headers:['Denetim', yz('spi.guide.ne-arar')],
           rows:SP.GROUNDING.banned.map(b => [html`<b>${b.why}</b>`,
             html`<code class="tiny">${String(b.re)}</code>`]) })}`,
     });
@@ -673,7 +748,7 @@ SP.Screens.guide = (function(){
     try{ return BODIES[t.id](); }
     catch(e){
       console.error('Rehber bölümü çizilemedi (' + t.id + '):', e);
-      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+      return K.Notice({ tone:'warn', body:yz('spi.guide.bu-bolum-su-an-cizilemedi') });
     }
   }
 
@@ -716,7 +791,7 @@ SP.Screens.guide = (function(){
     async 'saglik-oku'(){
       if(!saglikDosya){ UI.toast(yz('spi.guide.once-bir-dosya-sec')); return; }
       const g = document.getElementById('saglik-gun');
-      const o = await UI.withBusy('Dosya okunuyor', 'büyük dosyada bir dakika sürebilir',
+      const o = await UI.withBusy(yz('spi.guide.dosya-okunuyor'), 'büyük dosyada bir dakika sürebilir',
         () => SP.SaglikIce.dosyadanOku(saglikDosya, { gun:Number(g ? g.value : 90) || 90 }));
       if(!o.ok && !(o.alanlar || []).length){ UI.toast(o.why); return; }
       saglikOnizleme = o;
@@ -763,7 +838,7 @@ SP.Screens.guide = (function(){
     async 'hkm-toggle'(){
       const a = SP.Beacon.settings();
       await SP.Beacon.save({ enabled:!a.enabled });
-      UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      UI.toast(!a.enabled ? yz('spi.guide.hkm-isareti-acildi') : yz('spi.guide.hkm-isareti-kapatildi'));
       SP.App.render();
     },
     async 'hkm-pair'(){
@@ -776,7 +851,7 @@ SP.Screens.guide = (function(){
       UI.toast(yz('spi.guide.gecmis-gonderiliyor'));
       const r = await SP.Beacon.backfill(60);
       UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
-        : r.note || 'Gönderilemedi (' + (r.reason || r.status) + ')');
+        : r.note || yz('spi.guide.gonderilemedi') + (r.reason || r.status) + ')');
       SP.App.render();
     },
     async 'hkm-send'(){
@@ -831,10 +906,10 @@ SP.Screens.guide = (function(){
       const r = await LIFEOS.YedekAg.hkmdenCek({ hkm:() => SP.Beacon, modul:'spi' });
       if(!r.ok){ UI.toast(r.why, { life:5000 }); return; }
       const c = SP.Store.readBackup(r.obj);
-      if(!c.ok){ UI.toast(c.error || 'Geçersiz yedek'); return; }
-      UI.confirmSheet('HKM’deki yedek yüklensin mi?',
+      if(!c.ok){ UI.toast(c.error || yz('spi.guide.gecersiz-yedek')); return; }
+      UI.confirmSheet(yz('spi.guide.hkm-deki-yedek-yuklensin-mi'),
         r.tarihYazi + ' tarihli yedek' + (r.boyut ? ' (' + r.boyut + ')' : '') + ' bu cihazdaki verinin '
-          + 'TAMAMINI değiştirir. Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.',
+          + yz('spi.guide.tamamini-degistirir-yanlissa'),
         async () => {
           try{
             await SP.Store.importAll(r.obj);
@@ -843,7 +918,7 @@ SP.Screens.guide = (function(){
           }catch(e){
             UI.toast(yz('spi.guide.yukleme-basarisiz') + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
-        }, true, 'Bu cihazdaki veriyi yedekle değiştir');
+        }, true, yz('spi.guide.bu-cihazdaki-veriyi-yedekle'));
     },
     async restore(){
       const input = document.createElement('input');
@@ -865,7 +940,7 @@ SP.Screens.guide = (function(){
           setTimeout(() => location.reload(), 900);
         }catch(e){
           /* Yerel yazma basarisizsa sayfa YENILENMEZ. */
-          UI.toast(e && e.message ? e.message : 'Yedek okunamadı');
+          UI.toast(e && e.message ? e.message : yz('spi.guide.yedek-okunamadi'));
         }
       };
       input.click();
@@ -873,9 +948,9 @@ SP.Screens.guide = (function(){
     async 'undo-import'(){
       const undo = SP.Store.importUndoInfo();
       if(!undo){ UI.toast(yz('spi.guide.geri-alinacak-bir-ice-aktarm')); return; }
-      UI.confirmSheet('İçe aktarmayı geri al',
+      UI.confirmSheet(yz('spi.guide.i-ce-aktarmayi-geri-al'),
         new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
-          + 'Aradan geçen sürede eklediğin her şey kaybolur.',
+          + yz('spi.guide.aradan-gecen-surede-ekledigi'),
         async () => {
           try{
             await SP.Store.undoImport();
@@ -885,7 +960,7 @@ SP.Screens.guide = (function(){
           }catch(e){
             UI.toast(yz('spi.guide.geri-alinamadi')+(e.message || 'bilinmeyen hata'));
           }
-        }, true, 'İçe aktarma öncesine dön');
+        }, true, yz('spi.guide.i-ce-aktarma-oncesine-don'));
     },
     async wipe(){
       const G = (window.LIFEOS || {}).GUVEN;
@@ -896,15 +971,15 @@ SP.Screens.guide = (function(){
           sil:async () => { await SP.Store.clear(); if(SP.Foto) await SP.Foto.temizle(); UI.closeSheet(); location.reload(); } });
         return;
       }
-      UI.confirmSheet('Bütün veriyi sil',
-        'Bu profildeki tahliller, ölçümler, öğünler, antrenmanlar ve fotoğraflar silinir. '
-        + 'Geri alınamaz. Önce yedek al.',
+      UI.confirmSheet(yz('spi.guide.butun-veriyi-sil'),
+        yz('spi.guide.bu-profildeki-tahliller-olcu')
+        + yz('spi.guide.geri-alinamaz-once-yedek-al'),
         async () => {
           await SP.Store.clear();
           if(SP.Foto) await SP.Foto.temizle();
           UI.closeSheet();
           location.reload();
-        }, true, 'Bütün veriyi sil');
+        }, true, yz('spi.guide.butun-veriyi-sil'));
     },
   };
 
@@ -924,14 +999,14 @@ SP.Screens.guide = (function(){
     async 'otomatik-tur'(el){
       const turler = Object.assign({}, SP.Office.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
       await SP.Office.saveSettings({ otomatikTurler:turler });
-      SP.UI.toast(el.checked ? 'Bu tür sormadan yazılacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
+      SP.UI.toast(el.checked ? yz('spi.guide.bu-tur-sormadan-yazilacak-ge') : yz('spi.guide.bu-tur-her-zaman-once'));
     },
     async 'pick-otomatik'(el){
       const v = SP.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
       await SP.Office.saveSettings({ otomatikUygula:v });
-      SP.UI.toast(v === 'hicbiri' ? 'Her kayıt önce sorulacak'
-        : v === 'hepsi' ? 'Modelin okuduğu küçük kayıtlar da sormadan yazılacak'
-        : 'Yalnız senin yazdığın küçük kayıtlar sormadan yazılacak');
+      SP.UI.toast(v === 'hicbiri' ? yz('spi.guide.her-kayit-once-sorulacak')
+        : v === 'hepsi' ? yz('spi.guide.modelin-okudugu-kucuk-kayitl-2')
+        : yz('spi.guide.yalniz-senin-yazdigin-kucuk'));
     },
 
   };
@@ -945,7 +1020,7 @@ SP.Screens.guide = (function(){
     title:yz('spi.guide.rehber'),
     subtitle(){
       const MM = SP.Office.merkez ? SP.Office.merkez() : null;
-      return MM && MM.hazir() ? 'Model Merkez’de açık' : SP.Office.ready('patron') ? 'Model açık' : 'Model kapalı · kural motoru çalışıyor';
+      return MM && MM.hazir() ? yz('spi.guide.model-merkez-de-acik') : SP.Office.ready('patron') ? yz('spi.guide.model-acik') : yz('spi.guide.model-kapali-kural-motoru');
     },
     actions(){ return ''; },
     render, afterRender, handle, change,

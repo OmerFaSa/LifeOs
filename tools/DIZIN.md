@@ -93,10 +93,17 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `spi_porsiyon_kabul_test.py` — Görev 012 kabul testi; SPI serbest öğün porsiyon ve miktar ayrıştırmasını sınar, CI'da koşulur.
 - `spi_sure_kabul_test.py` — Görev 009 kabul testi; SPI hızlı giriş süre ayrıştırmasını sınar, CI'da koşulur.
 - `tarih_ortak_kabul_test.py` — Görev 014 kabul testi; üç modülün ortak tarih işlevlerinin sözleşme uyumunu sınar, CI'da koşulur.
+- `gun_iskelet_kabul_test.py` — Gün sayfası iskeleti: yedi durum, veri yok etiketi, kapalı ortak dosya listesi.
+- `gunveri_gecmis_kabul_test.py` — Gün › Geçmiş veri katmanı kabul testi.
+- `gunveri_kabul_test.py` — Gün veri katmanı: şerit, sıradaki blok, karne.
+- `merkezayar_kabul_test.py` — Ayarlar › Merkez: açık şema, sır okunmaz, yalnız şemadaki alan yazılır.
 - `tools_dizin_kabul_test.py` — Görev 017 kabul testi; tools/DIZIN.md dizininin eksiksizliğini, sekiz bölümünü ve formatını sınar.
 - `veri_denetle_kabul_test.py` — Görev 006 kabul testi; veri denetleme aracının nesne oranlarını ve doğrulama mantığını sınar, CI'da koşulur.
 
 ## Testler
+- `parca_test.py` — Parça kaydı, King rehberi, tembel ayırma, blok adları, CSS jetonları ve `!important` tavanı.
+- `parca_tembel_test.js` — Tembel verinin derlemede kaynak sürümle aynı olduğunu ve açılışta çalışmadığını gösterir.
+- `giris_sayfa_test.js` — Giriş ve Gün sayfalarını gerçek tarayıcıda açar; modül denetimleri bunları açmaz.
 - `king_olay_uctan_test.py` — KING-4 3c uçtan uca; modüllerin ürettiği olaylar taşıyıcının biçim denetiminden ve HKM kural motorundan geçer mi, CI'da koşulur.
 - `ajan_test.py` — tools/ajan.py ve tools/ajan_kanca.py birim testleri; döküm okuyucu, efor, yuva ve kanca kararlarını sınar, CI'da koşulur.
 - `ayar_test.py` — sistem/ayar.py sözleşme testleri; sistem ayarlarının tek kopyasını ve doğrulamasını sınar, CI'da koşulur.

@@ -1,6 +1,13 @@
 /* KING ÖĞRETMEN — ESP'nin öğretme motoru adaptörü (brand/ortak/ogret.js, KING-4 §D).
    Kelime sorusu, cevabı, teşhisi ve King araçlarını LIFEOS.OGRET ile yapar.
    Kartın kendi SRS takvimi (core/srs.js) DEĞİŞMEZ; motorun takvimi 'esp.ogret.tekrar'da. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.kingogret.tekrar':'Tekrar (',
+  'esp.core.kingogret.kelime-karti':'Kelime kartı',
+  'esp.core.kingogret.esp-senin-dil-kartlarin':'ESP · senin dil kartların',
+  'esp.core.kingogret.bu-cevap-kartin-tekrar-takvi':'Bu cevap kartın tekrar takvimine yazılmaz.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -47,7 +54,7 @@ ESP.KingOgret = (function(){
       if(vadeKarti){
         secilenKart = vadeKarti;
         const n = vadeKayit.n || 0;
-        notMetni = 'Tekrar (' + (n + 1) + '. tur): aynı kart.';
+        notMetni = yz('esp.core.kingogret.tekrar') + (n + 1) + '. tur): aynı kart.';
       }else{
         const tk = OGRET.depo('esp.ogret.tekrar').oku();
         const takvimdeOlmayanlar = adaylar.filter(c => !tk[c.id] || tk[c.id].bitti);
@@ -76,10 +83,10 @@ ESP.KingOgret = (function(){
 
     return {
       id: id,
-      konu: 'Kelime kartı',
+      konu: yz('esp.core.kingogret.kelime-karti'),
       soru: soruMetni,
       sec: opt.sec,
-      kaynak: 'ESP · senin dil kartların',
+      kaynak: yz('esp.core.kingogret.esp-senin-dil-kartlarin'),
       not: notMetni
     };
   }
@@ -134,7 +141,7 @@ ESP.KingOgret = (function(){
     if(res.not){
       notMetni = res.not + ' Kartın kendi tekrar takvimi değişmez.';
     }else{
-      notMetni = 'Bu cevap kartın tekrar takvimine yazılmaz.';
+      notMetni = yz('esp.core.kingogret.bu-cevap-kartin-tekrar-takvi');
     }
 
     return {

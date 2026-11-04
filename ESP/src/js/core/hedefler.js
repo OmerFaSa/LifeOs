@@ -22,6 +22,28 @@
    ESP sertifika vermez, yetenek yargısı kurmaz, sonuç garantisi etmez
    (AGENTS.md §1.5). */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.hedefler.yabanci-dil':'Yabancı dil',
+  'esp.core.hedefler.bu-dil':'Bu dil',
+  'esp.core.hedefler.su-anki-seviyen-hedefinle-ay':'Şu anki seviyen hedefinle aynı ya da üstünde. Daha üst bir seviye yazarak ',
+  'esp.core.hedefler.seviyeyi-anlayamadim-a1-a2-b':'Seviyeyi anlayamadım; A1, A2, B1, B2, C1, C2 ya da «sıfır» yaz.',
+  'esp.core.hedefler.su-anki-seviyen-bilinmeden-s':'Şu anki seviyen bilinmeden süre hesaplanamaz.',
+  'esp.core.hedefler.hedef-seviye-su-anki-seviyen':'Hedef seviye şu anki seviyenin üstünde olmalı.',
+  'esp.core.hedefler.c1-800-c2':'C1 ≈ 800, C2 ≈ 1.200 saat); dile ve kişiye göre değişir, kaynağı henüz bağlanmadı',
+  'esp.core.hedefler.birkac-kitap-bitirince-kendi':'Birkaç kitap bitirince kendi hızından hesaplanır',
+  'esp.core.hedefler.kac-kitap-okumak-istedigin-b':'Kaç kitap okumak istediğin bilinmeden süre hesaplanamaz.',
+  'esp.core.hedefler.yalniz':'Yalnız ',
+  'esp.core.hedefler.temiz-tempo-kaydin-yok':'Temiz tempo kaydın yok',
+  'esp.core.hedefler.temiz-tempo-kayitlarin':'Temiz tempo kayıtların ',
+  'esp.core.hedefler.son':'Son ',
+  'esp.core.hedefler.temiz-calabildigin-en-yuksek':'Temiz çalabildiğin en yüksek tempo kaç BPM? Bilmiyorsan «bilmiyorum» yaz; ',
+  'esp.core.hedefler.studyo-da-metronomla-olcebil':'Stüdyo’da metronomla ölçebilirsin.',
+  'esp.core.hedefler.tempoyu-anlayamadim-sayiyla':'Tempoyu anlayamadım; sayıyla yaz (ör. 90) ya da «bilmiyorum» de.',
+  'esp.core.hedefler.seviye-bir-oz-degerlendirmed':'Seviye bir öz-değerlendirmedir: CEFR bandı ESP merdiveniyle aynı ölçek değildir ',
+  'esp.core.hedefler.kitap-basina':'Kitap başına ',
+  'esp.core.hedefler.temiz-tempo-2':'Temiz tempo ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.hedefler.dil-seviyesi':'Dil seviyesi',
   'esp.core.hedefler.cefr-rehberli-ogrenme-saatle':'CEFR rehberli öğrenme saatleri kaynaktan (',
   'esp.core.hedefler.cefr-seviyeleri-icin-yaygin':'CEFR seviyeleri için yaygın aktarılan ',
@@ -90,11 +112,11 @@ ESP.Hedefler = (function(){
       const m = CEFR_RE.exec(k);
       if(!m) return null;
       const hedef = m[1].toUpperCase();
-      return { yon:'seviye', hedefSeviye:hedef, dil:dilAdi(k) || 'Yabancı dil',
+      return { yon:'seviye', hedefSeviye:hedef, dil:dilAdi(k) || yz('esp.core.hedefler.yabanci-dil'),
         hedefHam:{ deger:hedef, birim:'CEFR' }, birim:'saat' };
     },
     simdiSoru(h){
-      return (h.dil || 'Bu dil') + ' için şu anki seviyen ne? A1, A2, B1… yaz; hiç '
+      return (h.dil || yz('esp.core.hedefler.bu-dil')) + ' için şu anki seviyen ne? A1, A2, B1… yaz; hiç '
         + 'başlamadıysan «sıfır» de. Bu bir öz-değerlendirmedir, sınav sonucu gerekmez.';
     },
     simdiOku(metin, h){
@@ -104,17 +126,17 @@ ESP.Hedefler = (function(){
       if(d == null) return null;
       const T = cefrTablo();
       if(T[d] >= T[h.hedefSeviye]){
-        return { hata:'Şu anki seviyen hedefinle aynı ya da üstünde. Daha üst bir seviye yazarak '
+        return { hata:yz('esp.core.hedefler.su-anki-seviyen-hedefinle-ay')
           + 'hedefi yeniden kurabilirsin.' };
       }
       return { deger:d, birim:'CEFR', etiket:'tahmin' };
     },
-    simdiHata:'Seviyeyi anlayamadım; A1, A2, B1, B2, C1, C2 ya da «sıfır» yaz.',
+    simdiHata:yz('esp.core.hedefler.seviyeyi-anlayamadim-a1-a2-b'),
     gerekenSaat(h){
-      if(!h.simdi || h.simdi.deger == null) return { neden:'Şu anki seviyen bilinmeden süre hesaplanamaz.' };
+      if(!h.simdi || h.simdi.deger == null) return { neden:yz('esp.core.hedefler.su-anki-seviyen-bilinmeden-s') };
       const T = cefrTablo();
       const saat = T[h.hedefSeviye] - T[h.simdi.deger];
-      if(!(saat > 0)) return { neden:'Hedef seviye şu anki seviyenin üstünde olmalı.' };
+      if(!(saat > 0)) return { neden:yz('esp.core.hedefler.hedef-seviye-su-anki-seviyen') };
       const kd = ESP.Belge && ESP.Belge.dayanak('cefr');
       if(kd && kd.saat){
         return { saat, dayanak:{ durum:'kaynakli', metin:yz('esp.core.hedefler.cefr-rehberli-ogrenme-saatle')
@@ -123,7 +145,7 @@ ESP.Hedefler = (function(){
       }
       return { saat, dayanak:{ durum:'kaynak_bekliyor', metin:yz('esp.core.hedefler.cefr-seviyeleri-icin-yaygin')
         + 'rehberli öğrenme saati tahminleri (sıfırdan A1 ≈ 100, A2 ≈ 200, B1 ≈ 400, B2 ≈ 600, '
-        + 'C1 ≈ 800, C2 ≈ 1.200 saat); dile ve kişiye göre değişir, kaynağı henüz bağlanmadı' } };
+        + yz('esp.core.hedefler.c1-800-c2') } };
     },
   };
 
@@ -168,7 +190,7 @@ ESP.Hedefler = (function(){
       return { saat, etiket:'tahmin', dayanak:{ durum:'kaynakli', metin:yz('esp.core.hedefler.okuma-hizi-kaynaktan-dakikad')
         + hz.kelimeDk + ' kelime; ' + (hz.kaynak ? hz.kaynak.baslik : 'web kaynağı') + ', ' + hz.at
         + '); ortalama kitap ≈ 80 bin kelime varsayımıyla kitap başına ≈ ' + sayiYaz(saat) + ' saat. '
-        + 'Birkaç kitap bitirince kendi hızından hesaplanır' } };
+        + yz('esp.core.hedefler.birkac-kitap-bitirince-kendi') } };
     }
     return { saat:KITAP_SAAT_TAHMIN, etiket:'tahmin', dayanak:{ durum:'kaynak_bekliyor',
       metin:yz('esp.core.hedefler.ortalama-bir-kitap-icin-yakl')
@@ -199,7 +221,7 @@ ESP.Hedefler = (function(){
     simdi:() => ({ deger:0, birim:'kitap', etiket:'hesaplandi', tarih:null }),
     gerekenSaat(h){
       const n = h.fark != null ? h.fark : h.hedefDeger;
-      if(!(n > 0)) return { neden:'Kaç kitap okumak istediğin bilinmeden süre hesaplanamaz.' };
+      if(!(n > 0)) return { neden:yz('esp.core.hedefler.kac-kitap-okumak-istedigin-b') };
       const k = kitapSaati();
       return { saat:yuvarla(n * k.saat, 1), dayanak:k.dayanak, kitapSaat:k.saat };
     },
@@ -233,15 +255,15 @@ ESP.Hedefler = (function(){
      deneme ve iki hafta gerekir: daha azı bir hız değil bir andır. */
   function temizHiz(){
     const l = temizDenemeler();
-    if(l.length < 3) return { neden:l.length ? 'Yalnız ' + l.length + ' temiz deneme kaydın var' : 'Temiz tempo kaydın yok' };
+    if(l.length < 3) return { neden:l.length ? yz('esp.core.hedefler.yalniz') + l.length + ' temiz deneme kaydın var' : yz('esp.core.hedefler.temiz-tempo-kaydin-yok') };
     const ilk = l[0].date, son = l[l.length - 1].date;
     const gun = U().diffDays(ilk, son);
-    if(gun < 14) return { neden:'Temiz tempo kayıtların ' + gun + ' günü kapsıyor; en az iki hafta gerekir' };
+    if(gun < 14) return { neden:yz('esp.core.hedefler.temiz-tempo-kayitlarin') + gun + ' günü kapsıyor; en az iki hafta gerekir' };
     const ilkHafta = U().iso(U().addDays(U().parse(ilk), 6));
     const bas = Math.max.apply(null, l.filter(x => x.date <= ilkHafta).map(x => x.bpm));
     const tepe = Math.max.apply(null, l.map(x => x.bpm));
     const hiz = yuvarla((tepe - bas) / (gun / 7), 1);
-    if(!(hiz > 0)) return { neden:'Son ' + Math.round(gun / 7) + ' haftada temiz tempon artmadı (tıkanma)' };
+    if(!(hiz > 0)) return { neden:yz('esp.core.hedefler.son') + Math.round(gun / 7) + ' haftada temiz tempon artmadı (tıkanma)' };
     return { hiz, deneme:l.length, hafta:yuvarla(gun / 7, 1), artis:tepe - bas, tepe };
   }
 
@@ -273,8 +295,8 @@ ESP.Hedefler = (function(){
       const son = l[l.length - 1];
       return { deger:Math.max.apply(null, l.map(x => x.bpm)), birim:'BPM', etiket:'tahmin', tarih:son.date };
     },
-    simdiSoru:'Temiz çalabildiğin en yüksek tempo kaç BPM? Bilmiyorsan «bilmiyorum» yaz; '
-      + 'Stüdyo’da metronomla ölçebilirsin.',
+    simdiSoru:yz('esp.core.hedefler.temiz-calabildigin-en-yuksek')
+      + yz('esp.core.hedefler.studyo-da-metronomla-olcebil'),
     simdiOku(metin){
       const k = kucuk(metin);
       const m = /(\d{2,3})/.exec(k);
@@ -282,7 +304,7 @@ ESP.Hedefler = (function(){
       if(/(bilmiyorum|bilmem|ölçmedim)/.test(k)) return { deger:null, birim:'BPM', etiket:'veri_yok' };
       return null;
     },
-    simdiHata:'Tempoyu anlayamadım; sayıyla yaz (ör. 90) ya da «bilmiyorum» de.',
+    simdiHata:yz('esp.core.hedefler.tempoyu-anlayamadim-sayiyla'),
     hiz(){
       const t = temizHiz();
       if(!t.hiz){
@@ -328,7 +350,7 @@ ESP.Hedefler = (function(){
     const out = [];
     if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.notlar(h);
     if(h.paket === 'dil'){
-      out.push('Seviye bir öz-değerlendirmedir: CEFR bandı ESP merdiveniyle aynı ölçek değildir '
+      out.push(yz('esp.core.hedefler.seviye-bir-oz-degerlendirmed')
         + 've sertifika yerine geçmez.');
     }
     if(h.paket === 'enstruman' && h.hedefKademe){
@@ -341,7 +363,7 @@ ESP.Hedefler = (function(){
     }
     if(h.paket === 'okuma' && g && g.bant){
       const k = kitapSaati();
-      out.push('Kitap başına ' + sayiYaz(k.saat) + ' saat hesaplandı ('
+      out.push(yz('esp.core.hedefler.kitap-basina') + sayiYaz(k.saat) + ' saat hesaplandı ('
         + (k.etiket === 'hesaplandi' ? 'kendi ölçümün' : 'tahmin') + ').');
     }
     return out;
@@ -379,10 +401,10 @@ ESP.Hedefler = (function(){
   /* Hedefin kısa adı — ekranda ve plan önizlemesinde. */
   function ozet(h){
     if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.ozet(h);
-    if(h.paket === 'dil') return (h.dil || 'Yabancı dil') + ': ' + (h.simdi && h.simdi.deger
+    if(h.paket === 'dil') return (h.dil || yz('esp.core.hedefler.yabanci-dil')) + ': ' + (h.simdi && h.simdi.deger
       ? (h.simdi.deger === '0' ? 'sıfır' : h.simdi.deger) + ' → ' : '') + h.hedefSeviye;
     if(h.paket === 'okuma') return (h.fark || h.hedefDeger) + ' kitap';
-    if(h.paket === 'enstruman') return 'Temiz tempo ' + (h.simdi && h.simdi.deger ? h.simdi.deger + ' → ' : '')
+    if(h.paket === 'enstruman') return yz('esp.core.hedefler.temiz-tempo-2') + (h.simdi && h.simdi.deger ? h.simdi.deger + ' → ' : '')
       + h.hedefDeger + ' BPM' + (h.hedefKademe ? ' (' + kademeAdi(h.hedefKademe) + ')' : '');
     return h.cumle;
   }

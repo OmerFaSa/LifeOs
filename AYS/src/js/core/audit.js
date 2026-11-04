@@ -21,6 +21,14 @@
    4. NÖBETÇİYLE AYNI ŞEY SÖYLENMEZ. O çaba–sonuç ayrışmasını arar;
       bu, birikmiş BAKIM borcunu arar. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.audit.ayni-zorluk-ailesinden-denem':'AYNI zorluk ailesinden denemeler ister; farklı yayınların ',
+  'ays.core.audit.kapanis-kurali-yedi-gun-sonr':'Kapanış kuralı yedi gün sonra ikinci bir ölçüm ister; o ölçüm ',
+  'ays.core.audit.once-gelir-ustune-kurulan-he':'ÖNCE gelir: üstüne kurulan her şey aynı yerden çöker.',
+  'ays.core.audit.bu-esik-bir-bulgu-degil':'Bu eşik bir bulgu değil sistemin seçimidir (Rehber → Eşiklerin ',
+  'ays.core.audit.sende-ne-kadar-oldugu-ancak':'SENDE ne kadar olduğu ancak senin verinle ölçülür. İki hafta ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.audit.deneme-az':'Deneme az',
   'ays.core.audit.denetim-icin-en-az':'Denetim için en az ',
   'ays.core.audit.analiz-edilmeyen-deneme-bir':'Analiz edilmeyen deneme bir ölçüm değil bir yorgunluktur: ',
@@ -123,7 +131,7 @@ R.Audit = (function(){
         out.push(bul('exam-mixed-' + fam, { severity:'warn', route:'exams',
           title:fam + ' medyanı karışık yayınlardan',
           note:yz('ays.core.audit.son-denemeler') + adlar.length + ' farklı yayından. Medyan '
-             + 'AYNI zorluk ailesinden denemeler ister; farklı yayınların '
+             + yz('ays.core.audit.ayni-zorluk-ailesinden-denem')
              + 'medyanı net değil yayın zorluğu ölçer. Trend okurken bu '
              + 'sayı yanıltır.',
           items:adlar.slice(0, 5).map(y => ({ id:y, label:y,
@@ -188,7 +196,7 @@ R.Audit = (function(){
       out.push(bul('topic-pending-second', { severity:'warn', route:'subjects',
         title:asili.length + ' konu ikinci testi bekliyor',
         note:yz('ays.core.audit.i-lk-testi-gecmis-ama-tekrar')
-           + 'Kapanış kuralı yedi gün sonra ikinci bir ölçüm ister; o ölçüm '
+           + yz('ays.core.audit.kapanis-kurali-yedi-gun-sonr')
            + 'yapılmadıkça konu kapanmaz ve «öğrendim» duygusu ölçülmemiş '
            + 'kalır.',
         items:asili.slice(0, 5).map(t => ({ id:t.topicId,
@@ -201,7 +209,7 @@ R.Audit = (function(){
       out.push(bul('topic-reopened', { severity:'warn', route:'subjects',
         title:acilan.length + ' konu yeniden açıldı',
         note:yz('ays.core.audit.kapanmis-sayilip-sonradan-bo')
-           + 'ÖNCE gelir: üstüne kurulan her şey aynı yerden çöker.',
+           + yz('ays.core.audit.once-gelir-ustune-kurulan-he'),
         items:acilan.slice(0, 5).map(t => ({ id:t.topicId,
           label:t.topicId, meta:'yeniden açık' })) }));
     }
@@ -260,7 +268,7 @@ R.Audit = (function(){
         title:yz('ays.core.audit.tekrar-borcu') + borc,
         note:yz('ays.core.audit.due-kartlarin') + borc + '\'i gecikmiş. Borç %10\'u geçtiğinde '
            + 'yeni kart üretmek, hatırlanmayanın üstüne yenisini koymaktır. '
-           + 'Bu eşik bir bulgu değil sistemin seçimidir (Rehber → Eşiklerin '
+           + yz('ays.core.audit.bu-esik-bir-bulgu-degil')
            + 'dayanağı).' }));
     }
 
@@ -401,7 +409,7 @@ R.Audit = (function(){
       out.push(bul('plan-no-sleep', { severity:'info', route:'today',
         title:yz('ays.core.audit.uyku-neredeyse-hic-girilmemi'),
         note:yz('ays.core.audit.uykunun-netine-etkisi-genel')
-           + 'SENDE ne kadar olduğu ancak senin verinle ölçülür. İki hafta '
+           + yz('ays.core.audit.sende-ne-kadar-oldugu-ancak')
            + 'girmek, bu ilişkiyi görünür kılmaya yeter.' }));
     }
 

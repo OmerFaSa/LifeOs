@@ -17,6 +17,11 @@
    yok"tur. Hicbir olay girmemis birine "kapsamin %0" demek, olcmedigi bir
    seyi olcmus gibi yapmaktir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.chrono.neredeyse-hepsi-ikincil-bask':'Neredeyse hepsi ikincil: başkasının okumasını okuyorsun.',
+  'esp.core.chrono.neredeyse-hepsi-birincil-bag':'Neredeyse hepsi birincil: bağlamı verecek inceleme az.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.chrono.henuz-kaynak-degerlendirilme':'Henüz kaynak değerlendirilmedi.',
   'esp.core.chrono.bos-kronoloji':'Boş kronoloji',
   'esp.core.chrono.zaman-seridinde-hic-olay-yok':'Zaman şeridinde hiç olay yok. Tohum listesi ',
@@ -136,8 +141,8 @@ ESP.Chrono = (function(){
 
     return {
       cert:'derived', total:list.length, primary:birincil, ratio:oran, byKind:tur,
-      note:oran < 0.2 ? 'Neredeyse hepsi ikincil: başkasının okumasını okuyorsun.'
-        : (oran > 0.85 ? 'Neredeyse hepsi birincil: bağlamı verecek inceleme az.'
+      note:oran < 0.2 ? yz('esp.core.chrono.neredeyse-hepsi-ikincil-bask')
+        : (oran > 0.85 ? yz('esp.core.chrono.neredeyse-hepsi-birincil-bag')
           : null),
     };
   }

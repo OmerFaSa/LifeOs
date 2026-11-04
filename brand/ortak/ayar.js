@@ -21,6 +21,15 @@
    çizildiği andaki değeri `defaultValue` / `defaultChecked` /
    `defaultSelected`'dır. Durum ayrıca tutulmaz; ekran kodu bilmek zorunda
    değildir. Anında uygulanan alan (`data-change`) kaydedilmemiş sayılmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ayar.degisiklik-kaydedilmedi':'değişiklik kaydedilmedi',
+  'ortak.ayar.vazgec':'Vazgeç',
+  'ortak.ayar.kaydet':'Kaydet',
+  'ortak.ayar.varsayilan':'Varsayılan: ',
+  'ortak.ayar.varsayilana-don':'Varsayılana dön',
+  'ortak.ayar.bu-adla-bir-ayar-yok':'Bu adla bir ayar yok.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -118,9 +127,9 @@ window.LIFEOS.AYAR = (function(){
       serit.setAttribute('role', 'status');
       document.body.appendChild(serit);
     }
-    serit.innerHTML = '<span class="ayar-serit__yazi">' + d.length + ' değişiklik kaydedilmedi</span>'
-      + '<button type="button" class="btn btn--sm" data-ayar="vazgec">Vazgeç</button>'
-      + '<button type="button" class="btn btn--sm btn--primary" data-ayar="kaydet">Kaydet</button>';
+    serit.innerHTML = '<span class="ayar-serit__yazi">' + d.length + (' ' + yz('ortak.ayar.degisiklik-kaydedilmedi') + '</span>')
+      + ('<button type="button" class="btn btn--sm" data-ayar="vazgec">' + yz('ortak.ayar.vazgec') + '</button>')
+      + ('<button type="button" class="btn btn--sm btn--primary" data-ayar="kaydet">' + yz('ortak.ayar.kaydet') + '</button>');
   }
 
   function vazgec(kok){
@@ -160,8 +169,8 @@ window.LIFEOS.AYAR = (function(){
       const p = document.createElement('p');
       p.className = 'ayar-varsayilan';
       p.setAttribute('data-ayar-ek', '');
-      p.innerHTML = 'Varsayılan: ' + kac(ad)
-        + ' <button type="button" class="linkbtn" data-ayar="varsayilan" data-alan="' + kac(e.id) + '">Varsayılana dön</button>';
+      p.innerHTML = yz('ortak.ayar.varsayilan') + kac(ad)
+        + ' <button type="button" class="linkbtn" data-ayar="varsayilan" data-alan="' + kac(e.id) + ('">' + yz('ortak.ayar.varsayilana-don') + '</button>');
       k.insertAdjacentElement('afterend', p);
       n++;
     });
@@ -214,7 +223,7 @@ window.LIFEOS.AYAR = (function(){
     return (d || []).filter(x => duz(x.ad).indexOf(q) >= 0 || duz(x.bolum).indexOf(q) >= 0);
   }
   function aramaSonucu(sonuc){
-    if(!sonuc.length) return '<p class="small muted">Bu adla bir ayar yok.</p>';
+    if(!sonuc.length) return ('<p class="small muted">' + yz('ortak.ayar.bu-adla-bir-ayar-yok') + '</p>');
     const gruplar = {};
     sonuc.forEach(x => { (gruplar[x.modul] = gruplar[x.modul] || []).push(x); });
     return Object.keys(gruplar).map(m => '<div class="ayar-ara__grup"><p class="ayar-ara__modul">' + kac(m) + '</p>'

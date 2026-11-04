@@ -27,6 +27,23 @@
    Once Artifact "db" yetenegi denenir (cihazlar arasi), yoksa localStorage'a duser.
    Her iki durumda da yerel kopya tutulur; boylece cevrimdisi calisir.
    Hatalar yutulmaz: onError kancasi uzerinden arayuze bildirilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.depo.yerel-kayit-okunamadi-verile':'Yerel kayıt okunamadı; veriler geçici olarak bellekte tutuluyor.',
+  'ortak.depo.tarayici-depolama-alani-dold':'Tarayıcı depolama alanı doldu. ',
+  'ortak.depo.degisiklik-bu-cihaza-kaydedi':'Değişiklik bu cihaza kaydedilemedi.',
+  'ortak.depo.hesaba-bagli-senkronizasyon':'Hesaba bağlı senkronizasyon açılamadı; uygulama bu cihazda çalışmaya devam ediyor.',
+  'ortak.depo.buluttan-okunamadi-bu-cihazd':'Buluttan okunamadı; bu cihazdaki kopya kullanılıyor.',
+  'ortak.depo.degisiklik-bu-cihaza-kaydedi-2':'Değişiklik bu cihaza kaydedildi ama buluta gönderilemedi. Bağlantı gelince tekrar dene.',
+  'ortak.depo.degisiklik-kaydedilemedi':'Değişiklik kaydedilemedi.',
+  'ortak.depo.kayit-buluttan-silinemedi':'Kayıt buluttan silinemedi.',
+  'ortak.depo.bulut-verisi-okunamadi-bu-ci':'Bulut verisi okunamadı; bu cihazdaki kopya kullanılıyor.',
+  'ortak.depo.dosya-okunamadi':'Dosya okunamadı.',
+  'ortak.depo.bu-yedek-baska-bir-uygulamad':'Bu yedek başka bir uygulamadan («',
+  'ortak.depo.yedek-govdesi-okunamadi':'Yedek gövdesi okunamadı.',
+  'ortak.depo.bu-yedek-daha-yeni-bir':'Bu yedek daha yeni bir sürümle alınmış (şema ',
+  'ortak.depo.bu-dosya-bir':'Bu dosya bir ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -106,7 +123,7 @@ LIFEOS.Depo = Object.freeze({ kur(o){
       kopya = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}');
       return kopya;
     }catch(e){
-      report('local-read', e, 'Yerel kayıt okunamadı; veriler geçici olarak bellekte tutuluyor.');
+      report('local-read', e, yz('ortak.depo.yerel-kayit-okunamadi-verile'));
       health.local = 'error';
       kopya = {};
       return kopya;
@@ -147,8 +164,8 @@ LIFEOS.Depo = Object.freeze({ kur(o){
     }catch(e){
       health.local = 'error';
       report('local-write', e, isQuotaError(e)
-        ? 'Tarayıcı depolama alanı doldu. ' + o.veriYeri + ' bölümünden yedek alıp eski kayıtları temizle.'
-        : 'Değişiklik bu cihaza kaydedilemedi.');
+        ? yz('ortak.depo.tarayici-depolama-alani-dold') + o.veriYeri + ' bölümünden yedek alıp eski kayıtları temizle.'
+        : yz('ortak.depo.degisiklik-bu-cihaza-kaydedi'));
       return false;
     }
   }
@@ -225,7 +242,7 @@ LIFEOS.Depo = Object.freeze({ kur(o){
     }catch(e){
       db = null;
       health.cloud = 'error';
-      report('cloud-init', e, 'Hesaba bağlı senkronizasyon açılamadı; uygulama bu cihazda çalışmaya devam ediyor.');
+      report('cloud-init', e, yz('ortak.depo.hesaba-bagli-senkronizasyon'));
     }
     try{
       if(typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.persist === 'function'){
@@ -250,7 +267,7 @@ LIFEOS.Depo = Object.freeze({ kur(o){
         return lGet(path);
       }catch(e){
         health.cloud = 'error';
-        report('cloud-read', e, 'Buluttan okunamadı; bu cihazdaki kopya kullanılıyor.');
+        report('cloud-read', e, yz('ortak.depo.buluttan-okunamadi-bu-cihazd'));
         return lGet(path);
       }
     }
@@ -269,8 +286,8 @@ LIFEOS.Depo = Object.freeze({ kur(o){
       }catch(e){
         health.cloud = 'error';
         report('cloud-write', e, localOk
-          ? 'Değişiklik bu cihaza kaydedildi ama buluta gönderilemedi. Bağlantı gelince tekrar dene.'
-          : 'Değişiklik kaydedilemedi.');
+          ? yz('ortak.depo.degisiklik-bu-cihaza-kaydedi-2')
+          : yz('ortak.depo.degisiklik-kaydedilemedi'));
       }finally{
         health.pendingCloudWrites--;
       }
@@ -285,7 +302,7 @@ LIFEOS.Depo = Object.freeze({ kur(o){
       try{ await db.doc(path).delete(); }
       catch(e){
         health.cloud = 'error';
-        report('cloud-delete', e, 'Kayıt buluttan silinemedi.');
+        report('cloud-delete', e, yz('ortak.depo.kayit-buluttan-silinemedi'));
       }
     }
   }
@@ -301,7 +318,7 @@ LIFEOS.Depo = Object.freeze({ kur(o){
         return lList(collection);
       }catch(e){
         health.cloud = 'error';
-        report('cloud-list', e, 'Bulut verisi okunamadı; bu cihazdaki kopya kullanılıyor.');
+        report('cloud-list', e, yz('ortak.depo.bulut-verisi-okunamadi-bu-ci'));
         return lList(collection);
       }
     }
@@ -344,27 +361,27 @@ LIFEOS.Depo = Object.freeze({ kur(o){
 
   /* Hem yeni ({__meta,data}) hem eski (duz sozluk) bicimi kabul eder. */
   function readBackup(obj){
-    if(!obj || typeof obj !== 'object') return { ok:false, error:'Dosya okunamadı.' };
+    if(!obj || typeof obj !== 'object') return { ok:false, error:yz('ortak.depo.dosya-okunamadi') };
     if(obj.__meta && obj.data){
       /* UYGULAMA KIMLIGI once denetlenir. Yalniz sema surumune bakan bir
          okuma, baska bir LifeOS uygulamasinin yedegini kabul ediyordu:
          dosya secicide yanlis dosyayi secmek, profil verisinin baska bir
          uygulamanin verisiyle degismesi demekti. */
       if(obj.__meta.app && obj.__meta.app !== APP_ID){
-        return { ok:false, error:'Bu yedek başka bir uygulamadan («'
+        return { ok:false, error:yz('ortak.depo.bu-yedek-baska-bir-uygulamad')
           + String(obj.__meta.app).slice(0, 32) + '»). ' + o.ad + ' yedeği gerekir.' };
       }
       if(typeof obj.data !== 'object' || Array.isArray(obj.data)){
-        return { ok:false, error:'Yedek gövdesi okunamadı.' };
+        return { ok:false, error:yz('ortak.depo.yedek-govdesi-okunamadi') };
       }
       if(obj.__meta.schemaVersion > o.ns.SCHEMA_VERSION){
-        return { ok:false, error:'Bu yedek daha yeni bir sürümle alınmış (şema '+obj.__meta.schemaVersion+'). Önce uygulamayı güncelle.' };
+        return { ok:false, error:yz('ortak.depo.bu-yedek-daha-yeni-bir')+obj.__meta.schemaVersion+'). Önce uygulamayı güncelle.' };
       }
       return { ok:true, data:obj.data, meta:obj.__meta };
     }
     const keys = Object.keys(obj);
     const looksLegacy = keys.some(k => k.indexOf('/') > 0);
-    if(!looksLegacy) return { ok:false, error:'Bu dosya bir ' + o.ad + ' yedeği değil.' };
+    if(!looksLegacy) return { ok:false, error:yz('ortak.depo.bu-dosya-bir') + o.ad + ' yedeği değil.' };
     return { ok:true, data:obj, meta:{ schemaVersion:1, legacy:true } };
   }
 

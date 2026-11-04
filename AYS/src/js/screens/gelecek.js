@@ -5,6 +5,20 @@
    genişleyen aralık), «ne olursa» sürgüsü (yalnız senin verinden ölçülen
    etkiyle). «Nasıl hesaplandı» küçük başlar. Sayıların hepsi kodun;
    ekran yalnız çizer. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.gelecek.bu-gidisle-araligin-tamami-h':'Bu gidişle aralığın tamamı hedefinin içinde.',
+  'ays.gelecek.hedefin-bu-araligin-icinde-i':'Hedefin bu aralığın içinde: iyi uçta tutuyor, kötü uçta kaçıyor.',
+  'ays.gelecek.bu-gidisle-hedefin-araligin':'Bu gidişle hedefin aralığın dışında; «Ne olursa» neyin kaydırdığını gösterir.',
+  'ays.gelecek.siralama-araligi':'Sıralama aralığı',
+  'ays.gelecek.o-duzey-siralamada':'O düzey sıralamada',
+  'ays.gelecek.net-olculdu':'net (ölçüldü)',
+  'ays.gelecek.sonuc-etki':'Sonuç (etki)',
+  'ays.gelecek.ara-sonuc':'Ara sonuç',
+  'ays.gelecek.yeni-deney':'Yeni deney',
+  'ays.gelecek.deneyi-birak':'Deneyi bırak',
+  'ays.gelecek.sinav-gunune-kadar-bu-gidisl':'Sınav gününe kadar bu gidişle, ve ne olursa',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -93,12 +107,12 @@ R.Screens.gelecek = (function(){
         body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.' }) });
     }
     const s = r.sira;
-    const konum = r.konum === 'icinde' ? 'Bu gidişle aralığın tamamı hedefinin içinde.'
-      : r.konum === 'bantta' ? 'Hedefin bu aralığın içinde: iyi uçta tutuyor, kötü uçta kaçıyor.'
-      : r.konum === 'disinda' ? 'Bu gidişle hedefin aralığın dışında; «Ne olursa» neyin kaydırdığını gösterir.' : '';
+    const konum = r.konum === 'icinde' ? yz('ays.gelecek.bu-gidisle-araligin-tamami-h')
+      : r.konum === 'bantta' ? yz('ays.gelecek.hedefin-bu-araligin-icinde-i')
+      : r.konum === 'disinda' ? yz('ays.gelecek.bu-gidisle-hedefin-araligin') : '';
     /* Söz 6 (core/gelecek.js): sınav ufkun ötesindeyse sınav günü için
        sayı verilmez; ufuk tarihindeki aralık söylenir. */
-    const ne = t.sinavaKadar ? 'Sınav günü' : U.fmtDate(t.ufukTarih) + ' itibarıyla';
+    const ne = t.sinavaKadar ? yz('ays.gelecek.sinav-gunu') : U.fmtDate(t.ufukTarih) + ' itibarıyla';
     return K.Card({ title:yz('ays.gelecek.sinav-gunu'), hint:'gelecek', sub:U.fmtDate(r.sinav) + ' · ' + t.kalanGun + ' gün · tahmin',
       body:html`
         <div class="gel-ana">
@@ -106,7 +120,7 @@ R.Screens.gelecek = (function(){
           <p class="gel-cumle">${ne} ${yz('ays.gelecek.bu-gidisle-tyt-netin')} <b>${net(t.alt)}–${net(t.ust)}</b>${yz('ays.gelecek.en-olasi')} <b>${net(t.olasi)}</b>.</p>
           ${aralik({ alt:t.alt, ust:t.ust, olasi:t.olasi, min:0, max:t.max, dayanak:t.n, dayanakBirim:'deneme', birim:'net', ondalik:1, etiket:yz('ays.gelecek.tyt-net') })}
           ${when(s, () => html`
-            <p class="gel-cumle mt-12">${t.sinavaKadar ? 'Sıralama aralığı' : 'O düzey sıralamada'} <b>${sayi(s.sira.iyi)}–${sayi(s.sira.kotu)}</b>${yz('ays.gelecek.en-olasi')} <b>${sayi(s.sira.olasi)}</b>.</p>
+            <p class="gel-cumle mt-12">${t.sinavaKadar ? yz('ays.gelecek.siralama-araligi') : yz('ays.gelecek.o-duzey-siralamada')} <b>${sayi(s.sira.iyi)}–${sayi(s.sira.kotu)}</b>${yz('ays.gelecek.en-olasi')} <b>${sayi(s.sira.olasi)}</b>.</p>
             ${aralik({ alt:s.sira.iyi, ust:s.sira.kotu, olasi:s.sira.olasi, ters:true, dayanak:t.n, dayanakBirim:'deneme', etiket:yz('ays.gelecek.sira') })}
             ${when(r.hedef, () => html`<p class="small mt-8">${yz('ays.gelecek.hedefin')} ${sayi(r.hedef)}. ${konum}</p>`)}
             ${when(s.yalnizTyt, () => html`<p class="tiny dim mt-4">AYT denemesi yeterli değil: puan yalnız TYT gidişinden; AYT'nin aynı düzeyde geleceği varsayıldı.</p>`)}`)}
@@ -135,7 +149,7 @@ R.Screens.gelecek = (function(){
       '<line class="gel-g__izgara" x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '"/>'
       + '<text class="gel-g__yazi" x="' + (P.l - 6) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end">' + v + '</text>').join('');
     const noktalar = t.nokta.map(n => '<circle class="gel-g__nokta" r="3.5" cx="' + X(xGun(n.tarih)).toFixed(1) + '" cy="' + Y(n.net).toFixed(1) + '"><title>'
-      + U.fmtShort(n.tarih) + ' · ' + U.fmtNet(n.net) + ' net (ölçüldü)</title></circle>').join('');
+      + U.fmtShort(n.tarih) + ' · ' + U.fmtNet(n.net) + (' ' + yz('ays.gelecek.net-olculdu') + '</title></circle>')).join('');
     const svg = '<svg class="gel-g" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="TYT net gidişi: '
       + t.n + ' deneme ölçüldü; ' + (t.sinavaKadar ? 'sınav gününe' : U.fmtShort(bitis)) + ' kadar ' + U.fmtNet(t.alt) + '–' + U.fmtNet(t.ust) + ' net tahmini">'
       + izgara
@@ -201,13 +215,13 @@ R.Screens.gelecek = (function(){
     else{
       const iyi = s.fark >= 0 ? 'akşam' : 'sabah', f = Math.abs(s.fark);
       const [a, b] = s.fark >= 0 ? s.aralik : [-s.aralik[1], -s.aralik[0]];
-      govde = html`<p class="small mt-8">${s.durum === 'tamam' ? 'Sonuç (etki)' : 'Ara sonuç'}: ${s.anlamli
+      govde = html`<p class="small mt-8">${s.durum === 'tamam' ? yz('ays.gelecek.sonuc-etki') : yz('ays.gelecek.ara-sonuc')}: ${s.anlamli
           ? html`<b>${iyi}</b> ${yz('ays.gelecek.gunlerinde-ortalama')} <b>${bir(f)}</b> ${yz('ays.gelecek.soru-fazla')}` : 'iki koşul arasında ayırt edilir bir fark yok'}${yz('ays.gelecek.95-aralik')} ${bir(a)} – ${bir(b)} (sabah ${s.n.sabah}${yz('ays.gelecek.aksam-2')} ${s.n.aksam} ${yz('ays.gelecek.gun-3')}</p>
         ${when(R.Deney.surguAcik(s) && s.anlamli, () => deneySurgu(iyi, f, a, b))}`;
     }
     return K.Card({ title:yz('ays.gelecek.kisisel-deney'), sub:yz('ays.gelecek.sabah-mi-aksam-mi'), body:html`
       <p class="small">${ust}</p>${govde}
-      <div class="row mt-8"><button class="btn" data-act="deney-bitir">${s.durum === 'tamam' ? 'Yeni deney' : 'Deneyi bırak'}</button></div>` });
+      <div class="row mt-8"><button class="btn" data-act="deney-bitir">${s.durum === 'tamam' ? yz('ays.gelecek.yeni-deney') : yz('ays.gelecek.deneyi-birak')}</button></div>` });
   }
   /* Sürgü yalnız biten ve ayırt edilen deneyle (Faz 5 kabulü): etki ölçülenle çarpılır, uydurma katsayı yok. */
   function deneySurgu(iyi, f, a, b){
@@ -271,7 +285,7 @@ R.Screens.gelecek = (function(){
     id:'gelecek',
     kucukVarsayilan:['nasıl-hesaplandı'],
     title:yz('ays.gelecek.gelecek'),
-    subtitle(){ return 'Sınav gününe kadar bu gidişle, ve ne olursa'; },
+    subtitle(){ return yz('ays.gelecek.sinav-gunune-kadar-bu-gidisl'); },
     actions(){ return ''; },
     render, handle, change,
   };

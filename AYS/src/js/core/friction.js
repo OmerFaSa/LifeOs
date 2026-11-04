@@ -24,6 +24,10 @@
 
    4. SİSTEM KENDİ YÜKÜNÜ AZALTMAYI ÖNEREBİLİR, ARTIRMAYI ÖNEREMEZ. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.friction.bugunun-tek-isini-yapip-kapa':'Bugünün tek işini yapıp kapatmak yeterli.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.friction.surtunme-olculmedi':'Sürtünme ölçülmedi',
   'ays.core.friction.bu-pencerede-kayit-yok-siste':'Bu pencerede kayıt yok. Sistem kendi maliyetini bilmiyorsa ',
   'ays.core.friction.gerceklesen-calisma-girilmem':'Gerçekleşen çalışma girilmemiş',
@@ -218,7 +222,7 @@ R.Friction = (function(){
     if(!out.length){
       out.push({ id:'one-thing', label:yz('ays.core.friction.gunun-tek-isi'),
         note:yz('ays.core.friction.blok-sayisi-ve-kayit-yuku')
-           + 'Bugünün tek işini yapıp kapatmak yeterli.', route:'today' });
+           + yz('ays.core.friction.bugunun-tek-isini-yapip-kapa'), route:'today' });
     }
     return out;
   }

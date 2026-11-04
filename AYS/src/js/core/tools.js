@@ -4,6 +4,27 @@
    Araclar YALNIZ OKUR — hicbiri veriyi degistirmez.
    sanitize() modele giden her nesneyi suzer: kisisel alanlar (ad, sehir,
    okul) her derinlikte silinir ve metin icinde de maskelenir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.tools.risk-0-100-frekans-kapanis-a':'Risk 0–100: frekans, kapanış, açık yanlış, gecikmiş kart ve tazelikten hesaplanır.',
+  'ays.core.tools.bu-bir-kocluk-bandidir-kesin':'Bu bir koçluk bandıdır; kesin sıra tahmini değildir.',
+  'ays.core.tools.bugunku-genel-durum-program':'Bugünkü genel durum: program haftası, KPI’lar, medyanlar, borçlar, aktif telafi ve bu ayın karar kapısı. Neredeyse her soru için önce bunu çağır.',
+  'ays.core.tools.deneme-kayitlari-tarih-tur-t':'Deneme kayıtları: tarih, tür, test bazlı doğru/yanlış/boş/net ve süreler.',
+  'ays.core.tools.tyt-veya-ayt':'TYT veya AYT',
+  'ays.core.tools.yanlis-defteri-k-i-y-s-d-dag':'Yanlış defteri: K/İ/Y/S/D dağılımı ve kök neden metinleri. Kalıp aramak için kullan.',
+  'ays.core.tools.k-i-y-s-veya':'K, İ, Y, S veya D',
+  'ays.core.tools.ders-ve-konu-durumlari-kapan':'Ders ve konu durumları: kapanış yüzdeleri, ölçümler, soru sıklığı.',
+  'ays.core.tools.son-haftalarin-plani-tamamla':'Son haftaların planı, tamamlama oranı, sapma nedenleri ve weekly review metinleri.',
+  'ays.core.tools.son-gunlerin-calisma-kaydi-b':'Son günlerin çalışma kaydı: blok, dakika, soru, uyku, atlama nedeni, not.',
+  'ays.core.tools.hedef-katmanlari-test-bazli':'Hedef katmanları, test bazlı hedef bantları ile güncel medyanların karşılaştırması ve OBP katkısı.',
+  'ays.core.tools.aralikli-tekrar-durumu-due-g':'Aralıklı tekrar durumu: due, gecikmiş, borç yüzdesi ve örnek kartlar.',
+  'ays.core.tools.i-zlenen-derslerin-zaman-dam':'İzlenen derslerin zaman damgalı notları. Konu özeti veya kart üretmek için kullan. Ham transcript verilmez.',
+  'ays.core.tools.mola-ve-mesgale-durumu-bugun':'Mola ve meşgale durumu: bugün kaç mola alındı, şu an ne önerilebilir.',
+  'ays.core.tools.adayin-gunluk-enerji-girisi':'Adayın günlük enerji girişi (1–5), ortalaması ve uyku ortalaması.',
+  'ays.core.tools.bugunun-adimlari-izle-not':'Bugünün adımları (izle → not → soru → kart → mola), hangileri tamam, sıradaki hamle ve kazanılan davranışlar.',
+  'ays.core.tools.konu-bazli-risk-siralamasi-f':'Konu bazlı risk sıralaması: frekans, kapanış, açık yanlış, gecikmiş kart ve tazelikten hesaplanır. “Neye çalışayım” sorusunda kullan.',
+  'ays.core.tools.kural-motorunun-urettigi-tah':'Kural motorunun ürettiği tahmini puan ve sıra BANDI. Bu bant dışına çıkma, kesin sıra söyleme.',
+});
+
 
 window.R = window.R || {};
 
@@ -247,7 +268,7 @@ R.Tools = (function(){
   function konuRiski(input){
     const o = input || {};
     return {
-      aciklama:'Risk 0–100: frekans, kapanış, açık yanlış, gecikmiş kart ve tazelikten hesaplanır.',
+      aciklama:yz('ays.core.tools.risk-0-100-frekans-kapanis-a'),
       liste:C.riskRanking(o.limit || 10).map(r => ({
         ders:r.subjectName, konu:r.topicName, risk:r.score, bant:r.label,
         durum:r.state, frekans:r.freq, acikYanlis:r.errors, gunGecti:r.staleDays,
@@ -267,64 +288,64 @@ R.Tools = (function(){
       tahminiSiraBandi:[est.rankBest, est.rankWorst],
       hedefSira:est.targetRank,
       konum:est.meta.label,
-      uyari:'Bu bir koçluk bandıdır; kesin sıra tahmini değildir.',
+      uyari:yz('ays.core.tools.bu-bir-kocluk-bandidir-kesin'),
       hedefeNetFarki:gap ? gap.netDiff : null,
     };
   }
 
   /* ---------- sample() icin arac tanimlari ---------- */
   const TOOLS = [
-    { name:'durum_ozeti', description:'Bugünkü genel durum: program haftası, KPI’lar, medyanlar, borçlar, aktif telafi ve bu ayın karar kapısı. Neredeyse her soru için önce bunu çağır.',
+    { name:'durum_ozeti', description:yz('ays.core.tools.bugunku-genel-durum-program'),
       inputSchema:{ type:'object', properties:{} }, execute:durum },
 
-    { name:'denemeler', description:'Deneme kayıtları: tarih, tür, test bazlı doğru/yanlış/boş/net ve süreler.',
+    { name:'denemeler', description:yz('ays.core.tools.deneme-kayitlari-tarih-tur-t'),
       inputSchema:{ type:'object', properties:{
-        aile:{ type:'string', description:'TYT veya AYT' },
+        aile:{ type:'string', description:yz('ays.core.tools.tyt-veya-ayt') },
         yalnizTam:{ type:'boolean', description:'yalnız tam denemeler' },
         limit:{ type:'number' } } }, execute:denemeler },
 
-    { name:'hatalar', description:'Yanlış defteri: K/İ/Y/S/D dağılımı ve kök neden metinleri. Kalıp aramak için kullan.',
+    { name:'hatalar', description:yz('ays.core.tools.yanlis-defteri-k-i-y-s-d-dag'),
       inputSchema:{ type:'object', properties:{
-        etiket:{ type:'string', description:'K, İ, Y, S veya D' },
+        etiket:{ type:'string', description:yz('ays.core.tools.k-i-y-s-veya') },
         yalnizAcik:{ type:'boolean' },
         limit:{ type:'number' } } }, execute:hatalar },
 
-    { name:'konular', description:'Ders ve konu durumları: kapanış yüzdeleri, ölçümler, soru sıklığı.',
+    { name:'konular', description:yz('ays.core.tools.ders-ve-konu-durumlari-kapan'),
       inputSchema:{ type:'object', properties:{
         ders:{ type:'string', description:'ders id veya adı; boşsa tüm dersler' },
         tumKonular:{ type:'boolean', description:'başlanmamışları da getir' } } }, execute:konular },
 
-    { name:'haftalar', description:'Son haftaların planı, tamamlama oranı, sapma nedenleri ve weekly review metinleri.',
+    { name:'haftalar', description:yz('ays.core.tools.son-haftalarin-plani-tamamla'),
       inputSchema:{ type:'object', properties:{ gerideHafta:{ type:'number' } } }, execute:haftalar },
 
-    { name:'gunler', description:'Son günlerin çalışma kaydı: blok, dakika, soru, uyku, atlama nedeni, not.',
+    { name:'gunler', description:yz('ays.core.tools.son-gunlerin-calisma-kaydi-b'),
       inputSchema:{ type:'object', properties:{ gun:{ type:'number' } } }, execute:gunler },
 
-    { name:'hedef_ve_net_matrisi', description:'Hedef katmanları, test bazlı hedef bantları ile güncel medyanların karşılaştırması ve OBP katkısı.',
+    { name:'hedef_ve_net_matrisi', description:yz('ays.core.tools.hedef-katmanlari-test-bazli'),
       inputSchema:{ type:'object', properties:{} }, execute:hedef },
 
-    { name:'kartlar', description:'Aralıklı tekrar durumu: due, gecikmiş, borç yüzdesi ve örnek kartlar.',
+    { name:'kartlar', description:yz('ays.core.tools.aralikli-tekrar-durumu-due-g'),
       inputSchema:{ type:'object', properties:{ limit:{ type:'number' } } }, execute:kartlar },
 
-    { name:'video_notlari', description:'İzlenen derslerin zaman damgalı notları. Konu özeti veya kart üretmek için kullan. Ham transcript verilmez.',
+    { name:'video_notlari', description:yz('ays.core.tools.i-zlenen-derslerin-zaman-dam'),
       inputSchema:{ type:'object', properties:{
         notId:{ type:'string', description:'tek bir dersin id’si' },
         ders:{ type:'string', description:'ders id’si' },
         limit:{ type:'number' } } }, execute:videoNotlari },
 
-    { name:'mesgaleler', description:'Mola ve meşgale durumu: bugün kaç mola alındı, şu an ne önerilebilir.',
+    { name:'mesgaleler', description:yz('ays.core.tools.mola-ve-mesgale-durumu-bugun'),
       inputSchema:{ type:'object', properties:{} }, execute:mesgaleler },
 
-    { name:'enerji_durumu', description:'Adayın günlük enerji girişi (1–5), ortalaması ve uyku ortalaması.',
+    { name:'enerji_durumu', description:yz('ays.core.tools.adayin-gunluk-enerji-girisi'),
       inputSchema:{ type:'object', properties:{ gun:{ type:'number' } } }, execute:enerjiDurumu },
 
-    { name:'gunun_akisi', description:'Bugünün adımları (izle → not → soru → kart → mola), hangileri tamam, sıradaki hamle ve kazanılan davranışlar.',
+    { name:'gunun_akisi', description:yz('ays.core.tools.bugunun-adimlari-izle-not'),
       inputSchema:{ type:'object', properties:{} }, execute:gununAkisi },
 
-    { name:'konu_riski', description:'Konu bazlı risk sıralaması: frekans, kapanış, açık yanlış, gecikmiş kart ve tazelikten hesaplanır. “Neye çalışayım” sorusunda kullan.',
+    { name:'konu_riski', description:yz('ays.core.tools.konu-bazli-risk-siralamasi-f'),
       inputSchema:{ type:'object', properties:{ limit:{ type:'number' } } }, execute:konuRiski },
 
-    { name:'puan_tahmini', description:'Kural motorunun ürettiği tahmini puan ve sıra BANDI. Bu bant dışına çıkma, kesin sıra söyleme.',
+    { name:'puan_tahmini', description:yz('ays.core.tools.kural-motorunun-urettigi-tah'),
       inputSchema:{ type:'object', properties:{} }, execute:puanTahmini },
   ];
 

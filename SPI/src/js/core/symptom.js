@@ -23,6 +23,11 @@
    · Dongu tahmini bir TAHMINDIR ve oyle etiketlenir: ortalama
      uzunluktan hesaplanir, olculmez. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.symptom.ortalama-uzunluk-icin-en-az':'Ortalama uzunluk için en az iki dönem gerekir; ',
+  'spi.core.symptom.bu-donemde-ve-hemen-sonrasin':'Bu dönemde ve hemen sonrasında demir deposu ve hemoglobin ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.symptom.semptom-kaydi-yok':'Semptom kaydı yok.',
   'spi.core.symptom.kanama-gunu-isaretlenmemis-g':'Kanama günü işaretlenmemiş. Günlükte işaretlersen ferritin ve ',
   'spi.core.symptom.bu-olcum-dongunun-kanama-don':'Bu ölçüm döngünün kanama dönemine yakın',
@@ -153,7 +158,7 @@ SP.Symptom = (function(){
       nextExpected:U.iso(U.addDays(U.parse(son.start), uzunluk)),
       note:olculdu
         ? d.length + ' dönemden hesaplanan ortalama: ' + uzunluk + ' gün.'
-        : 'Ortalama uzunluk için en az iki dönem gerekir; ' + CYCLE_DEFAULT
+        : yz('spi.core.symptom.ortalama-uzunluk-icin-en-az') + CYCLE_DEFAULT
           + ' günlük varsayılan kullanıldı.',
     };
   }
@@ -182,7 +187,7 @@ SP.Symptom = (function(){
           title:yz('spi.core.symptom.bu-olcum-dongunun-kanama-don'),
           text:yz('spi.core.symptom.kanama') + U.fmtDate(don.start) + ' tarihinde başlamış; ölçüm '
             + (fark === 0 ? 'aynı dönemde' : fark + ' gün sonra') + ' alınmış. '
-            + 'Bu dönemde ve hemen sonrasında demir deposu ve hemoglobin '
+            + yz('spi.core.symptom.bu-donemde-ve-hemen-sonrasin')
             + 'olduğundan düşük okunabilir.' };
       }
       break;

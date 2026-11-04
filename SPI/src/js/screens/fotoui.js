@@ -5,6 +5,11 @@
 
    Eylemler her ekranda çalışsın diye geneldir (app.js bağlar), Hatırlat
    kalıbıyla aynı: `SP.FotoUI.handle`. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.fotoui.yeniden-cek':'Yeniden çek',
+  'spi.fotoui.fotograf-silindi':'Fotoğraf silindi',
+});
+
 
 window.SP = window.SP || {};
 
@@ -42,7 +47,7 @@ SP.FotoUI = (function(){
       body:String(html`<img class="foto-buyuk" src="${u}" alt="${d.ad}"/>`),
       footer:String(html`${K.Button({ label:'Sil', tone:'ghost', act:'foto-sil', data:veri })}
         <span class="grow"></span>
-        ${K.Button({ label:'Yeniden çek', icon:'camera', act:'foto-yeniden', data:veri })}
+        ${K.Button({ label:yz('spi.fotoui.yeniden-cek'), icon:'camera', act:'foto-yeniden', data:veri })}
         ${K.Button({ label:'Kapat', act:'sheet-close' })}`),
       noFocus:true,
     });
@@ -63,7 +68,7 @@ SP.FotoUI = (function(){
       await SP.Foto.sil(d.sahip);
       SP.UI.closeSheet();
       if(blob) SP.S.ui.undo = { restore:() => SP.Foto.kaydet(d.sahip, blob) };
-      SP.UI.toast('Fotoğraf silindi', { undo:!!blob });
+      SP.UI.toast(yz('spi.fotoui.fotograf-silindi'), { undo:!!blob });
       SP.App.render();
     },
   };

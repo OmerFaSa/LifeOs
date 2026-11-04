@@ -10,6 +10,25 @@
      script yuklemiyoruz, bu yuzden denenmez.
    - Gomulu oynatici acilmayabilir (CSP / ag). Bu durumda not editoru calismaya
      devam eder ve videoyu tarayicida acan bir baglanti gosterilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.learn.ders-baglanmadi':'Ders bağlanmadı',
+  'ays.learn.adsiz-ders':'Adsız ders',
+  'ays.learn.ders-videosu':'Ders videosu',
+  'ays.learn.sesle-yaz':'Sesle yaz',
+  'ays.learn.yeniden-ac':'Yeniden aç',
+  'ays.learn.bitti-isaretle':'Bitti işaretle',
+  'ays.learn.youtube-baglantisi-gomulu-ac':'YouTube bağlantısı gömülü açılır',
+  'ays.learn.otomatik-cekilmez-videonun-a':'Otomatik çekilmez. Videonun altyazısını kopyalayıp buraya ',
+  'ays.learn.zaman-damgalari-tahmindir-vi':'Zaman damgaları tahmindir. Video süresini girdiysen ',
+  'ays.learn.transcript-otomatik-cekilmez-2':'Transcript otomatik çekilmez. İzlerken durakla, ',
+  'ays.learn.dersi-sil-2':'Dersi sil',
+  'ays.learn.bu-ders-ve-altindaki-notlar':'Bu ders ve altındaki notlar silinecek. Üretilmiş tekrar kartları kalır.',
+  'ays.learn.dersi-ve':'Dersi ve ',
+  'ays.learn.onaylamadan-once-oku-yanlis':'Onaylamadan önce oku. Yanlış bir kart, yanlış bir ezberdir.',
+  'ays.learn.tum-notlardan-kart-uret':'Tüm notlardan kart üret',
+  'ays.learn.video-izle-not-dus-karta':'Video izle, not düş, karta çevir',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -178,7 +197,7 @@ R.Screens.learn = (function(){
   }
   function topicLabel(note){
     const s = R.SUBJECTS.find(x => x.id === note.subjectId);
-    if(!s) return 'Ders bağlanmadı';
+    if(!s) return yz('ays.learn.ders-baglanmadi');
     const t = s.topics.find(x => x.id === note.topicId);
     return t ? s.name+' · '+t.name : s.name;
   }
@@ -202,7 +221,7 @@ R.Screens.learn = (function(){
       <div class="listitem listitem--tap" data-act="note-open" data-id="${note.id}">
         <span class="notedot ${note.done ? 'is-done' : ''}">${raw(UI.icon(note.done ? 'check' : 'play'))}</span>
         <div class="grow">
-          <div class="row-sm wrap"><b>${note.title || 'Adsız ders'}</b>
+          <div class="row-sm wrap"><b>${note.title || yz('ays.learn.adsiz-ders')}</b>
             ${when(note.provider === 'youtube', () => K.Badge({ label:'video', tone:'muted' }))}
             ${when(note.transcript, () => K.Badge({ label:yz('ays.learn.metin-var'), tone:'muted' }))}</div>
           <div class="tiny dim">${meta}</div>
@@ -278,7 +297,7 @@ R.Screens.learn = (function(){
     const src = 'https://www.youtube-nocookie.com/embed/' + note.videoId + '?rel=0&modestbranding=1';
     return html`
       <div class="player">
-        <iframe class="player__frame" src="${src}" title="${note.title || 'Ders videosu'}"
+        <iframe class="player__frame" src="${src}" title="${note.title || yz('ays.learn.ders-videosu')}"
           loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture"
           referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
@@ -314,7 +333,7 @@ R.Screens.learn = (function(){
       title:yz('ays.learn.not-al'), hint:'notebook',
       sub:yz('ays.learn.durakla-tek-cumle-yaz-uzun'),
       actions:when(window.SpeechRecognition || window.webkitSpeechRecognition,
-        () => K.Button({ label:listening ? 'Dinleniyor…' : 'Sesle yaz', icon:'zap', size:'sm',
+        () => K.Button({ label:listening ? 'Dinleniyor…' : yz('ays.learn.sesle-yaz'), icon:'zap', size:'sm',
           tone:listening ? 'primary' : null, act:'note-voice' })),
       body:html`
         <div class="noteform">
@@ -349,13 +368,13 @@ R.Screens.learn = (function(){
         K.Button({ label:yz('ays.learn.dersler'), icon:'left', size:'sm', tone:'ghost', act:'note-back' }),
         html`<div class="row-sm">
           ${note.done ? K.Badge({ label:'bitti', tone:'ok' }) : K.Badge({ label:yz('ays.learn.devam-ediyor'), tone:'muted' })}
-          ${K.Button({ label:note.done ? 'Yeniden aç' : 'Bitti işaretle', size:'sm', act:'note-toggle-done' })}
+          ${K.Button({ label:note.done ? yz('ays.learn.yeniden-ac') : yz('ays.learn.bitti-isaretle'), size:'sm', act:'note-toggle-done' })}
           ${K.IconButton({ icon:'trash', size:'sm', aria:yz('ays.learn.dersi-sil'), act:'note-delete', data:{ 'data-id':note.id } })}
         </div>`,
       ], { between:true, wrap:true })),
 
       K.Span(7, K.Stack([
-        K.Card({ title:note.title || 'Adsız ders', sub:topicLabel(note), body:player(note) }),
+        K.Card({ title:note.title || yz('ays.learn.adsiz-ders'), sub:topicLabel(note), body:player(note) }),
         editor(note),
         K.Card({
           title:yz('ays.learn.notlar'), sub:U.plural(segs.length, 'kayıt', 'kayıt'),
@@ -389,7 +408,7 @@ R.Screens.learn = (function(){
           ${note.source === 'kitap'
             ? K.Field({ label:yz('ays.learn.kaynak-sayfa'), input:K.Input({ id:'nd-page', value:note.page,
                 placeholder:yz('ays.learn.or-345-tyt-matematik-s-128'), change:'note-page' }) })
-            : K.Field({ label:yz('ays.learn.video-baglantisi'), hint:'YouTube bağlantısı gömülü açılır',
+            : K.Field({ label:yz('ays.learn.video-baglantisi'), hint:yz('ays.learn.youtube-baglantisi-gomulu-ac'),
                 input:K.Input({ id:'nd-url', value:note.url, placeholder:'https://…', change:'note-url' }) })}` }),
 
         when(R.Office.mode() === 'llm' && note.segments.length, () => K.Card({
@@ -404,7 +423,7 @@ R.Screens.learn = (function(){
           title:yz('ays.learn.metin-transcript'), meta:note.transcript ? U.fmtNum(note.transcript.length)+' karakter' : 'boş',
           act:'note-toggle-transcript', open:!!S.ui.transcriptOpen,
           body:html`
-            ${K.Notice({ tone:'info', body:'Otomatik çekilmez. Videonun altyazısını kopyalayıp buraya '
+            ${K.Notice({ tone:'info', body:yz('ays.learn.otomatik-cekilmez-videonun-a')
               + 'yapıştır; sistem cümlelere bölüp zaman damgası önerir, sen onaylarsın.' })}
             ${K.Textarea({ id:'nd-transcript', rows:8, value:note.transcript,
               placeholder:yz('ays.learn.altyazi-metnini-buraya-yapis'), change:'note-transcript' })}
@@ -454,7 +473,7 @@ R.Screens.learn = (function(){
       UI.sheet({
         title:yz('ays.learn.bolunen-cumleler'), subtitle:parts.length+' öneri · onayladıkların not olur', wide:true,
         body:String(K.Stack([
-          K.Notice({ tone:'info', body:'Zaman damgaları tahmindir. Video süresini girdiysen '
+          K.Notice({ tone:'info', body:yz('ays.learn.zaman-damgalari-tahmindir-vi')
             + 'orantılı dağıtıldı; girmediysen cümle uzunluğuna göre yerleştirildi.' }),
           html`<div class="stack-xs">${map(parts, (x, i) => html`
             <label class="check">
@@ -492,13 +511,13 @@ R.Screens.learn = (function(){
         title:yz('ays.learn.ders-ekle'), subtitle:yz('ays.learn.video-baglantisi-istege-bagl'),
         body:String(K.Stack([
           K.Field({ label:yz('ays.learn.baslik'), input:K.Input({ id:'nn-title', placeholder:yz('ays.learn.or-paragrafta-ana-dusunce') }) }),
-          K.Field({ label:yz('ays.learn.video-baglantisi'), hint:'YouTube bağlantısı gömülü açılır',
+          K.Field({ label:yz('ays.learn.video-baglantisi'), hint:yz('ays.learn.youtube-baglantisi-gomulu-ac'),
             input:K.Input({ id:'nn-url', placeholder:'https://www.youtube.com/watch?v=…' }) }),
           K.Cols(2, [
             K.Field({ label:yz('ays.learn.ders-2'), input:K.Select({ id:'nn-subject', options:subjectOptions(), value:onDers }) }),
             K.Field({ label:yz('ays.learn.konu-2'), input:K.Select({ id:'nn-topic', options:topicOptions(onDers || null), value:onKonu }) }),
           ]),
-          K.Notice({ tone:'info', body:'Transcript otomatik çekilmez. İzlerken durakla, '
+          K.Notice({ tone:'info', body:yz('ays.learn.transcript-otomatik-cekilmez-2')
             + 'zaman damgası ve tek cümle notla ilerle.' }),
         ])),
         footer:String(html`${K.Button({ label:yz('ays.learn.vazgec'), act:'sheet-close' })}
@@ -529,13 +548,13 @@ R.Screens.learn = (function(){
     async 'note-delete'(el){
       const id = el.dataset.id;
       const notSay = ((S.videoNotes || []).find(n => n.id === id) || { segments:[] }).segments.length;
-      UI.confirmSheet('Dersi sil', 'Bu ders ve altındaki notlar silinecek. Üretilmiş tekrar kartları kalır.', async () => {
+      UI.confirmSheet(yz('ays.learn.dersi-sil-2'), yz('ays.learn.bu-ders-ve-altindaki-notlar'), async () => {
         await M.deleteVideoNote(id);
         S.ui.noteOpen = null;
         UI.closeSheet();
         UI.toast(yz('ays.learn.ders-silindi'));
         R.App.render();
-      }, true, notSay ? 'Dersi ve ' + notSay + ' notu sil' : 'Dersi sil');
+      }, true, notSay ? yz('ays.learn.dersi-ve') + notSay + ' notu sil' : yz('ays.learn.dersi-sil-2'));
     },
     async 'note-toggle-done'(){
       const note = openNote();
@@ -600,7 +619,7 @@ R.Screens.learn = (function(){
           title:yz('ays.learn.onerilen-kartlar'), subtitle:res.cards.length+' kart · '+(res.dropped ? res.dropped+' öneri elendi' : 'hepsi geçerli'),
           wide:true,
           body:String(K.Stack([
-            K.Notice({ tone:'info', body:'Onaylamadan önce oku. Yanlış bir kart, yanlış bir ezberdir.' }),
+            K.Notice({ tone:'info', body:yz('ays.learn.onaylamadan-once-oku-yanlis') }),
             html`<div class="stack-sm">${map(res.cards, (c, i) => K.Card({ flat:true, pad:'sm', body:html`
               <div class="row between"><b class="small">${c.front}</b>
                 ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:yz('ays.learn.oneriyi-cikar'),
@@ -633,7 +652,7 @@ R.Screens.learn = (function(){
     async 'note-cards-all'(){
       const note = openNote();
       if(!note || !note.segments.length) return;
-      UI.confirmSheet('Tüm notlardan kart üret',
+      UI.confirmSheet(yz('ays.learn.tum-notlardan-kart-uret'),
         note.segments.length+' not için tekrar kartı oluşturulacak. Kartlar 1 gün sonra çıkar.', async () => {
           for(const seg of note.segments) await M.saveCard(M.cardFromSegment(note, seg));
           UI.closeSheet();
@@ -694,11 +713,11 @@ R.Screens.learn = (function(){
     title:yz('ays.learn.ogrenme'),
     subtitle(){
       const note = openNote();
-      if(note) return (note.title || 'Adsız ders') + ' · ' + U.plural(note.segments.length, 'not', 'not');
+      if(note) return (note.title || yz('ays.learn.adsiz-ders')) + ' · ' + U.plural(note.segments.length, 'not', 'not');
       const segs = S.videoNotes.reduce((a, n) => a + n.segments.length, 0);
       return S.videoNotes.length
         ? U.plural(S.videoNotes.length, 'ders', 'ders') + ' · ' + U.plural(segs, 'not', 'not')
-        : 'Video izle, not düş, karta çevir';
+        : yz('ays.learn.video-izle-not-dus-karta');
     },
     actions(){
       return String(K.Button({ label:yz('ays.learn.ders-ekle'), icon:'plus', size:'sm', tone:'primary', act:'note-new' }));

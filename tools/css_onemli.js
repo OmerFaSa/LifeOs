@@ -120,7 +120,7 @@ async function modulTara(t, modul, liste){
         kat(await p.evaluate(SINA, liste));
       }
     }
-    for(const sec of ['[data-king-ac]', '[data-act="open-appearance"]']){
+    for(const sec of ['[data-king-ac]', '[data-act="open-appearance"]', '.ust__ses', '.ust__hesap', '[data-act="toggle-sidebar"]', '[data-act="open-palette"]', '[data-act="open-shortcuts"]']){
       await p.evaluate(s => { const e = document.querySelector(s); if(e) e.click(); }, sec).catch(() => {});
       await p.waitForTimeout(400);
       kat(await p.evaluate(SINA, liste));

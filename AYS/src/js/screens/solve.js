@@ -14,6 +14,41 @@
    «Deftere kaydet» soruyu, karalamaları, notunu ve çözümün kısa özetini
    konusunun etiketiyle tek Defter notunda toplar (medya cihazda kalır).
    Model yokken de çalışır: kâğıtta çözer, deftere kaydedersin. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.solve.zorluk-olculmedi':'Zorluk ölçülmedi.',
+  'ays.solve.ortalama-zorluk':'Ortalama zorluk ',
+  'ays.solve.fotografli-soru-icin-gorsel':'Fotoğraflı soru için görsel destekleyen bir model gerekir — Google AI Studio’nun ',
+  'ays.solve.gemini-modelleri-ucretsiz-ka':'Gemini modelleri ücretsiz katmanda bunu yapar. Ofis → Ayarlar’dan bağlayabilirsin. ',
+  'ays.solve.ya-da-soruyu-metin-olarak':'Ya da soruyu metin olarak yaz.',
+  'ays.solve.coz-ve-anlat':'Çöz ve anlat',
+  'ays.solve.konusmaya-devam-et':'Konuşmaya devam et',
+  'ays.solve.anlamadigin-yeri-sor':'Anlamadığın yeri sor',
+  'ays.solve.kayda-gecir':'Kayda geçir',
+  'ays.solve.model-konuyu':'Model konuyu “',
+  'ays.solve.asagidan-dogru-konuyu-sec':'Aşağıdan doğru konuyu seç — yanlış konu, konu takibini sessizce bozar.',
+  'ays.solve.soru-ikinci-kez-bagimsiz-ola':'Soru ikinci kez, bağımsız olarak çözülüyor…',
+  'ays.solve.yukaridaki-cozum-net-bir-cev':'Yukarıdaki çözüm net bir cevap bildirmedi, karşılaştıracak bir şey yok.',
+  'ays.solve.i-kinci-cozum-bir-cevap-uret':'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına ',
+  'ays.solve.soru-2':'Soru ',
+  'ays.solve.soru-ayni-modele-sifirdan-co':'Soru aynı modele sıfırdan çözdürüldü ve aynı sonuca ulaştı — bağlamı ',
+  'ays.solve.bu-bir-garanti-degildir-iki':'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.',
+  'ays.solve.hangisinin-dogru-olduguna-ka':'Hangisinin doğru olduğuna karar verilemedi. Çözümü kendin kontrol et; ',
+  'ays.solve.yukaridaki-cozum-dogru':'Yukarıdaki çözüm doğru.',
+  'ays.solve.yukaridaki-cozum-hatali':'Yukarıdaki çözüm HATALI.',
+  'ays.solve.i-kisi-de-hatali':'İkisi de hatalı.',
+  'ays.solve.karar-verilemedi':'Karar verilemedi.',
+  'ays.solve.dogru-cevap':'Doğru cevap: ',
+  'ays.solve.gorsel-cok-buyuk-daha':'Görsel çok büyük — daha küçük bir kırpma dene',
+  'ays.solve.bu-bir-gorsel-degil':'Bu bir görsel değil',
+  'ays.solve.gorsel-okunamadi':'Görsel okunamadı',
+  'ays.solve.soru-ustunde-coz':'Soru üstünde çöz',
+  'ays.solve.karalamayi-ekle':'Karalamayı ekle',
+  'ays.solve.soru-okunuyor-ve-cozuluyor':'Soru okunuyor ve çözülüyor…',
+  'ays.solve.soru-cozumu':'Soru çözümü',
+  'ays.solve.kaydedildi-ve-yanlis-defteri':'Kaydedildi ve yanlış defterine eklendi',
+  'ays.solve.soruyu-yaz-ya-da-fotografla':'Soruyu yaz ya da fotoğrafla, çözümü adım adım al',
+});
+
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -196,7 +231,7 @@ R.Screens.solve = (function(){
       s.cozumOrani == null
         ? { ust:yz('ays.solve.kendi-cozdugun'), cumle:yz('ays.solve.henuz-kayit-yok'), vurgu:yz('ays.solve.bir-soru-cozunce-oran-cikar'), sistem:'ays' }
         : { ust:yz('ays.solve.kendi-cozdugun'), sayi:sayi({ deger:s.cozumOrani, birim:'%', kesinlik:'computed', formul:'kendin çözdüğün ÷ kayıt' }),
-            cumle:'kendin.', vurgu:s.ortZorluk == null ? 'Zorluk ölçülmedi.' : 'Ortalama zorluk ' + s.ortZorluk + '.', sistem:'ays' },
+            cumle:'kendin.', vurgu:s.ortZorluk == null ? yz('ays.solve.zorluk-olculmedi') : yz('ays.solve.ortalama-zorluk') + s.ortZorluk + '.', sistem:'ays' },
     ];
     if(s.etiketsiz) m.push({ ust:yz('ays.solve.konusuz-kayit'), sayi:sayi({ deger:s.etiketsiz, birim:'kayıt', kesinlik:'measured' }),
       cumle:yz('ays.solve.konuya-baglanmadi'), vurgu:yz('ays.solve.cozulen-sorular-dan-elle-sec'), sistem:'ays' });
@@ -253,9 +288,9 @@ R.Screens.solve = (function(){
 
         when(image && !canImage, () => K.Notice({ tone:'warn',
           title:yz('ays.solve.bagli-model-gorsel-okuyamiyo'),
-          body:'Fotoğraflı soru için görsel destekleyen bir model gerekir — Google AI Studio’nun '
-             + 'Gemini modelleri ücretsiz katmanda bunu yapar. Ofis → Ayarlar’dan bağlayabilirsin. '
-             + 'Ya da soruyu metin olarak yaz.' })),
+          body:yz('ays.solve.fotografli-soru-icin-gorsel')
+             + yz('ays.solve.gemini-modelleri-ucretsiz-ka')
+             + yz('ays.solve.ya-da-soruyu-metin-olarak') })),
 
         /* --- metin --- */
         K.Field({ label:yz('ays.solve.soru-metni'), hint:image ? 'fotoğraf varken boş bırakabilirsin' : null,
@@ -266,7 +301,7 @@ R.Screens.solve = (function(){
           input:K.Input({ id:'q-note', placeholder:yz('ays.solve.or-ikinci-adimi-anlamadim') }) }),
 
         K.Row([
-          K.Button({ label:busy ? 'Çözülüyor…' : 'Çöz ve anlat', icon:'zap', tone:'primary',
+          K.Button({ label:busy ? 'Çözülüyor…' : yz('ays.solve.coz-ve-anlat'), icon:'zap', tone:'primary',
             act:'q-solve', disabled:busy || !canText }),
           when(busy, () => K.Button({ label:yz('ays.solve.i-ptal'), size:'sm', tone:'ghost', act:'q-cancel' })),
           when(result && !busy, () => K.Button({ label:yz('ays.solve.yeni-soru'), size:'sm', act:'q-reset' })),
@@ -335,7 +370,7 @@ R.Screens.solve = (function(){
           </div>`)}</div>`)}
 
         <div class="mt-12">
-          ${K.Field({ label:thread.length ? 'Konuşmaya devam et' : 'Anlamadığın yeri sor',
+          ${K.Field({ label:thread.length ? yz('ays.solve.konusmaya-devam-et') : yz('ays.solve.anlamadigin-yeri-sor'),
             hint:'yalnız o adımı açıklar, çözümü baştan yazmaz — istediğin kadar sorabilirsin',
             input:K.Input({ id:'q-follow',
               placeholder:thread.length ? 'başka?' : 'ör. üçüncü adımda neden 2 ile çarptın?' }) })}
@@ -348,13 +383,13 @@ R.Screens.solve = (function(){
         </div>
 
         <div class="qmeta mt-12">
-          ${K.SectionTitle('Kayda geçir')}
+          ${K.SectionTitle(yz('ays.solve.kayda-gecir'))}
           ${when(window.LIFEOS && window.LIFEOS.DEFTER && window.LIFEOS.DEFTER.kuruluMu(), () => html`<div class="row wrap gap-6 mb-8">
             ${K.Button({ label:yz('ays.solve.deftere-kaydet'), icon:'book', size:'sm', act:'q-defter' })}
             <span class="tiny dim">${yz('ays.solve.soru-karalamalarin-notun-ve')}</span></div>`)}
           ${when(!m.matched && m.rawTopic, () => K.Notice({ tone:'warn',
-            body:'Model konuyu “' + m.rawTopic + '” diye yazdı ama bu ders listende yok. '
-               + 'Aşağıdan doğru konuyu seç — yanlış konu, konu takibini sessizce bozar.' }))}
+            body:yz('ays.solve.model-konuyu') + m.rawTopic + '” diye yazdı ama bu ders listende yok. '
+               + yz('ays.solve.asagidan-dogru-konuyu-sec') }))}
           ${saveForm(m)}
         </div>`,
     });
@@ -371,7 +406,7 @@ R.Screens.solve = (function(){
 
   function checkCard(){
     if(checkBusy){
-      return K.Notice({ tone:'info', body:'Soru ikinci kez, bağımsız olarak çözülüyor…' });
+      return K.Notice({ tone:'info', body:yz('ays.solve.soru-ikinci-kez-bagimsiz-ola') });
     }
     if(!check){
       return html`<div class="mt-10">
@@ -386,17 +421,17 @@ R.Screens.solve = (function(){
     if(check.durum === 'emin_degil'){
       return K.Notice({ tone:'warn', title:yz('ays.solve.denetim-sonucsuz'),
         body:check.neden === 'no_first'
-          ? 'Yukarıdaki çözüm net bir cevap bildirmedi, karşılaştıracak bir şey yok.'
-          : 'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
+          ? yz('ays.solve.yukaridaki-cozum-net-bir-cev')
+          : yz('ays.solve.i-kinci-cozum-bir-cevap-uret')
             + 'gelmez ama doğrulandığı anlamına da gelmez.' });
     }
     if(check.durum === 'ayni'){
       return K.Notice({ tone:'ok', title:yz('ays.solve.i-ki-bagimsiz-cozum-ayni-cev'),
         body:(check.second.independent
-            ? 'Soru ' + check.second.model + ' modeline sıfırdan çözdürüldü ve aynı sonuca ulaştı. '
-            : 'Soru aynı modele sıfırdan çözdürüldü ve aynı sonuca ulaştı — bağlamı '
+            ? yz('ays.solve.soru-2') + check.second.model + ' modeline sıfırdan çözdürüldü ve aynı sonuca ulaştı. '
+            : yz('ays.solve.soru-ayni-modele-sifirdan-co')
               + 'görmedi ama model aynı, bağımsızlığı zayıf. ')
-          + 'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.'
+          + yz('ays.solve.bu-bir-garanti-degildir-iki')
           + (check.zayif ? ' Üstelik ikinci çözüm sonucundan emin olmadığını söyledi; '
               + 'aynı cevaba çıkması zayıf bir kanıt.' : '') });
     }
@@ -418,15 +453,15 @@ R.Screens.solve = (function(){
           </div>
         </div>
         ${when(!j, () => K.Notice({ tone:'warn',
-          body:'Hangisinin doğru olduğuna karar verilemedi. Çözümü kendin kontrol et; '
+          body:yz('ays.solve.hangisinin-dogru-olduguna-ka')
              + 'aşağıdan öğretmene sorabilirsin.' }))}
         ${when(j, () => html`
           ${K.Notice({ tone:j.winner === 'A' ? 'ok' : 'danger',
-            title:j.winner === 'A' ? 'Yukarıdaki çözüm doğru.'
-              : j.winner === 'B' ? 'Yukarıdaki çözüm HATALI.'
-              : j.winner === 'hicbiri' ? 'İkisi de hatalı.'
-              : 'Karar verilemedi.',
-            body:j.answer ? 'Doğru cevap: ' + j.answer : '' })}
+            title:j.winner === 'A' ? yz('ays.solve.yukaridaki-cozum-dogru')
+              : j.winner === 'B' ? yz('ays.solve.yukaridaki-cozum-hatali')
+              : j.winner === 'hicbiri' ? yz('ays.solve.i-kisi-de-hatali')
+              : yz('ays.solve.karar-verilemedi'),
+            body:j.answer ? yz('ays.solve.dogru-cevap') + j.answer : '' })}
           ${when(j.step, () => K.Notice({ tone:'info', title:yz('ays.solve.hata-nerede-basliyor'), body:j.step }))}
           ${when(j.text, () => html`<div class="mt-10">${raw(solutionBody(j.text))}</div>`)}`)}
         <p class="tiny dim mt-10">${yz('ays.solve.denetim-yanilabilir-hakem-de')}</p>`,
@@ -664,7 +699,7 @@ R.Screens.solve = (function(){
     const src = id ? R.Sources.byId(id) : null;
     const v = (f, d) => src ? (src[f] == null ? '' : src[f]) : (d == null ? '' : d);
     UI.sheet({
-      title:src ? 'Kaynağı düzenle' : 'Kaynak ekle',
+      title:src ? yz('ays.solve.kaynagi-duzenle') : yz('ays.solve.kaynak-ekle'),
       subtitle:yz('ays.solve.kademe-bir-baslangic-noktasi'),
       body:String(K.Stack([
         K.Field({ label:yz('ays.solve.ad'), input:K.Input({ id:'src-name', value:v('name'),
@@ -797,9 +832,9 @@ R.Screens.solve = (function(){
       UI.toast(yz('ays.solve.fotograf-hazir'));
     }catch(err){
       const code = err && err.code;
-      UI.toast(code === 'too_big' ? 'Görsel çok büyük — daha küçük bir kırpma dene'
-        : code === 'not_image' ? 'Bu bir görsel değil'
-        : 'Görsel okunamadı');
+      UI.toast(code === 'too_big' ? yz('ays.solve.gorsel-cok-buyuk-daha')
+        : code === 'not_image' ? yz('ays.solve.bu-bir-gorsel-degil')
+        : yz('ays.solve.gorsel-okunamadi'));
       image = null;
     }
     await R.App.render();
@@ -830,7 +865,7 @@ R.Screens.solve = (function(){
       const D = window.LIFEOS && window.LIFEOS.DEFTER;
       if(!D) return;
       const arka = el.dataset.arka === '1' && image ? image.previewUrl : null;
-      D.tuval({ baslik:arka ? 'Soru üstünde çöz' : 'Kâğıtta çöz', arka, kagit:arka ? 'duz' : 'kareli', dugme:'Karalamayı ekle',
+      D.tuval({ baslik:arka ? yz('ays.solve.soru-ustunde-coz') : yz('ays.solve.kagitta-coz'), arka, kagit:arka ? 'duz' : 'kareli', dugme:yz('ays.solve.karalamayi-ekle'),
         ust:!arka && questionText() ? U.esc(questionText()).slice(0, 600) : '',
         kaydet:async b => { karalamalar.push({ blob:b, url:URL.createObjectURL(b) }); await koruyarakCiz(); } });
     },
@@ -895,7 +930,7 @@ R.Screens.solve = (function(){
       result = null; failure = null;
       controller = new AbortController();
       await R.App.render();
-      out(K.Notice({ tone:'info', body:'Soru okunuyor ve çözülüyor…' }));
+      out(K.Notice({ tone:'info', body:yz('ays.solve.soru-okunuyor-ve-cozuluyor') }));
 
       try{
         const res = await Q.solve({ question:text, image, note }, {
@@ -1139,7 +1174,7 @@ R.Screens.solve = (function(){
       const err = {
         id:U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
         examId:null, examDate:R.U.gunOf((rec.at || '')), publisher:'',
-        testName:rec.topicName || 'Soru çözümü', questionNo:'', status:'Yanlış',
+        testName:rec.topicName || yz('ays.solve.soru-cozumu'), questionNo:'', status:'Yanlış',
         tag:R.ERROR_TAGS[val('q-tag')] ? val('q-tag') : 'K', seconds:rec.seconds,
         rootCause:rec.trap || '',
         principle:val('q-principle').slice(0, 400),
@@ -1150,7 +1185,7 @@ R.Screens.solve = (function(){
       await R.Model.saveError(err);
     }
 
-    UI.toast(alsoError ? 'Kaydedildi ve yanlış defterine eklendi' : 'Kaydedildi');
+    UI.toast(alsoError ? yz('ays.solve.kaydedildi-ve-yanlis-defteri') : 'Kaydedildi');
     result = null; image = null; thread = []; check = null; failure = null;
     topicRef = ''; topicQuery = '';
     await R.App.render();
@@ -1199,7 +1234,7 @@ R.Screens.solve = (function(){
       const s = Q.summary();
       return s.toplam ? s.toplam + ' soru çözüldü'
         + (s.cozumOrani == null ? '' : ' · %' + s.cozumOrani + ' kendi çözdüğün')
-        : 'Soruyu yaz ya da fotoğrafla, çözümü adım adım al';
+        : yz('ays.solve.soruyu-yaz-ya-da-fotografla');
     },
     render, afterRender, handle, change,
   };

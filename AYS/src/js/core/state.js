@@ -1,4 +1,13 @@
 /* Uygulama durumu, veri modeli ve yukleme/kaydetme islemleri. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.state.tatil-izin':'Tatil / izin',
+  'ays.core.state.okul-sinavi':'Okul sınavı',
+  'ays.core.state.yogun-gun':'Yoğun gün',
+  'ays.core.state.ekstra-calisma':'Ekstra çalışma',
+  'ays.core.state.ana-profil':'Ana profil',
+  'ays.core.state.yeni-profil':'Yeni profil',
+});
+
 
 window.R = window.R || {};
 
@@ -961,10 +970,10 @@ R.Model = (function(){
      Kaydetmek ve silmek araliktaki kayitli gunleri hemen yeniler —
      eskiden yalniz «yuk» sayisi degisiyor, gunler oldugu gibi kaliyordu. */
   const CALENDAR_KINDS = {
-    tatil:      { label:'Tatil / izin',   load:0,    tone:'muted' },
-    okulSinavi: { label:'Okul sınavı',    load:0.35, tone:'warn'  },
-    yogun:      { label:'Yoğun gün',      load:0.5,  tone:'warn'  },
-    ekstra:     { label:'Ekstra çalışma', load:1.5,  tone:'ok'    },
+    tatil:      { label:yz('ays.core.state.tatil-izin'),   load:0,    tone:'muted' },
+    okulSinavi: { label:yz('ays.core.state.okul-sinavi'),    load:0.35, tone:'warn'  },
+    yogun:      { label:yz('ays.core.state.yogun-gun'),      load:0.5,  tone:'warn'  },
+    ekstra:     { label:yz('ays.core.state.ekstra-calisma'), load:1.5,  tone:'ok'    },
   };
 
   async function saveCalendar(rec){
@@ -1030,7 +1039,7 @@ R.Model = (function(){
   function profileList(){
     const list = R.S.profiles.slice();
     if(!list.some(p => p.id === 'main')){
-      list.unshift({ id:'main', name:(R.S.profile && R.S.profile.name) || 'Ana profil', createdAt:null });
+      list.unshift({ id:'main', name:(R.S.profile && R.S.profile.name) || yz('ays.core.state.ana-profil'), createdAt:null });
     }
     return list;
   }
@@ -1039,7 +1048,7 @@ R.Model = (function(){
     catch(e){ return 'main'; }
   }
   async function saveProfileEntry(rec){
-    const doc = Object.assign({ id:U.uid('p'), name:'Yeni profil', createdAt:new Date().toISOString() }, rec);
+    const doc = Object.assign({ id:U.uid('p'), name:yz('ays.core.state.yeni-profil'), createdAt:new Date().toISOString() }, rec);
     const i = R.S.profiles.findIndex(x => x.id === doc.id);
     if(i >= 0) R.S.profiles[i] = doc; else R.S.profiles.push(doc);
     await R.Store.set('profiles/' + doc.id, doc);

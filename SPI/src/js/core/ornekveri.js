@@ -2,6 +2,10 @@
    yazılır (brand/ortak/ornekkip.js). Kaynak: tools/envanter.js DOLDUR.SPI.
    Aynı gün ya da kimlik varsa dokunulmaz: değişiklik ezilmez, ikilenmez. */
 window.LIFEOS.PARCA.yazilar({
+  'spi.core.ornekveri.ornek-laboratuvar':'Örnek laboratuvar',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'spi.core.ornekveri.ornek':'Örnek',
   'spi.core.ornekveri.ornek-seans':'Örnek seans ',
   'spi.core.ornekveri.ornek-kayit':'Örnek kayıt',
@@ -40,7 +44,7 @@ SP.OrnekVeri = (function(){
     }
     for(let i = 0; i < 3; i++){
       ekle(S.labs, { id:'ornek-l' + i, date:U.iso(U.addDays(U.today(), -(i * 30))),
-        lab:'Örnek laboratuvar',
+        lab:yz('spi.core.ornekveri.ornek-laboratuvar'),
         values:{ hgb:{ v:14 + i * 0.2, cert:'measured' },
           ferritin:{ v:50 + i * 2, cert:'measured' },
           glucose:{ v:88 + i, cert:'measured' } } });

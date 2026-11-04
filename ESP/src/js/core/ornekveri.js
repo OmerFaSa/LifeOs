@@ -2,6 +2,10 @@
    yazılır (brand/ortak/ornekkip.js). Kaynak: tools/envanter.js DOLDUR.ESP.
    Aynı kimlik varsa dokunulmaz: değişiklik ezilmez, kayıt ikilenmez. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.ornekveri.yazar':'Yazar ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.ornekveri.ornek-kitap':'Örnek kitap ',
   'esp.core.ornekveri.ornek-not':'Örnek not ',
   'esp.core.ornekveri.ornek-olay':'Örnek olay ',
@@ -27,7 +31,7 @@ ESP.OrnekVeri = (function(){
         history:[{ at:new Date().toISOString(), grade:'good', box:2, interval:3 }] }), { id:'ornek-c' + i }));
     }
     for(let i = 0; i < 6; i++){
-      ekle(S.books, Object.assign(M.newBook({ title:yz('esp.core.ornekveri.ornek-kitap') + (i + 1), author:'Yazar ' + (i + 1) }), { id:'ornek-b' + i }));
+      ekle(S.books, Object.assign(M.newBook({ title:yz('esp.core.ornekveri.ornek-kitap') + (i + 1), author:yz('esp.core.ornekveri.yazar') + (i + 1) }), { id:'ornek-b' + i }));
       ekle(S.notes, Object.assign(M.newNote({ text:yz('esp.core.ornekveri.ornek-not') + (i + 1), concepts:[['zaman', 'adalet'][i % 2]],
         bookId:'ornek-b' + (i % 3) }), { id:'ornek-n' + i }));
       ekle(S.events, Object.assign(M.newEvent({ title:yz('esp.core.ornekveri.ornek-olay') + (i + 1), year:-500 + i * 300 }), { id:'ornek-o' + i }));
