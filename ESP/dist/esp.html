@@ -16708,6 +16708,13 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .sinematik{ position:fixed; inset:0; z-index:9500; background:#120c24; color:#fff8ea; overflow:hidden;
   font-family:var(--font-body, system-ui); }
 .sinematik__tuval{ position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
+/* Sinema bandı: üstte ince kara şerit; altta söz şeridi aynı rengi taşır */
+.sinematik::before{ content:''; position:absolute; left:0; right:0; top:0; height:clamp(20px, 6vh, 64px); background:#0a0714; pointer-events:none; }
+.sinematik__etiket{ position:absolute; left:16px; top:calc(clamp(20px, 6vh, 64px) + 14px); margin:0; display:flex; align-items:center; gap:10px;
+  padding:6px 14px 6px 10px; background:#0a0714d9; color:#fff8ea; font-size:15px; opacity:0; transform:translateX(-12px);
+  transition:opacity .5s ease, transform .5s ease; box-shadow:inset 4px 0 0 var(--sinematik-renk, #fff8ea); }
+.sinematik__etiket.is-gorunur{ opacity:1; transform:none; }
+.sinematik__etiket b{ font-size:18px; color:var(--sinematik-renk, #fff8ea); }
 .sinematik button{ font:inherit; color:#1f1a2e; background:#fff8ea; border:0; cursor:pointer; min-height:36px; min-width:36px;
   box-shadow:0 -3px 0 #1f1a2e, 0 3px 0 #1f1a2e, -3px 0 0 #1f1a2e, 3px 0 0 #1f1a2e; }
 .sinematik button:focus-visible{ outline:3px solid #ffd35a; outline-offset:5px; }
@@ -16718,7 +16725,7 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .sinematik.is-basladi .sinematik__izle{ display:none; }
 
 .sinematik__alt{ position:absolute; left:0; right:0; bottom:0; padding:14px 16px max(14px, env(safe-area-inset-bottom));
-  background:#120c24e6; display:grid; gap:10px; justify-items:center; }
+  background:#0a0714; display:grid; gap:10px; justify-items:center; }
 .sinematik:not(.is-basladi) .sinematik__alt{ display:none; }
 .sinematik__yazi{ margin:0; min-height:2.6em; max-width:34em; text-align:center; font-size:clamp(17px, 2.4vw, 24px); font-weight:600;
   line-height:1.3; opacity:0; transition:opacity .45s ease; display:grid; place-items:center; }
@@ -16734,7 +16741,7 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .sinematik__basla{ padding:8px 28px; font-size:18px; font-weight:700; }
 .sinematik__yeniden{ padding:8px 18px; font-size:15px; }
 
-:root[data-hareket="az"] .sinematik__yazi{ transition:none; }
+:root[data-hareket="az"] :is(.sinematik__yazi, .sinematik__etiket){ transition:none; }
 @media (max-width:520px){
   .sinematik__izle{ font-size:19px; }
   .sinematik__denetim{ gap:12px; }
@@ -27560,6 +27567,24 @@ window.LIFEOS = window.LIFEOS || {};
     if(kalp) g.drawImage(gorsel('b_kalp', 0, null, false, v), 28, 5);
     return true;
   }
+  /* Tek oda yakın planda (tanıtım filmi, sinematik.js): duvar, eşya ve sakinler. Veri okumaz. */
+  const odaArka = new Map();
+  function odaCiz(c, tip, t, v, kisiler, uyku){
+    const Z = ODA[tip], F = KAT - 4, anahtar = tip + v + (uyku ? 'u' : '') + (kisiler || []).map(k => k.i).join();
+    let a = odaArka.get(anahtar);
+    if(!a){
+      a = { c:document.createElement('canvas'), r:Z.hayat(0, F, kisiler || [], v, 'gul', !!uyku, 'kedi') };
+      a.c.width = Z.g; a.c.height = KAT;
+      const g = a.c.getContext('2d');
+      duvarCiz(g, 0, 0, Z.g, F, Z.duvar, Z.alt, Z.desen);
+      Z.ciz(g, 0, F, PALET[v], { cesit:0 });
+      R(g, 0, F, Z.g, KAT - F, '#4a3b34');
+      odaArka.set(anahtar, a);
+    }
+    const g = c.getContext('2d');
+    g.drawImage(a.c, 0, 0);
+    a.r.map(s => kareAl(s, t)).filter(Boolean).forEach(k => { const o = gorsel(k.poz, k.i, k.kisi, k.ters, v); if(o) g.drawImage(o, k.x, k.y); });
+  }
   /* Dokunma: çift tıkla açılan sahnede canlıya dokununca balon çıkar. Kişi ruh hâlini, hayvan kalbini gösterir. */
   const CANSIZ = /^(tv|ekran|buhar|z|tak|laf|kalp|bulut|ampul|yildiz|kopuk|camasir|kabin|kapi_|b_|gizli|bocek)/;
   function dokun(o, x, y, t){
@@ -27606,7 +27631,7 @@ window.LIFEOS = window.LIFEOS || {};
     return yenilenen;
   }
 
-  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, kisiSatir, yuzPalet, kontrast, YAVAS_HZ, HIZLI_HZ, ARAC_HIZ, dokun, kingOda, KING_EN, KING_BOY, ODA, EVLER, BINALAR, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
+  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, kisiSatir, yuzPalet, kontrast, YAVAS_HZ, HIZLI_HZ, ARAC_HIZ, dokun, kingOda, odaCiz, gorsel, KING_EN, KING_BOY, ODA, EVLER, BINALAR, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
 })(window.LIFEOS);
 
 /* ==== js/core/piksel-doga.js ==== */
@@ -31171,7 +31196,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e2fecb56', at:'2026-11-05 18:50', dirty:true };
+ESP.BUILD = { id:'a287c795', at:'2026-11-05 19:03', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -70009,7 +70034,7 @@ window.LIFEOS.KILAVUZ = (function(){
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/sinematik.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* SİNEMATİK — hesaba ilk girişte LifeOS'u anlatan 40 saniyelik piksel film.
+/* SİNEMATİK — hesaba ilk girişte LifeOS'u anlatan bir dakikalık piksel film.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/sinematik.js`; `python3 tools/ortak.py --yay` ile üç
@@ -70018,23 +70043,28 @@ window.LIFEOS.KILAVUZ = (function(){
    ==================================================================
 
    Kullanıcı (2026-11-05): «hesaba ilk kez girildiğinde LifeOS'u ve misyonunu
-   anlatan mini piksel sanat sinematiği»; «video şeklinde olsun, güzel geçişler,
-   güzel sözler, anlatan güzel bir ses».
+   anlatan mini piksel sanat sinematiği»; «video şeklinde, güzel geçişler,
+   güzel sözler, anlatan güzel bir ses»; ikinci tur: «gün doğsun gün batsın,
+   AYS, SPİ, ESP'den bahsederken oraları göstersin, editör gibi, bir dakika».
+
+   Kurgu: gece biter, gün doğar (göl) › başlık › AYS (çalışma salonu,
+   kütüphane) › SPİ (mutfak, uyku, orman) › ESP (okuma salonu, araştırma
+   odası) › King'in odası › gün batar, veri evde kalır › basamaklar, gece.
 
    Sözler:
      1. SÜSTÜR. Hiçbir veri okumaz, yazmaz; sayı göstermez. Çizelgedeki
         sütunlar örnektir, kimsenin kaydı değildir.
-     2. MOTORU KULLANIR. Manzara, mahalle, King'in odası ve figürler
-        piksel-doga.js, piksel-apartman.js ve piksel-figur.js'in kendi
-        çizimleridir; burada yalnız kamera, geçiş ve yerleşim var.
+     2. MOTORU KULLANIR. Manzara, mahalle, odalar, sakinler, King ve
+        figürler piksel-doga.js, piksel-apartman.js ve piksel-figur.js'in
+        kendi çizimleridir; burada yalnız kamera, kurgu ve yerleşim var.
      3. HAREKET YUMUŞAK. Görünüm piksel, hareket kare kare değil: kamera ve
         figürler ekran pikseli hassasiyetinde, yumuşatılmış eğriyle kayar.
         Animasyonlar «Az» ise aynı film hareketsiz slaytlar olur (kesme geçiş).
      4. BİR KEZ, HESAP BAŞINA. Görüldü bilgisi kapıya bakmayan çerezdedir:
         aynı cihazdaki üç modül birlikte bilir. Menü › Tanıtım filmi yeniden açar.
      5. SES İSTEĞE BAĞLI. Film «İzle» denmeden başlamaz; ses düğmesi her an
-        kapatır. Anlatım King'in yerel sesiyle (EMA) bir kez kaydedildi
-        (`brand/medya/tanitim/`); dosya çalmazsa cihazın Türkçe sesi okur.
+        kapatır. Anlatım ve müzik tek kayıttır (`brand/medya/tanitim/`);
+        kayıt çözülemezse cihazın Türkçe sesi satır satır okur.
      6. HER AN ÇIKILIR. «Geç» ve Esc her sahnede; metin ekran okuyucuya
         gider, tuval gizlidir. Sekme arkadayken film durur. */
 window.LIFEOS.PARCA.yazilar({
@@ -70048,31 +70078,51 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.sinematik.surdur':'Sürdür',
   'ortak.sinematik.basla':'Başla',
   'ortak.sinematik.yeniden':'Yeniden izle',
-  'ortak.sinematik.s0':'Her gün, küçük bir başlangıçtır.',
-  'ortak.sinematik.s1':'Bu LifeOS: gündelik hayatın için tek bir sistem.',
-  'ortak.sinematik.s2':'AYS, sınava giden yolu planlar.',
-  'ortak.sinematik.s3':'SPİ; uykunu, beslenmeni ve hareketini izler.',
-  'ortak.sinematik.s4':'ESP, dilden felsefeye gelişimini planlar.',
-  'ortak.sinematik.s5':'Hepsinin yanında King var: seni tanır, sana yol gösterir.',
-  'ortak.sinematik.s6':'Verin senin bilgisayarında kalır.',
-  'ortak.sinematik.s7':'Sayıyı ve kararı kod verir; boş geçen gün sıfır sayılmaz.',
-  'ortak.sinematik.s8':'Ustalık küçük adımlarla gelir.',
-  'ortak.sinematik.s9':'Hazırsan, başlayalım.',
+  'ortak.sinematik.etiket.ays':'Sınav hazırlığı',
+  'ortak.sinematik.etiket.spi':'Sağlık',
+  'ortak.sinematik.etiket.esp':'Kişisel gelişim',
+  'ortak.sinematik.s0':'Her sabah, yeni bir sayfa açılır.',
+  'ortak.sinematik.s1':'LifeOS, o sayfayı seninle birlikte yazar.',
+  'ortak.sinematik.s2':'Üç sistem; tek bir hayat.',
+  'ortak.sinematik.s3':'AYS, sınav yolunu gün gün planlar.',
+  'ortak.sinematik.s4':'Konuyu öğretir, denemeni çözümler, tekrarını hatırlatır.',
+  'ortak.sinematik.s5':'SPİ; uykunu, beslenmeni ve hareketini izler.',
+  'ortak.sinematik.s6':'Teşhis koymaz; neyin iyi gittiğini gösterir.',
+  'ortak.sinematik.s7':'ESP, merakını ustalığa çevirir.',
+  'ortak.sinematik.s8':'Dil, felsefe, müzik, okuma, yazı ve tarih.',
+  'ortak.sinematik.s9':'Hepsinin yanında King var.',
+  'ortak.sinematik.s10':'Seni tanır, seninle konuşur, sana yol gösterir.',
+  'ortak.sinematik.s11':'Verin senin bilgisayarında kalır.',
+  'ortak.sinematik.s12':'Sayıyı ve kararı kod verir; boş geçen gün sıfır sayılmaz.',
+  'ortak.sinematik.s13':'Ustalık küçük adımlarla gelir.',
+  'ortak.sinematik.s14':'Hazırsan, başlayalım.',
 });
 
 window.LIFEOS.SINEMATIK = (function(L){
   'use strict';
   const yz = id => L.PARCA.yazi('ortak.sinematik.' + id);
-  const OLCEK = 3, SURE = 40.5, SON_KART = 39.2, CEREZ = 'lifeos_sinematik';
+  const OLCEK = 3, SURE = 64, SON_KART = 62, AFIS = 12.4, CEREZ = 'lifeos_sinematik';
   const SES_DOSYA = 'img/marka/tanitim-sinematik.mp4';
   /* [başlangıç sn, süre sn]: kayıttaki anlatımın yeri; ses dosyası bu çizelgeyle üretildi. */
-  const SATIR = Object.freeze([[0.6, 1.96], [3.0, 3.2], [7.9, 2.32], [11.4, 2.96], [15.2, 2.76],
-    [19.4, 3.4], [25.0, 1.8], [29.4, 3.52], [34.6, 1.72], [37.8, 1.2]]);
-  /* Sahneler 0,8 sn üst üste biner: geçiş o aralıkta çözülerek olur. */
+  const SATIR = Object.freeze([[1.2, 2.04], [5.2, 2.64], [10.6, 1.72], [15.0, 2.44], [19.8, 3.16], [24.6, 2.96], [28.4, 2.52],
+    [34.6, 2.36], [39.2, 2.64], [44.0, 1.56], [46.4, 2.8], [50.4, 1.8], [53.2, 3.52], [57.4, 1.72], [60.4, 1.2]]);
+  /* Sahneler ve girişleri: önceki sahneyle üst üste bindiği aralıkta geçiş olur.
+     cozul: çözülme · blok: piksel bloklarla silme · kay: yana kayma · yakin: yakınlaşarak çözülme */
   const SAHNE = Object.freeze([
-    { id:'gol', bas:0, son:7.4 }, { id:'sokak', bas:6.6, son:19.2 }, { id:'king', bas:18.4, son:24.6 },
-    { id:'ev', bas:23.8, son:28.8 }, { id:'kod', bas:28.0, son:34.0 }, { id:'basamak', bas:33.2, son:SURE + 60 }]);
+    { id:'safak', bas:0, son:10.6 },
+    { id:'baslik', bas:10.0, son:15.0, gecis:'cozul' },
+    { id:'ays1', bas:14.4, son:19.6, gecis:'blok', etiket:'ays' },
+    { id:'ays2', bas:19.2, son:24.6, gecis:'kay', etiket:'ays' },
+    { id:'spi1', bas:24.0, son:27.8, gecis:'blok', etiket:'spi' },
+    { id:'spi2', bas:27.4, son:30.8, gecis:'kay', etiket:'spi' },
+    { id:'spi3', bas:30.4, son:34.6, gecis:'kay', etiket:'spi' },
+    { id:'esp1', bas:34.0, son:39.0, gecis:'blok', etiket:'esp' },
+    { id:'esp2', bas:38.6, son:43.8, gecis:'kay', etiket:'esp' },
+    { id:'king', bas:43.2, son:50.4, gecis:'yakin' },
+    { id:'soz', bas:49.8, son:56.8, gecis:'cozul' },
+    { id:'son', bas:56.2, son:SURE + 60, gecis:'cozul' }]);
   const RENK = Object.freeze({ ays:'#5a84ea', spi:'#ff7d8f', esp:'#ffd166' });
+  const AD = Object.freeze({ ays:'AYS', spi:'SPİ', esp:'ESP' });
 
   let d = null;   // açık filmin durumu; kapalıyken null
 
@@ -70086,12 +70136,12 @@ window.LIFEOS.SINEMATIK = (function(L){
   /* Kesirli ölçek ekran pikselinin tam katına iner: büyütülen çizimde pikseller eşit kalır. */
   const ekranKat = (x, en) => Math.max(en || 1 / OLCEK, Math.floor(x * OLCEK) / OLCEK);
 
-  /* Hangi satır konuşuluyor (yazı biraz daha kalır). */
+  /* Hangi satır konuşuluyor (yazı bir sonrakine dek, en çok 1,2 sn daha kalır). */
   function satirAt(t){
-    for(let i = SATIR.length - 1; i >= 0; i--) if(t >= SATIR[i][0] - 0.15 && t < SATIR[i][0] + SATIR[i][1] + 0.9) return i;
+    for(let i = SATIR.length - 1; i >= 0; i--) if(t >= SATIR[i][0] - 0.15 && t < SATIR[i][0] + SATIR[i][1] + 1.2) return i;
     return -1;
   }
-  /* Görünen sahneler ve karışım oranı: [{ s, f }] (f: üstteki sahnenin opaklığı). */
+  /* Görünen sahneler: [{ s, f }]; f üstteki sahnenin girişindeki ilerleme (0-1). */
   function sahneler(t, az){
     const l = [];
     SAHNE.forEach((s, i) => {
@@ -70102,9 +70152,10 @@ window.LIFEOS.SINEMATIK = (function(L){
     });
     return l;
   }
+  const etiketAt = t => { const s = SAHNE.find(x => t >= x.bas + 0.4 && t < x.son - 0.3 && x.etiket); return s ? s.etiket : null; };
 
   /* ---------- çizim yardımcıları ---------- */
-  const tuval = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, w); c.height = Math.max(1, h); return c; };
+  const tuval = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; };
   const figurler = {};
   function figur(ad){
     if(figurler[ad]) return figurler[ad];
@@ -70125,15 +70176,23 @@ window.LIFEOS.SINEMATIK = (function(L){
     if(alfa <= 0) return;
     g.globalAlpha = Math.min(1, alfa); g.fillStyle = renk; g.fillRect(x, y, w, h); g.globalAlpha = 1;
   }
-  /* Bina ya da manzaranın üstüne gök: kamera gökten iner, göğe kalkar. */
-  function gok(arka, yuk){
-    const W = arka.width, c = tuval(W, yuk), g = c.getContext('2d');
-    const p = arka.getContext('2d').getImageData(Math.floor(W / 2), 0, 1, 1).data;
-    /* Piksel bant: yukarı çıktıkça koyulaşan, dörder piksellik basamaklar */
-    const n = Math.max(2, Math.ceil(yuk / 4));
+  /* Gök: vaktin sekiz rengi, dörder piksellik basamaklarla (tepesi biraz daha koyu) */
+  function gokBant(W, H, v){
+    const c = tuval(W, H), g = c.getContext('2d'), l = L.PIKSEL_APARTMAN.PALET[v].gok, n = Math.max(2, Math.ceil(H / 4));
+    const rgb = h => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
     for(let i = 0; i < n; i++){
-      const f = i / (n - 1), r = Math.round(karis(p[0] * 0.45, p[0], f)), gg = Math.round(karis(p[1] * 0.45, p[1], f)), b = Math.round(karis(p[2] * 0.6, p[2], f));
-      g.fillStyle = 'rgb(' + r + ',' + gg + ',' + b + ')';
+      const f = i / (n - 1) * (l.length - 1), a = rgb(l[Math.floor(f)]), b = rgb(l[Math.min(l.length - 1, Math.floor(f) + 1)]), q = f - Math.floor(f);
+      g.fillStyle = 'rgb(' + a.map((x, j) => Math.round(karis(x, b[j], q))).join(',') + ')';
+      g.fillRect(0, Math.floor(H * i / n), W, Math.ceil(H / n) + 1);
+    }
+    return c;
+  }
+  /* Manzaranın üstüne gök uzantısı: dikiş olmasın diye manzaranın kendi tepe renginden başlar, yukarı koyulaşır */
+  function gokUzat(arka, yuk){
+    const W = arka.width, c = tuval(W, yuk), g = c.getContext('2d'), p = arka.getContext('2d').getImageData(Math.floor(W / 2), 0, 1, 1).data, n = Math.max(2, Math.ceil(yuk / 4));
+    for(let i = 0; i < n; i++){
+      const f = i / (n - 1);
+      g.fillStyle = 'rgb(' + Math.round(karis(p[0] * 0.5, p[0], f)) + ',' + Math.round(karis(p[1] * 0.5, p[1], f)) + ',' + Math.round(karis(p[2] * 0.65, p[2], f)) + ')';
       g.fillRect(0, Math.floor(yuk * i / n), W, Math.ceil(yuk / n) + 1);
     }
     return c;
@@ -70147,27 +70206,36 @@ window.LIFEOS.SINEMATIK = (function(L){
     m.motor.kare(m.tampon.getContext('2d'), m.arka, m.o, t);
     return m.tampon;
   }
-  /* Kamera: sahnenin kendi yakınlaşması (merkez çevresinde) */
-  function yakin(g, W, H, z){
+  function yakin(g, W, H, z, ox, oy){
     if(z === 1) return;
-    g.translate(W / 2, H / 2); g.scale(z, z); g.translate(-W / 2, -H / 2);
+    const x = ox == null ? W / 2 : ox, y = oy == null ? H / 2 : oy;
+    g.translate(x, y); g.scale(z, z); g.translate(-x, -y);
+  }
+  function yildizlar(W, H, tohum){
+    const l = [];
+    let r = tohum || 7;
+    for(let i = 0; i < Math.round(W * H / 420); i++){ r = (r * 9301 + 49297) % 233280; const a = r / 233280; r = (r * 9301 + 49297) % 233280; l.push([Math.floor(a * W), Math.floor(r / 233280 * H * 0.6), i % 7]); }
+    return l;
+  }
+  function yildizCiz(g, l, yt, alfa){
+    if(alfa <= 0) return;
+    l.forEach(([x, y, f]) => kareCiz(g, '#fff8ea', x, y, 1, 1, alfa * (0.45 + 0.35 * Math.sin(yt * 2 + f) * oyna())));
+  }
+  /* Yazı tuvalde: dönüşüm ölçeği ekran çözünürlüğünde basar, piksel yazı keskin kalır */
+  function yaziCiz(g, metin, x, y, boy, renk, alfa){
+    if(alfa <= 0) return;
+    g.globalAlpha = Math.min(1, alfa);
+    g.font = '700 ' + boy + 'px "Pixelify Sans", system-ui, sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#1f1a2e'; g.fillText(metin, x + boy / 12, y + boy / 12);
+    g.fillStyle = renk; g.fillText(metin, x, y);
+    g.globalAlpha = 1;
   }
 
   /* Bilgisayar: 16×13 ızgara (sinematiğe ait tek yeni çizim). */
-  const PC = { p:{ k:'#1f1a2e', g:'#8d867b', G:'#b9b2a6', e:'#5a84ea', E:'#9fc2ff', w:'#fff8ea' }, s:[
-    '.kkkkkkkkkkkkkk.',
-    'kGGGGGGGGGGGGGGk',
-    'kGkkkkkkkkkkkkGk',
-    'kGkeeeeeeeeeekGk',
-    'kGkeEEeeeeeeekGk',
-    'kGkeEeeeeeeeekGk',
-    'kGkeeeeeeeeeekGk',
-    'kGkeeeeeeeeeekGk',
-    'kGkkkkkkkkkkkkGk',
-    'kGGGGGGGGGGGGGGk',
-    '.kkkkkkggkkkkkk.',
-    '.....kkGGkk.....',
-    '...kkkkkkkkkk...'] };
+  const PC = { p:{ k:'#1f1a2e', g:'#8d867b', G:'#b9b2a6', e:'#5a84ea', E:'#9fc2ff' }, s:[
+    '.kkkkkkkkkkkkkk.', 'kGGGGGGGGGGGGGGk', 'kGkkkkkkkkkkkkGk', 'kGkeeeeeeeeeekGk', 'kGkeEEeeeeeeekGk', 'kGkeEeeeeeeeekGk', 'kGkeeeeeeeeeekGk',
+    'kGkeeeeeeeeeekGk', 'kGkkkkkkkkkkkkGk', 'kGGGGGGGGGGGGGGk', '.kkkkkkggkkkkkk.', '.....kkGGkk.....', '...kkkkkkkkkk...'] };
   function pcCiz(g, x, y, k, isik){
     const c = figurler.__pc || (figurler.__pc = (() => {
       const t = tuval(16, 13), gg = t.getContext('2d');
@@ -70177,141 +70245,177 @@ window.LIFEOS.SINEMATIK = (function(L){
     g.drawImage(c, x, y, 16 * k, 13 * k);
     if(isik > 0) kareCiz(g, '#ffffff', x + 3 * k, y + 3 * k, 10 * k, 5 * k, isik * 0.35);
   }
+  /* Örnek çizelge (yedi gün, dördüncüsü girilmemiş: sütun değil boş kare) */
+  function cizelge(g, cx, cy, cw, ch, yt, gel){
+    const DEGER = [0.45, 0.7, 0.55, null, 0.85, 0.6, 0.92], adim = (cw - 12) / 7, bw = Math.max(3, Math.floor(adim * 0.55)), taban = cy + ch - 6;
+    kareCiz(g, '#1f1a2e', cx - 1, cy - 1, cw + 2, ch + 2, 1);
+    kareCiz(g, '#fff8ea', cx, cy, cw, ch, 1);
+    kareCiz(g, '#d8ccb4', cx + 6, taban + 1, cw - 12, 1, 1);
+    DEGER.forEach((v, i) => {
+      const x = Math.round(cx + 6 + adim * i + (adim - bw) / 2);
+      if(v == null){
+        const n = 5, nx = x + Math.floor((bw - n) / 2), ny = taban - n;
+        g.strokeStyle = '#1f1a2e'; g.lineWidth = 1; g.strokeRect(nx + 0.5, ny + 0.5, n - 1, n - 1);
+        const r = (yt * 1.2) % 1, e = 2 + r * 6;
+        if(oyna() && gel >= 1){ g.globalAlpha = (1 - r) * 0.8; g.strokeStyle = '#5a84ea'; g.strokeRect(nx + n / 2 - e, ny + n / 2 - e, e * 2, e * 2); g.globalAlpha = 1; }
+        return;
+      }
+      const boy = (ch - 14) * v * gel * ara(yt, 0.3 + i * 0.1, 1.0 + i * 0.1);
+      kareCiz(g, '#5a84ea', x, taban - boy, bw, boy, 1);
+      kareCiz(g, '#2f5fd0', x, taban - boy, bw, Math.min(1, boy), 1);
+    });
+    const ey = Math.round(taban - (ch - 14) * 0.6), ew = (cw - 12) * ara(yt, 1.0, 2.0) * gel;
+    for(let x = 0; x < ew; x += 4) kareCiz(g, '#1f1a2e', cx + 6 + x, ey, 2, 1, 1);
+  }
 
-  /* ---------- sahneler: hazirla(W, H) bir kez, ciz(g, W, H, yt, h) her kare ----------
+  /* Oda yakın planda: vaktin göğü, bina kesiti, oda ve sakinleri; kamera yavaşça yaklaşır.
+     Dar ekranda oda yüksekliğe göre büyür ve kamera odanın bir ucundan öbürüne kayar. */
+  function odaSahnesi(tip, v, kisiler, uyku){
+    return {
+      hazirla(W, H){
+        const A = L.PIKSEL_APARTMAN, en = A.ODA[tip].g, boy = A.KAT;
+        return { c:tuval(en, boy), en, boy, gok:gokBant(W, H, v), kisi:kisiler.map(i => A.SAKIN[i]) };
+      },
+      ciz(g, W, H, yt, h, s, sure){
+        const A = L.PIKSEL_APARTMAN;
+        g.drawImage(s.gok, 0, 0);
+        A.odaCiz(s.c, tip, h, v, s.kisi, uyku);
+        const dar = W / H < 1, kW = W * 0.9 / s.en, kH = H * (dar ? 0.42 : 0.62) / s.boy, k = ekranKat(dar ? Math.min(kH, kW * 2) : Math.min(kW, kH), 1);
+        const w = s.en * k, hh = s.boy * k, f = ara(yt, 0.2, sure - 0.2), z = 1 + 0.05 * yt / sure * oyna();
+        const x = w <= W * 0.96 ? (W - w) / 2 : karis(W * 0.04, W * 0.96 - w, f), y = Math.round(H * 0.47 - hh / 2);
+        g.save(); yakin(g, W, H, z);
+        const p = Math.max(2, Math.round(k * 2));
+        kareCiz(g, '#3a2420', x - p - 1, y - p - 1, w + 2 * p + 2, hh + 2 * p + 2, 1);
+        kareCiz(g, '#8a5a44', x - p, y - p, w + 2 * p, hh + 2 * p, 1);
+        kareCiz(g, '#6e4434', x - p, y + hh, w + 2 * p, p, 1);
+        g.drawImage(s.c, x, y, w, hh);
+        g.restore();
+      },
+    };
+  }
+
+  /* ---------- sahneler: hazirla(W, H) bir kez, ciz(g, W, H, yt, h, s, sure) her kare ----------
      yt: sahnenin kendi saati; h: motorun saati (hareketsizken 0, figürler durur). */
   const SAHNELER = {
-    gol:{
-      hazirla(W, H){ const m = manzara(L.PIKSEL_DOGA, W, H, 'dogum', 'dag'), yuk = Math.round(H * 0.6); return { m, yuk, gok:gok(m.arka, yuk) }; },
+    /* Gece biter, gün doğar: kamera yıldızlardan göle iner */
+    safak:{
+      hazirla(W, H){
+        const D = L.PIKSEL_DOGA, yuk = Math.round(H * 0.6), gece = manzara(D, W, H, 'gece', 'dag'), sabah = manzara(D, W, H, 'dogum', 'dag');
+        return { gece, sabah, yuk, gokG:gokUzat(gece.arka, yuk), gokS:gokUzat(sabah.arka, yuk), yildiz:yildizlar(W, yuk) };
+      },
       ciz(g, W, H, yt, h, s){
-        const y = s.yuk * (ara(yt, 0.1, 3.4) - 0.85 * ara(yt, 6.2, 7.5));
-        g.drawImage(s.gok, 0, -y);
-        g.drawImage(manzaraCiz(s.m, h), 0, s.yuk - y);
-        const gel = ara(yt, 2.3, 3.6), git = ara(yt, 6.3, 7.3), k = Math.max(2, Math.min(5, Math.round(Math.min(W, H) / 70)));
-        const boy = 16 * k * (0.85 + 0.15 * gel);
-        figurCiz(g, 'logo', W / 2 - boy / 2, H * 0.26 - boy / 2 + Math.sin(yt * 1.7) * 1.4 * oyna() - git * H * 0.25, boy / 16, gel * (1 - git));
+        const y = s.yuk * ara(yt, 0.2, 5.0), dog = ara(yt, 1.0, 7.5);
+        g.drawImage(s.gokG, 0, -y); g.drawImage(manzaraCiz(s.gece, h), 0, s.yuk - y);
+        if(dog > 0){ g.globalAlpha = dog; g.drawImage(s.gokS, 0, -y); g.drawImage(manzaraCiz(s.sabah, h), 0, s.yuk - y); g.globalAlpha = 1; }
+        g.save(); g.translate(0, -y); yildizCiz(g, s.yildiz, yt, 1 - dog); g.restore();
       },
     },
-    sokak:{
+    /* Başlık: logo, ad ve üç sistem */
+    baslik:{
+      hazirla(W, H){ return { m:manzara(L.PIKSEL_DOGA, W, H, 'dogum', 'dag') }; },
+      ciz(g, W, H, yt, h, s){
+        g.save(); yakin(g, W, H, 1.06 + 0.04 * yt / 5 * oyna(), W / 2, H * 0.3);
+        g.drawImage(manzaraCiz(s.m, h), 0, 0); g.restore();
+        kareCiz(g, '#1f1a2e', 0, 0, W, H, 0.38);
+        const k = ekranKat(Math.min(W, H) / 64, 2), gel = ara(yt, 0.1, 1.0);
+        figurCiz(g, 'logo', W / 2 - 8 * k, H * 0.2 - 8 * k * (0.9 + 0.1 * gel) + (1 - gel) * 6, k, gel);
+        yaziCiz(g, 'LifeOS', W / 2, H * 0.2 + 12 * k, Math.max(12, Math.round(Math.min(W, H) / 9)), '#fff8ea', ara(yt, 0.4, 1.3));
+        const fk = ekranKat(k * 0.7, 1), aralik = Math.min(W * 0.26, 34 * fk);
+        ['ays', 'spi', 'esp'].forEach((ad, i) => {
+          const a = ara(yt, 0.6 + i * 0.45, 1.2 + i * 0.45), x = W / 2 + (i - 1) * aralik - 8 * fk, yy = H * 0.56 + (1 - a) * 5;
+          figurCiz(g, ad, x, yy, fk, a);
+          yaziCiz(g, AD[ad], x + 8 * fk, yy + 16 * fk + 7, Math.max(7, Math.round(fk * 5)), RENK[ad], a);
+        });
+      },
+    },
+    ays1:odaSahnesi('calisma', 'dogum', [3, 10]),
+    ays2:odaSahnesi('kutuphane', 'ogle', [7, 22]),
+    spi1:odaSahnesi('mutfak', 'ogle', [1, 14]),
+    spi2:odaSahnesi('yatak', 'gece', [5, 18], true),
+    /* Hareket: ormanda öğle, patikada iki koşucu */
+    spi3:{
       hazirla(W, H){
-        const l = ['calisma', 'bugun', 'analiz'].map(yer => manzara(L.PIKSEL_APARTMAN, W, H, 'ogle', yer)), yuk = Math.round(H * 0.5);
-        return { l, yuk, gok:gok(l[0].arka, yuk) };
+        /* Orman bazı genişliklerde göğü ağaçla kapatıyor (motorun yerleşimi): gök görünmüyorsa tarla */
+        const m = manzara(L.PIKSEL_DOGA, W, H, 'ogle', 'orman'), p = m.arka.getContext('2d').getImageData(Math.floor(W / 2), Math.floor(H * 0.07), 1, 1).data;
+        return { m:p[2] > p[1] ? m : manzara(L.PIKSEL_DOGA, W, H, 'ogle', 'tarla') };
       },
       ciz(g, W, H, yt, h, s){
-        const y = s.yuk * ara(yt, 0, 2.4), x = W * (ara(yt, 4.1, 5.1) + ara(yt, 7.9, 8.9)), z = 1 + 0.9 * ara(yt, 11.3, 12.6);
-        g.save(); yakin(g, W, H, z);
-        for(let i = 0; i < 3; i++){
-          const sol = i * W - x;
-          if(sol > W || sol + W < 0) continue;
-          g.drawImage(s.gok, sol, -y, W, s.yuk);
-          g.drawImage(manzaraCiz(s.l[i], h), sol, s.yuk - y);
-        }
-        /* Her binanın üstünde kendi sistemi: konuşulan parlak, öteki ikisi soluk */
-        const k = Math.max(1, Math.min(4, Math.round(Math.min(W, H) / 90))), on = satirAt(yt + 6.6) - 2, gel = ara(yt, 1.2, 2.2);
-        ['ays', 'spi', 'esp'].forEach((ad, i) => {
-          const parlak = i === on, zip = parlak ? Math.abs(Math.sin(yt * 3)) * 2 * oyna() : 0;
-          figurCiz(g, ad, i * W - x + W / 2 - 8 * k, s.yuk - y + H * 0.06 - zip + (1 - gel) * 6, k, gel * (parlak ? 1 : 0.4));
+        const A = L.PIKSEL_APARTMAN, n = A.POZ.yuru.k.length;
+        g.save(); yakin(g, W, H, 1.1 - 0.08 * ara(yt, 0, 4) * oyna());
+        g.drawImage(manzaraCiz(s.m, h), 0, 0);
+        [[12, 0, 0.82], [27, 0.9, 0.86]].forEach(([i, gec, y]) => {
+          const f = d && d.az ? 0.45 + gec * 0.2 : (yt - 0.1 - gec) / 3.6, kare = d && d.az ? 0 : Math.floor(h * 9) % n, c = A.gorsel('yuru', kare, A.SAKIN[i], false, 'ogle');
+          const k = ekranKat(Math.min(W, H) / 110, 1);   // ön planda: manzaradan biraz büyük
+          if(c && f > -0.1 && f < 1.1) g.drawImage(c, Math.round(karis(-c.width * k, W + 4, f) * OLCEK) / OLCEK, Math.round(H * y) - c.height * k, c.width * k, c.height * k);
         });
         g.restore();
       },
     },
+    esp1:odaSahnesi('okuma', 'ogle', [9, 26]),
+    esp2:odaSahnesi('arastirma', 'batim', [2, 31]),
+    /* King'in odası, ikindi: üç sistemden ona ışık akar */
     king:{
-      hazirla(W, H){
-        const oda = tuval(L.PIKSEL_APARTMAN.KING_EN, L.PIKSEL_APARTMAN.KING_BOY), yildiz = [];
-        let r = 7;
-        for(let i = 0; i < Math.round(W * H / 500); i++){ r = (r * 9301 + 49297) % 233280; const a = r / 233280; r = (r * 9301 + 49297) % 233280; yildiz.push([Math.floor(a * W), Math.floor(r / 233280 * H * 0.55), i % 7]); }
-        return { oda, yildiz };
-      },
+      hazirla(W, H){ return { oda:tuval(L.PIKSEL_APARTMAN.KING_EN, L.PIKSEL_APARTMAN.KING_BOY), gok:gokBant(W, H, 'batim'), yildiz:yildizlar(W, H, 11) }; },
       ciz(g, W, H, yt, h, s){
-        const A = L.PIKSEL_APARTMAN, z = 1.35 - 0.35 * ara(yt, 0, 1.8);
-        kareCiz(g, '#2a2144', 0, 0, W, H, 1);
-        s.yildiz.forEach(([x, y, f]) => kareCiz(g, '#fff8ea', x, y, 1, 1, 0.35 + 0.35 * Math.sin(yt * 2 + f) * oyna()));
+        const A = L.PIKSEL_APARTMAN, z = 1.25 - 0.25 * ara(yt, 0, 2.2);
+        g.drawImage(s.gok, 0, 0);
+        kareCiz(g, '#1f1a2e', 0, 0, W, H, 0.45);
         g.save(); yakin(g, W, H, z);
         const k = ekranKat(Math.min(W * 0.86 / A.KING_EN, H * 0.48 / A.KING_BOY), 1), ow = A.KING_EN * k, ox = Math.round((W - ow) / 2), oy = Math.round(H * 0.36);
-        A.kingOda(s.oda, h, 'batim', yt > 3.2, L.PIKSEL && L.PIKSEL.kingYuzu ? L.PIKSEL.kingYuzu() : 'mochi');
+        A.kingOda(s.oda, h, 'batim', yt > 3.4, L.PIKSEL && L.PIKSEL.kingYuzu ? L.PIKSEL.kingYuzu() : 'mochi');
+        kareCiz(g, '#3a2420', ox - 3, oy - 3, ow + 6, A.KING_BOY * k + 6, 1);
         g.drawImage(s.oda, ox, oy, ow, A.KING_BOY * k);
-        /* Üç sistemden King'e akan ışık: noktalar yol boyunca kayar */
-        const fk = ekranKat(k * 0.8, 1), ps = Math.max(2, Math.round(fk)), hedefX = W / 2, hedefY = oy - 2, akis = ara(yt, 1.4, 2.4);
+        const fk = ekranKat(k * 0.8, 1), ps = Math.max(2, Math.round(fk)), hx = W / 2, hy = oy - 2, akis = ara(yt, 1.2, 2.2);
         ['ays', 'spi', 'esp'].forEach((ad, i) => {
-          const fx = W * (0.2 + 0.3 * i), fy = H * 0.08, gel = ara(yt, 0.5 + i * 0.3, 1.2 + i * 0.3);
+          const fx = W * (0.2 + 0.3 * i), fy = H * 0.08, gel = ara(yt, 0.4 + i * 0.3, 1.1 + i * 0.3);
           figurCiz(g, ad, fx - 8 * fk, fy + (1 - gel) * 4, fk, gel);
           for(let j = 0; j < 6; j++){
-            const p = d && d.az ? (j + 0.5) / 6 : (yt * 0.45 + j / 6) % 1, sx = fx, sy = fy + 16 * fk + 2;
-            const px = karis(sx, hedefX, p), py = karis(sy, hedefY, p) - Math.sin(p * Math.PI) * 6;
-            kareCiz(g, RENK[ad], px - ps / 2, py - ps / 2, ps, ps, akis * Math.sin(p * Math.PI) * 0.9);
+            const p = d && d.az ? (j + 0.5) / 6 : (yt * 0.45 + j / 6) % 1, sy = fy + 16 * fk + 2;
+            kareCiz(g, RENK[ad], karis(fx, hx, p) - ps / 2, karis(sy, hy, p) - Math.sin(p * Math.PI) * 6 - ps / 2, ps, ps, akis * Math.sin(p * Math.PI) * 0.9);
           }
         });
         g.restore();
       },
     },
-    ev:{
-      hazirla(W, H){ return { m:manzara(L.PIKSEL_APARTMAN, W, H, 'gece', 'bugun') }; },
+    /* Gün batar: mahallede ışıklar yanar, veri evdeki bilgisayara iner; sonra örnek çizelge */
+    soz:{
+      hazirla(W, H){ const A = L.PIKSEL_APARTMAN; return { batim:manzara(A, W, H, 'batim', 'bugun'), gece:manzara(A, W, H, 'gece', 'bugun') }; },
       ciz(g, W, H, yt, h, s){
-        g.save(); yakin(g, W, H, 1 + 0.08 * ara(yt, 0, 5));
-        g.drawImage(manzaraCiz(s.m, h), 0, 0);
+        const gece = ara(yt, 0.4, 3.0);
+        g.save(); yakin(g, W, H, 1 + 0.08 * ara(yt, 0, 7) * oyna());
+        g.drawImage(manzaraCiz(s.batim, h), 0, 0);
+        if(gece > 0){ g.globalAlpha = gece; g.drawImage(manzaraCiz(s.gece, h), 0, 0); g.globalAlpha = 1; }
         g.restore();
-        kareCiz(g, '#120c24', 0, 0, W, H, 0.35);
-        /* Üç sistemden bilgisayara veri: küçük kareler eğri yolla iner */
-        const k = Math.max(2, Math.min(5, Math.round(Math.min(W, H) / 60))), px = Math.round(W / 2 - 8 * k), py = Math.round(H * 0.66 - 13 * k);
-        const hx = W / 2, hy = py + 5 * k, gel = ara(yt, 0.3, 1.2);
+        kareCiz(g, '#120c24', 0, 0, W, H, 0.3);
+        const k = ekranKat(Math.min(W, H) / 60, 2), px = Math.round(W / 2 - 8 * k), py = Math.round(H * 0.6 - 13 * k), gel = ara(yt, 0.3, 1.2);
+        const kart = ara(yt, 3.0, 3.8);
         let isik = 0;
         ['ays', 'spi', 'esp'].forEach((ad, i) => {
-          const fx = W * (0.2 + 0.3 * i), fy = H * 0.08, fk = Math.max(1, Math.round(k / 2)), ps = fk + 1;
-          figurCiz(g, ad, fx - 8 * fk, fy, fk, gel);
+          const fx = W * (0.2 + 0.3 * i), fy = H * 0.1, fk = ekranKat(k / 2, 1), ps = Math.max(2, Math.round(fk) + 1);
+          figurCiz(g, ad, fx - 8 * fk, fy, fk, gel * (1 - kart));
           for(let j = 0; j < 4; j++){
             const p = d && d.az ? (j + 0.5) / 4 : ((yt - 0.8 - i * 0.25) * 0.55 + j / 4) % 1;
             if(p < 0) continue;
-            const cx = karis(fx, hx, 0.5) + (i - 1) * W * 0.15, cy = karis(fy, hy, 0.15);
-            const q = 1 - p, x = q * q * fx + 2 * q * p * cx + p * p * hx, y = q * q * (fy + 16 * fk) + 2 * q * p * cy + p * p * hy;
-            kareCiz(g, RENK[ad], x - ps / 2, y - ps / 2, ps, ps, gel * Math.min(1, (1 - p) * 4));
+            const cx = W / 2 + (i - 1) * W * 0.15, cy = karis(fy, py, 0.15), q = 1 - p;
+            const x = q * q * fx + 2 * q * p * cx + p * p * (W / 2), y = q * q * (fy + 16 * fk) + 2 * q * p * cy + p * p * (py + 5 * k);
+            kareCiz(g, RENK[ad], x - ps / 2, y - ps / 2, ps, ps, gel * (1 - kart) * Math.min(1, (1 - p) * 4));
             if(p > 0.9) isik = Math.max(isik, (p - 0.9) * 10);
           }
         });
-        pcCiz(g, px, py, k, gel * (0.4 + 0.6 * isik * oyna()));
+        pcCiz(g, px, py + kart * H * 0.2, k, gel * (0.4 + 0.6 * isik * oyna()));
+        if(kart > 0){
+          const cw = Math.min(Math.floor(W * 0.8), 168), ch = Math.min(Math.floor(H * 0.36), 88);
+          cizelge(g, Math.round((W - cw) / 2), Math.round(H * 0.16 + (1 - kart) * H * 0.5), cw, ch, yt - 3.0, kart);
+        }
       },
     },
-    kod:{
-      hazirla(W, H){
-        const kagit = tuval(W, H), k = kagit.getContext('2d');
-        k.fillStyle = '#fff8ea'; k.fillRect(0, 0, W, H);
-        k.fillStyle = '#e9dfcb';
-        for(let y = 3; y < H; y += 8) for(let x = 3; x < W; x += 8) k.fillRect(x, y, 1, 1);
-        return { kagit };
-      },
+    /* Son: gün batımında basamaklar, King tek tek çıkar; gece çöker, logo kalır */
+    son:{
+      hazirla(W, H){ const D = L.PIKSEL_DOGA; return { batim:manzara(D, W, H, 'batim', 'kiraz'), gece:manzara(D, W, H, 'gece', 'kiraz'), yildiz:yildizlar(W, H, 3) }; },
       ciz(g, W, H, yt, h, s){
-        g.drawImage(s.kagit, 0, 0);
-        /* Yedi günlük örnek çizelge: dördüncü gün girilmemiş, sütun değil nokta */
-        const cw = Math.min(Math.floor(W * 0.82), 168), ch = Math.min(Math.floor(H * 0.4), 88), cx = Math.round((W - cw) / 2), cy = Math.round(H * 0.18);
-        const DEGER = [0.45, 0.7, 0.55, null, 0.85, 0.6, 0.92], adim = (cw - 12) / 7, bw = Math.max(3, Math.floor(adim * 0.55)), taban = cy + ch - 6;
-        kareCiz(g, '#1f1a2e', cx, cy, cw, 1, 1); kareCiz(g, '#1f1a2e', cx, cy + ch, cw, 1, 1);
-        kareCiz(g, '#1f1a2e', cx, cy, 1, ch, 1); kareCiz(g, '#1f1a2e', cx + cw - 1, cy, 1, ch + 1, 1);
-        kareCiz(g, '#d8ccb4', cx + 6, taban + 1, cw - 12, 1, 1);
-        DEGER.forEach((v, i) => {
-          const x = Math.round(cx + 6 + adim * i + (adim - bw) / 2);
-          if(v == null){
-            const n = 5, nx = x + Math.floor((bw - n) / 2), ny = taban - n, nabiz = ara(yt, 3.0, 3.6) * oyna();
-            kareCiz(g, '#1f1a2e', nx, ny, n, 1, 1); kareCiz(g, '#1f1a2e', nx, ny + n - 1, n, 1, 1);
-            kareCiz(g, '#1f1a2e', nx, ny, 1, n, 1); kareCiz(g, '#1f1a2e', nx + n - 1, ny, 1, n, 1);
-            if(nabiz > 0){
-              const r = (yt * 1.4) % 1, e = 2 + r * 6;
-              g.globalAlpha = (1 - r) * 0.8; g.strokeStyle = '#5a84ea'; g.lineWidth = 1;
-              g.strokeRect(nx + n / 2 - e, ny + n / 2 - e, e * 2, e * 2); g.globalAlpha = 1;
-            }
-            return;
-          }
-          const boy = (ch - 14) * v * ara(yt, 0.5 + i * 0.12, 1.3 + i * 0.12);
-          kareCiz(g, '#5a84ea', x, taban - boy, bw, boy, 1);
-          kareCiz(g, '#2f5fd0', x, taban - boy, bw, Math.min(1, boy), 1);
-        });
-        /* Eşik: kuralın çizgisi soldan sağa gelir */
-        const ey = Math.round(taban - (ch - 14) * 0.6), ew = (cw - 12) * ara(yt, 1.4, 2.4);
-        for(let x = 0; x < ew; x += 4) kareCiz(g, '#1f1a2e', cx + 6 + x, ey, 2, 1, 1);
-      },
-    },
-    basamak:{
-      hazirla(W, H){ return { m:manzara(L.PIKSEL_DOGA, W, H, 'dogum', 'kiraz') }; },
-      ciz(g, W, H, yt, h, s){
-        g.drawImage(manzaraCiz(s.m, h), 0, 0);
+        const gece = ara(yt, 3.4, 6.4);
+        g.drawImage(manzaraCiz(s.batim, h), 0, 0);
+        if(gece > 0){ g.globalAlpha = gece; g.drawImage(manzaraCiz(s.gece, h), 0, 0); g.globalAlpha = 1; yildizCiz(g, s.yildiz, yt, gece); }
         const n = 5, sw = Math.max(16, Math.floor(Math.min(W * 0.6 / n, 30))), sh = Math.max(6, Math.floor(Math.min(H * 0.07, 16))), taban = Math.round(H * 0.74), x0 = Math.round(W / 2 - sw * n / 2);
         for(let i = 0; i < n; i++){
           const x = x0 + i * sw, y = taban - (i + 1) * sh;
@@ -70320,48 +70424,82 @@ window.LIFEOS.SINEMATIK = (function(L){
           kareCiz(g, '#e8e2d6', x + 1, y + 1, sw - 2, 2, 1);
           kareCiz(g, '#8d867b', x + sw - 3, y + 3, 2, taban - y - 3, 1);
         }
-        /* King basamakları tek tek çıkar; her inişte küçük kıvılcım */
+        kareCiz(g, '#120c24', x0, taban - n * sh, sw * n, n * sh, gece * 0.45);
         const yuz = L.PIKSEL && L.PIKSEL.kingYuzu ? L.PIKSEL.kingYuzu() : 'mochi', fk = ekranKat(sw * 1.25 / 16, 1);
         const yer = j => (j < 0 ? [x0 - sw, taban] : [x0 + j * sw, taban - (j + 1) * sh]);
-        let fx, fy, j = -1;
-        for(let i = 0; i < n; i++) if(yt >= 0.7 + i * 0.75 + 0.55) j = i;
-        const sonraki = j + 1, bas = 0.7 + sonraki * 0.75, f = sonraki < n && !(d && d.az) ? Math.max(0, Math.min(1, (yt - bas) / 0.55)) : 0;
+        let j = -1;
+        for(let i = 0; i < n; i++) if(yt >= 0.6 + i * 0.6 + 0.45) j = i;
+        const sonraki = j + 1, bas = 0.6 + sonraki * 0.6, f = sonraki < n && !(d && d.az) ? Math.max(0, Math.min(1, (yt - bas) / 0.45)) : 0;
         const [ax, ay] = yer(j), [bx, by] = yer(Math.min(n - 1, sonraki));
-        fx = karis(ax, bx, yumusak(f)); fy = karis(ay, by, f) - Math.sin(f * Math.PI) * sh * 1.6;
-        if(d && d.az){ const [sx, sy] = yer(n - 1); fx = sx; fy = sy; }
+        let fx = karis(ax, bx, yumusak(f)), fy = karis(ay, by, f) - Math.sin(f * Math.PI) * sh * 1.6;
+        if(d && d.az){ [fx, fy] = yer(n - 1); }
         figurCiz(g, 'king_' + yuz, fx + (sw - 16 * fk) / 2, fy - 16 * fk, fk, 1);
         for(let i = 0; i <= j; i++){
-          const r = (yt - (0.7 + i * 0.75 + 0.55)) / 0.5;
+          const r = (yt - (0.6 + i * 0.6 + 0.45)) / 0.5;
           if(r < 0 || r > 1 || (d && d.az)) continue;
           const [kx, ky] = yer(i), mx = kx + sw / 2;
           [[-1, 0], [1, 0], [0, -1], [-0.7, -0.7], [0.7, -0.7]].forEach(([vx, vy]) => kareCiz(g, '#ffd35a', mx + vx * (3 + r * 6), ky - 2 + vy * (3 + r * 6), 1, 1, 1 - r));
         }
-        const gel = ara(yt, 4.4, 5.4), k = Math.max(2, Math.min(5, Math.round(Math.min(W, H) / 70)));
-        figurCiz(g, 'logo', W / 2 - 8 * k, H * 0.16 - 8 * k + Math.sin(yt * 1.7) * 1.4 * oyna() + (1 - gel) * 4, k, gel);
+        const gel = ara(yt, 4.0, 5.2), k = ekranKat(Math.min(W, H) / 70, 2);
+        figurCiz(g, 'logo', W / 2 - 8 * k, H * 0.14 - 8 * k + Math.sin(yt * 1.7) * 1.4 * oyna() + (1 - gel) * 4, k, gel);
+        yaziCiz(g, 'LifeOS', W / 2, H * 0.14 + 13 * k, Math.max(11, Math.round(Math.min(W, H) / 11)), '#fff8ea', ara(yt, 4.4, 5.6));
       },
     },
   };
 
-  /* ---------- kare döngüsü ---------- */
+  /* ---------- kurgu: sahne girişleri ve kare döngüsü ---------- */
   function hazir(s){
     if(!d.hazir[s.id]) d.hazir[s.id] = SAHNELER[s.id].hazirla(d.W, d.H);
     return d.hazir[s.id];
   }
+  function sahneCiz(g, s, t){
+    const h = d.az ? 0 : t;
+    g.save(); SAHNELER[s.id].ciz(g, d.W, d.H, t - s.bas, h, hazir(s), s.son - s.bas); g.restore();
+  }
+  function araCiz(s, t){
+    const a = d.ara.getContext('2d');
+    a.setTransform(1, 0, 0, 1, 0, 0); a.imageSmoothingEnabled = false;
+    a.clearRect(0, 0, d.W, d.H);
+    sahneCiz(a, s, t);
+    return d.ara;
+  }
   function ciz(t){
-    const g = d.g, W = d.W, H = d.H;
+    const g = d.g, W = d.W, H = d.H, l = sahneler(t, d.az);
     g.setTransform(OLCEK, 0, 0, OLCEK, 0, 0);
     g.imageSmoothingEnabled = false;
-    sahneler(t, d.az).forEach(({ s, f }) => {
-      const yt = t - s.bas, x = hazir(s), h = d.az ? 0 : t;
-      if(f >= 1){ g.save(); SAHNELER[s.id].ciz(g, W, H, yt, h, x); g.restore(); return; }
-      if(f <= 0) return;
-      /* Geçiş: alttaki sahne tam, üstteki ara tuvalden f opaklıkla çözülür */
-      const a = d.ara.getContext('2d');
-      a.setTransform(1, 0, 0, 1, 0, 0); a.imageSmoothingEnabled = false;
-      a.clearRect(0, 0, W, H);
-      a.save(); SAHNELER[s.id].ciz(a, W, H, yt, h, x); a.restore();
-      g.globalAlpha = f; g.drawImage(d.ara, 0, 0); g.globalAlpha = 1;
-    });
+    if(l.length < 2 || l[1].f >= 1){ sahneCiz(g, (l[1] || l[0]).s, t); return; }
+    const [{ s:eski }, { s:yeni, f }] = l;
+    if(f <= 0){ sahneCiz(g, eski, t); return; }
+    const tur = yeni.gecis || 'cozul';
+    if(tur === 'kay'){
+      /* Kamera yana kayar: eski sola çıkar, yeni sağdan girer */
+      g.save(); g.translate(-Math.round(f * W * OLCEK) / OLCEK, 0); sahneCiz(g, eski, t); g.restore();
+      g.drawImage(araCiz(yeni, t), Math.round((1 - f) * W * OLCEK) / OLCEK, 0);
+      return;
+    }
+    if(tur === 'yakin'){
+      g.save(); yakin(g, W, H, 1 + 0.8 * f); sahneCiz(g, eski, t); g.restore();
+    }else sahneCiz(g, eski, t);
+    const yc = araCiz(yeni, t);
+    if(tur === 'blok'){
+      /* Piksel bloklar çaprazlamasına açılır */
+      const b = Math.max(8, Math.round(Math.min(W, H) / 12)), nx = Math.ceil(W / b), ny = Math.ceil(H / b);
+      g.save(); g.beginPath();
+      for(let y = 0; y < ny; y++) for(let x = 0; x < nx; x++) if((x + y * 0.7) / (nx + ny * 0.7) < f * 1.15 - 0.05) g.rect(x * b, y * b, b, b);
+      g.clip(); g.drawImage(yc, 0, 0); g.restore();
+      return;
+    }
+    g.globalAlpha = f; g.drawImage(yc, 0, 0); g.globalAlpha = 1;
+  }
+  function etiket(t){
+    const e = d.basladi ? etiketAt(t) : null;
+    if(e === d.etiketOn) return;
+    d.etiketOn = e;
+    d.etiket.classList.toggle('is-gorunur', !!e);
+    if(e){
+      d.etiket.style.setProperty('--sinematik-renk', RENK[e]);
+      d.etiket.innerHTML = '<b>' + AD[e] + '</b><span>' + yz('etiket.' + e) + '</span>';
+    }
   }
   function yazi(t){
     const i = d.basladi ? satirAt(t) : -1;
@@ -70392,6 +70530,7 @@ window.LIFEOS.SINEMATIK = (function(L){
       ciz(t);
     }
     yazi(t);
+    etiket(t);
     d.cubuk.style.transform = 'scaleX(' + (t / SURE).toFixed(4) + ')';
     if(t >= SON_KART && !d.kok.classList.contains('is-son')) sonKart();
     if(t >= SURE && d.oynuyor){ d.oynuyor = false; d.t = SURE; dugmeler(); }
@@ -70515,6 +70654,7 @@ window.LIFEOS.SINEMATIK = (function(L){
     kok.innerHTML = '<canvas class="sinematik__tuval" aria-hidden="true"></canvas>'
       + '<button type="button" class="sinematik__gec" data-sinematik="gec">' + yz('gec') + '</button>'
       + '<button type="button" class="sinematik__izle" data-sinematik="izle">' + simge('oynat') + '<span>' + yz('izle') + '</span></button>'
+      + '<p class="sinematik__etiket" aria-hidden="true"></p>'
       + '<div class="sinematik__alt"><p class="sinematik__yazi" aria-live="polite"></p>'
       +   '<div class="sinematik__son"><button type="button" class="sinematik__basla" data-sinematik="basla">' + yz('basla') + '</button>'
       +   '<button type="button" class="sinematik__yeniden" data-sinematik="yeniden">' + yz('yeniden') + '</button></div>'
@@ -70523,13 +70663,13 @@ window.LIFEOS.SINEMATIK = (function(L){
       +   '<span class="sinematik__cizgi" aria-hidden="true"><i></i></span></div></div>';
     document.body.appendChild(kok);
     d = { kok, c:kok.querySelector('canvas'), yazi:kok.querySelector('.sinematik__yazi'), cubuk:kok.querySelector('.sinematik__cizgi i'),
-      t:4.6, oynuyor:false, sesAcik, az:hareketAz(), hazir:{}, satir:-1, W:0, H:0, once:document.activeElement, son:null,
+      etiket:kok.querySelector('.sinematik__etiket'), t:AFIS, oynuyor:false, sesAcik, az:hareketAz(), hazir:{}, satir:-1, W:0, H:0, once:document.activeElement, son:null,
       bitince:o && o.bitince };
     kok.addEventListener('click', tikla);
     document.addEventListener('keydown', tus, true);
     document.addEventListener('visibilitychange', gorunurluk);
     window.addEventListener('resize', boyutla);
-    /* Afiş: oynatılmadan önce ilk sahnenin logolu karesi (t = 4,6) durur */
+    /* Afiş: oynatılmadan önce başlık kartı (t = AFIS) durur */
     boyutla();
     dugmeler();
     d.istek = requestAnimationFrame(dongu);
