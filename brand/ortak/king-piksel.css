@@ -1,0 +1,88 @@
+/* KING · PİKSEL GÖRÜNÜMÜ (2026-11-05, kullanıcı: «King'in arayüzünü çok daha güzel, çok daha profesyonel yap»).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/king-piksel.css`; `python3 tools/ortak.py --yay` ile üç arayüze kopyalanır.
+   piksel.css'ten sonra yüklenir (brand/parcalar.txt); yalnız büyük King penceresini giydirir, küçük King'e dokunmaz.
+
+   Kurallar: dört ayrı kutu yerine tek pencere; sütunlar ince çizgiyle ayrılır, kutu içinde kutu yok.
+   Sohbet ortada okunur bir sütundur; King'in cevabı solda vurgu şeritli kâğıt, seninki sağda vurgu tonlu.
+   Tek vurgu rengi --king-vurgu; gölge, parıltı, süs yok. Sayı ve karar değişmez: bu dosya yalnız görünümdür. */
+
+:root[data-zemin="piksel"] .king:not(.is-mini){
+  --kp-cizgi:var(--px-kenar);
+  --kp-cerceve:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar);
+  --kp-ton:color-mix(in oklab, var(--kp-vurgu) 14%, var(--surface));
+  --kp-vurgu:var(--king-vurgu, var(--primary)); --kp-kagit:var(--surface-2);
+}
+
+/* ---------- Pencere: sütunlar tek yüzeyin bölmeleri ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kutu{ padding:0; gap:0; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray{ margin:0; padding:16px 0; gap:4px; border:0; border-right:2px solid var(--kp-cizgi); background:var(--surface-2); box-shadow:none; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is{ width:48px; margin:0 auto; padding:8px 0; gap:4px; background:none; box-shadow:none; color:var(--text-2); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is:hover{ background:var(--surface-3); color:var(--text); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is.is-secili{ background:var(--surface); color:var(--kp-vurgu); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__yan{ margin:0; border:0; border-right:2px solid var(--kp-cizgi); background:var(--surface); box-shadow:none; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__yan-ust{ padding:0 16px 0 20px; min-height:64px; border-bottom:2px solid var(--kp-cizgi); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__yan-bos{ padding:4px 4px 0; color:var(--text-2); font-size:var(--fs-xs); line-height:1.6; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ana{ background:var(--surface); }
+
+/* ---------- Başlık: tek satır, altında ince çizgi ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__bas{ min-height:64px; padding:0 24px; gap:12px; border-bottom:2px solid var(--kp-cizgi); background:var(--surface); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__bas .king__yer{ background:var(--surface-2); border:0; box-shadow:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__kucult,.king__kapat,.king__kip-dugme){ background:none; box-shadow:none; border:0; color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__kucult,.king__kapat,.king__kip-dugme):hover{ background:var(--surface-2); color:var(--text); }
+
+/* ---------- Sohbet sütunu ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:32px 24px 24px; gap:20px; }
+/* Karşılama yüzü yalnız boş sohbette, küçük; konuşma başlayınca çekilir */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne{ min-height:0; padding:8px 0 4px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne .king__yuz{ width:56px; height:56px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis:has(.king__balon--sen) > .king__sahne{ display:none; }
+/* King'in cevabı: başında küçük King, solda vurgu şeridi, kâğıt zemin */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king{ padding-left:32px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king::before{ content:''; position:absolute; left:0; top:2px; width:20px; height:20px; border-radius:0; box-shadow:none;
+  background:var(--fig-king) center/contain no-repeat; image-rendering:pixelated; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king::after{ display:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king > div{ padding:14px 20px; background:var(--surface-2); background-image:none; box-shadow:none; border:0; border-left:4px solid var(--kp-vurgu); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king p{ line-height:1.65; }
+/* Son cevaba king-cam.css !important'la degrade ve çerçeve basıyor; o kural değişken okur, değişkenler burada sönümlenir */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king.is-son > div{ --king-vurgu:transparent; --border:transparent; --surface:var(--kp-kagit); }
+/* Senin mesajın: sağda, vurgu tonlu; zemin rengi king.css'in !important'ı yerine değişkenle verilir */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--sen{ --surface-2:var(--kp-ton); padding:10px 16px; border-radius:0; box-shadow:0 0 0 2px color-mix(in oklab, var(--kp-vurgu) 30%, var(--surface)); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__cip{ background:var(--surface); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__cip:hover{ background:var(--kp-ton); }
+
+/* ---------- Yazma çubuğu: tek çerçeve, içinde düz alan ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin-bottom:24px; padding:6px; gap:6px; background:var(--surface); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz:focus-within{ box-shadow:0 -2px 0 var(--kp-vurgu),0 2px 0 var(--kp-vurgu),-2px 0 0 var(--kp-vurgu),2px 0 0 var(--kp-vurgu); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__girdi{ border:0; outline:0; box-shadow:none; background:none; font-size:15px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__arti,.king__mik){ background:none; box-shadow:none; color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__arti,.king__mik):hover{ background:var(--surface-2); color:var(--text); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__gonder{ background:var(--kp-vurgu); box-shadow:none; }
+
+/* ---------- Bağlam: bölüm adı küçük ve soluk; kart kutu içinde kutu değil ---------- */
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__baglam{ margin:0; padding:20px 20px 24px; gap:24px; overflow-y:auto; border:0; border-left:2px solid var(--kp-cizgi); background:var(--surface-2); box-shadow:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-ust{ min-height:24px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-gor{ margin:0; color:var(--text-2); font-size:var(--fs-xs); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-bolum > h3{ margin:0 0 10px; font-size:var(--fs-xs); letter-spacing:.04em; color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kartlar{ gap:2px; background:var(--kp-cizgi); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart{ min-height:0; padding:12px; gap:4px; border:0; background:var(--surface); box-shadow:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-ad{ color:var(--text-2); font-size:var(--fs-xs); line-height:1.4; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-deger{ font-size:22px; line-height:1.2; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-etiket{ padding:0; border:0; background:none; box-shadow:none; color:var(--text-2); font-size:var(--fs-xs); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-alt{ color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-not{ margin:0; padding-left:16px; color:var(--text); line-height:1.6; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-sor{ gap:6px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-oner{ justify-content:flex-start; padding:10px 12px; text-align:left; border:0; background:var(--surface); box-shadow:inset 3px 0 0 var(--kp-vurgu); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-oner:hover{ background:var(--kp-ton); }
+/* King'in odası panel enine oturur, kesilmez; karakter seçimi odanın üstünde, sola yaslı */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__karakter{ justify-content:flex-start; margin-top:auto; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__oda{ width:100%; max-width:100%; margin:0; border-width:2px; }
+
+/* ---------- Telefon: başlık ve yazma çubuğu kenara yapışmaz ---------- */
+@media (max-width:679px){
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__bas{ min-height:56px; padding:0 16px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:20px 16px; gap:16px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin:0 16px 16px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king > div{ padding:12px 16px; }
+}
