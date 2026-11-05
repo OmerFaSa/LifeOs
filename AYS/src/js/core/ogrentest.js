@@ -120,6 +120,25 @@ R.OgrenTest = (function(){
   }
   const dogruMu = (q, v) => !!(v && !v.bak && v.h && v.h === q.dogru);
 
+  /* Konunun test kanıtı (ortak/ogrenmotor.js): biten testlerin cevapları. Test konuyu
+     baştan söylemez, karışık sayılır; bu kalıcılığın «Sağlam» aşamasına giden yoldur.
+     Yeni kayıt yok; yeni test bitmedikçe yeniden hesaplanmaz. */
+  let kanitOz = null;
+  function konuKanit(id){
+    const anahtar = doc.gecmis.length + '|' + (doc.gecmis[0] ? doc.gecmis[0].id : '');
+    if(!kanitOz || kanitOz.anahtar !== anahtar){
+      const m = {};
+      doc.gecmis.forEach(t => (t.sorular || []).forEach(x => {
+        if(!x.h || x.bak) return;
+        const s = soruOf(x.k, x.at || t.at);
+        if(!s) return;
+        (m[s.topic.id] = m[s.topic.id] || []).push({ g:R.U.iso(new Date(x.at || t.at)), isabet:dogruMu(s.q, x), karisik:true, ipucu:!!x.ip });
+      }));
+      kanitOz = { anahtar, m };
+    }
+    return kanitOz.m[id] || [];
+  }
+
   /* ---------- havuz ve kurulum (söz 2) ---------- */
 
   /* kapsam: { ders:'hepsi'|subjectId, konular:'okunan'|'hepsi', seviye:'hepsi'|'sinav' } */
@@ -426,7 +445,7 @@ R.OgrenTest = (function(){
       + yz('ays.core.ogrentest.uygulamadaki-cevap') + x.q.dogru + (x.isaret.not ? '\nNot: ' + x.isaret.not : '')).join('\n\n');
   }
 
-  return { STORE, BOYLAR, EN_AZ, PROVA, PROVA_BOY, provaPlani, provaBaslat, kalanSn, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
+  return { STORE, BOYLAR, EN_AZ, PROVA, PROVA_BOY, provaPlani, provaBaslat, kalanSn, yukle, soruOf, konuKanit, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
     bitir, vazgec, ozet, gecmis, sonDenemeler, yanlislar, tekrarCevapla,
     isaretOf, isaretle, isaretKaldir, isaretliler, isaretMetni };
 })();

@@ -1254,6 +1254,10 @@ ESP.Screens.today = (function(){
   LIFEOS.PARCA.blok({ id:'today.sinyal-satiri', sayfa:'today', yer:'y2', sira:20, ad:'Sinyal satırı', ciz({ GI }){
     return window.LIFEOS && window.LIFEOS.SORUKART ? null : signalRow();
   } });
+  /* Öğrenme motoru: yalnız tekrar varken görünen tek satır; kart değil (Y2 yoğunluğu). */
+  LIFEOS.PARCA.blok({ id:'today.ogrenme', sayfa:'today', yer:'y3', sira:20, ad:'Öğrenme tekrarı', ciz(){
+    return raw(window.LIFEOS.OMEKRAN ? window.LIFEOS.OMEKRAN.bugunSatiri() : '');
+  } });
   LIFEOS.PARCA.blok({ id:'today.soru-karti', sayfa:'today', yer:'y3', sira:10, ad:'Soru kartı', ciz({ GI }){
     return raw(soruKartHtml());
   } });

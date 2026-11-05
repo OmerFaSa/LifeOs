@@ -4,6 +4,8 @@ Kullanıcı (2026-11-05): her alanın uzman uygulamasındaki mekanikleri al; kul
 
 Çekirdek kuruldu: `brand/ortak/usta.js` (`LIFEOS.USTA`). Ekranı yok. Modüller kendi kaydını kanıta çevirip verir.
 
+Konunun baştan sona akışı (tahmin, anlatım, yoklama, onarım, aktarım) ve sistemde olmayan konular: [OGRENME-MOTORU.md](OGRENME-MOTORU.md).
+
 ## Araştırmadan çıkan kurallar
 
 | Bulgu | Güç | Burada ne yapar |

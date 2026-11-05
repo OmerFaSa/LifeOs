@@ -1776,6 +1776,10 @@ R.Screens.today = (function(){
   LIFEOS.PARCA.blok({ id:'today.geri-sayim', sayfa:'today', yer:'y2', sira:10, ad:'Geri sayım', ciz({ dateISO, n, day }){
     return when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`);
   } });
+  /* Öğrenme motoru: yalnız tekrar varken görünen tek satır; kart değil (Y2 yoğunluğu). */
+  LIFEOS.PARCA.blok({ id:'today.ogrenme', sayfa:'today', yer:'y3', sira:20, ad:'Öğrenme tekrarı', ciz(){
+    return raw(window.LIFEOS.OMEKRAN ? window.LIFEOS.OMEKRAN.bugunSatiri() : '');
+  } });
   LIFEOS.PARCA.blok({ id:'today.hizli-giris-kutusu', sayfa:'today', yer:'y3', sira:10, ad:'Hızlı giriş kutusu', ciz({ dateISO, n, day }){
     return raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '');
   } });

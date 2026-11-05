@@ -1287,6 +1287,7 @@ R.Model = (function(){
     if(R.Ogren) await R.Ogren.yukle();
     /* Karma test, geçmişi ve yeniden çözümler (core/ogrentest.js söz 4). */
     if(R.OgrenTest) await R.OgrenTest.yukle();
+    if(window.LIFEOS.OGRENMOTOR && window.LIFEOS.OGRENMOTOR.kuruluMu()) await window.LIFEOS.OGRENMOTOR.yukle();
     /* Günlük paragraf setleri (core/paragraf.js söz 2). */
     if(R.Paragraf) await R.Paragraf.yukle();
     /* Konuya bağlı çıkmış soru kayıtları (core/cikmis.js). */

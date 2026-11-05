@@ -49,6 +49,8 @@ LIFEOS.REHBER = (function(){
   const OKUNAN = 'lifeos.rehber.okundu';
   let ayar = null;            // { modul, konular:() => [], sinir, depo:{ oku, yaz }, ciz, ses? }
   const KV = () => (window.LIFEOS || {}).KAVRAT;
+  /* Öğrenme motoru kuruluysa konuya adım adım giriş (ortak/ogrenmotor-ekran.js). */
+  const OM = () => { const L = window.LIFEOS || {}; return L.OMEKRAN && L.OGRENMOTOR && L.OGRENMOTOR.kuruluMu() ? L.OMEKRAN : null; };
   let secili = null;
 
   const kac = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -145,6 +147,7 @@ LIFEOS.REHBER = (function(){
       + (ayar && ayar.sinir ? '<p class="rehber__sinir">' + kac(ayar.sinir) + '</p>' : '')
       + '<div class="rehber__ayak">'
       +   '<button type="button" class="btn ' + (okundu ? 'btn--ghost' : 'btn--primary') + '" data-rehber="okudum:' + kac(k.id) + '" aria-pressed="' + okundu + '">' + (okundu ? '✓ Okundu' : 'Okudum') + '</button>'
+      +   (OM() ? OM().girisDugmesi(k.id) : '')
       +   (onceki ? '<button type="button" class="btn btn--ghost" data-rehber="onceki">‹ ' + kac(onceki.ad) + '</button>' : '')
       +   (sonraki ? '<button type="button" class="btn btn--ghost" data-rehber="sonraki">' + kac(sonraki.ad) + ' ›</button>' : '')
       + '</div></article>';
