@@ -710,7 +710,7 @@ window.LIFEOS.PARCA.yazilar({
       + (kars.satirlar.length ? kisim('Notlar', '<ul class="king__baglam-not">' + kars.satirlar.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>') : '')
       + (sor.length ? kisim('Sorabileceklerin', '<div class="king__baglam-sor">' + sor.map(o => '<button type="button" class="king__baglam-oner" data-king="' + o.is + '">'
         + KI.kac(o.ad) + '</button>').join('') + '</div>') : '')
-      + '' + karakterSecimi() + '<canvas class="king__oda" width="38" height="32" aria-hidden="true"></canvas></aside>';
+      + '' + karakterSecimi() + '<canvas class="king__oda" width="64" height="44" aria-hidden="true"></canvas></aside>';
   }
   function govde(){
     if(KI.mini) return miniGovde();

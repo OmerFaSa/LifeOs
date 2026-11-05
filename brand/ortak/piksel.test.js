@@ -246,7 +246,7 @@
       expect(c.getContext('2d').getImageData(5, 5, 1, 1).data[3]).toBe(255);
       expect(A.kingOda(c, 1, 'ogle', true)).toBe(true);
       expect(A.kingOda(c, 1, 'ogle', true, 'tavsan')).toBe(true);
-      expect(A.ODA.king.hayat(0, 30, [], 'gece')[0].seg[0].poz).toBe('kuyu');
+      expect(A.ODA.king.hayat(0, 42, [], 'gece')[0].seg[0].poz).toBe('kuyu');
     });
     it('King karakteri: dört seçenek, seçim saklanır, bilinmeyen ad kabul edilmez', () => {
       const P = window.LIFEOS.PIKSEL, F = window.LIFEOS.PIKSEL_FIGUR, once = localStorage.getItem('lifeos.king.yuz');
@@ -256,6 +256,39 @@
         expect(P.kingYuz('aksolot')).toBe(false);
         expect(!!F.king).toBe(false);
       }finally{ if(once) localStorage.setItem('lifeos.king.yuz', once); else localStorage.removeItem('lifeos.king.yuz'); P.kingYuz(P.kingYuzu()); }
+    });
+    it('mahalle: her çekmecenin yeri var, binalar yatak odasız ve taşmaz, gündüz çalışan var', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, P = window.LIFEOS.PIKSEL;
+      expect(P.MAHALLE.includes('bugun') && P.MAHALLE.includes('calisma') && P.MAHALLE.includes('analiz') && P.MAHALLE.includes('kutuphane')).toBe(true);
+      Object.values(P.CEKMECE_YER).forEach(y => expect(P.MAHALLE.includes(y)).toBe(true));
+      ['calisma', 'analiz', 'kutuphane'].forEach(y => {
+        const o = A.yerlesim(384, 216, 'ogle', y);
+        expect(o.yer).toBe(y);
+        expect(o.odalar.some(a => a.tip === 'yatak')).toBe(false);
+        expect(o.odalar.every(a => a.x >= 0 && a.x + a.w <= 384)).toBe(true);
+        expect(o.bolgeler.some(b => b.sakin.some(r => r.kisi))).toBe(true);
+        [o.cati, o.zemin].concat(o.bolgeler).forEach(b => b.sakin.forEach(r => r.seg.forEach(q => expect(!!A.POZ[q.poz]).toBe(true))));
+      });
+      expect(A.yerlesim(384, 216, 'ogle', 'yok').yer).toBe('bugun');
+    });
+    it('manzara: on tür; aynı t aynı kare, her vakitte kurulur ve çizilir', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA;
+      expect(D.TUR_LISTE.length).toBe(10);
+      D.TUR_LISTE.forEach(t => ['dogum', 'ogle', 'batim', 'gece'].forEach(v => {
+        const o = D.yerlesim(384, 216, v, t);
+        expect(o.tur).toBe(t);
+        o.sakin.forEach(r => { expect(r.T > 0 && isFinite(r.T)).toBe(true); r.seg.forEach(q => expect(!!D.POZ[q.poz]).toBe(true)); expect(JSON.stringify(D.kareAl(r, 7.3))).toBe(JSON.stringify(D.kareAl(r, 7.3))); });
+        const c = document.createElement('canvas'); c.width = 384; c.height = 216;
+        D.binaCiz(c.getContext('2d'), o);
+        const piksel = c.getContext('2d').getImageData(0, 0, 384, 216).data;
+        let bos = 0; for(let i = 3; i < piksel.length; i += 4) if(piksel[i] !== 255) bos++;
+        expect(bos).toBe(0);
+      }));
+    });
+    it('yüklenme: manzara tuvali perdeye bir kez konur, kaldırılınca durur', () => {
+      const P = window.LIFEOS.PIKSEL, el = document.createElement('div');
+      document.body.appendChild(el);
+      try{ expect(!!P.manzaraKoy(el)).toBe(true); expect(P.manzaraKoy(el)).toBe(null); expect(el.querySelectorAll('canvas.piksel-manzara').length).toBe(1); }finally{ el.remove(); }
     });
     it('dokunma: canlıya dokununca balon çıkar, boşa dokununca hiçbir şey olmaz', () => {
       const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle'), t = 2;

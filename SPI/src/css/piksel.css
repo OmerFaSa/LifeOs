@@ -62,11 +62,20 @@
 /* Boşta: menü sola, kart aşağı çekilir; dokunulamaz, sahne kalır (piksel.js). */
 :root[data-bos] .site--v5 > .kenar, :root[data-bos] .site--v5 > .site__body, :root[data-bos] .altbant, :root[data-bos] body > *:not(.piksel-oda):not(#app){ transition:opacity .42s ease, transform .42s ease; }
 :root[data-bos="1"]:not([data-bos-el]){ cursor:none; }
+/* Yüklenme ekranı: cam yerine manzara; selam kâğıtta durur, her manzarada okunur */
+:root[data-zemin="piksel"] .piksel-manzara{ position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
+:root[data-zemin="piksel"] .lifeos-gecis{ background:#8fcff1; -webkit-backdrop-filter:none; backdrop-filter:none; }
+:root[data-zemin="piksel"] .perde--karsilama{ background:#8fcff1; }
+:root[data-zemin="piksel"] .perde--karsilama::before{ content:none; }
+:root[data-zemin="piksel"] .perde--karsilama .karsilama{ position:relative; z-index:1; padding:28px 40px; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),8px 12px 0 #3f282c44; }
+/* Seçim sayfası: tarla görünür, kapı zemini kalkar */
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi{ background:transparent; }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__tanitim{ --fg:#3a2430; --fg-2:#4a3440; --text:#3a2430; --text-2:#4a3440; }
 /* King: seçilen karakter, Bağlam sütununun altındaki küçük oda ve seçim düğmeleri */
 :root[data-zemin="piksel"] .king-fig{ display:block; width:100%; height:100%; background:var(--fig-king) center/contain no-repeat; image-rendering:pixelated; }
 :root[data-zemin="piksel"] .king__yuz, :root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne .king__yuz{ background:none; border-radius:0; box-shadow:none; }
 :root[data-zemin="piksel"] .king__bas .king__yuz{ display:none; }
-:root[data-zemin="piksel"] .king__oda{ display:block; flex:none; width:152px; height:128px; margin:0 0 0 auto; image-rendering:pixelated; border:4px solid #b5825a; cursor:pointer; }
+:root[data-zemin="piksel"] .king__oda{ display:block; flex:none; width:256px; max-width:100%; height:auto; aspect-ratio:64 / 44; margin:0 0 0 auto; image-rendering:pixelated; border:4px solid #b5825a; cursor:pointer; }
 :root[data-zemin="piksel"] .king__karakter{ display:flex; justify-content:flex-end; gap:6px; margin-top:auto; flex:none; }
 :root[data-zemin="piksel"] .king__karakter-sec{ width:34px; height:34px; padding:0; border:2px solid transparent; background:var(--yuva, transparent) center/26px no-repeat; image-rendering:pixelated; cursor:pointer; }
 :root[data-zemin="piksel"] .king__karakter-sec[aria-pressed="true"]{ border-color:#b5825a; }

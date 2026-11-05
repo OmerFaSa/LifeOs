@@ -57,6 +57,7 @@ js/core/zemin.js
 js/core/piksel-figur.js
 js/core/piksel-simge.js
 js/core/piksel-apartman.js
+js/core/piksel-doga.js
 js/core/piksel.js
 js/core/ayarlar.js
 
@@ -966,6 +967,7 @@ parca.test.js
 ../js/core/piksel-figur.js
 ../js/core/piksel-simge.js
 ../js/core/piksel-apartman.js
+../js/core/piksel-doga.js
 ../js/core/piksel.js
 piksel.test.js
 

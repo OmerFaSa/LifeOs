@@ -542,6 +542,7 @@ window.LIFEOS = window.LIFEOS || {};
        geldin»): perde yalnız karttan büyür; selam ve not varılan modülün perdesinde
        (brand/ortak/karsilama.js) — o modülün notunu yalnız o modül bilir. */
     document.body.appendChild(kap);
+    if(L.PIKSEL && L.PIKSEL.manzaraKoy) L.PIKSEL.manzaraKoy(kap);   // yüklenme ekranı: manzara
     void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
     kap.classList.add('is-tam');
     kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';

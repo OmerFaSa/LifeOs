@@ -14,6 +14,7 @@
         King'in odası apartmanda değildir: King arayüzünün sağ alt köşesinde durur (kingOda). O da veri okumaz.
      2. KODLA ÇİZİLİR. Görsel dosyası yok; çevrimdışı ve tek dosyada çalışır.
      3. EKRANI YORMAZ. Sahne bir kez ayrı tuvale çizilir; karede yalnız içinde bir şey değişen kat yenilenir.
+     Mahalle: Bugün apartmandır; Çalışma, Analiz ve Kütüphane aynı sokakta birer binadır (yerlesim'in dördüncü değeri).
      4. KARE SAATTEN HESAPLANIR. Saklı durum yok: aynı t aynı kareyi verir, hareketsiz kipte tek kare çizilir. */
 window.LIFEOS = window.LIFEOS || {};
 
@@ -419,18 +420,74 @@ window.LIFEOS = window.LIFEOS || {};
         const [a] = k;
         return a ? [rutin(a, X + 10, F, [['firca', 22, undefined, false], ['yuru', 0, X + 2], ['dur', 5], ['yuru', 0, X + 10]]), duygu('b_nota', X + 13, F - 18, 6, 5, 12)] : [];
       } },
-    /* King'in odası: apartmanda değil, King arayüzünün Bağlam sütununda (kingOda); seçilen karakter, akvaryum, minder */
-    king:{ g:38, duvar:'#ffd3e6', alt:'#f5b0cf', desen:'nokta',
-      ciz(g, X, F){ kutu(g, X + 3, F - 26, 11, 8, '#fff1f7'); [[5, 3], [8, 4], [11, 3]].forEach(q => R(g, X + q[0], F - 24, 1, q[1], '#e0a52e')); R(g, X + 5, F - 21, 7, 1, '#e0a52e');
-        kutu(g, X + 22, F - 28, 14, 10, '#9fdcec'); R(g, X + 23, F - 27, 12, 2, '#d3f2f8'); R(g, X + 25, F - 22, 1, 3, '#4c8a4a'); R(g, X + 32, F - 23, 1, 4, '#4c8a4a'); R(g, X + 28, F - 24, 2, 1, '#ee9c52'); R(g, X + 23, F - 20, 12, 1, '#e8d5a8'); kutu(g, X + 21, F - 18, 16, 2, AHSAP);
-        kutu(g, X + 20, F - 5, 16, 5, '#ff7fb0'); R(g, X + 22, F - 4, 12, 1, '#ffb3d0'); R(g, X + 1, F, 36, 1, '#ff9ecb'); },
+    /* Çalışma binası: kara tahta, not panosu, iki masa, masa lambası */
+    calisma:{ g:62, duvar:'#efe0c4', alt:'#d9c6a2', desen:'cizgi',
+      ciz(g, X, F){ kutu(g, X + 3, F - 27, 22, 12, '#3f5a50'); R(g, X + 5, F - 24, 10, 1, '#dfe8e0'); R(g, X + 5, F - 22, 15, 1, '#dfe8e0'); R(g, X + 5, F - 20, 7, 1, '#ffe27a'); R(g, X + 3, F - 15, 22, 1, AHSAP_K);
+        kutu(g, X + 39, F - 27, 16, 11, '#c9a27a'); [[41, 25, '#ffe27a'], [46, 25, '#f490b4'], [51, 24, '#8ad0e8'], [43, 21, '#a6d67a'], [49, 20, '#fff8ea']].forEach(q => R(g, X + q[0], F - q[1], 3, 3, q[2]));
+        [[3, 18], [34, 18]].forEach(q => { sandalye(g, X + q[0], F); masa(g, X + q[0] + 7, F, q[1]); }); kutu(g, X + 21, F - 9, 5, 3, TOPRAK); kutu(g, X + 21, F - 11, 4, 2, '#5f86a8'); R(g, X + 14, F - 13, 1, 7, HAT); kutu(g, X + 12, F - 15, 6, 3, '#6a8f52'); kutu(g, X + 43, F - 10, 8, 4, '#fff8ea'); R(g, X + 47, F - 10, 1, 4, HAT); bitki(g, X + 54, F - 6); },
       hayat(X, F, k, v){
-        if(v === 'gece') return [rutin(null, X + 20, F, [['kuyu', 30]]), rutin(null, X + 30, F - 18, [['z', 30]])];
-        return [rutin(null, X + 3, F, [['kdur', 9], ['kyuru', 0, X + 18], ['kdur', 7], ['kyuru', 0, X + 3]]), duygu('kalp', X + 8, F - 20, 12, 2.5, 14)];
+        const [a, b] = k, s = [];
+        if(a) s.push(rutin(a, X + 3, F, [['yaz', 16, undefined, false], ['oku', 10, undefined, false]]), ruh(a, X + 7, F - 18, v));
+        if(b) s.push(rutin(b, X + 34, F, [['oku', 14, undefined, false], ['yaz', 12, undefined, false]]));
+        return s;
+      } },
+    /* Analiz ofisi: büyük grafik panosu, ekran, sunum yapan biri */
+    analiz:{ g:72, duvar:'#d6e2ec', alt:'#bccbd8', desen:'duz',
+      ciz(g, X, F){ kutu(g, X + 3, F - 28, 32, 19, '#2c3a4a'); R(g, X + 5, F - 12, 28, 1, '#8ea2b4'); R(g, X + 5, F - 26, 1, 15, '#8ea2b4'); [[8, 5, '#5f9fd0'], [12, 8, '#5f9fd0'], [16, 6, '#5f9fd0'], [20, 10, '#f4b860'], [24, 12, '#f4b860'], [28, 9, '#7fc48a']].forEach(q => R(g, X + q[0], F - 12 - q[1], 3, q[1], q[2])); [[7, 20], [11, 22], [15, 19], [19, 23], [23, 25], [27, 24], [31, 26]].forEach(q => R(g, X + q[0], F - q[1], 2, 1, '#ff8fb5')); R(g, X + 10, F - 9, 2, 9, HAT); R(g, X + 26, F - 9, 2, 9, HAT);
+        sandalye(g, X + 42, F); masa(g, X + 49, F, 20); ekran(g, X + 53, F); kutu(g, X + 56, F - 27, 12, 10, '#fff8ea'); daire(g, X + 62, F - 22, 3, '#5f9fd0'); R(g, X + 62, F - 25, 3, 3, '#f4b860'); kutu(g, X + 42, F - 27, 11, 9, '#fff8ea'); [1, 3, 5, 7].forEach((d, i) => R(g, X + 43 + d, F - 19 - i * 1, 1, 1 + i, '#7fa35a')); },
+      hayat(X, F, k, v, il){
+        const [a, b] = k, s = [];
+        if(a && b) return sohbet(a, b, X + 16, X + 34, F, 6, false, true, 'konus', 'dinle', il);
+        if(a) s.push(rutin(null, X + 54, F - 8, [['ekran', 40]]), rutin(a, X + 42, F, [['yaz', 40, undefined, false]]), ruh(a, X + 46, F - 18, v));
+        return s;
+      } },
+    /* Okuma salonu: uzun masa, yeşil masa lambaları, açık kitaplar, duvar boyu raf */
+    okuma:{ g:74, duvar:'#c49a70', alt:'#a27a56', desen:'ahsap',
+      ciz(g, X, F, P){ kutu(g, X + 1, F - 28, 24, 12, '#5a3a30'); raf(g, X + 2, F - 27, 22); kutu(g, X + 49, F - 28, 24, 12, '#5a3a30'); raf(g, X + 50, F - 27, 22); pencere(g, X + 30, F - 28, P);
+        sandalye(g, X + 4, F); sandalye(g, X + 63, F); masa(g, X + 11, F, 52); [[20, 0], [36, 1], [52, 0]].forEach(q => { R(g, X + q[0] + 2, F - 11, 1, 5, HAT); kutu(g, X + q[0], F - 13, 6, 3, q[1] ? '#b8584a' : '#4c8a4a'); }); [[13, 0], [28, 1], [44, 0]].forEach(q => { kutu(g, X + q[0], F - 8, 6, 2, '#fff8ea'); R(g, X + q[0] + 3, F - 8, 1, 2, HAT); }); R(g, X + 8, F, 58, 1, '#8a3f36'); },
+      hayat(X, F, k, v){
+        const [a, b] = k, s = [];
+        if(a) s.push(rutin(a, X + 4, F, [['oku', 30, undefined, false]]), ruh(a, X + 8, F - 18, v));
+        if(b) s.push(rutin(b, X + 63, F, [['oku', 26, undefined, true]]));
+        return s;
+      } },
+    /* King'in odası: apartmanda değil, King arayüzünün Bağlam sütununda (kingOda). Pencere, kitaplık, akvaryum, minder, ışık zinciri. */
+    king:{ g:64, duvar:'#ffdcea', alt:'#f7bdd6', desen:'cizgi',
+      ciz(g, X, F, P){ pencere(g, X + 4, F - 36, P);
+        /* Işık zinciri */
+        for(let x = 1; x < 63; x++) R(g, X + x, F - 39 + Math.round(Math.abs(Math.sin(x / 10)) * 3), 1, 1, HAT);
+        [6, 14, 24, 34, 44, 54].forEach((x, i) => R(g, X + x, F - 37 + Math.round(Math.abs(Math.sin(x / 10)) * 3), 2, 2, ['#ffe27a', '#ff9ecb', '#8ad0e8'][i % 3]));
+        /* Taç tablosu */
+        kutu(g, X + 24, F - 34, 12, 10, '#fff1f7'); [[26, 4], [29, 5], [32, 4]].forEach(q => R(g, X + q[0], F - 32 + (5 - q[1]), 2, q[1], '#e0a52e')); R(g, X + 26, F - 28, 8, 2, '#e0a52e'); R(g, X + 29, F - 29, 2, 1, '#e8505b');
+        /* Kitaplık ve bitki */
+        R(g, X + 41, F - 25, 21, 1, HAT); kitaplar(g, X + 42, F - 29, 13); bitki(g, X + 54, F - 25);
+        /* Akvaryum dolap üstünde */
+        kutu(g, X + 42, F - 21, 20, 12, '#9fdcec'); R(g, X + 43, F - 20, 18, 2, '#d3f2f8'); R(g, X + 46, F - 15, 1, 5, '#4c8a4a'); R(g, X + 57, F - 16, 1, 6, '#4c8a4a'); R(g, X + 50, F - 15, 3, 2, '#ee9c52'); R(g, X + 53, F - 14, 1, 1, '#ee9c52'); R(g, X + 43, F - 11, 18, 1, '#e8d5a8');
+        kutu(g, X + 41, F - 9, 22, 9, AHSAP); R(g, X + 51, F - 8, 1, 7, HAT); R(g, X + 48, F - 5, 2, 1, '#e8b45a'); R(g, X + 53, F - 5, 2, 1, '#e8b45a');
+        /* Halı ve minder */
+        R(g, X + 2, F, 38, 1, '#ff9ecb'); R(g, X + 4, F - 1, 34, 1, '#ffb9d6'); kutu(g, X + 20, F - 6, 20, 6, '#ff7fb0'); R(g, X + 22, F - 5, 16, 1, '#ffb3d0'); kutu(g, X + 23, F - 9, 7, 4, '#fff1f7'); R(g, X + 25, F - 8, 3, 1, '#ff9ecb');
+        /* Oyuncak top */
+        daire(g, X + 7, F - 2, 2, '#ffe27a'); R(g, X + 6, F - 3, 1, 1, '#fff8ea'); },
+      hayat(X, F, k, v){
+        if(v === 'gece') return [rutin(null, X + 22, F - 5, [['kuyu', 30]]), rutin(null, X + 34, F - 22, [['z', 30]])];
+        return [rutin(null, X + 3, F, [['kdur', 8], ['kyuru', 0, X + 22], ['kdur', 6], ['kyuru', 0, X + 3]]), duygu('kalp', X + 14, F - 22, 12, 2.5, 14)];
       } },
   };
   /* Evler: kapıyla bağlı odalar; her evde tek yatak odası var, yer yetmezse önce ötekiler düşer */
   const EVLER = [['salon', 'banyo', 'yatak'], ['mutfak', 'yatak'], ['yatak', 'ofis'], ['banyo', 'yatak', 'atolye'], ['kutuphane', 'yatak'], ['mutfak', 'banyo', 'yatak']];
+  /* Mahallenin öteki binaları: odalar iş yeridir, gündüz dolu, gece birkaç ışık yanar */
+  const BINALAR = {
+    calisma:{ odalar:[['calisma', 'ofis'], ['calisma', 'kutuphane'], ['ofis', 'calisma']], koridor:'#e6d2ac', tabela:'#6a8f52' },
+    analiz:{ odalar:[['analiz', 'ofis'], ['ofis', 'analiz'], ['analiz', 'calisma']], koridor:'#c8d6e2', tabela:'#5f86a8' },
+    kutuphane:{ odalar:[['kutuphane', 'okuma'], ['okuma', 'kutuphane'], ['okuma', 'calisma']], koridor:'#b08a66', tabela:'#a0523f' },
+  };
+  function isPlani(tipler, a, b, v, sira){
+    const plan = {}, koy = (t, kisi) => { (plan[t] = plan[t] || { k:[], uyku:false }).k.push(kisi); };
+    if(v === 'gece'){ if(sira % 3 === 0) koy(tipler[0], a); return plan; }
+    koy(tipler[0], a);
+    if(b) koy(tipler[1] || tipler[0], b);
+    return plan;
+  }
   /* Günün planı: iki kişilik ev. Sabah banyo ve kahvaltı, öğlen iş ve yemek, akşam birlikte, gece uyku.
      Her evde gece kuşu yok: çift sıradaki evlerde biri geç saate kadar uyanık. */
   function gunPlani(tipler, a, b, v, sira){
@@ -490,8 +547,9 @@ window.LIFEOS = window.LIFEOS || {};
     ];
     liste.forEach(r => { r.faz = faz; b.sakin.push(r); });
   }
-  function yerlesim(W, H, v){
-    const gece = v === 'gece', dar = W < DAR;
+  function yerlesim(W, H, v, yer){
+    yer = BINALAR[yer] ? yer : 'bugun';
+    const gece = v === 'gece', dar = W < DAR, bina = BINALAR[yer], LISTE = bina ? bina.odalar : EVLER;
     const n = Math.max(1, Math.floor((H - TERAS - 2 - SOKAK) / KAT)), artan = Math.max(0, H - TERAS - 2 - SOKAK - n * KAT), T = TERAS + Math.floor(artan * 0.6), ilk = T + 2, sokak = ilk + n * KAT;
     const ax = dar ? W - ASANSOR : Math.floor((W - ASANSOR) / 2), solSon = dar ? ax : ax - KORIDOR, sagBas = ax + ASANSOR + KORIDOR;
     const f1 = Math.min(1, n - 1), f2 = Math.max(0, n - 2), P = PALET[v], lamba = [], odalar = [], kapilar = {};
@@ -499,14 +557,15 @@ window.LIFEOS = window.LIFEOS || {};
     const zemin = { tip:'zemin', x:0, y:ilk + (n - 1) * KAT, w:W, h:H - ilk - (n - 1) * KAT, sakin:[] }, bolgeler = [];
     for(let k = 0; k < n; k++){
       const y = ilk + k * KAT, F = y + KAT - 4, bolge = k === n - 1 ? zemin : { tip:'kat', x:0, y, w:W, h:KAT, sakin:[] };
-      const ziyaret = !dar && !gece && k % 2 === 0, sag = (k >> 1) % 2 === 0, gidenler = [];
+      const ziyaret = !bina && !dar && !gece && k % 2 === 0, sag = (k >> 1) % 2 === 0, gidenler = [];
       (dar ? [0] : [0, 1]).forEach(yan => {
-        const x = yan ? sagBas : 0, en = yan ? W - sagBas : solSon, ev = EVLER[(k * 2 + yan * 3) % EVLER.length];
+        const x = yan ? sagBas : 0, en = yan ? W - sagBas : solSon, ev = LISTE[(k * 2 + yan * 3) % LISTE.length];
         const faz = (k * 37 + yan * 13) % 41, sira = k * 2 + yan;
-        const a = SAKIN[s++ % 28], b = SAKIN[s++ % 28], bolum = odaBol(ev, x, en, dar), plan = gunPlani(bolum.map(q => q.tip), a, ziyaret ? null : b, v, sira);
+        const a = SAKIN[s++ % 28], b = SAKIN[s++ % 28], bolum = odaBol(ev, x, en, dar), plan = (bina ? isPlani : gunPlani)(bolum.map(q => q.tip), a, ziyaret ? null : b, v, sira);
         if(ziyaret) gidenler[yan] = b;
         bolum.forEach((o, j) => {
           const X = o.x + Math.floor((o.w - ODA[o.tip].g) / 2), q = plan[o.tip] || { k:[], uyku:false }, kapida = ziyaret && (yan ? j === 0 : j === bolum.length - 1);
+          delete plan[o.tip];
           const sonuk = v === 'ogle' || ((!q.k.length || q.uyku) && !kapida);
           odalar.push({ tip:o.tip, x:o.x, y, w:o.w, F, X, sonuk, ilk:j === 0 });
           ODA[o.tip].hayat(X, F, q.k, v, ILISKI[sira % 3], q.uyku, EVCIL[sira % EVCIL.length]).forEach(r => { r.faz = faz + j * 7; bolge.sakin.push(r); });
@@ -518,7 +577,7 @@ window.LIFEOS = window.LIFEOS || {};
       if(ziyaret){ kapilar[k] = sag ? 1 : 0; komsuYap(bolge, F, sag ? gidenler[0] : gidenler[1], sag ? gidenler[1] : gidenler[0], sag, solSon, sagBas, k * 19); }
       if(bolge !== zemin) bolgeler.push(bolge);
     }
-    const o = { W, H, T, ilk, ax, dar, sokak, n, f1, f2, solSon, sagBas, gece, odalar, bolgeler, kapilar, cati:catiYap(W, v, T, ax), zemin, lamba, P, vakit:v };
+    const o = { yer, bina, W, H, T, ilk, ax, dar, sokak, n, f1, f2, solSon, sagBas, gece, odalar, bolgeler, kapilar, cati:catiYap(W, v, T, ax), zemin, lamba, P, vakit:v };
     sokakYap(o);
     o.asansor = asansorYap(o);
     return o;
@@ -665,8 +724,8 @@ window.LIFEOS = window.LIFEOS || {};
     if(tip === 'kutuphane'){ R(c, X + 1, F, 12, 1, '#c2603f'); kutu(c, X + 2, F - 26, 8, 6, '#e6dcc6'); R(c, X + 3, F - 23, 6, 2, '#6a8f52'); }
     if(tip === 'atolye'){ kutu(c, X + 3, F - 26, 9, 7, '#f3e8d0'); R(c, X + 4, F - 23, 7, 3, '#5f86a8'); daire(c, X + 8, F - 24, 1, '#ffeeb0'); [[46, 3], [50, 1], [54, 4]].forEach(q => R(c, X + q[0], F, 2, 1, ['#c2603f', '#e8b45a', '#5f86a8'][q[1] % 3])); }
   }
-  function koridorCiz(c, x, y, F, sagda, kapali, no){
-    duvarCiz(c, x, y, KORIDOR, F - y, '#d7c3a0', '#bfa883', 'cizgi');
+  function koridorCiz(c, x, y, F, sagda, kapali, no, renk){
+    duvarCiz(c, x, y, KORIDOR, F - y, renk || '#d7c3a0', tonla(renk || '#d7c3a0', 0.88), 'cizgi');
     const b = sagda ? x + KORIDOR - 1 : x - 1;
     bolme(c, b, y, F);
     /* Ev kapısı, paspas, kapı numarası */
@@ -712,6 +771,13 @@ window.LIFEOS = window.LIFEOS || {};
     R(c, ax - 2, T - 25, ASANSOR + 4, 25, HAT); R(c, ax - 1, T - 24, ASANSOR + 2, 24, '#8a5a48'); for(let y = T - 22; y < T; y += 4) R(c, ax - 1, y, ASANSOR + 2, 1, '#6d463c');
     R(c, ax - 4, T - 27, ASANSOR + 8, 2, HAT); R(c, ax - 3, T - 27, ASANSOR + 6, 1, TOPRAK);
     kutu(c, ax + 3, T - 22, 7, 3, '#ffe6a0');
+    /* Binanın tabelası: damdan okunur; yazı yok, simge var */
+    if(o.bina && genis){
+      const x = ax + 22; R(c, x + 3, T - 8, 2, 8, HAT); R(c, x + 25, T - 8, 2, 8, HAT); kutu(c, x, T - 24, 30, 16, o.bina.tabela);
+      const b = c; if(o.yer === 'kutuphane'){ R(b, x + 7, T - 20, 8, 9, '#fff8ea'); R(b, x + 15, T - 20, 8, 9, '#f0e4cc'); R(b, x + 15, T - 20, 1, 9, HAT); [0, 2, 4, 6].forEach(d => { R(b, x + 9, T - 18 + d, 4, 1, HAT); R(b, x + 17, T - 18 + d, 4, 1, HAT); }); }
+      else if(o.yer === 'analiz') [[6, 4], [11, 7], [16, 5], [21, 10]].forEach((q, i) => R(c, x + q[0], T - 11 - q[1], 3, q[1], ['#ffe27a', '#fff8ea', '#ffe27a', '#ff9ecb'][i]));
+      else { for(let i = 0; i < 9; i++) R(c, x + 9 + i, T - 11 - i, 3, 2, '#ffe27a'); R(c, x + 18, T - 21, 3, 2, '#ff9ecb'); R(c, x + 8, T - 11, 2, 1, HAT); }
+    }
   }
   function sokakCiz(c, o){
     const { W, H, sokak, dar, gece } = o, yol = sokak + 8;
@@ -747,7 +813,7 @@ window.LIFEOS = window.LIFEOS || {};
     });
     for(let k = 0; k < n; k++){
       const y = ilk + k * KAT, F = y + KAT - 4;
-      if(!dar){ koridorCiz(c, solSon, y, F, false, kapilar[k] !== 0, k * 2 + 1); koridorCiz(c, ax + ASANSOR, y, F, true, kapilar[k] !== 1, k * 2 + 2); }
+      if(!dar){ const kr = o.bina && o.bina.koridor; koridorCiz(c, solSon, y, F, false, kapilar[k] !== 0, k * 2 + 1, kr); koridorCiz(c, ax + ASANSOR, y, F, true, kapilar[k] !== 1, k * 2 + 2, kr); }
       R(c, 0, F + 2, W, 2, DOSEME); R(c, 0, F + 2, W, 1, '#8a5f4c');
     }
     R(c, ax, T, ASANSOR, sokak - T, '#3a2a2e'); R(c, ax + 1, T, 1, sokak - T, '#4c3a3c'); R(c, ax + ASANSOR - 2, T, 1, sokak - T, '#4c3a3c'); R(c, ax + 6, T, 1, sokak - T, '#2a1e22');
@@ -773,7 +839,7 @@ window.LIFEOS = window.LIFEOS || {};
   }
 
   /* King'in odası: King arayüzündeki küçük tuval. Duvar bir kez çizilir; kare yalnız değişince yenilenir. */
-  const KING_EN = 38, KING_BOY = 32, kingArka = {};
+  const KING_EN = 64, KING_BOY = 44, KING_TABAN = 42, kingArka = {};
   const kingKare = new Map();
   function kingGorsel(ad, poz, i, ters, v){
     const anahtar = ad + poz + i + (ters ? 't' : '');
@@ -795,11 +861,13 @@ window.LIFEOS = window.LIFEOS || {};
     ad = ad || 'mochi';
     let a = kingArka[v];
     if(!a){
-      a = kingArka[v] = { c:document.createElement('canvas'), r:ODA.king.hayat(0, 30, [], v) };
+      a = kingArka[v] = { c:document.createElement('canvas'), r:ODA.king.hayat(0, KING_TABAN, [], v) };
       a.c.width = KING_EN; a.c.height = KING_BOY;
       const g = a.c.getContext('2d');
-      duvarCiz(g, 0, 0, KING_EN, 30, ODA.king.duvar, ODA.king.alt, ODA.king.desen);
-      ODA.king.ciz(g, 0, 30);
+      duvarCiz(g, 0, 0, KING_EN, KING_TABAN, ODA.king.duvar, ODA.king.alt, ODA.king.desen);
+      ODA.king.ciz(g, 0, KING_TABAN, PALET[v]);
+      /* Gece: pencere kararır, oda sıcak lamba ışığında kalır */
+      if(v === 'gece'){ g.fillStyle = '#2a1a4a55'; g.fillRect(0, 0, KING_EN, KING_BOY); }
     }
     const kareler = a.r.map(s => kareAl(s, t)).filter(Boolean), imza = ad + v + (kalp ? 'k' : '') + kareler.map(k => k.poz + k.i + ',' + k.x + ',' + k.y).join('|');
     if(c.dataset.imza === imza) return false;
@@ -807,7 +875,7 @@ window.LIFEOS = window.LIFEOS || {};
     const g = c.getContext('2d');
     g.drawImage(a.c, 0, 0);
     kareler.forEach(k => { const o = /^k(dur|yuru|uyu)$/.test(k.poz) ? kingGorsel(ad, k.poz, k.i, k.ters, v) : gorsel(k.poz, k.i, null, k.ters, v); if(o) g.drawImage(o, k.x, k.y); });
-    if(kalp) g.drawImage(gorsel('b_kalp', 0, null, false, v), 26, 2);
+    if(kalp) g.drawImage(gorsel('b_kalp', 0, null, false, v), 28, 5);
     return true;
   }
   /* Dokunma: çift tıkla açılan sahnede canlıya dokununca balon çıkar. Kişi ruh hâlini, hayvan kalbini gösterir. */
@@ -848,5 +916,5 @@ window.LIFEOS = window.LIFEOS || {};
     return yenilenen;
   }
 
-  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, dokun, kingOda, KING_EN, KING_BOY, ODA, EVLER, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
+  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, dokun, kingOda, KING_EN, KING_BOY, ODA, EVLER, BINALAR, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
 })(window.LIFEOS);

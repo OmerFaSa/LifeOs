@@ -208,17 +208,76 @@ window.LIFEOS = window.LIFEOS || {};
     return !!(L.ANIMASYON && L.ANIMASYON.azMi && L.ANIMASYON.azMi());
   }
   function kare(t){
-    if(durum.g && durum.o) L.PIKSEL_APARTMAN.kare(durum.g, durum.arka, durum.o, t);
+    if(durum.g && durum.o && !durum.kayiyor) sahneMotor().kare(durum.g, durum.arka, durum.o, t);
   }
   function hazirla(){
-    if(!durum.c || !L.PIKSEL_APARTMAN) return;
-    const W = Math.ceil(window.innerWidth / OLCEK), H = Math.ceil(window.innerHeight / OLCEK), A = L.PIKSEL_APARTMAN;
-    durum.c.width = W; durum.c.height = H;
-    durum.arka = document.createElement('canvas'); durum.arka.width = W; durum.arka.height = H;
-    durum.o = A.yerlesim(W, H, A.vakit(new Date().getHours()));
-    A.binaCiz(durum.arka.getContext('2d'), durum.o);
+    if(!durum.c || !sahneMotor()) return;
+    const olcek = dogaMi() ? MANZARA_OLCEK : OLCEK;
+    durum.c.width = Math.ceil(window.innerWidth / olcek); durum.c.height = Math.ceil(window.innerHeight / olcek);
+    durum.sahneler = {}; durum.kayiyor = false;
+    durum.yer = dogaMi() ? 'tarla' : simdikiYer();
+    const s = sahneAl(durum.yer);
+    durum.o = s.o; durum.arka = s.arka;
     durum.g = durum.c.getContext('2d');
     kare(Date.now() / 1000);
+  }
+  /* Seçim sayfası doğadır; modüllerin içi mahalle: her çekmecenin aynı sokakta bir yeri var. */
+  const MANZARA_OLCEK = 3;   // manzara daha ince piksel: uzak dağ ve yaprak ayrıntısı bunu ister
+  const dogaMi = () => document.documentElement.getAttribute('data-sahne') === 'doga';
+  const sahneMotor = () => (dogaMi() ? L.PIKSEL_DOGA : L.PIKSEL_APARTMAN);
+  const MAHALLE = Object.freeze(['calisma', 'bugun', 'analiz', 'kutuphane']);
+  const CEKMECE_YER = Object.freeze({ bugun:'bugun', plan:'bugun', onaylar:'bugun', calisma:'calisma', ogren:'calisma', analiz:'analiz', ofis:'analiz', kutuphane:'kutuphane' });
+  function simdikiYer(){
+    const on = document.querySelector('[data-cekmece].is-on'), y = on && CEKMECE_YER[on.getAttribute('data-cekmece')];
+    return y || durum.yer || 'bugun';
+  }
+  function sahneAl(yer){
+    durum.sahneler = durum.sahneler || {};
+    let s = durum.sahneler[yer];
+    if(s) return s;
+    const A = sahneMotor(), W = durum.c.width, H = durum.c.height, arka = document.createElement('canvas');
+    arka.width = W; arka.height = H;
+    const o = A.yerlesim(W, H, A.vakit(new Date().getHours()), yer);
+    A.binaCiz(arka.getContext('2d'), o);
+    s = durum.sahneler[yer] = { o, arka };
+    return s;
+  }
+  function sahneYerles(yer){
+    const s = sahneAl(yer);
+    durum.yer = yer; durum.o = s.o; durum.arka = s.arka; durum.kayiyor = false;
+    s.o.cizildi = false; s.o.imza = null; (s.o.tum || []).forEach(a => { a.imza = null; });
+    kare(Date.now() / 1000);
+  }
+  /* Geçiş: bina birden belirmez; kamera sokak boyunca kayar, aradaki binalar da görünür. */
+  function yereGit(yer){
+    const a = MAHALLE.indexOf(durum.yer), b = MAHALLE.indexOf(yer);
+    if(a < 0 || b < 0 || hareketsiz() || !durum.g || document.visibilityState === 'hidden') return sahneYerles(yer);
+    const W = durum.c.width, H = durum.c.height, fark = b - a, sure = 620 + 200 * Math.abs(fark), bas = performance.now();
+    for(let i = Math.min(a, b); i <= Math.max(a, b); i++) sahneAl(MAHALLE[i]);
+    durum.kayiyor = true;
+    const adim = simdi => {
+      if(!durum.kayiyor) return;
+      const f = Math.min(1, (simdi - bas) / sure), e = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2, x = (a + fark * e) * W, i0 = Math.floor(x / W);
+      for(let i = i0; i <= Math.min(MAHALLE.length - 1, i0 + 1); i++) durum.g.drawImage(sahneAl(MAHALLE[i]).arka, Math.round(i * W - x), 0, W, H);
+      if(f < 1) requestAnimationFrame(adim); else sahneYerles(yer);
+    };
+    requestAnimationFrame(adim);
+  }
+  /* Yüklenme ekranı: dağ, mağara, göl, deniz, tarla. İki sayfa aynı manzarayı görsün diye seçim saatten gelir. */
+  const manzaraTuru = () => { const D = L.PIKSEL_DOGA; return D.TUR_LISTE[Math.floor(Date.now() / 180000) % D.TUR_LISTE.length]; };
+  function manzaraKoy(el){
+    const D = L.PIKSEL_DOGA;
+    if(!D || !el || el.querySelector('canvas.piksel-manzara')) return null;
+    const c = document.createElement('canvas'), W = Math.ceil(window.innerWidth / MANZARA_OLCEK), H = Math.ceil(window.innerHeight / MANZARA_OLCEK), arka = document.createElement('canvas');
+    c.className = 'piksel-manzara'; c.setAttribute('aria-hidden', 'true');
+    c.width = arka.width = W; c.height = arka.height = H;
+    const o = D.yerlesim(W, H, D.vakit(new Date().getHours()), manzaraTuru());
+    D.binaCiz(arka.getContext('2d'), o);
+    const g = c.getContext('2d');
+    D.kare(g, arka, o, Date.now() / 1000);
+    el.insertBefore(c, el.firstChild);
+    if(!hareketsiz()){ const z = setInterval(() => { if(!c.isConnected) return clearInterval(z); D.kare(g, arka, o, Date.now() / 1000); }, 125); }
+    return c;
   }
   function dongu(){
     clearInterval(durum.zaman); durum.zaman = null;
@@ -227,7 +286,8 @@ window.LIFEOS = window.LIFEOS || {};
     durum.zaman = setInterval(() => {
       if(document.visibilityState === 'hidden' || (window.scrollY > 260 && !document.documentElement.hasAttribute('data-bos'))) return;
       /* Vakit değişti mi: dakikada bir bakılır, değiştiyse bina yeniden çizilir */
-      if(++n % 480 === 0 && durum.o && L.PIKSEL_APARTMAN.vakit(new Date().getHours()) !== durum.o.vakit) hazirla();
+      if(++n % 480 === 0 && durum.o && sahneMotor().vakit(new Date().getHours()) !== durum.o.vakit) hazirla();
+      if(!dogaMi() && !durum.kayiyor && durum.yer){ const y = simdikiYer(); if(y !== durum.yer) yereGit(y); }
       kare(Date.now() / 1000);
     }, 125);
   }
@@ -241,7 +301,7 @@ window.LIFEOS = window.LIFEOS || {};
     return Array.from(document.querySelectorAll('video,audio')).some(m => !m.paused && m.tagName === 'VIDEO');
   }
   function bosAc(el){
-    if(!secili() || !L.PIKSEL_APARTMAN) return;
+    if(!secili() || !sahneMotor()) return;
     bos.el = !!el;
     document.documentElement.toggleAttribute('data-bos-el', bos.el);
     document.documentElement.setAttribute('data-bos', '1');
@@ -263,7 +323,7 @@ window.LIFEOS = window.LIFEOS || {};
       bos.son = Date.now();
       if(k.getAttribute('data-bos') !== '1') return;
       /* Elle açılan sahnede canlıya dokunmak sahneyi kapatmaz, balon çıkarır; boşa dokunmak kapatır. */
-      if(o === 'pointerdown' && bos.el && durum.o && L.PIKSEL_APARTMAN.dokun(durum.o, e.clientX / OLCEK, e.clientY / OLCEK, Date.now() / 1000)) return;
+      if(o === 'pointerdown' && bos.el && durum.o && sahneMotor().dokun && sahneMotor().dokun(durum.o, e.clientX / OLCEK, e.clientY / OLCEK, Date.now() / 1000)) return;
       bosKapa();
     }, { capture:true, passive:true }));
     /* King'in odası: King arayüzünde açıkken döner; dokununca karakter kalp çıkarır */
@@ -350,6 +410,8 @@ window.LIFEOS = window.LIFEOS || {};
     }
     hazirla();
     dongu();
+    const varis = document.querySelector('.perde--karsilama');
+    if(varis) manzaraKoy(varis);
   }
   function kur(){
     uygula();
@@ -364,5 +426,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, cizimCevir });
+  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, cizimCevir });
 })(window.LIFEOS);
