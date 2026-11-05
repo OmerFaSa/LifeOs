@@ -1216,6 +1216,24 @@ window.LIFEOS = window.LIFEOS || {};
     if(kalp) g.drawImage(gorsel('b_kalp', 0, null, false, v), 28, 5);
     return true;
   }
+  /* Tek oda yakın planda (tanıtım filmi, sinematik.js): duvar, eşya ve sakinler. Veri okumaz. */
+  const odaArka = new Map();
+  function odaCiz(c, tip, t, v, kisiler, uyku){
+    const Z = ODA[tip], F = KAT - 4, anahtar = tip + v + (uyku ? 'u' : '') + (kisiler || []).map(k => k.i).join();
+    let a = odaArka.get(anahtar);
+    if(!a){
+      a = { c:document.createElement('canvas'), r:Z.hayat(0, F, kisiler || [], v, 'gul', !!uyku, 'kedi') };
+      a.c.width = Z.g; a.c.height = KAT;
+      const g = a.c.getContext('2d');
+      duvarCiz(g, 0, 0, Z.g, F, Z.duvar, Z.alt, Z.desen);
+      Z.ciz(g, 0, F, PALET[v], { cesit:0 });
+      R(g, 0, F, Z.g, KAT - F, '#4a3b34');
+      odaArka.set(anahtar, a);
+    }
+    const g = c.getContext('2d');
+    g.drawImage(a.c, 0, 0);
+    a.r.map(s => kareAl(s, t)).filter(Boolean).forEach(k => { const o = gorsel(k.poz, k.i, k.kisi, k.ters, v); if(o) g.drawImage(o, k.x, k.y); });
+  }
   /* Dokunma: çift tıkla açılan sahnede canlıya dokununca balon çıkar. Kişi ruh hâlini, hayvan kalbini gösterir. */
   const CANSIZ = /^(tv|ekran|buhar|z|tak|laf|kalp|bulut|ampul|yildiz|kopuk|camasir|kabin|kapi_|b_|gizli|bocek)/;
   function dokun(o, x, y, t){
@@ -1262,5 +1280,5 @@ window.LIFEOS = window.LIFEOS || {};
     return yenilenen;
   }
 
-  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, kisiSatir, yuzPalet, kontrast, YAVAS_HZ, HIZLI_HZ, ARAC_HIZ, dokun, kingOda, KING_EN, KING_BOY, ODA, EVLER, BINALAR, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
+  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, kisiSatir, yuzPalet, kontrast, YAVAS_HZ, HIZLI_HZ, ARAC_HIZ, dokun, kingOda, odaCiz, gorsel, KING_EN, KING_BOY, ODA, EVLER, BINALAR, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
 })(window.LIFEOS);

@@ -24,7 +24,8 @@ describe('Tanıtım filmi', () => {
       if(l.length === 2) expect(l[1].f >= 0 && l[1].f <= 1).toBe(true);
       z.forEach(x => expect(x.f === 0 || x.f === 1).toBe(true));
     }
-    expect(S._sahneler(7.0, false).length).toBe(2);
+    expect(S._sahneler(10.3, false).length).toBe(2);   // şafak › başlık geçişi
+    expect(S.SAHNE.filter(s => s.etiket).map(s => s.etiket).join()).toBe('ays,ays,spi,spi,spi,esp,esp');
   });
 
   it('girişsiz modülde kendiliğinden açılmaz; hesap başına bir kez gerekir', () => {

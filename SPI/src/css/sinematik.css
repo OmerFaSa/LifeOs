@@ -6,6 +6,13 @@
 .sinematik{ position:fixed; inset:0; z-index:9500; background:#120c24; color:#fff8ea; overflow:hidden;
   font-family:var(--font-body, system-ui); }
 .sinematik__tuval{ position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
+/* Sinema bandı: üstte ince kara şerit; altta söz şeridi aynı rengi taşır */
+.sinematik::before{ content:''; position:absolute; left:0; right:0; top:0; height:clamp(20px, 6vh, 64px); background:#0a0714; pointer-events:none; }
+.sinematik__etiket{ position:absolute; left:16px; top:calc(clamp(20px, 6vh, 64px) + 14px); margin:0; display:flex; align-items:center; gap:10px;
+  padding:6px 14px 6px 10px; background:#0a0714d9; color:#fff8ea; font-size:15px; opacity:0; transform:translateX(-12px);
+  transition:opacity .5s ease, transform .5s ease; box-shadow:inset 4px 0 0 var(--sinematik-renk, #fff8ea); }
+.sinematik__etiket.is-gorunur{ opacity:1; transform:none; }
+.sinematik__etiket b{ font-size:18px; color:var(--sinematik-renk, #fff8ea); }
 .sinematik button{ font:inherit; color:#1f1a2e; background:#fff8ea; border:0; cursor:pointer; min-height:36px; min-width:36px;
   box-shadow:0 -3px 0 #1f1a2e, 0 3px 0 #1f1a2e, -3px 0 0 #1f1a2e, 3px 0 0 #1f1a2e; }
 .sinematik button:focus-visible{ outline:3px solid #ffd35a; outline-offset:5px; }
@@ -16,7 +23,7 @@
 .sinematik.is-basladi .sinematik__izle{ display:none; }
 
 .sinematik__alt{ position:absolute; left:0; right:0; bottom:0; padding:14px 16px max(14px, env(safe-area-inset-bottom));
-  background:#120c24e6; display:grid; gap:10px; justify-items:center; }
+  background:#0a0714; display:grid; gap:10px; justify-items:center; }
 .sinematik:not(.is-basladi) .sinematik__alt{ display:none; }
 .sinematik__yazi{ margin:0; min-height:2.6em; max-width:34em; text-align:center; font-size:clamp(17px, 2.4vw, 24px); font-weight:600;
   line-height:1.3; opacity:0; transition:opacity .45s ease; display:grid; place-items:center; }
@@ -32,7 +39,7 @@
 .sinematik__basla{ padding:8px 28px; font-size:18px; font-weight:700; }
 .sinematik__yeniden{ padding:8px 18px; font-size:15px; }
 
-:root[data-hareket="az"] .sinematik__yazi{ transition:none; }
+:root[data-hareket="az"] :is(.sinematik__yazi, .sinematik__etiket){ transition:none; }
 @media (max-width:520px){
   .sinematik__izle{ font-size:19px; }
   .sinematik__denetim{ gap:12px; }
