@@ -274,6 +274,24 @@
       });
       expect(A.yerlesim(384, 216, 'ogle', 'yok').yer).toBe('bugun');
     });
+    it('iş binaları apartman değil: az kat, iki yanda boşluk; kütüphane ve çalışma asansörsüz, sokak çizgisi aynı', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, ap = A.yerlesim(384, 216, 'ogle');
+      [['calisma', 2, false], ['analiz', 3, true], ['kutuphane', 2, false]].forEach(q => {
+        const o = A.yerlesim(384, 216, 'ogle', q[0]);
+        expect(o.n).toBe(q[1]); expect(o.n < ap.n).toBe(true); expect(o.sokak).toBe(ap.sokak);
+        expect(!!o.asansor).toBe(q[2]); expect(o.bx0 > 0).toBe(true);
+        expect(o.odalar.every(a => a.x >= o.bx0 && a.x + a.w <= o.bx1)).toBe(true);
+      });
+    });
+    it('karar: sakin kendi seçer; aynı t aynı kare, bloklar arasında seçim değişir, balon kişiyle aynı zarı atar', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle', 'calisma'), hepsi = [o.zemin].concat(o.bolgeler).flatMap(b => b.sakin);
+      const k = hepsi.find(r => r.menu && r.kisi), b = hepsi[hepsi.indexOf(k) + 1];
+      expect(!!k && !!b.menu && b.tohum === k.tohum).toBe(true);
+      const kare = new Set();
+      for(let i = 0; i < 40; i++){ const t = i * k.B + 12; expect(JSON.stringify(A.kareAl(k, t))).toBe(JSON.stringify(A.kareAl(k, t))); const q = A.kareAl(k, t); kare.add(q.poz + q.x); }
+      expect(kare.size > 2).toBe(true);
+      k.menu.forEach(e => { expect(Math.abs(e.T - k.B) < 0.01).toBe(true); expect(e.seg[0].x0).toBe(e.seg[e.seg.length - 1].x1); });
+    });
     it('manzara: on tür; aynı t aynı kare, her vakitte kurulur ve çizilir', () => {
       const D = window.LIFEOS.PIKSEL_DOGA;
       expect(D.TUR_LISTE.length).toBe(10);
