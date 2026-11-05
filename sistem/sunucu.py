@@ -2115,15 +2115,30 @@ def main():
     print("  Durdurmak için: Ctrl+C\n")
 
     for _, _, s in sunucular + tel:
-        threading.Thread(target=s.serve_forever, daemon=True).start()
+        threading.Thread(target=surekli_hizmet, args=(s,), daemon=True).start()
     plan_zamanlayici().baslat()
     if kurulum:
-        threading.Thread(target=kurulum.serve_forever, daemon=True).start()
+        threading.Thread(target=surekli_hizmet, args=(kurulum,), daemon=True).start()
     try:
-        giris.serve_forever()
+        surekli_hizmet(giris)
     except KeyboardInterrupt:
         print("\nDurduruldu.")
     return 0
+
+
+def surekli_hizmet(srv, bekle=time.sleep):
+    """Gecici ag hatasinda sunucuyu yeniden baslatir. Sahada (2026-11-05) select()
+    WinError 10055 firlatti; giris dusunce surecle birlikte uc modul ve guncelleme de
+    kapandi. HKM'deki _surekli_hizmet'in ayni kalibi (bu sunucu HKM'siz de calisir)."""
+    tur = 0
+    while True:
+        try:
+            srv.serve_forever()
+            return
+        except OSError as e:
+            tur += 1
+            print("Ağ hatası, sunucu sürdürülüyor (%d): %s" % (tur, e), file=sys.stderr, flush=True)
+            bekle(min(5, tur))
 
 
 if __name__ == "__main__":

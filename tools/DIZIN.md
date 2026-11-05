@@ -116,7 +116,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `gorev_takip_test.py` — tools/gorev_takip.py görev dosyası okuyucu mantığının testi, CI'da koşulur.
 - `ice_test.py` — sistem/ice.py sözleşme testleri; Google Takvim verisini hesap bağlamadan getirmeyi sınar, CI'da koşulur.
 - `kabul_js_test.py` — tools/kabul_js.py modül dosyası yükleme ve localStorage ortamı testi, CI'da koşulur.
-- `kuyruk_test.py` — Sunucuların dinleme kuyruğu ve soket sınırları testi, CI'da koşulur.
+- `kuyruk_test.py` — Sunucuların dinleme kuyruğu, soket sınırları ve geçici ağ hatasında ayakta kalma testi, CI'da koşulur.
 - `muzik_test.py` — sistem/muzik.py müzik dosyaları ve çalma listesi sözleşme testleri, CI'da koşulur.
 - `ofis_pilot_test.py` — tools/ofis_pilot.py ve tools/ofis_test.py pilot karar tablosu ve kota testleri, CI'da koşulur.
 - `ofis_test.py` — AGENTS.md §2 tam denetimlerini ajan dalında dil modelsiz koşturan testçi aracıdır, pilot tarafından tetiklenir.

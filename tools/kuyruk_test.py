@@ -20,7 +20,8 @@ reddetmez. Iki sinama:
   2. davranis — BEKLEYEN baglanti acilir. Eski hali Windows'ta reddeder
      (belirtinin kendisi). Linux tasani reddetmez, istemci baglantiyi
      kurulmus sanabilir: orada bu sinama eski hali YAKALAMAYABILIR —
-     birinci sinama o yuzden var."""
+     birinci sinama o yuzden var.
+Ayrica: gecici ag hatasi (WinError 10055) sistem sunucusunu dusurmez."""
 import importlib.util
 import select
 import socket
@@ -94,6 +95,26 @@ for sistem in ("AYS", "SPI", "ESP"):
 sunucu = yukle("sunucu", KOK / "sistem" / "sunucu.py")
 for sistem in ("AYS", "SPI", "ESP"):
     sina("sistem/sunucu.py (%s kapisi)" % sistem, sunucu._sunucu_kur(sistem, 0))
+
+
+# Hata (2026-11-05): select() WinError 10055 («arabellek yok») firlatti, giris
+# sunucusu dustu, surecle birlikte uc modul ve guncelleme de kapandi. HKM'de
+# _surekli_hizmet vardi, sistem sunucusunda yoktu.
+class DusenSunucu:
+    def __init__(self, hata):
+        self.hata, self.tur = hata, 0
+    def serve_forever(self):
+        self.tur += 1
+        if self.tur <= 2:
+            raise self.hata
+
+
+s = DusenSunucu(OSError(10055, "arabellek yok"))
+bekleme = []
+sunucu.surekli_hizmet(s, bekle=bekleme.append)
+dogru("gecici ag hatasinda sunucu surer", s.tur == 3 and bekleme == [1, 2], (s.tur, bekleme))
+kaynak = (KOK / "sistem" / "sunucu.py").read_text(encoding="utf-8")
+dogru("hicbir kapi korumasiz dinlemez", ".serve_forever" not in kaynak.replace("srv.serve_forever()", ""))
 
 print("kirmizi: %d" % kirmizi if kirmizi else "temiz")
 sys.exit(1 if kirmizi else 0)
