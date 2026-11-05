@@ -27712,15 +27712,20 @@ window.LIFEOS = window.LIFEOS || {};
     if(svg.closest(SIMGE_ATLA)) return;
     const ol = boy || simgeBoyu(svg);
     /* Elle çizim: ad kaynak işlevden gelir (kabuk.simge, UI.icon, kisayol.simge, hesap.ikon). */
-    const el = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul(svg.getAttribute('data-simge'));
+    const ad = svg.getAttribute('data-simge'), el = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul(ad);
     if(el && ol <= 48){
-      let d = '';
-      el.forEach((r, y) => { for(let x = 0; x < r.length; x++) if(r[x] === '#') d += 'M' + x + ' ' + y + 'h1v1h-1z'; });
+      /* Kenar her çekmece geçişinde yeniden çizilir: aynı simgenin yolu bir kez kurulur. */
+      let d = simgeOnbellek.get('el|' + ad);
+      if(d === undefined){
+        d = '';
+        el.forEach((r, y) => { for(let x = 0; x < r.length; x++) if(r[x] === '#') d += 'M' + x + ' ' + y + 'h1v1h-1z'; });
+        simgeOnbellek.set('el|' + ad, d);
+      }
       const kat = ol >= 17 ? 2 : 1;
       svg.setAttribute('viewBox', '0 0 12 12');
       svg.setAttribute('shape-rendering', 'crispEdges');
       svg.style.width = svg.style.height = (12 * kat) + 'px';
-      svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
+      svg.replaceChildren(yol(d));
       return;
     }
     if(svg.querySelector('text,use,image,defs,[transform],[stroke-dasharray]')) return;
@@ -27744,41 +27749,64 @@ window.LIFEOS = window.LIFEOS || {};
     svg.setAttribute('viewBox', '0 0 ' + n + ' ' + n);
     svg.setAttribute('shape-rendering', 'crispEdges');
     svg.style.width = svg.style.height = n + 'px';
-    svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
+    svg.replaceChildren(yol(d));
+  }
+  /* Hazır yolun kopyası: her simgede innerHTML ayrıştırmak telefonda geçiş başına ~100 ms tutuyordu (2026-11-05). */
+  const yollar = new Map();
+  function yol(d){
+    let p = yollar.get(d);
+    if(!p){
+      p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', d); p.setAttribute('style', 'fill:currentColor;stroke:none');
+      yollar.set(d, p);
+    }
+    return p.cloneNode(false);
   }
   /* Çizimler ızgaraya oturur: grafik noktası kare olur, halka ve yay bloklara bölünür. Değer aynı kalır:
      yalnız üstüne zemin renginde aralık çizilir, dolu kısmın uzunluğuna dokunulmaz. */
   const CIZIM_ATLA = '.rutbe, .perde, .piksel-oda, .kenar, .altbant';
-  function cizimCevir(svg){
-    if(svg.dataset.pxc) return;
+  /* Önce okunur, sonra yazılır: daire daire oku-yaz (getComputedStyle, replaceWith) her dairede bütün
+     sayfanın stilini yeniden hesaplatıyordu (.site :has() kuralları); AYS Analiz geçişinde tek karede 385 ms
+     (2026-11-05). cizimOku yalnız okur ve yazacak işi döndürür. */
+  function cizimOku(svg){
+    if(svg.dataset.pxc) return null;
     svg.dataset.pxc = '1';
-    if(svg.closest(CIZIM_ATLA) || typeof svg.getBBox !== 'function') return;
-    const orbit = !!svg.closest('.agh');
+    if(svg.closest(CIZIM_ATLA) || typeof svg.getBBox !== 'function') return null;
+    const orbit = !!svg.closest('.agh'), kareler = [];
     let halka = null;
     Array.from(svg.querySelectorAll('circle')).forEach(c => {
       const r = parseFloat(c.getAttribute('r')) || 0, s = getComputedStyle(c), dolu = s.fill && s.fill !== 'none';
-      if(dolu && r > 0 && r <= (orbit ? 12 : 8)){
+      if(dolu && r > 0 && r <= (orbit ? 12 : 8)) kareler.push({ c, r, fill:s.fill, stroke:s.stroke, sw:s.strokeWidth });
+      else if(!dolu && r >= 10 && !halka && !orbit) halka = c;
+    });
+    const yay = halka || svg.querySelector('.pk-gosterge__iz');
+    let L = 0, cizgi = 4;
+    if(yay && !svg.querySelector('.px-ara') && typeof yay.getTotalLength === 'function'){
+      L = yay.getTotalLength();
+      if(L > 40) cizgi = parseFloat(getComputedStyle(yay).strokeWidth) || 4;
+    }
+    if(!kareler.length && !(L > 40)) return null;
+    return () => {
+      kareler.forEach(({ c, r, fill, stroke, sw }) => {
         const k = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         Array.from(c.attributes).forEach(a => { if(!/^(cx|cy|r)$/.test(a.name)) k.setAttribute(a.name, a.value); });
         const cx = parseFloat(c.getAttribute('cx')) || 0, cy = parseFloat(c.getAttribute('cy')) || 0;
         k.setAttribute('x', cx - r); k.setAttribute('y', cy - r); k.setAttribute('width', r * 2); k.setAttribute('height', r * 2);
-        if(!c.hasAttribute('fill')) k.style.fill = s.fill;
-        if(!c.hasAttribute('stroke') && s.stroke !== 'none'){ k.style.stroke = s.stroke; k.style.strokeWidth = s.strokeWidth; }
+        if(!c.hasAttribute('fill')) k.style.fill = fill;
+        if(!c.hasAttribute('stroke') && stroke !== 'none'){ k.style.stroke = stroke; k.style.strokeWidth = sw; }
         c.replaceWith(k);
-      } else if(!dolu && r >= 10 && !halka && !orbit) halka = c;
-    });
-    const yay = halka || svg.querySelector('.pk-gosterge__iz');
-    if(!yay || svg.querySelector('.px-ara') || typeof yay.getTotalLength !== 'function') return;
-    const L = yay.getTotalLength();
-    if(!(L > 40)) return;
-    const n = Math.max(12, Math.round(L / 10)), ara = yay.cloneNode(false), g = Math.min(3, L / n / 3);
-    ara.removeAttribute('class');
-    ara.setAttribute('class', 'px-ara');
-    ara.setAttribute('aria-hidden', 'true');
-    ara.style.cssText = 'fill:none;stroke:var(--surface);stroke-width:' + ((parseFloat(getComputedStyle(yay).strokeWidth) || 4) + 2) + ';stroke-dasharray:' + g + ' ' + (L / n - g) + ';stroke-dashoffset:0;animation:none;transition:none';
-    const yazi = svg.querySelector('text');
-    if(yazi) svg.insertBefore(ara, yazi); else svg.appendChild(ara);
+      });
+      if(!(L > 40)) return;
+      const n = Math.max(12, Math.round(L / 10)), ara = yay.cloneNode(false), g = Math.min(3, L / n / 3);
+      ara.removeAttribute('class');
+      ara.setAttribute('class', 'px-ara');
+      ara.setAttribute('aria-hidden', 'true');
+      ara.style.cssText = 'fill:none;stroke:var(--surface);stroke-width:' + (cizgi + 2) + ';stroke-dasharray:' + g + ' ' + (L / n - g) + ';stroke-dashoffset:0;animation:none;transition:none';
+      const yazi = svg.querySelector('text');
+      if(yazi) svg.insertBefore(ara, yazi); else svg.appendChild(ara);
+    };
   }
+  function cizimCevir(svg){ const yaz = cizimOku(svg); if(yaz) yaz(); }
   /* Bölüm başlığı konusuna göre simge alır; eşleşmeyen kare işaretle kalır. Süs: veri okumaz. */
   const BASLIK_SIMGE = [['öğün', 'ogun'], ['beslen', 'ogun'], ['uyku', 'ay'], ['gece', 'ay'], ['kilo', 'tarti'], ['hareket', 'nabiz'], ['seans', 'nabiz'], ['nabız', 'nabiz'], ['ölçüm', 'nabiz'],
     ['toparlan', 'kalp'], ['his', 'kalp'], ['test', 'tup'], ['tahlil', 'tup'], ['takvim', 'takvim'], ['hafta', 'takvim'], ['program', 'takvim'], ['plan', 'takvim'], ['akış', 'saat'], ['hedef', 'hedef'],
@@ -27812,7 +27840,9 @@ window.LIFEOS = window.LIFEOS || {};
     });
     const boylar = yeni.map(simgeBoyu);
     yeni.forEach((s, i) => simgeCevir(s, boylar[i]));
-    kokler.forEach(kok => kok.querySelectorAll('svg:not([data-pxc])').forEach(cizimCevir));
+    const yazlar = [];
+    kokler.forEach(kok => kok.querySelectorAll('svg:not([data-pxc])').forEach(svg => yazlar.push(cizimOku(svg))));
+    yazlar.forEach(yaz => yaz && yaz());
   }
   function simgeIzle(){
     if(/\/tests\//.test(location.pathname)) return;
@@ -30424,7 +30454,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'297e8945', at:'2026-11-05 12:15', dirty:true };
+ESP.BUILD = { id:'ca024e73', at:'2026-11-05 14:05', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -115626,7 +115656,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* --- DOM --- */
 
-  const durum = { elle:new Set(), havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
+  const durum = { elle:new Set(), havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{} };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -116105,10 +116135,7 @@ window.LIFEOS.MINIK = (function(){
   function tazele(){
     durum.bekle = 0;
     if(!durum.kat) return;
-    /* Sayfa yeniden çizildi ya da kaydı: imleç yerinde, altındaki kart değişmiş olabilir. */
-    if(imlec && (!hedef || !hedef.isConnected || durum.isikTazele)){ hedef = null; elIsigi(); }
-    durum.isikTazele = false;
-    if(kapaliMi()){ durum.kat.hidden = true; return; }
+    if(kapaliMi()){ if(!durum.kat.hidden) durum.kat.hidden = true; return; }   // aynı değeri yazmak da stil geçersizler
     durum.kat.hidden = false;
     durum.zeminler = olcum();
     durum.minikler.forEach(mk => {
@@ -116225,50 +116252,11 @@ window.LIFEOS.MINIK = (function(){
     clearTimeout(ikinci); ikinci = setTimeout(tazele, 700);
   }
 
-  /* Gözler fareyi izler; imlecin altındaki en dış cam kartta ışık imleci
-     takip eder (cam.css «EL IŞIĞI»). İkisi de karede en çok bir kez.
-     Işık imlece gecikmeyle yetişir (her karede yolun %22'si: suyun
-     altındaki ışık gibi süzülür); miniğin üstündeyken altındaki kartta
-     kalır; kart yeniden çizilince (tıklama, kayıt) aynı yerdeki yeni
-     karta sönmeden geçer. Ayrılınca --mx/--my kalır: ışık olduğu yerde söner. */
-  let imlec = null, kare = 0, hedef = null, isikli = null, isikKare = 0;
-  const isikYer = { x:0, y:0, hx:0, hy:0 };
-  function isikKarti(){
-    let el = hedef;
-    if(imlec && (!el || !el.isConnected)) el = hedef = document.elementFromPoint(imlec.x, imlec.y);
-    const m = el && el.closest && el.closest('.minik');
-    if(m){ const mk = durum.minikler.find(o => o.el === m); return mk && mk.z && mk.z.el && mk.z.el.isConnected ? mk.z.el : null; }
-    let k = el && el.closest ? el.closest(KART) : null;
-    while(k && k.parentElement && k.parentElement.closest(KART)) k = k.parentElement.closest(KART);
-    return k;
-  }
-  function elIsigi(){
-    const k = imlec ? isikKarti() : null;
-    const kopan = isikli && !isikli.isConnected;
-    if(isikli && isikli !== k) isikli.classList.remove('isikli', 'isik-bas');
-    if(!k){ isikli = null; return; }
-    const r = k.getBoundingClientRect();
-    isikYer.hx = imlec.x - r.left; isikYer.hy = imlec.y - r.top;
-    if(isikli !== k){
-      if(!kopan){ isikYer.x = isikYer.hx; isikYer.y = isikYer.hy; }
-      else k.classList.add('isik-hemen');
-      k.classList.add('isikli');
-      isikli = k;
-    }
-    if(!isikKare) isikKare = requestAnimationFrame(isikAdim);
-  }
-  function isikAdim(){
-    isikKare = 0;
-    if(!isikli) return;
-    isikli.classList.remove('isik-hemen');
-    isikYer.x += (isikYer.hx - isikYer.x) * .22; isikYer.y += (isikYer.hy - isikYer.y) * .22;
-    isikli.style.setProperty('--mx', isikYer.x.toFixed(1) + 'px');
-    isikli.style.setProperty('--my', isikYer.y.toFixed(1) + 'px');
-    if(Math.abs(isikYer.hx - isikYer.x) + Math.abs(isikYer.hy - isikYer.y) > .6) isikKare = requestAnimationFrame(isikAdim);
-  }
-  /* Basınca ışık parmağın altında toplanır; bırakınca yayılır. */
-  function bas(e){ if(isikli && isikli.contains(e.target)) isikli.classList.add('isik-bas'); }
-  function birak(){ if(isikli) isikli.classList.remove('isik-bas'); }
+  /* Gözler fareyi izler; karede en çok bir kez. El ışığı (kartta imleci
+     izleyen parıltı) cam temayla birlikte kalktı: CSS'i yoktu ama her karede
+     kartın --mx/--my'sini yazıp ~1500 alt öğenin stilini yeniden hesaplatıyordu
+     (kaydırmada kare başı 11-16 ms, 2026-11-05 ölçümü). */
+  let imlec = null, kare = 0;
   /* Ortam ışığı (kullanıcı, 2026-10-28: «ışık fiziğini geliştir»): zeminde
      imleci yavaşça izleyen çok yumuşak bir ışık; yalnız transform (cam.css
      «ORTAM IŞIĞI»), geçişi CSS yapar. */
@@ -116278,7 +116266,7 @@ window.LIFEOS.MINIK = (function(){
   }
   function gozler(){
     kare = 0;
-    elIsigi();
+    if(durum.kat && durum.kat.hidden) return;   // minikler kapalı: ölçecek göz yok
     ortamIsigi();
     durum.minikler.forEach(mk => {
       if(mk.el.hidden || mk.el.classList.contains('is-uyuyor')){ mk.el.classList.remove('is-takip'); return; }
@@ -116291,7 +116279,6 @@ window.LIFEOS.MINIK = (function(){
   }
   function fare(e){
     imlec = { x:e.clientX, y:e.clientY };
-    hedef = e.target;
     if(!kare) kare = requestAnimationFrame(gozler);
   }
 
@@ -116369,12 +116356,9 @@ window.LIFEOS.MINIK = (function(){
         && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();
     }, 1000);
     window.addEventListener('resize', iste);
-    window.addEventListener('scroll', () => { durum.isikTazele = true; iste(); }, { passive:true });
-    document.addEventListener('pointerdown', bas, true);
+    window.addEventListener('scroll', iste, { passive:true });
     /* Sekme gizliyken minikler durur: arka planda kare üretmesinler. */
     document.addEventListener('visibilitychange', () => { if(durum.kat) durum.kat.classList.toggle('is-durgun', document.hidden); });
-    document.addEventListener('pointerup', birak, true);
-    document.addEventListener('pointercancel', birak, true);
     document.addEventListener('click', sevin, true);
     document.addEventListener('pointermove', fare, { passive:true });
     window.LIFEOS.PARCA.tepki({ id:'minik.radyo', olay:'ses', ad:'Minikler radyoya uyar', yap(d){ radyoUygula(d); } });

@@ -87,15 +87,20 @@ window.LIFEOS = window.LIFEOS || {};
     if(svg.closest(SIMGE_ATLA)) return;
     const ol = boy || simgeBoyu(svg);
     /* Elle çizim: ad kaynak işlevden gelir (kabuk.simge, UI.icon, kisayol.simge, hesap.ikon). */
-    const el = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul(svg.getAttribute('data-simge'));
+    const ad = svg.getAttribute('data-simge'), el = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul(ad);
     if(el && ol <= 48){
-      let d = '';
-      el.forEach((r, y) => { for(let x = 0; x < r.length; x++) if(r[x] === '#') d += 'M' + x + ' ' + y + 'h1v1h-1z'; });
+      /* Kenar her çekmece geçişinde yeniden çizilir: aynı simgenin yolu bir kez kurulur. */
+      let d = simgeOnbellek.get('el|' + ad);
+      if(d === undefined){
+        d = '';
+        el.forEach((r, y) => { for(let x = 0; x < r.length; x++) if(r[x] === '#') d += 'M' + x + ' ' + y + 'h1v1h-1z'; });
+        simgeOnbellek.set('el|' + ad, d);
+      }
       const kat = ol >= 17 ? 2 : 1;
       svg.setAttribute('viewBox', '0 0 12 12');
       svg.setAttribute('shape-rendering', 'crispEdges');
       svg.style.width = svg.style.height = (12 * kat) + 'px';
-      svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
+      svg.replaceChildren(yol(d));
       return;
     }
     if(svg.querySelector('text,use,image,defs,[transform],[stroke-dasharray]')) return;
@@ -119,41 +124,64 @@ window.LIFEOS = window.LIFEOS || {};
     svg.setAttribute('viewBox', '0 0 ' + n + ' ' + n);
     svg.setAttribute('shape-rendering', 'crispEdges');
     svg.style.width = svg.style.height = n + 'px';
-    svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
+    svg.replaceChildren(yol(d));
+  }
+  /* Hazır yolun kopyası: her simgede innerHTML ayrıştırmak telefonda geçiş başına ~100 ms tutuyordu (2026-11-05). */
+  const yollar = new Map();
+  function yol(d){
+    let p = yollar.get(d);
+    if(!p){
+      p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', d); p.setAttribute('style', 'fill:currentColor;stroke:none');
+      yollar.set(d, p);
+    }
+    return p.cloneNode(false);
   }
   /* Çizimler ızgaraya oturur: grafik noktası kare olur, halka ve yay bloklara bölünür. Değer aynı kalır:
      yalnız üstüne zemin renginde aralık çizilir, dolu kısmın uzunluğuna dokunulmaz. */
   const CIZIM_ATLA = '.rutbe, .perde, .piksel-oda, .kenar, .altbant';
-  function cizimCevir(svg){
-    if(svg.dataset.pxc) return;
+  /* Önce okunur, sonra yazılır: daire daire oku-yaz (getComputedStyle, replaceWith) her dairede bütün
+     sayfanın stilini yeniden hesaplatıyordu (.site :has() kuralları); AYS Analiz geçişinde tek karede 385 ms
+     (2026-11-05). cizimOku yalnız okur ve yazacak işi döndürür. */
+  function cizimOku(svg){
+    if(svg.dataset.pxc) return null;
     svg.dataset.pxc = '1';
-    if(svg.closest(CIZIM_ATLA) || typeof svg.getBBox !== 'function') return;
-    const orbit = !!svg.closest('.agh');
+    if(svg.closest(CIZIM_ATLA) || typeof svg.getBBox !== 'function') return null;
+    const orbit = !!svg.closest('.agh'), kareler = [];
     let halka = null;
     Array.from(svg.querySelectorAll('circle')).forEach(c => {
       const r = parseFloat(c.getAttribute('r')) || 0, s = getComputedStyle(c), dolu = s.fill && s.fill !== 'none';
-      if(dolu && r > 0 && r <= (orbit ? 12 : 8)){
+      if(dolu && r > 0 && r <= (orbit ? 12 : 8)) kareler.push({ c, r, fill:s.fill, stroke:s.stroke, sw:s.strokeWidth });
+      else if(!dolu && r >= 10 && !halka && !orbit) halka = c;
+    });
+    const yay = halka || svg.querySelector('.pk-gosterge__iz');
+    let L = 0, cizgi = 4;
+    if(yay && !svg.querySelector('.px-ara') && typeof yay.getTotalLength === 'function'){
+      L = yay.getTotalLength();
+      if(L > 40) cizgi = parseFloat(getComputedStyle(yay).strokeWidth) || 4;
+    }
+    if(!kareler.length && !(L > 40)) return null;
+    return () => {
+      kareler.forEach(({ c, r, fill, stroke, sw }) => {
         const k = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         Array.from(c.attributes).forEach(a => { if(!/^(cx|cy|r)$/.test(a.name)) k.setAttribute(a.name, a.value); });
         const cx = parseFloat(c.getAttribute('cx')) || 0, cy = parseFloat(c.getAttribute('cy')) || 0;
         k.setAttribute('x', cx - r); k.setAttribute('y', cy - r); k.setAttribute('width', r * 2); k.setAttribute('height', r * 2);
-        if(!c.hasAttribute('fill')) k.style.fill = s.fill;
-        if(!c.hasAttribute('stroke') && s.stroke !== 'none'){ k.style.stroke = s.stroke; k.style.strokeWidth = s.strokeWidth; }
+        if(!c.hasAttribute('fill')) k.style.fill = fill;
+        if(!c.hasAttribute('stroke') && stroke !== 'none'){ k.style.stroke = stroke; k.style.strokeWidth = sw; }
         c.replaceWith(k);
-      } else if(!dolu && r >= 10 && !halka && !orbit) halka = c;
-    });
-    const yay = halka || svg.querySelector('.pk-gosterge__iz');
-    if(!yay || svg.querySelector('.px-ara') || typeof yay.getTotalLength !== 'function') return;
-    const L = yay.getTotalLength();
-    if(!(L > 40)) return;
-    const n = Math.max(12, Math.round(L / 10)), ara = yay.cloneNode(false), g = Math.min(3, L / n / 3);
-    ara.removeAttribute('class');
-    ara.setAttribute('class', 'px-ara');
-    ara.setAttribute('aria-hidden', 'true');
-    ara.style.cssText = 'fill:none;stroke:var(--surface);stroke-width:' + ((parseFloat(getComputedStyle(yay).strokeWidth) || 4) + 2) + ';stroke-dasharray:' + g + ' ' + (L / n - g) + ';stroke-dashoffset:0;animation:none;transition:none';
-    const yazi = svg.querySelector('text');
-    if(yazi) svg.insertBefore(ara, yazi); else svg.appendChild(ara);
+      });
+      if(!(L > 40)) return;
+      const n = Math.max(12, Math.round(L / 10)), ara = yay.cloneNode(false), g = Math.min(3, L / n / 3);
+      ara.removeAttribute('class');
+      ara.setAttribute('class', 'px-ara');
+      ara.setAttribute('aria-hidden', 'true');
+      ara.style.cssText = 'fill:none;stroke:var(--surface);stroke-width:' + (cizgi + 2) + ';stroke-dasharray:' + g + ' ' + (L / n - g) + ';stroke-dashoffset:0;animation:none;transition:none';
+      const yazi = svg.querySelector('text');
+      if(yazi) svg.insertBefore(ara, yazi); else svg.appendChild(ara);
+    };
   }
+  function cizimCevir(svg){ const yaz = cizimOku(svg); if(yaz) yaz(); }
   /* Bölüm başlığı konusuna göre simge alır; eşleşmeyen kare işaretle kalır. Süs: veri okumaz. */
   const BASLIK_SIMGE = [['öğün', 'ogun'], ['beslen', 'ogun'], ['uyku', 'ay'], ['gece', 'ay'], ['kilo', 'tarti'], ['hareket', 'nabiz'], ['seans', 'nabiz'], ['nabız', 'nabiz'], ['ölçüm', 'nabiz'],
     ['toparlan', 'kalp'], ['his', 'kalp'], ['test', 'tup'], ['tahlil', 'tup'], ['takvim', 'takvim'], ['hafta', 'takvim'], ['program', 'takvim'], ['plan', 'takvim'], ['akış', 'saat'], ['hedef', 'hedef'],
@@ -187,7 +215,9 @@ window.LIFEOS = window.LIFEOS || {};
     });
     const boylar = yeni.map(simgeBoyu);
     yeni.forEach((s, i) => simgeCevir(s, boylar[i]));
-    kokler.forEach(kok => kok.querySelectorAll('svg:not([data-pxc])').forEach(cizimCevir));
+    const yazlar = [];
+    kokler.forEach(kok => kok.querySelectorAll('svg:not([data-pxc])').forEach(svg => yazlar.push(cizimOku(svg))));
+    yazlar.forEach(yaz => yaz && yaz());
   }
   function simgeIzle(){
     if(/\/tests\//.test(location.pathname)) return;
