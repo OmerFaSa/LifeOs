@@ -67,10 +67,11 @@ uygulama/ios/
 
 ## Yeni bilgisayar
 
-Eski bilgisayarda (LifeOS kapalıyken), şifreli tek dosya masaüstüne çıkar:
+Eski bilgisayarda PowerShell'e yapıştır; şifreyi iki kez yaz. LifeOS açıksa betik
+onu kendisi kapatır, paket bitince yeniden açar; şifreli tek dosya masaüstüne çıkar:
 
 ```powershell
-python sistem/tasi.py --paket
+py $env:USERPROFILE\LifeOS-Sistem\sistem\tasi.py --paket
 ```
 
 Yeni bilgisayarda PowerShell'e yapıştır:
@@ -110,12 +111,21 @@ Bir kez:
    iOS 16 ve sonrası: Ayarlar › Gizlilik ve Güvenlik › **Geliştirici Kipi**'ni
    aç (telefon yeniden başlar).
 
-Güncellemeler (bir kez kaynak ekle, sonra tek dokunuş):
+Uygulamayı kur (bir kez):
 
-5. AltStore › **Sources** (Kaynaklar) › **+** › şu adresi yapıştır:
+5. iPhone'da kurulum sayfasını aç (Hesap › Cihazlar › Yeni cihaz bağla'daki QR) ›
+   **AltStore'a LifeOS'u ekle** (`altstore://source?url=…`; adres kopyalanmaz). Elle:
+   AltStore › Sources › **+** ›
    `https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json`
-6. Yeni derleme çıkınca AltStore › **My Apps**'te LifeOS'un yanında
-   **Update** belirir; dokun. Veri silinmez.
+6. AltStore › Browse › LifeOS › **Free**.
+7. **Haftalık yenileme kendiliğinden olsun:** Kısayollar › Otomasyon › **+** ›
+   Günün Saati (ör. 04:00, her gün) › eylem: AltStore › **Refresh All Apps** ›
+   «Çalıştırmadan önce sor» kapalı. AltServer'ı LifeOS kendisi açar
+   (`sistem/baslat.py`, kuruluysa ve kapalıysa); telefon evdeki Wi-Fi'dayken yenilenir.
+
+Sonra: web kodu bilgisayarsız kendisi gelir. Swift değişirse AltStore › **My Apps**'te
+LifeOS'un yanında **Update** belirir; evdeyken bir kez dokun (yenileme otomasyonu
+güncelleme kurmaz). Veri silinmez.
 
 Kaynak her derlemede CI'da üretilir (`uygulama/ios/kaynak.py`): sürüm ve izin
 metinleri derlenmiş uygulamanın kendi Info.plist'inden okunur (AltStore izinler
@@ -124,13 +134,15 @@ uyuşmazsa kurmayı reddeder); her derleme kendi numarasını taşır
 `LifeOS.ipa` → AltStore › My Apps › **+**.
 
 **Sınırlar (Apple'ın, bizim değil):** ücretsiz kimlikle uygulama **7 günde bir
-yenilenmeli**. AltStore bunu, iPhone ve AltServer'lı bilgisayar aynı
-Wi-Fi'dayken kendiliğinden yapar; yenilenmezse uygulama açılmaz ama **veri
+yenilenmeli**. Yukarıdaki otomasyon bunu, iPhone ve AltServer'lı bilgisayar aynı
+Wi-Fi'dayken her gece yapar (2026-11-05'e dek AltServer Windows açılışında başlamıyordu,
+yenileme olmuyordu; şimdi LifeOS onu açar); yenilenmezse uygulama açılmaz ama **veri
 silinmez**, yenileyince geri gelir. Aynı anda en çok 3 böyle uygulama.
 Yıllık 99 $'lık geliştirici hesabıyla TestFlight'a geçilebilir (90 gün,
 yenileme derdi yok).
 
-**7 günlük yenilemede de bilgisayar istemiyorsan: SideStore (denenmedi).** AltStore'un
+**7 günlük yenilemede de bilgisayar istemiyorsan: SideStore (denenmedi; 2026'da iOS 26.4
+bilgisayarsız yenilemeyi bozdu diye raporlar var, önce durumuna bak).** AltStore'un
 çatalıdır; bilgisayar yalnız ilk kurulumda gerekir, sonra yenileme telefonda yerel
 bir VPN üzerinden yapılır (LocalDevVPN aç, SideStore › Refresh All). Eşleştirme dosyası
 iOS güncellemesi ya da sıfırlama sonrası bozulabilir; o zaman bilgisayar yine gerekir.

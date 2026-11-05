@@ -187,6 +187,17 @@ try:
     veri = os.urandom(1000)
     sifreli = b"".join(a1.xor(veri[i:i + 7]) for i in range(0, 1000, 7))
     dogru("akis obekten bagimsiz", a2.xor(sifreli) == veri)
+
+    # LifeOS aciksa betik kendisi kapatir (elle adim yok); kapanmazsa ise baslamaz.
+    komut, durum = [], iter([True, True, False])
+    dogru("acik LifeOS'u baslat.py --dur ile kapatir ve bekler",
+          tasi.kapat(calistir=lambda a, **k: komut.append(a), acik_mi=lambda: next(durum), bekle=lambda s: None)
+          and komut[0][-2:] == [os.path.join(tasi.SISTEM, "baslat.py"), "--dur"], komut)
+    dogru("kapanmazsa vazgecer", not tasi.kapat(calistir=lambda a, **k: None, acik_mi=lambda: True,
+                                                bekle=lambda s: None, sure=1))
+    acilan = []
+    tasi.ac(calistir=lambda a, **k: acilan.append(a))
+    dogru("sonra tarayicisiz yeniden acar", acilan and acilan[0][-1] == "--tarayicisiz", acilan)
 finally:
     for ad, v in ortam.items():
         if v is None:

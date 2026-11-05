@@ -15,6 +15,7 @@
      3. USTUNE YAZMAZ. Yeni bilgisayarda var olan her sey once «.once-<tarih>» adiyla
         kenara alinir; hicbir sey silinmez.
      4. LIFEOS KAPALIYKEN. Acik uygulama dosyalarini tutar; kopya yarim olurdu.
+        Aciksa betik onu kendisi kapatir, is bitince yeniden acar.
      5. API ANAHTARLARI YASAR. Windows kasasi bu makineye baglidir; config.json'daki
         «kasa:» gondermesi yeni bilgisayarda olu kalirdi. Pakete (sifreli) deger
         olarak girer, yeni bilgisayarda yine kasaya yazilir. Eski kasaya dokunulmaz.
@@ -29,6 +30,7 @@ import os
 import shutil
 import socket
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import time
@@ -347,9 +349,37 @@ def main(argv=None):
     if not argv or argv[0] not in ("--paket", "--ac") or (argv[0] == "--ac" and len(argv) < 2):
         print(__doc__)
         return 2
-    if calisiyor():
-        print("  ✕ LifeOS açık. Önce kapat: python sistem/baslat.py --dur")
+    acikti = calisiyor()
+    if acikti and not kapat():
+        print("  ✕ LifeOS kapanmadı. Elle kapat: python sistem/baslat.py --dur")
         return 1
+    try:
+        return _is(argv)
+    finally:
+        if acikti:
+            ac()
+            print("  LifeOS yeniden açıldı.")
+
+
+def kapat(calistir=subprocess.call, acik_mi=calisiyor, bekle=time.sleep, sure=15):
+    """Soz 4: acik dosya kopyayi yarim birakir. Elle kapatma adimi olmasin diye
+    LifeOS'u kendisi kapatir (baslat.py --dur) ve kapandigini bekler."""
+    print("  LifeOS kapatılıyor (paket bitince yeniden açılır)…")
+    calistir([sys.executable, os.path.join(SISTEM, "baslat.py"), "--dur"],
+             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for _ in range(int(sure * 2)):
+        if not acik_mi():
+            return True
+        bekle(0.5)
+    return False
+
+
+def ac(calistir=subprocess.Popen):
+    calistir([sys.executable, os.path.join(SISTEM, "baslat.py"), "--tarayicisiz"],
+             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=KOK)
+
+
+def _is(argv):
     try:
         if argv[0] == "--paket":
             hedef = argv[1] if len(argv) > 1 else os.path.join(_masaustu(), time.strftime("LifeOS-tasima-%Y%m%d.lifeos"))

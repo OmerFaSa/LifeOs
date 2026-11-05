@@ -82,6 +82,8 @@ import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
 
 HOST = "127.0.0.1"
+# AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
+ALTSTORE_KAYNAK = "https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
 GIRIS_PORT = 4180
 HKM_PORT = 4200
 
@@ -2033,6 +2035,13 @@ ul{ padding-left:18px; margin:6px 0; } .yedek{ font-size:13px; } code{ font-size
 <p id="bagla-durum">Sertifika denetleniyor…</p>
 <a class="dugme" id="bagla-tarayici" hidden>Tarayıcıda devam et</a>
 <a class="dugme" id="bagla-uygulama" hidden>LifeOS uygulamasında aç</a></section>
+<section id="iphone-uygulama"><h2>iPhone uygulaması</h2>
+<p>Ekran kapalıyken rota ve bildirim için. AltStore'u bilgisayardaki AltServer ile
+bir kez kur, sonra bu düğmeye dokun: LifeOS kaynağı AltStore'a eklenir.</p>
+<a class="dugme" href="altstore://source?url=%s">AltStore'a LifeOS'u ekle</a>
+<p>AltStore › Browse › LifeOS › Free. Web kodu sonra kendiliğinden güncellenir.
+Haftalık imza yenilemesi: Kısayollar › Otomasyon › Her gün › AltStore «Refresh All Apps»,
+«Çalıştırmadan önce sor» kapalı. LifeOS açıkken AltServer da açılır.</p></section>
 <section><h2>1. Sertifikayı indir</h2>
 <p>Telefon bilgisayarla aynı Wi-Fi'da olmalı. Bu sertifika yalnız senin
 bilgisayarının adresine güvenmeyi sağlar; internete hiçbir şey çıkmaz.</p>
@@ -2080,7 +2089,7 @@ mobil internet gerekir.</p></section>
   }
   bak();
 })();
-</script></body></html>""" % (_kac(parmak), modul, telefon.PORTLAR["SPI"])
+</script></body></html>""" % (_kac(ALTSTORE_KAYNAK), _kac(parmak), modul, telefon.PORTLAR["SPI"])
 
 
 class TelefonKurulum(BaseHTTPRequestHandler):

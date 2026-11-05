@@ -232,7 +232,10 @@ with tempfile.TemporaryDirectory() as gecici:
     sayfa = govde.decode("utf-8", "replace")
     dogru("kurulum sayfasi yonergeyi verir", durum == 200 and "Sertifikayı indir" in sayfa, durum)
     dogru("kurulum sayfasi parmak izini gosterir", telefon.parmak_izi(y) in sayfa)
-    dogru("kurulum sayfasi tek QR ile baglar", "lifeos://bagla" in sayfa and ":%d/" % telefon.PORTLAR["SPI"] in sayfa)
+    kaynak = yukle("kaynak", KOK / "uygulama" / "ios" / "kaynak.py").KAYNAK_ADRESI
+    dogru("kurulum sayfasi AltStore kaynagini tek dokunusla ekler (CI'in yayimladigi adres)",
+          'href="altstore://source?url=%s"' % kaynak in sayfa)
+    dogru("kurulum sayfasi tek QR ile baglar","lifeos://bagla" in sayfa and ":%d/" % telefon.PORTLAR["SPI"] in sayfa)
     betik = sayfa[sayfa.index("<script>") + 8:sayfa.index("</script>")]
     with open(os.path.join(gecici, "kurulum.js"), "w", encoding="utf-8") as f:
         f.write(betik)
