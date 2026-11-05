@@ -118,7 +118,7 @@ ESP.SRS = (function(){
 
   /* Bir cevabi karta ISLER ve kaydeder. Gecmise tek satir duser; gecmis
      retansiyon hesabinin tek girdisidir. */
-  async function answer(cardId, gradeId){
+  async function answer(cardId, gradeId, ek){
     const card = S.cards.find(c => c.id === cardId);
     if(!card) return { ok:false, error:yz('esp.core.srs.kart-bulunamadi') };
     const next = schedule(card, gradeId);
@@ -126,9 +126,9 @@ ESP.SRS = (function(){
 
     const onceki = { box:card.box, ease:card.ease, due:card.due };
     Object.assign(card, next);
-    card.history = (card.history || []).concat([{
+    card.history = (card.history || []).concat([Object.assign({
       at:new Date().toISOString(), grade:gradeId, box:next.box, interval:next.interval,
-    }]);
+    }, ek || {})]);
     /* Gecmis sinirsiz buyumesin: retansiyon hesabi son 50 cevabi kullanir,
        fazlasi depoyu sisirir ve hicbir soruyu daha iyi cevaplamaz. */
     if(card.history.length > 50) card.history = card.history.slice(-50);

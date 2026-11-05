@@ -425,6 +425,47 @@ SP.Rota = (function(){
       .slice().sort((a, b) => a.rota.bas < b.rota.bas ? 1 : a.rota.bas > b.rota.bas ? -1 : 0);
   }
 
+  /* ----------------------------------------------------- kişisel rekor
+
+     Eski kayıtlar da göç etmeden girer: hesap yalnız saklı km dilimlerini okur.
+     shortcut: pencere km sınırında başlar, iki sınır arasına düşen en iyi çaba görülmez;
+     saklı izde zaman yok, tam çaba için iz zamanla saklanmalı. */
+  const REKOR_KM = [1, 5, 10];
+
+  /* Ardışık `km` tam dilimin en kısa hareket süresi (sn); yeterli dilim yoksa null. */
+  function enIyiCaba(rota, km){
+    const d = (rota && rota.dilimler) || [];
+    let en = null;
+    for(let i = 0; i + km <= d.length; i++){
+      const pencere = d.slice(i, i + km);
+      if(pencere.some(x => x.m !== 1000 || !(x.sn > 0))) continue;
+      const sn = pencere.reduce((a, x) => a + x.sn, 0);
+      if(en == null || sn < en) en = sn;
+    }
+    return en;
+  }
+
+  /* Hareket başına en iyi çabalar. Ölçülmemiş mesafe listede yer almaz. */
+  function rekorlar(seanslar, exId){
+    const l = liste(seanslar).filter(w => exOf(w) === exId);
+    return REKOR_KM.map(km => l.reduce((en, w) => {
+      const sn = enIyiCaba(w.rota, km);
+      return sn != null && (!en || sn < en.sn) ? { km, sn, id:w.id, gun:w.date } : en;
+    }, null)).filter(Boolean);
+  }
+
+  /* Bu seansın, kendinden ÖNCEKİLERE göre kırdığı rekorlar. İlk ölçüm rekor sayılmaz:
+     karşılaştıracak bir şey yoktur. */
+  function kirilanlar(w, seanslar){
+    const exId = exOf(w);
+    const once = liste(seanslar).filter(x => x !== w && exOf(x) === exId && x.rota.bas < w.rota.bas);
+    return REKOR_KM.map(km => {
+      const sn = enIyiCaba(w.rota, km);
+      const eski = once.map(x => enIyiCaba(x.rota, km)).filter(x => x != null);
+      return sn != null && eski.length && sn < Math.min(...eski) ? { km, sn, onceki:Math.min(...eski) } : null;
+    }).filter(Boolean);
+  }
+
   /* ----------------------------------------------------- metin biçimi */
 
   function km(m){
@@ -444,7 +485,7 @@ SP.Rota = (function(){
   function hizMi(exId){ return exId === 'bisiklet'; }
 
   return {
-    gpxOku, analiz, oku, noktalardan, kayitli, seans, exOf, liste, mesafe, sadelestir, sakla,
+    gpxOku, analiz, oku, noktalardan, kayitli, seans, exOf, liste, enIyiCaba, rekorlar, kirilanlar, mesafe, sadelestir, sakla,
     kodla, coz, km, sureMetni, tempo, hiz, hizMi, turOf, tirmanisOf,
     HAREKETLER, TITREME_M, HAREKET_MS, SICRAMA_MS, TIRMANIS_ESIK,
   };

@@ -1052,6 +1052,16 @@ ESP.App = (function(){
       S.ui.practice = s;
       S.ui.practiceShown = false;
       S.ui.practiceOrder = null;
+      S.ui.practiceGuven = S.ui.practiceYazi = null;
+      S.ui.practiceEmin = false;
+      render();
+    },
+
+    /* Yeniden çizim yazılan cevabı silmesin. İkinci dokunuş işareti kaldırır. */
+    async 'prac-guven'(el){
+      const alan = document.getElementById('prac-input');
+      S.ui.practiceYazi = alan ? alan.value : null;
+      S.ui.practiceGuven = S.ui.practiceGuven === el.dataset.value ? null : el.dataset.value;
       render();
     },
 
@@ -1070,9 +1080,11 @@ ESP.App = (function(){
         const alan = document.getElementById('prac-input');
         cevap = alan ? alan.value : '';
       }
-      const res = await ESP.Lesson.answer(s, cevap);
+      const res = await ESP.Lesson.answer(s, cevap, S.ui.practiceGuven);
       if(!res.ok){ UI.toast(res.error); return; }
       S.ui.practiceShown = !res.correct;
+      S.ui.practiceEmin = !res.correct && S.ui.practiceGuven === 'emin';
+      S.ui.practiceGuven = S.ui.practiceYazi = null;
       S.ui.practiceOrder = null;
       UI.toast(res.correct ? 'Doğru' : yz('esp.app.yanlis-dogrusu') + res.expected);
       render();
@@ -1086,6 +1098,8 @@ ESP.App = (function(){
       const res = await ESP.Lesson.answer(s, '');
       S.ui.practiceShown = true;
       S.ui.practiceOrder = null;
+      S.ui.practiceGuven = S.ui.practiceYazi = null;
+      S.ui.practiceEmin = false;
       if(res.ok) UI.toast(yz('esp.app.dogrusu') + res.expected);
       render();
     },

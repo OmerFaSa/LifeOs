@@ -54,8 +54,9 @@ window.LIFEOS.USTA = (function(){
   const zaman = iso => { const p = String(iso).split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); };
   const fark = (a, b) => Math.round((zaman(b) - zaman(a)) / 864e5);
   function gunEkle(iso, n){ return new Date(zaman(iso) + n * 864e5).toISOString().slice(0, 10); }
+  /* Metin sırası tarih sırasıdır; bu yol binlerce kartlı destede saniyede onlarca kez döner. */
   const sirali = k => (k || []).filter(x => x && x.g && typeof x.isabet === 'boolean')
-    .map((x, i) => [x, i]).sort((a, b) => zaman(a[0].g) - zaman(b[0].g) || a[1] - b[1]).map(x => x[0]);
+    .sort((a, b) => a.g < b.g ? -1 : a.g > b.g ? 1 : 0);
 
   /* Aşama. Yanlış zinciri keser: son ölçüm kazanır, eski başarı yeni unutmayı örtmez.
      Aynı gündeki ikinci doğru ara kanıtı sayılmaz (ara 0). İpuçlu cevap aşama
@@ -128,5 +129,5 @@ window.LIFEOS.USTA = (function(){
     return { sayi, toplam, olculen:toplam - sayi.yok, kritik, gecikti };
   }
 
-  return { ARA, ASAMALAR, asama, kalibrasyon, sira, harita, gunEkle };
+  return { ARA, ASAMALAR, adi:id => ADLAR()[id], asama, kalibrasyon, sira, harita, gunEkle };
 })();

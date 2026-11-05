@@ -325,6 +325,28 @@ ESP.Lesson = (function(){
     return { kind:'recall', cardId:card.id, prompt:card.front, answer:card.back };
   }
 
+  /* Kartın geçmişi → ustalık kanıtı (brand/ortak/usta.js). Yeni kayıt yok: eski
+     cevaplar da girer; yalnız güven ve karışıklık işareti onlarda boştur. */
+  function kanitlar(card){
+    return ((card && card.history) || []).map(function(h){
+      return { g:U.gunOf(h.at), isabet:h.grade !== 'again', guven:h.guven, karisik:h.karisik };
+    });
+  }
+
+  /* Destenin kalıcılık özeti: aşama dağılımı, emin olup yanılınan kartlar, güven isabeti. */
+  function kalicilik(lang){
+    const bugun = U.todayISO();
+    return ESP.Memo.of('usta:' + lang + ':' + bugun, function(){
+      const kartlar = ESP.Model.cardsOf(lang);
+      const beceriler = kartlar.map(function(c){ return { id:c.id, kanitlar:kanitlar(c) }; });
+      return {
+        harita:LIFEOS.USTA.harita(beceriler, bugun),
+        kritik:kartlar.filter(function(c, i){ return LIFEOS.USTA.asama(beceriler[i].kanitlar, bugun).kritik; }),
+        guven:LIFEOS.USTA.kalibrasyon([].concat.apply([], beceriler.map(function(b){ return b.kanitlar; }))),
+      };
+    });
+  }
+
   /* Bir pratik oturumu kurar.
 
      Kartlar önce VADESİ GELENLERDEN seçilir: pratik, tekrarın yerine geçmez
@@ -339,7 +361,10 @@ ESP.Lesson = (function(){
     /* Ünite sınavı (fikir 41) kendi kart listesini verir: vade önceliği
        yoktur, ünitenin bütün kartları karışık sorulur. */
     const kaynak = o.kartlar ? hepsi.filter(function(c){ return o.kartlar.indexOf(c) >= 0; }) : null;
-    const vadesi = kaynak ? [] : ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
+    const vadeli = kaynak ? [] : ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
+    /* Emin olup yanıldığın kart önce gelir: en kolay düzelen ama geri dönebilen hata budur. */
+    const kritik = c => LIFEOS.USTA.asama(kanitlar(c)).kritik;
+    const vadesi = vadeli.filter(kritik).concat(vadeli.filter(c => !kritik(c)));
     const geri = (kaynak || hepsi).filter(function(c){ return vadesi.indexOf(c) < 0; });
     const sira = vadesi.concat(shuffle(geri, bugun + deste))
       .slice(0, o.length || ESP.PRACTICE_LENGTH);
@@ -363,7 +388,7 @@ ESP.Lesson = (function(){
      Not «tekrar» ile «iyi» arasında üçüncü bir değer YOKTUR: pratik bir
      ölçüm değil bir denemedir ve kullanıcının «kolaydı» demesi burada
      sorulmaz. Kolaylık, aralığın kendisinden okunur. */
-  async function answer(session, given){
+  async function answer(session, given, guven){
     if(!session || session.done) return { ok:false, error:yz('esp.core.lesson.oturum-kapali') };
     const q = session.questions[session.pos];
     if(!q) return { ok:false, error:yz('esp.core.lesson.soru-yok') };
@@ -375,7 +400,11 @@ ESP.Lesson = (function(){
     /* Kart oturum sirasinda silinmis olabilir (baska sekmede, baska
        ekranda). SRS "kart bulunamadi" derse soru SAYILMAZ: olmayan bir
        karta verilmis cevap, retansiyonu da isabeti de yalan yapar. */
-    const yazildi = await ESP.SRS.answer(q.cardId, dogru ? 'good' : 'again');
+    /* Ünite sınavı konuyu baştan söyler; karışık sınama sayılmaz. İşaretsiz güven boş kalır. */
+    const ek = {};
+    if(guven === 'emin' || guven === 'kararsiz' || guven === 'tahmin') ek.guven = guven;
+    if(!session.unitId) ek.karisik = true;
+    const yazildi = await ESP.SRS.answer(q.cardId, dogru ? 'good' : 'again', ek);
     if(!yazildi.ok){
       session.pos++;
       if(session.pos >= session.questions.length) session.done = true;
@@ -497,7 +526,7 @@ ESP.Lesson = (function(){
         { baslik:yz('esp.core.lesson.kendini-sina'), metin:p.expected_answer ? yz('esp.core.lesson.cevabini-yazdiktan-sonra-bak') + p.expected_answer : '' }].filter(b => b.metin) };
   }
 
-  return { kingDers, units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
+  return { kanitlar, kalicilik, kingDers, units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
     topics, topicOf, topicMarks, topicProgress, markTopic, topicSummary,
     start, question, answer, result, log, correct, norm, shuffle,
     uniteSinavi, sonSinav, sinavYukle, SINAV_EN_AZ };

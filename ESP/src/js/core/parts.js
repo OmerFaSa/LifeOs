@@ -10,6 +10,14 @@
    ESP'nin alti disiplinidir — jenerik bir grafik degil, alana bagli bir
    sekildir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.parts.ne-kadar-eminsin':'Ne kadar eminsin?',
+  'esp.core.parts.eminim':'Eminim',
+  'esp.core.parts.kararsizim':'Kararsızım',
+  'esp.core.parts.tahmin':'Tahmin',
+  'esp.core.parts.emindin-one-alindi':' Emindin; bu kart bir sonraki pratikte ilk sorulur.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.disiplin-dengesi-radari':'Disiplin dengesi radarı',
   'esp.core.parts.dis-halka-penceredeki-en':'Dış halka = penceredeki en yüksek değer.',
   'esp.core.parts.sesli-sohbeti-bitir':'Sesli sohbeti bitir',
@@ -678,6 +686,9 @@ ESP.Parts = (function(){
         </div>
 
         <p class="prac__q">${q.prompt}</p>
+        ${K.Segmented({ act:'prac-guven', value:ESP.S.ui.practiceGuven || '', aria:yz('esp.core.parts.ne-kadar-eminsin'),
+          items:[{ value:'emin', label:yz('esp.core.parts.eminim') }, { value:'kararsiz', label:yz('esp.core.parts.kararsizim') },
+            { value:'tahmin', label:yz('esp.core.parts.tahmin') }] })}
 
         ${q.kind === 'order'
           ? (function(){
@@ -702,13 +713,13 @@ ESP.Parts = (function(){
           ? html`<div class="prac__opts">${map(q.options, opt => K.Button({ label:opt,
               act:'prac-answer', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>`
           : html`<div class="row mt-10">
-              ${K.Input({ id:'prac-input', aria:yz('esp.core.parts.cevabin'), placeholder:yz('esp.core.parts.cevabini-yaz') })}
+              ${K.Input({ id:'prac-input', value:ESP.S.ui.practiceYazi, aria:yz('esp.core.parts.cevabin'), placeholder:yz('esp.core.parts.cevabini-yaz') })}
               ${K.Mic({ target:'prac-input' })}
               ${K.Button({ label:yz('esp.core.parts.cevapla'), tone:'primary', act:'prac-answer' })}
             </div>`}
 
         ${when(gosterildi, () => K.Notice({ tone:'info',
-          body:yz('esp.core.parts.dogrusu') + q.answer }))}
+          body:yz('esp.core.parts.dogrusu') + q.answer + (ESP.S.ui.practiceEmin ? yz('esp.core.parts.emindin-one-alindi') : '') }))}
         <div class="row wrap mt-10">
           ${K.Button({ label:yz('esp.core.parts.bilmiyorum'), size:'sm', act:'prac-skip' })}
           ${K.Button({ label:yz('esp.core.parts.oturumu-bitir'), size:'sm', act:'prac-close' })}

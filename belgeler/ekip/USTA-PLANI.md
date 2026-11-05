@@ -34,6 +34,10 @@ Beceri, araya zaman girince ipucusuz da tutuyorsa ilerler. Kelime, konu, temiz t
 
 Yanlış zinciri keser. Son aşamanın adı «usta» değildir: yargı kişiye değil kayda söylenir (§1.5).
 
+## Durum (2026-11-05)
+
+Çalışıyor: 1 (yalnız ESP dil), 2'nin kalıcılık kartı (yalnız ESP dil), 3, 4. `USTA.sira` testli ama henüz hiçbir ekrana bağlı değil; ilk kullanıcısı AYS olacak.
+
 ## Boşluklar (etkiye göre)
 
 Var olan ve önerilmeyen: AYS'de hız-isabet, sülük kart, karışık sınav, öğrenme yolu, yanlış defteri; ESP'de aralıklı tekrar, sıklık kapsamı, gölgeleme, cümle kurma, merdiven, temiz tempo, kulak eğitimi, okuma düzeyleri, «anlat»; SPİ'de GPX, canlı kayıt, km dilimleri, ısı haritası, RPE yükü, programlar.

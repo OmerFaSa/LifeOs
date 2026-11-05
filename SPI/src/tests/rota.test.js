@@ -607,4 +607,52 @@
       expect(kagit()).toBeNull();
     });
   });
+
+  describe('Rota — kişisel rekor', () => {
+    const dilim = l => l.map(sn => ({ m:1000, sn, dy:null }));
+    const seans = (id, bas, sureler, exId) => ({ id, date:'2026-10-0' + bas, name:'Koşu', items:[{ exId:exId || 'kosu' }],
+      rota:{ iz:'x', bas, dilimler:dilim(sureler) } });
+
+    it('en iyi çaba ardışık tam kilometrelerden; kısa son dilim girmez', () => {
+      expect(R.enIyiCaba({ dilimler:dilim([300, 280, 310]) }, 1)).toBe(280);
+      expect(R.enIyiCaba({ dilimler:dilim([300, 280, 310]) }, 2)).toBe(580);
+      expect(R.enIyiCaba({ dilimler:dilim([300, 280]).concat([{ m:600, sn:100 }]) }, 3)).toBe(null);
+      expect(R.enIyiCaba({ dilimler:[{ m:1000, sn:0 }] }, 1)).toBe(null);
+      expect(R.enIyiCaba({}, 1)).toBe(null);
+    });
+    it('rekorlar hareket başına; ölçülmemiş mesafe listede yok', () => {
+      const l = [seans('a', 1, [300, 300, 300, 300, 300]), seans('b', 2, [280]), seans('c', 3, [100], 'bisiklet')];
+      const r = R.rekorlar(l, 'kosu');
+      expect(r.map(x => x.km).join()).toBe('1,5');
+      expect(r[0].sn).toBe(280);
+      expect(r[0].id).toBe('b');
+      expect(r[1].sn).toBe(1500);
+      expect(R.rekorlar([], 'kosu')).toHaveLength(0);
+    });
+    it('ilk ölçüm rekor değildir; yalnız öncekiler geçilirse kırılır', () => {
+      const a = seans('a', 1, [300]), b = seans('b', 2, [290]), c = seans('c', 3, [295]);
+      const l = [a, b, c];
+      expect(R.kirilanlar(a, l)).toHaveLength(0);
+      expect(R.kirilanlar(b, l)[0].onceki).toBe(300);
+      expect(R.kirilanlar(c, l)).toHaveLength(0);
+    });
+    it('kart en iyiyi, kağıt tempo grafiğini ve yeni rekoru gösterir', async () => {
+      resetState();
+      const eski = pushRota(besKm());
+      const yeni = pushRota(besKm());
+      yeni.rota.bas = eski.rota.bas + 864e5;
+      yeni.rota.dilimler = yeni.rota.dilimler.map(x => Object.assign({}, x, { sn:x.sn - 5 }));
+      const d = document.createElement('div');
+      d.innerHTML = await SP.Screens.move.render();
+      expect(d.querySelector('.rota').textContent.indexOf('1 km') >= 0).toBeTruthy();
+      const ciz = SP.App.render; SP.App.render = () => {};
+      try{ await SP.Screens.move.handle['rota-ac']({ dataset:{ id:yeni.id } }); }
+      finally{ SP.App.render = ciz; }
+      const k = document.getElementById('sheet');
+      expect(k.querySelectorAll('.rota-tempo').length).toBe(yeni.rota.dilimler.length);
+      expect(k.querySelectorAll('.rota-tempo.is-en').length >= 1).toBeTruthy();
+      expect(k.querySelector('.notice').textContent.indexOf('Yeni rekor') >= 0).toBeTruthy();
+      SP.UI.closeSheet();
+    });
+  });
 })();

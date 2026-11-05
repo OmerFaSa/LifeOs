@@ -258,6 +258,76 @@
     });
   });
 
+  describe('ders · güven ve kalıcılık (brand/ortak/usta.js)', () => {
+    const gecmis = (gun, grade, ek) => Object.assign({ at:gun + 'T09:00:00Z', grade }, ek || {});
+
+    it('cevap güveni ve karışıklığı geçmişe yazar; işaretsiz güven boş kalır', async () => {
+      resetState();
+      for(let i = 0; i < 4; i++) pushCard({ front:'k' + i, back:'c' + i, lang:'en' });
+      await withTodayAsync('2026-09-12', async () => {
+        const s = L().start('en', { kinds:['recall'] });
+        const ilk = s.questions.slice(0, 3);
+        await L().answer(s, ilk[0].answer, 'emin');
+        await L().answer(s, ilk[1].answer);
+        await L().answer(s, ilk[2].answer, 'uydurma');
+        const h = q => ESP.S.cards.find(c => c.id === q.cardId).history[0];
+        expect(h(ilk[0]).guven).toBe('emin');
+        expect(h(ilk[0]).karisik).toBe(true);
+        expect(h(ilk[1]).guven).toBe(undefined);
+        expect(h(ilk[2]).guven).toBe(undefined);
+      });
+    });
+    it('ünite sınavı karışık sayılmaz', async () => {
+      resetState();
+      const c = pushCard({ front:'k', back:'c', lang:'en' });
+      await withTodayAsync('2026-09-12', async () => {
+        const s = L().start('en', { kartlar:[c], kinds:['recall'] });
+        s.unitId = 'u1';
+        await L().answer(s, 'c');
+        expect(c.history[0].karisik).toBe(undefined);
+      });
+    });
+    it('emin olup yanılınan kart oturumun başına geçer', () => {
+      resetState();
+      withToday('2026-09-12', () => {
+        pushCard({ front:'once', back:'x', lang:'en', due:'2026-09-01' });
+        const c = pushCard({ front:'kritik', back:'y', lang:'en', due:'2026-09-12' });
+        c.history = [gecmis('2026-09-11', 'again', { guven:'emin' })];
+        expect(L().start('en', { kinds:['recall'] }).questions[0].cardId).toBe(c.id);
+      });
+    });
+    it('kalıcılık geçmişten okunur; sorulmamış kart ölçülmüş sayılmaz', () => {
+      resetState();
+      withToday('2026-09-12', () => {
+        pushCard({ front:'yeni', back:'x', lang:'en' });
+        const a = pushCard({ front:'a', back:'x', lang:'en' });
+        a.history = [gecmis('2026-08-01', 'good'), gecmis('2026-08-10', 'hard')];
+        const b = pushCard({ front:'b', back:'y', lang:'en' });
+        b.history = [gecmis('2026-09-11', 'again', { guven:'emin' })];
+        const k = L().kalicilik('en');
+        expect(k.harita.toplam).toBe(3);
+        expect(k.harita.olculen).toBe(2);
+        expect(k.harita.sayi.kalici).toBe(1);
+        expect(k.kritik[0].id).toBe(b.id);
+        expect(k.guven.emin.oran).toBe(null);
+      });
+    });
+    it('güven işareti görünür; yazılan cevap yeniden çizimde silinmez', () => {
+      resetState();
+      pushCard({ front:'k', back:'c', lang:'en' });
+      withToday('2026-09-12', () => {
+        ESP.S.ui.practice = L().start('en', { kinds:['recall'] });
+        ESP.S.ui.practiceGuven = 'emin';
+        ESP.S.ui.practiceYazi = 'yazdim';
+        const d = document.createElement('div');
+        d.innerHTML = String(ESP.Parts.practice('en'));
+        expect(d.querySelector('[data-act="prac-guven"][data-value="emin"]').getAttribute('aria-pressed')).toBe('true');
+        expect(d.querySelector('#prac-input').value).toBe('yazdim');
+        ESP.S.ui.practice = ESP.S.ui.practiceGuven = ESP.S.ui.practiceYazi = null;
+      });
+    });
+  });
+
   describe('ders · tarih pratigi', () => {
 
     function tarihDestesi(){

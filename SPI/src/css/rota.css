@@ -49,6 +49,8 @@
    piksele büzülüyor, Dilimler başlığı görünüp tablo görünmüyordu.
    Sarmalın içi düz akıştır: gövde bütünüyle kayar, hiçbir parça ezilmez. */
 .rota-kagit{ flex:none; }
+.rota-tempo{ display:block; height:8px; min-width:2px; margin:6px 0; background:color-mix(in oklab, var(--text) 16%, var(--surface)); }
+.rota-tempo.is-en{ background:var(--primary); }
 
 .rota__satir{
   display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between;

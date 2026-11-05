@@ -9,6 +9,16 @@
    ölçülemez, hatırlanan kelime ölçülür. Bu yüzden her sayının yanında
    nereden geldiği durur. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.lang.kalicilik':'Kalıcılık',
+  'esp.lang.olculdu':' ölçüldü',
+  'esp.lang.emin-yanildiklarin':'Emin olup yanıldıkların',
+  'esp.lang.kalicilik-kurali':'kalıcı: 7 gün arayla doğru · sağlam: 21 gün, karışık pratikte',
+  'esp.lang.cevap':' cevap',
+  'esp.lang.emin-dediklerinin':'Emin dediklerinin %',
+  'esp.lang.i-tuttu':' kadarı tuttu',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.lang.en-cok-geciken-kart':'En çok geciken kart ',
   'esp.lang.telaffuzumu-sina':'Telaffuzumu Sına',
   'esp.lang.bugun-vadeli':'Bugün vadeli.',
@@ -954,6 +964,19 @@ ESP.Screens.lang = (function(){
       govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:yz('esp.lang.onumuzdeki-7-gunun-vadesi') })) });
   }
 
+  /* Kutu sistemin planıdır; bu kart araya zaman girince gerçekten tutanı gösterir
+     (brand/ortak/usta.js). Hiç sorulmamış kart «ölçüldü»ye girmez. */
+  function kalicilikKarti(P, dil){
+    const k = ESP.Lesson.kalicilik(dil), h = k.harita, Us = LIFEOS.USTA;
+    if(!h.olculen) return '';
+    const emin = k.guven.emin;
+    return P.kart({ tur:'kalicilik', ad:yz('esp.lang.kalicilik'), simge:'kart', yuva:h.olculen + '/' + h.toplam + yz('esp.lang.olculdu'),
+      govde:P.yigin({ parcalar:['ogreniyor', 'tutuyor', 'kalici', 'saglam'].map(id => ({ ad:Us.adi(id), deger:h.sayi[id], metin:String(h.sayi[id]) })) })
+        + (k.kritik.length ? P.not(yz('esp.lang.emin-yanildiklarin')) + P.liste({ satirlar:k.kritik.slice(0, 3).map(c => ({ ad:c.front, not:c.back, nokta:0 })) }) : '')
+        + (emin.oran != null ? P.not(yz('esp.lang.emin-dediklerinin') + Math.round(emin.oran * 100) + yz('esp.lang.i-tuttu') + ' · ' + emin.n + yz('esp.lang.cevap')) : '')
+        + P.not(yz('esp.lang.kalicilik-kurali')) });
+  }
+
   /* PANO KARTLARI (2026-10-20): kartların kutulara dağılımı ve en çok
      unutulan beş kart. Deste boşsa kart yok. */
   function PanoDil(){
@@ -972,7 +995,7 @@ ESP.Screens.lang = (function(){
       ? P.kart({ tur:'zor-kartlar', ad:yz('esp.lang.en-cok-unutulanlar'), yildiz:'tekrar et',
           govde:P.liste({ satirlar:zor.map(c => ({ sol:c.lapses + '×', ad:c.front, not:c.back, nokta:0 })) }) + P.not('sol: kaç kez unutuldu') })
       : '';
-    return P.izgara([kutuKart, zorKart], 'pk-izgara--iki');
+    return P.izgara([kutuKart, zorKart, kalicilikKarti(P, dil)], 'pk-izgara--iki');
   }
 
   LIFEOS.PARCA.blok({ id:'lang.dil-sekmeleri', sayfa:'lang', yer:'y1', sira:10, ad:'Dil sekmeleri', ciz({ d }){
