@@ -250,6 +250,13 @@ window.LIFEOS = window.LIFEOS || {};
       if(o === 'pointerdown' && bos.el && durum.o && L.PIKSEL_APARTMAN.dokun(durum.o, e.clientX / OLCEK, e.clientY / OLCEK, Date.now() / 1000)) return;
       bosKapa();
     }, { capture:true, passive:true }));
+    /* King'in odası: King arayüzünde açıkken döner; dokununca aksolot kalp çıkarır */
+    let kalp = 0;
+    window.addEventListener('pointerdown', e => { if(e.target && e.target.matches && e.target.matches('canvas.king__oda')) kalp = Date.now() + 3000; }, { capture:true, passive:true });
+    setInterval(() => {
+      const c = document.visibilityState === 'hidden' ? null : document.querySelector('canvas.king__oda'), A = L.PIKSEL_APARTMAN;
+      if(c && A) A.kingOda(c, hareketsiz() ? 0 : Date.now() / 1000, A.vakit(new Date().getHours()), Date.now() < kalp);
+    }, 125);
     document.addEventListener('dblclick', o => {
       const t = o.target;
       if(!k.hasAttribute('data-bos') && t && t.matches && t.matches('html,body,.piksel-oda,.site--v5,.site__body,.sarmal,#app')) bosAc(true);

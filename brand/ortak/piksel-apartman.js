@@ -8,7 +8,7 @@
 
    Sözler:
      1. SÜSTÜR. Sakinler kurgudur: kullanıcıyı ya da modülü temsil etmez; veri okumaz, sayı üretmez.
-        Tek istisna King'in odası (depo sahibinin isteği, 2026-11-05): pembe aksolot orada yaşar, o da veri okumaz.
+        King'in odası apartmanda değildir: King arayüzünün sağ alt köşesinde durur (kingOda). O da veri okumaz.
      2. KODLA ÇİZİLİR. Görsel dosyası yok; çevrimdışı ve tek dosyada çalışır.
      3. EKRANI YORMAZ. Sahne bir kez ayrı tuvale çizilir; karede yalnız içinde bir şey değişen kat yenilenir.
      4. KARE SAATTEN HESAPLANIR. Saklı durum yok: aynı t aynı kareyi verir, hareketsiz kipte tek kare çizilir. */
@@ -420,10 +420,10 @@ window.LIFEOS = window.LIFEOS || {};
         const [a] = k;
         return a ? [rutin(a, X + 10, F, [['firca', 22, undefined, false], ['yuru', 0, X + 2], ['dur', 5], ['yuru', 0, X + 10]]), duygu('b_nota', X + 13, F - 18, 6, 5, 12)] : [];
       } },
-    /* King'in odası: binanın sağ alt köşesinde; pembe aksolot, akvaryum, minder */
+    /* King'in odası: apartmanda değil, King arayüzünün Bağlam sütununda (kingOda); pembe aksolot, akvaryum, minder */
     king:{ g:38, duvar:'#ffd3e6', alt:'#f5b0cf', desen:'nokta',
       ciz(g, X, F){ kutu(g, X + 3, F - 26, 11, 8, '#fff1f7'); [[5, 3], [8, 4], [11, 3]].forEach(q => R(g, X + q[0], F - 24, 1, q[1], '#e0a52e')); R(g, X + 5, F - 21, 7, 1, '#e0a52e');
-        kutu(g, X + 22, F - 25, 14, 10, '#9fdcec'); R(g, X + 23, F - 24, 12, 2, '#d3f2f8'); R(g, X + 25, F - 19, 1, 3, '#4c8a4a'); R(g, X + 32, F - 20, 1, 4, '#4c8a4a'); R(g, X + 28, F - 21, 2, 1, '#ee9c52'); R(g, X + 23, F - 17, 12, 1, '#e8d5a8'); kutu(g, X + 21, F - 15, 16, 2, AHSAP);
+        kutu(g, X + 22, F - 28, 14, 10, '#9fdcec'); R(g, X + 23, F - 27, 12, 2, '#d3f2f8'); R(g, X + 25, F - 22, 1, 3, '#4c8a4a'); R(g, X + 32, F - 23, 1, 4, '#4c8a4a'); R(g, X + 28, F - 24, 2, 1, '#ee9c52'); R(g, X + 23, F - 20, 12, 1, '#e8d5a8'); kutu(g, X + 21, F - 18, 16, 2, AHSAP);
         kutu(g, X + 20, F - 5, 16, 5, '#ff7fb0'); R(g, X + 22, F - 4, 12, 1, '#ffb3d0'); R(g, X + 1, F, 36, 1, '#ff9ecb'); },
       hayat(X, F, k, v){
         if(v === 'gece') return [rutin(null, X + 20, F, [['aksolot_u', 30]]), rutin(null, X + 30, F - 18, [['z', 30]])];
@@ -504,12 +504,11 @@ window.LIFEOS = window.LIFEOS || {};
       (dar ? [0] : [0, 1]).forEach(yan => {
         const x = yan ? sagBas : 0, en = yan ? W - sagBas : solSon, ev = EVLER[(k * 2 + yan * 3) % EVLER.length];
         const faz = (k * 37 + yan * 13) % 41, sira = k * 2 + yan;
-        const a = SAKIN[s++ % 28], b = SAKIN[s++ % 28], kingde = !dar && yan === 1 && k === n - 1, bolum = odaBol(ev, x, en - (kingde ? ODA.king.g : 0), dar), plan = gunPlani(bolum.map(q => q.tip), a, ziyaret ? null : b, v, sira);
+        const a = SAKIN[s++ % 28], b = SAKIN[s++ % 28], bolum = odaBol(ev, x, en, dar), plan = gunPlani(bolum.map(q => q.tip), a, ziyaret ? null : b, v, sira);
         if(ziyaret) gidenler[yan] = b;
-        if(kingde) bolum.push({ tip:'king', x:W - ODA.king.g, w:ODA.king.g });
         bolum.forEach((o, j) => {
           const X = o.x + Math.floor((o.w - ODA[o.tip].g) / 2), q = plan[o.tip] || { k:[], uyku:false }, kapida = ziyaret && (yan ? j === 0 : j === bolum.length - 1);
-          const sonuk = v === 'ogle' || ((!q.k.length || q.uyku) && !kapida && o.tip !== 'king');
+          const sonuk = v === 'ogle' || ((!q.k.length || q.uyku) && !kapida);
           odalar.push({ tip:o.tip, x:o.x, y, w:o.w, F, X, sonuk, ilk:j === 0 });
           ODA[o.tip].hayat(X, F, q.k, v, ILISKI[sira % 3], q.uyku, EVCIL[sira % EVCIL.length]).forEach(r => { r.faz = faz + j * 7; bolge.sakin.push(r); });
           if(o.tip === 'salon') bolge.sakin.push(rutin(null, X + 49, F - 16, [['papagan', 30]]));
@@ -774,6 +773,26 @@ window.LIFEOS = window.LIFEOS || {};
     c.putImageData(d, 0, 0);
   }
 
+  /* King'in odası: King arayüzündeki küçük tuval. Duvar bir kez çizilir; kare yalnız değişince yenilenir. */
+  const KING_EN = 38, KING_BOY = 32, kingArka = {};
+  function kingOda(c, t, v, kalp){
+    let a = kingArka[v];
+    if(!a){
+      a = kingArka[v] = { c:document.createElement('canvas'), r:ODA.king.hayat(0, 30, [], v) };
+      a.c.width = KING_EN; a.c.height = KING_BOY;
+      const g = a.c.getContext('2d');
+      duvarCiz(g, 0, 0, KING_EN, 30, ODA.king.duvar, ODA.king.alt, ODA.king.desen);
+      ODA.king.ciz(g, 0, 30);
+    }
+    const kareler = a.r.map(s => kareAl(s, t)).filter(Boolean), imza = v + (kalp ? 'k' : '') + kareler.map(k => k.poz + k.i + ',' + k.x + ',' + k.y).join('|');
+    if(c.dataset.imza === imza) return false;
+    c.dataset.imza = imza;
+    const g = c.getContext('2d');
+    g.drawImage(a.c, 0, 0);
+    kareler.forEach(k => g.drawImage(gorsel(k.poz, k.i, null, k.ters, v), k.x, k.y));
+    if(kalp) g.drawImage(gorsel('b_kalp', 0, null, false, v), 26, 2);
+    return true;
+  }
   /* Dokunma: çift tıkla açılan sahnede canlıya dokununca balon çıkar. Kişi ruh hâlini, hayvan kalbini gösterir. */
   const CANSIZ = /^(tv|ekran|buhar|z|tak|laf|kalp|bulut|ampul|yildiz|kopuk|camasir|kabin|kapi_|b_|gizli|bocek)/;
   function dokun(o, x, y, t){
@@ -812,5 +831,5 @@ window.LIFEOS = window.LIFEOS || {};
     return yenilenen;
   }
 
-  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, dokun, ODA, EVLER, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
+  L.PIKSEL_APARTMAN = Object.freeze({ vakit, yerlesim, gunPlani, binaCiz, kare, kareAl, dokun, kingOda, KING_EN, KING_BOY, ODA, EVLER, POZ, PALET, SAKIN, ruhu, KAT, TERAS, KORIDOR, ASANSOR });
 })(window.LIFEOS);

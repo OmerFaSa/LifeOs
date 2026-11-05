@@ -571,10 +571,8 @@ window.LIFEOS.PARCA.yazilar({
      taçlı minik, duran portre (süs; ekran okuyucuya gizli, dokunulmaz).
      Minikler yoksa küre kalır. Sesli sohbet şeridi küreyi korur. */
   function yuzHtml(buyuk){
-    const M = KI.L.MINIK;
-    if(!M || !M.ICERIK) return KURE;
-    return '<span class="king__yuz' + (buyuk ? ' king__yuz--buyuk' : '') + '" aria-hidden="true"><span class="minik minik--king minik--yuz" data-tip="tac" data-bicim="yuvarlak" data-desen="karin" data-yon="sag">'
-      + M.ICERIK + '</span></span>';
+    /* Pembe piksel aksolot (2026-11-05, depo sahibinin isteği); çizimi piksel-figur.js'te */
+    return '<span class="king__yuz' + (buyuk ? ' king__yuz--buyuk' : '') + '" aria-hidden="true"><span class="king-aks"></span></span>';
   }
   const NOKTA = m => '<i class="king__nokta king__nokta--' + (m || 'mer') + '" aria-hidden="true"></i>';
 
@@ -704,7 +702,7 @@ window.LIFEOS.PARCA.yazilar({
       + (kars.satirlar.length ? kisim('Notlar', '<ul class="king__baglam-not">' + kars.satirlar.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>') : '')
       + (sor.length ? kisim('Sorabileceklerin', '<div class="king__baglam-sor">' + sor.map(o => '<button type="button" class="king__baglam-oner" data-king="' + o.is + '">'
         + KI.kac(o.ad) + '</button>').join('') + '</div>') : '')
-      + '</aside>';
+      + '<canvas class="king__oda" width="38" height="32" aria-hidden="true"></canvas></aside>';
   }
   function govde(){
     if(KI.mini) return miniGovde();
