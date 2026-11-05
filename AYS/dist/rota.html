@@ -19968,7 +19968,7 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 /* Boşta: menü sola, kart aşağı çekilir; dokunulamaz, sahne kalır (piksel.js). */
 :root[data-bos] .site--v5 > .kenar, :root[data-bos] .site--v5 > .site__body, :root[data-bos] .altbant, :root[data-bos] body > *:not(.piksel-oda):not(#app){ transition:opacity .42s ease, transform .42s ease; }
 :root[data-bos="1"]{ cursor:none; }
-:root[data-bos="1"] .site--v5 > .kenar{ opacity:0; transform:translateX(-60px); pointer-events:none; }
+:root[data-zemin="piksel"][data-bos="1"] .site--v5 > .kenar{ opacity:0; transform:translateX(-100%); pointer-events:none; }
 :root[data-bos="1"] .site--v5 > .site__body{ opacity:0; transform:translateY(48px); pointer-events:none; }
 :root[data-bos="1"] .altbant{ opacity:0; transform:translateY(48px); pointer-events:none; }
 :root[data-bos="1"] body > *:not(.piksel-oda):not(#app){ opacity:0; pointer-events:none; }
@@ -48481,7 +48481,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ca941546', at:'2026-11-05 01:21', dirty:true };
+R.BUILD = { id:'5fedfb83', at:'2026-11-05 01:27', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
