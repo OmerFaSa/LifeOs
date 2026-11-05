@@ -16,6 +16,11 @@
    Ölçülemeyen basamak üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
    Orada istenen şey çalışmak değil ÖLÇMEKTİR. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.ladder.karisik-sinama':'Karışık sınama',
+  'esp.ladder.konu-olculdu':'konu ölçüldü',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.ladder.hicbir-disiplinde-olculmus-u':'Hiçbir disiplinde ölçülmüş üretim yok. ',
   'esp.ladder.merdiven-ilk-olcumle-baslar':'Merdiven ilk ölçümle başlar.',
   'esp.ladder.once-olc':'Önce ölç',
@@ -428,6 +433,18 @@ ESP.Screens.ladder = (function(){
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
+  /* Karışık alan sınaması (core/alan.js): sıradaki konu burada, sayfa değiştirmeden sınanır;
+     konu başlığı disiplin seçilmeden gelir, bu yüzden karışık kanıt sayılır. */
+  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'y1', sira:5, ad:'Karışık sınama', ciz(){
+    const P = (window.LIFEOS || {}).PANO, s = S.ui.alanSinav, h = ESP.Alan.harita();
+    const siradaki = ESP.Alan.sira(1)[0];
+    const t = ESP.Alan.konuOf(s && s.karisik ? s.id : siradaki && siradaki.id);
+    if(!P || !t) return '';
+    return K.Span(12, raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
+      yuva:h.olculen + '/' + h.toplam + ' ' + yz('esp.ladder.konu-olculdu'),
+      govde:String(html`<p class="small"><b>${(ESP.DISCIPLINE_BY_ID[t.disc] || {}).short || t.disc}</b> · ${t.title}</p>
+        ${ESP.Parts.konuSinama(t, true)}`) })));
+  } });
   LIFEOS.PARCA.blok({ id:'ladder.merdiven-sekmeleri', sayfa:'ladder', yer:'y1', sira:10, ad:'Merdiven sekmeleri', ciz({ disc }){
     return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));

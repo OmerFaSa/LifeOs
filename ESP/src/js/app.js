@@ -4,6 +4,11 @@
    ESP.S'yi okur. Bir ekranın çizilirken hata vermesi diğerlerini kapatmaz:
    hata paneline düşer, kenar çubuğu açılmaya devam eder. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.app.once-yanitini-yaz':'Önce yanıtını yaz.',
+  'esp.app.sonraki-sinama':'sonraki sınama ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.app.oteki-ekranlar-menuden-acilm':'Öteki ekranlar menüden açılmaya devam eder.',
   'esp.app.yeniden-yukle':'Yeniden yükle',
   'esp.app.ornek-veriye-gec':'Örnek veriye geç',
@@ -1118,6 +1123,41 @@ ESP.App = (function(){
       S.ui.practice = null; S.ui.practiceShown = false; S.ui.practiceOrder = null;
       render();
     },
+
+    /* Konu sınaması (core/alan.js). Güven yeniden çizmez: yazılan cevap silinmesin. */
+    async 'alan-basla'(el){
+      S.ui.alanSinav = { id:el.dataset.id, karisik:el.dataset.karisik === '1', guven:null, yazi:'', goster:false };
+      render();
+    },
+    async 'alan-guven'(el){
+      const a = S.ui.alanSinav;
+      if(!a) return;
+      a.guven = a.guven === el.dataset.value ? null : el.dataset.value;
+      el.parentElement.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.value === a.guven;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    },
+    async 'alan-goster'(el){
+      const a = S.ui.alanSinav;
+      if(!a) return;
+      const alan = document.getElementById('alan-yazi');
+      a.yazi = alan ? alan.value.trim() : '';
+      /* Önce üret: yanıtsız karşılaştırma yok. Bilmemek de bir yanıttır, ayrı düğmesi var. */
+      if(!a.yazi && el.dataset.bos !== '1'){ UI.toast(yz('esp.app.once-yanitini-yaz')); return; }
+      a.goster = true;
+      render();
+    },
+    async 'alan-sonuc'(el){
+      const a = S.ui.alanSinav;
+      if(!a) return;
+      const r = await ESP.Alan.kaydet(a.id, el.dataset.sonuc === '1', a);
+      S.ui.alanSinav = null;
+      if(r.ok) UI.toast(r.asama.ad + (r.asama.sonraki ? ' · ' + yz('esp.app.sonraki-sinama') + U.fmtShort(r.asama.sonraki) : ''));
+      render();
+    },
+    async 'alan-vazgec'(){ S.ui.alanSinav = null; render(); },
 
     /* --- teklif ve plan: tezgâhta, ofiste ve Bugün'de ortak --- */
     async 'prop-accept'(el){

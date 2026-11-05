@@ -94,9 +94,16 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.bu-bolumde-konu-haritasi-yok':'Bu bölümde konu haritası yok.',
   'esp.core.parts.ornek':'Örnek:',
   'esp.core.parts.sik-yanlis-yorum':'Sık yanlış yorum:',
-  'esp.core.parts.pratik':'Pratik',
-  'esp.core.parts.beklenen-yanit-ve-olcut':'Beklenen yanıt ve ölçüt',
-  'esp.core.parts.aktarim':'Aktarım:',
+  'esp.core.parts.kendini-sina':'Kendini sına',
+  'esp.core.parts.aktarim-gorevi':'Aktarım: yeni bir örnekte göster',
+  'esp.core.parts.karsilastir':'Karşılaştır',
+  'esp.core.parts.beklenen-yanit':'Beklenen yanıt:',
+  'esp.core.parts.eksik-gerekce-tutmadi':'Eksik gerekçe varsa tutmadı say.',
+  'esp.core.parts.tuttu':'Tuttu',
+  'esp.core.parts.tutmadi':'Tutmadı',
+  'esp.core.parts.kaynak':'Kaynak:',
+  'esp.core.parts.konu-olculdu':'konu ölçüldü',
+  'esp.core.parts.vazgec':'Vazgeç',
   'esp.core.parts.i-saretler-beyandir-hicbir-k':'İşaretler beyandır: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
   'esp.core.parts.bu-konu-icin-notum':'Bu konu için notum',
   'esp.core.parts.pratik-bir-sinav-degildir-ce':'Pratik bir sınav değildir: cevabın doğrudan aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.',
@@ -575,6 +582,58 @@ ESP.Parts = (function(){
     })}</div>`;
   }
 
+  /* Konu sınaması (core/alan.js): önce üret, sonra karşılaştır; kararı kişi verir. */
+  function konuSinama(t, karisik){
+    const q = ESP.Alan.soru(t.id);
+    if(!q) return '';
+    const s = ESP.S.ui.alanSinav;
+    if(!s || s.id !== t.id) return K.Button({ label:yz('esp.core.parts.kendini-sina'), size:'sm', act:'alan-basla',
+      data:{ 'data-id':t.id, 'data-karisik':karisik ? '1' : '0' } });
+    /* Soruların çoğu «bu durumda» der: örnek sorunun parçasıdır. */
+    const ornek = when(q.ornek, () => html`<p class="small text-2"><b>${yz('esp.core.parts.ornek')}</b> <i>${q.ornek}</i></p>`);
+    if(!s.goster) return html`<div class="prac">
+      ${when(q.aktarim, () => K.Badge({ label:yz('esp.core.parts.aktarim-gorevi'), tone:'muted', icon:false }))}
+      ${ornek}
+      <p class="prac__q">${q.soru}</p>
+      ${K.Segmented({ act:'alan-guven', value:s.guven || '', aria:yz('esp.core.parts.ne-kadar-eminsin'),
+        items:[{ value:'emin', label:yz('esp.core.parts.eminim') }, { value:'kararsiz', label:yz('esp.core.parts.kararsizim') },
+          { value:'tahmin', label:yz('esp.core.parts.tahmin') }] })}
+      <div class="row mt-10">
+        ${K.Textarea({ id:'alan-yazi', rows:3, aria:yz('esp.core.parts.cevabin'), placeholder:yz('esp.core.parts.cevabini-yaz'), value:s.yazi })}
+        ${K.Mic({ target:'alan-yazi' })}
+      </div>
+      <div class="row wrap mt-10">
+        ${K.Button({ label:yz('esp.core.parts.karsilastir'), tone:'primary', size:'sm', act:'alan-goster' })}
+        ${K.Button({ label:yz('esp.core.parts.bilmiyorum'), size:'sm', act:'alan-goster', data:{ 'data-bos':'1' } })}
+        ${K.Button({ label:yz('esp.core.parts.vazgec'), size:'sm', act:'alan-vazgec' })}
+      </div>
+    </div>`;
+    return html`<div class="prac">
+      ${ornek}
+      <p class="prac__q">${q.soru}</p>
+      ${when(s.yazi, () => html`<p class="small"><b>${yz('esp.core.parts.senin-cevabin')}</b> ${s.yazi}</p>`)}
+      ${when(q.yanit, () => html`<p class="small"><b>${yz('esp.core.parts.beklenen-yanit')}</b> ${q.yanit}</p>`)}
+      ${when(q.olcut.length, () => html`<ul class="bullets small">${map(q.olcut, x => html`<li>${x}</li>`)}</ul>`)}
+      <p class="tiny dim">${yz('esp.core.parts.eksik-gerekce-tutmadi')}</p>
+      <div class="row wrap mt-8">
+        ${K.Button({ label:yz('esp.core.parts.tuttu'), tone:'primary', size:'sm', act:'alan-sonuc', data:{ 'data-sonuc':'1' } })}
+        ${K.Button({ label:yz('esp.core.parts.tutmadi'), size:'sm', act:'alan-sonuc', data:{ 'data-sonuc':'0' } })}
+      </div>
+      ${when(q.kaynaklar.length, () => html`<p class="tiny dim mt-8">${yz('esp.core.parts.kaynak')}
+        ${map(q.kaynaklar, (k, i) => html`${i ? ', ' : ''}<a href="${k.url}" target="_blank" rel="noopener">${k.ad}</a>`)}.
+        ${q.incelendi ? '' : yz('esp.core.alan.kaynak-baglami')}</p>`)}
+    </div>`;
+  }
+
+  /* Disiplinin kalıcılık dağılımı. Hiç sınanmadıysa çizilmez: «sıfır» değil «veri yok». */
+  function alanOzet(discId){
+    const P = (window.LIFEOS || {}).PANO, Us = window.LIFEOS.USTA, h = ESP.Alan.harita(discId);
+    if(!P || !h.olculen) return '';
+    return html`<div class="mb-8">${raw(P.yigin({ parcalar:['ogreniyor', 'tutuyor', 'kalici', 'saglam']
+        .map(id => ({ ad:Us.adi(id), deger:h.sayi[id], metin:String(h.sayi[id]) })) }))}
+      <p class="tiny dim mt-4">${h.olculen}/${h.toplam} ${yz('esp.core.parts.konu-olculdu')}</p></div>`;
+  }
+
   /* Konu listesi — her bölümün müfredatı.
 
      İşaretler ÖLÇÜM DEĞİL BEYANDIR ve her satırda öyle görünür. Hiçbir
@@ -585,10 +644,12 @@ ESP.Parts = (function(){
     const isaret = ESP.Lesson.topicMarks();
     const acik = ESP.S.ui.topicOpen;
 
-    return html`<div class="topics">${map(list, t => {
+    return html`${alanOzet(discId)}<div class="topics">${map(list, t => {
       const p = ESP.Lesson.topicProgress(t);
       const on = acik === t.id;
       const card = (ESP.OGRENME_KARTI_BY_TOPIC || {})[t.id];
+      /* Sınama açıkken anlatım gizlenir: cevap gözün önündeyken hatırlama ölçülmez. */
+      const sinaniyor = (ESP.S.ui.alanSinav || {}).id === t.id;
       return html`
         <div class="${cls('topic', on && 'is-open')}">
           <button class="topic__head" data-act="topic-open" data-id="${t.id}"
@@ -599,34 +660,23 @@ ESP.Parts = (function(){
               <span class="small muted">${t.goal}</span>
             </span>
             ${when(t.band, () => K.Badge({ label:t.band, tone:'muted', icon:false }))}
+            ${when(ESP.Alan.asama(t.id).id !== 'yok', () => K.Badge({ label:ESP.Alan.asama(t.id).ad, tone:ESP.Alan.asama(t.id).kritik ? 'warn' : 'muted', icon:false }))}
             <span class="tiny dim">${p.marked}/${p.total}</span>
           </button>
           ${when(on, () => html`
             <div class="topic__detail">
               ${when(card && card.explanation, () => html`
                 <div class="ogrenme mb-8" data-notum-kaynak="${'konu:' + t.id}">
-                  <p class="small mb-6" style="line-height:1.45">${card.explanation}</p>
-                  ${when(card.worked_example && card.worked_example.text, () => html`
+                  ${when(!sinaniyor, () => html`<p class="small mb-6" style="line-height:1.45">${card.explanation}</p>`)}
+                  ${when(!sinaniyor && card.worked_example && card.worked_example.text, () => html`
                     <div class="small text-2 mb-4">
                       <b>${yz('esp.core.parts.ornek')}</b> <i>${card.worked_example.text}</i>
                     </div>`)}
-                  ${when(card.common_misinterpretation, () => html`
+                  ${when(!sinaniyor && card.common_misinterpretation, () => html`
                     <div class="ogrenme__dikkat">
                       <b>${yz('esp.core.parts.sik-yanlis-yorum')}</b> ${card.common_misinterpretation}
                     </div>`)}
-                  ${when(card.practice && card.practice.prompt, () => html`
-                    <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">
-                      <b class="block mb-2">${yz('esp.core.parts.pratik')}</b>
-                      <p class="small mb-4">${card.practice.prompt}</p>
-                      ${when(card.practice.expected_answer, () => html`
-                        <details class="tiny dim"><summary>${yz('esp.core.parts.beklenen-yanit-ve-olcut')}</summary>
-                          <p class="mt-4 mb-0">${card.practice.expected_answer}</p>
-                        </details>`)}
-                    </div>`)}
-                  ${when(card.transfer && card.transfer.prompt, () => html`
-                    <div class="tiny dim mt-6">
-                      <b>${yz('esp.core.parts.aktarim')}</b> ${card.transfer.prompt}
-                    </div>`)}
+                  <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">${konuSinama(t, false)}</div>
                 </div>`)}
               ${map(t.items, (it, i) => html`
                 <div class="topicrow">
@@ -970,6 +1020,6 @@ ESP.Parts = (function(){
 
   return { kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
-    units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics };
+    units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics, konuSinama };
 
 })();

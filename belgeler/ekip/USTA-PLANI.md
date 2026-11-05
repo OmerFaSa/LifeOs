@@ -36,7 +36,30 @@ Yanlış zinciri keser. Son aşamanın adı «usta» değildir: yargı kişiye d
 
 ## Durum (2026-11-05)
 
-Çalışıyor: 1 (yalnız ESP dil), 2'nin kalıcılık kartı (yalnız ESP dil), 3, 4. `USTA.sira` testli ama henüz hiçbir ekrana bağlı değil; ilk kullanıcısı AYS olacak.
+Çalışıyor:
+
+- **ESP dil:** güven işareti, kalıcılık kartı.
+- **AYS:** güven işareti, konu kalıcılığı, Bugünkü sıra, «Sıradaki konular» kaynağı.
+- **SPİ koşu:** kişisel rekorlar, göreli hız.
+- **ESP bütün alanlar:** alan sınaması (`ESP/src/js/core/alan.js`). 68 konunun çalışma sorusu önce üretilir, sonra karşılaştırılır; kalıcı olan konuda soru aktarım görevine döner. Merdiven'de karışık sınama, konu listelerinde aşama.
+
+## Alan başına kaynak ve yöntem
+
+Ortak iskelet her alanda aynı: geri getir, ara ver, karıştır, kaynağa bak. Alan farkı yalnız neyin kanıt sayıldığıdır.
+
+| Alan | Kaynak (uygulamada) | En güçlü bulgu | Durum | Boşluk |
+|---|---|---|---|---|
+| Felsefe | Stanford Felsefe Ansiklopedisi, kanon | Argüman haritalama ~0,8 SD, standart ders ~0,34 (eleştirel düşünme testinde; felsefe öğrenimini doğrudan ölçmüyor) | Tez ve itiraz, safsata denetimi, alan sınaması | Tezi görsel harita olarak çizmek |
+| Tarih | Kongre Kütüphanesi | Kaynağı sorgulama ve yakın okuma kazandırıyor, kaynakları karşılaştırma zayıf (Reisman 2012, rastgele atamalı değil) | Kaynak eleştirisi, olay kartları, alan sınaması | Bir olay için iki kaynağı karşılaştırma görevi |
+| Okuma | Open Library | Okuduktan sonra geri getirme yeniden okumadan iyi (ön bulgular); strateji tek başına değil, ön bilgiyle (Peng 2023) | Dört düzey, not, «anlat», alan sınaması | Kitabı kapatıp notlardan sorma; hızlı okuma için kanıt taranmadı |
+| Yazı | Purdue OWL | Strateji öğretimi 0,59, akran desteği 0,59, geri bildirim 0,30 (Graham 2024; 2007'deki 0,82 sonra düştü) | Rubrikler, projeler, alan sınaması | Planla-gözden geçir adımları, dış okur geri bildirimi |
+| Müzik | Open Music Theory, Mutopia | Göreve yönelik pratik ile başarı r≈0,61 (Platz 2014), süre değil nitelik; karışık pratik uygulamada küçük (Czyż 2024) | Temiz tempo, plato, kulak eğitimi, alan sınaması | Parça sırası ve hata bölgesi |
+| Diksiyon | NIDCD | Bu taramada doğrudan kanıt bulunamadı | Ölçümlü diksiyon, alan sınaması | Yöntem önerilmedi, önce araştırılmalı |
+| Dil | CEFR, Universal Dependencies | Bkz. yukarıdaki tablo | SRS, sıklık, gölgeleme, alan sınaması | Dikte, kişisel unutma eğrisi |
+
+Bütün alanlarda: başkasına öğretmeye hazırlanmak salt çalışmadan iyi (Kobayashi 2019, etki büyüklüğü okunmadı); «anlat» bunun için temel.
+
+Sınır: 68 kart öğretmen incelemesinden geçmedi (`ready_for_app:false`); ekran bunu söyler. Kaynak adresleri eklenirken tek tek açılmadı.
 
 ## Boşluklar (etkiye göre)
 
@@ -69,3 +92,8 @@ Var olan ve önerilmeyen: AYS'de hız-isabet, sülük kart, karışık sınav, �
 - [Kelime kapsamı tekrarı](https://www.cambridge.org/core/journals/language-teaching/article/how-much-vocabulary-is-needed-to-use-english-replication-of-van-zeeland-schmitt-2012-nation-2006-and-cobb-2007/1D217A56A2E0056E67802A6A8360FDDE)
 - [Uchihara ve ark. 2025](https://www.cambridge.org/core/product/6ABB8C1F32D88D53EA8D05A4565E76F6/core-reader)
 - [Anki aralıklı tekrar SSS](https://docs.ankiweb.net/faqs/what-spaced-repetition-algorithm)
+- [Argüman haritalama, Twardy](https://philarchive.org/archive/TWAAMIv1), [van Gelder özeti](https://ecampusontario.pressbooks.pub/criticalthinking1234/chapter/introduction/)
+- [Tarih okuryazarlığı derlemesi](https://www.societyforhistoryeducation.org/pdfs/M18_Cribb_Maglio_and_Greenleaf.pdf)
+- [Graham ve ark. 2024](https://bohrium.dp.tech/paper/arxiv/812122954769891329), [Writing Next özeti](https://www.adlit.org/topics/writing/summary-writing-next)
+- [Prinz ve ark. 2020](https://link.springer.com/doi/10.1007/s10648-020-09558-6), [okumada geri getirme, bildiri](https://www.psychologicalscience.org/conventions/archive/2017annual/paper/3391/)
+- [Platz ve ark. 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4073287/)

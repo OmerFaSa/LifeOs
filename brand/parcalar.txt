@@ -93,6 +93,7 @@ js/core/gunukapat.js
 js/core/yetki.js
 js/core/arac.js
 js/core/kingogret.js esp
+js/core/alan.js esp
 js/core/kingarac.js
 js/core/olay.js
 js/core/kingveri.js
@@ -541,6 +542,7 @@ js/app.js
 ../js/core/yetki.js
 ../js/core/arac.js
 ../js/core/kingogret.js esp
+../js/core/alan.js esp
 ../js/core/kingarac.js
 ../js/core/olay.js
 ../js/core/kingveri.js
@@ -779,6 +781,7 @@ yetki.test.js
 arac.test.js
 kingarac.test.js
 kingogret.test.js esp
+alan.test.js esp
 kingveri.test.js
 olay.test.js
 kisi.test.js
