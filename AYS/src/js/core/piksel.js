@@ -193,7 +193,7 @@ window.LIFEOS = window.LIFEOS || {};
     kokler.forEach(kok => kok.querySelectorAll('svg:not([data-pxc])').forEach(cizimCevir));
   }
   function simgeIzle(){
-    if(/\/tests\//.test(location.pathname)) return;
+    if(//tests//.test(location.pathname)) return;
     simgeleriTara(document.body);
     let bekleyen = false, kuyruk = [];
     new MutationObserver(l => {
@@ -268,14 +268,31 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* Yüklenme ekranı: dağ, mağara, göl, deniz, tarla. İki sayfa aynı manzarayı görsün diye seçim saatten gelir. */
   const manzaraTuru = () => { const D = L.PIKSEL_DOGA; return D.TUR_LISTE[Math.floor(Date.now() / 180000) % D.TUR_LISTE.length]; };
+  /* Çizim 100-250 ms sürer: tıklamada takılmasın diye boş anda önceden hazırlanır, hazırsa o kullanılır. */
+  const manzaraOnbellek = {};
+  function manzaraHazir(W, H){
+    const D = L.PIKSEL_DOGA, t = manzaraTuru(), v = D.vakit(new Date().getHours()), a = [t, v, W, H].join();
+    if(manzaraOnbellek.a === a) return manzaraOnbellek;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const o = D.yerlesim(W, H, v, t);
+    D.binaCiz(c.getContext('2d'), o);
+    Object.assign(manzaraOnbellek, { a, c, o });
+    return manzaraOnbellek;
+  }
+  function manzaraOnceden(){
+    if(!L.PIKSEL_DOGA || hareketsiz() || //tests//.test(location.pathname)) return;
+    const yap = () => { if(document.visibilityState !== 'hidden') manzaraHazir(Math.ceil(window.innerWidth / MANZARA_OLCEK), Math.ceil(window.innerHeight / MANZARA_OLCEK)); };
+    if(window.requestIdleCallback) requestIdleCallback(yap, { timeout:8000 }); else setTimeout(yap, 4000);
+  }
   function manzaraKoy(el){
     const D = L.PIKSEL_DOGA;
     if(!D || !el || el.querySelector('canvas.piksel-manzara')) return null;
     const c = document.createElement('canvas'), W = Math.ceil(window.innerWidth / MANZARA_OLCEK), H = Math.ceil(window.innerHeight / MANZARA_OLCEK), arka = document.createElement('canvas');
     c.className = 'piksel-manzara'; c.setAttribute('aria-hidden', 'true');
     c.width = arka.width = W; c.height = arka.height = H;
-    const o = D.yerlesim(W, H, D.vakit(new Date().getHours()), manzaraTuru());
-    D.binaCiz(arka.getContext('2d'), o);
+    const hazir = manzaraHazir(W, H);
+    const o = hazir.o;
+    arka.getContext('2d').drawImage(hazir.c, 0, 0);
     const g = c.getContext('2d');
     D.kare(g, arka, o, Date.now() / 1000);
     el.insertBefore(c, el.firstChild);
@@ -318,7 +335,7 @@ window.LIFEOS = window.LIFEOS || {};
     setTimeout(() => { if(k.getAttribute('data-bos') === 'don') k.removeAttribute('data-bos'); }, 420);
   }
   function bosIzle(){
-    if(/\/tests\//.test(location.pathname)) return;
+    if(//tests//.test(location.pathname)) return;
     const k = document.documentElement;
     const uyan = () => { bos.son = Date.now(); if(!bos.el) bosKapa(); };
     ['pointermove', 'wheel', 'touchstart'].forEach(o => window.addEventListener(o, uyan, { passive:true }));
@@ -415,6 +432,7 @@ window.LIFEOS = window.LIFEOS || {};
     dongu();
     const varis = document.querySelector('.perde--karsilama');
     if(varis) manzaraKoy(varis);
+    manzaraOnceden();
   }
   function kur(){
     uygula();
