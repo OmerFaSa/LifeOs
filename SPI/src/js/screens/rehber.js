@@ -20,9 +20,15 @@ window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'spi', cekmece:'kutuphane', ad:'A
 
 SP.Screens.rehber = (function(){
   const RB = () => (window.LIFEOS || {}).REHBER;
+  /* Dinle düğmesi (ortak/kavrat.js) modülün kendi sesiyle okur; Türkçe ses yoksa düğme yok. */
+  const SES = {
+    var:() => !!(SP.Speak && SP.Speak.supported() && SP.Speak.hasTurkish()),
+    konus:m => SP.Speak.say(m, { agent:'king' }),
+    dur:() => { if(SP.Speak) SP.Speak.stop(); },
+  };
   function hazirla(){
     const r = RB();
-    if(r && !r.kuruluMu()) r.kur({ modul:'spi', konular:() => SP.REHBER_KONULAR || [], sinir:SP.REHBER_SINIR,
+    if(r && !r.kuruluMu()) r.kur({ modul:'spi', ses:SES, konular:() => SP.REHBER_KONULAR || [], sinir:SP.REHBER_SINIR,
       ciz:() => SP.App.render() });
     return r;
   }

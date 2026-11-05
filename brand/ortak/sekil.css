@@ -1,0 +1,19 @@
+/* ŞEKİL (brand/ortak/sekil.js) — tek kaynak; tools/ortak.py --yay üç arayüze kopyalar. */
+/* Çizgi ve yazı currentColor'dır: tema ile döner; vurgu --accent. Şekil kendi
+   genişliğinin 1,4 katına kadar büyür, dar ekranda sığana kadar küçülür. */
+.sekil{ margin:4px 0 14px; color:var(--text); --sk-zemin:var(--surface); }
+.sekil__svg{ display:block; max-width:100%; height:auto; overflow:visible; }
+.sk{ fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.sk-i{ stroke-width:1; }
+.sk-k{ stroke-dasharray:5 4; }
+.sk-g{ fill:currentColor; fill-opacity:.12; }
+.sk-f, .sk-uc{ fill:currentColor; }
+.sk-uc{ stroke:none; }
+.sk-zemin{ fill:var(--sk-zemin); }
+.sk-v{ stroke:var(--accent); }
+.sk-v.sk-g, .sk-v.sk-f, .sk-uc.sk-v{ fill:var(--accent); }
+.sk-t{ fill:currentColor; stroke:none; font-size:12px; font-family:inherit; }
+.sk-tk{ font-size:10.5px; fill:var(--text-2); }
+.sk-tb{ font-weight:700; }
+.sk-tv{ fill:var(--accent); }
+.sekil--kusur{ margin:4px 0 12px; }

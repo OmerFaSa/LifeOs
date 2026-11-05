@@ -105,4 +105,19 @@
       expect(eksik).toEqual([]);
     });
   });
+
+  /* Gör, dinle, sına (ortak/kavrat.js, 2026-11-05): bölüm çizimi ve konu kartları
+     kavrat denetiminden geçer; ilk örnek tm-29 (dik üçgen) kaybolmaz. */
+  describe('Konu anlatımı — adım adım çizim ve kartlar', () => {
+    it('her çizim ve kart seti denetimden geçer; tm-29 ikisini de taşır', () => {
+      const K = window.LIFEOS.KAVRAT, A = R.KONU_ANLATIM || {}, h = [];
+      Object.keys(A).forEach(id => {
+        (A[id].bolumler || []).forEach((b, i) => { if(b.cizim) K.denetle({ cizim:b.cizim }).forEach(m => h.push(id + ' bölüm ' + (i + 1) + ': ' + m)); });
+        if(A[id].kartlar) K.denetle({ kartlar:A[id].kartlar }).forEach(m => h.push(id + ': ' + m));
+      });
+      expect(h).toEqual([]);
+      expect(A['tm-29'].bolumler.some(b => b.cizim && b.cizim.adimlar.length === 3)).toBe(true);
+      expect(A['tm-29'].kartlar.length).toBe(5);
+    });
+  });
 })();

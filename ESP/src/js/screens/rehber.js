@@ -18,9 +18,15 @@ window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'esp', cekmece:'kutuphane', ad:'A
 
 ESP.Screens.rehber = (function(){
   const RB = () => (window.LIFEOS || {}).REHBER;
+  /* Dinle düğmesi (ortak/kavrat.js) modülün kendi sesiyle okur; Türkçe ses yoksa düğme yok. */
+  const SES = {
+    var:() => !!(ESP.Speak && ESP.Speak.supported() && ESP.Speak.hasTurkish()),
+    konus:m => ESP.Speak.say(m, { agent:'king' }),
+    dur:() => { if(ESP.Speak) ESP.Speak.stop(); },
+  };
   function hazirla(){
     const r = RB();
-    if(r && !r.kuruluMu()) r.kur({ modul:'esp', konular:() => ESP.REHBER_KONULAR || [], sinir:ESP.REHBER_SINIR,
+    if(r && !r.kuruluMu()) r.kur({ modul:'esp', ses:SES, konular:() => ESP.REHBER_KONULAR || [], sinir:ESP.REHBER_SINIR,
       ciz:() => ESP.App.render(), git:() => ESP.App.go('rehber') });
     return r;
   }

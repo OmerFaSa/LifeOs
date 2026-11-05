@@ -9,6 +9,8 @@ css/tokens.css
 css/base.css
 css/layout.css
 css/components.css
+css/sekil.css
+css/kavrat.css
 css/temel.css
 css/vitrin.css
 css/kart.css
@@ -111,6 +113,7 @@ js/core/pusula.js
 js/core/sorukart.js
 js/core/ogret.js
 js/core/usta.js
+js/core/kavrat.js
 js/core/parca-rehber.js
 js/core/king.js
 js/core/king-ses.js
@@ -243,7 +246,7 @@ js/core/planner.js ays
 js/core/istisna.js ays
 js/core/takvim.js ays
 js/core/ogrenyolu.js ays
-js/core/sekil.js ays
+js/core/sekil.js
 js/core/cikmis.js ays
 js/core/paragraf.js ays
 js/core/konusor.js ays
@@ -560,6 +563,7 @@ js/app.js
 ../js/core/sorukart.js
 ../js/core/ogret.js
 ../js/core/usta.js
+../js/core/kavrat.js
 ../js/core/parca-rehber.js
 ../js/core/king.js
 ../js/core/king-ses.js
@@ -581,7 +585,7 @@ js/app.js
 ../js/core/istisna.js ays
 ../js/core/takvim.js ays
 ../js/core/ogrenyolu.js ays
-../js/core/sekil.js ays
+../js/core/sekil.js
 ../js/core/cikmis.js ays
 ../js/core/paragraf.js ays
 ../js/core/konusor.js ays

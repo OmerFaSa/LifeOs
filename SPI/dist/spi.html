@@ -4192,6 +4192,63 @@ body.is-dragging .drop.is-over{
 .analiz-ara-baslik{ margin:28px 2px 10px; font-size:15px; font-weight:650; color:var(--text-2); }
 .analiz-ayrinti{ display:flex; justify-content:center; margin:16px 0 4px; }
 
+/* ==== css/sekil.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/sekil.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ŞEKİL (brand/ortak/sekil.js) — tek kaynak; tools/ortak.py --yay üç arayüze kopyalar. */
+/* Çizgi ve yazı currentColor'dır: tema ile döner; vurgu --accent. Şekil kendi
+   genişliğinin 1,4 katına kadar büyür, dar ekranda sığana kadar küçülür. */
+.sekil{ margin:4px 0 14px; color:var(--text); --sk-zemin:var(--surface); }
+.sekil__svg{ display:block; max-width:100%; height:auto; overflow:visible; }
+.sk{ fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.sk-i{ stroke-width:1; }
+.sk-k{ stroke-dasharray:5 4; }
+.sk-g{ fill:currentColor; fill-opacity:.12; }
+.sk-f, .sk-uc{ fill:currentColor; }
+.sk-uc{ stroke:none; }
+.sk-zemin{ fill:var(--sk-zemin); }
+.sk-v{ stroke:var(--accent); }
+.sk-v.sk-g, .sk-v.sk-f, .sk-uc.sk-v{ fill:var(--accent); }
+.sk-t{ fill:currentColor; stroke:none; font-size:12px; font-family:inherit; }
+.sk-tk{ font-size:10.5px; fill:var(--text-2); }
+.sk-tb{ font-weight:700; }
+.sk-tv{ fill:var(--accent); }
+.sekil--kusur{ margin:4px 0 12px; }
+
+/* ==== css/kavrat.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kavrat.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KAVRAT — adım adım çizim, Dinle düğmesi, kartlar (brand/ortak/kavrat.js).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kavrat.css`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır.
+   ==================================================================
+   Görsel dil §1.10: ince çizgi, tek vurgu rengi, gölge ve geçiş yok. Önceki
+   adımlar ikincil yazı renginde; vurgu yalnız son adımda. */
+
+.kavrat-cizim{ margin:6px 0 16px; }
+.kavrat-adim.is-eski{ color:var(--text-2); }
+.kavrat-adim.is-eski .sk-v{ stroke:currentColor; }
+.kavrat-adim.is-eski .sk-v.sk-g, .kavrat-adim.is-eski .sk-v.sk-f, .kavrat-adim.is-eski .sk-uc.sk-v,
+.kavrat-adim.is-eski .sk-tv{ fill:currentColor; }
+.kavrat-cizim__alt{ display:flex; align-items:baseline; gap:10px; margin:8px 0 0; font-size:14px; line-height:1.5; color:var(--text); }
+.kavrat-cizim__sayac{ flex:none; display:inline-flex; gap:4px; }
+.kavrat-nokta{ width:7px; height:7px; border-radius:50%; box-shadow:inset 0 0 0 1.5px var(--border-strong, var(--border)); }
+.kavrat-nokta.is-dolu{ background:var(--accent); box-shadow:none; }
+.kavrat-dugmeler{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.kavrat-dinle{ margin:0 0 8px; }
+
+.kavrat-kartlar{ margin:18px 0 8px; padding:14px 16px; border:1px solid var(--border); border-radius:14px; }
+.kavrat-kartlar__bas{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 14px; margin:0 0 10px; }
+.kavrat-kartlar__ad{ margin:0; font-size:13px; font-weight:600; color:var(--text-2); }
+.kavrat-kart{ padding:12px 0 2px; }
+.kavrat-kart__on{ margin:0 0 8px; font-size:16px; font-weight:600; line-height:1.5; }
+.kavrat-kart__arka{ margin:0; padding-top:8px; border-top:1px solid var(--border); font-size:15px; line-height:1.55; }
+.kavrat-kart__ipucu, .kavrat-kart__bos{ margin:0; font-size:13.5px; color:var(--text-2); }
+
 /* ==== css/temel.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
@@ -18926,7 +18983,7 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 :root[data-zemin="piksel"] .site--v5 .lrow{ background-image:none; }
 
 /* Düğmeler: basınca gerçekten iner */
-:root[data-zemin="piksel"] :is(.btn,.dugme){ border:0; background-image:none; background-color:var(--surface-2); color:var(--text); box-shadow:var(--px-dugme); margin:2px; transition:background-color var(--dur) var(--ease), transform 220ms var(--px-yay); }
+:root[data-zemin="piksel"] :is(.btn,.dugme){ border:0; background-image:none; background-color:var(--surface-2); color:var(--text); box-shadow:var(--px-dugme); margin:2px; transition:background-color var(--dur) var(--ease), transform var(--dur-press) var(--ease); }
 :root[data-zemin="piksel"] :is(.btn,.dugme):hover{ background-color:var(--surface-3); transform:none; }
 :root[data-zemin="piksel"] :is(.btn,.dugme):active{ transform:translateY(2px); }
 :root[data-zemin="piksel"] .btn--ghost{ background-color:transparent; }
@@ -19096,9 +19153,7 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 :root[data-zemin="piksel"], :root[data-zemin="piksel"] body{ cursor:var(--fig-imlec) 1 1, auto; }
 :root[data-zemin="piksel"] :is(a[href],button,summary,label[for],select,[role="button"],[role="radio"],[role="tab"],[role="switch"],[data-act],input[type="checkbox"],input[type="radio"],input[type="range"]):not(:disabled){ cursor:var(--fig-imlec_el) 11 1, pointer; }
 /* Yükleniyor: yumuşakça solup gelir */
-:root[data-zemin="piksel"] .skeleton__row{ background:var(--surface-3); background-image:none; -webkit-mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); animation:px-yanip 1s ease-in-out infinite alternate; }
-:root[data-zemin="piksel"] .skeleton__row:nth-child(3n+2){ animation-delay:.15s; }
-:root[data-zemin="piksel"] .skeleton__row:nth-child(3n){ animation-delay:.3s; }
+:root[data-zemin="piksel"] .skeleton__row{ background:var(--surface-3); background-image:none; animation:px-yanip 1s ease-in-out infinite alternate; }
 @keyframes px-yanip{ from{ opacity:.45; } to{ opacity:1; } }
 /* Küçük tepki: bardağa basınca iner */
 :root[data-zemin="piksel"] .su-bardak:active{ transform:translateY(2px); }
@@ -19155,42 +19210,13 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 
 /* ----- HAREKET: kısa ve yumuşak (2026-11-05: «animasyonlar çok kötü, kasıyor, az fps vibe veriyor»; adımlı dil geri alındı) -----
    Görünüm piksel, hareket akıcı: jeton.css'in eğrisi, kısa süre. `body *` ile geçiş özelliği yazılmaz: her öğe «bütün özellikleri
-   geçişli» olur, her stil hesabı şişer (base.css notu). Bilerek adımlı kalanlar küçük: oda, kedi, yazı imleci (kıvılcım da akıcı).
-   Az ya da işletim sistemi «azalt» derken base.css'in !important süresi hepsini söndürür; ayrı kural gerekmez. */
-:root[data-zemin="piksel"]{ --px-otur:cubic-bezier(.34,1.45,.6,1); --px-yay:cubic-bezier(.34,1.8,.5,1); --dur-press:80ms; --dur:140ms; --dur-lg:220ms; --dur-in:320ms; --h-kisa:140ms; --h-uzun:240ms; --px-bas:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu); }
+   geçişli» olur, her stil hesabı şişer (base.css notu). Bilerek adımlı kalanlar küçük: kıvılcım, oda, kedi, yazı imleci. */
+:root[data-zemin="piksel"]{ --dur-press:80ms; --dur:140ms; --dur-lg:220ms; --dur-in:320ms; --h-kisa:140ms; --h-uzun:240ms; --px-bas:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu); }
 @keyframes px-gel{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
 @keyframes px-yan{ from{ opacity:0; transform:translateX(12px); } to{ opacity:1; transform:none; } }
 :root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.sayfabasi,.donen,.kutu,.ledger,.pk,.card,.bolumcubugu,.sayfabolum,.content){ animation-duration:var(--dur-lg); }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.sayfabolumler--kat > .sayfabolum.is-gelen,.kmenu--hizli > *,.king__dkart,.defter__kagit,.toast){ animation-name:px-gel; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) .haberci{ animation-name:px-yan; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
-/* 2026-11-05, ikinci tur (kullanıcı beş öneriyi seçti: oturma, yay, çekmece, onay, yükleme). Hareket akıcı, şekil piksel. */
-/* Sayfa: kartlar sırayla gelir ve hafifçe oturur. Ad «sayfa-gir» ile başlar: hız ayarında «Sayfa geçişi»ne düşer. */
-@keyframes sayfa-gir-px{ from{ opacity:0; transform:translateY(-10px); } to{ opacity:1; transform:none; } }
-:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar,.bolumcubugu){ animation-name:sayfa-gir-px; animation-duration:300ms; animation-timing-function:var(--px-otur); }
-:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(2){ animation-delay:40ms; }
-:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(3){ animation-delay:80ms; }
-:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(4){ animation-delay:120ms; }
-:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(n+5){ animation-delay:160ms; }
-/* Panel çekmece gibi açılır: üstten sert kenarla, içerik bir an sonra. Bitince kırpma kalkar (backwards): çerçeve ve gölge kesilmez. */
-@keyframes px-ac{ from{ clip-path:inset(-24px -24px 100% -24px); } to{ clip-path:inset(-24px); } }
-@keyframes px-ic{ from{ opacity:0; } }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.katman,.overlay .sheet){ animation:px-ac 240ms cubic-bezier(.2,.8,.3,1) backwards; }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.katman:not(.kmenu--hizli),.overlay .sheet) > *{ animation:px-ic 180ms ease 60ms backwards; }
-/* Onay: tik piksel çizimiyle yaylanır, yalnız gerçek tikte (hareket.js .h-tik); kutunun kendisi büyümez, kenarı keskin kalır. */
-@keyframes px-tik{ from{ transform:scale(.4); } }
-:root[data-zemin="piksel"] .h-tik input[type="checkbox"]{ animation:none; }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) .h-tik input[type="checkbox"]:checked::after{ animation:px-tik 260ms var(--px-yay); }
-/* Rozet anı: dört köşe işareti kâğıdın çevresinde kapanıp açılır ve söner. Köşeler maskeyle kesilir (zemin geçişi değil). */
-@keyframes px-kose{ 0%{ inset:-16px; opacity:0; } 30%{ inset:-9px; opacity:1; } 70%{ inset:-12px; opacity:1; } 100%{ inset:-12px; opacity:0; } }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) .haberci::after{ content:''; position:absolute; inset:-12px; border:3px solid var(--primary); opacity:0; pointer-events:none;
-  -webkit-mask:conic-gradient(at 10px 10px, transparent 75%, black 0) 0 0 / calc(100% - 10px) calc(100% - 10px); mask:conic-gradient(at 10px 10px, transparent 75%, black 0) 0 0 / calc(100% - 10px) calc(100% - 10px);
-  animation:px-kose 560ms cubic-bezier(.2,.8,.3,1) 180ms both; }
-/* Yükleme: yuvarlak halka yerine sekiz kare; ışıklı kare çevrede kayarak döner. */
-@keyframes px-don{ 0%{ transform:none; } 25%{ transform:translateX(10px); } 50%{ transform:translate(10px,10px); } 75%{ transform:translateY(10px); } 100%{ transform:none; } }
-:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin){ position:relative; width:15px; height:15px; border:0; border-radius:0; background:none; animation:none; }
-:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::before, :root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::after{ content:''; position:absolute; left:0; top:0; width:4px; height:4px; }
-:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::before{ background:var(--border-strong); box-shadow:5px 0 0 var(--border-strong),10px 0 0 var(--border-strong),10px 5px 0 var(--border-strong),10px 10px 0 var(--border-strong),5px 10px 0 var(--border-strong),0 10px 0 var(--border-strong),0 5px 0 var(--border-strong); }
-:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::after{ background:var(--primary); animation:px-don 1s linear infinite; }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.sayfabolumler--kat > .sayfabolum.is-gelen,.overlay .sheet,.kmenu--hizli > *,.king__dkart,.defter__kagit,.toast){ animation-name:px-gel; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.katman,.haberci){ animation-name:px-yan; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
 :root[data-zemin="piksel"] .site--v5 .kapak__ic{ animation:none; }
 :root[data-zemin="piksel"] .kenar__cekmece::before{ animation:none; }
 :root[data-zemin="piksel"] .h-halka{ display:none; }
@@ -19204,24 +19230,10 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 :root[data-zemin="piksel"] .site--v5 > .kenar *{ transition-duration:var(--dur); transition-delay:0ms; }
 /* Basınca gerçekten iner; üzerine gelince simge bir kez zıplar */
 :root[data-zemin="piksel"] :is(.btn,.dugme,.secenek,.chip--tap):active{ transform:translateY(2px); box-shadow:var(--px-bas); }
-/* İniş anında, kalkış küçük bir yayla (yukarıdaki 220 ms --px-yay) */
-:root[data-zemin="piksel"] :is(.btn,.dugme):active{ transition-duration:var(--dur), var(--dur-press); transition-timing-function:var(--ease); }
 :root[data-zemin="piksel"] :is(.btn--primary,.giris__gonder,.dugme--ana):active{ box-shadow:0 -2px 0 #7c2f12,0 2px 0 #7c2f12,-2px 0 0 #7c2f12,2px 0 0 #7c2f12,inset 0 3px 0 #00000040; }
 :root[data-zemin="piksel"] .kisayol__d:active .kisayol__simge{ transform:translateY(2px); box-shadow:var(--px-bas); }
 :root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.kenar__cekmece:hover svg,.kisayol__d:hover .kisayol__simge svg,.altbant :is(a,button):active svg,.kart:hover .sekil,.kart:hover .logo){ animation:px-zip .32s ease-in-out; }
 :root[data-zemin="piksel"]:not([data-hareket="az"]) .toast::before{ animation:px-zip .32s ease-in-out .12s; }
-/* Küçük tepkiler (2026-11-05, üçüncü tur: «tatlı minik UI animasyonları»). Hepsi gerçek bir dokunuşta; sınıfı piksel.js koyar. */
-/* Doğru cevap: harf bir kez zıplar (yeşil kıvılcım JS'te); yanlış: kısa bir «hayır» sallanması. */
-@keyframes px-sars{ 20%{ transform:translateX(-3px); } 40%{ transform:translateX(3px); } 60%{ transform:translateX(-2px); } 80%{ transform:translateX(2px); } }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) .px-dogru :is(.secenek__harf, b){ animation:px-zip .32s ease-in-out; }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) .px-yanlis{ animation:px-sars 280ms ease-in-out; }
-/* Anahtar: topuz ucuna yaylanarak varır. Geçiştir: yalnız aynı öğe değişince oynar, yeniden çizimde oynamaz. */
-:root[data-zemin="piksel"] .plan__anahtar i, :root[data-zemin="piksel"] .hesap-anahtar::after{ transition:transform 240ms var(--px-otur); }
-/* Değeri değişen sayı yerine hafif bir yayla oturur (hareket.js 149) */
-:root[data-zemin="piksel"] .h-yuvarla{ animation-timing-function:var(--px-otur); }
-/* Kaydırıcı: tutulan topuz biraz basılır */
-:root[data-zemin="piksel"] input[type="range"]:not(.skart *,.sesduzey *)::-webkit-slider-thumb{ transition:transform var(--dur-press) var(--ease); }
-:root[data-zemin="piksel"] input[type="range"]:not(.skart *,.sesduzey *):active::-webkit-slider-thumb{ transform:scaleY(.8); }
 /* Kıvılcım: gerçek kayıt ve tikte, parmağın altında (piksel.js) */
 .px-kivilcim{ position:fixed; width:0; height:0; z-index:10002; pointer-events:none; }
 .px-kivilcim i{ position:absolute; left:-2px; top:-2px; display:block; width:4px; height:4px; }
@@ -24907,7 +24919,7 @@ window.LIFEOS = window.LIFEOS || {};
   const secili = () => document.documentElement.getAttribute('data-zemin') === 'piksel';
   function hareketsiz(){
     if(document.documentElement.getAttribute('data-hareket') === 'az') return true;
-    return !!(L.hareketAz && L.hareketAz());
+    return !!(L.ANIMASYON && L.ANIMASYON.azMi && L.ANIMASYON.azMi());
   }
   function kare(t){
     if(durum.g && durum.o && !durum.kayiyor) sahneMotor().kare(durum.g, durum.arka, durum.o, t);
@@ -25062,36 +25074,25 @@ window.LIFEOS = window.LIFEOS || {};
       bosAc(false);
     }, 5000);
   }
-  /* Kıvılcım: gerçek bir kayıt ya da tikte sekiz kare dağılır ve küçülerek söner. Akıcı (2026-11-05: adımlı hâli 14 fps
-     görünüyordu). Süs: veri okumaz, hareket ayarına ve «Düğme ve dokunuş» hızına uyar (Kapalı'da çıkmaz). */
+  /* Kıvılcım: gerçek bir kayıt ya da tikte sekiz kare dağılır. Süs: veri okumaz, hareket ayarına uyar. */
   const KIVILCIM = [[-16, -16], [0, -24], [16, -16], [24, 0], [16, 16], [0, 24], [-16, 16], [-24, 0]];
-  /* Desenler: [dx, dy, gecikme ms]. BUYUK listenin son işinde, TOZ silinen satırda, YAN açılan anahtarda. */
-  const DESEN = Object.freeze({
-    kivilcim:KIVILCIM,
-    buyuk:KIVILCIM.concat(KIVILCIM.map(d => [Math.round(d[0] * 1.8), Math.round(d[1] * 1.8), 70])),
-    toz:[[-40, 14], [-22, 22], [-6, 12], [10, 24], [28, 16], [46, 20], [60, 12]],
-    yan:[[14, -8], [16, 6]],
-  });
-  function kivilcim(x, y, renkler, desen, sure){
-    const hiz = L.ANIMASYON && L.ANIMASYON.hizOrani ? L.ANIMASYON.hizOrani('dugme') : 1;
-    if(!secili() || hareketsiz() || !hiz || !document.body) return 0;
+  function kivilcim(x, y, renkler){
+    if(!secili() || hareketsiz() || !document.body) return 0;
     const R = renkler || ['#ffd35a', '#f2a24e', '#fff8ea'], kap = document.createElement('div');
     kap.className = 'px-kivilcim';
     kap.setAttribute('aria-hidden', 'true');
     kap.style.left = Math.round(x) + 'px';
     kap.style.top = Math.round(y) + 'px';
-    const D = DESEN[desen] || KIVILCIM;
-    sure = sure || 420;
-    D.forEach((d, i) => {
+    KIVILCIM.forEach((d, i) => {
       const k = document.createElement('i');
       k.style.background = R[i % R.length];
       kap.appendChild(k);
       const son = 'translate(' + d[0] + 'px,' + d[1] + 'px)';
-      k.animate([{ transform:'none', opacity:1, easing:'cubic-bezier(.2,.8,.3,1)' }, { transform:son, opacity:1, offset:.6, easing:'ease-in' }, { transform:son + ' scale(.5)', opacity:0 }], { duration:sure / hiz, delay:(d[2] || 0) / hiz, fill:'both' });
+      k.animate([{ transform:'none', opacity:1 }, { transform:son, opacity:1, offset:.75 }, { transform:son, opacity:0 }], { duration:360, easing:'steps(5, end)', fill:'forwards' });
     });
     document.body.appendChild(kap);
-    setTimeout(() => kap.remove(), (sure + 160) / hiz);
-    return D.length;
+    setTimeout(() => kap.remove(), 420);
+    return KIVILCIM.length;
   }
   /* Kayıtta bir kalp yükselir: yalnız gerçek kayıtta çağrılır. */
   function kayitTepki(e){
@@ -25111,68 +25112,19 @@ window.LIFEOS = window.LIFEOS || {};
     setTimeout(() => kap.remove(), 620);
     return n;
   }
-  function ogeKivilcim(e, renkler, desen, sure){
+  function ogeKivilcim(e, renkler){
     const r = e.getBoundingClientRect();
-    return kivilcim(r.left + r.width / 2, r.top + r.height / 2, renkler, desen, sure);
+    return kivilcim(r.left + r.width / 2, r.top + r.height / 2, renkler);
   }
-  /* Silinen satırın yerinden gri kareler aşağı süzülür (hareket.js satır kapanışı). Renk temanın kendi çizgisi. */
-  function toz(e){
-    const k = getComputedStyle(document.documentElement);
-    return ogeKivilcim(e, [k.getPropertyValue('--border-strong').trim() || '#c9a988', k.getPropertyValue('--text-3').trim() || '#6f4f42'], 'toz', 520);
-  }
-  /* Bu tikle listenin hepsi bitti mi: en az iki iş, hepsi işaretli ya da (az sonra) bitmiş. */
-  function listeBitti(t){
-    const kutu = t.closest('ul, ol, .kutu, .ledger, .card') || t.parentElement;
-    if(!kutu) return false;
-    if(t.matches('input')){
-      const h = Array.from(kutu.querySelectorAll('input[type="checkbox"]'));
-      return h.length >= 2 && h.every(c => c.checked);
-    }
-    const h = Array.from(kutu.querySelectorAll('button.minrow'));
-    return h.length >= 2 && h.every(b => b === t || b.classList.contains('is-done'));
-  }
-  /* Cevap işaretlendikten sonra: doğruysa harf zıplar ve yeşil kıvılcım, yanlışsa kısa sallanma. */
-  function cevapIsle(e){
-    if(!e || !e.classList) return null;
-    const tur = e.classList.contains('is-dogru') ? 'dogru' : e.classList.contains('is-yanlis') ? 'yanlis' : null;
-    if(!tur || hareketsiz()) return tur;
-    e.classList.remove('px-dogru', 'px-yanlis');
-    void e.offsetWidth;
-    e.classList.add('px-' + tur);
-    if(tur === 'dogru') ogeKivilcim(e.querySelector('.secenek__harf, b') || e, ['#5fbf4f', '#2f7a2a', '#ffd35a']);
-    return tur;
-  }
-  /* Ekran yeniden çizilince tıklanan öğe değişir: aynı kimlikle yeniden bulunur. */
-  function yenidenBul(sec, yedek, fn){
-    let n = 0;
-    const bak = () => { const e = (sec && document.querySelector(sec)) || (yedek && yedek.isConnected ? yedek : null); if(!fn(e) && ++n < 3) setTimeout(bak, 90); };
-    setTimeout(bak, 40);
-  }
-  const kimlik = (e, a) => e.getAttribute(a) == null ? null : '[' + a + '="' + CSS.escape(e.getAttribute(a)) + '"]';
   function tepkiIzle(){
     document.addEventListener('click', o => {
       const t = o.target;
-      if(!t || !t.closest || !secili()) return;
+      if(!t || !t.closest) return;
       const su = t.closest('.su-bardak');
       if(su){ ogeKivilcim(su, ['#58b9ec', '#e6f7ff', '#2f93cf']); return; }
-      if(t.matches('input[type="checkbox"]:checked')){ listeBitti(t) ? ogeKivilcim(t, null, 'buyuk', 560) : ogeKivilcim(t); return; }
+      if(t.matches('input[type="checkbox"]:checked')){ ogeKivilcim(t); return; }
       const satir = t.closest('button.minrow:not(.is-done)');
-      if(satir){ const m = satir.querySelector('.minrow__mark') || satir; listeBitti(satir) ? ogeKivilcim(m, null, 'buyuk', 560) : ogeKivilcim(m); return; }
-      const sik = t.closest('.secenek[data-harf]:not([disabled]), .king__soru-sik:not([disabled])');
-      if(sik){
-        const sec = sik.matches('.king__soru-sik') ? kimlik(sik, 'data-king') : (kimlik(sik, 'data-act') || '') + kimlik(sik, 'data-harf');
-        yenidenBul(sec && (sik.matches('.king__soru-sik') ? '.king__soru-sik' : '.secenek') + sec, sik, cevapIsle);
-        return;
-      }
-      const an = t.closest('[role="switch"]');
-      if(an && an.getAttribute('aria-checked') !== 'true'){
-        const r = an.getBoundingClientRect(), x = r.right - 6, y = r.top + r.height / 2;
-        yenidenBul(null, an, () => {
-          const e = document.elementFromPoint(x, y), s = (e && e.closest && e.closest('[role="switch"]')) || (an.isConnected ? an : null);
-          if(s && s.getAttribute('aria-checked') === 'true') kivilcim(x, y, null, 'yan', 260);
-          return true;
-        });
-      }
+      if(satir) ogeKivilcim(satir.querySelector('.minrow__mark') || satir);
     }, true);
   }
   function uygula(){
@@ -25206,7 +25158,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
+  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, cizimCevir });
 })(window.LIFEOS);
 
 /* ==== js/core/ayarlar.js ==== */
@@ -27561,7 +27513,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'cbba3af9', at:'2026-11-05 13:11', dirty:true };
+SP.BUILD = { id:'ca024e73', at:'2026-11-05 13:08', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -34676,7 +34628,6 @@ window.LIFEOS.HAREKET = (function(){
   }
   function kapat(h){
     const bitir = () => { if(h.parentNode) h.parentNode.removeChild(h); };
-    const PX = window.LIFEOS && window.LIFEOS.PIKSEL; if(PX && PX.toz) PX.toz(h);   // piksel: yerinden toz süzülür
     requestAnimationFrame(() => requestAnimationFrame(() => { h.classList.add('is-kapali'); }));
     h.addEventListener('transitionend', e => { if(e.propertyName === 'height') bitir(); });
     setTimeout(bitir, 700);
@@ -50966,7 +50917,10 @@ LIFEOS.KARSILAMA = (function(){
         koymaz, doz önermez — AGENTS §1.5). Ekranda «elle yazıldı ·
         doğrulanmadı» yazar.
      2. METİN ÖNCE KAÇIRILIR, sonra işaretler açılır; başka HTML geçmez.
-     3. «Okudum» bu cihazda kalır (modülün deposu); hiçbir ölçüme yazılmaz. */
+     3. «Okudum» bu cihazda kalır (modülün deposu); hiçbir ölçüme yazılmaz.
+     4. GÖR, DİNLE, SINA (2026-11-05). Bölüm `cizim` (adım adım şekil), konu
+        `kartlar` taşıyabilir; ikisi ve «Dinle» düğmesi ortak/kavrat.js'nindir.
+        Modül sesini `kur({ ses })` ile verir; ses yoksa düğme çıkmaz. */
 window.LIFEOS.PARCA.yazilar({
   'ortak.rehber.ornek':'Örnek',
   'ortak.rehber.cozumu-goster':'Çözümü göster',
@@ -50985,7 +50939,8 @@ window.LIFEOS = window.LIFEOS || {};
 LIFEOS.REHBER = (function(){
   'use strict';
   const OKUNAN = 'lifeos.rehber.okundu';
-  let ayar = null;            // { modul, konular:() => [], sinir, depo:{ oku, yaz }, ciz }
+  let ayar = null;            // { modul, konular:() => [], sinir, depo:{ oku, yaz }, ciz, ses? }
+  const KV = () => (window.LIFEOS || {}).KAVRAT;
   let secili = null;
 
   const kac = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -51049,10 +51004,13 @@ LIFEOS.REHBER = (function(){
 
   /* ------------------------------------------------------------ konu */
   const para = m => (Array.isArray(m) ? m : (m ? [m] : [])).map(p => '<p>' + metinHtml(p) + '</p>').join('');
-  function bolumHtml(b, i){
+  function bolumHtml(b, i, konu){
+    const kv = KV(), kim = 'rehber:' + konu + ':' + i;
     return '<section class="rehber__bolum" id="rehber-b' + (i + 1) + '">'
       + '<h2 class="rehber__baslik"><span class="rehber__no">' + (i + 1) + '</span>' + kac(b.baslik) + '</h2>'
+      + (kv ? kv.dinleHtml(kim, b) : '')
       + para(b.metin)
+      + (kv && b.cizim ? kv.cizimHtml(kim, b.cizim) : '')
       + (b.liste && b.liste.length ? '<ul class="rehber__madde">' + b.liste.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul>' : '')
       + (b.formul && b.formul.length ? '<div class="rehber__formul">' + b.formul.map(x => '<div>' + metinHtml(x) + '</div>').join('') + '</div>' : '')
       + (b.ornek ? ('<div class="rehber__ornek"><p class="rehber__ornek-etiket">' + yz('ortak.rehber.ornek') + '</p><p>') + metinHtml(b.ornek.soru) + '</p>'
@@ -51072,7 +51030,8 @@ LIFEOS.REHBER = (function(){
       + '<h1 class="rehber__ad">' + kac(k.ad) + '</h1>'
       + '<p class="rehber__giris">' + metinHtml(k.giris) + '</p>'
       + (k.kazanim && k.kazanim.length ? ('<div class="rehber__kazanim"><p>' + yz('ortak.rehber.bu-konunun-sonunda') + '</p><ul>') + k.kazanim.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
-      + (k.bolumler || []).map(bolumHtml).join('')
+      + (k.bolumler || []).map((b, j) => bolumHtml(b, j, k.id)).join('')
+      + (KV() && k.kartlar ? KV().kartlarHtml('rehber:' + k.id, k.kartlar) : '')
       + (k.akilda && k.akilda.length ? ('<div class="rehber__akilda"><p>' + yz('ortak.rehber.akilda-kalsin') + '</p><ul>') + k.akilda.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
       + (k.kaynaklar && k.kaynaklar.length ? ('<p class="rehber__kaynak"><b>' + yz('ortak.rehber.dayanak') + '</b> ') + k.kaynaklar.map(kac).join(' · ') + '</p>' : '')
       + (ayar && ayar.sinir ? '<p class="rehber__sinir">' + kac(ayar.sinir) + '</p>' : '')
@@ -51110,6 +51069,9 @@ LIFEOS.REHBER = (function(){
       if(!b.some(x => x.ornek || x.dikkat)) h.push(ad + ': ne örnek ne dikkat var');
       if(!k.kaynaklar || !k.kaynaklar.length) h.push(ad + ': dayanak yok');
       b.forEach((x, i) => { if(!x.baslik || !x.metin) h.push(ad + ': bölüm ' + (i + 1) + ' başlıksız ya da metinsiz'); });
+      const kv = KV();
+      b.forEach((x, i) => { if(x.cizim) (kv ? kv.denetle({ cizim:x.cizim }) : ['kavrat.js yok']).forEach(m => h.push(ad + ': bölüm ' + (i + 1) + ' ' + m)); });
+      if(k.kartlar) (kv ? kv.denetle({ kartlar:k.kartlar }) : ['kavrat.js yok']).forEach(m => h.push(ad + ': ' + m));
     });
     const gor = {};
     (l || []).forEach(k => { if(gor[k.id]) h.push(k.id + ': kimlik iki kez'); gor[k.id] = 1; });
@@ -51137,7 +51099,10 @@ LIFEOS.REHBER = (function(){
     });
   }
 
-  function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); }
+  function kur(o){
+    ayar = Object.assign({ modul:'' }, o || {});
+    if(KV()) KV().kur({ modul:ayar.modul + '.rehber', ses:ayar.ses, metin:metinHtml });
+  }
   function _sifirla(){ ayar = null; secili = null; }
 
   return { kur, html, listeHtml, konuHtml, alanHtml, metinHtml, sec, secili:() => secili, okudum, okunduMu, denetle, kuruluMu:() => !!ayar, _sifirla };
@@ -51727,6 +51692,340 @@ window.LIFEOS.USTA = (function(){
   }
 
   return { ARA, ASAMALAR, adi:id => ADLAR()[id], asama, kalibrasyon, sira, harita, gunEkle };
+})();
+
+/* ==== js/core/kavrat.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kavrat.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KAVRAT — anlatımı görerek, dinleyerek ve kartla kavratmak (AYS, SPİ, ESP).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kavrat.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `kavrat.css`,
+   testi `kavrat.test.js`. Plan: `belgeler/ekip/OGRETME-PLANI.md`.
+   ==================================================================
+
+   Üç parça; modül yalnız içerik ve sesini verir, çekirdek ne SPİ'yi ne ESP'yi bilir:
+     cizim   bölümün adım adım şekli: { w, h, alt, adimlar:[{ o:[öğe…], not }] }.
+             Öğeler `sekil.js` kataloğundan. Önceki adımlar ikincil renkte kalır,
+             yalnız son adım vurgulu: göz yeni parçaya gider.
+     dinle   bölümün metnini modülün kendi ses katmanıyla okur. Ses yoksa düğme yok.
+     kartlar konunun 3–8 kartı { on, arka }. Önce hatırla, sonra çevir (geri getirme);
+             «Bildim / Bilemedim» `USTA` kanıtıdır, sıra `USTA.sira`. Sesli tekrarda
+             kartın önü okunur, kısa ara, arkası okunur.
+
+   Sözler:
+     1. KARAR KODDA (AGENTS §1.1). Aşama, vade ve sıra `USTA`'nındır; model yok.
+     2. EKSİK SIFIR DEĞİL (§1.2). Hiç sorulmamış kart «veri yok»tur, sayaçta boş kalır.
+     3. ÖLÇÜME VE XP'YE YAZMAZ (§1.6). Kanıtlar bu cihazın deposunda (`<modul>.kavrat.kanit`).
+     4. YERİNDE ÇİZER. Tıklama yalnız kendi parçasını yeniden çizer, odak aynı düğmede
+        kalır; sayfa baştan çizilmez, kaydırma yeri kaybolmaz.
+     5. SES İSTEĞE BAĞLIDIR. API ya da Türkçe ses yoksa metin aynen durur, hata yok. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.kavrat.adim':'Adım {i} / {n}',
+  'ortak.kavrat.onceki':'‹ Önceki',
+  'ortak.kavrat.sonraki':'Sonraki ›',
+  'ortak.kavrat.bastan':'Baştan',
+  'ortak.kavrat.dinle':'Dinle',
+  'ortak.kavrat.durdur':'Durdur',
+  'ortak.kavrat.dinle-etiket':'«{ad}» bölümünü sesli dinle',
+  'ortak.kavrat.kartlar':'Kartlar',
+  'ortak.kavrat.kalici':'Kalıcı',
+  'ortak.kavrat.cevir':'Cevabı göster',
+  'ortak.kavrat.bildim':'Bildim',
+  'ortak.kavrat.bilemedim':'Bilemedim',
+  'ortak.kavrat.sesli':'Sesli tekrar',
+  'ortak.kavrat.once-hatirla':'Önce aklından söyle, sonra çevir.',
+  'ortak.kavrat.bugun-bitti':'Bugünlük kart kalmadı. Sıradaki tekrar: {g}.',
+  'ortak.kavrat.kart-sirasi':'Kart {i}, sırada {n}',
+});
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.KAVRAT = (function(){
+  'use strict';
+  const L = () => window.LIFEOS || {};
+  const yazi = (id, d) => L().PARCA.yazi(id, d);
+  const kac = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const SES_ARA = 3500;   // sistem ayarı: sesli tekrarda önü okuduktan sonra düşünme payı (ms)
+
+  let ayar = { modul:'ortak' };
+  const KAYIT = new Map();          // parça kimliği → { tur, veri }
+  const ADIM = {};                  // çizim kimliği → gösterilen adım (0'dan)
+  const KART = {};                  // konu → { sira:[on], i, cevrik, sesli }
+  let konusan = null;               // dinlenen bölüm kimliği
+  let sesKusak = 0;                 // eski sesli tekrar zamanlayıcısını boşa düşürür
+
+  function kur(o){ ayar = Object.assign({ modul:'ortak' }, o || {}); }
+  function metin(s){ return ayar.metin ? ayar.metin(String(s == null ? '' : s)) : kac(s); }
+  function bugun(){
+    if(ayar.bugun) return ayar.bugun();
+    const d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  }
+  function sesVar(){ try{ return !!(ayar.ses && ayar.ses.var()); }catch(e){ return false; } }
+
+  /* ------------------------------------------------------------ denetim */
+
+  /* Bir bölümün çizimi ya da bir konunun kartları için kusurlar; boş = temiz. */
+  function denetle(o){
+    const h = [], S = L().SEKIL;
+    if(o && o.cizim){
+      const c = o.cizim, a = c.adimlar;
+      if(!Array.isArray(a) || a.length < 2 || a.length > 6) h.push('çizim: 2–6 adım olmalı');
+      else{
+        a.forEach((x, i) => {
+          if(!x || !Array.isArray(x.o) || !x.o.length) h.push('çizim adım ' + (i + 1) + ': öğe yok');
+          const n = String((x && x.not) || '').trim();
+          if(n.length < 8 || n.length > 140) h.push('çizim adım ' + (i + 1) + ': not 8–140 harf olmalı');
+        });
+        if(S) S.denetle({ w:c.w, h:c.h, alt:c.alt, o:[].concat.apply([], a.map(x => (x && x.o) || [])) })
+          .forEach(k => h.push('çizim: ' + k));
+        else h.push('çizim: sekil.js yüklü değil');
+      }
+    }
+    if(o && o.kartlar){
+      const k = o.kartlar, gor = {};
+      if(!Array.isArray(k) || k.length < 3 || k.length > 8) h.push('kartlar: 3–8 kart olmalı');
+      else k.forEach((x, i) => {
+        const on = String((x && x.on) || '').trim(), arka = String((x && x.arka) || '').trim();
+        if(on.length < 4 || on.length > 160) h.push('kart ' + (i + 1) + ': ön yüz 4–160 harf olmalı');
+        if(arka.length < 1 || arka.length > 240) h.push('kart ' + (i + 1) + ': arka yüz 1–240 harf olmalı');
+        if(gor[on]) h.push('kart ' + (i + 1) + ': ön yüz iki kez');
+        gor[on] = 1;
+      });
+    }
+    return h;
+  }
+
+  /* ------------------------------------------------------------ çizim */
+
+  function cizimHtml(id, c){
+    if(!c || denetle({ cizim:c }).length) return '';
+    KAYIT.set(id, { tur:'cizim', veri:c });
+    const n = c.adimlar.length, k = Math.min(ADIM[id] || 0, n - 1), S = L().SEKIL;
+    const katman = c.adimlar.slice(0, k + 1).map((a, i) =>
+      '<g class="kavrat-adim' + (i < k ? ' is-eski' : '') + '">' + S.ogeler(a.o) + '</g>').join('');
+    const sayac = yazi('ortak.kavrat.adim', { i:k + 1, n });
+    const not = c.adimlar[k].not;
+    const dugme = (v, et, kapali) => '<button type="button" class="btn btn--sm btn--ghost" data-kavrat="' + v + ':' + kac(id) + '"'
+      + (kapali ? ' disabled' : '') + '>' + kac(et) + '</button>';
+    return '<figure class="kavrat-cizim sekil" data-kavrat-kok="' + kac(id) + '">'
+      + '<svg class="sekil__svg" viewBox="0 0 ' + c.w + ' ' + c.h + '" width="' + Math.round(c.w * 1.4) + '" role="img" focusable="false"'
+      + ' aria-label="' + kac(c.alt + ' ' + sayac + ': ' + not) + '">' + katman + '</svg>'
+      + '<figcaption class="kavrat-cizim__alt"><span class="kavrat-cizim__sayac" aria-hidden="true">' + noktalar(n, k) + '</span>'
+      + '<span class="kavrat-cizim__not" aria-live="polite">' + metin(not) + '</span></figcaption>'
+      + '<div class="kavrat-dugmeler">' + dugme('geri', yazi('ortak.kavrat.onceki'), k === 0)
+      + (k < n - 1 ? dugme('ileri', yazi('ortak.kavrat.sonraki')) : dugme('bastan', yazi('ortak.kavrat.bastan')))
+      + '</div></figure>';
+  }
+  /* Adım ilerlemesi çizilir, yazılmaz (§1.10): dolu nokta görülen adım. */
+  function noktalar(n, k){
+    let s = '';
+    for(let i = 0; i < n; i++) s += '<i class="kavrat-nokta' + (i <= k ? ' is-dolu' : '') + '"></i>';
+    return s;
+  }
+  function adimGit(id, yon){
+    const r = KAYIT.get(id);
+    if(!r) return;
+    const n = r.veri.adimlar.length, k = ADIM[id] || 0;
+    ADIM[id] = yon === 'bastan' ? 0 : Math.max(0, Math.min(n - 1, k + (yon === 'ileri' ? 1 : -1)));
+  }
+
+  /* ------------------------------------------------------------ dinle */
+
+  /* Ekrandaki işaret konuşmada yanlış duyulur; yalnız okunuş için çevrilir. */
+  function okunus(s){
+    return String(s == null ? '' : s)
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\^\{2\}/g, ' kare').replace(/\^\{3\}/g, ' küp')
+      .replace(/\^\{([^}]+)\}/g, ' üssü $1').replace(/_\{([^}]+)\}/g, ' $1')
+      .replace(/√/g, ' kök ').replace(/\s·\s/g, ' çarpı ').replace(/\s×\s/g, ' çarpı ')
+      .replace(/\s=\s/g, ' eşittir ').replace(/\s?→\s?/g, ', ')
+      .replace(/(\d)–(?=\d)/g, '$1, ').replace(/[«»]/g, '')
+      .replace(/\s+/g, ' ').trim();
+  }
+  /* Bir bölümün okunacak metni: başlık, paragraflar, maddeler, formül, dikkat. */
+  function bolumMetni(b){
+    if(!b) return '';
+    const dz = v => (Array.isArray(v) ? v : (v ? [v] : []));
+    return okunus([b.baslik].concat(dz(b.metin), dz(b.liste), dz(b.formul), b.dikkat ? ['Dikkat: ' + b.dikkat] : [])
+      .filter(Boolean).map(x => String(x).replace(/[.:;!?]?\s*$/, '.')).join(' '));
+  }
+  /* Kimlik 'ses:' ile ayrılır: aynı bölümün çizimi aynı kimliği taşır, yerinde çizimde karışmasın. */
+  function dinleHtml(bolum, b){
+    if(!sesVar() || !b) return '';
+    const id = 'ses:' + bolum;
+    const m = bolumMetni(b);
+    if(!m) return '';
+    KAYIT.set(id, { tur:'dinle', veri:m, ad:b.baslik });
+    return dinleDugme(id, b.baslik);
+  }
+  function dinleDugme(id, ad){
+    const acik = konusan === id;
+    return '<button type="button" class="btn btn--sm btn--ghost kavrat-dinle" data-kavrat-kok="' + kac(id) + '" data-kavrat="dinle:' + kac(id) + '"'
+      + ' aria-pressed="' + acik + '" aria-label="' + kac(yazi('ortak.kavrat.dinle-etiket', { ad:ad || '' })) + '">'
+      + '<span aria-hidden="true">' + (acik ? '■ ' : '▶ ') + '</span>' + kac(yazi(acik ? 'ortak.kavrat.durdur' : 'ortak.kavrat.dinle')) + '</button>';
+  }
+  function sesDur(){ sesKusak++; konusan = null; try{ ayar.ses && ayar.ses.dur(); }catch(e){ /* ses yok */ } }
+  function konus(m){
+    try{ return Promise.resolve(ayar.ses.konus(m)).catch(() => null); }catch(e){ return Promise.resolve(null); }
+  }
+  function dinle(id){
+    const r = KAYIT.get(id);
+    if(!r) return;
+    const onceki = konusan;
+    sesDur();
+    yenile(onceki);
+    Object.keys(KART).forEach(k => { if(KART[k].sesli){ KART[k].sesli = false; yenile('kart:' + k); } });
+    if(onceki === id) return;
+    konusan = id;
+    const kusak = sesKusak;
+    konus(r.veri).then(() => { if(kusak === sesKusak){ konusan = null; yenile(id); } });
+  }
+
+  /* ------------------------------------------------------------ kartlar */
+
+  const depo = () => L().OGRET.depo(ayar.modul + '.kavrat.kanit');
+  function kanitlar(konu){ const v = depo().oku()[konu]; return v && typeof v === 'object' ? v : {}; }
+  function beceriler(konu, kartlar){
+    const k = kanitlar(konu);
+    return (kartlar || []).map(x => ({ id:x.on, kanitlar:Array.isArray(k[x.on]) ? k[x.on] : [] }));
+  }
+  function cevapla(konu, on, isabet){
+    const t = depo(), v = t.oku();
+    const k = v[konu] && typeof v[konu] === 'object' ? v[konu] : {};
+    k[on] = (Array.isArray(k[on]) ? k[on] : []).concat([{ g:bugun(), isabet:!!isabet }]).slice(-30);
+    v[konu] = k;
+    t.yaz(v);
+  }
+  function durum(konu, kartlar){
+    const U = L().USTA, b = beceriler(konu, kartlar), g = bugun();
+    const h = U.harita(b, g);
+    const sonrakiler = b.map(x => U.asama(x.kanitlar, g).sonraki).filter(x => x && x > g).sort();
+    /* Hiç cevaplanmamış sette «kaç kart kalıcı» sorusunun cevabı yok: null (veri yok, §1.2). */
+    return { b, kalici:h.olculen ? h.sayi.kalici + h.sayi.saglam : null, toplam:h.toplam, sonraki:sonrakiler[0] || null,
+      sira:U.sira(b, g).map(x => x.id) };
+  }
+  function kartlarHtml(konu, kartlar){
+    if(!kartlar || denetle({ kartlar }).length || !L().USTA || !L().OGRET) return '';
+    const id = 'kart:' + konu;
+    KAYIT.set(id, { tur:'kart', veri:kartlar, konu });
+    const d = durum(konu, kartlar);
+    const s = KART[konu] = KART[konu] || { sira:null, i:0, cevrik:false, sesli:false };
+    if(!s.sira || s.i >= s.sira.length){ s.sira = d.sira; s.i = 0; s.cevrik = false; }
+    const on = s.sira[s.i], kart = kartlar.find(x => x.on === on);
+    const G = L().GRAFIK;
+    const sayac = G && G.tikHtml ? G.tikHtml({ hedef:d.toplam, yapilan:d.kalici, etiket:yazi('ortak.kavrat.kalici') }) : '';
+    const dugme = (v, et, ton, ek) => '<button type="button" class="btn btn--sm ' + (ton || 'btn--ghost') + '" data-kavrat="' + v + ':' + kac(id) + '"' + (ek || '') + '>' + kac(et) + '</button>';
+    let govde;
+    if(!kart){
+      govde = '<p class="kavrat-kart__bos">' + kac(yazi('ortak.kavrat.bugun-bitti', { g:d.sonraki ? tarihAdi(d.sonraki) : '—' })) + '</p>';
+    }else{
+      govde = '<div class="kavrat-kart" aria-label="' + kac(yazi('ortak.kavrat.kart-sirasi', { i:s.i + 1, n:s.sira.length })) + '" role="group">'
+        + '<p class="kavrat-kart__on">' + metin(kart.on) + '</p>'
+        + (s.cevrik ? '<p class="kavrat-kart__arka">' + metin(kart.arka) + '</p>' : '<p class="kavrat-kart__ipucu">' + kac(yazi('ortak.kavrat.once-hatirla')) + '</p>')
+        + '</div><div class="kavrat-dugmeler">'
+        + (s.cevrik ? dugme('bildim', yazi('ortak.kavrat.bildim'), 'btn--primary') + dugme('bilemedim', yazi('ortak.kavrat.bilemedim'))
+          : dugme('cevir', yazi('ortak.kavrat.cevir'), 'btn--primary'))
+        + (sesVar() ? dugme('sesli', yazi('ortak.kavrat.sesli'), null, ' aria-pressed="' + s.sesli + '"') : '')
+        + '</div>';
+    }
+    return '<section class="kavrat-kartlar" data-kavrat-kok="' + kac(id) + '" aria-label="' + kac(yazi('ortak.kavrat.kartlar')) + '">'
+      + '<div class="kavrat-kartlar__bas"><h3 class="kavrat-kartlar__ad">' + kac(yazi('ortak.kavrat.kartlar')) + '</h3>' + sayac + '</div>'
+      + govde + '</section>';
+  }
+  const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function tarihAdi(iso){ const p = String(iso).split('-').map(Number); return p[2] + ' ' + AYLAR[p[1] - 1]; }
+
+  function kartEylem(v, id){
+    const r = KAYIT.get(id);
+    if(!r) return;
+    const s = KART[r.konu];
+    if(!s) return;
+    const on = s.sira && s.sira[s.i];
+    if(v === 'cevir'){ s.cevrik = true; if(s.sesli) sesliOku(id, 'arka'); return; }
+    if(v === 'bildim' || v === 'bilemedim'){
+      if(on) cevapla(r.konu, on, v === 'bildim');
+      s.i++; s.cevrik = false;
+      if(s.sesli) setTimeout(() => sesliOku(id, 'on'), 0);
+      return;
+    }
+    if(v === 'sesli'){
+      s.sesli = !s.sesli;
+      if(!s.sesli){ sesDur(); return; }
+      const onceki = konusan; konusan = null; yenile(onceki);
+      setTimeout(() => sesliOku(id, s.cevrik ? 'arka' : 'on'), 0);
+    }
+  }
+  /* Sesli tekrar: önü oku, düşünme payı, kendiliğinden çevir ve arkayı oku. Cevap yine düğmeyle. */
+  function sesliOku(id, yuz){
+    const r = KAYIT.get(id), s = r && KART[r.konu];
+    if(!s || !s.sesli || !s.sira) return;
+    const kart = r.veri.find(x => x.on === s.sira[s.i]);
+    if(!kart) return;
+    try{ ayar.ses.dur(); }catch(e){ /* ses yok */ }
+    const kusak = ++sesKusak;
+    konus(okunus(yuz === 'on' ? kart.on : kart.arka)).then(() => {
+      if(yuz !== 'on' || kusak !== sesKusak) return;
+      setTimeout(() => {
+        if(kusak !== sesKusak || !s.sesli || s.cevrik) return;
+        s.cevrik = true; yenile(id); sesliOku(id, 'arka');
+      }, SES_ARA);
+    });
+  }
+
+  /* ------------------------------------------------------------ olay */
+
+  function parcaHtml(id){
+    const r = KAYIT.get(id);
+    if(!r) return null;
+    if(r.tur === 'cizim') return cizimHtml(id, r.veri);
+    if(r.tur === 'dinle') return dinleDugme(id, r.ad);
+    if(r.tur === 'kart') return kartlarHtml(r.konu, r.veri);
+    return null;
+  }
+  /* Parçayı yerinde yeniden çizer; odak aynı eylemin düğmesinde kalır (söz 4). */
+  function yenile(id, odak){
+    if(!id || typeof document === 'undefined') return;
+    const kok = Array.from(document.querySelectorAll('[data-kavrat-kok]')).filter(e => e.getAttribute('data-kavrat-kok') === id);
+    if(!kok.length) return;
+    const h = parcaHtml(id);
+    if(h == null) return;
+    kok.forEach(e => {
+      const sablon = document.createElement('template');
+      sablon.innerHTML = h;
+      const yeni = sablon.content.firstElementChild;
+      if(!yeni) return;
+      e.replaceWith(yeni);
+      if(odak){
+        const hedef = yeni.matches('[data-kavrat="' + odak + '"]') ? yeni
+          : yeni.querySelector('[data-kavrat="' + odak + '"]:not([disabled])') || yeni.querySelector('button:not([disabled])');
+        if(hedef) try{ hedef.focus({ preventScroll:true }); }catch(x){ hedef.focus(); }
+      }
+    });
+  }
+  function tikla(deger){
+    const i = deger.indexOf(':');
+    const v = deger.slice(0, i), id = deger.slice(i + 1);
+    if(v === 'ileri' || v === 'geri' || v === 'bastan') adimGit(id, v);
+    else if(v === 'dinle'){ dinle(id); yenile(id, deger); return; }
+    else kartEylem(v, id);
+    yenile(id, deger);
+  }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-kavrat]') : null;
+      if(!b || b.disabled) return;
+      e.preventDefault();
+      tikla(b.getAttribute('data-kavrat'));
+    });
+  }
+
+  function _sifirla(){ KAYIT.clear(); Object.keys(ADIM).forEach(k => delete ADIM[k]); Object.keys(KART).forEach(k => delete KART[k]); konusan = null; ayar = { modul:'ortak' }; }
+
+  return { kur, denetle, cizimHtml, dinleHtml, kartlarHtml, okunus, bolumMetni, cevapla, beceriler, durum, tikla, sesDur, SES_ARA, _sifirla };
 })();
 
 /* ==== js/core/parca-rehber.js ==== */
@@ -65723,7 +66022,15 @@ SP.REHBER_KONULAR = [
     kazanim:['Koş-yürü yöntemini kurabilir.', 'Yükü yavaş artırmanın nedenini açıklar.', 'Sık görülen sakatlıkların uyarı işaretlerini tanır.'],
     bolumler:[
       { baslik:'Koş-yürü', metin:'Yeni başlayan biri sürekli koşmak yerine **koşu ve yürüyüş aralıklarını** sırayla yapar: örneğin 1 dakika hafif koşu, 2 dakika yürüyüş, 6–8 tekrar. Haftalar içinde koşu aralığı uzar, yürüyüş kısalır.',
-        liste:['Koşu temposu konuşabileceğin kadar rahat olmalı.', 'Haftada 3 gün ve aralarda dinlenme günü yeterli bir başlangıçtır.', 'Her çıkışa 5 dakika yürüyüşle başla, yürüyüşle bitir.'] },
+        liste:['Koşu temposu konuşabileceğin kadar rahat olmalı.', 'Haftada 3 gün ve aralarda dinlenme günü yeterli bir başlangıçtır.', 'Her çıkışa 5 dakika yürüyüşle başla, yürüyüşle bitir.'],
+        cizim:{ w:300, h:110, alt:'Koş-yürü seansının zaman çizgisi: ısınma yürüyüşü, altı koşu ve yürüyüş aralığı, soğuma yürüyüşü. Yükseklik şiddeti gösterir.', adimlar:[
+          { o:[['c', 10, 80, 290, 80, 'i'], ['r', 10, 60, 50, 20, 'g'], ['t', 35, 92, 'ısınma 5 dk', 'k']],
+            not:'Her çıkış 5 dakikalık yürüyüşle başlar.' },
+          { o:[['r', 60, 40, 10, 40, 'fv'], ['r', 70, 60, 20, 20, 'g'], ['r', 90, 40, 10, 40, 'fv'], ['r', 100, 60, 20, 20, 'g'], ['r', 120, 40, 10, 40, 'fv'], ['r', 130, 60, 20, 20, 'g'], ['r', 150, 40, 10, 40, 'fv'], ['r', 160, 60, 20, 20, 'g'], ['r', 180, 40, 10, 40, 'fv'], ['r', 190, 60, 20, 20, 'g'], ['r', 210, 40, 10, 40, 'fv'], ['r', 220, 60, 20, 20, 'g'], ['t', 150, 28, '1 dk koşu, 2 dk yürüyüş, 6 kez', 'k']],
+            not:'Sonra 1 dakika hafif koşu, 2 dakika yürüyüş; örnekte altı kez.' },
+          { o:[['r', 240, 60, 50, 20, 'g'], ['t', 265, 92, 'soğuma 5 dk', 'k'], ['t', 150, 104, 'toplam 28 dk', 'k']],
+            not:'Yürüyüşle biter; örnek seans yaklaşık 28 dakikadır.' },
+        ] } },
       { baslik:'Yükü yavaş artırmak', metin:'Kas birkaç haftada güçlenir, tendon ve kemik daha uzun sürede uyum sağlar. Bu yüzden haftalık süre ya da mesafe **küçük adımlarla** artırılır. Yaygın «haftada en çok %10» kuralı kesin bir bilimsel sınır değil, makul bir temkin kuralıdır.',
         ornek:{ soru:'Bu hafta toplam 60 dakika koşan biri %10 temkin kuralıyla gelecek hafta en çok kaç dakika koşar?',
           cozum:['60 × 0,10 = 6 dakika artış.', '60 + 6 = 66 dakika.'] },
@@ -65731,6 +66038,12 @@ SP.REHBER_KONULAR = [
       { baslik:'Ağrı mı, yorgunluk mu?', metin:'Kaslarda yaygın, bir iki günde geçen gerginlik olağan yorgunluktur. **Bir noktaya sabitlenen, koştukça artan ya da topallatan ağrı** ise uyarıdır: koşuya ara verilir. Kaval kemiği ağrısı ve diz önü ağrısı yeni başlayanlarda sık görülür ve çoğu zaman ani yük artışıyla ilgilidir.',
         dikkat:'Ağrıyla koşmaya devam etmek küçük bir sorunu haftalarca süren bir sakatlığa çevirebilir.' },
       { baslik:'Ayakkabı ve zemin', metin:'«En iyi ayakkabı» tek değildir; rahat hissettiren ve ayağına oturan ayakkabı yeterlidir. Zemin değişikliği (asfalttan patikaya, düzden yokuşa) da bir yük artışıdır ve kademeli yapılır.' },
+    ],
+    kartlar:[
+      { on:'Koş-yürü nedir?', arka:'Koşu ve yürüyüş aralıklarını sırayla yapmak; haftalar içinde koşu uzar, yürüyüş kısalır.' },
+      { on:'Koşu temposu ne kadar rahat olmalı?', arka:'Konuşabileceğin kadar.' },
+      { on:'Yük neden küçük adımlarla artırılır?', arka:'Tendon ve kemik kastan daha yavaş uyum sağlar.' },
+      { on:'Hangi ağrı uyarıdır?', arka:'Bir noktaya sabitlenen, koştukça artan ya da topallatan ağrı: koşuya ara verilir.' },
     ],
     akilda:['Koş-yürüyle başla, koşu aralığını haftalar içinde uzat.', 'Yükü küçük adımlarla artır; tendon kastan yavaş uyum sağlar.', 'Bir noktaya sabitlenen, artan ağrıda dur.'],
     kaynaklar:['DSÖ 2020 Fiziksel Aktivite Kılavuzu', 'Koşu sakatlıkları üzerine derlemeler (ör. Nielsen ve ark., JOSPT, 2014)'] },
@@ -80562,6 +80875,289 @@ SP.BasarimSayim = (function(){
 
   return { gunluk:gunluk, gunler:gunler };
 })();
+
+/* ==== js/core/sekil.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/sekil.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ŞEKİL VE TABLO — sorularda, örneklerde ve anlatımda çizim (AYS, SPİ, ESP).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/sekil.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `sekil.css`.
+   AYS'de `R.Sekil` adıyla da durur (2026-11-05'e kadar yalnız AYS'deydi).
+   ==================================================================
+
+   Kullanıcı (2026-10-10): «şekilli soru yok; hepsini çok profesyonel
+   şekilde çöz». Geometri, grafik, devre, optik, soyağacı, nüfus piramidi
+   gibi konularda sınav sorusu şekilsiz sorulmaz. Bu dosya içerik
+   dosyalarındaki (data/anlatim-*.js, data/derin-*.js, data/paragraf.js)
+   küçük bir çizim tarifini SVG'ye, tablo tarifini HTML tabloya çevirir.
+
+   Sözler:
+     1. İÇERİKTE İŞARETLEME YOK, TARİF VAR. Veri dosyası SVG ya da HTML
+        yazmaz; kapalı bir öğe kataloğundan (TUR) diziler yazar. Bütün
+        yazılar kaçırılır, sayılar sonlu ve sınırlı olmak zorundadır.
+        İçerikten ekrana betik ya da öznitelik sızamaz (denetle()).
+     2. TEMA KODDA. Çizgi ve yazı currentColor'dır, vurgu --accent'tir;
+        koyu ve açık temada, bütün paletlerde aynı çizim okunur. Bu yüzden
+        dolu (f) ve gölgeli (g) yüzey koyu temada AÇIK görünür: içerik bir
+        yüzeyi «koyu/açık renkli» diye anmaz, «içi dolu», «taralı», «içi
+        boş» der ya da yüzeye yazı koyar. Denetim 2026-10-11: «koyu renkli
+        birey hastadır» diyen soyağacı koyu temada tersten okunuyordu
+        (sekil.test.js bunu bütün içerikte arar).
+     3. ŞEKLİN METNİ VAR. Her şeklin zorunlu bir «alt» cümlesi vardır:
+        ekran okuyucu onu okur; kart, yanlış defteri ve koç gibi düz metin
+        giden yerler de şekli bu cümleyle anlatır (metni()). Tablo da düz
+        metne satır satır çevrilir.
+     4. KOORDİNAT SVG'NİN. (0,0) sol üst; y aşağı doğru artar. Yalnız yay
+        açıları matematik yönündedir: 0° sağ, 90° yukarı.
+
+   Öğe kataloğu — her öğe bir dizi: [tür, …sayılar, (yazı), (bayrak)]
+     ['c',  x1,y1,x2,y2, b]          doğru parçası
+     ['ok', x1,y1,x2,y2, b]          ok (uçta ok başı; b'de 'ç' ise iki uç)
+     ['p',  [x,y,…], b]              kapalı çokgen
+     ['y',  [x,y,…], b]              açık kırık çizgi / grafik eğrisi
+     ['d',  cx,cy,r, b]              çember (g: gölgeli, f: dolu)
+     ['n',  x,y, b]                  nokta
+     ['t',  x,y,'yazı', b]           yazı (s: sola, e: sağa yaslı; k: küçük; b: kalın)
+     ['a',  cx,cy,r,a1,a2, b]        yay (a1'den a2'ye, saat yönünün tersine)
+     ['dk', x,y, x1,y1, x2,y2]       dik açı işareti (köşe, iki kol üstünde birer nokta)
+     ['r',  x,y,w,h, b]              dikdörtgen
+     ['e',  x0,y0, x1,y1, 'x','y']   eksen takımı: başlangıç, x ucu, y ucu, etiketler
+     ['tr', x1,y1,x2,y2]             taralı yüzey (ayna, duvar, zemin): soldaki yana tarama
+     ['dr', x1,y1,x2,y2,'R']         direnç (yatay ya da dikey kablo üstünde)
+     ['pil',x,y,'y'|'d','ε']         üreteç (yatay ya da dikey kabloda; uzun levha +)
+     ['mr', x,y,h,'ince'|'kalin']    mercek (dikey; ince kenarlı yakınsak, kalın kenarlı ıraksak)
+   Bayraklar (b, isteğe bağlı yazı): k kesik, v vurgu, i ince, g gölge, f dolu. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.sekil.sekil-cizilemedi':'Şekil çizilemedi: ',
+});
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.SEKIL = (function(){
+  const R = window.R || {};
+  /* Tür → { n: sayı argümanı adedi, d: dizi argümanı mı, y: yazı argümanı adedi } */
+  const TUR = {
+    c:{ n:4 }, ok:{ n:4 }, p:{ d:true }, y:{ d:true }, d:{ n:3 }, n:{ n:2 }, t:{ n:2, y:1 },
+    a:{ n:5 }, dk:{ n:6 }, r:{ n:4 }, e:{ n:4, y:2 }, tr:{ n:4 }, dr:{ n:4, y:1 }, pil:{ n:2, y:2 }, mr:{ n:3, y:1 },
+  };
+  const SINIR = 2000;
+  const esc = s => (R.U && R.U.esc ? R.U.esc(s) : String(s).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';'));
+  const sayi = v => Math.round(Number(v) * 10) / 10;
+  const bayrak = (o, i) => typeof o[i] === 'string' ? o[i] : '';
+
+  /* ---------- denetim (söz 1) ---------- */
+
+  /* Bir şekil tarifinin kusurları; boş dizi = temiz. */
+  function denetle(s){
+    const h = [];
+    if(!s || typeof s !== 'object') return ['şekil nesne değil'];
+    const w = Number(s.w), hh = Number(s.h);
+    if(!(w >= 80 && w <= 480)) h.push('genişlik 80–480 olmalı');
+    if(!(hh >= 40 && hh <= 360)) h.push('yükseklik 40–360 olmalı');
+    const alt = String(s.alt || '');
+    if(alt.trim().length < 15) h.push('alt cümlesi yok ya da çok kısa');
+    if(alt.length > 400) h.push('alt cümlesi çok uzun');
+    if(/[<>]|\*\*|[\^_]\{/.test(alt)) h.push('alt cümlesinde işaret');
+    if(!Array.isArray(s.o) || !s.o.length) h.push('öğe yok');
+    else s.o.forEach((o, k) => {
+      const ad = 'öğe ' + (k + 1);
+      if(!Array.isArray(o) || !TUR[o[0]]){ h.push(ad + ': bilinmeyen tür'); return; }
+      const t = TUR[o[0]];
+      let i = 1;
+      if(t.d){
+        const l = o[1];
+        if(!Array.isArray(l) || l.length < 4 || l.length % 2) h.push(ad + ': nokta dizisi bozuk');
+        else if(l.some(v => !isFinite(v) || Math.abs(v) > SINIR)) h.push(ad + ': sayı sınır dışı');
+        i = 2;
+      }else{
+        for(let j = 0; j < t.n; j++){
+          const v = o[1 + j];
+          if(typeof v !== 'number' || !isFinite(v) || Math.abs(v) > SINIR) h.push(ad + ': ' + (j + 1) + '. sayı geçersiz');
+        }
+        i = 1 + t.n;
+      }
+      for(let j = 0; j < (t.y || 0); j++){
+        const v = o[i + j];
+        if(v != null && (typeof v !== 'string' || v.length > 40 || /[<>]|\*\*|[\^_]\{/.test(v))) h.push(ad + ': yazı geçersiz');
+      }
+      const b = o[i + (t.y || 0)];
+      if(b != null && (typeof b !== 'string' || !/^[kvigfçsebo]*$/.test(b))) h.push(ad + ': bayrak geçersiz');
+      if(o.length > i + (t.y || 0) + 1) h.push(ad + ': fazla argüman');
+    });
+    return h;
+  }
+  function tabloDenetle(t){
+    const h = [];
+    if(!t || typeof t !== 'object') return ['tablo nesne değil'];
+    if(!Array.isArray(t.bas) || t.bas.length < 2 || t.bas.length > 8) h.push('başlık 2–8 sütun olmalı');
+    if(!Array.isArray(t.satir) || !t.satir.length || t.satir.length > 14) h.push('satır 1–14 olmalı');
+    else t.satir.forEach((r, k) => {
+      if(!Array.isArray(r) || r.length !== (t.bas || []).length) h.push((k + 1) + '. satır sütun sayısı tutmuyor');
+      else if(r.some(v => typeof v !== 'string' && typeof v !== 'number')) h.push((k + 1) + '. satırda geçersiz hücre');
+    });
+    if(t.baslik != null && (typeof t.baslik !== 'string' || t.baslik.length > 120)) h.push('tablo başlığı geçersiz');
+    return h;
+  }
+
+  /* ---------- çizim (söz 2, 4) ---------- */
+
+  function sinif(b, ek){
+    const l = ['sk', ek || 'sk-c'];
+    if(b.indexOf('k') >= 0) l.push('sk-k');
+    if(b.indexOf('v') >= 0) l.push('sk-v');
+    if(b.indexOf('i') >= 0) l.push('sk-i');
+    if(b.indexOf('g') >= 0) l.push('sk-g');
+    if(b.indexOf('f') >= 0) l.push('sk-f');
+    return l.join(' ');
+  }
+  function okBasi(x1, y1, x2, y2, b){
+    const a = Math.atan2(y2 - y1, x2 - x1), L = 8, W = 3.6;
+    const bx = x2 - L * Math.cos(a), by = y2 - L * Math.sin(a);
+    const p = [x2, y2, bx + W * Math.sin(a), by - W * Math.cos(a), bx - W * Math.sin(a), by + W * Math.cos(a)];
+    return '<polygon class="' + sinif(b.replace(/[gk]/g, ''), 'sk-uc') + '" points="' + p.map(sayi).join(' ') + '"/>';
+  }
+  function cizgi(x1, y1, x2, y2, b){
+    return '<line class="' + sinif(b) + '" x1="' + sayi(x1) + '" y1="' + sayi(y1) + '" x2="' + sayi(x2) + '" y2="' + sayi(y2) + '"/>';
+  }
+  function yazi(x, y, m, b){
+    const anchor = b.indexOf('s') >= 0 ? 'start' : b.indexOf('e') >= 0 ? 'end' : 'middle';
+    const l = ['sk-t'];
+    if(b.indexOf('k') >= 0) l.push('sk-tk');
+    if(b.indexOf('b') >= 0) l.push('sk-tb');
+    if(b.indexOf('v') >= 0) l.push('sk-tv');
+    return '<text class="' + l.join(' ') + '" x="' + sayi(x) + '" y="' + sayi(y) + '" text-anchor="' + anchor
+      + '" dominant-baseline="central">' + esc(m) + '</text>';
+  }
+  const OGE = {
+    c(o){ return cizgi(o[1], o[2], o[3], o[4], bayrak(o, 5)); },
+    ok(o){
+      const b = bayrak(o, 5);
+      return cizgi(o[1], o[2], o[3], o[4], b) + okBasi(o[1], o[2], o[3], o[4], b)
+        + (b.indexOf('ç') >= 0 ? okBasi(o[3], o[4], o[1], o[2], b) : '');
+    },
+    p(o){ return '<polygon class="' + sinif(bayrak(o, 2)) + '" points="' + o[1].map(sayi).join(' ') + '"/>'; },
+    y(o){ return '<polyline class="' + sinif(bayrak(o, 2)) + '" points="' + o[1].map(sayi).join(' ') + '"/>'; },
+    d(o){ return '<circle class="' + sinif(bayrak(o, 4)) + '" cx="' + sayi(o[1]) + '" cy="' + sayi(o[2]) + '" r="' + sayi(o[3]) + '"/>'; },
+    n(o){ return '<circle class="' + sinif(bayrak(o, 3) + 'f', 'sk-c') + '" cx="' + sayi(o[1]) + '" cy="' + sayi(o[2]) + '" r="2.6"/>'; },
+    t(o){ return yazi(o[1], o[2], o[3], bayrak(o, 4)); },
+    a(o){
+      const [cx, cy, r, a1, a2] = o.slice(1, 6), b = bayrak(o, 6);
+      const rad = d => d * Math.PI / 180;
+      const x1 = cx + r * Math.cos(rad(a1)), y1 = cy - r * Math.sin(rad(a1));
+      const x2 = cx + r * Math.cos(rad(a2)), y2 = cy - r * Math.sin(rad(a2));
+      let fark = ((a2 - a1) % 360 + 360) % 360;
+      const buyuk = fark > 180 ? 1 : 0;
+      return '<path class="' + sinif(b) + '" d="M' + sayi(x1) + ' ' + sayi(y1) + ' A' + sayi(r) + ' ' + sayi(r) + ' 0 ' + buyuk + ' 0 '
+        + sayi(x2) + ' ' + sayi(y2) + '"/>';
+    },
+    dk(o){
+      const [x, y, x1, y1, x2, y2] = o.slice(1, 7), s = 8;
+      const birim = (dx, dy) => { const L = Math.hypot(dx, dy) || 1; return [dx / L, dy / L]; };
+      const u = birim(x1 - x, y1 - y), v = birim(x2 - x, y2 - y);
+      const p = [x + u[0] * s, y + u[1] * s, x + u[0] * s + v[0] * s, y + u[1] * s + v[1] * s, x + v[0] * s, y + v[1] * s];
+      return '<polyline class="sk sk-c sk-i" points="' + p.map(sayi).join(' ') + '"/>';
+    },
+    r(o){ return '<rect class="' + sinif(bayrak(o, 5)) + '" x="' + sayi(o[1]) + '" y="' + sayi(o[2]) + '" width="' + sayi(o[3])
+      + '" height="' + sayi(o[4]) + '"/>'; },
+    e(o){
+      const [x0, y0, x1, y1] = o.slice(1, 5);
+      const ex = o[5] || '', ey = o[6] || '';
+      return cizgi(x0, y0, x1, y0, '') + okBasi(x0, y0, x1, y0, '') + cizgi(x0, y0, x0, y1, '') + okBasi(x0, y0, x0, y1, '')
+        + (ex ? yazi(x1, y0 + 12, ex, 'k') : '') + (ey ? yazi(x0 - 4, y1, ey, 'ke') : '');
+    },
+    tr(o){
+      const [x1, y1, x2, y2] = o.slice(1, 5);
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1, ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+      /* Sol normal (yön vektörünün solu): (uy, -ux) SVG'de görsel olarak sol. */
+      const nx = uy, ny = -ux;
+      let s = cizgi(x1, y1, x2, y2, '');
+      for(let d = 4; d < L; d += 7){
+        const px = x1 + ux * d, py = y1 + uy * d;
+        s += cizgi(px, py, px + (nx - ux) * 4.5, py + (ny - uy) * 4.5, 'i');
+      }
+      return s;
+    },
+    dr(o){
+      const [x1, y1, x2, y2] = o.slice(1, 5), et = o[5] || '';
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1, ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, yw = 13, yh = 5;
+      const a = [mx - ux * yw, my - uy * yw], b2 = [mx + ux * yw, my + uy * yw];
+      const kose = [a[0] - uy * yh, a[1] + ux * yh, b2[0] - uy * yh, b2[1] + ux * yh, b2[0] + uy * yh, b2[1] - ux * yh, a[0] + uy * yh, a[1] - ux * yh];
+      return cizgi(x1, y1, a[0], a[1], '') + cizgi(b2[0], b2[1], x2, y2, '')
+        + '<polygon class="sk sk-c sk-zemin" points="' + kose.map(sayi).join(' ') + '"/>'
+        + (et ? (() => {
+          /* Yazı kutunun yanına, kutuya değmeden: dikey dirençte yarım yazı
+             genişliği, yatayda yarım satır yüksekliği kadar ötede (denetim
+             2026-10-11: «3 Ω» kutuya yapışıyordu). */
+          const d = yh + 4 + Math.abs(uy) * String(et).length * 3.1 + Math.abs(ux) * 6;
+          return yazi(mx + uy * d, my - ux * d, et, 'k');
+        })() : '');
+    },
+    pil(o){
+      const [x, y] = o.slice(1, 3), yon = o[3] === 'd' ? 'd' : 'y', et = o[4] || '';
+      if(yon === 'y'){
+        return cizgi(x - 3, y - 10, x - 3, y + 10, '') + cizgi(x + 3, y - 5, x + 3, y + 5, '')
+          + (et ? yazi(x, y - 17, et, 'k') : '');
+      }
+      return cizgi(x - 10, y - 3, x + 10, y - 3, '') + cizgi(x - 5, y + 3, x + 5, y + 3, '')
+        + (et ? yazi(x + 18, y, et, 'ks') : '');
+    },
+    mr(o){
+      const [x, y, h] = o.slice(1, 4), ince = o[4] !== 'kalin';
+      const ust = y - h / 2, alt = y + h / 2;
+      return cizgi(x, ust, x, alt, '') + (ince
+        ? okBasi(x, ust + 8, x, ust, '') + okBasi(x, alt - 8, x, alt, '')
+        : okBasi(x, ust, x, ust + 8, '') + okBasi(x, alt, x, alt - 8, ''));
+    },
+  };
+
+  /* Denetlenmiş öğe dizisinin SVG içi (adım adım çizim katman katman ister: ortak/anlat.js). */
+  function ogeler(o){ return o.map(x => OGE[x[0]](x)).join(''); }
+
+  /* Şekil tarifi → <figure><svg>…</svg></figure>. Kusurlu tarif çizilmez;
+     yerine alt cümlesi yazılır (ekran boş kalmasın, kusur gizlenmesin). */
+  function svg(s){
+    if(!s) return '';
+    const kusur = denetle(s);
+    if(kusur.length) return '<p class="sekil sekil--kusur small dim">' + esc(yz('ortak.sekil.sekil-cizilemedi') + String((s && s.alt) || kusur[0])) + '</p>';
+    const ic = ogeler(s.o);
+    return '<figure class="sekil"><svg class="sekil__svg" viewBox="0 0 ' + sayi(s.w) + ' ' + sayi(s.h) + '" width="' + sayi(s.w * 1.4)
+      + '" role="img" aria-label="' + esc(s.alt) + '" focusable="false">' + ic + '</svg></figure>';
+  }
+
+  /* Tablo tarifi → <table>. Hücreler metin işaretlerini (**kalın**, x^{2})
+     tek ayrıştırıcıdan alır (core/ogren.js metinHtml). */
+  function tablo(t){
+    if(!t || tabloDenetle(t).length) return '';
+    const f = v => (R.Ogren && R.Ogren.metinHtml ? R.Ogren.metinHtml(String(v)) : esc(String(v)));
+    return '<div class="ogr-tablo-kap"><table class="ogr-tablo">'
+      + (t.baslik ? '<caption>' + f(t.baslik) + '</caption>' : '')
+      + '<thead><tr>' + t.bas.map(b => '<th scope="col">' + f(b) + '</th>').join('') + '</tr></thead>'
+      + '<tbody>' + t.satir.map(r => '<tr>' + r.map((v, k) => k === 0 ? '<th scope="row">' + f(v) + '</th>' : '<td>' + f(v) + '</td>').join('') + '</tr>').join('')
+      + '</tbody></table></div>';
+  }
+
+  /* ---------- düz metin karşılığı (söz 3) ---------- */
+  function metni(s){ return s && s.alt ? '[Şekil: ' + String(s.alt).trim() + ']' : ''; }
+  function tabloMetni(t){
+    if(!t || tabloDenetle(t).length) return '';
+    const d = v => (R.Ogren && R.Ogren.duzMetin ? R.Ogren.duzMetin(String(v)) : String(v));
+    return '[Tablo' + (t.baslik ? ' — ' + d(t.baslik) : '') + ': ' + t.bas.map(d).join(' | ') + '; '
+      + t.satir.map(r => r.map(d).join(' | ')).join('; ') + ']';
+  }
+  /* Bir sorunun (ya da örneğin) şekil ve tablosunun düz metni, boşsa ''. */
+  function ekMetni(q){
+    if(!q) return '';
+    return [metni(q.sekil), tabloMetni(q.tablo)].filter(Boolean).join(' ');
+  }
+
+  return { TUR, denetle, tabloDenetle, svg, ogeler, tablo, metni, tabloMetni, ekMetni };
+})();
+/* AYS'nin eski adı: içerik ve ekranlar R.Sekil der. */
+if(window.R) window.R.Sekil = window.LIFEOS.SEKIL;
 
 /* ==== js/core/bio.js ==== */
 /* Modul 1'in kural motoru — biyobelirtec durumu ve bireysel egilim.
@@ -102915,9 +103511,15 @@ window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'spi', cekmece:'kutuphane', ad:'A
 
 SP.Screens.rehber = (function(){
   const RB = () => (window.LIFEOS || {}).REHBER;
+  /* Dinle düğmesi (ortak/kavrat.js) modülün kendi sesiyle okur; Türkçe ses yoksa düğme yok. */
+  const SES = {
+    var:() => !!(SP.Speak && SP.Speak.supported() && SP.Speak.hasTurkish()),
+    konus:m => SP.Speak.say(m, { agent:'king' }),
+    dur:() => { if(SP.Speak) SP.Speak.stop(); },
+  };
   function hazirla(){
     const r = RB();
-    if(r && !r.kuruluMu()) r.kur({ modul:'spi', konular:() => SP.REHBER_KONULAR || [], sinir:SP.REHBER_SINIR,
+    if(r && !r.kuruluMu()) r.kur({ modul:'spi', ses:SES, konular:() => SP.REHBER_KONULAR || [], sinir:SP.REHBER_SINIR,
       ciz:() => SP.App.render() });
     return r;
   }
