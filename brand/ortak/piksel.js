@@ -7,7 +7,7 @@
    Sözler:
      1. SÜSTÜR. Hiçbir sayıya ve karara bakmaz, veri okumaz, yazmaz. Düşerse yalnız duvar düz kalır.
      2. KODLA ÇİZİLİR. Görsel dosyası yok; çevrimdışı ve tek dosyada çalışır.
-     3. EKRANI YORMAZ. Sahne bir kez hazırlanır, yalnız değişen bölge 8 kare/sn yenilenir;
+     3. EKRANI YORMAZ. Sahne bir kez hazırlanır, yalnız değişen bölge yenilenir (12 kare/sn, araç varken 24);
         sekme arkadayken ya da sayfa kaydırılmışken durur; animasyon kapalıysa tek kare çizilir.
      4. KART ÇEKİLİR. Üç dakika işlem olmazsa ya da arka plana çift tıklanırsa kart ve menü çekilir, sahne görünür. */
 window.LIFEOS = window.LIFEOS || {};
@@ -124,36 +124,48 @@ window.LIFEOS = window.LIFEOS || {};
   /* Çizimler ızgaraya oturur: grafik noktası kare olur, halka ve yay bloklara bölünür. Değer aynı kalır:
      yalnız üstüne zemin renginde aralık çizilir, dolu kısmın uzunluğuna dokunulmaz. */
   const CIZIM_ATLA = '.rutbe, .perde, .piksel-oda, .kenar, .altbant';
-  function cizimCevir(svg){
-    if(svg.dataset.pxc) return;
+  /* Önce okunur, sonra yazılır: daire daire getComputedStyle + replaceWith her dairede stili baştan hesaplatıyor,
+     Analiz'e geçişte 250-350 ms donduruyordu ve mahallenin kayması o sırada duruyordu (2026-11-05). */
+  function cizimOku(svg){
+    if(svg.dataset.pxc) return null;
     svg.dataset.pxc = '1';
-    if(svg.closest(CIZIM_ATLA) || typeof svg.getBBox !== 'function') return;
-    const orbit = !!svg.closest('.agh');
+    if(svg.closest(CIZIM_ATLA) || typeof svg.getBBox !== 'function') return null;
+    const orbit = !!svg.closest('.agh'), kareler = [];
     let halka = null;
     Array.from(svg.querySelectorAll('circle')).forEach(c => {
       const r = parseFloat(c.getAttribute('r')) || 0, s = getComputedStyle(c), dolu = s.fill && s.fill !== 'none';
-      if(dolu && r > 0 && r <= (orbit ? 12 : 8)){
-        const k = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        Array.from(c.attributes).forEach(a => { if(!/^(cx|cy|r)$/.test(a.name)) k.setAttribute(a.name, a.value); });
-        const cx = parseFloat(c.getAttribute('cx')) || 0, cy = parseFloat(c.getAttribute('cy')) || 0;
-        k.setAttribute('x', cx - r); k.setAttribute('y', cy - r); k.setAttribute('width', r * 2); k.setAttribute('height', r * 2);
-        if(!c.hasAttribute('fill')) k.style.fill = s.fill;
-        if(!c.hasAttribute('stroke') && s.stroke !== 'none'){ k.style.stroke = s.stroke; k.style.strokeWidth = s.strokeWidth; }
-        c.replaceWith(k);
-      } else if(!dolu && r >= 10 && !halka && !orbit) halka = c;
+      if(dolu && r > 0 && r <= (orbit ? 12 : 8)) kareler.push({ c, r, fill:s.fill, stroke:s.stroke, strokeWidth:s.strokeWidth });
+      else if(!dolu && r >= 10 && !halka && !orbit) halka = c;
     });
     const yay = halka || svg.querySelector('.pk-gosterge__iz');
-    if(!yay || svg.querySelector('.px-ara') || typeof yay.getTotalLength !== 'function') return;
-    const L = yay.getTotalLength();
-    if(!(L > 40)) return;
-    const n = Math.max(12, Math.round(L / 10)), ara = yay.cloneNode(false), g = Math.min(3, L / n / 3);
+    let ara = null;
+    if(yay && !svg.querySelector('.px-ara') && typeof yay.getTotalLength === 'function'){
+      const uz = yay.getTotalLength();
+      if(uz > 40) ara = { yay, uz, kalin:parseFloat(getComputedStyle(yay).strokeWidth) || 4 };
+    }
+    return { svg, kareler, ara };
+  }
+  function cizimYaz(p){
+    if(!p) return;
+    p.kareler.forEach(q => {
+      const c = q.c, r = q.r, k = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      Array.from(c.attributes).forEach(a => { if(!/^(cx|cy|r)$/.test(a.name)) k.setAttribute(a.name, a.value); });
+      const cx = parseFloat(c.getAttribute('cx')) || 0, cy = parseFloat(c.getAttribute('cy')) || 0;
+      k.setAttribute('x', cx - r); k.setAttribute('y', cy - r); k.setAttribute('width', r * 2); k.setAttribute('height', r * 2);
+      if(!c.hasAttribute('fill')) k.style.fill = q.fill;
+      if(!c.hasAttribute('stroke') && q.stroke !== 'none'){ k.style.stroke = q.stroke; k.style.strokeWidth = q.strokeWidth; }
+      c.replaceWith(k);
+    });
+    if(!p.ara) return;
+    const { yay, uz, kalin } = p.ara, n = Math.max(12, Math.round(uz / 10)), ara = yay.cloneNode(false), g = Math.min(3, uz / n / 3);
     ara.removeAttribute('class');
     ara.setAttribute('class', 'px-ara');
     ara.setAttribute('aria-hidden', 'true');
-    ara.style.cssText = 'fill:none;stroke:var(--surface);stroke-width:' + ((parseFloat(getComputedStyle(yay).strokeWidth) || 4) + 2) + ';stroke-dasharray:' + g + ' ' + (L / n - g) + ';stroke-dashoffset:0;animation:none;transition:none';
-    const yazi = svg.querySelector('text');
-    if(yazi) svg.insertBefore(ara, yazi); else svg.appendChild(ara);
+    ara.style.cssText = 'fill:none;stroke:var(--surface);stroke-width:' + (kalin + 2) + ';stroke-dasharray:' + g + ' ' + (uz / n - g) + ';stroke-dashoffset:0;animation:none;transition:none';
+    const yazi = p.svg.querySelector('text');
+    if(yazi) p.svg.insertBefore(ara, yazi); else p.svg.appendChild(ara);
   }
+  const cizimCevir = svg => cizimYaz(cizimOku(svg));
   /* Bölüm başlığı konusuna göre simge alır; eşleşmeyen kare işaretle kalır. Süs: veri okumaz. */
   const BASLIK_SIMGE = [['öğün', 'ogun'], ['beslen', 'ogun'], ['uyku', 'ay'], ['gece', 'ay'], ['kilo', 'tarti'], ['hareket', 'nabiz'], ['seans', 'nabiz'], ['nabız', 'nabiz'], ['ölçüm', 'nabiz'],
     ['toparlan', 'kalp'], ['his', 'kalp'], ['test', 'tup'], ['tahlil', 'tup'], ['takvim', 'takvim'], ['hafta', 'takvim'], ['program', 'takvim'], ['plan', 'takvim'], ['akış', 'saat'], ['hedef', 'hedef'],
@@ -182,12 +194,14 @@ window.LIFEOS = window.LIFEOS || {};
     kokler = [].concat(kokler).filter(k => k && k.querySelectorAll);
     kokler.forEach(kok => {
       kok.querySelectorAll('.kutu__ad').forEach(baslikSimge);
-      if(kok.tagName.toLowerCase() === 'svg'){ cizimCevir(kok); if(!kok.dataset.px) yeni.push(kok); }
+      if(kok.tagName.toLowerCase() === 'svg' && !kok.dataset.px) yeni.push(kok);
       kok.querySelectorAll('svg:not([data-px])').forEach(s => yeni.push(s));
     });
     const boylar = yeni.map(simgeBoyu);
     yeni.forEach((s, i) => simgeCevir(s, boylar[i]));
-    kokler.forEach(kok => kok.querySelectorAll('svg:not([data-pxc])').forEach(cizimCevir));
+    const cizimler = [];
+    kokler.forEach(kok => { if(kok.tagName.toLowerCase() === 'svg') cizimler.push(kok); kok.querySelectorAll('svg:not([data-pxc])').forEach(s => cizimler.push(s)); });
+    cizimler.map(cizimOku).forEach(cizimYaz);
   }
   function simgeIzle(){
     if(/\/tests\//.test(location.pathname)) return;
@@ -300,17 +314,24 @@ window.LIFEOS = window.LIFEOS || {};
     if(!hareketsiz()){ const z = setInterval(() => { if(!c.isConnected) return clearInterval(z); D.kare(g, arka, o, Date.now() / 1000); }, 125); }
     return c;
   }
+  /* Sonraki ızgaraya kadar uyur, sonra ekranın karesini bekler: zamanlayıcı ile ekran arasında vuru olmaz, gizli sekmede hiç uyanmaz. */
   function dongu(){
-    clearInterval(durum.zaman); durum.zaman = null;
+    clearTimeout(durum.zaman); durum.zaman = null;
+    const nesil = durum.nesil = (durum.nesil || 0) + 1;
     if(!durum.c || hareketsiz()) return;
-    let n = 0;
-    durum.zaman = setInterval(() => {
-      if(document.visibilityState === 'hidden' || (window.scrollY > 260 && !document.documentElement.hasAttribute('data-bos'))) return;
-      /* Vakit değişti mi: dakikada bir bakılır, değiştiyse bina yeniden çizilir */
-      if(++n % 480 === 0 && durum.o && sahneMotor().vakit(new Date().getHours()) !== durum.o.vakit) hazirla();
-      if(!dogaMi() && !durum.kayiyor && durum.yer){ const y = simdikiYer(); if(y !== durum.yer) yereGit(y); }
-      kare(Date.now() / 1000);
-    }, 125);
+    let vakitBak = Date.now();
+    const sirala = () => { const a = (durum.o && durum.o.aralik) || 1000 / 12; durum.zaman = setTimeout(() => requestAnimationFrame(tik), a - Date.now() % a); };
+    const tik = () => {
+      if(nesil !== durum.nesil) return;
+      if(window.scrollY <= 260 || document.documentElement.hasAttribute('data-bos')){
+        /* Vakit değişti mi: dakikada bir bakılır, değiştiyse bina yeniden çizilir */
+        if(Date.now() - vakitBak > 60000){ vakitBak = Date.now(); if(durum.o && sahneMotor().vakit(new Date().getHours()) !== durum.o.vakit) hazirla(); }
+        if(!dogaMi() && !durum.kayiyor && durum.yer){ const y = simdikiYer(); if(y !== durum.yer) yereGit(y); }
+        kare(Date.now() / 1000);
+      }
+      sirala();
+    };
+    sirala();
   }
   /* Boşta: kart ve menü çekilir, sahne kalır. Çift tıkla açılan el ile kapanır; hareketle kapanmaz. */
   const BOS_MS = 180000;
@@ -480,7 +501,7 @@ window.LIFEOS = window.LIFEOS || {};
   function uygula(){
     if(!secili()){
       if(durum.c){ durum.c.remove(); durum.c = null; durum.g = null; }
-      clearInterval(durum.zaman); durum.zaman = null;
+      clearTimeout(durum.zaman); durum.zaman = null; durum.nesil = (durum.nesil || 0) + 1;
       return;
     }
     if(!durum.c){
