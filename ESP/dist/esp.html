@@ -29196,7 +29196,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'2f01edf6', at:'2026-11-05 08:17', dirty:false };
+ESP.BUILD = { id:'c667d2ea', at:'2026-11-05 10:12', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -48053,6 +48053,117 @@ ESP.KingOgret = (function(){
   };
 })();
 
+/* ==== js/core/alan.js ==== */
+/* ALAN SINAMASI — felsefe, tarih, okuma, yazı, ses ve dilde «konuyu gerçekten biliyor muyum?»
+
+   Kullanıcı (2026-11-05): «sadece dil olarak bakma; felsefe ve birçok alanda kaynak nedir,
+   en verimli nasıl öğrenilir». 68 konunun öğrenme kartında çalışma sorusu ve aktarım görevi
+   zaten vardı ama cevabı bir tık ötede duruyor, hiçbir şey kaydedilmiyordu; konu ilerlemesi
+   yalnız beyan (işaret kutusu) idi.
+
+   Sözler:
+   1. ÖNCE ÜRET, SONRA BAK. Cevap yazılmadan görünmez; karşılaştırmayı kişi yapar, kod puan
+      vermez, model notlamaz (AGENTS §1.1, §1.5). Eksik gerekçe «tutmadı» sayılır.
+   2. AŞAMAYI ÇEKİRDEK VERİR (brand/ortak/usta.js). Araya zaman girmeden kalıcı denmez.
+      Kalıcı olan konuda soru AKTARIM görevine döner: aynı bilgi yeni bir örnekte.
+   3. BEYAN ÖLÇÜM DEĞİLDİR. İşaret kutuları buraya girmez, hiçbir kapı bu kayıtla açılmaz.
+   4. KAYNAK SÖYLENİR, ABARTILMAZ. Kaynak konunun bağlamıdır, her cümlenin onayı değildir;
+      öğretmen incelemesinden geçmemiş kart öyle yazılır. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.alan.kaynak-baglami':'Konu bağlamı; her cümlenin onayı değil. Öğretmen incelemesi bekliyor.',
+});
+
+window.ESP = window.ESP || {};
+
+ESP.Alan = (function(){
+  const ANAHTAR = 'meta/alanKanit', SAKLA = 40;
+
+  const KAYNAK = {
+    purdue:{ ad:'Purdue OWL', url:'https://owl.purdue.edu/' },
+    'sep-logic':{ ad:'Stanford Felsefe Ansiklopedisi', url:'https://plato.stanford.edu/' },
+    'sep-ethics':{ ad:'Stanford Felsefe Ansiklopedisi', url:'https://plato.stanford.edu/' },
+    ud:{ ad:'Universal Dependencies', url:'https://universaldependencies.org/' },
+    'ud-parallel':{ ad:'Universal Dependencies', url:'https://universaldependencies.org/' },
+    cefr:{ ad:'Avrupa Konseyi CEFR', url:'https://www.coe.int/en/web/common-european-framework-reference-languages' },
+    loc:{ ad:'ABD Kongre Kütüphanesi', url:'https://www.loc.gov/' },
+    'omt-scales':{ ad:'Open Music Theory', url:'https://viva.pressbooks.pub/openmusictheory/' },
+    'omt-meter':{ ad:'Open Music Theory', url:'https://viva.pressbooks.pub/openmusictheory/' },
+    'pugetsound-meter':{ ad:'Puget Sound müzik teorisi', url:'https://musictheory.pugetsound.edu/' },
+    nidcd:{ ad:'NIDCD (ABD Ulusal Sağlık Enstitüleri)', url:'https://www.nidcd.nih.gov/' },
+    openlibrary:{ ad:'Open Library', url:'https://openlibrary.org/' },
+    mutopia:{ ad:'Mutopia Project', url:'https://www.mutopiaproject.org/' },
+    'mutopia-all':{ ad:'Mutopia Project', url:'https://www.mutopiaproject.org/' },
+  };
+
+  const bugun = () => ESP.U.todayISO();
+  function kayit(){
+    if(!ESP.S.alanKanit || typeof ESP.S.alanKanit !== 'object') ESP.S.alanKanit = {};
+    return ESP.S.alanKanit;
+  }
+  async function yukle(){
+    const d = await ESP.Store.get(ANAHTAR);
+    ESP.S.alanKanit = d && typeof d === 'object' && !Array.isArray(d) ? d : {};
+  }
+
+  const kartOf = id => (ESP.OGRENME_KARTI_BY_TOPIC || {})[id] || null;
+  const sinanabilir = t => { const c = kartOf(t.id); return !!(c && c.practice && c.practice.prompt); };
+  const asama = id => window.LIFEOS.USTA.asama(kayit()[id] || [], bugun());
+
+  function konular(disc){
+    return (disc ? [disc] : ESP.Mod.active().map(d => d.id)).reduce((l, d) =>
+      l.concat(ESP.Lesson.topics(d).filter(sinanabilir)), []);
+  }
+  function beceriler(disc){
+    const k = kayit();
+    return konular(disc).map(t => ({ id:t.id, grup:t.disc, kanitlar:k[t.id] || [] }));
+  }
+  function konuOf(id){ return konular().find(t => t.id === id) || null; }
+
+  /* Kalıcı konuda aktarım görevi; yoksa ya da konu henüz oturmadıysa çalışma sorusu. */
+  function soru(id){
+    const c = kartOf(id);
+    if(!c || !c.practice || !c.practice.prompt) return null;
+    const a = asama(id);
+    const aktarim = (a.id === 'kalici' || a.id === 'saglam') && c.transfer && c.transfer.prompt;
+    return {
+      aktarim:!!aktarim,
+      ornek:(c.worked_example && c.worked_example.text) || null,
+      soru:aktarim ? c.transfer.prompt : c.practice.prompt,
+      yanit:aktarim ? null : c.practice.expected_answer || null,
+      olcut:aktarim ? (c.transfer.rubric || []) : [],
+      kaynaklar:kaynaklar(c),
+      incelendi:!!c.ready_for_app,
+    };
+  }
+
+  function kaynaklar(card){
+    const gorulen = {};
+    return ((card && card.source_ids) || []).map(i => KAYNAK[i]).filter(k => {
+      if(!k || gorulen[k.url]) return false;
+      gorulen[k.url] = true;
+      return true;
+    });
+  }
+
+  /* Tek kanıt. Güven işaretsizse boş kalır; konu sayfasından gelen sınama konuyu baştan
+     söylediği için karışık sayılmaz. */
+  async function kaydet(id, isabet, o){
+    if(!sinanabilir({ id })) return { ok:false };
+    const x = { g:bugun(), isabet:!!isabet };
+    if(o && o.guven) x.guven = o.guven;
+    if(o && o.karisik) x.karisik = true;
+    const k = kayit();
+    k[id] = (k[id] || []).concat([x]).slice(-SAKLA);
+    await ESP.Store.set(ANAHTAR, k);
+    return { ok:true, asama:asama(id) };
+  }
+
+  const sira = (n, disc) => window.LIFEOS.USTA.sira(beceriler(disc), bugun(), n);
+  const harita = disc => window.LIFEOS.USTA.harita(beceriler(disc), bugun());
+
+  return { KAYNAK, yukle, konular, konuOf, asama, soru, kaynaklar, kaydet, sira, harita };
+})();
+
 /* ==== js/core/kingarac.js ==== */
 /* KING ARAÇLARI — ESP'nin King'e açtığı işler (brand/ortak/arac.js, King 2.0 B).
 
@@ -53470,6 +53581,141 @@ window.LIFEOS.OGRET = (function(){
   }
 
   return { ARALIK, TURLER, bul, secenek, karistir, sayi, teshis, sokratik, depo, tasi, isle, vade, ozet, benzer, cevap, araclar, gunEkle };
+})();
+
+/* ==== js/core/usta.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/usta.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* USTALIK ÇEKİRDEĞİ — bir becerinin KALICI olduğunu nasıl biliriz? (AYS, SPİ, ESP)
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/usta.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Testi `usta.test.js`.
+   ==================================================================
+
+   Kullanıcı (2026-11-05): «kullanıcıyı o dallarda en profesyonel ve en hızlı
+   şekilde usta bir hale getirmenin altyapısını kur». Çekirdek tek soruya bakar:
+   beceri, araya zaman girdikten sonra ipucusuz da tutuyor mu? Yeni bir ölçüm
+   türü yok; modül kendi kaydını kanıta çevirip verir. Kelime, deneme konusu,
+   temiz tempo ya da koşu hedefi aynı biçime iner.
+
+   Kanıt: { g:'YYYY-AA-GG', isabet:bool, guven?:'emin'|'kararsiz'|'tahmin',
+            ipucu?:bool, karisik?:bool }
+
+   Dayanak: geri getirme ve aralıklı pratik en güçlü iki teknik (Dunlosky 2013);
+   karışık sınama aktarımı artırır (Rohrer 2020); emin olup yanılmak en kolay
+   düzelen ama geri dönebilen hatadır (Butterfield-Metcalfe 2001, Butler 2011).
+
+   Sözler:
+   1. SAF KURAL. Aynı girdi aynı çıktı; model yok, depo yok, saat yok (AGENTS §1.1).
+   2. EKSİK SIFIR DEĞİL. Kanıtsız beceri «veri yok»tur, «öğreniyor» bile değildir;
+      güveni işaretlenmemiş cevap isabet oranına girmez (AGENTS §1.2).
+   3. ESİKLER SİSTEM AYARIDIR. ARA (1/7/21/60 gün) araştırmadan alınmış bir sayı
+      değil, bu sistemin seçimidir; öyle sunulur.
+   4. YARGI KAYDA, KİŞİYE DEĞİL. «Sağlam» bu becerinin kaydı için söylenir; kişi
+      için yetenek yargısı ya da sertifika üretilmez (AGENTS §1.5). Bu yüzden
+      son aşamanın adı «usta» değildir.
+   5. XP'YE BAKMAZ, XP VERMEZ (AGENTS §1.6). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.usta.ogreniyor':'Öğreniyor',
+  'ortak.usta.tutuyor':'Tutuyor',
+  'ortak.usta.kalici':'Kalıcı',
+  'ortak.usta.saglam':'Sağlam',
+  'ortak.usta.veri-yok':'Veri yok',
+});
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.USTA = (function(){
+  'use strict';
+
+  /* Sıradaki kanıt, kanıtlanmış en uzun aradan bir üst basamağa gider. */
+  const ARA = { ilk:1, kalici:7, saglam:21, koru:60 };
+  const ASAMALAR = ['yok', 'ogreniyor', 'tutuyor', 'kalici', 'saglam'];
+  const ADLAR = () => ({ yok:yz('ortak.usta.veri-yok'), ogreniyor:yz('ortak.usta.ogreniyor'), tutuyor:yz('ortak.usta.tutuyor'),
+    kalici:yz('ortak.usta.kalici'), saglam:yz('ortak.usta.saglam') });
+  const EN_AZ_GUVEN = 10;
+
+  const zaman = iso => { const p = String(iso).split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); };
+  const fark = (a, b) => Math.round((zaman(b) - zaman(a)) / 864e5);
+  function gunEkle(iso, n){ return new Date(zaman(iso) + n * 864e5).toISOString().slice(0, 10); }
+  /* Metin sırası tarih sırasıdır; bu yol binlerce kartlı destede saniyede onlarca kez döner. */
+  const sirali = k => (k || []).filter(x => x && x.g && typeof x.isabet === 'boolean')
+    .sort((a, b) => a.g < b.g ? -1 : a.g > b.g ? 1 : 0);
+
+  /* Aşama. Yanlış zinciri keser: son ölçüm kazanır, eski başarı yeni unutmayı örtmez.
+     Aynı gündeki ikinci doğru ara kanıtı sayılmaz (ara 0). İpuçlu cevap aşama
+     kazandırmaz ve kırmaz: görülmüş cevap hatırlama ölçmez. */
+  function asama(kanitlar, bugun){
+    const k = sirali(kanitlar);
+    if(!k.length) return { id:'yok', ad:ADLAR().yok, etiket:'veri yok', enUzun:0, sonraki:null, gecikti:0, kritik:false, n:0 };
+    const temiz = k.filter(x => !x.ipucu);
+    let son = null, enUzun = 0, karisik = false, kritik = false;
+    temiz.forEach(x => {
+      if(!x.isabet){ son = null; enUzun = 0; karisik = false; kritik = x.guven === 'emin'; return; }
+      if(son) enUzun = Math.max(enUzun, fark(son, x.g));
+      if(x.karisik) karisik = true;
+      son = x.g; kritik = false;
+    });
+    const id = !son ? 'ogreniyor'
+      : enUzun >= ARA.saglam && karisik ? 'saglam'
+      : enUzun >= ARA.kalici ? 'kalici' : 'tutuyor';
+    const hedef = id === 'saglam' ? ARA.koru : enUzun >= ARA.kalici ? ARA.saglam : enUzun >= ARA.ilk ? ARA.kalici : ARA.ilk;
+    const sonraki = son ? gunEkle(son, hedef) : null;
+    return { id, ad:ADLAR()[id], etiket:'hesaplandı', enUzun, sonraki, kritik, n:k.length,
+      gecikti:sonraki && bugun && sonraki < bugun ? fark(sonraki, bugun) : 0 };
+  }
+
+  /* Güven isabeti: «emin» dediklerinde ne kadar tutuyor? Üstbiliş sinyalidir, puan
+     değildir. Az kanıtta oran üretilmez. */
+  function kalibrasyon(kanitlar){
+    const cikti = {};
+    ['emin', 'kararsiz', 'tahmin'].forEach(g => {
+      const l = (kanitlar || []).filter(x => x && x.guven === g && typeof x.isabet === 'boolean');
+      cikti[g] = { n:l.length, oran:l.length >= EN_AZ_GUVEN ? l.filter(x => x.isabet).length / l.length : null };
+    });
+    return cikti;
+  }
+
+  /* Sıradaki iş: önce emin olup yanıldıkların, sonra vadesi en çok geçenler,
+     sonra öğrenilmekte olanlar, en son yeniler. Vadesi gelmemiş beceri sorulmaz. */
+  function sira(beceriler, bugun, n){
+    const puan = a => a.kritik ? 0 : a.sonraki && a.sonraki <= bugun ? 1 : a.id === 'ogreniyor' ? 2 : a.id === 'yok' ? 3 : null;
+    const adaylar = (beceriler || []).map(b => ({ b, a:asama(b.kanitlar, bugun) }))
+      .map(x => Object.assign(x, { p:puan(x.a) })).filter(x => x.p != null)
+      .sort((x, y) => x.p - y.p || y.a.gecikti - x.a.gecikti);
+    return karistir(adaylar).slice(0, n > 0 ? n : adaylar.length)
+      .map(x => ({ id:x.b.id, grup:x.b.grup, asama:x.a.id, kritik:x.a.kritik, gecikti:x.a.gecikti }));
+  }
+
+  /* Aynı gruptan ikisi yan yana gelmesin (grup açık kalırsa sınavdaki gibi konu başlığı
+     ipucu olur). Önceliği en az bozan aday seçilir; olmuyorsa yan yana kalır. */
+  function karistir(l){
+    const kalan = l.slice(), cikti = [];
+    while(kalan.length){
+      const onceki = cikti.length ? cikti[cikti.length - 1].b.grup : null;
+      const i = kalan.findIndex(x => x.b.grup == null || x.b.grup !== onceki);
+      cikti.push(kalan.splice(i < 0 ? 0 : i, 1)[0]);
+    }
+    return cikti;
+  }
+
+  /* Harita: kaç beceri hangi aşamada ve kaçı ölçüldü. */
+  function harita(beceriler, bugun){
+    const sayi = { yok:0, ogreniyor:0, tutuyor:0, kalici:0, saglam:0 };
+    let kritik = 0, gecikti = 0;
+    (beceriler || []).forEach(b => {
+      const a = asama(b.kanitlar, bugun);
+      sayi[a.id]++;
+      if(a.kritik) kritik++;
+      if(a.gecikti) gecikti++;
+    });
+    const toplam = (beceriler || []).length;
+    return { sayi, toplam, olculen:toplam - sayi.yok, kritik, gecikti };
+  }
+
+  return { ARA, ASAMALAR, adi:id => ADLAR()[id], asama, kalibrasyon, sira, harita, gunEkle };
 })();
 
 /* ==== js/core/parca-rehber.js ==== */
@@ -81711,6 +81957,7 @@ ESP.Model = (function(){
     S.notes = ((await ESP.Store.list('notes')) || []).map(normNote);
     S.books = ((await ESP.Store.list('books')) || []).map(b => Object.assign(newBook(), b));
     if(ESP.Lesson && ESP.Lesson.sinavYukle) await ESP.Lesson.sinavYukle();
+    if(ESP.Alan) await ESP.Alan.yukle();
     if(ESP.KotuGun) await ESP.KotuGun.yukle();
     if(ESP.GunSure) await ESP.GunSure.yukle();
     if(ESP.Anlat) await ESP.Anlat.yukle();
@@ -83927,7 +84174,7 @@ ESP.SRS = (function(){
 
   /* Bir cevabi karta ISLER ve kaydeder. Gecmise tek satir duser; gecmis
      retansiyon hesabinin tek girdisidir. */
-  async function answer(cardId, gradeId){
+  async function answer(cardId, gradeId, ek){
     const card = S.cards.find(c => c.id === cardId);
     if(!card) return { ok:false, error:yz('esp.core.srs.kart-bulunamadi') };
     const next = schedule(card, gradeId);
@@ -83935,9 +84182,9 @@ ESP.SRS = (function(){
 
     const onceki = { box:card.box, ease:card.ease, due:card.due };
     Object.assign(card, next);
-    card.history = (card.history || []).concat([{
+    card.history = (card.history || []).concat([Object.assign({
       at:new Date().toISOString(), grade:gradeId, box:next.box, interval:next.interval,
-    }]);
+    }, ek || {})]);
     /* Gecmis sinirsiz buyumesin: retansiyon hesabi son 50 cevabi kullanir,
        fazlasi depoyu sisirir ve hicbir soruyu daha iyi cevaplamaz. */
     if(card.history.length > 50) card.history = card.history.slice(-50);
@@ -91006,6 +91253,28 @@ ESP.Lesson = (function(){
     return { kind:'recall', cardId:card.id, prompt:card.front, answer:card.back };
   }
 
+  /* Kartın geçmişi → ustalık kanıtı (brand/ortak/usta.js). Yeni kayıt yok: eski
+     cevaplar da girer; yalnız güven ve karışıklık işareti onlarda boştur. */
+  function kanitlar(card){
+    return ((card && card.history) || []).map(function(h){
+      return { g:U.gunOf(h.at), isabet:h.grade !== 'again', guven:h.guven, karisik:h.karisik };
+    });
+  }
+
+  /* Destenin kalıcılık özeti: aşama dağılımı, emin olup yanılınan kartlar, güven isabeti. */
+  function kalicilik(lang){
+    const bugun = U.todayISO();
+    return ESP.Memo.of('usta:' + lang + ':' + bugun, function(){
+      const kartlar = ESP.Model.cardsOf(lang);
+      const beceriler = kartlar.map(function(c){ return { id:c.id, kanitlar:kanitlar(c) }; });
+      return {
+        harita:LIFEOS.USTA.harita(beceriler, bugun),
+        kritik:kartlar.filter(function(c, i){ return LIFEOS.USTA.asama(beceriler[i].kanitlar, bugun).kritik; }),
+        guven:LIFEOS.USTA.kalibrasyon([].concat.apply([], beceriler.map(function(b){ return b.kanitlar; }))),
+      };
+    });
+  }
+
   /* Bir pratik oturumu kurar.
 
      Kartlar önce VADESİ GELENLERDEN seçilir: pratik, tekrarın yerine geçmez
@@ -91020,7 +91289,10 @@ ESP.Lesson = (function(){
     /* Ünite sınavı (fikir 41) kendi kart listesini verir: vade önceliği
        yoktur, ünitenin bütün kartları karışık sorulur. */
     const kaynak = o.kartlar ? hepsi.filter(function(c){ return o.kartlar.indexOf(c) >= 0; }) : null;
-    const vadesi = kaynak ? [] : ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
+    const vadeli = kaynak ? [] : ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
+    /* Emin olup yanıldığın kart önce gelir: en kolay düzelen ama geri dönebilen hata budur. */
+    const kritik = c => LIFEOS.USTA.asama(kanitlar(c)).kritik;
+    const vadesi = vadeli.filter(kritik).concat(vadeli.filter(c => !kritik(c)));
     const geri = (kaynak || hepsi).filter(function(c){ return vadesi.indexOf(c) < 0; });
     const sira = vadesi.concat(shuffle(geri, bugun + deste))
       .slice(0, o.length || ESP.PRACTICE_LENGTH);
@@ -91044,7 +91316,7 @@ ESP.Lesson = (function(){
      Not «tekrar» ile «iyi» arasında üçüncü bir değer YOKTUR: pratik bir
      ölçüm değil bir denemedir ve kullanıcının «kolaydı» demesi burada
      sorulmaz. Kolaylık, aralığın kendisinden okunur. */
-  async function answer(session, given){
+  async function answer(session, given, guven){
     if(!session || session.done) return { ok:false, error:yz('esp.core.lesson.oturum-kapali') };
     const q = session.questions[session.pos];
     if(!q) return { ok:false, error:yz('esp.core.lesson.soru-yok') };
@@ -91056,7 +91328,11 @@ ESP.Lesson = (function(){
     /* Kart oturum sirasinda silinmis olabilir (baska sekmede, baska
        ekranda). SRS "kart bulunamadi" derse soru SAYILMAZ: olmayan bir
        karta verilmis cevap, retansiyonu da isabeti de yalan yapar. */
-    const yazildi = await ESP.SRS.answer(q.cardId, dogru ? 'good' : 'again');
+    /* Ünite sınavı konuyu baştan söyler; karışık sınama sayılmaz. İşaretsiz güven boş kalır. */
+    const ek = {};
+    if(guven === 'emin' || guven === 'kararsiz' || guven === 'tahmin') ek.guven = guven;
+    if(!session.unitId) ek.karisik = true;
+    const yazildi = await ESP.SRS.answer(q.cardId, dogru ? 'good' : 'again', ek);
     if(!yazildi.ok){
       session.pos++;
       if(session.pos >= session.questions.length) session.done = true;
@@ -91178,7 +91454,7 @@ ESP.Lesson = (function(){
         { baslik:yz('esp.core.lesson.kendini-sina'), metin:p.expected_answer ? yz('esp.core.lesson.cevabini-yazdiktan-sonra-bak') + p.expected_answer : '' }].filter(b => b.metin) };
   }
 
-  return { kingDers, units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
+  return { kanitlar, kalicilik, kingDers, units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
     topics, topicOf, topicMarks, topicProgress, markTopic, topicSummary,
     start, question, answer, result, log, correct, norm, shuffle,
     uniteSinavi, sonSinav, sinavYukle, SINAV_EN_AZ };
@@ -96587,6 +96863,14 @@ ESP.C = (function(){
    ESP'nin alti disiplinidir — jenerik bir grafik degil, alana bagli bir
    sekildir. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.core.parts.ne-kadar-eminsin':'Ne kadar eminsin?',
+  'esp.core.parts.eminim':'Eminim',
+  'esp.core.parts.kararsizim':'Kararsızım',
+  'esp.core.parts.tahmin':'Tahmin',
+  'esp.core.parts.emindin-one-alindi':' Emindin; bu kart bir sonraki pratikte ilk sorulur.',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.disiplin-dengesi-radari':'Disiplin dengesi radarı',
   'esp.core.parts.dis-halka-penceredeki-en':'Dış halka = penceredeki en yüksek değer.',
   'esp.core.parts.sesli-sohbeti-bitir':'Sesli sohbeti bitir',
@@ -96663,9 +96947,16 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.bu-bolumde-konu-haritasi-yok':'Bu bölümde konu haritası yok.',
   'esp.core.parts.ornek':'Örnek:',
   'esp.core.parts.sik-yanlis-yorum':'Sık yanlış yorum:',
-  'esp.core.parts.pratik':'Pratik',
-  'esp.core.parts.beklenen-yanit-ve-olcut':'Beklenen yanıt ve ölçüt',
-  'esp.core.parts.aktarim':'Aktarım:',
+  'esp.core.parts.kendini-sina':'Kendini sına',
+  'esp.core.parts.aktarim-gorevi':'Aktarım: yeni bir örnekte göster',
+  'esp.core.parts.karsilastir':'Karşılaştır',
+  'esp.core.parts.beklenen-yanit':'Beklenen yanıt:',
+  'esp.core.parts.eksik-gerekce-tutmadi':'Eksik gerekçe varsa tutmadı say.',
+  'esp.core.parts.tuttu':'Tuttu',
+  'esp.core.parts.tutmadi':'Tutmadı',
+  'esp.core.parts.kaynak':'Kaynak:',
+  'esp.core.parts.konu-olculdu':'konu ölçüldü',
+  'esp.core.parts.vazgec':'Vazgeç',
   'esp.core.parts.i-saretler-beyandir-hicbir-k':'İşaretler beyandır: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
   'esp.core.parts.bu-konu-icin-notum':'Bu konu için notum',
   'esp.core.parts.pratik-bir-sinav-degildir-ce':'Pratik bir sınav değildir: cevabın doğrudan aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.',
@@ -97144,6 +97435,58 @@ ESP.Parts = (function(){
     })}</div>`;
   }
 
+  /* Konu sınaması (core/alan.js): önce üret, sonra karşılaştır; kararı kişi verir. */
+  function konuSinama(t, karisik){
+    const q = ESP.Alan.soru(t.id);
+    if(!q) return '';
+    const s = ESP.S.ui.alanSinav;
+    if(!s || s.id !== t.id) return K.Button({ label:yz('esp.core.parts.kendini-sina'), size:'sm', act:'alan-basla',
+      data:{ 'data-id':t.id, 'data-karisik':karisik ? '1' : '0' } });
+    /* Soruların çoğu «bu durumda» der: örnek sorunun parçasıdır. */
+    const ornek = when(q.ornek, () => html`<p class="small text-2"><b>${yz('esp.core.parts.ornek')}</b> <i>${q.ornek}</i></p>`);
+    if(!s.goster) return html`<div class="prac">
+      ${when(q.aktarim, () => K.Badge({ label:yz('esp.core.parts.aktarim-gorevi'), tone:'muted', icon:false }))}
+      ${ornek}
+      <p class="prac__q">${q.soru}</p>
+      ${K.Segmented({ act:'alan-guven', value:s.guven || '', aria:yz('esp.core.parts.ne-kadar-eminsin'),
+        items:[{ value:'emin', label:yz('esp.core.parts.eminim') }, { value:'kararsiz', label:yz('esp.core.parts.kararsizim') },
+          { value:'tahmin', label:yz('esp.core.parts.tahmin') }] })}
+      <div class="row mt-10">
+        ${K.Textarea({ id:'alan-yazi', rows:3, aria:yz('esp.core.parts.cevabin'), placeholder:yz('esp.core.parts.cevabini-yaz'), value:s.yazi })}
+        ${K.Mic({ target:'alan-yazi' })}
+      </div>
+      <div class="row wrap mt-10">
+        ${K.Button({ label:yz('esp.core.parts.karsilastir'), tone:'primary', size:'sm', act:'alan-goster' })}
+        ${K.Button({ label:yz('esp.core.parts.bilmiyorum'), size:'sm', act:'alan-goster', data:{ 'data-bos':'1' } })}
+        ${K.Button({ label:yz('esp.core.parts.vazgec'), size:'sm', act:'alan-vazgec' })}
+      </div>
+    </div>`;
+    return html`<div class="prac">
+      ${ornek}
+      <p class="prac__q">${q.soru}</p>
+      ${when(s.yazi, () => html`<p class="small"><b>${yz('esp.core.parts.senin-cevabin')}</b> ${s.yazi}</p>`)}
+      ${when(q.yanit, () => html`<p class="small"><b>${yz('esp.core.parts.beklenen-yanit')}</b> ${q.yanit}</p>`)}
+      ${when(q.olcut.length, () => html`<ul class="bullets small">${map(q.olcut, x => html`<li>${x}</li>`)}</ul>`)}
+      <p class="tiny dim">${yz('esp.core.parts.eksik-gerekce-tutmadi')}</p>
+      <div class="row wrap mt-8">
+        ${K.Button({ label:yz('esp.core.parts.tuttu'), tone:'primary', size:'sm', act:'alan-sonuc', data:{ 'data-sonuc':'1' } })}
+        ${K.Button({ label:yz('esp.core.parts.tutmadi'), size:'sm', act:'alan-sonuc', data:{ 'data-sonuc':'0' } })}
+      </div>
+      ${when(q.kaynaklar.length, () => html`<p class="tiny dim mt-8">${yz('esp.core.parts.kaynak')}
+        ${map(q.kaynaklar, (k, i) => html`${i ? ', ' : ''}<a href="${k.url}" target="_blank" rel="noopener">${k.ad}</a>`)}.
+        ${q.incelendi ? '' : yz('esp.core.alan.kaynak-baglami')}</p>`)}
+    </div>`;
+  }
+
+  /* Disiplinin kalıcılık dağılımı. Hiç sınanmadıysa çizilmez: «sıfır» değil «veri yok». */
+  function alanOzet(discId){
+    const P = (window.LIFEOS || {}).PANO, Us = window.LIFEOS.USTA, h = ESP.Alan.harita(discId);
+    if(!P || !h.olculen) return '';
+    return html`<div class="mb-8">${raw(P.yigin({ parcalar:['ogreniyor', 'tutuyor', 'kalici', 'saglam']
+        .map(id => ({ ad:Us.adi(id), deger:h.sayi[id], metin:String(h.sayi[id]) })) }))}
+      <p class="tiny dim mt-4">${h.olculen}/${h.toplam} ${yz('esp.core.parts.konu-olculdu')}</p></div>`;
+  }
+
   /* Konu listesi — her bölümün müfredatı.
 
      İşaretler ÖLÇÜM DEĞİL BEYANDIR ve her satırda öyle görünür. Hiçbir
@@ -97154,10 +97497,12 @@ ESP.Parts = (function(){
     const isaret = ESP.Lesson.topicMarks();
     const acik = ESP.S.ui.topicOpen;
 
-    return html`<div class="topics">${map(list, t => {
+    return html`${alanOzet(discId)}<div class="topics">${map(list, t => {
       const p = ESP.Lesson.topicProgress(t);
       const on = acik === t.id;
       const card = (ESP.OGRENME_KARTI_BY_TOPIC || {})[t.id];
+      /* Sınama açıkken anlatım gizlenir: cevap gözün önündeyken hatırlama ölçülmez. */
+      const sinaniyor = (ESP.S.ui.alanSinav || {}).id === t.id;
       return html`
         <div class="${cls('topic', on && 'is-open')}">
           <button class="topic__head" data-act="topic-open" data-id="${t.id}"
@@ -97168,34 +97513,23 @@ ESP.Parts = (function(){
               <span class="small muted">${t.goal}</span>
             </span>
             ${when(t.band, () => K.Badge({ label:t.band, tone:'muted', icon:false }))}
+            ${when(ESP.Alan.asama(t.id).id !== 'yok', () => K.Badge({ label:ESP.Alan.asama(t.id).ad, tone:ESP.Alan.asama(t.id).kritik ? 'warn' : 'muted', icon:false }))}
             <span class="tiny dim">${p.marked}/${p.total}</span>
           </button>
           ${when(on, () => html`
             <div class="topic__detail">
               ${when(card && card.explanation, () => html`
                 <div class="ogrenme mb-8" data-notum-kaynak="${'konu:' + t.id}">
-                  <p class="small mb-6" style="line-height:1.45">${card.explanation}</p>
-                  ${when(card.worked_example && card.worked_example.text, () => html`
+                  ${when(!sinaniyor, () => html`<p class="small mb-6" style="line-height:1.45">${card.explanation}</p>`)}
+                  ${when(!sinaniyor && card.worked_example && card.worked_example.text, () => html`
                     <div class="small text-2 mb-4">
                       <b>${yz('esp.core.parts.ornek')}</b> <i>${card.worked_example.text}</i>
                     </div>`)}
-                  ${when(card.common_misinterpretation, () => html`
+                  ${when(!sinaniyor && card.common_misinterpretation, () => html`
                     <div class="ogrenme__dikkat">
                       <b>${yz('esp.core.parts.sik-yanlis-yorum')}</b> ${card.common_misinterpretation}
                     </div>`)}
-                  ${when(card.practice && card.practice.prompt, () => html`
-                    <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">
-                      <b class="block mb-2">${yz('esp.core.parts.pratik')}</b>
-                      <p class="small mb-4">${card.practice.prompt}</p>
-                      ${when(card.practice.expected_answer, () => html`
-                        <details class="tiny dim"><summary>${yz('esp.core.parts.beklenen-yanit-ve-olcut')}</summary>
-                          <p class="mt-4 mb-0">${card.practice.expected_answer}</p>
-                        </details>`)}
-                    </div>`)}
-                  ${when(card.transfer && card.transfer.prompt, () => html`
-                    <div class="tiny dim mt-6">
-                      <b>${yz('esp.core.parts.aktarim')}</b> ${card.transfer.prompt}
-                    </div>`)}
+                  <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">${konuSinama(t, false)}</div>
                 </div>`)}
               ${map(t.items, (it, i) => html`
                 <div class="topicrow">
@@ -97255,6 +97589,9 @@ ESP.Parts = (function(){
         </div>
 
         <p class="prac__q">${q.prompt}</p>
+        ${K.Segmented({ act:'prac-guven', value:ESP.S.ui.practiceGuven || '', aria:yz('esp.core.parts.ne-kadar-eminsin'),
+          items:[{ value:'emin', label:yz('esp.core.parts.eminim') }, { value:'kararsiz', label:yz('esp.core.parts.kararsizim') },
+            { value:'tahmin', label:yz('esp.core.parts.tahmin') }] })}
 
         ${q.kind === 'order'
           ? (function(){
@@ -97279,13 +97616,13 @@ ESP.Parts = (function(){
           ? html`<div class="prac__opts">${map(q.options, opt => K.Button({ label:opt,
               act:'prac-answer', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>`
           : html`<div class="row mt-10">
-              ${K.Input({ id:'prac-input', aria:yz('esp.core.parts.cevabin'), placeholder:yz('esp.core.parts.cevabini-yaz') })}
+              ${K.Input({ id:'prac-input', value:ESP.S.ui.practiceYazi, aria:yz('esp.core.parts.cevabin'), placeholder:yz('esp.core.parts.cevabini-yaz') })}
               ${K.Mic({ target:'prac-input' })}
               ${K.Button({ label:yz('esp.core.parts.cevapla'), tone:'primary', act:'prac-answer' })}
             </div>`}
 
         ${when(gosterildi, () => K.Notice({ tone:'info',
-          body:yz('esp.core.parts.dogrusu') + q.answer }))}
+          body:yz('esp.core.parts.dogrusu') + q.answer + (ESP.S.ui.practiceEmin ? yz('esp.core.parts.emindin-one-alindi') : '') }))}
         <div class="row wrap mt-10">
           ${K.Button({ label:yz('esp.core.parts.bilmiyorum'), size:'sm', act:'prac-skip' })}
           ${K.Button({ label:yz('esp.core.parts.oturumu-bitir'), size:'sm', act:'prac-close' })}
@@ -97536,7 +97873,7 @@ ESP.Parts = (function(){
 
   return { kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
-    units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics };
+    units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics, konuSinama };
 
 })();
 
@@ -102700,6 +103037,16 @@ ESP.Screens.gun = ESP.Screens.today.ayrinti;
    ölçülemez, hatırlanan kelime ölçülür. Bu yüzden her sayının yanında
    nereden geldiği durur. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.lang.kalicilik':'Kalıcılık',
+  'esp.lang.olculdu':' ölçüldü',
+  'esp.lang.emin-yanildiklarin':'Emin olup yanıldıkların',
+  'esp.lang.kalicilik-kurali':'kalıcı: 7 gün arayla doğru · sağlam: 21 gün, karışık pratikte',
+  'esp.lang.cevap':' cevap',
+  'esp.lang.emin-dediklerinin':'Emin dediklerinin %',
+  'esp.lang.i-tuttu':' kadarı tuttu',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.lang.en-cok-geciken-kart':'En çok geciken kart ',
   'esp.lang.telaffuzumu-sina':'Telaffuzumu Sına',
   'esp.lang.bugun-vadeli':'Bugün vadeli.',
@@ -103645,6 +103992,19 @@ ESP.Screens.lang = (function(){
       govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:yz('esp.lang.onumuzdeki-7-gunun-vadesi') })) });
   }
 
+  /* Kutu sistemin planıdır; bu kart araya zaman girince gerçekten tutanı gösterir
+     (brand/ortak/usta.js). Hiç sorulmamış kart «ölçüldü»ye girmez. */
+  function kalicilikKarti(P, dil){
+    const k = ESP.Lesson.kalicilik(dil), h = k.harita, Us = LIFEOS.USTA;
+    if(!h.olculen) return '';
+    const emin = k.guven.emin;
+    return P.kart({ tur:'kalicilik', ad:yz('esp.lang.kalicilik'), simge:'kart', yuva:h.olculen + '/' + h.toplam + yz('esp.lang.olculdu'),
+      govde:P.yigin({ parcalar:['ogreniyor', 'tutuyor', 'kalici', 'saglam'].map(id => ({ ad:Us.adi(id), deger:h.sayi[id], metin:String(h.sayi[id]) })) })
+        + (k.kritik.length ? P.not(yz('esp.lang.emin-yanildiklarin')) + P.liste({ satirlar:k.kritik.slice(0, 3).map(c => ({ ad:c.front, not:c.back, nokta:0 })) }) : '')
+        + (emin.oran != null ? P.not(yz('esp.lang.emin-dediklerinin') + Math.round(emin.oran * 100) + yz('esp.lang.i-tuttu') + ' · ' + emin.n + yz('esp.lang.cevap')) : '')
+        + P.not(yz('esp.lang.kalicilik-kurali')) });
+  }
+
   /* PANO KARTLARI (2026-10-20): kartların kutulara dağılımı ve en çok
      unutulan beş kart. Deste boşsa kart yok. */
   function PanoDil(){
@@ -103663,7 +104023,7 @@ ESP.Screens.lang = (function(){
       ? P.kart({ tur:'zor-kartlar', ad:yz('esp.lang.en-cok-unutulanlar'), yildiz:'tekrar et',
           govde:P.liste({ satirlar:zor.map(c => ({ sol:c.lapses + '×', ad:c.front, not:c.back, nokta:0 })) }) + P.not('sol: kaç kez unutuldu') })
       : '';
-    return P.izgara([kutuKart, zorKart], 'pk-izgara--iki');
+    return P.izgara([kutuKart, zorKart, kalicilikKarti(P, dil)], 'pk-izgara--iki');
   }
 
   LIFEOS.PARCA.blok({ id:'lang.dil-sekmeleri', sayfa:'lang', yer:'y1', sira:10, ad:'Dil sekmeleri', ciz({ d }){
@@ -105673,6 +106033,11 @@ ESP.Screens.history = (function(){
    Ölçülemeyen basamak üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
    Orada istenen şey çalışmak değil ÖLÇMEKTİR. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.ladder.karisik-sinama':'Karışık sınama',
+  'esp.ladder.konu-olculdu':'konu ölçüldü',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.ladder.hicbir-disiplinde-olculmus-u':'Hiçbir disiplinde ölçülmüş üretim yok. ',
   'esp.ladder.merdiven-ilk-olcumle-baslar':'Merdiven ilk ölçümle başlar.',
   'esp.ladder.once-olc':'Önce ölç',
@@ -106085,6 +106450,18 @@ ESP.Screens.ladder = (function(){
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
+  /* Karışık alan sınaması (core/alan.js): sıradaki konu burada, sayfa değiştirmeden sınanır;
+     konu başlığı disiplin seçilmeden gelir, bu yüzden karışık kanıt sayılır. */
+  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'y1', sira:5, ad:'Karışık sınama', ciz(){
+    const P = (window.LIFEOS || {}).PANO, s = S.ui.alanSinav, h = ESP.Alan.harita();
+    const siradaki = ESP.Alan.sira(1)[0];
+    const t = ESP.Alan.konuOf(s && s.karisik ? s.id : siradaki && siradaki.id);
+    if(!P || !t) return '';
+    return K.Span(12, raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
+      yuva:h.olculen + '/' + h.toplam + ' ' + yz('esp.ladder.konu-olculdu'),
+      govde:String(html`<p class="small"><b>${(ESP.DISCIPLINE_BY_ID[t.disc] || {}).short || t.disc}</b> · ${t.title}</p>
+        ${ESP.Parts.konuSinama(t, true)}`) })));
+  } });
   LIFEOS.PARCA.blok({ id:'ladder.merdiven-sekmeleri', sayfa:'ladder', yer:'y1', sira:10, ad:'Merdiven sekmeleri', ciz({ disc }){
     return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));
@@ -114788,6 +115165,11 @@ window.LIFEOS.MINIK = (function(){
    ESP.S'yi okur. Bir ekranın çizilirken hata vermesi diğerlerini kapatmaz:
    hata paneline düşer, kenar çubuğu açılmaya devam eder. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.app.once-yanitini-yaz':'Önce yanıtını yaz.',
+  'esp.app.sonraki-sinama':'sonraki sınama ',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'esp.app.oteki-ekranlar-menuden-acilm':'Öteki ekranlar menüden açılmaya devam eder.',
   'esp.app.yeniden-yukle':'Yeniden yükle',
   'esp.app.ornek-veriye-gec':'Örnek veriye geç',
@@ -115836,6 +116218,16 @@ ESP.App = (function(){
       S.ui.practice = s;
       S.ui.practiceShown = false;
       S.ui.practiceOrder = null;
+      S.ui.practiceGuven = S.ui.practiceYazi = null;
+      S.ui.practiceEmin = false;
+      render();
+    },
+
+    /* Yeniden çizim yazılan cevabı silmesin. İkinci dokunuş işareti kaldırır. */
+    async 'prac-guven'(el){
+      const alan = document.getElementById('prac-input');
+      S.ui.practiceYazi = alan ? alan.value : null;
+      S.ui.practiceGuven = S.ui.practiceGuven === el.dataset.value ? null : el.dataset.value;
       render();
     },
 
@@ -115854,9 +116246,11 @@ ESP.App = (function(){
         const alan = document.getElementById('prac-input');
         cevap = alan ? alan.value : '';
       }
-      const res = await ESP.Lesson.answer(s, cevap);
+      const res = await ESP.Lesson.answer(s, cevap, S.ui.practiceGuven);
       if(!res.ok){ UI.toast(res.error); return; }
       S.ui.practiceShown = !res.correct;
+      S.ui.practiceEmin = !res.correct && S.ui.practiceGuven === 'emin';
+      S.ui.practiceGuven = S.ui.practiceYazi = null;
       S.ui.practiceOrder = null;
       UI.toast(res.correct ? 'Doğru' : yz('esp.app.yanlis-dogrusu') + res.expected);
       render();
@@ -115870,6 +116264,8 @@ ESP.App = (function(){
       const res = await ESP.Lesson.answer(s, '');
       S.ui.practiceShown = true;
       S.ui.practiceOrder = null;
+      S.ui.practiceGuven = S.ui.practiceYazi = null;
+      S.ui.practiceEmin = false;
       if(res.ok) UI.toast(yz('esp.app.dogrusu') + res.expected);
       render();
     },
@@ -115888,6 +116284,41 @@ ESP.App = (function(){
       S.ui.practice = null; S.ui.practiceShown = false; S.ui.practiceOrder = null;
       render();
     },
+
+    /* Konu sınaması (core/alan.js). Güven yeniden çizmez: yazılan cevap silinmesin. */
+    async 'alan-basla'(el){
+      S.ui.alanSinav = { id:el.dataset.id, karisik:el.dataset.karisik === '1', guven:null, yazi:'', goster:false };
+      render();
+    },
+    async 'alan-guven'(el){
+      const a = S.ui.alanSinav;
+      if(!a) return;
+      a.guven = a.guven === el.dataset.value ? null : el.dataset.value;
+      el.parentElement.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.value === a.guven;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    },
+    async 'alan-goster'(el){
+      const a = S.ui.alanSinav;
+      if(!a) return;
+      const alan = document.getElementById('alan-yazi');
+      a.yazi = alan ? alan.value.trim() : '';
+      /* Önce üret: yanıtsız karşılaştırma yok. Bilmemek de bir yanıttır, ayrı düğmesi var. */
+      if(!a.yazi && el.dataset.bos !== '1'){ UI.toast(yz('esp.app.once-yanitini-yaz')); return; }
+      a.goster = true;
+      render();
+    },
+    async 'alan-sonuc'(el){
+      const a = S.ui.alanSinav;
+      if(!a) return;
+      const r = await ESP.Alan.kaydet(a.id, el.dataset.sonuc === '1', a);
+      S.ui.alanSinav = null;
+      if(r.ok) UI.toast(r.asama.ad + (r.asama.sonraki ? ' · ' + yz('esp.app.sonraki-sinama') + U.fmtShort(r.asama.sonraki) : ''));
+      render();
+    },
+    async 'alan-vazgec'(){ S.ui.alanSinav = null; render(); },
 
     /* --- teklif ve plan: tezgâhta, ofiste ve Bugün'de ortak --- */
     async 'prop-accept'(el){
