@@ -62,7 +62,7 @@
 /* Boşta: menü sola, kart aşağı çekilir; dokunulamaz, sahne kalır (piksel.js). */
 :root[data-bos] .site--v5 > .kenar, :root[data-bos] .site--v5 > .site__body, :root[data-bos] .altbant, :root[data-bos] body > *:not(.piksel-oda):not(#app){ transition:opacity .42s ease, transform .42s ease; }
 :root[data-bos="1"]{ cursor:none; }
-:root[data-bos="1"] .site--v5 > .kenar{ opacity:0; transform:translateX(-60px); pointer-events:none; }
+:root[data-zemin="piksel"][data-bos="1"] .site--v5 > .kenar{ opacity:0; transform:translateX(-100%); pointer-events:none; }
 :root[data-bos="1"] .site--v5 > .site__body{ opacity:0; transform:translateY(48px); pointer-events:none; }
 :root[data-bos="1"] .altbant{ opacity:0; transform:translateY(48px); pointer-events:none; }
 :root[data-bos="1"] body > *:not(.piksel-oda):not(#app){ opacity:0; pointer-events:none; }
