@@ -19360,6 +19360,99 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 :root[data-zemin="piksel"] .hesap-anahtar{ width:44px; height:24px; background:var(--surface-3); box-shadow:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu); }
 :root[data-zemin="piksel"] .hesap-anahtar::after{ top:3px; left:3px; width:18px; height:18px; background:var(--surface); box-shadow:inset 0 -3px 0 var(--px-koyu), 0 0 0 2px var(--px-kenar); }
 :root[data-zemin="piksel"] .hesap-anahtar[aria-checked="true"]{ background:var(--primary); }
+
+/* ==== css/king-piksel.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/king-piksel.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KING · PİKSEL GÖRÜNÜMÜ (2026-11-05, kullanıcı: «King'in arayüzünü çok daha güzel, çok daha profesyonel yap»).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/king-piksel.css`; `python3 tools/ortak.py --yay` ile üç arayüze kopyalanır.
+   piksel.css'ten sonra yüklenir (brand/parcalar.txt); yalnız büyük King penceresini giydirir, küçük King'e dokunmaz.
+
+   Kurallar: dört ayrı kutu yerine tek pencere; sütunlar ince çizgiyle ayrılır, kutu içinde kutu yok.
+   Sohbet ortada okunur bir sütundur; King'in cevabı solda vurgu şeritli kâğıt, seninki sağda vurgu tonlu.
+   Tek vurgu rengi --king-vurgu; gölge, parıltı, süs yok. Sayı ve karar değişmez: bu dosya yalnız görünümdür. */
+
+:root[data-zemin="piksel"] .king:not(.is-mini){
+  --kp-cizgi:var(--px-kenar);
+  --kp-cerceve:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar);
+  --kp-ton:color-mix(in oklab, var(--kp-vurgu) 14%, var(--surface));
+  --kp-vurgu:var(--king-vurgu, var(--primary)); --kp-kagit:var(--surface-2);
+}
+
+/* ---------- Pencere: sütunlar tek yüzeyin bölmeleri ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kutu{ padding:0; gap:0; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray{ margin:0; padding:16px 0; gap:4px; border:0; border-right:2px solid var(--kp-cizgi); background:var(--surface-2); box-shadow:none; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is{ width:48px; margin:0 auto; padding:8px 0; gap:4px; background:none; box-shadow:none; color:var(--text-2); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is:hover{ background:var(--surface-3); color:var(--text); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is.is-secili{ background:var(--surface); color:var(--kp-vurgu); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__yan{ margin:0; border:0; border-right:2px solid var(--kp-cizgi); background:var(--surface); box-shadow:none; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__yan-ust{ padding:0 16px 0 20px; min-height:64px; border-bottom:2px solid var(--kp-cizgi); }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__yan-bos{ padding:4px 4px 0; color:var(--text-2); font-size:var(--fs-xs); line-height:1.6; }
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ana{ background:var(--surface); }
+
+/* ---------- Başlık: tek satır, altında ince çizgi ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__bas{ min-height:64px; padding:0 24px; gap:12px; border-bottom:2px solid var(--kp-cizgi); background:var(--surface); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__bas .king__yer{ background:var(--surface-2); border:0; box-shadow:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__kucult,.king__kapat,.king__kip-dugme){ background:none; box-shadow:none; border:0; color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__kucult,.king__kapat,.king__kip-dugme):hover{ background:var(--surface-2); color:var(--text); }
+
+/* ---------- Sohbet sütunu ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:32px 24px 24px; gap:20px; }
+/* Karşılama yüzü yalnız boş sohbette, küçük; konuşma başlayınca çekilir */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne{ min-height:0; padding:8px 0 4px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne .king__yuz{ width:56px; height:56px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis:has(.king__balon--sen) > .king__sahne{ display:none; }
+/* King'in cevabı: başında küçük King, solda vurgu şeridi, kâğıt zemin */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king{ padding-left:32px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king::before{ content:''; position:absolute; left:0; top:2px; width:20px; height:20px; border-radius:0; box-shadow:none;
+  background:var(--fig-king) center/contain no-repeat; image-rendering:pixelated; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king::after{ display:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king > div{ padding:14px 20px; background:var(--surface-2); background-image:none; box-shadow:none; border:0; border-left:4px solid var(--kp-vurgu); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king p{ line-height:1.65; }
+/* Son cevaba king-cam.css !important'la degrade ve çerçeve basıyor; o kural değişken okur, değişkenler burada sönümlenir */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__akis > .king__balon--king.is-son > div{ --king-vurgu:transparent; --border:transparent; --surface:var(--kp-kagit); }
+/* Senin mesajın: sağda, vurgu tonlu; zemin rengi king.css'in !important'ı yerine değişkenle verilir */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--sen{ --surface-2:var(--kp-ton); padding:10px 16px; border-radius:0; box-shadow:0 0 0 2px color-mix(in oklab, var(--kp-vurgu) 30%, var(--surface)); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__cip{ background:var(--surface); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__cip:hover{ background:var(--kp-ton); }
+
+/* ---------- Yazma çubuğu: tek çerçeve, içinde düz alan ---------- */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin-bottom:24px; padding:6px; gap:6px; background:var(--surface); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz:focus-within{ box-shadow:0 -2px 0 var(--kp-vurgu),0 2px 0 var(--kp-vurgu),-2px 0 0 var(--kp-vurgu),2px 0 0 var(--kp-vurgu); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__girdi{ border:0; outline:0; box-shadow:none; background:none; font-size:15px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__arti,.king__mik){ background:none; box-shadow:none; color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__arti,.king__mik):hover{ background:var(--surface-2); color:var(--text); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__gonder{ background:var(--kp-vurgu); box-shadow:none; }
+
+/* ---------- Bağlam: bölüm adı küçük ve soluk; kart kutu içinde kutu değil ---------- */
+:root[data-zemin="piksel"] .king.king:not(.is-mini) .king__baglam{ margin:0; padding:20px 20px 24px; gap:24px; overflow-y:auto; border:0; border-left:2px solid var(--kp-cizgi); background:var(--surface-2); box-shadow:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-ust{ min-height:24px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-gor{ margin:0; color:var(--text-2); font-size:var(--fs-xs); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-bolum > h3{ margin:0 0 10px; font-size:var(--fs-xs); letter-spacing:.04em; color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kartlar{ gap:2px; background:var(--kp-cizgi); box-shadow:var(--kp-cerceve); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart{ min-height:0; padding:12px; gap:4px; border:0; background:var(--surface); box-shadow:none; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-ad{ color:var(--text-2); font-size:var(--fs-xs); line-height:1.4; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-deger{ font-size:22px; line-height:1.2; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-etiket{ padding:0; border:0; background:none; box-shadow:none; color:var(--text-2); font-size:var(--fs-xs); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__kart-alt{ color:var(--text-2); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-not{ margin:0; padding-left:16px; color:var(--text); line-height:1.6; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-sor{ gap:6px; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-oner{ justify-content:flex-start; padding:10px 12px; text-align:left; border:0; background:var(--surface); box-shadow:inset 3px 0 0 var(--kp-vurgu); }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__baglam-oner:hover{ background:var(--kp-ton); }
+/* King'in odası panel enine oturur, kesilmez; karakter seçimi odanın üstünde, sola yaslı */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__karakter{ justify-content:flex-start; margin-top:auto; }
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__oda{ width:100%; max-width:100%; margin:0; border-width:2px; }
+
+/* ---------- Telefon: başlık ve yazma çubuğu kenara yapışmaz ---------- */
+@media (max-width:679px){
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__bas{ min-height:56px; padding:0 16px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:20px 16px; gap:16px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin:0 16px 16px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king > div{ padding:12px 16px; }
+}
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -23473,10 +23566,45 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* Saf: aynı t aynı kareyi verir. null = görünmüyor. Kişi kareleri 13 enindedir, konumdan iki piksel sola taşar. */
   function kareAl(a, t){
+    if(a.menu){ const b = Math.floor(t / a.B); return kareAl(a.menu[secim(a, b)], t - b * a.B); }
     const z = ((t % a.T) + a.T) % a.T, s = a.seg.find(q => z < q.t1) || a.seg[a.seg.length - 1];
     if(s.poz === 'gizli') return null;
     const P = POZ[s.poz], i = Math.floor(z * P.h) % P.k.length, f = (z - s.t0) / (s.t1 - s.t0), kare = P.k[i];
     return { poz:s.poz, i, x:Math.round(s.x0 + (s.x1 - s.x0) * f) - (kare.bas ? 2 : 0), y:Math.round(s.y0 + (s.y1 - s.y0) * f) - kare.length, ters:s.ters, kisi:s.kisi || a.kisi };
+  }
+  /* ---------- KARAR: sakin her blokta ne yapacağını kendi seçer ----------
+     Seçim kişiden ve saatten türetilir (zar): aynı t aynı kararı verir, saklı durum yok (söz 4); ama döngü
+     tekrar etmez. Her seçenek evde başlar ve evde biter, geçiş kesintisiz. Ruh hâli seçimi eğer:
+     neşeli gezer, uykulu gerinir, üzgün ya da kızgın bir köşede durup düşünür, sakin işine bakar. */
+  const KARAR_B = 26;
+  function zar(a, b){ let h = (Math.imul(a, 374761393) + Math.imul(b, 668265263)) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+  function secim(a, b){
+    let u = zar(a.tohum, b) * a.toplam;
+    for(let i = 0; i < a.agirlik.length; i++){ u -= a.agirlik[i]; if(u < 0) return i; }
+    return a.agirlik.length - 1;
+  }
+  /* ana: evdeki iş [poz, ters]; alan: odada yürünebilecek aralık. Kişi ve balonu aynı zarla seçer. */
+  function karar(kisi, x, y, ana, alan, v){
+    const r = ruhu(kisi, v), ters = ana[1], B = KARAR_B, ep = [], bal = [], ag = [];
+    const hedef = [alan[0], alan[1], Math.round((alan[0] + alan[1]) / 2)].filter(h => Math.abs(h - x) >= 8);
+    const koy = (w, adim, balon, nerede) => {
+      const ham = rutin(kisi, x, y, adim), kalan = B - ham.T;
+      if(kalan < 1 || w <= 0) return;
+      const tam = rutin(kisi, x, y, adim.concat([[ana[0], kalan, undefined, ters]]));
+      const q = tam.seg.find(g => g.poz === nerede) || tam.seg[0];
+      ep.push(tam); ag.push(w);
+      bal.push(balon ? rutin(null, q.x0 + 2, y - 18, [['gizli', q.t0 + 1], ['b_' + balon, Math.min(4, q.t1 - q.t0 - 1)], ['gizli', B]]) : rutin(null, x, y, [['gizli', B]]));
+    };
+    const gezer = r === 'nese' || r === 'gul' || r === 'asik', dalgin = r === 'uz' || r === 'kiz';
+    koy(dalgin ? 1.5 : 3, [[ana[0], 6, undefined, ters]], BALONU[r], ana[0]);
+    koy(r === 'uyku' ? 4 : 1, [[ana[0], 7, undefined, ters], ['esne', 3]], 'uyku', 'esne');
+    hedef.forEach((h, i) => {
+      koy(gezer ? 2.5 : 1, [[ana[0], 3, undefined, ters], ['yuru', 0, h], ['dur', 6, undefined, i % 2 ? h > x : h < x], ['yuru', 0, x]], 'nota', 'dur');
+      if(i === 0) koy(1.2, [[ana[0], 4, undefined, ters], ['yuru', 0, h], ['ic', 5, undefined, h < x], ['yuru', 0, x]], null, 'ic');
+      if(i === hedef.length - 1) koy(dalgin ? 3 : 0.6, [[ana[0], 2, undefined, ters], ['yuru', 0, h], ['dinle', 9, undefined, h > x], ['yuru', 0, x]], BALONU[r], 'dinle');
+    });
+    const tohum = kisi.i * 97 + Math.round(x) * 13 + 7, toplam = ag.reduce((a, b) => a + b, 0), hepsi = ep.flatMap(e => e.seg), bhepsi = bal.flatMap(e => e.seg);
+    return [{ kisi, menu:ep, agirlik:ag, toplam, tohum, B, T:B, seg:hepsi }, { kisi:null, menu:bal, agirlik:ag, toplam, tohum, B, T:B, seg:bhepsi }];
   }
   /* İki kişi sırayla konuşur: biri anlatır, öbürü başını sallar; balon konuşanın üstünde */
   function sohbet(a, b, xa, xb, y, d, ta, tb, pk, pd, bal){
@@ -23546,7 +23674,7 @@ window.LIFEOS = window.LIFEOS || {};
       },
       hayat(X, F, k, v){
         if(v === 'gece') return [];
-        const s = [rutin(SAKIN[ESNAF[tur]], X + 36, F, [['dur', 12, undefined, true], ['konus', 6, undefined, true], ['dur', 10, undefined, true]]), duygu('b_gul', X + 39, F - 18, 8, 4, 16)];
+        const s = karar(SAKIN[ESNAF[tur]], X + 36, F, ['dur', true], [X + 30, X + 44], v);
         if(tur === 'kafe') s.push(rutin(null, X + 6, F - 15, [['buhar', 30]]));
         if(tur === 'firin') s.push(rutin(null, X + 9, F - 13, [['buhar', 30]]));
         return s;
@@ -23565,7 +23693,7 @@ window.LIFEOS = window.LIFEOS || {};
         if(uyku) return [rutin(a, X + 7, F - 6, [['yat', 30]]), rutin(null, X + 10, F - 12, [['z', 30]])];
         const tv = rutin(null, X + 45, F - 7, [['tv', 30]]);
         if(b) return [tv].concat(sohbet(a, b, X + 5, X + 15, F, 6, false, true, 'oturK', 'oturD', il));
-        return [tv, rutin(a, X + 30, F, [['oku', 40, undefined, false]]), ruh(a, X + 33, F - 18, v)];
+        return [tv].concat(karar(a, X + 30, F, ['oku', false], [X + 4, X + 48], v));
       } },
     /* Mutfak: dolaplar, ocak, kahve makinesi, buzdolabı, küçük masa */
     mutfak:{ g:68, duvar:'#fbdcb0', alt:'#f0c493', desen:'fayans',
@@ -23623,8 +23751,8 @@ window.LIFEOS = window.LIFEOS || {};
         const [a, b] = k, s = [];
         if(a) s.push(rutin(null, X + 14, F - 8, [['ekran', 40]]));
         if(a && uyku) s.push(rutin(a, X + 2, F, [['uyu', 30]]), rutin(null, X + 6, F - 14, [['z', 30]]));
-        else if(a) s.push(rutin(a, X + 2, F, [['yaz', 26, undefined, false], ['yuru', 0, X + 24], ['esne', 2], ['ic', 7, undefined, false], ['yuru', 0, X + 2], ['yaz', 6, undefined, false]]), ruh(a, X + 6, F - 18, v));
-        if(b) s.push(rutin(null, X + 44, F - 8, [['ekran', 40]]), rutin(b, X + 32, F, [['yaz', 40, undefined, false]]));
+        else if(a) s.push(...karar(a, X + 2, F, ['yaz', false], [X + 2, X + 26], v));
+        if(b) s.push(rutin(null, X + 44, F - 8, [['ekran', 40]]), ...karar(b, X + 32, F, ['yaz', false], [X + 28, X + 52], v));
         return s;
       } },
     /* Kütüphane: tam boy raf, merdiven, okuma koltuğu */
@@ -23632,17 +23760,17 @@ window.LIFEOS = window.LIFEOS || {};
       ciz(g, X, F){ kutu(g, X + 14, F - 28, 36, 28, '#5a3a30'); for(let i = 0; i < 4; i++) raf(g, X + 15, F - 27 + i * 7, 34); R(g, X + 44, F - 27, 1, 27, '#d3a475'); R(g, X + 48, F - 27, 1, 27, '#d3a475'); for(let y = F - 25; y < F; y += 3) R(g, X + 44, y, 5, 1, '#d3a475'); kanepe(g, X, F, 13, '#a0523f'); lambader(g, X + 54, F); },
       hayat(X, F, k, v){
         const [a, b] = k, s = [];
-        if(a) s.push(rutin(a, X + 2, F, [['oku', 40, undefined, false]]), ruh(a, X + 5, F - 18, v));
-        if(b) s.push(rutin(b, X + 51, F, [['dur', 8], ['yuru', 0, X + 26], ['dur', 6], ['esne', 2], ['yuru', 0, X + 51], ['dur', 3]]));
+        if(a) s.push(...karar(a, X + 2, F, ['oku', false], [X + 4, X + 30], v));
+        if(b) s.push(...karar(b, X + 51, F, ['dur', true], [X + 26, X + 51], v));
         return s;
       } },
     /* Atölye: şövale, boya masası */
     atolye:{ g:64, duvar:'#cdd2ea', alt:'#b4bbd8', desen:'duz',
       ciz(g, X, F){ kutu(g, X + 19, F - 22, 18, 14, '#f3e8d0'); R(g, X + 20, F - 16, 16, 3, '#ef916b'); R(g, X + 20, F - 13, 16, 4, '#6a4470'); daire(g, X + 31, F - 17, 2, '#ffeeb0'); R(g, X + 20, F - 8, 2, 8, HAT); R(g, X + 34, F - 8, 2, 8, HAT); R(g, X + 18, F - 8, 20, 1, HAT);
         masa(g, X + 42, F, 18); kutu(g, X + 44, F - 9, 4, 3, TOPRAK); kutu(g, X + 49, F - 9, 4, 3, '#5f86a8'); R(g, X + 55, F - 11, 1, 5, '#d3a475'); R(g, X + 42, F - 20, 18, 1, HAT); [0, 6, 12].forEach((d, i) => kutu(g, X + 43 + d, F - 24, 5, 4, ['#c2603f', '#e8b45a', '#5f86a8'][i])); },
-      hayat(X, F, k){
+      hayat(X, F, k, v){
         const [a] = k;
-        return a ? [rutin(a, X + 10, F, [['firca', 22, undefined, false], ['yuru', 0, X + 2], ['dur', 5], ['yuru', 0, X + 10]]), duygu('b_nota', X + 13, F - 18, 6, 5, 12)] : [];
+        return a ? karar(a, X + 10, F, ['firca', false], [X + 2, X + 50], v) : [];
       } },
     /* Çalışma binası: kara tahta, not panosu, iki masa, masa lambası */
     calisma:{ g:62, duvar:'#efe0c4', alt:'#d9c6a2', desen:'cizgi',
@@ -23652,8 +23780,8 @@ window.LIFEOS = window.LIFEOS || {};
         saat(g, X + 31, F - 20); R(g, X + 52, F - 9, 2, 3, '#5f86a8'); R(g, X + 52, F - 11, 1, 2, '#e8b45a'); R(g, X + 53, F - 12, 1, 3, '#c2603f'); },
       hayat(X, F, k, v){
         const [a, b] = k, s = [];
-        if(a) s.push(rutin(a, X + 3, F, [['yaz', 16, undefined, false], ['oku', 10, undefined, false]]), ruh(a, X + 7, F - 18, v));
-        if(b) s.push(rutin(b, X + 34, F, [['oku', 14, undefined, false], ['yaz', 12, undefined, false]]));
+        if(a) s.push(...karar(a, X + 3, F, ['yaz', false], [X + 3, X + 28], v));
+        if(b) s.push(...karar(b, X + 34, F, ['oku', false], [X + 30, X + 50], v));
         return s;
       } },
     /* Analiz ofisi: büyük grafik panosu, ekran, sunum yapan biri */
@@ -23664,7 +23792,7 @@ window.LIFEOS = window.LIFEOS || {};
       hayat(X, F, k, v, il){
         const [a, b] = k, s = [];
         if(a && b) return sohbet(a, b, X + 16, X + 34, F, 6, false, true, 'konus', 'dinle', il);
-        if(a) s.push(rutin(null, X + 54, F - 8, [['ekran', 40]]), rutin(a, X + 42, F, [['yaz', 40, undefined, false]]), ruh(a, X + 46, F - 18, v));
+        if(a) s.push(rutin(null, X + 54, F - 8, [['ekran', 40]]), ...karar(a, X + 42, F, ['yaz', false], [X + 14, X + 58], v));
         return s;
       } },
     /* Okuma salonu: uzun masa, yeşil masa lambaları, açık kitaplar, duvar boyu raf */
@@ -23673,8 +23801,8 @@ window.LIFEOS = window.LIFEOS || {};
         sandalye(g, X + 4, F); sandalye(g, X + 63, F); masa(g, X + 11, F, 52); [[20, 0], [36, 1], [52, 0]].forEach(q => { R(g, X + q[0] + 2, F - 11, 1, 5, HAT); kutu(g, X + q[0], F - 13, 6, 3, q[1] ? '#b8584a' : '#4c8a4a'); }); [[13, 0], [28, 1], [44, 0]].forEach(q => { kutu(g, X + q[0], F - 8, 6, 2, '#fff8ea'); R(g, X + q[0] + 3, F - 8, 1, 2, HAT); }); R(g, X + 8, F, 58, 1, '#8a3f36'); },
       hayat(X, F, k, v){
         const [a, b] = k, s = [];
-        if(a) s.push(rutin(a, X + 4, F, [['oku', 30, undefined, false]]), ruh(a, X + 8, F - 18, v));
-        if(b) s.push(rutin(b, X + 63, F, [['oku', 26, undefined, true]]));
+        if(a) s.push(...karar(a, X + 4, F, ['oku', false], [X + 4, X + 30], v));
+        if(b) s.push(...karar(b, X + 63, F, ['oku', true], [X + 40, X + 63], v));
         return s;
       } },
     /* Sera köşesi: raflarda saksılar, asılı saksı, sulama kabı */
@@ -23685,7 +23813,7 @@ window.LIFEOS = window.LIFEOS || {};
         bitki(g, X + 26, F); kutu(g, X + 2, F - 5, 7, 5, '#5f86a8'); R(g, X + 9, F - 5, 3, 1, '#5f86a8'); R(g, X + 11, F - 6, 1, 1, '#5f86a8'); R(g, X + 3, F - 7, 5, 1, HAT); },
       hayat(X, F, k, v){
         const [a] = k;
-        return a ? [rutin(a, X + 12, F, [['sula', 30, undefined, false]]), ruh(a, X + 15, F - 18, v)] : [];
+        return a ? karar(a, X + 12, F, ['sula', false], [X + 2, X + 24], v) : [];
       } },
     /* Toplantı odası: perde, uzun masa, dizüstü, sürahi, saat */
     toplanti:{ g:62, duvar:'#dfe6ee', alt:'#c4d0dc', desen:'duz',
@@ -23701,7 +23829,7 @@ window.LIFEOS = window.LIFEOS || {};
       hayat(X, F, k, v, il){
         const [a, b] = k;
         if(a && b) return sohbet(a, b, X + 2, X + 44, F, 6, false, true, 'konus', 'dinle', il);
-        return a ? [rutin(a, X + 2, F, [['konus', 30, undefined, false]]), ruh(a, X + 5, F - 18, v)] : [];
+        return a ? karar(a, X + 2, F, ['konus', false], [X + 2, X + 40], v) : [];
       } },
     /* Araştırma odası: dünya haritası, fiş dolabı, küre, mikroskop, kavanozlar */
     arastirma:{ g:64, duvar:'#d8cbb4', alt:'#bba88c', desen:'ahsap',
@@ -23715,8 +23843,8 @@ window.LIFEOS = window.LIFEOS || {};
         kutu(g, X + 48, F - 8, 6, 2, '#fff8ea'); R(g, X + 51, F - 8, 1, 2, HAT); R(g, X + 56, F - 12, 1, 5, HAT); kutu(g, X + 54, F - 14, 5, 3, '#4c8a4a'); },
       hayat(X, F, k, v){
         const [a, b] = k, s = [];
-        if(a) s.push(rutin(a, X + 30, F, [['yaz', 30, undefined, false]]), ruh(a, X + 34, F - 18, v));
-        if(b) s.push(rutin(b, X + 17, F, [['dur', 30, undefined, true]]));
+        if(a) s.push(...karar(a, X + 30, F, ['yaz', false], [X + 22, X + 50], v));
+        if(b) s.push(...karar(b, X + 17, F, ['dur', true], [X + 2, X + 26], v));
         return s;
       } },
     /* Dükkân: zemin katın sokağa bakan ilk evi. Tente, raflar, tezgâh, kapı; gece kepenk iner. */
@@ -23753,9 +23881,11 @@ window.LIFEOS = window.LIFEOS || {};
   const DUKKAN = { bugun:'firin', calisma:'kirtasiye', analiz:'kafe', kutuphane:'sahaf' };
   /* Mahallenin öteki binaları: odalar iş yeridir, gündüz dolu, gece birkaç ışık yanar */
   const BINALAR = {
-    calisma:{ odalar:[['calisma', 'ofis'], ['calisma', 'kutuphane'], ['ofis', 'calisma']], koridor:'#e6d2ac', tabela:'#6a8f52' },
-    analiz:{ odalar:[['analiz', 'ofis'], ['toplanti', 'analiz'], ['analiz', 'calisma'], ['ofis', 'toplanti']], koridor:'#c8d6e2', tabela:'#5f86a8' },
-    kutuphane:{ odalar:[['kutuphane', 'okuma'], ['okuma', 'kutuphane'], ['arastirma', 'kutuphane'], ['okuma', 'arastirma']], koridor:'#b08a66', tabela:'#a0523f' },
+    /* İş binaları apartman değildir: az kat, iki yanda boşluk, ortada asansörlü koridor yok.
+       hol: ortada merdivenli giriş holü; tekYan: asansör ve lobi binanın sağ kenarında, katlar boydan boya açık. */
+    calisma:{ stil:'loft', kat:2, pay:0.05, hol:true, odalar:[['calisma', 'ofis'], ['kutuphane', 'calisma'], ['ofis', 'calisma'], ['calisma', 'kutuphane']], koridor:'#e6d2ac', tabela:'#6a8f52' },
+    analiz:{ stil:'kule', kat:3, pay:0.04, tekYan:true, odalar:[['analiz', 'toplanti', 'ofis'], ['ofis', 'analiz', 'toplanti'], ['toplanti', 'ofis', 'analiz']], koridor:'#c8d6e2', tabela:'#5f86a8' },
+    kutuphane:{ stil:'klasik', kat:2, pay:0.07, hol:true, odalar:[['kutuphane', 'okuma'], ['arastirma', 'kutuphane'], ['okuma', 'kutuphane'], ['kutuphane', 'arastirma']], koridor:'#b08a66', tabela:'#a0523f' },
   };
   function isPlani(tipler, a, b, v, sira){
     const plan = {}, koy = (t, kisi) => { (plan[t] = plan[t] || { k:[], uyku:false }).k.push(kisi); };
@@ -23825,17 +23955,20 @@ window.LIFEOS = window.LIFEOS || {};
   }
   function yerlesim(W, H, v, yer){
     yer = BINALAR[yer] ? yer : 'bugun';
-    const gece = v === 'gece', dar = W < DAR, bina = BINALAR[yer], LISTE = bina ? bina.odalar : EVLER;
-    const n = Math.max(1, Math.floor((H - TERAS - 2 - SOKAK) / KAT)), artan = Math.max(0, H - TERAS - 2 - SOKAK - n * KAT), T = TERAS + Math.floor(artan * 0.6), ilk = T + 2, sokak = ilk + n * KAT;
-    const ax = dar ? W - ASANSOR - DIS : Math.floor((W - ASANSOR) / 2), solSon = dar ? ax : ax - KORIDOR, sagBas = ax + ASANSOR + KORIDOR;
+    const gece = v === 'gece', dar = W < DAR, bina = BINALAR[yer], LISTE = bina ? bina.odalar : EVLER, stil = bina ? bina.stil : 'apartman';
+    /* Sokak çizgisi bütün mahallede aynı yükseklikte; iş binası daha az katlıdır, üstü gökyüzü ve çatıdır */
+    const nA = Math.max(1, Math.floor((H - TERAS - 2 - SOKAK) / KAT)), artan = Math.max(0, H - TERAS - 2 - SOKAK - nA * KAT), sokak = TERAS + Math.floor(artan * 0.6) + 2 + nA * KAT;
+    const n = bina ? Math.max(1, Math.min(bina.kat, nA)) : nA, ilk = sokak - n * KAT, T = ilk - 2;
+    const tekYan = !!(bina && bina.tekYan), hol = !!(bina && bina.hol), bx0 = bina && !dar ? Math.round(W * bina.pay) : 0, bx1 = W - bx0;
+    const ax = dar ? W - ASANSOR - DIS : tekYan ? bx1 - ASANSOR : Math.floor((W - ASANSOR) / 2), solSon = dar ? ax : ax - KORIDOR, sagBas = ax + ASANSOR + KORIDOR;
     const f1 = Math.min(1, n - 1), f2 = Math.max(0, n - 2), P = PALET[v], lamba = [], odalar = [], kapilar = {};
     let s = 0;
     const zemin = { tip:'zemin', x:0, y:ilk + (n - 1) * KAT, w:W, h:H - ilk - (n - 1) * KAT, sakin:[] }, bolgeler = [];
     for(let k = 0; k < n; k++){
       const y = ilk + k * KAT, F = y + KAT - 4, bolge = k === n - 1 ? zemin : { tip:'kat', x:0, y, w:W, h:KAT, sakin:[] };
       const ziyaret = !bina && !dar && !gece && k % 2 === 0, sag = (k >> 1) % 2 === 0, gidenler = [];
-      (dar ? [0] : [0, 1]).forEach(yan => {
-        const x = yan ? sagBas : 0, en = yan ? W - sagBas : solSon, ev = (k === n - 1 && !yan ? [DUKKAN[yer]] : []).concat(LISTE[(k * 5 + yan * 3) % LISTE.length]);
+      (dar || tekYan ? [0] : [0, 1]).forEach(yan => {
+        const x = yan ? sagBas : bx0, en = yan ? bx1 - sagBas : solSon - bx0, ev = (k === n - 1 && !yan && !bina ? [DUKKAN[yer]] : []).concat(LISTE[(k * 5 + yan * 3) % LISTE.length]);
         const faz = (k * 37 + yan * 13) % 41, sira = k * 2 + yan;
         const a = SAKIN[s++ % 28], b = SAKIN[s++ % 28], bolum = odaBol(ev, x, en, dar), plan = (bina ? isPlani : gunPlani)(bolum.map(q => q.tip), a, ziyaret || dar ? null : b, v, sira);   // telefonda oda tek kişilik: iki kişi ve asansör yolcusu üst üste biniyordu
         if(ziyaret) gidenler[yan] = b;
@@ -23848,19 +23981,25 @@ window.LIFEOS = window.LIFEOS || {};
           if(o.tip === 'salon') bolge.sakin.push(rutin(null, X + 49, F - 16, [['papagan', 30]]));
           if(!sonuk) lamba.push({ x:o.x + Math.floor(o.w / 2), y:y + 3, r:Math.max(o.w * 0.62, 26), k:[o.x, y, o.w, F + 2 - y] });
         });
-        if(!dar && v !== 'ogle') lamba.push({ x:yan ? ax + ASANSOR + 9 : ax - 9, y:y + 3, r:20, k:[yan ? ax + ASANSOR : solSon, y, KORIDOR, F + 2 - y] });
+        if(!dar && !hol && v !== 'ogle' && !(tekYan && yan)) lamba.push({ x:yan ? ax + ASANSOR + 9 : ax - 9, y:y + 3, r:20, k:[yan ? ax + ASANSOR : solSon, y, KORIDOR, F + 2 - y] });
       });
+      /* Hol: giriş katında masa başında görevli, üst katta pencere önünde biri; ikisi de kendi karar verir */
+      if(hol && !dar){
+        const kisi = SAKIN[s++ % 28], zemindeyiz = k === n - 1;
+        karar(kisi, zemindeyiz ? solSon + 4 : sagBas - 15, F, zemindeyiz ? ['yaz', false] : ['dur', true], [solSon + 3, sagBas - 14], v).forEach(r => { r.faz = k * 11; bolge.sakin.push(r); });
+        if(v !== 'ogle') lamba.push({ x:ax + 6, y:y + 4, r:30, k:[solSon, y, sagBas - solSon, F + 2 - y] });
+      }
       if(ziyaret){ kapilar[k] = sag ? 1 : 0; komsuYap(bolge, F, sag ? gidenler[0] : gidenler[1], sag ? gidenler[1] : gidenler[0], sag, solSon, sagBas, k * 19); }
       if(bolge !== zemin) bolgeler.push(bolge);
     }
-    const o = { yer, bina, W, H, T, ilk, ax, dar, sokak, n, f1, f2, solSon, sagBas, gece, odalar, bolgeler, kapilar, cati:catiYap(W, v, T, ax), zemin, lamba, P, vakit:v };
+    const o = { yer, bina, stil, tekYan, hol, bx0, bx1, W, H, T, ilk, ax, dar, sokak, n, f1, f2, solSon, sagBas, gece, odalar, bolgeler, kapilar, cati:catiYap(W, v, T, ax, stil), zemin, lamba, P, vakit:v };
     sokakYap(o);
-    o.asansor = asansorYap(o);
+    o.asansor = hol ? null : asansorYap(o);
     return o;
   }
   /* Teras: sohbet, çamaşır, mangal, kitap, kuş ve bulut; asansör buraya da çıkar. */
-  function catiYap(W, v, T, ax){
-    const gece = v === 'gece', s = [], yer = f => Math.round(W * f), genis = W >= DAR;
+  function catiYap(W, v, T, ax, stil){
+    const gece = v === 'gece', s = [], yer = f => Math.round(W * f), apt = (stil || 'apartman') === 'apartman', genis = W >= DAR && apt;
     s.push(rutin(null, -20, 7, [['bulut', 90, W + 2, false], ['gizli', 10]]));
     s.push(rutin(null, W + 2, 13, [['gizli', 30], ['bulut', 110, -20, false]]));
     if(gece) [[0.1, 1], [0.36, 6], [0.62, 0], [0.88, 2]].forEach((q, i) => s.push(rutin(null, yer(q[0]), q[1] + 3, [['yildiz', 3 + i]])));
@@ -23880,13 +24019,14 @@ window.LIFEOS = window.LIFEOS || {};
       if(genis){ s.push(rutin(null, yer(0.94) - 3, T - 28, [['baykus', 12]])); [0.3, 0.42, 0.61, 0.74].forEach((f, i) => s.push(rutin(null, yer(f), T - 12 + i, [['bocek', 3 + i], ['bocek', 2, yer(f) + 6, false], ['bocek', 3, yer(f), false]]))); }
     } else {
       [['k', 0, 11, 0], ['k', 9, 8, 0.6], ['s', 16, 12, 1.2]].forEach(q => s.push(rutin(null, -9 - q[1], q[2], [[`kusu_${q[0]}`, W / 16, W + 9, false], ['gizli', 24]])));
-      [['m', 0, 9], ['y', 8, 12]].forEach(q => s.push(rutin(null, W + 2 + q[1], q[2], [['gizli', 18], [`kusu_${q[0]}`, W / 14, -9, false], ['gizli', 9]])));
+      [['m', 0, 9], ['y', 8, 12]].forEach(q => s.push(rutin(null, W + 2 + q[1], q[2], [['gizli', 18], [`kusu_${q[0]}`, W / 14, -9, true], ['gizli', 9]])));
+      if(W >= DAR && stil === 'kule') [['s', 0.42], ['m', 0.52]].forEach(q => s.push(rutin(null, yer(q[1]), T - 7, [[`kusk_${q[0]}`, 11]])));
       if(genis){
         [['s', 0.45], ['m', 0.75], ['y', 0.12]].forEach(q => s.push(rutin(null, yer(q[1]), T - 8, [[`kusk_${q[0]}`, 11]])));
         const yk = ax - 40; s.push(rutin(null, yk, T - 13, [['kelebek', 4, yk + 12, false, T - 16], ['kelebek', 3, yk + 6, true, T - 11], ['kelebek', 4, yk, true, T - 13]]));
       }
     }
-    if(v !== 'ogle') for(let i = 0; i * 14 < W - 8; i++) s.push(rutin(null, 6 + i * 14, T - 22 + (i % 2), [['ampul', 3 + (i % 3)]]));
+    if(v !== 'ogle' && apt) for(let i = 0; i * 14 < W - 8; i++) s.push(rutin(null, 6 + i * 14, T - 22 + (i % 2), [['ampul', 3 + (i % 3)]]));
     return { tip:'cati', x:0, y:0, w:W, h:T + 2, sakin:s };
   }
   function sokakYap(o){
@@ -23904,7 +24044,7 @@ window.LIFEOS = window.LIFEOS || {};
   function asansorYap(o){
     const { ax, n, f1, f2, sokak, dar, zemin, cati, bolgeler, T:Teras, ilk } = o, X = SAKIN[32], Y = SAKIN[31], z = n - 1, x = ax;
     const dip = k => (k === 't' ? Teras + 1 : ilk + k * KAT + KAT - 3);
-    const duraklar = [[z, 5, Y, null], [f1, 6, null, X], ['t', 20, X, X], [f1, 5, X, null], [z, 6, null, Y], [f2, 14, Y, Y]];
+    const tepe = o.bina ? 0 : 't', duraklar = [[z, 5, Y, null], [f1, 6, null, X], [tepe, 20, X, X], [f1, 5, X, null], [z, 6, null, Y], [f2, 14, Y, Y]];
     const seg = [], an = [];
     let t = 0, py = dip(f2);
     const koy = (poz, kisi, s, y0, y1) => { seg.push({ poz, kisi, t0:t, t1:t + s, x0:x, x1:x, y0, y1, ters:false }); t += s; };
@@ -23919,11 +24059,12 @@ window.LIFEOS = window.LIFEOS || {};
     });
     const TT = t, bolge = k => (k === z ? zemin : bolgeler[k]);
     const ek = (b, a) => { a.faz = 0; b.sakin.push(a); };
-    const sol = ax - 9, hedefX = sol - (dar ? 7 : 36), w = (sol - hedefX) / HIZ, sag = ax + ASANSOR, hedefY = dar ? hedefX : sag + 36, kapiY = dar ? sol : sag;
+    const sol = ax - 9, hedefX = sol - (dar ? 7 : 36), w = (sol - hedefX) / HIZ, sag = ax + ASANSOR, hedefY = dar || o.tekYan ? hedefX : sag + 36, kapiY = dar || o.tekYan ? sol : sag;
     const xBin = an[1][1] - 0.6, xCik = an[3][0] + 0.6;
     ek(bolge(f1), rutin(X, hedefX, dip(f1) - 1, [['dur', xBin - w, undefined, false], ['yuru', 0, sol], ['gizli', xCik - xBin], ['yuru', 0, hedefX], ['dur', TT - xCik - w, undefined, false]]));
     const tBas = an[2][0] + 0.6, tSon = an[2][1] - 0.6, tw = 28 / HIZ;
-    ek(cati, rutin(X, sol, Teras, [['gizli', tBas], ['yuru', 0, sol - 28], [o.gece ? 'dur' : 'sula', tSon - tBas - tw * 2, undefined, true], ['yuru', 0, sol], ['gizli', TT - tSon]]));
+    if(o.bina) ek(bolge(0), rutin(X, sol, dip(0) - 1, [['gizli', tBas], ['yuru', 0, sol - 28], ['dur', tSon - tBas - tw * 2, undefined, true], ['yuru', 0, sol], ['gizli', TT - tSon]]));
+    else ek(cati, rutin(X, sol, Teras, [['gizli', tBas], ['yuru', 0, sol - 28], [o.gece ? 'dur' : 'sula', tSon - tBas - tw * 2, undefined, true], ['yuru', 0, sol], ['gizli', TT - tSon]]));
     const yBas = an[5][0] + 0.6, ySon = an[5][1] - 0.6;
     ek(bolge(f2), rutin(Y, kapiY, dip(f2) - 1, [['gizli', yBas], ['yuru', 0, hedefY], ['dur', ySon - yBas - w * 2], ['yuru', 0, kapiY], ['gizli', TT - ySon]]));
     const sBas = an[0][0] + 0.6, sSon = an[4][1] - 0.6, sw = 14 / HIZ + 2;
@@ -23933,7 +24074,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------- SABİT SAHNE: yalnız hazırlıkta bir kez ---------- */
   function gokCiz(g, o){
-    const { W, P, T } = o, n = P.gok.length - 1, boy = T + 2;
+    const { W, P } = o, T = o.bina ? o.sokak - 2 : o.T, n = P.gok.length - 1, boy = T + 2;
     for(let y = 0; y < boy; y++){
       const f = y / boy * n, i = Math.floor(f), k = f - i;
       R(g, 0, y, W, 1, P.gok[k < 0.5 ? i : Math.min(n, i + 1)]);
@@ -24029,6 +24170,7 @@ window.LIFEOS = window.LIFEOS || {};
     R(c, m, y, 1, 2, HAT); kutu(c, m - 2, y + 2, 5, 3, '#ffe6a0');
   }
   function terasCiz(c, o){
+    if(o.stil && o.stil !== 'apartman') return STIL[o.stil].cati(c, o);
     const { W, ax, T } = o, yer = f => Math.round(W * f), genis = W >= DAR;
     /* Korkuluk en arkada; eşya önünde durur */
     R(c, 0, T - 8, W, 1, HAT); for(let x = 0; x < W; x += 5) R(c, x, T - 7, 1, 7, HAT); R(c, 0, T - 7, W, 1, '#a07a60');
@@ -24081,13 +24223,163 @@ window.LIFEOS = window.LIFEOS || {};
     /* Direk kaldırımın yol kenarında: ev ve koridorun önünde değil */
     [0.27, 0.73].forEach(f => direk(c, Math.round(W * f), sokak + 7, gece, o.lamba));
     /* Ağaç zemin kattaki iki odanın arasındaki duvarın önünde durur: kimsenin yüzünü, dükkânın tezgâhını örtmez */
-    const zk = o.odalar.filter(a => a.y === o.zemin.y && !a.ilk);
-    [zk.find(a => a.x < o.ax), zk.find(a => a.x > o.ax)].forEach((a, i) => agac(c, a ? a.x : Math.round(W * (i ? 0.8 : 0.2)), sokak + 3, ay));
+    if(o.bina){
+      [[0, o.bx0], [o.bx1, W]].forEach(q => { if(q[1] - q[0] < 6) return; R(c, q[0], sokak - 3, q[1] - q[0], 3, '#7fa35a'); R(c, q[0], sokak - 3, q[1] - q[0], 1, '#a6d67a'); agac(c, Math.round((q[0] + q[1]) / 2), sokak - 1, ay); });
+      if(o.hol){ const m = o.ax + Math.floor(ASANSOR / 2); [[14, '#e0d2b4'], [10, '#d8c8a8'], [6, '#c8b898']].forEach((q, i) => R(c, m - q[0], sokak + i * 2, q[0] * 2 + 1, 2, o.stil === 'klasik' ? q[1] : ['#8e959f', '#7a818b', '#6a707c'][i])); }
+    } else {
+      const zk = o.odalar.filter(a => a.y === o.zemin.y && !a.ilk);
+      [zk.find(a => a.x < o.ax), zk.find(a => a.x > o.ax)].forEach((a, i) => agac(c, a ? a.x : Math.round(W * (i ? 0.8 : 0.2)), sokak + 3, ay));
+    }
     [0.12, 0.88].forEach(f => { const x = Math.round(W * f); kutu(c, x, sokak + 1, 16, 3, AHSAP); R(c, x + 2, sokak + 4, 1, 2, HAT); R(c, x + 13, sokak + 4, 1, 2, HAT); });
     /* Yangın musluğu, posta kutusu */
     const yx = Math.round(W * 0.3); kutu(c, yx, sokak + 2, 4, 5, '#c2603f'); R(c, yx - 1, sokak + 3, 6, 1, HAT);
     const px = Math.round(W * 0.7); kutu(c, px, sokak + 1, 8, 5, '#5f86a8'); R(c, px + 1, sokak + 2, 6, 1, HAT); R(c, px + 3, sokak + 6, 2, 1, HAT);
   }
+  /* ---------- MİMARİ: iş binaları apartman değildir ----------
+     loft (Çalışma): tuğla ayaklar, çelik kiriş, ahşap tavan kirişi, sanayi lambası, demir merdiven, yük asansörü, testere dişi çatı.
+     kule (Analiz): cam ve çelik; panel tavan ışığı, cam bölme, cam asansör, düz dam (klima, güneş paneli, anten).
+     klasik (Kütüphane): taş sütun, kornişli döşeme, avize, büst ve kemerli pencere, pirinç kafes asansör, alınlık. */
+  const TUGLA = '#a0523f', HARC = '#c98a6a', TAS = '#efe4cc', TAS_K = '#d8c8a8', TAS_A = '#f4ead6', CELIK = '#3a4250', CAM = '#7fd0e8';
+  function tugla(c, x, y, w, h){
+    R(c, x, y, w, h, TUGLA);
+    for(let j = 0; j < h; j += 3){ R(c, x, y + j, w, 1, HARC); for(let i = x + ((j / 3) % 2 ? 1 : 3); i < x + w; i += 4) R(c, i, y + j + 1, 1, 2, HARC); }
+    R(c, x + w - 1, y, 1, h, '#7a3a2e');
+  }
+  function sutun(c, x, y, F){
+    const h = F - y + 2;
+    R(c, x - 1, y + 3, 4, h - 6, TAS); R(c, x, y + 3, 1, h - 6, TAS_K); R(c, x + 2, y + 3, 1, h - 6, TAS_K);
+    R(c, x - 2, y, 6, 3, '#e0d2b4'); R(c, x - 2, y, 6, 1, TAS_A); R(c, x - 2, y + h - 3, 6, 3, '#e0d2b4'); R(c, x - 2, y + h - 1, 6, 1, '#c8b898');
+  }
+  function tabela(c, o, x, taban){
+    R(c, x + 3, taban - 8, 2, 8, HAT); R(c, x + 25, taban - 8, 2, 8, HAT); kutu(c, x, taban - 24, 30, 16, o.bina.tabela);
+    if(o.yer === 'analiz') [[6, 4], [11, 7], [16, 5], [21, 10]].forEach((q, i) => R(c, x + q[0], taban - 11 - q[1], 3, q[1], ['#ffe27a', '#fff8ea', '#ffe27a', '#ff9ecb'][i]));
+    else { for(let i = 0; i < 9; i++) R(c, x + 9 + i, taban - 11 - i, 3, 2, '#ffe27a'); R(c, x + 18, taban - 21, 3, 2, '#ff9ecb'); R(c, x + 8, taban - 11, 2, 1, HAT); }
+  }
+  const STIL = {
+    loft:{
+      dis(c, x, y, w, h){ tugla(c, x, y, w, h); },
+      doseme(c, F, x0, x1){ R(c, x0, F + 2, x1 - x0, 2, '#4a4f5a'); R(c, x0, F + 2, x1 - x0, 1, '#6a707c'); for(let x = x0 + 3; x < x1; x += 8) R(c, x, F + 3, 1, 1, '#9aa1ab'); },
+      lamba(c, a, yan){
+        R(c, a.x, a.y, a.w, 2, '#7d5540'); for(let x = a.x + 4; x < a.x + a.w - 2; x += 10) R(c, x, a.y + 2, 2, 1, '#5a3a30');
+        const m = a.x + Math.floor(a.w / 2);
+        [m - 16, m + 16].forEach(q => { if(q < a.x + 5 || q > a.x + a.w - 6) return; R(c, q, a.y + 2, 1, 3, HAT); R(c, q - 2, a.y + 5, 5, 1, HAT); R(c, q - 3, a.y + 6, 7, 1, '#3f5a50'); R(c, q - 3, a.y + 7, 7, 1, HAT); R(c, q - 2, a.y + 6, 2, 1, '#5f7a6e'); R(c, q - 1, a.y + 8, 3, 1, yan); });
+      },
+      bolme(c, x, y, F){ tugla(c, x - 1, y, 4, F - y + 2); },
+      /* Hol: beton duvar, katlar arası demir merdiven kolu (zikzak), sarı korkuluk; girişte cam kapı ve bisiklet */
+      hol(c, o, k, y, F){
+        const x0 = o.solSon, w = o.sagBas - o.solSon, yuk = F - y, sag = (o.n - 1 - k) % 2 === 0;
+        R(c, x0, y, w, yuk, '#c4bcae'); for(let j = y + 5; j < F; j += 6){ R(c, x0, j, w, 1, '#b2aa9c'); for(let i = x0 + (j % 12 < 6 ? 3 : 9); i < x0 + w; i += 12) R(c, i, j - 5, 1, 5, '#b2aa9c'); }
+        R(c, x0, y, w, 2, '#7d5540');
+        if(k === o.n - 1){ const d = x0 + Math.floor(w / 2) - 7; kutu(c, d, F - 20, 15, 20, '#4a4f5a'); R(c, d + 2, F - 18, 5, 17, '#9fd0e0'); R(c, d + 8, F - 18, 5, 17, '#9fd0e0'); R(c, d + 3, F - 17, 1, 4, '#d8f0f6'); R(c, d + 9, F - 17, 1, 4, '#d8f0f6'); R(c, d + 6, F - 10, 1, 2, '#e8b45a'); R(c, d + 8, F - 10, 1, 2, '#e8b45a'); }
+        if(k > 0){
+          const n = w - 4;
+          for(let i = 0; i < n; i++){
+            const sx = sag ? x0 + 2 + i : x0 + w - 3 - i, sy = F - 1 - Math.round(i * (yuk + 3) / n);
+            R(c, sx, sy, 1, 2, '#3a3f48'); if(i % 3 === 0) R(c, sx, sy - 1, 2, 1, '#6a707c');
+            R(c, sx, sy - 8, 1, 1, '#e8b45a'); if(i % 6 === 0) R(c, sx, sy - 7, 1, 6, '#6a707c');
+          }
+        }
+        if(k === o.n - 1){ [x0 + 3, x0 + w - 13].forEach(bx => { daire(c, bx + 2, F - 3, 2, HAT); daire(c, bx + 8, F - 3, 2, HAT); daire(c, bx + 2, F - 3, 1, '#c4bcae'); daire(c, bx + 8, F - 3, 1, '#c4bcae'); R(c, bx + 2, F - 6, 6, 1, '#c2603f'); R(c, bx + 5, F - 8, 1, 3, '#c2603f'); }); }
+        else bitki(c, x0 + Math.floor(w / 2) - 4, F);
+      },
+      kenar(c, o){ tugla(c, o.bx0, o.ilk - 2, 4, o.sokak - o.ilk + 2); if(!o.dar) tugla(c, o.bx1 - 4, o.ilk - 2, 4, o.sokak - o.ilk + 2); },
+      asansor(){},
+      /* Testere dişi çatı: dik yüzü camlı; ahşap su deposu, tuğla baca, çatı bahçesi, tabela */
+      cati(c, o){
+        const { W, ax, T, bx0, bx1 } = o, taban = T + 2, genis = W >= DAR, en = bx1 - bx0;
+        tugla(c, bx0, taban - 4, en, 4); R(c, bx0, taban - 5, en, 1, HAT);
+        for(let x0 = bx0; x0 < bx1; x0 += 24){
+          for(let i = 0; i < 24 && x0 + i < bx1; i++){ const h = 4 + Math.round((23 - i) * 12 / 23); R(c, x0 + i, taban - 4 - h, 1, h, '#7a4a3c'); R(c, x0 + i, taban - 4 - h, 1, 1, HAT); if(i % 3 === 0) R(c, x0 + i, taban - 2 - h, 1, h - 3, '#6a3e32'); }
+          R(c, x0, taban - 20, 1, 16, HAT); R(c, x0 + 1, taban - 19, 2, 11, '#9fd0e0'); R(c, x0 + 1, taban - 14, 2, 1, '#6a8a9a'); R(c, x0 + 1, taban - 19, 1, 3, '#d8f0f6');
+        }
+        if(genis){
+          const b = bx0 + Math.round(en * 0.06); tugla(c, b, taban - 32, 6, 14); R(c, b - 1, taban - 33, 8, 1, HAT);
+          const d = bx0 + Math.round(en * 0.84); [1, 11].forEach(q => R(c, d + q, taban - 26, 1, 10, HAT)); kutu(c, d - 1, taban - 37, 15, 12, '#8a5a3a'); [taban - 34, taban - 30].forEach(y => R(c, d, y, 13, 1, '#5a3a2a')); for(let i = 0; i < 4; i++) R(c, d + 1 + i, taban - 38 - i, 11 - i * 2, 1, '#6a4030');
+          tabela(c, o, ax - 9, taban - 16);
+        }
+      },
+    },
+    kule:{
+      dis(c, x, y, w, h){ R(c, x, y, w, h, CELIK); for(let j = y + 2; j < y + h; j += 4) R(c, x + 1, j, w - 1, 2, '#5f86a8'); },
+      doseme(c, F, x0, x1){ R(c, x0, F + 2, x1 - x0, 2, CELIK); R(c, x0, F + 2, x1 - x0, 1, CAM); },
+      lamba(c, a){ R(c, a.x, a.y, a.w, 2, '#e4ecf2'); R(c, a.x, a.y + 2, a.w, 1, '#c4ccd6'); for(let x = a.x + 5; x < a.x + a.w - 7; x += 14) R(c, x, a.y + 2, 6, 1, a.sonuk ? '#9aa4ae' : '#ffffff'); },
+      bolme(c, x, y, F){ R(c, x - 1, y, 1, F - y, '#5a6a78'); R(c, x, y, 2, F - y, '#bfe0ea66'); R(c, x + 2, y, 1, F - y, '#5a6a78'); R(c, x, y + 4, 1, 6, '#ffffff88'); R(c, x - 1, F - 14, 4, 1, '#5a6a78'); },
+      /* Asansör lobisi: cam duvar, ekran ya da bitki, kat tabelası */
+      cekirdek(c, x, y, F, sagda, k){
+        R(c, x, y, KORIDOR, F - y, '#d6e2ec'); R(c, x, y, KORIDOR, 2, '#e4ecf2'); R(c, x, F - 6, KORIDOR, 6, '#c4d0dc'); R(c, x, F - 6, KORIDOR, 1, '#dbe4ec');
+        R(c, sagda ? x + KORIDOR - 1 : x, y, 1, F - y, '#5a6a78');
+        if(k % 2){ bitki(c, x + 5, F); kutu(c, sagda ? x + KORIDOR - 7 : x + 2, y + 5, 5, 4, '#5f86a8'); R(c, sagda ? x + KORIDOR - 6 : x + 3, y + 7, 3, 1, '#fff8ea'); }
+        else { kutu(c, x + 4, F - 25, 10, 7, '#2c3a4a'); [[1, 2, '#5f9fd0'], [4, 3, '#f4b860'], [7, 1, '#7fc48a']].forEach(q => R(c, x + 5 + q[0], F - 20 - q[1], 2, q[1], q[2])); kutu(c, x + 6, F - 12, 6, 12, '#dfe6e6'); kutu(c, x + 7, F - 17, 4, 5, '#9ec6d6'); }
+      },
+      kenar(c, o){ const h = o.sokak - o.ilk + 2; [o.bx0, o.dar ? -9 : o.bx1 - 3].forEach(x => { if(x < 0) return; R(c, x, o.ilk - 2, 3, h, CELIK); R(c, x + 1, o.ilk - 2, 1, h, CAM); }); },
+      asansor(c, o){
+        const { ax, T, sokak, ilk, n } = o, h = sokak - T;
+        R(c, ax, T, ASANSOR, h, '#9fc8d8'); R(c, ax + 2, T, 2, h, '#c8e4ee'); R(c, ax + 6, T, 1, h, '#5a7a8a');
+        R(c, ax, T, 1, h, CELIK); R(c, ax + ASANSOR - 1, T, 1, h, CELIK);
+        for(let k = 0; k < n; k++){ const F = ilk + k * KAT + KAT - 4; R(c, ax, F + 2, ASANSOR, 2, CELIK); R(c, ax, F + 2, ASANSOR, 1, CAM); R(c, ax, F - 14, ASANSOR, 1, '#5a7a8a'); }
+      },
+      /* Cam ofis: çelik taç, klima, güneş paneli, ışıklı anten, tabela */
+      cati(c, o){
+        const { W, ax, T, bx0, bx1 } = o, taban = T + 2, genis = W >= DAR, en = bx1 - bx0, yer = f => bx0 + Math.round(en * f);
+        R(c, bx0, taban - 6, en, 6, CELIK); R(c, bx0, taban - 6, en, 1, CAM); for(let x = bx0 + 4; x < bx1; x += 8) R(c, x, taban - 5, 1, 4, '#5a6a78');
+        if(genis){
+          [0.04, 0.17].forEach(f => { const x = yer(f); kutu(c, x, taban - 15, 18, 9, '#b8c2cc'); [5, 12].forEach(d => { daire(c, x + d, taban - 11, 2, '#5a6a78'); R(c, x + d, taban - 11, 1, 1, '#d6e2ec'); }); });
+          for(let i = 0; i < 5; i++){ const x = yer(0.5) + i * 10; for(let j = 0; j < 8; j++) R(c, x + j, taban - 10 - Math.round(j * 0.6), 1, 3, j % 4 === 3 ? '#4f6fa8' : '#2f4f8a'); R(c, x, taban - 11, 8, 1, '#7fa8e8'); R(c, x + 2, taban - 8, 1, 2, HAT); R(c, x + 6, taban - 9, 1, 3, HAT); }
+          tabela(c, o, yer(0.3), taban - 6);
+        }
+        R(c, ax - 2, taban - 18, ASANSOR + 4, 12, '#5a6a78'); for(let y = taban - 16; y < taban - 8; y += 2) R(c, ax + 1, y, ASANSOR - 2, 1, CELIK);
+        const a = ax + 6; R(c, a, taban - 40, 1, 22, '#5a6a78'); [taban - 34, taban - 26].forEach(y => R(c, a - 2, y, 5, 1, '#5a6a78')); R(c, a - 1, taban - 41, 3, 2, '#e8505b');
+      },
+    },
+    klasik:{
+      dis(c, x, y, w, h){ R(c, x, y, w, h, TAS); for(let j = y + 4; j < y + h; j += 5) R(c, x, j, w, 1, TAS_K); },
+      doseme(c, F, x0, x1){ R(c, x0, F + 2, x1 - x0, 2, TAS_K); R(c, x0, F + 2, x1 - x0, 1, TAS_A); for(let x = x0 + 1; x < x1; x += 4) R(c, x, F + 3, 2, 1, '#b8a888'); },
+      /* Pirinç avize: üç mum */
+      lamba(c, a, yan){
+        const m = a.x + Math.floor(a.w / 2);
+        R(c, m, a.y, 1, 4, '#a07a30'); R(c, m - 5, a.y + 6, 11, 1, '#c8a050'); R(c, m - 5, a.y + 5, 1, 1, '#c8a050'); R(c, m + 5, a.y + 5, 1, 1, '#c8a050'); daire(c, m, a.y + 6, 1, '#c8a050'); R(c, m, a.y + 8, 1, 1, '#a07a30');
+        [-5, 0, 5].forEach(d => { R(c, m + d, a.y + (d ? 3 : 2), 1, 2, '#fff8ea'); R(c, m + d, a.y + (d ? 2 : 1), 1, 1, yan); });
+      },
+      bolme(c, x, y, F){ sutun(c, x + 1, y, F); },
+      /* Giriş holü: mermer; altta kemerli ahşap kapı, danışma masası ve saksı; üstte büyük kemerli pencere ve büst */
+      hol(c, o, k, y, F){
+        const x0 = o.solSon, w = o.sagBas - o.solSon, m = x0 + Math.floor(w / 2);
+        R(c, x0, y, w, F - y, '#ece2cc'); R(c, x0 + 2, y + 3, w - 4, F - y - 10, '#e0d4ba'); R(c, x0 + 3, y + 4, w - 6, F - y - 12, '#ece2cc'); R(c, x0, F - 6, w, 6, TAS_K); R(c, x0, F - 6, w, 1, TAS_A);
+        STIL.klasik.lamba(c, { x:x0, y, w }, '#ffe6a0');
+        if(k === o.n - 1){
+          daire(c, m, F - 18, 7, '#c8b898'); R(c, m - 7, F - 18, 15, 18, '#c8b898'); daire(c, m, F - 18, 6, '#9fd0e0'); R(c, m - 6, F - 18, 13, 18, '#7d5540'); R(c, m, F - 18, 1, 18, '#5a3a30'); R(c, m - 6, F - 18, 13, 1, '#5a3a30'); R(c, m - 2, F - 10, 1, 2, '#e8b45a'); R(c, m + 2, F - 10, 1, 2, '#e8b45a'); R(c, m, F - 24, 1, 6, '#c8b898');
+          kutu(c, x0 + 2, F - 8, 12, 8, AHSAP); R(c, x0 + 3, F - 8, 10, 1, KREM); R(c, x0 + 11, F - 12, 1, 4, HAT); kutu(c, x0 + 9, F - 14, 5, 3, '#4c8a4a');
+          bitki(c, x0 + w - 11, F);
+        } else {
+          R(c, m - 9, F - 25, 19, 19, '#c8b898'); daire(c, m, F - 25, 9, '#c8b898'); R(c, m - 8, F - 25, 17, 18, o.P.gok[4]); daire(c, m, F - 25, 8, o.P.gok[3]); R(c, m, F - 33, 1, 26, '#c8b898'); R(c, m - 8, F - 17, 17, 1, '#c8b898'); R(c, m - 10, F - 7, 21, 2, TAS_K);
+          kutu(c, x0 + w - 8, F - 9, 6, 9, '#d8d0c0'); R(c, x0 + w - 8, F - 12, 6, 3, '#ece8e0'); daire(c, x0 + w - 5, F - 14, 2, '#ece8e0');
+        }
+      },
+      kenar(c, o){ sutun(c, o.bx0 + 2, o.ilk - 1, o.sokak - 3); if(!o.dar) sutun(c, o.bx1 - 3, o.ilk - 1, o.sokak - 3); },
+      asansor(){},
+      /* Alınlık ve kubbe: korniş, dişli saçak, iç üçgende açık kitap kabartması, kasnakta pencereler, fener */
+      cati(c, o){
+        const { W, T, bx0, bx1, ax } = o, taban = T + 2, en = bx1 - bx0, m = o.dar ? W / 2 : ax + ASANSOR / 2, H = Math.max(8, Math.min(20, Math.round(en * 0.08)));
+        R(c, bx0 - 2, taban - 4, en + 4, 4, TAS_K); R(c, bx0 - 2, taban - 4, en + 4, 1, TAS_A); for(let x = bx0; x < bx1; x += 4) R(c, x, taban - 1, 2, 1, '#b8a888');
+        /* Kubbe: alınlığın arkasında */
+        const r = Math.max(8, Math.min(24, Math.round(en * 0.09))), ky = taban - 4 - H - 6;
+        if(ky - r > 4){
+          R(c, m - r - 2, ky, 2 * r + 5, H + 6, '#e0d2b4'); for(let x = m - r + 2; x < m + r; x += 6) { R(c, x, ky + 2, 2, 4, '#7a6a88'); R(c, x, ky + 1, 2, 1, '#c8b898'); }
+          daire(c, m, ky, r + 1, '#5a7a6a'); daire(c, m, ky, r, '#7fa88e'); R(c, m - r - 2, ky, 2 * r + 5, 1, '#c8b898');
+          for(let i = -r + 3; i < r; i += 5) R(c, Math.round(m + i), ky - Math.round(Math.sqrt(Math.max(0, r * r - i * i))) + 1, 1, Math.round(Math.sqrt(Math.max(0, r * r - i * i))) - 1, '#6a9a7e');
+          daire(c, m - Math.round(r * 0.4), ky - Math.round(r * 0.55), 2, '#a6c8b2');
+          R(c, m - 2, ky - r - 6, 5, 6, '#e0d2b4'); R(c, m - 1, ky - r - 5, 3, 3, '#ffe6a0'); R(c, m - 3, ky - r - 7, 7, 1, '#c8b898'); R(c, m, ky - r - 10, 1, 3, '#c8a050');
+        }
+        for(let x = bx0; x < bx1; x++){
+          const h = Math.round(H * (1 - Math.abs(x + 0.5 - m) / (en / 2))); if(h <= 0) continue;
+          R(c, x, taban - 4 - h, 1, h, TAS); R(c, x, taban - 4 - h, 1, 1, '#b8a888'); R(c, x, taban - 3 - h, 1, 1, TAS_A); if(h > 6) R(c, x, taban - h, 1, h - 5, '#e2d4b8');
+        }
+        const bx = Math.round(m) - 9, by = taban - 4 - Math.round(H * 0.68);
+        if(H >= 12){ R(c, bx, by, 9, 7, '#fff8ea'); R(c, bx + 9, by, 9, 7, '#f0e4cc'); R(c, bx + 8, by, 2, 7, '#c8b898'); [1, 3, 5].forEach(d => { R(c, bx + 2, by + d, 5, 1, '#c8b898'); R(c, bx + 11, by + d, 5, 1, '#c8b898'); }); R(c, bx - 1, by + 7, 20, 1, '#b8a888'); }
+        [[bx0, taban - 7], [bx1 - 3, taban - 7]].forEach(q => { R(c, q[0], q[1] - 2, 3, 3, '#c8a050'); R(c, q[0] + 1, q[1] - 3, 1, 1, '#e0c070'); });
+      },
+    },
+  };
   function binaCiz(g, o){
     const { W, H, P, ax, sokak, solSon, dar, n, gece, T, ilk, kapilar } = o;
     gokCiz(g, o);
@@ -24102,18 +24394,25 @@ window.LIFEOS = window.LIFEOS || {};
       susle(c, a);
       /* Tavan lambası: kablo, abajur, ampul (dükkânın tentesi var, lambası yok) */
       const m = a.x + Math.floor(a.w / 2), yan = a.sonuk ? '#7a7680' : '#ffe6a0';
-      if(!Z.dukkan){ R(c, m, a.y, 1, 2, HAT); R(c, m - 2, a.y + 2, 5, 1, HAT); R(c, m - 3, a.y + 3, 7, 1, HAT); R(c, m - 2, a.y + 3, 5, 1, a.sonuk ? '#8a6a56' : '#c2603f'); R(c, m - 4, a.y + 4, 9, 1, HAT); R(c, m - 1, a.y + 5, 3, 1, yan); }
-      if(!a.ilk) bolme(c, a.x - 1, a.y, a.F);
+      const S = STIL[o.stil];
+      if(!Z.dukkan && S) S.lamba(c, a, yan);
+      else if(!Z.dukkan){ R(c, m, a.y, 1, 2, HAT); R(c, m - 2, a.y + 2, 5, 1, HAT); R(c, m - 3, a.y + 3, 7, 1, HAT); R(c, m - 2, a.y + 3, 5, 1, a.sonuk ? '#8a6a56' : '#c2603f'); R(c, m - 4, a.y + 4, 9, 1, HAT); R(c, m - 1, a.y + 5, 3, 1, yan); }
+      if(!a.ilk) (S ? S.bolme : bolme)(c, a.x - 1, a.y, a.F);
     });
+    const S = STIL[o.stil];
     for(let k = 0; k < n; k++){
       const y = ilk + k * KAT, F = y + KAT - 4;
-      if(!dar){ const kr = o.bina && o.bina.koridor; koridorCiz(c, solSon, y, F, false, kapilar[k] !== 0, k * 2 + 1, kr); koridorCiz(c, ax + ASANSOR, y, F, true, kapilar[k] !== 1, k * 2 + 2, kr); }
-      R(c, 0, F + 2, W, 2, DOSEME); R(c, 0, F + 2, W, 1, '#8a5f4c');
+      if(!dar && S && o.hol) S.hol(c, o, k, y, F);
+      else if(!dar && S){ S.cekirdek(c, solSon, y, F, false, k, o); if(!o.tekYan) S.cekirdek(c, ax + ASANSOR, y, F, true, k + 1, o); }
+      else if(!dar){ const kr = o.bina && o.bina.koridor; koridorCiz(c, solSon, y, F, false, kapilar[k] !== 0, k * 2 + 1, kr); koridorCiz(c, ax + ASANSOR, y, F, true, kapilar[k] !== 1, k * 2 + 2, kr); }
+      if(S) S.doseme(c, F, o.bx0, o.bx1); else { R(c, 0, F + 2, W, 2, DOSEME); R(c, 0, F + 2, W, 1, '#8a5f4c'); }
     }
-    R(c, ax, T, ASANSOR, sokak - T, '#3a2a2e'); R(c, ax + 1, T, 1, sokak - T, '#4c3a3c'); R(c, ax + ASANSOR - 2, T, 1, sokak - T, '#4c3a3c'); R(c, ax + 6, T, 1, sokak - T, '#2a1e22');
-    for(let k = 0; k < n; k++){ const F = ilk + k * KAT + KAT - 4; R(c, ax, F + 2, ASANSOR, 2, DOSEME); R(c, ax + 5, F - 24, 3, 1, '#e8b45a'); }
+    if(S){ S.kenar(c, o); if(o.asansor) S.asansor(c, o); }
+    else { R(c, ax, T, ASANSOR, sokak - T, '#3a2a2e'); R(c, ax + 1, T, 1, sokak - T, '#4c3a3c'); R(c, ax + ASANSOR - 2, T, 1, sokak - T, '#4c3a3c'); R(c, ax + 6, T, 1, sokak - T, '#2a1e22');
+    for(let k = 0; k < n; k++){ const F = ilk + k * KAT + KAT - 4; R(c, ax, F + 2, ASANSOR, 2, DOSEME); R(c, ax + 5, F - 24, 3, 1, '#e8b45a'); } }
     /* Telefonda asansör kenarda kesik durmasın: sağında binanın tuğla duvarı */
-    if(dar){ const x = ax + ASANSOR; R(c, x, T, W - x, sokak - T, '#8a5a48'); R(c, x, T, 1, sokak - T, HAT); for(let y = T + 2; y < sokak; y += 3) R(c, x + 1, y, W - x - 1, 1, (y >> 1) % 2 ? '#6d463c' : '#7a5040'); }
+    if(dar && S){ const x = o.asansor ? ax + ASANSOR : ax; S.dis(c, x, ilk, W - x, sokak - ilk); }
+    else if(dar){ const x = ax + ASANSOR; R(c, x, T, W - x, sokak - T, '#8a5a48'); R(c, x, T, 1, sokak - T, HAT); for(let y = T + 2; y < sokak; y += 3) R(c, x + 1, y, W - x - 1, 1, (y >> 1) % 2 ? '#6d463c' : '#7a5040'); }
     sokakCiz(c, o);
     isikla(c, o);
     g.drawImage(on, 0, 0);
@@ -24197,9 +24496,9 @@ window.LIFEOS = window.LIFEOS || {};
   function kare(g, arka, o, t){
     if(!o.cizildi){ g.drawImage(arka, 0, 0); o.cizildi = true; }
     let yenilenen = 0;
-    const tum = o.tum || (o.tum = [o.cati].concat(o.bolgeler, o.zemin)), kk = kareAl(o.asansor.sakin[0], t), kabinC = gorsel(kk.poz, kk.i, kk.kisi, false, o.vakit);
+    const tum = o.tum || (o.tum = [o.cati].concat(o.bolgeler, o.zemin)), kk = o.asansor ? kareAl(o.asansor.sakin[0], t) : null, kabinC = kk && gorsel(kk.poz, kk.i, kk.kisi, false, o.vakit);
     for(let j = 0; j < tum.length; j++){
-      const a = tum[j], kareler = a.sakin.map(s => kareAl(s, t + (s.faz || 0))), kabinde = kk.y < a.y + a.h && kk.y + kabinC.height > a.y;
+      const a = tum[j], kareler = a.sakin.map(s => kareAl(s, t + (s.faz || 0))), kabinde = !!kk && kk.y < a.y + a.h && kk.y + kabinC.height > a.y;
       const tp = o.tepki && t < o.tepki.bitis && o.tepki.y < a.y + a.h && o.tepki.y + 6 > a.y ? o.tepki : null;
       const imza = (tp ? tp.poz + tp.x + ',' + tp.y : '') + (kabinde ? kk.poz + kk.y + (kk.kisi ? kk.kisi.i : '') : '') + kareler.map(k => (k ? k.poz + k.i + ',' + k.x + ',' + k.y : '-')).join('|');
       if(imza === a.imza) continue;
@@ -27740,7 +28039,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'706add1c', at:'2026-11-05 13:32', dirty:false };
+SP.BUILD = { id:'166841c3', at:'2026-11-05 14:04', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
