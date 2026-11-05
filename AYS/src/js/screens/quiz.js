@@ -3,6 +3,26 @@
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz.
    Karar motoru R.Quiz'dedir; ekran yalnizca cizer ve olay tasir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.quiz.ne-kadar-eminsin':'Ne kadar eminsin?',
+  'ays.quiz.eminim':'Eminim',
+  'ays.quiz.kararsizim':'Kararsızım',
+  'ays.quiz.tahmin':'Tahmin',
+  'ays.quiz.emindin-kart-one-alindi':'Emindin; bu kart sonraki sınamada öne alınır.',
+  'ays.quiz.bugunku-sira':'Bugünkü sıra',
+  'ays.quiz.karisik':'karışık',
+  'ays.quiz.sirayi-sina':'Sırayı sına',
+  'ays.quiz.emin-yanilmistin':'emin yanılmıştın',
+  'ays.quiz.gun-gecikti':' gün gecikti',
+  'ays.quiz.ilk-sinama':'ilk sınama',
+  'ays.quiz.kalicilik':'Kalıcılık',
+  'ays.quiz.konu-olculdu':' konu ölçüldü',
+  'ays.quiz.emin-dediklerinin':'Emin dediklerinin %',
+  'ays.quiz.kadari-tuttu':' kadarı tuttu',
+  'ays.quiz.cevap':' cevap',
+  'ays.quiz.kalicilik-kurali':'kalıcı: 7 gün arayla %70 ve üstü · sağlam: 21 gün, karışık sınamada',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.quiz.olcumden':'Ölçümden: ',
   'ays.quiz.bu-secimde-sinanacak-madde-y':'Bu seçimde sınanacak madde yok. Ders notu ekle, kart üret ya da ',
   'ays.quiz.bos-biraktin':'Boş bıraktın.',
@@ -123,7 +143,7 @@ R.Screens.quiz = (function(){
     const mode = S.ui.quizMode || 'due';
     const size = S.ui.quizSize || 10;
     const count = {
-      due:av.due, errors:av.errors, notes:av.notes, mixed:av.mixed,
+      due:av.due, errors:av.errors, notes:av.notes, mixed:av.mixed, siradaki:av.siradaki,
       subject:Q.pool({ mode:'subject', subjectId:S.ui.quizSubject || null }).length,
       topic:Q.pool({ mode:'topic', subjectId:S.ui.quizSubject || null, topicId:S.ui.quizTopic || null }).length,
     };
@@ -237,6 +257,10 @@ R.Screens.quiz = (function(){
           ${when(revealed, () => html`<div class="quizcard__answer"><span class="mono-label">${yz('ays.quiz.dogru-cevap')}</span>
             <p>${item.answer}</p></div>`)}
         </div>`,
+
+        when(!revealed, () => K.Segmented({ act:'quiz-guven', value:Q.guven() || '', aria:yz('ays.quiz.ne-kadar-eminsin'),
+          items:[{ value:'emin', label:yz('ays.quiz.eminim') }, { value:'kararsiz', label:yz('ays.quiz.kararsizim') },
+            { value:'tahmin', label:yz('ays.quiz.tahmin') }] })),
 
         when(item.choices, () => html`<div class="choices">${map(item.choices, (opt, i) => {
           const picked = Q.pickedIndex();
@@ -418,6 +442,25 @@ R.Screens.quiz = (function(){
   LIFEOS.PARCA.blok({ id:'quiz.sonuc', sayfa:'quiz', yer:'ana', ad:'Test sonucu', kosul:() => !kitapta() && sonOzet() && !Q.active(), ciz:() => kitapSonucView(sonOzet()) });
   LIFEOS.PARCA.blok({ id:'quiz.kosu', sayfa:'quiz', yer:'ana', ad:'Sınama', kosul:() => !kitapta() && Q.active(), ciz:() => runView() });
   LIFEOS.PARCA.blok({ id:'quiz.kurulum', sayfa:'quiz', yer:'ana', ad:'Sınama kurulumu', kosul:() => !kitapta() && !sonOzet() && !Q.active(), ciz:() => setupView() });
+  LIFEOS.PARCA.blok({ id:'quiz.kalicilik', sayfa:'quiz', yer:'ana', ad:'Sıra ve kalıcılık', kosul:() => !kitapta() && !sonOzet() && !Q.active(), ciz:() => raw(kalicilikHtml()) });
+
+  /* Bugünkü sıra ve konuların kalıcılığı (core/quiz.js, brand/ortak/usta.js). Ölçülmemiş
+     konu «ölçüldü»ye girmez; kanıt yoksa kart da yok. */
+  function kalicilikHtml(){
+    const P = (window.LIFEOS || {}).PANO, Us = window.LIFEOS.USTA;
+    if(!P) return '';
+    const liste = Q.siradaki(5), k = Q.konuKalicilik(), h = k.harita, emin = k.guven.emin;
+    const neden = x => x.kritik ? yz('ays.quiz.emin-yanilmistin') : x.gecikti ? x.gecikti + yz('ays.quiz.gun-gecikti')
+      : x.asama === 'yok' ? yz('ays.quiz.ilk-sinama') : Us.adi(x.asama);
+    const sira = liste.length ? P.kart({ tur:'sira', ad:yz('ays.quiz.bugunku-sira'), simge:'kart', yuva:yz('ays.quiz.karisik'),
+      govde:P.liste({ satirlar:liste.map(x => ({ ad:x.ad, not:neden(x), nokta:x.kritik ? 0 : 'n' })) })
+        + '<div class="mt-8">' + K.Button({ label:yz('ays.quiz.sirayi-sina'), size:'sm', tone:'primary', act:'quiz-siradaki' }) + '</div>' }) : '';
+    const kalici = h.olculen ? P.kart({ tur:'kalicilik', ad:yz('ays.quiz.kalicilik'), simge:'kart', yuva:h.olculen + '/' + h.toplam + yz('ays.quiz.konu-olculdu'),
+      govde:P.yigin({ parcalar:['ogreniyor', 'tutuyor', 'kalici', 'saglam'].map(id => ({ ad:Us.adi(id), deger:h.sayi[id], metin:String(h.sayi[id]) })) })
+        + (emin.oran != null ? P.not(yz('ays.quiz.emin-dediklerinin') + Math.round(emin.oran * 100) + yz('ays.quiz.kadari-tuttu') + ' · ' + emin.n + yz('ays.quiz.cevap')) : '')
+        + P.not(yz('ays.quiz.kalicilik-kurali')) }) : '';
+    return P.izgara([sira, kalici], 'pk-izgara--iki');
+  }
   async function render(){ return String(LIFEOS.PARCA.yer('quiz', 'ana', R.C)); }
 
   const handle = {
@@ -486,9 +529,21 @@ R.Screens.quiz = (function(){
       UI.toast(res.total + ' madde · başla');
       R.App.render();
     },
+    async 'quiz-siradaki'(){ S.ui.quizMode = 'siradaki'; await handle['quiz-start'](); },
+    /* Yeniden çizmez: çizim sesli okumayı baştan başlatırdı. */
+    async 'quiz-guven'(el){
+      Q.guvenSec(el.dataset.value);
+      el.parentElement.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.value === Q.guven();
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    },
     async 'quiz-reveal'(){ Q.reveal(); R.App.render(); },
     async 'quiz-answer'(el){
+      const eminYanildi = Q.guven() === 'emin' && el.dataset.verdict === 'unknown' && (Q.current() || {}).cardId;
       const res = await Q.answer(el.dataset.verdict);
+      if(eminYanildi) UI.toast(yz('ays.quiz.emindin-kart-one-alindi'));
       if(res && res.done){
         lastSummary = res.summary;
         UI.toast(yz('ays.quiz.oturum-bitti') + res.summary.score);

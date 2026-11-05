@@ -580,7 +580,7 @@ R.Model = (function(){
   }
   /* 1g / 3g / 1h / 1a — "hatirlamadim" donguyu +1 gunden baslatir,
      "zorlandim" bir sonraki araligi acmaz (ayni araligi tekrarlar). */
-  function schedule(card, rating){
+  function schedule(card, rating, ek){
     let stage = card.stage || 0;
     if(rating === 'forgot') stage = 1;
     else if(rating === 'hard') stage = Math.max(1, stage);
@@ -597,7 +597,7 @@ R.Model = (function(){
     card.lastResult = rating;
     card.lastReviewedAt = U.todayISO();
     card.history = (card.history || [])
-      .concat([{ at:U.todayISO(), rating, result, stage, gapDays }])
+      .concat([Object.assign({ at:U.todayISO(), rating, result, stage, gapDays }, ek || {})])
       .slice(-40);
     return card;
   }

@@ -486,6 +486,86 @@
 
   /* ==================== sınama biçimleri ==================== */
 
+  describe('Sınama — güven ve kalıcılık (brand/ortak/usta.js)', function(){
+    const dersi = () => R.SUBJECTS[0], konu = i => dersi().topics[i];
+    const kart = (i, ek) => M.newCard(Object.assign({ front:'S' + i, back:'C' + i, subjectId:dersi().id, topic:konu(i).name,
+      dueAt:'2026-01-01' }, ek || {}));
+
+    it('cevap güveni ve karışıklığı geçmişe yazar; işaretsiz güven boş kalır', async function(){
+      resetState();
+      await M.saveCard(kart(0)); await M.saveCard(kart(1));
+      Q.start({ mode:'due', size:2 });
+      const a = Q.current().cardId;
+      Q.guvenSec('emin');
+      await Q.answer('known');
+      const b = Q.current().cardId;
+      await Q.answer('known');
+      const h = id => S.cards.find(c => c.id === id).history[0];
+      expect(h(a).guven).toBe('emin');
+      expect(h(a).karisik).toBe(true);
+      expect(h(b).guven).toBe(undefined);
+    });
+    it('ikinci dokunuş güveni kaldırır; tek ders sınaması karışık sayılmaz', async function(){
+      resetState();
+      await M.saveCard(kart(0));
+      Q.start({ mode:'subject', subjectId:dersi().id, size:1 });
+      Q.guvenSec('emin'); Q.guvenSec('emin');
+      expect(Q.guven()).toBe(null);
+      const id = Q.current().cardId;
+      await Q.answer('known');
+      expect(S.cards.find(c => c.id === id).history[0].karisik).toBe(undefined);
+    });
+    it('emin olup yanılınan kart boyut küçükken de oturuma girer', async function(){
+      resetState();
+      for(let i = 0; i < 6; i++) await M.saveCard(kart(i % 2));
+      const c = S.cards[5];
+      c.history = [{ at:'2026-01-01', rating:'forgot', guven:'emin' }];
+      Q.start({ mode:'due', size:1 });
+      expect(Q.current().cardId).toBe(c.id);
+      Q.cancel();
+    });
+    it('konu kanıtı gün başına tektir; tek yanlış kart zinciri kesmez, boş doğru sayı kanıt değildir', function(){
+      resetState();
+      withToday('2026-03-20', function(){
+        const onlu = [];
+        for(let i = 0; i < 9; i++) onlu.push({ at:'2026-03-01', rating:'remembered' });
+        const c = kart(0, { history:onlu.concat([{ at:'2026-03-01', rating:'forgot' }, { at:'2026-03-10', rating:'remembered' }]) });
+        S.cards.push(c);
+        S.days['2026-03-15'] = { blocks:[{ subjectId:dersi().id, topicId:konu(1).id, actualQ:20, correctQ:null }] };
+        const b = id => Q.konuBecerileri().find(x => x.id === dersi().id + '|' + id);
+        expect(b(konu(0).name).kanitlar.length).toBe(2);
+        expect(window.LIFEOS.USTA.asama(b(konu(0).name).kanitlar).id).toBe('kalici');
+        expect(b(konu(1).name).kanitlar.length).toBe(0);
+        const h = Q.konuKalicilik().harita;
+        expect(h.olculen).toBe(1);
+        expect(h.toplam).toBe(R.SUBJECTS.reduce((a, s) => a + s.topics.length, 0));
+      });
+    });
+    it('çözülen soru bloğu kanıttır; sıra yalnız kartı olan konulardan gelir', function(){
+      resetState();
+      withToday('2026-03-20', function(){
+        S.cards.push(kart(0));
+        S.days['2026-03-19'] = { blocks:[{ subjectId:dersi().id, topicId:konu(1).id, actualQ:10, correctQ:8 }] };
+        expect(Q.konuBecerileri().find(x => x.ad === konu(1).name).kanitlar[0].isabet).toBe(true);
+        const l = Q.siradaki(5);
+        expect(l.length).toBe(1);
+        expect(l[0].ad).toBe(konu(0).name);
+        expect(Q.pool({ mode:'siradaki' }).length).toBe(1);
+      });
+    });
+    it('kurulum ekranı sırayı ve kalıcılığı çizer; kanıt yoksa kalıcılık kartı yok', async function(){
+      resetState();
+      const d = document.createElement('div');
+      await M.saveCard(kart(0));
+      d.innerHTML = await R.Screens.quiz.render();
+      expect(d.querySelector('[data-pano="sira"]')).toBeTruthy();
+      expect(d.querySelector('[data-pano="kalicilik"]')).toBeNull();
+      S.cards[0].history = [{ at:U.todayISO(), rating:'remembered' }];
+      d.innerHTML = await R.Screens.quiz.render();
+      expect(d.querySelector('[data-pano="kalicilik"]')).toBeTruthy();
+    });
+  });
+
   describe('Sınama biçimleri', function(){
     async function seedCards(n, topics){
       resetState();

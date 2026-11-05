@@ -16,6 +16,11 @@
 
    Karar motoru burada da otoritedir; LLM soru üretebilir ama puanlamaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.quiz.siradaki-konular':'Sıradaki konular',
+  'ays.core.quiz.kaliciligi-sinanacak-konular':'Bugün kalıcılığı sınanacak konular, karışık',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.quiz.bu-secimde-sinanacak-madde-y':'Bu seçimde sınanacak madde yok. Önce kart üret ya da ders notu ekle.',
   'ays.core.quiz.geri-cagirma-saglam-bu-konud':'Geri çağırma sağlam. Bu konuda tekrar aralığını uzatabilirsin.',
   'ays.core.quiz.yaridan-fazlasi-geldi-ama-bo':'Yarıdan fazlası geldi ama boşluk var. Bilinmeyenler karta düştü.',
@@ -57,7 +62,56 @@ R.Quiz = (function(){
     notes:    { label:yz('ays.core.quiz.ders-notlari'),     note:yz('ays.core.quiz.video-notlarindan-geri-cagir') },
     mixed:    { label:yz('ays.core.quiz.karisik'),          note:yz('ays.core.quiz.hepsinden-rastgele-sinav-ben') },
     zayif:    { label:yz('ays.core.quiz.zayif-konular'),    note:yz('ays.core.quiz.acik-yanlisi-en-cok-olan') },
+    siradaki: { label:yz('ays.core.quiz.siradaki-konular'), note:yz('ays.core.quiz.kaliciligi-sinanacak-konular') },
   };
+
+  /* ---------- kalıcılık (brand/ortak/usta.js) ----------
+     Beceri konudur. Yeni kayıt yok: kart geçmişi ve çözülen soru blokları kanıta çevrilir.
+     Bir konunun o günkü kanıtı TEKtir: doğruluk ≥ R.CLOSURE_RULE.second (planın kapanış
+     eşiği) ise isabet. Tek yanlış kart konunun bütün zincirini kesmesin diye gün gün toplanır. */
+  const kartKaniti = card => (card.history || []).map(h => ({ g:String(h.at).slice(0, 10),
+    isabet:h.rating !== 'forgot', guven:h.guven, karisik:h.karisik }));
+
+  function konuBecerileri(){
+    const gun = {};
+    const yaz = (anahtar, g, dogru, toplam, x) => {
+      const k = gun[anahtar] = gun[anahtar] || {};
+      const o = k[g] = k[g] || { d:0, n:0, karisik:false, eminYanlis:false };
+      o.d += dogru; o.n += toplam;
+      if(x && x.karisik) o.karisik = true;
+      if(x && x.guven === 'emin' && !x.isabet) o.eminYanlis = true;
+    };
+    S.cards.forEach(c => { if(c.subjectId && c.topic) kartKaniti(c).forEach(k => yaz(c.subjectId + '|' + c.topic, k.g, k.isabet ? 1 : 0, 1, k)); });
+    const adlar = {};
+    R.SUBJECTS.forEach(s => s.topics.forEach(t => { adlar[s.id + '/' + t.id] = t.name; }));
+    Object.keys(S.days || {}).forEach(g => ((S.days[g] || {}).blocks || []).forEach(b => {
+      const ad = adlar[b.subjectId + '/' + b.topicId];
+      /* Doğru sayısı yazılmamış blok sıfır doğru değildir, kanıt da değildir. */
+      if(ad && b.actualQ > 0 && b.correctQ != null) yaz(b.subjectId + '|' + ad, g, b.correctQ, b.actualQ);
+    }));
+    const esik = R.CLOSURE_RULE.second / 100, kartli = {};
+    S.cards.forEach(c => { kartli[c.subjectId + '|' + c.topic] = true; });
+    const cikti = [];
+    R.SUBJECTS.forEach(s => s.topics.forEach(t => {
+      const id = s.id + '|' + t.name, k = gun[id] || {};
+      cikti.push({ id, grup:s.id, ad:t.name, kartli:!!kartli[id], kanitlar:Object.keys(k).map(g => ({ g,
+        isabet:k[g].d / k[g].n >= esik, karisik:k[g].karisik, guven:k[g].eminYanlis ? 'emin' : undefined })) });
+    }));
+    return cikti;
+  }
+
+  /* Sınanabilir, yani kartı olan konulardan bugünün sırası. */
+  function siradaki(n){
+    const b = konuBecerileri().filter(x => x.kartli);
+    return window.LIFEOS.USTA.sira(b, U.todayISO(), n || 5)
+      .map(x => Object.assign(x, { ad:b.find(y => y.id === x.id).ad }));
+  }
+
+  function konuKalicilik(){
+    const Us = window.LIFEOS.USTA;
+    return { harita:Us.harita(konuBecerileri(), U.todayISO()),
+      guven:Us.kalibrasyon([].concat.apply([], S.cards.map(kartKaniti))) };
+  }
 
   /* Zayıf konu ÖLÇÜMDEN gelir (fikir 23): açık yanlışı en çok olan konular.
      Yanlış yoksa zayıf konu da yoktur — tahmin edilmez. */
@@ -175,6 +229,9 @@ R.Quiz = (function(){
       items = S.cards.filter(c => adlar.indexOf(c.topic) >= 0).map(fromCard)
         .concat(C.openErrors().filter(e => adlar.indexOf(e.topic) >= 0 && (e.principle || e.recipe))
           .map(fromError));
+    }else if(mode === 'siradaki'){
+      const sec = siradaki(5).map(x => x.id);
+      items = S.cards.filter(c => sec.indexOf(c.subjectId + '|' + c.topic) >= 0).map(fromCard);
     }else if(mode === 'notes'){
       S.videoNotes.forEach(n => n.segments.forEach((seg, i) => items.push(fromSegment(n, seg, i))));
     }else{ // mixed
@@ -206,7 +263,11 @@ R.Quiz = (function(){
     const perQuestion = TIMERS.indexOf(Number(o.seconds)) >= 0 ? Number(o.seconds) : 0;
 
     const all = pool(o);
-    let items = shuffle(all).slice(0, size);
+    /* Emin olup yanıldığın kart oturuma kesin girer: en kolay düzelen ama geri dönebilen hata. */
+    const kritikKart = {};
+    S.cards.forEach(c => { if(window.LIFEOS.USTA.asama(kartKaniti(c)).kritik) kritikKart[c.id] = true; });
+    let items = all.filter(i => kritikKart[i.cardId])
+      .concat(shuffle(all.filter(i => !kritikKart[i.cardId]))).slice(0, size);
 
     /* Karışık tekrar: aynı konudan iki madde peş peşe gelmesin.
        ÖSYM sana konu başlığı vermiyor; ard arda aynı konu yanıltıcı kolaylık üretir. */
@@ -227,6 +288,9 @@ R.Quiz = (function(){
     session = {
       mode:o.mode || 'due',
       format, perQuestion,
+      /* Tek ders ya da tek konu sınaması başlığı baştan söyler; karışık sayılmaz. */
+      karisik:o.interleave !== false && o.mode !== 'subject' && o.mode !== 'topic',
+      guven:null,
       subjectId:o.subjectId || null,
       topicId:o.topicId || null,
       items,
@@ -278,6 +342,9 @@ R.Quiz = (function(){
     return Math.max(0, session.perQuestion - questionSeconds());
   }
   function isRevealed(){ return !!(session && session.revealed); }
+  /* Cevaptan önce; ikinci dokunuş kaldırır. İşaretsiz cevap güven oranına girmez. */
+  function guven(){ return session ? session.guven : null; }
+  function guvenSec(v){ if(session) session.guven = session.guven === v ? null : v; }
 
   function progress(){
     if(!session) return null;
@@ -297,17 +364,21 @@ R.Quiz = (function(){
     if(!item) return null;
 
     session.results.push({ itemId:item.id, verdict, kind:item.kind, topic:item.topic,
-      subjectId:item.subjectId, seconds:questionSeconds(), picked:session.picked });
+      subjectId:item.subjectId, seconds:questionSeconds(), picked:session.picked, guven:session.guven });
 
     if(item.cardId){
       const card = S.cards.find(c => c.id === item.cardId);
       if(card){
-        M.schedule(card, verdict === 'known' ? 'remembered' : verdict === 'shaky' ? 'hard' : 'forgot');
+        const ek = {};
+        if(session.guven) ek.guven = session.guven;
+        if(session.karisik) ek.karisik = true;
+        M.schedule(card, verdict === 'known' ? 'remembered' : verdict === 'shaky' ? 'hard' : 'forgot', ek);
         await M.saveCard(card);
       }
     }
 
     session.revealed = false;
+    session.guven = null;
     session.picked = null;
     session.questionStartedMs = Date.now();
     session.index++;
@@ -325,6 +396,7 @@ R.Quiz = (function(){
   async function skip(){
     if(!session) return null;
     session.revealed = false;
+    session.guven = null;
     session.picked = null;
     session.questionStartedMs = Date.now();
     session.index = Math.min(session.index + 1, session.items.length);
@@ -421,10 +493,12 @@ R.Quiz = (function(){
       notes:pool({ mode:'notes' }).length,
       mixed:pool({ mode:'mixed' }).length,
       zayif:pool({ mode:'zayif' }).length,
+      siradaki:pool({ mode:'siradaki' }).length,
     };
   }
 
   return { MODES, SIZES, FORMATS, TIMERS, pool, start, active, current, reveal, isRevealed,
     pick, pickedIndex, format, questionSeconds, questionLeft, timeout,
-    progress, answer, skip, finish, cancel, availability, zayifKonular };
+    progress, answer, skip, finish, cancel, availability, zayifKonular,
+    guven, guvenSec, kartKaniti, konuBecerileri, siradaki, konuKalicilik };
 })();
