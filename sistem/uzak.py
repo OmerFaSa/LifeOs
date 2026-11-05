@@ -148,6 +148,28 @@ def merkez(oku=durum, yol=None):
     return {"url": "https://%s" % d["ad"], "token": jeton, "adres": "https://%s:%d" % (d["ad"], HESAP_KAPI)}
 
 
+def sahip(calistir=subprocess.run):
+    """Bu bilgisayarin Tailscale hesabi (kucuk harf); okunamazsa ''."""
+    cli = _cli()
+    if not cli:
+        return ""
+    try:
+        s = json.loads(_tailscale(cli, ["status", "--json"], calistir).stdout or "{}")
+        u = (s.get("User") or {}).get(str((s.get("Self") or {}).get("UserID"))) or {}
+        return (u.get("LoginName") or "").lower()
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return ""
+
+
+def merkez_kimlikle(basliklar, oku_sahip=sahip, oku_merkez=merkez):
+    """Hesapsiz bag: serve kimlik basligini kendisi yazar, disaridan geleni ezer (2026-11-06'da
+    canli denendi). Yalniz vekilden gelen istekte cagrilir ve yalniz bilgisayarin sahibine verir."""
+    giris = (basliklar.get("Tailscale-User-Login") or "").lower()
+    if not giris or giris != oku_sahip():
+        return None
+    return oku_merkez()
+
+
 if __name__ == "__main__":
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")

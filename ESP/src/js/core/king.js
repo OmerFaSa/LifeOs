@@ -508,7 +508,7 @@ window.LIFEOS.KING_IC = {};
     { es:new RegExp(B + '(besin|yemek|öğün|kahvaltı|yedim|yiyeceğim)'), modul:'spi', route:'meals', cevap:yz('ortak.king.afiyet-olsun') },
     { es:new RegExp(B + '(deneme)'), modul:'ays', route:'exams', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(test|soru)'), modul:'ays', route:'solve', cevap:yz('ortak.king.kolay-gelsin') },
-    { es:new RegExp(B + '(konu|ders)'), modul:'ays', route:'subjects', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(konu(?!ş)|ders)'), modul:'ays', route:'subjects', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(tekrar|kart)'), modul:'ays', route:'cards', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(dil|ingilizce|almanca|fransızca|kelime)'), modul:'esp', route:'lang', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(kitap|okuma|okuyacağım)'), modul:'esp', route:'library', cevap:yz('ortak.king.keyifli-okumalar') },
@@ -1047,7 +1047,8 @@ window.LIFEOS.KING_IC = {};
     let en = null, uzun = 0;
     const adli = (String(t).match(MODUL_SOZ) || []).map(x => x.trim()).filter((m, i, a) => a.indexOf(m) === i);
     SAYFALAR.forEach(s => (adli.length === 1 && s.modul !== adli[0] ? [] : s.es).forEach(e => {
-      if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(t)) return;
+      /* «konu» sözcük başıyla «konuşmak»a da uyuyordu: «seninle konuşabiliyor muyum» sayfa açıyordu. */
+      if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (e === 'konu' ? '(?!ş)' : '')).test(t)) return;
       const puan = e.length + (KI.ayar && s.modul === KI.ayar.modul ? 0.5 : 0);   // eşitlikte bulunulan modül
       if(puan > uzun){ uzun = puan; en = s; }
     }));

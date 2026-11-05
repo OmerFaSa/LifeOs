@@ -20698,6 +20698,12 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:20px 16px; gap:16px; }
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin:0 16px 16px; }
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king > div{ padding:12px 16px; }
+  /* Telefonda pencere tam ekran: kenar boşluğu okuma alanından çalıyordu, çerçeve de ekrandan taşıyordu. */
+  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__kutu{ inset:0; width:100%; height:100dvh;
+    transform:none; border:0; border-radius:0; box-shadow:none;
+    padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+  /* Yedi sekme eşit paylaşır: sonuncusu yarım kesilmez. */
+  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is{ flex:1 1 0; width:auto; min-width:0; margin:0; }
 }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
@@ -50477,7 +50483,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'31b408be', at:'2026-11-05 21:29', dirty:true };
+R.BUILD = { id:'2b3b5eb9', at:'2026-11-05 22:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -64937,22 +64943,30 @@ window.LIFEOS.HESAP = (function(){
   async function evAgiAc(){ return api('/api/hesap/ev-agi-ac', {}); }
   async function uzakAc(){ return api('/api/hesap/uzak-ac', {}); }
 
-  /* Her yerden erişim (sistem/uzak.py): girişli admin cihazı Merkez'in adresini ve
-     jetonunu hesaptan alır, elle eşleme yok. Oturum başına bir deneme; kapalı ya da
-     ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
+  /* Her yerden erişim (sistem/uzak.py): Merkez'in adresi ve jetonu elle girilmez. Özel ağ adresinden
+     açan cihaz Tailscale kimliğiyle alır (hesap gerekmez), uygulama admin hesabıyla. Oturum başına
+     bir deneme; kapalı ya da ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
   let merkezDenenen = null;
   async function merkezBagla(){
     const o = oturum(), b = ayar && ayar.hkm && ayar.hkm();
-    if(!o || o.r !== 'admin' || !b || ornekMi() || pcMi() || merkezDenenen === o.j) return false;
+    const deneme = (o && o.j) || 'ozel-ag';
+    if(!b || ornekMi() || pcMi() || merkezDenenen === deneme) return false;
     const a = b.settings() || {};
     if(a.token && /^https:/i.test(a.url || '') && a.lastStatus !== 401) return false;
-    merkezDenenen = o.j;
+    const ozelAg = /\.ts\.net$/i.test(ortam.konum().hostname || '');
+    if(!ozelAg && (!o || o.r !== 'admin')) return false;
+    merkezDenenen = deneme;
     let v;
-    try{ v = await api('/api/hesap/merkez', {}); }catch(e){ return false; }
+    try{
+      if(ozelAg){
+        const r = await ortam.fetch('/api/uzak/merkez', { method:'POST', cache:'no-store', headers:{ 'X-LifeOS':'hesap' } });
+        v = r.ok ? await r.json() : null;
+      }else v = await api('/api/hesap/merkez', {});
+    }catch(e){ return false; }
     if(!v || !v.url || !v.token) return false;
     await b.save({ url:v.url, token:v.token, enabled:true, lastStatus:null });
     /* Uygulama ev ağı adresiyle girmiş olabilir: her yerde geçen adrese geçer. */
-    if(ortam.yerelUygulama() && v.adres && o.s !== v.adres){
+    if(o && ortam.yerelUygulama() && v.adres && o.s !== v.adres){
       cerezYaz(CEREZ, Object.assign({}, o, { s:v.adres }));
       cerezYaz(SUNUCU, v.adres);
     }
@@ -75647,7 +75661,7 @@ window.LIFEOS.KING_IC = {};
     { es:new RegExp(B + '(besin|yemek|öğün|kahvaltı|yedim|yiyeceğim)'), modul:'spi', route:'meals', cevap:yz('ortak.king.afiyet-olsun') },
     { es:new RegExp(B + '(deneme)'), modul:'ays', route:'exams', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(test|soru)'), modul:'ays', route:'solve', cevap:yz('ortak.king.kolay-gelsin') },
-    { es:new RegExp(B + '(konu|ders)'), modul:'ays', route:'subjects', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(konu(?!ş)|ders)'), modul:'ays', route:'subjects', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(tekrar|kart)'), modul:'ays', route:'cards', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(dil|ingilizce|almanca|fransızca|kelime)'), modul:'esp', route:'lang', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(kitap|okuma|okuyacağım)'), modul:'esp', route:'library', cevap:yz('ortak.king.keyifli-okumalar') },
@@ -76186,7 +76200,8 @@ window.LIFEOS.KING_IC = {};
     let en = null, uzun = 0;
     const adli = (String(t).match(MODUL_SOZ) || []).map(x => x.trim()).filter((m, i, a) => a.indexOf(m) === i);
     SAYFALAR.forEach(s => (adli.length === 1 && s.modul !== adli[0] ? [] : s.es).forEach(e => {
-      if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(t)) return;
+      /* «konu» sözcük başıyla «konuşmak»a da uyuyordu: «seninle konuşabiliyor muyum» sayfa açıyordu. */
+      if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (e === 'konu' ? '(?!ş)' : '')).test(t)) return;
       const puan = e.length + (KI.ayar && s.modul === KI.ayar.modul ? 0.5 : 0);   // eşitlikte bulunulan modül
       if(puan > uzun){ uzun = puan; en = s; }
     }));
@@ -77842,7 +77857,8 @@ window.LIFEOS.PARCA.yazilar({
   const SELAM = /^(merhaba|merhabalar|selam|selamlar|sa|slm|mrb|hey|hi|hello|naber|nbr|nasılsın|nasilsin|ne haber|günaydın|gunaydin|iyi (akşamlar|aksamlar|geceler|günler|gunler|sabahlar)|hayırlı (sabahlar|günler)|king)[\s!.,?]*$/;
   function cevapGibi(metin){
     const t = String(metin || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
-    if(t.length < 2 || SELAM.test(t) || /\?\s*$/.test(t)) return false;
+    /* İşaretsiz soru da cevap değildir: «seninle konuşabiliyor muyum» en sevdiği yemek diye yazılıyordu. */
+    if(t.length < 2 || SELAM.test(t) || KI.soruMu(t)) return false;
     return true;
   }
   const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;

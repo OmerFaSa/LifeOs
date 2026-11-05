@@ -1789,6 +1789,12 @@ class Giris(SimpleHTTPRequestHandler):
             except (ValueError, UnicodeDecodeError):
                 govde = {}
             return self._json(200, gun_cumlesi(govde))
+        if yol == "/api/uzak/merkez":
+            # Ozel baslik tarayiciyi on-kontrole zorlar (izin yok); isaret yalniz serve'den gelene konur.
+            izin = (self.client_address[0] == uzak.VEKIL_IP and self.headers.get("X-LifeOS") == "hesap"
+                    and hesap._koken_izinli(self))
+            v = uzak.merkez_kimlikle(self.headers) if izin else None
+            return self._json(200 if v else 403, v or {"hata": "İzin yok."})
         if yol not in ("/api/guncelle", "/api/hkm", "/api/hkm/yeniden", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):

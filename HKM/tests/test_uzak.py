@@ -138,6 +138,15 @@ def run():
                 eq(cfg["allowed_origins"], ["https://x.y"] + ["https://%s:%d" % (AD, p) for p in (5173, 5183, 5193)])
         test("jeton yalniz erisim acikken; koken yazimi ayari korur", jeton)
 
+        def kimlik():
+            m = {"url": "u", "token": "t"}
+            y = lambda b: uzak.merkez_kimlikle(b, oku_sahip=lambda: "ben@x.com", oku_merkez=lambda: m)
+            eq(y({"Tailscale-User-Login": "BEN@x.com"}), m)
+            eq(y({"Tailscale-User-Login": "baskasi@x.com"}), None)
+            eq(y({}), None)
+            eq(uzak.merkez_kimlikle({"Tailscale-User-Login": ""}, oku_sahip=lambda: "", oku_merkez=lambda: m), None)
+        test("hesapsiz Merkez bagi yalniz bilgisayarin sahibine", kimlik)
+
         def durumu():
             d = uzak.durum(_sahte(serve_web=_web())[0])
             ok(d["acik"], "dort kapi dogru hedefte")

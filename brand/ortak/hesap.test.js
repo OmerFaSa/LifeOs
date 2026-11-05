@@ -1349,6 +1349,20 @@
       expect(await h._merkezBagla()).toBe(false);          // bağ varsa yeniden istemez
       a.lastStatus = 401;
       expect(await h._merkezBagla()).toBe(true);           // jeton yenilendiyse alır
+      /* Özel ağ adresi: hesapsız, Tailscale kimliğiyle; sunucu reddederse sessiz. */
+      const b = { url:'', token:'' };
+      h.kur({ modul:'spi', depo:c.depo, hkm:() => ({ settings:() => b, save:async v => Object.assign(b, v) }) });
+      const konum = h._ortam.konum, fetch0 = h._ortam.fetch, istenen = [];
+      h._ortam.konum = () => ({ protocol:'https:', hostname:'pc.ts.net' });
+      let izin = false;
+      h._ortam.fetch = async (u, s) => { if(u === '/api/uzak/merkez'){ istenen.push(s.headers['X-LifeOS']); return { ok:izin, json:async () => ({ url:'https://pc.ts.net', token:'j' }) }; } return fetch0(u, s); };
+      expect(await h._merkezBagla()).toBe(false);
+      expect(b.token).toBe('');
+      izin = true;
+      expect(await h._merkezBagla()).toBe(true);
+      expect(b.token).toBe('j');
+      expect(istenen).toEqual(['hesap', 'hesap']);
+      h._ortam.konum = konum; h._ortam.fetch = fetch0;
     }));
 
     it('kimlik, plan ve gruplar; yönetim yalnız adminde', () => sahneyle(async () => {

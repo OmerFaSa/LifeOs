@@ -2151,22 +2151,30 @@ window.LIFEOS.HESAP = (function(){
   async function evAgiAc(){ return api('/api/hesap/ev-agi-ac', {}); }
   async function uzakAc(){ return api('/api/hesap/uzak-ac', {}); }
 
-  /* Her yerden erişim (sistem/uzak.py): girişli admin cihazı Merkez'in adresini ve
-     jetonunu hesaptan alır, elle eşleme yok. Oturum başına bir deneme; kapalı ya da
-     ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
+  /* Her yerden erişim (sistem/uzak.py): Merkez'in adresi ve jetonu elle girilmez. Özel ağ adresinden
+     açan cihaz Tailscale kimliğiyle alır (hesap gerekmez), uygulama admin hesabıyla. Oturum başına
+     bir deneme; kapalı ya da ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
   let merkezDenenen = null;
   async function merkezBagla(){
     const o = oturum(), b = ayar && ayar.hkm && ayar.hkm();
-    if(!o || o.r !== 'admin' || !b || ornekMi() || pcMi() || merkezDenenen === o.j) return false;
+    const deneme = (o && o.j) || 'ozel-ag';
+    if(!b || ornekMi() || pcMi() || merkezDenenen === deneme) return false;
     const a = b.settings() || {};
     if(a.token && /^https:/i.test(a.url || '') && a.lastStatus !== 401) return false;
-    merkezDenenen = o.j;
+    const ozelAg = /\.ts\.net$/i.test(ortam.konum().hostname || '');
+    if(!ozelAg && (!o || o.r !== 'admin')) return false;
+    merkezDenenen = deneme;
     let v;
-    try{ v = await api('/api/hesap/merkez', {}); }catch(e){ return false; }
+    try{
+      if(ozelAg){
+        const r = await ortam.fetch('/api/uzak/merkez', { method:'POST', cache:'no-store', headers:{ 'X-LifeOS':'hesap' } });
+        v = r.ok ? await r.json() : null;
+      }else v = await api('/api/hesap/merkez', {});
+    }catch(e){ return false; }
     if(!v || !v.url || !v.token) return false;
     await b.save({ url:v.url, token:v.token, enabled:true, lastStatus:null });
     /* Uygulama ev ağı adresiyle girmiş olabilir: her yerde geçen adrese geçer. */
-    if(ortam.yerelUygulama() && v.adres && o.s !== v.adres){
+    if(o && ortam.yerelUygulama() && v.adres && o.s !== v.adres){
       cerezYaz(CEREZ, Object.assign({}, o, { s:v.adres }));
       cerezYaz(SUNUCU, v.adres);
     }
