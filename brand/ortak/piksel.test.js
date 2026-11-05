@@ -257,7 +257,6 @@
       expect(new Set(A.SAKIN.map(k => [k.s, k.h, k.sac, k.g, k.giyim, k.ek, k.boy].join())).size).toBe(A.SAKIN.length);
       Object.keys(A.POZ).filter(p => p !== 'kabinK' && p !== 'gizli').forEach(p => A.POZ[p].k.forEach(f => expect(new Set(f.map(r => r.length)).size).toBe(1)));
       expect(A.POZ.yuru.k.length).toBe(4);
-      expect(A.POZ.araba1.k[0][0].length >= 30).toBe(true);
     });
     it('ruh hâli vakte göre değişir', () => {
       const A = window.LIFEOS.PIKSEL_APARTMAN;
@@ -370,12 +369,156 @@
       expect(A.dokun(A.yerlesim(384, 216, 'gece'), 2, 1, t)).toBe(null);
     });
     it('hareketsiz kipte sahne döngüsü hiç kurulmaz', () => {
-      const P = window.LIFEOS.PIKSEL, k = document.documentElement, once = k.getAttribute('data-hareket'), asil = window.setInterval;
+      const P = window.LIFEOS.PIKSEL, k = document.documentElement, once = k.getAttribute('data-hareket'), asil = [window.setInterval, window.setTimeout, window.requestAnimationFrame];
       let kurulan = 0;
-      window.setInterval = function(){ kurulan++; return asil.apply(window, arguments); };
+      const say = f => function(){ kurulan++; return f.apply(window, arguments); };
       k.setAttribute('data-zemin', 'piksel'); k.setAttribute('data-hareket', 'az');
+      /* az kipine geçişi gözcü de görür: o sıra bitsin, sonra say */
+      P.uygula();
+      window.setInterval = say(asil[0]); window.setTimeout = say(asil[1]); window.requestAnimationFrame = say(asil[2]);
       try{ P.uygula(); expect(kurulan).toBe(0); }
-      finally{ window.setInterval = asil; if(once) k.setAttribute('data-hareket', once); else k.removeAttribute('data-hareket'); }
+      finally{ window.setInterval = asil[0]; window.setTimeout = asil[1]; window.requestAnimationFrame = asil[2]; if(once) k.setAttribute('data-hareket', once); else k.removeAttribute('data-hareket'); }
+    });
+    it('döngü: üç kez kurulsa da tek zincir işler, kapatılınca sıradaki uyanış çizmez', async () => {
+      const P = window.LIFEOS.PIKSEL, k = document.documentElement, once = k.getAttribute('data-hareket'), asilRaf = window.requestAnimationFrame;
+      k.setAttribute('data-zemin', 'piksel'); k.setAttribute('data-hareket', 'tam');
+      let raf = 0;
+      window.requestAnimationFrame = function(){ raf++; return asilRaf.apply(window, arguments); };
+      try{
+        P.uygula(); P.uygula(); P.uygula();
+        raf = 0;
+        await new Promise(r => setTimeout(r, 500));
+        /* tek zincir saniyede en çok 24 uyanır; yarım saniyede 12 (eski zincirler yaşasaydı katlanırdı) */
+        expect(raf <= 16).toBe(true);
+        k.setAttribute('data-hareket', 'az');
+        P.uygula();
+        await new Promise(r => setTimeout(r, 120));
+        raf = 0;
+        await new Promise(r => setTimeout(r, 250));
+        expect(raf).toBe(0);
+      }finally{ window.requestAnimationFrame = asilRaf; if(once) k.setAttribute('data-hareket', once); else k.removeAttribute('data-hareket'); P.uygula(); }
+    });
+    it('çizim çevirici önce okur sonra yazar: daireler arası stil yeniden hesaplanmaz', () => {
+      const P = window.LIFEOS.PIKSEL, kok = document.documentElement, eskiZemin = kok.getAttribute('data-zemin'), d = document.createElement('div');
+      kok.setAttribute('data-zemin', 'piksel');
+      d.innerHTML = '<svg viewBox="0 0 100 100" width="100" height="100"><circle cx="10" cy="10" r="3" fill="#00f"/><circle cx="20" cy="10" r="3" fill="#00f"/></svg>'.repeat(3);
+      document.body.appendChild(d);
+      const eski = window.getComputedStyle, asilYaz = Element.prototype.replaceWith;
+      let yazildi = false, gecOkuma = 0;
+      window.getComputedStyle = function(e, s){ if(yazildi && e.tagName.toLowerCase() !== 'svg') gecOkuma++; return eski.call(window, e, s); };
+      Element.prototype.replaceWith = function(){ yazildi = true; return asilYaz.apply(this, arguments); };
+      try{
+        P.simgeleriTara(d);
+        expect(yazildi).toBe(true);
+        expect(gecOkuma).toBe(0);
+        expect(d.querySelectorAll('rect').length).toBe(6);
+        expect(d.querySelectorAll('circle').length).toBe(0);
+      }finally{
+        window.getComputedStyle = eski;
+        Element.prototype.replaceWith = asilYaz;
+        d.remove();
+        if(eskiZemin) kok.setAttribute('data-zemin', eskiZemin); else kok.removeAttribute('data-zemin');
+      }
+    });
+    it('hareket ızgaraya oturur: yürüyüş kareleri eşit sürer, araç her karede tam bir piksel ilerler', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle');
+      const yuruyen = o.zemin.sakin.find(s => s.kisi === A.SAKIN[28]), q = yuruyen.seg.find(g => g.poz === 'yuru');
+      const tut = [];
+      let son = null, n = 0;
+      for(let i = Math.ceil(q.t0 * A.YAVAS_HZ) + 1; i < q.t1 * A.YAVAS_HZ - 1; i++){ const k = A.kareAl(yuruyen, i / A.YAVAS_HZ).i; if(k === son) n++; else { if(son !== null) tut.push(n); son = k; n = 1; } }
+      expect(tut.length > 8).toBe(true);
+      tut.slice(1).forEach(v => expect(v).toBe(2));
+      const araba = o.zemin.sakin.find(s => s.seg.some(g => g.poz === 'araba3')), s = araba.seg.find(g => g.poz === 'araba3');
+      expect(araba.hizli).toBe(true);
+      expect(o.zemin.sakin.filter(r => r.kisi).every(r => !r.hizli)).toBe(true);
+      for(let i = Math.ceil(s.t0 * A.HIZLI_HZ) + 1; i + 1 < s.t1 * A.HIZLI_HZ; i++) expect(A.kareAl(araba, (i + 1) / A.HIZLI_HZ).x - A.kareAl(araba, i / A.HIZLI_HZ).x).toBe(1);
+    });
+    it('kare: aynı ızgara hücresinde hiç çizmez; hızlı aralık yalnız ekranda araç varken', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle'), arka = document.createElement('canvas');
+      arka.width = 384; arka.height = 216;
+      let ciz = 0;
+      const g = { drawImage(){ ciz++; } }, araba = o.zemin.sakin.filter(s => s.hizli);
+      const ara = f => { for(let t = 3000; t < 3400; t += 0.5) if(f(araba.some(s => A.kareAl(s, t)))) return Math.floor(t * 12) / 12; };
+      const bos = ara(v => !v), dolu = ara(v => v);
+      A.kare(g, arka, o, bos + 0.001);
+      expect(Math.round(o.aralik)).toBe(83);
+      ciz = 0;
+      A.kare(g, arka, o, bos + 0.01);
+      expect(ciz).toBe(0);
+      A.kare(g, arka, o, dolu + 0.001);
+      expect(Math.round(o.aralik)).toBe(42);
+    });
+    it('araçlar kişi boyunda ve binaya göre belirgin; şerit, yön ve çarpışma ölçeğe uyar', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN;
+      ['araba1', 'araba2', 'araba3'].forEach(p => A.POZ[p].k.forEach(f => {
+        expect(f.length >= 17).toBe(true);
+        expect(f[0].length >= 52).toBe(true);
+        expect(f.length * 2 >= A.KAT).toBe(true);   // en az yarım kat boyunda
+      }));
+      [[384, 216], [342, 192], [480, 270], [98, 211], [640, 360], [320, 150]].forEach(q => {
+        const o = A.yerlesim(q[0], q[1], 'ogle'), W = q[0], H = q[1], yol = o.sokak + 8;
+        expect(H - yol >= 32).toBe(true);
+        const arac = o.zemin.sakin.filter(s => s.seg.some(g => /^araba/.test(g.poz)));
+        expect(arac.length).toBe(3);
+        const T = arac[0].T;
+        arac.forEach(a => expect(Math.abs(a.T - T) < 1e-6).toBe(true));
+        for(let t = 0; t < T; t += 0.25){
+          const k = arac.map(a => { const v = A.kareAl(a, t); return v && Object.assign(v, { w:A.POZ[v.poz].k[v.i][0].length, h:A.POZ[v.poz].k[v.i].length }); });
+          k.forEach((v, i) => {
+            if(!v) return;
+            expect(v.y >= o.sokak + 6).toBe(true);        // kaldırımdaki kişinin üstüne binmez
+            expect(v.y + v.h <= H).toBe(true);
+            const s = arac[i].seg.find(g => /^araba/.test(g.poz));
+            expect(s.x1 < s.x0).toBe(v.ters);             // gittiği yöne bakar
+            k.forEach((u, j) => { if(u && j > i && u.y + u.h === v.y + v.h) expect(u.x + u.w <= v.x || v.x + v.w <= u.x).toBe(true); });   // aynı şeritte çakışmaz
+          });
+        }
+        /* ekrana tamamen girer ve tamamen çıkar */
+        arac.forEach(a => { const s = a.seg.find(g => /^araba/.test(g.poz)), w = A.POZ[s.poz].k[0][0].length; expect(Math.min(s.x0, s.x1) + w <= 0).toBe(true); expect(Math.max(s.x0, s.x1) >= W).toBe(true); });
+      });
+    });
+    it('yüz: her kişide, her pozda ve yönde gözü ve ağzı var; koyu tende de okunur', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, POZLAR = Object.keys(A.POZ).filter(p => (A.POZ[p].k[0] && A.POZ[p].k[0].bas) || p === 'yat');
+      expect(POZLAR.length > 12).toBe(true);
+      A.SAKIN.forEach(k => {
+        const P = A.yuzPalet(k);
+        expect(A.kontrast(P.e, P.s) >= 2.5).toBe(true);
+        expect(A.kontrast(P.n, P.s) >= 3).toBe(true);
+        Object.keys(A.PALET).forEach(v => POZLAR.forEach(p => A.POZ[p].k.forEach((_, i) => {
+          const s = A.kisiSatir(p, i, k, A.ruhu(k, v)).flat();
+          expect(s.filter(c => c === 'e').length >= 2).toBe(true);
+          expect(s.filter(c => c === 'n' || c === 'M').length >= 1).toBe(true);
+        })));
+      });
+    });
+    it('yüz: sakal ağzı, gözlük gözü örtmez; saç tenle aynı aileden ise koyulaşır', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, bul = e => A.SAKIN.find(k => k.ek === e);
+      const gozluk = A.kisiSatir('dur', 0, bul('gozluk'), 'sakin').flat();
+      expect(gozluk.filter(c => c === 'W').length >= 2).toBe(true);
+      const sakal = A.kisiSatir('dur', 0, bul('sakal'), 'sakin'), sira = sakal.findIndex(r => r.includes('n'));
+      expect(sira >= 0).toBe(true);
+      sakal[sira].forEach((c, x) => { if(c === 'n') expect(sakal[sira][x - 1] === 's' || sakal[sira][x - 1] === 'n').toBe(true); });
+      const P = A.yuzPalet({ h:'#a5612f', s:'#a8703f' });
+      expect(P.h === '#a5612f').toBe(false);
+      expect(A.kontrast(P.h, P.s) > A.kontrast('#a5612f', P.s)).toBe(true);
+      expect(A.yuzPalet({ h:'#d9d3c6', s:'#f6d3ae' }).h).toBe('#d9d3c6');   // beyaz saç griye dönmez
+    });
+    it('yüz: gece çift yatakta öndeki arkadakinin yüzünü örtmez', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'gece');
+      let cift = 0;
+      [o.cati].concat(o.bolgeler, o.zemin).forEach(a => {
+        const yatan = a.sakin.map(s => A.kareAl(s, 1000 + (s.faz || 0))).filter(q => q && q.kisi && q.poz === 'yat');
+        yatan.forEach((q, i) => {
+          const yuz = [];
+          A.kisiSatir(q.poz, q.i, q.kisi, A.ruhu(q.kisi, 'gece')).forEach((r, yy) => r.forEach((c, xx) => { if(c === 'e' || c === 'n') yuz.push([q.x + xx, q.y + yy]); }));
+          yatan.slice(i + 1).forEach(u => {
+            const f = A.POZ[u.poz].k[u.i];
+            cift++;
+            yuz.forEach(d => { const c = f[d[1] - u.y] && f[d[1] - u.y][d[0] - u.x]; expect(!c || c === '.').toBe(true); });
+          });
+        });
+      });
+      expect(cift > 0).toBe(true);
     });
     it('kart çekilir ve geri gelir; süs veri okumaz', () => {
       const P = window.LIFEOS.PIKSEL, k = document.documentElement, once = k.getAttribute('data-zemin');

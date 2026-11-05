@@ -7,7 +7,7 @@
    Sözler:
      1. SÜSTÜR. Hiçbir sayıya ve karara bakmaz, veri okumaz, yazmaz. Düşerse yalnız duvar düz kalır.
      2. KODLA ÇİZİLİR. Görsel dosyası yok; çevrimdışı ve tek dosyada çalışır.
-     3. EKRANI YORMAZ. Sahne bir kez hazırlanır, yalnız değişen bölge 8 kare/sn yenilenir;
+     3. EKRANI YORMAZ. Sahne bir kez hazırlanır, yalnız değişen bölge yenilenir (12 kare/sn, araç varken 24);
         sekme arkadayken ya da sayfa kaydırılmışken durur; animasyon kapalıysa tek kare çizilir.
      4. KART ÇEKİLİR. Üç dakika işlem olmazsa ya da arka plana çift tıklanırsa kart ve menü çekilir, sahne görünür. */
 window.LIFEOS = window.LIFEOS || {};
@@ -330,17 +330,24 @@ window.LIFEOS = window.LIFEOS || {};
     if(!hareketsiz()){ const z = setInterval(() => { if(!c.isConnected) return clearInterval(z); D.kare(g, arka, o, Date.now() / 1000); }, 125); }
     return c;
   }
+  /* Sonraki ızgaraya kadar uyur, sonra ekranın karesini bekler: zamanlayıcı ile ekran arasında vuru olmaz, gizli sekmede hiç uyanmaz. */
   function dongu(){
-    clearInterval(durum.zaman); durum.zaman = null;
+    clearTimeout(durum.zaman); durum.zaman = null;
+    const nesil = durum.nesil = (durum.nesil || 0) + 1;
     if(!durum.c || hareketsiz()) return;
-    let n = 0;
-    durum.zaman = setInterval(() => {
-      if(document.visibilityState === 'hidden' || (window.scrollY > 260 && !document.documentElement.hasAttribute('data-bos'))) return;
-      /* Vakit değişti mi: dakikada bir bakılır, değiştiyse bina yeniden çizilir */
-      if(++n % 480 === 0 && durum.o && sahneMotor().vakit(new Date().getHours()) !== durum.o.vakit) hazirla();
-      if(!dogaMi() && !durum.kayiyor && durum.yer){ const y = simdikiYer(); if(y !== durum.yer) yereGit(y); }
-      kare(Date.now() / 1000);
-    }, 125);
+    let vakitBak = Date.now();
+    const sirala = () => { const a = (durum.o && durum.o.aralik) || 1000 / 12; durum.zaman = setTimeout(() => requestAnimationFrame(tik), a - Date.now() % a); };
+    const tik = () => {
+      if(nesil !== durum.nesil) return;
+      if(window.scrollY <= 260 || document.documentElement.hasAttribute('data-bos')){
+        /* Vakit değişti mi: dakikada bir bakılır, değiştiyse bina yeniden çizilir */
+        if(Date.now() - vakitBak > 60000){ vakitBak = Date.now(); if(durum.o && sahneMotor().vakit(new Date().getHours()) !== durum.o.vakit) hazirla(); }
+        if(!dogaMi() && !durum.kayiyor && durum.yer){ const y = simdikiYer(); if(y !== durum.yer) yereGit(y); }
+        kare(Date.now() / 1000);
+      }
+      sirala();
+    };
+    sirala();
   }
   /* Boşta: kart ve menü çekilir, sahne kalır. Çift tıkla açılan el ile kapanır; hareketle kapanmaz. */
   const BOS_MS = 180000;
@@ -510,7 +517,7 @@ window.LIFEOS = window.LIFEOS || {};
   function uygula(){
     if(!secili()){
       if(durum.c){ durum.c.remove(); durum.c = null; durum.g = null; }
-      clearInterval(durum.zaman); durum.zaman = null;
+      clearTimeout(durum.zaman); durum.zaman = null; durum.nesil = (durum.nesil || 0) + 1;
       return;
     }
     if(!durum.c){
