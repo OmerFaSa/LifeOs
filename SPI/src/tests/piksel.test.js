@@ -172,7 +172,7 @@
       const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(98, 211, 'batim');
       expect(o.dar).toBe(true);
       expect(o.odalar.length).toBe(o.n);
-      expect(o.ax + A.ASANSOR).toBe(98);
+      expect(o.ax + A.ASANSOR + 3).toBe(98);   // asansörün sağında üç piksellik bina duvarı
     });
     it('vakit gerçek saatten gelir: gün doğumu, öğlen, gün batımı, gece', () => {
       const V = window.LIFEOS.PIKSEL_APARTMAN.vakit;

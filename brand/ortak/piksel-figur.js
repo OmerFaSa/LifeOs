@@ -116,7 +116,7 @@ window.LIFEOS.PIKSEL_FIGUR = Object.freeze({
     '..ooMMMMMMMMoo..',
     '....oooooooo....',
     '................'] },
-  king_kedi:{ p:{ o:'#8a3f66', m:'#ffc2dc', M:'#f49ac1', k:'#3a1f33', w:'#ffffff', p:'#ff8fb5', n:'#a84e74', y:'#ffd35a', Y:'#e0a52e', b:'#fff0f6', W:'#ffe6f1' }, s:[
+  king_kedi:{ p:{ o:'#7a3a12', m:'#ffc890', M:'#f29a52', k:'#3a1f10', w:'#ffffff', p:'#ff9f8f', n:'#b8602a', y:'#ffd35a', Y:'#e0a52e', b:'#fff1dc', W:'#ffe4c4' }, s:[
     '.....y.yy.y.....',
     '.o...yYyyYy...o.',
     '.oo.oooooooo.oo.',
@@ -133,7 +133,7 @@ window.LIFEOS.PIKSEL_FIGUR = Object.freeze({
     '...omMbbbbMmoomo',
     '....omo..omooo..',
     '.....o....o.....'] },
-  king_tavsan:{ p:{ o:'#8a3f66', m:'#ffc2dc', M:'#f49ac1', k:'#3a1f33', w:'#ffffff', p:'#ff8fb5', n:'#a84e74', y:'#ffd35a', Y:'#e0a52e', b:'#fff0f6', W:'#ffe6f1' }, s:[
+  king_tavsan:{ p:{ o:'#5e5a6e', m:'#f6f4fa', M:'#d2cde0', k:'#2e2a3a', w:'#ffffff', p:'#ffa8c4', n:'#8e88a4', y:'#ffd35a', Y:'#e0a52e', b:'#ffffff', W:'#ffffff' }, s:[
     '...oo......oo...',
     '..omMo....oMmo..',
     '..ompo.yy.opmo..',
@@ -150,7 +150,7 @@ window.LIFEOS.PIKSEL_FIGUR = Object.freeze({
     '..ommbbbbbbmmo..',
     '...oMMooooMMo...',
     '....oo....oo....'] },
-  king_ejderha:{ p:{ o:'#8a3f66', m:'#ffc2dc', M:'#f49ac1', k:'#3a1f33', w:'#ffffff', p:'#ff8fb5', n:'#a84e74', y:'#ffd35a', Y:'#e0a52e', b:'#fff0f6', W:'#ffe6f1' }, s:[
+  king_ejderha:{ p:{ o:'#2f6a52', m:'#bdf0d4', M:'#7fd4ab', k:'#1e3a2e', w:'#ffffff', p:'#ff9fb0', n:'#3f9a74', y:'#ffd35a', Y:'#e0a52e', b:'#f2fff6', W:'#e2fbef' }, s:[
     '.....y.yy.y.....',
     '.....yYyyYy.....',
     '..M.oooooooo.M..',

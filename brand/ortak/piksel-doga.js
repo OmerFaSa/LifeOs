@@ -418,10 +418,10 @@ window.LIFEOS = window.LIFEOS || {};
         if(o.gece) for(let i = 0; i < W * 0.3; i++) for(let j = -i * 0.05; j <= i * 0.05; j++) if(bay(fx - i | 0, ky - kh - 5 + j | 0) > 0.55) ortu(b, fx - 5 - i, ky - kh - 5 + j, '!#ffe6a0', 0.25);
         const palmiye = (x, F, h, yon) => {
           const eg = 0.3 / h;
-          for(let i = 0; i < h; i++){ const q = x + Math.round(i * i * eg * yon); R(b, q, F - i, 4, 1, i % 4 === 0 ? '#6d4f34' : '#8a6a48'); R(b, q + 3, F - i, 1, 1, '#5a3f2a'); px(b, q, F - i, '#a48660'); }
+          for(let i = 0; i < h; i++){ const q = x + Math.round(i * i * eg * yon); R(b, q, F - i, 5, 1, i % 4 === 0 ? '#6d4f34' : '#8a6a48'); R(b, q + 4, F - i, 1, 1, '#5a3f2a'); px(b, q, F - i, '#a48660'); px(b, q + 1, F - i, i % 4 === 0 ? '#8a6a48' : '#a48660'); }
           const tx = x + Math.round(h * 0.3 * yon) + 2, ty = F - h, ol = h / 42;
-          [[-22, 11], [-16, 15], [-9, 16], [9, 16], [16, 15], [22, 11], [-14, 3], [14, 3]].forEach(q0 => { const q = [Math.round(q0[0] * ol), Math.round(q0[1] * ol)], n = Math.abs(q[0]); for(let i = 0; i <= n; i++){ const dy = Math.round((i / n) ** 2 * q[1]) - Math.round(Math.sin(i / n * 3.14) * 5), X = tx + Math.sign(q[0]) * i, t = 3 - Math.round(i / n * 2); R(b, X, ty + dy, 1, t + 1, '#256a3c'); R(b, X, ty + dy, 1, t, '#3f9a4e'); px(b, X, ty + dy, '#7cc864'); if(i % 3 === 0) R(b, X, ty + dy + t, 1, 2, '#2f7c44'); } });
-          daire(b, tx - 2, ty + 3, 2, '#5a3f2a'); daire(b, tx + 3, ty + 3, 2, '#6d4f34'); px(b, tx - 3, ty + 2, '#a48660');
+          [[-24, 9], [-22, 13], [-16, 16], [-10, 18], [-5, 19], [5, 19], [10, 18], [16, 16], [22, 13], [24, 9], [-18, 2], [-12, 5], [12, 5], [18, 2]].forEach(q0 => { const q = [Math.round(q0[0] * ol), Math.round(q0[1] * ol)], n = Math.abs(q[0]); for(let i = 0; i <= n; i++){ const dy = Math.round((i / n) ** 2 * q[1]) - Math.round(Math.sin(i / n * 3.14) * 5), X = tx + Math.sign(q[0]) * i, t = 4 - Math.round(i / n * 3); R(b, X, ty + dy, 1, t + 1, '#256a3c'); R(b, X, ty + dy, 1, t, '#3f9a4e'); px(b, X, ty + dy, '#7cc864'); if(i % 3 === 0) R(b, X, ty + dy + t, 1, 2, '#2f7c44'); } });
+          daire(b, tx, ty + 1, 4, '#256a3c'); daire(b, tx - 1, ty, 3, '#3f9a4e'); daire(b, tx - 3, ty + 4, 2, '#5a3f2a'); daire(b, tx + 2, ty + 4, 2, '#6d4f34'); daire(b, tx, ty + 6, 2, '#5a3f2a'); px(b, tx - 4, ty + 3, '#a48660'); px(b, tx + 1, ty + 3, '#a48660');
         };
         for(let i = 0; i < W / 3; i++){ const x = r() * W, y = H - 2 - r() * 10; if(x < W * 0.34 || x > W * 0.92){ const h = 2 + r() * 6; R(b, x, y - h, 1, h, r() < 0.5 ? '#6a9a50' : '#8ab860'); } }
         palmiye(yer(0.03), H - 8, Math.round(H * 0.42), 1); palmiye(yer(0.24), H - 4, Math.round(H * 0.25), -1);
