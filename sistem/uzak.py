@@ -108,7 +108,16 @@ def ac(calistir=subprocess.run, kok_yaz=_kokenleri_yaz):
         return {"ok": False, "mesaj": "Tailscale'e giriş yap, sonra yeniden dene."}
     cli = _cli()
     for dis, ic in KAPILAR.items():
-        r = _tailscale(cli, ["serve", "--bg", "--https=%d" % dis, "http://127.0.0.1:%d" % ic], calistir)
+        try:
+            r = _tailscale(cli, ["serve", "--bg", "--https=%d" % dis, "http://127.0.0.1:%d" % ic], calistir)
+        except subprocess.TimeoutExpired as e:
+            # Serve agda kapaliysa tailscale onay bekler, cikmaz; onay adresi ciktisindadir.
+            cikti = "".join(x.decode("utf-8", "replace") if isinstance(x, bytes) else (x or "")
+                            for x in (e.stdout, e.stderr))
+            m = re.search(r"https://login\.tailscale\.com/\S+", cikti)
+            return {"ok": False, "onay": m.group(0) if m else "",
+                    "mesaj": "Tailscale'de bu özellik kapalı. Şu sayfadan aç, sonra yeniden dene: %s" % m.group(0)
+                    if m else "Tailscale cevap vermedi; yeniden dene."}
         if r.returncode != 0:
             # Sik sebep: agda HTTPS kapali; Tailscale'in yonergesi aynen gosterilir.
             return {"ok": False, "mesaj": (r.stderr or r.stdout or "Tailscale kapıyı açamadı.").strip()[:400]}

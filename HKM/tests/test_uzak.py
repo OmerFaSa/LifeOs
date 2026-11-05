@@ -108,6 +108,21 @@ def run():
             eq(yazilan, [])
         test("kapi acilamazsa sebep soylenir, koken yazilmaz", basarisiz)
 
+        def onay_bekler():
+            ic, _ = _sahte()
+
+            def calistir(arg, **k):
+                if "--bg" in arg:
+                    raise subprocess.TimeoutExpired(arg, 30, output=b"To enable, visit:\n\n  https://login.tailscale.com/f/serve?node=abc\n", stderr=None)
+                return ic(arg, **k)
+            yazilan = []
+            r = uzak.ac(calistir, kok_yaz=yazilan.append)
+            no(r["ok"], "acilmadi")
+            eq(r["onay"], "https://login.tailscale.com/f/serve?node=abc")
+            ok(r["mesaj"].startswith("Tailscale'de"), "Turkce yonerge")
+            eq(yazilan, [])
+        test("serve kapaliysa takilmaz: onay adresi soylenir", onay_bekler)
+
         def jeton():
             with tempfile.TemporaryDirectory() as klasor:
                 yol = os.path.join(klasor, "config.json")
