@@ -138,11 +138,13 @@ def _zaman_asimi_mi(e):
         getattr(e, "reason", None), (TimeoutError, socket.timeout))
 
 
-def _sse_birlestir(satirlar, akis):
+def _sse_birlestir(satirlar, akis, yalniz_arac=False):
     """Akan cevap (OpenAI bicimi, «data: {...}» satirlari) -> tek cevap.
     Her metin parcasi `akis(parca)` ile disari verilir; sonda `akis(None)`.
+    `yalniz_arac`: arac secimi turu; arac cagrisi ilk jetonlarda gelir, metin
+    baslarsa okuma kesilir (model cevabin kalanini bosuna yazmaz).
     Doner: _istek'in dondurdugu bicim (choices, usage)."""
-    metin, usage, bitis = [], None, None
+    metin, usage, bitis, cagri = [], None, None, {}
     for ham in satirlar:
         s = (ham.decode("utf-8", "replace") if isinstance(ham, bytes) else str(ham)).strip()
         if not s.startswith("data:"):
@@ -157,8 +159,16 @@ def _sse_birlestir(satirlar, akis):
         if y.get("usage"):
             usage = y["usage"]
         for c in y.get("choices") or []:
+            # Arac secimi parca parca gelir: ad bir kez, arguman parcalar halinde.
+            for t in (c.get("delta") or {}).get("tool_calls") or []:
+                g = cagri.setdefault(t.get("index", len(cagri)), {"name": "", "arguments": ""})
+                f = t.get("function") or {}
+                g["name"] = g["name"] or f.get("name") or ""
+                g["arguments"] += f.get("arguments") or ""
             d = (c.get("delta") or {}).get("content")
             if d:
+                if yalniz_arac and d.strip() and not cagri:
+                    return {"choices": [{"message": {"content": ""}, "finish_reason": "stop"}], "usage": usage or {}}
                 metin.append(d)
                 try:
                     akis(d)
@@ -170,13 +180,15 @@ def _sse_birlestir(satirlar, akis):
         akis(None)
     except Exception:                           # noqa: BLE001
         pass
-    return {"choices": [{"message": {"content": "".join(metin)}, "finish_reason": bitis}],
-            "usage": usage or {}}
+    mesaj = {"content": "".join(metin)}
+    if cagri:
+        mesaj["tool_calls"] = [{"function": cagri[i]} for i in sorted(cagri)]
+    return {"choices": [{"message": mesaj, "finish_reason": bitis}], "usage": usage or {}}
 
 
 def _gemini_birlestir(satirlar, akis):
     """Gemini akisi («data: {candidates, usageMetadata}» satirlari) -> tek cevap."""
-    metin, usage, bitis = [], {}, None
+    metin, usage, bitis, cagri = [], {}, None, []
     for ham in satirlar:
         s = (ham.decode("utf-8", "replace") if isinstance(ham, bytes) else str(ham)).strip()
         if not s.startswith("data:"):
@@ -189,6 +201,8 @@ def _gemini_birlestir(satirlar, akis):
             usage = y["usageMetadata"]
         aday = (y.get("candidates") or [{}])[0]
         for p in ((aday.get("content") or {}).get("parts") or []):
+            if p.get("functionCall"):
+                cagri.append({"functionCall": p["functionCall"]})
             d = p.get("text")
             if d:
                 metin.append(d)
@@ -202,7 +216,7 @@ def _gemini_birlestir(satirlar, akis):
         akis(None)
     except Exception:                           # noqa: BLE001
         pass
-    return {"candidates": [{"content": {"parts": [{"text": "".join(metin)}]}, "finishReason": bitis}],
+    return {"candidates": [{"content": {"parts": [{"text": "".join(metin)}] + cagri}, "finishReason": bitis}],
             "usageMetadata": usage}
 
 
@@ -332,7 +346,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
     timeout = ayar.get("sure") or timeout
     tanim = models.PROVIDERS[provider]
     # ARAC KATALOGU (core/arac.py): model yalniz secer; cagrilar ek["cagrilar"]
-    # ile doner ve ust katmanda dogrulanir. Araclar varken cevap akmaz.
+    # ile doner ve ust katmanda dogrulanir. Cevap araclar varken de akar.
     araclar = ayar.get("araclar") or None
     if provider in ("openrouter", "openai", "yerel"):
         url, baslik, govde = _openai_bicimi(
@@ -368,7 +382,11 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
                     and govde["messages"][0].get("role") == "system":
                 govde["messages"][0]["content"] = [{"type": "text", "text": sistem,
                                                     "cache_control": {"type": "ephemeral"}}]
-        if callable(ayar.get("akis")) and not araclar:
+        if ayar.get("yalniz_arac"):
+            govde["stream"] = True
+            y = _akis_istek(url, baslik, govde, timeout, lambda p: None,
+                            lambda s, a: _sse_birlestir(s, a, yalniz_arac=True))
+        elif callable(ayar.get("akis")):
             # Akan cevap (King'de yazi akarak gelir); kullanim son parcada.
             govde["stream"] = True
             govde["stream_options"] = {"include_usage": True}
@@ -432,7 +450,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
         if araclar:
             govde["tools"] = arac.saglayici_araclari(provider, araclar)
         baslik_g = {"Content-Type": "application/json", "x-goog-api-key": anahtar or ""}
-        if callable(ayar.get("akis")) and not araclar:
+        if callable(ayar.get("akis")):
             # Akan cevap: streamGenerateContent (SSE); kullanim son parcada.
             y = _akis_istek(url.replace(":generateContent", ":streamGenerateContent?alt=sse"), baslik_g, govde,
                             timeout, ayar["akis"], _gemini_birlestir)
@@ -502,8 +520,18 @@ PARCA_RE = re.compile(r"(?<!\d),(?!\d)|\bama\b|\bancak\b|\bfakat\b",
                       re.IGNORECASE)
 
 
-def uydurma_sayilar(cevap, baglam):
+# Sayi KULLANICIYA baglanmis mi: «senin», iyelik («uykun», «netin») ya da ikinci
+# kisi fiil («calistin», «uyumussun»). «Pomodoro 25 dakika calisma» genel bilgidir.
+KISIYE_BAGLI = re.compile(r"\b(?:senin|sana|sende|uykun|netin|netlerin|kilon|skorun|ortalaman|nabz[ıi]n|kalorin|"
+                          r"proteinin|sorular[ıi]n|denemen|denemelerin|[çc]al[ıi][şs]man|oran[ıi]n)\b"
+                          r"|\w{2,}(?:d|t)[ıiuü]n\b|\w+m[ıiuü][sş]s[ıiuü]n\b", re.IGNORECASE)
+
+
+def uydurma_sayilar(cevap, baglam, genel=False):
     """Cevapta OLCUM gibi sunulan ama dayanagi olmayan sayilar.
+
+    `genel`: mesaj kullanicinin verisine degmiyor (sohbet.sistem_konusu); genel
+    bilgideki sayi serbesttir, yalniz kullaniciya baglanan sayi aranir.
 
     Uc kosul birden aranir:
 
@@ -527,8 +555,8 @@ def uydurma_sayilar(cevap, baglam):
         for parca in PARCA_RE.split(cumle):
             if ONERI_RE.search(parca):
                 oneri = True
-            if oneri or not OLCUM_RE.search(parca):
-                continue                # oneri kipi ya da olcum adi yok
+            if oneri or not OLCUM_RE.search(parca) or (genel and not KISIYE_BAGLI.search(parca)):
+                continue                # oneri kipi, olcum adi yok ya da genel bilgi
             for s in _sayilar(parca):
                 if s not in var and s not in out:
                     out.append(s)
@@ -541,7 +569,7 @@ def _belge(cevap):
     return (metin, None) if metin else (None, "Model boş cevap döndü.")
 
 
-def _temizle(cevap, baglam):
+def _temizle(cevap, baglam, genel=False):
     """(metin, dusurulen_sebep). Dusurulen cevap YUTULMAZ, soylenir."""
     metin = (cevap or "").strip()
     if not metin:
@@ -550,7 +578,7 @@ def _temizle(cevap, baglam):
     if suc:
         return None, ("Cevap buyurgan kip taşıdığı için düşürüldü (%s). "
                       "HKM'nin böyle bir yetkisi yok." % ", ".join(suc[:3]))
-    uydurma = uydurma_sayilar(metin, baglam)
+    uydurma = uydurma_sayilar(metin, baglam, genel=genel)
     if uydurma:
         return None, ("Cevapta dayanağı olmayan sayı(lar) geçtiği için "
                       "düşürüldü: %s. Ölçülmemiş bir sayı, ölçüm değildir."
@@ -621,7 +649,7 @@ def _saglayici_hatasi(e):
 # Uzunlugu sessizce kesmek, yarim bir cumleyi tam cevap gibi gostermekti.
 KISALT = ("Önceki cevabın uzunluk sınırına takıldı ve yarıda kesildi. "
           "Aynı şeyi DAHA KISA söyle: en fazla 3 cümle, madde listesi "
-          "kullanma.")
+          "kullanma. Yalnız yeni cevabı yaz; bu uyarıdan söz etme.")
 
 
 def _son_cumlede_kes(metin):
@@ -647,19 +675,22 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
             "Aynı şeyi tekrar etme. Ölçüm iddia etme; yalnızca sana "
             "verilen ölçümlere dayan. Önerdiğin süre ya da saat "
             "sayıları serbesttir, ama olmuş bitmiş bir ölçüm gibi "
-            "sunulamaz. Buyurgan kip kullanma.")
+            "sunulamaz. Buyurgan kip kullanma. Yalnız kullanıcının sorusuna "
+            "yeni cevabı yaz; bu uyarıdan, düzeltmeden ya da önceki cevabından "
+            "hiç söz etme.")
 
 
-def _genis(ayar, jeton, sure, akis=None, araclar=None):
+def _genis(ayar, jeton, sure, akis=None, araclar=None, yalniz_arac=False):
     """Basamak ayarini uzun cevap icin genisletir; daraltmaz. `akis`
-    verilmisse cevap akarak istenir (yalniz OpenAI bicimli saglayicilar).
-    `araclar` (core/arac.py katalogu) varsa cevap akmaz: cagri butun gelir."""
+    verilmisse cevap akarak istenir. `araclar`: core/arac.py katalogu."""
     if not jeton and not sure and not akis and not araclar:
         return ayar
     a = dict(ayar or {})
+    if yalniz_arac:
+        a["yalniz_arac"] = True
     if araclar:
         a["araclar"] = araclar
-    elif akis:
+    if akis:
         a["akis"] = akis
     if jeton:
         a["jeton"] = max(int(a.get("jeton") or EN_COK_JETON), int(jeton))
@@ -671,11 +702,13 @@ def _genis(ayar, jeton, sure, akis=None, araclar=None):
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
         gorseller=None, medya=None, seviye=None, jeton=None, sure=None, akis=None,
-        araclar=None, adim=0):
+        araclar=None, adim=0, yalniz_arac=False):
     """Bir kademe adina model cagirir — MERDIVENLE (core/motor.py).
 
     `araclar`: core/arac.py'nin temiz katalogu. Verilirse model bir arac
     secebilir; cevapta `cagrilar` (DOGRULANMAMIS ham secim) doner.
+    `yalniz_arac`: yalniz secim turu; arac secilmezse metin yazdirilmaz, cevap
+    bos ve «ok» doner (ust basamaga cikilmaz, cevabi sonraki tur yazar).
 
     Paket seciliyse basamaklar ucuzdan pahaliya denenir; bir basamak
     ZORLANIRSA (cevap dusuruldu, saglayici hatasi, kesildi, «[[YUKSELT]]»)
@@ -720,7 +753,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      sistem=sistem + (motor.YUKSELT_KURALI if ust_var else ""),
                      user=user, transport=transport, now=now, duzeltme=duzeltme,
                      denetim=denetim, veri=veri, gorseller=gorseller, medya=medya,
-                     ayar=_genis(b["ayar"], jeton, sure, akis, araclar), escalated=i > 0, not_ek=not_ek,
+                     ayar=_genis(b["ayar"], jeton, sure, akis, araclar, yalniz_arac), escalated=i > 0, not_ek=not_ek,
                      karar={"seviye": motor.kat(b), "neden": neden})
         r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
@@ -770,7 +803,9 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
     """Bir kademe adina model cagirir.
 
     `denetim`: «olcum» (varsayilan) kullaniciya konusan cevaptir: dayanaksiz
-    sayi ve buyurgan kip DUSURULUR. «belge» BAM'in urettigi belgedir
+    sayi ve buyurgan kip DUSURULUR. «genel» mesaj kullanicinin verisine
+    degmiyorsa: yalniz kullaniciya baglanan sayi aranir (uydurma_sayilar).
+    «belge» BAM'in urettigi belgedir
     (arastirma, soru seti): dunya hakkindaki sayilar ve «hesaplayiniz» gibi
     kalip serbesttir, ama belge HER ZAMAN «dogrulanmadi» etiketiyle
     saklanir — kullanicinin olcumu gibi sunulmaz (core/bam.py).
@@ -844,6 +879,13 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         if not izin["ok"]:
             return {"ok": False, "reason": "budget", "text": None,
                     "note": izin["note"]}
+        if a.get("provider") == "yerel":
+            # Az once kalkmadiysa baglanti denemesi 2 sn bekletmesin; defterde cagri yok.
+            from core import ollama
+            kalan = ollama.kapali_kalan()
+            if kalan:
+                return {"ok": False, "reason": "provider", "text": None,
+                        "note": "Model çağrısı başarısız: Ollama açılamadı; %d sn sonra yeniden denenecek." % kalan}
         with butce.ayir(en_kotu):
             return _gonder(sistem_metni, gecmis, istem_jeton)
 
@@ -856,12 +898,33 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         ek = {}
         gec = False
         t_cagri = time.perf_counter()
-        try:
-            cagir = transport if transport is not None else _cagir
+        ilk = [None]
+        tur_ayar = ayar
+        if callable(ayar.get("akis")):
+            # Ilk soz: modelin ilk parcasi ne zaman geldi (ai_olcum).
+            def olcen(p, asil=ayar["akis"]):
+                if p and ilk[0] is None:
+                    ilk[0] = time.perf_counter()
+                asil(p)
+            tur_ayar = dict(ayar, akis=olcen)
+
+        def gonder_bir():
             # Ayar (efor, cevap siniri) yalniz VARSA gecer: eski tasiyicilar
             # bu parametreyi bilmez.
-            sonuc = (cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis, ayar=ayar)
-                     if ayar else cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis))
+            return (cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis, ayar=tur_ayar)
+                    if tur_ayar else cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis))
+
+        try:
+            cagir = transport if transport is not None else _cagir
+            try:
+                sonuc = gonder_bir()
+            except urllib.error.URLError as e:
+                # Ollama kapali: bu makinedeyse bir kez acilir ve ayni istek yinelenir.
+                from core import ollama
+                if a.get("provider") == "yerel" and ollama.reddedildi_mi(e) and ollama.uyandir(cfg):
+                    sonuc = gonder_bir()
+                else:
+                    raise
             # Tasiyici kesilme isareti vermeyebilir: vermeyen icin «kesilmedi»
             # varsayilir, cunku bilinmeyeni «kesildi» saymak da uydurmaktir.
             if len(sonuc) == 5:
@@ -903,6 +966,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                      ok=(hata is None), escalated=escalated,
                      cached=bool((ek or {}).get("cached")), cached_tok=int((ek or {}).get("cached") or 0),
                      reason_tok=int((ek or {}).get("reasoning") or 0), ms=sure_ms,
+                     ilk_ms=int((ilk[0] - t_cagri) * 1000) if ilk[0] else None,
                      seviye=(karar or {}).get("seviye"), neden=(karar or {}).get("neden"),
                      note=(hata or ",".join(
                          n for n, var in (("tahmini-fiyat", tahmini),
@@ -929,6 +993,9 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
     r = _tur(sistem, mesajlar)
     if not r["ok"] and katalog and ARACSIZ_HATA.search(r.get("note") or ""):
         # Motor «bu model arac desteklemez» dedi: bir kez aracsiz (olagan sohbet).
+        if ayar.get("yalniz_arac"):
+            return {"ok": True, "text": "", "cagrilar": [], "model": a["model"], "provider": a["provider"],
+                    "in_tok": 0, "out_tok": 0, "usd": 0.0, "truncated": False}
         ayar.pop("araclar", None)
         katalog = None
         r = _tur(sistem, mesajlar)
@@ -949,6 +1016,9 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                     "price_estimated": r.get("price_estimated", False),
                     "tokens_estimated": r.get("tokens_estimated", False), "truncated": False,
                     "seconds": round((datetime.datetime.now() - t0).total_seconds(), 1)}
+    if ayar.get("yalniz_arac"):
+        return {"ok": True, "text": "", "cagrilar": [], "model": a["model"], "provider": a["provider"],
+                "in_tok": r["in_tok"], "out_tok": r["out_tok"], "usd": r["usd"], "truncated": False}
 
     # KESILME once ele alinir: yarim bir cevabi denetlemek, yarim bir
     # cumleyi «uydurma sayi» diye dusurmeye de yol acabilir.
@@ -960,7 +1030,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         elif r2["ok"]:
             r = r2                       # yine kesildi; asagida isaretlenir
 
-    temiz, dusme = (_temizle(r["raw"], baglam) if denetim != "belge"
+    temiz, dusme = (_temizle(r["raw"], baglam, genel=denetim == "genel") if denetim != "belge"
                     else _belge(r["raw"]))
 
     if dusme and duzeltme:
@@ -971,7 +1041,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                   mesajlar + [{"role": "assistant", "content": r["raw"]},
                               {"role": "user", "content": DUZELTME % dusme}])
         if r2["ok"]:
-            temiz2, dusme2 = (_temizle(r2["raw"], baglam) if denetim != "belge"
+            temiz2, dusme2 = (_temizle(r2["raw"], baglam, genel=denetim == "genel") if denetim != "belge"
                               else _belge(r2["raw"]))
             if not dusme2:
                 r, temiz, dusme = r2, temiz2, None

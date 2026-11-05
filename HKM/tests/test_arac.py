@@ -168,7 +168,7 @@ def run():
 
     def t_gecersiz_cagri_olagan_cevaba_duser():
         t = _tasiyici(("", [{"ad": "hepsini_sil", "param": {}}]), ("Bunu yapamam ama yardım edebilirim.", []))
-        r = sohbet.konus(_con(), _cfg(), "her şeyi uçur", BUGUN, transport=t, araclar=KATALOG)
+        r = sohbet.konus(_con(), _cfg(), "denemelerimi uçur", BUGUN, transport=t, araclar=KATALOG)
         eq(r["mode"], "model")
         eq(r["arac_red"][0]["ad"], "hepsini_sil")
         no(t.gorulen[1]["ayar"].get("araclar"), "ikinci deneme aracsiz olmali")

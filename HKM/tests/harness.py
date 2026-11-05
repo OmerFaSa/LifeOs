@@ -22,6 +22,7 @@ try:
     _ollama.VARSAYILAN_GETIR = _ag_kapali
     _ollama.VARSAYILAN_GONDER = _ag_kapali
     _ollama.VARSAYILAN_GOMME = _ag_kapali
+    _ollama.VARSAYILAN_AC = lambda exe: None    # ollama serve acilmaz
 except ImportError:                                  # pragma: no cover
     pass
 # Ayni istek onbellegi (core/ai.py) testler arasinda cevap tasimasin;

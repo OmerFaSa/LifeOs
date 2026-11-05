@@ -391,21 +391,69 @@
        sinüs «blop» değil: kısa bir dokunuş hışırtısı + cam gövde + hafif
        ağırlık; aç/kapa iki notalık tel (aç yükselir, kapa iner); hepsi
        kısık, ortak bir sıkıştırıcıdan ve kısa bir oda yankısından geçer. */
-    it('tık: hışırtı + ton katmanı, 60 ms\'den kısa; aç yükselir, kapa iner; «tamam» yankılı çan', () => {
+    /* Kullanıcı (2026-11-05): «sistem sesleri tema ile çok alakasız ve kötü».
+       Tema piksel: arayüz sesleri çip notaları (üçgen, kare, nabız), kuru
+       (oda yankısı yok), gürültüsüz, kısa; aç yükselir, kapa iner, onay
+       yükselen arpejle biter, uyarı aşağı iner. */
+    const ARAYUZ = ['tik', 'ac', 'kapa', 'sayfa', 'tamam', 'uyari'];
+    const CIP = ['triangle', 'square', 'nabiz'];
+    it('arayüz sesleri çip: yalnız üçgen, kare ya da nabız notası; kuru, kısa; aç yükselir, kapa iner; onay yükselir, uyarı iner', () => {
+      ARAYUZ.forEach(ad => {
+        S.SESLER[ad].forEach(k => {
+          expect(k.tur == null || k.tur === 'ton').toBe(true);
+          expect(CIP.indexOf(k.dalga) >= 0).toBe(true);
+          expect(!k.oda).toBe(true);
+        });
+        expect(Math.max.apply(null, S.SESLER[ad].map(k => k.t + k.d)) <= 0.6).toBe(true);
+      });
+      expect(Math.max.apply(null, S.SESLER.tik.map(k => k.t + k.d)) <= 0.06).toBe(true);
+      /* Ezgi yönü: en geç başlayan nota ile ilk ezgi notası (alttaki bas sayılmaz). */
+      const yon = ad => {
+        const l = S.SESLER[ad], son = l.reduce((a, k) => k.t >= a.t ? k : a, l[0]);
+        const ilk = l.filter(k => k !== son && k.f[0] > 300)[0] || l[0];
+        return son.f[0] - ilk.f[0];
+      };
+      expect(yon('ac')).toBeGreaterThan(0);
+      expect(yon('kapa') < 0).toBe(true);
+      expect(yon('tamam')).toBeGreaterThan(0);
+      expect(yon('uyari') < 0).toBe(true);
       const { Baglam, kayit } = sahteBaglam();
       return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
         S.tikAc(true);
-        expect(S.tik('tik')).toBe(true);
-        expect(kayit.gurultu.length).toBe(1);
-        expect(kayit.nota.length > 0).toBe(true);
-        expect(Math.max.apply(null, S.SESLER.tik.map(k => k.t + k.d)) <= 0.06).toBe(true);
-        const ton = ad => S.SESLER[ad].map(k => k.f[0]);
-        const ac = ton('ac'), kapa = ton('kapa');
-        expect(ac.length).toBe(2);
-        expect(ac[1]).toBeGreaterThan(ac[0]);
-        expect(kapa[0]).toBeGreaterThan(kapa[1]);
-        expect(S.SESLER.tamam.some(k => k.oda > 0 && k.d >= 0.4)).toBe(true);
+        ARAYUZ.forEach(ad => {
+          kayit.saat += 3; kayit.nota.length = 0; kayit.gurultu.length = 0;
+          expect(S.tik(ad, true)).toBe(true);
+          expect(kayit.gurultu.length).toBe(0);
+          expect(kayit.nota.length).toBe(S.SESLER[ad].length);
+        });
       });
+    });
+    it('nabız dalgası bağlamda bir kez kurulur; kuramayan bağlam kare çalar', () => {
+      const ad = ARAYUZ.find(a => S.SESLER[a].some(k => k.dalga === 'nabiz'));
+      if(!ad) return;
+      const nb = S.SESLER[ad].filter(k => k.dalga === 'nabiz').length;
+      const { Baglam, kayit } = sahteBaglam();
+      let kurulan = 0, takilan = 0;
+      function NabizliBaglam(){
+        Baglam.call(this);
+        const yeni = this.createOscillator;
+        this.createPeriodicWave = (re, im) => { kurulan++; expect(re.length).toBe(im.length); return { nabiz:true }; };
+        this.createOscillator = () => { const o = yeni(); o.setPeriodicWave = w => { if(w && w.nabiz) takilan++; }; return o; };
+      }
+      return ortamla({ AudioContext:NabizliBaglam, sentetik:true }, () => {
+        S.tikAc(true);
+        kayit.saat += 3;
+        expect(S.tik(ad, true)).toBe(true);
+        kayit.saat += 3;
+        expect(S.tik(ad, true)).toBe(true);
+        expect(kurulan).toBe(1);
+        expect(takilan).toBe(2 * nb);
+      }).then(() => ortamla({ AudioContext:Baglam, sentetik:true }, () => {
+        S.tikAc(true);
+        kayit.saat += 3; kayit.nota.length = 0;
+        expect(S.tik(ad, true)).toBe(true);
+        expect(kayit.nota.filter(n => n.type === 'square').length).toBe(nb);
+      }));
     });
 
     it('çıkış zinciri: bir sıkıştırıcı ve bir oda yankısı (bağlamda bir kez); aynı ses 40 ms içinde üst üste çalmaz', () => {
@@ -425,9 +473,11 @@
        tırmalıyor». Ölçüm: tepe −33…−42 dBFS (duyulmuyordu), Ponpon'un
        kıkırdamasının yarısı 2,5 kHz üstündeydi (testere dişi + 2,8 kHz
        ünlü). Şimdi: duyulur düzey, tizlik yok, testere dişi yok. */
-    it('duyulur ama yumuşak: katman kazancı 0.05–0.3; hiçbir ton ya da süzgeç 2,2 kHz üstüne çıkmaz; testere dişi yok', () => {
+    it('duyulur ama yumuşak: katman kazancı en çok 0.3; hiçbir ton ya da süzgeç 2,2 kHz üstüne çıkmaz; testere dişi yok, kare yalnız arayüzde', () => {
       Object.keys(S.SESLER).forEach(ad => {
-        expect(Math.max.apply(null, S.SESLER[ad].map(k => k.g)) >= 0.05).toBe(true);
+        /* Nabız ve kare, üçgenden çok daha güçlü duyulur: alt sınırı düşük. */
+        const keskin = S.SESLER[ad].some(k => k.dalga === 'nabiz' || k.dalga === 'square');
+        expect(Math.max.apply(null, S.SESLER[ad].map(k => k.g)) >= (keskin ? 0.03 : 0.05)).toBe(true);
         S.SESLER[ad].forEach(k => { expect(k.g > 0 && k.g <= 0.3).toBe(true); expect(k.t + k.d <= 1).toBe(true); });
       });
       const { Baglam, kayit } = sahteBaglam();
@@ -437,7 +487,8 @@
           kayit.saat += 2; kayit.nota.length = 0; kayit.filtre.length = 0;
           expect(S.tik(ad, true, { perde:1.25 })).toBe(true);
           kayit.nota.forEach(n => {
-            expect(n.type === 'sawtooth' || n.type === 'square').toBe(false);
+            expect(n.type === 'sawtooth').toBe(false);
+            if(ARAYUZ.indexOf(ad) < 0) expect(n.type === 'square').toBe(false);
             expect(Math.max(n.f0, n.f1 || 0) <= 2200).toBe(true);
           });
           /* 2026-10-28: gerçek kayıtların yolu ayrı ve 5,5 kHz (S.KAYIT_TAVAN): yalnız kayıt geçer, sentez 2,2 kHz altında kalır. */
@@ -453,26 +504,17 @@
        minik sesleri KABARCIK (perdesi yukarı kıvrılan çok kısa sinüs: suda
        «blup»), dokunuş ve adım KEÇE (alçak geçiren süzgeçten kısa gürültü).
        Hiçbir tonlu katman ani başlamaz (en az 4 ms yükseliş: tık yok). */
-    it('organik ve yumuşak: notalar tel, minik sesleri kabarcık, dokunuş keçe; ani başlayan ton yok', () => {
-      ['ac', 'kapa', 'tamam'].forEach(ad => S.SESLER[ad].forEach(k => expect(k.tur).toBe('tel')));
+    it('minikler organik: konuşma kabarcık, adım ve hırr keçe; ani başlayan ton yok', () => {
       ['gidik', 'bla'].forEach(ad => S.SESLER[ad].forEach(k => {
         expect(k.tur === 'ton' && (k.dalga || 'sine') === 'sine').toBe(true);
         expect(k.f[1] > k.f[0]).toBe(true);
         expect(k.d <= 0.1).toBe(true);
       }));
-      ['tik', 'adim', 'hirr', 'sayfa'].forEach(ad => expect(S.SESLER[ad].some(k => k.tur === 'kece')).toBe(true));
+      ['adim', 'hirr'].forEach(ad => expect(S.SESLER[ad].some(k => k.tur === 'kece')).toBe(true));
       Object.keys(S.SESLER).forEach(ad => S.SESLER[ad].forEach(k => {
         expect(k.tur === 'ses').toBe(false);
-        if(k.tur === 'ton' || k.tur === 'tel') expect((k.a || 0) >= 0.004).toBe(true);
+        if(k.tur == null || k.tur === 'ton' || k.tur === 'tel') expect((k.a || 0) >= 0.004).toBe(true);
       }));
-      const { Baglam, kayit } = sahteBaglam();
-      return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
-        S.tikAc(true);
-        kayit.saat += 3; kayit.nota.length = 0; kayit.gurultu.length = 0;
-        expect(S.tik('tamam', true)).toBe(true);
-        expect(kayit.gurultu.length).toBe(S.SESLER.tamam.length);
-        expect(kayit.nota.length).toBe(0);
-      });
     });
 
     it('çıkışta sıcak süzgeç: bütün sesler 2,2 kHz altında bir alçak geçirenden geçer', () => {
@@ -528,16 +570,17 @@
         d.innerHTML = '<button type="button" aria-pressed="false" id="tk-p">P</button><input type="checkbox" id="tk-c">';
         document.body.appendChild(d);
         try{
-          /* aç sesi iki tel: iki tampon kaynağı, ikincisi sonra başlar (perde sırası veride). */
-          kayit.gurultu.length = 0;
+          /* aç sesi çip notaları: ilk nota hemen, sonuncusu daha geç başlar (perde sırası veride). */
+          const n = S.SESLER.ac.length;
+          kayit.nota.length = 0;
           tikla(d.querySelector('#tk-p'));
-          expect(kayit.gurultu.length).toBe(2);
-          expect(kayit.gurultu[1].t).toBeGreaterThan(kayit.gurultu[0].t);
-          kayit.saat += 1; kayit.gurultu.length = 0;
+          expect(kayit.nota.length).toBe(n);
+          expect(kayit.nota[n - 1].t).toBeGreaterThan(kayit.nota[0].t);
+          kayit.saat += 1; kayit.nota.length = 0;
           const c = d.querySelector('#tk-c');
           c.checked = true;
           c.dispatchEvent(new Event('change', { bubbles:true }));
-          expect(kayit.gurultu.length).toBe(2);
+          expect(kayit.nota.length).toBe(S.SESLER.kapa.length);
         }finally{ d.remove(); }
       });
     });

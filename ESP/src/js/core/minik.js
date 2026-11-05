@@ -496,7 +496,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* --- DOM --- */
 
-  const durum = { elle:new Set(), havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
+  const durum = { elle:new Set(), havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{} };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -975,10 +975,7 @@ window.LIFEOS.MINIK = (function(){
   function tazele(){
     durum.bekle = 0;
     if(!durum.kat) return;
-    /* Sayfa yeniden çizildi ya da kaydı: imleç yerinde, altındaki kart değişmiş olabilir. */
-    if(imlec && (!hedef || !hedef.isConnected || durum.isikTazele)){ hedef = null; elIsigi(); }
-    durum.isikTazele = false;
-    if(kapaliMi()){ durum.kat.hidden = true; return; }
+    if(kapaliMi()){ if(!durum.kat.hidden) durum.kat.hidden = true; return; }   // aynı değeri yazmak da stil geçersizler
     durum.kat.hidden = false;
     durum.zeminler = olcum();
     durum.minikler.forEach(mk => {
@@ -1095,50 +1092,11 @@ window.LIFEOS.MINIK = (function(){
     clearTimeout(ikinci); ikinci = setTimeout(tazele, 700);
   }
 
-  /* Gözler fareyi izler; imlecin altındaki en dış cam kartta ışık imleci
-     takip eder (cam.css «EL IŞIĞI»). İkisi de karede en çok bir kez.
-     Işık imlece gecikmeyle yetişir (her karede yolun %22'si: suyun
-     altındaki ışık gibi süzülür); miniğin üstündeyken altındaki kartta
-     kalır; kart yeniden çizilince (tıklama, kayıt) aynı yerdeki yeni
-     karta sönmeden geçer. Ayrılınca --mx/--my kalır: ışık olduğu yerde söner. */
-  let imlec = null, kare = 0, hedef = null, isikli = null, isikKare = 0;
-  const isikYer = { x:0, y:0, hx:0, hy:0 };
-  function isikKarti(){
-    let el = hedef;
-    if(imlec && (!el || !el.isConnected)) el = hedef = document.elementFromPoint(imlec.x, imlec.y);
-    const m = el && el.closest && el.closest('.minik');
-    if(m){ const mk = durum.minikler.find(o => o.el === m); return mk && mk.z && mk.z.el && mk.z.el.isConnected ? mk.z.el : null; }
-    let k = el && el.closest ? el.closest(KART) : null;
-    while(k && k.parentElement && k.parentElement.closest(KART)) k = k.parentElement.closest(KART);
-    return k;
-  }
-  function elIsigi(){
-    const k = imlec ? isikKarti() : null;
-    const kopan = isikli && !isikli.isConnected;
-    if(isikli && isikli !== k) isikli.classList.remove('isikli', 'isik-bas');
-    if(!k){ isikli = null; return; }
-    const r = k.getBoundingClientRect();
-    isikYer.hx = imlec.x - r.left; isikYer.hy = imlec.y - r.top;
-    if(isikli !== k){
-      if(!kopan){ isikYer.x = isikYer.hx; isikYer.y = isikYer.hy; }
-      else k.classList.add('isik-hemen');
-      k.classList.add('isikli');
-      isikli = k;
-    }
-    if(!isikKare) isikKare = requestAnimationFrame(isikAdim);
-  }
-  function isikAdim(){
-    isikKare = 0;
-    if(!isikli) return;
-    isikli.classList.remove('isik-hemen');
-    isikYer.x += (isikYer.hx - isikYer.x) * .22; isikYer.y += (isikYer.hy - isikYer.y) * .22;
-    isikli.style.setProperty('--mx', isikYer.x.toFixed(1) + 'px');
-    isikli.style.setProperty('--my', isikYer.y.toFixed(1) + 'px');
-    if(Math.abs(isikYer.hx - isikYer.x) + Math.abs(isikYer.hy - isikYer.y) > .6) isikKare = requestAnimationFrame(isikAdim);
-  }
-  /* Basınca ışık parmağın altında toplanır; bırakınca yayılır. */
-  function bas(e){ if(isikli && isikli.contains(e.target)) isikli.classList.add('isik-bas'); }
-  function birak(){ if(isikli) isikli.classList.remove('isik-bas'); }
+  /* Gözler fareyi izler; karede en çok bir kez. El ışığı (kartta imleci
+     izleyen parıltı) cam temayla birlikte kalktı: CSS'i yoktu ama her karede
+     kartın --mx/--my'sini yazıp ~1500 alt öğenin stilini yeniden hesaplatıyordu
+     (kaydırmada kare başı 11-16 ms, 2026-11-05 ölçümü). */
+  let imlec = null, kare = 0;
   /* Ortam ışığı (kullanıcı, 2026-10-28: «ışık fiziğini geliştir»): zeminde
      imleci yavaşça izleyen çok yumuşak bir ışık; yalnız transform (cam.css
      «ORTAM IŞIĞI»), geçişi CSS yapar. */
@@ -1148,7 +1106,7 @@ window.LIFEOS.MINIK = (function(){
   }
   function gozler(){
     kare = 0;
-    elIsigi();
+    if(durum.kat && durum.kat.hidden) return;   // minikler kapalı: ölçecek göz yok
     ortamIsigi();
     durum.minikler.forEach(mk => {
       if(mk.el.hidden || mk.el.classList.contains('is-uyuyor')){ mk.el.classList.remove('is-takip'); return; }
@@ -1161,7 +1119,6 @@ window.LIFEOS.MINIK = (function(){
   }
   function fare(e){
     imlec = { x:e.clientX, y:e.clientY };
-    hedef = e.target;
     if(!kare) kare = requestAnimationFrame(gozler);
   }
 
@@ -1239,12 +1196,9 @@ window.LIFEOS.MINIK = (function(){
         && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();
     }, 1000);
     window.addEventListener('resize', iste);
-    window.addEventListener('scroll', () => { durum.isikTazele = true; iste(); }, { passive:true });
-    document.addEventListener('pointerdown', bas, true);
+    window.addEventListener('scroll', iste, { passive:true });
     /* Sekme gizliyken minikler durur: arka planda kare üretmesinler. */
     document.addEventListener('visibilitychange', () => { if(durum.kat) durum.kat.classList.toggle('is-durgun', document.hidden); });
-    document.addEventListener('pointerup', birak, true);
-    document.addEventListener('pointercancel', birak, true);
     document.addEventListener('click', sevin, true);
     document.addEventListener('pointermove', fare, { passive:true });
     window.LIFEOS.PARCA.tepki({ id:'minik.radyo', olay:'ses', ad:'Minikler radyoya uyar', yap(d){ radyoUygula(d); } });

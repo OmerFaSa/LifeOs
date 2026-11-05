@@ -6,8 +6,9 @@
    ==================================================================
 
    Kullanıcı (2026-10-28): «sesleri … zirveye taşı»; önceki turlarda
-   «elektronik ses veriyor». Arayüz sesleri ve adım gerçek CC0 kayıttır;
-   kayıt yoksa ya da çözülemezse sentez çalar (ses bozulmaz). */
+   «elektronik ses veriyor». 2026-11-05 («sistem sesleri tema ile çok
+   alakasız»): arayüz sesleri piksel temaya uyan çip sentezi oldu; yalnız
+   minik adımı CC0 kayıttır. Kayıt çözülemezse sentez çalar. */
 (function(){
   const NS = window.R || window.SP || window.ESP;
   const { describe, it, expect } = NS.Test;
@@ -82,8 +83,8 @@
   });
 
   describe('Ses — kayıtlar', () => {
-    const TURLER = ['tik', 'ac', 'kapa', 'tamam', 'sayfa', 'adim'];
-    it('altı kayıt var ve hepsi gerçek WAV (RIFF … WAVE, 22 050 Hz mono)', () => {
+    const TURLER = ['adim'];
+    it('tek kayıt (adım) var ve gerçek WAV (RIFF … WAVE, 22 050 Hz mono)', () => {
       const K = window.LIFEOS.SES_KAYIT;
       expect(Object.keys(K)).toEqual(TURLER);
       TURLER.forEach(t => {
@@ -95,12 +96,12 @@
         expect(v.getUint32(24, true)).toBe(22050);
       });
     });
-    it('ses.js kayıtla çalan türleri bilir; gıdık, hırr ve mırıltı sentezde kalır', () => {
+    it('ses.js kayıtla çalan türleri bilir; arayüz sesleri ve minik konuşması sentezde kalır', () => {
       const S = window.LIFEOS.SES;
       expect(S.KAYITLI).toEqual(TURLER);
-      ['gidik', 'hirr', 'bla'].forEach(t => expect(S.KAYITLI.indexOf(t) < 0).toBe(true));
+      ['tik', 'ac', 'kapa', 'tamam', 'sayfa', 'uyari', 'gidik', 'hirr', 'bla'].forEach(t => expect(S.KAYITLI.indexOf(t) < 0).toBe(true));
     });
-    /* Kayıt çözüldüyse dokunuş kayıttan çalar (sentez notası açılmaz);
+    /* Kayıt çözüldüyse adım kayıttan çalar (sentez notası açılmaz);
        çözülmemişse (ilk ses, sahte bağlam) sentez çalar. */
     it('çözülen kayıt sentezin yerine çalar, aynı zincirden geçer', () => {
       const S = window.LIFEOS.SES, olay = { kaynak:[], nota:0 };
@@ -123,7 +124,7 @@
       S._sifirla();
       try{
         S.tikAc(true);
-        expect(S.tik('tik')).toBe(true);
+        expect(S.tik('adim')).toBe(true);
         const kayitli = olay.kaynak.filter(b => b.buffer && b.buffer.kayit);
         expect(kayitli.length).toBe(1);
         expect(olay.nota).toBe(0);

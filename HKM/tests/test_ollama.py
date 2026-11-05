@@ -136,7 +136,7 @@ def run():
         ok(settings.validate(y)[0], settings.validate(y))
 
     def t_ayar():
-        eq(settings.read({})["ollama"], {"kendiligi": True, "sicak": True})
+        eq(settings.read({})["ollama"], {"kendiligi": True, "sicak": True, "baslat": True})
         ok(settings.validate({"ollama": {"kendiligi": False}})[0])
         no(settings.validate({"ollama": {"kendiligi": "evet"}})[0], "bool olmayan")
         no(settings.validate({"ollama": {"model": "x"}})[0], "bilinmeyen alan")
