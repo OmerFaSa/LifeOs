@@ -185,6 +185,15 @@ jobs:
       - name: Telefon kapıları yalnız bilinçli kurulumla ve https ile açılır
         run: python3 tools/telefon_test.py
 
+      # YENI BILGISAYARA TASIMA (2026-11-05). Paket sifresiz acilmaz, degismis dosya
+      # acilmaz, var olan silinmez, listede olmayan yola yazilmaz.
+      - name: Taşıma paketi şifreli ve üstüne yazmaz
+        run: python3 tools/tasi_test.py
+
+      # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
+      - name: Web paketi üreticisi
+        run: python3 uygulama/ios/web_paket_test.py
+
       # KENDİ ARKA PLANIN (2026-10-29). Kullanıcının fotoğrafı/videosu PC'de
       # durur; yalnız bu bilgisayardan okunur ve yazılır, tür içerikle uyuşmalı.
       - name: Arka plan dosyası yalnız bu bilgisayardan ve doğru türle

@@ -35,6 +35,15 @@ uygulama/ios/
   güvenli kökendir: kamera ve konum burada çalışır.
 - **Ortak görsel tek kopya.** `img/seviye` ve `img/marka` üç modülde aynıdır;
   uygulamada bir kez durur (~110 MB yerine ~320 MB olurdu).
+- **Web kodu bilgisayarsız güncellenir.** Uygulama açılışta ve öne gelişte
+  `web-son` sürümüne bakar (`LifeOS/WebGuncelleme.swift`, paket `web_paket.py`).
+  Yalnız uygulamanın içindekinden farklı dosyalar iner, her biri özetle doğrulanır,
+  hepsi inince tek yazımla geçilir; yeni kod sonraki açılışta ya da modül
+  değişince görünür. Paket yalnız testlerden geçen derlemeden yayımlanır. Yeni
+  sürüm iki açılışta ayağa kalkmazsa uygulama içindeki sürüme döner ve o sürümü
+  atlar. Yalnız kod iner; kayıtlara dokunulmaz, hiçbir kayıt gönderilmez.
+  **Swift değişirse** yine AltStore gerekir; sayfa yeni bir köprü istiyorsa
+  `project.yml › LifeOSWebUyum` artırılır, eski kabuk o paketi almaz.
 - **Veri telefonda.** Uygulamanın verisi bilgisayardakinden ayrıdır; taşımak
   için modüllerin «Yedek indir / Yedek yükle» düğmeleri (indirme paylaş
   menüsüyle Dosyalar'a kaydedilir). HKM telefonda yoktur; modüller onsuz
@@ -55,6 +64,36 @@ uygulama/ios/
 | 7 | yazıldı (2026-10-09) | **Bildirimdeki düğmeler:** SPİ hatırlatmasında «Aldım / İçtim / Yaptım / Ölçtüm», ESP hatırlatıcısında «Yapıldı», ikisinde de «15 dk ertele». Uygulamayı açmadan basılır; işaret (kilit açık olmalı) telefonda sıraya girer, kabuk hiçbir kayda yazmaz. Modül açılınca sırayı alır, kendi koduyla ve basıldığı anla yazar, ancak yazdıktan sonra sıradan siler (işaret kaybolmaz). Hatırlatma silinmişse ya da zaten yapılmışsa işaret uydurulmaz. «İçtim» bir işarettir, su miktarı yazmaz. Ertelenen bildirim, iş işaretlenince kalkar. |
 | 8 | yazıldı (2026-10-09) | **Kurulu bildirimler ve sessiz saat:** AYS (Ofis ayarları › Telefon bildirimi), SPİ (hatırlatma penceresi) ve ESP'de (Profil) «Kurulu bildirimler» bu modülün telefonda bekleyen bildirimlerini saatiyle listeler. «Bunu sil» o tek bildirimi siler ve modül yeniden kurduğunda da kurmaz (zamanı geçene dek, bu cihazda); «Hepsini sil» şu an kurulu olanları siler, yeni günlerinki yine kurulur; «Geri al» silineni geri kurar. Sessiz saat ve tür ayarı artık ESP'de ve uygulamadaki AYS'de de var; değişince kurulu bildirimler hemen yeniden kurulur. |
 | — | yapılmadı (2026-10-09) | **Apple Sağlık'ı uygulamanın kendisi okumaz:** HealthKit bir yetki (entitlement) ister; ücretsiz Apple kimliğiyle AltStore'un bu yetkiyi verdiği doğrulanamadı ve yetki tutmazsa AltStore kurmayı reddeder (güncelleme yolu kırılır). Yerine Hesap › Kısayollar › «Apple Sağlık’tan her sabah» tarifi: Kısayollar otomasyonu Sağlık örneğini okur, gelen kutusuna yollar, SPİ Onaylar'a bırakır. |
+
+## Yeni bilgisayar
+
+Eski bilgisayarda (LifeOS kapalıyken), şifreli tek dosya masaüstüne çıkar:
+
+```powershell
+python sistem/tasi.py --paket
+```
+
+Yeni bilgisayarda PowerShell'e yapıştır:
+
+```powershell
+irm https://raw.githubusercontent.com/OmerFaSa/LifeOs/main/sistem/kur.ps1 | iex
+```
+
+Python, Git, depo, masaüstü uygulaması ve kısayol kurulur; dosya masaüstünde,
+İndirilenler'de ya da USB'de ise açılsın mı diye sorar. Pakette hesap deposu, kök
+sertifika, HKM verisi ve ayarı (kasadaki API anahtarları dahil), arka plan, müzik
+ve uygulama depoları vardır; önbellek ve oturum çerezi yoktur (yeniden girilir).
+Var olan hiçbir dosya silinmez: `.once-<tarih>` adıyla kenara alınır. Kök sertifika
+taşındığı için telefon ve tablete sertifika yeniden kurulmaz; bilgisayarın adresi
+değiştiyse yalnız yeni kodla bağlanır.
+
+## Yeni cihaz (telefon, tablet)
+
+Bilgisayarda Hesap › Cihazlar › Yeni cihaz bağla: QR çıkar (ev ağı kapalıysa aynı
+sayfadan açılır). Cihazın kamerasıyla okut; sertifikayı indirip kurunca cihaz
+kendiliğinden hesabına bağlanır. iPhone'da «LifeOS uygulamasında aç» adresi ve kodu
+uygulamaya taşır. Adres değişirse sunucu sertifikası kendiliğinden yenilenir;
+kök aynı kaldığı için cihazda bir şey yapılmaz.
 
 ## Kurulum (Windows + iPhone, ücretsiz — AltStore)
 
@@ -91,6 +130,13 @@ silinmez**, yenileyince geri gelir. Aynı anda en çok 3 böyle uygulama.
 Yıllık 99 $'lık geliştirici hesabıyla TestFlight'a geçilebilir (90 gün,
 yenileme derdi yok).
 
+**7 günlük yenilemede de bilgisayar istemiyorsan: SideStore (denenmedi).** AltStore'un
+çatalıdır; bilgisayar yalnız ilk kurulumda gerekir, sonra yenileme telefonda yerel
+bir VPN üzerinden yapılır (LocalDevVPN aç, SideStore › Refresh All). Eşleştirme dosyası
+iOS güncellemesi ya da sıfırlama sonrası bozulabilir; o zaman bilgisayar yine gerekir.
+Apple kimliğini girdiğin için ikinci bir kimlik kullan. Rehber: docs.sidestore.io.
+Web kodu güncellemeleri bu seçimden bağımsızdır, ikisinde de bilgisayarsız gelir.
+
 ## Denetim
 
 `.github/workflows/ios.yml` her `uygulama/ios/` ya da `dist/` değişikliğinde:
@@ -99,4 +145,6 @@ dosya, yöntem), `KabukTests` (üç modül uygulamada açılır, `isSecureContex
 konum arayüzü), `BildirimKoprusuTests` (kapıdan modül, yalnız kendi bildirimi,
 üst sınır, geçmiş kurulmaz; gerçek SPİ sayfasından istek) ve `KonumKoprusuTests` (arka planda birikme, diskteki tampon;
 gerçek SPİ sayfasında web süreci ölünce kaydın sürmesi, uygulama kapanınca
-noktaların kayda eklenmesi). Telefonda deneme kullanıcıdadır: kurulum, kamera izni, konum.
+noktaların kayda eklenmesi), `WebGuncellemeTests` (yalnız farklı dosya iner, bozuk dosya
+sürümü değiştirmez, uyumsuz paket alınmaz, bozuk sürüm geri alınır). Telefonda deneme
+kullanıcıdadır: kurulum, kamera izni, konum, web güncellemesinin gerçek ağda inmesi.
