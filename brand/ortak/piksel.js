@@ -190,7 +190,7 @@ window.LIFEOS = window.LIFEOS || {};
     kokler.forEach(kok => kok.querySelectorAll('svg:not([data-pxc])').forEach(cizimCevir));
   }
   function simgeIzle(){
-    if(//tests//.test(location.pathname)) return;
+    if(/\/tests\//.test(location.pathname)) return;
     simgeleriTara(document.body);
     let bekleyen = false, kuyruk = [];
     new MutationObserver(l => {
@@ -277,7 +277,7 @@ window.LIFEOS = window.LIFEOS || {};
     return manzaraOnbellek;
   }
   function manzaraOnceden(){
-    if(!L.PIKSEL_DOGA || hareketsiz() || //tests//.test(location.pathname)) return;
+    if(!L.PIKSEL_DOGA || hareketsiz() || /\/tests\//.test(location.pathname)) return;
     const yap = () => { if(document.visibilityState !== 'hidden') manzaraHazir(Math.ceil(window.innerWidth / MANZARA_OLCEK), Math.ceil(window.innerHeight / MANZARA_OLCEK)); };
     if(window.requestIdleCallback) requestIdleCallback(yap, { timeout:8000 }); else setTimeout(yap, 4000);
   }
@@ -332,7 +332,7 @@ window.LIFEOS = window.LIFEOS || {};
     setTimeout(() => { if(k.getAttribute('data-bos') === 'don') k.removeAttribute('data-bos'); }, 420);
   }
   function bosIzle(){
-    if(//tests//.test(location.pathname)) return;
+    if(/\/tests\//.test(location.pathname)) return;
     const k = document.documentElement;
     const uyan = () => { bos.son = Date.now(); if(!bos.el) bosKapa(); };
     ['pointermove', 'wheel', 'touchstart'].forEach(o => window.addEventListener(o, uyan, { passive:true }));
