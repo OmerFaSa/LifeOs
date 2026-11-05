@@ -91,10 +91,26 @@ değiştiyse yalnız yeni kodla bağlanır.
 ## Yeni cihaz (telefon, tablet)
 
 Bilgisayarda Hesap › Cihazlar › Yeni cihaz bağla: QR çıkar (ev ağı kapalıysa aynı
-sayfadan açılır). Cihazın kamerasıyla okut; sertifikayı indirip kurunca cihaz
-kendiliğinden hesabına bağlanır. iPhone'da «LifeOS uygulamasında aç» adresi ve kodu
-uygulamaya taşır. Adres değişirse sunucu sertifikası kendiliğinden yenilenir;
-kök aynı kaldığı için cihazda bir şey yapılmaz.
+sayfadan açılır). Cihazın kamerasıyla okut; açılan kurulum sayfası yalnız o cihazın
+adımlarını gösterir (`sistem/sunucu.py` `telefon_kurulum_html`):
+
+- **iPhone/iPad (3 adım):** «LifeOS profilini indir» › Ayarlar › İndirilen Profil ›
+  Yükle › Genel › Hakkında › Sertifika Güven Ayarları › «LifeOS Yerel Kök». Tek profil
+  (`/lifeos.mobileconfig`, `telefon.profil`) kök sertifikayı ve AYS · SPİ · ESP ana
+  ekran simgelerini birlikte kurar; «Ana Ekrana Ekle» üç kez yapılmaz. Güven anahtarını
+  Apple elle açtırır (elle kurulan her kök için).
+- **Android telefon/tablet (3 adım):** Sertifikayı indir › Ayarlar araması «CA
+  sertifikası» › yükle › her modül Chrome ⋮ › Ana ekrana ekle.
+
+Sertifika kurulunca cihaz kendiliğinden hesabına bağlanır. iPhone'da «LifeOS
+uygulamasında aç» adresi ve kodu uygulamaya taşır. Adres değişirse sunucu sertifikası
+kendiliğinden yenilenir; kök aynı kaldığı için cihazda bir şey yapılmaz.
+
+**Güncelleme: her cihazda 0 dokunuş.** Giriş sayfasındaki güncelleme kutusunda
+«Kendiliğinden güncelle» açıksa PC her gece 04:00'te (kapalıysa açılınca) kendini
+günceller (Sistem planlaması › Güncelleme, «kur» açık). Tablet ve tarayıcıdaki telefon
+kodu PC'den alır; modüllerin `sw.js`'i yeni sürümü sonraki açılışta devralır.
+iPhone uygulaması web kodunu ayrıca kendisi indirir (aşağıda).
 
 ## Kurulum (Windows + iPhone, ücretsiz — AltStore)
 

@@ -54,8 +54,10 @@ irm https://raw.githubusercontent.com/OmerFaSa/LifeOs/main/sistem/kur.ps1 | iex
 kendisi kapatıp açar, masaüstüne şifreli tek dosya bırakır. Kurulum o dosyayı
 masaüstünde, İndirilenler'de ya da USB'de bulursa sorar.
 
-**Telefon ve tablet:** Hesap › Cihazlar › Yeni cihaz bağla'daki QR'ı okut;
-sertifika kurulunca hesabına kendiliğinden bağlanır. iPhone uygulaması yeni web
+**Telefon ve tablet:** Hesap › Cihazlar › Yeni cihaz bağla'daki QR'ı okut; sayfa
+yalnız o cihazın üç adımını gösterir (iPhone/iPad'de tek profil simgeleri de kurar),
+sertifika kurulunca hesabına kendiliğinden bağlanır. Giriş sayfasında «Kendiliğinden
+güncelle» açıksa PC her gece güncellenir, tablet ve telefon onunla gelir. iPhone uygulaması yeni web
 kodunu bilgisayarsız kendisi indirir; LifeOS açılınca AltServer'ı da açar, haftalık
 imza yenilemesi evde kendiliğinden olur. Ayrıntı: [belgeler/UYGULAMA.md](belgeler/UYGULAMA.md).
 

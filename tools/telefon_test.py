@@ -235,6 +235,22 @@ with tempfile.TemporaryDirectory() as gecici:
     kaynak = yukle("kaynak", KOK / "uygulama" / "ios" / "kaynak.py").KAYNAK_ADRESI
     dogru("kurulum sayfasi AltStore kaynagini tek dokunusla ekler (CI'in yayimladigi adres)",
           'href="altstore://source?url=%s"' % kaynak in sayfa)
+    dogru("kurulum sayfasi cihaza gore tek yol gosterir (iPhone/iPad profili, Android sertifikasi)",
+          'data-cihaz="ios"' in sayfa and 'data-cihaz="android"' in sayfa and 'href="/lifeos.mobileconfig"' in sayfa)
+    durum, tur, govde = http_al(kp, yol="/lifeos.mobileconfig")
+    dogru("kurulum: iPhone profili iner", durum == 200 and tur == "application/x-apple-aspen-config", (durum, tur))
+    import plistlib
+    pr = plistlib.loads(govde)
+    yuk = {x["PayloadType"]: x for x in pr["PayloadContent"]}
+    klipler = [x for x in pr["PayloadContent"] if x["PayloadType"] == "com.apple.webClip.managed"]
+    a = telefon.adresler(telefon.ad(), telefon.ipler())
+    dogru("profil: kok sertifika ayni DER, ozel anahtar yok",
+          yuk["com.apple.security.root"]["PayloadContent"] == der and b"PRIVATE KEY" not in govde)
+    dogru("profil: uc modul ana ekranda, kurulum sayfasinin ilk adresiyle (veri ayni kokende)",
+          [(k["Label"], k["URL"]) for k in klipler] == [("AYS", a["AYS"][0]), ("SPİ", a["SPI"][0]), ("ESP", a["ESP"][0])]
+          and all(k["Icon"][:8] == b"\x89PNG\r\n\x1a\n" for k in klipler), [(k["Label"], k["URL"]) for k in klipler])
+    dogru("profil: yeniden kurulunca eskisinin yerine gecer (kimlik sabit)",
+          plistlib.loads(telefon.profil(k, telefon.ad(), telefon.ipler()))["PayloadUUID"] == pr["PayloadUUID"])
     dogru("kurulum sayfasi tek QR ile baglar","lifeos://bagla" in sayfa and ":%d/" % telefon.PORTLAR["SPI"] in sayfa)
     betik = sayfa[sayfa.index("<script>") + 8:sayfa.index("</script>")]
     with open(os.path.join(gecici, "kurulum.js"), "w", encoding="utf-8") as f:
