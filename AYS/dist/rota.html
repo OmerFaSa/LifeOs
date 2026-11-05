@@ -49709,7 +49709,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'8eef58c2', at:'2026-11-05 09:53', dirty:false };
+R.BUILD = { id:'8a1d39a0', at:'2026-11-05 10:23', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -73719,6 +73719,141 @@ window.LIFEOS.OGRET = (function(){
   return { ARALIK, TURLER, bul, secenek, karistir, sayi, teshis, sokratik, depo, tasi, isle, vade, ozet, benzer, cevap, araclar, gunEkle };
 })();
 
+/* ==== js/core/usta.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/usta.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* USTALIK ÇEKİRDEĞİ — bir becerinin KALICI olduğunu nasıl biliriz? (AYS, SPİ, ESP)
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/usta.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Testi `usta.test.js`.
+   ==================================================================
+
+   Kullanıcı (2026-11-05): «kullanıcıyı o dallarda en profesyonel ve en hızlı
+   şekilde usta bir hale getirmenin altyapısını kur». Çekirdek tek soruya bakar:
+   beceri, araya zaman girdikten sonra ipucusuz da tutuyor mu? Yeni bir ölçüm
+   türü yok; modül kendi kaydını kanıta çevirip verir. Kelime, deneme konusu,
+   temiz tempo ya da koşu hedefi aynı biçime iner.
+
+   Kanıt: { g:'YYYY-AA-GG', isabet:bool, guven?:'emin'|'kararsiz'|'tahmin',
+            ipucu?:bool, karisik?:bool }
+
+   Dayanak: geri getirme ve aralıklı pratik en güçlü iki teknik (Dunlosky 2013);
+   karışık sınama aktarımı artırır (Rohrer 2020); emin olup yanılmak en kolay
+   düzelen ama geri dönebilen hatadır (Butterfield-Metcalfe 2001, Butler 2011).
+
+   Sözler:
+   1. SAF KURAL. Aynı girdi aynı çıktı; model yok, depo yok, saat yok (AGENTS §1.1).
+   2. EKSİK SIFIR DEĞİL. Kanıtsız beceri «veri yok»tur, «öğreniyor» bile değildir;
+      güveni işaretlenmemiş cevap isabet oranına girmez (AGENTS §1.2).
+   3. ESİKLER SİSTEM AYARIDIR. ARA (1/7/21/60 gün) araştırmadan alınmış bir sayı
+      değil, bu sistemin seçimidir; öyle sunulur.
+   4. YARGI KAYDA, KİŞİYE DEĞİL. «Sağlam» bu becerinin kaydı için söylenir; kişi
+      için yetenek yargısı ya da sertifika üretilmez (AGENTS §1.5). Bu yüzden
+      son aşamanın adı «usta» değildir.
+   5. XP'YE BAKMAZ, XP VERMEZ (AGENTS §1.6). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.usta.ogreniyor':'Öğreniyor',
+  'ortak.usta.tutuyor':'Tutuyor',
+  'ortak.usta.kalici':'Kalıcı',
+  'ortak.usta.saglam':'Sağlam',
+  'ortak.usta.veri-yok':'Veri yok',
+});
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.USTA = (function(){
+  'use strict';
+
+  /* Sıradaki kanıt, kanıtlanmış en uzun aradan bir üst basamağa gider. */
+  const ARA = { ilk:1, kalici:7, saglam:21, koru:60 };
+  const ASAMALAR = ['yok', 'ogreniyor', 'tutuyor', 'kalici', 'saglam'];
+  const ADLAR = () => ({ yok:yz('ortak.usta.veri-yok'), ogreniyor:yz('ortak.usta.ogreniyor'), tutuyor:yz('ortak.usta.tutuyor'),
+    kalici:yz('ortak.usta.kalici'), saglam:yz('ortak.usta.saglam') });
+  const EN_AZ_GUVEN = 10;
+
+  const zaman = iso => { const p = String(iso).split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); };
+  const fark = (a, b) => Math.round((zaman(b) - zaman(a)) / 864e5);
+  function gunEkle(iso, n){ return new Date(zaman(iso) + n * 864e5).toISOString().slice(0, 10); }
+  /* Metin sırası tarih sırasıdır; bu yol binlerce kartlı destede saniyede onlarca kez döner. */
+  const sirali = k => (k || []).filter(x => x && x.g && typeof x.isabet === 'boolean')
+    .sort((a, b) => a.g < b.g ? -1 : a.g > b.g ? 1 : 0);
+
+  /* Aşama. Yanlış zinciri keser: son ölçüm kazanır, eski başarı yeni unutmayı örtmez.
+     Aynı gündeki ikinci doğru ara kanıtı sayılmaz (ara 0). İpuçlu cevap aşama
+     kazandırmaz ve kırmaz: görülmüş cevap hatırlama ölçmez. */
+  function asama(kanitlar, bugun){
+    const k = sirali(kanitlar);
+    if(!k.length) return { id:'yok', ad:ADLAR().yok, etiket:'veri yok', enUzun:0, sonraki:null, gecikti:0, kritik:false, n:0 };
+    const temiz = k.filter(x => !x.ipucu);
+    let son = null, enUzun = 0, karisik = false, kritik = false;
+    temiz.forEach(x => {
+      if(!x.isabet){ son = null; enUzun = 0; karisik = false; kritik = x.guven === 'emin'; return; }
+      if(son) enUzun = Math.max(enUzun, fark(son, x.g));
+      if(x.karisik) karisik = true;
+      son = x.g; kritik = false;
+    });
+    const id = !son ? 'ogreniyor'
+      : enUzun >= ARA.saglam && karisik ? 'saglam'
+      : enUzun >= ARA.kalici ? 'kalici' : 'tutuyor';
+    const hedef = id === 'saglam' ? ARA.koru : enUzun >= ARA.kalici ? ARA.saglam : enUzun >= ARA.ilk ? ARA.kalici : ARA.ilk;
+    const sonraki = son ? gunEkle(son, hedef) : null;
+    return { id, ad:ADLAR()[id], etiket:'hesaplandı', enUzun, sonraki, kritik, n:k.length,
+      gecikti:sonraki && bugun && sonraki < bugun ? fark(sonraki, bugun) : 0 };
+  }
+
+  /* Güven isabeti: «emin» dediklerinde ne kadar tutuyor? Üstbiliş sinyalidir, puan
+     değildir. Az kanıtta oran üretilmez. */
+  function kalibrasyon(kanitlar){
+    const cikti = {};
+    ['emin', 'kararsiz', 'tahmin'].forEach(g => {
+      const l = (kanitlar || []).filter(x => x && x.guven === g && typeof x.isabet === 'boolean');
+      cikti[g] = { n:l.length, oran:l.length >= EN_AZ_GUVEN ? l.filter(x => x.isabet).length / l.length : null };
+    });
+    return cikti;
+  }
+
+  /* Sıradaki iş: önce emin olup yanıldıkların, sonra vadesi en çok geçenler,
+     sonra öğrenilmekte olanlar, en son yeniler. Vadesi gelmemiş beceri sorulmaz. */
+  function sira(beceriler, bugun, n){
+    const puan = a => a.kritik ? 0 : a.sonraki && a.sonraki <= bugun ? 1 : a.id === 'ogreniyor' ? 2 : a.id === 'yok' ? 3 : null;
+    const adaylar = (beceriler || []).map(b => ({ b, a:asama(b.kanitlar, bugun) }))
+      .map(x => Object.assign(x, { p:puan(x.a) })).filter(x => x.p != null)
+      .sort((x, y) => x.p - y.p || y.a.gecikti - x.a.gecikti);
+    return karistir(adaylar).slice(0, n > 0 ? n : adaylar.length)
+      .map(x => ({ id:x.b.id, grup:x.b.grup, asama:x.a.id, kritik:x.a.kritik, gecikti:x.a.gecikti }));
+  }
+
+  /* Aynı gruptan ikisi yan yana gelmesin (grup açık kalırsa sınavdaki gibi konu başlığı
+     ipucu olur). Önceliği en az bozan aday seçilir; olmuyorsa yan yana kalır. */
+  function karistir(l){
+    const kalan = l.slice(), cikti = [];
+    while(kalan.length){
+      const onceki = cikti.length ? cikti[cikti.length - 1].b.grup : null;
+      const i = kalan.findIndex(x => x.b.grup == null || x.b.grup !== onceki);
+      cikti.push(kalan.splice(i < 0 ? 0 : i, 1)[0]);
+    }
+    return cikti;
+  }
+
+  /* Harita: kaç beceri hangi aşamada ve kaçı ölçüldü. */
+  function harita(beceriler, bugun){
+    const sayi = { yok:0, ogreniyor:0, tutuyor:0, kalici:0, saglam:0 };
+    let kritik = 0, gecikti = 0;
+    (beceriler || []).forEach(b => {
+      const a = asama(b.kanitlar, bugun);
+      sayi[a.id]++;
+      if(a.kritik) kritik++;
+      if(a.gecikti) gecikti++;
+    });
+    const toplam = (beceriler || []).length;
+    return { sayi, toplam, olculen:toplam - sayi.yok, kritik, gecikti };
+  }
+
+  return { ARA, ASAMALAR, adi:id => ADLAR()[id], asama, kalibrasyon, sira, harita, gunEkle };
+})();
+
 /* ==== js/core/parca-rehber.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/parca-rehber.js içine yazılır; burası bir sonraki
@@ -92472,7 +92607,7 @@ R.Model = (function(){
   }
   /* 1g / 3g / 1h / 1a — "hatirlamadim" donguyu +1 gunden baslatir,
      "zorlandim" bir sonraki araligi acmaz (ayni araligi tekrarlar). */
-  function schedule(card, rating){
+  function schedule(card, rating, ek){
     let stage = card.stage || 0;
     if(rating === 'forgot') stage = 1;
     else if(rating === 'hard') stage = Math.max(1, stage);
@@ -92489,7 +92624,7 @@ R.Model = (function(){
     card.lastResult = rating;
     card.lastReviewedAt = U.todayISO();
     card.history = (card.history || [])
-      .concat([{ at:U.todayISO(), rating, result, stage, gapDays }])
+      .concat([Object.assign({ at:U.todayISO(), rating, result, stage, gapDays }, ek || {})])
       .slice(-40);
     return card;
   }
@@ -103143,6 +103278,11 @@ R.C = (function(){
 
    Karar motoru burada da otoritedir; LLM soru üretebilir ama puanlamaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.core.quiz.siradaki-konular':'Sıradaki konular',
+  'ays.core.quiz.kaliciligi-sinanacak-konular':'Bugün kalıcılığı sınanacak konular, karışık',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.core.quiz.bu-secimde-sinanacak-madde-y':'Bu seçimde sınanacak madde yok. Önce kart üret ya da ders notu ekle.',
   'ays.core.quiz.geri-cagirma-saglam-bu-konud':'Geri çağırma sağlam. Bu konuda tekrar aralığını uzatabilirsin.',
   'ays.core.quiz.yaridan-fazlasi-geldi-ama-bo':'Yarıdan fazlası geldi ama boşluk var. Bilinmeyenler karta düştü.',
@@ -103184,7 +103324,56 @@ R.Quiz = (function(){
     notes:    { label:yz('ays.core.quiz.ders-notlari'),     note:yz('ays.core.quiz.video-notlarindan-geri-cagir') },
     mixed:    { label:yz('ays.core.quiz.karisik'),          note:yz('ays.core.quiz.hepsinden-rastgele-sinav-ben') },
     zayif:    { label:yz('ays.core.quiz.zayif-konular'),    note:yz('ays.core.quiz.acik-yanlisi-en-cok-olan') },
+    siradaki: { label:yz('ays.core.quiz.siradaki-konular'), note:yz('ays.core.quiz.kaliciligi-sinanacak-konular') },
   };
+
+  /* ---------- kalıcılık (brand/ortak/usta.js) ----------
+     Beceri konudur. Yeni kayıt yok: kart geçmişi ve çözülen soru blokları kanıta çevrilir.
+     Bir konunun o günkü kanıtı TEKtir: doğruluk ≥ R.CLOSURE_RULE.second (planın kapanış
+     eşiği) ise isabet. Tek yanlış kart konunun bütün zincirini kesmesin diye gün gün toplanır. */
+  const kartKaniti = card => (card.history || []).map(h => ({ g:String(h.at).slice(0, 10),
+    isabet:h.rating !== 'forgot', guven:h.guven, karisik:h.karisik }));
+
+  function konuBecerileri(){
+    const gun = {};
+    const yaz = (anahtar, g, dogru, toplam, x) => {
+      const k = gun[anahtar] = gun[anahtar] || {};
+      const o = k[g] = k[g] || { d:0, n:0, karisik:false, eminYanlis:false };
+      o.d += dogru; o.n += toplam;
+      if(x && x.karisik) o.karisik = true;
+      if(x && x.guven === 'emin' && !x.isabet) o.eminYanlis = true;
+    };
+    S.cards.forEach(c => { if(c.subjectId && c.topic) kartKaniti(c).forEach(k => yaz(c.subjectId + '|' + c.topic, k.g, k.isabet ? 1 : 0, 1, k)); });
+    const adlar = {};
+    R.SUBJECTS.forEach(s => s.topics.forEach(t => { adlar[s.id + '/' + t.id] = t.name; }));
+    Object.keys(S.days || {}).forEach(g => ((S.days[g] || {}).blocks || []).forEach(b => {
+      const ad = adlar[b.subjectId + '/' + b.topicId];
+      /* Doğru sayısı yazılmamış blok sıfır doğru değildir, kanıt da değildir. */
+      if(ad && b.actualQ > 0 && b.correctQ != null) yaz(b.subjectId + '|' + ad, g, b.correctQ, b.actualQ);
+    }));
+    const esik = R.CLOSURE_RULE.second / 100, kartli = {};
+    S.cards.forEach(c => { kartli[c.subjectId + '|' + c.topic] = true; });
+    const cikti = [];
+    R.SUBJECTS.forEach(s => s.topics.forEach(t => {
+      const id = s.id + '|' + t.name, k = gun[id] || {};
+      cikti.push({ id, grup:s.id, ad:t.name, kartli:!!kartli[id], kanitlar:Object.keys(k).map(g => ({ g,
+        isabet:k[g].d / k[g].n >= esik, karisik:k[g].karisik, guven:k[g].eminYanlis ? 'emin' : undefined })) });
+    }));
+    return cikti;
+  }
+
+  /* Sınanabilir, yani kartı olan konulardan bugünün sırası. */
+  function siradaki(n){
+    const b = konuBecerileri().filter(x => x.kartli);
+    return window.LIFEOS.USTA.sira(b, U.todayISO(), n || 5)
+      .map(x => Object.assign(x, { ad:b.find(y => y.id === x.id).ad }));
+  }
+
+  function konuKalicilik(){
+    const Us = window.LIFEOS.USTA;
+    return { harita:Us.harita(konuBecerileri(), U.todayISO()),
+      guven:Us.kalibrasyon([].concat.apply([], S.cards.map(kartKaniti))) };
+  }
 
   /* Zayıf konu ÖLÇÜMDEN gelir (fikir 23): açık yanlışı en çok olan konular.
      Yanlış yoksa zayıf konu da yoktur — tahmin edilmez. */
@@ -103302,6 +103491,9 @@ R.Quiz = (function(){
       items = S.cards.filter(c => adlar.indexOf(c.topic) >= 0).map(fromCard)
         .concat(C.openErrors().filter(e => adlar.indexOf(e.topic) >= 0 && (e.principle || e.recipe))
           .map(fromError));
+    }else if(mode === 'siradaki'){
+      const sec = siradaki(5).map(x => x.id);
+      items = S.cards.filter(c => sec.indexOf(c.subjectId + '|' + c.topic) >= 0).map(fromCard);
     }else if(mode === 'notes'){
       S.videoNotes.forEach(n => n.segments.forEach((seg, i) => items.push(fromSegment(n, seg, i))));
     }else{ // mixed
@@ -103333,7 +103525,11 @@ R.Quiz = (function(){
     const perQuestion = TIMERS.indexOf(Number(o.seconds)) >= 0 ? Number(o.seconds) : 0;
 
     const all = pool(o);
-    let items = shuffle(all).slice(0, size);
+    /* Emin olup yanıldığın kart oturuma kesin girer: en kolay düzelen ama geri dönebilen hata. */
+    const kritikKart = {};
+    S.cards.forEach(c => { if(window.LIFEOS.USTA.asama(kartKaniti(c)).kritik) kritikKart[c.id] = true; });
+    let items = all.filter(i => kritikKart[i.cardId])
+      .concat(shuffle(all.filter(i => !kritikKart[i.cardId]))).slice(0, size);
 
     /* Karışık tekrar: aynı konudan iki madde peş peşe gelmesin.
        ÖSYM sana konu başlığı vermiyor; ard arda aynı konu yanıltıcı kolaylık üretir. */
@@ -103354,6 +103550,9 @@ R.Quiz = (function(){
     session = {
       mode:o.mode || 'due',
       format, perQuestion,
+      /* Tek ders ya da tek konu sınaması başlığı baştan söyler; karışık sayılmaz. */
+      karisik:o.interleave !== false && o.mode !== 'subject' && o.mode !== 'topic',
+      guven:null,
       subjectId:o.subjectId || null,
       topicId:o.topicId || null,
       items,
@@ -103405,6 +103604,9 @@ R.Quiz = (function(){
     return Math.max(0, session.perQuestion - questionSeconds());
   }
   function isRevealed(){ return !!(session && session.revealed); }
+  /* Cevaptan önce; ikinci dokunuş kaldırır. İşaretsiz cevap güven oranına girmez. */
+  function guven(){ return session ? session.guven : null; }
+  function guvenSec(v){ if(session) session.guven = session.guven === v ? null : v; }
 
   function progress(){
     if(!session) return null;
@@ -103424,17 +103626,21 @@ R.Quiz = (function(){
     if(!item) return null;
 
     session.results.push({ itemId:item.id, verdict, kind:item.kind, topic:item.topic,
-      subjectId:item.subjectId, seconds:questionSeconds(), picked:session.picked });
+      subjectId:item.subjectId, seconds:questionSeconds(), picked:session.picked, guven:session.guven });
 
     if(item.cardId){
       const card = S.cards.find(c => c.id === item.cardId);
       if(card){
-        M.schedule(card, verdict === 'known' ? 'remembered' : verdict === 'shaky' ? 'hard' : 'forgot');
+        const ek = {};
+        if(session.guven) ek.guven = session.guven;
+        if(session.karisik) ek.karisik = true;
+        M.schedule(card, verdict === 'known' ? 'remembered' : verdict === 'shaky' ? 'hard' : 'forgot', ek);
         await M.saveCard(card);
       }
     }
 
     session.revealed = false;
+    session.guven = null;
     session.picked = null;
     session.questionStartedMs = Date.now();
     session.index++;
@@ -103452,6 +103658,7 @@ R.Quiz = (function(){
   async function skip(){
     if(!session) return null;
     session.revealed = false;
+    session.guven = null;
     session.picked = null;
     session.questionStartedMs = Date.now();
     session.index = Math.min(session.index + 1, session.items.length);
@@ -103548,12 +103755,14 @@ R.Quiz = (function(){
       notes:pool({ mode:'notes' }).length,
       mixed:pool({ mode:'mixed' }).length,
       zayif:pool({ mode:'zayif' }).length,
+      siradaki:pool({ mode:'siradaki' }).length,
     };
   }
 
   return { MODES, SIZES, FORMATS, TIMERS, pool, start, active, current, reveal, isRevealed,
     pick, pickedIndex, format, questionSeconds, questionLeft, timeout,
-    progress, answer, skip, finish, cancel, availability, zayifKonular };
+    progress, answer, skip, finish, cancel, availability, zayifKonular,
+    guven, guvenSec, kartKaniti, konuBecerileri, siradaki, konuKalicilik };
 })();
 
 /* ==== js/core/examrun.js ==== */
@@ -126001,6 +126210,26 @@ R.Screens.learn = (function(){
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz.
    Karar motoru R.Quiz'dedir; ekran yalnizca cizer ve olay tasir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.quiz.ne-kadar-eminsin':'Ne kadar eminsin?',
+  'ays.quiz.eminim':'Eminim',
+  'ays.quiz.kararsizim':'Kararsızım',
+  'ays.quiz.tahmin':'Tahmin',
+  'ays.quiz.emindin-kart-one-alindi':'Emindin; bu kart sonraki sınamada öne alınır.',
+  'ays.quiz.bugunku-sira':'Bugünkü sıra',
+  'ays.quiz.karisik':'karışık',
+  'ays.quiz.sirayi-sina':'Sırayı sına',
+  'ays.quiz.emin-yanilmistin':'emin yanılmıştın',
+  'ays.quiz.gun-gecikti':' gün gecikti',
+  'ays.quiz.ilk-sinama':'ilk sınama',
+  'ays.quiz.kalicilik':'Kalıcılık',
+  'ays.quiz.konu-olculdu':' konu ölçüldü',
+  'ays.quiz.emin-dediklerinin':'Emin dediklerinin %',
+  'ays.quiz.kadari-tuttu':' kadarı tuttu',
+  'ays.quiz.cevap':' cevap',
+  'ays.quiz.kalicilik-kurali':'kalıcı: 7 gün arayla %70 ve üstü · sağlam: 21 gün, karışık sınamada',
+});
+
+window.LIFEOS.PARCA.yazilar({
   'ays.quiz.olcumden':'Ölçümden: ',
   'ays.quiz.bu-secimde-sinanacak-madde-y':'Bu seçimde sınanacak madde yok. Ders notu ekle, kart üret ya da ',
   'ays.quiz.bos-biraktin':'Boş bıraktın.',
@@ -126121,7 +126350,7 @@ R.Screens.quiz = (function(){
     const mode = S.ui.quizMode || 'due';
     const size = S.ui.quizSize || 10;
     const count = {
-      due:av.due, errors:av.errors, notes:av.notes, mixed:av.mixed,
+      due:av.due, errors:av.errors, notes:av.notes, mixed:av.mixed, siradaki:av.siradaki,
       subject:Q.pool({ mode:'subject', subjectId:S.ui.quizSubject || null }).length,
       topic:Q.pool({ mode:'topic', subjectId:S.ui.quizSubject || null, topicId:S.ui.quizTopic || null }).length,
     };
@@ -126235,6 +126464,10 @@ R.Screens.quiz = (function(){
           ${when(revealed, () => html`<div class="quizcard__answer"><span class="mono-label">${yz('ays.quiz.dogru-cevap')}</span>
             <p>${item.answer}</p></div>`)}
         </div>`,
+
+        when(!revealed, () => K.Segmented({ act:'quiz-guven', value:Q.guven() || '', aria:yz('ays.quiz.ne-kadar-eminsin'),
+          items:[{ value:'emin', label:yz('ays.quiz.eminim') }, { value:'kararsiz', label:yz('ays.quiz.kararsizim') },
+            { value:'tahmin', label:yz('ays.quiz.tahmin') }] })),
 
         when(item.choices, () => html`<div class="choices">${map(item.choices, (opt, i) => {
           const picked = Q.pickedIndex();
@@ -126416,6 +126649,25 @@ R.Screens.quiz = (function(){
   LIFEOS.PARCA.blok({ id:'quiz.sonuc', sayfa:'quiz', yer:'ana', ad:'Test sonucu', kosul:() => !kitapta() && sonOzet() && !Q.active(), ciz:() => kitapSonucView(sonOzet()) });
   LIFEOS.PARCA.blok({ id:'quiz.kosu', sayfa:'quiz', yer:'ana', ad:'Sınama', kosul:() => !kitapta() && Q.active(), ciz:() => runView() });
   LIFEOS.PARCA.blok({ id:'quiz.kurulum', sayfa:'quiz', yer:'ana', ad:'Sınama kurulumu', kosul:() => !kitapta() && !sonOzet() && !Q.active(), ciz:() => setupView() });
+  LIFEOS.PARCA.blok({ id:'quiz.kalicilik', sayfa:'quiz', yer:'ana', ad:'Sıra ve kalıcılık', kosul:() => !kitapta() && !sonOzet() && !Q.active(), ciz:() => raw(kalicilikHtml()) });
+
+  /* Bugünkü sıra ve konuların kalıcılığı (core/quiz.js, brand/ortak/usta.js). Ölçülmemiş
+     konu «ölçüldü»ye girmez; kanıt yoksa kart da yok. */
+  function kalicilikHtml(){
+    const P = (window.LIFEOS || {}).PANO, Us = window.LIFEOS.USTA;
+    if(!P) return '';
+    const liste = Q.siradaki(5), k = Q.konuKalicilik(), h = k.harita, emin = k.guven.emin;
+    const neden = x => x.kritik ? yz('ays.quiz.emin-yanilmistin') : x.gecikti ? x.gecikti + yz('ays.quiz.gun-gecikti')
+      : x.asama === 'yok' ? yz('ays.quiz.ilk-sinama') : Us.adi(x.asama);
+    const sira = liste.length ? P.kart({ tur:'sira', ad:yz('ays.quiz.bugunku-sira'), simge:'kart', yuva:yz('ays.quiz.karisik'),
+      govde:P.liste({ satirlar:liste.map(x => ({ ad:x.ad, not:neden(x), nokta:x.kritik ? 0 : 'n' })) })
+        + '<div class="mt-8">' + K.Button({ label:yz('ays.quiz.sirayi-sina'), size:'sm', tone:'primary', act:'quiz-siradaki' }) + '</div>' }) : '';
+    const kalici = h.olculen ? P.kart({ tur:'kalicilik', ad:yz('ays.quiz.kalicilik'), simge:'kart', yuva:h.olculen + '/' + h.toplam + yz('ays.quiz.konu-olculdu'),
+      govde:P.yigin({ parcalar:['ogreniyor', 'tutuyor', 'kalici', 'saglam'].map(id => ({ ad:Us.adi(id), deger:h.sayi[id], metin:String(h.sayi[id]) })) })
+        + (emin.oran != null ? P.not(yz('ays.quiz.emin-dediklerinin') + Math.round(emin.oran * 100) + yz('ays.quiz.kadari-tuttu') + ' · ' + emin.n + yz('ays.quiz.cevap')) : '')
+        + P.not(yz('ays.quiz.kalicilik-kurali')) }) : '';
+    return P.izgara([sira, kalici], 'pk-izgara--iki');
+  }
   async function render(){ return String(LIFEOS.PARCA.yer('quiz', 'ana', R.C)); }
 
   const handle = {
@@ -126484,9 +126736,21 @@ R.Screens.quiz = (function(){
       UI.toast(res.total + ' madde · başla');
       R.App.render();
     },
+    async 'quiz-siradaki'(){ S.ui.quizMode = 'siradaki'; await handle['quiz-start'](); },
+    /* Yeniden çizmez: çizim sesli okumayı baştan başlatırdı. */
+    async 'quiz-guven'(el){
+      Q.guvenSec(el.dataset.value);
+      el.parentElement.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.value === Q.guven();
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    },
     async 'quiz-reveal'(){ Q.reveal(); R.App.render(); },
     async 'quiz-answer'(el){
+      const eminYanildi = Q.guven() === 'emin' && el.dataset.verdict === 'unknown' && (Q.current() || {}).cardId;
       const res = await Q.answer(el.dataset.verdict);
+      if(eminYanildi) UI.toast(yz('ays.quiz.emindin-kart-one-alindi'));
       if(res && res.done){
         lastSummary = res.summary;
         UI.toast(yz('ays.quiz.oturum-bitti') + res.summary.score);
