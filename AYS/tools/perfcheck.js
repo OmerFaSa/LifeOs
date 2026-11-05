@@ -209,6 +209,14 @@ async function portMuhafizi(portlar, ipucu){
       console.log('\nBütün ekranlar bütçede — en ağırı ' + rows[0].route
         + ' ' + rows[0].ms + ' ms (bütçe ' + rows[0].budget + ').');
     }
+    /* Akıcılık: süre değil SAYI bütçesi (tools/akicilik.js, 2026-11-05) — simge
+       çevirici oku-yaz ve kartta fare; yük ya da makine sayıyı değiştirmez. */
+    const ak = await require(path.join(ROOT, '..', 'tools', 'akicilik.js'))(browser, page);
+    console.log('\nAkıcılık (sayı bütçesi, makineden bağımsız):');
+    ak.forEach(x => console.log('  ' + (x.deger > x.butce ? '✕ ' : '  ') + x.ad + ': '
+      + x.deger + ' ' + x.birim + '   bütçe ' + x.butce));
+    if(ak.length < 2){ console.log('  ✕ ölçülemedi: ' + (2 - ak.length) + ' ölçü koşmadı (piksel tema ya da kart yok)'); process.exitCode = 1; }
+    if(ak.some(x => x.deger > x.butce)) process.exitCode = 1;
   }catch(err){
     console.error('Koşum hatası:', err.message);
     process.exitCode = 1;

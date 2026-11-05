@@ -38,6 +38,10 @@ def main():
         # ilk tur olcumu 16'yi secip ~5,6 GB ayirdi; 6 GB kartta model sigmaz).
         if hasattr(tts, "_batch_size"):
             tts._batch_size = int(os.environ.get("EMA_PARTI") or 4)
+        # Ilk uretim isinma ister (olculen: ilk cumle 1,4-1,7 sn, sonrakiler 0,1-0,2 sn);
+        # kullanicinin ilk cumlesi beklemesin.
+        for _ in tts.stream("Merhaba.", sample_rate=24000):
+            pass
     except Exception as e:                      # noqa: BLE001
         yaz({"hata": "EMA yüklenemedi (%s): %s" % (type(e).__name__, str(e)[:200])})
         return 1

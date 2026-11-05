@@ -25,6 +25,7 @@ import hashlib
 import http.client
 import importlib.util
 import os
+import shutil
 import socket
 import ssl
 import subprocess
@@ -155,6 +156,21 @@ with tempfile.TemporaryDirectory() as gecici:
     dogru("yenileme koku korur", izi(y["kok"]) == kok_izi)
     dogru("yenileme yeni IP'yi ekler", "IP Address:192.168.50.8" in metin(y["sertifika"]))
 
+    # 3a — adres degisince kendiliginden yenilenir (telefona bir sey kurulmaz)
+    tz = lambda ip, **e: telefon.tazele(k, OPENSSL, "lifeos-test", [ip], **e)
+    dogru("ilk bakista ad listesi yazilir", tz("192.168.50.8"))
+    dogru("ayni adreste yenilemez", not tz("192.168.50.8"))
+    dogru("adres degisince yeniler", tz("192.168.50.9"))
+    dogru("yeni adres sertifikada", "IP Address:192.168.50.9" in metin(y["sertifika"]))
+    dogru("adres degisince kok ayni kalir", izi(y["kok"]) == kok_izi)
+    dogru("suresi bitmeden yeniler", tz("192.168.50.9", simdi=time.time() + (telefon.SUNUCU_GUN - 30) * 86400))
+    sertifika = izi(y["sertifika"])
+    dogru("openssl yoksa eski sertifikayla surer",
+          not telefon.tazele(k, "yok-boyle-openssl", "lifeos-test", ["192.168.50.1"]) and izi(y["sertifika"]) == sertifika)
+    bos = os.path.join(gecici, "bos")
+    dogru("ev agi kapaliysa tazele acmaz (kural 3)", not telefon.tazele(bos, OPENSSL, "lifeos-test", ["192.168.50.1"])
+          and not telefon.acik_mi(bos))
+
     # 4 — https kapisi
     acik, sorun = sunucu.telefon_sunuculari(k, portlar={"AYS": 0, "SPI": 0, "ESP": 0}, host="127.0.0.1")
     dogru("uc modulun telefon kapisi acilir", len(acik) == 3 and not sorun, (len(acik), sorun))
@@ -216,6 +232,32 @@ with tempfile.TemporaryDirectory() as gecici:
     sayfa = govde.decode("utf-8", "replace")
     dogru("kurulum sayfasi yonergeyi verir", durum == 200 and "Sertifikayı indir" in sayfa, durum)
     dogru("kurulum sayfasi parmak izini gosterir", telefon.parmak_izi(y) in sayfa)
+    kaynak = yukle("kaynak", KOK / "uygulama" / "ios" / "kaynak.py").KAYNAK_ADRESI
+    dogru("kurulum sayfasi AltStore kaynagini tek dokunusla ekler (CI'in yayimladigi adres)",
+          'href="altstore://source?url=%s"' % kaynak in sayfa)
+    dogru("kurulum sayfasi cihaza gore tek yol gosterir (iPhone/iPad profili, Android sertifikasi)",
+          'data-cihaz="ios"' in sayfa and 'data-cihaz="android"' in sayfa and 'href="/lifeos.mobileconfig"' in sayfa)
+    durum, tur, govde = http_al(kp, yol="/lifeos.mobileconfig")
+    dogru("kurulum: iPhone profili iner", durum == 200 and tur == "application/x-apple-aspen-config", (durum, tur))
+    import plistlib
+    pr = plistlib.loads(govde)
+    yuk = {x["PayloadType"]: x for x in pr["PayloadContent"]}
+    klipler = [x for x in pr["PayloadContent"] if x["PayloadType"] == "com.apple.webClip.managed"]
+    a = telefon.adresler(telefon.ad(), telefon.ipler())
+    dogru("profil: kok sertifika ayni DER, ozel anahtar yok",
+          yuk["com.apple.security.root"]["PayloadContent"] == der and b"PRIVATE KEY" not in govde)
+    dogru("profil: uc modul ana ekranda, kurulum sayfasinin ilk adresiyle (veri ayni kokende)",
+          [(k["Label"], k["URL"]) for k in klipler] == [("AYS", a["AYS"][0]), ("SPİ", a["SPI"][0]), ("ESP", a["ESP"][0])]
+          and all(k["Icon"][:8] == b"\x89PNG\r\n\x1a\n" for k in klipler), [(k["Label"], k["URL"]) for k in klipler])
+    dogru("profil: yeniden kurulunca eskisinin yerine gecer (kimlik sabit)",
+          plistlib.loads(telefon.profil(k, telefon.ad(), telefon.ipler()))["PayloadUUID"] == pr["PayloadUUID"])
+    dogru("kurulum sayfasi tek QR ile baglar","lifeos://bagla" in sayfa and ":%d/" % telefon.PORTLAR["SPI"] in sayfa)
+    betik = sayfa[sayfa.index("<script>") + 8:sayfa.index("</script>")]
+    with open(os.path.join(gecici, "kurulum.js"), "w", encoding="utf-8") as f:
+        f.write(betik)
+    if shutil.which("node"):
+        r = subprocess.run(["node", "--check", os.path.join(gecici, "kurulum.js")], capture_output=True, text=True)
+        dogru("kurulum sayfasinin betigi gecerli", r.returncode == 0, r.stderr[-200:])
     yasak = ["/kok.key", "/sunucu.key", "/sunucu.crt", "/../kok.key", "/veri/", "/HKM/db/hkm.db",
              "/sistem/telefon.py", "/README.md", "/index.html/../../kok.key"]
     sizinti = []

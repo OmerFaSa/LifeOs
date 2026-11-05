@@ -40,13 +40,16 @@ final class YerelSunucu {
 
     let modul: Modul
     let ortak: URL
+    /// PC'siz indirilen daha yeni dosya (WebGuncelleme). Anahtar: Web/ altindaki yol.
+    let katman: ((String) -> URL?)?
     private(set) var kapi: UInt16 = 0
     private var dinleyici: NWListener?
     private let kuyruk: DispatchQueue
 
-    init(modul: Modul, ortak: URL) {
+    init(modul: Modul, ortak: URL, katman: ((String) -> URL?)? = nil) {
         self.modul = modul
         self.ortak = ortak
+        self.katman = katman
         self.kuyruk = DispatchQueue(label: "lifeos.sunucu." + modul.ad)
     }
 
@@ -183,15 +186,18 @@ final class YerelSunucu {
             .split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false).first.map(String.init) ?? ""
         guard let yol = ham.removingPercentEncoding, yol.hasPrefix("/"),
               !yol.contains("\\"), !yol.contains("\0") else { return nil }
+        let ad = modul.klasor.lastPathComponent
         if yol == "/" || yol == "/index.html" {
-            return var_mi(modul.klasor.appendingPathComponent(modul.sayfa), kok: modul.klasor)
+            return katman?(ad + "/" + modul.sayfa) ?? var_mi(modul.klasor.appendingPathComponent(modul.sayfa), kok: modul.klasor)
         }
         let parca = yol.split(separator: "/").map(String.init)
         guard !parca.isEmpty, !parca.contains(where: { $0.hasPrefix(".") }) else { return nil }
         if parca.count >= 3, parca[0] == "img", parca[1] == "seviye" || parca[1] == "marka" {
+            if let k = katman?("ortak/" + parca.dropFirst().joined(separator: "/")) { return k }
             let tam = parca.dropFirst().reduce(ortak) { $0.appendingPathComponent($1) }
             return var_mi(tam, kok: ortak)
         }
+        if let k = katman?(ad + "/" + parca.joined(separator: "/")) { return k }
         let tam = parca.reduce(modul.klasor) { $0.appendingPathComponent($1) }
         return var_mi(tam, kok: modul.klasor)
     }
@@ -253,7 +259,8 @@ final class SunucuDuzeni {
     private(set) var sunucular: [YerelSunucu] = []
     private(set) var hata: String?
 
-    init(web: URL? = Bundle.main.url(forResource: "Web", withExtension: nil)) {
+    init(web: URL? = Bundle.main.url(forResource: "Web", withExtension: nil),
+         katman: ((String) -> URL?)? = { WebGuncelleme.ortak.dosya($0) }) {
         guard let web = web else {
             hata = "Uygulamanın içindeki sayfalar bulunamadı (Web klasörü yok)."
             return
@@ -263,7 +270,7 @@ final class SunucuDuzeni {
             YerelSunucu(modul: .init(ad: $0.ad, kapi: $0.kapi,
                                      klasor: web.appendingPathComponent($0.ad, isDirectory: true),
                                      sayfa: $0.sayfa),
-                        ortak: ortak)
+                        ortak: ortak, katman: katman)
         }
     }
 

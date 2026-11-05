@@ -242,7 +242,7 @@ ev ağına açılmaz. Sertifikalar deponun dışında, kullanıcı klasöründed
 kök bir kez kurulur (iPhone: profil + «tam güven»; Android: CA sertifikası),
 modül ana ekrana eklenir ve evde bir kez açılır: sonra çevrimdışı kabukla her
 yerde açılır. Telefon yolunda depo kalıcı istenir (`pwa.js` söz 5). IP
-değişince `telefon.py --yenile` (kök kalır, telefona yeniden kurulmaz);
+değişince LifeOS açılışta sunucu sertifikasını kendiliğinden yeniler (kök kalır, telefona yeniden kurulmaz);
 kapatmak: `telefon.py --kapat`. Bir modülü hep aynı adresten aç: adres
 başka bir kökendir, verisi ayrı durur. Test: `tools/telefon_test.py`.
 

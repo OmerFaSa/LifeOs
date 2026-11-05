@@ -189,6 +189,35 @@ def kur(yenile=False, k=None, openssl=None, bilgisayar=None, ip_listesi=None):
     return y
 
 
+def tazele(k=None, openssl=None, bilgisayar=None, ip_listesi=None, simdi=None):
+    """Sunucu acilirken: adres degistiyse (DHCP, yeni bilgisayar) ya da sertifikanin
+    suresi bitiyorsa sunucu sertifikasini kendiliginden yeniler. Kok korunur: telefona
+    bir sey kurulmaz. Yapamazsa eski sertifikayla surer. Doner: yenilendi mi."""
+    k = k or klasor()
+    if not acik_mi(k):
+        return False
+    bilgisayar = bilgisayar or ad()
+    ip_listesi = ipler() if ip_listesi is None else ip_listesi
+    istenen = san_listesi(bilgisayar, sorted(ip_listesi))
+    kayit = os.path.join(k, "sunucu.adlar")
+    try:
+        with open(kayit, encoding="utf-8") as f:
+            eski = f.read().strip()
+    except OSError:
+        eski = ""
+    simdi = datetime.datetime.now().timestamp() if simdi is None else simdi
+    yas = simdi - os.path.getmtime(yollar(k)["sertifika"])
+    if eski == istenen and yas < (SUNUCU_GUN - 60) * 86400:
+        return False
+    try:
+        kur(yenile=True, k=k, openssl=openssl, bilgisayar=bilgisayar, ip_listesi=sorted(ip_listesi))
+        with open(kayit, "w", encoding="utf-8") as f:
+            f.write(istenen)
+    except (RuntimeError, OSError):
+        return False
+    return True
+
+
 def kapat(k=None):
     """Ev agina acmayi kapatir: sunucu sertifikasi silinir, kok kalir."""
     y = yollar(k)
@@ -212,6 +241,56 @@ def adresler(bilgisayar=None, ip_listesi=None):
         out[modul] = ["https://%s.local:%d/" % (bilgisayar, port)]
         out[modul] += ["https://%s:%d/" % (ip, port) for ip in ip_listesi]
     return out
+
+
+MODUL_AD = {"AYS": "AYS", "SPI": "SPİ", "ESP": "ESP"}
+MODUL_SAYFA = {"AYS": "AYS/dist/rota.html", "SPI": "SPI/dist/spi.html", "ESP": "ESP/dist/esp.html"}
+
+
+def _simge(modul, kok_klasor):
+    """Modulun kendi simgesi (dist'teki ilk PNG favicon); yoksa LifeOS logosu."""
+    import base64
+    import re
+    try:
+        with open(os.path.join(kok_klasor, MODUL_SAYFA[modul]), encoding="utf-8", errors="replace") as f:
+            m = re.search(r'rel="icon" type="image/png" href="data:image/png;base64,([A-Za-z0-9+/=]+)"', f.read(400000))
+        if m:
+            return base64.b64decode(m.group(1))
+    except (OSError, ValueError):
+        pass
+    with open(os.path.join(kok_klasor, "brand", "life", "logo.png"), "rb") as f:
+        return f.read()
+
+
+def profil(k=None, bilgisayar=None, ip_listesi=None, kok_klasor=None):
+    """iPhone/iPad icin TEK dosya (.mobileconfig): kok sertifika + uc modulun ana
+    ekran simgesi. «Ana Ekrana Ekle» uc kez yapilmaz. Adres, kurulum sayfasinin
+    ilk adresiyle aynidir (veri o kokende durur). Kimlikler parmak izinden
+    turetilir: yeniden kurulan profil eskisinin yerine gecer, ikinci kopya olmaz.
+    Kok sertifikaya tam guveni Apple yine elle actirir (Sertifika Guven Ayarlari)."""
+    import plistlib
+    import uuid
+    y = yollar(k)
+    with open(y["kok_der"], "rb") as f:
+        der = f.read()
+    kok_klasor = kok_klasor or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    iz = hashlib.sha256(der).hexdigest()
+    kimlik = lambda ek: str(uuid.uuid5(uuid.NAMESPACE_URL, "lifeos:%s:%s" % (iz, ek))).upper()
+    a = adresler(bilgisayar, ip_listesi)
+    icerik = [{"PayloadType": "com.apple.security.root", "PayloadVersion": 1,
+               "PayloadIdentifier": "com.lifeos.yerel.kok", "PayloadUUID": kimlik("kok"),
+               "PayloadDisplayName": "LifeOS Yerel Kök", "PayloadContent": der}]
+    for m in ("AYS", "SPI", "ESP"):
+        icerik.append({"PayloadType": "com.apple.webClip.managed", "PayloadVersion": 1,
+                       "PayloadIdentifier": "com.lifeos.yerel." + m.lower(), "PayloadUUID": kimlik(m),
+                       "PayloadDisplayName": MODUL_AD[m], "Label": MODUL_AD[m], "URL": a[m][0],
+                       "Icon": _simge(m, kok_klasor), "FullScreen": True, "IsRemovable": True})
+    return plistlib.dumps({"PayloadType": "Configuration", "PayloadVersion": 1,
+                           "PayloadIdentifier": "com.lifeos.yerel", "PayloadUUID": kimlik("profil"),
+                           "PayloadDisplayName": "LifeOS", "PayloadOrganization": "LifeOS · bu bilgisayar",
+                           "PayloadDescription": "Bilgisayarındaki LifeOS'a güvenir ve AYS, SPİ, ESP'yi ana ekrana koyar. "
+                                                 "Veri yalnız evdeki ağda dolaşır.",
+                           "PayloadRemovalDisallowed": False, "PayloadContent": icerik})
 
 
 def yonerge(bilgisayar=None, ip_listesi=None):

@@ -107,6 +107,29 @@ def sistemler_baslat():
     return False, p, gunluk_yolu
 
 
+def altserver_baslat(ortam=None, calistir=subprocess.run, ac=None, isletim=None):
+    """iPhone'daki LifeOS (AltStore, ucretsiz kimlik) 7 gunde bir yeniden imzalanir
+    ve bunu bu bilgisayardaki AltServer yapar; AltServer kapaliysa yenileme olmaz,
+    uygulama acilmaz (veri silinmez). Kuruluysa ve kapaliysa LifeOS onu da acar.
+    Doner: (durum, not) — durum "acildi" | "acik" | "yok"."""
+    if (isletim or os.name) != "nt":
+        return "yok", ""
+    ortam = os.environ if ortam is None else ortam
+    exe = next((y for y in (os.path.join(ortam.get(k) or "", "AltServer", "AltServer.exe")
+                            for k in ("ProgramFiles(x86)", "ProgramFiles")) if os.path.isfile(y)), None)
+    if not exe:
+        return "yok", ""
+    try:
+        r = calistir(["tasklist", "/FI", "IMAGENAME eq AltServer.exe", "/NH"],
+                     capture_output=True, text=True, timeout=10)
+        if "altserver.exe" in (r.stdout or "").lower():
+            return "acik", ""
+        (ac or os.startfile)(exe)       # ayri surec: LifeOS kapaninca da acik kalir
+    except Exception as e:
+        return "yok", str(e)
+    return "acildi", ""
+
+
 def adiyla_durdur(hedef, calistir=subprocess.run, isletim=None):
     """Komut satirinda `hedef` (betigin tam yolu) gecen surecleri kapatir.
     Doner: (ok, not). Surec ADIYLA bulunur: port dinleyen her seyi
@@ -229,6 +252,12 @@ def main():
             _yaz("yok", "HKM açılamadı", sebep)
             print("     Üç sistem bundan etkilenmez; HKM kapalıyken de"
                   " çalışırlar.")
+
+    # 2b — AltServer (iPhone uygulamasinin haftalik imza yenilemesi). Yoksa sessiz.
+    durum, not_ = altserver_baslat()
+    if durum != "yok" or not_:
+        _yaz("ok" if durum != "yok" else "yok", "AltServer " + ("açıldı" if durum == "acildi" else
+             "zaten açık" if durum == "acik" else "açılamadı"), not_ or "iPhone uygulaması haftalık yenilenir")
 
     # 3 — tarayici.
     if "--tarayicisiz" in sys.argv:

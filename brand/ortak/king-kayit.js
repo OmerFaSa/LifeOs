@@ -312,6 +312,7 @@ window.LIFEOS.PARCA.yazilar({
   function cevapSec(v){
     if(['oto', 'ses', 'yazi'].indexOf(v) < 0) return false;
     if(v === 'oto') KI.ortam.depo.sil(KI.CEVAP); else KI.ortam.depo.yaz(KI.CEVAP, v);
+    if(v === 'ses') KI.sesIsit();
     if(v === 'yazi') KI.sus();
     KI.ciz(false);
     return true;

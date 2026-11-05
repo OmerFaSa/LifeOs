@@ -28,6 +28,10 @@ SIMGE = BURASI / "LifeOS" / "Assets.xcassets" / "AppIcon.appiconset" / "icon-102
 MODULLER = [("AYS", "rota.html"), ("SPI", "spi.html"), ("ESP", "esp.html")]
 ORTAK = ("seviye", "marka")
 MEDYA = (".mp4", ".webm", ".png", ".jpg", ".webp", ".svg")
+# Telefon giris sayfasinin yukledigi ortak dosyalar. Windows'taki test (test_guncelle)
+# sayfadaki her adresin burada oldugunu sinar: eksik kalan dosya telefonda 404 olurdu.
+GIRIS_DOSYALARI = ("parca.js", "piksel.js", "piksel-doga.js", "piksel-figur.js", "piksel-simge.js",
+                   "piksel.css", "piksel-yazi.css", "hesap.js", "hesap.css", "animasyon.js", "qr.js")
 
 
 def ortak_kaynak():
@@ -97,8 +101,13 @@ def main():
     # Giris ekrani (hesap): secim sayfasinda bir kez giris (brand/ortak/hesap.*);
     # animasyon.js: LifeOS'un kendi «Animasyonlar» ayari (sunucu.py giris_html);
     # qr.js: hesap sayfasinin QR'i (iki adim, kodla baglama).
-    for ad in ("parca.js", "piksel.js", "piksel-figur.js", "piksel-simge.js", "piksel.css", "piksel-yazi.css", "hesap.js", "hesap.css", "animasyon.js", "qr.js"):
+    for ad in GIRIS_DOSYALARI:
         shutil.copy2(KOK / "brand" / "ortak" / ad, giris / ad)
+
+    # Telefon yalniz bundan farkli dosyalari indirir (web_paket.py, WebGuncelleme.swift).
+    sys.path.insert(0, str(BURASI))
+    import web_paket  # noqa: E402
+    web_paket.temel_yaz(WEB)
 
     shutil.copy2(KOK / "brand" / "life" / "logo.png", SIMGE)
     if sys.platform == "darwin":

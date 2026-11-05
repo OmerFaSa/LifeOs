@@ -82,6 +82,8 @@ import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
 
 HOST = "127.0.0.1"
+# AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
+ALTSTORE_KAYNAK = "https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
 GIRIS_PORT = 4180
 HKM_PORT = 4200
 
@@ -527,6 +529,9 @@ button{ font:inherit; }
   border:1px solid var(--cizgi); border-radius:999px; background:var(--yuzey); white-space:nowrap; cursor:pointer; }
 /* ---- guncelleme ---- */
 .guncel[hidden]{ display:none; }
+.guncel__oto{ display:flex; gap:8px; align-items:center; margin-top:10px; font-size:13px; color:var(--fg-2); cursor:pointer; }
+.guncel__oto[hidden]{ display:none; }
+.guncel__oto input{ width:18px; height:18px; margin:0; accent-color:var(--primary); }
 .guncel{ display:flex; gap:16px; align-items:flex-start; padding:18px 20px; margin-bottom:32px;
   background:var(--yuzey); border:1px solid var(--cizgi); border-radius:14px; box-shadow:var(--golge); }
 .guncel__ikon{ flex:none; width:40px; height:40px; border-radius:10px; display:grid; place-items:center;
@@ -1005,6 +1010,8 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
       <div class="guncel__baslik" id="guncel-baslik">Güncelleme kontrol ediliyor…</div>
       <div class="guncel__alt" id="guncel-alt"></div>
       <ul id="guncel-liste" hidden></ul>
+      <label class="guncel__oto" id="guncel-oto-k" hidden><input type="checkbox" id="guncel-oto">
+        <span>Kendiliğinden güncelle · her gece 04:00, bilgisayar kapalıysa açılınca</span></label>
     </div>
     <div class="guncel__eylem">
       <button type="button" class="dugme" id="guncel-bak" hidden>Yeniden kontrol et</button>
@@ -1284,6 +1291,24 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
   dugme.addEventListener('click', function(){ if(sonraki) sonraki(); });
   bak.addEventListener('click', function(){ kontrol(true); });
   kontrol(false);
+
+  /* Tek anahtar (2026-11-05): Sistem planlamasindaki Guncelleme isi her gun 04:00,
+     «kur» acik. Telefon ve tabletin web kodu PC'den geldigi icin onlar da guncel kalir. */
+  var oto = $('guncel-oto');
+  function planAl(){ return fetch('/api/planlama').then(function(r){ if(!r.ok) throw 0; return r.json(); }); }
+  planAl().then(function(v){ var g = v.plan.isler.guncelleme; oto.checked = g.acik && g.kur; $('guncel-oto-k').hidden = false; })
+    .catch(function(){});
+  oto.addEventListener('change', function(){
+    var ac = oto.checked;
+    oto.disabled = true;
+    planAl().then(function(v){
+      var p = v.plan, g = p.isler.guncelleme;
+      if(ac){ g.acik = true; g.kur = true; g.gunler = [0, 1, 2, 3, 4, 5, 6]; g.saat = '04:00'; g.kacarsa = 'hemen'; }
+      else g.kur = false;
+      return fetch('/api/planlama', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'planlama' }, body:JSON.stringify(p) });
+    }).then(function(r){ if(!r.ok) throw 0; }).catch(function(){ oto.checked = !ac; })
+      .then(function(){ oto.disabled = false; });
+  });
 
   /* Durum isigi. Uc sistem bu sayfayla ayni surecte: sayfa geldiyse onlar da
      ayaktadir ve no-cors yoklamasi her HTTP cevabinda (503 dahil) cozulur.
@@ -1574,6 +1599,70 @@ def guncelleme_durumu(taze=False, durum=None):
         return veri
 
 
+def guncelle_kur(yedekle=False):
+    with _GUNCEL_KILIT:
+        sonuc = guncelle.uygula(yedekle=yedekle)
+        _GUNCEL.update(zaman=0.0, veri=None)
+    # HKM'nin kodu degistiyse ve HKM aciksa yeni kodla yeniden acilir (arka planda).
+    if sonuc.get("durum") == "guncellendi" and sonuc.get("hkm_degisti") and hkm_ayakta():
+        threading.Thread(target=hkm_yeniden, daemon=True).start()
+        sonuc["mesaj"] = (sonuc.get("mesaj") or "") + " HKM yeni sürümle yeniden başlatılıyor."
+    return sonuc
+
+
+# BASKA CIHAZDAN GUNCELLEME (hesap.py soz 28). Kurulum uzun surebilir, istek
+# bekletilmez: arkada yurur, cihaz durumu sorar. Sonuc yeniden baslatmada kaybolur;
+# cihaz «geride 0» ile anlar.
+_SISTEM_IS = {"calisiyor": False, "sonuc": None}
+_SISTEM_KILIT = threading.Lock()
+
+
+def sistem_durum(taze=False, durum=None):
+    with _SISTEM_KILIT:
+        calisiyor, sonuc = _SISTEM_IS["calisiyor"], _SISTEM_IS["sonuc"]
+    cevap = {"surum": guncelle.surum(), "calisiyor": calisiyor, "sonuc": sonuc}
+    if calisiyor:                                       # kilit kurulumda: beklenmez
+        return cevap
+    d = guncelleme_durumu(taze=taze, durum=durum)
+    cevap.update(durum=d.get("durum"), geride=d.get("geride") or 0, yeni=(d.get("yeni") or [])[:5],
+                 ag=d.get("ag", False), mesaj=d.get("mesaj") or "",
+                 engel=guncelle.engel_cumlesi(d))
+    return cevap
+
+
+def sistem_baslat(kur=guncelle_kur, yeniden=yeniden_baslat_zamanla):
+    with _SISTEM_KILIT:
+        if _SISTEM_IS["calisiyor"]:
+            return {"calisiyor": True}
+        _SISTEM_IS.update(calisiyor=True, sonuc=None)
+
+    def is_():
+        try:
+            s = kur()
+        except Exception as e:                          # cihaz «sürüyor»da takilmasin
+            s = {"durum": "hata", "mesaj": "Güncelleme yapılamadı: %s" % e}
+        with _SISTEM_KILIT:
+            _SISTEM_IS.update(calisiyor=False, sonuc={"durum": s.get("durum"), "mesaj": s.get("mesaj") or ""})
+        if s.get("durum") == "guncellendi" and s.get("yeniden_baslat"):
+            yeniden()
+
+    threading.Thread(target=is_, daemon=True).start()
+    return {"calisiyor": True}
+
+
+def ev_agi_ac(kur=None, yeniden=yeniden_baslat_zamanla):
+    """Hesap sayfasindaki «Ev ağını aç»: `python sistem/telefon.py` + yeniden baslatma."""
+    try:
+        (kur or telefon.kur)()
+    except (RuntimeError, OSError) as e:
+        raise hesap.Hata(500, str(e))
+    yeniden()
+    return {"ok": True, "mesaj": "Ev ağı açılıyor; LifeOS birkaç saniyede geri gelir."}
+
+
+hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac)
+
+
 def merkez_izinli(basliklar, kapi):
     """POST /api/merkez/ac yalniz modulun kendi sayfasindan: X-LifeOS: merkez basligi
     tarayiciyi on-kontrole zorlar (bu sunucu izin vermez); Origin varsa ayni kapi olmali."""
@@ -1693,15 +1782,8 @@ class Giris(SimpleHTTPRequestHandler):
         if yol == "/api/yeniden":
             yeniden_baslat_zamanla()
             return self._json(200, {"ok": True})
-        with _GUNCEL_KILIT:
-            # yedekle=1 yalniz kutudaki «Yedekle ve güncelle» dugmesinden gelir.
-            sonuc = guncelle.uygula(yedekle="yedekle=1" in self.path)
-            _GUNCEL.update(zaman=0.0, veri=None)
-        # HKM'nin kodu degistiyse ve HKM aciksa yeni kodla yeniden acilir (arka planda).
-        if sonuc.get("durum") == "guncellendi" and sonuc.get("hkm_degisti") and hkm_ayakta():
-            threading.Thread(target=hkm_yeniden, daemon=True).start()
-            sonuc["mesaj"] = (sonuc.get("mesaj") or "") + " HKM yeni sürümle yeniden başlatılıyor."
-        return self._json(200, sonuc)
+        # yedekle=1 yalniz kutudaki «Yedekle ve güncelle» dugmesinden gelir.
+        return self._json(200, guncelle_kur(yedekle="yedekle=1" in self.path))
 
     def do_GET(self):
         yol = self.path.split("?", 1)[0]
@@ -1956,7 +2038,7 @@ def telefon_kurulum_html(bilgisayar, ip_listesi, parmak):
         for m in ("AYS", "SPI", "ESP"))
     return """<!doctype html><html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LifeOS — telefon kurulumu</title>
+<title>LifeOS — cihaz kurulumu</title>
 <style>
 :root{ --bg:#f6f6f8; --kart:#fff; --yazi:#1d1d22; --ikinci:#5c5c66; --vurgu:#3d3f8f; }
 @media (prefers-color-scheme:dark){ :root{ --bg:#16171b; --kart:#202227; --yazi:#ececf1; --ikinci:#a3a3ad; --vurgu:#a7a9ff; } }
@@ -1969,30 +2051,70 @@ p, li{ color:var(--ikinci); } b{ color:var(--yazi); } a{ color:var(--vurgu); wor
 .dugme{ display:inline-block; margin-top:6px; padding:12px 18px; border-radius:999px;
   background:var(--vurgu); color:#fff; text-decoration:none; font-weight:600; }
 @media (prefers-color-scheme:dark){ .dugme{ color:#16171b; } }
-ul{ padding-left:18px; margin:6px 0; } .yedek{ font-size:13px; } code{ font-size:12px; word-break:break-all; }
+ul, ol{ padding-left:18px; margin:6px 0; } ol li{ margin:8px 0; } [hidden]{ display:none !important; } .yedek{ font-size:13px; } code{ font-size:12px; word-break:break-all; }
 </style></head><body><main>
-<h1>LifeOS'u telefona kur</h1>
-<section><h2>1. Sertifikayı indir</h2>
-<p>Telefon bilgisayarla aynı Wi-Fi'da olmalı. Bu sertifika yalnız senin
-bilgisayarının adresine güvenmeyi sağlar; internete hiçbir şey çıkmaz.</p>
-<a class="dugme" href="/lifeos-kok.cer">Sertifikayı indir</a></section>
-<section><h2>2. Sertifikayı kur</h2>
-<p><b>iPhone:</b> Ayarlar › İndirilen Profil › Yükle. Sonra Ayarlar › Genel ›
-Hakkında › Sertifika Güven Ayarları › «LifeOS Yerel Kok» için tam güveni aç.</p>
-<p><b>Android:</b> Ayarlar › Güvenlik › Şifreleme ve kimlik bilgileri ›
-Sertifika yükle › CA sertifikası › indirilen dosyayı seç.</p>
-<p>Parmak izi (profilde aynı olmalı):<br><code>%s</code></p></section>
-<section><h2>3. Modülü aç, ana ekrana ekle</h2>
+<h1>LifeOS'u bu cihaza kur</h1>
+<section id="bagla" hidden><h2>Bu cihazı hesabına bağla</h2>
+<p id="bagla-durum">Sertifika denetleniyor…</p>
+<a class="dugme" id="bagla-tarayici" hidden>Tarayıcıda devam et</a>
+<a class="dugme" id="bagla-uygulama" hidden>LifeOS uygulamasında aç</a></section>
+<section data-cihaz="ios"><h2>iPhone ve iPad</h2>
+<ol><li><a class="dugme" href="/lifeos.mobileconfig">LifeOS profilini indir</a> › İzin ver.</li>
+<li>Ayarlar › <b>İndirilen Profil</b> › Yükle.</li>
+<li>Ayarlar › Genel › Hakkında › <b>Sertifika Güven Ayarları</b> › «LifeOS Yerel Kök»ü aç.</li></ol>
+<p>AYS, SPİ ve ESP ana ekrana gelir. Profil yalnız senin bilgisayarına güvenir; internete hiçbir şey çıkmaz.</p></section>
+<section data-cihaz="ios" id="iphone-uygulama"><h2>iPhone uygulaması (isteğe bağlı)</h2>
+<p>Ekran kapalıyken rota ve bildirim için. AltStore'u bilgisayardaki AltServer ile
+bir kez kur, sonra dokun: LifeOS kaynağı AltStore'a eklenir.</p>
+<a class="dugme" href="altstore://source?url=%s">AltStore'a LifeOS'u ekle</a>
+<p>AltStore › Browse › LifeOS › Free. Web kodu sonra kendiliğinden güncellenir.
+Haftalık imza yenilemesi: Kısayollar › Otomasyon › Her gün › AltStore «Refresh All Apps»,
+«Çalıştırmadan önce sor» kapalı. LifeOS açıkken AltServer da açılır.</p></section>
+<section data-cihaz="android"><h2>Android telefon ve tablet</h2>
+<ol><li><a class="dugme" href="/lifeos-kok.cer">Sertifikayı indir</a></li>
+<li>Ayarlar'ın arama kutusuna <b>CA sertifikası</b> yaz › CA sertifikası › Yine de yükle › İndirilenler › lifeos-kok.cer.</li>
+<li>Aşağıdaki her modülü Chrome'da aç › ⋮ menüsü › <b>Ana ekrana ekle</b>.</li></ol></section>
+<section><h2>Modüller</h2>
 <ul>%s</ul>
 <p>Bir modülü hep aynı adresten aç: adres değişirse verin ayrı bir kökende
 kalır ve «silinmiş» görünür. <b>.local</b> açılmazsa yedek adresi kullan.</p>
-<p><b>iPhone:</b> Paylaş › Ana Ekrana Ekle. Verin o uygulamada durur.
-<b>Android:</b> Chrome menüsü › Ana ekrana ekle.</p></section>
-<section><h2>4. Evde bir kez aç</h2>
-<p>Ana ekrandan bir kez açınca dosyalar telefona kaydedilir. Sonra dışarıda
-internetsiz de açılır; kamera ve canlı rota çalışır. Harita karoları için
-mobil internet gerekir.</p></section>
-</main></body></html>""" % (_kac(parmak), modul)
+<p>Evde bir kez açınca dosyalar cihaza kaydedilir; sonra dışarıda internetsiz de açılır.
+Harita karoları için mobil internet gerekir. Güncellemeler bilgisayardan kendiliğinden gelir.</p>
+<p>Parmak izi (profilde aynı olmalı):<br><code>%s</code></p></section>
+</main>
+<script>
+/* Cihaza gore tek yol: oteki cihazin adimlari gizlenir (betik yoksa hepsi gorunur). */
+(function(){
+  var ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var cihaz = ios ? 'ios' : /Android/.test(ua) ? 'android' : '';
+  if(cihaz) document.querySelectorAll('[data-cihaz]').forEach(function(e){ e.hidden = e.getAttribute('data-cihaz') !== cihaz; });
+})();
+/* Tek QR (hesap sayfasi › Yeni cihaz bagla): sertifika kuruluysa hemen, degilse
+   kurulunca kendiliginden hesaba baglar. Kod rakam degilse hic okunmaz. */
+(function(){
+  var kod = (new URLSearchParams(location.search).get('bagla') || '').replace(/[^0-9]/g, '');
+  if(kod.length !== 6) return;
+  history.replaceState(null, '', location.pathname);
+  var ip = location.hostname, hedef = 'https://' + ip + ':%d/';
+  var iphone = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  var $ = function(i){ return document.getElementById(i); };
+  $('bagla').hidden = false;
+  $('bagla-tarayici').href = hedef + '?bagla=' + kod;
+  $('bagla-uygulama').href = 'lifeos://bagla?adres=' + encodeURIComponent(ip) + '&kod=' + kod;
+  function bak(){
+    fetch(hedef + 'sw.js', { mode:'no-cors', cache:'no-store' }).then(function(){
+      if(iphone){
+        $('bagla-durum').textContent = 'Sertifika hazır. Uygulamayı kurduysan oradan aç.';
+        $('bagla-uygulama').hidden = $('bagla-tarayici').hidden = false;
+      }else location.replace($('bagla-tarayici').href);
+    }).catch(function(){
+      $('bagla-durum').textContent = 'Önce aşağıdaki sertifikayı indirip kur; kurulunca bu cihaz kendiliğinden bağlanır.';
+      setTimeout(bak, 2000);
+    });
+  }
+  bak();
+})();
+</script></body></html>""" % (_kac(ALTSTORE_KAYNAK), modul, _kac(parmak), telefon.PORTLAR["SPI"])
 
 
 class TelefonKurulum(BaseHTTPRequestHandler):
@@ -2014,6 +2136,15 @@ class TelefonKurulum(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/x-x509-ca-cert")
             self.send_header("Content-Disposition", 'attachment; filename="lifeos-kok.cer"')
+        elif yol == "/lifeos.mobileconfig":
+            # iPhone/iPad: kok sertifika + uc ana ekran simgesi tek profilde.
+            try:
+                govde = telefon.profil(self.klasor, telefon.ad(), telefon.ipler())
+            except OSError:
+                return self.send_error(404)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-apple-aspen-config")
+            self.send_header("Content-Disposition", 'attachment; filename="LifeOS.mobileconfig"')
         elif yol in ("/", "/index.html"):
             ipl = telefon.ipler()
             govde = telefon_kurulum_html(telefon.ad(), ipl, telefon.parmak_izi(y)).encode("utf-8")
@@ -2097,6 +2228,8 @@ def main():
 
     # Telefon: yalniz telefon.py ile sertifika uretildiyse. Acilamazsa
     # bilgisayardaki sistemler yine calisir.
+    if telefon.tazele():
+        print("  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
     tel, tel_sorun = telefon_sunuculari()
     kurulum = None
     if tel:

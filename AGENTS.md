@@ -68,6 +68,14 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    kabuk derlenmiş tek dosyaları (`dist/`) içine alır ve telefonda yerel bir
    sunucuyla 4173/4183/4193'te açar. Derleme araçları (Xcode, XcodeGen)
    yalnız CI'da koşar. Ayrıntı: `belgeler/UYGULAMA.md`.
+   **Kabuk web kodunu indirebilir (2026-11-05, depo sahibinin isteği: «her güncellemede
+   PC bağlamam lazım»):** kabuk içindeki `dist/` yedek olarak kalır; daha yeni web kodunu
+   yalnız yeşil derlemeden, özet doğrulamasıyla kendisi indirir (`WebGuncelleme.swift`).
+   Yalnız kod iner, hiçbir kayıt gitmez. Sayfa yeni bir yerel köprü isterse `project.yml`
+   › `LifeOSWebUyum` artırılır: eski kabuk o paketi almaz.
+   **Masaüstü kabuğu (2026-11-05):** `uygulama/masaustu/` Electron'un resmî paketine giren
+   kabuktur (depodaki kodu olduğu gibi çalıştırır, çerçeve ya da paket eklemez); web kodu
+   ona bağlı değildir. `sistem/kur.ps1` kurar, «Güncelle» tazeler.
 4. **Modüller HKM'yi bilir ama ona bağımlı değildir.** AYS/SPİ/ESP,
    HKM'nin üst patron (King) olduğunu bilir ve onunla konuşabilir; ama HKM
    kapalıyken, yanıt vermezken ya da hata verirken hiçbiri bozulmaz,
@@ -92,6 +100,9 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    onaysız yazılmaz. Takvimi modül üretir (AYS, ESP), sunucu yalnız
    birleştirip sunar. Hesap deposu her gün yedeklenir; geri yükleme büyük
    aksiyondur ve cihazların sonraki değişikliğini ezmez (sunucu sözü 20).
+   Admin, şifresiyle, bilgisayardaki LifeOS'u telefondan ya da tabletten
+   güncelleyebilir (sunucu sözü 28): güncelleyicinin sözleri aynıdır, veriye
+   dokunmaz. Ev ağını açmak yine yalnız bilgisayarın kendisinden.
    Siri «Bugün ne var?»: her modül günün cümlesini KENDİ kuralıyla yazıp
    yayınlar; sunucu yalnız dizer, bugüne ait olmayanı «henüz açılmadı» der
    (sunucu sözü 21).
@@ -186,6 +197,8 @@ cd HKM && python3 -m tests.run && python3 tools/perf.py && node tools/yuz.js
 python3 tools/sayilar.py --tam --yaz
 node tools/entegre.js       # üç arayüz + HKM uçtan uca
 node tools/portmuhafiz.test.js  # sabit portlu her denetim port doluysa başlamaz (çıkış 2)
+python3 tools/tasi_test.py          # yeni bilgisayara taşıma paketi: şifreli, üstüne yazmaz
+python3 uygulama/ios/web_paket_test.py  # telefonun PC'siz indirdiği web paketi
 ```
 
 **Kural:** bir değişiklik, dokunduğu sistemin testleri ve duman testi

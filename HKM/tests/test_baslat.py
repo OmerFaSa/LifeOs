@@ -202,6 +202,31 @@ def run():
             eq(len(bos), 1, ad)
     test("--dur Windows'ta pkill olmadan surecin adiyla calisir", t_stop_by_name_on_windows)
 
+    def t_altserver():
+        """iPhone uygulamasi 7 gunde bir AltServer'la yenilenir; kapaliysa
+        uygulama acilmaz. Kuruluysa ve kapaliysa LifeOS acar, aciksa ikilemez,
+        kurulu degilse hicbir sey yapmaz."""
+        m = _kok()
+
+        class Sonuc:
+            def __init__(self, cikti):
+                self.stdout = cikti
+        with tempfile.TemporaryDirectory() as d:
+            exe = os.path.join(d, "AltServer", "AltServer.exe")
+            ortam = {"ProgramFiles(x86)": d}
+            acilan = []
+            eq(m.altserver_baslat(ortam=ortam, ac=acilan.append, isletim="nt")[0], "yok")
+            os.makedirs(os.path.dirname(exe))
+            open(exe, "w").close()
+            eq(m.altserver_baslat(ortam=ortam, ac=acilan.append, isletim="nt",
+                                  calistir=lambda a, **k: Sonuc("AltServer.exe   4120 Console"))[0], "acik")
+            eq(acilan, [])
+            eq(m.altserver_baslat(ortam=ortam, ac=acilan.append, isletim="nt",
+                                  calistir=lambda a, **k: Sonuc("INFO: No tasks are running"))[0], "acildi")
+            eq(acilan, [exe])
+            eq(m.altserver_baslat(ortam=ortam, ac=acilan.append, isletim="posix")[0], "yok")
+    test("AltServer kuruluysa ve kapaliysa LifeOS onu da acar", t_altserver)
+
     def t_stop_by_name_posix_real():
         """POSIX'te gercek bir surecle: adiyla bulunur ve kapanir; adi
         tutmayan surece dokunulmaz."""

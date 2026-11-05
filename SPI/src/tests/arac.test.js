@@ -49,6 +49,9 @@
       const m = a.modelIcin();
       expect(m[1]).toEqual({ ad:'ays_week_target', aciklama:'Haftalık soru hedefini güncelle.', tur:'yaz', parametreler:HEDEF.parametreler });
       expect(typeof m[1].uygula).toBe('undefined');
+      /* HKM araç daraltmada okur (dar_katalog); aciklama ve şema değişmez. */
+      const b = sahne([{ ad:'ays_notlar', tur:'oku', aciklama:'Notlar.', calistir:() => 1, anahtar:'video', ornek:'türev notlarım' }]);
+      expect(b.modelIcin()[0]).toEqual({ ad:'ays_notlar', aciklama:'Notlar.', tur:'oku', anahtar:'video türev notlarım' });
     }));
   });
 

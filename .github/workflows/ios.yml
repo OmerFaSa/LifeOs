@@ -12,9 +12,8 @@ on:
       - 'uygulama/ios/**'
       # Telefonun giris sayfasi derlemede buradan uretilir (hazirla.py giris_html).
       - 'sistem/sunucu.py'
-      - 'brand/ortak/hesap.js'
-      - 'brand/ortak/hesap.css'
-      - 'brand/ortak/animasyon.js'
+      # giris sayfasinin ortak dosyalari (hazirla.py GIRIS_DOSYALARI: hesap, piksel, qr ...)
+      - 'brand/ortak/**'
       - 'AYS/dist/**'
       - 'SPI/dist/**'
       - 'ESP/dist/**'
@@ -45,8 +44,10 @@ jobs:
       - name: Sayfaları uygulamaya hazırla (dist → Web, ortak görsel tek kopya)
         run: python3 uygulama/ios/hazirla.py
 
-      - name: AltStore kaynağı üreticisi sınanır
-        run: python3 uygulama/ios/kaynak_test.py
+      - name: AltStore kaynağı ve web paketi üreticileri sınanır
+        run: |
+          python3 uygulama/ios/kaynak_test.py
+          python3 uygulama/ios/web_paket_test.py
 
       - name: Xcode projesini üret
         working-directory: uygulama/ios
@@ -131,3 +132,20 @@ jobs:
             || gh release create ios-son --prerelease --title "LifeOS iOS — son derleme" --notes "$NOT"
           gh release upload ios-son uygulama/ios/LifeOS.ipa uygulama/ios/altstore-kaynak.json --clobber
           gh release edit ios-son --notes "$NOT"
+
+      # PC'siz güncelleme: uygulama web kodunu buradan kendisi indirir (WebGuncelleme.swift).
+      # Testlerden sonra çalışır (yalnız yeşil derleme gider). Dosya adı içeriğin özetidir:
+      # var olan yeniden yüklenmez. Liste en son yazılır: telefon eksik paket görmez.
+      - name: Web paketini yayımla (telefon PC'siz güncellensin)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 uygulama/ios/web_paket.py uygulama/ios/build/Build/Products/Release-iphoneos/LifeOS.app web-paket ${{ github.run_number }}
+          gh release view web-son >/dev/null 2>&1 \
+            || gh release create web-son --prerelease --title "LifeOS telefon web paketi" --notes "Uygulama bunu kendisi indirir; elle kurulmaz."
+          gh release view web-son --json assets -q '.assets[].name' | sort > var.txt
+          (cd web-paket && ls | grep '^w-' | sort) > yeni.txt
+          comm -13 var.txt yeni.txt | sed 's|^|web-paket/|' | xargs -r -n 20 gh release upload web-son --clobber
+          gh release upload web-son web-paket/web-surum.json --clobber
+          comm -23 var.txt yeni.txt | grep '^w-' | xargs -r -n 1 gh release delete-asset web-son -y

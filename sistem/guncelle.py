@@ -46,6 +46,10 @@ ESKI_KOK = ("baslat.py", "sunucu.py", "guncelle.py", "baslat.sh",
             "BASLAT.command", "GELISTIRME_RAPORU.md", "NOTLAR.md",
             "LIFEOS2.md", "skills-lock.json", "ekip")
 
+BAKIS_SN = 45       # «yenilik var mi?» sayfa acilisini bekletir: kisa
+INDIRME_SN = 900    # kurarken buyuk bir indirme yavas agda dakikalar surebilir
+SARMA_SN = 600      # ileri sarma; yavas diskte 60 sn'de oldurulup yarim kalmamali
+
 
 def _git(args, kok=KOK, calistir=subprocess.run, timeout=60):
     """(kod, cikti). git yoksa kod None."""
@@ -60,12 +64,12 @@ def _git(args, kok=KOK, calistir=subprocess.run, timeout=60):
     return r.returncode, ((r.stdout or "") + (r.stderr or "")).strip()
 
 
-def durum(kok=KOK, calistir=subprocess.run, getir=True):
+def durum(kok=KOK, calistir=subprocess.run, getir=True, sure=BAKIS_SN):
     """Guncelleme var mi? Hicbir dosyayi degistirmez.
 
     Doner: {"durum": "ok" | "git-yok" | "git-degil", ...}
     "ok" iken: dal, geride, ileride, kirli (liste), yeni (commit basliklari),
-    ag (uzak bilgi tazelenebildi mi)."""
+    ag (uzak bilgi tazelenebildi mi), asim (ag yavas: sure doldu)."""
     kod, _ = _git(["--version"], kok, calistir)
     if kod is None:
         return {"durum": "git-yok",
@@ -79,10 +83,10 @@ def durum(kok=KOK, calistir=subprocess.run, getir=True):
                          "GitHub'daki sürüme bağlar ve en yeni sürümü kurar; "
                          "verin (tarayıcı ve HKM/db) korunur."}
     _, dal = _git(["rev-parse", "--abbrev-ref", "HEAD"], kok, calistir)
-    ag = True
+    ag, asim = True, False
     if getir:
-        kod, _ = _git(["fetch", "--quiet", UZAK, DAL], kok, calistir, timeout=45)
-        ag = kod == 0
+        kod, _ = _git(["fetch", "--quiet", UZAK, DAL], kok, calistir, timeout=sure)
+        ag, asim = kod == 0, kod == 124
     hedef = UZAK + "/" + DAL
     kod, g = _git(["rev-list", "--count", "HEAD.." + hedef], kok, calistir)
     geride = int(g) if kod == 0 and g.strip().isdigit() else 0
@@ -101,8 +105,103 @@ def durum(kok=KOK, calistir=subprocess.run, getir=True):
     # Ileri sarilamaz; ancak kullanici isterse yerel kayitlar yedek dala
     # alinip guncellenebilir (uygula(yedekle=True)).
     return {"durum": "ok", "dal": dal.strip(), "geride": geride,
-            "ileride": ileride, "kirli": kirli, "yeni": yeni, "ag": ag,
+            "ileride": ileride, "kirli": kirli, "yeni": yeni, "ag": ag, "asim": asim,
             "yedeklenebilir": bool(geride and ileride)}
+
+
+def engel_cumlesi(d):
+    """durum() sonucu icin: guncelleme neden yapilamaz; yapilabiliyorsa bos.
+    Baska cihazdan bakan da panelin gordugu nedeni gorsun."""
+    if d.get("durum") != "ok":
+        return d.get("mesaj") or ""
+    if d.get("dal") != DAL:
+        return "Klasör şu an «%s» dalında. Güncelleme yalnız «main» dalında yapılır." % d.get("dal")
+    if d.get("ileride") and d.get("geride"):
+        return "Bu klasörde GitHub'da olmayan %d kayıt var; bilgisayardaki panelden «Yedekle ve güncelle»." % d["ileride"]
+    return ""
+
+
+def kilit_temizle(kok=KOK, calistir=subprocess.run, simdi=None):
+    """Oldurulmus bir git'in biraktigi index.lock sonraki her guncellemeyi
+    durdurur. Ileri sarmanin en uzun suresinden eski kilidin sahibi yoktur."""
+    import time
+    kod, yol = _git(["rev-parse", "--git-path", "index.lock"], kok, calistir, timeout=10)
+    if kod != 0:
+        return False
+    tam = os.path.join(kok, yol.strip())
+    try:
+        if (simdi or time.time()) - os.path.getmtime(tam) > SARMA_SN:
+            os.remove(tam)
+            return True
+    except OSError:
+        pass                # kilit yok ya da acik bir surec tutuyor
+    return False
+
+
+def _yarim_mi(kirli, kok, calistir):
+    """Yarim kalmis ileri sarma: degisen HER dosya zaten hedef surumde (ya da
+    hedefte olmayan bir dosya silinmis). Elle yazilmis bir sey yoktur; yalniz
+    boyleyse dosyalarin ustune yazilir (soz 2 yine gecerli)."""
+    hedef = UZAK + "/" + DAL
+    for ad in kirli:
+        kod, beklenen = _git(["rev-parse", "--verify", "--quiet", hedef + ":" + ad], kok, calistir, timeout=30)
+        var = os.path.isfile(os.path.join(kok, ad))
+        if kod != 0:
+            if var:
+                return False
+            continue
+        if not var:
+            return False
+        # --path: satir sonu donusumu depodakiyle ayni olsun (Windows'ta CRLF)
+        kod, ozet = _git(["hash-object", "--path=" + ad, "--", ad], kok, calistir, timeout=60)
+        if kod != 0 or ozet.strip() != beklenen.strip():
+            return False
+    return True
+
+
+def _calisan_kopya():
+    return os.environ.get("LIFEOS_DIR") or os.path.join(os.path.expanduser("~"), "LifeOS-Sistem")
+
+
+def _kabuk_klasoru():
+    elle = os.environ.get("LIFEOS_KABUK_KLASOR")
+    if elle:
+        return elle
+    temel = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+    return os.path.join(temel, "Programs", "LifeOS", "resources", "app")
+
+
+def kabuk_tazele(kok=KOK, hedef=None):
+    """Masaustu kabugu (uygulama/masaustu) kuruluysa onu da yeni surume getirir;
+    bir sonraki acilista gecerli olur. Yalniz uygulamanin calistirdigi kopya
+    (LifeOS-Sistem) dokunur: gelistirme deposu kurulu uygulamayi degistirmez."""
+    import shutil
+    if hedef is None:
+        if os.path.realpath(kok) != os.path.realpath(_calisan_kopya()):
+            return []
+        hedef = _kabuk_klasoru()
+    kaynak = os.path.join(kok, "uygulama", "masaustu")
+    if not os.path.isdir(hedef) or not os.path.isdir(kaynak):
+        return []
+    degisen = []
+    for ad in sorted(os.listdir(kaynak)):
+        a, b = os.path.join(kaynak, ad), os.path.join(hedef, ad)
+        try:
+            if os.path.isfile(a) and not _ayni(a, b):
+                shutil.copyfile(a, b + ".yeni")
+                os.replace(b + ".yeni", b)
+                degisen.append(ad)
+        except OSError:
+            pass            # guncellemeyi durdurmaz; bir dahaki sefere
+    return degisen
+
+
+def _ayni(a, b):
+    try:
+        with open(a, "rb") as x, open(b, "rb") as y:
+            return x.read() == y.read()
+    except OSError:
+        return False
 
 
 # Eski surumlerin kok klasorde biraktigi, git disi URETILMIS artiklar.
@@ -208,20 +307,27 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
 
     Doner: {"durum": "guncellendi" | "guncel" | "engel" | "git-yok" |
     "git-degil" | "hata", "mesaj": ..., ...}"""
-    d = durum(kok, calistir, getir=True)
+    kilit_temizle(kok, calistir)
+    d = durum(kok, calistir, getir=True, sure=INDIRME_SN)
     if d["durum"] == "git-degil" and d.get("baglanabilir"):
         return baglan(kok, calistir, uzak_url)
     if d["durum"] != "ok":
         return d
     if not d["ag"]:
         return dict(d, durum="engel",
-                    mesaj="Sunucuya ulaşılamadı; internet bağlantısını "
+                    mesaj="İndirme çok uzun sürdü; bağlantı yavaş. Hiçbir şey değişmedi, "
+                          "sonra yeniden dene." if d.get("asim") else
+                          "Sunucuya ulaşılamadı; internet bağlantısını "
                           "kontrol edip yeniden dene.")
     if d["dal"] != DAL:
         return dict(d, durum="engel",
                     mesaj="Klasör şu an «%s» dalında. Güncelleme yalnız "
                           "«main» dalında yapılır." % d["dal"])
-    if d["kirli"]:
+    # Elektrik kesildi ya da surec olduruldu: ileri sarma yarim kaldi. Bu
+    # «elle degisiklik» degildir; kendiliginden tamamlanir (test_guncelle).
+    yarim = bool(d["kirli"] and d["geride"] and not d["ileride"]
+                 and _yarim_mi(d["kirli"], kok, calistir))
+    if d["kirli"] and not yarim:
         return dict(d, durum="engel",
                     mesaj="Şu dosyalarda elle yapılmış değişiklik var; "
                           "üstüne yazmamak için güncelleme yapılmadı: "
@@ -243,12 +349,16 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
             return dict(d, durum="hata", mesaj="Yerel kayıtlar yedek dala konamadı; "
                                                "hiçbir şey değişmedi.")
         # --keep: izlenen dosyalar degisir, izlenmeyenler (veri) yerinde kalir.
-        kod, cikti = _git(["reset", "--keep", UZAK + "/" + DAL], kok, calistir, timeout=300)
+        kod, cikti = _git(["reset", "--keep", UZAK + "/" + DAL], kok, calistir, timeout=SARMA_SN)
+    elif yarim:
+        kod, cikti = _git(["reset", "--hard", UZAK + "/" + DAL], kok, calistir, timeout=SARMA_SN)
     else:
-        kod, cikti = _git(["merge", "--ff-only", UZAK + "/" + DAL], kok, calistir)
+        kod, cikti = _git(["merge", "--ff-only", UZAK + "/" + DAL], kok, calistir, timeout=SARMA_SN)
     if kod != 0:
         return dict(d, durum="hata",
-                    mesaj="Güncelleme uygulanamadı: " + (cikti.splitlines() or ["?"])[-1])
+                    mesaj="Az önce başka bir güncelleme başlamış; birkaç dakika sonra yeniden dene."
+                          if "index.lock" in cikti else
+                          "Güncelleme uygulanamadı: " + (cikti.splitlines() or ["?"])[-1])
     _, degisen = _git(["diff", "--name-only", eski.strip(), "HEAD"], kok, calistir)
     degisen = [s for s in degisen.splitlines() if s.strip()]
     yeniden = any(s.endswith(".py") for s in degisen)
@@ -256,6 +366,7 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
     # 2026-10-19: guncellendi ama HKM 40 dakika eski surumle cevap verdi).
     hkm = any(s.startswith("HKM/") and s.endswith(".py") for s in degisen)
     artiklari_temizle(kok)
+    kabuk_tazele(kok)
     return dict(d, durum="guncellendi", degisen=len(degisen),
                 yeniden_baslat=yeniden, hkm_degisti=hkm, yedek_dal=yedek_dal,
                 mesaj="%d yenilik indirildi." % d["geride"]

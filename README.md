@@ -42,10 +42,30 @@ yalnız açıklar.** Model kapalıyken de bütün sistem çalışır.
 Gereken tek şey [Python 3](https://www.python.org/downloads/). macOS ve
 Linux'ta: `sistem/BASLAT.command` · `sistem/baslat.sh`.
 
+**Yeni bilgisayara tek komutla kurulum:** PowerShell'e yapıştır; Python ve Git
+yoksa kurar, masaüstü uygulamasını ve kısayolu koyar, uygulamayı açar.
+
+```powershell
+irm https://raw.githubusercontent.com/OmerFaSa/LifeOs/main/sistem/kur.ps1 | iex
+```
+
+**Eski bilgisayardan taşımak:** eski bilgisayarda PowerShell'e
+`py $env:USERPROFILE\LifeOS-Sistem\sistem\tasi.py --paket` yapıştır; LifeOS'u
+kendisi kapatıp açar, masaüstüne şifreli tek dosya bırakır. Kurulum o dosyayı
+masaüstünde, İndirilenler'de ya da USB'de bulursa sorar.
+
+**Telefon ve tablet:** Hesap › Cihazlar › Yeni cihaz bağla'daki QR'ı okut; sayfa
+yalnız o cihazın üç adımını gösterir (iPhone/iPad'de tek profil simgeleri de kurar),
+sertifika kurulunca hesabına kendiliğinden bağlanır. Giriş sayfasında «Kendiliğinden
+güncelle» açıksa PC her gece güncellenir, tablet ve telefon onunla gelir. iPhone uygulaması yeni web
+kodunu bilgisayarsız kendisi indirir; LifeOS açılınca AltServer'ı da açar, haftalık
+imza yenilemesi evde kendiliğinden olur. Ayrıntı: [belgeler/UYGULAMA.md](belgeler/UYGULAMA.md).
+
 Güncelleme yalnız ileri sarar: elle değiştirilmiş bir dosya varsa hiçbir
-şeye dokunmaz ve nedenini söyler. Zip ile indirilmiş bir klasörü ilk
-güncellemede GitHub'a bağlar. Verin git'in dışındadır; güncelleme ona
-dokunmaz.
+şeye dokunmaz ve nedenini söyler; yarım kalmış bir güncellemeyi kendisi
+tamamlar. Zip ile indirilmiş bir klasörü ilk güncellemede GitHub'a bağlar.
+Verin git'in dışındadır; güncelleme ona dokunmaz. Bilgisayarı başka cihazdan
+güncellemek için: Hesap › Yönetim › Bilgisayarı güncelle (admin, şifreyle).
 
 ## Dört parça
 

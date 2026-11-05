@@ -106,6 +106,86 @@ def run():
             eq(_oku(r.kul, "OKU.md"), "elle\n")            # ustune yazilmadi
     test("elle degistirilmis dosya varsa guncellemez ve adini soyler", t_kirli)
 
+    # 2026-11-05: sistem/guncelle.py merge'u 60 sn'de olduruyordu; yarim kalan
+    # ileri sarma sonsuza dek «elle değişiklik var» diyor, kalan index.lock
+    # Ingilizce git hatasiyla butun guncellemeleri durduruyordu.
+    def t_yarim():
+        with _Depo() as r:
+            _yaz(r.gel, "iki.md", "eski\n")
+            _g(r.gel, "add", "-A"); _g(r.gel, "commit", "-m", "x"); _g(r.gel, "push", "origin", "main")
+            _g(r.kul, "pull", "--ff-only")
+            _yaz(r.gel, "iki.md", "yeni\n"); _yaz(r.gel, "OKU.md", "yeni\n")
+            _g(r.gel, "add", "-A"); _g(r.gel, "commit", "-m", "y"); _g(r.gel, "push", "origin", "main")
+            _yaz(r.kul, "OKU.md", "yeni\n")                # yalniz biri yazilmis, HEAD eski
+            s = guncelle.uygula(r.kul)
+            eq(s["durum"], "guncellendi")
+            eq((_oku(r.kul, "OKU.md"), _oku(r.kul, "iki.md")), ("yeni\n", "yeni\n"))
+            eq(guncelle.durum(r.kul)["geride"], 0)
+    test("yarim kalan ileri sarma kendiliginden tamamlanir", t_yarim)
+
+    def t_yarim_elle():
+        with _Depo() as r:
+            _yaz(r.gel, "iki.md", "eski\n")
+            _g(r.gel, "add", "-A"); _g(r.gel, "commit", "-m", "x"); _g(r.gel, "push", "origin", "main")
+            _g(r.kul, "pull", "--ff-only")
+            _yaz(r.gel, "iki.md", "yeni\n"); _yaz(r.gel, "OKU.md", "yeni\n")
+            _g(r.gel, "add", "-A"); _g(r.gel, "commit", "-m", "y"); _g(r.gel, "push", "origin", "main")
+            _yaz(r.kul, "OKU.md", "yeni\n")
+            _yaz(r.kul, "iki.md", "benim\n")               # biri hedefte, biri elle
+            eq(guncelle.uygula(r.kul)["durum"], "engel")
+            eq(_oku(r.kul, "iki.md"), "benim\n")
+    test("yarim gorunse de elle yazilmis tek dosya varsa dokunmaz", t_yarim_elle)
+
+    def t_kilit():
+        import time as _t
+        with _Depo() as r:
+            r.yeni("OKU.md", "iki\n", "x")
+            kilit = os.path.join(r.kul, ".git", "index.lock")
+            open(kilit, "w").close()
+            s = guncelle.uygula(r.kul)                     # taze kilit: sahibi olabilir
+            eq(s["durum"], "hata")
+            ok("başka bir güncelleme" in s["mesaj"], s["mesaj"])
+            ok(os.path.exists(kilit))
+            eski = _t.time() - guncelle.SARMA_SN - 5
+            os.utime(kilit, (eski, eski))
+            eq(guncelle.uygula(r.kul)["durum"], "guncellendi")
+            no(os.path.exists(kilit))
+    test("sahipsiz git kilidi temizlenir, taze kilide dokunulmaz", t_kilit)
+
+    def t_yavas():
+        with _Depo() as r:
+            r.yeni("OKU.md", "iki\n", "x")
+            sureler = []
+
+            def yavas(arg, **kw):
+                if arg[1] == "fetch":
+                    sureler.append(kw.get("timeout"))
+                    raise subprocess.TimeoutExpired(arg, kw.get("timeout"))
+                return subprocess.run(arg, **kw)
+            s = guncelle.uygula(r.kul, calistir=yavas)
+            eq(s["durum"], "engel")
+            ok("yavaş" in s["mesaj"], s["mesaj"])          # «internet yok» demez
+            eq(sureler, [guncelle.INDIRME_SN])
+            eq(guncelle.durum(r.kul, calistir=yavas)["asim"], True)
+            eq(sureler[-1], guncelle.BAKIS_SN)             # bakis sayfayi bekletmez
+    test("yavas indirme «internet yok» denmez; kurarken uzun sure verilir", t_yavas)
+
+    def t_kabuk():
+        d = tempfile.mkdtemp(prefix="lifeos-kabuk-")
+        try:
+            kok, hedef = os.path.join(d, "depo"), os.path.join(d, "app")
+            _yaz(kok, "uygulama/masaustu/main.js", "yeni\n")
+            _yaz(hedef, "main.js", "eski\n")
+            _yaz(hedef, "icon.ico", "dokunma\n")
+            eq(guncelle.kabuk_tazele(kok, hedef), ["main.js"])
+            eq((_oku(hedef, "main.js"), _oku(hedef, "icon.ico")), ("yeni\n", "dokunma\n"))
+            eq(guncelle.kabuk_tazele(kok, hedef), [])      # ayniysa yazmaz
+            eq(guncelle.kabuk_tazele(kok), [])             # calisan kopya degil: kurulu uygulamaya dokunmaz
+            eq(guncelle.kabuk_tazele(kok, os.path.join(d, "yok")), [])   # uygulama kurulu degil
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+    test("masaustu kabugu guncelleme ile gelir; gelistirme deposu kurulu uygulamaya dokunmaz", t_kabuk)
+
     def t_izlenmeyen():
         with _Depo() as r:
             r.yeni("OKU.md", "iki\n", "x")
@@ -397,6 +477,74 @@ def run():
                     shutil.rmtree(d, ignore_errors=True)
     test("giris sayfasinin betigi gecerli JavaScript (node --check)", t_sayfa_betigi)
 
+    # 2026-11-05 (hesap.py soz 28): telefondan ya da tabletten PC'yi guncelleme.
+    def t_sistem_baslat():
+        import threading as _th
+        import time as _t
+
+        def bekle():
+            for _ in range(200):
+                if not sunucu._SISTEM_IS["calisiyor"]:
+                    return
+                _t.sleep(0.01)
+            raise AssertionError("is bitmedi")
+        sunucu._SISTEM_IS.update(calisiyor=False, sonuc=None)
+        kapi, yeniden, kuruldu = _th.Event(), [], []
+
+        def kur():
+            kuruldu.append(1)
+            kapi.wait(5)
+            return {"durum": "guncellendi", "mesaj": "m", "yeniden_baslat": True}
+
+        def patlar(*a, **k):
+            raise AssertionError("kurulum surerken git'e bakilmamali")
+        eq(sunucu.sistem_baslat(kur, lambda: yeniden.append(1)), {"calisiyor": True})
+        eq(sunucu.sistem_baslat(kur, lambda: yeniden.append(1)), {"calisiyor": True})   # ikincisi baslamaz
+        eq(sunucu.sistem_durum(True, durum=patlar)["calisiyor"], True)
+        kapi.set()
+        bekle()
+        eq(kuruldu, [1])
+        eq(yeniden, [1])
+        eq(sunucu._SISTEM_IS["sonuc"], {"durum": "guncellendi", "mesaj": "m"})
+        for dondu, baslar in (({"durum": "guncel", "mesaj": "x"}, False),
+                              ({"durum": "guncellendi", "mesaj": "x", "yeniden_baslat": False}, False),
+                              ({"durum": "engel", "mesaj": "elle"}, False)):
+            del yeniden[:]
+            sunucu.sistem_baslat(lambda: dondu, lambda: yeniden.append(1))
+            bekle()
+            eq(bool(yeniden), baslar)
+
+        def hata():
+            raise ValueError("bozuk")
+        sunucu.sistem_baslat(hata, lambda: yeniden.append(1))
+        bekle()
+        eq(sunucu._SISTEM_IS["sonuc"]["durum"], "hata")
+        ayrismis = {"durum": "ok", "dal": "main", "geride": 2, "ileride": 1, "kirli": [], "yeni": ["a"], "ag": True}
+        d = sunucu.sistem_durum(True, durum=lambda: ayrismis)
+        eq((d["geride"], d["yeni"]), (2, ["a"]))
+        ok("Yedekle ve güncelle" in d["engel"], d["engel"])
+        eq(sunucu.sistem_durum(True, durum=lambda: dict(ayrismis, ileride=0))["engel"], "")
+        ok("deneme" in sunucu.sistem_durum(True, durum=lambda: dict(ayrismis, ileride=0, dal="deneme"))["engel"])
+        sunucu._SISTEM_IS.update(calisiyor=False, sonuc=None)
+        sunucu.guncelleme_durumu(True, durum=lambda: {"durum": "ok"})
+        sunucu._GUNCEL.update(zaman=0.0, veri=None)
+    test("baska cihazdan guncelleme: arkada yurur, ikincisi baslamaz, yalniz gerekirse yeniden baslar", t_sistem_baslat)
+
+    def t_ev_agi_ac():
+        yeniden = []
+        eq(sunucu.ev_agi_ac(lambda: None, lambda: yeniden.append(1))["ok"], True)
+        eq(yeniden, [1])
+
+        def openssl_yok():
+            raise RuntimeError("openssl bulunamadı.")
+        try:
+            sunucu.ev_agi_ac(openssl_yok, lambda: yeniden.append(1))
+            ok(False, "hata bekleniyordu")
+        except sunucu.hesap.Hata as e:
+            eq(e.kod, 500)
+        eq(yeniden, [1])                                    # basarisizsa yeniden baslamaz
+    test("ev agini ac: yapilamazsa nedenini soyler, sistemi yeniden baslatmaz", t_ev_agi_ac)
+
     def t_telefon_sayfa():
         """Telefon uygulamasinin giris sayfasi (uygulama/ios, 2026-10-04): ayni
         sayfa ve ayni kartlar; telefonda olmayan HKM, guncelleme ve bilgisayarin
@@ -412,7 +560,15 @@ def run():
         govde = h[:a] + h[h.index("</script>", a):]
         no(any(x in govde for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
            "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
-        eq(h.count("<script"), 8)                         # parca motoru + piksel figur ve simge + piksel oda + giris ekrani (hesap.js) + Animasyonlar + QR + acilis videosu
+        # Telefon sayfasinin yukledigi her dosya uygulamaya girer (hazirla.py). piksel-doga.js
+        # 2026-11'de sayfaya eklendi, uygulamaya eklenmedi; yalniz simulatorde gorulurdu.
+        import importlib.util as _iu
+        _s = _iu.spec_from_file_location("hazirla_ios", os.path.join(KOK, "uygulama", "ios", "hazirla.py"))
+        _h = _iu.module_from_spec(_s); _s.loader.exec_module(_h)
+        import re as _re
+        adresler = _re.findall(r'(?:src|href)="/([a-z-]+\.(?:js|css))"', h)
+        ok(adresler, "sayfada dosya adresi bulunamadi")
+        no(sorted(set(adresler) - set(_h.GIRIS_DOSYALARI)), "uygulamaya girmeyen dosya")
         ok('<script src="/hesap.js" data-giris></script>' in h)
         ok('<script src="/animasyon.js"></script>' in h)
         ok('<script src="/qr.js"></script>' in h)         # hesap sayfasinin QR'i (2026-10-08)

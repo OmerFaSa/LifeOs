@@ -566,7 +566,8 @@ window.LIFEOS = window.LIFEOS || {};
      yok: her ses birkaç katmanlı küçük bir sentezdir. Katman türleri:
        tel      Karplus–Strong: süzülmüş gürültü bir gecikme halkasında
                 söner — yumuşak naylon tel / kalimba (notalar)
-       ton      sinüs; perdesi yukarı kıvrılırsa suda kabarcık «blup»
+       ton      osilatör: sinüs (perdesi yukarı kıvrılırsa suda kabarcık
+                «blup»); üçgen, kare, nabız (yüzde 25): arayüzün çip notaları
        keçe     alçak geçiren süzgeçten kısa gürültü: keçeye dokunuş, adım
        hisirti  bant süzgeçli gürültü (hava)
      Alanlar: t gecikme sn · f [başlangıç, bitiş] Hz · d süre sn · g tepe
@@ -578,26 +579,33 @@ window.LIFEOS = window.LIFEOS || {};
      perde ±%2 oynar: aynı tık art arda makineli tüfek gibi duyulmaz. */
   /* Dördüncü tur (2026-10-28, «hâlâ elektronik; soft ve yumuşak değil»):
      osilatör ne yapılsa elektronik duyuluyordu (üçgen dalga, formant,
-     titreşim). Notalar artık tel, minik sesleri kabarcık, dokunuş keçe;
-     tonlu hiçbir katman 4 ms'den hızlı başlamaz. */
+     titreşim). Minik sesleri kabarcık, adım keçe; tonlu hiçbir katman
+     4 ms'den hızlı başlamaz. Arayüz sesleri 2026-11-05'te piksel temaya
+     uysun diye bilerek çip notasına döndü (aşağıda). */
   const SESLER = Object.freeze({
-    /* Dokunuş: keçeye parmak ucu — boğuk kısa vuruş + alttan hafif ağırlık. */
-    tik:  [{ t:0, tur:'kece', f:[1800, 600], q:0.8, d:0.03, g:0.3, a:0.002 },
-           { t:0, tur:'ton', dalga:'sine', f:[190, 120], d:0.05, g:0.22, a:0.005 }],
-    /* Aç/kapa: iki notalık yumuşak tel (G4 ↔ D5); aç yükselir, kapa iner. */
-    ac:   [{ t:0, tur:'tel', f:[392], d:0.5, g:0.22, a:0.004, oda:0.15, parlak:0.45 },
-           { t:0.07, tur:'tel', f:[587], d:0.6, g:0.2, a:0.004, oda:0.18, parlak:0.45 }],
-    kapa: [{ t:0, tur:'tel', f:[587], d:0.5, g:0.2, a:0.004, oda:0.15, parlak:0.45 },
-           { t:0.07, tur:'tel', f:[392], d:0.6, g:0.22, a:0.004, oda:0.18, parlak:0.45 }],
-    /* Kaydedildi: tel üzerinde yumuşak bir arpej (C5 · E5 · G5). */
-    /* Uyarı (hata bildirimi): yumuşak, iki nota aşağı; sert değil. */
-    uyari:[{ t:0, tur:'tel', f:[494], d:0.5, g:0.17, a:0.006, oda:0.2, parlak:0.35 },
-           { t:0.12, tur:'tel', f:[392], d:0.6, g:0.15, a:0.006, oda:0.22, parlak:0.35 }],
-    tamam:[{ t:0, tur:'tel', f:[523], d:0.8, g:0.2, a:0.004, oda:0.25, parlak:0.5 },
-           { t:0.09, tur:'tel', f:[659], d:0.8, g:0.18, a:0.004, oda:0.25, parlak:0.5 },
-           { t:0.18, tur:'tel', f:[784], d:0.8, g:0.16, a:0.004, oda:0.3, parlak:0.5 }],
-    /* Sayfa açılınca: camın üstünden geçen hava — alçaktan açılan yumuşak keçe. */
-    sayfa:[{ t:0, tur:'kece', f:[300, 1100], q:0.6, d:0.3, g:0.2, a:0.12, oda:0.3 }],
+    /* ARAYÜZ SESLERİ ÇİP-TÜNE (kullanıcı, 2026-11-05: «sistem sesleri tema ile
+       çok alakasız ve kötü»; tema piksel, akşam sokağı). Kısa, kuru, nota
+       nota (8-bit arpej); üçgen ve nabız dalgası 2 kHz sıcak süzgeçten geçer:
+       tiz değil, kısık. Seçim önizlemeyle yapıldı; kullanıcının seçimi: dokunuş ve sayfa nabız, gerisi üçgen. */
+    /* Dokunuş: tek kısa nabız notası (C6), çok kısık. */
+    tik:  [{ t:0, tur:'ton', dalga:'nabiz', f:[1046], d:0.026, g:0.075, a:0.004 }],
+    /* Aç/kapa: iki üçgen nota (C5 ↔ G5); aç yükselir, kapa iner. */
+    ac:   [{ t:0, tur:'ton', dalga:'triangle', f:[523], d:0.07, g:0.2, a:0.004 },
+           { t:0.06, tur:'ton', dalga:'triangle', f:[784], d:0.1, g:0.18, a:0.004 }],
+    kapa: [{ t:0, tur:'ton', dalga:'triangle', f:[784], d:0.07, g:0.18, a:0.004 },
+           { t:0.06, tur:'ton', dalga:'triangle', f:[523], d:0.1, g:0.2, a:0.004 }],
+    /* Sayfa: üç hızlı nabız notası yukarı (C5 · E5 · G5), en kısığı. */
+    sayfa:[{ t:0, tur:'ton', dalga:'nabiz', f:[523], d:0.045, g:0.045, a:0.004 },
+           { t:0.035, tur:'ton', dalga:'nabiz', f:[659], d:0.045, g:0.045, a:0.004 },
+           { t:0.07, tur:'ton', dalga:'nabiz', f:[784], d:0.06, g:0.045, a:0.004 }],
+    /* Kaydedildi: üçgen arpej C5 · E5 · G5 · C6, son nota biraz uzar. */
+    tamam:[{ t:0, tur:'ton', dalga:'triangle', f:[523], d:0.09, g:0.2, a:0.004 },
+           { t:0.07, tur:'ton', dalga:'triangle', f:[659], d:0.09, g:0.19, a:0.004 },
+           { t:0.14, tur:'ton', dalga:'triangle', f:[784], d:0.09, g:0.18, a:0.004 },
+           { t:0.21, tur:'ton', dalga:'triangle', f:[1046], d:0.3, g:0.17, a:0.004 }],
+    /* Uyarı (hata bildirimi): iki üçgen nota aşağı (A4 → F4); sert değil. */
+    uyari:[{ t:0, tur:'ton', dalga:'triangle', f:[440], d:0.14, g:0.2, a:0.004 },
+           { t:0.12, tur:'ton', dalga:'triangle', f:[349], d:0.25, g:0.2, a:0.004 }],
     /* Gıdık: suda dört kabarcık, her biri biraz daha ince («blup-blup-blip»). */
     gidik:[{ t:0, tur:'ton', dalga:'sine', f:[420, 760], d:0.07, g:0.16, a:0.006 },
            { t:0.1, tur:'ton', dalga:'sine', f:[460, 840], d:0.07, g:0.15, a:0.006 },
@@ -841,7 +849,8 @@ window.LIFEOS = window.LIFEOS || {};
       } else kaynak.connect(g);
     } else {
       kaynak = c.createOscillator();
-      kaynak.type = k.dalga || 'sine';
+      const nb = k.dalga === 'nabiz' && nabizDalga(c);
+      if(nb) kaynak.setPeriodicWave(nb); else kaynak.type = k.dalga === 'nabiz' ? 'square' : (k.dalga || 'sine');
       kaynak.frequency.setValueAtTime(f0, t);
       if(f1 !== f0) kaynak.frequency.exponentialRampToValueAtTime(f1, t + k.d);
       if(k.suz){
@@ -851,6 +860,19 @@ window.LIFEOS = window.LIFEOS || {};
     }
     kaynak.start(t);
     kaynak.stop(t + k.d + 0.03);
+  }
+
+  /* Nabız dalgası (yüzde 25 dolu kare): 8-bit seslerin ince, burnundan
+     tınısı. Bağlamda bir kez kurulur; kuramayan bağlam kare çalar. */
+  const NABIZ = new WeakMap();
+  function nabizDalga(c){
+    if(!c.createPeriodicWave) return null;
+    if(!NABIZ.has(c)){
+      const n = 32, re = new Float32Array(n), im = new Float32Array(n);
+      for(let i = 1; i < n; i++){ re[i] = Math.sin(2 * Math.PI * i * .25) / (i * Math.PI); im[i] = (1 - Math.cos(2 * Math.PI * i * .25)) / (i * Math.PI); }
+      try{ NABIZ.set(c, c.createPeriodicWave(re, im)); }catch(e){ NABIZ.set(c, null); }
+    }
+    return NABIZ.get(c);
   }
 
   /* Karplus–Strong teli: süzülmüş gürültü (parlak: koparmanın parlaklığı)
@@ -875,12 +897,12 @@ window.LIFEOS = window.LIFEOS || {};
     return b;
   }
 
-  /* KAYITLAR (2026-10-28, sesler.js): arayüz sesleri ve adım gerçek CC0
-     kayıttır; sentezle AYNI zincirden geçer (oda, 2 kHz tavan, sıkıştırıcı,
+  /* KAYITLAR (2026-10-28, sesler.js): minik adımı gerçek CC0 kayıttır
+     (arayüz sesleri 2026-11-05'ten beri çip sentezi); sentezle AYNI zincirden geçer (oda, 2 kHz tavan, sıkıştırıcı,
      perde). İlk seste bir kez çözülür; çözülene kadar ya da çözülemezse
      sentez çalar. Kazançlar sentezin yüksekliğine eşlenmiştir. */
-  const KAYITLI = Object.freeze(['tik', 'ac', 'kapa', 'tamam', 'sayfa', 'adim']);
-  const KAYIT_KAZANC = { tik:.42, ac:1.1, kapa:.95, tamam:.23, sayfa:.2, adim:.06 };   // ses gözlemi 2026-10-28: aile hedeflerine eşlendi
+  const KAYITLI = Object.freeze(['adim']);
+  const KAYIT_KAZANC = { adim:.06 };   // ses gözlemi 2026-10-28: aile hedefine eşlendi
   /* Çözülen tampon bağlamına aittir: bağlam yeniden kurulursa (ya da test
      sahte bir bağlam verirse) eskisinin tamponu kullanılmaz. */
   const KAYITLAR = new WeakMap();
@@ -901,12 +923,10 @@ window.LIFEOS = window.LIFEOS || {};
       }catch(e){ /* çözülemedi: sentez çalar */ }
     });
   }
-  /* Kapa, açın aynı kaydının bir perde aşağısıdır (aile tutarlı: aç yükselir, kapa iner). */
   function kayitCal(c, cikis, oda, tur, bas, perde){
-    const d = KAYITLAR.get(c), kaynak = tur === 'kapa' && d && d.tablo.get('ac') ? 'ac' : tur;
-    const b = d && d.tablo.get(kaynak);
+    const d = KAYITLAR.get(c), b = d && d.tablo.get(tur);
     if(!b || !c.createBufferSource) return 0;
-    const s = c.createBufferSource(), oran = perde * (tur === 'kapa' && kaynak === 'ac' ? .84 : 1);
+    const s = c.createBufferSource(), oran = perde;
     s.buffer = b;
     if(s.playbackRate) s.playbackRate.value = oran;
     const g = c.createGain();
@@ -914,13 +934,7 @@ window.LIFEOS = window.LIFEOS || {};
     s.connect(g); g.connect(cikis);
     if(oda){ const o = c.createGain(); o.gain.value = .12; g.connect(o); o.connect(oda); }
     s.start(bas);
-    /* Onay kısa kalır (en çok 0,6 sn): kalimba yumuşakça susar. */
-    const sure = tur === 'tamam' ? Math.min(.6, b.duration / oran) : b.duration / oran;
-    if(tur === 'tamam' && g.gain.setValueAtTime && g.gain.linearRampToValueAtTime){
-      g.gain.setValueAtTime(KAYIT_KAZANC.tamam, bas + .4); g.gain.linearRampToValueAtTime(0, bas + .6);
-      try{ s.stop(bas + .62); }catch(e){}
-    }
-    return sure;
+    return b.duration / oran;
   }
 
   /* Döner: çaldı mı. `kur` yoksa yalnız kurulu bağlam kullanılır.
@@ -957,7 +971,7 @@ window.LIFEOS = window.LIFEOS || {};
       const perde = (o && o.perde > 0 ? o.perde : 1) * (1 + (Math.random() - 0.5) * 0.04);
       kayitHazirla(c);
       if(KAYITLI.indexOf(tur) >= 0){
-        const d = KAYITLAR.get(c), hazir = d && (d.tablo.has(tur) || (tur === 'kapa' && d.tablo.has('ac')));
+        const d = KAYITLAR.get(c), hazir = d && d.tablo.has(tur);
         if(hazir){
           const ks = kayitCal(c, yol(z0.kayit || z0.hedef), z0.oda, tur, bas, perde);
           if(ks){ sonBitis = Math.max(sonBitis, bas + ks); return true; }
@@ -980,6 +994,7 @@ window.LIFEOS = window.LIFEOS || {};
     baglam = null;
     zincir = null;
     sonBitis = 0;
+    sonDokunus = -1; sonOnay = -9;   // yeni bağlamın saati sıfırdan başlar
     Object.keys(sonCal).forEach(k => delete sonCal[k]);
   }
 

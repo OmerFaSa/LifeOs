@@ -1,0 +1,8 @@
+{
+  "name": "lifeos",
+  "productName": "LifeOS",
+  "version": "1.0.0",
+  "description": "LifeOS masaüstü uygulaması: repodaki AYS, SPİ, ESP ve HKM'yi olduğu gibi çalıştırır",
+  "main": "main.js",
+  "private": true
+}

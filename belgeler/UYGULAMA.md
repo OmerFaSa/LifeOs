@@ -35,6 +35,15 @@ uygulama/ios/
   güvenli kökendir: kamera ve konum burada çalışır.
 - **Ortak görsel tek kopya.** `img/seviye` ve `img/marka` üç modülde aynıdır;
   uygulamada bir kez durur (~110 MB yerine ~320 MB olurdu).
+- **Web kodu bilgisayarsız güncellenir.** Uygulama açılışta ve öne gelişte
+  `web-son` sürümüne bakar (`LifeOS/WebGuncelleme.swift`, paket `web_paket.py`).
+  Yalnız uygulamanın içindekinden farklı dosyalar iner, her biri özetle doğrulanır,
+  hepsi inince tek yazımla geçilir; yeni kod sonraki açılışta ya da modül
+  değişince görünür. Paket yalnız testlerden geçen derlemeden yayımlanır. Yeni
+  sürüm iki açılışta ayağa kalkmazsa uygulama içindeki sürüme döner ve o sürümü
+  atlar. Yalnız kod iner; kayıtlara dokunulmaz, hiçbir kayıt gönderilmez.
+  **Swift değişirse** yine AltStore gerekir; sayfa yeni bir köprü istiyorsa
+  `project.yml › LifeOSWebUyum` artırılır, eski kabuk o paketi almaz.
 - **Veri telefonda.** Uygulamanın verisi bilgisayardakinden ayrıdır; taşımak
   için modüllerin «Yedek indir / Yedek yükle» düğmeleri (indirme paylaş
   menüsüyle Dosyalar'a kaydedilir). HKM telefonda yoktur; modüller onsuz
@@ -56,6 +65,53 @@ uygulama/ios/
 | 8 | yazıldı (2026-10-09) | **Kurulu bildirimler ve sessiz saat:** AYS (Ofis ayarları › Telefon bildirimi), SPİ (hatırlatma penceresi) ve ESP'de (Profil) «Kurulu bildirimler» bu modülün telefonda bekleyen bildirimlerini saatiyle listeler. «Bunu sil» o tek bildirimi siler ve modül yeniden kurduğunda da kurmaz (zamanı geçene dek, bu cihazda); «Hepsini sil» şu an kurulu olanları siler, yeni günlerinki yine kurulur; «Geri al» silineni geri kurar. Sessiz saat ve tür ayarı artık ESP'de ve uygulamadaki AYS'de de var; değişince kurulu bildirimler hemen yeniden kurulur. |
 | — | yapılmadı (2026-10-09) | **Apple Sağlık'ı uygulamanın kendisi okumaz:** HealthKit bir yetki (entitlement) ister; ücretsiz Apple kimliğiyle AltStore'un bu yetkiyi verdiği doğrulanamadı ve yetki tutmazsa AltStore kurmayı reddeder (güncelleme yolu kırılır). Yerine Hesap › Kısayollar › «Apple Sağlık’tan her sabah» tarifi: Kısayollar otomasyonu Sağlık örneğini okur, gelen kutusuna yollar, SPİ Onaylar'a bırakır. |
 
+## Yeni bilgisayar
+
+Eski bilgisayarda PowerShell'e yapıştır; şifreyi iki kez yaz. LifeOS açıksa betik
+onu kendisi kapatır, paket bitince yeniden açar; şifreli tek dosya masaüstüne çıkar:
+
+```powershell
+py $env:USERPROFILE\LifeOS-Sistem\sistem\tasi.py --paket
+```
+
+Yeni bilgisayarda PowerShell'e yapıştır:
+
+```powershell
+irm https://raw.githubusercontent.com/OmerFaSa/LifeOs/main/sistem/kur.ps1 | iex
+```
+
+Python, Git, depo, masaüstü uygulaması ve kısayol kurulur; dosya masaüstünde,
+İndirilenler'de ya da USB'de ise açılsın mı diye sorar. Pakette hesap deposu, kök
+sertifika, HKM verisi ve ayarı (kasadaki API anahtarları dahil), arka plan, müzik
+ve uygulama depoları vardır; önbellek ve oturum çerezi yoktur (yeniden girilir).
+Var olan hiçbir dosya silinmez: `.once-<tarih>` adıyla kenara alınır. Kök sertifika
+taşındığı için telefon ve tablete sertifika yeniden kurulmaz; bilgisayarın adresi
+değiştiyse yalnız yeni kodla bağlanır.
+
+## Yeni cihaz (telefon, tablet)
+
+Bilgisayarda Hesap › Cihazlar › Yeni cihaz bağla: QR çıkar (ev ağı kapalıysa aynı
+sayfadan açılır). Cihazın kamerasıyla okut; açılan kurulum sayfası yalnız o cihazın
+adımlarını gösterir (`sistem/sunucu.py` `telefon_kurulum_html`):
+
+- **iPhone/iPad (3 adım):** «LifeOS profilini indir» › Ayarlar › İndirilen Profil ›
+  Yükle › Genel › Hakkında › Sertifika Güven Ayarları › «LifeOS Yerel Kök». Tek profil
+  (`/lifeos.mobileconfig`, `telefon.profil`) kök sertifikayı ve AYS · SPİ · ESP ana
+  ekran simgelerini birlikte kurar; «Ana Ekrana Ekle» üç kez yapılmaz. Güven anahtarını
+  Apple elle açtırır (elle kurulan her kök için).
+- **Android telefon/tablet (3 adım):** Sertifikayı indir › Ayarlar araması «CA
+  sertifikası» › yükle › her modül Chrome ⋮ › Ana ekrana ekle.
+
+Sertifika kurulunca cihaz kendiliğinden hesabına bağlanır. iPhone'da «LifeOS
+uygulamasında aç» adresi ve kodu uygulamaya taşır. Adres değişirse sunucu sertifikası
+kendiliğinden yenilenir; kök aynı kaldığı için cihazda bir şey yapılmaz.
+
+**Güncelleme: her cihazda 0 dokunuş.** Giriş sayfasındaki güncelleme kutusunda
+«Kendiliğinden güncelle» açıksa PC her gece 04:00'te (kapalıysa açılınca) kendini
+günceller (Sistem planlaması › Güncelleme, «kur» açık). Tablet ve tarayıcıdaki telefon
+kodu PC'den alır; modüllerin `sw.js`'i yeni sürümü sonraki açılışta devralır.
+iPhone uygulaması web kodunu ayrıca kendisi indirir (aşağıda).
+
 ## Kurulum (Windows + iPhone, ücretsiz — AltStore)
 
 Bir kez:
@@ -71,12 +127,21 @@ Bir kez:
    iOS 16 ve sonrası: Ayarlar › Gizlilik ve Güvenlik › **Geliştirici Kipi**'ni
    aç (telefon yeniden başlar).
 
-Güncellemeler (bir kez kaynak ekle, sonra tek dokunuş):
+Uygulamayı kur (bir kez):
 
-5. AltStore › **Sources** (Kaynaklar) › **+** › şu adresi yapıştır:
+5. iPhone'da kurulum sayfasını aç (Hesap › Cihazlar › Yeni cihaz bağla'daki QR) ›
+   **AltStore'a LifeOS'u ekle** (`altstore://source?url=…`; adres kopyalanmaz). Elle:
+   AltStore › Sources › **+** ›
    `https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json`
-6. Yeni derleme çıkınca AltStore › **My Apps**'te LifeOS'un yanında
-   **Update** belirir; dokun. Veri silinmez.
+6. AltStore › Browse › LifeOS › **Free**.
+7. **Haftalık yenileme kendiliğinden olsun:** Kısayollar › Otomasyon › **+** ›
+   Günün Saati (ör. 04:00, her gün) › eylem: AltStore › **Refresh All Apps** ›
+   «Çalıştırmadan önce sor» kapalı. AltServer'ı LifeOS kendisi açar
+   (`sistem/baslat.py`, kuruluysa ve kapalıysa); telefon evdeki Wi-Fi'dayken yenilenir.
+
+Sonra: web kodu bilgisayarsız kendisi gelir. Swift değişirse AltStore › **My Apps**'te
+LifeOS'un yanında **Update** belirir; evdeyken bir kez dokun (yenileme otomasyonu
+güncelleme kurmaz). Veri silinmez.
 
 Kaynak her derlemede CI'da üretilir (`uygulama/ios/kaynak.py`): sürüm ve izin
 metinleri derlenmiş uygulamanın kendi Info.plist'inden okunur (AltStore izinler
@@ -85,11 +150,20 @@ uyuşmazsa kurmayı reddeder); her derleme kendi numarasını taşır
 `LifeOS.ipa` → AltStore › My Apps › **+**.
 
 **Sınırlar (Apple'ın, bizim değil):** ücretsiz kimlikle uygulama **7 günde bir
-yenilenmeli**. AltStore bunu, iPhone ve AltServer'lı bilgisayar aynı
-Wi-Fi'dayken kendiliğinden yapar; yenilenmezse uygulama açılmaz ama **veri
+yenilenmeli**. Yukarıdaki otomasyon bunu, iPhone ve AltServer'lı bilgisayar aynı
+Wi-Fi'dayken her gece yapar (2026-11-05'e dek AltServer Windows açılışında başlamıyordu,
+yenileme olmuyordu; şimdi LifeOS onu açar); yenilenmezse uygulama açılmaz ama **veri
 silinmez**, yenileyince geri gelir. Aynı anda en çok 3 böyle uygulama.
 Yıllık 99 $'lık geliştirici hesabıyla TestFlight'a geçilebilir (90 gün,
 yenileme derdi yok).
+
+**7 günlük yenilemede de bilgisayar istemiyorsan: SideStore (denenmedi; 2026'da iOS 26.4
+bilgisayarsız yenilemeyi bozdu diye raporlar var, önce durumuna bak).** AltStore'un
+çatalıdır; bilgisayar yalnız ilk kurulumda gerekir, sonra yenileme telefonda yerel
+bir VPN üzerinden yapılır (LocalDevVPN aç, SideStore › Refresh All). Eşleştirme dosyası
+iOS güncellemesi ya da sıfırlama sonrası bozulabilir; o zaman bilgisayar yine gerekir.
+Apple kimliğini girdiğin için ikinci bir kimlik kullan. Rehber: docs.sidestore.io.
+Web kodu güncellemeleri bu seçimden bağımsızdır, ikisinde de bilgisayarsız gelir.
 
 ## Denetim
 
@@ -99,4 +173,6 @@ dosya, yöntem), `KabukTests` (üç modül uygulamada açılır, `isSecureContex
 konum arayüzü), `BildirimKoprusuTests` (kapıdan modül, yalnız kendi bildirimi,
 üst sınır, geçmiş kurulmaz; gerçek SPİ sayfasından istek) ve `KonumKoprusuTests` (arka planda birikme, diskteki tampon;
 gerçek SPİ sayfasında web süreci ölünce kaydın sürmesi, uygulama kapanınca
-noktaların kayda eklenmesi). Telefonda deneme kullanıcıdadır: kurulum, kamera izni, konum.
+noktaların kayda eklenmesi), `WebGuncellemeTests` (yalnız farklı dosya iner, bozuk dosya
+sürümü değiştirmez, uyumsuz paket alınmaz, bozuk sürüm geri alınır). Telefonda deneme
+kullanıcıdadır: kurulum, kamera izni, konum, web güncellemesinin gerçek ağda inmesi.

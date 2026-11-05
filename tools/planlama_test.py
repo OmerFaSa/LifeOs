@@ -168,6 +168,20 @@ with tempfile.TemporaryDirectory() as d:
     v = json.loads(h.wfile.getvalue().decode("utf-8"))
     bekle("GET plani ve isleri verir", h.kod == 200 and len(v["isler"]) == len(P.ISLER) and v["plan"]["isler"]["yedek"]["acik"])
 
+    # 9) Giris sayfasindaki «Kendiliğinden güncelle» anahtari: sayfanin yaptigi gibi
+    # plani alip guncellemeyi her gun 04:00 «kur» acik yazar; uc kabul eder, oteki isler kalir.
+    giris = (KOK / "sistem" / "sunucu.py").read_text(encoding="utf-8")
+    js = "g.acik = true; g.kur = true; g.gunler = [0, 1, 2, 3, 4, 5, 6]; g.saat = '04:00'; g.kacarsa = 'hemen';"
+    bekle("giris sayfasinda anahtar var", 'id="guncel-oto"' in giris and js in giris and "'X-LifeOS':'planlama'" in giris)
+    plan = v["plan"]
+    plan["isler"]["guncelleme"].update(acik=True, kur=True, gunler=list(range(7)), saat="04:00", kacarsa="hemen")
+    h = H("POST", "/api/planlama", govde=json.dumps(plan).encode("utf-8"))
+    P.isle(h, z, "x")
+    g = P.oku(d)["isler"]["guncelleme"]
+    bekle("anahtar: uc kabul eder, her gun 04:00 kurar",
+          h.kod == 200 and g["acik"] and g["kur"] and g["gunler"] == list(range(7)) and g["saat"] == "04:00")
+    bekle("anahtar: oteki islere dokunmaz", P.oku(d)["isler"]["yedek"]["acik"])
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)

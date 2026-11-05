@@ -33,16 +33,18 @@ final class KabukTests: XCTestCase {
         d.loadViewIfNeeded()
         XCTAssertEqual(bekle(d.web, "document.querySelectorAll('a.kart').length === 3") as? Bool, true, "giriş sayfası açılmadı")
         let hedefler = jsDegerlendir(d.web, "Array.from(document.querySelectorAll('a.kart')).map(a => a.getAttribute('href')).join(' ')").deger as? String
-        XCTAssertEqual(hedefler, "http://127.0.0.1:4173/ http://127.0.0.1:4183/ http://127.0.0.1:4193/")
+        // Kart sirasi tasarimdir (2026-10-29: ESP · SPI · AYS); kapilar degismez.
+        XCTAssertEqual(hedefler?.split(separator: " ").map { String($0) }.sorted(),
+                       ["http://127.0.0.1:4173/", "http://127.0.0.1:4183/", "http://127.0.0.1:4193/"])
         XCTAssertEqual(bekle(d.web, "Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)", sure: 10) as? Bool, true, "logolar yüklenmedi")
-        // Bilgisayara ozgu parca yok: HKM karti, guncelleme kutusu, PC API'lerine
-        // giden betik. Betikler bilerek vardir: giris ekrani (hesap.js, 020ae7ab)
-        // ve LifeOS'un «Animasyonlar» ayari (animasyon.js, 2026-10-06). Bu satir
-        // once «hic betik yok» diyordu; giris ekrani gelince 13. derlemeden beri
-        // kirmiziydi ve telefona hic guncelleme gitmedi. qr.js (2026-10-08): hesap
-        // sayfasinin QR'i (iki adimli dogrulama, kodla cihaz baglama).
-        XCTAssertEqual(jsDegerlendir(d.web, "!document.querySelector('[data-hkm], #guncel, .guncel') && Array.from(document.scripts).every(s => ['/hesap.js', '/animasyon.js', '/qr.js'].some(x => (s.getAttribute('src') || '').endsWith(x)))").deger as? Bool, true,
+        // Bilgisayara ozgu parca yok: HKM karti, guncelleme kutusu.
+        XCTAssertEqual(jsDegerlendir(d.web, "!document.querySelector('[data-hkm], #guncel, .guncel')").deger as? Bool, true,
                        "telefonun giriş sayfasında bilgisayara özgü parça var")
+        // Sayfanin betikleri uygulamada gercekten var. Bu sinama iki kez sabit bir
+        // betik listesiyle yazildi ve her yeni betikte kirmizi kalip telefona
+        // guncellemeyi durdurdu (13. derleme; 2026-10-29'dan sonra 71 kosu).
+        jsCalistir(d.web, "window.__betik = null; Promise.all(Array.from(document.scripts).filter(s => s.src).map(s => fetch(s.src).then(r => r.ok))).then(l => { window.__betik = l.every(Boolean); })")
+        XCTAssertEqual(bekle(d.web, "window.__betik === true", sure: 10) as? Bool, true, "giriş sayfasının bir betiği uygulamada yok")
         XCTAssertEqual(bekle(d.web, "!!(window.LIFEOS && window.LIFEOS.HESAP)", sure: 10) as? Bool, true, "giriş ekranı (hesap.js) yüklenmedi")
         jsCalistir(d.web, "document.querySelectorAll('a.kart')[1].click()")
         XCTAssertEqual(bekle(d.web, "location.port === '4183' && !!(document.querySelector('.site') && window.SP)") as? Bool, true, "karttan SPİ açılmadı")
