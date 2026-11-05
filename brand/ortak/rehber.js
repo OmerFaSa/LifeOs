@@ -22,7 +22,10 @@
         koymaz, doz önermez — AGENTS §1.5). Ekranda «elle yazıldı ·
         doğrulanmadı» yazar.
      2. METİN ÖNCE KAÇIRILIR, sonra işaretler açılır; başka HTML geçmez.
-     3. «Okudum» bu cihazda kalır (modülün deposu); hiçbir ölçüme yazılmaz. */
+     3. «Okudum» bu cihazda kalır (modülün deposu); hiçbir ölçüme yazılmaz.
+     4. GÖR, DİNLE, SINA (2026-11-05). Bölüm `cizim` (adım adım şekil), konu
+        `kartlar` taşıyabilir; ikisi ve «Dinle» düğmesi ortak/kavrat.js'nindir.
+        Modül sesini `kur({ ses })` ile verir; ses yoksa düğme çıkmaz. */
 window.LIFEOS.PARCA.yazilar({
   'ortak.rehber.ornek':'Örnek',
   'ortak.rehber.cozumu-goster':'Çözümü göster',
@@ -41,7 +44,8 @@ window.LIFEOS = window.LIFEOS || {};
 LIFEOS.REHBER = (function(){
   'use strict';
   const OKUNAN = 'lifeos.rehber.okundu';
-  let ayar = null;            // { modul, konular:() => [], sinir, depo:{ oku, yaz }, ciz }
+  let ayar = null;            // { modul, konular:() => [], sinir, depo:{ oku, yaz }, ciz, ses? }
+  const KV = () => (window.LIFEOS || {}).KAVRAT;
   let secili = null;
 
   const kac = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -105,10 +109,13 @@ LIFEOS.REHBER = (function(){
 
   /* ------------------------------------------------------------ konu */
   const para = m => (Array.isArray(m) ? m : (m ? [m] : [])).map(p => '<p>' + metinHtml(p) + '</p>').join('');
-  function bolumHtml(b, i){
+  function bolumHtml(b, i, konu){
+    const kv = KV(), kim = 'rehber:' + konu + ':' + i;
     return '<section class="rehber__bolum" id="rehber-b' + (i + 1) + '">'
       + '<h2 class="rehber__baslik"><span class="rehber__no">' + (i + 1) + '</span>' + kac(b.baslik) + '</h2>'
+      + (kv ? kv.dinleHtml(kim, b) : '')
       + para(b.metin)
+      + (kv && b.cizim ? kv.cizimHtml(kim, b.cizim) : '')
       + (b.liste && b.liste.length ? '<ul class="rehber__madde">' + b.liste.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul>' : '')
       + (b.formul && b.formul.length ? '<div class="rehber__formul">' + b.formul.map(x => '<div>' + metinHtml(x) + '</div>').join('') + '</div>' : '')
       + (b.ornek ? ('<div class="rehber__ornek"><p class="rehber__ornek-etiket">' + yz('ortak.rehber.ornek') + '</p><p>') + metinHtml(b.ornek.soru) + '</p>'
@@ -128,7 +135,8 @@ LIFEOS.REHBER = (function(){
       + '<h1 class="rehber__ad">' + kac(k.ad) + '</h1>'
       + '<p class="rehber__giris">' + metinHtml(k.giris) + '</p>'
       + (k.kazanim && k.kazanim.length ? ('<div class="rehber__kazanim"><p>' + yz('ortak.rehber.bu-konunun-sonunda') + '</p><ul>') + k.kazanim.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
-      + (k.bolumler || []).map(bolumHtml).join('')
+      + (k.bolumler || []).map((b, j) => bolumHtml(b, j, k.id)).join('')
+      + (KV() && k.kartlar ? KV().kartlarHtml('rehber:' + k.id, k.kartlar) : '')
       + (k.akilda && k.akilda.length ? ('<div class="rehber__akilda"><p>' + yz('ortak.rehber.akilda-kalsin') + '</p><ul>') + k.akilda.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
       + (k.kaynaklar && k.kaynaklar.length ? ('<p class="rehber__kaynak"><b>' + yz('ortak.rehber.dayanak') + '</b> ') + k.kaynaklar.map(kac).join(' · ') + '</p>' : '')
       + (ayar && ayar.sinir ? '<p class="rehber__sinir">' + kac(ayar.sinir) + '</p>' : '')
@@ -166,6 +174,9 @@ LIFEOS.REHBER = (function(){
       if(!b.some(x => x.ornek || x.dikkat)) h.push(ad + ': ne örnek ne dikkat var');
       if(!k.kaynaklar || !k.kaynaklar.length) h.push(ad + ': dayanak yok');
       b.forEach((x, i) => { if(!x.baslik || !x.metin) h.push(ad + ': bölüm ' + (i + 1) + ' başlıksız ya da metinsiz'); });
+      const kv = KV();
+      b.forEach((x, i) => { if(x.cizim) (kv ? kv.denetle({ cizim:x.cizim }) : ['kavrat.js yok']).forEach(m => h.push(ad + ': bölüm ' + (i + 1) + ' ' + m)); });
+      if(k.kartlar) (kv ? kv.denetle({ kartlar:k.kartlar }) : ['kavrat.js yok']).forEach(m => h.push(ad + ': ' + m));
     });
     const gor = {};
     (l || []).forEach(k => { if(gor[k.id]) h.push(k.id + ': kimlik iki kez'); gor[k.id] = 1; });
@@ -193,7 +204,10 @@ LIFEOS.REHBER = (function(){
     });
   }
 
-  function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); }
+  function kur(o){
+    ayar = Object.assign({ modul:'' }, o || {});
+    if(KV()) KV().kur({ modul:ayar.modul + '.rehber', ses:ayar.ses, metin:metinHtml });
+  }
   function _sifirla(){ ayar = null; secili = null; }
 
   return { kur, html, listeHtml, konuHtml, alanHtml, metinHtml, sec, secili:() => secili, okudum, okunduMu, denetle, kuruluMu:() => !!ayar, _sifirla };
