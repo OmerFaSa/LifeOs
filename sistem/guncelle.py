@@ -109,6 +109,18 @@ def durum(kok=KOK, calistir=subprocess.run, getir=True, sure=BAKIS_SN):
             "yedeklenebilir": bool(geride and ileride)}
 
 
+def engel_cumlesi(d):
+    """durum() sonucu icin: guncelleme neden yapilamaz; yapilabiliyorsa bos.
+    Baska cihazdan bakan da panelin gordugu nedeni gorsun."""
+    if d.get("durum") != "ok":
+        return d.get("mesaj") or ""
+    if d.get("dal") != DAL:
+        return "Klasör şu an «%s» dalında. Güncelleme yalnız «main» dalında yapılır." % d.get("dal")
+    if d.get("ileride") and d.get("geride"):
+        return "Bu klasörde GitHub'da olmayan %d kayıt var; bilgisayardaki panelden «Yedekle ve güncelle»." % d["ileride"]
+    return ""
+
+
 def kilit_temizle(kok=KOK, calistir=subprocess.run, simdi=None):
     """Oldurulmus bir git'in biraktigi index.lock sonraki her guncellemeyi
     durdurur. Ileri sarmanin en uzun suresinden eski kilidin sahibi yoktur."""

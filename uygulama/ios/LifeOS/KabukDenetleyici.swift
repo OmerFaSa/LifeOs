@@ -284,6 +284,26 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         kopru.sayfaDegisti()
     }
 
+    /// Sayfa ayaga kalkti: indirilen web surumu saglam (WebGuncelleme soz 4).
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        webView.evaluateJavaScript("!!(window.LIFEOS && window.LIFEOS.HESAP)") { v, _ in
+            if v as? Bool == true { WebGuncelleme.ortak.onayla() }
+        }
+    }
+
+    /// lifeos://bagla?adres=…&kod=… → giris sayfasi; yalniz alti hane ve duz adres gecer.
+    static func baglaAdresi(_ u: URL) -> URL? {
+        guard u.scheme == "lifeos", u.host == "bagla",
+              let q = URLComponents(url: u, resolvingAgainstBaseURL: false)?.queryItems,
+              let kod = q.first(where: { $0.name == "kod" })?.value,
+              let adres = q.first(where: { $0.name == "adres" })?.value,
+              kod.count == 6, kod.allSatisfy({ $0.isASCII && $0.isNumber }),
+              !adres.isEmpty, adres.count <= 64,
+              adres.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || ".:-".contains($0)) })
+        else { return nil }
+        return URL(string: baslangic.absoluteString + "?bagla=" + kod + "&adres=" + adres)
+    }
+
     /// iOS arka planda web icerigini sonlandirabilir: yeniden yuklenir. Kayit
     /// suruyorsa GPS durmaz; noktalar diske yazilir, yeni sayfa kaydi
     /// sahiplenip kaldigi yerden surdurur (KonumKoprusu, asama 2b).

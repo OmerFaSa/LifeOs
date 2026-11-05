@@ -477,6 +477,74 @@ def run():
                     shutil.rmtree(d, ignore_errors=True)
     test("giris sayfasinin betigi gecerli JavaScript (node --check)", t_sayfa_betigi)
 
+    # 2026-11-05 (hesap.py soz 28): telefondan ya da tabletten PC'yi guncelleme.
+    def t_sistem_baslat():
+        import threading as _th
+        import time as _t
+
+        def bekle():
+            for _ in range(200):
+                if not sunucu._SISTEM_IS["calisiyor"]:
+                    return
+                _t.sleep(0.01)
+            raise AssertionError("is bitmedi")
+        sunucu._SISTEM_IS.update(calisiyor=False, sonuc=None)
+        kapi, yeniden, kuruldu = _th.Event(), [], []
+
+        def kur():
+            kuruldu.append(1)
+            kapi.wait(5)
+            return {"durum": "guncellendi", "mesaj": "m", "yeniden_baslat": True}
+
+        def patlar(*a, **k):
+            raise AssertionError("kurulum surerken git'e bakilmamali")
+        eq(sunucu.sistem_baslat(kur, lambda: yeniden.append(1)), {"calisiyor": True})
+        eq(sunucu.sistem_baslat(kur, lambda: yeniden.append(1)), {"calisiyor": True})   # ikincisi baslamaz
+        eq(sunucu.sistem_durum(True, durum=patlar)["calisiyor"], True)
+        kapi.set()
+        bekle()
+        eq(kuruldu, [1])
+        eq(yeniden, [1])
+        eq(sunucu._SISTEM_IS["sonuc"], {"durum": "guncellendi", "mesaj": "m"})
+        for dondu, baslar in (({"durum": "guncel", "mesaj": "x"}, False),
+                              ({"durum": "guncellendi", "mesaj": "x", "yeniden_baslat": False}, False),
+                              ({"durum": "engel", "mesaj": "elle"}, False)):
+            del yeniden[:]
+            sunucu.sistem_baslat(lambda: dondu, lambda: yeniden.append(1))
+            bekle()
+            eq(bool(yeniden), baslar)
+
+        def hata():
+            raise ValueError("bozuk")
+        sunucu.sistem_baslat(hata, lambda: yeniden.append(1))
+        bekle()
+        eq(sunucu._SISTEM_IS["sonuc"]["durum"], "hata")
+        ayrismis = {"durum": "ok", "dal": "main", "geride": 2, "ileride": 1, "kirli": [], "yeni": ["a"], "ag": True}
+        d = sunucu.sistem_durum(True, durum=lambda: ayrismis)
+        eq((d["geride"], d["yeni"]), (2, ["a"]))
+        ok("Yedekle ve güncelle" in d["engel"], d["engel"])
+        eq(sunucu.sistem_durum(True, durum=lambda: dict(ayrismis, ileride=0))["engel"], "")
+        ok("deneme" in sunucu.sistem_durum(True, durum=lambda: dict(ayrismis, ileride=0, dal="deneme"))["engel"])
+        sunucu._SISTEM_IS.update(calisiyor=False, sonuc=None)
+        sunucu.guncelleme_durumu(True, durum=lambda: {"durum": "ok"})
+        sunucu._GUNCEL.update(zaman=0.0, veri=None)
+    test("baska cihazdan guncelleme: arkada yurur, ikincisi baslamaz, yalniz gerekirse yeniden baslar", t_sistem_baslat)
+
+    def t_ev_agi_ac():
+        yeniden = []
+        eq(sunucu.ev_agi_ac(lambda: None, lambda: yeniden.append(1))["ok"], True)
+        eq(yeniden, [1])
+
+        def openssl_yok():
+            raise RuntimeError("openssl bulunamadı.")
+        try:
+            sunucu.ev_agi_ac(openssl_yok, lambda: yeniden.append(1))
+            ok(False, "hata bekleniyordu")
+        except sunucu.hesap.Hata as e:
+            eq(e.kod, 500)
+        eq(yeniden, [1])                                    # basarisizsa yeniden baslamaz
+    test("ev agini ac: yapilamazsa nedenini soyler, sistemi yeniden baslatmaz", t_ev_agi_ac)
+
     def t_telefon_sayfa():
         """Telefon uygulamasinin giris sayfasi (uygulama/ios, 2026-10-04): ayni
         sayfa ve ayni kartlar; telefonda olmayan HKM, guncelleme ve bilgisayarin

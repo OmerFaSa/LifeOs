@@ -34,7 +34,7 @@ final class KabukTests: XCTestCase {
         XCTAssertEqual(bekle(d.web, "document.querySelectorAll('a.kart').length === 3") as? Bool, true, "giriş sayfası açılmadı")
         let hedefler = jsDegerlendir(d.web, "Array.from(document.querySelectorAll('a.kart')).map(a => a.getAttribute('href')).join(' ')").deger as? String
         // Kart sirasi tasarimdir (2026-10-29: ESP · SPI · AYS); kapilar degismez.
-        XCTAssertEqual(hedefler?.split(separator: " ").map(String.init).sorted(),
+        XCTAssertEqual(hedefler?.split(separator: " ").map { String($0) }.sorted(),
                        ["http://127.0.0.1:4173/", "http://127.0.0.1:4183/", "http://127.0.0.1:4193/"])
         XCTAssertEqual(bekle(d.web, "Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)", sure: 10) as? Bool, true, "logolar yüklenmedi")
         // Bilgisayara ozgu parca yok: HKM karti, guncelleme kutusu.

@@ -1428,6 +1428,50 @@ def run():
             shutil.rmtree(klasor, ignore_errors=True)
     test("yedek komut satirindan: al, listele, onaylatarak geri yukle (USB dosyasindan da)", t_kopya_komut)
 
+    def t_http_sistem():
+        eski = dict(hesap.SISTEM)
+        yerel0 = hesap._yerel_mi
+        basladi, acildi = [], []
+        hesap.SISTEM.clear()
+        hesap.SISTEM.update(durum=lambda taze: {"geride": 2, "taze": taze},
+                            baslat=lambda: basladi.append(1) or {"calisiyor": True},
+                            ev_agi_ac=lambda: acildi.append(1) or {"ok": True})
+        try:
+            with _Srv() as s:
+                kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+                y = dict(H, Authorization="Bearer " + v["jeton"])
+                eq(s.iste("/api/hesap/sistem", {}, H)[0], 401)                 # oturumsuz
+                eq(s.iste("/api/hesap/sistem-guncelle", {"parola": "parola-123"}, H)[0], 401)
+                kod, _, v = s.iste("/api/hesap/sistem", {"taze": True}, y)
+                eq((kod, v), (200, {"geride": 2, "taze": True}))
+                eq(s.iste("/api/hesap/sistem-guncelle", {"parola": "yanlis-sifre"}, y)[0], 401)
+                eq(basladi, [])                                                # sifre sart
+                eq(s.iste("/api/hesap/sistem-guncelle", {"parola": "parola-123"}, y)[0], 202)
+                eq(basladi, [1])
+                ok(any(o["tur"] == "sistem" for o in s.iste("/api/hesap/etkinlik", baslik=y)[2]["olaylar"]))
+                # Uye goremez, guncelleyemez.
+                eq(s.iste("/api/hesap/kullanici", {"ad": "anne", "parola": "parola-456"}, y)[0], 200)
+                _, _, g = s.iste("/api/hesap/giris", {"ad": "anne", "parola": "parola-456", "cihaz": B}, H)
+                u = dict(H, Authorization="Bearer " + g["jeton"])
+                eq(s.iste("/api/hesap/sistem", {}, u)[0], 403)
+                eq(s.iste("/api/hesap/sistem-guncelle", {"parola": "parola-456"}, u)[0], 403)
+                eq(s.iste("/api/hesap/ev-agi-ac", {}, u)[0], 403)
+                eq(basladi, [1])
+                # Ev agi yalniz bilgisayarin kendisinden acilir.
+                hesap._yerel_mi = lambda h: False
+                eq(s.iste("/api/hesap/ev-agi-ac", {}, y)[0], 403)
+                eq(acildi, [])
+                hesap._yerel_mi = yerel0
+                eq(s.iste("/api/hesap/ev-agi-ac", {}, y)[0], 200)
+                eq(acildi, [1])
+                hesap.SISTEM.clear()
+                eq(s.iste("/api/hesap/sistem", {}, y)[0], 503)                 # kancasiz sunucu: ne oldugunu soyler
+        finally:
+            hesap._yerel_mi = yerel0
+            hesap.SISTEM.clear()
+            hesap.SISTEM.update(eski)
+    test("sistemi baska cihazdan guncelleme: admin + sifre, defterde gorunur; ev agi yalniz PC'den", t_http_sistem)
+
     def t_http_yedek():
         with _Srv() as s:
             kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)

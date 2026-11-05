@@ -42,6 +42,15 @@ targets:
           - UIInterfaceOrientationPortrait
         UIStatusBarStyle: UIStatusBarStyleDefault
         ITSAppUsesNonExemptEncryption: false
+        # Sayfa yeni bir yerel kopru isterse artirilir: eski kabuk o web paketini
+        # almaz, AltStore guncellemesini bekler (WebGuncelleme.swift soz 5).
+        LifeOSWebUyum: 1
+        # Kurulum sayfasindaki «Uygulamada aç» (izin degildir; AltStore'un izin
+        # karsilastirmasina girmez).
+        CFBundleURLTypes:
+          - CFBundleURLName: com.omerfasa.lifeos.bagla
+            CFBundleURLSchemes:
+              - lifeos
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
           NSAllowsArbitraryLoadsInWebContent: true

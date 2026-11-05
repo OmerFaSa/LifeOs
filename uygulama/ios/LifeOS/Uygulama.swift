@@ -12,8 +12,12 @@ final class Uygulama: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     let sunucular = SunucuDuzeni()
 
+    /// Test sureci gercek paketi indirmez: testler uygulamanin kendi sayfalarini sinar.
+    private var testte: Bool { ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil }
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        if !testte { WebGuncelleme.ortak.acilis() }
         sunucular.baslat()
         let w = UIWindow(frame: UIScreen.main.bounds)
         if let h = sunucular.hata {
@@ -29,6 +33,7 @@ final class Uygulama: UIResponder, UIApplicationDelegate {
         }
         w.makeKeyAndVisible()
         window = w
+        if !testte { WebGuncelleme.ortak.arkada() }
         // Ana ekran kisayoluyla acildiysa o modul; false: iOS performActionFor'u
         // bir daha cagirmasin.
         if let k = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem {
@@ -53,5 +58,14 @@ final class Uygulama: UIResponder, UIApplicationDelegate {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         sunucular.baslat()
+        if !testte { WebGuncelleme.ortak.arkada() }
+    }
+
+    /// Kurulum sayfasindaki «Uygulamada aç» (lifeos://bagla): adres ve kod elle yazilmaz.
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        guard let u = KabukDenetleyici.baglaAdresi(url),
+              let d = window?.rootViewController as? KabukDenetleyici else { return false }
+        d.modulAc(u)
+        return true
     }
 }

@@ -189,6 +189,35 @@ def kur(yenile=False, k=None, openssl=None, bilgisayar=None, ip_listesi=None):
     return y
 
 
+def tazele(k=None, openssl=None, bilgisayar=None, ip_listesi=None, simdi=None):
+    """Sunucu acilirken: adres degistiyse (DHCP, yeni bilgisayar) ya da sertifikanin
+    suresi bitiyorsa sunucu sertifikasini kendiliginden yeniler. Kok korunur: telefona
+    bir sey kurulmaz. Yapamazsa eski sertifikayla surer. Doner: yenilendi mi."""
+    k = k or klasor()
+    if not acik_mi(k):
+        return False
+    bilgisayar = bilgisayar or ad()
+    ip_listesi = ipler() if ip_listesi is None else ip_listesi
+    istenen = san_listesi(bilgisayar, sorted(ip_listesi))
+    kayit = os.path.join(k, "sunucu.adlar")
+    try:
+        with open(kayit, encoding="utf-8") as f:
+            eski = f.read().strip()
+    except OSError:
+        eski = ""
+    simdi = datetime.datetime.now().timestamp() if simdi is None else simdi
+    yas = simdi - os.path.getmtime(yollar(k)["sertifika"])
+    if eski == istenen and yas < (SUNUCU_GUN - 60) * 86400:
+        return False
+    try:
+        kur(yenile=True, k=k, openssl=openssl, bilgisayar=bilgisayar, ip_listesi=sorted(ip_listesi))
+        with open(kayit, "w", encoding="utf-8") as f:
+            f.write(istenen)
+    except (RuntimeError, OSError):
+        return False
+    return True
+
+
 def kapat(k=None):
     """Ev agina acmayi kapatir: sunucu sertifikasi silinir, kok kalir."""
     y = yollar(k)

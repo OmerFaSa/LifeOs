@@ -172,6 +172,13 @@
       hava izi (`gun/sen`; okuma `GET /api/hesap/gunsen`). Kullanicinin girdigi
       deger; sunucu her alani denetler, sayi uydurmaz. Adi bilerek `/bugun`,
       `/gun`, `/gunluk` ile bitmez: o sonekleri ozet, tek gun ve gunluk toplar.
+  28. SISTEMI BASKA CIHAZDAN GUNCELLEME (2026-11-05: «guncellemeyi daha kolay»).
+      Admin, sifresiyle, telefondan ya da tabletten bilgisayardaki LifeOS'u
+      gunceller (`/sistem`, `/sistem-guncelle`). guncelle.py'nin sozleri aynen
+      gecerli: yalniz ileri sarar, veriye dokunmaz, elle degistirilmis dosyanin
+      ustune yazmaz. Isin kendisi sunucu.py'dedir (SISTEM kancasi). Ev agini
+      acmak (`/ev-agi-ac`) yalniz bilgisayarin kendisinden: disari acma karari
+      ev aginda alinamaz.
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -194,6 +201,7 @@ import time
 import urllib.parse
 
 SURUM = 8
+SISTEM = {}                     # soz 28: sunucu.py doldurur (durum, baslat, ev_agi_ac)
 TUR = 600000                    # PBKDF2 tur sayisi (OWASP 2023, SHA-256)
 EN_KISA_PAROLA = 8
 EN_UZUN_PAROLA = 256
@@ -2146,6 +2154,13 @@ class Depo:
         x = next(x for x in self.kopyalar() if x["ad"] == ad)
         return dict(x, yedek=b, simdi=simdi)
 
+    def sistem_onay(self, yapan, parola, jeton=None, ip=""):
+        """Soz 28: admin ve sifre; defterde kim, hangi cihazdan gorunur."""
+        self._admin(yapan, "Sistemi yalnız admin günceller.")
+        with self._islem() as c:
+            self._parola_bak(c, yapan["id"], parola)
+            self._olay(c, yapan["id"], "sistem", self._oturum_cihaz(c, jeton), ip)
+
     def kopya_indir(self, yapan, yerel, parola, ad, jeton=None, ip=""):
         """Yedegin dosya yolu (HTTP dosyayi akitir). Admin, bilgisayardan,
         sifreyle: dosya butun hesaplari tasir."""
@@ -2625,6 +2640,23 @@ def isle(h):
                 return _cevap(h, 200, {"ok": True})
             if yol == "/api/hesap/iki-adim/yedek":
                 return _cevap(h, 200, d.yedek_yenile(k, v.get("parola"), j, ip))
+            if yol == "/api/hesap/sistem":
+                d._admin(k, "Sistem durumunu yalnız admin görür.")
+                if not SISTEM:
+                    raise Hata(503, "Bu sunucuda sistem güncellemesi yok.")
+                return _cevap(h, 200, SISTEM["durum"](bool(v.get("taze"))))
+            if yol == "/api/hesap/sistem-guncelle":
+                if not SISTEM:
+                    raise Hata(503, "Bu sunucuda sistem güncellemesi yok.")
+                d.sistem_onay(k, v.get("parola"), j, ip)
+                return _cevap(h, 202, SISTEM["baslat"]())
+            if yol == "/api/hesap/ev-agi-ac":
+                d._admin(k, "Ev ağını yalnız admin açar.")
+                if not _yerel_mi(h):
+                    raise Hata(403, "Ev ağı yalnız bu bilgisayardan açılır.")
+                if not SISTEM:
+                    raise Hata(503, "Bu sunucuda ev ağı açılamaz.")
+                return _cevap(h, 200, SISTEM["ev_agi_ac"]())
             if yol == "/api/hesap/bag-kodu":
                 return _cevap(h, 200, d.bag_kodu_ac(k))
             if yol == "/api/hesap/bag-durum":

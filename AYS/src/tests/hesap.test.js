@@ -211,6 +211,14 @@
         s.kullanicilar[ad].yedek = ['MMMM2222', 'NNNN3333'];
         return cevap(200, { yedek:['MMMM-2222', 'NNNN-3333'] });
       }
+      if(yol === '/api/hesap/sistem') return s.sistem ? cevap(200, s.sistem) : cevap(503, { hata:'yok' });
+      if(yol === '/api/hesap/sistem-guncelle'){
+        if(govde.parola !== 'parola-123') return cevap(401, { hata:'Şifre yanlış.' });
+        s.sistemGuncellendi = true;
+        s.sistem = Object.assign({}, s.sistem, { calisiyor:true });
+        return cevap(202, { calisiyor:true });
+      }
+      if(yol === '/api/hesap/ev-agi-ac'){ s.evAgiAcildi = true; return cevap(200, { ok:true, mesaj:'Ev ağı açılıyor.' }); }
       if(yol === '/api/hesap/bag-kodu'){
         s.bag = { kod:'482913', id:(s.bag ? s.bag.id + 1 : 7), ad, durum:'bekliyor' };
         return cevap(200, { kod:s.bag.kod, id:s.bag.id, bitis:1700000000000 + 1e9 });
@@ -1406,6 +1414,48 @@
       expect(merkez().querySelector('[data-hesap="kayit-ayar"]').getAttribute('aria-checked')).toBe('false');
     }));
 
+    it('bilgisayar buradan güncellenir: şifre sorulur, sürerken form kalkar, «güncel» uydurulmaz', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      srv.sistem = { durum:'ok', ag:true, geride:3, yeni:['Yeni iş'], engel:'', calisiyor:false, surum:{ tarih:'05.11.2026' } };
+      await h.merkezAc('yonetim');
+      await hazir();
+      expect(merkez().textContent).toContain('3 yenilik var');
+      expect(merkez().textContent).toContain('Yeni iş');
+      const f = merkez().querySelector('[data-hesap-form="sistem-guncelle"]');
+      document.getElementById('hesap-sistem-sifre').value = 'yanlis-sifre';
+      f.requestSubmit();
+      await hazir();
+      expect(!!srv.sistemGuncellendi).toBe(false);
+      expect(f.querySelector('.hesap__mesaj').textContent).toContain('Şifre yanlış');
+      document.getElementById('hesap-sistem-sifre').value = 'parola-123';
+      f.requestSubmit();
+      await hazir();
+      expect(srv.sistemGuncellendi).toBe(true);
+      expect(merkez().querySelector('[data-hesap-form="sistem-guncelle"]')).toBeNull();
+      expect(merkez().textContent).toContain('Güncelleniyor');
+    }));
+
+    it('bilgisayar: ağ yoksa «güncel» denmez; engel varsa form çıkmaz; eski sunucuda bölüm yok', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      srv.sistem = { durum:'ok', ag:false, geride:0, calisiyor:false };
+      await h.merkezAc('yonetim');
+      await hazir();
+      expect(merkez().textContent.includes('Güncel')).toBe(false);
+      expect(merkez().textContent).toContain('bakılamadı');
+      expect(!!merkez().querySelector('[data-hesap="sistem-bak"]')).toBe(true);
+      srv.sistem = { durum:'ok', ag:true, geride:2, engel:'Yedekle ve güncelle gerekir', calisiyor:false };
+      tikla('[data-hesap="sistem-bak"]');
+      await hazir();
+      expect(merkez().textContent).toContain('Yedekle ve güncelle gerekir');
+      expect(merkez().querySelector('[data-hesap-form="sistem-guncelle"]')).toBeNull();
+      h.merkezKapat();
+      srv.sistem = null;
+      await h.merkezAc('yonetim');
+      await hazir();
+      expect(merkez().textContent.includes('Bilgisayardaki LifeOS')).toBe(false);
+      expect(merkez().querySelector('.hesap-uyari')).toBeNull();
+    }));
+
     it('yazılan alan gelen veriyle silinmez', () => sahneyle(async () => {
       const { h } = await girisli();
       const ac = h.merkezAc('profil');                       // veri henüz gelmedi
@@ -1740,6 +1790,7 @@
       expect(k.textContent).toBe('482913');
       expect(k.getAttribute('aria-label')).toContain('4 8 2 9 1 3');
       expect(merkez().querySelector('.hesap-qr svg').getAttribute('aria-label')).toContain('bağlama kodu');
+      expect(merkez().textContent).toContain('sertifikası kurulunca');
       await srv.fetch('/api/hesap/bagla', { method:'POST', body:JSON.stringify({ kod:'482913', cihaz_ad:'iPad' }) });
       isler.splice(0).forEach(f => f());
       await hazir();

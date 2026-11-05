@@ -104,6 +104,11 @@ def main():
     for ad in GIRIS_DOSYALARI:
         shutil.copy2(KOK / "brand" / "ortak" / ad, giris / ad)
 
+    # Telefon yalniz bundan farkli dosyalari indirir (web_paket.py, WebGuncelleme.swift).
+    sys.path.insert(0, str(BURASI))
+    import web_paket  # noqa: E402
+    web_paket.temel_yaz(WEB)
+
     shutil.copy2(KOK / "brand" / "life" / "logo.png", SIMGE)
     if sys.platform == "darwin":
         subprocess.run(["sips", "-z", "1024", "1024", str(SIMGE)], check=True, capture_output=True)

@@ -1574,6 +1574,70 @@ def guncelleme_durumu(taze=False, durum=None):
         return veri
 
 
+def guncelle_kur(yedekle=False):
+    with _GUNCEL_KILIT:
+        sonuc = guncelle.uygula(yedekle=yedekle)
+        _GUNCEL.update(zaman=0.0, veri=None)
+    # HKM'nin kodu degistiyse ve HKM aciksa yeni kodla yeniden acilir (arka planda).
+    if sonuc.get("durum") == "guncellendi" and sonuc.get("hkm_degisti") and hkm_ayakta():
+        threading.Thread(target=hkm_yeniden, daemon=True).start()
+        sonuc["mesaj"] = (sonuc.get("mesaj") or "") + " HKM yeni sürümle yeniden başlatılıyor."
+    return sonuc
+
+
+# BASKA CIHAZDAN GUNCELLEME (hesap.py soz 28). Kurulum uzun surebilir, istek
+# bekletilmez: arkada yurur, cihaz durumu sorar. Sonuc yeniden baslatmada kaybolur;
+# cihaz «geride 0» ile anlar.
+_SISTEM_IS = {"calisiyor": False, "sonuc": None}
+_SISTEM_KILIT = threading.Lock()
+
+
+def sistem_durum(taze=False, durum=None):
+    with _SISTEM_KILIT:
+        calisiyor, sonuc = _SISTEM_IS["calisiyor"], _SISTEM_IS["sonuc"]
+    cevap = {"surum": guncelle.surum(), "calisiyor": calisiyor, "sonuc": sonuc}
+    if calisiyor:                                       # kilit kurulumda: beklenmez
+        return cevap
+    d = guncelleme_durumu(taze=taze, durum=durum)
+    cevap.update(durum=d.get("durum"), geride=d.get("geride") or 0, yeni=(d.get("yeni") or [])[:5],
+                 ag=d.get("ag", False), mesaj=d.get("mesaj") or "",
+                 engel=guncelle.engel_cumlesi(d))
+    return cevap
+
+
+def sistem_baslat(kur=guncelle_kur, yeniden=yeniden_baslat_zamanla):
+    with _SISTEM_KILIT:
+        if _SISTEM_IS["calisiyor"]:
+            return {"calisiyor": True}
+        _SISTEM_IS.update(calisiyor=True, sonuc=None)
+
+    def is_():
+        try:
+            s = kur()
+        except Exception as e:                          # cihaz «sürüyor»da takilmasin
+            s = {"durum": "hata", "mesaj": "Güncelleme yapılamadı: %s" % e}
+        with _SISTEM_KILIT:
+            _SISTEM_IS.update(calisiyor=False, sonuc={"durum": s.get("durum"), "mesaj": s.get("mesaj") or ""})
+        if s.get("durum") == "guncellendi" and s.get("yeniden_baslat"):
+            yeniden()
+
+    threading.Thread(target=is_, daemon=True).start()
+    return {"calisiyor": True}
+
+
+def ev_agi_ac(kur=None, yeniden=yeniden_baslat_zamanla):
+    """Hesap sayfasindaki «Ev ağını aç»: `python sistem/telefon.py` + yeniden baslatma."""
+    try:
+        (kur or telefon.kur)()
+    except (RuntimeError, OSError) as e:
+        raise hesap.Hata(500, str(e))
+    yeniden()
+    return {"ok": True, "mesaj": "Ev ağı açılıyor; LifeOS birkaç saniyede geri gelir."}
+
+
+hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac)
+
+
 def merkez_izinli(basliklar, kapi):
     """POST /api/merkez/ac yalniz modulun kendi sayfasindan: X-LifeOS: merkez basligi
     tarayiciyi on-kontrole zorlar (bu sunucu izin vermez); Origin varsa ayni kapi olmali."""
@@ -1693,15 +1757,8 @@ class Giris(SimpleHTTPRequestHandler):
         if yol == "/api/yeniden":
             yeniden_baslat_zamanla()
             return self._json(200, {"ok": True})
-        with _GUNCEL_KILIT:
-            # yedekle=1 yalniz kutudaki «Yedekle ve güncelle» dugmesinden gelir.
-            sonuc = guncelle.uygula(yedekle="yedekle=1" in self.path)
-            _GUNCEL.update(zaman=0.0, veri=None)
-        # HKM'nin kodu degistiyse ve HKM aciksa yeni kodla yeniden acilir (arka planda).
-        if sonuc.get("durum") == "guncellendi" and sonuc.get("hkm_degisti") and hkm_ayakta():
-            threading.Thread(target=hkm_yeniden, daemon=True).start()
-            sonuc["mesaj"] = (sonuc.get("mesaj") or "") + " HKM yeni sürümle yeniden başlatılıyor."
-        return self._json(200, sonuc)
+        # yedekle=1 yalniz kutudaki «Yedekle ve güncelle» dugmesinden gelir.
+        return self._json(200, guncelle_kur(yedekle="yedekle=1" in self.path))
 
     def do_GET(self):
         yol = self.path.split("?", 1)[0]
@@ -1972,6 +2029,10 @@ p, li{ color:var(--ikinci); } b{ color:var(--yazi); } a{ color:var(--vurgu); wor
 ul{ padding-left:18px; margin:6px 0; } .yedek{ font-size:13px; } code{ font-size:12px; word-break:break-all; }
 </style></head><body><main>
 <h1>LifeOS'u telefona kur</h1>
+<section id="bagla" hidden><h2>Bu cihazı hesabına bağla</h2>
+<p id="bagla-durum">Sertifika denetleniyor…</p>
+<a class="dugme" id="bagla-tarayici" hidden>Tarayıcıda devam et</a>
+<a class="dugme" id="bagla-uygulama" hidden>LifeOS uygulamasında aç</a></section>
 <section><h2>1. Sertifikayı indir</h2>
 <p>Telefon bilgisayarla aynı Wi-Fi'da olmalı. Bu sertifika yalnız senin
 bilgisayarının adresine güvenmeyi sağlar; internete hiçbir şey çıkmaz.</p>
@@ -1992,7 +2053,34 @@ kalır ve «silinmiş» görünür. <b>.local</b> açılmazsa yedek adresi kulla
 <p>Ana ekrandan bir kez açınca dosyalar telefona kaydedilir. Sonra dışarıda
 internetsiz de açılır; kamera ve canlı rota çalışır. Harita karoları için
 mobil internet gerekir.</p></section>
-</main></body></html>""" % (_kac(parmak), modul)
+</main>
+<script>
+/* Tek QR (hesap sayfasi › Yeni cihaz bagla): sertifika kuruluysa hemen, degilse
+   kurulunca kendiliginden hesaba baglar. Kod rakam degilse hic okunmaz. */
+(function(){
+  var kod = (new URLSearchParams(location.search).get('bagla') || '').replace(/[^0-9]/g, '');
+  if(kod.length !== 6) return;
+  history.replaceState(null, '', location.pathname);
+  var ip = location.hostname, hedef = 'https://' + ip + ':%d/';
+  var iphone = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  var $ = function(i){ return document.getElementById(i); };
+  $('bagla').hidden = false;
+  $('bagla-tarayici').href = hedef + '?bagla=' + kod;
+  $('bagla-uygulama').href = 'lifeos://bagla?adres=' + encodeURIComponent(ip) + '&kod=' + kod;
+  function bak(){
+    fetch(hedef + 'sw.js', { mode:'no-cors', cache:'no-store' }).then(function(){
+      if(iphone){
+        $('bagla-durum').textContent = 'Sertifika hazır. Uygulamayı kurduysan oradan aç.';
+        $('bagla-uygulama').hidden = $('bagla-tarayici').hidden = false;
+      }else location.replace($('bagla-tarayici').href);
+    }).catch(function(){
+      $('bagla-durum').textContent = 'Önce aşağıdaki sertifikayı indirip kur; kurulunca bu cihaz kendiliğinden bağlanır.';
+      setTimeout(bak, 2000);
+    });
+  }
+  bak();
+})();
+</script></body></html>""" % (_kac(parmak), modul, telefon.PORTLAR["SPI"])
 
 
 class TelefonKurulum(BaseHTTPRequestHandler):
@@ -2097,6 +2185,8 @@ def main():
 
     # Telefon: yalniz telefon.py ile sertifika uretildiyse. Acilamazsa
     # bilgisayardaki sistemler yine calisir.
+    if telefon.tazele():
+        print("  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
     tel, tel_sorun = telefon_sunuculari()
     kurulum = None
     if tel:
