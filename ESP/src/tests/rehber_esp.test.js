@@ -9,6 +9,17 @@
       ['lang', 'philo', 'music', 'diction', 'reading', 'writing', 'history']
         .forEach(d => expect(ESP.REHBER_KONULAR.some(k => k.disc === d)).toBe(true));
     });
+    it('örnek konu adım adım çizim ve kartlarla açılır (ortak/kavrat.js)', () => {
+      const RB = window.LIFEOS.REHBER;
+      RB._sifirla();
+      RB.kur({ modul:'rehbertest', konular:() => ESP.REHBER_KONULAR });
+      RB.sec('mantik-arguman');
+      const h = RB.html();
+      expect(h).toContain('kavrat-cizim');
+      expect(h).toContain('Adım 1 / 3');
+      expect(h).toContain('data-kavrat="cevir:kart:rehber:mantik-arguman"');
+      RB._sifirla();
+    });
     it('Çalışma bölümünün kartı yalnız o alanın konularını gösterir', () => {
       window.LIFEOS.REHBER._sifirla();
       const dil = ESP.Screens.rehber.alanKarti('lang');

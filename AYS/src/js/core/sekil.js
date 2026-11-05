@@ -1,4 +1,13 @@
-/* ŞEKİL VE TABLO — Öğren'in sorularında, örneklerinde ve anlatımında çizim.
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/sekil.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ŞEKİL VE TABLO — sorularda, örneklerde ve anlatımda çizim (AYS, SPİ, ESP).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/sekil.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `sekil.css`.
+   AYS'de `R.Sekil` adıyla da durur (2026-11-05'e kadar yalnız AYS'deydi).
+   ==================================================================
 
    Kullanıcı (2026-10-10): «şekilli soru yok; hepsini çok profesyonel
    şekilde çöz». Geometri, grafik, devre, optik, soyağacı, nüfus piramidi
@@ -43,13 +52,13 @@
      ['mr', x,y,h,'ince'|'kalin']    mercek (dikey; ince kenarlı yakınsak, kalın kenarlı ıraksak)
    Bayraklar (b, isteğe bağlı yazı): k kesik, v vurgu, i ince, g gölge, f dolu. */
 window.LIFEOS.PARCA.yazilar({
-  'ays.core.sekil.sekil-cizilemedi':'Şekil çizilemedi: ',
+  'ortak.sekil.sekil-cizilemedi':'Şekil çizilemedi: ',
 });
 
+window.LIFEOS = window.LIFEOS || {};
 
-window.R = window.R || {};
-
-R.Sekil = (function(){
+window.LIFEOS.SEKIL = (function(){
+  const R = window.R || {};
   /* Tür → { n: sayı argümanı adedi, d: dizi argümanı mı, y: yazı argümanı adedi } */
   const TUR = {
     c:{ n:4 }, ok:{ n:4 }, p:{ d:true }, y:{ d:true }, d:{ n:3 }, n:{ n:2 }, t:{ n:2, y:1 },
@@ -226,13 +235,16 @@ R.Sekil = (function(){
     },
   };
 
+  /* Denetlenmiş öğe dizisinin SVG içi (adım adım çizim katman katman ister: ortak/anlat.js). */
+  function ogeler(o){ return o.map(x => OGE[x[0]](x)).join(''); }
+
   /* Şekil tarifi → <figure><svg>…</svg></figure>. Kusurlu tarif çizilmez;
      yerine alt cümlesi yazılır (ekran boş kalmasın, kusur gizlenmesin). */
   function svg(s){
     if(!s) return '';
     const kusur = denetle(s);
-    if(kusur.length) return '<p class="sekil sekil--kusur small dim">' + esc(yz('ays.core.sekil.sekil-cizilemedi') + String((s && s.alt) || kusur[0])) + '</p>';
-    const ic = s.o.map(o => OGE[o[0]](o)).join('');
+    if(kusur.length) return '<p class="sekil sekil--kusur small dim">' + esc(yz('ortak.sekil.sekil-cizilemedi') + String((s && s.alt) || kusur[0])) + '</p>';
+    const ic = ogeler(s.o);
     return '<figure class="sekil"><svg class="sekil__svg" viewBox="0 0 ' + sayi(s.w) + ' ' + sayi(s.h) + '" width="' + sayi(s.w * 1.4)
       + '" role="img" aria-label="' + esc(s.alt) + '" focusable="false">' + ic + '</svg></figure>';
   }
@@ -263,5 +275,7 @@ R.Sekil = (function(){
     return [metni(q.sekil), tabloMetni(q.tablo)].filter(Boolean).join(' ');
   }
 
-  return { TUR, denetle, tabloDenetle, svg, tablo, metni, tabloMetni, ekMetni };
+  return { TUR, denetle, tabloDenetle, svg, ogeler, tablo, metni, tabloMetni, ekMetni };
 })();
+/* AYS'nin eski adı: içerik ve ekranlar R.Sekil der. */
+if(window.R) window.R.Sekil = window.LIFEOS.SEKIL;

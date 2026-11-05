@@ -333,6 +333,10 @@ window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', i
   const sekilHtml = x => x && (x.sekil || x.tablo) && R.Sekil ? raw(R.Sekil.svg(x.sekil) + R.Sekil.tablo(x.tablo)) : '';
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
   const kisaAd = s => s.name;
+  /* Gör, dinle, sına (ortak/kavrat.js): bölüm `cizim`, konu `kartlar`; Dinle AYS'nin sesiyle okur. */
+  const KV = () => (window.LIFEOS || {}).KAVRAT;
+  const SES = { var:() => !!(R.Voice && R.Voice.available()), konus:m => R.Voice.speak(m), dur:() => { if(R.Voice) R.Voice.cancel(); } };
+  function kavratKur(){ if(KV()) KV().kur({ modul:'ays.ogren', ses:SES, metin:s => O().metinHtml(s) }); return KV(); }
 
   /* Konu çubuğu: ‹ ders · konu › — dört bölümde aynı. Uçta ok yerine boşluk. */
   function konuCubugu(x){
@@ -659,19 +663,23 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
   function dersHtml(a, d, topic){
     const an = topic ? O().akilliNot(topic.id) : null;
     const kr = topic ? O().kaynaklar(topic.id) : [];
+    const kv = kavratKur();
     return html`<div class="ders__govde">
       ${when(a.giris, () => html`<p class="ders__giris">${fmt(a.giris)}</p>`)}
       ${when(d && d.kazanim, () => kazanimHtml(d))}
       ${when(d && d.onKosul, () => onKosulHtml(d))}
       ${map(a.bolumler, (b, i) => html`<section class="ders__bolum" id="${'ders-b' + (i + 1)}">
         <h3 class="ders__baslik"><span class="ders__no num" aria-hidden="true">${i + 1}</span>${b.baslik}</h3>
+        ${kv ? raw(kv.dinleHtml('ays:' + (topic ? topic.id : '') + ':' + i, b)) : ''}
         ${map(dizi(b.metin), p => html`<p>${fmt(p)}</p>`)}
         ${sekilHtml(b)}
+        ${kv && b.cizim ? raw(kv.cizimHtml('ays:' + (topic ? topic.id : '') + ':' + i, b.cizim)) : ''}
         ${when(b.liste, () => html`<ul class="ders__liste">${map(b.liste, m => html`<li>${fmt(m)}</li>`)}</ul>`)}
         ${when(b.formul, () => html`<div class="ders__formul">${map(b.formul, f => html`<div>${fmt(f)}</div>`)}</div>`)}
         ${when(b.ornek, () => ornekHtml(b.ornek))}
         ${when(b.dikkat, () => html`<p class="ders__dikkat"><b>Dikkat:</b> ${fmt(b.dikkat)}</p>`)}
       </section>`)}
+      ${kv && topic && a.kartlar ? raw(kv.kartlarHtml('ays:' + topic.id, a.kartlar)) : ''}
       ${when(an, () => akilliNotHtml(an))}
       ${when(d && d.ornekler && d.ornekler.length, () => orneklerHtml(d))}
       ${when(d && d.kaliplar && d.kaliplar.length, () => listeBlogu('ders-kaliplar', yz('ays.ogren.sinavda-nasil-sorulur'), d.kaliplar))}
