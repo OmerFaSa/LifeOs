@@ -267,6 +267,7 @@ window.LIFEOS = window.LIFEOS || {};
     "lifeos.minik":"tpo",
     "lifeos.minik.ses":"t",
     "lifeos.minik.boy":"tp",
+    "lifeos.king.yuz":"tpo",
     "lifeos.minik.takim":"tp",
     "lifeos.muzik.var":"to",
     "lifeos.manzara":"tpso",

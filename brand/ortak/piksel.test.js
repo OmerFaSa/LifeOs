@@ -238,14 +238,24 @@
       expect(gece.some(p => /^kusu_/.test(p))).toBe(false);
       expect(new Set(gun.filter(p => /^(kedi|kopek|tavsan)/.test(p) && !/yuru$/.test(p))).size >= 3).toBe(true);
     });
-    it('King odası: aksolot küçük tuvalde döner, kare değişmezse yeniden çizilmez, gece uyur', () => {
+    it('King odası: karakter küçük tuvalde döner, kare değişmezse yeniden çizilmez, gece uyur', () => {
       const A = window.LIFEOS.PIKSEL_APARTMAN, c = document.createElement('canvas');
       c.width = A.KING_EN; c.height = A.KING_BOY;
       expect(A.kingOda(c, 1, 'ogle', false)).toBe(true);
       expect(A.kingOda(c, 1, 'ogle', false)).toBe(false);
       expect(c.getContext('2d').getImageData(5, 5, 1, 1).data[3]).toBe(255);
       expect(A.kingOda(c, 1, 'ogle', true)).toBe(true);
-      expect(A.ODA.king.hayat(0, 30, [], 'gece')[0].seg[0].poz).toBe('aksolot_u');
+      expect(A.kingOda(c, 1, 'ogle', true, 'tavsan')).toBe(true);
+      expect(A.ODA.king.hayat(0, 30, [], 'gece')[0].seg[0].poz).toBe('kuyu');
+    });
+    it('King karakteri: dört seçenek, seçim saklanır, bilinmeyen ad kabul edilmez', () => {
+      const P = window.LIFEOS.PIKSEL, F = window.LIFEOS.PIKSEL_FIGUR, once = localStorage.getItem('lifeos.king.yuz');
+      try{
+        expect(P.KING_YUZLER.length).toBe(4);
+        P.KING_YUZLER.forEach(a => { expect(F['king_' + a].s.length).toBe(16); expect(P.kingYuz(a)).toBe(true); expect(P.kingYuzu()).toBe(a); expect(document.documentElement.style.getPropertyValue('--fig-king')).toBe('var(--fig-king_' + a + ')'); });
+        expect(P.kingYuz('aksolot')).toBe(false);
+        expect(!!F.king).toBe(false);
+      }finally{ if(once) localStorage.setItem('lifeos.king.yuz', once); else localStorage.removeItem('lifeos.king.yuz'); P.kingYuz(P.kingYuzu()); }
     });
     it('dokunma: canlıya dokununca balon çıkar, boşa dokununca hiçbir şey olmaz', () => {
       const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle'), t = 2;

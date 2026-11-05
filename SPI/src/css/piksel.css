@@ -62,11 +62,14 @@
 /* Boşta: menü sola, kart aşağı çekilir; dokunulamaz, sahne kalır (piksel.js). */
 :root[data-bos] .site--v5 > .kenar, :root[data-bos] .site--v5 > .site__body, :root[data-bos] .altbant, :root[data-bos] body > *:not(.piksel-oda):not(#app){ transition:opacity .42s ease, transform .42s ease; }
 :root[data-bos="1"]:not([data-bos-el]){ cursor:none; }
-/* King: pembe aksolot avatarı ve Bağlam sütununun altındaki küçük odası */
-:root[data-zemin="piksel"] .king-aks{ display:block; width:100%; height:100%; background:var(--fig-king) center/contain no-repeat; image-rendering:pixelated; }
+/* King: seçilen karakter, Bağlam sütununun altındaki küçük oda ve seçim düğmeleri */
+:root[data-zemin="piksel"] .king-fig{ display:block; width:100%; height:100%; background:var(--fig-king) center/contain no-repeat; image-rendering:pixelated; }
 :root[data-zemin="piksel"] .king__yuz, :root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne .king__yuz{ background:none; border-radius:0; box-shadow:none; }
 :root[data-zemin="piksel"] .king__bas .king__yuz{ display:none; }
-:root[data-zemin="piksel"] .king__oda{ display:block; flex:none; width:152px; height:128px; margin:auto 0 0 auto; image-rendering:pixelated; border:4px solid #b5825a; cursor:pointer; }
+:root[data-zemin="piksel"] .king__oda{ display:block; flex:none; width:152px; height:128px; margin:0 0 0 auto; image-rendering:pixelated; border:4px solid #b5825a; cursor:pointer; }
+:root[data-zemin="piksel"] .king__karakter{ display:flex; justify-content:flex-end; gap:6px; margin-top:auto; flex:none; }
+:root[data-zemin="piksel"] .king__karakter-sec{ width:34px; height:34px; padding:0; border:2px solid transparent; background:var(--yuva, transparent) center/26px no-repeat; image-rendering:pixelated; cursor:pointer; }
+:root[data-zemin="piksel"] .king__karakter-sec[aria-pressed="true"]{ border-color:#b5825a; }
 :root[data-zemin="piksel"][data-bos="1"] .site--v5 > .kenar{ opacity:0; transform:translateX(-100%); pointer-events:none; }
 :root[data-bos="1"] .site--v5 > .site__body{ opacity:0; transform:translateY(48px); pointer-events:none; }
 :root[data-bos="1"] .altbant{ opacity:0; transform:translateY(48px); pointer-events:none; }

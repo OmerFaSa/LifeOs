@@ -3724,7 +3724,7 @@
       const { k } = sahne();
       k.ac({ mini:false, mesaj:'x' });
       const y = document.querySelector('.king__bas .king__yuz');
-      expect(!!(y && y.querySelector('.king-aks'))).toBe(true);
+      expect(!!(y && y.querySelector('.king-fig'))).toBe(true);
       expect(y.getAttribute('aria-hidden')).toBe('true');
       expect(!!document.querySelector('.king__bas .king__kure')).toBe(false);
     }));

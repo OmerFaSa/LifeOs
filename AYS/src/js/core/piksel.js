@@ -28,8 +28,24 @@ window.LIFEOS = window.LIFEOS || {};
     return '<svg xmlns="http://www.w3.org/2000/svg" data-px="1" data-pxc="1" viewBox="0 0 ' + G + ' ' + Y + '"' + (boy ? ' width="' + boy + '" height="' + boy + '"' : '') + ' shape-rendering="crispEdges" aria-hidden="true">'
       + Object.keys(yol).map(c => '<path fill="' + c + '" d="' + yol[c] + '"/>').join('') + '</svg>';
   }
+  /* King karakteri: dört çizimden biri --fig-king olur; King'in her yerindeki avatar onu kullanır. */
+  const KING_YUZLER = Object.freeze(['mochi', 'kedi', 'tavsan', 'ejderha']), KING_YUZ_ANAHTAR = 'lifeos.king.yuz';
+  function kingYuzu(){
+    let d = null;
+    try{ d = localStorage.getItem(KING_YUZ_ANAHTAR); }catch(e){}
+    return KING_YUZLER.indexOf(d) >= 0 ? d : 'mochi';
+  }
+  function kingYuzKoy(){ document.documentElement.style.setProperty('--fig-king', 'var(--fig-king_' + kingYuzu() + ')'); }
+  function kingYuz(ad){
+    if(KING_YUZLER.indexOf(ad) < 0) return false;
+    try{ localStorage.setItem(KING_YUZ_ANAHTAR, ad); }catch(e){}
+    kingYuzKoy();
+    document.querySelectorAll('[data-king-yuz]').forEach(b => b.setAttribute('aria-pressed', b.getAttribute('data-king-yuz') === ad ? 'true' : 'false'));
+    return true;
+  }
   function figurleriKoy(){
     if(!L.PIKSEL_FIGUR) return;
+    kingYuzKoy();
     Object.keys(L.PIKSEL_FIGUR).forEach(ad => document.documentElement.style.setProperty('--fig-' + ad, 'url("data:image/svg+xml,' + encodeURIComponent(figurSvg(ad, ad.indexOf('imlec') === 0 ? 32 : 0)) + '")'));   // imleç boyutsuz çizilmez
   }
 
@@ -253,12 +269,13 @@ window.LIFEOS = window.LIFEOS || {};
       if(o === 'pointerdown' && bos.el && durum.o && L.PIKSEL_APARTMAN.dokun(durum.o, e.clientX / OLCEK, e.clientY / OLCEK, Date.now() / 1000)) return;
       bosKapa();
     }, { capture:true, passive:true }));
-    /* King'in odası: King arayüzünde açıkken döner; dokununca aksolot kalp çıkarır */
+    /* King'in odası: King arayüzünde açıkken döner; dokununca karakter kalp çıkarır */
+    window.addEventListener('click', e => { const b = e.target && e.target.closest ? e.target.closest('[data-king-yuz]') : null; if(b) kingYuz(b.getAttribute('data-king-yuz')); }, { capture:true });
     let kalp = 0;
     window.addEventListener('pointerdown', e => { if(e.target && e.target.matches && e.target.matches('canvas.king__oda')) kalp = Date.now() + 3000; }, { capture:true, passive:true });
     setInterval(() => {
       const c = document.visibilityState === 'hidden' ? null : document.querySelector('canvas.king__oda'), A = L.PIKSEL_APARTMAN;
-      if(c && A) A.kingOda(c, hareketsiz() ? 0 : Date.now() / 1000, A.vakit(new Date().getHours()), Date.now() < kalp);
+      if(c && A) A.kingOda(c, hareketsiz() ? 0 : Date.now() / 1000, A.vakit(new Date().getHours()), Date.now() < kalp, kingYuzu());
     }, 125);
     document.addEventListener('dblclick', o => {
       const t = o.target;
@@ -350,5 +367,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, cizimCevir });
+  L.PIKSEL = Object.freeze({ kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, cizimCevir });
 })(window.LIFEOS);

@@ -158,13 +158,9 @@ window.LIFEOS = window.LIFEOS || {};
   POZ.papagan = { h:1, k:[['..ooo..', '.ooeyy.', '.oooyy.', '..oOo..', '..oOo..', '..ooo..', 'dddrddd', '...r...', '...r...'], ['.......', '..ooo..', '.ooeyy.', '.oooyy.', '..oOo..', '..ooo..', 'dddrddd', '...r...', '...r...']] };
   POZ.kelebek = { h:5, k:[['rr.rr', 'rrdrr', '.rdr.'], ['.r.r.', '.rdr.', '..d..']] };
   POZ.bocek = { h:1.5, k:[['y'], ['Y'], ['.'], ['.'], ['Y']] };
-  /* King'in aksolotu: pembe, solungaçlı, tacı küçük */
-  const AKS = (a) => ['.....y.yy.y.....', '.....yYyyYy.....', a[0] + '...oooooooo...' + a[0], 'gg.ommmmmmmmo.gg', '.gommmmmmmmmmog.', 'ggommwkmmwkmmogg', '.gommkkmmkkmmog.', a[1] + '.opmmnnmmpo.' + a[1], '...ommmmmmmmo...', '....oMMMMMMo....', '...ommbbbbmmo...', '..omommbbmmomo..', '..oo.ommmmo.oo..', '....ommMMmmo....', a[2], a[3]];
-  const AKS1 = AKS(['g.', 'gg', '....oMo..oMo....', '.....o....o.....'].map((r, i) => (i === 0 ? 'g' : r))), AKS2 = AKS(['.', '.g', '...oMo....oMo...', '....o......o....']);
-  POZ.aksolot = { h:1.5, k:[AKS1, AKS1, AKS1, AKS2.map((r, y) => (y === 5 || y === 6 ? r.replace('wk', 'oo').replace('kk', 'kk') : r))].map(f => f.map((r, y) => (y >= 14 ? AKS1[y] : r))) };
-  POZ.aksolotyuru = { h:4, k:[AKS1, AKS2] };
-  POZ.aksolot_u = { h:1, k:[AKS1.map((r, y) => (y === 5 ? r.replace(/wk/g, 'mm') : y === 6 ? r.replace(/kk/g, 'oo') : r))] };
-  ['aksolot', 'aksolotyuru', 'aksolot_u'].forEach(a => { OZEL[a] = { o:'#7a2f55', m:'#ff9ecb', M:'#e878ad', g:'#ff5f9e', y:'#ffd35a', Y:'#e0a52e', k:'#2a1430', w:'#ffffff', p:'#ff6f9f', b:'#ffd9e8', n:'#7a2f55' }; });
+  /* King odasındaki karakter: çizimi piksel-figur.js'te, kullanıcı seçer. Burada yalnız hareketi: bekle (göz kırpar), zıpla, uyu. */
+  const KF = Array(16).fill('.'.repeat(16));
+  POZ.kdur = { h:1.5, k:[KF, KF, KF, KF.slice()] }; POZ.kyuru = { h:4, k:[KF, KF.slice()] }; POZ.kuyu = { h:1, k:[KF] };
   /* Arabalar: kişiden biraz kısa, sağa bakar; tekerlek döner */
   const OTO = (w) => ['...........KKKKKKKKKKKK...........', '..........KUUUUUKUUUUUUK..........', '.........KUUUUUUKUUUUUUUK.........', '...KKKKKKBBBBBBBBBBBBBBBBKKKKK....', '..KBBBBBBBBBBBBBBBBBBBBBBBBBBBBK..', '.KrBBBBBBBBBBBKBBBBBBBBBBBBBBBBYK.', '.KAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAK.', '.KAAKKKKKAAAAAAAAAAAAAKKKKKAAAAAK.', '..KKK' + w[0] + 'KKKKKKKKKKKKKKK' + w[0] + 'KKKKKK..', '....K' + w[1] + 'K.............K' + w[1] + 'K.......', '.....KKK...............KKK........'];
   const VAN = (w) => ['......KKKKKKKKKKKKKKKKKKKK........', '.....KBBBBBBBBBBBBBBBBBBBBBKK......', '....KBBBBBBBBBBBBBBBBBBBBKUUUKK....', '....KBBBBBBBBBBBBBBBBBBBBKUUUUUK...', '....KBBBBBBBBBBBBBBBBBBBBKUUUUUUK..', '...KBBBBBBBBBBBBBBBBBBBBBBBBBBBBK..', '...KrBBBBBBBBBBBBBBBBBBBBKBBBBBYK..', '...KAAAAAAAAAAAAAAAAAAAAAKAAAAAAK..', '...KAKKKKKAAAAAAAAAAAAAKKKKKAAAAK..', '...KKK' + w[0] + 'KKKKKKKKKKKKKKK' + w[0] + 'KKKKK...', '.....K' + w[1] + 'K.............K' + w[1] + 'K.......', '......KKK...............KKK.......'];
@@ -267,7 +263,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(kisi){
       Object.assign(P, { c:'#f4a39a', n:'#a84e46', h:kisi.h, H:tonla(kisi.h, 1.35), s:kisi.s, S:tonla(kisi.s, 0.84), g:kisi.g, G:tonla(kisi.g, 0.76), p:kisi.p, P:tonla(kisi.p, 0.76), a:kisi.a, v:tonla(kisi.a, 0.76), x:tonla(kisi.g, 1.35) });
       Object.keys(P).forEach(k => { P[k] = tonla(P[k], PALET[v].sakin); });
-    } else if(v === 'gece' && (ARABA_P[poz] || (OZEL[poz] && !/^aksolot|^kapi|^bocek/.test(poz)))){
+    } else if(v === 'gece' && (ARABA_P[poz] || (OZEL[poz] && !/^kapi|^bocek/.test(poz)))){
       const f = ARABA_P[poz] ? 0.55 : 0.7;
       Object.keys(P).forEach(k => { P[k] = tonla(P[k], f); });
     }
@@ -420,14 +416,14 @@ window.LIFEOS = window.LIFEOS || {};
         const [a] = k;
         return a ? [rutin(a, X + 10, F, [['firca', 22, undefined, false], ['yuru', 0, X + 2], ['dur', 5], ['yuru', 0, X + 10]]), duygu('b_nota', X + 13, F - 18, 6, 5, 12)] : [];
       } },
-    /* King'in odası: apartmanda değil, King arayüzünün Bağlam sütununda (kingOda); pembe aksolot, akvaryum, minder */
+    /* King'in odası: apartmanda değil, King arayüzünün Bağlam sütununda (kingOda); seçilen karakter, akvaryum, minder */
     king:{ g:38, duvar:'#ffd3e6', alt:'#f5b0cf', desen:'nokta',
       ciz(g, X, F){ kutu(g, X + 3, F - 26, 11, 8, '#fff1f7'); [[5, 3], [8, 4], [11, 3]].forEach(q => R(g, X + q[0], F - 24, 1, q[1], '#e0a52e')); R(g, X + 5, F - 21, 7, 1, '#e0a52e');
         kutu(g, X + 22, F - 28, 14, 10, '#9fdcec'); R(g, X + 23, F - 27, 12, 2, '#d3f2f8'); R(g, X + 25, F - 22, 1, 3, '#4c8a4a'); R(g, X + 32, F - 23, 1, 4, '#4c8a4a'); R(g, X + 28, F - 24, 2, 1, '#ee9c52'); R(g, X + 23, F - 20, 12, 1, '#e8d5a8'); kutu(g, X + 21, F - 18, 16, 2, AHSAP);
         kutu(g, X + 20, F - 5, 16, 5, '#ff7fb0'); R(g, X + 22, F - 4, 12, 1, '#ffb3d0'); R(g, X + 1, F, 36, 1, '#ff9ecb'); },
       hayat(X, F, k, v){
-        if(v === 'gece') return [rutin(null, X + 20, F, [['aksolot_u', 30]]), rutin(null, X + 30, F - 18, [['z', 30]])];
-        return [rutin(null, X + 3, F, [['aksolot', 9], ['aksolotyuru', 0, X + 18], ['aksolot', 7], ['aksolotyuru', 0, X + 3]]), duygu('kalp', X + 8, F - 20, 12, 2.5, 14)];
+        if(v === 'gece') return [rutin(null, X + 20, F, [['kuyu', 30]]), rutin(null, X + 30, F - 18, [['z', 30]])];
+        return [rutin(null, X + 3, F, [['kdur', 9], ['kyuru', 0, X + 18], ['kdur', 7], ['kyuru', 0, X + 3]]), duygu('kalp', X + 8, F - 20, 12, 2.5, 14)];
       } },
   };
   /* Evler: kapıyla bağlı odalar; her evde tek yatak odası var, yer yetmezse önce ötekiler düşer */
@@ -775,7 +771,25 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* King'in odası: King arayüzündeki küçük tuval. Duvar bir kez çizilir; kare yalnız değişince yenilenir. */
   const KING_EN = 38, KING_BOY = 32, kingArka = {};
-  function kingOda(c, t, v, kalp){
+  const kingKare = new Map();
+  function kingGorsel(ad, poz, i, ters, v){
+    const anahtar = ad + poz + i + (ters ? 't' : '');
+    let c = kingKare.get(anahtar);
+    if(c) return c;
+    const f = L.PIKSEL_FIGUR && L.PIKSEL_FIGUR['king_' + ad];
+    if(!f) return null;
+    let r = f.s.slice();
+    /* Göz kırpma ve uyku: gözün üst sırası kapanır, alt sırası çizgi kalır */
+    if(poz === 'kuyu' || (poz === 'kdur' && i === 3)) r = r.map(q => q.replace(/kw/g, 'mm'));
+    if(poz === 'kyuru' && i === 1) r = r.slice(1).concat('.'.repeat(16));
+    c = document.createElement('canvas'); c.width = c.height = 16;
+    const g = c.getContext('2d');
+    r.forEach((q, y) => { for(let x = 0; x < 16; x++){ const renk = f.p[q[x]]; if(renk){ g.fillStyle = renk; g.fillRect(ters ? 15 - x : x, y, 1, 1); } } });
+    kingKare.set(anahtar, c);
+    return c;
+  }
+  function kingOda(c, t, v, kalp, ad){
+    ad = ad || 'mochi';
     let a = kingArka[v];
     if(!a){
       a = kingArka[v] = { c:document.createElement('canvas'), r:ODA.king.hayat(0, 30, [], v) };
@@ -784,12 +798,12 @@ window.LIFEOS = window.LIFEOS || {};
       duvarCiz(g, 0, 0, KING_EN, 30, ODA.king.duvar, ODA.king.alt, ODA.king.desen);
       ODA.king.ciz(g, 0, 30);
     }
-    const kareler = a.r.map(s => kareAl(s, t)).filter(Boolean), imza = v + (kalp ? 'k' : '') + kareler.map(k => k.poz + k.i + ',' + k.x + ',' + k.y).join('|');
+    const kareler = a.r.map(s => kareAl(s, t)).filter(Boolean), imza = ad + v + (kalp ? 'k' : '') + kareler.map(k => k.poz + k.i + ',' + k.x + ',' + k.y).join('|');
     if(c.dataset.imza === imza) return false;
     c.dataset.imza = imza;
     const g = c.getContext('2d');
     g.drawImage(a.c, 0, 0);
-    kareler.forEach(k => g.drawImage(gorsel(k.poz, k.i, null, k.ters, v), k.x, k.y));
+    kareler.forEach(k => { const o = /^k(dur|yuru|uyu)$/.test(k.poz) ? kingGorsel(ad, k.poz, k.i, k.ters, v) : gorsel(k.poz, k.i, null, k.ters, v); if(o) g.drawImage(o, k.x, k.y); });
     if(kalp) g.drawImage(gorsel('b_kalp', 0, null, false, v), 26, 2);
     return true;
   }

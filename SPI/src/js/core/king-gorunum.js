@@ -574,8 +574,16 @@ window.LIFEOS.PARCA.yazilar({
      taçlı minik, duran portre (süs; ekran okuyucuya gizli, dokunulmaz).
      Minikler yoksa küre kalır. Sesli sohbet şeridi küreyi korur. */
   function yuzHtml(buyuk){
-    /* Pembe piksel aksolot (2026-11-05, depo sahibinin isteği); çizimi piksel-figur.js'te */
-    return '<span class="king__yuz' + (buyuk ? ' king__yuz--buyuk' : '') + '" aria-hidden="true"><span class="king-aks"></span></span>';
+    /* Seçilen piksel karakter (2026-11-05, depo sahibinin isteği); çizimleri piksel-figur.js'te */
+    return '<span class="king__yuz' + (buyuk ? ' king__yuz--buyuk' : '') + '" aria-hidden="true"><span class="king-fig"></span></span>';
+  }
+  /* King'in karakteri: dört küçük düğme, odanın hemen üstünde. Seçimi piksel.js saklar ve uygular. */
+  const KARAKTER_AD = { mochi:'Mochi', kedi:'Kedi', tavsan:'Tavşan', ejderha:'Ejderha' };
+  function karakterSecimi(){
+    const P = KI.L.PIKSEL;
+    if(!P || !P.kingYuzu) return '';
+    return '<div class="king__karakter" role="group" aria-label="King karakteri">' + P.KING_YUZLER.map(a => '<button type="button" class="king__karakter-sec" data-king-yuz="' + a + '" aria-pressed="' + (P.kingYuzu() === a ? 'true' : 'false')
+      + '" aria-label="' + KARAKTER_AD[a] + '" title="' + KARAKTER_AD[a] + '" style="background-image:var(--fig-king_' + a + ')"></button>').join('') + '</div>';
   }
   const NOKTA = m => '<i class="king__nokta king__nokta--' + (m || 'mer') + '" aria-hidden="true"></i>';
 
@@ -705,7 +713,7 @@ window.LIFEOS.PARCA.yazilar({
       + (kars.satirlar.length ? kisim('Notlar', '<ul class="king__baglam-not">' + kars.satirlar.map(x => '<li>' + KI.kac(x) + '</li>').join('') + '</ul>') : '')
       + (sor.length ? kisim('Sorabileceklerin', '<div class="king__baglam-sor">' + sor.map(o => '<button type="button" class="king__baglam-oner" data-king="' + o.is + '">'
         + KI.kac(o.ad) + '</button>').join('') + '</div>') : '')
-      + '<canvas class="king__oda" width="38" height="32" aria-hidden="true"></canvas></aside>';
+      + '' + karakterSecimi() + '<canvas class="king__oda" width="38" height="32" aria-hidden="true"></canvas></aside>';
   }
   function govde(){
     if(KI.mini) return miniGovde();
