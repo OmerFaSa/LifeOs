@@ -19,6 +19,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [IPHONE-PLANI](ekip/IPHONE-PLANI.md) — Sistemin tamamını sade, öz ve modern bir kullanıcı deneyimine taşıma planı; durumu: tamamlandı (2026-10-02)
 - [PIKSEL-PLANI](ekip/PIKSEL-PLANI.md) — Sistemin tatlı piksel hâli için yapılacaklar listesi; durumu: sürüyor (2026-11-05)
 - [KOLAY-PLANI](ekip/KOLAY-PLANI.md) — Sürtünmesiz veri girişi ve sadeleştirilmiş kullanıcı deneyimi planı; durumu: tamamlandı (2026-10-16)
+- [USTA-PLANI](ekip/USTA-PLANI.md) — Öğrenme araştırması, ortak ustalık çekirdeği ve üç modülün boşluk listesi; durumu: sürüyor (2026-11-05)
 - [KISI-PLANI](ekip/KISI-PLANI.md) — King'in 14 yaşam alanında kullanıcıyı tanıyan kişi modeli ve hafıza yapısı; durumu: tamamlandı (2026-10-17)
 - [NOT-PLANI](ekip/NOT-PLANI.md) — Zengin içerikli, iki yönlü bağlantılı yerel defter ve not sistemi mimarisi; durumu: tamamlandı (2026-10-17)
 - [KING-4](ekip/KING-4.md) — Tek ajan üzerinden bütün sistemi yöneten King 4.0 vizyonu ve yol haritası; durumu: sürüyor (2026-11-01)

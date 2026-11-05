@@ -108,6 +108,7 @@ js/core/rehber.js
 js/core/pusula.js
 js/core/sorukart.js
 js/core/ogret.js
+js/core/usta.js
 js/core/parca-rehber.js
 js/core/king.js
 js/core/king-ses.js
@@ -555,6 +556,7 @@ js/app.js
 ../js/core/pusula.js
 ../js/core/sorukart.js
 ../js/core/ogret.js
+../js/core/usta.js
 ../js/core/parca-rehber.js
 ../js/core/king.js
 ../js/core/king-ses.js
@@ -736,6 +738,7 @@ xp.test.js
 kesinlik.test.js
 turkcesayi.test.js
 ogret.test.js
+usta.test.js
 tarih.test.js
 bicim.test.js
 olumsuz.test.js

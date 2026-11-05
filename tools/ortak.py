@@ -378,6 +378,9 @@ DOSYALAR = {
     # OGRETME MOTORU (KING-4 §D, tur 4b) — teshis, Sokratik satir, 1/3/7 gun tekrar; uc modulun tek ogretmeni.
     "ogret.js":       "js/core",
     "ogret.test.js":  "tests",
+    # USTALIK CEKIRDEGI (2026-11-05) — kaniti asamaya, siraya ve kalibrasyona cevirir; ekran yok, saf kural.
+    "usta.js":        "js/core",
+    "usta.test.js":   "tests",
     # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
     # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
     # tercihi okur), ilk cizimden once <html data-zemin> koyar.
