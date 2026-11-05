@@ -248,6 +248,9 @@ window.LIFEOS.ARAC = (function(){
     return liste().map(a => {
       const o = { ad:a.ad, aciklama:String(a.aciklama).replace(/\s+/g, ' ').trim().slice(0, 400), tur:a.tur };
       if(a.parametreler) o.parametreler = a.parametreler;
+      /* HKM mesajla ortüşen araçları seçerken okur (core/arac.py dar_katalog); modele gitmez. */
+      const anahtar = [a.anahtar, a.ornek].filter(Boolean).join(' ').slice(0, 300);
+      if(anahtar) o.anahtar = anahtar;
       return o;
     });
   }

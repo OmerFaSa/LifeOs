@@ -214,17 +214,18 @@
       Araçlar yazı alanındaki «+» menüsündedir (ARACLAR kataloğu).
       Sohbet yeniden adlandırılır (boş ad ilk soruya döner) ve sabitlenir;
       sabitlenenler en üstte «Sabitlenenler»dedir.
-  28. GÜZEL SES (depo sahibi, 2026-10-19: «internete bağlıyken Gemini, yerelde
-      Piper; PC, telefon, tablet hepsi; ayarlanabilsin»). HKM bağlıysa King
-      cevabı HKM'den WAV olarak ister (/api/ses, HKM/core/ses.py): internet
-      varsa Gemini'nin Türkçe sesi, yoksa PC'deki Piper. Alamazsa (HKM kapalı,
-      ikisi de yok) söz 7'deki gibi cihazın kendi sesine düşer; King hiç
-      susmaz. Seçim cihazda durur (Dinle ve Konuş panelinde «Ses»):
-        Otomatik  Gemini → Piper → cihaz (varsayılan)
+  28. GÜZEL SES (depo sahibi, 2026-10-19; sıra 2026-11-05'te dinlenip seçildi:
+      Otomatik önce EMA, Gemini yalnız elle). HKM bağlıysa King cevabı HKM'den
+      ister (/api/ses, HKM/core/ses.py). Alamazsa (HKM kapalı, motor yok) söz
+      7'deki gibi cihazın kendi sesine düşer; King hiç susmaz. Sesli moda
+      geçince EMA arka planda ısınır (/api/ses/isit). Seçim cihazda durur
+      (Dinle ve Konuş panelinde «Ses»):
+        Otomatik  EMA → Piper → cihaz (varsayılan); metin bilgisayardan çıkmaz
+        EMA       yalnız EMA, olmazsa cihaz
         Gemini    yalnız Gemini, olmazsa cihaz
         Piper     yalnız Piper (metin bilgisayardan çıkmaz), olmazsa cihaz
         Cihaz     yalnız cihazın sesi; HKM'ye ses isteği gitmez
-      Gemini seçiliyken (Otomatik dahil) okunacak cevabın METNİ Google'a
+      Gemini seçiliyken okunacak cevabın METNİ Google'a
       gider; bu söz 7'nin «metin hiçbir şirkete gitmez» sözünü o seçim için
       değiştirir ve panel bunu söyler. Uzun cevap parça parça istenir;
       biri çalarken sonraki hazırlanır. Sustur her şeyi keser.
@@ -404,9 +405,9 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.king.kullanicinin-ekranina-arada':'Kullanıcının ekranına arada bir bakıyorsun; kendisi bir şey sormadı. Ekranda o an yaptığı işle ilgili, ',
   'ortak.king.soylenecek-degerli-bir-sey-y':'Söylenecek değerli bir şey yoksa yalnız PAS yaz. Ekranda görmediğin hiçbir şeyi uydurma.',
   'ortak.king.kullanicinin-masasindaki-kam':'Kullanıcının masasındaki kameraya arada bir bakıyorsun; kendisi bir şey sormadı. Görüntüde ders çalışmayla ',
-  'ortak.king.i-nternet-varsa-gemini-yoksa':'İnternet varsa Gemini, yoksa bilgisayardaki EMA, sonra Piper, en son cihazın sesi',
+  'ortak.king.i-nternet-varsa-gemini-yoksa':'Önce bilgisayardaki EMA, sonra Piper, en son cihazın sesi; metin bilgisayardan çıkmaz',
   'ortak.king.bilgisayardaki-ema-dogal-tur':'Bilgisayardaki EMA: doğal Türkçe ses, ücretsiz; metin bilgisayardan çıkmaz',
-  'ortak.king.gemini-nin-turkce-sesi-metin':'Gemini’nin Türkçe sesi; metin Google’a gider',
+  'ortak.king.gemini-nin-turkce-sesi-metin':'Gemini’nin Türkçe sesi; yalnız bu seçilirse okur, metin Google’a gider',
   'ortak.king.bilgisayardaki-piper-metin-b':'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
   'ortak.king.yalniz-bu-cihazin-kendi-sesi':'Yalnız bu cihazın kendi sesi',
   'ortak.king.gemma-4':'Gemma 4',
@@ -516,6 +517,7 @@ window.LIFEOS.KING_IC = {};
     { es:new RegExp(B + '(müzik|diksiyon)'), modul:'esp', route:'studio', cevap:yz('ortak.king.kolay-gelsin') },
   ];
 
+  let ortamPcm = null;
   const ortam = {
     /* Söz 30: kenar çubuğu geniş ekranda yerinde kapanır, darda üstte açılır. */
     genis:() => !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width:1023px)').matches),
@@ -667,18 +669,27 @@ window.LIFEOS.KING_IC = {};
     /* K3: akan ses (HKM /api/ses/akis: 16 bit tek kanal PCM). Her parça gelir
        gelmez sıraya konup çalınır; ilk kelime ilk parçayla duyulur. Döner:
        'bitti' | 'olmadi' (hiç ses gelmedi ya da çalınamadı). */
+    /* Bağlam cümleler arasında paylaşılır: her cümlede yenisi ilk seste 550 ms, sonra
+       50-80 ms bekletiyordu (ölçüldü, 2026-11-05). */
+    pcmBaglam:() => {
+      const C = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
+      if(!C) return null;
+      if(!ortamPcm || ortamPcm.state === 'closed') ortamPcm = new C();
+      if(ortamPcm.state === 'suspended' && ortamPcm.resume) ortamPcm.resume().catch(() => {});
+      return ortamPcm;
+    },
     pcmCal:(typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? (res, hz, tut) => new Promise(ok => {
       let ctx = null, okuyucu = null, bitti = false, zaman = 0, son = null, calindi = false, artik = null;
+      const kaynaklar = [];
       const kapat = s => {
         if(bitti) return;
         bitti = true;
         try{ const c = okuyucu && okuyucu.cancel(); if(c && c.catch) c.catch(() => {}); }catch(e){ /* kapalı */ }
-        try{ const c = ctx && ctx.close(); if(c && c.catch) c.catch(() => {}); }catch(e){ /* kapalı */ }
+        kaynaklar.forEach(x => { try{ x.stop(); }catch(e){ /* bitmiş */ } });
         ok(s);
       };
       try{
-        ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if(ctx.state === 'suspended' && ctx.resume) ctx.resume().catch(() => {});
+        ctx = ortam.pcmBaglam();
         okuyucu = res.body.getReader();
       }catch(e){ return kapat('olmadi'); }
       tut({ dur:() => kapat('bitti') });
@@ -695,6 +706,7 @@ window.LIFEOS.KING_IC = {};
         zaman = Math.max(zaman, ctx.currentTime + 0.03);
         src.start(zaman);
         zaman += buf.duration;
+        kaynaklar.push(src);
         son = src; calindi = true;
       };
       (async () => {

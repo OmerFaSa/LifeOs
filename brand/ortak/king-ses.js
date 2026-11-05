@@ -456,6 +456,22 @@ window.LIFEOS.PARCA.yazilar({
     return gorselCevap(yz('ortak.king-ses.bu-fotografta-ne-var-kisaca'), resim);
   }
 
+  /* EMA ilk açılışta ~8 sn ister: sesli moda geçerken arka planda ısınır (5 dk'da
+     bir kez). Hata sessizdir: ses yine ilk istekte açılır ya da cihaza düşer. */
+  KI.sesIsitT = -Infinity;
+  function sesIsit(){
+    const t = sesTercihi(), k = t === 'oto' || t === 'ema' ? KI.baglanti() : null;
+    const su = KI.ortam.simdi().getTime();
+    if(!k || !KI.ortam.fetch || su - KI.sesIsitT < 300000) return;
+    KI.sesIsitT = su;
+    try{
+      if(KI.ortam.pcmBaglam) KI.ortam.pcmBaglam();     // dokunuştayız: ilk ses bağlam kurulumunu beklemez
+      const p = KI.ortam.fetch(k.url + '/api/ses/isit', { method:'POST', body:JSON.stringify({ tercih:t }),
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king-ses.bearer') + k.token } });
+      if(p && p.catch) p.catch(() => {});
+    }catch(e){ /* yok */ }
+  }
+
   /* ---------- söz 13: sesli sohbet ---------- */
   function sohbetDevam(){
     kesiciKapat();
@@ -469,6 +485,7 @@ window.LIFEOS.PARCA.yazilar({
     KI.sessizSay = 0;
     if(!KI.sesliSohbet){ if(KI.dinleyen){ try{ KI.dinleyen.stop(); }catch(e){ /* kapalı */ } } KI.soyle(yz('ortak.king-ses.sesli-sohbeti-bitirdim')); return false; }
     KI.sesli = true;
+    sesIsit();
     KI.soyle(yz('ortak.king-ses.seni-dinliyorum-bitirmek-ici'));
     return true;
   }
@@ -666,6 +683,7 @@ window.LIFEOS.PARCA.yazilar({
 
   function dinle(){
     if(KI.dinleyen){ try{ KI.dinleyen.stop(); }catch(e){ /* kapalı */ } return; }
+    sesIsit();
     const hk = !hkmDinlemez() && KI.ortam.kayitAc && KI.algila() !== 'tarayici' ? KI.baglanti() : null;
     if(hk){ kayitDinle(hk); return; }
     const T = KI.ortam.tanima();
@@ -1034,5 +1052,5 @@ window.LIFEOS.PARCA.yazilar({
       + '<p class="king__menu-not" data-king-uyan-not>' + KI.kac(not) + '</p>';
   }
 
-  Object.assign(KI, { fotoIsleri, fotoAl, PDF_METIN, pdfAl, fotoIsle, kameraIs, isKamera, isSec, ekranOku, ekranGoster, gorselZincir, gorselCevap, paylasimBaslat, kameraAc, gozSec, paylasimKapat, paylasimBitir, fotoYorumla, sohbetDevam, sesliSohbetAc, sesSec, durum, sus, sesTercihi, sesTercihSec, sesParcalari, seslendir, dinle, wavYap, mikDene, depoAnahtar, sakla, tasimaYaz, geriGetir, kesiciKapat, UYAN, uyanAcikMi, uyanCumlesi, uyanKontrol, uyanParca, uyanKur, uyanSec, uyanHtml });
+  Object.assign(KI, { sesIsit, fotoIsleri, fotoAl, PDF_METIN, pdfAl, fotoIsle, kameraIs, isKamera, isSec, ekranOku, ekranGoster, gorselZincir, gorselCevap, paylasimBaslat, kameraAc, gozSec, paylasimKapat, paylasimBitir, fotoYorumla, sohbetDevam, sesliSohbetAc, sesSec, durum, sus, sesTercihi, sesTercihSec, sesParcalari, seslendir, dinle, wavYap, mikDene, depoAnahtar, sakla, tasimaYaz, geriGetir, kesiciKapat, UYAN, uyanAcikMi, uyanCumlesi, uyanKontrol, uyanParca, uyanKur, uyanSec, uyanHtml });
 })();

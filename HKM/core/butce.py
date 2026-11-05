@@ -142,11 +142,12 @@ def is_baglami(is_id):
 def record(con, *, role, task, provider, model, user="ben", in_tok=0, out_tok=0,
            image_tok=0, reason_tok=0, usd=0.0, rate=0.0, cached=False,
            escalated=False, ok=True, note="", now=None, is_id=None, veri=None, cached_tok=0,
-           ms=None, seviye=None, neden=None):
+           ms=None, seviye=None, neden=None, ilk_ms=None):
     """Bir cagriyi deftere yazar. BASARISIZ CAGRI DA YAZILIR: para, cevap
     alinmadan da harcanmis olabilir. `is_id` verilmezse is parcaciginin
     baglamindaki BAM isi yazilir (is_baglami). `ms`: cagrinin suresi
-    (ai_olcum); olculmediyse bos kalir, 0 yazilmaz. `seviye` (yerel|bulut) ve
+    (ai_olcum); olculmediyse bos kalir, 0 yazilmaz. `ilk_ms`: akan cevapta ilk
+    parcaya kadar gecen sure (akmayan cagrida bos). `seviye` (yerel|bulut) ve
     `neden`: model merdiveninin karari ya da dususu (KING-4 A6)."""
     t = now or datetime.datetime.now()
     if is_id is None:
@@ -154,15 +155,16 @@ def record(con, *, role, task, provider, model, user="ben", in_tok=0, out_tok=0,
     con.execute(
         "INSERT INTO usage(created_at, day, user, role, task, provider, model,"
         " in_tok, out_tok, image_tok, reason_tok, usd, try_, rate, cached,"
-        " escalated, ok, note, is_id, veri, cached_tok, ms, seviye, neden)"
-        " VALUES (%s)" % ",".join("?" * 24),
+        " escalated, ok, note, is_id, veri, cached_tok, ms, seviye, neden, ilk_ms)"
+        " VALUES (%s)" % ",".join("?" * 25),
         (t.isoformat(timespec="seconds"), t.date().isoformat(), user, role, task,
          provider, model, int(in_tok), int(out_tok), int(image_tok),
          int(reason_tok), float(usd), float(usd) * float(rate), float(rate),
          1 if cached else 0, 1 if escalated else 0, 1 if ok else 0, note or "",
          int(is_id) if is_id else None,
          ",".join(sorted(set(veri))) if veri else None, int(cached_tok or 0),
-         int(ms) if ms is not None else None, seviye, (neden or "")[:160] or None))
+         int(ms) if ms is not None else None, seviye, (neden or "")[:160] or None,
+         int(ilk_ms) if ilk_ms is not None else None))
     con.commit()
     return {"ok": True}
 
@@ -174,7 +176,8 @@ def ai_olcum(con, gun=None):
     sec = ("COUNT(*) cagri, SUM(ok) basarili, COALESCE(SUM(in_tok),0) giris, "
            "COALESCE(SUM(out_tok),0) cikis, COALESCE(SUM(reason_tok),0) dusunme, "
            "COALESCE(SUM(cached_tok),0) onbellek, ROUND(COALESCE(SUM(usd),0),6) usd, "
-           "COALESCE(SUM(ms),0) sure_ms, CAST(AVG(ms) AS INTEGER) ort_ms, MAX(ms) en_uzun_ms")
+           "COALESCE(SUM(ms),0) sure_ms, CAST(AVG(ms) AS INTEGER) ort_ms, MAX(ms) en_uzun_ms, "
+           "CAST(AVG(ilk_ms) AS INTEGER) ort_ilk_ms")
     top = dict(con.execute("SELECT %s FROM usage WHERE day=?" % sec, (gun,)).fetchone())
     satir = [dict(r) for r in con.execute(
         "SELECT role rol, model, provider, %s FROM usage WHERE day=? "

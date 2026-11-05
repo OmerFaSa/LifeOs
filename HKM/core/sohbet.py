@@ -23,6 +23,7 @@
       «Yapay zeka yok» ile «sistem bozuk» ayri seylerdir.
 """
 
+import datetime
 import re
 
 from core import (ai, arac, arastir, butce, cross, dil, eylem, manager, memory, models, motto, patron, program,
@@ -115,6 +116,12 @@ SISTEM_SERBEST = KISA_KIMLIK + """%(ek)s
 
 %(baglam)s"""
 
+# Kucuk modelin arac secimi turu (5 aday metin olculdu: bu 23/25 dogru arac, 42 sohbet
+# cumlesinde 4 gereksiz cagri; yazan araclar yine onaysiz uygulanmaz).
+SISTEM_ARAC = """Sen %(ad)s'sin, LifeOS asistanı. Kullanıcının isteği verilen araçlardan biriyle karşılanıyorsa o aracı hemen çağır; soru sorma, isteğe bağlı parametreleri boş bırak. Hiçbir araç uymuyorsa Türkçe kısa cevap ver.
+
+%(baglam)s"""
+
 # Mesaj sisteme ya da olculere degiyor mu (kod karari; kucuk modelde
 # olcum listesinin gidip gitmeyecegini bu secer).
 SISTEM_KONUSU = re.compile(
@@ -177,6 +184,21 @@ def sistem_metni(gorevli, bg, kisa=False, serbest=False, ek=""):
                            "baglam": bg, "ek": ek}
 
 
+GUN_AD = ("Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar")
+
+
+def _tarih_satiri(date, now=None):
+    """«Tarih: 2026-11-05 (Perşembe, akşam)». Model saati bilmeyince akşam
+    «Günaydın» diyordu. Rakam eklemez: sayi denetimi ve onbellek anahtari kisa
+    aralikta degismez. Gecmis bir gunun bolumu yazilmaz."""
+    t = now or datetime.datetime.now()
+    if str(date) != t.date().isoformat():
+        return "Tarih: %s" % date
+    s = t.hour
+    bolum = "sabah" if 5 <= s < 11 else "gündüz" if 11 <= s < 17 else "akşam" if 17 <= s < 22 else "gece"
+    return "Tarih: %s (%s, %s)" % (date, GUN_AD[t.weekday()], bolum)
+
+
 def baglam(con, date, gorevli="king", th=None, veri=None, kisa=False):
     """Modelin gorecegi TEK gercek: kural motorunun urettigi olculer.
 
@@ -187,7 +209,7 @@ def baglam(con, date, gorevli="king", th=None, veri=None, kisa=False):
     b = manager.brief(con, date, th=th)
     if kisa:
         return _kisa_baglam(con, date, gorevli, b, veri)
-    satir = ["Tarih: %s" % date]
+    satir = [_tarih_satiri(date)]
     alan = ALAN.get(gorevli)
     for l in b["lines"]:
         if alan and l.get("vp") and l["vp"] != alan:
@@ -234,7 +256,7 @@ def _kisa_baglam(con, date, gorevli, b, veri):
     (sahada, 2026-09-27). Burada: veri gelmeyenler TEK satir, olcum
     satirlari (seri, capraz, modul hukmu, oneri) aynen ve bir kez. Hukmu
     INCOMPLETE ve bulgusuz modul de «veri gelmeyen»dir (2026-10-19)."""
-    satir = ["Tarih: %s" % date]
+    satir = [_tarih_satiri(date)]
     alan = ALAN.get(gorevli)
     sessiz, olcum = [], []
     for l in b["lines"]:
@@ -749,6 +771,10 @@ USLUP_TALIMAT = {
 }
 
 
+# Arac iddiasi duzeltmesinde daha genis pencere: dar katalogun kacirdigi arac da gorulsun.
+DAR_GENIS = 16
+
+
 def uslup_of(v):
     return v if v in USLUPLAR else None
 
@@ -762,8 +788,9 @@ CUMLE_SONU = re.compile(r"[.!?\u2026]+[\"'»)]*\s+|\n+")
 
 
 class CumleAkisi:
-    def __init__(self, yay, baglam, serbest=False):
+    def __init__(self, yay, baglam, serbest=False, genel=False, aracli=False):
         self.yay, self.baglam, self.serbest = yay, baglam, serbest
+        self.genel, self.aracli = genel, aracli
         self.tampon, self.kapali, self.durdu = "", False, False
 
     def __call__(self, parca):
@@ -797,7 +824,9 @@ class CumleAkisi:
             t = kalipsiz(t)
         if not t.strip():
             return
-        if manager.imperatives(t) or ai.uydurma_sayilar(t, self.baglam):
+        if (manager.imperatives(t) or ai.uydurma_sayilar(t, self.baglam, genel=self.genel)
+                or (self.aracli and (ARAC_IDDIA.search(t) or re.search(r"\barac|\baraç", t, re.I)))):
+            # Aracli turda «bakiyorum», «arac cagiriyorum» akmaz (sesle de okunurdu).
             self.durdu = True
             return
         try:
@@ -1159,9 +1188,12 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # baglamdaki «veri gelmedi» satirina guvenip okuma aracini cagirmiyordu
     # (sahada, gemma4:e2b ve gemma3:4b, 2026-10-20); kayit modulde, arac okur.
     # Araci cagiran model mi (gemma3 gibi aracsiz modele katalog gitmez, core/arac.py).
-    aracli = bool(katalog) and not arac.aracsiz_mi((hazir.get("assignment") or {}).get("model"))
-    if serbest or (yerel_model and aracli and sonuclar is None):
-        bg = "Tarih: %s" % date
+    # Tam katalog gonderilmez: mesajla ortusmeyen araclar modele sunulmaz (arac.dar_katalog);
+    # secilen cagri yine tam katalogla dogrulanir.
+    sunulan = arac.dar_katalog(katalog, metin)
+    aracli = bool(sunulan) and not arac.aracsiz_mi((hazir.get("assignment") or {}).get("model"))
+    if serbest:
+        bg = _tarih_satiri(date)
     if sonuclar:
         veri.add("arac")
         bg += "\n" + arac.sonuc_baglami(sonuclar)
@@ -1181,12 +1213,15 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    sistem = sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest, ek=(
-        (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
-        + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
-        + USLUP_TALIMAT.get(uslup_of(uslup), "")
-        + (arac.SONUC_TALIMATI + (arac.DONGU_TALIMATI if devam and aracli else "") if sonuclar
-           else ARAC_TALIMATI if aracli and sonuclar is None else "")))
+    # Genel bilgi sorusu («pomodoro nedir»): sayiyi yalniz kullaniciya baglaninca denetle.
+    denetim = "genel" if sonuclar is None and not sistem_konusu(metin) else "olcum"
+    ek_sabit = ((HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
+                + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
+                + USLUP_TALIMAT.get(uslup_of(uslup), ""))
+    sistem = sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest, ek=ek_sabit + (
+        arac.SONUC_TALIMATI + (arac.DONGU_TALIMATI if devam and aracli else "") if sonuclar
+        else ARAC_TALIMATI if aracli and sonuclar is None else ""))
+    aracsiz_sistem = sistem.replace(ARAC_TALIMATI, "").replace(arac.DONGU_TALIMATI, "")
     onceki = [m if m.get("role") != "assistant" else dict(m, content=kalipsiz(m.get("content")))
               for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
     onceki = [m for m in onceki if m.get("content")]
@@ -1195,12 +1230,28 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     mesajlar = onceki + [{"role": "user", "content": metin}]
 
     ilk_tur = bool(katalog) and sonuclar is None
-    arac_turu = ilk_tur or bool(devam and aracli)
-    r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
-               user=user, transport=transport, veri=veri, seviye=sv["seviye"],
-               jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
-               akis=CumleAkisi(akis, bg, serbest) if akis and not arac_turu else None,
-               araclar=katalog if arac_turu else None, adim=devam["adim"] + 1 if devam else 1)
+    arac_turu = bool(sunulan) and (ilk_tur or bool(devam and aracli))
+    r = None
+    if yerel_model and aracli and ilk_tur:
+        # IKI ASAMA (kucuk model): once yalniz secim, sonra sohbet. Tek turda «samimi sohbet
+        # arkadasi» metni araci bastiriyordu (Olcum 6: 0/24); kisa metinle secim dogru ama arac
+        # uymayinca talimatini ya da arac adini metne yaziyordu. Secim turunda metin baslarsa
+        # okuma kesilir; sohbet turu aracsiz ve akarak gelir.
+        sec = ai.ask(con, cfg, rol, "arac_sec", mesajlar[-3:], baglam=_tarih_satiri(date),
+                     sistem=SISTEM_ARAC % {"ad": GOREVLILER[gorevli]["ad"], "baglam": _tarih_satiri(date)},
+                     user=user, transport=transport, veri=veri, seviye=sv["seviye"], araclar=sunulan,
+                     adim=1, duzeltme=False, yalniz_arac=True)
+        if sec.get("ok") and sec.get("cagrilar"):
+            r = sec
+        else:
+            arac_turu, sistem = False, aracsiz_sistem
+    if r is None:
+        r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
+                   user=user, transport=transport, veri=veri, seviye=sv["seviye"],
+                   jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
+                   akis=CumleAkisi(akis, bg, serbest, genel=denetim == "genel", aracli=arac_turu) if akis else None,
+                   araclar=sunulan if arac_turu else None, adim=devam["adim"] + 1 if devam else 1,
+                   denetim=denetim)
     motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
@@ -1208,7 +1259,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         # Model araci CAGIRMADAN «ekliyorum, karartiyorum, bakayim» dedi: yapilmamis
         # isi anlatmak yalandir. Bir kez duzeltme; yine olmazsa kodun cumlesi.
         r2 = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem + ARAC_DUZELT,
-                    user=user, transport=transport, veri=veri, seviye=sv["seviye"], araclar=katalog)
+                    user=user, transport=transport, veri=veri, seviye=sv["seviye"],
+                    araclar=arac.dar_katalog(katalog, metin, DAR_GENIS) or katalog[:DAR_GENIS] or None,
+                    denetim=denetim)
         if r2.get("ok") and (r2.get("cagrilar") or not ARAC_IDDIA.search(r2.get("text") or "")):
             r = r2
         else:
@@ -1236,9 +1289,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         # Model yalniz gecersiz cagri yapti: araclarsiz bir kez daha sorulur,
         # cevap olagan denetimden gecer. Reddedilen cagrilar cevapta durur.
         r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg,
-                   sistem=sistem.replace(ARAC_TALIMATI, "").replace(arac.DONGU_TALIMATI, ""),
+                   sistem=aracsiz_sistem,
                    user=user, transport=transport, veri=veri, seviye=sv["seviye"],
-                   jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None)
+                   jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None, denetim=denetim)
         if r.get("ok") and ARAC_IDDIA.search(r.get("text") or ""):
             r = dict(r, text=ARAC_YAPILMADI)
     if not r["ok"] and sonuclar is not None:
