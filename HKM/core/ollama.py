@@ -38,6 +38,13 @@
       onerilir. Baglama bunlari da yazar; bagliyken oneri farkliysa kart
       «Önerilenle bağla»yi yine gosterir (elle secim yine ezilmez).
 
+   8. UYANDIRMA (Olcum 6, 2026-11-05: defterde 16 cagrinin 15'i «baglanti
+      reddedildi»; King gunlerce modelsiz kaldi, her mesaj 2 sn bekledi). Yerel
+      model cagrilirken Ollama KAPALIYSA ve adres bu makineyse `ollama serve`
+      bir kez acilir, istek yinelenir. `ollama.baslat` false ise yapilmaz. Kurulu
+      degilse ya da acilmadiysa KAPALI_ARA boyunca denenmez: kural motoru hemen
+      konusur.
+
    «Bagli» yalniz model listesinin okunabildigini soyler; sohbetin gercekten
    calistigini soylemez (kullanici, 2026-10-19: «ayarlarda bagli gorunuyor
    ama mesaj uretilmiyor»). Bu yuzden kart, yerel modelin defterdeki SON
@@ -46,15 +53,19 @@
 import atexit
 import datetime
 import json
+import os
 import re
+import shutil
+import subprocess
+import threading
 import time
 import urllib.request
 
 from core import kendiliginden as _kendi  # ayni adli fonksiyon asagida (bulunca bagla)
 from core import models
 
-VARSAYILAN = {"kendiligi": True, "sicak": True}
-ALANLAR = {"kendiligi": bool, "sicak": bool}
+VARSAYILAN = {"kendiligi": True, "sicak": True, "baslat": True}
+ALANLAR = {"kendiligi": bool, "sicak": bool, "baslat": bool}
 ISIT_ARALIK = 20 * 60
 ISIT_SURE = "30m"
 EKONOMIK_UST = 9.0       # milyar parametre
@@ -343,6 +354,73 @@ def isit(cfg, tarama, gonder=None):
 
 
 _ISITILAN = {}
+
+
+# ------------------------------------------------------------- uyandirma (kural 8)
+UYANMA_ZAMAN = 12                   # sn: `ollama serve` kapisini acana kadar
+KAPALI_ARA = 30
+_KAPALI = [0.0]
+_UYANMA_KILIT = threading.Lock()
+
+
+def ollama_exe():
+    yerel = os.environ.get("LOCALAPPDATA") or ""
+    p = os.path.join(yerel, "Programs", "Ollama", "ollama.exe")
+    return shutil.which("ollama") or (p if yerel and os.path.isfile(p) else None)
+
+
+def _ac(exe):
+    bayrak = (getattr(subprocess, "CREATE_NO_WINDOW", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
+    subprocess.Popen([exe, "serve"], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,  # noqa: S603
+                     stderr=subprocess.DEVNULL, creationflags=bayrak)
+
+
+# Testler surec acmaz (tests/harness.py).
+VARSAYILAN_AC = _ac
+
+
+def reddedildi_mi(e):
+    """Kapi kapali mi (zaman asimi degil, ConnectionRefused / WinError 10061)."""
+    n = getattr(e, "reason", None)
+    return isinstance(n, ConnectionRefusedError) or getattr(n, "winerror", None) == 10061
+
+
+def kapali_kalan():
+    """Az once acilamadiysa kalan saniye; yoksa 0."""
+    kalan = _KAPALI[0] - time.monotonic()
+    return int(kalan + 0.999) if kalan > 0 else 0
+
+
+def uyandir(cfg, ac=None, bekle=time.sleep):
+    """Ollama'yi acar ve kapisi acilana kadar bekler. Doner: acildi mi."""
+    with _UYANMA_KILIT:                 # ayni anda ikinci istek ikinci surec acmaz
+        kok = models.yerel_kok(cfg)
+        try:
+            VARSAYILAN_GETIR(kok + "/api/tags", 1)
+            return True                 # baska bir istek az once acti
+        except Exception:               # noqa: BLE001 — kapali motor bir durumdur
+            pass
+        exe = ollama_exe()
+        if (not settings(cfg)["baslat"] or not exe
+                or models.adres_denetle(kok)[2] != "ayni_makine"):
+            _KAPALI[0] = time.monotonic() + KAPALI_ARA
+            return False
+        try:
+            (ac or VARSAYILAN_AC)(exe)
+        except OSError:
+            _KAPALI[0] = time.monotonic() + KAPALI_ARA
+            return False
+        bitis = time.monotonic() + UYANMA_ZAMAN
+        while time.monotonic() < bitis:
+            bekle(0.25)
+            try:
+                VARSAYILAN_GETIR(kok + "/api/tags", 1)
+                _KAPALI[0] = 0.0
+                return True
+            except Exception:           # noqa: BLE001
+                continue
+        _KAPALI[0] = time.monotonic() + KAPALI_ARA
+        return False
 
 
 @atexit.register

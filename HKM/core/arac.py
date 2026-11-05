@@ -33,7 +33,10 @@ sistemde olan her isi sohbetten yapabilsin»).
    anlatti; yarim guvenilir bir secici, hic secici olmamasindan kotudur."""
 
 import json
+import math
 import re
+
+from core import seviye
 
 AD_RE = re.compile(r"^[a-z][a-z0-9_]{1,47}$")
 TURLER = ("oku", "yaz")
@@ -113,8 +116,63 @@ def katalog_temizle(ham):
             red.append("%s: aciklama yok" % ad)
             continue
         gorulen.add(ad)
-        temiz.append({"ad": ad, "aciklama": aciklama, "tur": a["tur"], "parametreler": sema})
+        satir = {"ad": ad, "aciklama": aciklama, "tur": a["tur"], "parametreler": sema}
+        if isinstance(a.get("anahtar"), str) and a["anahtar"].strip():
+            satir["anahtar"] = a["anahtar"].strip()[:300]    # yalniz dar_katalog okur, modele gitmez
+        temiz.append(satir)
     return temiz, red
+
+
+# DAR KATALOG (Olcum 6, 2026-11-05). Istemci butun katalogu yollar (AYS 67 arac,
+# ~7.100 jeton); yerel modelin 8.192 baglaminda cevaba yer kalmiyordu, ilk soz
+# 4 sn suruyor ve model hic arac cagirmiyordu. Modele yalniz mesajla ortusen
+# araclar sunulur; dogrulama yine tam katalogla yapilir (kapali katalog degismez).
+DAR_EN_COK = 4
+KAYIT_IZI = re.compile(r"\d|\w(?:d|t)[iu]m\b|\w(?:d|t)[iu]k\b|\bkilom\b")
+_DURAK = frozenset(seviye.kucult(k) for k in (
+    "ve ile veya ama için gibi kadar daha çok bir iki bu şu o ben sen biz siz bana beni benim sana "
+    "seni senin ne neden nasıl nerede niye kaç hangi mi mı mu mü de da ki şey şeyi var yok olan olarak "
+    "söyle anlat lütfen merhaba selam king tamam evet hayır bugün şimdi").split())
+
+
+def _kelimeler(metin):
+    return {k for k in re.findall(r"[a-z0-9]{3,}", seviye.kucult(metin)) if k not in _DURAK}
+
+
+def _ortusur(a, b):
+    """Turkce ek payi: biri otekinin onekiyse ortusur (uyku/uykum, deneme/denemelerim);
+    sondaki yumusama (kitap/kitabi) icin uzun kokte son harf serbesttir."""
+    kisa, uzun = (a, b) if len(a) <= len(b) else (b, a)
+    return uzun.startswith(kisa if len(kisa) < 5 else kisa[:-1])
+
+
+def dar_katalog(katalog, metin, en_cok=DAR_EN_COK):
+    """Mesajla ortusen araclar, en guclu ortusen once; ortusen yoksa bos liste
+    (model aracsiz, akarak cevaplar). Az aracta gecen kelime daha agirdir."""
+    sozluk = []
+    for a in katalog or []:
+        s = a.get("parametreler") or {}
+        ek = " ".join(str(v.get("description") or "") + " " + " ".join(map(str, v.get("enum") or []))
+                      for v in (s.get("properties") or {}).values())
+        sozluk.append((a, _kelimeler(a["ad"].replace("_", " ") + " " + a.get("anahtar", "")),
+                       _kelimeler(a.get("aciklama", "") + " " + ek)))
+    puanli = []
+    for k in _kelimeler(metin):
+        gecen = [(i, any(_ortusur(k, x) for x in ad)) for i, (_, ad, ac) in enumerate(sozluk)
+                 if any(_ortusur(k, x) for x in ad | ac)]
+        agirlik = math.log(1 + len(sozluk) / max(1, len(gecen)))
+        puanli += [(i, agirlik * (2 if adda else 1)) for i, adda in gecen]
+    toplam = {}
+    for i, p in puanli:
+        toplam[i] = toplam.get(i, 0) + p
+    sira = sorted(toplam, key=lambda i: (-toplam[i], i))[:en_cok]
+    dar = [sozluk[i][0] for i in sira]
+    # Yapilmis is cumlesi («1 bucuk saat geometri calistim») genel kayit araciyla
+    # girer; sozcukleri aracin tanimindan gecmez.
+    kayit = _bul(katalog, "kayit_gir")
+    if kayit and kayit not in dar and KAYIT_IZI.search(seviye.kucult(metin)):
+        dar = dar[:max(0, en_cok - 1)] + [kayit]
+    return dar
 
 
 def _bul(katalog, ad):

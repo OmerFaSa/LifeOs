@@ -9,9 +9,11 @@
 
    Dokuz kural:
 
-   1. SIRA KODDUR. «oto»: once Gemini (internet + Google anahtari + butce),
-      olmazsa EMA, olmazsa Piper (ikisi de bu bilgisayarda), olmazsa «yok» —
-      cihaz sesi. «gemini», «ema» ve «piper» yalniz kendisini dener.
+   1. SIRA KODDUR (2026-11-05, kullanici dinleyip secti: Olcum 6). «oto»: once
+      EMA, olmazsa Piper (ikisi de bu bilgisayarda, metin cikmaz), olmazsa «yok»
+      — cihaz sesi. Gemini yalniz elle secilince calisir: «gemini», «ema» ve
+      «piper» yalniz kendisini dener. Eskiden oto once Gemini'ydi: ilk ses
+      2,5-7 sn, dorduncu cagrida kota; EMA sicakken 0,1 sn.
    2. GEMINI UCRETLIDIR ve butce kapisindan gecer (core/butce.py guard);
       her cagri deftere yazilir. Fiyat «tahmin»dir (sabit tablo).
    3. PIPER YERELDIR, UCRETSIZDIR, METIN MAKINEDEN CIKMAZ. HKM onu KURMAZ ve
@@ -36,10 +38,10 @@
       ses, GPU'da. Kendi sanal ortaminda (venv, PyTorch) AYRI bir surec
       olarak calisir (tools/ema_isci.py); HKM'ye paket girmez. HKM onu
       KURMAZ ve INDIRMEZ (agirliklar da: HF_HUB_OFFLINE); bulamazsa nerede
-      aradigini soyler. Surec ilk istekte acilir, sicak kalir (ilk ses
-      milisaniyeler), EMA_BOS saniye bos kalirsa kapanir (RAM ve VRAM geri
-      verilir). Uretim akislidir: ema_parcalar() PCM'i parca parca verir;
-      seslendir() parcalari tek WAV'a dizer."""
+      aradigini soyler. Surec King sesli moda gecince (isit) ya da ilk istekte
+      acilir, sicak kalir (ilk ses milisaniyeler), EMA_BOS saniye bos kalirsa
+      kapanir (RAM ve VRAM geri verilir). Uretim akislidir: ema_parcalar() PCM'i
+      parca parca verir; seslendir() parcalari tek WAV'a dizer."""
 import atexit
 import base64
 import collections
@@ -48,11 +50,13 @@ import io
 import json
 import os
 import queue
+import re
 import shutil
 import subprocess
 import tempfile
 import threading
 import time
+import unicodedata
 import urllib.error
 import urllib.request
 import wave
@@ -60,6 +64,7 @@ import wave
 from core import butce, models
 
 TERCIHLER = ("oto", "gemini", "ema", "piper", "cihaz")
+OTO_SIRA = ("ema", "piper")         # kural 1
 GEMINI_MODEL = "gemini-2.5-flash-preview-tts"
 # Gemini'nin hazir sesleri (speechConfig.prebuiltVoiceConfig.voiceName).
 GEMINI_SESLER = ("Kore", "Zephyr", "Puck", "Charon", "Fenrir", "Leda", "Orus", "Aoede",
@@ -495,6 +500,31 @@ def _ema_akis(py, betik, metin, timeout):
 VARSAYILAN_EMA = _ema_akis
 
 
+def _ema_isit(p):
+    with _EMA_KILIT:
+        if _ema_canli():
+            return
+        try:
+            _ema_baslat(p["python"], p["betik"], EMA_ZAMAN)
+        except Exception:                       # noqa: BLE001 — sonraki istek yeniden dener
+            _ema_kapat()
+
+
+def isit(cfg, tercih="oto", basla=None, bul=None):
+    """King sesli moda gecti: EMA arka planda acilir, ilk cumle ~8 sn beklemez.
+    Baska motor seciliyse ya da EMA yoksa bir sey yapmaz. Doner: acilis baslatildi mi."""
+    if tercih not in ("oto", "ema"):
+        return False
+    p = bul or ema_bul(cfg)
+    if not p["bulundu"]:
+        return False
+    if _ema_canli():
+        _EMA["son"] = time.monotonic()      # kullanim suruyor: bosta kapanma sayaci ertelenir
+        return False
+    threading.Thread(target=basla or _ema_isit, args=(p,), daemon=True).start()
+    return True
+
+
 def ema_parcalar(cfg, metin, calistir=None, bul=None):
     """Akisli uretim: PCM parcalari (EMA_HZ, 16 bit tek kanal). Bulunamazsa
     hic parca vermez; hata firlatabilir (cagiran yakalar)."""
@@ -518,10 +548,86 @@ def ema(cfg, metin, calistir=None, bul=None):
     return wav(pcm, EMA_HZ), ""
 
 
+# ---------------------------------------------------------------- okunur metin
+# Modelin cevabi ekran icin yazilir: «**», madde imi, emoji, «%25», «7,5 dk». Motor
+# bunlari ya harf harf okur ya da atlar. Sayi rakamdan yaziya cevrilir, degeri
+# degismez (kural 4): uretilen ya da yuvarlanan sayi yoktur.
+_BIRLER = ("", "bir", "iki", "üç", "dört", "beş", "altı", "yedi", "sekiz", "dokuz")
+_ONLAR = ("", "on", "yirmi", "otuz", "kırk", "elli", "altmış", "yetmiş", "seksen", "doksan")
+_BOLUK = ("", "bin", "milyon", "milyar", "trilyon")
+_AY = ("", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül",
+       "Ekim", "Kasım", "Aralık")
+_BIRIM = {"dk": "dakika", "dak": "dakika", "sn": "saniye", "sa": "saat", "kg": "kilo", "km": "kilometre",
+          "gr": "gram", "g": "gram", "ml": "mililitre", "lt": "litre", "cm": "santimetre", "kcal": "kalori",
+          "TL": "lira", "tl": "lira"}
+_KISA = {"AYS": "ays", "SPİ": "spi", "SPI": "spi", "ESP": "esp", "TYT": "te ye te", "AYT": "a ye te",
+         "YKS": "ye ka se", "HKM": "he ka me", "LifeOS": "layf o es", "HRV": "he re ve", "TL": "lira"}
+
+
+def _sayi_yaz(n):
+    """0 <= n < 10^15 tam sayi -> Turkce yazi («bin», «yüz» onunde «bir» yok)."""
+    if n == 0:
+        return "sıfır"
+    parca, i = [], 0
+    while n:
+        n, u = divmod(n, 1000)
+        if u:
+            y, o, b = u // 100, u // 10 % 10, u % 10
+            s = " ".join(x for x in ((_BIRLER[y] + " yüz" if y > 1 else "yüz" if y else ""), _ONLAR[o], _BIRLER[b]) if x)
+            parca.append("bin" if i == 1 and u == 1 else (s + " " + _BOLUK[i]).strip())
+        i += 1
+    return " ".join(reversed(parca))
+
+
+def _ondalik_yaz(tam, kesir):
+    # Bastaki sifir okunur: «7,05» -> «yedi virgül sıfır beş».
+    bas = len(kesir) - len(kesir.lstrip("0"))
+    kalan = kesir.lstrip("0")
+    return " ".join([_sayi_yaz(int(tam)), "virgül"] + ["sıfır"] * bas + ([_sayi_yaz(int(kalan))] if kalan else []))
+
+
+def _emojisiz(t):
+    return "".join(c for c in t if unicodedata.category(c) not in ("So", "Cs", "Cn", "Sk") and c not in "\ufe0f\u200d")
+
+
+def okunur(metin):
+    """Ekran metni -> sesin okuyacagi metin. Sira onemli: yapi, tarih/saat, yuzde, ondalik, tam sayi."""
+    t = str(metin or "")
+    t = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", t)                      # [ad](adres)
+    t = re.sub(r"https?://\S+", "bağlantı", t)
+    t = re.sub(r"(?m)^\s*(?:[-*•]|\d{1,2}[.)])\s+", "", t)                 # madde imi
+    t = re.sub(r"(?m)^\s*#{1,6}\s*", "", t)
+    t = re.sub(r"[*_`~«»\"“”]|\[\[.*?\]\]", "", t)
+    t = _emojisiz(t).replace("→", ", ").replace("·", ", ").replace("&", " ve ")
+    t = re.sub(r"\b(\d{4})-(\d{2})-(\d{2})\b",
+               lambda m: "%d %s %s" % (int(m[3]), _AY[min(int(m[2]), 12)], m[1]), t)
+    t = re.sub(r"\b(\d{1,2}):(\d{2})\b",
+               lambda m: _sayi_yaz(int(m[1])) + ("" if m[2] == "00" else " " + _ondalik_kesme(m[2])), t)
+    t = re.sub(r"%\s?(\d)", r"yüzde \1", t)
+    t = re.sub(r"(\d)\s?%", lambda m: m[1], re.sub(r"(\d+(?:[.,]\d+)?)\s?%", r"yüzde \1", t))
+    t = re.sub(r"\b(\d{1,3}(?:\.\d{3})+)\b(?![.,]\d)", lambda m: m[1].replace(".", ""), t)   # 12.500
+    t = re.sub(r"(\d)\s?-\s?(\d)", r"\1 \2", t)                          # 3-4 aralik
+    t = re.sub(r"(?<![\w,.])-(\d)", r"eksi \1", t)
+    t = re.sub(r"(\d)\s*/\s*(\d)", r"\1 bölü \2", t)
+    t = re.sub(r"(\d)\s*(%s)\b" % "|".join(sorted(_BIRIM, key=len, reverse=True)),
+               lambda m: m[1] + " " + _BIRIM[m[2]], t)
+    t = t.replace("'", "").replace("’", "")                              # 25'te -> 25te, King'in -> Kingin
+    t = re.sub(r"\b(\d+)[.,](\d+)", lambda m: _ondalik_yaz(m[1], m[2]), t)
+    t = re.sub(r"\d{1,15}", lambda m: _sayi_yaz(int(m[0])), t)
+    t = re.sub(r"\b(%s)\b" % "|".join(_KISA), lambda m: _KISA[m[1]], t)
+    t = re.sub(r"(?<=\w)\s+([.,!?;:])", r"\1", t)
+    return " ".join(t.split())[:EN_COK]
+
+
+def _ondalik_kesme(iki):
+    """Saatin dakikasi: «05» -> «sıfır beş», «30» -> «otuz»."""
+    return ("sıfır " if iki[0] == "0" else "") + _sayi_yaz(int(iki))
+
+
 # ---------------------------------------------------------------- giris
 
 def _temiz(metin):
-    return " ".join(str(metin or "").split())[:EN_COK]
+    return okunur(metin)
 
 
 def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None,
@@ -533,8 +639,7 @@ def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None,
     tercih = tercih if tercih in TERCIHLER else "oto"
     if tercih == "cihaz":
         return {"ok": False, "notlar": ["Cihazın kendi sesi seçili."]}
-    sira = {"oto": ("gemini", "ema", "piper"), "gemini": ("gemini",), "ema": ("ema",),
-            "piper": ("piper",)}[tercih]
+    sira = {"oto": OTO_SIRA, "gemini": ("gemini",), "ema": ("ema",), "piper": ("piper",)}[tercih]
     notlar = []
     for motor in sira:
         ses = settings(cfg)["gemini_ses"] if motor == "gemini" else motor
@@ -595,8 +700,7 @@ def akis(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None,
     tercih = tercih if tercih in TERCIHLER else "oto"
     if tercih == "cihaz":
         return {"ok": False, "notlar": ["Cihazın kendi sesi seçili."]}
-    sira = {"oto": ("gemini", "ema", "piper"), "gemini": ("gemini",), "ema": ("ema",),
-            "piper": ("piper",)}[tercih]
+    sira = {"oto": OTO_SIRA, "gemini": ("gemini",), "ema": ("ema",), "piper": ("piper",)}[tercih]
     notlar = []
     for motor in sira:
         if motor != "ema":

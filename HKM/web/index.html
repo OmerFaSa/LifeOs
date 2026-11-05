@@ -3062,7 +3062,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     if(!k) return;
     var g = d.gemini || {}, p = d.piper || {}, e = d.ema || {}, a = d.ayar || {};
     var h = '<div class="tag">King’in sesi</div>'
-      + '<p class="ollama__not" style="font-size:13px">Sıra: Gemini → EMA → Piper → cihaz sesi. '
+      + '<p class="ollama__not" style="font-size:13px">Sıra: EMA → Piper → cihaz sesi; metin bilgisayardan çıkmaz. Gemini yalnız elle seçilirse okur. '
       + 'Hangisi kullanılsın, her cihazda King’in Dinle ve Konuş panelinden seçilir.</p>'
       + '<p class="ollama__durum ollama__durum--' + (g.hazir ? 'bagli' : 'eksik') + '"><b>Gemini</b> · ' + esc(g.not || '') + '</p>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Gemini’nin sesi '

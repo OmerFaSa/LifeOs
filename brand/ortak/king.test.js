@@ -3333,6 +3333,24 @@
         expect(calinan).toEqual([['wav', 'Selam.'], ['wav', 'Yine.']]);
       }finally{ k.sesTercihSec('oto'); }
     }));
+    it('sesli moda geçince EMA ısınır: beş dakikada bir istek; Gemini seçiliyse istek gitmez, hata sessiz', () => sahneyle(async () => {
+      const yollar = [];
+      const fetch = async (url, o) => { yollar.push([url.replace('http://127.0.0.1:4200', ''), JSON.parse(o.body).tercih]); throw new Error('kapalı'); };
+      const { k } = sahne({ hkm, fetch });
+      k._ortam.pcmBaglam = null;
+      const KI = window.LIFEOS.KING_IC;
+      KI.sesIsitT = -Infinity;
+      try{
+        k.sesTercihSec('gemini');
+        KI.sesIsit();
+        expect(yollar).toEqual([]);
+        k.sesTercihSec('oto');
+        KI.sesIsit();
+        KI.sesIsit();
+        await bitsin();
+        expect(yollar).toEqual([['/api/ses/isit', 'oto']]);
+      }finally{ k.sesTercihSec('oto'); }
+    }));
     it('sesli sohbette ilk cümle cevap bitmeden okunur; baş tekrar okunmaz', () => sahneyle(async () => {
       const okunan = [];
       let i = 0, erken = null;

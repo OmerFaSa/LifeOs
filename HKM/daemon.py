@@ -90,6 +90,7 @@ Ucnoktalar:
     POST /api/ses                   {metin, tercih: oto|gemini|piper} -> audio/wav; uretilemezse 503 + notlar
                                     (modul King'i o zaman cihazin kendi sesine duser; core/ses.py)
     POST /api/ses/akis              ayni govde -> akan 16 bit tek kanal PCM (X-Ses-Hz); EMA ilk parcayla baslar
+    POST /api/ses/isit              {tercih}: King sesli moda gecti, EMA arka planda acilir
     GET  /api/eylem                 King'in yazdigi eylemler, yeniden eskiye (core/eylem.py)
     GET  /api/hafiza                «benim hakkımda ne biliyorsun»: bilgiler, olanlar, beceriler (core/memory.py)
     GET  /api/hafiza/ara?q=&k=      gommeyle arama (motor yoksa kok); {yontem, sonuclar}
@@ -1964,6 +1965,15 @@ class Handler(BaseHTTPRequestHandler):
                 # Neden gunluge de yazilir: 503'un sebebi ekranda kaybolmasin (2026-10-21).
                 self.log_message("dinle basarisiz (%d bayt): %s", len(wav), "; ".join(r.get("notlar") or []))
             return self._send(200 if r["ok"] else 503, r)
+        if u.path == "/api/ses/isit":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            return self._send(200, {"ok": True, "aciliyor": ses.isit(self.server.config, str(body.get("tercih") or "oto"))})
         if u.path in ("/api/ses", "/api/ses/akis"):
             ham, hata = self._read_body()
             if hata:

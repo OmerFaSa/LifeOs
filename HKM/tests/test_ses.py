@@ -2,7 +2,7 @@
 """Ses — King'in sesi (core/ses.py).
 
    Kanitladigi sozler:
-     1. Sira: «oto» once Gemini, olmazsa Piper, olmazsa «yok» ve iki
+     1. Sira: «oto» once EMA, olmazsa Piper (Gemini yalniz elle), olmazsa «yok» ve iki
         neden de adiyla; «gemini»/«piper» yalniz kendini dener; «cihaz»
         sunucuda ses uretmez.
      2. Gemini anahtarsiz ya da butcesiz cagrilmaz; cagri deftere yazilir
@@ -14,11 +14,11 @@
      6. Ayar dogrulanir; uclar bearer ister, uretilemezse 503 + notlar,
         uretilirse audio/wav ve motor basligi; sira ilerlediyse neden basligi.
      8. EMA (kural 9): ortam ve paket bulunur, yoksa nerede arandigi
-        soylenir; «oto» Gemini olmazsa EMA'yi Piper'dan once dener; akisli
+        soylenir; «oto» EMA'yi Piper'dan once dener; akisli
         parcalar tek WAV olur; gercek boru protokolu (sahte isci) parcalari
         sirayla verir, isci hatasinda surec kapanir, yeniden acilir.
      7. Kota beklemesi (kural 8): 429/503 sonrasi Gemini bir sure hic
-        denenmez ve deftere yazilmaz; «oto» Piper'a gecer; bekleme ust uste
+        denenmez ve deftere yazilmaz; bekleme ust uste
         iki katina cikar, tavanda durur, Google'in suresine uyar; basarili
         cagri sifirlar."""
 import base64
@@ -199,11 +199,13 @@ def run():
         cfg = {"ses": {"piper_yol": d}}
         bul = ses.piper_bul(cfg, ara=lambda x: None)
         piper_ok = lambda e, s, m, t: RIFF                       # noqa: E731
-        r = ses.seslendir(con, cfg, "Bir", post=_sahte_post(GEMINI_CEVAP), calistir=piper_ok, bul=bul)
-        eq((r["ok"], r["motor"]), (True, "gemini"))
-        r = ses.seslendir(con, cfg, "İki", post=_sahte_post(OSError("yok")), calistir=piper_ok, bul=bul)
-        eq((r["ok"], r["motor"], len(r["notlar"])), (True, "piper", 2))
-        ok("EMA bulunamadı" in r["notlar"][1], r["notlar"])
+        # Oto Gemini'yi hic denemez (kural 1): metin bilgisayardan cikmaz.
+        kayit = []
+        r = ses.seslendir(con, cfg, "Bir", post=_sahte_post(GEMINI_CEVAP, kayit), calistir=piper_ok, bul=bul)
+        eq((r["ok"], r["motor"], len(r["notlar"]), kayit), (True, "piper", 1, []))
+        ok("EMA bulunamadı" in r["notlar"][0], r["notlar"])
+        r = ses.seslendir(con, cfg, "İki", "gemini", post=_sahte_post(GEMINI_CEVAP, kayit))
+        eq((r["ok"], r["motor"], len(kayit)), (True, "gemini", 1))
         r = ses.seslendir(con, cfg, "Üç", "gemini", post=_sahte_post(OSError("yok")), calistir=piper_ok, bul=bul)
         no(r["ok"], "yalniz gemini")
         r = ses.seslendir(con, cfg, "Dört", "piper", post=_sahte_post(GEMINI_CEVAP), calistir=piper_ok, bul=bul)
@@ -212,7 +214,7 @@ def run():
         no(r["ok"], "cihaz secili")
         r = ses.seslendir(con, cfg, "Altı", post=_sahte_post(OSError("yok")),
                           calistir=lambda *a: (_ for _ in ()).throw(OSError("x")), bul=bul)
-        eq((r["ok"], len(r["notlar"])), (False, 3))
+        eq((r["ok"], len(r["notlar"])), (False, 2))
         no(ses.seslendir(con, cfg, "   ")["ok"], "bos metin")
 
     @_gemini_acik
@@ -254,14 +256,14 @@ def run():
             bul = ses.piper_bul(cfg, ara=lambda x: None)
             piper_ok = lambda e, s_, m, t: RIFF                   # noqa: E731
             kayit = []
-            r = ses.seslendir(con, cfg, "Bir", post=_sahte_post(_Http(429), kayit), calistir=piper_ok, bul=bul)
-            eq((r["ok"], r["motor"], len(kayit)), (True, "piper", 1))
+            r = ses.seslendir(con, cfg, "Bir", "gemini", post=_sahte_post(_Http(429), kayit), calistir=piper_ok, bul=bul)
+            eq((r["ok"], len(kayit)), (False, 1))
             ok("kotası doldu" in r["notlar"][0] and "60 sn" in r["notlar"][0], r["notlar"])
             eq(ses.gemini_bekliyor(), 60)
-            # Beklerken Gemini'ye istek gitmez, deftere yazilmaz; oto dogrudan Piper.
+            # Beklerken Gemini'ye istek gitmez, deftere yazilmaz.
             n0 = con.execute("SELECT COUNT(*) FROM usage").fetchone()[0]
-            r = ses.seslendir(con, cfg, "İki", post=_sahte_post(GEMINI_CEVAP, kayit), calistir=piper_ok, bul=bul)
-            eq((r["motor"], len(kayit)), ("piper", 1))
+            r = ses.seslendir(con, cfg, "İki", "gemini", post=_sahte_post(GEMINI_CEVAP, kayit), calistir=piper_ok, bul=bul)
+            eq((r["ok"], len(kayit)), (False, 1))
             ok("yeniden denenecek" in r["notlar"][0], r["notlar"])
             eq(con.execute("SELECT COUNT(*) FROM usage").fetchone()[0], n0)
             r = ses.seslendir(con, cfg, "Üç", "gemini", post=_sahte_post(GEMINI_CEVAP, kayit), calistir=piper_ok, bul=bul)
@@ -270,8 +272,8 @@ def run():
             eq(ses.durum(con, cfg)["gemini"]["bekliyor"], 60)
             # Sure dolunca yeniden denenir; ust uste ikinci 429 iki kati.
             saat.t += 61
-            r = ses.seslendir(con, cfg, "Dört", post=_sahte_post(_Http(503), kayit), calistir=piper_ok, bul=bul)
-            eq((r["motor"], len(kayit), ses.gemini_bekliyor()), ("piper", 2, 120))
+            r = ses.seslendir(con, cfg, "Dört", "gemini", post=_sahte_post(_Http(503), kayit), calistir=piper_ok, bul=bul)
+            eq((r["ok"], len(kayit), ses.gemini_bekliyor()), (False, 2, 120))
             ok("yoğun" in r["notlar"][0] and "2 dk" in r["notlar"][0], r["notlar"])
             for _ in range(8):
                 saat.t += ses.BEKLE_EN_COK + 1
@@ -337,14 +339,14 @@ def run():
             yield b"\x02\x00" * 5
         r = ses.seslendir(con, cfg, "Bir", post=_sahte_post(OSError("yok")), calistir=piper_ok, bul=bul,
                           ema_calistir=ema_ok)
-        eq((r["ok"], r["motor"], len(r["notlar"]), istek), (True, "ema", 1, ["Bir"]))
+        eq((r["ok"], r["motor"], len(r["notlar"]), istek), (True, "ema", 0, ["Bir"]))
         with wave.open(io.BytesIO(r["wav"])) as w:
             eq((w.getframerate(), w.getnframes()), (ses.EMA_HZ, 15))
         r = ses.seslendir(con, cfg, "Bir", "ema", ema_calistir=ema_ok)
         eq((r["motor"], r.get("onbellek"), len(istek)), ("ema", True, 1))
         r = ses.seslendir(con, cfg, "İki", post=_sahte_post(OSError("yok")), calistir=piper_ok, bul=bul)
-        eq((r["motor"], len(r["notlar"])), ("piper", 2))
-        ok("EMA sesi üretemedi" in r["notlar"][1], r["notlar"])
+        eq((r["motor"], len(r["notlar"])), ("piper", 1))
+        ok("EMA sesi üretemedi" in r["notlar"][0], r["notlar"])
         r = ses.seslendir(con, cfg, "Üç", "ema", ema_calistir=lambda *a: iter(()))
         eq(r["ok"], False)
         ok("ses döndürmedi" in r["notlar"][0], r["notlar"])
@@ -376,7 +378,7 @@ def run():
             ses._ema_kapat()
 
     test("EMA bulunur; yoksa nerede aranacağı söylenir", t_ema_bul)
-    test("sıra: Gemini olmazsa EMA, o da olmazsa Piper; parçalar tek WAV", t_ema_sira)
+    test("sıra: önce EMA, olmazsa Piper; Gemini yalnız elle; parçalar tek WAV", t_ema_sira)
     test("EMA borusu: parçalar sırayla, süreç sıcak, hatada kapanır", t_ema_boru)
 
     def t_akis():
@@ -408,6 +410,24 @@ def run():
 
     test("akışlı ses: EMA ilk parçayla döner, bütünü önbelleğe; Piper tek parça", t_akis)
 
+    def t_isit():
+        bulgu = {"bulundu": True, "python": "x", "betik": "y"}
+        acilan = []
+
+        def basla(p):
+            acilan.append(p)
+        ok(ses.isit({}, "oto", basla=basla, bul=bulgu))
+        ok(ses.isit({}, "ema", basla=basla, bul=bulgu))
+        no(ses.isit({}, "gemini", basla=basla, bul=bulgu), "baska motor secili")
+        no(ses.isit({}, "piper", basla=basla, bul=bulgu))
+        no(ses.isit({}, "oto", basla=basla, bul=dict(bulgu, bulundu=False)), "EMA kurulu degil")
+        for t in __import__("threading").enumerate():
+            if t.name != "MainThread" and t.daemon and getattr(t, "_target", None) is basla:
+                t.join(2)
+        eq(len(acilan), 2)
+        no(ses.isit({}, "oto"), "testte EMA yok: surec acilmaz")
+    test("sesli moda geçince EMA ısınır; başka motor ya da EMA yoksa açılmaz", t_isit)
+
 
 def run_daemon():
     from tests.test_daemon import _Server
@@ -423,7 +443,10 @@ def run_daemon():
             eq(s.call("/api/ses", token=None, body={"metin": "x"})[0], 401)
             st, r = s.call("/api/ses", body={"metin": "Merhaba", "tercih": "oto"})
             eq((st, r["ok"]), (503, False))
-            ok(len(r["notlar"]) == 3 and "EMA" in r["notlar"][1], r["notlar"])          # Gemini, EMA, Piper
+            ok(len(r["notlar"]) == 2 and "EMA" in r["notlar"][0], r["notlar"])          # EMA, Piper
+            st, r = s.call("/api/ses/isit", body={"tercih": "oto"})
+            eq((st, r["ok"], r["aciliyor"]), (200, True, False))                         # testte EMA yok
+            eq(s.call("/api/ses/isit", token=None, body={})[0], 401)
             eski = ses.VARSAYILAN_CALISTIR
             d2 = _piper_dizini()
             s.srv.config["ses"] = {"piper_yol": d2}
@@ -439,7 +462,7 @@ def run_daemon():
                     eq((y.status, y.headers["Content-Type"], y.headers["X-Ses-Motor"], y.read()[:4]),
                        (200, "audio/wav", "piper", b"RIFF"))
                     eq(y.headers.get("X-Ses-Not"), None)
-                # Oto: Gemini anahtarsiz -> Piper; neden basliga yuzde kodlu yazilir.
+                # Oto: EMA yok -> Piper; neden basliga yuzde kodlu yazilir.
                 ses._ONBELLEK.clear()
                 req2 = urllib.request.Request(s.url("/api/ses"), method="POST",
                                               data=json.dumps({"metin": "Selam", "tercih": "oto"}).encode())
@@ -448,7 +471,7 @@ def run_daemon():
                 with urllib.request.urlopen(req2, timeout=10) as y:
                     from urllib.parse import unquote
                     eq(y.headers["X-Ses-Motor"], "piper")
-                    ok("anahtar" in unquote(y.headers["X-Ses-Not"]), y.headers["X-Ses-Not"])
+                    ok("EMA" in unquote(y.headers["X-Ses-Not"]), y.headers["X-Ses-Not"])
                     ok("X-Ses-Not" in y.headers["Access-Control-Expose-Headers"], y.headers["Access-Control-Expose-Headers"])
             finally:
                 ses.VARSAYILAN_CALISTIR = eski
