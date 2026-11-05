@@ -200,6 +200,57 @@
       expect(o.cati.sakin.some(r => Math.abs(r.T - T) < 0.001)).toBe(true);
       expect(o.zemin.sakin.some(r => Math.abs(r.T - T) < 0.001)).toBe(true);
     });
+    it('sakinler: otuz altı kişi birbirinin aynısı değil, her karesi düzgün dikdörtgen', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN;
+      expect(new Set(A.SAKIN.map(k => [k.s, k.h, k.sac, k.g, k.giyim, k.ek, k.boy].join())).size).toBe(A.SAKIN.length);
+      Object.keys(A.POZ).filter(p => p !== 'kabinK' && p !== 'gizli').forEach(p => A.POZ[p].k.forEach(f => expect(new Set(f.map(r => r.length)).size).toBe(1)));
+      expect(A.POZ.yuru.k.length).toBe(4);
+      expect(A.POZ.araba1.k[0][0].length >= 30).toBe(true);
+    });
+    it('ruh hâli vakte göre değişir', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN;
+      A.SAKIN.forEach(k => ['dogum', 'ogle', 'batim', 'gece'].forEach(v => expect(!!A.ruhu(k, v)).toBe(true)));
+      expect(A.SAKIN.some(k => new Set(['dogum', 'ogle', 'batim', 'gece'].map(v => A.ruhu(k, v))).size > 1)).toBe(true);
+    });
+    it('her evde tam bir yatak odası var; King odası sağ alt köşede, telefonda yok', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN;
+      [[384, 216], [342, 192], [480, 270], [640, 360]].forEach(q => {
+        const o = A.yerlesim(q[0], q[1], 'ogle'), ev = {};
+        o.odalar.forEach(a => { const k = a.y + (a.x > o.ax ? 's' : 'l'); (ev[k] = ev[k] || []).push(a.tip); });
+        Object.values(ev).forEach(l => expect(l.filter(t => t === 'yatak').length).toBe(1));
+        const son = o.odalar[o.odalar.length - 1];
+        expect(son.tip).toBe('king');
+        expect(son.x + son.w).toBe(q[0]);
+        expect(son.y).toBe(o.ilk + (o.n - 1) * A.KAT);
+      });
+      expect(A.yerlesim(98, 211, 'ogle').odalar.some(a => a.tip === 'king')).toBe(false);
+    });
+    it('komşuluk: gündüz biri kapı çalar, kapı açılır, gece kimse kapı çalmaz', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, poz = o => [o.cati, o.zemin].concat(o.bolgeler).flatMap(b => b.sakin).flatMap(r => r.seg.map(q => q.poz));
+      const gun = poz(A.yerlesim(384, 216, 'ogle')), gece = poz(A.yerlesim(384, 216, 'gece'));
+      ['kapi', 'tak', 'kapi_a', 'konus', 'dinle', 'el'].forEach(p => expect(gun.includes(p)).toBe(true));
+      ['kapi', 'tak', 'kapi_a'].forEach(p => expect(gece.includes(p)).toBe(false));
+      const o = A.yerlesim(384, 216, 'batim'), kat = o.bolgeler[0], ikisi = kat.sakin.filter(r => r.seg.some(q => q.poz === 'kapi' || q.poz === 'kapi_a'));
+      expect(ikisi.length).toBe(2);
+      expect(Math.abs(ikisi[0].T - ikisi[1].T) < 0.001).toBe(true);
+    });
+    it('hayvanlar: gündüz kuşlar, gece baykuş; evlerde türlü evcil hayvan', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, poz = o => [o.cati, o.zemin].concat(o.bolgeler).flatMap(b => b.sakin).flatMap(r => r.seg.map(q => q.poz));
+      const gun = poz(A.yerlesim(384, 216, 'ogle')), gece = poz(A.yerlesim(384, 216, 'gece'));
+      expect(new Set(gun.filter(p => /^kus[uk]_/.test(p)).map(p => p.slice(-1))).size >= 3).toBe(true);
+      expect(gece.includes('baykus')).toBe(true);
+      expect(gece.some(p => /^kusu_/.test(p))).toBe(false);
+      expect(new Set(gun.filter(p => /^(kedi|kopek|tavsan)/.test(p) && !/yuru$/.test(p))).size >= 3).toBe(true);
+    });
+    it('dokunma: canlıya dokununca balon çıkar, boşa dokununca hiçbir şey olmaz', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle'), t = 2;
+      const r = o.zemin.sakin.find(s => s.seg.some(q => q.poz === 'aksolot')), k = A.kareAl(r, t + (r.faz || 0));
+      const sonuc = A.dokun(o, k.x + 8, k.y + 8, t);
+      expect(sonuc.poz.indexOf('aksolot')).toBe(0);
+      expect(sonuc.tepki).toBe('b_kalp');
+      expect(!!A.POZ[o.tepki.poz]).toBe(true);
+      expect(A.dokun(A.yerlesim(384, 216, 'gece'), 2, 1, t)).toBe(null);
+    });
     it('hareketsiz kipte sahne döngüsü hiç kurulmaz', () => {
       const P = window.LIFEOS.PIKSEL, k = document.documentElement, once = k.getAttribute('data-hareket'), asil = window.setInterval;
       let kurulan = 0;

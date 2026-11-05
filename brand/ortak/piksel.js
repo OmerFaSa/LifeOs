@@ -227,11 +227,13 @@ window.LIFEOS = window.LIFEOS || {};
   function bosAc(el){
     if(!secili() || !L.PIKSEL_APARTMAN) return;
     bos.el = !!el;
+    document.documentElement.toggleAttribute('data-bos-el', bos.el);
     document.documentElement.setAttribute('data-bos', '1');
   }
   function bosKapa(){
     bos.el = false;
     const k = document.documentElement;
+    k.removeAttribute('data-bos-el');
     if(k.getAttribute('data-bos') !== '1') return;
     k.setAttribute('data-bos', 'don');
     setTimeout(() => { if(k.getAttribute('data-bos') === 'don') k.removeAttribute('data-bos'); }, 420);
@@ -241,7 +243,13 @@ window.LIFEOS = window.LIFEOS || {};
     const k = document.documentElement;
     const uyan = () => { bos.son = Date.now(); if(!bos.el) bosKapa(); };
     ['pointermove', 'wheel', 'touchstart'].forEach(o => window.addEventListener(o, uyan, { passive:true }));
-    ['pointerdown', 'keydown'].forEach(o => window.addEventListener(o, () => { bos.son = Date.now(); if(k.getAttribute('data-bos') === '1') bosKapa(); }, { capture:true, passive:true }));
+    ['pointerdown', 'keydown'].forEach(o => window.addEventListener(o, e => {
+      bos.son = Date.now();
+      if(k.getAttribute('data-bos') !== '1') return;
+      /* Elle açılan sahnede canlıya dokunmak sahneyi kapatmaz, balon çıkarır; boşa dokunmak kapatır. */
+      if(o === 'pointerdown' && bos.el && durum.o && L.PIKSEL_APARTMAN.dokun(durum.o, e.clientX / OLCEK, e.clientY / OLCEK, Date.now() / 1000)) return;
+      bosKapa();
+    }, { capture:true, passive:true }));
     document.addEventListener('dblclick', o => {
       const t = o.target;
       if(!k.hasAttribute('data-bos') && t && t.matches && t.matches('html,body,.piksel-oda,.site--v5,.site__body,.sarmal,#app')) bosAc(true);
