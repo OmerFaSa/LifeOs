@@ -217,6 +217,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!durum.c || !sahneMotor()) return;
     const olcek = dogaMi() ? MANZARA_OLCEK : OLCEK;
     durum.c.width = Math.ceil(window.innerWidth / olcek); durum.c.height = Math.ceil(window.innerHeight / olcek);
+    tamKat(durum.c, olcek);
     durum.sahneler = {}; durum.kayiyor = false;
     durum.yer = dogaMi() ? 'tarla' : simdikiYer();
     const s = sahneAl(durum.yer);
@@ -226,6 +227,8 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* Seçim sayfası doğadır; modüllerin içi mahalle: her çekmecenin aynı sokakta bir yeri var. */
   const MANZARA_OLCEK = 3;   // manzara daha ince piksel: uzak dağ ve yaprak ayrıntısı bunu ister
+  /* Tuval ekranın tam katı olur: %100'e gerilince 4'e bölünmeyen genişlikte piksel sütunları 3 ve 4 px karışıyordu; artan 1-3 px kenardan taşar. */
+  const tamKat = (c, k) => { c.style.width = c.width * k + 'px'; c.style.height = c.height * k + 'px'; };
   const dogaMi = () => document.documentElement.getAttribute('data-sahne') === 'doga';
   const sahneMotor = () => (dogaMi() ? L.PIKSEL_DOGA : L.PIKSEL_APARTMAN);
   const MAHALLE = Object.freeze(['calisma', 'bugun', 'analiz', 'kutuphane']);
@@ -290,6 +293,7 @@ window.LIFEOS = window.LIFEOS || {};
     const c = document.createElement('canvas'), W = Math.ceil(window.innerWidth / MANZARA_OLCEK), H = Math.ceil(window.innerHeight / MANZARA_OLCEK), arka = document.createElement('canvas');
     c.className = 'piksel-manzara'; c.setAttribute('aria-hidden', 'true');
     c.width = arka.width = W; c.height = arka.height = H;
+    tamKat(c, MANZARA_OLCEK);
     const hazir = manzaraHazir(W, H);
     const o = hazir.o;
     arka.getContext('2d').drawImage(hazir.c, 0, 0);
