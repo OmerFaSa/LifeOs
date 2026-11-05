@@ -2007,7 +2007,7 @@ ESP.App = (function(){
          ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
-        window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
+        window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, hkm:() => ESP.Beacon, kesilebilir:sihirbaz,
           /* Kısayollar'dan gelen satır (hesap.js söz 20): ESP'nin
              ayrıştırıcısı okur, Onaylar'a teklif olur; ölçüm onaysız yazılmaz. */
           gelen:async oge => {

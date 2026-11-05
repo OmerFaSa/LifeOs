@@ -78,6 +78,7 @@ import muzik  # noqa: E402  (kullanicinin muzik dosyalari ve listeleri, sistem/m
 import ice  # noqa: E402  (Google verisini hesap baglamadan getirmek, sistem/ice.py)
 import ayar  # noqa: E402  (sistem ayarlarinin tek kopyasi, sistem/ayar.py)
 import gun  # noqa: E402  (Gun bolumu, Gun plani F2: /gun/ yolu, yeni port yok)
+import uzak  # noqa: E402  (her yerden erisim, sistem/uzak.py)
 import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
 
@@ -366,6 +367,14 @@ class Sunucu(SimpleHTTPRequestHandler):
             elif clean not in (DIST_BETIK, DIST_STIL):
                 return self._src_sayfa()
         return super().do_GET()
+
+    def parse_request(self):
+        """Vekil (tailscale serve) istegi 127.0.0.1'den getirir: burada isaretlenir ki
+        hesap, ayar, ice, muzik, planlama, zemin onu «bu bilgisayar» sanmasin (uzak.py soz 2)."""
+        tamam = super().parse_request()
+        if tamam and uzak.vekilden_mi(self.client_address[0], self.headers):
+            self.client_address = (uzak.VEKIL_IP, self.client_address[1])
+        return tamam
 
     def _ayarli(self, govde):
         """Ortak ayar yalniz bu bilgisayardan acilan sayfaya konur (sistem/ayar.py
@@ -1660,7 +1669,16 @@ def ev_agi_ac(kur=None, yeniden=yeniden_baslat_zamanla):
     return {"ok": True, "mesaj": "Ev ağı açılıyor; LifeOS birkaç saniyede geri gelir."}
 
 
-hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac)
+def uzak_ac():
+    """Hesap sayfasindaki «Her yerden erişim»: kapilar + Merkez yeni kokenlerle yeniden baslar."""
+    sonuc = uzak.ac()
+    if sonuc.get("ok"):
+        threading.Thread(target=hkm_yeniden, daemon=True).start()
+    return sonuc
+
+
+hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac,
+                    uzak_ac=uzak_ac, uzak_kapat=uzak.kapat, merkez=uzak.merkez)
 
 
 def merkez_izinli(basliklar, kapi):
@@ -2231,6 +2249,8 @@ def main():
     if telefon.tazele():
         print("  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
     tel, tel_sorun = telefon_sunuculari()
+    # Dis cihaz Merkez'i baslatamaz: her yerden erisim aciksa LifeOS ile birlikte kalkar.
+    threading.Thread(target=lambda: uzak.durum()["acik"] and hkm_ac(), daemon=True).start()
     kurulum = None
     if tel:
         try:

@@ -49,6 +49,15 @@ uygulama/ios/
   menüsüyle Dosyalar'a kaydedilir). HKM telefonda yoktur; modüller onsuz
   çalışır (§1.4).
 
+## Her yerden erişim (King evden uzakta)
+
+Model ve Merkez bilgisayarda kalır; API anahtarı ve ücret yoktur. Bilgisayar, telefon ve tablet aynı
+Tailscale ağına girer. Bilgisayarda Hesap › cihaz bağlama › «Her yerden erişimi aç» (ya da
+`python sistem/uzak.py --ac`), Tailscale yönetiminde MagicDNS ve HTTPS açık olmalı. Cihazda sunucu
+adresi olarak bilgisayarın `.ts.net` adı yazılır; admin girişinden sonra Merkez kendiliğinden bağlanır.
+Android'de aynı adres tarayıcıda açılıp ana ekrana eklenir. Bilgisayar açık kalmalı ve uyumamalıdır;
+kapalıyken AI olmaz, kayıtlar cihazda sıraya girer.
+
 ## Aşamalar
 
 | | Durum | Ne |

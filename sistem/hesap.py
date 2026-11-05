@@ -2329,11 +2329,17 @@ def depo_kur(d):
 def ev_agi():
     """Telefon ve tabletin yazacagi adres(ler): ev agi https acik ise
     bilgisayarin agdaki IP'leri, degilse bos liste (sistem/telefon.py)."""
+    uzak_ad = []
+    try:
+        import uzak
+        uzak_ad = [uzak.acik_ad()] if uzak.acik_ad() else []    # her yerde gecen adres once
+    except Exception:
+        pass
     try:
         import telefon
-        return list(telefon.ipler()) if telefon.acik_mi() else []
+        return uzak_ad + (list(telefon.ipler()) if telefon.acik_mi() else [])
     except Exception:          # telefon modulu yoksa ya da ag okunamadiysa
-        return []
+        return uzak_ad
 
 
 def _koken_izinli(h):
@@ -2657,6 +2663,19 @@ def isle(h):
                 if not SISTEM:
                     raise Hata(503, "Bu sunucuda ev ağı açılamaz.")
                 return _cevap(h, 200, SISTEM["ev_agi_ac"]())
+            if yol in ("/api/hesap/uzak-ac", "/api/hesap/uzak-kapat"):
+                d._admin(k, "Her yerden erişimi yalnız admin değiştirir.")
+                if not _yerel_mi(h):
+                    raise Hata(403, "Her yerden erişim yalnız bu bilgisayardan değiştirilir.")
+                if not SISTEM:
+                    raise Hata(503, "Bu sunucuda her yerden erişim yok.")
+                return _cevap(h, 200, SISTEM["uzak_ac" if yol.endswith("-ac") else "uzak_kapat"]())
+            if yol == "/api/hesap/merkez":
+                d._admin(k, "Merkez bağlantısını yalnız admin alır.")
+                v = SISTEM["merkez"]() if SISTEM else None
+                if not v:
+                    raise Hata(409, "Her yerden erişim kapalı.")
+                return _cevap(h, 200, v)
             if yol == "/api/hesap/bag-kodu":
                 return _cevap(h, 200, d.bag_kodu_ac(k))
             if yol == "/api/hesap/bag-durum":
