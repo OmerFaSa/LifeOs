@@ -789,6 +789,8 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="menusayfa__bas"><b>Menü</b>'
       + '<button class="menusayfa__kapat" data-act="toggle-sidebar" aria-label="Menüyü kapat">' + simge('kapat') + '</button></div>'
       + sistemSecici(o)
+      /* Kılavuz en başta: yeni başlayan aramadan bulsun (brand/ortak/kilavuz.js). */
+      + '<button class="menusayfa__kilavuz" data-act="go" data-route="kilavuz">' + simge('bilgi') + '<span>Kullanım kılavuzu</span>' + simge('ileri') + '</button>'
       + '<nav class="menusayfa__govde" aria-label="Bütün çekmeceler">' + govde + '</nav>'
       + (o.ayak ? '<div class="menusayfa__ayak">' + o.ayak + '</div>' : '')
       + '</div>';
