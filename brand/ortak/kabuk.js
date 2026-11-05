@@ -102,6 +102,7 @@ window.LIFEOS = window.LIFEOS || {};
     asagi:'<path d="M7 10l5 5 5-5"/>',
     ileri:'<path d="M10 7l5 5-5 5"/>',
     kapat:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+    oynat:'<path d="M8.5 6.5v11l9-5.5z"/>',
   };
 
   function kac(t){
@@ -788,6 +789,8 @@ window.LIFEOS = window.LIFEOS || {};
       + sistemSecici(o)
       /* Kılavuz en başta: yeni başlayan aramadan bulsun (brand/ortak/kilavuz.js). */
       + '<button class="menusayfa__kilavuz" data-act="go" data-route="kilavuz">' + simge('bilgi') + '<span>Kullanım kılavuzu</span>' + simge('ileri') + '</button>'
+      /* Tanıtım filmi: ilk girişte bir kez açılan film yeniden izlenir (brand/ortak/sinematik.js). */
+      + '<button class="menusayfa__kilavuz" data-sinematik-ac>' + simge('oynat') + '<span>Tanıtım filmi</span>' + simge('ileri') + '</button>'
       + '<nav class="menusayfa__govde" aria-label="Bütün çekmeceler">' + govde + '</nav>'
       + (o.ayak ? '<div class="menusayfa__ayak">' + o.ayak + '</div>' : '')
       + '</div>';
