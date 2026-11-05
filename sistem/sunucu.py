@@ -1303,6 +1303,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 <script src="/qr.js"></script>
 <script src="/piksel-figur.js"></script>
 <script src="/piksel-simge.js"></script>
+<script src="/piksel-apartman.js"></script>
 <script src="/piksel.js"></script>
 <script src="/hesap.js" data-giris></script>
 </body></html>
@@ -1645,7 +1646,7 @@ class Giris(SimpleHTTPRequestHandler):
         adim kurulumu ve kodla cihaz baglama QR'i (hesap.js soz 17-18)."""
         tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8",
                "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8",
-               "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8",
+               "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-apartman.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8",
                "piksel.css": "text/css; charset=utf-8", "piksel-yazi.css": "text/css; charset=utf-8"}[ad]
         with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
             govde = f.read()
@@ -1716,7 +1717,7 @@ class Giris(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
             return plan_isle(self)
-        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel-figur.js", "/piksel-simge.js", "/piksel.css", "/piksel-yazi.css"):
+        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel-apartman.js", "/piksel-figur.js", "/piksel-simge.js", "/piksel.css", "/piksel-yazi.css"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/gun":
             self.send_response(301)

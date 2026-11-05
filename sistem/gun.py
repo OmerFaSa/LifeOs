@@ -23,7 +23,7 @@ ORTAK = {
     "layout.css": "text/css; charset=utf-8", "temel.css": "text/css; charset=utf-8",
     "kabuk.css": "text/css; charset=utf-8", "kabuk.js": "text/javascript; charset=utf-8",
     "cam.css": "text/css; charset=utf-8", "hareket.css": "text/css; charset=utf-8",
-    "piksel-yazi.css": "text/css; charset=utf-8", "piksel.css": "text/css; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8", "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
+    "piksel-yazi.css": "text/css; charset=utf-8", "piksel.css": "text/css; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-apartman.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8", "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
 }
 
 
@@ -334,6 +334,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <script src="/gun/ortak/kabuk.js"></script>
 <script src="/gun/ortak/piksel-figur.js"></script>
 <script src="/gun/ortak/piksel-simge.js"></script>
+<script src="/gun/ortak/piksel-apartman.js"></script>
 <script src="/gun/ortak/piksel.js"></script>
 <script src="/gun/ortak/gunveri.js"></script>
 <script>

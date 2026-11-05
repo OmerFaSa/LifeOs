@@ -153,10 +153,73 @@
       Object.keys(G.AD).forEach(ad => expect(!!G.bul(ad)).toBe(true));
       expect(G.bul('yok-boyle')).toBe(null);
     });
-    it('oda içerik sütununa oturur, ekrandan taşmaz', () => {
-      const o = window.LIFEOS.PIKSEL.yerlesim(98, 2);
-      expect(o.dx + o.dw <= 98).toBe(true);
-      expect(o.yer < o.rh).toBe(true);
+    it('apartman: asansör ortada, koridor iki yanda, evler dışta; hiçbir oda taşmaz ve çakışmaz', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN;
+      [[384, 216], [342, 192], [480, 270]].forEach(q => {
+        const o = A.yerlesim(q[0], q[1], 'ogle');
+        expect(Math.abs(o.ax + A.ASANSOR / 2 - q[0] / 2) <= 1).toBe(true);
+        expect(o.solSon).toBe(o.ax - A.KORIDOR);
+        expect(o.odalar.every(a => a.x >= 0 && a.x + a.w <= q[0] && (a.x + a.w <= o.solSon || a.x >= o.sagBas))).toBe(true);
+        const kat = {};
+        o.odalar.forEach(a => { (kat[a.y] = kat[a.y] || []).push(a); });
+        Object.values(kat).forEach(l => l.sort((x, y) => x.x - y.x).forEach((a, i) => { if(i) expect(a.x >= l[i - 1].x + l[i - 1].w).toBe(true); }));
+      });
+    });
+    it('apartman: telefonda koridor yok, kat başına tek oda, asansör kenarda', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(98, 211, 'batim');
+      expect(o.dar).toBe(true);
+      expect(o.odalar.length).toBe(o.n);
+      expect(o.ax + A.ASANSOR).toBe(98);
+    });
+    it('vakit gerçek saatten gelir: gün doğumu, öğlen, gün batımı, gece', () => {
+      const V = window.LIFEOS.PIKSEL_APARTMAN.vakit;
+      expect(V(3)).toBe('gece'); expect(V(7)).toBe('dogum'); expect(V(12)).toBe('ogle'); expect(V(19)).toBe('batim'); expect(V(23)).toBe('gece');
+    });
+    it('günün planı: gece yatakta uyur, öğlen işe gider, akşam ikisi birlikte', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, a = { ad:'a' }, b = { ad:'b' };
+      const gece = A.gunPlani(['salon', 'banyo', 'yatak'], a, b, 'gece', 1);
+      expect(gece.yatak.uyku).toBe(true); expect(gece.yatak.k.length).toBe(2);
+      const ogle = A.gunPlani(['mutfak', 'ofis'], a, b, 'ogle', 0);
+      expect(ogle.ofis.k[0]).toBe(a); expect(ogle.mutfak.k[0]).toBe(b);
+      const aksam = A.gunPlani(['salon', 'banyo', 'yatak'], a, b, 'batim', 1);
+      expect(aksam.salon.k.length).toBe(2);
+    });
+    it('sahne: aynı t aynı kareyi verir, her kişinin saati kırık değil, bilinmeyen poz yok', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN;
+      ['dogum', 'ogle', 'batim', 'gece'].forEach(v => {
+        const o = A.yerlesim(384, 216, v), hepsi = [o.cati, o.zemin, o.asansor].concat(o.bolgeler);
+        hepsi.forEach(b => b.sakin.forEach(r => {
+          expect(r.T > 0 && isFinite(r.T)).toBe(true);
+          r.seg.forEach(q => { expect(!!A.POZ[q.poz]).toBe(true); expect(q.t1 >= q.t0).toBe(true); });
+          [0, 7.3, r.T + 2].forEach(t => { const k = A.kareAl(r, t); expect(JSON.stringify(k)).toBe(JSON.stringify(A.kareAl(r, t))); });
+        }));
+      });
+    });
+    it('hikâye: asansör sakinleri kabinle aynı saatte döner', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle'), T = o.asansor.sakin[0].T;
+      expect(o.cati.sakin.some(r => Math.abs(r.T - T) < 0.001)).toBe(true);
+      expect(o.zemin.sakin.some(r => Math.abs(r.T - T) < 0.001)).toBe(true);
+    });
+    it('hareketsiz kipte sahne döngüsü hiç kurulmaz', () => {
+      const P = window.LIFEOS.PIKSEL, k = document.documentElement, once = k.getAttribute('data-hareket'), asil = window.setInterval;
+      let kurulan = 0;
+      window.setInterval = function(){ kurulan++; return asil.apply(window, arguments); };
+      k.setAttribute('data-zemin', 'piksel'); k.setAttribute('data-hareket', 'az');
+      try{ P.uygula(); expect(kurulan).toBe(0); }
+      finally{ window.setInterval = asil; if(once) k.setAttribute('data-hareket', once); else k.removeAttribute('data-hareket'); }
+    });
+    it('kart çekilir ve geri gelir; süs veri okumaz', () => {
+      const P = window.LIFEOS.PIKSEL, k = document.documentElement, once = k.getAttribute('data-zemin');
+      k.setAttribute('data-zemin', 'piksel');
+      try{
+        P.bosAc(true);
+        expect(k.getAttribute('data-bos')).toBe('1');
+        P.bosKapa();
+        expect(k.getAttribute('data-bos')).toBe('don');
+        k.removeAttribute('data-bos');
+        const kaynak = String(window.LIFEOS.PIKSEL_APARTMAN.yerlesim);
+        expect(/localStorage|LIFEOS\.|HESAP/.test(kaynak)).toBe(false);
+      }finally{ if(once) k.setAttribute('data-zemin', once); else k.removeAttribute('data-zemin'); k.removeAttribute('data-bos'); }
     });
   });
 })();

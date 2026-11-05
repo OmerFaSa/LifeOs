@@ -56,6 +56,7 @@ js/core/animasyon.js
 js/core/zemin.js
 js/core/piksel-figur.js
 js/core/piksel-simge.js
+js/core/piksel-apartman.js
 js/core/piksel.js
 js/core/ayarlar.js
 
@@ -964,6 +965,7 @@ veri_entegrasyon.test.js esp
 parca.test.js
 ../js/core/piksel-figur.js
 ../js/core/piksel-simge.js
+../js/core/piksel-apartman.js
 ../js/core/piksel.js
 piksel.test.js
 

@@ -59,6 +59,13 @@
 :root[data-zemin="piksel"]{ background:var(--piksel-duvar); }
 :root[data-zemin="piksel"] .piksel-oda{ position:fixed; inset:0; width:100%; height:100%; image-rendering:pixelated; z-index:-1; pointer-events:none; }
 :root[data-zemin="piksel"] .zemin-isik{ display:none; }
+/* Boşta: menü sola, kart aşağı çekilir; dokunulamaz, sahne kalır (piksel.js). */
+:root[data-bos] .site--v5 > .kenar, :root[data-bos] .site--v5 > .site__body, :root[data-bos] .altbant, :root[data-bos] body > *:not(.piksel-oda):not(#app){ transition:opacity .42s ease, transform .42s ease; }
+:root[data-bos="1"]{ cursor:none; }
+:root[data-bos="1"] .site--v5 > .kenar{ opacity:0; transform:translateX(-60px); pointer-events:none; }
+:root[data-bos="1"] .site--v5 > .site__body{ opacity:0; transform:translateY(48px); pointer-events:none; }
+:root[data-bos="1"] .altbant{ opacity:0; transform:translateY(48px); pointer-events:none; }
+:root[data-bos="1"] body > *:not(.piksel-oda):not(#app){ opacity:0; pointer-events:none; }
 
 /* Yaprak: bütün içerik burada */
 :root[data-zemin="piksel"] .site--v5{ background:none; }
