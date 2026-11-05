@@ -38,6 +38,21 @@
         e.remove();
       }
     });
+    it('kıvılcım: Sistem kipinde işletim sistemi «azalt» derse ve düğme hızı Kapalı ise çizmez', () => {
+      const P = window.LIFEOS.PIKSEL, L = window.LIFEOS, eskiAz = L.hareketAz, A = L.ANIMASYON, eskiHiz = A.hizlar();
+      document.documentElement.setAttribute('data-zemin', 'piksel');
+      try{
+        L.hareketAz = () => true;
+        expect(P.kivilcim(10, 10)).toBe(0);
+        L.hareketAz = () => false;
+        A.hizAyarla('dugme', 0);
+        expect(P.kivilcim(10, 10)).toBe(0);
+      }finally{
+        L.hareketAz = eskiAz;
+        A.hizAyarla('dugme', eskiHiz.dugme);
+        document.querySelectorAll('.px-kivilcim').forEach(e => e.remove());
+      }
+    });
     it('çizim: nokta kare olur, halka bloklanır ama dolu kısmın uzunluğu değişmez', () => {
       const P = window.LIFEOS.PIKSEL, d = document.createElement('div');
       d.innerHTML = '<svg viewBox="0 0 100 100" width="100" height="100"><circle cx="50" cy="50" r="30" fill="none" stroke="#000" stroke-width="6"/><circle class="dolu" cx="50" cy="50" r="30" fill="none" stroke="#f00" stroke-width="6" stroke-dasharray="40 200"/><circle class="n" cx="20" cy="10" r="4" fill="#00f"/></svg>';

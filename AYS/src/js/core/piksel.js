@@ -208,7 +208,7 @@ window.LIFEOS = window.LIFEOS || {};
   const secili = () => document.documentElement.getAttribute('data-zemin') === 'piksel';
   function hareketsiz(){
     if(document.documentElement.getAttribute('data-hareket') === 'az') return true;
-    return !!(L.ANIMASYON && L.ANIMASYON.azMi && L.ANIMASYON.azMi());
+    return !!(L.hareketAz && L.hareketAz());
   }
   function kare(t){
     if(durum.g && durum.o && !durum.kayiyor) sahneMotor().kare(durum.g, durum.arka, durum.o, t);
@@ -363,10 +363,12 @@ window.LIFEOS = window.LIFEOS || {};
       bosAc(false);
     }, 5000);
   }
-  /* Kıvılcım: gerçek bir kayıt ya da tikte sekiz kare dağılır. Süs: veri okumaz, hareket ayarına uyar. */
+  /* Kıvılcım: gerçek bir kayıt ya da tikte sekiz kare dağılır ve küçülerek söner. Akıcı (2026-11-05: adımlı hâli 14 fps
+     görünüyordu). Süs: veri okumaz, hareket ayarına ve «Düğme ve dokunuş» hızına uyar (Kapalı'da çıkmaz). */
   const KIVILCIM = [[-16, -16], [0, -24], [16, -16], [24, 0], [16, 16], [0, 24], [-16, 16], [-24, 0]];
   function kivilcim(x, y, renkler){
-    if(!secili() || hareketsiz() || !document.body) return 0;
+    const hiz = L.ANIMASYON && L.ANIMASYON.hizOrani ? L.ANIMASYON.hizOrani('dugme') : 1;
+    if(!secili() || hareketsiz() || !hiz || !document.body) return 0;
     const R = renkler || ['#ffd35a', '#f2a24e', '#fff8ea'], kap = document.createElement('div');
     kap.className = 'px-kivilcim';
     kap.setAttribute('aria-hidden', 'true');
@@ -377,10 +379,10 @@ window.LIFEOS = window.LIFEOS || {};
       k.style.background = R[i % R.length];
       kap.appendChild(k);
       const son = 'translate(' + d[0] + 'px,' + d[1] + 'px)';
-      k.animate([{ transform:'none', opacity:1 }, { transform:son, opacity:1, offset:.75 }, { transform:son, opacity:0 }], { duration:360, easing:'steps(5, end)', fill:'forwards' });
+      k.animate([{ transform:'none', opacity:1 }, { transform:son + ' scale(.5)', opacity:0 }], { duration:420 / hiz, easing:'cubic-bezier(.2,.8,.3,1)', fill:'forwards' });
     });
     document.body.appendChild(kap);
-    setTimeout(() => kap.remove(), 420);
+    setTimeout(() => kap.remove(), 480 / hiz);
     return KIVILCIM.length;
   }
   /* Kayıtta bir kalp yükselir: yalnız gerçek kayıtta çağrılır. */

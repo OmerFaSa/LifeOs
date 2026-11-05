@@ -176,7 +176,7 @@
 :root[data-zemin="piksel"] .site--v5 .lrow{ background-image:none; }
 
 /* Düğmeler: basınca gerçekten iner */
-:root[data-zemin="piksel"] :is(.btn,.dugme){ border:0; background-image:none; background-color:var(--surface-2); color:var(--text); box-shadow:var(--px-dugme); margin:2px; transition:background-color var(--dur) var(--ease), transform var(--dur-press) var(--ease); }
+:root[data-zemin="piksel"] :is(.btn,.dugme){ border:0; background-image:none; background-color:var(--surface-2); color:var(--text); box-shadow:var(--px-dugme); margin:2px; transition:background-color var(--dur) var(--ease), transform 220ms var(--px-yay); }
 :root[data-zemin="piksel"] :is(.btn,.dugme):hover{ background-color:var(--surface-3); transform:none; }
 :root[data-zemin="piksel"] :is(.btn,.dugme):active{ transform:translateY(2px); }
 :root[data-zemin="piksel"] .btn--ghost{ background-color:transparent; }
@@ -346,7 +346,9 @@
 :root[data-zemin="piksel"], :root[data-zemin="piksel"] body{ cursor:var(--fig-imlec) 1 1, auto; }
 :root[data-zemin="piksel"] :is(a[href],button,summary,label[for],select,[role="button"],[role="radio"],[role="tab"],[role="switch"],[data-act],input[type="checkbox"],input[type="radio"],input[type="range"]):not(:disabled){ cursor:var(--fig-imlec_el) 11 1, pointer; }
 /* Yükleniyor: yumuşakça solup gelir */
-:root[data-zemin="piksel"] .skeleton__row{ background:var(--surface-3); background-image:none; animation:px-yanip 1s ease-in-out infinite alternate; }
+:root[data-zemin="piksel"] .skeleton__row{ background:var(--surface-3); background-image:none; -webkit-mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); animation:px-yanip 1s ease-in-out infinite alternate; }
+:root[data-zemin="piksel"] .skeleton__row:nth-child(3n+2){ animation-delay:.15s; }
+:root[data-zemin="piksel"] .skeleton__row:nth-child(3n){ animation-delay:.3s; }
 @keyframes px-yanip{ from{ opacity:.45; } to{ opacity:1; } }
 /* Küçük tepki: bardağa basınca iner */
 :root[data-zemin="piksel"] .su-bardak:active{ transform:translateY(2px); }
@@ -403,13 +405,42 @@
 
 /* ----- HAREKET: kısa ve yumuşak (2026-11-05: «animasyonlar çok kötü, kasıyor, az fps vibe veriyor»; adımlı dil geri alındı) -----
    Görünüm piksel, hareket akıcı: jeton.css'in eğrisi, kısa süre. `body *` ile geçiş özelliği yazılmaz: her öğe «bütün özellikleri
-   geçişli» olur, her stil hesabı şişer (base.css notu). Bilerek adımlı kalanlar küçük: kıvılcım, oda, kedi, yazı imleci. */
-:root[data-zemin="piksel"]{ --dur-press:80ms; --dur:140ms; --dur-lg:220ms; --dur-in:320ms; --h-kisa:140ms; --h-uzun:240ms; --px-bas:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu); }
+   geçişli» olur, her stil hesabı şişer (base.css notu). Bilerek adımlı kalanlar küçük: oda, kedi, yazı imleci (kıvılcım da akıcı).
+   Az ya da işletim sistemi «azalt» derken base.css'in !important süresi hepsini söndürür; ayrı kural gerekmez. */
+:root[data-zemin="piksel"]{ --px-otur:cubic-bezier(.34,1.45,.6,1); --px-yay:cubic-bezier(.34,1.8,.5,1); --dur-press:80ms; --dur:140ms; --dur-lg:220ms; --dur-in:320ms; --h-kisa:140ms; --h-uzun:240ms; --px-bas:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu); }
 @keyframes px-gel{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
 @keyframes px-yan{ from{ opacity:0; transform:translateX(12px); } to{ opacity:1; transform:none; } }
 :root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.sayfabasi,.donen,.kutu,.ledger,.pk,.card,.bolumcubugu,.sayfabolum,.content){ animation-duration:var(--dur-lg); }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.sayfabolumler--kat > .sayfabolum.is-gelen,.overlay .sheet,.kmenu--hizli > *,.king__dkart,.defter__kagit,.toast){ animation-name:px-gel; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
-:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.katman,.haberci){ animation-name:px-yan; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.sayfabolumler--kat > .sayfabolum.is-gelen,.kmenu--hizli > *,.king__dkart,.defter__kagit,.toast){ animation-name:px-gel; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) .haberci{ animation-name:px-yan; animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
+/* 2026-11-05, ikinci tur (kullanıcı beş öneriyi seçti: oturma, yay, çekmece, onay, yükleme). Hareket akıcı, şekil piksel. */
+/* Sayfa: kartlar sırayla gelir ve hafifçe oturur. Ad «sayfa-gir» ile başlar: hız ayarında «Sayfa geçişi»ne düşer. */
+@keyframes sayfa-gir-px{ from{ opacity:0; transform:translateY(-10px); } to{ opacity:1; transform:none; } }
+:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar,.bolumcubugu){ animation-name:sayfa-gir-px; animation-duration:300ms; animation-timing-function:var(--px-otur); }
+:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(2){ animation-delay:40ms; }
+:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(3){ animation-delay:80ms; }
+:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(4){ animation-delay:120ms; }
+:root[data-zemin="piksel"].sayfa-gecis .site--v5 #main :is(.kutu,.card,.donen,.kahraman,.notice,.okart-sar):nth-child(n+5){ animation-delay:160ms; }
+/* Panel çekmece gibi açılır: üstten sert kenarla, içerik bir an sonra. Bitince kırpma kalkar (backwards): çerçeve ve gölge kesilmez. */
+@keyframes px-ac{ from{ clip-path:inset(-24px -24px 100% -24px); } to{ clip-path:inset(-24px); } }
+@keyframes px-ic{ from{ opacity:0; } }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.katman,.overlay .sheet){ animation:px-ac 240ms cubic-bezier(.2,.8,.3,1) backwards; }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.katman:not(.kmenu--hizli),.overlay .sheet) > *{ animation:px-ic 180ms ease 60ms backwards; }
+/* Onay: tik piksel çizimiyle yaylanır, yalnız gerçek tikte (hareket.js .h-tik); kutunun kendisi büyümez, kenarı keskin kalır. */
+@keyframes px-tik{ from{ transform:scale(.4); } }
+:root[data-zemin="piksel"] .h-tik input[type="checkbox"]{ animation:none; }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) .h-tik input[type="checkbox"]:checked::after{ animation:px-tik 260ms var(--px-yay); }
+/* Rozet anı: dört köşe işareti kâğıdın çevresinde kapanıp açılır ve söner. Köşeler maskeyle kesilir (zemin geçişi değil). */
+@keyframes px-kose{ 0%{ inset:-16px; opacity:0; } 30%{ inset:-9px; opacity:1; } 70%{ inset:-12px; opacity:1; } 100%{ inset:-12px; opacity:0; } }
+:root[data-zemin="piksel"]:not([data-hareket="az"]) .haberci::after{ content:''; position:absolute; inset:-12px; border:3px solid var(--primary); opacity:0; pointer-events:none;
+  -webkit-mask:conic-gradient(at 10px 10px, transparent 75%, black 0) 0 0 / calc(100% - 10px) calc(100% - 10px); mask:conic-gradient(at 10px 10px, transparent 75%, black 0) 0 0 / calc(100% - 10px) calc(100% - 10px);
+  animation:px-kose 560ms cubic-bezier(.2,.8,.3,1) 180ms both; }
+/* Yükleme: yuvarlak halka yerine sekiz kare; ışıklı kare çevrede kayarak döner. */
+@keyframes px-don{ 0%{ transform:none; } 25%{ transform:translateX(10px); } 50%{ transform:translate(10px,10px); } 75%{ transform:translateY(10px); } 100%{ transform:none; } }
+:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin){ position:relative; width:15px; height:15px; border:0; border-radius:0; background:none; animation:none; }
+:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::before, :root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::after{ content:''; position:absolute; left:0; top:0; width:4px; height:4px; }
+:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::before{ background:var(--border-strong); box-shadow:5px 0 0 var(--border-strong),10px 0 0 var(--border-strong),10px 5px 0 var(--border-strong),10px 10px 0 var(--border-strong),5px 10px 0 var(--border-strong),0 10px 0 var(--border-strong),0 5px 0 var(--border-strong); }
+:root[data-zemin="piksel"] :is(.skeleton__spin,.busy__spin)::after{ background:var(--primary); animation:px-don 1s linear infinite; }
 :root[data-zemin="piksel"] .site--v5 .kapak__ic{ animation:none; }
 :root[data-zemin="piksel"] .kenar__cekmece::before{ animation:none; }
 :root[data-zemin="piksel"] .h-halka{ display:none; }
@@ -423,6 +454,8 @@
 :root[data-zemin="piksel"] .site--v5 > .kenar *{ transition-duration:var(--dur); transition-delay:0ms; }
 /* Basınca gerçekten iner; üzerine gelince simge bir kez zıplar */
 :root[data-zemin="piksel"] :is(.btn,.dugme,.secenek,.chip--tap):active{ transform:translateY(2px); box-shadow:var(--px-bas); }
+/* İniş anında, kalkış küçük bir yayla (yukarıdaki 220 ms --px-yay) */
+:root[data-zemin="piksel"] :is(.btn,.dugme):active{ transition-duration:var(--dur), var(--dur-press); transition-timing-function:var(--ease); }
 :root[data-zemin="piksel"] :is(.btn--primary,.giris__gonder,.dugme--ana):active{ box-shadow:0 -2px 0 #7c2f12,0 2px 0 #7c2f12,-2px 0 0 #7c2f12,2px 0 0 #7c2f12,inset 0 3px 0 #00000040; }
 :root[data-zemin="piksel"] .kisayol__d:active .kisayol__simge{ transform:translateY(2px); box-shadow:var(--px-bas); }
 :root[data-zemin="piksel"]:not([data-hareket="az"]) :is(.kenar__cekmece:hover svg,.kisayol__d:hover .kisayol__simge svg,.altbant :is(a,button):active svg,.kart:hover .sekil,.kart:hover .logo){ animation:px-zip .32s ease-in-out; }
