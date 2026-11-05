@@ -202,6 +202,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.guide.rehber':'Rehber',
 });
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'esp', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:20 });
+window.LIFEOS.KILAVUZ.kur('esp', ESP);
 
 ESP.Screens.guide = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

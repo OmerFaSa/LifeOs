@@ -39,6 +39,7 @@ css/gunukapat.css
 css/defter.css
 css/karsilama.css
 css/rehber.css
+css/kilavuz.css
 css/pusula.css
 css/sorukart.css
 css/zemin.css
@@ -147,6 +148,7 @@ js/data/rehber.js spi
 js/core/hedefplan.js esp
 js/core/takvim.js esp
 js/core/tanitim.js
+js/core/kilavuz.js
 js/core/gorsel.js
 js/core/pwa.js
 js/core/seri.js
@@ -513,6 +515,7 @@ js/app.js
 ../js/core/hedefplan.js esp
 ../js/core/takvim.js esp
 ../js/core/tanitim.js
+../js/core/kilavuz.js
 ../js/core/gorsel.js
 ../js/core/pwa.js
 ../js/core/seri.js

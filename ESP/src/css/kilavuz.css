@@ -1,0 +1,52 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kilavuz.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KULLANIM KILAVUZU (brand/ortak/kilavuz.js). Yalnız jeton; süs yok.
+   Kaynağı `brand/ortak/kilavuz.css`; `tools/ortak.py --yay` üç arayüze kopyalar. */
+.kilavuz{ max-width:760px; margin:0 auto; color:var(--text); font-size:var(--fs-md); line-height:1.6; }
+.kilavuz p{ margin:0; }
+.kilavuz dl, .kilavuz ol{ margin:0; padding:0; list-style:none; }
+.kilavuz dd{ margin:0; }
+
+.kilavuz__ad{ margin:0 0 16px; font-size:var(--fs-xl, var(--fs-lg)); line-height:1.3; }
+.kilavuz__bolum{ margin-top:32px; }
+.kilavuz__baslik{ margin:0 0 12px; font-size:var(--fs-lg); line-height:1.3; }
+.kilavuz .kilavuz__not{ margin-top:12px; color:var(--text-2); font-size:var(--fs-sm); }
+
+/* Üstte iki süre: tek bakışta ne kadar sürdüğü */
+.kilavuz__ozet{ display:grid; grid-template-columns:1fr 1fr; gap:1px; border:1px solid var(--border); background:var(--border); }
+.kilavuz__ozet > div{ display:flex; flex-direction:column; padding:12px 16px; background:var(--surface); }
+.kilavuz__ozet span, .kilavuz__ozet small{ color:var(--text-2); font-size:var(--fs-sm); }
+.kilavuz__ozet b{ font-size:var(--fs-lg); line-height:1.4; }
+
+/* Numaralı adımlar */
+.kilavuz__adimlar{ display:grid; gap:16px; }
+.kilavuz__adim{ display:grid; grid-template-columns:28px minmax(0, 1fr); gap:12px; }
+.kilavuz__no{ width:28px; height:28px; display:grid; place-items:center; background:var(--primary); color:var(--primary-ink, var(--surface)); font-weight:700; font-size:var(--fs-sm); }
+
+/* Günün üç anı: yan yana bir şerit, dar ekranda alt alta */
+.kilavuz__gun{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:1px; border:1px solid var(--border); background:var(--border); }
+.kilavuz__gun li{ padding:12px 16px; background:var(--surface); }
+.kilavuz__gun span{ display:block; color:var(--text-2); font-size:var(--fs-sm); }
+.kilavuz__gun b{ display:block; }
+
+/* «yer | ne işe yarar» satırları */
+.kilavuz .kilavuz__satirlar{ margin-top:8px; }
+.kilavuz__satirlar > div{ display:grid; grid-template-columns:minmax(0, 2fr) minmax(0, 3fr); gap:4px 16px; padding:8px 0; border-top:1px solid var(--border); }
+.kilavuz__satirlar dt{ font-weight:700; }
+.kilavuz__satirlar dd{ color:var(--text-2); }
+
+.kilavuz__kartlar{ display:grid; gap:16px; }
+.kilavuz__kart{ padding:16px; border:1px solid var(--border); background:var(--surface); }
+.kilavuz__kart h3{ display:flex; align-items:center; gap:8px; margin:0 0 8px; font-size:var(--fs-md); }
+.kilavuz__kart h3 small{ color:var(--text-2); font-size:var(--fs-sm); font-weight:400; }
+.kilavuz__isaret{ width:12px; height:12px; flex:none; background:var(--primary); }
+.kilavuz__isaret--ays{ background:var(--ays); }
+.kilavuz__isaret--spi{ background:var(--spi); }
+.kilavuz__isaret--esp{ background:var(--esp); }
+.kilavuz__ornek span{ color:var(--text-2); }
+
+@media (max-width:679px){
+  .kilavuz__gun{ grid-template-columns:minmax(0, 1fr); }
+  .kilavuz__satirlar > div{ grid-template-columns:minmax(0, 1fr); }
+}
