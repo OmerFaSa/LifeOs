@@ -3339,7 +3339,7 @@
     it('sesli moda geçince EMA ısınır: beş dakikada bir istek; Gemini seçiliyse istek gitmez, hata sessiz', () => sahneyle(async () => {
       const yollar = [];
       const fetch = async (url, o) => { yollar.push([url.replace('http://127.0.0.1:4200', ''), JSON.parse(o.body).tercih]); throw new Error('kapalı'); };
-      const { k, ic } = sahne({ hkm, fetch });
+      const { k } = sahne({ hkm, fetch });
       k._ortam.pcmBaglam = null;
       const KI = window.LIFEOS.KING_IC;
       KI.sesIsitT = -Infinity;
