@@ -41,6 +41,43 @@
         e.remove();
       }
     });
+    it('küçük tepkiler: liste bitti yalnız hepsi bitince, cevap sınıfı doğru/yanlışa göre, desenler', () => {
+      const P = window.LIFEOS.PIKSEL, d = document.createElement('div'), kok = document.documentElement, once = kok.getAttribute('data-hareket');
+      kok.setAttribute('data-zemin', 'piksel');
+      kok.setAttribute('data-hareket', 'tam');
+      d.innerHTML = '<ul><li><input type="checkbox" checked></li><li><input type="checkbox"></li></ul>'
+        + '<div class="kutu"><button class="minrow is-done"></button><button class="minrow" id="m2"></button></div>'
+        + '<div class="kutu"><button class="minrow"></button><button class="minrow" id="m3"></button></div>'
+        + '<ul><li><input type="checkbox" id="tek" checked></li></ul>'
+        + '<button class="secenek is-dogru" data-harf="A"><span class="secenek__harf">A</span></button><button class="secenek is-yanlis" data-harf="B"></button><button class="secenek" data-harf="C"></button>';
+      document.body.appendChild(d);
+      try{
+        const k = d.querySelectorAll('input');
+        expect(P.listeBitti(k[1])).toBe(false);
+        k[1].checked = true;
+        expect(P.listeBitti(k[1])).toBe(true);
+        expect(P.listeBitti(d.querySelector('#tek'))).toBe(false);   // tek iş «liste» değil
+        expect(P.listeBitti(d.querySelector('#m2'))).toBe(true);
+        expect(P.listeBitti(d.querySelector('#m3'))).toBe(false);
+        const s = d.querySelectorAll('.secenek');
+        expect(P.cevapIsle(s[0])).toBe('dogru');
+        expect(s[0].classList.contains('px-dogru')).toBe(true);
+        expect(P.cevapIsle(s[1])).toBe('yanlis');
+        expect(s[1].classList.contains('px-yanlis')).toBe(true);
+        expect(P.cevapIsle(s[2])).toBe(null);
+        expect(P.DESEN.buyuk.length).toBe(16);
+        expect(P.DESEN.toz.length).toBe(7);
+        kok.setAttribute('data-hareket', 'az');
+        s[1].classList.remove('px-yanlis');
+        expect(P.cevapIsle(s[1])).toBe('yanlis');
+        expect(s[1].classList.contains('px-yanlis')).toBe(false);   // azaltılmışta sallanma yok
+        expect(P.toz(s[1])).toBe(0);
+      }finally{
+        d.remove();
+        document.querySelectorAll('.px-kivilcim').forEach(e => e.remove());
+        if(once) kok.setAttribute('data-hareket', once); else kok.removeAttribute('data-hareket');
+      }
+    });
     it('kıvılcım: Sistem kipinde işletim sistemi «azalt» derse ve düğme hızı Kapalı ise çizmez', () => {
       const P = window.LIFEOS.PIKSEL, L = window.LIFEOS, eskiAz = L.hareketAz, A = L.ANIMASYON, eskiHiz = A.hizlar();
       document.documentElement.setAttribute('data-zemin', 'piksel');

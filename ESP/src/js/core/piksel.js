@@ -366,7 +366,14 @@ window.LIFEOS = window.LIFEOS || {};
   /* Kıvılcım: gerçek bir kayıt ya da tikte sekiz kare dağılır ve küçülerek söner. Akıcı (2026-11-05: adımlı hâli 14 fps
      görünüyordu). Süs: veri okumaz, hareket ayarına ve «Düğme ve dokunuş» hızına uyar (Kapalı'da çıkmaz). */
   const KIVILCIM = [[-16, -16], [0, -24], [16, -16], [24, 0], [16, 16], [0, 24], [-16, 16], [-24, 0]];
-  function kivilcim(x, y, renkler){
+  /* Desenler: [dx, dy, gecikme ms]. BUYUK listenin son işinde, TOZ silinen satırda, YAN açılan anahtarda. */
+  const DESEN = Object.freeze({
+    kivilcim:KIVILCIM,
+    buyuk:KIVILCIM.concat(KIVILCIM.map(d => [Math.round(d[0] * 1.8), Math.round(d[1] * 1.8), 70])),
+    toz:[[-40, 14], [-22, 22], [-6, 12], [10, 24], [28, 16], [46, 20], [60, 12]],
+    yan:[[14, -8], [16, 6]],
+  });
+  function kivilcim(x, y, renkler, desen, sure){
     const hiz = L.ANIMASYON && L.ANIMASYON.hizOrani ? L.ANIMASYON.hizOrani('dugme') : 1;
     if(!secili() || hareketsiz() || !hiz || !document.body) return 0;
     const R = renkler || ['#ffd35a', '#f2a24e', '#fff8ea'], kap = document.createElement('div');
@@ -374,16 +381,18 @@ window.LIFEOS = window.LIFEOS || {};
     kap.setAttribute('aria-hidden', 'true');
     kap.style.left = Math.round(x) + 'px';
     kap.style.top = Math.round(y) + 'px';
-    KIVILCIM.forEach((d, i) => {
+    const D = DESEN[desen] || KIVILCIM;
+    sure = sure || 420;
+    D.forEach((d, i) => {
       const k = document.createElement('i');
       k.style.background = R[i % R.length];
       kap.appendChild(k);
       const son = 'translate(' + d[0] + 'px,' + d[1] + 'px)';
-      k.animate([{ transform:'none', opacity:1 }, { transform:son + ' scale(.5)', opacity:0 }], { duration:420 / hiz, easing:'cubic-bezier(.2,.8,.3,1)', fill:'forwards' });
+      k.animate([{ transform:'none', opacity:1, easing:'cubic-bezier(.2,.8,.3,1)' }, { transform:son, opacity:1, offset:.6, easing:'ease-in' }, { transform:son + ' scale(.5)', opacity:0 }], { duration:sure / hiz, delay:(d[2] || 0) / hiz, fill:'both' });
     });
     document.body.appendChild(kap);
-    setTimeout(() => kap.remove(), 480 / hiz);
-    return KIVILCIM.length;
+    setTimeout(() => kap.remove(), (sure + 160) / hiz);
+    return D.length;
   }
   /* Kayıtta bir kalp yükselir: yalnız gerçek kayıtta çağrılır. */
   function kayitTepki(e){
@@ -403,19 +412,68 @@ window.LIFEOS = window.LIFEOS || {};
     setTimeout(() => kap.remove(), 620);
     return n;
   }
-  function ogeKivilcim(e, renkler){
+  function ogeKivilcim(e, renkler, desen, sure){
     const r = e.getBoundingClientRect();
-    return kivilcim(r.left + r.width / 2, r.top + r.height / 2, renkler);
+    return kivilcim(r.left + r.width / 2, r.top + r.height / 2, renkler, desen, sure);
   }
+  /* Silinen satırın yerinden gri kareler aşağı süzülür (hareket.js satır kapanışı). Renk temanın kendi çizgisi. */
+  function toz(e){
+    const k = getComputedStyle(document.documentElement);
+    return ogeKivilcim(e, [k.getPropertyValue('--border-strong').trim() || '#c9a988', k.getPropertyValue('--text-3').trim() || '#6f4f42'], 'toz', 520);
+  }
+  /* Bu tikle listenin hepsi bitti mi: en az iki iş, hepsi işaretli ya da (az sonra) bitmiş. */
+  function listeBitti(t){
+    const kutu = t.closest('ul, ol, .kutu, .ledger, .card') || t.parentElement;
+    if(!kutu) return false;
+    if(t.matches('input')){
+      const h = Array.from(kutu.querySelectorAll('input[type="checkbox"]'));
+      return h.length >= 2 && h.every(c => c.checked);
+    }
+    const h = Array.from(kutu.querySelectorAll('button.minrow'));
+    return h.length >= 2 && h.every(b => b === t || b.classList.contains('is-done'));
+  }
+  /* Cevap işaretlendikten sonra: doğruysa harf zıplar ve yeşil kıvılcım, yanlışsa kısa sallanma. */
+  function cevapIsle(e){
+    if(!e || !e.classList) return null;
+    const tur = e.classList.contains('is-dogru') ? 'dogru' : e.classList.contains('is-yanlis') ? 'yanlis' : null;
+    if(!tur || hareketsiz()) return tur;
+    e.classList.remove('px-dogru', 'px-yanlis');
+    void e.offsetWidth;
+    e.classList.add('px-' + tur);
+    if(tur === 'dogru') ogeKivilcim(e.querySelector('.secenek__harf, b') || e, ['#5fbf4f', '#2f7a2a', '#ffd35a']);
+    return tur;
+  }
+  /* Ekran yeniden çizilince tıklanan öğe değişir: aynı kimlikle yeniden bulunur. */
+  function yenidenBul(sec, yedek, fn){
+    let n = 0;
+    const bak = () => { const e = (sec && document.querySelector(sec)) || (yedek && yedek.isConnected ? yedek : null); if(!fn(e) && ++n < 3) setTimeout(bak, 90); };
+    setTimeout(bak, 40);
+  }
+  const kimlik = (e, a) => e.getAttribute(a) == null ? null : '[' + a + '="' + CSS.escape(e.getAttribute(a)) + '"]';
   function tepkiIzle(){
     document.addEventListener('click', o => {
       const t = o.target;
-      if(!t || !t.closest) return;
+      if(!t || !t.closest || !secili()) return;
       const su = t.closest('.su-bardak');
       if(su){ ogeKivilcim(su, ['#58b9ec', '#e6f7ff', '#2f93cf']); return; }
-      if(t.matches('input[type="checkbox"]:checked')){ ogeKivilcim(t); return; }
+      if(t.matches('input[type="checkbox"]:checked')){ listeBitti(t) ? ogeKivilcim(t, null, 'buyuk', 560) : ogeKivilcim(t); return; }
       const satir = t.closest('button.minrow:not(.is-done)');
-      if(satir) ogeKivilcim(satir.querySelector('.minrow__mark') || satir);
+      if(satir){ const m = satir.querySelector('.minrow__mark') || satir; listeBitti(satir) ? ogeKivilcim(m, null, 'buyuk', 560) : ogeKivilcim(m); return; }
+      const sik = t.closest('.secenek[data-harf]:not([disabled]), .king__soru-sik:not([disabled])');
+      if(sik){
+        const sec = sik.matches('.king__soru-sik') ? kimlik(sik, 'data-king') : (kimlik(sik, 'data-act') || '') + kimlik(sik, 'data-harf');
+        yenidenBul(sec && (sik.matches('.king__soru-sik') ? '.king__soru-sik' : '.secenek') + sec, sik, cevapIsle);
+        return;
+      }
+      const an = t.closest('[role="switch"]');
+      if(an && an.getAttribute('aria-checked') !== 'true'){
+        const r = an.getBoundingClientRect(), x = r.right - 6, y = r.top + r.height / 2;
+        yenidenBul(null, an, () => {
+          const e = document.elementFromPoint(x, y), s = (e && e.closest && e.closest('[role="switch"]')) || (an.isConnected ? an : null);
+          if(s && s.getAttribute('aria-checked') === 'true') kivilcim(x, y, null, 'yan', 260);
+          return true;
+        });
+      }
     }, true);
   }
   function uygula(){
@@ -449,5 +507,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, cizimCevir });
+  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
 })(window.LIFEOS);

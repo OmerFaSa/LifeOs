@@ -212,6 +212,7 @@ window.LIFEOS.HAREKET = (function(){
   }
   function kapat(h){
     const bitir = () => { if(h.parentNode) h.parentNode.removeChild(h); };
+    const PX = window.LIFEOS && window.LIFEOS.PIKSEL; if(PX && PX.toz) PX.toz(h);   // piksel: yerinden toz süzülür
     requestAnimationFrame(() => requestAnimationFrame(() => { h.classList.add('is-kapali'); }));
     h.addEventListener('transitionend', e => { if(e.propertyName === 'height') bitir(); });
     setTimeout(bitir, 700);
