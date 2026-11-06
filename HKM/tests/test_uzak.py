@@ -147,6 +147,41 @@ def run():
             eq(uzak.merkez_kimlikle({"Tailscale-User-Login": ""}, oku_sahip=lambda: "", oku_merkez=lambda: m), None)
         test("hesapsiz Merkez bagi yalniz bilgisayarin sahibine", kimlik)
 
+        def modul_kapisi():
+            # Telefon sayfasi modul kapisindan acilir; uc orada olmalidir (Giris'te kalmisti, telefon 405 aliyordu).
+            import sunucu
+            from http.server import ThreadingHTTPServer
+
+            class Isleyici(sunucu.Sunucu):
+                def log_message(self, *a):
+                    pass
+            eski = uzak.merkez_kimlikle
+            uzak.merkez_kimlikle = lambda b: {"url": "u", "token": "t"} if b.get("Tailscale-User-Login") == "ben@x.com" else None
+            with tempfile.TemporaryDirectory() as klasor:
+                srv = ThreadingHTTPServer(("127.0.0.1", 0), lambda *a: Isleyici(*a, directory=klasor))
+                threading.Thread(target=srv.serve_forever, daemon=True).start()
+
+                def post(**baslik):
+                    b = {"Host": AD + ":5183", "X-LifeOS": "hesap", "Origin": "https://%s:5183" % AD}
+                    b.update({k.replace("_", "-"): v for k, v in baslik.items()})
+                    b = {k: v for k, v in b.items() if v}
+                    istek = urllib.request.Request("http://127.0.0.1:%d/api/uzak/merkez" % srv.server_address[1], data=b"{}", headers=b, method="POST")
+                    try:
+                        with urllib.request.urlopen(istek, timeout=5) as y:
+                            return y.status, json.loads(y.read())
+                    except urllib.error.HTTPError as h:
+                        return h.code, None
+                try:
+                    eq(post(Tailscale_User_Login="ben@x.com"), (200, {"url": "u", "token": "t"}))
+                    eq(post(Tailscale_User_Login="baskasi@x.com")[0], 403)
+                    eq(post(Tailscale_User_Login="ben@x.com", X_LifeOS="")[0], 403)
+                    eq(post(Tailscale_User_Login="ben@x.com", Origin="https://kotu.example")[0], 403)
+                finally:
+                    uzak.merkez_kimlikle = eski
+                    srv.shutdown()
+                    srv.server_close()
+        test("telefonun Merkez bagi modul kapisindan alinir", modul_kapisi)
+
         def durumu():
             d = uzak.durum(_sahte(serve_web=_web())[0])
             ok(d["acik"], "dort kapi dogru hedefte")
