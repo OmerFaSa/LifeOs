@@ -96,6 +96,8 @@ window.LIFEOS.PARCA.yazilar({
   'spi.basket.talep-tablosu':'Aylık ihtiyaç',
   'spi.basket.sepet-ilk-adim':'Haftalık alışverişini yaz; maliyet ve besin kapsaması buradan hesaplanır.',
   'spi.basket.veri-yok':'veri yok',
+  'spi.basket.aylik-ilk-adim':'Haftalık sepetini yazınca gıdanın aylık karşılığı burada toplanır.',
+  'spi.basket.sepete-git':'Sepete git',
   'spi.basket.tl':'TL',
   'spi.basket.kalem-fiyati-bilinmedigi-ici':'kalem fiyatı bilinmediği için toplamın dışında.',
   'spi.basket.butun-kalemlerin-karsiligi-h':'Bütün kalemlerin karşılığı hesaplandı.',
@@ -415,7 +417,11 @@ SP.Screens.basket = (function(){
               title:yz('spi.basket.talep-tablosu'), hint:'budget-rank',
               badge:K.Badge({ label:bilinen ? U.fmtNum(b.total) + ' TL / ay' : 'veri yok',
                 tone:!bilinen ? 'muted' : b.over ? 'warn' : 'info' }),
-              body:html`${map(b.rows, r => html`
+              /* Hiçbir kalem bilinmiyorsa satırlardan önce ilk adım: toplam Sepet'ten başlar (yeni kart değil, açık kart sınırı). */
+              body:html`${when(!bilinen, () => html`<div class="mb-16">
+                <p class="small">${yz('spi.basket.aylik-ilk-adim')}</p>
+                <div class="row wrap gap-8 mt-8">${K.Button({ label:yz('spi.basket.sepete-git'), tone:'primary',
+                  act:'basket-tab', data:{ 'data-tab':'sepet' } })}</div></div>`)}${map(b.rows, r => html`
                 <div class="demand">
                   <div class="demand__who">
                     ${P.avatar(r.agent, 'sm')}

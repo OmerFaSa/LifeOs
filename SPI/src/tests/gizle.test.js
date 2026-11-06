@@ -493,6 +493,28 @@
       }finally{ bitir(kok, d); }
     });
 
+    it('sayfa notu katlı sayfada: her kat yalnız kendi gizlisini sayar, not katın sonunda', () => {
+      const kat = (id, adlar) => '<section class="sayfabolum" id="bl-' + id + '"><h2 class="sayfabolum__ad">' + id + '</h2><div class="liste">'
+        + adlar.map(ad => '<section class="kutu"><header class="kutu__bas"><h2 class="kutu__ad">' + ad + '</h2></header>'
+          + '<div class="kutu__govde">gövde</div></section>').join('') + '</div></section>';
+      const kok = document.createElement('div');
+      kok.innerHTML = '<h1>Kat</h1><div class="sayfabolumler sayfabolumler--kat">' + kat('a', ['Bir', 'İki']) + kat('b', ['Üç', 'Dört']) + '</div>';
+      document.body.appendChild(kok);
+      G()._sifirla();
+      const d = ust();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'kat' });
+      try{
+        G().durumAyarla(G().anahtar('Üç'), 'gizli');
+        G().durumAyarla(G().anahtar('Dört'), 'gizli');
+        expect(kok.querySelector('#bl-a > .gizle-dip')).toBe(null);
+        const dip = kok.querySelector('#bl-b > .gizle-dip');
+        expect(!!dip && dip.textContent.includes('2 bölüm')).toBe(true);
+        expect(kok.querySelectorAll('.gizle-dip').length).toBe(1);
+        G().durumAyarla(G().anahtar('Bir'), 'gizli');
+        expect(kok.querySelector('#bl-a > .gizle-dip').textContent.includes('Bir')).toBe(true);
+      }finally{ bitir(kok, d); }
+    });
+
     it('sayfada bırakma: bölüm başka bir bölümün önüne/arkasına konur; başka kaba geçmez', () => {
       const kok = sayfa3('Taşı', AD); G()._sifirla();
       G().uygula({ kok, modul:MOD, profil:'p', ekran:'birak' });

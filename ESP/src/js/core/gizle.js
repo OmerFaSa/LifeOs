@@ -329,10 +329,23 @@ LIFEOS.Gizle = (function(){
     try{ return el.matches(UYARI) || !!el.querySelector(UYARI); }catch(e){ return false; }
   }
 
-  /* Söz 10: sayfada gizli bölüm varsa sayfanın sonunda tek satırlık not. */
+  /* Söz 10: sayfada gizli bölüm varsa sayfanın sonunda tek satırlık not.
+     Katlı sayfada (K.SayfaBolumleri) her katın notu kendi sonunda ve yalnız
+     kendi bölümlerini sayar: açık katta öbür katların gizlisi yazılmaz. */
   function dipCiz(o, liste, uyariSay){
     if(!o.kok) return;
-    let dip = o.kok.querySelector(':scope > .gizle-dip');
+    const katlar = Array.from(o.kok.querySelectorAll('.sayfabolumler--kat > .sayfabolum'));
+    if(!katlar.length){ dipYaz(o.kok, liste, uyariSay); return; }
+    let kalan = liste;
+    katlar.forEach(kat => {
+      const ic = kalan.filter(b => kat.contains(b.el));
+      kalan = kalan.filter(b => !kat.contains(b.el));
+      dipYaz(kat, ic, ic.filter(b => b.el.hidden && uyariVar(b.el)).length);
+    });
+    dipYaz(o.kok, kalan, kalan.filter(b => b.el.hidden && uyariVar(b.el)).length);
+  }
+  function dipYaz(kap, liste, uyariSay){
+    let dip = kap.querySelector(':scope > .gizle-dip');
     const gizli = liste.filter(b => b.el.hidden);
     if(!gizli.length){ if(dip) dip.remove(); return; }
     if(!dip){
@@ -340,7 +353,7 @@ LIFEOS.Gizle = (function(){
       dip.className = 'gizle-dip';
       dip.setAttribute('data-gizlenmez', '');
     }
-    if(o.kok.lastElementChild !== dip) o.kok.appendChild(dip);
+    if(kap.lastElementChild !== dip) kap.appendChild(dip);
     dip.classList.toggle('gizle-dip--uyari', !!uyariSay);
     const ne = gizli.length === 1 ? '«' + kac(gizli[0].baslik) + '» gizli' : gizli.length + ' bölüm gizli';
     const uy = !uyariSay ? '' : gizli.length === 1 ? ' · içinde uyarı var' : ' · ' + uyariSay + ' tanesinde uyarı var';

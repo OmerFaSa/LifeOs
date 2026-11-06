@@ -482,5 +482,37 @@
         expect(SP.S.ui.analyticsTab == null).toBe(true);
       }finally{ d.remove(); SP.S.ui.spiAnalizAyrinti = false; }
     });
+
+    it('Bütçe › Aylık: hiçbir kalem bilinmiyorsa satırlardan önce Sepet\'e giden ilk adım; bilinince yok', async () => {
+      resetState();
+      SP.S.basket = Object.assign({}, SP.S.basket || {}, { equipment:SP.EXERCISES.map(e => e.equip).filter(x => x && x !== 'yok') });
+      let d = yerlestir(await SP.Screens.basket.render());
+      try{
+        expect(SP.Money.budget().rows.some(r => r.monthly != null)).toBe(true);   // ekipman tamam: 0 TL biliniyor
+        expect(d.querySelector('#bl-butce [data-act="basket-tab"][data-tab="sepet"]')).toBeNull();
+      }finally{ d.remove(); }
+      resetState();
+      d = yerlestir(await SP.Screens.basket.render());
+      try{
+        expect(SP.Money.budget().rows.some(r => r.monthly != null)).toBe(false);   // boş hesap: üç satır da «veri yok»
+        const git = d.querySelector('#bl-butce [data-act="basket-tab"][data-tab="sepet"]');
+        expect(!!git).toBe(true);
+        expect(git.textContent.trim()).toBe('Sepete git');
+      }finally{ d.remove(); }
+    });
+
+    it('Uzmanlar: kartta iki not; «Raporu aç» denince bütün notlar (gizli not kalmaz)', async () => {
+      resetState();
+      const eski = SP.Office.notes;
+      const notlar = [1, 2, 3, 4, 5].map(i => ({ agent:'lab', tone:'warn', text:'not ' + i }));
+      SP.Office.notes = () => notlar;
+      try{
+        let d = yerlestir(await SP.Screens.office.render());
+        try{ expect(d.querySelectorAll('.desk--lab .note').length).toBe(2); }finally{ d.remove(); }
+        SP.S.ui.officeDesk = 'lab';
+        d = yerlestir(await SP.Screens.office.render());
+        try{ expect(d.querySelectorAll('.desk--lab .note').length).toBe(5); }finally{ d.remove(); }
+      }finally{ SP.Office.notes = eski; SP.S.ui.officeDesk = null; }
+    });
   });
 })();

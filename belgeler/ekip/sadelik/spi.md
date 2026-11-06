@@ -80,10 +80,17 @@ Kırmızı bayrak kartları ve Bugün'ün acil uyarısı her turda yerinde kald�
 - **«Asgari gün»:** 50 yerde geçiyor, testlerde de var. Kavram doğru, söz resmî. Ayrı tur.
 - **«Bugünkü yük», «73/100 tam yük»:** puanın ne demek olduğu ⓘ'de. Tek bakışta tam oturmuyor.
 - **Sedef'in notu, Kerem, Nesrin:** yeni kullanıcı bu adların kim olduğunu bilmiyor; yanında alan adı var.
-- **Ofis › Uzmanlar** hâlâ uzun ve tek eylemi yok; ara sıra açılan ekran. Kartlar açılır olabilir.
-- **Bütçe › Aylık** boşken üç «veri yok» satırı duruyor; satırlar nedenini söylüyor, ilk adım Sepet'te.
-- **«N bölüm gizli» notu** her bölümde bütün sayfayı sayıyor. `gizle.js`, ortak.
+- **Ofis › Uzmanlar** hâlâ uzun ve tek eylemi yok; ara sıra açılan ekran. Kart başı not dörtten ikiye indi
+  (devam turu); kartı tümden açılır yapmak ayrı karar.
 - **Ayarlar › Genel › Pusula:** «Yönetim 0 dk/gün» yeni kullanıcıya bir şey söylemiyor. `pusula.js`, ortak.
+
+### Devam turu (2026-11-06, ikinci oturum)
+
+| Ne | Önce | Sonra |
+|---|---|---|
+| Bütçe › Aylık, boş | üç «veri yok» satırı, ne yapılacağı yok | «Aylık ihtiyaç» kartının başında tek cümle + «Sepete git» (yeni kart değil: açık kart sınırı üç) |
+| Uzmanlar kartı | dört not; «N not daha — raporu aç» deniyordu ama rapor notları göstermiyordu | iki not; «Raporu aç» bütün notları gösterir (gizli not kalmaz) |
+| «N bölüm gizli» notu (`brand/ortak/gizle.js`) | katlı sayfada bütün katları sayıyor, notu sayfanın sonuna koyuyordu: Analiz › Özet'te «Raporun mantığı gizli» | her kat kendi gizlisini sayar, not katın sonunda; katsız sayfa aynı. Üç modülde test |
 
 ### Sana sorulacak
 
@@ -181,7 +188,7 @@ Kırmızı bayraklar Testler'de seçicinin üstünde kaldı (testli); sınır sa
    sola kayıp kesiliyor. Çekmece seçicisi ile sayfa seçicisi piksel temada aynı görünüyor; üst üste iki
    sekme satırı karmaşanın kalan büyük parçası. `piksel.css` ve `kabuk.js`.
 2. **«N bölüm gizli» notu.** `gizle.js` sayfanın bütün bölümlerini sayıyor; Analiz'in her bölümünde
-   «Raporun mantığı gizli» yazıyor. Yalnız açık bölüm sayılmalı.
+   «Raporun mantığı gizli» yazıyor. Yalnız açık bölüm sayılmalı. **Devam turunda düzeldi.**
 3. **Grup kalıbı.** AYS ve ESP isterse `components.js` üç modülde ayrı kopya; ortağa alınabilir.
 4. **Windows'ta yanlış kırmızı.** `tools/ortak.py --denetle` ve `tools/parca_test.py`, satır sonu farkı
    yüzünden kırmızı (`parca-rehber.js`, CRLF). `brand/` bu dalda değişmedi; içerik satır satır aynı.

@@ -105,7 +105,7 @@ SP.Screens.office = (function(){
      ajanin boyuna gore uzar. Masada en fazla dort not gosterilir,
      gerisi rapora iner. Not URETIMI de ayrica toplandi (core/office.js):
      on iki ayri "hic olculmemis" notu tek satira indi. */
-  const DESK_NOTES = 4;
+  const DESK_NOTES = 2;
 
   /* Patron digerlerinin yanina dizilmez. Dort uzman birbirinin esiti,
      Patron degil: o dordunun raporunu okur. Kat planinda da oyle
@@ -200,10 +200,10 @@ SP.Screens.office = (function(){
         </div>
         ${tekrar ? '' : K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
-          ${map(notes.slice(0, DESK_NOTES), n => html`
+          ${map(open ? notes : notes.slice(0, DESK_NOTES), n => html`
             <div class="note note--${n.tone}"><span class="note__dot"></span>
               <span class="small">${n.text}</span></div>`)}
-          ${when(notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
+          ${when(!open && notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
             ${notes.length - DESK_NOTES} ${yz('spi.office.not-daha-raporu-ac')}</p>`)}
         </div>`)}
         ${deskFlow(agent.id)}
