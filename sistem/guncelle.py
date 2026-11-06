@@ -358,6 +358,12 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
         kod, cikti = _git(["reset", "--hard", UZAK + "/" + DAL], kok, calistir, timeout=SARMA_SN)
     else:
         kod, cikti = _git(["merge", "--ff-only", UZAK + "/" + DAL], kok, calistir, timeout=SARMA_SN)
+        if kod != 0 and "index.lock" not in cikti:
+            # Windows o an okunan dosyayi silemez («Invalid argument», 2026-11-06, spi.html): merge yarida
+            # kalir. Bir sonraki «Guncelle»yi beklemeden, yazilan her dosya hedefteyse ayni koşuda tamamla.
+            kirli = durum(kok, calistir, getir=False).get("kirli") or []
+            if kirli and _yarim_mi(kirli, kok, calistir):
+                kod, cikti = _git(["reset", "--hard", UZAK + "/" + DAL], kok, calistir, timeout=SARMA_SN)
     if kod != 0:
         return dict(d, durum="hata",
                     mesaj="Az önce başka bir güncelleme başlamış; birkaç dakika sonra yeniden dene."
