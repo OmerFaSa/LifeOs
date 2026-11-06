@@ -458,7 +458,8 @@ window.LIFEOS = window.LIFEOS || {};
 
   const GECIS_CEREZ = 'lifeos_gecis';
   const GECIS_MS = 560;
-  const GECIS_BEKLE = GECIS_MS + 380, GECIS_ACIK = 1200, GECIS_BULUT_MS = GECIS_BEKLE + 420 + GECIS_ACIK + 460;   // bulutlu sıranın toplamı
+  /* Bulutlu sıra: kapan · bekle · açıl · manzara · kapan · sayfa. GECIS_BULUT_KAP piksel.css .px-bulut i geçişiyle aynıdır. */
+  const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_BEKLE = 120, GECIS_ACIK = 600, GECIS_BULUT_MS = GECIS_BULUT_HAZIR + 3 * GECIS_BULUT_KAP + GECIS_BEKLE + GECIS_ACIK + 60;
   const GECIS_OMUR = 15000;
   const GECIS_MODUL = /^(ays|spi|esp|hkm)$/;
   /* Perdenin ölçüsü ve camı seviye.css .perde--marka ile AYNIDIR; biri
@@ -542,37 +543,57 @@ window.LIFEOS = window.LIFEOS || {};
     const kap = document.createElement('div');
     kap.className = 'lifeos-gecis';
     kap.setAttribute('aria-hidden', 'true');
-    kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
-      + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
     /* LOGO YOK (kullanıcı, 2026-10-18: «geçerken logo yerine italik bir yazıyla hoş
-       geldin»): perde yalnız karttan büyür; selam ve not varılan modülün perdesinde
-       (brand/ortak/karsilama.js) — o modülün notunu yalnız o modül bilir. */
+       geldin»): selam ve not varılan modülün perdesinde (brand/ortak/karsilama.js) —
+       o modülün notunu yalnız o modül bilir. */
     document.body.appendChild(kap);
-    /* Piksel: perde büyük beyaz buluttur, ortada selam ve gidilen modül; modül açılana dek kalır (varışta aynı bulut açılır). */
-    const bulut = !!(L.PIKSEL && L.PIKSEL.bulutKoy);
+    /* Piksel: perde iki yandan gelen büyük beyaz buluttur (resmi CSS'te, piksel.css); ortada selam ve gidilen modül. */
+    const bulut = document.documentElement.getAttribute('data-zemin') === 'piksel';
+    const P = L.PIKSEL;
     if(bulut){
-      L.PIKSEL.bulutKoy(kap);
-      if(L.PIKSEL.manzaraKoy) L.PIKSEL.manzaraKoy(kap);   // manzara bulutun altında: bulut açılınca görünür
+      const b = document.createElement('div');
+      b.className = 'px-bulut'; b.setAttribute('aria-hidden', 'true');
+      b.innerHTML = '<i class="px-bulut__sol"></i><i class="px-bulut__sag"></i>';
+      kap.appendChild(b);
       const y = document.createElement('div'), AD = { ays:'AYS', spi:'SPİ', esp:'ESP', hkm:'Merkez' };
       y.className = 'px-bulut__yazi';
       y.innerHTML = '<div class="px-bulut__kart"><small>' + yz('ortak.animasyon.gecis-selam') + '</small><b>' + AD[o.modul] + '</b><span>' + yz('ortak.animasyon.gecis-' + o.modul) + '</span></div>';
       kap.appendChild(y);
       if(o.url){ try{ const l = document.createElement('link'); l.rel = 'prefetch'; l.href = o.url; document.head.appendChild(l); }catch(e){ /* önceden yükleme yoksa açılış yine olur */ } }
-    } else if(L.PIKSEL && L.PIKSEL.manzaraKoy) L.PIKSEL.manzaraKoy(kap);
+    } else {
+      kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
+        + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
+      if(P && P.manzaraKoy) P.manzaraKoy(kap);
+    }
     void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
     kap.classList.add('is-tam');
-    kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
-    /* Bulutlu sıra (kullanıcı, 2026-11-06): bulut kapanır, açılır (yüklenme manzarası görünür), yeniden kapanır, sonra sayfa değişir.
-       Varış sayfası aynı bulutla açılır ve perde kalkınca bulut iki yana çekilir. Test kendi süresini verir, sıra oynamaz. */
-    const bekle = GECIS_BEKLE, acik = GECIS_ACIK;
-    if(bulut && typeof o.sure !== 'number'){ setTimeout(() => kap.classList.add('is-acik'), bekle); setTimeout(() => kap.classList.remove('is-acik'), bekle + 420 + acik); }
-    const sure = typeof o.sure === 'number' ? o.sure : bulut ? GECIS_BULUT_MS : GECIS_MS + 40;
-    setTimeout(() => {
+    const git = sure => setTimeout(() => {
       gecisCerezYaz(o.modul);
       try{ o.git(); }catch(e){ console.error('Geçiş:', e); }
       /* Sayfa değişmediyse (engellendi, hata) perde kendiliğinden kalkar. */
       setTimeout(() => { if(kap.isConnected){ kap.remove(); gecisAktif = false; } }, 6000);
     }, sure);
+    if(!bulut || typeof o.sure === 'number'){
+      if(!bulut) kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
+      git(typeof o.sure === 'number' ? o.sure : GECIS_MS + 40);
+      return true;
+    }
+    /* Bulutlu sıra (kullanıcı, 2026-11-06): bulut kapanır, açılır (yüklenme manzarası görünür), yeniden kapanır, sonra sayfa değişir.
+       Varış sayfasının ilk boyamasında aynı bulut durur (perde.html, resmi CSS'te): sayfa değişimi görünmez, perde kalkınca bulut iki yana çekilir.
+       Kayma, bulut katmanları hazırlanınca başlar: büyük katmanın ilk çizimi ilk ~300 ms'deki kareleri yutuyordu, bulut «aniden» geliyordu (kare kare ölçüldü, 2026-11-06).
+       Manzara bulutun ardında, kapanınca kurulur: çizimi (100-250 ms) görünür hareketi durdurmaz. Manzara yoksa (seçim sayfası) yalnız kapanır. */
+    const ses = t => { try{ if(L.SES && L.SES.olaySes) L.SES.olaySes(t); }catch(e){ /* ses bilgi taşımaz */ } };
+    setTimeout(() => {
+      kap.classList.add('is-kapali');
+      ses('bulutGel');
+      if(!(P && P.manzaraKoy)){ kap.classList.add('is-kalkis'); git(GECIS_BULUT_KAP + 60); return; }
+      setTimeout(() => {
+        P.manzaraKoy(kap);
+        setTimeout(() => { kap.classList.add('is-acik'); ses('bulutGit'); }, 40);   // manzara bir kare boyansın
+      }, GECIS_BULUT_KAP + GECIS_BEKLE);
+      setTimeout(() => { kap.classList.remove('is-acik'); kap.classList.add('is-kalkis'); ses('bulutGel'); }, 2 * GECIS_BULUT_KAP + GECIS_BEKLE + GECIS_ACIK);
+      git(GECIS_BULUT_MS - GECIS_BULUT_HAZIR);
+    }, GECIS_BULUT_HAZIR);
     return true;
   }
 

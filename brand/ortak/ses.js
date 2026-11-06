@@ -64,7 +64,10 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.ses.tik-sesleri':'Tık sesleri',
   'ortak.ses.ajanlar-ve-king':'Ajanlar ve King',
   'ortak.ses.gecis-ve-sayfa':'Geçiş ve sayfa',
-  'ortak.ses.onay-ve-uyari':'Onay ve uyarı',
+  'ortak.ses.onay-ve-uyari':'Onay, uyarı ve tepkiler',
+  'ortak.ses.sesler':'Sesler',
+  'ortak.ses.basinca-calar':'Basınca çalar; düzeyi yukarıdaki kaydırıcılardan',
+  'ortak.ses.tik-kapali':'Tık sesleri kapalı. Üst çubuktaki ♪ panelinden açılır.',
   'ortak.ses.minik-konusmasi-ve-gidik':'Minik konuşması ve gıdık',
   'ortak.ses.minik-adimlari':'Minik adımları',
   'ortak.ses.king-in-sesi':'King’in sesi',
@@ -606,6 +609,58 @@ window.LIFEOS = window.LIFEOS || {};
     /* Uyarı (hata bildirimi): iki üçgen nota aşağı (A4 → F4); sert değil. */
     uyari:[{ t:0, tur:'ton', dalga:'triangle', f:[440], d:0.14, g:0.2, a:0.004 },
            { t:0.12, tur:'ton', dalga:'triangle', f:[349], d:0.25, g:0.2, a:0.004 }],
+    /* Bulut (kullanıcı, 2026-11-06: «rahatlatıcı geliş gidiş sesi»): 0,7-0,8 sn'lik kaymayla aynı boyda, yumuşak rüzgâr.
+       Gelişte hava yükselir ve iki yarım buluşurken pes bir nefes oturur; gidişte hava açılır, sonunda tek hafif çan kalır. */
+    bulutGel:[{ t:0, tur:'hisirti', f:[260, 720], q:0.6, d:0.9, g:0.2, a:0.5, oda:0.3, nefes:true },
+              { t:0.04, tur:'kece', f:[320, 520], q:0.5, d:0.86, g:0.09, a:0.5, nefes:true },
+              { t:0.5, tur:'ton', dalga:'sine', f:[196, 196], d:0.6, g:0.05, a:0.2, oda:0.25, nefes:true }],
+    bulutGit:[{ t:0, tur:'hisirti', f:[760, 300], q:0.6, d:1.05, g:0.18, a:0.34, oda:0.35, nefes:true },
+              { t:0.02, tur:'kece', f:[560, 300], q:0.5, d:1.0, g:0.08, a:0.36, nefes:true },
+              { t:0.34, tur:'ton', dalga:'sine', f:[523, 523], d:0.8, g:0.035, a:0.12, oda:0.5 },
+              { t:0.46, tur:'ton', dalga:'sine', f:[784, 784], d:0.72, g:0.022, a:0.12, oda:0.5 }],
+    /* TATLI SESLER (kullanıcı, 2026-11-06: «5-6 tane ses var; 10-15 tane güzel, tatlı, eğlenceli ses olsun»). Hepsi gerçek bir olayda
+       çalar (piksel.js tepkiIzle, hareket.js, perde.js, king-gorunum.js), Ayarlar › Ses kartında tek tek dinlenir. */
+    /* Su bardağı: tek damla, yukarı kıvrılan kabarcık ve küçük yankısı. */
+    damla:[{ t:0, tur:'ton', dalga:'sine', f:[380, 1100], d:0.09, g:0.2, a:0.004 },
+           { t:0.1, tur:'ton', dalga:'sine', f:[560, 1250], d:0.07, g:0.07, a:0.004, oda:0.2 }],
+    /* İş işaretlendi: iki küçük nabız notası (B5 → E6), altın gibi. */
+    isaret:[{ t:0, tur:'ton', dalga:'nabiz', f:[988], d:0.05, g:0.06, a:0.004 },
+            { t:0.05, tur:'ton', dalga:'nabiz', f:[1319], d:0.16, g:0.06, a:0.004, oda:0.12 }],
+    /* Liste bitti: yukarı koşan beş nota, sonuncusu kalimba gibi çınlar. */
+    liste:[{ t:0, tur:'ton', dalga:'triangle', f:[523], d:0.08, g:0.15, a:0.004 },
+           { t:0.07, tur:'ton', dalga:'triangle', f:[659], d:0.08, g:0.15, a:0.004 },
+           { t:0.14, tur:'ton', dalga:'triangle', f:[784], d:0.08, g:0.15, a:0.004 },
+           { t:0.21, tur:'ton', dalga:'triangle', f:[1046], d:0.08, g:0.15, a:0.004 },
+           { t:0.28, tur:'tel', f:[1319], d:0.5, g:0.3, a:0.004, parlak:0.5, oda:0.25 }],
+    /* Doğru cevap: iki üçgen nota yukarı (G5 → C6), üstüne tel. */
+    dogru:[{ t:0, tur:'ton', dalga:'triangle', f:[784], d:0.09, g:0.17, a:0.004 },
+           { t:0.08, tur:'ton', dalga:'triangle', f:[1046], d:0.22, g:0.16, a:0.004 },
+           { t:0.08, tur:'tel', f:[1046], d:0.4, g:0.16, a:0.004, parlak:0.4, oda:0.2 }],
+    /* Yanlış cevap: yumuşak «bup-bup» aşağı; azarlamaz. */
+    yanlis:[{ t:0, tur:'ton', dalga:'sine', f:[294, 247], d:0.12, g:0.17, a:0.006 },
+            { t:0.13, tur:'ton', dalga:'sine', f:[247, 196], d:0.18, g:0.15, a:0.006, oda:0.1 }],
+    /* Kayıt kalbi: «pu-pum», iki küçük kalp atışı. */
+    kalp:[{ t:0, tur:'ton', dalga:'sine', f:[220, 300], d:0.09, g:0.17, a:0.006 },
+          { t:0.12, tur:'ton', dalga:'sine', f:[262, 392], d:0.15, g:0.17, a:0.006, oda:0.2 }],
+    /* Silme: kâğıttan «püf», aşağı süzülür (ekrandaki toz gibi). */
+    sil:[{ t:0, tur:'kece', f:[1000, 220], q:0.7, d:0.26, g:0.3, a:0.008 },
+         { t:0.01, tur:'hisirti', f:[1400, 500], q:0.8, d:0.2, g:0.14, a:0.01 }],
+    /* Seviye atlama: dört adım çıkış ve akor; kutlama, bağırmadan. */
+    seviye:[{ t:0, tur:'ton', dalga:'nabiz', f:[392], d:0.09, g:0.07, a:0.004 },
+            { t:0.09, tur:'ton', dalga:'nabiz', f:[523], d:0.09, g:0.07, a:0.004 },
+            { t:0.18, tur:'ton', dalga:'nabiz', f:[659], d:0.09, g:0.07, a:0.004 },
+            { t:0.27, tur:'ton', dalga:'triangle', f:[784], d:0.1, g:0.13, a:0.004 },
+            { t:0.37, tur:'ton', dalga:'triangle', f:[1046], d:0.55, g:0.11, a:0.006, oda:0.25 },
+            { t:0.37, tur:'ton', dalga:'triangle', f:[784], d:0.5, g:0.06, a:0.006 },
+            { t:0.37, tur:'ton', dalga:'triangle', f:[659], d:0.45, g:0.06, a:0.006 }],
+    /* Yeni rozet: dört tel, parıltı gibi yukarı. */
+    rozet:[{ t:0, tur:'tel', f:[659], d:0.4, g:0.28, a:0.004, parlak:0.5 },
+           { t:0.09, tur:'tel', f:[784], d:0.4, g:0.28, a:0.004, parlak:0.5 },
+           { t:0.18, tur:'tel', f:[988], d:0.4, g:0.28, a:0.004, parlak:0.5 },
+           { t:0.27, tur:'tel', f:[1319], d:0.65, g:0.3, a:0.004, parlak:0.5, oda:0.3 }],
+    /* King açıldı: kalimba iki nota (A4 → E5), sakin. */
+    king:[{ t:0, tur:'tel', f:[440], d:0.4, g:0.24, a:0.004, parlak:0.35 },
+          { t:0.11, tur:'tel', f:[659], d:0.55, g:0.24, a:0.004, parlak:0.35, oda:0.25 }],
     /* Gıdık: suda dört kabarcık, her biri biraz daha ince («blup-blup-blip»). */
     gidik:[{ t:0, tur:'ton', dalga:'sine', f:[420, 760], d:0.07, g:0.16, a:0.006 },
            { t:0.1, tur:'ton', dalga:'sine', f:[460, 840], d:0.07, g:0.15, a:0.006 },
@@ -630,7 +685,8 @@ window.LIFEOS = window.LIFEOS || {};
      konuşmasının sesi, sistemdeki tüm sesler»). Her tür bir aileye bağlıdır;
      ailenin düzeyi genel düzeyle çarpılır, 0 olan aile hiç çalmaz. Tercih
      `lifeos.ses.duzey` (animasyon.js TASINAN). King'in sesli okuması 'king'. */
-  const AILE = Object.freeze({ tik:'dokunus', ac:'gecis', kapa:'gecis', sayfa:'gecis', tamam:'onay', uyari:'onay',
+  const AILE = Object.freeze({ tik:'dokunus', ac:'gecis', kapa:'gecis', sayfa:'gecis', bulutGel:'gecis', bulutGit:'gecis', tamam:'onay', uyari:'onay',
+    damla:'onay', isaret:'onay', liste:'onay', dogru:'onay', yanlis:'onay', kalp:'onay', sil:'onay', seviye:'onay', rozet:'onay', king:'onay',
     gidik:'karakter', hirr:'karakter', bla:'karakter', adim:'ortam' });
   const DUZEY_ANAHTAR = 'lifeos.ses.duzey';
   /* GRUPLAR (kullanıcı, 2026-10-29: «genel, ajan, UI seslerini tek seferde kısalım;
@@ -689,6 +745,16 @@ window.LIFEOS = window.LIFEOS || {};
     try{ localStorage.setItem(DUZEY_ANAHTAR, JSON.stringify(d)); }catch(e){ /* depo kapalı: bu sayfada geçerli değil */ }
     return true;
   }
+  /* Sesler kartı (Ayarlar › Ses): her ses adıyla, basınca çalar. */
+  const SES_AD = Object.freeze({ tik:'Dokunuş', ac:'Açma', kapa:'Kapama', sayfa:'Sayfa', bulutGel:'Bulut gelişi', bulutGit:'Bulut gidişi', tamam:'Kaydedildi', uyari:'Uyarı',
+    damla:'Su bardağı', isaret:'İş işaretlendi', liste:'Liste bitti', dogru:'Doğru cevap', yanlis:'Yanlış cevap', kalp:'Kayıt kalbi', sil:'Silme', seviye:'Seviye atlama', rozet:'Yeni rozet', king:'King açıldı',
+    gidik:'Minik gıdık', hirr:'Kızan minik', bla:'Minik sohbeti', adim:'Minik adımı' });
+  function sesListeHtml(){
+    return (tercih.tik ? '' : '<p class="sesliste__not">' + yz('ortak.ses.tik-kapali') + '</p>')
+      + '<div class="sesliste" role="group" aria-label="' + yz('ortak.ses.sesler') + '">' + Object.keys(SES_AD).map(t =>
+        '<button type="button" class="sesliste__ses" data-ses-dinle="' + t + '"' + (tercih.tik ? '' : ' disabled') + ' aria-label="' + kac(SES_AD[t]) + ' sesini dinle">' + SIMGE_CAL + '<span>' + kac(SES_AD[t]) + '</span></button>').join('')
+      + '</div>';
+  }
   const yuzde = y => y ? '%' + y : 'Kapalı';
   function duzeySeciciHtml(){
     const d = duzeyler();
@@ -704,7 +770,7 @@ window.LIFEOS = window.LIFEOS || {};
       + Object.keys(GRUP).filter(k => GRUP[k] === g).map(satir).join('') + '</details></div>';
     return '<div class="sesduzey" role="group" aria-label="Ses düzeyleri">' + satir('genel') + grup('arayuz') + grup('ajan') + '</div>';
   }
-  let sonDokunus = -1, sonOnay = -9;
+  let sonDokunus = -1, sonOnay = -9, sonTepki = -9;
   /* Göç (bir kez): eski «Minik sesleri» aç/kapa düğmeleri kalktı; kapalı olan
      aile kaydırıcıda «Kapalı» görünsün, yeniden açılabilsin. */
   try{
@@ -811,8 +877,14 @@ window.LIFEOS = window.LIFEOS || {};
     return zincir;
   }
 
-  function zarf(c, g, t, tepe, yuksel, sure){
+  function zarf(c, g, t, tepe, yuksel, sure, nefes){
     g.gain.setValueAtTime(0.0001, t);
+    /* Nefes: düz doğrusal çan. Üstel eğri uzun seste çoğu süre duyulmaz, sonra ~150 ms'de patlar (ölçüldü); rüzgâr böyle gelmez. */
+    if(nefes && g.gain.linearRampToValueAtTime){
+      g.gain.linearRampToValueAtTime(tepe, t + yuksel);
+      g.gain.linearRampToValueAtTime(0.0001, t + sure);
+      return;
+    }
     g.gain.exponentialRampToValueAtTime(tepe, t + Math.max(0.001, yuksel));
     g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
   }
@@ -828,7 +900,7 @@ window.LIFEOS = window.LIFEOS || {};
   function katman(c, z, t, k, perde){
     const f0 = k.f[0] * perde, f1 = (k.f[1] || k.f[0]) * perde;
     const g = c.createGain();
-    zarf(c, g, t, k.g, k.a || 0.003, k.d);
+    zarf(c, g, t, k.g, k.a || 0.003, k.d, k.nefes);
     g.connect(z.hedef);
     if(k.oda && z.oda){ const s = c.createGain(); s.gain.value = k.oda; g.connect(s); s.connect(z.oda); }
     let kaynak;
@@ -842,6 +914,7 @@ window.LIFEOS = window.LIFEOS || {};
       if(!z.gurultu || !c.createBufferSource) return;
       kaynak = c.createBufferSource();
       kaynak.buffer = z.gurultu;
+      kaynak.loop = true;   // süre tampondan uzun olabilir: tampon biter bitmez kesilmesin
       const b = suzgec(c, k.tur === 'kece' ? 'lowpass' : 'bandpass', Math.min(TAVAN, f0), k.q == null ? 1 : k.q, t);
       if(b){
         if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(Math.min(TAVAN, f1), t + k.d);
@@ -954,9 +1027,14 @@ window.LIFEOS = window.LIFEOS || {};
          sesinin ardından gelen ortam sesi çalmaz; onay ve uyarı 1,5 sn'de bir. */
       if(tur === 'sayfa' && simdi - sonDokunus < .15) return false;
       if(aile === 'ortam' && simdi - sonDokunus < .4) return false;
-      if(aile === 'onay' && simdi - sonOnay < 1.5 && simdi >= sonOnay) return false;
+      const bildirim = tur === 'tamam' || tur === 'uyari';
+      if(bildirim && simdi - sonOnay < 1.5 && simdi >= sonOnay) return false;
+      /* Tepki sesi (damla, işaret, kalp…) o olayın sesidir: ardından gelen aç/kapa ya da «kaydedildi» aynı olayın ikinci sesi olurdu. */
+      if((tur === 'ac' || tur === 'kapa') && simdi - sonTepki < .05 && simdi >= sonTepki) return false;
+      if(tur === 'tamam' && simdi - sonTepki < .8 && simdi >= sonTepki) return false;
       if(aile === 'dokunus' || aile === 'gecis') sonDokunus = simdi;
-      if(aile === 'onay') sonOnay = simdi;
+      if(bildirim) sonOnay = simdi;
+      else if(aile === 'onay') sonTepki = simdi;
       sonCal[tur] = simdi;
       const z0 = zincirKur(c);
       const yol = cikis => {
@@ -983,6 +1061,17 @@ window.LIFEOS = window.LIFEOS || {};
       return true;
     }catch(e){ return false; }
   }
+  /* Dokunuşla gelmeyen, ana bağlı ses (bulut). Askıdaki bağlamda zamanlanan ses, bağlam ilk dokunuşta açılınca alakasız
+     bir anda çalar: bu yüzden bağlam kısa sürede çalışmıyorsa (tarayıcı izin vermedi) o ses atlanır. */
+  function olaySes(tur){
+    const c = sesBaglami(true);
+    if(!c) return false;
+    if(c.state === 'running' || !c.resume) return tik(tur, false);
+    let gec = false;
+    setTimeout(() => { gec = true; }, 200);
+    Promise.resolve(c.resume()).then(() => { if(!gec && c.state === 'running') tik(tur, false); }).catch(() => {});
+    return false;
+  }
   function tikAc(v){
     tercihYaz({ tik:!!v });
     if(!v) baglamKapat();
@@ -994,7 +1083,7 @@ window.LIFEOS = window.LIFEOS || {};
     baglam = null;
     zincir = null;
     sonBitis = 0;
-    sonDokunus = -1; sonOnay = -9;   // yeni bağlamın saati sıfırdan başlar
+    sonDokunus = -1; sonOnay = -9; sonTepki = -9;   // yeni bağlamın saati sıfırdan başlar
     Object.keys(sonCal).forEach(k => delete sonCal[k]);
   }
 
@@ -1020,7 +1109,7 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('click', e => {
       if(!tercih.tik || !gercekMi(e)) return;
       const el = e.target && e.target.closest ? e.target.closest(TIKLANAN) : null;
-      if(!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+      if(!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('data-ses-dinle')) return;
       const basili = el.getAttribute('aria-pressed') || (el.getAttribute('role') === 'switch' ? el.getAttribute('aria-checked') : null);
       if(basili === 'true') tik('kapa');
       else if(basili === 'false') tik('ac');
@@ -1062,6 +1151,8 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
+      const dinle = t.closest('[data-ses-dinle]');
+      if(dinle){ sonDokunus = -1; sonOnay = -9; sonTepki = -9; tik(dinle.getAttribute('data-ses-dinle'), true); return; }
       const d = t.closest('.ust__ses');
       if(d){
         e.preventDefault();
@@ -1158,8 +1249,8 @@ window.LIFEOS = window.LIFEOS || {};
     ANAHTAR, TURLER,
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
-    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER, KAYITLI,
-    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, SESSIZ_ANAHTAR, sessiz, sessizMi, SUSTUR_ANAHTAR, sustur, susturBitis,
+    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, olaySes, devret, SESLER, KAYITLI,
+    AILE, SES_AD, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, sesListeHtml, SESSIZ_ANAHTAR, sessiz, sessizMi, SUSTUR_ANAHTAR, sustur, susturBitis,
     chime:ad => tik(/bitti|kapa|dur/i.test(String(ad || '')) ? 'kapa' : 'ac'),
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik, _onKur:onKur,
   });

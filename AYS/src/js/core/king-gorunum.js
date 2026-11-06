@@ -934,6 +934,7 @@ window.LIFEOS.PARCA.yazilar({
     if(KI.L.KABUK && typeof KI.L.KABUK.kenarSakinlestir === 'function'){ try{ KI.L.KABUK.kenarSakinlestir(); }catch(e){ /* kabuk yok */ } }
     /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
+    try{ if(KI.L.SES) KI.L.SES.tik('king', false); }catch(x){ /* ses yok */ }
     const gorunen = window.visualViewport;
     if(gorunen){   // aynı işlev ikinci kez eklenmez
       gorunen.addEventListener('resize', gorunenAlanaOtur);

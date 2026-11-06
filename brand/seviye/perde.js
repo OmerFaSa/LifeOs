@@ -160,6 +160,10 @@ __NS__.Perde = (function(){
        enAz    videosuz perde en az kaç ms dursun (varsayılan 4200)
        bitti   perde kapanınca çağrılır
      ================================================================ */
+  /* Ses bilgi taşımaz: ses.js yoksa ya da kapalıysa perde aynı çalışır. Dokunuşla gelmez (brand/ortak/ses.js olaySes). */
+  function sesCal(tur){
+    try{ var S = window.LIFEOS && window.LIFEOS.SES; if(S && S.olaySes) S.olaySes(tur); }catch(e){}
+  }
   function baglan(perde, secenekler){
     secenekler = secenekler || {};
     if(!perde || perde.__perdeBagli) return null;
@@ -216,6 +220,9 @@ __NS__.Perde = (function(){
       try{ if(v){ v.pause(); } if(ortam){ ortam.pause(); } }catch(e){}
       perde.classList.add('perde--kapaniyor');
       kaydirmaSerbest();
+      /* Bulutlu karşılama çekilirken sayfa görünür; perde bulut tam çıkmadan kalkarsa bulut ortada kesilir (piksel.css). */
+      var bulut = perde.querySelector('.px-bulut');
+      if(bulut) sesCal('bulutGit');
       setTimeout(function(){
         if(perde.parentNode) perde.parentNode.removeChild(perde);
         if(typeof secenekler.bitti === 'function'){
@@ -225,7 +232,7 @@ __NS__.Perde = (function(){
            `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
            bakıyor. */
         siradakini();
-      }, 420);
+      }, bulut ? 840 : 420);
     }
 
     /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:
@@ -858,6 +865,7 @@ __NS__.Perde = (function(){
         kapat:function(){}, sirada:false };
     }
 
+    sesCal('seviye');
     var sec = {
       sinif:'perde--rutbe' + (yukselme.yeniKademe ? ' perde--yeni-kademe' : ''),
       baslik:(yukselme.yeniKademe ? 'Yeni kademe: ' : 'Yeni rütbe: ')
@@ -931,6 +939,7 @@ __NS__.Perde = (function(){
         kapat:function(){}, sirada:false };
     }
 
+    sesCal('rozet');
     var sec = {
       sinif:'perde--rozet',
       baslik:'Yeni rozet: ' + (rozet.ad || rozet.kod),

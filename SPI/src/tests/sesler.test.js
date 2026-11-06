@@ -85,6 +85,100 @@
     }));
   });
 
+  /* Kullanıcı, 2026-11-06: «5-6 tane ses var; 10-15 tane güzel, tatlı, eğlenceli ses olsun», «rahatlatıcı geliş gidiş sesi».
+     Kulakla değil ölçüyle: her ses gerçekten çizilir (OfflineAudioContext); tepe, kırpılma, süre ve bulutun yumuşak başlayıp sönmesi. */
+  describe('Ses — tatlı sesler ölçülür', () => {
+    const S = () => window.LIFEOS.SES, SR = 44100;
+    async function ciz(tur){
+      const off = new OfflineAudioContext(2, SR * 3, SR);
+      off.resume = () => Promise.resolve();
+      off.decodeAudioData = undefined;   // kayıt yolu ayrı sınanır; burada sentez
+      S()._ortam({ AudioContext:function(){ return off; }, sentetik:true, cevrimici:() => true, fetch:() => Promise.resolve({ ok:true, json:() => [] }) });
+      S()._sifirla();
+      S().tikAc(true);
+      const caldi = S().tik(tur, true, { perde:1 });
+      const r = await off.startRendering(), v = r.getChannelData(0);
+      let tepe = 0, ilk = -1, son = -1;
+      for(let i = 0; i < v.length; i++){ const a = Math.abs(v[i]); if(a > tepe) tepe = a; if(a > 0.00316){ if(ilk < 0) ilk = i; son = i; } }   // -50 dB
+      const rms = (a, b) => { let t = 0; for(let i = a; i < b; i++) t += v[i] * v[i]; return Math.sqrt(t / Math.max(1, b - a)); };
+      return { caldi, tepe, sure:(son - ilk) / SR, rms, ilk, v };
+    }
+    it('en az 15 ses; hepsinin adı ve ailesi var; Ayarlar kartında tek tek dinlenir', () => {
+      const t = Object.keys(S().SESLER);
+      expect(t.length >= 15).toBe(true);
+      t.forEach(x => { expect(!!S().AILE[x]).toBe(true); expect(!!S().SES_AD[x]).toBe(true); });
+      S()._sifirla(); const vardi = S().tercih().tik;
+      try{
+        S().tikAc(true);
+        const d = document.createElement('div'); d.innerHTML = S().sesListeHtml();
+        expect(Array.from(d.querySelectorAll('[data-ses-dinle]')).map(b => b.getAttribute('data-ses-dinle')).sort()).toEqual(t.slice().sort());
+        S().tikAc(false);
+        d.innerHTML = S().sesListeHtml();
+        expect(d.querySelector('[data-ses-dinle]').disabled).toBe(true);   // ses kapalıyken dinlenmez, kartta söylenir
+        expect(!!d.querySelector('.sesliste__not')).toBe(true);
+      }finally{ S().tikAc(vardi); S()._sifirla(); }
+    });
+    it('her ses: çalar, kırpılmaz, duyulur, uzamaz', async () => {
+      try{
+        for(const tur of Object.keys(S().SESLER)){
+          const o = await ciz(tur);
+          if(!o.caldi || o.tepe >= 0.99 || o.tepe < 0.008 || o.sure > 1.6) throw new Error(tur + ' tepe ' + o.tepe.toFixed(3) + ' süre ' + o.sure.toFixed(2));
+        }
+      }finally{ S()._ortam(null); S()._sifirla(); }
+    });
+    it('bulut sesi: kaymayla aynı boyda, yumuşak başlar, ani kesilmez', async () => {
+      try{
+        for(const tur of ['bulutGel', 'bulutGit']){
+          const o = await ciz(tur), pen = Math.floor(SR * 0.05);
+          let en = 0, enYer = 0;
+          for(let i = o.ilk; i + pen < o.v.length; i += pen){ const r = o.rms(i, i + pen); if(r > en){ en = r; enYer = i; } }
+          expect(o.sure > 0.55 && o.sure < 1.3).toBe(true);
+          expect(o.rms(o.ilk, o.ilk + pen) < en * 0.5).toBe(true);                       // ilk 50 ms tepenin yarısından az: «aniden gelmez»
+          expect((enYer - o.ilk) / SR > 0.15).toBe(true);
+          const sonPen = o.ilk + Math.floor(SR * o.sure);
+          expect(o.rms(sonPen - pen, sonPen) < en * 0.25).toBe(true);                    // sonu sönerek biter: «aniden kesilmez»
+        }
+      }finally{ S()._ortam(null); S()._sifirla(); }
+    });
+    it('ses kapalıyken çalmaz; askıdaki bağlamda (tarayıcı izin vermedi) ses sonraya birikmez', async () => {
+      let kurulan = 0, cal = 0;
+      const param = () => ({ value:0, setValueAtTime(){}, exponentialRampToValueAtTime(){} }), dugum = o => Object.assign({ connect(){ return {}; } }, o);
+      function Baglam(){ kurulan++; this.state = 'suspended'; this.currentTime = 0; this.destination = {}; this.sampleRate = 22050;
+        this.resume = () => new Promise(() => {});   // tarayıcı dokunuş bekliyor: hiç çözülmez
+        this.createGain = () => dugum({ gain:param() }); this.createOscillator = () => dugum({ frequency:param(), start(){ cal++; }, stop(){} }); }
+      S()._ortam({ AudioContext:Baglam, sentetik:true, cevrimici:() => true, fetch:() => Promise.resolve({ ok:true, json:() => [] }) });
+      S()._sifirla();
+      const vardi = S().tercih().tik;
+      try{
+        S().tikAc(false);
+        expect(S().olaySes('bulutGel')).toBe(false);
+        expect(kurulan).toBe(0);                                                         // kapalıyken bağlam hiç kurulmaz
+        S().tikAc(true);
+        expect(S().olaySes('bulutGit')).toBe(false);
+        expect(cal).toBe(0);
+      }finally{ S().tikAc(vardi); S()._ortam(null); S()._sifirla(); }
+    });
+    it('bir olay bir ses: tepki sesinin ardından aç/kapa ve «kaydedildi» çalmaz; arada uzun süre varsa çalar', () => {
+      const param = () => ({ value:0, setValueAtTime(){}, linearRampToValueAtTime(){}, exponentialRampToValueAtTime(){} }), dugum = o => Object.assign({ connect(){ return {}; } }, o);
+      let saat = 1;
+      function Baglam(){ this.state = 'running'; Object.defineProperty(this, 'currentTime', { get:() => saat }); this.destination = {}; this.sampleRate = 22050;
+        this.createOscillator = () => dugum({ frequency:param(), start(){}, stop(){} }); this.createGain = () => dugum({ gain:param() }); this.resume = () => Promise.resolve(); }
+      S()._ortam({ AudioContext:Baglam, sentetik:true, cevrimici:() => true, fetch:() => Promise.resolve({ ok:true, json:() => [] }) });
+      S()._sifirla();
+      const vardi = S().tercih().tik;
+      try{
+        S().tikAc(true);
+        expect(S().tik('isaret')).toBe(true);
+        expect(S().tik('ac')).toBe(false);
+        expect(S().tik('tamam')).toBe(false);
+        saat += 1;
+        expect(S().tik('tamam')).toBe(true);
+        saat += 0.1;
+        expect(S().tik('isaret')).toBe(true);   // tepkiler üst üste gelebilir: art arda tiklenen iş sessiz kalmaz
+      }finally{ S().tikAc(vardi); S()._ortam(null); S()._sifirla(); }
+    });
+  });
+
   describe('Ses — kayıtlar', () => {
     const TURLER = ['adim'];
     it('tek kayıt (adım) var ve gerçek WAV (RIFF … WAVE, 22 050 Hz mono)', () => {

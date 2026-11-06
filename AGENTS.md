@@ -179,6 +179,8 @@ node tools/css_onemli.js             # her !important'i olcer: gerekli, gereksiz
 node tools/parca_kanit.js --durum     # kac ekran, blok, komut, yazi, bilgi parcaya gecti
 node tools/piksel_denetim.js          # temaya uymayan izler: bulaniklik, bulanik golge, gecis, soluk yazi, yapisik serit ve yazi
 python3 tools/piksel_rakam.py --denetle  # gomulu rakam yazi tipi cizimle ayni mi
+python3 tools/piksel_bulut.py --denetle  # gecis perdesinin bulut resmi cizimle ayni mi
+node tools/bulut_gecis.js             # uc modul arasi gercek gecis, iki yonde: bulut ilk karede yerinde, sicramaz, ortada kesilmez; ses kapaliyken ve azaltilmis harekette sessiz (once build.py)
 node tools/giris_sayfa_test.js        # giris ve Gun sayfasi gercekten aciliyor mu (modul denetimleri bunlari acmaz)
 node tools/parca_tembel_test.js       # tembel veri (parcalar.txt [tembel]): dist kaynak surumle ayni, acilista calismiyor (once build.py)
 node tools/mobil_tara.js SPI         # telefon/tablet: dokunmatik, yatay, King bolumleri (AYS, ESP de; modul basina ~2 dk)
