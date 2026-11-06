@@ -20218,6 +20218,12 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:20px 16px; gap:16px; }
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin:0 16px 16px; }
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king > div{ padding:12px 16px; }
+  /* Telefonda pencere tam ekran: kenar boşluğu okuma alanından çalıyordu, çerçeve de ekrandan taşıyordu. */
+  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__kutu{ inset:0; width:100%; height:100dvh;
+    transform:none; border:0; border-radius:0; box-shadow:none;
+    padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+  /* Yedi sekme eşit paylaşır: sonuncusu yarım kesilmez. */
+  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is{ flex:1 1 0; width:auto; min-width:0; margin:0; }
 }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
@@ -31241,7 +31247,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'9df61c9b', at:'2026-11-05 22:51', dirty:false };
+ESP.BUILD = { id:'fc5f1770', at:'2026-11-06 10:01', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -44098,6 +44104,8 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.sistem-yeniden-bak':'Yeniden kontrol et',
   'ortak.hesap.sistem-guncellendi':'Sistem güncellendi',
   'ortak.hesap.ev-agini-ac':'Ev ağını aç',
+  'ortak.hesap.her-yerden-not':'Telefon ve tablet evden uzakta da bu bilgisayara ve King’e bağlanır. Tailscale gerekir; bilgisayar açık kalmalı.',
+  'ortak.hesap.her-yerden-ac':'Her yerden erişimi aç',
   'ortak.hesap.ev-agi-telefon-tablet':'Telefon ve tablet bu bilgisayara bağlanabilsin. Veri yalnız evdeki ağda dolaşır.',
   'ortak.hesap.qr-tek-adim':'Yeni cihazın kamerasıyla QR’ı okut; sertifikası kurulunca hesabına kendiliğinden bağlanır.',
   'ortak.hesap.hesap-ve-esitleme':'Hesap ve eşitleme',
@@ -44840,6 +44848,7 @@ window.LIFEOS.HESAP = (function(){
     hatirla(v.kullanici);
     kapiKapat();
     cipTazele();
+    Promise.resolve().then(merkezBagla).catch(() => null);
   }
   /* Sunucudaki profil (başka cihazda değişmiş olabilir) çereze iner. */
   function profilYaz(k){
@@ -45696,6 +45705,37 @@ window.LIFEOS.HESAP = (function(){
     sistemZaman = ortam.zamanla(tur, SISTEM_ARALIK);
   }
   async function evAgiAc(){ return api('/api/hesap/ev-agi-ac', {}); }
+  async function uzakAc(){ return api('/api/hesap/uzak-ac', {}); }
+
+  /* Her yerden erişim (sistem/uzak.py): Merkez'in adresi ve jetonu elle girilmez. Özel ağ adresinden
+     açan cihaz Tailscale kimliğiyle alır (hesap gerekmez), uygulama admin hesabıyla. Oturum başına
+     bir deneme; kapalı ya da ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
+  let merkezDenenen = null;
+  async function merkezBagla(){
+    const o = oturum(), b = ayar && ayar.hkm && ayar.hkm();
+    const deneme = (o && o.j) || 'ozel-ag';
+    if(!b || ornekMi() || pcMi() || merkezDenenen === deneme) return false;
+    const a = b.settings() || {};
+    if(a.token && /^https:/i.test(a.url || '') && a.lastStatus !== 401) return false;
+    const ozelAg = /\.ts\.net$/i.test(ortam.konum().hostname || '');
+    if(!ozelAg && (!o || o.r !== 'admin')) return false;
+    merkezDenenen = deneme;
+    let v;
+    try{
+      if(ozelAg){
+        const r = await ortam.fetch('/api/uzak/merkez', { method:'POST', cache:'no-store', headers:{ 'X-LifeOS':'hesap' } });
+        v = r.ok ? await r.json() : null;
+      }else v = await api('/api/hesap/merkez', {});
+    }catch(e){ return false; }
+    if(!v || !v.url || !v.token) return false;
+    await b.save({ url:v.url, token:v.token, enabled:true, lastStatus:null });
+    /* Uygulama ev ağı adresiyle girmiş olabilir: her yerde geçen adrese geçer. */
+    if(o && ortam.yerelUygulama() && v.adres && o.s !== v.adres){
+      cerezYaz(CEREZ, Object.assign({}, o, { s:v.adres }));
+      cerezYaz(SUNUCU, v.adres);
+    }
+    return true;
+  }
   async function yedekDurum(){ return api('/api/hesap/yedekler'); }
   async function yedekle(){ return api('/api/hesap/yedekle', {}); }
   async function yedekAyar(ikinci){ return api('/api/hesap/yedek-ayar', { ikinci }); }
@@ -46564,6 +46604,8 @@ window.LIFEOS.HESAP = (function(){
           + (qr ? ('<span>' + yz('ortak.hesap.qr-tek-adim') + '</span>') : '')])
         + (!ev && pcMi() && kim().r === 'admin'
           ? '<p class="hesap__not">' + yz('ortak.hesap.ev-agi-telefon-tablet') + '</p><button type="button" class="hesap__ana hesap__tam" data-hesap="ev-agi-ac">' + yz('ortak.hesap.ev-agini-ac') + '</button>' : '')
+        + (pcMi() && kim().r === 'admin'
+          ? '<p class="hesap__not">' + yz('ortak.hesap.her-yerden-not') + '</p><button type="button" class="hesap__ana hesap__tam" data-hesap="uzak-ac">' + yz('ortak.hesap.her-yerden-ac') + '</button>' : '')
         + '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.vazgec'), eylem:'bag-vazgec', sinif:'is-tehlike' }) + '</ul>'
         + ('<p class="hesap__not">' + yz('ortak.hesap.kod-tek-kullanimlik-baglanan') + '</p>');
     },
@@ -47354,6 +47396,9 @@ window.LIFEOS.HESAP = (function(){
         yz('ortak.hesap.lifeos-yedek-kodlari') + (o.a || '') + ')\r\nHer biri girişi bir kez açar.\r\n\r\n' + y.join('\r\n') + '\r\n', 'text/plain')).catch(() => {});
     }else if(ad === 'sistem-bak'){
       merkezIs(async () => { const v = await sistemDurum(true); if(merkez) merkez.sistem = v; return ''; });
+    }else if(ad === 'uzak-ac'){
+      is.disabled = true;
+      merkezIs(async () => (await uzakAc()).mesaj);
     }else if(ad === 'ev-agi-ac'){
       is.disabled = true;
       merkezIs(async () => (await evAgiAc()).mesaj);
@@ -47621,6 +47666,7 @@ window.LIFEOS.HESAP = (function(){
       }else if(giris && kapiAcikMi()) kapiKapat(false);
       if(giris) girisHazir();
       if(giris && oturum()) uyarilar().catch(() => null);  // söz 22: çipte nokta
+      merkezBagla().catch(() => null);
       return esitle();
     }).catch(e => { if(giris) girisHazir(); console.error('Hesap:', e); });
     if(araId == null && typeof setInterval === 'function'){
@@ -47667,7 +47713,7 @@ window.LIFEOS.HESAP = (function(){
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
     bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
-    _ortam:ortam, _sifirla, _istek:istek, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
+    _ortam:ortam, _sifirla, _istek:istek, _merkezBagla:() => { merkezDenenen = null; return merkezBagla(); }, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
   };
 })();
@@ -58138,7 +58184,7 @@ window.LIFEOS.KING_IC = {};
     { es:new RegExp(B + '(besin|yemek|öğün|kahvaltı|yedim|yiyeceğim)'), modul:'spi', route:'meals', cevap:yz('ortak.king.afiyet-olsun') },
     { es:new RegExp(B + '(deneme)'), modul:'ays', route:'exams', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(test|soru)'), modul:'ays', route:'solve', cevap:yz('ortak.king.kolay-gelsin') },
-    { es:new RegExp(B + '(konu|ders)'), modul:'ays', route:'subjects', cevap:yz('ortak.king.kolay-gelsin') },
+    { es:new RegExp(B + '(konu(?!ş)|ders)'), modul:'ays', route:'subjects', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(tekrar|kart)'), modul:'ays', route:'cards', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(dil|ingilizce|almanca|fransızca|kelime)'), modul:'esp', route:'lang', cevap:yz('ortak.king.kolay-gelsin') },
     { es:new RegExp(B + '(kitap|okuma|okuyacağım)'), modul:'esp', route:'library', cevap:yz('ortak.king.keyifli-okumalar') },
@@ -58677,7 +58723,8 @@ window.LIFEOS.KING_IC = {};
     let en = null, uzun = 0;
     const adli = (String(t).match(MODUL_SOZ) || []).map(x => x.trim()).filter((m, i, a) => a.indexOf(m) === i);
     SAYFALAR.forEach(s => (adli.length === 1 && s.modul !== adli[0] ? [] : s.es).forEach(e => {
-      if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(t)) return;
+      /* «konu» sözcük başıyla «konuşmak»a da uyuyordu: «seninle konuşabiliyor muyum» sayfa açıyordu. */
+      if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (e === 'konu' ? '(?!ş)' : '')).test(t)) return;
       const puan = e.length + (KI.ayar && s.modul === KI.ayar.modul ? 0.5 : 0);   // eşitlikte bulunulan modül
       if(puan > uzun){ uzun = puan; en = s; }
     }));
@@ -60333,7 +60380,8 @@ window.LIFEOS.PARCA.yazilar({
   const SELAM = /^(merhaba|merhabalar|selam|selamlar|sa|slm|mrb|hey|hi|hello|naber|nbr|nasılsın|nasilsin|ne haber|günaydın|gunaydin|iyi (akşamlar|aksamlar|geceler|günler|gunler|sabahlar)|hayırlı (sabahlar|günler)|king)[\s!.,?]*$/;
   function cevapGibi(metin){
     const t = String(metin || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
-    if(t.length < 2 || SELAM.test(t) || /\?\s*$/.test(t)) return false;
+    /* İşaretsiz soru da cevap değildir: «seninle konuşabiliyor muyum» en sevdiği yemek diye yazılıyordu. */
+    if(t.length < 2 || SELAM.test(t) || KI.soruMu(t)) return false;
     return true;
   }
   const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;
@@ -122328,7 +122376,7 @@ ESP.App = (function(){
          ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
-        window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
+        window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, hkm:() => ESP.Beacon, kesilebilir:sihirbaz,
           /* Kısayollar'dan gelen satır (hesap.js söz 20): ESP'nin
              ayrıştırıcısı okur, Onaylar'a teklif olur; ölçüm onaysız yazılmaz. */
           gelen:async oge => {
