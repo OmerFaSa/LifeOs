@@ -1,21 +1,20 @@
 # Yarım kalan işler
 
-Son güncelleme: 2026-11-06. Bu dosya bir sonraki oturum içindir: önce bunu oku, bitirdiğini sil.
-Oturumların kendi notları kendi dallarındadır: `belgeler/ekip/yarim/<oturum>.md`.
+Son güncelleme: 2026-11-06 (akşam). Bu dosya bir sonraki oturum içindir: önce bunu oku, bitirdiğini sil.
+Oturumların kendi notları: `belgeler/ekip/yarim/<oturum>.md`.
 
-## Son durum (2026-11-06)
+## Son durum
 
-Tablodaki iki dal da `main`'de ve bilgisayardaki kopyada (`573560dd`). Birim, duman, uçtan uca temiz; birleşme sonrası `mobil_tara` ve `layoutcheck` koşmadı: önce bunları koş. Gerçek telefonda hız ve King denenmedi; dalların kendi notları `belgeler/ekip/yarim/` altında.
+Her yerden erişim, telefon hızı ve öğrenme motoru `main`'de. Birleşme sonrası `mobil_tara` ve `layoutcheck`
+üç modülde temiz (2026-11-06). Kalan iş yalnız gerçek cihazda denemek.
 
-## Oturumlar
+Sürüyor (kendi dallarında, main'e almadan önce kullanıcıya soracaklar):
+- Piksel sanatı: manzara, ofis ve apartmanların kalitesi (`local_de8da877-36fc-42be-b656-d645e024b8d4`).
+- Öğretme altyapısı: `kavrat.js` ile öğrenme motorunu tek deneyimde birleştirme (`local_c18910ec-8efb-4b45-af1f-32c2865c85fb`).
 
-| Oturum | Dal | Durum | Yapılacak |
-|---|---|---|---|
-| Her yerden erişim (`local_28a9a5f6-edf7-4d03-aea1-39a05b4ec25d`) | `claude/her-yerden-erisim-7242be` (`2b09db31`) | Kullanıcı «main'e al» dedi. Yöneticinin çalışma klasöründe birleştirildi (`8ead3deb`), derlemeler üretildi, denetimler sürüyordu | `.claude/worktrees/yasayan-apartman-0339d0` klasörüne bak: derlemeleri commit'le, §2 denetimleri (entegre dahil) temizse `git push origin HEAD:main`. `main`'de değilse iş bitmemiştir |
-| Telefon ve tablette sayfa hızı (`local_50507126-4efd-4c93-b99e-50a8358f4f3d`) | `claude/telefon-hiz-f459e1` (`92d1ae4b`) | Bitti, `main`'e ALINMADI: kullanıcıdan söz yok. Bildirilen: yavaş 4G taklidinde tekrar açılış 37,8 sn'den 0,65 sn'ye; gerçek adreste denenmedi, yönetici doğrulamadı | Kullanıcı «al» derse birleştir. Her yerden erişimle çakışır: `brand/ortak/sw.js` (ve kopyaları), `SPI/src/js/data/build.js`. `sw.js`'i ikisinin davranışını koruyarak elle çöz, sonra `tools/ortak.py --yay`, üç `build.py`, denetimler. Notu dalda: `belgeler/ekip/yarim/telefon-hiz.md` |
-| Öğrenme motoru (`local_73d2870f-f5b5-4932-87aa-d77510db2d40`) | `main`'de (`660751a1`) | Bitti | Telefonda ve King üzerinden model düğmeleri denenmedi; ayrıntı o oturumun son raporunda |
-
-Tam dal adını `git branch -a --no-merged origin/main` verir.
+Sahipsiz dal: `claude/yasayan-apartman-0339d0` (`d242341f`, 2026-11-05) main'e hiç girmemiş başka bir «iş binaları
+apartman değil» denemesi; main'deki sürüm `e48116b4`. Birleştirilmeyecek, fikirleri piksel sanatı oturumuna verildi.
+O oturum bitince dal silinebilir (kullanıcıya sor).
 
 ## Alınan karar
 
@@ -30,12 +29,18 @@ Bilgisayarda taklitle ölçüldü, cihazda görülmedi:
 2. Küçük King penceresi klavyeyle hiç ölçülmedi.
 3. Samsung ve tablet hiç denenmedi (`https://desktop-alntlh5.tailaff979.ts.net:5183`). Tablet modeli bilinmiyor.
 4. Bilgisayar kapalıyken telefondan açılış ve Ana Ekrana Ekle ile çevrimdışı açılış doğrulanmadı.
+5. Telefon hızı gerçek adreste (yavaş 4G'de tekrar açılış, taklitte 37,8 sn'den 0,65 sn'ye) ölçülmedi.
+6. Öğrenme motorunun model düğmeleri telefonda ve King üzerinden denenmedi.
+7. Açılış filmi yeni bir hesapla ilk girişte görülmedi.
 
 ## Küçük açıklar
 
-- **Çalışan kopya bir commit geride:** `%USERPROFILE%\LifeOS-Sistem` `adbe59a7`'de; güncelleyici düzeltmesi `e7c11529`. Sonraki «Güncelle» alır, sunucu dosyası değiştiği için yeniden başlatır. Düzeltme yeni sürüm açılana dek çalışmaz.
-- **Güncelleme yarım kalma sebebi:** 2026-11-06'da `git merge` `SPI/dist/spi.html`'i silemedi («Invalid argument»), muhtemelen dosya o an okunuyordu. Sebep kanıtlanmadı. Yarım kalan iş artık kendiliğinden tamamlanıyor, ama ilk hata önlenmiş değil.
-- **`AYS/src/js/core/quiz.js` depoda CRLF.** Zararsız hâle getirildi, dosya normalleştirilmedi. Başka CRLF dosya var mı `git ls-files --eol` ile bakılmadı.
 - **`tools/mobil_tara.js` CI'da değil** (modül başına ~2 dk) ve ekranları veri girilmemiş hâlde gezer. Dik 390 ve 820'de veriyle ölçümü yine `layoutcheck` yapar; yatayda veriyle ölçüm yok.
 - **Oyun açıkken denetim yanıltıcı:** VALORANT açıkken SPİ birim testlerinde 266 kırmızı çıktı, oyun kapanınca aynı kodla 0. Sebep büyük ihtimalle bellek, kanıtlanmadı. Oyun açıkken model çağrıları da 60 sn sınırına takıldı.
-- **LifeOS Windows açılışında başlamıyor.** Kullanıcı sunucuyu bazen bilerek kapatıyor: kapalı görürsen sormadan açma. Kendiliğinden başlatma seçeneği Her yerden erişim oturumunun işi.
+- **LifeOS Windows açılışında kendiliğinden başlamaz, seçenek var:** Hesap › «Bilgisayar açılınca LifeOS başlasın» (`sistem/uzak.py` `acilis_ayarla`). Varsayılan kapalı; kullanıcı sunucuyu bazen bilerek kapatıyor: kapalı görürsen sormadan açma.
+
+## Kapananlar (2026-11-06)
+
+- Güncelleme «Invalid argument» ile yarıda kalırsa (Windows o an okunan dosyayı silemez) artık aynı koşuda tamamlanır (`sistem/guncelle.py`, test `HKM/tests/test_guncelle.py`). Kilidin kendisi önlenmedi.
+- Depoda CRLF duran beş AYS dosyası (`quiz.js` dahil) LF'e çevrildi; `git ls-files --eol` başka dosya göstermiyor (`.bat` hariç).
+- Çalışan kopya (`LifeOS-Sistem`) güncelleyici düzeltmesini (`e7c11529`) almış durumda.
