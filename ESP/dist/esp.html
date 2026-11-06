@@ -20076,7 +20076,8 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 :root[data-zemin="piksel"] .secenek:is(.is-dogru,.is-yanlis) .secenek__harf{ background-color:transparent; box-shadow:0 0 0 2px currentColor; }
 /* Defter: kareli kâğıt; konu haritası kareleri ışık alır */
 :root[data-zemin="piksel"] .defter__kagit{ --kareli:color-mix(in oklab, var(--border-soft) 40%, transparent); background-color:var(--surface); background-image:linear-gradient(var(--kareli) 2px, transparent 2px),linear-gradient(90deg, var(--kareli) 2px, transparent 2px); background-size:24px 24px; box-shadow:var(--px-kart); }
-:root[data-zemin="piksel"] .defter__govde{ background:transparent; box-shadow:none; }
+:root[data-zemin="piksel"] textarea.defter__govde{ background-color:transparent; box-shadow:none; margin:0; }
+:root[data-zemin="piksel"] textarea.defter__govde:focus{ outline:none; box-shadow:none; }
 :root[data-zemin="piksel"] .pk-kare i:is(.is-dolu,.is-s3,.is-yarim,.is-s2){ box-shadow:inset 0 2px 0 #ffffff40, inset 0 -2px 0 #00000026; }
 
 /* Özet kareleri: bütün kartlarla aynı çerçeve */
@@ -31665,7 +31666,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'5b043819', at:'2026-11-06 20:38', dirty:true };
+ESP.BUILD = { id:'46bed911', at:'2026-11-06 20:51', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
