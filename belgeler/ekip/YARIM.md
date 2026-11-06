@@ -7,8 +7,8 @@ Oturumların kendi notları kendi dallarındadır: `belgeler/ekip/yarim/<oturum>
 
 | Oturum | Dal | Durum | Yapılacak |
 |---|---|---|---|
-| Her yerden erişim (`local_28a9a5f6-edf7-4d03-aea1-39a05b4ec25d`) | `claude/her-yerden-erisim…` | Bu not yazılırken çalışıyordu | Dalı ve `belgeler/ekip/yarim/her-yerden-erisim.md`'yi incele; `main`'e yalnız kullanıcı «al» derse birleştir |
-| Telefon ve tablette sayfa hızı (`local_50507126-4efd-4c93-b99e-50a8358f4f3d`) | `claude/telefon-hiz…` | Bu not yazılırken çalışıyordu | Dalı ve `belgeler/ekip/yarim/telefon-hiz.md`'yi incele; birleştirme kuralı aynı |
+| Her yerden erişim (`local_28a9a5f6-edf7-4d03-aea1-39a05b4ec25d`) | `claude/her-yerden-erisim-7242be` (`2b09db31`) | Kullanıcı «main'e al» dedi. Yöneticinin çalışma klasöründe birleştirildi (`8ead3deb`), derlemeler üretildi, denetimler sürüyordu | `.claude/worktrees/yasayan-apartman-0339d0` klasörüne bak: derlemeleri commit'le, §2 denetimleri (entegre dahil) temizse `git push origin HEAD:main`. `main`'de değilse iş bitmemiştir |
+| Telefon ve tablette sayfa hızı (`local_50507126-4efd-4c93-b99e-50a8358f4f3d`) | `claude/telefon-hiz-f459e1` (`92d1ae4b`) | Bitti, `main`'e ALINMADI: kullanıcıdan söz yok. Bildirilen: yavaş 4G taklidinde tekrar açılış 37,8 sn'den 0,65 sn'ye; gerçek adreste denenmedi, yönetici doğrulamadı | Kullanıcı «al» derse birleştir. Her yerden erişimle çakışır: `brand/ortak/sw.js` (ve kopyaları), `SPI/src/js/data/build.js`. `sw.js`'i ikisinin davranışını koruyarak elle çöz, sonra `tools/ortak.py --yay`, üç `build.py`, denetimler. Notu dalda: `belgeler/ekip/yarim/telefon-hiz.md` |
 | Öğrenme motoru (`local_73d2870f-f5b5-4932-87aa-d77510db2d40`) | `main`'de (`660751a1`) | Bitti | Telefonda ve King üzerinden model düğmeleri denenmedi; ayrıntı o oturumun son raporunda |
 
 Tam dal adını `git branch -a --no-merged origin/main` verir.
