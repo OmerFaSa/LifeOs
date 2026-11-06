@@ -2340,6 +2340,11 @@ window.LIFEOS.HESAP = (function(){
     try{ return await api('/api/hesap/kisi'); }
     catch(e){ if(e && e.kod === 401) return null; throw e; }
   }
+  /* Sunucu sözü 29: üç modülün notları ve sözlüğü; Defter'in gezgini salt okur. */
+  async function defter(){
+    try{ return await api('/api/hesap/defter'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
   /* Sunucu sözü 26 (Gün planı F3a): Gün'ün kaydı — niyet, enerji (1–5), iç hava.
      Gün sayfası ve her modülün King'i okur ve yazar; yazma önceki kaydın üstüne. */
   async function gunKayit(){
@@ -4267,7 +4272,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, defter, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle, merkezHali, merkezHalMetni,
     _ortam:ortam, _sifirla, _istek:istek, _merkezBagla:() => { merkezDenenen = null; return merkezBagla(); }, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,

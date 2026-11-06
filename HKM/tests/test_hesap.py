@@ -892,6 +892,9 @@ def run():
             eq((kod, v["kabul"]), (200, 1))
             kod, _, v = s.iste("/api/hesap/ben", baslik={"Authorization": "Bearer " + j})
             eq((kod, v["kullanici"]["ad"], v["ozet"]), (200, "omer", {"spi/ben": 1}))
+            eq(s.iste("/api/hesap/defter")[0], 401)                  # soz 29: oturumsuz not okunmaz
+            kod, _, v = s.iste("/api/hesap/defter", baslik={"Authorization": "Bearer " + j})
+            eq((kod, [m["modul"] for m in v["moduller"]]), (200, ["ays", "spi", "esp"]))
             eq(s.iste("/api/hesap/cikis", {}, yetki)[0], 200)
             eq(s.iste("/api/hesap/ben", baslik={"Authorization": "Bearer " + j})[0], 401)
     test("HTTP: kurulum, eslesme basligi, jetonla esitleme, cikis", t_http_akis)
@@ -1694,6 +1697,29 @@ def run():
             eq(r.d.tek_gun(k)["moduller"], [])                                         # tek gune karismaz
     test("Kisi modeli: modulun JSON kayitlari; bicim ve boyut denetlenir, icerik anlasilmaz; sabit sira",
          t_kisi)
+
+    def t_defter():
+        with _Depo() as r:
+            k, j = _admin(r)
+            eq([(m["modul"], m["notlar"], m["terimler"]) for m in r.d.defter(k)["moduller"]],
+               [("ays", [], []), ("spi", [], []), ("esp", [], [])])
+            z = 1760000000000
+            r.d.esitle(k, "spi/ben", "cihaz-001", 0, [
+                {"y": "defter/n1", "d": {"id": "n1", "baslik": "Uyku", "govde": "Renkot"}, "z": z},
+                {"y": "defter/silinen", "d": None, "z": z},
+                {"y": "defterterim/t1", "d": {"id": "t1", "ad": "Renkot", "tanim": "Kaplama"}, "z": z},
+                {"y": "defterklasor/liste", "d": {"id": "liste", "liste": ["X"]}, "z": z},      # not degil
+                {"y": "gunler/2026-11-06", "d": {"gizli": 1}, "z": z},                           # not degil
+            ])
+            r.d.esitle(k, "spi/deneme", "cihaz-001", 0, [{"y": "defter/n2", "d": {"id": "n2", "baslik": "Deneme profili"}, "z": z}])
+            v = {m["modul"]: m for m in r.d.defter(k)["moduller"]}
+            eq([n["id"] for n in v["spi"]["notlar"]], ["n1"])                # silinen ve baska profil yok
+            eq(v["spi"]["terimler"], [{"id": "t1", "ad": "Renkot", "tanim": "Kaplama"}])
+            eq(v["ays"]["notlar"], [])
+            u = r.d.kullanici_ekle(k, "anne", "parola-456")
+            eq(r.d.defter(u)["moduller"][1]["notlar"], [])                   # baskasinin notu gelmez
+    test("Defter gezgini: uc modulun notu ve sozlugu salt okunur; silinen, baska kayit ve baska profil gelmez",
+         t_defter)
 
     def t_gunluk():
         with _Depo() as r:

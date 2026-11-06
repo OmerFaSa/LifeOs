@@ -41,6 +41,7 @@ dosya, bağlantı, etiket yok.
 | Herhangi bir dosya ekle, indir | 1 |
 | Notu dosya olarak dışa aktar (.md) | 1 |
 | Klasörler, şablonlar, grafik görünümü (bağlantı ağı) | 2 |
+| Modül gezgini, anahtar kelime sözlüğü ve bilgi kartı | 2 |
 | King'in notları okuması ve nota eklemesi | 2 |
 | Medyayı PC sunucusuna yedekleme (isteğe bağlı) | 3 |
 
@@ -68,5 +69,23 @@ dosya, bağlantı, etiket yok.
   özeti + #soru #ders #konu); Öğren'de her soruda «Karala» (o sorunun notuna
   birikir); Defter yedeği medyasıyla tek dosya, geri yükleme ezmez; kalıcı
   depolama isteği ve kullanılan alan.
-- Sıradaki (Faz 2): klasör, bağlantı ağı görünümü, King'in notları okuyup nota
-  eklemesi.
+- 2026-10-20: klasör ve bağlantı ağı (`defter.js` başlık yorumu).
+- 2026-11-06: **Modül gezgini ve sözlük** («notlarımızı modül modül yönetelim;
+  "Renkot" diye anahtar kelime kaydedelim, üzerine gelince bilgi kartı açılsın;
+  yazı, resim ya da belge olsun»):
+  - Üç sütun: gezgin (modüller, klasörler), liste, kâğıt. Kutu opak; arkadaki
+    ekran artık notun içinden okunmuyor.
+  - Öbür modüllerin notları ve kelimeleri **salt okunur** (sunucu sözü 29). Modül
+    öbürüne yazmaz (AGENTS §1.4): «Buraya kopyala» metni alır, kaynak durur.
+    Sunucu kapalıysa Defter açılır, bunu söyler. Arama bütün modüllerde ve sözlükte.
+  - Sözlük: `defterterim/<id>`; yazı eşitlenir, resim ve belge cihazda kalır, form
+    bunu söyler. Notların biçimi değişmedi; yedek kelimeleri de taşır, eski yedek
+    yüklenir (test var). Geri yükleme artık notun klasörünü ve türünü düşürmüyor.
+  - Bilgi kartı: fare (üzerine gelme), klavye (odak; Enter karta geçer, Esc döner),
+    dokunma. King'in «notlarımda…» araması kelimeleri de bulur.
+  - Sürtünme: listede Enter maddeyi sürdürür, `[[` not adı önerir, başlıkta Enter
+    gövdeye geçer, «Kaydedildi» görünür, not klasöre sürüklenir.
+  - Bilerek yok: modüller arası gerçek taşıma (§1.4), WYSIWYG, günlük not, sürüm
+    geçmişi, çoklu seçim, başka bir profilin notları.
+- Sıradaki: King'in nota eklemesi; modüller arası taşıma istenirse gelen kutusu
+  yoluyla (modül kendi koduyla kabul eder).

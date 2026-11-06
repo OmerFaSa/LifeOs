@@ -225,6 +225,7 @@ window.LIFEOS.PARCA.yazilar({
     const kelimeler = t0.replace(/[.,!?;:«»"']/g, ' ').replace(NOT_DOLGU, ' ').replace(NOT_DOLGU, ' ').split(/\s+/).filter(w => w.length >= 3);
     let liste = [];
     try{ liste = (await Df.yukle()) || []; }catch(e){ liste = []; }
+    if(Df.terimNotlari) liste = liste.concat(Df.terimNotlari());   // sözlükteki kelime de bulunur
     const bulunan = kelimeler.length ? notPuanla(liste, kelimeler) : [];
     if(!bulunan.length){ KI.soyle(kelimeler.length ? '«' + kelimeler.join(' ') + '» geçen bir not bulamadım.' : yz('ortak.king-arac.notlarinda-neyi-arayayim-orn')); return { tur:'not-bos' }; }
     const kaynak = bulunan.map(n => yz('ortak.king-arac.kaynak') + (n.baslik || yz('ortak.king-arac.basliksiz-not')));

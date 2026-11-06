@@ -179,6 +179,12 @@
       ustune yazmaz. Isin kendisi sunucu.py'dedir (SISTEM kancasi). Ev agini
       acmak (`/ev-agi-ac`) yalniz bilgisayarin kendisinden: disari acma karari
       ev aginda alinamaz.
+  29. DEFTER GEZGINI (2026-11-06, «notlarimizi modul modul yonetebilelim»). Uc
+      modulun notlari ve sozlugu oturumla, salt okunur verilir (`GET
+      /api/hesap/defter`). Sunucu ANLAMAZ: esitlenmis kayitlardan `defter/` ve
+      `defterterim/` yollarini oldugu gibi verir, yazmaz. Medya zaten burada
+      degildir (cihazda kalir). Modul baska bir modulun notunu
+      degistiremez; kopya alabilir (AGENTS §1.4).
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -1846,6 +1852,25 @@ class Depo:
             moduller.append({"modul": modul, "kayitlar": kayitlar, "zaman": int(x["zaman"] * 1000)})
         return {"moduller": moduller}
 
+    def defter(self, kullanici):
+        """Soz 29: uc modulun esitlenmis notlari ve sozlugu; oldugu gibi, silinen yok."""
+        # shortcut: yalniz varsayilan profiller (ays/main, spi/ben, esp/ben); baska profil gosterilmez.
+        alanlar = {"ays/main": "ays", "spi/ben": "spi", "esp/ben": "esp"}
+        with self._islem() as c:
+            satirlar = c.execute(
+                "SELECT alan, yol, deger FROM kayit WHERE kullanici=? AND deger IS NOT NULL AND alan IN (?,?,?)"
+                " AND (yol LIKE 'defter/%' OR yol LIKE 'defterterim/%')",
+                (kullanici["id"],) + tuple(alanlar)).fetchall()
+        toplam = {m: {"modul": m, "notlar": [], "terimler": []} for m in alanlar.values()}
+        for x in satirlar:
+            try:
+                d = json.loads(x["deger"])
+            except ValueError:
+                continue
+            if isinstance(d, dict):
+                toplam[alanlar[x["alan"]]]["terimler" if x["yol"].startswith("defterterim/") else "notlar"].append(d)
+        return {"moduller": [toplam[m] for m in ("ays", "spi", "esp")]}
+
     def takvim(self, kullanici):
         with self._islem() as c:
             r = c.execute("SELECT jeton, olusturma, son FROM takvim WHERE kullanici=?", (kullanici["id"],)).fetchone()
@@ -2741,6 +2766,8 @@ def isle(h):
                 return _cevap(h, 200, d.tek_gun(k))
             if yol == "/api/hesap/kisi":
                 return _cevap(h, 200, d.kisi(k))
+            if yol == "/api/hesap/defter":
+                return _cevap(h, 200, d.defter(k))
             if yol == "/api/hesap/gunluk":
                 return _cevap(h, 200, d.gunluk(k))
             if yol == "/api/hesap/gunkayit":

@@ -20,6 +20,292 @@
   }
   async function ile(fn){ const s = sahne(); try{ await fn(s); }finally{ s.birak(); } }
 
+  /* Kullanıcı (2026-11-06): «notun içine "Renkot" adında bir anahtar kelime
+     koyduk, bunu sisteme kaydetmeli; üzerine geldiğimizde bilgi kartında
+     gözükmeli; yazı, resim ya da belge olabilsin». */
+  describe('Defter — sözlük ve bilgi kartı', () => {
+    const bekle = ms => new Promise(r => setTimeout(r, ms || 0));
+    const bul = (metin, adlar) => D().terimBul(metin, D().terimKalibi(adlar.map((ad, i) => ({ id:'t' + i, ad, es:[] })))).map(b => metin.slice(b.bas, b.son));
+    it('kelime: büyük küçük, Türkçe ekler ve kesme işareti tanınır; kelimenin içi işaretlenmez', () => {
+      expect(bul('Renkot, RENKOT\'un renkotu renkotlar Renkotlarda', ['Renkot'])).toEqual(['Renkot', 'RENKOT\'un', 'renkotu', 'renkotlar', 'Renkotlarda']);
+      expect(bul('Tarenkot ve renkotçu', ['Renkot'])).toEqual([]);
+      expect(bul('IŞIK İŞIK ışık', ['ışık'])).toEqual(['IŞIK', 'ışık']);          // Türkçe küçük harf
+      expect(bul('ata atı at at\'ı', ['at'])).toEqual(['at', 'at\'ı']);            // kısa kelimede ek sayılmaz
+      expect(bul('renk kodu ve renk', ['renk', 'renk kodu'])).toEqual(['renk kodu', 'renk']); // uzun olan önce
+      expect(bul('a.b axb (c++)', ['a.b', 'c++'])).toEqual(['a.b', 'c++']);        // düzenli ifade karakteri kaçırılır
+    });
+    it('kaydet: yazı depoya, aynı ad reddedilir, başka yazılış bulunur; eski notun biçimi değişmez', () => ile(async s => {
+      const n = await D().yeni('Eski', 'Renkot sürüldü');
+      const onceki = JSON.stringify(s.depo['defter/' + n.id]);
+      const t = await D().terimKaydet({ ad:' Renkot ', es:['kaplama, ', 'Renkot'], tanim:'Astar boyası' });
+      expect(s.depo['defterterim/' + t.id].ad).toBe('Renkot');
+      expect(t.es).toEqual(['kaplama,']);
+      let hata = null; try{ await D().terimKaydet({ ad:'renkot', tanim:'x' }); }catch(e){ hata = e.message; }
+      expect(hata).toContain('zaten sözlükte');
+      hata = null; try{ await D().terimKaydet({ ad:' a ' }); }catch(e){ hata = e.message; }
+      expect(hata).toContain('en az iki');
+      expect(JSON.stringify(s.depo['defter/' + n.id])).toBe(onceki);
+      expect(D().terimGecenler(t).map(x => x.n.id)).toEqual([n.id]);
+      D()._sifirla();
+      D().kur({ modul:'test', store:{ list:async c => Object.keys(s.depo).filter(k => k.indexOf(c + '/') === 0).map(k => s.depo[k]), set:async () => {}, remove:async () => {} } });
+      await D().yukle();
+      expect(D().terimler().map(x => x.ad)).toEqual(['Renkot']);
+      expect(D().terimNotlari()[0]).toEqual({ id:t.id, baslik:'Renkot', govde:'Astar boyası' });   // King bulur
+    }));
+    it('resim ve belge cihazda kalır: depoya yalnız kimlik gider; silince medya da silinir', () => ile(async s => {
+      const r = await D().medyaEkle(new Blob(['%PDF-gizli'], { type:'application/pdf' }), { ad:'renkot.pdf' });
+      const t = await D().terimKaydet({ ad:'Renkot', tanim:'', ekler:[r.kayit.id, '<script>'] });
+      expect(t.ekler).toEqual([r.kayit.id]);                                       // kimlik denetlenir
+      expect(JSON.stringify(s.depo).indexOf('%PDF-gizli') < 0).toBe(true);
+      await D().terimSil(t.id);
+      expect(s.m[r.kayit.id]).toBe(undefined);
+      expect(s.depo['defterterim/' + t.id]).toBe(undefined);
+    }));
+    it('yedek: kelime ve eki taşınır; sözlüğü olmayan eski yedek hatasız yüklenir, not kaybolmaz', () => ile(async s => {
+      const eskiYedek = { app:'lifeos-defter', surum:1, notlar:[{ id:'neski', baslik:'Eski not', govde:'g', klasor:'Fizik', tur:'belge' }], medya:[] };
+      const r0 = await D().yedekYukle(eskiYedek);
+      expect([r0.not, r0.terim]).toEqual([1, 0]);
+      const n0 = D().notlar().find(x => x.id === 'neski');
+      expect([n0.klasor, n0.tur]).toEqual(['Fizik', 'belge']);                     // eskiden düşüyordu
+      const m = await D().medyaEkle(new Blob(['png'], { type:'image/png' }), { ad:'k.png' });
+      const t = await D().terimKaydet({ ad:'Renkot', tanim:'yazı', ekler:[m.kayit.id] });
+      const y = await D().yedekNesnesi();
+      expect([y.terimler.length, y.medya.length]).toEqual([1, 1]);
+      await D().terimSil(t.id);
+      const r = await D().yedekYukle(y);
+      expect([r.terim, r.medya]).toEqual([1, 1]);
+      expect(D().terimler()[0].tanim).toBe('yazı');
+      const r2 = await D().yedekYukle(y);
+      expect(r2.terim).toBe(0);                                                    // ezmez, iki kez eklemez
+    }));
+    it('okuma: kelime işaretlenir; kod ve bağlantı işaretlenmez; metin kaçırılır', () => ile(async () => {
+      const t = await D().terimKaydet({ ad:'Renkot', tanim:'<img src=x onerror=alert(1)> astar' });
+      const n = await D().yeni('Not', 'Renkot sürüldü `Renkot` [[Renkot]] renkotun');
+      D().ac({ id:n.id });
+      const el = document.getElementById('defter');
+      const isaret = Array.from(el.querySelectorAll('[data-defter-oku] [data-defter-terim]'));
+      expect(isaret.map(a => a.textContent)).toEqual(['Renkot', 'renkotun']);
+      expect(isaret[0].getAttribute('data-defter-terim')).toBe(t.id);
+      /* tıkla: kart açılır, tanım kaçırılmıştır; ikinci kez fareyle kapanır */
+      isaret[0].dispatchEvent(new MouseEvent('click', { bubbles:true, detail:1 }));
+      await bekle();
+      const k = el.querySelector('.defter__kart');
+      expect(k.getAttribute('role')).toBe('dialog');
+      expect(k.textContent).toContain('astar');
+      expect(!!k.querySelector('img')).toBe(false);
+      expect(k.textContent).toContain('1 notta geçiyor');
+      expect(isaret[0].getAttribute('aria-expanded')).toBe('true');
+      isaret[0].dispatchEvent(new MouseEvent('click', { bubbles:true, detail:1 }));
+      expect(!!el.querySelector('.defter__kart')).toBe(false);
+    }));
+    it('kart: fareyle üstüne gelince açılır, ayrılınca kapanır; Enter karta geçirir, Esc yalnız kartı kapatıp işarete döner', () => ile(async () => {
+      await D().terimKaydet({ ad:'Renkot', tanim:'astar' });
+      const n = await D().yeni('Not', 'Renkot sürüldü');
+      D().ac({ id:n.id });
+      const el = document.getElementById('defter');
+      const a = el.querySelector('[data-defter-oku] [data-defter-terim]');
+      const fare = (h, tur) => h.dispatchEvent(Object.assign(new MouseEvent('pointerover', { bubbles:true }), { pointerType:tur || 'mouse' }));
+      fare(a, 'touch');
+      await bekle(160);
+      expect(!!el.querySelector('.defter__kart')).toBe(false);                    // dokunuş üzerine gelme sayılmaz
+      fare(a);
+      await bekle(160);
+      expect(!!el.querySelector('.defter__kart')).toBe(true);
+      fare(el.querySelector('.defter__kart'));
+      await bekle(240);
+      expect(!!el.querySelector('.defter__kart')).toBe(true);                     // kartın üstünde durur
+      fare(el.querySelector('[data-defter-baslik]'));
+      await bekle(240);
+      expect(!!el.querySelector('.defter__kart')).toBe(false);
+      /* fareyle açık kartta odak sayfadadır: Esc yine yalnız kartı kapatır */
+      fare(a);
+      await bekle(160);
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
+      expect(!!el.querySelector('.defter__kart')).toBe(false);
+      a.focus();
+      a.click();                                                                  // klavye Enter'ı: detail 0
+      await bekle();
+      expect(el.querySelector('.defter__kart').contains(document.activeElement)).toBe(true);
+      document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
+      expect(!!el.querySelector('.defter__kart')).toBe(false);
+      expect(!!document.getElementById('defter')).toBe(true);                     // Defter açık kalır
+      expect(document.activeElement).toBe(a);
+    }));
+    it('form: seçili kelime dolu gelir; ek eklenip vazgeçilirse cihazda yetim kalmaz; kaydedince not işaretlenir', () => ile(async s => {
+      const n = await D().yeni('Not', 'Renkot sürüldü');
+      D().ac({ id:n.id, duzen:true });
+      await bekle();
+      const el = document.getElementById('defter');
+      const ta = el.querySelector('[data-defter-govde]');
+      ta.setSelectionRange(0, 6);
+      el.querySelector('[data-defter="terim-yeni"]').click();
+      const f = () => el.querySelector('.defter-terim');
+      expect(f().querySelector('[data-terim="ad"]').value).toBe('Renkot');
+      expect(f().textContent).toContain('yalnız bu cihazda kalır');
+      const dosya = f().querySelector('[data-terim="dosya"]');
+      const dt = new DataTransfer(); dt.items.add(new File(['x'], 'b.pdf', { type:'application/pdf' }));
+      dosya.files = dt.files;
+      dosya.dispatchEvent(new Event('change', { bubbles:true }));
+      await bekle(20);
+      expect(f().querySelector('[data-terim="ekler"]').textContent).toContain('b.pdf');
+      expect(Object.keys(s.m).length).toBe(1);
+      f().querySelector('[data-terim-is="vazgec"]').click();
+      await bekle(20);
+      expect(Object.keys(s.m).length).toBe(0);
+      expect(D().terimler().length).toBe(0);
+      const ta2 = el.querySelector('[data-defter-govde]');
+      ta2.setSelectionRange(0, 6);
+      el.querySelector('[data-defter="terim-yeni"]').click();
+      f().querySelector('[data-terim="tanim"]').value = 'Astar';
+      f().querySelector('[data-terim-is="kaydet"]').click();
+      await bekle(20);
+      expect(!!f()).toBe(false);
+      expect(D().terimler()[0].ad).toBe('Renkot');
+      expect(el.querySelector('[data-defter-not-terim]').textContent).toContain('Renkot');   // yazarken çip
+      el.querySelector('[data-defter="oku"]').click();
+      await bekle(20);
+      expect(!!el.querySelector('[data-defter-oku] [data-defter-terim]')).toBe(true);
+    }));
+    it('yazarken: listede Enter sürdürür, boş maddede biter; [[ not adı önerir', () => ile(async () => {
+      expect(D().enterDevam('- a', 3)).toEqual({ metin:'- a\n- ', imlec:6 });
+      expect(D().enterDevam('- [x] a', 7)).toEqual({ metin:'- [x] a\n- [ ] ', imlec:14 });
+      expect(D().enterDevam('3. a', 4)).toEqual({ metin:'3. a\n4. ', imlec:8 });
+      expect(D().enterDevam('x\n- ', 4)).toEqual({ metin:'x\n', imlec:2 });
+      expect(D().enterDevam('düz yazı', 8)).toBe(null);
+      const l = [{ id:'1', baslik:'Türev' }, { id:'2', baslik:'Limit' }, { id:'3', baslik:'' }];
+      expect(D().baglantiOneri('bak [[tü', 8, l, null)).toEqual({ bas:6, adaylar:['Türev'] });
+      expect(D().baglantiOneri('bak [[', 6, l, '2').adaylar).toEqual(['Türev']);
+      expect(D().baglantiOneri('bak [[x]] sonra', 15, l, null)).toBe(null);
+      const a = await D().yeni('Türev', '');
+      const b = await D().yeni('Yazılan', '[[tü');
+      D().ac({ id:b.id, duzen:true });
+      await bekle();
+      const el = document.getElementById('defter'), ta = el.querySelector('[data-defter-govde]');
+      ta.setSelectionRange(4, 4);
+      ta.dispatchEvent(new Event('input', { bubbles:true }));
+      const oneri = el.querySelector('[data-defter-oneri-sec]');
+      expect(oneri.textContent).toBe('Türev');
+      oneri.click();
+      await bekle();
+      expect(ta.value).toBe('[[Türev]]');
+      expect(a.id !== b.id).toBe(true);
+    }));
+    it('başlıkta Enter gövdeye geçer; «Kaydedildi» görünür', () => ile(async s => {
+      const n = await D().yeni('A', '');
+      D().ac({ id:n.id });
+      await bekle();
+      const el = document.getElementById('defter');
+      const bas = el.querySelector('[data-defter-baslik]');
+      bas.dispatchEvent(new KeyboardEvent('keydown', { key:'Enter', bubbles:true }));
+      expect(document.activeElement).toBe(el.querySelector('[data-defter-govde]'));
+      const ta = el.querySelector('[data-defter-govde]');
+      ta.value = 'yazı';
+      ta.dispatchEvent(new Event('input', { bubbles:true }));
+      expect(el.querySelector('[data-defter-durum]').textContent).toContain('Kaydediliyor');
+      await bekle(560);
+      expect(el.querySelector('[data-defter-durum]').textContent).toBe('Kaydedildi');
+      expect(s.depo['defter/' + n.id].govde).toBe('yazı');
+    }));
+  });
+
+  /* Modüller ayrı kökendir: öbür modülün notu sunucudan salt okunur gelir. */
+  describe('Defter — modül gezgini', () => {
+    const bekle = ms => new Promise(r => setTimeout(r, ms || 0));
+    const H = () => window.LIFEOS.HESAP;
+    async function disli(fn){
+      const eski = H().defter;
+      H().defter = async () => ({ moduller:[
+        { modul:'ays', notlar:[], terimler:[] },
+        { modul:'spi', notlar:[{ id:'s1', baslik:'Uyku', govde:'Melatonin\n![[medya:mspi1]]\n- [ ] sor\n[[Beslenme]]', klasor:'Sağlık' }, { id:'s2', baslik:'Beslenme', govde:'protein' }],
+          terimler:[{ id:'ts', ad:'Melatonin', tanim:'Uyku hormonu', ekler:['mspi2'] }] },
+        { modul:'esp', notlar:[], terimler:[] } ] });
+      try{
+        await ile(async s => {
+          D()._sifirla();
+          D().kur({ modul:'ays', store:{ set:async (p, d) => { s.depo[p] = JSON.parse(JSON.stringify(d)); }, list:async () => [], remove:async p => { delete s.depo[p]; } } });
+          await fn(s);
+        });
+      }finally{ H().defter = eski; }
+    }
+    it('gezgin öbür modülleri gösterir; notu açınca yalnız okunur, kutu kilitli, medya «orada» der', () => disli(async s => {
+      await D().yeni('Benim', 'Melatonin aldım');
+      D().ac();
+      await bekle(20);
+      const el = document.getElementById('defter');
+      const spi = el.querySelector('[data-defter-kapsam="spi"]');
+      expect(spi.textContent).toContain('2');
+      spi.click();
+      await bekle();
+      expect(el.querySelector('[data-defter-liste]').textContent).toContain('Uyku');
+      expect(el.querySelector('[data-defter-agac]').textContent).toContain('Sağlık');
+      el.querySelector('[data-defter-dis-ac="s1"]').click();
+      await bekle(20);
+      const sag = el.querySelector('[data-defter-sag]');
+      expect(sag.textContent).toContain('yalnız okunur');
+      expect(!!sag.querySelector('[data-defter-baslik]')).toBe(false);
+      expect(!!sag.querySelector('[data-defter-govde]')).toBe(false);
+      expect(sag.querySelector('input[type="checkbox"]').disabled).toBe(true);
+      expect(sag.textContent).toContain('öteki modülde kayıtlı');
+      expect(sag.querySelector('[data-defter-terim]').textContent).toBe('Melatonin');    // öbür modülün sözlüğü
+      /* bağlantı orada aranır, bu modülde boş not açılmaz */
+      const sayi = D().notlar().length;
+      sag.querySelector('[data-defter-git="Beslenme"]').click();
+      await bekle();
+      expect(sag.textContent).toContain('protein');
+      expect(D().notlar().length).toBe(sayi);
+      expect(Object.keys(s.depo).some(k => k.indexOf('s1') >= 0)).toBe(false);           // öbür modülün kaydı buraya yazılmaz
+    }));
+    it('buraya kopyala: metin bu modüle gelir, medya yerine not kalır; kaynak değişmez', () => disli(async () => {
+      await D().disYukle();
+      const n = await D().disKopyala('spi', 's1');
+      expect(n.klasor).toBe("SPİ'den");
+      expect(n.govde).toContain('Melatonin');
+      expect(n.govde.indexOf('![[medya:') < 0).toBe(true);
+      expect(n.govde).toContain('SPİ modülünde kaldı');
+      expect(await D().disKopyala('spi', 'yok')).toBe(null);
+    }));
+    it('arama bütün modüllerde ve sözlükte arar; sunucu yoksa Defter yine açılır ve söyler', () => disli(async () => {
+      await D().yeni('Benim', 'melatonin aldım');
+      D().ac();
+      await bekle(20);
+      const el = document.getElementById('defter'), a = el.querySelector('[data-defter-ara]');
+      a.value = 'melatonin';
+      a.dispatchEvent(new Event('input', { bubbles:true }));
+      const l = el.querySelector('[data-defter-liste]');
+      expect(!!l.querySelector('[data-defter-terim-ac="ts"]')).toBe(true);
+      expect(!!l.querySelector('[data-defter-dis-ac="s1"]')).toBe(true);
+      expect(l.textContent).toContain('Benim');
+      D().kapat();
+      H().defter = async () => { throw new Error('ağ yok'); };
+      await D().disYukle();
+      D().ac();
+      await bekle(20);
+      const el2 = document.getElementById('defter');
+      expect(!!el2.querySelector('[data-defter-kapsam="spi"]')).toBe(false);
+      expect(el2.querySelector('[data-defter-agac]').textContent).toContain('bilgisayarın açıkken');
+      expect(!!el2.querySelector('[data-defter-kapsam=""]')).toBe(true);
+    }));
+    it('taşıma: klasör seçili yeni not orada açılır; kendi modülün gezgininde klasör yönetilir', () => disli(async () => {
+      const n = await D().yeni('Taşınacak', 'x', 'not', '');
+      await D().klasorEkle('Fizik');
+      D().ac({ id:n.id });
+      await bekle(20);
+      const el = document.getElementById('defter');
+      const s = el.querySelector('[data-defter-not-klasor]');
+      s.value = 'Fizik';
+      s.dispatchEvent(new Event('change', { bubbles:true }));
+      await bekle(10);
+      expect(D().notlar()[0].klasor).toBe('Fizik');
+      expect(el.querySelector('[data-defter-klasor="Fizik"]').textContent).toContain('1');
+      /* sürükle bırak */
+      const dt = new DataTransfer();
+      el.querySelector('[data-defter-ac]').dispatchEvent(new DragEvent('dragstart', { bubbles:true, dataTransfer:dt }));
+      el.querySelector('[data-defter-klasor=""]').dispatchEvent(new DragEvent('drop', { bubbles:true, cancelable:true, dataTransfer:dt }));
+      await bekle(10);
+      expect(D().notlar()[0].klasor).toBe('');
+    }));
+  });
+
   describe('Defter — klasör, ağ, boş not (2026-10-20)', () => {
     it('klasör adı temizlenir; ağaç üst klasörleri de gösterir; yeni not seçili klasörde açılır', () => ile(async () => {
       expect(D().klasorAdi('  Sağlık / uyku/ ')).toBe('Sağlık/uyku');
