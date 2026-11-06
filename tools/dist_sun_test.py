@@ -15,6 +15,7 @@ kokte dist'i YALNIZ kaynaklarin hepsi ayniysa sunar; tek dosya degismisse,
 liste yoksa ya da bozuksa src'ye doner — eski surum calismaz (sunucu
 kurali 2). Satir sonu (CRLF/LF) imzayi degistirmez: Windows'ta git
 dosyalari CRLF'e cevirir."""
+import gzip
 import hashlib
 import importlib.util
 import json
@@ -129,6 +130,94 @@ try:
         dogru('dist eskiyken betik adresi yok (404)', kod == 404, kod)
     finally:
         s.shutdown(); s.server_close()
+
+    print('telefon ve tablet (vekil)')
+    (repo / 'src' / 'js' / 'a.js').write_bytes(b'var a = 1;\nvar b = 2;\n')
+    s = sunucu.KuyrukluSunucu(('127.0.0.1', 0), partial(sinif, directory=str(repo / 'src')))
+    threading.Thread(target=s.serve_forever, daemon=True).start()
+    try:
+        adres = 'http://127.0.0.1:%d/' % s.server_address[1]
+
+        def iste(yol, **baslik):
+            # Host yerel degil: vekil gibi (uzak.vekilden_mi); urllib 304'u hata sayar
+            b = {'Host':'lifeos.ts.net', 'Accept-Encoding':'gzip'}
+            b.update({k.replace('_', '-'):v for k, v in baslik.items()})
+            try:
+                return urllib.request.urlopen(urllib.request.Request(adres + yol, headers=b), timeout=5)
+            except urllib.error.HTTPError as h:
+                return h
+
+        r = iste('')
+        ham = r.read()
+        dogru('sayfa gzip gelir', r.headers.get('Content-Encoding') == 'gzip' and 'tek dosya' in gzip.decompress(ham).decode('utf-8'), dict(r.headers))
+        dogru('sayfa her acilista dogrulanir, saklanip sorulmadan kullanilmaz', r.headers.get('Cache-Control') == 'no-cache' and 'no-store' not in str(r.headers), r.headers.get('Cache-Control'))
+        etag = r.headers.get('ETag')
+        r2 = iste('', If_None_Match=etag)
+        dogru('sayfa degismediyse 304, govde yok', r2.status == 304 and r2.read() == b'', r2.status)
+        dogru('304 cevabi da her acilista sorulur', 'no-cache' in (r2.headers.get('Cache-Control') or ''), r2.headers.get('Cache-Control'))
+        (repo / 'dist' / 'mod.html').write_text((repo / 'dist' / 'mod.html').read_text(encoding='utf-8') + '<p>yeni</p>', encoding='utf-8')
+        r3 = iste('', If_None_Match=etag)
+        dogru('sayfa degisince 200 ve yeni govde', r3.status == 200 and 'yeni' in gzip.decompress(r3.read()).decode('utf-8'), r3.status)
+        surum = gzip.decompress(iste('').read()).decode('utf-8').split('dist-betik.js?v=', 1)[-1].split('"', 1)[0]
+        r = iste('dist-betik.js?v=' + surum)
+        dogru('surumlu betik gzip ve saklanir', r.headers.get('Content-Encoding') == 'gzip' and 'immutable' in r.headers.get('Cache-Control', '') and r.headers.get('Vary') == 'Accept-Encoding', dict(r.headers))
+        r = iste('dist-betik.js?v=' + surum, Accept_Encoding='identity')
+        dogru('gzip istemeyene ham gider', r.headers.get('Content-Encoding') is None and 'buyuk' in r.read().decode('utf-8'), dict(r.headers))
+        (repo / 'src' / 'gorsel.png').write_bytes(b'png')
+        r = iste('gorsel.png')
+        dogru('gorsel saklanir ama sorulur', r.headers.get('Cache-Control') == 'no-cache' and r.headers.get('Last-Modified'), dict(r.headers))
+        r2 = iste('gorsel.png', If_Modified_Since=r.headers.get('Last-Modified'))
+        dogru('gorsel degismediyse 304', r2.status == 304, r2.status)
+        r = iste('yok.png')
+        dogru('olmayan dosya 404', r.status == 404, r.status)
+        with urllib.request.urlopen(adres + 'gorsel.png', timeout=5) as y:
+            dogru('bu bilgisayarda gorsel eskisi gibi no-store', 'no-store' in y.headers.get('Cache-Control', ''), y.headers.get('Cache-Control'))
+        with urllib.request.urlopen(urllib.request.Request(adres, headers={'Accept-Encoding':'gzip'}), timeout=5) as y:
+            dogru('bu bilgisayarda sayfa ham ve no-store', y.headers.get('Content-Encoding') is None and 'no-store' in y.headers.get('Cache-Control', ''), dict(y.headers))
+    finally:
+        s.shutdown(); s.server_close()
+
+    print('dist eskiyse bellekte derlenir (Derlemeler unutulsa da 250 istek olmaz)')
+    (repo / 'src' / 'js' / 'a.js').write_bytes(b'var degisti = 1;\n')
+    derle_sayac = repo / 'derle_sayac.txt'
+    (repo / 'build.py').write_text(
+        "from pathlib import Path\n"
+        "ROOT = Path(__file__).parent\n"
+        "def derle():\n"
+        "    import hashlib, json\n"
+        "    with open(ROOT / 'derle_sayac.txt', 'a') as f: f.write('x')\n"
+        "    a = (ROOT / 'src/js/a.js').read_text()\n"
+        "    liste = {'dosya':'mod.html', 'kaynak':{'js/a.js':hashlib.sha256(a.replace(chr(13)+chr(10), chr(10)).encode()).hexdigest()}}\n"
+        "    return '<p>canli</p><script>' + a + '</script>', json.dumps(liste)\n", encoding='utf-8')
+    yol_once = list(sys.path)
+    s = sunucu.KuyrukluSunucu(('127.0.0.1', 0), partial(sinif, directory=str(repo / 'src')))
+    threading.Thread(target=s.serve_forever, daemon=True).start()
+    try:
+        adres = 'http://127.0.0.1:%d/' % s.server_address[1]
+
+        def kok():
+            with urllib.request.urlopen(adres, timeout=5) as r:
+                return r.read().decode('utf-8')
+
+        g = kok()
+        dogru('eski dist yerine guncel kaynaktan tek dosya', 'canli' in g and 'dist-betik.js?v=' in g and 'js/a.js' not in g, g[:80])
+        kok()
+        dogru('kaynak ayniyken yeniden derlenmez', derle_sayac.read_text() == 'x', derle_sayac.read_text())
+        v1 = g.split('?v=', 1)[1].split('"', 1)[0]
+        (repo / 'src' / 'js' / 'a.js').write_bytes(b'var yine = 2;\n')
+        g2 = kok()
+        dogru('kaynak degisince yeni surum (kural 2)', g2.split('?v=', 1)[1].split('"', 1)[0] != v1 and derle_sayac.read_text() == 'xx', g2[:80])
+        (repo / 'build.py').write_text('import sys\ndef derle():\n    sys.exit("HATA")\n', encoding='utf-8')
+        (repo / 'src' / 'js' / 'a.js').write_bytes(b'var bozuk = 3;\n')
+        dogru('derlenemezse src sunulur, sunucu dusmez', 'js/a.js' in kok())
+        dogru('sys.path eski haline doner', sys.path == yol_once)
+    finally:
+        s.shutdown(); s.server_close()
+
+    print('gercek build.py bellekte derler')
+    for klasor in ('AYS', 'SPI', 'ESP'):
+        b = sunucu._canli_bol(str(KOK / klasor))
+        dogru(klasor + ': derle() betik ve stili ayirir', bool(b and b[1] and b[3] and b[0].lstrip().startswith(b'<html')), b and b[0][:40])
 
     print('depodaki uc modul')
     for klasor in ('AYS', 'SPI', 'ESP'):

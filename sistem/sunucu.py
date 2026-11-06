@@ -34,8 +34,11 @@
       uc sistemi acar. Uc sistemin HKM'den bagimsizligi bir slogan degil,
       calisma bicimidir; sunucu katmaninda da boyle kalir.
 
-   2. ONBELLEK YOK. Her yanit no-store tasir: kaynak duzenlendikten sonra
-      eski surumun calismaya devam etmesi, saatler yiyen bir hatadir.
+   2. ESKI SURUM CALISMAZ. Bu bilgisayarda her yanit no-store tasir: kaynak
+      duzenlendikten sonra eski surumun calismaya devam etmesi, saatler yiyen
+      bir hatadir. Telefon ve tablette (2026-11-06, 4G'de 13,7 MB) dosyalar
+      saklanir ama her acilista sorulur (no-cache + 304); yalniz adresinde
+      surum olan betik ve stil sorulmaz, icerigi adresiyle degisir.
 
    3. YALNIZ YEREL. 127.0.0.1'e baglanir. Disari acmak ayri ve BILINCLI
       bir karardir; bu betik o karari kullanici yerine vermez.
@@ -52,8 +55,10 @@
       yalniz bu bilgisayardan kurulur.
 """
 
+import gzip
 import hashlib
 import html
+import importlib.util
 import json
 import os
 import re
@@ -64,7 +69,7 @@ import sys
 import threading
 import time
 import urllib.request
-from functools import partial
+from functools import lru_cache, partial
 from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
@@ -261,17 +266,23 @@ _BOLUK = {}
 
 
 def _dist_bol(yol):
-    """(html, betik, surum, stil, stil_surum). En buyuk <script> govdesi betige,
-    en buyuk <style> (>= STIL_ESIK) stile tasinir; HTML'de ayni yerde <script src> ve
-    <link rel=stylesheet> kalir (sira, kaskad ve engelleme ayni); yoksa None.
-    Surum adreste durur: tutan istek onbellege girer, V8 derlemeyi de saklar."""
+    """Dist dosyasinin parcalari (_metni_bol); mtime+boyut degismedikce yeniden bolunmez."""
     st = os.stat(yol)
     anahtar = (st.st_mtime_ns, st.st_size)
     eski = _BOLUK.get(yol)
     if eski and eski[0] == anahtar:
         return eski[1]
     with open(yol, encoding="utf-8") as f:
-        metin = f.read()
+        sonuc = _metni_bol(f.read())
+    _BOLUK[yol] = (anahtar, sonuc)
+    return sonuc
+
+
+def _metni_bol(metin):
+    """(html, betik, surum, stil, stil_surum). En buyuk <script> govdesi betige,
+    en buyuk <style> (>= STIL_ESIK) stile tasinir; HTML'de ayni yerde <script src> ve
+    <link rel=stylesheet> kalir (sira, kaskad ve engelleme ayni); yoksa None.
+    Surum adreste durur: tutan istek onbellege girer, V8 derlemeyi de saklar."""
     en = max(re.finditer(r"<script>(.*?)</script>", metin, re.S),
              key=lambda m: len(m.group(1)), default=None)
     stil = max(re.finditer(r"<style>(.*?)</style>", metin, re.S),
@@ -290,9 +301,48 @@ def _dist_bol(yol):
         parcalar.append((stil.start(), stil.end(), '<link rel="stylesheet" href="%s?v=%s">' % (DIST_STIL, stil_surum)))
     for bas, son, yerine in sorted(parcalar, reverse=True):
         metin = metin[:bas] + yerine + metin[son:]
-    sonuc = (metin.encode("utf-8"), betik, surum, stil_govde, stil_surum)
-    _BOLUK[yol] = (anahtar, sonuc)
-    return sonuc
+    return (metin.encode("utf-8"), betik, surum, stil_govde, stil_surum)
+
+
+# Kaynak degisip «Derlemeler» commit'i unutulunca kapi src'ye dusuyordu (2026-11-06, olculen:
+# telefonda SPI her acilista 251 istek). dist eskiyse ayni kaynaklardan bellekte derlenir; kural 2
+# korunur (imza tutmazsa yeniden derlenir), diske yazilmaz: calisan kopyanin agaci temiz kalir,
+# guncelleyici takilmaz. Derlenemezse None: src sunulur. Test: tools/dist_sun_test.py
+_CANLI = {}
+_CANLI_KILIT = threading.Lock()
+
+
+def _canli_bol(repo):
+    with _CANLI_KILIT:
+        yol = list(sys.path)   # build.py tools/'u ekler; uzun omurlu surecte stdlib adlarini golgelemesin
+        try:
+            eski = _CANLI.get(repo)
+            if eski and all(_dosya_imzasi(os.path.join(repo, "src", r)) == i for r, i in eski[0].items()):
+                return eski[1]
+            spec = importlib.util.spec_from_file_location("lifeos_derle", os.path.join(repo, "build.py"))
+            modul = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(modul)
+            metin, liste = modul.derle()
+            sonuc = _metni_bol(metin)
+            _CANLI[repo] = (json.loads(liste)["kaynak"], sonuc)
+            return sonuc
+        except (Exception, SystemExit):   # build.py eksik dosyada sys.exit yapar
+            return None
+        finally:
+            sys.path[:] = yol
+
+
+def _dist_parcalari(repo):
+    dist = _guncel_dist(repo)
+    return _dist_bol(dist) if dist else _canli_bol(repo)
+
+
+@lru_cache(maxsize=12)   # uc modul x uc parca; surum degisince eskisi duser
+def _sikistir(govde):
+    return gzip.compress(govde, 6, mtime=0)
+
+
+YEREL_IP = ("127.0.0.1", "::1")
 
 
 class Sunucu(SimpleHTTPRequestHandler):
@@ -349,25 +399,54 @@ class Sunucu(SimpleHTTPRequestHandler):
             return plan_isle(self)
         clean = self.path.split("?", 1)[0].split("#", 1)[0]
         if clean in ("/", "/index.html", DIST_BETIK, DIST_STIL):
-            dist = _guncel_dist(self.repo)
-            if dist:
-                sayfa, betik, surum, stil, stil_surum = _dist_bol(dist)
+            bolum = _dist_parcalari(self.repo)
+            if bolum:
+                sayfa, betik, surum, stil, stil_surum = bolum
                 parca = {DIST_BETIK: (betik, surum, "text/javascript"), DIST_STIL: (stil, stil_surum, "text/css")}.get(clean)
                 govde = parca[0] if parca else self._ayarli(sayfa)
                 if govde is not None:
-                    tur = parca[2] if parca else "text/html"
                     # Yalniz surumu tutan adres saklanir; yaris aninda eski
                     # surum adresine yeni govde gittiyse saklanmaz.
-                    self._kalici = bool(parca) and self.path.endswith("?v=" + parca[1])
-                    self.send_response(200)
-                    self.send_header("Content-Type", tur + "; charset=utf-8")
-                    self.send_header("Content-Length", str(len(govde)))
-                    self.end_headers()
-                    self.wfile.write(govde)
-                    return
+                    kalici = bool(parca) and self.path.endswith("?v=" + parca[1])
+                    return self._dist_gonder(govde, parca[2] if parca else "text/html", kalici)
             elif clean not in (DIST_BETIK, DIST_STIL):
                 return self._src_sayfa()
         return super().do_GET()
+
+    def _dist_gonder(self, govde, tur, kalici):
+        """Telefon ve tablet (bu bilgisayar degil): gzip, sayfa her acilista dogrulanir (304).
+        Bu bilgisayar eskisi gibi: ham ve no-store."""
+        uzak_mi = self.client_address[0] not in YEREL_IP
+        if kalici:
+            self._onbellek = "public, max-age=31536000, immutable"
+        etag = None
+        if uzak_mi and not kalici:
+            self._onbellek = "no-cache"   # kural 2 ayakta: her acilis sunucuya sorar, eski surum calismaz
+            etag = '"%s"' % hashlib.sha256(govde).hexdigest()[:20]
+            if etag in self.headers.get("If-None-Match", ""):
+                self.send_response(304)
+                self.send_header("ETag", etag)
+                self.end_headers()
+                return
+        self.send_response(200)
+        self.send_header("Content-Type", tur + "; charset=utf-8")
+        if uzak_mi:
+            self.send_header("Vary", "Accept-Encoding")
+            if etag:
+                self.send_header("ETag", etag)
+            if "gzip" in self.headers.get("Accept-Encoding", ""):
+                govde = _sikistir(govde)
+                self.send_header("Content-Encoding", "gzip")
+        self.send_header("Content-Length", str(len(govde)))
+        self.end_headers()
+        self.wfile.write(govde)
+
+    def send_head(self):
+        """Dosya sunumu. Telefon ve tablet gorselleri her acilista yeniden indirmez: tarayici
+        Last-Modified ile sorar, degismediyse 304 (no-store'da hepsi bastan iniyordu)."""
+        if self.client_address[0] not in YEREL_IP:
+            self._onbellek = "no-cache"
+        return super().send_head()
 
     def parse_request(self):
         """Vekil (tailscale serve) istegi 127.0.0.1'den getirir: burada isaretlenir ki
@@ -382,7 +461,7 @@ class Sunucu(SimpleHTTPRequestHandler):
         soz 1). Ev agindan baglanan tablet ayni Sunucu sinifiyla sunulur; ona da
         konunca kendi ayarlari her yenilemede bilgisayarinkiyle eziliyor, yazmasi
         ise reddediliyordu (2026-10-31, hata analizi)."""
-        if self.client_address[0] in ("127.0.0.1", "::1"):
+        if self.client_address[0] in YEREL_IP:
             return ayar.sayfaya_ekle(govde)
         return govde
 
@@ -450,9 +529,10 @@ class Sunucu(SimpleHTTPRequestHandler):
         return self.send_error(405)
 
     def end_headers(self):
-        if getattr(self, "_kalici", False):
-            self._kalici = False   # keep-alive: ayni isleyici sonraki istege gecer
-            self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+        kural = getattr(self, "_onbellek", None)
+        if kural:
+            self._onbellek = None   # keep-alive: ayni isleyici sonraki istege gecer
+            self.send_header("Cache-Control", kural)
             return super().end_headers()
         self.send_header("Cache-Control",
                          "no-store, no-cache, must-revalidate, max-age=0")
@@ -1971,9 +2051,7 @@ def _sunucu_kur(klasor, port):
 def _dist_isit(kok):
     """Ilk bolme ~100 ms; ilk acilis beklemesin diye sunucu kurulunca yapilir."""
     try:
-        dist = _guncel_dist(kok)
-        if dist:
-            _dist_bol(dist)
+        _dist_parcalari(kok)
     except OSError:
         pass
 

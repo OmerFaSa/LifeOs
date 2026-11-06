@@ -402,7 +402,7 @@ async function cevrimdisi(browser, base, hedefler, durdur, errors){
       for(let i = 0; i < 80; i++){
         d = await page.evaluate(async () => {
           if(!navigator.serviceWorker || !navigator.serviceWorker.controller) return { kontrol:false };
-          const k = await caches.open('lifeos-kabuk-v1');
+          const k = await caches.open('lifeos-kabuk-v2');
           const adres = [location.href.split('#')[0]]
             .concat(Array.from(document.querySelectorAll('script[src]')).map(s => s.src));
           let eksik = 0;
