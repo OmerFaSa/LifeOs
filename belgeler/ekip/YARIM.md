@@ -13,17 +13,10 @@ Oturumların kendi notları kendi dallarındadır: `belgeler/ekip/yarim/<oturum>
 
 Tam dal adını `git branch -a --no-merged origin/main` verir.
 
-## Kullanıcının kararı bekleniyor
+## Alınan karar
 
-**AltStore silinecek mi?** Kullanıcı: «altstore ile işim kalmadı ise silsene». SİLİNMEDİ, çünkü hâlâ bir işi var:
-iPhone'daki yerel LifeOS uygulaması AltStore ile kurulu ve 7 günde bir AltServer ile yenilenir. Uygulamanın tarayıcıda
-karşılığı olmayan tek asıl işi: koşuda ekran kapalıyken rota kaydı (`KonumKoprusu.swift`, AGENTS §1.3). Telefon bildirimleri de ona bağlı.
-Kullanıcı bugün LifeOS'u Safari'den açıyor ve «life os yok» demişti, yani uygulama telefonda olmayabilir.
-
-- Kullanıcı «sil» derse: Windows'tan AltServer kaldırılır (`C:\Program Files (x86)\AltServer`, başlangıçta açılıyor, yönetici onayı ister).
-  Telefondaki AltStore'u kullanıcı kendisi siler. Uygulamada eşitlenmemiş kayıt varsa önce eşitlenmeli: kayıtlar Safari'nin deposundan ayrıdır.
-- iTunes, iCloud ve Bonjour 2026-10-04'te AltServer için kurulmuştu; başka kullanımı var mı sor, sormadan silme.
-- `uygulama/ios`, `belgeler/UYGULAMA.md` ve CI'daki iOS işi ayrı karardır, sorulmadan silinmez.
+**AltStore ve AltServer kalıyor** (2026-11-06, kullanıcı: «Kalsın»). Ekran kapalıyken koşu rotası ve telefon bildirimleri
+iPhone'daki yerel uygulamaya bağlı; uygulama 7 günde bir AltServer ile yenilenir. Yeniden önerme, kullanıcı sorarsa konuş.
 
 ## Gerçek cihazda denenmedi
 
