@@ -66,6 +66,23 @@
 :root[data-zemin="piksel"] .piksel-manzara{ position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
 :root[data-zemin="piksel"] .lifeos-gecis{ background:#8fcff1; -webkit-backdrop-filter:none; backdrop-filter:none; }
 :root[data-zemin="piksel"] .perde--karsilama{ background:#8fcff1; }
+/* Bulut perdesi (piksel.js bulutKoy): iki yarım; perde kalkarken iki yana açılır. Yazı bulutun üstünde, kâğıt kart yok. */
+:root[data-zemin="piksel"] :is(.lifeos-gecis,.perde--karsilama):has(.px-bulut){ background:#e2ecf6; }
+:root[data-zemin="piksel"] .perde--karsilama:has(.px-bulut)::before{ content:none; }
+:root[data-zemin="piksel"] .perde--karsilama:has(.px-bulut) .karsilama{ background:none; box-shadow:none; }
+.px-bulut{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.px-bulut canvas{ position:absolute; top:0; image-rendering:pixelated; transition:transform .42s cubic-bezier(.4,0,.2,1); }
+.px-bulut__sol{ left:0; }
+.px-bulut__sag{ right:0; }
+:is(.perde--kapaniyor,.lifeos-gecis.is-acik) .px-bulut__sol{ transform:translateX(-86%); }
+:is(.perde--kapaniyor,.lifeos-gecis.is-acik) .px-bulut__sag{ transform:translateX(86%); }
+.px-bulut__yazi{ position:absolute; inset:0; z-index:1; display:grid; place-content:center; justify-items:center; gap:6px; text-align:center; color:var(--text); animation:px-bulut-yazi .5s ease .18s both; }
+.px-bulut__kart{ display:grid; justify-items:center; gap:6px; padding:20px 36px; background:var(--piksel-kagit, #fffaef); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar); }
+.px-bulut__yazi small{ font-size:var(--fs-sm); color:var(--text-2); }
+.px-bulut__yazi b{ font-size:clamp(32px, 7vw, 64px); line-height:1.1; }
+.px-bulut__yazi span{ font-size:var(--fs-md, 16px); color:var(--text-2); }
+@keyframes px-bulut-yazi{ from{ opacity:0; transform:translateY(10px); } }
+@media (prefers-reduced-motion:reduce){ .px-bulut canvas{ transition:none; } .px-bulut__yazi{ animation:none; } }
 :root[data-zemin="piksel"] .perde--karsilama::before{ content:none; }
 :root[data-zemin="piksel"] .perde--karsilama .karsilama{ position:relative; z-index:1; padding:28px 40px; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),8px 12px 0 #3f282c44; }
 /* Seçim sayfası: tarla görünür, kapı zemini kalkar */

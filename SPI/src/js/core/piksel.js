@@ -273,7 +273,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(s) return s;
     const A = sahneMotor(), W = durum.c.width, H = durum.c.height, arka = document.createElement('canvas');
     arka.width = W; arka.height = H;
-    const o = A.yerlesim(W, H, A.vakit(new Date().getHours()), yer);
+    const o = A.yerlesim(W, H, A.vakit(new Date().getHours()), yer, document.documentElement.getAttribute('data-modul'));   // çalışma binası modüle göre
     A.binaCiz(arka.getContext('2d'), o);
     s = durum.sahneler[yer] = { o, arka };
     return s;
@@ -316,6 +316,28 @@ window.LIFEOS = window.LIFEOS || {};
     if(!L.PIKSEL_DOGA || hareketsiz() || /\/tests\//.test(location.pathname)) return;
     const yap = () => { if(document.visibilityState !== 'hidden') manzaraHazir(Math.ceil(window.innerWidth / MANZARA_OLCEK), Math.ceil(window.innerHeight / MANZARA_OLCEK)); };
     if(window.requestIdleCallback) requestIdleCallback(yap, { timeout:8000 }); else setTimeout(yap, 4000);
+  }
+  /* BULUT PERDESİ (2026-11-06, kullanıcı: «modüller arası geçişte tüm ekranı büyük beyaz bir bulut kaplasın, o modüle
+     geçene kadar dağılmasın; geçerken karşılama yazıları gelsin, geçince açılsın»). İki yarım: ortada kabarık kenarları üst
+     üste biner, ekranda boşluk kalmaz; perde kalkarken (perde--kapaniyor) iki yana açılır (piksel.css). Süs: veri okumaz. */
+  function bulutYarim(c, sag){
+    const W = c.width, H = c.height, g = c.getContext('2d');
+    let v = sag ? 917 : 331; const r = () => (v = (v * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const top = (cx, cy, rr, renk) => { g.fillStyle = renk; for(let y = -rr; y <= rr; y++){ const w = Math.round(Math.sqrt(rr * rr - y * y)); g.fillRect(Math.round(cx) - w, Math.round(cy) + y, w * 2 + 1, 1); } };
+    const kenar = W * 0.84, X = x => (sag ? W - x : x);   // gövde ekranın ortasını geçer: iki yarım arasında boşluk kalmaz
+    g.fillStyle = '#ffffff'; g.fillRect(sag ? W - kenar : 0, 0, kenar, H);
+    /* Gövdede kümeler: alt kenarları gölge tonunda, doku verir ama beyaz kalır */
+    for(let i = 0; i < W * H / 280; i++){ const x = r() * kenar, y = r() * H, rr = 4 + Math.floor(r() * 7); top(X(x), y + 2, rr, '#e6eef8'); top(X(x), y, rr, '#ffffff'); }
+    /* Ortaya bakan kabarık kenar: büyük toplar, altta gölge, en altta mavi pus */
+    for(let y = -8; y < H + 12; y += 6 + Math.floor(r() * 5)){ const rr = 8 + Math.floor(r() * 10), x = kenar + rr * 0.35 - r() * 6; top(X(x), y + 3, rr, '#d6e2f0'); top(X(x), y, rr, '#ffffff'); top(X(x - rr * 0.3), y - rr * 0.35, Math.max(2, rr - 6), '#ffffff'); }
+  }
+  function bulutKoy(el){
+    if(!el || el.querySelector('.px-bulut')) return null;
+    const k = document.createElement('div'), W = Math.ceil(window.innerWidth * 0.62 / OLCEK), H = Math.ceil(window.innerHeight / OLCEK);
+    k.className = 'px-bulut'; k.setAttribute('aria-hidden', 'true');
+    ['sol', 'sag'].forEach(y => { const c = document.createElement('canvas'); c.className = 'px-bulut__' + y; c.width = W; c.height = H; tamKat(c, OLCEK); bulutYarim(c, y === 'sag'); k.appendChild(c); });
+    el.insertBefore(k, el.firstChild);
+    return k;
   }
   function manzaraKoy(el){
     const D = L.PIKSEL_DOGA;
@@ -532,7 +554,7 @@ window.LIFEOS = window.LIFEOS || {};
     hazirla();
     dongu();
     const varis = document.querySelector('.perde--karsilama');
-    if(varis) manzaraKoy(varis);
+    if(varis) bulutKoy(varis);   // varış: aynı bulut, üstünde karşılama; perde kalkınca iki yana açılır
     manzaraOnceden();
   }
   function kur(){
@@ -548,5 +570,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
+  L.PIKSEL = Object.freeze({ bulutKoy, manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
 })(window.LIFEOS);

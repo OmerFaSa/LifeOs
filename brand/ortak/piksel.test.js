@@ -331,6 +331,41 @@
         expect(o.odalar.every(a => a.x >= o.bx0 && a.x + a.w <= o.bx1)).toBe(true);
       });
     });
+    it('bulut perdesi: bir kez konur, iki yarım ekranı birlikte örter', () => {
+      const P = window.LIFEOS.PIKSEL, el = document.createElement('div');
+      document.body.appendChild(el);
+      try{
+        const k = P.bulutKoy(el);
+        expect(!!k).toBe(true); expect(P.bulutKoy(el)).toBe(null);
+        const c = el.querySelectorAll('.px-bulut canvas');
+        expect(c.length).toBe(2);
+        expect(c[0].width * 2 >= Math.ceil(window.innerWidth / 4)).toBe(true);
+        expect(c[0].getContext('2d').getImageData(0, Math.floor(c[0].height / 2), 1, 1).data[3]).toBe(255);
+        /* Ortada boşluk yok: sol yarım ekranın ortasına (ölçekte) kadar her satırda dolu */
+        const orta = Math.ceil(window.innerWidth / 8), d = c[0].getContext('2d').getImageData(0, 0, Math.min(orta, c[0].width), c[0].height).data;
+        let bos = 0; for(let y = 0; y < c[0].height; y++) if(d[(y * Math.min(orta, c[0].width) + Math.min(orta, c[0].width) - 1) * 4 + 3] !== 255) bos++;
+        expect(bos).toBe(0);
+      }finally{ el.remove(); }
+    });
+    it('araç yönü: yüzü hep gittiği yöne bakar (her genişlik, bina ve vakitte)', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN;
+      [94, 342, 480].forEach(W => ['bugun', 'calisma', 'analiz'].forEach(y => ['ogle', 'gece'].forEach(v => {
+        const o = A.yerlesim(W, 216, v, y), arac = o.zemin.sakin.filter(s => s.seg.some(g => /^araba/.test(g.poz)));
+        arac.forEach(s => { for(let t = 0; t < s.T; t += 0.25){ const a = A.kareAl(s, t), b = A.kareAl(s, t + 1 / 24); if(a && b && a.poz === b.poz && b.x !== a.x) expect(b.x < a.x).toBe(!!a.ters); } });
+      })));
+    });
+    it('çalışma binası modüle göre ayrı: AYS dershane, SPİ spor salonu, ESP zanaat evi', () => {
+      const A = window.LIFEOS.PIKSEL_APARTMAN, stil = {};
+      ['ays', 'spi', 'esp'].forEach(m => {
+        const o = A.yerlesim(384, 216, 'ogle', 'calisma', m);
+        stil[m] = o.stil;
+        expect(o.odalar.some(a => a.tip === 'yatak')).toBe(false);
+        expect(o.bolgeler.concat(o.zemin).some(b => b.sakin.some(r => r.kisi))).toBe(true);
+        [o.cati, o.zemin].concat(o.bolgeler).forEach(b => b.sakin.forEach(r => r.seg.forEach(q => expect(!!A.POZ[q.poz]).toBe(true))));
+      });
+      expect(new Set(Object.values(stil)).size).toBe(3);
+      expect(A.yerlesim(384, 216, 'ogle', 'calisma').stil).toBe('loft');
+    });
     it('karar: sakin kendi seçer; aynı t aynı kare, bloklar arasında seçim değişir, balon kişiyle aynı zarı atar', () => {
       const A = window.LIFEOS.PIKSEL_APARTMAN, o = A.yerlesim(384, 216, 'ogle', 'calisma'), hepsi = [o.zemin].concat(o.bolgeler).flatMap(b => b.sakin);
       const k = hepsi.find(r => r.menu && r.kisi), b = hepsi[hepsi.indexOf(k) + 1];
