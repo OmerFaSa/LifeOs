@@ -151,11 +151,21 @@
 /* Ayırıcı çizgi kart kenarının sıfırlanmasından sonra gelir (özgüllük + !important). */
 .sayfa--kapakli .bugun .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket):not(.donen){
   border-top:2px dashed var(--border-strong) !important; }
+/* «Gün» etiketi kartın kendi başlığının («Günün akışı», «Öğünler») tekrarıydı. */
+.sayfa--kapakli .bugun__alan[aria-label="Gün"] > .bugun__etiket{ display:none; }
+/* Küçültme düğmesi kartın dolgusuna çıkar: başlık satırının sağı alttaki satırlarla aynı hizada biter. */
+@media (min-width:680px){
+  .sayfa--kapakli .bugun .gizle-araclar--uzerinde{ top:0; right:-28px; }
+  .sayfa--kapakli .bugun .gizle-acik:has(> .gizle-araclar--uzerinde) > .kutu__bas::after{ content:none; }
+}
 /* Kutunun iç boşlukları da kalkar: içerik etiket sütununa hizalanır. */
 .sayfa--kapakli .bugun .kutu__bas,
 .sayfa--kapakli .bugun .kutu__govde,
 .sayfa--kapakli .bugun .kutu__ayak{ padding-left:0 !important; padding-right:0 !important; }
 .sayfa--kapakli .bugun .kutu__bas{ padding-top:0 !important; }
+/* Akış satırları ve ayak düğmesi kart başlığıyla aynı sol ve sağ hizada: 24 piksel içeride ve 14 piksel dışarıda duruyorlardı. */
+.sayfa--kapakli .bugun :is(.akis__satir, .akis__bos){ padding-inline:0; }
+.sayfa--kapakli .bugun .kutu__ayak > .btn:first-child{ margin-left:2px; }
 /* Öneri alanının kendi kart kuralı (kabuk.css) ve defter satırlarının iç boşluğu da kalkar. */
 .site--v5 .sayfa--kapakli .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
   background:transparent !important; box-shadow:none !important; border-color:transparent !important; padding:0 !important; border-radius:0 !important; }

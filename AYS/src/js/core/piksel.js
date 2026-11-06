@@ -160,7 +160,8 @@ window.LIFEOS = window.LIFEOS || {};
     const yay = halka || svg.querySelector('.pk-gosterge__iz');
     let L = 0, cizgi = 4;
     if(yay && !svg.querySelector('.px-ara') && typeof yay.getTotalLength === 'function'){
-      L = yay.getTotalLength();
+      /* Ekrandan kalkmış ya da gizli halka ölçülemez: atılan hata sıradaki çizimleri de düşürüyordu. */
+      try{ L = yay.getTotalLength(); }catch(e){ delete svg.dataset.pxc; return null; }
       if(L > 40) cizgi = parseFloat(getComputedStyle(yay).strokeWidth) || 4;
     }
     if(!kareler.length && !(L > 40)) return null;
