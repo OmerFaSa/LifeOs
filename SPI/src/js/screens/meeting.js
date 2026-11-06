@@ -31,7 +31,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meeting.belirgin-baglar':'Belirgin bağlar',
   'spi.meeting.gun-sayisina-gore-rastlantid':'Gün sayısına göre rastlantıdan ayrılan bir bağ yok.',
   'spi.meeting.bag-zayif':'bağ zayıf,',
-  'spi.meeting.bag-icin-ortak-gun-yetersiz':'bağ için ortak gün yetersiz. Eşik gün sayısına göre büyür (Analiz › Bağlar).',
+  'spi.meeting.bag-icin-ortak-gun-yetersiz':'bağ için ortak gün yetersiz. Eşik gün sayısına göre büyür (Analiz › Birlikte değişenler).',
   'spi.meeting.planlarin-uyumu':'Planların uyumu',
   'spi.meeting.tek-karar':'Tek karar',
   'spi.meeting.one-cikan-is-yok':'Öne çıkan iş yok.',
@@ -40,14 +40,15 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meeting.karari-takibe-al':'Kararı takibe al',
   'spi.meeting.patron':'Patron',
   'spi.meeting.tutanak':'Tutanak',
-  'spi.meeting.kural-motorunun-karari':'Kural motorunun kararı:',
+  'spi.meeting.kural-motorunun-karari':'Kurala göre karar:',
+  'spi.meeting.haftayi-ac':'Haftanın grafikleri',
   'spi.meeting.tutanagi-dinle':'Tutanağı dinle',
   'spi.meeting.durdur':'Durdur',
   'spi.meeting.eski-toplanti-tutanaklari':'Eski toplantı tutanakları',
   'spi.meeting.karar-takibe-alindi':'Karar takibe alındı',
   'spi.meeting.i-nceleme':'İnceleme',
 });
-window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'spi', cekmece:'ofis', ad:'İnceleme', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'spi', cekmece:'ofis', ad:'İnceleme', sira:20 });
 
 SP.Screens.meeting = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;
@@ -64,13 +65,14 @@ SP.Screens.meeting = (function(){
         <span class="inc-sayi__ad">${s.ad}</span>
         <span class="inc-sayi__deger num">${s.deger == null ? '—' : SP.Inceleme.sayi(s.deger)}<small>${s.deger == null ? '' : s.birim}</small></span>
         <span class="inc-sayi__not">${s.deger == null ? 'veri yok' : s.etiket + (s.n ? ' · ' + s.n + ' gün' : '')}</span>
-      </div>`)}</div>` });
+      </div>`)}</div>
+      <div class="mt-8">${K.Button({ label:yz('spi.meeting.haftayi-ac'), size:'sm', tone:'ghost', act:'inceleme-hafta' })}</div>` });
   }
 
   function gundemKutusu(r){
     const rows = r.gundem;
     const enCok = Math.max.apply(null, rows.map(a => a.score).concat([1]));
-    return K.Kutu({ ad:yz('spi.meeting.gundem'), yuva:'kural motorunun sırası',
+    return K.Kutu({ ad:yz('spi.meeting.gundem'), yuva:'önem sırasıyla',
       govde:html`<ol class="inc-gundem">${map(rows, a => html`<li>
         <span class="inc-gundem__cubuk" style="${'--oran:' + Math.round(100 * a.score / enCok) + '%'}" aria-hidden="true"></span>
         <div class="grow"><b>${a.label}</b><span>${a.detail}</span><small>${a.note}</small></div>
@@ -115,7 +117,7 @@ SP.Screens.meeting = (function(){
   function kararKutusu(r){
     const k = r.karar;
     const ozet = S.ui.incelemeOzet && S.ui.incelemeOzet.tarih === r.tarih ? S.ui.incelemeOzet : null;
-    return K.Kutu({ ad:yz('spi.meeting.tek-karar'), yuva:'kural motoru', class:'inc-karar',
+    return K.Kutu({ ad:yz('spi.meeting.tek-karar'), yuva:'kurala göre', class:'inc-karar',
       govde:html`${k.calm ? html`<p><b>${yz('spi.meeting.one-cikan-is-yok')}</b> ${k.why}</p>`
           : html`<p><b>${k.title}</b></p><p class="small">${k.why}</p>${when(k.action, () => html`<p class="small"><b>${yz('spi.meeting.ne-yapilir')}</b> ${k.action}</p>`)}`}
         ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">Patron'un özeti · ${P.sourceBadge(ozet.source)}</span><p>${ozet.text}</p></div>`)}`,
@@ -258,6 +260,7 @@ SP.Screens.meeting = (function(){
   }
 
   const handle = {
+    async 'inceleme-hafta'(){ S.ui.analyticsTab = 'bu'; SP.App.go('analytics'); },
     async 'inceleme-takip'(){
       const k = SP.Calc.nextAction();
       if(k.calm) return;
@@ -312,7 +315,7 @@ SP.Screens.meeting = (function(){
   return {
     id:'meeting',
     /* İnceleme'nin tek işi haftanın kararı: sayıları gördükten sonra karşılaştırmalar isteyene. */
-    kucukVarsayilan:['verinden-çıkan-fikirler', 'belirgin-bağlar'],
+    kucukVarsayilan:['son-yedi-gün', 'verinden-çıkan-fikirler', 'belirgin-bağlar'],
     /* Sade (2026-10-16): öncelik tablosu sabit bir kuraldır, her açılışta
        açık durmaz; başlığına dokununca açılır. Gündem ve modelin rolü
        ekranın ⓘ kartında (office, no-model ipuçları). */

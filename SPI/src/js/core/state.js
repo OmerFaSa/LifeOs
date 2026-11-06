@@ -117,7 +117,7 @@ SP.S = {
     moveTab:'bugun',       // bugun | kardiyo | kuvvet | esneklik | dinlenme | ilerleme
     movePattern:'all',     // kuvvet alanindaki kalip seridinde secili olan
     workoutOpen:null,
-    basketTab:'butce',     // butce | sepet | ikame | fiyat
+    basketTab:'sepet',     // butce | sepet | ikame | fiyat
     priceEdit:null,
     trendMarker:'weight',
     trendRange:90,

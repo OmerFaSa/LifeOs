@@ -36,7 +36,7 @@
     it('iç içelik iki kat: bölüm başka bölüm taşımaz; Çalışma en çok altı bölüm', () => {
       SP.App.SECTIONS.forEach(g => g.views.forEach(v => expect(v.views).toBe(undefined)));
       const cal = SP.App.SECTIONS.find(g => g.id === 'calisma');
-      expect(cal.views.map(v => v.route).join(',')).toBe('labs,meals,kitchen,move,basket');
+      expect(cal.views.map(v => v.route).join(',')).toBe('meals,move,labs,kitchen,basket');   // sık kullanılan önde (2026-11-06)
     });
 
     it('her ekran yolunu söyler; tek bölümlü çekmecede yalnız ad', () => {

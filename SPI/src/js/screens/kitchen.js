@@ -36,7 +36,7 @@ window.LIFEOS.PARCA.yazilar({
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 window.LIFEOS.PARCA.yazilar({
-  'spi.kitchen.pisen-yemek':'Pişen yemek',
+  'spi.kitchen.pisen-yemek':'Yemeği paylaştır',
   'spi.kitchen.tencerenin-tamami':'Tencerenin tamamı',
   'spi.kitchen.yemek':'Yemek',
   'spi.kitchen.toplam-gram':'Toplam gram',
@@ -89,7 +89,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.kitchen.kalori-protein-yag-ve-karbon':'Kalori, protein, yağ ve karbonhidrat zorunlu',
   'spi.kitchen.mutfak':'Mutfak',
 });
-window.LIFEOS.PARCA.sayfa({ id:'kitchen', modul:'spi', king:{ sira:30, ad:'Mutfak', es:['mutfak', 'mutfağ', 'tarif'] }, cekmece:'calisma', ad:'Mutfak', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'kitchen', modul:'spi', king:{ sira:30, ad:'Mutfak', es:['mutfak', 'mutfağ', 'tarif'] }, cekmece:'calisma', ad:'Mutfak', sira:40 });
 
 SP.Screens.kitchen = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

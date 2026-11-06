@@ -85,7 +85,7 @@ window.LIFEOS.PARCA.komut({ modul:'spi', sira:70, id:'act:backup', kind:'Eylem',
   hint:'Veri', run:() => { SP.S.ui.guideTab = 'veri'; SP.App.go('guide'); } });
 window.LIFEOS.PARCA.yazilar({
   'spi.guide.kullanim':'Kullanım',
-  'spi.guide.ofis':'Ofis',
+  'spi.guide.yapay-zeka':'Yapay zekâ',
   'spi.guide.veri':'Veri',
   'spi.guide.sinirlar':'Sınırlar',
   'spi.guide.nasil-kullanilir':'Nasıl kullanılır',
@@ -224,7 +224,7 @@ SP.Screens.guide = (function(){
 
   const TABS = [
     { id:'kullanim', label:yz('spi.guide.kullanim'), icon:'guide' },
-    { id:'model',    label:yz('spi.guide.ofis'),     icon:'zap' },
+    { id:'model',    label:yz('spi.guide.yapay-zeka'), icon:'zap' },
     { id:'veri',     label:yz('spi.guide.veri'),     icon:'layers' },
     { id:'sinir',    label:yz('spi.guide.sinirlar'), icon:'shield' },
   ];

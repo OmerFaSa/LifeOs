@@ -68,9 +68,9 @@ window.LIFEOS.PARCA.yazilar({
   'spi.team.bu-uzman-neye-bakar':'Bu uzman neye bakar?',
   'spi.team.modele-ne-gider':'Modele ne gider?',
   'spi.team.uzmanin-gordugu-ozet':'Uzmanın gördüğü özet',
-  'spi.team.ajan-hesap-yapmaz-butun-sayi':'Ajan hesap yapmaz: bütün sayılar bu brifingden gelir. Brifingde olmayan bir sayıyı yazamaz.',
+  'spi.team.ajan-hesap-yapmaz-butun-sayi':'Uzman hesap yapmaz: bütün sayılar bu brifingden gelir. Brifingde olmayan bir sayıyı yazamaz.',
   'spi.team.sorabileceklerin':'Sorabileceklerin',
-  'spi.team.ajan-onerdi':'ajan önerdi',
+  'spi.team.ajan-onerdi':'uzman önerdi',
   'spi.team.vazgecildi':'vazgeçildi',
   'spi.team.geri-alindi':'geri alındı',
   'spi.team.gecersizlesti':'geçersizleşti',
@@ -81,7 +81,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.team.sohbet-temizlendi':'Sohbet temizlendi',
   'spi.team.danisma':'Danışma',
 });
-window.LIFEOS.PARCA.sayfa({ id:'team', modul:'spi', cekmece:'ofis', ad:'Danışma', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'spi', cekmece:'ofis', ad:'Danışma', sira:10 });
 
 SP.Screens.team = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;

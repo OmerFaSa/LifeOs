@@ -165,7 +165,8 @@ SP.App = (function(){
     if(id === 'labs'){
       const f = M.openFlags().filter(x => !x.ack).length;
       if(f) return { text:String(f), quiet:false };
-      const due = SP.Bio.overdue().length;
+      /* Hiç test girmemiş kişiye «10» bir şey söylemez: sayı ancak kayıt varken anlamlı. */
+      const due = S.labs.length ? SP.Bio.overdue().length : 0;
       return due ? { text:String(due), quiet:true } : null;
     }
     if(id === 'meals'){
@@ -2195,7 +2196,7 @@ SP.App = (function(){
     }
   }
 
-  return { girisKur:() => girisKurucu(), gunuKapatKur:() => gunuKapatKurucu(), girildi, sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
+  return { badgeFor, girisKur:() => girisKurucu(), gunuKapatKur:() => gunuKapatKurucu(), girildi, sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan, enterEylemi, kisayolDugmeleri };
 })();
 

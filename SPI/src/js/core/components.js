@@ -240,7 +240,7 @@ SP.C = (function(){
         <section class="${cls('sayfabolum', grupId(g) === aktif && 'is-on')}" id="${'bl-' + grupId(g)}" aria-labelledby="${'bl-' + grupId(g) + '-ad'}">
           <h2 class="sayfabolum__ad" id="${'bl-' + grupId(g) + '-ad'}" tabindex="-1">${g}</h2>
           ${map(uyeler(g), x => html`<button class="minrow" ${attrs({ 'data-act':o.act, 'data-tab':x.id })}>
-            <span class="minrow__label">${x.ad}</span><span class="minrow__detail">${x.sayi != null ? x.sayi + ' ' : ''}›</span></button>`)}
+            <span class="minrow__label">${x.ad}${when(x.not, () => html`<span class="tiny dim sayfagrup__not">${x.not}</span>`)}</span><span class="minrow__detail">${x.sayi != null ? x.sayi + ' ' : ''}›</span></button>`)}
         </section>`)}</div>`;
   }
 

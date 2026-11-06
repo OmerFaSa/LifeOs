@@ -61,7 +61,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meals.fotograftan':'Fotoğraftan',
   'spi.meals.ogun':'Öğün',
   'spi.meals.ogunlerimi-duzenle':'Öğünlerimi düzenle',
-  'spi.meals.1-tabak-etli-kuru-fasulye':'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
+  'spi.meals.1-tabak-etli-kuru-fasulye':'Örn. 1 tabak fasulye, 2 dilim ekmek',
   'spi.meals.ogun-metni':'Öğün metni',
   'spi.meals.ekle':'Ekle',
   'spi.meals.tamami':'Tamamı',
@@ -122,7 +122,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meals.profil':'Profil',
   'spi.meals.tahlil-bagi':'Tahlil bağı',
   'spi.meals.yukseltildi':'yükseltildi.',
-  'spi.meals.oneri':'Öneri',
+  'spi.meals.oneri':'Ne yesem',
   'spi.meals.mikro-besinler':'Mikro besinler',
   'spi.meals.alinan-ve-emilen-ayri-goster':'Alınan ve emilen ayrı gösterilir',
   'spi.meals.alinan':'Alınan',
@@ -161,7 +161,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meals.besin-degeri':'Besin değeri',
   'spi.meals.gunluk-enerji':'Günlük enerji',
   'spi.meals.profili-tamamla':'Profili tamamla',
-  'spi.meals.bazal-metabolizma':'Bazal metabolizma',
+  'spi.meals.bazal-metabolizma':'Dinlenirken harcanan',
   'spi.meals.mifflin-st-jeor-kilo-boy':'Mifflin-St Jeor · kilo, boy, yaş ve cinsiyet',
   'spi.meals.girilen-hareket':'Girilen hareket',
   'spi.meals.hesaba-girmeyen':'Hesaba girmeyen:',
@@ -180,7 +180,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meals.beslenme-ve-emilim-notlari':'Beslenme ve emilim notları',
   'spi.meals.kanita-dayali-sporcu-beslenm':'Kanıta dayalı sporcu beslenmesi ve biyoyararlanım senaryoları',
   'spi.meals.akilli-i-lke':'Akıllı İlke',
-  'spi.meals.makrolar':'Makrolar',
+  'spi.meals.makrolar':'Besin dağılımı',
   'spi.meals.ogun-girilince-protein-karbo':'Öğün girilince protein, karbonhidrat ve yağ burada çizilir.',
   'spi.meals.protein-2':'Protein ',
   'spi.meals.su-14-gun':'Su · 14 gün',
@@ -199,9 +199,11 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meals.bugun-alinan-veri-yok':'bugün alınan · veri yok',
   'spi.meals.bugun-alinan':'bugün alınan',
   'spi.meals.protein-veri-yok':'protein · veri yok',
-  'spi.meals.ozet':'Özet',
+  'spi.meals.ozet':'Gidişat',
+  'spi.meals.henuz-ogun-yok':'Henüz öğün yok',
+  'spi.meals.ogun-girdikce':'Öğün ve su girdikçe burada günlerin dizilir.',
 });
-window.LIFEOS.PARCA.sayfa({ id:'meals', modul:'spi', king:{ sira:20, ad:'Öğün', es:['öğün', 'besin', 'yemek', 'beslenme'] }, cekmece:'calisma', ad:'Öğün', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'meals', modul:'spi', king:{ sira:20, ad:'Öğün', es:['öğün', 'besin', 'yemek', 'beslenme'] }, cekmece:'calisma', ad:'Öğün', sira:10 });
 
 SP.Screens.meals = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
@@ -347,14 +349,16 @@ SP.Screens.meals = (function(){
     return K.Entry({
       label:yz('spi.meals.ogun-ekle'), hint:'portion',
       body:html`
-        <div class="quick">
-          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot || guessSlot(), aria:yz('spi.meals.ogun'),
-            options:acikSlotlar().map(s => ({ value:s.id, label:s.label + (s.saat ? ' · ' + s.saat : '') })), change:'pick-slot' })}
-          ${K.IconButton({ icon:'gear', size:'sm', plain:true, aria:yz('spi.meals.ogunlerimi-duzenle'), act:'ogun-duzen' })}
-          ${K.Mic({ target:'meal-text' })}
+        <div class="quick quick--tek">
           ${K.Input({ id:'meal-text', placeholder:yz('spi.meals.1-tabak-etli-kuru-fasulye'),
             aria:yz('spi.meals.ogun-metni'), value:S.ui.mealDraftText || '' })}
           ${K.Button({ label:yz('spi.meals.ekle'), tone:'primary', act:'add-meal' })}
+        </div>
+        <div class="quick quick--alt mt-8">
+          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot || guessSlot(), aria:yz('spi.meals.ogun'),
+            options:acikSlotlar().map(s => ({ value:s.id, label:s.label + (s.saat ? ' · ' + s.saat : '') })), change:'pick-slot' })}
+          ${K.Mic({ target:'meal-text' })}
+          ${K.IconButton({ icon:'gear', size:'sm', plain:true, aria:yz('spi.meals.ogunlerimi-duzenle'), act:'ogun-duzen' })}
         </div>
         <div class="row wrap gap-8 mt-8">
           ${K.Button({ label:yz('spi.meals.besin-ara'), size:'sm', tone:'ghost', act:'open-search' })}
@@ -527,6 +531,8 @@ SP.Screens.meals = (function(){
       ] }),
       body:rows.length
         ? html`${map(sorted, mealCard)}`
+        /* Bugün için yazma kutusu hemen üstte; ikinci düğme yalnız başka güne bakarken. */
+        : d === U.todayISO() ? P.empty(yz('spi.meals.bu-gune-henuz-ogun-girilmedi'))
         : P.empty(yz('spi.meals.bu-gune-henuz-ogun-girilmedi'), yz('spi.meals.ogun-ekle'), 'focus-meal', null, true),
     });
   }
@@ -972,8 +978,8 @@ SP.Screens.meals = (function(){
     if(!tg.ok){
       return K.Card({ title:yz('spi.meals.gunluk-enerji'),
         body:K.Notice({ tone:'warn', title:yz('spi.meals.hesaplanamiyor'),
-          body:yz('spi.meals.profilde') + tg.missing.join(', ') + ' eksik. Bu üçü olmadan bazal '
-             + 'metabolizma tahmin edilmez; uydurulmuş bir sayı yazılmaz.' }),
+          body:yz('spi.meals.profilde') + tg.missing.join(', ') + ' eksik. Bu üçü olmadan günlük enerji '
+             + 'ihtiyacı tahmin edilmez; uydurulmuş bir sayı yazılmaz.' }),
         foot:K.Button({ label:yz('spi.meals.profili-tamamla'), size:'sm',
           act:'go', data:{ 'data-route':'family' } }) });
     }
@@ -1147,13 +1153,24 @@ SP.Screens.meals = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): üç bölüm alt alta; bölüm çubuğu kaydırır,
      günün öğün sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o bölüm
      sakin bir notla düşer. */
+  function ogunVar(){
+    for(let i = 0; i < 30; i++){
+      const t = U.iso(U.addDays(U.today(), -i));
+      if(M.mealsOf(t).length || (S.vitals[t] && S.vitals[t].water != null)) return true;
+    }
+    return false;
+  }
   const BODIES = {
     /* iPhone Faz 2b: sol sütun iş (öğünü yaz, günün öğünleri), sağ sütun
        durum ve kısayol (dönen «Öğün» kartı, sık öğünler); raf DOM sırasıyla
        ikişer dizer. Telefonda tek sütun: önce yazma alanı. */
     gunluk:() => html`${K.Ledger(() => [quickEntry(), dayCard(), sablonKutusu(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
       <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
-    ozet:() => html`${raw(LIFEOS.PARCA.yer('meals', 'ust', K))}${K.Ledger(() => [DonenOgun()])}`,
+    /* Öğün ve su kaydı yoksa dört boş kart yerine ilk adım (girilmemiş gün sıfır değildir). */
+    ozet:() => !ogunVar() ? K.Kutu({ ad:yz('spi.meals.henuz-ogun-yok'),
+        govde:html`<p class="small">${yz('spi.meals.ogun-girdikce')}</p>
+          <div class="mt-8">${K.Button({ label:yz('spi.meals.ogun-ekle'), tone:'primary', act:'meal-tab', data:{ 'data-tab':'gunluk' } })}</div>` })
+      : html`${raw(LIFEOS.PARCA.yer('meals', 'ust', K))}${K.Ledger(() => [DonenOgun()])}`,
     oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard(), akilliBeslenmeKutusu()])}
       <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
     deger:() => html`${K.Ledger(() => [microCard(), gapCard()])}

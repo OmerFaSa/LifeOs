@@ -24,8 +24,20 @@ window.LIFEOS.PARCA.yazilar({
   'spi.analytics.haftalik-rapor':'Haftalık rapor',
   'spi.analytics.ozet':'Özet',
   'spi.analytics.hafta':'Hafta',
-  'spi.analytics.egilim':'Eğilim',
-  'spi.analytics.baglar':'Bağlar',
+  'spi.analytics.egilim':'Gidişat',
+  'spi.analytics.baglar':'Birlikte değişenler',
+  'spi.analytics.not-baglar':'Hangi ölçümler birlikte iniyor, çıkıyor',
+  'spi.analytics.not-rapor':'Haftanın tek sayfası',
+  'spi.analytics.not-denetim':'Eskiyen tahlil, girilmeyen ölçüm, açık uyarı',
+  'spi.analytics.not-durust':'Uyarılarım işe yaradı mı, kaç dakika aldı',
+  'spi.analytics.not-kavram':'Terimlerin anlamı ve kaynakları',
+  'spi.analytics.not-yol':'Hedeflerinin haritası',
+  'spi.analytics.not-ice':'Başka uygulamadan veri al',
+  'spi.analytics.henuz-kayit-yok':'Henüz kayıt yok',
+  'spi.analytics.kayit-girdikce':'Kayıt girdikçe burada uyku, su, öğün ve hareketin görünür.',
+  'spi.analytics.bugunu-kaydet':'Bugünü kaydet',
+  'spi.analytics.kayit-bakim-bekliyor':'kayıt bakım bekliyor',
+  'spi.analytics.belirgin-bag':'belirgin bağ bulundu',
   'spi.analytics.daha':'Daha',
   'spi.analytics.veri-aktar':'Veri aktar',
   'spi.analytics.kapandi-sapma':'Kapandı — sapma %',
@@ -39,9 +51,9 @@ window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 window.LIFEOS.PARCA.yazilar({
   'spi.analytics.capraz-baglar':'Çapraz bağlar',
-  'spi.analytics.fizyoloji-ve-kavramlar':'Fizyoloji ve kavramlar',
-  'spi.analytics.denetim':'Denetim',
-  'spi.analytics.durustluk':'Dürüstlük',
+  'spi.analytics.fizyoloji-ve-kavramlar':'Bilgi ve kavramlar',
+  'spi.analytics.denetim':'Eksik kayıtlar',
+  'spi.analytics.durustluk':'Sistemin karnesi',
   'spi.analytics.birlikte-hareket-etmek-sebep':'Birlikte hareket etmek, sebep olmak demek değildir.',
   'spi.analytics.r':'r = ',
   'spi.analytics.zayif':'zayıf',
@@ -148,14 +160,39 @@ SP.Screens.analytics = (function(){
     { id:'ozet',   label:yz('spi.analytics.ozet'),     icon:'chart' },
     { id:'bu',     label:yz('spi.analytics.hafta'),    icon:'list' },
     { id:'seri',   label:yz('spi.analytics.egilim'),   icon:'chart' },
-    { id:'capraz', label:yz('spi.analytics.baglar'),   icon:'layers' },
-    { id:'hafta',  label:yz('spi.analytics.haftalik-rapor'), icon:'list', grup:yz('spi.analytics.daha') },
-    { id:'denetim', label:yz('spi.analytics.denetim'), icon:'list', grup:yz('spi.analytics.daha') },
-    { id:'kavramlar', label:yz('spi.analytics.fizyoloji-ve-kavramlar'), icon:'book', grup:yz('spi.analytics.daha') },
-    { id:'durust', label:yz('spi.analytics.durustluk'), icon:'shield', grup:yz('spi.analytics.daha') },
-    { id:'yol',    label:yz('spi.analytics.yol-haritasi'), icon:'target', grup:yz('spi.analytics.daha') },
-    { id:'ice',    label:yz('spi.analytics.veri-aktar'), icon:'layers', grup:yz('spi.analytics.daha') },
+    { id:'capraz', label:yz('spi.analytics.baglar'),   icon:'layers', grup:yz('spi.analytics.daha'), not:yz('spi.analytics.not-baglar') },
+    { id:'hafta',  label:yz('spi.analytics.haftalik-rapor'), icon:'list', grup:yz('spi.analytics.daha'), not:yz('spi.analytics.not-rapor') },
+    { id:'denetim', label:yz('spi.analytics.denetim'), icon:'list', grup:yz('spi.analytics.daha'), not:yz('spi.analytics.not-denetim') },
+    { id:'durust', label:yz('spi.analytics.durustluk'), icon:'shield', grup:yz('spi.analytics.daha'), not:yz('spi.analytics.not-durust') },
+    { id:'kavramlar', label:yz('spi.analytics.fizyoloji-ve-kavramlar'), icon:'book', grup:yz('spi.analytics.daha'), not:yz('spi.analytics.not-kavram') },
+    { id:'yol',    label:yz('spi.analytics.yol-haritasi'), icon:'target', grup:yz('spi.analytics.daha'), not:yz('spi.analytics.not-yol') },
+    { id:'ice',    label:yz('spi.analytics.veri-aktar'), icon:'layers', grup:yz('spi.analytics.daha'), not:yz('spi.analytics.not-ice') },
   ];
+
+  /* Son 14 günde kayıt olan gün sayısı: kartlar mı, ilk adım mı çizilecek?
+     Girilmemiş gün sıfır değildir (AGENTS §1.2): kayıt yoksa boş kart çizilmez. */
+  function kayitliGun(){
+    let n = 0;
+    for(let i = 0; i < 14; i++){
+      const t = U.iso(U.addDays(U.today(), -i));
+      const v = S.vitals[t];
+      if((v && Object.keys(v).some(k => v[k] != null)) || SP.Model.mealsOf(t).length || SP.Model.workoutsOf(t).length) n++;
+    }
+    return n;
+  }
+  function ilkAdim(){
+    return K.Kutu({ ad:yz('spi.analytics.henuz-kayit-yok'),
+      govde:html`<p class="small">${yz('spi.analytics.kayit-girdikce')}</p>
+        <div class="mt-8">${K.Button({ label:yz('spi.analytics.bugunu-kaydet'), tone:'primary', act:'go', data:{ 'data-route':'today' } })}</div>` });
+  }
+  /* Daha'daki iş bekliyorsa Özet'te söylenir: uyarı arkaya gömülmez. */
+  function dikkatSatirlari(){
+    const bakim = SP.Audit.all().filter(f => f.severity === 'warn').length;
+    const bag = SP.Calc.crossFindings(60).filter(r => r.ok && !r.weak).length;
+    const satir = (metin, tab) => html`<button class="minrow" data-act="an-tab" data-tab="${tab}"><span class="minrow__label">${metin}</span><span class="minrow__detail">›</span></button>`;
+    if(!bakim && !bag) return '';
+    return html`<div class="mt-16">${when(bakim, () => satir(bakim + ' ' + yz('spi.analytics.kayit-bakim-bekliyor'), 'denetim'))}${when(bag, () => satir(bag + ' ' + yz('spi.analytics.belirgin-bag'), 'capraz'))}</div>`;
+  }
 
   /* --------------------------------------------------------------- capraz */
 
@@ -608,12 +645,13 @@ SP.Screens.analytics = (function(){
   const BODIES = {
     /* Başta bugünün özeti (KOLAY-PLANI Faz 2): Bugün'den taşınan karolar,
        Durum ve Öneri (screens/today.js ozet). */
-    ozet:() => raw(SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet() : ''),
+    ozet:() => { const bos = !kayitliGun();
+      return html`${when(bos, ilkAdim)}${raw(SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet({ karosuz:bos }) : '')}${dikkatSatirlari()}`; },
     yol:() => yolHaritasi(),
     ice:() => raw(window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''),
     capraz:() => html`${K.Ledger(() => [modelCard(), crossCard(), pairCard()])}
       <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`,
-    bu:() => html`${K.Kutu({ ad:yz('spi.analytics.bu-hafta'), yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
+    bu:() => !kayitliGun() ? ilkAdim() : html`${K.Kutu({ ad:yz('spi.analytics.bu-hafta'), yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
       ${raw(SP.Screens.today && SP.Screens.today.panoUst ? SP.Screens.today.panoUst() : '')}`,
     hafta:() => html`${K.Ledger(() => [reportCard(), disciplineCard(),
         K.Entry({ label:yz('spi.analytics.raporun-mantigi'), meta:'sayı nereden gelir',
@@ -623,7 +661,7 @@ SP.Screens.analytics = (function(){
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
       ])}
       <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`,
-    seri:() => html`${kategorilerHtml()}<div class="mt-16">${K.Ledger(() => [seriesCard()])}</div>
+    seri:() => !kayitliGun() ? ilkAdim() : html`${kategorilerHtml()}<div class="mt-16">${K.Ledger(() => [seriesCard()])}</div>
       <div class="mt-24">${raw(UI.rail(['trend', 'ref-range', 'certainty']))}</div>`,
     kavramlar:() => html`${K.Ledger(() => [derinAnalizCard(), kavramlarCard(), kanitCard()])}`,
     denetim:() => html`${K.Ledger(() => [denetimCard()])}
@@ -806,7 +844,7 @@ SP.Screens.analytics = (function(){
   TABS.forEach(t => LIFEOS.PARCA.blok({ id:'analytics.' + t.id, sayfa:'analytics', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
     return String(K.SayfaBolumleri({ act:'an-tab', aria:yz('spi.analytics.analiz-bolumleri'),
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, govde:LIFEOS.PARCA.yer('analytics', t.id, K) })) }));
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, not:t.not, govde:LIFEOS.PARCA.yer('analytics', t.id, K) })) }));
   }
 
   /* Başka ekrandan istenen bölüm (ofis kartının «Çapraz bağ tablosu» gibi)

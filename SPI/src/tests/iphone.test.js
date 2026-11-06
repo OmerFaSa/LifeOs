@@ -108,6 +108,7 @@
         }finally{ b.bitir(); }
 
         resetState();
+        SP.S.vitals['2026-10-02'] = { water:500 };   // hiç kayıt yoksa ilk adım gelir (bolumler.test)
         b = await bolumle('meals', 'gunluk');
         try{
           const d = b.kok.querySelector('.donen[aria-label="Öğün"]');
@@ -116,6 +117,7 @@
         }finally{ b.bitir(); }
 
         resetState();
+        SP.S.vitals['2026-10-02'] = { water:500 };
         SP.S.profile.weightKg = null;
         b = await bolumle('meals', 'gunluk');
         try{
@@ -158,7 +160,7 @@
         ['evde-ne-var', 'kendi-gıdaların'].forEach(a => expect(b.kucuk.indexOf(a) >= 0).toBe(true));
         /* sıkı ölçü (2d): hane tablosu başvurudur (düzenleme Hane ekranında) — gizli */
         expect(b.gizli.indexOf('hane') >= 0).toBe(true);
-        expect(b.acik.indexOf('pişen-yemek') >= 0).toBe(true);
+        expect(b.acik.indexOf('yemeği-paylaştır') >= 0).toBe(true);
         expect(b.acik.length).toBe(3);
         /* açıklama satırları ekranda değil ⓘ'de; bilgi kaybolmadı */
         ['Tencerede kaç gram', 'Sistemin tablosunda olmayan', 'Genel ev usulü']
@@ -212,7 +214,7 @@
           /* sıkı ölçü (2d): emrin ayrıntısı dönen kartta; kırmızı gerekçe orada söylenir — gizli */
           expect(b.gizli.indexOf('bugünkü-yük') >= 0).toBe(true);
           ['bu-hafta-hareket', 'antrenman-haftası'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
-          expect(b.acik.indexOf('seans-seç') >= 0 && b.acik.indexOf('bugünün-seansları') >= 0).toBe(true);
+          expect(b.acik.indexOf('bugün-ne-yapacaksın') >= 0 && b.acik.indexOf('bugünün-seansları') >= 0).toBe(true);
           expect(b.acik.length <= 3).toBe(true);
           ['Emri toparlanma belirler', 'Öneri toparlanma bandından gelir']
             .forEach(t => expect(b.alan.textContent.indexOf(t)).toBe(-1));

@@ -44,10 +44,10 @@ window.LIFEOS.PARCA.yazilar({
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 window.LIFEOS.PARCA.yazilar({
-  'spi.basket.butce':'Bütçe',
+  'spi.basket.butce':'Aylık',
   'spi.basket.sepet':'Sepet',
-  'spi.basket.i-kame':'İkame',
-  'spi.basket.fiyat':'Fiyat',
+  'spi.basket.i-kame':'Daha ucuzu',
+  'spi.basket.fiyat':'Fiyatlar',
   'spi.basket.haftalik-sepet':'Haftalık sepet',
   'spi.basket.toplam':'Toplam',
   'spi.basket.kisi-basi':'Kişi başı',
@@ -66,7 +66,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.basket.kapsiyor':'kapsıyor',
   'spi.basket.kapsama':'Kapsama',
   'spi.basket.en-ucuz-kaynak':'En ucuz kaynak',
-  'spi.basket.i-kame-firsatlari':'İkame fırsatları',
+  'spi.basket.i-kame-firsatlari':'Daha ucuz seçenekler',
   'spi.basket.sepetindeki-kalemler-icin':'Sepetindeki kalemler için',
   'spi.basket.dusen':'Düşen:',
   'spi.basket.degistir':'Değiştir',
@@ -94,6 +94,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.basket.100-g-da':'100 g\'da',
   'spi.basket.harcama-seritleri':'Harcama şeritleri',
   'spi.basket.talep-tablosu':'Aylık ihtiyaç',
+  'spi.basket.sepet-ilk-adim':'Haftalık alışverişini yaz; maliyet ve besin kapsaması buradan hesaplanır.',
   'spi.basket.veri-yok':'veri yok',
   'spi.basket.tl':'TL',
   'spi.basket.kalem-fiyati-bilinmedigi-ici':'kalem fiyatı bilinmediği için toplamın dışında.',
@@ -152,8 +153,8 @@ SP.Screens.basket = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'butce', label:yz('spi.basket.butce'), icon:'target' },
     { id:'sepet', label:yz('spi.basket.sepet'), icon:'wallet' },
+    { id:'butce', label:yz('spi.basket.butce'), icon:'target' },
     { id:'ikame', label:yz('spi.basket.i-kame'), icon:'refresh' },
     { id:'fiyat', label:yz('spi.basket.fiyat'), icon:'list' },
   ];
@@ -182,8 +183,7 @@ SP.Screens.basket = (function(){
         ${when(b.estimate.pct >= 50 && b.rows.length, () => K.Notice({ tone:'warn', class:'mt-12',
           body:yz('spi.basket.bu-hesabin') + b.estimate.pct + '\'i başlangıç tahminiyle yapıldı. '
             + yz('spi.basket.uygulama-market-taramaz-gerc') }))}`,
-      foot:html`${K.Button({ label:yz('spi.basket.kalem-ekle'), size:'sm', act:'open-add' })}
-        ${K.Button({ label:yz('spi.basket.ogunlerimden-liste'), size:'sm', act:'open-ogun-liste' })}
+      foot:html`${K.Button({ label:yz('spi.basket.ogunlerimden-liste'), size:'sm', act:'open-ogun-liste' })}
         ${K.Button({ label:yz('spi.basket.haftalik-sinir'), size:'sm', act:'open-limit' })}`,
     });
   }
@@ -615,7 +615,16 @@ SP.Screens.basket = (function(){
   const BODIES = {
     butce:() => html`${ustDugme(K.Button({ label:yz('spi.basket.sinir-ve-ucretler'), size:'sm', act:'open-limits' }))}${budgetView()}
       <div class="mt-24">${raw(UI.rail(['budget-rank', 'price-estimate', 'certainty']))}</div>`,
-    sepet:() => html`${ustDugme(K.Button({ label:yz('spi.basket.kalem-ekle'), icon:'plus', size:'sm', tone:'primary', act:'open-add' }))}${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
+    /* Sepet boşken 0 TL ve kapsama kartı değil, tek ilk adım (eksik veri sıfır değildir). */
+    sepet:() => html`${((S.basket && S.basket.items) || []).length
+        ? html`${ustDugme(K.Button({ label:yz('spi.basket.kalem-ekle'), icon:'plus', size:'sm', tone:'primary', act:'open-add' }))}${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}`
+        : K.Ledger(() => [K.Card({ title:yz('spi.basket.haftalik-sepet'), hint:'price-estimate',
+            body:html`<p class="small">${yz('spi.basket.sepet-ilk-adim')}</p>
+              <div class="row wrap gap-8 mt-8">
+                ${K.Button({ label:yz('spi.basket.kalem-ekle'), icon:'plus', tone:'primary', act:'open-add' })}
+                ${K.Button({ label:yz('spi.basket.ogunlerimden-liste'), act:'open-ogun-liste' })}
+                ${K.Button({ label:yz('spi.basket.haftalik-sinir'), tone:'ghost', act:'open-limit' })}
+              </div>` })])}
       <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`,
     ikame:() => html`${K.Ledger(() => [swapCard(), bulkCard(),
         /* Bütçe bölümündeki «Bütçenin yeri» ile aynı tablo: aynı başlık aynı

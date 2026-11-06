@@ -40,7 +40,7 @@
           /* Gün: öğün yuvaları ve Öğün'e bağ. */
           const g = d.querySelector('.bugun__alan[aria-label="Gün"]');
           expect(g.querySelector('.minrow.is-done .minrow__label').textContent).toBe('Kahvaltı');
-          expect(!!g.querySelector('[data-act="go"][data-route="meals"]')).toBe(true);
+          expect(!!g.querySelector('[data-act="gk-ogun"]')).toBe(true);
           ['.pk-ust', '.donen', '.kapak__sayi'].forEach(c => expect(d.querySelector(c)).toBe(null));
         }finally{ d.remove(); }
       });

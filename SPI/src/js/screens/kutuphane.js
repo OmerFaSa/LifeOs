@@ -12,7 +12,7 @@
    istenir ve listelenir. HKM kapalıyken liste yine okunur; kayıtlar bu
    cihazdadır. */
 window.LIFEOS.PARCA.yazilar({
-  'spi.kutuphane.hkm-arastirma-burosu':'HKM · Araştırma Bürosu',
+  'spi.kutuphane.hkm-arastirma-burosu':'kaynaktan araştırılır',
   'spi.kutuphane.king-once-maliyet-ve-sure':'King önce maliyet ve süre teklifi yapar; sonuç Onaylar’a teklif olarak gelir ve SPİ ',
   'spi.kutuphane.ne-tur-yer':'Ne tür yer?',
   'spi.kutuphane.dogrulanmadi-kaynaksiz-model':'Doğrulanmadı: kaynaksız, modelin bilgisidir. ',

@@ -5,9 +5,10 @@
   const dom = h => { const k = document.createElement('div'); k.innerHTML = String(h); return k; };
 
   describe('Vitrin · SPİ Analiz', () => {
-    it('oz-041 oz-027 oz-034 oz-036 oz-037 veri yokken de kartlar çizilir ve «veri yok» der', async () => {
+    it('oz-041 oz-027 oz-034 oz-036 oz-037 uyku girilmemişken kartlar çizilir ve «veri yok» der', async () => {
       await withTodayAsync('2026-10-12', async () => {
         resetState();
+        SP.S.vitals['2026-10-12'] = { water:500 };   // hiç kayıt yoksa ilk adım gelir (bolumler.test)
         const k = dom(await SP.Screens.analytics.render());
         ['041', '027', '034', '036', '037'].forEach(n => expect(k.querySelector('[data-oz~="' + n + '"]')).toBeTruthy());
         expect(k.querySelector('[data-oz="034"]').textContent).toContain('veri yok');

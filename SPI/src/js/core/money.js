@@ -312,7 +312,7 @@ SP.Money = (function(){
     rows.push({
       id:'test', agent:'lab', label:yz('spi.core.money.test'),
       detail:overdue.length
-        ? overdue.length + ' panelin ölçüm borcu var'
+        ? overdue.length + ' test grubunun zamanı geldi'
         : yz('spi.core.money.vadesi-gecmis-panel-yok'),
       monthly:overdue.length && testFee != null ? U.round(overdue.length * testFee / 6, 0) : null,
       cert:!overdue.length ? 'measured' : (testFee == null ? 'missing' : 'estimated'),

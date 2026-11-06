@@ -94,7 +94,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.office.masalar-arasi-devir-2':'masalar arası devir',
   'spi.office.karar-takipte':'karar takipte',
 });
-window.LIFEOS.PARCA.sayfa({ id:'office', modul:'spi', cekmece:'ofis', ad:'Masalar', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'spi', cekmece:'ofis', ad:'Uzmanlar', sira:30 });
 
 SP.Screens.office = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;
@@ -195,8 +195,8 @@ SP.Screens.office = (function(){
           </div>
           ${when(notes.length, () => K.Badge({ label:String(notes.length),
             tone:notes.some(n => n.tone === 'danger') ? 'danger' : 'warn' }))}
-          ${SP.Office.ready(agent.id) ? K.Badge({ label:yz('spi.office.model-acik'), tone:'info' })
-            : K.Badge({ label:yz('spi.office.hazir-kurallar'), tone:'muted', icon:false })}
+          ${/* Model kapalıysa sayfanın başı bir kez söylüyor; dört kartta dört kez değil. */''}
+          ${when(SP.Office.ready(agent.id), () => K.Badge({ label:yz('spi.office.model-acik'), tone:'info' }))}
         </div>
         ${tekrar ? '' : K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
@@ -392,15 +392,15 @@ SP.Screens.office = (function(){
   LIFEOS.PARCA.blok({ id:'office.aciklamalar', sayfa:'office', yer:'y1', sira:10, ad:'Açıklamalar', ciz({ flags, vo }){
     return raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']));
   } });
-  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'y2', sira:10, ad:'Masa', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'y2', sira:30, ad:'Masa', ciz({ flags, vo }){
     return when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('spi.office.masa'), meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'y2', sira:20, ad:'Günün toplantısı', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'y2', sira:35, ad:'Günün toplantısı', ciz({ flags, vo }){
     return when(vo.toplanti, () => K.Entry({ wide:true, label:yz('spi.office.gunun-toplantisi'), meta:'her masadan tek cümle',
           body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'Günün özeti', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:10, ad:'Günün özeti', ciz({ flags, vo }){
     return briefingCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.patron-masasi', sayfa:'office', yer:'y2', sira:40, ad:'Patron masası', ciz({ flags, vo }){
@@ -410,8 +410,8 @@ SP.Screens.office = (function(){
   LIFEOS.PARCA.blok({ id:'office.handoffentry', sayfa:'office', yer:'y2', sira:50, ad:'Devir notu', ciz({ flags, vo }){
     return handoffEntry();
   } });
-  LIFEOS.PARCA.blok({ id:'office.dort-uzman-masasi', sayfa:'office', yer:'y2', sira:60, ad:'Dört uzman masası', ciz({ flags, vo }){
-    return K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:yz('spi.office.dort-uzman-masasi'), meta:COACHES.length + ' ajan',
+  LIFEOS.PARCA.blok({ id:'office.dort-uzman-masasi', sayfa:'office', yer:'y2', sira:20, ad:'Dört uzman masası', ciz({ flags, vo }){
+    return K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:yz('spi.office.dort-uzman-masasi'), meta:COACHES.length + ' uzman',
           body:html`<div class="desks">${map(COACHES, deskCard)}</div>` });
   } });
   LIFEOS.PARCA.blok({ id:'office.agendacard', sayfa:'office', yer:'y2', sira:70, ad:'Gündem', ciz({ flags, vo }){
@@ -521,7 +521,8 @@ SP.Screens.office = (function(){
     /* iPhone Faz 4 («brifing + tek eylem»): açık günün brifingi ve Patron
        masası; konuşan masa, toplantı satırları, uzman masaları, gündem ve
        kararlar şerit. */
-    kucukVarsayilan:['masalar-arası-devir', 'yetki-ayrımı', 'masa', 'günün-toplantısı', 'dört-uzman-masası',
+    /* «Patron masası» Günün özeti'ni tekrar ediyordu; açık olan dört uzman, bu sayfanın adı. */
+    kucukVarsayilan:['masalar-arası-devir', 'yetki-ayrımı', 'masa', 'günün-toplantısı', 'patron-masası',
       'gündem-adayları', 'takipteki-kararlar'],
     title:yz('spi.office.ofis'),
     headline(){

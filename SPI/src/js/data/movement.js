@@ -270,14 +270,14 @@ SP.EX_ALIASES = (function(){
    "yapilmayan sey" olarak gecer ve gorunmez olur; burada kendi sayfasi
    vardir cunku yuk yonetiminin yarisi odur. */
 SP.AREAS = [
-  { id:'kardiyo', label:'Kardiyo', icon:'pulse', kind:'cardio',
+  { id:'kardiyo', label:'Kardiyo', icon:'pulse', kind:'cardio', kisa:'Yürüyüş, koşu, rota',
     note:'Yürüyüş, koşu ve evde sprint. Haftalık toplam süre %10\'dan hızlı artmaz.' },
-  { id:'kuvvet', label:'Kuvvet', icon:'dumbbell', kind:'strength',
+  { id:'kuvvet', label:'Kuvvet', icon:'dumbbell', kind:'strength', kisa:'Vücut ağırlığıyla basamak basamak',
     note:'Vücut ağırlığıyla altı temel kalıp. İlerleme ağırlıkla değil, merdivenin '
       + 'bir üst basamağıyla olur.' },
-  { id:'esneklik', label:'Esneklik', icon:'leaf', kind:'mobility',
+  { id:'esneklik', label:'Esneklik', icon:'leaf', kind:'mobility', kisa:'Esneme akışları',
     note:'Mobilite akışları. Toparlanma düşükken ağır antrenmanın yerine geçer.' },
-  { id:'dinlenme', label:'Dinlenme', icon:'bed', kind:null,
+  { id:'dinlenme', label:'Dinlenme', icon:'bed', kind:null, kisa:'Toparlanma günleri',
     note:'Yükün diğer yarısı. Boşluk günü değil, planın parçası.' },
 ];
 

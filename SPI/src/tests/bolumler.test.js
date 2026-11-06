@@ -44,10 +44,10 @@
        Kavramlar» bölümünü ekledi; okumalar artık altı. */
     it('oz-019 Analiz: bütün işler tek seçicide; dört bölüm ve «Daha» (2026-11-06)', async () => {
       resetState();
-      const d = await bolumlu('analytics', 'an-tab', ['Özet', 'Hafta', 'Eğilim', 'Bağlar', 'Haftalık rapor', 'Denetim',
-        'Fizyoloji ve kavramlar', 'Dürüstlük', 'Yol haritası', 'Veri aktar', 'Daha']);
+      const d = await bolumlu('analytics', 'an-tab', ['Özet', 'Hafta', 'Gidişat', 'Birlikte değişenler', 'Haftalık rapor', 'Eksik kayıtlar',
+        'Sistemin karnesi', 'Bilgi ve kavramlar', 'Yol haritası', 'Veri aktar', 'Daha']);
       try{
-        expect(gorunen(d)).toEqual(['Özet', 'Hafta', 'Eğilim', 'Bağlar', 'Daha']);
+        expect(gorunen(d)).toEqual(['Özet', 'Hafta', 'Gidişat', 'Daha']);
         /* Sayfada seçicinin dışında bir şey kalmaz: iş ya bir bölümde ya hiç. */
         expect(Array.from(d.querySelector('.bolumcubugu--sayfa').parentElement.children).every(c =>
           c.matches('.bolumcubugu--sayfa, .sayfabolumler'))).toBe(true);
@@ -57,10 +57,10 @@
     it('sadelik: seçici telefonda taşmasın diye en çok beş görünür düğme; sayfa başı boş', async () => {
       resetState();
       for(const [ekran, adlar] of [
-        ['labs', ['Sonuçlar', 'Test gir', 'Geçmiş', 'Daha']],
+        ['labs', ['Sonuçlar', 'Test gir', 'İlaç', 'Daha']],
         ['move', ['Bugün', 'Egzersizler', 'İlerleme']],
-        ['meals', ['Öğünler', 'Özet', 'Öneri', 'Besin değeri']],
-        ['basket', ['Bütçe', 'Sepet', 'İkame', 'Fiyat']],
+        ['meals', ['Öğünler', 'Gidişat', 'Ne yesem', 'Besin değeri']],
+        ['basket', ['Sepet', 'Aylık', 'Daha ucuzu', 'Fiyatlar']],
       ]){
         const d = yerlestir(await SP.Screens[ekran].render());
         try{ expect(gorunen(d)).toEqual(adlar); }finally{ d.remove(); }
@@ -70,6 +70,9 @@
 
     it('sadelik: özet kartları ilk görünüşte değil, kendi bölümünde', async () => {
       resetState();
+      const bugun = SP.U.todayISO();
+      SP.S.meals[bugun] = [{ id:'m1', slot:'ogle', items:[{ foodId:'yumurta', grams:100 }] }];
+      SP.S.workouts.push({ id:'w1', date:bugun, name:'Yürüyüş', kind:'cardio', items:[], minutes:30, rpe:5, note:'', createdAt:new Date().toISOString() });
       const m = yerlestir(await SP.Screens.meals.render());
       const h = yerlestir(await SP.Screens.move.render());
       try{
@@ -93,20 +96,20 @@
       }finally{ b.remove(); l.remove(); }
     });
 
-    it('sadelik: başka ekrandan gelen bölüm isteği gruptaki bölümü de açar (İlaç, Kuvvet, Denetim)', async () => {
+    it('sadelik: başka ekrandan gelen bölüm isteği gruptaki bölümü de açar', async () => {
       resetState();
       const d = yerlestir(await SP.Screens.labs.render());
       try{
-        expect(SP.C.bolumeGit('ilac')).toBe(true);
-        expect(d.querySelector('#bl-ilac').classList.contains('is-on')).toBe(true);
+        expect(SP.C.bolumeGit('kiyas')).toBe(true);
+        expect(d.querySelector('#bl-kiyas').classList.contains('is-on')).toBe(true);
         const on = d.querySelector('.bolumcubugu--sayfa .bolumcubugu__ad.is-on:not([hidden])');
         expect(on.textContent.trim()).toBe('Daha');
         /* Geri düğmesi grubun listesine döner, liste her üyeye gider. */
-        const geri = d.querySelector('#bl-ilac [data-act="lab-tab"]');
+        const geri = d.querySelector('#bl-kiyas .linkbtn[data-act="lab-tab"]');
         expect(geri.textContent).toContain('Daha');
         expect(SP.C.bolumeGit(geri.getAttribute('data-tab'))).toBe(true);
         const liste = Array.from(d.querySelectorAll('.sayfabolum.is-on button.minrow')).map(x => x.getAttribute('data-tab'));
-        expect(liste).toEqual(['kiyas', 'panel', 'ilac', 'trend']);
+        expect(liste).toEqual(['gecmis', 'kiyas', 'trend', 'panel']);
       }finally{
         SP.C.bolumeGit('sonuc');
         d.remove();
@@ -177,6 +180,155 @@
       }finally{ d.remove(); }
     });
 
+    it('anlaşılırlık: Çalışma her gün gerekenle, Ofis soruyla açılır', () => {
+      const views = id => SP.App.SECTIONS.find(s => s.id === id).views.map(v => v.route);
+      expect(views('calisma').slice(0, 2)).toEqual(['meals', 'move']);
+      expect(views('ofis')[0]).toBe('team');
+    });
+
+    it('anlaşılırlık: hiç kayıt yokken Analiz boş kart değil ilk adım gösterir; kayıt gelince kartlar döner', async () => {
+      resetState();
+      let d = yerlestir(await SP.Screens.analytics.render());
+      try{
+        expect(d.querySelector('#bl-ozet [data-act="go"][data-route="today"].btn--primary') != null).toBe(true);
+        expect(d.querySelectorAll('#bl-ozet .kapak__sayi').length).toBe(0);
+        expect(d.querySelector('#bl-bu .pk-ust')).toBe(null);
+      }finally{ d.remove(); }
+      SP.S.vitals[SP.U.todayISO()] = { sleep:7 };
+      d = yerlestir(await SP.Screens.analytics.render());
+      try{
+        expect(d.querySelectorAll('#bl-ozet .kapak__sayi').length).toBe(4);
+        expect(d.querySelector('#bl-ozet [data-act="go"][data-route="today"].btn--primary')).toBe(null);
+      }finally{ d.remove(); delete SP.S.vitals[SP.U.todayISO()]; }
+    });
+
+    it('anlaşılırlık: açık uyarı Daha\'ya gömülmez, Özet\'te satırla söylenir', async () => {
+      resetState();
+      SP.S.vitals[SP.U.todayISO()] = { sleep:7 };
+      const eski = SP.Audit.all;
+      SP.Audit.all = () => [{ id:'x', severity:'warn', title:'t', note:'n', items:[] }];
+      const d = yerlestir(await SP.Screens.analytics.render());
+      try{
+        const s = d.querySelector('#bl-ozet button.minrow[data-tab="denetim"]');
+        expect(!!s).toBe(true);
+        expect(s.textContent).toContain('1 kayıt');
+      }finally{ d.remove(); SP.Audit.all = eski; delete SP.S.vitals[SP.U.todayISO()]; }
+    });
+
+    it('anlaşılırlık: Öğün yazma satırı ve düğmesi tek sırada; boş Analiz sıradaki işi iki kez söylemez', async () => {
+      resetState();
+      const m = yerlestir(await SP.Screens.meals.render());
+      const a = yerlestir(await SP.Screens.analytics.render());
+      try{
+        const k = m.querySelector('#meal-text').closest('.quick--tek');
+        expect(!!k.querySelector('[data-act="add-meal"]')).toBe(true);
+        expect(getComputedStyle(k).flexWrap).toBe('nowrap');
+        expect(a.querySelectorAll('#bl-ozet .donen').length).toBe(1);
+        expect(a.querySelector('#bl-ozet .donen[aria-label="Bugün"]')).toBe(null);
+      }finally{ m.remove(); a.remove(); }
+    });
+
+    it('anlaşılırlık: Uzmanlar önce günün özetini ve dört uzmanı gösterir, rozet tekrarı yok', async () => {
+      resetState();
+      const d = yerlestir(await SP.Screens.office.render());
+      try{
+        const ust = d.textContent;
+        expect(ust.indexOf('Günün özeti') < ust.indexOf('Dört uzman masası')).toBe(true);
+        expect(ust.indexOf('Dört uzman masası') < ust.indexOf('Patron masası')).toBe(true);
+        expect(ust.indexOf('Dört uzman masası') < ust.indexOf('Yetki ayrımı')).toBe(true);
+        expect(d.querySelectorAll('.desk .desk__head .badge--muted').length).toBe(0);
+      }finally{ d.remove(); }
+    });
+
+    it('anlaşılırlık: Daha satırı içini açmadan ne olduğunu söyler', async () => {
+      resetState();
+      for(const [ekran, act] of [['analytics', 'an-tab'], ['labs', 'lab-tab'], ['move', 'move-tab']]){
+        const d = yerlestir(await SP.Screens[ekran].render());
+        try{
+          const satir = Array.from(d.querySelectorAll('button.minrow[data-act="' + act + '"]')).filter(x => !x.closest('#bl-ozet'));
+          expect(satir.length > 0).toBe(true);
+          satir.forEach(x => expect((x.querySelector('.sayfagrup__not') || {}).textContent ? true : false).toBe(true));
+        }finally{ d.remove(); }
+      }
+    });
+
+    it('anlaşılırlık: boş Testler iki yol söyler; yeni kullanıcıya süre rozeti çıkmaz, bayrak çıkar', async () => {
+      resetState();
+      const d = yerlestir(await SP.Screens.labs.render());
+      try{
+        const b = d.querySelector('#bl-sonuc');
+        expect(b.querySelector('.btn--primary[data-act="open-paste"]') != null).toBe(true);
+        expect(b.querySelector('[data-act="lab-tab"][data-tab="giris"]') != null).toBe(true);
+      }finally{ d.remove(); }
+      /* Hiç test yokken «10» rozeti yok; kırmızı bayrak her durumda sayılır. */
+      expect(SP.App.badgeFor('labs')).toBe(null);
+      const eski = SP.Model.openFlags;
+      SP.Model.openFlags = () => [{ id:'x', label:'b', detail:'d', tone:'danger' }];
+      try{ expect(SP.App.badgeFor('labs').text).toBe('1'); }finally{ SP.Model.openFlags = eski; }
+    });
+
+    it('anlaşılırlık: sonuç listesinde sınır cümlesi görünür (AGENTS §1.5)', async () => {
+      resetState();
+      pushLab('2026-03-01', { glucose:90 });
+      const d = yerlestir(await SP.Screens.labs.render());
+      try{ expect(d.querySelector('#bl-sonuc').textContent).toContain('karar hekimindir'); }finally{ d.remove(); }
+    });
+
+    it('anlaşılırlık: boş sepet 0 TL göstermez, ilk adımı söyler; kalem varsa toplam döner', async () => {
+      resetState();
+      SP.S.basket = SP.S.basket || {}; SP.S.basket.items = [];
+      let d = yerlestir(await SP.Screens.basket.render());
+      try{
+        const b = d.querySelector('#bl-sepet');
+        expect(b.querySelector('.btn--primary[data-act="open-add"]') != null).toBe(true);
+        expect(b.querySelector('[data-act="open-ogun-liste"]') != null).toBe(true);
+        expect(b.textContent.indexOf('0 TL')).toBe(-1);
+      }finally{ d.remove(); }
+    });
+
+    it('anlaşılırlık: kayıt yokken Gidişat ve İlerleme boş kart yerine ilk adım; beden ölçüsü kalır', async () => {
+      resetState();
+      const m = yerlestir(await SP.Screens.meals.render());
+      const h = yerlestir(await SP.Screens.move.render());
+      try{
+        expect(m.querySelector('#bl-ozet .pk-ust')).toBe(null);
+        expect(m.querySelector('#bl-ozet .btn--primary[data-tab="gunluk"]') != null).toBe(true);
+        expect(h.querySelector('#bl-ilerleme .pk-ust')).toBe(null);
+        expect(h.querySelector('#bl-ilerleme .btn--primary[data-tab="bugun"]') != null).toBe(true);
+        expect(h.querySelector('#bl-ilerleme').textContent).toContain('Vücut analizi');
+      }finally{ m.remove(); h.remove(); }
+    });
+
+    it('anlaşılırlık: seans kaydedildiyse önce o görünür, seçici açılır bölümde', async () => {
+      resetState();
+      let d = yerlestir(await SP.Screens.move.render());
+      try{ expect(d.querySelector('#bl-bugun details .pickcard[data-id=""]')).toBe(null); }finally{ d.remove(); }
+      SP.S.workouts.push({ id:'w1', date:SP.U.todayISO(), name:'Yürüyüş', kind:'cardio', items:[], minutes:30, rpe:5, note:'', createdAt:new Date().toISOString() });
+      d = yerlestir(await SP.Screens.move.render());
+      try{
+        expect(d.querySelector('#bl-bugun details .pickcard[data-id=""]') != null).toBe(true);
+        expect(d.querySelector('#bl-bugun .pickcard__box')).toBe(null);
+      }finally{ d.remove(); }
+    });
+
+    it('anlaşılırlık: Bugün\'ün öğün düğmesi sıradaki boş öğünü adıyla söyler', async () => {
+      resetState();
+      const d = yerlestir(await SP.Screens.today.render());
+      try{
+        const b = d.querySelector('[data-act="gk-ogun"]');
+        expect(b.textContent).toContain(' ekle');
+        const y = SP.Ogun.liste().find(s => s.id === b.getAttribute('data-slot'));
+        expect(b.textContent).toContain(y.label);
+      }finally{ d.remove(); }
+    });
+
+    it('anlaşılırlık: İnceleme\'nin sayıları Analiz › Hafta\'ya bağlanır', async () => {
+      resetState();
+      const d = yerlestir(await SP.Screens.meeting.render());
+      try{ expect(d.querySelector('[data-act="inceleme-hafta"]') != null).toBe(true); }finally{ d.remove(); }
+      expect(SP.Screens.meeting.kucukVarsayilan.indexOf('son-yedi-gün') >= 0).toBe(true);
+    });
+
     it('sadelik: Danışma iç terim göstermez; İnceleme önce kararı çizer', async () => {
       resetState();
       SP.AGENTS.forEach(a => expect(/Modül|Orkestrat/.test(a.title)).toBe(false));
@@ -204,14 +356,14 @@
 
     it('oz-019 Rehber: dört bölüm alt alta, sekme yok', async () => {
       resetState();
-      (await bolumlu('guide', 'guide-tab', ['Kullanım', 'Ofis', 'Veri', 'Sınırlar'])).remove();
+      (await bolumlu('guide', 'guide-tab', ['Kullanım', 'Yapay zekâ', 'Veri', 'Sınırlar'])).remove();
     });
 
     it('oz-019 Sepet: dört bölüm alt alta; kalem sayısı çubukta rozet', async () => {
       resetState();
       SP.S.basket = SP.S.basket || {};
       SP.S.basket.items = [{ id:'yumurta', qty:1 }, { id:'mercimek', qty:1 }];
-      const d = await bolumlu('basket', 'basket-tab', ['Bütçe', 'Sepet', 'İkame', 'Fiyat']);
+      const d = await bolumlu('basket', 'basket-tab', ['Sepet', 'Aylık', 'Daha ucuzu', 'Fiyatlar']);
       try{
         const r = d.querySelector('.bolumcubugu__ad[data-tab="sepet"] .bolumcubugu__rozet');
         expect(r && r.textContent).toBe('2');
@@ -220,9 +372,9 @@
 
     it('oz-019 Öğün: dört bölüm; ekranda tek dolu düğme (öğünü yaz)', async () => {
       resetState();
-      const d = await bolumlu('meals', 'meal-tab', ['Öğünler', 'Özet', 'Öneri', 'Besin değeri']);
+      const d = await bolumlu('meals', 'meal-tab', ['Öğünler', 'Gidişat', 'Ne yesem', 'Besin değeri']);
       try{
-        const b = d.querySelectorAll('.btn--primary');
+        const b = d.querySelectorAll('#bl-gunluk .btn--primary');
         expect(b.length).toBe(1);
         expect(b[0].getAttribute('data-act')).toBe('add-meal');
         const u = document.createElement('div');
@@ -244,7 +396,7 @@
           .map(h => h.textContent.trim()).filter(x => x.indexOf('Kalıp dengesi') === 0);
         expect(basliklar.length).toBe(1);
         /* Sayfa başı boş: seans Bugün'ün listesinden ve alan kartından başlar. */
-        expect(d.querySelectorAll('.btn--primary').length).toBe(0);
+        expect(d.querySelectorAll('#bl-bugun .btn--primary').length).toBe(0);
         expect(String(SP.Screens.move.actions())).toBe('');
         expect(!!d.querySelector('#bl-bugun [data-act="start-session"][data-id=""]')).toBe(true);
         expect(!!d.querySelector('#bl-kuvvet [data-act="start-area"]')).toBe(true);
@@ -254,12 +406,12 @@
 
     it('oz-019 Testler: yedi bölüm; panel süzgeci sekme değil, eylemi aynı', async () => {
       resetState();
-      const d = await bolumlu('labs', 'lab-tab', ['Sonuçlar', 'Test gir', 'Geçmiş', 'Karşılaştır',
-        'Paneller', 'İlaç', 'Eğilim', 'Daha']);
+      const d = await bolumlu('labs', 'lab-tab', ['Sonuçlar', 'Test gir', 'İlaç', 'Geçmiş', 'Karşılaştır',
+        'Eğilim', 'Paneller', 'Daha']);
       try{
         /* Tek dolu düğme: formun «Testi kaydet»i. */
         const dolu = Array.from(d.querySelectorAll('.btn--primary')).map(x => x.getAttribute('data-act'));
-        expect(dolu).toEqual(['entry-save']);
+        expect(dolu).toEqual(['open-paste', 'entry-save']);   // bölüm başına bir: boş Sonuçlar'ın ilk adımı, formun kaydı
         const u = document.createElement('div');
         u.innerHTML = SP.Screens.labs.actions();
         expect(u.querySelectorAll('.btn--primary').length).toBe(0);
@@ -278,8 +430,8 @@
       iki.forEach(b => { deger[b.id] = (b.ref && b.ref.low != null) ? b.ref.low : 1; });
       pushLab('2026-03-01', deger);
       SP.S.ui.labFilter = iki[0].panel;
-      const d = await bolumlu('labs', 'lab-tab', ['Sonuçlar', 'Test gir', 'Geçmiş', 'Karşılaştır',
-        'Paneller', 'İlaç', 'Eğilim', 'Daha']);
+      const d = await bolumlu('labs', 'lab-tab', ['Sonuçlar', 'Test gir', 'İlaç', 'Geçmiş', 'Karşılaştır',
+        'Eğilim', 'Paneller', 'Daha']);
       try{
         const cip = Array.from(d.querySelectorAll('[data-act="lab-filter"]'));
         expect(cip.length).toBe(3);

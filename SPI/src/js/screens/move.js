@@ -106,12 +106,16 @@ window.LIFEOS.PARCA.yazilar({
   'spi.move.tumu':'Tümü',
   'spi.move.gunun-yuk-emri':'Bugünkü yük',
   'spi.move.egzersizler':'Egzersizler',
+  'spi.move.henuz-seans-yok':'Henüz seans yok',
+  'spi.move.seans-girdikce':'İlk seansını girince haftan ve yükün burada çizilir.',
+  'spi.move.seans-sec-dugme':'Seans seç',
   'spi.move.basamaklar-ve-teknik':'Basamaklar ve teknik',
   'spi.move.diger-seanslar':'Diğer seanslar',
   'spi.move.veri-gir':'Veri gir',
-  'spi.move.seans-sec':'Seans seç',
+  'spi.move.seans-sec':'Bugün ne yapacaksın?',
+  'spi.move.baska-seans-ekle':'Başka seans ekle',
   'spi.move.programlar-20':'Programlar (20)',
-  'spi.move.met-kalori':'MET Kalori',
+  'spi.move.met-kalori':'Kalori hesabı',
   'spi.move.onerilen':'· önerilen',
   'spi.move.dk':'dk ·',
   'spi.move.hareket':'hareket —',
@@ -278,7 +282,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.move.haftalik-yuk':'haftalık yük',
   'spi.move.hafta-ay':'hafta / ay',
 });
-window.LIFEOS.PARCA.sayfa({ id:'move', modul:'spi', king:{ sira:40, ad:'Hareket', es:['hareket', 'antrenman', 'egzersiz', 'spor'] }, cekmece:'calisma', ad:'Hareket', sira:40 });
+window.LIFEOS.PARCA.sayfa({ id:'move', modul:'spi', king:{ sira:40, ad:'Hareket', es:['hareket', 'antrenman', 'egzersiz', 'spor'] }, cekmece:'calisma', ad:'Hareket', sira:20 });
 
 SP.Screens.move = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
@@ -287,7 +291,7 @@ SP.Screens.move = (function(){
 
   /* Sekmeler: iki genel görünüm ve arada dört faaliyet alanı. */
   const TABS = [{ id:'bugun', label:yz('spi.move.bugun'), icon:'today' }]
-    .concat(SP.AREAS.map(a => ({ id:a.id, label:a.label, icon:a.icon, grup:yz('spi.move.egzersizler') })))
+    .concat(SP.AREAS.map(a => ({ id:a.id, label:a.label, icon:a.icon, grup:yz('spi.move.egzersizler'), not:a.kisa })))
     .concat([{ id:'ilerleme', label:yz('spi.move.i-lerleme'), icon:'chart' }]);
 
   /* Kuvvet alanının ikinci şeridi: hareket kalıpları. Yalnız kuvvette
@@ -355,7 +359,6 @@ SP.Screens.move = (function(){
     const satir = t => html`
         <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
           data-act="start-session" data-id="${t.id}">
-          <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? raw(UI.icon('check')) : ''}</span>
           <span class="pickcard__body">
             <span class="pickcard__name">${t.name}
               ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> ${yz('spi.move.onerilen')}</span>`)}</span>
@@ -365,14 +368,14 @@ SP.Screens.move = (function(){
     /* Önerilen yoksa (ölçüm bekleniyor) hiçbiri saklanmaz. */
     const onde = SP.SESSION_TEMPLATES.filter(t => !suggested.length || suggested.indexOf(t.id) >= 0);
     const diger = SP.SESSION_TEMPLATES.filter(t => onde.indexOf(t) < 0);
+    /* Bugünün seansı kaydedildiyse sıradaki iş seçmek değil, kaydı görmek. */
+    const bugunVar = M.workoutsOf(U.todayISO()).length > 0;
     return K.Entry({
       label:yz('spi.move.seans-sec'), hint:'session-pick',
-      meta:SP.SESSION_TEMPLATES.length + ' şablon',
       action:html`${K.Button({ label:yz('spi.move.programlar-20'), act:'open-programs', size:'sm', tone:'ghost' })}
         ${K.Button({ label:yz('spi.move.met-kalori'), act:'open-met-calc', size:'sm', tone:'ghost' })}`,
-      body:html`<div class="picks">${map(onde, satir)}
+      body:html`${bugunVar ? raw('<details class="hiz-ac"><summary>' + yz('spi.move.baska-seans-ekle') + '</summary>') : ''}<div class="picks">${map(onde, satir)}
         <button class="pickcard" data-act="start-session" data-id="">
-          <span class="pickcard__box" aria-hidden="true"></span>
           <span class="pickcard__body">
             <span class="pickcard__name">${yz('spi.move.serbest-seans')}</span>
             <span class="pickcard__meta">${yz('spi.move.hareketleri-kendin-sec')}</span>
@@ -380,7 +383,7 @@ SP.Screens.move = (function(){
         </button>
       </div>
       ${when(diger.length, () => html`<details class="hiz-ac mt-8"><summary>${yz('spi.move.diger-seanslar')} · ${diger.length}</summary>
-        <div class="picks">${map(diger, satir)}</div></details>`)}`,
+        <div class="picks">${map(diger, satir)}</div></details>`)}${bugunVar ? raw('</details>') : ''}`,
     });
   }
 
@@ -1515,14 +1518,17 @@ SP.Screens.move = (function(){
      dengesi» eskiden üç sekmede ayrı ayrı çiziliyordu; alt alta durunca
      aynı kart üç kez görünürdü — yalnız Kuvvet'te, kalıpların yanında. */
   const BODIES = {
-    bugun:() => html`${K.Ledger([DonenHareket(), hazirAntrenmanEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
+    bugun:() => html`${K.Ledger([DonenHareket(), M.workoutsOf(U.todayISO()).length ? todaySessionsEntry() : null, hazirAntrenmanEntry(), pickSessionEntry(), M.workoutsOf(U.todayISO()).length ? null : todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
-    ilerleme:() => html`${raw(LIFEOS.PARCA.yer('move', 'ust', K))}${K.Ledger([
+    /* Seans yokken boş eğri ve «0 yük» değil ilk adım; beden ölçüleri seansa bağlı değil, kalır. */
+    ilerleme:() => html`${S.workouts.length ? raw(LIFEOS.PARCA.yer('move', 'ust', K)) : K.Kutu({ ad:yz('spi.move.henuz-seans-yok'),
+        govde:html`<p class="small">${yz('spi.move.seans-girdikce')}</p>
+          <div class="mt-8">${K.Button({ label:yz('spi.move.seans-sec-dugme'), tone:'primary', act:'move-tab', data:{ 'data-tab':'bugun' } })}</div>` })}${K.Ledger([
         vucutAnalizKutusu(),
         vucutKutusu(),
-        K.Entry({ wide:true, label:yz('spi.move.yuk-egrisi'), hint:'load', meta:'son 30 gün',
-          body:loadBody() }),
-        yogunlukKutusu(),
+        S.workouts.length ? K.Entry({ wide:true, label:yz('spi.move.yuk-egrisi'), hint:'load', meta:'son 30 gün',
+          body:loadBody() }) : null,
+        S.workouts.length ? yogunlukKutusu() : null,
         K.Entry({ label:yz('spi.move.seans-gecmisi'), meta:S.workouts.length + ' kayıt',
           body:historyBody() }),
       ])}
@@ -1584,7 +1590,7 @@ SP.Screens.move = (function(){
   async function render(){
     const done = M.workoutsOf(U.todayISO()).length;
     return String(K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, govde:LIFEOS.PARCA.yer('move', t.id, K),
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, not:t.not, govde:LIFEOS.PARCA.yer('move', t.id, K),
         sayi:t.id === 'bugun' && done ? done : null })) }));
   }
 

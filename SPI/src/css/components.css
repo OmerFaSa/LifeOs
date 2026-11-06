@@ -2680,3 +2680,8 @@ body.is-dragging .drop.is-over{
 
 /* Gruptaki bölümün çubuk düğmesi (K.SayfaBolumleri): gizli durur, liste açar. */
 .site--v5 .bolumcubugu--sayfa .bolumcubugu__ad[hidden]{ display:none; }
+.sayfagrup__not{ display:block; margin-top:2px; font-weight:400; }
+.quick--alt{ align-items:center; }
+.quick--alt .select{ flex:1 1 140px; min-width:0; }
+.quick--tek{ flex-wrap:nowrap; }
+.quick--tek .input{ min-width:0; }

@@ -1540,7 +1540,7 @@ SP.Screens.today = (function(){
     const n = SP.Calc.nextAction();
     if(!n.calm && n.title){
       gun.push({ ust:yz('spi.today.siradaki'), cumle:n.title + '.', vurgu:n.action || n.why || '', sistem:'spi',
-        dugme:n.route && n.route !== 'today' ? git('Aç', n.route) : null });
+        dugme:n.route && (analiz || n.route !== 'today') ? git('Aç', n.route) : null });
     }
     const m = SP.Calc.minimumDay();
     const kalan = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
@@ -1576,6 +1576,8 @@ SP.Screens.today = (function(){
     /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
     const ozet = SP.Ornek && SP.Ornek.acik() ? null : 'spi';
     const ayikla = l => analiz ? l.filter(x => x.ust !== 'Seri' && x.ust !== 'Toparlanma') : l;
+    /* Hiç kayıt yokken ilk adımı Analiz söylüyor: «Sıradaki» aynı işi tekrar etmez. */
+    if(analiz === 'bos') return raw(V.donen({ id:'spi-saglik', ad:yz('spi.today.saglik'), ozet:null, maddeler:ayikla(saglik) }));
     return raw(V.donen({ id:'spi-bugun', ad:yz('spi.today.bugun'), ozet:analiz ? null : ozet, maddeler:ayikla(gun) })
       + V.donen({ id:'spi-saglik', ad:yz('spi.today.saglik'), ozet:analiz ? null : ozet, maddeler:ayikla(saglik) }));
   }
@@ -1759,7 +1761,17 @@ SP.Screens.today = (function(){
         })}
         ${when(tg.ok && !top.empty, () => html`<div class="mt-8">${K.Meter({ label:yz('spi.today.enerji'), value:tg.kcal ? 100 * top.kcal / tg.kcal : 0,
           text:U.fmtNum(Math.round(top.kcal)) + ' / ' + U.fmtNum(tg.kcal) + ' kcal' })}</div>`)}
-        <div class="row wrap gap-8 mt-8">${K.Button({ label:yz('spi.today.ogun'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'meals' } })}</div>` });
+        <div class="row wrap gap-8 mt-8">${siradakiOgunDugmesi(yuvalar, dolu)}</div>` });
+  }
+  /* Sıradaki boş öğün: saatin önerdiği yuva boşsa o, doluysa ondan sonraki ilk boş.
+     Hepsi doluysa düz «Öğün ekle»: uydurma öğün önerilmez. */
+  function siradakiOgunDugmesi(yuvalar, dolu){
+    const bos = yuvalar.filter(s => !dolu.some(m => m.slot === s.id));
+    const saat = SP.Screens.meals && SP.Screens.meals.guessSlot ? SP.Screens.meals.guessSlot() : null;
+    const sira = yuvalar.findIndex(s => s.id === saat);
+    const hedef = bos.find(s => yuvalar.indexOf(s) >= sira) || bos[0];
+    if(!hedef) return K.Button({ label:yz('spi.today.ogun-ekle'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'meals' } });
+    return K.Button({ label:hedef.label + ' ekle', size:'sm', tone:'ghost', act:'gk-ogun', data:{ 'data-slot':hedef.id } });
   }
 
   /* BUGÜN — üç blok (KOLAY-PLANI Faz 2, 2026-10-26; Bugün ~11 kutuydu ve
@@ -1849,16 +1861,16 @@ SP.Screens.today = (function(){
      dört karo, pano kartları, Durum ve Öneri. Karolar kapağın kendi
      çiziminden alınır (brand/ortak/karsilama.js), ayrı kopya yazılmaz.
      Öneri kartının düğmeleri Onaylar'ın işleyicisine gider (onayHandle). */
-  function ozet(){
+  function ozet(o){
     const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
     const k = document.createElement('div');
     k.innerHTML = KS ? KS.kapakHtml({ modul:'spi', sayilar:kapakSayilari() }) : '';
     const karolar = k.querySelector('.kapak__sayilar');
     const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
     return String(html`<section class="analiz-bugun mb-16" aria-label="Bugünün özeti">
-      ${raw(karolar ? karolar.outerHTML : '')}
+      ${raw(karolar && !(o && o.karosuz) ? karolar.outerHTML : '')}
       <section class="bugun__alan mt-16" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">${yz('spi.today.durum')}</h2>
-        ${DonenKutular(true)}
+        ${DonenKutular(o && o.karosuz ? 'bos' : true)}
         ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         ${raw(window.LIFEOS.ONERI && SP.Hedefler && SP.Hedefler.ag ? window.LIFEOS.ONERI.butceCakismaHtml(SP.Hedefler.ag.butce()) : '')}
       </section>
@@ -2240,6 +2252,12 @@ SP.Screens.today = (function(){
       UI.toast(yz('spi.today.brifing-uretiliyor'));
       await SP.Office.dailyBriefing(true);
       SP.App.render();
+    },
+    /* Öğün satırı: o öğün seçili, yazma kutusu hazır. */
+    async 'gk-ogun'(el){
+      S.ui.mealSlot = el.dataset.slot;
+      SP.App.go('meals');
+      setTimeout(() => { const m = document.getElementById('meal-text'); if(m) m.focus(); }, 60);
     },
     async 'quick-meal'(){
       const el = document.getElementById('quick-meal');

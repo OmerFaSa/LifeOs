@@ -19,7 +19,13 @@ window.LIFEOS.PARCA.yazilar({
   'spi.labs.referans-araligi':'Referans aralığı',
   'spi.labs.hedef-bant':'Hedef bant',
   'spi.labs.kirmizi-bayrak':'Kırmızı bayrak',
-  'spi.labs.henuz-hic-test-girilmedi':'Henüz hiç test girilmedi.',
+  'spi.labs.henuz-hic-test-girilmedi':'Elindeki tahlil sonucunu yapıştır ya da elle yaz; değerler buraya gelir.',
+  'spi.labs.elle-yaz':'Elle yaz',
+  'spi.labs.karar-hekimin':'Bu liste teşhis değildir; karar hekimindir.',
+  'spi.labs.not-gecmis':'Girdiğin bütün testler',
+  'spi.labs.not-kiyas':'İki testi yan yana koy',
+  'spi.labs.not-trend':'Bir ölçümün zaman içindeki değişimi',
+  'spi.labs.not-panel':'Testleri gruba göre gör',
   'spi.labs.bu-suzgecle-eslesen-olcum-yo':'Bu süzgeçle eşleşen ölçüm yok.',
   'spi.labs.aclik-glukozu-insulin-trigli-2':'Açlık glukozu, insülin, trigliserit ve onlardan ',
   'spi.labs.sayilar-kaydedilir-yorum-yap':'Sayılar kaydedilir; yorum yapılmaz.',
@@ -252,7 +258,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.labs.bu-satirda-olcum-adindan-son':'Bu satırda ölçüm adından sonra bir sayı bulunamadı',
   'spi.labs.testler':'Testler',
 });
-window.LIFEOS.PARCA.sayfa({ id:'labs', modul:'spi', king:{ sira:50, ad:'Testler', es:['tahlil', 'kan testi', 'laboratuvar', 'testler'] }, cekmece:'calisma', ad:'Testler', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'labs', modul:'spi', king:{ sira:50, ad:'Testler', es:['tahlil', 'kan testi', 'laboratuvar', 'testler'] }, cekmece:'calisma', ad:'Testler', sira:30 });
 
 SP.Screens.labs = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
@@ -272,11 +278,11 @@ SP.Screens.labs = (function(){
   const TABS = [
     { id:'sonuc',  label:yz('spi.labs.sonuclar'),     icon:'layers' },
     { id:'giris',  label:yz('spi.labs.test-gir'),     icon:'flask' },
-    { id:'gecmis', label:yz('spi.labs.gecmis'),       icon:'clock' },
-    { id:'kiyas',  label:yz('spi.labs.karsilastir'),  icon:'chart', grup:yz('spi.labs.daha') },
-    { id:'panel',  label:yz('spi.labs.paneller'),     icon:'layers', grup:yz('spi.labs.daha') },
-    { id:'ilac',   label:yz('spi.labs.i-lac'),         icon:'flask', grup:yz('spi.labs.daha') },
-    { id:'trend',  label:yz('spi.labs.egilim'),       icon:'chart', grup:yz('spi.labs.daha') },
+    { id:'ilac',   label:yz('spi.labs.i-lac'),        icon:'flask' },
+    { id:'gecmis', label:yz('spi.labs.gecmis'),       icon:'clock', grup:yz('spi.labs.daha'), not:yz('spi.labs.not-gecmis') },
+    { id:'kiyas',  label:yz('spi.labs.karsilastir'),  icon:'chart', grup:yz('spi.labs.daha'), not:yz('spi.labs.not-kiyas') },
+    { id:'trend',  label:yz('spi.labs.egilim'),       icon:'chart', grup:yz('spi.labs.daha'), not:yz('spi.labs.not-trend') },
+    { id:'panel',  label:yz('spi.labs.paneller'),     icon:'layers', grup:yz('spi.labs.daha'), not:yz('spi.labs.not-panel') },
   ];
 
   /* Yapistirma onizlemesi oturum boyunca burada durur; kaydedilene kadar
@@ -431,8 +437,11 @@ SP.Screens.labs = (function(){
     if(!total){
       return K.Ledger([K.Entry({
         label:yz('spi.labs.sonuclar'), hint:'lab-paste', meta:'kayıt yok',
-        action:K.Button({ label:yz('spi.labs.rapor-yapistir'), act:'open-paste' }),
-        body:P.empty(yz('spi.labs.henuz-hic-test-girilmedi')),
+        body:html`<p class="small">${yz('spi.labs.henuz-hic-test-girilmedi')}</p>
+          <div class="row wrap gap-8 mt-8">
+            ${K.Button({ label:yz('spi.labs.rapor-yapistir'), tone:'primary', act:'open-paste' })}
+            ${K.Button({ label:yz('spi.labs.elle-yaz'), act:'lab-tab', data:{ 'data-tab':'giris' } })}
+          </div>`,
       })]);
     }
 
@@ -457,6 +466,7 @@ SP.Screens.labs = (function(){
           ${raw(etkinSuzgec(rows.length))}
           ${when(!rows.length, () => K.Notice({ tone:'info',
             body:yz('spi.labs.bu-suzgecle-eslesen-olcum-yo') }))}
+          <p class="tiny dim mt-8 mb-8">${yz('spi.labs.karar-hekimin')}</p>
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
             const tr = SP.Bio.trendOf(r.marker.id);
             /* Tok karnına alınmış bir ölçüme durum etiketi basılmaz:
@@ -1579,7 +1589,7 @@ SP.Screens.labs = (function(){
   } });
   LIFEOS.PARCA.blok({ id:'labs.test-sekmeleri', sayfa:'labs', yer:'y2', sira:10, ad:'Test sekmeleri', ciz({ flags }){
     return K.SayfaBolumleri({ act:'lab-tab', aria:yz('spi.labs.test-bolumleri'),
-        bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, govde:govde(t), sayi:rozet(t.id) })) });
+        bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, not:t.not, govde:govde(t), sayi:rozet(t.id) })) });
   } });
   LIFEOS.PARCA.blok({ id:'labs.uyari-kartlari', sayfa:'labs', yer:'y3', sira:10, ad:'Uyarı kartları', ciz({ flags }){
     return when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`);
