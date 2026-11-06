@@ -258,7 +258,7 @@
       expect(await sw.agOnce({ url:'http://yerel/dist-betik.js?v=a', method:'GET', headers:new Headers() }, {})).toBe('kasadan');
       expect(ag).toBe(0);
       m.set('http://yerel/css/a.css', 'eski');
-      const c = await sw.agOnce({ url:'http://yerel/css/a.css', method:'GET', headers:new Headers() }, {});
+      const c = await sw.agOnce({ url:'http://yerel/css/a.css', method:'GET', headers:new Headers() }, { waitUntil(){} });
       expect(c === 'eski').toBeFalsy();
       expect(ag).toBe(1);
     });
