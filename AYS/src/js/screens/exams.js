@@ -3,6 +3,9 @@
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz; metin h`` icinde
    otomatik kacirilir, yapisal parcalar C.* bilesenlerinden gelir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.exams.deneme-bolumleri':'Deneme bölümleri',
+  'ays.exams.bolum-denemeler':'Denemeler',
+  'ays.exams.bolum-ozet':'Özet',
   'ays.exams.hedef-bandin-ustundesin-band':'Hedef bandın üstündesin; bandı koru',
   'ays.exams.deneme-takvimi':'Deneme takvimi',
   'ays.exams.onceki-denemeyle':'Önceki denemeyle',
@@ -362,7 +365,7 @@ R.Screens.exams = (function(){
           action:K.Button({ label:yz('ays.exams.i-lk-denemeyi-ekle'), icon:'plus', tone:'primary', act:'new-exam' }) });
 
     return K.Grid([
-      K.Span(8, K.Stack([
+      K.Span(12, K.Stack([
         K.Row([
           K.Segmented({ items:FILTERS, value:filter, act:'exam-filter', aria:yz('ays.exams.deneme-ailesi') }),
           html`<span class="small dim">${U.plural(list.length, 'kayıt', 'kayıt')}</span>`,
@@ -371,18 +374,22 @@ R.Screens.exams = (function(){
           sonuc:list.length, birim:'deneme', temizle:{ act:'exam-filter', data:{ 'data-value':'all' } } }))),
         K.Card({ body, pad:'sm' }),
       ])),
-      K.Span(3, K.Stack([
-        DonenGidisat(),
-        siralamaKutusu(),
-        hedefeKalanKutusu(),
-        denemeTakvimi(),
-        K.Card({ title:yz('ays.exams.deneme-hacmi'), hint:'exam-volume', sub:yz('ays.exams.plan-gerceklesen'), body:volumeTable() }),
-        K.Card({ title:yz('ays.exams.yayin-merdiveni'), hint:'publisher', sub:yz('ays.exams.zorluk-kademesi'),
-          body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`
-            <div class="ladder__row"><span class="ladder__level">${l.level}</span>
-              <span class="muted">${l.detail}</span></div>`)}</div>` }),
-      ])),
       K.Span(12, raw(UI.rail(['net', 'analysis-debt', 'error-tags', 'exam-volume', 'publisher']))),
+    ]);
+  }
+
+  /* Listenin yanındaki sayı kartları «Özet» katına taşındı (2026-11-06). */
+  function ozetKartlari(){
+    return K.Stack([
+      DonenGidisat(),
+      siralamaKutusu(),
+      hedefeKalanKutusu(),
+      denemeTakvimi(),
+      K.Card({ title:yz('ays.exams.deneme-hacmi'), hint:'exam-volume', sub:yz('ays.exams.plan-gerceklesen'), body:volumeTable() }),
+      K.Card({ title:yz('ays.exams.yayin-merdiveni'), hint:'publisher', sub:yz('ays.exams.zorluk-kademesi'),
+        body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`
+          <div class="ladder__row"><span class="ladder__level">${l.level}</span>
+            <span class="muted">${l.detail}</span></div>`)}</div>` }),
     ]);
   }
 
@@ -1077,9 +1084,18 @@ R.Screens.exams = (function(){
 
   LIFEOS.PARCA.blok({ id:'exams.kosu', sayfa:'exams', yer:'ana', ad:'Deneme akışı', kosul:() => R.ExamRun.active(), ciz:() => runView() });
   LIFEOS.PARCA.blok({ id:'exams.detay', sayfa:'exams', yer:'ana', ad:'Deneme ayrıntısı', kosul:() => !R.ExamRun.active() && S.ui.examOpen, ciz:() => detailView(S.ui.examOpen) });
-  LIFEOS.PARCA.blok({ id:'exams.pano', sayfa:'exams', yer:'ana', sira:10, ad:'Deneme özeti', kosul:() => !R.ExamRun.active() && !S.ui.examOpen, ciz:() => PanoDeneme() });
-  LIFEOS.PARCA.blok({ id:'exams.liste', sayfa:'exams', yer:'ana', sira:20, ad:'Deneme listesi', kosul:() => !R.ExamRun.active() && !S.ui.examOpen, ciz:() => listView() });
-  async function render(){ return String(LIFEOS.PARCA.yer('exams', 'ana', R.C)); }
+  LIFEOS.PARCA.blok({ id:'exams.pano', sayfa:'exams', yer:'ozet', sira:10, ad:'Deneme özeti', ciz:() => raw(PanoDeneme()) });
+  LIFEOS.PARCA.blok({ id:'exams.ozet-kartlari', sayfa:'exams', yer:'ozet', sira:20, ad:'Deneme sayıları', ciz:() => ozetKartlari() });
+  LIFEOS.PARCA.blok({ id:'exams.liste', sayfa:'exams', yer:'liste', sira:10, ad:'Deneme listesi', ciz:() => listView() });
+  /* TEK İŞ (2026-11-06): önce denemelerin listesi; sayılar ve grafikler «Özet»te. */
+  async function render(){
+    const P = LIFEOS.PARCA;
+    if(R.ExamRun.active() || S.ui.examOpen) return String(P.yer('exams', 'ana', K));
+    return String(K.SayfaBolumleri({ act:'exam-tab', aria:yz('ays.exams.deneme-bolumleri'), bolumler:[
+      { id:'liste', ad:yz('ays.exams.bolum-denemeler'), govde:P.yer('exams', 'liste', K, undefined, raw) },
+      { id:'ozet', ad:yz('ays.exams.bolum-ozet'), govde:P.yer('exams', 'ozet', K, undefined, raw) },
+    ] }));
+  }
 
   function afterRender(){
     if(R.ExamRun.active()) startTick(); else stopTick();
@@ -1087,6 +1103,7 @@ R.Screens.exams = (function(){
   }
 
   const handle = {
+    async 'exam-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'new-exam'(){ newExamSheet(); },
     async 'run-open'(){ startRunSheet(); },
     async 'run-start'(){
@@ -1422,7 +1439,7 @@ R.Screens.exams = (function(){
       if(R.ExamRun.active()) return '';
       return String(html`
         ${K.Button({ label:yz('ays.exams.sureli-oturum'), icon:'clock', size:'sm', act:'run-open' })}
-        ${K.Button({ label:yz('ays.exams.deneme-ekle'), icon:'plus', size:'sm', tone:'primary', act:'new-exam' })}`);
+        ${when(S.exams.length, () => K.Button({ label:yz('ays.exams.deneme-ekle'), icon:'plus', size:'sm', tone:'primary', act:'new-exam' }))}`);
     },
     onKey(e){
       if(!R.ExamRun.active() || UI.isSheetOpen()) return;

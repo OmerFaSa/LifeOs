@@ -622,7 +622,7 @@ R.Screens.today = (function(){
     const list = R.CHECKLISTS[{ contract:'monday', exam:'saturday', review:'sunday' }[ritual]];
     const state = day.checklist || {};
     const cta = ritual === 'contract'
-      ? c.Button({ label:yz('ays.today.haftalik-sozlesmeyi-ac'), tone:'primary', block:true, act:'go', data:{ 'data-route':'week' } })
+      ? c.Button({ label:yz('ays.today.haftalik-sozlesmeyi-ac'), tone:'primary', block:true, act:'go', data:{ 'data-route':'week', 'data-bolum':'sozlesme' } })
       : ritual === 'exam'
         ? c.Button({ label:yz('ays.today.deneme-ekle'), tone:'primary', block:true, act:'go', data:{ 'data-route':'exams' } })
         : c.Button({ label:yz('ays.today.haftalik-degerlendirmeyi-ac'), tone:'primary', block:true, act:'open-review' });

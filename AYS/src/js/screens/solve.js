@@ -15,6 +15,10 @@
    konusunun etiketiyle tek Defter notunda toplar (medya cihazda kalır).
    Model yokken de çalışır: kâğıtta çözer, deftere kaydedersin. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.solve.soru-bolumleri':'Soru çöz bölümleri',
+  'ays.solve.bolum-sor':'Sor',
+  'ays.solve.bolum-kayit':'Kayıt',
+  'ays.solve.bolum-gecmis':'Geçmiş',
   'ays.solve.zorluk-olculmedi':'Zorluk ölçülmedi.',
   'ays.solve.ortalama-zorluk':'Ortalama zorluk ',
   'ays.solve.fotografli-soru-icin-gorsel':'Fotoğraflı soru için görsel destekleyen bir model gerekir — Google AI Studio’nun ',
@@ -64,7 +68,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.solve.cozum':'Çözüm',
   'ays.solve.soruyu-ver':'Soruyu ver',
   'ays.solve.yapay-zeka-bagli-degil':'Yapay zekâ bağlı değil.',
-  'ays.solve.fotograftan-ya-da-metinden-s':'Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla. Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.',
+  'ays.solve.fotograftan-ya-da-metinden-s':'Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla. Çözdüğün soruları «Kayıt» bölümünden girebilirsin.',
   'ays.solve.ofis-ayarlarini-ac':'Ofis ayarlarını aç',
   'ays.solve.kb':'KB',
   'ays.solve.fotografi-buraya-birak':'Fotoğrafı buraya bırak',
@@ -750,32 +754,35 @@ R.Screens.solve = (function(){
     return K.Kutu({ ad:yz('ays.solve.hizli-kayit'), ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
   }
 
-  LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'y1', sira:10, ad:'Soru girişi', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'sor', sira:10, ad:'Soru girişi', ciz(){
     return inputCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.resultcard', sayfa:'solve', yer:'y1', sira:20, ad:'Sonuç', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.resultcard', sayfa:'solve', yer:'sor', sira:20, ad:'Sonuç', ciz(){
     return resultCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.donencozum', sayfa:'solve', yer:'y2', sira:10, ad:'Dönen çözüm', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.donencozum', sayfa:'solve', yer:'kayit', sira:10, ad:'Dönen çözüm', ciz(){
     return DonenCozum();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'y2', sira:20, ad:'Hızlı satır', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'kayit', sira:20, ad:'Hızlı satır', ciz(){
     return hizliSatir();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'y2', sira:30, ad:'Kaynak', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'gecmis', sira:30, ad:'Kaynak', ciz(){
     return sourceCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'y2', sira:40, ad:'Konu', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'gecmis', sira:40, ad:'Konu', ciz(){
     return topicCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'y2', sira:50, ad:'Geçmiş', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'gecmis', sira:50, ad:'Geçmiş', ciz(){
     return historyCard();
   } });
   async function render(){
-    return String(K.Grid([
-    K.Span(8, K.Stack(LIFEOS.PARCA.liste('solve', 'y1', K, undefined))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('solve', 'y2', K, undefined))),
-  ]));
+    /* TEK İŞ (2026-11-06): soruyu sormak, çözdüğünü kaydetmek ve geçmişe bakmak ayrı katlarda. */
+    const P = LIFEOS.PARCA;
+    return String(K.SayfaBolumleri({ act:'solve-tab', aria:yz('ays.solve.soru-bolumleri'), bolumler:[
+      { id:'sor', ad:yz('ays.solve.bolum-sor'), govde:K.Stack(P.liste('solve', 'sor', K)) },
+      { id:'kayit', ad:yz('ays.solve.bolum-kayit'), govde:K.Stack(P.liste('solve', 'kayit', K)) },
+      { id:'gecmis', ad:yz('ays.solve.bolum-gecmis'), govde:K.Stack(P.liste('solve', 'gecmis', K)) },
+    ] }));
   }
 
   /* Sürükle-bırak ve yapıştır: her ikisi de aynı yola çıkar. */
@@ -848,6 +855,7 @@ R.Screens.solve = (function(){
   /* ---------- eylemler ---------- */
 
   const handle = {
+    async 'solve-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'q-hizli'(){
       const ders = R.SUBJECTS.find(x => x.id === hizli.ders);
       const konu = ders && ders.topics.find(t => t.id === hizli.konu);
@@ -1228,7 +1236,7 @@ R.Screens.solve = (function(){
     sureSuphesi,
     /* iPhone Faz 2: iş soruyu vermek ve kaydetmek; kaynaklar, konu başına
        oran ve son kayıtlar şerit (dokununca açılır). */
-    kucukVarsayilan:['kaynaklarım', 'konu-başına-çözüm', 'çözülen-sorular'],
+    kucukVarsayilan:['kaynaklarım', 'konu-başına-çözüm'],
     title:yz('ays.solve.soru-coz'),
     subtitle(){
       const s = Q.summary();

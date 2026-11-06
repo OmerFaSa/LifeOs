@@ -94,7 +94,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.meeting.rapor-kopyalandi':'Rapor kopyalandı',
   'ays.meeting.karar-kapandi':'Karar kapandı',
   'ays.meeting.toplanti-odasi':'Toplantı odası',
-  'ays.meeting.ofis':'Ofis',
 });
 window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'ays', cekmece:'ofis', ad:'Toplantı', ikon:'list', sira:30 });
 
@@ -931,10 +930,9 @@ R.Screens.meeting = (function(){
       return last ? yz('ays.meeting.son-toplanti') + U.relativeDay(R.U.gunOf(last.at)) + ' · ' + last.topic
         : yz('ays.meeting.ekip-5-kisi-gundemi');
     },
-    actions(){
-      return String(K.Button({ label:yz('ays.meeting.ofis'), icon:'guide', size:'sm', act:'go',
-        data:{ 'data-route':'office' } }));
-    },
+    /* «Ofis» düğmesi kalktı: Masalar hemen üstteki sekmede. Masadakiler ara sıra bakılır. */
+    actions(){ return ''; },
+    kucukVarsayilan:['masadakiler'],
     render, handle, change, afterRender,
     isRunning(){ return running; },
   };

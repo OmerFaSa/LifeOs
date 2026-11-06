@@ -118,9 +118,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.app.calisma-suresi':'Çalışma süresi',
   'ays.app.soruyu-coz':'Soruyu çöz',
   'ays.app.tekrar':'Tekrar',
-  'ays.app.soru-coz':'Soru çöz',
   'ays.app.siradaki-konu':'Sıradaki konu',
-  'ays.app.deneme':'Deneme',
   'ays.app.not-al':'Not al',
   'ays.app.uygulama-acilamadi':'Uygulama açılamadı.',
 });
@@ -399,7 +397,7 @@ R.App = (function(){
   function ayarListesi(sc, kok){
     if(!sc || sc.id === 'rutbe' || !kok || !ayarlardaMi(sc.id) || !(window.LIFEOS && LIFEOS.Gizle)) return [];
     const gizli = (sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []);
-    return LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0).slice(1);
+    return LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0).slice(sc.id === 'guide' ? 0 : 1);
   }
 
   /* BAŞLIK ÇEKMECENİN ADIDIR (kullanıcı, 2026-10-02: «Sınama'daysa üstte
@@ -421,8 +419,7 @@ R.App = (function(){
     const aciklama = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
     const ozet = [cumle === baslik ? '' : cumle, aciklama].filter(Boolean).map(String).join(' ');
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
-    const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
-      + (safe(() => sc.actions ? sc.actions() : '') || '');
+    const eylem = AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '';
     return K.sayfaBasi({ yol:[], ust:safe(() => sc.ust ? String(sc.ust()) : ''), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '',
       /* 004: günün cümlesi bilgi kartının ilk satırında. */
       bilgiOz:cumle && cumle !== baslik ? (sc.headlineOz || '') : '' });
@@ -431,8 +428,12 @@ R.App = (function(){
   function bolumCubuguHtml(sc){
     const sec = bolumOf(sc.id);
     const r = UST[sc.id] || sc.id;
+    /* Ekranın düğmeleri sekmelerin ALTINDA (2026-11-06): üstte dururken sekme çubuğu bölümden
+       bölüme yukarı aşağı oynuyordu. */
+    const eylem = safe(() => sc.actions ? sc.actions() : '') || '';
     return K.bolumCubugu({ kabuk:true, cekmece:sec.label, bolumler:sec.items.filter(v => !gizliMi(v.id)).map(v => ({
-      route:v.id, ad:v.label, on:v.id === r, rozet:safe(() => badgeFor(v.id), null) || null })) });
+      route:v.id, ad:v.label, on:v.id === r, rozet:safe(() => badgeFor(v.id), null) || null })) })
+      + (eylem ? '<div class="ekran-eylem">' + eylem + '</div>' : '');
   }
 
   function menuHtml(sc){
@@ -746,6 +747,8 @@ R.App = (function(){
         if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
       }
       if(sc.afterRender) sc.afterRender();
+      /* Başka ekrandan belli bir bölüme gelindi (`data-bolum`): istek bir kez uygulanır. */
+      if(S.ui.bolumIstek){ const b = S.ui.bolumIstek; S.ui.bolumIstek = null; R.C.bolumeGit(b); }
       /* Gizlenen ve kucultulen bolumler (brand/ortak/gizle.js): her cizimden
          sonra uygulanir; tercih modul + profil + ekran icin ayri saklanir. */
       if(window.LIFEOS && LIFEOS.Gizle){
@@ -908,6 +911,7 @@ R.App = (function(){
       go(el.dataset.route || 'anlatim');
     },
     async go(el){
+      if(el.dataset.bolum) S.ui.bolumIstek = el.dataset.bolum;
       if(el.dataset.tab){
         S.ui.cardTab = el.dataset.tab;
         if(el.dataset.route === 'sorular') S.ui.ogrenKip = el.dataset.tab;
@@ -1990,6 +1994,7 @@ R.App = (function(){
           },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ id:'soru', ad:yz('ays.app.soruyu-coz'), is:async f => {
+            S.ui.bolumIstek = 'sor';
             go('solve');
             await new Promise(r => setTimeout(r, 80));
             const ok = R.Screens.solve.fotoKoy ? await R.Screens.solve.fotoKoy(f) : false;
@@ -2036,9 +2041,7 @@ R.App = (function(){
         window.LIFEOS.KISAYOL.kur({ modul:'ays', git:r => go(r), palet:() => R.Palette.open(),
           dugmeler:() => [
             { ad:yz('ays.app.tekrar'), rota:'cards', sayi:C.dueCards().length },
-            { ad:yz('ays.app.soru-coz'), rota:'solve' },
             { ad:yz('ays.app.siradaki-konu'), rota:'ogren' },
-            { ad:yz('ays.app.deneme'), rota:'exams' },
             { ad:yz('ays.app.not-al'), doldur:'not: ' },
           ],
           cekmeceler:() => NAV.filter(g => (g.items || []).length).map(g => ({ id:g.id, rota:g.items[0].id })) });

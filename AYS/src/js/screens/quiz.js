@@ -639,6 +639,8 @@ R.Screens.quiz = (function(){
 
   return {
     id:'quiz',
+    /* Kurma formu iştir; havuzun sayıları başlıkta kalır. */
+    kucukVarsayilan:['havuz'],
     title:yz('ays.quiz.sinama'),
     subtitle(){
       const m = R.TestKitabi ? R.TestKitabi.mevcut() : null;

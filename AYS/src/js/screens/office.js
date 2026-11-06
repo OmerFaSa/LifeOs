@@ -3,6 +3,11 @@
    Yazim bicimi: STIL.md / DONUSTURME.md. String birlestirme yok,
    etkilesim yalniz data-act / data-change ile baglanir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.office.ofis-bolumleri':'Ofis bölümleri',
+  'ays.office.bolum-ozet':'Özet',
+  'ays.office.bolum-uzmanlar':'Uzmanlar',
+  'ays.office.bolum-kayit':'Kayıtlar',
+  'ays.office.raporlari-gor':'Raporları gör',
   'ays.office.raporu-ac':'Raporu aç',
   'ays.office.patron-masalari-henuz-ozetle':'Patron masaları henüz özetlemedi',
   'ays.office.brifing-al':'Brifing al',
@@ -83,7 +88,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.office.simdi-yap':'Şimdi yap',
   'ays.office.toplanti-baslat':'Toplantı başlat',
   'ays.office.patron-a-danis':'Patron’a danış',
-  'ays.office.toplanti-odasi':'Toplantı odası',
   'ays.office.takipteki-kararlar':'Takipteki kararlar',
   'ays.office.yapildi':'Yapıldı',
   'ays.office.devret':'Devret',
@@ -366,14 +370,13 @@ R.Screens.office = (function(){
               data:{ 'data-route':action.route || 'today' } }) })}
         </div>
 
-        <div class="stack-xs mt-12">${map(b.findings, findingRow)}</div>
+        <div class="mt-12">${K.Ayrinti({ etiket:yz('ays.office.raporlari-gor'),
+          govde:html`<div class="stack-xs">${map(b.findings, findingRow)}</div>` })}</div>
 
         <div class="row wrap gap-6 mt-12">
           ${K.Button({ label:yz('ays.office.toplanti-baslat'), icon:'zap', tone:'primary', act:'office-meet' })}
           ${K.Button({ label:yz('ays.office.patron-a-danis'), size:'sm', act:'office-talk',
             data:{ 'data-agent':'patron' } })}
-          ${K.Button({ label:yz('ays.office.toplanti-odasi'), size:'sm', tone:'ghost', act:'go',
-            data:{ 'data-route':'meeting' } })}
         </div>`,
     });
   }
@@ -867,33 +870,33 @@ R.Screens.office = (function(){
   LIFEOS.PARCA.blok({ id:'office.sozluk-seridi', sayfa:'office', yer:'y1', sira:10, ad:'Sözlük şeridi', ciz({ specialists, vo }){
     return (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : '';
   } });
-  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'y2', sira:10, ad:'Masa', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'uzmanlar', sira:10, ad:'Masa', ciz({ specialists, vo }){
     return when(vo.masa, () => K.Kutu({ ad:yz('ays.office.masa'), yuva:'kim konuşuyor', class:'vkutu',
           govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'y2', sira:20, ad:'Günün toplantısı', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'uzmanlar', sira:20, ad:'Günün toplantısı', ciz({ specialists, vo }){
     return when(vo.toplanti, () => K.Kutu({ ad:yz('ays.office.gunun-toplantisi'), yuva:'her masadan tek cümle', class:'vkutu',
           govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'Günün özeti', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'ozet', sira:30, ad:'Günün özeti', ciz({ specialists, vo }){
     return briefingCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.bosscard', sayfa:'office', yer:'y2', sira:40, ad:'Patron masası', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.bosscard', sayfa:'office', yer:'ozet', sira:40, ad:'Patron masası', ciz({ specialists, vo }){
     return BossCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.decisionscard', sayfa:'office', yer:'y2', sira:50, ad:'Kararlar', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.decisionscard', sayfa:'office', yer:'kayit', sira:50, ad:'Kararlar', ciz({ specialists, vo }){
     return decisionsCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y2', sira:60, ad:'Uzman masaları', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'uzmanlar', sira:60, ad:'Uzman masaları', ciz({ specialists, vo }){
     return K.Card({ title:yz('ays.office.uzman-masalari'), body:html`<div class="desks">${map(specialists, Desk)}</div>` });
   } });
-  LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'y3', sira:10, ad:'Ürünler', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'ozet', sira:10, ad:'Ürünler', ciz({ specialists, vo }){
     return urunlerKart();
   } });
-  LIFEOS.PARCA.blok({ id:'office.quotacard', sayfa:'office', yer:'y3', sira:20, ad:'Kota', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.quotacard', sayfa:'office', yer:'kayit', sira:20, ad:'Kota', ciz({ specialists, vo }){
     return quotaCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.lastmeetingcard', sayfa:'office', yer:'y3', sira:30, ad:'Son toplantı', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.lastmeetingcard', sayfa:'office', yer:'kayit', sira:30, ad:'Son toplantı', ciz({ specialists, vo }){
     return lastMeetingCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.aciklamalar', sayfa:'office', yer:'y3', sira:40, ad:'Açıklamalar', ciz({ specialists, vo }){
@@ -906,11 +909,14 @@ R.Screens.office = (function(){
 
     /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     const parcaB = { specialists, vo };
-    return String(K.Grid([
-    K.Span(12, LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(8, K.Stack(LIFEOS.PARCA.liste('office', 'y2', K, parcaB))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('office', 'y3', K, parcaB))),
-  ]));
+    /* TEK İŞ (2026-11-06): önce günün özeti ve tek eylem; masalar ve kayıtlar kendi katında. */
+    const P = LIFEOS.PARCA;
+    return String(html`
+      ${K.SayfaBolumleri({ act:'office-tab', aria:yz('ays.office.ofis-bolumleri'), bolumler:[
+        { id:'ozet', ad:yz('ays.office.bolum-ozet'), govde:K.Stack(P.liste('office', 'y1', K, parcaB).concat(P.liste('office', 'ozet', K, parcaB))) },
+        { id:'uzmanlar', ad:yz('ays.office.bolum-uzmanlar'), govde:K.Stack(P.liste('office', 'uzmanlar', K, parcaB)) },
+        { id:'kayit', ad:yz('ays.office.bolum-kayit'), govde:K.Stack(P.liste('office', 'kayit', K, parcaB)) },
+      ] })}${P.yer('office', 'y3', K, parcaB, raw)}`);
   }
 
   function afterRender(){}
@@ -918,6 +924,7 @@ R.Screens.office = (function(){
   /* ---------- eylemler ---------- */
 
   const handle = {
+    async 'office-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* Ürün KUTUDA açılır: sandbox iframe, betik çalışmaz (core/urun.js). */
     async 'urun-ac'(el){
       const u = R.Urunler && R.Urunler.bul(el.dataset.id);
@@ -1262,6 +1269,6 @@ R.Screens.office = (function(){
        Patron'da ve uzman kartında üç kez yazılıyordu: toplantı ve uzman
        masaları ve kararlar şerit. BAM ürünleri yalnız ürün varken çizilir
        ve o zaman açıktır: yeni ürün gözden kaçmasın. */
-    kucukVarsayilan:['günün-toplantısı', 'uzman-masaları', 'takipteki-kararlar'],
+    kucukVarsayilan:['günün-toplantısı'],
   };
 })();

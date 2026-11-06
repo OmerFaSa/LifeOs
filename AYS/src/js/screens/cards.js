@@ -2,6 +2,11 @@
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.cards.bolum-bugun':'Bugün',
+  'ays.cards.bolum-yanlislar':'Yanlışlar',
+  'ays.cards.bolum-tumu':'Tümü',
+  'ays.cards.neden':'Neden?',
+  'ays.cards.borc-neden':'%10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.',
   'ays.cards.yanlis-notu':'Yanlış notu',
   'ays.cards.arka-yuz':'Arka yüz',
   'ays.cards.on-yuz':'Ön yüz',
@@ -85,9 +90,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.cards.kaydet':'Kaydet',
   'ays.cards.gelecek-yuk':'Gelecek yük',
   'ays.cards.onumuzdeki-7-gunun-vadesi':'Önümüzdeki 7 günün vadesi',
-  'ays.cards.bugunun-kartlari':'Bugünün kartları',
-  'ays.cards.yanlis-defteri':'Yanlış defteri',
-  'ays.cards.butun-kartlar':'Bütün kartlar',
   'ays.cards.tekrar-borcu':'Tekrar borcu %',
   'ays.cards.tekrar-takvimi':'Tekrar takvimi',
   'ays.cards.araliklar-sabittir':'Aralıklar sabittir',
@@ -380,10 +382,10 @@ R.Screens.cards = (function(){
 
   function bolumler(){
     return [
-      { id:'due', ad:yz('ays.cards.bugunun-kartlari'), sayi:C.dueCards().length,
+      { id:'due', ad:yz('ays.cards.bolum-bugun'), sayi:C.dueCards().length,
         govde:html`${gelecekYuk()}<div class="cardsgrid">${K.Stack(dueSession())}<div>${K.Stack([tekrarPaketi(C.dueCards()), sidebar()])}</div></div>` },
-      { id:'notebook', ad:yz('ays.cards.yanlis-defteri'), sayi:C.openErrors().length, govde:notebook() },
-      { id:'all', ad:yz('ays.cards.butun-kartlar'), sayi:S.cards.length, govde:K.Stack(allCards()) },
+      { id:'notebook', ad:yz('ays.cards.bolum-yanlislar'), sayi:C.openErrors().length, govde:notebook() },
+      { id:'all', ad:yz('ays.cards.bolum-tumu'), sayi:S.cards.length, govde:K.Stack(allCards()) },
     ];
   }
 
@@ -391,8 +393,10 @@ R.Screens.cards = (function(){
     const debt = C.cardDebt();
     const overdue = C.overdueCards().length;
     if(debt <= 10) return '';
+    /* Uyarı tek satır; gerekçe bir dokunuşla açılır (§1.10). */
     return K.Span(12, K.Notice({ tone:'warn', title:yz('ays.cards.tekrar-borcu')+debt+'.',
-      body:yz('ays.cards.gecikmis')+overdue+' kart var. %10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.' }));
+      body:K.Ayrinti({ ozet:yz('ays.cards.gecikmis')+overdue+' kart var.', etiket:yz('ays.cards.neden'),
+        govde:yz('ays.cards.borc-neden') }) }));
   }
 
   function sidebar(){
@@ -573,6 +577,7 @@ R.Screens.cards = (function(){
     actions(){
       return String(K.Button({ label:yz('ays.cards.kart-ekle'), icon:'plus', size:'sm', act:'new-card' }));
     },
+    kucukVarsayilan:['tekrar-paketi'],
     render, afterRender, handle, change, onKey,
   };
 })();

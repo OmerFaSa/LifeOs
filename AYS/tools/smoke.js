@@ -321,6 +321,44 @@ async function rozetKuyrugu(page, base, errors){
    kırmızıya döndü — künyedeki DERLEME DAMGASI bir git özetidir
    (`4f18345+`) ve içinde beş haneli bir rakam dizisi çıkabiliyor.
    «Damga dört haneyi geçmez» diye yazmıştım; geçiyormuş. */
+/* Bir bölüm, bir iş (belgeler/ekip/sadelik/ays.md): sekme çubuğu aynı çekmecede yer
+   değiştirmez, başka ekrandan istenen bölüm açılır, bölüme geçmek sayfayı oynatmaz. */
+async function tekIs(page, base, errors){
+  /* Telefonda ölçülür: masaüstünde yaprak dikey ortalı, sayfa boyuyla oynar (kullanıcının tercihi). */
+  const eskiBoy = page.viewportSize();
+  await page.setViewportSize({ width:390, height:844 });
+  await page.goto(base + '/index.html', { waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(500);
+  const yler = {};
+  for(const r of ['solve', 'exams', 'cards', 'quiz', 'subjects']){
+    await page.evaluate(x => R.App.go(x), r);
+    await wait(500);
+    await page.evaluate(() => window.scrollTo({ top:0, behavior:'instant' }));
+    await wait(300);
+    yler[r] = await page.evaluate(() => {
+      const c = document.querySelector('.bolumcubugu:not(.bolumcubugu--sayfa)');
+      return c ? Math.round(c.getBoundingClientRect().top) : null;
+    });
+  }
+  if(new Set(Object.values(yler)).size !== 1) errors.push('Çalışma: sekme çubuğu yer değiştiriyor: ' + JSON.stringify(yler));
+
+  await page.evaluate(() => { R.S.ui.bolumIstek = 'sozlesme'; R.App.go('week'); });
+  await wait(400);
+  const gelis = await page.evaluate(() => {
+    const s = document.querySelector('.sayfabolum.is-on');
+    return { id:s && s.id, istek:R.S.ui.bolumIstek };
+  });
+  if(gelis.id !== 'bl-sozlesme' || gelis.istek) errors.push('Başka ekrandan bölüm açılmadı: ' + JSON.stringify(gelis));
+
+  await page.evaluate(() => { window.scrollTo(0, 0); document.querySelector('[data-act="week-tab"][data-tab="gunler"]').click(); });
+  await wait(300);
+  const kayma = await page.evaluate(() => ({ y:window.scrollY, on:document.querySelector('.sayfabolum.is-on').id }));
+  if(kayma.on !== 'bl-gunler') errors.push('Bölüm seçimi çalışmadı: ' + kayma.on);
+  if(kayma.y !== 0) errors.push('Ekrandaki bölüme geçmek sayfayı kaydırdı: ' + kayma.y);
+  if(eskiBoy) await page.setViewportSize(eskiBoy);
+}
+
 async function rutbeSayilari(page, base, errors){
   await page.goto(base + '/index.html', { waitUntil:'load' });
   await page.waitForSelector('.site', { timeout:15000 });
@@ -487,6 +525,7 @@ async function portMuhafizi(portlar, ipucu){
     await walkScreens(page, base, '/dist/rota.html', errors);
     await walkFlows(page, base, errors);
     await rozetKuyrugu(page, base, errors);
+    await tekIs(page, base, errors);
     await rutbeSayilari(page, base, errors);
     /* Gezinti sayfasi, sunucu BILEREK durdurulmadan once kapanir. Acik
        kalirsa sonradan yaptigi her istek (baslikta yeniden cizilen marka
