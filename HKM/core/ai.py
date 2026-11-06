@@ -50,14 +50,48 @@ import urllib.request
 from core import arac, butce, manager, models
 
 ZAMAN_ASIMI = 60
-# Baska makinedeki motor servisi (cogu zaman islemcide calisan bir model)
-# ilk cevapta yavastir: yerel ag ve internet sinifinda cagri daha uzun
-# beklenir. Sinama (model listesi) kisa kalir.
-UZAK_ZAMAN_ASIMI = 120
+# Yerel model ILK CEVABI (soket suresi, cevap akarken dolmaz). Olcum, bu bilgisayarin
+# Ollama gunlugu 2026-10-23..11-06: 509 basarili cagri, medyan 0,44 sn, %99 20 sn, en yavasi
+# oyun acikken 43,4 sn; 60 sn'de kesilen 3 cagri. Kesmek bosa gitmekten de kotu: Ollama istemci
+# kopunca yuklemeyi IPTAL eder («aborting load»), sonraki cagri bastan yukler. Olculen en
+# yavasin ~2,8 kati; asan cagri «mesgul» sayilir. Sinama (model listesi) kisa kalir.
+YEREL_ZAMAN_ASIMI = 120
 # Yerel motor ayakta ama cevap zamaninda gelmedi: model bellege yukleniyor
 # olabilir (soguk baslangic). Deftere bu isaretle yazilir; motor durumu
 # ve merdiven bunu «kapali»dan ayirir.
 YEREL_GEC = "yerel-gec"
+# Model ayni anda tek cevap uretir (OLLAMA_NUM_PARALLEL 1). Sira burada beklenir ki bir
+# mesajin suresi digerini beklerken islemesin (sahada 2 cagri sirada 60 sn'yi doldurdu).
+_YEREL_SIRA = threading.Lock()
+# Bellege sigmadi ya da yuklenemedi: GPU/RAM baska bir isle dolu (sahada: oyun).
+YEREL_DOLU = re.compile(r"out.of.memory|more system memory|startup failed|unable to allocate", re.I)
+YEREL_YOK = re.compile(r"\b404\b|not found", re.I)
+YEREL_KAPALI = re.compile(r"10061|refused|reddetti", re.I)
+# Saglik ucunun (daemon /api/health) okudugu son gercek cagri; o da cagri yapmaz.
+YEREL_HAL_SN = 120
+_YEREL_SON = {"hal": None, "t": 0.0}
+
+
+class AkisKesildi(Exception):
+    """Istemci gitti (sayfa kapandi): okuma kesilir, baglanti kapanir, model bosa uretmez."""
+
+
+def _yerel_sebep(hata):
+    """Ham hata -> kullaniciya soylenecek sebebin kodu (sohbet.YEDEK_METIN); bilinmiyorsa None."""
+    h = str(hata or "")
+    return ("yerel-kapali" if YEREL_KAPALI.search(h) else
+            "yerel-model-yok" if YEREL_YOK.search(h) else None)
+
+
+def _yerel_yaz(hal):
+    _YEREL_SON.update(hal=hal, t=time.monotonic())
+
+
+def yerel_hal():
+    """«hazir», «mesgul», «kapali» ya da «» (yakin zamanda cagri yok: veri yok)."""
+    if time.monotonic() - _YEREL_SON["t"] > YEREL_HAL_SN:
+        return ""
+    return _YEREL_SON["hal"] or ""
 EN_COK_MESAJ = 12          # gecmisin tamami her turda gonderilmez
 EN_COK_JETON = 1200        # cevap uzunlugu sinirlari
 
@@ -220,11 +254,18 @@ def _gemini_birlestir(satirlar, akis):
             "usageMetadata": usage}
 
 
-def _akis_istek(url, baslik, govde, timeout, akis, birlestir=None):
+def _iptalli(satirlar, iptal):
+    for s in satirlar:
+        if iptal():
+            raise AkisKesildi("istemci gitti")
+        yield s
+
+
+def _akis_istek(url, baslik, govde, timeout, akis, birlestir=None, iptal=None):
     r = urllib.request.Request(url, data=json.dumps(govde).encode("utf-8"),
                                headers=baslik, method="POST")
     with urllib.request.urlopen(r, timeout=timeout) as y:      # noqa: S310
-        return (birlestir or _sse_birlestir)(y, akis)
+        return (birlestir or _sse_birlestir)(_iptalli(y, iptal) if iptal else y, akis)
 
 
 def _istek(url, baslik, govde, timeout=ZAMAN_ASIMI):
@@ -343,7 +384,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
     Doner: (metin, giris_jeton, cikis_jeton, kesildi_mi)."""
     ayar = ayar or {}
     jeton = int(ayar.get("jeton") or EN_COK_JETON)
-    timeout = ayar.get("sure") or timeout
+    timeout = ayar.get("sure") or (YEREL_ZAMAN_ASIMI if provider == "yerel" else timeout)
     tanim = models.PROVIDERS[provider]
     # ARAC KATALOGU (core/arac.py): model yalniz secer; cagrilar ek["cagrilar"]
     # ile doner ve ust katmanda dogrulanir. Cevap araclar varken de akar.
@@ -385,12 +426,12 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
         if ayar.get("yalniz_arac"):
             govde["stream"] = True
             y = _akis_istek(url, baslik, govde, timeout, lambda p: None,
-                            lambda s, a: _sse_birlestir(s, a, yalniz_arac=True))
+                            lambda s, a: _sse_birlestir(s, a, yalniz_arac=True), iptal=ayar.get("iptal"))
         elif callable(ayar.get("akis")):
             # Akan cevap (King'de yazi akarak gelir); kullanim son parcada.
             govde["stream"] = True
             govde["stream_options"] = {"include_usage": True}
-            y = _akis_istek(url, baslik, govde, timeout, ayar["akis"])
+            y = _akis_istek(url, baslik, govde, timeout, ayar["akis"], iptal=ayar.get("iptal"))
         else:
             y = _istek(url, baslik, govde, timeout)
         secim = (y.get("choices") or [{}])[0]
@@ -680,12 +721,14 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
             "hiç söz etme.")
 
 
-def _genis(ayar, jeton, sure, akis=None, araclar=None, yalniz_arac=False):
+def _genis(ayar, jeton, sure, akis=None, araclar=None, yalniz_arac=False, iptal=None):
     """Basamak ayarini uzun cevap icin genisletir; daraltmaz. `akis`
     verilmisse cevap akarak istenir. `araclar`: core/arac.py katalogu."""
-    if not jeton and not sure and not akis and not araclar:
+    if not jeton and not sure and not akis and not araclar and not iptal:
         return ayar
     a = dict(ayar or {})
+    if iptal:
+        a["iptal"] = iptal
     if yalniz_arac:
         a["yalniz_arac"] = True
     if araclar:
@@ -702,7 +745,7 @@ def _genis(ayar, jeton, sure, akis=None, araclar=None, yalniz_arac=False):
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
         gorseller=None, medya=None, seviye=None, jeton=None, sure=None, akis=None,
-        araclar=None, adim=0, yalniz_arac=False):
+        araclar=None, adim=0, yalniz_arac=False, iptal=None):
     """Bir kademe adina model cagirir — MERDIVENLE (core/motor.py).
 
     `araclar`: core/arac.py'nin temiz katalogu. Verilirse model bir arac
@@ -753,11 +796,13 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      sistem=sistem + (motor.YUKSELT_KURALI if ust_var else ""),
                      user=user, transport=transport, now=now, duzeltme=duzeltme,
                      denetim=denetim, veri=veri, gorseller=gorseller, medya=medya,
-                     ayar=_genis(b["ayar"], jeton, sure, akis, araclar, yalniz_arac), escalated=i > 0, not_ek=not_ek,
+                     ayar=_genis(b["ayar"], jeton, sure, akis, araclar, yalniz_arac, iptal), escalated=i > 0, not_ek=not_ek,
                      karar={"seviye": motor.kat(b), "neden": neden})
         r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
                       "ekonomi": plan.get("ekonomi"), "kat": motor.kat(b), "kat_neden": neden}
+        if r.get("sebep") == "iptal":
+            break
         if r.get("yerel_gec"):
             # Soguk baslangic: ikinci yerel model de bellege yuklenecekti;
             # kullanici iki kez beklemesin. Kalan yerel basamaklar atlanir;
@@ -823,8 +868,6 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         adres = models.yerel_uclari(cfg)[0]
         if adres != models.PROVIDERS["yerel"]["base"]:
             ayar["adres"] = adres
-        if models.adres_denetle(models.yerel_kok(cfg))[2] in ("yerel_ag", "internet"):
-            ayar["sure"] = UZAK_ZAMAN_ASIMI
     tavan_jeton = int(ayar.get("jeton") or EN_COK_JETON)
     # ARAC KATALOGU: araci desteklemeyen modele (gemma3 gibi) arac SUNULMAZ;
     # olagan sohbet cevabi verir, isi istemcinin kural yolu yapar (core/arac.py).
@@ -884,7 +927,8 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
             from core import ollama
             kalan = ollama.kapali_kalan()
             if kalan:
-                return {"ok": False, "reason": "provider", "text": None,
+                _yerel_yaz("kapali")
+                return {"ok": False, "reason": "provider", "text": None, "sebep": "yerel-kapali",
                         "note": "Model çağrısı başarısız: Ollama açılamadı; %d sn sonra yeniden denenecek." % kalan}
         with butce.ayir(en_kotu):
             return _gonder(sistem_metni, gecmis, istem_jeton)
@@ -914,14 +958,25 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
             return (cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis, ayar=tur_ayar)
                     if tur_ayar else cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis))
 
+        yerel = a.get("provider") == "yerel"
+        sirada = kesik = False
         try:
+            if yerel:
+                son_an = time.monotonic() + YEREL_ZAMAN_ASIMI
+                while not sirada:
+                    if callable(ayar.get("iptal")) and ayar["iptal"]():
+                        raise AkisKesildi("istemci gitti")
+                    if time.monotonic() >= son_an:
+                        raise TimeoutError("sira gelmedi")
+                    sirada = _YEREL_SIRA.acquire(timeout=min(1.0, max(0.0, son_an - time.monotonic())))
+                t_cagri = time.perf_counter()       # sure sira gelince baslar
             cagir = transport if transport is not None else _cagir
             try:
                 sonuc = gonder_bir()
             except urllib.error.URLError as e:
                 # Ollama kapali: bu makinedeyse bir kez acilir ve ayni istek yinelenir.
                 from core import ollama
-                if a.get("provider") == "yerel" and ollama.reddedildi_mi(e) and ollama.uyandir(cfg):
+                if yerel and ollama.reddedildi_mi(e) and ollama.uyandir(cfg):
                     sonuc = gonder_bir()
                 else:
                     raise
@@ -936,10 +991,15 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                 metin, gir, cik = sonuc
         except urllib.error.HTTPError as e:
             hata = _saglayici_hatasi(e)
+            gec = yerel and bool(YEREL_DOLU.search(hata))
         except Exception as e:                  # noqa: BLE001
             hata = "%s: %s" % (type(e).__name__, e)
-            if a.get("provider") == "yerel" and _zaman_asimi_mi(e):
+            kesik = isinstance(e, AkisKesildi)
+            if yerel and _zaman_asimi_mi(e):
                 gec = True
+        finally:
+            if sirada:
+                _YEREL_SIRA.release()
         sure_ms = int((time.perf_counter() - t_cagri) * 1000)
         if hata is None and (gir is None or cik is None):
             # HATALAR D-16: saglayici kullanim bilgisi dondurmedi. 0 yazmak
@@ -978,13 +1038,20 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                      # Gizlilik panosu (fikir 55): modele giden veri TURU.
                      # BAM istemi konu metni ve web kaynagidir (kitap.py kural 5).
                      veri=veri or (["bam_istegi"] if str(role).startswith("bam.") else None))
+        if kesik:
+            return {"ok": False, "reason": "provider", "text": None, "sebep": "iptal", "note": hata}
+        if yerel:
+            sebep = "yerel-mesgul" if gec else _yerel_sebep(hata)
+            _yerel_yaz("mesgul" if gec else "kapali" if sebep == "yerel-kapali" else
+                       None if hata else "hazir")
         if gec:
-            return {"ok": False, "reason": "provider", "text": None, "yerel_gec": True,
+            return {"ok": False, "reason": "provider", "text": None, "yerel_gec": True, "sebep": "yerel-mesgul",
                     "note": ("Yerel motor ayakta ama cevap zamanında gelmedi: model belleğe "
                              "yükleniyor olabilir. Birazdan yeniden dene.")}
         if hata:
-            return {"ok": False, "reason": "provider", "text": None,
-                    "note": "Model çağrısı başarısız: %s" % hata}
+            r = {"ok": False, "reason": "provider", "text": None,
+                 "note": "Model çağrısı başarısız: %s" % hata}
+            return dict(r, sebep=sebep) if yerel and sebep else r
         return {"ok": True, "raw": metin, "in_tok": gir, "out_tok": cik,
                 "usd": usd, "price_estimated": tahmini,
                 "tokens_estimated": jeton_tahmini, "truncated": kesildi,

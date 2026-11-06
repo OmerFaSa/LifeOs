@@ -94,7 +94,10 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    **Her yerden erişim (2026-11-06, depo sahibinin kararı: «apisiz, ücretsiz»):** telefon ve tablet
    evden uzakta Merkez'e ve yerel modele kullanıcının özel Tailscale ağından ulaşır (`sistem/uzak.py`);
    `tailscale serve`, asla `funnel`. Vekil isteği «bu bilgisayar» sayılmaz. Bilgisayar kapalıyken AI
-   yoktur, modüller ve King'in kural yolları çalışır; model cihaza kurulmaz.
+   yoktur, modüller ve King'in kural yolları çalışır; model cihaza kurulmaz. King ve Hesap › Bağlantılar ›
+   Her yerden erişim hâli adıyla söyler: bilgisayara ulaşılamıyor, Merkez kapalı, model meşgul, bağlı. Bilgisayar
+   kapalıyken soru ve sayfa beklemez (`brand/ortak/sw.js`, `hesap.js` merkezHali). Bilgisayar açılınca başlama
+   kullanıcının düğmesidir, varsayılan kapalı; uyku ve güç ayarına dokunulmaz.
    **Bağlantılar (2026-10-08, depo sahibinin isteği):** iki adımlı
    doğrulama (TOTP, yedek kodlar), kodla cihaz bağlama, erişim anahtarıyla
    gelen kutusu (iPhone Kısayollar, Home Assistant) ve takvim aboneliği de

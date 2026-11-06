@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import urllib.error
 import urllib.request
 
 KOK = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,6 +44,14 @@ def _sahte(serve_web=None, kod=0, stderr=""):
 def _web():
     return {"%s:%d" % (AD, d): {"Handlers": {"/": {"Proxy": "http://127.0.0.1:%d" % i}}}
             for d, i in uzak.KAPILAR.items()}
+
+
+class _RegYok:
+    """Windows disi ya da erisim reddi."""
+    HKEY_CURRENT_USER, KEY_SET_VALUE, REG_SZ = 1, 2, 3
+
+    def OpenKey(self, *a):
+        raise PermissionError("izin yok")
 
 
 def run():
@@ -190,6 +199,115 @@ def run():
             del web["%s:443" % AD]
             no(uzak.durum(_sahte(serve_web=web)[0])["acik"], "eksik kapi acik sayilmaz")
         test("durum tailscale'in kendisinden okunur", durumu)
+
+        def funnel_acikken():
+            # Birisi elle funnel acarsa: acik sayilmaz, jeton verilmez, ac() susarak ustune kurmaz.
+            def calistir(arg, **k):
+                if arg[1:4] == ["serve", "status", "--json"]:
+                    return subprocess.CompletedProcess(arg, 0, json.dumps(
+                        {"Web": _web(), "AllowFunnel": {AD + ":443": True}}), "")
+                return _sahte(serve_web=_web())[0](arg, **k)
+            d = uzak.durum(calistir)
+            ok(d["funnel"], "funnel gorulur")
+            no(d["acik"], "internete acik kapi «acik» sayilmaz")
+            eq(uzak.merkez(oku=lambda: d, yol="/yok"), None)
+            r = uzak.ac(calistir, kok_yaz=lambda ad: 1 / 0)
+            no(r["ok"], "ustune kurulmaz")
+            ok("funnel" in r["mesaj"], r["mesaj"])
+            no(uzak.durum(_sahte(serve_web=_web())[0])["funnel"], "olagani funnel degil")
+        test("funnel elle acilsa bile erisim acik sayilmaz, jeton verilmez", funnel_acikken)
+
+        def vekil_yerel_uclari():
+            # Vekilden gelen hic bir «yalniz bu bilgisayar» ucundan gecemez (soz 2).
+            import sunucu
+            from http.server import ThreadingHTTPServer
+            acildi = []
+            eski_ac = sunucu.hkm_ac
+            sunucu.hkm_ac = lambda: acildi.append(1) or {"ok": True}
+
+            class Isleyici(sunucu.Sunucu):
+                def log_message(self, *a):
+                    pass
+            with tempfile.TemporaryDirectory() as klasor:
+                srv = ThreadingHTTPServer(("127.0.0.1", 0), lambda *a: Isleyici(*a, directory=klasor))
+                threading.Thread(target=srv.serve_forever, daemon=True).start()
+                try:
+                    def post(yol, **baslik):
+                        istek = urllib.request.Request("http://127.0.0.1:%d%s" % (srv.server_address[1], yol),
+                                                       data=b"{}", headers=baslik, method="POST")
+                        try:
+                            with urllib.request.urlopen(istek, timeout=5) as y:
+                                return y.status
+                        except urllib.error.HTTPError as h:
+                            return h.code
+                    disaridan = {"Host": AD + ":5183", "X-Forwarded-For": "100.1.2.3", "X-LifeOS": "merkez",
+                                 "Tailscale-User-Login": "ben@x.com"}
+                    eq(post("/api/merkez/ac", **disaridan), 403)
+                    eq(acildi, [], "disaridan Merkez baslatilamaz")
+                    eq(post("/api/merkez/ac", **{"X-LifeOS": "merkez"}), 200)
+                    eq(acildi, [1], "bilgisayarin kendisi baslatir")
+                    for yol, ek in (("/api/ayar", "ayar"), ("/api/planlama", "planlama"), ("/api/muzik", "muzik"),
+                                    ("/api/zemin/x", "zemin"), ("/api/ice", "ice")):
+                        kod = post(yol, **dict(disaridan, **{"X-LifeOS": ek}))
+                        ok(kod == 403, "%s disaridan %s" % (yol, kod))
+                finally:
+                    sunucu.hkm_ac = eski_ac
+                    srv.shutdown()
+                    srv.server_close()
+        test("vekilden gelen istek yerel uclardan gecemez, Merkez'i baslatamaz", vekil_yerel_uclari)
+
+        def acilis():
+            class Reg:
+                HKEY_CURRENT_USER, KEY_SET_VALUE, REG_SZ = 1, 2, 3
+
+                def __init__(self):
+                    self.deger = {}
+
+                def OpenKey(self, *a):
+                    return self
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *a):
+                    return False
+
+                def QueryValueEx(self, k, ad):
+                    if ad not in self.deger:
+                        raise FileNotFoundError(ad)
+                    return self.deger[ad], 1
+
+                def SetValueEx(self, k, ad, _, tur, deger):
+                    self.deger[ad] = deger
+
+                def DeleteValue(self, k, ad):
+                    if ad not in self.deger:
+                        raise FileNotFoundError(ad)
+                    del self.deger[ad]
+            r = Reg()
+            no(uzak.acilis_acik(r), "varsayilan kapali")
+            uzak.acilis_ayarla(False, r)                    # zaten kapaliyken firlatmaz
+            uzak.acilis_ayarla(True, r)
+            ok(uzak.acilis_acik(r))
+            komut = r.deger["LifeOS"]
+            ok('baslat.py" --tarayicisiz' in komut, komut)
+            no("funnel" in komut or "serve" in komut, "erisimi acmaz, yalniz LifeOS'u baslatir")
+            uzak.acilis_ayarla(False, r)
+            no(uzak.acilis_acik(r))
+            eq(r.deger, {}, "kapatinca iz kalmaz")
+            eq(uzak.acilis_ayarla(True, _RegYok())["ok"], False)
+        test("acilista baslama: varsayilan kapali, kapatinca iz kalmaz", acilis)
+
+        def bekci():
+            import sunucu
+            acilan = []
+            ac = lambda: acilan.append(1)
+            no(sunucu.merkez_bekci(ayakta=lambda: True, oku=lambda: {"acik": True}, ac=ac), "ayakta")
+            no(sunucu.merkez_bekci(ayakta=lambda: False, oku=lambda: {"acik": False}, ac=ac), "erisim kapali: dokunmaz")
+            eq(acilan, [])
+            ok(sunucu.merkez_bekci(ayakta=lambda: False, oku=lambda: {"acik": True}, ac=ac))
+            eq(acilan, [1], "erisim acik, Merkez dusmus: acilir")
+        test("bekci: Merkez dusunce yalniz erisim aciksa kaldirir", bekci)
     finally:
         uzak._cli = eski_cli
 

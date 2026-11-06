@@ -393,6 +393,7 @@
       basılı tut: sesli sohbet), gönder. Önerinin altında «Neden?» yalnız
       bilinen kaynağı söyler. PDF'in metnini Merkez çıkarır (model yok). */
 window.LIFEOS.PARCA.yazilar({
+  'ortak.king.model-hazirlaniyor':'Model hazırlanıyor. Bilgisayar meşgulse biraz sürebilir.',
   'ortak.king.kolay-gelsin':'Kolay gelsin.',
   'ortak.king.afiyet-olsun':'Afiyet olsun.',
   'ortak.king.keyifli-okumalar':'Keyifli okumalar.',
@@ -769,8 +770,11 @@ window.LIFEOS.KING_IC = {};
     } : null,
     gizli:() => typeof document !== 'undefined' && document.visibilityState === 'hidden',
   };
-  /* HKM'deki King'in modelli cevabı yerel modelde saniyeler sürebilir. */
-  const MERKEZ_ZAMAN_ASIMI = 60000;
+  /* Yerel model hazırlanırken Merkez en çok 120 sn bekler (HKM/core/ai.py YEREL_ZAMAN_ASIMI); ondan
+     önce vazgeçmek yüklemeyi boşa çıkarır. Bilgisayar kapalıyken bu süre beklenmez: önce merkezHali. */
+  const MERKEZ_ZAMAN_ASIMI = 130000;
+  /* Akan cevapta başlıklar model beklenmeden gelir; gelmiyorsa hat ölüdür. */
+  const AKIS_BASLIK_SURE = 15000;
   /* Uzun metin isteği (HKM/core/sohbet.py uzun_istek ile aynı kural): bekleme üç katı. */
   const UZUN_ISTEK = /(uzun|uzunca|detaylı|ayrıntılı|kapsamlı|derinlemesine)/i;
   const UZUN_YAZ = /(yaz|anlat|açıkla|metin|cevap|bilgi|makale|rapor|özetle)/i;
@@ -1189,10 +1193,24 @@ window.LIFEOS.KING_IC = {};
     const d = ortam.simdi();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
+  /* King açıldı: kullanıcı sormak üzere, model arkada ısınsın (soğuk yükleme 9-13 sn ölçüldü).
+     Merkez bellek darsa (oyun) yüklemez; hata sessizdir, soru yine çalışır. */
+  KI.modelIsitT = -Infinity;
+  function modelIsit(){
+    const k = baglanti(), su = ortam.simdi().getTime();
+    if(!k || !ortam.fetch || su - KI.modelIsitT < 300000) return;
+    KI.modelIsitT = su;
+    try{
+      const f = ortam.fetch;
+      const p = f(k.url + '/api/ollama/isit', { method:'POST', body:'{}',
+        headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king.bearer') + k.token } });
+      if(p && p.catch) p.catch(() => {});
+    }catch(e){ /* yok */ }
+  }
   /* Doner: { ok:true, text, mode } ya da { ok:false, neden:'baglanti'|'yok' }. */
   /* Söz 33: akan cevap. HKM satır satır NDJSON yollar: önce denetlenmiş
      cümleler («parca»), sonda tam cevap («son»). */
-  async function akisOku(res, parca){
+  async function akisOku(res, parca, canli){
     const r = res.body.getReader();
     const dec = typeof TextDecoder === 'function' ? new TextDecoder() : null;
     let tampon = '', sonuc = null;
@@ -1201,6 +1219,7 @@ window.LIFEOS.KING_IC = {};
       if(!s) return;
       let o = null;
       try{ o = JSON.parse(s); }catch(e){ return; }
+      if(canli) canli(o && o.t);
       if(o && o.t === 'parca' && typeof o.metin === 'string') parca(o.metin);
       else if(o && o.t === 'son') sonuc = o;
     };
@@ -1228,12 +1247,18 @@ window.LIFEOS.KING_IC = {};
   async function merkezeSor(metin, bek, ek){
     const k = baglanti();
     if(!k) return { ok:false, neden:'baglanti' };
+    /* Bilgisayar ya da Merkez kapalıysa soru hiç beklemez (§1.4); sebebi King söyler. */
+    const H = L.HESAP && L.HESAP.merkezHali ? await L.HESAP.merkezHali() : null;
+    if(H && (H.hal === 'bilgisayar-kapali' || H.hal === 'merkez-kapali')) return { ok:false, neden:'baglanti', hal:H };
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     const d = derinlik();
     let okunan = '';
     /* Söz 31: Derin daha uzun sürebilir; bekleme iki katı. */
     const uzun = UZUN_ISTEK.test(metin) && UZUN_YAZ.test(metin);
-    const t = ctrl ? setTimeout(() => ctrl.abort(), MERKEZ_ZAMAN_ASIMI * (uzun ? 3 : d === 'derin' ? 2 : 1)) : null;
+    const tam = MERKEZ_ZAMAN_ASIMI * (uzun ? 3 : d === 'derin' ? 2 : 1);
+    let t = null;
+    const sure = ms => { if(t) clearTimeout(t); t = ctrl ? setTimeout(() => ctrl.abort(), ms) : null; };
+    sure(bek ? AKIS_BASLIK_SURE : tam);
     try{
       /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»). */
       const f = ortam.fetch;
@@ -1254,17 +1279,26 @@ window.LIFEOS.KING_IC = {};
         signal:ctrl ? ctrl.signal : undefined,
       });
       let res = await istek(bek ? '/api/chat/akis' : '/api/chat');
-      if(bek && (res.status === 404 || res.status === 405)) res = await istek('/api/chat');   // eski HKM
+      if(bek && (res.status === 404 || res.status === 405)){ sure(tam); res = await istek('/api/chat'); }   // eski HKM
+      sure(tam);
       const tur = res.headers && res.headers.get ? String(res.headers.get('Content-Type') || '') : '';
-      let g = null, akti = false;
+      let g = null, akti = false, notta = false;
       if(res.status === 200 && /ndjson/.test(tur) && res.body && typeof res.body.getReader === 'function'){
         g = await akisOku(res, p => {
           if(!bek) return;
           akti = true;
+          if(notta){ bek.metin = ''; notta = false; }
           bek.bekliyor = false; bek.akiyor = true; bek.metin += p;
           /* K3: sesle konuşurken ilk cümle cevap bitmeden okunur. */
           if(KI.sesleMi() && p.trim()){ KI.seslendir(p, okunan ? 'ek' : 'acik'); okunan += p; }
           KI.ciz(false);
+        }, tur_ => {
+          sure(tam);          // hat canlı: süre son satırdan sayılır
+          if(tur_ === 'bekle' && bek && !akti && !notta){
+            notta = true;
+            bek.bekliyor = false; bek.akiyor = true; bek.metin = yz('ortak.king.model-hazirlaniyor');
+            KI.ciz(false);
+          }
         });
       }else{
         try{ g = await res.json(); }catch(e){ g = null; }
@@ -1331,5 +1365,5 @@ window.LIFEOS.KING_IC = {};
     return (Array.isArray(s) ? s : [s]).filter(Boolean).map(String);
   }
 
-  Object.assign(KI, { L, MODUL_AD, SAYFALAR, HAZIR, NIYET, ortam, YAN, yanDar, yanDarSec, yanDugme, yanDugmeHtml, EKRAN_EN_COK, GORSEL_SISTEM, KAMERA_NOT, kameraMi, INCE_OKU, KAM, kamSecili, kamTazele, kamSec, GOZ, GOZ_ILK, GOZ_ARA, GOZ_SORU, GOZ_KAMERA, gozAcik, TASIMA, CEVAP, SES, SES_TERCIH, SES_AD, SES_IP, SES_PARCA, ALGILA, ALGILA_TERCIH, ALGILA_AD, ALGILA_IP, algila, MIK, mikSecili, mikSec, mikTazele, DERIN, DERIN_TERCIH, DERIN_AD, DERIN_IP, derinlik, derinlikSec, HIZ, HIZLAR, hiz, GUNLUK_EN_COK, ARSIV_EN_COK, TANISMA, CIKARIM_KARAR, SORMA, USLUP, FOTO_EN_BUYUK, ARKADAS_UYKU, arkadasPoz, yazimSuresi, arkadasEsya, arkadasHal, arkadasHtml, arkadasGuncelle, arkadasUyandir, videoKaynak, kac, kucuk, sayfaBul, yorumla, sohbet, veriGibi, geriAlYap, ilet, EVET, HAYIR, soruMu, baglanti, bugunISO, BAS, sohbetBas, sohbetBasYaz, merkezeSor, gecerliRota, git, ozetSatirlari });
+  Object.assign(KI, { L, MODUL_AD, SAYFALAR, HAZIR, NIYET, ortam, YAN, yanDar, yanDarSec, yanDugme, yanDugmeHtml, EKRAN_EN_COK, GORSEL_SISTEM, KAMERA_NOT, kameraMi, INCE_OKU, KAM, kamSecili, kamTazele, kamSec, GOZ, GOZ_ILK, GOZ_ARA, GOZ_SORU, GOZ_KAMERA, gozAcik, TASIMA, CEVAP, SES, SES_TERCIH, SES_AD, SES_IP, SES_PARCA, ALGILA, ALGILA_TERCIH, ALGILA_AD, ALGILA_IP, algila, MIK, mikSecili, mikSec, mikTazele, DERIN, DERIN_TERCIH, DERIN_AD, DERIN_IP, derinlik, derinlikSec, HIZ, HIZLAR, hiz, GUNLUK_EN_COK, ARSIV_EN_COK, TANISMA, CIKARIM_KARAR, SORMA, USLUP, FOTO_EN_BUYUK, ARKADAS_UYKU, arkadasPoz, yazimSuresi, arkadasEsya, arkadasHal, arkadasHtml, arkadasGuncelle, arkadasUyandir, videoKaynak, kac, kucuk, sayfaBul, yorumla, sohbet, veriGibi, geriAlYap, ilet, EVET, HAYIR, soruMu, baglanti, bugunISO, BAS, sohbetBas, sohbetBasYaz, merkezeSor, modelIsit, gecerliRota, git, ozetSatirlari });
 })();

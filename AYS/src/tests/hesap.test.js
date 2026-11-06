@@ -1333,6 +1333,100 @@
       return { srv, c, h };
     }
 
+    it('LifeOS kapalıyken vekilin 502’si «ulaşılamadı»dır, sunucu hatası değil', () => sahneyle(async () => {
+      const { h } = await girisli();
+      const f0 = h._ortam.fetch;
+      h._ortam.fetch = async () => ({ ok:false, status:502, json:async () => { throw new Error('boş'); } });
+      let hata = null;
+      try{ await h._istek('https://pc.ts.net:5183', '/api/hesap/durum'); }catch(e){ hata = e; }
+      expect(hata.kod).toBe(0);
+      h._ortam.fetch = async () => ({ ok:false, status:503, json:async () => ({ hata:'Bu sunucuda yok.' }) });
+      hata = null;
+      try{ await h._istek('https://pc.ts.net:5183', '/api/hesap/durum'); }catch(e){ hata = e; }
+      expect([hata.kod, hata.message]).toEqual([503, 'Bu sunucuda yok.']);    // kendi cevabımız kalır
+      h._ortam.fetch = f0;
+    }));
+
+    it('Merkez’in hâli: bağlı, model meşgul, Merkez kapalı, bilgisayar kapalı dürüstçe ayrılır', () => sahneyle(async () => {
+      const { h, c } = await girisli();
+      const a = { enabled:true, url:'https://pc.ts.net', token:'j' };
+      h.kur({ modul:'spi', depo:c.depo, hkm:() => ({ settings:() => a, save:async () => {} }) });
+      await hazir();
+      const f0 = h._ortam.fetch, z0 = h._ortam.zamanla;
+      const istek = [];
+      const kur = f => { istek.length = 0; h._ortam.fetch = (u, s) => { istek.push([u, s && s.mode]); return f(u, s); }; };
+      kur(async () => ({ ok:true, json:async () => ({ ok:true, model:'mesgul' }) }));
+      { const v = await h.merkezHali(true); expect([v.hal, v.model]).toEqual(['bagli', 'mesgul']); }
+      expect(istek).toEqual([['https://pc.ts.net/api/health', undefined]]);
+      expect(h.merkezHalMetni({ hal:'bagli', model:'mesgul' })).toContain('meşgul');
+      /* Önbellek: her King mesajı ağa çıkmaz. */
+      istek.length = 0;
+      await h.merkezHali();
+      expect(istek).toEqual([]);
+      /* 502: tarayıcı CORS'tan reddeder; no-cors ulaşırsa bilgisayar açıktır. */
+      kur(async (u, s) => { if(!s.mode) throw new TypeError('cors'); return { type:'opaque' }; });
+      expect((await h.merkezHali(true)).hal).toBe('merkez-kapali');
+      expect(h.merkezHalMetni({ hal:'merkez-kapali' })).toContain('Merkez kapalı');
+      /* Ağ reddediyor: internet yok ya da özel ağ kapalı. */
+      kur(async () => { throw new TypeError('ag'); });
+      expect((await h.merkezHali(true)).hal).toBe('bilgisayar-kapali');
+      expect(h.merkezHalMetni({ hal:'bilgisayar-kapali' })).toContain('ulaşılamıyor');
+      /* Bilgisayar kapalıyken paket düşer, cevap hiç gelmez: süre dolunca ikinci kez beklenmez. */
+      h._ortam.zamanla = f => { f(); return 1; };
+      kur((u, s) => new Promise((ok, red) => { if(s.signal.aborted) red(new Error('kesildi')); s.signal.addEventListener('abort', () => red(new Error('kesildi'))); }));
+      expect((await h.merkezHali(true)).hal).toBe('bilgisayar-kapali');
+      expect(istek.length).toBe(1);
+      h._ortam.zamanla = z0;
+      /* Bilgisayarın kendisinde «bilgisayar kapalı» denmez. */
+      a.url = 'http://127.0.0.1:4200';
+      kur(async () => { throw new TypeError('ag'); });
+      expect((await h.merkezHali(true)).hal).toBe('merkez-kapali');
+      a.token = '';
+      expect((await h.merkezHali(true)).hal).toBe('yok');
+      h._ortam.fetch = f0;
+    }));
+
+    it('Her yerden erişim sayfası: telefon hâli görür, ayarı yalnız bilgisayar görür', () => sahneyle(async () => {
+      const { h, c, srv } = await girisli();
+      const a = { enabled:true, url:'https://pc.ts.net', token:'j' };
+      h.kur({ modul:'spi', depo:c.depo, hkm:() => ({ settings:() => a, save:async () => {} }) });
+      await hazir();
+      const f0 = h._ortam.fetch, istek = [];
+      const pc = { kurulu:true, bagli:true, acik:true, ad:'pc.ts.net', funnel:false, acilis:false };
+      h._ortam.fetch = async (u, s) => {
+        istek.push(u);
+        if(u.endsWith('/api/health')) throw new TypeError('ag');
+        if(u.endsWith('/api/hesap/uzak-durum')) return { ok:true, status:200, json:async () => pc };
+        if(u.endsWith('/api/hesap/uzak-acilis')){ pc.acilis = JSON.parse(s.body).acik; return { ok:true, status:200, json:async () => ({ ok:true, acilis:pc.acilis, mesaj:'Tamam' }) }; }
+        return f0(u, s);
+      };
+      await h.merkezAc('uzak');
+      await hazir();
+      let m = merkez().textContent;
+      expect(m).toContain('Bilgisayara ulaşılamıyor');
+      expect(m).toContain('Yeniden dene');
+      /* Testin sunucusu bu cihazı yerel sayar: bilgisayar görünümü. */
+      expect(m).toContain('Her yerden erişimi kapat');
+      expect(m).toContain('Bilgisayar açılınca LifeOS başlasın');
+      expect(m).toContain('Kapalı');
+      merkez().querySelector('[data-hesap="uzak-acilis"]').click();
+      await hazir();
+      expect(pc.acilis).toBe(true);
+      expect(merkez().querySelector('[data-hesap="uzak-acilis"]').textContent).toContain('Açık');
+      h.merkezKapat();
+      /* Dışarıdaki cihaz: ayar hiç istenmez ve görünmez. */
+      srv.disarida = true;
+      await h.yokla();
+      istek.length = 0;
+      await h.merkezAc('uzak');
+      await hazir();
+      expect(merkez().textContent).toContain('Bilgisayara ulaşılamıyor');
+      expect(merkez().querySelector('[data-hesap="uzak-acilis"]')).toBeNull();
+      expect(istek.filter(u => /uzak-durum/.test(u))).toEqual([]);
+      h.merkezKapat();
+      h._ortam.fetch = f0;
+    }));
+
     it('her yerden erişim: admin cihazı Merkez bağını hesaptan alır; kapalıysa King bozulmaz', () => sahneyle(async () => {
       const { h, srv, c } = await girisli();
       const a = { url:'http://127.0.0.1:4200', token:'' };

@@ -29,7 +29,8 @@
       basliyordu). Bagli ekonomik model ISIT_ARALIK'ta bir Ollama'ya
       «bellekte kalsin» denir (/api/generate, istem bos: model yuklenir,
       metin uretilmez, para ve jeton harcanmaz). `ollama.sicak` false ise
-      yapilmaz.
+      yapilmaz. Bellek darsa (oyun) yapilmaz, gomme modeli de yuklenmez: model
+      oyunla yarismaz, bellekteyse suresi dolunca iner; soran kullanici yine bekler.
 
    7. ROLLER (2026-10-20, King 2.0 A). Gorsel uzman model (adinda «-vl»,
       «vision», «llava»…) metin sinifina onerilmez, «gorsel» olarak onerilir;
@@ -106,6 +107,35 @@ def validate(patch):
         elif not isinstance(v, tip):
             hata.append("ollama.%s true ya da false olmalı" % k)
     return (not hata), hata
+
+
+# Olcum (Ollama gunlugu, 2026-11-06, oyun acik/kapali): bos sanal bellek (RAM + takas) 0,9-5,5 GiB iken
+# yukleme «out of memory» ile dustu; 6,8 GiB ve ustunde oldu. VRAM belirleyici degil (4,5 GiB bostu);
+# num_ctx de degil (8192 -> 2048: yalniz 29 MiB). Tek gunluk olcum, esik buna gore.
+BELLEK_ALT = 6144                   # MiB
+
+
+def bellek_bos_mb():
+    """Bos sanal bellek (MiB); Windows disinda ya da okunamazsa None."""
+    try:
+        import ctypes
+
+        class Durum(ctypes.Structure):
+            _fields_ = [("uzunluk", ctypes.c_ulong), ("yuk", ctypes.c_ulong)] + [
+                (a, ctypes.c_ulonglong) for a in ("t_fiz", "b_fiz", "t_sayfa", "b_sayfa", "t_san", "b_san", "ek")]
+        d = Durum()
+        d.uzunluk = ctypes.sizeof(Durum)
+        return d.b_sayfa // (1024 * 1024) if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(d)) else None
+    except (ImportError, AttributeError, OSError):
+        return None
+
+
+VARSAYILAN_BELLEK = bellek_bos_mb   # testler makineye bagli kalmaz (tests/harness.py)
+
+
+def bellek_dar():
+    b = VARSAYILAN_BELLEK()
+    return b is not None and b < BELLEK_ALT
 
 
 def _getir(url, timeout):
@@ -321,6 +351,8 @@ def gomme(cfg, metinler, gonder=None):
         return []
     if gonder is None and time.monotonic() - _gomme_hata[0] < GOMME_ARA and _gomme_hata[0]:
         return None
+    if bellek_dar():
+        return None
     try:
         r = (gonder or VARSAYILAN_GOMME)(models.yerel_kok(cfg) + "/api/embed",
                                          {"model": gomme_modeli(cfg), "input": list(metinler),
@@ -335,13 +367,14 @@ def gomme(cfg, metinler, gonder=None):
         return None
 
 
-def isit(cfg, tarama, gonder=None):
-    """Kural 6: bagli ekonomik modeli bellekte tutar. Doner: model adi ya da None."""
-    if (not settings(cfg)["sicak"] or not _kendi.acik(cfg)
+def isit(cfg, tarama, gonder=None, istek=False):
+    """Kural 6: bagli ekonomik modeli bellekte tutar. Doner: model adi ya da None.
+    `istek`: kullanici King'i acti; «kendi basina» anahtari arka plan isidir, buna engel degil."""
+    if (not settings(cfg)["sicak"] or (not istek and not _kendi.acik(cfg))
             or (tarama or {}).get("durum") != "bagli"):
         return None
     model = models.yerel_of(cfg).get("ekonomik")
-    if not model:
+    if not model or bellek_dar():
         return None
     try:
         (gonder or VARSAYILAN_GONDER)(models.yerel_kok(cfg) + "/api/generate",

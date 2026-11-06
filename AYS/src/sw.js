@@ -15,6 +15,13 @@
    böyle bozulmaz: kaynak düzenlenince yeni sürüm hemen gelir, eski kopya
    YALNIZ ağ yokken görünür.
 
+   AĞ YOK ÜÇ BİÇİMDE GELİR (her yerden erişim, 2026-11-06). Reddedilir; vekil
+   LifeOS kapalıyken boş 502 döner (ölçüldü); bilgisayar kapalıyken özel ağ
+   hiç cevap vermez, tarayıcı dakikalarca bekler. İkisinde de kopya açılır,
+   AG_BEKLE'den uzun beklenmez; geç gelen cevap arkada saklanır (§1.4). Bir
+   dosya geciktiyse sonrakiler AG_DINLEN boyunca hiç beklemez: açılış toplam
+   AG_BEKLE sürer, dosya sayısıyla büyümez.
+
    Saklanmayanlar: başka kökenden gelen (HKM, yazı tipi), /api/ (hesap),
    GET olmayan,
    parça isteği (Range / 206) ve hatalı cevap. Kişisel veri buraya hiç
@@ -23,6 +30,9 @@
 
 const KASA = 'lifeos-kabuk-v1';
 const EN_COK = 400;
+const AG_BEKLE = 3000;
+const AG_DINLEN = 30000;
+let agGec = 0;
 
 function ayniKoken(adres){
   try{ return new URL(adres).origin === self.location.origin; }catch(e){ return false; }
@@ -72,14 +82,23 @@ async function tamaminiSakla(adres){
 }
 
 async function agOnce(istek, olay){
-  try{
-    const cevap = await fetch(istek);
-    if(saklanir(istek, cevap)) sakla(istek.url, cevap.clone());
-    else if(istek.headers.has('range') && cevap.ok) olay.waitUntil(tamaminiSakla(istek.url));
+  const ag = fetch(istek).then(cevap => {
+    agGec = 0;
+    if(saklanir(istek, cevap)) return sakla(istek.url, cevap.clone()).then(() => cevap);
+    if(istek.headers.has('range') && cevap.ok) olay.waitUntil(tamaminiSakla(istek.url));
     return cevap;
-  }catch(hata){
+  });
+  olay.waitUntil(ag.catch(() => {}));
+  const GEC = {};
+  try{
+    const bekle = Date.now() - agGec < AG_DINLEN ? 0 : AG_BEKLE;
+    const cevap = await Promise.race([ag, new Promise(ok => setTimeout(() => ok(GEC), bekle))]);
+    if(cevap !== GEC && (cevap.status < 502 || cevap.status > 504)) return cevap;
+    if(cevap === GEC) agGec = Date.now();
     /* Parça isteği (video) çevrimdışıyken dosyanın tamamıyla karşılanır;
        tarayıcı 200 cevabını da oynatır. */
+    return await eskisi(istek) || await ag;
+  }catch(hata){
     const eski = await eskisi(istek);
     if(eski) return eski;
     throw hata;

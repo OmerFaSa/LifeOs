@@ -321,6 +321,14 @@ YEDEK_METIN = {
                "Ölçülen şeyler için «durum» yaz.",
     "key-missing": "Bu kademeye seçilen anahtar artık yok. Ayarlar → "
                    "Yapay zekâ'dan yeniden seç.",
+    # Yerel model (ai._yerel_sebep): bulut «sağlayıcı»sı değildir, sebep ayrı söylenir.
+    "yerel-mesgul": "Bilgisayardaki model şu an meşgul: bilgisayar başka bir işle (oyun gibi) "
+                    "dolu olabilir, model zamanında hazır olamadı. Birazdan yeniden dene. "
+                    "Bu arada «durum» komutu çalışıyor.",
+    "yerel-kapali": "Bilgisayardaki model kapalı ve açılamadı, bu yüzden serbest cümleyle "
+                    "cevap veremiyorum. Bilgisayarda Ollama'yı aç. Bu arada «durum» komutu çalışıyor.",
+    "yerel-model-yok": "Seçili model bilgisayarda bulunamadı. Ayarlar → Yapay zekâ'dan "
+                       "yeniden bağla. Bu arada «durum» komutu çalışıyor.",
 }
 
 
@@ -633,8 +641,8 @@ def _yedek_metin(r, yedek):
     # cevabi ZATEN dogru cevaptir; taninmadiysa `command` None gelir.
     if yedek.get("command"):
         return yedek["text"]
-    return YEDEK_METIN.get(r.get("reason"),
-                           "Şu an serbest cümleyle cevap veremiyorum.")
+    return (YEDEK_METIN.get(r.get("sebep")) or YEDEK_METIN.get(r.get("reason"))
+            or "Şu an serbest cümleyle cevap veremiyorum.")
 
 
 # YALNIZ SELAM: mesajin TAMAMI selam kelimeleri (+ istege bagli hitap)
@@ -1109,19 +1117,20 @@ def _k2_ek(con, metin, r, kanal, hedef, modul, gorevli):
 
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
           user="ben", transport=None, kayit=True, kanal="local", hedef=None,
-          derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None, dongu=None):
+          derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None, dongu=None,
+          iptal=None):
     """Bir mesaja cevap (bkz. `_konus`); King'in cevabina söz ve soru
     cevabi notu eklenir (`_k2_ek`)."""
     r = _konus(con, cfg, metin, date, gorevli=gorevli, gecmis=gecmis, th=th, user=user, transport=transport,
                kayit=kayit, kanal=kanal, hedef=hedef, derinlik=derinlik, uslup=uslup, akis=akis,
-               araclar=araclar, arac_sonuclari=arac_sonuclari, modul=modul, dongu=dongu)
+               araclar=araclar, arac_sonuclari=arac_sonuclari, modul=modul, dongu=dongu, iptal=iptal)
     return _k2_ek(con, metin, r, kanal, hedef, modul, gorevli)
 
 
 def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
            user="ben", transport=None, kayit=True, kanal="local", hedef=None,
            derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None,
-           dongu=None):
+           dongu=None, iptal=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
     `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
     `araclar`: istemcinin arac katalogu (core/arac.py); model bir arac
@@ -1240,8 +1249,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         sec = ai.ask(con, cfg, rol, "arac_sec", mesajlar[-3:], baglam=_tarih_satiri(date),
                      sistem=SISTEM_ARAC % {"ad": GOREVLILER[gorevli]["ad"], "baglam": _tarih_satiri(date)},
                      user=user, transport=transport, veri=veri, seviye=sv["seviye"], araclar=sunulan,
-                     adim=1, duzeltme=False, yalniz_arac=True)
-        if sec.get("ok") and sec.get("cagrilar"):
+                     adim=1, duzeltme=False, yalniz_arac=True, iptal=iptal)
+        # Model mesgul ya da kapaliysa sohbet turu ayni sureyi yeniden beklemez.
+        if (sec.get("ok") and sec.get("cagrilar")) or sec.get("sebep"):
             r = sec
         else:
             arac_turu, sistem = False, aracsiz_sistem
@@ -1251,7 +1261,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                    jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
                    akis=CumleAkisi(akis, bg, serbest, genel=denetim == "genel", aracli=arac_turu) if akis else None,
                    araclar=sunulan if arac_turu else None, adim=devam["adim"] + 1 if devam else 1,
-                   denetim=denetim)
+                   denetim=denetim, iptal=iptal)
+    if r.get("sebep") == "iptal":
+        return {"ok": False, "mode": "yok", "text": None, "agent": gorevli, "reason": "iptal"}
     motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
@@ -1314,7 +1326,7 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             patron.log(con, kanal, "manager", govde, agent=gorevli)
         return {"ok": True, "mode": "komut", "command": yedek["command"],
                 "text": govde, "agent": gorevli,
-                "ai": {"ok": False, "reason": r.get("reason"),
+                "ai": {"ok": False, "reason": r.get("reason"), "sebep": r.get("sebep"),
                        "note": r.get("note")}}
     # Hafiza adayi (core/memory.py): model yalniz ADAY birakir; etiket
     # kullaniciya gitmez, aday kullanici onaylayana dek baglama girmez.

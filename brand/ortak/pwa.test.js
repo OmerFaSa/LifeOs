@@ -246,6 +246,56 @@
       expect(karsilanan).toEqual(['http://yerel/js/app.js']);
     });
 
+    /* Her yerden erişim (2026-11-06): LifeOS kapalıyken vekil boş 502 döner, bilgisayar
+       kapalıyken özel ağ cevap vermez. Modül ikisinde de kopyasından, beklemeden açılır (§1.4). */
+    const swSure = [];
+    async function swAg(ag, kasa){
+      const metin = await (await fetch('../sw.js', { cache:'no-store' })).text();
+      const dinle = {}, isler = [];
+      const k = { match:async u => kasa[u] || null, put:async (u, c) => { kasa[u] = c; } };
+      new Function('self', 'caches', 'fetch', 'setTimeout', metin)(
+        { addEventListener:(t, f) => { dinle[t] = f; }, location:{ origin:'http://yerel' }, registration:{ scope:'http://yerel/' } },
+        { open:async () => k, keys:async () => [] }, ag, (f, ms) => { swSure.push(ms); setTimeout(f, 1); });
+      return adres => new Promise(ok => dinle.fetch({
+        request:{ method:'GET', url:adres, headers:new Headers(), mode:'cors' },
+        respondWith:ok, waitUntil:p => isler.push(p) })).then(async c => (await c).text());
+    }
+    const YOL = 'http://yerel/js/app.js';
+    const kopya = () => ({ [YOL]:new Response('eski') });
+    it('LifeOS kapalıyken (502) sayfa boş kalmaz, kopyası açılır; kopya yoksa cevap aynen döner', async () => {
+      const ag = async () => new Response('', { status:502 });
+      expect(await (await swAg(ag, kopya()))(YOL)).toBe('eski');
+      expect(await (await swAg(ag, {}))(YOL)).toBe('');
+    });
+    it('bilgisayar kapalıyken ağ takılsa da kopya beklemeden açılır; geç gelen cevap sonra saklanır', async () => {
+      const takili = () => new Promise(() => {});
+      const kasa0 = kopya();
+      const ac0 = await swAg(takili, kasa0);
+      swSure.length = 0;
+      expect(await ac0(YOL)).toBe('eski');
+      kasa0[YOL] = new Response('eski');
+      expect(await ac0(YOL)).toBe('eski');
+      expect(swSure[0] > 0).toBe(true);
+      expect(swSure[1]).toBe(0);                     // ikinci dosya aynı süreyi yeniden beklemez
+      let bitir;
+      const kasa = kopya();
+      const ac = await swAg(() => new Promise(ok => { bitir = ok; }), kasa);
+      expect(await ac(YOL)).toBe('eski');
+      bitir(new Response('yeni'));
+      await new Promise(ok => setTimeout(ok, 5));
+      expect(await kasa[YOL].text()).toBe('yeni');
+    });
+    it('kopyası olmayan dosya ağı bekler; ağ açıkken yeni sürüm gelir', async () => {
+      let bitir;
+      const ac = await swAg(() => new Promise(ok => { bitir = ok; }), {});
+      const s = ac(YOL);
+      await new Promise(ok => setTimeout(ok, 5));
+      bitir(new Response('yeni'));
+      expect(await s).toBe('yeni');
+      expect(await (await swAg(async () => new Response('yeni'), kopya()))(YOL)).toBe('yeni');
+      expect(await (await swAg(async () => { throw new Error('ag yok'); }, kopya()))(YOL)).toBe('eski');
+    });
+
     it('T2-11 uygulama kapalıyken bildirimdeki eylem adrese taşınır, kaybolmaz', async () => {
       const kapali = await swKos([]);
       await tik(kapali, 'bitti');
