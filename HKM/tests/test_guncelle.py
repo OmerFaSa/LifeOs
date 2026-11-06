@@ -139,6 +139,19 @@ def run():
             eq(guncelle.durum(r.kul)["geride"], 0)
     test("CRLF'le depoya girmis dosya yarim kalan sarmayi durdurmaz", t_yarim_crlf)
 
+    # 2026-11-06: merge, kilitli bir dosyayi silemeyip («Invalid argument») yarida kaldi.
+    def t_merge_yarida():
+        with _Depo() as r:
+            r.yeni("OKU.md", "yeni\n", "y")
+            def calistir(args, **kw):
+                if "merge" in args:                        # bir dosyayi yazip dusen merge
+                    _yaz(r.kul, "OKU.md", "yeni\n")
+                    return subprocess.CompletedProcess(args, 1, "", "error: unable to unlink old 'x': Invalid argument")
+                return subprocess.run(args, **kw)
+            eq(guncelle.uygula(r.kul, calistir=calistir)["durum"], "guncellendi")
+            eq(guncelle.durum(r.kul)["geride"], 0)
+    test("merge kilitli dosyada yarida kalirsa ayni koşuda tamamlanir", t_merge_yarida)
+
     def t_yarim_elle():
         with _Depo() as r:
             _yaz(r.gel, "iki.md", "eski\n")
