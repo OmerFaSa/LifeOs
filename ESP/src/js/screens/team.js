@@ -150,6 +150,10 @@ ESP.Screens.team = (function(){
         ESP.Mod.activeAgents(), x => K.Chip({ label:x.short || x.name, act:'pick-agent', on:x.id === a.id,
           data:{ 'data-tab':x.id, 'aria-pressed':x.id === a.id ? 'true' : 'false' } }))}</div>`);
   } });
+  /* Masalar (eski Ofis › Masalar, 2026-11-06): sohbetin altında katlı satırlar. */
+  LIFEOS.PARCA.blok({ id:'team.masalar', sayfa:'team', yer:'y4', sira:10, ad:'Masalar', ciz(){
+    return ESP.Screens.office ? ESP.Screens.office.masalar() : '';
+  } });
   function render(){
     const a = agent();
     const brf = ESP.Office.brief(a.id);
@@ -182,7 +186,8 @@ ESP.Screens.team = (function(){
 
       ${LIFEOS.PARCA.yer('team', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
 
-      ${LIFEOS.PARCA.yer('team', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
+      ${LIFEOS.PARCA.yer('team', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('team', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   /* 134 AJAN SEÇİCİ: «@» ile başlayınca ajanlar rolüyle listelenir. */
@@ -198,6 +203,12 @@ ESP.Screens.team = (function(){
     async 'pick-agent'(el){
       S.ui.officeAgent = el.dataset.tab;
       ESP.App.render();
+    },
+    /* Masa kartındaki «Danış»: aynı sayfada o uzmanın sohbeti. */
+    async 'open-agent'(el){
+      S.ui.officeAgent = el.dataset.agent;
+      ESP.App.render();
+      window.scrollTo(0, 0);
     },
 
     async 'toggle-brief'(){ S.ui.briefOpen = !S.ui.briefOpen; ESP.App.render(); },
@@ -250,7 +261,8 @@ ESP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
-    kucukVarsayilan:['masa', 'sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
+    kucukVarsayilan:['masa', 'sistemin-cümlesi', 'bu-masanın-defteri', 'özet',
+      'masalar-arası-devir', 'öncelik-sırası', 'ofis-masası', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
     title:yz('esp.team.danisma'),
     headline(){
       const a = agent();

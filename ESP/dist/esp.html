@@ -31357,7 +31357,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'f2ed1b09', at:'2026-11-06 17:26', dirty:true };
+ESP.BUILD = { id:'ff2eda02', at:'2026-11-06 17:49', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -107329,7 +107329,6 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.gunluk-en-az':'Günlük en az ',
   'esp.today.i-lk-oturumla-baslar':'İlk oturumla başlar.',
   'esp.today.oturum-gir':'Oturum gir',
-  'esp.today.gunun-akisi':'Günün akışı',
   'esp.today.oneri-bekliyor':'öneri bekliyor',
   'esp.today.eylem-lang':'Kartları çalış',
   'esp.today.eylem-dil':'Dil çalışmasına geç',
@@ -108392,8 +108391,8 @@ ESP.Screens.today = (function(){
     /* Sıradaki işin adı cümlede, düğme ne yapacağını söyler. «Kartları hatırlama
        oranı düşük» yazan düğmeye basınca ne olacağı belli değildi. Sıralama planner'ın. */
     return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.kapakCumlesi(), sayilar:[],
-      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:ESP.Screens.today.eylemAdi(n), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
-      ikincil:('<button type="button" class="btn btn--ghost" data-kapak-asagi>' + yz('esp.today.gunun-akisi') + '</button>') });
+      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:ESP.Screens.today.eylemAdi(n), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '' });
+    /* «Günün akışı» düğmesi kalktı (kullanıcı, 2026-11-06): kapağın aşağı oku aynı işi yapar. */
   }
 
   /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).
@@ -112486,11 +112485,13 @@ ESP.Screens.ladder = (function(){
     return K.Span(12, ESP.Parts.bolumler({ act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows },
         ust:{ tespit:() => LIFEOS.PARCA.yer('ladder', 'sinama', K, undefined, raw),
-          ozet:() => C().overall().cert === 'missing' ? '' : yolHaritasi() } }));
+          ozet:() => C().overall().cert === 'missing' ? '' : yolHaritasi(),
+          yol:() => String(K.Select({ id:'lad-disc', value:disc, change:'pick-disc-sel', aria:yz('esp.ladder.disiplin-sec'), size:'sm',
+            options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) })) } }));
   } });
   function render(){
     const disc = S.ui.curDisc || 'lang';
-    /* disiplin seçici sayfa başındadır (actions), bölümlerin üstünde asılı durmaz */
+    /* disiplin seçici Basamaklar'ın başında (ust.yol) */
     const parcaB = { disc };
     return K.Grid(html`
       ${LIFEOS.PARCA.yer('ladder', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
@@ -112576,11 +112577,8 @@ ESP.Screens.ladder = (function(){
       const ov = C().overall();
       return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
     },
-    actions(){
-      return String(K.Select({ id:'lad-disc', value:S.ui.curDisc || 'lang', change:'pick-disc-sel',
-        aria:yz('esp.ladder.disiplin-sec'), size:'sm',
-        options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }));
-    },
+    /* Disiplin seçici yalnız Basamaklar'ı etkiler, orada durur (kullanıcı, 2026-11-06). */
+    actions(){ return ''; },
     render, afterRender, handle, change,
   };
 })();
@@ -114777,13 +114775,13 @@ window.LIFEOS.PARCA.yazilar({
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'esp', sira:130, id:'act:proposals', kind:'Eylem', label:'Bekleyen teklifleri gör',
-  hint:'Ofis', run:() => ESP.App.go('office') });
+  hint:'Onaylar', run:() => ESP.App.go('onaylar') });
 window.LIFEOS.PARCA.yazilar({
   'esp.office.ac':'Aç',
   'esp.office.bu-masada-bekleyen-bulgu-yok':'Bu masada bekleyen bulgu yok.',
   'esp.office.danis':'Danış',
   'esp.office.masaya-git':'Masaya git',
-  'esp.office.masa':'Masa',
+  'esp.office.masa':'Ofis masası',
   'esp.office.gunun-toplantisi':'Günün toplantısı',
   'esp.office.patron':'Patron',
   'esp.office.siradaki-tek-is':'Sıradaki tek iş',
@@ -114798,7 +114796,8 @@ window.LIFEOS.PARCA.yazilar({
   'esp.office.tikanma':'tıkanma',
   'esp.office.vadesi-gecmis':'vadesi geçmiş',
 });
-window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:30 });
+/* Menüde ayrı satır değil (2026-11-06): masalar Uzmana sor'un altında; `office` rotası ve komutu çalışır (app.js UST). */
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:131, id:'act:masalar', kind:'Eylem', label:'Uzman masaları', hint:'Ofis', run:() => ESP.App.go('team') });
 
 ESP.Screens.office = (function(){
   const U = ESP.U, S = ESP.S;
@@ -114870,10 +114869,11 @@ ESP.Screens.office = (function(){
       devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + '’a düşüyor.' } : null });
   }
 
-  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y1', sira:10, ad:'Uzman masaları', ciz({ vo, patron, uzmanlar, devir, brf, next }){
+  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y1', sira:10, ad:'Uzman masaları', ciz({ vo, patron, uzmanlar, devir, brf, next, gomulu }){
     return K.Span(12, K.Ledger(() => [
-        /* Ofisin tek işi: sıradaki iş ne, kime sorarım. Patron başta; gerisi altında. */
-        K.Entry({
+        /* Ofisin tek işi: sıradaki iş ne, kime sorarım. Patron başta; gerisi altında.
+           Uzmana sor'un altında (gomulu) Patron satırı yok: sohbet zaten Patron'la açılır. */
+        gomulu ? '' : K.Entry({
           label:yz('esp.office.patron'), hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
           action:K.Button({ label:yz('esp.office.danis'), size:'sm', act:'open-agent',
@@ -114940,15 +114940,15 @@ ESP.Screens.office = (function(){
   LIFEOS.PARCA.blok({ id:'office.sozluk-seridi', sayfa:'office', yer:'y2', sira:10, ad:'Sözlük şeridi', ciz({ vo, patron, uzmanlar, devir, brf, next }){
     return K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '');
   } });
-  function render(){
-    const vo = vitrinOfis();
-    const patron = ESP.AGENT_BY_ID.patron;
-    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
-    const devir = ESP.Office.handoffs();
+  function veri(gomulu){
     const brf = ESP.Office.patronBrief();
-    const next = brf.next;
-
-    const parcaB = { vo, patron, uzmanlar, devir, brf, next };
+    return { vo:vitrinOfis(), patron:ESP.AGENT_BY_ID.patron, uzmanlar:ESP.Mod.activeAgents().filter(a => a.id !== 'patron'),
+      devir:ESP.Office.handoffs(), brf, next:brf.next, gomulu };
+  }
+  /* Uzmana sor'un altındaki masalar (kullanıcı, 2026-11-06: «Masalar'ı Uzmana sor'a kat»). */
+  function masalar(){ return LIFEOS.PARCA.yer('office', 'y1', K, veri(true), raw); }
+  function render(){
+    const parcaB = veri(false);
     return K.Grid(html`
       ${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('office', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
@@ -114970,7 +114970,7 @@ ESP.Screens.office = (function(){
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     /* iPhone Faz 4 («brifing + tek eylem»): açık Patron ve teklifler;
        konuşan masa, toplantı satırları, uzman masaları, haftalık plan şerit. */
-    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası', 'masa', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
+    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası', 'ofis-masası', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
     title:yz('esp.office.masalar'),
     headline(){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger').length;
@@ -114994,7 +114994,7 @@ ESP.Screens.office = (function(){
     },
     subtitle(){ return ESP.Office.notes().length + ' bulgu'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, handle, change, masalar,
   };
 })();
 
@@ -115151,6 +115151,10 @@ ESP.Screens.team = (function(){
         ESP.Mod.activeAgents(), x => K.Chip({ label:x.short || x.name, act:'pick-agent', on:x.id === a.id,
           data:{ 'data-tab':x.id, 'aria-pressed':x.id === a.id ? 'true' : 'false' } }))}</div>`);
   } });
+  /* Masalar (eski Ofis › Masalar, 2026-11-06): sohbetin altında katlı satırlar. */
+  LIFEOS.PARCA.blok({ id:'team.masalar', sayfa:'team', yer:'y4', sira:10, ad:'Masalar', ciz(){
+    return ESP.Screens.office ? ESP.Screens.office.masalar() : '';
+  } });
   function render(){
     const a = agent();
     const brf = ESP.Office.brief(a.id);
@@ -115183,7 +115187,8 @@ ESP.Screens.team = (function(){
 
       ${LIFEOS.PARCA.yer('team', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
 
-      ${LIFEOS.PARCA.yer('team', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
+      ${LIFEOS.PARCA.yer('team', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('team', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   /* 134 AJAN SEÇİCİ: «@» ile başlayınca ajanlar rolüyle listelenir. */
@@ -115199,6 +115204,12 @@ ESP.Screens.team = (function(){
     async 'pick-agent'(el){
       S.ui.officeAgent = el.dataset.tab;
       ESP.App.render();
+    },
+    /* Masa kartındaki «Danış»: aynı sayfada o uzmanın sohbeti. */
+    async 'open-agent'(el){
+      S.ui.officeAgent = el.dataset.agent;
+      ESP.App.render();
+      window.scrollTo(0, 0);
     },
 
     async 'toggle-brief'(){ S.ui.briefOpen = !S.ui.briefOpen; ESP.App.render(); },
@@ -115251,7 +115262,8 @@ ESP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
-    kucukVarsayilan:['masa', 'sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
+    kucukVarsayilan:['masa', 'sistemin-cümlesi', 'bu-masanın-defteri', 'özet',
+      'masalar-arası-devir', 'öncelik-sırası', 'ofis-masası', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
     title:yz('esp.team.danisma'),
     headline(){
       const a = agent();
@@ -121378,7 +121390,7 @@ ESP.App = (function(){
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
      Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
-  const UST = { gun:'today', rehber:'ogrenme' };
+  const UST = { gun:'today', rehber:'ogrenme', office:'team' };
 
   /* Telefon alt bandı (KOLAY-PLANI Faz 2): Bugün · Çalışma · Analiz · Menü; masaüstü kenarı da aynı (kabuk.js ANA_CEKMECE). */
   const BANT = ['bugun', 'calisma', 'analiz'];
@@ -121399,7 +121411,7 @@ ESP.App = (function(){
       const due = ESP.SRS.dueCards().length;
       return due ? { text:String(due), quiet:due < 20 } : null;
     }
-    if(id === 'office'){
+    if(id === 'team'){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger' || x.tone === 'warn').length;
       return n ? { text:String(n), quiet:true } : null;
     }

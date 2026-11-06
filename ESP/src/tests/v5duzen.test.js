@@ -29,16 +29,17 @@
       }finally{ bas.remove(); govde.remove(); }
     });
 
-    it('Merdiven: disiplin seçici sayfa başında; gövdede asılı seçici yok', async () => {
+    /* 2026-11-06 (kullanıcı): seçici yalnız Basamaklar'ı etkiler, yalnız orada durur. */
+    it('Merdiven: disiplin seçici Basamaklar\'ın başında; sayfa başında ve öbür bölümlerde yok', async () => {
       resetState();
-      const bas = yerlestir(ESP.Screens.ladder.actions());
+      expect(String(ESP.Screens.ladder.actions())).toBe('');
       const govde = yerlestir(await ESP.Screens.ladder.render());
       try{
-        const s = bas.querySelector('#lad-disc');
-        expect(s).toBeTruthy();
-        expect(s.getAttribute('data-change')).toBe('pick-disc-sel');
-        expect(govde.querySelector('#lad-disc')).toBeNull();
-      }finally{ bas.remove(); govde.remove(); }
+        const s = govde.querySelectorAll('#lad-disc');
+        expect(s.length).toBe(1);
+        expect(s[0].closest('.sayfabolum').id).toBe('bl-yol');
+        expect(s[0].getAttribute('data-change')).toBe('pick-disc-sel');
+      }finally{ govde.remove(); }
     });
 
     it('Ofis: «Uzman masaları» bir kez görünür; h2 ekran okuyucuya kalır', async () => {

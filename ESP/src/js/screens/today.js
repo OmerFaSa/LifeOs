@@ -25,7 +25,6 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.gunluk-en-az':'Günlük en az ',
   'esp.today.i-lk-oturumla-baslar':'İlk oturumla başlar.',
   'esp.today.oturum-gir':'Oturum gir',
-  'esp.today.gunun-akisi':'Günün akışı',
   'esp.today.oneri-bekliyor':'öneri bekliyor',
   'esp.today.eylem-lang':'Kartları çalış',
   'esp.today.eylem-dil':'Dil çalışmasına geç',
@@ -1088,8 +1087,8 @@ ESP.Screens.today = (function(){
     /* Sıradaki işin adı cümlede, düğme ne yapacağını söyler. «Kartları hatırlama
        oranı düşük» yazan düğmeye basınca ne olacağı belli değildi. Sıralama planner'ın. */
     return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.kapakCumlesi(), sayilar:[],
-      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:ESP.Screens.today.eylemAdi(n), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
-      ikincil:('<button type="button" class="btn btn--ghost" data-kapak-asagi>' + yz('esp.today.gunun-akisi') + '</button>') });
+      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:ESP.Screens.today.eylemAdi(n), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '' });
+    /* «Günün akışı» düğmesi kalktı (kullanıcı, 2026-11-06): kapağın aşağı oku aynı işi yapar. */
   }
 
   /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).

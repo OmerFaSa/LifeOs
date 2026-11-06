@@ -132,7 +132,7 @@ ESP.App = (function(){
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
      Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
-  const UST = { gun:'today', rehber:'ogrenme' };
+  const UST = { gun:'today', rehber:'ogrenme', office:'team' };
 
   /* Telefon alt bandı (KOLAY-PLANI Faz 2): Bugün · Çalışma · Analiz · Menü; masaüstü kenarı da aynı (kabuk.js ANA_CEKMECE). */
   const BANT = ['bugun', 'calisma', 'analiz'];
@@ -153,7 +153,7 @@ ESP.App = (function(){
       const due = ESP.SRS.dueCards().length;
       return due ? { text:String(due), quiet:due < 20 } : null;
     }
-    if(id === 'office'){
+    if(id === 'team'){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger' || x.tone === 'warn').length;
       return n ? { text:String(n), quiet:true } : null;
     }

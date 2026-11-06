@@ -190,6 +190,9 @@
         const b = Array.from(d.querySelectorAll('[aria-label="Gün"] th')).map(x => x.textContent.trim());
         expect(b.indexOf('Sayım')).toBe(-1);
         expect(b.indexOf('Not')).toBe(-1);
+        /* «Günün akışı» düğmesi kalktı (kullanıcı, 2026-11-06); aşağı ok kapağın kendisinde. */
+        expect(d.querySelector('.kapak .btn[data-kapak-asagi]')).toBeNull();
+        expect(d.textContent.indexOf('Günün akışı')).toBe(-1);
       }finally{ d.remove(); }
     });
 
@@ -219,13 +222,29 @@
 
     it('Ofis önce «Bu hafta»yla açılır; sıradaki iş Masalar\'da ikinci kez çizilmez', async () => {
       resetState();
-      const ofis = ESP.Nav.sections().find(s => s.id === 'ofis');
-      expect(ofis.views.map(v => v.label || v.ad)).toEqual(['Bu hafta', 'Uzmana sor', 'Masalar']);
       const d = yerlestir(await ESP.Screens.office.render());
       try{
         expect(d.querySelector('.nextup')).toBeNull();
         expect(!!d.querySelector('[data-route="meeting"]')).toBe(true);
       }finally{ d.remove(); }
+    });
+
+    it('Ofis iki iş: Bu hafta, Uzmana sor; masalar sohbetin altında, Patron satırı tekrar etmez (2026-11-06)', async () => {
+      resetState();
+      const ofis = ESP.Nav.sections().find(s => s.id === 'ofis');
+      expect(ofis.views.map(v => v.label || v.ad)).toEqual(['Bu hafta', 'Uzmana sor']);
+      expect(!!ESP.Screens.office).toBe(true);
+      const d = yerlestir(await ESP.Screens.team.render());
+      try{
+        expect(!!d.querySelector('.desks')).toBe(true);
+        expect(d.querySelector('[data-route="meeting"]')).toBeNull();
+        const danis = d.querySelector('.desks [data-act="open-agent"]');
+        if(danis){
+          await ESP.Screens.team.handle['open-agent'](danis);
+          expect(ESP.S.ui.officeAgent).toBe(danis.getAttribute('data-agent'));
+          expect(ESP.S.route === 'office').toBe(false);
+        }
+      }finally{ d.remove(); ESP.S.ui.officeAgent = null; }
     });
 
     it('Anlatımlar menüde ayrı satır değil; Öğrenme\'nin altından açılır', async () => {

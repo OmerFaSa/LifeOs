@@ -20,13 +20,13 @@ window.LIFEOS.PARCA.yazilar({
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'esp', sira:130, id:'act:proposals', kind:'Eylem', label:'Bekleyen teklifleri gör',
-  hint:'Ofis', run:() => ESP.App.go('office') });
+  hint:'Onaylar', run:() => ESP.App.go('onaylar') });
 window.LIFEOS.PARCA.yazilar({
   'esp.office.ac':'Aç',
   'esp.office.bu-masada-bekleyen-bulgu-yok':'Bu masada bekleyen bulgu yok.',
   'esp.office.danis':'Danış',
   'esp.office.masaya-git':'Masaya git',
-  'esp.office.masa':'Masa',
+  'esp.office.masa':'Ofis masası',
   'esp.office.gunun-toplantisi':'Günün toplantısı',
   'esp.office.patron':'Patron',
   'esp.office.siradaki-tek-is':'Sıradaki tek iş',
@@ -41,7 +41,8 @@ window.LIFEOS.PARCA.yazilar({
   'esp.office.tikanma':'tıkanma',
   'esp.office.vadesi-gecmis':'vadesi geçmiş',
 });
-window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:30 });
+/* Menüde ayrı satır değil (2026-11-06): masalar Uzmana sor'un altında; `office` rotası ve komutu çalışır (app.js UST). */
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:131, id:'act:masalar', kind:'Eylem', label:'Uzman masaları', hint:'Ofis', run:() => ESP.App.go('team') });
 
 ESP.Screens.office = (function(){
   const U = ESP.U, S = ESP.S;
@@ -113,10 +114,11 @@ ESP.Screens.office = (function(){
       devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + '’a düşüyor.' } : null });
   }
 
-  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y1', sira:10, ad:'Uzman masaları', ciz({ vo, patron, uzmanlar, devir, brf, next }){
+  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y1', sira:10, ad:'Uzman masaları', ciz({ vo, patron, uzmanlar, devir, brf, next, gomulu }){
     return K.Span(12, K.Ledger(() => [
-        /* Ofisin tek işi: sıradaki iş ne, kime sorarım. Patron başta; gerisi altında. */
-        K.Entry({
+        /* Ofisin tek işi: sıradaki iş ne, kime sorarım. Patron başta; gerisi altında.
+           Uzmana sor'un altında (gomulu) Patron satırı yok: sohbet zaten Patron'la açılır. */
+        gomulu ? '' : K.Entry({
           label:yz('esp.office.patron'), hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
           action:K.Button({ label:yz('esp.office.danis'), size:'sm', act:'open-agent',
@@ -183,15 +185,15 @@ ESP.Screens.office = (function(){
   LIFEOS.PARCA.blok({ id:'office.sozluk-seridi', sayfa:'office', yer:'y2', sira:10, ad:'Sözlük şeridi', ciz({ vo, patron, uzmanlar, devir, brf, next }){
     return K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '');
   } });
-  function render(){
-    const vo = vitrinOfis();
-    const patron = ESP.AGENT_BY_ID.patron;
-    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
-    const devir = ESP.Office.handoffs();
+  function veri(gomulu){
     const brf = ESP.Office.patronBrief();
-    const next = brf.next;
-
-    const parcaB = { vo, patron, uzmanlar, devir, brf, next };
+    return { vo:vitrinOfis(), patron:ESP.AGENT_BY_ID.patron, uzmanlar:ESP.Mod.activeAgents().filter(a => a.id !== 'patron'),
+      devir:ESP.Office.handoffs(), brf, next:brf.next, gomulu };
+  }
+  /* Uzmana sor'un altındaki masalar (kullanıcı, 2026-11-06: «Masalar'ı Uzmana sor'a kat»). */
+  function masalar(){ return LIFEOS.PARCA.yer('office', 'y1', K, veri(true), raw); }
+  function render(){
+    const parcaB = veri(false);
     return K.Grid(html`
       ${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('office', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
@@ -213,7 +215,7 @@ ESP.Screens.office = (function(){
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     /* iPhone Faz 4 («brifing + tek eylem»): açık Patron ve teklifler;
        konuşan masa, toplantı satırları, uzman masaları, haftalık plan şerit. */
-    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası', 'masa', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
+    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası', 'ofis-masası', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
     title:yz('esp.office.masalar'),
     headline(){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger').length;
@@ -237,6 +239,6 @@ ESP.Screens.office = (function(){
     },
     subtitle(){ return ESP.Office.notes().length + ' bulgu'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, handle, change, masalar,
   };
 })();

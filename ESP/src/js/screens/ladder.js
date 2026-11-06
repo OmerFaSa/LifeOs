@@ -473,11 +473,13 @@ ESP.Screens.ladder = (function(){
     return K.Span(12, ESP.Parts.bolumler({ act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows },
         ust:{ tespit:() => LIFEOS.PARCA.yer('ladder', 'sinama', K, undefined, raw),
-          ozet:() => C().overall().cert === 'missing' ? '' : yolHaritasi() } }));
+          ozet:() => C().overall().cert === 'missing' ? '' : yolHaritasi(),
+          yol:() => String(K.Select({ id:'lad-disc', value:disc, change:'pick-disc-sel', aria:yz('esp.ladder.disiplin-sec'), size:'sm',
+            options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) })) } }));
   } });
   function render(){
     const disc = S.ui.curDisc || 'lang';
-    /* disiplin seçici sayfa başındadır (actions), bölümlerin üstünde asılı durmaz */
+    /* disiplin seçici Basamaklar'ın başında (ust.yol) */
     const parcaB = { disc };
     return K.Grid(html`
       ${LIFEOS.PARCA.yer('ladder', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
@@ -563,11 +565,8 @@ ESP.Screens.ladder = (function(){
       const ov = C().overall();
       return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
     },
-    actions(){
-      return String(K.Select({ id:'lad-disc', value:S.ui.curDisc || 'lang', change:'pick-disc-sel',
-        aria:yz('esp.ladder.disiplin-sec'), size:'sm',
-        options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }));
-    },
+    /* Disiplin seçici yalnız Basamaklar'ı etkiler, orada durur (kullanıcı, 2026-11-06). */
+    actions(){ return ''; },
     render, afterRender, handle, change,
   };
 })();

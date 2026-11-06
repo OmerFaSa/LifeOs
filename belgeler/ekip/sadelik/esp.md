@@ -18,8 +18,8 @@ Kullanıcının sözü: «karmaşıklığı en akıllıca, en anlaşılır seviy
 | Okuma | Çalış · Not ve kitap · Öğren · İlerleme |
 | Yazı | Çalış · Taslaklarım · Öğren · İlerleme |
 | Analiz | Özet · Alanlar · Zaman · Rapor |
-| Plan | Durum · Basamaklar · Projeler · Sınama |
-| Ofis | Bu hafta · Uzmana sor · Masalar |
+| Plan | Durum · Basamaklar · Projeler · Sınama (alan seçici yalnız Basamaklar'da) |
+| Ofis | Bu hafta · Uzmana sor (masalar sohbetin altında, katlı) |
 
 - **Çalış** «şimdi ne yapacağım»ı cevaplar: kayıt yoksa ilk adım (`Parts.simdi`, «İlk taslağını aç»),
   varsa sıradaki iş; hangisi olduğunu kod seçer. Altında bugünkü reçete (`Parts.recete`) ve kapalı
@@ -45,6 +45,16 @@ Kullanıcının sözü: «karmaşıklığı en akıllıca, en anlaşılır seviy
 | Bugün | 2,0 → 1,8 | 66 → 51 |
 | Ofis | 1,5 → 1,4 | 68 → 57 |
 | Tarih | 1,3 → 1,9 | 52 → 95 (ilk sekme artık şerit değil bugünün egzersizi + deste) |
+
+### Dört sorunun cevabı (kullanıcı, 2026-11-06)
+
+1. **Bugün › «Günün akışı»** kalktı: kapağın aşağı oku aynı işi yapar.
+2. **Öğrenme** böyle kalır: alanın «Öğren»i o alanın konuları, Kütüphanem › Öğrenme adım adım yol
+   (Anlatımlar onun altında); ikisi birbirine bağlı.
+3. **Masalar Uzmana sor'a katıldı:** Ofis iki iş. Masa, toplantı, devir, uzman masaları, öneriler,
+   haftalık plan ve öncelik sırası sohbetin altında katlı; Patron satırı tekrar çizilmez (sohbet
+   Patron'la açılır). `office` rotası ve komutu çalışır, menüde yok; bekleyen rozeti Uzmana sor'da.
+4. **Plan seçici** yalnız Basamaklar'ın başında (Projeler'in kendi süzgeci var).
 
 Aşağıdaki 1. tur dökümü tarihçedir; «Diğer» kuralı geçersiz.
 
@@ -121,7 +131,7 @@ Felsefe ve Okuma'da «İlerleme» yalnız veri varken listelenir: boş bölüm s
 - `tools/ortak.py --denetle` ve `tools/parca_test.py` bu Windows kopyasında kırmızı: `parca-rehber.js` yalnız satır sonu (CRLF) yüzünden uyuşmuyor; `--yay` sonrası içerik farkı sıfır. Değişiklikten bağımsız.
 - «Diğer» kalıbı AYS ve SPİ'de de işe yarar; `components.js` modül başınadır, kopyalanması gerekir.
 
-## Kullanıcıya sorulacak (silinmedi)
+## Kullanıcıya sorulan (1. tur; cevaplar yukarıda)
 
 1. **Bugün › «Günün akışı» düğmesi** yalnız sayfayı aşağı kaydırıyor. Kalksın mı?
 2. **Öğrenmenin üç yeri var:** her alanda «Öğren», Kütüphanem › Öğrenme, Kütüphanem › Anlatımlar. Tek yerde toplansın mı?
