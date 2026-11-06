@@ -296,11 +296,11 @@ window.LIFEOS.SINEMATIK = (function(L){
     ays2:odaSahnesi('kutuphane', 'ogle', [7, 22]),
     spi1:odaSahnesi('mutfak', 'ogle', [1, 14]),
     spi2:odaSahnesi('yatak', 'gece', [5, 18], true),
-    /* Hareket: ormanda öğle, patikada iki koşucu */
+    /* Hareket: yaylada öğle, patikada iki koşucu */
     spi3:{
       hazirla(W, H){
-        /* Orman bazı genişliklerde göğü ağaçla kapatıyor (motorun yerleşimi): gök görünmüyorsa tarla */
-        const m = manzara(L.PIKSEL_DOGA, W, H, 'ogle', 'orman'), p = m.arka.getContext('2d').getImageData(Math.floor(W / 2), Math.floor(H * 0.07), 1, 1).data;
+        /* Gök görünmüyorsa tarla (yedek; yaylada gök hep açık) */
+        const m = manzara(L.PIKSEL_DOGA, W, H, 'ogle', 'yayla'), p = m.arka.getContext('2d').getImageData(Math.floor(W / 2), Math.floor(H * 0.07), 1, 1).data;
         return { m:p[2] > p[1] ? m : manzara(L.PIKSEL_DOGA, W, H, 'ogle', 'tarla') };
       },
       ciz(g, W, H, yt, h, s){
