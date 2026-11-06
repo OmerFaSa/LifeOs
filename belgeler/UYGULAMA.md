@@ -1,4 +1,4 @@
-# LifeOS telefon uygulaması (iOS)
+# LifeOS telefon uygulaması (iOS) ve Android
 
 **Neden.** Tarayıcı ekran kapalıyken konum vermez; koşuda telefon cepteyken
 SPİ'nin canlı rotası duraklar. Ana ekrana eklenen web uygulaması bunu aşamaz.
@@ -55,7 +55,7 @@ Model ve Merkez bilgisayarda kalır; API anahtarı ve ücret yoktur. Bilgisayar,
 Tailscale ağına girer. Bilgisayarda Hesap › cihaz bağlama › «Her yerden erişimi aç» (ya da
 `python sistem/uzak.py --ac`), Tailscale yönetiminde MagicDNS ve HTTPS açık olmalı. Cihazda sunucu
 adresi olarak bilgisayarın `.ts.net` adı yazılır; admin girişinden sonra Merkez kendiliğinden bağlanır.
-Android'de aynı adres tarayıcıda açılıp ana ekrana eklenir. Bilgisayar açık kalmalı ve uyumamalıdır;
+Android'de yerel uygulama yok, modüller web uygulaması olarak kurulur (aşağıda). Bilgisayar açık kalmalı ve uyumamalıdır;
 kapalıyken AI olmaz, kayıtlar cihazda sıraya girer.
 
 Hesap › Bağlantılar › Her yerden erişim bağlantının hâlini söyler. Bilgisayarda aynı sayfada aç, kapat ve
@@ -67,7 +67,20 @@ Kesilme davranışı: serve kapıları Tailscale'de durur, LifeOS kapanınca kal
 502 döner: daha önce açılmış modül kopyasından açılır, hesap «ulaşılamıyor» der; cihazda hiç açılmamışsa boş
 sayfa görünür. LifeOS açıkken Merkez düşerse bir dakikada kendisi kalkar. Yerel model bir cevabı en çok 120 sn
 bekler, mesajlar sırayla gider. Samsung ve Android'de gerçek cihazda henüz denenmedi: Özel DNS ayarı «Kapalı» ya
-da «Otomatik» olmalı, Tailscale pil kısıtlamasından çıkarılmalı.
+da «Otomatik» olmalı, Tailscale pil kısıtlamasından çıkarılmalı (kurulum sayfası ve Hesap › Her yerden erişim söyler).
+
+## Android telefon ve tablet (web uygulaması)
+
+Karar (2026-11-06, depo sahibi): yerel APK değil, kurulabilir web uygulaması. §1.3'e istisna gelmez. iPhone'daki kabukla
+farkı: üç ayrı simge (üç köken), ekran kapalıyken rota yok, kapalı uygulamaya zamanlı bildirim yok, modül en az bir kez
+çevrimiçi açılmış olmalı. Bir kez açılan modül bilgisayar kapalıyken de açılır (`sw.js`), kayıtlar cihazda sıraya girer.
+
+Akış: Hesap › Cihazlar › Yeni cihaz bağla › QR. Kurulum sayfası sırayla Tailscale adresini (sertifika istemez), `.local`
+adını ve IP'yi dener; ulaştığı ilkine geçer, hesaba bağlar. Hiçbirine ulaşamazsa Tailscale'i ya da sertifikayı kurdurur
+ve 2 saniyede bir yeniden dener. Modül açılınca altta «Bu modülü ana ekrana kur» şeridi çıkar (`pwa.js` söz 6); kurulum
+yine tarayıcının onayıyla olur, «Şimdi değil» o modülde bir daha sormaz. Oturum üç modülde ortaktır (aynı ad, çerez).
+Bilinen ama burada denenmemiş davranış: Chrome kurulumda Google'ın sunucusundan WebAPK ister (modül adı ve adres gider,
+kayıt gitmez); özel adreste üretilemezse ana ekran kısayolu koyar.
 
 ## Aşamalar
 
@@ -77,7 +90,7 @@ da «Otomatik» olmalı, Tailscale pil kısıtlamasından çıkarılmalı.
 | 2 | yazıldı | **Ekran kapalıyken rota:** `KonumKoprusu.swift` sayfanın `navigator.geolocation`'ını CoreLocation'a bağlar (arka plan konum kipi). Arka plandayken noktalar telefonda birikir, öne gelince kendi sırası ve zamanıyla SPİ'ye gider; `canli.js` aynı arayüzden okur. Uygulamada ekran kilidi istenmez, «ekranı açık tut» denmez (`window.LIFEOS_YEREL`). Her sayfa kimlik taşır: modül değişince eski izleyici biter, GPS durur. |
 | 2b | yazıldı | **Nokta kaybolmaz:** izlenen her nokta diske de yazılır (`KaliciTampon.swift`); SPİ taslağını depoya yazınca «buraya kadar yazdım» der (`yazildi`), o kısım silinir. **iOS web sürecini öldürürse** GPS durmaz, noktalar diske akmaya devam eder; yeniden açılan sayfa sorar (`kurtar`) ve kayıt kaldığı yerden sürer (süre ve yol kesilmez). **Uygulamanın kendisi kapanırsa** noktalar diskte kalır; SPİ açılınca kayda eklenir, kayıt duraklatılmış gelir, süre son noktaya dek sayılır. Önceden bu iki durumda ekran kapalı kısım kayboluyordu. |
 | 2c | yazıldı | **Konum neden gelmiyor, ekran söyler:** köprü durumunu sayfaya bildirir (izin soruldu mu · Konum Servisleri · Kesin Konum · GPS · gelen konum sayısı); SPİ «Konum bekleniyor…» yerine nedenini yazar. Durum hiç gelmezse «konum servisi cevap vermedi» der: istek köprüye ulaşmamıştır. Kullanıcının ilk telefon denemesinde (2026-10-05) ekranda yalnız «Konum bekleniyor…» vardı ve Ayarlar › LifeOS'ta Konum satırı yoktu; neden henüz görülmedi. |
-| 3 | yapılmayacak (2026-10-07) | Android: telefon iPhone, tablet tarayıcıdan açar (`LIFEOS2.md` §3). |
+| 3 | web uygulaması (2026-11-06) | Android yerel kabuk yazılmadı; 2026-10-07'deki «yapılmayacak» kararı değişti: Android kurulabilir web uygulamasıyla açılır (yukarıda). |
 | 4 | yazıldı (2026-10-09) | **Yerel bildirim:** WKWebView'da tarayıcı bildirimi yok; SPİ hatırlatmaları uygulamada hiç gelmiyordu. `BildirimKoprusu.swift` sayfanın isteğini iOS'un yerel bildirimine çevirir (`brand/ortak/bildirim.js`): SPİ hatırlatma saatleri ve ESP hatırlatıcıları (vade günü 09:00) önümüzdeki 7 güne kurulur, uygulama kapalıyken de gelir; her açılış ve arka plana geçiş pencereyi ileri taşır. Modül sayfanın kapısından bilinir, biri ötekinin bildirimine dokunamaz; iOS'un 64 sınırının altında modül başına üst sınır. İzin yalnız kullanıcı açınca sorulur. Bildirime dokununca o modül açılır. |
 | 5 | yazıldı (2026-10-09) | **Ana ekran kısayolları:** uygulama simgesine basılı tutunca AYS · SPİ · ESP doğrudan açılır (Info.plist `UIApplicationShortcutItems`; yetki gerektirmez). **AYS telefon bildirimi:** Ofis › Ofis ayarları › Telefon bildirimi — her gün seçilen saatte günün planı (yükü sıfır istisna günü, örneğin tatil, atlanır), hedefin son günü ve önceki akşam, sınavdan bir gün önce akşam (yalnız kullanıcının profilde yazdığı tarih; planın tahmini tarihi bildirilmez). Modül başına sınır SPİ 30 · ESP 16 · AYS 16 (toplam 62 < 64). |
 | 6 | yazıldı (2026-10-09) | **Bildirim temizliği ve rozet:** bir modül açılınca ve öne her gelişinde o modülün iPhone bildirim ekranında duran bildirimleri kalkar (kurulu olanlara ve öteki modüllere dokunulmaz). Uygulama simgesindeki sayı üç modülün Onaylar'da bekleyen önerilerinin toplamıdır (karar 167, PC'deki kurulu uygulamayla aynı sayı); kabuk tarayıcının `navigator.setAppBadge`'ini kendisi sağlar, modül kodu değişmez. Rozet için bildirim izni gerekir. |
@@ -119,8 +132,9 @@ adımlarını gösterir (`sistem/sunucu.py` `telefon_kurulum_html`):
   (`/lifeos.mobileconfig`, `telefon.profil`) kök sertifikayı ve AYS · SPİ · ESP ana
   ekran simgelerini birlikte kurar; «Ana Ekrana Ekle» üç kez yapılmaz. Güven anahtarını
   Apple elle açtırır (elle kurulan her kök için).
-- **Android telefon/tablet (3 adım):** Sertifikayı indir › Ayarlar araması «CA
-  sertifikası» › yükle › her modül Chrome ⋮ › Ana ekrana ekle.
+- **Android telefon/tablet:** Tailscale kuruluysa adım yok, QR doğrudan bağlar. Değilse Tailscale'i kur ya da
+  yalnız ev ağı için sertifikayı indir › Ayarlar araması «CA sertifikası» › yükle; sayfa kendiliğinden devam eder.
+  Her modülde altta «Kur» (çıkmazsa Chrome ⋮ › Ana ekrana ekle).
 
 Kök sertifika yalnız LifeOS adreslerine (`.local`, `localhost`, özel IP aralıkları) etki eder; tarayıcının başka
 sitelerine etkisi yoktur (`sistem/telefon.py` `kok_kisiti`). 2026-11-06'dan önce kurulan kök kısıtsızdı: LifeOS onu

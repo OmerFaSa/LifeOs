@@ -1904,6 +1904,28 @@
       expect(merkez().textContent).toContain('10 kod kaldı');
     }));
 
+    [[['pc.tail1.ts.net', '192.168.0.10'], 'http://192.168.0.10:5180/?bagla=482913', 'sertifikası kurulunca'],
+     [['pc.tail1.ts.net'], 'https://pc.tail1.ts.net:5183/?bagla=482913', 'Tailscale açık olsun']].forEach(([evAgi, beklenen, metin]) => {
+      it('QR yeni cihazın ulaşabileceği adrese gider: ' + evAgi.join(' + '), () => sahneyle(async () => {
+        const qrAdres = [], eski = window.LIFEOS.QR;
+        window.LIFEOS.QR = { svg:a => { qrAdres.push(a); return '<svg></svg>'; } };
+        try{
+          const srv = sunucuKur({ evAgi }), c = cihazKur(srv);
+          const h = sahne(c);
+          await hazir();
+          await h.girisYap('omer', 'parola-123');
+          await h.merkezAc('cihazlar');
+          await hazir();
+          tikla('[data-sayfa="bagla"]');
+          await hazir();
+          expect(qrAdres[qrAdres.length - 1]).toBe(beklenen);
+          expect(merkez().textContent).toContain(metin);
+          tikla('[data-hesap="bag-vazgec"]');
+          await hazir();
+        }finally{ window.LIFEOS.QR = eski; }
+      }));
+    });
+
     it('kök sertifika yenilendiyse Cihazlar söyler; «Tamam» bir daha göstermez', () => sahneyle(async () => {
       const srv = sunucuKur({ evAgi:['192.168.0.10'] }), c = cihazKur(srv);
       srv.sertifikaYeni = true;

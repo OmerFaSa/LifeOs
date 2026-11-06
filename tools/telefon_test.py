@@ -334,6 +334,12 @@ with tempfile.TemporaryDirectory() as gecici:
           and all(k["Icon"][:8] == b"\x89PNG\r\n\x1a\n" for k in klipler), [(k["Label"], k["URL"]) for k in klipler])
     dogru("profil: yeniden kurulunca eskisinin yerine gecer (kimlik sabit)",
           plistlib.loads(telefon.profil(k, telefon.ad(), telefon.ipler()))["PayloadUUID"] == pr["PayloadUUID"])
+    tsli = sunucu.telefon_kurulum_html("pc", ["192.168.1.5"], "AA", "pc.tail1.ts.net")
+    dogru("Tailscale aciksa Android once onu dener, sonra .local",
+          '["https://pc.tail1.ts.net", "https://pc.local"]' in tsli and "Tailscale'i kur" in tsli)
+    tssiz = sunucu.telefon_kurulum_html("pc", ["192.168.1.5"], "AA")
+    dogru("Tailscale kapaliysa sayfada Tailscale adimi yok",
+          "Tailscale'i kur" not in tssiz and '["https://pc.local"]' in tssiz)
     dogru("kurulum sayfasi tek QR ile baglar","lifeos://bagla" in sayfa and ":%d/" % telefon.PORTLAR["SPI"] in sayfa)
     betik = sayfa[sayfa.index("<script>") + 8:sayfa.index("</script>")]
     with open(os.path.join(gecici, "kurulum.js"), "w", encoding="utf-8") as f:
