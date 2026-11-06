@@ -1,2 +1,2 @@
-Bulut geçişi ve ses listesi dalda bitti (`claude/bulut-ses-9ffd8e`), ama süre bitiyor diye denetimler yarım kaldı: entegre, smoke, a11y, layout, palette, perf koşulmadı; sesler kulakla dinlenmedi.
-Açık: `node tools/entegre.js` ve modül denetimleri, seçim sayfasından geçiş denenmedi, tarayıcıda varış sesi izinsiz çalmayabilir; sonra `belgeler/ekip/yarim/` notu silinir.
+Bulut geçişi ve ses listesi `main`'de (2026-11-07 birleşimi). Denetimler koşuldu: entegre, üç modülde smoke, a11y, layout, palette ve `tools/bulut_gecis.js` (altı yön temiz; ağır yük altında bir kez spi→esp kırmızı verdi, tek başına temiz).
+Açık (kullanıcı): sesler kulakla dinlenmedi (Ayarlar › Ses ve müzik › Sesler); seçim sayfasından geçiş elle denenmedi; tarayıcı varış sesini izinsiz çalmayabilir. perf koşulmadı.

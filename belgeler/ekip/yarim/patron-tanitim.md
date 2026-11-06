@@ -1,4 +1,4 @@
-# Patron turu: yarım kalanlar (dal claude/patron-tanitim-5701e9, WIP)
+# Patron turu: açık kalanlar
 
-- Tam koşu `node tools/patrontur_kosu.js` son düzeltmeden sonra baştan sona yeniden koşulmadı; 1280 piksel tamamlandı, 390 ve klavye geçişleri ayrı denendi. `entegre`, `smoke`, `layoutcheck`, `a11ycheck` ve derleme birleştirmeden önce koşulacak.
+- `main`'de (2026-11-07 birleşimi). `node tools/patrontur_kosu.js` baştan sona temiz (1280, 390, klavye); entegre, smoke, layout, a11y geçti. Klavye yolunda karanlığa basınca odak düşüyordu, düzeltildi.
 - Patronların hepsi King ses yolunu kullanıyor, kişiye özel ses yok; ses gerçek kulakla dinlenmedi.
