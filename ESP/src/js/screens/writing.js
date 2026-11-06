@@ -346,7 +346,7 @@ ESP.Screens.writing = (function(){
         ? { etiket:yz('esp.writing.son-taslak'), baslik:son.title || yz('esp.writing.baslik'), neden:yz('esp.writing.kaldigin-yer'),
             dugme:{ label:yz('esp.writing.ac'), act:'son-taslak', data:{ 'data-id':son.id } } }
         : { baslik:yz('esp.writing.ilk-taslak'), neden:yz('esp.writing.ilk-taslak-neden'), dugme:{ label:yz('esp.writing.yeni-taslak'), act:'new-draft' } })],
-      son ? [ESP.Parts.recete('writing')] : [], [ESP.Parts.desk('writing')]);
+      son ? [ESP.Parts.recete('writing', { kunyesiz:true })] : [], [ESP.Parts.desk('writing')]);
   }
   const GOVDE = { calis:calisRows, taslaklar:draftRows, olcum:() => [].concat(measureRows(), [ESP.Parts.yol('writing')]),
     ogren:() => [].concat(topicRows(), toolRows()) };

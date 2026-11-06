@@ -122,7 +122,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.profile.kaydedildi':'Kaydedildi',
   'esp.profile.profil-eklendi':'Profil eklendi',
   'esp.profile.yedek-indirildi':'Yedek indirildi',
-  'esp.profile.yedekten-yukleme-rehber-veri':'Yedekten yükleme Ayarlar › Genel › Veri bölümünde',
+  'esp.profile.yedekten-yukleme-rehber-veri':'Yedeği geri yüklemek için Ayarlar’da veri bölümünü aç',
   'esp.profile.profil':'Profil',
   'esp.profile.acik-bolum':'açık bölüm',
   'esp.profile.son-yedek':'son yedek',

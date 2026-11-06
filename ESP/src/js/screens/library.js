@@ -590,7 +590,7 @@ ESP.Screens.library = (function(){
     return [].concat([ESP.Parts.simdi('reading', bagsiz
         ? { baslik:bagsiz + ' ' + yz('esp.library.bagsiz-not'), neden:yz('esp.library.bagsiz-neden'), dugme:{ label:yz('esp.library.notlara-git'), act:'tab-not' } }
         : { baslik:yz('esp.library.ilk-not'), neden:yz('esp.library.ilk-not-neden'), dugme:{ label:yz('esp.library.not-yaz'), act:'tab-not' } })],
-      notlar.length ? [ESP.Parts.recete('reading')] : [], [ESP.Parts.desk('reading')]);
+      notlar.length ? [ESP.Parts.recete('reading', { kunyesiz:true })] : [], [ESP.Parts.desk('reading')]);
   }
   const GOVDE = { calis:calisRows, notlar:() => [].concat(noteRows(), matrixRows(), bookRows()),
     ogren:() => [].concat(topicRows(), methodRows()), ilerleme:() => [ESP.Parts.yol('reading')] };

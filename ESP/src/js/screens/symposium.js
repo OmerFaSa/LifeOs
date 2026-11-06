@@ -406,7 +406,7 @@ ESP.Screens.symposium = (function(){
             dugme:{ label:yz('esp.symposium.tezlerime-git'), act:'tab-ekle' } }
         : { baslik:yz('esp.symposium.ilk-tez'), neden:yz('esp.symposium.ilk-tez-neden'),
             dugme:{ label:yz('esp.symposium.tez-yaz-kisa'), act:'tab-ekle' } })],
-      hic ? [] : [ESP.Parts.recete('philo')], experimentRows(), [ESP.Parts.desk('philo')]);
+      hic ? [] : [ESP.Parts.recete('philo', { kunyesiz:true })], experimentRows(), [ESP.Parts.desk('philo')]);
   }
   /* Tezlerim: yeni tez, açık ve kapanan bir arada. Boş liste kart olmaz. */
   function tezRows(){

@@ -81,6 +81,8 @@
       try{
         expect(d.querySelector('#bl-calis').textContent).toContain('Denemem');
         expect(d.querySelector('#bl-calis').textContent).toContain('Bugünkü çalışma');
+        /* «Şimdi» ile reçete art arda: künye bir kez yazılır. */
+        expect(d.querySelector('#bl-calis').textContent.split('bugün kayıt yok').length).toBe(2);
         expect(!!d.querySelector('#bl-calis [data-act="son-taslak"]')).toBe(true);
       }finally{ d.remove(); }
       resetState();

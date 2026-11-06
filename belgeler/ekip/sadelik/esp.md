@@ -4,6 +4,50 @@
 > özellik olduğundan anlaşılmıyor ve karmaşık gözüküyor». Ölçü: telefon 390 px, dolu profil
 > (`tools/envanter.js` verisi). «Ekran» = sayfa boyu ÷ 844 px, «kelime» = görünen yazı.
 
+## 2. tur (2026-11-06, dal `claude/esp-sadelik-son-0b854f`): «Diğer» kalktı
+
+Kullanıcının sözü: «karmaşıklığı en akıllıca, en anlaşılır seviyeye getir». 1. turun «Diğer»
+çekmecesi bir yerine iki dokunuş ve gizli bir liste demekti; yerine **her alanda aynı dört iş**:
+
+| Alan | Çubuk |
+|---|---|
+| Dil | Çalış · Kartlarım · Öğren · İlerleme |
+| Felsefe | Çalış · Tezlerim · Öğren · İlerleme |
+| Tarih | Çalış · Olaylar · Öğren · İlerleme |
+| Ses | Müzik · Diksiyon · Öğren · İlerleme |
+| Okuma | Çalış · Not ve kitap · Öğren · İlerleme |
+| Yazı | Çalış · Taslaklarım · Öğren · İlerleme |
+| Analiz | Özet · Alanlar · Zaman · Rapor |
+| Plan | Durum · Basamaklar · Projeler · Sınama |
+| Ofis | Bu hafta · Uzmana sor · Masalar |
+
+- **Çalış** «şimdi ne yapacağım»ı cevaplar: kayıt yoksa ilk adım (`Parts.simdi`, «İlk taslağını aç»),
+  varsa sıradaki iş; hangisi olduğunu kod seçer. Altında bugünkü reçete (`Parts.recete`) ve kapalı
+  uzman masası. Künye yaptığının sonucunu söyler: «bugün 25 dk»; girilmemiş gün «0 dk» yazılmaz.
+- Eski ikincil bölümler işin yanına girdi: kart listesi Kartlarım'da, dilbilgisi Öğren'de, yol
+  haritası İlerleme'de (Analiz'de değil, Plan'a bağlantı), radar Alanlar'da, dürüstlük Rapor'da.
+- Uzman masası beş satır (Uzmanla konuş, Ekler, Hatırlatma, Öneriler, Bakım), başta hepsi kapalı;
+  reçete ve harita masadan çıktı. Anlatımlar menüde ayrı satır değil, Öğrenme'nin altında.
+- Boş ekranda boş kart yok: Analiz, Plan, Tarih, Felsefe, Yazı kayıt yokken tek ilk adım gösterir.
+
+Ölçü (`tools/envanter.js` dolu profili, 390 px, main → dal, ilk sekme):
+
+| Ekran | Ekran boyu | Kelime |
+|---|---|---|
+| Analiz | 5,8 → 1,6 | 444 → 92 |
+| Onaylar | 4,4 → 1,6 | 299 → 59 |
+| Plan | 1,8 → 1,0 | 93 → 24 |
+| Dil | 1,8 → 1,4 | 107 → 58 |
+| Okuma | 1,9 → 1,4 | 103 → 54 |
+| Yazı | 1,3 → 1,4 | 73 → 45 |
+| Felsefe | 1,1 → 1,0 | 42 → 30 |
+| Ses | 2,4 → 2,3 | 135 → 118 |
+| Bugün | 2,0 → 1,8 | 66 → 51 |
+| Ofis | 1,5 → 1,4 | 68 → 57 |
+| Tarih | 1,3 → 1,9 | 52 → 95 (ilk sekme artık şerit değil bugünün egzersizi + deste) |
+
+Aşağıdaki 1. tur dökümü tarihçedir; «Diğer» kuralı geçersiz.
+
 ## Bulunan kök sorunlar
 
 1. **İş ilk ekranda değildi.** Dil'de sekmelerin üstünde üç grafik duruyordu; «12 kartı çalış»

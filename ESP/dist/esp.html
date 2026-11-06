@@ -10634,6 +10634,25 @@ button.rutbe-rozet:focus-visible{
 .siklik__lejant i.is-yok{ background:color-mix(in oklab, var(--text) 10%, var(--surface)); }
 .siklik-kelimeler{ display:flex; flex-wrap:wrap; gap:6px; }
 
+/* SADE BOLUMLER (2026-11-06): bolum basi kartlar arali durur. */
+.bolum-ust{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+.bolum-ust + *{ margin-top:16px; }
+/* Oneri gruplari: ad ve sayi tek satir, dokununca acilir. */
+.oneri-grup > summary.oneri-grup__ad{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+  min-height:44px; margin:0; cursor:pointer; list-style-position:inside; }
+.oneri-grup[open] > summary.oneri-grup__ad{ margin-bottom:6px; }
+.oneri-grup__sayi i{ display:inline-block; font-style:normal; margin-left:4px; }
+.oneri-grup[open] .oneri-grup__sayi i{ transform:rotate(90deg); }
+.oneri-grup > summary::-webkit-details-marker{ display:none; }
+.evrow__islem{ margin-top:6px; }
+/* Telefonda dort sayi iki sutun; alt alta bes kutu iki ekran ediyordu. */
+.inc-sayilar{ grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); }
+/* Katli satir dokunulabilir oldugunu soylesin. */
+.hiz-ac > summary::before{ content:'›'; display:inline-block; width:12px; flex:none; }
+.hiz-ac[open] > summary::before{ transform:rotate(90deg); }
+/* Ozet sekmesinde «Ozet» etiketi ikinci kez yazilmaz. */
+#bl-ozet .bugun__etiket{ display:none; }
+
 /* ==== css/kabuk.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/kabuk.css içine yazılır; burası bir sonraki
@@ -31338,7 +31357,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'605f4928', at:'2026-11-06 13:01', dirty:true };
+ESP.BUILD = { id:'f2ed1b09', at:'2026-11-06 17:26', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -84321,7 +84340,7 @@ ESP.HINTS = {
 
   /* --- ofis --- */
   'brief':{ t:'Özet', b:'Uzmanın gördüğü tek şey: ölçülmüş metrikler ve durum etiketleri.',
-    more:'Ham ses kaydı, tam metin taslak ve kişisel not brifinge girmez. Ham JSON\'u Danışma ekranından açabilirsin: ajanın görmediği bir şeye dayanarak konuşmadığını görmen gerekir.' },
+    more:'Ham ses kaydı, tam metin taslak ve kişisel not brifinge girmez. Ham JSON\'u Uzmana sor ekranından açabilirsin: ajanın görmediği bir şeye dayanarak konuşmadığını görmen gerekir.' },
   'rule-engine':{ t:'Kural motoru', b:'Sayıyı ve kararı üreten katman. Model yalnızca cümleye çevirir.',
     more:'Model kapalıyken ofis kapanmaz: brifing doğrudan kural cümlesine çevrilir ve ajanlar «kural motoru» rozetiyle konuşur. Rozet süs değildir; bir cümleye ne kadar güveneceğini belirler.' },
   'handoff':{ t:'Masalar arası devir', b:'Bir masanın bulgusu başka bir masanın işi olduğunda düşen satır.',
@@ -84439,8 +84458,8 @@ ESP.HINTS = {
 
   'modules':{ t:'Bölümler', b:'Hangi disiplinlerin açık olduğu.',
     more:'Kapalı bir bölüm gezinmede görünmez, reçeteye ve denge hesabına girmez, merdivende ortalamaya katılmaz ve ofiste masası kapanır. Ama verisi SİLİNMEZ — «kapalı» ile «yok» ayrı şeylerdir. Numaralar da boşluk bırakmadan yeniden verilir: eksik bir numara, kaybedilmiş bir şey varmış gibi görünürdü.' },
-  'desk':{ t:'Tezgâh', b:'Her bölümün altındaki ortak katman: koç, harita, ekler, hatırlatma.',
-    more:'Dördü de tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Danışma ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
+  'desk':{ t:'Uzman masası', b:'Her alanın ortak katmanı: uzmanla konuşma, ekler, hatırlatma, öneri ve bakım.',
+    more:'Hepsi tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Uzmana sor ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
   'reminder':{ t:'Hatırlatma', b:'Kendine söylediğin bir şeyin günü gelince tekrar söylenmesi.',
     more:'Bir görev değildir: sistem hiçbir şeyi zorunlu kılmaz ve kaçırılan bir hatırlatıcı ceza üretmez, borç yazmaz. Tekrarlı olan tamamlanınca silinmez, bir sonraki tarihe taşınır — ve o tarih BUGÜNDEN sayılır: iki hafta geciken günlük bir hatırlatıcı on dört kez üst üste düşmemeli.' },
   'unit':{ t:'Ünite', b:'Bir konunun somut öğeleri ve ölçülebilir hedefi.',
@@ -86248,19 +86267,19 @@ ESP.S = {
     cardQuery:'',
     cardOpen:null,
     reviewQueue:null,       // acik calisma oturumu
-    philoTab:'acik',        // acik | kapali | ekle | metinler
+    philoTab:'calis',        // acik | kapali | ekle | metinler
     argOpen:null,
     studioTab:'muzik',      // muzik | diksiyon | ilerleme
     pieceOpen:null,
     metronomeBpm:80,
     metronomeOn:false,
-    readTab:'notlar',       // notlar | matris | kaynaklar
+    readTab:'calis',       // notlar | matris | kaynaklar
     noteQuery:'',
     noteOpen:null,
     conceptFilter:null,
-    writeTab:'taslaklar',   // taslaklar | olcum
+    writeTab:'calis',   // taslaklar | olcum
     draftOpen:null,
-    analyticsTab:'radar',   // radar | seriler | rapor
+    analyticsTab:'ozet',    // ozet | alanlar | zaman | (Diger: yol, radar, seriler, rapor...)
     deskTab:{},             // discId -> 'kocla' | 'harita' | 'ekler' | 'hatirlatma'
     deskOpen:{},            // discId -> tezgah acik mi
     assetOpen:null,
@@ -86270,7 +86289,7 @@ ESP.S = {
     rxOpen:null,            // acik egzersiz (gorev metni katli durur)
     unitOpen:null,
     topicOpen:null,
-    histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
+    histTab:'calisma',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,
     chainOpen:null,
@@ -96610,12 +96629,12 @@ window.LIFEOS.PARCA.yazilar({
 
 window.LIFEOS.PARCA.yazilar({
   'esp.core.desk.recete':'Reçete',
-  'esp.core.desk.koc':'Koç',
+  'esp.core.desk.koc':'Uzmanla konuş',
   'esp.core.desk.harita':'Harita',
   'esp.core.desk.ekler':'Ekler',
   'esp.core.desk.hatirlatma':'Hatırlatma',
-  'esp.core.desk.plan':'Plan',
-  'esp.core.desk.denetim':'Denetim',
+  'esp.core.desk.plan':'Öneriler',
+  'esp.core.desk.denetim':'Bakım',
 });
 
 
@@ -96625,9 +96644,8 @@ ESP.Desk = (function(){
   const U = ESP.U, S = ESP.S;
 
   const TABS = [
-    { id:'recete',     label:yz('esp.core.desk.recete') },
+    /* Reçete «Çalış»ın başında, harita «İlerleme»de (Parts.recete, Parts.yol). */
     { id:'kocla',      label:yz('esp.core.desk.koc') },
-    { id:'harita',     label:yz('esp.core.desk.harita') },
     { id:'ekler',      label:yz('esp.core.desk.ekler') },
     { id:'hatirlatma', label:yz('esp.core.desk.hatirlatma') },
     { id:'plan',       label:yz('esp.core.desk.plan') },
@@ -96642,7 +96660,7 @@ ESP.Desk = (function(){
   }
 
   function tab(discId){
-    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'recete';
+    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'kapali';
   }
 
   function setTab(discId, id){
@@ -102782,13 +102800,13 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.radar-icin-en-az-uc':'Radar için en az üç eksen gerekir.',
   'esp.core.parts.kesikli-nokta-olculmemis-eks':'Kesikli nokta: ölçülmemiş eksen — sıfır değil.',
   'esp.core.parts.bu-kademede-tanimli-egzersiz':'Bu kademede tanımlı egzersiz yok.',
-  'esp.core.parts.islendi':'işlendi',
-  'esp.core.parts.i-sle':'İşle',
+  'esp.core.parts.islendi':'Yapıldı',
+  'esp.core.parts.i-sle':'Yaptım',
   'esp.core.parts.merdiven':'Merdiven',
   'esp.core.parts.kurallara-takildi':'kurallara takıldı',
   'esp.core.parts.sorunu-yaz':'Sorunu yaz…',
   'esp.core.parts.gonder':'Gönder',
-  'esp.core.parts.danisma-ekrani':'Danışma ekranı',
+  'esp.core.parts.danisma-ekrani':'Uzmana sor',
   'esp.core.parts.gecmisi-temizle':'Geçmişi temizle',
   'esp.core.parts.bu-tarayici-sesli-sohbeti-de':'Bu tarayıcı sesli sohbeti desteklemiyor; yazarak sorduğun soru aynı yoldan geçer.',
   'esp.core.parts.bu-bolumun-merdiveni-tanimli':'Bu bölümün merdiveni tanımlı değil.',
@@ -102867,10 +102885,19 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.ac':'Aç',
   'esp.core.parts.plani-yenile':'Planı yenile',
   'esp.core.parts.plani-kaldir':'Planı kaldır',
-  'esp.core.parts.tezgah':'TEZGÂH',
-  'esp.core.parts.tezgah-kapali':'Tezgâh kapalı.',
+  'esp.core.parts.tezgah':'Uzman masası',
+  'esp.core.parts.adim-adim-ogren':'Adım adım öğren',
+  'esp.core.parts.bugun':'bugün',
+  'esp.core.parts.bugun-kayit-yok':'bugün kayıt yok',
+  'esp.core.parts.simdi':'Şimdi',
+  'esp.core.parts.gunluk-taban':'günlük taban',
+  'esp.core.parts.siradaki':'Sıradaki',
+  'esp.core.parts.bugunku-calisma':'Bugünkü çalışma',
+  'esp.core.parts.yol-haritasi':'Yol haritası',
+  'esp.core.parts.hatirlatma-kisa':'hatırlatma',
+  'esp.core.parts.oneri-kisa':'öneri',
+  'esp.core.parts.tezgah-kapali':'Uzman masası kapalı.',
   'esp.core.parts.ile-konusmak-haritayi-gormek':'ile konuşmak, haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.',
-  'esp.core.parts.tezgah-2':'Tezgâh',
 });
 
 
@@ -103038,25 +103065,6 @@ ESP.Parts = (function(){
         ${when(on, () => html`<span class="rx__task">${it.drill.task}</span>`)}
       </li>`;
     })}</ul>`;
-  }
-
-  /* Reçete sekmesi — bir zamanlar AYRI bir kutuydu (KOÇ) ve tezgâhın
-     hemen üstünde duruyordu. İkisi aynı cümleyi (sıradaki kapı) iki kez
-     yazıyor, ekranı iki katına çıkarıyordu. Reçete de koçun işi: artık
-     tezgâhın ilk sekmesi ve varsayılan görünüm. */
-  function deskRx(discId){
-    const r = ESP.Coach.prescribe(discId);
-    if(!r) return raw('');
-    return html`
-      <div class="coachhead">
-        ${K.Badge({ label:r.level.label + ' · ' + r.level.short,
-          tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
-        ${cert(r.cert)}
-        <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
-        ${K.Button({ label:yz('esp.core.parts.merdiven'), size:'sm', act:'go',
-          data:{ 'data-route':'ladder' } })}
-      </div>
-      ${rxList(r)}`;
   }
 
   /* --------------------------------------------------------------- tezgâh
@@ -103677,7 +103685,33 @@ ESP.Parts = (function(){
       </div>`;
   }
 
-  /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
+  /* «ŞİMDİ» (kullanıcı, 2026-11-06: «ilk bakışta ne yapacağım belli olsun»). Alanın ilk
+     sekmesinin ilk satırı: veri yoksa ilk adım, varsa sıradaki iş. Hangisini EKRAN seçer,
+     kayıttan; burada yalnız çizim var. Sağdaki künye yaptığının sonucunu söyler: bugün
+     bu alanda kaç dakika. Girilmemiş gün sıfır yazılmaz (§1.2). */
+  function bugunKunye(disc){
+    const bugun = U.todayISO();
+    const l = [].concat(disc).map(d => ESP.Model.minutesOf(bugun, d)).filter(v => v != null);
+    return l.length ? yz('esp.core.parts.bugun') + ' ' + U.fmtMin(l.reduce((a, b) => a + b, 0)) : yz('esp.core.parts.bugun-kayit-yok');
+  }
+  function simdi(disc, o){
+    return K.Entry({ label:yz('esp.core.parts.simdi'), meta:bugunKunye(disc), wide:true,
+      body:html`${K.NextUp({ icon:'zap', calm:true, label:o.etiket || yz('esp.core.parts.siradaki'), title:o.baslik, why:o.neden })}
+        ${when(o.dugme, () => K.Button({ label:o.dugme.label, tone:'primary', act:o.dugme.act, data:o.dugme.data, class:'mt-10' }))}` });
+  }
+  /* Reçete uzman masasının dibindeydi; bugün ne yapılacağının cevabı olduğu için ilk sekmede. */
+  /* `o.kunyesiz`: hemen üstte «Şimdi» aynı künyeyi yazıyorsa ikinci kez yazılmaz. */
+  function recete(disc, o){
+    const r = ESP.Coach.prescribe(disc);
+    return K.Entry({ label:yz('esp.core.parts.bugunku-calisma'), meta:o && o.kunyesiz ? null : bugunKunye(disc), wide:true,
+      body:r ? html`${rxList(r)}<p class="tiny dim mt-8">${U.fmtMin(r.minutes)} · ${yz('esp.core.parts.gunluk-taban')} ${U.fmtMin(r.budget)}</p>` : raw('') });
+  }
+  /* Yol, ilerlemenin parçasıdır: «Şimdi» sırayı, bu satır basamakları söyler. */
+  function yol(disc){
+    return K.Entry({ label:yz('esp.core.parts.yol-haritasi'), meta:(ESP.DISCIPLINE_BY_ID[disc] || {}).short || '', wide:true, body:deskMap(disc) });
+  }
+
+  /* Uzman masası: konuşmak, ek, hatırlatma, öneri ve bakım. Bekleyen sayılar kapalıyken de görünür. */
   function desk(discId){
     const d = ESP.DISCIPLINE_BY_ID[discId];
     if(!d) return raw('');
@@ -103689,8 +103723,8 @@ ESP.Parts = (function(){
 
     return K.Entry({
       label:yz('esp.core.parts.tezgah'), hint:'desk',
-      meta:a.short || a.name,
-      note:ESP.Desk.headline(discId),
+      meta:[a.short || a.name].concat(bekleyen ? [bekleyen + ' ' + yz('esp.core.parts.hatirlatma-kisa')] : [],
+        teklif ? [teklif + ' ' + yz('esp.core.parts.oneri-kisa')] : []).join(' · '),
       action:K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'desk-toggle',
         data:{ 'data-disc':discId } }),
       wide:true,
@@ -103713,9 +103747,7 @@ ESP.Parts = (function(){
                   aria-expanded="${on ? 'true' : 'false'}" aria-controls="${kim}">${x.label}${when(sayi[x.id],
                   () => html` <span class="bolumcubugu__rozet is-sessiz">${sayi[x.id]}</span>`)}</button>
                 <div class="desk__body" id="${kim}" data-disc="${discId}" ${on ? '' : raw('hidden')}>
-                  ${x.id === 'recete' ? deskRx(discId)
-                    : x.id === 'harita' ? deskMap(discId)
-                    : x.id === 'ekler' ? deskAssets(discId)
+                  ${x.id === 'ekler' ? deskAssets(discId)
                     : x.id === 'hatirlatma' ? deskReminders(discId)
                     : x.id === 'plan' ? deskPlans(discId)
                     : x.id === 'denetim' ? deskAudit(discId)
@@ -103731,17 +103763,28 @@ ESP.Parts = (function(){
   /* SEKME → BÖLÜM (EKIP-PLANI §1.2, T3): disiplin ekranının sekmeleri alt
      alta bölüm olur, tezgâh en sonda kendi bölümüdür. Bir bölüm çizilemezse
      yalnız o düşer. `sayi` bölüm çubuğundaki rozettir. */
-  function bolumler(discId, o){
+  function bolumler(o){
+    /* `o.ust[id]`: bölümün başında duran pano kartları (kutu, defter satırı değil).
+       Konu anlatımı kartı ve adım adım öğrenme bağlantısı «Öğren»in içindedir. */
+    const konuKarti = id => {
+      if(id !== 'ogren' || !ESP.Screens.rehber) return '';
+      const v = ESP.Nav.viewOf(ESP.S.route);
+      if(!v || !v.disc) return '';
+      return String(ESP.Screens.rehber.alanKarti(v.disc)) + String(html`<div class="mt-12">${K.Button({ label:yz('esp.core.parts.adim-adim-ogren'), size:'sm',
+        tone:'ghost', act:'go', data:{ 'data-route':'ogrenme' } })}</div>`);
+    };
     const guvenli = id => {
-      try{ return K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)); }
+      try{
+        const ust = o.ust && o.ust[id] ? String(o.ust[id]() || '') : '';
+        const defter = o.govde[id] ? K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)) : '';
+        return html`${when(ust, () => html`<div class="bolum-ust">${raw(ust)}</div>`)}${defter}${raw(konuKarti(id))}`;
+      }
       catch(e){
         console.error('Bölüm çizilemedi (' + discId + '/' + id + '):', e);
         return K.Notice({ tone:'warn', body:yz('esp.core.parts.bu-bolum-su-an-cizilemedi') });
       }
     };
     const b = o.tabs.map(t => ({ id:t.id, ad:t.label, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));
-    /* discId null: tezgâhı olmayan ekran (Analiz, Rehber, Merdiven). */
-    if(discId) b.push({ id:'tezgah', ad:yz('esp.core.parts.tezgah-2'), govde:K.Ledger(() => [desk(discId)]) });
     return K.SayfaBolumleri({ act:o.act, aria:o.aria, bolumler:b });
   }
 
@@ -103753,7 +103796,7 @@ ESP.Parts = (function(){
     if(t && t !== ilk) K.bolumeGit(t);
   }
 
-  return { kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
+  return { simdi, recete, yol, kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
     units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics, konuSinama };
 
@@ -107037,18 +107080,18 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.setup.entelektuel-seviye-planlayic':'entelektüel seviye planlayıcı',
   'esp.core.setup.i-lk-kurulum':'İlk kurulum',
   'esp.core.setup.uc-alan-yeter-gerisi-calisti':'Üç alan yeter. Gerisi çalıştıkça dolar.',
-  'esp.core.setup.bu-sistem-senin-girdigin-pra':'Bu sistem senin girdiğin pratiği okur ve ondan hesap yapar. Sınav yapmaz, seviye vermez, yetenek yargısı kurmaz — ve bilmediği hiçbir şeyi tahmin etmez.',
+  'esp.core.setup.bu-sistem-senin-girdigin-pra':'Girdiğin çalışmadan hesap yapar. Sınav yapmaz, seviye vermez, yetenek yargısı kurmaz.',
   'esp.core.setup.bu-alanlar-neyi-acar':'Bu alanlar neyi açar',
   'esp.core.setup.siradaki-tek-is':'Sıradaki tek iş',
-  'esp.core.setup.acik-disiplinler-arasinda-on':'— açık disiplinler arasında önceliği kural motoru seçer',
+  'esp.core.setup.acik-disiplinler-arasinda-on':'— sıradaki işi sistem seçer',
   'esp.core.setup.aralikli-tekrar':'Aralıklı tekrar',
-  'esp.core.setup.kart-eklediginde-retansiyon':'— kart eklediğinde retansiyon ölçülmeye başlar',
+  'esp.core.setup.kart-eklediginde-retansiyon':'— kart ekleyince hatırlama ölçülür',
   'esp.core.setup.haftalik-rota':'Haftalık rota',
-  'esp.core.setup.hic-acilmayan-disiplin-one':'— hiç açılmayan disiplin öne alınır',
-  'esp.core.setup.dokuz-ajanli-ofis':'Dokuz ajanlı ofis',
-  'esp.core.setup.her-masa-yalnizca-kendi':'— her masa yalnızca kendi ölçümüne bakar',
+  'esp.core.setup.hic-acilmayan-disiplin-one':'— uzun süredir açılmayan alan öne alınır',
+  'esp.core.setup.dokuz-ajanli-ofis':'Uzmanlar',
+  'esp.core.setup.her-masa-yalnizca-kendi':'— her uzman kendi alanına bakar',
   'esp.core.setup.merdiven':'Merdiven',
-  'esp.core.setup.her-bolumde-sifirdan-ustatli':'— her bölümde sıfırdan üstatlığa ölçülebilir basamaklar',
+  'esp.core.setup.her-bolumde-sifirdan-ustatli':'— her alanda ölçülebilir basamaklar',
   'esp.core.setup.girilmemis-gun-sifir-sayilma':'Girilmemiş gün sıfır sayılmaz.',
   'esp.core.setup.calismadigin-gun-hesaba-0-da':'Çalışmadığın gün hesaba «0 dakika» diye girmez; o gün hiç sayılmaz ve kaç günden hesaplandığı ekranda yazar.',
   'esp.core.setup.tahmin-olcum-gibi-gosterilme':'Tahmin, ölçüm gibi gösterilmez.',
@@ -107122,8 +107165,7 @@ ESP.Setup = (function(){
           <p class="setup__lede">${yz('esp.core.setup.bu-sistem-senin-girdigin-pra')}</p>
         </div>
 
-        <div class="setup__unlock">
-          <p class="setup__kicker">${yz('esp.core.setup.bu-alanlar-neyi-acar')}</p>
+        <details class="setup__unlock hiz-ac"><summary>${yz('esp.core.setup.bu-alanlar-neyi-acar')}</summary>
           <ul class="setup__list">
             <li><b>${yz('esp.core.setup.siradaki-tek-is')}</b> ${yz('esp.core.setup.acik-disiplinler-arasinda-on')}</li>
             <li><b>${yz('esp.core.setup.aralikli-tekrar')}</b> ${yz('esp.core.setup.kart-eklediginde-retansiyon')}</li>
@@ -107131,7 +107173,7 @@ ESP.Setup = (function(){
             <li><b>${yz('esp.core.setup.dokuz-ajanli-ofis')}</b> ${yz('esp.core.setup.her-masa-yalnizca-kendi')}</li>
             <li><b>${yz('esp.core.setup.merdiven')}</b> ${yz('esp.core.setup.her-bolumde-sifirdan-ustatli')}</li>
           </ul>
-        </div>
+        </details>
 
 `),
           /* 2/3 Neye karar vermiyoruz? — sınır atlanamaz: «Başla» son adımda */
@@ -107274,7 +107316,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.cozulen-kart':'Çözülen kart',
   'esp.today.temiz-tekrar':'Temiz tekrar',
   'esp.today.bu-satirlar-kaydedilmeyecek':'Bu satırlar kaydedilmeyecek; yukarıdaki formdan elle girebilirsin.',
-  'esp.today.girilmemis-gun-sifir-sayilma':'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.',
+  'esp.today.girilmemis-gun-sifir-sayilma':'Üstteki kutuya yaz, kayıt buraya düşer.',
   'esp.today.plandan-sonra':'Plandan sonra',
   'esp.today.bu-tarihe-hala-yetisilebilir':'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.',
   'esp.today.bugune-hic-oturum-girilmedi':'Bugüne hiç oturum girilmedi. Bu gün ortalamaya katılmaz.',
@@ -107288,6 +107330,17 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.i-lk-oturumla-baslar':'İlk oturumla başlar.',
   'esp.today.oturum-gir':'Oturum gir',
   'esp.today.gunun-akisi':'Günün akışı',
+  'esp.today.oneri-bekliyor':'öneri bekliyor',
+  'esp.today.eylem-lang':'Kartları çalış',
+  'esp.today.eylem-dil':'Dil çalışmasına geç',
+  'esp.today.eylem-symposium':'Felsefeye geç',
+  'esp.today.eylem-history':'Tarihe geç',
+  'esp.today.eylem-studio':'Stüdyoya geç',
+  'esp.today.eylem-library':'Okumaya geç',
+  'esp.today.eylem-writing':'Yazıya geç',
+  'esp.today.eylem-ladder':'Planı aç',
+  'esp.today.eylem-onaylar':'Önerilere bak',
+  'esp.today.eylem-genel':'Başla',
   'esp.today.bugun-oturum-yok-taban':'Bugün oturum yok; taban ',
   'esp.today.tatil-modu-3':'Tatil modu ',
   'esp.today.tatil-bitti-hos-geldin':'Tatil bitti; hoş geldin',
@@ -107338,7 +107391,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.vazgec':'Vazgeç',
   'esp.today.eslesmedi':'Eşleşmedi',
   'esp.today.gunu-kapat':'Günü kapat',
-  'esp.today.oturum-gir-ve-butun-satirlar':'Oturum gir ve bütün satırlar',
+  'esp.today.oturum-gir-ve-butun-satirlar':'Ayrıntılı giriş',
   'esp.today.bugun':'Bugün',
   'esp.today.bu-gune-henuz-oturum-girilme':'Bu güne henüz oturum girilmedi. ',
   'esp.today.bugunun-oturumlari':'Bugünün oturumları',
@@ -107368,9 +107421,9 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.plani-gor':'Planı gör',
   'esp.today.zaman-butcesi-king':'Zaman bütçesi (King):',
   'esp.today.hedeflerim':'Hedeflerim',
-  'esp.today.danisma-da-hedef-koy':'Danışma’da hedef koy',
+  'esp.today.danisma-da-hedef-koy':'Uzmana hedefini söyle',
   'esp.today.ornekler':'Örnekler',
-  'esp.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
+  'esp.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Uzmana sor ekranında tek cümleyle yazabilirsin.',
   'esp.today.bir-yilda-gitarda-kalfa-ya-g':'«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi söylerim. Alışkanlık da kurabilirsin: «her gün 20 dakika kitap okuma alışkanlığı kazanmak istiyorum».',
   'esp.today.gunun-toplami':'Günün toplamı',
   'esp.today.taban':'Taban ',
@@ -107653,8 +107706,10 @@ ESP.Screens.today = (function(){
      taşındığından (KOLAY Faz 2) Bugün'e eklenen tek düğme budur. */
   const gunuKapatAcik = () => !!(window.LIFEOS && window.LIFEOS.GUNUKAPAT && window.LIFEOS.GUNUKAPAT.kuruluMu())
     && gun() === U.todayISO();
+  /* Ekranda tek birincil düğme: kapağın eylemi varsa «Günü kapat» sade durur. */
+  const kapakEylemi = () => { const n = ESP.Planner.nextAction(); return !!(n.rank && n.route && n.route !== 'today'); };
   const gunDugmesi = () => html`<div class="row wrap gap-6 mt-8">${when(gunuKapatAcik(), () => K.Button({ label:yz('esp.today.gunu-kapat'),
-    size:'sm', tone:'primary', act:'gunu-kapat' }))}${K.Button({ label:yz('esp.today.oturum-gir-ve-butun-satirlar'), size:'sm',
+    size:'sm', tone:kapakEylemi() ? '' : 'primary', act:'gunu-kapat' }))}${K.Button({ label:yz('esp.today.oturum-gir-ve-butun-satirlar'), size:'sm',
     tone:'ghost', act:'go', data:{ 'data-route':'gun' } })}</div>`;
 
   function sessionList(){
@@ -107679,16 +107734,16 @@ ESP.Screens.today = (function(){
          altındaki gün rozet almaz ve boş döner. */
       action:raw(ESP.Basarim ? ESP.Basarim.odakHtml(toplam) : ''),
       body:html`${K.Table({ tight:true,
-        headers:['Disiplin', 'Süre', 'Sayım', 'Not', ''],
+        /* Hiç sayım ya da not girilmemişse o sütun yoktur (sıfır demek değil; yer kaplamasın). */
+        headers:['Disiplin', 'Süre'].concat(rows.some(s => s.count != null) ? ['Sayım'] : [], rows.some(s => s.note) ? ['Not'] : [], ['']),
         rows:rows.map(s => {
           const d = ESP.DISCIPLINE_BY_ID[s.disc];
           return [
             d ? d.label : s.disc,
             s.minutes != null ? U.fmtMin(s.minutes) : raw(String(P_cert('missing'))),
-            s.count != null ? U.fmtNum(s.count) : raw(String(P_cert('missing'))),
-            s.note || '—',
-            K.Button({ label:yz('esp.today.sil'), size:'sm', act:'del-session', data:{ 'data-id':s.id } }),
-          ];
+          ].concat(rows.some(x => x.count != null) ? [s.count != null ? U.fmtNum(s.count) : raw(String(P_cert('missing')))] : [],
+            rows.some(x => x.note) ? [s.note || '—'] : [],
+            [K.Button({ label:yz('esp.today.sil'), size:'sm', act:'del-session', data:{ 'data-id':s.id } })]);
         }) })}${gunDugmesi()}`,
     });
   }
@@ -107921,7 +107976,8 @@ ESP.Screens.today = (function(){
   function sikSerit(){
     const VT = (window.LIFEOS || {}).VITRIN;
     if(!ESP.Dunku || !ESP.Dunku.sik || !VT || gun() !== U.todayISO()) return '';
-    const l = ESP.Dunku.sik(U.todayISO());
+    /* En sık üçü: uzun liste girdi kutusunun işini tekrar ediyordu. */
+    const l = ESP.Dunku.sik(U.todayISO()).slice(0, 3);
     if(!l.length) return '';
     return VT.ogunSablonlari({ act:'sik-oturum', baslik:yz('esp.today.sik-oturumlarin-tek-dokunus'), sablonlar:l.map(x => ({
       ad:x.ad, icerik:U.fmtMin(x.dk), on:x.bugun, data:{ 'data-disc':x.disc, 'data-dk':x.dk } })) });
@@ -108333,8 +108389,10 @@ ESP.Screens.today = (function(){
     const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
     if(!KS) return '';
     const n = ESP.Planner.nextAction();
-    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.headline(), sayilar:[],
-      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:String(n.title).split(' — ')[0], tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
+    /* Sıradaki işin adı cümlede, düğme ne yapacağını söyler. «Kartları hatırlama
+       oranı düşük» yazan düğmeye basınca ne olacağı belli değildi. Sıralama planner'ın. */
+    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.kapakCumlesi(), sayilar:[],
+      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:ESP.Screens.today.eylemAdi(n), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
       ikincil:('<button type="button" class="btn btn--ghost" data-kapak-asagi>' + yz('esp.today.gunun-akisi') + '</button>') });
   }
 
@@ -108565,7 +108623,8 @@ ESP.Screens.today = (function(){
      yerde); düştüler. Kesinlik etiketleri olduğu gibi. */
   function analizOzeti(){
     const O = ESP.Screens.onaylar;
-    const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
+    /* Özet «nasıl gidiyorum» der; karar Onaylar'da. Buradan tek düğmeyle gidilir. */
+    const oneri = O && O.bekleyen() ? K.Button({ label:O.bekleyen() + ' ' + yz('esp.today.oneri-bekliyor'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'onaylar' } }) : '';
     return [PanoUst(),
       String(html`<section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">${yz('esp.today.ozet')}</h2>${DonenKutular(true)}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>`),
       oneri ? String(html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">${yz('esp.today.oneri')}</h2>${oneri}</section>`) : ''].filter(Boolean);
@@ -108866,6 +108925,20 @@ ESP.Screens.today = (function(){
       if(h) c += ' ' + h + ' hatırlatıcı bugün.';
       return c;
     },
+    /* Düğmenin adı işten: «Kartları çalış» yalnız sırası gelen kart varken. */
+    eylemAdi(n){
+      if(n.route === 'lang') return yz(/^(srs|retention)/.test(n.id || '') ? 'esp.today.eylem-lang' : 'esp.today.eylem-dil');
+      const EYLEM = { symposium:1, history:1, studio:1, library:1, writing:1, ladder:1, onaylar:1 };
+      return yz('esp.today.eylem-' + (EYLEM[n.route] ? n.route : 'genel'));
+    },
+    /* Kapağın cümlesi: başlıkla aynı, ama «sıradaki iş hazır» yerine işin adı. */
+    kapakCumlesi(){
+      const rows = M.sessionsOf(gun());
+      const n = ESP.Planner.nextAction();
+      if(!n.rank) return this.headline();
+      const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+      return (rows.length ? rows.length + ' oturum, toplam ' + U.fmtMin(toplam) + '. ' : '') + n.title + '.';
+    },
     headline(){
       const rows = M.sessionsOf(gun());
       const n = ESP.Planner.nextAction();
@@ -108967,6 +109040,8 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:100, id:'act:practice-lang', kind:
   hint:'Dil', run:() => { ESP.S.ui.langTab = 'ogren'; ESP.App.go('lang'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.lang.calis':'Çalış',
+  'esp.lang.kart-ayrintisi':'Bağlam, eş ve zıt anlam',
+  'esp.lang.kartlarim':'Kartlarım',
   'esp.lang.kartlar':'Kartlar',
   'esp.lang.ekle':'Ekle',
   'esp.lang.ogren':'Öğren',
@@ -108974,7 +109049,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.lang.i-lerleme':'İlerleme',
   'esp.lang.bugun':'Bugün ',
   'esp.lang.calisma':'Çalışma',
-  'esp.lang.bu-dilde-hic-kart-yok':'Bu dilde hiç kart yok. Ekle sekmesinden bir liste ',
+  'esp.lang.bu-dilde-hic-kart-yok':'Bu dilde hiç kart yok. Kartlarım sekmesinden bir liste ',
   'esp.lang.kart-ekle':'Kart ekle',
   'esp.lang.bugunluk-bitti':'Bugünlük bitti',
   'esp.lang.telaffuzu-dinle':'Telaffuzu Dinle',
@@ -109092,10 +109167,8 @@ ESP.Screens.lang = (function(){
 
   const TABS = [
     { id:'calis',    label:yz('esp.lang.calis') },
-    { id:'kartlar',  label:yz('esp.lang.kartlar') },
-    { id:'ekle',     label:yz('esp.lang.ekle') },
+    { id:'ekle',     label:yz('esp.lang.kartlarim') },
     { id:'ogren',    label:yz('esp.lang.ogren') },
-    { id:'gramer',   label:yz('esp.lang.dilbilgisi') },
     { id:'ilerleme', label:yz('esp.lang.i-lerleme') },
   ];
 
@@ -109237,7 +109310,7 @@ ESP.Screens.lang = (function(){
       }
       return [K.Entry({
         label:yz('esp.lang.calisma'), hint:'srs',
-        meta:d.due + ' kartın sırası geldi' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
+        meta:d.overdue ? d.overdue + ' gecikmiş' : null,
         /* Gecikme yoksa künye («N kart vadeli») yeter; not yalnız gecikmeyi söyler. */
         note:d.overdue ? yz('esp.lang.en-cok-geciken-kart') + d.maxOverdueDays + ' gündür bekliyor.' : null,
         body:html`
@@ -109403,10 +109476,32 @@ ESP.Screens.lang = (function(){
     const res = S.ui.vocabParsed;
     return [
       K.Entry({
+        label:yz('esp.lang.tek-kart'),
+        meta:'elle',
+        body:html`
+          <div class="cols-2">
+            ${K.Field({ label:yz('esp.lang.on-yuz'), input:K.Input({ id:'c-front', placeholder:'nevertheless', value:S.ui.siklikOn || null }) })}
+            ${K.Field({ label:yz('esp.lang.karsilik'), input:K.Input({ id:'c-back', placeholder:yz('esp.lang.yine-de') }) })}
+          </div>
+          <details class="hiz-ac mt-8" ${raw(siklikOrnek() ? 'open' : '')}><summary>${yz('esp.lang.kart-ayrintisi')}</summary>
+            ${K.Field({ label:yz('esp.lang.baglam'), hint:'isteğe bağlı',
+              input:K.Input({ id:'c-ctx', placeholder:yz('esp.lang.ornek-cumle'), value:siklikOrnek() ? siklikOrnek().yabanci : null }) })}
+            <div class="cols-2 mt-8">
+              ${K.Field({ label:yz('esp.lang.es-anlamlilar'), hint:'isteğe bağlı · virgülle',
+                input:K.Input({ id:'c-es', placeholder:yz('esp.lang.however-still') }) })}
+              ${K.Field({ label:yz('esp.lang.zit-anlamli'), hint:'isteğe bağlı',
+                input:K.Input({ id:'c-zit', placeholder:'therefore' }) })}
+            </div>
+          </details>
+          ${when(siklikOrnek(), () => html`<p class="small muted mt-8 siklik-ornek">${yz('esp.lang.baglam-tatoeba-dan-turkcesi')}${siklikOrnek().turkce}» · <a href="${siklikOrnek().kaynak}" target="_blank" rel="noopener">kaynak</a> (${siklikOrnek().lisans})</p>`)}
+          ${K.Button({ label:yz('esp.lang.kart-ekle'), tone:'primary', act:'add-card', class:'mt-10' })}`,
+      }),
+
+      K.Entry({
         label:yz('esp.lang.liste-yapistir'), hint:'liste-yapistir',
         meta:'kelime – karşılık',
         body:html`
-          ${K.Textarea({ id:'vocab-text', rows:6, aria:yz('esp.lang.kelime-listesi'),
+          ${K.Textarea({ id:'vocab-text', rows:3, aria:yz('esp.lang.kelime-listesi'),
             placeholder:yz('esp.lang.nevertheless-yine-de-nto-gra') })}
           <div class="row mt-10">
             ${K.Select({ id:'vocab-lang', value:aktifDil(), change:'pick-lang',
@@ -109415,26 +109510,6 @@ ESP.Screens.lang = (function(){
             ${K.Button({ label:yz('esp.lang.coz'), act:'parse-vocab' })}
           </div>
           ${when(res, () => vocabPreview(res))}`,
-      }),
-
-      K.Entry({
-        label:yz('esp.lang.tek-kart'),
-        meta:'elle',
-        body:html`
-          <div class="cols-3">
-            ${K.Field({ label:yz('esp.lang.on-yuz'), input:K.Input({ id:'c-front', placeholder:'nevertheless', value:S.ui.siklikOn || null }) })}
-            ${K.Field({ label:yz('esp.lang.karsilik'), input:K.Input({ id:'c-back', placeholder:yz('esp.lang.yine-de') }) })}
-            ${K.Field({ label:yz('esp.lang.baglam'), hint:'isteğe bağlı',
-              input:K.Input({ id:'c-ctx', placeholder:yz('esp.lang.ornek-cumle'), value:siklikOrnek() ? siklikOrnek().yabanci : null }) })}
-          </div>
-          <div class="cols-2 mt-8">
-            ${K.Field({ label:yz('esp.lang.es-anlamlilar'), hint:'isteğe bağlı · virgülle',
-              input:K.Input({ id:'c-es', placeholder:yz('esp.lang.however-still') }) })}
-            ${K.Field({ label:yz('esp.lang.zit-anlamli'), hint:'isteğe bağlı',
-              input:K.Input({ id:'c-zit', placeholder:'therefore' }) })}
-          </div>
-          ${when(siklikOrnek(), () => html`<p class="small muted mt-8 siklik-ornek">${yz('esp.lang.baglam-tatoeba-dan-turkcesi')}${siklikOrnek().turkce}» · <a href="${siklikOrnek().kaynak}" target="_blank" rel="noopener">kaynak</a> (${siklikOrnek().lisans})</p>`)}
-          ${K.Button({ label:yz('esp.lang.kart-ekle'), act:'add-card', class:'mt-10' })}`,
       }),
 
       siklikEkleRow(),
@@ -109859,8 +109934,14 @@ ESP.Screens.lang = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): altı bölüm alt alta, tezgâh en sonda. */
-  const GOVDE = { calis:reviewRows, kartlar:cardRows, ekle:addRows, ogren:learnRows,
-    gramer:grammarRows, ilerleme:progressRows };
+  /* Dört iş: çalış, kartlarım, öğren, ilerleme. Dilbilgisi öğrenmenin parçası; kart listesi
+     kart eklemenin yanında. Deste boşken reçete yok: ilk adım kart eklemek. */
+  const GOVDE = {
+    calis:() => [].concat(reviewRows(), ESP.SRS.deckStatus(aktifDil()).total ? [ESP.Parts.recete('lang')] : [], [ESP.Parts.desk('lang')]),
+    ekle:() => [].concat(addRows(), cardRows()),
+    ogren:() => [].concat(learnRows(), grammarRows()),
+    ilerleme:() => [].concat(progressRows(), [ESP.Parts.yol('lang')]),
+  };
 
   /* 033 GELECEK YÜK (vitrin): seçili dilin önümüzdeki yedi günlük vadesi.
      Bugünün sütunu gecikenleri de taşır; kart yoksa hiç çizilmez. */
@@ -109913,14 +109994,16 @@ ESP.Screens.lang = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'lang.dil-sekmeleri', sayfa:'lang', yer:'y1', sira:10, ad:'Dil sekmeleri', ciz({ d }){
-    return K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:yz('esp.lang.dil-bolumleri'), tabs:TABS,
-        govde:GOVDE, sayi:{ calis:d.due || null } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'lang-tab', aria:yz('esp.lang.dil-bolumleri'), tabs:TABS,
+        govde:GOVDE, sayi:{ calis:d.due || null },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('lang', 'ilerleme', K, { d }, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'lang.gelecek-yuk', sayfa:'lang', yer:'y2', sira:10, ad:'Gelecek yük', ciz({ d }){
-    return K.Span(12, gelecekYuk());
+  /* Grafikler «İlerleme»de: önceden sekmelerin üstündeydi ve «Çalış» düğmesini ilk ekranın dışına itiyordu. */
+  LIFEOS.PARCA.blok({ id:'lang.gelecek-yuk', sayfa:'lang', yer:'ilerleme', sira:20, ad:'Gelecek yük', ciz({ d }){
+    return gelecekYuk();
   } });
-  LIFEOS.PARCA.blok({ id:'lang.dil-panosu', sayfa:'lang', yer:'y3', sira:10, ad:'Dil panosu', ciz({ d }){
-    return K.Span(12, raw(PanoDil()));
+  LIFEOS.PARCA.blok({ id:'lang.dil-panosu', sayfa:'lang', yer:'ilerleme', sira:10, ad:'Dil panosu', ciz({ d }){
+    return raw(PanoDil());
   } });
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
@@ -109928,8 +110011,6 @@ ESP.Screens.lang = (function(){
        arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     const parcaB = { d };
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('lang', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('lang', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('lang', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
@@ -110216,7 +110297,7 @@ ESP.Screens.lang = (function(){
     /* iPhone Faz 2d (sıkı ölçü): her bölümde iş açık; ara sıra açılan
        araçlar (konuşma, cümle kurma, dinleme, ünite isteği, tohum deste) ve
        başvuru (konu haritası, kutu dağılımı, shadowing kaynakları) şerit. */
-    kucukVarsayilan:['tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'iki-eksen', 'düzeyler', 'hata-günlüğü', 'deste', 'sık-kelimeler', 'tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
       'kutu-dağılımı', 'shadowing', 'dilde-paralel-cümleler-universal-dependencies'],
     title:yz('esp.lang.dil-studyosu'),
     headline(){
@@ -110282,11 +110363,18 @@ window.LIFEOS.PARCA.yazilar({
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'esp', sira:40, id:'act:arg', kind:'Eylem', label:'Yeni tez yaz',
-  hint:'Felsefe', run:() => { ESP.S.ui.philoTab = 'ekle'; ESP.App.go('symposium');
+  hint:'Felsefe', run:() => { ESP.S.ui.philoTab = 'acik'; ESP.App.go('symposium');
     setTimeout(() => { const el = document.getElementById('arg-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
-  'esp.symposium.acik':'Açık',
-  'esp.symposium.kapali':'Kapalı',
+  'esp.symposium.calis':'Çalış',
+  'esp.symposium.acik':'Tezlerim',
+  'esp.symposium.ilerleme':'İlerleme',
+  'esp.symposium.ilk-tez':'Bir tezle başla',
+  'esp.symposium.ilk-tez-neden':'Tek cümle yeter; gerisini itirazlar açar.',
+  'esp.symposium.tez-yaz-kisa':'Tez yaz',
+  'esp.symposium.acik-tez-bekliyor':'açık tez seni bekliyor',
+  'esp.symposium.acik-tez-neden':'Bir itiraza cevap yaz ya da yeni bir itiraz ekle.',
+  'esp.symposium.tezlerime-git':'Tezlerime git',
   'esp.symposium.ekle':'Ekle',
   'esp.symposium.metinler':'Metinler',
   'esp.symposium.deneyler':'Deneyler',
@@ -110367,12 +110455,10 @@ ESP.Screens.symposium = (function(){
   const K = ESP.C;
 
   const TABS = [
+    { id:'calis',    label:yz('esp.symposium.calis') },
     { id:'acik',     label:yz('esp.symposium.acik') },
-    { id:'kapali',   label:yz('esp.symposium.kapali') },
-    { id:'ekle',     label:yz('esp.symposium.ekle') },
-    { id:'metinler', label:yz('esp.symposium.metinler') },
-    { id:'deneyler', label:yz('esp.symposium.deneyler') },
-    { id:'ogren',     label:yz('esp.symposium.ogren') },
+    { id:'ogren',    label:yz('esp.symposium.ogren') },
+    { id:'ilerleme', label:yz('esp.symposium.ilerleme') },
   ];
 
   /* --------------------------------------------------------------- deneyler
@@ -110649,8 +110735,25 @@ ESP.Screens.symposium = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { acik:openRows, kapali:closedRows, ekle:addRows, metinler:textRows,
-    deneyler:experimentRows, ogren:topicRows };
+  /* Çalış: durumu kayıt seçer; hiç tez yoksa ilk adım, açık tez varsa onlara götürür. */
+  function calisRows(){
+    const acikTez = ESP.Intellect.openArguments().length;
+    const hic = !(S.args || []).length;
+    return [].concat([ESP.Parts.simdi('philo', acikTez
+        ? { baslik:acikTez + ' ' + yz('esp.symposium.acik-tez-bekliyor'), neden:yz('esp.symposium.acik-tez-neden'),
+            dugme:{ label:yz('esp.symposium.tezlerime-git'), act:'tab-ekle' } }
+        : { baslik:yz('esp.symposium.ilk-tez'), neden:yz('esp.symposium.ilk-tez-neden'),
+            dugme:{ label:yz('esp.symposium.tez-yaz-kisa'), act:'tab-ekle' } })],
+      hic ? [] : [ESP.Parts.recete('philo', { kunyesiz:true })], experimentRows(), [ESP.Parts.desk('philo')]);
+  }
+  /* Tezlerim: yeni tez, açık ve kapanan bir arada. Boş liste kart olmaz. */
+  function tezRows(){
+    const acikTez = ESP.Intellect.openArguments().length;
+    const kapanan = (S.args || []).some(a => a.status === 'closed');
+    return [].concat(addRows(), acikTez ? openRows() : [], kapanan ? closedRows() : []);
+  }
+  const GOVDE = { calis:calisRows, acik:tezRows, ogren:() => [].concat(topicRows(), textRows()),
+    ilerleme:() => [ESP.Parts.yol('philo')] };
 
   /* PANO KARTI (2026-10-20): açık tezler ve kaç gündür dokunulmadıkları;
      14 gün ve üstü koyu çubuk. */
@@ -110669,15 +110772,15 @@ ESP.Screens.symposium = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'symposium.felsefe-sekmeleri', sayfa:'symposium', yer:'y1', sira:10, ad:'Felsefe sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:yz('esp.symposium.felsefe-bolumleri'), tabs:TABS,
-        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'philo-tab', aria:yz('esp.symposium.felsefe-bolumleri'), tabs:TABS,
+        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('symposium', 'ilerleme', K, undefined, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'symposium.tez-panosu', sayfa:'symposium', yer:'y2', sira:10, ad:'Tez panosu', ciz(){
-    return K.Span(12, raw(PanoTez()));
+  LIFEOS.PARCA.blok({ id:'symposium.tez-panosu', sayfa:'symposium', yer:'ilerleme', sira:10, ad:'Tez panosu', ciz(){
+    return raw(PanoTez());
   } });
   function render(){
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('symposium', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('symposium', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
@@ -110693,7 +110796,7 @@ ESP.Screens.symposium = (function(){
       if(r.ok) ESP.App.render();
     },
     async 'philo-tab'(el){ K.bolumeGit(el.dataset.tab); },
-    async 'tab-ekle'(){ S.ui.philoTab = 'ekle'; ESP.App.render(); },
+    async 'tab-ekle'(){ S.ui.philoTab = 'acik'; ESP.App.render(); },
 
     /* Deneyi teze çevirmek: deneyin kurgusu tezin YERINE geçmez, tezi
        kullanıcı yazar. Sistem yalnızca boş tezi açar ve deneyi bağlam
@@ -110867,7 +110970,7 @@ ESP.Screens.symposium = (function(){
     id:'symposium',
     /* iPhone Faz 2d (sıkı ölçü): belge isteği, Sokratik soru kalıpları ve iki
        egzersiz kataloğu başvurudur — şerit, dokununca açılır. */
-    kucukVarsayilan:['belge-iste', 'sokratik-sorular', 'düşünce-deneyleri', 'argüman-alıştırmaları'],
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'kaynaklar', 'kanondan-ekle', 'belge-iste', 'sokratik-sorular', 'düşünce-deneyleri', 'argüman-alıştırmaları'],
     title:yz('esp.symposium.sempozyum'),
     headline(){
       const acik = ESP.Intellect.openArguments();
@@ -110944,11 +111047,16 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:120, id:'act:timeline', kind:'Eyle
   hint:'Tarih', run:() => { ESP.S.ui.histTab = 'olaylar'; ESP.App.go('history'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.history.serit':'Şerit',
+  'esp.history.islemler':'İşlemler',
+  'esp.history.ilerleme':'İlerleme',
+  'esp.history.ilk-olay':'Zaman şeridi boş',
+  'esp.history.ilk-olay-neden':'İlk olayını ekle ya da hazır listeyi yükle.',
+  'esp.history.olaylara-git':'Olaylara git',
   'esp.history.olaylar':'Olaylar',
   'esp.history.kaynaklar':'Kaynaklar',
-  'esp.history.zincir':'Zincir',
+  'esp.history.zincir':'Neden zinciri',
   'esp.history.ogren':'Öğren',
-  'esp.history.calisma':'Çalışma',
+  'esp.history.calisma':'Çalış',
   'esp.history.bos-serit':'Boş şerit',
   'esp.history.zaman-seridinde-hic-olay-yok':'Zaman şeridinde hiç olay yok.',
   'esp.history.tohumu-yukle':'Tohumu yükle · ',
@@ -111066,12 +111174,10 @@ ESP.Screens.history = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'serit',     label:yz('esp.history.serit') },
-    { id:'olaylar',   label:yz('esp.history.olaylar') },
-    { id:'kaynaklar', label:yz('esp.history.kaynaklar') },
-    { id:'zincir',    label:yz('esp.history.zincir') },
-    { id:'ogren',     label:yz('esp.history.ogren') },
     { id:'calisma',   label:yz('esp.history.calisma') },
+    { id:'olaylar',   label:yz('esp.history.olaylar') },
+    { id:'ogren',     label:yz('esp.history.ogren') },
+    { id:'ilerleme',  label:yz('esp.history.ilerleme') },
   ];
 
   function evs(){ return S.events || []; }
@@ -111090,23 +111196,15 @@ ESP.Screens.history = (function(){
 
   /* ------------------------------------------------------------------ şerit */
 
-  function seritRows(){
+  /* Şerit ve dönem süzgeci olayların başında; kapsam ve boşluklar ilerlemede. */
+  function seritRows(kisim){
     const st = ESP.Chrono.status();
     const rows = [];
+    const serit = [];
 
     /* iPhone Faz 2c: boş şeridin ve tohumun açıklaması ⓘ'de (hints: chrono);
        tohumun kaç olay taşıdığı düğmenin üstünde. */
-    if(!evs().length){
-      rows.push(K.Entry({
-        label:yz('esp.history.bos-serit'), hint:'chrono',
-        meta:'olay yok',
-        body:html`
-          ${K.Empty({ text:yz('esp.history.zaman-seridinde-hic-olay-yok') })}
-          ${K.Button({ label:yz('esp.history.tohumu-yukle') + (ESP.SEED_EVENTS || []).length + ' olay', tone:'primary',
-            act:'seed', class:'mt-10' })}`,
-      }));
-      return rows;
-    }
+    if(!evs().length) return [];
 
     rows.push(DonenKapsam(st));
 
@@ -111118,11 +111216,11 @@ ESP.Screens.history = (function(){
     const enYeni = evs().reduce((m, e) => (!m || (e.createdAt || '') > (m.createdAt || '')) ? e : m, null);
     const seritHtml = V ? V.tarihSeridi({ olaylar:evs().filter(e => typeof e.year === 'number').slice()
       .sort((a, b) => a.year - b.year).map(e => ({ yil:e.year, ad:e.title, on:e === enYeni })) }) : '';
-    if(seritHtml) rows.push(K.Entry({ label:yz('esp.history.serit'), meta:evs().length + ' olay', wide:true, body:raw(seritHtml) }));
+    if(seritHtml) serit.push(K.Entry({ label:yz('esp.history.serit'), meta:evs().length + ' olay', wide:true, body:raw(seritHtml) }));
 
     /* Dönem şeridi — her dönem kendi olay sayısıyla. */
     const donem = ESP.Chrono.spread('era');
-    rows.push(K.Entry({
+    serit.push(K.Entry({
       label:yz('esp.history.donemler'), hint:'era',
       meta:st.eras.covered + '/' + st.eras.total + ' kapsandı',
       wide:true,
@@ -111184,7 +111282,7 @@ ESP.Screens.history = (function(){
         </div>`,
     }));
 
-    return rows;
+    return kisim === 'ilerleme' ? rows : serit;
   }
 
   /* iPhone Faz 2c (2026-10-02): kapsamın üç ekseni ve yüzyıl boşluğu tek
@@ -111302,6 +111400,7 @@ ESP.Screens.history = (function(){
                   tone:a.state === 'balanced' ? 'ok' : (a.state === 'thin' ? 'warn' : 'muted') })}
                 ${when(e.voiceNote, () => K.Button({ label:yz('esp.history.dinle'), size:'sm', act:'listen-voice-note',
                   data:{ 'data-id':e.id } }))}
+                </div><details class="hiz-ac evrow__islem"><summary>${yz('esp.history.islemler')}</summary><div class="row wrap gap-6 mt-6">
                 ${K.Button({ label:e.voiceNote ? 'Düzenle' : yz('esp.history.sesli-not-3'), size:'sm', act:'edit-voice-note',
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:yz('esp.history.eszamanli'), size:'sm', act:'contemp',
@@ -111312,7 +111411,7 @@ ESP.Screens.history = (function(){
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:yz('esp.history.sil'), size:'sm', act:'del-event',
                   data:{ 'data-id':e.id } })}
-              </div>
+              </div></details>
               ${when(S.ui.eventOpen === e.id, () => esZamanli(e))}
             </div>
           </div>`;
@@ -111603,11 +111702,20 @@ ESP.Screens.history = (function(){
   /* ----------------------------------------------------------------- çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { serit:seritRows, olaylar:olayRows, kaynaklar:kaynakRows, zincir:zincirRows,
-    ogren:learnRows, calisma:calismaRows };
+  const KUCUK = ['uzman-masası', 'yol-haritası', 'denge', 'dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'];
+  /* Çalış: şerit boşsa ilk adım; doluysa bugünün egzersizi ve deste. Olaylar: şerit, liste,
+     neden zinciri ve kaynaklar tek işin parçaları. Kapsam ilerlemede. */
+  const GOVDE = {
+    calisma:() => evs().length ? [].concat(calismaRows(), [ESP.Parts.recete('history'), ESP.Parts.desk('history')])
+      : [ESP.Parts.simdi('history', { baslik:yz('esp.history.ilk-olay'), neden:yz('esp.history.ilk-olay-neden'),
+          dugme:{ label:yz('esp.history.olaylara-git'), act:'tab-olay' } }), ESP.Parts.desk('history')],
+    olaylar:() => [].concat(seritRows(), olayRows(), zincirRows(), kaynakRows()),
+    ogren:learnRows,
+    ilerleme:() => [].concat(seritRows('ilerleme'), [ESP.Parts.yol('history')]),
+  };
 
   LIFEOS.PARCA.blok({ id:'history.tarih-sekmeleri', sayfa:'history', yer:'y1', sira:10, ad:'Tarih sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:yz('esp.history.tarih-bolumleri'), tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler({ act:'pick-tab', aria:yz('esp.history.tarih-bolumleri'), tabs:TABS,
         govde:GOVDE }));
   } });
   function render(){
@@ -111628,6 +111736,7 @@ ESP.Screens.history = (function(){
       if(r.ok) ESP.App.render();
     },
     async 'pick-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'tab-olay'(){ S.ui.histTab = 'olaylar'; ESP.App.render(); },
     async 'pick-era'(el){
       S.ui.histEra = el.dataset.id === S.ui.histEra ? 'all' : el.dataset.id;
       ESP.App.render();
@@ -111817,7 +111926,7 @@ ESP.Screens.history = (function(){
       const res = await M.saveChain(M.newChain({ eventId:el.dataset.id }));
       if(!res.ok){ ESP.UI.toast(res.error); return; }
       S.ui.chainOpen = res.chain.id;
-      S.ui.histTab = 'zincir';
+      S.ui.histTab = 'olaylar';
       ESP.Memo.bitir();
       ESP.App.render();
     },
@@ -111866,7 +111975,8 @@ ESP.Screens.history = (function(){
     /* iPhone Faz 2c: Şerit'te iş zaman şeridinin kendisi; dönem kutuları
        ara sıra açılan süzgeç (şerit), boşluk ve dağılım dönen kartta.
        Öbür bölümlerde belge isteği ve iki başvuru tablosu şerit. */
-    kucukVarsayilan:['dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'],
+    /* Olay varken form katlı: liste işin kendisi; olay yokken form açık (ilk eylem). */
+    get kucukVarsayilan(){ return (S.events || []).length ? ['olay-ekle', 'neden-zinciri', 'kaynak-ekle', 'kaynaklar'].concat(KUCUK) : KUCUK; },
     title:yz('esp.history.kronoloji'),
     headline(){
       const st = ESP.Chrono.status();
@@ -111924,8 +112034,8 @@ window.LIFEOS.PARCA.yazilar({
 });
 
 window.LIFEOS.PARCA.yazilar({
-  'esp.ladder.hicbir-disiplinde-olculmus-u':'Hiçbir disiplinde ölçülmüş üretim yok. ',
-  'esp.ladder.merdiven-ilk-olcumle-baslar':'Merdiven ilk ölçümle başlar.',
+  'esp.ladder.hicbir-disiplinde-olculmus-u':'Henüz ölçüm yok. ',
+  'esp.ladder.merdiven-ilk-olcumle-baslar':'Kısa bir sınamayla başla.',
   'esp.ladder.once-olc':'Önce ölç',
   'esp.ladder.siradaki-kapi':'Sıradaki kapı',
   'esp.ladder.ustat-kademesi-bile-bu-madde':'Üstat kademesi bile bu maddeleri kapatmaz. Merdiven bir ',
@@ -111957,6 +112067,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.ladder.kademe':'Kademe ',
   'esp.ladder.kapanis-isi':'Kapanış işi:',
   'esp.ladder.seviye-tespiti':'Seviye tespiti',
+  'esp.ladder.sinama':'Sınama',
+  'esp.ladder.durum':'Durum',
+  'esp.ladder.basamaklar':'Basamaklar',
+  'esp.ladder.projeler':'Projeler',
+  'esp.ladder.kendini-sina':'Kendini sına',
   'esp.ladder.disiplin':'Disiplin',
   'esp.ladder.tespit-yapilacak-disiplin':'Tespit yapılacak disiplin',
   'esp.ladder.cevapsiz':'(cevapsız)',
@@ -112031,8 +112146,10 @@ ESP.Screens.ladder = (function(){
       label:yz('esp.ladder.genel-kademe'), hint:'level',
       meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
       body:ov.cert === 'missing'
-        ? K.Notice({ tone:'info', body:yz('esp.ladder.hicbir-disiplinde-olculmus-u')
-            + yz('esp.ladder.merdiven-ilk-olcumle-baslar') })
+        /* Veri yoksa yedi sıfır kart değil ilk adım; alan kartları katlı (kucukVarsayilan). */
+        ? html`${K.Notice({ tone:'info', body:yz('esp.ladder.hicbir-disiplinde-olculmus-u')
+            + yz('esp.ladder.merdiven-ilk-olcumle-baslar') })}
+            <div class="mt-10">${K.Button({ label:yz('esp.ladder.kendini-sina'), tone:'primary', act:'pick-tab', data:{ 'data-tab':'tespit' } })}</div>`
         : html`
           ${K.NextUp({ icon:'chart', label:yz('esp.ladder.olculmus-uretim'), title:ov.level.label,
             why:ov.level.note })}
@@ -112156,7 +112273,7 @@ ESP.Screens.ladder = (function(){
           : (st.state === 'current' ? '%' + st.pct : 'ileride'),
         note:st.title,
         wide:true,
-        class:'step step--' + st.state,
+        class:'step--' + st.state,
         body:html`
           <div class="step__cols">
             <div>
@@ -112325,32 +112442,51 @@ ESP.Screens.ladder = (function(){
     ];
   }
 
+  /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
+     öğrendiğimiz konular hedefinde; yol haritası gibi»). Açık alanların
+     merdiveni: basamak durumu ve yüzdesi müfredat motorundan (geçilmeyen
+     kapı ilerleme sayılmaz). */
+  function yolHaritasi(){
+    const A = window.LIFEOS.AGHARITA;
+    if(!A || !ESP.Curriculum || !ESP.Curriculum.roadmap) return '';
+    const kumeler = ESP.Mod.active().map(d => {
+      const y = ESP.Curriculum.roadmap(d.id);
+      return { ad:d.short || d.label, dugumler:y ? y.steps.map(s => ({ ad:s.title, durum:s.state === 'done' ? 'bitti' : s.state === 'current' ? (s.pct > 0 ? 'suruyor' : 'sirada') : 'bekliyor',
+        ilerleme:s.state === 'current' && s.pct > 0 ? s.pct / 100 : undefined })) : [] };
+    });
+    return html`<section class="kutu" aria-label="Yol haritası"><h2 class="kutu__ad">${yz('esp.core.parts.yol-haritasi')}</h2>
+      <p class="tiny dim">${yz('esp.analytics.her-alanin-merdiveni-gecilen')}</p>
+      ${raw(A.html({ merkez:'Gelişim', kumeler, bos:yz('esp.analytics.bir-alan-acinca-merdiveni-bu') }))}</section>`;
+  }
+
   /* ----------------------------------------------------------------- çizim */
 
   const TABS = [
-    { id:'ozet',     label:yz('esp.ladder.genel') },
-    { id:'yol',      label:yz('esp.ladder.yol-2') },
-    { id:'projeler', label:yz('esp.ladder.projeler-14') },
-    { id:'tespit',   label:yz('esp.ladder.seviye-tespiti') },
+    { id:'ozet',     label:yz('esp.ladder.durum') },
+    { id:'yol',      label:yz('esp.ladder.basamaklar') },
+    { id:'projeler', label:yz('esp.ladder.projeler') },
+    { id:'tespit',   label:yz('esp.ladder.sinama') },
   ];
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
   /* Karışık alan sınaması (core/alan.js): sıradaki konu burada, sayfa değiştirmeden sınanır;
      konu başlığı disiplin seçilmeden gelir, bu yüzden karışık kanıt sayılır. */
-  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'y1', sira:5, ad:'Karışık sınama', ciz(){
+  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'sinama', sira:5, ad:'Karışık sınama', ciz(){
     const P = (window.LIFEOS || {}).PANO, s = S.ui.alanSinav, h = ESP.Alan.harita();
     const siradaki = ESP.Alan.sira(1)[0];
     const t = ESP.Alan.konuOf(s && s.karisik ? s.id : siradaki && siradaki.id);
     if(!P || !t) return '';
-    return K.Span(12, raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
+    return raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
       yuva:h.olculen + '/' + h.toplam + ' ' + yz('esp.ladder.konu-olculdu'),
       govde:String(html`<p class="small"><b>${(ESP.DISCIPLINE_BY_ID[t.disc] || {}).short || t.disc}</b> · ${t.title}</p>
-        ${ESP.Parts.konuSinama(t, true)}`) })));
+        ${ESP.Parts.konuSinama(t, true)}`) }));
   } });
   LIFEOS.PARCA.blok({ id:'ladder.merdiven-sekmeleri', sayfa:'ladder', yer:'y1', sira:10, ad:'Merdiven sekmeleri', ciz({ disc }){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
-        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
+        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows },
+        ust:{ tespit:() => LIFEOS.PARCA.yer('ladder', 'sinama', K, undefined, raw),
+          ozet:() => C().overall().cert === 'missing' ? '' : yolHaritasi() } }));
   } });
   function render(){
     const disc = S.ui.curDisc || 'lang';
@@ -112409,7 +112545,8 @@ ESP.Screens.ladder = (function(){
       const yol = G ? C().roadmap(S.ui.curDisc || 'lang') : null;
       const kademeler = (yol ? yol.steps : []).filter(st => st.state !== 'current')
         .map(st => G.anahtar(yz('esp.ladder.kademe') + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
-      return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler);
+      /* Ölçüm yokken yedi sıfır kart açık durmaz; alan listesi katlı, adı ve sayısı görünür. */
+      return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler, C().overall().cert === 'missing' ? ['disiplinler'] : []);
     },
     title:yz('esp.ladder.merdiven'),
     headline(){
@@ -112490,9 +112627,9 @@ window.LIFEOS.PARCA.yazilar({
   'esp.studio.muzik':'Müzik',
   'esp.studio.diksiyon':'Diksiyon',
   'esp.studio.kulak':'Kulak',
+  'esp.studio.hangi-hatalar':'Hangi hatalar oldu?',
   'esp.studio.ogren':'Öğren',
   'esp.studio.i-lerleme':'İlerleme',
-  'esp.studio.tezgah':'Tezgâh',
   'esp.studio.kulak-egzersizleri':'Kulak egzersizleri',
   'esp.studio.kademe':'Kademe',
   'esp.studio.araliklar':'Aralıklar',
@@ -112593,12 +112730,8 @@ ESP.Screens.studio = (function(){
   const TABS = [
     { id:'muzik',    label:yz('esp.studio.muzik') },
     { id:'diksiyon', label:yz('esp.studio.diksiyon') },
-    { id:'kulak',    label:yz('esp.studio.kulak') },
     { id:'ogren',    label:yz('esp.studio.ogren') },
     { id:'ilerleme', label:yz('esp.studio.i-lerleme') },
-    /* iPhone Faz 2c: iki masa (müzik, diksiyon) öbür ekranlardaki gibi kendi
-       bölümünde; Müzik ve Diksiyon işle başlar. */
-    { id:'tezgah',   label:yz('esp.studio.tezgah') },
   ];
 
   /* ------------------------------------------------------------------ kulak
@@ -112849,6 +112982,8 @@ ESP.Screens.studio = (function(){
 
     rows.push(scaleCalculatorEntry());
 
+    /* Parça yokken önce ekleme, metronom sonra; kaydedecek şey yokken «Tekrar kaydet» durmaz. */
+    if(!parcalar.length){ const [metro, , ekle, ...gerisi] = rows; return [ekle, metro].concat(gerisi); }
     return rows;
   }
 
@@ -112867,12 +113002,12 @@ ESP.Screens.studio = (function(){
         <div class="row wrap gap-8 mb-10">
           <div class="grow" style="min-width:140px">
             <span class="tiny dim block mb-2">${yz('esp.studio.kok-ses-tonalite')}</span>
-            ${K.Select({ id:'scale-root-sel', value:root, change:'pick-scale-root',
+            ${K.Select({ id:'scale-root-sel', value:root, change:'pick-scale-root', aria:yz('esp.studio.kok-ses-tonalite'),
               options:ESP.NOTES.map(n => ({ value:n, label:n + ' (' + (ESP.NOTE_TR[n] || n) + ')' })) })}
           </div>
           <div class="grow" style="min-width:180px">
             <span class="tiny dim block mb-2">${yz('esp.studio.gam-mod-12-oruntu')}</span>
-            ${K.Select({ id:'scale-mode-sel', value:scaleId, change:'pick-scale-mode',
+            ${K.Select({ id:'scale-mode-sel', value:scaleId, change:'pick-scale-mode', aria:yz('esp.studio.gam-mod-12-oruntu'),
               options:ESP.SCALES.map(s => ({ value:s.id, label:s.label })) })}
           </div>
         </div>
@@ -112960,11 +113095,11 @@ ESP.Screens.studio = (function(){
               input:K.Input({ id:'r-err', type:'number', numeric:true, min:0,
                 placeholder:'2' }) })}
           </div>
-          <div class="row wrap mt-10">
+          <details class="hiz-ac mt-10" ${raw((S.ui.errTags || []).length ? 'open' : '')}><summary>${yz('esp.studio.hangi-hatalar')}</summary><div class="row wrap mt-6">
             ${map(ESP.ARTICULATION_ERRORS, e => K.Button({ label:e.label, size:'sm',
               tone:(S.ui.errTags || []).indexOf(e.id) >= 0 ? 'primary' : '',
               act:'toggle-err', data:{ 'data-id':e.id } }))}
-          </div>
+          </div></details>
           ${K.Button({ label:yz('esp.studio.olcumu-kaydet'), act:'add-recording', class:'mt-10' })}`,
       }),
 
@@ -113124,17 +113259,19 @@ ESP.Screens.studio = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'studio.studyo-sekmeleri', sayfa:'studio', yer:'y1', sira:10, ad:'Stüdyo sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
-        muzik:musicRows, diksiyon:dictionRows,
-        kulak:earRows, ogren:topicRows, ilerleme:progressRows,
-        tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
+        /* Reçete önde, kayıt arkasından; hiç parça/kayıt yokken reçete yok: ilk adım eklemek. */
+        muzik:() => [].concat((S.pieces || []).length ? [ESP.Parts.recete('music')] : [], musicRows(), earRows(), [ESP.Parts.desk('music')]),
+        diksiyon:() => [].concat((S.recordings || []).length ? [ESP.Parts.recete('diction')] : [], dictionRows(), [ESP.Parts.desk('diction')]),
+        ogren:topicRows,
+        ilerleme:() => [].concat(progressRows(), [ESP.Parts.yol('music'), ESP.Parts.yol('diction')]) },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('studio', 'ilerleme', K, undefined, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'studio.tempo-panosu', sayfa:'studio', yer:'y2', sira:10, ad:'Tempo panosu', ciz(){
-    return K.Span(12, raw(PanoTempo()));
+  LIFEOS.PARCA.blok({ id:'studio.tempo-panosu', sayfa:'studio', yer:'ilerleme', sira:10, ad:'Tempo panosu', ciz(){
+    return raw(PanoTempo());
   } });
   function render(){
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('studio', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('studio', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
@@ -113283,8 +113420,11 @@ ESP.Screens.studio = (function(){
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     /* iPhone Faz 2c: parça ekleme ara sıra; Diksiyon'da kural listesi ve
        geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
-    kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
-      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'],
+    /* Parça yokken «Parça ekle» açık: ilk adım. */
+    get kucukVarsayilan(){
+      return ['uzman-masası', 'yol-haritası', 'metronom', 'repertuar-bakımı', 'konuşma-hızı', 'kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'telaffuz-kuralları', 'son-kayıtlar',
+        'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'].concat((S.pieces || []).length ? ['parça-ekle'] : []);
+    },
     title:yz('esp.studio.studyo'),
     headline(){
       const plato = ESP.Acoustic.plateaus();
@@ -113361,7 +113501,15 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:60, id:'act:note', kind:'Eylem', l
     setTimeout(() => { const el = document.getElementById('note-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.library.notlar':'Notlar',
-  'esp.library.matris':'Matris',
+  'esp.library.not-ve-kitap':'Not ve kitap',
+  'esp.library.calis':'Çalış',
+  'esp.library.ilerleme':'İlerleme',
+  'esp.library.ilk-not':'Okuduğun bir fikri yaz',
+  'esp.library.ilk-not-neden':'Tek fikir, tek cümle yeter.',
+  'esp.library.not-yaz':'Not yaz',
+  'esp.library.bagsiz-not':'not henüz bağlanmadı',
+  'esp.library.bagsiz-neden':'Bir notu başka bir nota bağla.',
+  'esp.library.notlara-git':'Notlara git',
   'esp.library.kaynaklar':'Kaynaklar',
   'esp.library.yontem':'Yöntem',
   'esp.library.ogren':'Öğren',
@@ -113415,7 +113563,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.library.alinti':'Alıntı',
   'esp.library.bam':'BAM ·',
   'esp.library.notlarini-ozetle':'Notlarını özetle',
-  'esp.library.kaynak-listesi-bos-sempozyum':'Kaynak listesi boş. Sempozyum → Metinler sekmesinden ',
+  'esp.library.kaynak-listesi-bos-sempozyum':'Kaynak listesi boş. Felsefe › Öğren bölümünden ',
   'esp.library.okuma-listesi-iste':'Okuma listesi iste',
   'esp.library.konu-stoacilik-bilim-tarihi':'Konu: Stoacılık, bilim tarihi…',
   'esp.library.okuma-konusu':'Okuma konusu',
@@ -113451,11 +113599,10 @@ ESP.Screens.library = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'notlar',    label:yz('esp.library.notlar') },
-    { id:'matris',    label:yz('esp.library.matris') },
-    { id:'kaynaklar', label:yz('esp.library.kaynaklar') },
-    { id:'yontem',    label:yz('esp.library.yontem') },
+    { id:'calis',     label:yz('esp.library.calis') },
+    { id:'notlar',    label:yz('esp.library.not-ve-kitap') },
     { id:'ogren',     label:yz('esp.library.ogren') },
+    { id:'ilerleme',  label:yz('esp.library.ilerleme') },
   ];
 
   /* ----------------------------------------------------------------- yöntem
@@ -113899,8 +114046,17 @@ ESP.Screens.library = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { notlar:noteRows, matris:matrixRows, kaynaklar:bookRows, yontem:methodRows,
-    ogren:topicRows };
+  /* Çalış: hiç not yoksa ilk adım, bağsız not varsa onlar, yoksa yeni not. Sayılar kayıttan. */
+  function calisRows(){
+    const notlar = S.notes || [];
+    const bagsiz = notlar.filter(n => !(n.links || []).length).length;
+    return [].concat([ESP.Parts.simdi('reading', bagsiz
+        ? { baslik:bagsiz + ' ' + yz('esp.library.bagsiz-not'), neden:yz('esp.library.bagsiz-neden'), dugme:{ label:yz('esp.library.notlara-git'), act:'tab-not' } }
+        : { baslik:yz('esp.library.ilk-not'), neden:yz('esp.library.ilk-not-neden'), dugme:{ label:yz('esp.library.not-yaz'), act:'tab-not' } })],
+      notlar.length ? [ESP.Parts.recete('reading', { kunyesiz:true })] : [], [ESP.Parts.desk('reading')]);
+  }
+  const GOVDE = { calis:calisRows, notlar:() => [].concat(noteRows(), matrixRows(), bookRows()),
+    ogren:() => [].concat(topicRows(), methodRows()), ilerleme:() => [ESP.Parts.yol('reading')] };
 
   /* PANO KARTI (2026-10-20, üçüncü tur): bu yıl biten kitaplar (yıldız,
      en az biri bittiyse) ve aylara göre dağılımı. */
@@ -113920,15 +114076,15 @@ ESP.Screens.library = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'library.okuma-sekmeleri', sayfa:'library', yer:'y1', sira:10, ad:'Okuma sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:yz('esp.library.okuma-bolumleri'), tabs:TABS,
-        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'read-tab', aria:yz('esp.library.okuma-bolumleri'), tabs:TABS,
+        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('library', 'ilerleme', K, undefined, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'library.okuma-panosu', sayfa:'library', yer:'y2', sira:10, ad:'Okuma panosu', ciz(){
-    return K.Span(12, raw(PanoOkuma()));
+  LIFEOS.PARCA.blok({ id:'library.okuma-panosu', sayfa:'library', yer:'ilerleme', sira:10, ad:'Okuma panosu', ciz(){
+    return raw(PanoOkuma());
   } });
   function render(){
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('library', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('library', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
@@ -113964,6 +114120,7 @@ ESP.Screens.library = (function(){
       if(r.ok) ESP.App.render();
     },
     async 'read-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'tab-not'(){ S.ui.readTab = 'notlar'; ESP.App.render(); },
 
     async 'add-note'(){
       const t = val('note-text');
@@ -114074,7 +114231,7 @@ ESP.Screens.library = (function(){
     id:'library',
     /* iPhone Faz 2c: Kaynaklar'da raf (listenin görseli) ve okuma listesi
        isteği, Yöntem'in beş başvuru kartı şerit — dokununca açılır. */
-    kucukVarsayilan:['raf', 'okuma-listesi-iste', 'dört-düzey', 'analitik-okumanın-dört-sorusu',
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'sentez-katsayısı', 'bağ-önerileri', 'kavram-matrisi', 'kaynaklar', 'kaynak-ekle', 'raf', 'okuma-listesi-iste', 'dört-düzey', 'analitik-okumanın-dört-sorusu',
       'okuma-protokolü', 'not-şablonları', 'bırakma-izni'],
     title:yz('esp.library.kutuphane'),
     headline(){
@@ -114140,6 +114297,13 @@ window.LIFEOS.PARCA.yazilar({
   'esp.writing.taslaklar':'Taslaklar',
   'esp.writing.olcum':'Ölçüm',
   'esp.writing.araclar':'Araçlar',
+  'esp.writing.calis':'Çalış',
+  'esp.writing.taslaklarim':'Taslaklarım',
+  'esp.writing.ilerleme':'İlerleme',
+  'esp.writing.ilk-taslak':'İlk taslağını aç',
+  'esp.writing.ilk-taslak-neden':'Bir başlık ve bir paragraf yeter.',
+  'esp.writing.son-taslak':'Son taslak',
+  'esp.writing.kaldigin-yer':'Kaldığın yerden sür.',
   'esp.writing.ogren':'Öğren',
   'esp.writing.yazi-ornekleri-iste':'Yazı örnekleri iste',
   'esp.writing.konu-deneme-kisa-oyku':'Konu: deneme, kısa öykü…',
@@ -114200,10 +114364,10 @@ ESP.Screens.writing = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'taslaklar', label:yz('esp.writing.taslaklar') },
-    { id:'olcum',     label:yz('esp.writing.olcum') },
-    { id:'araclar',   label:yz('esp.writing.araclar') },
+    { id:'calis',     label:yz('esp.writing.calis') },
+    { id:'taslaklar', label:yz('esp.writing.taslaklarim') },
     { id:'ogren',     label:yz('esp.writing.ogren') },
+    { id:'olcum',     label:yz('esp.writing.ilerleme') },
   ];
 
   /* ---------------------------------------------------------------- araçlar
@@ -114440,10 +114604,21 @@ ESP.Screens.writing = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { taslaklar:draftRows, olcum:measureRows, araclar:toolRows, ogren:topicRows };
+  /* Çalış: taslak yoksa ilk adım, varsa en son dokunduğun taslak. */
+  function calisRows(){
+    const l = S.drafts || [];
+    const son = l.reduce((m, d) => (!m || (d.updatedAt || '') > (m.updatedAt || '')) ? d : m, null);
+    return [].concat([ESP.Parts.simdi('writing', son
+        ? { etiket:yz('esp.writing.son-taslak'), baslik:son.title || yz('esp.writing.baslik'), neden:yz('esp.writing.kaldigin-yer'),
+            dugme:{ label:yz('esp.writing.ac'), act:'son-taslak', data:{ 'data-id':son.id } } }
+        : { baslik:yz('esp.writing.ilk-taslak'), neden:yz('esp.writing.ilk-taslak-neden'), dugme:{ label:yz('esp.writing.yeni-taslak'), act:'new-draft' } })],
+      son ? [ESP.Parts.recete('writing', { kunyesiz:true })] : [], [ESP.Parts.desk('writing')]);
+  }
+  const GOVDE = { calis:calisRows, taslaklar:draftRows, olcum:() => [].concat(measureRows(), [ESP.Parts.yol('writing')]),
+    ogren:() => [].concat(topicRows(), toolRows()) };
 
   LIFEOS.PARCA.blok({ id:'writing.yazi-sekmeleri', sayfa:'writing', yer:'y1', sira:10, ad:'Yazı sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:yz('esp.writing.yazi-bolumleri'), tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler({ act:'write-tab', aria:yz('esp.writing.yazi-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }));
   } });
   function render(){
@@ -114472,6 +114647,7 @@ ESP.Screens.writing = (function(){
     },
 
     async 'open-draft'(el){ S.ui.draftOpen = el.dataset.id; ESP.App.render(); },
+    async 'son-taslak'(el){ S.ui.draftOpen = el.dataset.id; S.ui.writeTab = 'taslaklar'; ESP.App.render(); },
     async 'close-draft'(){ S.ui.draftOpen = null; ESP.App.render(); },
 
     async 'save-draft'(el){
@@ -114545,7 +114721,7 @@ ESP.Screens.writing = (function(){
     /* iPhone Faz 2d (sıkı ölçü): Ölçüm'de üç sayı açık, pratik süresi şerit;
        Araçlar'ın dördü de başvuru (şerit). Sınır kartı gizli: pedagojik
        sınır her sayfanın sonunda ve ⓘ'de (hints: pedagogic). */
-    kucukVarsayilan:['pratik-süresi', 'yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'],
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'pratik-süresi', 'yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'],
     title:yz('esp.writing.yazi-laboratuvari'),
     headline(){
       const w = ESP.Intellect.wordsWritten(7);
@@ -114592,6 +114768,7 @@ ESP.Screens.writing = (function(){
    kimlik şeridinde asla kullanılmaz; aciliyet yalnızca devir okuna dokunur.
    İki renk sistemi aynı yüzeyde karışmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.office.haftanin-karari':'Bu haftanın kararı',
   'esp.office.masalarda-bekleyen-bulgu-yok':'Masalarda bekleyen bulgu yok.',
   'esp.office.dokuz-masa-patron-yedi-uzman':'Dokuz masa: Patron, yedi uzman ve bir koç. Her masa yalnızca kendi ',
 });
@@ -114621,7 +114798,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.office.tikanma':'tıkanma',
   'esp.office.vadesi-gecmis':'vadesi geçmiş',
 });
-window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:30 });
 
 ESP.Screens.office = (function(){
   const U = ESP.U, S = ESP.S;
@@ -114695,22 +114872,22 @@ ESP.Screens.office = (function(){
 
   LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y1', sira:10, ad:'Uzman masaları', ciz({ vo, patron, uzmanlar, devir, brf, next }){
     return K.Span(12, K.Ledger(() => [
-        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('esp.office.masa'), meta:'kim konuşuyor',
-          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
-        when(vo.toplanti, () => K.Entry({ wide:true, label:yz('esp.office.gunun-toplantisi'), meta:'her masadan tek cümle',
-          body:raw(vo.toplanti) })),
-
+        /* Ofisin tek işi: sıradaki iş ne, kime sorarım. Patron başta; gerisi altında. */
         K.Entry({
           label:yz('esp.office.patron'), hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
           action:K.Button({ label:yz('esp.office.danis'), size:'sm', act:'open-agent',
             data:{ 'data-agent':'patron' } }),
           body:html`
-            ${K.NextUp({ icon:next.rank ? 'zap' : 'check', calm:!next.rank,
-              sanat:'istikrar',
-              label:yz('esp.office.siradaki-tek-is'), title:next.title, why:next.why })}
-            <p class="rulesay mt-10">${ESP.Office.ruleText('patron', brf)}</p>`,
+            <p class="rulesay">${ESP.Office.ruleText('patron', brf)}</p>
+            ${/* Sıradaki iş Bugün'de ve «Bu hafta»da; burada ikinci kez çizilmez. */''}
+            <div class="mt-10">${K.Button({ label:yz('esp.office.haftanin-karari'), size:'sm', act:'go', data:{ 'data-route':'meeting' } })}</div>`,
         }),
+
+        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('esp.office.masa'), meta:'kim konuşuyor',
+          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
+        when(vo.toplanti, () => K.Entry({ wide:true, label:yz('esp.office.gunun-toplantisi'), meta:'her masadan tek cümle',
+          body:raw(vo.toplanti) })),
 
         K.Entry({
           label:yz('esp.office.masalar-arasi-devir'), hint:'handoff',
@@ -114773,8 +114950,8 @@ ESP.Screens.office = (function(){
 
     const parcaB = { vo, patron, uzmanlar, devir, brf, next };
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('office', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
+      ${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('office', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   const handle = {
@@ -114854,11 +115031,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.team.ham-brifing-json':'Ham brifing (JSON)',
   'esp.team.ajana-sorun':'Ajana sorun',
   'esp.team.sorunu-yaz':'Sorunu yaz…',
-  'esp.team.danisma':'Danışma',
+  'esp.team.danisma':'Uzmana sor',
   'esp.team.gelen-devir':'gelen devir',
   'esp.team.giden-devir':'giden devir',
 });
-window.LIFEOS.PARCA.sayfa({ id:'team', modul:'esp', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'esp', cekmece:'ofis', ad:'Uzmana sor', ikon:'zap', sira:20 });
 
 ESP.Screens.team = (function(){
   /* Mesaj saati. m.at ISO tarih metnidir; fmtClock SANIYE bekler ve
@@ -115074,7 +115251,7 @@ ESP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
-    kucukVarsayilan:['sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
+    kucukVarsayilan:['masa', 'sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
     title:yz('esp.team.danisma'),
     headline(){
       const a = agent();
@@ -115153,11 +115330,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.meeting.patron':'Patron',
   'esp.meeting.karar-takibe-alindi':'Karar takibe alındı',
   'esp.meeting.sonuc-yazilmadan-karar-kapan':'Sonuç yazılmadan karar kapanmaz',
-  'esp.meeting.i-nceleme':'İnceleme',
+  'esp.meeting.i-nceleme':'Bu hafta',
   'esp.meeting.acik-karar':'açık karar',
   'esp.meeting.gundem-2':'gündem',
 });
-window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'İnceleme', ikon:'list', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'Bu hafta', ikon:'list', sira:10 });
 
 ESP.Screens.meeting = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -115296,15 +115473,16 @@ ESP.Screens.meeting = (function(){
     return kararKutusu(r);
   } });
   LIFEOS.PARCA.blok({ id:'meeting.haftakutusu', sayfa:'meeting', yer:'y7', sira:10, ad:'Hafta', ciz({ r }){
-    return haftaKutusu(r);
+    /* Hiç ölçüm yokken beş boş kutu çizilmez: karar ilk adımı söyler. */
+    return r.hafta.some(s => s.deger) ? haftaKutusu(r) : '';
   } });
   function render(){
     const r = ESP.Memo ? ESP.Memo.of('inceleme.rapor', () => ESP.Inceleme.rapor()) : ESP.Inceleme.rapor();
     const parcaB = { r };
     return String(html`
       <div class="inc">
-        ${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         <div class="inc-iki">${LIFEOS.PARCA.yer('meeting', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('meeting', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+        ${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
@@ -115363,6 +115541,8 @@ ESP.Screens.meeting = (function(){
 
   return {
     id:'meeting',
+    /* İncelemenin işi tek karar; kanıtı tek dokunuş altında. */
+    kucukVarsayilan:['gündem', 'verinden-çıkan-fikirler', 'alanlar-arası-bağlar'],
     title:yz('esp.meeting.i-nceleme'),
     headline(){
       const k = ESP.Planner.nextAction();
@@ -115436,7 +115616,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.analytics.rapor':'Rapor',
   'esp.analytics.durustluk':'Dürüstlük',
   'esp.analytics.rubrik-ve-analiz':'Rubrik ve analiz',
-  'esp.analytics.entelektuel-sermaye':'Entelektüel sermaye',
+  'esp.analytics.entelektuel-sermaye':'Alanların dengesi',
   'esp.analytics.olcum-penceresi':'Ölçüm penceresi',
   'esp.analytics.7-gun':'7 gün',
   'esp.analytics.14-gun':'14 gün',
@@ -115459,31 +115639,31 @@ window.LIFEOS.PARCA.yazilar({
   'esp.analytics.kart-hatirlama':'Kart hatırlama',
   'esp.analytics.hic-cevaplanmis-kart-yok':'Hiç cevaplanmış kart yok.',
   'esp.analytics.haftalik-rapor':'Haftalık rapor',
-  'esp.analytics.capraz-bulgular':'Çapraz bulgular',
+  'esp.analytics.capraz-bulgular':'Alanlar arası bağlar',
   'esp.analytics.ac':'Aç',
   'esp.analytics.i-ki-masayi-birbirine-baglay':'İki masayı birbirine bağlayan ölçülmüş bir bulgu yok.',
-  'esp.analytics.gunun-brifingi':'Günün brifingi',
+  'esp.analytics.gunun-brifingi':'Günün özeti',
   'esp.analytics.bugun-icin-brifing-uretilmed':'Bugün için brifing üretilmedi.',
   'esp.analytics.sinir':'Sınır',
-  'esp.analytics.denetim-defteri':'Denetim defteri',
+  'esp.analytics.denetim-defteri':'Uyarı defteri',
   'esp.analytics.bu-sayfa-gerekli-mi':'Bu sayfa gerekli mi?',
   'esp.analytics.acik-soru':'Açık soru',
   'esp.analytics.sayi':'Sayı',
   'esp.analytics.adet':'Adet',
   'esp.analytics.ayrisma-kapandi':'Ayrışma kapandı',
-  'esp.analytics.surtunme':'Sürtünme',
+  'esp.analytics.surtunme':'Kayda harcanan süre',
   'esp.analytics.yonetim':'Yönetim',
   'esp.analytics.calisma':'Çalışma',
   'esp.analytics.pay':'Pay',
   'esp.analytics.bak':'Bak',
-  'esp.analytics.gosterge-ayrismasi':'Gösterge ayrışması',
+  'esp.analytics.gosterge-ayrismasi':'Süre ve sonuç farkı',
   'esp.analytics.yon-sutunu-sonucun-hangi-tar':'«Yön» sütunu sonucun hangi tarafa gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.',
   'esp.analytics.bu-sayilar-nereden':'Bu sayılar nereden?',
   'esp.analytics.pencere':'Pencere ',
   'esp.analytics.bu-sayilar-bir-bulgu-degil':'Bu sayılar bir bulgu değil bu yazılımın ayarıdır:',
   'esp.analytics.acik-bolum-yok-nobetcinin-ba':'Açık bölüm yok; nöbetçinin bakacağı çift de yok.',
   'esp.analytics.soru':'Soru',
-  'esp.analytics.kalibrasyon':'Kalibrasyon',
+  'esp.analytics.kalibrasyon':'Tahminlerin',
   'esp.analytics.yanlilik':'Yanlılık',
   'esp.analytics.ne-tahmin-ediyorsun':'Ne tahmin ediyorsun?',
   'esp.analytics.tahmin-turu':'Tahmin türü',
@@ -115535,6 +115715,13 @@ window.LIFEOS.PARCA.yazilar({
   'esp.analytics.analiz-bolumleri':'Analiz bölümleri',
   'esp.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı.',
   'esp.analytics.analiz':'Analiz',
+  'esp.analytics.ozet':'Özet',
+  'esp.analytics.alanlar':'Alanlar',
+  'esp.analytics.zaman':'Zaman',
+  'esp.analytics.ilk-adim':'Henüz kayıt yok',
+  'esp.analytics.ilk-adim-neden':'Bugün ne yaptığını yaz; sayılar buradan dolar.',
+  'esp.analytics.bugune-git':'Bugün\'e git',
+  'esp.analytics.yol-plan-da':'Yol haritası Plan\'da',
   'esp.analytics.ssk':'SSK',
   'esp.analytics.capraz-bulgu':'çapraz bulgu',
 });
@@ -115546,11 +115733,12 @@ ESP.Screens.analytics = (function(){
   const K = ESP.C, P = ESP.Parts;
 
   const TABS = [
-    { id:'radar',     label:yz('esp.analytics.radar') },
-    { id:'seriler',   label:yz('esp.analytics.seriler') },
+    /* Analiz = tek soru: «nasıl gidiyorum?» Özet her gün; alan ve zaman kırılımı; rapor ayda bir.
+       Radar ve rubrik alanların, seriler zamanın, dürüstlük raporun parçası (2026-11-06). */
+    { id:'ozet',      label:yz('esp.analytics.ozet') },
+    { id:'alanlar',   label:yz('esp.analytics.alanlar') },
+    { id:'zaman',     label:yz('esp.analytics.zaman') },
     { id:'rapor',     label:yz('esp.analytics.rapor') },
-    { id:'durust',    label:yz('esp.analytics.durustluk') },
-    { id:'rubrikler', label:yz('esp.analytics.rubrik-ve-analiz') },
   ];
 
   /* ------------------------------------------------------------------ radar */
@@ -116055,7 +116243,9 @@ ESP.Screens.analytics = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): okumalar alt alta. */
-  const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows, rubrikler:rubriklerRows };
+  const kayitVar = () => Object.keys(S.days || {}).some(t => ESP.Model.sessionsOf(t).length > 0);
+  const GOVDE = { alanlar:() => [].concat(radarRows(), rubriklerRows()), zaman:() => kayitVar() ? seriesRows() : [],
+    rapor:() => [].concat(reportRows(), honestyRows()) };
 
   /* ALANLARA ÖZEL GÖRÜNÜM (2026-10-20, kullanıcı: «ESP Analiz çok karmaşık;
      alanlara özel ama göz yormayan, göze hitap eden bir düzen»).
@@ -116195,19 +116385,6 @@ ESP.Screens.analytics = (function(){
         + P.not('uzun çubuk: uzun süredir açılmadı · 14 gün ve üstü dolu') });
     return '<div class="pk-izgara">' + [saatKart, ikiHafta, rekor, dokunus].filter(Boolean).join('') + '</div>';
   }
-  function dengeCubugu(){
-    const b = ESP.Planner.balance(7);
-    if(b.cert === 'missing') return K.Kutu({ ad:yz('esp.analytics.haftanin-dengesi'), yuva:'son 7 gün', govde:html`<p class="small muted">${yz('esp.analytics.son-yedi-gunde-kayit-yok')}</p>` });
-    const act = ESP.Mod.active().map(d => d.id);
-    const satir = b.rows.filter(r => r.share != null && r.share > 0);
-    return K.Kutu({ ad:yz('esp.analytics.haftanin-dengesi'), yuva:'son 7 gün · süre payı', govde:html`
-      <div class="denge-cubuk" role="img" aria-label="${satir.map(r => r.disc.label + ' %' + Math.round(r.share * 100)).join(', ')}">
-        ${map(satir, r => html`<i style="${'width:' + (r.share * 100).toFixed(1) + '%;background:' + RENK[Math.max(0, act.indexOf(r.disc.id)) % RENK.length]}" title="${r.disc.label + ' · ' + U.fmtMin(r.minutes)}"></i>`)}
-      </div>
-      <div class="denge-lejant">${map(satir, r => html`<span><i style="${'background:' + RENK[Math.max(0, act.indexOf(r.disc.id)) % RENK.length]}"></i>${r.disc.short || r.disc.label} <b class="num">%${Math.round(r.share * 100)}</b></span>`)}</div>
-      ${when(b.skewed, () => html`<p class="small muted mt-8">${yz('esp.analytics.pratik')} ${b.top.label} ${yz('esp.analytics.tarafina-yigilmis')} ${b.untouched.map(d => d.label).join(', ')} ${yz('esp.analytics.bu-hafta-acilmadi-bu-bir')}</p>`)}` });
-  }
-
   /* ANALİZ BAŞI (vitrin): 041 veri doluluğu, günlük dakika çizgisi (027,
      girilmemiş gün boşluk), 037 güvenli eğilim, 034 grafiğin cümlesi. */
   function analizBasi(){
@@ -116226,78 +116403,50 @@ ESP.Screens.analytics = (function(){
         ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
         ${raw(G.metrikHtml(son, { etiket:yz('esp.analytics.gunluk-pratik'), birim:'dk', ondalik:0, yon:'artis-iyi' }))}
         <details class="hiz-ac"><summary>${yz('esp.analytics.veri-dolulugu')}</summary>${raw(G.dolulukHtml([{ modul:'esp', ad:yz('esp.analytics.esp'), gunler:kayitli }], { gun:7 }))}</details>` })}
-      ${dengeCubugu()}
     </div>`;
   }
 
-  /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
-     öğrendiğimiz konular hedefinde; yol haritası gibi»). Açık alanların
-     merdiveni: basamak durumu ve yüzdesi müfredat motorundan (geçilmeyen
-     kapı ilerleme sayılmaz). */
-  function yolHaritasi(){
-    const A = window.LIFEOS.AGHARITA;
-    if(!A || !ESP.Curriculum || !ESP.Curriculum.roadmap) return '';
-    const kumeler = ESP.Mod.active().map(d => {
-      const y = ESP.Curriculum.roadmap(d.id);
-      return { ad:d.short || d.label, dugumler:y ? y.steps.map(s => ({ ad:s.title, durum:s.state === 'done' ? 'bitti' : s.state === 'current' ? (s.pct > 0 ? 'suruyor' : 'sirada') : 'bekliyor',
-        ilerleme:s.state === 'current' && s.pct > 0 ? s.pct / 100 : undefined })) : [] };
-    });
-    return html`<section class="kutu" aria-label="Yol haritası"><h2 class="kutu__ad">${yz('esp.analytics.yol-haritasi')}</h2>
-      <p class="tiny dim">${yz('esp.analytics.her-alanin-merdiveni-gecilen')}</p>
-      ${raw(A.html({ merkez:'Gelişim', kumeler, bos:yz('esp.analytics.bir-alan-acinca-merdiveni-bu') }))}</section>`;
-  }
-
-  LIFEOS.PARCA.blok({ id:'analytics.analiz-sekmeleri', sayfa:'analytics', yer:'y1', sira:10, ad:'Analiz sekmeleri', ciz({ acik }){
-    return when(acik, () => K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:yz('esp.analytics.analiz-bolumleri'), tabs:TABS, govde:GOVDE })));
+  const yerOf = ad => () => LIFEOS.PARCA.yer('analytics', ad, K, undefined, raw);
+  LIFEOS.PARCA.blok({ id:'analytics.analiz-sekmeleri', sayfa:'analytics', yer:'ana', sira:10, ad:'Analiz sekmeleri', ciz(){
+    return K.Span(12, ESP.Parts.bolumler({ act:'ana-tab', aria:yz('esp.analytics.analiz-bolumleri'), tabs:TABS, govde:GOVDE,
+      sayi:{ rapor:ESP.Goodhart ? ESP.Goodhart.flags().length || null : null },
+      ust:{ ozet:yerOf('ozet'), alanlar:yerOf('alanlar'), zaman:() => kayitVar() ? yerOf('zaman')() : K.Empty({ text:yz('esp.analytics.ilk-adim-neden') }) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.ayrinti-dugmesi', sayfa:'analytics', yer:'y2', sira:10, ad:'Ayrıntı düğmesi', ciz({ acik }){
-    return K.Span(12, html`<div class="analiz-ayrinti">
-        ${K.Button({ label:acik ? yz('esp.analytics.ayrintili-okumalari-gizle') : yz('esp.analytics.ayrintili-okumalar-radar-ser'), size:'sm', tone:'ghost',
-          act:'analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } })}</div>`);
+  LIFEOS.PARCA.blok({ id:'analytics.analiz-basligi', sayfa:'analytics', yer:'zaman', sira:10, ad:'Analiz başlığı', ciz(){
+    return analizBasi();
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.analiz-basligi', sayfa:'analytics', yer:'y3', sira:10, ad:'Analiz başlığı', ciz({ acik }){
-    return K.Span(12, analizBasi());
+  LIFEOS.PARCA.blok({ id:'analytics.isi-haritasi', sayfa:'analytics', yer:'zaman', sira:20, ad:'Isı haritası', ciz(){
+    return raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>');
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.analiz-panosu', sayfa:'analytics', yer:'y4', sira:10, ad:'Analiz panosu', ciz({ acik }){
-    return K.Span(12, raw(panoAnaliz()));
+  LIFEOS.PARCA.blok({ id:'analytics.analiz-panosu', sayfa:'analytics', yer:'zaman', sira:30, ad:'Analiz panosu', ciz(){
+    return raw(panoAnaliz());
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.isi-haritasi', sayfa:'analytics', yer:'y5', sira:10, ad:'Isı haritası', ciz({ acik }){
-    return K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'));
+  /* İçe aktarılan takvim özeti: yalnız veri varken dolu, Özet'in sonunda. */
+  LIFEOS.PARCA.blok({ id:'analytics.ice-aktarma-karti', sayfa:'analytics', yer:'ozet', sira:20, ad:'İçe aktarma kartı', ciz(){
+    return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('esp') : ''));
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.ice-aktarma-karti', sayfa:'analytics', yer:'y6', sira:10, ad:'İçe aktarma kartı', ciz({ acik }){
-    return K.Span(12, raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('esp') : '')));
+  LIFEOS.PARCA.blok({ id:'analytics.alan-karolari', sayfa:'analytics', yer:'alanlar', sira:10, ad:'Alan karoları', ciz(){
+    return html`${alanKarolari()}<div class="mt-8">${K.Button({ label:yz('esp.analytics.yol-plan-da'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'ladder' } })}</div>`;
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.yol-haritasi', sayfa:'analytics', yer:'y7', sira:10, ad:'Yol haritası', ciz({ acik }){
-    return K.Span(12, yolHaritasi());
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.alan-karolari', sayfa:'analytics', yer:'y8', sira:10, ad:'Alan karoları', ciz({ acik }){
-    return K.Span(12, alanKarolari());
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.bugunden-analiz-ozeti', sayfa:'analytics', yer:'y9', sira:10, ad:'Bugünden analiz özeti', ciz({ acik }){
-    return map(ESP.Screens.today.analizOzeti(), x => K.Span(12, raw(x)));
+  /* KOLAY Faz 2 (2026-10-26): Bugün'ün karoları, pano ve dönen kartları,
+     haftalık özeti ve bekleyen önerisi «Özet»te (today.analizOzeti). */
+  LIFEOS.PARCA.blok({ id:'analytics.bugunden-analiz-ozeti', sayfa:'analytics', yer:'ozet', sira:10, ad:'Bugünden analiz özeti', ciz(){
+    /* Veri yoksa üç boş kart yerine tek ilk adım; öneri bağlantısı yine görünür. */
+    const parcalar = ESP.Screens.today.analizOzeti();
+    if(!kayitVar() && !S.ui.haftaOzet) return html`${K.Kutu({ ad:yz('esp.analytics.ilk-adim'), govde:html`<p class="small">${yz('esp.analytics.ilk-adim-neden')}</p>
+      <div class="mt-10">${K.Button({ label:yz('esp.analytics.bugune-git'), tone:'primary', act:'go', data:{ 'data-route':'today' } })}</div>` })}${raw(parcalar.filter(x => x.indexOf('aria-label="Öneri"') >= 0).join(''))}`;
+    /* Uyarı gömülmez: süre ile sonuç ayrıştıysa Özet'in başında söylenir (kod seçer). */
+    const u = ESP.Goodhart ? ESP.Goodhart.brief() : null;
+    return html`${when(u, () => K.Notice({ tone:'warn', title:u.title, body:u.body }))}${raw(parcalar.join(''))}`;
   } });
   function render(){
-    const acik = !!S.ui.analizAyrinti;
-    /* KOLAY Faz 2 (2026-10-26): Bugün'ün karoları, pano ve dönen kartları,
-       haftalık özeti ve bekleyen önerisi burada, en başta (today.analizOzeti). */
-    const parcaB = { acik };
-    return K.Grid(html`
-      ${LIFEOS.PARCA.yer('analytics', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('analytics', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
+    return K.Grid(html`${LIFEOS.PARCA.yer('analytics', 'ana', K, undefined, raw)}`);
   }
 
-  function afterRender(){ if(S.ui.analizAyrinti) ESP.Parts.bolumIstegi('analyticsTab', TABS[0].id); }
+  function afterRender(){ ESP.Parts.bolumIstegi('analyticsTab', TABS[0].id); }
 
   const handle = {
-    async 'analiz-ayrinti'(){ S.ui.analizAyrinti = !S.ui.analizAyrinti; ESP.App.render(); },
-    async 'ana-tab'(el){ S.ui.analizAyrinti = true; K.bolumeGit(el.dataset.tab); },
+    async 'ana-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'gen-briefing'(){
       delete S.officeBriefings[U.todayISO()];
@@ -116334,9 +116483,6 @@ ESP.Screens.analytics = (function(){
     },
   };
 
-  /* Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider (tek yol). */
-  ESP.Screens.today.onayEylemleri.forEach(a => { handle[a] = el => ESP.Screens.onaylar.handle[a](el); });
-
   /* Tahminin vadesi: haftalık sayılar hafta bitmeden, aylık kapı tahmini
      ay bitmeden kapanmaz. Erken kapanış tahmini kolaylaştırır. */
   function dueFor(kind){
@@ -116360,8 +116506,9 @@ ESP.Screens.analytics = (function(){
     get kucukVarsayilan(){
       const G = (window.LIFEOS || {}).Gizle;
       const bayrak = G && ESP.Goodhart ? ESP.Goodhart.flags().map(p => G.anahtar(p.effortLabel.toUpperCase())) : [];
-      return ['denge', 'haftalık-rota', 'seri', 'çapraz-bulgular', 'günün-brifingi',
-        'denetim-defteri', 'sürtünme', 'gösterge-ayrışması', 'derin-alan-analizleri', 'kademeli-geri-bildirim-ipuçları'].concat(bayrak);
+      return ['denge', 'haftalık-rota', 'seri', 'alanlar-arası-bağlar', 'günün-özeti',
+        'uyarı-defteri', 'kayda-harcanan-süre', 'süre-ve-sonuç-farkı', 'derin-alan-analizleri', 'kademeli-geri-bildirim-ipuçları',
+        'alanların-dengesi', 'değerlendirme-rubrikleri-ve-boyutlar', 'günlük-süre', 'kart-hatırlama', 'tahminlerin'].concat(bayrak);
     },
     title:yz('esp.analytics.analiz'),
     headline(){
@@ -116406,7 +116553,7 @@ ESP.Screens.analytics = (function(){
    Profil geçişi sayfayı yeniden yükler: yarım kalmış bir yazma işleminin
    yanlış profile düşmesi böylece imkânsızdır. */
 window.LIFEOS.PARCA.yazilar({
-  'esp.profile.danisma-da-hatirla-diye-de':'Danışma’da «hatırla: …» diye de yazabilirsin.',
+  'esp.profile.danisma-da-hatirla-diye-de':'Uzmana sor ekranında «hatırla: …» diye de yazabilirsin.',
   'esp.profile.kucuk-hatirlatici-hedef-odak':'Küçük: hatırlatıcı, hedef, odak. Bölüm ve günlük taban her zaman önce sorulur.',
   'esp.profile.vade-gunu-saat':'Vade günü saat ',
   'esp.profile.tamamen-kapatmak-icin-yukari':'Tamamen kapatmak için yukarıda «Hayır» seç.',
@@ -116521,7 +116668,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.profile.kaydedildi':'Kaydedildi',
   'esp.profile.profil-eklendi':'Profil eklendi',
   'esp.profile.yedek-indirildi':'Yedek indirildi',
-  'esp.profile.yedekten-yukleme-rehber-veri':'Yedekten yükleme Rehber → Veri sekmesinde',
+  'esp.profile.yedekten-yukleme-rehber-veri':'Yedeği geri yüklemek için Ayarlar’da veri bölümünü aç',
   'esp.profile.profil':'Profil',
   'esp.profile.acik-bolum':'açık bölüm',
   'esp.profile.son-yedek':'son yedek',
@@ -118318,7 +118465,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.guide.merdiven':'Merdiven',
   'esp.guide.her-bolumde-sifirdan-ustatli':'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta ',
   'esp.guide.merdiven-ardisiktir-alttaki':'Merdiven ardışıktır: alttaki basamak atlanarak üsttekine geçilmez. Ölçülemeyen basamak üçüncü bir durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak değil ölçmek.',
-  'esp.guide.tezgah':'TEZGÂH',
+  'esp.guide.tezgah':'UZMAN MASASI',
   'esp.guide.her-bolumun-altinda-ayni-yer':'Her bölümün altında aynı yerde durur ve bölümden bölüme ',
   'esp.guide.bolumler':'Bölümler',
   'esp.guide.calismayacagin-bolumu-kapata':'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, ',
@@ -118471,8 +118618,8 @@ ESP.Screens.guide = (function(){
         wide:true,
         body:K.Table({ tight:true, headers:['Sekme', yz('esp.guide.ne-yapar')],
           rows:[
-            ['Koç', yz('esp.guide.o-bolumun-uzmaniyla-yazili-y')
-              + 'dinleyebilirsin. Danışma ekranıyla aynı yoldan geçer.'],
+            ['Uzmanla konuş', yz('esp.guide.o-bolumun-uzmaniyla-yazili-y')
+              + 'dinleyebilirsin. Uzmana sor ekranıyla aynı yoldan geçer.'],
             ['Harita', yz('esp.guide.bu-bolumde-nerede-durdugun-v')],
             ['Ekler', yz('esp.guide.not-belge-baglanti-ve-ses')
               + 've başlığını görür; içeriğini görmez.'],
@@ -118885,7 +119032,7 @@ ESP.Screens.guide = (function(){
   const GOVDE = { kullanim:usageRows, model:modelRows, veri:dataRows, sinirlar:limitRows, kanit:evidenceRows };
 
   LIFEOS.PARCA.blok({ id:'guide.rehber-sekmeleri', sayfa:'guide', yer:'y1', sira:10, ad:'Rehber sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:yz('esp.guide.rehber-bolumleri'), tabs:TABS, govde:GOVDE }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'guide-tab', aria:yz('esp.guide.rehber-bolumleri'), tabs:TABS, govde:GOVDE }));
   } });
   LIFEOS.PARCA.blok({ id:'guide.kolaylik-pusulasi', sayfa:'guide', yer:'y2', sira:10, ad:'Kolaylık pusulası', ciz(){
     return K.Span(12, html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}`);
@@ -119130,8 +119277,12 @@ window.LIFEOS.PARCA.yazilar({
   'esp.onaylar.cikarimlar':'Çıkarımlar',
   'esp.onaylar.king-in-senin-hakkindaki-tah':'King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.',
   'esp.onaylar.bekleyen-oneri-yok':'Bekleyen öneri yok',
+  'esp.onaylar.oneriler':'Öneriler',
+  'esp.onaylar.sorular':'Sorular',
+  'esp.onaylar.kararlar':'Son kararlar',
+  'esp.onaylar.bolumler':'Onaylar bölümleri',
   'esp.onaylar.merkez-king-ve-ajanlar-bir':'Merkez, King ve ajanlar bir şey önerdiğinde burada durur; sen onaylamadan hiçbiri uygulanmaz.',
-  'esp.onaylar.danisma-ya-git':'Danışma’ya git',
+  'esp.onaylar.danisma-ya-git':'Uzmana sor',
   'esp.onaylar.onaylar':'Onaylar',
 });
 window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'esp', cekmece:'onaylar', ad:'Bekleyen', sira:10 });
@@ -119379,14 +119530,16 @@ ESP.Screens.onaylar = (function(){
     });
     const ad = d => ((ESP.DISCIPLINE_BY_ID || {})[d] || {}).label || 'Genel';
     return gruplar.length < 2 ? ESP.Parts.proposalList(l, yz('esp.onaylar.bekleyen-teklif-yok'))
-      : html`<div class="oneri-gruplar">${map(gruplar, g => html`<section class="oneri-grup" data-disc="${g.disc}">
-          <h2 class="oneri-grup__ad">${ad(g.disc)}</h2>
+      /* Tek kart açık: ilk alan. Ötekiler adı ve sayısıyla bir satır (kullanıcı,
+         2026-11-06: 21 öneri, sekiz kart, dört ekran; nereden başlayacağı belli değildi). */
+      : html`<div class="oneri-gruplar">${map(gruplar, (g, i) => html`<details class="oneri-grup" data-disc="${g.disc}" ${raw(i === 0 ? 'open' : '')}>
+          <summary class="oneri-grup__ad"><span>${ad(g.disc)}</span><span class="oneri-grup__sayi tiny dim num">${g.l.length} <i aria-hidden="true">›</i></span></summary>
           ${ESP.Parts.proposalList(g.l.slice(0, 1))}
           ${when(g.l.length > 1, () => html`<details class="oneri-grup__dahasi">
             <summary>${g.l.length - 1} ${yz('esp.onaylar.oneri-daha')}</summary>
             ${ESP.Parts.proposalList(g.l.slice(1))}
           </details>`)}
-        </section>`)}</div>`;
+        </details>`)}</div>`;
   }
   function onaySatirlari(){
     const l = [];
@@ -119467,7 +119620,8 @@ ESP.Screens.onaylar = (function(){
   function cikarimKutusu(){
     const Kg = (window.LIFEOS || {}).KING;
     let h = '';
-    try{ h = Kg && Kg.cikarimKarti ? Kg.cikarimKarti(3) : ''; }catch(e){ console.error(e); }
+    /* Sıra sıra sorulur: cevap verince sonraki gelir (üç kart üç birincil düğme demekti). */
+    try{ h = Kg && Kg.cikarimKarti ? Kg.cikarimKarti(1) : ''; }catch(e){ console.error(e); }
     if(!h) return '';
     return String(K.Kutu({ ad:yz('esp.onaylar.cikarimlar'), yuva:String(cikarimSayisi()), govde:html`
       <p class="small muted">${yz('esp.onaylar.king-in-senin-hakkindaki-tah')}</p>${raw(h)}` }));
@@ -119479,20 +119633,26 @@ ESP.Screens.onaylar = (function(){
     const parcaB = { ana:String(onayRender()) };
     const ana = LIFEOS.PARCA.yer('onaylar', 'ana', ESP.C, parcaB);
     const ck = LIFEOS.PARCA.yer('onaylar', 'cikarim', ESP.C);
-    return ck ? String(html`<div data-oz="cikarim">${raw(ck)}</div><div class="mt-16">${raw(ana)}</div>`) : ana;
+    const gecmis = sonKararlar();
+    const beklemede = onaySatirlari().length + (ESP.Plans ? ESP.Plans.all().length : 0);
+    const oneriler = { id:'oneriler', ad:yz('esp.onaylar.oneriler'), sayi:beklemede || null, govde:raw(ana) };
+    const sorular = { id:'sorular', ad:yz('esp.onaylar.sorular'), sayi:cikarimSayisi() || null,
+      govde:ck ? html`<div data-oz="cikarim">${raw(ck)}</div>` : null };
+    /* Öneri yoksa önce soru: boş kutu ilk bakışta durmasın. */
+    return String(K.SayfaBolumleri({ act:'onay-tab', aria:yz('esp.onaylar.bolumler'), bolumler:(beklemede || !ck ? [oneriler, sorular] : [sorular, oneriler]).concat([
+      { id:'kararlar', ad:yz('esp.onaylar.kararlar'), govde:gecmis ? K.Ledger([gecmis]) : null }]) }));
   }
 
   function onayRender(){
     const l = onaySatirlari();
     const ajan = ESP.Plans ? ESP.Plans.all() : [];
-    const gecmis = sonKararlar();
     if(!l.length && !ajan.length){
-      /* Boş durum (10): tek eylem. Geçmiş varsa altında durur (119). */
+      /* Boş durum (10): tek eylem. */
       const bos = K.Kutu({ ad:yz('esp.onaylar.bekleyen-oneri-yok'), govde:html`
         <p class="small muted">${yz('esp.onaylar.merkez-king-ve-ajanlar-bir')}</p>
         <div class="mt-10">${K.Button({ label:yz('esp.onaylar.danisma-ya-git'), size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
-      return gecmis ? html`${bos}<div class="mt-16">${K.Ledger([gecmis])}</div>` : bos;
+      return bos;
     }
     const say = {};
     l.forEach(x => { say[x.tur] = (say[x.tur] || 0) + 1; });
@@ -119507,12 +119667,14 @@ ESP.Screens.onaylar = (function(){
         govde:html`${when(g.satirlar.some(x => !x.ajan), () => html`<div class="onay-liste" data-raf-tam>${map(g.satirlar.filter(x => !x.ajan), x => x.html)}</div>`)}
           <div data-raf-tam>${ajanGovde(ajan)}</div>` }))
       .map(grupKutusu);
-    return html`<div class="onaylar">${raw(ON().turSeciciHtml({ secili:sec, sayilar:say, act:'onay-tur' }))}
-      ${K.Stack(gruplar.concat([gecmis].filter(Boolean)))}</div>`;
+    /* Tek tür varken seçici bir şey seçtirmez («Tümü 21 · Plan 21»). */
+    return html`<div class="onaylar">${when(Object.keys(say).length > 1, () => raw(ON().turSeciciHtml({ secili:sec, sayilar:say, act:'onay-tur' })))}
+      ${K.Stack(gruplar)}</div>`;
   }
 
   const handle = {
     'onay-tur'(el){ S.ui.onayTur = el.dataset.value; ESP.App.render(); },
+    'onay-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* Çıkarım kararı: Doğru / Yanlış / kendi cümlenle düzelt. */
     async 'cikarim-karar'(el){
       const Kg = (window.LIFEOS || {}).KING;
@@ -119617,7 +119779,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.kutuphane.silindi':'Silindi',
   'esp.kutuphane.kutuphanen-henuz-bos':'Kütüphanen henüz boş',
   'esp.kutuphane.bam-bir-ozet-rapor-ya':'BAM bir özet, rapor ya da ünite ürettiğinde burada durur.',
-  'esp.kutuphane.danisma-ya-git':'Danışma’ya git',
+  'esp.kutuphane.danisma-ya-git':'Uzmana sor',
   'esp.kutuphane.kutuphanem':'Kütüphanem',
   'esp.kutuphane.notlar':'Notlar',
   'esp.kutuphane.notlar-ve-belgeler':'Notlar ve belgeler',
@@ -119749,7 +119911,8 @@ ESP.Screens = ESP.Screens || {};
 window.LIFEOS.PARCA.yazilar({
   'esp.rehber.kutuphanem':'Kütüphanem',
 });
-window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'esp', cekmece:'kutuphane', ad:'Anlatımlar', sira:20 });
+/* Menüde ayrı satır değil: Öğrenme'nin altından ve alanın «Öğren» kartından açılır (app.js UST). */
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:128, id:'act:anlatim', kind:'Eylem', label:'Konu anlatımları', hint:'Kütüphanem', run:() => ESP.App.go('rehber') });
 
 ESP.Screens.rehber = (function(){
   const RB = () => (window.LIFEOS || {}).REHBER;
@@ -119795,6 +119958,7 @@ ESP.Screens.rehber = (function(){
 window.LIFEOS.PARCA.yazilar({
   'esp.ogrenme.inceleme':'öğretmen incelemesi bekliyor',
   'esp.ogrenme.baslik':'Kütüphanem',
+  'esp.ogrenme.anlatimlar':'Konu anlatımlarını oku',
 });
 
 window.ESP = window.ESP || {};
@@ -119853,7 +120017,10 @@ ESP.Screens.ogrenme = (function(){
   hazirla();
 
   LIFEOS.PARCA.blok({ id:'ogrenme.motor', sayfa:'ogrenme', yer:'ana', ad:'Öğrenme', ciz(){ return window.LIFEOS.OMEKRAN.html(); } });
-  function render(){ return LIFEOS.PARCA.yer('ogrenme', 'ana', ESP.C); }
+  function render(){
+    return LIFEOS.PARCA.yer('ogrenme', 'ana', ESP.C) + '<div class="mt-16">' + ESP.C.Button({ label:yz('esp.ogrenme.anlatimlar') + ' · ' + (ESP.REHBER_KONULAR || []).length,
+      size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'rehber' } }) + '</div>';
+  }
   return { id:'ogrenme', title:yz('esp.ogrenme.baslik'), subtitle(){ return ''; }, lede(){ return ''; }, actions(){ return ''; }, render, handle:{}, hazirla };
 })();
 
@@ -121173,6 +121340,8 @@ window.LIFEOS.PARCA.yazilar({
   'esp.app.kitap-sayfasini-oku':'Kitap sayfasını oku',
   'esp.app.calisma-suresi':'Çalışma süresi',
   'esp.app.merdiven':'Merdiven',
+  'esp.app.calisma':'Çalışma',
+  'esp.app.plan':'Plan',
   'esp.app.uygulama-acilamadi':'Uygulama açılamadı.',
   'esp.app.calisilan-gun-30-gun':'Çalışılan gün · 30 gün',
   'esp.app.olculdu':'ölçüldü',
@@ -121209,7 +121378,7 @@ ESP.App = (function(){
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
      Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
-  const UST = { gun:'today' };
+  const UST = { gun:'today', rehber:'ogrenme' };
 
   /* Telefon alt bandı (KOLAY-PLANI Faz 2): Bugün · Çalışma · Analiz · Menü; masaüstü kenarı da aynı (kabuk.js ANA_CEKMECE). */
   const BANT = ['bugun', 'calisma', 'analiz'];
@@ -121759,14 +121928,6 @@ ESP.App = (function(){
         console.error('Ekran hatası (' + sc.id + '):', err);
         body = errorPanel(err);
       }
-      /* Konu anlatımı (2026-10-18, kullanıcı: «bölümlerin içine her alanın
-         kendisiyle alakalı anlatım»): Çalışma'daki alan bölümünün sonunda o
-         alanın kartı (screens/rehber.js); okuyucu Kütüphanem › Anlatımlar. */
-      try{
-        const v = viewOf(S.route);
-        if(v && v.disc && ESP.Screens.rehber) body += ESP.Screens.rehber.alanKarti(v.disc);
-      }catch(err){ console.error('Konu anlatımı kartı çizilemedi:', err); }
-
       /* v4 iskeleti (belgeler/ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
@@ -123305,10 +123466,11 @@ ESP.App = (function(){
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
       if(window.LIFEOS && window.LIFEOS.KISAYOL){
         window.LIFEOS.KISAYOL.kur({ modul:'esp', git:r => go(r), palet:() => ESP.Palette.open(),
-          /* Açık disiplinlerin tezgâhları: kapalı disiplin düğme olmaz. */
+          /* Tek sıra: Çalışma (açık ilk alan; kapalı disiplin düğme olmaz) ve Plan. Dört alan
+             düğmesi Çalışma'nın şeridini tekrar ediyordu (kullanıcı, 2026-11-06). */
           dugmeler:() => ((ESP.Nav.sections().find(s => s.id === 'calisma') || {}).views || [])
-            .slice(0, 4).map(v => ({ ad:v.label, rota:v.route }))
-            .concat([{ ad:yz('esp.app.merdiven'), rota:'ladder' }]),
+            .slice(0, 1).map(v => ({ ad:yz('esp.app.calisma'), rota:v.route }))
+            .concat([{ ad:yz('esp.app.plan'), rota:'ladder' }]),
           cekmeceler:() => ESP.Nav.sections().map(s => ({ id:s.id, rota:s.views[0].route })) });
       }
 

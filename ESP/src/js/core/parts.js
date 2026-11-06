@@ -947,9 +947,10 @@ ESP.Parts = (function(){
         ${when(o.dugme, () => K.Button({ label:o.dugme.label, tone:'primary', act:o.dugme.act, data:o.dugme.data, class:'mt-10' }))}` });
   }
   /* Reçete uzman masasının dibindeydi; bugün ne yapılacağının cevabı olduğu için ilk sekmede. */
-  function recete(disc){
+  /* `o.kunyesiz`: hemen üstte «Şimdi» aynı künyeyi yazıyorsa ikinci kez yazılmaz. */
+  function recete(disc, o){
     const r = ESP.Coach.prescribe(disc);
-    return K.Entry({ label:yz('esp.core.parts.bugunku-calisma'), meta:bugunKunye(disc), wide:true,
+    return K.Entry({ label:yz('esp.core.parts.bugunku-calisma'), meta:o && o.kunyesiz ? null : bugunKunye(disc), wide:true,
       body:r ? html`${rxList(r)}<p class="tiny dim mt-8">${U.fmtMin(r.minutes)} · ${yz('esp.core.parts.gunluk-taban')} ${U.fmtMin(r.budget)}</p>` : raw('') });
   }
   /* Yol, ilerlemenin parçasıdır: «Şimdi» sırayı, bu satır basamakları söyler. */

@@ -191,7 +191,8 @@ async function portMuhafizi(portlar, ipucu){
           || (el.getAttribute('aria-labelledby') &&
               (document.getElementById(el.getAttribute('aria-labelledby')) || {}).textContent)
           || '';
-        const gorunur = el => el.offsetParent !== null;
+        /* `inert` ağaç (gizle önizlemesi, kimliksiz kopya) erişilebilirlik ağacında yoktur. */
+        const gorunur = el => el.offsetParent !== null && !el.closest('[inert]');
 
         document.querySelectorAll('button, a[href], [role="button"]').forEach(el => {
           if(!gorunur(el)) return;
