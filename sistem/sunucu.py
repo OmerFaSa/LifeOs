@@ -83,6 +83,7 @@ import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
 
 HOST = "127.0.0.1"
+BEKCI_SN = 60
 # AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
 ALTSTORE_KAYNAK = "https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
 GIRIS_PORT = 4180
@@ -414,7 +415,8 @@ class Sunucu(SimpleHTTPRequestHandler):
         if self.path.split("?", 1)[0] == "/api/merkez/ac":
             # Gun plani (2026-11-03): HKM'nin arayuzu kalkti; Merkez modulun Ayarlar › Merkez'inden
             # baslatilir. Yalniz bu kapinin kendi sayfasindan (ozel baslik + Origin).
-            izin = merkez_izinli(self.headers, self.server.server_address[1])
+            izin = (self.client_address[0] in ("127.0.0.1", "::1")      # ev agi ve vekil baslatamaz
+                    and merkez_izinli(self.headers, self.server.server_address[1]))
             return self._json(200 if izin else 403, hkm_ac() if izin else {"ok": False, "mesaj": "İzin yok."})
         if self.path.split("?", 1)[0] == "/api/uzak/merkez":
             # Ozel baslik tarayiciyi on-kontrole zorlar (izin yok); isaret yalniz serve'den gelene konur.
@@ -1685,8 +1687,29 @@ def uzak_ac():
     return sonuc
 
 
+def uzak_durum():
+    return dict(uzak.durum(), merkez=hkm_ayakta(), acilis=uzak.acilis_acik())
+
+
+def merkez_bekci(ayakta=hkm_ayakta, oku=uzak.durum, ac=hkm_ac):
+    """Dis cihaz Merkez'i baslatamaz: erisim aciksa ve Merkez dustuyse burasi kaldirir. Tek seferlik
+    denetim acilista Tailscale henuz hazir degilse bir daha bakmiyordu. Doner: acmayi denedi mi."""
+    if ayakta() or not oku()["acik"]:
+        return False
+    ac()
+    return True
+
+
+def _bekci_dongusu():
+    while True:
+        time.sleep(BEKCI_SN)
+        if merkez_bekci() and not hkm_ayakta():
+            time.sleep(BEKCI_SN * 4)                # acilamiyor: her dakika surec acmasin
+
+
 hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac,
-                    uzak_ac=uzak_ac, uzak_kapat=uzak.kapat, merkez=uzak.merkez)
+                    uzak_ac=uzak_ac, uzak_kapat=uzak.kapat, merkez=uzak.merkez,
+                    uzak_durum=uzak_durum, uzak_acilis=uzak.acilis_ayarla)
 
 
 def merkez_izinli(basliklar, kapi):
@@ -2257,8 +2280,7 @@ def main():
     if telefon.tazele():
         print("  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
     tel, tel_sorun = telefon_sunuculari()
-    # Dis cihaz Merkez'i baslatamaz: her yerden erisim aciksa LifeOS ile birlikte kalkar.
-    threading.Thread(target=lambda: uzak.durum()["acik"] and hkm_ac(), daemon=True).start()
+    threading.Thread(target=_bekci_dongusu, daemon=True).start()
     kurulum = None
     if tel:
         try:

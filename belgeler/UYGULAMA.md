@@ -58,6 +58,17 @@ adresi olarak bilgisayarın `.ts.net` adı yazılır; admin girişinden sonra Me
 Android'de aynı adres tarayıcıda açılıp ana ekrana eklenir. Bilgisayar açık kalmalı ve uyumamalıdır;
 kapalıyken AI olmaz, kayıtlar cihazda sıraya girer.
 
+Hesap › Bağlantılar › Her yerden erişim bağlantının hâlini söyler. Bilgisayarda aynı sayfada aç, kapat ve
+«Bilgisayar açılınca LifeOS başlasın» vardır: varsayılan kapalı, kullanıcının Windows başlangıç listesine tek
+satır yazar, kapatınca iz kalmaz. Oturum açılmadan başlamaz. LifeOS uygulaması sunucuyu kendisi başlattıysa
+penceresi kapanınca Merkez de kapanır; açılışta başlamışsa pencere kapansa da açık kalır.
+
+Kesilme davranışı: serve kapıları Tailscale'de durur, LifeOS kapanınca kalkmaz. LifeOS kapalıyken dış adres boş
+502 döner: daha önce açılmış modül kopyasından açılır, hesap «ulaşılamıyor» der; cihazda hiç açılmamışsa boş
+sayfa görünür. LifeOS açıkken Merkez düşerse bir dakikada kendisi kalkar. Yerel model bir cevabı en çok 120 sn
+bekler, mesajlar sırayla gider. Samsung ve Android'de gerçek cihazda henüz denenmedi: Özel DNS ayarı «Kapalı» ya
+da «Otomatik» olmalı, Tailscale pil kısıtlamasından çıkarılmalı.
+
 ## Aşamalar
 
 | | Durum | Ne |

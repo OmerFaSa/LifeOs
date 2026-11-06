@@ -70,7 +70,7 @@ def sina(adres, model=None, jeton=None, get=_get, post=_post, saat=time.monotoni
         y = post(kok + "/v1/chat/completions", jeton,
                  {"model": secilen, "max_tokens": 8,
                   "messages": [{"role": "user", "content": "Tek kelimeyle: merhaba"}]},
-                 ai.UZAK_ZAMAN_ASIMI if sinif != "ayni_makine" else ai.ZAMAN_ASIMI)
+                 ai.YEREL_ZAMAN_ASIMI if sinif != "ayni_makine" else ai.ZAMAN_ASIMI)
     except Exception as e:                      # noqa: BLE001
         if ai._zaman_asimi_mi(e):
             satir.append("✗ Sohbet (%s): zamanında dönmedi. Model belleğe yükleniyor olabilir; "

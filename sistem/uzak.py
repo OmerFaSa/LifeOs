@@ -12,6 +12,10 @@
       (vekilden_mi). Admin kurulumu, yedek, ayar yine yalniz bilgisayardan.
    3. KURMAZ, GIRIS YAPMAZ. Tailscale'i kullanici kurar ve hesabina girer.
    4. DURUMUN TEK KAYNAGI TAILSCALE'IN KENDISI; ayri ayar dosyasi yok.
+      Funnel elle acilmissa erisim «acik» sayilmaz, jeton verilmez.
+   5. ACILISTA BASLAMA KULLANICININ DUGMESIDIR, varsayilan kapali. Windows'un kullaniciya
+      ait baslangic listesine tek satir (yonetici izni istemez); kapatinca iz kalmaz. Oturum
+      acilmadan calismaz. Bilgisayarin uyku ve guc ayarina hic dokunmaz.
 """
 
 import json
@@ -57,7 +61,7 @@ def _tailscale(cli, argumanlar, calistir):
 
 def durum(calistir=subprocess.run):
     """{kurulu, bagli, acik, ad}. Tailscale yoksa ya da cevap vermezse hepsi bos; firlatmaz."""
-    sonuc = {"kurulu": False, "bagli": False, "acik": False, "ad": ""}
+    sonuc = {"kurulu": False, "bagli": False, "acik": False, "ad": "", "funnel": False}
     cli = _cli()
     if not cli:
         return sonuc
@@ -67,8 +71,10 @@ def durum(calistir=subprocess.run):
         sonuc["bagli"] = s.get("BackendState") == "Running"
         sonuc["ad"] = ((s.get("Self") or {}).get("DNSName") or "").rstrip(".")
         if sonuc["bagli"] and sonuc["ad"]:
-            web = json.loads(_tailscale(cli, ["serve", "status", "--json"], calistir).stdout or "{}").get("Web") or {}
-            sonuc["acik"] = all(
+            serve = json.loads(_tailscale(cli, ["serve", "status", "--json"], calistir).stdout or "{}")
+            web = serve.get("Web") or {}
+            sonuc["funnel"] = any((serve.get("AllowFunnel") or {}).values())
+            sonuc["acik"] = not sonuc["funnel"] and all(
                 ((web.get("%s:%d" % (sonuc["ad"], dis)) or {}).get("Handlers") or {}).get("/", {}).get("Proxy")
                 == "http://127.0.0.1:%d" % ic
                 for dis, ic in KAPILAR.items())
@@ -106,6 +112,9 @@ def ac(calistir=subprocess.run, kok_yaz=_kokenleri_yaz):
         return {"ok": False, "mesaj": "Önce bu bilgisayara Tailscale'i kur."}
     if not d["bagli"] or not d["ad"]:
         return {"ok": False, "mesaj": "Tailscale'e giriş yap, sonra yeniden dene."}
+    if d["funnel"]:
+        return {"ok": False, "mesaj": "Bu bilgisayarda funnel açık, yani internete açık bir kapı var. "
+                                      "Önce kapat: tailscale funnel reset"}
     cli = _cli()
     for dis, ic in KAPILAR.items():
         try:
@@ -168,6 +177,53 @@ def merkez_kimlikle(basliklar, oku_sahip=sahip, oku_merkez=merkez):
     if not giris or giris != oku_sahip():
         return None
     return oku_merkez()
+
+
+RUN_ANAHTAR = r"Software\Microsoft\Windows\CurrentVersion\Run"
+RUN_AD = "LifeOS"
+
+
+def _reg(reg):
+    if reg is not None:
+        return reg
+    import winreg       # Windows disinda ImportError: secenek yok
+    return winreg
+
+
+def acilis_komutu():
+    """Pencere acmayan Python; tarayici da acilmaz. Her yerden erisimi degistirmez."""
+    w = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+    return '"%s" "%s" --tarayicisiz' % (w if os.path.exists(w) else sys.executable,
+                                        os.path.join(KOK, "sistem", "baslat.py"))
+
+
+def acilis_acik(reg=None):
+    try:
+        r = _reg(reg)
+        with r.OpenKey(r.HKEY_CURRENT_USER, RUN_ANAHTAR) as k:
+            return bool(r.QueryValueEx(k, RUN_AD)[0])
+    except (ImportError, OSError):
+        return False
+
+
+def acilis_ayarla(acik, reg=None):
+    """Soz 5. Doner: {ok, acilis, mesaj}."""
+    try:
+        r = _reg(reg)
+        with r.OpenKey(r.HKEY_CURRENT_USER, RUN_ANAHTAR, 0, r.KEY_SET_VALUE) as k:
+            if acik:
+                r.SetValueEx(k, RUN_AD, 0, r.REG_SZ, acilis_komutu())
+            else:
+                try:
+                    r.DeleteValue(k, RUN_AD)
+                except FileNotFoundError:
+                    pass
+    except ImportError:
+        return {"ok": False, "acilis": False, "mesaj": "Bu seçenek yalnız Windows'ta var."}
+    except OSError as e:
+        return {"ok": False, "acilis": acilis_acik(reg), "mesaj": "Ayar yazılamadı: %s" % e}
+    return {"ok": True, "acilis": bool(acik),
+            "mesaj": "Bilgisayar açılınca LifeOS da başlayacak." if acik else "LifeOS açılışta başlamayacak."}
 
 
 if __name__ == "__main__":

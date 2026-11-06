@@ -550,6 +550,22 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.ev-agini-ac':'Ev ağını aç',
   'ortak.hesap.her-yerden-not':'Telefon ve tablet evden uzakta da bu bilgisayara ve King’e bağlanır. Tailscale gerekir; bilgisayar açık kalmalı.',
   'ortak.hesap.her-yerden-ac':'Her yerden erişimi aç',
+  'ortak.hesap.her-yerden':'Her yerden erişim',
+  'ortak.hesap.her-yerden-alt':'Bilgisayarındaki King’e bağlantı',
+  'ortak.hesap.her-yerden-kapat':'Her yerden erişimi kapat',
+  'ortak.hesap.her-yerden-kosul':'LifeOS ve bilgisayar açık kalmalı. Kapalıyken modüller ve kurallar çalışır, model cevap vermez.',
+  'ortak.hesap.acilista':'Bilgisayar açılınca LifeOS başlasın',
+  'ortak.hesap.acilista-not':'Pencere açılmaz, oturum açınca arkada başlar. Uyku ve güç ayarına dokunulmaz; bilgisayar uyursa telefon erişemez.',
+  'ortak.hesap.yeniden-dene':'Yeniden dene',
+  'ortak.hesap.hal-bagli':'Bağlı. King bilgisayarındaki modelle konuşuyor.',
+  'ortak.hesap.hal-model-mesgul':'Bağlı ama model şu an meşgul: cevaplar geç gelebilir.',
+  'ortak.hesap.hal-model-kapali':'Bağlı ama model kapalı: King şimdilik kurallarla çalışıyor.',
+  'ortak.hesap.hal-merkez-kapali':'Bilgisayar açık ama Merkez kapalı: King şimdilik kurallarla çalışıyor. Bilgisayarda LifeOS’u aç.',
+  'ortak.hesap.hal-bilgisayar-kapali':'Bilgisayara ulaşılamıyor: kapalı, uykuda ya da internet yok. Modüller ve kayıtlar çalışır; değişiklikler bağlanınca gider.',
+  'ortak.hesap.hal-yok':'Bu cihaz henüz Merkez’e bağlı değil.',
+  'ortak.hesap.ts-yok':'Bu bilgisayarda Tailscale kurulu değil.',
+  'ortak.hesap.ts-giris':'Tailscale kurulu ama giriş yapılmamış.',
+  'ortak.hesap.ts-funnel':'Bu bilgisayarda funnel açık, yani internete açık bir kapı var. Önce kapat: tailscale funnel reset',
   'ortak.hesap.ev-agi-telefon-tablet':'Telefon ve tablet bu bilgisayara bağlanabilsin. Veri yalnız evdeki ağda dolaşır.',
   'ortak.hesap.qr-tek-adim':'Yeni cihazın kamerasıyla QR’ı okut; sertifikası kurulunca hesabına kendiliğinden bağlanır.',
   'ortak.hesap.hesap-ve-esitleme':'Hesap ve eşitleme',
@@ -846,6 +862,8 @@ window.LIFEOS.HESAP = (function(){
       });
       let v = null;
       try{ v = await r.json(); }catch(e){ v = null; }
+      /* Vekil (tailscale serve) LifeOS kapalıyken boş 502 döner: bu «ulaşılamadı»dır, hata değil. */
+      if(!v && r.status >= 502 && r.status <= 504) throw new Error('vekil');
       if(!r.ok){
         const h = new Error((v && v.hata) || ('Sunucu cevap vermedi (' + r.status + ').'));
         h.kod = r.status;
@@ -2168,9 +2186,14 @@ window.LIFEOS.HESAP = (function(){
     try{
       if(ozelAg){
         const r = await ortam.fetch('/api/uzak/merkez', { method:'POST', cache:'no-store', headers:{ 'X-LifeOS':'hesap' } });
+        if(r.status >= 502 && r.status <= 504) throw new Error('vekil');
         v = r.ok ? await r.json() : null;
       }else v = await api('/api/hesap/merkez', {});
-    }catch(e){ return false; }
+    }catch(e){
+      /* Ulaşılamadı: LifeOS açılınca sayfa yenilenmeden bağlansın (dakikalık turda yeniden). */
+      if(!e || !e.kod) merkezDenenen = null;
+      return false;
+    }
     if(!v || !v.url || !v.token) return false;
     await b.save({ url:v.url, token:v.token, enabled:true, lastStatus:null });
     /* Uygulama ev ağı adresiyle girmiş olabilir: her yerde geçen adrese geçer. */
@@ -2180,6 +2203,55 @@ window.LIFEOS.HESAP = (function(){
     }
     return true;
   }
+  /* MERKEZİN HÂLİ (AGENTS §1.4): King ve hesap sayfası dürüst söylesin, bilgisayar kapalıyken soru
+     beklemesin. Üç bakış: sağlık ucu cevap verdiyse bağlı; vekil 502 dönerse başlığında izin olmadığı
+     için tarayıcı reddeder, no-cors ulaşırsa bilgisayar açık, Merkez kapalı; hiç ulaşmıyorsa bilgisayar
+     kapalı, uykuda ya da internet yok. Süre dolduysa ikinci kez beklenmez. Model sağlık ucundan gelir. */
+  const MERKEZ_YOKLA = 4000;
+  let merkezHalSon = null;
+  async function merkezYokla(url, secenek){
+    const kes = new AbortController();
+    let doldu = false;
+    const z = ortam.zamanla(() => { doldu = true; kes.abort(); }, MERKEZ_YOKLA);
+    try{
+      return await ortam.fetch(url, Object.assign({ cache:'no-store', credentials:'omit', signal:kes.signal }, secenek));
+    }catch(e){
+      e.doldu = doldu;
+      throw e;
+    }finally{ ortam.iptal(z); }
+  }
+  async function merkezHali(taze){
+    const b = ayar && ayar.hkm && ayar.hkm(), a = (b && b.settings && b.settings()) || {};
+    if(!a.enabled || !a.token || !a.url) return { hal:'yok', model:'' };
+    const son = merkezHalSon;
+    if(!taze && son && ortam.simdi() - son.t < (son.hal === 'bagli' ? 30000 : 15000)) return son;
+    const kok = String(a.url).replace(/\/$/, '');
+    const bu = /^http:\/\/(127\.0\.0\.1|localhost|\[::1\])/i.test(kok);
+    let hal = bu ? 'merkez-kapali' : 'bilgisayar-kapali', model = '';
+    try{
+      const r = await merkezYokla(kok + '/api/health');
+      if(r.ok){
+        hal = 'bagli';
+        try{ model = String((await r.json()).model || ''); }catch(e){ /* eski Merkez */ }
+      }else hal = 'merkez-kapali';
+    }catch(e){
+      if(!bu && !e.doldu){
+        try{ await merkezYokla(kok + '/api/health', { mode:'no-cors' }); hal = 'merkez-kapali'; }catch(e2){ /* ulaşılamıyor */ }
+      }
+    }
+    merkezHalSon = { hal, model, t:ortam.simdi() };
+    return merkezHalSon;
+  }
+  function merkezHalMetni(h){
+    const v = h || {};
+    if(v.hal === 'bagli') return yz(v.model === 'mesgul' ? 'ortak.hesap.hal-model-mesgul'
+      : v.model === 'kapali' ? 'ortak.hesap.hal-model-kapali' : 'ortak.hesap.hal-bagli');
+    return yz(v.hal === 'merkez-kapali' ? 'ortak.hesap.hal-merkez-kapali'
+      : v.hal === 'bilgisayar-kapali' ? 'ortak.hesap.hal-bilgisayar-kapali' : 'ortak.hesap.hal-yok');
+  }
+  async function uzakDurum(){ return api('/api/hesap/uzak-durum', {}); }
+  async function uzakKapat(){ return api('/api/hesap/uzak-kapat', {}); }
+  async function uzakAcilis(acik){ return api('/api/hesap/uzak-acilis', { acik }); }
   async function yedekDurum(){ return api('/api/hesap/yedekler'); }
   async function yedekle(){ return api('/api/hesap/yedekle', {}); }
   async function yedekAyar(ikinci){ return api('/api/hesap/yedek-ayar', { ikinci }); }
@@ -2364,7 +2436,7 @@ window.LIFEOS.HESAP = (function(){
      içindeki alanlar modülün «yazıyor mu?» denetimine sayılmaz. */
   const SAYFA_AD = { kok:'Hesap', profil:'Profil', plan:'Plan', cihazlar:'Cihazlar', guvenlik:'Güvenlik',
     esitleme:'Eşitleme', yonetim:'Yönetim', kisi:'Kullanıcı', etkinlik:'Etkinlik', verin:'Verin',
-    baglantilar:'Bağlantılar', ikiadim:yz('ortak.hesap.i-ki-adimli-dogrulama'), takvim:yz('ortak.hesap.takvim-aboneligi'),
+    baglantilar:'Bağlantılar', uzak:yz('ortak.hesap.her-yerden'), ikiadim:yz('ortak.hesap.i-ki-adimli-dogrulama'), takvim:yz('ortak.hesap.takvim-aboneligi'),
     anahtarlar:yz('ortak.hesap.kisayollar-ve-otomasyon'), gelen:yz('ortak.hesap.gelen-kutusu'), bagla:yz('ortak.hesap.yeni-cihaz-bagla'), cihaz:'Cihaz', yedek:'Yedekler' };
   /* Oturumun nasıl açıldığı (sunucu sözü 18). */
   const YONTEM_AD = { sifre:'Şifreyle', 'iki-adim':yz('ortak.hesap.sifre-ve-dogrulama-koduyla'), yedek:yz('ortak.hesap.sifre-ve-yedek-kodla'),
@@ -2876,10 +2948,29 @@ window.LIFEOS.HESAP = (function(){
           : 'admin Yönetim’den kapatır.') + '</p>';
     },
 
+    /* HER YERDEN ERİŞİM: bağlantının hâli her cihazda; aç, kapat ve açılışta başlama yalnız
+       bilgisayarın kendisinde, admin için (sunucu da denetler). */
+    uzak(m){
+      const pc = m.uzakPc;
+      const yonet = !pc ? '' : !pc.kurulu ? '<p class="hesap__not">' + yz('ortak.hesap.ts-yok') + '</p>'
+        : !pc.bagli ? '<p class="hesap__not">' + yz('ortak.hesap.ts-giris') + '</p>'
+        : pc.funnel ? '<p class="hesap__not">' + yz('ortak.hesap.ts-funnel') + '</p>'
+        : '<p class="hesap__not">' + yz('ortak.hesap.her-yerden-kosul') + '</p>'
+          + (pc.acik ? '<p class="hesap__not">' + kac(pc.ad) + '</p>' : '')
+          + '<button type="button" class="hesap__ana hesap__tam" data-hesap="' + (pc.acik ? 'uzak-kapat">' + yz('ortak.hesap.her-yerden-kapat')
+            : 'uzak-ac">' + yz('ortak.hesap.her-yerden-ac')) + '</button>';
+      return (m.uzakHal ? '<p class="hesap__not" role="status">' + kac(merkezHalMetni(m.uzakHal)) + '</p>' : yukleniyor(m))
+        + '<ul class="hesap-liste">' + satir({ ikon:'yenile', ad:yz('ortak.hesap.yeniden-dene'), eylem:'uzak-bak' }) + '</ul>'
+        + yonet
+        + (pc ? '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.acilista'), alt:yz('ortak.hesap.acilista-not'),
+          detay:pc.acilis ? 'Açık' : 'Kapalı', eylem:'uzak-acilis' }) + '</ul>' : '');
+    },
+
     /* BAĞLANTILAR: ücretsiz uygulamalar, gruplu (iOS Ayarlar gibi). */
     baglantilar(m){
       const oz = (m.ben && m.ben.baglantilar) || {}, iki = m.ben && m.ben.iki_adim;
-      return ('<p class="hesap-bolum">' + yz('ortak.hesap.takvim') + '</p><ul class="hesap-liste">')
+      return ('<ul class="hesap-liste">' + satir({ ikon:'baglanti', ad:yz('ortak.hesap.her-yerden'), alt:yz('ortak.hesap.her-yerden-alt'), sayfa:'uzak' }) + '</ul>')
+        + ('<p class="hesap-bolum">' + yz('ortak.hesap.takvim') + '</p><ul class="hesap-liste">')
         + satir({ ikon:'takvim', ad:yz('ortak.hesap.takvim-aboneligi'), alt:yz('ortak.hesap.iphone-takvim-outlook-thunde'),
           detay:m.ben ? (oz.takvim ? 'Açık' : 'Kapalı') : '', sayfa:'takvim' }) + '</ul>'
         + ('<p class="hesap-bolum">' + yz('ortak.hesap.kisayollar-ve-otomasyon') + '</p><ul class="hesap-liste">')
@@ -3347,7 +3438,7 @@ window.LIFEOS.HESAP = (function(){
     merkezTazele();
     const kart = document.querySelector('[data-hesap-merkez] .hesap-merkez__kart');
     try{ kart.focus({ preventScroll:true }); }catch(e){ /* odaklanamadı */ }
-    if(/^(takvim|anahtarlar|gelen|ikiadim|baglantilar|bagla|yedek)$/.test(ilkSayfa || '')) sayfaGir(ilkSayfa);
+    if(/^(takvim|anahtarlar|gelen|ikiadim|baglantilar|bagla|yedek|uzak)$/.test(ilkSayfa || '')) sayfaGir(ilkSayfa);
     return merkezYukle();
   }
   function merkezKapat(){
@@ -3375,6 +3466,10 @@ window.LIFEOS.HESAP = (function(){
     sayfaVerisi(() => sistemDurum().then(v => { merkez.sistem = v; if(v.calisiyor) sistemIzle(); },
       e => { if(e && e.kod === 401) throw e; }));
   }
+  function uzakYukle(){
+    sayfaVerisi(() => merkezHali(true).then(v => { merkez.uzakHal = v; }));
+    if(pcMi() && kim().r === 'admin') sayfaVerisi(() => uzakDurum().then(v => { merkez.uzakPc = v; }));
+  }
   /* Sayfaya girerken verisi tazelenir (başka cihazdan değişmiş olabilir). */
   function sayfaGir(s){
     if(!merkez) return;
@@ -3385,6 +3480,7 @@ window.LIFEOS.HESAP = (function(){
       sistemYukle();
     }
     if(s === 'yedek') sayfaVerisi(() => yedekDurum().then(v => { merkez.yedek = v; }));
+    if(s === 'uzak') uzakYukle();
     if(s === 'guvenlik'){
       sayfaVerisi(() => Promise.all([cihazlar(), etkinlik()]).then(([c, e]) => { merkez.cihazlar = c; merkez.etkinlik = e; }));
     }
@@ -3840,9 +3936,24 @@ window.LIFEOS.HESAP = (function(){
         yz('ortak.hesap.lifeos-yedek-kodlari') + (o.a || '') + ')\r\nHer biri girişi bir kez açar.\r\n\r\n' + y.join('\r\n') + '\r\n', 'text/plain')).catch(() => {});
     }else if(ad === 'sistem-bak'){
       merkezIs(async () => { const v = await sistemDurum(true); if(merkez) merkez.sistem = v; return ''; });
-    }else if(ad === 'uzak-ac'){
+    }else if(ad === 'uzak-ac' || ad === 'uzak-kapat'){
       is.disabled = true;
-      merkezIs(async () => (await uzakAc()).mesaj);
+      merkezIs(async () => {
+        const v = await (ad === 'uzak-ac' ? uzakAc() : uzakKapat());
+        if(merkez && merkez.uzakPc) merkez.uzakPc = await uzakDurum();
+        return v.mesaj;
+      });
+    }else if(ad === 'uzak-acilis'){
+      is.disabled = true;
+      merkezIs(async () => {
+        const v = await uzakAcilis(!(merkez && merkez.uzakPc && merkez.uzakPc.acilis));
+        if(merkez && merkez.uzakPc) merkez.uzakPc.acilis = !!v.acilis;
+        return v.mesaj;
+      });
+    }else if(ad === 'uzak-bak'){
+      merkezDenenen = null;
+      merkezBagla().catch(() => null);
+      uzakYukle();
     }else if(ad === 'ev-agi-ac'){
       is.disabled = true;
       merkezIs(async () => (await evAgiAc()).mesaj);
@@ -4117,6 +4228,7 @@ window.LIFEOS.HESAP = (function(){
       araId = setInterval(() => {
         if(typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
         esitle();
+        if(merkezDenenen === null) merkezBagla().catch(() => null);
       }, ARALIK);
     }
   }
@@ -4127,7 +4239,7 @@ window.LIFEOS.HESAP = (function(){
     if(yenileId != null) ortam.iptal(yenileId);
     if(cizimId != null) ortam.iptal(cizimId);
     erteleId = null; yenileId = null; cizimId = null; cizimler.length = 0;
-    ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null;
+    ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null; merkezHalSon = null;
     aktif = null; siradaki = null; panelMesaj = ''; onayBitis = 0;
     modelBekliyor = false; ekranBekliyor = false; tazeleme = null; profilTazelendi = false;
     ekAktif = false; sonGelen = 0; sonYayin = 0; sonUyari = 0; ekSon = null; uyari = { liste:null, yeni:[] };
@@ -4156,7 +4268,7 @@ window.LIFEOS.HESAP = (function(){
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
     bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
-    yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
+    yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle, merkezHali, merkezHalMetni,
     _ortam:ortam, _sifirla, _istek:istek, _merkezBagla:() => { merkezDenenen = null; return merkezBagla(); }, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
   };

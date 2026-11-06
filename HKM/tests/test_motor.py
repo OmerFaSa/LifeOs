@@ -488,26 +488,6 @@ def run():
         ok("buluta" in k["not"])                              # hibritte is durmaz
     test("sunucu motorun durumunu bilir", t_node_status)
 
-    def t_remote_node_waits_longer():
-        """Baska makinedeki motor (cogu zaman islemcide) yavas cevap verir:
-        cagri suresi uzar. Ayni makinede ve bulutta eski sure kalir."""
-        con = db.connect(":memory:")
-        uzak = models.apply(_yer_cfg("yerel", bulut=False), {"yerel_adres": "http://192.168.1.20:11434"})
-        t = _tasiyici("Tamam.")
-        ai.ask(con, uzak, "seviye.alt", "sohbet", _mesaj(), baglam="", sistem="s",
-               transport=t, seviye="alt")
-        eq(t.kayit[0]["ayar"].get("sure"), ai.UZAK_ZAMAN_ASIMI)
-        ok(ai.UZAK_ZAMAN_ASIMI > ai.ZAMAN_ASIMI)
-        ayni = _tasiyici("Tamam.")
-        ai.ask(con, _yer_cfg("yerel", bulut=False), "seviye.alt", "sohbet", _mesaj(),
-               baglam="", sistem="s", transport=ayni, seviye="alt")
-        no(ayni.kayit[0]["ayar"].get("sure"))
-        bulut = _tasiyici("Tamam.")
-        ai.ask(con, _yer_cfg("bulut"), "seviye.alt", "sohbet", _mesaj(), baglam="",
-               sistem="s", transport=bulut, seviye="alt")
-        no(bulut.kayit[0]["ayar"].get("sure"))
-    test("uzak motor icin cagri suresi uzar", t_remote_node_waits_longer)
-
     def t_remote_timeout_reaches_urlopen():
         """`sure` gercekten istege gider (tasiyicisiz yol)."""
         gorulen = []
@@ -520,8 +500,9 @@ def run():
             ai._cagir("yerel", "", "qwen", "s", _mesaj(), ayar={"jeton": 100})
         finally:
             ai._istek = eski
-        eq(gorulen, [120, ai.ZAMAN_ASIMI])
-    test("uzak motor suresi istege gider", t_remote_timeout_reaches_urlopen)
+        eq(gorulen, [120, ai.YEREL_ZAMAN_ASIMI])
+        ok(ai.YEREL_ZAMAN_ASIMI > ai.ZAMAN_ASIMI)
+    test("yerel motor suresi istege gider", t_remote_timeout_reaches_urlopen)
 
     def _soguk_cfg(yer):
         return models.apply(_yer_cfg(yer, bulut=(yer == "hibrit"),
@@ -631,7 +612,7 @@ def run():
             return {"choices": [{"message": {"content": "Merhaba"}}]}
         g, s = ms.sina("http://192.168.1.20:11434", get=liste, post=cevap)
         ok(g, s)
-        eq(sureler, [ai.UZAK_ZAMAN_ASIMI])
+        eq(sureler, [ai.YEREL_ZAMAN_ASIMI])
         ok("Motor hazır" in s[-1])
         # Kotu adres, kapali servis, eksik model, soguk baslangic: her biri
         # kaldi ve NEDENINI soyler.

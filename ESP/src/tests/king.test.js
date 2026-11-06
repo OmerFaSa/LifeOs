@@ -1636,7 +1636,7 @@
       await sh.k.isle('bugünün özeti');
       expect(sh.k.akis().slice(-1)[0].satirlar).toEqual(['Toparlanma iyi.']);          // yerel özet
       await sh.k.isle('bilmem ne şey');
-      expect(sh.k.akis().slice(-1)[0].metin).toContain('Merkeze (HKM) şu an ulaşılamadı');
+      expect(sh.k.akis().slice(-1)[0].metin).toContain('Merkeze şu an ulaşılamadı');
       birak();
       m = merkez({ ok:false, mode:'yok', text:null, note:'Model kapalı.' });
       sh = bagliSahne(m);
@@ -1918,6 +1918,57 @@
         const oneri = [...document.querySelectorAll('[data-king^="oner-metin:"]')].map(b => b.textContent);
         expect(oneri.slice(0, 2)).toEqual(['Detaylandır', 'Kısalt']);
       }finally{ temizle(k); }
+    }));
+    it('King açılınca model arkada ısınır; beş dakikada bir kez, Merkez yoksa hiç', () => sahneyle(async () => {
+      const giden = [];
+      const { k } = sahne({ hkm, fetch:async (u, o) => { giden.push([u, o.headers.Authorization]); return { status:200, json:async () => ({}) }; } });
+      window.LIFEOS.KING_IC.modelIsitT = -Infinity;
+      k.ac();
+      k.kapat();
+      k.ac();
+      const isit = giden.filter(x => /ollama\/isit$/.test(x[0]));
+      expect(isit).toEqual([['http://127.0.0.1:4200/api/ollama/isit', 'Bearer jeton']]);
+      k.kapat();
+      birak();
+      const y = [];
+      const s2 = sahne({ fetch:async u => { y.push(u); return { status:200, json:async () => ({}) }; } });
+      window.LIFEOS.KING_IC.modelIsitT = -Infinity;
+      s2.k.ac();
+      expect(y.filter(u => /ollama\/isit$/.test(u))).toEqual([]);
+      s2.k.kapat();
+      window.LIFEOS.KING_IC.modelIsitT = Infinity;      // sonraki sahneler kendi isteklerini sayar
+    }));
+    it('bilgisayar ya da Merkez kapalıysa soru beklemez, King sebebi söyler', () => sahneyle(async () => {
+      const H = window.LIFEOS.HESAP, eski = H.merkezHali;
+      for(const [hal, cumle] of [['bilgisayar-kapali', 'ulaşılamıyor'], ['merkez-kapali', 'Merkez kapalı']]){
+        H.merkezHali = async () => ({ hal, model:'' });
+        const istekler = [];
+        const { k } = sahne({ hkm, fetch:async u => { istekler.push(u); return akanCevap([]); } });
+        try{
+          await k.isle('bilmem ne şey');
+          expect(istekler).toEqual([]);
+          expect(k.akis().slice(-1)[0].metin).toContain(cumle);
+          expect(k.akis().slice(-1)[0].metin).toContain('sıraya aldım');
+        }finally{ H.merkezHali = eski; temizle(k); birak(); }
+      }
+    }));
+    it('model hazırlanırken balon beklediğini söyler; ilk cümle gelince not gider', () => sahneyle(async () => {
+      const H = window.LIFEOS.HESAP, eski = H.merkezHali, gorulen = [];
+      H.merkezHali = async () => ({ hal:'bagli', model:'' });
+      let k = null;
+      const satirlar = ['{"t":"bekle"}\n', '{"t":"parca","metin":"Merhaba. "}\n', '{"t":"son","ok":true,"mode":"model","text":"Merhaba."}\n'];
+      const fetch = async () => ({ status:200, headers:{ get:() => 'application/x-ndjson' }, body:{ getReader:() => ({ read:async () => {
+        const b = k.akis().find(m => m.akiyor);
+        gorulen.push(b ? b.metin : '');
+        return satirlar.length ? { value:satirlar.shift(), done:false } : { done:true };
+      } }) } });
+      ({ k } = sahne({ hkm, fetch }));
+      try{
+        await k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
+        expect(gorulen[1]).toContain('hazırlanıyor');
+        expect(gorulen[2]).toBe('Merhaba. ');
+        expect(k.akis().filter(m => m.kim === 'king').pop().metin).toBe('Merhaba.');
+      }finally{ H.merkezHali = eski; temizle(k); }
     }));
     it('eski HKM (404) için /api/chat’e düşer', () => sahneyle(async () => {
       const yollar = [];

@@ -791,6 +791,7 @@ window.LIFEOS.PARCA.yazilar({
   /* Öbür modülde anlatılıp buraya ait olan kayıtlar: bu modülün ayrıştırıcısıyla yeniden önizlenir. */
   function bekleyenleriSun(ek){
     if(!KI.ayar || KI.mini) return false;
+    if(!ek) KI.modelIsit();                 // King açıldı (king-gorunum.js ac)
     const tum = bekleyenKayitlar(), bura = tum.filter(x => x.modul === KI.ayar.modul).concat(Array.isArray(ek) ? ek : []);
     if(!bura.length) return false;
     KI.ortam.depo.yaz(BEKLEYEN_KAYIT, tum.filter(x => x.modul !== KI.ayar.modul));

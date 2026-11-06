@@ -2670,6 +2670,14 @@ def isle(h):
                 if not SISTEM:
                     raise Hata(503, "Bu sunucuda her yerden erişim yok.")
                 return _cevap(h, 200, SISTEM["uzak_ac" if yol.endswith("-ac") else "uzak_kapat"]())
+            if yol in ("/api/hesap/uzak-durum", "/api/hesap/uzak-acilis"):
+                d._admin(k, "Her yerden erişimi yalnız admin görür.")
+                if not _yerel_mi(h):
+                    raise Hata(403, "Bu ayar yalnız bu bilgisayardan.")
+                if not SISTEM:
+                    raise Hata(503, "Bu sunucuda her yerden erişim yok.")
+                return _cevap(h, 200, SISTEM["uzak_durum"]() if yol.endswith("-durum")
+                              else SISTEM["uzak_acilis"](bool(v.get("acik"))))
             if yol == "/api/hesap/merkez":
                 d._admin(k, "Merkez bağlantısını yalnız admin alır.")
                 v = SISTEM["merkez"]() if SISTEM else None

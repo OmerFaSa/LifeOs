@@ -86,6 +86,7 @@ Ucnoktalar:
     GET  /api/ollama                Ollama'yi simdi tarar: durum, modeller, oneri, son baglama (core/ollama.py)
     POST /api/ollama/bagla          {ekonomik?, standart?} bos ise oneri; yalniz Ollama'da olan model
     POST /api/ollama/geri           son baglamayi geri alir (bir daha kendiliginden baglanmaz)
+    POST /api/ollama/isit           King acildi: model arkada yuklenir (bellek darsa yuklenmez)
     GET  /api/ses/durum             King'in sesi: Gemini hazir mi, Piper bulundu mu (ses uretmez, para harcamaz)
     POST /api/ses                   {metin, tercih: oto|gemini|piper} -> audio/wav; uretilemezse 503 + notlar
                                     (modul King'i o zaman cihazin kendi sesine duser; core/ses.py)
@@ -120,6 +121,8 @@ import json
 import math
 import os
 import re
+import select
+import socket
 import sys
 import threading
 import time
@@ -154,6 +157,7 @@ PAIR_MAX_ORIGINS = 4         # yuz + AYS + SPI + ESP; fazlasina verilmez
 # YEREL koken jetonu pencere beklemeden alir; baska bir yerel port
 # (gelistirme sunucusu, baska bir uygulama) eskisi gibi pencere ister.
 LIFEOS_PORTS = (4173, 4183, 4193, 4200)
+NABIZ_SN = 10   # /api/chat/akis: cevap beklerken «bekle» satiri
 
 # --------------------------------------------------------------- sinirlar
 #
@@ -415,6 +419,14 @@ class Handler(BaseHTTPRequestHandler):
             return True
         except OSError:
             return False
+
+    def _kopuk(self):
+        """Karsi taraf baglantiyi kapatti mi (akis cevabinda istekten sonra bayt gelmez)."""
+        try:
+            hazir = select.select([self.connection], [], [], 0)[0]
+            return bool(hazir) and self.connection.recv(1, socket.MSG_PEEK) == b""
+        except OSError:
+            return True
 
     def _send_ses(self, wav, motor, notlar=None):
         """King'in sesi: WAV, hangi motorun urettigi ve (sira ilerlediyse)
@@ -955,7 +967,8 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/health":
             # «baslangic»: surecin acilis zamani; panel kodun daha yeni olup
             # olmadigina bakar (eski surumle calisan HKM uyarisi).
-            return self._send(200, {"ok": True, "service": "hkm", "baslangic": BASLANGIC})
+            # «model»: son gercek cagridan (ai.yerel_hal); saglik ucu modele gitmez, 1 sn'de doner.
+            return self._send(200, {"ok": True, "service": "hkm", "baslangic": BASLANGIC, "model": ai.yerel_hal()})
         if u.path == "/api/wa/webhook":
             """Meta'nin kurulum dogrulamasi. Bearer TASIYAMAZ (istegi Meta
             yollar), bu yuzden tek kapi dogrulama jetonudur: yanlis jetonda
@@ -1912,13 +1925,33 @@ class Handler(BaseHTTPRequestHandler):
                 # Akan cevap: NDJSON satirlari; once denetlenmis cumleler, sonda tam cevap.
                 self._akis_baslat()
                 yazilabilir = [True]
+                kilit, bitti = threading.Lock(), threading.Event()
 
                 def yay(parca):
-                    if yazilabilir[0]:
-                        yazilabilir[0] = self._akis_yaz({"t": "parca", "metin": parca})
-                r = sohbet.konus(self.con, self.server.config, metin, gun, gorevli=gorevli,
-                                 gecmis=mesajlar, th=self.server.thresholds, akis=yay, **ek)
-                self._akis_yaz(dict(r, t="son"))
+                    with kilit:
+                        if yazilabilir[0]:
+                            yazilabilir[0] = self._akis_yaz({"t": "parca", "metin": parca})
+
+                def nabiz():
+                    # Model hazirlanirken hat sessiz kalmasin: istemci beklendigini bilir, kopmaz.
+                    # Saniyede bir de istemci gitti mi bakilir: gittiyse model bosa uretmez (ai.AkisKesildi).
+                    son = time.monotonic()
+                    while not bitti.wait(min(1.0, NABIZ_SN)):
+                        with kilit:
+                            if yazilabilir[0] and self._kopuk():
+                                yazilabilir[0] = False
+                            elif yazilabilir[0] and time.monotonic() - son >= NABIZ_SN:
+                                son = time.monotonic()
+                                yazilabilir[0] = self._akis_yaz({"t": "bekle"})
+                threading.Thread(target=nabiz, daemon=True).start()
+                try:
+                    r = sohbet.konus(self.con, self.server.config, metin, gun, gorevli=gorevli,
+                                     gecmis=mesajlar, th=self.server.thresholds, akis=yay,
+                                     iptal=lambda: not yazilabilir[0], **ek)
+                finally:
+                    bitti.set()
+                with kilit:
+                    self._akis_yaz(dict(r, t="son"))
                 return None
             r = sohbet.konus(self.con, self.server.config, metin, gun,
                              gorevli=gorevli, gecmis=mesajlar,
@@ -1965,6 +1998,11 @@ class Handler(BaseHTTPRequestHandler):
                 # Neden gunluge de yazilir: 503'un sebebi ekranda kaybolmasin (2026-10-21).
                 self.log_message("dinle basarisiz (%d bayt): %s", len(wav), "; ".join(r.get("notlar") or []))
             return self._send(200 if r["ok"] else 503, r)
+        if u.path == "/api/ollama/isit":
+            # King acildi: ilk soru soguk yuklemeyi (9-13 sn) beklemesin. Yukleme arkada, cevap hemen.
+            threading.Thread(target=ollama.isit, args=(self.server.config, {"durum": "bagli"}),
+                             kwargs={"istek": True}, daemon=True).start()
+            return self._send(200, {"ok": True})
         if u.path == "/api/ses/isit":
             ham, hata = self._read_body()
             if hata:

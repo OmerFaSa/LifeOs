@@ -30,12 +30,12 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.king-yol.olumsuz-bir-istek-hicbir-sey':'Olumsuz bir istek; hiçbir şeyi değiştirmedim. Ne istediğini olumlu söylersen yaparım.',
   'ortak.king-yol.not-ettim':'Not ettim: «',
   'ortak.king-yol.anlattiklarinda-sunlari-buld':'Anlattıklarında şunları buldum; seçtiklerini kaydedeyim:',
-  'ortak.king-yol.merkeze-hkm-su-an-ulasilamad':'Merkeze (HKM) şu an ulaşılamadı. Sorunu sıraya aldım; bağlantı gelince kendim soracağım. Sırada ',
+  'ortak.king-yol.siraya-aldim':'Sorunu sıraya aldım; bağlantı gelince kendim soracağım. Sırada ',
   'ortak.king-yol.bugun-icin-henuz-bir-sey':'Bugün için henüz bir şey yok.',
   'ortak.king-yol.bu':'Bu ',
   'ortak.king-yol.henuz-yapmadiysan-yaptiktan':'Henüz yapmadıysan, yaptıktan sonra da söyleyebilirsin.',
   'ortak.king-yol.king-in-modeli-su-an-kapali':'King’in modeli şu an kapalı. ',
-  'ortak.king-yol.merkeze-hkm-su-an-ulasilamad-2':'Merkeze (HKM) şu an ulaşılamadı. ',
+  'ortak.king-yol.merkeze-ulasilamadi':'Merkeze şu an ulaşılamadı. ',
   'ortak.king-yol.bunu-anlayamadim-sunlardan-b':'Bunu anlayamadım. Şunlardan birini seçebilir ya da «hareket sayfasına git», «uyku 7», ',
   'ortak.king-yol.kaydedilemedi':'Kaydedilemedi: ',
   'ortak.king-yol.tamam-hicbir-seyi-degistirme':'Tamam, hiçbir şeyi değiştirmedim.',
@@ -452,7 +452,9 @@ window.LIFEOS.KING = (function(){
        değildir; Merkez cevaplar, Merkez yoksa sayfa açılır (KING-4 A3). */
     const merkeze = !!KI.baglanti() && (!!bulunan || y.tur === 'bilinmiyor' || y.tur === 'ozet'
       || (y.tur === 'git' && y.kaynak !== 'komut' && (KI.soruMu(metin) || (y.kaynak === 'sayfa' && KI.kucuk(metin).split(' ').length > 3))));
-    let neden = null;
+    let neden = null, hal = null;
+    /* Kapalı olanın adıyla (hesap.js merkezHalMetni); hâl bilinmiyorsa genel cümle. */
+    const kopuk = () => (hal && KI.L.HESAP.merkezHalMetni ? KI.L.HESAP.merkezHalMetni(hal) + ' ' : yz('ortak.king-yol.merkeze-ulasilamadi'));
     if(merkeze){
       const bek = { kim:'king', bekliyor:true, metin:'' };
       KI.akis.push(bek);
@@ -485,6 +487,7 @@ window.LIFEOS.KING = (function(){
         return { tur:'merkez', mode:r.mode };
       }
       neden = r.neden;
+      hal = r.hal || null;
     }
     /* K4: Merkez kurulu ama ulaşılamıyor; Merkez'e giden soru sıraya girer. */
     if(neden === 'baglanti' && !bulunan && y.tur === 'bilinmiyor'){
@@ -492,15 +495,15 @@ window.LIFEOS.KING = (function(){
       /* Sıradan yeniden deneme başarısızsa sohbete hiçbir şey yazılmaz (dakikada bir gürültü olurdu). */
       if(KI.siradanSoru){ KI.akis = KI.akis.filter(m => m !== senMesaj); KI.ciz(false); return { tur:'sira', n, sessiz:true }; }
       KI.cipler = [{ ad:yz('ortak.king-yol.sirayi-gor'), is:'bolum:kutuphane' }];
-      KI.soyle(yz('ortak.king-yol.merkeze-hkm-su-an-ulasilamad') + n + ' soru var.');
+      KI.soyle(kopuk() + yz('ortak.king-yol.siraya-aldim') + n + ' soru var.');
       KI.siraPlanla();
       return { tur:'sira', n };
     }
-    return yerel(y, neden, metin);
+    return yerel(y, neden, metin, kopuk);
   }
 
   /* Yerel King (HKM yoksa ya da cevap veremediyse; sayfa ve kayıt hep burada). */
-  function yerel(y, neden, metin){
+  function yerel(y, neden, metin, kopuk){
     if(y.tur === 'notlar'){
       KI.kapat();
       /* Defter (NOT-PLANI) kuruluysa o; değilse eski Notlarım paneli. */
@@ -540,7 +543,7 @@ window.LIFEOS.KING = (function(){
       KI.soyle(KI.selam());
     }else{
       const on = neden === 'yok' ? yz('ortak.king-yol.king-in-modeli-su-an-kapali')
-        : neden === 'baglanti' ? yz('ortak.king-yol.merkeze-hkm-su-an-ulasilamad-2') : '';
+        : neden === 'baglanti' ? (kopuk ? kopuk() : yz('ortak.king-yol.merkeze-ulasilamadi')) : '';
       KI.soyle(on + yz('ortak.king-yol.bunu-anlayamadim-sunlardan-b')
         + '«bugünün özeti» gibi yazabilirsin.');
     }
