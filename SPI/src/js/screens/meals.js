@@ -6,7 +6,7 @@
    Ekranın ayırt edici tarafı emilim sütunudur: aynı öğünde çay varsa demir
    emilimi yarıya iner ve bu ekranda görünür. */
 window.LIFEOS.PARCA.yazilar({
-  'spi.meals.modul-2':'Modül 2',
+  'spi.meals.modul-2':'Öğün',
   'spi.meals.fotograftan-ogun-okumak-icin':'Fotoğraftan öğün okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için ',
   'spi.meals.fotografi-buraya-birak-ya-da':'Fotoğrafı buraya bırak ya da seçmek için tıkla',
   'spi.meals.fotograftan-gelen-gramaj-her':'Fotoğraftan gelen gramaj her zaman «tahmin» ',
@@ -199,7 +199,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meals.bugun-alinan-veri-yok':'bugün alınan · veri yok',
   'spi.meals.bugun-alinan':'bugün alınan',
   'spi.meals.protein-veri-yok':'protein · veri yok',
-  'spi.meals.oneriyi-ac':'Öneriyi aç',
+  'spi.meals.ozet':'Özet',
 });
 window.LIFEOS.PARCA.sayfa({ id:'meals', modul:'spi', king:{ sira:20, ad:'Öğün', es:['öğün', 'besin', 'yemek', 'beslenme'] }, cekmece:'calisma', ad:'Öğün', sira:20 });
 
@@ -346,8 +346,6 @@ SP.Screens.meals = (function(){
   function quickEntry(){
     return K.Entry({
       label:yz('spi.meals.ogun-ekle'), hint:'portion',
-      action:html`${K.Button({ label:yz('spi.meals.besin-ara'), act:'open-search' })}
-        ${K.Button({ label:yz('spi.meals.fotograftan'), icon:'camera', act:'open-photo' })}`,
       body:html`
         <div class="quick">
           ${K.Select({ id:'meal-slot', value:S.ui.mealSlot || guessSlot(), aria:yz('spi.meals.ogun'),
@@ -357,6 +355,10 @@ SP.Screens.meals = (function(){
           ${K.Input({ id:'meal-text', placeholder:yz('spi.meals.1-tabak-etli-kuru-fasulye'),
             aria:yz('spi.meals.ogun-metni'), value:S.ui.mealDraftText || '' })}
           ${K.Button({ label:yz('spi.meals.ekle'), tone:'primary', act:'add-meal' })}
+        </div>
+        <div class="row wrap gap-8 mt-8">
+          ${K.Button({ label:yz('spi.meals.besin-ara'), size:'sm', tone:'ghost', act:'open-search' })}
+          ${K.Button({ label:yz('spi.meals.fotograftan'), size:'sm', tone:'ghost', icon:'camera', act:'open-photo' })}
         </div>
         ${mealSuggestionChips()}`,
     });
@@ -957,6 +959,7 @@ SP.Screens.meals = (function(){
 
   const TABS = [
     { id:'gunluk', label:yz('spi.meals.ogunler'),      icon:'meal' },
+    { id:'ozet',   label:yz('spi.meals.ozet'),         icon:'chart' },
     { id:'oneri',  label:yz('spi.meals.oneri'),        icon:'target' },
     { id:'deger',  label:yz('spi.meals.besin-degeri'), icon:'layers' },
   ];
@@ -1148,8 +1151,9 @@ SP.Screens.meals = (function(){
     /* iPhone Faz 2b: sol sütun iş (öğünü yaz, günün öğünleri), sağ sütun
        durum ve kısayol (dönen «Öğün» kartı, sık öğünler); raf DOM sırasıyla
        ikişer dizer. Telefonda tek sütun: önce yazma alanı. */
-    gunluk:() => html`${K.Ledger(() => [quickEntry(), DonenOgun(), dayCard(), sablonKutusu(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
+    gunluk:() => html`${K.Ledger(() => [quickEntry(), dayCard(), sablonKutusu(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
       <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
+    ozet:() => html`${raw(LIFEOS.PARCA.yer('meals', 'ust', K))}${K.Ledger(() => [DonenOgun()])}`,
     oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard(), akilliBeslenmeKutusu()])}
       <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
     deger:() => html`${K.Ledger(() => [microCard(), gapCard()])}
@@ -1234,7 +1238,7 @@ SP.Screens.meals = (function(){
   TABS.forEach(t => LIFEOS.PARCA.blok({ id:'meals.' + t.id, sayfa:'meals', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
     const n = M.mealsOf(shownDate()).length;
-    return String(LIFEOS.PARCA.yer('meals', 'ust', K) + K.SayfaBolumleri({ act:'meal-tab', aria:'Besin bölümleri',
+    return String(K.SayfaBolumleri({ act:'meal-tab', aria:'Besin bölümleri',
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:LIFEOS.PARCA.yer('meals', t.id, K),
         sayi:t.id === 'gunluk' && n ? n : null })) }));
   }
@@ -1598,11 +1602,8 @@ SP.Screens.meals = (function(){
       return Math.round(t.kcal) + ' kcal · protein ' + Math.round(t.protein) + ' g'
         + (tg.ok ? ' / ' + tg.protein.min + ' g' : '');
     },
-    actions(){
-      return String(html`${K.Button({ label:yz('spi.meals.ogun-ekle'), icon:'plus', size:'sm',
-        act:'meal-tab', data:{ 'data-tab':'gunluk' } })}
-        ${K.Button({ label:yz('spi.meals.oneriyi-ac'), size:'sm', act:'meal-tab', data:{ 'data-tab':'oneri' } })}`);
-    },
+    /* Sayfa başında düğme yok: ikisi de bölüm çubuğundaki aynı yere gidiyordu. */
+    actions(){ return ''; },
     render, afterRender, handle, change, guessSlot,
   };
 })();

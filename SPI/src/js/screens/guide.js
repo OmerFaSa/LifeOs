@@ -12,7 +12,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.guide.gunluk-olcum':'Günlük ölçüm',
   'spi.guide.gunluk-olcum-ekraninda-uyku':'Günlük ölçüm ekranında uyku, nabız ve hissettiğin hâl. ',
   'spi.guide.hepsi-zorunlu-degil-eksik-gi':'Hepsi zorunlu değil: eksik girdi sıfır sayılmaz.',
-  'spi.guide.hareket-bolumu-kardiyo-kuvve':'Hareket bölümü kardiyo, kuvvet, esneklik ve dinlenme sayfalarına ayrılır; Bugün sayfası günün yük emrini verir. Emri toparlanma belirler, istek değil.',
+  'spi.guide.hareket-bolumu-kardiyo-kuvve':'Hareket bölümünde Egzersizler kardiyo, kuvvet, esneklik ve dinlenmeye ayrılır; Bugün sayfası günün yük emrini verir. Emri toparlanma belirler, istek değil.',
   'spi.guide.finans-sepet-sayfasina-hafta':'Finans → Sepet sayfasına haftalık alışverişi gir; Bütçe sayfası koçların talebini toplar. Fiyatı kendi fişinden düzeltince ',
   'spi.guide.bes-ajan-kendi-alanina-bakar':'Beş ajan kendi alanına bakar. Danışma ekranından birine doğrudan soru sorabilirsin.',
   'spi.guide.hkm-bagli-degil-ofis-kural':'HKM bağlı değil. Ofis kural motoruyla çalışıyor; HKM’ye bağlanınca oradaki model kullanılır.',

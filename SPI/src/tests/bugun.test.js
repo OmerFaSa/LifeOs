@@ -46,7 +46,7 @@
       });
     });
 
-    it('karolar, pano kartları ve Durum Analiz\'in başında', async () => {
+    it('karolar ve Durum Analiz\'in ilk bölümünde, pano kartları Hafta\'da', async () => {
       dolu();
       await withTodayAsync(GUN, async () => {
         const d = yerlestir(await SP.Screens.analytics.render());
@@ -54,10 +54,9 @@
           const o = d.querySelector('.analiz-bugun');
           expect(!!o).toBe(true);
           expect(o.querySelectorAll('.kapak__sayi').length).toBe(4);
-          expect(!!o.querySelector('.pk-ust [data-pano="uyku"]')).toBe(true);
           expect(!!o.querySelector('.bugun__alan[aria-label="Durum"] .donen')).toBe(true);
-          /* Özet sayfanın başındadır: «Bu hafta» kutusundan önce. */
-          expect(d.firstElementChild).toBe(o);
+          expect(o.closest('.sayfabolum').id).toBe('bl-ozet');
+          expect(!!d.querySelector('#bl-bu .pk-ust [data-pano="uyku"]')).toBe(true);
         }finally{ d.remove(); }
       });
     });

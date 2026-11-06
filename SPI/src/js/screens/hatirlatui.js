@@ -129,7 +129,7 @@ SP.HatirlatUI = (function(){
             options:[{ value:'', label:yz('spi.hatirlatui.hicbiri-yalniz-isaret') }].concat(hazirlar().map(a => ({ value:a.id, label:a.ad }))) }) })),
         html`<div id="ht-hata" class="small" role="alert"></div>`,
         when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
-          Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
+          Testler › Daha › İlaç’tan kullandığın şeyi kaydet.</p>`),
         K.Notice({ tone:'info', body:(H().telefonMu()
             ? yz('spi.hatirlatui.telefon-bildirimi-aciksa-saa') + H().PLAN_GUN + ' güne kurulur: SPİ kapalıyken de gelir. '
               + yz('spi.hatirlatui.uygulamayi-bir-hafta-acmazsa')

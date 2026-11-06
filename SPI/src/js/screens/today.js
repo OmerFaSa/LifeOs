@@ -1093,7 +1093,7 @@ SP.Screens.today = (function(){
     const v = M.vitalsOf(d) || M.defaultVitals(d);
     const alanlar = FIELDS.filter(f => HIZLI_ALAN.indexOf(f.id) >= 0);
     return K.Kutu({ ad:yz('spi.today.gunun-olcumu'), class:'kahraman',
-      yuva:raw(SP.h.esc(d === U.todayISO() ? 'bugün' : U.fmtDate(d)) + OdakRozeti(d)),
+      yuva:raw(SP.h.esc((d === U.todayISO() ? 'bugün' : U.fmtDate(d)) + ' · ' + alanlar.filter(f => v[f.id] != null).length + '/' + alanlar.length) + OdakRozeti(d)),
       /* SADE (kullanıcı, 2026-10-02: «SPİ'de AYS kadar sade olmayan, göz
          yoran şeyler var»): Bugün'ün dört alanı simgesiz, yalnız etiket —
          renkli simgeler «Günü düzenle»nin tam formunda durur. «Boş alan
@@ -1857,7 +1857,6 @@ SP.Screens.today = (function(){
     const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
     return String(html`<section class="analiz-bugun mb-16" aria-label="Bugünün özeti">
       ${raw(karolar ? karolar.outerHTML : '')}
-      ${raw(PanoUst())}
       <section class="bugun__alan mt-16" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">${yz('spi.today.durum')}</h2>
         ${DonenKutular(true)}
         ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
@@ -2266,7 +2265,7 @@ SP.Screens.today = (function(){
     id:'today',
     /* iPhone Faz 6 (2026-10-02): Bugün'de açık dört giriş kartı vardı; günün
        hissi isteğe bağlı bir kayıttır — şerit, dokununca açılır. */
-    kucukVarsayilan:['günün-hissi'],
+    kucukVarsayilan:['günün-hissi', 'günün-ölçümü'],
     title:yz('spi.today.bugun'),
     /* Bu sayfanın başlığı BUGÜNÜ anlatır. Sıradaki hamle başka bir
        bölüme aitse (tahlil, sepet) onu buraya başlık yapmak kafa
@@ -2278,7 +2277,7 @@ SP.Screens.today = (function(){
        «ilaç ya da takviye». Kural metni, model yok. */
     kapak,
     /* Analiz'in başındaki «Bugün» özeti ve onun öneri düğmeleri (Faz 2). */
-    ozet, onayHandle,
+    ozet, panoUst:PanoUst, onayHandle,
     /* Günü kapat: app.js kurar (GUNUKAPAT.kur); satırlar ve tazeleme burada. */
     gunuKapat:{ satirlar:gkSatirlari, tazele:gkTazele, ac:gkAc },
     sesli(simdi){

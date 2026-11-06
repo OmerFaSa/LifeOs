@@ -93,7 +93,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.basket.birim-basi':'Birim başı',
   'spi.basket.100-g-da':'100 g\'da',
   'spi.basket.harcama-seritleri':'Harcama şeritleri',
-  'spi.basket.talep-tablosu':'Talep tablosu',
+  'spi.basket.talep-tablosu':'Aylık ihtiyaç',
   'spi.basket.veri-yok':'veri yok',
   'spi.basket.tl':'TL',
   'spi.basket.kalem-fiyati-bilinmedigi-ici':'kalem fiyatı bilinmediği için toplamın dışında.',
@@ -610,10 +610,12 @@ SP.Screens.basket = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): dört bölüm alt alta; bölüm çubuğu kaydırır,
      Sepet'in kalem sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o
      bölüm sakin bir notla düşer. */
+  /* Düğme sayfa başında değil, işinin bölümünde: üçü birden her bölümde duruyordu. */
+  const ustDugme = d => html`<div class="row wrap gap-8 mb-16">${d}</div>`;
   const BODIES = {
-    butce:() => html`${budgetView()}
+    butce:() => html`${ustDugme(K.Button({ label:yz('spi.basket.sinir-ve-ucretler'), size:'sm', act:'open-limits' }))}${budgetView()}
       <div class="mt-24">${raw(UI.rail(['budget-rank', 'price-estimate', 'certainty']))}</div>`,
-    sepet:() => html`${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
+    sepet:() => html`${ustDugme(K.Button({ label:yz('spi.basket.kalem-ekle'), icon:'plus', size:'sm', tone:'primary', act:'open-add' }))}${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
       <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`,
     ikame:() => html`${K.Ledger(() => [swapCard(), bulkCard(),
         /* Bütçe bölümündeki «Bütçenin yeri» ile aynı tablo: aynı başlık aynı
@@ -623,7 +625,7 @@ SP.Screens.basket = (function(){
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
       ])}
       <div class="mt-24">${raw(UI.rail(['substitute', 'bulk', 'budget-rank']))}</div>`,
-    fiyat:() => html`${K.Ledger(() => [priceCard()])}
+    fiyat:() => html`${ustDugme(K.Button({ label:yz('spi.basket.fis-oku'), size:'sm', icon:'camera', act:'open-receipt' }))}${K.Ledger(() => [priceCard()])}
       <div class="mt-24">${raw(UI.rail(['price-estimate', 'certainty']))}</div>`,
   };
 
@@ -818,12 +820,7 @@ SP.Screens.basket = (function(){
       const st = SP.Money.status();
       return st.text;
     },
-    actions(){
-      return String(html`${K.Button({ label:yz('spi.basket.kalem-ekle'), icon:'plus', size:'sm', tone:'primary',
-        act:'open-add' })}
-        ${K.Button({ label:yz('spi.basket.fis-oku'), size:'sm', icon:'camera', act:'open-receipt' })}
-        ${K.Button({ label:yz('spi.basket.sinir-ve-ucretler'), size:'sm', act:'open-limits' })}`);
-    },
+    actions(){ return ''; },
     render, afterRender, handle, change,
   };
 })();

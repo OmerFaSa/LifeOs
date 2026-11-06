@@ -39,7 +39,7 @@
       }
     });
 
-    it('Hareket › Günün yük emri: toparlanma cümlesi bir kez yazılır', async () => {
+    it('Hareket › Bugünkü yük: toparlanma cümlesi bir kez yazılır', async () => {
       resetState();
       await withTodayAsync('2026-03-01', async () => {
         pushVitals('2026-03-01', { sleep:8 });
@@ -47,7 +47,7 @@
         expect(rx.readiness.ok).toBeTruthy();
         const d = yerlestir(await SP.Screens.move.render());
         try{
-          const k = kutu(d, 'Günün yük emri');
+          const k = kutu(d, 'Bugünkü yük');
           const cumle = rx.readiness.band.order;
           const kez = k.textContent.split(cumle).length - 1;
           expect(kez).toBe(1);
@@ -63,8 +63,8 @@
       try{
         expect(d.querySelector('.sect__h')).toBeNull();
         expect(d.textContent.indexOf('Bütçe diğer koçların talebinden çıkar') < 0).toBe(true);
-        /* Talep tablosu yerinde */
-        expect(d.textContent).toContain('Talep tablosu');
+        /* Aylık ihtiyaç tablosu yerinde */
+        expect(d.textContent).toContain('Aylık ihtiyaç');
       }finally{ d.remove(); }
     });
   });

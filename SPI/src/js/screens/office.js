@@ -93,7 +93,6 @@ window.LIFEOS.PARCA.yazilar({
   'spi.office.masa-notu':'masa notu',
   'spi.office.masalar-arasi-devir-2':'masalar arası devir',
   'spi.office.karar-takipte':'karar takipte',
-  'spi.office.i-nceleme':'İnceleme',
 });
 window.LIFEOS.PARCA.sayfa({ id:'office', modul:'spi', cekmece:'ofis', ad:'Masalar', sira:10 });
 
@@ -405,7 +404,7 @@ SP.Screens.office = (function(){
     return briefingCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.patron-masasi', sayfa:'office', yer:'y2', sira:40, ad:'Patron masası', ciz({ flags, vo }){
-    return K.Entry({ wide:true, label:yz('spi.office.patron-masasi'), hint:'office', meta:'orkestrasyon',
+    return K.Entry({ wide:true, label:yz('spi.office.patron-masasi'), hint:'office',
           body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` });
   } });
   LIFEOS.PARCA.blok({ id:'office.handoffentry', sayfa:'office', yer:'y2', sira:50, ad:'Devir notu', ciz({ flags, vo }){
@@ -561,10 +560,8 @@ SP.Screens.office = (function(){
         + (hand ? ' · ' + hand + ' devir' : '')
         + (open ? ' · ' + open + ' karar takipte' : '');
     },
-    actions(){
-      return String(K.Button({ label:yz('spi.office.i-nceleme'), size:'sm', icon:'users', class:'btn--screen',
-        act:'go', data:{ 'data-route':'meeting' } }));
-    },
+    /* Sayfa başında düğme yok: «İnceleme» çekmecenin kendi seçicisinde. */
+    actions(){ return ''; },
     render, handle,
   };
 })();

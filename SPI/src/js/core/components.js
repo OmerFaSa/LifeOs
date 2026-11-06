@@ -206,20 +206,41 @@ SP.C = (function(){
      aşağı doğru uzamaz; bölüm çubuğu bir KAT seçer ve o kat görünür.
      Bütün bölümler DOM'da kalır (arama, derin bağlantı, bolumeGit); seçim
      yeniden çizimde korunur (AKTIF_BOLUM, çubuğun eylemine göre). */
+  /* GRUP (2026-11-06, kullanıcı: «bir bölümde birden fazla özellik var, ne
+     yapacağım anlaşılmıyor»): `grup` taşıyan bölümler çubukta tek düğmede
+     toplanır; düğme adlarını sıralayan kısa bir liste açar. Bölüm silinmez:
+     çubukta gizli düğmesi durur, bolumeGit ve derin bağlantı aynen çalışır,
+     denetim araçları oraya da ulaşır. Görünen ilk ile son düğme uçta kalsın
+     diye gizliler araya yazılır (ortalama kuralı :first/:last-child ister). */
   const AKTIF_BOLUM = {};
   function SayfaBolumleri(o){
     const b = (o.bolumler || []).filter(x => x && x.govde != null && String(x.govde) !== '');
+    const gruplar = b.map(x => x.grup).filter((g, i, l) => g && l.indexOf(g) === i);
+    const grupId = g => (o.act || 'x') + '-g' + gruplar.indexOf(g);
+    const uyeler = g => b.filter(x => x.grup === g);
     const secili = AKTIF_BOLUM[o.act || ''];
-    const aktif = b.some(x => x.id === secili) ? secili : (b[0] && b[0].id);
+    const aktif = b.some(x => x.id === secili) || gruplar.some(g => grupId(g) === secili) ? secili : (b[0] && b[0].id);
+    const dugme = x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
+          ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':x.id === aktif ? 'true' : null, hidden:!!x.grup })}>${x.ad}${when(x.sayi != null,
+          () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`;
+    const grupDugme = g => { const u = uyeler(g), on = grupId(g) === aktif || u.some(x => x.id === aktif);
+      return html`<button class="${cls('bolumcubugu__ad', on && 'is-on')}"
+          ${attrs({ 'data-act':o.act, 'data-tab':grupId(g), 'data-uyeler':u.map(x => x.id).join(' '), 'aria-current':on ? 'true' : null })}>${g}</button>`; };
+    const gorunen = b.filter((x, i) => !x.grup || b.findIndex(y => y.grup === x.grup) === i).map(x => x.grup ? grupDugme(x.grup) : dugme(x));
+    const gizli = b.filter(x => x.grup).map(dugme);
     return html`
-      ${when(b.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
-        aria-label="${o.aria || yz('spi.core.components.bu-sayfada')}">${map(b, x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
-          ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':x.id === aktif ? 'true' : null })}>${x.ad}${when(x.sayi != null,
-          () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`)}</nav>`)}
+      ${when(gorunen.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
+        aria-label="${o.aria || yz('spi.core.components.bu-sayfada')}">${gorunen[0]}${gizli}${gorunen.slice(1)}</nav>`)}
       <div class="${cls('sayfabolumler', b.length > 1 && 'sayfabolumler--kat')}">${map(b, x => html`
         <section class="${cls('sayfabolum', x.id === aktif && 'is-on')}" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
           <h2 class="sayfabolum__ad" id="${'bl-' + x.id + '-ad'}" tabindex="-1">${x.ad}</h2>
+          ${when(x.grup, () => html`<button class="linkbtn mb-16" ${attrs({ 'data-act':o.act, 'data-tab':grupId(x.grup) })}>‹ ${x.grup}</button>`)}
           ${x.govde}
+        </section>`)}${map(gruplar, g => html`
+        <section class="${cls('sayfabolum', grupId(g) === aktif && 'is-on')}" id="${'bl-' + grupId(g)}" aria-labelledby="${'bl-' + grupId(g) + '-ad'}">
+          <h2 class="sayfabolum__ad" id="${'bl-' + grupId(g) + '-ad'}" tabindex="-1">${g}</h2>
+          ${map(uyeler(g), x => html`<button class="minrow" ${attrs({ 'data-act':o.act, 'data-tab':x.id })}>
+            <span class="minrow__label">${x.ad}</span><span class="minrow__detail">${x.sayi != null ? x.sayi + ' ' : ''}›</span></button>`)}
         </section>`)}</div>`;
   }
 
@@ -300,15 +321,16 @@ SP.C = (function(){
       const nav = kap.previousElementSibling;
       const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(nav && nav.classList.contains('bolumcubugu--sayfa')){
-        const eski = nav.querySelector('.bolumcubugu__ad.is-on');
+        const eski = nav.querySelector('.bolumcubugu__ad.is-on:not([hidden])');
         Array.prototype.forEach.call(nav.querySelectorAll('button[data-tab]'), btn => {
-          const on = btn.getAttribute('data-tab') === id;
+          /* Gruptaki bölüm açılınca grubun düğmesi de seçili görünür. */
+          const on = btn.getAttribute('data-tab') === id || (btn.getAttribute('data-uyeler') || '').split(' ').indexOf(id) >= 0;
           btn.classList.toggle('is-on', on);
           if(on){ btn.setAttribute('aria-current', 'true'); AKTIF_BOLUM[btn.getAttribute('data-act') || ''] = id; }
           else btn.removeAttribute('aria-current');
         });
         /* Seçili hap eski bölümden yenisine kayar (hareket.js isaretKaydir). */
-        const yeni = nav.querySelector('.bolumcubugu__ad.is-on');
+        const yeni = nav.querySelector('.bolumcubugu__ad.is-on:not([hidden])');
         if(H && H.isaretKaydir && yeni && eski && yeni !== eski) H.isaretKaydir(yeni, eski);
       }
       /* Açılan kat yumuşakça gelir; yalnız seçimde (yeniden çizimde değil). */

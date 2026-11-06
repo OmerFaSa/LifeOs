@@ -31,7 +31,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meeting.belirgin-baglar':'Belirgin bağlar',
   'spi.meeting.gun-sayisina-gore-rastlantid':'Gün sayısına göre rastlantıdan ayrılan bir bağ yok.',
   'spi.meeting.bag-zayif':'bağ zayıf,',
-  'spi.meeting.bag-icin-ortak-gun-yetersiz':'bağ için ortak gün yetersiz. Eşik gün sayısına göre büyür (Analiz › Çapraz).',
+  'spi.meeting.bag-icin-ortak-gun-yetersiz':'bağ için ortak gün yetersiz. Eşik gün sayısına göre büyür (Analiz › Bağlar).',
   'spi.meeting.planlarin-uyumu':'Planların uyumu',
   'spi.meeting.tek-karar':'Tek karar',
   'spi.meeting.one-cikan-is-yok':'Öne çıkan iş yok.',
@@ -248,8 +248,8 @@ SP.Screens.meeting = (function(){
     const parcaB = { r, open };
     return String(html`
       <div class="inc">
-        ${LIFEOS.PARCA.yer('meeting', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         <div class="inc-iki">${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('meeting', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+        ${LIFEOS.PARCA.yer('meeting', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         <div class="inc-iki">${LIFEOS.PARCA.yer('meeting', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('meeting', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
         ${LIFEOS.PARCA.yer('meeting', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
@@ -311,6 +311,8 @@ SP.Screens.meeting = (function(){
 
   return {
     id:'meeting',
+    /* İnceleme'nin tek işi haftanın kararı: sayıları gördükten sonra karşılaştırmalar isteyene. */
+    kucukVarsayilan:['verinden-çıkan-fikirler', 'belirgin-bağlar'],
     /* Sade (2026-10-16): öncelik tablosu sabit bir kuraldır, her açılışta
        açık durmaz; başlığına dokununca açılır. Gündem ve modelin rolü
        ekranın ⓘ kartında (office, no-model ipuçları). */

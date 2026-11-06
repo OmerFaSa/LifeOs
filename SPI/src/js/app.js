@@ -373,7 +373,7 @@ SP.App = (function(){
        düzenlenir; bütçenin yeri, kural sırası ve fiyat kaynağı sabit
        başvuru metnidir. */
     meals:['günlük-hedef', 'tabak', 'öğün-çizelgesi'],
-    move:['günün-yük-emri', 'bu-hafta-hareket', 'antrenman-haftası',
+    move:['bugünkü-yük', 'bu-hafta-hareket', 'antrenman-haftası',
       'ilerleme-kuralı-kardiyo', 'ilerleme-kuralı-kuvvet', 'ilerleme-kuralı-esneklik'],
     basket:['bütçenin-yeri', 'fiyatlar-nereden-geliyor', 'kural-sırası'],
     kitchen:['hane'],

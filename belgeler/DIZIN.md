@@ -11,6 +11,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 ## Ekip ve planlar
 
 - [YARIM](ekip/YARIM.md) — Yarım kalan işler, bekleyen kararlar ve gerçek cihazda denenmeyenler; yeni oturum önce bunu okur; durumu: güncel (2026-11-06)
+- [SPİ sadelik](ekip/sadelik/spi.md) — SPİ ekranlarının önce/sonra sadelik dökümü, ortak gereken işler ve sorulacak silme önerileri; durumu: 2026-11-06.
 - [PLAN](ekip/PLAN.md) — Esnek hedef sistemi mimarisi ve ofisler arası genel planlama motoru; durumu: tamamlandı (2026-09-24)
 - [EKIP-PLANI](ekip/EKIP-PLANI.md) — Üç Claude için tek tasarım ve 183 özelliklik ekip hareket planı; durumu: tamamlandı (2026-09-24)
 - [DEVIR](ekip/DEVIR.md) — Sıradaki Claude için anlık çalışma talimatları ve öncelikli iş listesi; durumu: tamamlandı (2026-09-23)

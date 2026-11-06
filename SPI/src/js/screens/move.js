@@ -25,7 +25,7 @@ window.LIFEOS.PARCA.yazilar({
 });
 
 window.LIFEOS.PARCA.yazilar({
-  'spi.move.modul-3':'Modül 3',
+  'spi.move.modul-3':'Hareket',
   'spi.move.bu-bir-geri-adim-degil':'Bu bir geri adım değil, planın parçası. Asgari gün yine geçerli: ',
   'spi.move.bugun-henuz-seans-kaydi-yok':'Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.',
   'spi.move.toparlanma':'Toparlanma ',
@@ -88,7 +88,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.move.bugun-dinlenme-gunu':'Bugün dinlenme günü.',
   'spi.move.bugun-tam-yuk-yapilabilir':'Bugün tam yük yapılabilir.',
   'spi.move.bugun-yuk-hafifletilmeli':'Bugün yük hafifletilmeli.',
-  'spi.move.uyku-ve-nabiz-girilince-gunu':'Uyku ve nabız girilince günün yük emri hesaplanır. ',
+  'spi.move.uyku-ve-nabiz-girilince-gunu':'Uyku ve nabız girilince bugünkü yük hesaplanır. ',
   'spi.move.olcum-olmadan-yuk-korlemesin':'Ölçüm olmadan yük körlemesine verilmez.',
   'spi.move.olcum-bekliyor-2':'Ölçüm bekliyor',
 });
@@ -104,7 +104,10 @@ window.LIFEOS.PARCA.yazilar({
   'spi.move.bugun':'Bugün',
   'spi.move.i-lerleme':'İlerleme',
   'spi.move.tumu':'Tümü',
-  'spi.move.gunun-yuk-emri':'Günün yük emri',
+  'spi.move.gunun-yuk-emri':'Bugünkü yük',
+  'spi.move.egzersizler':'Egzersizler',
+  'spi.move.basamaklar-ve-teknik':'Basamaklar ve teknik',
+  'spi.move.diger-seanslar':'Diğer seanslar',
   'spi.move.veri-gir':'Veri gir',
   'spi.move.seans-sec':'Seans seç',
   'spi.move.programlar-20':'Programlar (20)',
@@ -284,7 +287,7 @@ SP.Screens.move = (function(){
 
   /* Sekmeler: iki genel görünüm ve arada dört faaliyet alanı. */
   const TABS = [{ id:'bugun', label:yz('spi.move.bugun'), icon:'today' }]
-    .concat(SP.AREAS.map(a => ({ id:a.id, label:a.label, icon:a.icon })))
+    .concat(SP.AREAS.map(a => ({ id:a.id, label:a.label, icon:a.icon, grup:yz('spi.move.egzersizler') })))
     .concat([{ id:'ilerleme', label:yz('spi.move.i-lerleme'), icon:'chart' }]);
 
   /* Kuvvet alanının ikinci şeridi: hareket kalıpları. Yalnız kuvvette
@@ -349,12 +352,7 @@ SP.Screens.move = (function(){
   function pickSessionEntry(){
     const rx = SP.Move.prescription();
     const suggested = rx.suggest.map(t => t.id);
-    return K.Entry({
-      label:yz('spi.move.seans-sec'), hint:'session-pick',
-      meta:SP.SESSION_TEMPLATES.length + ' şablon',
-      action:html`${K.Button({ label:yz('spi.move.programlar-20'), act:'open-programs', size:'sm', tone:'ghost' })}
-        ${K.Button({ label:yz('spi.move.met-kalori'), act:'open-met-calc', size:'sm', tone:'ghost' })}`,
-      body:html`<div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
+    const satir = t => html`
         <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
           data-act="start-session" data-id="${t.id}">
           <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? raw(UI.icon('check')) : ''}</span>
@@ -363,7 +361,16 @@ SP.Screens.move = (function(){
               ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> ${yz('spi.move.onerilen')}</span>`)}</span>
             <span class="pickcard__meta">${t.minutes} ${yz('spi.move.dk')} ${t.items.length} ${yz('spi.move.hareket')} ${t.note}</span>
           </span>
-        </button>`)}
+        </button>`;
+    /* Önerilen yoksa (ölçüm bekleniyor) hiçbiri saklanmaz. */
+    const onde = SP.SESSION_TEMPLATES.filter(t => !suggested.length || suggested.indexOf(t.id) >= 0);
+    const diger = SP.SESSION_TEMPLATES.filter(t => onde.indexOf(t) < 0);
+    return K.Entry({
+      label:yz('spi.move.seans-sec'), hint:'session-pick',
+      meta:SP.SESSION_TEMPLATES.length + ' şablon',
+      action:html`${K.Button({ label:yz('spi.move.programlar-20'), act:'open-programs', size:'sm', tone:'ghost' })}
+        ${K.Button({ label:yz('spi.move.met-kalori'), act:'open-met-calc', size:'sm', tone:'ghost' })}`,
+      body:html`<div class="picks">${map(onde, satir)}
         <button class="pickcard" data-act="start-session" data-id="">
           <span class="pickcard__box" aria-hidden="true"></span>
           <span class="pickcard__body">
@@ -371,7 +378,9 @@ SP.Screens.move = (function(){
             <span class="pickcard__meta">${yz('spi.move.hareketleri-kendin-sec')}</span>
           </span>
         </button>
-      </div>`,
+      </div>
+      ${when(diger.length, () => html`<details class="hiz-ac mt-8"><summary>${yz('spi.move.diger-seanslar')} · ${diger.length}</summary>
+        <div class="picks">${map(diger, satir)}</div></details>`)}`,
     });
   }
 
@@ -471,22 +480,28 @@ SP.Screens.move = (function(){
           ${pr.ready ? K.Badge({ label:yz('spi.move.ust-basamak-acik'), tone:'ok' })
             : K.Badge({ label:pr.sessions + '/' + pr.needed + ' seans', tone:'muted' })}
         </div>
-        <p class="small muted">${ex.cue}</p>
-        <div class="ladder">${map(ex.levels, (l, i) => html`
-          <div class="${cls('ladderstep', i < cur && 'is-done', i === cur && 'is-current')}">
-            <span class="ladderstep__no">${i + 1}</span>
-            <span>${l.name}</span>
-            <span class="ladderstep__to">${l.to}</span>
-          </div>`)}</div>
-        <div class="ladderblk__foot">
-          <span class="small dim">${pr.note}</span>
-          <span class="row-sm">
-            ${K.Button({ label:yz('spi.move.teknik-ve-ipuclari'), size:'sm', tone:'ghost', act:'open-ex-detail', data:{ 'data-id':ex.id } })}
-            ${when(pr.ready, () => K.Button({ label:yz('spi.move.ust-basamaga-gec'), size:'sm',
-              act:'advance', data:{ 'data-id':ex.id } }))}
-            ${K.Button({ label:yz('spi.move.basamak-sec'), size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
-          </span>
-        </div>
+        ${/* Görünen: şu anki basamak ve varsa tek gerçek eylem; gerisi açılır (45 düğme vardı). */''}
+        ${when(ex.levels[cur], () => html`<div class="ladder"><div class="ladderstep is-current">
+          <span class="ladderstep__no">${cur + 1}</span><span>${ex.levels[cur].name}</span>
+          <span class="ladderstep__to">${ex.levels[cur].to}</span></div></div>`)}
+        ${when(pr.ready, () => html`<div class="mt-8">${K.Button({ label:yz('spi.move.ust-basamaga-gec'), size:'sm',
+          act:'advance', data:{ 'data-id':ex.id } })}</div>`)}
+        <details class="hiz-ac mt-8"><summary>${yz('spi.move.basamaklar-ve-teknik')}</summary>
+          <p class="small muted">${ex.cue}</p>
+          <div class="ladder">${map(ex.levels, (l, i) => html`
+            <div class="${cls('ladderstep', i < cur && 'is-done', i === cur && 'is-current')}">
+              <span class="ladderstep__no">${i + 1}</span>
+              <span>${l.name}</span>
+              <span class="ladderstep__to">${l.to}</span>
+            </div>`)}</div>
+          <div class="ladderblk__foot">
+            <span class="small dim">${pr.note}</span>
+            <span class="row-sm">
+              ${K.Button({ label:yz('spi.move.teknik-ve-ipuclari'), size:'sm', tone:'ghost', act:'open-ex-detail', data:{ 'data-id':ex.id } })}
+              ${K.Button({ label:yz('spi.move.basamak-sec'), size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
+            </span>
+          </div>
+        </details>
       </div>`;
   }
 
@@ -1502,7 +1517,7 @@ SP.Screens.move = (function(){
   const BODIES = {
     bugun:() => html`${K.Ledger([DonenHareket(), hazirAntrenmanEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
-    ilerleme:() => html`${K.Ledger([
+    ilerleme:() => html`${raw(LIFEOS.PARCA.yer('move', 'ust', K))}${K.Ledger([
         vucutAnalizKutusu(),
         vucutKutusu(),
         K.Entry({ wide:true, label:yz('spi.move.yuk-egrisi'), hint:'load', meta:'son 30 gün',
@@ -1568,8 +1583,8 @@ SP.Screens.move = (function(){
   TABS.forEach(t => LIFEOS.PARCA.blok({ id:'move.' + t.id, sayfa:'move', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
     const done = M.workoutsOf(U.todayISO()).length;
-    return String(LIFEOS.PARCA.yer('move', 'ust', K) + K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:LIFEOS.PARCA.yer('move', t.id, K),
+    return String(K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, govde:LIFEOS.PARCA.yer('move', t.id, K),
         sayi:t.id === 'bugun' && done ? done : null })) }));
   }
 
@@ -1956,10 +1971,9 @@ SP.Screens.move = (function(){
       return rx.readiness.band.label + (rx.factor >= 1 ? ' · tam yük'
         : ' · yükün %' + Math.round(rx.factor * 100) + '\u2019i');
     },
-    actions(){
-      return String(K.Button({ label:yz('spi.move.seans-ekle'), icon:'plus', size:'sm', tone:'primary',
-        act:'start-session', data:{ 'data-id':'' } }));
-    },
+    /* Sayfa başında düğme yok: seans Bugün'ün listesinden, alana özgü olan
+       o alanın kartından başlar; aynı yere giden ikinci düğme sadeleşti. */
+    actions(){ return ''; },
     yogunlukBantlari, render, afterRender, handle, change,
   };
 })();

@@ -15,7 +15,7 @@
    Panel artık bir yapı değil, bir SÜZGEÇtir: listeyi daraltır, listeyi
    bölmez. Girişte ise hiç yoktur — arama kutusu onun yerini alır. */
 window.LIFEOS.PARCA.yazilar({
-  'spi.labs.modul-1':'Modül 1',
+  'spi.labs.modul-1':'Testler',
   'spi.labs.referans-araligi':'Referans aralığı',
   'spi.labs.hedef-bant':'Hedef bant',
   'spi.labs.kirmizi-bayrak':'Kırmızı bayrak',
@@ -79,6 +79,9 @@ window.LIFEOS.PARCA.yazilar({
   'spi.labs.test-gir':'Test gir',
   'spi.labs.gecmis':'Geçmiş',
   'spi.labs.karsilastir':'Karşılaştır',
+  'spi.labs.daha':'Daha',
+  'spi.labs.laboratuvar-ve-saat':'Laboratuvar ve saat',
+  'spi.labs.panele-gore-suz':'Panele göre süz',
   'spi.labs.paneller':'Paneller',
   'spi.labs.i-lac':'İlaç',
   'spi.labs.egilim':'Eğilim',
@@ -253,7 +256,7 @@ window.LIFEOS.PARCA.sayfa({ id:'labs', modul:'spi', king:{ sira:50, ad:'Testler'
 
 SP.Screens.labs = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
-  const { html, raw, when, map, cls } = SP.h;
+  const { html, raw, when, map, cls, attrs } = SP.h;
   const K = SP.C, P = SP.Parts;
 
   /* Eşiğin dayanağı — tabloda tek kelimelik özet, ayrıntısı altındaki
@@ -270,10 +273,10 @@ SP.Screens.labs = (function(){
     { id:'sonuc',  label:yz('spi.labs.sonuclar'),     icon:'layers' },
     { id:'giris',  label:yz('spi.labs.test-gir'),     icon:'flask' },
     { id:'gecmis', label:yz('spi.labs.gecmis'),       icon:'clock' },
-    { id:'kiyas',  label:yz('spi.labs.karsilastir'),  icon:'chart' },
-    { id:'panel',  label:yz('spi.labs.paneller'),     icon:'layers' },
-    { id:'ilac',   label:yz('spi.labs.i-lac'),         icon:'flask' },
-    { id:'trend',  label:yz('spi.labs.egilim'),       icon:'chart' },
+    { id:'kiyas',  label:yz('spi.labs.karsilastir'),  icon:'chart', grup:yz('spi.labs.daha') },
+    { id:'panel',  label:yz('spi.labs.paneller'),     icon:'layers', grup:yz('spi.labs.daha') },
+    { id:'ilac',   label:yz('spi.labs.i-lac'),         icon:'flask', grup:yz('spi.labs.daha') },
+    { id:'trend',  label:yz('spi.labs.egilim'),       icon:'chart', grup:yz('spi.labs.daha') },
   ];
 
   /* Yapistirma onizlemesi oturum boyunca burada durur; kaydedilene kadar
@@ -449,7 +452,8 @@ SP.Screens.labs = (function(){
           placeholder:yz('spi.labs.olcum-ara'), aria:yz('spi.labs.olcum-ara-2'), change:'lab-query', debounce:200 })}
           ${K.Button({ label:yz('spi.labs.hekime-gotur'), act:'open-doctor' })}`,
         body:html`
-          ${when(panelFilter(), () => raw(String(panelFilter())))}
+          ${when(panelFilter(), () => html`<details class="hiz-ac mb-8" ${attrs({ open:(S.ui.labFilter || 'all') !== 'all' })}>
+            <summary>${yz('spi.labs.panele-gore-suz')}</summary>${raw(String(panelFilter()))}</details>`)}
           ${raw(etkinSuzgec(rows.length))}
           ${when(!rows.length, () => K.Notice({ tone:'info',
             body:yz('spi.labs.bu-suzgecle-eslesen-olcum-yo') }))}
@@ -571,11 +575,6 @@ SP.Screens.labs = (function(){
           <div class="pair">
             ${K.Field({ label:yz('spi.labs.test-tarihi'),
               input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
-            ${K.Field({ label:yz('spi.labs.laboratuvar'), hint:'isteğe bağlı',
-              input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:yz('spi.labs.hangi-laboratuvar'),
-                change:'entry-lab' }) })}
-          </div>
-          <div class="pair mt-12">
             ${K.Field({ label:yz('spi.labs.kan-ac-karnina-mi-alindi'),
               hint:'glukoz, insülin ve trigliserit buna bağlı',
               input:K.Select({ id:'entry-fasting', value:draft.fasting, change:'entry-fasting',
@@ -583,10 +582,17 @@ SP.Screens.labs = (function(){
                   { value:'unknown', label:yz('spi.labs.bilmiyorum') },
                   { value:'yes', label:yz('spi.labs.evet-ac-karnina') },
                   { value:'no', label:yz('spi.labs.hayir-tok') }] }) })}
-            ${K.Field({ label:yz('spi.labs.saat'), hint:'isteğe bağlı',
-              input:K.Input({ id:'entry-time', type:'time', value:draft.time,
-                change:'entry-time' }) })}
           </div>
+          <details class="hiz-ac mt-12" ${attrs({ open:!!(draft.lab || draft.time) })}><summary>${yz('spi.labs.laboratuvar-ve-saat')}</summary>
+            <div class="pair">
+              ${K.Field({ label:yz('spi.labs.laboratuvar'), hint:'isteğe bağlı',
+                input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:yz('spi.labs.hangi-laboratuvar'),
+                  change:'entry-lab' }) })}
+              ${K.Field({ label:yz('spi.labs.saat'), hint:'isteğe bağlı',
+                input:K.Input({ id:'entry-time', type:'time', value:draft.time,
+                  change:'entry-time' }) })}
+            </div>
+          </details>
           ${when(draft.fasting === 'no', () => K.Notice({ tone:'warn', class:'mt-10',
             title:yz('spi.labs.tok-olcum'), body:yz('spi.labs.aclik-glukozu-insulin-trigli-2')
               + 'hesaplanan TyG, TG/HDL ve LDL için durum etiketi basılmayacak. '
@@ -1573,7 +1579,7 @@ SP.Screens.labs = (function(){
   } });
   LIFEOS.PARCA.blok({ id:'labs.test-sekmeleri', sayfa:'labs', yer:'y2', sira:10, ad:'Test sekmeleri', ciz({ flags }){
     return K.SayfaBolumleri({ act:'lab-tab', aria:yz('spi.labs.test-bolumleri'),
-        bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t), sayi:rozet(t.id) })) });
+        bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, govde:govde(t), sayi:rozet(t.id) })) });
   } });
   LIFEOS.PARCA.blok({ id:'labs.uyari-kartlari', sayfa:'labs', yer:'y3', sira:10, ad:'Uyarı kartları', ciz({ flags }){
     return when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`);
@@ -1985,11 +1991,8 @@ SP.Screens.labs = (function(){
       const s = SP.Bio.summary();
       return s.measured + ' ölçüm · ' + s.out + ' referans dışı';
     },
-    actions(){
-      return String(html`${K.Button({ label:yz('spi.labs.test-gir'), icon:'flask', size:'sm',
-        act:'lab-tab', data:{ 'data-tab':'giris' } })}
-        ${K.Button({ label:yz('spi.labs.rapor-yapistir'), size:'sm', act:'open-paste' })}`);
-    },
+    /* Sayfa başında düğme yok: «Test gir» bölüm çubuğunda, «Rapor yapıştır» o bölümde. */
+    actions(){ return ''; },
     render, afterRender, handle, change,
   };
 })();

@@ -76,7 +76,7 @@
         pushMeal('2026-10-02', 'ogle', [['yumurta', 100]]);
         const b = await bolumle('meals', 'gunluk');
         try{
-          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          const d = b.kok.querySelector('.donen[aria-label="Öğün"]');
           expect(!!d).toBe(true);
           expect(ustler(d).slice(0, 2).join(',')).toBe('Kalori,Protein');
           /* ev ölçüsünden gelen gram tahmindir: toplam da tahmin etiketli, kaynağı yazılı */
@@ -102,7 +102,7 @@
         pushMeal('2026-10-02', 'ogle', [['yumurta', 100, 'measured']]);
         let b = await bolumle('meals', 'gunluk');
         try{
-          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          const d = b.kok.querySelector('.donen[aria-label="Öğün"]');
           expect(!!d.querySelector('[data-donen-madde="0"] .sayi--computed')).toBe(true);
           expect(d.querySelector('[data-donen-madde="0"] .koken').textContent.indexOf('kayıtlı değil')).toBe(-1);
         }finally{ b.bitir(); }
@@ -110,7 +110,7 @@
         resetState();
         b = await bolumle('meals', 'gunluk');
         try{
-          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          const d = b.kok.querySelector('.donen[aria-label="Öğün"]');
           expect(d.querySelectorAll('[data-donen-madde="0"] .sayi').length).toBe(0);
           expect(d.textContent).toContain('Öğün girilmedi.');
         }finally{ b.bitir(); }
@@ -119,7 +119,7 @@
         SP.S.profile.weightKg = null;
         b = await bolumle('meals', 'gunluk');
         try{
-          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          const d = b.kok.querySelector('.donen[aria-label="Öğün"]');
           expect(d.querySelectorAll('.sayi').length).toBe(0);
           expect(ustler(d).join(',')).toBe('Kalori,Günlük hedef');
           expect(d.textContent).toContain('Hedef yok.');
@@ -134,7 +134,7 @@
         pushMeal('2026-10-02', 'ogle', [['yumurta', undefined]]);
         let b = await bolumle('meals', 'gunluk');
         try{
-          const m = b.alan.querySelector('.donen[aria-label="Öğün"] [data-donen-madde="0"]');
+          const m = b.kok.querySelector('.donen[aria-label="Öğün"] [data-donen-madde="0"]');
           expect(m.querySelectorAll('.sayi').length).toBe(0);
           expect(m.textContent).toContain('Gram girilmedi.');
           expect(m.textContent).toContain('1 kalemin gramı yok');
@@ -144,7 +144,7 @@
         pushMeal('2026-10-02', 'ogle', [['yumurta', 100], ['yumurta', undefined]]);
         b = await bolumle('meals', 'gunluk');
         try{
-          const m = b.alan.querySelector('.donen[aria-label="Öğün"] [data-donen-madde="0"]');
+          const m = b.kok.querySelector('.donen[aria-label="Öğün"] [data-donen-madde="0"]');
           expect(m.querySelectorAll('.sayi').length).toBe(1);
           expect(m.textContent).toContain('1 kalemin gramı yok; toplama girmedi.');
         }finally{ b.bitir(); }
@@ -204,13 +204,13 @@
         try{
           const d = b.alan.querySelector('.donen[aria-label="Hareket"]');
           expect(!!d).toBe(true);
-          expect(ustler(d).join(',')).toBe('Günün yük emri,Bu hafta');
+          expect(ustler(d).join(',')).toBe('Bugünkü yük,Bu hafta');
           expect(!!d.querySelector('[data-donen-madde="0"] .sayi--computed')).toBe(true);
           d.querySelectorAll('.koken').forEach(k => expect(k.textContent.indexOf('kayıtlı değil')).toBe(-1));
           /* Pazartesi 2026-09-28: Çarşamba 40 dk ve Cuma 20 dk asgari 15 dakikayı geçti */
           expect(d.querySelector('[data-donen-madde="1"]').textContent).toContain('2/7');
           /* sıkı ölçü (2d): emrin ayrıntısı dönen kartta; kırmızı gerekçe orada söylenir — gizli */
-          expect(b.gizli.indexOf('günün-yük-emri') >= 0).toBe(true);
+          expect(b.gizli.indexOf('bugünkü-yük') >= 0).toBe(true);
           ['bu-hafta-hareket', 'antrenman-haftası'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
           expect(b.acik.indexOf('seans-seç') >= 0 && b.acik.indexOf('bugünün-seansları') >= 0).toBe(true);
           expect(b.acik.length <= 3).toBe(true);
@@ -248,7 +248,7 @@
       const b = await bolumle('basket', 'butce');
       try{
         ['bütçenin-yeri', 'fiyatlar-nereden-geliyor'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
-        expect(b.acik.indexOf('talep-tablosu') >= 0 && b.acik.indexOf('sedef-in-notu') >= 0).toBe(true);
+        expect(b.acik.indexOf('aylık-ihtiyaç') >= 0 && b.acik.indexOf('sedef-in-notu') >= 0).toBe(true);
         expect(b.acik.length <= 3).toBe(true);
       }finally{ b.bitir(); }
     });
@@ -544,10 +544,9 @@
       expect(!!SP.Ofis3B).toBe(false);
       SP.AGENTS.filter(a => a.id !== 'patron').forEach(a => expect(out).toContain('data-id="' + a.id + '"'));
     });
-    it('«Toplantı» sayfa başında ve Toplantı bölümüne gider', () => {
-      const ust = String(SP.Screens.office.actions());
-      expect(ust).toContain('data-act="go"');
-      expect(ust).toContain('data-route="meeting"');
+    it('sayfa başında düğme yok: İnceleme çekmecenin kendi seçicisinde', () => {
+      expect(String(SP.Screens.office.actions())).toBe('');
+      expect(SP.App.SECTIONS.find(s => s.id === 'ofis').views.some(v => v.route === 'meeting')).toBe(true);
       expect(typeof SP.Screens.office.handle['office-3d']).toBe('undefined');
     });
   });

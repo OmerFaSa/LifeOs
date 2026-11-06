@@ -312,7 +312,7 @@ describe('Bütçe — koçların talebi', () => {
     });
     const d = document.createElement('div');
     d.innerHTML = String(await SP.Screens.basket.render());
-    expect(kart(d, 'Talep tablosu').querySelector('.card__head .badge').textContent.trim()).toBe('veri yok');
+    expect(kart(d, 'Aylık ihtiyaç').querySelector('.card__head .badge').textContent.trim()).toBe('veri yok');
 
     SP.S.basket.monthlyLimit = 3000;
     d.innerHTML = String(await SP.Screens.basket.render());

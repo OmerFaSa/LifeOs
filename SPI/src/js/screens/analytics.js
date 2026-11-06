@@ -21,8 +21,13 @@ window.LIFEOS.PARCA.yazilar({
   'spi.analytics.son-7-gunde-kayit-yok':'Son 7 günde kayıt yok',
   'spi.analytics.dinlenik-nabiz':'Dinlenik nabız',
   'spi.analytics.yatis-ve-kalkis-saatleri':'Yatış ve kalkış saatleri',
-  'spi.analytics.ayrintili-okumalari-gizle':'Ayrıntılı okumaları gizle',
-  'spi.analytics.ayrintili-okumalar-kavramlar':'Ayrıntılı okumalar: kavramlar ve dürüstlük',
+  'spi.analytics.haftalik-rapor':'Haftalık rapor',
+  'spi.analytics.ozet':'Özet',
+  'spi.analytics.hafta':'Hafta',
+  'spi.analytics.egilim':'Eğilim',
+  'spi.analytics.baglar':'Bağlar',
+  'spi.analytics.daha':'Daha',
+  'spi.analytics.veri-aktar':'Veri aktar',
   'spi.analytics.kapandi-sapma':'Kapandı — sapma %',
   'spi.analytics.belirgin-bir-bag-bulunamadi':'Belirgin bir bağ bulunamadı.',
   'spi.analytics.birlikte-hareket-eden-iki-ol':'Birlikte hareket eden iki ölçüm, birinin diğerine sebep olduğu ',
@@ -34,8 +39,6 @@ window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 window.LIFEOS.PARCA.yazilar({
   'spi.analytics.capraz-baglar':'Çapraz bağlar',
-  'spi.analytics.haftalik-rapor':'Haftalık rapor',
-  'spi.analytics.seriler':'Seriler',
   'spi.analytics.fizyoloji-ve-kavramlar':'Fizyoloji ve kavramlar',
   'spi.analytics.denetim':'Denetim',
   'spi.analytics.durustluk':'Dürüstlük',
@@ -128,7 +131,6 @@ window.LIFEOS.PARCA.yazilar({
   'spi.analytics.plan-hedefler-de-bir-hedef':'Plan › Hedefler’de bir hedef koyunca yol haritası burada belirir.',
   'spi.analytics.analiz-bolumleri':'Analiz bölümleri',
   'spi.analytics.bu-hafta':'Bu hafta',
-  'spi.analytics.kategoriler':'Kategoriler',
   'spi.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı',
   'spi.analytics.analiz':'Analiz',
 });
@@ -139,13 +141,20 @@ SP.Screens.analytics = (function(){
   const { html, raw, when, map } = SP.h;
   const K = SP.C, P = SP.Parts;
 
+  /* TEK SEÇİCİ (2026-11-06): sayfa eskiden alt alta sekiz iş taşıyordu (özet,
+     bu hafta, yol haritası, içe aktarma, sekmeler, kategoriler, ayrıntı).
+     Şimdi her iş bir bölüm; her gün bakılmayanlar «Daha»da. */
   const TABS = [
-    { id:'capraz', label:yz('spi.analytics.capraz-baglar'),  icon:'layers' },
-    { id:'hafta',  label:yz('spi.analytics.haftalik-rapor'), icon:'list' },
-    { id:'seri',   label:yz('spi.analytics.seriler'),        icon:'chart' },
-    { id:'kavramlar', label:yz('spi.analytics.fizyoloji-ve-kavramlar'), icon:'book' },
-    { id:'denetim', label:yz('spi.analytics.denetim'),      icon:'list' },
-    { id:'durust', label:yz('spi.analytics.durustluk'),      icon:'shield' },
+    { id:'ozet',   label:yz('spi.analytics.ozet'),     icon:'chart' },
+    { id:'bu',     label:yz('spi.analytics.hafta'),    icon:'list' },
+    { id:'seri',   label:yz('spi.analytics.egilim'),   icon:'chart' },
+    { id:'capraz', label:yz('spi.analytics.baglar'),   icon:'layers' },
+    { id:'hafta',  label:yz('spi.analytics.haftalik-rapor'), icon:'list', grup:yz('spi.analytics.daha') },
+    { id:'denetim', label:yz('spi.analytics.denetim'), icon:'list', grup:yz('spi.analytics.daha') },
+    { id:'kavramlar', label:yz('spi.analytics.fizyoloji-ve-kavramlar'), icon:'book', grup:yz('spi.analytics.daha') },
+    { id:'durust', label:yz('spi.analytics.durustluk'), icon:'shield', grup:yz('spi.analytics.daha') },
+    { id:'yol',    label:yz('spi.analytics.yol-haritasi'), icon:'target', grup:yz('spi.analytics.daha') },
+    { id:'ice',    label:yz('spi.analytics.veri-aktar'), icon:'layers', grup:yz('spi.analytics.daha') },
   ];
 
   /* --------------------------------------------------------------- capraz */
@@ -597,8 +606,15 @@ SP.Screens.analytics = (function(){
      çubuğu sayfa içinde o okumaya kaydırır. Bir bölüm çizilemezse yalnız o
      bölüm sakin bir notla düşer; öteki dördü durur. */
   const BODIES = {
+    /* Başta bugünün özeti (KOLAY-PLANI Faz 2): Bugün'den taşınan karolar,
+       Durum ve Öneri (screens/today.js ozet). */
+    ozet:() => raw(SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet() : ''),
+    yol:() => yolHaritasi(),
+    ice:() => raw(window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''),
     capraz:() => html`${K.Ledger(() => [modelCard(), crossCard(), pairCard()])}
       <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`,
+    bu:() => html`${K.Kutu({ ad:yz('spi.analytics.bu-hafta'), yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
+      ${raw(SP.Screens.today && SP.Screens.today.panoUst ? SP.Screens.today.panoUst() : '')}`,
     hafta:() => html`${K.Ledger(() => [reportCard(), disciplineCard(),
         K.Entry({ label:yz('spi.analytics.raporun-mantigi'), meta:'sayı nereden gelir',
           note:yz('spi.analytics.sayilar-kural-motorundan-gel')
@@ -607,7 +623,7 @@ SP.Screens.analytics = (function(){
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
       ])}
       <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`,
-    seri:() => html`${K.Ledger(() => [seriesCard()])}
+    seri:() => html`${kategorilerHtml()}<div class="mt-16">${K.Ledger(() => [seriesCard()])}</div>
       <div class="mt-24">${raw(UI.rail(['trend', 'ref-range', 'certainty']))}</div>`,
     kavramlar:() => html`${K.Ledger(() => [derinAnalizCard(), kavramlarCard(), kanitCard()])}`,
     denetim:() => html`${K.Ledger(() => [denetimCard()])}
@@ -629,8 +645,8 @@ SP.Screens.analytics = (function(){
      azaltılsın; grafik ve tablolarla göze hitap etsin»). Üstte dört karo:
      son 7 günün değeri (kayıttan, etiketiyle), 14 günlük mini sütunlar
      (girilmemiş gün nokta, sıfır değil). Altında bugünün enerji dengesi:
-     ihtiyaç (BMR + girilen hareket) ve alınan. Uyku ayrıntısı «Kategoriler»
-     bölümünde; denetim ve dürüstlük okumaları «Ayrıntılı okumalar»da. */
+     ihtiyaç (BMR + girilen hareket) ve alınan. Uyku ayrıntısı «Eğilim»
+     bölümünde; denetim ve dürüstlük okumaları «Daha»da. */
   const gunListesi = n => { const out = []; for(let i = n - 1; i >= 0; i--) out.push(U.iso(U.addDays(U.today(), -i))); return out; };
   function miniSutun(l, renk){
     const enBuyuk = Math.max(1e-9, ...l.filter(v => v != null));
@@ -768,10 +784,6 @@ SP.Screens.analytics = (function(){
     return h ? ('<details class="hiz-ac"><summary>' + yz('spi.analytics.yatis-ve-kalkis-saatleri') + '</summary>') + h + '</details>' : '';
   }
 
-  /* Öne çıkan dört okuma görünür (denetim klinik sınırı taşır, AGENTS §1.5);
-     kavram ve dürüstlük okumaları isteyene açılır (anlaşılması emek
-     isteyen, her gün bakılmayan şeyler). */
-  const ONDE = ['capraz', 'hafta', 'seri', 'denetim'];
   /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
      SPİ'de koyduğumuz hedefler dahilinde; yol haritası gibi»). Hedef türü
      kümeleri; hedefin durumu kendi kaydından (tamam / aktif / taslak).
@@ -791,42 +803,10 @@ SP.Screens.analytics = (function(){
       govde:raw(A.html({ merkez:'Sağlık', kumeler, bos:yz('spi.analytics.plan-hedefler-de-bir-hedef') })) });
   }
 
-  LIFEOS.PARCA.blok({ id:'analytics.ayrinti-dugmesi', sayfa:'analytics', yer:'y1', sira:10, ad:'Ayrıntı düğmesi', ciz({ acik, bolumler, bugun }){
-    return K.Button({ label:acik ? yz('spi.analytics.ayrintili-okumalari-gizle') : yz('spi.analytics.ayrintili-okumalar-kavramlar'),
-        size:'sm', tone:'ghost', act:'spi-analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } });
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.kategorilerhtml', sayfa:'analytics', yer:'y2', sira:10, ad:'Kategoriler', ciz({ acik, bolumler, bugun }){
-    return kategorilerHtml();
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.analiz-sekmeleri', sayfa:'analytics', yer:'y3', sira:10, ad:'Analiz sekmeleri', ciz({ acik, bolumler, bugun }){
-    return K.SayfaBolumleri({ act:'an-tab', aria:yz('spi.analytics.analiz-bolumleri'), bolumler });
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.ice-aktarma-karti', sayfa:'analytics', yer:'y4', sira:10, ad:'İçe aktarma kartı', ciz({ acik, bolumler, bugun }){
-    return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''));
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.yolharitasi', sayfa:'analytics', yer:'y5', sira:10, ad:'Yol haritası', ciz({ acik, bolumler, bugun }){
-    return yolHaritasi();
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.bu-hafta', sayfa:'analytics', yer:'y6', sira:10, ad:'Bu hafta', ciz({ acik, bolumler, bugun }){
-    return K.Kutu({ ad:yz('spi.analytics.bu-hafta'), yuva:'kayıttan · son 7 gün', govde:ozetHtml() });
-  } });
-  LIFEOS.PARCA.blok({ id:'analytics.bugunden-analiz-ozeti', sayfa:'analytics', yer:'y7', sira:10, ad:'Bugünden analiz özeti', ciz({ acik, bolumler, bugun }){
-    return raw(bugun);
-  } });
+  TABS.forEach(t => LIFEOS.PARCA.blok({ id:'analytics.' + t.id, sayfa:'analytics', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
-    const acik = !!S.ui.spiAnalizAyrinti;
-    const bolumler = TABS.filter(t => acik || ONDE.indexOf(t.id) >= 0).map(t => ({ id:t.id, ad:t.label, govde:govde(t) }));
-    /* Başta bugünün özeti (KOLAY-PLANI Faz 2): Bugün'den taşınan karolar,
-       pano kartları, Durum ve Öneri (screens/today.js ozet). */
-    const bugun = SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet() : '';
-    const parcaB = { acik, bolumler, bugun };
-    return String(html`${LIFEOS.PARCA.yer('analytics', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('analytics', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      <div class="mt-16">${LIFEOS.PARCA.yer('analytics', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
-      ${LIFEOS.PARCA.yer('analytics', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      <div class="mt-16">${LIFEOS.PARCA.yer('analytics', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
-      <h2 class="analiz-ara-baslik">${yz('spi.analytics.kategoriler')}</h2>
-      ${LIFEOS.PARCA.yer('analytics', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      <div class="analiz-ayrinti">${LIFEOS.PARCA.yer('analytics', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>`);
+    return String(K.SayfaBolumleri({ act:'an-tab', aria:yz('spi.analytics.analiz-bolumleri'),
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, grup:t.grup, govde:LIFEOS.PARCA.yer('analytics', t.id, K) })) }));
   }
 
   /* Başka ekrandan istenen bölüm (ofis kartının «Çapraz bağ tablosu» gibi)
@@ -834,17 +814,10 @@ SP.Screens.analytics = (function(){
   function afterRender(){
     const t = S.ui.analyticsTab;
     S.ui.analyticsTab = null;
-    /* İstenen bölüm «Ayrıntılı okumalar»daysa önce açılır, sonra kayılır. */
-    if(t && ONDE.indexOf(t) < 0 && !S.ui.spiAnalizAyrinti && TABS.some(x => x.id === t)){
-      S.ui.spiAnalizAyrinti = true;
-      Promise.resolve(SP.App.render()).then(() => K.bolumeGit(t));
-      return;
-    }
     if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
-    async 'spi-analiz-ayrinti'(){ S.ui.spiAnalizAyrinti = !S.ui.spiAnalizAyrinti; SP.App.render(); },
     async 'an-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'an-kavram-tab'(el){ S.ui.anKavramTab = el.dataset.tab; SP.App.render(); },
 

@@ -121,7 +121,7 @@ SP.S = {
     priceEdit:null,
     trendMarker:'weight',
     trendRange:90,
-    analyticsTab:'capraz',
+    analyticsTab:'ozet',
     officeAgent:'patron',
     officeDesk:null,
     officePerAgent:false,

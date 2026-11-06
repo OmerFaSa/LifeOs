@@ -665,7 +665,7 @@ SP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık sohbet ve ajanın kartı; ajanın tanıtımı, örnek sorular ve brifing şerit. */
-    kucukVarsayilan:['bu-uzman-neye-bakar', 'sorabileceklerin', 'uzmanın-gördüğü-özet'],
+    kucukVarsayilan:['sesli-sohbet', 'bu-uzman-neye-bakar', 'sorabileceklerin', 'uzmanın-gördüğü-özet'],
     title:yz('spi.team.danisma'),
     subtitle(){
       const a = current();
