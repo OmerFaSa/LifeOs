@@ -720,6 +720,7 @@ R.Screens.learn = (function(){
         : yz('ays.learn.video-izle-not-dus-karta');
     },
     actions(){
+      if(!S.videoNotes.length) return '';   /* boşken ilk adım boş durumun kendi düğmesi */
       return String(K.Button({ label:yz('ays.learn.ders-ekle'), icon:'plus', size:'sm', tone:'primary', act:'note-new' }));
     },
     render, handle, change, onKey,

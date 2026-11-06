@@ -70,6 +70,18 @@ window.LIFEOS.PARCA.yazilar({
   'ays.progress.bir-mudahale-sec':'Bir müdahale seç',
   'ays.progress.mudahale-kaydedildi-21-gun':'Müdahale kaydedildi · 21 gün sonra yeniden değerlendirilecek',
   'ays.progress.i-lerleme':'İlerleme',
+  'ays.progress.ilerleme-bolumleri':'İlerleme bölümleri',
+  'ays.progress.bolum-ozet':'Özet',
+  'ays.progress.bolum-netler':'Netler',
+  'ays.progress.bolum-yol':'Konular',
+  'ays.progress.bolum-karar':'Aylık karar',
+  'ays.progress.sirada':'Sırada',
+  'ays.progress.karar-basligi':'Bu ayın kararı bekliyor',
+  'ays.progress.karara-gec':'Karara geç',
+  'ays.progress.ilk-deneme':'İlk tam denemeni gir',
+  'ays.progress.ilk-deneme-neden':'Gidişat denemelerden çizilir.',
+  'ays.progress.net-dustu':'Son 3 deneme, önceki 3 denemeden düşük',
+  'ays.progress.hatalara-bak':'Hatalara bak',
 });
 window.LIFEOS.PARCA.sayfa({ id:'progress', modul:'ays', king:{ sira:160, ad:'İlerleme', es:['ilerleme'] }, cekmece:'analiz', ad:'İlerleme', ikon:'chart', sira:10 });
 
@@ -142,7 +154,8 @@ R.Screens.progress = (function(){
     const sayi = o => L.SAYI ? L.SAYI.html(o) : U.esc(String(o.deger) + (o.birim ? ' ' + o.birim : ''));
     const sira = t => t === 'danger' ? 0 : t === 'warn' ? 1 : 2;
     const buyuk = t => String(t || '').charAt(0).toLocaleUpperCase('tr-TR') + String(t || '').slice(1);
-    const m = kpiValues().map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
+    /* Tekrar borcu Özet'teki «Tekrar kartları» kutusunda (düğmesiyle); dönen kartta ikinci kez yazılmaz (depo sahibi, 2026-11-06). */
+    const m = kpiValues().filter(c => c.key !== 'cardDebt').map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
       .sort((a, b) => (sira(a.c.tone) - sira(b.c.tone)) || a.i - b.i)
       .map(({ c, def }) => c.num == null
         ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : yz('ays.progress.veri-yok')) + '.',
@@ -324,44 +337,60 @@ R.Screens.progress = (function(){
       body:raw(A.html({ merkez:'Sınav', kumeler, bos:yz('ays.progress.konular-yuklenince-harita-be') })) });
   }
 
-  LIFEOS.PARCA.blok({ id:'progress.ilerleme-ozeti', sayfa:'progress', yer:'y1', sira:10, ad:'İlerleme özeti', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  /* Ekran duruma göre konuşur (kural motoru seçer, sayı Calc'tan): ilk deneme → karar → düşen net. */
+  function siradaki(){
+    if(!C.fullExams('TYT').length) return K.NextUp({ calm:true, icon:'exam', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.ilk-deneme'), why:yz('ays.progress.ilk-deneme-neden'),
+      action:K.Button({ label:yz('ays.progress.deneme-ekle'), tone:'primary', size:'sm', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } }) });
+    const gate = C.currentGate();
+    if(gate && !S.decisions[U.monthKey(U.today())]) return K.NextUp({ calm:true, icon:'target', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.karar-basligi'),
+      action:K.Button({ label:yz('ays.progress.karara-gec'), tone:'primary', size:'sm', act:'progress-tab', data:{ 'data-tab':'karar' } }) });
+    const t = C.medianTrend('TYT');
+    if(t.delta != null && t.delta < 0) return K.NextUp({ calm:true, icon:'chart', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.net-dustu'), why:U.fmtNet(t.delta) + ' net · hesaplandı',
+      action:K.Button({ label:yz('ays.progress.hatalara-bak'), size:'sm', act:'go', data:{ 'data-route':'analytics', 'data-bolum':'errors' } }) });
+    return '';
+  }
+
+  LIFEOS.PARCA.blok({ id:'progress.ilerleme-ozeti', sayfa:'progress', yer:'ozet', sira:10, ad:'İlerleme özeti', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return raw(ozet);
   } });
-  LIFEOS.PARCA.blok({ id:'progress.yolharitasi', sayfa:'progress', yer:'y2', sira:10, ad:'Yol haritası', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.yolharitasi', sayfa:'progress', yer:'yol-ust', sira:10, ad:'Yol haritası', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return yolHaritasi();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.ice-aktarma-karti', sayfa:'progress', yer:'y3', sira:10, ad:'İçe aktarma kartı', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.ice-aktarma-karti', sayfa:'progress', yer:'ozet', sira:10, ad:'İçe aktarma kartı', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('ays') : ''));
   } });
-  LIFEOS.PARCA.blok({ id:'progress.donengidisat', sayfa:'progress', yer:'y4', sira:10, ad:'Dönen gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.donengidisat', sayfa:'progress', yer:'ozet', sira:10, ad:'Dönen gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return DonenGidisat();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.trendcard', sayfa:'progress', yer:'y5', sira:10, ad:'Gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.trendcard', sayfa:'progress', yer:'netler', sira:10, ad:'Gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return trendCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.gatecard', sayfa:'progress', yer:'y6', sira:10, ad:'Geçiş kapıları', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.gatecard', sayfa:'progress', yer:'karar', sira:10, ad:'Geçiş kapıları', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return gateCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.testtrendcard', sayfa:'progress', yer:'y7', sira:10, ad:'Test gidişatı', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.testtrendcard', sayfa:'progress', yer:'netler', sira:10, ad:'Test gidişatı', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return testTrendCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.plan-tamamlama-son-8-hafta', sayfa:'progress', yer:'y7', sira:20, ad:'Plan tamamlama — son 8 hafta', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.plan-tamamlama-son-8-hafta', sayfa:'progress', yer:'yol', sira:20, ad:'Plan tamamlama — son 8 hafta', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return K.Card({ title:yz('ays.progress.plan-tamamlama-son-8'), sub:yz('ays.progress.hedef-85'),
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
   } });
-  LIFEOS.PARCA.blok({ id:'progress.monthcurvecard', sayfa:'progress', yer:'y7', sira:30, ad:'Aylık eğri', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.monthcurvecard', sayfa:'progress', yer:'netler', sira:30, ad:'Aylık eğri', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return monthCurveCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.kpireference', sayfa:'progress', yer:'y7', sira:40, ad:'Gösterge rehberi', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.kpireference', sayfa:'progress', yer:'yol', sira:40, ad:'Gösterge rehberi', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return kpiReference();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.hata-paretosu', sayfa:'progress', yer:'y8', sira:10, ad:'Hata paretosu', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.hata-paretosu', sayfa:'progress', yer:'netler', sira:10, ad:'Hata paretosu', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return K.Card({ hint:'pareto', title:yz('ays.progress.hata-paretosu'), body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
             body:yz('ays.progress.recete')+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` });
   } });
-  LIFEOS.PARCA.blok({ id:'progress.surec-gostergeleri', sayfa:'progress', yer:'y8', sira:20, ad:'Süreç göstergeleri', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.surec-gostergeleri', sayfa:'progress', yer:'yol', sira:20, ad:'Süreç göstergeleri', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return K.Card({ hint:'not-surec-gostergeleri', title:yz('ays.progress.surec-gostergeleri'), body:K.Stack([
           K.Meter({ label:yz('ays.progress.tekrar-borcu'), value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
           K.Meter({ label:yz('ays.progress.konu-kapanisi'), value:closure, text:'%'+closure }),
@@ -384,23 +413,23 @@ R.Screens.progress = (function(){
     /* Özet (KOLAY-PLANI Faz 2): Bugün'den taşınan günün sayıları en üstte. */
     const ozet = await R.Screens.today.ozet();
 
-    /* Raf iki sütunu DOM sırasıyla dizer: trend ile karar kapısı yan yana,
-       şeritler altta; gizli başvuru kartları en sonda (iPhone Faz 3). */
+    /* TEK İŞ (kullanıcı, 2026-11-06: «bir bölümde birden fazla özellik olduğundan
+       anlaşılmıyor»): Özet açılır; netler, yol ve aylık karar kendi katında. Karar
+       bekliyorsa seçicide rozet durur, gizli kalmaz. */
     const parcaB = { pareto, history, sleep, debt, closure, ozet };
-    return String(K.Grid([
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(6, K.Stack(LIFEOS.PARCA.liste('progress', 'y5', K, parcaB))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('progress', 'y6', K, parcaB))),
-    K.Span(6, K.Stack(LIFEOS.PARCA.liste('progress', 'y7', K, parcaB))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('progress', 'y8', K, parcaB))),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-  ]));
+    const P = LIFEOS.PARCA;
+    const gate = C.currentGate();
+    const kararBekliyor = gate && !S.decisions[U.monthKey(U.today())];
+    return String(html`${K.SayfaBolumleri({ act:'progress-tab', aria:yz('ays.progress.ilerleme-bolumleri'), bolumler:[
+      { id:'ozet', ad:yz('ays.progress.bolum-ozet'), govde:K.Stack([siradaki()].concat(P.liste('progress', 'ozet', K, parcaB))) },
+      { id:'netler', ad:yz('ays.progress.bolum-netler'), govde:K.Stack(P.liste('progress', 'netler', K, parcaB)) },
+      { id:'yol', ad:yz('ays.progress.bolum-yol'), govde:K.Stack(P.liste('progress', 'yol-ust', K, parcaB).concat(P.liste('progress', 'yol', K, parcaB))) },
+      { id:'karar', ad:yz('ays.progress.bolum-karar'), sayi:kararBekliyor ? 1 : null, govde:gate ? P.yer('progress', 'karar', K, parcaB, raw) : '' },
+    ] })}${P.yer('progress', 'y9', K, parcaB, raw)}`);
   }
 
   const handle = {
+    async 'progress-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'trend-family'(el){ S.ui.trendFamily = el.dataset.value; R.App.render(); },
     async 'toggle-kpi-ref'(){ S.ui.kpiRefOpen = !S.ui.kpiRefOpen; R.App.render(); },
     async 'toggle-month-curve'(){ S.ui.monthCurveOpen = !S.ui.monthCurveOpen; R.App.render(); },
@@ -439,15 +468,8 @@ R.Screens.progress = (function(){
 
   return {
     id:'progress',
-    /* iPhone Faz 3: açık trend ve (karar bekliyorsa) karar kapısı; test
-       trendi, plan geçmişi ve pareto şerit; başvuru kartları app.js'te gizli. */
-    get kucukVarsayilan(){
-      const G = (window.LIFEOS || {}).Gizle;
-      const gate = C.currentGate();
-      const verildi = gate && S.decisions[U.monthKey(U.today())];
-      return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
-        .concat(G && verildi ? [G.anahtar(yz('ays.progress.aylik-degerlendirme') + gate.month)] : []);
-    },
+    /* Her katta iş açık; plan geçmişi ve hata dağılımı ara sıra bakılır (başvuru kartları app.js'te gizli). */
+    kucukVarsayilan:['plan-tamamlama-son-hafta', 'hata-paretosu'],
     title:yz('ays.progress.i-lerleme'),
     subtitle(){
       const t = C.medianTrend('TYT');

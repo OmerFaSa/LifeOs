@@ -109,7 +109,7 @@ R.Palette = (function(){
           const st = M2.topicState(s.id, t.id);
           out.push({ group:'Konu', label:t.name, sub:s.name+' · '+R.TOPIC_STATES[st.state].label,
             icon:'book', weight:6,
-            run(){ S2.ui.subjectOpen = s.id; R.App.go('subjects'); setTimeout(()=>{
+            run(){ S2.ui.subjectOpen = s.id; S2.ui.bolumIstek = 'konular'; R.App.go('subjects'); setTimeout(()=>{
               const el = document.querySelector('[data-topic="'+t.id+'"]');
               if(el){ el.scrollIntoView({block:'center'}); el.click(); }
             }, 120); } });

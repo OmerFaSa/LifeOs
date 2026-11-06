@@ -128,7 +128,7 @@ R.Screens.target = (function(){
   P.blok({ id:'hedef.katman', sayfa:'target', yer:'sol', sira:10, ad:y('hedef.katman.baslik'), ciz(){
     const p = S.profile;
     return K.Card({
-      title:y('hedef.katman.baslik'), hint:'tiers',
+      class:'hedef-katman', title:y('hedef.katman.baslik'), hint:'tiers',
       sub:(p.program ? p.program + ' · ' : '') + y('hedef.katman.alt', { sira:U.fmtNum(R.PROGRAM.refRank) }),
       badge:raw(UI.provenance('ref2026')),
       body:html`${tierTable()}`,

@@ -4,6 +4,10 @@
    arkadasina yonlendirir. Model bagli degilse yanit kural motoru
    metninden gelir — ekran her kosulda calisir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.team.danisma-bolumleri':'Danışma bölümleri',
+  'ays.team.bolum-sohbet':'Sohbet',
+  'ays.team.bolum-rapor':'Rapor',
+  'ays.team.bolum-ekip':'Ekip',
   'ays.team.patron-a-ilettim':'Patron’a ilettim. ',
   'ays.team.geri-aldim':'Geri aldım: ',
   'ays.team.geri-alinacak-bir-degisiklig':'Geri alınacak bir değişikliğin yok.',
@@ -43,9 +47,8 @@ window.LIFEOS.PARCA.yazilar({
   'ays.team.ucretsiz-modellerde-ilk-yani':'(ücretsiz modellerde ilk yanıt 10–60 sn sürebilir)',
   'ays.team.su-an-konusmuyor':'Şu an konuşmuyor',
   'ays.team.ekip-sohbeti':'Ekip sohbeti',
-  'ays.team.ofis':'Ofis',
 });
-window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Uzmana sor', ikon:'zap', sira:20 });
 
 R.Screens.team = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -307,13 +310,13 @@ R.Screens.team = (function(){
     if(m) m.textContent = st.metin || '';
   }
 
-  LIFEOS.PARCA.blok({ id:'team.picker', sayfa:'team', yer:'y1', sira:10, ad:'Ajan seçici', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.picker', sayfa:'team', yer:'sohbet', sira:10, ad:'Ajan seçici', ciz({ agent, msgs, ruleMode, G, pencere }){
     return picker();
   } });
-  LIFEOS.PARCA.blok({ id:'team.ajan-penceresi', sayfa:'team', yer:'y1', sira:20, ad:'Ajan penceresi', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-penceresi', sayfa:'team', yer:'sohbet', sira:20, ad:'Ajan penceresi', ciz({ agent, msgs, ruleMode, G, pencere }){
     return pencere;
   } });
-  LIFEOS.PARCA.blok({ id:'team.ajan-masasi', sayfa:'team', yer:'y2', sira:10, ad:'Ajan masası', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-masasi', sayfa:'team', yer:'rapor', sira:10, ad:'Ajan masası', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Card({
           body:html`
             <div class="desk__head">
@@ -327,7 +330,7 @@ R.Screens.team = (function(){
             <div class="mt-10">${deskStrip(agent)}</div>`,
         });
   } });
-  LIFEOS.PARCA.blok({ id:'team.masasindaki-rapor', sayfa:'team', yer:'y2', sira:20, ad:'Masasındaki rapor', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.masasindaki-rapor', sayfa:'team', yer:'rapor', sira:20, ad:'Masasındaki rapor', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Card({
           hint:'not-masasindaki-rapor', title:yz('ays.team.masasindaki-rapor'),           actions:K.Button({ label:yz('ays.team.ozet-iste'), icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
@@ -341,7 +344,7 @@ R.Screens.team = (function(){
                 : html`<span class="tiny dim">${agent.reads.length} ${yz('ays.team.veri-kaynagi')}</span>`}</div>`,
         });
   } });
-  LIFEOS.PARCA.blok({ id:'team.ekipteki-digerleri', sayfa:'team', yer:'y3', sira:10, ad:'Ekipteki diğerleri', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ekipteki-digerleri', sayfa:'team', yer:'ekip', sira:10, ad:'Ekipteki diğerleri', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Stack([
         /* Ses tanima yoksa voiceCard() null doner: olmayan bir
            yetenegin dugmesini gostermek, basip bir sey olmamasindan
@@ -386,11 +389,13 @@ R.Screens.team = (function(){
     })) : '';
 
     const parcaB = { agent, msgs, ruleMode, G, pencere };
-    return String(K.Grid([
-    K.Span(12, K.Stack(LIFEOS.PARCA.liste('team', 'y1', K, parcaB))),
-    K.Span(8, K.Stack(LIFEOS.PARCA.liste('team', 'y2', K, parcaB))),
-    K.Span(4, LIFEOS.PARCA.yer('team', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-  ]));
+    /* TEK İŞ (2026-11-06): önce sohbet; uzmanın raporu ve ekip listesi kendi katında. */
+    const P = LIFEOS.PARCA;
+    return String(K.SayfaBolumleri({ act:'team-tab', aria:yz('ays.team.danisma-bolumleri'), bolumler:[
+      { id:'sohbet', ad:yz('ays.team.bolum-sohbet'), govde:K.Stack(P.liste('team', 'sohbet', K, parcaB)) },
+      { id:'rapor', ad:yz('ays.team.bolum-rapor'), govde:K.Stack(P.liste('team', 'rapor', K, parcaB)) },
+      { id:'ekip', ad:yz('ays.team.bolum-ekip'), govde:P.yer('team', 'ekip', K, parcaB, raw) },
+    ] }));
   }
 
   /* ---------- konusma ---------- */
@@ -464,6 +469,7 @@ R.Screens.team = (function(){
   }
 
   const handle = {
+    async 'team-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'chat-onayla'(el){
       const ids = String(el.dataset.ids || '').split(',').filter(Boolean);
       const r = await R.Komut.onayla(ids);
@@ -571,17 +577,15 @@ R.Screens.team = (function(){
     id:'team',
     /* iPhone Faz 4: açık sohbet ve ajanın raporu; ekibin geri kalanı şerit.
        2026-10-07: sesli sohbet de şerit (ara sıra açılan araç). */
-    kucukVarsayilan:['ekipteki-diğerleri', 'sesli-sohbet'],
+    kucukVarsayilan:['sesli-sohbet'],
     title:yz('ays.team.ekip-sohbeti'),
     subtitle(){
       const agent = current();
       const n = O.chatOf(agent.id).length;
       return agent.name + ' · ' + agent.role + (n ? ' · ' + Math.ceil(n/2) + ' soru' : '');
     },
-    actions(){
-      return String(R.C.Button({ label:yz('ays.team.ofis'), icon:'guide', size:'sm', act:'go',
-        data:{ 'data-route':'office' } }));
-    },
+    /* «Ofis» düğmesi kalktı: Masalar hemen üstteki sekmede. */
+    actions(){ return ''; },
     render, handle, onKey, afterRender(){ mentionKur(); if(!OS()) scrollLog(); }, mentionHtml,
   };
 })();

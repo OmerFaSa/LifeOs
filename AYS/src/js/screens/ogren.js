@@ -16,6 +16,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.ogren.onceki-konu':'Önceki konu',
   'ays.ogren.kaldigin-yer':'Kaldığın yer',
   'ays.ogren.devam-et':'Devam et',
+  'ays.ogren.adim-adim':'Adım adım öğren',
   'ays.ogren.konuyu-sec-anlatim-ornek-sor':'Konuyu seç; anlatım, örnek soru ve koç aynı konuya bakar',
   'ays.ogren.sinavda-nasil-sorulur':'Sınavda nasıl sorulur',
   'ays.ogren.bu-konunun-ayrintili-anlatim':'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.',
@@ -423,10 +424,13 @@ window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', i
       title:x.topic.name, why:x.subject.name + (s ? ' · sırada: ' + s.ad.toLocaleLowerCase('tr-TR') : ' · bütün adımlar tamam'),
       action:K.Button({ label:son ? yz('ays.ogren.devam-et') : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
         data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
-      ${when(a || y, () => html`<div class="row wrap gap-6 mt-10">
+      ${when(a || y || window.LIFEOS.OMEKRAN, () => html`<div class="row wrap gap-6 mt-10">
         ${/* Sade (2026-10-16): «Günlük paragraf» ve «Karma test» düğmeleri
              Sorular sekmesinin içindekileri tekrar ediyordu; burada yalnız
              DURUM kalır: süren bir karma test ve açık yanlışlar. */ ''}
+        ${/* Konular ile Adım adım birleşti (depo sahibi, 2026-11-06): ikinci başlama yolu
+             artık sekme değil, buradan açılır (karışık tekrar, kendi konun dahil). */ ''}
+        ${when(window.LIFEOS.OMEKRAN, () => K.Button({ label:yz('ays.ogren.adim-adim'), icon:'zap', size:'sm', tone:'ghost', data:{ 'data-om-git':'ana' } }))}
         ${when(a, () => K.Button({ label:yz('ays.ogren.karma-teste-don'), icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } }))}
         ${when(y, () => K.Button({ label:yz('ays.ogren.yanlislarim') + y, icon:'list', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'yanlis' } }))}
       </div>`)}</div>`;

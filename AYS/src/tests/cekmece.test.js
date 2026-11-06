@@ -33,7 +33,7 @@
       expect(R.App.yolOf('today').join(' › ')).toBe('Bugün');
       expect(R.App.yolOf('onaylar').join(' › ')).toBe('Onaylar');
       /* Menüde olmayan ayrıntı ekranı üst bölümünün altında durur. */
-      expect(R.App.yolOf('topic').join(' › ')).toBe('Çalışma › Konu kapanışı › Konu');
+      expect(R.App.yolOf('topic').join(' › ')).toBe('Çalışma › Konu takibi › Konu');
       expect(R.App.yolOf('rutbe').join(' › ')).toBe('Ayarlar › Rütbe');
       expect(R.App.yolOf('anlatim').join(' › ')).toBe('Öğren › Anlatım');
       expect(R.App.yolOf('learn').join(' › ')).toBe('Öğren › Ders notları');
@@ -120,11 +120,11 @@
 
   /* 2026-10-16 (depo sahibi: «AYS'de çok şey iç içe girmiş, göz kalabalığı»). */
   describe('Sade AYS — iç içelik', () => {
-    it('Çalışma «Soru çöz» ile açılır; konu listesinin adı Öğren › Konular ile karışmaz', () => {
+    it('Çalışma en sık işle (Tekrar) açılır; konu listesinin adı Öğren › Konular ile karışmaz', () => {
       const c = R.App.NAV.find(g => g.id === 'calisma');
-      expect(c.items[0].id).toBe('solve');
+      expect(c.items[0].id).toBe('cards');
       const sub = c.items.find(i => i.id === 'subjects');
-      expect(sub.label).toBe('Konu kapanışı');
+      expect(sub.label).toBe('Konu takibi');
       const og = R.App.NAV.find(g => g.id === 'ogren').items.find(i => i.id === 'ogren');
       expect(og.label === sub.label).toBe(false);
     });

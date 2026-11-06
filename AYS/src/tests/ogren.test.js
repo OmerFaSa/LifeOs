@@ -178,7 +178,7 @@
       resetState();
       const s = TM(), t = s.topics.find(x => x.id === 'tm-05');
       const cek = R.App.NAV.find(g => g.id === 'ogren');
-      expect(cek.items.map(i => i.id)).toEqual(['ogren', 'ogrenme', 'anlatim', 'sorular', 'koc', 'learn']);
+      expect(cek.items.map(i => i.id)).toEqual(['ogren', 'anlatim', 'sorular', 'koc', 'learn']);
       expect(R.App.NAV.find(g => g.id === 'calisma').items.some(i => i.id === 'learn')).toBe(false);
       await sahteIcerik(t.id, async () => {
         await sessiz(async () => {
