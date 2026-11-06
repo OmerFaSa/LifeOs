@@ -415,15 +415,23 @@ class Sunucu(SimpleHTTPRequestHandler):
             # Gun plani (2026-11-03): HKM'nin arayuzu kalkti; Merkez modulun Ayarlar › Merkez'inden
             # baslatilir. Yalniz bu kapinin kendi sayfasindan (ozel baslik + Origin).
             izin = merkez_izinli(self.headers, self.server.server_address[1])
-            govde = json.dumps(hkm_ac() if izin else {"ok": False, "mesaj": "İzin yok."}, ensure_ascii=False).encode("utf-8")
-            self.send_response(200 if izin else 403)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(govde)))
-            self.send_header("Cache-Control", "no-store")
-            self.end_headers()
-            self.wfile.write(govde)
-            return None
+            return self._json(200 if izin else 403, hkm_ac() if izin else {"ok": False, "mesaj": "İzin yok."})
+        if self.path.split("?", 1)[0] == "/api/uzak/merkez":
+            # Ozel baslik tarayiciyi on-kontrole zorlar (izin yok); isaret yalniz serve'den gelene konur.
+            izin = (self.client_address[0] == uzak.VEKIL_IP and self.headers.get("X-LifeOS") == "hesap"
+                    and hesap._koken_izinli(self))
+            v = uzak.merkez_kimlikle(self.headers) if izin else None
+            return self._json(200 if v else 403, v or {"hata": "İzin yok."})
         return self.send_error(405)
+
+    def _json(self, kod, veri):
+        govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
+        self.send_response(kod)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(govde)
 
     def do_DELETE(self):
         if self.path.startswith("/api/ice"):
@@ -1789,12 +1797,6 @@ class Giris(SimpleHTTPRequestHandler):
             except (ValueError, UnicodeDecodeError):
                 govde = {}
             return self._json(200, gun_cumlesi(govde))
-        if yol == "/api/uzak/merkez":
-            # Ozel baslik tarayiciyi on-kontrole zorlar (izin yok); isaret yalniz serve'den gelene konur.
-            izin = (self.client_address[0] == uzak.VEKIL_IP and self.headers.get("X-LifeOS") == "hesap"
-                    and hesap._koken_izinli(self))
-            v = uzak.merkez_kimlikle(self.headers) if izin else None
-            return self._json(200 if v else 403, v or {"hata": "İzin yok."})
         if yol not in ("/api/guncelle", "/api/hkm", "/api/hkm/yeniden", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):
