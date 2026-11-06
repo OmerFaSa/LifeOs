@@ -178,6 +178,7 @@ node tools/piksel_denetim.js          # temaya uymayan izler: bulaniklik, bulani
 python3 tools/piksel_rakam.py --denetle  # gomulu rakam yazi tipi cizimle ayni mi
 node tools/giris_sayfa_test.js        # giris ve Gun sayfasi gercekten aciliyor mu (modul denetimleri bunlari acmaz)
 node tools/parca_tembel_test.js       # tembel veri (parcalar.txt [tembel]): dist kaynak surumle ayni, acilista calismiyor (once build.py)
+node tools/mobil_tara.js SPI         # telefon/tablet: dokunmatik, yatay, King bolumleri (AYS, ESP de; modul basina ~2 dk)
 node tools/pusula.js                 # Kolay LifeOS pusulasi: iyi gun kaydi eylem sayisi, Bugun ve menu (belgeler/ekip/KOLAY-PLANI.md)
 
 # her sistem kendi dizininde

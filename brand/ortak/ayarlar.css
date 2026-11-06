@@ -73,7 +73,7 @@ html[data-yazi="comfortaa"]{ --font-body:'Comfortaa', ui-rounded, system-ui, san
 
 /* Dar ekran: bölümler üstte yatay kayan şerit, satırlar alt alta. */
 @media (max-width:679px){
-  .ayarlar{ width:auto; max-height:88vh; }
+  .ayarlar{ width:auto; max-height:88dvh; }
   .ayarlar__govde{ grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr); }
   .ayarlar__nav{ flex-direction:row; overflow-x:auto; padding:0 16px 8px; scrollbar-width:none; }
   .ayarlar__sekme{ flex:none; }

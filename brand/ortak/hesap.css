@@ -332,7 +332,7 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
   background:color-mix(in oklab, var(--bg) 58%, transparent);
   -webkit-backdrop-filter:none; backdrop-filter:none;
   animation:hesap-kapi-gel .36s cubic-bezier(.32,.72,0,1) both; }
-.hesap-merkez__kart{ position:relative; box-sizing:border-box; width:min(520px, 100%); height:min(720px, calc(100vh - 48px));
+.hesap-merkez__kart{ position:relative; box-sizing:border-box; width:min(520px, 100%); height:min(720px, calc(100dvh - 48px));
   display:flex; flex-direction:column; border-radius:28px; overflow:hidden;
   background:color-mix(in oklab, var(--surface) 95%, transparent);
   box-shadow:var(--buz-isik, inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.4)),

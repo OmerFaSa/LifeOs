@@ -8,7 +8,7 @@
 .defter{ position:fixed; inset:0; z-index:90; display:grid; place-items:center; }
 .defter__perde{ position:absolute; inset:0; background:color-mix(in oklab, var(--bg) 40%, transparent);
   -webkit-backdrop-filter:none; backdrop-filter:none; }
-.defter__kutu{ position:relative; width:min(1200px, calc(100vw - 32px)); height:min(840px, calc(100vh - 32px)); display:flex; flex-direction:column;
+.defter__kutu{ position:relative; width:min(1200px, calc(100vw - 32px)); height:min(840px, calc(100dvh - 32px)); display:flex; flex-direction:column;
   color:var(--text); border-radius:28px; overflow:hidden;
   background:var(--buz-ust, color-mix(in oklab, var(--surface) 84%, transparent));
   -webkit-backdrop-filter:none; backdrop-filter:none;
@@ -106,7 +106,7 @@
 /* Kalemle yaz ve çiz */
 .defter-ciz{ position:fixed; inset:0; z-index:95; display:grid; place-items:center; background:color-mix(in oklab, var(--bg) 50%, transparent);
   -webkit-backdrop-filter:none; backdrop-filter:none; }
-.defter-ciz__kutu{ width:min(1160px, calc(100vw - 24px)); max-height:calc(100vh - 24px); display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:24px;
+.defter-ciz__kutu{ width:min(1160px, calc(100vw - 24px)); max-height:calc(100dvh - 24px); display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:24px;
   background:var(--surface); box-shadow:none; }
 .defter-ciz__arac, .defter-ciz__alt{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
 .defter-ciz__grup{ display:inline-flex; gap:3px; padding:3px; border-radius:999px; background:var(--surface-2); }
@@ -117,12 +117,12 @@
 .defter-ciz__arac .defter-ciz__renk.is-secili{ box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--primary); }
 .defter-ciz__alt button{ background:var(--surface-2); }
 .defter-ciz__alt .is-ana{ background:var(--text); color:var(--surface); font-weight:600; }
-.defter-ciz__alan{ position:relative; width:100%; aspect-ratio:1400/900; max-height:calc(100vh - 170px); border-radius:14px; overflow:hidden; }
+.defter-ciz__alan{ position:relative; width:100%; aspect-ratio:1400/900; max-height:calc(100dvh - 170px); border-radius:14px; overflow:hidden; }
 .defter-ciz__alan canvas{ position:absolute; inset:0; width:100%; height:100%; }
 .defter-ciz__tuval{ touch-action:none; cursor:crosshair; }
 
 @media (max-width:760px){
-  .defter__kutu{ width:100vw; height:100vh; border-radius:0; }
+  .defter__kutu{ width:100vw; height:100dvh; border-radius:0; }
   .defter__bas{ padding:12px 12px 8px 16px; }
   .defter__govdeler{ grid-template-columns:1fr; padding:0 8px 8px; }
   .defter.is-not .defter__liste{ display:none; }
@@ -136,7 +136,7 @@
   .defter__govde, .defter__oku{ padding:14px 16px 18px; }
 }
 /* Tuvalin üstünde soru (Faz 1c). */
-.defter-ciz__ust{ display:flex; flex-direction:column; gap:4px; padding:2px 4px; max-height:22vh; overflow-y:auto; }
+.defter-ciz__ust{ display:flex; flex-direction:column; gap:4px; padding:2px 4px; max-height:22dvh; overflow-y:auto; }
 .defter-ciz__ust b{ font-size:14px; }
 .defter-ciz__soru{ font-size:13.5px; line-height:1.5; color:var(--text-2); }
 @media (max-width:760px){

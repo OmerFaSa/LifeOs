@@ -526,9 +526,16 @@
         dinle.resize();
         expect(oku('--king-boy')).toBe('400px');
         expect(oku('--king-ust')).toBe('260px');
+        Object.assign(g, { height:window.innerHeight - 300, offsetTop:0 });
+        dinle.resize();
+        expect(el.hasAttribute('data-klavye')).toBe(true);
+        Object.assign(g, { height:window.innerHeight, offsetTop:0 });
+        dinle.resize();
+        expect(el.hasAttribute('data-klavye')).toBe(false);
+        expect(oku('--king-boy')).toBe(window.innerHeight + 'px');
         Object.assign(g, { height:200, scale:2 });
         dinle.resize();
-        expect(oku('--king-boy')).toBe('400px');
+        expect(oku('--king-boy')).toBe(window.innerHeight + 'px');
         k.kapat();
       }finally{ window.visualViewport = eski; }
     }));

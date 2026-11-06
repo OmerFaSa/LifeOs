@@ -10,6 +10,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `parca_kanit.js` — Lego dönüşümünde çizimi önce ve sonra karşılaştırır, parça çıkarma denemesi yapar.
 - `css_onemli.js` — Her `!important`'ı bütün ekran ve temalarda ölçer; yalnız kanıtlı gereksizi siler, görülmeyene dokunmaz.
 - `piksel_denetim.js` — Temaya uymayan izleri bulur: bulanıklık, bulanık gölge, geçiş, soluk yazı, yazıya yapışık şerit, kart kenarına yapışık yazı; açılır katmanlar dahil.
+- `mobil_tara.js` — Telefon ve tablet: dokunmatik kipte, dik ve yatay, bütün ekranlar ve King bölümleri; görünmez düğme, ulaşılamayan sekme, kesik ad, küçük hedef.
 - `piksel_rakam.py` — Sistemin kendi rakam yazı tipini (5×7, yalnız 0-9) üretip `piksel-yazi.css`e gömer; `--denetle`.
 - `piksel_gorsel.js` — Logo ve modül simgesi dosyalarını (PNG, ICO, SVG) piksel figürlerden üretir.
 - `olucss.py` — Arayüzde hiçbir öğeye uymayan ölü CSS kurallarını bulur ve temizler, CI'da denetim olarak koşulur.

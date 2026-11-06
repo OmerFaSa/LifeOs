@@ -950,6 +950,7 @@ window.LIFEOS.PARCA.yazilar({
     const boy = g.height + 'px', kisaldi = el.style.getPropertyValue('--king-boy') !== boy;
     el.style.setProperty('--king-ust', g.offsetTop + 'px');
     el.style.setProperty('--king-boy', boy);
+    el.toggleAttribute('data-klavye', window.innerHeight - g.height > 120);
     const akis = el.querySelector('.king__akis');
     if(kisaldi && akis) akis.scrollTop = akis.scrollHeight;
   }

@@ -27,7 +27,7 @@
 .ust__gizli.is-uyari .ust__gizli-sayi{ background:var(--danger, #D0433B); color:var(--beyaz); }
 
 /* ---------- panel: sayfa düzeni ---------- */
-.kmenu--gizle{ width:min(420px, calc(100vw - 24px)); padding:6px 6px 10px; max-height:min(620px, calc(100vh - 80px));
+.kmenu--gizle{ width:min(420px, calc(100vw - 24px)); padding:6px 6px 10px; max-height:min(620px, calc(100dvh - 80px));
   display:flex; flex-direction:column; overflow:hidden; }
 .gizle-sim{ width:14px; height:14px; flex:none; }
 .gd-bas{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:10px 10px 8px; }
@@ -183,7 +183,7 @@
 /* Telefonda panel alttan açılan bir sayfadır. */
 @media (max-width:560px){
   .kmenu--gizle{ left:0 !important; right:0 !important; top:auto !important; bottom:0; width:100%;
-    max-height:78vh; border-radius:16px 16px 0 0; padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px)); }
+    max-height:78dvh; border-radius:16px 16px 0 0; padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px)); }
   .kmenu--gizle::before{ content:''; display:block; width:36px; height:4px; border-radius:2px; margin:4px auto 0;
     background:var(--border-strong); }
   .gd-tasi{ opacity:1; }
@@ -270,7 +270,7 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
 /* ---------- önizleme penceresi ---------- */
 .gizle-onizleme{
   position:fixed; z-index:calc(var(--z-overlay, 60) + 1);
-  width:min(460px, calc(100vw - 16px)); max-height:min(380px, 62vh); overflow:hidden;
+  width:min(460px, calc(100vw - 16px)); max-height:min(380px, 62dvh); overflow:hidden;
   background:var(--surface); border:1px solid var(--border); border-radius:12px;
   box-shadow:none;
   pointer-events:none;

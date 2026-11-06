@@ -396,7 +396,7 @@
 .katman{
   position:fixed; z-index:var(--z-overlay);
   min-width:240px; max-width:min(360px, calc(100vw - 24px));
-  max-height:min(70vh, 560px); overflow:auto;
+  max-height:min(70dvh, 560px); overflow:auto;
   background:var(--surface); border:1px solid var(--border);
   border-radius:var(--r-md); box-shadow:var(--shadow-lg);
   padding:8px;
@@ -627,7 +627,7 @@ a.kmenu__satir:hover{ background:var(--surface-2); }
 .site--v5 > .site__body{ grid-column:2; grid-row:2; min-width:0; }
 .site--v5 > .sayfasonu{ grid-column:2; grid-row:3; }
 
-.kenar{ position:sticky; top:0; height:100vh; box-sizing:border-box; display:flex; flex-direction:column;
+.kenar{ position:sticky; top:0; height:100dvh; box-sizing:border-box; display:flex; flex-direction:column;
   gap:18px; padding:16px 12px 12px; background:var(--bg); border-right:1px solid var(--border);
   overflow-y:auto; font-size:14px; line-height:1.4; }
 .kenar__marka{ display:flex; align-items:center; gap:10px; height:28px; padding:0 6px; border:0; background:none;
@@ -1218,6 +1218,7 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 .donen__dur{ margin-left:auto; width:24px; height:24px; padding:0; border:0; border-radius:50%; background:none;
   display:grid; place-items:center; color:var(--text-3); cursor:pointer; opacity:0; transition:opacity var(--dur) var(--ease); }
 .donen:hover .donen__dur, .donen:focus-within .donen__dur, .donen.is-dur .donen__dur{ opacity:1; }
+@media (hover:none){ .donen__dur{ opacity:1; } }
 .donen__dur svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
 .donen.is-dur .donen__dur svg path{ d:path("M8 6l10 6-10 6z"); }
 @media (prefers-reduced-motion:reduce){ .donen__madde, .donen__nokta{ transition:none; } .donen__dur{ display:none; } }
@@ -1306,6 +1307,7 @@ svg.chart{ max-height:180px; }
 .gizle-kucuk .kutu__bas{ padding-top:12px; padding-bottom:12px; }
 .gizle-kucuk .gizle-araclar{ opacity:0; transition:opacity var(--dur) var(--ease); }
 .gizle-kucuk:hover .gizle-araclar, .gizle-kucuk:focus-within .gizle-araclar{ opacity:1; }
+@media (hover:none){ .gizle-kucuk .gizle-araclar{ opacity:1; } }
 
 /* Gizli bölüm notu tek ince satır (2026-10-02): çerçevesiz, küçük, sağda
    sessiz bir «Göster» bağı. Uyarılı hâli (gizlide kırmızı) yine belirgin. */

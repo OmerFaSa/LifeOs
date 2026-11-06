@@ -79,17 +79,38 @@
 :root[data-zemin="piksel"] .king:not(.is-mini) .king__karakter{ justify-content:flex-start; margin-top:auto; }
 :root[data-zemin="piksel"] .king:not(.is-mini) .king__oda{ width:100%; max-width:100%; margin:0; border-width:2px; }
 
+/* Ayar paneli dar ekranda sohbetin üstüne biner: cam temadan kalan %70 saydam zemin alttaki yazıyı okutuyordu. */
+:root[data-zemin="piksel"] .king:not(.is-mini) .king__alan{ background:var(--surface); }
+
 /* ---------- Telefon: başlık ve yazma çubuğu kenara yapışmaz ---------- */
 @media (max-width:679px){
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__bas{ min-height:56px; padding:0 16px; }
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:20px 16px; gap:16px; }
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin:0 16px 16px; }
   :root[data-zemin="piksel"] .king:not(.is-mini) .king__balon--king > div{ padding:12px 16px; }
-  /* Telefonda pencere tam ekran: kenar boşluğu okuma alanından çalıyordu, çerçeve de ekrandan taşıyordu. */
-  /* --king-ust ve --king-boy: görünen alan (king-gorunum.js); klavye açıkken pencere onun üstünde biter. */
+  /* Yedi sekme eşit paylaşır: sonuncusu yarım kesilmez, en uzun ad («Kütüphane») kesilmez. */
+  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is{ flex:1 1 0; width:auto; min-width:0; margin:0; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__ray-ad{ max-width:none; overflow:visible; text-overflow:clip; }
+}
+/* Telefon, yatay telefon ve klavyesi açık tablet: pencere görünen alanın tamamı.
+   Kenar boşluğu okuma alanından çalıyordu, çerçeve ekrandan taşıyordu. --king-ust ve --king-boy: king-gorunum.js. */
+@media (max-width:679px), (max-height:500px){
   :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__kutu{ inset:var(--king-ust, 0px) 0 auto; width:100%; height:var(--king-boy, 100dvh);
     transform:none; border:0; border-radius:0; box-shadow:none;
-    padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
-  /* Yedi sekme eşit paylaşır: sonuncusu yarım kesilmez. */
-  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is{ flex:1 1 0; width:auto; min-width:0; margin:0; }
+    padding:env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+}
+:root[data-zemin="piksel"] .king.king[data-klavye]:not(.is-mini) .king__kutu{ inset:var(--king-ust, 0px) 0 auto; width:100%; height:var(--king-boy, 100dvh);
+  transform:none; border:0; border-radius:0; box-shadow:none; padding:0; }
+/* Yatay telefon: boy az. Yedi sekme sığar (kalan kısa ekranda kayar), yüz mesajın üstüne binmez, başlık ve boşluklar kısalır. */
+@media (max-height:500px){
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne{ display:none; }
+  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray{ padding:4px 0 !important; gap:0 !important; overflow-y:auto; }
+  :root[data-zemin="piksel"] .king.king:not(.is-mini) .king__ray-is{ flex:none; height:46px !important; padding:0; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) :is(.king__bas,.king__yan-ust){ min-height:44px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__akis{ padding:12px 16px; gap:12px; }
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__yaz{ margin-bottom:8px; }
+}
+/* Parmakla basılan yan panel kulakçığı: 14 piksel tutturulamıyordu. */
+@media (pointer:coarse){
+  :root[data-zemin="piksel"] .king:not(.is-mini) .king__cikinti{ width:24px; }
 }
