@@ -123,6 +123,22 @@ def run():
             eq(guncelle.durum(r.kul)["geride"], 0)
     test("yarim kalan ileri sarma kendiliginden tamamlanir", t_yarim)
 
+    # 2026-11-06: depoya CRLF'le girmis tek dosya (quiz.js) «elle degisiklik» sanildi, kopya yarim kaldi.
+    def t_yarim_crlf():
+        with _Depo() as r:
+            _g(r.gel, "config", "core.autocrlf", "false")
+            _g(r.kul, "config", "core.autocrlf", "true")
+            _yaz(r.gel, "iki.md", "eski\n")
+            _g(r.gel, "add", "-A"); _g(r.gel, "commit", "-m", "x"); _g(r.gel, "push", "origin", "main")
+            _g(r.kul, "pull", "--ff-only")
+            for kok in (r.gel, r.kul):                     # gelistiricide commit edilen, kullanicida yarim yazilan
+                with open(os.path.join(kok, "iki.md"), "wb") as f:
+                    f.write(b"yeni\r\n")
+            _g(r.gel, "add", "-A"); _g(r.gel, "commit", "-m", "y"); _g(r.gel, "push", "origin", "main")
+            eq(guncelle.uygula(r.kul)["durum"], "guncellendi")
+            eq(guncelle.durum(r.kul)["geride"], 0)
+    test("CRLF'le depoya girmis dosya yarim kalan sarmayi durdurmaz", t_yarim_crlf)
+
     def t_yarim_elle():
         with _Depo() as r:
             _yaz(r.gel, "iki.md", "eski\n")

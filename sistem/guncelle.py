@@ -154,6 +154,10 @@ def _yarim_mi(kirli, kok, calistir):
             return False
         # --path: satir sonu donusumu depodakiyle ayni olsun (Windows'ta CRLF)
         kod, ozet = _git(["hash-object", "--path=" + ad, "--", ad], kok, calistir, timeout=60)
+        if kod == 0 and ozet.strip() == beklenen.strip():
+            continue
+        # Depoya CRLF'le girmis dosya: donusum ozeti degistirir, ham bayt ayni (2026-11-06, quiz.js).
+        kod, ozet = _git(["hash-object", "--no-filters", "--", ad], kok, calistir, timeout=60)
         if kod != 0 or ozet.strip() != beklenen.strip():
             return False
     return True
