@@ -122,6 +122,12 @@ adımlarını gösterir (`sistem/sunucu.py` `telefon_kurulum_html`):
 - **Android telefon/tablet (3 adım):** Sertifikayı indir › Ayarlar araması «CA
   sertifikası» › yükle › her modül Chrome ⋮ › Ana ekrana ekle.
 
+Kök sertifika yalnız LifeOS adreslerine (`.local`, `localhost`, özel IP aralıkları) etki eder; tarayıcının başka
+sitelerine etkisi yoktur (`sistem/telefon.py` `kok_kisiti`). 2026-11-06'dan önce kurulan kök kısıtsızdı: LifeOS onu
+açılışta yenisiyle değiştirir ve Hesap › Cihazlar bir kez söyler. O cihazlarda yeni sertifikayı kur, eskisini kaldır
+(Android: Ayarlar › Güvenlik › Kullanıcı sertifikaları; iPhone: Ayarlar › Genel › VPN ve Cihaz Yönetimi). Yeniden
+kurulana dek ev ağı adresi o cihazda sertifika uyarısı verir; Tailscale adresi etkilenmez, kendi sertifikası vardır.
+
 Sertifika kurulunca cihaz kendiliğinden hesabına bağlanır. iPhone'da «LifeOS
 uygulamasında aç» adresi ve kodu uygulamaya taşır. Adres değişirse sunucu sertifikası
 kendiliğinden yenilenir; kök aynı kaldığı için cihazda bir şey yapılmaz.

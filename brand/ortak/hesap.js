@@ -548,6 +548,8 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.sistem-yeniden-bak':'Yeniden kontrol et',
   'ortak.hesap.sistem-guncellendi':'Sistem güncellendi',
   'ortak.hesap.ev-agini-ac':'Ev ağını aç',
+  'ortak.hesap.sertifika-yenilendi':'Güvenlik sertifikası yenilendi: artık yalnız LifeOS adreslerine etki ediyor. Her cihazda bir kez yeniden kur (Yeni cihaz bağla › QR), eskisini kaldır.',
+  'ortak.hesap.sertifika-tamam':'Tamam, kurdum',
   'ortak.hesap.her-yerden-not':'Telefon ve tablet evden uzakta da bu bilgisayara ve King’e bağlanır. Tailscale gerekir; bilgisayar açık kalmalı.',
   'ortak.hesap.her-yerden-ac':'Her yerden erişimi aç',
   'ortak.hesap.her-yerden':'Her yerden erişim',
@@ -1679,11 +1681,15 @@ window.LIFEOS.HESAP = (function(){
   function adresNotu(){
     if(ortam.yerelUygulama() || !sunucu || !sunucu.yerel) return '';
     const l = Array.isArray(sunucu.ev_agi) ? sunucu.ev_agi : [];
+    /* Kök yenilendiyse (sistem/telefon.py): kullanıcı «Tamam» diyene dek hatırlatılır. */
+    const yenilendi = sunucu.sertifika_yenilendi
+      ? '<p class="hesap__not">' + yz('ortak.hesap.sertifika-yenilendi') + '</p><button type="button" class="hesap__ikinci" data-hesap="sertifika-tamam">' + yz('ortak.hesap.sertifika-tamam') + '</button>'
+      : '';
     if(l.length){
-      return ('<p class="hesap__not">' + yz('ortak.hesap.telefonda-ve-tablette-bilgis') + ' <b>') + l.map(kac).join(('</b> ' + yz('ortak.hesap.ya-da') + ' <b>'))
+      return yenilendi + ('<p class="hesap__not">' + yz('ortak.hesap.telefonda-ve-tablette-bilgis') + ' <b>') + l.map(kac).join(('</b> ' + yz('ortak.hesap.ya-da') + ' <b>'))
         + ('</b>' + yz('ortak.hesap.tablette-tarayicida') + ' <b>https://') + kac(l[0]) + ':' + TELEFON_KAPI + ('</b> ' + yz('ortak.hesap.acilir') + '</p>');
     }
-    return ('<p class="hesap__not">' + yz('ortak.hesap.telefon-ve-tablet-icin-ev') + ' ')
+    return yenilendi + ('<p class="hesap__not">' + yz('ortak.hesap.telefon-ve-tablet-icin-ev') + ' ')
       + ('<code>' + yz('ortak.hesap.python-sistem-telefon-py') + '</code> çalıştırıp LifeOS\'u yeniden başlat.</p>');
   }
 
@@ -3954,6 +3960,12 @@ window.LIFEOS.HESAP = (function(){
       merkezDenenen = null;
       merkezBagla().catch(() => null);
       uzakYukle();
+    }else if(ad === 'sertifika-tamam'){
+      is.disabled = true;
+      merkezIs(async () => {
+        await api('/api/hesap/sertifika-tamam', {});
+        sunucu.sertifika_yenilendi = false;
+      });
     }else if(ad === 'ev-agi-ac'){
       is.disabled = true;
       merkezIs(async () => (await evAgiAc()).mesaj);

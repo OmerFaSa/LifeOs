@@ -43,6 +43,13 @@ PORTLAR = {"AYS": 5173, "SPI": 5183, "ESP": 5193}
 KURULUM_PORT = 5180          # http: yalniz yonerge + kok sertifikanin AÇIK kismi
 KOK_GUN = 3650               # kok sertifika: on yil (telefona bir kez kurulur)
 SUNUCU_GUN = 800             # iOS sunucu sertifikasini en cok 825 gun kabul eder
+# Kok yalniz bu adlari imzalayabilir: kok.key calinsa bile baska site taklit edilemez.
+# .ts.net ve Tailscale IP'si yok: o adresin sertifikasini Tailscale verir, bu kok imzalamaz.
+# Ciplak bilgisayar adi da yok: tasinan kok baska adli bilgisayarda da gecerli kalsin.
+KOK_ADLAR = ("local", "localhost")
+KOK_AGLAR = tuple(ipaddress.ip_network(a) for a in
+                  ("127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"))
+_AD_KISITI_OID = b"\x06\x03\x55\x1d\x1e"   # nameConstraints (2.5.29.30), DER icinde
 
 
 def klasor():
@@ -64,6 +71,7 @@ def yollar(k=None):
         "kok_der": os.path.join(k, "lifeos-kok.cer"),
         "anahtar": os.path.join(k, "sunucu.key"),
         "sertifika": os.path.join(k, "sunucu.crt"),
+        "yenilendi": os.path.join(k, "kok.yenilendi"),
     }
 
 
@@ -78,8 +86,18 @@ def ad():
     return (socket.gethostname() or "lifeos").split(".")[0].lower()
 
 
+def ev_ipi_mi(ip):
+    """Kokun imzalayabilecegi, disaridan ulasilabilir bir ev agi adresi mi?
+    Kisit disi tek bir SAN butun sertifikayi reddettirir (ornegin VPN'in 198.18.x'i)."""
+    try:
+        a = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return a.version == 4 and not a.is_loopback and any(a in ag for ag in KOK_AGLAR)
+
+
 def ipler():
-    """Bu bilgisayarin ev agindaki IPv4 adresleri (ozel aralik).
+    """Bu bilgisayarin ev agindaki IPv4 adresleri (kokun izinli araliklari).
 
     Birincil adres bir UDP soketinin «baglanmasiyla» bulunur: UDP connect
     paket gondermez, yalniz isletim sistemine hangi arayuzu kullanacagini
@@ -101,11 +119,7 @@ def ipler():
         pass
     out = []
     for ip in bulunan:
-        try:
-            a = ipaddress.ip_address(ip)
-        except ValueError:
-            continue
-        if a.is_private and not a.is_loopback and not a.is_link_local and ip not in out:
+        if ev_ipi_mi(ip) and ip not in out:
             out.append(ip)
     return out
 
@@ -131,19 +145,42 @@ def _kos(openssl, *arg):
 
 
 def san_listesi(bilgisayar, ip_listesi):
-    """Sunucu sertifikasinin adlari: mDNS adi, cıplak ad, localhost, IP'ler."""
-    adlar = ["DNS:%s.local" % bilgisayar, "DNS:%s" % bilgisayar, "DNS:localhost"]
+    """Sunucu sertifikasinin adlari: mDNS adi, localhost, IP'ler. Hepsi kok kisitina sigar."""
+    adlar = ["DNS:%s.local" % bilgisayar, "DNS:localhost"]
     adlar += ["IP:%s" % ip for ip in ip_listesi] + ["IP:127.0.0.1"]
     return ",".join(adlar)
 
 
+def kok_kisiti():
+    """openssl bicimi: yalniz KOK_ADLAR ve KOK_AGLAR izinli, kritik."""
+    izinli = ["permitted;DNS:%s" % a for a in KOK_ADLAR]
+    izinli += ["permitted;IP:%s/%s" % (ag.network_address, ag.netmask) for ag in KOK_AGLAR]
+    return "nameConstraints=critical," + ",".join(izinli)
+
+
+def kok_kisitli_mi(y):
+    try:
+        with open(y["kok_der"], "rb") as f:
+            return _AD_KISITI_OID in f.read()
+    except OSError:
+        return False
+
+
 def kok_kur(openssl, y, bilgisayar):
-    _kos(openssl, "req", "-x509", "-newkey", "rsa:2048", "-nodes",
-         "-keyout", y["kok_anahtar"], "-out", y["kok"], "-days", str(KOK_GUN),
-         "-subj", "/CN=LifeOS Yerel Kok (%s)" % bilgisayar,
-         "-addext", "basicConstraints=critical,CA:TRUE",
-         "-addext", "keyUsage=critical,keyCertSign,cRLSign")
-    _kos(openssl, "x509", "-in", y["kok"], "-outform", "DER", "-out", y["kok_der"])
+    """Yeni kok once yanda uretilir: openssl yarida kalirsa eski kok yerinde durur.
+    Ad «Kok 2»: cihazda kisitsiz eskisiyle karismasin, kaldirilacak olan belli olsun."""
+    with tempfile.TemporaryDirectory(dir=os.path.dirname(y["kok"])) as gecici:
+        anahtar, kok, der = (os.path.join(gecici, a) for a in ("k", "c", "d"))
+        _kos(openssl, "req", "-x509", "-newkey", "rsa:2048", "-nodes",
+             "-keyout", anahtar, "-out", kok, "-days", str(KOK_GUN),
+             "-subj", "/CN=LifeOS Yerel Kok 2 (%s)" % bilgisayar,
+             "-addext", "basicConstraints=critical,CA:TRUE",
+             "-addext", "keyUsage=critical,keyCertSign,cRLSign",
+             "-addext", kok_kisiti())
+        _kos(openssl, "x509", "-in", kok, "-outform", "DER", "-out", der)
+        os.replace(anahtar, y["kok_anahtar"])
+        os.replace(kok, y["kok"])
+        os.replace(der, y["kok_der"])
 
 
 def sunucu_kur(openssl, y, bilgisayar, ip_listesi):
@@ -171,8 +208,10 @@ def parmak_izi(y):
 
 
 def kur(yenile=False, k=None, openssl=None, bilgisayar=None, ip_listesi=None):
-    """Sertifikalari uretir. Kok varsa KORUNUR (telefona yeniden kurulmaz);
-    yalniz sunucu sertifikasi yenilenir. Doner: yollar sozlugu."""
+    """Sertifikalari uretir. Kok varsa KORUNUR (telefona yeniden kurulmaz); yalniz
+    sunucu sertifikasi yenilenir. Tek istisna ad kisiti olmayan eski koktur: yenisiyle
+    degisir, eski anahtar silinir (cihazda kalan eski kok boylece zararsizlasir) ve
+    Hesap › Cihazlar yeniden kurulumu bir kez soyler. Doner: yollar sozlugu."""
     k = k or klasor()
     y = yollar(k)
     openssl = openssl or openssl_bul()
@@ -182,8 +221,17 @@ def kur(yenile=False, k=None, openssl=None, bilgisayar=None, ip_listesi=None):
     bilgisayar = bilgisayar or ad()
     ip_listesi = ipler() if ip_listesi is None else ip_listesi
     os.makedirs(k, exist_ok=True)
-    if not (os.path.isfile(y["kok"]) and os.path.isfile(y["kok_anahtar"])):
+    kok_var = os.path.isfile(y["kok"]) and os.path.isfile(y["kok_anahtar"])
+    if not (kok_var and kok_kisitli_mi(y)):
         kok_kur(openssl, y, bilgisayar)
+        yenile = True
+        try:
+            os.remove(os.path.join(k, "sunucu.adlar"))   # sunucu imzasi yarida kalirsa tazele yeniden dener
+        except OSError:
+            pass
+        if kok_var:
+            with open(y["yenilendi"], "w", encoding="utf-8") as f:
+                f.write(datetime.date.today().isoformat())
     if yenile or not acik_mi(k):
         sunucu_kur(openssl, y, bilgisayar, ip_listesi)
     return y
@@ -192,7 +240,8 @@ def kur(yenile=False, k=None, openssl=None, bilgisayar=None, ip_listesi=None):
 def tazele(k=None, openssl=None, bilgisayar=None, ip_listesi=None, simdi=None):
     """Sunucu acilirken: adres degistiyse (DHCP, yeni bilgisayar) ya da sertifikanin
     suresi bitiyorsa sunucu sertifikasini kendiliginden yeniler. Kok korunur: telefona
-    bir sey kurulmaz. Yapamazsa eski sertifikayla surer. Doner: yenilendi mi."""
+    bir sey kurulmaz. Kisitsiz eski kok burada yenisine gecer (kur). Yapamazsa eski
+    sertifikayla surer. Doner: yenilendi mi."""
     k = k or klasor()
     if not acik_mi(k):
         return False
@@ -207,7 +256,7 @@ def tazele(k=None, openssl=None, bilgisayar=None, ip_listesi=None, simdi=None):
         eski = ""
     simdi = datetime.datetime.now().timestamp() if simdi is None else simdi
     yas = simdi - os.path.getmtime(yollar(k)["sertifika"])
-    if eski == istenen and yas < (SUNUCU_GUN - 60) * 86400:
+    if eski == istenen and yas < (SUNUCU_GUN - 60) * 86400 and kok_kisitli_mi(yollar(k)):
         return False
     try:
         kur(yenile=True, k=k, openssl=openssl, bilgisayar=bilgisayar, ip_listesi=sorted(ip_listesi))
@@ -216,6 +265,18 @@ def tazele(k=None, openssl=None, bilgisayar=None, ip_listesi=None, simdi=None):
     except (RuntimeError, OSError):
         return False
     return True
+
+
+def kok_yenilendi_mi(k=None):
+    """Hesap › Cihazlar bunu kullanici «Tamam» diyene dek soyler."""
+    return os.path.isfile(yollar(k)["yenilendi"])
+
+
+def kok_yenilendi_tamam(k=None):
+    try:
+        os.remove(yollar(k)["yenilendi"])
+    except FileNotFoundError:
+        pass
 
 
 def kapat(k=None):
@@ -304,12 +365,14 @@ def yonerge(bilgisayar=None, ip_listesi=None):
         "     http://%s:%d/" % (ip, KURULUM_PORT),
         "   «Sertifikayı indir»e dokun.",
         "",
-        "2. Sertifikayı kur:",
+        "2. Sertifikayı kur (yalnız LifeOS adreslerinde geçerlidir, başka siteye etki etmez):",
         "   iPhone : Ayarlar › İndirilen Profil › Yükle; sonra",
         "            Ayarlar › Genel › Hakkında › Sertifika Güven Ayarları ›",
-        "            «LifeOS Yerel Kok» için tam güveni AÇ.",
+        "            «LifeOS Yerel Kok 2» için tam güveni AÇ.",
         "   Android: Ayarlar › Güvenlik › Şifreleme ve kimlik bilgileri ›",
         "            Sertifika yükle › CA sertifikası › indirilen dosya.",
+        "   Eskisi kuruluysa kaldır: Android'de Ayarlar › Güvenlik › Kullanıcı sertifikaları;",
+        "   iPhone'da Ayarlar › Genel › VPN ve Cihaz Yönetimi › eski LifeOS profili.",
         "",
         "3. Modülü aç ve ana ekrana ekle (her modül ayrı):",
     ]

@@ -2518,8 +2518,10 @@ def isle(h):
         d = depo()
         d.kopya_tetikle()                       # soz 20: gunluk yedek, arkada
         if yontem == "GET" and yol == "/api/hesap/durum":
+            yerel, yenilendi = _yerel_mi(h), SISTEM.get("sertifika_yenilendi")
             return _cevap(h, 200, {"surum": SURUM, "kurulum": d.kurulum_gerekli(), "kayit": d.kayit_acik(),
-                                   "yerel": _yerel_mi(h), "ev_agi": ev_agi()})
+                                   "yerel": yerel, "ev_agi": ev_agi(),
+                                   "sertifika_yenilendi": bool(yerel and yenilendi and yenilendi())})
         if yontem == "GET":
             m = TAKVIM_YOL_RE.match(yol)
             if m:
@@ -2663,6 +2665,14 @@ def isle(h):
                 if not SISTEM:
                     raise Hata(503, "Bu sunucuda ev ağı açılamaz.")
                 return _cevap(h, 200, SISTEM["ev_agi_ac"]())
+            if yol == "/api/hesap/sertifika-tamam":
+                d._admin(k, "Bu notu yalnız admin kapatır.")
+                if not _yerel_mi(h):
+                    raise Hata(403, "Bu not yalnız bu bilgisayardan kapatılır.")
+                if not SISTEM:
+                    raise Hata(503, "Bu sunucuda ev ağı yok.")
+                SISTEM["sertifika_tamam"]()
+                return _cevap(h, 200, {"ok": True})
             if yol in ("/api/hesap/uzak-ac", "/api/hesap/uzak-kapat"):
                 d._admin(k, "Her yerden erişimi yalnız admin değiştirir.")
                 if not _yerel_mi(h):

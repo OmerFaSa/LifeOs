@@ -1788,6 +1788,7 @@ def _bekci_dongusu():
 
 
 hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac,
+                    sertifika_yenilendi=telefon.kok_yenilendi_mi, sertifika_tamam=telefon.kok_yenilendi_tamam,
                     uzak_ac=uzak_ac, uzak_kapat=uzak.kapat, merkez=uzak.merkez,
                     uzak_durum=uzak_durum, uzak_acilis=uzak.acilis_ayarla)
 
@@ -2189,7 +2190,8 @@ ul, ol{ padding-left:18px; margin:6px 0; } ol li{ margin:8px 0; } [hidden]{ disp
 <ol><li><a class="dugme" href="/lifeos.mobileconfig">LifeOS profilini indir</a> › İzin ver.</li>
 <li>Ayarlar › <b>İndirilen Profil</b> › Yükle.</li>
 <li>Ayarlar › Genel › Hakkında › <b>Sertifika Güven Ayarları</b> › «LifeOS Yerel Kök»ü aç.</li></ol>
-<p>AYS, SPİ ve ESP ana ekrana gelir. Profil yalnız senin bilgisayarına güvenir; internete hiçbir şey çıkmaz.</p></section>
+<p>AYS, SPİ ve ESP ana ekrana gelir. Profil yalnız LifeOS adreslerine (ev ağı, bu bilgisayar) etki eder; başka sitelere ve internete dokunmaz.</p>
+<p>Eski LifeOS profili varsa önce kaldır: Ayarlar › Genel › <b>VPN ve Cihaz Yönetimi</b> › LifeOS › Profili Kaldır.</p></section>
 <section data-cihaz="ios" id="iphone-uygulama"><h2>iPhone uygulaması (isteğe bağlı)</h2>
 <p>Ekran kapalıyken rota ve bildirim için. AltStore'u bilgisayardaki AltServer ile
 bir kez kur, sonra dokun: LifeOS kaynağı AltStore'a eklenir.</p>
@@ -2200,7 +2202,9 @@ Haftalık imza yenilemesi: Kısayollar › Otomasyon › Her gün › AltStore �
 <section data-cihaz="android"><h2>Android telefon ve tablet</h2>
 <ol><li><a class="dugme" href="/lifeos-kok.cer">Sertifikayı indir</a></li>
 <li>Ayarlar'ın arama kutusuna <b>CA sertifikası</b> yaz › CA sertifikası › Yine de yükle › İndirilenler › lifeos-kok.cer.</li>
-<li>Aşağıdaki her modülü Chrome'da aç › ⋮ menüsü › <b>Ana ekrana ekle</b>.</li></ol></section>
+<li>Aşağıdaki her modülü Chrome'da aç › ⋮ menüsü › <b>Ana ekrana ekle</b>.</li></ol>
+<p>Sertifika yalnız LifeOS adreslerine (ev ağı, bu bilgisayar) etki eder; başka sitelere dokunmaz.</p>
+<p>Eski LifeOS sertifikası varsa önce kaldır: Ayarlar › Güvenlik › <b>Kullanıcı sertifikaları</b> › «LifeOS Yerel Kok» › Kaldır («Kok 2» kalsın).</p></section>
 <section><h2>Modüller</h2>
 <ul>%s</ul>
 <p>Bir modülü hep aynı adresten aç: adres değişirse verin ayrı bir kökende
@@ -2356,7 +2360,9 @@ def main():
     # Telefon: yalniz telefon.py ile sertifika uretildiyse. Acilamazsa
     # bilgisayardaki sistemler yine calisir.
     if telefon.tazele():
-        print("  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
+        print("  • Güvenlik sertifikası yenilendi: her cihazda bir kez yeniden kur (Hesap › Cihazlar)."
+              if telefon.kok_yenilendi_mi() else
+              "  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
     tel, tel_sorun = telefon_sunuculari()
     threading.Thread(target=_bekci_dongusu, daemon=True).start()
     kurulum = None
