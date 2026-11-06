@@ -44,6 +44,8 @@
     it('oz-041 oz-040 Analiz başı: veri doluluğu ve haftanın birikimi', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
+        const gun = await R.Model.ensureDay(R.U.today());
+        gun.blocks[0].status = 'done';   /* kayıt yokken birikim çizilmez (tekis.test) */
         const k = dom(await R.Screens.analytics.render());
         expect(k.querySelector('[data-oz="041"]')).toBeTruthy();
         expect(k.querySelector('[data-oz="040"]')).toBeTruthy();

@@ -1313,7 +1313,8 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentav--xs{ width:20px; height:20px; font-size:10px; }
 .agenttab__name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 @media (max-width:640px){
-  .agenttab__name{ display:none; }
+  /* Altı aynı yüz kimin kim olduğunu söylemiyordu: ad durur, seçici üçerli iki satır. */
+  .seg:has(.agenttab){ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); }
 }
 
 /* ====================================================================

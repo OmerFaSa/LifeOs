@@ -317,7 +317,9 @@ R.C = (function(){
     }
     let az = true;
     try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
-    el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });
+    /* Bölüm zaten ekrandaysa sayfa oynamaz: telefonda her seçimde başlık ve sekmeler üstte kayboluyordu. */
+    const ust = el.getBoundingClientRect().top;
+    if(ust < 72 || ust > window.innerHeight * 0.8) el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });
     const h = el.querySelector('.sayfabolum__ad');
     if(h){ try{ h.focus({ preventScroll:true }); }catch(e){} }
     return true;

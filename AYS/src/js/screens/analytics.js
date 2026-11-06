@@ -150,7 +150,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı',
   'ays.analytics.ayrintili-analiz':'Ayrıntılı analiz',
 });
-window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Ayrıntı', ikon:'search', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Neden?', ikon:'search', sira:30 });
 
 R.Screens.analytics = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -801,7 +801,7 @@ R.Screens.analytics = (function(){
     });
     return K.Grid([K.Span(12, html`<div class="analizbasi">
       ${K.Kutu({ ad:yz('ays.analytics.veri-dolulugu'), yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'ays', ad:yz('ays.analytics.ays'), gunler:kayitli }], { gun:7 })) })}
-      ${K.Kutu({ ad:yz('ays.analytics.bu-haftanin-birikimi'), yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:yz('ays.analytics.haftalik-soru') })) })}
+      ${when(gunluk.length, () => K.Kutu({ ad:yz('ays.analytics.bu-haftanin-birikimi'), yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:yz('ays.analytics.haftalik-soru') })) }))}
     </div>`)]);
   }
 

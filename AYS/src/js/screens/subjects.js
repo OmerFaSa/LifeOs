@@ -2,6 +2,11 @@
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.subjects.sirada':'Sırada',
+  'ays.subjects.konuyu-ac':'Konuyu aç',
+  'ays.subjects.konu-bolumleri':'Konu bölümleri',
+  'ays.subjects.bolum-konular':'Konular',
+  'ays.subjects.bolum-genel':'Genel',
   'ays.subjects.gecici-kapali':'Geçici kapalı',
   'ays.subjects.yeniden-acildi':'Yeniden açıldı',
   'ays.subjects.hedef-2':'Hedef ',
@@ -21,12 +26,12 @@ window.R = window.R || {};
 R.Screens = R.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:120, group:'Git', label:'Dersler — konu kapanışı', icon:'book', route:'subjects', run(){ R.App.go('subjects'); } });
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:310, uret(){
-  return R.SUBJECTS.map(s => ({ group:'Ders', label:s.name, icon:'book', run(){ R.S.ui.subjectOpen = s.id; R.App.go('subjects'); } }));
+  return R.SUBJECTS.map(s => ({ group:'Ders', label:s.name, icon:'book', run(){ R.S.ui.subjectOpen = s.id; R.S.ui.bolumIstek = 'konular'; R.App.go('subjects'); } }));
 } });
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:320, uret(){
   return R.Calc.riskRanking(5).map(r => ({ group:'Öncelik', label:r.topicName+' — risk '+r.score, icon:'target',
     keywords:r.subjectName, weight:4,
-    run(){ R.S.ui.subjectOpen = r.subjectId; R.App.go('subjects');
+    run(){ R.S.ui.subjectOpen = r.subjectId; R.S.ui.bolumIstek = 'konular'; R.App.go('subjects');
       setTimeout(()=>R.Screens.subjects.handle['open-topic']({ dataset:{ subject:r.subjectId, topic:r.topicId } }), 80); } }));
 } });
 window.LIFEOS.PARCA.yazilar({
@@ -94,7 +99,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.subjects.i-kinci-kontrol':'İkinci kontrol',
   'ays.subjects.dersler':'Dersler',
 });
-window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', king:{ sira:120, ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] }, cekmece:'calisma', ad:'Konu kapanışı', ikon:'book', sira:50 });
+window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', king:{ sira:120, ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] }, cekmece:'calisma', ad:'Konu takibi', ikon:'book', sira:40 });
 
 R.Screens.subjects = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -364,6 +369,16 @@ R.Screens.subjects = (function(){
     })}</div>`;
   }
 
+  /* Ekran duruma göre konuşur: bekleyen ölçüm kendi kartındadır; yoksa risk sırasının başı (kural motoru). */
+  function siradakiKonu(){
+    if(C.pendingSecondChecks().length) return '';
+    const r = C.riskRanking(1)[0];
+    if(!r) return '';
+    return K.NextUp({ calm:true, icon:'book', label:yz('ays.subjects.sirada'), title:r.topicName, why:r.subjectName,
+      action:K.Button({ label:yz('ays.subjects.konuyu-ac'), tone:'primary', size:'sm', act:'open-topic',
+        data:{ 'data-subject':r.subjectId, 'data-topic':r.topicId } }) });
+  }
+
   function riskCard(){
     const list = C.riskRanking(8);
     if(!list.length) return null;
@@ -529,34 +544,34 @@ R.Screens.subjects = (function(){
     return P.izgara([kart, ikinci], 'pk-izgara--iki');
   }
 
-  LIFEOS.PARCA.blok({ id:'subjects.konu-haritasi', sayfa:'subjects', yer:'y1', sira:10, ad:'Konu haritası', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-haritasi', sayfa:'subjects', yer:'genel', sira:10, ad:'Konu haritası', ciz({ sid, subject, P }){
     return raw(KonuHaritasi(subject));
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.donenkapanis', sayfa:'subjects', yer:'y2', sira:10, ad:'Dönen kapanış', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.donenkapanis', sayfa:'subjects', yer:'genel', sira:10, ad:'Dönen kapanış', ciz({ sid, subject, P }){
     return DonenKapanis();
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.pendingcard', sayfa:'subjects', yer:'y3', sira:10, ad:'Bekleyenler', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.pendingcard', sayfa:'subjects', yer:'konular-ust', sira:10, ad:'Bekleyenler', ciz({ sid, subject, P }){
     return pendingCard(C.pendingSecondChecks());
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.dersler', sayfa:'subjects', yer:'y4', sira:10, ad:'Dersler', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.dersler', sayfa:'subjects', yer:'konular-sol', sira:10, ad:'Dersler', ciz({ sid, subject, P }){
     return K.Card({ pad:'sm', title:yz('ays.subjects.dersler'), sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) });
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.konu-listesi', sayfa:'subjects', yer:'y5', sira:10, ad:'Konu listesi', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-listesi', sayfa:'subjects', yer:'konular-sag', sira:10, ad:'Konu listesi', ciz({ sid, subject, P }){
     return P.konular;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.konu-zinciri', sayfa:'subjects', yer:'y5', sira:20, ad:'Konu zinciri', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-zinciri', sayfa:'subjects', yer:'konular-sag', sira:20, ad:'Konu zinciri', ciz({ sid, subject, P }){
     return P.zincir;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.riskcard', sayfa:'subjects', yer:'y6', sira:10, ad:'Risk', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.riskcard', sayfa:'subjects', yer:'genel', sira:10, ad:'Risk', ciz({ sid, subject, P }){
     return riskCard();
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.konu-karti', sayfa:'subjects', yer:'y7', sira:10, ad:'Konu kartı', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-karti', sayfa:'subjects', yer:'konular-alt', sira:10, ad:'Konu kartı', ciz({ sid, subject, P }){
     return P.kart;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.kaynaklar', sayfa:'subjects', yer:'y7', sira:20, ad:'Kaynaklar', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.kaynaklar', sayfa:'subjects', yer:'konular-alt', sira:20, ad:'Kaynaklar', ciz({ sid, subject, P }){
     return P.kaynak;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.profilkarti', sayfa:'subjects', yer:'y8', sira:10, ad:'Ders profili', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.profilkarti', sayfa:'subjects', yer:'genel-alt', sira:10, ad:'Ders profili', ciz({ sid, subject, P }){
     return profilKarti();
   } });
   LIFEOS.PARCA.blok({ id:'subjects.aciklamalar', sayfa:'subjects', yer:'y9', sira:10, ad:'Açıklamalar', ciz({ sid, subject, P }){
@@ -568,23 +583,27 @@ R.Screens.subjects = (function(){
     const P = subjectPanel(subject);
 
     const parcaB = { sid, subject, P };
-    return String(K.Grid([
-    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    LIFEOS.PARCA.yer('subjects', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw),
-    K.Span(3, K.Stack(LIFEOS.PARCA.liste('subjects', 'y4', K, parcaB))),
-    K.Span(7, K.Stack(LIFEOS.PARCA.liste('subjects', 'y5', K, parcaB))),
-    K.Span(3, K.Stack(LIFEOS.PARCA.liste('subjects', 'y6', K, parcaB))),
-    K.Span(7, K.Stack(LIFEOS.PARCA.liste('subjects', 'y7', K, parcaB))),
-    LIFEOS.PARCA.yer('subjects', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw),
-    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-  ]));
+    const Y = LIFEOS.PARCA;
+    /* TEK İŞ (2026-11-06): konu listesi önce; harita, kapanış oranı ve risk «Genel»de. */
+    return String(html`${K.SayfaBolumleri({ act:'subjects-tab', aria:yz('ays.subjects.konu-bolumleri'), bolumler:[
+      { id:'konular', ad:yz('ays.subjects.bolum-konular'), govde:K.Grid([
+        K.Span(12, siradakiKonu()),
+        Y.yer('subjects', 'konular-ust', K, parcaB, raw),
+        K.Span(3, K.Stack(Y.liste('subjects', 'konular-sol', K, parcaB))),
+        K.Span(7, K.Stack(Y.liste('subjects', 'konular-sag', K, parcaB).concat(Y.liste('subjects', 'konular-alt', K, parcaB)))),
+      ]) },
+      { id:'genel', ad:yz('ays.subjects.bolum-genel'), govde:K.Grid([
+        K.Span(12, K.Stack(Y.liste('subjects', 'genel', K, parcaB))),
+        Y.yer('subjects', 'genel-alt', K, parcaB, raw),
+      ]) },
+    ] })}${K.Grid([K.Span(12, Y.yer('subjects', 'y9', K, parcaB, raw))])}`);
   }
 
   const handle = {
+    async 'subjects-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'topic-filter'(el){ S.ui.topicFilter = el.dataset.value; R.App.render(); },
     async 'topic-reset'(){ S.ui.topicFilter = 'all'; S.ui.topicQuery = ''; R.App.render(); },
-    async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; R.App.render(); },
+    async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; S.ui.bolumIstek = 'konular'; R.App.render(); },
     async 'sp-yukle'(){
       const ad = document.getElementById('sp-yukle-ad'), m = document.getElementById('sp-yukle-metin');
       const r = R.SinavProfil.metindenProfil(ad ? ad.value : '', m ? m.value : '');

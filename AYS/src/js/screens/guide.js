@@ -1081,7 +1081,7 @@ R.Screens.guide = (function(){
     return raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '');
   } });
   async function render(){
-    return String(html`<div id="pane-guide">${LIFEOS.PARCA.yer('guide', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('guide', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
+    return String(html`<div id="pane-guide">${LIFEOS.PARCA.yer('guide', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('guide', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* «Bütün veriyi sil»: defter VE bu cihazdaki soru fotoğrafları ile çözümleri

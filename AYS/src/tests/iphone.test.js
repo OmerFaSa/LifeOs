@@ -41,33 +41,32 @@
 
   describe('iPhone · Faz 1 · Plan çekmecesi', () => {
 
-    it('Hafta: açık yalnız haftanın kendisi; özet şerit, geçmiş ve başvuru gizli', async () => {
+    it('Hafta: önce günler; sözleşme ve özet kendi katında, geçmiş ve başvuru gizli', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const b = await bolumle('week');
         try{
-          expect(!!b.kok.querySelector('.weekgrid')).toBe(true);
-          expect(b.acik.length <= 3).toBe(true);
-          /* imza bekleyen sözleşme işin kendisidir: açık */
-          expect(b.acik.indexOf('haftalık-sözleşme') >= 0).toBe(true);
-          expect(b.kucuk.indexOf('haftanın-özeti') >= 0).toBe(true);
+          expect(b.kok.querySelector('.sayfabolum.is-on').id).toBe('bl-gunler');
+          expect(!!b.kok.querySelector('#bl-gunler .weekgrid')).toBe(true);
+          expect(!!b.kok.querySelector('#bl-sozlesme [data-act="week-sign"]')).toBe(true);
+          expect(!!b.kok.querySelector('#bl-gunler [data-act="week-sign"]')).toBe(false);
           ['plan-tamamlama-geçmişi', 'sınava-kadar', 'plan-ızgarası', 'planın-şekli', 'müfredat-referansı']
             .filter(a => b.var.indexOf(a) >= 0)
             .forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
-          expect(b.acik.filter(a => ['haftalık-sözleşme', 'bugüne-önerilen-blok'].indexOf(a) < 0).join(',')).toBe('');
+          /* imza bekleyen sözleşme gizli kalmaz: seçicide rozet */
+          expect(!!b.kok.querySelector('[data-act="week-tab"][data-tab="sozlesme"] .bolumcubugu__rozet')).toBe(true);
         }finally{ b.bitir(); }
       });
     });
 
-    it('Hafta: sözleşme imzalanınca o da şerit olur', async () => {
+    it('Hafta: sözleşme imzalanınca rozet kalkar', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const w = R.S.weeks[R.Model.weekId(R.Model.currentWeek())];
         w.signedAt = '2026-10-12T08:00:00';
         const b = await bolumle('week');
         try{
-          expect(b.kucuk.indexOf('haftalık-sözleşme') >= 0).toBe(true);
-          expect(b.acik.indexOf('haftalık-sözleşme')).toBe(-1);
+          expect(!!b.kok.querySelector('[data-act="week-tab"][data-tab="sozlesme"] .bolumcubugu__rozet')).toBe(false);
         }finally{ b.bitir(); w.signedAt = null; }
       });
     });
@@ -176,7 +175,7 @@
       });
     });
 
-    it('Soru çöz: dört istatistik dönen kartta; kaynak, oran ve son kayıtlar şerit', async () => {
+    it('Soru çöz: dört istatistik dönen kartta; son kayıtlar kaydın altında, kaynaklar kendi katında', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const solved = R.S.solved;
@@ -188,8 +187,9 @@
           /* kayıt yokken oran sayı değil cümle */
           expect(d.textContent).toContain('Henüz kayıt yok.');
           expect(b.var.indexOf('çözüm-kaydı')).toBe(-1);
-          ['kaynaklarım', 'çözülen-sorular'].forEach(a => expect(b.kucuk.indexOf(a) >= 0).toBe(true));
-          expect(b.acik.length <= 3).toBe(true);
+          expect(!!b.kok.querySelector('#bl-kayit .donen')).toBe(true);
+          expect(b.var.indexOf('kaynaklarım') >= 0).toBe(true);
+          expect(!!b.kok.querySelector('#bl-sor #q-hizli-kutu')).toBe(false);
         }finally{ b.bitir(); R.S.solved = solved; }
       });
     });
@@ -217,6 +217,7 @@
     it('Sınama kur ve Kaynaklarım: açıklama cümlesi ekranda değil ⓘ’de', async () => {
       resetState();
       R.S.profile.setupDone = true;
+      R.S.cards = [{ id:'c1', front:'a', back:'b', dueAt:'2020-01-01', stage:0 }];   /* boşken form yerine ilk adım çizilir */
       const sinama = String(await R.Screens.quiz.render());
       expect(sinama.indexOf('Önce cevabı üret')).toBe(-1);
       expect(sinama.indexOf('data-hint="quiz"') >= 0).toBe(true);
@@ -258,7 +259,7 @@
 
   describe('iPhone · Faz 3 · Analiz (AYS)', () => {
 
-    it('İlerleme: sekiz KPI tek dönen kart; açık trend ve karar kapısı; başvuru gizli', async () => {
+    it('İlerleme: KPI’lar tek dönen kart (tekrar borcu Özet’te bir kez); açık trend ve karar kapısı; başvuru gizli', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const kok = await ciz('progress');
@@ -267,7 +268,7 @@
           /* KPI kartı «Göstergeler» (Faz 2: Özet'teki Bugün «Gidişat»ından ayrı). */
           const d = kok.querySelector('.donen[aria-label="Göstergeler"]');
           expect(!!d).toBe(true);
-          expect(d.querySelectorAll('.donen__madde').length >= 8).toBe(true);
+          expect(d.querySelectorAll('.donen__madde').length >= 7).toBe(true);
           const acik = bolumBolum(R, 'progress', kok)[0].acik;
           expect(acik.length <= 3).toBe(true);
           expect(acik.indexOf('test-bazlı-trend')).toBe(-1);
@@ -370,9 +371,12 @@
         await R.Model.ensureDay(R.U.today());
         const kok = await ciz(id);
         try{
-          const a = acik(id, kok);
+          /* Her kat ayrı sayılır: açılan katta en çok üç kart. */
+          const G = window.LIFEOS.Gizle, on = kok.querySelector('.sayfabolum.is-on');
+          const sc = R.Screens[id], k = (sc.gizliVarsayilan || []).concat(R.App.SADE_GIZLI[id] || [], sc.kucukVarsayilan || []);
+          const a = G.bolumler(on).map(x => x.anahtar).filter(x => k.indexOf(x) < 0);
           expect(id + ':' + a.join(',') + ':' + (a.length <= 3)).toBe(id + ':' + a.join(',') + ':true');
-          if(id === 'office'){ expect(kok.querySelector('.board')).toBeNull(); expect(R.Screens.office.kucukVarsayilan.indexOf('uzman-masaları') >= 0).toBe(true); }
+          if(id === 'office'){ expect(kok.querySelector('.board')).toBeNull(); expect(!!kok.querySelector('#bl-uzmanlar .desks')).toBe(true); }
           if(id === 'team') expect(kok.textContent.indexOf('Alan dışı soruyu sahibine sor')).toBe(-1);
           /* 2026-10-07: sesli sohbet şerit; model kapalıyken Masalar'daki tek
              satırlık gri şerit, iki cümlelik uyarı kutusu değil. */
@@ -392,7 +396,7 @@
   const { describe, it, expect, resetState } = R.Test;
   describe('iPhone · Faz 5 · Ayarlar (AYS)', () => {
     ['guide', 'profiles'].forEach(id => {
-      it(id + ': ilk bölüm açık, gerisi şerit; gizliler gizli kalır', async () => {
+      it(id + ': liste şerit (Genel\u2019de ilk form da); gizliler gizli kalır', async () => {
         resetState();
         const sc = R.Screens[id];
         const kok = document.createElement('div');
@@ -403,7 +407,7 @@
           const gizli = (sc.gizliVarsayilan || []).concat(R.App.SADE_GIZLI[id] || []);
           const gorunen = G.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0);
           const serit = R.App.ayarListesi(sc, kok);
-          expect(serit.join(',')).toBe(gorunen.slice(1).join(','));
+          expect(serit.join(',')).toBe(gorunen.slice(id === 'guide' ? 0 : 1).join(','));
           expect(gorunen.filter(a => serit.indexOf(a) < 0).length <= 1).toBe(true);
         }finally{ kok.remove(); }
       });

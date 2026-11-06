@@ -3,6 +3,8 @@
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz.
    Karar motoru R.Quiz'dedir; ekran yalnizca cizer ve olay tasir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.quiz.ilk-adim':'Sınanacak bir şey yok. Önce bir tekrar kartı ekle; sınama buradan başlar.',
+  'ays.quiz.kart-ekle':'Kart ekle',
   'ays.quiz.ne-kadar-eminsin':'Ne kadar eminsin?',
   'ays.quiz.eminim':'Eminim',
   'ays.quiz.kararsizim':'Kararsızım',
@@ -118,9 +120,9 @@ window.LIFEOS.PARCA.yazilar({
   'ays.quiz.oturum-bitti':'Oturum bitti · %',
   'ays.quiz.sure-doldu-oturum-bitti':'Süre doldu — oturum bitti',
   'ays.quiz.sure-doldu':'Süre doldu',
-  'ays.quiz.sinama':'Sınama',
+  'ays.quiz.sinama':'Kendini sına',
 });
-window.LIFEOS.PARCA.sayfa({ id:'quiz', modul:'ays', cekmece:'calisma', ad:'Sınama', ikon:'zap', sira:40 });
+window.LIFEOS.PARCA.sayfa({ id:'quiz', modul:'ays', cekmece:'calisma', ad:'Kendini sına', ikon:'zap', sira:50 });
 
 R.Screens.quiz = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -147,6 +149,9 @@ R.Screens.quiz = (function(){
       subject:Q.pool({ mode:'subject', subjectId:S.ui.quizSubject || null }).length,
       topic:Q.pool({ mode:'topic', subjectId:S.ui.quizSubject || null, topicId:S.ui.quizTopic || null }).length,
     };
+    /* Sınanacak hiçbir şey yokken ayar formu boşa durur: ilk adım söylenir (kod seçer). */
+    if(!Object.keys(count).some(k => count[k])) return K.Card({ body:K.Empty({ icon:'zap', text:yz('ays.quiz.ilk-adim'),
+      action:K.Button({ label:yz('ays.quiz.kart-ekle'), tone:'primary', act:'next-action', data:{ 'data-route':'cards', 'data-next':'new-card' } }) }) });
     const ready = (count[mode] || 0) > 0;
 
     const modeItems = Object.keys(Q.MODES).map(k => ({
@@ -639,6 +644,8 @@ R.Screens.quiz = (function(){
 
   return {
     id:'quiz',
+    /* Kurma formu iştir; havuzun sayıları başlıkta kalır. */
+    kucukVarsayilan:['havuz'],
     title:yz('ays.quiz.sinama'),
     subtitle(){
       const m = R.TestKitabi ? R.TestKitabi.mevcut() : null;

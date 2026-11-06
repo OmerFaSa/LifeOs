@@ -1271,3 +1271,15 @@ tbody tr:hover{ background:var(--surface-2); }
 .konusatir__cozulen{ font-size:13px; font-weight:600; color:var(--text); text-align:center; }
 .konusatir__cozulen small{ font-weight:400; color:var(--text-3); }
 
+
+/* Ekranın düğmeleri sekme çubuğunun altında (app.js bolumCubuguHtml). */
+.ekran-eylem{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0 0 16px; }
+
+/* Program › Sıradaki haftalar telefonda: konu sütunu daralıp uzuyordu; soru sayısı alta iner. */
+@media (max-width:640px){
+  .tlweek{ grid-template-columns:64px minmax(0, 1fr); }
+  .tlweek__right{ grid-column:2; text-align:left; }
+}
+
+/* Hedef katmanları telefonda: açıklama tek sözcük genişliğine sıkışıyordu. */
+.hedef-katman td:first-child{ min-width:150px; }

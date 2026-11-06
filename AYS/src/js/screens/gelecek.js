@@ -6,6 +6,11 @@
    etkiyle). «Nasıl hesaplandı» küçük başlar. Sayıların hepsi kodun;
    ekran yalnız çizer. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.gelecek.deneme-ekle':'Deneme ekle',
+  'ays.gelecek.neden-sinav-gunu-degil':'Neden sınav günü değil?',
+  'ays.gelecek.gelecek-bolumleri':'Gelecek bölümleri',
+  'ays.gelecek.bolum-tahmin':'Sınav günü',
+  'ays.gelecek.bolum-deney':'Deney',
   'ays.gelecek.bu-gidisle-araligin-tamami-h':'Bu gidişle aralığın tamamı hedefinin içinde.',
   'ays.gelecek.hedefin-bu-araligin-icinde-i':'Hedefin bu aralığın içinde: iyi uçta tutuyor, kötü uçta kaçıyor.',
   'ays.gelecek.bu-gidisle-hedefin-araligin':'Bu gidişle hedefin aralığın dışında; «Ne olursa» neyin kaydırdığını gösterir.',
@@ -83,7 +88,7 @@ window.LIFEOS.PARCA.yazilar({
 });
 /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
 ve «ne olursa» (core/gelecek.js). */
-window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', king:{ sira:110, ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] }, cekmece:'analiz', ad:'Gelecek', ikon:'target', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', king:{ sira:110, ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] }, cekmece:'analiz', ad:'Tahmin', ikon:'target', sira:20 });
 
 R.Screens.gelecek = (function(){
   const U = R.U, S = R.S;
@@ -104,7 +109,8 @@ R.Screens.gelecek = (function(){
     const t = r.tyt;
     if(!t.ok){
       return K.Card({ title:yz('ays.gelecek.sinav-gunu'), hint:'gelecek',
-        body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.' }) });
+        body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.',
+          action:K.Button({ label:yz('ays.gelecek.deneme-ekle'), tone:'primary', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } }) }) });
     }
     const s = r.sira;
     const konum = r.konum === 'icinde' ? yz('ays.gelecek.bu-gidisle-araligin-tamami-h')
@@ -116,7 +122,6 @@ R.Screens.gelecek = (function(){
     return K.Card({ title:yz('ays.gelecek.sinav-gunu'), hint:'gelecek', sub:U.fmtDate(r.sinav) + ' · ' + t.kalanGun + ' gün · tahmin',
       body:html`
         <div class="gel-ana">
-          ${when(!t.sinavaKadar, () => html`<p class="small gel-uyari">${yz('ays.gelecek.sinav-gunune-kadar-cizmek-ic')}${t.yayilim} ${yz('ays.gelecek.gun-en-cok')} ${R.Gelecek.UFUK_KAT} ${yz('ays.gelecek.kati-kadar-uzatilir-yaklasik')} ${t.gerekGun} ${yz('ays.gelecek.gun-daha-deneme-girdikce-ufu')}</p>`)}
           <p class="gel-cumle">${ne} ${yz('ays.gelecek.bu-gidisle-tyt-netin')} <b>${net(t.alt)}–${net(t.ust)}</b>${yz('ays.gelecek.en-olasi')} <b>${net(t.olasi)}</b>.</p>
           ${aralik({ alt:t.alt, ust:t.ust, olasi:t.olasi, min:0, max:t.max, dayanak:t.n, dayanakBirim:'deneme', birim:'net', ondalik:1, etiket:yz('ays.gelecek.tyt-net') })}
           ${when(s, () => html`
@@ -124,6 +129,7 @@ R.Screens.gelecek = (function(){
             ${aralik({ alt:s.sira.iyi, ust:s.sira.kotu, olasi:s.sira.olasi, ters:true, dayanak:t.n, dayanakBirim:'deneme', etiket:yz('ays.gelecek.sira') })}
             ${when(r.hedef, () => html`<p class="small mt-8">${yz('ays.gelecek.hedefin')} ${sayi(r.hedef)}. ${konum}</p>`)}
             ${when(s.yalnizTyt, () => html`<p class="tiny dim mt-4">AYT denemesi yeterli değil: puan yalnız TYT gidişinden; AYT'nin aynı düzeyde geleceği varsayıldı.</p>`)}`)}
+          ${when(!t.sinavaKadar, () => K.Ayrinti({ class:'mt-8', etiket:yz('ays.gelecek.neden-sinav-gunu-degil'), govde:html`${yz('ays.gelecek.sinav-gunune-kadar-cizmek-ic')}${t.yayilim} ${yz('ays.gelecek.gun-en-cok')} ${R.Gelecek.UFUK_KAT} ${yz('ays.gelecek.kati-kadar-uzatilir-yaklasik')} ${t.gerekGun} ${yz('ays.gelecek.gun-daha-deneme-girdikce-ufu')}` }))}
           ${when(r.tyt.ekSoru, () => html`<p class="tiny dim mt-8">${yz('ays.gelecek.bu-aralik-ne-olursa-daki-sec')} ${r.tyt.ekSoru > 0 ? '+' : ''}${r.tyt.ekSoru} soru.</p>`)}
         </div>` });
   }
@@ -261,10 +267,16 @@ R.Screens.gelecek = (function(){
   async function render(){
     const r = R.Gelecek.hesapla({ ekSoru:Number(S.ui.gelecekEkSoru) || 0 });
     const parcaB = { r };
-    return String(html`${LIFEOS.PARCA.yer('gelecek', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}${yontem(r)}`);
+    /* TEK İŞ (2026-11-06): tahmin okunur; kişisel deney ayrı bir iştir, kendi katında. */
+    const P = LIFEOS.PARCA;
+    return String(K.SayfaBolumleri({ act:'gelecek-tab', aria:yz('ays.gelecek.gelecek-bolumleri'), bolumler:[
+      { id:'tahmin', ad:yz('ays.gelecek.bolum-tahmin'), govde:html`${P.yer('gelecek', 'y4', K, parcaB, raw)}${P.yer('gelecek', 'y3', K, parcaB, raw)}${P.yer('gelecek', 'y2', K, parcaB, raw)}${yontem(r)}` },
+      { id:'deney', ad:yz('ays.gelecek.bolum-deney'), govde:P.yer('gelecek', 'y1', K, parcaB, raw) },
+    ] }));
   }
 
   const handle = {
+    async 'gelecek-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'deney-baslat'(){
       S.profile.deney = Object.assign({ id:'sabah-aksam-' + U.todayISO(), baslangic:U.iso(U.addDays(U.todayISO(), 1)) }, DENEY);
       await R.Model.saveProfile(); R.App.render();

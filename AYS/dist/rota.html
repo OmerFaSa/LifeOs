@@ -2852,7 +2852,8 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentav--xs{ width:20px; height:20px; font-size:10px; }
 .agenttab__name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 @media (max-width:640px){
-  .agenttab__name{ display:none; }
+  /* Altı aynı yüz kimin kim olduğunu söylemiyordu: ad durur, seçici üçerli iki satır. */
+  .seg:has(.agenttab){ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); }
 }
 
 /* ====================================================================
@@ -11157,6 +11158,19 @@ tbody tr:hover{ background:var(--surface-2); }
 .konusatir__cubuk i{ display:block; height:100%; background:var(--ays); }
 .konusatir__cozulen{ font-size:13px; font-weight:600; color:var(--text); text-align:center; }
 .konusatir__cozulen small{ font-weight:400; color:var(--text-3); }
+
+
+/* Ekranın düğmeleri sekme çubuğunun altında (app.js bolumCubuguHtml). */
+.ekran-eylem{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0 0 16px; }
+
+/* Program › Sıradaki haftalar telefonda: konu sütunu daralıp uzuyordu; soru sayısı alta iner. */
+@media (max-width:640px){
+  .tlweek{ grid-template-columns:64px minmax(0, 1fr); }
+  .tlweek__right{ grid-column:2; text-align:left; }
+}
+
+/* Hedef katmanları telefonda: açıklama tek sözcük genişliğine sıkışıyordu. */
+.hedef-katman td:first-child{ min-width:150px; }
 
 /* ==== css/kabuk.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -50627,7 +50641,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'33040286', at:'2026-11-06 17:30', dirty:true };
+R.BUILD = { id:'25f0326d', at:'2026-11-06 17:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -107267,7 +107281,9 @@ R.C = (function(){
     }
     let az = true;
     try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
-    el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });
+    /* Bölüm zaten ekrandaysa sayfa oynamaz: telefonda her seçimde başlık ve sekmeler üstte kayboluyordu. */
+    const ust = el.getBoundingClientRect().top;
+    if(ust < 72 || ust > window.innerHeight * 0.8) el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });
     const h = el.querySelector('.sayfabolum__ad');
     if(h){ try{ h.focus({ preventScroll:true }); }catch(e){} }
     return true;
@@ -123380,7 +123396,7 @@ R.Palette = (function(){
           const st = M2.topicState(s.id, t.id);
           out.push({ group:'Konu', label:t.name, sub:s.name+' · '+R.TOPIC_STATES[st.state].label,
             icon:'book', weight:6,
-            run(){ S2.ui.subjectOpen = s.id; R.App.go('subjects'); setTimeout(()=>{
+            run(){ S2.ui.subjectOpen = s.id; S2.ui.bolumIstek = 'konular'; R.App.go('subjects'); setTimeout(()=>{
               const el = document.querySelector('[data-topic="'+t.id+'"]');
               if(el){ el.scrollIntoView({block:'center'}); el.click(); }
             }, 120); } });
@@ -124325,8 +124341,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.today.programini-kuralim':'Programını kuralım.',
   'ays.today.bugun-icin-plan-yok':'Bugün için plan yok.',
   'ays.today.tam-plan':'Tam plan',
-  'ays.today.simdi':'Şimdi: ',
-  'ays.today.sirada':'Sırada: ',
   'ays.today.bugunun-bloklari-kapandi':'Bugünün blokları kapandı.',
   'ays.today.blok-bitince-cozulen-soru-gi':'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.',
   'ays.today.gunun-soru-hedefi-tamam':'Günün soru hedefi tamam.',
@@ -124569,7 +124583,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.today.gunun-blogu':'günün bloğu',
   'ays.today.kuruluma-basla':'Kuruluma başla',
   'ays.today.basla':'Başla',
-  'ays.today.gunun-bloklari':'Günün blokları',
   'ays.today.bugun-icin-blok-yok':'Bugün için blok yok.',
   'ays.today.programin':'Programın ',
   'ays.today.tekrar-kartlari':'Tekrar kartları',
@@ -124904,7 +124917,7 @@ R.Screens.today = (function(){
     const list = R.CHECKLISTS[{ contract:'monday', exam:'saturday', review:'sunday' }[ritual]];
     const state = day.checklist || {};
     const cta = ritual === 'contract'
-      ? c.Button({ label:yz('ays.today.haftalik-sozlesmeyi-ac'), tone:'primary', block:true, act:'go', data:{ 'data-route':'week' } })
+      ? c.Button({ label:yz('ays.today.haftalik-sozlesmeyi-ac'), tone:'primary', block:true, act:'go', data:{ 'data-route':'week', 'data-bolum':'sozlesme' } })
       : ritual === 'exam'
         ? c.Button({ label:yz('ays.today.deneme-ekle'), tone:'primary', block:true, act:'go', data:{ 'data-route':'exams' } })
         : c.Button({ label:yz('ays.today.haftalik-degerlendirmeyi-ac'), tone:'primary', block:true, act:'open-review' });
@@ -125992,17 +126005,7 @@ R.Screens.today = (function(){
     if(!P || R.Setup.needed()) return '';
     const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
     const bloklar = (day.blocks || []).filter(b => b.slot !== 'Dinlenme');
-    const ad = b => b.subject || b.topic || b.slot;
-    const durum = b => b.status === 'done' ? 'bitti' : b.startedAt ? 'simdi' : 'sira';
-    const bitti = bloklar.filter(b => b.status === 'done').length;
-    const suren = bloklar.find(b => b.startedAt && b.status !== 'done');
-    const sira = bloklar.find(b => b.status === 'pending' && !b.startedAt);
-    const blokKart = bloklar.length
-      ? P.kart({ tur:'bloklar', ad:yz('ays.today.gunun-bloklari'), simge:'blok', yuva:bitti + ' / ' + bloklar.length + ' bitti',
-          govde:P.serit({ parcalar:bloklar.map(b => ({ ad:ad(b), sure:Number(b.targetMin) || 1, durum:durum(b) })),
-              etiket:bloklar.length + ' blok: ' + bitti + ' bitti' + (suren ? ', ' + ad(suren) + ' sürüyor' : '') })
-            + P.not(suren ? yz('ays.today.simdi') + ad(suren) : sira ? yz('ays.today.sirada') + ad(sira) + (sira.targetMin ? ' · ' + sira.targetMin + ' dk' : '') : yz('ays.today.bugunun-bloklari-kapandi')) })
-      : P.kart({ tur:'bloklar', ad:yz('ays.today.gunun-bloklari'), simge:'blok', bos:{ cumle:yz('ays.today.bugun-icin-blok-yok'), dugme:git(yz('ays.today.plana-bak'), 'plan') } });
+    /* Günün blokları Bugün › Gün'de yaşar (2026-11-06); burada ikinci kez yazılmaz. */
     const kalan = U.diffDays(dateISO, R.PLAN.examTytISO);
     const hafta = M.currentWeek(), topHafta = R.PLAN.totalWeeks;
     const tahmini = !(S.profile && S.profile.examTytISO);
@@ -126049,7 +126052,7 @@ R.Screens.today = (function(){
           + P.not((s.subject && s.subject.name ? s.subject.name + ' · ' : '') + yanlis.length + ' soru tekrar bekliyor'),
         ayak:P.dugmeHtml({ label:yz('ays.today.soruyu-ac'), act:'go', data:{ 'data-route':'sorular', 'data-tab':'yanlis' } }, 'pk__dugme') });
     }
-    return '<div class="pk-ust">' + P.izgara([tekrar, blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
+    return '<div class="pk-ust">' + P.izgara([tekrar, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
   }
 
   LIFEOS.PARCA.blok({ id:'today.akiskutusu', sayfa:'today', yer:'y1', sira:10, ad:'Akış kutusu', ciz({ dateISO, n, day }){
@@ -127007,6 +127010,15 @@ window.LIFEOS.PARCA.yazilar({
   'ays.week.konu-adi':'konu adı',
   'ays.week.konuyu-kaldir':'konuyu kaldır',
   'ays.week.haftalik-sozlesme':'Haftalık sözleşme',
+  'ays.week.hafta-bolumleri':'Hafta bölümleri',
+  'ays.week.bolum-gunler':'Günler',
+  'ays.week.bolum-sozlesme':'Sözleşme',
+  'ays.week.bolum-ozet':'Özet',
+  'ays.week.sirada':'Sırada',
+  'ays.week.imza-bekliyor':'Bu haftanın sözleşmesi imza bekliyor',
+  'ays.week.sozlesmeye-gec':'Sözleşmeye geç',
+  'ays.week.degerlendirme-gunu':'Bugün haftayı değerlendirme günü',
+  'ays.week.degerlendirmeyi-ac':'Değerlendirmeyi aç',
   'ays.week.en-fazla':'En fazla ',
   'ays.week.i-mzalandi':'İmzalandı',
   'ays.week.i-mza-bekliyor':'İmza bekliyor',
@@ -127582,38 +127594,38 @@ R.Screens.week = (function(){
   LIFEOS.PARCA.blok({ id:'week.cakisma-uyarisi', sayfa:'week', yer:'y2', sira:10, ad:'Çakışma uyarısı', ciz({ n, week, phase, curriculum, history, cak }){
     return cak ? K.Span(12, raw(cak)) : '';
   } });
-  LIFEOS.PARCA.blok({ id:'week.ders-dagilimi', sayfa:'week', yer:'y3', sira:10, ad:'Ders dağılımı', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.ders-dagilimi', sayfa:'week', yer:'ozet-ust', sira:10, ad:'Ders dağılımı', ciz({ n, week, phase, curriculum, history, cak }){
     return raw(DersDagilimi(n));
   } });
-  LIFEOS.PARCA.blok({ id:'week.hafta-takvimi', sayfa:'week', yer:'y4', sira:10, ad:'Hafta takvimi', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.hafta-takvimi', sayfa:'week', yer:'gunler', sira:10, ad:'Hafta takvimi', ciz({ n, week, phase, curriculum, history, cak }){
     return html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`;
   } });
-  LIFEOS.PARCA.blok({ id:'week.contractcard', sayfa:'week', yer:'y5', sira:10, ad:'Haftalık sözleşme', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.contractcard', sayfa:'week', yer:'sozlesme', sira:10, ad:'Haftalık sözleşme', ciz({ n, week, phase, curriculum, history, cak }){
     return contractCard(week, n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.ozetcard', sayfa:'week', yer:'y5', sira:20, ad:'Hafta özeti', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.ozetcard', sayfa:'week', yer:'ozet', sira:20, ad:'Hafta özeti', ciz({ n, week, phase, curriculum, history, cak }){
     return ozetCard(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.dersdengesi', sayfa:'week', yer:'y5', sira:30, ad:'Ders dengesi', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.dersdengesi', sayfa:'week', yer:'ozet', sira:30, ad:'Ders dengesi', ciz({ n, week, phase, curriculum, history, cak }){
     return dersDengesi(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.plan-tamamlama-gecmisi', sayfa:'week', yer:'y5', sira:40, ad:'Plan tamamlama geçmişi', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.plan-tamamlama-gecmisi', sayfa:'week', yer:'ozet', sira:40, ad:'Plan tamamlama geçmişi', ciz({ n, week, phase, curriculum, history, cak }){
     return K.Card({ title:yz('ays.week.plan-tamamlama-gecmisi'), sub:yz('ays.week.hedef-85'),
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
   } });
-  LIFEOS.PARCA.blok({ id:'week.hayaletoneri', sayfa:'week', yer:'y6', sira:10, ad:'Hayalet öneri', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.hayaletoneri', sayfa:'week', yer:'gunler', sira:10, ad:'Hayalet öneri', ciz({ n, week, phase, curriculum, history, cak }){
     return hayaletOneri(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.haftacizgisi', sayfa:'week', yer:'y6', sira:20, ad:'Hafta çizgisi', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.haftacizgisi', sayfa:'week', yer:'ozet', sira:20, ad:'Hafta çizgisi', ciz({ n, week, phase, curriculum, history, cak }){
     return haftaCizgisi(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.planizgarasi', sayfa:'week', yer:'y6', sira:30, ad:'Plan ızgarası', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.planizgarasi', sayfa:'week', yer:'ozet', sira:30, ad:'Plan ızgarası', ciz({ n, week, phase, curriculum, history, cak }){
     return planIzgarasi(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.istisnacard', sayfa:'week', yer:'y6', sira:40, ad:'İstisnalar', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.istisnacard', sayfa:'week', yer:'sozlesme', sira:40, ad:'İstisnalar', ciz({ n, week, phase, curriculum, history, cak }){
     return istisnaCard();
   } });
-  LIFEOS.PARCA.blok({ id:'week.mufredat-referansi', sayfa:'week', yer:'y6', sira:50, ad:'Müfredat referansı', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.mufredat-referansi', sayfa:'week', yer:'ozet', sira:50, ad:'Müfredat referansı', ciz({ n, week, phase, curriculum, history, cak }){
     return K.Card({ title:yz('ays.week.mufredat-referansi'), sub:yz('ays.week.bu-haftanin-plandaki-karsili'), body:html`
           <div class="stack-xs"><span class="mono-label">${yz('ays.week.konu-bloklari')}</span>
             ${K.Row(map(curriculum.topics, t => K.Chip(t)), { wrap:true })}</div>
@@ -127622,7 +127634,7 @@ R.Screens.week = (function(){
           <div class="stack-xs mt-10"><span class="mono-label">${yz('ays.week.kontrol-noktasi')}</span>
             <p class="small">${curriculum.check}</p></div>` });
   } });
-  LIFEOS.PARCA.blok({ id:'week.revizyon-kaydi', sayfa:'week', yer:'y6', sira:60, ad:'Revizyon kaydı', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.revizyon-kaydi', sayfa:'week', yer:'sozlesme', sira:60, ad:'Revizyon kaydı', ciz({ n, week, phase, curriculum, history, cak }){
     return when(week.revisions && week.revisions.length, () => K.Card({ title:yz('ays.week.revizyon-kaydi'),
           body:html`<div class="stack-xs">${map(week.revisions, r => html`
             <div class="small"><b>${U.fmtShort(R.U.gunOf(r.at))}</b> — ${r.reason}</div>`)}</div>` }));
@@ -127630,6 +127642,16 @@ R.Screens.week = (function(){
   LIFEOS.PARCA.blok({ id:'week.aciklamalar', sayfa:'week', yer:'y7', sira:10, ad:'Açıklamalar', ciz({ n, week, phase, curriculum, history, cak }){
     return raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']));
   } });
+  /* İmza ve haftanın değerlendirmesi katta kalmaz: Günler'in başında tek eylem (kod seçer). */
+  function siradaki(n, week){
+    if(n !== M.currentWeek()) return '';
+    if(!week.signedAt) return K.NextUp({ calm:true, icon:'check', label:yz('ays.week.sirada'), title:yz('ays.week.imza-bekliyor'),
+      action:K.Button({ label:yz('ays.week.sozlesmeye-gec'), tone:'primary', size:'sm', act:'week-tab', data:{ 'data-tab':'sozlesme' } }) });
+    if(!S.reviews[M.weekId(n)] && U.todayISO() === U.iso(M.weekEnd(n))) return K.NextUp({ calm:true, icon:'check', label:yz('ays.week.sirada'), title:yz('ays.week.degerlendirme-gunu'),
+      action:K.Button({ label:yz('ays.week.degerlendirmeyi-ac'), tone:'primary', size:'sm', act:'open-review' }) });
+    return '';
+  }
+
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -127642,18 +127664,19 @@ R.Screens.week = (function(){
     const cak = (window.LIFEOS || {}).ONERI && R.Hedefler && R.Hedefler.ag
       ? window.LIFEOS.ONERI.butceCakismaHtml(R.Hedefler.ag.butce()) : '';
     const parcaB = { n, week, phase, curriculum, history, cak };
-    return String(K.Grid([
-    LIFEOS.PARCA.yer('week', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw),
-    LIFEOS.PARCA.yer('week', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw),
-    K.Span(12, LIFEOS.PARCA.yer('week', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('week', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(6, K.Stack(LIFEOS.PARCA.liste('week', 'y5', K, parcaB))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('week', 'y6', K, parcaB))),
-    K.Span(12, LIFEOS.PARCA.yer('week', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-  ]));
+    const P = LIFEOS.PARCA;
+    /* TEK İŞ (2026-11-06): önce günler; 15 alanlı sözleşme formu kendi katında. İmza bekleyen haftada seçicide rozet. */
+    const imzaBekliyor = n === M.currentWeek() && !week.signedAt;
+    return String(html`${K.Grid([P.yer('week', 'y1', K, parcaB, raw), P.yer('week', 'y2', K, parcaB, raw)])}
+      ${K.SayfaBolumleri({ act:'week-tab', aria:yz('ays.week.hafta-bolumleri'), bolumler:[
+        { id:'gunler', ad:yz('ays.week.bolum-gunler'), govde:K.Stack([siradaki(n, week)].concat(P.liste('week', 'gunler', K, parcaB))) },
+        { id:'sozlesme', ad:yz('ays.week.bolum-sozlesme'), sayi:imzaBekliyor ? 1 : null, govde:K.Stack(P.liste('week', 'sozlesme', K, parcaB)) },
+        { id:'ozet', ad:yz('ays.week.bolum-ozet'), govde:K.Stack(P.liste('week', 'ozet-ust', K, parcaB).concat(P.liste('week', 'ozet', K, parcaB))) },
+      ] })}${P.yer('week', 'y7', K, parcaB, raw)}`);
   }
 
   const handle = {
+    async 'week-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* 125: onay tek yoldan geçer (Onaylar ekranının işleyicisi). */
     async 'office-approve'(el){ return R.Screens.onaylar.handle['office-approve'](el); },
     'istisna-ac'(el){
@@ -127819,23 +127842,9 @@ R.Screens.week = (function(){
     },
   };
 
-  /* SADE (kullanıcı, 2026-10-02: «çok uzun, çok büyük, gereksiz»): her hafta
-     kullanılan bölümler açık (gün şeridi, sözleşme, kapsam, hafta özeti,
-     değerlendirme); ara sıra bakılanlar baştan küçük gelir — başlık kalır,
-     dokununca açılır, açılırsa açık kalır (brand/ortak/gizle.js). */
-  /* iPhone (2026-10-02, «haftalık kısmında sadece haftalık bölümü görebilirim
-     veya onun bir şeridini»): açık yalnız hafta. Özet hep şerit; sözleşme
-     imzalanınca şerit (imza bekliyorsa iş odur, açık kalır). Geçmiş, ızgara,
-     planın şekli ve referans app.js SADE_GIZLI'de. */
-  function kucukler(){
-    const w = S.weeks[M.weekId(viewN())];
-    return ['haftanın-özeti'].concat(w && w.signedAt ? ['haftalık-sözleşme'] : []);
-  }
-
   return {
     id:'week',
     title:yz('ays.week.hafta'),
-    get kucukVarsayilan(){ return kucukler(); },
     subtitle(){
       const n = viewN();
       return yz('ays.week.hafta-2')+n+'/'+R.PLAN.totalWeeks+' · '+U.fmtRange(M.weekStart(n), M.weekEnd(n));
@@ -127853,6 +127862,13 @@ R.Screens.week = (function(){
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz; metin h`` icinde
    otomatik kacirilir, yapisal parcalar C.* bilesenlerinden gelir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.exams.sirada':'Sırada',
+  'ays.exams.analizi-bekliyor':'denemesinin analizi bekliyor',
+  'ays.exams.deneme-bekliyor':'deneme bekliyor; en eskisi önce.',
+  'ays.exams.analizi-ac':'Analizi aç',
+  'ays.exams.deneme-bolumleri':'Deneme bölümleri',
+  'ays.exams.bolum-denemeler':'Denemeler',
+  'ays.exams.bolum-ozet':'Özet',
   'ays.exams.hedef-bandin-ustundesin-band':'Hedef bandın üstündesin; bandı koru',
   'ays.exams.deneme-takvimi':'Deneme takvimi',
   'ays.exams.onceki-denemeyle':'Önceki denemeyle',
@@ -128068,7 +128084,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.exams.hata-silindi':'Hata silindi',
   'ays.exams.deneme-2':'Deneme',
 });
-window.LIFEOS.PARCA.sayfa({ id:'exams', modul:'ays', king:{ sira:140, ad:'Deneme', es:['deneme', 'sınav'] }, cekmece:'calisma', ad:'Deneme', ikon:'exam', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'exams', modul:'ays', king:{ sira:140, ad:'Deneme', es:['deneme', 'sınav'] }, cekmece:'calisma', ad:'Deneme', ikon:'exam', sira:30 });
 
 R.Screens.exams = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -128212,7 +128228,7 @@ R.Screens.exams = (function(){
           action:K.Button({ label:yz('ays.exams.i-lk-denemeyi-ekle'), icon:'plus', tone:'primary', act:'new-exam' }) });
 
     return K.Grid([
-      K.Span(8, K.Stack([
+      K.Span(12, K.Stack([
         K.Row([
           K.Segmented({ items:FILTERS, value:filter, act:'exam-filter', aria:yz('ays.exams.deneme-ailesi') }),
           html`<span class="small dim">${U.plural(list.length, 'kayıt', 'kayıt')}</span>`,
@@ -128221,18 +128237,33 @@ R.Screens.exams = (function(){
           sonuc:list.length, birim:'deneme', temizle:{ act:'exam-filter', data:{ 'data-value':'all' } } }))),
         K.Card({ body, pad:'sm' }),
       ])),
-      K.Span(3, K.Stack([
-        DonenGidisat(),
-        siralamaKutusu(),
-        hedefeKalanKutusu(),
-        denemeTakvimi(),
-        K.Card({ title:yz('ays.exams.deneme-hacmi'), hint:'exam-volume', sub:yz('ays.exams.plan-gerceklesen'), body:volumeTable() }),
-        K.Card({ title:yz('ays.exams.yayin-merdiveni'), hint:'publisher', sub:yz('ays.exams.zorluk-kademesi'),
-          body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`
-            <div class="ladder__row"><span class="ladder__level">${l.level}</span>
-              <span class="muted">${l.detail}</span></div>`)}</div>` }),
-      ])),
       K.Span(12, raw(UI.rail(['net', 'analysis-debt', 'error-tags', 'exam-volume', 'publisher']))),
+    ]);
+  }
+
+  /* Analizi bekleyen deneme gizlenmez: listenin başında, tek eylem (kod seçer, en eskisi önce). */
+  function siradakiAnaliz(){
+    const borc = C.analysisDebt().slice().sort((a, b) => a.date.localeCompare(b.date));
+    if(!borc.length) return '';
+    const x = borc[0];
+    return K.NextUp({ calm:true, icon:'exam', label:yz('ays.exams.sirada'),
+      title:U.fmtShort(x.date) + ' ' + (x.family || '') + ' ' + yz('ays.exams.analizi-bekliyor'),
+      why:borc.length > 1 ? borc.length + ' ' + yz('ays.exams.deneme-bekliyor') : yz('ays.exams.analiz-yanlislari-kart-ve-ko'),
+      action:K.Button({ label:yz('ays.exams.analizi-ac'), tone:'primary', size:'sm', act:'open-exam', data:{ 'data-id':x.id } }) });
+  }
+
+  /* Listenin yanındaki sayı kartları «Özet» katına taşındı (2026-11-06). */
+  function ozetKartlari(){
+    return K.Stack([
+      DonenGidisat(),
+      siralamaKutusu(),
+      hedefeKalanKutusu(),
+      denemeTakvimi(),
+      K.Card({ title:yz('ays.exams.deneme-hacmi'), hint:'exam-volume', sub:yz('ays.exams.plan-gerceklesen'), body:volumeTable() }),
+      K.Card({ title:yz('ays.exams.yayin-merdiveni'), hint:'publisher', sub:yz('ays.exams.zorluk-kademesi'),
+        body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`
+          <div class="ladder__row"><span class="ladder__level">${l.level}</span>
+            <span class="muted">${l.detail}</span></div>`)}</div>` }),
     ]);
   }
 
@@ -128927,9 +128958,18 @@ R.Screens.exams = (function(){
 
   LIFEOS.PARCA.blok({ id:'exams.kosu', sayfa:'exams', yer:'ana', ad:'Deneme akışı', kosul:() => R.ExamRun.active(), ciz:() => runView() });
   LIFEOS.PARCA.blok({ id:'exams.detay', sayfa:'exams', yer:'ana', ad:'Deneme ayrıntısı', kosul:() => !R.ExamRun.active() && S.ui.examOpen, ciz:() => detailView(S.ui.examOpen) });
-  LIFEOS.PARCA.blok({ id:'exams.pano', sayfa:'exams', yer:'ana', sira:10, ad:'Deneme özeti', kosul:() => !R.ExamRun.active() && !S.ui.examOpen, ciz:() => PanoDeneme() });
-  LIFEOS.PARCA.blok({ id:'exams.liste', sayfa:'exams', yer:'ana', sira:20, ad:'Deneme listesi', kosul:() => !R.ExamRun.active() && !S.ui.examOpen, ciz:() => listView() });
-  async function render(){ return String(LIFEOS.PARCA.yer('exams', 'ana', R.C)); }
+  LIFEOS.PARCA.blok({ id:'exams.pano', sayfa:'exams', yer:'ozet', sira:10, ad:'Deneme özeti', ciz:() => raw(PanoDeneme()) });
+  LIFEOS.PARCA.blok({ id:'exams.ozet-kartlari', sayfa:'exams', yer:'ozet', sira:20, ad:'Deneme sayıları', ciz:() => ozetKartlari() });
+  LIFEOS.PARCA.blok({ id:'exams.liste', sayfa:'exams', yer:'liste', sira:10, ad:'Deneme listesi', ciz:() => listView() });
+  /* TEK İŞ (2026-11-06): önce denemelerin listesi; sayılar ve grafikler «Özet»te. */
+  async function render(){
+    const P = LIFEOS.PARCA;
+    if(R.ExamRun.active() || S.ui.examOpen) return String(P.yer('exams', 'ana', K));
+    return String(K.SayfaBolumleri({ act:'exam-tab', aria:yz('ays.exams.deneme-bolumleri'), bolumler:[
+      { id:'liste', ad:yz('ays.exams.bolum-denemeler'), govde:K.Stack([siradakiAnaliz(), P.yer('exams', 'liste', K, undefined, raw)]) },
+      { id:'ozet', ad:yz('ays.exams.bolum-ozet'), govde:P.yer('exams', 'ozet', K, undefined, raw) },
+    ] }));
+  }
 
   function afterRender(){
     if(R.ExamRun.active()) startTick(); else stopTick();
@@ -128937,6 +128977,7 @@ R.Screens.exams = (function(){
   }
 
   const handle = {
+    async 'exam-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'new-exam'(){ newExamSheet(); },
     async 'run-open'(){ startRunSheet(); },
     async 'run-start'(){
@@ -129272,7 +129313,7 @@ R.Screens.exams = (function(){
       if(R.ExamRun.active()) return '';
       return String(html`
         ${K.Button({ label:yz('ays.exams.sureli-oturum'), icon:'clock', size:'sm', act:'run-open' })}
-        ${K.Button({ label:yz('ays.exams.deneme-ekle'), icon:'plus', size:'sm', tone:'primary', act:'new-exam' })}`);
+        ${when(S.exams.length, () => K.Button({ label:yz('ays.exams.deneme-ekle'), icon:'plus', size:'sm', tone:C.analysisDebt().length ? undefined : 'primary', act:'new-exam' }))}`);
     },
     onKey(e){
       if(!R.ExamRun.active() || UI.isSheetOpen()) return;
@@ -129289,6 +129330,11 @@ R.Screens.exams = (function(){
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.cards.bolum-bugun':'Bugün',
+  'ays.cards.bolum-yanlislar':'Yanlışlar',
+  'ays.cards.bolum-tumu':'Tümü',
+  'ays.cards.neden':'Neden?',
+  'ays.cards.borc-neden':'%10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.',
   'ays.cards.yanlis-notu':'Yanlış notu',
   'ays.cards.arka-yuz':'Arka yüz',
   'ays.cards.on-yuz':'Ön yüz',
@@ -129372,9 +129418,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.cards.kaydet':'Kaydet',
   'ays.cards.gelecek-yuk':'Gelecek yük',
   'ays.cards.onumuzdeki-7-gunun-vadesi':'Önümüzdeki 7 günün vadesi',
-  'ays.cards.bugunun-kartlari':'Bugünün kartları',
-  'ays.cards.yanlis-defteri':'Yanlış defteri',
-  'ays.cards.butun-kartlar':'Bütün kartlar',
   'ays.cards.tekrar-borcu':'Tekrar borcu %',
   'ays.cards.tekrar-takvimi':'Tekrar takvimi',
   'ays.cards.araliklar-sabittir':'Aralıklar sabittir',
@@ -129388,7 +129431,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.cards.kart-geri-alindi':'Kart geri alındı',
   'ays.cards.tekrar':'Tekrar',
 });
-window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', king:{ sira:150, ad:'Tekrar', es:['tekrar', 'kart'] }, cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', king:{ sira:150, ad:'Tekrar', es:['tekrar', 'kart'] }, cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:10 });
 
 R.Screens.cards = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -129475,7 +129518,7 @@ R.Screens.cards = (function(){
             <button class="${'btn grow' + (r.tone ? ' btn--'+r.tone : '')}" data-act="rate"
               data-id="${card.id}" data-rating="${r.rating}">
               <span>${r.label}</span><span class="tiny dim">${r.key}</span></button>`)}</div>`
-        : K.Button({ label:yz('ays.cards.cevabi-goster'), block:true, class:'mt-12', act:'flip', data:{ 'data-id':card.id } })}
+        : K.Button({ label:yz('ays.cards.cevabi-goster'), tone:'primary', block:true, class:'mt-12', act:'flip', data:{ 'data-id':card.id } })}
 
       <div class="row between mt-10">
         <span class="tiny dim">${yz('ays.cards.asama')} ${stageLabel(card.stage)}${card.source === 'error' ? ' · deneme hatasından' : ''}</span>
@@ -129667,10 +129710,10 @@ R.Screens.cards = (function(){
 
   function bolumler(){
     return [
-      { id:'due', ad:yz('ays.cards.bugunun-kartlari'), sayi:C.dueCards().length,
+      { id:'due', ad:yz('ays.cards.bolum-bugun'), sayi:C.dueCards().length,
         govde:html`${gelecekYuk()}<div class="cardsgrid">${K.Stack(dueSession())}<div>${K.Stack([tekrarPaketi(C.dueCards()), sidebar()])}</div></div>` },
-      { id:'notebook', ad:yz('ays.cards.yanlis-defteri'), sayi:C.openErrors().length, govde:notebook() },
-      { id:'all', ad:yz('ays.cards.butun-kartlar'), sayi:S.cards.length, govde:K.Stack(allCards()) },
+      { id:'notebook', ad:yz('ays.cards.bolum-yanlislar'), sayi:C.openErrors().length, govde:notebook() },
+      { id:'all', ad:yz('ays.cards.bolum-tumu'), sayi:S.cards.length, govde:K.Stack(allCards()) },
     ];
   }
 
@@ -129678,8 +129721,10 @@ R.Screens.cards = (function(){
     const debt = C.cardDebt();
     const overdue = C.overdueCards().length;
     if(debt <= 10) return '';
+    /* Uyarı tek satır; gerekçe bir dokunuşla açılır (§1.10). */
     return K.Span(12, K.Notice({ tone:'warn', title:yz('ays.cards.tekrar-borcu')+debt+'.',
-      body:yz('ays.cards.gecikmis')+overdue+' kart var. %10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.' }));
+      body:K.Ayrinti({ ozet:yz('ays.cards.gecikmis')+overdue+' kart var.', etiket:yz('ays.cards.neden'),
+        govde:yz('ays.cards.borc-neden') }) }));
   }
 
   function sidebar(){
@@ -129858,8 +129903,10 @@ R.Screens.cards = (function(){
       return C.dueCards().length+' kart due · borç %'+C.cardDebt()+' · '+C.openErrors().length+' açık yanlış';
     },
     actions(){
+      if(!S.cards.length) return '';   /* boşken ilk adım boş durumun kendi düğmesi */
       return String(K.Button({ label:yz('ays.cards.kart-ekle'), icon:'plus', size:'sm', act:'new-card' }));
     },
+    kucukVarsayilan:['tekrar-paketi'],
     render, afterRender, handle, change, onKey,
   };
 })();
@@ -130587,6 +130634,7 @@ R.Screens.learn = (function(){
         : yz('ays.learn.video-izle-not-dus-karta');
     },
     actions(){
+      if(!S.videoNotes.length) return '';   /* boşken ilk adım boş durumun kendi düğmesi */
       return String(K.Button({ label:yz('ays.learn.ders-ekle'), icon:'plus', size:'sm', tone:'primary', act:'note-new' }));
     },
     render, handle, change, onKey,
@@ -130599,6 +130647,8 @@ R.Screens.learn = (function(){
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz.
    Karar motoru R.Quiz'dedir; ekran yalnizca cizer ve olay tasir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.quiz.ilk-adim':'Sınanacak bir şey yok. Önce bir tekrar kartı ekle; sınama buradan başlar.',
+  'ays.quiz.kart-ekle':'Kart ekle',
   'ays.quiz.ne-kadar-eminsin':'Ne kadar eminsin?',
   'ays.quiz.eminim':'Eminim',
   'ays.quiz.kararsizim':'Kararsızım',
@@ -130714,9 +130764,9 @@ window.LIFEOS.PARCA.yazilar({
   'ays.quiz.oturum-bitti':'Oturum bitti · %',
   'ays.quiz.sure-doldu-oturum-bitti':'Süre doldu — oturum bitti',
   'ays.quiz.sure-doldu':'Süre doldu',
-  'ays.quiz.sinama':'Sınama',
+  'ays.quiz.sinama':'Kendini sına',
 });
-window.LIFEOS.PARCA.sayfa({ id:'quiz', modul:'ays', cekmece:'calisma', ad:'Sınama', ikon:'zap', sira:40 });
+window.LIFEOS.PARCA.sayfa({ id:'quiz', modul:'ays', cekmece:'calisma', ad:'Kendini sına', ikon:'zap', sira:50 });
 
 R.Screens.quiz = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -130743,6 +130793,9 @@ R.Screens.quiz = (function(){
       subject:Q.pool({ mode:'subject', subjectId:S.ui.quizSubject || null }).length,
       topic:Q.pool({ mode:'topic', subjectId:S.ui.quizSubject || null, topicId:S.ui.quizTopic || null }).length,
     };
+    /* Sınanacak hiçbir şey yokken ayar formu boşa durur: ilk adım söylenir (kod seçer). */
+    if(!Object.keys(count).some(k => count[k])) return K.Card({ body:K.Empty({ icon:'zap', text:yz('ays.quiz.ilk-adim'),
+      action:K.Button({ label:yz('ays.quiz.kart-ekle'), tone:'primary', act:'next-action', data:{ 'data-route':'cards', 'data-next':'new-card' } }) }) });
     const ready = (count[mode] || 0) > 0;
 
     const modeItems = Object.keys(Q.MODES).map(k => ({
@@ -131235,6 +131288,8 @@ R.Screens.quiz = (function(){
 
   return {
     id:'quiz',
+    /* Kurma formu iştir; havuzun sayıları başlıkta kalır. */
+    kucukVarsayilan:['havuz'],
     title:yz('ays.quiz.sinama'),
     subtitle(){
       const m = R.TestKitabi ? R.TestKitabi.mevcut() : null;
@@ -131267,6 +131322,10 @@ R.Screens.quiz = (function(){
    konusunun etiketiyle tek Defter notunda toplar (medya cihazda kalır).
    Model yokken de çalışır: kâğıtta çözer, deftere kaydedersin. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.solve.soru-bolumleri':'Soru çöz bölümleri',
+  'ays.solve.bolum-sor':'Sor',
+  'ays.solve.bolum-kaydet':'Kaydet',
+  'ays.solve.bolum-kaynak':'Kaynaklar',
   'ays.solve.zorluk-olculmedi':'Zorluk ölçülmedi.',
   'ays.solve.ortalama-zorluk':'Ortalama zorluk ',
   'ays.solve.fotografli-soru-icin-gorsel':'Fotoğraflı soru için görsel destekleyen bir model gerekir — Google AI Studio’nun ',
@@ -131316,7 +131375,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.solve.cozum':'Çözüm',
   'ays.solve.soruyu-ver':'Soruyu ver',
   'ays.solve.yapay-zeka-bagli-degil':'Yapay zekâ bağlı değil.',
-  'ays.solve.fotograftan-ya-da-metinden-s':'Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla. Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.',
+  'ays.solve.fotograftan-ya-da-metinden-s':'Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla. Çözdüğün soruları «Kaydet» bölümünden girebilirsin.',
   'ays.solve.ofis-ayarlarini-ac':'Ofis ayarlarını aç',
   'ays.solve.kb':'KB',
   'ays.solve.fotografi-buraya-birak':'Fotoğrafı buraya bırak',
@@ -131407,7 +131466,7 @@ window.LIFEOS.PARCA.yazilar({
 çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
 listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
 sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
-window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', king:{ sira:130, ad:'Soru çöz', es:['soru çöz', 'soru', 'test çöz'] }, cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', king:{ sira:130, ad:'Soru çöz', es:['soru çöz', 'soru', 'test çöz'] }, cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:20 });
 
 R.Screens.solve = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -132002,32 +132061,36 @@ R.Screens.solve = (function(){
     return K.Kutu({ ad:yz('ays.solve.hizli-kayit'), ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
   }
 
-  LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'y1', sira:10, ad:'Soru girişi', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'sor', sira:10, ad:'Soru girişi', ciz(){
     return inputCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.resultcard', sayfa:'solve', yer:'y1', sira:20, ad:'Sonuç', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.resultcard', sayfa:'solve', yer:'sor', sira:20, ad:'Sonuç', ciz(){
     return resultCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.donencozum', sayfa:'solve', yer:'y2', sira:10, ad:'Dönen çözüm', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.donencozum', sayfa:'solve', yer:'kayit', sira:10, ad:'Dönen çözüm', ciz(){
     return DonenCozum();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'y2', sira:20, ad:'Hızlı satır', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'kayit', sira:20, ad:'Hızlı satır', ciz(){
     return hizliSatir();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'y2', sira:30, ad:'Kaynak', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'kaynak', sira:30, ad:'Kaynak', ciz(){
     return sourceCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'y2', sira:40, ad:'Konu', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'kaynak', sira:40, ad:'Konu', ciz(){
     return topicCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'y2', sira:50, ad:'Geçmiş', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'kayit', sira:50, ad:'Geçmiş', ciz(){
     return historyCard();
   } });
   async function render(){
-    return String(K.Grid([
-    K.Span(8, K.Stack(LIFEOS.PARCA.liste('solve', 'y1', K, undefined))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('solve', 'y2', K, undefined))),
-  ]));
+    /* TEK İŞ (2026-11-06). Son kayıtlar «Kaydet»in altında: yazdığın satır aynı yerde görünür.
+       Model yokken «Sor» çalışmaz: ekran önce işe yarayan kaydı açar (kod seçer). */
+    const P = LIFEOS.PARCA;
+    const sor = { id:'sor', ad:yz('ays.solve.bolum-sor'), govde:K.Stack(P.liste('solve', 'sor', K)) };
+    const kaydet = { id:'kayit', ad:yz('ays.solve.bolum-kaydet'), govde:K.Stack(P.liste('solve', 'kayit', K)) };
+    const kaynak = { id:'kaynak', ad:yz('ays.solve.bolum-kaynak'), govde:K.Stack(P.liste('solve', 'kaynak', K)) };
+    return String(K.SayfaBolumleri({ act:'solve-tab', aria:yz('ays.solve.soru-bolumleri'),
+      bolumler:Q.ready(false) ? [sor, kaydet, kaynak] : [kaydet, sor, kaynak] }));
   }
 
   /* Sürükle-bırak ve yapıştır: her ikisi de aynı yola çıkar. */
@@ -132100,6 +132163,7 @@ R.Screens.solve = (function(){
   /* ---------- eylemler ---------- */
 
   const handle = {
+    async 'solve-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'q-hizli'(){
       const ders = R.SUBJECTS.find(x => x.id === hizli.ders);
       const konu = ders && ders.topics.find(t => t.id === hizli.konu);
@@ -132480,7 +132544,6 @@ R.Screens.solve = (function(){
     sureSuphesi,
     /* iPhone Faz 2: iş soruyu vermek ve kaydetmek; kaynaklar, konu başına
        oran ve son kayıtlar şerit (dokununca açılır). */
-    kucukVarsayilan:['kaynaklarım', 'konu-başına-çözüm', 'çözülen-sorular'],
     title:yz('ays.solve.soru-coz'),
     subtitle(){
       const s = Q.summary();
@@ -132497,6 +132560,11 @@ R.Screens.solve = (function(){
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.subjects.sirada':'Sırada',
+  'ays.subjects.konuyu-ac':'Konuyu aç',
+  'ays.subjects.konu-bolumleri':'Konu bölümleri',
+  'ays.subjects.bolum-konular':'Konular',
+  'ays.subjects.bolum-genel':'Genel',
   'ays.subjects.gecici-kapali':'Geçici kapalı',
   'ays.subjects.yeniden-acildi':'Yeniden açıldı',
   'ays.subjects.hedef-2':'Hedef ',
@@ -132516,12 +132584,12 @@ window.R = window.R || {};
 R.Screens = R.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:120, group:'Git', label:'Dersler — konu kapanışı', icon:'book', route:'subjects', run(){ R.App.go('subjects'); } });
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:310, uret(){
-  return R.SUBJECTS.map(s => ({ group:'Ders', label:s.name, icon:'book', run(){ R.S.ui.subjectOpen = s.id; R.App.go('subjects'); } }));
+  return R.SUBJECTS.map(s => ({ group:'Ders', label:s.name, icon:'book', run(){ R.S.ui.subjectOpen = s.id; R.S.ui.bolumIstek = 'konular'; R.App.go('subjects'); } }));
 } });
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:320, uret(){
   return R.Calc.riskRanking(5).map(r => ({ group:'Öncelik', label:r.topicName+' — risk '+r.score, icon:'target',
     keywords:r.subjectName, weight:4,
-    run(){ R.S.ui.subjectOpen = r.subjectId; R.App.go('subjects');
+    run(){ R.S.ui.subjectOpen = r.subjectId; R.S.ui.bolumIstek = 'konular'; R.App.go('subjects');
       setTimeout(()=>R.Screens.subjects.handle['open-topic']({ dataset:{ subject:r.subjectId, topic:r.topicId } }), 80); } }));
 } });
 window.LIFEOS.PARCA.yazilar({
@@ -132589,7 +132657,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.subjects.i-kinci-kontrol':'İkinci kontrol',
   'ays.subjects.dersler':'Dersler',
 });
-window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', king:{ sira:120, ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] }, cekmece:'calisma', ad:'Konu kapanışı', ikon:'book', sira:50 });
+window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', king:{ sira:120, ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] }, cekmece:'calisma', ad:'Konu takibi', ikon:'book', sira:40 });
 
 R.Screens.subjects = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -132859,6 +132927,16 @@ R.Screens.subjects = (function(){
     })}</div>`;
   }
 
+  /* Ekran duruma göre konuşur: bekleyen ölçüm kendi kartındadır; yoksa risk sırasının başı (kural motoru). */
+  function siradakiKonu(){
+    if(C.pendingSecondChecks().length) return '';
+    const r = C.riskRanking(1)[0];
+    if(!r) return '';
+    return K.NextUp({ calm:true, icon:'book', label:yz('ays.subjects.sirada'), title:r.topicName, why:r.subjectName,
+      action:K.Button({ label:yz('ays.subjects.konuyu-ac'), tone:'primary', size:'sm', act:'open-topic',
+        data:{ 'data-subject':r.subjectId, 'data-topic':r.topicId } }) });
+  }
+
   function riskCard(){
     const list = C.riskRanking(8);
     if(!list.length) return null;
@@ -133024,34 +133102,34 @@ R.Screens.subjects = (function(){
     return P.izgara([kart, ikinci], 'pk-izgara--iki');
   }
 
-  LIFEOS.PARCA.blok({ id:'subjects.konu-haritasi', sayfa:'subjects', yer:'y1', sira:10, ad:'Konu haritası', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-haritasi', sayfa:'subjects', yer:'genel', sira:10, ad:'Konu haritası', ciz({ sid, subject, P }){
     return raw(KonuHaritasi(subject));
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.donenkapanis', sayfa:'subjects', yer:'y2', sira:10, ad:'Dönen kapanış', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.donenkapanis', sayfa:'subjects', yer:'genel', sira:10, ad:'Dönen kapanış', ciz({ sid, subject, P }){
     return DonenKapanis();
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.pendingcard', sayfa:'subjects', yer:'y3', sira:10, ad:'Bekleyenler', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.pendingcard', sayfa:'subjects', yer:'konular-ust', sira:10, ad:'Bekleyenler', ciz({ sid, subject, P }){
     return pendingCard(C.pendingSecondChecks());
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.dersler', sayfa:'subjects', yer:'y4', sira:10, ad:'Dersler', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.dersler', sayfa:'subjects', yer:'konular-sol', sira:10, ad:'Dersler', ciz({ sid, subject, P }){
     return K.Card({ pad:'sm', title:yz('ays.subjects.dersler'), sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) });
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.konu-listesi', sayfa:'subjects', yer:'y5', sira:10, ad:'Konu listesi', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-listesi', sayfa:'subjects', yer:'konular-sag', sira:10, ad:'Konu listesi', ciz({ sid, subject, P }){
     return P.konular;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.konu-zinciri', sayfa:'subjects', yer:'y5', sira:20, ad:'Konu zinciri', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-zinciri', sayfa:'subjects', yer:'konular-sag', sira:20, ad:'Konu zinciri', ciz({ sid, subject, P }){
     return P.zincir;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.riskcard', sayfa:'subjects', yer:'y6', sira:10, ad:'Risk', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.riskcard', sayfa:'subjects', yer:'genel', sira:10, ad:'Risk', ciz({ sid, subject, P }){
     return riskCard();
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.konu-karti', sayfa:'subjects', yer:'y7', sira:10, ad:'Konu kartı', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.konu-karti', sayfa:'subjects', yer:'konular-alt', sira:10, ad:'Konu kartı', ciz({ sid, subject, P }){
     return P.kart;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.kaynaklar', sayfa:'subjects', yer:'y7', sira:20, ad:'Kaynaklar', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.kaynaklar', sayfa:'subjects', yer:'konular-alt', sira:20, ad:'Kaynaklar', ciz({ sid, subject, P }){
     return P.kaynak;
   } });
-  LIFEOS.PARCA.blok({ id:'subjects.profilkarti', sayfa:'subjects', yer:'y8', sira:10, ad:'Ders profili', ciz({ sid, subject, P }){
+  LIFEOS.PARCA.blok({ id:'subjects.profilkarti', sayfa:'subjects', yer:'genel-alt', sira:10, ad:'Ders profili', ciz({ sid, subject, P }){
     return profilKarti();
   } });
   LIFEOS.PARCA.blok({ id:'subjects.aciklamalar', sayfa:'subjects', yer:'y9', sira:10, ad:'Açıklamalar', ciz({ sid, subject, P }){
@@ -133063,23 +133141,27 @@ R.Screens.subjects = (function(){
     const P = subjectPanel(subject);
 
     const parcaB = { sid, subject, P };
-    return String(K.Grid([
-    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    LIFEOS.PARCA.yer('subjects', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw),
-    K.Span(3, K.Stack(LIFEOS.PARCA.liste('subjects', 'y4', K, parcaB))),
-    K.Span(7, K.Stack(LIFEOS.PARCA.liste('subjects', 'y5', K, parcaB))),
-    K.Span(3, K.Stack(LIFEOS.PARCA.liste('subjects', 'y6', K, parcaB))),
-    K.Span(7, K.Stack(LIFEOS.PARCA.liste('subjects', 'y7', K, parcaB))),
-    LIFEOS.PARCA.yer('subjects', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw),
-    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-  ]));
+    const Y = LIFEOS.PARCA;
+    /* TEK İŞ (2026-11-06): konu listesi önce; harita, kapanış oranı ve risk «Genel»de. */
+    return String(html`${K.SayfaBolumleri({ act:'subjects-tab', aria:yz('ays.subjects.konu-bolumleri'), bolumler:[
+      { id:'konular', ad:yz('ays.subjects.bolum-konular'), govde:K.Grid([
+        K.Span(12, siradakiKonu()),
+        Y.yer('subjects', 'konular-ust', K, parcaB, raw),
+        K.Span(3, K.Stack(Y.liste('subjects', 'konular-sol', K, parcaB))),
+        K.Span(7, K.Stack(Y.liste('subjects', 'konular-sag', K, parcaB).concat(Y.liste('subjects', 'konular-alt', K, parcaB)))),
+      ]) },
+      { id:'genel', ad:yz('ays.subjects.bolum-genel'), govde:K.Grid([
+        K.Span(12, K.Stack(Y.liste('subjects', 'genel', K, parcaB))),
+        Y.yer('subjects', 'genel-alt', K, parcaB, raw),
+      ]) },
+    ] })}${K.Grid([K.Span(12, Y.yer('subjects', 'y9', K, parcaB, raw))])}`);
   }
 
   const handle = {
+    async 'subjects-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'topic-filter'(el){ S.ui.topicFilter = el.dataset.value; R.App.render(); },
     async 'topic-reset'(){ S.ui.topicFilter = 'all'; S.ui.topicQuery = ''; R.App.render(); },
-    async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; R.App.render(); },
+    async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; S.ui.bolumIstek = 'konular'; R.App.render(); },
     async 'sp-yukle'(){
       const ad = document.getElementById('sp-yukle-ad'), m = document.getElementById('sp-yukle-metin');
       const r = R.SinavProfil.metindenProfil(ad ? ad.value : '', m ? m.value : '');
@@ -133672,6 +133754,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.ogren.onceki-konu':'Önceki konu',
   'ays.ogren.kaldigin-yer':'Kaldığın yer',
   'ays.ogren.devam-et':'Devam et',
+  'ays.ogren.adim-adim':'Adım adım öğren',
   'ays.ogren.konuyu-sec-anlatim-ornek-sor':'Konuyu seç; anlatım, örnek soru ve koç aynı konuya bakar',
   'ays.ogren.sinavda-nasil-sorulur':'Sınavda nasıl sorulur',
   'ays.ogren.bu-konunun-ayrintili-anlatim':'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.',
@@ -134079,10 +134162,13 @@ window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', i
       title:x.topic.name, why:x.subject.name + (s ? ' · sırada: ' + s.ad.toLocaleLowerCase('tr-TR') : ' · bütün adımlar tamam'),
       action:K.Button({ label:son ? yz('ays.ogren.devam-et') : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
         data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
-      ${when(a || y, () => html`<div class="row wrap gap-6 mt-10">
+      ${when(a || y || window.LIFEOS.OMEKRAN, () => html`<div class="row wrap gap-6 mt-10">
         ${/* Sade (2026-10-16): «Günlük paragraf» ve «Karma test» düğmeleri
              Sorular sekmesinin içindekileri tekrar ediyordu; burada yalnız
              DURUM kalır: süren bir karma test ve açık yanlışlar. */ ''}
+        ${/* Konular ile Adım adım birleşti (depo sahibi, 2026-11-06): ikinci başlama yolu
+             artık sekme değil, buradan açılır (karışık tekrar, kendi konun dahil). */ ''}
+        ${when(window.LIFEOS.OMEKRAN, () => K.Button({ label:yz('ays.ogren.adim-adim'), icon:'zap', size:'sm', tone:'ghost', data:{ 'data-om-git':'ana' } }))}
         ${when(a, () => K.Button({ label:yz('ays.ogren.karma-teste-don'), icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } }))}
         ${when(y, () => K.Button({ label:yz('ays.ogren.yanlislarim') + y, icon:'list', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'yanlis' } }))}
       </div>`)}</div>`;
@@ -135739,12 +135825,12 @@ LIFEOS.PARCA.blok({ id:'koc.kockarti', sayfa:'koc', yer:'ana', sira:20, ad:'Koç
 window.LIFEOS.PARCA.yazilar({
   'ays.ogrenme.kalip-baslik':'Sınavda nasıl sorulur?',
   'ays.ogrenme.kalip-metin':'Bu konu sınavda çoğunlukla şu kalıplarla gelir:',
-  'ays.ogrenme.baslik':'Öğrenme',
+  'ays.ogrenme.baslik':'Adım adım',
 });
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
-window.LIFEOS.PARCA.sayfa({ id:'ogrenme', modul:'ays', king:{ sira:122, ad:'Öğrenme', es:['öğrenme', 'konu öğren', 'adım adım öğren', 'öğrenme motoru'] }, cekmece:'ogren', ad:'Öğrenme', ikon:'zap', sira:15 });
+window.LIFEOS.PARCA.sayfa({ id:'ogrenme', modul:'ays', king:{ sira:122, ad:'Öğrenme', es:['öğrenme', 'konu öğren', 'adım adım öğren', 'öğrenme motoru'] } });
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:35, group:'Git', label:'Öğrenme — adım adım konu, karışık tekrar, kendi konun', icon:'zap', route:'ogrenme', run(){ R.App.go('ogrenme'); } });
 
 R.Screens.ogrenme = (function(){
@@ -136330,7 +136416,7 @@ R.Screens.target = (function(){
   P.blok({ id:'hedef.katman', sayfa:'target', yer:'sol', sira:10, ad:y('hedef.katman.baslik'), ciz(){
     const p = S.profile;
     return K.Card({
-      title:y('hedef.katman.baslik'), hint:'tiers',
+      class:'hedef-katman', title:y('hedef.katman.baslik'), hint:'tiers',
       sub:(p.program ? p.program + ' · ' : '') + y('hedef.katman.alt', { sira:U.fmtNum(R.PROGRAM.refRank) }),
       badge:raw(UI.provenance('ref2026')),
       body:html`${tierTable()}`,
@@ -136642,6 +136728,18 @@ window.LIFEOS.PARCA.yazilar({
   'ays.progress.bir-mudahale-sec':'Bir müdahale seç',
   'ays.progress.mudahale-kaydedildi-21-gun':'Müdahale kaydedildi · 21 gün sonra yeniden değerlendirilecek',
   'ays.progress.i-lerleme':'İlerleme',
+  'ays.progress.ilerleme-bolumleri':'İlerleme bölümleri',
+  'ays.progress.bolum-ozet':'Özet',
+  'ays.progress.bolum-netler':'Netler',
+  'ays.progress.bolum-yol':'Konular',
+  'ays.progress.bolum-karar':'Aylık karar',
+  'ays.progress.sirada':'Sırada',
+  'ays.progress.karar-basligi':'Bu ayın kararı bekliyor',
+  'ays.progress.karara-gec':'Karara geç',
+  'ays.progress.ilk-deneme':'İlk tam denemeni gir',
+  'ays.progress.ilk-deneme-neden':'Gidişat denemelerden çizilir.',
+  'ays.progress.net-dustu':'Son 3 deneme, önceki 3 denemeden düşük',
+  'ays.progress.hatalara-bak':'Hatalara bak',
 });
 window.LIFEOS.PARCA.sayfa({ id:'progress', modul:'ays', king:{ sira:160, ad:'İlerleme', es:['ilerleme'] }, cekmece:'analiz', ad:'İlerleme', ikon:'chart', sira:10 });
 
@@ -136714,7 +136812,8 @@ R.Screens.progress = (function(){
     const sayi = o => L.SAYI ? L.SAYI.html(o) : U.esc(String(o.deger) + (o.birim ? ' ' + o.birim : ''));
     const sira = t => t === 'danger' ? 0 : t === 'warn' ? 1 : 2;
     const buyuk = t => String(t || '').charAt(0).toLocaleUpperCase('tr-TR') + String(t || '').slice(1);
-    const m = kpiValues().map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
+    /* Tekrar borcu Özet'teki «Tekrar kartları» kutusunda (düğmesiyle); dönen kartta ikinci kez yazılmaz (depo sahibi, 2026-11-06). */
+    const m = kpiValues().filter(c => c.key !== 'cardDebt').map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
       .sort((a, b) => (sira(a.c.tone) - sira(b.c.tone)) || a.i - b.i)
       .map(({ c, def }) => c.num == null
         ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : yz('ays.progress.veri-yok')) + '.',
@@ -136896,44 +136995,60 @@ R.Screens.progress = (function(){
       body:raw(A.html({ merkez:'Sınav', kumeler, bos:yz('ays.progress.konular-yuklenince-harita-be') })) });
   }
 
-  LIFEOS.PARCA.blok({ id:'progress.ilerleme-ozeti', sayfa:'progress', yer:'y1', sira:10, ad:'İlerleme özeti', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  /* Ekran duruma göre konuşur (kural motoru seçer, sayı Calc'tan): ilk deneme → karar → düşen net. */
+  function siradaki(){
+    if(!C.fullExams('TYT').length) return K.NextUp({ calm:true, icon:'exam', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.ilk-deneme'), why:yz('ays.progress.ilk-deneme-neden'),
+      action:K.Button({ label:yz('ays.progress.deneme-ekle'), tone:'primary', size:'sm', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } }) });
+    const gate = C.currentGate();
+    if(gate && !S.decisions[U.monthKey(U.today())]) return K.NextUp({ calm:true, icon:'target', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.karar-basligi'),
+      action:K.Button({ label:yz('ays.progress.karara-gec'), tone:'primary', size:'sm', act:'progress-tab', data:{ 'data-tab':'karar' } }) });
+    const t = C.medianTrend('TYT');
+    if(t.delta != null && t.delta < 0) return K.NextUp({ calm:true, icon:'chart', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.net-dustu'), why:U.fmtNet(t.delta) + ' net · hesaplandı',
+      action:K.Button({ label:yz('ays.progress.hatalara-bak'), size:'sm', act:'go', data:{ 'data-route':'analytics', 'data-bolum':'errors' } }) });
+    return '';
+  }
+
+  LIFEOS.PARCA.blok({ id:'progress.ilerleme-ozeti', sayfa:'progress', yer:'ozet', sira:10, ad:'İlerleme özeti', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return raw(ozet);
   } });
-  LIFEOS.PARCA.blok({ id:'progress.yolharitasi', sayfa:'progress', yer:'y2', sira:10, ad:'Yol haritası', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.yolharitasi', sayfa:'progress', yer:'yol-ust', sira:10, ad:'Yol haritası', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return yolHaritasi();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.ice-aktarma-karti', sayfa:'progress', yer:'y3', sira:10, ad:'İçe aktarma kartı', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.ice-aktarma-karti', sayfa:'progress', yer:'ozet', sira:10, ad:'İçe aktarma kartı', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('ays') : ''));
   } });
-  LIFEOS.PARCA.blok({ id:'progress.donengidisat', sayfa:'progress', yer:'y4', sira:10, ad:'Dönen gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.donengidisat', sayfa:'progress', yer:'ozet', sira:10, ad:'Dönen gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return DonenGidisat();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.trendcard', sayfa:'progress', yer:'y5', sira:10, ad:'Gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.trendcard', sayfa:'progress', yer:'netler', sira:10, ad:'Gidişat', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return trendCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.gatecard', sayfa:'progress', yer:'y6', sira:10, ad:'Geçiş kapıları', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.gatecard', sayfa:'progress', yer:'karar', sira:10, ad:'Geçiş kapıları', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return gateCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.testtrendcard', sayfa:'progress', yer:'y7', sira:10, ad:'Test gidişatı', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.testtrendcard', sayfa:'progress', yer:'netler', sira:10, ad:'Test gidişatı', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return testTrendCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.plan-tamamlama-son-8-hafta', sayfa:'progress', yer:'y7', sira:20, ad:'Plan tamamlama — son 8 hafta', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.plan-tamamlama-son-8-hafta', sayfa:'progress', yer:'yol', sira:20, ad:'Plan tamamlama — son 8 hafta', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return K.Card({ title:yz('ays.progress.plan-tamamlama-son-8'), sub:yz('ays.progress.hedef-85'),
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
   } });
-  LIFEOS.PARCA.blok({ id:'progress.monthcurvecard', sayfa:'progress', yer:'y7', sira:30, ad:'Aylık eğri', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.monthcurvecard', sayfa:'progress', yer:'netler', sira:30, ad:'Aylık eğri', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return monthCurveCard();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.kpireference', sayfa:'progress', yer:'y7', sira:40, ad:'Gösterge rehberi', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.kpireference', sayfa:'progress', yer:'yol', sira:40, ad:'Gösterge rehberi', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return kpiReference();
   } });
-  LIFEOS.PARCA.blok({ id:'progress.hata-paretosu', sayfa:'progress', yer:'y8', sira:10, ad:'Hata paretosu', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.hata-paretosu', sayfa:'progress', yer:'netler', sira:10, ad:'Hata paretosu', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return K.Card({ hint:'pareto', title:yz('ays.progress.hata-paretosu'), body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
             body:yz('ays.progress.recete')+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` });
   } });
-  LIFEOS.PARCA.blok({ id:'progress.surec-gostergeleri', sayfa:'progress', yer:'y8', sira:20, ad:'Süreç göstergeleri', ciz({ pareto, history, sleep, debt, closure, ozet }){
+  LIFEOS.PARCA.blok({ id:'progress.surec-gostergeleri', sayfa:'progress', yer:'yol', sira:20, ad:'Süreç göstergeleri', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return K.Card({ hint:'not-surec-gostergeleri', title:yz('ays.progress.surec-gostergeleri'), body:K.Stack([
           K.Meter({ label:yz('ays.progress.tekrar-borcu'), value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
           K.Meter({ label:yz('ays.progress.konu-kapanisi'), value:closure, text:'%'+closure }),
@@ -136956,23 +137071,23 @@ R.Screens.progress = (function(){
     /* Özet (KOLAY-PLANI Faz 2): Bugün'den taşınan günün sayıları en üstte. */
     const ozet = await R.Screens.today.ozet();
 
-    /* Raf iki sütunu DOM sırasıyla dizer: trend ile karar kapısı yan yana,
-       şeritler altta; gizli başvuru kartları en sonda (iPhone Faz 3). */
+    /* TEK İŞ (kullanıcı, 2026-11-06: «bir bölümde birden fazla özellik olduğundan
+       anlaşılmıyor»): Özet açılır; netler, yol ve aylık karar kendi katında. Karar
+       bekliyorsa seçicide rozet durur, gizli kalmaz. */
     const parcaB = { pareto, history, sleep, debt, closure, ozet };
-    return String(K.Grid([
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(6, K.Stack(LIFEOS.PARCA.liste('progress', 'y5', K, parcaB))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('progress', 'y6', K, parcaB))),
-    K.Span(6, K.Stack(LIFEOS.PARCA.liste('progress', 'y7', K, parcaB))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('progress', 'y8', K, parcaB))),
-    K.Span(12, LIFEOS.PARCA.yer('progress', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-  ]));
+    const P = LIFEOS.PARCA;
+    const gate = C.currentGate();
+    const kararBekliyor = gate && !S.decisions[U.monthKey(U.today())];
+    return String(html`${K.SayfaBolumleri({ act:'progress-tab', aria:yz('ays.progress.ilerleme-bolumleri'), bolumler:[
+      { id:'ozet', ad:yz('ays.progress.bolum-ozet'), govde:K.Stack([siradaki()].concat(P.liste('progress', 'ozet', K, parcaB))) },
+      { id:'netler', ad:yz('ays.progress.bolum-netler'), govde:K.Stack(P.liste('progress', 'netler', K, parcaB)) },
+      { id:'yol', ad:yz('ays.progress.bolum-yol'), govde:K.Stack(P.liste('progress', 'yol-ust', K, parcaB).concat(P.liste('progress', 'yol', K, parcaB))) },
+      { id:'karar', ad:yz('ays.progress.bolum-karar'), sayi:kararBekliyor ? 1 : null, govde:gate ? P.yer('progress', 'karar', K, parcaB, raw) : '' },
+    ] })}${P.yer('progress', 'y9', K, parcaB, raw)}`);
   }
 
   const handle = {
+    async 'progress-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'trend-family'(el){ S.ui.trendFamily = el.dataset.value; R.App.render(); },
     async 'toggle-kpi-ref'(){ S.ui.kpiRefOpen = !S.ui.kpiRefOpen; R.App.render(); },
     async 'toggle-month-curve'(){ S.ui.monthCurveOpen = !S.ui.monthCurveOpen; R.App.render(); },
@@ -137011,15 +137126,8 @@ R.Screens.progress = (function(){
 
   return {
     id:'progress',
-    /* iPhone Faz 3: açık trend ve (karar bekliyorsa) karar kapısı; test
-       trendi, plan geçmişi ve pareto şerit; başvuru kartları app.js'te gizli. */
-    get kucukVarsayilan(){
-      const G = (window.LIFEOS || {}).Gizle;
-      const gate = C.currentGate();
-      const verildi = gate && S.decisions[U.monthKey(U.today())];
-      return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
-        .concat(G && verildi ? [G.anahtar(yz('ays.progress.aylik-degerlendirme') + gate.month)] : []);
-    },
+    /* Her katta iş açık; plan geçmişi ve hata dağılımı ara sıra bakılır (başvuru kartları app.js'te gizli). */
+    kucukVarsayilan:['plan-tamamlama-son-hafta', 'hata-paretosu'],
     title:yz('ays.progress.i-lerleme'),
     subtitle(){
       const t = C.medianTrend('TYT');
@@ -137184,7 +137292,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı',
   'ays.analytics.ayrintili-analiz':'Ayrıntılı analiz',
 });
-window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Ayrıntı', ikon:'search', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Neden?', ikon:'search', sira:30 });
 
 R.Screens.analytics = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -137835,7 +137943,7 @@ R.Screens.analytics = (function(){
     });
     return K.Grid([K.Span(12, html`<div class="analizbasi">
       ${K.Kutu({ ad:yz('ays.analytics.veri-dolulugu'), yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'ays', ad:yz('ays.analytics.ays'), gunler:kayitli }], { gun:7 })) })}
-      ${K.Kutu({ ad:yz('ays.analytics.bu-haftanin-birikimi'), yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:yz('ays.analytics.haftalik-soru') })) })}
+      ${when(gunluk.length, () => K.Kutu({ ad:yz('ays.analytics.bu-haftanin-birikimi'), yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:yz('ays.analytics.haftalik-soru') })) }))}
     </div>`)]);
   }
 
@@ -138195,6 +138303,11 @@ R.Screens.protocols = (function(){
    etkiyle). «Nasıl hesaplandı» küçük başlar. Sayıların hepsi kodun;
    ekran yalnız çizer. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.gelecek.deneme-ekle':'Deneme ekle',
+  'ays.gelecek.neden-sinav-gunu-degil':'Neden sınav günü değil?',
+  'ays.gelecek.gelecek-bolumleri':'Gelecek bölümleri',
+  'ays.gelecek.bolum-tahmin':'Sınav günü',
+  'ays.gelecek.bolum-deney':'Deney',
   'ays.gelecek.bu-gidisle-araligin-tamami-h':'Bu gidişle aralığın tamamı hedefinin içinde.',
   'ays.gelecek.hedefin-bu-araligin-icinde-i':'Hedefin bu aralığın içinde: iyi uçta tutuyor, kötü uçta kaçıyor.',
   'ays.gelecek.bu-gidisle-hedefin-araligin':'Bu gidişle hedefin aralığın dışında; «Ne olursa» neyin kaydırdığını gösterir.',
@@ -138272,7 +138385,7 @@ window.LIFEOS.PARCA.yazilar({
 });
 /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
 ve «ne olursa» (core/gelecek.js). */
-window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', king:{ sira:110, ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] }, cekmece:'analiz', ad:'Gelecek', ikon:'target', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', king:{ sira:110, ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] }, cekmece:'analiz', ad:'Tahmin', ikon:'target', sira:20 });
 
 R.Screens.gelecek = (function(){
   const U = R.U, S = R.S;
@@ -138293,7 +138406,8 @@ R.Screens.gelecek = (function(){
     const t = r.tyt;
     if(!t.ok){
       return K.Card({ title:yz('ays.gelecek.sinav-gunu'), hint:'gelecek',
-        body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.' }) });
+        body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.',
+          action:K.Button({ label:yz('ays.gelecek.deneme-ekle'), tone:'primary', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } }) }) });
     }
     const s = r.sira;
     const konum = r.konum === 'icinde' ? yz('ays.gelecek.bu-gidisle-araligin-tamami-h')
@@ -138305,7 +138419,6 @@ R.Screens.gelecek = (function(){
     return K.Card({ title:yz('ays.gelecek.sinav-gunu'), hint:'gelecek', sub:U.fmtDate(r.sinav) + ' · ' + t.kalanGun + ' gün · tahmin',
       body:html`
         <div class="gel-ana">
-          ${when(!t.sinavaKadar, () => html`<p class="small gel-uyari">${yz('ays.gelecek.sinav-gunune-kadar-cizmek-ic')}${t.yayilim} ${yz('ays.gelecek.gun-en-cok')} ${R.Gelecek.UFUK_KAT} ${yz('ays.gelecek.kati-kadar-uzatilir-yaklasik')} ${t.gerekGun} ${yz('ays.gelecek.gun-daha-deneme-girdikce-ufu')}</p>`)}
           <p class="gel-cumle">${ne} ${yz('ays.gelecek.bu-gidisle-tyt-netin')} <b>${net(t.alt)}–${net(t.ust)}</b>${yz('ays.gelecek.en-olasi')} <b>${net(t.olasi)}</b>.</p>
           ${aralik({ alt:t.alt, ust:t.ust, olasi:t.olasi, min:0, max:t.max, dayanak:t.n, dayanakBirim:'deneme', birim:'net', ondalik:1, etiket:yz('ays.gelecek.tyt-net') })}
           ${when(s, () => html`
@@ -138313,6 +138426,7 @@ R.Screens.gelecek = (function(){
             ${aralik({ alt:s.sira.iyi, ust:s.sira.kotu, olasi:s.sira.olasi, ters:true, dayanak:t.n, dayanakBirim:'deneme', etiket:yz('ays.gelecek.sira') })}
             ${when(r.hedef, () => html`<p class="small mt-8">${yz('ays.gelecek.hedefin')} ${sayi(r.hedef)}. ${konum}</p>`)}
             ${when(s.yalnizTyt, () => html`<p class="tiny dim mt-4">AYT denemesi yeterli değil: puan yalnız TYT gidişinden; AYT'nin aynı düzeyde geleceği varsayıldı.</p>`)}`)}
+          ${when(!t.sinavaKadar, () => K.Ayrinti({ class:'mt-8', etiket:yz('ays.gelecek.neden-sinav-gunu-degil'), govde:html`${yz('ays.gelecek.sinav-gunune-kadar-cizmek-ic')}${t.yayilim} ${yz('ays.gelecek.gun-en-cok')} ${R.Gelecek.UFUK_KAT} ${yz('ays.gelecek.kati-kadar-uzatilir-yaklasik')} ${t.gerekGun} ${yz('ays.gelecek.gun-daha-deneme-girdikce-ufu')}` }))}
           ${when(r.tyt.ekSoru, () => html`<p class="tiny dim mt-8">${yz('ays.gelecek.bu-aralik-ne-olursa-daki-sec')} ${r.tyt.ekSoru > 0 ? '+' : ''}${r.tyt.ekSoru} soru.</p>`)}
         </div>` });
   }
@@ -138450,10 +138564,16 @@ R.Screens.gelecek = (function(){
   async function render(){
     const r = R.Gelecek.hesapla({ ekSoru:Number(S.ui.gelecekEkSoru) || 0 });
     const parcaB = { r };
-    return String(html`${LIFEOS.PARCA.yer('gelecek', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}${yontem(r)}`);
+    /* TEK İŞ (2026-11-06): tahmin okunur; kişisel deney ayrı bir iştir, kendi katında. */
+    const P = LIFEOS.PARCA;
+    return String(K.SayfaBolumleri({ act:'gelecek-tab', aria:yz('ays.gelecek.gelecek-bolumleri'), bolumler:[
+      { id:'tahmin', ad:yz('ays.gelecek.bolum-tahmin'), govde:html`${P.yer('gelecek', 'y4', K, parcaB, raw)}${P.yer('gelecek', 'y3', K, parcaB, raw)}${P.yer('gelecek', 'y2', K, parcaB, raw)}${yontem(r)}` },
+      { id:'deney', ad:yz('ays.gelecek.bolum-deney'), govde:P.yer('gelecek', 'y1', K, parcaB, raw) },
+    ] }));
   }
 
   const handle = {
+    async 'gelecek-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'deney-baslat'(){
       S.profile.deney = Object.assign({ id:'sabah-aksam-' + U.todayISO(), baslangic:U.iso(U.addDays(U.todayISO(), 1)) }, DENEY);
       await R.Model.saveProfile(); R.App.render();
@@ -140665,7 +140785,7 @@ R.Screens.guide = (function(){
     return raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '');
   } });
   async function render(){
-    return String(html`<div id="pane-guide">${LIFEOS.PARCA.yer('guide', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('guide', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
+    return String(html`<div id="pane-guide">${LIFEOS.PARCA.yer('guide', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('guide', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* «Bütün veriyi sil»: defter VE bu cihazdaki soru fotoğrafları ile çözümleri
@@ -141421,6 +141541,11 @@ R.Screens.profiles = (function(){
    Yazim bicimi: STIL.md / DONUSTURME.md. String birlestirme yok,
    etkilesim yalniz data-act / data-change ile baglanir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.office.ofis-bolumleri':'Ofis bölümleri',
+  'ays.office.bolum-ozet':'Özet',
+  'ays.office.bolum-uzmanlar':'Uzmanlar',
+  'ays.office.bolum-kayit':'Kayıtlar',
+  'ays.office.raporlari-gor':'Raporları gör',
   'ays.office.raporu-ac':'Raporu aç',
   'ays.office.patron-masalari-henuz-ozetle':'Patron masaları henüz özetlemedi',
   'ays.office.brifing-al':'Brifing al',
@@ -141501,7 +141626,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.office.simdi-yap':'Şimdi yap',
   'ays.office.toplanti-baslat':'Toplantı başlat',
   'ays.office.patron-a-danis':'Patron’a danış',
-  'ays.office.toplanti-odasi':'Toplantı odası',
   'ays.office.takipteki-kararlar':'Takipteki kararlar',
   'ays.office.yapildi':'Yapıldı',
   'ays.office.devret':'Devret',
@@ -141589,7 +141713,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.office.ofis':'Ofis',
   'ays.office.masalari-tara':'Masaları tara',
 });
-window.LIFEOS.PARCA.sayfa({ id:'office', modul:'ays', cekmece:'ofis', ad:'Masalar', ikon:'guide', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'ays', cekmece:'ofis', ad:'Ekip özeti', ikon:'guide', sira:10 });
 
 R.Screens.office = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -141784,14 +141908,13 @@ R.Screens.office = (function(){
               data:{ 'data-route':action.route || 'today' } }) })}
         </div>
 
-        <div class="stack-xs mt-12">${map(b.findings, findingRow)}</div>
+        <div class="mt-12">${K.Ayrinti({ etiket:yz('ays.office.raporlari-gor'),
+          govde:html`<div class="stack-xs">${map(b.findings, findingRow)}</div>` })}</div>
 
         <div class="row wrap gap-6 mt-12">
           ${K.Button({ label:yz('ays.office.toplanti-baslat'), icon:'zap', tone:'primary', act:'office-meet' })}
           ${K.Button({ label:yz('ays.office.patron-a-danis'), size:'sm', act:'office-talk',
             data:{ 'data-agent':'patron' } })}
-          ${K.Button({ label:yz('ays.office.toplanti-odasi'), size:'sm', tone:'ghost', act:'go',
-            data:{ 'data-route':'meeting' } })}
         </div>`,
     });
   }
@@ -142285,33 +142408,33 @@ R.Screens.office = (function(){
   LIFEOS.PARCA.blok({ id:'office.sozluk-seridi', sayfa:'office', yer:'y1', sira:10, ad:'Sözlük şeridi', ciz({ specialists, vo }){
     return (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : '';
   } });
-  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'y2', sira:10, ad:'Masa', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'uzmanlar', sira:10, ad:'Masa', ciz({ specialists, vo }){
     return when(vo.masa, () => K.Kutu({ ad:yz('ays.office.masa'), yuva:'kim konuşuyor', class:'vkutu',
           govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'y2', sira:20, ad:'Günün toplantısı', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'uzmanlar', sira:20, ad:'Günün toplantısı', ciz({ specialists, vo }){
     return when(vo.toplanti, () => K.Kutu({ ad:yz('ays.office.gunun-toplantisi'), yuva:'her masadan tek cümle', class:'vkutu',
           govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'Günün özeti', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'ozet', sira:30, ad:'Günün özeti', ciz({ specialists, vo }){
     return briefingCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.bosscard', sayfa:'office', yer:'y2', sira:40, ad:'Patron masası', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.bosscard', sayfa:'office', yer:'ozet', sira:40, ad:'Patron masası', ciz({ specialists, vo }){
     return BossCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.decisionscard', sayfa:'office', yer:'y2', sira:50, ad:'Kararlar', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.decisionscard', sayfa:'office', yer:'kayit', sira:50, ad:'Kararlar', ciz({ specialists, vo }){
     return decisionsCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y2', sira:60, ad:'Uzman masaları', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'uzmanlar', sira:60, ad:'Uzman masaları', ciz({ specialists, vo }){
     return K.Card({ title:yz('ays.office.uzman-masalari'), body:html`<div class="desks">${map(specialists, Desk)}</div>` });
   } });
-  LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'y3', sira:10, ad:'Ürünler', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'ozet', sira:10, ad:'Ürünler', ciz({ specialists, vo }){
     return urunlerKart();
   } });
-  LIFEOS.PARCA.blok({ id:'office.quotacard', sayfa:'office', yer:'y3', sira:20, ad:'Kota', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.quotacard', sayfa:'office', yer:'kayit', sira:20, ad:'Kota', ciz({ specialists, vo }){
     return quotaCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.lastmeetingcard', sayfa:'office', yer:'y3', sira:30, ad:'Son toplantı', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.lastmeetingcard', sayfa:'office', yer:'kayit', sira:30, ad:'Son toplantı', ciz({ specialists, vo }){
     return lastMeetingCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.aciklamalar', sayfa:'office', yer:'y3', sira:40, ad:'Açıklamalar', ciz({ specialists, vo }){
@@ -142324,11 +142447,14 @@ R.Screens.office = (function(){
 
     /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     const parcaB = { specialists, vo };
-    return String(K.Grid([
-    K.Span(12, LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-    K.Span(8, K.Stack(LIFEOS.PARCA.liste('office', 'y2', K, parcaB))),
-    K.Span(4, K.Stack(LIFEOS.PARCA.liste('office', 'y3', K, parcaB))),
-  ]));
+    /* TEK İŞ (2026-11-06): önce günün özeti ve tek eylem; masalar ve kayıtlar kendi katında. */
+    const P = LIFEOS.PARCA;
+    return String(html`
+      ${K.SayfaBolumleri({ act:'office-tab', aria:yz('ays.office.ofis-bolumleri'), bolumler:[
+        { id:'ozet', ad:yz('ays.office.bolum-ozet'), govde:K.Stack(P.liste('office', 'y1', K, parcaB).concat(P.liste('office', 'ozet', K, parcaB))) },
+        { id:'uzmanlar', ad:yz('ays.office.bolum-uzmanlar'), sayi:specialists.filter(a => O.brief(a.id).findings.some(f => f.tone === 'danger')).length || null, govde:K.Stack(P.liste('office', 'uzmanlar', K, parcaB)) },
+        { id:'kayit', ad:yz('ays.office.bolum-kayit'), govde:K.Stack(P.liste('office', 'kayit', K, parcaB)) },
+      ] })}${P.yer('office', 'y3', K, parcaB, raw)}`);
   }
 
   function afterRender(){}
@@ -142336,6 +142462,7 @@ R.Screens.office = (function(){
   /* ---------- eylemler ---------- */
 
   const handle = {
+    async 'office-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* Ürün KUTUDA açılır: sandbox iframe, betik çalışmaz (core/urun.js). */
     async 'urun-ac'(el){
       const u = R.Urunler && R.Urunler.bul(el.dataset.id);
@@ -142680,7 +142807,7 @@ R.Screens.office = (function(){
        Patron'da ve uzman kartında üç kez yazılıyordu: toplantı ve uzman
        masaları ve kararlar şerit. BAM ürünleri yalnız ürün varken çizilir
        ve o zaman açıktır: yeni ürün gözden kaçmasın. */
-    kucukVarsayilan:['günün-toplantısı', 'uzman-masaları', 'takipteki-kararlar'],
+    kucukVarsayilan:['günün-toplantısı'],
   };
 })();
 
@@ -142691,6 +142818,10 @@ R.Screens.office = (function(){
    arkadasina yonlendirir. Model bagli degilse yanit kural motoru
    metninden gelir — ekran her kosulda calisir. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.team.danisma-bolumleri':'Danışma bölümleri',
+  'ays.team.bolum-sohbet':'Sohbet',
+  'ays.team.bolum-rapor':'Rapor',
+  'ays.team.bolum-ekip':'Ekip',
   'ays.team.patron-a-ilettim':'Patron’a ilettim. ',
   'ays.team.geri-aldim':'Geri aldım: ',
   'ays.team.geri-alinacak-bir-degisiklig':'Geri alınacak bir değişikliğin yok.',
@@ -142730,9 +142861,8 @@ window.LIFEOS.PARCA.yazilar({
   'ays.team.ucretsiz-modellerde-ilk-yani':'(ücretsiz modellerde ilk yanıt 10–60 sn sürebilir)',
   'ays.team.su-an-konusmuyor':'Şu an konuşmuyor',
   'ays.team.ekip-sohbeti':'Ekip sohbeti',
-  'ays.team.ofis':'Ofis',
 });
-window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Uzmana sor', ikon:'zap', sira:20 });
 
 R.Screens.team = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -142994,13 +143124,13 @@ R.Screens.team = (function(){
     if(m) m.textContent = st.metin || '';
   }
 
-  LIFEOS.PARCA.blok({ id:'team.picker', sayfa:'team', yer:'y1', sira:10, ad:'Ajan seçici', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.picker', sayfa:'team', yer:'sohbet', sira:10, ad:'Ajan seçici', ciz({ agent, msgs, ruleMode, G, pencere }){
     return picker();
   } });
-  LIFEOS.PARCA.blok({ id:'team.ajan-penceresi', sayfa:'team', yer:'y1', sira:20, ad:'Ajan penceresi', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-penceresi', sayfa:'team', yer:'sohbet', sira:20, ad:'Ajan penceresi', ciz({ agent, msgs, ruleMode, G, pencere }){
     return pencere;
   } });
-  LIFEOS.PARCA.blok({ id:'team.ajan-masasi', sayfa:'team', yer:'y2', sira:10, ad:'Ajan masası', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-masasi', sayfa:'team', yer:'rapor', sira:10, ad:'Ajan masası', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Card({
           body:html`
             <div class="desk__head">
@@ -143014,7 +143144,7 @@ R.Screens.team = (function(){
             <div class="mt-10">${deskStrip(agent)}</div>`,
         });
   } });
-  LIFEOS.PARCA.blok({ id:'team.masasindaki-rapor', sayfa:'team', yer:'y2', sira:20, ad:'Masasındaki rapor', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.masasindaki-rapor', sayfa:'team', yer:'rapor', sira:20, ad:'Masasındaki rapor', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Card({
           hint:'not-masasindaki-rapor', title:yz('ays.team.masasindaki-rapor'),           actions:K.Button({ label:yz('ays.team.ozet-iste'), icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
@@ -143028,7 +143158,7 @@ R.Screens.team = (function(){
                 : html`<span class="tiny dim">${agent.reads.length} ${yz('ays.team.veri-kaynagi')}</span>`}</div>`,
         });
   } });
-  LIFEOS.PARCA.blok({ id:'team.ekipteki-digerleri', sayfa:'team', yer:'y3', sira:10, ad:'Ekipteki diğerleri', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ekipteki-digerleri', sayfa:'team', yer:'ekip', sira:10, ad:'Ekipteki diğerleri', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Stack([
         /* Ses tanima yoksa voiceCard() null doner: olmayan bir
            yetenegin dugmesini gostermek, basip bir sey olmamasindan
@@ -143073,11 +143203,13 @@ R.Screens.team = (function(){
     })) : '';
 
     const parcaB = { agent, msgs, ruleMode, G, pencere };
-    return String(K.Grid([
-    K.Span(12, K.Stack(LIFEOS.PARCA.liste('team', 'y1', K, parcaB))),
-    K.Span(8, K.Stack(LIFEOS.PARCA.liste('team', 'y2', K, parcaB))),
-    K.Span(4, LIFEOS.PARCA.yer('team', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
-  ]));
+    /* TEK İŞ (2026-11-06): önce sohbet; uzmanın raporu ve ekip listesi kendi katında. */
+    const P = LIFEOS.PARCA;
+    return String(K.SayfaBolumleri({ act:'team-tab', aria:yz('ays.team.danisma-bolumleri'), bolumler:[
+      { id:'sohbet', ad:yz('ays.team.bolum-sohbet'), govde:K.Stack(P.liste('team', 'sohbet', K, parcaB)) },
+      { id:'rapor', ad:yz('ays.team.bolum-rapor'), govde:K.Stack(P.liste('team', 'rapor', K, parcaB)) },
+      { id:'ekip', ad:yz('ays.team.bolum-ekip'), govde:P.yer('team', 'ekip', K, parcaB, raw) },
+    ] }));
   }
 
   /* ---------- konusma ---------- */
@@ -143151,6 +143283,7 @@ R.Screens.team = (function(){
   }
 
   const handle = {
+    async 'team-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'chat-onayla'(el){
       const ids = String(el.dataset.ids || '').split(',').filter(Boolean);
       const r = await R.Komut.onayla(ids);
@@ -143258,17 +143391,15 @@ R.Screens.team = (function(){
     id:'team',
     /* iPhone Faz 4: açık sohbet ve ajanın raporu; ekibin geri kalanı şerit.
        2026-10-07: sesli sohbet de şerit (ara sıra açılan araç). */
-    kucukVarsayilan:['ekipteki-diğerleri', 'sesli-sohbet'],
+    kucukVarsayilan:['sesli-sohbet'],
     title:yz('ays.team.ekip-sohbeti'),
     subtitle(){
       const agent = current();
       const n = O.chatOf(agent.id).length;
       return agent.name + ' · ' + agent.role + (n ? ' · ' + Math.ceil(n/2) + ' soru' : '');
     },
-    actions(){
-      return String(R.C.Button({ label:yz('ays.team.ofis'), icon:'guide', size:'sm', act:'go',
-        data:{ 'data-route':'office' } }));
-    },
+    /* «Ofis» düğmesi kalktı: Masalar hemen üstteki sekmede. */
+    actions(){ return ''; },
     render, handle, onKey, afterRender(){ mentionKur(); if(!OS()) scrollLog(); }, mentionHtml,
   };
 })();
@@ -143370,7 +143501,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.meeting.rapor-kopyalandi':'Rapor kopyalandı',
   'ays.meeting.karar-kapandi':'Karar kapandı',
   'ays.meeting.toplanti-odasi':'Toplantı odası',
-  'ays.meeting.ofis':'Ofis',
 });
 window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'ays', cekmece:'ofis', ad:'Toplantı', ikon:'list', sira:30 });
 
@@ -144207,10 +144337,9 @@ R.Screens.meeting = (function(){
       return last ? yz('ays.meeting.son-toplanti') + U.relativeDay(R.U.gunOf(last.at)) + ' · ' + last.topic
         : yz('ays.meeting.ekip-5-kisi-gundemi');
     },
-    actions(){
-      return String(K.Button({ label:yz('ays.meeting.ofis'), icon:'guide', size:'sm', act:'go',
-        data:{ 'data-route':'office' } }));
-    },
+    /* «Ofis» düğmesi kalktı: Masalar hemen üstteki sekmede. Masadakiler ara sıra bakılır. */
+    actions(){ return ''; },
+    kucukVarsayilan:['masadakiler'],
     render, handle, change, afterRender,
     isRunning(){ return running; },
   };
@@ -146353,9 +146482,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.app.calisma-suresi':'Çalışma süresi',
   'ays.app.soruyu-coz':'Soruyu çöz',
   'ays.app.tekrar':'Tekrar',
-  'ays.app.soru-coz':'Soru çöz',
   'ays.app.siradaki-konu':'Sıradaki konu',
-  'ays.app.deneme':'Deneme',
   'ays.app.not-al':'Not al',
   'ays.app.uygulama-acilamadi':'Uygulama açılamadı.',
 });
@@ -146381,7 +146508,7 @@ R.App = (function(){
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
      Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
-  const UST = { topic:'subjects', gun:'today' };
+  const UST = { topic:'subjects', gun:'today', ogrenme:'ogren' };
 
   /* Telefon alt bandı (KOLAY-PLANI Faz 2): Bugün · Çalışma · Analiz · Menü; masaüstü kenarı da aynı (kabuk.js ANA_CEKMECE). */
   const BANT = ['bugun', 'calisma', 'analiz'];
@@ -146634,7 +146761,7 @@ R.App = (function(){
   function ayarListesi(sc, kok){
     if(!sc || sc.id === 'rutbe' || !kok || !ayarlardaMi(sc.id) || !(window.LIFEOS && LIFEOS.Gizle)) return [];
     const gizli = (sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []);
-    return LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0).slice(1);
+    return LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0).slice(sc.id === 'guide' ? 0 : 1);
   }
 
   /* BAŞLIK ÇEKMECENİN ADIDIR (kullanıcı, 2026-10-02: «Sınama'daysa üstte
@@ -146656,8 +146783,7 @@ R.App = (function(){
     const aciklama = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
     const ozet = [cumle === baslik ? '' : cumle, aciklama].filter(Boolean).map(String).join(' ');
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
-    const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
-      + (safe(() => sc.actions ? sc.actions() : '') || '');
+    const eylem = AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '';
     return K.sayfaBasi({ yol:[], ust:safe(() => sc.ust ? String(sc.ust()) : ''), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '',
       /* 004: günün cümlesi bilgi kartının ilk satırında. */
       bilgiOz:cumle && cumle !== baslik ? (sc.headlineOz || '') : '' });
@@ -146666,8 +146792,12 @@ R.App = (function(){
   function bolumCubuguHtml(sc){
     const sec = bolumOf(sc.id);
     const r = UST[sc.id] || sc.id;
+    /* Ekranın düğmeleri sekmelerin ALTINDA (2026-11-06): üstte dururken sekme çubuğu bölümden
+       bölüme yukarı aşağı oynuyordu. */
+    const eylem = safe(() => sc.actions ? sc.actions() : '') || '';
     return K.bolumCubugu({ kabuk:true, cekmece:sec.label, bolumler:sec.items.filter(v => !gizliMi(v.id)).map(v => ({
-      route:v.id, ad:v.label, on:v.id === r, rozet:safe(() => badgeFor(v.id), null) || null })) });
+      route:v.id, ad:v.label, on:v.id === r, rozet:safe(() => badgeFor(v.id), null) || null })) })
+      + (eylem ? '<div class="ekran-eylem">' + eylem + '</div>' : '');
   }
 
   function menuHtml(sc){
@@ -146981,6 +147111,8 @@ R.App = (function(){
         if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
       }
       if(sc.afterRender) sc.afterRender();
+      /* Başka ekrandan belli bir bölüme gelindi (`data-bolum`): istek bir kez uygulanır. */
+      if(S.ui.bolumIstek){ const b = S.ui.bolumIstek; S.ui.bolumIstek = null; R.C.bolumeGit(b); }
       /* Gizlenen ve kucultulen bolumler (brand/ortak/gizle.js): her cizimden
          sonra uygulanir; tercih modul + profil + ekran icin ayri saklanir. */
       if(window.LIFEOS && LIFEOS.Gizle){
@@ -147143,6 +147275,7 @@ R.App = (function(){
       go(el.dataset.route || 'anlatim');
     },
     async go(el){
+      if(el.dataset.bolum) S.ui.bolumIstek = el.dataset.bolum;
       if(el.dataset.tab){
         S.ui.cardTab = el.dataset.tab;
         if(el.dataset.route === 'sorular') S.ui.ogrenKip = el.dataset.tab;
@@ -148225,6 +148358,7 @@ R.App = (function(){
           },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ id:'soru', ad:yz('ays.app.soruyu-coz'), is:async f => {
+            S.ui.bolumIstek = 'sor';
             go('solve');
             await new Promise(r => setTimeout(r, 80));
             const ok = R.Screens.solve.fotoKoy ? await R.Screens.solve.fotoKoy(f) : false;
@@ -148271,9 +148405,7 @@ R.App = (function(){
         window.LIFEOS.KISAYOL.kur({ modul:'ays', git:r => go(r), palet:() => R.Palette.open(),
           dugmeler:() => [
             { ad:yz('ays.app.tekrar'), rota:'cards', sayi:C.dueCards().length },
-            { ad:yz('ays.app.soru-coz'), rota:'solve' },
             { ad:yz('ays.app.siradaki-konu'), rota:'ogren' },
-            { ad:yz('ays.app.deneme'), rota:'exams' },
             { ad:yz('ays.app.not-al'), doldur:'not: ' },
           ],
           cekmeceler:() => NAV.filter(g => (g.items || []).length).map(g => ({ id:g.id, rota:g.items[0].id })) });
