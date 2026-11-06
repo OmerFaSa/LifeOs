@@ -18,7 +18,7 @@
    girmez: veri tarayıcı deposunda durur, bu kasa yalnız uygulamanın
    dosyalarını (sayfa, kod, görsel) tutar. */
 
-const KASA = 'lifeos-kabuk-v1';
+const KASA = 'lifeos-kabuk-v2';
 const EN_COK = 400;
 
 function ayniKoken(adres){
@@ -41,8 +41,23 @@ function saklanir(istek, cevap){
     && (cevap.type === 'basic' || cevap.type === 'default');
 }
 
+/* Sunucunun surumlu dosyasi (sistem/sunucu.py, dist-betik.js?v=...): icerigi adresiyle
+   degismez. Kasada varsa aga sorulmaz; yeni surum gelince eskisi silinir, yoksa her
+   guncelleme kasaya ~7 MB ekliyordu. */
+function surumlu(adres){
+  try{ const u = new URL(adres); return /^\/dist-(betik\.js|stil\.css)$/.test(u.pathname) && u.searchParams.has('v'); }catch(e){ return false; }
+}
+
 async function sakla(anahtar, cevap){
-  try{ await (await caches.open(KASA)).put(anahtar, cevap); }catch(e){ /* kota dolu: sessiz */ }
+  try{
+    const k = await caches.open(KASA);
+    await k.put(anahtar, cevap);
+    if(!surumlu(anahtar)) return;
+    const yol = new URL(anahtar).pathname;
+    for(const eski of await k.keys()){
+      if(eski.url !== anahtar && new URL(eski.url).pathname === yol) await k.delete(eski);
+    }
+  }catch(e){ /* kota dolu: sessiz */ }
 }
 
 async function eskisi(istek){
@@ -69,6 +84,10 @@ async function tamaminiSakla(adres){
 }
 
 async function agOnce(istek, olay){
+  if(surumlu(istek.url)){
+    const hazir = await (await caches.open(KASA)).match(istek.url);
+    if(hazir) return hazir;
+  }
   try{
     const cevap = await fetch(istek);
     if(saklanir(istek, cevap)) sakla(istek.url, cevap.clone());
@@ -85,15 +104,17 @@ async function agOnce(istek, olay){
 
 /* İlk açılışta sayfa, kabuk devreye girmeden yüklenir: o dosyalar
    kasaya hiç uğramaz. Sayfa yüklediklerinin adresini gönderir; kasada
-   olmayanlar bir kez indirilip saklanır. */
+   olmayanlar saklanır. Tarayıcının az önce indirdiği kopya kullanılır
+   (force-cache): no-store her dosyayı ikinci kez indiriyordu (2026-11-06,
+   ölçülen SPİ ilk açılış: 6,7 MB sayfa + 7 MB kasa, telefon verisinden). */
 async function doldur(adresler){
   const k = await caches.open(KASA);
   const liste = (Array.isArray(adresler) ? adresler : []).filter(ayniKoken).slice(0, EN_COK);
   for(const adres of liste){
     try{
       if(await k.match(adres)) continue;
-      const cevap = await fetch(adres, { cache:'no-store' });
-      if(cevap.ok && cevap.status === 200) await k.put(adres, cevap);
+      const cevap = await fetch(adres, { cache:'force-cache' });
+      if(cevap.ok && cevap.status === 200) await sakla(adres, cevap);
     }catch(e){ /* ağ yok ya da dosya yok: sonraki */ }
   }
 }

@@ -235,6 +235,44 @@
       return is;
     }
 
+    /* Telefon verisi (2026-11-06): ilk açılışta her dosya ikinci kez iniyordu, sürümlü
+       dosyanın eski kopyaları kasada birikiyordu. */
+    async function swKasa(fetchSahte){
+      const metin = await (await fetch('../sw.js', { cache:'no-store' })).text();
+      const m = new Map();
+      const kasa = { match:async u => m.get(u), put:async (u, c) => { m.set(u, c); }, delete:async r => m.delete(r.url), keys:async () => [...m.keys()].map(url => ({ url })) };
+      const sahte = { addEventListener:() => {}, location:{ origin:'http://yerel' }, registration:{ scope:'http://yerel/' }, clients:{} };
+      const sw = new Function('self', 'caches', 'fetch', metin + ';return { agOnce, doldur, sakla };')(sahte, { open:async () => kasa }, fetchSahte);
+      return { sw, m };
+    }
+
+    it('kasa dolarken dosya ikinci kez inmez: tarayıcının kopyası kullanılır', async () => {
+      const giden = [];
+      const { sw, m } = await swKasa(async (u, o) => { giden.push(o.cache); return { ok:true, status:200 }; });
+      await sw.doldur(['http://yerel/dist-betik.js?v=a', 'http://yerel/']);
+      expect(giden).toEqual(['force-cache', 'force-cache']);
+      expect(m.size).toBe(2);
+    });
+
+    it('sürümlü dosya kasadaysa ağa sorulmaz, sürümsüz dosya yine ağdan gelir', async () => {
+      let ag = 0;
+      const { sw, m } = await swKasa(async () => { ag++; return { ok:true, status:200, type:'basic', clone(){ return this; } }; });
+      m.set('http://yerel/dist-betik.js?v=a', 'kasadan');
+      expect(await sw.agOnce({ url:'http://yerel/dist-betik.js?v=a', method:'GET', headers:new Headers() }, {})).toBe('kasadan');
+      expect(ag).toBe(0);
+      m.set('http://yerel/css/a.css', 'eski');
+      const c = await sw.agOnce({ url:'http://yerel/css/a.css', method:'GET', headers:new Headers() }, {});
+      expect(c === 'eski').toBeFalsy();
+      expect(ag).toBe(1);
+    });
+
+    it('yeni sürüm kasaya girince aynı dosyanın eskisi silinir, öteki dosya kalır', async () => {
+      const { sw, m } = await swKasa(async () => null);
+      m.set('http://yerel/dist-betik.js?v=a', 1); m.set('http://yerel/dist-stil.css?v=a', 2);
+      await sw.sakla('http://yerel/dist-betik.js?v=b', 3);
+      expect([...m.keys()].sort()).toEqual(['http://yerel/dist-betik.js?v=b', 'http://yerel/dist-stil.css?v=a']);
+    });
+
     /* Hesap API'si (brand/ortak/hesap.js) kasaya GİRMEZ: cevabı kişiseldir
        (kullanıcı adı, kayıtlar) ve bayat bir «durum» çevrimdışıyken yanlış
        söylerdi. SW bu isteklere hiç karışmaz; dosyalar eskisi gibi. */

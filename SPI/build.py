@@ -260,15 +260,9 @@ def ikonu_gom(etiketler: list) -> list:
             for e in etiketler]
 
 
-def build(denetle: bool = False):
-    for name in REQUIRED:
-        if not (SRC / name).exists():
-            sys.exit(f"HATA: src/{name} yok")
-
-    # Denetimde damga YENIDEN yazilmaz: dist, depodaki build.js ile
-    # derlenmistir ve karsilastirma o dosyayla yapilir.
-    damga = None if denetle else stamp()
-
+def derle():
+    """(tek dosya metni, kaynak listesi) bellekte; diske yazmaz. sistem/sunucu.py dist
+    eskiyken bunu cagirir (tools/dist_sun_test.py)."""
     html = read("index.html")
     title_match = re.search(r"<title>(.*?)</title>", html, re.S)
     # <html> etiketi (lang, data-modul) kaynaktan aynen gelir: sarmalayici soyulunca
@@ -304,9 +298,20 @@ def build(denetle: bool = False):
     parts.append(body)
     parts.extend(script_blocks)
     output = "\n".join(parts) + "\n"
+    return output, kaynak_listesi("spi.html", ["index.html"] + css_files + js_files)
 
+
+def build(denetle: bool = False):
+    for name in REQUIRED:
+        if not (SRC / name).exists():
+            sys.exit(f"HATA: src/{name} yok")
+
+    # Denetimde damga YENIDEN yazilmaz: dist, depodaki build.js ile
+    # derlenmistir ve karsilastirma o dosyayla yapilir.
+    damga = None if denetle else stamp()
+
+    output, liste = derle()
     out_path = DIST / "spi.html"
-    liste = kaynak_listesi(out_path.name, ["index.html"] + css_files + js_files)
     if denetle:
         return denetle_dist(out_path, output) or denetle_liste(liste)
     DIST.mkdir(exist_ok=True)
@@ -319,7 +324,7 @@ def build(denetle: bool = False):
 
     size_kb = len(output.encode("utf-8")) / 1024
     print(f"OK   {out_path}")
-    print(f"     {len(js_files)} js modulu, {output.count(chr(10))+1} satir, {size_kb:,.0f} KB")
+    print(f"     {sum(k.endswith('.js') for k in json.loads(liste)['kaynak'])} js modulu, {output.count(chr(10))+1} satir, {size_kb:,.0f} KB")
     print(f"     damga {damga}")
 
 
