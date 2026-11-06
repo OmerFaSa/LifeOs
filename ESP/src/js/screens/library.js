@@ -38,7 +38,11 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:60, id:'act:note', kind:'Eylem', l
     setTimeout(() => { const el = document.getElementById('note-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.library.notlar':'Notlar',
-  'esp.library.matris':'Matris',
+  'esp.library.matris':'Not bağları',
+  'esp.library.matris-not':'Notların birbirine bağlanması, bağ önerileri',
+  'esp.library.yontem-not':'Okuma düzeyleri, protokol, not şablonları',
+  'esp.library.ilerleme':'İlerleme',
+  'esp.library.ilerleme-not':'Okuma ve not grafikleri',
   'esp.library.kaynaklar':'Kaynaklar',
   'esp.library.yontem':'Yöntem',
   'esp.library.ogren':'Öğren',
@@ -129,10 +133,11 @@ ESP.Screens.library = (function(){
 
   const TABS = [
     { id:'notlar',    label:yz('esp.library.notlar') },
-    { id:'matris',    label:yz('esp.library.matris') },
     { id:'kaynaklar', label:yz('esp.library.kaynaklar') },
-    { id:'yontem',    label:yz('esp.library.yontem') },
     { id:'ogren',     label:yz('esp.library.ogren') },
+    { id:'matris',    label:yz('esp.library.matris'), ikincil:true, not:yz('esp.library.matris-not') },
+    { id:'yontem',    label:yz('esp.library.yontem'), ikincil:true, not:yz('esp.library.yontem-not') },
+    { id:'ilerleme',  label:yz('esp.library.ilerleme'), ikincil:true, not:yz('esp.library.ilerleme-not') },
   ];
 
   /* ----------------------------------------------------------------- yöntem
@@ -598,14 +603,14 @@ ESP.Screens.library = (function(){
 
   LIFEOS.PARCA.blok({ id:'library.okuma-sekmeleri', sayfa:'library', yer:'y1', sira:10, ad:'Okuma sekmeleri', ciz(){
     return K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:yz('esp.library.okuma-bolumleri'), tabs:TABS,
-        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }));
+        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('library', 'ilerleme', K, undefined, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'library.okuma-panosu', sayfa:'library', yer:'y2', sira:10, ad:'Okuma panosu', ciz(){
-    return K.Span(12, raw(PanoOkuma()));
+  LIFEOS.PARCA.blok({ id:'library.okuma-panosu', sayfa:'library', yer:'ilerleme', sira:10, ad:'Okuma panosu', ciz(){
+    return raw(PanoOkuma());
   } });
   function render(){
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('library', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('library', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 

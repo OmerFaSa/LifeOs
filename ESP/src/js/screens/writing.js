@@ -31,6 +31,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.writing.taslaklar':'Taslaklar',
   'esp.writing.olcum':'Ölçüm',
   'esp.writing.araclar':'Araçlar',
+  'esp.writing.araclar-not':'Örnek iste, revizyon, yapı kalıpları',
   'esp.writing.ogren':'Öğren',
   'esp.writing.yazi-ornekleri-iste':'Yazı örnekleri iste',
   'esp.writing.konu-deneme-kisa-oyku':'Konu: deneme, kısa öykü…',
@@ -93,8 +94,8 @@ ESP.Screens.writing = (function(){
   const TABS = [
     { id:'taslaklar', label:yz('esp.writing.taslaklar') },
     { id:'olcum',     label:yz('esp.writing.olcum') },
-    { id:'araclar',   label:yz('esp.writing.araclar') },
     { id:'ogren',     label:yz('esp.writing.ogren') },
+    { id:'araclar',   label:yz('esp.writing.araclar'), ikincil:true, not:yz('esp.writing.araclar-not') },
   ];
 
   /* ---------------------------------------------------------------- araçlar

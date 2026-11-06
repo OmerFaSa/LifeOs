@@ -126,7 +126,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.guide.merdiven':'Merdiven',
   'esp.guide.her-bolumde-sifirdan-ustatli':'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta ',
   'esp.guide.merdiven-ardisiktir-alttaki':'Merdiven ardışıktır: alttaki basamak atlanarak üsttekine geçilmez. Ölçülemeyen basamak üçüncü bir durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak değil ölçmek.',
-  'esp.guide.tezgah':'TEZGÂH',
+  'esp.guide.tezgah':'UZMAN MASASI',
   'esp.guide.her-bolumun-altinda-ayni-yer':'Her bölümün altında aynı yerde durur ve bölümden bölüme ',
   'esp.guide.bolumler':'Bölümler',
   'esp.guide.calismayacagin-bolumu-kapata':'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, ',

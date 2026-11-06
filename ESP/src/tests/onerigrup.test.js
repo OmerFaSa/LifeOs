@@ -21,18 +21,22 @@
   }
 
   describe('Onaylar — öneriler disipline göre', () => {
-    it('her disiplinde bir öneri açık, kalanı katlı; hiçbiri silinmez', async () => {
+    it('yalnız ilk alan açık, ötekiler adı ve sayısıyla tek satır; hiçbiri silinmez', async () => {
       resetState();
       const k = await ciz([oneri('a1', 'lang'), oneri('a2', 'lang'), oneri('a3', 'lang'), oneri('b1', 'philo'), oneri('b2', 'philo')]);
       const gruplar = k.querySelectorAll('.oneri-grup');
       expect(gruplar.length).toBe(2);
+      expect(gruplar[0].hasAttribute('open')).toBe(true);
+      expect(gruplar[1].hasAttribute('open')).toBe(false);
+      expect(gruplar[1].querySelector('summary').textContent).toContain('2');
       const dahasi = k.querySelectorAll('.oneri-grup__dahasi');
       expect(dahasi.length).toBe(2);
       expect(dahasi[0].hasAttribute('open')).toBe(false);
       expect(dahasi[0].querySelector('summary').textContent).toContain('2 öneri daha');
       ['a1', 'a2', 'a3', 'b1', 'b2'].forEach(id => expect(k.textContent).toContain('Öneri ' + id));
-      /* 2026-10-17: türe göre Onaylar — uzman önerileri «Plan ve ayar» kutusunda, sayısı kutunun başında. */
-      expect(k.querySelector('.onay-turleri [data-value="plan"]').textContent).toContain('5');
+      /* 2026-11-06: tek tür varken seçici çizilmez («Tümü 5 · Plan 5» bir şey seçtirmiyordu); sayı sekmede. */
+      expect(k.querySelector('.onay-turleri')).toBeNull();
+      expect(k.querySelector('.onaylar .kutu').textContent).toContain('5');
     });
 
     it('tek disiplin varsa gruplama yok', async () => {

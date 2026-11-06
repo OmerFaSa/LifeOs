@@ -114,11 +114,7 @@ ESP.Screens.office = (function(){
 
   LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y1', sira:10, ad:'Uzman masaları', ciz({ vo, patron, uzmanlar, devir, brf, next }){
     return K.Span(12, K.Ledger(() => [
-        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('esp.office.masa'), meta:'kim konuşuyor',
-          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
-        when(vo.toplanti, () => K.Entry({ wide:true, label:yz('esp.office.gunun-toplantisi'), meta:'her masadan tek cümle',
-          body:raw(vo.toplanti) })),
-
+        /* Ofisin tek işi: sıradaki iş ne, kime sorarım. Patron başta; gerisi altında. */
         K.Entry({
           label:yz('esp.office.patron'), hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
@@ -130,6 +126,11 @@ ESP.Screens.office = (function(){
               label:yz('esp.office.siradaki-tek-is'), title:next.title, why:next.why })}
             <p class="rulesay mt-10">${ESP.Office.ruleText('patron', brf)}</p>`,
         }),
+
+        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('esp.office.masa'), meta:'kim konuşuyor',
+          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
+        when(vo.toplanti, () => K.Entry({ wide:true, label:yz('esp.office.gunun-toplantisi'), meta:'her masadan tek cümle',
+          body:raw(vo.toplanti) })),
 
         K.Entry({
           label:yz('esp.office.masalar-arasi-devir'), hint:'handoff',
@@ -192,8 +193,8 @@ ESP.Screens.office = (function(){
 
     const parcaB = { vo, patron, uzmanlar, devir, brf, next };
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('office', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
+      ${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('office', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   const handle = {

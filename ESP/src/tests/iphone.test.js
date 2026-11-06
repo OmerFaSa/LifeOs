@@ -365,10 +365,8 @@
 
     it('Radar: radar ile disiplin tablosu tek kapta (genişte yan yana, esp.css .radarcift)', async () => {
       resetState();
-      ESP.S.ui.analizAyrinti = true;     // ayrıntılı okumalar açık (2026-10-20)
       const kok = document.createElement('div');
       kok.innerHTML = String(await ESP.Screens.analytics.render());
-      ESP.S.ui.analizAyrinti = false;
       document.body.appendChild(kok);
       try{
         const cift = kok.querySelector('.radarcift');
@@ -549,8 +547,8 @@
 (function(){
   const { describe, it, expect, resetState } = ESP.Test;
   describe('Sade (ESP) · Bugün', () => {
-    /* KOLAY Faz 2 (2026-10-26): sıradaki iş bir kez, kapağın tek birincil
-       düğmesinde adıyla; ayrı «Sıradaki iş» kartı yok. */
+    /* KOLAY Faz 2 (2026-10-26): sıradaki iş bir kez, kapağın cümlesinde adıyla;
+       düğme ne yapacağını söyler (2026-11-06); ayrı «Sıradaki iş» kartı yok. */
     it('sıradaki iş bir kez (kapağın düğmesi); gerekçe ve örnek ⓘ kartında', () => {
       resetState();
       const d = document.createElement('div');
@@ -559,7 +557,8 @@
       const ia = ESP.Planner.nextAction();
       const eb = d.querySelectorAll('.kapak .btn--primary');
       expect(eb.length).toBe(ia.rank && ia.route && ia.route !== 'today' ? 1 : 0);
-      if(eb.length) expect(eb[0].textContent.trim()).toBe(String(ia.title).split(' — ')[0]);
+      if(eb.length) expect(eb[0].textContent.trim()).toBe(yz('esp.today.eylem-' + ia.route));
+      if(ia.rank) expect(d.querySelector('.kapak').textContent).toContain(ia.title);
       expect(d.textContent.indexOf('Öncelik ')).toBe(-1);
       expect(d.textContent.indexOf('gibi yazabilirsin')).toBe(-1);
       const b = document.createElement('div');

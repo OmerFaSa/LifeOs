@@ -11,6 +11,7 @@
    ekranlar kademeli olarak C.* API'sine gecirilir. */
 window.LIFEOS.PARCA.yazilar({
   'esp.core.components.bu-sayfada':'Bu sayfada',
+  'esp.core.components.diger':'Diğer',
   'esp.core.components.bu-ekran-acilamadi':'Bu ekran açılamadı.',
   'esp.core.components.yeniden-yukle':'Yeniden yükle',
   'esp.core.components.dinlemeyi-durdur':'Dinlemeyi durdur',
@@ -206,20 +207,38 @@ ESP.C = (function(){
      Bütün bölümler DOM'da kalır (arama, derin bağlantı, bolumeGit); seçim
      yeniden çizimde korunur (AKTIF_BOLUM, çubuğun eylemine göre). */
   const AKTIF_BOLUM = {};
+  /* «DİĞER» (kullanıcı, 2026-11-06: «bir bölümde birden fazla özellik var,
+     anlaşılmıyor»). Çubukta yalnız işin kendisi durur; `ikincil:true` taşıyan
+     bölümler «Diğer»in listesindedir, her satır ne işe yaradığını söyler.
+     Bütün bölümler yine DOM'da ve bolumeGit ile açılır: özellik kaybolmaz. */
+  function DigerListesi(act, l){
+    return html`<ul class="rehber__konular diger-liste">${map(l, x => html`<li><button type="button" class="rehber__satir diger-satir"
+      ${attrs({ 'data-act':act, 'data-tab':x.id })}><span class="diger-satir__yazi"><span class="rehber__satir-ad">${x.ad}</span>${when(x.not,
+      () => html`<span class="tiny muted">${x.not}</span>`)}</span><span class="rehber__satir-yan">${when(x.sayi != null, () => html`<span class="num">${x.sayi}</span>`)} ›</span></button></li>`)}</ul>`;
+  }
   function SayfaBolumleri(o){
-    const b = (o.bolumler || []).filter(x => x && x.govde != null && String(x.govde) !== '');
+    const dolu = (o.bolumler || []).filter(x => x && x.govde != null && String(x.govde) !== '');
+    const ikincil = dolu.filter(x => x.ikincil);
+    const ana = dolu.filter(x => !x.ikincil);
+    /* Tek ikincil bölüm için liste açılmaz: çubukta adıyla durur. */
+    const liste = ikincil.length > 1 ? ana.concat([{ id:'diger', ad:yz('esp.core.components.diger'), govde:DigerListesi(o.act, ikincil) }]) : dolu;
+    const cubuk = liste;
+    const b = ikincil.length > 1 ? liste.concat(ikincil) : dolu;
     const secili = AKTIF_BOLUM[o.act || ''];
     const aktif = b.some(x => x.id === secili) ? secili : (b[0] && b[0].id);
+    const digerde = ikincil.length > 1 && ikincil.some(x => x.id === aktif);
     return html`
       ${when(b.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
-        aria-label="${o.aria || yz('esp.core.components.bu-sayfada')}">${map(b, x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
-          ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':x.id === aktif ? 'true' : null })}>${x.ad}${when(x.sayi != null,
-          () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`)}</nav>`)}
-      <div class="${cls('sayfabolumler', b.length > 1 && 'sayfabolumler--kat')}">${map(b, x => html`
-        <section class="${cls('sayfabolum', x.id === aktif && 'is-on')}" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
+        aria-label="${o.aria || yz('esp.core.components.bu-sayfada')}">${map(cubuk, x => { const on = x.id === aktif || (digerde && x.id === 'diger'); return html`<button class="${cls('bolumcubugu__ad', on && 'is-on')}"
+          ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':on ? 'true' : null })}>${x.ad}${when(x.sayi != null,
+          () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`; })}</nav>`)}
+      <div class="${cls('sayfabolumler', b.length > 1 && 'sayfabolumler--kat')}">${map(b, x => { const alt = ikincil.length > 1 && x.ikincil; return html`
+        <section class="${cls('sayfabolum', x.id === aktif && 'is-on', alt && 'sayfabolum--alt')}" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}"
+          ${attrs({ 'data-ust':alt ? 'diger' : null })}>
+          ${when(alt, () => html`<button type="button" class="sayfabolum__geri" ${attrs({ 'data-act':o.act, 'data-tab':'diger' })}>‹ ${yz('esp.core.components.diger')}</button>`)}
           <h2 class="sayfabolum__ad" id="${'bl-' + x.id + '-ad'}" tabindex="-1">${x.ad}</h2>
           ${x.govde}
-        </section>`)}</div>`;
+        </section>`; })}</div>`;
   }
 
   /* AYRINTI (D katmanı, EKIP-PLANI §1.1–1.2): 30 kelimeyi aşan açıklama
@@ -287,8 +306,10 @@ ESP.C = (function(){
       const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(nav && nav.classList.contains('bolumcubugu--sayfa')){
         const eski = nav.querySelector('.bolumcubugu__ad.is-on');
+        /* «Diğer»in altındaki bölüm açıkken çubukta «Diğer» seçili kalır; hatırlanan yine bölümdür. */
+        const hedef = el.getAttribute('data-ust') || id;
         Array.prototype.forEach.call(nav.querySelectorAll('button[data-tab]'), btn => {
-          const on = btn.getAttribute('data-tab') === id;
+          const on = btn.getAttribute('data-tab') === hedef;
           btn.classList.toggle('is-on', on);
           if(on){ btn.setAttribute('aria-current', 'true'); AKTIF_BOLUM[btn.getAttribute('data-act') || ''] = id; }
           else btn.removeAttribute('aria-current');

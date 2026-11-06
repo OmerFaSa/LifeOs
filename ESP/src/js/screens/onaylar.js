@@ -65,6 +65,10 @@ window.LIFEOS.PARCA.yazilar({
   'esp.onaylar.cikarimlar':'Çıkarımlar',
   'esp.onaylar.king-in-senin-hakkindaki-tah':'King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.',
   'esp.onaylar.bekleyen-oneri-yok':'Bekleyen öneri yok',
+  'esp.onaylar.oneriler':'Öneriler',
+  'esp.onaylar.sorular':'Sorular',
+  'esp.onaylar.kararlar':'Son kararlar',
+  'esp.onaylar.bolumler':'Onaylar bölümleri',
   'esp.onaylar.merkez-king-ve-ajanlar-bir':'Merkez, King ve ajanlar bir şey önerdiğinde burada durur; sen onaylamadan hiçbiri uygulanmaz.',
   'esp.onaylar.danisma-ya-git':'Danışma’ya git',
   'esp.onaylar.onaylar':'Onaylar',
@@ -314,14 +318,16 @@ ESP.Screens.onaylar = (function(){
     });
     const ad = d => ((ESP.DISCIPLINE_BY_ID || {})[d] || {}).label || 'Genel';
     return gruplar.length < 2 ? ESP.Parts.proposalList(l, yz('esp.onaylar.bekleyen-teklif-yok'))
-      : html`<div class="oneri-gruplar">${map(gruplar, g => html`<section class="oneri-grup" data-disc="${g.disc}">
-          <h2 class="oneri-grup__ad">${ad(g.disc)}</h2>
+      /* Tek kart açık: ilk alan. Ötekiler adı ve sayısıyla bir satır (kullanıcı,
+         2026-11-06: 21 öneri, sekiz kart, dört ekran; nereden başlayacağı belli değildi). */
+      : html`<div class="oneri-gruplar">${map(gruplar, (g, i) => html`<details class="oneri-grup" data-disc="${g.disc}" ${raw(i === 0 ? 'open' : '')}>
+          <summary class="oneri-grup__ad"><span>${ad(g.disc)}</span><span class="oneri-grup__sayi tiny dim num">${g.l.length} <i aria-hidden="true">›</i></span></summary>
           ${ESP.Parts.proposalList(g.l.slice(0, 1))}
           ${when(g.l.length > 1, () => html`<details class="oneri-grup__dahasi">
             <summary>${g.l.length - 1} ${yz('esp.onaylar.oneri-daha')}</summary>
             ${ESP.Parts.proposalList(g.l.slice(1))}
           </details>`)}
-        </section>`)}</div>`;
+        </details>`)}</div>`;
   }
   function onaySatirlari(){
     const l = [];
@@ -402,7 +408,8 @@ ESP.Screens.onaylar = (function(){
   function cikarimKutusu(){
     const Kg = (window.LIFEOS || {}).KING;
     let h = '';
-    try{ h = Kg && Kg.cikarimKarti ? Kg.cikarimKarti(3) : ''; }catch(e){ console.error(e); }
+    /* Sıra sıra sorulur: cevap verince sonraki gelir (üç kart üç birincil düğme demekti). */
+    try{ h = Kg && Kg.cikarimKarti ? Kg.cikarimKarti(1) : ''; }catch(e){ console.error(e); }
     if(!h) return '';
     return String(K.Kutu({ ad:yz('esp.onaylar.cikarimlar'), yuva:String(cikarimSayisi()), govde:html`
       <p class="small muted">${yz('esp.onaylar.king-in-senin-hakkindaki-tah')}</p>${raw(h)}` }));
@@ -414,20 +421,26 @@ ESP.Screens.onaylar = (function(){
     const parcaB = { ana:String(onayRender()) };
     const ana = LIFEOS.PARCA.yer('onaylar', 'ana', ESP.C, parcaB);
     const ck = LIFEOS.PARCA.yer('onaylar', 'cikarim', ESP.C);
-    return ck ? String(html`<div data-oz="cikarim">${raw(ck)}</div><div class="mt-16">${raw(ana)}</div>`) : ana;
+    const gecmis = sonKararlar();
+    const beklemede = onaySatirlari().length + (ESP.Plans ? ESP.Plans.all().length : 0);
+    const oneriler = { id:'oneriler', ad:yz('esp.onaylar.oneriler'), sayi:beklemede || null, govde:raw(ana) };
+    const sorular = { id:'sorular', ad:yz('esp.onaylar.sorular'), sayi:cikarimSayisi() || null,
+      govde:ck ? html`<div data-oz="cikarim">${raw(ck)}</div>` : null };
+    /* Öneri yoksa önce soru: boş kutu ilk bakışta durmasın. */
+    return String(K.SayfaBolumleri({ act:'onay-tab', aria:yz('esp.onaylar.bolumler'), bolumler:(beklemede || !ck ? [oneriler, sorular] : [sorular, oneriler]).concat([
+      { id:'kararlar', ad:yz('esp.onaylar.kararlar'), govde:gecmis ? K.Ledger([gecmis]) : null }]) }));
   }
 
   function onayRender(){
     const l = onaySatirlari();
     const ajan = ESP.Plans ? ESP.Plans.all() : [];
-    const gecmis = sonKararlar();
     if(!l.length && !ajan.length){
-      /* Boş durum (10): tek eylem. Geçmiş varsa altında durur (119). */
+      /* Boş durum (10): tek eylem. */
       const bos = K.Kutu({ ad:yz('esp.onaylar.bekleyen-oneri-yok'), govde:html`
         <p class="small muted">${yz('esp.onaylar.merkez-king-ve-ajanlar-bir')}</p>
         <div class="mt-10">${K.Button({ label:yz('esp.onaylar.danisma-ya-git'), size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
-      return gecmis ? html`${bos}<div class="mt-16">${K.Ledger([gecmis])}</div>` : bos;
+      return bos;
     }
     const say = {};
     l.forEach(x => { say[x.tur] = (say[x.tur] || 0) + 1; });
@@ -442,12 +455,14 @@ ESP.Screens.onaylar = (function(){
         govde:html`${when(g.satirlar.some(x => !x.ajan), () => html`<div class="onay-liste" data-raf-tam>${map(g.satirlar.filter(x => !x.ajan), x => x.html)}</div>`)}
           <div data-raf-tam>${ajanGovde(ajan)}</div>` }))
       .map(grupKutusu);
-    return html`<div class="onaylar">${raw(ON().turSeciciHtml({ secili:sec, sayilar:say, act:'onay-tur' }))}
-      ${K.Stack(gruplar.concat([gecmis].filter(Boolean)))}</div>`;
+    /* Tek tür varken seçici bir şey seçtirmez («Tümü 21 · Plan 21»). */
+    return html`<div class="onaylar">${when(Object.keys(say).length > 1, () => raw(ON().turSeciciHtml({ secili:sec, sayilar:say, act:'onay-tur' })))}
+      ${K.Stack(gruplar)}</div>`;
   }
 
   const handle = {
     'onay-tur'(el){ S.ui.onayTur = el.dataset.value; ESP.App.render(); },
+    'onay-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* Çıkarım kararı: Doğru / Yanlış / kendi cümlenle düzelt. */
     async 'cikarim-karar'(el){
       const Kg = (window.LIFEOS || {}).KING;

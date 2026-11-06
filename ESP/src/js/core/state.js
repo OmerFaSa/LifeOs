@@ -137,7 +137,7 @@ ESP.S = {
     conceptFilter:null,
     writeTab:'taslaklar',   // taslaklar | olcum
     draftOpen:null,
-    analyticsTab:'radar',   // radar | seriler | rapor
+    analyticsTab:'ozet',    // ozet | alanlar | zaman | (Diger: yol, radar, seriler, rapor...)
     deskTab:{},             // discId -> 'kocla' | 'harita' | 'ekler' | 'hatirlatma'
     deskOpen:{},            // discId -> tezgah acik mi
     assetOpen:null,

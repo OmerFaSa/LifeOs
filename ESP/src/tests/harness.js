@@ -230,7 +230,7 @@ ESP.Test = (function(){
       studioTab:'muzik', pieceOpen:null, metronomeBpm:80, metronomeOn:false,
       readTab:'notlar', noteQuery:'', noteOpen:null, conceptFilter:null,
       writeTab:'taslaklar', draftOpen:null,
-      analyticsTab:'radar',
+      analyticsTab:'ozet',
       histTab:'serit', eventOpen:null, sourceOpen:null, chainOpen:null,
       histEra:'all', histQuery:'', curDisc:null, ladderTab:'ozet', expField:'all',
       deskTab:{}, deskOpen:{}, assetOpen:null,

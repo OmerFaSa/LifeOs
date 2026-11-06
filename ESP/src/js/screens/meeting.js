@@ -197,8 +197,8 @@ ESP.Screens.meeting = (function(){
     const parcaB = { r };
     return String(html`
       <div class="inc">
-        ${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         <div class="inc-iki">${LIFEOS.PARCA.yer('meeting', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('meeting', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+        ${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
@@ -257,6 +257,8 @@ ESP.Screens.meeting = (function(){
 
   return {
     id:'meeting',
+    /* İncelemenin işi tek karar; kanıtı tek dokunuş altında. */
+    kucukVarsayilan:['gündem', 'verinden-çıkan-fikirler', 'alanlar-arası-bağlar'],
     title:yz('esp.meeting.i-nceleme'),
     headline(){
       const k = ESP.Planner.nextAction();

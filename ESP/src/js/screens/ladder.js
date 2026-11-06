@@ -54,6 +54,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.ladder.kademe':'Kademe ',
   'esp.ladder.kapanis-isi':'Kapanış işi:',
   'esp.ladder.seviye-tespiti':'Seviye tespiti',
+  'esp.ladder.sinama':'Sınama',
   'esp.ladder.disiplin':'Disiplin',
   'esp.ladder.tespit-yapilacak-disiplin':'Tespit yapılacak disiplin',
   'esp.ladder.cevapsiz':'(cevapsız)',
@@ -253,7 +254,7 @@ ESP.Screens.ladder = (function(){
           : (st.state === 'current' ? '%' + st.pct : 'ileride'),
         note:st.title,
         wide:true,
-        class:'step step--' + st.state,
+        class:'step--' + st.state,
         body:html`
           <div class="step__cols">
             <div>
@@ -428,26 +429,27 @@ ESP.Screens.ladder = (function(){
     { id:'ozet',     label:yz('esp.ladder.genel') },
     { id:'yol',      label:yz('esp.ladder.yol-2') },
     { id:'projeler', label:yz('esp.ladder.projeler-14') },
-    { id:'tespit',   label:yz('esp.ladder.seviye-tespiti') },
+    { id:'tespit',   label:yz('esp.ladder.sinama') },
   ];
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
   /* Karışık alan sınaması (core/alan.js): sıradaki konu burada, sayfa değiştirmeden sınanır;
      konu başlığı disiplin seçilmeden gelir, bu yüzden karışık kanıt sayılır. */
-  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'y1', sira:5, ad:'Karışık sınama', ciz(){
+  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'sinama', sira:5, ad:'Karışık sınama', ciz(){
     const P = (window.LIFEOS || {}).PANO, s = S.ui.alanSinav, h = ESP.Alan.harita();
     const siradaki = ESP.Alan.sira(1)[0];
     const t = ESP.Alan.konuOf(s && s.karisik ? s.id : siradaki && siradaki.id);
     if(!P || !t) return '';
-    return K.Span(12, raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
+    return raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
       yuva:h.olculen + '/' + h.toplam + ' ' + yz('esp.ladder.konu-olculdu'),
       govde:String(html`<p class="small"><b>${(ESP.DISCIPLINE_BY_ID[t.disc] || {}).short || t.disc}</b> · ${t.title}</p>
-        ${ESP.Parts.konuSinama(t, true)}`) })));
+        ${ESP.Parts.konuSinama(t, true)}`) }));
   } });
   LIFEOS.PARCA.blok({ id:'ladder.merdiven-sekmeleri', sayfa:'ladder', yer:'y1', sira:10, ad:'Merdiven sekmeleri', ciz({ disc }){
     return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
-        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));
+        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows },
+        ust:{ tespit:() => LIFEOS.PARCA.yer('ladder', 'sinama', K, undefined, raw) } }));
   } });
   function render(){
     const disc = S.ui.curDisc || 'lang';

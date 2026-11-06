@@ -28,8 +28,14 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:40, id:'act:arg', kind:'Eylem', la
   hint:'Felsefe', run:() => { ESP.S.ui.philoTab = 'ekle'; ESP.App.go('symposium');
     setTimeout(() => { const el = document.getElementById('arg-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
-  'esp.symposium.acik':'Açık',
-  'esp.symposium.kapali':'Kapalı',
+  'esp.symposium.acik':'Tezler',
+  'esp.symposium.yeni-tez':'Yeni tez',
+  'esp.symposium.kapali':'Kapanan tezler',
+  'esp.symposium.kapali-not':'İtirazı kalmayan tezler',
+  'esp.symposium.metinler-not':'Okuduğun eserler',
+  'esp.symposium.deneyler-not':'Düşünce deneyleri, argüman alıştırmaları',
+  'esp.symposium.ilerleme':'İlerleme',
+  'esp.symposium.ilerleme-not':'Tezlerin ve itirazların durumu',
   'esp.symposium.ekle':'Ekle',
   'esp.symposium.metinler':'Metinler',
   'esp.symposium.deneyler':'Deneyler',
@@ -111,11 +117,12 @@ ESP.Screens.symposium = (function(){
 
   const TABS = [
     { id:'acik',     label:yz('esp.symposium.acik') },
-    { id:'kapali',   label:yz('esp.symposium.kapali') },
-    { id:'ekle',     label:yz('esp.symposium.ekle') },
-    { id:'metinler', label:yz('esp.symposium.metinler') },
-    { id:'deneyler', label:yz('esp.symposium.deneyler') },
+    { id:'ekle',     label:yz('esp.symposium.yeni-tez') },
     { id:'ogren',     label:yz('esp.symposium.ogren') },
+    { id:'kapali',   label:yz('esp.symposium.kapali'), ikincil:true, not:yz('esp.symposium.kapali-not') },
+    { id:'metinler', label:yz('esp.symposium.metinler'), ikincil:true, not:yz('esp.symposium.metinler-not') },
+    { id:'deneyler', label:yz('esp.symposium.deneyler'), ikincil:true, not:yz('esp.symposium.deneyler-not') },
+    { id:'ilerleme', label:yz('esp.symposium.ilerleme'), ikincil:true, not:yz('esp.symposium.ilerleme-not') },
   ];
 
   /* --------------------------------------------------------------- deneyler
@@ -413,14 +420,14 @@ ESP.Screens.symposium = (function(){
 
   LIFEOS.PARCA.blok({ id:'symposium.felsefe-sekmeleri', sayfa:'symposium', yer:'y1', sira:10, ad:'Felsefe sekmeleri', ciz(){
     return K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:yz('esp.symposium.felsefe-bolumleri'), tabs:TABS,
-        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }));
+        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('symposium', 'ilerleme', K, undefined, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'symposium.tez-panosu', sayfa:'symposium', yer:'y2', sira:10, ad:'Tez panosu', ciz(){
-    return K.Span(12, raw(PanoTez()));
+  LIFEOS.PARCA.blok({ id:'symposium.tez-panosu', sayfa:'symposium', yer:'ilerleme', sira:10, ad:'Tez panosu', ciz(){
+    return raw(PanoTez());
   } });
   function render(){
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('symposium', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('symposium', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 

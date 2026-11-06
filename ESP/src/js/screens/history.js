@@ -41,11 +41,16 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:120, id:'act:timeline', kind:'Eyle
   hint:'Tarih', run:() => { ESP.S.ui.histTab = 'olaylar'; ESP.App.go('history'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.history.serit':'Şerit',
+  'esp.history.islemler':'İşlemler',
+  'esp.history.serit-sekme':'Zaman şeridi',
+  'esp.history.calisma-not':'Bugünün egzersizi, tarih destesi',
+  'esp.history.kaynaklar-not':'Belge iste, kaynak ekle',
+  'esp.history.zincir-not':'Olaylar arası neden bağları',
   'esp.history.olaylar':'Olaylar',
   'esp.history.kaynaklar':'Kaynaklar',
-  'esp.history.zincir':'Zincir',
+  'esp.history.zincir':'Neden zinciri',
   'esp.history.ogren':'Öğren',
-  'esp.history.calisma':'Çalışma',
+  'esp.history.calisma':'Alıştırma',
   'esp.history.bos-serit':'Boş şerit',
   'esp.history.zaman-seridinde-hic-olay-yok':'Zaman şeridinde hiç olay yok.',
   'esp.history.tohumu-yukle':'Tohumu yükle · ',
@@ -163,12 +168,12 @@ ESP.Screens.history = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'serit',     label:yz('esp.history.serit') },
+    { id:'serit',     label:yz('esp.history.serit-sekme') },
     { id:'olaylar',   label:yz('esp.history.olaylar') },
-    { id:'kaynaklar', label:yz('esp.history.kaynaklar') },
-    { id:'zincir',    label:yz('esp.history.zincir') },
     { id:'ogren',     label:yz('esp.history.ogren') },
-    { id:'calisma',   label:yz('esp.history.calisma') },
+    { id:'calisma',   label:yz('esp.history.calisma'), ikincil:true, not:yz('esp.history.calisma-not') },
+    { id:'kaynaklar', label:yz('esp.history.kaynaklar'), ikincil:true, not:yz('esp.history.kaynaklar-not') },
+    { id:'zincir',    label:yz('esp.history.zincir'), ikincil:true, not:yz('esp.history.zincir-not') },
   ];
 
   function evs(){ return S.events || []; }
@@ -399,6 +404,7 @@ ESP.Screens.history = (function(){
                   tone:a.state === 'balanced' ? 'ok' : (a.state === 'thin' ? 'warn' : 'muted') })}
                 ${when(e.voiceNote, () => K.Button({ label:yz('esp.history.dinle'), size:'sm', act:'listen-voice-note',
                   data:{ 'data-id':e.id } }))}
+                </div><details class="hiz-ac evrow__islem"><summary>${yz('esp.history.islemler')}</summary><div class="row wrap gap-6 mt-6">
                 ${K.Button({ label:e.voiceNote ? 'Düzenle' : yz('esp.history.sesli-not-3'), size:'sm', act:'edit-voice-note',
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:yz('esp.history.eszamanli'), size:'sm', act:'contemp',
@@ -409,7 +415,7 @@ ESP.Screens.history = (function(){
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:yz('esp.history.sil'), size:'sm', act:'del-event',
                   data:{ 'data-id':e.id } })}
-              </div>
+              </div></details>
               ${when(S.ui.eventOpen === e.id, () => esZamanli(e))}
             </div>
           </div>`;
@@ -700,6 +706,7 @@ ESP.Screens.history = (function(){
   /* ----------------------------------------------------------------- çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const KUCUK = ['dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'];
   const GOVDE = { serit:seritRows, olaylar:olayRows, kaynaklar:kaynakRows, zincir:zincirRows,
     ogren:learnRows, calisma:calismaRows };
 
@@ -963,7 +970,8 @@ ESP.Screens.history = (function(){
     /* iPhone Faz 2c: Şerit'te iş zaman şeridinin kendisi; dönem kutuları
        ara sıra açılan süzgeç (şerit), boşluk ve dağılım dönen kartta.
        Öbür bölümlerde belge isteği ve iki başvuru tablosu şerit. */
-    kucukVarsayilan:['dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'],
+    /* Olay varken form katlı: liste işin kendisi; olay yokken form açık (ilk eylem). */
+    get kucukVarsayilan(){ return (S.events || []).length ? ['olay-ekle'].concat(KUCUK) : KUCUK; },
     title:yz('esp.history.kronoloji'),
     headline(){
       const st = ESP.Chrono.status();

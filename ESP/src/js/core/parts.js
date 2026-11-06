@@ -132,10 +132,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.ac':'Aç',
   'esp.core.parts.plani-yenile':'Planı yenile',
   'esp.core.parts.plani-kaldir':'Planı kaldır',
-  'esp.core.parts.tezgah':'TEZGÂH',
-  'esp.core.parts.tezgah-kapali':'Tezgâh kapalı.',
+  'esp.core.parts.tezgah':'UZMAN MASASI',
+  'esp.core.parts.tezgah-not':'Reçete, koç, yol haritası, hatırlatma',
+  'esp.core.parts.tezgah-kapali':'Uzman masası kapalı.',
   'esp.core.parts.ile-konusmak-haritayi-gormek':'ile konuşmak, haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.',
-  'esp.core.parts.tezgah-2':'Tezgâh',
+  'esp.core.parts.tezgah-2':'Uzman masası',
 });
 
 
@@ -997,16 +998,27 @@ ESP.Parts = (function(){
      alta bölüm olur, tezgâh en sonda kendi bölümüdür. Bir bölüm çizilemezse
      yalnız o düşer. `sayi` bölüm çubuğundaki rozettir. */
   function bolumler(discId, o){
+    /* `o.ust[id]`: bölümün başında duran pano kartları (kutu, defter satırı değil).
+       Konu anlatımı kartı «Öğren»in içindedir; önceden her sekmenin altına ekleniyordu. */
+    const konuKarti = id => {
+      if(id !== 'ogren' || !ESP.Screens.rehber) return '';
+      const v = ESP.Nav.viewOf(ESP.S.route);
+      return v && v.disc ? String(ESP.Screens.rehber.alanKarti(v.disc)) : '';
+    };
     const guvenli = id => {
-      try{ return K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)); }
+      try{
+        const ust = o.ust && o.ust[id] ? String(o.ust[id]() || '') : '';
+        const defter = o.govde[id] ? K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)) : '';
+        return html`${when(ust, () => html`<div class="bolum-ust">${raw(ust)}</div>`)}${defter}${raw(konuKarti(id))}`;
+      }
       catch(e){
         console.error('Bölüm çizilemedi (' + discId + '/' + id + '):', e);
         return K.Notice({ tone:'warn', body:yz('esp.core.parts.bu-bolum-su-an-cizilemedi') });
       }
     };
-    const b = o.tabs.map(t => ({ id:t.id, ad:t.label, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));
-    /* discId null: tezgâhı olmayan ekran (Analiz, Rehber, Merdiven). */
-    if(discId) b.push({ id:'tezgah', ad:yz('esp.core.parts.tezgah-2'), govde:K.Ledger(() => [desk(discId)]) });
+    const b = o.tabs.map(t => ({ id:t.id, ad:t.label, ikincil:t.ikincil, not:t.not, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));
+    /* discId null: uzman masası olmayan ekran (Analiz, Rehber, Merdiven). */
+    if(discId) b.push({ id:'tezgah', ad:yz('esp.core.parts.tezgah-2'), ikincil:true, not:yz('esp.core.parts.tezgah-not'), govde:K.Ledger(() => [desk(discId)]) });
     return K.SayfaBolumleri({ act:o.act, aria:o.aria, bolumler:b });
   }
 

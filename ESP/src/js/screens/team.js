@@ -250,7 +250,7 @@ ESP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
-    kucukVarsayilan:['sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
+    kucukVarsayilan:['masa', 'sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
     title:yz('esp.team.danisma'),
     headline(){
       const a = agent();

@@ -16,13 +16,14 @@
       });
     });
 
-    it('Analiz › Alanların: her açık disiplin bir karo; girilmemiş gün nokta; ayrıntılı okumalar baştan kapalı (2026-10-20)', async () => {
+    it('Analiz › Alanların: her açık disiplin bir karo; girilmemiş gün nokta; ayrıntılı okumalar «Diğer»de (2026-11-06)', async () => {
       await withTodayAsync('2026-10-12', async () => {
         resetState();
         let k = dom(ESP.Screens.analytics.render());
         expect(k.querySelectorAll('.alan-kare').length).toBe(ESP.Mod.active().length);
         expect(k.textContent).toContain('veri yok');
-        expect(!!k.querySelector('.radarcift')).toBe(false);
+        /* Radar «Diğer»in altında: yerinde ama açık bölüm değil (2026-11-06). */
+        expect(k.querySelector('#bl-radar').classList.contains('is-on')).toBe(false);
         pushSession('2026-10-10', 'music', 30);
         k = dom(ESP.Screens.analytics.render());
         const muzik = Array.from(k.querySelectorAll('.alan-kare')).find(x => /Müzik/.test(x.textContent));
