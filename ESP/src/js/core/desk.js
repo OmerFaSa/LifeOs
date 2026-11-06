@@ -35,12 +35,12 @@ window.LIFEOS.PARCA.yazilar({
 
 window.LIFEOS.PARCA.yazilar({
   'esp.core.desk.recete':'Reçete',
-  'esp.core.desk.koc':'Koç',
+  'esp.core.desk.koc':'Uzmanla konuş',
   'esp.core.desk.harita':'Harita',
   'esp.core.desk.ekler':'Ekler',
   'esp.core.desk.hatirlatma':'Hatırlatma',
-  'esp.core.desk.plan':'Plan',
-  'esp.core.desk.denetim':'Denetim',
+  'esp.core.desk.plan':'Öneriler',
+  'esp.core.desk.denetim':'Bakım',
 });
 
 
@@ -50,9 +50,8 @@ ESP.Desk = (function(){
   const U = ESP.U, S = ESP.S;
 
   const TABS = [
-    { id:'recete',     label:yz('esp.core.desk.recete') },
+    /* Reçete «Çalış»ın başında, harita «İlerleme»de (Parts.recete, Parts.yol). */
     { id:'kocla',      label:yz('esp.core.desk.koc') },
-    { id:'harita',     label:yz('esp.core.desk.harita') },
     { id:'ekler',      label:yz('esp.core.desk.ekler') },
     { id:'hatirlatma', label:yz('esp.core.desk.hatirlatma') },
     { id:'plan',       label:yz('esp.core.desk.plan') },
@@ -67,7 +66,7 @@ ESP.Desk = (function(){
   }
 
   function tab(discId){
-    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'recete';
+    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'kapali';
   }
 
   function setTab(discId, id){

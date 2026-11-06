@@ -21,7 +21,7 @@
       const gor = id => ESP.App.SECTIONS().find(g => g.id === id);
       expect(gor('onaylar').views.map(v => v.route).join(',')).toBe('onaylar');
       /* 2026-10-17: Kütüphanem notlarla açılır (kullanıcı: «yeni not, belge, dosya»). */
-      expect(gor('kutuphane').views.map(v => v.route).join(',')).toBe('notlar,ogrenme,rehber,kutuphane');   // 2026-10-18: Anlatımlar
+      expect(gor('kutuphane').views.map(v => v.route).join(',')).toBe('notlar,ogrenme,kutuphane');   // 2026-11-06: Anlatımlar Öğrenme'nin altında
       expect(!!ESP.Screens.onaylar && !!ESP.Screens.kutuphane && !!ESP.Screens.notlar && !!ESP.Screens.rehber).toBe(true);
     });
 
@@ -38,12 +38,12 @@
       expect(alan.indexOf('data-act="king-onayla"') >= 0).toBe(true);
       expect(alan.indexOf('data-act="hkm-intent-') < 0).toBe(true);
       expect(alan.indexOf('öneri Onaylar') >= 0).toBe(true);
-      /* Öneri alanının düğmesi Onaylar'ın işleyicisine gider: tek yol. KOLAY
-         Faz 2: alan Bugün'den Analiz'in başına taşındı; bekleyen onay oradan da açılır. */
+      /* Öneri alanının düğmesi Onaylar'ın işleyicisine gider: tek yol. 2026-11-06:
+         Analiz › Özet kararı göstermez, Onaylar'a tek düğmeyle gönderir. */
       expect(typeof ESP.Screens.today.handle['king-onayla']).toBe('function');
-      expect(typeof ESP.Screens.analytics.handle['king-onayla']).toBe('function');
       const an = document.createElement('div'); an.innerHTML = String(await ESP.Screens.analytics.render());
-      expect(!!an.querySelector('[aria-label="Öneri"] [data-act="king-onayla"]')).toBe(true);
+      expect(an.querySelector('[aria-label="Öneri"] [data-act="king-onayla"]')).toBeNull();
+      expect(!!an.querySelector('[aria-label="Öneri"] [data-route="onaylar"]')).toBe(true);
       /* Onay bekleyen ücretli King işi Bugün'de kalır (yalnız bekleyen varken). */
       expect(String(await ESP.Screens.today.render()).indexOf('data-act="king-onayla"') >= 0).toBe(true);
       ESP.S.ui.kingTeklifler = [];

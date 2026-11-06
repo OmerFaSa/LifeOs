@@ -47,11 +47,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.meeting.patron':'Patron',
   'esp.meeting.karar-takibe-alindi':'Karar takibe alındı',
   'esp.meeting.sonuc-yazilmadan-karar-kapan':'Sonuç yazılmadan karar kapanmaz',
-  'esp.meeting.i-nceleme':'İnceleme',
+  'esp.meeting.i-nceleme':'Bu hafta',
   'esp.meeting.acik-karar':'açık karar',
   'esp.meeting.gundem-2':'gündem',
 });
-window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'İnceleme', ikon:'list', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'Bu hafta', ikon:'list', sira:10 });
 
 ESP.Screens.meeting = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -190,15 +190,16 @@ ESP.Screens.meeting = (function(){
     return kararKutusu(r);
   } });
   LIFEOS.PARCA.blok({ id:'meeting.haftakutusu', sayfa:'meeting', yer:'y7', sira:10, ad:'Hafta', ciz({ r }){
-    return haftaKutusu(r);
+    /* Hiç ölçüm yokken beş boş kutu çizilmez: karar ilk adımı söyler. */
+    return r.hafta.some(s => s.deger) ? haftaKutusu(r) : '';
   } });
   function render(){
     const r = ESP.Memo ? ESP.Memo.of('inceleme.rapor', () => ESP.Inceleme.rapor()) : ESP.Inceleme.rapor();
     const parcaB = { r };
     return String(html`
       <div class="inc">
-        ${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         <div class="inc-iki">${LIFEOS.PARCA.yer('meeting', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('meeting', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+        ${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         ${LIFEOS.PARCA.yer('meeting', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
@@ -257,6 +258,8 @@ ESP.Screens.meeting = (function(){
 
   return {
     id:'meeting',
+    /* İncelemenin işi tek karar; kanıtı tek dokunuş altında. */
+    kucukVarsayilan:['gündem', 'verinden-çıkan-fikirler', 'alanlar-arası-bağlar'],
     title:yz('esp.meeting.i-nceleme'),
     headline(){
       const k = ESP.Planner.nextAction();

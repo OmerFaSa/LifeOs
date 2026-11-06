@@ -53,6 +53,8 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:100, id:'act:practice-lang', kind:
   hint:'Dil', run:() => { ESP.S.ui.langTab = 'ogren'; ESP.App.go('lang'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.lang.calis':'Çalış',
+  'esp.lang.kart-ayrintisi':'Bağlam, eş ve zıt anlam',
+  'esp.lang.kartlarim':'Kartlarım',
   'esp.lang.kartlar':'Kartlar',
   'esp.lang.ekle':'Ekle',
   'esp.lang.ogren':'Öğren',
@@ -60,7 +62,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.lang.i-lerleme':'İlerleme',
   'esp.lang.bugun':'Bugün ',
   'esp.lang.calisma':'Çalışma',
-  'esp.lang.bu-dilde-hic-kart-yok':'Bu dilde hiç kart yok. Ekle sekmesinden bir liste ',
+  'esp.lang.bu-dilde-hic-kart-yok':'Bu dilde hiç kart yok. Kartlarım sekmesinden bir liste ',
   'esp.lang.kart-ekle':'Kart ekle',
   'esp.lang.bugunluk-bitti':'Bugünlük bitti',
   'esp.lang.telaffuzu-dinle':'Telaffuzu Dinle',
@@ -178,10 +180,8 @@ ESP.Screens.lang = (function(){
 
   const TABS = [
     { id:'calis',    label:yz('esp.lang.calis') },
-    { id:'kartlar',  label:yz('esp.lang.kartlar') },
-    { id:'ekle',     label:yz('esp.lang.ekle') },
+    { id:'ekle',     label:yz('esp.lang.kartlarim') },
     { id:'ogren',    label:yz('esp.lang.ogren') },
-    { id:'gramer',   label:yz('esp.lang.dilbilgisi') },
     { id:'ilerleme', label:yz('esp.lang.i-lerleme') },
   ];
 
@@ -323,7 +323,7 @@ ESP.Screens.lang = (function(){
       }
       return [K.Entry({
         label:yz('esp.lang.calisma'), hint:'srs',
-        meta:d.due + ' kartın sırası geldi' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
+        meta:d.overdue ? d.overdue + ' gecikmiş' : null,
         /* Gecikme yoksa künye («N kart vadeli») yeter; not yalnız gecikmeyi söyler. */
         note:d.overdue ? yz('esp.lang.en-cok-geciken-kart') + d.maxOverdueDays + ' gündür bekliyor.' : null,
         body:html`
@@ -489,10 +489,32 @@ ESP.Screens.lang = (function(){
     const res = S.ui.vocabParsed;
     return [
       K.Entry({
+        label:yz('esp.lang.tek-kart'),
+        meta:'elle',
+        body:html`
+          <div class="cols-2">
+            ${K.Field({ label:yz('esp.lang.on-yuz'), input:K.Input({ id:'c-front', placeholder:'nevertheless', value:S.ui.siklikOn || null }) })}
+            ${K.Field({ label:yz('esp.lang.karsilik'), input:K.Input({ id:'c-back', placeholder:yz('esp.lang.yine-de') }) })}
+          </div>
+          <details class="hiz-ac mt-8" ${raw(siklikOrnek() ? 'open' : '')}><summary>${yz('esp.lang.kart-ayrintisi')}</summary>
+            ${K.Field({ label:yz('esp.lang.baglam'), hint:'isteğe bağlı',
+              input:K.Input({ id:'c-ctx', placeholder:yz('esp.lang.ornek-cumle'), value:siklikOrnek() ? siklikOrnek().yabanci : null }) })}
+            <div class="cols-2 mt-8">
+              ${K.Field({ label:yz('esp.lang.es-anlamlilar'), hint:'isteğe bağlı · virgülle',
+                input:K.Input({ id:'c-es', placeholder:yz('esp.lang.however-still') }) })}
+              ${K.Field({ label:yz('esp.lang.zit-anlamli'), hint:'isteğe bağlı',
+                input:K.Input({ id:'c-zit', placeholder:'therefore' }) })}
+            </div>
+          </details>
+          ${when(siklikOrnek(), () => html`<p class="small muted mt-8 siklik-ornek">${yz('esp.lang.baglam-tatoeba-dan-turkcesi')}${siklikOrnek().turkce}» · <a href="${siklikOrnek().kaynak}" target="_blank" rel="noopener">kaynak</a> (${siklikOrnek().lisans})</p>`)}
+          ${K.Button({ label:yz('esp.lang.kart-ekle'), tone:'primary', act:'add-card', class:'mt-10' })}`,
+      }),
+
+      K.Entry({
         label:yz('esp.lang.liste-yapistir'), hint:'liste-yapistir',
         meta:'kelime – karşılık',
         body:html`
-          ${K.Textarea({ id:'vocab-text', rows:6, aria:yz('esp.lang.kelime-listesi'),
+          ${K.Textarea({ id:'vocab-text', rows:3, aria:yz('esp.lang.kelime-listesi'),
             placeholder:yz('esp.lang.nevertheless-yine-de-nto-gra') })}
           <div class="row mt-10">
             ${K.Select({ id:'vocab-lang', value:aktifDil(), change:'pick-lang',
@@ -501,26 +523,6 @@ ESP.Screens.lang = (function(){
             ${K.Button({ label:yz('esp.lang.coz'), act:'parse-vocab' })}
           </div>
           ${when(res, () => vocabPreview(res))}`,
-      }),
-
-      K.Entry({
-        label:yz('esp.lang.tek-kart'),
-        meta:'elle',
-        body:html`
-          <div class="cols-3">
-            ${K.Field({ label:yz('esp.lang.on-yuz'), input:K.Input({ id:'c-front', placeholder:'nevertheless', value:S.ui.siklikOn || null }) })}
-            ${K.Field({ label:yz('esp.lang.karsilik'), input:K.Input({ id:'c-back', placeholder:yz('esp.lang.yine-de') }) })}
-            ${K.Field({ label:yz('esp.lang.baglam'), hint:'isteğe bağlı',
-              input:K.Input({ id:'c-ctx', placeholder:yz('esp.lang.ornek-cumle'), value:siklikOrnek() ? siklikOrnek().yabanci : null }) })}
-          </div>
-          <div class="cols-2 mt-8">
-            ${K.Field({ label:yz('esp.lang.es-anlamlilar'), hint:'isteğe bağlı · virgülle',
-              input:K.Input({ id:'c-es', placeholder:yz('esp.lang.however-still') }) })}
-            ${K.Field({ label:yz('esp.lang.zit-anlamli'), hint:'isteğe bağlı',
-              input:K.Input({ id:'c-zit', placeholder:'therefore' }) })}
-          </div>
-          ${when(siklikOrnek(), () => html`<p class="small muted mt-8 siklik-ornek">${yz('esp.lang.baglam-tatoeba-dan-turkcesi')}${siklikOrnek().turkce}» · <a href="${siklikOrnek().kaynak}" target="_blank" rel="noopener">kaynak</a> (${siklikOrnek().lisans})</p>`)}
-          ${K.Button({ label:yz('esp.lang.kart-ekle'), act:'add-card', class:'mt-10' })}`,
       }),
 
       siklikEkleRow(),
@@ -945,8 +947,14 @@ ESP.Screens.lang = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): altı bölüm alt alta, tezgâh en sonda. */
-  const GOVDE = { calis:reviewRows, kartlar:cardRows, ekle:addRows, ogren:learnRows,
-    gramer:grammarRows, ilerleme:progressRows };
+  /* Dört iş: çalış, kartlarım, öğren, ilerleme. Dilbilgisi öğrenmenin parçası; kart listesi
+     kart eklemenin yanında. Deste boşken reçete yok: ilk adım kart eklemek. */
+  const GOVDE = {
+    calis:() => [].concat(reviewRows(), ESP.SRS.deckStatus(aktifDil()).total ? [ESP.Parts.recete('lang')] : [], [ESP.Parts.desk('lang')]),
+    ekle:() => [].concat(addRows(), cardRows()),
+    ogren:() => [].concat(learnRows(), grammarRows()),
+    ilerleme:() => [].concat(progressRows(), [ESP.Parts.yol('lang')]),
+  };
 
   /* 033 GELECEK YÜK (vitrin): seçili dilin önümüzdeki yedi günlük vadesi.
      Bugünün sütunu gecikenleri de taşır; kart yoksa hiç çizilmez. */
@@ -999,14 +1007,16 @@ ESP.Screens.lang = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'lang.dil-sekmeleri', sayfa:'lang', yer:'y1', sira:10, ad:'Dil sekmeleri', ciz({ d }){
-    return K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:yz('esp.lang.dil-bolumleri'), tabs:TABS,
-        govde:GOVDE, sayi:{ calis:d.due || null } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'lang-tab', aria:yz('esp.lang.dil-bolumleri'), tabs:TABS,
+        govde:GOVDE, sayi:{ calis:d.due || null },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('lang', 'ilerleme', K, { d }, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'lang.gelecek-yuk', sayfa:'lang', yer:'y2', sira:10, ad:'Gelecek yük', ciz({ d }){
-    return K.Span(12, gelecekYuk());
+  /* Grafikler «İlerleme»de: önceden sekmelerin üstündeydi ve «Çalış» düğmesini ilk ekranın dışına itiyordu. */
+  LIFEOS.PARCA.blok({ id:'lang.gelecek-yuk', sayfa:'lang', yer:'ilerleme', sira:20, ad:'Gelecek yük', ciz({ d }){
+    return gelecekYuk();
   } });
-  LIFEOS.PARCA.blok({ id:'lang.dil-panosu', sayfa:'lang', yer:'y3', sira:10, ad:'Dil panosu', ciz({ d }){
-    return K.Span(12, raw(PanoDil()));
+  LIFEOS.PARCA.blok({ id:'lang.dil-panosu', sayfa:'lang', yer:'ilerleme', sira:10, ad:'Dil panosu', ciz({ d }){
+    return raw(PanoDil());
   } });
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
@@ -1014,8 +1024,6 @@ ESP.Screens.lang = (function(){
        arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     const parcaB = { d };
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('lang', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
-      ${LIFEOS.PARCA.yer('lang', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('lang', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
@@ -1302,7 +1310,7 @@ ESP.Screens.lang = (function(){
     /* iPhone Faz 2d (sıkı ölçü): her bölümde iş açık; ara sıra açılan
        araçlar (konuşma, cümle kurma, dinleme, ünite isteği, tohum deste) ve
        başvuru (konu haritası, kutu dağılımı, shadowing kaynakları) şerit. */
-    kucukVarsayilan:['tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'iki-eksen', 'düzeyler', 'hata-günlüğü', 'deste', 'sık-kelimeler', 'tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
       'kutu-dağılımı', 'shadowing', 'dilde-paralel-cümleler-universal-dependencies'],
     title:yz('esp.lang.dil-studyosu'),
     headline(){

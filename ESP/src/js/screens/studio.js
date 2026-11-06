@@ -39,9 +39,9 @@ window.LIFEOS.PARCA.yazilar({
   'esp.studio.muzik':'Müzik',
   'esp.studio.diksiyon':'Diksiyon',
   'esp.studio.kulak':'Kulak',
+  'esp.studio.hangi-hatalar':'Hangi hatalar oldu?',
   'esp.studio.ogren':'Öğren',
   'esp.studio.i-lerleme':'İlerleme',
-  'esp.studio.tezgah':'Tezgâh',
   'esp.studio.kulak-egzersizleri':'Kulak egzersizleri',
   'esp.studio.kademe':'Kademe',
   'esp.studio.araliklar':'Aralıklar',
@@ -142,12 +142,8 @@ ESP.Screens.studio = (function(){
   const TABS = [
     { id:'muzik',    label:yz('esp.studio.muzik') },
     { id:'diksiyon', label:yz('esp.studio.diksiyon') },
-    { id:'kulak',    label:yz('esp.studio.kulak') },
     { id:'ogren',    label:yz('esp.studio.ogren') },
     { id:'ilerleme', label:yz('esp.studio.i-lerleme') },
-    /* iPhone Faz 2c: iki masa (müzik, diksiyon) öbür ekranlardaki gibi kendi
-       bölümünde; Müzik ve Diksiyon işle başlar. */
-    { id:'tezgah',   label:yz('esp.studio.tezgah') },
   ];
 
   /* ------------------------------------------------------------------ kulak
@@ -398,6 +394,8 @@ ESP.Screens.studio = (function(){
 
     rows.push(scaleCalculatorEntry());
 
+    /* Parça yokken önce ekleme, metronom sonra; kaydedecek şey yokken «Tekrar kaydet» durmaz. */
+    if(!parcalar.length){ const [metro, , ekle, ...gerisi] = rows; return [ekle, metro].concat(gerisi); }
     return rows;
   }
 
@@ -416,12 +414,12 @@ ESP.Screens.studio = (function(){
         <div class="row wrap gap-8 mb-10">
           <div class="grow" style="min-width:140px">
             <span class="tiny dim block mb-2">${yz('esp.studio.kok-ses-tonalite')}</span>
-            ${K.Select({ id:'scale-root-sel', value:root, change:'pick-scale-root',
+            ${K.Select({ id:'scale-root-sel', value:root, change:'pick-scale-root', aria:yz('esp.studio.kok-ses-tonalite'),
               options:ESP.NOTES.map(n => ({ value:n, label:n + ' (' + (ESP.NOTE_TR[n] || n) + ')' })) })}
           </div>
           <div class="grow" style="min-width:180px">
             <span class="tiny dim block mb-2">${yz('esp.studio.gam-mod-12-oruntu')}</span>
-            ${K.Select({ id:'scale-mode-sel', value:scaleId, change:'pick-scale-mode',
+            ${K.Select({ id:'scale-mode-sel', value:scaleId, change:'pick-scale-mode', aria:yz('esp.studio.gam-mod-12-oruntu'),
               options:ESP.SCALES.map(s => ({ value:s.id, label:s.label })) })}
           </div>
         </div>
@@ -509,11 +507,11 @@ ESP.Screens.studio = (function(){
               input:K.Input({ id:'r-err', type:'number', numeric:true, min:0,
                 placeholder:'2' }) })}
           </div>
-          <div class="row wrap mt-10">
+          <details class="hiz-ac mt-10" ${raw((S.ui.errTags || []).length ? 'open' : '')}><summary>${yz('esp.studio.hangi-hatalar')}</summary><div class="row wrap mt-6">
             ${map(ESP.ARTICULATION_ERRORS, e => K.Button({ label:e.label, size:'sm',
               tone:(S.ui.errTags || []).indexOf(e.id) >= 0 ? 'primary' : '',
               act:'toggle-err', data:{ 'data-id':e.id } }))}
-          </div>
+          </div></details>
           ${K.Button({ label:yz('esp.studio.olcumu-kaydet'), act:'add-recording', class:'mt-10' })}`,
       }),
 
@@ -673,17 +671,19 @@ ESP.Screens.studio = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'studio.studyo-sekmeleri', sayfa:'studio', yer:'y1', sira:10, ad:'Stüdyo sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
-        muzik:musicRows, diksiyon:dictionRows,
-        kulak:earRows, ogren:topicRows, ilerleme:progressRows,
-        tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
+        /* Reçete önde, kayıt arkasından; hiç parça/kayıt yokken reçete yok: ilk adım eklemek. */
+        muzik:() => [].concat((S.pieces || []).length ? [ESP.Parts.recete('music')] : [], musicRows(), earRows(), [ESP.Parts.desk('music')]),
+        diksiyon:() => [].concat((S.recordings || []).length ? [ESP.Parts.recete('diction')] : [], dictionRows(), [ESP.Parts.desk('diction')]),
+        ogren:topicRows,
+        ilerleme:() => [].concat(progressRows(), [ESP.Parts.yol('music'), ESP.Parts.yol('diction')]) },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('studio', 'ilerleme', K, undefined, raw) } }));
   } });
-  LIFEOS.PARCA.blok({ id:'studio.tempo-panosu', sayfa:'studio', yer:'y2', sira:10, ad:'Tempo panosu', ciz(){
-    return K.Span(12, raw(PanoTempo()));
+  LIFEOS.PARCA.blok({ id:'studio.tempo-panosu', sayfa:'studio', yer:'ilerleme', sira:10, ad:'Tempo panosu', ciz(){
+    return raw(PanoTempo());
   } });
   function render(){
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('studio', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
       ${LIFEOS.PARCA.yer('studio', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
@@ -832,8 +832,11 @@ ESP.Screens.studio = (function(){
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     /* iPhone Faz 2c: parça ekleme ara sıra; Diksiyon'da kural listesi ve
        geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
-    kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
-      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'],
+    /* Parça yokken «Parça ekle» açık: ilk adım. */
+    get kucukVarsayilan(){
+      return ['uzman-masası', 'yol-haritası', 'metronom', 'repertuar-bakımı', 'konuşma-hızı', 'kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'telaffuz-kuralları', 'son-kayıtlar',
+        'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'].concat((S.pieces || []).length ? ['parça-ekle'] : []);
+    },
     title:yz('esp.studio.studyo'),
     headline(){
       const plato = ESP.Acoustic.plateaus();

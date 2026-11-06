@@ -12,7 +12,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.cozulen-kart':'Çözülen kart',
   'esp.today.temiz-tekrar':'Temiz tekrar',
   'esp.today.bu-satirlar-kaydedilmeyecek':'Bu satırlar kaydedilmeyecek; yukarıdaki formdan elle girebilirsin.',
-  'esp.today.girilmemis-gun-sifir-sayilma':'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.',
+  'esp.today.girilmemis-gun-sifir-sayilma':'Üstteki kutuya yaz, kayıt buraya düşer.',
   'esp.today.plandan-sonra':'Plandan sonra',
   'esp.today.bu-tarihe-hala-yetisilebilir':'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.',
   'esp.today.bugune-hic-oturum-girilmedi':'Bugüne hiç oturum girilmedi. Bu gün ortalamaya katılmaz.',
@@ -25,7 +25,17 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.gunluk-en-az':'Günlük en az ',
   'esp.today.i-lk-oturumla-baslar':'İlk oturumla başlar.',
   'esp.today.oturum-gir':'Oturum gir',
-  'esp.today.gunun-akisi':'Günün akışı',
+  'esp.today.oneri-bekliyor':'öneri bekliyor',
+  'esp.today.eylem-lang':'Kartları çalış',
+  'esp.today.eylem-dil':'Dil çalışmasına geç',
+  'esp.today.eylem-symposium':'Felsefeye geç',
+  'esp.today.eylem-history':'Tarihe geç',
+  'esp.today.eylem-studio':'Stüdyoya geç',
+  'esp.today.eylem-library':'Okumaya geç',
+  'esp.today.eylem-writing':'Yazıya geç',
+  'esp.today.eylem-ladder':'Planı aç',
+  'esp.today.eylem-onaylar':'Önerilere bak',
+  'esp.today.eylem-genel':'Başla',
   'esp.today.bugun-oturum-yok-taban':'Bugün oturum yok; taban ',
   'esp.today.tatil-modu-3':'Tatil modu ',
   'esp.today.tatil-bitti-hos-geldin':'Tatil bitti; hoş geldin',
@@ -76,7 +86,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.vazgec':'Vazgeç',
   'esp.today.eslesmedi':'Eşleşmedi',
   'esp.today.gunu-kapat':'Günü kapat',
-  'esp.today.oturum-gir-ve-butun-satirlar':'Oturum gir ve bütün satırlar',
+  'esp.today.oturum-gir-ve-butun-satirlar':'Ayrıntılı giriş',
   'esp.today.bugun':'Bugün',
   'esp.today.bu-gune-henuz-oturum-girilme':'Bu güne henüz oturum girilmedi. ',
   'esp.today.bugunun-oturumlari':'Bugünün oturumları',
@@ -106,9 +116,9 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.plani-gor':'Planı gör',
   'esp.today.zaman-butcesi-king':'Zaman bütçesi (King):',
   'esp.today.hedeflerim':'Hedeflerim',
-  'esp.today.danisma-da-hedef-koy':'Danışma’da hedef koy',
+  'esp.today.danisma-da-hedef-koy':'Uzmana hedefini söyle',
   'esp.today.ornekler':'Örnekler',
-  'esp.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
+  'esp.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Uzmana sor ekranında tek cümleyle yazabilirsin.',
   'esp.today.bir-yilda-gitarda-kalfa-ya-g':'«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi söylerim. Alışkanlık da kurabilirsin: «her gün 20 dakika kitap okuma alışkanlığı kazanmak istiyorum».',
   'esp.today.gunun-toplami':'Günün toplamı',
   'esp.today.taban':'Taban ',
@@ -391,8 +401,10 @@ ESP.Screens.today = (function(){
      taşındığından (KOLAY Faz 2) Bugün'e eklenen tek düğme budur. */
   const gunuKapatAcik = () => !!(window.LIFEOS && window.LIFEOS.GUNUKAPAT && window.LIFEOS.GUNUKAPAT.kuruluMu())
     && gun() === U.todayISO();
+  /* Ekranda tek birincil düğme: kapağın eylemi varsa «Günü kapat» sade durur. */
+  const kapakEylemi = () => { const n = ESP.Planner.nextAction(); return !!(n.rank && n.route && n.route !== 'today'); };
   const gunDugmesi = () => html`<div class="row wrap gap-6 mt-8">${when(gunuKapatAcik(), () => K.Button({ label:yz('esp.today.gunu-kapat'),
-    size:'sm', tone:'primary', act:'gunu-kapat' }))}${K.Button({ label:yz('esp.today.oturum-gir-ve-butun-satirlar'), size:'sm',
+    size:'sm', tone:kapakEylemi() ? '' : 'primary', act:'gunu-kapat' }))}${K.Button({ label:yz('esp.today.oturum-gir-ve-butun-satirlar'), size:'sm',
     tone:'ghost', act:'go', data:{ 'data-route':'gun' } })}</div>`;
 
   function sessionList(){
@@ -417,16 +429,16 @@ ESP.Screens.today = (function(){
          altındaki gün rozet almaz ve boş döner. */
       action:raw(ESP.Basarim ? ESP.Basarim.odakHtml(toplam) : ''),
       body:html`${K.Table({ tight:true,
-        headers:['Disiplin', 'Süre', 'Sayım', 'Not', ''],
+        /* Hiç sayım ya da not girilmemişse o sütun yoktur (sıfır demek değil; yer kaplamasın). */
+        headers:['Disiplin', 'Süre'].concat(rows.some(s => s.count != null) ? ['Sayım'] : [], rows.some(s => s.note) ? ['Not'] : [], ['']),
         rows:rows.map(s => {
           const d = ESP.DISCIPLINE_BY_ID[s.disc];
           return [
             d ? d.label : s.disc,
             s.minutes != null ? U.fmtMin(s.minutes) : raw(String(P_cert('missing'))),
-            s.count != null ? U.fmtNum(s.count) : raw(String(P_cert('missing'))),
-            s.note || '—',
-            K.Button({ label:yz('esp.today.sil'), size:'sm', act:'del-session', data:{ 'data-id':s.id } }),
-          ];
+          ].concat(rows.some(x => x.count != null) ? [s.count != null ? U.fmtNum(s.count) : raw(String(P_cert('missing')))] : [],
+            rows.some(x => x.note) ? [s.note || '—'] : [],
+            [K.Button({ label:yz('esp.today.sil'), size:'sm', act:'del-session', data:{ 'data-id':s.id } })]);
         }) })}${gunDugmesi()}`,
     });
   }
@@ -659,7 +671,8 @@ ESP.Screens.today = (function(){
   function sikSerit(){
     const VT = (window.LIFEOS || {}).VITRIN;
     if(!ESP.Dunku || !ESP.Dunku.sik || !VT || gun() !== U.todayISO()) return '';
-    const l = ESP.Dunku.sik(U.todayISO());
+    /* En sık üçü: uzun liste girdi kutusunun işini tekrar ediyordu. */
+    const l = ESP.Dunku.sik(U.todayISO()).slice(0, 3);
     if(!l.length) return '';
     return VT.ogunSablonlari({ act:'sik-oturum', baslik:yz('esp.today.sik-oturumlarin-tek-dokunus'), sablonlar:l.map(x => ({
       ad:x.ad, icerik:U.fmtMin(x.dk), on:x.bugun, data:{ 'data-disc':x.disc, 'data-dk':x.dk } })) });
@@ -1071,9 +1084,11 @@ ESP.Screens.today = (function(){
     const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
     if(!KS) return '';
     const n = ESP.Planner.nextAction();
-    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.headline(), sayilar:[],
-      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:String(n.title).split(' — ')[0], tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
-      ikincil:('<button type="button" class="btn btn--ghost" data-kapak-asagi>' + yz('esp.today.gunun-akisi') + '</button>') });
+    /* Sıradaki işin adı cümlede, düğme ne yapacağını söyler. «Kartları hatırlama
+       oranı düşük» yazan düğmeye basınca ne olacağı belli değildi. Sıralama planner'ın. */
+    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.kapakCumlesi(), sayilar:[],
+      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:ESP.Screens.today.eylemAdi(n), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '' });
+    /* «Günün akışı» düğmesi kalktı (kullanıcı, 2026-11-06): kapağın aşağı oku aynı işi yapar. */
   }
 
   /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).
@@ -1303,7 +1318,8 @@ ESP.Screens.today = (function(){
      yerde); düştüler. Kesinlik etiketleri olduğu gibi. */
   function analizOzeti(){
     const O = ESP.Screens.onaylar;
-    const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
+    /* Özet «nasıl gidiyorum» der; karar Onaylar'da. Buradan tek düğmeyle gidilir. */
+    const oneri = O && O.bekleyen() ? K.Button({ label:O.bekleyen() + ' ' + yz('esp.today.oneri-bekliyor'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'onaylar' } }) : '';
     return [PanoUst(),
       String(html`<section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">${yz('esp.today.ozet')}</h2>${DonenKutular(true)}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>`),
       oneri ? String(html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">${yz('esp.today.oneri')}</h2>${oneri}</section>`) : ''].filter(Boolean);
@@ -1603,6 +1619,20 @@ ESP.Screens.today = (function(){
       const h = M.dueReminders(null, U.todayISO()).filter(r => ESP.Mod.isOn(r.disc)).length;
       if(h) c += ' ' + h + ' hatırlatıcı bugün.';
       return c;
+    },
+    /* Düğmenin adı işten: «Kartları çalış» yalnız sırası gelen kart varken. */
+    eylemAdi(n){
+      if(n.route === 'lang') return yz(/^(srs|retention)/.test(n.id || '') ? 'esp.today.eylem-lang' : 'esp.today.eylem-dil');
+      const EYLEM = { symposium:1, history:1, studio:1, library:1, writing:1, ladder:1, onaylar:1 };
+      return yz('esp.today.eylem-' + (EYLEM[n.route] ? n.route : 'genel'));
+    },
+    /* Kapağın cümlesi: başlıkla aynı, ama «sıradaki iş hazır» yerine işin adı. */
+    kapakCumlesi(){
+      const rows = M.sessionsOf(gun());
+      const n = ESP.Planner.nextAction();
+      if(!n.rank) return this.headline();
+      const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+      return (rows.length ? rows.length + ' oturum, toplam ' + U.fmtMin(toplam) + '. ' : '') + n.title + '.';
     },
     headline(){
       const rows = M.sessionsOf(gun());

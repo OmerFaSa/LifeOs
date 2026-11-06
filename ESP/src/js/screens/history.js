@@ -41,11 +41,16 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:120, id:'act:timeline', kind:'Eyle
   hint:'Tarih', run:() => { ESP.S.ui.histTab = 'olaylar'; ESP.App.go('history'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.history.serit':'Şerit',
+  'esp.history.islemler':'İşlemler',
+  'esp.history.ilerleme':'İlerleme',
+  'esp.history.ilk-olay':'Zaman şeridi boş',
+  'esp.history.ilk-olay-neden':'İlk olayını ekle ya da hazır listeyi yükle.',
+  'esp.history.olaylara-git':'Olaylara git',
   'esp.history.olaylar':'Olaylar',
   'esp.history.kaynaklar':'Kaynaklar',
-  'esp.history.zincir':'Zincir',
+  'esp.history.zincir':'Neden zinciri',
   'esp.history.ogren':'Öğren',
-  'esp.history.calisma':'Çalışma',
+  'esp.history.calisma':'Çalış',
   'esp.history.bos-serit':'Boş şerit',
   'esp.history.zaman-seridinde-hic-olay-yok':'Zaman şeridinde hiç olay yok.',
   'esp.history.tohumu-yukle':'Tohumu yükle · ',
@@ -163,12 +168,10 @@ ESP.Screens.history = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'serit',     label:yz('esp.history.serit') },
-    { id:'olaylar',   label:yz('esp.history.olaylar') },
-    { id:'kaynaklar', label:yz('esp.history.kaynaklar') },
-    { id:'zincir',    label:yz('esp.history.zincir') },
-    { id:'ogren',     label:yz('esp.history.ogren') },
     { id:'calisma',   label:yz('esp.history.calisma') },
+    { id:'olaylar',   label:yz('esp.history.olaylar') },
+    { id:'ogren',     label:yz('esp.history.ogren') },
+    { id:'ilerleme',  label:yz('esp.history.ilerleme') },
   ];
 
   function evs(){ return S.events || []; }
@@ -187,23 +190,15 @@ ESP.Screens.history = (function(){
 
   /* ------------------------------------------------------------------ şerit */
 
-  function seritRows(){
+  /* Şerit ve dönem süzgeci olayların başında; kapsam ve boşluklar ilerlemede. */
+  function seritRows(kisim){
     const st = ESP.Chrono.status();
     const rows = [];
+    const serit = [];
 
     /* iPhone Faz 2c: boş şeridin ve tohumun açıklaması ⓘ'de (hints: chrono);
        tohumun kaç olay taşıdığı düğmenin üstünde. */
-    if(!evs().length){
-      rows.push(K.Entry({
-        label:yz('esp.history.bos-serit'), hint:'chrono',
-        meta:'olay yok',
-        body:html`
-          ${K.Empty({ text:yz('esp.history.zaman-seridinde-hic-olay-yok') })}
-          ${K.Button({ label:yz('esp.history.tohumu-yukle') + (ESP.SEED_EVENTS || []).length + ' olay', tone:'primary',
-            act:'seed', class:'mt-10' })}`,
-      }));
-      return rows;
-    }
+    if(!evs().length) return [];
 
     rows.push(DonenKapsam(st));
 
@@ -215,11 +210,11 @@ ESP.Screens.history = (function(){
     const enYeni = evs().reduce((m, e) => (!m || (e.createdAt || '') > (m.createdAt || '')) ? e : m, null);
     const seritHtml = V ? V.tarihSeridi({ olaylar:evs().filter(e => typeof e.year === 'number').slice()
       .sort((a, b) => a.year - b.year).map(e => ({ yil:e.year, ad:e.title, on:e === enYeni })) }) : '';
-    if(seritHtml) rows.push(K.Entry({ label:yz('esp.history.serit'), meta:evs().length + ' olay', wide:true, body:raw(seritHtml) }));
+    if(seritHtml) serit.push(K.Entry({ label:yz('esp.history.serit'), meta:evs().length + ' olay', wide:true, body:raw(seritHtml) }));
 
     /* Dönem şeridi — her dönem kendi olay sayısıyla. */
     const donem = ESP.Chrono.spread('era');
-    rows.push(K.Entry({
+    serit.push(K.Entry({
       label:yz('esp.history.donemler'), hint:'era',
       meta:st.eras.covered + '/' + st.eras.total + ' kapsandı',
       wide:true,
@@ -281,7 +276,7 @@ ESP.Screens.history = (function(){
         </div>`,
     }));
 
-    return rows;
+    return kisim === 'ilerleme' ? rows : serit;
   }
 
   /* iPhone Faz 2c (2026-10-02): kapsamın üç ekseni ve yüzyıl boşluğu tek
@@ -399,6 +394,7 @@ ESP.Screens.history = (function(){
                   tone:a.state === 'balanced' ? 'ok' : (a.state === 'thin' ? 'warn' : 'muted') })}
                 ${when(e.voiceNote, () => K.Button({ label:yz('esp.history.dinle'), size:'sm', act:'listen-voice-note',
                   data:{ 'data-id':e.id } }))}
+                </div><details class="hiz-ac evrow__islem"><summary>${yz('esp.history.islemler')}</summary><div class="row wrap gap-6 mt-6">
                 ${K.Button({ label:e.voiceNote ? 'Düzenle' : yz('esp.history.sesli-not-3'), size:'sm', act:'edit-voice-note',
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:yz('esp.history.eszamanli'), size:'sm', act:'contemp',
@@ -409,7 +405,7 @@ ESP.Screens.history = (function(){
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:yz('esp.history.sil'), size:'sm', act:'del-event',
                   data:{ 'data-id':e.id } })}
-              </div>
+              </div></details>
               ${when(S.ui.eventOpen === e.id, () => esZamanli(e))}
             </div>
           </div>`;
@@ -700,11 +696,20 @@ ESP.Screens.history = (function(){
   /* ----------------------------------------------------------------- çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { serit:seritRows, olaylar:olayRows, kaynaklar:kaynakRows, zincir:zincirRows,
-    ogren:learnRows, calisma:calismaRows };
+  const KUCUK = ['uzman-masası', 'yol-haritası', 'denge', 'dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'];
+  /* Çalış: şerit boşsa ilk adım; doluysa bugünün egzersizi ve deste. Olaylar: şerit, liste,
+     neden zinciri ve kaynaklar tek işin parçaları. Kapsam ilerlemede. */
+  const GOVDE = {
+    calisma:() => evs().length ? [].concat(calismaRows(), [ESP.Parts.recete('history'), ESP.Parts.desk('history')])
+      : [ESP.Parts.simdi('history', { baslik:yz('esp.history.ilk-olay'), neden:yz('esp.history.ilk-olay-neden'),
+          dugme:{ label:yz('esp.history.olaylara-git'), act:'tab-olay' } }), ESP.Parts.desk('history')],
+    olaylar:() => [].concat(seritRows(), olayRows(), zincirRows(), kaynakRows()),
+    ogren:learnRows,
+    ilerleme:() => [].concat(seritRows('ilerleme'), [ESP.Parts.yol('history')]),
+  };
 
   LIFEOS.PARCA.blok({ id:'history.tarih-sekmeleri', sayfa:'history', yer:'y1', sira:10, ad:'Tarih sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:yz('esp.history.tarih-bolumleri'), tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler({ act:'pick-tab', aria:yz('esp.history.tarih-bolumleri'), tabs:TABS,
         govde:GOVDE }));
   } });
   function render(){
@@ -725,6 +730,7 @@ ESP.Screens.history = (function(){
       if(r.ok) ESP.App.render();
     },
     async 'pick-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'tab-olay'(){ S.ui.histTab = 'olaylar'; ESP.App.render(); },
     async 'pick-era'(el){
       S.ui.histEra = el.dataset.id === S.ui.histEra ? 'all' : el.dataset.id;
       ESP.App.render();
@@ -914,7 +920,7 @@ ESP.Screens.history = (function(){
       const res = await M.saveChain(M.newChain({ eventId:el.dataset.id }));
       if(!res.ok){ ESP.UI.toast(res.error); return; }
       S.ui.chainOpen = res.chain.id;
-      S.ui.histTab = 'zincir';
+      S.ui.histTab = 'olaylar';
       ESP.Memo.bitir();
       ESP.App.render();
     },
@@ -963,7 +969,8 @@ ESP.Screens.history = (function(){
     /* iPhone Faz 2c: Şerit'te iş zaman şeridinin kendisi; dönem kutuları
        ara sıra açılan süzgeç (şerit), boşluk ve dağılım dönen kartta.
        Öbür bölümlerde belge isteği ve iki başvuru tablosu şerit. */
-    kucukVarsayilan:['dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'],
+    /* Olay varken form katlı: liste işin kendisi; olay yokken form açık (ilk eylem). */
+    get kucukVarsayilan(){ return (S.events || []).length ? ['olay-ekle', 'neden-zinciri', 'kaynak-ekle', 'kaynaklar'].concat(KUCUK) : KUCUK; },
     title:yz('esp.history.kronoloji'),
     headline(){
       const st = ESP.Chrono.status();

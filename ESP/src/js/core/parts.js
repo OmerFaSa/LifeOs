@@ -47,13 +47,13 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.radar-icin-en-az-uc':'Radar için en az üç eksen gerekir.',
   'esp.core.parts.kesikli-nokta-olculmemis-eks':'Kesikli nokta: ölçülmemiş eksen — sıfır değil.',
   'esp.core.parts.bu-kademede-tanimli-egzersiz':'Bu kademede tanımlı egzersiz yok.',
-  'esp.core.parts.islendi':'işlendi',
-  'esp.core.parts.i-sle':'İşle',
+  'esp.core.parts.islendi':'Yapıldı',
+  'esp.core.parts.i-sle':'Yaptım',
   'esp.core.parts.merdiven':'Merdiven',
   'esp.core.parts.kurallara-takildi':'kurallara takıldı',
   'esp.core.parts.sorunu-yaz':'Sorunu yaz…',
   'esp.core.parts.gonder':'Gönder',
-  'esp.core.parts.danisma-ekrani':'Danışma ekranı',
+  'esp.core.parts.danisma-ekrani':'Uzmana sor',
   'esp.core.parts.gecmisi-temizle':'Geçmişi temizle',
   'esp.core.parts.bu-tarayici-sesli-sohbeti-de':'Bu tarayıcı sesli sohbeti desteklemiyor; yazarak sorduğun soru aynı yoldan geçer.',
   'esp.core.parts.bu-bolumun-merdiveni-tanimli':'Bu bölümün merdiveni tanımlı değil.',
@@ -132,10 +132,19 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.parts.ac':'Aç',
   'esp.core.parts.plani-yenile':'Planı yenile',
   'esp.core.parts.plani-kaldir':'Planı kaldır',
-  'esp.core.parts.tezgah':'TEZGÂH',
-  'esp.core.parts.tezgah-kapali':'Tezgâh kapalı.',
+  'esp.core.parts.tezgah':'Uzman masası',
+  'esp.core.parts.adim-adim-ogren':'Adım adım öğren',
+  'esp.core.parts.bugun':'bugün',
+  'esp.core.parts.bugun-kayit-yok':'bugün kayıt yok',
+  'esp.core.parts.simdi':'Şimdi',
+  'esp.core.parts.gunluk-taban':'günlük taban',
+  'esp.core.parts.siradaki':'Sıradaki',
+  'esp.core.parts.bugunku-calisma':'Bugünkü çalışma',
+  'esp.core.parts.yol-haritasi':'Yol haritası',
+  'esp.core.parts.hatirlatma-kisa':'hatırlatma',
+  'esp.core.parts.oneri-kisa':'öneri',
+  'esp.core.parts.tezgah-kapali':'Uzman masası kapalı.',
   'esp.core.parts.ile-konusmak-haritayi-gormek':'ile konuşmak, haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.',
-  'esp.core.parts.tezgah-2':'Tezgâh',
 });
 
 
@@ -303,25 +312,6 @@ ESP.Parts = (function(){
         ${when(on, () => html`<span class="rx__task">${it.drill.task}</span>`)}
       </li>`;
     })}</ul>`;
-  }
-
-  /* Reçete sekmesi — bir zamanlar AYRI bir kutuydu (KOÇ) ve tezgâhın
-     hemen üstünde duruyordu. İkisi aynı cümleyi (sıradaki kapı) iki kez
-     yazıyor, ekranı iki katına çıkarıyordu. Reçete de koçun işi: artık
-     tezgâhın ilk sekmesi ve varsayılan görünüm. */
-  function deskRx(discId){
-    const r = ESP.Coach.prescribe(discId);
-    if(!r) return raw('');
-    return html`
-      <div class="coachhead">
-        ${K.Badge({ label:r.level.label + ' · ' + r.level.short,
-          tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
-        ${cert(r.cert)}
-        <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
-        ${K.Button({ label:yz('esp.core.parts.merdiven'), size:'sm', act:'go',
-          data:{ 'data-route':'ladder' } })}
-      </div>
-      ${rxList(r)}`;
   }
 
   /* --------------------------------------------------------------- tezgâh
@@ -942,7 +932,33 @@ ESP.Parts = (function(){
       </div>`;
   }
 
-  /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
+  /* «ŞİMDİ» (kullanıcı, 2026-11-06: «ilk bakışta ne yapacağım belli olsun»). Alanın ilk
+     sekmesinin ilk satırı: veri yoksa ilk adım, varsa sıradaki iş. Hangisini EKRAN seçer,
+     kayıttan; burada yalnız çizim var. Sağdaki künye yaptığının sonucunu söyler: bugün
+     bu alanda kaç dakika. Girilmemiş gün sıfır yazılmaz (§1.2). */
+  function bugunKunye(disc){
+    const bugun = U.todayISO();
+    const l = [].concat(disc).map(d => ESP.Model.minutesOf(bugun, d)).filter(v => v != null);
+    return l.length ? yz('esp.core.parts.bugun') + ' ' + U.fmtMin(l.reduce((a, b) => a + b, 0)) : yz('esp.core.parts.bugun-kayit-yok');
+  }
+  function simdi(disc, o){
+    return K.Entry({ label:yz('esp.core.parts.simdi'), meta:bugunKunye(disc), wide:true,
+      body:html`${K.NextUp({ icon:'zap', calm:true, label:o.etiket || yz('esp.core.parts.siradaki'), title:o.baslik, why:o.neden })}
+        ${when(o.dugme, () => K.Button({ label:o.dugme.label, tone:'primary', act:o.dugme.act, data:o.dugme.data, class:'mt-10' }))}` });
+  }
+  /* Reçete uzman masasının dibindeydi; bugün ne yapılacağının cevabı olduğu için ilk sekmede. */
+  /* `o.kunyesiz`: hemen üstte «Şimdi» aynı künyeyi yazıyorsa ikinci kez yazılmaz. */
+  function recete(disc, o){
+    const r = ESP.Coach.prescribe(disc);
+    return K.Entry({ label:yz('esp.core.parts.bugunku-calisma'), meta:o && o.kunyesiz ? null : bugunKunye(disc), wide:true,
+      body:r ? html`${rxList(r)}<p class="tiny dim mt-8">${U.fmtMin(r.minutes)} · ${yz('esp.core.parts.gunluk-taban')} ${U.fmtMin(r.budget)}</p>` : raw('') });
+  }
+  /* Yol, ilerlemenin parçasıdır: «Şimdi» sırayı, bu satır basamakları söyler. */
+  function yol(disc){
+    return K.Entry({ label:yz('esp.core.parts.yol-haritasi'), meta:(ESP.DISCIPLINE_BY_ID[disc] || {}).short || '', wide:true, body:deskMap(disc) });
+  }
+
+  /* Uzman masası: konuşmak, ek, hatırlatma, öneri ve bakım. Bekleyen sayılar kapalıyken de görünür. */
   function desk(discId){
     const d = ESP.DISCIPLINE_BY_ID[discId];
     if(!d) return raw('');
@@ -954,8 +970,8 @@ ESP.Parts = (function(){
 
     return K.Entry({
       label:yz('esp.core.parts.tezgah'), hint:'desk',
-      meta:a.short || a.name,
-      note:ESP.Desk.headline(discId),
+      meta:[a.short || a.name].concat(bekleyen ? [bekleyen + ' ' + yz('esp.core.parts.hatirlatma-kisa')] : [],
+        teklif ? [teklif + ' ' + yz('esp.core.parts.oneri-kisa')] : []).join(' · '),
       action:K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'desk-toggle',
         data:{ 'data-disc':discId } }),
       wide:true,
@@ -978,9 +994,7 @@ ESP.Parts = (function(){
                   aria-expanded="${on ? 'true' : 'false'}" aria-controls="${kim}">${x.label}${when(sayi[x.id],
                   () => html` <span class="bolumcubugu__rozet is-sessiz">${sayi[x.id]}</span>`)}</button>
                 <div class="desk__body" id="${kim}" data-disc="${discId}" ${on ? '' : raw('hidden')}>
-                  ${x.id === 'recete' ? deskRx(discId)
-                    : x.id === 'harita' ? deskMap(discId)
-                    : x.id === 'ekler' ? deskAssets(discId)
+                  ${x.id === 'ekler' ? deskAssets(discId)
                     : x.id === 'hatirlatma' ? deskReminders(discId)
                     : x.id === 'plan' ? deskPlans(discId)
                     : x.id === 'denetim' ? deskAudit(discId)
@@ -996,17 +1010,28 @@ ESP.Parts = (function(){
   /* SEKME → BÖLÜM (EKIP-PLANI §1.2, T3): disiplin ekranının sekmeleri alt
      alta bölüm olur, tezgâh en sonda kendi bölümüdür. Bir bölüm çizilemezse
      yalnız o düşer. `sayi` bölüm çubuğundaki rozettir. */
-  function bolumler(discId, o){
+  function bolumler(o){
+    /* `o.ust[id]`: bölümün başında duran pano kartları (kutu, defter satırı değil).
+       Konu anlatımı kartı ve adım adım öğrenme bağlantısı «Öğren»in içindedir. */
+    const konuKarti = id => {
+      if(id !== 'ogren' || !ESP.Screens.rehber) return '';
+      const v = ESP.Nav.viewOf(ESP.S.route);
+      if(!v || !v.disc) return '';
+      return String(ESP.Screens.rehber.alanKarti(v.disc)) + String(html`<div class="mt-12">${K.Button({ label:yz('esp.core.parts.adim-adim-ogren'), size:'sm',
+        tone:'ghost', act:'go', data:{ 'data-route':'ogrenme' } })}</div>`);
+    };
     const guvenli = id => {
-      try{ return K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)); }
+      try{
+        const ust = o.ust && o.ust[id] ? String(o.ust[id]() || '') : '';
+        const defter = o.govde[id] ? K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)) : '';
+        return html`${when(ust, () => html`<div class="bolum-ust">${raw(ust)}</div>`)}${defter}${raw(konuKarti(id))}`;
+      }
       catch(e){
         console.error('Bölüm çizilemedi (' + discId + '/' + id + '):', e);
         return K.Notice({ tone:'warn', body:yz('esp.core.parts.bu-bolum-su-an-cizilemedi') });
       }
     };
     const b = o.tabs.map(t => ({ id:t.id, ad:t.label, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));
-    /* discId null: tezgâhı olmayan ekran (Analiz, Rehber, Merdiven). */
-    if(discId) b.push({ id:'tezgah', ad:yz('esp.core.parts.tezgah-2'), govde:K.Ledger(() => [desk(discId)]) });
     return K.SayfaBolumleri({ act:o.act, aria:o.aria, bolumler:b });
   }
 
@@ -1018,7 +1043,7 @@ ESP.Parts = (function(){
     if(t && t !== ilk) K.bolumeGit(t);
   }
 
-  return { kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
+  return { simdi, recete, yol, kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
     units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics, konuSinama };
 

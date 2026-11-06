@@ -21,8 +21,8 @@ window.LIFEOS.PARCA.yazilar({
 });
 
 window.LIFEOS.PARCA.yazilar({
-  'esp.ladder.hicbir-disiplinde-olculmus-u':'Hiçbir disiplinde ölçülmüş üretim yok. ',
-  'esp.ladder.merdiven-ilk-olcumle-baslar':'Merdiven ilk ölçümle başlar.',
+  'esp.ladder.hicbir-disiplinde-olculmus-u':'Henüz ölçüm yok. ',
+  'esp.ladder.merdiven-ilk-olcumle-baslar':'Kısa bir sınamayla başla.',
   'esp.ladder.once-olc':'Önce ölç',
   'esp.ladder.siradaki-kapi':'Sıradaki kapı',
   'esp.ladder.ustat-kademesi-bile-bu-madde':'Üstat kademesi bile bu maddeleri kapatmaz. Merdiven bir ',
@@ -54,6 +54,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.ladder.kademe':'Kademe ',
   'esp.ladder.kapanis-isi':'Kapanış işi:',
   'esp.ladder.seviye-tespiti':'Seviye tespiti',
+  'esp.ladder.sinama':'Sınama',
+  'esp.ladder.durum':'Durum',
+  'esp.ladder.basamaklar':'Basamaklar',
+  'esp.ladder.projeler':'Projeler',
+  'esp.ladder.kendini-sina':'Kendini sına',
   'esp.ladder.disiplin':'Disiplin',
   'esp.ladder.tespit-yapilacak-disiplin':'Tespit yapılacak disiplin',
   'esp.ladder.cevapsiz':'(cevapsız)',
@@ -128,8 +133,10 @@ ESP.Screens.ladder = (function(){
       label:yz('esp.ladder.genel-kademe'), hint:'level',
       meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
       body:ov.cert === 'missing'
-        ? K.Notice({ tone:'info', body:yz('esp.ladder.hicbir-disiplinde-olculmus-u')
-            + yz('esp.ladder.merdiven-ilk-olcumle-baslar') })
+        /* Veri yoksa yedi sıfır kart değil ilk adım; alan kartları katlı (kucukVarsayilan). */
+        ? html`${K.Notice({ tone:'info', body:yz('esp.ladder.hicbir-disiplinde-olculmus-u')
+            + yz('esp.ladder.merdiven-ilk-olcumle-baslar') })}
+            <div class="mt-10">${K.Button({ label:yz('esp.ladder.kendini-sina'), tone:'primary', act:'pick-tab', data:{ 'data-tab':'tespit' } })}</div>`
         : html`
           ${K.NextUp({ icon:'chart', label:yz('esp.ladder.olculmus-uretim'), title:ov.level.label,
             why:ov.level.note })}
@@ -253,7 +260,7 @@ ESP.Screens.ladder = (function(){
           : (st.state === 'current' ? '%' + st.pct : 'ileride'),
         note:st.title,
         wide:true,
-        class:'step step--' + st.state,
+        class:'step--' + st.state,
         body:html`
           <div class="step__cols">
             <div>
@@ -422,36 +429,57 @@ ESP.Screens.ladder = (function(){
     ];
   }
 
+  /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
+     öğrendiğimiz konular hedefinde; yol haritası gibi»). Açık alanların
+     merdiveni: basamak durumu ve yüzdesi müfredat motorundan (geçilmeyen
+     kapı ilerleme sayılmaz). */
+  function yolHaritasi(){
+    const A = window.LIFEOS.AGHARITA;
+    if(!A || !ESP.Curriculum || !ESP.Curriculum.roadmap) return '';
+    const kumeler = ESP.Mod.active().map(d => {
+      const y = ESP.Curriculum.roadmap(d.id);
+      return { ad:d.short || d.label, dugumler:y ? y.steps.map(s => ({ ad:s.title, durum:s.state === 'done' ? 'bitti' : s.state === 'current' ? (s.pct > 0 ? 'suruyor' : 'sirada') : 'bekliyor',
+        ilerleme:s.state === 'current' && s.pct > 0 ? s.pct / 100 : undefined })) : [] };
+    });
+    return html`<section class="kutu" aria-label="Yol haritası"><h2 class="kutu__ad">${yz('esp.core.parts.yol-haritasi')}</h2>
+      <p class="tiny dim">${yz('esp.analytics.her-alanin-merdiveni-gecilen')}</p>
+      ${raw(A.html({ merkez:'Gelişim', kumeler, bos:yz('esp.analytics.bir-alan-acinca-merdiveni-bu') }))}</section>`;
+  }
+
   /* ----------------------------------------------------------------- çizim */
 
   const TABS = [
-    { id:'ozet',     label:yz('esp.ladder.genel') },
-    { id:'yol',      label:yz('esp.ladder.yol-2') },
-    { id:'projeler', label:yz('esp.ladder.projeler-14') },
-    { id:'tespit',   label:yz('esp.ladder.seviye-tespiti') },
+    { id:'ozet',     label:yz('esp.ladder.durum') },
+    { id:'yol',      label:yz('esp.ladder.basamaklar') },
+    { id:'projeler', label:yz('esp.ladder.projeler') },
+    { id:'tespit',   label:yz('esp.ladder.sinama') },
   ];
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
   /* Karışık alan sınaması (core/alan.js): sıradaki konu burada, sayfa değiştirmeden sınanır;
      konu başlığı disiplin seçilmeden gelir, bu yüzden karışık kanıt sayılır. */
-  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'y1', sira:5, ad:'Karışık sınama', ciz(){
+  LIFEOS.PARCA.blok({ id:'ladder.alan-sinamasi', sayfa:'ladder', yer:'sinama', sira:5, ad:'Karışık sınama', ciz(){
     const P = (window.LIFEOS || {}).PANO, s = S.ui.alanSinav, h = ESP.Alan.harita();
     const siradaki = ESP.Alan.sira(1)[0];
     const t = ESP.Alan.konuOf(s && s.karisik ? s.id : siradaki && siradaki.id);
     if(!P || !t) return '';
-    return K.Span(12, raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
+    return raw(P.kart({ tur:'alan-sinama', ad:yz('esp.ladder.karisik-sinama'), simge:'kart',
       yuva:h.olculen + '/' + h.toplam + ' ' + yz('esp.ladder.konu-olculdu'),
       govde:String(html`<p class="small"><b>${(ESP.DISCIPLINE_BY_ID[t.disc] || {}).short || t.disc}</b> · ${t.title}</p>
-        ${ESP.Parts.konuSinama(t, true)}`) })));
+        ${ESP.Parts.konuSinama(t, true)}`) }));
   } });
   LIFEOS.PARCA.blok({ id:'ladder.merdiven-sekmeleri', sayfa:'ladder', yer:'y1', sira:10, ad:'Merdiven sekmeleri', ciz({ disc }){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
-        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
+        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows },
+        ust:{ tespit:() => LIFEOS.PARCA.yer('ladder', 'sinama', K, undefined, raw),
+          ozet:() => C().overall().cert === 'missing' ? '' : yolHaritasi(),
+          yol:() => String(K.Select({ id:'lad-disc', value:disc, change:'pick-disc-sel', aria:yz('esp.ladder.disiplin-sec'), size:'sm',
+            options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) })) } }));
   } });
   function render(){
     const disc = S.ui.curDisc || 'lang';
-    /* disiplin seçici sayfa başındadır (actions), bölümlerin üstünde asılı durmaz */
+    /* disiplin seçici Basamaklar'ın başında (ust.yol) */
     const parcaB = { disc };
     return K.Grid(html`
       ${LIFEOS.PARCA.yer('ladder', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
@@ -506,7 +534,8 @@ ESP.Screens.ladder = (function(){
       const yol = G ? C().roadmap(S.ui.curDisc || 'lang') : null;
       const kademeler = (yol ? yol.steps : []).filter(st => st.state !== 'current')
         .map(st => G.anahtar(yz('esp.ladder.kademe') + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
-      return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler);
+      /* Ölçüm yokken yedi sıfır kart açık durmaz; alan listesi katlı, adı ve sayısı görünür. */
+      return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler, C().overall().cert === 'missing' ? ['disiplinler'] : []);
     },
     title:yz('esp.ladder.merdiven'),
     headline(){
@@ -536,11 +565,8 @@ ESP.Screens.ladder = (function(){
       const ov = C().overall();
       return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
     },
-    actions(){
-      return String(K.Select({ id:'lad-disc', value:S.ui.curDisc || 'lang', change:'pick-disc-sel',
-        aria:yz('esp.ladder.disiplin-sec'), size:'sm',
-        options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }));
-    },
+    /* Disiplin seçici yalnız Basamaklar'ı etkiler, orada durur (kullanıcı, 2026-11-06). */
+    actions(){ return ''; },
     render, afterRender, handle, change,
   };
 })();

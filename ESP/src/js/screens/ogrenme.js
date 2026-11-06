@@ -6,6 +6,7 @@
 window.LIFEOS.PARCA.yazilar({
   'esp.ogrenme.inceleme':'öğretmen incelemesi bekliyor',
   'esp.ogrenme.baslik':'Kütüphanem',
+  'esp.ogrenme.anlatimlar':'Konu anlatımlarını oku',
 });
 
 window.ESP = window.ESP || {};
@@ -64,6 +65,9 @@ ESP.Screens.ogrenme = (function(){
   hazirla();
 
   LIFEOS.PARCA.blok({ id:'ogrenme.motor', sayfa:'ogrenme', yer:'ana', ad:'Öğrenme', ciz(){ return window.LIFEOS.OMEKRAN.html(); } });
-  function render(){ return LIFEOS.PARCA.yer('ogrenme', 'ana', ESP.C); }
+  function render(){
+    return LIFEOS.PARCA.yer('ogrenme', 'ana', ESP.C) + '<div class="mt-16">' + ESP.C.Button({ label:yz('esp.ogrenme.anlatimlar') + ' · ' + (ESP.REHBER_KONULAR || []).length,
+      size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'rehber' } }) + '</div>';
+  }
   return { id:'ogrenme', title:yz('esp.ogrenme.baslik'), subtitle(){ return ''; }, lede(){ return ''; }, actions(){ return ''; }, render, handle:{}, hazirla };
 })();

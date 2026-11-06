@@ -216,9 +216,8 @@
       resetState();
       ESP.Desk.setTab('lang', 'ekler');
       expect(ESP.Desk.tab('lang')).toBe('ekler');
-      /* Varsayilan sekme RECETE: bir bolume girildiginde ilk gorulmesi
-         gereken sey bugun ne yapilacagidir. */
-      expect(ESP.Desk.tab('music')).toBe('recete');
+      /* Recete artik «Calis»in basinda (Parts.recete); masada baslangicta hepsi kapali. */
+      expect(ESP.Desk.tab('music')).toBe('kapali');
     });
   });
 })();

@@ -126,7 +126,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.guide.merdiven':'Merdiven',
   'esp.guide.her-bolumde-sifirdan-ustatli':'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta ',
   'esp.guide.merdiven-ardisiktir-alttaki':'Merdiven ardışıktır: alttaki basamak atlanarak üsttekine geçilmez. Ölçülemeyen basamak üçüncü bir durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak değil ölçmek.',
-  'esp.guide.tezgah':'TEZGÂH',
+  'esp.guide.tezgah':'UZMAN MASASI',
   'esp.guide.her-bolumun-altinda-ayni-yer':'Her bölümün altında aynı yerde durur ve bölümden bölüme ',
   'esp.guide.bolumler':'Bölümler',
   'esp.guide.calismayacagin-bolumu-kapata':'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, ',
@@ -279,8 +279,8 @@ ESP.Screens.guide = (function(){
         wide:true,
         body:K.Table({ tight:true, headers:['Sekme', yz('esp.guide.ne-yapar')],
           rows:[
-            ['Koç', yz('esp.guide.o-bolumun-uzmaniyla-yazili-y')
-              + 'dinleyebilirsin. Danışma ekranıyla aynı yoldan geçer.'],
+            ['Uzmanla konuş', yz('esp.guide.o-bolumun-uzmaniyla-yazili-y')
+              + 'dinleyebilirsin. Uzmana sor ekranıyla aynı yoldan geçer.'],
             ['Harita', yz('esp.guide.bu-bolumde-nerede-durdugun-v')],
             ['Ekler', yz('esp.guide.not-belge-baglanti-ve-ses')
               + 've başlığını görür; içeriğini görmez.'],
@@ -693,7 +693,7 @@ ESP.Screens.guide = (function(){
   const GOVDE = { kullanim:usageRows, model:modelRows, veri:dataRows, sinirlar:limitRows, kanit:evidenceRows };
 
   LIFEOS.PARCA.blok({ id:'guide.rehber-sekmeleri', sayfa:'guide', yer:'y1', sira:10, ad:'Rehber sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:yz('esp.guide.rehber-bolumleri'), tabs:TABS, govde:GOVDE }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'guide-tab', aria:yz('esp.guide.rehber-bolumleri'), tabs:TABS, govde:GOVDE }));
   } });
   LIFEOS.PARCA.blok({ id:'guide.kolaylik-pusulasi', sayfa:'guide', yer:'y2', sira:10, ad:'Kolaylık pusulası', ciz(){
     return K.Span(12, html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}`);

@@ -47,7 +47,8 @@
         expect(gorulen[v.route]).toBe(undefined);
         gorulen[v.route] = sec.id;
       }));
-      ids.forEach(id => expect(!!gorulen[id]).toBe(true));
+      /* office menüde değil (2026-11-06): masalar Uzmana sor'un altında, rota çalışır. */
+      ids.filter(id => id !== 'office').forEach(id => expect(!!gorulen[id]).toBe(true));
     });
 
     it('boş durumda hiçbir ekran çökmez; her iç sekme de çizilir', async () => {

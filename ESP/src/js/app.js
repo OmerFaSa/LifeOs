@@ -94,6 +94,8 @@ window.LIFEOS.PARCA.yazilar({
   'esp.app.kitap-sayfasini-oku':'Kitap sayfasını oku',
   'esp.app.calisma-suresi':'Çalışma süresi',
   'esp.app.merdiven':'Merdiven',
+  'esp.app.calisma':'Çalışma',
+  'esp.app.plan':'Plan',
   'esp.app.uygulama-acilamadi':'Uygulama açılamadı.',
   'esp.app.calisilan-gun-30-gun':'Çalışılan gün · 30 gün',
   'esp.app.olculdu':'ölçüldü',
@@ -130,7 +132,7 @@ ESP.App = (function(){
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
      Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
-  const UST = { gun:'today' };
+  const UST = { gun:'today', rehber:'ogrenme', office:'team' };
 
   /* Telefon alt bandı (KOLAY-PLANI Faz 2): Bugün · Çalışma · Analiz · Menü; masaüstü kenarı da aynı (kabuk.js ANA_CEKMECE). */
   const BANT = ['bugun', 'calisma', 'analiz'];
@@ -151,7 +153,7 @@ ESP.App = (function(){
       const due = ESP.SRS.dueCards().length;
       return due ? { text:String(due), quiet:due < 20 } : null;
     }
-    if(id === 'office'){
+    if(id === 'team'){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger' || x.tone === 'warn').length;
       return n ? { text:String(n), quiet:true } : null;
     }
@@ -680,14 +682,6 @@ ESP.App = (function(){
         console.error('Ekran hatası (' + sc.id + '):', err);
         body = errorPanel(err);
       }
-      /* Konu anlatımı (2026-10-18, kullanıcı: «bölümlerin içine her alanın
-         kendisiyle alakalı anlatım»): Çalışma'daki alan bölümünün sonunda o
-         alanın kartı (screens/rehber.js); okuyucu Kütüphanem › Anlatımlar. */
-      try{
-        const v = viewOf(S.route);
-        if(v && v.disc && ESP.Screens.rehber) body += ESP.Screens.rehber.alanKarti(v.disc);
-      }catch(err){ console.error('Konu anlatımı kartı çizilemedi:', err); }
-
       /* v4 iskeleti (belgeler/ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
@@ -2226,10 +2220,11 @@ ESP.App = (function(){
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
       if(window.LIFEOS && window.LIFEOS.KISAYOL){
         window.LIFEOS.KISAYOL.kur({ modul:'esp', git:r => go(r), palet:() => ESP.Palette.open(),
-          /* Açık disiplinlerin tezgâhları: kapalı disiplin düğme olmaz. */
+          /* Tek sıra: Çalışma (açık ilk alan; kapalı disiplin düğme olmaz) ve Plan. Dört alan
+             düğmesi Çalışma'nın şeridini tekrar ediyordu (kullanıcı, 2026-11-06). */
           dugmeler:() => ((ESP.Nav.sections().find(s => s.id === 'calisma') || {}).views || [])
-            .slice(0, 4).map(v => ({ ad:v.label, rota:v.route }))
-            .concat([{ ad:yz('esp.app.merdiven'), rota:'ladder' }]),
+            .slice(0, 1).map(v => ({ ad:yz('esp.app.calisma'), rota:v.route }))
+            .concat([{ ad:yz('esp.app.plan'), rota:'ladder' }]),
           cekmeceler:() => ESP.Nav.sections().map(s => ({ id:s.id, rota:s.views[0].route })) });
       }
 

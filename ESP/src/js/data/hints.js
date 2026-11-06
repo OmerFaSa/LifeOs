@@ -105,7 +105,7 @@ ESP.HINTS = {
 
   /* --- ofis --- */
   'brief':{ t:'Özet', b:'Uzmanın gördüğü tek şey: ölçülmüş metrikler ve durum etiketleri.',
-    more:'Ham ses kaydı, tam metin taslak ve kişisel not brifinge girmez. Ham JSON\'u Danışma ekranından açabilirsin: ajanın görmediği bir şeye dayanarak konuşmadığını görmen gerekir.' },
+    more:'Ham ses kaydı, tam metin taslak ve kişisel not brifinge girmez. Ham JSON\'u Uzmana sor ekranından açabilirsin: ajanın görmediği bir şeye dayanarak konuşmadığını görmen gerekir.' },
   'rule-engine':{ t:'Kural motoru', b:'Sayıyı ve kararı üreten katman. Model yalnızca cümleye çevirir.',
     more:'Model kapalıyken ofis kapanmaz: brifing doğrudan kural cümlesine çevrilir ve ajanlar «kural motoru» rozetiyle konuşur. Rozet süs değildir; bir cümleye ne kadar güveneceğini belirler.' },
   'handoff':{ t:'Masalar arası devir', b:'Bir masanın bulgusu başka bir masanın işi olduğunda düşen satır.',
@@ -223,8 +223,8 @@ ESP.HINTS = {
 
   'modules':{ t:'Bölümler', b:'Hangi disiplinlerin açık olduğu.',
     more:'Kapalı bir bölüm gezinmede görünmez, reçeteye ve denge hesabına girmez, merdivende ortalamaya katılmaz ve ofiste masası kapanır. Ama verisi SİLİNMEZ — «kapalı» ile «yok» ayrı şeylerdir. Numaralar da boşluk bırakmadan yeniden verilir: eksik bir numara, kaybedilmiş bir şey varmış gibi görünürdü.' },
-  'desk':{ t:'Tezgâh', b:'Her bölümün altındaki ortak katman: koç, harita, ekler, hatırlatma.',
-    more:'Dördü de tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Danışma ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
+  'desk':{ t:'Uzman masası', b:'Her alanın ortak katmanı: uzmanla konuşma, ekler, hatırlatma, öneri ve bakım.',
+    more:'Hepsi tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Uzmana sor ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
   'reminder':{ t:'Hatırlatma', b:'Kendine söylediğin bir şeyin günü gelince tekrar söylenmesi.',
     more:'Bir görev değildir: sistem hiçbir şeyi zorunlu kılmaz ve kaçırılan bir hatırlatıcı ceza üretmez, borç yazmaz. Tekrarlı olan tamamlanınca silinmez, bir sonraki tarihe taşınır — ve o tarih BUGÜNDEN sayılır: iki hafta geciken günlük bir hatırlatıcı on dört kez üst üste düşmemeli.' },
   'unit':{ t:'Ünite', b:'Bir konunun somut öğeleri ve ölçülebilir hedefi.',

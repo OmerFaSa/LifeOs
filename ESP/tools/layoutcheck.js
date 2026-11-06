@@ -140,15 +140,15 @@ async function portMuhafizi(portlar, ipucu){
         await page.waitForTimeout(160);
 
         /* Sekmeleri de gez: tasma cogu zaman ikinci sekmede. */
-        const tabs = await page.$$eval('.subtabs .subtab',
-          els => els.map(e => e.getAttribute('data-tab')).filter(Boolean));
+        /* Sekme artik «sayfa bolumu»: .subtabs yok, hepsi #main'de durur. Cubugun
+           disindakiler «Diger»in altinda; bolumeGit hepsine ulasir (2026-11-06). */
+        const tabs = await page.$$eval('#main .sayfabolum',
+          els => els.map(e => e.id.replace(/^bl-/, '')).filter(Boolean));
         const yerler = [null].concat(tabs);
 
         for(const t of yerler){
           if(t){
-            const btn = await page.$('.subtabs .subtab[data-tab="' + t + '"]');
-            if(!btn) continue;
-            await btn.click();
+            await page.evaluate(id => ESP.C.bolumeGit(id), t);
             await page.waitForTimeout(120);
           }
           const sonuc = await page.evaluate(({ minTap, allow }) => {
