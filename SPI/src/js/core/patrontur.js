@@ -227,6 +227,8 @@ window.LIFEOS.PATRONTUR = (function(L){
     document.body.appendChild(k);
     /* Turun içindeki tıklama uygulamaya inmez: karanlığa basmak açık kenar penceresini kapatmasın. */
     k.addEventListener('click', e => { e.stopPropagation(); tikla(e); });
+    /* Karanlığa ya da kart yazısına basmak odağı spottan almasın: klavyeyle Enter sürsün. */
+    k.addEventListener('mousedown', e => { if(!e.target.closest('button')) e.preventDefault(); });
     return k;
   }
   function kimYaz(kim){

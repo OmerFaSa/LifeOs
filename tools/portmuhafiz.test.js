@@ -53,6 +53,7 @@ DENETIMLER.push(
   { dosya:'tools/nerede.js', cwd:'.', sabit:[4389], arg:() => ['AYS'] },
   { dosya:'tools/king_kapsam.js', cwd:'.', sabit:[4177, 4187, 4197] },
   { dosya:'tools/king_sinav.js', cwd:'.', sabit:[4176, 4186, 4196] },
+  { dosya:'tools/mobil_tara.js', cwd:'.', sabit:[4396], arg:() => ['AYS'] },
 );
 
 /* Sunucu başlatıp bu listede OLMAYAN dosyalar — gerekçesiyle. */
