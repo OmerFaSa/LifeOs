@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr" translate="no" data-modul="esp">
+<html lang="tr" translate="no" data-modul="esp" data-zemin="piksel">
 <head>
 <meta charset="utf-8"/>
 <!-- Mobil tarayicilar sayfayi yabanci sanip otomatik cevirebiliyor ve arayuz
@@ -97,10 +97,13 @@
      gösterir ve ad yer tutucudan gelir, üç yerde ayrı yazılmaz. -->
 <!-- KARŞILAMA (kullanıcı, 2026-10-18): logonun yerine italik selam ve altında
      küçük yazıyla bölümün o anki notu (brand/ortak/karsilama.js). Selam ve not
-     karsilama.js yüklenince yazılır; yüklenmezse 0,7 sn sonra varsayılan selam
+     karsilama.js yüklenince yazılır; yüklenmezse 1,5 sn sonra varsayılan selam
      görünür. Not modülün KENDİ kural cümlesidir ya da kullanıcının notu. -->
 <div id="marka-perde" class="perde perde--marka perde--karsilama" role="dialog" aria-modal="true"
   aria-label="Karşılama">
+  <!-- Bulut (2026-11-06): markupta ve resmi CSS'te, çünkü betikler ilk boyamadan sonra çalışır;
+       modül geçişinde gelen sayfanın ilk karesi gidenin son karesiyle aynı buluttur. -->
+  <div class="px-bulut" aria-hidden="true"><i class="px-bulut__sol"></i><i class="px-bulut__sag"></i></div>
   <div class="karsilama" aria-live="polite">
     <p class="karsilama__selam">Hoş geldin</p>
     <span class="karsilama__cizgi" aria-hidden="true"></span>
@@ -157,7 +160,7 @@
      Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
   var deneme = 0, kars = el.querySelector('.karsilama'), yazildi = false;
   /* Karşılama yazılamazsa (betik yok) varsayılan selam görünür. */
-  setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 700);
+  setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 1500);
   /* Selam ayrı bekler: kaynak sürümde perde.js hemen, karsilama.js sayfanın
      aşağısında yüklenir; tek dosya sürümünde ikisi de sonda. */
   var kDeneme = 0;

@@ -57,6 +57,8 @@
 
 :root[data-zemin="piksel"], :root[data-zemin="piksel"] body{ background:none; }
 :root[data-zemin="piksel"]{ background:var(--piksel-duvar); }
+/* Modül sayfasının gövdesi henüz okunmadıysa (ilk kare) duvar rengi değil bulutun beyazı: gelen bulutun önünde renk parlamaz. */
+:root[data-modul][data-zemin="piksel"]:not(:has(> body)){ background:var(--beyaz); }
 :root[data-zemin="piksel"] .piksel-oda{ position:fixed; inset:0; width:100%; height:100%; image-rendering:pixelated; z-index:-1; pointer-events:none; }
 :root[data-zemin="piksel"] .zemin-isik{ display:none; }
 /* Boşta: menü sola, kart aşağı çekilir; dokunulamaz, sahne kalır (piksel.js). */
@@ -65,26 +67,38 @@
 /* Yüklenme ekranı: cam yerine manzara; selam kâğıtta durur, her manzarada okunur */
 :root[data-zemin="piksel"] .piksel-manzara{ position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
 :root[data-zemin="piksel"] .lifeos-gecis{ background:#8fcff1; -webkit-backdrop-filter:none; backdrop-filter:none; }
-:root[data-zemin="piksel"] .perde--karsilama{ background:#8fcff1; }
-/* Bulut perdesi (piksel.js bulutKoy): iki yarım; perde kalkarken iki yana açılır. Yazı bulutun üstünde, kâğıt kart yok. */
-:root[data-zemin="piksel"] :is(.lifeos-gecis,.perde--karsilama):has(.px-bulut){ background:#e2ecf6; }
-:root[data-zemin="piksel"] .perde--karsilama:has(.px-bulut)::before{ content:none; }
-:root[data-zemin="piksel"] .perde--karsilama:has(.px-bulut) .karsilama{ background:none; box-shadow:none; }
+/* Bulut perdesi (kullanıcı, 2026-11-06: «tüm ekranı büyük beyaz bir bulut kaplasın»; «aniden gelip kesiliyor»): iki yarım
+   iki yandan gelir, ortada kabarık kenarları üst üste biner. Resim CSS'te (tools/piksel_bulut.py): varış sayfasının İLK
+   boyamasında yerindedir, sayfa değişimi görünmez. Perdenin kendi zemini yok: bulut çekilirken altındaki sayfa görünür. */
+/* PIKSEL BULUT BASI: tools/piksel_bulut.py uretir */
+.px-bulut i{ background-image:url(data:image/png;base64,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), linear-gradient(var(--beyaz), var(--beyaz)); }
+/* PIKSEL BULUT SONU */
 .px-bulut{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
-.px-bulut canvas{ position:absolute; top:0; image-rendering:pixelated; transition:transform .42s cubic-bezier(.4,0,.2,1); }
+/* Genişlik: resmin kabarık payı (26 piksel × 4 = 104) ortayı geçsin, iki yarım arasında boşluk kalmasın. Düz beyaz katman resimden geniş ekranda sola doğru tamamlar. */
+.px-bulut i{ position:absolute; top:0; bottom:0; width:calc(50vw + 130px); image-rendering:pixelated; will-change:transform;
+  background-size:1600px 720px, calc(100% - 800px) 100%; background-repeat:repeat-y, no-repeat; background-position:right top, left top;
+  transition:transform .7s cubic-bezier(.45,.05,.35,1); }
 .px-bulut__sol{ left:0; }
-.px-bulut__sag{ right:0; }
-:is(.perde--kapaniyor,.lifeos-gecis.is-acik) .px-bulut__sol{ transform:translateX(-86%); }
-:is(.perde--kapaniyor,.lifeos-gecis.is-acik) .px-bulut__sag{ transform:translateX(86%); }
-.px-bulut__yazi{ position:absolute; inset:0; z-index:1; display:grid; place-content:center; justify-items:center; gap:6px; text-align:center; color:var(--text); animation:px-bulut-yazi .5s ease .18s both; }
+/* Sağ yarım aynı resmin aynası, biraz kaydırılmış; ayna kayma yönünü de çevirir: iki yarıma tek kural yeter. */
+.px-bulut__sag{ right:0; scale:-1 1; background-position:right -236px, left top; }
+:root[data-zemin="piksel"] .lifeos-gecis:has(.px-bulut){ background:none; }
+.lifeos-gecis:not(.is-kapali) .px-bulut i{ transform:translateX(-101%); }
+.lifeos-gecis.is-acik .px-bulut i{ transform:translateX(-86%); }
+.perde--kapaniyor .px-bulut i{ transform:translateX(-101%); transition-duration:.8s; }
+/* Yazı sayfayla birlikte değişir: gidenin yazısı önce söner, varanın yazısı bulutun üstünde belirir. Sürekli olan yalnız buluttur. */
+.lifeos-gecis.is-kalkis .px-bulut__kart{ opacity:0; transition:opacity .4s ease; }
+.perde--karsilama .perde__araclar{ animation:px-bulut-yazi .5s ease .5s both; }
+:root[data-zemin="piksel"] .perde--kapaniyor:has(.px-bulut){ opacity:1; }
+:root[data-zemin="piksel"] .perde--kapaniyor:has(.px-bulut) :is(.karsilama,.perde__araclar){ opacity:0; transition:opacity .25s ease; }
+.px-bulut__yazi{ position:absolute; inset:0; z-index:1; display:grid; place-content:center; justify-items:center; gap:6px; text-align:center; color:var(--text); animation:px-bulut-yazi .5s ease .6s both; }
 .px-bulut__kart{ display:grid; justify-items:center; gap:6px; padding:20px 36px; background:var(--piksel-kagit, #fffaef); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar); }
 .px-bulut__yazi small{ font-size:var(--fs-sm); color:var(--text-2); }
 .px-bulut__yazi b{ font-size:clamp(32px, 7vw, 64px); line-height:1.1; }
 .px-bulut__yazi span{ font-size:var(--fs-md, 16px); color:var(--text-2); }
 @keyframes px-bulut-yazi{ from{ opacity:0; transform:translateY(10px); } }
-@media (prefers-reduced-motion:reduce){ .px-bulut canvas{ transition:none; } .px-bulut__yazi{ animation:none; } }
+@media (prefers-reduced-motion:reduce){ .px-bulut i{ transition:none; } .px-bulut__yazi, .perde--karsilama .perde__araclar{ animation:none; } }
 :root[data-zemin="piksel"] .perde--karsilama::before{ content:none; }
-:root[data-zemin="piksel"] .perde--karsilama .karsilama{ position:relative; z-index:1; padding:28px 40px; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),8px 12px 0 #3f282c44; }
+:root[data-zemin="piksel"] .perde--karsilama .karsilama{ position:relative; z-index:1; }
 /* Seçim sayfası: tarla görünür, kapı zemini kalkar */
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi{ background:transparent; }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__tanitim{ --fg:#3a2430; --fg-2:#4a3440; --text:#3a2430; --text-2:#4a3440; }
@@ -497,10 +511,9 @@
 .px-kivilcim{ position:fixed; width:0; height:0; z-index:10002; pointer-events:none; }
 .px-kivilcim i{ position:absolute; left:-2px; top:-2px; display:block; width:4px; height:4px; }
 
-/* Açılış karşılaması: bulanık cam yerine odanın duvarı, kâğıtta selam */
-:root[data-zemin="piksel"] .perde--karsilama{ --pm-yazi:var(--text); --pm-iz:var(--border-strong); background:var(--piksel-duvar); -webkit-backdrop-filter:none; backdrop-filter:none; }
+/* Açılış karşılaması: bulanık cam yerine bulut (yukarıda), kâğıtta selam */
+:root[data-zemin="piksel"] .perde--karsilama{ --pm-yazi:var(--text); --pm-iz:var(--border-strong); background:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
 :root[data-zemin="piksel"] .perde--karsilama .perde__ortam{ display:none; }
-:root[data-zemin="piksel"] .perde--karsilama::before{ inset:auto 0 0 0; height:24%; background:var(--piksel-tahta); box-shadow:0 -6px 0 var(--piksel-tahta-2); }
 :root[data-zemin="piksel"] .karsilama{ gap:12px; padding:26px 44px 28px; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),12px 14px 0 var(--piksel-golge); transition:opacity .2s var(--ease), transform .24s var(--ease); }
 :root[data-zemin="piksel"] .karsilama::before{ content:''; width:96px; height:96px; image-rendering:pixelated; background:var(--fig-gun) center/contain no-repeat; }
 :root[data-zemin="piksel"][data-modul="ays"] .karsilama::before{ background-image:var(--fig-ays); }

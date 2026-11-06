@@ -334,21 +334,25 @@
         expect(o.odalar.every(a => a.x >= o.bx0 && a.x + a.w <= o.bx1)).toBe(true);
       });
     });
-    it('bulut perdesi: bir kez konur, iki yarım ekranı birlikte örter', () => {
-      const P = window.LIFEOS.PIKSEL, el = document.createElement('div');
+    /* Bulut resmi CSS'te (tools/piksel_bulut.py): betik beklemeden ilk boyamada yerinde. */
+    it('bulut perdesi: resim CSS içinden gelir, iki yarım ekranın ortasını geçer, kapanırken ekran dışına çıkar', async () => {
+      const l = document.createElement('link'), el = document.createElement('div');
+      l.rel = 'stylesheet'; l.href = '../css/piksel.css';
+      await new Promise((iyi, kotu) => { l.onload = iyi; l.onerror = kotu; document.head.appendChild(l); });
+      el.className = 'perde perde--karsilama';
+      el.style.cssText = 'position:fixed;inset:0;display:block;opacity:0;pointer-events:none';
+      el.innerHTML = '<div class="px-bulut"><i class="px-bulut__sol"></i><i class="px-bulut__sag"></i></div>';
       document.body.appendChild(el);
       try{
-        const k = P.bulutKoy(el);
-        expect(!!k).toBe(true); expect(P.bulutKoy(el)).toBe(null);
-        const c = el.querySelectorAll('.px-bulut canvas');
-        expect(c.length).toBe(2);
-        expect(c[0].width * 2 >= Math.ceil(window.innerWidth / 4)).toBe(true);
-        expect(c[0].getContext('2d').getImageData(0, Math.floor(c[0].height / 2), 1, 1).data[3]).toBe(255);
-        /* Ortada boşluk yok: sol yarım ekranın ortasına (ölçekte) kadar her satırda dolu */
-        const orta = Math.ceil(window.innerWidth / 8), d = c[0].getContext('2d').getImageData(0, 0, Math.min(orta, c[0].width), c[0].height).data;
-        let bos = 0; for(let y = 0; y < c[0].height; y++) if(d[(y * Math.min(orta, c[0].width) + Math.min(orta, c[0].width) - 1) * 4 + 3] !== 255) bos++;
-        expect(bos).toBe(0);
-      }finally{ el.remove(); }
+        const [sol, sag] = el.querySelectorAll('.px-bulut i');
+        expect(/^url\("?data:image\/png/.test(getComputedStyle(sol).backgroundImage)).toBe(true);
+        expect(sol.getBoundingClientRect().right > window.innerWidth / 2 + 100).toBe(true);
+        expect(sag.getBoundingClientRect().left < window.innerWidth / 2 - 100).toBe(true);
+        sol.style.transition = sag.style.transition = 'none';
+        el.classList.add('perde--kapaniyor');
+        expect(sol.getBoundingClientRect().right <= 0).toBe(true);
+        expect(sag.getBoundingClientRect().left >= window.innerWidth).toBe(true);
+      }finally{ el.remove(); l.remove(); }
     });
     it('araç yönü: yüzü hep gittiği yöne bakar (her genişlik, bina ve vakitte)', () => {
       const A = window.LIFEOS.PIKSEL_APARTMAN;

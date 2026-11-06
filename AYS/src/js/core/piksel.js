@@ -317,28 +317,6 @@ window.LIFEOS = window.LIFEOS || {};
     const yap = () => { if(document.visibilityState !== 'hidden') manzaraHazir(Math.ceil(window.innerWidth / MANZARA_OLCEK), Math.ceil(window.innerHeight / MANZARA_OLCEK)); };
     if(window.requestIdleCallback) requestIdleCallback(yap, { timeout:8000 }); else setTimeout(yap, 4000);
   }
-  /* BULUT PERDESİ (2026-11-06, kullanıcı: «modüller arası geçişte tüm ekranı büyük beyaz bir bulut kaplasın, o modüle
-     geçene kadar dağılmasın; geçerken karşılama yazıları gelsin, geçince açılsın»). İki yarım: ortada kabarık kenarları üst
-     üste biner, ekranda boşluk kalmaz; perde kalkarken (perde--kapaniyor) iki yana açılır (piksel.css). Süs: veri okumaz. */
-  function bulutYarim(c, sag){
-    const W = c.width, H = c.height, g = c.getContext('2d');
-    let v = sag ? 917 : 331; const r = () => (v = (v * 1664525 + 1013904223) >>> 0) / 4294967296;
-    const top = (cx, cy, rr, renk) => { g.fillStyle = renk; for(let y = -rr; y <= rr; y++){ const w = Math.round(Math.sqrt(rr * rr - y * y)); g.fillRect(Math.round(cx) - w, Math.round(cy) + y, w * 2 + 1, 1); } };
-    const kenar = W * 0.84, X = x => (sag ? W - x : x);   // gövde ekranın ortasını geçer: iki yarım arasında boşluk kalmaz
-    g.fillStyle = '#ffffff'; g.fillRect(sag ? W - kenar : 0, 0, kenar, H);
-    /* Gövdede kümeler: alt kenarları gölge tonunda, doku verir ama beyaz kalır */
-    for(let i = 0; i < W * H / 280; i++){ const x = r() * kenar, y = r() * H, rr = 4 + Math.floor(r() * 7); top(X(x), y + 2, rr, '#e6eef8'); top(X(x), y, rr, '#ffffff'); }
-    /* Ortaya bakan kabarık kenar: büyük toplar, altta gölge, en altta mavi pus */
-    for(let y = -8; y < H + 12; y += 6 + Math.floor(r() * 5)){ const rr = 8 + Math.floor(r() * 10), x = kenar + rr * 0.35 - r() * 6; top(X(x), y + 3, rr, '#d6e2f0'); top(X(x), y, rr, '#ffffff'); top(X(x - rr * 0.3), y - rr * 0.35, Math.max(2, rr - 6), '#ffffff'); }
-  }
-  function bulutKoy(el){
-    if(!el || el.querySelector('.px-bulut')) return null;
-    const k = document.createElement('div'), W = Math.ceil(window.innerWidth * 0.62 / OLCEK), H = Math.ceil(window.innerHeight / OLCEK);
-    k.className = 'px-bulut'; k.setAttribute('aria-hidden', 'true');
-    ['sol', 'sag'].forEach(y => { const c = document.createElement('canvas'); c.className = 'px-bulut__' + y; c.width = W; c.height = H; tamKat(c, OLCEK); bulutYarim(c, y === 'sag'); k.appendChild(c); });
-    el.insertBefore(k, el.firstChild);
-    return k;
-  }
   function manzaraKoy(el){
     const D = L.PIKSEL_DOGA;
     if(!D || !el || el.querySelector('canvas.piksel-manzara')) return null;
@@ -458,7 +436,9 @@ window.LIFEOS = window.LIFEOS || {};
     return D.length;
   }
   /* Kayıtta bir kalp yükselir: yalnız gerçek kayıtta çağrılır. */
+  const ses = tur => { try{ if(L.SES) L.SES.tik(tur, false); }catch(x){ /* ses bilgi taşımaz */ } };
   function kayitTepki(e){
+    ses('kalp');
     const r = e.getBoundingClientRect(), n = kivilcim(r.left + r.width / 2, r.top + r.height / 2);
     const sim = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul('kalp');
     if(!n || !sim) return n;
@@ -481,6 +461,7 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* Silinen satırın yerinden gri kareler aşağı süzülür (hareket.js satır kapanışı). Renk temanın kendi çizgisi. */
   function toz(e){
+    ses('sil');
     const k = getComputedStyle(document.documentElement);
     return ogeKivilcim(e, [k.getPropertyValue('--border-strong').trim() || '#c9a988', k.getPropertyValue('--text-3').trim() || '#6f4f42'], 'toz', 520);
   }
@@ -499,6 +480,7 @@ window.LIFEOS = window.LIFEOS || {};
   function cevapIsle(e){
     if(!e || !e.classList) return null;
     const tur = e.classList.contains('is-dogru') ? 'dogru' : e.classList.contains('is-yanlis') ? 'yanlis' : null;
+    if(tur) ses(tur);
     if(!tur || hareketsiz()) return tur;
     e.classList.remove('px-dogru', 'px-yanlis');
     void e.offsetWidth;
@@ -518,10 +500,10 @@ window.LIFEOS = window.LIFEOS || {};
       const t = o.target;
       if(!t || !t.closest || !secili()) return;
       const su = t.closest('.su-bardak');
-      if(su){ ogeKivilcim(su, ['#58b9ec', '#e6f7ff', '#2f93cf']); return; }
-      if(t.matches('input[type="checkbox"]:checked')){ listeBitti(t) ? ogeKivilcim(t, null, 'buyuk', 560) : ogeKivilcim(t); return; }
+      if(su){ ses('damla'); ogeKivilcim(su, ['#58b9ec', '#e6f7ff', '#2f93cf']); return; }
+      if(t.matches('input[type="checkbox"]:checked')){ const b = listeBitti(t); ses(b ? 'liste' : 'isaret'); b ? ogeKivilcim(t, null, 'buyuk', 560) : ogeKivilcim(t); return; }
       const satir = t.closest('button.minrow:not(.is-done)');
-      if(satir){ const m = satir.querySelector('.minrow__mark') || satir; listeBitti(satir) ? ogeKivilcim(m, null, 'buyuk', 560) : ogeKivilcim(m); return; }
+      if(satir){ const m = satir.querySelector('.minrow__mark') || satir, b = listeBitti(satir); ses(b ? 'liste' : 'isaret'); b ? ogeKivilcim(m, null, 'buyuk', 560) : ogeKivilcim(m); return; }
       const sik = t.closest('.secenek[data-harf]:not([disabled]), .king__soru-sik:not([disabled])');
       if(sik){
         const sec = sik.matches('.king__soru-sik') ? kimlik(sik, 'data-king') : (kimlik(sik, 'data-act') || '') + kimlik(sik, 'data-harf');
@@ -553,8 +535,6 @@ window.LIFEOS = window.LIFEOS || {};
     }
     hazirla();
     dongu();
-    const varis = document.querySelector('.perde--karsilama');
-    if(varis) bulutKoy(varis);   // varış: aynı bulut, üstünde karşılama; perde kalkınca iki yana açılır
     manzaraOnceden();
   }
   function kur(){
@@ -570,5 +550,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ bulutKoy, manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
+  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
 })(window.LIFEOS);

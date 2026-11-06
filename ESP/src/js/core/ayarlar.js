@@ -732,6 +732,7 @@ window.LIFEOS = window.LIFEOS || {};
        kartlar; düzeyler, müzik kitaplığı, açılış, arka plan müziği, arka plan videosu. */
     if(id === 'ses') return '<div class="skartlar">'
       + kart(SIMGE_SES, yz('ortak.ayarlar.ses-duzeyleri'), yz('ortak.ayarlar.genel-hepsini-birlikte-kisar'), cagir(L.SES, 'duzeySeciciHtml'))
+      + kart(SIMGE_SES, yz('ortak.ses.sesler'), yz('ortak.ses.basinca-calar'), cagir(L.SES, 'sesListeHtml'))
       + cagir(L.MUZIK, 'ayarHtml')
       + '</div>';
     if(id === 'king') return '<div class="skartlar">' + kart(SIMGE.king, 'King', yz('ortak.ayarlar.adi-konusmasi-ve-sesi'),

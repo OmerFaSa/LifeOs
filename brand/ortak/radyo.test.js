@@ -475,7 +475,7 @@
         /* Nabız ve kare, üçgenden çok daha güçlü duyulur: alt sınırı düşük. */
         const keskin = S.SESLER[ad].some(k => k.dalga === 'nabiz' || k.dalga === 'square');
         expect(Math.max.apply(null, S.SESLER[ad].map(k => k.g)) >= (keskin ? 0.03 : 0.05)).toBe(true);
-        S.SESLER[ad].forEach(k => { expect(k.g > 0 && k.g <= 0.3).toBe(true); expect(k.t + k.d <= 1).toBe(true); });
+        S.SESLER[ad].forEach(k => { expect(k.g > 0 && k.g <= 0.3).toBe(true); expect(k.t + k.d <= (/^bulut/.test(ad) ? 1.4 : 1)).toBe(true); });   // bulut sesi kaymayla aynı boydadır
       });
       const { Baglam, kayit } = sahteBaglam();
       return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
@@ -485,7 +485,7 @@
           expect(S.tik(ad, true, { perde:1.25 })).toBe(true);
           kayit.nota.forEach(n => {
             expect(n.type === 'sawtooth').toBe(false);
-            if(ARAYUZ.indexOf(ad) < 0) expect(n.type === 'square').toBe(false);
+            if(ARAYUZ.indexOf(ad) < 0 && !S.SESLER[ad].some(k => k.dalga === 'nabiz')) expect(n.type === 'square').toBe(false);   // nabız dalgası kuramayan bağlam kare çalar
             expect(Math.max(n.f0, n.f1 || 0) <= 2200).toBe(true);
           });
           /* 2026-10-28: gerçek kayıtların yolu ayrı ve 5,5 kHz (S.KAYIT_TAVAN): yalnız kayıt geçer, sentez 2,2 kHz altında kalır. */

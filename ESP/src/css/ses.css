@@ -75,6 +75,13 @@
   .ust__ses.is-baglaniyor .ust__ses-nokta{ animation:none; }
 }
 
+/* Sesler kartı (Ayarlar › Ses; ses.js sesListeHtml): her ses bir düğme, basınca çalar. */
+.sesliste{ display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px; }
+.sesliste__ses{ display:flex; align-items:center; gap:8px; min-height:36px; padding:6px 10px; font:inherit; font-size:13.5px; text-align:left; color:var(--text); background:var(--surface-2); border:0; cursor:pointer; }
+.sesliste__ses:hover{ background:var(--surface-3); }
+.sesliste__ses:disabled{ color:var(--text-3); cursor:default; }
+.sesliste__ses svg{ flex:none; width:14px; height:14px; fill:currentColor; }
+.sesliste__not{ margin:0 0 8px; font-size:13px; color:var(--text-2); }
 /* SES DÜZEYLERİ (Görünüm › Ses; ses.js duzeySeciciHtml): ince cam ray, modül renginde dolgu. */
 .sesduzey{ display:grid; gap:10px; }
 .sesduzey__satir{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:2px 12px; font-size:13.5px; }
