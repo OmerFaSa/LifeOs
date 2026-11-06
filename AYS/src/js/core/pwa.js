@@ -20,6 +20,9 @@
         sistem/telefon.py) kabuk kurulunca depo bir kez kalıcı istenir:
         tarayıcı yer darlığında sitenin verisini silmesin. Bilgisayarda
         (http://127.0.0.1) istenmez; Firefox bunu kullanıcıya sorar.
+     6. ANDROID'DE TEK DOKUNUŞ. Tarayıcı kurulum teklif edince altta şerit
+        çıkar; «Şimdi değil» o modülde bir daha sormaz. Kurulum yine tarayıcının
+        kendi onayıyla olur. Android dışında teklife dokunulmaz.
 
    Manifest ayrı dosya değildir: `app.js › installManifest` onu gömülü
    üretir (tek dosya sürümüyle aynı yol). */
@@ -30,6 +33,9 @@ window.LIFEOS.PARCA.yazilar({
 window.LIFEOS.PARCA.yazilar({
   'ortak.pwa.saat-ss-dd-biciminde-olmali':'Saat «SS:DD» biçiminde olmalı.',
   'ortak.pwa.tercih-bu-cihaza-yazilamadi':'Tercih bu cihaza yazılamadı.',
+  'ortak.pwa.kur-yazi':'Bu modülü ana ekrana kur',
+  'ortak.pwa.kur':'Kur',
+  'ortak.pwa.simdi-degil':'Şimdi değil',
 });
 
 
@@ -90,6 +96,52 @@ window.LIFEOS.PARCA.yazilar({
     }catch(e){ return false; }
   }
 
+
+  /* Android tablette Chrome çoğu kez masaüstü sitesi ister: adında Android geçmez. */
+  function androidMi(nav){
+    nav = nav || (typeof navigator !== 'undefined' ? navigator : {});
+    const ua = nav.userAgent || '';
+    return /Android/.test(ua) || (/Linux/.test(ua) && nav.maxTouchPoints > 1);
+  }
+
+  /* Söz 6. Doner: gosterilen serit ya da null. */
+  const KURULUM_KAPALI = 'lifeos.kurulum.kapali';
+  function kurulumSeridi(e, o){
+    o = o || {};
+    const d = o.document || document;
+    if(!androidMi(o.navigator)) return null;
+    try{ if(localStorage.getItem(KURULUM_KAPALI)) return null; }catch(x){ /* depo yok: yine sorulur */ }
+    e.preventDefault();
+    const eski = d.querySelector('.pwa-serit');
+    if(eski) eski.remove();
+    const s = d.createElement('div');
+    s.className = 'pwa-serit';
+    s.setAttribute('role', 'region');
+    s.setAttribute('aria-label', yz('ortak.pwa.kur-yazi'));
+    s.innerHTML = '<span>' + yz('ortak.pwa.kur-yazi') + '</span>'
+      + '<button type="button" class="hesap__ana" data-pwa="kur">' + yz('ortak.pwa.kur') + '</button>'
+      + '<button type="button" class="hesap__ikinci" data-pwa="kapat">' + yz('ortak.pwa.simdi-degil') + '</button>';
+    s.addEventListener('click', async ev => {
+      const ad = ev.target && ev.target.getAttribute('data-pwa');
+      if(!ad) return;
+      s.remove();
+      if(ad === 'kapat'){
+        try{ localStorage.setItem(KURULUM_KAPALI, '1'); }catch(x){ /* depo yok */ }
+        return;
+      }
+      /* AYS Rehber'deki düğme aynı teklifi kullanmış olabilir: tarayıcı reddeder, ⋮ menüsü kalır. */
+      try{ await e.prompt(); }catch(x){ /* teklif kullanılmış */ }
+    });
+    d.body.appendChild(s);
+    return s;
+  }
+  if(typeof window !== 'undefined' && window.addEventListener){
+    window.addEventListener('beforeinstallprompt', e => { kurulumSeridi(e); });
+    window.addEventListener('appinstalled', () => {
+      const s = document.querySelector('.pwa-serit');
+      if(s) s.remove();
+    });
+  }
 
   /* ------------------------------------------------ 164 bildirim kartı
 
@@ -306,7 +358,7 @@ window.LIFEOS.PARCA.yazilar({
   }
   const rozet = rozetKur();
 
-  L.Pwa = { uygun, adresler, kaydet, kaliciIste, EN_COK, rozet, rozetKur,
+  L.Pwa = { uygun, adresler, kaydet, kaliciIste, EN_COK, rozet, rozetKur, androidMi, kurulumSeridi,
     bildirimAyari, bildirimAyariYaz, turAcik, sessizMi, gonderilebilir,
     EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle, bildirimSorusu };
 })();

@@ -45,7 +45,7 @@ Oyun açıkken günlükten: bellek hatası boş sanal bellek 0,9-5,5 GiB iken, b
 
 ## Gerçek cihazda denenmedi
 
-- Samsung ve tablet hiç denenmedi. Koddan engel görmedim (adres, köken, CORS, service worker, akış okuma). Bilinen dış riskler: Android Özel DNS ayarı Tailscale adını çözmeyebilir, Samsung pil kısıtlaması Tailscale'i kapatabilir. iPad'de uygulama yalnız iPhone hedefli (`TARGETED_DEVICE_FAMILY: "1"`); iPad'de tarayıcıyla açılmalı.
+- Samsung ve tablet hiç denenmedi. Koddan engel görmedim (adres, köken, CORS, service worker, akış okuma). Bilinen dış riskler: Android Özel DNS ayarı Tailscale adını çözmeyebilir, Samsung pil kısıtlaması Tailscale'i kapatabilir (2026-11-06'dan beri kurulum sayfası ve Hesap › Her yerden erişim ikisini de söyler). iPad'de uygulama yalnız iPhone hedefli (`TARGETED_DEVICE_FAMILY: "1"`); iPad'de tarayıcıyla açılmalı.
 - iPhone'da yeni durum cümleleri, bilgisayar kapalı senaryosu ve «Model hazırlanıyor» balonu denenmedi.
 - Gerçek yeniden başlatma denenmedi. Kapılar LifeOS kapalıyken durdu (ölçüldü); Tailscale yeniden başlayınca durduğu belgeden biliniyor, denenmedi.
 - Açılışta başlama düğmesinin gerçek bilgisayarda çalışması denenmedi: kayıt defteri testte sahte, pencere açmayan Python yalnız ayrı denendi. Oturum açılmadan başlamaz. Başlarken kısa süre bir komut penceresi görünebilir.

@@ -93,7 +93,7 @@
       const yol = url.replace(/^https?:\/\/[^/]+/, '');
       if(s.yok) return cevap(404, null);
       const govde = op && typeof op.body === 'string' ? JSON.parse(op.body) : null;   // ham gövde (dosya) JSON değil
-      if(yol === '/api/hesap/durum') return cevap(200, { surum:5, kurulum:s.kurulum, kayit:s.kayitAcik, yerel:!s.disarida, ev_agi:s.evAgi || [] });
+      if(yol === '/api/hesap/durum') return cevap(200, { surum:5, kurulum:s.kurulum, kayit:s.kayitAcik, yerel:!s.disarida, ev_agi:s.evAgi || [], sertifika_yenilendi:!!s.sertifikaYeni });
       if(yol === '/api/hesap/kayit'){
         if(s.kullanicilar[govde.ad]) return cevap(409, { hata:'Bu adla bir kullanıcı zaten var.' });
         const ilk = !Object.keys(s.kullanicilar).length;
@@ -216,6 +216,7 @@
         return cevap(202, { calisiyor:true });
       }
       if(yol === '/api/hesap/merkez') return s.merkez ? cevap(200, s.merkez) : cevap(409, { hata:'Her yerden erişim kapalı.' });
+      if(yol === '/api/hesap/sertifika-tamam'){ s.sertifikaYeni = false; return cevap(200, { ok:true }); }
       if(yol === '/api/hesap/ev-agi-ac'){ s.evAgiAcildi = true; return cevap(200, { ok:true, mesaj:'Ev ağı açılıyor.' }); }
       if(yol === '/api/hesap/bag-kodu'){
         s.bag = { kod:'482913', id:(s.bag ? s.bag.id + 1 : 7), ad, durum:'bekliyor' };
@@ -1901,6 +1902,43 @@
       tikla('[data-sayfa="ikiadim"]');
       expect(merkez().querySelector('.hesap-yedek__liste')).toBeNull();          // bir kez gösterildi
       expect(merkez().textContent).toContain('10 kod kaldı');
+    }));
+
+    [[['pc.tail1.ts.net', '192.168.0.10'], 'http://192.168.0.10:5180/?bagla=482913', 'sertifikası kurulunca'],
+     [['pc.tail1.ts.net'], 'https://pc.tail1.ts.net:5183/?bagla=482913', 'Tailscale açık olsun']].forEach(([evAgi, beklenen, metin]) => {
+      it('QR yeni cihazın ulaşabileceği adrese gider: ' + evAgi.join(' + '), () => sahneyle(async () => {
+        const qrAdres = [], eski = window.LIFEOS.QR;
+        window.LIFEOS.QR = { svg:a => { qrAdres.push(a); return '<svg></svg>'; } };
+        try{
+          const srv = sunucuKur({ evAgi }), c = cihazKur(srv);
+          const h = sahne(c);
+          await hazir();
+          await h.girisYap('omer', 'parola-123');
+          await h.merkezAc('cihazlar');
+          await hazir();
+          tikla('[data-sayfa="bagla"]');
+          await hazir();
+          expect(qrAdres[qrAdres.length - 1]).toBe(beklenen);
+          expect(merkez().textContent).toContain(metin);
+          tikla('[data-hesap="bag-vazgec"]');
+          await hazir();
+        }finally{ window.LIFEOS.QR = eski; }
+      }));
+    });
+
+    it('kök sertifika yenilendiyse Cihazlar söyler; «Tamam» bir daha göstermez', () => sahneyle(async () => {
+      const srv = sunucuKur({ evAgi:['192.168.0.10'] }), c = cihazKur(srv);
+      srv.sertifikaYeni = true;
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.merkezAc('cihazlar');
+      await hazir();
+      expect(merkez().textContent).toContain('Güvenlik sertifikası yenilendi');
+      tikla('[data-hesap="sertifika-tamam"]');
+      await hazir();
+      expect(srv.sertifikaYeni).toBe(false);
+      expect(merkez().textContent.includes('Güvenlik sertifikası yenilendi')).toBe(false);
     }));
 
     it('kodla cihaz bağla: büyük kod ve QR; bağlanınca söyler; çıkınca açık kod kapatılır', () => sahneyle(async () => {

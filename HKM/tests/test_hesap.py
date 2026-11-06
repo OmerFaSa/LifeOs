@@ -1434,11 +1434,12 @@ def run():
     def t_http_sistem():
         eski = dict(hesap.SISTEM)
         yerel0 = hesap._yerel_mi
-        basladi, acildi = [], []
+        basladi, acildi, sertifika = [], [], [1]
         hesap.SISTEM.clear()
         hesap.SISTEM.update(durum=lambda taze: {"geride": 2, "taze": taze},
                             baslat=lambda: basladi.append(1) or {"calisiyor": True},
                             ev_agi_ac=lambda: acildi.append(1) or {"ok": True},
+                            sertifika_yenilendi=lambda: bool(sertifika), sertifika_tamam=sertifika.clear,
                             uzak_durum=lambda: {"acik": True, "acilis": False},
                             uzak_acilis=lambda acik: acildi.append(acik) or {"ok": True, "acilis": acik})
         try:
@@ -1468,7 +1469,14 @@ def run():
                 eq(s.iste("/api/hesap/uzak-durum", {}, y)[0], 403)
                 eq(s.iste("/api/hesap/uzak-acilis", {"acik": True}, y)[0], 403)
                 eq(acildi, [])
+                # Sertifika notu yalniz bilgisayarda gorunur ve yalniz orada kapanir.
+                eq(s.iste("/api/hesap/durum")[2]["sertifika_yenilendi"], False)
+                eq(s.iste("/api/hesap/sertifika-tamam", {}, y)[0], 403)
                 hesap._yerel_mi = yerel0
+                eq(s.iste("/api/hesap/durum")[2]["sertifika_yenilendi"], True)
+                eq(s.iste("/api/hesap/sertifika-tamam", {}, u)[0], 403)
+                eq(s.iste("/api/hesap/sertifika-tamam", {}, y)[0], 200)
+                eq(s.iste("/api/hesap/durum")[2]["sertifika_yenilendi"], False)
                 eq(s.iste("/api/hesap/ev-agi-ac", {}, y)[0], 200)
                 eq(acildi, [1])
                 eq(s.iste("/api/hesap/uzak-durum", {}, u)[0], 403)              # uye degistiremez, goremez

@@ -19,6 +19,8 @@ Sozler:
   6. Kurulum sayfasi yalniz yonergeyi ve kokun ACIK kismini verir: ozel
      anahtar, depo dosyalari, HEAD/POST yoktur.
   7. --kapat ev agi kapilarini kapatir, koku birakir.
+  8. Kok yalniz LifeOS adreslerini imzalayabilir (kritik nameConstraints): anahtar
+     calinsa bile baska bir site taklit edilemez. Kisitsiz eski kok yenisine gecer.
 Testler gecici klasorde calisir; kullanicinin gercek sertifikasina dokunmaz."""
 import datetime
 import hashlib
@@ -119,6 +121,35 @@ def http_al(port, yontem="GET", yol="/"):
     return r.status, r.getheader("Content-Type") or "", govde
 
 
+def imzala(y, gecici, san):
+    """Calinmis anahtarla imzalanan sertifika: kisit bunu yakalamali."""
+    d = tempfile.mkdtemp(dir=gecici)
+    anahtar, csr, ek, cikti = (os.path.join(d, a) for a in ("k", "c", "e", "s"))
+    subprocess.run([OPENSSL, "req", "-newkey", "rsa:2048", "-nodes", "-keyout", anahtar, "-out", csr,
+                    "-subj", "/CN=x"], check=True, capture_output=True)
+    with open(ek, "w", encoding="ascii") as f:
+        f.write("subjectAltName=%s\n" % san)
+    subprocess.run([OPENSSL, "x509", "-req", "-in", csr, "-CA", y["kok"], "-CAkey", y["kok_anahtar"],
+                    "-set_serial", "1", "-days", "1", "-sha256", "-extfile", ek, "-out", cikti],
+                   check=True, capture_output=True)
+    return cikti
+
+
+def dogrula(kok, sertifika):
+    p = subprocess.run([OPENSSL, "verify", "-CAfile", kok, sertifika], capture_output=True, text=True)
+    return p.returncode == 0, p.stdout + p.stderr
+
+
+def eski_kok(y):
+    """2026-11 oncesi kurulumun koku: ad kisiti yok."""
+    subprocess.run([OPENSSL, "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", y["kok_anahtar"],
+                    "-out", y["kok"], "-days", "3650", "-subj", "/CN=LifeOS Yerel Kok (pc)",
+                    "-addext", "basicConstraints=critical,CA:TRUE", "-addext", "keyUsage=critical,keyCertSign,cRLSign"],
+                   check=True, capture_output=True)
+    subprocess.run([OPENSSL, "x509", "-in", y["kok"], "-outform", "DER", "-out", y["kok_der"]],
+                   check=True, capture_output=True)
+
+
 with tempfile.TemporaryDirectory() as gecici:
     k = os.path.join(gecici, "telefon")
     y = telefon.yollar(k)
@@ -146,6 +177,58 @@ with tempfile.TemporaryDirectory() as gecici:
     with open(y["kok_der"], "rb") as f:
         der = f.read()
     dogru("kokun DER kopyasi var", der[:1] == b"\x30", der[:4])
+
+    # 2a — ad kisiti: izinli ad gecer, dis ad reddedilir (openssl verify zinciri denetler)
+    dogru("kokte kritik ad kisiti var", "X509v3 Name Constraints: critical" in km, km[-600:])
+    dogru("yeni kurulum «yenilendi» demez", not telefon.kok_yenilendi_mi(k))
+    dogru("sunucu sertifikasi kisita sigar", dogrula(y["kok"], y["sertifika"])[0], dogrula(y["kok"], y["sertifika"])[1])
+    for san in ("DNS:pc.local", "DNS:localhost", "IP:127.0.0.1", "IP:10.1.2.3", "IP:172.16.0.9", "IP:192.168.1.1"):
+        gecti, cikti = dogrula(y["kok"], imzala(y, gecici, san))
+        dogru("izinli ad gecer: " + san, gecti, cikti[-200:])
+    for san in ("DNS:ornek.com", "DNS:www.google.com", "DNS:local.ornek.com", "DNS:evim.ts.net", "DNS:pc",
+                "IP:8.8.8.8", "IP:172.32.0.1", "IP:100.100.1.1", "DNS:pc.local,DNS:banka.com"):
+        gecti, cikti = dogrula(y["kok"], imzala(y, gecici, san))
+        dogru("dis ad reddedilir: " + san, not gecti and "subtree" in cikti, cikti[-200:])
+    dogru("ciplak ad SAN'da yok (tasinan kok baska adda da gecerli)", "DNS:lifeos-test," not in sm + ",")
+    for ip, beklenen in (("192.168.1.5", True), ("10.0.0.2", True), ("172.20.0.1", True), ("127.0.0.1", False),
+                         ("100.80.0.1", False), ("198.18.0.1", False), ("169.254.1.1", False), ("8.8.8.8", False)):
+        dogru("ev_ipi_mi(%s) = %s" % (ip, beklenen), telefon.ev_ipi_mi(ip) is beklenen)
+
+    # 2b — kisitsiz eski kok yenisine gecer; yanindaki dosyaya dokunulmaz, eski anahtar kalmaz
+    e = os.path.join(gecici, "eski")
+    ey = telefon.yollar(e)
+    os.makedirs(e)
+    eski_kok(ey)
+    telefon.sunucu_kur(OPENSSL, ey, "pc", ["192.168.1.5"])
+    with open(os.path.join(e, "baska.dosya"), "w") as f:
+        f.write("veri")
+    dogru("eski kok kisitsiz gorunur", not telefon.kok_kisitli_mi(ey))
+    eski_iz = izi(ey["kok_anahtar"])
+    dogru("openssl yoksa eski kokle surer", not telefon.tazele(e, "yok-boyle-openssl", "pc", ["192.168.1.5"])
+          and izi(ey["kok_anahtar"]) == eski_iz and not telefon.kok_yenilendi_mi(e))
+    dogru("acilista gecis yapilir", telefon.tazele(e, OPENSSL, "pc", ["192.168.1.5"]))
+    dogru("yeni kok kisitli", telefon.kok_kisitli_mi(ey) and "Name Constraints: critical" in metin(ey["kok"]))
+    dogru("eski anahtar kalmadi", izi(ey["kok_anahtar"]) != eski_iz)
+    dogru("sunucu sertifikasi yeni kokle dogrulanir", dogrula(ey["kok"], ey["sertifika"])[0])
+    dogru("Hesap › Cihazlar soyler", telefon.kok_yenilendi_mi(e))
+    with open(os.path.join(e, "baska.dosya")) as f:
+        dogru("baska dosyaya dokunulmadi", f.read() == "veri")
+    kok2 = izi(ey["kok"])
+    telefon.kok_yenilendi_tamam(e)
+    dogru("ikinci acilista kok yeniden uretilmez", not telefon.tazele(e, OPENSSL, "pc", ["192.168.1.5"])
+          and izi(ey["kok"]) == kok2 and not telefon.kok_yenilendi_mi(e))
+    dogru("baska bilgisayar adinda kok gecerli kalir (tasima)", telefon.tazele(e, OPENSSL, "yeni-pc", ["10.0.0.4"])
+          and izi(ey["kok"]) == kok2 and dogrula(ey["kok"], ey["sertifika"])[0])
+    import plistlib
+    with open(ey["kok_der"], "rb") as f:
+        dogru("iPhone profili yeni koku tasir",
+              plistlib.loads(telefon.profil(e, "pc", ["192.168.1.5"], str(KOK)))["PayloadContent"][0]["PayloadContent"] == f.read())
+    telefon.kapat(e)
+    eski_kok(ey)
+    dogru("ev agi kapaliyken tazele koke dokunmaz (kural 3)", not telefon.tazele(e, OPENSSL, "pc", [])
+          and not telefon.kok_kisitli_mi(ey))
+    telefon.kur(k=e, openssl=OPENSSL, bilgisayar="pc", ip_listesi=[])
+    dogru("ev agi yeniden acilinca gecis yapilir", telefon.kok_kisitli_mi(ey) and dogrula(ey["kok"], ey["sertifika"])[0])
 
     # 3 — yenileme koku korur
     kok_izi, sunucu_izi = izi(y["kok"]), izi(y["sertifika"])
@@ -251,6 +334,12 @@ with tempfile.TemporaryDirectory() as gecici:
           and all(k["Icon"][:8] == b"\x89PNG\r\n\x1a\n" for k in klipler), [(k["Label"], k["URL"]) for k in klipler])
     dogru("profil: yeniden kurulunca eskisinin yerine gecer (kimlik sabit)",
           plistlib.loads(telefon.profil(k, telefon.ad(), telefon.ipler()))["PayloadUUID"] == pr["PayloadUUID"])
+    tsli = sunucu.telefon_kurulum_html("pc", ["192.168.1.5"], "AA", "pc.tail1.ts.net")
+    dogru("Tailscale aciksa Android once onu dener, sonra .local",
+          '["https://pc.tail1.ts.net", "https://pc.local"]' in tsli and "Tailscale'i kur" in tsli)
+    tssiz = sunucu.telefon_kurulum_html("pc", ["192.168.1.5"], "AA")
+    dogru("Tailscale kapaliysa sayfada Tailscale adimi yok",
+          "Tailscale'i kur" not in tssiz and '["https://pc.local"]' in tssiz)
     dogru("kurulum sayfasi tek QR ile baglar","lifeos://bagla" in sayfa and ":%d/" % telefon.PORTLAR["SPI"] in sayfa)
     betik = sayfa[sayfa.index("<script>") + 8:sayfa.index("</script>")]
     with open(os.path.join(gecici, "kurulum.js"), "w", encoding="utf-8") as f:

@@ -16,27 +16,10 @@ Sahipsiz dal: `claude/yasayan-apartman-0339d0` (`d242341f`, 2026-11-05) main'e h
 apartman değil» denemesi; main'deki sürüm `e48116b4`. Birleştirilmeyecek, fikirleri piksel sanatı oturumuna verildi.
 O oturum bitince dal silinebilir (kullanıcıya sor).
 
-## Sıradaki iş: kök sertifikayı LifeOS adreslerine sınırla (kullanıcı onayladı, 2026-11-06)
-
-Sorun: `sistem/telefon.py` kök sertifikayı (`kok.key` + `lifeos-kok.cer`) ad kısıtı OLMADAN üretiyor.
-Cihaza kurulu bu kök, `kok.key` çalınırsa her siteyi taklit edebilir.
-
-Yapılacak:
-1. Kök üretiminde kritik `nameConstraints`: izinli yalnız `.local`, bilgisayarın adı, `.ts.net`
-   (tercihen yalnız `tailaff979.ts.net`), özel IP aralıkları (127.0.0.0/8, 10/8, 172.16/12, 192.168/16,
-   Tailscale 100.64.0.0/10). Sunucu sertifikasının SAN'ları bu listeye sığmalı (adres değişiminde de).
-2. Geçiş: kısıtsız eski kök varsa yenisini üret, sunucu sertifikasını yeniden imzala. Veriye dokunma.
-   Taşıma paketi (`sistem/tasi.py`) ve iPhone profili (`/lifeos.mobileconfig`) yeni kökü taşısın.
-3. Hesap › Cihazlar'da bir kez «Güvenlik sertifikası yenilendi: her cihazda bir kez yeniden kur» de.
-   Kurulum sayfasına eski sertifikayı kaldırma adımı ekle (Android: Ayarlar › Güvenlik › Kullanıcı
-   sertifikaları; iPhone: Ayarlar › Genel › VPN ve Cihaz Yönetimi).
-4. Test: üretilen kökte kısıt var ve kritik; kısıt dışı bir ad için imzalanan sertifika `openssl verify`
-   ile reddedilir; eski kök yeniye çevrilir; SAN listesi kısıta sığar. HKM ve `sistem/` testleri,
-   `python3 tools/tasi_test.py`, `python3 uygulama/ios/web_paket_test.py`, `node tools/entegre.js`.
-5. Gerçek cihaz: iPhone ve Android tablette yeni kökü kur, modüller https ile açılıyor mu bak
-   (iOS ve Chrome ad kısıtını uygular; denenmedi).
-
 ## Alınan karar
+
+**Android yerel APK yok, kurulabilir web uygulaması** (2026-11-06, kullanıcı: «B: web uygulaması»). Ekran kapalıyken rota ve
+zamanlı bildirim Android'de yok; üç ayrı simge var. Ayrıntı: `belgeler/UYGULAMA.md`. Yeniden önerme, kullanıcı sorarsa konuş.
 
 **AltStore ve AltServer kalıyor** (2026-11-06, kullanıcı: «Kalsın»). Ekran kapalıyken koşu rotası ve telefon bildirimleri
 iPhone'daki yerel uygulamaya bağlı; uygulama 7 günde bir AltServer ile yenilenir. Yeniden önerme, kullanıcı sorarsa konuş.
@@ -52,6 +35,8 @@ Bilgisayarda taklitle ölçüldü, cihazda görülmedi:
 5. Telefon hızı gerçek adreste (yavaş 4G'de tekrar açılış, taklitte 37,8 sn'den 0,65 sn'ye) ölçülmedi.
 6. Öğrenme motorunun model düğmeleri telefonda ve King üzerinden denenmedi.
 7. Açılış filmi yeni bir hesapla ilk girişte görülmedi.
+8. Kök sertifika ad kısıtı gerçek cihazda görülmedi: iPhone ve Android'de yeni kökü kur, modüller https ile açılıyor mu bak (kısıtı yalnız `openssl verify` ve Python TLS ile ölçtüm). Eski kökü kurulu iPhone, yenisini kurana dek ev ağı adresinde uyarı görür.
+9. Android kurulumu cihazda hiç denenmedi: QR, Tailscale'e kendiliğinden geçiş, Samsung tarayıcısı, «Kur» şeridi, ana ekrandan bilgisayar kapalıyken açılış. Chrome'un kurulabilirlik denetimi yalnız masaüstü Chromium'da, Android kimliğiyle temiz çıktı.
 
 ## Küçük açıklar
 

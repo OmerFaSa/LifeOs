@@ -242,8 +242,11 @@ ev ağına açılmaz. Sertifikalar deponun dışında, kullanıcı klasöründed
 kök bir kez kurulur (iPhone: profil + «tam güven»; Android: CA sertifikası),
 modül ana ekrana eklenir ve evde bir kez açılır: sonra çevrimdışı kabukla her
 yerde açılır. Telefon yolunda depo kalıcı istenir (`pwa.js` söz 5). IP
-değişince LifeOS açılışta sunucu sertifikasını kendiliğinden yeniler (kök kalır, telefona yeniden kurulmaz);
-kapatmak: `telefon.py --kapat`. Bir modülü hep aynı adresten aç: adres
+değişince LifeOS açılışta sunucu sertifikasını kendiliğinden yeniler (kök kalır, telefona yeniden kurulmaz).
+**Kök yalnız LifeOS adreslerini imzalayabilir** (kritik `nameConstraints`: `.local`, `localhost`, 127/8, 10/8,
+172.16/12, 192.168/16): `kok.key` çalınsa da başka site taklit edilemez, cihazın geri kalanına etkisi yok.
+`.ts.net` listede yok, o adresin sertifikasını Tailscale verir. Kısıtsız eski kök açılışta yenisine geçer, eski
+anahtar silinir, Hesap › Cihazlar her cihazda bir kez yeniden kurmayı söyler (veriye dokunulmaz). Kapatmak: `telefon.py --kapat`. Bir modülü hep aynı adresten aç: adres
 başka bir kökendir, verisi ayrı durur. Test: `tools/telefon_test.py`.
 
 **Veriyi taşımak — yedek dosyası.** Her sistemde *Rehber* ekranında

@@ -1788,6 +1788,7 @@ def _bekci_dongusu():
 
 
 hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac,
+                    sertifika_yenilendi=telefon.kok_yenilendi_mi, sertifika_tamam=telefon.kok_yenilendi_tamam,
                     uzak_ac=uzak_ac, uzak_kapat=uzak.kapat, merkez=uzak.merkez,
                     uzak_durum=uzak_durum, uzak_acilis=uzak.acilis_ayarla)
 
@@ -2155,11 +2156,19 @@ def telefon_sunuculari(k=None, portlar=None, host=TELEFON_HOST):
     return acik, sorun
 
 
-def telefon_kurulum_html(bilgisayar, ip_listesi, parmak):
+def telefon_kurulum_html(bilgisayar, ip_listesi, parmak, uzak_ad=""):
     a = telefon.adresler(bilgisayar, ip_listesi)
+    # Android once calisan adresi arar: Tailscale (sertifika istemez, her yerde ayni koken), .local, IP.
+    aday = (["https://" + uzak_ad] if uzak_ad else []) + ["https://%s.local" % bilgisayar]
+    tailscale = ('''<h3>Tailscale ile (önerilen)</h3>
+<p>Sertifika istemez, evden uzakta da çalışır.</p>
+<ol><li><a class="dugme" href="https://play.google.com/store/apps/details?id=com.tailscale.ipn">Tailscale'i kur</a> ve bilgisayardaki hesabınla gir.</li>
+<li>Bu sayfaya dön: kendiliğinden devam eder.</li></ol>
+<p>Devam etmezse Ayarlar'da <b>Özel DNS</b> ara, «Otomatik» ya da «Kapalı» yap. Samsung'da <b>pil</b> ara, Tailscale'i hiç uyutulmayan uygulamalara ekle.</p>
+<h3>Yalnız ev ağında</h3>''' if uzak_ad else "")
     modul = "".join(
-        '<li><b>%s</b> <a href="%s">%s</a>%s</li>' % (
-            _kac(m), _kac(a[m][0]), _kac(a[m][0]),
+        '<li><b>%s</b> <a data-kapi="%d" href="%s">%s</a>%s</li>' % (
+            _kac(m), telefon.PORTLAR[m], _kac(a[m][0]), _kac(a[m][0]),
             (' <span class="yedek">yedek: <a href="%s">%s</a></span>' % (_kac(a[m][1]), _kac(a[m][1]))
              if len(a[m]) > 1 else ""))
         for m in ("AYS", "SPI", "ESP"))
@@ -2173,7 +2182,7 @@ body{ margin:0; padding:24px 16px 40px; background:var(--bg); color:var(--yazi);
   font:16px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; }
 main{ max-width:560px; margin:0 auto; }
 section{ background:var(--kart); border-radius:16px; padding:16px 18px; margin:0 0 14px; }
-h1{ font-size:22px; margin:0 0 16px; } h2{ font-size:16px; margin:0 0 8px; }
+h1{ font-size:22px; margin:0 0 16px; } h2{ font-size:16px; margin:0 0 8px; } h3{ font-size:15px; margin:14px 0 4px; }
 p, li{ color:var(--ikinci); } b{ color:var(--yazi); } a{ color:var(--vurgu); word-break:break-all; }
 .dugme{ display:inline-block; margin-top:6px; padding:12px 18px; border-radius:999px;
   background:var(--vurgu); color:#fff; text-decoration:none; font-weight:600; }
@@ -2189,7 +2198,8 @@ ul, ol{ padding-left:18px; margin:6px 0; } ol li{ margin:8px 0; } [hidden]{ disp
 <ol><li><a class="dugme" href="/lifeos.mobileconfig">LifeOS profilini indir</a> › İzin ver.</li>
 <li>Ayarlar › <b>İndirilen Profil</b> › Yükle.</li>
 <li>Ayarlar › Genel › Hakkında › <b>Sertifika Güven Ayarları</b> › «LifeOS Yerel Kök»ü aç.</li></ol>
-<p>AYS, SPİ ve ESP ana ekrana gelir. Profil yalnız senin bilgisayarına güvenir; internete hiçbir şey çıkmaz.</p></section>
+<p>AYS, SPİ ve ESP ana ekrana gelir. Profil yalnız LifeOS adreslerine (ev ağı, bu bilgisayar) etki eder; başka sitelere ve internete dokunmaz.</p>
+<p>Eski LifeOS profili varsa önce kaldır: Ayarlar › Genel › <b>VPN ve Cihaz Yönetimi</b> › LifeOS › Profili Kaldır.</p></section>
 <section data-cihaz="ios" id="iphone-uygulama"><h2>iPhone uygulaması (isteğe bağlı)</h2>
 <p>Ekran kapalıyken rota ve bildirim için. AltStore'u bilgisayardaki AltServer ile
 bir kez kur, sonra dokun: LifeOS kaynağı AltStore'a eklenir.</p>
@@ -2197,10 +2207,15 @@ bir kez kur, sonra dokun: LifeOS kaynağı AltStore'a eklenir.</p>
 <p>AltStore › Browse › LifeOS › Free. Web kodu sonra kendiliğinden güncellenir.
 Haftalık imza yenilemesi: Kısayollar › Otomasyon › Her gün › AltStore «Refresh All Apps»,
 «Çalıştırmadan önce sor» kapalı. LifeOS açıkken AltServer da açılır.</p></section>
-<section data-cihaz="android"><h2>Android telefon ve tablet</h2>
-<ol><li><a class="dugme" href="/lifeos-kok.cer">Sertifikayı indir</a></li>
+<section data-cihaz="android" id="android-hazir" hidden><h2>Android telefon ve tablet</h2>
+<p>Bu cihaz LifeOS'a bağlanıyor. Aşağıdaki her modülü bir kez aç, altta çıkan <b>Kur</b>'a dokun (çıkmazsa ⋮ menüsü › <b>Ana ekrana ekle</b>).
+Bir kez açılan modül bilgisayar kapalıyken de açılır.</p></section>
+<section data-cihaz="android" id="android-kur"><h2>Android telefon ve tablet</h2>
+%s<ol><li><a class="dugme" href="/lifeos-kok.cer">Sertifikayı indir</a></li>
 <li>Ayarlar'ın arama kutusuna <b>CA sertifikası</b> yaz › CA sertifikası › Yine de yükle › İndirilenler › lifeos-kok.cer.</li>
-<li>Aşağıdaki her modülü Chrome'da aç › ⋮ menüsü › <b>Ana ekrana ekle</b>.</li></ol></section>
+<li>Bu sayfaya dön: kendiliğinden devam eder.</li></ol>
+<p>Sertifika yalnız LifeOS adreslerine (ev ağı, bu bilgisayar) etki eder; başka sitelere dokunmaz.</p>
+<p>Eski LifeOS sertifikası varsa önce kaldır: Ayarlar › Güvenlik › <b>Kullanıcı sertifikaları</b> › «LifeOS Yerel Kok» › Kaldır («Kok 2» kalsın).</p></section>
 <section><h2>Modüller</h2>
 <ul>%s</ul>
 <p>Bir modülü hep aynı adresten aç: adres değişirse verin ayrı bir kökende
@@ -2213,35 +2228,60 @@ Harita karoları için mobil internet gerekir. Güncellemeler bilgisayardan kend
 /* Cihaza gore tek yol: oteki cihazin adimlari gizlenir (betik yoksa hepsi gorunur). */
 (function(){
   var ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  var cihaz = ios ? 'ios' : /Android/.test(ua) ? 'android' : '';
-  if(cihaz) document.querySelectorAll('[data-cihaz]').forEach(function(e){ e.hidden = e.getAttribute('data-cihaz') !== cihaz; });
+  var cihaz = ios ? 'ios' : /Android/.test(ua) || (/Linux/.test(ua) && navigator.maxTouchPoints > 1) ? 'android' : '';
+  if(cihaz) document.querySelectorAll('[data-cihaz]').forEach(function(e){ e.hidden = e.getAttribute('data-cihaz') !== cihaz || e.id === 'android-hazir'; });
 })();
-/* Tek QR (hesap sayfasi › Yeni cihaz bagla): sertifika kuruluysa hemen, degilse
-   kurulunca kendiliginden hesaba baglar. Kod rakam degilse hic okunmaz. */
+/* Tek QR (hesap sayfasi › Yeni cihaz bagla): adrese ulasilinca (sertifika kuruluysa ya da
+   Tailscale aciksa) kendiliginden hesaba baglar. Kod rakam degilse hic okunmaz. Android'de
+   kod olmadan da calisan adres aranir: modul baglantilari ona doner, koken hep ayni kalir. */
 (function(){
   var kod = (new URLSearchParams(location.search).get('bagla') || '').replace(/[^0-9]/g, '');
-  if(kod.length !== 6) return;
-  history.replaceState(null, '', location.pathname);
-  var ip = location.hostname, hedef = 'https://' + ip + ':%d/';
-  var iphone = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  if(kod.length !== 6) kod = '';
+  var ua = navigator.userAgent, iphone = /iPhone|iPad|iPod/.test(ua);
+  var android = !iphone && (/Android/.test(ua) || (/Linux/.test(ua) && navigator.maxTouchPoints > 1));
+  if(!kod && !android) return;
+  if(kod) history.replaceState(null, '', location.pathname);
+  var ip = location.hostname, KAPI = %d, aday = (android ? %s : []);
+  if(aday.indexOf('https://' + ip) < 0) aday.push('https://' + ip);
   var $ = function(i){ return document.getElementById(i); };
-  $('bagla').hidden = false;
-  $('bagla-tarayici').href = hedef + '?bagla=' + kod;
-  $('bagla-uygulama').href = 'lifeos://bagla?adres=' + encodeURIComponent(ip) + '&kod=' + kod;
+  if(kod){
+    $('bagla').hidden = false;
+    $('bagla-tarayici').href = 'https://' + ip + ':' + KAPI + '/?bagla=' + kod;
+    $('bagla-uygulama').href = 'lifeos://bagla?adres=' + encodeURIComponent(ip) + '&kod=' + kod;
+  }
+  function dene(i, bitti){
+    if(i >= aday.length) return bitti('');
+    var d = new AbortController(), t = setTimeout(function(){ d.abort(); }, 4000);
+    fetch(aday[i] + ':' + KAPI + '/sw.js', { mode:'no-cors', cache:'no-store', signal:d.signal }).then(function(){
+      clearTimeout(t); bitti(aday[i]);
+    }, function(){ clearTimeout(t); dene(i + 1, bitti); });
+  }
+  function hazir(adres){
+    if(iphone){
+      $('bagla-durum').textContent = 'Sertifika hazır. Uygulamayı kurduysan oradan aç.';
+      $('bagla-uygulama').hidden = $('bagla-tarayici').hidden = false;
+    }else if(kod) location.replace(adres + ':' + KAPI + '/?bagla=' + kod);
+    else{
+      $('android-kur').hidden = true;
+      $('android-hazir').hidden = false;
+      document.querySelectorAll('a[data-kapi]').forEach(function(a){
+        a.href = a.textContent = adres + ':' + a.getAttribute('data-kapi') + '/';
+      });
+      document.querySelectorAll('.yedek').forEach(function(y){ y.hidden = true; });
+    }
+  }
   function bak(){
-    fetch(hedef + 'sw.js', { mode:'no-cors', cache:'no-store' }).then(function(){
-      if(iphone){
-        $('bagla-durum').textContent = 'Sertifika hazır. Uygulamayı kurduysan oradan aç.';
-        $('bagla-uygulama').hidden = $('bagla-tarayici').hidden = false;
-      }else location.replace($('bagla-tarayici').href);
-    }).catch(function(){
-      $('bagla-durum').textContent = 'Önce aşağıdaki sertifikayı indirip kur; kurulunca bu cihaz kendiliğinden bağlanır.';
+    dene(0, function(adres){
+      if(adres) return hazir(adres);
+      if(kod) $('bagla-durum').textContent = android ? 'Önce aşağıdaki adımlardan birini yap; olunca bu cihaz kendiliğinden bağlanır.'
+        : 'Önce aşağıdaki sertifikayı indirip kur; kurulunca bu cihaz kendiliğinden bağlanır.';
       setTimeout(bak, 2000);
     });
   }
   bak();
 })();
-</script></body></html>""" % (_kac(ALTSTORE_KAYNAK), modul, _kac(parmak), telefon.PORTLAR["SPI"])
+</script></body></html>""" % (_kac(ALTSTORE_KAYNAK), tailscale, modul, _kac(parmak), telefon.PORTLAR["SPI"],
+                               json.dumps(aday).replace("<", "\\u003c"))
 
 
 class TelefonKurulum(BaseHTTPRequestHandler):
@@ -2274,7 +2314,7 @@ class TelefonKurulum(BaseHTTPRequestHandler):
             self.send_header("Content-Disposition", 'attachment; filename="LifeOS.mobileconfig"')
         elif yol in ("/", "/index.html"):
             ipl = telefon.ipler()
-            govde = telefon_kurulum_html(telefon.ad(), ipl, telefon.parmak_izi(y)).encode("utf-8")
+            govde = telefon_kurulum_html(telefon.ad(), ipl, telefon.parmak_izi(y), uzak.acik_ad()).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
         else:
@@ -2356,7 +2396,9 @@ def main():
     # Telefon: yalniz telefon.py ile sertifika uretildiyse. Acilamazsa
     # bilgisayardaki sistemler yine calisir.
     if telefon.tazele():
-        print("  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
+        print("  • Güvenlik sertifikası yenilendi: her cihazda bir kez yeniden kur (Hesap › Cihazlar)."
+              if telefon.kok_yenilendi_mi() else
+              "  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
     tel, tel_sorun = telefon_sunuculari()
     threading.Thread(target=_bekci_dongusu, daemon=True).start()
     kurulum = None

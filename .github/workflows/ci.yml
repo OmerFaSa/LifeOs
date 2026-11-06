@@ -366,6 +366,9 @@ jobs:
       - name: Uçtan uca
         run: node tools/entegre.js
 
+      - name: Android kurulum sayfası çalışan adresi bulur
+        run: node tools/android_kurulum_test.js
+
   envanter:
     name: Envanter + sadelik — tek tasarıma geçerken kayıp yok
     # belgeler/ekip/EKIP-PLANI.md: «hicbir sey silinmez, katmanlanir». Tabandaki
