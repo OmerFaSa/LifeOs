@@ -161,6 +161,23 @@ describe('Kavrat — kartlar ve aralıklı tekrar', () => {
       K().sesDur(); temizle();
     });
   });
+  it('anlatım sayfasındaki eski kart kaydı modülün anahtarına bir kez taşınır, eskisi silinmez', () => {
+    const ad = ['spi.rehber.kavrat.kanit', 'spi.kavrat.kanit'], eski = ad.map(k => localStorage.getItem(k));
+    try{
+      localStorage.removeItem(ad[1]);
+      localStorage.setItem(ad[0], JSON.stringify({ 'rehber:kosu':{ 'Koş-yürü nedir?':[{ g:'2026-11-05', isabet:true }] } }));
+      K()._sifirla(); K().kur({ modul:'spi', bugun:() => '2026-11-06' });
+      expect(JSON.parse(localStorage.getItem(ad[1])).kosu['Koş-yürü nedir?'].length).toBe(1);
+      expect(localStorage.getItem(ad[0]) != null).toBe(true);
+      /* Yeni kayıt varken bir daha taşınmaz. */
+      localStorage.setItem(ad[0], JSON.stringify({ 'rehber:kosu':{ x:[] } }));
+      K().kur({ modul:'spi' });
+      expect(JSON.parse(localStorage.getItem(ad[1])).kosu.x).toBe(undefined);
+    }finally{
+      ad.forEach((k, i) => { if(eski[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, eski[i]); });
+      K()._sifirla();
+    }
+  });
   it('aynı bölümün Dinle düğmesi ve çizimi birbirinin yerine geçmez', () => {
     kur({ ses:{ var:() => true, konus:() => new Promise(() => {}), dur:() => {} } });
     const kap = document.createElement('div');

@@ -9,7 +9,7 @@
       ['lang', 'philo', 'music', 'diction', 'reading', 'writing', 'history']
         .forEach(d => expect(ESP.REHBER_KONULAR.some(k => k.disc === d)).toBe(true));
     });
-    it('örnek konu adım adım çizim ve kartlarla açılır (ortak/kavrat.js)', () => {
+    it('örnek konu adım adım çizimle açılır; kartlar anlatım sayfasında değil (ortak/kavrat.js)', () => {
       const RB = window.LIFEOS.REHBER;
       RB._sifirla();
       RB.kur({ modul:'rehbertest', konular:() => ESP.REHBER_KONULAR });
@@ -17,7 +17,8 @@
       const h = RB.html();
       expect(h).toContain('kavrat-cizim');
       expect(h).toContain('Adım 1 / 3');
-      expect(h).toContain('data-kavrat="cevir:kart:rehber:mantik-arguman"');
+      /* Kartlar öğrenme motorundadır (2026-11-06); anlatım sayfası okumak içindir. */
+      expect(h.indexOf('kavrat-kartlar')).toBe(-1);
       RB._sifirla();
     });
     it('Çalışma bölümünün kartı yalnız o alanın konularını gösterir', () => {

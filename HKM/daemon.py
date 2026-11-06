@@ -132,7 +132,7 @@ from urllib.parse import parse_qs, quote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import arastir, kutu, motor, tarife  # noqa: E402
-from core import beceri, disdunya, eylem, kendiliginden, soz  # noqa: E402
+from core import beceri, disdunya, eylem, kendiliginden, kodlama, soz  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, gorev, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
@@ -1394,7 +1394,7 @@ class Handler(BaseHTTPRequestHandler):
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
-        if gorev.bizim_mi(u.path) or beceri.bizim_mi(u.path) or kendiliginden.bizim_mi(u.path):
+        if gorev.bizim_mi(u.path) or beceri.bizim_mi(u.path) or kendiliginden.bizim_mi(u.path) or kodlama.bizim_mi(u.path):
             ham, hata = self._read_body()
             if hata:
                 return self._send(413, {"error": hata})
@@ -1404,6 +1404,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "govde JSON nesnesi olmali"})
             if beceri.bizim_mi(u.path):
                 return self._send(*beceri.uc(self.con, self.server.config, "POST", u.path, {}, govde))
+            if kodlama.bizim_mi(u.path):
+                # Ogrenme motorunun ipucu merdiveni: web'den kaynakli kodlama adayi (model yok, yazmaz).
+                return self._send(*kodlama.uc(self.con, self.server.config, "POST", u.path, {}, govde))
             if kendiliginden.bizim_mi(u.path):
                 # Modul olayi (belgeler/ekip/KING-OLAY.md) -> kural motoru.
                 return self._send(*kendiliginden.uc(self.con, self.server.config, "POST", u.path, {}, govde))

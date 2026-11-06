@@ -42,13 +42,21 @@
    6. YARGI KAYDA (§1.5). «Sağlam» kaydın durumudur; yetenek yargısı, sertifika,
       sonuç garantisi yok. SPİ'de yalnız sağlık davranışı bilgisi; teşhis ve doz yok.
    7. XP'YE BAKMAZ, PLANA YAZMAZ (§1.6). Kayıtlar yalnız bu motorundur;
-      modül isterse kanca ile kendi kaydına da yazar. */
+      modül isterse kanca ile kendi kaydına da yazar.
+   8. İLK SEANS KOLAYDIR (2026-11-06, OGRETME-PLANI Faz 2). Yeni konu: sezgi → anlatım →
+      çözülmüş örnek → kendin dene (+ alan görevi) → kartlar. Ağır teknikler (tahmin, kendi
+      cümlenle, anlatma, aktarım) «Derinleş» seansındadır. Plan aşamaya göre kodla seçilir.
+   9. CEVAP ERKEN VERİLMEZ. Yanlıştan sonra ipucu merdiveni: yönlendiren soru → kodlama →
+      anlatımdan cümle → eleme → çözüm. İlk cevap kanıttır; ipuçlu doğru aşama kazandırmaz.
+      Kodlama içerikten, kişiden ya da internetten gelir; internetten geleni kişi onaylamadan
+      kaydedilmez, cevabı açıkça veren kodlama ve cümle ipucu olarak gösterilmez. */
 window.LIFEOS.PARCA.yazilar({
   'ortak.om.etiket-yazili':'elle yazıldı · doğrulanmadı',
   'ortak.om.etiket-model':'model taslağı · doğrulanmadı',
   'ortak.om.etiket-metin':'senin metnin',
   'ortak.om.etiket-yeniden':'model yazdı · doğrulanmadı',
   'ortak.om.grup-kendi':'Kendi konularım',
+  'ortak.om.ip-genel':'Soru kökü tam olarak ne istiyor? Anahtar kelimeyi bul, sonra anlatımdaki kuralı hatırla.',
 });
 
 window.LIFEOS = window.LIFEOS || {};
@@ -56,11 +64,16 @@ window.LIFEOS = window.LIFEOS || {};
 window.LIFEOS.OGRENMOTOR = (function(){
   'use strict';
   const L = () => window.LIFEOS || {};
+  const K = () => L().KING_IC;
+  const HARF = 'ABCDE';
   const ESIK = 2 / 3;              // sistem ayarı: günün kanıtı için doğruluk
   const SAKLA = 80, NOT_SAKLA = 3, NOT_UZUN = 500;
   const METIN_UZUN = 12000, ATOLYE_EN_COK = 40;
   const K_KAYIT = 'meta/omKayit', K_ATOLYE = 'meta/omAtolye';
   const TURLER = ['kavram', 'islem', 'dikkat', 'bilmiyor'];
+  const SEVIYELER = ['temel', 'orta', 'ileri'];
+  const DIKTE_ESIK = 0.9;          // sistem ayarı: dikte kelimelerinin bu oranı doğruysa isabet
+  const GOREV_TURLERI = ['sirala', 'efsane', 'dikte', 'kaynak'];
 
   let ayar = null;
   let kayit = bosKayit(), atolye = [];
@@ -68,7 +81,11 @@ window.LIFEOS.OGRENMOTOR = (function(){
   function bosKayit(){ return { k:{}, n:{}, h:{} }; }
   function nesne(v){ return v && typeof v === 'object' && !Array.isArray(v) ? v : null; }
 
-  function kur(o){ ayar = Object.assign({ modul:'ortak' }, o || {}); kayit = bosKayit(); atolye = []; }
+  function kur(o){
+    ayar = Object.assign({ modul:'ortak' }, o || {}); kayit = bosKayit(); atolye = [];
+    /* Kartlar kavrat'ındır: aynı modül anahtarı, aynı ses ve metin (anlatım sayfasıyla tek kayıt). */
+    if(L().KAVRAT) L().KAVRAT.kur({ modul:ayar.modul, ses:ayar.ses, metin:ayar.metin, bugun:ayar.bugun });
+  }
   const kuruluMu = () => !!ayar;
 
   function bugun(){
@@ -273,7 +290,9 @@ window.LIFEOS.OGRENMOTOR = (function(){
     /* Elle yazılmış açık soru yoksa parçanın dikkat notu sorulur: metin yazarındır. */
     const acikEk = dizi(k.acik).length ? [] : parcalar.map((p, i) => (p.dikkat && p.baslik ? { id:'d' + i, soru:'«' + duz(p.baslik) + '» konusunda neye dikkat edilir?', yanit:p.dikkat } : null)).filter(Boolean);
     return Object.assign({ etiket:'', onKosul:[], kazanim:[], akilda:[] }, k,
-      { parcalar, ornekler, terimler:terim, sorular, acik:dizi(k.acik).concat(acikEk), aktarim:dizi(k.aktarim), hatalar, kazanim:dizi(k.kazanim), akilda:dizi(k.akilda), onKosul:dizi(k.onKosul) });
+      { parcalar, ornekler, terimler:terim, sorular, acik:dizi(k.acik).concat(acikEk), aktarim:dizi(k.aktarim), hatalar, kazanim:dizi(k.kazanim), akilda:dizi(k.akilda), onKosul:dizi(k.onKosul),
+        kodlama:dizi(k.kodlama).filter(x => x && String(x.metin || x).trim()).map(x => (typeof x === 'string' ? { metin:x } : x)),
+        gorevler:dizi(k.gorevler).filter(g => g && GOREV_TURLERI.indexOf(g.tur) >= 0 && g.id), kartlar:dizi(k.kartlar) });
   }
 
   /* Kişinin verdiği metinden konu (sistemde olmayan bilgi). Model taslağı da buradan geçer:
@@ -296,7 +315,8 @@ window.LIFEOS.OGRENMOTOR = (function(){
 
   /* Rehber biçimindeki anlatım (brand/ortak/rehber.js) → konu. */
   function rehberKonu(k, ek){
-    return Object.assign({ id:k.id, ad:k.ad, grup:k.alan, grupAd:k.alan, etiket:yz('ortak.om.etiket-yazili'), giris:k.giris, kazanim:k.kazanim, akilda:k.akilda, parcalar:k.bolumler }, ek || {});
+    return Object.assign({ id:k.id, ad:k.ad, grup:k.alan, grupAd:k.alan, etiket:yz('ortak.om.etiket-yazili'), giris:k.giris, kazanim:k.kazanim, akilda:k.akilda, parcalar:k.bolumler,
+      sezgi:k.sezgi, kartlar:k.kartlar, kodlama:k.kodlama, gorevler:k.gorevler }, ek || {});
   }
 
   const atolyeOf = id => atolye.find(x => x.id === id) || null;
@@ -394,11 +414,13 @@ window.LIFEOS.OGRENMOTOR = (function(){
   }
 
   /* Kişinin kendi cümleleri: tekrarda «geçen sefer böyle demiştin» diye geri gelir. */
-  async function notYaz(konuId, tur, metin){
+  async function notYaz(konuId, tur, metin, kaynak){
     const m = String(metin || '').trim().slice(0, NOT_UZUN);
     if(!m) return;
     const n = kayit.n[konuId] = nesne(kayit.n[konuId]) || {};
-    n[tur] = dizi(n[tur]).concat([{ g:bugun(), m }]).slice(-NOT_SAKLA);
+    const x = { g:bugun(), m };
+    if(kaynak && /^https?:\/\//.test(String(kaynak))) x.k = String(kaynak).slice(0, 500);
+    n[tur] = dizi(n[tur]).filter(y => y.m !== m).concat([x]).slice(-NOT_SAKLA);
     await kaydet();
   }
   function notlar(konuId, tur){ const n = nesne(kayit.n[konuId]); return n ? dizi(n[tur]) : []; }
@@ -476,7 +498,10 @@ window.LIFEOS.OGRENMOTOR = (function(){
     o = o || {};
     const g = bugun(), son = {};
     ham(k.id).forEach(x => { son[x.s] = x; });
-    const hedef = SEVIYE_HEDEF[asama(k.id).id] || SEVIYE_HEDEF.yok;
+    /* Seans içinde seviye kayar (art arda iki doğru üst, yanlış alt): istenen seviye en öne. */
+    const taban = SEVIYE_HEDEF[asama(k.id).id] || SEVIYE_HEDEF.yok;
+    const uzak = x => Math.abs(SEVIYELER.indexOf(x) - SEVIYELER.indexOf(o.seviye));
+    const hedef = o.seviye ? SEVIYELER.slice().sort((a, b) => uzak(a) - uzak(b) || taban.indexOf(a) - taban.indexOf(b)) : taban;
     const haric = o.haric || {};
     const puan = q => {
       const s = son[q.id];
@@ -526,7 +551,7 @@ window.LIFEOS.OGRENMOTOR = (function(){
      Plan koda aittir; kişi anlatım biçimini seçer (parca / ornek / ozet), adımı atlayabilir. */
   const ACIKLA = ['kendi', 'neden', 'benzet'];
 
-  function planOgren(k, bicim, sorulan){
+  function planDerin(k, bicim, sorulan){
     const a = [];
     const yeni = !kanitlar(k.id).length;
     const ilk = yeni ? soruSec(k, 1, { kapali:true })[0] : null;
@@ -553,14 +578,69 @@ window.LIFEOS.OGRENMOTOR = (function(){
     a.push({ t:'bitir' });
     return a;
   }
+  /* Kendin dene: önce kapalı soru (anında geri bildirim), yetmezse açık. */
+  function deneSorulari(k, n, sorulan){
+    const l = soruSec(k, n, { haric:sorulan, kapali:true });
+    if(l.length < n){
+      const haric = Object.assign({}, sorulan);
+      l.forEach(q => { haric[q.id] = 1; });
+      soruSec(k, n - l.length, { haric }).forEach(q => l.push(q));
+    }
+    l.forEach(q => { sorulan[q.id] = 1; });
+    return l.map(q => ({ t:'yokla', q }));
+  }
+  /* Alan görevi: dikte ses ister, ses yoksa yer almaz. Görev kimliği soru kimliği gibi kayda geçer. */
+  function gorevAdimlari(k, n){
+    let ses = false;
+    try{ ses = !!(ayar && ayar.ses && ayar.ses.var()); }catch(e){ ses = false; }
+    return dizi(k.gorevler).filter(g => g.tur !== 'dikte' || ses).slice(0, n)
+      .map(g => ({ t:'gorev', g, q:{ id:'g:' + g.id, soru:g.soru || g.iddia || g.belge || '' } }));
+  }
+  /* Kartlar: yazarın kartları; yoksa «akılda kalsın» cümlesinde yazarın kalın terimi boşluk olur. */
+  function kartlarOf(k){
+    const KV = L().KAVRAT;
+    if(dizi(k.kartlar).length && (!KV || !KV.denetle({ kartlar:k.kartlar }).length)) return k.kartlar;
+    const out = [];
+    dizi(k.akilda).forEach(c => {
+      const t = kalinTerimler([c])[0];
+      if(!t) return;
+      const on = duz(c).replace(t, '_____');
+      if(on !== duz(c) && !out.some(x => x.on === on)) out.push({ on, arka:t });
+    });
+    return out.length >= 3 ? out.slice(0, 6) : [];
+  }
+  const kartAdimi = k => (kartlarOf(k).length ? [{ t:'kart' }] : []);
+
+  /* İlk seans (söz 8): sezgi → anlatım → örnek → kendin dene → görev → kartlar. */
+  function planIlk(k, bicim, sorulan){
+    const a = [];
+    if(k.sezgi || k.giris) a.push({ t:'sezgi' });
+    const anlatim = bicim === 'ozet' ? [{ t:'ozet' }] : k.parcalar.map((p, i) => ({ t:'parca', i }));
+    const ornek = k.ornekler.slice(0, 1).map(o => ({ t:'ornek', o }));
+    if(bicim === 'ornek') a.push(...ornek, ...anlatim);
+    else a.push(...anlatim, ...ornek);
+    a.push(...deneSorulari(k, 2, sorulan), ...gorevAdimlari(k, 2), ...kartAdimi(k), { t:'bitir' });
+    return a;
+  }
+  /* Tutuyor: anlatım yok; aklında kalanı yaz, sorular, bir görev, kartlar. */
+  function planTutuyor(k, sorulan){
+    return [{ t:'bosalt' }].concat(deneSorulari(k, 2, sorulan), gorevAdimlari(k, 1), kartAdimi(k), [{ t:'bitir' }]);
+  }
   /* Tekrar: önce kitabı kapat, aklında kalanı yaz; sonra yeni sorular. Kalıcı konuda aktarım. */
   function planTekrar(k, sorulan){
     const a = [{ t:'bosalt' }];
     soruSec(k, 2, { haric:sorulan }).forEach(q => { sorulan[q.id] = 1; a.push({ t:'yokla', q }); });
     const as = asama(k.id).id;
     if((as === 'kalici' || as === 'saglam') && k.aktarim.length) a.push({ t:'aktar', q:k.aktarim[notlar(k.id, 'aktar').length % k.aktarim.length] });
-    a.push({ t:'bitir' });
+    a.push(...kartAdimi(k), { t:'bitir' });
     return a;
+  }
+  /* «Öğren» seansının planı aşamadan gelir (karar kodda). */
+  function planOgren(k, bicim, sorulan){
+    const as = asama(k.id).id;
+    if(as === 'yok' || as === 'ogreniyor') return planIlk(k, bicim, sorulan);
+    if(as === 'tutuyor') return planTutuyor(k, sorulan);
+    return planTekrar(k, sorulan);
   }
 
   /* Seans: { tur:'ogren'|'tekrar'|'karma', konu, adimlar, i, sonuc:[], sorulan, bicim } */
@@ -570,7 +650,7 @@ window.LIFEOS.OGRENMOTOR = (function(){
     const sorulan = {};
     const t = tur || 'ogren';
     return { tur:t, id, konu:k, bicim:bicim || 'parca', sorulan, i:0, sonuc:[], onarim:0,
-      adimlar:t === 'tekrar' ? planTekrar(k, sorulan) : planOgren(k, bicim, sorulan) };
+      seri:0, adimlar:t === 'tekrar' ? planTekrar(k, sorulan) : t === 'derin' ? planDerin(k, bicim, sorulan) : planOgren(k, bicim, sorulan) };
   }
   /* Karışık tekrar: vadesi gelen konulardan birer soru, gruplar yan yana gelmez (usta.sira).
      Konu başlığı baştan söylenmez, bu yüzden karışık sınama sayılır. */
@@ -597,15 +677,18 @@ window.LIFEOS.OGRENMOTOR = (function(){
     const r = await cevapYaz({ konu:k.id, soru:a.q.id, isabet:c.isabet, guven:c.guven, karisik:!!a.karisik, ipucu:c.ipucu, on:onYok, harf:c.harf, kapali:!!a.q.sec });
     if(onYok) return r;
     s.sonuc.push({ konu:k.id, ad:k.ad, soru:a.q.id, isabet:!!c.isabet, guven:c.guven || null, ipucu:!!c.ipucu });
+    if(a.t === 'gorev') return r;
+    if(a.t === 'yokla' && !a.karisik && a.q.sec) seviyeKaydir(s, k, !!c.isabet && !c.ipucu, a.q.seviye);
     if(!c.isabet && !a.onarimli){
       s.onarim++;
-      const ek = [{ t:'onar', q:a.q, harf:c.harf, konu:a.konu, guven:c.guven }];
+      /* Hata türü seçtirmek ağırdır: yalnız «Derinleş»te. Öteki seanslarda ipucu merdiveni ekrandadır (söz 9). */
+      const ek = s.tur === 'derin' ? [{ t:'onar', q:a.q, harf:c.harf, konu:a.konu, guven:c.guven }] : [];
       const benzer = s.onarim <= 2 ? benzerSoru(k, a.q, s.sorulan) : null;
       s.adimlar.splice(s.i + 1, 0, ...ek);
       if(benzer){
         s.sorulan[benzer.id] = 1;
         /* Bir sonraki yoklamanın ardına: yanıt gözün önündeyken sorulmasın. */
-        let yer = s.i + 2;
+        let yer = s.i + 1 + ek.length;
         while(yer < s.adimlar.length && s.adimlar[yer].t !== 'yokla' && s.adimlar[yer].t !== 'anlat' && s.adimlar[yer].t !== 'aktar' && s.adimlar[yer].t !== 'niyet' && s.adimlar[yer].t !== 'bitir') yer++;
         if(s.adimlar[yer] && s.adimlar[yer].t === 'yokla') yer++;
         s.adimlar.splice(yer, 0, { t:'yokla', q:benzer, konu:a.konu, karisik:a.karisik, onarimli:true });
@@ -614,6 +697,118 @@ window.LIFEOS.OGRENMOTOR = (function(){
     return r;
   }
   const ilerle = s => { if(s && s.i < s.adimlar.length - 1) s.i++; return adimOf(s); };
+
+  /* Ölçülü zorluk seans içinde: art arda iki temiz doğru bir üst seviye, yanlış bir alt. Sıradaki
+     cevaplanmamış soru yalnız yazarın `seviye` etiketiyle değiştirilir; uygun soru yoksa aynı kalır. */
+  function seviyeKaydir(s, k, temiz, cevaplanan){
+    s.seri = temiz ? Math.max(0, s.seri || 0) + 1 : -1;
+    if(s.seri === 1) return;
+    /* Taban az önce cevaplanan sorunun seviyesidir: kişi o seviyede iki kez tuttu ya da yanıldı. */
+    const simdiki = s.seviye || cevaplanan || 'temel';
+    const j = SEVIYELER.indexOf(simdiki) + (s.seri < 0 ? -1 : 1);
+    if(s.seri >= 2) s.seri = 0;
+    if(j < 0 || j >= SEVIYELER.length) return;
+    s.seviye = SEVIYELER[j];
+    const yer = s.adimlar.findIndex((x, i) => i > s.i && x.t === 'yokla' && !x.onarimli && !x.karisik && x.q.sec && !x.bitti && !x.kayit);
+    if(yer < 0) return;
+    const eski = s.adimlar[yer].q;
+    const haric = Object.assign({}, s.sorulan);
+    delete haric[eski.id];
+    const yeni = soruSec(k, 1, { haric, kapali:true, seviye:s.seviye })[0];
+    if(!yeni || yeni.id === eski.id || (yeni.seviye || 'temel') !== s.seviye) return;
+    delete s.sorulan[eski.id];
+    s.sorulan[yeni.id] = 1;
+    s.adimlar[yer] = Object.assign({}, s.adimlar[yer], { q:yeni });
+  }
+
+  /* ---------------------------------------------------------------- ipucu merdiveni (söz 9) */
+
+  const icerir = (metin, parca) => { const p = kucuk(duz(parca)).trim(); return p.length >= 4 && kucuk(duz(metin)).indexOf(p) >= 0; };
+  const cevapMetni = q => (q && q.sec && q.dogru ? String(q.sec[HARF.indexOf(q.dogru)] || '') : String((q && q.yanit) || ''));
+  /* Konunun kodlamaları: içerik, kişinin yazdığı, internetten onaylanan. Cevabı açıkça veren elenir. */
+  function kodlamalar(k, q){
+    const cevap = cevapMetni(q);
+    return dizi(k.kodlama).map(x => ({ metin:String(x.metin), kaynak:x.kaynak || '', tur:'icerik' }))
+      .concat(notlar(k.id, 'kodlama').map(x => ({ metin:x.m, kaynak:x.k || '', tur:x.k ? 'internet' : 'kendi' })))
+      .filter(x => !cevap || !icerir(x.metin, cevap));
+  }
+  /* Basamaklar: { tur:'soru'|'kodlama'|'parca'|'eleme'|'cozum', metin?, liste?, ara? }. */
+  function ipuclari(k, q, o){
+    o = o || {};
+    const out = [], OG = L().OGRET, cevap = cevapMetni(q);
+    let yon = null;
+    if(OG && q.sec && o.harf){
+      const g = { secilen:o.harf, dogru:q.dogru, secMetin:q.sec[HARF.indexOf(o.harf)], dogruMetin:cevap, konu:k.ad };
+      yon = (OG.sokratik(g) || [])[1] || null;
+    }
+    out.push({ tur:'soru', metin:yon || yz('ortak.om.ip-genel') });
+    const kod = kodlamalar(k, q);
+    if(kod.length || o.ara) out.push({ tur:'kodlama', liste:kod, ara:!!o.ara });
+    const pi = ilgiliParca(k, q), p = pi == null ? null : k.parcalar[pi];
+    const adaylar = (q.ipucu ? [q.ipucu] : []).concat(p ? cumleler(duz(parcaMetni(p))) : []).filter(c => !cevap || !icerir(c, cevap));
+    if(adaylar.length) out.push({ tur:'parca', metin:adaylar[0] });
+    if(q.sec && q.sec.length >= 4) out.push({ tur:'eleme' });
+    out.push({ tur:'cozum' });
+    return out;
+  }
+  /* Eleme: seçilmemiş ilk yanlış şık (kod; aynı girdi aynı şık). */
+  function eleme(q, kapali){
+    return HARF.slice(0, q.sec.length).split('').find(x => x !== q.dogru && (kapali || []).indexOf(x) < 0) || null;
+  }
+
+  /* ---------------------------------------------------------------- görev denetimi */
+
+  /* Sıralama: her yerin doğru olup olmadığı; karar kod. */
+  function siraDenetle(dogru, verilen){
+    const yer = dogru.map((x, i) => verilen[i] === x);
+    return { yer, isabet:verilen.length === dogru.length && yer.every(Boolean), etiket:'hesaplandı' };
+  }
+  /* Karıştırma tohumlu: aynı görev her açılışta aynı sırayla gelir; doğru sırayla gelmez. */
+  function karisik(l, tohum){
+    const r = tohumlu(tohum), a = l.slice();
+    for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
+    if(a.length > 1 && a.every((x, i) => x === l[i])) a.push(a.shift());
+    return a;
+  }
+  /* Dikte: kelime kelime (büyük-küçük harf ve noktalama sayılmaz). */
+  function dikte(yazilan, metin){
+    const norm = x => String(x || '').toLocaleLowerCase('tr').replace(/[.,;:!?¿¡"«»()\[\]]/g, ' ').split(/\s+/).filter(Boolean);
+    const h = norm(metin), y = norm(yazilan);
+    const kelimeler = h.map((w, i) => ({ w, ok:y[i] === w }));
+    const oran = h.length ? kelimeler.filter(x => x.ok).length / h.length : 0;
+    return { kelimeler, oran, isabet:oran >= DIKTE_ESIK && y.length <= h.length + 2, etiket:'hesaplandı' };
+  }
+
+  /* ---------------------------------------------------------------- internetten kodlama */
+
+  /* HKM açıkken web'de kodlama adayı arar (HKM core/kodlama.py; model yok, kod süzer).
+     Döner: { ok, adaylar:[{ metin, url, baslik }] } ya da { ok:false, neden }. Hiçbiri kayda geçmez. */
+  function kodlamaAraVar(){
+    if(ayar && ayar.kodlamaAra) return true;
+    try{ return !!(K() && K().baglanti && K().baglanti()); }catch(e){ return false; }
+  }
+  async function kodlamaAra(k, q){
+    if(!kodlamaAraVar()) return { ok:false, neden:'baglanti' };
+    const cevap = cevapMetni(q);
+    const govde = { konu:k.ad, terimler:k.terimler.slice(0, 8), cevaplar:cevap ? [cevap] : [] };
+    let r = null;
+    try{
+      if(ayar && ayar.kodlamaAra) r = await ayar.kodlamaAra(govde);
+      else{
+        const b = K().baglanti();
+        const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+        const t = ctrl ? setTimeout(() => ctrl.abort(), 45000) : null;
+        const res = await fetch(b.url + '/api/kodlama', { method:'POST', signal:ctrl ? ctrl.signal : undefined,
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + b.token }, body:JSON.stringify(govde) });
+        if(t) clearTimeout(t);
+        r = res.ok ? await res.json() : null;
+      }
+    }catch(e){ return { ok:false, neden:'baglanti' }; }
+    /* HKM süzdü; istemci yine denetler: kaynaksız ve cevabı veren aday gösterilmez. */
+    const adaylar = dizi(r && r.adaylar).filter(x => x && x.metin && /^https?:\/\//.test(String(x.url || '')) && (!cevap || !icerir(x.metin, cevap)))
+      .slice(0, 3).map(x => ({ metin:String(x.metin).slice(0, 300), url:String(x.url), baslik:String(x.baslik || '').slice(0, 120) }));
+    return adaylar.length ? { ok:true, adaylar } : { ok:false, neden:r ? 'yok' : 'baglanti' };
+  }
 
   /* Sonuç: kod hesaplar; hangi konu yarın, hangisi ne zaman. */
   function sonuc(s){
@@ -627,7 +822,6 @@ window.LIFEOS.OGRENMOTOR = (function(){
 
   /* ---------------------------------------------------------------- model (isteğe bağlı) */
 
-  const K = () => L().KING_IC;
   function modelVar(){
     if(ayar && ayar.model) return true;
     try{ return !!(K() && K().baglanti && K().baglanti() && K().merkezeSor); }catch(e){ return false; }
@@ -686,6 +880,18 @@ window.LIFEOS.OGRENMOTOR = (function(){
       if('ABCDE'.indexOf(q.dogru) < 0 || !q.sec || !q.sec['ABCDE'.indexOf(q.dogru)]) h.push(ad + ': doğru seçenek yok ' + q.id);
     });
     (k && k.acik || []).forEach(q => { if(!q.id || !q.soru) h.push(ad + ': açık soru eksik'); });
+    const KV = L().KAVRAT, z = k && k.sezgi;
+    if(z && typeof z === 'object' && z.cizim && KV) KV.denetle({ cizim:z.cizim }).forEach(m => h.push(ad + ': sezgi ' + m));
+    if(z && String(typeof z === 'string' ? z : z.metin || '').trim().length < 20) h.push(ad + ': sezgi kısa');
+    if(k && dizi(k.kartlar).length && KV) KV.denetle({ kartlar:k.kartlar }).forEach(m => h.push(ad + ': ' + m));
+    dizi(k && k.gorevler).forEach(g => {
+      const gk = ad + ' görev ' + ((g && g.id) || '?') + ': ';
+      if(!g || GOREV_TURLERI.indexOf(g.tur) < 0 || !g.id) return h.push(gk + 'tür ya da kimlik yok');
+      if(g.tur === 'sirala' && (dizi(g.ogeler).length < 3 || new Set(g.ogeler).size !== g.ogeler.length)) h.push(gk + 'en az üç farklı parça');
+      if(g.tur === 'efsane' && (!g.iddia || !g.neden || typeof g.dogru !== 'boolean')) h.push(gk + 'iddia, neden ve doğru (evet/hayır) gerekir');
+      if(g.tur === 'dikte' && (!g.metin || !/^[a-z]{2}(-[A-Z]{2})?$/.test(String(g.dil || '')))) h.push(gk + 'metin ve dil kodu gerekir');
+      if(g.tur === 'kaynak' && (!g.belge || !g.yanit)) h.push(gk + 'belge ve beklenen yanıt gerekir');
+    });
     return h;
   }
 
@@ -693,5 +899,6 @@ window.LIFEOS.OGRENMOTOR = (function(){
 
   return { ESIK, TURLER, tohumlu, rehberKonu, kur, kuruluMu, yukle, ayar:() => ayar, bugun, cumleler, terimler, boslukSorulari, kapsam, sayiTemiz, tamamla, metindenKonu, konu, konular, ara,
     atolyeEkle, atolyeGuncelle, atolyeSil, atolyeOf, kaynakBul, kanitlar, asama, cevapYaz, notYaz, notlar, hataYaz, hataOzet, gunluk, tekrarSayisi, harita, oneri, onKosullar,
-    soruSec, benzerSoru, ilgiliParca, seans, karma, adimOf, konuOf, isle, ilerle, sonuc, modelVar, yenidenAnlat, modelTaslak, denetle, parcaMetni, duz, _sifirla };
+    soruSec, benzerSoru, ilgiliParca, seans, karma, adimOf, konuOf, isle, ilerle, sonuc, modelVar, yenidenAnlat, modelTaslak, denetle, parcaMetni, duz, _sifirla,
+    SEVIYELER, DIKTE_ESIK, GOREV_TURLERI, kartlarOf, kodlamalar, ipuclari, eleme, siraDenetle, karisik, dikte, kodlamaAraVar, kodlamaAra };
 })();

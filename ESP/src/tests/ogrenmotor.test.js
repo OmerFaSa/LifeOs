@@ -16,8 +16,9 @@
     + 'Glikoz fotosentezin ürettiği şekerdir ve bitki onu enerji kaynağı olarak kullanır. Klorofil az olursa yapraklar sararır.';
   const KONU = { id:'k1', ad:'Fotosentez', grup:'g1', parcalar:[{ baslik:'Işık', metin:'**Klorofil** ışığı tutan pigmenttir ve yaprakta bulunur her zaman.' }, { baslik:'Ürün', metin:'**Glikoz** bitkinin ürettiği şekerdir ve enerji kaynağıdır onun için.' }],
     ornekler:[{ soru:'Yaprak neden yeşildir?', cozum:['Klorofil yeşil ışığı yansıtır.', 'Bu yüzden yeşil görünür.'] }], hatalar:['Klorofili şekerle karıştırmak.'], terimler:['klorofil', 'glikoz', 'yaprak'],
-    sorular:[0, 1, 2, 3].map(i => ({ id:'s' + i, soru:'Soru ' + i, sec:['bir', 'iki', 'üç', 'dört'], dogru:'B', cozum:['Çözüm ' + i], seviye:i < 2 ? 'temel' : 'ileri' })),
-    acik:[{ id:'a0', soru:'Açık soru', yanit:'Yanıt' }], aktarim:[{ id:'t0', soru:'Yeni durum', olcut:['Ölçüt'] }] };
+    sorular:[0, 1, 2, 3].map(i => ({ id:'s' + i, soru:'Soru ' + i, sec:['birinci', 'ikinci', 'üçüncü', 'dördüncü'], dogru:'B', cozum:['Çözüm ' + i], seviye:i < 2 ? 'temel' : 'ileri' })),
+    acik:[{ id:'a0', soru:'Açık soru', yanit:'Yanıt' }], aktarim:[{ id:'t0', soru:'Yeni durum', olcut:['Ölçüt'] }],
+    sezgi:'Yaprak küçük bir güneş paneli gibidir: ışığı alır, şekere çevirir.', kodlama:['«Yeşil tutar, şeker yapar»: klorofil ışığı tutar.', 'Bu kodlama cevabı veriyor: ikinci diye bil.'] };
   let gun = '2026-11-06';
   let modelCevabi = null, cevaplar = [];
   function kur(o){
@@ -221,21 +222,54 @@
   });
 
   describe('Öğrenme motoru — akış', () => {
-    it('yeni konu: önce tahmin, sonra anlatım ve açıklama, örnek, yoklama, anlatma, aktarım, son', () => {
+    it('ilk seans kolay: sezgi, anlatım, örnek, iki deneme, son; ağır teknikler yok', () => {
       kur();
       const t = M().seans('k1').adimlar.map(a => a.t);
+      expect(t).toEqual(['sezgi', 'parca', 'parca', 'ornek', 'yokla', 'yokla', 'bitir']);
+      ['tahmin', 'acikla', 'anlat', 'aktar', 'niyet', 'onar'].forEach(x => expect(t.indexOf(x)).toBe(-1));
+    });
+    it('Derinleş eski uzun akıştır: tahmin, açıklama, anlatma, aktarım; tahmin edilen soru yeniden sorulmaz', () => {
+      kur();
+      const a = M().seans('k1', 'derin').adimlar, t = a.map(x => x.t);
       expect(t[0]).toBe('tahmin');
-      expect(t.indexOf('parca') < t.indexOf('ornek')).toBe(true);
       expect(t).toContain('acikla');
-      expect(t.indexOf('ornek') < t.indexOf('yokla')).toBe(true);
       expect(t.indexOf('yokla') < t.indexOf('anlat')).toBe(true);
       expect(t).toContain('aktar');
-      expect(t[t.length - 1]).toBe('bitir');
+      expect(a.filter(x => x.t === 'yokla').some(x => x.q.id === a[0].q.id)).toBe(false);
     });
-    it('tahmin edilen soru yoklamada yeniden sorulmaz', () => {
+    it('plan aşamadan gelir: tutuyorsa anlatım yok, kalıcıysa tekrar ve aktarım', async () => {
       kur();
-      const a = M().seans('k1').adimlar, ilk = a[0].q.id;
-      expect(a.filter(x => x.t === 'yokla').some(x => x.q.id === ilk)).toBe(false);
+      await M().cevapYaz({ konu:'k1', soru:'s0', isabet:true });
+      gun = '2026-11-08';
+      expect(M().asama('k1').id).toBe('tutuyor');
+      const t = M().seans('k1').adimlar.map(a => a.t);
+      expect(t[0]).toBe('bosalt');
+      expect(t.indexOf('parca')).toBe(-1);
+      expect(t.indexOf('sezgi')).toBe(-1);
+      gun = '2026-11-14';
+      await M().cevapYaz({ konu:'k1', soru:'s1', isabet:true });
+      gun = '2026-11-20';
+      expect(M().asama('k1').id).toBe('kalici');
+      expect(M().seans('k1').adimlar.map(a => a.t)).toContain('aktar');
+    });
+    it('seviye seans içinde kayar: art arda iki temiz doğrudan sonra sıradaki soru bir üst seviyeden', async () => {
+      const q = (id, sv) => ({ id, soru:'Soru ' + id, sec:['bir', 'iki', 'üç', 'dört'], dogru:'B', cozum:['Ç'], seviye:sv });
+      kur({ konu:id => (id === 'k1' ? Object.assign({}, KONU, { sorular:[q('t0', 'temel'), q('t1', 'temel'), q('t2', 'temel'), q('o0', 'orta')] }) : null) });
+      const s = M().seans('k1');
+      const i0 = s.adimlar.findIndex(a => a.t === 'yokla');
+      s.adimlar.splice(i0 + 2, 0, { t:'yokla', q:q('t2', 'temel') });
+      s.sorulan.t2 = 1;
+      s.i = i0; await M().isle(s, { isabet:true, harf:'B' });
+      s.i = i0 + 1; await M().isle(s, { isabet:true, harf:'B' });
+      expect(s.seviye).toBe('orta');
+      expect(s.adimlar[i0 + 2].q.id).toBe('o0');
+    });
+    it('ipuçlu doğru seviye artırmaz; yanlış bir alt seviyeye iner', async () => {
+      kur();
+      const s = M().seans('k1');
+      const i0 = s.adimlar.findIndex(a => a.t === 'yokla');
+      s.i = i0; await M().isle(s, { isabet:true, ipucu:true });
+      expect(s.seri).toBe(-1);
     });
     it('anlatım biçimi: önce örnek ve kısa özet akışı değiştirir', () => {
       kur();
@@ -251,10 +285,10 @@
       expect(t[0]).toBe('bosalt');
       expect(t.indexOf('parca') < 0).toBe(true);
     });
-    it('yanlış: hemen onarım; benzer soru ara vererek ve başka soruyla gelir', async () => {
+    it('yanlış (Derinleş): hemen onarım; benzer soru ara vererek ve başka soruyla gelir', async () => {
       kur();
-      const s = M().seans('k1', 'tekrar');
-      M().ilerle(s);
+      const s = M().seans('k1', 'derin');
+      s.i = s.adimlar.findIndex(a => a.t === 'yokla');
       const q = M().adimOf(s).q;
       await M().isle(s, { isabet:false, harf:'A', guven:'emin' });
       expect(s.adimlar[s.i + 1].t).toBe('onar');
@@ -263,6 +297,14 @@
       expect(benzer[0].q.id === q.id).toBe(false);
       /* Araya en az bir yoklama girer. */
       expect(s.adimlar[s.i + 2].onarimli).toBe(undefined);
+    });
+    it('yanlış (öğren, tekrar): hata türü seçtirilmez, benzer soru yine gelir', async () => {
+      kur();
+      const s = M().seans('k1', 'tekrar');
+      M().ilerle(s);
+      await M().isle(s, { isabet:false, harf:'A' });
+      expect(s.adimlar.some(a => a.t === 'onar')).toBe(false);
+      expect(s.adimlar.some(a => a.onarimli)).toBe(true);
     });
     it('onarım sorusunda ikinci yanlış sonsuz döngü yapmaz', async () => {
       kur();
@@ -382,10 +424,7 @@
       E().ac('k1');
       expect(E().html()).toContain('data-om="ogren"');
       await E().tikla('ogren');
-      /* Tahmin: seçenek tıklanınca hemen açılır ve ölçüm olmaz. */
-      await E().tikla('sec:A');
-      expect(M().kanitlar('k1')).toEqual([]);
-      expect(E().html()).toContain('Doğrusu');
+      expect(E().html()).toContain('güneş paneli');
       let koruma = 60;
       while(M().adimOf(E().durum().s).t !== 'bitir' && koruma--){
         const a = M().adimOf(E().durum().s);
@@ -395,11 +434,11 @@
       }
       expect(koruma > 0).toBe(true);
       expect(M().asama('k1').id).toBe('tutuyor');
-      expect(cevaplar.length >= 3).toBe(true);
+      expect(cevaplar.length >= 2).toBe(true);
       expect(cevaplar[0].harf).toBe('B');
       expect(E().html()).toContain('Tutuyor');
     });
-    it('güven işareti olmadan cevap verilemez; yanlış cevapta onarım çizilir', async () => {
+    it('yanlıştan sonra cevap gösterilmez: ipucu merdiveni, ikinci denemedeki doğru kanıtı değiştirmez', async () => {
       kur();
       E().ac('k1');
       await E().tikla('tekrar');
@@ -409,6 +448,44 @@
       await E().tikla('sec:A');
       expect(E().html()).toContain('Ne kadar eminsin');
       await E().tikla('cevap:emin');
+      let h = E().html();
+      expect(h).toContain('Bir daha dene');
+      expect(h.indexOf('is-dogru')).toBe(-1);            // doğru şık açılmadı
+      expect(h).toContain('om-ipucu');                   // ilk basamak: yönlendiren soru
+      expect(M().kanitlar('k1')[0].isabet).toBe(false);  // ilk cevap kayıtta
+      await E().tikla('ipucu');
+      h = E().html();
+      expect(h).toContain('Yeşil tutar');                // kodlama basamağı
+      expect(h.indexOf('cevabı veriyor')).toBe(-1);      // cevabı veren kodlama gösterilmez
+      await E().tikla('sec:B');
+      h = E().html();
+      expect(h).toContain('İpucuyla bulduğun');
+      expect(M().kanitlar('k1')[0].isabet).toBe(false);
+      expect(M().kanitlar('k1').length).toBe(1);
+    });
+    it('Bilmiyorum ve ipucu sonunda çözüm açılır; eleme bir şık kapatır', async () => {
+      kur();
+      const s = M().seans('k1', 'tekrar');
+      M().ilerle(s);
+      E().durum().s = s; E().durum().kip = 'seans';
+      await E().tikla('bos');
+      const a = M().adimOf(s);
+      let koruma = 10;
+      while(!a.bitti && koruma--) await E().tikla('ipucu');
+      expect(a.bitti).toBe(true);
+      expect((a.elenen || []).length).toBe(1);
+      expect(E().html()).toContain('is-dogru');
+    });
+    it('Derinleş: yanlış cevapta onarım ve hata türü', async () => {
+      kur();
+      E().ac('k1');
+      await E().tikla('derin');
+      const s = E().durum().s;
+      s.i = s.adimlar.findIndex(a => a.t === 'yokla');
+      await E().tikla('sec:A');
+      await E().tikla('cevap:emin');
+      let k = 10;
+      while(!M().adimOf(s).bitti && k--) await E().tikla('ipucu');
       await E().tikla('devam');
       const h = E().html();
       expect(h).toContain('Hatayı onar');
@@ -420,7 +497,7 @@
     });
     it('başkasına anlat: terimleri sayar, yazılan kayda geçer', async () => {
       kur();
-      const s = M().seans('k1');
+      const s = M().seans('k1', 'derin');
       s.i = s.adimlar.findIndex(a => a.t === 'anlat');
       E().durum().s = s; E().durum().kip = 'seans';
       E().yazIsle('adim', 'Klorofil yaprakta ışığı tutar.');
@@ -452,6 +529,86 @@
       expect(M().atolyeOf(id) != null).toBe(true);
       await E().tikla('sil-evet');
       expect(M().atolyeOf(id)).toBe(null);
+    });
+  });
+
+  describe('Öğrenme motoru — kartlar, görevler, kodlama', () => {
+    it('kart: yazarın kartı yoksa «akılda kalsın»daki kalın terim boşluk olur; üçten azsa kart yok', () => {
+      kur();
+      const k = M().tamamla({ id:'x', ad:'X', parcalar:[{ metin:'a' }], akilda:['**Klorofil** ışığı tutar.', 'Ürün **glikoz** şekeridir.', '**Stoma** gaz alışverişini sağlar.'] });
+      const l = M().kartlarOf(k);
+      expect(l.length).toBe(3);
+      expect(l[0]).toEqual({ on:'_____ ışığı tutar.', arka:'Klorofil' });
+      expect(M().kartlarOf(M().tamamla({ id:'y', ad:'Y', parcalar:[{ metin:'a' }], akilda:['**A1b2** bir.', 'iki'] })).length).toBe(0);
+    });
+    it('ilk seansta görev ve kart adımı yer alır; ses yoksa dikte yok', () => {
+      kur({ konu:id => (id === 'k1' ? Object.assign({}, KONU, {
+        kartlar:[{ on:'Birinci ön yüz', arka:'1' }, { on:'İkinci ön yüz', arka:'2' }, { on:'Üçüncü ön yüz', arka:'3' }],
+        gorevler:[{ tur:'efsane', id:'e1', iddia:'İddia', dogru:false, neden:'Neden' }, { tur:'dikte', id:'d1', metin:'hello world', dil:'en-US' }] }) : null) });
+      const t = M().seans('k1').adimlar.map(a => a.t);
+      expect(t.filter(x => x === 'gorev').length).toBe(1);
+      expect(t[t.length - 2]).toBe('kart');
+    });
+    it('görev denetimi kodda: sıralama, karıştırma, dikte', () => {
+      kur();
+      const d = ['a', 'b', 'c'];
+      expect(M().siraDenetle(d, ['a', 'b', 'c']).isabet).toBe(true);
+      expect(M().siraDenetle(d, ['b', 'a', 'c']).yer).toEqual([false, false, true]);
+      const k = M().karisik(d, 'g1');
+      expect(k.join() === d.join()).toBe(false);
+      expect(k.slice().sort().join()).toBe('a,b,c');
+      expect(M().karisik(d, 'g1')).toEqual(k);
+      expect(M().dikte('Spaced practice helps you remember new words', 'Spaced practice helps you remember new words.').isabet).toBe(true);
+      const r = M().dikte('spaced practise helps', 'Spaced practice helps you.');
+      expect(r.isabet).toBe(false);
+      expect(r.kelimeler.map(x => x.ok)).toEqual([true, false, true, false]);
+    });
+    it('görev ekranı: efsane ve sıralama cevabı kayda geçer; sıralamada ikinci denemede doğru sıra görünür', async () => {
+      kur({ konu:id => (id === 'k1' ? Object.assign({}, KONU, {
+        gorevler:[{ tur:'efsane', id:'e1', iddia:'Klorofil şekerdir.', dogru:false, neden:'Klorofil pigmenttir.' }, { tur:'sirala', id:'s1', soru:'Sırala', ogeler:['bir', 'iki', 'üç'] }] }) : null) });
+      E().ac('k1');
+      await E().tikla('ogren');
+      const s = E().durum().s;
+      s.i = s.adimlar.findIndex(a => a.t === 'gorev');
+      await E().tikla('efsane:0');
+      expect(E().html()).toContain('Klorofil pigmenttir');
+      expect(cevaplar[cevaplar.length - 1].isabet).toBe(true);
+      await E().tikla('devam');
+      const a = M().adimOf(s);
+      for(const x of ['üç', 'iki', 'bir']) await E().tikla('sira-ekle:' + a.g.ogeler.indexOf(x));
+      await E().tikla('sira-kontrol');
+      expect(a.bitti).toBe(undefined);
+      expect(E().html()).toContain('Bir kez daha dene');
+      await E().tikla('sira-yeniden');
+      for(const x of ['iki', 'bir', 'üç']) await E().tikla('sira-ekle:' + a.g.ogeler.indexOf(x));
+      await E().tikla('sira-kontrol');
+      expect(a.bitti).toBe(true);
+      expect(E().html()).toContain('Doğru sıra');
+      expect(M().kanitlar('k1').length).toBe(1);
+    });
+    it('internetten kodlama: kaynaksız ve cevabı veren aday gösterilmez; eklenen kaynaklı kodlama olur', async () => {
+      kur({ kodlamaAra:async () => ({ adaylar:[{ metin:'Kaynaksız aday' }, { metin:'Cevap ikinci olur diye ezberle', url:'https://ornek.org/a' },
+        { metin:'Yeşili tutan pigment: klorofil diye kodla', url:'https://ornek.org/b', baslik:'Örnek' }] }) });
+      const k = M().konu('k1'), q = k.sorular[0];
+      const r = await M().kodlamaAra(k, q);
+      expect(r.ok).toBe(true);
+      expect(r.adaylar.length).toBe(1);
+      expect(r.adaylar[0].url).toBe('https://ornek.org/b');
+      await M().notYaz('k1', 'kodlama', r.adaylar[0].metin, r.adaylar[0].url);
+      const l = M().kodlamalar(k, q);
+      expect(l.some(x => x.tur === 'internet' && x.kaynak === 'https://ornek.org/b')).toBe(true);
+      kur();
+      expect(M().kodlamaAraVar()).toBe(false);
+      expect((await M().kodlamaAra(M().konu('k1'), null)).ok).toBe(false);
+    });
+    it('içerik denetimi: bozuk görev ve kısa sezgi yakalanır', () => {
+      kur();
+      const h = M().denetle(Object.assign({}, KONU, { sezgi:'kısa', gorevler:[{ tur:'sirala', id:'x', ogeler:['a', 'a', 'b'] }, { tur:'efsane', id:'y', iddia:'i' }, { tur:'dikte', id:'z', metin:'m', dil:'ingilizce' }] }));
+      expect(h.some(x => /sezgi kısa/.test(x))).toBe(true);
+      expect(h.some(x => /üç farklı/.test(x))).toBe(true);
+      expect(h.some(x => /iddia, neden/.test(x))).toBe(true);
+      expect(h.some(x => /dil kodu/.test(x))).toBe(true);
+      expect(M().denetle(KONU)).toEqual([]);
     });
   });
 

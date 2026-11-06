@@ -37,7 +37,8 @@ R.Screens.ogrenme = (function(){
     if(d.kaliplar && d.kaliplar.length) parcalar.push({ baslik:yz('ays.ogrenme.kalip-baslik'), metin:yz('ays.ogrenme.kalip-metin'), liste:d.kaliplar });
     return { id, ad:x.topic.name, grup:x.subject.id, grupAd:x.subject.name, etiket:yz('ortak.om.etiket-yazili'), giris:a.giris,
       kazanim:d.kazanim, onKosul:d.onKosul, parcalar, ornekler:d.ornekler, hatalar:d.hatalar, sorular:sor,
-      terimler:(O().kavramlar(id) || []).slice(0, 8) };
+      terimler:(O().kavramlar(id) || []).slice(0, 8),
+      sezgi:a.sezgi, kartlar:a.kartlar, kodlama:a.kodlama, gorevler:a.gorevler };
   }
 
   /* Öğren sorularının ilk cevapları ve biten karma testler (yeni kayıt yok). Yenilenen sorunun
@@ -53,13 +54,21 @@ R.Screens.ogrenme = (function(){
     return l.concat(R.OgrenTest ? R.OgrenTest.konuKanit(id) : []);
   }
 
+  /* Kurumun temposu: 184 konu YKS'nindir (ÖSYM biçimi). Sayı Öğren'in tempo rozetiyle aynı sistem ayarıdır.
+     shortcut: ogren.js tempoRozeti ile aynı iki sayı burada da yazılı; biri değişirse öbürü de değişmeli. */
+  function tempo(id){
+    const x = konuBul(id);
+    if(!x) return null;
+    return { sn:String(x.subject.id).indexOf('ayt') === 0 ? 120 : 75, ad:'YKS (ÖSYM)' };
+  }
+
   function hazirla(){
     if(!OM() || OM().kuruluMu()) return;
     OM().kur({ modul:'ays',
       depo:{ oku:k => R.Store.get(k), yaz:(k, v) => R.Store.set(k, v) },
       bugun:() => R.U.todayISO(),
       konular:() => O().konular().map(x => ({ id:x.topic.id, ad:x.topic.name, grup:x.subject.id, grupAd:x.subject.name })),
-      konu, ekKanit, ses:SES,
+      konu, ekKanit, ses:SES, tempo,
       ekIdler:() => O().konular().map(x => x.topic.id),
       metin:s => O().metinHtml(s),
       oncelik:() => { const s = O().sonAcilan(); return s ? s.topic.id : null; },

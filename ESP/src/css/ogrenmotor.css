@@ -41,3 +41,12 @@
 .om-yeni[open] > *:not(summary){ margin-top:10px; }
 .om-grup .rehber__konular{ margin-top:4px; }
 .om-bugun{ display:block; width:100%; min-height:32px; padding:6px 0; text-align:left; font:inherit; font-weight:600; color:var(--text); background:none; border:0; border-bottom:1px solid var(--border); cursor:pointer; }
+/* İpucu merdiveni, kodlama, alan görevleri (2026-11-06). */
+.om-sec.is-elendi{ color:var(--text-2); text-decoration:line-through; }
+.om-ipucu p{ line-height:1.55; }
+.om-kodlama, .om-aday{ display:flex; flex-direction:column; gap:6px; }
+.om-sira li.is-dogru{ color:var(--text); }
+.om-sira li.is-yanlis{ color:var(--danger); }
+.om-dikte{ line-height:1.8; }
+.om-dikte .is-yanlis{ color:var(--danger); text-decoration:underline; }
+.om-soru p{ white-space:pre-line; }

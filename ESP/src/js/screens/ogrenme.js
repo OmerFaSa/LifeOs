@@ -16,7 +16,8 @@ ESP.Screens.ogrenme = (function(){
   const OM = () => window.LIFEOS.OGRENMOTOR;
   const SES = {
     var:() => !!(ESP.Speak && ESP.Speak.supported() && ESP.Speak.hasTurkish()),
-    konus:m => ESP.Speak.say(m, { agent:'king' }),
+    /* Dikte yabancı dilde okur: { lang } ses seçimine gider (speak.js voiceForLang). */
+    konus:(m, o) => ESP.Speak.say(m, Object.assign({ agent:'king' }, o || {})),
     dur:() => { if(ESP.Speak) ESP.Speak.stop(); },
   };
   const discAd = d => (ESP.DISCIPLINE_BY_ID[d] || {}).label || d;

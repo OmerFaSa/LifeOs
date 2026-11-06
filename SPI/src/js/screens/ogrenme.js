@@ -24,7 +24,7 @@ SP.Screens.ogrenme = (function(){
   const OM = () => window.LIFEOS.OGRENMOTOR;
   const SES = {
     var:() => !!(SP.Speak && SP.Speak.supported() && SP.Speak.hasTurkish()),
-    konus:m => SP.Speak.say(m, { agent:'king' }),
+    konus:(m, o) => SP.Speak.say(m, Object.assign({ agent:'king' }, o || {})),
     dur:() => { if(SP.Speak) SP.Speak.stop(); },
   };
   const INCELEME = yz('spi.ogrenme.inceleme'), DURUMLAR = yz('spi.ogrenme.durumlar');

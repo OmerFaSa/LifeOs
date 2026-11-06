@@ -9,7 +9,7 @@
       ['spor-temel', 'yuruyus', 'kosu', 'kalistenik', 'kalori', 'kilo-verme', 'diyet', 'beslenme-temel']
         .forEach(id => expect(!!SP.REHBER_KONULAR.find(k => k.id === id)).toBe(true));
     });
-    it('örnek konu adım adım çizim ve kartlarla açılır (ortak/kavrat.js)', () => {
+    it('örnek konu adım adım çizimle açılır; kartlar anlatım sayfasında değil (ortak/kavrat.js)', () => {
       const RB = window.LIFEOS.REHBER;
       RB._sifirla();
       RB.kur({ modul:'rehbertest', konular:() => SP.REHBER_KONULAR });
@@ -17,7 +17,8 @@
       const h = RB.html();
       expect(h).toContain('kavrat-cizim');
       expect(h).toContain('Adım 1 / 3');
-      expect(h).toContain('data-kavrat="cevir:kart:rehber:kosu"');
+      /* Kartlar öğrenme motorundadır (2026-11-06); anlatım sayfası okumak içindir. */
+      expect(h.indexOf('kavrat-kartlar')).toBe(-1);
       RB._sifirla();
     });
     it('liste ve konu çizilir; sınır notu konunun sonunda', () => {

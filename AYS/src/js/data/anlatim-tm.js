@@ -1042,6 +1042,12 @@ Object.assign(R.KONU_ANLATIM, {
   },
 
   'tm-29': {
+    sezgi:{ metin:'Duvara yaslanan bir merdiven düşün: duvar ile yer dik açı yapar, merdiven bu açının karşısındadır ve hep en uzun kenardır. Ona hipotenüs denir; bütün kurallar bu üç kenar arasındadır.',
+      cizim:{ w:240, h:130, alt:'Duvara yaslanmış merdiven: duvar ile yer dik açı yapar, merdiven en uzun kenardır.', adimlar:[
+        { o:[['c', 180, 10, 180, 120], ['c', 20, 120, 220, 120], ['dk', 180, 120, 180, 110, 170, 120]], not:'Duvar ve yer: aralarında dik açı.' },
+        { o:[['c', 60, 120, 180, 25, 'v'], ['t', 108, 52, 'en uzun kenar', 'kve']], not:'Merdiven dik açının karşısında: hipotenüs, en uzun kenar.' },
+      ] } },
+    kodlama:['Öklid: «yükseklik kare, iki parçanın çarpımı» (h^{2} = p · k).', 'Özel üçgen: «otuz-altmış-doksan: k, k√3, 2k»; en küçük açının karşısı en kısadır.'],
     giris:'Dik üçgen geometrinin en çok kullanılan aracıdır. Pisagor bağıntısı, özel üçgenler ve Öklid bağıntıları ezbere bilinmelidir.',
     bolumler:[
       { baslik:'Pisagor bağıntısı',
@@ -1087,6 +1093,9 @@ Object.assign(R.KONU_ANLATIM, {
       { soru:'Bir kenarı 8 cm olan eşkenar üçgenin yüksekliği kaç cm’dir?',
         sec:['4', '2√3', '4√2', '4√3', '8'], dogru:'D',
         cozum:['Yükseklik a√3/2.', '8√3 / 2 = 4√3.'] },
+      { soru:'Dik kenarları a ve b, hipotenüsü c olan bir dik üçgende hipotenüse ait yükseklik h, bu yüksekliğin hipotenüste ayırdığı parçalar p ve k’dir. Buna göre\nI. a^{2} + b^{2} = c^{2}\nII. h^{2} = p · k\nIII. a · b = c · h\nifadelerinden hangileri doğrudur?',
+        sec:['Yalnız I', 'I ve II', 'I ve III', 'II ve III', 'I, II ve III'], dogru:'E',
+        cozum:['I: Pisagor bağıntısı, doğru.', 'II: Öklid yükseklik bağıntısı, doğru.', 'III: Alan iki yoldan yazılır (a · b / 2 = c · h / 2), doğru.'] },
     ],
   },
 

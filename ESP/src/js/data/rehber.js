@@ -36,6 +36,9 @@ ESP.REHBER_KONULAR = [
     kaynaklar:['Avrupa Konseyi, CEFR Tamamlayıcı Cilt (2020)', 'Nation, Learning Vocabulary in Another Language (2013)', 'Leitner, So lernt man lernen (1972)'] },
 
   { id:'dil-kelime', disc:'lang', alan:'Yabancı Dil', ad:'Kelime ve dilbilgisi nasıl kalıcı olur?', sure:7,
+    gorevler:[
+      { tur:'dikte', id:'dil-dikte-1', soru:'Duy ve yaz', metin:'Spaced practice helps you remember new words.', dil:'en-US' },
+    ],
     giris:'Bir kelimeyi «bilmek» yalnız anlamını tanımak değil; söyleyişini, yazılışını, hangi kelimelerle birlikte kullanıldığını ve hangi durumda uygun düştüğünü bilmektir. Dilbilgisi de en iyi, gerçek cümlelerin içinde kalıp olarak yerleşir.',
     kazanim:['Kelimeyi bağlamıyla ve eşdizimiyle öğrenir.', 'Aktif hatırlamanın tanımaktan farkını bilir.', 'Dilbilgisini kalıplar üzerinden çalışır.'],
     bolumler:[
@@ -94,6 +97,12 @@ ESP.REHBER_KONULAR = [
       { on:'Geçerli argüman nedir?', arka:'Öncüller doğruysa sonucun da zorunlu olarak doğru olduğu argüman.' },
       { on:'Sağlam argüman nedir?', arka:'Geçerli olup öncülleri gerçekten doğru olan argüman.' },
       { on:'«P ise Q. Q. Öyleyse P.» hangi hatadır?', arka:'Sonucu onaylama safsatası; argüman geçersizdir.' },
+    ],
+    sezgi:'Bir argüman bir köprü gibidir: öncüller ayaklar, sonuç yol. İki soru sorulur: ayaklar yolu taşıyacak biçimde mi dizilmiş (geçerlilik), ayaklar sağlam mı (öncüllerin doğruluğu)?',
+    kodlama:['«Biçim doğru + öncül doğru = sağlam»: geçerlilik biçimdir, sağlamlık gerçektir.', '«Çünkü öncülü, öyleyse sonucu getirir.»'],
+    gorevler:[
+      { tur:'sirala', id:'arguman-haritasi', soru:'Argüman haritasını kur: önce öncüller, sonra sonuç.',
+        ogeler:['Bütün insanlar ölümlüdür', 'Sokrates bir insandır', 'Öyleyse Sokrates ölümlüdür'], etiketler:['Öncül', 'Öncül', 'Sonuç'] },
     ],
     akilda:['Geçerlilik biçimle, sağlamlık öncüllerin doğruluğuyla ilgilidir.', 'Sonucu onaylamak geçersizdir.', 'Safsata, sonucu değil argümanı çürütür.'],
     kaynaklar:['Stanford Encyclopedia of Philosophy, «Informal Logic» ve «Fallacies»', 'Weston, A Rulebook for Arguments (2018)'] },
@@ -236,6 +245,15 @@ ESP.REHBER_KONULAR = [
         liste:['Kim yazdı, olayın içinde miydi?', 'Ne zaman yazıldı: olay sırasında mı, yıllar sonra mı?', 'Neden ve kimin için yazıldı?', 'Başka kaynaklar ne diyor; çelişki var mı?'],
         dikkat:'Bir kaynağın taraflı olması onu değersiz kılmaz; tarafını bilmek onu doğru okumayı sağlar.' },
       { baslik:'Kronoloji, nedensellik, anakronizm', metin:'Olayları sıraya koymak (kronoloji) ilk adımdır; asıl soru olaylar arasındaki neden-sonuç ilişkisidir. Bir olayı kendi döneminin bilgisi ve değerleriyle değil, bugünün ölçüleriyle yargılamaya **anakronizm** denir ve tarihi yanlış okumanın en yaygın yoludur.' },
+    ],
+    sezgi:'Tarihçi bir dedektif gibidir: olay yerinde değildi, elinde yalnız ipuçları (belgeler) var. Her ipucuna önce «bunu kim, ne zaman, neden bıraktı?» diye sorar, sonra ipuçlarını karşılaştırır.',
+    kodlama:['«O an yazan birincil, sonra yazan ikincil.»', 'Kaynak sorusu: «Kim, ne zaman, neden, kimin için?»'],
+    gorevler:[
+      { tur:'kaynak', id:'tarih-mektup', soru:'Kaynağı sorgula',
+        belge:'Kurtuluş Savaşı sırasında cephedeki bir askerin ailesine yazdığı mektup.',
+        yanit:'Yazan olayın içindeki bir asker; olay sırasında yazılmış, bu yüzden birincil kaynaktır. Ailesine yazdığı için duygularını ve gördüklerini anlatır; savaşın bütününü değil, kendi bakış açısını verir. Başka kaynaklarla karşılaştırılarak okunur.' },
+      { tur:'sirala', id:'tarih-kronoloji', soru:'Kronoloji kur: olayları eskiden yeniye sırala.',
+        ogeler:['İstanbul’un fethi', 'Fransız Devrimi', 'Türkiye Cumhuriyeti’nin ilanı'] },
     ],
     akilda:['Birincil: dönemin kendisi; ikincil: sonraki inceleme.', 'Kim, ne zaman, neden, kimin için?', 'Geçmiş kendi bağlamında okunur.'],
     kaynaklar:['Carr, Tarih Nedir? (1961)', 'Bloch, Tarihçinin Zanaatı (1949)'] },

@@ -11,7 +11,9 @@
       baştan çizilmez; yazılan metin kaybolmaz, odak yeni adımın başlığına gider.
    3. AZ METİN (§1.10). Teknik adı başlıkta, bir cümle yönerge; ilerleme noktayla,
       sonuç tik sayacıyla çizilir. Süs yok.
-   4. HER ADIM GEÇİLEBİLİR. Yazmak zorunlu değildir; yalnız cevap verilen soru kanıt olur. */
+   4. HER ADIM GEÇİLEBİLİR. Yazmak zorunlu değildir; yalnız cevap verilen soru kanıt olur.
+   5. CEVAP ERKEN GÖRÜNMEZ (motor söz 9). Yanlıştan sonra merdivenin bir basamağı açılır;
+      doğru şık yalnız «çözüm» basamağında ya da kişi bulunca gösterilir. */
 window.LIFEOS.PARCA.yazilar({
   'ortak.om.baslik':'Öğrenme',
   'ortak.om.tekrar-var':'{n} konu tekrar bekliyor',
@@ -132,6 +134,47 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.om.kapat':'Konulara dön',
   'ortak.om.bugun-tekrar':'Öğrenme: {n} konu tekrar bekliyor',
   'ortak.om.anlatimdan':'Adım adım öğren',
+  'ortak.om.derin':'Derinleş',
+  'ortak.om.sezgi':'Önce sezgi',
+  'ortak.om.dene':'Kendin dene',
+  'ortak.om.dogru-ipucu':'Doğru. İpucuyla bulduğun için kalıcılığa sayılmaz; ilk cevabın sayıldı.',
+  'ortak.om.cozum-baslik':'Çözüm',
+  'ortak.om.tekrar-dene':'Bir daha dene: işaretli şıklar kapandı.',
+  'ortak.om.ip-sonraki':'Bir ipucu daha',
+  'ortak.om.ip-kodlama':'Kodlama',
+  'ortak.om.ip-anlatim':'Anlatımdan',
+  'ortak.om.ip-eleme':'Bir yanlış şık kapandı.',
+  'ortak.om.kod-kendi':'senin kodlaman',
+  'ortak.om.kod-internet':'internetten · doğrulanmadı',
+  'ortak.om.kod-bul':'İnternette kodlama ara',
+  'ortak.om.kod-ariyor':'Aranıyor…',
+  'ortak.om.kod-ekle':'Kodlamalarıma ekle',
+  'ortak.om.kod-yok':'Kaynaklı ve cevabı vermeyen bir kodlama bulunamadı.',
+  'ortak.om.kod-baglanti':'Arama için HKM açık olmalı.',
+  'ortak.om.kod-kaynak':'Kaynak',
+  'ortak.om.kod-yaz':'Kendi kodlamanı yaz (kısaltma, kafiye, benzetme)',
+  'ortak.om.kod-kaydet':'Kaydet',
+  'ortak.om.kod-kaydedildi':'Kaydedildi; bu konuda ipucu olarak gelir.',
+  'ortak.om.tempo':'{sn} sn · {ad} temposu {hedef} sn (sistem ayarı)',
+  'ortak.om.kartlar':'Kartlar',
+  'ortak.om.gorev-sirala':'Sırayı kur',
+  'ortak.om.gorev-efsane':'Doğru mu?',
+  'ortak.om.gorev-dikte':'Duy ve yaz',
+  'ortak.om.gorev-kaynak':'Kaynağı sorgula',
+  'ortak.om.sira-not':'Parçalara doğru sırayla dokun.',
+  'ortak.om.sira-geri':'Son seçimi geri al',
+  'ortak.om.sira-kontrol':'Kontrol et',
+  'ortak.om.sira-yeniden':'Yeniden dene',
+  'ortak.om.sira-dogru':'Doğru sıra',
+  'ortak.om.sira-tam':'Sıra doğru.',
+  'ortak.om.sira-yanlis':'İşaretli yerler yanlış. Bir kez daha dene.',
+  'ortak.om.efsane-dogru':'Doğru',
+  'ortak.om.efsane-yanlis':'Yanlış',
+  'ortak.om.efsane-isabet':'İsabetli.',
+  'ortak.om.efsane-iskala':'Tersini düşündün.',
+  'ortak.om.dikte-not':'Dinle, duyduğunu yaz, sonra karşılaştır.',
+  'ortak.om.dikte-sonuc':'Kelimelerin yüzde {y}’i tuttu.',
+  'ortak.om.kaynak-sorular':'Kim yazdı, olayın içinde miydi? Ne zaman yazdı? Neden ve kimin için yazdı?',
 });
 
 window.LIFEOS = window.LIFEOS || {};
@@ -148,7 +191,7 @@ window.LIFEOS.OMEKRAN = (function(){
   const tarih = iso => { const p = String(iso).split('-').map(Number); return p[2] + ' ' + AYLAR[p[1] - 1]; };
 
   /* kip: ana | konu | seans. Seans yalnız bellekte; verilen cevaplar anında kayda geçer. */
-  let E = { kip:'ana', id:null, s:null, bicim:'parca', yeni:{ ad:'', metin:'', onay:false }, ekle:{ metin:'', soru:'', yanit:'' }, sil:false, not:'', bekle:false };
+  let E = { kip:'ana', id:null, s:null, bicim:'parca', yeni:{ ad:'', metin:'', onay:false }, ekle:{ metin:'', soru:'', yanit:'' }, sil:false, not:'', bekle:false, kodYaz:'', kodNot:'' };
   let konusan = null;
 
   function metin(s){
@@ -231,7 +274,8 @@ window.LIFEOS.OMEKRAN = (function(){
       + (calisir && k.parcalar.length ? '<div class="om-blok"><h3 class="om-ara-baslik" id="om-bicim-ad">' + kac(yazi('ortak.om.bicim')) + '</h3><div class="om-dugmeler" role="group" aria-labelledby="om-bicim-ad">'
         + bic.map(b => dugme('bicim:' + b, yazi('ortak.om.bicim-' + b), E.bicim === b ? 'btn--primary' : 'btn--ghost', ' aria-pressed="' + (E.bicim === b) + '"')).join('') + '</div></div>' : '')
       + (calisir ? '<div class="om-dugmeler om-blok">' + birinci('ogren', yazi('ortak.om.ogren'))
-        + (a.id !== 'yok' && (k.sorular.length + k.acik.length) ? dugme('tekrar', yazi('ortak.om.tekrar-et')) : '') + '</div>' : '')
+        + (a.id !== 'yok' && (k.sorular.length + k.acik.length) ? dugme('tekrar', yazi('ortak.om.tekrar-et')) : '')
+        + dugme('derin', yazi('ortak.om.derin')) + '</div>' : '')
       + (k.atolye ? atolyeHtml(k) : '');
   }
 
@@ -271,11 +315,14 @@ window.LIFEOS.OMEKRAN = (function(){
 
   /* Seçeneğin metni (işaretler açılır); cevaplanınca doğru ve seçilen ayrılır. */
   function secenekler(q, a, kapali){
+    const denenen = a.denenen || [], elenen = a.elenen || [];
     return '<div class="om-secenekler" role="group">' + q.sec.map((x, i) => {
       const h = HARF[i], secili = a.sec === h, cevap = a.bitti;
-      const sinif = 'om-sec' + (secili ? ' is-secili' : '') + (cevap && h === q.dogru ? ' is-dogru' : '') + (cevap && secili && h !== q.dogru ? ' is-yanlis' : '');
-      const isaret = cevap && h === q.dogru ? ' <span class="om-sec__isaret">✓</span>' : cevap && secili ? ' <span class="om-sec__isaret">✗</span>' : '';
-      return '<button type="button" class="' + sinif + '" data-om="sec:' + h + '" aria-pressed="' + secili + '"' + (cevap || kapali ? ' disabled' : '') + '><b>' + h + '</b><span>' + metin(x) + isaret + '</span></button>';
+      const yanlis = denenen.indexOf(h) >= 0 || (cevap && secili && h !== q.dogru), elendi = elenen.indexOf(h) >= 0;
+      const dogruGoster = cevap && h === q.dogru;
+      const sinif = 'om-sec' + (secili ? ' is-secili' : '') + (dogruGoster ? ' is-dogru' : '') + (yanlis ? ' is-yanlis' : '') + (elendi ? ' is-elendi' : '');
+      const isaret = dogruGoster ? ' <span class="om-sec__isaret">✓</span>' : yanlis ? ' <span class="om-sec__isaret">✗</span>' : '';
+      return '<button type="button" class="' + sinif + '" data-om="sec:' + h + '" aria-pressed="' + secili + '"' + (cevap || kapali || yanlis || elendi ? ' disabled' : '') + '><b>' + h + '</b><span>' + metin(x) + isaret + '</span></button>';
     }).join('') + '</div>';
   }
   const soruMetni = q => '<div class="om-soru">' + para(q.soru) + (q.gorsel || '') + '</div>';
@@ -290,20 +337,54 @@ window.LIFEOS.OMEKRAN = (function(){
   /* {c} işaretli metin taşıyabilir; yazı kaçırılır, c metin() ile açılır. */
   function yaziMetin(id, c){ return kac(yazi(id, { c:'\u0001' })).replace('\u0001', metin(c)); }
 
+  /* Açılan ipucu basamakları; cevabı yalnız «çözüm» basamağı verir. */
+  function ipucuHtml(a, k){
+    const l = (a.ipler || []).slice(0, a.ip || 0).filter(x => x.tur !== 'cozum');
+    if(!l.length) return '';
+    return '<div class="om-destek om-ipucu" role="status">' + l.map(x => {
+      if(x.tur === 'soru') return '<p>' + metin(x.metin) + '</p>';
+      if(x.tur === 'parca') return '<p><b>' + kac(yazi('ortak.om.ip-anlatim')) + ':</b> ' + metin(x.metin) + '</p>';
+      if(x.tur === 'eleme') return '<p class="om-kucuk">' + kac(yazi('ortak.om.ip-eleme')) + '</p>';
+      return kodlamaHtml(x, a);
+    }).join('') + '</div>';
+  }
+  function kodlamaHtml(x, a){
+    const et = y => (y.tur === 'kendi' ? yazi('ortak.om.kod-kendi') : y.tur === 'internet' ? yazi('ortak.om.kod-internet') : '');
+    return '<div class="om-kodlama"><p class="om-ara-baslik">' + kac(yazi('ortak.om.ip-kodlama')) + '</p>'
+      + x.liste.map(y => '<p>' + metin(y.metin) + (et(y) ? ' <span class="om-kucuk">· ' + kac(et(y)) + '</span>' : '')
+        + (y.kaynak ? ' <a class="om-kucuk" href="' + kac(y.kaynak) + '" target="_blank" rel="noopener noreferrer">' + kac(yazi('ortak.om.kod-kaynak')) + '</a>' : '') + '</p>').join('')
+      + (a.kodAday ? a.kodAday.map((y, i) => '<div class="om-aday"><p>' + kac(y.metin) + ' <span class="om-kucuk">· ' + kac(yazi('ortak.om.kod-internet')) + '</span> '
+          + '<a class="om-kucuk" href="' + kac(y.url) + '" target="_blank" rel="noopener noreferrer">' + kac(y.baslik || yazi('ortak.om.kod-kaynak')) + '</a></p>'
+          + (y.eklendi ? '' : '<div class="om-dugmeler">' + dugme('kod-ekle:' + i, yazi('ortak.om.kod-ekle')) + '</div>') + '</div>').join('') : '')
+      + (x.ara && !a.kodAday ? '<div class="om-dugmeler">' + dugme('kod-bul', yazi(a.kodBekle ? 'ortak.om.kod-ariyor' : 'ortak.om.kod-bul'), null, a.kodBekle ? ' disabled' : '') + '</div>' : '')
+      + (a.kodNot ? '<p class="om-kucuk" role="status">' + kac(a.kodNot) + '</p>' : '') + '</div>';
+  }
+  function tempoHtml(a, k){
+    const t = M().ayar().tempo;
+    let h = null;
+    try{ h = t && k ? t(k.id) : null; }catch(e){ h = null; }
+    return h && h.sn && a.sure ? '<p class="om-kucuk">' + kac(yazi('ortak.om.tempo', { sn:a.sure, ad:h.ad, hedef:h.sn })) + '</p>' : '';
+  }
   function yoklaHtml(s, a){
     const q = a.q, k = M().konuOf(s, a);
-    const baslik = baslikHtml(a.karisik ? 'ortak.om.yokla-karisik' : 'ortak.om.yokla');
+    const baslik = baslikHtml(a.karisik ? 'ortak.om.yokla-karisik' : s.tur === 'ogren' ? 'ortak.om.dene' : 'ortak.om.yokla');
     if(!q.sec) return baslik + acikHtml(a, k);
+    if(!a.bas) a.bas = Date.now();
     if(!a.bitti){
+      const kalan = (a.ipler || []).length > (a.ip || 0);
       return baslik + soruMetni(q) + secenekler(q, a)
-        + (a.ip ? '<p class="om-kucuk">' + metin(q.ipucu) + '</p>' : '')
-        + (a.sec ? '<p class="om-ara-baslik" id="om-guven">' + kac(yazi('ortak.om.ne-kadar-emin')) + '</p><div class="om-dugmeler" role="group" aria-labelledby="om-guven">'
+        + (a.kayit ? '<p class="om-geri-bildirim is-yanlis" role="status">' + kac(yazi('ortak.om.tekrar-dene')) + '</p>' : '')
+        + ipucuHtml(a, k)
+        + (a.sec && !a.kayit ? '<p class="om-ara-baslik" id="om-guven">' + kac(yazi('ortak.om.ne-kadar-emin')) + '</p><div class="om-dugmeler" role="group" aria-labelledby="om-guven">'
           + birinci('cevap:emin', yazi('ortak.om.emin')) + dugme('cevap:kararsiz', yazi('ortak.om.kararsiz')) + dugme('cevap:tahmin', yazi('ortak.om.tahmin-g')) + '</div>' : '')
-        + '<div class="om-dugmeler">' + (q.ipucu && !a.ip ? dugme('ipucu', yazi('ortak.om.ipucu')) : '') + dugme('bos', yazi('ortak.om.bilmiyorum')) + '</div>';
+        + '<div class="om-dugmeler">' + (!a.ipler || kalan ? dugme('ipucu', yazi(a.ip ? 'ortak.om.ip-sonraki' : 'ortak.om.ipucu')) : '')
+        + (a.kayit ? '' : dugme('bos', yazi('ortak.om.bilmiyorum'))) + '</div>';
     }
+    const ilk = a.isabet, sonra = !ilk && a.sec === q.dogru;
     return baslik + soruMetni(q) + secenekler(q, a)
-      + '<p class="om-geri-bildirim ' + (a.isabet ? 'is-dogru' : 'is-yanlis') + '" role="status">' + kac(yazi(a.isabet ? 'ortak.om.dogru' : 'ortak.om.yanlis')) + (a.karisik && k ? ' · ' + kac(k.ad) : '') + '</p>'
-      + (a.isabet ? cozumHtml(q) : '') + devamD();
+      + '<p class="om-geri-bildirim ' + (ilk || sonra ? 'is-dogru' : 'is-yanlis') + '" role="status">'
+      + kac(yazi(ilk ? 'ortak.om.dogru' : sonra ? 'ortak.om.dogru-ipucu' : 'ortak.om.cozum-baslik')) + (a.karisik && k ? ' · ' + kac(k.ad) : '') + '</p>'
+      + tempoHtml(a, k) + ipucuHtml(a, k) + cozumHtml(q) + devamD();
   }
 
   /* Açık soru: önce üret, sonra karşılaştır, kararı kişi verir. Boş cevap «tutmadı». */
@@ -430,6 +511,51 @@ window.LIFEOS.OMEKRAN = (function(){
       + '<div class="om-dugmeler">' + birinci('devam', yazi('ortak.om.devam')) + '</div>';
   }
 
+  function sezgiHtml(s){
+    const k = s.konu, z = k.sezgi, kv = L().KAVRAT;
+    const m = z ? (typeof z === 'string' ? z : z.metin) : k.giris;
+    return baslikHtml('ortak.om.sezgi')
+      + (z && z.cizim && kv ? kv.cizimHtml('om:' + k.id + ':sezgi', z.cizim) : '')
+      + '<div class="om-metin">' + para(m) + '</div>' + devamD();
+  }
+  function kartHtml(s){
+    const k = s.konu, kv = L().KAVRAT;
+    return baslikHtml('ortak.om.kartlar') + (kv ? kv.kartlarHtml(k.id, M().kartlarOf(k)) : '') + devamD();
+  }
+  function gorevHtml(s, a){
+    const g = a.g, k = s.konu;
+    if(g.tur === 'kaynak') return baslikHtml('ortak.om.gorev-kaynak') + acikHtml(Object.assign(a, { q:Object.assign({}, a.q, { soru:[g.belge, yazi('ortak.om.kaynak-sorular')], yanit:g.yanit }) }), k);
+    if(g.tur === 'efsane'){
+      return baslikHtml('ortak.om.gorev-efsane') + '<div class="om-soru">' + para(g.iddia) + '</div>'
+        + (a.bitti ? '<p class="om-geri-bildirim ' + (a.isabet ? 'is-dogru' : 'is-yanlis') + '" role="status">' + kac(yazi(a.isabet ? 'ortak.om.efsane-isabet' : 'ortak.om.efsane-iskala')) + '</p>'
+            + '<div class="om-metin">' + para(g.neden) + '</div>' + devamD()
+          : '<div class="om-dugmeler">' + dugme('efsane:1', yazi('ortak.om.efsane-dogru')) + dugme('efsane:0', yazi('ortak.om.efsane-yanlis')) + '</div>');
+    }
+    if(g.tur === 'dikte'){
+      const r = a.sonuc;
+      return baslikHtml('ortak.om.gorev-dikte') + '<p class="om-kucuk">' + kac(yazi('ortak.om.dikte-not')) + '</p>'
+        + '<div class="om-dugmeler">' + dugme('dikte-dinle', '▶ ' + yazi('ortak.om.dinle')) + '</div>'
+        + (r ? '<p class="om-dikte" lang="' + kac(g.dil || '') + '">' + r.kelimeler.map(x => '<span class="' + (x.ok ? 'is-dogru' : 'is-yanlis') + '">' + kac(x.w) + '</span>').join(' ') + '</p>'
+            + '<p class="om-kucuk">' + kac(yazi('ortak.om.dikte-sonuc', { y:Math.round(r.oran * 100) })) + '</p>' + devamD()
+          : alan('adim', yazi('ortak.om.yazi-etiket'), a.yazi, { satir:2 }) + '<div class="om-dugmeler">' + birinci('dikte-karsilastir', yazi('ortak.om.karsilastir')) + '</div>');
+    }
+    /* sirala */
+    const dagit = M().karisik(g.ogeler, g.id), secilen = a.yer || [], r = a.sonuc;
+    const et = i => (g.etiketler && g.etiketler[i] ? '<span class="om-kucuk">' + kac(g.etiketler[i]) + ':</span> ' : '');
+    const liste = '<ol class="om-liste om-sira">' + secilen.map((x, i) => '<li class="' + (r ? (r.yer[i] ? 'is-dogru' : 'is-yanlis') : '') + '">' + et(i) + metin(x) + (r ? (r.yer[i] ? ' ✓' : ' ✗') : '') + '</li>').join('') + '</ol>';
+    const goster = a.bitti && r && !r.isabet;
+    return baslikHtml('ortak.om.gorev-sirala') + (g.soru ? '<div class="om-soru">' + para(g.soru) + '</div>' : '')
+      + '<p class="om-kucuk">' + kac(yazi('ortak.om.sira-not')) + '</p>' + liste
+      + (r ? '<p class="om-geri-bildirim ' + (r.isabet ? 'is-dogru' : 'is-yanlis') + '" role="status">' + kac(yazi(r.isabet ? 'ortak.om.sira-tam' : a.bitti ? 'ortak.om.sira-dogru' : 'ortak.om.sira-yanlis')) + '</p>' : '')
+      + (goster ? '<ol class="om-liste">' + g.ogeler.map((x, i) => '<li>' + et(i) + metin(x) + '</li>').join('') + '</ol>' : '')
+      + (a.bitti ? devamD()
+        : r ? '<div class="om-dugmeler">' + birinci('sira-yeniden', yazi('ortak.om.sira-yeniden')) + '</div>'
+        : '<div class="om-dugmeler">' + dagit.filter(x => secilen.indexOf(x) < 0).map(x => dugme('sira-ekle:' + g.ogeler.indexOf(x), duzYazi(x))).join('') + '</div>'
+          + '<div class="om-dugmeler">' + (secilen.length ? dugme('sira-geri', yazi('ortak.om.sira-geri')) : '')
+          + (secilen.length === g.ogeler.length ? birinci('sira-kontrol', yazi('ortak.om.sira-kontrol')) : '') + '</div>');
+  }
+  const duzYazi = x => M().duz(x);
+
   function bitirHtml(s){
     const r = M().sonuc(s), G = L().GRAFIK, o = M().oneri();
     return baslikHtml('ortak.om.bitir')
@@ -437,6 +563,9 @@ window.LIFEOS.OMEKRAN = (function(){
       + '<ul class="om-sonuc">' + r.konular.map(x => '<li><span>' + kac(x.ad) + '</span>' + (x.asama !== 'yok' ? '<span class="om-asama' + (x.kritik ? ' is-kritik' : '') + '">' + kac(x.adi) + '</span>' : '')
         + (x.sonraki ? '<span class="om-kucuk">' + kac(yazi('ortak.om.sonraki-tekrar', { g:tarih(x.sonraki) })) + '</span>' : '') + '</li>').join('') + '</ul>'
       + ((s.konu && s.konu.sinir) || M().ayar().sinir ? '<p class="rehber__sinir">' + kac((s.konu && s.konu.sinir) || M().ayar().sinir) + '</p>' : '')
+      + (s.konu ? '<div class="om-blok">' + satirAlan('kodlama-yaz', yazi('ortak.om.kod-yaz'), E.kodYaz)
+        + '<div class="om-dugmeler">' + dugme('kod-kaydet', yazi('ortak.om.kod-kaydet')) + '</div>'
+        + (E.kodNot ? '<p class="om-kucuk" role="status">' + kac(E.kodNot) + '</p>' : '') + '</div>' : '')
       + '<div class="om-dugmeler">'
       + (o.tur === 'tekrar' ? birinci('karma', yazi('ortak.om.tekrar-basla')) : o.tur === 'yeni' ? birinci('konu:' + o.konu, yazi('ortak.om.siradaki', { ad:o.ad })) : '')
       + dugme('ana', yazi('ortak.om.kapat')) + '</div>';
@@ -449,7 +578,8 @@ window.LIFEOS.OMEKRAN = (function(){
     /* Karışık tekrarda konu cevaptan önce söylenmez: başlık ipucu olur. */
     const ad = a.karisik && !a.bitti ? '' : (k ? k.ad : '');
     const g = { tahmin:() => tahminHtml(a), parca:() => parcaHtml(s, a), ozet:() => ozetHtml(s), acikla:() => aciklaHtml(a), ornek:() => ornekHtml(a), yokla:() => yoklaHtml(s, a),
-      onar:() => onarHtml(s, a), anlat:() => anlatHtml(s, a), aktar:() => aktarHtml(s, a), niyet:() => niyetHtml(a), bosalt:() => bosaltHtml(s, a), bitir:() => bitirHtml(s) }[a.t];
+      onar:() => onarHtml(s, a), anlat:() => anlatHtml(s, a), aktar:() => aktarHtml(s, a), niyet:() => niyetHtml(a), bosalt:() => bosaltHtml(s, a), bitir:() => bitirHtml(s),
+      sezgi:() => sezgiHtml(s), kart:() => kartHtml(s), gorev:() => gorevHtml(s, a) }[a.t];
     return ustHtml(ad, k && !a.karisik ? k.etiket : '', 'seans-cik') + noktalar(s) + '<div class="om-blok om-seans">' + g() + '</div>';
   }
 
@@ -468,7 +598,7 @@ window.LIFEOS.OMEKRAN = (function(){
     sesDur();
     const s = tur === 'karma' ? M().karma() : M().seans(E.id, tur, E.bicim);
     if(!s) return false;
-    E.s = s; E.kip = 'seans';
+    E.s = s; E.kip = 'seans'; E.kodYaz = ''; E.kodNot = '';
     return true;
   }
   /* Yazılan metin kayda: hangi adım hangi başlığa gider. */
@@ -492,6 +622,7 @@ window.LIFEOS.OMEKRAN = (function(){
       case 'bicim': E.bicim = d; break;
       case 'ogren': if(seansAc('ogren')) adimDegisti = true; break;
       case 'tekrar': if(seansAc('tekrar')) adimDegisti = true; break;
+      case 'derin': if(seansAc('derin')) adimDegisti = true; break;
       case 'karma': if(seansAc('karma')) adimDegisti = true; break;
       case 'devam':
         if(a && a.t === 'bitir') break;
@@ -525,21 +656,86 @@ window.LIFEOS.OMEKRAN = (function(){
         if(!a || a.bitti) break;
         a.sec = d;
         if(a.t === 'tahmin'){ a.bitti = true; await M().isle(s, { isabet:d === a.q.dogru, harf:d }); }
+        /* İlk cevap kayda geçtiyse yeniden deneme anında değerlendirilir; kanıt değişmez. */
+        else if(a.kayit){
+          if(d === a.q.dogru) a.bitti = true;
+          else{ (a.denenen = a.denenen || []).push(d); a.sec = null; ipIleri(s, a); }
+        }
         break;
       case 'tahmin-bos':
         if(a && !a.bitti){ a.bitti = true; await M().isle(s, { isabet:false }); }
         break;
-      case 'ipucu': if(a) a.ip = true; break;
+      case 'ipucu': if(a && !a.bitti) ipIleri(s, a); break;
       case 'cevap':
-        if(!a || a.bitti || !a.sec) break;
-        a.bitti = true; a.isabet = a.sec === a.q.dogru;
+        if(!a || a.bitti || !a.sec || a.kayit) break;
+        a.kayit = true; a.isabet = a.sec === a.q.dogru;
+        a.sure = a.bas ? Math.max(1, Math.round((Date.now() - a.bas) / 1000)) : null;
         await M().isle(s, { isabet:a.isabet, guven:d, harf:a.sec, ipucu:!!a.ip });
+        if(a.isabet) a.bitti = true;
+        else{ a.harf = a.sec; (a.denenen = a.denenen || []).push(a.sec); a.sec = null; a.ipler = null; ipIleri(s, a); }
         break;
       case 'bos':
         if(!a || a.bitti) break;
-        a.bitti = true; a.isabet = false; a.sec = null;
-        await M().isle(s, { isabet:false, ipucu:!!a.ip });
+        if(!a.kayit){
+          a.kayit = true; a.isabet = false; a.sec = null;
+          await M().isle(s, { isabet:false, ipucu:!!a.ip });
+        }
+        ipIleri(s, a);
         break;
+      case 'kod-bul': {
+        if(!a || a.kodBekle) break;
+        a.kodBekle = true; a.kodNot = ''; yenile();
+        const r = await M().kodlamaAra(M().konuOf(s, a), a.q);
+        a.kodBekle = false;
+        if(r.ok) a.kodAday = r.adaylar;
+        else a.kodNot = yazi(r.neden === 'baglanti' ? 'ortak.om.kod-baglanti' : 'ortak.om.kod-yok');
+        break;
+      }
+      case 'kod-ekle': {
+        const y = a && a.kodAday && a.kodAday[Number(d)];
+        if(!y || y.eklendi) break;
+        const k = M().konuOf(s, a);
+        await M().notYaz(k.id, 'kodlama', y.metin, y.url);
+        y.eklendi = true;
+        break;
+      }
+      case 'kod-kaydet': {
+        const k = s && s.konu, m = String(E.kodYaz || '').trim();
+        if(!k || m.length < 3) break;
+        await M().notYaz(k.id, 'kodlama', m);
+        E.kodYaz = ''; E.kodNot = yazi('ortak.om.kod-kaydedildi');
+        break;
+      }
+      case 'efsane':
+        if(!a || a.bitti) break;
+        a.bitti = true; a.isabet = (d === '1') === !!a.g.dogru;
+        await M().isle(s, { isabet:a.isabet });
+        break;
+      case 'dikte-dinle': {
+        const ses = M().ayar().ses;
+        if(ses && a) Promise.resolve(ses.konus(a.g.metin, { lang:a.g.dil })).catch(() => null);
+        break;
+      }
+      case 'dikte-karsilastir':
+        if(!a || a.bitti) break;
+        a.sonuc = M().dikte(a.yazi, a.g.metin); a.bitti = true;
+        await M().isle(s, { isabet:a.sonuc.isabet });
+        break;
+      case 'sira-ekle': {
+        const x = a && a.g.ogeler[Number(d)];
+        if(x == null || a.sonuc) break;
+        a.yer = (a.yer || []).concat([x]);
+        break;
+      }
+      case 'sira-geri': if(a && !a.sonuc && a.yer) a.yer = a.yer.slice(0, -1); break;
+      case 'sira-kontrol':
+        if(!a || a.bitti || !a.yer || a.yer.length !== a.g.ogeler.length) break;
+        a.sonuc = M().siraDenetle(a.g.ogeler, a.yer);
+        a.deneme = (a.deneme || 0) + 1;
+        if(a.deneme === 1) await M().isle(s, { isabet:a.sonuc.isabet });
+        if(a.sonuc.isabet || a.deneme >= 2) a.bitti = true;
+        break;
+      case 'sira-yeniden': if(a && !a.bitti){ a.sonuc = null; a.yer = []; } break;
       case 'karsilastir': if(a){ a.goster = true; await adimNotu(s, a); } break;
       case 'bos-acik':
         if(!a || a.bitti) break;
@@ -593,6 +789,19 @@ window.LIFEOS.OMEKRAN = (function(){
     }
     yenile(adimDegisti, olay);
   }
+  /* Merdivende bir basamak (motor söz 9). Eleme bir şıkkı kapatır; çözüm basamağı adımı bitirir. */
+  function ipIleri(s, a){
+    const k = M().konuOf(s, a);
+    if(!a.ipler) a.ipler = M().ipuclari(k, a.q, { harf:a.harf, ara:M().kodlamaAraVar() });
+    if((a.ip || 0) >= a.ipler.length) return;
+    const b = a.ipler[a.ip || 0];
+    a.ip = (a.ip || 0) + 1;
+    if(b.tur === 'eleme' && a.q.sec){
+      const h = M().eleme(a.q, (a.denenen || []).concat(a.elenen || []));
+      if(h) (a.elenen = a.elenen || []).push(h);
+    }
+    if(b.tur === 'cozum') a.bitti = true;
+  }
   async function yeniAc(){
     const y = E.yeni;
     const r = await M().atolyeEkle({ ad:y.ad, metin:y.metin });
@@ -605,6 +814,7 @@ window.LIFEOS.OMEKRAN = (function(){
     else if(id === 'ekle-metin') E.ekle.metin = v;
     else if(id === 'ekle-soru') E.ekle.soru = v;
     else if(id === 'ekle-yanit') E.ekle.yanit = v;
+    else if(id === 'kodlama-yaz') E.kodYaz = v;
   }
 
   /* Yerinde çizim (söz 2). Adım değişince odak başlığa gider, sayfa kökün başına kayar. */
@@ -666,7 +876,7 @@ window.LIFEOS.OMEKRAN = (function(){
     });
   }
 
-  function _sifirla(){ E = { kip:'ana', id:null, s:null, bicim:'parca', yeni:{ ad:'', metin:'', onay:false }, ekle:{ metin:'', soru:'', yanit:'' }, sil:false, not:'', bekle:false }; konusan = null; }
+  function _sifirla(){ E = { kip:'ana', id:null, s:null, bicim:'parca', yeni:{ ad:'', metin:'', onay:false }, ekle:{ metin:'', soru:'', yanit:'' }, sil:false, not:'', bekle:false, kodYaz:'', kodNot:'' }; konusan = null; }
 
   return { html, tikla, yazIsle, ac, bugunSatiri, girisDugmesi, durum:() => E, _sifirla };
 })();

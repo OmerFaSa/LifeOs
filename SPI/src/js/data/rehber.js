@@ -80,6 +80,14 @@ SP.REHBER_KONULAR = [
       { on:'Yük neden küçük adımlarla artırılır?', arka:'Tendon ve kemik kastan daha yavaş uyum sağlar.' },
       { on:'Hangi ağrı uyarıdır?', arka:'Bir noktaya sabitlenen, koştukça artan ya da topallatan ağrı: koşuya ara verilir.' },
     ],
+    sezgi:'Kas birkaç haftada güçlenir, tendon ve kemik daha yavaş. Yeni bir binaya kat çıkmak gibidir: duvarlar hızlı yükselir ama temel kurumadan üst kat eklenmez. Koş-yürü, temele kuruma zamanı verir.',
+    kodlama:['«Konuşabiliyorsan doğru hızdasın»: koşu temposu sohbet temposudur.', '«Önce yürü, sonra koş, yine yürü»: her çıkış yürüyüşle başlar ve biter.'],
+    gorevler:[
+      { tur:'sirala', id:'kosu-zincir', soru:'Yük çok hızlı artınca ne olur? Zinciri nedenden sonuca kur.',
+        ogeler:['Haftalık süre ya da mesafe hızla artar', 'Kas çabuk uyum sağlar, tendon ve kemik yavaş', 'Tendon ve kemiğe kaldırabileceğinden fazla yük biner', 'Bir noktaya sabitlenen, koştukça artan ağrı başlar'] },
+      { tur:'efsane', id:'kosu-yuzde-on', iddia:'«Haftada en çok %10 artır» kuralı kesin bir bilimsel sınırdır.', dogru:false,
+        neden:'Anlatım bunun kesin bir sınır değil, makul bir temkin kuralı olduğunu söyler. Asıl fikir yükü küçük adımlarla artırmaktır; ara verdiysen daha da hafif başlarsın.' },
+    ],
     akilda:['Koş-yürüyle başla, koşu aralığını haftalar içinde uzat.', 'Yükü küçük adımlarla artır; tendon kastan yavaş uyum sağlar.', 'Bir noktaya sabitlenen, artan ağrıda dur.'],
     kaynaklar:['DSÖ 2020 Fiziksel Aktivite Kılavuzu', 'Koşu sakatlıkları üzerine derlemeler (ör. Nielsen ve ark., JOSPT, 2014)'] },
 

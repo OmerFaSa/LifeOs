@@ -26,8 +26,9 @@
         doğrulanmadı» yazar.
      2. METİN ÖNCE KAÇIRILIR, sonra işaretler açılır; başka HTML geçmez.
      3. «Okudum» bu cihazda kalır (modülün deposu); hiçbir ölçüme yazılmaz.
-     4. GÖR, DİNLE, SINA (2026-11-05). Bölüm `cizim` (adım adım şekil), konu
-        `kartlar` taşıyabilir; ikisi ve «Dinle» düğmesi ortak/kavrat.js'nindir.
+     4. GÖR, DİNLE, SINA (2026-11-05). Bölüm `cizim` (adım adım şekil) ve «Dinle»
+        ortak/kavrat.js'nindir. Konunun `kartlar`ı, `sezgi`si, `kodlama`sı ve `gorevler`i
+        öğrenme motorundadır (2026-11-06): öğrenmenin tek yolu orasıdır, burası okumak içindir.
         Modül sesini `kur({ ses })` ile verir; ses yoksa düğme çıkmaz. */
 window.LIFEOS.PARCA.yazilar({
   'ortak.rehber.ornek':'Örnek',
@@ -138,16 +139,15 @@ LIFEOS.REHBER = (function(){
       + ('<p class="rehber__ust"><button type="button" class="rehber__geri" data-rehber="geri">' + yz('ortak.rehber.konular') + '</button>')
       + '<span>' + kac(k.alan) + (k.sure ? ' · ' + kac(k.sure) + ' dk' : '') + (' ' + yz('ortak.rehber.elle-yazildi-dogrulanmadi') + '</span></p>')
       + '<h1 class="rehber__ad">' + kac(k.ad) + '</h1>'
+      + (OM() ? '<p class="rehber__ogren">' + OM().girisDugmesi(k.id, 'btn--primary') + '</p>' : '')
       + '<p class="rehber__giris">' + metinHtml(k.giris) + '</p>'
       + (k.kazanim && k.kazanim.length ? ('<div class="rehber__kazanim"><p>' + yz('ortak.rehber.bu-konunun-sonunda') + '</p><ul>') + k.kazanim.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
       + (k.bolumler || []).map((b, j) => bolumHtml(b, j, k.id)).join('')
-      + (KV() && k.kartlar ? KV().kartlarHtml('rehber:' + k.id, k.kartlar) : '')
       + (k.akilda && k.akilda.length ? ('<div class="rehber__akilda"><p>' + yz('ortak.rehber.akilda-kalsin') + '</p><ul>') + k.akilda.map(x => '<li>' + metinHtml(x) + '</li>').join('') + '</ul></div>' : '')
       + (k.kaynaklar && k.kaynaklar.length ? ('<p class="rehber__kaynak"><b>' + yz('ortak.rehber.dayanak') + '</b> ') + k.kaynaklar.map(kac).join(' · ') + '</p>' : '')
       + (ayar && ayar.sinir ? '<p class="rehber__sinir">' + kac(ayar.sinir) + '</p>' : '')
       + '<div class="rehber__ayak">'
       +   '<button type="button" class="btn ' + (okundu ? 'btn--ghost' : 'btn--primary') + '" data-rehber="okudum:' + kac(k.id) + '" aria-pressed="' + okundu + '">' + (okundu ? '✓ Okundu' : 'Okudum') + '</button>'
-      +   (OM() ? OM().girisDugmesi(k.id) : '')
       +   (onceki ? '<button type="button" class="btn btn--ghost" data-rehber="onceki">‹ ' + kac(onceki.ad) + '</button>' : '')
       +   (sonraki ? '<button type="button" class="btn btn--ghost" data-rehber="sonraki">' + kac(sonraki.ad) + ' ›</button>' : '')
       + '</div></article>';
@@ -212,7 +212,8 @@ LIFEOS.REHBER = (function(){
 
   function kur(o){
     ayar = Object.assign({ modul:'' }, o || {});
-    if(KV()) KV().kur({ modul:ayar.modul + '.rehber', ses:ayar.ses, metin:metinHtml });
+    /* Kartlar ve kanıtları öğrenme motoruyla tek kayıttır: anahtar modülün kendisi. */
+    if(KV()) KV().kur({ modul:ayar.modul, ses:ayar.ses, metin:metinHtml });
   }
   function _sifirla(){ ayar = null; secili = null; }
 

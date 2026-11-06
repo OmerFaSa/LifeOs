@@ -17,6 +17,9 @@ Kullanıcı (2026-11-06): kişinin çok rahat anlayacağı, her konuda; sistemde
 
 ## Şimdi akış
 
+**2026-11-06 sonrası (OGRETME-PLANI Faz 2):** «Adım adım öğren» planı aşamadan kurar. Veri yok/öğreniyor: sezgi → parça parça anlatım → çözülmüş örnek → kendin dene (2 soru, yanlışta ipucu merdiveni) → alan görevi → kartlar. Tutuyor: aklında kalan → sorular → görev → kartlar. Kalıcı: tekrar ve aktarım. Aşağıdaki uzun akış artık «Derinleş» düğmesidir; hata türü seçtirmek yalnız orada.
+
+
 Yeni konu: **Tahmin → parça parça anlatım → kendi cümlenle → çözümlü örnek → hatırla (güven işaretiyle) → yanlışsa hatayı onar, araya bir soru girdikten sonra benzer soru → başkasına anlat → yeni durumda kullan → nerede kullanacaksın → sonuç.**
 
 Tekrar: aklında kalanı yaz → yeni sorular → kalıcıysa aktarım. Karışık tekrar: vadesi gelen konulardan birer soru, konu adı cevaptan önce söylenmez.

@@ -336,7 +336,7 @@ window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', i
   /* Gör, dinle, sına (ortak/kavrat.js): bölüm `cizim`, konu `kartlar`; Dinle AYS'nin sesiyle okur. */
   const KV = () => (window.LIFEOS || {}).KAVRAT;
   const SES = { var:() => !!(R.Voice && R.Voice.available()), konus:m => R.Voice.speak(m), dur:() => { if(R.Voice) R.Voice.cancel(); } };
-  function kavratKur(){ if(KV()) KV().kur({ modul:'ays.ogren', ses:SES, metin:s => O().metinHtml(s) }); return KV(); }
+  function kavratKur(){ if(KV()) KV().kur({ modul:'ays', ses:SES, metin:s => O().metinHtml(s) }); return KV(); }
 
   /* Konu çubuğu: ‹ ders · konu › — dört bölümde aynı. Uçta ok yerine boşluk. */
   function konuCubugu(x){
@@ -679,7 +679,6 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
         ${when(b.ornek, () => ornekHtml(b.ornek))}
         ${when(b.dikkat, () => html`<p class="ders__dikkat"><b>Dikkat:</b> ${fmt(b.dikkat)}</p>`)}
       </section>`)}
-      ${kv && topic && a.kartlar ? raw(kv.kartlarHtml('ays:' + topic.id, a.kartlar)) : ''}
       ${when(an, () => akilliNotHtml(an))}
       ${when(d && d.ornekler && d.ornekler.length, () => orneklerHtml(d))}
       ${when(d && d.kaliplar && d.kaliplar.length, () => listeBlogu('ders-kaliplar', yz('ays.ogren.sinavda-nasil-sorulur'), d.kaliplar))}
@@ -736,7 +735,6 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
         : K.Button({ label:yz('ays.ogren.okudum'), icon:'check', size:'sm', tone:'primary', act:'ogren-okundu' }),
       when(d.skor.toplam, () => K.Button({ label:yz('ays.ogren.sorulara-gec'), icon:'right', size:'sm', tone:d.okundu ? 'primary' : null,
         act:'ogren-git', data:{ 'data-route':'sorular', 'data-subject':subject.id, 'data-topic':topic.id } })),
-      when(window.LIFEOS.OMEKRAN, () => raw(window.LIFEOS.OMEKRAN.girisDugmesi(topic.id, 'btn--sm btn--ghost'))),
       K.Button({ label:yz('ays.ogren.stratejiler'), icon:'book', size:'sm', tone:'ghost', act:'ogren-strateji', title:yz('ays.ogren.bilimsel-ogrenme-yontemleri') }),
       K.Button({ label:yz('ays.ogren.koca-sor'), icon:'zap', size:'sm', tone:'ghost', act:'ogren-git',
         data:{ 'data-route':'koc', 'data-subject':subject.id, 'data-topic':topic.id } }),
@@ -749,6 +747,7 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
           <header class="ders__bas">
             <h2 id="ders-baslik">${topic.name}</h2>
             <p class="small dim">${subject.name + (topic.group ? ' · ' + topic.group : '')} ${yz('ays.ogren.elle-yazildi-dogrulanmadi-2')}</p>
+            ${when(window.LIFEOS.OMEKRAN, () => raw('<p class="mt-8 mb-6">' + window.LIFEOS.OMEKRAN.girisDugmesi(topic.id, 'btn--primary') + '</p>'))}
             ${when(kavramlar && kavramlar.length, () => html`<div class="ders__kavramlar mt-8 mb-6" role="list" aria-label="Konu kavramları">
               <span class="tiny dim mr-4">Kavramlar:</span>
               ${map(kavramlar, k => html`<span class="ogr-kavram" role="listitem">${fmt(k)}</span>`)}

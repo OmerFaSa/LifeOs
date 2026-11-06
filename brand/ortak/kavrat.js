@@ -57,7 +57,20 @@ window.LIFEOS.KAVRAT = (function(){
   let konusan = null;               // dinlenen bölüm kimliği
   let sesKusak = 0;                 // eski sesli tekrar zamanlayıcısını boşa düşürür
 
-  function kur(o){ ayar = Object.assign({ modul:'ortak' }, o || {}); }
+  /* 2026-11-06'ya kadar kartlar anlatım sayfasındaydı ve anahtar sayfaya göreydi
+     (spi.rehber, konu «rehber:kosu»). Artık öğrenme motorundadır: anahtar modülündür,
+     eski kayıt bir kez taşınır, eskisi silinmez (ESKİ VERİ KAYBOLMAZ). */
+  const ESKI = { ays:'ays.ogren', spi:'spi.rehber', esp:'esp.rehber' };
+  function tasi(){
+    const e = ESKI[ayar.modul];
+    if(!e || !L().OGRET) return;
+    const yeni = depo();
+    if(Object.keys(yeni.oku()).length) return;
+    const eski = L().OGRET.depo(e + '.kavrat.kanit').oku(), v = {};
+    Object.keys(eski).forEach(k => { v[k.replace(/^(rehber|ays):/, '')] = eski[k]; });
+    if(Object.keys(v).length) yeni.yaz(v);
+  }
+  function kur(o){ ayar = Object.assign({ modul:'ortak' }, o || {}); try{ tasi(); }catch(e){ /* depo kapalı */ } }
   function metin(s){ return ayar.metin ? ayar.metin(String(s == null ? '' : s)) : kac(s); }
   function bugun(){
     if(ayar.bugun) return ayar.bugun();
@@ -187,7 +200,7 @@ window.LIFEOS.KAVRAT = (function(){
 
   /* ------------------------------------------------------------ kartlar */
 
-  const depo = () => L().OGRET.depo(ayar.modul + '.kavrat.kanit');
+  function depo(){ return L().OGRET.depo(ayar.modul + '.kavrat.kanit'); }
   function kanitlar(konu){ const v = depo().oku()[konu]; return v && typeof v === 'object' ? v : {}; }
   function beceriler(konu, kartlar){
     const k = kanitlar(konu);
