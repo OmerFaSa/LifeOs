@@ -175,7 +175,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.office.ofis':'Ofis',
   'ays.office.masalari-tara':'Masaları tara',
 });
-window.LIFEOS.PARCA.sayfa({ id:'office', modul:'ays', cekmece:'ofis', ad:'Masalar', ikon:'guide', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'ays', cekmece:'ofis', ad:'Ekip özeti', ikon:'guide', sira:10 });
 
 R.Screens.office = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -914,7 +914,7 @@ R.Screens.office = (function(){
     return String(html`
       ${K.SayfaBolumleri({ act:'office-tab', aria:yz('ays.office.ofis-bolumleri'), bolumler:[
         { id:'ozet', ad:yz('ays.office.bolum-ozet'), govde:K.Stack(P.liste('office', 'y1', K, parcaB).concat(P.liste('office', 'ozet', K, parcaB))) },
-        { id:'uzmanlar', ad:yz('ays.office.bolum-uzmanlar'), govde:K.Stack(P.liste('office', 'uzmanlar', K, parcaB)) },
+        { id:'uzmanlar', ad:yz('ays.office.bolum-uzmanlar'), sayi:specialists.filter(a => O.brief(a.id).findings.some(f => f.tone === 'danger')).length || null, govde:K.Stack(P.liste('office', 'uzmanlar', K, parcaB)) },
         { id:'kayit', ad:yz('ays.office.bolum-kayit'), govde:K.Stack(P.liste('office', 'kayit', K, parcaB)) },
       ] })}${P.yer('office', 'y3', K, parcaB, raw)}`);
   }

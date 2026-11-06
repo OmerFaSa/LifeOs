@@ -801,7 +801,7 @@ R.Screens.analytics = (function(){
     });
     return K.Grid([K.Span(12, html`<div class="analizbasi">
       ${K.Kutu({ ad:yz('ays.analytics.veri-dolulugu'), yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'ays', ad:yz('ays.analytics.ays'), gunler:kayitli }], { gun:7 })) })}
-      ${K.Kutu({ ad:yz('ays.analytics.bu-haftanin-birikimi'), yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:yz('ays.analytics.haftalik-soru') })) })}
+      ${when(gunluk.length, () => K.Kutu({ ad:yz('ays.analytics.bu-haftanin-birikimi'), yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:yz('ays.analytics.haftalik-soru') })) }))}
     </div>`)]);
   }
 

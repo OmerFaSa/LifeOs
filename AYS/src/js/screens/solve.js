@@ -17,8 +17,8 @@
 window.LIFEOS.PARCA.yazilar({
   'ays.solve.soru-bolumleri':'Soru çöz bölümleri',
   'ays.solve.bolum-sor':'Sor',
-  'ays.solve.bolum-kayit':'Kayıt',
-  'ays.solve.bolum-gecmis':'Geçmiş',
+  'ays.solve.bolum-kaydet':'Kaydet',
+  'ays.solve.bolum-kaynak':'Kaynaklar',
   'ays.solve.zorluk-olculmedi':'Zorluk ölçülmedi.',
   'ays.solve.ortalama-zorluk':'Ortalama zorluk ',
   'ays.solve.fotografli-soru-icin-gorsel':'Fotoğraflı soru için görsel destekleyen bir model gerekir — Google AI Studio’nun ',
@@ -68,7 +68,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.solve.cozum':'Çözüm',
   'ays.solve.soruyu-ver':'Soruyu ver',
   'ays.solve.yapay-zeka-bagli-degil':'Yapay zekâ bağlı değil.',
-  'ays.solve.fotograftan-ya-da-metinden-s':'Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla. Çözdüğün soruları «Kayıt» bölümünden girebilirsin.',
+  'ays.solve.fotograftan-ya-da-metinden-s':'Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla. Çözdüğün soruları «Kaydet» bölümünden girebilirsin.',
   'ays.solve.ofis-ayarlarini-ac':'Ofis ayarlarını aç',
   'ays.solve.kb':'KB',
   'ays.solve.fotografi-buraya-birak':'Fotoğrafı buraya bırak',
@@ -159,7 +159,7 @@ window.LIFEOS.PARCA.yazilar({
 çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
 listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
 sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
-window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', king:{ sira:130, ad:'Soru çöz', es:['soru çöz', 'soru', 'test çöz'] }, cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', king:{ sira:130, ad:'Soru çöz', es:['soru çöz', 'soru', 'test çöz'] }, cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:20 });
 
 R.Screens.solve = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -766,23 +766,24 @@ R.Screens.solve = (function(){
   LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'kayit', sira:20, ad:'Hızlı satır', ciz(){
     return hizliSatir();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'gecmis', sira:30, ad:'Kaynak', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'kaynak', sira:30, ad:'Kaynak', ciz(){
     return sourceCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'gecmis', sira:40, ad:'Konu', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'kaynak', sira:40, ad:'Konu', ciz(){
     return topicCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'gecmis', sira:50, ad:'Geçmiş', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'kayit', sira:50, ad:'Geçmiş', ciz(){
     return historyCard();
   } });
   async function render(){
-    /* TEK İŞ (2026-11-06): soruyu sormak, çözdüğünü kaydetmek ve geçmişe bakmak ayrı katlarda. */
+    /* TEK İŞ (2026-11-06). Son kayıtlar «Kaydet»in altında: yazdığın satır aynı yerde görünür.
+       Model yokken «Sor» çalışmaz: ekran önce işe yarayan kaydı açar (kod seçer). */
     const P = LIFEOS.PARCA;
-    return String(K.SayfaBolumleri({ act:'solve-tab', aria:yz('ays.solve.soru-bolumleri'), bolumler:[
-      { id:'sor', ad:yz('ays.solve.bolum-sor'), govde:K.Stack(P.liste('solve', 'sor', K)) },
-      { id:'kayit', ad:yz('ays.solve.bolum-kayit'), govde:K.Stack(P.liste('solve', 'kayit', K)) },
-      { id:'gecmis', ad:yz('ays.solve.bolum-gecmis'), govde:K.Stack(P.liste('solve', 'gecmis', K)) },
-    ] }));
+    const sor = { id:'sor', ad:yz('ays.solve.bolum-sor'), govde:K.Stack(P.liste('solve', 'sor', K)) };
+    const kaydet = { id:'kayit', ad:yz('ays.solve.bolum-kaydet'), govde:K.Stack(P.liste('solve', 'kayit', K)) };
+    const kaynak = { id:'kaynak', ad:yz('ays.solve.bolum-kaynak'), govde:K.Stack(P.liste('solve', 'kaynak', K)) };
+    return String(K.SayfaBolumleri({ act:'solve-tab', aria:yz('ays.solve.soru-bolumleri'),
+      bolumler:Q.ready(false) ? [sor, kaydet, kaynak] : [kaydet, sor, kaynak] }));
   }
 
   /* Sürükle-bırak ve yapıştır: her ikisi de aynı yola çıkar. */
@@ -1236,7 +1237,6 @@ R.Screens.solve = (function(){
     sureSuphesi,
     /* iPhone Faz 2: iş soruyu vermek ve kaydetmek; kaynaklar, konu başına
        oran ve son kayıtlar şerit (dokununca açılır). */
-    kucukVarsayilan:['kaynaklarım', 'konu-başına-çözüm'],
     title:yz('ays.solve.soru-coz'),
     subtitle(){
       const s = Q.summary();

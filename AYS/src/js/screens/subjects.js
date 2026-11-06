@@ -2,6 +2,8 @@
 
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.subjects.sirada':'Sırada',
+  'ays.subjects.konuyu-ac':'Konuyu aç',
   'ays.subjects.konu-bolumleri':'Konu bölümleri',
   'ays.subjects.bolum-konular':'Konular',
   'ays.subjects.bolum-genel':'Genel',
@@ -97,7 +99,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.subjects.i-kinci-kontrol':'İkinci kontrol',
   'ays.subjects.dersler':'Dersler',
 });
-window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', king:{ sira:120, ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] }, cekmece:'calisma', ad:'Konu kapanışı', ikon:'book', sira:50 });
+window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', king:{ sira:120, ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] }, cekmece:'calisma', ad:'Konu takibi', ikon:'book', sira:40 });
 
 R.Screens.subjects = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -367,6 +369,16 @@ R.Screens.subjects = (function(){
     })}</div>`;
   }
 
+  /* Ekran duruma göre konuşur: bekleyen ölçüm kendi kartındadır; yoksa risk sırasının başı (kural motoru). */
+  function siradakiKonu(){
+    if(C.pendingSecondChecks().length) return '';
+    const r = C.riskRanking(1)[0];
+    if(!r) return '';
+    return K.NextUp({ calm:true, icon:'book', label:yz('ays.subjects.sirada'), title:r.topicName, why:r.subjectName,
+      action:K.Button({ label:yz('ays.subjects.konuyu-ac'), tone:'primary', size:'sm', act:'open-topic',
+        data:{ 'data-subject':r.subjectId, 'data-topic':r.topicId } }) });
+  }
+
   function riskCard(){
     const list = C.riskRanking(8);
     if(!list.length) return null;
@@ -575,6 +587,7 @@ R.Screens.subjects = (function(){
     /* TEK İŞ (2026-11-06): konu listesi önce; harita, kapanış oranı ve risk «Genel»de. */
     return String(html`${K.SayfaBolumleri({ act:'subjects-tab', aria:yz('ays.subjects.konu-bolumleri'), bolumler:[
       { id:'konular', ad:yz('ays.subjects.bolum-konular'), govde:K.Grid([
+        K.Span(12, siradakiKonu()),
         Y.yer('subjects', 'konular-ust', K, parcaB, raw),
         K.Span(3, K.Stack(Y.liste('subjects', 'konular-sol', K, parcaB))),
         K.Span(7, K.Stack(Y.liste('subjects', 'konular-sag', K, parcaB).concat(Y.liste('subjects', 'konular-alt', K, parcaB)))),

@@ -175,7 +175,7 @@
       });
     });
 
-    it('Soru çöz: dört istatistik dönen kartta; kaynak ve oran şerit, son kayıtlar Geçmiş katında', async () => {
+    it('Soru çöz: dört istatistik dönen kartta; son kayıtlar kaydın altında, kaynaklar kendi katında', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const solved = R.S.solved;
@@ -187,8 +187,8 @@
           /* kayıt yokken oran sayı değil cümle */
           expect(d.textContent).toContain('Henüz kayıt yok.');
           expect(b.var.indexOf('çözüm-kaydı')).toBe(-1);
-          expect(b.kucuk.indexOf('kaynaklarım') >= 0).toBe(true);
           expect(!!b.kok.querySelector('#bl-kayit .donen')).toBe(true);
+          expect(b.var.indexOf('kaynaklarım') >= 0).toBe(true);
           expect(!!b.kok.querySelector('#bl-sor #q-hizli-kutu')).toBe(false);
         }finally{ b.bitir(); R.S.solved = solved; }
       });
@@ -217,6 +217,7 @@
     it('Sınama kur ve Kaynaklarım: açıklama cümlesi ekranda değil ⓘ’de', async () => {
       resetState();
       R.S.profile.setupDone = true;
+      R.S.cards = [{ id:'c1', front:'a', back:'b', dueAt:'2020-01-01', stage:0 }];   /* boşken form yerine ilk adım çizilir */
       const sinama = String(await R.Screens.quiz.render());
       expect(sinama.indexOf('Önce cevabı üret')).toBe(-1);
       expect(sinama.indexOf('data-hint="quiz"') >= 0).toBe(true);

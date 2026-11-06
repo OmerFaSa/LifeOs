@@ -67,6 +67,11 @@ window.LIFEOS.PARCA.yazilar({
   'ays.week.bolum-gunler':'Günler',
   'ays.week.bolum-sozlesme':'Sözleşme',
   'ays.week.bolum-ozet':'Özet',
+  'ays.week.sirada':'Sırada',
+  'ays.week.imza-bekliyor':'Bu haftanın sözleşmesi imza bekliyor',
+  'ays.week.sozlesmeye-gec':'Sözleşmeye geç',
+  'ays.week.degerlendirme-gunu':'Bugün haftayı değerlendirme günü',
+  'ays.week.degerlendirmeyi-ac':'Değerlendirmeyi aç',
   'ays.week.en-fazla':'En fazla ',
   'ays.week.i-mzalandi':'İmzalandı',
   'ays.week.i-mza-bekliyor':'İmza bekliyor',
@@ -690,6 +695,16 @@ R.Screens.week = (function(){
   LIFEOS.PARCA.blok({ id:'week.aciklamalar', sayfa:'week', yer:'y7', sira:10, ad:'Açıklamalar', ciz({ n, week, phase, curriculum, history, cak }){
     return raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']));
   } });
+  /* İmza ve haftanın değerlendirmesi katta kalmaz: Günler'in başında tek eylem (kod seçer). */
+  function siradaki(n, week){
+    if(n !== M.currentWeek()) return '';
+    if(!week.signedAt) return K.NextUp({ calm:true, icon:'check', label:yz('ays.week.sirada'), title:yz('ays.week.imza-bekliyor'),
+      action:K.Button({ label:yz('ays.week.sozlesmeye-gec'), tone:'primary', size:'sm', act:'week-tab', data:{ 'data-tab':'sozlesme' } }) });
+    if(!S.reviews[M.weekId(n)] && U.todayISO() === U.iso(M.weekEnd(n))) return K.NextUp({ calm:true, icon:'check', label:yz('ays.week.sirada'), title:yz('ays.week.degerlendirme-gunu'),
+      action:K.Button({ label:yz('ays.week.degerlendirmeyi-ac'), tone:'primary', size:'sm', act:'open-review' }) });
+    return '';
+  }
+
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -707,7 +722,7 @@ R.Screens.week = (function(){
     const imzaBekliyor = n === M.currentWeek() && !week.signedAt;
     return String(html`${K.Grid([P.yer('week', 'y1', K, parcaB, raw), P.yer('week', 'y2', K, parcaB, raw)])}
       ${K.SayfaBolumleri({ act:'week-tab', aria:yz('ays.week.hafta-bolumleri'), bolumler:[
-        { id:'gunler', ad:yz('ays.week.bolum-gunler'), govde:K.Stack(P.liste('week', 'gunler', K, parcaB)) },
+        { id:'gunler', ad:yz('ays.week.bolum-gunler'), govde:K.Stack([siradaki(n, week)].concat(P.liste('week', 'gunler', K, parcaB))) },
         { id:'sozlesme', ad:yz('ays.week.bolum-sozlesme'), sayi:imzaBekliyor ? 1 : null, govde:K.Stack(P.liste('week', 'sozlesme', K, parcaB)) },
         { id:'ozet', ad:yz('ays.week.bolum-ozet'), govde:K.Stack(P.liste('week', 'ozet-ust', K, parcaB).concat(P.liste('week', 'ozet', K, parcaB))) },
       ] })}${P.yer('week', 'y7', K, parcaB, raw)}`);

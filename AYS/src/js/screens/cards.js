@@ -103,7 +103,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.cards.kart-geri-alindi':'Kart geri alındı',
   'ays.cards.tekrar':'Tekrar',
 });
-window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', king:{ sira:150, ad:'Tekrar', es:['tekrar', 'kart'] }, cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', king:{ sira:150, ad:'Tekrar', es:['tekrar', 'kart'] }, cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:10 });
 
 R.Screens.cards = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -190,7 +190,7 @@ R.Screens.cards = (function(){
             <button class="${'btn grow' + (r.tone ? ' btn--'+r.tone : '')}" data-act="rate"
               data-id="${card.id}" data-rating="${r.rating}">
               <span>${r.label}</span><span class="tiny dim">${r.key}</span></button>`)}</div>`
-        : K.Button({ label:yz('ays.cards.cevabi-goster'), block:true, class:'mt-12', act:'flip', data:{ 'data-id':card.id } })}
+        : K.Button({ label:yz('ays.cards.cevabi-goster'), tone:'primary', block:true, class:'mt-12', act:'flip', data:{ 'data-id':card.id } })}
 
       <div class="row between mt-10">
         <span class="tiny dim">${yz('ays.cards.asama')} ${stageLabel(card.stage)}${card.source === 'error' ? ' · deneme hatasından' : ''}</span>
@@ -575,6 +575,7 @@ R.Screens.cards = (function(){
       return C.dueCards().length+' kart due · borç %'+C.cardDebt()+' · '+C.openErrors().length+' açık yanlış';
     },
     actions(){
+      if(!S.cards.length) return '';   /* boşken ilk adım boş durumun kendi düğmesi */
       return String(K.Button({ label:yz('ays.cards.kart-ekle'), icon:'plus', size:'sm', act:'new-card' }));
     },
     kucukVarsayilan:['tekrar-paketi'],

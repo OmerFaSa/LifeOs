@@ -6,9 +6,10 @@
    etkiyle). «Nasıl hesaplandı» küçük başlar. Sayıların hepsi kodun;
    ekran yalnız çizer. */
 window.LIFEOS.PARCA.yazilar({
+  'ays.gelecek.deneme-ekle':'Deneme ekle',
   'ays.gelecek.neden-sinav-gunu-degil':'Neden sınav günü değil?',
   'ays.gelecek.gelecek-bolumleri':'Gelecek bölümleri',
-  'ays.gelecek.bolum-tahmin':'Tahmin',
+  'ays.gelecek.bolum-tahmin':'Sınav günü',
   'ays.gelecek.bolum-deney':'Deney',
   'ays.gelecek.bu-gidisle-araligin-tamami-h':'Bu gidişle aralığın tamamı hedefinin içinde.',
   'ays.gelecek.hedefin-bu-araligin-icinde-i':'Hedefin bu aralığın içinde: iyi uçta tutuyor, kötü uçta kaçıyor.',
@@ -87,7 +88,7 @@ window.LIFEOS.PARCA.yazilar({
 });
 /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
 ve «ne olursa» (core/gelecek.js). */
-window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', king:{ sira:110, ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] }, cekmece:'analiz', ad:'Gelecek', ikon:'target', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', king:{ sira:110, ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] }, cekmece:'analiz', ad:'Tahmin', ikon:'target', sira:20 });
 
 R.Screens.gelecek = (function(){
   const U = R.U, S = R.S;
@@ -108,7 +109,8 @@ R.Screens.gelecek = (function(){
     const t = r.tyt;
     if(!t.ok){
       return K.Card({ title:yz('ays.gelecek.sinav-gunu'), hint:'gelecek',
-        body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.' }) });
+        body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.',
+          action:K.Button({ label:yz('ays.gelecek.deneme-ekle'), tone:'primary', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } }) }) });
     }
     const s = r.sira;
     const konum = r.konum === 'icinde' ? yz('ays.gelecek.bu-gidisle-araligin-tamami-h')

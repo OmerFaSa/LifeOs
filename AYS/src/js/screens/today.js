@@ -43,8 +43,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.today.programini-kuralim':'Programını kuralım.',
   'ays.today.bugun-icin-plan-yok':'Bugün için plan yok.',
   'ays.today.tam-plan':'Tam plan',
-  'ays.today.simdi':'Şimdi: ',
-  'ays.today.sirada':'Sırada: ',
   'ays.today.bugunun-bloklari-kapandi':'Bugünün blokları kapandı.',
   'ays.today.blok-bitince-cozulen-soru-gi':'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.',
   'ays.today.gunun-soru-hedefi-tamam':'Günün soru hedefi tamam.',
@@ -287,7 +285,6 @@ window.LIFEOS.PARCA.yazilar({
   'ays.today.gunun-blogu':'günün bloğu',
   'ays.today.kuruluma-basla':'Kuruluma başla',
   'ays.today.basla':'Başla',
-  'ays.today.gunun-bloklari':'Günün blokları',
   'ays.today.bugun-icin-blok-yok':'Bugün için blok yok.',
   'ays.today.programin':'Programın ',
   'ays.today.tekrar-kartlari':'Tekrar kartları',
@@ -1710,17 +1707,7 @@ R.Screens.today = (function(){
     if(!P || R.Setup.needed()) return '';
     const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
     const bloklar = (day.blocks || []).filter(b => b.slot !== 'Dinlenme');
-    const ad = b => b.subject || b.topic || b.slot;
-    const durum = b => b.status === 'done' ? 'bitti' : b.startedAt ? 'simdi' : 'sira';
-    const bitti = bloklar.filter(b => b.status === 'done').length;
-    const suren = bloklar.find(b => b.startedAt && b.status !== 'done');
-    const sira = bloklar.find(b => b.status === 'pending' && !b.startedAt);
-    const blokKart = bloklar.length
-      ? P.kart({ tur:'bloklar', ad:yz('ays.today.gunun-bloklari'), simge:'blok', yuva:bitti + ' / ' + bloklar.length + ' bitti',
-          govde:P.serit({ parcalar:bloklar.map(b => ({ ad:ad(b), sure:Number(b.targetMin) || 1, durum:durum(b) })),
-              etiket:bloklar.length + ' blok: ' + bitti + ' bitti' + (suren ? ', ' + ad(suren) + ' sürüyor' : '') })
-            + P.not(suren ? yz('ays.today.simdi') + ad(suren) : sira ? yz('ays.today.sirada') + ad(sira) + (sira.targetMin ? ' · ' + sira.targetMin + ' dk' : '') : yz('ays.today.bugunun-bloklari-kapandi')) })
-      : P.kart({ tur:'bloklar', ad:yz('ays.today.gunun-bloklari'), simge:'blok', bos:{ cumle:yz('ays.today.bugun-icin-blok-yok'), dugme:git(yz('ays.today.plana-bak'), 'plan') } });
+    /* Günün blokları Bugün › Gün'de yaşar (2026-11-06); burada ikinci kez yazılmaz. */
     const kalan = U.diffDays(dateISO, R.PLAN.examTytISO);
     const hafta = M.currentWeek(), topHafta = R.PLAN.totalWeeks;
     const tahmini = !(S.profile && S.profile.examTytISO);
@@ -1767,7 +1754,7 @@ R.Screens.today = (function(){
           + P.not((s.subject && s.subject.name ? s.subject.name + ' · ' : '') + yanlis.length + ' soru tekrar bekliyor'),
         ayak:P.dugmeHtml({ label:yz('ays.today.soruyu-ac'), act:'go', data:{ 'data-route':'sorular', 'data-tab':'yanlis' } }, 'pk__dugme') });
     }
-    return '<div class="pk-ust">' + P.izgara([tekrar, blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
+    return '<div class="pk-ust">' + P.izgara([tekrar, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
   }
 
   LIFEOS.PARCA.blok({ id:'today.akiskutusu', sayfa:'today', yer:'y1', sira:10, ad:'Akış kutusu', ciz({ dateISO, n, day }){

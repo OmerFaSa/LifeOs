@@ -8,9 +8,69 @@ düğme = görünen düğme, alan = yazı ya da seçim alanı. «Dolu» = ekrand
 Boş profilde de bakıldı (aşağıda). Sayılar tahmin değil ölçümdür; «özellik» elle sayıldı.
 Deneme ve Gelecek'te düğme sayısı bölüm seçicisi yüzünden artar; üst düğmeler bu sayıya hiç girmez.
 
-## Önce / sonra (en karmaşıktan en sadeye)
+## İkinci tur: ilk bakışta anlaşılıyor mu?
 
-Sonra sütunları **açılan ilk katı** gösterir; öbür katlar parantezde.
+Hedef: daha az görünen şey değil, ilk bakışta anlaşılan ekran. Her ekran telefon boyutunda, boş ve dolu
+profille açıldı. Üç soru: **Ne** = beş saniyede burası ne için anlaşılıyor mu; **Şimdi** = ne yapacağım tek
+ve belli mi; **Sonuç** = yaptığımın sonucu nerede görünüyor. Değerlendirme benim bakışımdır, kullanıcı
+denemesi değildir. ✓ evet · ~ kısmen · ✕ hayır.
+
+| Ekran | Ne | Şimdi | Sonuç | Ne değişti |
+|---|---|---|---|---|
+| Bugün | ✓ → ✓ | ✓ → ✓ | ~ → ~ | Yeterli: tek cümle ve «Başla». Boşken «Kuruluma başla». Sonuç aynı ekranda, «Gün» altta |
+| Tekrar | ~ → ✓ | ~ → ✓ | ✓ → ✓ | Çalışma artık bununla açılır; «Cevabı göster» tek dolu düğme |
+| Soru çöz | ✕ → ✓ | ✕ → ✓ | ✕ → ✓ | Model yokken önce işe yarayan «Kaydet» açılır (kod seçer); son kayıtlar yazdığın satırın altında |
+| Deneme | ~ → ✓ | ~ → ✓ | ✓ → ✓ | Analiz bekleyen deneme listenin başında «Sırada»; boşken tek düğme |
+| Konu takibi (eski «Konu kapanışı») | ✕ → ✓ | ✕ → ✓ | ✓ → ✓ | Başta sıradaki konu, risk sırasından; bekleyen ölçüm varsa onun kartı konuşur |
+| Kendini sına (eski «Sınama») | ✕ → ✓ | ~ → ✓ | ✓ → ✓ | Boşken ayar formu yerine ilk adım; ad işi söylüyor |
+| Plan › Hafta | ~ → ✓ | ✕ → ✓ | ✓ → ✓ | Günler'in başında imza ya da değerlendirme; imza katta gömülü kalmıyor |
+| Plan › Program | ✓ → ✓ | ~ → ~ | ✓ → ✓ | Salt bakış. Telefondaki dar sütun düzeldi |
+| Plan › Hedefler | ~ → ✓ | ~ → ~ | ✓ → ✓ | Tablo telefonda okunuyor |
+| Analiz › İlerleme | ✕ → ✓ | ✕ → ✓ | ~ → ✓ | Başta tek cümle: ilk deneme, aylık karar ya da düşen net; ikinci «Günün blokları» kalktı |
+| Analiz › Tahmin (eski «Gelecek») | ~ → ✓ | ✕ → ✓ | ✓ → ✓ | Boşken «Deneme ekle»; önce cevap, sonra «Neden sınav günü değil?» |
+| Analiz › Ayrıntı | ~ → ~ | ~ → ~ | ✓ → ✓ | Kayıt yokken «114 soru geride» yazmıyor; ad açık soru |
+| Analiz › Telafi | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: ilk satır durumu söylüyor |
+| Öğren › Konular | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: başta sıradaki konu ve «Başla», ders kartlarında okunan sayısı |
+| Öğren › Adım adım (eski «Öğrenme») | ~ → ✓ | ✓ → ✓ | ✓ → ✓ | Yalnız ad; Konular'la birleşme açık soru |
+| Öğren › Anlatım, Sorular, Koç | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: içeriğin kendisi; model yokken Koç bunu söylüyor |
+| Öğren › Ders notları | ~ → ✓ | ~ → ✓ | ✓ → ✓ | Boşken tek düğme |
+| Onaylar | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: boşken ne olduğunu söylüyor |
+| Ofis › Ekip özeti (eski «Masalar») | ✕ → ✓ | ~ → ✓ | ✓ → ✓ | Ad işi söylüyor; uzmanların kırmızı uyarısı seçicide sayı |
+| Ofis › Uzmana sor (eski «Danışma») | ~ → ✓ | ~ → ✓ | ✓ → ✓ | Ad işi söylüyor; yüzlerin yanında isim |
+| Ofis › Toplantı | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli |
+| Kütüphane | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: boşken ne duracağını söylüyor |
+| Ayarlar › Genel | ~ → ✓ | ~ → ✓ | ✓ → ✓ | Düz liste; ölçü satırı («Pusula») listenin altına indi |
+| Ayarlar › Profil, Kılavuz | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli |
+| Ayarlar › Rütbe | — | — | — | Kapsam dışı (depo sahibinin kararı) |
+
+### Kökten yapılanlar
+
+- **Duruma göre konuşan satır («Sırada»).** İlerleme, Hafta, Deneme, Konu takibi: tek cümle, tek düğme. Kod seçer, sayı `Calc`'tan gelir:
+  - İlerleme: ilk deneme yoksa onu ister; varsa aylık karar; o da yoksa düşen net («hesaplandı» etiketli). Hiçbiri yoksa satır yok.
+  - Hafta: imza yoksa imza; hafta sonuysa değerlendirme; yoksa satır yok.
+  - Deneme: analizi bekleyen en eski deneme. Bugünkü deneme bir gün dolmadan borç sayılmaz (var olan kural).
+  - Konu takibi: risk sırasının başı; bekleyen ikinci ölçüm varsa onun kartı konuşur.
+- **Saklama kusuru düzeltildi.** Birinci turda kata gömülen aylık karar, imza, analiz borcu ve uzman uyarısı yeniden ilk bakışta.
+- **Yinelenen birleşti.** «Günün blokları» yalnız Bugün'de. Soru çöz'de sonuç kaydın altında. Kart, deneme ve ders eklerken boş ekranda çift düğme yok.
+- **Sıra kullanım sıklığına göre.** Çalışma: Tekrar · Soru çöz · Deneme · Konu takibi · Kendini sına. Kullanım sıklığı ölçülmedi, planın ritminden çıkarıldı: tekrar her gün, deneme haftada bir.
+- **Adlar işi söylüyor.** Tablodaki eski adlar. İç bölümler: Kaydet · Sor · Kaynaklar; Özet · Netler · Konular · Aylık karar; Sınav günü · Deney.
+- **Boş ekran ilk adımı söyler.** Kendini sına, Tahmin, İlerleme, Tekrar, Ders notları, Deneme.
+
+### Hâlâ anlaşılmayan yerler
+
+- **Öğren alt bantta yok.** Her gün gereken iş Menü'nün içinde. Bant ortak kabukta; KOLAY-PLANI'ndaki «Çalış = Çalışma + Öğren» kararı depo sahibinde.
+- **Çalışma'da beş sekme telefona sığmıyor.** «Kendini sına» kaydırınca görünüyor (ortak).
+- **Hızlı kayıt sıkışık.** Üç seçim alt alta, kaydet düğmesi küçük `↵` (ortak `vitrin.js tekSatirSoru`).
+- **«N bölüm gizli» satırı** yeni kullanıcıya «bir şey saklanmış» dedirtiyor (ortak).
+- **İlerleme › Özet uzun** (1999 px). Satır yönü verdi, ama kartların çoğu yine sıralı okunuyor; Tekrar yinelemesi açık soru 3.
+- **«Ayrıntı» adı** ne olduğunu söylemiyor (açık soru 2).
+- **Konular ve Adım adım** iki ayrı başlama yolu (açık soru 1).
+- **Plan › Program ve Hedefler'de eylem yok.** Salt bakış olduğu için «şimdi ne yapacağım» kısmen kalıyor; ekleyecek gerçek bir iş bulamadım.
+
+## Birinci tur: önce / sonra (en karmaşıktan en sadeye)
+
+Sonra sütunları birinci turun sonundaki **açılan ilk katı** gösterir. İkinci tur «Sırada» satırı ekledi; o
+ekranlarda sayı biraz arttı (İlerleme 107 söz, Hafta 119, Konu takibi 177, Soru çöz'de ilk kat artık Kaydet: 131).
 
 | Sıra | Ekran | Tek işi | Özellik önce → açılan katta | Söz | Düğme | Alan | Boy (px) | Birincil eylem önce → sonra |
 |---|---|---|---|---|---|---|---|---|
@@ -43,31 +103,31 @@ Her şey hâlâ erişilebilir; kapı yalnız bir dokunuş uzakta.
 
 | Ekran | Katlar |
 |---|---|
-| İlerleme | **Özet** · Netler (trend, test, aylık eğri, hata dağılımı) · Yol (harita, plan geçmişi, göstergeler) · Karar (aylık değerlendirme) |
+| İlerleme | **Özet** · Netler (trend, test, aylık eğri, hata dağılımı) · Konular (harita, plan geçmişi, göstergeler) · Aylık karar |
 | Hafta | **Günler** (hafta takvimi, öneri) · Sözleşme (form, istisna, revizyon) · Özet (ders dağılımı, değerlendirme, denge, geçmiş, müfredat) |
-| Konu kapanışı | **Konular** (bekleyen ölçüm, dersler, konu listesi, zincir, kaynak) · Genel (harita, oran, risk, profiller) |
+| Konu takibi | **Konular** (bekleyen ölçüm, dersler, konu listesi, zincir, kaynak) · Genel (harita, oran, risk, profiller) |
 | Deneme | **Denemeler** (liste) · Özet (net, rekor, ders ders, sıra, hedef, takvim, hacim, yayın) |
-| Soru çöz | **Sor** · Kayıt (çözüm sayısı, hızlı kayıt) · Geçmiş (kaynaklar, konu, son kayıtlar) |
-| Danışma | **Sohbet** · Rapor · Ekip (ses, öbür uzmanlar) |
-| Masalar | **Özet** (model notu, günün özeti, Patron, ürünler) · Uzmanlar · Kayıtlar (kararlar, kota, son toplantı) |
-| Gelecek | **Tahmin** · Deney |
+| Soru çöz | **Kaydet** (çözüm sayısı, hızlı kayıt, son kayıtlar; model bağlıysa **Sor** önce gelir) · Sor · Kaynaklar (kaynaklar, konu başına çözüm) |
+| Uzmana sor | **Sohbet** · Rapor · Ekip (ses, öbür uzmanlar) |
+| Ekip özeti | **Özet** (model notu, günün özeti, Patron, ürünler) · Uzmanlar · Kayıtlar (kararlar, kota, son toplantı) |
+| Tahmin | **Sınav günü** · Deney |
 
 Bütün ekranlara değen üç değişiklik:
 
 - **Sekme çubuğu yerinde durur.** Ekranın düğmeleri («Kart ekle», «Deneme ekle») başlığın altından
   sekmelerin altına indi; telefonda sekmeler bölümden bölüme oynamıyor (`app.js`, duman testi ölçer).
 - **Bölüm seçmek sayfayı oynatmaz.** Bölüm zaten ekrandaysa kayma yok (`components.js bolumeGit`).
-- **Başka yerden doğru kata gelinir.** `data-bolum` (Bugün › «Haftalık sözleşmeyi aç» Sözleşme'yi açar;
+- **Başka yerden doğru kata gelinir.** `data-bolum` (Bugün › «Haftalık sözleşmeyi aç» Sözleşme'yi açar; İlerleme › «Hatalara bak» Hata haritası'nı;
   arama ve komutlardaki konu ve ders satırları Konular'ı; King'e gelen fotoğraf Sor'u).
 
-Kaldırılan yalnız yinelenen üç düğme: Danışma ve Toplantı'daki «Ofis» ile Patron kartındaki
-«Toplantı odası». Üçü de hemen üstteki sekmeyle aynı yere gidiyordu. Bugün'den çıkan iki kısa yol
+Kaldırılan yalnız yinelenen üç düğme: Uzmana sor ve Toplantı'daki «Ofis» ile Patron kartındaki
+«Toplantı odası». Üçü de hemen üstteki sekmeyle aynı yere gidiyordu. Boş ekranda çift «ekle» düğmesinin üstteki kopyası da gizlenir. Bugün'den çıkan iki kısa yol
 (Soru çöz, Deneme) Çalışma'da birer dokunuş, aramada ve klavyede duruyor.
 
 ## Boş profil
 
-Yeni kullanıcıda da bakıldı (390 px): İlerleme 49 söz, Hafta 134, Deneme tek birincil düğme
-(«İlk denemeyi ekle»), Soru çöz tek kart. Hafta'da ilk açılan kat Günler kalıyor; Sözleşme rozetle duruyor.
+Yeni kullanıcıda da bakıldı (390 px): Deneme 29 söz ve tek birincil düğme («İlk denemeyi ekle»), Tekrar 26 söz,
+Kendini sına tek ilk adım. İlerleme başta «İlk tam denemeni gir», Hafta başta imza diyor.
 
 ## Ortak gerekli (bu oturum dokunmadı)
 
@@ -88,23 +148,26 @@ Hiçbiri yapılmadı; karar bekliyor.
 1. **Öğren › Konular ile Öğren › Öğrenme birleşsin mi?** İkisi de konu listesi ve «başla» düğmesi gösteriyor. Biri Anlatım'a, öbürü adım adım öğrenmeye götürüyor. Öğren'de altı sekme bu yüzden kalabalık.
 2. **«Ayrıntı» sekmesinin adı değişsin mi?** İçinde deneme karşılaştırma, hata haritası, sıra ve hız var; ad bunu söylemiyor. Öneri: «Neden?».
 3. **Özet'te yinelenen kart silinsin mi?** İlerleme › Özet'te Tekrar kartı ile dönen «Tekrar borcu» aynı sayıyı söylüyor.
+4. **Öğren alt banda çıksın mı?** Her gün gereken iş şu an Menü'nün içinde. Ortak kabuk değişir, Y3 = 4 hedefine dokunur.
+
+Birinci turdaki ad değişikliklerinden geri isteyeceğin olursa: `PARCA.sayfa` satırında tek sözcük.
 
 ## Yapılmayanlar
 
 - Sayı ve karar kodu değişmedi; tema değişmedi; Rütbe'ye dokunulmadı; `brand/ortak/` değişmedi.
-- İlerleme › Özet hâlâ uzun (1993 px, 9 kart): kartlar `today.js PanoUst` ve ortak pano biçiminde; bölmek Faz 2 kararını açar.
-- Konu kapanışı'nda 39 düğme kaldı: her konu bir düğme, liste ilk beşe kısılmış değil.
+- İlerleme › Özet'in kart düzeni: kartlar `today.js PanoUst` ve ortak pano biçiminde; bölmek Faz 2 kararını açar.
+- Konu takibi'nde 40 düğme kaldı: her konu bir düğme, liste ilk beşe kısılmış değil.
 - Anlatım ve Sorular'ın içine girilmedi.
 - `AYS/dist` yeniden derlenmedi: paralel oturumlarla çakışır, birleştirmeden sonra derlenir.
 
 ## Denetim
 
 Davranış testleri: `AYS/src/tests/tekis.test.js` (tek kat açık, en çok bir dolu düğme, taşınan
-parçalar yerinde, rozetler, kayma) ve `AYS/tools/smoke.js` `tekIs`.
+parçalar yerinde, rozetler, kayma, «Sırada» seçimi, sıra ve adlar, boş ekranın ilk adımı) ve `AYS/tools/smoke.js` `tekIs`.
 
 | Denetim | Sonuç |
 |---|---|
-| `AYS` `runtests.js` | 3402/3402 |
+| `AYS` `runtests.js` | 3408/3408 |
 | `AYS` `smoke.js` | temiz, 58 ekran, 10 sekme |
 | `AYS` `layoutcheck.js` | temiz, 68 yer, 390 ve 820 piksel |
 | `AYS` `a11ycheck.js` | temiz (1 bilinen eksik izin listesinde) |

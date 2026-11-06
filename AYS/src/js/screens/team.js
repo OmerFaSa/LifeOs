@@ -48,7 +48,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.team.su-an-konusmuyor':'Şu an konuşmuyor',
   'ays.team.ekip-sohbeti':'Ekip sohbeti',
 });
-window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Uzmana sor', ikon:'zap', sira:20 });
 
 R.Screens.team = (function(){
   const U = R.U, UI = R.UI, S = R.S;

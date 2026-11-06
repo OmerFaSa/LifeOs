@@ -73,8 +73,15 @@ window.LIFEOS.PARCA.yazilar({
   'ays.progress.ilerleme-bolumleri':'İlerleme bölümleri',
   'ays.progress.bolum-ozet':'Özet',
   'ays.progress.bolum-netler':'Netler',
-  'ays.progress.bolum-yol':'Yol',
-  'ays.progress.bolum-karar':'Karar',
+  'ays.progress.bolum-yol':'Konular',
+  'ays.progress.bolum-karar':'Aylık karar',
+  'ays.progress.sirada':'Sırada',
+  'ays.progress.karar-basligi':'Bu ayın kararı bekliyor',
+  'ays.progress.karara-gec':'Karara geç',
+  'ays.progress.ilk-deneme':'İlk tam denemeni gir',
+  'ays.progress.ilk-deneme-neden':'Gidişat denemelerden çizilir.',
+  'ays.progress.net-dustu':'Son 3 deneme, önceki 3 denemeden düşük',
+  'ays.progress.hatalara-bak':'Hatalara bak',
 });
 window.LIFEOS.PARCA.sayfa({ id:'progress', modul:'ays', king:{ sira:160, ad:'İlerleme', es:['ilerleme'] }, cekmece:'analiz', ad:'İlerleme', ikon:'chart', sira:10 });
 
@@ -329,6 +336,22 @@ R.Screens.progress = (function(){
       body:raw(A.html({ merkez:'Sınav', kumeler, bos:yz('ays.progress.konular-yuklenince-harita-be') })) });
   }
 
+  /* Ekran duruma göre konuşur (kural motoru seçer, sayı Calc'tan): ilk deneme → karar → düşen net. */
+  function siradaki(){
+    if(!C.fullExams('TYT').length) return K.NextUp({ calm:true, icon:'exam', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.ilk-deneme'), why:yz('ays.progress.ilk-deneme-neden'),
+      action:K.Button({ label:yz('ays.progress.deneme-ekle'), tone:'primary', size:'sm', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } }) });
+    const gate = C.currentGate();
+    if(gate && !S.decisions[U.monthKey(U.today())]) return K.NextUp({ calm:true, icon:'target', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.karar-basligi'),
+      action:K.Button({ label:yz('ays.progress.karara-gec'), tone:'primary', size:'sm', act:'progress-tab', data:{ 'data-tab':'karar' } }) });
+    const t = C.medianTrend('TYT');
+    if(t.delta != null && t.delta < 0) return K.NextUp({ calm:true, icon:'chart', label:yz('ays.progress.sirada'),
+      title:yz('ays.progress.net-dustu'), why:U.fmtNet(t.delta) + ' net · hesaplandı',
+      action:K.Button({ label:yz('ays.progress.hatalara-bak'), size:'sm', act:'go', data:{ 'data-route':'analytics', 'data-bolum':'errors' } }) });
+    return '';
+  }
+
   LIFEOS.PARCA.blok({ id:'progress.ilerleme-ozeti', sayfa:'progress', yer:'ozet', sira:10, ad:'İlerleme özeti', ciz({ pareto, history, sleep, debt, closure, ozet }){
     return raw(ozet);
   } });
@@ -397,7 +420,7 @@ R.Screens.progress = (function(){
     const gate = C.currentGate();
     const kararBekliyor = gate && !S.decisions[U.monthKey(U.today())];
     return String(html`${K.SayfaBolumleri({ act:'progress-tab', aria:yz('ays.progress.ilerleme-bolumleri'), bolumler:[
-      { id:'ozet', ad:yz('ays.progress.bolum-ozet'), govde:K.Stack(P.liste('progress', 'ozet', K, parcaB)) },
+      { id:'ozet', ad:yz('ays.progress.bolum-ozet'), govde:K.Stack([siradaki()].concat(P.liste('progress', 'ozet', K, parcaB))) },
       { id:'netler', ad:yz('ays.progress.bolum-netler'), govde:K.Stack(P.liste('progress', 'netler', K, parcaB)) },
       { id:'yol', ad:yz('ays.progress.bolum-yol'), govde:K.Stack(P.liste('progress', 'yol-ust', K, parcaB).concat(P.liste('progress', 'yol', K, parcaB))) },
       { id:'karar', ad:yz('ays.progress.bolum-karar'), sayi:kararBekliyor ? 1 : null, govde:gate ? P.yer('progress', 'karar', K, parcaB, raw) : '' },

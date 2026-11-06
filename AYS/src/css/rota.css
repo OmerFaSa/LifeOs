@@ -1280,3 +1280,6 @@ tbody tr:hover{ background:var(--surface-2); }
   .tlweek{ grid-template-columns:64px minmax(0, 1fr); }
   .tlweek__right{ grid-column:2; text-align:left; }
 }
+
+/* Hedef katmanları telefonda: açıklama tek sözcük genişliğine sıkışıyordu. */
+.hedef-katman td:first-child{ min-width:150px; }
