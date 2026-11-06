@@ -3,6 +3,10 @@
 Son güncelleme: 2026-11-06. Bu dosya bir sonraki oturum içindir: önce bunu oku, bitirdiğini sil.
 Oturumların kendi notları kendi dallarındadır: `belgeler/ekip/yarim/<oturum>.md`.
 
+## Son durum (2026-11-06)
+
+Tablodaki iki dal da `main`'de ve bilgisayardaki kopyada (`573560dd`). Birim, duman, uçtan uca temiz; birleşme sonrası `mobil_tara` ve `layoutcheck` koşmadı: önce bunları koş. Gerçek telefonda hız ve King denenmedi; dalların kendi notları `belgeler/ekip/yarim/` altında.
+
 ## Oturumlar
 
 | Oturum | Dal | Durum | Yapılacak |
