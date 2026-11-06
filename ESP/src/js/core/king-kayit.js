@@ -306,7 +306,8 @@ window.LIFEOS.PARCA.yazilar({
   const SELAM = /^(merhaba|merhabalar|selam|selamlar|sa|slm|mrb|hey|hi|hello|naber|nbr|nasılsın|nasilsin|ne haber|günaydın|gunaydin|iyi (akşamlar|aksamlar|geceler|günler|gunler|sabahlar)|hayırlı (sabahlar|günler)|king)[\s!.,?]*$/;
   function cevapGibi(metin){
     const t = String(metin || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
-    if(t.length < 2 || SELAM.test(t) || /\?\s*$/.test(t)) return false;
+    /* İşaretsiz soru da cevap değildir: «seninle konuşabiliyor muyum» en sevdiği yemek diye yazılıyordu. */
+    if(t.length < 2 || SELAM.test(t) || KI.soruMu(t)) return false;
     return true;
   }
   const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;

@@ -93,7 +93,7 @@
       const yol = url.replace(/^https?:\/\/[^/]+/, '');
       if(s.yok) return cevap(404, null);
       const govde = op && typeof op.body === 'string' ? JSON.parse(op.body) : null;   // ham gövde (dosya) JSON değil
-      if(yol === '/api/hesap/durum') return cevap(200, { surum:5, kurulum:s.kurulum, kayit:s.kayitAcik, yerel:true, ev_agi:s.evAgi || [] });
+      if(yol === '/api/hesap/durum') return cevap(200, { surum:5, kurulum:s.kurulum, kayit:s.kayitAcik, yerel:!s.disarida, ev_agi:s.evAgi || [] });
       if(yol === '/api/hesap/kayit'){
         if(s.kullanicilar[govde.ad]) return cevap(409, { hata:'Bu adla bir kullanıcı zaten var.' });
         const ilk = !Object.keys(s.kullanicilar).length;
@@ -215,6 +215,7 @@
         s.sistem = Object.assign({}, s.sistem, { calisiyor:true });
         return cevap(202, { calisiyor:true });
       }
+      if(yol === '/api/hesap/merkez') return s.merkez ? cevap(200, s.merkez) : cevap(409, { hata:'Her yerden erişim kapalı.' });
       if(yol === '/api/hesap/ev-agi-ac'){ s.evAgiAcildi = true; return cevap(200, { ok:true, mesaj:'Ev ağı açılıyor.' }); }
       if(yol === '/api/hesap/bag-kodu'){
         s.bag = { kod:'482913', id:(s.bag ? s.bag.id + 1 : 7), ad, durum:'bekliyor' };
@@ -1328,6 +1329,41 @@
       await h.girisYap('omer', 'parola-123');
       return { srv, c, h };
     }
+
+    it('her yerden erişim: admin cihazı Merkez bağını hesaptan alır; kapalıysa King bozulmaz', () => sahneyle(async () => {
+      const { h, srv, c } = await girisli();
+      const a = { url:'http://127.0.0.1:4200', token:'' };
+      h.kur({ modul:'spi', depo:c.depo, hkm:() => ({ settings:() => a, save:async v => Object.assign(a, v) }) });
+      await hazir();
+      srv.merkez = { url:'https://pc.ts.net', token:'jeton-x' };
+      expect(await h._merkezBagla()).toBe(false);          // bilgisayarın kendisi: eşleme zaten var
+      srv.disarida = true;
+      await h.yokla();
+      srv.merkez = null;
+      expect(await h._merkezBagla()).toBe(false);          // kapalı: sessiz, ayar değişmez
+      expect(a.token).toBe('');
+      srv.merkez = { url:'https://pc.ts.net', token:'jeton-x', adres:'https://pc.ts.net:5183' };
+      expect(await h._merkezBagla()).toBe(true);
+      expect(a).toEqual({ url:'https://pc.ts.net', token:'jeton-x', enabled:true, lastStatus:null });
+      srv.merkez = { url:'https://baska', token:'y' };
+      expect(await h._merkezBagla()).toBe(false);          // bağ varsa yeniden istemez
+      a.lastStatus = 401;
+      expect(await h._merkezBagla()).toBe(true);           // jeton yenilendiyse alır
+      /* Özel ağ adresi: hesapsız, Tailscale kimliğiyle; sunucu reddederse sessiz. */
+      const b = { url:'', token:'' };
+      h.kur({ modul:'spi', depo:c.depo, hkm:() => ({ settings:() => b, save:async v => Object.assign(b, v) }) });
+      const konum = h._ortam.konum, fetch0 = h._ortam.fetch, istenen = [];
+      h._ortam.konum = () => ({ protocol:'https:', hostname:'pc.ts.net' });
+      let izin = false;
+      h._ortam.fetch = async (u, s) => { if(u === '/api/uzak/merkez'){ istenen.push(s.headers['X-LifeOS']); return { ok:izin, json:async () => ({ url:'https://pc.ts.net', token:'j' }) }; } return fetch0(u, s); };
+      expect(await h._merkezBagla()).toBe(false);
+      expect(b.token).toBe('');
+      izin = true;
+      expect(await h._merkezBagla()).toBe(true);
+      expect(b.token).toBe('j');
+      expect(istenen).toEqual(['hesap', 'hesap']);
+      h._ortam.konum = konum; h._ortam.fetch = fetch0;
+    }));
 
     it('kimlik, plan ve gruplar; yönetim yalnız adminde', () => sahneyle(async () => {
       let { h } = await girisli();

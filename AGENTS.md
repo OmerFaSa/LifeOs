@@ -91,6 +91,10 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    gitmez. Admin yalnız PC'nin kendisinden kurulur; parola düz tutulmaz.
    Kayıt düzeyinde son yazan kazanır; bir cihazın ilk eşitlemesi
    sunucudakini ezmez. Fotoğraflar eşitlenmez (çekildiği cihazda kalır).
+   **Her yerden erişim (2026-11-06, depo sahibinin kararı: «apisiz, ücretsiz»):** telefon ve tablet
+   evden uzakta Merkez'e ve yerel modele kullanıcının özel Tailscale ağından ulaşır (`sistem/uzak.py`);
+   `tailscale serve`, asla `funnel`. Vekil isteği «bu bilgisayar» sayılmaz. Bilgisayar kapalıyken AI
+   yoktur, modüller ve King'in kural yolları çalışır; model cihaza kurulmaz.
    **Bağlantılar (2026-10-08, depo sahibinin isteği):** iki adımlı
    doğrulama (TOTP, yedek kodlar), kodla cihaz bağlama, erişim anahtarıyla
    gelen kutusu (iPhone Kısayollar, Home Assistant) ve takvim aboneliği de

@@ -1824,7 +1824,7 @@ R.App = (function(){
          hemen yeniden yüklenir (Kaydet en yeni kaydın üstüne yazar);
          ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
-        window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik,
+        window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik, hkm:() => R.Beacon,
           yukle:() => M.loadAll(), yenile:() => render(),
           /* Kısayollar'dan gelen satır (hesap.js söz 20): AYS'nin kural
              motoru okur, Onaylar'a öneri olur; ölçüm onaysız yazılmaz. */

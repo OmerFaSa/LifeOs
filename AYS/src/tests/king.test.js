@@ -243,6 +243,8 @@
       const { k } = sahne();
       const h = m => { const y = k.yorumla(m); return y.tur === 'git' ? y.hedef.modul + ':' + y.hedef.route : y.tur; };
       expect(h('antrenman yapacağım')).toBe('spi:move');
+      expect(h('seninle konuşabiliyor muyum')).toBe('bilinmiyor');   // «konu» «konuş»a uymaz
+      expect(h('konu kapanışı')).toBe('ays:subjects');
       expect(h('Besin gireceğim')).toBe('spi:meals');
       expect(h('test çözeceğim')).toBe('ays:solve');
       expect(h('deneme gireceğim')).toBe('ays:exams');
@@ -624,6 +626,17 @@
       expect(H.etkin().map(x => x.metin)).toEqual(['Kahveyi çok severim']);
       expect(k.akis().slice(-1)[0].onizleme.metin).toBe('Kahve 2 bardak');
     }));
+    it('tanışma: işaretsiz soru da cevap sayılıp kişi kaydına yazılmaz', () => sahneyle(async () => {
+      if(!window.LIFEOS.KISI || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      hafizali(k);
+      k.ac();
+      expect(k.tanismaVar()).toBe(true);
+      await k.isle('seninle konuşabiliyor muyum');
+      expect(k.akis().some(m => /not ettim/.test(m.metin || ''))).toBe(false);
+    }));
+
     it('tanışma: günde bir soru; cevap «senin sözün» olarak sorunun alanına yazılır', () => sahneyle(async () => {
       if(!window.LIFEOS.KISI || !window.LIFEOS.Hafiza) return;
       const { k } = sahne();

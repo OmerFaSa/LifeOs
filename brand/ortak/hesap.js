@@ -548,6 +548,8 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.sistem-yeniden-bak':'Yeniden kontrol et',
   'ortak.hesap.sistem-guncellendi':'Sistem güncellendi',
   'ortak.hesap.ev-agini-ac':'Ev ağını aç',
+  'ortak.hesap.her-yerden-not':'Telefon ve tablet evden uzakta da bu bilgisayara ve King’e bağlanır. Tailscale gerekir; bilgisayar açık kalmalı.',
+  'ortak.hesap.her-yerden-ac':'Her yerden erişimi aç',
   'ortak.hesap.ev-agi-telefon-tablet':'Telefon ve tablet bu bilgisayara bağlanabilsin. Veri yalnız evdeki ağda dolaşır.',
   'ortak.hesap.qr-tek-adim':'Yeni cihazın kamerasıyla QR’ı okut; sertifikası kurulunca hesabına kendiliğinden bağlanır.',
   'ortak.hesap.hesap-ve-esitleme':'Hesap ve eşitleme',
@@ -1290,6 +1292,7 @@ window.LIFEOS.HESAP = (function(){
     hatirla(v.kullanici);
     kapiKapat();
     cipTazele();
+    Promise.resolve().then(merkezBagla).catch(() => null);
   }
   /* Sunucudaki profil (başka cihazda değişmiş olabilir) çereze iner. */
   function profilYaz(k){
@@ -2146,6 +2149,37 @@ window.LIFEOS.HESAP = (function(){
     sistemZaman = ortam.zamanla(tur, SISTEM_ARALIK);
   }
   async function evAgiAc(){ return api('/api/hesap/ev-agi-ac', {}); }
+  async function uzakAc(){ return api('/api/hesap/uzak-ac', {}); }
+
+  /* Her yerden erişim (sistem/uzak.py): Merkez'in adresi ve jetonu elle girilmez. Özel ağ adresinden
+     açan cihaz Tailscale kimliğiyle alır (hesap gerekmez), uygulama admin hesabıyla. Oturum başına
+     bir deneme; kapalı ya da ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
+  let merkezDenenen = null;
+  async function merkezBagla(){
+    const o = oturum(), b = ayar && ayar.hkm && ayar.hkm();
+    const deneme = (o && o.j) || 'ozel-ag';
+    if(!b || ornekMi() || pcMi() || merkezDenenen === deneme) return false;
+    const a = b.settings() || {};
+    if(a.token && /^https:/i.test(a.url || '') && a.lastStatus !== 401) return false;
+    const ozelAg = /\.ts\.net$/i.test(ortam.konum().hostname || '');
+    if(!ozelAg && (!o || o.r !== 'admin')) return false;
+    merkezDenenen = deneme;
+    let v;
+    try{
+      if(ozelAg){
+        const r = await ortam.fetch('/api/uzak/merkez', { method:'POST', cache:'no-store', headers:{ 'X-LifeOS':'hesap' } });
+        v = r.ok ? await r.json() : null;
+      }else v = await api('/api/hesap/merkez', {});
+    }catch(e){ return false; }
+    if(!v || !v.url || !v.token) return false;
+    await b.save({ url:v.url, token:v.token, enabled:true, lastStatus:null });
+    /* Uygulama ev ağı adresiyle girmiş olabilir: her yerde geçen adrese geçer. */
+    if(o && ortam.yerelUygulama() && v.adres && o.s !== v.adres){
+      cerezYaz(CEREZ, Object.assign({}, o, { s:v.adres }));
+      cerezYaz(SUNUCU, v.adres);
+    }
+    return true;
+  }
   async function yedekDurum(){ return api('/api/hesap/yedekler'); }
   async function yedekle(){ return api('/api/hesap/yedekle', {}); }
   async function yedekAyar(ikinci){ return api('/api/hesap/yedek-ayar', { ikinci }); }
@@ -3014,6 +3048,8 @@ window.LIFEOS.HESAP = (function(){
           + (qr ? ('<span>' + yz('ortak.hesap.qr-tek-adim') + '</span>') : '')])
         + (!ev && pcMi() && kim().r === 'admin'
           ? '<p class="hesap__not">' + yz('ortak.hesap.ev-agi-telefon-tablet') + '</p><button type="button" class="hesap__ana hesap__tam" data-hesap="ev-agi-ac">' + yz('ortak.hesap.ev-agini-ac') + '</button>' : '')
+        + (pcMi() && kim().r === 'admin'
+          ? '<p class="hesap__not">' + yz('ortak.hesap.her-yerden-not') + '</p><button type="button" class="hesap__ana hesap__tam" data-hesap="uzak-ac">' + yz('ortak.hesap.her-yerden-ac') + '</button>' : '')
         + '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.vazgec'), eylem:'bag-vazgec', sinif:'is-tehlike' }) + '</ul>'
         + ('<p class="hesap__not">' + yz('ortak.hesap.kod-tek-kullanimlik-baglanan') + '</p>');
     },
@@ -3804,6 +3840,9 @@ window.LIFEOS.HESAP = (function(){
         yz('ortak.hesap.lifeos-yedek-kodlari') + (o.a || '') + ')\r\nHer biri girişi bir kez açar.\r\n\r\n' + y.join('\r\n') + '\r\n', 'text/plain')).catch(() => {});
     }else if(ad === 'sistem-bak'){
       merkezIs(async () => { const v = await sistemDurum(true); if(merkez) merkez.sistem = v; return ''; });
+    }else if(ad === 'uzak-ac'){
+      is.disabled = true;
+      merkezIs(async () => (await uzakAc()).mesaj);
     }else if(ad === 'ev-agi-ac'){
       is.disabled = true;
       merkezIs(async () => (await evAgiAc()).mesaj);
@@ -4071,6 +4110,7 @@ window.LIFEOS.HESAP = (function(){
       }else if(giris && kapiAcikMi()) kapiKapat(false);
       if(giris) girisHazir();
       if(giris && oturum()) uyarilar().catch(() => null);  // söz 22: çipte nokta
+      merkezBagla().catch(() => null);
       return esitle();
     }).catch(e => { if(giris) girisHazir(); console.error('Hesap:', e); });
     if(araId == null && typeof setInterval === 'function'){
@@ -4117,7 +4157,7 @@ window.LIFEOS.HESAP = (function(){
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
     bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
-    _ortam:ortam, _sifirla, _istek:istek, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
+    _ortam:ortam, _sifirla, _istek:istek, _merkezBagla:() => { merkezDenenen = null; return merkezBagla(); }, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
   };
 })();

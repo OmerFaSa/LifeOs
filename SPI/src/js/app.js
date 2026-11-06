@@ -1800,7 +1800,7 @@ SP.App = (function(){
          ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
-        window.LIFEOS.HESAP.kur({ modul:'spi', depo:SP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
+        window.LIFEOS.HESAP.kur({ modul:'spi', depo:SP.Store, ornek:ornekAcik, hkm:() => SP.Beacon, kesilebilir:sihirbaz,
           /* Kısayollar'dan gelen satır (hesap.js söz 20): kural motoru okur,
              Onaylar'a öneri olur; sayaç ve Bugün'ün öneri alanı cizIste ile. */
           /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
