@@ -28378,7 +28378,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'af3fd84f', at:'2026-11-06 16:12', dirty:false };
+SP.BUILD = { id:'33040286', at:'2026-11-06 17:30', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -36987,10 +36987,23 @@ LIFEOS.Gizle = (function(){
     try{ return el.matches(UYARI) || !!el.querySelector(UYARI); }catch(e){ return false; }
   }
 
-  /* Söz 10: sayfada gizli bölüm varsa sayfanın sonunda tek satırlık not. */
+  /* Söz 10: sayfada gizli bölüm varsa sayfanın sonunda tek satırlık not.
+     Katlı sayfada (K.SayfaBolumleri) her katın notu kendi sonunda ve yalnız
+     kendi bölümlerini sayar: açık katta öbür katların gizlisi yazılmaz. */
   function dipCiz(o, liste, uyariSay){
     if(!o.kok) return;
-    let dip = o.kok.querySelector(':scope > .gizle-dip');
+    const katlar = Array.from(o.kok.querySelectorAll('.sayfabolumler--kat > .sayfabolum'));
+    if(!katlar.length){ dipYaz(o.kok, liste, uyariSay); return; }
+    let kalan = liste;
+    katlar.forEach(kat => {
+      const ic = kalan.filter(b => kat.contains(b.el));
+      kalan = kalan.filter(b => !kat.contains(b.el));
+      dipYaz(kat, ic, ic.filter(b => b.el.hidden && uyariVar(b.el)).length);
+    });
+    dipYaz(o.kok, kalan, kalan.filter(b => b.el.hidden && uyariVar(b.el)).length);
+  }
+  function dipYaz(kap, liste, uyariSay){
+    let dip = kap.querySelector(':scope > .gizle-dip');
     const gizli = liste.filter(b => b.el.hidden);
     if(!gizli.length){ if(dip) dip.remove(); return; }
     if(!dip){
@@ -36998,7 +37011,7 @@ LIFEOS.Gizle = (function(){
       dip.className = 'gizle-dip';
       dip.setAttribute('data-gizlenmez', '');
     }
-    if(o.kok.lastElementChild !== dip) o.kok.appendChild(dip);
+    if(kap.lastElementChild !== dip) kap.appendChild(dip);
     dip.classList.toggle('gizle-dip--uyari', !!uyariSay);
     const ne = gizli.length === 1 ? '«' + kac(gizli[0].baslik) + '» gizli' : gizli.length + ' bölüm gizli';
     const uy = !uyariSay ? '' : gizli.length === 1 ? ' · içinde uyarı var' : ' · ' + uyariSay + ' tanesinde uyarı var';
@@ -113865,6 +113878,8 @@ window.LIFEOS.PARCA.yazilar({
   'spi.basket.talep-tablosu':'Aylık ihtiyaç',
   'spi.basket.sepet-ilk-adim':'Haftalık alışverişini yaz; maliyet ve besin kapsaması buradan hesaplanır.',
   'spi.basket.veri-yok':'veri yok',
+  'spi.basket.aylik-ilk-adim':'Haftalık sepetini yazınca gıdanın aylık karşılığı burada toplanır.',
+  'spi.basket.sepete-git':'Sepete git',
   'spi.basket.tl':'TL',
   'spi.basket.kalem-fiyati-bilinmedigi-ici':'kalem fiyatı bilinmediği için toplamın dışında.',
   'spi.basket.butun-kalemlerin-karsiligi-h':'Bütün kalemlerin karşılığı hesaplandı.',
@@ -114184,7 +114199,11 @@ SP.Screens.basket = (function(){
               title:yz('spi.basket.talep-tablosu'), hint:'budget-rank',
               badge:K.Badge({ label:bilinen ? U.fmtNum(b.total) + ' TL / ay' : 'veri yok',
                 tone:!bilinen ? 'muted' : b.over ? 'warn' : 'info' }),
-              body:html`${map(b.rows, r => html`
+              /* Hiçbir kalem bilinmiyorsa satırlardan önce ilk adım: toplam Sepet'ten başlar (yeni kart değil, açık kart sınırı). */
+              body:html`${when(!bilinen, () => html`<div class="mb-16">
+                <p class="small">${yz('spi.basket.aylik-ilk-adim')}</p>
+                <div class="row wrap gap-8 mt-8">${K.Button({ label:yz('spi.basket.sepete-git'), tone:'primary',
+                  act:'basket-tab', data:{ 'data-tab':'sepet' } })}</div></div>`)}${map(b.rows, r => html`
                 <div class="demand">
                   <div class="demand__who">
                     ${P.avatar(r.agent, 'sm')}
@@ -115639,7 +115658,7 @@ SP.Screens.office = (function(){
      ajanin boyuna gore uzar. Masada en fazla dort not gosterilir,
      gerisi rapora iner. Not URETIMI de ayrica toplandi (core/office.js):
      on iki ayri "hic olculmemis" notu tek satira indi. */
-  const DESK_NOTES = 4;
+  const DESK_NOTES = 2;
 
   /* Patron digerlerinin yanina dizilmez. Dort uzman birbirinin esiti,
      Patron degil: o dordunun raporunu okur. Kat planinda da oyle
@@ -115734,10 +115753,10 @@ SP.Screens.office = (function(){
         </div>
         ${tekrar ? '' : K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
-          ${map(notes.slice(0, DESK_NOTES), n => html`
+          ${map(open ? notes : notes.slice(0, DESK_NOTES), n => html`
             <div class="note note--${n.tone}"><span class="note__dot"></span>
               <span class="small">${n.text}</span></div>`)}
-          ${when(notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
+          ${when(!open && notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
             ${notes.length - DESK_NOTES} ${yz('spi.office.not-daha-raporu-ac')}</p>`)}
         </div>`)}
         ${deskFlow(agent.id)}
