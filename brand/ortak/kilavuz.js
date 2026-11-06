@@ -119,7 +119,9 @@ window.LIFEOS.KILAVUZ = (function(){
   function ozetHtml(){
     const hucre = (ad, sure) => '<div><span>' + kac(k(ad)) + '</span><b>' + kac(k(sure)) + '</b><small>' + kac(k('ozet.tahmin')) + '</small></div>';
     /* Kabuğun başlığı çekmece adıdır («Ayarlar»); sayfanın adı burada. */
-    return '<h2 class="kilavuz__ad">' + kac(k('baslik')) + '</h2><div class="kilavuz__ozet">' + hucre('ozet.kurulum', 'ozet.kurulum-sure') + hucre('ozet.gun', 'ozet.gun-sure') + '</div>';
+    return '<h2 class="kilavuz__ad">' + kac(k('baslik')) + '</h2><div class="kilavuz__ozet">' + hucre('ozet.kurulum', 'ozet.kurulum-sure') + hucre('ozet.gun', 'ozet.gun-sure') + '</div>'
+      /* Spot ışıklı tur buradan yeniden başlar (ortak/patrontur.js). */
+      + '<p><button type="button" class="btn btn--ghost btn--sm" data-patrontur-ac>' + kac(yz('ortak.patrontur.yeniden')) + '</button></p>';
   }
 
   function ilkGunHtml(){

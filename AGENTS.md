@@ -182,6 +182,7 @@ python3 tools/piksel_rakam.py --denetle  # gomulu rakam yazi tipi cizimle ayni m
 python3 tools/piksel_bulut.py --denetle  # gecis perdesinin bulut resmi cizimle ayni mi
 node tools/bulut_gecis.js             # uc modul arasi gercek gecis, iki yonde: bulut ilk karede yerinde, sicramaz, ortada kesilmez; ses kapaliyken ve azaltilmis harekette sessiz (once build.py)
 node tools/giris_sayfa_test.js        # giris ve Gun sayfasi gercekten aciliyor mu (modul denetimleri bunlari acmaz)
+node tools/patrontur_kosu.js          # patron turu: yeni hesap, uc kapi, 1280 ve 390 piksel, klavye; 4180/4173/4183/4193 bos olmali (~6 dk)
 node tools/parca_tembel_test.js       # tembel veri (parcalar.txt [tembel]): dist kaynak surumle ayni, acilista calismiyor (once build.py)
 node tools/mobil_tara.js SPI         # telefon/tablet: dokunmatik, yatay, King bolumleri (AYS, ESP de; modul basina ~2 dk)
 node tools/android_kurulum_test.js   # Android kurulum sayfasi calisan adresi bulur, iPhone akisi degismez

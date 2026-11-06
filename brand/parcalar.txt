@@ -42,6 +42,7 @@ css/karsilama.css
 css/rehber.css
 css/kilavuz.css
 css/sinematik.css
+css/patrontur.css
 css/pusula.css
 css/sorukart.css
 css/zemin.css
@@ -154,6 +155,7 @@ js/core/takvim.js esp
 js/core/tanitim.js
 js/core/kilavuz.js
 js/core/sinematik.js
+js/core/patrontur.js
 js/core/gorsel.js
 js/core/pwa.js
 js/core/seri.js

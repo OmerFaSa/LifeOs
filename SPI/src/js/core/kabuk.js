@@ -794,6 +794,8 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button class="menusayfa__kilavuz" data-act="go" data-route="kilavuz">' + simge('bilgi') + '<span>Kullanım kılavuzu</span>' + simge('ileri') + '</button>'
       /* Tanıtım filmi: ilk girişte bir kez açılan film yeniden izlenir (brand/ortak/sinematik.js). */
       + '<button class="menusayfa__kilavuz" data-sinematik-ac>' + simge('oynat') + '<span>Tanıtım filmi</span>' + simge('ileri') + '</button>'
+      /* Tanışma turu: patronların anlattığı spot ışıklı tur baştan başlar (brand/ortak/patrontur.js). */
+      + '<button class="menusayfa__kilavuz" data-patrontur-ac>' + simge('oynat') + '<span>Tanışma turu</span>' + simge('ileri') + '</button>'
       + '<nav class="menusayfa__govde" aria-label="Bütün çekmeceler">' + govde + '</nav>'
       + (o.ayak ? '<div class="menusayfa__ayak">' + o.ayak + '</div>' : '')
       + '</div>';

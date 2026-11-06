@@ -724,5 +724,5 @@ window.LIFEOS.SINEMATIK = (function(L){
     if(document.readyState === 'complete') bekle(); else window.addEventListener('load', bekle, { once:true });
   }
 
-  return Object.freeze({ ac, kapat, acikMi:() => !!d, gerekli, SATIR, SAHNE, SURE, _satirAt:satirAt, _sahneler:sahneler, _durum:() => d, _kare:t => { if(d) ciz(t); } });
+  return Object.freeze({ ac, kapat, acikMi:() => !!d, gerekli, hesapAnahtari:anahtar, SATIR, SAHNE, SURE, _satirAt:satirAt, _sahneler:sahneler, _durum:() => d, _kare:t => { if(d) ciz(t); } });
 })(window.LIFEOS);

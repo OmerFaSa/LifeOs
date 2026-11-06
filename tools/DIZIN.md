@@ -110,6 +110,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `parca_test.py` — Parça kaydı, King rehberi, tembel ayırma, blok adları, CSS jetonları ve `!important` tavanı.
 - `parca_tembel_test.js` — Tembel verinin derlemede kaynak sürümle aynı olduğunu ve açılışta çalışmadığını gösterir.
 - `giris_sayfa_test.js` — Giriş ve Gün sayfalarını gerçek tarayıcıda açar; modül denetimleri bunları açmaz.
+- `patrontur_kosu.js` — Patron turunu yeni hesapla gerçek sunucuda, üç kapıda, 1280 ve 390 pikselde, klavyeyle ve azaltılmış hareketle baştan sona yürür.
 - `king_olay_uctan_test.py` — KING-4 3c uçtan uca; modüllerin ürettiği olaylar taşıyıcının biçim denetiminden ve HKM kural motorundan geçer mi, CI'da koşulur.
 - `ajan_test.py` — tools/ajan.py ve tools/ajan_kanca.py birim testleri; döküm okuyucu, efor, yuva ve kanca kararlarını sınar, CI'da koşulur.
 - `ayar_test.py` — sistem/ayar.py sözleşme testleri; sistem ayarlarının tek kopyasını ve doğrulamasını sınar, CI'da koşulur.
