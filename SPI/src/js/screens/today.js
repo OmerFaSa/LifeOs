@@ -1775,6 +1775,10 @@ SP.Screens.today = (function(){
   LIFEOS.PARCA.blok({ id:'today.soru-karti', sayfa:'today', yer:'y2', sira:10, ad:'Soru kartı', ciz({ acil, vakti, sig, soruKart, soru }){
     return raw(soruKart);
   } });
+  /* Öğrenme motoru: yalnız tekrar varken görünen tek satır; kart değil (Y2 yoğunluğu). */
+  LIFEOS.PARCA.blok({ id:'today.ogrenme', sayfa:'today', yer:'y3', sira:20, ad:'Öğrenme tekrarı', ciz(){
+    return raw(window.LIFEOS.OMEKRAN ? window.LIFEOS.OMEKRAN.bugunSatiri() : '');
+  } });
   LIFEOS.PARCA.blok({ id:'today.zamani-gelen-is', sayfa:'today', yer:'y3', sira:10, ad:'Zamanı gelen iş', ciz({ acil, vakti, sig, soruKart, soru }){
     return when(vakti, () => K.Ledger([vakti]));
   } });

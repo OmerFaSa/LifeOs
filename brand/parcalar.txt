@@ -11,6 +11,7 @@ css/layout.css
 css/components.css
 css/sekil.css
 css/kavrat.css
+css/ogrenmotor.css
 css/temel.css
 css/vitrin.css
 css/kart.css
@@ -117,6 +118,8 @@ js/core/sorukart.js
 js/core/ogret.js
 js/core/usta.js
 js/core/kavrat.js
+js/core/ogrenmotor.js
+js/core/ogrenmotor-ekran.js
 js/core/parca-rehber.js
 js/core/king.js
 js/core/king-ses.js
@@ -367,11 +370,13 @@ js/screens/solve.js ays
 js/screens/subjects.js ays
 js/screens/topic.js ays
 js/screens/ogren.js ays
+js/screens/ogrenme.js ays
 js/screens/plan.js ays
 js/screens/target.js ays
 js/screens/progress.js ays
 js/screens/planlar.js spi
 js/screens/rehber.js spi
+js/screens/ogrenme.js spi
 js/screens/labs.js spi
 js/screens/meals.js spi
 js/screens/kitchen.js spi
@@ -401,6 +406,7 @@ js/screens/guide.js spi esp
 js/screens/onaylar.js
 js/screens/kutuphane.js
 js/screens/rehber.js esp
+js/screens/ogrenme.js esp
 js/core/minik.js
 js/app.js
 
@@ -570,6 +576,8 @@ js/app.js
 ../js/core/ogret.js
 ../js/core/usta.js
 ../js/core/kavrat.js
+../js/core/ogrenmotor.js
+../js/core/ogrenmotor-ekran.js
 ../js/core/parca-rehber.js
 ../js/core/king.js
 ../js/core/king-ses.js
@@ -709,11 +717,13 @@ js/app.js
 ../js/screens/subjects.js ays
 ../js/screens/topic.js ays
 ../js/screens/ogren.js ays
+../js/screens/ogrenme.js ays
 ../js/screens/plan.js ays
 ../js/screens/target.js ays
 ../js/screens/progress.js ays
 ../js/screens/planlar.js spi
 ../js/screens/rehber.js spi
+../js/screens/ogrenme.js spi
 ../js/screens/labs.js spi
 ../js/screens/meals.js spi
 ../js/screens/kitchen.js spi
@@ -743,6 +753,7 @@ js/app.js
 ../js/screens/onaylar.js
 ../js/screens/kutuphane.js
 ../js/screens/rehber.js esp
+../js/screens/ogrenme.js esp
 ../js/app.js
 # test altyapisi ve paketler
 harness.js

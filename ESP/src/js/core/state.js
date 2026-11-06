@@ -1433,6 +1433,7 @@ ESP.Model = (function(){
     S.books = ((await ESP.Store.list('books')) || []).map(b => Object.assign(newBook(), b));
     if(ESP.Lesson && ESP.Lesson.sinavYukle) await ESP.Lesson.sinavYukle();
     if(ESP.Alan) await ESP.Alan.yukle();
+    if(window.LIFEOS.OGRENMOTOR && window.LIFEOS.OGRENMOTOR.kuruluMu()) await window.LIFEOS.OGRENMOTOR.yukle();
     if(ESP.KotuGun) await ESP.KotuGun.yukle();
     if(ESP.GunSure) await ESP.GunSure.yukle();
     if(ESP.Anlat) await ESP.Anlat.yukle();

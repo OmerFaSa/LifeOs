@@ -991,6 +991,7 @@ SP.Model = (function(){
        yoksa kullanici onayladigini sanip onaylamamis olur. */
     if(SP.Proposals) await SP.Proposals.load();
     if(SP.Bolum) await SP.Bolum.yukle();
+    if(window.LIFEOS.OGRENMOTOR && window.LIFEOS.OGRENMOTOR.kuruluMu()) await window.LIFEOS.OGRENMOTOR.yukle();
     /* Hedefler ve hekim talimatlari (core/hedefler.js). */
     if(SP.Hedefler) await SP.Hedefler.yukle();
     if(SP.Plan) await SP.Plan.yukle();

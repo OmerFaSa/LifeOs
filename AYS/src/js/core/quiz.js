@@ -89,6 +89,9 @@ R.Quiz = (function(){
       /* Doğru sayısı yazılmamış blok sıfır doğru değildir, kanıt da değildir. */
       if(ad && b.actualQ > 0 && b.correctQ != null) yaz(b.subjectId + '|' + ad, g, b.correctQ, b.actualQ);
     }));
+    /* Öğrenme motoru, Öğren soruları ve karma testler de kanıttır (ortak/ogrenmotor.js). */
+    const OM = window.LIFEOS.OGRENMOTOR;
+    if(OM && OM.kuruluMu()) R.SUBJECTS.forEach(s => s.topics.forEach(t => OM.kanitlar(t.id).forEach(k => yaz(s.id + '|' + t.name, k.g, k.isabet ? 1 : 0, 1, k))));
     const esik = R.CLOSURE_RULE.second / 100, kartli = {};
     S.cards.forEach(c => { kartli[c.subjectId + '|' + c.topic] = true; });
     const cikti = [];

@@ -21,6 +21,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [KOLAY-PLANI](ekip/KOLAY-PLANI.md) — Sürtünmesiz veri girişi ve sadeleştirilmiş kullanıcı deneyimi planı; durumu: tamamlandı (2026-10-16)
 - [USTA-PLANI](ekip/USTA-PLANI.md) — Öğrenme araştırması, ortak ustalık çekirdeği ve üç modülün boşluk listesi; durumu: sürüyor (2026-11-05)
 - [OGRETME-PLANI](ekip/OGRETME-PLANI.md) — Adım adım çizim, Dinle ve kartla aralıklı tekrar: ortak kavrat çekirdeği ve üç modülde örnek konu; durumu: kuruldu (2026-11-05)
+- [OGRENME-MOTORU](ekip/OGRENME-MOTORU.md) — Konunun baştan sona öğrenme akışı, sistemde olmayan konular ve eklenen tekniklerin dayanağı; durumu: kuruldu (2026-11-06)
 - [KISI-PLANI](ekip/KISI-PLANI.md) — King'in 14 yaşam alanında kullanıcıyı tanıyan kişi modeli ve hafıza yapısı; durumu: tamamlandı (2026-10-17)
 - [NOT-PLANI](ekip/NOT-PLANI.md) — Zengin içerikli, iki yönlü bağlantılı yerel defter ve not sistemi mimarisi; durumu: tamamlandı (2026-10-17)
 - [KING-4](ekip/KING-4.md) — Tek ajan üzerinden bütün sistemi yöneten King 4.0 vizyonu ve yol haritası; durumu: sürüyor (2026-11-01)
