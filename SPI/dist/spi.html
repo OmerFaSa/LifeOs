@@ -1,4 +1,4 @@
-<html lang="tr" translate="no" data-modul="spi">
+<html lang="tr" translate="no" data-modul="spi" data-zemin="piksel">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google" content="notranslate">
@@ -12697,6 +12697,13 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
   .ust__ses.is-baglaniyor .ust__ses-nokta{ animation:none; }
 }
 
+/* Sesler kartı (Ayarlar › Ses; ses.js sesListeHtml): her ses bir düğme, basınca çalar. */
+.sesliste{ display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px; }
+.sesliste__ses{ display:flex; align-items:center; gap:8px; min-height:36px; padding:6px 10px; font:inherit; font-size:13.5px; text-align:left; color:var(--text); background:var(--surface-2); border:0; cursor:pointer; }
+.sesliste__ses:hover{ background:var(--surface-3); }
+.sesliste__ses:disabled{ color:var(--text-3); cursor:default; }
+.sesliste__ses svg{ flex:none; width:14px; height:14px; fill:currentColor; }
+.sesliste__not{ margin:0 0 8px; font-size:13px; color:var(--text-2); }
 /* SES DÜZEYLERİ (Görünüm › Ses; ses.js duzeySeciciHtml): ince cam ray, modül renginde dolgu. */
 .sesduzey{ display:grid; gap:10px; }
 .sesduzey__satir{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:2px 12px; font-size:13.5px; }
@@ -19040,6 +19047,8 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 
 :root[data-zemin="piksel"], :root[data-zemin="piksel"] body{ background:none; }
 :root[data-zemin="piksel"]{ background:var(--piksel-duvar); }
+/* Modül sayfasının gövdesi henüz okunmadıysa (ilk kare) duvar rengi değil bulutun beyazı: gelen bulutun önünde renk parlamaz. */
+:root[data-modul][data-zemin="piksel"]:not(:has(> body)){ background:var(--beyaz); }
 :root[data-zemin="piksel"] .piksel-oda{ position:fixed; inset:0; width:100%; height:100%; image-rendering:pixelated; z-index:-1; pointer-events:none; }
 :root[data-zemin="piksel"] .zemin-isik{ display:none; }
 /* Boşta: menü sola, kart aşağı çekilir; dokunulamaz, sahne kalır (piksel.js). */
@@ -19048,26 +19057,38 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 /* Yüklenme ekranı: cam yerine manzara; selam kâğıtta durur, her manzarada okunur */
 :root[data-zemin="piksel"] .piksel-manzara{ position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
 :root[data-zemin="piksel"] .lifeos-gecis{ background:#8fcff1; -webkit-backdrop-filter:none; backdrop-filter:none; }
-:root[data-zemin="piksel"] .perde--karsilama{ background:#8fcff1; }
-/* Bulut perdesi (piksel.js bulutKoy): iki yarım; perde kalkarken iki yana açılır. Yazı bulutun üstünde, kâğıt kart yok. */
-:root[data-zemin="piksel"] :is(.lifeos-gecis,.perde--karsilama):has(.px-bulut){ background:#e2ecf6; }
-:root[data-zemin="piksel"] .perde--karsilama:has(.px-bulut)::before{ content:none; }
-:root[data-zemin="piksel"] .perde--karsilama:has(.px-bulut) .karsilama{ background:none; box-shadow:none; }
+/* Bulut perdesi (kullanıcı, 2026-11-06: «tüm ekranı büyük beyaz bir bulut kaplasın»; «aniden gelip kesiliyor»): iki yarım
+   iki yandan gelir, ortada kabarık kenarları üst üste biner. Resim CSS'te (tools/piksel_bulut.py): varış sayfasının İLK
+   boyamasında yerindedir, sayfa değişimi görünmez. Perdenin kendi zemini yok: bulut çekilirken altındaki sayfa görünür. */
+/* PIKSEL BULUT BASI: tools/piksel_bulut.py uretir */
+.px-bulut i{ background-image:url(data:image/png;base64,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), linear-gradient(var(--beyaz), var(--beyaz)); }
+/* PIKSEL BULUT SONU */
 .px-bulut{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
-.px-bulut canvas{ position:absolute; top:0; image-rendering:pixelated; transition:transform .42s cubic-bezier(.4,0,.2,1); }
+/* Genişlik: resmin kabarık payı (26 piksel × 4 = 104) ortayı geçsin, iki yarım arasında boşluk kalmasın. Düz beyaz katman resimden geniş ekranda sola doğru tamamlar. */
+.px-bulut i{ position:absolute; top:0; bottom:0; width:calc(50vw + 130px); image-rendering:pixelated; will-change:transform;
+  background-size:1600px 720px, calc(100% - 800px) 100%; background-repeat:repeat-y, no-repeat; background-position:right top, left top;
+  transition:transform .7s cubic-bezier(.45,.05,.35,1); }
 .px-bulut__sol{ left:0; }
-.px-bulut__sag{ right:0; }
-:is(.perde--kapaniyor,.lifeos-gecis.is-acik) .px-bulut__sol{ transform:translateX(-86%); }
-:is(.perde--kapaniyor,.lifeos-gecis.is-acik) .px-bulut__sag{ transform:translateX(86%); }
-.px-bulut__yazi{ position:absolute; inset:0; z-index:1; display:grid; place-content:center; justify-items:center; gap:6px; text-align:center; color:var(--text); animation:px-bulut-yazi .5s ease .18s both; }
+/* Sağ yarım aynı resmin aynası, biraz kaydırılmış; ayna kayma yönünü de çevirir: iki yarıma tek kural yeter. */
+.px-bulut__sag{ right:0; scale:-1 1; background-position:right -236px, left top; }
+:root[data-zemin="piksel"] .lifeos-gecis:has(.px-bulut){ background:none; }
+.lifeos-gecis:not(.is-kapali) .px-bulut i{ transform:translateX(-101%); }
+.lifeos-gecis.is-acik .px-bulut i{ transform:translateX(-86%); }
+.perde--kapaniyor .px-bulut i{ transform:translateX(-101%); transition-duration:.8s; }
+/* Yazı sayfayla birlikte değişir: gidenin yazısı önce söner, varanın yazısı bulutun üstünde belirir. Sürekli olan yalnız buluttur. */
+.lifeos-gecis.is-kalkis .px-bulut__kart{ opacity:0; transition:opacity .4s ease; }
+.perde--karsilama .perde__araclar{ animation:px-bulut-yazi .5s ease .5s both; }
+:root[data-zemin="piksel"] .perde--kapaniyor:has(.px-bulut){ opacity:1; }
+:root[data-zemin="piksel"] .perde--kapaniyor:has(.px-bulut) :is(.karsilama,.perde__araclar){ opacity:0; transition:opacity .25s ease; }
+.px-bulut__yazi{ position:absolute; inset:0; z-index:1; display:grid; place-content:center; justify-items:center; gap:6px; text-align:center; color:var(--text); animation:px-bulut-yazi .5s ease .6s both; }
 .px-bulut__kart{ display:grid; justify-items:center; gap:6px; padding:20px 36px; background:var(--piksel-kagit, #fffaef); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar); }
 .px-bulut__yazi small{ font-size:var(--fs-sm); color:var(--text-2); }
 .px-bulut__yazi b{ font-size:clamp(32px, 7vw, 64px); line-height:1.1; }
 .px-bulut__yazi span{ font-size:var(--fs-md, 16px); color:var(--text-2); }
 @keyframes px-bulut-yazi{ from{ opacity:0; transform:translateY(10px); } }
-@media (prefers-reduced-motion:reduce){ .px-bulut canvas{ transition:none; } .px-bulut__yazi{ animation:none; } }
+@media (prefers-reduced-motion:reduce){ .px-bulut i{ transition:none; } .px-bulut__yazi, .perde--karsilama .perde__araclar{ animation:none; } }
 :root[data-zemin="piksel"] .perde--karsilama::before{ content:none; }
-:root[data-zemin="piksel"] .perde--karsilama .karsilama{ position:relative; z-index:1; padding:28px 40px; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),8px 12px 0 #3f282c44; }
+:root[data-zemin="piksel"] .perde--karsilama .karsilama{ position:relative; z-index:1; }
 /* Seçim sayfası: tarla görünür, kapı zemini kalkar */
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi{ background:transparent; }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__tanitim{ --fg:#3a2430; --fg-2:#4a3440; --text:#3a2430; --text-2:#4a3440; }
@@ -19480,10 +19501,9 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 .px-kivilcim{ position:fixed; width:0; height:0; z-index:10002; pointer-events:none; }
 .px-kivilcim i{ position:absolute; left:-2px; top:-2px; display:block; width:4px; height:4px; }
 
-/* Açılış karşılaması: bulanık cam yerine odanın duvarı, kâğıtta selam */
-:root[data-zemin="piksel"] .perde--karsilama{ --pm-yazi:var(--text); --pm-iz:var(--border-strong); background:var(--piksel-duvar); -webkit-backdrop-filter:none; backdrop-filter:none; }
+/* Açılış karşılaması: bulanık cam yerine bulut (yukarıda), kâğıtta selam */
+:root[data-zemin="piksel"] .perde--karsilama{ --pm-yazi:var(--text); --pm-iz:var(--border-strong); background:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
 :root[data-zemin="piksel"] .perde--karsilama .perde__ortam{ display:none; }
-:root[data-zemin="piksel"] .perde--karsilama::before{ inset:auto 0 0 0; height:24%; background:var(--piksel-tahta); box-shadow:0 -6px 0 var(--piksel-tahta-2); }
 :root[data-zemin="piksel"] .karsilama{ gap:12px; padding:26px 44px 28px; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),12px 14px 0 var(--piksel-golge); transition:opacity .2s var(--ease), transform .24s var(--ease); }
 :root[data-zemin="piksel"] .karsilama::before{ content:''; width:96px; height:96px; image-rendering:pixelated; background:var(--fig-gun) center/contain no-repeat; }
 :root[data-zemin="piksel"][data-modul="ays"] .karsilama::before{ background-image:var(--fig-ays); }
@@ -19701,10 +19721,13 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
      gösterir ve ad yer tutucudan gelir, üç yerde ayrı yazılmaz. -->
 <!-- KARŞILAMA (kullanıcı, 2026-10-18): logonun yerine italik selam ve altında
      küçük yazıyla bölümün o anki notu (brand/ortak/karsilama.js). Selam ve not
-     karsilama.js yüklenince yazılır; yüklenmezse 0,7 sn sonra varsayılan selam
+     karsilama.js yüklenince yazılır; yüklenmezse 1,5 sn sonra varsayılan selam
      görünür. Not modülün KENDİ kural cümlesidir ya da kullanıcının notu. -->
 <div id="marka-perde" class="perde perde--marka perde--karsilama" role="dialog" aria-modal="true"
   aria-label="Karşılama">
+  <!-- Bulut (2026-11-06): markupta ve resmi CSS'te, çünkü betikler ilk boyamadan sonra çalışır;
+       modül geçişinde gelen sayfanın ilk karesi gidenin son karesiyle aynı buluttur. -->
+  <div class="px-bulut" aria-hidden="true"><i class="px-bulut__sol"></i><i class="px-bulut__sag"></i></div>
   <div class="karsilama" aria-live="polite">
     <p class="karsilama__selam">Hoş geldin</p>
     <span class="karsilama__cizgi" aria-hidden="true"></span>
@@ -19760,7 +19783,7 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
      Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
   var deneme = 0, kars = el.querySelector('.karsilama'), yazildi = false;
   /* Karşılama yazılamazsa (betik yok) varsayılan selam görünür. */
-  setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 700);
+  setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 1500);
   /* Selam ayrı bekler: kaynak sürümde perde.js hemen, karsilama.js sayfanın
      aşağısında yüklenir; tek dosya sürümünde ikisi de sonda. */
   var kDeneme = 0;
@@ -22189,7 +22212,8 @@ window.LIFEOS = window.LIFEOS || {};
 
   const GECIS_CEREZ = 'lifeos_gecis';
   const GECIS_MS = 560;
-  const GECIS_BEKLE = GECIS_MS + 380, GECIS_ACIK = 1200, GECIS_BULUT_MS = GECIS_BEKLE + 420 + GECIS_ACIK + 460;   // bulutlu sıranın toplamı
+  /* Bulutlu sıra: kapan · bekle · açıl · manzara · kapan · sayfa. GECIS_BULUT_KAP piksel.css .px-bulut i geçişiyle aynıdır. */
+  const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_BEKLE = 120, GECIS_ACIK = 600, GECIS_BULUT_MS = GECIS_BULUT_HAZIR + 3 * GECIS_BULUT_KAP + GECIS_BEKLE + GECIS_ACIK + 60;
   const GECIS_OMUR = 15000;
   const GECIS_MODUL = /^(ays|spi|esp|hkm)$/;
   /* Perdenin ölçüsü ve camı seviye.css .perde--marka ile AYNIDIR; biri
@@ -22273,37 +22297,57 @@ window.LIFEOS = window.LIFEOS || {};
     const kap = document.createElement('div');
     kap.className = 'lifeos-gecis';
     kap.setAttribute('aria-hidden', 'true');
-    kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
-      + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
     /* LOGO YOK (kullanıcı, 2026-10-18: «geçerken logo yerine italik bir yazıyla hoş
-       geldin»): perde yalnız karttan büyür; selam ve not varılan modülün perdesinde
-       (brand/ortak/karsilama.js) — o modülün notunu yalnız o modül bilir. */
+       geldin»): selam ve not varılan modülün perdesinde (brand/ortak/karsilama.js) —
+       o modülün notunu yalnız o modül bilir. */
     document.body.appendChild(kap);
-    /* Piksel: perde büyük beyaz buluttur, ortada selam ve gidilen modül; modül açılana dek kalır (varışta aynı bulut açılır). */
-    const bulut = !!(L.PIKSEL && L.PIKSEL.bulutKoy);
+    /* Piksel: perde iki yandan gelen büyük beyaz buluttur (resmi CSS'te, piksel.css); ortada selam ve gidilen modül. */
+    const bulut = document.documentElement.getAttribute('data-zemin') === 'piksel';
+    const P = L.PIKSEL;
     if(bulut){
-      L.PIKSEL.bulutKoy(kap);
-      if(L.PIKSEL.manzaraKoy) L.PIKSEL.manzaraKoy(kap);   // manzara bulutun altında: bulut açılınca görünür
+      const b = document.createElement('div');
+      b.className = 'px-bulut'; b.setAttribute('aria-hidden', 'true');
+      b.innerHTML = '<i class="px-bulut__sol"></i><i class="px-bulut__sag"></i>';
+      kap.appendChild(b);
       const y = document.createElement('div'), AD = { ays:'AYS', spi:'SPİ', esp:'ESP', hkm:'Merkez' };
       y.className = 'px-bulut__yazi';
       y.innerHTML = '<div class="px-bulut__kart"><small>' + yz('ortak.animasyon.gecis-selam') + '</small><b>' + AD[o.modul] + '</b><span>' + yz('ortak.animasyon.gecis-' + o.modul) + '</span></div>';
       kap.appendChild(y);
       if(o.url){ try{ const l = document.createElement('link'); l.rel = 'prefetch'; l.href = o.url; document.head.appendChild(l); }catch(e){ /* önceden yükleme yoksa açılış yine olur */ } }
-    } else if(L.PIKSEL && L.PIKSEL.manzaraKoy) L.PIKSEL.manzaraKoy(kap);
+    } else {
+      kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
+        + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
+      if(P && P.manzaraKoy) P.manzaraKoy(kap);
+    }
     void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
     kap.classList.add('is-tam');
-    kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
-    /* Bulutlu sıra (kullanıcı, 2026-11-06): bulut kapanır, açılır (yüklenme manzarası görünür), yeniden kapanır, sonra sayfa değişir.
-       Varış sayfası aynı bulutla açılır ve perde kalkınca bulut iki yana çekilir. Test kendi süresini verir, sıra oynamaz. */
-    const bekle = GECIS_BEKLE, acik = GECIS_ACIK;
-    if(bulut && typeof o.sure !== 'number'){ setTimeout(() => kap.classList.add('is-acik'), bekle); setTimeout(() => kap.classList.remove('is-acik'), bekle + 420 + acik); }
-    const sure = typeof o.sure === 'number' ? o.sure : bulut ? GECIS_BULUT_MS : GECIS_MS + 40;
-    setTimeout(() => {
+    const git = sure => setTimeout(() => {
       gecisCerezYaz(o.modul);
       try{ o.git(); }catch(e){ console.error('Geçiş:', e); }
       /* Sayfa değişmediyse (engellendi, hata) perde kendiliğinden kalkar. */
       setTimeout(() => { if(kap.isConnected){ kap.remove(); gecisAktif = false; } }, 6000);
     }, sure);
+    if(!bulut || typeof o.sure === 'number'){
+      if(!bulut) kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
+      git(typeof o.sure === 'number' ? o.sure : GECIS_MS + 40);
+      return true;
+    }
+    /* Bulutlu sıra (kullanıcı, 2026-11-06): bulut kapanır, açılır (yüklenme manzarası görünür), yeniden kapanır, sonra sayfa değişir.
+       Varış sayfasının ilk boyamasında aynı bulut durur (perde.html, resmi CSS'te): sayfa değişimi görünmez, perde kalkınca bulut iki yana çekilir.
+       Kayma, bulut katmanları hazırlanınca başlar: büyük katmanın ilk çizimi ilk ~300 ms'deki kareleri yutuyordu, bulut «aniden» geliyordu (kare kare ölçüldü, 2026-11-06).
+       Manzara bulutun ardında, kapanınca kurulur: çizimi (100-250 ms) görünür hareketi durdurmaz. Manzara yoksa (seçim sayfası) yalnız kapanır. */
+    const ses = t => { try{ if(L.SES && L.SES.olaySes) L.SES.olaySes(t); }catch(e){ /* ses bilgi taşımaz */ } };
+    setTimeout(() => {
+      kap.classList.add('is-kapali');
+      ses('bulutGel');
+      if(!(P && P.manzaraKoy)){ kap.classList.add('is-kalkis'); git(GECIS_BULUT_KAP + 60); return; }
+      setTimeout(() => {
+        P.manzaraKoy(kap);
+        setTimeout(() => { kap.classList.add('is-acik'); ses('bulutGit'); }, 40);   // manzara bir kare boyansın
+      }, GECIS_BULUT_KAP + GECIS_BEKLE);
+      setTimeout(() => { kap.classList.remove('is-acik'); kap.classList.add('is-kalkis'); ses('bulutGel'); }, 2 * GECIS_BULUT_KAP + GECIS_BEKLE + GECIS_ACIK);
+      git(GECIS_BULUT_MS - GECIS_BULUT_HAZIR);
+    }, GECIS_BULUT_HAZIR);
     return true;
   }
 
@@ -26017,28 +26061,6 @@ window.LIFEOS = window.LIFEOS || {};
     const yap = () => { if(document.visibilityState !== 'hidden') manzaraHazir(Math.ceil(window.innerWidth / MANZARA_OLCEK), Math.ceil(window.innerHeight / MANZARA_OLCEK)); };
     if(window.requestIdleCallback) requestIdleCallback(yap, { timeout:8000 }); else setTimeout(yap, 4000);
   }
-  /* BULUT PERDESİ (2026-11-06, kullanıcı: «modüller arası geçişte tüm ekranı büyük beyaz bir bulut kaplasın, o modüle
-     geçene kadar dağılmasın; geçerken karşılama yazıları gelsin, geçince açılsın»). İki yarım: ortada kabarık kenarları üst
-     üste biner, ekranda boşluk kalmaz; perde kalkarken (perde--kapaniyor) iki yana açılır (piksel.css). Süs: veri okumaz. */
-  function bulutYarim(c, sag){
-    const W = c.width, H = c.height, g = c.getContext('2d');
-    let v = sag ? 917 : 331; const r = () => (v = (v * 1664525 + 1013904223) >>> 0) / 4294967296;
-    const top = (cx, cy, rr, renk) => { g.fillStyle = renk; for(let y = -rr; y <= rr; y++){ const w = Math.round(Math.sqrt(rr * rr - y * y)); g.fillRect(Math.round(cx) - w, Math.round(cy) + y, w * 2 + 1, 1); } };
-    const kenar = W * 0.84, X = x => (sag ? W - x : x);   // gövde ekranın ortasını geçer: iki yarım arasında boşluk kalmaz
-    g.fillStyle = '#ffffff'; g.fillRect(sag ? W - kenar : 0, 0, kenar, H);
-    /* Gövdede kümeler: alt kenarları gölge tonunda, doku verir ama beyaz kalır */
-    for(let i = 0; i < W * H / 280; i++){ const x = r() * kenar, y = r() * H, rr = 4 + Math.floor(r() * 7); top(X(x), y + 2, rr, '#e6eef8'); top(X(x), y, rr, '#ffffff'); }
-    /* Ortaya bakan kabarık kenar: büyük toplar, altta gölge, en altta mavi pus */
-    for(let y = -8; y < H + 12; y += 6 + Math.floor(r() * 5)){ const rr = 8 + Math.floor(r() * 10), x = kenar + rr * 0.35 - r() * 6; top(X(x), y + 3, rr, '#d6e2f0'); top(X(x), y, rr, '#ffffff'); top(X(x - rr * 0.3), y - rr * 0.35, Math.max(2, rr - 6), '#ffffff'); }
-  }
-  function bulutKoy(el){
-    if(!el || el.querySelector('.px-bulut')) return null;
-    const k = document.createElement('div'), W = Math.ceil(window.innerWidth * 0.62 / OLCEK), H = Math.ceil(window.innerHeight / OLCEK);
-    k.className = 'px-bulut'; k.setAttribute('aria-hidden', 'true');
-    ['sol', 'sag'].forEach(y => { const c = document.createElement('canvas'); c.className = 'px-bulut__' + y; c.width = W; c.height = H; tamKat(c, OLCEK); bulutYarim(c, y === 'sag'); k.appendChild(c); });
-    el.insertBefore(k, el.firstChild);
-    return k;
-  }
   function manzaraKoy(el){
     const D = L.PIKSEL_DOGA;
     if(!D || !el || el.querySelector('canvas.piksel-manzara')) return null;
@@ -26158,7 +26180,9 @@ window.LIFEOS = window.LIFEOS || {};
     return D.length;
   }
   /* Kayıtta bir kalp yükselir: yalnız gerçek kayıtta çağrılır. */
+  const ses = tur => { try{ if(L.SES) L.SES.tik(tur, false); }catch(x){ /* ses bilgi taşımaz */ } };
   function kayitTepki(e){
+    ses('kalp');
     const r = e.getBoundingClientRect(), n = kivilcim(r.left + r.width / 2, r.top + r.height / 2);
     const sim = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul('kalp');
     if(!n || !sim) return n;
@@ -26181,6 +26205,7 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* Silinen satırın yerinden gri kareler aşağı süzülür (hareket.js satır kapanışı). Renk temanın kendi çizgisi. */
   function toz(e){
+    ses('sil');
     const k = getComputedStyle(document.documentElement);
     return ogeKivilcim(e, [k.getPropertyValue('--border-strong').trim() || '#c9a988', k.getPropertyValue('--text-3').trim() || '#6f4f42'], 'toz', 520);
   }
@@ -26199,6 +26224,7 @@ window.LIFEOS = window.LIFEOS || {};
   function cevapIsle(e){
     if(!e || !e.classList) return null;
     const tur = e.classList.contains('is-dogru') ? 'dogru' : e.classList.contains('is-yanlis') ? 'yanlis' : null;
+    if(tur) ses(tur);
     if(!tur || hareketsiz()) return tur;
     e.classList.remove('px-dogru', 'px-yanlis');
     void e.offsetWidth;
@@ -26218,10 +26244,10 @@ window.LIFEOS = window.LIFEOS || {};
       const t = o.target;
       if(!t || !t.closest || !secili()) return;
       const su = t.closest('.su-bardak');
-      if(su){ ogeKivilcim(su, ['#58b9ec', '#e6f7ff', '#2f93cf']); return; }
-      if(t.matches('input[type="checkbox"]:checked')){ listeBitti(t) ? ogeKivilcim(t, null, 'buyuk', 560) : ogeKivilcim(t); return; }
+      if(su){ ses('damla'); ogeKivilcim(su, ['#58b9ec', '#e6f7ff', '#2f93cf']); return; }
+      if(t.matches('input[type="checkbox"]:checked')){ const b = listeBitti(t); ses(b ? 'liste' : 'isaret'); b ? ogeKivilcim(t, null, 'buyuk', 560) : ogeKivilcim(t); return; }
       const satir = t.closest('button.minrow:not(.is-done)');
-      if(satir){ const m = satir.querySelector('.minrow__mark') || satir; listeBitti(satir) ? ogeKivilcim(m, null, 'buyuk', 560) : ogeKivilcim(m); return; }
+      if(satir){ const m = satir.querySelector('.minrow__mark') || satir, b = listeBitti(satir); ses(b ? 'liste' : 'isaret'); b ? ogeKivilcim(m, null, 'buyuk', 560) : ogeKivilcim(m); return; }
       const sik = t.closest('.secenek[data-harf]:not([disabled]), .king__soru-sik:not([disabled])');
       if(sik){
         const sec = sik.matches('.king__soru-sik') ? kimlik(sik, 'data-king') : (kimlik(sik, 'data-act') || '') + kimlik(sik, 'data-harf');
@@ -26253,8 +26279,6 @@ window.LIFEOS = window.LIFEOS || {};
     }
     hazirla();
     dongu();
-    const varis = document.querySelector('.perde--karsilama');
-    if(varis) bulutKoy(varis);   // varış: aynı bulut, üstünde karşılama; perde kalkınca iki yana açılır
     manzaraOnceden();
   }
   function kur(){
@@ -26270,7 +26294,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ bulutKoy, manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
+  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
 })(window.LIFEOS);
 
 /* ==== js/core/ayarlar.js ==== */
@@ -27008,6 +27032,7 @@ window.LIFEOS = window.LIFEOS || {};
        kartlar; düzeyler, müzik kitaplığı, açılış, arka plan müziği, arka plan videosu. */
     if(id === 'ses') return '<div class="skartlar">'
       + kart(SIMGE_SES, yz('ortak.ayarlar.ses-duzeyleri'), yz('ortak.ayarlar.genel-hepsini-birlikte-kisar'), cagir(L.SES, 'duzeySeciciHtml'))
+      + kart(SIMGE_SES, yz('ortak.ses.sesler'), yz('ortak.ses.basinca-calar'), cagir(L.SES, 'sesListeHtml'))
       + cagir(L.MUZIK, 'ayarHtml')
       + '</div>';
     if(id === 'king') return '<div class="skartlar">' + kart(SIMGE.king, 'King', yz('ortak.ayarlar.adi-konusmasi-ve-sesi'),
@@ -27762,6 +27787,10 @@ SP.Perde = (function(){
        enAz    videosuz perde en az kaç ms dursun (varsayılan 4200)
        bitti   perde kapanınca çağrılır
      ================================================================ */
+  /* Ses bilgi taşımaz: ses.js yoksa ya da kapalıysa perde aynı çalışır. Dokunuşla gelmez (brand/ortak/ses.js olaySes). */
+  function sesCal(tur){
+    try{ var S = window.LIFEOS && window.LIFEOS.SES; if(S && S.olaySes) S.olaySes(tur); }catch(e){}
+  }
   function baglan(perde, secenekler){
     secenekler = secenekler || {};
     if(!perde || perde.__perdeBagli) return null;
@@ -27818,6 +27847,9 @@ SP.Perde = (function(){
       try{ if(v){ v.pause(); } if(ortam){ ortam.pause(); } }catch(e){}
       perde.classList.add('perde--kapaniyor');
       kaydirmaSerbest();
+      /* Bulutlu karşılama çekilirken sayfa görünür; perde bulut tam çıkmadan kalkarsa bulut ortada kesilir (piksel.css). */
+      var bulut = perde.querySelector('.px-bulut');
+      if(bulut) sesCal('bulutGit');
       setTimeout(function(){
         if(perde.parentNode) perde.parentNode.removeChild(perde);
         if(typeof secenekler.bitti === 'function'){
@@ -27827,7 +27859,7 @@ SP.Perde = (function(){
            `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
            bakıyor. */
         siradakini();
-      }, 420);
+      }, bulut ? 840 : 420);
     }
 
     /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:
@@ -28460,6 +28492,7 @@ SP.Perde = (function(){
         kapat:function(){}, sirada:false };
     }
 
+    sesCal('seviye');
     var sec = {
       sinif:'perde--rutbe' + (yukselme.yeniKademe ? ' perde--yeni-kademe' : ''),
       baslik:(yukselme.yeniKademe ? 'Yeni kademe: ' : 'Yeni rütbe: ')
@@ -28533,6 +28566,7 @@ SP.Perde = (function(){
         kapat:function(){}, sirada:false };
     }
 
+    sesCal('rozet');
     var sec = {
       sinif:'perde--rozet',
       baslik:'Yeni rozet: ' + (rozet.ad || rozet.kod),
@@ -28625,7 +28659,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'31afbb77', at:'2026-11-06 18:48', dirty:true };
+SP.BUILD = { id:'5b043819', at:'2026-11-06 20:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -38290,7 +38324,10 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.ses.tik-sesleri':'Tık sesleri',
   'ortak.ses.ajanlar-ve-king':'Ajanlar ve King',
   'ortak.ses.gecis-ve-sayfa':'Geçiş ve sayfa',
-  'ortak.ses.onay-ve-uyari':'Onay ve uyarı',
+  'ortak.ses.onay-ve-uyari':'Onay, uyarı ve tepkiler',
+  'ortak.ses.sesler':'Sesler',
+  'ortak.ses.basinca-calar':'Basınca çalar; düzeyi yukarıdaki kaydırıcılardan',
+  'ortak.ses.tik-kapali':'Tık sesleri kapalı. Üst çubuktaki ♪ panelinden açılır.',
   'ortak.ses.minik-konusmasi-ve-gidik':'Minik konuşması ve gıdık',
   'ortak.ses.minik-adimlari':'Minik adımları',
   'ortak.ses.king-in-sesi':'King’in sesi',
@@ -38832,6 +38869,58 @@ window.LIFEOS = window.LIFEOS || {};
     /* Uyarı (hata bildirimi): iki üçgen nota aşağı (A4 → F4); sert değil. */
     uyari:[{ t:0, tur:'ton', dalga:'triangle', f:[440], d:0.14, g:0.2, a:0.004 },
            { t:0.12, tur:'ton', dalga:'triangle', f:[349], d:0.25, g:0.2, a:0.004 }],
+    /* Bulut (kullanıcı, 2026-11-06: «rahatlatıcı geliş gidiş sesi»): 0,7-0,8 sn'lik kaymayla aynı boyda, yumuşak rüzgâr.
+       Gelişte hava yükselir ve iki yarım buluşurken pes bir nefes oturur; gidişte hava açılır, sonunda tek hafif çan kalır. */
+    bulutGel:[{ t:0, tur:'hisirti', f:[260, 720], q:0.6, d:0.9, g:0.2, a:0.5, oda:0.3, nefes:true },
+              { t:0.04, tur:'kece', f:[320, 520], q:0.5, d:0.86, g:0.09, a:0.5, nefes:true },
+              { t:0.5, tur:'ton', dalga:'sine', f:[196, 196], d:0.6, g:0.05, a:0.2, oda:0.25, nefes:true }],
+    bulutGit:[{ t:0, tur:'hisirti', f:[760, 300], q:0.6, d:1.05, g:0.18, a:0.34, oda:0.35, nefes:true },
+              { t:0.02, tur:'kece', f:[560, 300], q:0.5, d:1.0, g:0.08, a:0.36, nefes:true },
+              { t:0.34, tur:'ton', dalga:'sine', f:[523, 523], d:0.8, g:0.035, a:0.12, oda:0.5 },
+              { t:0.46, tur:'ton', dalga:'sine', f:[784, 784], d:0.72, g:0.022, a:0.12, oda:0.5 }],
+    /* TATLI SESLER (kullanıcı, 2026-11-06: «5-6 tane ses var; 10-15 tane güzel, tatlı, eğlenceli ses olsun»). Hepsi gerçek bir olayda
+       çalar (piksel.js tepkiIzle, hareket.js, perde.js, king-gorunum.js), Ayarlar › Ses kartında tek tek dinlenir. */
+    /* Su bardağı: tek damla, yukarı kıvrılan kabarcık ve küçük yankısı. */
+    damla:[{ t:0, tur:'ton', dalga:'sine', f:[380, 1100], d:0.09, g:0.2, a:0.004 },
+           { t:0.1, tur:'ton', dalga:'sine', f:[560, 1250], d:0.07, g:0.07, a:0.004, oda:0.2 }],
+    /* İş işaretlendi: iki küçük nabız notası (B5 → E6), altın gibi. */
+    isaret:[{ t:0, tur:'ton', dalga:'nabiz', f:[988], d:0.05, g:0.06, a:0.004 },
+            { t:0.05, tur:'ton', dalga:'nabiz', f:[1319], d:0.16, g:0.06, a:0.004, oda:0.12 }],
+    /* Liste bitti: yukarı koşan beş nota, sonuncusu kalimba gibi çınlar. */
+    liste:[{ t:0, tur:'ton', dalga:'triangle', f:[523], d:0.08, g:0.15, a:0.004 },
+           { t:0.07, tur:'ton', dalga:'triangle', f:[659], d:0.08, g:0.15, a:0.004 },
+           { t:0.14, tur:'ton', dalga:'triangle', f:[784], d:0.08, g:0.15, a:0.004 },
+           { t:0.21, tur:'ton', dalga:'triangle', f:[1046], d:0.08, g:0.15, a:0.004 },
+           { t:0.28, tur:'tel', f:[1319], d:0.5, g:0.3, a:0.004, parlak:0.5, oda:0.25 }],
+    /* Doğru cevap: iki üçgen nota yukarı (G5 → C6), üstüne tel. */
+    dogru:[{ t:0, tur:'ton', dalga:'triangle', f:[784], d:0.09, g:0.17, a:0.004 },
+           { t:0.08, tur:'ton', dalga:'triangle', f:[1046], d:0.22, g:0.16, a:0.004 },
+           { t:0.08, tur:'tel', f:[1046], d:0.4, g:0.16, a:0.004, parlak:0.4, oda:0.2 }],
+    /* Yanlış cevap: yumuşak «bup-bup» aşağı; azarlamaz. */
+    yanlis:[{ t:0, tur:'ton', dalga:'sine', f:[294, 247], d:0.12, g:0.17, a:0.006 },
+            { t:0.13, tur:'ton', dalga:'sine', f:[247, 196], d:0.18, g:0.15, a:0.006, oda:0.1 }],
+    /* Kayıt kalbi: «pu-pum», iki küçük kalp atışı. */
+    kalp:[{ t:0, tur:'ton', dalga:'sine', f:[220, 300], d:0.09, g:0.17, a:0.006 },
+          { t:0.12, tur:'ton', dalga:'sine', f:[262, 392], d:0.15, g:0.17, a:0.006, oda:0.2 }],
+    /* Silme: kâğıttan «püf», aşağı süzülür (ekrandaki toz gibi). */
+    sil:[{ t:0, tur:'kece', f:[1000, 220], q:0.7, d:0.26, g:0.3, a:0.008 },
+         { t:0.01, tur:'hisirti', f:[1400, 500], q:0.8, d:0.2, g:0.14, a:0.01 }],
+    /* Seviye atlama: dört adım çıkış ve akor; kutlama, bağırmadan. */
+    seviye:[{ t:0, tur:'ton', dalga:'nabiz', f:[392], d:0.09, g:0.07, a:0.004 },
+            { t:0.09, tur:'ton', dalga:'nabiz', f:[523], d:0.09, g:0.07, a:0.004 },
+            { t:0.18, tur:'ton', dalga:'nabiz', f:[659], d:0.09, g:0.07, a:0.004 },
+            { t:0.27, tur:'ton', dalga:'triangle', f:[784], d:0.1, g:0.13, a:0.004 },
+            { t:0.37, tur:'ton', dalga:'triangle', f:[1046], d:0.55, g:0.11, a:0.006, oda:0.25 },
+            { t:0.37, tur:'ton', dalga:'triangle', f:[784], d:0.5, g:0.06, a:0.006 },
+            { t:0.37, tur:'ton', dalga:'triangle', f:[659], d:0.45, g:0.06, a:0.006 }],
+    /* Yeni rozet: dört tel, parıltı gibi yukarı. */
+    rozet:[{ t:0, tur:'tel', f:[659], d:0.4, g:0.28, a:0.004, parlak:0.5 },
+           { t:0.09, tur:'tel', f:[784], d:0.4, g:0.28, a:0.004, parlak:0.5 },
+           { t:0.18, tur:'tel', f:[988], d:0.4, g:0.28, a:0.004, parlak:0.5 },
+           { t:0.27, tur:'tel', f:[1319], d:0.65, g:0.3, a:0.004, parlak:0.5, oda:0.3 }],
+    /* King açıldı: kalimba iki nota (A4 → E5), sakin. */
+    king:[{ t:0, tur:'tel', f:[440], d:0.4, g:0.24, a:0.004, parlak:0.35 },
+          { t:0.11, tur:'tel', f:[659], d:0.55, g:0.24, a:0.004, parlak:0.35, oda:0.25 }],
     /* Gıdık: suda dört kabarcık, her biri biraz daha ince («blup-blup-blip»). */
     gidik:[{ t:0, tur:'ton', dalga:'sine', f:[420, 760], d:0.07, g:0.16, a:0.006 },
            { t:0.1, tur:'ton', dalga:'sine', f:[460, 840], d:0.07, g:0.15, a:0.006 },
@@ -38856,7 +38945,8 @@ window.LIFEOS = window.LIFEOS || {};
      konuşmasının sesi, sistemdeki tüm sesler»). Her tür bir aileye bağlıdır;
      ailenin düzeyi genel düzeyle çarpılır, 0 olan aile hiç çalmaz. Tercih
      `lifeos.ses.duzey` (animasyon.js TASINAN). King'in sesli okuması 'king'. */
-  const AILE = Object.freeze({ tik:'dokunus', ac:'gecis', kapa:'gecis', sayfa:'gecis', tamam:'onay', uyari:'onay',
+  const AILE = Object.freeze({ tik:'dokunus', ac:'gecis', kapa:'gecis', sayfa:'gecis', bulutGel:'gecis', bulutGit:'gecis', tamam:'onay', uyari:'onay',
+    damla:'onay', isaret:'onay', liste:'onay', dogru:'onay', yanlis:'onay', kalp:'onay', sil:'onay', seviye:'onay', rozet:'onay', king:'onay',
     gidik:'karakter', hirr:'karakter', bla:'karakter', adim:'ortam' });
   const DUZEY_ANAHTAR = 'lifeos.ses.duzey';
   /* GRUPLAR (kullanıcı, 2026-10-29: «genel, ajan, UI seslerini tek seferde kısalım;
@@ -38915,6 +39005,16 @@ window.LIFEOS = window.LIFEOS || {};
     try{ localStorage.setItem(DUZEY_ANAHTAR, JSON.stringify(d)); }catch(e){ /* depo kapalı: bu sayfada geçerli değil */ }
     return true;
   }
+  /* Sesler kartı (Ayarlar › Ses): her ses adıyla, basınca çalar. */
+  const SES_AD = Object.freeze({ tik:'Dokunuş', ac:'Açma', kapa:'Kapama', sayfa:'Sayfa', bulutGel:'Bulut gelişi', bulutGit:'Bulut gidişi', tamam:'Kaydedildi', uyari:'Uyarı',
+    damla:'Su bardağı', isaret:'İş işaretlendi', liste:'Liste bitti', dogru:'Doğru cevap', yanlis:'Yanlış cevap', kalp:'Kayıt kalbi', sil:'Silme', seviye:'Seviye atlama', rozet:'Yeni rozet', king:'King açıldı',
+    gidik:'Minik gıdık', hirr:'Kızan minik', bla:'Minik sohbeti', adim:'Minik adımı' });
+  function sesListeHtml(){
+    return (tercih.tik ? '' : '<p class="sesliste__not">' + yz('ortak.ses.tik-kapali') + '</p>')
+      + '<div class="sesliste" role="group" aria-label="' + yz('ortak.ses.sesler') + '">' + Object.keys(SES_AD).map(t =>
+        '<button type="button" class="sesliste__ses" data-ses-dinle="' + t + '"' + (tercih.tik ? '' : ' disabled') + ' aria-label="' + kac(SES_AD[t]) + ' sesini dinle">' + SIMGE_CAL + '<span>' + kac(SES_AD[t]) + '</span></button>').join('')
+      + '</div>';
+  }
   const yuzde = y => y ? '%' + y : 'Kapalı';
   function duzeySeciciHtml(){
     const d = duzeyler();
@@ -38930,7 +39030,7 @@ window.LIFEOS = window.LIFEOS || {};
       + Object.keys(GRUP).filter(k => GRUP[k] === g).map(satir).join('') + '</details></div>';
     return '<div class="sesduzey" role="group" aria-label="Ses düzeyleri">' + satir('genel') + grup('arayuz') + grup('ajan') + '</div>';
   }
-  let sonDokunus = -1, sonOnay = -9;
+  let sonDokunus = -1, sonOnay = -9, sonTepki = -9;
   /* Göç (bir kez): eski «Minik sesleri» aç/kapa düğmeleri kalktı; kapalı olan
      aile kaydırıcıda «Kapalı» görünsün, yeniden açılabilsin. */
   try{
@@ -39037,8 +39137,14 @@ window.LIFEOS = window.LIFEOS || {};
     return zincir;
   }
 
-  function zarf(c, g, t, tepe, yuksel, sure){
+  function zarf(c, g, t, tepe, yuksel, sure, nefes){
     g.gain.setValueAtTime(0.0001, t);
+    /* Nefes: düz doğrusal çan. Üstel eğri uzun seste çoğu süre duyulmaz, sonra ~150 ms'de patlar (ölçüldü); rüzgâr böyle gelmez. */
+    if(nefes && g.gain.linearRampToValueAtTime){
+      g.gain.linearRampToValueAtTime(tepe, t + yuksel);
+      g.gain.linearRampToValueAtTime(0.0001, t + sure);
+      return;
+    }
     g.gain.exponentialRampToValueAtTime(tepe, t + Math.max(0.001, yuksel));
     g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
   }
@@ -39054,7 +39160,7 @@ window.LIFEOS = window.LIFEOS || {};
   function katman(c, z, t, k, perde){
     const f0 = k.f[0] * perde, f1 = (k.f[1] || k.f[0]) * perde;
     const g = c.createGain();
-    zarf(c, g, t, k.g, k.a || 0.003, k.d);
+    zarf(c, g, t, k.g, k.a || 0.003, k.d, k.nefes);
     g.connect(z.hedef);
     if(k.oda && z.oda){ const s = c.createGain(); s.gain.value = k.oda; g.connect(s); s.connect(z.oda); }
     let kaynak;
@@ -39068,6 +39174,7 @@ window.LIFEOS = window.LIFEOS || {};
       if(!z.gurultu || !c.createBufferSource) return;
       kaynak = c.createBufferSource();
       kaynak.buffer = z.gurultu;
+      kaynak.loop = true;   // süre tampondan uzun olabilir: tampon biter bitmez kesilmesin
       const b = suzgec(c, k.tur === 'kece' ? 'lowpass' : 'bandpass', Math.min(TAVAN, f0), k.q == null ? 1 : k.q, t);
       if(b){
         if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(Math.min(TAVAN, f1), t + k.d);
@@ -39180,9 +39287,14 @@ window.LIFEOS = window.LIFEOS || {};
          sesinin ardından gelen ortam sesi çalmaz; onay ve uyarı 1,5 sn'de bir. */
       if(tur === 'sayfa' && simdi - sonDokunus < .15) return false;
       if(aile === 'ortam' && simdi - sonDokunus < .4) return false;
-      if(aile === 'onay' && simdi - sonOnay < 1.5 && simdi >= sonOnay) return false;
+      const bildirim = tur === 'tamam' || tur === 'uyari';
+      if(bildirim && simdi - sonOnay < 1.5 && simdi >= sonOnay) return false;
+      /* Tepki sesi (damla, işaret, kalp…) o olayın sesidir: ardından gelen aç/kapa ya da «kaydedildi» aynı olayın ikinci sesi olurdu. */
+      if((tur === 'ac' || tur === 'kapa') && simdi - sonTepki < .05 && simdi >= sonTepki) return false;
+      if(tur === 'tamam' && simdi - sonTepki < .8 && simdi >= sonTepki) return false;
       if(aile === 'dokunus' || aile === 'gecis') sonDokunus = simdi;
-      if(aile === 'onay') sonOnay = simdi;
+      if(bildirim) sonOnay = simdi;
+      else if(aile === 'onay') sonTepki = simdi;
       sonCal[tur] = simdi;
       const z0 = zincirKur(c);
       const yol = cikis => {
@@ -39209,6 +39321,17 @@ window.LIFEOS = window.LIFEOS || {};
       return true;
     }catch(e){ return false; }
   }
+  /* Dokunuşla gelmeyen, ana bağlı ses (bulut). Askıdaki bağlamda zamanlanan ses, bağlam ilk dokunuşta açılınca alakasız
+     bir anda çalar: bu yüzden bağlam kısa sürede çalışmıyorsa (tarayıcı izin vermedi) o ses atlanır. */
+  function olaySes(tur){
+    const c = sesBaglami(true);
+    if(!c) return false;
+    if(c.state === 'running' || !c.resume) return tik(tur, false);
+    let gec = false;
+    setTimeout(() => { gec = true; }, 200);
+    Promise.resolve(c.resume()).then(() => { if(!gec && c.state === 'running') tik(tur, false); }).catch(() => {});
+    return false;
+  }
   function tikAc(v){
     tercihYaz({ tik:!!v });
     if(!v) baglamKapat();
@@ -39220,7 +39343,7 @@ window.LIFEOS = window.LIFEOS || {};
     baglam = null;
     zincir = null;
     sonBitis = 0;
-    sonDokunus = -1; sonOnay = -9;   // yeni bağlamın saati sıfırdan başlar
+    sonDokunus = -1; sonOnay = -9; sonTepki = -9;   // yeni bağlamın saati sıfırdan başlar
     Object.keys(sonCal).forEach(k => delete sonCal[k]);
   }
 
@@ -39246,7 +39369,7 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('click', e => {
       if(!tercih.tik || !gercekMi(e)) return;
       const el = e.target && e.target.closest ? e.target.closest(TIKLANAN) : null;
-      if(!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+      if(!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('data-ses-dinle')) return;
       const basili = el.getAttribute('aria-pressed') || (el.getAttribute('role') === 'switch' ? el.getAttribute('aria-checked') : null);
       if(basili === 'true') tik('kapa');
       else if(basili === 'false') tik('ac');
@@ -39288,6 +39411,8 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
+      const dinle = t.closest('[data-ses-dinle]');
+      if(dinle){ sonDokunus = -1; sonOnay = -9; sonTepki = -9; tik(dinle.getAttribute('data-ses-dinle'), true); return; }
       const d = t.closest('.ust__ses');
       if(d){
         e.preventDefault();
@@ -39384,8 +39509,8 @@ window.LIFEOS = window.LIFEOS || {};
     ANAHTAR, TURLER,
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
-    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER, KAYITLI,
-    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, SESSIZ_ANAHTAR, sessiz, sessizMi, SUSTUR_ANAHTAR, sustur, susturBitis,
+    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, olaySes, devret, SESLER, KAYITLI,
+    AILE, SES_AD, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, sesListeHtml, SESSIZ_ANAHTAR, sessiz, sessizMi, SUSTUR_ANAHTAR, sustur, susturBitis,
     chime:ad => tik(/bitti|kapa|dur/i.test(String(ad || '')) ? 'kapa' : 'ac'),
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik, _onKur:onKur,
   });
@@ -59435,6 +59560,7 @@ window.LIFEOS.PARCA.yazilar({
     if(KI.L.KABUK && typeof KI.L.KABUK.kenarSakinlestir === 'function'){ try{ KI.L.KABUK.kenarSakinlestir(); }catch(e){ /* kabuk yok */ } }
     /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
+    try{ if(KI.L.SES) KI.L.SES.tik('king', false); }catch(x){ /* ses yok */ }
     const gorunen = window.visualViewport;
     if(gorunen){   // aynı işlev ikinci kez eklenmez
       gorunen.addEventListener('resize', gorunenAlanaOtur);
