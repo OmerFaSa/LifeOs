@@ -458,6 +458,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   const GECIS_CEREZ = 'lifeos_gecis';
   const GECIS_MS = 560;
+  const GECIS_BEKLE = GECIS_MS + 380, GECIS_ACIK = 1200, GECIS_BULUT_MS = GECIS_BEKLE + 420 + GECIS_ACIK + 460;   // bulutlu sıranın toplamı
   const GECIS_OMUR = 15000;
   const GECIS_MODUL = /^(ays|spi|esp|hkm)$/;
   /* Perdenin ölçüsü ve camı seviye.css .perde--marka ile AYNIDIR; biri
@@ -563,9 +564,9 @@ window.LIFEOS = window.LIFEOS || {};
     kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
     /* Bulutlu sıra (kullanıcı, 2026-11-06): bulut kapanır, açılır (yüklenme manzarası görünür), yeniden kapanır, sonra sayfa değişir.
        Varış sayfası aynı bulutla açılır ve perde kalkınca bulut iki yana çekilir. Test kendi süresini verir, sıra oynamaz. */
-    const bekle = GECIS_MS + 380, acik = 1200;
+    const bekle = GECIS_BEKLE, acik = GECIS_ACIK;
     if(bulut && typeof o.sure !== 'number'){ setTimeout(() => kap.classList.add('is-acik'), bekle); setTimeout(() => kap.classList.remove('is-acik'), bekle + 420 + acik); }
-    const sure = typeof o.sure === 'number' ? o.sure : bulut ? bekle + 420 + acik + 460 : GECIS_MS + 40;
+    const sure = typeof o.sure === 'number' ? o.sure : bulut ? GECIS_BULUT_MS : GECIS_MS + 40;
     setTimeout(() => {
       gecisCerezYaz(o.modul);
       try{ o.git(); }catch(e){ console.error('Geçiş:', e); }
@@ -783,7 +784,7 @@ window.LIFEOS = window.LIFEOS || {};
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
-    gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS,
+    gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS, GECIS_BULUT_MS,
     _yonlendir:fn => { const eski = yonlendir; if(typeof fn === 'function') yonlendir = fn; return eski; },
   });
 })();
