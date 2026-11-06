@@ -44,7 +44,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.analytics.rapor':'Rapor',
   'esp.analytics.durustluk':'Dürüstlük',
   'esp.analytics.rubrik-ve-analiz':'Rubrik ve analiz',
-  'esp.analytics.entelektuel-sermaye':'Entelektüel sermaye',
+  'esp.analytics.entelektuel-sermaye':'Alanların dengesi',
   'esp.analytics.olcum-penceresi':'Ölçüm penceresi',
   'esp.analytics.7-gun':'7 gün',
   'esp.analytics.14-gun':'14 gün',
@@ -67,31 +67,31 @@ window.LIFEOS.PARCA.yazilar({
   'esp.analytics.kart-hatirlama':'Kart hatırlama',
   'esp.analytics.hic-cevaplanmis-kart-yok':'Hiç cevaplanmış kart yok.',
   'esp.analytics.haftalik-rapor':'Haftalık rapor',
-  'esp.analytics.capraz-bulgular':'Çapraz bulgular',
+  'esp.analytics.capraz-bulgular':'Alanlar arası bağlar',
   'esp.analytics.ac':'Aç',
   'esp.analytics.i-ki-masayi-birbirine-baglay':'İki masayı birbirine bağlayan ölçülmüş bir bulgu yok.',
-  'esp.analytics.gunun-brifingi':'Günün brifingi',
+  'esp.analytics.gunun-brifingi':'Günün özeti',
   'esp.analytics.bugun-icin-brifing-uretilmed':'Bugün için brifing üretilmedi.',
   'esp.analytics.sinir':'Sınır',
-  'esp.analytics.denetim-defteri':'Denetim defteri',
+  'esp.analytics.denetim-defteri':'Uyarı defteri',
   'esp.analytics.bu-sayfa-gerekli-mi':'Bu sayfa gerekli mi?',
   'esp.analytics.acik-soru':'Açık soru',
   'esp.analytics.sayi':'Sayı',
   'esp.analytics.adet':'Adet',
   'esp.analytics.ayrisma-kapandi':'Ayrışma kapandı',
-  'esp.analytics.surtunme':'Sürtünme',
+  'esp.analytics.surtunme':'Kayda harcanan süre',
   'esp.analytics.yonetim':'Yönetim',
   'esp.analytics.calisma':'Çalışma',
   'esp.analytics.pay':'Pay',
   'esp.analytics.bak':'Bak',
-  'esp.analytics.gosterge-ayrismasi':'Gösterge ayrışması',
+  'esp.analytics.gosterge-ayrismasi':'Süre ve sonuç farkı',
   'esp.analytics.yon-sutunu-sonucun-hangi-tar':'«Yön» sütunu sonucun hangi tarafa gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.',
   'esp.analytics.bu-sayilar-nereden':'Bu sayılar nereden?',
   'esp.analytics.pencere':'Pencere ',
   'esp.analytics.bu-sayilar-bir-bulgu-degil':'Bu sayılar bir bulgu değil bu yazılımın ayarıdır:',
   'esp.analytics.acik-bolum-yok-nobetcinin-ba':'Açık bölüm yok; nöbetçinin bakacağı çift de yok.',
   'esp.analytics.soru':'Soru',
-  'esp.analytics.kalibrasyon':'Kalibrasyon',
+  'esp.analytics.kalibrasyon':'Tahminlerin',
   'esp.analytics.yanlilik':'Yanlılık',
   'esp.analytics.ne-tahmin-ediyorsun':'Ne tahmin ediyorsun?',
   'esp.analytics.tahmin-turu':'Tahmin türü',
@@ -146,14 +146,10 @@ window.LIFEOS.PARCA.yazilar({
   'esp.analytics.ozet':'Özet',
   'esp.analytics.alanlar':'Alanlar',
   'esp.analytics.zaman':'Zaman',
-  'esp.analytics.yol-not':'Her alanın basamakları',
-  'esp.analytics.radar-not':'Alanların dengesi, tek bakışta',
-  'esp.analytics.seriler-not':'Bir alanın günlere göre çizgisi',
-  'esp.analytics.rapor-not':'Dönem raporu ve brifing',
-  'esp.analytics.durust-not':'Tahminlerin ne kadar tuttu',
-  'esp.analytics.rubrik-not':'Üretimini ölçütlerle değerlendir',
-  'esp.analytics.aktar':'Veri aktar',
-  'esp.analytics.aktar-not':'Başka uygulamadan kayıt al',
+  'esp.analytics.ilk-adim':'Henüz kayıt yok',
+  'esp.analytics.ilk-adim-neden':'Bugün ne yaptığını yaz; sayılar buradan dolar.',
+  'esp.analytics.bugune-git':'Bugün\'e git',
+  'esp.analytics.yol-plan-da':'Yol haritası Plan\'da',
   'esp.analytics.ssk':'SSK',
   'esp.analytics.capraz-bulgu':'çapraz bulgu',
 });
@@ -165,18 +161,12 @@ ESP.Screens.analytics = (function(){
   const K = ESP.C, P = ESP.Parts;
 
   const TABS = [
-    /* Analiz = tek soru: «nasıl gidiyorum?» Önce özet; alan ve zaman ayrı;
-       derin okumalar «Diğer»in listesinde (kullanıcı, 2026-11-06). */
+    /* Analiz = tek soru: «nasıl gidiyorum?» Özet her gün; alan ve zaman kırılımı; rapor ayda bir.
+       Radar ve rubrik alanların, seriler zamanın, dürüstlük raporun parçası (2026-11-06). */
     { id:'ozet',      label:yz('esp.analytics.ozet') },
     { id:'alanlar',   label:yz('esp.analytics.alanlar') },
     { id:'zaman',     label:yz('esp.analytics.zaman') },
-    { id:'yol',       label:yz('esp.analytics.yol-haritasi'), ikincil:true, not:yz('esp.analytics.yol-not') },
-    { id:'radar',     label:yz('esp.analytics.radar'), ikincil:true, not:yz('esp.analytics.radar-not') },
-    { id:'seriler',   label:yz('esp.analytics.seriler'), ikincil:true, not:yz('esp.analytics.seriler-not') },
-    { id:'rapor',     label:yz('esp.analytics.rapor'), ikincil:true, not:yz('esp.analytics.rapor-not') },
-    { id:'durust',    label:yz('esp.analytics.durustluk'), ikincil:true, not:yz('esp.analytics.durust-not') },
-    { id:'rubrikler', label:yz('esp.analytics.rubrik-ve-analiz'), ikincil:true, not:yz('esp.analytics.rubrik-not') },
-    { id:'aktar',     label:yz('esp.analytics.aktar'), ikincil:true, not:yz('esp.analytics.aktar-not') },
+    { id:'rapor',     label:yz('esp.analytics.rapor') },
   ];
 
   /* ------------------------------------------------------------------ radar */
@@ -681,7 +671,9 @@ ESP.Screens.analytics = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): okumalar alt alta. */
-  const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows, rubrikler:rubriklerRows };
+  const kayitVar = () => Object.keys(S.days || {}).some(t => ESP.Model.sessionsOf(t).length > 0);
+  const GOVDE = { alanlar:() => [].concat(radarRows(), rubriklerRows()), zaman:() => kayitVar() ? seriesRows() : [],
+    rapor:() => [].concat(reportRows(), honestyRows()) };
 
   /* ALANLARA ÖZEL GÖRÜNÜM (2026-10-20, kullanıcı: «ESP Analiz çok karmaşık;
      alanlara özel ama göz yormayan, göze hitap eden bir düzen»).
@@ -842,27 +834,11 @@ ESP.Screens.analytics = (function(){
     </div>`;
   }
 
-  /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
-     öğrendiğimiz konular hedefinde; yol haritası gibi»). Açık alanların
-     merdiveni: basamak durumu ve yüzdesi müfredat motorundan (geçilmeyen
-     kapı ilerleme sayılmaz). */
-  function yolHaritasi(){
-    const A = window.LIFEOS.AGHARITA;
-    if(!A || !ESP.Curriculum || !ESP.Curriculum.roadmap) return '';
-    const kumeler = ESP.Mod.active().map(d => {
-      const y = ESP.Curriculum.roadmap(d.id);
-      return { ad:d.short || d.label, dugumler:y ? y.steps.map(s => ({ ad:s.title, durum:s.state === 'done' ? 'bitti' : s.state === 'current' ? (s.pct > 0 ? 'suruyor' : 'sirada') : 'bekliyor',
-        ilerleme:s.state === 'current' && s.pct > 0 ? s.pct / 100 : undefined })) : [] };
-    });
-    return html`<section class="kutu" aria-label="Yol haritası"><h2 class="kutu__ad">${yz('esp.analytics.yol-haritasi')}</h2>
-      <p class="tiny dim">${yz('esp.analytics.her-alanin-merdiveni-gecilen')}</p>
-      ${raw(A.html({ merkez:'Gelişim', kumeler, bos:yz('esp.analytics.bir-alan-acinca-merdiveni-bu') }))}</section>`;
-  }
-
   const yerOf = ad => () => LIFEOS.PARCA.yer('analytics', ad, K, undefined, raw);
   LIFEOS.PARCA.blok({ id:'analytics.analiz-sekmeleri', sayfa:'analytics', yer:'ana', sira:10, ad:'Analiz sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:yz('esp.analytics.analiz-bolumleri'), tabs:TABS, govde:GOVDE,
-      ust:{ ozet:yerOf('ozet'), alanlar:yerOf('alanlar'), zaman:yerOf('zaman'), yol:yerOf('yol'), aktar:yerOf('aktar') } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'ana-tab', aria:yz('esp.analytics.analiz-bolumleri'), tabs:TABS, govde:GOVDE,
+      sayi:{ rapor:ESP.Goodhart ? ESP.Goodhart.flags().length || null : null },
+      ust:{ ozet:yerOf('ozet'), alanlar:yerOf('alanlar'), zaman:() => kayitVar() ? yerOf('zaman')() : K.Empty({ text:yz('esp.analytics.ilk-adim-neden') }) } }));
   } });
   LIFEOS.PARCA.blok({ id:'analytics.analiz-basligi', sayfa:'analytics', yer:'zaman', sira:10, ad:'Analiz başlığı', ciz(){
     return analizBasi();
@@ -873,19 +849,23 @@ ESP.Screens.analytics = (function(){
   LIFEOS.PARCA.blok({ id:'analytics.analiz-panosu', sayfa:'analytics', yer:'zaman', sira:30, ad:'Analiz panosu', ciz(){
     return raw(panoAnaliz());
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.ice-aktarma-karti', sayfa:'analytics', yer:'aktar', sira:10, ad:'İçe aktarma kartı', ciz(){
+  /* İçe aktarılan takvim özeti: yalnız veri varken dolu, Özet'in sonunda. */
+  LIFEOS.PARCA.blok({ id:'analytics.ice-aktarma-karti', sayfa:'analytics', yer:'ozet', sira:20, ad:'İçe aktarma kartı', ciz(){
     return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('esp') : ''));
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.yol-haritasi', sayfa:'analytics', yer:'yol', sira:10, ad:'Yol haritası', ciz(){
-    return yolHaritasi();
-  } });
   LIFEOS.PARCA.blok({ id:'analytics.alan-karolari', sayfa:'analytics', yer:'alanlar', sira:10, ad:'Alan karoları', ciz(){
-    return alanKarolari();
+    return html`${alanKarolari()}<div class="mt-8">${K.Button({ label:yz('esp.analytics.yol-plan-da'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'ladder' } })}</div>`;
   } });
   /* KOLAY Faz 2 (2026-10-26): Bugün'ün karoları, pano ve dönen kartları,
      haftalık özeti ve bekleyen önerisi «Özet»te (today.analizOzeti). */
   LIFEOS.PARCA.blok({ id:'analytics.bugunden-analiz-ozeti', sayfa:'analytics', yer:'ozet', sira:10, ad:'Bugünden analiz özeti', ciz(){
-    return raw(ESP.Screens.today.analizOzeti().join(''));
+    /* Veri yoksa üç boş kart yerine tek ilk adım; öneri bağlantısı yine görünür. */
+    const parcalar = ESP.Screens.today.analizOzeti();
+    if(!kayitVar() && !S.ui.haftaOzet) return html`${K.Kutu({ ad:yz('esp.analytics.ilk-adim'), govde:html`<p class="small">${yz('esp.analytics.ilk-adim-neden')}</p>
+      <div class="mt-10">${K.Button({ label:yz('esp.analytics.bugune-git'), tone:'primary', act:'go', data:{ 'data-route':'today' } })}</div>` })}${raw(parcalar.filter(x => x.indexOf('aria-label="Öneri"') >= 0).join(''))}`;
+    /* Uyarı gömülmez: süre ile sonuç ayrıştıysa Özet'in başında söylenir (kod seçer). */
+    const u = ESP.Goodhart ? ESP.Goodhart.brief() : null;
+    return html`${when(u, () => K.Notice({ tone:'warn', title:u.title, body:u.body }))}${raw(parcalar.join(''))}`;
   } });
   function render(){
     return K.Grid(html`${LIFEOS.PARCA.yer('analytics', 'ana', K, undefined, raw)}`);
@@ -954,8 +934,9 @@ ESP.Screens.analytics = (function(){
     get kucukVarsayilan(){
       const G = (window.LIFEOS || {}).Gizle;
       const bayrak = G && ESP.Goodhart ? ESP.Goodhart.flags().map(p => G.anahtar(p.effortLabel.toUpperCase())) : [];
-      return ['denge', 'haftalık-rota', 'seri', 'çapraz-bulgular', 'günün-brifingi',
-        'denetim-defteri', 'sürtünme', 'gösterge-ayrışması', 'derin-alan-analizleri', 'kademeli-geri-bildirim-ipuçları'].concat(bayrak);
+      return ['denge', 'haftalık-rota', 'seri', 'alanlar-arası-bağlar', 'günün-özeti',
+        'uyarı-defteri', 'kayda-harcanan-süre', 'süre-ve-sonuç-farkı', 'derin-alan-analizleri', 'kademeli-geri-bildirim-ipuçları',
+        'alanların-dengesi', 'değerlendirme-rubrikleri-ve-boyutlar', 'günlük-süre', 'kart-hatırlama', 'tahminlerin'].concat(bayrak);
     },
     title:yz('esp.analytics.analiz'),
     headline(){

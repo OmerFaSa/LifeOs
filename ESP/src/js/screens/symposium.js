@@ -25,17 +25,18 @@ window.LIFEOS.PARCA.yazilar({
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
 window.LIFEOS.PARCA.komut({ modul:'esp', sira:40, id:'act:arg', kind:'Eylem', label:'Yeni tez yaz',
-  hint:'Felsefe', run:() => { ESP.S.ui.philoTab = 'ekle'; ESP.App.go('symposium');
+  hint:'Felsefe', run:() => { ESP.S.ui.philoTab = 'acik'; ESP.App.go('symposium');
     setTimeout(() => { const el = document.getElementById('arg-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
-  'esp.symposium.acik':'Tezler',
-  'esp.symposium.yeni-tez':'Yeni tez',
-  'esp.symposium.kapali':'Kapanan tezler',
-  'esp.symposium.kapali-not':'İtirazı kalmayan tezler',
-  'esp.symposium.metinler-not':'Okuduğun eserler',
-  'esp.symposium.deneyler-not':'Düşünce deneyleri, argüman alıştırmaları',
+  'esp.symposium.calis':'Çalış',
+  'esp.symposium.acik':'Tezlerim',
   'esp.symposium.ilerleme':'İlerleme',
-  'esp.symposium.ilerleme-not':'Tezlerin ve itirazların durumu',
+  'esp.symposium.ilk-tez':'Bir tezle başla',
+  'esp.symposium.ilk-tez-neden':'Tek cümle yeter; gerisini itirazlar açar.',
+  'esp.symposium.tez-yaz-kisa':'Tez yaz',
+  'esp.symposium.acik-tez-bekliyor':'açık tez seni bekliyor',
+  'esp.symposium.acik-tez-neden':'Bir itiraza cevap yaz ya da yeni bir itiraz ekle.',
+  'esp.symposium.tezlerime-git':'Tezlerime git',
   'esp.symposium.ekle':'Ekle',
   'esp.symposium.metinler':'Metinler',
   'esp.symposium.deneyler':'Deneyler',
@@ -116,13 +117,10 @@ ESP.Screens.symposium = (function(){
   const K = ESP.C;
 
   const TABS = [
+    { id:'calis',    label:yz('esp.symposium.calis') },
     { id:'acik',     label:yz('esp.symposium.acik') },
-    { id:'ekle',     label:yz('esp.symposium.yeni-tez') },
-    { id:'ogren',     label:yz('esp.symposium.ogren') },
-    { id:'kapali',   label:yz('esp.symposium.kapali'), ikincil:true, not:yz('esp.symposium.kapali-not') },
-    { id:'metinler', label:yz('esp.symposium.metinler'), ikincil:true, not:yz('esp.symposium.metinler-not') },
-    { id:'deneyler', label:yz('esp.symposium.deneyler'), ikincil:true, not:yz('esp.symposium.deneyler-not') },
-    { id:'ilerleme', label:yz('esp.symposium.ilerleme'), ikincil:true, not:yz('esp.symposium.ilerleme-not') },
+    { id:'ogren',    label:yz('esp.symposium.ogren') },
+    { id:'ilerleme', label:yz('esp.symposium.ilerleme') },
   ];
 
   /* --------------------------------------------------------------- deneyler
@@ -399,8 +397,25 @@ ESP.Screens.symposium = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { acik:openRows, kapali:closedRows, ekle:addRows, metinler:textRows,
-    deneyler:experimentRows, ogren:topicRows };
+  /* Çalış: durumu kayıt seçer; hiç tez yoksa ilk adım, açık tez varsa onlara götürür. */
+  function calisRows(){
+    const acikTez = ESP.Intellect.openArguments().length;
+    const hic = !(S.args || []).length;
+    return [].concat([ESP.Parts.simdi('philo', acikTez
+        ? { baslik:acikTez + ' ' + yz('esp.symposium.acik-tez-bekliyor'), neden:yz('esp.symposium.acik-tez-neden'),
+            dugme:{ label:yz('esp.symposium.tezlerime-git'), act:'tab-ekle' } }
+        : { baslik:yz('esp.symposium.ilk-tez'), neden:yz('esp.symposium.ilk-tez-neden'),
+            dugme:{ label:yz('esp.symposium.tez-yaz-kisa'), act:'tab-ekle' } })],
+      hic ? [] : [ESP.Parts.recete('philo')], experimentRows(), [ESP.Parts.desk('philo')]);
+  }
+  /* Tezlerim: yeni tez, açık ve kapanan bir arada. Boş liste kart olmaz. */
+  function tezRows(){
+    const acikTez = ESP.Intellect.openArguments().length;
+    const kapanan = (S.args || []).some(a => a.status === 'closed');
+    return [].concat(addRows(), acikTez ? openRows() : [], kapanan ? closedRows() : []);
+  }
+  const GOVDE = { calis:calisRows, acik:tezRows, ogren:() => [].concat(topicRows(), textRows()),
+    ilerleme:() => [ESP.Parts.yol('philo')] };
 
   /* PANO KARTI (2026-10-20): açık tezler ve kaç gündür dokunulmadıkları;
      14 gün ve üstü koyu çubuk. */
@@ -419,7 +434,7 @@ ESP.Screens.symposium = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'symposium.felsefe-sekmeleri', sayfa:'symposium', yer:'y1', sira:10, ad:'Felsefe sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:yz('esp.symposium.felsefe-bolumleri'), tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler({ act:'philo-tab', aria:yz('esp.symposium.felsefe-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null },
         ust:{ ilerleme:() => LIFEOS.PARCA.yer('symposium', 'ilerleme', K, undefined, raw) } }));
   } });
@@ -443,7 +458,7 @@ ESP.Screens.symposium = (function(){
       if(r.ok) ESP.App.render();
     },
     async 'philo-tab'(el){ K.bolumeGit(el.dataset.tab); },
-    async 'tab-ekle'(){ S.ui.philoTab = 'ekle'; ESP.App.render(); },
+    async 'tab-ekle'(){ S.ui.philoTab = 'acik'; ESP.App.render(); },
 
     /* Deneyi teze çevirmek: deneyin kurgusu tezin YERINE geçmez, tezi
        kullanıcı yazar. Sistem yalnızca boş tezi açar ve deneyi bağlam
@@ -617,7 +632,7 @@ ESP.Screens.symposium = (function(){
     id:'symposium',
     /* iPhone Faz 2d (sıkı ölçü): belge isteği, Sokratik soru kalıpları ve iki
        egzersiz kataloğu başvurudur — şerit, dokununca açılır. */
-    kucukVarsayilan:['belge-iste', 'sokratik-sorular', 'düşünce-deneyleri', 'argüman-alıştırmaları'],
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'kaynaklar', 'kanondan-ekle', 'belge-iste', 'sokratik-sorular', 'düşünce-deneyleri', 'argüman-alıştırmaları'],
     title:yz('esp.symposium.sempozyum'),
     headline(){
       const acik = ESP.Intellect.openArguments();

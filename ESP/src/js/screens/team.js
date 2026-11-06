@@ -30,11 +30,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.team.ham-brifing-json':'Ham brifing (JSON)',
   'esp.team.ajana-sorun':'Ajana sorun',
   'esp.team.sorunu-yaz':'Sorunu yaz…',
-  'esp.team.danisma':'Danışma',
+  'esp.team.danisma':'Uzmana sor',
   'esp.team.gelen-devir':'gelen devir',
   'esp.team.giden-devir':'giden devir',
 });
-window.LIFEOS.PARCA.sayfa({ id:'team', modul:'esp', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'esp', cekmece:'ofis', ad:'Uzmana sor', ikon:'zap', sira:20 });
 
 ESP.Screens.team = (function(){
   /* Mesaj saati. m.at ISO tarih metnidir; fmtClock SANIYE bekler ve

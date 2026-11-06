@@ -70,7 +70,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.onaylar.kararlar':'Son kararlar',
   'esp.onaylar.bolumler':'Onaylar bölümleri',
   'esp.onaylar.merkez-king-ve-ajanlar-bir':'Merkez, King ve ajanlar bir şey önerdiğinde burada durur; sen onaylamadan hiçbiri uygulanmaz.',
-  'esp.onaylar.danisma-ya-git':'Danışma’ya git',
+  'esp.onaylar.danisma-ya-git':'Uzmana sor',
   'esp.onaylar.onaylar':'Onaylar',
 });
 window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'esp', cekmece:'onaylar', ad:'Bekleyen', sira:10 });

@@ -125,17 +125,17 @@ ESP.S = {
     cardQuery:'',
     cardOpen:null,
     reviewQueue:null,       // acik calisma oturumu
-    philoTab:'acik',        // acik | kapali | ekle | metinler
+    philoTab:'calis',        // acik | kapali | ekle | metinler
     argOpen:null,
     studioTab:'muzik',      // muzik | diksiyon | ilerleme
     pieceOpen:null,
     metronomeBpm:80,
     metronomeOn:false,
-    readTab:'notlar',       // notlar | matris | kaynaklar
+    readTab:'calis',       // notlar | matris | kaynaklar
     noteQuery:'',
     noteOpen:null,
     conceptFilter:null,
-    writeTab:'taslaklar',   // taslaklar | olcum
+    writeTab:'calis',   // taslaklar | olcum
     draftOpen:null,
     analyticsTab:'ozet',    // ozet | alanlar | zaman | (Diger: yol, radar, seriler, rapor...)
     deskTab:{},             // discId -> 'kocla' | 'harita' | 'ekler' | 'hatirlatma'
@@ -147,7 +147,7 @@ ESP.S = {
     rxOpen:null,            // acik egzersiz (gorev metni katli durur)
     unitOpen:null,
     topicOpen:null,
-    histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
+    histTab:'calisma',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,
     chainOpen:null,

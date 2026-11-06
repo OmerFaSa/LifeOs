@@ -54,9 +54,7 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:100, id:'act:practice-lang', kind:
 window.LIFEOS.PARCA.yazilar({
   'esp.lang.calis':'Çalış',
   'esp.lang.kart-ayrintisi':'Bağlam, eş ve zıt anlam',
-  'esp.lang.kartlar-not':'Bütün kartlar, arama, düzenleme',
-  'esp.lang.dilbilgisi-not':'A1–C2 düzey konuları',
-  'esp.lang.ilerleme-not':'Kutular, kalıcılık, önümüzdeki günlerin yükü',
+  'esp.lang.kartlarim':'Kartlarım',
   'esp.lang.kartlar':'Kartlar',
   'esp.lang.ekle':'Ekle',
   'esp.lang.ogren':'Öğren',
@@ -64,7 +62,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.lang.i-lerleme':'İlerleme',
   'esp.lang.bugun':'Bugün ',
   'esp.lang.calisma':'Çalışma',
-  'esp.lang.bu-dilde-hic-kart-yok':'Bu dilde hiç kart yok. Ekle sekmesinden bir liste ',
+  'esp.lang.bu-dilde-hic-kart-yok':'Bu dilde hiç kart yok. Kartlarım sekmesinden bir liste ',
   'esp.lang.kart-ekle':'Kart ekle',
   'esp.lang.bugunluk-bitti':'Bugünlük bitti',
   'esp.lang.telaffuzu-dinle':'Telaffuzu Dinle',
@@ -182,11 +180,9 @@ ESP.Screens.lang = (function(){
 
   const TABS = [
     { id:'calis',    label:yz('esp.lang.calis') },
-    { id:'ekle',     label:yz('esp.lang.ekle') },
+    { id:'ekle',     label:yz('esp.lang.kartlarim') },
     { id:'ogren',    label:yz('esp.lang.ogren') },
-    { id:'kartlar',  label:yz('esp.lang.kartlar'), ikincil:true, not:yz('esp.lang.kartlar-not') },
-    { id:'gramer',   label:yz('esp.lang.dilbilgisi'), ikincil:true, not:yz('esp.lang.dilbilgisi-not') },
-    { id:'ilerleme', label:yz('esp.lang.i-lerleme'), ikincil:true, not:yz('esp.lang.ilerleme-not') },
+    { id:'ilerleme', label:yz('esp.lang.i-lerleme') },
   ];
 
   const BCP = {
@@ -327,7 +323,7 @@ ESP.Screens.lang = (function(){
       }
       return [K.Entry({
         label:yz('esp.lang.calisma'), hint:'srs',
-        meta:d.due + ' kartın sırası geldi' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
+        meta:d.overdue ? d.overdue + ' gecikmiş' : null,
         /* Gecikme yoksa künye («N kart vadeli») yeter; not yalnız gecikmeyi söyler. */
         note:d.overdue ? yz('esp.lang.en-cok-geciken-kart') + d.maxOverdueDays + ' gündür bekliyor.' : null,
         body:html`
@@ -951,8 +947,14 @@ ESP.Screens.lang = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): altı bölüm alt alta, tezgâh en sonda. */
-  const GOVDE = { calis:reviewRows, kartlar:cardRows, ekle:addRows, ogren:learnRows,
-    gramer:grammarRows, ilerleme:progressRows };
+  /* Dört iş: çalış, kartlarım, öğren, ilerleme. Dilbilgisi öğrenmenin parçası; kart listesi
+     kart eklemenin yanında. Deste boşken reçete yok: ilk adım kart eklemek. */
+  const GOVDE = {
+    calis:() => [].concat(reviewRows(), ESP.SRS.deckStatus(aktifDil()).total ? [ESP.Parts.recete('lang')] : [], [ESP.Parts.desk('lang')]),
+    ekle:() => [].concat(addRows(), cardRows()),
+    ogren:() => [].concat(learnRows(), grammarRows()),
+    ilerleme:() => [].concat(progressRows(), [ESP.Parts.yol('lang')]),
+  };
 
   /* 033 GELECEK YÜK (vitrin): seçili dilin önümüzdeki yedi günlük vadesi.
      Bugünün sütunu gecikenleri de taşır; kart yoksa hiç çizilmez. */
@@ -1005,7 +1007,7 @@ ESP.Screens.lang = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'lang.dil-sekmeleri', sayfa:'lang', yer:'y1', sira:10, ad:'Dil sekmeleri', ciz({ d }){
-    return K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:yz('esp.lang.dil-bolumleri'), tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler({ act:'lang-tab', aria:yz('esp.lang.dil-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null },
         ust:{ ilerleme:() => LIFEOS.PARCA.yer('lang', 'ilerleme', K, { d }, raw) } }));
   } });
@@ -1308,7 +1310,7 @@ ESP.Screens.lang = (function(){
     /* iPhone Faz 2d (sıkı ölçü): her bölümde iş açık; ara sıra açılan
        araçlar (konuşma, cümle kurma, dinleme, ünite isteği, tohum deste) ve
        başvuru (konu haritası, kutu dağılımı, shadowing kaynakları) şerit. */
-    kucukVarsayilan:['sık-kelimeler', 'tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'iki-eksen', 'düzeyler', 'hata-günlüğü', 'deste', 'sık-kelimeler', 'tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
       'kutu-dağılımı', 'shadowing', 'dilde-paralel-cümleler-universal-dependencies'],
     title:yz('esp.lang.dil-studyosu'),
     headline(){

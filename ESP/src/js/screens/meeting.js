@@ -47,11 +47,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.meeting.patron':'Patron',
   'esp.meeting.karar-takibe-alindi':'Karar takibe alındı',
   'esp.meeting.sonuc-yazilmadan-karar-kapan':'Sonuç yazılmadan karar kapanmaz',
-  'esp.meeting.i-nceleme':'İnceleme',
+  'esp.meeting.i-nceleme':'Bu hafta',
   'esp.meeting.acik-karar':'açık karar',
   'esp.meeting.gundem-2':'gündem',
 });
-window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'İnceleme', ikon:'list', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'Bu hafta', ikon:'list', sira:10 });
 
 ESP.Screens.meeting = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -190,7 +190,8 @@ ESP.Screens.meeting = (function(){
     return kararKutusu(r);
   } });
   LIFEOS.PARCA.blok({ id:'meeting.haftakutusu', sayfa:'meeting', yer:'y7', sira:10, ad:'Hafta', ciz({ r }){
-    return haftaKutusu(r);
+    /* Hiç ölçüm yokken beş boş kutu çizilmez: karar ilk adımı söyler. */
+    return r.hafta.some(s => s.deger) ? haftaKutusu(r) : '';
   } });
   function render(){
     const r = ESP.Memo ? ESP.Memo.of('inceleme.rapor', () => ESP.Inceleme.rapor()) : ESP.Inceleme.rapor();

@@ -29,18 +29,18 @@ window.LIFEOS.PARCA.yazilar({
   'esp.core.setup.entelektuel-seviye-planlayic':'entelektüel seviye planlayıcı',
   'esp.core.setup.i-lk-kurulum':'İlk kurulum',
   'esp.core.setup.uc-alan-yeter-gerisi-calisti':'Üç alan yeter. Gerisi çalıştıkça dolar.',
-  'esp.core.setup.bu-sistem-senin-girdigin-pra':'Bu sistem senin girdiğin pratiği okur ve ondan hesap yapar. Sınav yapmaz, seviye vermez, yetenek yargısı kurmaz — ve bilmediği hiçbir şeyi tahmin etmez.',
+  'esp.core.setup.bu-sistem-senin-girdigin-pra':'Girdiğin çalışmadan hesap yapar. Sınav yapmaz, seviye vermez, yetenek yargısı kurmaz.',
   'esp.core.setup.bu-alanlar-neyi-acar':'Bu alanlar neyi açar',
   'esp.core.setup.siradaki-tek-is':'Sıradaki tek iş',
-  'esp.core.setup.acik-disiplinler-arasinda-on':'— açık disiplinler arasında önceliği kural motoru seçer',
+  'esp.core.setup.acik-disiplinler-arasinda-on':'— sıradaki işi sistem seçer',
   'esp.core.setup.aralikli-tekrar':'Aralıklı tekrar',
-  'esp.core.setup.kart-eklediginde-retansiyon':'— kart eklediğinde retansiyon ölçülmeye başlar',
+  'esp.core.setup.kart-eklediginde-retansiyon':'— kart ekleyince hatırlama ölçülür',
   'esp.core.setup.haftalik-rota':'Haftalık rota',
-  'esp.core.setup.hic-acilmayan-disiplin-one':'— hiç açılmayan disiplin öne alınır',
-  'esp.core.setup.dokuz-ajanli-ofis':'Dokuz ajanlı ofis',
-  'esp.core.setup.her-masa-yalnizca-kendi':'— her masa yalnızca kendi ölçümüne bakar',
+  'esp.core.setup.hic-acilmayan-disiplin-one':'— uzun süredir açılmayan alan öne alınır',
+  'esp.core.setup.dokuz-ajanli-ofis':'Uzmanlar',
+  'esp.core.setup.her-masa-yalnizca-kendi':'— her uzman kendi alanına bakar',
   'esp.core.setup.merdiven':'Merdiven',
-  'esp.core.setup.her-bolumde-sifirdan-ustatli':'— her bölümde sıfırdan üstatlığa ölçülebilir basamaklar',
+  'esp.core.setup.her-bolumde-sifirdan-ustatli':'— her alanda ölçülebilir basamaklar',
   'esp.core.setup.girilmemis-gun-sifir-sayilma':'Girilmemiş gün sıfır sayılmaz.',
   'esp.core.setup.calismadigin-gun-hesaba-0-da':'Çalışmadığın gün hesaba «0 dakika» diye girmez; o gün hiç sayılmaz ve kaç günden hesaplandığı ekranda yazar.',
   'esp.core.setup.tahmin-olcum-gibi-gosterilme':'Tahmin, ölçüm gibi gösterilmez.',
@@ -114,8 +114,7 @@ ESP.Setup = (function(){
           <p class="setup__lede">${yz('esp.core.setup.bu-sistem-senin-girdigin-pra')}</p>
         </div>
 
-        <div class="setup__unlock">
-          <p class="setup__kicker">${yz('esp.core.setup.bu-alanlar-neyi-acar')}</p>
+        <details class="setup__unlock hiz-ac"><summary>${yz('esp.core.setup.bu-alanlar-neyi-acar')}</summary>
           <ul class="setup__list">
             <li><b>${yz('esp.core.setup.siradaki-tek-is')}</b> ${yz('esp.core.setup.acik-disiplinler-arasinda-on')}</li>
             <li><b>${yz('esp.core.setup.aralikli-tekrar')}</b> ${yz('esp.core.setup.kart-eklediginde-retansiyon')}</li>
@@ -123,7 +122,7 @@ ESP.Setup = (function(){
             <li><b>${yz('esp.core.setup.dokuz-ajanli-ofis')}</b> ${yz('esp.core.setup.her-masa-yalnizca-kendi')}</li>
             <li><b>${yz('esp.core.setup.merdiven')}</b> ${yz('esp.core.setup.her-bolumde-sifirdan-ustatli')}</li>
           </ul>
-        </div>
+        </details>
 
 `),
           /* 2/3 Neye karar vermiyoruz? — sınır atlanamaz: «Başla» son adımda */

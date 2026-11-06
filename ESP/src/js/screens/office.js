@@ -11,6 +11,7 @@
    kimlik şeridinde asla kullanılmaz; aciliyet yalnızca devir okuna dokunur.
    İki renk sistemi aynı yüzeyde karışmaz. */
 window.LIFEOS.PARCA.yazilar({
+  'esp.office.haftanin-karari':'Bu haftanın kararı',
   'esp.office.masalarda-bekleyen-bulgu-yok':'Masalarda bekleyen bulgu yok.',
   'esp.office.dokuz-masa-patron-yedi-uzman':'Dokuz masa: Patron, yedi uzman ve bir koç. Her masa yalnızca kendi ',
 });
@@ -40,7 +41,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.office.tikanma':'tıkanma',
   'esp.office.vadesi-gecmis':'vadesi geçmiş',
 });
-window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:30 });
 
 ESP.Screens.office = (function(){
   const U = ESP.U, S = ESP.S;
@@ -121,10 +122,9 @@ ESP.Screens.office = (function(){
           action:K.Button({ label:yz('esp.office.danis'), size:'sm', act:'open-agent',
             data:{ 'data-agent':'patron' } }),
           body:html`
-            ${K.NextUp({ icon:next.rank ? 'zap' : 'check', calm:!next.rank,
-              sanat:'istikrar',
-              label:yz('esp.office.siradaki-tek-is'), title:next.title, why:next.why })}
-            <p class="rulesay mt-10">${ESP.Office.ruleText('patron', brf)}</p>`,
+            <p class="rulesay">${ESP.Office.ruleText('patron', brf)}</p>
+            ${/* Sıradaki iş Bugün'de ve «Bu hafta»da; burada ikinci kez çizilmez. */''}
+            <div class="mt-10">${K.Button({ label:yz('esp.office.haftanin-karari'), size:'sm', act:'go', data:{ 'data-route':'meeting' } })}</div>`,
         }),
 
         when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('esp.office.masa'), meta:'kim konuşuyor',

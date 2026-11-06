@@ -7,23 +7,24 @@
     it('oz-041 oz-027 oz-034 oz-037 Analiz başı; girilmemiş gün sıfır sayılmaz', async () => {
       await withTodayAsync('2026-10-12', async () => {
         resetState();
+        /* Hiç kayıt yokken Zaman tek cümle (2026-11-06); bir kayıtla çizgi ve doluluk gelir. */
         let k = dom(ESP.Screens.analytics.render());
-        ['041', '027', '034', '037'].forEach(n => expect(k.querySelector('[data-oz~="' + n + '"]')).toBeTruthy());
-        expect(k.querySelector('[data-oz="034"]').textContent).toContain('veri yok');
+        expect(k.querySelector('[data-oz="034"]')).toBeNull();
         pushSession('2026-10-10', 'music', 30);
         k = dom(ESP.Screens.analytics.render());
+        ['041', '027', '034', '037'].forEach(n => expect(k.querySelector('[data-oz~="' + n + '"]')).toBeTruthy());
         expect(k.querySelector('[data-oz="034"]').textContent).toContain('1 gün veri');
       });
     });
 
-    it('Analiz › Alanların: her açık disiplin bir karo; girilmemiş gün nokta; ayrıntılı okumalar «Diğer»de (2026-11-06)', async () => {
+    it('Analiz › Alanların: her açık disiplin bir karo; girilmemiş gün nokta; radar aynı bölümde (2026-11-06)', async () => {
       await withTodayAsync('2026-10-12', async () => {
         resetState();
         let k = dom(ESP.Screens.analytics.render());
         expect(k.querySelectorAll('.alan-kare').length).toBe(ESP.Mod.active().length);
         expect(k.textContent).toContain('veri yok');
-        /* Radar «Diğer»in altında: yerinde ama açık bölüm değil (2026-11-06). */
-        expect(k.querySelector('#bl-radar').classList.contains('is-on')).toBe(false);
+        /* Radar Alanlar'ın altında, kapalı satır (2026-11-06). */
+        expect(!!k.querySelector('#bl-alanlar .radarcift')).toBe(true);
         pushSession('2026-10-10', 'music', 30);
         k = dom(ESP.Screens.analytics.render());
         const muzik = Array.from(k.querySelectorAll('.alan-kare')).find(x => /Müzik/.test(x.textContent));

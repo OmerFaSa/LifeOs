@@ -21,7 +21,7 @@
       const gor = id => ESP.App.SECTIONS().find(g => g.id === id);
       expect(gor('onaylar').views.map(v => v.route).join(',')).toBe('onaylar');
       /* 2026-10-17: Kütüphanem notlarla açılır (kullanıcı: «yeni not, belge, dosya»). */
-      expect(gor('kutuphane').views.map(v => v.route).join(',')).toBe('notlar,ogrenme,rehber,kutuphane');   // 2026-10-18: Anlatımlar
+      expect(gor('kutuphane').views.map(v => v.route).join(',')).toBe('notlar,ogrenme,kutuphane');   // 2026-11-06: Anlatımlar Öğrenme'nin altında
       expect(!!ESP.Screens.onaylar && !!ESP.Screens.kutuphane && !!ESP.Screens.notlar && !!ESP.Screens.rehber).toBe(true);
     });
 

@@ -7,7 +7,7 @@
    Profil geçişi sayfayı yeniden yükler: yarım kalmış bir yazma işleminin
    yanlış profile düşmesi böylece imkânsızdır. */
 window.LIFEOS.PARCA.yazilar({
-  'esp.profile.danisma-da-hatirla-diye-de':'Danışma’da «hatırla: …» diye de yazabilirsin.',
+  'esp.profile.danisma-da-hatirla-diye-de':'Uzmana sor ekranında «hatırla: …» diye de yazabilirsin.',
   'esp.profile.kucuk-hatirlatici-hedef-odak':'Küçük: hatırlatıcı, hedef, odak. Bölüm ve günlük taban her zaman önce sorulur.',
   'esp.profile.vade-gunu-saat':'Vade günü saat ',
   'esp.profile.tamamen-kapatmak-icin-yukari':'Tamamen kapatmak için yukarıda «Hayır» seç.',
@@ -122,7 +122,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.profile.kaydedildi':'Kaydedildi',
   'esp.profile.profil-eklendi':'Profil eklendi',
   'esp.profile.yedek-indirildi':'Yedek indirildi',
-  'esp.profile.yedekten-yukleme-rehber-veri':'Yedekten yükleme Rehber → Veri sekmesinde',
+  'esp.profile.yedekten-yukleme-rehber-veri':'Yedekten yükleme Ayarlar › Genel › Veri bölümünde',
   'esp.profile.profil':'Profil',
   'esp.profile.acik-bolum':'açık bölüm',
   'esp.profile.son-yedek':'son yedek',

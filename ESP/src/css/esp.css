@@ -1040,15 +1040,7 @@
 .siklik__lejant i.is-yok{ background:color-mix(in oklab, var(--text) 10%, var(--surface)); }
 .siklik-kelimeler{ display:flex; flex-wrap:wrap; gap:6px; }
 
-/* SADE BOLUMLER (2026-11-06): cubukta isin kendisi, geri kalani «Diger» listesinde.
-   Satir ne ise yaradigini kendi soyler; alt bolumde geri yolu ve baslik gorunur. */
-.diger-satir{ text-align:left; }
-.diger-satir__yazi{ display:flex; flex-direction:column; gap:2px; min-width:0; white-space:normal; }
-.sayfabolum__geri{ display:inline-flex; align-items:center; min-height:44px; padding:0 8px 0 0; margin:-6px 0 2px;
-  background:none; border:0; color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; }
-.sayfabolum__geri:hover{ color:var(--text); }
-.sayfabolumler--kat > .sayfabolum--alt > .sayfabolum__ad{ position:static; width:auto; height:auto; margin:0 0 12px;
-  overflow:visible; clip:auto; clip-path:none; white-space:normal; }
+/* SADE BOLUMLER (2026-11-06): bolum basi kartlar arali durur. */
 .bolum-ust{ display:flex; flex-direction:column; gap:16px; min-width:0; }
 .bolum-ust + *{ margin-top:16px; }
 /* Oneri gruplari: ad ve sayi tek satir, dokununca acilir. */
@@ -1064,3 +1056,5 @@
 /* Katli satir dokunulabilir oldugunu soylesin. */
 .hiz-ac > summary::before{ content:'›'; display:inline-block; width:12px; flex:none; }
 .hiz-ac[open] > summary::before{ transform:rotate(90deg); }
+/* Ozet sekmesinde «Ozet» etiketi ikinci kez yazilmaz. */
+#bl-ozet .bugun__etiket{ display:none; }

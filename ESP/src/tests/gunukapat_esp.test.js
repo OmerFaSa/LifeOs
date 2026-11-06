@@ -353,7 +353,7 @@
         const n = ESP.Planner.nextAction();
         const birincil = Array.from(k.querySelectorAll('.btn--primary'));
         expect(birincil.length).toBe(n.rank && n.route && n.route !== 'today' ? 1 : 0);
-        if(birincil.length) expect(birincil[0].textContent.trim()).toBe(yz('esp.today.eylem-' + n.route));
+        if(birincil.length) expect(birincil[0].textContent.trim()).toBe(ESP.Screens.today.eylemAdi(n));
         const d = dugmeler(await T().render());
         expect(Array.from(d.querySelectorAll('.bugun__alan')).map(x => x.getAttribute('aria-label'))).toEqual(['Ne yaptın?', 'Gün']);
         expect(!!d.querySelector('[aria-label="Gün"] .ledger [data-act="gunu-kapat"]')).toBe(true);

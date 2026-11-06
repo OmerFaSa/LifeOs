@@ -14,7 +14,8 @@ ESP.Screens = ESP.Screens || {};
 window.LIFEOS.PARCA.yazilar({
   'esp.rehber.kutuphanem':'Kütüphanem',
 });
-window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'esp', cekmece:'kutuphane', ad:'Anlatımlar', sira:20 });
+/* Menüde ayrı satır değil: Öğrenme'nin altından ve alanın «Öğren» kartından açılır (app.js UST). */
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:128, id:'act:anlatim', kind:'Eylem', label:'Konu anlatımları', hint:'Kütüphanem', run:() => ESP.App.go('rehber') });
 
 ESP.Screens.rehber = (function(){
   const RB = () => (window.LIFEOS || {}).REHBER;

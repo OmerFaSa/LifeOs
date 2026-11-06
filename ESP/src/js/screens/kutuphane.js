@@ -29,7 +29,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.kutuphane.silindi':'Silindi',
   'esp.kutuphane.kutuphanen-henuz-bos':'Kütüphanen henüz boş',
   'esp.kutuphane.bam-bir-ozet-rapor-ya':'BAM bir özet, rapor ya da ünite ürettiğinde burada durur.',
-  'esp.kutuphane.danisma-ya-git':'Danışma’ya git',
+  'esp.kutuphane.danisma-ya-git':'Uzmana sor',
   'esp.kutuphane.kutuphanem':'Kütüphanem',
   'esp.kutuphane.notlar':'Notlar',
   'esp.kutuphane.notlar-ve-belgeler':'Notlar ve belgeler',

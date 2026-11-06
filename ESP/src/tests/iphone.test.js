@@ -94,14 +94,18 @@
       pushEvent(1453, 'İstanbul’un fethi', { kind:'siyasi', region:'anadolu' });
       pushEvent(1789, 'Fransız Devrimi', { kind:'toplumsal', region:'avrupa' });
       ESP.Memo.bitir();
-      const b = await bolumle('history', 'serit');
+      /* 2026-11-06: şerit olaylarla, kapsam ilerlemede. */
+      const k = await bolumle('history', 'ilerleme');
       try{
-        const d = b.alan.querySelector('.donen[aria-label="Kapsam"]');
+        const d = k.alan.querySelector('.donen[aria-label="Kapsam"]');
         expect(!!d).toBe(true);
         expect(ustler(d).slice(0, 2).join(',')).toBe('Dönem,Alan');
-        expect(b.acik.join(',')).toBe('şerit');
+      }finally{ k.kok.remove(); }
+      const b = await bolumle('history', 'olaylar');
+      try{
+        expect(b.acik.join(',')).toBe('şerit,olaylar');
         expect(b.kucuk.indexOf('dönemler') >= 0).toBe(true);
-        ['yüzyıl-boşlukları', 'dağılım'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
+        ['yüzyıl-boşlukları', 'dağılım'].forEach(a => expect(b.gizli.indexOf(a) >= 0 || b.var.indexOf(a) < 0).toBe(true));
         /* «Tohumu yükle» ayrı bir satır değil: olay ekleme kartının yanında */
         expect(b.kok.querySelectorAll('[data-act="seed"]').length).toBe(1);
         expect(!!b.kok.querySelector('#bl-olaylar [data-act="seed"]')).toBe(true);
@@ -121,20 +125,21 @@
       }finally{ b.bitir(); ESP.Memo.bitir(); }
     });
 
-    it('Ses: açık metronom, tekrar kaydet ve tek «Parçalar» listesi; tezgâh kendi bölümünde', async () => {
+    it('Ses: açık bugünkü çalışma, tekrar kaydet ve tek «Parçalar» listesi; uzman masası işin altında', async () => {
       resetState();
       for(let i = 0; i < 7; i++) pushPiece('parça' + i, { kind:'technique', targetBpm:140 });
       ESP.Memo.bitir();
       const b = await bolumle('studio', 'muzik');
       try{
-        expect(b.acik.join(',')).toBe('metronom,tekrar-kaydet,parçalar');
+        expect(b.acik.join(',')).toBe('bugünkü-çalışma,tekrar-kaydet,parçalar');
+        expect(b.kucuk.indexOf('metronom') >= 0).toBe(true);
         expect(b.var.indexOf('teknik')).toBe(-1);
         expect(b.var.indexOf('tezgâh')).toBe(-1);
         expect(b.kucuk.indexOf('parça-ekle') >= 0).toBe(true);
         expect(b.gizli.indexOf('paket-iste') >= 0).toBe(true);
         /* iki masa da kendi bölümünde */
-        ['music', 'diction'].forEach(x =>
-          expect(!!b.kok.querySelector('#bl-tezgah [data-act="desk-toggle"][data-disc="' + x + '"]')).toBe(true));
+        expect(!!b.kok.querySelector('#bl-muzik [data-act="desk-toggle"][data-disc="music"]')).toBe(true);
+        expect(!!b.kok.querySelector('#bl-diksiyon [data-act="desk-toggle"][data-disc="diction"]')).toBe(true);
         /* ilk beş parça + «Tümü» */
         expect(b.alan.querySelectorAll('.parca').length).toBe(5);
         expect(!!b.alan.querySelector('[data-act="parca-tumu"]')).toBe(true);
@@ -191,10 +196,10 @@
       ESP.Test.pushBook('Devlet', 'Platon');
       ESP.Memo.bitir();
       const bek = {
-        history:{ kaynaklar:['belge-iste'], calisma:['anakronizm-tuzakları', 'tarih-yazımı-okulları'] },
-        studio:{ diksiyon:['telaffuz-kuralları', 'son-kayıtlar'], kulak:['aralıklar', 'caged', 'deşifre'] },
-        library:{ kaynaklar:['raf', 'okuma-listesi-iste'],
-          yontem:['dört-düzey', 'analitik-okumanın-dört-sorusu', 'okuma-protokolü', 'not-şablonları', 'bırakma-izni'] },
+        history:{ olaylar:['belge-iste'], calisma:['anakronizm-tuzakları', 'tarih-yazımı-okulları'] },
+        studio:{ diksiyon:['telaffuz-kuralları', 'son-kayıtlar'], muzik:['aralıklar', 'caged', 'deşifre'] },
+        library:{ notlar:['raf', 'okuma-listesi-iste'],
+          ogren:['dört-düzey', 'analitik-okumanın-dört-sorusu', 'okuma-protokolü', 'not-şablonları', 'bırakma-izni'] },
       };
       for(const ekran of Object.keys(bek)){
         const sc = ESP.Screens[ekran];
@@ -286,8 +291,8 @@
       ESP.Memo.bitir();
       await bolumTuru({
         lang:{ ilerleme:['kutu-dağılımı'], ekle:['tohum-deste'], ogren:['konular', 'ünite-iste'] },
-        symposium:{ metinler:['belge-iste'], ekle:['sokratik-sorular'], deneyler:['düşünce-deneyleri', 'argüman-alıştırmaları'] },
-        writing:{ olcum:['pratik-süresi'], araclar:['yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'] },
+        symposium:{ ogren:['belge-iste'], acik:['sokratik-sorular'], calis:['düşünce-deneyleri', 'argüman-alıştırmaları'] },
+        writing:{ olcum:['pratik-süresi'], ogren:['yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'] },
       }, { writing:['sınır'] });
     });
 
@@ -302,9 +307,9 @@
         ['a', 'b', 'c'].forEach(a => expect(anahtarlar.indexOf(a)).toBe(-1));
         expect(anahtarlar.indexOf('düzeyler') >= 0).toBe(true);
         const bantlar = ESP.CEFR.filter(x => (ESP.GRAMMAR_BY_BAND[x.label] || []).length);
-        expect(kok.querySelectorAll('#bl-gramer details.duzey').length).toBe(bantlar.length);
+        expect(kok.querySelectorAll('#bl-ogren details.duzey').length).toBe(bantlar.length);
         /* sınırdaki düzey (beyanı eksik ilk düzey) açık gelir */
-        expect(kok.querySelectorAll('#bl-gramer details.duzey[open]').length).toBe(1);
+        expect(kok.querySelectorAll('#bl-ogren details.duzey[open]').length).toBe(1);
       }finally{ kok.remove(); }
     });
 
@@ -557,7 +562,7 @@
       const ia = ESP.Planner.nextAction();
       const eb = d.querySelectorAll('.kapak .btn--primary');
       expect(eb.length).toBe(ia.rank && ia.route && ia.route !== 'today' ? 1 : 0);
-      if(eb.length) expect(eb[0].textContent.trim()).toBe(yz('esp.today.eylem-' + ia.route));
+      if(eb.length) expect(eb[0].textContent.trim()).toBe(ESP.Screens.today.eylemAdi(ia));
       if(ia.rank) expect(d.querySelector('.kapak').textContent).toContain(ia.title);
       expect(d.textContent.indexOf('Öncelik ')).toBe(-1);
       expect(d.textContent.indexOf('gibi yazabilirsin')).toBe(-1);
@@ -585,7 +590,7 @@
      Durum alanında defterin DIŞINDA, kartsız yüzüyordu. Oturum listesinin
      içinde durur (AYS'de «Blokları ve sayaçları aç» gibi). */
   describe('Tablet · Bugün', () => {
-    it('«Oturum gir ve bütün satırlar» oturum kartının içinde (oturum varken de yokken de)', async () => {
+    it('«Ayrıntılı giriş» oturum kartının içinde (oturum varken de yokken de)', async () => {
       for(const oturum of [false, true]){
         ESP.Test.resetState();
         if(oturum){
@@ -596,7 +601,7 @@
         d.innerHTML = String(await ESP.Screens.today.render());
         document.body.appendChild(d);
         try{
-          const b = Array.from(d.querySelectorAll('[data-route="gun"]')).find(x => /Oturum gir/.test(x.textContent));
+          const b = Array.from(d.querySelectorAll('[data-route="gun"]')).find(x => /Ayrıntılı giriş/.test(x.textContent));
           expect(!!b).toBe(true);
           expect(!!b.closest('.ledger')).toBe(true);
         }finally{ d.remove(); }

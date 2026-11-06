@@ -40,12 +40,8 @@ window.LIFEOS.PARCA.yazilar({
   'esp.studio.diksiyon':'Diksiyon',
   'esp.studio.kulak':'Kulak',
   'esp.studio.hangi-hatalar':'Hangi hatalar oldu?',
-  'esp.studio.kulak-not':'Aralık, CAGED, deşifre egzersizleri',
-  'esp.studio.ilerleme-not':'Tempo ve tekrar kayıtların',
   'esp.studio.ogren':'Öğren',
   'esp.studio.i-lerleme':'İlerleme',
-  'esp.studio.tezgah':'Uzman masaları',
-  'esp.studio.tezgah-not':'Müzik ve diksiyon: reçete, koç, yol haritası',
   'esp.studio.kulak-egzersizleri':'Kulak egzersizleri',
   'esp.studio.kademe':'Kademe',
   'esp.studio.araliklar':'Aralıklar',
@@ -147,11 +143,7 @@ ESP.Screens.studio = (function(){
     { id:'muzik',    label:yz('esp.studio.muzik') },
     { id:'diksiyon', label:yz('esp.studio.diksiyon') },
     { id:'ogren',    label:yz('esp.studio.ogren') },
-    { id:'kulak',    label:yz('esp.studio.kulak'), ikincil:true, not:yz('esp.studio.kulak-not') },
-    { id:'ilerleme', label:yz('esp.studio.i-lerleme'), ikincil:true, not:yz('esp.studio.ilerleme-not') },
-    /* iPhone Faz 2c: iki masa (müzik, diksiyon) öbür ekranlardaki gibi kendi
-       bölümünde; Müzik ve Diksiyon işle başlar. */
-    { id:'tezgah',   label:yz('esp.studio.tezgah'), ikincil:true, not:yz('esp.studio.tezgah-not') },
+    { id:'ilerleme', label:yz('esp.studio.i-lerleme') },
   ];
 
   /* ------------------------------------------------------------------ kulak
@@ -402,6 +394,8 @@ ESP.Screens.studio = (function(){
 
     rows.push(scaleCalculatorEntry());
 
+    /* Parça yokken önce ekleme, metronom sonra; kaydedecek şey yokken «Tekrar kaydet» durmaz. */
+    if(!parcalar.length){ const [metro, , ekle, ...gerisi] = rows; return [ekle, metro].concat(gerisi); }
     return rows;
   }
 
@@ -677,10 +671,13 @@ ESP.Screens.studio = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'studio.studyo-sekmeleri', sayfa:'studio', yer:'y1', sira:10, ad:'Stüdyo sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
-        muzik:musicRows, diksiyon:dictionRows,
-        kulak:earRows, ogren:topicRows, ilerleme:progressRows,
-        tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }));
+    return K.Span(12, ESP.Parts.bolumler({ act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
+        /* Reçete önde, kayıt arkasından; hiç parça/kayıt yokken reçete yok: ilk adım eklemek. */
+        muzik:() => [].concat((S.pieces || []).length ? [ESP.Parts.recete('music')] : [], musicRows(), earRows(), [ESP.Parts.desk('music')]),
+        diksiyon:() => [].concat((S.recordings || []).length ? [ESP.Parts.recete('diction')] : [], dictionRows(), [ESP.Parts.desk('diction')]),
+        ogren:topicRows,
+        ilerleme:() => [].concat(progressRows(), [ESP.Parts.yol('music'), ESP.Parts.yol('diction')]) },
+        ust:{ ilerleme:() => LIFEOS.PARCA.yer('studio', 'ilerleme', K, undefined, raw) } }));
   } });
   LIFEOS.PARCA.blok({ id:'studio.tempo-panosu', sayfa:'studio', yer:'ilerleme', sira:10, ad:'Tempo panosu', ciz(){
     return raw(PanoTempo());
@@ -835,8 +832,11 @@ ESP.Screens.studio = (function(){
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     /* iPhone Faz 2c: parça ekleme ara sıra; Diksiyon'da kural listesi ve
        geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
-    kucukVarsayilan:['konuşma-hızı', 'kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
-      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'],
+    /* Parça yokken «Parça ekle» açık: ilk adım. */
+    get kucukVarsayilan(){
+      return ['uzman-masası', 'yol-haritası', 'metronom', 'repertuar-bakımı', 'konuşma-hızı', 'kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'telaffuz-kuralları', 'son-kayıtlar',
+        'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'].concat((S.pieces || []).length ? ['parça-ekle'] : []);
+    },
     title:yz('esp.studio.studyo'),
     headline(){
       const plato = ESP.Acoustic.plateaus();

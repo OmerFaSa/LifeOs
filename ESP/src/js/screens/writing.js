@@ -31,7 +31,13 @@ window.LIFEOS.PARCA.yazilar({
   'esp.writing.taslaklar':'Taslaklar',
   'esp.writing.olcum':'Ölçüm',
   'esp.writing.araclar':'Araçlar',
-  'esp.writing.araclar-not':'Örnek iste, revizyon, yapı kalıpları',
+  'esp.writing.calis':'Çalış',
+  'esp.writing.taslaklarim':'Taslaklarım',
+  'esp.writing.ilerleme':'İlerleme',
+  'esp.writing.ilk-taslak':'İlk taslağını aç',
+  'esp.writing.ilk-taslak-neden':'Bir başlık ve bir paragraf yeter.',
+  'esp.writing.son-taslak':'Son taslak',
+  'esp.writing.kaldigin-yer':'Kaldığın yerden sür.',
   'esp.writing.ogren':'Öğren',
   'esp.writing.yazi-ornekleri-iste':'Yazı örnekleri iste',
   'esp.writing.konu-deneme-kisa-oyku':'Konu: deneme, kısa öykü…',
@@ -92,10 +98,10 @@ ESP.Screens.writing = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'taslaklar', label:yz('esp.writing.taslaklar') },
-    { id:'olcum',     label:yz('esp.writing.olcum') },
+    { id:'calis',     label:yz('esp.writing.calis') },
+    { id:'taslaklar', label:yz('esp.writing.taslaklarim') },
     { id:'ogren',     label:yz('esp.writing.ogren') },
-    { id:'araclar',   label:yz('esp.writing.araclar'), ikincil:true, not:yz('esp.writing.araclar-not') },
+    { id:'olcum',     label:yz('esp.writing.ilerleme') },
   ];
 
   /* ---------------------------------------------------------------- araçlar
@@ -332,10 +338,21 @@ ESP.Screens.writing = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { taslaklar:draftRows, olcum:measureRows, araclar:toolRows, ogren:topicRows };
+  /* Çalış: taslak yoksa ilk adım, varsa en son dokunduğun taslak. */
+  function calisRows(){
+    const l = S.drafts || [];
+    const son = l.reduce((m, d) => (!m || (d.updatedAt || '') > (m.updatedAt || '')) ? d : m, null);
+    return [].concat([ESP.Parts.simdi('writing', son
+        ? { etiket:yz('esp.writing.son-taslak'), baslik:son.title || yz('esp.writing.baslik'), neden:yz('esp.writing.kaldigin-yer'),
+            dugme:{ label:yz('esp.writing.ac'), act:'son-taslak', data:{ 'data-id':son.id } } }
+        : { baslik:yz('esp.writing.ilk-taslak'), neden:yz('esp.writing.ilk-taslak-neden'), dugme:{ label:yz('esp.writing.yeni-taslak'), act:'new-draft' } })],
+      son ? [ESP.Parts.recete('writing')] : [], [ESP.Parts.desk('writing')]);
+  }
+  const GOVDE = { calis:calisRows, taslaklar:draftRows, olcum:() => [].concat(measureRows(), [ESP.Parts.yol('writing')]),
+    ogren:() => [].concat(topicRows(), toolRows()) };
 
   LIFEOS.PARCA.blok({ id:'writing.yazi-sekmeleri', sayfa:'writing', yer:'y1', sira:10, ad:'Yazı sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:yz('esp.writing.yazi-bolumleri'), tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler({ act:'write-tab', aria:yz('esp.writing.yazi-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }));
   } });
   function render(){
@@ -364,6 +381,7 @@ ESP.Screens.writing = (function(){
     },
 
     async 'open-draft'(el){ S.ui.draftOpen = el.dataset.id; ESP.App.render(); },
+    async 'son-taslak'(el){ S.ui.draftOpen = el.dataset.id; S.ui.writeTab = 'taslaklar'; ESP.App.render(); },
     async 'close-draft'(){ S.ui.draftOpen = null; ESP.App.render(); },
 
     async 'save-draft'(el){
@@ -437,7 +455,7 @@ ESP.Screens.writing = (function(){
     /* iPhone Faz 2d (sıkı ölçü): Ölçüm'de üç sayı açık, pratik süresi şerit;
        Araçlar'ın dördü de başvuru (şerit). Sınır kartı gizli: pedagojik
        sınır her sayfanın sonunda ve ⓘ'de (hints: pedagogic). */
-    kucukVarsayilan:['pratik-süresi', 'yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'],
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'pratik-süresi', 'yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'],
     title:yz('esp.writing.yazi-laboratuvari'),
     headline(){
       const w = ESP.Intellect.wordsWritten(7);

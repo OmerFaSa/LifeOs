@@ -12,7 +12,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.cozulen-kart':'Çözülen kart',
   'esp.today.temiz-tekrar':'Temiz tekrar',
   'esp.today.bu-satirlar-kaydedilmeyecek':'Bu satırlar kaydedilmeyecek; yukarıdaki formdan elle girebilirsin.',
-  'esp.today.girilmemis-gun-sifir-sayilma':'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.',
+  'esp.today.girilmemis-gun-sifir-sayilma':'Üstteki kutuya yaz, kayıt buraya düşer.',
   'esp.today.plandan-sonra':'Plandan sonra',
   'esp.today.bu-tarihe-hala-yetisilebilir':'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.',
   'esp.today.bugune-hic-oturum-girilmedi':'Bugüne hiç oturum girilmedi. Bu gün ortalamaya katılmaz.',
@@ -28,6 +28,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.gunun-akisi':'Günün akışı',
   'esp.today.oneri-bekliyor':'öneri bekliyor',
   'esp.today.eylem-lang':'Kartları çalış',
+  'esp.today.eylem-dil':'Dil çalışmasına geç',
   'esp.today.eylem-symposium':'Felsefeye geç',
   'esp.today.eylem-history':'Tarihe geç',
   'esp.today.eylem-studio':'Stüdyoya geç',
@@ -86,7 +87,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.vazgec':'Vazgeç',
   'esp.today.eslesmedi':'Eşleşmedi',
   'esp.today.gunu-kapat':'Günü kapat',
-  'esp.today.oturum-gir-ve-butun-satirlar':'Oturum gir ve bütün satırlar',
+  'esp.today.oturum-gir-ve-butun-satirlar':'Ayrıntılı giriş',
   'esp.today.bugun':'Bugün',
   'esp.today.bu-gune-henuz-oturum-girilme':'Bu güne henüz oturum girilmedi. ',
   'esp.today.bugunun-oturumlari':'Bugünün oturumları',
@@ -116,9 +117,9 @@ window.LIFEOS.PARCA.yazilar({
   'esp.today.plani-gor':'Planı gör',
   'esp.today.zaman-butcesi-king':'Zaman bütçesi (King):',
   'esp.today.hedeflerim':'Hedeflerim',
-  'esp.today.danisma-da-hedef-koy':'Danışma’da hedef koy',
+  'esp.today.danisma-da-hedef-koy':'Uzmana hedefini söyle',
   'esp.today.ornekler':'Örnekler',
-  'esp.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
+  'esp.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Uzmana sor ekranında tek cümleyle yazabilirsin.',
   'esp.today.bir-yilda-gitarda-kalfa-ya-g':'«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi söylerim. Alışkanlık da kurabilirsin: «her gün 20 dakika kitap okuma alışkanlığı kazanmak istiyorum».',
   'esp.today.gunun-toplami':'Günün toplamı',
   'esp.today.taban':'Taban ',
@@ -1086,9 +1087,8 @@ ESP.Screens.today = (function(){
     const n = ESP.Planner.nextAction();
     /* Sıradaki işin adı cümlede, düğme ne yapacağını söyler. «Kartları hatırlama
        oranı düşük» yazan düğmeye basınca ne olacağı belli değildi. Sıralama planner'ın. */
-    const EYLEM = { lang:1, symposium:1, history:1, studio:1, library:1, writing:1, ladder:1, onaylar:1 };
     return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.kapakCumlesi(), sayilar:[],
-      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:yz('esp.today.eylem-' + (EYLEM[n.route] ? n.route : 'genel')), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
+      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:ESP.Screens.today.eylemAdi(n), tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
       ikincil:('<button type="button" class="btn btn--ghost" data-kapak-asagi>' + yz('esp.today.gunun-akisi') + '</button>') });
   }
 
@@ -1620,6 +1620,12 @@ ESP.Screens.today = (function(){
       const h = M.dueReminders(null, U.todayISO()).filter(r => ESP.Mod.isOn(r.disc)).length;
       if(h) c += ' ' + h + ' hatırlatıcı bugün.';
       return c;
+    },
+    /* Düğmenin adı işten: «Kartları çalış» yalnız sırası gelen kart varken. */
+    eylemAdi(n){
+      if(n.route === 'lang') return yz(/^(srs|retention)/.test(n.id || '') ? 'esp.today.eylem-lang' : 'esp.today.eylem-dil');
+      const EYLEM = { symposium:1, history:1, studio:1, library:1, writing:1, ladder:1, onaylar:1 };
+      return yz('esp.today.eylem-' + (EYLEM[n.route] ? n.route : 'genel'));
     },
     /* Kapağın cümlesi: başlıkla aynı, ama «sıradaki iş hazır» yerine işin adı. */
     kapakCumlesi(){

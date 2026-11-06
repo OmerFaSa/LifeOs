@@ -38,11 +38,15 @@ window.LIFEOS.PARCA.komut({ modul:'esp', sira:60, id:'act:note', kind:'Eylem', l
     setTimeout(() => { const el = document.getElementById('note-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.library.notlar':'Notlar',
-  'esp.library.matris':'Not bağları',
-  'esp.library.matris-not':'Notların birbirine bağlanması, bağ önerileri',
-  'esp.library.yontem-not':'Okuma düzeyleri, protokol, not şablonları',
+  'esp.library.not-ve-kitap':'Not ve kitap',
+  'esp.library.calis':'Çalış',
   'esp.library.ilerleme':'İlerleme',
-  'esp.library.ilerleme-not':'Okuma ve not grafikleri',
+  'esp.library.ilk-not':'Okuduğun bir fikri yaz',
+  'esp.library.ilk-not-neden':'Tek fikir, tek cümle yeter.',
+  'esp.library.not-yaz':'Not yaz',
+  'esp.library.bagsiz-not':'not henüz bağlanmadı',
+  'esp.library.bagsiz-neden':'Bir notu başka bir nota bağla.',
+  'esp.library.notlara-git':'Notlara git',
   'esp.library.kaynaklar':'Kaynaklar',
   'esp.library.yontem':'Yöntem',
   'esp.library.ogren':'Öğren',
@@ -96,7 +100,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.library.alinti':'Alıntı',
   'esp.library.bam':'BAM ·',
   'esp.library.notlarini-ozetle':'Notlarını özetle',
-  'esp.library.kaynak-listesi-bos-sempozyum':'Kaynak listesi boş. Sempozyum → Metinler sekmesinden ',
+  'esp.library.kaynak-listesi-bos-sempozyum':'Kaynak listesi boş. Felsefe › Öğren bölümünden ',
   'esp.library.okuma-listesi-iste':'Okuma listesi iste',
   'esp.library.konu-stoacilik-bilim-tarihi':'Konu: Stoacılık, bilim tarihi…',
   'esp.library.okuma-konusu':'Okuma konusu',
@@ -132,12 +136,10 @@ ESP.Screens.library = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'notlar',    label:yz('esp.library.notlar') },
-    { id:'kaynaklar', label:yz('esp.library.kaynaklar') },
+    { id:'calis',     label:yz('esp.library.calis') },
+    { id:'notlar',    label:yz('esp.library.not-ve-kitap') },
     { id:'ogren',     label:yz('esp.library.ogren') },
-    { id:'matris',    label:yz('esp.library.matris'), ikincil:true, not:yz('esp.library.matris-not') },
-    { id:'yontem',    label:yz('esp.library.yontem'), ikincil:true, not:yz('esp.library.yontem-not') },
-    { id:'ilerleme',  label:yz('esp.library.ilerleme'), ikincil:true, not:yz('esp.library.ilerleme-not') },
+    { id:'ilerleme',  label:yz('esp.library.ilerleme') },
   ];
 
   /* ----------------------------------------------------------------- yöntem
@@ -581,8 +583,17 @@ ESP.Screens.library = (function(){
   /* ------------------------------------------------------------------ çizim */
 
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
-  const GOVDE = { notlar:noteRows, matris:matrixRows, kaynaklar:bookRows, yontem:methodRows,
-    ogren:topicRows };
+  /* Çalış: hiç not yoksa ilk adım, bağsız not varsa onlar, yoksa yeni not. Sayılar kayıttan. */
+  function calisRows(){
+    const notlar = S.notes || [];
+    const bagsiz = notlar.filter(n => !(n.links || []).length).length;
+    return [].concat([ESP.Parts.simdi('reading', bagsiz
+        ? { baslik:bagsiz + ' ' + yz('esp.library.bagsiz-not'), neden:yz('esp.library.bagsiz-neden'), dugme:{ label:yz('esp.library.notlara-git'), act:'tab-not' } }
+        : { baslik:yz('esp.library.ilk-not'), neden:yz('esp.library.ilk-not-neden'), dugme:{ label:yz('esp.library.not-yaz'), act:'tab-not' } })],
+      notlar.length ? [ESP.Parts.recete('reading')] : [], [ESP.Parts.desk('reading')]);
+  }
+  const GOVDE = { calis:calisRows, notlar:() => [].concat(noteRows(), matrixRows(), bookRows()),
+    ogren:() => [].concat(topicRows(), methodRows()), ilerleme:() => [ESP.Parts.yol('reading')] };
 
   /* PANO KARTI (2026-10-20, üçüncü tur): bu yıl biten kitaplar (yıldız,
      en az biri bittiyse) ve aylara göre dağılımı. */
@@ -602,7 +613,7 @@ ESP.Screens.library = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'library.okuma-sekmeleri', sayfa:'library', yer:'y1', sira:10, ad:'Okuma sekmeleri', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:yz('esp.library.okuma-bolumleri'), tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler({ act:'read-tab', aria:yz('esp.library.okuma-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null },
         ust:{ ilerleme:() => LIFEOS.PARCA.yer('library', 'ilerleme', K, undefined, raw) } }));
   } });
@@ -646,6 +657,7 @@ ESP.Screens.library = (function(){
       if(r.ok) ESP.App.render();
     },
     async 'read-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'tab-not'(){ S.ui.readTab = 'notlar'; ESP.App.render(); },
 
     async 'add-note'(){
       const t = val('note-text');
@@ -756,7 +768,7 @@ ESP.Screens.library = (function(){
     id:'library',
     /* iPhone Faz 2c: Kaynaklar'da raf (listenin görseli) ve okuma listesi
        isteği, Yöntem'in beş başvuru kartı şerit — dokununca açılır. */
-    kucukVarsayilan:['raf', 'okuma-listesi-iste', 'dört-düzey', 'analitik-okumanın-dört-sorusu',
+    kucukVarsayilan:['uzman-masası', 'yol-haritası', 'sentez-katsayısı', 'bağ-önerileri', 'kavram-matrisi', 'kaynaklar', 'kaynak-ekle', 'raf', 'okuma-listesi-iste', 'dört-düzey', 'analitik-okumanın-dört-sorusu',
       'okuma-protokolü', 'not-şablonları', 'bırakma-izni'],
     title:yz('esp.library.kutuphane'),
     headline(){
