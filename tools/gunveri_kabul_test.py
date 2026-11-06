@@ -113,6 +113,14 @@ if k0:
 k2 = js("%s.karne({ moduller:[{ modul:'ays', zaman:%d, gunler:{} }] }, '2026-11-03').satirlar[3].hucreler.slice(0, 2)" % (G, 1793613600000))
 bekle("yayin bugunden onceyse bugun veri yok", k2 == ["kayit-yok", "veri-yok"])
 
+# Serit yerlesimi: sagdan tasmaz, cakisan alt siraya iner, uzak olan ayni sirada kalir.
+y = js(G + ".seritYeri([{yuzde:10},{yuzde:15},{yuzde:40},{yuzde:95}])")
+bekle("serit: tasan sola dayanir", y["yerler"][3]["x"] == 80)
+bekle("serit: cakisan alt sirada", y["yerler"][1]["serit"] == 1)
+bekle("serit: bosalan sira yeniden kullanilir", y["yerler"][2]["serit"] == 0)
+bekle("serit: sira sayisi", y["seritler"] == 2)
+bekle("serit: bos liste", js(G + ".seritYeri([])") == {"yerler": [], "seritler": 1})
+
 if hata:
     print("KIRMIZI (%d):" % len(hata))
     for h in hata:

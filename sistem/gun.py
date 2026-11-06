@@ -57,29 +57,30 @@ GUN_SAYFASI = r"""<!doctype html>
 .site--gun .kenar [data-king-ac], .site--gun .kenar [data-act="open-appearance"],
 .site--gun .kenar [data-cekmece="menu"], .site--gun .ust__king, .site--gun .ust [data-act="open-appearance"]{ display:none !important; }
 
-.gun{ position:relative; max-width:1080px; margin:0 auto; padding:clamp(18px, 3vw, 36px) clamp(16px, 3vw, 32px) 64px; }
-.gun::before{ content:none; }
-.gun-bas{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+/* Kagit (.sayfa) dolguyu verir; bolumler tek aralikla dizilir, kartlar kendi disini bilmez. */
+.gun{ --gun:var(--mod); --gun-ara:16px; --gun-ic:20px; position:relative; max-width:1080px; margin:0 auto; padding:0 0 8px; }
+.gun > * + *{ margin-top:var(--gun-ara); }
+.gun-bas{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px; }
 .gun-selam{ margin:0; font-size:clamp(26px, 3.2vw, 36px); font-weight:700; letter-spacing:-.025em; line-height:1.1; }
 .gun-tarih{ margin:6px 0 0; color:var(--text-2); font-size:15px; }
-.gun-merkez{ display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; font-size:12.5px; color:var(--text-2);
-  background:color-mix(in oklab, var(--surface) 70%, transparent); box-shadow:inset 0 0 0 1px var(--border); }
+.gun-merkez{ display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-3); }
 .gun-merkez i{ width:7px; height:7px; border-radius:50%; background:var(--text-3); }
 .gun-merkez[data-hal="acik"] i{ background:var(--ok, #1a7f5a); }
 
 .gun-kart{ position:relative; border-radius:20px; background:color-mix(in oklab, var(--surface) 88%, transparent);
   box-shadow:inset 0 0 0 1px var(--border); }
-.gun-kart__ad{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px; font-size:12.5px; font-weight:650;
-  letter-spacing:.02em; text-transform:uppercase; color:var(--text-3); }
-.gun-kart__ad small{ text-transform:none; letter-spacing:0; font-weight:500; }
+.gun-kart__ad{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:2px 12px; margin:0 0 12px; font-size:14px; font-weight:700; color:var(--text); }
+.gun-kart__ad small{ font-weight:500; color:var(--text-3); }
 
 /* ust sira: niyet · enerji · ic hava */
-.gun-ust{ display:grid; grid-template-columns:1.6fr 1fr 1.2fr; gap:12px; margin-bottom:12px; }
-.gun-ust > .gun-kart{ padding:16px 18px; }
-.gun-niyet{ width:100%; border:0; padding:0; background:transparent; color:var(--text); font:inherit; font-size:18px; font-weight:600; letter-spacing:-.01em; }
+.gun-ust{ display:grid; grid-template-columns:1.5fr 1fr 1.3fr; padding:var(--gun-ic); }
+.gun-ust__b{ min-width:0; }
+.gun-ust__b + .gun-ust__b{ margin-left:var(--gun-ic); padding-left:var(--gun-ic); border-left:2px dashed var(--border-strong); }
+.gun-ust > .gun-senin{ grid-column:1 / -1; }
+.gun-niyet{ width:100%; border:0; padding:0; background:transparent; color:var(--text); font:inherit; font-size:17px; font-weight:600; letter-spacing:-.01em; }
 .gun-niyet::placeholder{ color:var(--text-3); font-weight:500; }
 .gun-niyet:focus{ outline:none; }
-.gun-pil{ display:flex; align-items:center; gap:10px; }
+.gun-pil{ display:flex; align-items:center; gap:16px; }
 .gun-pil__govde{ position:relative; flex:none; display:grid; grid-template-columns:repeat(5, 1fr); gap:3px; width:min(132px, 60%); height:34px; padding:4px;
   border-radius:9px; box-shadow:inset 0 0 0 2px var(--text-3); }
 .gun-pil__govde::after{ content:""; position:absolute; right:-6px; top:11px; width:4px; height:12px; border-radius:0 3px 3px 0; background:var(--text-3); }
@@ -96,17 +97,17 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-hava button svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .gun-hava button:hover{ background:var(--surface-2); transform:translateY(-1px); }
 .gun-hava button[aria-pressed="true"]{ background:var(--mod-t); color:var(--mod-ink); box-shadow:inset 0 0 0 1.5px var(--mod); }
-.gun-senin{ margin:8px 0 0; font-size:11.5px; color:var(--text-3); }
+.gun-senin{ margin:12px 0 0; font-size:12px; color:var(--text-3); }
 
 /* gunun seridi */
-.gun-serit{ padding:18px 20px 16px; margin-bottom:12px; }
-.gun-serit__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
-.gun-serit__ust h2{ margin:0; font-size:18px; font-weight:680; letter-spacing:-.015em; }
+.gun-serit{ padding:var(--gun-ic); }
+.gun-serit__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.gun-serit__ust .gun-kart__ad{ margin:0; }
 .gun-gecis{ display:inline-flex; padding:3px; border-radius:999px; background:var(--surface-2); }
 .gun-gecis button{ min-height:30px; padding:0 14px; border:0; border-radius:999px; background:transparent; color:var(--text-2); font:inherit; font-size:13px; font-weight:600;
   cursor:pointer; transition:background .25s ease, color .2s, box-shadow .25s; }
 .gun-gecis button[aria-pressed="true"]{ background:var(--surface); color:var(--text); box-shadow:none; }
-.gun-saat{ position:relative; height:132px; margin-top:30px; }
+.gun-saat{ position:relative; height:max(132px, calc(var(--seritler, 1) * 34px + 38px)); margin-top:36px; }
 .gun-saat__izgara{ position:absolute; inset:0 0 22px; display:grid; grid-template-columns:repeat(16, 1fr); }
 .gun-saat__izgara span{ border-left:1px dashed color-mix(in oklab, var(--text) 10%, transparent); }
 .gun-saat__izgara span:first-child{ border-left-color:transparent; }
@@ -120,89 +121,81 @@ GUN_SAYFASI = r"""<!doctype html>
   transition:left .6s cubic-bezier(.22,1,.36,1); }
 .gun-saat__simdi::before{ content:""; position:absolute; top:-3px; left:-4px; width:10px; height:10px; border-radius:50%; background:var(--mod);
   box-shadow:0 0 0 3px var(--surface); }
-.gun-saat__simdi b{ position:absolute; top:-26px; left:8px; padding:2px 7px; border-radius:6px; background:var(--mod); color:#fff; font-size:11px;
+.gun-saat__simdi b{ position:absolute; top:-26px; left:8px; padding:2px 7px; border-radius:6px; background:var(--mod); color:var(--primary-ink); font-size:11px;
   font-weight:650; font-variant-numeric:tabular-nums; white-space:nowrap; }
 .gun-saat__bos{ position:absolute; inset:24px 8% 40px; display:grid; place-items:center; text-align:center; font-size:13.5px; color:var(--text-2); }
 .gun-saat__bos small{ display:block; margin-top:2px; color:var(--text-3); font-size:12px; }
 
-/* alan cubuklari */
-.gun-alanlar{ display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:12px; }
-.gun-alan{ display:grid; gap:8px; padding:12px 14px; border:0; border-radius:16px; text-align:left; font:inherit; color:var(--text); cursor:pointer;
-  background:color-mix(in oklab, var(--surface) 88%, transparent); box-shadow:inset 0 0 0 1px var(--border);
-  transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .25s ease; }
-.gun-alan:hover{ transform:translateY(-2px); }
-.gun-alan[aria-pressed="true"]{ box-shadow:inset 0 0 0 2px var(--renk); }
-.gun-alan b{ display:flex; align-items:center; gap:7px; font-size:13.5px; font-weight:650; }
-.gun-alan b i{ width:8px; height:8px; border-radius:50%; background:var(--renk); }
-.gun-alan__cubuk{ height:8px; border-radius:99px;
-  background:repeating-linear-gradient(135deg, color-mix(in oklab, var(--renk) 18%, transparent) 0 5px, transparent 5px 10px); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--renk) 30%, transparent); }
-.gun-alan small{ font-size:11.5px; color:var(--text-3); }
+/* alanlar: hedef olmadigi icin cubuk yok; deger ya da «veri yok» */
+.gun-alanlar{ display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); padding:8px; }
+.gun-alan{ display:grid; align-content:start; gap:4px; min-width:0; padding:12px; border:0; background:none; text-align:left; font:inherit; color:var(--text); cursor:pointer; }
+.gun-alan + .gun-alan{ border-left:2px dashed var(--border-strong); }
+.gun-alan:hover{ background:var(--surface-2); }
+.gun-alan > b{ display:flex; align-items:center; gap:7px; font-size:13px; font-weight:650; color:var(--text-2); }
+.gun-alan > b i{ flex:none; width:8px; height:8px; background:var(--renk); }
+.gun-alan__deger{ font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; }
+.gun-alan__deger.is-yok{ font-size:14px; font-weight:500; color:var(--text-3); }
+.gun-alan small{ font-size:12px; color:var(--text-3); }
 
 /* alt sira: simdi ne yapsam · hayat karnesi */
-.gun-alt{ display:grid; grid-template-columns:1fr 1.35fr; gap:12px; }
-.gun-oneri{ padding:18px 20px; overflow:hidden;
-  background:var(--surface-2); }
+.gun-alt{ display:grid; gap:var(--gun-ara); }
+.gun-oneri{ padding:var(--gun-ic); }
 .gun-oneri h3{ margin:4px 0 6px; font-size:20px; font-weight:700; letter-spacing:-.02em; }
 .gun-oneri p{ margin:0 0 14px; color:var(--text-2); font-size:14px; }
-.gun-oneri a{ display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 16px; border-radius:999px; background:var(--mod); color:#fff;
+.gun-oneri__eylem{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; }
+.gun-oneri a{ display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 16px; border-radius:999px; background:var(--mod); color:var(--primary-ink);
   text-decoration:none; font-size:13.5px; font-weight:650; transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
 .gun-oneri a:hover{ transform:translateY(-1px); box-shadow:none; }
-.gun-karne{ padding:18px 20px; }
-.gun-karne__izgara{ display:grid; grid-template-columns:76px repeat(7, 1fr); gap:5px; align-items:center; font-size:11.5px; }
+.gun-karne{ padding:var(--gun-ic); }
+.gun-karne__izgara{ display:grid; grid-template-columns:84px repeat(7, 1fr); gap:4px; align-items:center; font-size:12px; }
 .gun-karne__izgara > span{ color:var(--text-3); text-align:center; }
 .gun-karne__izgara > span.is-bugun{ color:var(--mod-ink); font-weight:700; }
 .gun-karne__izgara > b{ font-weight:600; color:var(--text-2); font-size:12px; }
-.gun-kare{ aspect-ratio:1; max-height:26px; border-radius:7px; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--text) 14%, transparent);
+/* Kare sutunun tamamini doldurur: bas yazi ve hucre ayni hizada (eskiden kare solda, gun adi ortadaydi). */
+.gun-kare{ display:block; height:24px; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--text) 14%, transparent);
   background:repeating-linear-gradient(135deg, color-mix(in oklab, var(--text) 7%, transparent) 0 3px, transparent 3px 6px); }
-.gun-kare.is-bugun{ box-shadow:inset 0 0 0 1.5px var(--mod); }
 .gun-lejant{ display:flex; gap:14px; margin-top:12px; font-size:11.5px; color:var(--text-3); flex-wrap:wrap; }
 .gun-lejant i{ display:inline-block; width:10px; height:10px; margin-right:5px; border-radius:3px; vertical-align:-1px; }
 
 /* seritteki bloklar (F3a: hesap sunucusundaki «tek gun», sunucu sozu 22) */
-.gun-blok{ position:absolute; left:var(--x); top:calc(8px + var(--serit, 0) * 34px); transform:translateX(-6px); display:inline-flex; align-items:center; gap:6px;
-  max-width:24%; height:28px; padding:0 10px 0 8px; border-radius:9px; font-size:12px; font-weight:600; color:var(--text); text-decoration:none; white-space:nowrap;
+.gun-blok{ position:absolute; left:var(--x); top:calc(8px + var(--serit, 0) * 34px); width:calc(var(--gen, 20) * 1%); box-sizing:border-box; display:inline-flex; align-items:center; gap:6px;
+  height:28px; padding:0 10px 0 8px; border-radius:9px; font-size:12px; font-weight:600; color:var(--text); text-decoration:none; white-space:nowrap;
   background:color-mix(in oklab, var(--renk) 10%, var(--surface)); box-shadow:inset 3px 0 0 var(--renk), inset 0 0 0 1px color-mix(in oklab, var(--renk) 30%, transparent);
   animation:gun-gel .45s cubic-bezier(.22,1,.36,1) both; animation-delay:calc(var(--i, 0) * 50ms); transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; z-index:1; }
-.gun-blok span{ overflow:hidden; text-overflow:ellipsis; }
-.gun-blok small{ color:var(--text-3); font-weight:500; font-variant-numeric:tabular-nums; }
-.gun-blok:hover{ transform:translate(-6px, -2px); z-index:2; }
+.gun-blok span{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.gun-blok small{ margin-left:auto; color:var(--text-3); font-weight:500; font-variant-numeric:tabular-nums; }
+.gun-blok:hover{ transform:translateY(-2px); z-index:2; }
 .gun-blok[data-durum="bitti"]{ background:color-mix(in oklab, var(--renk) 22%, var(--surface)); }
 .gun-blok[data-durum="bitti"]::before{ content:"✓"; color:var(--renk); font-weight:800; }
 .gun-blok[data-durum="atlandi"]{ opacity:.55; text-decoration:line-through; }
 .gun-blok[data-durum="vakti"]{ box-shadow:inset 3px 0 0 var(--renk), 0 0 0 2px color-mix(in oklab, var(--renk) 45%, transparent); }
-.gun-saatsiz{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
-.gun-saatsiz > span{ font-size:11.5px; font-weight:650; color:var(--text-3); align-self:center; margin-right:2px; }
-.gun-saatsiz .gun-blok{ position:static; transform:none; max-width:none; animation-delay:0s; }
+.gun-saatsiz{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:12px; }
+.gun-saatsiz > span{ font-size:12px; font-weight:650; color:var(--text-3); margin-right:2px; }
+.gun-saatsiz .gun-blok{ position:static; width:auto; max-width:100%; animation-delay:0s; }
 .gun-saatsiz .gun-blok:hover{ transform:translateY(-2px); }
 .gun-notlar{ margin:10px 0 0; padding:0; list-style:none; font-size:12px; color:var(--text-3); }
-.gun-alan__cubuk.is-dolu{ background:var(--renk); box-shadow:none; }
-.gun-alan__cubuk.is-kayitsiz{ background:transparent; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--renk) 45%, transparent); }
-.gun-alan small b{ color:var(--text); font-weight:650; }
 .gun-kare.is-yapildi{ background:var(--renk); box-shadow:none; }
 .gun-kare.is-kayit-yok{ background:transparent; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--renk) 40%, transparent); }
 .gun-kare.is-gelecek{ background:transparent; box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 8%, transparent); }
-.gun-kare.is-bugun{ outline:2px solid var(--mod); outline-offset:1px; }
+.gun-kare.is-bugun{ outline:2px solid var(--mod); outline-offset:-2px; }
 
-/* ust kart (2026-11-03: «daha guzel, profesyonel, modelle»): selam, gunun cumlesi, ilerleme halkasi */
-.gun-kahraman{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:24px; padding:22px 26px; margin-bottom:12px; border-radius:24px;
-  background:var(--surface-2);
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mod) 18%, var(--border)); }
+/* ust: modul kapagi gibi dogrudan kagitta, kart degil; selam, gunun cumlesi, ilerleme halkasi */
+.gun-kahraman{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:start; gap:16px 24px; padding:0 0 8px; }
 .gun-kahraman .gun-selam{ font-size:clamp(28px, 3.4vw, 40px); }
-.gun-kahraman .gun-tarih{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.gun-cumle{ margin:14px 0 0; max-width:640px; font-size:16.5px; line-height:1.5; color:var(--text); min-height:1.5em; }
-.gun-cumle small{ display:block; margin-top:4px; font-size:11.5px; color:var(--text-3); letter-spacing:.01em; }
-.gun-halka{ position:relative; width:118px; height:118px; flex:none; }
+.gun-kahraman .gun-tarih{ display:flex; align-items:center; gap:4px 14px; flex-wrap:wrap; }
+.gun-cumle{ margin:14px 0 0; max-width:640px; font-size:16px; line-height:1.5; color:var(--text); min-height:1.5em; }
+.gun-cumle small{ display:block; margin-top:4px; font-size:12px; color:var(--text-3); }
+.gun-halka{ position:relative; width:104px; height:104px; flex:none; }
 .gun-halka svg{ width:100%; height:100%; transform:rotate(-90deg); }
 .gun-halka circle{ fill:none; stroke-width:10; }
 .gun-halka .iz{ stroke:color-mix(in oklab, var(--text) 9%, transparent); }
 .gun-halka .dolu{ stroke:var(--mod); stroke-linecap:round; transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1); }
 .gun-halka div{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; }
-.gun-halka b{ font-size:26px; font-weight:750; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.gun-halka b{ font-size:22px; font-weight:750; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
 .gun-halka small{ font-size:11px; color:var(--text-3); }
 /* kendi isler: seritte dorduncu sira, planim listesi, ekle formu */
-.gun-saat{ height:166px; }
 .gun-blok[data-kendi-blok]{ cursor:pointer; }
-.gun-plan{ padding:18px 20px; }
+.gun-plan{ padding:var(--gun-ic); }
 .gun-plan ul{ list-style:none; margin:0 0 10px; padding:0; display:grid; gap:4px; max-height:190px; overflow:auto; }
 .gun-plan li{ display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:10px; transition:background .2s ease; }
 .gun-plan li:hover{ background:var(--surface-2); }
@@ -210,42 +203,39 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-plan li span{ flex:1; min-width:0; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gun-plan li small{ font-size:12px; color:var(--text-3); font-variant-numeric:tabular-nums; }
 .gun-tik{ flex:none; width:20px; height:20px; display:grid; place-items:center; padding:0; border:0; border-radius:6px; cursor:pointer;
-  background:transparent; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--mod) 55%, var(--border)); color:#fff; transition:background .2s ease, transform .2s; }
+  background:transparent; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--mod) 55%, var(--border)); color:var(--primary-ink); transition:background .2s ease, transform .2s; }
 .gun-tik[aria-pressed="true"]{ background:var(--mod); box-shadow:none; }
 .gun-tik:active{ transform:scale(.9); }
 .gun-tik svg{ width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
-.gun-sil{ flex:none; width:24px; height:24px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--text-3); cursor:pointer; opacity:0; transition:opacity .2s; }
+.gun-sil{ flex:none; width:24px; height:24px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--text-3); cursor:pointer; opacity:.55; transition:opacity .2s; }
 .gun-plan li:hover .gun-sil, .gun-destelist li:hover .gun-sil, .gun-sil:focus-visible{ opacity:1; }
-.gun-ekle{ display:flex; gap:6px; }
-.gun-ekle input{ min-width:0; height:36px; padding:0 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); font:inherit; font-size:14px; }
+.gun-ekle{ display:flex; align-items:center; gap:6px; }
+.gun-ekle input{ min-width:0; height:36px; padding:0 12px; font:inherit; font-size:14px; color:var(--text); }
 .gun-ekle input[name="ad"]{ flex:1; }
-.gun-ekle input[name="saat"]{ width:104px; }
-.gun-ekle button{ height:36px; padding:0 14px; border:0; border-radius:10px; background:var(--mod); color:#fff; font:inherit; font-size:13.5px; font-weight:650; cursor:pointer; }
-.gun-ekle input:focus{ outline:none; border-color:var(--mod); box-shadow:0 0 0 3px color-mix(in oklab, var(--mod) 18%, transparent); }
-.gun-alt{ grid-template-columns:1fr 1fr; }
-.gun-karne{ margin-top:12px; }
-@media (max-width:900px){ .gun-kahraman{ grid-template-columns:1fr; } .gun-halka{ width:96px; height:96px; } }
+.gun-ekle input[name="saat"]{ width:116px; flex:none; }
+.gun-ekle button{ height:36px; padding:0 14px; border:0; border-radius:10px; background:var(--mod); color:var(--primary-ink); font:inherit; font-size:13.5px; font-weight:650; cursor:pointer; }
+.gun-alt{ grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); }
 
 /* Gecmis (plan §2): olcu kutulari, hayat karnesi (hafta / ay), haftanin sekli, plan ve gercek, enerji izi */
 .gun-bas .gun-gecis{ align-self:center; }
-.gun-olcu{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:12px; }
-.gun-olcu > .gun-kart{ padding:16px 18px 14px; }
+.gun-olcu{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--gun-ara); }
+.gun-olcu > .gun-kart{ padding:var(--gun-ic); }
 .gun-sayi{ display:flex; align-items:baseline; gap:6px; margin:2px 0 2px; }
 .gun-sayi b{ font-size:30px; font-weight:720; letter-spacing:-.03em; font-variant-numeric:tabular-nums; line-height:1.1; }
 .gun-sayi span{ font-size:13px; color:var(--text-2); }
 .gun-sayi.is-yok b{ color:var(--text-3); font-weight:600; font-size:22px; }
-.gun-etiket{ margin:0 0 10px; font-size:11.5px; color:var(--text-3); }
+.gun-etiket{ margin:0 0 10px; font-size:12px; color:var(--text-3); }
 .gun-sutun{ display:block; width:100%; height:38px; }
 .gun-sutun rect.d{ fill:var(--renk); }
 .gun-sutun rect.s{ fill:color-mix(in oklab, var(--renk) 35%, transparent); }
 .gun-sutun rect.b{ fill:color-mix(in oklab, var(--mod) 12%, transparent); }
-.gun-karne.is-ay .gun-karne__izgara{ grid-template-columns:76px repeat(30, 1fr); gap:3px; }
-.gun-karne.is-ay .gun-kare{ border-radius:3px; max-height:18px; box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 12%, transparent); }
+.gun-karne.is-ay .gun-karne__izgara{ grid-template-columns:84px repeat(30, 1fr); gap:2px; }
+.gun-karne.is-ay .gun-kare{ border-radius:3px; height:18px; box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 12%, transparent); }
 .gun-karne.is-ay .gun-kare.is-yapildi{ box-shadow:none; }
 .gun-karne.is-ay .gun-kare.is-kayit-yok{ box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--renk) 40%, transparent); }
 .gun-karne.is-ay .gun-karne__izgara > span{ font-size:10px; }
-.gun-iki{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
-.gun-iki > .gun-kart{ padding:18px 20px; }
+.gun-iki{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:var(--gun-ara); }
+.gun-iki > .gun-kart{ padding:var(--gun-ic); }
 .gun-sekil{ display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; align-items:end; height:120px; }
 .gun-sekil > div{ display:grid; grid-template-rows:1fr auto; gap:6px; height:100%; text-align:center; }
 .gun-sekil__cift{ display:flex; align-items:flex-end; justify-content:center; gap:3px; }
@@ -265,12 +255,15 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-iz__pil{ align-self:end; width:min(18px, 80%); border-radius:5px; background:var(--mod); opacity:calc(.35 + var(--e) * .13); height:calc(var(--e) * 20%); }
 .gun-iz__pil.is-yok{ width:5px; height:5px; border-radius:50%; background:color-mix(in oklab, var(--text) 18%, transparent); opacity:1; }
 .gun-iz small{ font-size:10.5px; color:var(--text-3); line-height:1; }
+.gun-izkart{ padding:var(--gun-ic); }
 .gun-iz svg{ width:16px; height:16px; fill:none; stroke:var(--text-2); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .gun-iz.is-ay small, .gun-iz.is-ay svg{ display:none; }
 
 /* Sen (plan §2): kendi sozun, veren / calan, «Ne yapsam?» destesi */
-.gun-soz{ padding:22px 24px; margin-bottom:12px; }
-.gun-soz textarea{ display:block; width:100%; min-height:3.2em; padding:0; border:0; resize:none; background:transparent; color:var(--text); font:inherit;
+.gun-soz{ padding:var(--gun-ic); }
+/* Soz kartin kendisidir: piksel alan kutusu (uzerine yazi yapisiyordu) burada yok. */
+:root[data-zemin="piksel"] .gun-soz textarea{ background:none; box-shadow:none; margin:0; }
+.gun-soz textarea{ display:block; width:100%; min-height:2.8em; padding:0; border:0; resize:none; background:transparent; color:var(--text); font:inherit;
   font-size:clamp(19px, 2.4vw, 24px); font-weight:600; letter-spacing:-.015em; line-height:1.35; field-sizing:content; }
 .gun-soz textarea::placeholder{ color:var(--text-3); font-weight:500; }
 .gun-soz textarea:focus{ outline:none; }
@@ -280,7 +273,7 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-cipler li button{ width:24px; height:24px; padding:0; border:0; border-radius:50%; background:transparent; color:var(--text-3); font-size:15px; cursor:pointer; }
 .gun-cipler li button:hover{ background:var(--surface-2); color:var(--text); }
 .gun-cipler .gun-senin{ margin:0; align-self:center; }
-.gun-deste{ display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(0, 1fr); gap:20px; padding:20px 22px; align-items:start; }
+.gun-deste{ display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(0, 1fr); gap:var(--gun-ic); padding:var(--gun-ic); align-items:start; }
 .gun-kartyuz{ position:relative; display:grid; align-content:space-between; gap:18px; min-height:190px; padding:22px; border-radius:18px;
   background:var(--surface-2);
   box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mod) 26%, transparent);
@@ -291,22 +284,21 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-kartyuz p{ margin:0; font-size:13px; color:var(--text-2); }
 .gun-kartyuz__dugme{ display:flex; gap:8px; flex-wrap:wrap; }
 .gun-dugme{ display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 16px; border:0; border-radius:999px; font:inherit; font-size:13.5px; font-weight:650;
-  cursor:pointer; background:var(--mod); color:#fff; transition:transform .25s cubic-bezier(.22,1,.36,1); text-decoration:none; }
+  cursor:pointer; background:var(--mod); color:var(--primary-ink); transition:transform .25s cubic-bezier(.22,1,.36,1); text-decoration:none; }
 .gun-dugme.is-ikinci{ background:var(--surface); color:var(--text); box-shadow:inset 0 0 0 1px var(--border); }
 .gun-dugme:hover{ transform:translateY(-1px); }
-.gun-destelist{ margin:0 0 10px; padding:0; list-style:none; display:grid; gap:2px; max-height:240px; overflow:auto; }
+.gun-destelist{ margin:0 0 10px; padding:0; list-style:none; display:grid; gap:2px; max-height:320px; overflow:auto; }
 .gun-destelist li{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:10px; font-size:13.5px; }
 .gun-destelist li:hover{ background:var(--surface-2); }
 .gun-destelist li span{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gun-destelist li small{ color:var(--text-3); font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }
-.gun-ekle select{ height:36px; padding:0 8px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); font:inherit; font-size:13px; }
-.gun-oneri .gun-oneri__kart{ margin-left:12px; font-size:13px; color:var(--mod-ink); font-weight:600; text-decoration:none; background:none; padding:0; min-height:0; }
-@media (max-width:900px){ .gun-olcu{ grid-template-columns:1fr 1fr; } .gun-olcu > :last-child{ grid-column:1 / -1; } .gun-iki, .gun-deste{ grid-template-columns:minmax(0, 1fr); } }
-@media (max-width:560px){ .gun-olcu{ grid-template-columns:1fr; } .gun-karne.is-ay .gun-karne__izgara{ grid-template-columns:58px repeat(30, 1fr); gap:2px; }
+.gun-ekle select{ height:36px; padding-left:8px; color:var(--text); font:inherit; font-size:13px; }
+.gun-oneri .gun-oneri__kart{ font-size:13px; color:var(--mod-ink); font-weight:600; text-decoration:none; background:none; padding:0; min-height:0; }
+@media (max-width:900px){ .gun-olcu{ grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); } .gun-olcu > :last-child{ grid-column:1 / -1; } .gun-iki, .gun-deste{ grid-template-columns:minmax(0, 1fr); } }
+@media (max-width:560px){ .gun-olcu{ grid-template-columns:minmax(0, 1fr); } .gun-karne.is-ay .gun-karne__izgara{ grid-template-columns:62px repeat(30, 1fr); gap:1px; }
   .gun-karne__izgara{ grid-template-columns:64px repeat(7, 1fr); } .gun-ekle{ flex-wrap:wrap; } .gun-ekle input[name="ad"]{ flex-basis:100%; }
-  .gun-ekle input[name="saat"], .gun-ekle select{ flex:1; } .gun-kahraman{ padding:18px; gap:14px; } .gun-soz, .gun-deste{ padding:18px; } .gun-destelist li{ flex-wrap:wrap; } .gun-destelist li span{ flex-basis:calc(100% - 40px); } }
+  .gun-ekle input[name="saat"], .gun-ekle select{ flex:1; } .gun-destelist li{ flex-wrap:wrap; } .gun-destelist li span{ flex-basis:calc(100% - 40px); } }
 @media (hover:none){ .gun-sil{ opacity:1; } }
-@media (max-width:700px){ .gun::before{ left:0; right:0; } }
 .gun-saat__simdi.is-sag b{ left:auto; right:8px; }
 
 /* Gecmis ve Sen */
@@ -317,13 +309,31 @@ GUN_SAYFASI = r"""<!doctype html>
 
 .gun-gir > *{ animation:gun-gel .55s cubic-bezier(.22,1,.36,1) both; animation-delay:calc(var(--i, 0) * 60ms); }
 @keyframes gun-gel{ from{ opacity:0; transform:translateY(10px); } }
-@media (max-width:900px){ .gun-ust{ grid-template-columns:1fr 1fr; } .gun-ust > :first-child{ grid-column:1 / -1; } .gun-alt{ grid-template-columns:1fr; }
-  .gun-alanlar{ grid-template-columns:repeat(3, 1fr); } }
-@media (max-width:560px){ .gun-ust{ grid-template-columns:1fr; } .gun-alanlar{ grid-template-columns:repeat(2, 1fr); } .gun-saat{ height:110px; }
-  .gun-saat__etiket span:nth-child(even){ visibility:hidden; } }
+@media (max-width:900px){ .gun-ust{ grid-template-columns:minmax(0, 1fr) minmax(0, 1.3fr); }
+  .gun-ust__b:first-child{ grid-column:1 / -1; margin-bottom:16px; padding-bottom:16px; border-bottom:2px dashed var(--border-strong); }
+  .gun-ust__b:nth-child(2){ margin-left:0; padding-left:0; border-left:0; }
+  .gun-alt{ grid-template-columns:minmax(0, 1fr); } }
+/* Telefon: 16 saatlik yatay eksene ad sigmaz; ayni bloklar saat sirasiyla liste olur, ustte gunun gecen kismi. */
+@media (max-width:560px){ .gun{ --gun-ic:16px; }
+  .gun-kahraman{ gap:12px 16px; } .gun-halka{ width:72px; height:72px; } .gun-halka b{ font-size:16px; } .gun-halka small{ display:none; }
+  .gun-niyet{ font-size:15px; }
+  .gun-ust{ grid-template-columns:minmax(0, 1fr); }
+  .gun-ust__b + .gun-ust__b{ margin-left:0; padding-left:0; border-left:0; }
+  .gun-ust__b:not(:last-of-type){ margin-bottom:16px; padding-bottom:16px; border-bottom:2px dashed var(--border-strong); }
+  .gun-alanlar{ grid-template-columns:minmax(0, 1fr); }
+  .gun-alan{ grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:12px; padding:10px 8px; }
+  .gun-alan + .gun-alan{ border-left:0; border-top:2px dashed var(--border-strong); }
+  .gun-alan__deger{ grid-column:2; grid-row:1; text-align:right; } .gun-alan small{ grid-column:1 / -1; }
+  .gun-karne__izgara{ grid-template-columns:64px repeat(7, 1fr); gap:3px; }
+  .gun-saat{ height:auto; margin-top:12px; display:grid; gap:6px; padding-top:12px; }
+  .gun-saat__izgara, .gun-saat__etiket, .gun-saat__simdi{ display:none; }
+  .gun-saat__gecmis{ top:0; bottom:auto; height:6px; opacity:1; background:var(--mod); }
+  .gun-saat[data-gorunum="yapacak"] .gun-saat__gecmis{ opacity:1; }
+  .gun-saat .gun-blok{ position:static; width:100%; height:36px; }
+  .gun-saat__bos{ position:static; padding:12px 0 4px; } }
 @media (prefers-reduced-motion:reduce){ .gun-gir > *, .gun-blok, .gun-kartyuz{ animation:none; } .gun-saat__simdi::before{ animation:none; }
-  .gun-alan, .gun-hava button, .gun-pil button, .gun-oneri a, .gun-dugme, .gun-halka .dolu, .gun-saat__gecmis, .gun-saat__simdi, .gun-sekil__cift i, .gun-gecis button{ transition:none; }
-  .gun-alan:hover, .gun-hava button:hover, .gun-dugme:hover, .gun-blok:hover, .gun-oneri a:hover{ transform:none; } .gun-blok:hover{ transform:translateX(-6px); } }
+  .gun-hava button, .gun-pil button, .gun-oneri a, .gun-dugme, .gun-halka .dolu, .gun-saat__gecmis, .gun-saat__simdi, .gun-sekil__cift i, .gun-gecis button{ transition:none; }
+  .gun-hava button:hover, .gun-dugme:hover, .gun-blok:hover, .gun-oneri a:hover{ transform:none; } }
 </style>
 </head>
 <body>
@@ -344,7 +354,7 @@ GUN_SAYFASI = r"""<!doctype html>
   var HOST = '__HOST__';
   var BOLUM = [{ id:'bugun', ad:'Bugün' }, { id:'analiz', ad:'Geçmiş' }, { id:'calisma', ad:'Sen' }];
   var ALANLAR = [['uyku', 'Uyku', 'spi'], ['beslenme', 'Beslenme', 'spi'], ['hareket', 'Hareket', 'spi'], ['calisma', 'Çalışma', 'ays'], ['gelisim', 'Gelişim', 'esp']];
-  var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP', gun:'Gün' }, MPORT = { ays:4173, spi:4183, esp:4193 }, SERIT_SIRA = { ays:0, spi:1, esp:2, gun:3 };
+  var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP', gun:'Gün' }, MPORT = { ays:4173, spi:4183, esp:4193 };
   var DILIM_AD = { sabah:'Sabah', ogle:'Öğle', aksam:'Akşam', gece:'Gece', gun:'Gün içinde' };
   function adres(m, rota){ return m === 'gun' ? '#bugun' : 'http://' + HOST + ':' + MPORT[m] + '/' + (rota ? '#king=' + rota : ''); }
   function oturum(){ var m = document.cookie.match(/(?:^|;\s*)lifeos_hesap=([^;]*)/); if(!m) return null;
@@ -431,7 +441,7 @@ GUN_SAYFASI = r"""<!doctype html>
   }
   function cumleHtml(){
     return '<p class="gun-cumle" id="gun-cumle">' + kac(cumle.metin || kodCumlesi()) + '<small>' + (cumle.kaynak === 'model'
-      ? 'Cümleyi model kurdu · sayılar ve adlar Gün’ün kodundan' : 'hesaplandı · Merkez açıkken cümleyi model kurar') + '</small></p>';
+      ? 'cümle modelden · sayılar koddan' : 'hesaplandı') + '</small></p>';
   }
   function cumleYaz(){ var e = document.getElementById('gun-cumle'); if(e) e.outerHTML = cumleHtml(); }
   function halkaHtml(){
@@ -454,7 +464,7 @@ GUN_SAYFASI = r"""<!doctype html>
             + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button><span>' + kac(x.ad) + '</span>' + (x.saat ? '<small>' + x.saat + '</small>' : '')
             + '<button type="button" class="gun-sil" data-plan-sil="' + i + '" aria-label="' + kac(x.ad) + ' sil" title="Sil">×</button></li>'; }).join('') + '</ul>'
         : '<p class="gun-senin" style="margin:0 0 10px">Modüllerin planı şeritte; buraya kendi işlerini ekle. King de görür.</p>')
-      + '<form class="gun-ekle" data-gun-ekle><input name="ad" maxlength="80" placeholder="İş ekle: kitap oku" aria-label="İşin adı" required/>'
+      + '<form class="gun-ekle" data-gun-ekle><input type="text" name="ad" maxlength="80" placeholder="İş ekle: kitap oku" aria-label="İşin adı" required/>'
       + '<input name="saat" type="time" aria-label="Saat (isteğe bağlı)"/><button type="submit">Ekle</button></form></section>';
   }
   var HAVA = [['gunes', 'Güneşli', '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>'],
@@ -522,8 +532,8 @@ GUN_SAYFASI = r"""<!doctype html>
   /* Simdi ne yapsam? — YALNIZ saate bakar (veri yok); bunu kartta soyler. */
   function oneri(){
     var x = GV ? GV.siradaki(serit(), simdiISO()) : null;
-    if(x && x.modul === 'gun') return { bas:x.ad, ne:'Sıradaki: kendi planından' + (x.saat ? ' · ' + x.saat : '') + '. Bitince planında işaretle.', ad:'Bitti olarak işaretle', href:'#bugun', kendi:x.kendi, kaynak:'planından' };
-    if(x) return { bas:x.ad, ne:'Sıradaki: ' + MAD[x.modul] + (x.saat ? ' · ' + x.saat : ' · ' + DILIM_AD[x.dilim]) + (x.alt ? ' · ' + x.alt : '') + '. Modül kendi planından verdi.',
+    if(x && x.modul === 'gun') return { bas:x.ad, ne:'Sıradaki: kendi planından' + (x.saat ? ' · ' + x.saat : ''), ad:'Bitti olarak işaretle', href:'#bugun', kendi:x.kendi, kaynak:'planından' };
+    if(x) return { bas:x.ad, ne:'Sıradaki: ' + MAD[x.modul] + (x.saat ? ' · ' + x.saat : ' · ' + DILIM_AD[x.dilim]) + (x.alt ? ' · ' + x.alt : ''),
       ad:MAD[x.modul] + '’de aç', href:adres(x.modul, x.rota), kaynak:'planından' };
     var s = new Date().getHours(), v = oku();
     if(!v.niyet && s >= 5 && s < 12) return { bas:'Günün niyetini yaz', ne:'Sabah: bugün neyi bitirirsen gün iyi geçmiş olur? Tek cümle yeter.', ad:'Niyete git', href:'#bugun', odak:true };
@@ -535,22 +545,21 @@ GUN_SAYFASI = r"""<!doctype html>
   }
   function ustHtml(v){
     var pil = Number(v.enerji) || 0;
-    return '<div class="gun-ust">'
-      + '<section class="gun-kart" style="--i:1"><h2 class="gun-kart__ad">Günün niyeti</h2>'
-      + '<input class="gun-niyet" id="gun-niyet" maxlength="120" placeholder="Bugün neyi bitirmek istiyorsun?" value="' + kac(v.niyet || '') + '" aria-label="Günün niyeti"/>'
-      + '<p class="gun-senin">Senin yazdığın · bu tarayıcıda</p></section>'
-      + '<section class="gun-kart" style="--i:2"><h2 class="gun-kart__ad">Enerji pili</h2><div class="gun-pil" data-v="' + pil + '">'
+    return '<div class="gun-kart gun-ust" style="--i:1">'
+      + '<section class="gun-ust__b"><h2 class="gun-kart__ad">Günün niyeti</h2>'
+      + '<input class="gun-niyet" id="gun-niyet" maxlength="120" placeholder="Bugün neyi bitirmek istiyorsun?" value="' + kac(v.niyet || '') + '" aria-label="Günün niyeti"/></section>'
+      + '<section class="gun-ust__b"><h2 class="gun-kart__ad">Enerji pili</h2><div class="gun-pil" data-v="' + pil + '">'
       + '<div class="gun-pil__govde" role="group" aria-label="Enerji">' + [1, 2, 3, 4, 5].map(function(n){
           return '<button type="button" data-pil="' + n + '" aria-label="Enerji ' + n + '/5: ' + PIL[n] + '" aria-pressed="' + (n === pil) + '"></button>'; }).join('') + '</div>'
-      + '<span class="gun-pil__metin">' + (pil ? PIL[pil] : 'veri yok') + '</span></div><p class="gun-senin">Senin girdiğin</p></section>'
-      + '<section class="gun-kart" style="--i:3"><h2 class="gun-kart__ad">İç hava</h2><div class="gun-hava" role="group" aria-label="İç hava">'
+      + '<span class="gun-pil__metin">' + (pil ? PIL[pil] : 'veri yok') + '</span></div></section>'
+      + '<section class="gun-ust__b"><h2 class="gun-kart__ad">İç hava</h2><div class="gun-hava" role="group" aria-label="İç hava">'
       + HAVA.map(function(h){ var on = v.hava === h[0];
           return '<button type="button" data-hava="' + h[0] + '" aria-pressed="' + on + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + h[2] + '</svg>' + h[1] + '</button>'; }).join('')
-      + '</div><p class="gun-senin">Senin girdiğin</p></section></div>';
+      + '</div></section><p class="gun-senin">Senin girdiğin</p></div>';
   }
-  function blokHtml(x, i){
-    return '<a class="gun-blok" href="' + kac(adres(x.modul, x.rota)) + '"' + (x.kendi != null ? ' data-kendi-blok="' + x.kendi + '"' : '') + ' data-durum="' + x.durum + '" style="--renk:var(--' + x.modul + ');--serit:' + SERIT_SIRA[x.modul]
-      + (x.yuzde == null ? '' : ';--x:' + x.yuzde.toFixed(2) + '%') + ';--i:' + i + '" title="' + kac(MAD[x.modul] + ' · ' + x.ad + (x.alt ? ' · ' + x.alt : '') + (x.saat ? ' · ' + x.saat : '')) + '">'
+  function blokHtml(x, i, yer){
+    return '<a class="gun-blok" href="' + kac(adres(x.modul, x.rota)) + '"' + (x.kendi != null ? ' data-kendi-blok="' + x.kendi + '"' : '') + ' data-durum="' + x.durum + '" style="--renk:var(--' + x.modul + ')'
+      + (yer ? ';--serit:' + yer.serit + ';--x:' + yer.x.toFixed(2) + '%;--gen:' + yer.gen : '') + ';--i:' + i + '" title="' + kac(MAD[x.modul] + ' · ' + x.ad + (x.alt ? ' · ' + x.alt : '') + (x.saat ? ' · ' + x.saat : '')) + '">'
       + '<span>' + kac(x.ad) + '</span>' + (x.saat ? '<small>' + x.saat + '</small>' : '') + '</a>';
   }
   function gorunsun(x){
@@ -559,20 +568,20 @@ GUN_SAYFASI = r"""<!doctype html>
   }
   function seritHtml(){
     var saatler = []; for(var h = 7; h <= 22; h++) saatler.push(h);
-    var sr = serit(), saatli = sr.bloklar.filter(gorunsun), saatsiz = sr.saatsiz.filter(gorunsun);
+    var sr = serit(), saatli = sr.bloklar.filter(gorunsun), saatsiz = sr.saatsiz.filter(gorunsun), yer = GV.seritYeri(saatli);
     var bos = veri.durum === 'bekle' ? 'Üç modülün bugünü getiriliyor…<small>&nbsp;</small>'
       : veri.durum === 'girisyok' ? 'Hesabınla giriş yapılmamış: veri yok<small>Giriş sayfasından hesabına girince AYS, SPİ ve ESP’nin bugünkü blokları burada dizilir</small>'
       : veri.durum === 'hata' ? 'Veri katmanı yüklenemedi<small>Sayfayı yenile</small>'
       : (gorunum === 'yaptim' ? 'Bugün biten blok yok' : 'Bekleyen blok yok') + '<small>' + (secAlan ? 'Bu alanda; alanı yeniden seçince hepsi döner' : 'Modüller bugün için plan yayınladıkça burada belirir') + '</small>';
-    return '<section class="gun-kart gun-serit" style="--i:4"><div class="gun-serit__ust"><h2>Günün şeridi</h2>'
+    return '<section class="gun-kart gun-serit" style="--i:4"><div class="gun-serit__ust"><h2 class="gun-kart__ad">Günün şeridi</h2>'
       + '<div class="gun-gecis" role="group" aria-label="Şerit">'
       + '<button type="button" data-gorunum="yaptim" aria-pressed="' + (gorunum === 'yaptim') + '">Yaptıklarım</button>'
       + '<button type="button" data-gorunum="yapacak" aria-pressed="' + (gorunum === 'yapacak') + '">Yapacaklarım</button></div></div>'
-      + '<div class="gun-saat" data-gorunum="' + gorunum + '" style="--simdi:' + simdiYuzde().toFixed(2) + '%">'
+      + '<div class="gun-saat" data-gorunum="' + gorunum + '" style="--simdi:' + simdiYuzde().toFixed(2) + '%;--seritler:' + yer.seritler + '">'
       + '<div class="gun-saat__izgara" aria-hidden="true">' + saatler.map(function(){ return '<span></span>'; }).join('') + '</div>'
       + '<div class="gun-saat__gecmis" aria-hidden="true"></div>'
       + '<div class="gun-saat__simdi' + (simdiYuzde() > 80 ? ' is-sag' : '') + '" aria-hidden="true"><b id="gun-simdi">' + saatMetni() + '</b></div>'
-      + (saatli.length ? saatli.map(blokHtml).join('') : (saatsiz.length ? '' : '<div class="gun-saat__bos">' + bos + '</div>'))
+      + (saatli.length ? saatli.map(function(x, i){ return blokHtml(x, i, yer.yerler[i]); }).join('') : (saatsiz.length ? '' : '<div class="gun-saat__bos">' + bos + '</div>'))
       + '<div class="gun-saat__etiket" aria-hidden="true">' + saatler.map(function(h){ return '<span>' + ('0' + h).slice(-2) + '</span>'; }).join('') + '</div>'
       + '</div>'
       + (saatsiz.length ? '<div class="gun-saatsiz"><span>Saati yok</span>' + saatsiz.map(function(x, i){ return blokHtml(x, i).replace('<span>', '<span>' + kac(DILIM_AD[x.dilim]) + ' · '); }).join('') + '</div>' : '')
@@ -582,17 +591,17 @@ GUN_SAYFASI = r"""<!doctype html>
   function alanlarHtml(){
     var oz = veri.karne ? veri.karne.bugunOzet : {};
     var hal = function(a){ var k = veri.karne && veri.karne.satirlar.filter(function(x){ return x.alan === a[0]; })[0]; return k ? k.hucreler[veri.karne.bugun] : 'veri-yok'; };
-    return '<div class="gun-alanlar" role="group" aria-label="Alanlar" style="--i:5">' + ALANLAR.map(function(a){
+    return '<div class="gun-kart gun-alanlar" role="group" aria-label="Alanlar" style="--i:5">' + ALANLAR.map(function(a){
       var h = hal(a), v = oz[a[0]];
-      var alt = h === 'yapildi' ? '<b>' + v + ' dk</b> · ölçüldü · ' + MAD[a[2]] : h === 'kayit-yok' ? 'bugün kayıt yok · ' + MAD[a[2]] : 'veri yok · ' + MAD[a[2]];
+      var deger = h === 'yapildi' ? v + ' dk' : h === 'kayit-yok' ? 'kayıt yok' : 'veri yok', alt = (h === 'yapildi' ? 'ölçüldü · ' : h === 'kayit-yok' ? 'bugün · ' : '') + MAD[a[2]];
       return '<button type="button" class="gun-alan" data-alan="' + a[0] + '" aria-pressed="' + (secAlan === a[0]) + '" style="--renk:var(--' + a[2] + ')">'
-        + '<b><i aria-hidden="true"></i>' + a[1] + '</b><span class="gun-alan__cubuk' + (h === 'yapildi' ? ' is-dolu' : h === 'kayit-yok' ? ' is-kayitsiz' : '') + '" aria-hidden="true"></span><small>' + alt + '</small></button>'; }).join('') + '</div>';
+        + '<b><i aria-hidden="true"></i>' + a[1] + '</b><span class="gun-alan__deger' + (h === 'yapildi' ? '' : ' is-yok') + '">' + deger + '</span><small>' + alt + '</small></button>'; }).join('') + '</div>';
   }
   function altHtml(){
     var o = oneri(), k = veri.karne, bugunNo = k ? k.bugun : (new Date().getDay() + 6) % 7;
     return '<div class="gun-alt"><section class="gun-kart gun-oneri" style="--i:6"><h2 class="gun-kart__ad">Şimdi ne yapsam?<small>' + (o.kaynak || 'saate göre') + '</small></h2>'
-      + '<h3>' + kac(o.bas) + '</h3><p>' + kac(o.ne) + '</p><a href="' + kac(o.href) + '"' + (o.odak ? ' data-odak-niyet' : '') + (o.kendi != null ? ' data-kendi-blok="' + o.kendi + '"' : '') + '>' + kac(o.ad) + ' →</a>'
-      + '<a class="gun-oneri__kart" href="#calisma">ya da desteden kart çek</a></section>'
+      + '<h3>' + kac(o.bas) + '</h3><p>' + kac(o.ne) + '</p><div class="gun-oneri__eylem"><a href="' + kac(o.href) + '"' + (o.odak ? ' data-odak-niyet' : '') + (o.kendi != null ? ' data-kendi-blok="' + o.kendi + '"' : '') + '>' + kac(o.ad) + ' →</a>'
+      + '<a class="gun-oneri__kart" href="#calisma">ya da desteden kart çek</a></div></section>'
       + planHtml() + '</div>'
       + karneHtml(ALANLAR.map(function(a, r){ var sat = k ? k.satirlar[r] : null;
           return { ad:a[1], modul:a[2], hucreler:sat ? sat.hucreler : GUN.map(function(){ return 'veri-yok'; }), degerler:sat ? sat.degerler : GUN.map(function(){ return null; }) }; }),
@@ -628,7 +637,7 @@ GUN_SAYFASI = r"""<!doctype html>
       + satirlar.map(function(sat){
           return '<b>' + sat.ad + '</b>' + sat.hucreler.map(function(h, j){ var d = sat.degerler[j], ne = ay ? sat.gunler[j] : etiketler[j];
             return '<i class="gun-kare is-' + h + (j === bugunNo ? ' is-bugun' : '') + '" style="--renk:var(--' + sat.modul + ')" title="' + sat.ad + ' · ' + ne + ': ' + HAL_AD[h] + (d != null && h === 'yapildi' ? ' (' + d + ' dk)' : '') + '" role="img" aria-label="' + sat.ad + ' ' + ne + ': ' + HAL_AD[h] + '"></i>'; }).join(''); }).join('')
-      + '</div><div class="gun-lejant"><span><i style="background:var(--mod)"></i>yapıldı</span>'
+      + '</div><div class="gun-lejant"><span><i style="background:var(--text-2)"></i>yapıldı</span>'
       + '<span><i style="box-shadow:inset 0 0 0 1.5px var(--text-3)"></i>kayıt yok</span>'
       + '<span><i class="gun-kare" style="display:inline-block;width:10px;height:10px"></i>veri yok</span></div>'
       + '<p class="gun-senin">Uyku, beslenme ve hareket: SPİ henüz günlük özet yayınlamıyor.</p></section>';
@@ -638,7 +647,7 @@ GUN_SAYFASI = r"""<!doctype html>
     var n = donemN, bg = bugun(), d = GV.donem(veri.gunluk, bg, n), d30 = n === 30 ? d : GV.donem(veri.gunluk, bg, 30), z = GV.izDizi(sen.iz, bg, n);
     var a = {}; d.satirlar.forEach(function(s){ s.gunler = d.gunler; a[s.alan] = s; });
     var a30 = {}; d30.satirlar.forEach(function(s){ a30[s.alan] = s; });
-    var giris = veri.durum === 'girisyok' ? '<p class="gun-senin" style="margin:0 0 12px">Hesabınla giriş yapılmamış: modüllerin özeti gelmez, sayılar «veri yok» kalır.</p>' : '';
+    var giris = veri.durum === 'girisyok' ? '<p class="gun-senin" style="margin:0">Hesabınla giriş yapılmamış: modüllerin özeti gelmez, sayılar «veri yok» kalır.</p>' : '';
     // enerji kutusu: senin girdigin
     var eH = z.gunler.map(function(g){ return g.enerji ? 'yapildi' : 'veri-yok'; }), eD = z.gunler.map(function(g){ return g.enerji; });
     var enerji = '<section class="gun-kart" style="--i:3;--renk:var(--mod)"><h2 class="gun-kart__ad">Enerji<small>' + z.girilen + '/' + n + ' gün</small></h2>'
@@ -667,7 +676,7 @@ GUN_SAYFASI = r"""<!doctype html>
         : '<p class="gun-senin" style="margin:0">' + (veri.durum === 'girisyok' ? 'Giriş yapılmadığı için modüllerin planı gelmedi.' : 'Bugün için plan yok: modüller plan yayınlayınca ya da Bugün’e iş ekleyince burada görünür.') + '</p>')
       + '</section>';
     // enerji ve ic hava izi
-    var iz = '<section class="gun-kart" style="--i:7;padding:18px 20px;margin-top:12px"><h2 class="gun-kart__ad">Enerji ve iç hava<small>senin girdiğin · girilmeyen gün nokta</small></h2>'
+    var iz = '<section class="gun-kart gun-izkart" style="--i:7"><h2 class="gun-kart__ad">Enerji ve iç hava<small>senin girdiğin · girilmeyen gün nokta</small></h2>'
       + '<div class="gun-iz' + (n > 7 ? ' is-ay' : '') + '" style="--n:' + n + '" role="img" aria-label="Son ' + n + ' gün: ' + z.girilen + ' gün enerji girildi' + (z.ortalama == null ? '' : ', ortalama ' + z.ortalama + '/5') + '">'
       + z.gunler.map(function(g){ var h = g.hava && HAVA.filter(function(x){ return x[0] === g.hava; })[0];
           return '<div title="' + g.gun + ': ' + (g.enerji ? 'enerji ' + g.enerji + '/5' : 'enerji girilmedi') + (h ? ', ' + h[1].toLocaleLowerCase('tr-TR') : '') + '">'
@@ -675,7 +684,7 @@ GUN_SAYFASI = r"""<!doctype html>
             + (h ? '<svg viewBox="0 0 24 24" aria-hidden="true">' + h[2] + '</svg>' : '<small>' + GUN[(new Date(g.gun + 'T12:00').getDay() + 6) % 7] + '</small>') + '</div>'; }).join('')
       + '</div></section>';
     return giris + '<div class="gun-olcu">' + olcuHtml(a.calisma, 'Çalışma', 'AYS', 1) + olcuHtml(a.gelisim, 'Gelişim', 'ESP', 2) + enerji + '</div>'
-      + karne + '<div class="gun-iki" style="margin-top:12px">' + sekil + plan + '</div>' + iz;
+      + karne + '<div class="gun-iki">' + sekil + plan + '</div>' + iz;
   }
 
   /* ---------------- Sen: kendi sozun, veren / calan, «Ne yapsam?» destesi (sunucu sozu 27). */
@@ -687,7 +696,7 @@ GUN_SAYFASI = r"""<!doctype html>
     return '<section class="gun-kart" style="--i:' + i + ';--renk:' + renk + '"><h2 class="gun-kart__ad">' + ad + '<small>' + l.length + '/12</small></h2>'
       + (l.length ? '<ul class="gun-cipler">' + l.map(function(x, j){ return '<li>' + kac(x) + '<button type="button" data-sen-sil="' + k + '" data-i="' + j + '" aria-label="' + kac(x) + ' sil">×</button></li>'; }).join('') + '</ul>'
         : '<p class="gun-senin" style="margin:0 0 12px">' + (k === 'veren' ? 'Seni ne dolduruyor? Yürüyüş, bir şarkı, bir arkadaş…' : 'Seni ne boşaltıyor? Uzun ekran, dağınık masa…') + '</p>')
-      + (l.length < 12 ? '<form class="gun-ekle" data-sen-ekle="' + k + '"><input name="ad" maxlength="40" placeholder="' + ornek + '" aria-label="' + ad + ': ekle" required/><button type="submit">Ekle</button></form>' : '')
+      + (l.length < 12 ? '<form class="gun-ekle" data-sen-ekle="' + k + '"><input type="text" name="ad" maxlength="40" placeholder="' + ornek + '" aria-label="' + ad + ': ekle" required/><button type="submit">Ekle</button></form>' : '')
       + '</section>';
   }
   function senHtml(){
@@ -707,9 +716,9 @@ GUN_SAYFASI = r"""<!doctype html>
       + '<p class="gun-senin">Kartı kural seçer: sık yaptıkların ve enerjine uyanlar öne çıkar' + (enerji ? ' · enerjin ' + enerji + '/5' : ' · Bugün’de enerji girersen ona göre seçer') + '.</p>'
       + (sonEylem ? '<p class="gun-senin" role="status">' + kac(sonEylem) + '</p>' : '')
       + '</div><div><h2 class="gun-kart__ad">Deste<small>' + dst.length + '/30</small></h2><ul class="gun-destelist">'
-      + dst.map(function(k, j){ return '<li><span>' + kac(k.ad) + '</span><small>' + (k.enerji ? EN_AD[k.enerji] + ' · ' : '') + k.evet + ' yaptın · ' + k.gec + ' geçtin</small>'
+      + dst.map(function(k, j){ return '<li><span>' + kac(k.ad) + '</span><small>' + [k.enerji ? EN_AD[k.enerji] : '', k.evet ? k.evet + ' yaptın' : '', k.gec ? k.gec + ' geçtin' : ''].filter(Boolean).join(' · ') + '</small>'
           + '<button type="button" class="gun-sil" data-kart-sil="' + j + '" aria-label="' + kac(k.ad) + ' sil" title="Sil">×</button></li>'; }).join('') + '</ul>'
-      + (dst.length < 30 ? '<form class="gun-ekle" data-kart-ekle><input name="ad" maxlength="60" placeholder="Kart ekle: bir şarkı aç" aria-label="Kartın adı" required/>'
+      + (dst.length < 30 ? '<form class="gun-ekle" data-kart-ekle><input type="text" name="ad" maxlength="60" placeholder="Kart ekle: bir şarkı aç" aria-label="Kartın adı" required/>'
         + '<select name="enerji" aria-label="Kartın enerjisi"><option value="">Fark etmez</option><option value="az">Az enerji</option><option value="cok">Çok enerji</option></select>'
         + '<button type="submit">Ekle</button></form>' : '')
       + '</div></section>';

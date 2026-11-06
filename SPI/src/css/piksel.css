@@ -227,9 +227,11 @@
 :root[data-zemin="piksel"] .tema-ornek{ background-image:none; }
 
 /* Gün: aynı kart dili, ışık yok */
-:root[data-zemin="piksel"] :is(.gun-kart,.gun-alan,.gun-oneri){ background-color:var(--surface); background-image:none; box-shadow:var(--px-kart); }
-:root[data-zemin="piksel"] .gun-alan[aria-pressed="true"]{ box-shadow:0 -2px 0 var(--renk),0 2px 0 var(--renk),-2px 0 0 var(--renk),2px 0 0 var(--renk); }
+:root[data-zemin="piksel"] :is(.gun-kart,.gun-oneri){ background-color:var(--surface); background-image:none; box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .gun-alan[aria-pressed="true"]{ background-color:var(--surface-2); box-shadow:inset 0 -3px 0 var(--renk); }
 :root[data-zemin="piksel"] .gun-blok{ background-image:none; }
+:root[data-zemin="piksel"] :is(.gun-oneri a:not(.gun-oneri__kart),.gun-dugme:not(.is-ikinci),.gun-ekle button){ box-shadow:var(--px-ana); margin:2px; }
+:root[data-zemin="piksel"] .gun-dugme.is-ikinci{ box-shadow:var(--px-dugme); margin:2px; }
 
 /* Kaydırma çubuğu ve seçim */
 :root[data-zemin="piksel"] ::-webkit-scrollbar{ width:12px; height:12px; }
@@ -370,7 +372,10 @@
 /* Küçük tepki: bardağa basınca iner */
 :root[data-zemin="piksel"] .su-bardak:active{ transform:translateY(2px); }
 @media (max-width:679px){
-  :root[data-zemin="piksel"] .site--v5 .kapak__ic::after{ top:14px; right:14px; width:48px; height:48px; }
+  :root[data-zemin="piksel"] .site--v5 .kapak__ic::after{ top:10px; right:14px; width:40px; height:40px; }
+  /* Yüz selamın satırında durur, başlığa binmez; telefonda kart dolgusu içeriği daraltmaz. */
+  :root[data-zemin="piksel"] .site--v5 .kapak__selam{ padding-right:48px; }
+  :root[data-zemin="piksel"] .sayfa--kapakli .bugun__alan{ padding:18px 16px 20px; }
 }
 /* iPhone 16 pikselden küçük yazı kutusuna odaklanınca sayfayı büyütür ve geri almaz: ekran sağa taşar (2026-11-06). */
 @supports (-webkit-touch-callout:none){

@@ -82,6 +82,20 @@ LIFEOS.GunVeri = (function(){
       || null;
   }
 
+  /* Serit yerlesimi: saat sirali bloklar sabit genislikte; sagdan tasan sola dayanir,
+     cakisan alt siraya iner. Sira modulu degil yeri soyler (modulu renk soyler). */
+  function seritYeri(bloklar, gen){
+    const g = gen || 20, son = [];
+    const yerler = (bloklar || []).map(b => {
+      const x = Math.min(b.yuzde == null ? 0 : b.yuzde, 100 - g);
+      let serit = 0;
+      while(son[serit] > x) serit++;
+      son[serit] = x + g;
+      return { x, serit, gen:g };
+    });
+    return { yerler, seritler:Math.max(1, son.length) };
+  }
+
   /* Karne ve donemin ortak cekirdegi: gun listesi icin bes satir, uc hal. */
   function satirKur(gunluk, gunler, bugunIso){
     const liste = gunluk && Array.isArray(gunluk.moduller) ? gunluk.moduller : [];
@@ -174,5 +188,5 @@ LIFEOS.GunVeri = (function(){
     return en;
   }
 
-  return { serit, siradaki, karne, donem, planGercek, izDizi, kartCek, BASLANGIC };
+  return { serit, seritYeri, siradaki, karne, donem, planGercek, izDizi, kartCek, BASLANGIC };
 })();
