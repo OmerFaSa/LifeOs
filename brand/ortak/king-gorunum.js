@@ -931,6 +931,24 @@ window.LIFEOS.PARCA.yazilar({
     if(KI.L.KABUK && typeof KI.L.KABUK.kenarSakinlestir === 'function'){ try{ KI.L.KABUK.kenarSakinlestir(); }catch(e){ /* kabuk yok */ } }
     /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
+    const gorunen = window.visualViewport;
+    if(gorunen){   // aynı işlev ikinci kez eklenmez
+      gorunen.addEventListener('resize', gorunenAlanaOtur);
+      gorunen.addEventListener('scroll', gorunenAlanaOtur);
+      gorunenAlanaOtur();
+    }
+  }
+
+  /* iPhone klavyesi sayfayı küçültmez, görünen alanı kaydırır: telefonda King görünen alana oturur (king-piksel.css).
+     Kullanıcı iki parmakla büyütmüşse dokunulmaz. */
+  function gorunenAlanaOtur(){
+    const g = window.visualViewport, el = document.querySelector('[data-king]');
+    if(!g || !el || g.scale > 1.01) return;
+    const boy = g.height + 'px', kisaldi = el.style.getPropertyValue('--king-boy') !== boy;
+    el.style.setProperty('--king-ust', g.offsetTop + 'px');
+    el.style.setProperty('--king-boy', boy);
+    const akis = el.querySelector('.king__akis');
+    if(kisaldi && akis) akis.scrollTop = akis.scrollHeight;
   }
 
   /* Büyük King sayfayı kilitler (king.css html.king-acik). Sayfa kayabiliyorsa

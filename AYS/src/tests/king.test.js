@@ -516,6 +516,26 @@
       k.kapat();
     }));
 
+    /* 2026-11-06: iPhone klavyesi görünen alanı kaydırır; pencere altta arka sayfayı gösteriyordu. */
+    it('King görünen alana oturur; iki parmakla büyütülünce dokunulmaz', () => sahneyle(async () => {
+      const { k } = sahne(), dinle = {}, eski = window.visualViewport;
+      const g = { height:700, offsetTop:0, scale:1, addEventListener:(t, f) => { dinle[t] = f; } };
+      window.visualViewport = g;
+      try{
+        k.ac();
+        const el = document.querySelector('[data-king]'), oku = a => el.style.getPropertyValue(a);
+        expect(oku('--king-boy')).toBe('700px');
+        Object.assign(g, { height:400, offsetTop:260 });
+        dinle.resize();
+        expect(oku('--king-boy')).toBe('400px');
+        expect(oku('--king-ust')).toBe('260px');
+        Object.assign(g, { height:200, scale:2 });
+        dinle.resize();
+        expect(oku('--king-boy')).toBe('400px');
+        k.kapat();
+      }finally{ window.visualViewport = eski; }
+    }));
+
     /* Söz 11–15 (2026-10-16: «King'e o an fotoğraf yükleyip gönderebilelim, ekranı
        açabilelim, sesli konuşabilelim; söylemediğim eksikleri de bul»). */
     it('fotoğraf modülün kendi akışına teslim edilir; işi olmayan modülde söylenir', () => sahneyle(async () => {

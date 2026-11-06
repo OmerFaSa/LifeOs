@@ -352,6 +352,10 @@
 @media (max-width:679px){
   :root[data-zemin="piksel"] .site--v5 .kapak__ic::after{ top:14px; right:14px; width:48px; height:48px; }
 }
+/* iPhone 16 pikselden küçük yazı kutusuna odaklanınca sayfayı büyütür ve geri almaz: ekran sağa taşar (2026-11-06). */
+@supports (-webkit-touch-callout:none){
+  :is(input,select,textarea):not(.hesap__kod){ font-size:16px !important; }
+}
 
 /* Kenar araçları: açıkken de ahşap; yazı solmaz */
 :root[data-zemin="piksel"] .site--v5 .kenar .kenar__arac:is(:hover,[aria-expanded="true"]){ background:#ffffff1c; color:var(--piksel-kenar-yazi); }
