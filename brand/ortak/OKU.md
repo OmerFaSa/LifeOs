@@ -55,6 +55,7 @@ buraya girmez (`tools/parca_tembel_test.js` yakalar).
 | `tanitim.*` | `js/core`, `css`, `tests` | ilk kurulumun üç adımı; `KURULUM_HTML`/`KURULUM_GIT` (171): her adım tek soru, ilerleme üstte, yeniden çizmeden |
 | `ogret.*` | `js/core`, `tests` | öğretme motoru `ogret.js` → `LIFEOS.OGRET` (KING-4 §D): kurallı yanılgı teşhisi (kavram, işlem, dikkat, bilmiyor; kanıt yoksa tür yok), Sokratik satır, 1/3/7 gün konu tekrarı ve benzer soru, eski kaydın kayıpsız göçü, King araçları `<modül>_tekrarlarim`, `<modül>_yanlis_teshis` |
 | `kilavuz.*` | `js/core`, `css`, `tests` | kullanım kılavuzu ekranı: Menü'nün başı, Ayarlar › Kılavuz, komut paleti; anlattığı menü yolları testte gerçek menüyle karşılaştırılır |
+| `patrontur.*` | `js/core`, `css`, `tests` | kurulum ve filmden sonraki spot ışıklı tur: King açar, her modülü kendi patronu anlatır, durum portlar arası çerezde; Menü ve Ayarlar › Kılavuz yeniden başlatır |
 | `simge.*` | `js/core`, `css`, `tests` | kimlikten görsel adına giden tek kural |
 | `medya.js` | `js/core` | **üretilmiş** künye — hangi görsel gerçekten var (`tools/marka.py --kunye`) |
 | `quota.js` | `js/core` | ücretsiz modelin istek sınırı — **kalıp** |
