@@ -17076,11 +17076,21 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 /* Ayırıcı çizgi kart kenarının sıfırlanmasından sonra gelir (özgüllük + !important). */
 .sayfa--kapakli .bugun .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket):not(.donen){
   border-top:2px dashed var(--border-strong) !important; }
+/* «Gün» etiketi kartın kendi başlığının («Günün akışı», «Öğünler») tekrarıydı. */
+.sayfa--kapakli .bugun__alan[aria-label="Gün"] > .bugun__etiket{ display:none; }
+/* Küçültme düğmesi kartın dolgusuna çıkar: başlık satırının sağı alttaki satırlarla aynı hizada biter. */
+@media (min-width:680px){
+  .sayfa--kapakli .bugun .gizle-araclar--uzerinde{ top:0; right:-28px; }
+  .sayfa--kapakli .bugun .gizle-acik:has(> .gizle-araclar--uzerinde) > .kutu__bas::after{ content:none; }
+}
 /* Kutunun iç boşlukları da kalkar: içerik etiket sütununa hizalanır. */
 .sayfa--kapakli .bugun .kutu__bas,
 .sayfa--kapakli .bugun .kutu__govde,
 .sayfa--kapakli .bugun .kutu__ayak{ padding-left:0 !important; padding-right:0 !important; }
 .sayfa--kapakli .bugun .kutu__bas{ padding-top:0 !important; }
+/* Akış satırları ve ayak düğmesi kart başlığıyla aynı sol ve sağ hizada: 24 piksel içeride ve 14 piksel dışarıda duruyorlardı. */
+.sayfa--kapakli .bugun :is(.akis__satir, .akis__bos){ padding-inline:0; }
+.sayfa--kapakli .bugun .kutu__ayak > .btn:first-child{ margin-left:2px; }
 /* Öneri alanının kendi kart kuralı (kabuk.css) ve defter satırlarının iç boşluğu da kalkar. */
 .site--v5 .sayfa--kapakli .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
   background:transparent !important; box-shadow:none !important; border-color:transparent !important; padding:0 !important; border-radius:0 !important; }
@@ -20352,9 +20362,11 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 :root[data-zemin="piksel"] .tema-ornek{ background-image:none; }
 
 /* Gün: aynı kart dili, ışık yok */
-:root[data-zemin="piksel"] :is(.gun-kart,.gun-alan,.gun-oneri){ background-color:var(--surface); background-image:none; box-shadow:var(--px-kart); }
-:root[data-zemin="piksel"] .gun-alan[aria-pressed="true"]{ box-shadow:0 -2px 0 var(--renk),0 2px 0 var(--renk),-2px 0 0 var(--renk),2px 0 0 var(--renk); }
+:root[data-zemin="piksel"] :is(.gun-kart,.gun-oneri){ background-color:var(--surface); background-image:none; box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .gun-alan[aria-pressed="true"]{ background-color:var(--surface-2); box-shadow:inset 0 -3px 0 var(--renk); }
 :root[data-zemin="piksel"] .gun-blok{ background-image:none; }
+:root[data-zemin="piksel"] :is(.gun-oneri a:not(.gun-oneri__kart),.gun-dugme:not(.is-ikinci),.gun-ekle button){ box-shadow:var(--px-ana); margin:2px; }
+:root[data-zemin="piksel"] .gun-dugme.is-ikinci{ box-shadow:var(--px-dugme); margin:2px; }
 
 /* Kaydırma çubuğu ve seçim */
 :root[data-zemin="piksel"] ::-webkit-scrollbar{ width:12px; height:12px; }
@@ -20495,7 +20507,10 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 /* Küçük tepki: bardağa basınca iner */
 :root[data-zemin="piksel"] .su-bardak:active{ transform:translateY(2px); }
 @media (max-width:679px){
-  :root[data-zemin="piksel"] .site--v5 .kapak__ic::after{ top:14px; right:14px; width:48px; height:48px; }
+  :root[data-zemin="piksel"] .site--v5 .kapak__ic::after{ top:10px; right:14px; width:40px; height:40px; }
+  /* Yüz selamın satırında durur, başlığa binmez; telefonda kart dolgusu içeriği daraltmaz. */
+  :root[data-zemin="piksel"] .site--v5 .kapak__selam{ padding-right:48px; }
+  :root[data-zemin="piksel"] .sayfa--kapakli .bugun__alan{ padding:18px 16px 20px; }
 }
 /* iPhone 16 pikselden küçük yazı kutusuna odaklanınca sayfayı büyütür ve geri almaz: ekran sağa taşar (2026-11-06). */
 @supports (-webkit-touch-callout:none){
@@ -48123,7 +48138,8 @@ window.LIFEOS = window.LIFEOS || {};
     const yay = halka || svg.querySelector('.pk-gosterge__iz');
     let L = 0, cizgi = 4;
     if(yay && !svg.querySelector('.px-ara') && typeof yay.getTotalLength === 'function'){
-      L = yay.getTotalLength();
+      /* Ekrandan kalkmış ya da gizli halka ölçülemez: atılan hata sıradaki çizimleri de düşürüyordu. */
+      try{ L = yay.getTotalLength(); }catch(e){ delete svg.dataset.pxc; return null; }
       if(L > 40) cizgi = parseFloat(getComputedStyle(yay).strokeWidth) || 4;
     }
     if(!kareler.length && !(L > 40)) return null;
@@ -50888,7 +50904,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'31afbb77', at:'2026-11-06 18:48', dirty:true };
+R.BUILD = { id:'5b043819', at:'2026-11-06 20:32', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -83113,6 +83129,20 @@ LIFEOS.GunVeri = (function(){
       || null;
   }
 
+  /* Serit yerlesimi: saat sirali bloklar sabit genislikte; sagdan tasan sola dayanir,
+     cakisan alt siraya iner. Sira modulu degil yeri soyler (modulu renk soyler). */
+  function seritYeri(bloklar, gen){
+    const g = gen || 20, son = [];
+    const yerler = (bloklar || []).map(b => {
+      const x = Math.min(b.yuzde == null ? 0 : b.yuzde, 100 - g);
+      let serit = 0;
+      while(son[serit] > x) serit++;
+      son[serit] = x + g;
+      return { x, serit, gen:g };
+    });
+    return { yerler, seritler:Math.max(1, son.length) };
+  }
+
   /* Karne ve donemin ortak cekirdegi: gun listesi icin bes satir, uc hal. */
   function satirKur(gunluk, gunler, bugunIso){
     const liste = gunluk && Array.isArray(gunluk.moduller) ? gunluk.moduller : [];
@@ -83205,7 +83235,7 @@ LIFEOS.GunVeri = (function(){
     return en;
   }
 
-  return { serit, siradaki, karne, donem, planGercek, izDizi, kartCek, BASLANGIC };
+  return { serit, seritYeri, siradaki, karne, donem, planGercek, izDizi, kartCek, BASLANGIC };
 })();
 
 /* ==== js/core/king-arac.js ==== */
