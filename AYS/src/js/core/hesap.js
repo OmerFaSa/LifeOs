@@ -551,6 +551,8 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.sistem-yeniden-bak':'Yeniden kontrol et',
   'ortak.hesap.sistem-guncellendi':'Sistem güncellendi',
   'ortak.hesap.ev-agini-ac':'Ev ağını aç',
+  'ortak.hesap.sertifika-yenilendi':'Güvenlik sertifikası yenilendi: artık yalnız LifeOS adreslerine etki ediyor. Her cihazda bir kez yeniden kur (Yeni cihaz bağla › QR), eskisini kaldır.',
+  'ortak.hesap.sertifika-tamam':'Tamam, kurdum',
   'ortak.hesap.her-yerden-not':'Telefon ve tablet evden uzakta da bu bilgisayara ve King’e bağlanır. Tailscale gerekir; bilgisayar açık kalmalı.',
   'ortak.hesap.her-yerden-ac':'Her yerden erişimi aç',
   'ortak.hesap.her-yerden':'Her yerden erişim',
@@ -570,6 +572,8 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.ts-giris':'Tailscale kurulu ama giriş yapılmamış.',
   'ortak.hesap.ts-funnel':'Bu bilgisayarda funnel açık, yani internete açık bir kapı var. Önce kapat: tailscale funnel reset',
   'ortak.hesap.ev-agi-telefon-tablet':'Telefon ve tablet bu bilgisayara bağlanabilsin. Veri yalnız evdeki ağda dolaşır.',
+  'ortak.hesap.qr-tailscale':'Yeni cihazda Tailscale açık olsun, QR’ı kamerayla okut; hesabına kendiliğinden bağlanır.',
+  'ortak.hesap.android-ulasilamiyor':'Bilgisayar açıksa bu cihazda Tailscale açık olsun, Özel DNS «Otomatik» ya da «Kapalı» olsun, Tailscale pil kısıtlamasından çıkarılsın.',
   'ortak.hesap.qr-tek-adim':'Yeni cihazın kamerasıyla QR’ı okut; sertifikası kurulunca hesabına kendiliğinden bağlanır.',
   'ortak.hesap.hesap-ve-esitleme':'Hesap ve eşitleme',
   'ortak.hesap.i-ki-adimli-dogrulama':'İki adımlı doğrulama',
@@ -770,7 +774,7 @@ window.LIFEOS.HESAP = (function(){
   function cihazAdi(){
     const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
     const tur = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad'
-      : /Android/.test(ua) ? (/Mobile/.test(ua) ? yz('ortak.hesap.android-telefon') : yz('ortak.hesap.android-tablet'))
+      : L.Pwa && L.Pwa.androidMi() ? (/Mobile/.test(ua) ? yz('ortak.hesap.android-telefon') : yz('ortak.hesap.android-tablet'))
       : /Windows/.test(ua) ? yz('ortak.hesap.windows-pc') : /Macintosh/.test(ua) ? 'Mac' : 'Cihaz';
     return tur + (ortam.yerelUygulama() ? ' · uygulama' : '');
   }
@@ -1682,11 +1686,15 @@ window.LIFEOS.HESAP = (function(){
   function adresNotu(){
     if(ortam.yerelUygulama() || !sunucu || !sunucu.yerel) return '';
     const l = Array.isArray(sunucu.ev_agi) ? sunucu.ev_agi : [];
+    /* Kök yenilendiyse (sistem/telefon.py): kullanıcı «Tamam» diyene dek hatırlatılır. */
+    const yenilendi = sunucu.sertifika_yenilendi
+      ? '<p class="hesap__not">' + yz('ortak.hesap.sertifika-yenilendi') + '</p><button type="button" class="hesap__ikinci" data-hesap="sertifika-tamam">' + yz('ortak.hesap.sertifika-tamam') + '</button>'
+      : '';
     if(l.length){
-      return ('<p class="hesap__not">' + yz('ortak.hesap.telefonda-ve-tablette-bilgis') + ' <b>') + l.map(kac).join(('</b> ' + yz('ortak.hesap.ya-da') + ' <b>'))
+      return yenilendi + ('<p class="hesap__not">' + yz('ortak.hesap.telefonda-ve-tablette-bilgis') + ' <b>') + l.map(kac).join(('</b> ' + yz('ortak.hesap.ya-da') + ' <b>'))
         + ('</b>' + yz('ortak.hesap.tablette-tarayicida') + ' <b>https://') + kac(l[0]) + ':' + TELEFON_KAPI + ('</b> ' + yz('ortak.hesap.acilir') + '</p>');
     }
-    return ('<p class="hesap__not">' + yz('ortak.hesap.telefon-ve-tablet-icin-ev') + ' ')
+    return yenilendi + ('<p class="hesap__not">' + yz('ortak.hesap.telefon-ve-tablet-icin-ev') + ' ')
       + ('<code>' + yz('ortak.hesap.python-sistem-telefon-py') + '</code> çalıştırıp LifeOS\'u yeniden başlat.</p>');
   }
 
@@ -2963,6 +2971,8 @@ window.LIFEOS.HESAP = (function(){
           + '<button type="button" class="hesap__ana hesap__tam" data-hesap="' + (pc.acik ? 'uzak-kapat">' + yz('ortak.hesap.her-yerden-kapat')
             : 'uzak-ac">' + yz('ortak.hesap.her-yerden-ac')) + '</button>';
       return (m.uzakHal ? '<p class="hesap__not" role="status">' + kac(merkezHalMetni(m.uzakHal)) + '</p>' : yukleniyor(m))
+        + (m.uzakHal && m.uzakHal.hal === 'bilgisayar-kapali' && L.Pwa && L.Pwa.androidMi()
+          ? '<p class="hesap__not">' + yz('ortak.hesap.android-ulasilamiyor') + '</p>' : '')
         + '<ul class="hesap-liste">' + satir({ ikon:'yenile', ad:yz('ortak.hesap.yeniden-dene'), eylem:'uzak-bak' }) + '</ul>'
         + yonet
         + (pc ? '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.acilista'), alt:yz('ortak.hesap.acilista-not'),
@@ -3129,9 +3139,11 @@ window.LIFEOS.HESAP = (function(){
         return tanit('etkinlik', yz('ortak.hesap.kodun-suresi-doldu'), yz('ortak.hesap.guvenlik-icin-kod-5-dakika'))
           + ('<button type="button" class="hesap__ana hesap__tam" data-hesap="bag-yeni">' + yz('ortak.hesap.yeni-kod') + '</button>');
       }
-      /* Tek QR: kurulum sayfası (http, sertifika gerektirmez) sertifikayı kurdurur, sonra bağlar. */
-      const ev = evAdresleri()[0];
-      const adres = ev ? ev.replace(/^https:/, 'http:').replace(':' + TELEFON_KAPI, ':' + KURULUM_KAPI) + '/?bagla=' + b.kod : '';
+      /* Tek QR: kurulum sayfası (http, sertifika gerektirmez) yolu seçer, sonra bağlar. Yeni cihazda
+         henüz Tailscale olmayabilir: ev ağı varsa QR ona gider. Yalnız Tailscale varsa doğrudan modüle. */
+      const tum = evAdresleri(), ev = tum.find(a => !/\.ts\.net\b/.test(a)), ts = ev ? '' : tum[0];
+      const adres = ev ? ev.replace(/^https:/, 'http:').replace(':' + TELEFON_KAPI, ':' + KURULUM_KAPI) + '/?bagla=' + b.kod
+        : ts ? ts + '/?bagla=' + b.kod : '';
       const qr = adres && L.QR && !ortam.yerelUygulama() ? L.QR.svg(adres, { etiket:yz('ortak.hesap.tabletin-kamerasiyla-okutula') }) : '';
       return '<div class="hesap-bag">'
         + '<p class="hesap-bag__kod" aria-label="' + kac(yz('ortak.hesap.baglama-kodu-2') + b.kod.split('').join(' ')) + '">'
@@ -3139,7 +3151,7 @@ window.LIFEOS.HESAP = (function(){
         + '<p class="hesap-bag__sure" data-hesap-sure>' + kac(kalanMetni(b.bitis)) + '</p>'
         + (qr ? '<div class="hesap-qr hesap-qr--kucuk">' + qr + '</div>' : '') + '</div>'
         + adimlar([yz('ortak.hesap.yeni-cihazda-lifeos-u-ac'), '«Kodla bağlan»a dokun ve bu kodu yaz'
-          + (qr ? ('<span>' + yz('ortak.hesap.qr-tek-adim') + '</span>') : '')])
+          + (qr ? ('<span>' + yz(ts ? 'ortak.hesap.qr-tailscale' : 'ortak.hesap.qr-tek-adim') + '</span>') : '')])
         + (!ev && pcMi() && kim().r === 'admin'
           ? '<p class="hesap__not">' + yz('ortak.hesap.ev-agi-telefon-tablet') + '</p><button type="button" class="hesap__ana hesap__tam" data-hesap="ev-agi-ac">' + yz('ortak.hesap.ev-agini-ac') + '</button>' : '')
         + (pcMi() && kim().r === 'admin'
@@ -3957,6 +3969,12 @@ window.LIFEOS.HESAP = (function(){
       merkezDenenen = null;
       merkezBagla().catch(() => null);
       uzakYukle();
+    }else if(ad === 'sertifika-tamam'){
+      is.disabled = true;
+      merkezIs(async () => {
+        await api('/api/hesap/sertifika-tamam', {});
+        sunucu.sertifika_yenilendi = false;
+      });
     }else if(ad === 'ev-agi-ac'){
       is.disabled = true;
       merkezIs(async () => (await evAgiAc()).mesaj);

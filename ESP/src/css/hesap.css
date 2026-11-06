@@ -661,6 +661,12 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .hesap-hap--simge{ display:inline-flex; align-items:center; gap:6px; }
 .hesap-hap--simge .hesap-ikon{ width:14px; height:14px; color:var(--ok-ink, var(--ok)); stroke-width:2; }
 /* Yeni giriş uyarısı: nötr zemin, durumu simge söyler. */
+/* Android: modülü ana ekrana kurma şeridi (pwa.js söz 6). */
+.pwa-serit{ position:fixed; left:12px; right:12px; bottom:calc(var(--altbant-h, 64px) + 8px + env(safe-area-inset-bottom, 0px));
+  z-index:var(--z-overlay); display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 12px;
+  background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:var(--r); font-size:var(--fs-sm); }
+.pwa-serit span{ flex:1 1 160px; font-weight:600; }
+.pwa-serit button{ min-height:44px; padding:0 16px; border:0; border-radius:var(--r); font:inherit; }
 .hesap-olaykart{ display:flex; align-items:flex-start; gap:12px; margin:0 0 22px; padding:14px 16px; border-radius:16px;
   background:var(--surface-2); animation:hesap-alttan .42s cubic-bezier(.32,.72,0,1) both; }
 .hesap-olaykart__ikon{ flex:none; width:22px; height:22px; margin-top:1px; fill:none; stroke:var(--text); stroke-width:1.8;

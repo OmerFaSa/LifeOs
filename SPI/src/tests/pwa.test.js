@@ -124,6 +124,47 @@
     });
   });
 
+  describe('Android kurulum şeridi', () => {
+    const ANDROID = { userAgent:'Mozilla/5.0 (Linux; Android 14; SM-X710)', maxTouchPoints:5 };
+    const olay = () => { const e = { engel:0, soruldu:0 };
+      e.preventDefault = () => { e.engel++; }; e.prompt = async () => { e.soruldu++; }; return e; };
+    const temizle = () => { localStorage.removeItem('lifeos.kurulum.kapali');
+      document.querySelectorAll('.pwa-serit').forEach(s => s.remove()); };
+
+    it('Android: telefon, masaüstü sitesi isteyen tablet; bilgisayar ve iPhone değil', () => {
+      expect(P().androidMi(ANDROID)).toBe(true);
+      expect(P().androidMi({ userAgent:'Mozilla/5.0 (X11; Linux x86_64)', maxTouchPoints:5 })).toBe(true);
+      expect(P().androidMi({ userAgent:'Mozilla/5.0 (X11; Linux x86_64)', maxTouchPoints:0 })).toBe(false);
+      expect(P().androidMi({ userAgent:'Mozilla/5.0 (Windows NT 10.0)', maxTouchPoints:10 })).toBe(false);
+      expect(P().androidMi({ userAgent:'Mozilla/5.0 (iPhone)', maxTouchPoints:5 })).toBe(false);
+    });
+
+    it('«Kur» tarayıcının onayını açar; bilgisayarda teklife dokunulmaz', () => {
+      temizle();
+      const e = olay();
+      expect(P().kurulumSeridi(e, { navigator:{ userAgent:'Mozilla/5.0 (Windows NT 10.0)' } })).toBe(null);
+      expect(e.engel).toBe(0);
+      const s = P().kurulumSeridi(e, { navigator:ANDROID });
+      expect(e.engel).toBe(1);
+      expect(s.querySelector('span').textContent).toBe('Bu modülü ana ekrana kur');
+      s.querySelector('[data-pwa="kur"]').click();
+      expect(e.soruldu).toBe(1);
+      expect(document.querySelector('.pwa-serit')).toBe(null);
+      temizle();
+    });
+
+    it('«Şimdi değil» bu modülde bir daha sormaz; ikinci teklif şeridi çoğaltmaz', () => {
+      temizle();
+      P().kurulumSeridi(olay(), { navigator:ANDROID });
+      const s = P().kurulumSeridi(olay(), { navigator:ANDROID });
+      expect(document.querySelectorAll('.pwa-serit').length).toBe(1);
+      s.querySelector('[data-pwa="kapat"]').click();
+      expect(document.querySelector('.pwa-serit')).toBe(null);
+      expect(P().kurulumSeridi(olay(), { navigator:ANDROID })).toBe(null);
+      temizle();
+    });
+  });
+
   describe('164 · Bildirim kartı', () => {
     const KART = { modul:'ays', baslik:'Sıradaki 20:30', cumle:'Paragraf · akşam bloğu, 30 soru.',
       eylemler:[{ id:'basla', ad:'Başla' }, { id:'ertele', ad:'15 dk ertele' }], rota:'today' };
