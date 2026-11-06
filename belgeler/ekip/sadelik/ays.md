@@ -28,10 +28,10 @@ denemesi değildir. ✓ evet · ~ kısmen · ✕ hayır.
 | Plan › Hedefler | ~ → ✓ | ~ → ~ | ✓ → ✓ | Tablo telefonda okunuyor |
 | Analiz › İlerleme | ✕ → ✓ | ✕ → ✓ | ~ → ✓ | Başta tek cümle: ilk deneme, aylık karar ya da düşen net; ikinci «Günün blokları» kalktı |
 | Analiz › Tahmin (eski «Gelecek») | ~ → ✓ | ✕ → ✓ | ✓ → ✓ | Boşken «Deneme ekle»; önce cevap, sonra «Neden sınav günü değil?» |
-| Analiz › Ayrıntı | ~ → ~ | ~ → ~ | ✓ → ✓ | Kayıt yokken «114 soru geride» yazmıyor; ad açık soru |
+| Analiz › Neden? (eski «Ayrıntı») | ~ → ✓ | ~ → ~ | ✓ → ✓ | Kayıt yokken «114 soru geride» yazmıyor; ad netin nedenini sorduğunu söylüyor |
 | Analiz › Telafi | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: ilk satır durumu söylüyor |
 | Öğren › Konular | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: başta sıradaki konu ve «Başla», ders kartlarında okunan sayısı |
-| Öğren › Adım adım (eski «Öğrenme») | ~ → ✓ | ✓ → ✓ | ✓ → ✓ | Yalnız ad; Konular'la birleşme açık soru |
+| Öğren › Adım adım (eski «Öğrenme») | ~ → ✓ | ✓ → ✓ | ✓ → ✓ | Sekme değil: Konular'daki «Adım adım öğren» açar, açıkken Konular seçili |
 | Öğren › Anlatım, Sorular, Koç | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: içeriğin kendisi; model yokken Koç bunu söylüyor |
 | Öğren › Ders notları | ~ → ✓ | ~ → ✓ | ✓ → ✓ | Boşken tek düğme |
 | Onaylar | ✓ → ✓ | ✓ → ✓ | ✓ → ✓ | Yeterli: boşken ne olduğunu söylüyor |
@@ -62,9 +62,7 @@ denemesi değildir. ✓ evet · ~ kısmen · ✕ hayır.
 - **Çalışma'da beş sekme telefona sığmıyor.** «Kendini sına» kaydırınca görünüyor (ortak).
 - **Hızlı kayıt sıkışık.** Üç seçim alt alta, kaydet düğmesi küçük `↵` (ortak `vitrin.js tekSatirSoru`).
 - **«N bölüm gizli» satırı** yeni kullanıcıya «bir şey saklanmış» dedirtiyor (ortak).
-- **İlerleme › Özet uzun** (1999 px). Satır yönü verdi, ama kartların çoğu yine sıralı okunuyor; Tekrar yinelemesi açık soru 3.
-- **«Ayrıntı» adı** ne olduğunu söylemiyor (açık soru 2).
-- **Konular ve Adım adım** iki ayrı başlama yolu (açık soru 1).
+- **İlerleme › Özet uzun** (1999 px). Satır yönü verdi, ama kartların çoğu yine sıralı okunuyor.
 - **Plan › Program ve Hedefler'de eylem yok.** Salt bakış olduğu için «şimdi ne yapacağım» kısmen kalıyor; ekleyecek gerçek bir iş bulamadım.
 
 ## Birinci tur: önce / sonra (en karmaşıktan en sadeye)
@@ -88,7 +86,7 @@ ekranlarda sayı biraz arttı (İlerleme 107 söz, Hafta 119, Konu takibi 177, S
 | 12 | Ofis › Toplantı | Toplantı yap | 2 → 1 + şerit | 124 → 58 | 12 → 7 | 1 → 1 | 1643 → 1100 | Toplantıyı başlat → değişmedi |
 | 13 | Çalışma › Sınama | Sınava başla | 2 → 1 + şerit | 74 → 59 | 14 → 15 | 1 → 1 | 1396 → 1069 | Sınamayı başlat → değişmedi; Havuz şerit |
 | 14 | Plan › Program | Plana bak | 3 | 154 → 154 | 6 → 6 | 0 | 1546 → 1546 | Yok; dar sütun telefonda düzeldi |
-| 15 | Öğren › Konular, Öğrenme | Konuya başla | 2 | 171; 39 | 30; 186 | 0; 2 | 2414; 1055 | **Dokunulmadı**, aşağıda soru 1 |
+| 15 | Öğren › Konular, Öğrenme | Konuya başla | 2 | 171; 39 | 30; 186 | 0; 2 | 2414; 1055 | Sonra birleşti: Adım adım Konular’dan açılır (karar 1) |
 | 16 | Öğren › Anlatım, Sorular | Oku; çöz | 1 | 620; 211 | 16; 24 | 3; 2 | 5149; 1565 | Dokunulmadı: uzunluk içerikten |
 | 17 | Plan › Hedefler; Analiz › Ayrıntı, Telafi; Onaylar; Kütüphane | Tek iş | 1 | ≤186 | ≤11 | ≤2 | ≤1991 | Sade; dokunulmadı |
 | — | Ayarlar › Rütbe | — | — | 151 | 8 | 0 | 2862 | Kapsam dışı (depo sahibinin kararı) |
@@ -141,14 +139,16 @@ Bunlar `brand/ortak/` içinde, üç modülü birden değiştirir:
 - **Hızlı kayıt telefonda sıkışık.** `vitrin.js` `tekSatirSoru`.
 - **Masaüstünde sekmeler yine oynuyor.** Yaprak dikey ortalı olduğu için sayfa boyuyla kayıyor. Tercihten geldi; yukarı yaslamak üç modülü değiştirir, sormadan yapılmadı.
 
-## Depo sahibine sorular
+## Depo sahibinin kararları (2026-11-06)
 
-Hiçbiri yapılmadı; karar bekliyor.
-
-1. **Öğren › Konular ile Öğren › Öğrenme birleşsin mi?** İkisi de konu listesi ve «başla» düğmesi gösteriyor. Biri Anlatım'a, öbürü adım adım öğrenmeye götürüyor. Öğren'de altı sekme bu yüzden kalabalık.
-2. **«Ayrıntı» sekmesinin adı değişsin mi?** İçinde deneme karşılaştırma, hata haritası, sıra ve hız var; ad bunu söylemiyor. Öneri: «Neden?».
-3. **Özet'te yinelenen kart silinsin mi?** İlerleme › Özet'te Tekrar kartı ile dönen «Tekrar borcu» aynı sayıyı söylüyor.
-4. **Öğren alt banda çıksın mı?** Her gün gereken iş şu an Menü'nün içinde. Ortak kabuk değişir, Y3 = 4 hedefine dokunur.
+1. **Konular ile Adım adım birleşti.** Öğren'de bir başlama yolu: Konular. Adım adım sekme değil; Konular'daki
+   «Adım adım öğren» açar (karışık tekrar ve kendi konun dahil), her konunun Anlatım'ındaki giriş de duruyor.
+   Açıkken seçicide Konular yanar (`app.js UST`). Öğren 6 sekmeden 5'e indi.
+2. **«Ayrıntı» → «Neden?».** Deneme karşılaştırma, hata haritası, sıra ve hız: netin nedeni.
+3. **Tekrar borcu Özet'te bir kez.** Düğmeli «Tekrar kartları» kutusu kalır; dönen «Göstergeler» kartı aynı
+   sayıyı ikinci kez söylemez. Seçeneğin yazısı tersini diyordu (dönen kartın kalması); düğmeli kutu «şimdi ne
+   yapacağım»ı da söylediği için o kaldı. Süreç göstergeleri (İlerleme › Konular) yine gösteriyor.
+4. **Öğren alt banda çıkmadı** (şimdilik hayır): ortak kabuk değişmedi.
 
 Birinci turdaki ad değişikliklerinden geri isteyeceğin olursa: `PARCA.sayfa` satırında tek sözcük.
 
@@ -158,7 +158,6 @@ Birinci turdaki ad değişikliklerinden geri isteyeceğin olursa: `PARCA.sayfa` 
 - İlerleme › Özet'in kart düzeni: kartlar `today.js PanoUst` ve ortak pano biçiminde; bölmek Faz 2 kararını açar.
 - Konu takibi'nde 40 düğme kaldı: her konu bir düğme, liste ilk beşe kısılmış değil.
 - Anlatım ve Sorular'ın içine girilmedi.
-- `AYS/dist` yeniden derlenmedi: paralel oturumlarla çakışır, birleştirmeden sonra derlenir.
 
 ## Denetim
 
@@ -167,11 +166,12 @@ parçalar yerinde, rozetler, kayma, «Sırada» seçimi, sıra ve adlar, boş ek
 
 | Denetim | Sonuç |
 |---|---|
-| `AYS` `runtests.js` | 3408/3408 |
-| `AYS` `smoke.js` | temiz, 58 ekran, 10 sekme |
-| `AYS` `layoutcheck.js` | temiz, 68 yer, 390 ve 820 piksel |
+| `AYS` `runtests.js` | 3410/3410 |
+| `AYS` `smoke.js` | temiz, 57 ekran, 10 sekme |
+| `AYS` `layoutcheck.js` | temiz, 66 yer, 390 ve 820 piksel |
 | `AYS` `a11ycheck.js` | temiz (1 bilinen eksik izin listesinde) |
-| `tools/mobil_tara.js AYS` | 268 ölçüm, 0 bulgu |
+| `AYS` `perfcheck.js` | bütçe içinde |
+| `tools/mobil_tara.js AYS` | 264 ölçüm, 0 bulgu |
 | `tools/yazi.py --denetle` | temiz |
 | `tools/pusula.js` | AYS iyi gün 3 eylem, Bugün 1 kart, 4 menü (hedefte) |
 | `tools/sadelik.js AYS` | kuralı aşan tek ekran Rütbe (dokunulmadı) |

@@ -144,7 +144,7 @@ R.App = (function(){
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
      Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
-  const UST = { topic:'subjects', gun:'today' };
+  const UST = { topic:'subjects', gun:'today', ogrenme:'ogren' };
 
   /* Telefon alt bandı (KOLAY-PLANI Faz 2): Bugün · Çalışma · Analiz · Menü; masaüstü kenarı da aynı (kabuk.js ANA_CEKMECE). */
   const BANT = ['bugun', 'calisma', 'analiz'];

@@ -12,7 +12,7 @@ window.LIFEOS.PARCA.yazilar({
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
-window.LIFEOS.PARCA.sayfa({ id:'ogrenme', modul:'ays', king:{ sira:122, ad:'Öğrenme', es:['öğrenme', 'konu öğren', 'adım adım öğren', 'öğrenme motoru'] }, cekmece:'ogren', ad:'Adım adım', ikon:'zap', sira:15 });
+window.LIFEOS.PARCA.sayfa({ id:'ogrenme', modul:'ays', king:{ sira:122, ad:'Öğrenme', es:['öğrenme', 'konu öğren', 'adım adım öğren', 'öğrenme motoru'] } });
 window.LIFEOS.PARCA.komut({ modul:'ays', sira:35, group:'Git', label:'Öğrenme — adım adım konu, karışık tekrar, kendi konun', icon:'zap', route:'ogrenme', run(){ R.App.go('ogrenme'); } });
 
 R.Screens.ogrenme = (function(){

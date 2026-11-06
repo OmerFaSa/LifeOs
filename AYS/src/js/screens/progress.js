@@ -154,7 +154,8 @@ R.Screens.progress = (function(){
     const sayi = o => L.SAYI ? L.SAYI.html(o) : U.esc(String(o.deger) + (o.birim ? ' ' + o.birim : ''));
     const sira = t => t === 'danger' ? 0 : t === 'warn' ? 1 : 2;
     const buyuk = t => String(t || '').charAt(0).toLocaleUpperCase('tr-TR') + String(t || '').slice(1);
-    const m = kpiValues().map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
+    /* Tekrar borcu Özet'teki «Tekrar kartları» kutusunda (düğmesiyle); dönen kartta ikinci kez yazılmaz (depo sahibi, 2026-11-06). */
+    const m = kpiValues().filter(c => c.key !== 'cardDebt').map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
       .sort((a, b) => (sira(a.c.tone) - sira(b.c.tone)) || a.i - b.i)
       .map(({ c, def }) => c.num == null
         ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : yz('ays.progress.veri-yok')) + '.',

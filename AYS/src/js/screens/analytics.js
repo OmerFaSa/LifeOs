@@ -150,7 +150,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı',
   'ays.analytics.ayrintili-analiz':'Ayrıntılı analiz',
 });
-window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Ayrıntı', ikon:'search', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Neden?', ikon:'search', sira:30 });
 
 R.Screens.analytics = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

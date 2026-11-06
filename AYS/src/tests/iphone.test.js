@@ -259,7 +259,7 @@
 
   describe('iPhone · Faz 3 · Analiz (AYS)', () => {
 
-    it('İlerleme: sekiz KPI tek dönen kart; açık trend ve karar kapısı; başvuru gizli', async () => {
+    it('İlerleme: KPI’lar tek dönen kart (tekrar borcu Özet’te bir kez); açık trend ve karar kapısı; başvuru gizli', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const kok = await ciz('progress');
@@ -268,7 +268,7 @@
           /* KPI kartı «Göstergeler» (Faz 2: Özet'teki Bugün «Gidişat»ından ayrı). */
           const d = kok.querySelector('.donen[aria-label="Göstergeler"]');
           expect(!!d).toBe(true);
-          expect(d.querySelectorAll('.donen__madde').length >= 8).toBe(true);
+          expect(d.querySelectorAll('.donen__madde').length >= 7).toBe(true);
           const acik = bolumBolum(R, 'progress', kok)[0].acik;
           expect(acik.length <= 3).toBe(true);
           expect(acik.indexOf('test-bazlı-trend')).toBe(-1);

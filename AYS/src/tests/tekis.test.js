@@ -91,7 +91,9 @@
       expect(ad('calisma', 'subjects')).toBe('Konu takibi');
       expect(ad('calisma', 'quiz')).toBe('Kendini sına');
       expect(ad('analiz', 'gelecek')).toBe('Tahmin');
-      expect(ad('ogren', 'ogrenme')).toBe('Adım adım');
+      expect(ad('analiz', 'analytics')).toBe('Neden?');
+      /* Konular ile Adım adım birleşti: ikinci başlama yolu sekme değil, Konular'dan açılır; açıkken Öğren seçili. */
+      expect(R.App.NAV.find(g => g.id === 'ogren').items.some(i => i.id === 'ogrenme')).toBe(false);
       expect(ad('ofis', 'office')).toBe('Ekip özeti');
       expect(ad('ofis', 'team')).toBe('Uzmana sor');
     });
@@ -175,6 +177,23 @@
       try{ expect(an.textContent.indexOf('Bu haftanın birikimi')).toBe(-1); }finally{ an.remove(); }
       const ge = await ciz('gelecek');
       try{ expect(ge.querySelector('[data-act="next-action"][data-next="new-exam"]') != null).toBe(true); }finally{ ge.remove(); }
+    });
+
+    it('Konular adım adım öğrenmeyi açar; açıkken Öğren › Konular seçili kalır', async () => {
+      await hazirla();
+      const h = String(await R.Screens.ogren.render());
+      expect(h.indexOf('data-om-git="ana"') >= 0).toBe(true);
+      expect(R.App.UST.ogrenme).toBe('ogren');
+    });
+
+    it('İlerleme › Özet: tekrar borcu bir kez (dönen göstergelerde yok)', async () => {
+      await hazirla();
+      const kok = await ciz('progress');
+      try{
+        const donen = kok.querySelector('#bl-ozet .donen[data-donen]');
+        expect(!!donen).toBe(true);
+        expect(donen.textContent.indexOf('Tekrar borcu')).toBe(-1);
+      }finally{ kok.remove(); }
     });
 
     it('Ekrandaki bölüme geçmek sayfayı oynatmaz; ekran dışındakine kayar', () => {
