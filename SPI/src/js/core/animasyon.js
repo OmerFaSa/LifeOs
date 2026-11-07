@@ -572,7 +572,9 @@ window.LIFEOS = window.LIFEOS || {};
        o modülün notunu yalnız o modül bilir. */
     document.body.appendChild(kap);
     /* Piksel: perde iki yandan gelen büyük beyaz buluttur (resmi CSS'te, piksel.css); ortada selam ve gidilen modül. */
-    const bulut = document.documentElement.getAttribute('data-zemin') === 'piksel';
+    /* shortcut: bulut geçişi kapalı (kullanıcı, 2026-11-07: «bulutu kaldır, eski manzara gelsin; bulutu sonra yapacağız»);
+       açmak için bu satırı data-zemin="piksel" denetimine geri çevir ve perde.html'e .px-bulut markupunu geri koy. */
+    const bulut = false;
     const P = L.PIKSEL;
     if(bulut){
       const b = document.createElement('div');
