@@ -508,11 +508,7 @@ window.LIFEOS = window.LIFEOS || {};
     '.lifeos-gecis.is-son::after{opacity:1;}',
     /* Varış: perde ilk karede durur; logosu yeniden gelmez, zaten yerinde. */
     'html.gecis-gel .perde--marka .perde__logo,html.gecis-gel .perde--marka .perde__ortam{animation:none!important;}',
-    /* Varışta sayfa perdenin ardında (duvar rengi) kurulur; hazır olunca (gecis-hazir) perde.js perdeyi kaldırır:
-       selam kartı ve duvar birlikte söner, sayfa altından gelir (kullanıcı, 2026-11-07: «kart kaybolurken öbür sayfa gelsin»). */
-    'html.gecis-gel .perde--karsilama::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;',
-    'background:var(--piksel-duvar,var(--bg));}',
-    'html.gecis-gel .perde--karsilama.perde--kapaniyor{transition:opacity .9s cubic-bezier(.4,0,.2,1);}',
+    /* Varışın duvar örtüsü ilk boyamada gerekir: brand/seviye/seviye.css (html.gecis-gel .perde--karsilama::after). */
   ].join('');
 
   function gecisStil(){

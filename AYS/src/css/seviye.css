@@ -42,6 +42,11 @@
   touch-action:none;
 }
 .perde--kapaniyor{ opacity:0; pointer-events:none; }
+/* Modül geçişiyle varış (html.gecis-gel: perde.html satır içi betiği çerezden, ilk boyamadan önce): sayfa
+   perdenin ardında duvar rengiyle örtülü kurulur; hazır olunca perde.js perdeyi kaldırır, selam kartı ve
+   duvar birlikte söner, sayfa altından gelir (kullanıcı, 2026-11-07: «kart kaybolurken öbür sayfa gelsin»). */
+html.gecis-gel .perde--karsilama::after{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:var(--piksel-duvar, var(--bg, #120d08)); }
+html.gecis-gel .perde--karsilama.perde--kapaniyor{ transition:opacity .9s cubic-bezier(.4,0,.2,1); }
 .perde[hidden]{ display:none; }
 
 /* ---------- ortam (bulanık arka kopya) ---------- */

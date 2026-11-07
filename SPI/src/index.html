@@ -129,6 +129,9 @@
 (function(){
   var el = document.getElementById('marka-perde');
   if(!el) return;
+  /* Modül geçişiyle mi gelindi (animasyon.js lifeos_gecis çerezi)? Tek dosya sürümünde animasyon.js sonda
+     yüklenir; seviye.css'teki varış örtüsü ilk boyamada gerekir, sınıf burada konur. */
+  try{ if(/(?:^|;\s*)lifeos_gecis=/.test(document.cookie || '')) document.documentElement.classList.add('gecis-gel'); }catch(e){}
   /* Hareket azaltma tercihinde marka girisi HIC gorunmez. Karar LifeOS'un
      KENDI Animasyonlar ayaridir (brand/ortak/animasyon.js: depo, sonra cerez,
      yoksa Tam), tarayicinin «azalt» cevabi degil: Windows'ta animasyon
