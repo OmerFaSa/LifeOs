@@ -81,6 +81,10 @@
 :root[data-zemin="piksel"] .lifeos-gecis:has(.px-bulut){ background:none; }
 .lifeos-gecis:not(.is-kapali) .px-bulut i{ transform:translateX(-101%); }
 .lifeos-gecis.is-acik .px-bulut i{ transform:translateX(-86%); }
+/* Varış (perde.js şehir yakınlaşması): bulut gidişteki gibi aralanır, şehir yaklaşır; perde kalkarken şehir arka plana karışır. */
+.perde--karsilama.is-sehir .px-bulut i{ transform:translateX(-86%); }
+.perde--karsilama .piksel-sehir{ transition:opacity .45s ease; }
+.perde--kapaniyor .piksel-sehir{ opacity:0; }
 .perde--kapaniyor .px-bulut i{ transform:translateX(-101%); transition-duration:.8s; }
 /* Yazı sayfayla birlikte değişir: gidenin yazısı önce söner, varanın yazısı bulutun üstünde belirir. Sürekli olan yalnız buluttur. */
 .lifeos-gecis.is-kalkis .px-bulut__kart{ opacity:0; transition:opacity .4s ease; }
@@ -98,7 +102,22 @@
 :root[data-zemin="piksel"] .perde--karsilama .karsilama{ position:relative; z-index:1; }
 /* Seçim sayfası: tarla görünür, kapı zemini kalkar */
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi{ background:transparent; }
-:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__tanitim{ --fg:#3a2430; --fg-2:#4a3440; --text:#3a2430; --text-2:#4a3440; }
+/* Tanıtım da giriş kartı gibi kâğıt bir levhadır (kullanıcı, 2026-11-07: «bu ekran basit kaldı»; koyu temada ve
+   gece manzarasında yazı sabit koyu kahve olduğu için kayboluyordu). Renkler kartın temaya uyan renkleridir. */
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__tanitim{ --text:inherit; --text-2:inherit; --text-3:inherit; --fg:var(--text); --fg-2:var(--text-2); color:var(--text);
+  padding:26px 28px 22px; background:var(--piksel-kagit);
+  box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),12px 14px 0 var(--piksel-golge); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__ad{ color:var(--text); text-shadow:3px 3px 0 var(--piksel-golge); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__slogan, :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sozler span{ color:var(--text-2); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler li{ position:relative;
+  background:color-mix(in oklab, var(--renk) 16%, var(--piksel-tahta));
+  box-shadow:inset 4px 0 0 var(--renk), inset 0 3px 0 #ffffff1a, inset 0 -3px 0 #00000033;
+  transition:transform .18s steps(3), box-shadow .18s steps(3); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler li:hover{ transform:translate(-2px, -2px);
+  box-shadow:inset 4px 0 0 var(--renk), inset 0 3px 0 #ffffff1a, inset 0 -3px 0 #00000033, 4px 4px 0 var(--renk); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler b{ color:color-mix(in oklab, var(--renk) 45%, #fff); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler span{ color:var(--piksel-kenar-yazi-2, #e8d4b6); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sozler svg{ color:var(--text-2); }
 /* King: seçilen karakter, Bağlam sütununun altındaki küçük oda ve seçim düğmeleri */
 :root[data-zemin="piksel"] .king-fig{ display:block; width:100%; height:100%; background:var(--fig-king) center/contain no-repeat; image-rendering:pixelated; }
 :root[data-zemin="piksel"] .king__yuz, :root[data-zemin="piksel"] .king:not(.is-mini) .king__sahne .king__yuz{ background:none; border-radius:0; box-shadow:none; }

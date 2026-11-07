@@ -263,6 +263,7 @@ window.LIFEOS = window.LIFEOS || {};
   const KATALOG = /*KATALOG*/{
     "lifeos.hareket":"tpo",
     "lifeos.hareket.hiz":"tpo",
+    "lifeos.hareket.bulut":"tpo",
     "lifeos.ses":"tpo",
     "lifeos.zemin":"tpso",
     "lifeos.yazi":"tpso",
@@ -459,7 +460,24 @@ window.LIFEOS = window.LIFEOS || {};
   const GECIS_CEREZ = 'lifeos_gecis';
   const GECIS_MS = 560;
   /* Bulutlu sıra: kapan · bekle · açıl · manzara · kapan · sayfa. GECIS_BULUT_KAP piksel.css .px-bulut i geçişiyle aynıdır. */
-  const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_BEKLE = 120, GECIS_ACIK = 600, GECIS_BULUT_MS = GECIS_BULUT_HAZIR + 3 * GECIS_BULUT_KAP + GECIS_BEKLE + GECIS_ACIK + 60;
+  const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_BEKLE = 120;
+  /* Bulutlu geçişin tıklamadan sayfa değişimine dek süresi (açık kalma kullanıcının ayarı). */
+  const gecisBulutMs = () => GECIS_BULUT_HAZIR + 3 * GECIS_BULUT_KAP + GECIS_BEKLE + Math.round(bulutSure() * 1000) + 60;
+  /* Bulut açıkken manzaranın (şehir kamerası) kaç saniye göründüğü (kullanıcı, 2026-11-07: «bulutların
+     arasındaki süreyi animasyon kısmından ayarlayabilelim»). Hem gidişte (uzaklaşma) hem varışta (yaklaşma). */
+  const BULUT_ANAHTAR = 'lifeos.hareket.bulut', BULUT_EN_AZ = .6, BULUT_EN_COK = 8, BULUT_VARSAYILAN = 2.4;
+  function bulutSure(){
+    let v = NaN;
+    try{ v = Number(localStorage.getItem(BULUT_ANAHTAR)); }catch(e){ /* depo kapalı */ }
+    return isFinite(v) && v >= BULUT_EN_AZ && v <= BULUT_EN_COK ? Math.round(v * 10) / 10 : BULUT_VARSAYILAN;
+  }
+  function bulutSureAyarla(sn){
+    const v = Math.round(Number(sn) * 10) / 10;
+    if(!isFinite(v) || v < BULUT_EN_AZ || v > BULUT_EN_COK) return false;
+    try{ localStorage.setItem(BULUT_ANAHTAR, String(v)); }catch(e){ return false; }
+    return true;
+  }
+  const bulutYaz = v => String(v).replace('.', ',') + ' sn';
   const GECIS_OMUR = 15000;
   const GECIS_MODUL = /^(ays|spi|esp|hkm)$/;
   /* Perdenin ölçüsü ve camı seviye.css .perde--marka ile AYNIDIR; biri
@@ -582,17 +600,20 @@ window.LIFEOS = window.LIFEOS || {};
        Varış sayfasının ilk boyamasında aynı bulut durur (perde.html, resmi CSS'te): sayfa değişimi görünmez, perde kalkınca bulut iki yana çekilir.
        Kayma, bulut katmanları hazırlanınca başlar: büyük katmanın ilk çizimi ilk ~300 ms'deki kareleri yutuyordu, bulut «aniden» geliyordu (kare kare ölçüldü, 2026-11-06).
        Manzara bulutun ardında, kapanınca kurulur: çizimi (100-250 ms) görünür hareketi durdurmaz. Manzara yoksa (seçim sayfası) yalnız kapanır. */
+    /* 2026-11-07: manzara artık şehir kamerasıdır (piksel.js sehirKoy): bulut açılınca kendi apartmanımızdan
+       geri çekilir, bulut katmanına yükselir; açık kalma süresi kullanıcının ayarı (bulutSure). */
     const ses = t => { try{ if(L.SES && L.SES.olaySes) L.SES.olaySes(t); }catch(e){ /* ses bilgi taşımaz */ } };
+    const acik = Math.round(bulutSure() * 1000);
     setTimeout(() => {
       kap.classList.add('is-kapali');
       ses('bulutGel');
       if(!(P && P.manzaraKoy)){ kap.classList.add('is-kalkis'); git(GECIS_BULUT_KAP + 60); return; }
       setTimeout(() => {
-        P.manzaraKoy(kap);
+        if(!(P.sehirKoy && P.sehirKoy(kap, 'uzak', acik + GECIS_BULUT_KAP))) P.manzaraKoy(kap);
         setTimeout(() => { kap.classList.add('is-acik'); ses('bulutGit'); }, 40);   // manzara bir kare boyansın
       }, GECIS_BULUT_KAP + GECIS_BEKLE);
-      setTimeout(() => { kap.classList.remove('is-acik'); kap.classList.add('is-kalkis'); ses('bulutGel'); }, 2 * GECIS_BULUT_KAP + GECIS_BEKLE + GECIS_ACIK);
-      git(GECIS_BULUT_MS - GECIS_BULUT_HAZIR);
+      setTimeout(() => { kap.classList.remove('is-acik'); kap.classList.add('is-kalkis'); ses('bulutGel'); }, 2 * GECIS_BULUT_KAP + GECIS_BEKLE + acik);
+      git(gecisBulutMs() - GECIS_BULUT_HAZIR);
     }, GECIS_BULUT_HAZIR);
     return true;
   }
@@ -781,9 +802,23 @@ window.LIFEOS = window.LIFEOS || {};
       + (alan in HIZ_GRUP ? '<small class="anihiz__oran" data-anihiz-oran="' + alan + '">etkin ' + oranYaz(hizOrani(alan)) + '</small>' : '') + '</span>' + hizSeg(alan) + '</div>';
     const grup = g => '<div class="anihiz__grup">' + satir(g) + ('<details class="anihiz__ayrinti"><summary>' + yz('ortak.animasyon.ayrinti') + '</summary>')
       + Object.keys(HIZ_GRUP).filter(k => HIZ_GRUP[k] === g).map(satir).join('') + '</details></div>';
-    return '<div class="anihiz__kok">' + grup('ui') + grup('ajan') + '</div>';
+    const b = bulutSure();
+    const bulut = '<div class="anihiz__grup"><div class="anihiz__satir"><span class="anihiz__ad">Bulut manzarası<small class="anihiz__oran">modül geçişinde şehrin görünme süresi</small></span>'
+      + '<div class="anihiz"><input type="range" class="anihiz__cubuk" min="' + BULUT_EN_AZ + '" max="' + BULUT_EN_COK + '" step="0.1" value="' + b + '" data-anibulut'
+      + ' aria-label="Bulut manzarası süresi" aria-valuetext="' + bulutYaz(b) + '" style="--dolu:' + ((b - BULUT_EN_AZ) / (BULUT_EN_COK - BULUT_EN_AZ) * 100) + '%">'
+      + '<output class="anihiz__deger" data-anibulut-deger>' + bulutYaz(b) + '</output></div></div></div>';
+    return '<div class="anihiz__kok">' + grup('ui') + grup('ajan') + bulut + '</div>';
   }
   if(typeof document !== 'undefined' && document.addEventListener){
+    document.addEventListener('input', e => {
+      const t = e.target && e.target.matches && e.target.matches('input[data-anibulut]') ? e.target : null;
+      if(t && bulutSureAyarla(t.value)){
+        const v = bulutSure();
+        t.style.setProperty('--dolu', ((v - BULUT_EN_AZ) / (BULUT_EN_COK - BULUT_EN_AZ) * 100) + '%');
+        t.setAttribute('aria-valuetext', bulutYaz(v));
+        document.querySelectorAll('[data-anibulut-deger]').forEach(x => { x.textContent = bulutYaz(v); });
+      }
+    });
     document.addEventListener('input', e => {
       const b = e.target && e.target.matches && e.target.matches('input[data-anihiz]') ? e.target : null;
       if(!b) return;
@@ -805,7 +840,8 @@ window.LIFEOS = window.LIFEOS || {};
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
-    gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS, GECIS_BULUT_MS,
+    gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS, gecisBulutMs,
+    BULUT_ANAHTAR, bulutSure, bulutSureAyarla,
     _yonlendir:fn => { const eski = yonlendir; if(typeof fn === 'function') yonlendir = fn; return eski; },
   });
 })();

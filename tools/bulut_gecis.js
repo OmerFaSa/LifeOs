@@ -51,7 +51,7 @@ function izleyici(kip){
   const ornek = () => {
     const sol = document.querySelector('.px-bulut__sol'), sag = document.querySelector('.px-bulut__sag'), perde = document.querySelector('.perde--karsilama'), gecis = document.querySelector('.lifeos-gecis'), kart = document.querySelector('.px-bulut__kart');
     const a = sol && sol.getBoundingClientRect(), b = sag && sag.getBoundingClientRect();
-    k.push({ t:performance.timeOrigin + performance.now(), sag:a ? a.right : null, sol:b ? b.left : null, vw:innerWidth, perde:!!perde, kapan:!!(perde && perde.classList.contains('perde--kapaniyor')), gecis:!!gecis, kartO:kart ? +getComputedStyle(kart).opacity : null });
+    k.push({ t:performance.timeOrigin + performance.now(), sag:a ? a.right : null, sol:b ? b.left : null, vw:innerWidth, perde:!!perde, kapan:!!(perde && perde.classList.contains('perde--kapaniyor')), sehir:!!(perde && perde.classList.contains('is-sehir')), gecis:!!gecis, kartO:kart ? +getComputedStyle(kart).opacity : null });
     requestAnimationFrame(ornek);
   };
   requestAnimationFrame(ornek);
@@ -93,8 +93,9 @@ function denetle(ad, n, kapiV){
   /* Varış: bulut ilk karede ortayı örter, perde kalkana dek kapalıdır, bulut tam çıkmadan perde kalkmaz. */
   if(!var_.length) return bulgu(ad, 'varış sayfası örneklenemedi');
   const ilk = var_[0];
-  if(ilk.sag == null || ilk.sag <= ilk.vw / 2 || ilk.sol >= ilk.vw / 2) bulgu(ad, 'varışın ilk karesinde bulut ortayı örtmüyor');
-  const kapali = var_.filter(k => k.perde && !k.kapan);
+  if(ilk.sag == null || ilk.sag <= ilk.vw / 2 || ilk.sol >= ilk.vw / 2) bulgu(ad, 'varışın ilk karesinde bulut ortayı örtmüyor (' + JSON.stringify(var_.slice(0, 3).map(k => [Math.round(k.t - var_[0].t), k.sag, k.sol, k.perde, k.sehir])) + ')');
+  /* 2026-11-07: perde dururken bulut aralanır ve şehre yaklaşılır (perde.js is-sehir); o kareler sayılmaz. */
+  const kapali = var_.filter(k => k.perde && !k.kapan && !k.sehir);
   if(kapali.some(k => k.sag == null || k.sag <= k.vw / 2 || k.sol >= k.vw / 2)) bulgu(ad, 'perde dururken bulut açıldı');
   const kalkis = var_.filter(k => k.perde && k.kapan);
   if(!kalkis.length) return bulgu(ad, 'perde hiç kalkmadı');

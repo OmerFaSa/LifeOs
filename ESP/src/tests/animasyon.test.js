@@ -289,7 +289,7 @@
         a.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, button:0 }));
         expect(document.querySelectorAll('.lifeos-gecis').length).toBe(1);
         expect(gidilen.length).toBe(0);                                            // önce yer, sonra sayfa
-        await ilerlet((p.querySelector('.px-bulut') ? A.GECIS_BULUT_MS : A.GECIS_MS) + 240);   // piksel: bulut kapanır, açılır, kapanır (başlangıç iki kare bekler)
+        await ilerlet((p.querySelector('.px-bulut') ? A.gecisBulutMs() : A.GECIS_MS) + 240);   // piksel: bulut kapanır, açılır, kapanır (başlangıç iki kare bekler)
         expect(gidilen).toEqual(['http://127.0.0.1:4183/']);
         expect(/^spi\.\d{13}$/.test(gecisCerezi())).toBe(true);
         /* Ctrl ile tık (yeni sekme) dokunulmadan geçer. */
@@ -304,6 +304,25 @@
         A.yenile();
       }
     }));
+
+    it('bulut manzarası süresi ayarlanır: sınır dışı reddedilir, geçiş süresi ona göre uzar', () => {
+      let eski = null;
+      try{ eski = localStorage.getItem(A.BULUT_ANAHTAR); }catch(e){}
+      try{
+        localStorage.removeItem(A.BULUT_ANAHTAR);
+        expect(A.bulutSure()).toBe(2.4);
+        const kisa = A.gecisBulutMs();
+        expect(A.bulutSureAyarla(5)).toBe(true);
+        expect(A.bulutSure()).toBe(5);
+        expect(A.gecisBulutMs() - kisa).toBe(2600);
+        expect(A.bulutSureAyarla(0.1)).toBe(false);
+        expect(A.bulutSureAyarla(99)).toBe(false);
+        expect(A.bulutSureAyarla('x')).toBe(false);
+        expect(A.bulutSure()).toBe(5);
+        expect(A.KATALOG[A.BULUT_ANAHTAR]).toContain('t');                       // modüller arası taşınır
+        expect(A.hizSeciciHtml()).toContain('data-anibulut');
+      }finally{ try{ if(eski == null) localStorage.removeItem(A.BULUT_ANAHTAR); else localStorage.setItem(A.BULUT_ANAHTAR, eski); }catch(e){} }
+    });
 
     it('geçiş: Merkez kartına ve görünmeyen kaynağa dokunmaz; ölçüsüz kaynakta perde ortadan açılır', async () => {
       let eskiKip = null;

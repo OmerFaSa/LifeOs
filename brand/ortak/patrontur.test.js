@@ -159,6 +159,32 @@ describe('Patron turu', () => {
     }finally{ T.bitir(true); cerezSil(); }
   });
 
+  it('uzun süre dokunulmazsa «Anlamadın mı?» sorar; «Anlamadım» yeniden anlatır; otomatikte kendi ilerler', async () => {
+    cerezSil();
+    try{
+      adimaGit('ays', 'ays.tanis');
+      await bekle(30);
+      const d = T._durum(), soru = d.kok.querySelector('.ptur__soru'), anla = d.kok.querySelector('[data-ptur="anla"]');
+      expect(soru.hidden).toBe(true);
+      /* Söz çoktan bitti, kullanıcı 20 sn dokunmadı */
+      d.kart.classList.add('is-bitti'); d.bittiZaman = Date.now() - 20000; d.sonDokunus = Date.now() - 20000;
+      await bekle(260);
+      expect(soru.hidden).toBe(false);
+      expect(anla.hidden).toBe(false);
+      anla.click();
+      expect(soru.hidden).toBe(true);
+      expect(d.yazi.textContent).toContain('bir daha');
+      expect(d.adim.id).toBe('ays.tanis');
+      /* Otomatik: söz bitince kendi ilerler, durumu çerezde taşır */
+      d.kok.querySelector('[data-ptur="oto"]').click();
+      expect(T._oku('h:test').o).toBe(1);
+      d.kusak++; d.yolNo++; d.yolda = false;                                   // söz ve yolculuk bitmiş say
+      d.kart.classList.add('is-bitti'); d.bittiZaman = Date.now() - 5000;
+      await bekle(260);
+      expect(d.adim.id).toBe('ays.giris');
+    }finally{ T.bitir(true); cerezSil(); }
+  });
+
   it('başka kapıda açılırsa oraya götüren kart çıkar: sayfa zorla değişmez', async () => {
     cerezSil();
     try{

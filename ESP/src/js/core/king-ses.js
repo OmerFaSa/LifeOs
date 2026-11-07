@@ -597,7 +597,7 @@ window.LIFEOS.PARCA.yazilar({
   function kuyrukKapat(q){ if(!q) return; q.kapali = true; if(q.bekle) q.bekle(); }
   /* Doner: true (okundu ya da kesildi) | false (ilk parça bile gelmedi: cihaza düş). */
   async function sunucuSesi(k, q, no){
-    const tercih = sesTercihi();
+    const tercih = q.tercih || sesTercihi();
     let kilit = '';            // ses kilidi: ilk parçayı okuyan motor
     const getir = m => (m == null ? null : sesGetir(k, m, kilit || tercih).then(r => ({ m, r })));
     let sonraki = kuyrukAl(q).then(getir);
@@ -639,8 +639,9 @@ window.LIFEOS.PARCA.yazilar({
   }
   /* `devam`: 'acik' akan cevabın ilk cümlesi (kuyruk açık kalır), 'ek' açık
      kuyruğa yeni cümle, 'son' son parça (kuyruk kapanır). Açık kuyruk yoksa
-     'ek' ve 'son' baştan okur. */
-  function seslendir(metin, devam){
+     'ek' ve 'son' baştan okur. `tercih`: bu okuma için motor (tanışma turu
+     anlatıcısı 'ema' ister, kullanıcı 2026-11-07); King'in kendi tercihi değişmez. */
+  function seslendir(metin, devam, tercih){
     const q0 = KI.sesKuyruk;
     if(devam && devam !== 'acik'){
       /* Kesildiyse (sus) akan cevabın kalanı okunmaz. */
@@ -653,8 +654,9 @@ window.LIFEOS.PARCA.yazilar({
     if(!metin) return;
     sus();
     const no = KI.sesNo;
-    const q = KI.sesKuyruk = { no, l:sesParcalari(metin), kapali:devam !== 'acik', bekle:null, cihaz:false };
-    const k = sesTercihi() === 'cihaz' ? null : KI.baglanti();
+    tercih = KI.SES_TERCIH.indexOf(tercih) > 0 ? tercih : null;
+    const q = KI.sesKuyruk = { no, l:sesParcalari(metin), kapali:devam !== 'acik', bekle:null, cihaz:false, tercih };
+    const k = (tercih || sesTercihi()) === 'cihaz' ? null : KI.baglanti();
     if(!k || !KI.ortam.oynat){ q.cihaz = true; cihazSesi(metin); return; }
     KI.konusuyor = 1;
     durum();

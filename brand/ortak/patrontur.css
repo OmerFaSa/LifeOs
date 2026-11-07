@@ -34,8 +34,62 @@
 .ptur__ses svg{ fill:currentColor; stroke:currentColor; stroke-width:1.6; }
 .ptur__devam{ margin-left:auto; min-height:40px; }
 
+/* GEZGİN (kullanıcı, 2026-11-07: «kutunun içinde sabit durmasın, sistemin içinde gezsin»). Patron spotun
+   yanında durur; söz kartı onun konuşma balonudur (geniş ekranda yerini patrontur.js balonKoy verir). */
+.ptur__gezgin{ position:fixed; left:0; top:0; width:64px; height:64px; pointer-events:none; z-index:2; will-change:transform; }
+.ptur__figur{ position:absolute; inset:0; display:grid; place-items:end center; transform-origin:50% 100%; }
+.ptur__figur svg{ display:block; width:64px; height:64px; image-rendering:pixelated; filter:drop-shadow(3px 3px 0 rgba(10, 7, 20, .55)); }
+.ptur__gezgin[data-yon="sol"] .ptur__figur svg{ transform:scaleX(-1); }
+.ptur__gezgin::after{ content:''; position:absolute; left:14px; right:14px; bottom:-3px; height:5px; background:rgba(10, 7, 20, .35); }
+.ptur__gezgin.is-yuru .ptur__figur svg{ animation:ptur-adim .22s steps(2) infinite; }
+@keyframes ptur-adim{ 50%{ translate:0 -2px; } }
+/* Araba: figür arabanın içinde, yalnız başı görünür */
+.ptur__arac{ position:absolute; left:-8px; bottom:-6px; width:80px; height:36px; opacity:0; }
+.ptur__arac svg{ display:block; image-rendering:pixelated; }
+.ptur__gezgin[data-yon="sol"] .ptur__arac svg{ transform:scaleX(-1); }
+.ptur__gezgin.is-araba .ptur__arac{ opacity:1; }
+.ptur__gezgin.is-araba .ptur__figur{ clip-path:inset(0 0 46% 0); translate:0 -14px; }
+.ptur__gezgin.is-araba::after{ left:0; right:0; }
+/* Ağ: figürden yukarıdaki tutunma noktasına uzanan ip */
+.ptur__ag{ position:absolute; left:32px; top:6px; height:2px; width:0; transform-origin:0 50%; opacity:0;
+  background:repeating-linear-gradient(90deg, #f4f1ff 0 6px, #c9c2e8 6px 8px); box-shadow:0 1px 0 rgba(10, 7, 20, .5); }
+.ptur__gezgin.is-ag .ptur__figur svg{ transform:rotate(-8deg); }
+/* Roket: sırtta alev (kıvılcımlar betikten) */
+.ptur__gezgin.is-roket .ptur__figur::after{ content:''; position:absolute; left:26px; bottom:-10px; width:12px; height:12px;
+  background:#ffb347; box-shadow:0 4px 0 #ff6b3d; animation:ptur-alev .12s steps(2) infinite; }
+@keyframes ptur-alev{ 50%{ scale:.6 1.2; } }
+/* Dev sıçrayış: inişte ekran bir an sarsılır */
+.ptur.is-sars .ptur__perde, .ptur.is-sars .ptur__delik{ animation:ptur-sars .32s steps(4); }
+@keyframes ptur-sars{ 25%{ translate:4px 2px; } 50%{ translate:-3px -2px; } 75%{ translate:2px -1px; } }
+/* Işınlanma küresi ve kıvılcımlar */
+.ptur__goz{ position:fixed; left:0; top:0; width:10px; height:10px; z-index:3; pointer-events:none; background:#d7a8ff;
+  box-shadow:0 0 0 2px #7b3fe4, 0 0 14px 4px rgba(177, 108, 255, .7); }
+.ptur__pk{ position:fixed; width:4px; height:4px; z-index:3; pointer-events:none; }
+/* Soru: «Anlamadın mı?» gezgin el sallar gibi zıplar */
+.ptur__gezgin.is-sor .ptur__figur{ animation:ptur-sor .9s steps(6) 2; }
+@keyframes ptur-sor{ 25%{ translate:0 -10px; rotate:-6deg; } 50%{ translate:0 0; } 75%{ translate:0 -6px; rotate:6deg; } }
+.ptur__soru{ margin:8px 0 0; padding:8px 10px; font-size:14px; font-weight:700; color:var(--text);
+  background:color-mix(in oklab, var(--ptur-renk, #ffd166) 22%, transparent); border-left:4px solid var(--ptur-renk, #ffd166); }
+.ptur__soru[hidden]{ display:none; }
+.ptur__anla{ animation:ptur-yazi .4s ease both; }
+.ptur__oto{ display:inline-flex; align-items:center; gap:6px; }
+.ptur__oto.is-on{ background:var(--ptur-renk, #ffd166); color:#2b1d14; }
+.ptur__delik.is-nabiz{ animation:ptur-nabiz .7s steps(4) 3; }
+@keyframes ptur-nabiz{ 50%{ outline-width:7px; outline-offset:4px; } }
+/* Balon: geniş ekranda figürün üstünde (ya da altında), kuyruğu figüre bakar; yolda iken saklanır. */
+@media (min-width:680px){
+  .ptur .ptur__kart, .ptur.is-ustte .ptur__kart, .ptur.is-ortada .ptur__kart{ left:calc(50% - min(230px, 50vw - 16px)); top:auto; bottom:clamp(16px, 5vh, 48px); transform:none;
+    width:min(460px, calc(100vw - 32px)); transition:opacity .2s ease, scale .2s ease; transform-origin:var(--kuyruk, 50%) 100%; }
+  .ptur .ptur__kart[style*="top"]{ bottom:auto; }
+  .ptur__kart::after{ content:''; position:absolute; left:calc(var(--kuyruk, 50%) - 9px); bottom:-11px; width:18px; height:11px;
+    background:var(--border-strong, #42291f); clip-path:polygon(0 0, 100% 0, 50% 100%); }
+  .ptur__kart.is-altta::after{ bottom:auto; top:-11px; clip-path:polygon(50% 0, 100% 100%, 0 100%); }
+  .ptur.is-yolda .ptur__kart{ opacity:0; scale:.92; pointer-events:none; }
+}
+.ptur.is-az .ptur__kart{ transition:none; }
+
 /* Kurulum açıkken: karartma yok, patron pencerenin üstünde konuşur */
-.ptur.is-bekle .ptur__perde, .ptur.is-bekle .ptur__delik{ display:none; }
+.ptur.is-bekle .ptur__perde, .ptur.is-bekle .ptur__delik, .ptur.is-bekle .ptur__gezgin{ display:none; }
 .ptur.is-bekle .ptur__kart{ top:8px; bottom:auto; padding:10px 14px; }
 .ptur.is-bekle .ptur__yazi{ min-height:0; font-size:15px; }
 .ptur.is-bekle .ptur__alt{ margin-top:6px; }

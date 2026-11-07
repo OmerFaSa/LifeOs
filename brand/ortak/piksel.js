@@ -331,6 +331,62 @@ window.LIFEOS = window.LIFEOS || {};
     if(!hareketsiz()){ const z = setInterval(() => { if(!c.isConnected) return clearInterval(z); D.kare(g, arka, o, Date.now() / 1000); }, 125); }
     return c;
   }
+
+  /* ŞEHİR KAMERASI (kullanıcı, 2026-11-07: «GTA'daki gibi şehirden uzaklaşırken bulutlar gelsin, girişte şehre
+     yaklaşılsın; bizim piksel evlerin çatı görünüşü gibi gitsin»). Ayrı bir şehir çizilmez: kamera arka plandaki
+     KENDİ apartmanımızdan başlar (ilk kare arka planla birebir aynıdır), geri çekildikçe mahallenin öteki binaları
+     yan yana görünür. yon 'uzak': uzaklaşır; 'yakin': yakınlaşıp varılan binaya (arka plana) oturur. */
+  const SEHIR_ONBELLEK = {};
+  function mahalleSahneleri(W, H){
+    const A = L.PIKSEL_APARTMAN;
+    if(!A || !A.yerlesim || !A.binaCiz) return null;
+    const v = A.vakit(new Date().getHours()), m = document.documentElement.getAttribute('data-modul'), a = [W, H, v, m].join();
+    if(SEHIR_ONBELLEK.a === a) return SEHIR_ONBELLEK;
+    /* Arka plan aynı ölçüde çizildiyse onun sahneleri kullanılır: hem hızlı hem birebir aynı. */
+    const hazir = durum.c && durum.c.width === W && durum.c.height === H && !dogaMi();
+    const sahne = MAHALLE.map(yer => {
+      if(hazir) return sahneAl(yer).arka;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      A.binaCiz(c.getContext('2d'), A.yerlesim(W, H, v, yer, m));
+      return c;
+    });
+    let zemin = '#2a2733';
+    try{ const p = sahne[0].getContext('2d').getImageData(0, H - 1, 1, 1).data; zemin = 'rgb(' + p[0] + ',' + p[1] + ',' + p[2] + ')'; }catch(e){ /* tuval okunamadı: koyu zemin */ }
+    return Object.assign(SEHIR_ONBELLEK, { a, sahne, P:A.PALET ? A.PALET[v] : null, v, zemin });
+  }
+  /* Düz uzaklaşma/yakınlaşma (kullanıcı, 2026-11-07: «tepeden bakmasına gerek yok, ilk bulutlar çok güzeldi»):
+     ekranın ortasına doğru küçülür; üstü sahnenin gök tonu, altı sokak tonu. Bulut, perdenin kendi büyük bulutudur. */
+  function sehirCiz(g, W, H, a, t, M){
+    const e = a * a * (3 - 2 * a), s = 1 - .72 * e, sw = W * s, sh = H * s, x0 = W / 2 - sw / 2, y0 = Math.round(H / 2 - sh / 2);
+    g.fillStyle = M.P.gok[0]; g.fillRect(0, 0, W, y0 + 1);
+    g.fillStyle = M.zemin; g.fillRect(0, y0 + Math.floor(sh) - 1, W, H);
+    const n = Math.ceil((W / sw) / 2) + 1, ort = MAHALLE.indexOf(M.yer) < 0 ? 1 : MAHALLE.indexOf(M.yer);
+    g.imageSmoothingEnabled = s < .995;   // küçülürken yumuşatılır, yoksa pikseller titrer
+    for(let i = -n; i <= n; i++){
+      const x = Math.round(x0 + i * sw);
+      if(x > W || x + sw < 0) continue;
+      g.drawImage(M.sahne[((ort + i) % 4 + 4) % 4], x, y0, Math.ceil(sw) + 1, Math.ceil(sh));
+    }
+    g.imageSmoothingEnabled = false;
+  }
+  /* Döner: tuval (el'in ilk çocuğu) ya da null (mahalle yok: seçim sayfası). Tuval DOM'dan çıkınca döngü durur. */
+  function sehirKoy(el, yon, sure){
+    if(!el) return null;
+    const W = Math.ceil(window.innerWidth / OLCEK), H = Math.ceil(window.innerHeight / OLCEK), M = mahalleSahneleri(W, H);
+    if(!M || !M.P) return null;
+    M.yer = simdikiYer();
+    const eski = el.querySelector('canvas.piksel-sehir');
+    if(eski) eski.remove();
+    const c = document.createElement('canvas');
+    c.className = 'piksel-manzara piksel-sehir'; c.setAttribute('aria-hidden', 'true');
+    c.width = W; c.height = H; tamKat(c, OLCEK);
+    const g = c.getContext('2d'), bas = performance.now(), sn = Math.max(300, sure || 2000), uzak = yon !== 'yakin';
+    const ciz = simdi => { const p = Math.min(1, (simdi - bas) / sn); sehirCiz(g, W, H, uzak ? p : 1 - p, simdi / 1000, M); };
+    ciz(hareketsiz() ? bas + sn * .5 : bas);
+    el.insertBefore(c, el.firstChild);
+    if(!hareketsiz()){ const adim = s => { if(!c.isConnected) return; ciz(s); requestAnimationFrame(adim); }; requestAnimationFrame(adim); }
+    return c;
+  }
   /* Sonraki ızgaraya kadar uyur, sonra ekranın karesini bekler: zamanlayıcı ile ekran arasında vuru olmaz, gizli sekmede hiç uyanmaz. */
   function dongu(){
     clearTimeout(durum.zaman); durum.zaman = null;
@@ -548,5 +604,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ manzaraKoy, manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
+  L.PIKSEL = Object.freeze({ manzaraKoy, sehirKoy, _sehirCiz:sehirCiz, _mahalle:mahalleSahneleri,manzaraTuru, MAHALLE, CEKMECE_YER, yereGit, kingYuz, kingYuzu, KING_YUZLER, uygula, bosAc, bosKapa, figurSvg, kaplamaYol, simgeCevir, simgeleriTara, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, toz, listeBitti, cevapIsle, DESEN, cizimCevir });
 })(window.LIFEOS);

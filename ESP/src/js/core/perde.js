@@ -384,6 +384,30 @@ ESP.Perde = (function(){
     var enAz = Number(secenekler.enAz) > 0 ? Number(secenekler.enAz) : 4200;
     var basladi = Date.now();
 
+    /* ŞEHRE YAKLAŞMA (kullanıcı, 2026-11-07: «bulut çıktığımız yere gelecek, manzara gözükecek, bulut girdiğimiz
+       yerden kalkacak; girişte şehre yaklaşma sekansı»). Bulutlu karşılama önce kapalı durur (selam okunur), sonra
+       aralanır ve şehir kamerası (piksel.js sehirKoy) bu modülün arka plan binasına yaklaşır; perde tam oraya
+       vardığında kalkar, yani son kare arka planın kendisidir. Süre Animasyonlar › Bulut manzarası. Piksel
+       betikleri tek dosya sürümünde perdeden sonra yüklenir: kısa süre beklenir, gelmezse eski düzen kalır. */
+    var bulutVar = !!perde.querySelector('.px-bulut');
+    if(bulutVar){
+      var SELAM_MS = 900, ARALAN_MS = 700, sDeneme = 0;
+      (function sehirBekle(){
+        if(kapandi) return;
+        var LL = window.LIFEOS, P = LL && LL.PIKSEL, A = LL && LL.ANIMASYON;
+        if(!(P && P.sehirKoy && document.body)){ if(++sDeneme < 40) setTimeout(sehirBekle, 50); return; }
+        var sure = Math.round((A && A.bulutSure ? A.bulutSure() : 2.4) * 1000);
+        var gecen = Date.now() - basladi, bekle = Math.max(0, SELAM_MS - gecen);
+        setTimeout(function(){
+          if(kapandi) return;
+          if(!P.sehirKoy(perde, 'yakin', ARALAN_MS + sure)) return;
+          sesCal('bulutGit');
+          setTimeout(function(){ if(!kapandi) perde.classList.add('is-sehir'); }, 40);
+          enAz = Date.now() - basladi + ARALAN_MS + sure + 40;
+        }, bekle);
+      })();
+    }
+
     function tik(){
       var oran = 0, kalan = 0;
       if(v && v.duration && isFinite(v.duration) && v.duration > 0){
@@ -396,7 +420,9 @@ ESP.Perde = (function(){
       }
       if(yol) yol.style.setProperty('--ilerleme', String(oran));
       if(sayi) sayi.textContent = kalan > 0 ? String(kalan) : '·';
-      if(!v && oran >= 1) kapat();     /* videosuz perde süresini doldurdu */
+      /* Videosuz perde süresini doldurdu. Bulutlu karşılama uygulama açılışı (#app .boot, «… yükleniyor»)
+         bitmeden kalkmaz: kullanıcı (2026-11-07) bulut kalkınca bulutsuz bir yükleme ekranı görüyordu. 12 sn sınır. */
+      if(!v && oran >= 1 && !(bulutVar && document.querySelector('#app > .boot') && Date.now() - basladi < enAz + 12000)) kapat();
     }
     tik();
     sayacId = setInterval(tik, 250);
