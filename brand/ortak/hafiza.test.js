@@ -65,6 +65,25 @@
       expect(H().komut('Benim hakkımda ne biliyorsun?')).toEqual({ tur:'liste' });
       expect(H().komut('#3 unut')).toEqual({ tur:'unut', sira:3 });
       expect(H().komut('2 numarayı unut')).toEqual({ tur:'unut', sira:2 });
+      /* King 5 deneme kullanımı: doğal biçim. */
+      expect(H().komut('Kahve içmem, bunu aklında tut')).toEqual({ tur:'ekle', metin:'Kahve içmem' });
+      expect(H().komut('Sınavım 21 Haziran, bunu unutma.')).toEqual({ tur:'ekle', metin:'Sınavım 21 Haziran' });
+      expect(H().komut('aklında tut, Pazar çalışmam')).toEqual({ tur:'ekle', metin:'Pazar çalışmam' });
+    });
+
+    it('hafızadakini soran cümle kaydı bulur; ölçüm sorusu ve başka konu bulmaz', () => {
+      const l = H().ekle(H().ekle([], { metin:'Kahve içmem' }).liste, { metin:'Sınavım 21 Haziran' }).liste;
+      const bul = m => H().sorudaBul(l, m).map(x => x.metin);
+      expect(bul('ben ne içmem?')).toEqual(['Kahve içmem']);
+      expect(bul('sınavım ne zaman')).toEqual(['Sınavım 21 Haziran']);
+      expect(bul('uykum nasıl?')).toEqual([]);
+      expect(bul('türev nedir')).toEqual([]);
+      expect(bul('ne içsem iyi gelir')).toEqual([]);
+    });
+
+    it('hatırlatma isteği ve soru hafıza komutu değildir', () => {
+      ['ilacımı içmeyi unutma', 'bunu aklında tutar mısın?', 'yarın 7\'de koşuyu hatırlat']
+        .forEach(m => expect(H().komut(m)).toBe(null));
     });
 
     it('sıradan cümle komut değildir', () => {

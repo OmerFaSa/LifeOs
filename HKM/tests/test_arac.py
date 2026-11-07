@@ -227,6 +227,28 @@ def run():
         eq(arac.gevsek_json("{bozuk"), None)
     test("arac cagirmadan «yaptim» denmez", t_yapilmamis_is)
 
+    def t_soz_verme_katalogsuz():
+        # Deneme kullanimi (2026-11-08, gemma4): «yarin 7'de kosuyu hatirlatirim» — hicbir sey kurulmadi.
+        t = _tasiyici(("Yarın sabah 7'de koşuyu hatırlatırım.", []), ("Tamam, 8'de hatırlatacağım.", []))
+        r = sohbet.konus(_con(), _cfg(), "yarın sabah 7'de bana koşuyu hatırlat", BUGUN, transport=t)
+        eq(r["text"], sohbet.ARAC_YAPILMADI)
+        ok("araç çağırmadan" in t.gorulen[1]["sistem"])
+        no(t.gorulen[1]["ayar"].get("araclar"), "katalogsuz turda arac sunulmaz")
+        akan = []
+        a = sohbet.CumleAkisi(akan.append, "", iddia=True)
+        a("Tamam. Yarın 7'de hatırlatırım. Başka?")
+        a(None)
+        eq(akan, ["Tamam. "], "soz veren cumle akmaz")
+        # Sonuc turu (istemci bir OKUMA araci calistirdi): yine soz verilmez.
+        t3 = _tasiyici(("Yarın ekmek almayı hatırlatırım.", []), ("Hatırlatırım.", []))
+        r3 = sohbet.konus(_con(), _cfg(), "yarın ekmek almayı hatırlat", BUGUN, transport=t3, araclar=KATALOG,
+                          arac_sonuclari=[{"ad": "sistem_haritasi", "sonuc": {"moduller": ["AYS"]}}])
+        eq(r3["text"], sohbet.ARAC_YAPILMADI)
+        t2 = _tasiyici(("Türev, anlık değişim hızıdır.", []))
+        r2 = sohbet.konus(_con(), _cfg(), "türev nedir", BUGUN, transport=t2)
+        eq(r2["text"], "Türev, anlık değişim hızıdır.")
+    test("katalogsuz turda da «hatırlatırım» denmez; akista durur", t_soz_verme_katalogsuz)
+
     def t_uc():
         # /api/chat ve /api/chat/akis katalogu ve sonuclari konus'a tasir.
         from tests.test_daemon import _Server

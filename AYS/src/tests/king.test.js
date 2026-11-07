@@ -2423,11 +2423,12 @@
       expect(kart().textContent).toContain('elle yazıldı · doğrulanmadı');
       expect(kart().textContent).toContain('Değişim hızı.');
       kart().querySelector('[data-king^="ders-ileri:"]').click();
-      kart().querySelector('[data-king^="ders-ileri:"]').click();
+      /* King 5 (deneme 2026-11-08): yazılı «devam» düğmeyle aynı; «peki bir örnek ver» dersin sorusudur. */
+      expect(await k.isle('devam')).toEqual({ tur:'ders', adim:1 });
       expect(kart().querySelector('.king__ders-baslik').textContent).toBe('Örnek');
       expect(kart().textContent).toContain('Sabitin türevi 0.');
       expect(kart().querySelector('[data-king^="ders-ileri:"]')).toBe(null);
-      kart().querySelector('[data-king^="ders-soru:"]').click();
+      await k.isle('peki bir örnek ver');
       for(let i = 0; i < 8; i++) await new Promise(x => setTimeout(x, 0));
       const soru = [...document.querySelectorAll('[data-king^="soru-cevap:"]')];
       expect(soru.length).toBe(3);
@@ -3913,6 +3914,40 @@
         const a = p.length > 3 ? Number(p[3]) : (/color\(/.test(cs.backgroundColor) ? Number((cs.backgroundColor.match(/\/\s*([\d.]+)/) || [0, 1])[1]) : 1);
         expect(a >= 0.9).toBe(true);
       }finally{ k.remove(); }
+    });
+  });
+  /* KING 5 (deneme kullanımı 2026-11-08): doğal hatırlatma cümlesi modele gidip «hatırlatırım» diye
+     uyduruluyordu; saat kodla çözülür, «onu 8'e al» son hatırlatmayı kaydırır. */
+  describe('King 5 — doğal hatırlatma', () => {
+    const d = new Date(2026, 9, 5, 9, 0);
+    const coz = m => { const r = K().hatirCoz(m, d); return r ? [r.z.getDate(), r.z.getHours(), r.z.getMinutes(), r.ne] : null; };
+    it('gün, vakit ve saat cümleden çözülür', () => {
+      expect(coz("yarın sabah 7'de bana koşuyu hatırlat")).toEqual([6, 7, 0, 'koşuyu']);
+      expect(coz("akşam 9'da su içmeyi hatırlat")).toEqual([5, 21, 0, 'su içmeyi']);
+      expect(coz("15:30'da annemi aramayı hatırlat")).toEqual([5, 15, 30, 'annemi aramayı']);
+      expect(coz('2 saat sonra ilacımı hatırlat')).toEqual([5, 11, 0, 'ilacımı']);
+      expect(coz("saat 8'de hatırlat")).toEqual([6, 8, 0, 'Hatırlatma']);
+    });
+    it('saat yoksa ya da bugünün geçmiş saatiyse tahmin edilmez', () => {
+      ["bugün 8'de hatırlat", 'yarın kitap almayı hatırlat', 'ilacımı içmeyi unutma', 'hatırlatmalarım']
+        .forEach(m => expect(K().hatirCoz(m, d)).toBe(null));
+    });
+    it('kurulur ve «onu 8\'e al» son hatırlatmayı kaydırır', async () => {
+      const k = K(); k._sifirla();
+      const y = Object.assign({}, k._ortam);
+      Object.assign(k._ortam, { zamanla:fn => fn(), simdi:() => new Date(2026, 9, 5, 9, 0) });
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [] });
+      try{
+        expect(await k.isle("yarın sabah 7'de bana koşuyu hatırlat")).toEqual({ tur:'hatirlat' });
+        expect(k.hatirlatmalar().map(x => [new Date(x.zaman).getHours(), x.metin])).toEqual([[7, 'koşuyu']]);
+        expect(await k.isle("onu 8'e al")).toEqual({ tur:'hatirlat' });
+        const l = k.hatirlatmalar();
+        expect(l.map(x => [new Date(x.zaman).getDate(), new Date(x.zaman).getHours(), x.metin])).toEqual([[6, 8, 'koşuyu']]);
+        /* Saatsiz istek sorulur; cevap bekleyenle birleşir. */
+        expect(await k.isle('yarın ekmek almayı hatırlat')).toEqual({ tur:'hatirlat-sor' });
+        expect(await k.isle("akşam 6'da")).toEqual({ tur:'hatirlat' });
+        expect(k.hatirlatmalar().map(x => [new Date(x.zaman).getDate(), new Date(x.zaman).getHours(), x.metin]).pop()).toEqual([6, 18, 'ekmek almayı']);
+      }finally{ k._sifirla(); Object.assign(k._ortam, y); }
     });
   });
 })();

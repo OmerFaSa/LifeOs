@@ -163,11 +163,23 @@ LIFEOS.Hafiza = (function(){
   const LISTE = ['hafızam', 'hafizam', 'neyi hatırlıyorsun', 'neyi hatirliyorsun',
     'benim hakkımda ne biliyorsun', 'benim hakkımda neyi hatırlıyorsun'];
 
+  /* Doğal biçim (King 5 deneme kullanımı, 2026-11-08: «kahve içmem, bunu aklında tut» bir ders aracına
+     gidiyordu). «unutma» ve «hatırla» yalnız «bunu» ile: «ilacımı içmeyi unutma» bir hatırlatma isteğidir. */
+  const EKLE_SON = /^(.{3,200}?)\s*[,;–-]?\s+(?:(?:bunu|şunu)\s+)?(?:aklında|aklinda)\s+(?:tut|olsun)$|^(.{3,200}?)\s*[,;–-]?\s+(?:bunu|şunu)\s+(?:unutma|hatırla|hatirla)$/;
+  const EKLE_BAS = /^(?:(?:bunu|şunu)\s+)?(?:aklında|aklinda)\s+tut\s*[,:]?\s+(.{3,200})$/;
+
   function komut(metin){
     const ham = String(metin || '').trim();
     const k = ham.toLocaleLowerCase('tr').replace(/[?!.]+$/, '').trim();
     for(const on of EKLE_ONEK){
       if(k.indexOf(on) === 0) return { tur:'ekle', metin:ham.slice(on.length).trim() };
+    }
+    if(ham.indexOf('?') < 0){
+      /* k, ham'ın küçük harfli hâlidir; sondaki noktalama dışında konumlar aynıdır. */
+      const s = k.match(EKLE_SON);
+      if(s) return { tur:'ekle', metin:ham.slice(0, (s[1] || s[2]).length).replace(/[\s,;–-]+$/, '') };
+      const b = k.match(EKLE_BAS);
+      if(b) return { tur:'ekle', metin:ham.slice(k.length - b[1].length, k.length).trim() };
     }
     if(LISTE.indexOf(k) >= 0) return { tur:'liste' };
     const m = k.match(/^#?(\d+)\s*(?:numarayı|numaralı hafızayı|nolu|\.)?\s*(unut|sil)$/);
@@ -275,6 +287,25 @@ LIFEOS.Hafiza = (function(){
       baglam:opts => baglam(liste(), opts), komutIsle };
   }
 
+  /* Hafızadakini doğrudan soran cümle (King 5 deneme 2026-11-08: «ben ne içmem?» sorusunda küçük model
+     «kahve içmem» kaydını görmezden gelip kahve önerdi). Cevabı kural motoru kaydın kendisiyle verir
+     (AGENTS §1.1). Yalnız «ne / neyi / ne zaman / hangi / nerede / kaç» sorusu, kişinin kendisine dair
+     («ben», «sınavım») ve kayıtla ortak bir kelimesi varsa; ölçüm sorusu («uykum nasıl») buraya düşmez. */
+  const SORU_DURAK = new Set(['ben', 'benim', 'bana', 'beni', 'neyi', 'nedir', 'zaman', 'nerede', 'hangi', 'acaba',
+    'peki', 'king', 'hatırlıyor', 'musun', 'müsün', 'misin', 'mısın', 'mıyım', 'miyim', 'hatırla']);
+  function sorudaBul(liste, soru){
+    const k = String(soru || '').toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    if(!/(?:^|\s)(?:ne|neyi|ne zaman|nedir|nerede|hangi|kaç)(?:\s|$)/.test(k)) return [];
+    const sozc = k.split(' ').filter(w => w.length >= 4 && !SORU_DURAK.has(w));
+    const kendi = /(?:^|\s)(?:ben|benim|bana|beni)(?:\s|$)/.test(k) || sozc.some(w => /m$/.test(w));
+    if(!kendi || !sozc.length) return [];
+    const kok = w => w.slice(0, Math.max(4, w.length - 2));
+    return etkin(liste).filter(x => {
+      const kw = String(x.metin).toLocaleLowerCase('tr').split(/[^a-zçğıöşü0-9]+/);
+      return sozc.some(w => kw.some(v => v.length >= 4 && v.startsWith(kok(w))));
+    }).slice(0, 3);
+  }
+
   return { KATMANLAR, KAYNAK_IZNI, MAX_METIN, MAX_KAYIT, ANAHTAR,
-    ekle, unut, etkin, baglam, komut, listeMetni, gecerli, kur };
+    ekle, unut, etkin, baglam, komut, listeMetni, gecerli, sorudaBul, kur };
 })();

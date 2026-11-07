@@ -81,6 +81,18 @@
       });
     });
 
+    /* King 5 deneme kullanımı (2026-11-08): «bugünkü çalışmayı kısalt, 30 dakika yeter» tanınmıyor, model
+       KALICI günlük süreyi öneriyordu (180 → 30 dk, 156 konu plandan çıkıyordu). */
+    it('«yeter» ile tarihli süre yine geçicidir', () => {
+      withToday(TODAY, () => {
+        const o = tek('bugünkü çalışmayı kısalt, 30 dakika yeter');
+        expect(o.action).toBe('gecici-sure');
+        expect(o.params.dakika).toBe(30);
+        expect(o.params.from).toBe(o.params.to);
+        expect(tek('bugün için 45 dakika yeterli').action).toBe('gecici-sure');
+      });
+    });
+
     it('«X değil Y» cümlesinde yeni değer Y’dir', () => {
       withToday(TODAY, () => {
         const o = tek('gelecek hafta sadece bir haftalığına günlük üç değil dört saat çalışacağım');

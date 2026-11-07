@@ -743,7 +743,11 @@ ARAC_IDDIA = re.compile(
     r"bakıyorum|bakayım|hesaplıyorum|hesaplayayım|işledim|işliyorum|not ettim|not ediyorum|"
     r"kayda ekliyorum|kayda geçiyorum|ekleyeceğim|kaydedeceğim|değiştireceğim|ayarlayacağım|"
     r"karartacağım|çevirdim|çeviriyorum|aktif ettim|aktif ediyorum|"
-    r"aktif edildi|etkin edildi|kayda eklendi|kaydedildi|ayarın değiştirildi|tema değiştirildi)\b", re.I)
+    r"aktif edildi|etkin edildi|kayda eklendi|kaydedildi|ayarın değiştirildi|tema değiştirildi|"
+    # Soz verme kipi (deneme kullanimi 2026-11-08: «yarin 7'de kosuyu hatirlatirim» dedi, hicbir sey kurulmadi).
+    r"hatırlatırım|hatırlatacağım|hatırlattım|hatırlatıcı kurdum|alarm kurdum|kurdum|kuruyorum|kuracağım|"
+    r"kurarım|eklerim|kaydederim|ayarlarım|değiştiririm|silerim|not ederim|not aldım|planladım|planlarım|"
+    r"oluşturdum|oluşturacağım|taşıdım|erteledim|ertelerim)\b", re.I)
 ARAC_DUZELT = ("\n\nÖnceki cevabında bir işi araç çağırmadan yapmış ya da yapacakmış gibi anlattın; "
                "sen hiçbir şeyi kendin yapamazsın. Ya uygun aracı ÇAĞIR ya da yapamadığını açıkça söyle.")
 ARAC_YAPILMADI = ("Bunu şu an buradan yapamadım; hiçbir şeyi değiştirmedim. Daha açık söylersen "
@@ -796,9 +800,9 @@ CUMLE_SONU = re.compile(r"[.!?\u2026]+[\"'»)]*\s+|\n+")
 
 
 class CumleAkisi:
-    def __init__(self, yay, baglam, serbest=False, genel=False, aracli=False):
+    def __init__(self, yay, baglam, serbest=False, genel=False, aracli=False, iddia=False):
         self.yay, self.baglam, self.serbest = yay, baglam, serbest
-        self.genel, self.aracli = genel, aracli
+        self.genel, self.aracli, self.iddia = genel, aracli, iddia
         self.tampon, self.kapali, self.durdu = "", False, False
 
     def __call__(self, parca):
@@ -833,7 +837,8 @@ class CumleAkisi:
         if not t.strip():
             return
         if (manager.imperatives(t) or ai.uydurma_sayilar(t, self.baglam, genel=self.genel)
-                or (self.aracli and (ARAC_IDDIA.search(t) or re.search(r"\barac|\baraç", t, re.I)))):
+                or (self.aracli and (ARAC_IDDIA.search(t) or re.search(r"\barac|\baraç", t, re.I)))
+                or (self.iddia and ARAC_IDDIA.search(t))):
             # Aracli turda «bakiyorum», «arac cagiriyorum» akmaz (sesle de okunurdu).
             self.durdu = True
             return
@@ -1259,7 +1264,8 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
                    user=user, transport=transport, veri=veri, seviye=sv["seviye"],
                    jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
-                   akis=CumleAkisi(akis, bg, serbest, genel=denetim == "genel", aracli=arac_turu) if akis else None,
+                   akis=CumleAkisi(akis, bg, serbest, genel=denetim == "genel", aracli=arac_turu,
+                                   iddia=True) if akis else None,
                    araclar=sunulan if arac_turu else None, adim=devam["adim"] + 1 if devam else 1,
                    denetim=denetim, iptal=iptal)
     if r.get("sebep") == "iptal":
@@ -1267,12 +1273,14 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
-    if ilk_tur and r.get("ok") and not r.get("cagrilar") and ARAC_IDDIA.search(r.get("text") or ""):
-        # Model araci CAGIRMADAN «ekliyorum, karartiyorum, bakayim» dedi: yapilmamis
+    if r.get("ok") and not r.get("cagrilar") and ARAC_IDDIA.search(r.get("text") or ""):
+        # Model araci CAGIRMADAN «ekliyorum, hatirlatirim, bakayim» dedi: yapilmamis
         # isi anlatmak yalandir. Bir kez duzeltme; yine olmazsa kodun cumlesi.
+        # Her turda (deneme 2026-11-08): sonuc turunda gelen araclar yalniz OKUMADIR (yazan
+        # arac onaysiz calismaz, ikinci turu yoktur); «kurdum, hatirlatirim» orada da yalandir.
         r2 = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem + ARAC_DUZELT,
                     user=user, transport=transport, veri=veri, seviye=sv["seviye"],
-                    araclar=arac.dar_katalog(katalog, metin, DAR_GENIS) or katalog[:DAR_GENIS] or None,
+                    araclar=(arac.dar_katalog(katalog, metin, DAR_GENIS) or katalog[:DAR_GENIS] or None) if katalog else None,
                     denetim=denetim)
         if r2.get("ok") and (r2.get("cagrilar") or not ARAC_IDDIA.search(r2.get("text") or "")):
             r = r2

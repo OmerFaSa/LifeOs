@@ -260,6 +260,19 @@ window.LIFEOS.KING = (function(){
       KI.ciz(false);
       return { tur:'envanter' };
     }
+    /* Dersin ipi (KING-5 K5-09, deneme kullanımı 2026-11-08: ders kartından sonra «peki bir örnek ver»
+       ilgisiz bir araca gidip iç bir kimlik soruyordu). Son mesaj bir dersse yazılı «devam» ve «örnek/soru»
+       kartın kendi düğmeleriyle aynı işi yapar. */
+    { const sn = KI.akis.length - 1, sd = KI.akis[sn];
+      if(sd && sd.kim === 'king' && sd.ders){
+        const s = t0.replace(/[.!?]+$/, '');
+        if(/^(?:tamam\s+|peki\s+)?(?:devam|devam et|sonraki|ileri)$/.test(s)){ KI.dersAdim(sn, 1); return { tur:'ders', adim:1 }; }
+        if(/^(?:peki|o zaman|tamam|şimdi)?\s*(?:bana\s+)?(?:bir\s+)?(?:örnek|soru|alıştırma)(?:\s+(?:ver|sor|göster|çöz|yap)(?:\s*(?:misin|mısın|lütfen))?)?$/.test(s)){
+          if(sd.ders.kd){ KI.cipler = null; KI.kdSoru(sd.ders.id); return { tur:'ders', soru:true }; }
+          return isle('bana soru sor ' + sd.ders.sorgu);
+        }
+      }
+    }
     /* Öğretmen (2026-10-22): «türevi anlat» → modülün kendi anlatımından ders
        kartı. Modülde o konu yoksa yol açık kalır (Merkez cevaplar). */
     const DN = KI.dersNiyeti(t0);
@@ -323,6 +336,17 @@ window.LIFEOS.KING = (function(){
       const r = await KI.hafiza().komutIsle(metin);
       KI.soyle(r ? r.text : 'Anlayamadım.');
       return { tur:'hafiza' };
+    }
+    /* Hafızadakini soran cümleyi kural cevaplar, model değil (hafiza.js sorudaBul). */
+    { const H = KI.L.Hafiza && KI.L.Hafiza.sorudaBul && KI.hafiza();
+      const bul = H ? KI.L.Hafiza.sorudaBul(H.liste(), metin) : [];
+      if(bul.length){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+        KI.bekleyenTanisma = null; KI.cipler = null;
+        if(bul.length === 1) KI.soyle('Bana şöyle demiştin: «' + bul[0].metin + '».');
+        else KI.soyle('Bana şunları demiştin:', bul.map(x => '«' + x.metin + '»'));
+        return { tur:'hafiza-cevap', n:bul.length };
+      }
     }
     if(KI.YORUMLA.test(t0) && KI.hafiza() && KI.L.CIKARIM){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -987,7 +1011,7 @@ window.LIFEOS.KING = (function(){
     if(KI.ayar) KI.ortam.depo.sil(KI.depoAnahtar());
     KI.ortam.depo.sil(KI.TASIMA);
     KI.ortam.depo.sil(KI.SIRA); KI.ortam.depo.sil(KI.SOZET); KI.ortam.depo.sil(KI.DERSLER); KI.kaynakMetin = null;
-    KI.ortam.depo.sil(KI.YAP); KI.ortam.depo.sil(KI.HATIR); KI.ortam.depo.sil(KI.KART); KI.ortam.depo.sil(KI.GORSEL); KI.kutFiltre = 'hepsi'; KI.kutBuyuk = null; KI.kartOnbellek = null; KI.kvDuzen = false; KI.kvSecili = null; KI.kvYeni = false; KI.kvGiris = true; if(KI.hatirSaat){ try{ clearTimeout(KI.hatirSaat); }catch(e){ /* yok */ } KI.hatirSaat = null; }
+    KI.ortam.depo.sil(KI.YAP); KI.ortam.depo.sil(KI.HATIR); KI.sonHatir = null; KI.bekleyenHatir = null; KI.ortam.depo.sil(KI.KART); KI.ortam.depo.sil(KI.GORSEL); KI.kutFiltre = 'hepsi'; KI.kutBuyuk = null; KI.kartOnbellek = null; KI.kvDuzen = false; KI.kvSecili = null; KI.kvYeni = false; KI.kvGiris = true; if(KI.hatirSaat){ try{ clearTimeout(KI.hatirSaat); }catch(e){ /* yok */ } KI.hatirSaat = null; }
     KI.siradanSoru = null; KI.siraCalisiyor = false;
     if(KI.siraSaat){ try{ clearInterval(KI.siraSaat); }catch(e){ /* yok */ } KI.siraSaat = null; }
     if(KI.ayar) KI.ortam.depo.sil(KI.arsivAnahtar());
@@ -1032,7 +1056,7 @@ window.LIFEOS.KING = (function(){
     sohbetiKaydet:KI.sohbetiKaydet, sohbetiTemizle:KI.sohbetiTemizle, sohbetiGeriGetir:KI.sohbetiGeriGetir, kayitlar:KI.arsivOku, kayitIndir:KI.kayitIndir,
     kayitKopyala:KI.kayitKopyala, kayitSil:KI.kayitSil, kayitMetni:KI.kayitMetni, menuAc:KI.menuAc, menuDurum:() => KI.menu,
     yeniSohbet:KI.yeniSohbet, kayitAc:KI.kayitAc, ARACLAR:KI.ARACLAR, aktifKayit:() => KI.aktifKayit,
-    BOLUMLER:KI.BOLUMLER, bolumSec:KI.bolumSec, bolum:() => KI.bolum, listeGorunur:KI.listeGorunur, alanAc:KI.alanAc, pdfAl:KI.pdfAl, nedenSatirlari:KI.nedenSatirlari, yetenekler:KI.yetenekler, dersNiyeti:KI.dersNiyeti, hesapla:KI.hesapla, birimCevir:KI.birimCevir, kartEkle:KI.kartEkle, kartSabitle:KI.kartSabitle, oneCikanlar:KI.oneCikanlar, yapilacaklar:KI.yapilacaklar, hatirlatmalar:KI.hatirlatmalar, yasaHesapla:KI.yasaHesapla, kdKur:KI.kdKur, kdDersler:KI.kdDersler, DERSLER:KI.DERSLER, sira:KI.sira, siraBosalt:KI.siraBosalt, SIRA:KI.SIRA, SOZET:KI.SOZET, sozetler:KI.sozetler,
+    BOLUMLER:KI.BOLUMLER, bolumSec:KI.bolumSec, bolum:() => KI.bolum, listeGorunur:KI.listeGorunur, alanAc:KI.alanAc, pdfAl:KI.pdfAl, nedenSatirlari:KI.nedenSatirlari, yetenekler:KI.yetenekler, dersNiyeti:KI.dersNiyeti, hesapla:KI.hesapla, birimCevir:KI.birimCevir, kartEkle:KI.kartEkle, kartSabitle:KI.kartSabitle, oneCikanlar:KI.oneCikanlar, yapilacaklar:KI.yapilacaklar, hatirlatmalar:KI.hatirlatmalar, hatirCoz:KI.hatirCoz, yasaHesapla:KI.yasaHesapla, kdKur:KI.kdKur, kdDersler:KI.kdDersler, DERSLER:KI.DERSLER, sira:KI.sira, siraBosalt:KI.siraBosalt, SIRA:KI.SIRA, SOZET:KI.SOZET, sozetler:KI.sozetler,
     KIPLER:KI.KIPLER, kip:KI.kip, kipSec:KI.kipSec, klasorler:KI.klasorler, klasorEkle:KI.klasorEkle, klasorSil:KI.klasorSil, kayitTasi:KI.kayitTasi, kayitAdlandir:KI.kayitAdlandir, kayitSabitle:KI.kayitSabitle,
     acikMi:() => KI.acik, miniMi:() => KI.mini, akis:() => KI.akis.slice(),
     SAYFALAR:KI.SAYFALAR, HAZIR:KI.HAZIR, _ortam:KI.ortam, _sifirla, _videoKaynak:KI.videoKaynak, _gorunurluk:gorunurluk,

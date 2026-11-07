@@ -40,6 +40,27 @@ Korunacak iyi taraflar:
 - İlk söz zaten ölçülüyor (`usage.ilk_ms`).
 - Kota dolunca yerel yedek basamak var.
 
+### Deneme kullanımı (2026-11-08)
+
+Worktree'den ayrı bir kopya açıldı: HKM 4290, modüller 4281–4283, boş veritabanı, gerçek Ollama
+(`gemma4:e2b`), kanallar kapalı. Yeni bir öğrenci gibi kullanıldı: tanışma sihirbazı, sohbet, süre
+değişikliği, kayıt, soru çözme, ders, hafıza, hatırlatma.
+
+| # | Cümle | Ne oldu | Kök neden | Durum |
+|---|---|---|---|---|
+| D1 | «yarın sabah 7'de bana koşuyu hatırlat», ardından «onu 8'e al» | King «hatırlatırım» ve «tamam, 8'de» dedi; **hiçbir şey kurulmadı** | hatırlatma kuralı yalnız «20 dk sonra hatırlat: X» biçimini tanıyor; model yapmadığı işi söylüyor ve bu denetim yalnız araçlı turda çalışıyordu | **düzeltildi:** doğal gün/vakit/saat çözücüsü + «onu 8'e al»; HKM her turda «yaptım/yaparım» sözünü durduruyor, akışta da |
+| D2 | «kahve içmem, bunu aklında tut», sonra «ben ne içmem?» | «Bu ders sistemde yok..» hatası; sonra hatırlamadı | hafıza komutu yalnız «aklında tut: X» önekini tanıyor; cümle modelin araç seçimine düştü | **düzeltildi:** «X, bunu aklında tut / bunu unutma», «aklında tut, X» |
+| D3 | «bugünkü çalışmayı kısalt, 30 dakika yeter» | **kalıcı** değişiklik önerildi: her gün 180 → 30 dk, 156 konu plandan çıkıyor (onay kartı durdurdu) | AYS çözücüsü «yeter» fiilini tanımıyor; model kalıcı aracı seçti | **düzeltildi:** tarihli «… yeter» geçici süredir |
+| D4 | «hayır, kalıcı değil sadece bugün için» | yalnız «hayır» anlaşıldı, «sadece bugün» atıldı | onay beklerken «hayır + düzeltme» iptal sayılıyor | açık (K5-09) |
+| D5 | ders kartından sonra «peki bir örnek ver» | «Konuyu tekrara al için konu kimliği (ays_konular) ne olsun?» | konu ipi yok; araç parametresi sorusunda şema açıklaması kullanıcıya gidiyor | **düzeltildi:** yazılı «devam» ve «örnek/soru» derse bağlanır; iç ad sorudan atılır |
+| D6 | «bugün matematikten 40 soru çözdüm 32 doğru» (pazar) | önizleme 40 soruyu «Dinlenme» bloğuna yazıyor, «matematik» kayboluyor; King kaydetmeden «Helal olsun» dedi | AYS kayıt çözücüsü dinlenme gününde dersi bloğa bağlayamıyor | açık (AYS modül mantığı, ofise uygun) |
+| D7 | «günaydın King, bugün biraz yorgunum» | ilk söz 10,2 sn (soğuk); cevap plana bağlanmadı | soğuk model (K5-05); yorgunluk → «bugünü kısaltayım mı?» önerisi yok | açık |
+| D8 | tanışma sihirbazı | 2. adım (hedef sıralaması) boşken geçiliyor; hata 5. adımın sonunda «2. adıma dön» diye çıkıyor | doğrulama yalnız sonda | açık (AYS, ofise uygun) |
+| D9 | «2x+3=11 ise x kaç?» | doğru, 1,5 sn; cevapta `$2x + 3 = 11$` LaTeX işareti | model biçimi | açık (küçük) |
+
+İyi çalışanlar: geçici süre önizlemesi ve onayı, türev ders kartı (dürüst etiketli), sıcak modelde
+0,6–1,5 sn cevap, onaylanan eylemin `eylem` defterine düşmesi.
+
 ## 2. İlkeler
 
 1. **Ölç → kök neden → düzelt → yeniden ölç.** Ölçüsüz değişiklik yok.

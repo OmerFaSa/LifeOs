@@ -467,6 +467,43 @@ window.LIFEOS.PARCA.yazilar({
   const HATIR_SAAT_RE = /^saat\s*(\d{1,2})[:.](\d{2})\S*\s*(?:bana\s*)?(?:hatırlat|haber ver)\s*:?\s*(.*)$/;
   const HATIR_LISTE_RE = /^hatırlatma(?:larım|lar)\s*[?.!]*$/;
   KI.hatirSaat = null;
+  /* Doğal hatırlatma (King 5 deneme kullanımı, 2026-11-08: «yarın sabah 7'de bana koşuyu hatırlat» modele
+     gidiyor, model «hatırlatırım» diyor, hiçbir şey kurulmuyordu). Gün, vakit ve saat kodla çözülür; saat
+     yoksa ya da bugünün geçmiş saatiyse null: tahmin edilmez (AGENTS §1.7). */
+  const HATIR_FIIL_RE = /\s*(?:bana\s+|beni\s+)?hatırlat(?:ır\s*mısın|sana|\s+lütfen)?$/;
+  const HATIR_KAYDIR_RE = /^(?:onu|bunu|hatırlatmayı)\s+(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*['’]?\s*(?:e|a|ye|ya|ne|na)?\s+(?:al|çek|kaydır|ertele|değiştir)$/;
+  function hatirCoz(t, d){
+    let s = String(t || '').replace(/[.!?]+$/, '').trim(), m;
+    if(!HATIR_FIIL_RE.test(s)) return null;
+    s = s.replace(HATIR_FIIL_RE, '');
+    const kes = x => { s = s.replace(x, ' ').replace(/\s+/g, ' ').trim(); };
+    let z;
+    if((m = s.match(/(?:^|\s)(\d{1,3})\s*(dk|dakika|saat)\s+sonra(?=\s|$)/))){
+      z = new Date(d.getTime() + Number(m[1]) * (m[2] === 'saat' ? 3600000 : 60000)); kes(m[0]);
+    }else{
+      const gun = (m = s.match(/(?:^|\s)(bugün|yarın)(?=\s|$)/)) ? m[1] : '';
+      if(gun) kes(m[0]);
+      const vakit = (m = s.match(/(?:^|\s)(sabah|öğleden sonra|öğlen|öğle|akşam|gece)(?=\s|$)/)) ? m[1] : '';
+      if(vakit) kes(m[0]);
+      m = s.match(/(?:^|\s)(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*['’]?\s*(?:de|da|te|ta)(?=\s|$)/) || s.match(/(?:^|\s)saat\s*(\d{1,2})(?:[:.](\d{2}))?(?=\s|$)/);
+      if(!m) return null;
+      let h = Number(m[1]);
+      const dk = Number(m[2] || 0);
+      if(h > 23 || dk > 59) return null;
+      if((vakit === 'akşam' || vakit === 'öğleden sonra') && h < 12) h += 12;
+      else if((vakit === 'öğlen' || vakit === 'öğle') && h >= 1 && h <= 6) h += 12;
+      else if(vakit === 'gece' && h >= 8 && h < 12) h += 12;
+      kes(m[0]);
+      z = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (gun === 'yarın' ? 1 : 0), h, dk);
+      if(z <= d){ if(gun) return null; z = new Date(z.getTime() + 864e5); }
+    }
+    const ne = s.replace(/^(?:bana|beni)\s+|\s+(?:bana|beni)$/g, '').replace(/^[\s,:;–-]+|[\s,:;–-]+$/g, '').trim();
+    return { z, ne:ne || 'Hatırlatma' };
+  }
+  function hatirZaman(z, d){
+    const g = new Date(d.getFullYear(), d.getMonth(), d.getDate()), f = Math.round((new Date(z.getFullYear(), z.getMonth(), z.getDate()) - g) / 864e5);
+    return (f === 0 ? 'bugün' : f === 1 ? 'yarın' : KI.tarihYaz(z.toISOString())) + ' ' + String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0');
+  }
   function hatirlatmalar(){ const l = KI.ortam.depo.oku(HATIR); return Array.isArray(l) ? l.filter(x => x && x.id && x.zaman) : []; }
   function hatirYaz(l){ if(l.length) KI.ortam.depo.yaz(HATIR, l.slice(-30)); else KI.ortam.depo.sil(HATIR); }
   /* Vadesi gelenleri söyler; en yakını için tek zamanlayıcı kurar (gerçek setTimeout: sınama sahte zamanlamayı kullanmaz). */
@@ -513,6 +550,19 @@ window.LIFEOS.PARCA.yazilar({
   /* Tek giriş: anlaşılırsa sonucu döner, değilse null (mesaj olağan yoluna gider). */
   function aracKutusu(metin, t0){
     const sen = () => { KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null; };
+    /* «Ne zaman hatırlatayım?» sorusunun cevabı («9'da», «akşam 8'de»): bekleyen işle birleşir; tutmazsa düşer. */
+    if(KI.bekleyenHatir){
+      const b = KI.bekleyenHatir, h = hatirCoz(t0.replace(/[.!?]+$/, '') + ' ' + b + ' hatırlat', KI.ortam.simdi());
+      KI.bekleyenHatir = null;
+      if(h){
+        const d = KI.ortam.simdi(), id = 'h' + d.getTime().toString(36);
+        hatirYaz(hatirlatmalar().concat([{ id, zaman:h.z.toISOString(), metin:h.ne.slice(0, 160) }]));
+        KI.sonHatir = id;
+        sen(); KI.soyle('Tamam, hatırlatacağım: ' + h.ne + ' · ' + hatirZaman(h.z, d) + '.');
+        hatirlatKur();
+        return { tur:'hatirlat' };
+      }
+    }
     let m = t0.match(HESAP_RE);
     if(m){
       const v = hesapla(m[1]);
@@ -558,8 +608,40 @@ window.LIFEOS.PARCA.yazilar({
       const ne = (m[3] || '').trim() || 'Hatırlatma';
       if(!(Number(m[1]) > 0 || m.length === 4 && !/^(dk|dakika|sa|saat)$/.test(m[2])) || isNaN(z)){ return null; }
       hatirYaz(hatirlatmalar().concat([{ id:'h' + d.getTime().toString(36), zaman:z.toISOString(), metin:ne.slice(0, 160) }]));
+      KI.sonHatir = 'h' + d.getTime().toString(36);
       sen(); KI.soyle(yz('ortak.king-arac.tamam') + String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0') + (z.getDate() !== d.getDate() ? ' (yarın)' : '')
         + '’de hatırlatacağım: ' + ne + '. Sayfa açıksa bildirim gelir; kapalıysa açtığında söylerim.');
+      hatirlatKur();
+      return { tur:'hatirlat' };
+    }
+    const hd = hatirCoz(t0, KI.ortam.simdi());
+    if(hd){
+      const d = KI.ortam.simdi(), id = 'h' + d.getTime().toString(36);
+      hatirYaz(hatirlatmalar().concat([{ id, zaman:hd.z.toISOString(), metin:hd.ne.slice(0, 160) }]));
+      KI.sonHatir = id;
+      sen(); KI.soyle('Tamam, hatırlatacağım: ' + hd.ne + ' · ' + hatirZaman(hd.z, d) + '. Sayfa açıksa bildirim gelir; kapalıysa açtığında söylerim.');
+      hatirlatKur();
+      return { tur:'hatirlat' };
+    }
+    /* Saatsiz hatırlatma isteği tahmin edilmez, sorulur (deneme: «yarın ekmek almayı hatırlat» kart aracına
+       gidiyor, model «hatırlatırım» diyordu). Cevap bir sonraki mesajda bekleyenle birleşir. */
+    if(HATIR_FIIL_RE.test(t0.replace(/[.!?]+$/, '')) && !/^hatırlatma/.test(t0)){
+      KI.bekleyenHatir = t0.replace(/[.!?]+$/, '').replace(HATIR_FIIL_RE, '').trim();
+      sen(); KI.cipler = [{ is:'vazgec', ad:yz('ortak.king-arac.vazgec') }];
+      KI.soyle('Ne zaman hatırlatayım? Saatiyle söyle: «9\'da», «akşam 8\'de» ya da «2 saat sonra».');
+      return { tur:'hatirlat-sor' };
+    }
+    /* «onu 8'e al»: son kurulan hatırlatma (konuşmanın ipi, KING-5 K5-09). */
+    m = KI.sonHatir ? t0.replace(/[.!]+$/, '').match(HATIR_KAYDIR_RE) : null;
+    const eski = m ? hatirlatmalar().find(x => x.id === KI.sonHatir) : null;
+    if(m && eski && Number(m[1]) <= 23 && Number(m[2] || 0) <= 59){
+      const d = KI.ortam.simdi(), o = new Date(eski.zaman);
+      let h = Number(m[1]);
+      if(o.getHours() >= 12 && h < 12) h += 12;                 // akşamki hatırlatma akşamda kalır
+      let z = new Date(o.getFullYear(), o.getMonth(), o.getDate(), h, Number(m[2] || 0));
+      if(z <= d) z = new Date(z.getTime() + 864e5);
+      hatirYaz(hatirlatmalar().map(x => x.id === eski.id ? Object.assign({}, x, { zaman:z.toISOString() }) : x));
+      sen(); KI.soyle('Tamam, hatırlatma artık ' + hatirZaman(z, d) + ': ' + eski.metin + '.');
       hatirlatKur();
       return { tur:'hatirlat' };
     }
@@ -1178,7 +1260,9 @@ window.LIFEOS.PARCA.yazilar({
     if(!p || p.type !== 'string') return null;
     KI.bekleyenNiyet = { ad:a.ad, param:N.param, k:eksik[0] };
     KI.cipler = [{ is:'vazgec', ad:yz('ortak.king-arac.vazgec') }];
-    KI.soyle((a.ozetAd || String(a.aciklama).split(/[.:;(]/)[0]).trim() + ' için ' + (p.description || eksik[0]) + ' ne olsun?');
+    /* Şema açıklaması modele yazılır («konu kimliği (ays_konular)»); kullanıcıya iç ad gitmez (AGENTS §1.8). */
+    const ad = String(p.description || '').replace(/\s*\([^)]*\)/g, '').replace(/\s+kimliği$/, '').trim();
+    KI.soyle((a.ozetAd || String(a.aciklama).split(/[.:;(]/)[0]).trim() + ' için ' + (ad && !/_/.test(ad) ? ad : 'bu') + ' ne olsun?');
     return { tur:'arac-sor', ad:a.ad };
   }
   async function niyetCevap(metin){
@@ -1216,5 +1300,5 @@ window.LIFEOS.PARCA.yazilar({
     return (cevap || yz('ortak.king-arac.kolay-gelsin')) + (yer ? ' ' + yer + ' açılıyor.' : '');
   }
 
-  Object.assign(KI, { onayAdi, onaySorusu, D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });
+  Object.assign(KI, { onayAdi, onaySorusu, D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, hatirCoz, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });
 })();

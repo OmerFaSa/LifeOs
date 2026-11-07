@@ -66,7 +66,7 @@ R.Komut = (function(){
      ara isteğidir. Olumsuzluk süzgeci (LIFEOS.Olumsuz) bunları hariç tutar;
      geri kalan olumsuzluk («ara vermek istemiyorum») isteği durdurur. */
   const ARA_OLUMSUZ_RE = /(çalışmayacağım|çalışmayacam|çalışmıyorum|çalışamayacağım|çalışamam)/;
-  const GELECEK_RE = /(çalışacağım|çalışacam|çalışıcam|çalışıcağım|çalışmak istiyorum|çalışayım|olsun|yap|ayarla|çıkar|düşür|indir)/;
+  const GELECEK_RE = /(çalışacağım|çalışacam|çalışıcam|çalışıcağım|çalışmak istiyorum|çalışayım|olsun|yap|ayarla|çıkar|düşür|indir|yeter)/;   // «kısalt/azalt 30 dk» miktar kadar mı, miktara mı: belirsiz, eklenmez
   const GECMIS_RE = /(çalıştım|çalıştık|çalışmıştım|yaptım|çözdüm|çalışabildim)/;
   const GUNLUK_RE = /(günde|günlük|her gün|artık|bundan sonra|kalıcı)/;
   const HEDEF_RE = /hedef/;
