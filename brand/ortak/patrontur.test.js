@@ -69,6 +69,11 @@ describe('Patron turu', () => {
     expect(sozler('ays').toLocaleLowerCase('tr')).toContain('üniversite önermem');
   });
 
+  it('sese giden metin kısaltmaları okunuşla yazar, altyazı aynı kalır', () => {
+    expect(T._okunus('LifeOS, AYS’nin, SPİ ve ESP. Ctrl K ile.')).toBe('Layf O Es, A Ye Se’nin, Se Pe İ ve E Se Pe. Kontrol Ka ile.');
+    expect(T._sozler(T._akis('ays').find(a => a.id === 'king.ac')).join(' ')).toContain('AYS');
+  });
+
   it('durum port değişse de okunur: hesap başına çerezde durur, hesaplar karışmaz', () => {
     cerezSil();
     T._yaz('h:bir', { a:'spi.calisma', i:'ays', s:1 });

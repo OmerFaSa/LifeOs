@@ -54,65 +54,75 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.patrontur.kim.esp':'ESP patronu',
   'ortak.patrontur.uzak':'Kaldığımız yer {ad}. Devam dersen oraya geçelim.',
 
-  'ortak.patrontur.king.ac.1':'Hoş geldin. Ben King, bu mahallenin büyüğüyüm.',
-  'ortak.patrontur.king.ac.2':'Kapıda tanıştık; şimdi seni ortada bırakmak olmaz.',
-  'ortak.patrontur.king.ac.3':'Gel, içeriyi birlikte gezelim. Her evi kendi patronu anlatsın.',
-  'ortak.patrontur.king.cagir.1':'Önce beni nerede bulacağını göstereyim.',
-  'ortak.patrontur.king.cagir.2':'Takıldığın an buraya dokun, ne dersen dinlerim.',
-  'ortak.patrontur.king.cagir.3':'Sayıyı ben uydurmam; hesabı kod yapar, ben anlatırım. Şimdi sözü patrona bırakıyorum.',
+  'ortak.patrontur.king.ac.1':'Hoş geldin. Ben King; LifeOS’ta her ekranda yanında olan yardımcınım.',
+  'ortak.patrontur.king.ac.2':'LifeOS üç sistemden oluşur: sınav hazırlığı için AYS, sağlık için SPİ, kişisel gelişim için ESP.',
+  'ortak.patrontur.king.ac.3':'Şimdi kısa bir tur yapalım. Her sistemi kendi patronu, kendi ekranında anlatacak.',
+  'ortak.patrontur.king.cagir.1':'Önce beni nerede bulacağını göstereyim: bu düğmeye bas ya da Ctrl tuşuna iki kez dokun.',
+  'ortak.patrontur.king.cagir.2':'Bana «kilo 74 yaz» ya da «öğün ekranını aç» gibi kısa komutlar verebilirsin. Sabah brifingi ve haftalık değerlendirme kartları da bende.',
+  'ortak.patrontur.king.cagir.3':'Bir şey yazmadan önce onayını isterim; yaptığım her işlem «King ne yaptı» listesinde durur ve geri alınabilir.',
+  'ortak.patrontur.king.cagir.4':'Sohbetlerin, derslerin ve sesli özetlerin Kütüphane’de saklanır; sık sorduklarını Kartlarım’a ekleyip tek dokunuşla sorarsın.',
+  'ortak.patrontur.king.cagir.5':'Sayıları ben uydurmam: hesabı kod yapar, ben anlatırım. Şimdi sözü patrona bırakıyorum.',
 
   'ortak.patrontur.ays.tanis.1':'Merhaba, ben AYS’nin patronuyum.',
-  'ortak.patrontur.ays.tanis.2':'Sınav yolundaki masanın başındayım; ekibimin raporlarını okur, sana tek bir karar çıkarırım.',
-  'ortak.patrontur.ays.tanis.3':'Meslek seçmem, üniversite önermem. O kararlar senin.',
-  'ortak.patrontur.ays.giris.1':'En çok uğrayacağın yer burası.',
-  'ortak.patrontur.ays.giris.2':'Ne yaptıysan tek cümleyle yaz: «matematikten 40 soru çözdüm» gibi. Ne anladığımı gösteririm, doğruysa kaydedersin.',
-  'ortak.patrontur.ays.calisma.1':'Şimdi şuna bas, çalışma masamı göstereyim.',
-  'ortak.patrontur.ays.calisma-ic.1':'Tekrarların ve denemelerin burada toplanır.',
-  'ortak.patrontur.ays.calisma-ic.2':'Bugün neye oturacağını bilmiyorsan önce buraya bak; sıranı hazır tutarım.',
-  'ortak.patrontur.ays.analiz.1':'Bir de şuna bas, gidişine birlikte bakalım.',
-  'ortak.patrontur.ays.analiz-ic.1':'Netlerin nasıl gidiyor, burada görürsün.',
-  'ortak.patrontur.ays.analiz-ic.2':'Boş geçen gün sıfır sayılmaz; girilmemiştir, o kadar. Telaş yok.',
-  'ortak.patrontur.ays.devir.1':'Benden bu kadar; kapım hep açık.',
+  'ortak.patrontur.ays.tanis.2':'Sınava kalan süreyi haftalara böler, hedefine göre çalışma planını kurarım; ekibimin raporlarını okuyup sana günün tek kararını çıkarırım.',
+  'ortak.patrontur.ays.tanis.3':'Meslek seçmem, üniversite önermem; o kararlar senin.',
+  'ortak.patrontur.ays.giris.1':'Bugün ekranının merkezi «Ne yaptın?» kutusudur.',
+  'ortak.patrontur.ays.giris.2':'Yaptığını tek cümleyle yaz, örneğin «matematikten 40 soru çözdüm». Ne anladığımı gösteririm; doğruysa kaydedersin.',
+  'ortak.patrontur.ays.calisma.1':'Şimdi Çalışma’ya bas, masamı göstereyim.',
+  'ortak.patrontur.ays.calisma-ic.1':'Burada Tekrar, Soru çöz, Deneme, Konu takibi ve Kendini sına ekranları var.',
+  'ortak.patrontur.ays.calisma-ic.2':'Soru çözerken sorunun üstüne kalemle not alabilir, deneme sonuçlarını girip çözümlemesini görebilirsin.',
+  'ortak.patrontur.ays.calisma-ic.3':'Bugün neye oturacağını bilmiyorsan önce Tekrar’a bak; sırası gelen kartlar orada seni bekler.',
+  'ortak.patrontur.ays.analiz.1':'Şimdi Analiz’e bas, gidişine birlikte bakalım.',
+  'ortak.patrontur.ays.analiz-ic.1':'İlerleme netlerinin seyrini, Tahmin ise bu gidişle sınav gününe hangi aralıkta varacağını gösterir.',
+  'ortak.patrontur.ays.analiz-ic.2':'Neden? ekranı hangi konunun hangi hatayı ürettiğini sorar; Telafi, plandan sapınca izlenecek adımları başlatır.',
+  'ortak.patrontur.ays.analiz-ic.3':'Kartlar yalnız senin kayıtlarından çizilir. Boş geçen gün sıfır sayılmaz; girilmemiş olarak görünür.',
+  'ortak.patrontur.ays.devir.1':'Benden bu kadar; kapım her zaman açık.',
 
-  'ortak.patrontur.spi.kurulum':'Ben SPİ’nin patronuyum. Önce seni biraz tanıyayım; birkaç kısa soru. İstersen «Şimdilik atla» de, kapım sonra da açık.',
+  'ortak.patrontur.spi.kurulum':'Ben SPİ’nin patronuyum. Önce seni biraz tanıyayım: ad, doğum yılı, boy ve kilo yeterli. İstersen «Şimdilik atla» de, sonra da tamamlayabilirsin.',
   'ortak.patrontur.spi.tanis.1':'Merhaba, ben SPİ’nin patronuyum.',
-  'ortak.patrontur.spi.tanis.2':'Uykun, öğünün, hareketin: ekibim bunları izler, ben de haftanın tek işini seçerim.',
-  'ortak.patrontur.spi.tanis.3':'Baştan söyleyeyim: teşhis koymam, ilaç önermem. O iş hekimindir.',
-  'ortak.patrontur.spi.giris.1':'Gün içinde buraya yazman yeter.',
-  'ortak.patrontur.spi.giris.2':'«7 saat uyudum, 2 yumurta yedim» gibi. Ne anladığımı gösteririm, doğruysa kaydedersin.',
-  'ortak.patrontur.spi.calisma.1':'Şimdi şuna bas, mutfağa ve spor salonuna uğrayalım.',
-  'ortak.patrontur.spi.calisma-ic.1':'Öğünlerin, antrenmanın, tahlil sonuçların burada durur.',
-  'ortak.patrontur.spi.calisma-ic.2':'Hepsini aynı gün doldurmak zorunda değilsin; ne varsa onunla başlarız.',
-  'ortak.patrontur.spi.analiz.1':'Bir de şuna bas, kendi verine bakalım.',
-  'ortak.patrontur.spi.analiz-ic.1':'Neyin iyi gittiğini burada görürsün.',
-  'ortak.patrontur.spi.analiz-ic.2':'Ölçmediğini tahmin etmem, girmediğin günü sıfır saymam. Karar senin ve hekiminin.',
+  'ortak.patrontur.spi.tanis.2':'Uykunu, öğünlerini, hareketini ve ölçümlerini ekibim izler; ben de haftanın odaklanacağın tek işini seçerim.',
+  'ortak.patrontur.spi.tanis.3':'Baştan söyleyeyim: teşhis koymam, ilaç önermem. O karar hekimindir.',
+  'ortak.patrontur.spi.giris.1':'Gün içinde buraya yazman yeterli.',
+  'ortak.patrontur.spi.giris.2':'Örneğin «7 saat uyudum, 2 yumurta yedim». Ne anladığımı gösteririm; doğruysa kaydedersin.',
+  'ortak.patrontur.spi.calisma.1':'Şimdi Çalışma’ya bas; mutfağa ve spor salonuna uğrayalım.',
+  'ortak.patrontur.spi.calisma-ic.1':'Öğün, Hareket, Testler, Mutfak ve Bütçe burada.',
+  'ortak.patrontur.spi.calisma-ic.2':'Öğünlerini ve antrenmanını kaydeder, tahlil sonuçlarını saklarsın; mutfakta tariflerin, bütçede market sepetin durur.',
+  'ortak.patrontur.spi.calisma-ic.3':'Hepsini aynı gün doldurmak zorunda değilsin; elinde ne varsa onunla başlarız.',
+  'ortak.patrontur.spi.analiz.1':'Şimdi Analiz’e bas, kendi verine bakalım.',
+  'ortak.patrontur.spi.analiz-ic.1':'Burada girdiğin kayıtların zaman içindeki seyrini ve neyin iyi gittiğini görürsün.',
+  'ortak.patrontur.spi.analiz-ic.2':'Ölçmediğini tahmin etmem, girmediğin günü sıfır saymam.',
+  'ortak.patrontur.spi.analiz-ic.3':'Karar senin ve hekiminin.',
   'ortak.patrontur.spi.devir.1':'Benden bu kadar; kendine iyi bak.',
 
-  'ortak.patrontur.esp.kurulum':'Ben ESP’nin patronuyum. Önce adını öğreneyim, gerisi kolay. İstersen «Şimdilik atla» de, kapım sonra da açık.',
+  'ortak.patrontur.esp.kurulum':'Ben ESP’nin patronuyum. Önce adını öğreneyim, gerisi kolay. İstersen «Şimdilik atla» de, sonra da tamamlayabilirsin.',
   'ortak.patrontur.esp.tanis.1':'Merhaba, ben ESP’nin patronuyum.',
-  'ortak.patrontur.esp.tanis.2':'Merakın neredeyse oradan başlarız: dil, felsefe, müzik, okuma, yazı, tarih.',
-  'ortak.patrontur.esp.tanis.3':'Sertifika vermem, yeteneğin hakkında hüküm kurmam, sonuç da vaat etmem. Yolu birlikte yürürüz.',
+  'ortak.patrontur.esp.tanis.2':'Merakın neredeyse oradan başlarız: dil, felsefe, tarih, müzik ve diksiyon, okuma ve yazı.',
+  'ortak.patrontur.esp.tanis.3':'Sertifika vermem, yeteneğin hakkında hüküm kurmam, sonuç da vaat etmem; yolu birlikte yürürüz.',
   'ortak.patrontur.esp.giris.1':'Yaptığını buraya yaz.',
-  'ortak.patrontur.esp.giris.2':'«45 dakika gitar, 20 dakika kelime» gibi. Ne anladığımı gösteririm, doğruysa kaydedersin.',
-  'ortak.patrontur.esp.calisma.1':'Şimdi şuna bas, çalışma odasını açayım.',
-  'ortak.patrontur.esp.calisma-ic.1':'Kelimelerin, okuduğun kitaplar, her alanın kendi köşesi burada.',
-  'ortak.patrontur.esp.calisma-ic.2':'Hepsine birden koşma; bir tanesini seç, gerisi seni bekler.',
-  'ortak.patrontur.esp.analiz.1':'Bir de şuna bas, yoluna bakalım.',
-  'ortak.patrontur.esp.analiz-ic.1':'Hangi alanda ne kadar yürüdüğün burada görünür.',
-  'ortak.patrontur.esp.analiz-ic.2':'Kıyas yok; sen ve dünkü sen varsınız.',
+  'ortak.patrontur.esp.giris.2':'Örneğin «45 dakika gitar, 20 dakika kelime». Ne anladığımı gösteririm; doğruysa kaydedersin.',
+  'ortak.patrontur.esp.calisma.1':'Şimdi Çalışma’ya bas, çalışma odasını açayım.',
+  'ortak.patrontur.esp.calisma-ic.1':'Her alanın kendi odası var: Dil, Felsefe, Tarih, Ses, Okuma ve Yazı.',
+  'ortak.patrontur.esp.calisma-ic.2':'Dil’de kelime kartların tekrar sırasıyla gelir; Okuma’da okuduğun kitaplar listelenir.',
+  'ortak.patrontur.esp.calisma-ic.3':'Hepsine birden koşma; birini seç, gerisi seni bekler.',
+  'ortak.patrontur.esp.analiz.1':'Şimdi Analiz’e bas, yoluna bakalım.',
+  'ortak.patrontur.esp.analiz-ic.1':'Radar alanlar arasındaki dengeni, Seriler sürekliliğini gösterir; Rapor haftanı özetler.',
+  'ortak.patrontur.esp.analiz-ic.2':'Birlikte hareket eden iki şeyi birbirinin sebebi gibi anlatmam.',
+  'ortak.patrontur.esp.analiz-ic.3':'Kıyas yok; sen ve dünkü sen varsınız.',
   'ortak.patrontur.esp.devir.1':'Benden bu kadar; merakın eksik olmasın.',
 
-  'ortak.patrontur.ays.kurulum':'Ben AYS’nin patronuyum. Önce seni biraz tanıyayım; birkaç kısa soru. Sen hazır olunca buradayım.',
-  'ortak.patrontur.devir.ays':'Seni AYS’nin patronuna bırakıyorum. Şuraya bas, kapıyı aç.',
-  'ortak.patrontur.devir.spi':'Seni SPİ’nin patronuna bırakıyorum. Şuraya bas, kapıyı aç.',
-  'ortak.patrontur.devir.esp':'Seni ESP’nin patronuna bırakıyorum. Şuraya bas, kapıyı aç.',
-  'ortak.patrontur.gec.ays':'AYS’ye şuradan geçilir.',
-  'ortak.patrontur.gec.spi':'SPİ’ye şuradan geçilir.',
-  'ortak.patrontur.gec.esp':'ESP’ye şuradan geçilir.',
+  'ortak.patrontur.ays.kurulum':'Ben AYS’nin patronuyum. Önce seni biraz tanıyayım: takvimin ve hedef başarı sıran, birkaç kısa soru. Hedef sıra boş kalırsa plan kuramam.',
+  'ortak.patrontur.devir.ays':'Seni AYS’nin patronuna bırakıyorum. Şuraya bas; sistemler arasında buradan geçilir.',
+  'ortak.patrontur.devir.spi':'Seni SPİ’nin patronuna bırakıyorum. Şuraya bas; sistemler arasında buradan geçilir.',
+  'ortak.patrontur.devir.esp':'Seni ESP’nin patronuna bırakıyorum. Şuraya bas; sistemler arasında buradan geçilir.',
+  'ortak.patrontur.gec.ays':'AYS’yi buradan aç.',
+  'ortak.patrontur.gec.spi':'SPİ’yi buradan aç.',
+  'ortak.patrontur.gec.esp':'ESP’yi buradan aç.',
 
-  'ortak.patrontur.son.bugun.1':'Patronlarla tanıştın. Son bir adım kaldı: Bugün’e dön.',
-  'ortak.patrontur.son.is.1':'Ee, hadi bakalım. Tanışma bitti, işe koyulalım.',
-  'ortak.patrontur.son.is.2':'İlk cümleni şuraya yaz; küçük olsun, yeter. Biz buradayız.',
+  'ortak.patrontur.son.bugun.1':'Üç patronla da tanıştın. Son olarak Bugün’e dön.',
+  'ortak.patrontur.son.is.1':'Günlük düzen basit: sabah Bugün’e bak, gün içinde «Ne yaptın?» kutusuna yaz, akşam «Günü kapat» ile günü tek ekranda onayla.',
+  'ortak.patrontur.son.is.2':'Notların için Defter var: notları birbirine bağlar, resim, çizim ve ses eklersin. Ctrl K ile her ekrana ve komuta ulaşırsın.',
+  'ortak.patrontur.son.is.3':'Tanışma bitti; şimdi işe koyulalım.',
+  'ortak.patrontur.son.is.4':'İlk cümleni şuraya yaz; küçük olsun, yeter. Biz buradayız.',
 });
 
 window.LIFEOS.PATRONTUR = (function(L){
@@ -142,16 +152,16 @@ window.LIFEOS.PATRONTUR = (function(L){
     const sira = [ilk].concat(SIRA.filter(m => m !== ilk));
     const l = [
       { id:'king.ac', kim:'king', modul:ilk, soz:3, cekmece:'bugun' },
-      { id:'king.cagir', kim:'king', modul:ilk, soz:3, hedef:'king', cekmece:'bugun' },
+      { id:'king.cagir', kim:'king', modul:ilk, soz:5, hedef:'king', cekmece:'bugun' },
     ];
     sira.forEach((m, i) => {
       const a = o => l.push(Object.assign({ kim:m, modul:m, soz:1 }, o, { id:m + '.' + o.id }));
       a({ id:'tanis', soz:3, cekmece:'bugun' });
       a({ id:'giris', soz:2, hedef:'giris', cekmece:'bugun' });
       a({ id:'calisma', hedef:'calisma', tikla:true });
-      a({ id:'calisma-ic', soz:2, cekmece:'calisma' });
+      a({ id:'calisma-ic', soz:3, cekmece:'calisma' });
       a({ id:'analiz', hedef:'analiz', tikla:true });
-      a({ id:'analiz-ic', soz:2, cekmece:'analiz' });
+      a({ id:'analiz-ic', soz:3, cekmece:'analiz' });
       const s = sira[i + 1];
       if(s){
         a({ id:'devir', soz:1, ekSoz:'devir.' + s, hedef:'sistemac', tikla:true });
@@ -159,7 +169,7 @@ window.LIFEOS.PATRONTUR = (function(L){
       }
     });
     l.push({ id:'son.bugun', kim:'king', modul:null, soz:1, hedef:'bugun', tikla:true, cekmeceDegilse:'bugun' });
-    l.push({ id:'son.is', kim:'king', modul:null, soz:2, hedef:'girdi', cekmece:'bugun', son:true });
+    l.push({ id:'son.is', kim:'king', modul:null, soz:4, hedef:'girdi', cekmece:'bugun', son:true });
     return l;
   }
   const sozler = a => {
@@ -426,11 +436,14 @@ window.LIFEOS.PATRONTUR = (function(L){
 
   /* ---------- konuşma ---------- */
   function sus(){ const K = L.KING; try{ if(K && K.sus) K.sus(); }catch(e){ /* yok */ } }
+  /* EMA kısaltmaları harf harf okumaz: sese giden metin okunuşla yazılır (tools/sinematik/satirlar.json ile aynı); altyazı değişmez. */
+  const OKUNUS = [[/LifeOS/g, 'Layf O Es'], [/\bAYS/g, 'A Ye Se'], [/SPİ/g, 'Se Pe İ'], [/\bESP/g, 'E Se Pe'], [/\bCtrl K\b/g, 'Kontrol Ka'], [/\bCtrl\b/g, 'Kontrol']];
+  const okunus = m => OKUNUS.reduce((s, [r, y]) => s.replace(r, y), m);
   function konus(m){
     if(!d.ses) return;
     const K = L.KING;
     /* Anlatıcının sesi EMA (kullanıcı, 2026-11-07); EMA yoksa King'in yolu cihaz sesine düşer. */
-    try{ if(K && K.seslendir) K.seslendir(m, undefined, 'ema'); }catch(e){ /* ses yok: yazı yeter */ }
+    try{ if(K && K.seslendir) K.seslendir(okunus(m), undefined, 'ema'); }catch(e){ /* ses yok: yazı yeter */ }
   }
   const konusuyor = () => { const K = L.KING; try{ return !!(K && K.konusuyorMu && K.konusuyorMu()); }catch(e){ return false; } };
   const uyu = ms => new Promise(ok => setTimeout(ok, ms));
@@ -767,5 +780,5 @@ window.LIFEOS.PATRONTUR = (function(L){
     if(document.readyState === 'complete') kendiliginden(); else window.addEventListener('load', kendiliginden, { once:true });
   }
 
-  return Object.freeze({ baslat, bitir, acikMi:() => !!d, SIRA, _akis:akis, _sozler:sozler, _oku:oku, _yaz:yaz, _durum:() => d, _ac:ac, _hedefListe:hedefListe });
+  return Object.freeze({ baslat, bitir, acikMi:() => !!d, SIRA, _akis:akis, _sozler:sozler, _oku:oku, _yaz:yaz, _durum:() => d, _ac:ac, _hedefListe:hedefListe, _okunus:okunus });
 })(window.LIFEOS);
