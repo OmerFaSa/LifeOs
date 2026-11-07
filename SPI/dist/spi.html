@@ -19266,9 +19266,15 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 .perde--karsilama.is-sehir .px-bulut i{ transform:translateX(-86%); }
 .perde--karsilama .piksel-sehir{ transition:opacity .45s ease; }
 .perde--kapaniyor .piksel-sehir{ opacity:0; }
-.perde--kapaniyor .px-bulut i{ transform:translateX(-101%); transition-duration:.8s; }
+.perde--kapaniyor .px-bulut i{ transform:translateX(-101%); transition:transform 1.1s cubic-bezier(.4,0,.2,1); }
 /* Yazı sayfayla birlikte değişir: gidenin yazısı önce söner, varanın yazısı bulutun üstünde belirir. Sürekli olan yalnız buluttur. */
-.lifeos-gecis.is-kalkis .px-bulut__kart{ opacity:0; transition:opacity .4s ease; }
+.lifeos-gecis:is(.is-acik,.is-kalkis) .px-bulut__kart{ opacity:0; transition:opacity .4s ease; }
+/* Gidiş (animasyon.js gecis): tıklanınca sayfa şehir kamerasının ilk karesine (arka planın kendisi) söner; kartta yükleme çizgisi. */
+.lifeos-gecis .piksel-sehir.is-sol{ animation:px-sol .35s ease both; }
+@keyframes px-sol{ from{ opacity:0; } }
+.px-bulut__yuk{ display:block; width:132px; height:8px; margin-top:6px; padding:2px; box-sizing:border-box; background:var(--px-kenar); }
+.px-bulut__yuk::after{ content:""; display:block; height:100%; background:var(--accent, #6fb2e8); transform-origin:left; animation:px-yuk var(--yuk, 2s) linear both; }
+@keyframes px-yuk{ from{ transform:scaleX(0); } }
 .perde--karsilama .perde__araclar{ animation:px-bulut-yazi .5s ease .5s both; }
 :root[data-zemin="piksel"] .perde--kapaniyor:has(.px-bulut){ opacity:1; }
 :root[data-zemin="piksel"] .perde--kapaniyor:has(.px-bulut) :is(.karsilama,.perde__araclar){ opacity:0; transition:opacity .25s ease; }
@@ -22427,10 +22433,13 @@ window.LIFEOS = window.LIFEOS || {};
 
   const GECIS_CEREZ = 'lifeos_gecis';
   const GECIS_MS = 560;
-  /* Bulutlu sıra: kapan · bekle · açıl · manzara · kapan · sayfa. GECIS_BULUT_KAP piksel.css .px-bulut i geçişiyle aynıdır. */
-  const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_BEKLE = 120;
-  /* Bulutlu geçişin tıklamadan sayfa değişimine dek süresi (açık kalma kullanıcının ayarı). */
-  const gecisBulutMs = () => GECIS_BULUT_HAZIR + 3 * GECIS_BULUT_KAP + GECIS_BEKLE + Math.round(bulutSure() * 1000) + 60;
+  /* Bulutlu sıra (kullanıcı, 2026-11-07): hafif geri çekil + bulut kapan · 2 sn yükleme · bulut kenarlara aralanır,
+     manzara izlenir (karşı sunucu bu sırada hazırlanır) · kapan · sayfa. GECIS_BULUT_KAP piksel.css .px-bulut i geçişiyle aynıdır. */
+  const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_YUKLE = 2000;
+  /* Karşı sunucu manzara bitince hâlâ cevap vermediyse en çok bu kadar daha beklenir; sonra yine gidilir. */
+  const GECIS_HAZIR_EK = 6000;
+  /* Bulutlu geçişin tıklamadan sayfa değişimine dek süresi, sunucu hazırsa (açık kalma kullanıcının ayarı). */
+  const gecisBulutMs = () => GECIS_BULUT_HAZIR + 3 * GECIS_BULUT_KAP + GECIS_YUKLE + Math.round(bulutSure() * 1000) + 60;
   /* Bulut açıkken manzaranın (şehir kamerası) kaç saniye göründüğü (kullanıcı, 2026-11-07: «bulutların
      arasındaki süreyi animasyon kısmından ayarlayabilelim»). Hem gidişte (uzaklaşma) hem varışta (yaklaşma). */
   const BULUT_ANAHTAR = 'lifeos.hareket.bulut', BULUT_EN_AZ = .6, BULUT_EN_COK = 8, BULUT_VARSAYILAN = 2.4;
@@ -22543,9 +22552,16 @@ window.LIFEOS = window.LIFEOS || {};
       kap.appendChild(b);
       const y = document.createElement('div'), AD = { ays:'AYS', spi:'SPİ', esp:'ESP', hkm:'Merkez' };
       y.className = 'px-bulut__yazi';
-      y.innerHTML = '<div class="px-bulut__kart"><small>' + yz('ortak.animasyon.gecis-selam') + '</small><b>' + AD[o.modul] + '</b><span>' + yz('ortak.animasyon.gecis-' + o.modul) + '</span></div>';
+      y.innerHTML = '<div class="px-bulut__kart"><small>' + yz('ortak.animasyon.gecis-selam') + '</small><b>' + AD[o.modul] + '</b><span>' + yz('ortak.animasyon.gecis-' + o.modul) + '</span>'
+        + '<i class="px-bulut__yuk" style="--yuk:' + (GECIS_BULUT_HAZIR + GECIS_BULUT_KAP + GECIS_YUKLE) + 'ms"></i></div>';
       kap.appendChild(y);
-      if(o.url){ try{ const l = document.createElement('link'); l.rel = 'prefetch'; l.href = o.url; document.head.appendChild(l); }catch(e){ /* önceden yükleme yoksa açılış yine olur */ } }
+      /* SUNUCU GEÇİŞİ arka planda: karşı kapı cevap verene dek (açılıyor olabilir) yeniden sorulur; cevap önbelleğe de girer. */
+      if(o.url && typeof fetch === 'function'){
+        const bas = Date.now();
+        const dene = () => fetch(o.url, { mode:'no-cors', credentials:'include' }).then(() => { kap.dataset.hazir = '1'; },
+          () => { if(kap.isConnected && Date.now() - bas < gecisBulutMs() + GECIS_HAZIR_EK) setTimeout(dene, 400); });
+        dene();
+      } else kap.dataset.hazir = '1';
     } else {
       kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
         + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
@@ -22571,17 +22587,27 @@ window.LIFEOS = window.LIFEOS || {};
     /* 2026-11-07: manzara artık şehir kamerasıdır (piksel.js sehirKoy): bulut açılınca kendi apartmanımızdan
        geri çekilir, bulut katmanına yükselir; açık kalma süresi kullanıcının ayarı (bulutSure). */
     const ses = t => { try{ if(L.SES && L.SES.olaySes) L.SES.olaySes(t); }catch(e){ /* ses bilgi taşımaz */ } };
+    /* 2026-11-07 (kullanıcı): tıklayınca kamera «çok değil, hafif» geri gider ve bulut o sırada kapanır; 2 sn
+       yükleme; manzara bulut kenarda dururken izlenir ve uzaklaşma sürer; sunucu hazır olunca bulut kapanır. */
     const acik = Math.round(bulutSure() * 1000);
     setTimeout(() => {
       kap.classList.add('is-kapali');
       ses('bulutGel');
       if(!(P && P.manzaraKoy)){ kap.classList.add('is-kalkis'); git(GECIS_BULUT_KAP + 60); return; }
+      const geri = P.sehirKoy && P.sehirKoy(kap, 'uzak', GECIS_BULUT_KAP + 300, [0, .3]);
+      if(geri) geri.classList.add('is-sol');                                        // sayfa arka plana söner
       setTimeout(() => {
-        if(!(P.sehirKoy && P.sehirKoy(kap, 'uzak', acik + GECIS_BULUT_KAP))) P.manzaraKoy(kap);
+        if(!(P.sehirKoy && P.sehirKoy(kap, 'uzak', acik + GECIS_BULUT_KAP, [.3, 1]))) P.manzaraKoy(kap);
         setTimeout(() => { kap.classList.add('is-acik'); ses('bulutGit'); }, 40);   // manzara bir kare boyansın
-      }, GECIS_BULUT_KAP + GECIS_BEKLE);
-      setTimeout(() => { kap.classList.remove('is-acik'); kap.classList.add('is-kalkis'); ses('bulutGel'); }, 2 * GECIS_BULUT_KAP + GECIS_BEKLE + acik);
-      git(gecisBulutMs() - GECIS_BULUT_HAZIR);
+        let kalan = Math.ceil(GECIS_HAZIR_EK / 150);                              // sayılır: sahte saatte Date.now ilerlemez
+        const kapan = () => {
+          if(!kap.isConnected) return;
+          if(!kap.dataset.hazir && kalan-- > 0){ setTimeout(kapan, 150); return; }
+          kap.classList.remove('is-acik'); kap.classList.add('is-kalkis'); ses('bulutGel');
+          git(GECIS_BULUT_KAP + 60);
+        };
+        setTimeout(kapan, GECIS_BULUT_KAP + acik);
+      }, GECIS_BULUT_KAP + GECIS_YUKLE);
     }, GECIS_BULUT_HAZIR);
     return true;
   }
@@ -26367,8 +26393,11 @@ window.LIFEOS = window.LIFEOS || {};
     g.imageSmoothingEnabled = false;
   }
   /* Döner: tuval (el'in ilk çocuğu) ya da null (mahalle yok: seçim sayfası). Tuval DOM'dan çıkınca döngü durur. */
-  function sehirKoy(el, yon, sure){
+  /* aralik [a0, a1]: kameranın yolun hangi parçasını oynadığı (gidiş: tıklayınca [0,.3] hafif geri, manzarada [.3,1]).
+     Sona varmayan parça yavaşlayarak durur; sona varanı sehirCiz'in yumuşatması durdurur. */
+  function sehirKoy(el, yon, sure, aralik){
     if(!el) return null;
+    const a0 = aralik ? aralik[0] : 0, a1 = aralik ? aralik[1] : 1;
     const W = Math.ceil(window.innerWidth / OLCEK), H = Math.ceil(window.innerHeight / OLCEK), M = mahalleSahneleri(W, H);
     if(!M || !M.P) return null;
     M.yer = simdikiYer();
@@ -26378,7 +26407,12 @@ window.LIFEOS = window.LIFEOS || {};
     c.className = 'piksel-manzara piksel-sehir'; c.setAttribute('aria-hidden', 'true');
     c.width = W; c.height = H; tamKat(c, OLCEK);
     const g = c.getContext('2d'), bas = performance.now(), sn = Math.max(300, sure || 2000), uzak = yon !== 'yakin';
-    const ciz = simdi => { const p = Math.min(1, (simdi - bas) / sn); sehirCiz(g, W, H, uzak ? p : 1 - p, simdi / 1000, M); };
+    const ciz = simdi => {
+      let p = Math.min(1, (simdi - bas) / sn);
+      if(a1 < 1) p = 1 - (1 - p) * (1 - p);
+      const a = a0 + (a1 - a0) * p;
+      sehirCiz(g, W, H, uzak ? a : 1 - a, simdi / 1000, M);
+    };
     ciz(hareketsiz() ? bas + sn * .5 : bas);
     el.insertBefore(c, el.firstChild);
     if(!hareketsiz()){ const adim = s => { if(!c.isConnected) return; ciz(s); requestAnimationFrame(adim); }; requestAnimationFrame(adim); }
@@ -28166,7 +28200,7 @@ SP.Perde = (function(){
            `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
            bakıyor. */
         siradakini();
-      }, bulut ? 840 : 420);
+      }, bulut ? 1140 : 420);
     }
 
     /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:
@@ -28321,7 +28355,11 @@ SP.Perde = (function(){
        vardığında kalkar, yani son kare arka planın kendisidir. Süre Animasyonlar › Bulut manzarası. Piksel
        betikleri tek dosya sürümünde perdeden sonra yüklenir: kısa süre beklenir, gelmezse eski düzen kalır. */
     var bulutVar = !!perde.querySelector('.px-bulut');
-    if(bulutVar){
+    /* Modül geçişiyle gelindiyse manzara gidişte izlendi (animasyon.js gecis, kullanıcı 2026-11-07): selam kısa
+       okunur, bulut yumuşakça iki yana çekilir. Çerez de bakılır: tek dosyada animasyon.js perdeden sonra yüklenir. */
+    var gecisGel = document.documentElement.classList.contains('gecis-gel') || /(?:^|;\s*)lifeos_gecis=/.test(document.cookie || '');
+    if(bulutVar && gecisGel) enAz = 1400;
+    else if(bulutVar){
       var SELAM_MS = 900, ARALAN_MS = 700, sDeneme = 0;
       (function sehirBekle(){
         if(kapandi) return;
@@ -28992,7 +29030,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'2190fe51', at:'2026-11-07 09:46', dirty:true };
+SP.BUILD = { id:'8c6d5b61', at:'2026-11-07 11:22', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
