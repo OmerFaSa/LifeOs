@@ -38,7 +38,9 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.patrontur.ses-ac':'Sesi aç',
   'ortak.patrontur.ses-kapa':'Sesi kapat',
   'ortak.patrontur.ipucu':'Aydınlık yere bas.',
-  'ortak.patrontur.oto':'Otomatik',
+  'ortak.patrontur.bolum.king':'Başlangıç',
+  'ortak.patrontur.bolum.son':'Bitiş',
+  'ortak.patrontur.adim':'Adım {i} / {n}',
   'ortak.patrontur.oto-ipucu':'Otomatik: sen dokunmasan da tur kendi ilerler, menüleri kendisi açar.',
   'ortak.patrontur.oto-izle':'Turu otomatik izle',
   'ortak.patrontur.anladin-mi':'Anlamadın mı? Takıldıysan söyle, bir daha anlatayım.',
@@ -169,6 +171,15 @@ window.LIFEOS.PATRONTUR = (function(L){
     l.push({ id:'son.is', kim:'king', modul:null, soz:4, hedef:'girdi', cekmece:'bugun', son:true });
     return l;
   }
+  /* Adımın bölümü: King'in açılışı, adımı anlatan patronun sistemi, sondaki dönüş «son». */
+  const bolum = a => a.modul === null ? 'son' : a.id.indexOf('king.') === 0 ? 'king' : a.kim;
+  function bolumDurumu(l, a){
+    const ad = [];
+    l.forEach(x => { const b = bolum(x); if(ad.indexOf(b) < 0) ad.push(b); });
+    const bu = bolum(a), ici = l.filter(x => bolum(x) === bu), j = ici.indexOf(a), k = ad.indexOf(bu);
+    return { bu, j, n:ici.length, liste:ad.map((b, i) => ({ b, dol:i < k ? 1 : i > k ? 0 : (j + 1) / ici.length })) };
+  }
+  const bolumAdi = b => AD[b] || yz('bolum.' + b);
   const sozler = a => {
     const l = [];
     for(let i = 1; i <= a.soz; i++) l.push(yz(a.id + '.' + i));
@@ -239,12 +250,16 @@ window.LIFEOS.PATRONTUR = (function(L){
       + '<div class="ptur__gezgin" aria-hidden="true"><i class="ptur__ag"></i><span class="ptur__arac">' + ARABA_SVG + '</span><span class="ptur__figur"></span></div>'
       + '<section class="ptur__kart">'
       +   '<div class="ptur__kim"><b class="ptur__ad"></b><span class="ptur__sayac"></span></div>'
+      /* Bölüm çubuğu (2026-11-07, «tanıtma daha profesyonel olsun»): 26 adımlık tek sayaç yerine King, üç
+         sistem ve bitiş; bulunduğun bölüm adım adım dolar. Noktalar adımın kaç cümlesi kaldığını söyler. */
+      +   '<div class="ptur__bolumler" aria-hidden="true"></div>'
       +   '<p class="ptur__yazi" aria-live="polite"></p>'
+      +   '<div class="ptur__noktalar" aria-hidden="true"></div>'
       +   '<p class="ptur__ipucu" hidden>' + yz('ipucu') + '</p>'
       +   '<p class="ptur__soru" hidden>' + yz('anladin-mi') + '</p>'
       +   '<div class="ptur__alt"><button type="button" class="btn btn--ghost btn--sm ptur__ses" data-ptur="ses"></button>'
-      +   '<button type="button" class="btn btn--ghost btn--sm ptur__oto" data-ptur="oto" aria-pressed="false" title="' + yz('oto-ipucu') + '">' + OTO_SVG + '<span>' + yz('oto') + '</span></button>'
-      +   '<button type="button" class="btn btn--ghost btn--sm" data-ptur="gec">' + yz('gec') + '</button>'
+      +   '<button type="button" class="btn btn--ghost btn--sm ptur__oto" data-ptur="oto" aria-pressed="false" aria-label="' + yz('oto-izle') + '" title="' + yz('oto-ipucu') + '">' + OTO_SVG + '</button>'
+      +   '<button type="button" class="ptur__gec" data-ptur="gec">' + yz('gec') + ' <kbd>Esc</kbd></button>'
       +   '<button type="button" class="btn btn--ghost btn--sm ptur__anla" data-ptur="anla" hidden>' + yz('anlamadim') + '</button>'
       +   '<button type="button" class="btn btn--primary ptur__devam" data-ptur="devam">' + yz('devam') + '</button></div>'
       + '</section>';
@@ -400,6 +415,8 @@ window.LIFEOS.PATRONTUR = (function(L){
   /* Delik ölçülür: perdeler deliğin çevresini tutar, delik yalnız görsel (tıklama geçer). */
   function olc(){
     if(!d || d.gizli) return;
+    /* Pencere dar ekrana inerse geniş ekranın balon yeri kalkar; kart alta yapışık düzene döner (yoksa ekran dışında kalıyordu). */
+    if(innerWidth < 680 && d.kart.style.left){ d.kart.style.left = ''; d.kart.style.top = ''; d.kart.classList.remove('is-altta'); }
     const a = d.adim, el = a ? bul(a.hedef) : null, [ust, alt, sol, sag] = d.perdeler, W = innerWidth, H = innerHeight, D = d.delik;
     const koy = (e, x, y, w, h) => { e.style.left = x + 'px'; e.style.top = y + 'px'; e.style.width = Math.max(0, w) + 'px'; e.style.height = Math.max(0, h) + 'px'; };
     if(!el){
@@ -451,6 +468,7 @@ window.LIFEOS.PATRONTUR = (function(L){
     for(let i = 0; i < l.length; i++){
       if(x !== d || no !== x.kusak) return;
       x.yazi.textContent = l[i];
+      x.kok.querySelector('.ptur__noktalar').innerHTML = l.length > 1 ? l.map((_, j) => '<i' + (j < i ? ' class="is-gecti"' : j === i ? ' class="is-bu"' : '') + '></i>').join('') : '';
       x.yazi.classList.remove('is-yeni'); void x.yazi.offsetWidth; x.yazi.classList.add('is-yeni');
       konus(l[i]);
       const bas = Date.now(), en_az = Math.max(1300, l[i].length * 50), emniyet = en_az * 3 + 6000;
@@ -474,7 +492,11 @@ window.LIFEOS.PATRONTUR = (function(L){
     kenarTut(a);
     onceAc(a);
     const i = d.akis.indexOf(a);
-    d.kok.querySelector('.ptur__sayac').textContent = (i + 1) + ' / ' + d.akis.length;
+    const bd = bolumDurumu(d.akis, a), sayac = d.kok.querySelector('.ptur__sayac');
+    sayac.textContent = bolumAdi(bd.bu) + ' · ' + (bd.j + 1) + '/' + bd.n;
+    sayac.setAttribute('title', yz('adim').replace('{i}', i + 1).replace('{n}', d.akis.length));
+    d.kok.querySelector('.ptur__bolumler').innerHTML = bd.liste.map(x => '<i class="' + (x.b === bd.bu ? 'is-bu' : '')
+      + '" style="--dol:' + x.dol.toFixed(3) + '"><b>' + bolumAdi(x.b) + '</b></i>').join('');
     const devam = d.kok.querySelector('[data-ptur="devam"]'), ipucu = d.kok.querySelector('.ptur__ipucu');
     devam.textContent = yz(a.son ? 'basla' : 'devam');
     devam.hidden = !!a.tikla;
@@ -777,5 +799,5 @@ window.LIFEOS.PATRONTUR = (function(L){
     if(document.readyState === 'complete') kendiliginden(); else window.addEventListener('load', kendiliginden, { once:true });
   }
 
-  return Object.freeze({ baslat, bitir, acikMi:() => !!d, SIRA, _akis:akis, _sozler:sozler, _oku:oku, _yaz:yaz, _durum:() => d, _ac:ac, _hedefListe:hedefListe, _okunus:okunus });
+  return Object.freeze({ baslat, bitir, acikMi:() => !!d, SIRA, _akis:akis, _sozler:sozler, _oku:oku, _yaz:yaz, _durum:() => d, _ac:ac, _hedefListe:hedefListe, _okunus:okunus, _bolumDurumu:bolumDurumu });
 })(window.LIFEOS);

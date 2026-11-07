@@ -511,6 +511,17 @@ window.LIFEOS = window.LIFEOS || {};
     '.lifeos-gecis.is-son::after{opacity:1;}',
     /* Varış: perde ilk karede durur; logosu yeniden gelmez, zaten yerinde. */
     'html.gecis-gel .perde--marka .perde__logo,html.gecis-gel .perde--marka .perde__ortam{animation:none!important;}',
+    /* Selam kartı gidişin son yarım saniyesinde duvarla birlikte gelir; varış aynı kartı ilk karede çizer (perde.html,
+       çerezdeki selam): sayfa değişimi kartın ardında olur. */
+    /* Temel düzen burada da yazılı: seçim sayfası (4180) karsilama.css yüklemez; kâğıt ve yazı tipi piksel.css'ten. */
+    ':root .lifeos-gecis .karsilama[data-gecis-modul]{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;',
+    'max-width:min(680px,calc(100vw - 48px));text-align:center;opacity:0;transform:translateY(8px);',
+    'transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);}',
+    ':root .lifeos-gecis.is-son .karsilama[data-gecis-modul]{opacity:1;transform:none;filter:none;}',
+    ':root .lifeos-gecis .karsilama[data-gecis-modul] .karsilama__selam{margin:0;line-height:1.08;}',
+    ':root .lifeos-gecis .karsilama[data-gecis-modul] .karsilama__cizgi{display:block;background:var(--primary,#e8a64a);}',
+    /* Figür yok: varışta figür değişkeni (piksel.js) sayfanın sonunda kurulur, ilk karede kart figürsüzdür. */
+    ':root .lifeos-gecis .karsilama[data-gecis-modul]::before{display:none;}',
     /* Varışın duvar örtüsü ilk boyamada gerekir: brand/seviye/seviye.css (html.gecis-gel .perde--karsilama::after). */
   ].join('');
 
@@ -521,9 +532,20 @@ window.LIFEOS = window.LIFEOS || {};
     s.textContent = GECIS_STIL;
     (document.head || document.documentElement).appendChild(s);
   }
-  function gecisCerezYaz(m, simdi){
+  /* Varılan modülün selamı gidişte seçilir ve çerezle taşınır (2026-11-07): varış sayfası onu ilk boyamada yazar,
+     tek dosyada sayfanın sonunda yüklenen karsilama.js'i beklemez. Ölçüldü: önceden varışta 1,5 sn boş duvar vardı. */
+  function gecisSelam(m){
+    let s = '';
     try{
-      document.cookie = GECIS_CEREZ + '=' + m + '.' + (simdi || Date.now()) + '; Path=/; Max-Age=15; SameSite=Strict'
+      const K = L.KARSILAMA;
+      if(K && K.selam) s = String(K.selam({ ayar:K.ayar(), modul:m, simdi:new Date() }) || '');
+    }catch(e){ /* seçim sayfası karsilama.js yüklemez: yedek selam */ }
+    return (s || yz('ortak.animasyon.gecis-selam')).slice(0, 120);
+  }
+  function gecisCerezYaz(m, simdi, selam){
+    try{
+      document.cookie = GECIS_CEREZ + '=' + m + '.' + (simdi || Date.now()) + (selam ? '.' + encodeURIComponent(selam) : '')
+        + '; Path=/; Max-Age=15; SameSite=Strict'
         + (location.protocol === 'https:' ? '; Secure' : '');
     }catch(e){ /* çerez kapalı: varışta logo yine gelir, geçiş bozulmaz */ }
   }
@@ -605,10 +627,19 @@ window.LIFEOS = window.LIFEOS || {};
         + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
       if(P && P.manzaraKoy) P.manzaraKoy(kap);
     }
+    const selam = gecisSelam(o.modul);
+    if(!bulut && selam){
+      const kart = document.createElement('div');
+      kart.className = 'karsilama';
+      kart.setAttribute('data-gecis-modul', o.modul);
+      kart.innerHTML = '<p class="karsilama__selam"></p><span class="karsilama__cizgi"></span>';
+      kart.firstChild.textContent = selam;
+      kap.appendChild(kart);
+    }
     void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
     kap.classList.add('is-tam');
     const git = sure => setTimeout(() => {
-      gecisCerezYaz(o.modul);
+      gecisCerezYaz(o.modul, 0, selam);
       try{ o.git(); }catch(e){ console.error('Geçiş:', e); }
       /* Sayfa değişmediyse (engellendi, hata) perde kendiliğinden kalkar. */
       setTimeout(() => { if(kap.isConnected){ kap.remove(); gecisAktif = false; } }, 6000);

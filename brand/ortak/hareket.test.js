@@ -463,6 +463,30 @@
         expect(k.isConnected).toBe(false);
       }finally{ el.parentNode.remove(); }
     });
+    /* 2026-11-07 (ölçüldü): kurulum sihirbazı her adımda UI.sheet'i yeniden çağırıyor; kapanış kopyası ve giriş
+       hareketi art arda oynuyor, adımlar arasında ~1 sn boş pencere görünüyordu. Açık alt sayfa yerinde yenilenir. */
+    it('açık alt sayfa yeniden açılmaz, yerinde yenilenir: kopya yok, açan öğe ve kilit kalır', () => {
+      const UI = (window.R && R.UI) || (window.SP && SP.UI) || (window.ESP && ESP.UI);
+      if(!UI || !UI.sheet || !document.getElementById('overlay-root')) return;
+      const acan = document.createElement('button');
+      document.body.appendChild(acan);
+      acan.focus();
+      try{
+        UI.sheet({ title:'Adım 1', body:'<p>bir</p>', noFocus:true });
+        const ilk = document.getElementById('sheet');
+        const kilit = document.body.style.overflow;
+        UI.sheet({ title:'Adım 2', body:'<p>iki</p>', noFocus:true });
+        const yeni = document.getElementById('sheet');
+        expect(document.querySelectorAll('#sheet').length).toBe(1);
+        expect(yeni === ilk).toBe(false);
+        expect(yeni.classList.contains('is-yerinde')).toBe(true);
+        expect(yeni.querySelector('h3').textContent).toBe('Adım 2');
+        expect(document.querySelectorAll('.h-cikis').length).toBe(0);         // kapanış kopyası oynamadı
+        expect(document.body.style.overflow).toBe(kilit);
+        UI.closeSheet();
+        expect(document.activeElement).toBe(acan);                              // odak ilk açan öğeye döner
+      }finally{ if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet(); acan.remove(); document.querySelectorAll('.h-cikis').forEach(x => x.remove()); }
+    });
   });
 
   /* Açılır bölüm (details) yalnız kullanıcı başlığa dokununca yumuşakça

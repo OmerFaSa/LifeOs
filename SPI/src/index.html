@@ -161,6 +161,17 @@
      Perde bu betikten SONRA tanimlanir ve bekleme gercekten calisir.
      Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
   var deneme = 0, kars = el.querySelector('.karsilama'), yazildi = false;
+  /* Geçişle gelindiyse selam gidişte seçildi ve çerezde (animasyon.js gecisSelam): ilk karede yazılır, gidişin
+     son karesindeki kartın aynısı. Önceden karsilama.js'i bekliyordu: 1,5 sn boş duvar (2026-11-07, ölçüldü). */
+  try{
+    var gs = /(?:^|;\s*)lifeos_gecis=[a-z]{2,4}\.\d{10,16}\.([^;]+)/.exec(document.cookie || '');
+    var gsMetin = gs ? decodeURIComponent(gs[1]).slice(0, 120) : '';
+    if(kars && gsMetin){
+      kars.querySelector('.karsilama__selam').textContent = gsMetin;
+      kars.classList.add('is-hazir');
+      yazildi = true;
+    }
+  }catch(e){}
   /* Karşılama yazılamazsa (betik yok) varsayılan selam görünür. */
   setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 1500);
   /* Selam ayrı bekler: kaynak sürümde perde.js hemen, karsilama.js sayfanın

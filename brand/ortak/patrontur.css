@@ -22,7 +22,19 @@
 .ptur__yuz{ flex:none; display:grid; place-items:center; width:40px; height:40px; }
 .ptur__yuz svg{ display:block; }
 .ptur__ad{ flex:1; font-size:15px; font-weight:700; }
-.ptur__sayac{ font-size:12.5px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.ptur__sayac{ font-size:12.5px; font-weight:600; color:var(--text-2); font-variant-numeric:tabular-nums; }
+/* Bölüm çubuğu: King, üç sistem, bitiş. Geçilen dolu, bulunulan adım adım dolar, gelecek boş; ad yalnız
+   bulunulanda yazar (geniş ekranda), diğerleri sessiz. */
+.ptur__bolumler{ display:flex; gap:4px; margin:0 0 12px; padding-left:6px; }
+.ptur__bolumler i{ position:relative; flex:1; height:4px; background:color-mix(in oklab, var(--text) 14%, transparent); }
+.ptur__bolumler i::before{ content:''; position:absolute; inset:0; transform-origin:0 50%; transform:scaleX(var(--dol, 0));
+  background:var(--ptur-renk, #ffd166); transition:transform .45s cubic-bezier(.2,0,0,1); }
+.ptur__bolumler b{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+/* Cümle noktaları: adımın kaçıncı cümlesindesin */
+.ptur__noktalar{ display:flex; gap:5px; min-height:6px; margin:10px 0 0; padding-left:6px; }
+.ptur__noktalar i{ width:6px; height:6px; background:color-mix(in oklab, var(--text) 18%, transparent); transition:background .2s ease, width .2s ease; }
+.ptur__noktalar i.is-gecti{ background:color-mix(in oklab, var(--text) 45%, transparent); }
+.ptur__noktalar i.is-bu{ width:16px; background:var(--ptur-renk, #ffd166); }
 .ptur__yazi{ margin:0; padding-left:6px; min-height:3.1em; font-size:17px; line-height:1.5; color:var(--text); }
 .ptur__yazi.is-yeni{ animation:ptur-yazi .4s ease both; }
 @keyframes ptur-yazi{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
@@ -32,7 +44,16 @@
 .ptur__alt [hidden]{ display:none; }
 .ptur__ses{ min-width:44px; min-height:40px; padding:0 10px; display:inline-flex; align-items:center; justify-content:center; }
 .ptur__ses svg{ fill:currentColor; stroke:currentColor; stroke-width:1.6; }
-.ptur__devam{ margin-left:auto; min-height:40px; }
+.ptur__devam{ min-height:40px; min-width:112px; }
+/* piksel.css :is(.btn, .dugme) kenar boşluğunu yazar (0,3,0): sağa yaslama ondan güçlü olmalı. */
+:root .ptur__alt > .btn.ptur__devam{ margin-left:auto; }
+/* İkincil eylemler sessiz: ses ve otomatik yalnız simge, «Turu geç» yazı bağlantısı; tek vurgu «Devam». */
+.ptur__oto{ min-width:44px; min-height:40px; padding:0 10px; justify-content:center; }
+.ptur__gec{ min-height:40px; padding:0 8px; border:0; background:none; color:var(--text-2); font:inherit; font-size:13.5px;
+  cursor:pointer; text-decoration:underline; text-underline-offset:3px; text-decoration-color:color-mix(in oklab, currentColor 40%, transparent); }
+.ptur__gec:hover{ color:var(--text); }
+.ptur__gec kbd{ margin-left:4px; padding:1px 5px; font:600 11px/1.4 var(--font-mono, ui-monospace, monospace); text-decoration:none;
+  display:inline-block; border:1px solid color-mix(in oklab, currentColor 35%, transparent); color:var(--text-2); }
 
 /* GEZGİN (kullanıcı, 2026-11-07: «kutunun içinde sabit durmasın, sistemin içinde gezsin»). Patron spotun
    yanında durur; söz kartı onun konuşma balonudur (geniş ekranda yerini patrontur.js balonKoy verir). */
@@ -93,14 +114,17 @@
 .ptur.is-bekle .ptur__kart{ top:8px; bottom:auto; padding:10px 14px; }
 .ptur.is-bekle .ptur__yazi{ min-height:0; font-size:15px; }
 .ptur.is-bekle .ptur__alt{ margin-top:6px; }
+.ptur.is-bekle .ptur__bolumler, .ptur.is-bekle .ptur__noktalar{ display:none; }
 
 /* Animasyonlar «Az»: sıçrayarak gelir */
 .ptur.is-az .ptur__delik, .ptur.is-az .ptur__kart{ transition:none; }
 .ptur.is-az .ptur__yazi.is-yeni{ animation:none; }
+.ptur.is-az .ptur__bolumler i::before, .ptur.is-az .ptur__noktalar i{ transition:none; }
 
 @media (max-width:679px){
   .ptur__kart{ bottom:12px; padding:12px 14px 12px; }
   .ptur.is-ustte .ptur__kart{ top:12px; }
   .ptur__yazi{ font-size:16px; }
+  .ptur__gec kbd{ display:none; }
   .ptur.is-bekle .ptur__yazi{ font-size:14px; line-height:1.4; }
 }

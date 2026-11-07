@@ -672,8 +672,11 @@ SP.UI = (function(){
   let sheetScroll = '';
 
   function sheet(opts){
-    closeSheet();
-    sheetOpener = document.activeElement;
+    /* Açık alt sayfa YERİNDE yenilenir (sihirbaz adımı, onaydan sonuca): kapanıp yeniden açılması çıkış ve giriş
+       hareketini art arda oynatıyor, her adımda ~1 sn boş pencere görünüyordu (2026-11-07, ölçüldü). Açan öğe,
+       kaydırma kilidi ve inert ilk açılıştan kalır. */
+    const onceki = document.getElementById('sheet');
+    if(!onceki) sheetOpener = document.activeElement;
     const root = document.getElementById('overlay-root');
     const el = document.createElement('div');
     el.className = 'overlay';
@@ -703,19 +706,22 @@ SP.UI = (function(){
       else if(!e.shiftKey && document.activeElement === son){ e.preventDefault(); ilk.focus(); }
     });
 
-    root.appendChild(el);
+    if(onceki){ el.classList.add('is-yerinde'); onceki.replaceWith(el); }
+    else {
+      root.appendChild(el);
 
-    /* Arkadaki sayfa KAYMAZ: alt sayfa acikken tekerlek arkayi
-       kaydiriyordu ve kapaninca baska bir yerde kaliniyordu. */
-    sheetScroll = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+      /* Arkadaki sayfa KAYMAZ: alt sayfa acikken tekerlek arkayi
+         kaydiriyordu ve kapaninca baska bir yerde kaliniyordu. */
+      sheetScroll = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
 
-    /* ...ve arkadaki sayfa OKUNMAZ. Odagi hapsetmek yalnizca klavyeyi
-       durdurur; ekran okuyucunun sanal imleci alt sayfayi hic gormeden
-       arkadaki tabloyu okumaya devam edebiliyordu. `inert` ikisini
-       birden keser: odak da, erisilebilirlik agaci da. */
-    const kabuk = document.querySelector('.site');
-    if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+      /* ...ve arkadaki sayfa OKUNMAZ. Odagi hapsetmek yalnizca klavyeyi
+         durdurur; ekran okuyucunun sanal imleci alt sayfayi hic gormeden
+         arkadaki tabloyu okumaya devam edebiliyordu. `inert` ikisini
+         birden keser: odak da, erisilebilirlik agaci da. */
+      const kabuk = document.querySelector('.site');
+      if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+    }
 
     const first = el.querySelector('input, textarea, select')
       || el.querySelector(ODAKLANABILIR);

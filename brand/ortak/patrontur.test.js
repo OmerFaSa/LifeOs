@@ -49,6 +49,26 @@ describe('Patron turu', () => {
     expect(T._sozler(l[l.length - 1]).join(' ')).toContain('işe koyulalım');
   });
 
+  /* 2026-11-07 (kullanıcı: «tanıtma kısmı daha profesyonel olsun»): tek «1 / 26» sayacı yerine bölümler. */
+  it('ilerleme bölümlerle okunur: King, ilk kapıdan başlayan üç sistem, bitiş; bölüm adım adım dolar', () => {
+    const l = T._akis('spi');
+    const ilk = T._bolumDurumu(l, l[0]);
+    expect(ilk.liste.map(x => x.b)).toEqual(['king', 'spi', 'ays', 'esp', 'son']);
+    expect(ilk.bu).toBe('king');
+    expect(ilk.j).toBe(0);
+    expect(ilk.liste[0].dol).toBe(1 / ilk.n);
+    expect(ilk.liste.slice(1).every(x => x.dol === 0)).toBe(true);
+    /* Her adım tam bir bölümdedir; bölüm uzunlukları toplamı akışın kendisidir. */
+    const boy = {};
+    l.forEach(a => { const b = T._bolumDurumu(l, a); boy[b.bu] = b.n; expect(b.j >= 0 && b.j < b.n).toBe(true); });
+    expect(Object.values(boy).reduce((t, n) => t + n, 0)).toBe(l.length);
+    const son = T._bolumDurumu(l, l[l.length - 1]);
+    expect(son.bu).toBe('son');
+    expect(son.liste.every(x => x.dol === 1)).toBe(true);
+    /* Bir sistemin devir ve geçiş adımları o sistemin bölümünde kalır. */
+    expect(T._bolumDurumu(l, l.find(a => a.id === 'spi.gec')).bu).toBe('spi');
+  });
+
   it('bütün cümleler kayıtlı ve düzgün; kimlik tekil', () => {
     hepsi().forEach(a => T._sozler(a).forEach(c => {
       expect(c.length > 5).toBe(true);

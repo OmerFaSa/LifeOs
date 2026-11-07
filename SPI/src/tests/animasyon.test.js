@@ -291,7 +291,18 @@
         expect(gidilen.length).toBe(0);                                            // önce yer, sonra sayfa
         await ilerlet((p.querySelector('.px-bulut') ? A.gecisBulutMs() + 6000 : A.GECIS_MS) + 240);   // piksel: sahte saatte sunucu cevabı gelmeyebilir, en çok 6 sn ek beklenir
         expect(gidilen).toEqual(['http://127.0.0.1:4183/']);
-        expect(/^spi\.\d{13}$/.test(gecisCerezi())).toBe(true);
+        /* 2026-11-07: varılan modülün selamı gidişte seçilir; son karede kart olarak durur ve çerezle taşınır,
+           varış (perde.html) onu ilk karede yazar. Çerezin baş kısmı eskisi gibi okunur. */
+        const cerez = gecisCerezi(), parca = /^spi\.(\d{13})\.(.+)$/.exec(cerez);
+        expect(!!parca).toBe(true);
+        const kart = p.querySelector('.karsilama[data-gecis-modul="spi"] .karsilama__selam');
+        expect(!!kart && kart.textContent.length > 0).toBe(true);
+        expect(decodeURIComponent(parca[2])).toBe(kart.textContent);
+        expect(A.gecisVaris('lifeos_gecis=' + cerez, Number(parca[1]))).toBe('spi');
+        /* Kart, karsilama.css olmayan sayfada da (seçim sayfası) dikey ve ortalı durur, son yarım saniyeye dek saydamdır. */
+        const kk = getComputedStyle(kart.parentNode);
+        expect(kk.display).toBe('flex');
+        expect(kk.flexDirection).toBe('column');
         /* Ctrl ile tık (yeni sekme) dokunulmadan geçer. */
         A.gecisBitir();
         const ctrl = new MouseEvent('click', { bubbles:true, cancelable:true, button:0, ctrlKey:true });
@@ -300,6 +311,27 @@
         expect(document.querySelector('.lifeos-gecis')).toBeNull();
       }finally{
         A._yonlendir(eski); A.gecisBitir(); a.remove(); cerezSil();
+        try{ if(eskiKip == null) localStorage.removeItem(A.ANAHTAR); else localStorage.setItem(A.ANAHTAR, eskiKip); }catch(e){}
+        A.yenile();
+      }
+    }));
+
+    it('geçiş: selam modülü olmayan sayfada (seçim sayfası, 4180) yedek selam kartta durur ve taşınır', () => LIFEOS.SahteSaat.saatle(async ilerlet => {
+      let eskiKip = null;
+      try{ eskiKip = localStorage.getItem(A.ANAHTAR); }catch(e){}
+      const K = LIFEOS.KARSILAMA, eski = A._yonlendir(() => {});
+      A.ayarla('tam');
+      cerezSil();
+      LIFEOS.KARSILAMA = undefined;
+      try{
+        expect(A.gecis({ modul:'esp', url:'http://127.0.0.1:4193/', git:() => {} })).toBe(true);
+        const k = document.querySelector('.lifeos-gecis .karsilama[data-gecis-modul="esp"] .karsilama__selam');
+        expect(k.textContent).toBe(LIFEOS.PARCA.yazi('ortak.animasyon.gecis-selam'));
+        await ilerlet(A.GECIS_MS + 240);
+        const m = /^esp\.\d{13}\.(.+)$/.exec(gecisCerezi());
+        expect(!!m && decodeURIComponent(m[1])).toBe(k.textContent);
+      }finally{
+        LIFEOS.KARSILAMA = K; A._yonlendir(eski); A.gecisBitir(); cerezSil();
         try{ if(eskiKip == null) localStorage.removeItem(A.ANAHTAR); else localStorage.setItem(A.ANAHTAR, eskiKip); }catch(e){}
         A.yenile();
       }

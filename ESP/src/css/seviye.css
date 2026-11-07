@@ -47,6 +47,12 @@
    duvar birlikte söner, sayfa altından gelir (kullanıcı, 2026-11-07: «kart kaybolurken öbür sayfa gelsin»). */
 html.gecis-gel .perde--karsilama::after{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:var(--piksel-duvar, var(--bg, #120d08)); }
 html.gecis-gel .perde--karsilama.perde--kapaniyor{ transition:opacity .9s cubic-bezier(.4,0,.2,1); }
+/* Kart duvardan önce söner: sayfa gelirken üstünde yarı saydam kart kalmaz (ölçüldü, 2026-11-07). Kısa selamda
+   «Geç» halkası yalnız göz yorar; Esc yine geçer. */
+html.gecis-gel .perde--karsilama.perde--kapaniyor .karsilama{ opacity:0; transform:translateY(-6px) scale(.98); transition:opacity .4s cubic-bezier(.4,0,.2,1), transform .4s cubic-bezier(.4,0,.2,1); }
+html.gecis-gel .perde--karsilama .perde__araclar{ visibility:hidden; }
+/* Gidişteki kartla aynı: figürsüz (figür değişkeni piksel.js ile sayfanın sonunda gelir, ilk karede yoktur). */
+html.gecis-gel .perde--karsilama .karsilama::before{ display:none; }
 .perde[hidden]{ display:none; }
 
 /* ---------- ortam (bulanık arka kopya) ---------- */

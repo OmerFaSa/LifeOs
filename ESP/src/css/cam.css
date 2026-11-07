@@ -1130,6 +1130,9 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
   body .overlay{ animation:h-karart-gel var(--h-kisa) var(--e-std) both; }
    .overlay .sheet{ animation:h-kagit-gel var(--h-uzun) var(--su) both; transform-origin:50% 100%; }
   @media (min-width:680px){  .overlay .sheet{ transform-origin:50% 40%; } }
+  /* Yerinde yenilenen alt sayfa (ui.js sheet) yeniden gelmez; yalnız içerik kısa süzülür. */
+  body .overlay.is-yerinde, .overlay.is-yerinde .sheet{ animation:none; }
+  .overlay.is-yerinde .sheet__body{ animation:h-yerinde var(--h-kisa) var(--e-std) both; }
   /* Kapanış kopyası (hareket.js cikis; içerik değil, yalnız görünüş): karartma söner, kağıdın camı aşağı süzülür. */
   .h-cikis{ animation:h-karart-git var(--h-kisa) var(--e-git) forwards; }
   .h-cikis__kagit{ animation:h-kagit-git var(--h-kisa) var(--e-git) forwards; }
@@ -1147,6 +1150,7 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
 }
 @keyframes h-karart-gel{ from{ opacity:0; } }
 @keyframes h-karart-git{ to{ opacity:0; } }
+@keyframes h-yerinde{ from{ opacity:.25; transform:translateX(8px); } to{ opacity:1; transform:none; } }
 @keyframes h-kagit-gel{ from{ opacity:0; transform:translateY(22px) scale(.965); } 45%{ opacity:1; } to{ opacity:1; transform:none; } }
 @keyframes h-kagit-git{ to{ opacity:0; transform:translateY(14px) scale(.97); } }
 @keyframes h-bildirim-gel{ from{ opacity:0; transform:translateY(14px) scale(.94); } 40%{ opacity:1; } to{ opacity:1; transform:none; } }
