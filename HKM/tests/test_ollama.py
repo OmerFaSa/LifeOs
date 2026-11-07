@@ -237,6 +237,27 @@ def run():
         eq(len(giden), 1)
     test("sıcak tutma: bağlı model bellekte tutulur; kapalıysa ya da ayar kapalıysa gitmez", t_isit)
 
+    def t_gorsel_yerine():
+        cfg = {"models": {"yer": "yerel", "yerel": {"ekonomik": "gemma4:e2b", "gorsel": "qwen3-vl:4b"}}}
+        ps = lambda *ad: _sahte({"models": [{"name": n} for n in ad]})      # noqa: E731
+        eski, eski_ram = ollama.VARSAYILAN_BELLEK, ollama.VARSAYILAN_RAM
+        try:
+            ollama.VARSAYILAN_BELLEK, ollama.VARSAYILAN_RAM = (lambda: 12000), (lambda: 9000)
+            eq(ollama.gorsel_yerine(cfg, "qwen3-vl:4b", ps("gemma4:e2b")), "qwen3-vl:4b", "bellek bolken istenen")
+            ollama.VARSAYILAN_RAM = lambda: 3000
+            eq(ollama.gorsel_yerine(cfg, "qwen3-vl:4b", ps("gemma4:e2b")), "gemma4:e2b", "sanal bol, RAM dar")
+            ollama.VARSAYILAN_BELLEK = lambda: 700
+            eq(ollama.gorsel_yerine(cfg, "qwen3-vl:4b", ps("gemma4:e2b")), "gemma4:e2b", "dar: bellekteki gorselli")
+            eq(ollama.gorsel_yerine(cfg, "qwen3-vl:4b", ps("qwen3-vl:4b", "gemma4:e2b")), "qwen3-vl:4b", "zaten bellekte")
+            eq(ollama.gorsel_yerine(cfg, "qwen3-vl:4b", ps()), "gemma4:e2b", "bos: ekonomik gorselli")
+            eq(ollama.gorsel_yerine(cfg, "qwen3-vl:4b", _kapali), "gemma4:e2b", "ps okunamadi")
+            eq(ollama.gorsel_yerine(cfg, "qwen3-vl:4b", ps("qwen3-embedding:0.6b")), "gemma4:e2b", "gomme gormez")
+            metin = {"models": {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}}}
+            eq(ollama.gorsel_yerine(metin, "qwen3-vl:4b", ps("gemma3:4b")), "qwen3-vl:4b", "gorselli aday yok")
+        finally:
+            ollama.VARSAYILAN_BELLEK, ollama.VARSAYILAN_RAM = eski, eski_ram
+    test("bellek darken ikinci görsel model yüklenmez; bellekteki görselli model okur", t_gorsel_yerine)
+
 
 def run_daemon():
     from tests.test_daemon import _Server

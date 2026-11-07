@@ -115,8 +115,8 @@ def validate(patch):
 BELLEK_ALT = 6144                   # MiB
 
 
-def bellek_bos_mb():
-    """Bos sanal bellek (MiB); Windows disinda ya da okunamazsa None."""
+def bellek_bos_mb(fiziksel=False):
+    """Bos sanal bellek (MiB; `fiziksel`: bos RAM); Windows disinda ya da okunamazsa None."""
     try:
         import ctypes
 
@@ -125,12 +125,16 @@ def bellek_bos_mb():
                 (a, ctypes.c_ulonglong) for a in ("t_fiz", "b_fiz", "t_sayfa", "b_sayfa", "t_san", "b_san", "ek")]
         d = Durum()
         d.uzunluk = ctypes.sizeof(Durum)
-        return d.b_sayfa // (1024 * 1024) if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(d)) else None
+        return (d.b_fiz if fiziksel else d.b_sayfa) // (1024 * 1024) if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(d)) else None
     except (ImportError, AttributeError, OSError):
         return None
 
 
 VARSAYILAN_BELLEK = bellek_bos_mb   # testler makineye bagli kalmaz (tests/harness.py)
+VARSAYILAN_RAM = lambda: bellek_bos_mb(True)   # noqa: E731
+# Ikinci model (qwen3-vl 3,9 GiB) ancak bu kadar bos RAM varken yuklenir: takas dosyasi 30 GiB'ken bos sanal
+# bellek 12 GiB gorunup bos RAM 3 GiB kalabiliyordu (olcum 2026-11-07).
+IKINCI_MODEL_RAM = 6144             # MiB
 
 
 def bellek_dar():
@@ -387,6 +391,29 @@ def isit(cfg, tarama, gonder=None, istek=False):
 
 
 _ISITILAN = {}
+
+
+# Kamera (olcum 2026-11-07, 8 GB RAM, bos RAM 0,7 GiB): «oku» qwen3-vl'i (3,9 GiB) yukleyip gemma4'u atti;
+# sonraki sohbet gemma4'u geri yukledi (40 sn, Ollama 500, bos sanal bellek 19 MiB) ve PC takasa dustu.
+# Bellekteki gemma4 ayni kareyi 2,6 sn'de eksiksiz okudu. Bu yuzden bellek darken ikinci model yuklenmez.
+def _gorselli(m):
+    return str(m).lower().startswith("gemma4") or bool(GORSEL.search(str(m)))
+
+
+def gorsel_yerine(cfg, model, getir=None):
+    """Bellek darken bellekte olmayan gorsel model yerine bellekteki (yoksa ekonomik) gorselli model."""
+    ram = VARSAYILAN_RAM()
+    if not bellek_dar() and (ram is None or ram >= IKINCI_MODEL_RAM):
+        return model
+    try:
+        ham = (getir or VARSAYILAN_GETIR)(models.yerel_kok(cfg) + "/api/ps", 1)
+        bellekte = [str(x.get("name") or x.get("model") or "") for x in (ham or {}).get("models") or []]
+    except Exception:                           # noqa: BLE001 — bilinmiyorsa sohbetin zaten yukleyecegi model
+        bellekte = []
+    if model in bellekte:
+        return model
+    aday = [m for m in bellekte if _gorselli(m)] + [models.yerel_of(cfg).get("ekonomik") or ""]
+    return next((m for m in aday if m and _gorselli(m)), model)
 
 
 # ------------------------------------------------------------- uyandirma (kural 8)

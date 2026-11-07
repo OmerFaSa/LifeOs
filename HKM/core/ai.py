@@ -868,6 +868,11 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         adres = models.yerel_uclari(cfg)[0]
         if adres != models.PROVIDERS["yerel"]["base"]:
             ayar["adres"] = adres
+        if gorseller is not None:
+            from core import ollama
+            m = ollama.gorsel_yerine(cfg, a.get("model"))
+            if m != a.get("model"):
+                a = dict(a, model=m)
     tavan_jeton = int(ayar.get("jeton") or EN_COK_JETON)
     # ARAC KATALOGU: araci desteklemeyen modele (gemma3 gibi) arac SUNULMAZ;
     # olagan sohbet cevabi verir, isi istemcinin kural yolu yapar (core/arac.py).

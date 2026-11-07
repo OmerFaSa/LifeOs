@@ -24,6 +24,7 @@ try:
     _ollama.VARSAYILAN_GOMME = _ag_kapali
     _ollama.VARSAYILAN_AC = lambda exe: None    # ollama serve acilmaz
     _ollama.VARSAYILAN_BELLEK = lambda: None    # bu makinenin bellegine bagli kalma
+    _ollama.VARSAYILAN_RAM = lambda: None
 except ImportError:                                  # pragma: no cover
     pass
 # Ayni istek onbellegi (core/ai.py) testler arasinda cevap tasimasin;
