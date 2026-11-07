@@ -1316,7 +1316,8 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
   var yayG = $('yay-g');
   function kutuAc(ac){ kutu.hidden = !ac; if(yayG) yayG.setAttribute('aria-expanded', ac ? 'true' : 'false'); }
   surumEt.addEventListener('click', function(){ kutuAc(true); kontrol(true); });
-  if(yayG) yayG.addEventListener('click', function(){ kutuAc(kutu.hidden); });
+  var gElle = false;      // G ile acilan kutu «guncel» cikinca kendiliginden kapanmaz
+  if(yayG) yayG.addEventListener('click', function(){ gElle = kutu.hidden; kutuAc(gElle); if(gElle) yeniBak(); });
   function post(yol){
     return fetch(yol, { method:'POST', headers:{ 'X-LifeOS':'guncelle' } })
       .then(function(r){ return r.json(); });
@@ -1348,7 +1349,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
     }
     hal('ok', 'Sistem güncel', d.ag ? 'En yeni sürümü kullanıyorsun.' : 'GitHub\\'a ulaşılamadı; son bilinen duruma göre.');
     ana('', null);
-    if(d.ag){ kutuAc(false); surumYazi.textContent = surumMetni + ' · güncel'; }
+    if(d.ag){ if(!gElle) kutuAc(false); surumYazi.textContent = surumMetni + ' · güncel'; }
   }
   function kontrol(taze){
     surumYazi.textContent = surumMetni;
@@ -1390,6 +1391,16 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
   dugme.addEventListener('click', function(){ if(sonraki) sonraki(); });
   bak.addEventListener('click', function(){ kontrol(true); });
   kontrol(false);
+  /* 2026-11-07 («güncelleme kısmına düşmüyor»): yalnız açılışta bakıyordu; panel açık kaldıkça yeni
+     sürüm hiç görünmüyordu. Pencere öne gelince (en çok dakikada bir) ve 10 dakikada bir yeniden bakar. */
+  var sonBakis = Date.now();
+  function yeniBak(){
+    if(document.hidden || dugme.disabled || Date.now() - sonBakis < 60000) return;
+    sonBakis = Date.now(); kontrol(true);
+  }
+  window.addEventListener('focus', yeniBak);
+  document.addEventListener('visibilitychange', yeniBak);
+  setInterval(yeniBak, 600000);
 
   /* Tek anahtar (2026-11-05): Sistem planlamasindaki Guncelleme isi her gun 04:00,
      «kur» acik. Telefon ve tabletin web kodu PC'den geldigi icin onlar da guncel kalir. */
@@ -1684,7 +1695,7 @@ def plan_isle(h):
 # saklanir. Uygulamadan sonra silinir.
 _GUNCEL = {"zaman": 0.0, "veri": None}
 _GUNCEL_KILIT = threading.Lock()
-GUNCEL_SAKLA_SN = 300
+GUNCEL_SAKLA_SN = 60    # her modulden panele donus aga cikmasin, ama yeni surum gec gorunmesin
 
 
 def guncelleme_durumu(taze=False, durum=None):
