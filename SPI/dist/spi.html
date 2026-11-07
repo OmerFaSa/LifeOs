@@ -7778,6 +7778,11 @@ body.is-dragging .drop.is-over{
   touch-action:none;
 }
 .perde--kapaniyor{ opacity:0; pointer-events:none; }
+/* Modül geçişiyle varış (html.gecis-gel: perde.html satır içi betiği çerezden, ilk boyamadan önce): sayfa
+   perdenin ardında duvar rengiyle örtülü kurulur; hazır olunca perde.js perdeyi kaldırır, selam kartı ve
+   duvar birlikte söner, sayfa altından gelir (kullanıcı, 2026-11-07: «kart kaybolurken öbür sayfa gelsin»). */
+html.gecis-gel .perde--karsilama::after{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:var(--piksel-duvar, var(--bg, #120d08)); }
+html.gecis-gel .perde--karsilama.perde--kapaniyor{ transition:opacity .9s cubic-bezier(.4,0,.2,1); }
 .perde[hidden]{ display:none; }
 
 /* ---------- ortam (bulanık arka kopya) ---------- */
@@ -19970,6 +19975,9 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 (function(){
   var el = document.getElementById('marka-perde');
   if(!el) return;
+  /* Modül geçişiyle mi gelindi (animasyon.js lifeos_gecis çerezi)? Tek dosya sürümünde animasyon.js sonda
+     yüklenir; seviye.css'teki varış örtüsü ilk boyamada gerekir, sınıf burada konur. */
+  try{ if(/(?:^|;\s*)lifeos_gecis=/.test(document.cookie || '')) document.documentElement.classList.add('gecis-gel'); }catch(e){}
   /* Hareket azaltma tercihinde marka girisi HIC gorunmez. Karar LifeOS'un
      KENDI Animasyonlar ayaridir (brand/ortak/animasyon.js: depo, sonra cerez,
      yoksa Tam), tarayicinin «azalt» cevabi degil: Windows'ta animasyon
@@ -22429,7 +22437,9 @@ window.LIFEOS = window.LIFEOS || {};
      yoktur: yeni sekmede açılır, kendi sayfası kısa bir girişle belirir. */
 
   const GECIS_CEREZ = 'lifeos_gecis';
-  const GECIS_MS = 900;   // 2026-11-07 (kullanıcı: «bazıları çok hızlı, uyum yok»): karşılama perdesinin ritmiyle aynı
+  /* Tıklamadan sayfa değişimine: kart 0,9 sn büyür, manzara kısa durur, son 0,5 sn duvar rengine söner.
+     2026-11-07 (kullanıcı: «modül arası ekran hızlı yükleniyor, biraz yavaşlat»): 900 → 1300. */
+  const GECIS_MS = 1300;
   /* Bulutlu sıra (kullanıcı, 2026-11-07): hafif geri çekil + bulut kapan · 2 sn yükleme · bulut kenarlara aralanır,
      manzara izlenir (karşı sunucu bu sırada hazırlanır) · kapan · sayfa. GECIS_BULUT_KAP piksel.css .px-bulut i geçişiyle aynıdır. */
   const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_YUKLE = 2000;
@@ -22473,15 +22483,11 @@ window.LIFEOS = window.LIFEOS || {};
     '.lifeos-gecis.is-tam .lifeos-gecis__logo{opacity:1;transform:none;}',
     /* Gidişin son karesi varışın ilk karesidir (duvar rengi): sayfa değişimi kesme olarak görünmez (2026-11-07). */
     '.lifeos-gecis::after{content:"";position:absolute;inset:0;background:var(--piksel-duvar,var(--bg,#120d08));',
-    'opacity:0;transition:opacity .28s cubic-bezier(.2,0,0,1);pointer-events:none;}',
+    'opacity:0;transition:opacity .5s cubic-bezier(.4,0,.2,1);pointer-events:none;}',
     '.lifeos-gecis.is-son::after{opacity:1;}',
     /* Varış: perde ilk karede durur; logosu yeniden gelmez, zaten yerinde. */
     'html.gecis-gel .perde--marka .perde__logo,html.gecis-gel .perde--marka .perde__ortam{animation:none!important;}',
-    /* Varışta sayfa perdenin ardında (duvar rengi) kurulur, hazır olunca selamın arkasında tek bir solmayla belirir:
-       sahne parça parça görünmez, selam boş ekranda da beklemez (perde.js 3 sn). */
-    'html.gecis-gel .perde--karsilama::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;',
-    'background:var(--piksel-duvar,var(--bg));transition:opacity .5s cubic-bezier(.2,0,0,1);}',
-    'html.gecis-hazir .perde--karsilama::after{opacity:0;}',
+    /* Varışın duvar örtüsü ilk boyamada gerekir: brand/seviye/seviye.css (html.gecis-gel .perde--karsilama::after). */
   ].join('');
 
   function gecisStil(){
@@ -22587,7 +22593,7 @@ window.LIFEOS = window.LIFEOS || {};
       const son = typeof o.sure === 'number' ? o.sure : GECIS_MS + 40;
       if(!bulut){
         kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
-        setTimeout(() => kap.classList.add('is-son'), Math.max(0, son - 300));   // manzara duvar rengine söner
+        setTimeout(() => kap.classList.add('is-son'), Math.max(0, son - 540));   // manzara duvar rengine söner
       }
       git(son);
       return true;
@@ -28222,7 +28228,7 @@ SP.Perde = (function(){
            `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
            bakıyor. */
         siradakini();
-      }, bulut ? 1140 : 640);
+      }, bulut ? 1140 : gecisGel ? 940 : 640);   // geçişle gelişte perde 0,9 sn'de söner (animasyon.js)
     }
 
     /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:
@@ -28379,6 +28385,7 @@ SP.Perde = (function(){
     var bulutVar = !!perde.querySelector('.px-bulut');
     /* Modül geçişiyle gelindiyse manzara gidişte izlendi (animasyon.js gecis, kullanıcı 2026-11-07): selam kısa
        okunur, bulut yumuşakça iki yana çekilir. Çerez de bakılır: tek dosyada animasyon.js perdeden sonra yüklenir. */
+    var GECIS_SELAM_MS = 1200;
     var gecisGel = document.documentElement.classList.contains('gecis-gel') || /(?:^|;\s*)lifeos_gecis=/.test(document.cookie || '');
     if(bulutVar && gecisGel) enAz = 1400;
     else if(bulutVar){
@@ -28413,6 +28420,10 @@ SP.Perde = (function(){
       if(sayi) sayi.textContent = kalan > 0 ? String(kalan) : '·';
       /* Videosuz perde süresini doldurdu. Bulutlu karşılama uygulama açılışı (#app .boot, «… yükleniyor»)
          bitmeden kalkmaz: kullanıcı (2026-11-07) bulut kalkınca bulutsuz bir yükleme ekranı görüyordu. 12 sn sınır. */
+      /* Modül geçişiyle gelindiyse perde sayfa hazır olunca (animasyon.js gecis-hazir) kalkar; selam en az
+         GECIS_SELAM_MS okunur (kullanıcı, 2026-11-07: «modül yüklendiğinde ortadaki kart durmaya devam ediyor»). */
+      if(!v && gecisGel && !bulutVar && Date.now() - basladi >= GECIS_SELAM_MS
+        && document.documentElement.classList.contains('gecis-hazir')){ kapat(); return; }
       if(!v && oran >= 1 && !(bulutVar && document.querySelector('#app > .boot') && Date.now() - basladi < enAz + 12000)) kapat();
     }
     tik();
@@ -29052,7 +29063,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'4191b654', at:'2026-11-07 15:21', dirty:false };
+SP.BUILD = { id:'fef3c871', at:'2026-11-07 15:44', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
