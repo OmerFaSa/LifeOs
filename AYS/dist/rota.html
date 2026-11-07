@@ -7876,6 +7876,12 @@ body.is-dragging .drop.is-over{
    duvar birlikte söner, sayfa altından gelir (kullanıcı, 2026-11-07: «kart kaybolurken öbür sayfa gelsin»). */
 html.gecis-gel .perde--karsilama::after{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:var(--piksel-duvar, var(--bg, #120d08)); }
 html.gecis-gel .perde--karsilama.perde--kapaniyor{ transition:opacity .9s cubic-bezier(.4,0,.2,1); }
+/* Kart duvardan önce söner: sayfa gelirken üstünde yarı saydam kart kalmaz (ölçüldü, 2026-11-07). Kısa selamda
+   «Geç» halkası yalnız göz yorar; Esc yine geçer. */
+html.gecis-gel .perde--karsilama.perde--kapaniyor .karsilama{ opacity:0; transform:translateY(-6px) scale(.98); transition:opacity .4s cubic-bezier(.4,0,.2,1), transform .4s cubic-bezier(.4,0,.2,1); }
+html.gecis-gel .perde--karsilama .perde__araclar{ visibility:hidden; }
+/* Gidişteki kartla aynı: figürsüz (figür değişkeni piksel.js ile sayfanın sonunda gelir, ilk karede yoktur). */
+html.gecis-gel .perde--karsilama .karsilama::before{ display:none; }
 .perde[hidden]{ display:none; }
 
 /* ---------- ortam (bulanık arka kopya) ---------- */
@@ -17461,7 +17467,19 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .ptur__yuz{ flex:none; display:grid; place-items:center; width:40px; height:40px; }
 .ptur__yuz svg{ display:block; }
 .ptur__ad{ flex:1; font-size:15px; font-weight:700; }
-.ptur__sayac{ font-size:12.5px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.ptur__sayac{ font-size:12.5px; font-weight:600; color:var(--text-2); font-variant-numeric:tabular-nums; }
+/* Bölüm çubuğu: King, üç sistem, bitiş. Geçilen dolu, bulunulan adım adım dolar, gelecek boş; ad yalnız
+   bulunulanda yazar (geniş ekranda), diğerleri sessiz. */
+.ptur__bolumler{ display:flex; gap:4px; margin:0 0 12px; padding-left:6px; }
+.ptur__bolumler i{ position:relative; flex:1; height:4px; background:color-mix(in oklab, var(--text) 14%, transparent); }
+.ptur__bolumler i::before{ content:''; position:absolute; inset:0; transform-origin:0 50%; transform:scaleX(var(--dol, 0));
+  background:var(--ptur-renk, #ffd166); transition:transform .45s cubic-bezier(.2,0,0,1); }
+.ptur__bolumler b{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+/* Cümle noktaları: adımın kaçıncı cümlesindesin */
+.ptur__noktalar{ display:flex; gap:5px; min-height:6px; margin:10px 0 0; padding-left:6px; }
+.ptur__noktalar i{ width:6px; height:6px; background:color-mix(in oklab, var(--text) 18%, transparent); transition:background .2s ease, width .2s ease; }
+.ptur__noktalar i.is-gecti{ background:color-mix(in oklab, var(--text) 45%, transparent); }
+.ptur__noktalar i.is-bu{ width:16px; background:var(--ptur-renk, #ffd166); }
 .ptur__yazi{ margin:0; padding-left:6px; min-height:3.1em; font-size:17px; line-height:1.5; color:var(--text); }
 .ptur__yazi.is-yeni{ animation:ptur-yazi .4s ease both; }
 @keyframes ptur-yazi{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
@@ -17471,7 +17489,16 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .ptur__alt [hidden]{ display:none; }
 .ptur__ses{ min-width:44px; min-height:40px; padding:0 10px; display:inline-flex; align-items:center; justify-content:center; }
 .ptur__ses svg{ fill:currentColor; stroke:currentColor; stroke-width:1.6; }
-.ptur__devam{ margin-left:auto; min-height:40px; }
+.ptur__devam{ min-height:40px; min-width:112px; }
+/* piksel.css :is(.btn, .dugme) kenar boşluğunu yazar (0,3,0): sağa yaslama ondan güçlü olmalı. */
+:root .ptur__alt > .btn.ptur__devam{ margin-left:auto; }
+/* İkincil eylemler sessiz: ses ve otomatik yalnız simge, «Turu geç» yazı bağlantısı; tek vurgu «Devam». */
+.ptur__oto{ min-width:44px; min-height:40px; padding:0 10px; justify-content:center; }
+.ptur__gec{ min-height:40px; padding:0 8px; border:0; background:none; color:var(--text-2); font:inherit; font-size:13.5px;
+  cursor:pointer; text-decoration:underline; text-underline-offset:3px; text-decoration-color:color-mix(in oklab, currentColor 40%, transparent); }
+.ptur__gec:hover{ color:var(--text); }
+.ptur__gec kbd{ margin-left:4px; padding:1px 5px; font:600 11px/1.4 var(--font-mono, ui-monospace, monospace); text-decoration:none;
+  display:inline-block; border:1px solid color-mix(in oklab, currentColor 35%, transparent); color:var(--text-2); }
 
 /* GEZGİN (kullanıcı, 2026-11-07: «kutunun içinde sabit durmasın, sistemin içinde gezsin»). Patron spotun
    yanında durur; söz kartı onun konuşma balonudur (geniş ekranda yerini patrontur.js balonKoy verir). */
@@ -17532,15 +17559,18 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .ptur.is-bekle .ptur__kart{ top:8px; bottom:auto; padding:10px 14px; }
 .ptur.is-bekle .ptur__yazi{ min-height:0; font-size:15px; }
 .ptur.is-bekle .ptur__alt{ margin-top:6px; }
+.ptur.is-bekle .ptur__bolumler, .ptur.is-bekle .ptur__noktalar{ display:none; }
 
 /* Animasyonlar «Az»: sıçrayarak gelir */
 .ptur.is-az .ptur__delik, .ptur.is-az .ptur__kart{ transition:none; }
 .ptur.is-az .ptur__yazi.is-yeni{ animation:none; }
+.ptur.is-az .ptur__bolumler i::before, .ptur.is-az .ptur__noktalar i{ transition:none; }
 
 @media (max-width:679px){
   .ptur__kart{ bottom:12px; padding:12px 14px 12px; }
   .ptur.is-ustte .ptur__kart{ top:12px; }
   .ptur__yazi{ font-size:16px; }
+  .ptur__gec kbd{ display:none; }
   .ptur.is-bekle .ptur__yazi{ font-size:14px; line-height:1.4; }
 }
 
@@ -19569,6 +19599,9 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
   body .overlay{ animation:h-karart-gel var(--h-kisa) var(--e-std) both; }
    .overlay .sheet{ animation:h-kagit-gel var(--h-uzun) var(--su) both; transform-origin:50% 100%; }
   @media (min-width:680px){  .overlay .sheet{ transform-origin:50% 40%; } }
+  /* Yerinde yenilenen alt sayfa (ui.js sheet) yeniden gelmez; yalnız içerik kısa süzülür. */
+  body .overlay.is-yerinde, .overlay.is-yerinde .sheet{ animation:none; }
+  .overlay.is-yerinde .sheet__body{ animation:h-yerinde var(--h-kisa) var(--e-std) both; }
   /* Kapanış kopyası (hareket.js cikis; içerik değil, yalnız görünüş): karartma söner, kağıdın camı aşağı süzülür. */
   .h-cikis{ animation:h-karart-git var(--h-kisa) var(--e-git) forwards; }
   .h-cikis__kagit{ animation:h-kagit-git var(--h-kisa) var(--e-git) forwards; }
@@ -19586,6 +19619,7 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
 }
 @keyframes h-karart-gel{ from{ opacity:0; } }
 @keyframes h-karart-git{ to{ opacity:0; } }
+@keyframes h-yerinde{ from{ opacity:.25; transform:translateX(8px); } to{ opacity:1; transform:none; } }
 @keyframes h-kagit-gel{ from{ opacity:0; transform:translateY(22px) scale(.965); } 45%{ opacity:1; } to{ opacity:1; transform:none; } }
 @keyframes h-kagit-git{ to{ opacity:0; transform:translateY(14px) scale(.97); } }
 @keyframes h-bildirim-gel{ from{ opacity:0; transform:translateY(14px) scale(.94); } 40%{ opacity:1; } to{ opacity:1; transform:none; } }
@@ -21149,6 +21183,17 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
      Perde bu betikten SONRA tanimlanir ve bekleme gercekten calisir.
      Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
   var deneme = 0, kars = el.querySelector('.karsilama'), yazildi = false;
+  /* Geçişle gelindiyse selam gidişte seçildi ve çerezde (animasyon.js gecisSelam): ilk karede yazılır, gidişin
+     son karesindeki kartın aynısı. Önceden karsilama.js'i bekliyordu: 1,5 sn boş duvar (2026-11-07, ölçüldü). */
+  try{
+    var gs = /(?:^|;\s*)lifeos_gecis=[a-z]{2,4}\.\d{10,16}\.([^;]+)/.exec(document.cookie || '');
+    var gsMetin = gs ? decodeURIComponent(gs[1]).slice(0, 120) : '';
+    if(kars && gsMetin){
+      kars.querySelector('.karsilama__selam').textContent = gsMetin;
+      kars.classList.add('is-hazir');
+      yazildi = true;
+    }
+  }catch(e){}
   /* Karşılama yazılamazsa (betik yok) varsayılan selam görünür. */
   setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 1500);
   /* Selam ayrı bekler: kaynak sürümde perde.js hemen, karsilama.js sayfanın
@@ -44750,6 +44795,17 @@ window.LIFEOS = window.LIFEOS || {};
     '.lifeos-gecis.is-son::after{opacity:1;}',
     /* Varış: perde ilk karede durur; logosu yeniden gelmez, zaten yerinde. */
     'html.gecis-gel .perde--marka .perde__logo,html.gecis-gel .perde--marka .perde__ortam{animation:none!important;}',
+    /* Selam kartı gidişin son yarım saniyesinde duvarla birlikte gelir; varış aynı kartı ilk karede çizer (perde.html,
+       çerezdeki selam): sayfa değişimi kartın ardında olur. */
+    /* Temel düzen burada da yazılı: seçim sayfası (4180) karsilama.css yüklemez; kâğıt ve yazı tipi piksel.css'ten. */
+    ':root .lifeos-gecis .karsilama[data-gecis-modul]{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;',
+    'max-width:min(680px,calc(100vw - 48px));text-align:center;opacity:0;transform:translateY(8px);',
+    'transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);}',
+    ':root .lifeos-gecis.is-son .karsilama[data-gecis-modul]{opacity:1;transform:none;filter:none;}',
+    ':root .lifeos-gecis .karsilama[data-gecis-modul] .karsilama__selam{margin:0;line-height:1.08;}',
+    ':root .lifeos-gecis .karsilama[data-gecis-modul] .karsilama__cizgi{display:block;background:var(--primary,#e8a64a);}',
+    /* Figür yok: varışta figür değişkeni (piksel.js) sayfanın sonunda kurulur, ilk karede kart figürsüzdür. */
+    ':root .lifeos-gecis .karsilama[data-gecis-modul]::before{display:none;}',
     /* Varışın duvar örtüsü ilk boyamada gerekir: brand/seviye/seviye.css (html.gecis-gel .perde--karsilama::after). */
   ].join('');
 
@@ -44760,9 +44816,20 @@ window.LIFEOS = window.LIFEOS || {};
     s.textContent = GECIS_STIL;
     (document.head || document.documentElement).appendChild(s);
   }
-  function gecisCerezYaz(m, simdi){
+  /* Varılan modülün selamı gidişte seçilir ve çerezle taşınır (2026-11-07): varış sayfası onu ilk boyamada yazar,
+     tek dosyada sayfanın sonunda yüklenen karsilama.js'i beklemez. Ölçüldü: önceden varışta 1,5 sn boş duvar vardı. */
+  function gecisSelam(m){
+    let s = '';
     try{
-      document.cookie = GECIS_CEREZ + '=' + m + '.' + (simdi || Date.now()) + '; Path=/; Max-Age=15; SameSite=Strict'
+      const K = L.KARSILAMA;
+      if(K && K.selam) s = String(K.selam({ ayar:K.ayar(), modul:m, simdi:new Date() }) || '');
+    }catch(e){ /* seçim sayfası karsilama.js yüklemez: yedek selam */ }
+    return (s || yz('ortak.animasyon.gecis-selam')).slice(0, 120);
+  }
+  function gecisCerezYaz(m, simdi, selam){
+    try{
+      document.cookie = GECIS_CEREZ + '=' + m + '.' + (simdi || Date.now()) + (selam ? '.' + encodeURIComponent(selam) : '')
+        + '; Path=/; Max-Age=15; SameSite=Strict'
         + (location.protocol === 'https:' ? '; Secure' : '');
     }catch(e){ /* çerez kapalı: varışta logo yine gelir, geçiş bozulmaz */ }
   }
@@ -44844,10 +44911,19 @@ window.LIFEOS = window.LIFEOS || {};
         + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
       if(P && P.manzaraKoy) P.manzaraKoy(kap);
     }
+    const selam = gecisSelam(o.modul);
+    if(!bulut && selam){
+      const kart = document.createElement('div');
+      kart.className = 'karsilama';
+      kart.setAttribute('data-gecis-modul', o.modul);
+      kart.innerHTML = '<p class="karsilama__selam"></p><span class="karsilama__cizgi"></span>';
+      kart.firstChild.textContent = selam;
+      kap.appendChild(kart);
+    }
     void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
     kap.classList.add('is-tam');
     const git = sure => setTimeout(() => {
-      gecisCerezYaz(o.modul);
+      gecisCerezYaz(o.modul, 0, selam);
       try{ o.git(); }catch(e){ console.error('Geçiş:', e); }
       /* Sayfa değişmediyse (engellendi, hata) perde kendiliğinden kalkar. */
       setTimeout(() => { if(kap.isConnected){ kap.remove(); gecisAktif = false; } }, 6000);
@@ -51326,7 +51402,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'fef3c871', at:'2026-11-07 15:44', dirty:false };
+R.BUILD = { id:'c090bfc8', at:'2026-11-07 18:32', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -92380,7 +92456,9 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.patrontur.ses-ac':'Sesi aç',
   'ortak.patrontur.ses-kapa':'Sesi kapat',
   'ortak.patrontur.ipucu':'Aydınlık yere bas.',
-  'ortak.patrontur.oto':'Otomatik',
+  'ortak.patrontur.bolum.king':'Başlangıç',
+  'ortak.patrontur.bolum.son':'Bitiş',
+  'ortak.patrontur.adim':'Adım {i} / {n}',
   'ortak.patrontur.oto-ipucu':'Otomatik: sen dokunmasan da tur kendi ilerler, menüleri kendisi açar.',
   'ortak.patrontur.oto-izle':'Turu otomatik izle',
   'ortak.patrontur.anladin-mi':'Anlamadın mı? Takıldıysan söyle, bir daha anlatayım.',
@@ -92511,6 +92589,15 @@ window.LIFEOS.PATRONTUR = (function(L){
     l.push({ id:'son.is', kim:'king', modul:null, soz:4, hedef:'girdi', cekmece:'bugun', son:true });
     return l;
   }
+  /* Adımın bölümü: King'in açılışı, adımı anlatan patronun sistemi, sondaki dönüş «son». */
+  const bolum = a => a.modul === null ? 'son' : a.id.indexOf('king.') === 0 ? 'king' : a.kim;
+  function bolumDurumu(l, a){
+    const ad = [];
+    l.forEach(x => { const b = bolum(x); if(ad.indexOf(b) < 0) ad.push(b); });
+    const bu = bolum(a), ici = l.filter(x => bolum(x) === bu), j = ici.indexOf(a), k = ad.indexOf(bu);
+    return { bu, j, n:ici.length, liste:ad.map((b, i) => ({ b, dol:i < k ? 1 : i > k ? 0 : (j + 1) / ici.length })) };
+  }
+  const bolumAdi = b => AD[b] || yz('bolum.' + b);
   const sozler = a => {
     const l = [];
     for(let i = 1; i <= a.soz; i++) l.push(yz(a.id + '.' + i));
@@ -92581,12 +92668,16 @@ window.LIFEOS.PATRONTUR = (function(L){
       + '<div class="ptur__gezgin" aria-hidden="true"><i class="ptur__ag"></i><span class="ptur__arac">' + ARABA_SVG + '</span><span class="ptur__figur"></span></div>'
       + '<section class="ptur__kart">'
       +   '<div class="ptur__kim"><b class="ptur__ad"></b><span class="ptur__sayac"></span></div>'
+      /* Bölüm çubuğu (2026-11-07, «tanıtma daha profesyonel olsun»): 26 adımlık tek sayaç yerine King, üç
+         sistem ve bitiş; bulunduğun bölüm adım adım dolar. Noktalar adımın kaç cümlesi kaldığını söyler. */
+      +   '<div class="ptur__bolumler" aria-hidden="true"></div>'
       +   '<p class="ptur__yazi" aria-live="polite"></p>'
+      +   '<div class="ptur__noktalar" aria-hidden="true"></div>'
       +   '<p class="ptur__ipucu" hidden>' + yz('ipucu') + '</p>'
       +   '<p class="ptur__soru" hidden>' + yz('anladin-mi') + '</p>'
       +   '<div class="ptur__alt"><button type="button" class="btn btn--ghost btn--sm ptur__ses" data-ptur="ses"></button>'
-      +   '<button type="button" class="btn btn--ghost btn--sm ptur__oto" data-ptur="oto" aria-pressed="false" title="' + yz('oto-ipucu') + '">' + OTO_SVG + '<span>' + yz('oto') + '</span></button>'
-      +   '<button type="button" class="btn btn--ghost btn--sm" data-ptur="gec">' + yz('gec') + '</button>'
+      +   '<button type="button" class="btn btn--ghost btn--sm ptur__oto" data-ptur="oto" aria-pressed="false" aria-label="' + yz('oto-izle') + '" title="' + yz('oto-ipucu') + '">' + OTO_SVG + '</button>'
+      +   '<button type="button" class="ptur__gec" data-ptur="gec">' + yz('gec') + ' <kbd>Esc</kbd></button>'
       +   '<button type="button" class="btn btn--ghost btn--sm ptur__anla" data-ptur="anla" hidden>' + yz('anlamadim') + '</button>'
       +   '<button type="button" class="btn btn--primary ptur__devam" data-ptur="devam">' + yz('devam') + '</button></div>'
       + '</section>';
@@ -92742,6 +92833,8 @@ window.LIFEOS.PATRONTUR = (function(L){
   /* Delik ölçülür: perdeler deliğin çevresini tutar, delik yalnız görsel (tıklama geçer). */
   function olc(){
     if(!d || d.gizli) return;
+    /* Pencere dar ekrana inerse geniş ekranın balon yeri kalkar; kart alta yapışık düzene döner (yoksa ekran dışında kalıyordu). */
+    if(innerWidth < 680 && d.kart.style.left){ d.kart.style.left = ''; d.kart.style.top = ''; d.kart.classList.remove('is-altta'); }
     const a = d.adim, el = a ? bul(a.hedef) : null, [ust, alt, sol, sag] = d.perdeler, W = innerWidth, H = innerHeight, D = d.delik;
     const koy = (e, x, y, w, h) => { e.style.left = x + 'px'; e.style.top = y + 'px'; e.style.width = Math.max(0, w) + 'px'; e.style.height = Math.max(0, h) + 'px'; };
     if(!el){
@@ -92793,6 +92886,7 @@ window.LIFEOS.PATRONTUR = (function(L){
     for(let i = 0; i < l.length; i++){
       if(x !== d || no !== x.kusak) return;
       x.yazi.textContent = l[i];
+      x.kok.querySelector('.ptur__noktalar').innerHTML = l.length > 1 ? l.map((_, j) => '<i' + (j < i ? ' class="is-gecti"' : j === i ? ' class="is-bu"' : '') + '></i>').join('') : '';
       x.yazi.classList.remove('is-yeni'); void x.yazi.offsetWidth; x.yazi.classList.add('is-yeni');
       konus(l[i]);
       const bas = Date.now(), en_az = Math.max(1300, l[i].length * 50), emniyet = en_az * 3 + 6000;
@@ -92816,7 +92910,11 @@ window.LIFEOS.PATRONTUR = (function(L){
     kenarTut(a);
     onceAc(a);
     const i = d.akis.indexOf(a);
-    d.kok.querySelector('.ptur__sayac').textContent = (i + 1) + ' / ' + d.akis.length;
+    const bd = bolumDurumu(d.akis, a), sayac = d.kok.querySelector('.ptur__sayac');
+    sayac.textContent = bolumAdi(bd.bu) + ' · ' + (bd.j + 1) + '/' + bd.n;
+    sayac.setAttribute('title', yz('adim').replace('{i}', i + 1).replace('{n}', d.akis.length));
+    d.kok.querySelector('.ptur__bolumler').innerHTML = bd.liste.map(x => '<i class="' + (x.b === bd.bu ? 'is-bu' : '')
+      + '" style="--dol:' + x.dol.toFixed(3) + '"><b>' + bolumAdi(x.b) + '</b></i>').join('');
     const devam = d.kok.querySelector('[data-ptur="devam"]'), ipucu = d.kok.querySelector('.ptur__ipucu');
     devam.textContent = yz(a.son ? 'basla' : 'devam');
     devam.hidden = !!a.tikla;
@@ -93119,7 +93217,7 @@ window.LIFEOS.PATRONTUR = (function(L){
     if(document.readyState === 'complete') kendiliginden(); else window.addEventListener('load', kendiliginden, { once:true });
   }
 
-  return Object.freeze({ baslat, bitir, acikMi:() => !!d, SIRA, _akis:akis, _sozler:sozler, _oku:oku, _yaz:yaz, _durum:() => d, _ac:ac, _hedefListe:hedefListe, _okunus:okunus });
+  return Object.freeze({ baslat, bitir, acikMi:() => !!d, SIRA, _akis:akis, _sozler:sozler, _oku:oku, _yaz:yaz, _durum:() => d, _ac:ac, _hedefListe:hedefListe, _okunus:okunus, _bolumDurumu:bolumDurumu });
 })(window.LIFEOS);
 
 /* ==== js/core/gorsel.js ==== */
@@ -108964,8 +109062,11 @@ R.UI = (function(){
   let sheetScroll = '';
 
   function sheet(opts){
-    closeSheet();
-    sheetOpener = document.activeElement;
+    /* Açık alt sayfa YERİNDE yenilenir (sihirbaz adımı, onaydan sonuca): kapanıp yeniden açılması çıkış ve giriş
+       hareketini art arda oynatıyor, her adımda ~1 sn boş pencere görünüyordu (2026-11-07, ölçüldü). Açan öğe,
+       kaydırma kilidi ve inert ilk açılıştan kalır. */
+    const onceki = document.getElementById('sheet');
+    if(!onceki) sheetOpener = document.activeElement;
     const root = document.getElementById('overlay-root');
     const el = document.createElement('div');
     el.className = 'overlay';
@@ -108995,19 +109096,22 @@ R.UI = (function(){
       else if(!e.shiftKey && document.activeElement === son){ e.preventDefault(); ilk.focus(); }
     });
 
-    root.appendChild(el);
+    if(onceki){ el.classList.add('is-yerinde'); onceki.replaceWith(el); }
+    else {
+      root.appendChild(el);
 
-    /* Arkadaki sayfa KAYMAZ: alt sayfa acikken tekerlek arkayi
-       kaydiriyordu ve kapaninca baska bir yerde kaliniyordu. */
-    sheetScroll = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+      /* Arkadaki sayfa KAYMAZ: alt sayfa acikken tekerlek arkayi
+         kaydiriyordu ve kapaninca baska bir yerde kaliniyordu. */
+      sheetScroll = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
 
-    /* ...ve arkadaki sayfa OKUNMAZ. Odagi hapsetmek yalnizca klavyeyi
-       durdurur; ekran okuyucunun sanal imleci alt sayfayi hic gormeden
-       arkadaki tabloyu okumaya devam edebiliyordu. `inert` ikisini
-       birden keser: odak da, erisilebilirlik agaci da. */
-    const kabuk = document.querySelector('.site');
-    if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+      /* ...ve arkadaki sayfa OKUNMAZ. Odagi hapsetmek yalnizca klavyeyi
+         durdurur; ekran okuyucunun sanal imleci alt sayfayi hic gormeden
+         arkadaki tabloyu okumaya devam edebiliyordu. `inert` ikisini
+         birden keser: odak da, erisilebilirlik agaci da. */
+      const kabuk = document.querySelector('.site');
+      if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+    }
 
     const first = el.querySelector('input, textarea, select')
       || el.querySelector(ODAKLANABILIR);
