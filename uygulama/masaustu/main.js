@@ -81,8 +81,15 @@ async function boot() {
       app.quit(); return;
     }
   }
-  win.loadURL(GIRIS);
+  // 2026-11-07 (kullanıcı: «yüklenmeler çok hızlı, uyum yok»): sunucu zaten açıksa açılış ekranı bir an görünüp
+  // kesiliyordu. En az 1,2 sn durur, sonra 0,4 sn söner; giriş sayfası aynı koyu zeminden (backgroundColor) gelir.
+  await sleep(Math.max(0, 1200 - (Date.now() - ACILIS)));
+  if (!win || win.isDestroyed()) return;
+  await win.webContents.executeJavaScript("document.body.style.transition='opacity .4s ease';document.body.style.opacity='0'").catch(() => {});
+  await sleep(420);
+  if (!win.isDestroyed()) win.loadURL(GIRIS);
 }
+const ACILIS = Date.now();
 
 function appWindow(opts = {}) {
   const w = new BrowserWindow({

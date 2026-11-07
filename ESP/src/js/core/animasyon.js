@@ -461,7 +461,7 @@ window.LIFEOS = window.LIFEOS || {};
      yoktur: yeni sekmede açılır, kendi sayfası kısa bir girişle belirir. */
 
   const GECIS_CEREZ = 'lifeos_gecis';
-  const GECIS_MS = 560;
+  const GECIS_MS = 900;   // 2026-11-07 (kullanıcı: «bazıları çok hızlı, uyum yok»): karşılama perdesinin ritmiyle aynı
   /* Bulutlu sıra (kullanıcı, 2026-11-07): hafif geri çekil + bulut kapan · 2 sn yükleme · bulut kenarlara aralanır,
      manzara izlenir (karşı sunucu bu sırada hazırlanır) · kapan · sayfa. GECIS_BULUT_KAP piksel.css .px-bulut i geçişiyle aynıdır. */
   const GECIS_BULUT_HAZIR = 300, GECIS_BULUT_KAP = 700, GECIS_YUKLE = 2000;
@@ -492,16 +492,16 @@ window.LIFEOS = window.LIFEOS || {};
     '.lifeos-gecis{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;pointer-events:auto;',
     'overflow:hidden;--g-zemin:rgba(12,13,18,.72);--g-golge:rgba(0,0,0,.5);background:var(--g-zemin);',
     '-webkit-backdrop-filter:blur(28px) saturate(1.35);backdrop-filter:blur(28px) saturate(1.35);',
-    'transition:clip-path .56s cubic-bezier(.32,.72,0,1),opacity .2s ease;}',
+    'transition:clip-path .9s cubic-bezier(.32,.72,0,1),opacity .2s ease;}',
     ':root[data-theme="light"] .lifeos-gecis{--g-zemin:rgba(244,244,248,.7);--g-golge:rgba(30,34,60,.16);}',
     '@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .lifeos-gecis{--g-zemin:rgba(244,244,248,.7);',
     '--g-golge:rgba(30,34,60,.16);}}',
     '.lifeos-gecis__ortam{position:absolute;inset:18%;width:64%;height:64%;object-fit:contain;',
-    'filter:blur(72px) saturate(1.5);opacity:0;pointer-events:none;transition:opacity .56s ease .1s;}',
+    'filter:blur(72px) saturate(1.5);opacity:0;pointer-events:none;transition:opacity .9s ease .1s;}',
     '.lifeos-gecis.is-tam .lifeos-gecis__ortam{opacity:.34;}',
     '.lifeos-gecis__logo{position:relative;width:min(38vw,300px);height:auto;object-fit:contain;opacity:0;',
     'filter:drop-shadow(0 22px 56px var(--g-golge));transform-origin:50% 50%;',
-    'transition:transform .56s cubic-bezier(.32,.72,0,1) .04s,opacity .32s ease .08s;}',
+    'transition:transform .9s cubic-bezier(.32,.72,0,1) .04s,opacity .32s ease .08s;}',
     '.lifeos-gecis.is-tam .lifeos-gecis__logo{opacity:1;transform:none;}',
     /* Varış: perde ilk karede durur; logosu yeniden gelmez, zaten yerinde. */
     'html.gecis-gel .perde--marka .perde__logo,html.gecis-gel .perde--marka .perde__ortam{animation:none!important;}',

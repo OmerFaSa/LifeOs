@@ -235,7 +235,7 @@ ESP.Perde = (function(){
            `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
            bakıyor. */
         siradakini();
-      }, bulut ? 1140 : 420);
+      }, bulut ? 1140 : 640);
     }
 
     /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:

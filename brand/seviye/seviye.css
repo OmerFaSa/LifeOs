@@ -33,7 +33,7 @@
   z-index:10000;
   display:grid; place-items:center;
   background:#000;
-  opacity:1; transition:opacity .38s ease;
+  opacity:1; transition:opacity .6s ease;   /* 2026-11-07: geçişlerle aynı ritim (perde.js kapat 640 ms) */
   overflow:hidden;
   /* Perde açıkken altındaki sayfa kaymasın. */
   touch-action:none;
