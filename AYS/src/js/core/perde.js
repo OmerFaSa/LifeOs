@@ -235,7 +235,7 @@ R.Perde = (function(){
            `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
            bakıyor. */
         siradakini();
-      }, bulut ? 1140 : 640);
+      }, bulut ? 1140 : gecisGel ? 940 : 640);   // geçişle gelişte perde 0,9 sn'de söner (animasyon.js)
     }
 
     /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:
@@ -392,6 +392,7 @@ R.Perde = (function(){
     var bulutVar = !!perde.querySelector('.px-bulut');
     /* Modül geçişiyle gelindiyse manzara gidişte izlendi (animasyon.js gecis, kullanıcı 2026-11-07): selam kısa
        okunur, bulut yumuşakça iki yana çekilir. Çerez de bakılır: tek dosyada animasyon.js perdeden sonra yüklenir. */
+    var GECIS_SELAM_MS = 1200;
     var gecisGel = document.documentElement.classList.contains('gecis-gel') || /(?:^|;\s*)lifeos_gecis=/.test(document.cookie || '');
     if(bulutVar && gecisGel) enAz = 1400;
     else if(bulutVar){
@@ -426,6 +427,10 @@ R.Perde = (function(){
       if(sayi) sayi.textContent = kalan > 0 ? String(kalan) : '·';
       /* Videosuz perde süresini doldurdu. Bulutlu karşılama uygulama açılışı (#app .boot, «… yükleniyor»)
          bitmeden kalkmaz: kullanıcı (2026-11-07) bulut kalkınca bulutsuz bir yükleme ekranı görüyordu. 12 sn sınır. */
+      /* Modül geçişiyle gelindiyse perde sayfa hazır olunca (animasyon.js gecis-hazir) kalkar; selam en az
+         GECIS_SELAM_MS okunur (kullanıcı, 2026-11-07: «modül yüklendiğinde ortadaki kart durmaya devam ediyor»). */
+      if(!v && gecisGel && !bulutVar && Date.now() - basladi >= GECIS_SELAM_MS
+        && document.documentElement.classList.contains('gecis-hazir')){ kapat(); return; }
       if(!v && oran >= 1 && !(bulutVar && document.querySelector('#app > .boot') && Date.now() - basladi < enAz + 12000)) kapat();
     }
     tik();
