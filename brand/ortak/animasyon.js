@@ -500,8 +500,17 @@ window.LIFEOS = window.LIFEOS || {};
     'filter:drop-shadow(0 22px 56px var(--g-golge));transform-origin:50% 50%;',
     'transition:transform .9s cubic-bezier(.32,.72,0,1) .04s,opacity .32s ease .08s;}',
     '.lifeos-gecis.is-tam .lifeos-gecis__logo{opacity:1;transform:none;}',
+    /* Gidişin son karesi varışın ilk karesidir (duvar rengi): sayfa değişimi kesme olarak görünmez (2026-11-07). */
+    '.lifeos-gecis::after{content:"";position:absolute;inset:0;background:var(--piksel-duvar,var(--bg,#120d08));',
+    'opacity:0;transition:opacity .28s cubic-bezier(.2,0,0,1);pointer-events:none;}',
+    '.lifeos-gecis.is-son::after{opacity:1;}',
     /* Varış: perde ilk karede durur; logosu yeniden gelmez, zaten yerinde. */
     'html.gecis-gel .perde--marka .perde__logo,html.gecis-gel .perde--marka .perde__ortam{animation:none!important;}',
+    /* Varışta sayfa perdenin ardında (duvar rengi) kurulur, hazır olunca selamın arkasında tek bir solmayla belirir:
+       sahne parça parça görünmez, selam boş ekranda da beklemez (perde.js 3 sn). */
+    'html.gecis-gel .perde--karsilama::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;',
+    'background:var(--piksel-duvar,var(--bg));transition:opacity .5s cubic-bezier(.2,0,0,1);}',
+    'html.gecis-hazir .perde--karsilama::after{opacity:0;}',
   ].join('');
 
   function gecisStil(){
@@ -604,8 +613,12 @@ window.LIFEOS = window.LIFEOS || {};
       setTimeout(() => { if(kap.isConnected){ kap.remove(); gecisAktif = false; } }, 6000);
     }, sure);
     if(!bulut || typeof o.sure === 'number'){
-      if(!bulut) kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
-      git(typeof o.sure === 'number' ? o.sure : GECIS_MS + 40);
+      const son = typeof o.sure === 'number' ? o.sure : GECIS_MS + 40;
+      if(!bulut){
+        kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
+        setTimeout(() => kap.classList.add('is-son'), Math.max(0, son - 300));   // manzara duvar rengine söner
+      }
+      git(son);
       return true;
     }
     /* Bulutlu sıra (kullanıcı, 2026-11-06): bulut kapanır, açılır (yüklenme manzarası görünür), yeniden kapanır, sonra sayfa değişir.
@@ -651,6 +664,16 @@ window.LIFEOS = window.LIFEOS || {};
       document.documentElement.classList.add('gecis-gel');
       document.documentElement.setAttribute('data-gecis', gelen);
       gecisStil();
+      /* Sahne (piksel.js .piksel-oda) yüklemeden sonra boyutlanır, ilk çizimi ve içeriğin gelişi biraz sonradır:
+         boyutlandıktan 350 ms sonra (en geç 1,5 sn) açılır; ölçüldü, 2026-11-07. */
+      addEventListener('load', () => {
+        const bas = Date.now(), hazir = () => document.documentElement.classList.add('gecis-hazir');
+        (function bak(){
+          const c = document.querySelector('canvas.piksel-oda');
+          if((c && c.width > 0) || Date.now() - bas > 1500) setTimeout(hazir, 350);
+          else setTimeout(bak, 50);
+        })();
+      }, { once:true });
     }
   }
 
