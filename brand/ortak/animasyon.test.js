@@ -286,7 +286,7 @@
         a.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, button:0 }));
         expect(document.querySelectorAll('.lifeos-gecis').length).toBe(1);
         expect(gidilen.length).toBe(0);                                            // önce yer, sonra sayfa
-        await ilerlet((p.querySelector('.px-bulut') ? A.gecisBulutMs() : A.GECIS_MS) + 240);   // piksel: bulut kapanır, açılır, kapanır (başlangıç iki kare bekler)
+        await ilerlet((p.querySelector('.px-bulut') ? A.gecisBulutMs() + 6000 : A.GECIS_MS) + 240);   // piksel: sahte saatte sunucu cevabı gelmeyebilir, en çok 6 sn ek beklenir
         expect(gidilen).toEqual(['http://127.0.0.1:4183/']);
         expect(/^spi\.\d{13}$/.test(gecisCerezi())).toBe(true);
         /* Ctrl ile tık (yeni sekme) dokunulmadan geçer. */

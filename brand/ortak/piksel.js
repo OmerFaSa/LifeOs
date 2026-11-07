@@ -370,8 +370,11 @@ window.LIFEOS = window.LIFEOS || {};
     g.imageSmoothingEnabled = false;
   }
   /* Döner: tuval (el'in ilk çocuğu) ya da null (mahalle yok: seçim sayfası). Tuval DOM'dan çıkınca döngü durur. */
-  function sehirKoy(el, yon, sure){
+  /* aralik [a0, a1]: kameranın yolun hangi parçasını oynadığı (gidiş: tıklayınca [0,.3] hafif geri, manzarada [.3,1]).
+     Sona varmayan parça yavaşlayarak durur; sona varanı sehirCiz'in yumuşatması durdurur. */
+  function sehirKoy(el, yon, sure, aralik){
     if(!el) return null;
+    const a0 = aralik ? aralik[0] : 0, a1 = aralik ? aralik[1] : 1;
     const W = Math.ceil(window.innerWidth / OLCEK), H = Math.ceil(window.innerHeight / OLCEK), M = mahalleSahneleri(W, H);
     if(!M || !M.P) return null;
     M.yer = simdikiYer();
@@ -381,7 +384,12 @@ window.LIFEOS = window.LIFEOS || {};
     c.className = 'piksel-manzara piksel-sehir'; c.setAttribute('aria-hidden', 'true');
     c.width = W; c.height = H; tamKat(c, OLCEK);
     const g = c.getContext('2d'), bas = performance.now(), sn = Math.max(300, sure || 2000), uzak = yon !== 'yakin';
-    const ciz = simdi => { const p = Math.min(1, (simdi - bas) / sn); sehirCiz(g, W, H, uzak ? p : 1 - p, simdi / 1000, M); };
+    const ciz = simdi => {
+      let p = Math.min(1, (simdi - bas) / sn);
+      if(a1 < 1) p = 1 - (1 - p) * (1 - p);
+      const a = a0 + (a1 - a0) * p;
+      sehirCiz(g, W, H, uzak ? a : 1 - a, simdi / 1000, M);
+    };
     ciz(hareketsiz() ? bas + sn * .5 : bas);
     el.insertBefore(c, el.firstChild);
     if(!hareketsiz()){ const adim = s => { if(!c.isConnected) return; ciz(s); requestAnimationFrame(adim); }; requestAnimationFrame(adim); }

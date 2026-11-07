@@ -235,7 +235,7 @@ ESP.Perde = (function(){
            `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
            bakıyor. */
         siradakini();
-      }, bulut ? 840 : 420);
+      }, bulut ? 1140 : 420);
     }
 
     /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:
@@ -390,7 +390,11 @@ ESP.Perde = (function(){
        vardığında kalkar, yani son kare arka planın kendisidir. Süre Animasyonlar › Bulut manzarası. Piksel
        betikleri tek dosya sürümünde perdeden sonra yüklenir: kısa süre beklenir, gelmezse eski düzen kalır. */
     var bulutVar = !!perde.querySelector('.px-bulut');
-    if(bulutVar){
+    /* Modül geçişiyle gelindiyse manzara gidişte izlendi (animasyon.js gecis, kullanıcı 2026-11-07): selam kısa
+       okunur, bulut yumuşakça iki yana çekilir. Çerez de bakılır: tek dosyada animasyon.js perdeden sonra yüklenir. */
+    var gecisGel = document.documentElement.classList.contains('gecis-gel') || /(?:^|;\s*)lifeos_gecis=/.test(document.cookie || '');
+    if(bulutVar && gecisGel) enAz = 1400;
+    else if(bulutVar){
       var SELAM_MS = 900, ARALAN_MS = 700, sDeneme = 0;
       (function sehirBekle(){
         if(kapandi) return;
