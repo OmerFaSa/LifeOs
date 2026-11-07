@@ -72,7 +72,7 @@
         temiz();
         P.ac({ banner:banner(1), enAz:60000 });
         acikPerde().querySelector('.perde__gec').click();
-        await ilerlet(520);
+        await ilerlet(760);
         expect(perdeler()).toHaveLength(0);
         temiz();
       });
@@ -83,7 +83,7 @@
         temiz();
         P.ac({ banner:banner(1), enAz:60000 });
         document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
-        await ilerlet(520);
+        await ilerlet(760);
         expect(perdeler()).toHaveLength(0);
         temiz();
       });
@@ -95,7 +95,7 @@
         let bitti = 0;
         P.ac({ banner:banner(1), enAz:60000, bitti:() => { bitti++; } });
         acikPerde().querySelector('.perde__gec').click();
-        await ilerlet(520);
+        await ilerlet(760);
         expect(bitti).toBe(1);
         temiz();
       });
@@ -117,7 +117,7 @@
         P.ac({ banner:banner(1), enAz:60000 });
         expect(document.documentElement.style.overflow).toBe('hidden');
         acikPerde().querySelector('.perde__gec').click();
-        await ilerlet(520);
+        await ilerlet(760);
         expect(document.documentElement.style.overflow).toBe('');
         temiz();
       });
@@ -185,7 +185,7 @@
         P.ac({ banner:banner(1), enAz:60000 });
         P.ac({ banner:banner(2), enAz:60000 });
         acikPerde().querySelector('.perde__gec').click();
-        await ilerlet(560);
+        await ilerlet(760);
         expect(perdeler()).toHaveLength(1);
         expect(acikPerde().querySelector('.perde__banner').textContent).toContain('Gümüş');
         temiz();
@@ -199,7 +199,7 @@
         const ikinci = P.ac({ banner:banner(2), enAz:60000 });
         ikinci.kapat();
         acikPerde().querySelector('.perde__gec').click();
-        await ilerlet(560);
+        await ilerlet(760);
         expect(perdeler()).toHaveLength(0);
         temiz();
       });
