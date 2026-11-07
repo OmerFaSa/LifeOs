@@ -51402,7 +51402,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'c090bfc8', at:'2026-11-07 18:32', dirty:true };
+R.BUILD = { id:'e5ef4671', at:'2026-11-07 23:52', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -84920,6 +84920,43 @@ window.LIFEOS.PARCA.yazilar({
   const HATIR_SAAT_RE = /^saat\s*(\d{1,2})[:.](\d{2})\S*\s*(?:bana\s*)?(?:hatırlat|haber ver)\s*:?\s*(.*)$/;
   const HATIR_LISTE_RE = /^hatırlatma(?:larım|lar)\s*[?.!]*$/;
   KI.hatirSaat = null;
+  /* Doğal hatırlatma (King 5 deneme kullanımı, 2026-11-08: «yarın sabah 7'de bana koşuyu hatırlat» modele
+     gidiyor, model «hatırlatırım» diyor, hiçbir şey kurulmuyordu). Gün, vakit ve saat kodla çözülür; saat
+     yoksa ya da bugünün geçmiş saatiyse null: tahmin edilmez (AGENTS §1.7). */
+  const HATIR_FIIL_RE = /\s*(?:bana\s+|beni\s+)?hatırlat(?:ır\s*mısın|sana|\s+lütfen)?$/;
+  const HATIR_KAYDIR_RE = /^(?:onu|bunu|hatırlatmayı)\s+(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*['’]?\s*(?:e|a|ye|ya|ne|na)?\s+(?:al|çek|kaydır|ertele|değiştir)$/;
+  function hatirCoz(t, d){
+    let s = String(t || '').replace(/[.!?]+$/, '').trim(), m;
+    if(!HATIR_FIIL_RE.test(s)) return null;
+    s = s.replace(HATIR_FIIL_RE, '');
+    const kes = x => { s = s.replace(x, ' ').replace(/\s+/g, ' ').trim(); };
+    let z;
+    if((m = s.match(/(?:^|\s)(\d{1,3})\s*(dk|dakika|saat)\s+sonra(?=\s|$)/))){
+      z = new Date(d.getTime() + Number(m[1]) * (m[2] === 'saat' ? 3600000 : 60000)); kes(m[0]);
+    }else{
+      const gun = (m = s.match(/(?:^|\s)(bugün|yarın)(?=\s|$)/)) ? m[1] : '';
+      if(gun) kes(m[0]);
+      const vakit = (m = s.match(/(?:^|\s)(sabah|öğleden sonra|öğlen|öğle|akşam|gece)(?=\s|$)/)) ? m[1] : '';
+      if(vakit) kes(m[0]);
+      m = s.match(/(?:^|\s)(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*['’]?\s*(?:de|da|te|ta)(?=\s|$)/) || s.match(/(?:^|\s)saat\s*(\d{1,2})(?:[:.](\d{2}))?(?=\s|$)/);
+      if(!m) return null;
+      let h = Number(m[1]);
+      const dk = Number(m[2] || 0);
+      if(h > 23 || dk > 59) return null;
+      if((vakit === 'akşam' || vakit === 'öğleden sonra') && h < 12) h += 12;
+      else if((vakit === 'öğlen' || vakit === 'öğle') && h >= 1 && h <= 6) h += 12;
+      else if(vakit === 'gece' && h >= 8 && h < 12) h += 12;
+      kes(m[0]);
+      z = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (gun === 'yarın' ? 1 : 0), h, dk);
+      if(z <= d){ if(gun) return null; z = new Date(z.getTime() + 864e5); }
+    }
+    const ne = s.replace(/^(?:bana|beni)\s+|\s+(?:bana|beni)$/g, '').replace(/^[\s,:;–-]+|[\s,:;–-]+$/g, '').trim();
+    return { z, ne:ne || 'Hatırlatma' };
+  }
+  function hatirZaman(z, d){
+    const g = new Date(d.getFullYear(), d.getMonth(), d.getDate()), f = Math.round((new Date(z.getFullYear(), z.getMonth(), z.getDate()) - g) / 864e5);
+    return (f === 0 ? 'bugün' : f === 1 ? 'yarın' : KI.tarihYaz(z.toISOString())) + ' ' + String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0');
+  }
   function hatirlatmalar(){ const l = KI.ortam.depo.oku(HATIR); return Array.isArray(l) ? l.filter(x => x && x.id && x.zaman) : []; }
   function hatirYaz(l){ if(l.length) KI.ortam.depo.yaz(HATIR, l.slice(-30)); else KI.ortam.depo.sil(HATIR); }
   /* Vadesi gelenleri söyler; en yakını için tek zamanlayıcı kurar (gerçek setTimeout: sınama sahte zamanlamayı kullanmaz). */
@@ -84966,6 +85003,19 @@ window.LIFEOS.PARCA.yazilar({
   /* Tek giriş: anlaşılırsa sonucu döner, değilse null (mesaj olağan yoluna gider). */
   function aracKutusu(metin, t0){
     const sen = () => { KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null; };
+    /* «Ne zaman hatırlatayım?» sorusunun cevabı («9'da», «akşam 8'de»): bekleyen işle birleşir; tutmazsa düşer. */
+    if(KI.bekleyenHatir){
+      const b = KI.bekleyenHatir, h = hatirCoz(t0.replace(/[.!?]+$/, '') + ' ' + b + ' hatırlat', KI.ortam.simdi());
+      KI.bekleyenHatir = null;
+      if(h){
+        const d = KI.ortam.simdi(), id = 'h' + d.getTime().toString(36);
+        hatirYaz(hatirlatmalar().concat([{ id, zaman:h.z.toISOString(), metin:h.ne.slice(0, 160) }]));
+        KI.sonHatir = id;
+        sen(); KI.soyle('Tamam, hatırlatacağım: ' + h.ne + ' · ' + hatirZaman(h.z, d) + '.');
+        hatirlatKur();
+        return { tur:'hatirlat' };
+      }
+    }
     let m = t0.match(HESAP_RE);
     if(m){
       const v = hesapla(m[1]);
@@ -85011,8 +85061,40 @@ window.LIFEOS.PARCA.yazilar({
       const ne = (m[3] || '').trim() || 'Hatırlatma';
       if(!(Number(m[1]) > 0 || m.length === 4 && !/^(dk|dakika|sa|saat)$/.test(m[2])) || isNaN(z)){ return null; }
       hatirYaz(hatirlatmalar().concat([{ id:'h' + d.getTime().toString(36), zaman:z.toISOString(), metin:ne.slice(0, 160) }]));
+      KI.sonHatir = 'h' + d.getTime().toString(36);
       sen(); KI.soyle(yz('ortak.king-arac.tamam') + String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0') + (z.getDate() !== d.getDate() ? ' (yarın)' : '')
         + '’de hatırlatacağım: ' + ne + '. Sayfa açıksa bildirim gelir; kapalıysa açtığında söylerim.');
+      hatirlatKur();
+      return { tur:'hatirlat' };
+    }
+    const hd = hatirCoz(t0, KI.ortam.simdi());
+    if(hd){
+      const d = KI.ortam.simdi(), id = 'h' + d.getTime().toString(36);
+      hatirYaz(hatirlatmalar().concat([{ id, zaman:hd.z.toISOString(), metin:hd.ne.slice(0, 160) }]));
+      KI.sonHatir = id;
+      sen(); KI.soyle('Tamam, hatırlatacağım: ' + hd.ne + ' · ' + hatirZaman(hd.z, d) + '. Sayfa açıksa bildirim gelir; kapalıysa açtığında söylerim.');
+      hatirlatKur();
+      return { tur:'hatirlat' };
+    }
+    /* Saatsiz hatırlatma isteği tahmin edilmez, sorulur (deneme: «yarın ekmek almayı hatırlat» kart aracına
+       gidiyor, model «hatırlatırım» diyordu). Cevap bir sonraki mesajda bekleyenle birleşir. */
+    if(HATIR_FIIL_RE.test(t0.replace(/[.!?]+$/, '')) && !/^hatırlatma/.test(t0)){
+      KI.bekleyenHatir = t0.replace(/[.!?]+$/, '').replace(HATIR_FIIL_RE, '').trim();
+      sen(); KI.cipler = [{ is:'vazgec', ad:yz('ortak.king-arac.vazgec') }];
+      KI.soyle('Ne zaman hatırlatayım? Saatiyle söyle: «9\'da», «akşam 8\'de» ya da «2 saat sonra».');
+      return { tur:'hatirlat-sor' };
+    }
+    /* «onu 8'e al»: son kurulan hatırlatma (konuşmanın ipi, KING-5 K5-09). */
+    m = KI.sonHatir ? t0.replace(/[.!]+$/, '').match(HATIR_KAYDIR_RE) : null;
+    const eski = m ? hatirlatmalar().find(x => x.id === KI.sonHatir) : null;
+    if(m && eski && Number(m[1]) <= 23 && Number(m[2] || 0) <= 59){
+      const d = KI.ortam.simdi(), o = new Date(eski.zaman);
+      let h = Number(m[1]);
+      if(o.getHours() >= 12 && h < 12) h += 12;                 // akşamki hatırlatma akşamda kalır
+      let z = new Date(o.getFullYear(), o.getMonth(), o.getDate(), h, Number(m[2] || 0));
+      if(z <= d) z = new Date(z.getTime() + 864e5);
+      hatirYaz(hatirlatmalar().map(x => x.id === eski.id ? Object.assign({}, x, { zaman:z.toISOString() }) : x));
+      sen(); KI.soyle('Tamam, hatırlatma artık ' + hatirZaman(z, d) + ': ' + eski.metin + '.');
       hatirlatKur();
       return { tur:'hatirlat' };
     }
@@ -85631,7 +85713,9 @@ window.LIFEOS.PARCA.yazilar({
     if(!p || p.type !== 'string') return null;
     KI.bekleyenNiyet = { ad:a.ad, param:N.param, k:eksik[0] };
     KI.cipler = [{ is:'vazgec', ad:yz('ortak.king-arac.vazgec') }];
-    KI.soyle((a.ozetAd || String(a.aciklama).split(/[.:;(]/)[0]).trim() + ' için ' + (p.description || eksik[0]) + ' ne olsun?');
+    /* Şema açıklaması modele yazılır («konu kimliği (ays_konular)»); kullanıcıya iç ad gitmez (AGENTS §1.8). */
+    const ad = String(p.description || '').replace(/\s*\([^)]*\)/g, '').replace(/\s+kimliği$/, '').trim();
+    KI.soyle((a.ozetAd || String(a.aciklama).split(/[.:;(]/)[0]).trim() + ' için ' + (ad && !/_/.test(ad) ? ad : 'bu') + ' ne olsun?');
     return { tur:'arac-sor', ad:a.ad };
   }
   async function niyetCevap(metin){
@@ -85669,7 +85753,7 @@ window.LIFEOS.PARCA.yazilar({
     return (cevap || yz('ortak.king-arac.kolay-gelsin')) + (yer ? ' ' + yer + ' açılıyor.' : '');
   }
 
-  Object.assign(KI, { onayAdi, onaySorusu, D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });
+  Object.assign(KI, { onayAdi, onaySorusu, D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, hatirCoz, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });
 })();
 
 /* ==== js/core/king-devrim.js ==== */
@@ -86762,6 +86846,19 @@ window.LIFEOS.KING = (function(){
       KI.ciz(false);
       return { tur:'envanter' };
     }
+    /* Dersin ipi (KING-5 K5-09, deneme kullanımı 2026-11-08: ders kartından sonra «peki bir örnek ver»
+       ilgisiz bir araca gidip iç bir kimlik soruyordu). Son mesaj bir dersse yazılı «devam» ve «örnek/soru»
+       kartın kendi düğmeleriyle aynı işi yapar. */
+    { const sn = KI.akis.length - 1, sd = KI.akis[sn];
+      if(sd && sd.kim === 'king' && sd.ders){
+        const s = t0.replace(/[.!?]+$/, '');
+        if(/^(?:tamam\s+|peki\s+)?(?:devam|devam et|sonraki|ileri)$/.test(s)){ KI.dersAdim(sn, 1); return { tur:'ders', adim:1 }; }
+        if(/^(?:peki|o zaman|tamam|şimdi)?\s*(?:bana\s+)?(?:bir\s+)?(?:örnek|soru|alıştırma)(?:\s+(?:ver|sor|göster|çöz|yap)(?:\s*(?:misin|mısın|lütfen))?)?$/.test(s)){
+          if(sd.ders.kd){ KI.cipler = null; KI.kdSoru(sd.ders.id); return { tur:'ders', soru:true }; }
+          return isle('bana soru sor ' + sd.ders.sorgu);
+        }
+      }
+    }
     /* Öğretmen (2026-10-22): «türevi anlat» → modülün kendi anlatımından ders
        kartı. Modülde o konu yoksa yol açık kalır (Merkez cevaplar). */
     const DN = KI.dersNiyeti(t0);
@@ -86825,6 +86922,17 @@ window.LIFEOS.KING = (function(){
       const r = await KI.hafiza().komutIsle(metin);
       KI.soyle(r ? r.text : 'Anlayamadım.');
       return { tur:'hafiza' };
+    }
+    /* Hafızadakini soran cümleyi kural cevaplar, model değil (hafiza.js sorudaBul). */
+    { const H = KI.L.Hafiza && KI.L.Hafiza.sorudaBul && KI.hafiza();
+      const bul = H ? KI.L.Hafiza.sorudaBul(H.liste(), metin) : [];
+      if(bul.length){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+        KI.bekleyenTanisma = null; KI.cipler = null;
+        if(bul.length === 1) KI.soyle('Bana şöyle demiştin: «' + bul[0].metin + '».');
+        else KI.soyle('Bana şunları demiştin:', bul.map(x => '«' + x.metin + '»'));
+        return { tur:'hafiza-cevap', n:bul.length };
+      }
     }
     if(KI.YORUMLA.test(t0) && KI.hafiza() && KI.L.CIKARIM){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -87489,7 +87597,7 @@ window.LIFEOS.KING = (function(){
     if(KI.ayar) KI.ortam.depo.sil(KI.depoAnahtar());
     KI.ortam.depo.sil(KI.TASIMA);
     KI.ortam.depo.sil(KI.SIRA); KI.ortam.depo.sil(KI.SOZET); KI.ortam.depo.sil(KI.DERSLER); KI.kaynakMetin = null;
-    KI.ortam.depo.sil(KI.YAP); KI.ortam.depo.sil(KI.HATIR); KI.ortam.depo.sil(KI.KART); KI.ortam.depo.sil(KI.GORSEL); KI.kutFiltre = 'hepsi'; KI.kutBuyuk = null; KI.kartOnbellek = null; KI.kvDuzen = false; KI.kvSecili = null; KI.kvYeni = false; KI.kvGiris = true; if(KI.hatirSaat){ try{ clearTimeout(KI.hatirSaat); }catch(e){ /* yok */ } KI.hatirSaat = null; }
+    KI.ortam.depo.sil(KI.YAP); KI.ortam.depo.sil(KI.HATIR); KI.sonHatir = null; KI.bekleyenHatir = null; KI.ortam.depo.sil(KI.KART); KI.ortam.depo.sil(KI.GORSEL); KI.kutFiltre = 'hepsi'; KI.kutBuyuk = null; KI.kartOnbellek = null; KI.kvDuzen = false; KI.kvSecili = null; KI.kvYeni = false; KI.kvGiris = true; if(KI.hatirSaat){ try{ clearTimeout(KI.hatirSaat); }catch(e){ /* yok */ } KI.hatirSaat = null; }
     KI.siradanSoru = null; KI.siraCalisiyor = false;
     if(KI.siraSaat){ try{ clearInterval(KI.siraSaat); }catch(e){ /* yok */ } KI.siraSaat = null; }
     if(KI.ayar) KI.ortam.depo.sil(KI.arsivAnahtar());
@@ -87534,7 +87642,7 @@ window.LIFEOS.KING = (function(){
     sohbetiKaydet:KI.sohbetiKaydet, sohbetiTemizle:KI.sohbetiTemizle, sohbetiGeriGetir:KI.sohbetiGeriGetir, kayitlar:KI.arsivOku, kayitIndir:KI.kayitIndir,
     kayitKopyala:KI.kayitKopyala, kayitSil:KI.kayitSil, kayitMetni:KI.kayitMetni, menuAc:KI.menuAc, menuDurum:() => KI.menu,
     yeniSohbet:KI.yeniSohbet, kayitAc:KI.kayitAc, ARACLAR:KI.ARACLAR, aktifKayit:() => KI.aktifKayit,
-    BOLUMLER:KI.BOLUMLER, bolumSec:KI.bolumSec, bolum:() => KI.bolum, listeGorunur:KI.listeGorunur, alanAc:KI.alanAc, pdfAl:KI.pdfAl, nedenSatirlari:KI.nedenSatirlari, yetenekler:KI.yetenekler, dersNiyeti:KI.dersNiyeti, hesapla:KI.hesapla, birimCevir:KI.birimCevir, kartEkle:KI.kartEkle, kartSabitle:KI.kartSabitle, oneCikanlar:KI.oneCikanlar, yapilacaklar:KI.yapilacaklar, hatirlatmalar:KI.hatirlatmalar, yasaHesapla:KI.yasaHesapla, kdKur:KI.kdKur, kdDersler:KI.kdDersler, DERSLER:KI.DERSLER, sira:KI.sira, siraBosalt:KI.siraBosalt, SIRA:KI.SIRA, SOZET:KI.SOZET, sozetler:KI.sozetler,
+    BOLUMLER:KI.BOLUMLER, bolumSec:KI.bolumSec, bolum:() => KI.bolum, listeGorunur:KI.listeGorunur, alanAc:KI.alanAc, pdfAl:KI.pdfAl, nedenSatirlari:KI.nedenSatirlari, yetenekler:KI.yetenekler, dersNiyeti:KI.dersNiyeti, hesapla:KI.hesapla, birimCevir:KI.birimCevir, kartEkle:KI.kartEkle, kartSabitle:KI.kartSabitle, oneCikanlar:KI.oneCikanlar, yapilacaklar:KI.yapilacaklar, hatirlatmalar:KI.hatirlatmalar, hatirCoz:KI.hatirCoz, yasaHesapla:KI.yasaHesapla, kdKur:KI.kdKur, kdDersler:KI.kdDersler, DERSLER:KI.DERSLER, sira:KI.sira, siraBosalt:KI.siraBosalt, SIRA:KI.SIRA, SOZET:KI.SOZET, sozetler:KI.sozetler,
     KIPLER:KI.KIPLER, kip:KI.kip, kipSec:KI.kipSec, klasorler:KI.klasorler, klasorEkle:KI.klasorEkle, klasorSil:KI.klasorSil, kayitTasi:KI.kayitTasi, kayitAdlandir:KI.kayitAdlandir, kayitSabitle:KI.kayitSabitle,
     acikMi:() => KI.acik, miniMi:() => KI.mini, akis:() => KI.akis.slice(),
     SAYFALAR:KI.SAYFALAR, HAZIR:KI.HAZIR, _ortam:KI.ortam, _sifirla, _videoKaynak:KI.videoKaynak, _gorunurluk:gorunurluk,
@@ -88106,11 +88214,23 @@ LIFEOS.Hafiza = (function(){
   const LISTE = ['hafızam', 'hafizam', 'neyi hatırlıyorsun', 'neyi hatirliyorsun',
     'benim hakkımda ne biliyorsun', 'benim hakkımda neyi hatırlıyorsun'];
 
+  /* Doğal biçim (King 5 deneme kullanımı, 2026-11-08: «kahve içmem, bunu aklında tut» bir ders aracına
+     gidiyordu). «unutma» ve «hatırla» yalnız «bunu» ile: «ilacımı içmeyi unutma» bir hatırlatma isteğidir. */
+  const EKLE_SON = /^(.{3,200}?)\s*[,;–-]?\s+(?:(?:bunu|şunu)\s+)?(?:aklında|aklinda)\s+(?:tut|olsun)$|^(.{3,200}?)\s*[,;–-]?\s+(?:bunu|şunu)\s+(?:unutma|hatırla|hatirla)$/;
+  const EKLE_BAS = /^(?:(?:bunu|şunu)\s+)?(?:aklında|aklinda)\s+tut\s*[,:]?\s+(.{3,200})$/;
+
   function komut(metin){
     const ham = String(metin || '').trim();
     const k = ham.toLocaleLowerCase('tr').replace(/[?!.]+$/, '').trim();
     for(const on of EKLE_ONEK){
       if(k.indexOf(on) === 0) return { tur:'ekle', metin:ham.slice(on.length).trim() };
+    }
+    if(ham.indexOf('?') < 0){
+      /* k, ham'ın küçük harfli hâlidir; sondaki noktalama dışında konumlar aynıdır. */
+      const s = k.match(EKLE_SON);
+      if(s) return { tur:'ekle', metin:ham.slice(0, (s[1] || s[2]).length).replace(/[\s,;–-]+$/, '') };
+      const b = k.match(EKLE_BAS);
+      if(b) return { tur:'ekle', metin:ham.slice(k.length - b[1].length, k.length).trim() };
     }
     if(LISTE.indexOf(k) >= 0) return { tur:'liste' };
     const m = k.match(/^#?(\d+)\s*(?:numarayı|numaralı hafızayı|nolu|\.)?\s*(unut|sil)$/);
@@ -88218,8 +88338,27 @@ LIFEOS.Hafiza = (function(){
       baglam:opts => baglam(liste(), opts), komutIsle };
   }
 
+  /* Hafızadakini doğrudan soran cümle (King 5 deneme 2026-11-08: «ben ne içmem?» sorusunda küçük model
+     «kahve içmem» kaydını görmezden gelip kahve önerdi). Cevabı kural motoru kaydın kendisiyle verir
+     (AGENTS §1.1). Yalnız «ne / neyi / ne zaman / hangi / nerede / kaç» sorusu, kişinin kendisine dair
+     («ben», «sınavım») ve kayıtla ortak bir kelimesi varsa; ölçüm sorusu («uykum nasıl») buraya düşmez. */
+  const SORU_DURAK = new Set(['ben', 'benim', 'bana', 'beni', 'neyi', 'nedir', 'zaman', 'nerede', 'hangi', 'acaba',
+    'peki', 'king', 'hatırlıyor', 'musun', 'müsün', 'misin', 'mısın', 'mıyım', 'miyim', 'hatırla']);
+  function sorudaBul(liste, soru){
+    const k = String(soru || '').toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    if(!/(?:^|\s)(?:ne|neyi|ne zaman|nedir|nerede|hangi|kaç)(?:\s|$)/.test(k)) return [];
+    const sozc = k.split(' ').filter(w => w.length >= 4 && !SORU_DURAK.has(w));
+    const kendi = /(?:^|\s)(?:ben|benim|bana|beni)(?:\s|$)/.test(k) || sozc.some(w => /m$/.test(w));
+    if(!kendi || !sozc.length) return [];
+    const kok = w => w.slice(0, Math.max(4, w.length - 2));
+    return etkin(liste).filter(x => {
+      const kw = String(x.metin).toLocaleLowerCase('tr').split(/[^a-zçğıöşü0-9]+/);
+      return sozc.some(w => kw.some(v => v.length >= 4 && v.startsWith(kok(w))));
+    }).slice(0, 3);
+  }
+
   return { KATMANLAR, KAYNAK_IZNI, MAX_METIN, MAX_KAYIT, ANAHTAR,
-    ekle, unut, etkin, baglam, komut, listeMetni, gecerli, kur };
+    ekle, unut, etkin, baglam, komut, listeMetni, gecerli, sorudaBul, kur };
 })();
 
 /* ==== js/core/ofis.js ==== */
@@ -125250,7 +125389,7 @@ R.Komut = (function(){
      ara isteğidir. Olumsuzluk süzgeci (LIFEOS.Olumsuz) bunları hariç tutar;
      geri kalan olumsuzluk («ara vermek istemiyorum») isteği durdurur. */
   const ARA_OLUMSUZ_RE = /(çalışmayacağım|çalışmayacam|çalışmıyorum|çalışamayacağım|çalışamam)/;
-  const GELECEK_RE = /(çalışacağım|çalışacam|çalışıcam|çalışıcağım|çalışmak istiyorum|çalışayım|olsun|yap|ayarla|çıkar|düşür|indir)/;
+  const GELECEK_RE = /(çalışacağım|çalışacam|çalışıcam|çalışıcağım|çalışmak istiyorum|çalışayım|olsun|yap|ayarla|çıkar|düşür|indir|yeter)/;   // «kısalt/azalt 30 dk» miktar kadar mı, miktara mı: belirsiz, eklenmez
   const GECMIS_RE = /(çalıştım|çalıştık|çalışmıştım|yaptım|çözdüm|çalışabildim)/;
   const GUNLUK_RE = /(günde|günlük|her gün|artık|bundan sonra|kalıcı)/;
   const HEDEF_RE = /hedef/;
