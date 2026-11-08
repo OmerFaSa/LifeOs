@@ -413,7 +413,8 @@
       "m": "spi",
       "c": "D vitaminim kaç çıkmıştı",
       "b": [
-        "arac:spi_tahliller"
+        "arac:spi_tahliller",
+        "tur:olcu"
       ]
     },
     {
@@ -1421,7 +1422,8 @@
       "m": "spi",
       "c": "B12 vitaminim en son kaç çıkmıştı",
       "b": [
-        "arac:spi_tahliller"
+        "arac:spi_tahliller",
+        "tur:olcu"
       ]
     },
     {
@@ -2685,7 +2687,8 @@
       "m": "ays",
       "c": "dün ne çalıştım",
       "b": [
-        "arac:ays_gunler"
+        "arac:ays_gunler",
+        "tur:olcu"
       ]
     },
     {

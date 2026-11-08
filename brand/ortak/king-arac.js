@@ -470,12 +470,18 @@ window.LIFEOS.PARCA.yazilar({
   /* Doğal hatırlatma (King 5 deneme kullanımı, 2026-11-08: «yarın sabah 7'de bana koşuyu hatırlat» modele
      gidiyor, model «hatırlatırım» diyor, hiçbir şey kurulmuyordu). Gün, vakit ve saat kodla çözülür; saat
      yoksa ya da bugünün geçmiş saatiyse null: tahmin edilmez (AGENTS §1.7). */
-  const HATIR_FIIL_RE = /\s*(?:bana\s+|beni\s+)?hatırlat(?:ır\s*mısın|sana|\s+lütfen)?$/;
+  const HATIR_FIIL_RE = /\s*(?:bana\s+|beni\s+)?(?:hatırlat|uyandır)(?:ır\s*mısın|sana|\s+lütfen)?$/;
+  /* «yarın 9da vizem var beni 7de uyandır», «beni 7de uyandır finalim var» (King 5 tur 5, klon): fiil ortada da
+     olabilir, ardındaki söz nottur; birden çok saat varsa fiile en yakın (sonuncu) saat kurulur. */
+  const HATIR_ORTA_RE = /^(.*?)\s*(?:bana\s+|beni\s+)?(?:hatırlat|uyandır)(?:ır\s*mısın|sana|\s+lütfen)?(?:\s+(.+))?$/;
   const HATIR_KAYDIR_RE = /^(?:onu|bunu|hatırlatmayı)\s+(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*['’]?\s*(?:e|a|ye|ya|ne|na)?\s+(?:al|çek|kaydır|ertele|değiştir)$/;
   function hatirCoz(t, d){
     let s = String(t || '').replace(/[.!?]+$/, '').trim(), m;
-    if(!HATIR_FIIL_RE.test(s)) return null;
-    s = s.replace(HATIR_FIIL_RE, '');
+    const om = s.match(HATIR_ORTA_RE);
+    if(!om) return null;
+    const uyan = /uyandır/.test(s), not = (om[2] || '').trim();
+    if(not && /^(hatırlat|uyandır)/.test(not)) return null;
+    s = om[1];
     const kes = x => { s = s.replace(x, ' ').replace(/\s+/g, ' ').trim(); };
     let z;
     if((m = s.match(/(?:^|\s)(\d{1,3})\s*(dk|dakika|saat)\s+sonra(?=\s|$)/))){
@@ -485,7 +491,8 @@ window.LIFEOS.PARCA.yazilar({
       if(gun) kes(m[0]);
       const vakit = (m = s.match(/(?:^|\s)(sabah|öğleden sonra|öğlen|öğle|akşam|gece)(?=\s|$)/)) ? m[1] : '';
       if(vakit) kes(m[0]);
-      m = s.match(/(?:^|\s)(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*['’]?\s*(?:de|da|te|ta)(?=\s|$)/) || s.match(/(?:^|\s)saat\s*(\d{1,2})(?:[:.](\d{2}))?(?=\s|$)/);
+      const hepsi = [...s.matchAll(/(?:^|\s)(?:saat\s*)?(\d{1,2})(?:[:.](\d{2}))?\s*['’]?\s*(?:de|da|te|ta)(?=\s|$)/g)];
+      m = hepsi.length ? hepsi[hepsi.length - 1] : s.match(/(?:^|\s)saat\s*(\d{1,2})(?:[:.](\d{2}))?(?=\s|$)/);
       if(!m) return null;
       let h = Number(m[1]);
       const dk = Number(m[2] || 0);
@@ -493,12 +500,13 @@ window.LIFEOS.PARCA.yazilar({
       if((vakit === 'akşam' || vakit === 'öğleden sonra') && h < 12) h += 12;
       else if((vakit === 'öğlen' || vakit === 'öğle') && h >= 1 && h <= 6) h += 12;
       else if(vakit === 'gece' && h >= 8 && h < 12) h += 12;
-      kes(m[0]);
+      (hepsi.length ? hepsi : [m]).forEach(x => kes(x[0]));
       z = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (gun === 'yarın' ? 1 : 0), h, dk);
       if(z <= d){ if(gun) return null; z = new Date(z.getTime() + 864e5); }
     }
-    const ne = s.replace(/^(?:bana|beni)\s+|\s+(?:bana|beni)$/g, '').replace(/^[\s,:;–-]+|[\s,:;–-]+$/g, '').trim();
-    return { z, ne:ne || 'Hatırlatma' };
+    let ne = s.replace(/^(?:bana|beni)\s+|\s+(?:bana|beni)$/g, '').replace(/^[\s,:;–-]+|[\s,:;–-]+$/g, '').trim();
+    if(not) ne = ne ? ne + ' (' + not + ')' : not;
+    return { z, ne:ne || (uyan ? 'Uyan' : 'Hatırlatma') };
   }
   function hatirZaman(z, d){
     const g = new Date(d.getFullYear(), d.getMonth(), d.getDate()), f = Math.round((new Date(z.getFullYear(), z.getMonth(), z.getDate()) - g) / 864e5);
@@ -1134,7 +1142,7 @@ window.LIFEOS.PARCA.yazilar({
         calistir:p => { KI.odakBaslat(p.dakika, p.konu || ''); return { cevap:p.dakika + ' dakikalık odak başladı' + (p.konu ? ' (' + p.konu + ')' : '') + '. Süre dolunca haber vereceğim.' }; } },
       { ad:'odak_durdur', tur:'oku', ornek:'sayacı durdur', aciklama:yz('ortak.king-arac.calisan-odak-sayacini-durdur'),
         calistir:() => { const v = KI.odak(); KI.odakTemizle(); KI.ortam.depo.sil(KI.ODAK); return { cevap:v ? yz('ortak.king-arac.odak-sayacini-durdurdum') : yz('ortak.king-arac.calisan-bir-odak-sayaci-yok') }; } },
-      { ad:'king_harcama', tur:'oku', ornek:'bugün ne harcadın', es:/((?:bugün )?ne (?:kadar )?harcad[ıi]n|harcaman(?:ı| ne)|kaç (?:jeton|token)|model çağrı)/,
+      { ad:'king_harcama', tur:'oku', ornek:'bugün ne harcadın', es:/((?:bugün )?ne (?:kadar )?harcad[ıi]n(?![ıi]?m)|king(?:'in)? harcama|harcaman(?:ı| ne)|kaç (?:jeton|token)|model çağrı)/,
         aciklama:yz('ortak.king-arac.king-in-bugunku-model-kullan'),
         kullanilir:() => !!KI.baglanti(),
         calistir:async () => { await KI.eylemTazele(); const o = KI.harcamaOzet(KI.harcama);
@@ -1249,7 +1257,9 @@ window.LIFEOS.PARCA.yazilar({
       KI.akis = KI.akis.filter(m => m !== bek);
       const satir = [].concat.apply([], sonuclar.map(x => x.satirlar || []));
       const adimEk = adimlar.length > 1 ? { adimlar } : {};
-      if(r2.ok && !r2.arac) KI.soyle(r2.text, satir.length ? satir : null, null, null, Object.assign(adimEk, r2.akti ? { yeni:false, okunan:r2.okunan } : {}));
+      /* HKM söz denetimi model cümlesini «hiçbir şeyi değiştirmedim»e çevirdiyse okunan satırlar yine söylenir (King 5 tur 5: «dün ne çalıştım»). */
+      const bosCevap = r2.ok && /hiçbir şeyi değiştirmedim/.test(String(r2.text || ''));
+      if(r2.ok && !r2.arac && !bosCevap) KI.soyle(r2.text, satir.length ? satir : null, null, null, Object.assign(adimEk, r2.akti ? { yeni:false, okunan:r2.okunan } : {}));
       else KI.soyle(satir.length ? yz('ortak.king-arac.sistemden-okudum') : yz('ortak.king-arac.sistemden-okudum-ama-merkez'), satir.length ? satir : null, null, null, adimEk);
       KI.cipler = KI.oneriListesi(true);
       KI.ciz(false);

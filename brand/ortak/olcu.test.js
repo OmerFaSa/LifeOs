@@ -39,7 +39,7 @@
         expect(O().coz('TYT net ortalamam kaç', BUGUN).cevap).toContain('ortalaman 64,83 net (3 deneme)');
         expect(O().coz('matematik netim son 2 denemede nasıl değişti', BUGUN).cevap).toContain('20 → 23,25 net (+3,25)');
         expect(O().coz('sınava kaç gün kaldı', BUGUN).cevap).toBe('Sınava 223 gün kaldı.');
-        expect(O().coz('bu hafta soru sayım geçen haftaya göre arttı mı', BUGUN).cevap).toContain('önceki 7 günde 30 soru. Arttı (+90)');
+        expect(O().coz('bu hafta soru sayım geçen haftaya göre arttı mı', BUGUN).cevap).toContain('geçen hafta 30 soru. Arttı (+90)');
       }finally{ O()._sifirla(); }
     });
   });

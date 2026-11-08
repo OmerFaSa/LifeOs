@@ -236,20 +236,51 @@ window.LIFEOS.ARAC = (function(){
      → «… için yapılacak işlem ne olsun?». İşlem cümlenin fiilinden, ana metin «X: …»dan okunur; yalnız
      boş alan doldurulur, şemadaki değerler dışında hiçbir şey yazılmaz. */
   const ISLEM = [['ekle', /(ekle|yeni|kaydet|kart yap|oluştur|yaz:)/], ['sil', /(sil|kaldır|çıkar)/], ['guncelle', /(güncelle|değiştir|düzelt)/]];
+  const ANA = ['tez', 'baslik', 'metin', 'ad', 'hedef', 'gida', 'kitap'];
   function tamamla(ad, param, metin){
     const a = bul(String(ad || ''));
     const s = a && sema(a);
     if(!s || !s.properties) return param;
-    const p = Object.assign({}, param || {});
+    const P = s.properties, p = Object.assign({}, param || {});
     const t = String(metin || '').toLocaleLowerCase('tr');
-    const e = s.properties.islem && s.properties.islem.enum;
-    if(e && p.islem == null){ const i = ISLEM.find(x => e.indexOf(x[0]) >= 0 && x[1].test(t)); if(i) p.islem = i[0]; }
-    const iki = String(metin || '').match(/^[^:]{2,40}:\s*(.{2,})$/);
-    if(iki && p.islem !== 'sil'){
-      const k = ['metin', 'ad', 'baslik', 'kitap'].find(k => s.properties[k] && s.properties[k].type === 'string' && p[k] == null);
-      if(k) p[k] = iki[1].trim().slice(0, s.properties[k].maxLength || 300);
+    const e = P.islem && P.islem.enum;
+    if(e && p.islem == null){
+      for(const [x, re] of ISLEM){
+        const v = e.find(v => v === x || v.endsWith('_' + x) || v.startsWith(x + '_'));
+        if(v && re.test(t)){ p.islem = v; break; }
+      }
     }
+    if(String(p.islem || '').indexOf('sil') >= 0) return p;
+    /* Ana metin yalnız hiçbir metin alanı dolu değilse: kural «alıntı: …»yı metne koyduysa kitap adına yazılmaz. */
+    const dizi = Object.keys(P).filter(k => P[k].type === 'string' && k !== 'islem' && k !== 'id' && !P[k].enum);
+    if(dizi.some(k => p[k] != null && String(p[k]).trim())) return p;
+    const m = String(metin || '').match(/^[^:]{2,40}:\s*(.{2,})$/) || String(metin || '').match(/(?:listesine|listeye|sepete|repertuvar(?:ım)?a)\s+(.+?)\s+ekle\b/i)
+      || String(metin || '').match(/\bekle\s+(.{2,})$/i);
+    if(!m) return p;
+    let govde = m[1].trim();
+    if(P.yil && p.yil == null){ const y = govde.match(/^(\d{3,4})\b\s*/); if(y){ p.yil = Number(y[1]); govde = govde.slice(y[0].length).trim() || govde; } }
+    const k = ANA.find(k => dizi.indexOf(k) >= 0);
+    if(!k) return p;
+    const kes = (k2, v) => String(v).slice(0, P[k2].maxLength || 300);
+    if(k === 'baslik' && dizi.indexOf('metin') >= 0){ p.baslik = kes('baslik', govde.split(/[,.]/)[0].trim()); p.metin = kes('metin', govde); }
+    else p[k] = kes(k, govde);
     return p;
+  }
+
+  /* Yazma komutu ön eki → araç (King 5 tur 5, klon simülasyonu: «kronolojiye ekle: 1071 Malazgirt»
+     okuma aracına gidip «kayıt yok» diyordu, «tez ekle: …» hiç yazılmıyordu). Araç modülde yoksa atlanır. */
+  const KOMUT = [[/^(kronolojiye|zaman şeridine) ekle\b/, 'esp_olay'], [/^repertuvar(a|ıma) ekle\b/, 'esp_eser'],
+    [/^(yeni )?tez( ekle)?\s*:/, 'esp_arguman'], [/^(yeni )?(yazı )?taslağ?ı?( ekle)?\s*:/, 'esp_taslak'],
+    [/^hedef ekle\b/, 'esp_hedef'], [/^kaynak ekle\b/, 'esp_kaynak'],
+    [/^(market|alışveriş) listesine\b/, 'spi_market'], [/^ilaç ekle\b/, 'spi_ilac']];
+  function komutla(t){
+    for(const [re, ad] of KOMUT){
+      const a = re.test(t) && bul(ad);
+      if(!a) continue;
+      const e = (((sema(a) || {}).properties || {}).islem || {}).enum || [];
+      return { ad, param:e.indexOf('ekle') >= 0 ? { islem:'ekle' } : {} };
+    }
+    return null;
   }
 
   function dogrula(ad, param){
@@ -325,6 +356,8 @@ window.LIFEOS.ARAC = (function(){
   function kuralla(metin){
     const t = kucuk(metin);
     if(!t) return null;
+    const km = komutla(t);
+    if(km) return km;
     for(const a of liste()){
       if(typeof a.kural === 'function'){
         let p = null;
@@ -358,7 +391,7 @@ window.LIFEOS.ARAC = (function(){
      onay ister (söz 3). */
   const NIYET_DIS = /^(sayfa_ac|kayit_gir|odak_baslat|odak_durdur|modul_bilgileri)$/;
   /* Danışma ve bilgi sorusu («ne yesem», «nasıl korurum», «… nedir») araç değil, Merkez'in işi. */
-  const NIYET_DANIS = /(\S(?:ay[ıi]m|ey[ıi]m|mal[ıi]y[ıi]m|mel[ıi]y[ıi]m|s[ae]m)(?=$|\s|[?.!])|ne önerirsin|nasıl .*(?:[ae]b[iı]l[iı]r[iı]m|r[ıiuü]m|n[ıiuü]r)(?=$|\s|[?.!])|nedir|tavsiye|bir şey söyle)/;
+  const NIYET_DANIS = /(\S(?:ay[ıi]m|ey[ıi]m|mal[ıi]y[ıi]m|mel[ıi]y[ıi]m|s[ae]m)(?=$|\s|[?.!])|ne önerirsin|nasıl .*(?:[ae]b[iı]l[iı]r[iı]m|r[ıiuü]m|n[ıiuü]r)(?=$|\s|[?.!])|nedir|tavsiye|bir şey söyle|sence|^neden\b|ilişki|günler(?:de|i)?\s.*(?:mi|mı|mu|mü)\b|nasıl değişti)/;
   const NIYET_DOLGU = new Set(('ve ile veya bu şu o bir de da ne neler nasıl kaç hangi hangileri için gibi daha en çok az şey '
     + 'ben benim bana beni sen king lütfen olarak olan var yok mi mı mu mü misin mısın bakalım acaba şimdi artık hep tüm bütün her kadar').split(' '));
   const NIYET_SORU = /\?|(?:^|\s)(ne|neden|niye|nasıl|hangi|hangileri|kaç|kim|nerede|niçin|m[ıiuü](?:s[ıiuü]n(?:[ıiuü]z)?|y[ıiuü][mz]|d[ıiuü]r)?)(?=$|\s|[.,!])/;

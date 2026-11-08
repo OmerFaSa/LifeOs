@@ -245,7 +245,7 @@ def run():
         eq(r["text"], "Bunu değerlendirmek için çalışma kaydın yok; birkaç gün kayıt girersen bakarım.")
         ok("dayanağı olmayan" in t.gorulen[1]["sistem"])
         t2 = _tasiyici(("Kesinlikle var.", []), ("Kesinlikle var, şansın yüksek.", []))
-        r2 = sohbet.konus(_con(), _cfg(), "uykumun netlerime etkisi var mı", BUGUN, transport=t2)
+        r2 = sohbet.konus(_con(), _cfg(), "uykumun başarıma etkisi var mı", BUGUN, transport=t2)
         eq(r2["text"], sohbet.GERCEK_YOK)
         # Tur 4 aciği: durust cumleye dusunce bilinen kisim kaybolmaz.
         t3 = _tasiyici(("Sınava 223 gün kaldı. Bu tempoyla şansın yüksek.", []),
@@ -271,6 +271,22 @@ def run():
         no(t.gorulen[0]["ayar"].get("araclar"), "his cumlesinde arac yok")
         ok("Önce onu dinle" in t.gorulen[0]["sistem"])
         no("baş görevlisi" in sohbet.selam_cevabi("Merhaba!", "king"))
+        # Aşama 2: bölüme yönlendirme cümlesi düşer; kullanıcı bölümü andıysa kalır.
+        eq(sohbet.bolum_ayikla("Zor bir dönem. Bunun için ESP bölümüne odaklanabilirsin.", "her şey üstüme geliyor"), "Zor bir dönem.")
+        eq(sohbet.bolum_ayikla("ESP bölümünü kontrol et.", "ESP'de ne var"), "ESP bölümünü kontrol et.")
+        from core import patron, iliski
+        eq(patron.parse("neden hep yorgun uyanıyorum"), None)
+        # Aşama 2b: modüller arası ilişki kodla hesaplanır; az veride yargı yok.
+        con = db.connect(":memory:")
+        for i in range(10):
+            d = "2026-07-%02d" % (i + 1)
+            sync_engine.ingest(con, {"module": "spi", "date": d, "metrics": {"sleep_hours": metric(5 if i % 2 else 8)}}, now=d + "T09:00:00")
+            sync_engine.ingest(con, {"module": "ays", "date": d, "metrics": {"questions": metric(40 if i % 2 else 80)}}, now=d + "T21:00:00")
+        c = iliski.cevap(con, "az uyuduğum günler daha az soru mu çözüyorum", "2026-07-10")
+        ok("ortalama 40 soru" in c and "80 soru" in c and "%50 daha az" in c and "neden-sonuç değil" in c, c)
+        ok("en az 6 gün" in iliski.cevap(con, "az uyuduğum günler daha az soru mu çözüyorum", "2026-07-03"))
+        eq(iliski.anla("bu hafta kaç soru çözdüm"), None)
+        eq(patron.parse("neden"), "neden")
     test("metne yazılmış araç çağrısı gerçek çağrıya döner; his cümlesi araçsız dinlenir", t_klon_simulasyonu)
 
     def t_soz_verme_katalogsuz():

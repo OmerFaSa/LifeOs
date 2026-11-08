@@ -24,9 +24,9 @@ window.LIFEOS = window.LIFEOS || {};
 window.LIFEOS.OLCU = (function(){
   let ayar = null;
   const kucuk = s => String(s || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
-  const SORU = /(kaç|ne kadar|ortalama|toplam|değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|gidiyor|nasıl gitti|ilerle)/;
-  const BASKA = /(hedef|kaç bine|sıralama|puan|kart|deste|yüzde kaç|ne işe yar|nedir|ne demek)/;
-  const DEGISIM = /(değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|ilerle|daha mı|geçen haftaya göre|öncekine göre)/;
+  const SORU = /(kaç|ne kadar|ortalama|toplam|değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|gidiyor|nasıl gitti|nasıl geçti|nasıl uyu|ilerle|karşılaştır|daha (?:çok|az|fazla)|ne çalıştım|ne yaptım|en zayıf|en güçlü)/;
+  const BASKA = /(hedef|kaç bine|sıralama|puan|kart|deste|yüzde kaç|ne işe yar|nedir|ne demek|ilişki|etkisi|günler(?:de|i)?\b|neden|sence|doz|almalıyım|içmeliyim|kaç tane)/;
+  const DEGISIM = /(değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|ilerle|daha mı|geçen haftaya göre|öncekine göre|karşılaştır|daha (?:çok|az|fazla))/;
   const SAYI = { bir:1, iki:2, üç:3, dört:4, beş:5, altı:6, yedi:7, sekiz:8, dokuz:9, on:10, otuz:30 };
   const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const gunEkle = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
@@ -77,21 +77,22 @@ window.LIFEOS.OLCU = (function(){
     if(!ayar) return null;
     const t = kucuk(metin);
     /* Ölçü değil: hedef/puan karşılaştırması, kart sayısı, tanım sorusu («ne işe yarıyor?»). */
-    if(!SORU.test(t) || BASKA.test(t)) return null;
+    /* `komut`: kısa ad da sorudur («ilaçlarım»). */
+    if((!SORU.test(t) && !ayar.olculer.some(o => o.komut && o.es.test(t))) || BASKA.test(t)) return null;
     const b = olcuBul(t);
     if(!b) return null;
     /* İki ölçü birden («gitar ve dil çalışma saatim»): tek sayıyla cevaplanmaz, yol modülün aracına kalır. */
     if(ayar.olculer.filter(o => !o.genel && o.es.test(t)).length > 1) return null;
     const { o, alt } = b;
-    const ad = (alt ? alt + ' ' : '') + o.ad;
+    const ad = (alt ? alt + ' ' : '') + (typeof o.adOf === 'function' ? o.adOf(t) : o.ad);
     const on = o.ondalik ? 10 : 1;
     if(o.tur === 'anlik'){
-      const a = o.anlik();
+      const a = o.anlik(t, bugun);
       return a ? { id:o.id, cevap:a.metin } : null;
     }
     const degisim = DEGISIM.test(t);
     if(o.tur === 'olay'){
-      let l = (o.olaylar(alt) || []).filter(x => x && x.v != null).sort((x, y) => x.t < y.t ? -1 : 1);
+      let l = (o.olaylar(alt, t) || []).filter(x => x && x.v != null).sort((x, y) => x.t < y.t ? -1 : 1);
       const d = donem(t, bugun);
       if(d && d.adet) l = l.slice(-d.adet);
       else if(d && d.bas) l = l.filter(x => x.t >= d.bas && x.t <= d.son);
@@ -101,15 +102,19 @@ window.LIFEOS.OLCU = (function(){
       if(degisim && l.length >= 2){
         const fark = l[l.length - 1].v - l[0].v;
         return { id:o.id, satirlar, cevap:(d ? d.ad + 'de' : 'Son ' + l.length + ' kayıtta') + ' ' + ad + ' ' + yaz(l[0].v, 100) + ' → ' + yaz(l[l.length - 1].v, 100)
-          + ' ' + o.birim + ' (' + (fark >= 0 ? '+' : '') + yaz(fark, 100) + '). Ortalama ' + yaz(ort, 100) + ', ' + l.length + ' deneme.' };
+          + ' ' + o.birim + ' (' + (fark >= 0 ? '+' : '') + yaz(fark, 100) + '). Ortalama ' + yaz(ort, 100) + ', ' + l.length + ' ' + (o.olayAd || 'deneme') + '.' };
       }
-      return { id:o.id, satirlar, cevap:ad.charAt(0).toLocaleUpperCase('tr') + ad.slice(1) + ' ortalaman ' + yaz(ort, 100) + ' ' + o.birim
-        + ' (' + l.length + ' deneme' + (d ? ', ' + d.ad : '') + '). Son deneme: ' + yaz(l[l.length - 1].v, 100) + '.' };
+      return { id:o.id, satirlar, cevap:ad.charAt(0).toLocaleUpperCase('tr') + ad.slice(1) + ' ortalaman ' + yaz(ort, 100) + (o.birim ? ' ' + o.birim : '')
+        + ' (' + l.length + ' ' + (o.olayAd || 'deneme') + (d ? ', ' + d.ad : '') + '). Son ' + (o.olayAd || 'deneme') + ': ' + yaz(l[l.length - 1].v, 100) + '.' };
     }
     const d = donem(t, bugun) || (degisim ? { bas:gunEkle(bugun, o.tur === 'son' ? -29 : -13), son:bugun, ad:o.tur === 'son' ? 'son 30 gün' : 'son 14 gün' }
       : { bas:gunEkle(bugun, -6), son:bugun, ad:'son 7 gün' });
     const r = topla(o, alt, d);
     const bas = d.ad.charAt(0).toLocaleUpperCase('tr') + d.ad.slice(1);
+    if(r.deger == null && degisim && (d.ad === 'bu hafta' || d.ad === 'bu ay')){
+      const r0 = topla(o, alt, donem(d.ad === 'bu hafta' ? 'geçen hafta' : 'geçen ay', bugun));
+      if(r0.deger != null) return { id:o.id, cevap:bas + ' henüz ' + ad + ' kaydı yok; ' + (d.ad === 'bu hafta' ? 'geçen hafta' : 'geçen ay') + ' ' + yaz(r0.deger, on) + ' ' + o.birim + '.' };
+    }
     if(r.deger == null) return { id:o.id, cevap:bas + ' ' + ad + ' kaydı yok; kayıt girilmeyen gün sıfır sayılmaz.' };
     const satirlar = r.l.length <= 7 ? r.l.map(x => tarihYaz(x.g) + ': ' + yaz(x.v, on) + ' ' + o.birim) : null;
     if(o.tur === 'son'){
@@ -123,12 +128,15 @@ window.LIFEOS.OLCU = (function(){
     const deger = (o.tur === 'ortalama' ? 'ortalama ' : '') + yaz(r.deger, on) + ' ' + o.birim;
     if(degisim){
       const uzun = gunler(d.bas, d.son).length;
-      const once = { bas:gunEkle(d.bas, -uzun), son:gunEkle(d.bas, -1) };
+      /* «bu hafta» / «bu ay» tam önceki hafta ve ayla karşılaştırılır (pazartesi günü önceki dönem tek gün oluyordu). */
+      const once = d.ad === 'bu hafta' ? donem('geçen hafta', bugun) : d.ad === 'bu ay' ? donem('geçen ay', bugun)
+        : { bas:gunEkle(d.bas, -uzun), son:gunEkle(d.bas, -1) };
       const r0 = topla(o, alt, once);
       if(r0.deger == null) return { id:o.id, satirlar, cevap:bas + ' ' + ad + ': ' + deger + ' (' + kac + '). Karşılaştıracak önceki dönemde kayıt yok.' };
       const fark = r.deger - r0.deger;
       const yon = Math.abs(fark) < (o.tur === 'ortalama' ? 0.05 * Math.abs(r0.deger || 1) : 0.05 * Math.abs(r0.deger || 1)) ? 'aşağı yukarı aynı' : fark > 0 ? 'arttı' : 'azaldı';
-      return { id:o.id, satirlar, cevap:bas + ' ' + ad + ': ' + deger + '; önceki ' + uzun + ' günde ' + yaz(r0.deger, on) + ' ' + o.birim
+      const onceAd = d.ad === 'bu hafta' ? 'geçen hafta' : d.ad === 'bu ay' ? 'geçen ay' : 'önceki ' + uzun + ' günde';
+      return { id:o.id, satirlar, cevap:bas + ' ' + ad + ': ' + deger + '; ' + onceAd + ' ' + yaz(r0.deger, on) + ' ' + o.birim
         + '. ' + yon.charAt(0).toLocaleUpperCase('tr') + yon.slice(1) + ' (' + (fark >= 0 ? '+' : '') + yaz(fark, on) + ').' };
     }
     return { id:o.id, satirlar, cevap:bas + ' ' + ad + ': ' + deger + ' (' + kac + ').' };

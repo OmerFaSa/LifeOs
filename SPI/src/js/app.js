@@ -679,6 +679,14 @@ SP.App = (function(){
       { id:'uyku', ad:'uyku', birim:'saat', ondalik:true, es:/uyku|uyu(?:dum|yor|muşum)|nasıl uyu/, tur:'ortalama', gun:g => v(g, 'sleep') },
       { id:'kilo', ad:'kilo', birim:'kg', ondalik:true, es:/kilo|tartı/, tur:'son', gun:g => v(g, 'weight') },
       { id:'su', ad:'su', birim:'ml', es:/\bsu\b|su iç/, tur:'ortalama', gun:g => v(g, 'water') },
+      { id:'ilac', komut:true, ad:'ilaç', es:/^(?:ilaçlarım|ilaç(?:larım)? listem|hangi ilaçları|ilaçlarım neler|takviyelerim)/, tur:'anlik', anlik:() => {
+        const l = (SP.S.meds || []).filter(m => !m.endDate);
+        return { v:l.length, metin:l.length ? 'Kullandığın ' + l.length + ' ilaç/takviye: ' + l.map(m => m.name + (m.dose ? ' (' + m.dose + ')' : '')).join(', ') + '.' : 'Kayıtlı ilaç ya da takviye yok.' };
+      } },
+      { id:'tahlil', ad:'tahlil', birim:'', olayAd:'ölçüm', es:new RegExp('(' + (SP.BIOMARKERS || []).map(b => b.id === 'vitd' ? 'd vitamin' : b.id === 'b12' ? 'b12' : String(b.name).toLocaleLowerCase('tr').split(' ')[0]).filter(x => x && x.length >= 4).join('|') + ')'), genel:true, tur:'olay',
+        adOf:t => { const b = (SP.BIOMARKERS || []).find(b => t.indexOf(b.id === 'vitd' ? 'd vitamin' : b.id === 'b12' ? 'b12' : String(b.name).toLocaleLowerCase('tr').split(' ')[0]) >= 0); return b ? b.name : 'tahlil'; },
+        olaylar:(alt, t) => { const b = (SP.BIOMARKERS || []).find(b => t.indexOf(b.id === 'vitd' ? 'd vitamin' : b.id === 'b12' ? 'b12' : String(b.name).toLocaleLowerCase('tr').split(' ')[0]) >= 0);
+          return b ? (SP.S.labs || []).map(r => { const c = (r.values || {})[b.id]; const x = c && typeof c === 'object' ? c.v : c; return typeof x === 'number' ? { t:r.date, v:x } : null; }).filter(Boolean) : []; } },
       { id:'spor', genel:true, ad:'antrenman süresi', birim:'dk', es:/spor|antrenman|egzersiz|yürü|koş/, tur:'toplam',
         gun:g => { const l = seans(g); return l.length ? l.reduce((s, w) => s + (Number(w.minutes) || 0), 0) : null; } },
     ] });
@@ -689,6 +697,8 @@ SP.App = (function(){
            tabağımı yedim», «bacak günümü yaptım». Önizleme + onay.
            2026-10-25: gün sözü («dün …») ve öğün sözü («akşam …») geçer. */
         const Q = SP.Quick;
+        /* «dolaba 6 yumurta ekle», «market listesine muz ekle» öğün değildir (King 5 tur 5: öğün diye yazılıyordu). */
+        if(/(dolaba|buzdolab|kilere|market listesi|alışveriş listesi|sepete)/i.test(t) || /\d\s*(tl|lira|₺)\b|harcama|harcadım/i.test(t)) return null;
         const hz = SP.Hazir && SP.Hazir.bul(t);
         if(hz){
           const ogun = hz.tur === 'ogun';
@@ -710,6 +720,9 @@ SP.App = (function(){
            yalnız ilk ölçüm yazılıp başarı deniyordu (2026-10-25). */
         const vb = Q && Q.vitalBol ? Q.vitalBol(t) : null;
         const Gi = window.LIFEOS && window.LIFEOS.GIRIS;
+        /* «tahlil: D vitamini 31, B12 260»: her değer kendi «tahlil:» satırıdır (King 5 tur 5: yalnız tek değer yazılıyordu). */
+        const th = String(t).match(/^tahlil\s*:\s*(.+)$/i);
+        if(th && th[1].indexOf(',') > 0 && !/tahlil\s*:/i.test(th[1]) && Gi && Gi.kuruluMu && Gi.kuruluMu()) return Gi.onizle(th[1].split(',').map(x => 'tahlil: ' + x.trim()).filter(x => x.length > 9).join(', '));
         if(vb && Gi && Gi.kuruluMu && Gi.kuruluMu()) return Gi.onizle(vb.join(', '));
         const p = Q && Q.parse(t);
         /* tur: King'in sohbet karşılığı için (king.js söz 8). */

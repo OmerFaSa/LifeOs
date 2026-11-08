@@ -393,7 +393,7 @@ def rapor_gunu(metin):
 # SORUDUR; rapor sanilsaydi «ne kadar oldugunu yazmadin» diye geri sorulurdu.
 SORU_KELIME = frozenset(("mi", "mu", "misin", "miyim", "midir", "miydi", "musun",
                          "kac", "kacta", "nasil", "neden", "niye", "nicin",
-                         "hangi", "nerede", "ne"))
+                         "hangi", "nerede", "ne", "neye", "neyi", "neler", "neyle"))
 
 
 def soru_mu(metin):

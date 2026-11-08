@@ -313,6 +313,9 @@ window.LIFEOS.PARCA.yazilar({
     /* İşaretsiz soru da cevap değildir: «seninle konuşabiliyor muyum» en sevdiği yemek diye yazılıyordu. */
     if(t.length < 2 || SELAM.test(t) || KI.soruMu(t)) return false;
     if(KENDI_ISI.test(t) || t.split(' ').length > 12) return false;
+    /* «bu ay ESP de en çok neye zaman verdim», «hedeflerim» (King 5 tur 5, aşama 2): soru ve istek. */
+    if(/(?:^|\s)(ne|neye|neyi|neler|nasıl|kaç|hangi|nerede|neden|niye|kim)(?:\s|$)|(?:^|\s)m[ıiuü](?:\s|$)/.test(t)) return false;
+    if(/^\S+(?:lar|ler)[ıiuü]m$/.test(t)) return false;
     return true;
   }
   const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;

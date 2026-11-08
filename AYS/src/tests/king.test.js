@@ -3972,6 +3972,9 @@
       expect(coz("15:30'da annemi aramayı hatırlat")).toEqual([5, 15, 30, 'annemi aramayı']);
       expect(coz('2 saat sonra ilacımı hatırlat')).toEqual([5, 11, 0, 'ilacımı']);
       expect(coz("saat 8'de hatırlat")).toEqual([6, 8, 0, 'Hatırlatma']);
+      /* King 5 tur 5 (klon): fiil ortada, birden çok saat; uyandırma da hatırlatmadır. */
+      expect(coz('yarın 9da vizem var beni 7de uyandır')).toEqual([6, 7, 0, 'vizem var']);
+      expect(coz('yarın sabah 7de beni uyandır finalim var')).toEqual([6, 7, 0, 'finalim var']);
     });
     it('saat yoksa ya da bugünün geçmiş saatiyse tahmin edilmez', () => {
       ["bugün 8'de hatırlat", 'yarın kitap almayı hatırlat', 'ilacımı içmeyi unutma', 'hatırlatmalarım']
@@ -4039,7 +4042,8 @@
     it('tanışma sorusu kendi işi olan cümleyi yutmaz; en çok 3 günde bir sorulur', () => sahnede(async (k, KI) => {
       expect(KI.cevapGibi('gece insanıyım')).toBe(true);
       ['uyuyamıyorum kanka', 'bugün deneme çözdüm 61 net', 'hedef ekle: 3 ayda A2 Almanca', 'kronolojiye ekle: 1453 İstanbul’un fethi',
-        'valorant oynadım 3 saat ya bugün hiç çalışamadım sonra'].forEach(c => expect([c, KI.cevapGibi(c)]).toEqual([c, false]));
+        'valorant oynadım 3 saat ya bugün hiç çalışamadım sonra', 'hedeflerim', 'bu ay ESP de en çok neye zaman verdim']
+        .forEach(c => expect([c, KI.cevapGibi(c)]).toEqual([c, false]));
       const KS = window.LIFEOS.KISI;
       expect(KS.tanismaSorusu([], '2026-04-05', '2026-04-04')).toBe(null);
       expect(!!KS.tanismaSorusu([], '2026-04-07', '2026-04-04')).toBe(true);
@@ -4067,6 +4071,7 @@
       try{
         expect(A.tamamla('esp_arguman', {}, 'tez ekle: insan özgür doğmaz')).toEqual({ islem:'ekle', metin:'insan özgür doğmaz' });
         expect(A.tamamla('esp_arguman', { islem:'sil' }, 'tezi sil: x')).toEqual({ islem:'sil' });
+        expect(A.tamamla('esp_arguman', { islem:'ekle', metin:'var' }, 'tez ekle: başka')).toEqual({ islem:'ekle', metin:'var' });
       }finally{ A.kur({ modul:'esp', araclar:[] }); }
     });
   });

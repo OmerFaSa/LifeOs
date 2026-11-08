@@ -187,6 +187,7 @@ window.LIFEOS.KING = (function(){
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   const PLAN_SOZ_RE = /(bugünün|bugünkü|günün) (planı|plan|programı|akışı)/;
   const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
+  const ILISKI_RE = /(ilişki|etkisi|etkiliyor|günler(?:de|i)?\s.*(?:mi|mı|mu|mü)\b)/;
   const OLUMSUZ_GUN_RE = /(hiç çalışmadım|çalışmadım|çalışamadım|hiçbir şey yapmadım|hiç bir şey yapmadım|bir şey yapamadım|boş geçti|hiç çalışasım yok)/;
   const HIS_RE = /(hissediyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|bunaldım|baskı yapıyor|motivasyon|uyuyamıyorum|başarısız|suçlu|endişeliyim|kaygılıyım|konuşalım mı|konuşabilir miyiz)/;
   const OZET_GUN_RE = /^(?:bana\s+)?(?:bugünün|günün|bugünkü)\s+(?:\S+\s+)?özet(?:i|ini)?(?:\s+(?:çıkar|ver|göster|yaz|nedir|ne))?\s*[?.!]*$/;
@@ -459,7 +460,7 @@ window.LIFEOS.KING = (function(){
     /* A3 hızlı yol (KING-4): cümleden parametresi çıkan araç (arac.js söz 4)
        sayfa ve veri tahmininden önce; okuma sorusu sayfa açmaz, sistemden
        cevaplanır. Yazan araç yine önizlenir ve onay ister. */
-    const KA = KI.ARAC() && !KI.paylasim && !HIS_RE.test(t0) ? KI.ARAC().kuralla(metin) : null;   // his cümlesi araca düşmez (King 5 tur 5)
+    const KA = KI.ARAC() && !KI.paylasim && !HIS_RE.test(t0) && !ILISKI_RE.test(t0) ? KI.ARAC().kuralla(metin) : null;   // his cümlesi araca düşmez (King 5 tur 5)
     if(KA){
       const sen = { kim:'sen', metin:String(metin).trim() };
       KI.akis.push(sen);
@@ -525,6 +526,7 @@ window.LIFEOS.KING = (function(){
        açılıyor»). Açık komut («dil sayfasını aç») yine sayfadır. */
     if(y.tur === 'git' && y.kaynak !== 'komut' && /(anlat|açıkla|nedir|ne demek|farkı|nasıl yapılır|neden|örnek ver)/.test(t0)) y = { tur:'bilinmiyor' };
     if(y.tur === 'git' && y.kaynak !== 'komut' && HIS_RE.test(t0)) y = { tur:'bilinmiyor' };
+    if(y.tur === 'git' && y.kaynak !== 'komut' && KI.soruMu(metin) && t0.split(' ').length > 4 && !/(aç|göster|git|nerede)/.test(t0)) y = { tur:'bilinmiyor' };
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
        kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
        sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),

@@ -1688,13 +1688,38 @@ R.App = (function(){
     if(window.LIFEOS.OLCU) window.LIFEOS.OLCU.kur({ modul:'ays', olculer:[
       { id:'kalan', ad:'sınava kalan gün', es:/(kaç gün kal|ne kadar (?:gün|zaman) kal|kaç gün var)/, tur:'anlik',
         anlik:() => { const k = R.PLAN.kalanGun(R.U.todayISO()); return k == null ? null : { v:k, metin:'Sınava ' + k + ' gün kaldı.' }; } },
+      /* Gün özeti: «dün ne çalıştım» (King 5 tur 5: ne çalışıldığı söylenmiyordu). */
+      { id:'gun', ad:'çalışma', es:/ne (?:çalıştım|yaptım)/, tur:'anlik', anlik:(t, bugun) => {
+        const g = /dün/.test(t) ? R.U.iso(R.U.addDays(R.U.parse(bugun), -1)) : bugun, d = R.S.days[g];
+        const ad = id => ((R.SUBJECTS || []).find(s => s.id === id) || {}).name || id;
+        const l = d ? (d.blocks || []).filter(b => b.actualQ || (b.minCert === 'measured' && b.actualMin)).map(b => (b.topic || b.subject) + ': '
+          + [b.actualQ ? b.actualQ + ' soru' + (b.correctQ != null ? ' (' + b.correctQ + ' doğru)' : '') : '', b.minCert === 'measured' && b.actualMin ? b.actualMin + ' dk' : ''].filter(Boolean).join(', '))
+          .concat(Object.keys(d.freeBySubject || {}).map(k => { const x = d.freeBySubject[k]; return ad(k) + ': ' + [x.q ? x.q + ' soru' + (x.c ? ' (' + x.c + ' doğru)' : '') : '', x.m ? x.m + ' dk' : ''].filter(Boolean).join(', '); }))
+          .concat(d.paragraphActual ? ['Paragraf: ' + d.paragraphActual] : []).concat(d.problemActual ? ['Problem: ' + d.problemActual] : []) : [];
+        const gun = g === bugun ? 'Bugün' : 'Dün';
+        return { v:l.length, metin:l.length ? gun + ' şunları kaydetmişsin: ' + l.join(' · ') + '.' : gun + ' için çalışma kaydı yok.' };
+      } },
+      { id:'zayif', ad:'en zayıf ders', es:/en zayıf|en güçlü|en kötü|en iyi olduğum/, tur:'anlik', anlik:t => {
+        const l = (R.S.exams || []).filter(e => e.family !== 'AYT').slice(-5);
+        if(!l.length) return { v:null, metin:'Henüz deneme kaydın yok; dersleri karşılaştırmak için en az bir deneme gerekiyor.' };
+        const top = {};
+        l.forEach(e => (e.tests || []).forEach(x => { const q = (R.EXAM_TEMPLATES.find(tp => tp.id === 'tyt-full').tests.find(s => s.name === x.name) || {}).q; if(!q) return;
+          const o = top[x.name] = top[x.name] || { n:0, q:0 }; o.n += R.Model.testNet(x); o.q += q; }));
+        const s = Object.keys(top).map(k => ({ k, r:top[k].n / top[k].q })).sort((a, b) => a.r - b.r);
+        const en = /güçlü|en iyi/.test(t) ? s[s.length - 1] : s[0];
+        return { v:en.r, metin:'Son ' + l.length + ' TYT denemesinde ' + (/güçlü|en iyi/.test(t) ? 'en güçlü' : 'en zayıf') + ' testin ' + en.k
+          + ': soruların %' + Math.round(en.r * 100) + "'i kadar net. Sıralama: " + s.map(x => x.k + ' %' + Math.round(x.r * 100)).join(', ') + '.' };
+      } },
       { id:'net', ad:'net', birim:'net', es:/\bnet|deneme/, tur:'olay',
-        alt:[['Türkçe', /türkçe/], ['Temel Matematik', /matematik|\bmat\b/], ['Fen Bilimleri', /\bfen\b/], ['Sosyal Bilimler', /sosyal/]],
-        olaylar:alt => (R.S.exams || []).map(e => {
-          if(!alt) return { t:e.date, v:R.Model.examNet(e) };
-          const t = (e.tests || []).find(x => x.name === alt || (alt === 'Temel Matematik' && x.name === 'Matematik'));
-          return t ? { t:e.date, v:R.Model.testNet(t) } : null;
-        }).filter(Boolean) },
+        adOf:t => (/\bayt\b/.test(t) ? 'AYT ' : 'TYT ') + 'net',
+        alt:[['Türkçe', /türkçe/], ['Matematik', /matematik|\bmat\b/], ['Fen Bilimleri', /\bfen\b/], ['Sosyal Bilimler', /sosyal/], ['Fizik', /fizik/], ['Kimya', /kimya/], ['Biyoloji', /biyoloji/]],
+        /* TYT ve AYT karışmaz (King 5 tur 5: «AYT netim kaç» 11 denemenin hepsini ortalıyordu); söylenmezse TYT. */
+        olaylar:(alt, t) => { const aile = /\bayt\b/.test(t || '') ? 'AYT' : 'TYT';
+          return (R.S.exams || []).filter(e => (e.family || 'TYT') === aile).map(e => {
+            if(!alt) return { t:e.date, v:R.Model.examNet(e) };
+            const x = (e.tests || []).find(y => y.name === alt || (alt === 'Matematik' && y.name === 'Temel Matematik'));
+            return x ? { t:e.date, v:R.Model.testNet(x) } : null;
+          }).filter(Boolean); } },
       { id:'sure', ad:'çalışma süresi', birim:'dk', es:/(ne kadar|kaç saat|kaç dakika).*çalış|çalışma süre/, tur:'toplam',
         gun:g => { const d = R.S.days[g]; if(!d) return null;
           const v = (d.blocks || []).reduce((s, b) => s + (b.minCert === 'measured' ? Number(b.actualMin) || 0 : 0), 0) + (Number(d.freeMin) || 0);

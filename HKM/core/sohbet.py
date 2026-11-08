@@ -26,7 +26,7 @@
 import datetime
 import re
 
-from core import (ai, arac, arastir, butce, cross, dil, eylem, manager, memory, models, motto, patron, program,
+from core import (ai, arac, arastir, butce, cross, dil, eylem, iliski, manager, memory, models, motto, patron, program,
                   seviye, streak, urunler)
 
 # Kademeler: kullanici kiminle konusuyor.
@@ -752,6 +752,7 @@ ARAC_IDDIA = re.compile(
     r"aktif edildi|etkin edildi|kayda eklendi|kaydedildi|ayarın değiştirildi|tema değiştirildi|"
     # Soz verme kipi (deneme kullanimi 2026-11-08: «yarin 7'de kosuyu hatirlatirim» dedi, hicbir sey kurulmadi).
     r"hatırlatırım|hatırlatacağım|hatırlattım|hatırlatıcı kurdum|alarm kurdum|kurdum|kuruyorum|kuracağım|"
+    r"uyandırırım|uyandıracağım|alarm(?:ı)? (?:ayarlarım|kurarım|ayarladım)|"
     r"kurarım|eklerim|kaydederim|ayarlarım|değiştiririm|silerim|not ederim|not aldım|planladım|planlarım|"
     r"oluşturdum|oluşturacağım|taşıdım|erteledim|ertelerim|"
     # Ic konusma (D10: «dun ne calistigini ogrenmek icin bir arac cagirmam gerekiyor»).
@@ -772,7 +773,24 @@ GERCEK_KISMI = "Bunun ötesinde bir değerlendirme için yeterli kayıt yok."
 HIS_RE = re.compile(
     r"(hissediyorum|hissetmiyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|stres altında|bunaldım|yalnızım|"
     r"baskı yapıyor|motivasyon(?:um)? yok|motivasyon ver|uyuyamıyorum|başarısız|suçlu|korkuyorum|"
-    r"endişeliyim|kaygılıyım|canım sıkkın|konuşalım mı|konuşabilir miyiz|dertleş|geçemeyecekmişim)", re.I)
+    r"endişeliyim|kaygılıyım|canım sıkkın|konuşalım mı|konuşabilir miyiz|dertleş|geçemeyecekmişim|üstüme geliyor|"
+    r"kötü geçti|bırakmak istiyorum|yoruldum|sıkıldım|zor geçti|ağlamak|teşekkür|sağ ol|dinlediğin için)", re.I)
+# Kullanıcının anmadığı bölüme yönlendirme («ESP bölümüne odaklanabilirsin», «SPİ bölümünü kontrol et»):
+# küçük model bunu her cevaba ekliyordu (klon simülasyonu aşama 1-2). Cümle düşer, kalan söylenir.
+BOLUM_YONLENDIR = re.compile(r"\b(AYS|SPİ|SPI|ESP)\s+bölüm\w*\b[^.!?]*(?:odaklan|kontrol|incele|bak|gözden geçir|değerlendir|ele al)\w*[^.!?]*[.!?]?", re.I)
+
+
+BOLUM_AD = {"ays": "AYS (sınav hazırlığı)", "spi": "SPİ (sağlık)", "esp": "ESP (kişisel gelişim)"}
+
+
+def bolum_ayikla(metin, soru):
+    """Kullanıcı bölümü anmadıysa «X bölümüne odaklan/kontrol et» cümleleri atılır."""
+    t = str(metin or "")
+    if re.search(r"\b(AYS|SPİ|SPI|ESP)\b", str(soru or ""), re.I):
+        return t
+    cumleler = re.split(r"(?<=[.!?])\s+", t.strip())
+    kalan = [c for c in cumleler if not BOLUM_YONLENDIR.search(c)]
+    return " ".join(kalan) if kalan else t
 HIS_TALIMAT = ("\n\nKişi bir duygusunu ya da derdini paylaşıyor. Önce onu dinle: bir iki cümleyle anladığını "
                "göster, sıcak ve sade konuş. Bölüm adı (AYS, SPİ, ESP) verme, sayfaya ya da araca yönlendirme, "
                "öğüt sıralama. Gerekirse tek bir nazik soru sor. Kendine zarar verme sözü geçerse güvendiği "
@@ -909,6 +927,15 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, t
             patron.log(con, kanal, "manager", hafiza_komutu["text"], agent=gorevli)
         return {"ok": True, "mode": "memory", "command": "memory",
                 "text": hafiza_komutu["text"], "agent": gorevli}
+
+    # 0b — Modüller arası ilişki sorusu (core/iliski.py): sayıyı kod üretir, model değil.
+    if gorevli == "king":
+        ic = iliski.cevap(con, metin, date)
+        if ic:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", ic, agent=gorevli)
+            return {"ok": True, "mode": "komut", "command": "iliski", "text": ic, "agent": gorevli}
 
     # 0 — YALNIZ SELAM: kural cevaplar (bkz. SELAM_KELIMELERI).
     acilis = selam_mi(metin, gorevli)
@@ -1250,6 +1277,10 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += "\n" + arac.sonuc_baglami(sonuclar)
     if uzun or LIFEOS_SOZ.search(str(metin or "")):
         bg += "\n" + LIFEOS_BILGI
+    # Bulunulan bölüm (King 5 tur 5, klon: AYS sayfasında «bu yaz için bana bir plan öner» → «hangi bölüm?»).
+    if modul in BOLUM_AD:
+        bg += ("\nKullanıcı şu an %s sayfasından yazıyor; belirsiz isteği bu bölümle ilgili anla, "
+               "«hangi bölüm» diye sorma." % BOLUM_AD[modul])
     # Hafiza (KING-4 B): ilgi gommeyle olculur, King'e ilgili «olanlar» da girer;
     # rol butcesinin beste biri asilmaz (core/ai.py butceye_sigdir sistemi kirpmaz).
     hbutce = ai.baglam_butcesi(rol) // 5
@@ -1326,6 +1357,8 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             r = r2
         else:
             r = dict(r, text=ARAC_YAPILMADI)
+    if r.get("ok") and not r.get("cagrilar") and r.get("text"):
+        r = dict(r, text=bolum_ayikla(r["text"], metin))
     if r.get("ok") and not r.get("cagrilar") and GERCEK_DISI.search(r.get("text") or ""):
         # Dayanaksiz yargi: bir kez duzeltme; yine olmazsa kodun durust cumlesi.
         r2 = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem + GERCEK_DUZELT,
