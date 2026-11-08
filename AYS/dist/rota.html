@@ -51402,7 +51402,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'e5ef4671', at:'2026-11-07 23:52', dirty:true };
+R.BUILD = { id:'62e3c608', at:'2026-11-08 04:56', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -70610,7 +70610,8 @@ R.KingArac = (function(){
     /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
     denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
     konu_riski:/(risk altında|riskli konu|konu riski|net (?:kayb|kaçır))/,
-    gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç)/,
+    /* «dün ne çalıştım» (King 5 D10): model «araç çağırmam gerekiyor» deyip cevapsız bırakıyordu. */
+    gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç|(?:bugün|dün|önceki gün)(?:kü)? (?:ne|neler|ne kadar) (?:çalıştım|yaptım|çözdüm))/,
     konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
     gunun_akisi:/(günün akışı|bugünün akışı)/,
     durum_ozeti:/(sınava (?:kaç gün|ne kadar)|durum özet|genel durum)/,
@@ -70628,7 +70629,7 @@ R.KingArac = (function(){
     haftalar:'hafta haftalık review değerlendirme bülten geriye dönük',
     gunler:'gün günlük çözülen süre saat dakika soru',
     hedef_ve_net_matrisi:'hedef net matris tablo karşılaştırma ders',
-    kartlar:'kart tekrar srs aralıklı ezber hatırlama',
+    kartlar:'kart tekrar srs aralıklı ezber',   // «hatırlama» «hatırlat» isteğini kartlara çekiyordu (King 5)
     video_notlari:'video not izleme ders notu kayıt',
     mesgaleler:'meşgale mola kesinti ara duraklama dinlenme',
     enerji_durumu:'enerji yorgunluk zindelik seviye durum güç canlılık',
@@ -79913,14 +79914,16 @@ window.LIFEOS.KING_IC = {};
   }
   /* King açıldı: kullanıcı sormak üzere, model arkada ısınsın (soğuk yükleme 9-13 sn ölçüldü).
      Merkez bellek darsa (oyun) yüklemez; hata sessizdir, soru yine çalışır. */
-  KI.modelIsitT = -Infinity;
-  function modelIsit(){
-    const k = baglanti(), su = ortam.simdi().getTime();
-    if(!k || !ortam.fetch || su - KI.modelIsitT < 300000) return;
-    KI.modelIsitT = su;
+  KI.modelIsitT = -Infinity; KI.modelIsitYT = -Infinity;
+  /* `yaziyor` (King 5 D7): kişi yazmaya başladı; Merkez bellek darken de kısa süreli ısıtır (soru zaten
+     yükleyecekti, yalnız birkaç saniye önce başlar). Kendi beş dakikalık sınırı var. */
+  function modelIsit(yaziyor){
+    const k = baglanti(), su = ortam.simdi().getTime(), an = yaziyor ? 'modelIsitYT' : 'modelIsitT';
+    if(!k || !ortam.fetch || su - KI[an] < 300000) return;
+    KI[an] = su;
     try{
       const f = ortam.fetch;
-      const p = f(k.url + '/api/ollama/isit', { method:'POST', body:'{}',
+      const p = f(k.url + '/api/ollama/isit', { method:'POST', body:yaziyor ? '{"yaziyor":true}' : '{}',
         headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king.bearer') + k.token } });
       if(p && p.catch) p.catch(() => {});
     }catch(e){ /* yok */ }
@@ -82429,8 +82432,16 @@ window.LIFEOS.PARCA.yazilar({
     if(K && typeof K.istatistik === 'function') l.push([yz('ortak.king-gorunum.kartlari-goster'), 'istatistiklerim']);
     if(K && typeof K.soru === 'function') l.push([yz('ortak.king-gorunum.bana-soru-sor'), 'bana soru sor']);
     if(!cevapSonrasi && K && typeof K.oncelik === 'function') l.unshift([yz('ortak.king-gorunum.neye-calisayim'), 'neye çalışayım']);
-    return l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
+    const out = l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
+    /* King 5 D7 (deneme 2026-11-08): «bugün yorgunum» plana bağlanmıyordu. Modülde bugünü kısaltan araç varsa
+       ilk öneri odur; cümle kutuya doldurulur, dakikayı kişi seçer (sayı uydurulmaz, gönderilmeden önce görünür). */
+    const sen = KI.akis.filter(m => m.kim === 'sen').pop();
+    const A = KI.ARAC && KI.ARAC();
+    if(cevapSonrasi && sen && YORGUN_RE.test(KI.kucuk(sen.metin)) && A && A.bul && KI.ayar && A.bul(KI.ayar.modul + '_gecici_sure'))
+      out.unshift({ ad:'Bugünü kısalt', is:'doldur:sadece bugün 30 dakika çalışacağım' });
+    return out.slice(0, 4);
   }
+  const YORGUN_RE = /(yorgun|yoruldum|bitkin|halsiz|uykusuz|enerjim yok|keyfim yok|hastayım)/;
   /* GÖRÜNÜŞ (kullanıcı, 2026-10-28: «hem erkek hem kadın tarafı: pembe
      yapabilmeliyiz, mavi yapabilmeliyiz»). Köke data-king-gorunus yazılır;
      renk ve taç king-cam.css'te. Sesli okumada cihaz sesi tercihe göre
@@ -82976,7 +82987,7 @@ window.LIFEOS.PARCA.yazilar({
     setTimeout(() => el.remove(), 360);
   }
 
-  Object.assign(KI, { adimHtml, BOLUMLER, listeGorunur, bolumSec, listeGrup, yanBos, alanAc, soyle, oneriListesi, AD_ANAHTAR, ad, adYonelme, GORUNUS, GORUNUSLER, GORUNUS_AD, gorunus, gorunusAyarla, gorunusSeciciHtml, cinsiyetPuan, TARZ, TARZLAR, TARZ_AD, tarz, tarzSec, cizgi, selam, KURE, yuzHtml, NOKTA, ekranAdi, nedenSatirlari, ciz, ac, kucult, buyut, ekranDegisti, kapat });
+  Object.assign(KI, { YORGUN_RE, adimHtml, BOLUMLER, listeGorunur, bolumSec, listeGrup, yanBos, alanAc, soyle, oneriListesi, AD_ANAHTAR, ad, adYonelme, GORUNUS, GORUNUSLER, GORUNUS_AD, gorunus, gorunusAyarla, gorunusSeciciHtml, cinsiyetPuan, TARZ, TARZLAR, TARZ_AD, tarz, tarzSec, cizgi, selam, KURE, yuzHtml, NOKTA, ekranAdi, nedenSatirlari, ciz, ac, kucult, buyut, ekranDegisti, kapat });
 })();
 
 /* ==== js/core/king-kart.js ==== */
@@ -86785,6 +86796,24 @@ window.LIFEOS.KING = (function(){
       await KI.yetkiUygula();
       return { tur:'yetki' };
     }
+    /* «Hayır + düzeltme» (King 5 D4, deneme 2026-11-08: «hayır, kalıcı değil sadece bugün için» yalnız
+       «hayır» sayılıyor, düzeltme atılıyordu): bekleyen öneri iptal edilir, asıl istek düzeltmeyle
+       birlikte yeniden okunur. Akışta kullanıcının kendi cümlesi görünür. */
+    const duz = KI.bekleyenYetki ? t0.match(/^(?:hayır|hayir|yok|öyle değil|değil)\s*[,.!:-]?\s+(.+)$/) : null;
+    if(duz && duz[1].split(' ').length >= 2 && !KI.HAYIR.test(duz[1])){
+      const onceki = KI.akis.filter(m => m.kim === 'sen').pop();
+      /* «kalıcı değil» olumsuzluk süzgecine takılıp isteği durduruyordu (canlı deneme): «X değil» atılır,
+         düzeltme başa gelir: «sadece bugün için, günde 30 dakika çalışacağım». */
+      const ek = duz[1].replace(/(?:^|\s)\S+\s+değil(?=[\s,]|$),?/g, ' ').replace(/\s+/g, ' ').trim();
+      if(onceki && onceki.metin && ek){
+        const birlesik = ek + ', ' + String(onceki.metin).trim().replace(/[.!]+$/, '');
+        vazgec();
+        const r = await isle(birlesik);
+        const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === birlesik).pop();
+        if(sen) sen.metin = String(metin).trim();
+        return r;
+      }
+    }
     if(KI.bekleyenYetki && (KI.EVET.test(t0) || KI.HAYIR.test(t0))){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       if(KI.HAYIR.test(t0)){ vazgec(); return { tur:'hayir' }; }
@@ -87009,8 +87038,22 @@ window.LIFEOS.KING = (function(){
         return { tur:'beyan', alan:bey.alan };
       }
     }
-    const y = KI.yorumla(metin);
+    let y = KI.yorumla(metin);
     if(y.tur === 'bos') return y;
+    /* Yorgunluk (King 5 D7, canlı deneme: «bugün çok yorgunum» «Bugün» sayfasını açıyordu). Bir his
+       sayfa komutu değildir. Bugünü kısaltan araç varsa King hemen önerir (dakikayı kişi seçer);
+       yoksa cümle sohbete gider. */
+    if(KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri'){
+      const A = KI.ARAC && KI.ARAC();
+      if(A && A.bul && A.bul(KI.ayar.modul + '_gecici_sure')){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+        KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
+        KI.cipler = [{ ad:'Bugünü kısalt', is:'doldur:sadece bugün 30 dakika çalışacağım' }];
+        KI.soyle('Anladım, yorgunsun. İstersen bugünü hafifletelim: «Bugünü kısalt»a dokun, dakikayı sen seç.');
+        return { tur:'yorgun' };
+      }
+      if(y.tur === 'git') y = { tur:'bilinmiyor' };
+    }
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
        kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
        sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),
@@ -87498,6 +87541,10 @@ window.LIFEOS.KING = (function(){
       const g = e.target && e.target.matches && e.target.matches('[data-king-kv-emoji]') ? e.target : null;
       if(!g || !KI.kvSecili) return;
       KI.kartSus(KI.kvSecili, 'emoji', [...g.value.trim()].slice(0, 4).join('')); KI.ciz(false);
+    });
+    /* King 5 D7: yazmaya başlamak kesin niyettir; model o an ısınır, yazma süresi soğuk yüklemeyi gizler. */
+    document.addEventListener('input', e => {
+      if(e.target && e.target.matches && e.target.matches('.king__girdi') && e.target.value) KI.modelIsit(true);
     });
     document.addEventListener('input', e => {
       const g = e.target && e.target.matches && e.target.matches('[data-king-ara-girdi]') ? e.target : null;
@@ -122355,7 +122402,9 @@ R.Proposals = (function(){
           subject, blok, day });
       },
       preview(p, ctx){
-        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : yz('ays.core.proposals.plan-disi-gunun-toplami');
+        /* King 5 D6 (deneme 2026-11-08): bloğu olmayan dersin adı önizlemede kaybolmasın. */
+        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject
+          : (ctx.subject ? ctx.subject.name + ' · ' : '') + yz('ays.core.proposals.plan-disi-gunun-toplami');
         const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
           : ctx.day.freeQ == null ? 'girilmemiş' : String(ctx.day.freeQ);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
@@ -122387,6 +122436,13 @@ R.Proposals = (function(){
              DUSUYORDU: onizleme «dogru: 32 yazilacak» diyor ama kayit
              yalniz bloga gidiyordu. Onizlemenin verdigi soz tutulmali. */
           if(ctx.dogru != null) ctx.day.freeCorrect = (ctx.day.freeCorrect || 0) + ctx.dogru;
+          /* Ders ayrımı (King 5 D6): toplam aynı kalır; hangi dersten olduğu ek alanda saklanır, uydurma blok açılmaz. */
+          if(ctx.subject){
+            const fs = ctx.day.freeBySubject = ctx.day.freeBySubject || {};
+            const x = fs[ctx.subject.id] = fs[ctx.subject.id] || { q:0, c:0 };
+            x.q += ctx.n; if(ctx.dogru != null) x.c += ctx.dogru;
+            geri.dersId = ctx.subject.id;
+          }
         }
         await R.Model.saveDay(p.date);
         return geri;
@@ -122408,6 +122464,11 @@ R.Proposals = (function(){
         }else{
           day.freeQ = farkGeri(day.freeQ, n, s.eskiQ);
           if(d != null) day.freeCorrect = farkGeri(day.freeCorrect, d, s.eskiC);
+          const x = s.dersId && day.freeBySubject && day.freeBySubject[s.dersId];
+          if(x){
+            x.q = Math.max(0, x.q - n); if(d != null) x.c = Math.max(0, x.c - d);
+            if(!x.q && !x.c) delete day.freeBySubject[s.dersId];
+          }
         }
         ayniHedef(o, 'soru-yaz', x => x.date === s.date && (x.blockId || null) === (s.blockId || null))
           .forEach(x => {
@@ -126708,6 +126769,8 @@ R.Setup = (function(){
       const p = preview(draft.startDate, draft.examTytISO);
       if(p.days <= 0){ UI.toast(yz('ays.core.setup.sinav-tarihi-baslangictan-so')); return; }
     }
+    /* King 5 D8 (deneme 2026-11-08): boş sıra burada durur; eskiden ancak 5. adımda «2. adıma dön» deniyordu. */
+    if(STEPS[step].id === 'hedef' && !draft.targetRank){ UI.toast(yz('ays.core.setup.hedef-basari-sirasi-gerekli').split(' — ')[0]); return; }
     step = Math.min(step + 1, STEPS.length - 1);
     render();
   }
