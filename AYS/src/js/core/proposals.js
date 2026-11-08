@@ -862,10 +862,14 @@ R.Proposals = (function(){
         if(!day) return fail(yz('ays.core.proposals.o-gunun-kaydi-henuz-acilmami'));
         const blok = (day.blocks || []).find(b => b.subjectId === subject.id
           || (b.subject && R.U.norm(b.subject) === R.U.norm(subject.name)));
-        if(!blok) return fail(subject.name + ' için bugün planlanmış bir blok yok.');
+        /* King 5 tur 5 (klon simülasyonu): «1 saat fizik çalıştım» önizlenip «yazılamadı» oluyordu; plansız
+           ders reddediliyordu. Soru kaydı gibi: blok yoksa günün serbest dakikasına, ders ayrımıyla. */
+        if(!blok) return pass({ dk:Math.round(dk), subject, blok:null, day });
         return pass({ dk:Math.round(dk), subject, blok });
       },
       preview(p, ctx){
+        if(!ctx.blok) return [{ label:ctx.subject.name + ' · ' + yz('ays.core.proposals.plan-disi-gunun-toplami') + ' · süre',
+          before:ctx.day.freeMin == null ? 'girilmemiş' : ctx.day.freeMin + ' dk', after:((Number(ctx.day.freeMin) || 0) + ctx.dk) + ' dk' }];
         return [{ label:(ctx.blok.topic || ctx.subject.name) + ' · süre',
           before:ctx.blok.actualMin == null ? 'girilmemiş' : ctx.blok.actualMin + ' dk',
           after:(ctx.blok.minCert === 'estimated' ? ctx.dk : (Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' }];
@@ -874,6 +878,14 @@ R.Proposals = (function(){
          ona EKLENMEZ, yerine geçer (`yerine`). Ölçülmüşe eklenir. Geri al
          eski dakikayı da kesinliğini de olduğu gibi geri koyar. */
       async apply(p, ctx){
+        if(!ctx.blok){
+          ctx.day.freeMin = (Number(ctx.day.freeMin) || 0) + ctx.dk;
+          const fs = ctx.day.freeBySubject = ctx.day.freeBySubject || {};
+          const x = fs[ctx.subject.id] = fs[ctx.subject.id] || { q:0, c:0 };
+          x.m = (Number(x.m) || 0) + ctx.dk;
+          await R.Model.saveDay(p.date);
+          return { date:p.date, serbest:true, dk:ctx.dk, dersId:ctx.subject.id };
+        }
         const yerine = ctx.blok.minCert === 'estimated';
         const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin, eskiCert:ctx.blok.minCert, dk:ctx.dk,
           durum:ctx.blok.status === 'pending' ? 'pending' : null };
@@ -888,6 +900,13 @@ R.Proposals = (function(){
         const day = R.S.days[s.date];
         if(!day) return;
         const dk = s.dk != null ? s.dk : Math.round(Number(((o && o.params) || {}).minutes) || 0);
+        if(s.serbest){
+          day.freeMin = Math.max(0, (Number(day.freeMin) || 0) - dk) || null;
+          const x = s.dersId && day.freeBySubject && day.freeBySubject[s.dersId];
+          if(x) x.m = Math.max(0, (Number(x.m) || 0) - dk);
+          await R.Model.saveDay(s.date);
+          return;
+        }
         const b = (day.blocks || []).find(x => x.id === s.blockId);
         const sonra = ayniHedef(o, 'sure-yaz', x => x.date === s.date && x.blockId === s.blockId);
         const eskiCert = 'eskiCert' in s ? s.eskiCert : undefined;

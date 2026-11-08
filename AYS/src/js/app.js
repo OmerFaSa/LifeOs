@@ -1684,6 +1684,24 @@ R.App = (function(){
       },
       sor:t => (!gkBaglam && R.Palette.kingSor ? R.Palette.kingSor(t) : null),
       ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
+    /* Ölçü soruları (brand/ortak/olcu.js, King 5 tur 5): «bu hafta kaç soru», «net ortalamam», «kaç gün kaldı». */
+    if(window.LIFEOS.OLCU) window.LIFEOS.OLCU.kur({ modul:'ays', olculer:[
+      { id:'kalan', ad:'sınava kalan gün', es:/(kaç gün kal|ne kadar (?:gün|zaman) kal|kaç gün var)/, tur:'anlik',
+        anlik:() => { const k = R.PLAN.kalanGun(R.U.todayISO()); return k == null ? null : { v:k, metin:'Sınava ' + k + ' gün kaldı.' }; } },
+      { id:'net', ad:'net', birim:'net', es:/\bnet|deneme/, tur:'olay',
+        alt:[['Türkçe', /türkçe/], ['Temel Matematik', /matematik|\bmat\b/], ['Fen Bilimleri', /\bfen\b/], ['Sosyal Bilimler', /sosyal/]],
+        olaylar:alt => (R.S.exams || []).map(e => {
+          if(!alt) return { t:e.date, v:R.Model.examNet(e) };
+          const t = (e.tests || []).find(x => x.name === alt || (alt === 'Temel Matematik' && x.name === 'Matematik'));
+          return t ? { t:e.date, v:R.Model.testNet(t) } : null;
+        }).filter(Boolean) },
+      { id:'sure', ad:'çalışma süresi', birim:'dk', es:/(ne kadar|kaç saat|kaç dakika).*çalış|çalışma süre/, tur:'toplam',
+        gun:g => { const d = R.S.days[g]; if(!d) return null;
+          const v = (d.blocks || []).reduce((s, b) => s + (b.minCert === 'measured' ? Number(b.actualMin) || 0 : 0), 0) + (Number(d.freeMin) || 0);
+          return v || null; } },
+      { id:'soru', ad:'çözülen soru', birim:'soru', es:/soru|paragraf|problem/, tur:'toplam',
+        gun:g => { const v = R.Calc.gunSorusu(R.S.days[g]); return v || null; } },
+    ] });
     return true;
   }
 

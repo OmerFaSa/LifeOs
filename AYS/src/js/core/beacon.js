@@ -250,8 +250,9 @@ R.Beacon = (function(){
     /* Plandan doldurulan dakika «tahmin»dir (blok.minCert); bir blok bile
        tahminse günün toplamı ölçüm diye gitmez. */
     const sure = bloklar.filter(function(b){ return b.actualMin != null; });
-    out.study_minutes = sure.length
-      ? metric(sure.reduce(function(a, b){ return a + Number(b.actualMin || 0); }, 0),
+    const serbestDk = gun ? Number(gun.freeMin) || 0 : 0;
+    out.study_minutes = (sure.length || serbestDk)
+      ? metric(sure.reduce(function(a, b){ return a + Number(b.actualMin || 0); }, 0) + serbestDk,
         sure.some(function(b){ return b.minCert === 'estimated'; }) ? 'estimated' : 'measured')
       : metric(null, 'missing');
 

@@ -90,7 +90,8 @@
       "m": "ays",
       "c": "son denemede kaç net yaptım",
       "b": [
-        "arac:ays_denemeler"
+        "arac:ays_denemeler",
+        "tur:olcu"
       ]
     },
     {
@@ -181,7 +182,8 @@
       "c": "bugün kaç dakika çalıştım",
       "b": [
         "arac:ays_gunler",
-        "arac:bugun_ozeti"
+        "arac:bugun_ozeti",
+        "tur:olcu"
       ]
     },
     {
@@ -231,7 +233,8 @@
       "c": "sınava kaç gün kaldı",
       "b": [
         "arac:ays_durum_ozeti",
-        "merkez"
+        "merkez",
+        "tur:olcu"
       ]
     },
     {
@@ -377,7 +380,8 @@
       "m": "spi",
       "c": "bu hafta ortalama kaç saat uyudum",
       "b": [
-        "arac:spi_uyku"
+        "arac:spi_uyku",
+        "tur:olcu"
       ]
     },
     {
@@ -617,7 +621,8 @@
       "m": "esp",
       "c": "bu hafta ne kadar çalıştım",
       "b": [
-        "arac:esp_hafta"
+        "arac:esp_hafta",
+        "tur:olcu"
       ]
     },
     {
@@ -931,7 +936,8 @@
       "m": "ays",
       "c": "bu hafta hangi gün kaç soru çözdüm",
       "b": [
-        "arac:ays_gunler"
+        "arac:ays_gunler",
+        "tur:olcu"
       ]
     },
     {
@@ -939,7 +945,8 @@
       "m": "ays",
       "c": "dün toplam kaç dakika ders çalıştım",
       "b": [
-        "arac:ays_gunler"
+        "arac:ays_gunler",
+        "tur:olcu"
       ]
     },
     {
@@ -1380,7 +1387,8 @@
       "m": "spi",
       "c": "son 14 gündeki uyku ortalamam",
       "b": [
-        "arac:spi_uyku"
+        "arac:spi_uyku",
+        "tur:olcu"
       ]
     },
     {
@@ -1396,7 +1404,8 @@
       "m": "spi",
       "c": "bu hafta kaç antrenman yaptım",
       "b": [
-        "arac:spi_antrenmanlar"
+        "arac:spi_antrenmanlar",
+        "tur:olcu"
       ]
     },
     {
@@ -2759,6 +2768,103 @@
       "b": [
         "tur:harita",
         "arac:sistem_haritasi"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "bu hafta kaç soru çözdüm",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "net ortalamam kaç",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "yks ye kaç gün kaldı",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "son 4 denemede matematik netim nasıl değişti",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "spi",
+      "m": "spi",
+      "c": "kilom son bir ayda nasıl değişti",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "spi",
+      "m": "spi",
+      "c": "bu hafta nasıl uyudum",
+      "b": [
+        "tur:olcu",
+        "arac:spi_uyku"
+      ]
+    },
+    {
+      "g": "esp",
+      "m": "esp",
+      "c": "gitar çalışmam son 2 haftada arttı mı",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "bana soru sorma artık",
+      "b": [
+        "tur:tanisma-kapali"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "bugün hiç çalışmadım cuma ya",
+      "b": [
+        "tur:olumsuz-gun"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "kendimi başarısız hissediyorum",
+      "b": [
+        "merkez"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "ailem sınav konusunda çok baskı yapıyor",
+      "b": [
+        "merkez"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "1 saat fizik çalıştım",
+      "b": [
+        "veri"
       ]
     }
   ]

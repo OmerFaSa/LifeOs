@@ -1930,6 +1930,20 @@ ESP.App = (function(){
         };
       },
       ornekler:['45 dk gitar, 20 dakika kelime', '30 dk felsefe okuması', '20 dakika kelime'] });
+    /* Ölçü soruları (brand/ortak/olcu.js, King 5 tur 5): «gitar çalışmam arttı mı», «bu hafta kaç kelime». */
+    if(window.LIFEOS.OLCU){
+      const oturum = (g, f) => ((ESP.S.days[g] || {}).sessions || []).filter(f);
+      const kac = (g, disc) => { const l = oturum(g, s => s.disc === disc && s.count != null); return l.length ? l.reduce((a, s) => a + Number(s.count), 0) : null; };
+      const dk = (g, disc) => { const l = oturum(g, s => (!disc || s.disc === disc) && s.minutes != null); return l.length ? l.reduce((a, s) => a + Number(s.minutes), 0) : null; };
+      const ad = (ESP.Parse && ESP.Parse.ALIASES) || {};
+      const kacis = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      window.LIFEOS.OLCU.kur({ modul:'esp', olculer:[
+        { id:'kelime', genel:true, ad:'kelime', birim:'kelime', es:/kelime/, tur:'toplam', gun:g => kac(g, 'lang') },
+        { id:'sayfa', genel:true, ad:'okunan sayfa', birim:'sayfa', es:/sayfa|kaç kitap|okudum|okuma/, tur:'toplam', gun:g => kac(g, 'reading') },
+      ].concat((ESP.DISCIPLINES || []).map(d => ({ id:'esp-' + d.id, ad:d.label + ' çalışması', birim:'dk', tur:'toplam',
+        es:new RegExp('(' + [d.label, d.short].concat(ad[d.id] || []).filter(x => x && x.length >= 3).map(x => kacis(String(x).toLocaleLowerCase('tr'))).join('|') + ')'),
+        gun:g => dk(g, d.id) }))).concat([{ id:'esp', genel:true, ad:'ESP çalışması', birim:'dk', es:/esp|ne kadar çalış/, tur:'toplam', gun:g => dk(g) }]) });
+    }
   }
 
   /* GÜNÜ KAPAT (brand/ortak/gunukapat.js; KOLAY-PLANI Faz 1). Satırları

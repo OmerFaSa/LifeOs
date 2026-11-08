@@ -296,12 +296,16 @@ LIFEOS.Hafiza = (function(){
   function sorudaBul(liste, soru){
     const k = String(soru || '').toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
     if(!/(?:^|\s)(?:ne|neyi|ne zaman|nedir|nerede|hangi|kaç)(?:\s|$)/.test(k)) return [];
-    const sozc = k.split(' ').filter(w => w.length >= 4 && !SORU_DURAK.has(w));
+    /* Geçmiş zaman fiili («çözdüm», «çalıştım») bir ölçü sorusudur, hafıza sorusu değil (King 5 tur 5:
+       «bu hafta kaç soru çözdüm» → «Bana şöyle demiştin: … deneme çözdüm 61 net»). */
+    const FIIL = /(d|t)(ı|i|u|ü)m$/;
+    const sozc = k.split(' ').filter(w => w.length >= 4 && !SORU_DURAK.has(w) && !FIIL.test(w));
     const kendi = /(?:^|\s)(?:ben|benim|bana|beni)(?:\s|$)/.test(k) || sozc.some(w => /m$/.test(w));
     if(!kendi || !sozc.length) return [];
     const kok = w => w.slice(0, Math.max(4, w.length - 2));
     return etkin(liste).filter(x => {
-      const kw = String(x.metin).toLocaleLowerCase('tr').split(/[^a-zçğıöşü0-9]+/);
+      /* Tanışma kaydı «soru → cevap»: yalnız kişinin cevabı eşleşir, sorunun kelimeleri değil. */
+      const kw = String(x.metin).split('→').pop().toLocaleLowerCase('tr').split(/[^a-zçğıöşü0-9]+/);
       return sozc.some(w => kw.some(v => v.length >= 4 && v.startsWith(kok(w))));
     }).slice(0, 3);
   }

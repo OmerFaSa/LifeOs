@@ -685,8 +685,8 @@ def selam_mi(metin, gorevli="king"):
 
 def selam_cevabi(acilis, gorevli):
     g = GOREVLILER[gorevli]
-    kim = ("HKM'nin baş görevlisi; AYS, SPİ ve ESP'nin günlük özetini tek yerde tutarım."
-           if gorevli == "king" else "HKM'deki görevlilerden biriyim. " + g["is"])
+    kim = ("sınav, sağlık ve kişisel gelişim günlerini seninle birlikte takip ederim."
+           if gorevli == "king" else g["is"])
     return ("%s Ben %s — %s\n«durum» yazarsan günün özetini, «hafta» yazarsan "
             "haftayı veririm; «yardım» bütün komutları gösterir. Aklındakini "
             "serbestçe de sorabilirsin." % (acilis, g["ad"], kim))
@@ -766,6 +766,17 @@ GERCEK_DUZELT = ("\n\nÖnceki cevabında ölçülerde dayanağı olmayan bir yar
 GERCEK_YOK = ("Bunu söyleyebilmem için yeterli kayıt yok. Birkaç gün düzenli kayıt girersen ölçülere dayanarak "
               "değerlendiririm.")
 GERCEK_KISMI = "Bunun ötesinde bir değerlendirme için yeterli kayıt yok."
+# Duygu ve dert (King 5 tur 5, klon simülasyonu): «kötü hissediyorum biraz» sessizce «enerji 2/5» kaydı oldu,
+# «kendimi başarısız hissediyorum» puan tahmini aracını çağırdı, «uyuyamıyorum» «ESP bölümündeki
+# stratejiler»e yönlendirildi. His cümlesinde araç sunulmaz; model önce dinler.
+HIS_RE = re.compile(
+    r"(hissediyorum|hissetmiyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|stres altında|bunaldım|yalnızım|"
+    r"baskı yapıyor|motivasyon(?:um)? yok|motivasyon ver|uyuyamıyorum|başarısız|suçlu|korkuyorum|"
+    r"endişeliyim|kaygılıyım|canım sıkkın|konuşalım mı|konuşabilir miyiz|dertleş|geçemeyecekmişim)", re.I)
+HIS_TALIMAT = ("\n\nKişi bir duygusunu ya da derdini paylaşıyor. Önce onu dinle: bir iki cümleyle anladığını "
+               "göster, sıcak ve sade konuş. Bölüm adı (AYS, SPİ, ESP) verme, sayfaya ya da araca yönlendirme, "
+               "öğüt sıralama. Gerekirse tek bir nazik soru sor. Kendine zarar verme sözü geçerse güvendiği "
+               "birine ve 112'ye ulaşmasını söyle.")
 
 
 def gercek_ayikla(metin):
@@ -1271,6 +1282,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     ilk_tur = bool(katalog) and sonuclar is None
     arac_turu = bool(sunulan) and (ilk_tur or bool(devam and aracli))
+    if sonuclar is None and HIS_RE.search(str(metin or "")):
+        ilk_tur = arac_turu = False
+        sistem = aracsiz_sistem + HIS_TALIMAT
     r = None
     if yerel_model and aracli and ilk_tur:
         # IKI ASAMA (kucuk model): once yalniz secim, sonra sohbet. Tek turda «samimi sohbet
@@ -1332,8 +1346,7 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             if kayit and all(c["tur"] == "yaz" for c in gecerli):
                 # Yazma cagrisinin ikinci turu yok: konusma burada deftere girer.
                 patron.log(con, kanal, "user", metin, agent=gorevli)
-                patron.log(con, kanal, "manager", "(Önizleme hazırlandı, onayını bekliyor: %s)"
-                           % ", ".join(c["ad"] for c in gecerli), agent=gorevli)
+                patron.log(con, kanal, "manager", "Bir değişikliği önizledim; onayını bekliyorum.", agent=gorevli)
             return {"ok": True, "mode": "arac", "cagrilar": gecerli, "reddedilen": red,
                     "adim": devam["adim"] + 1 if devam else 1,
                     "text": r.get("text") or "", "agent": gorevli, "model": r.get("model"),

@@ -668,7 +668,22 @@ SP.App = (function(){
   /* TEK SATIR GİRİŞİN SPİ KURULUMU (brand/ortak/giris.js). Modül düzeyinde ve
      adlı (2026-10-25): boot çağırır; testler ortak kutuyu sıfırladıktan sonra
      SP.App.girisKur() ile gerçek kurulumu geri getirir. */
-  function girisKurucu(){ return window.LIFEOS.GIRIS.kur({ modul:'spi',
+
+  /* Ölçü soruları (brand/ortak/olcu.js, King 5 tur 5): «kilom nasıl değişti», «bu ay ortalama uyku». */
+  function olcuKur(){
+    if(!window.LIFEOS.OLCU) return;
+    const v = (g, f) => { const x = SP.S.vitals[g]; return x && x[f] != null ? Number(x[f]) : null; };
+    const seans = g => (SP.S.workouts || []).filter(w => w.date === g);
+    window.LIFEOS.OLCU.kur({ modul:'spi', olculer:[
+      { id:'seans', ad:'antrenman', birim:'seans', es:/kaç (?:kez|kere|gün|defa|antrenman|seans)/, tur:'toplam', gun:g => seans(g).length || null },
+      { id:'uyku', ad:'uyku', birim:'saat', ondalik:true, es:/uyku|uyu(?:dum|yor|muşum)|nasıl uyu/, tur:'ortalama', gun:g => v(g, 'sleep') },
+      { id:'kilo', ad:'kilo', birim:'kg', ondalik:true, es:/kilo|tartı/, tur:'son', gun:g => v(g, 'weight') },
+      { id:'su', ad:'su', birim:'ml', es:/\bsu\b|su iç/, tur:'ortalama', gun:g => v(g, 'water') },
+      { id:'spor', genel:true, ad:'antrenman süresi', birim:'dk', es:/spor|antrenman|egzersiz|yürü|koş/, tur:'toplam',
+        gun:g => { const l = seans(g); return l.length ? l.reduce((s, w) => s + (Number(w.minutes) || 0), 0) : null; } },
+    ] });
+  }
+  function girisKurucu(){ olcuKur(); return window.LIFEOS.GIRIS.kur({ modul:'spi',
       onizle:t => {
         /* Hazır öğün / antrenman adıyla (core/hazir.js söz 5): «menemen
            tabağımı yedim», «bacak günümü yaptım». Önizleme + onay.

@@ -313,6 +313,30 @@ def saglayici_araclari(provider, katalog):
             for a in katalog]
 
 
+METIN_CAGRI = re.compile(r"\b([A-Za-z][A-Za-z0-9_]{2,40})\s*\(([^()]{0,600})\)")
+METIN_PARAM = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(\"[^\"]*\"|'[^']*'|-?\d+(?:\.\d+)?|true|false)")
+
+
+def metin_cagrilari(metin, katalog):
+    """Metne yazılmış çağrılar: yalnız katalogdaki adla (büyük/küçük harf yok sayılır)."""
+    adlar = {str(a.get("ad", "")).lower(): a["ad"] for a in (katalog or []) if a.get("ad")}
+    out = []
+    for m in METIN_CAGRI.finditer(str(metin or "")):
+        ad = adlar.get(m.group(1).lower())
+        if not ad:
+            continue
+        p = {}
+        for k, v in METIN_PARAM.findall(m.group(2)):
+            if v[:1] in "\"'":
+                p[k] = v[1:-1]
+            elif v in ("true", "false"):
+                p[k] = v == "true"
+            else:
+                p[k] = float(v) if "." in v else int(v)
+        out.append({"ad": ad, "param": p})
+    return out[:3]
+
+
 def openai_cagrilari(mesaj):
     out = []
     for c in (mesaj or {}).get("tool_calls") or []:

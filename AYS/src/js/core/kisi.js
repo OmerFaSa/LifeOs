@@ -196,7 +196,11 @@ LIFEOS.KISI = (function(){
   /* Tanışma sorusu: en az kaydı olan alandan, güne göre sabit seçim.
      Bugün sorulduysa null. */
   function tanismaSorusu(kayitlar, gunISO, sonSorulanGun){
-    if(sonSorulanGun === gunISO) return null;
+    /* King 5 tur 5 (klon simülasyonu): her modülde her gün soruluyordu; kişi «neden sürekli soru
+       soruyon» dedi. En çok 3 günde bir; «bana soru sorma» denince hiç (sonSorulanGun 'kapali'). */
+    if(sonSorulanGun === 'kapali') return null;
+    if(sonSorulanGun && /^\d{4}-\d\d-\d\d$/.test(sonSorulanGun) && gunISO
+      && (Date.parse(gunISO) - Date.parse(sonSorulanGun)) / 864e5 < 3) return null;
     const g = grupla(kayitlar);
     const sira = ALANLAR.slice().sort((a, b) => g[a.id].length - g[b.id].length);
     const enAz = g[sira[0].id].length;

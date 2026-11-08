@@ -4027,4 +4027,47 @@
       expect((A.niyet('bu hafta karşılaştırma özeti göster') || {}).ad).toBe('spi_karne');
     }));
   });
+  /* KING 5 tur 5 (klon simülasyonu, 2026-11-08): gerçek kullanıcı gibi 50 gün; kök neden düzeltmeleri. */
+  describe('King 5 — klon simülasyonu', () => {
+    async function sahnede(fn){
+      const k = K(); k._sifirla();
+      const y = Object.assign({}, k._ortam);
+      Object.assign(k._ortam, { zamanla:fn => fn(), simdi:() => new Date(2026, 3, 5, 1, 45) });
+      k.kur({ modul:'ays', ozet:() => [] });
+      try{ await fn(k, window.LIFEOS.KING_IC); }finally{ k._sifirla(); Object.assign(k._ortam, y); }
+    }
+    it('tanışma sorusu kendi işi olan cümleyi yutmaz; en çok 3 günde bir sorulur', () => sahnede(async (k, KI) => {
+      expect(KI.cevapGibi('gece insanıyım')).toBe(true);
+      ['uyuyamıyorum kanka', 'bugün deneme çözdüm 61 net', 'hedef ekle: 3 ayda A2 Almanca', 'kronolojiye ekle: 1453 İstanbul’un fethi',
+        'valorant oynadım 3 saat ya bugün hiç çalışamadım sonra'].forEach(c => expect([c, KI.cevapGibi(c)]).toEqual([c, false]));
+      const KS = window.LIFEOS.KISI;
+      expect(KS.tanismaSorusu([], '2026-04-05', '2026-04-04')).toBe(null);
+      expect(!!KS.tanismaSorusu([], '2026-04-07', '2026-04-04')).toBe(true);
+      expect(KS.tanismaSorusu([], '2026-04-07', 'kapali')).toBe(null);
+    }));
+    it('«bana soru sorma artık» tanışmayı kapatır; olumsuz gün teknik retle karşılanmaz', () => sahnede(async (k, KI) => {
+      expect(await k.isle('bana soru sorma artık')).toEqual({ tur:'tanisma-kapali' });
+      expect(KI.ortam.depo.oku(KI.TANISMA)).toBe('kapali');
+      expect(await k.isle('bugün hiç çalışmadım cuma ya')).toEqual({ tur:'olumsuz-gun' });
+      expect(k.akis().slice(-1)[0].metin).toContain('Olur böyle günler');
+      expect((await k.isle('bugün 40 soru çözdüm')).tur !== 'olumsuz-gun').toBe(true);
+    }));
+    it('hafıza sorusu: geçmiş zaman fiili ve tanışma sorusunun kelimeleri eşleşmez', () => {
+      const H = window.LIFEOS.Hafiza;
+      const l = [{ id:'m1', metin:'Boş zamanında ne yapmayı seversin → bugün deneme çözdüm 61 net', katman:'soz', kaynak:'kullanici', at:'2026-03-28', kapsam:'hepsi' },
+        { id:'m2', metin:'kahve içmem', katman:'soz', kaynak:'kullanici', at:'2026-03-29', kapsam:'hepsi' }];
+      expect(H.sorudaBul(l, 'bu hafta kaç soru çözdüm')).toEqual([]);
+      expect(H.sorudaBul(l, 'boş zamanımda ne yaparım')).toEqual([]);
+      expect(H.sorudaBul(l, 'ben ne içmem?').map(x => x.id)).toEqual(['m2']);
+    });
+    it('«X ekle: …» işlemi ve ana metni cümleden doldurulur', () => {
+      const A = window.LIFEOS.ARAC;
+      A.kur({ modul:'esp', araclar:[{ ad:'esp_arguman', tur:'yaz', aciklama:'Tez ekle.', onizle:() => ({ metin:'x' }), uygula:async () => ({}),
+        parametreler:{ type:'object', properties:{ islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'] }, metin:{ type:'string', maxLength:300 } }, required:['islem'] } }] });
+      try{
+        expect(A.tamamla('esp_arguman', {}, 'tez ekle: insan özgür doğmaz')).toEqual({ islem:'ekle', metin:'insan özgür doğmaz' });
+        expect(A.tamamla('esp_arguman', { islem:'sil' }, 'tezi sil: x')).toEqual({ islem:'sil' });
+      }finally{ A.kur({ modul:'esp', araclar:[] }); }
+    });
+  });
 })();

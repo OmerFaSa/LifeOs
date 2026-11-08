@@ -304,10 +304,15 @@ window.LIFEOS.PARCA.yazilar({
   }
   /* Bir soruya cevap gibi mi? Selam, hal hatır, soru ve tek harf değil. */
   const SELAM = /^(merhaba|merhabalar|selam|selamlar|sa|slm|mrb|hey|hi|hello|naber|nbr|nasılsın|nasilsin|ne haber|günaydın|gunaydin|iyi (akşamlar|aksamlar|geceler|günler|gunler|sabahlar)|hayırlı (sabahlar|günler)|king)[\s!.,?]*$/;
+  /* Kendi işi olan cümle tanışma cevabı değildir (King 5 tur 5, klon simülasyonu: «uyuyamıyorum kanka»,
+     «bugün deneme çözdüm 61 net», «hedef ekle: 3 ayda A2 Almanca», «kronolojiye ekle: 1453 …» hep
+     «Teşekkürler, not ettim» oldu, asıl istek kayboldu). Sayı, komut, bugün/dün sözü, kayıt fiili, his. */
+  const KENDI_ISI = /(\d|:|\b(bugün|dün|yarın|bu gece|şimdi|ekle|kaydet|yaz|sil|hatırlat|aç|göster|yap|ver|başlat)\b|(çöz|uyu|çalış|oyna|ye|iç|oku|yürü|koş|yap|öğren|bitir)(dum|düm|dım|dim|tum|tüm|tım|tim)\b|hissediyorum|yorgunum|yorgundum|uyuyamıyorum|stres|kötüyüm|mutsuz|sıkıldım)/;
   function cevapGibi(metin){
     const t = String(metin || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
     /* İşaretsiz soru da cevap değildir: «seninle konuşabiliyor muyum» en sevdiği yemek diye yazılıyordu. */
     if(t.length < 2 || SELAM.test(t) || KI.soruMu(t)) return false;
+    if(KENDI_ISI.test(t) || t.split(' ').length > 12) return false;
     return true;
   }
   const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;

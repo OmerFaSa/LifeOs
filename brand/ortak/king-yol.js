@@ -184,6 +184,8 @@ window.LIFEOS.KING = (function(){
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   const PLAN_SOZ_RE = /(bugünün|bugünkü|günün) (planı|plan|programı|akışı)/;
   const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
+  const OLUMSUZ_GUN_RE = /(hiç çalışmadım|çalışmadım|çalışamadım|hiçbir şey yapmadım|hiç bir şey yapmadım|bir şey yapamadım|boş geçti|hiç çalışasım yok)/;
+  const HIS_RE = /(hissediyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|bunaldım|baskı yapıyor|motivasyon|uyuyamıyorum|başarısız|suçlu|endişeliyim|kaygılıyım|konuşalım mı|konuşabilir miyiz)/;
   const OZET_GUN_RE = /^(?:bana\s+)?(?:bugünün|günün|bugünkü)\s+(?:\S+\s+)?özet(?:i|ini)?(?:\s+(?:çıkar|ver|göster|yaz|nedir|ne))?\s*[?.!]*$/;
   async function isle(metin){
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
@@ -335,6 +337,14 @@ window.LIFEOS.KING = (function(){
     { const AK = KI.aracKutusu(metin, t0); if(AK) return AK; }
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
     /* KING-4 §H: brifing, «unuttuğun ne var?», haftalık rapor, alışkanlık saati, «onu 30 dk yap». */
+    /* Ölçü soruları (brand/ortak/olcu.js): sayıyı kod üretir; modelden ve hafızadan önce. */
+    { const O = KI.L.OLCU && KI.L.OLCU.kuruluMu && KI.L.OLCU.kuruluMu() ? KI.L.OLCU.coz(metin, KI.bugunISO()) : null;
+      if(O){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+        KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenTanisma = null; KI.cipler = null;
+        KI.soyle(O.cevap, O.satirlar && O.satirlar.length ? O.satirlar : null);
+        return { tur:'olcu', id:O.id };
+      }
     const YN = KI.yardimNiyeti(t0);
     if(YN) return KI.yardimIsle(YN, metin);
     const KN = KI.kartNiyeti(t0);
@@ -367,12 +377,34 @@ window.LIFEOS.KING = (function(){
     if(DB) return KI.deneyBaslat(metin, DB[1]);
     if(KI.NOT_RE.test(t0)) return KI.notAra(metin, t0);
     /* Söz 24: «… artık sorma / sor». */
+    /* King 5 tur 5: «bana soru sorma artık» tanışma sorularını kapatır («beni tanı» yeniden açar). */
+    if(/(bana )?(soru sorma|soru sormayı bırak|sorularını kes|sürekli soru sor)/.test(t0) && !/(bana soru sor\b|soru sor$)/.test(t0.replace(/sorma.*$/, ''))){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyenTanisma = null; KI.cipler = null;
+      KI.ortam.depo.yaz(KI.TANISMA, 'kapali');
+      KI.soyle('Haklısın, tamam: artık kendiliğimden tanışma sorusu sormayacağım. İstersen bir gün «beni tanı» dersin.');
+      return { tur:'tanisma-kapali' };
+    }
+    if(/^beni tanı\b/.test(t0) && KI.ortam.depo.oku(KI.TANISMA) === 'kapali') KI.ortam.depo.yaz(KI.TANISMA, '');
     const SK = KI.sormaKomutu(metin);
     if(SK && !KI.veriGibi(metin)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       KI.bekleyen = null; KI.cipler = null;
       KI.soyle(KI.sormaUygula(SK));
       return { tur:'sorma', sorma:SK.sorma };
+    }
+    /* King 5 tur 5 (klon simülasyonu): «bugün hiç çalışmadım cuma ya», «dün hiçbir şey yapmadım» teknik
+       retle («yapılmış bir işi anlatmıyor») ya da «Bugün açılıyor»la karşılanıyordu. Kayıt yazılmaz;
+       King insanca karşılar, planı olan modülde yarını hafifletmeyi önerir. */
+    if(OLUMSUZ_GUN_RE.test(t0) && !KI.soruMu(metin) && !/\d/.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenTanisma = null;
+      const A = KI.ARAC && KI.ARAC();
+      const hafif = A && A.bul && A.bul(KI.ayar.modul + '_gecici_sure');
+      KI.cipler = hafif ? [{ ad:'Yarını hafiflet', is:'doldur:yarın sadece 90 dakika çalışacağım' }] : null;
+      KI.soyle('Olur böyle günler; kayda bir şey yazmadım.' + (hafif ? ' İstersen yarını biraz hafifletelim, tekrar ritme girmek kolaylaşır.' : ' Yarın kaldığın yerden devam ederiz.'));
+      return { tur:'olumsuz-gun' };
+    }
     }
     /* Söz 22: hafıza komutları. */
     const HK = KI.L.Hafiza && KI.hafiza() ? KI.L.Hafiza.komut(metin) : null;
@@ -424,7 +456,7 @@ window.LIFEOS.KING = (function(){
     /* A3 hızlı yol (KING-4): cümleden parametresi çıkan araç (arac.js söz 4)
        sayfa ve veri tahmininden önce; okuma sorusu sayfa açmaz, sistemden
        cevaplanır. Yazan araç yine önizlenir ve onay ister. */
-    const KA = KI.ARAC() && !KI.paylasim ? KI.ARAC().kuralla(metin) : null;
+    const KA = KI.ARAC() && !KI.paylasim && !HIS_RE.test(t0) ? KI.ARAC().kuralla(metin) : null;   // his cümlesi araca düşmez (King 5 tur 5)
     if(KA){
       const sen = { kim:'sen', metin:String(metin).trim() };
       KI.akis.push(sen);
@@ -489,11 +521,12 @@ window.LIFEOS.KING = (function(){
     /* Anlatım sorusu sayfa açmaz (King 5, deneme: «Almancada der, die, das farkını kısaca anlat» → «Dil
        açılıyor»). Açık komut («dil sayfasını aç») yine sayfadır. */
     if(y.tur === 'git' && y.kaynak !== 'komut' && /(anlat|açıkla|nedir|ne demek|farkı|nasıl yapılır|neden|örnek ver)/.test(t0)) y = { tur:'bilinmiyor' };
+    if(y.tur === 'git' && y.kaynak !== 'komut' && HIS_RE.test(t0)) y = { tur:'bilinmiyor' };
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
        kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
        sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),
        «… bölümünü aç» sayfa değil bölüm işidir. */
-    const NA = KI.ARAC() && !KI.paylasim ? KI.ARAC() : null;
+    const NA = KI.ARAC() && !KI.paylasim && !HIS_RE.test(t0) ? KI.ARAC() : null;
     const ns = NA && NA.niyet ? NA.niyetSinif(metin) : null;
     /* Sayfa sözü geçen kısa cümle («haftalık programımı göster») sayfadır; Merkez'e gitme koşuluyla aynı. */
     /* Kısa emir («kitap ekle») ise iş yapar; kısa dilek («diksiyon çalışmak istiyorum») sayfadır. */

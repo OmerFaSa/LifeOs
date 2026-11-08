@@ -459,7 +459,7 @@ R.Calc = (function(){
         let value = null, missed = false;
         if(day){
           const target = U.sum(day.blocks.filter(b => b.slot !== 'Dinlenme').map(b => b.targetMin || 0));
-          const actual = U.sum(day.blocks.map(b => b.actualMin || 0));
+          const actual = U.sum(day.blocks.map(b => b.actualMin || 0)) + (Number(day.freeMin) || 0);
           if(actual > 0) value = target ? U.clamp(actual/target, 0, 1) : 1;
           else if(!future && day.blocks.some(b => b.status === 'skipped')) missed = true;
         }else if(!future && iso >= R.PLAN.startISO){
@@ -502,7 +502,7 @@ R.Calc = (function(){
   function minimumDayMet(dayISO, on){
     const day = S.days[dayISO || U.todayISO()];
     if(!day) return false;
-    const mins = U.sum(day.blocks.map(b => b.actualMin || 0));
+    const mins = U.sum(day.blocks.map(b => b.actualMin || 0)) + (Number(day.freeMin) || 0);
     const due = on ? on.due : dueCards().length;
     const reviewedToday = on ? (on.gozden[dayISO || U.todayISO()] || 0)
       : S.cards.filter(c => c.lastReviewedAt === (dayISO || U.todayISO())).length;

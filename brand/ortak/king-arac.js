@@ -1193,6 +1193,7 @@ window.LIFEOS.PARCA.yazilar({
     const sonuclar = [], dogrudan = [];
     let yazma = null, yerine = false;
     for(const c of (r.arac || []).slice(0, 3)){
+      if(c && A.tamamla) c.param = A.tamamla(c.ad, c.param, metin);
       const d = A.dogrula(c && c.ad, c && c.param);
       if(!d.ok){ red.push({ ad:String(c && c.ad || ''), neden:d.hata }); continue; }
       if(d.arac.tur === 'yaz'){ if(!yazma) yazma = d; continue; }
@@ -1211,6 +1212,15 @@ window.LIFEOS.PARCA.yazilar({
       return aracKart(o);
     }
     dogrudan.forEach(x => KI.soyle(x.cevap, x.satirlar));
+    /* Boş okuma (King 5 tur 5): sonuç «veri yok» iken model geçmişten öğe uyduruyordu («Kronolojide 1453 ve
+       1071 var» — kayıt yoktu). Okunacak bir şey yoksa kodun cümlesi söylenir, model çağrılmaz. */
+    const BOS = /(veri yok|kayıt yok|kayıtlı .{0,30} yok|henüz .{0,30} yok)/i;
+    if(sonuclar.length && sonuclar.every(x => (Array.isArray(x.sonuc) && !x.sonuc.length) || ((x.satirlar || []).length && (x.satirlar || []).every(s => BOS.test(s))))){
+      const s = [].concat.apply([], sonuclar.map(x => x.satirlar || [])).map(x => String(x).replace(/\s*\(veri yok\)\.?$/, '.'));
+      KI.soyle(s.length ? s.join(' ') : 'Burada henüz kayıt yok.');
+      KI.cipler = KI.oneriListesi(true);
+      return { tur:'arac-oku', n:sonuclar.length, bos:true };
+    }
     if(sonuclar.length){
       /* İkinci tur: sonucu kod üretti; model yalnız cümleye çevirir (HKM sayıyı denetler).
          A4: model yine araç isterse (HKM döngüsü, en çok 4 adım) okumalar yapılır,

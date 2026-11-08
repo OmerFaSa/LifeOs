@@ -794,6 +794,8 @@ window.LIFEOS.PARCA.yazilar({
   const SORU_DOLGU = /(^|\s)(bana|bir|tane|daha|soru|sorusu|sor|sorar|ver|getir|çek|lütfen|king|hakkında|konusunda|ile|ilgili|beni|test|et|çözelim|çözeyim|mısın|misin|musun)(?=\s|$)/g;
   const ETIKETLER = ['ölçüldü', 'hesaplandı', 'tahmin', 'veri yok'];
   function kartNiyeti(t){
+    /* «bana soru sorma artık» bir istek değil, ret (King 5 tur 5): soru kartı aranmaz. */
+    if(/soru sorma|sormayı bırak|sorma artık|soru soruyon/.test(t)) return null;
     if(KART_SORU.test(t)){
       const konu = t.replace(/[.,!?;:]/g, ' ').replace(SORU_DOLGU, ' ').replace(SORU_DOLGU, ' ').replace(/\s+/g, ' ').trim();
       return { tur:'soru', konu };

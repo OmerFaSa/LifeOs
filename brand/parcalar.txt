@@ -130,6 +130,7 @@ js/core/king-kart.js
 js/core/gunveri.js
 js/core/king-arac.js
 js/core/king-devrim.js
+js/core/olcu.js
 js/core/king-yol.js
 js/core/olumsuz.js
 js/core/hkmbag.js
@@ -589,6 +590,7 @@ js/app.js
 ../js/core/gunveri.js
 ../js/core/king-arac.js
 ../js/core/king-devrim.js
+../js/core/olcu.js
 ../js/core/king-yol.js
 ../js/core/minik.js
 ../js/core/simge.js

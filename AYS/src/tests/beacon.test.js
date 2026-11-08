@@ -746,15 +746,16 @@
       expect(R.S.days[BUGUN].blocks[0].actualMin).toBeNull();
     });
 
-    it('yazılamayan parça sebebiyle gösterilir; uydurma blok açılmaz', async () => {
+    /* King 5 tur 5 (klon simülasyonu): plansız derse söylenen süre reddediliyordu; artık günün serbest
+       dakikasına yazılır (soru kaydı gibi). Uydurma blok yine açılmaz. */
+    it('bloğu olmayan dersin süresi günün serbest dakikasına yazılır; uydurma blok açılmaz', async () => {
       gunuKur();
       const n = teklif('1 saat fizik çalıştım');
       n.okuma = await B().kayitOku(n);
-      expect(n.okuma.yazilacak.length).toBe(0);
-      expect(n.okuma.yazilamaz[0].why).toContain('blok yok');
-      expect(B().canApply(n)).toBe(false);
-      expect((await B().applyIntent(n)).ok).toBe(false);
+      expect(n.okuma.yazilacak.length).toBe(1);
+      expect((await B().applyIntent(n)).ok).toBe(true);
       expect(R.S.days[BUGUN].blocks.length).toBe(1);
+      expect(R.S.days[BUGUN].freeMin).toBe(60);
     });
 
     /* KR-1: HKM olumsuzluğu kendisi de süzer, ama modül ona güvenmez. */

@@ -442,6 +442,10 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
               "reasoning": ((k.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0)}
         if araclar:
             ek["cagrilar"] = arac.openai_cagrilari(secim.get("message"))
+            if not ek["cagrilar"]:
+                yazili = arac.metin_cagrilari(metin, araclar)
+                if yazili:
+                    ek["cagrilar"], metin = yazili, ""
         # Kullanim bilgisi yoksa None: olculmeyen sifir degildir (D-16).
         return (metin, k.get("prompt_tokens"), k.get("completion_tokens"),
                 secim.get("finish_reason") in KESILDI, ek)

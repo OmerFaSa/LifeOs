@@ -232,6 +232,26 @@ window.LIFEOS.ARAC = (function(){
     return { param:temiz };
   }
 
+  /* King 5 tur 5 (klon simülasyonu): «ilaç ekle: D vitamini», «tez ekle: …», «market listesine muz ekle»
+     → «… için yapılacak işlem ne olsun?». İşlem cümlenin fiilinden, ana metin «X: …»dan okunur; yalnız
+     boş alan doldurulur, şemadaki değerler dışında hiçbir şey yazılmaz. */
+  const ISLEM = [['ekle', /(ekle|yeni|kaydet|kart yap|oluştur|yaz:)/], ['sil', /(sil|kaldır|çıkar)/], ['guncelle', /(güncelle|değiştir|düzelt)/]];
+  function tamamla(ad, param, metin){
+    const a = bul(String(ad || ''));
+    const s = a && sema(a);
+    if(!s || !s.properties) return param;
+    const p = Object.assign({}, param || {});
+    const t = String(metin || '').toLocaleLowerCase('tr');
+    const e = s.properties.islem && s.properties.islem.enum;
+    if(e && p.islem == null){ const i = ISLEM.find(x => e.indexOf(x[0]) >= 0 && x[1].test(t)); if(i) p.islem = i[0]; }
+    const iki = String(metin || '').match(/^[^:]{2,40}:\s*(.{2,})$/);
+    if(iki && p.islem !== 'sil'){
+      const k = ['metin', 'ad', 'baslik', 'kitap'].find(k => s.properties[k] && s.properties[k].type === 'string' && p[k] == null);
+      if(k) p[k] = iki[1].trim().slice(0, s.properties[k].maxLength || 300);
+    }
+    return p;
+  }
+
   function dogrula(ad, param){
     const a = bul(String(ad || ''));
     if(!a) return { ok:false, hata:'katalogda böyle bir araç yok' };
@@ -434,7 +454,7 @@ window.LIFEOS.ARAC = (function(){
 
   function _sifirla(){ modul = null; modulAraclar = []; ortak = []; }
 
-  const api = { kur, ortakKur, modulSec, liste, bul, dogrula, paramDogrula, modelIcin, calistir, onizle, uygula,
+  const api = { kur, ortakKur, modulSec, liste, bul, dogrula, tamamla, paramDogrula, modelIcin, calistir, onizle, uygula,
     kademe, kuralla, ara, niyet, niyetSinif, harita, isler, isAra, ISLER, GRUP_AD, sayilar, sayiKorunur, HARITA, MODUL_AD, kuruluMu:() => liste().length > 0, _sifirla };
   return api;
 })();

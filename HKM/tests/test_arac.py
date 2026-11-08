@@ -258,6 +258,21 @@ def run():
         ok("Gerçekçi ol" in sohbet.KISA_KIMLIK and "Gerçekçi ol" in sohbet.SISTEM_METNI)
     test("dayanaksız yargı ve güvence düzeltilir; talimat profesyonel", t_gercekci)
 
+    def t_klon_simulasyonu():
+        # King 5 tur 5: kucuk model cagriyi metne yaziyordu («Esp_olay(islem="ekle", yil=1071)»), kayit olmuyordu.
+        kat = [{"ad": "esp_olay", "aciklama": "Olay ekler.", "tur": "yaz"}]
+        eq(arac.metin_cagrilari('Esp_olay(islem="ekle", baslik="Malazgirt", yil=1071)', kat),
+           [{"ad": "esp_olay", "param": {"islem": "ekle", "baslik": "Malazgirt", "yil": 1071}}])
+        eq(arac.metin_cagrilari("Bu konuda print(x) yazabilirsin.", kat), [])
+        # His cumlesinde arac sunulmaz, model once dinler («kötü hissediyorum» sessizce enerji kaydı oluyordu).
+        t = _tasiyici(("Anlıyorum, zor bir gün olmuş gibi.", []))
+        r = sohbet.konus(_con(), _cfg(), "kendimi başarısız hissediyorum", BUGUN, transport=t, araclar=KATALOG)
+        eq(r["text"], "Anlıyorum, zor bir gün olmuş gibi.")
+        no(t.gorulen[0]["ayar"].get("araclar"), "his cumlesinde arac yok")
+        ok("Önce onu dinle" in t.gorulen[0]["sistem"])
+        no("baş görevlisi" in sohbet.selam_cevabi("Merhaba!", "king"))
+    test("metne yazılmış araç çağrısı gerçek çağrıya döner; his cümlesi araçsız dinlenir", t_klon_simulasyonu)
+
     def t_soz_verme_katalogsuz():
         # Deneme kullanimi (2026-11-08, gemma4): «yarin 7'de kosuyu hatirlatirim» — hicbir sey kurulmadi.
         t = _tasiyici(("Yarın sabah 7'de koşuyu hatırlatırım.", []), ("Tamam, 8'de hatırlatacağım.", []))
