@@ -427,6 +427,8 @@ def rapor(metin):
             onceki = None
             continue
         mod, puan = rapor_modulu(p)
+        if not _miktarli(p) and re.search(r"ilaç|ilac|damla|vitamin|hap|takviye", p, re.I):
+            continue    # «D vitamini damlamı içtim»: ilaç alımı miktar sorusu değildir (King 5 tur 5)
         if not _miktarli(p):
             # Miktari olmayan parca bir kayit degildir; alani biliniyorsa
             # sorulur, bilinmiyorsa («bugun yorgundum») sessizce gecer.

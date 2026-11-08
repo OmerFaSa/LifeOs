@@ -266,8 +266,10 @@ R.KingArac = (function(){
         s.uyari || ''].filter(Boolean);
     }
     if(ad === 'hatalar'){
-      const d = s.dagilim || [];
-      return d.length ? d.map(x => x.ad + ': ' + x.adet) : [yz('ays.core.kingarac.yanlis-defterinde-kayit-yok')];
+      const d = s.dagilim || [], k = s.kayitlar || [];
+      /* King 5 tur 5 (klon): King'le eklenen kayıt etiketsiz; dağılım boşken «kayıt yok» deniyordu. */
+      if(d.length) return d.map(x => x.ad + ': ' + x.adet);
+      return k.length ? k.slice(0, 6).map(e => e.tarih + ' · ' + [e.konu || e.test, e.not].filter(Boolean).join(' · ')) : [yz('ays.core.kingarac.yanlis-defterinde-kayit-yok')];
     }
     return null;
   }
@@ -282,7 +284,10 @@ R.KingArac = (function(){
       calistir:p => {
         const ham = t.execute(p || {});
         const sonuc = ham === undefined ? { sonuc:'veri yok' } : T.sanitize(ham);
-        return { sonuc, satirlar:satirlar(t.name, sonuc) };
+        const st = satirlar(t.name, sonuc);
+        /* King 5 tur 5 (klon): yanlış defterini model «doğru ilke, durum, kapandi…» diye alan adlarıyla anlatıyordu. */
+        if(t.name === 'hatalar' && st && (sonuc.kayitlar || []).length) return { sonuc, satirlar:st, cevap:'Yanlış defterinde ' + sonuc.kayitlar.length + ' kayıt var:' };
+        return { sonuc, satirlar:st };
       },
     }));
   }

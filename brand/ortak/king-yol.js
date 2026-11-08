@@ -186,7 +186,7 @@ window.LIFEOS.KING = (function(){
   const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
   const ILISKI_RE = /(ilişki|etkisi|etkiliyor|günler(?:de|i)?\s.*(?:mi|mı|mu|mü)\b)/;
   const OLUMSUZ_GUN_RE = /(hiç çalışmadım|çalışmadım|çalışamadım|hiçbir şey yapmadım|hiç bir şey yapmadım|bir şey yapamadım|boş geçti|hiç çalışasım yok)/;
-  const HIS_RE = /(hissediyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|bunaldım|baskı yapıyor|motivasyon|uyuyamıyorum|başarısız|suçlu|endişeliyim|kaygılıyım|konuşalım mı|konuşabilir miyiz)/;
+  const HIS_RE = /(hissediyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|bunaldım|bunalıyorum|baskı yapıyor|motivasyon|uyuyamıyorum|başarısız|suçlu|endişeliyim|kaygılıyım|konuşalım mı|konuşabilir miyiz|yetişemiyorum|yetişemeyeceğim|üstüme geliyor|nasıl yetişeceğim)/;
   const OZET_GUN_RE = /^(?:bana\s+)?(?:bugünün|günün|bugünkü)\s+(?:\S+\s+)?özet(?:i|ini)?(?:\s+(?:çıkar|ver|göster|yaz|nedir|ne))?\s*[?.!]*$/;
   async function isle(metin){
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
@@ -397,7 +397,7 @@ window.LIFEOS.KING = (function(){
     /* King 5 tur 5 (klon simülasyonu): «bugün hiç çalışmadım cuma ya», «dün hiçbir şey yapmadım» teknik
        retle («yapılmış bir işi anlatmıyor») ya da «Bugün açılıyor»la karşılanıyordu. Kayıt yazılmaz;
        King insanca karşılar, planı olan modülde yarını hafifletmeyi önerir. */
-    if(OLUMSUZ_GUN_RE.test(t0) && !KI.soruMu(metin) && !/\d/.test(t0)){
+    if(OLUMSUZ_GUN_RE.test(t0) && !KI.soruMu(metin) && !/\d+\s*(soru|dk|dakika|saat|sayfa|paragraf|problem)/.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenTanisma = null;
       const A = KI.ARAC && KI.ARAC();
@@ -523,6 +523,7 @@ window.LIFEOS.KING = (function(){
        açılıyor»). Açık komut («dil sayfasını aç») yine sayfadır. */
     if(y.tur === 'git' && y.kaynak !== 'komut' && /(anlat|açıkla|nedir|ne demek|farkı|nasıl yapılır|neden|örnek ver)/.test(t0)) y = { tur:'bilinmiyor' };
     if(y.tur === 'git' && y.kaynak !== 'komut' && HIS_RE.test(t0)) y = { tur:'bilinmiyor' };
+    if(y.tur === 'git' && y.kaynak === 'sayfa' && /(?:d|t)[ıiuü](?:k|m|n)?[.!]*$/.test(t0)) y = { tur:'bilinmiyor' };   // «bugün okul açıldı»: durum cümlesi
     if(y.tur === 'git' && y.kaynak !== 'komut' && KI.soruMu(metin) && t0.split(' ').length > 4 && !/(aç|göster|git|nerede)/.test(t0)) y = { tur:'bilinmiyor' };
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
        kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
@@ -568,7 +569,8 @@ window.LIFEOS.KING = (function(){
     /* Söz 35: anlatımın içindeki kayıtlar tek kartta; sohbet sürer. */
     let bulunan = (y.tur === 'bilinmiyor' || y.tur === 'ozet' || y.tur === 'veri' || (y.tur === 'git' && y.kaynak !== 'komut')) ? KI.sohbettenBul(metin) : null;
     /* Tek kayıtlık cümleyi tek satır kapısı zaten önizler (söz 10); kart yalnız birden çok kayıtta. */
-    if(bulunan && y.tur === 'veri' && bulunan.filter(o => o.modul !== 'defter').length < 2) bulunan = null;
+    if(bulunan && y.tur === 'veri' && (bulunan.filter(o => o.modul !== 'defter').length < 2
+      || (/ · /.test(String((y.onizleme || {}).metin || '')) && bulunan.every(o => o.modul === KI.ayar.modul || o.modul === 'defter')))) bulunan = null;
     if(bulunan){
       KI.bulunanGoster(bulunan, yz('ortak.king-yol.anlattiklarinda-sunlari-buld'));
       if(!KI.baglanti()) return { tur:'bulunan', n:bulunan.length };

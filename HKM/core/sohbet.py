@@ -774,10 +774,11 @@ HIS_RE = re.compile(
     r"(hissediyorum|hissetmiyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|stres altında|bunaldım|yalnızım|"
     r"baskı yapıyor|motivasyon(?:um)? yok|motivasyon ver|uyuyamıyorum|başarısız|suçlu|korkuyorum|"
     r"endişeliyim|kaygılıyım|canım sıkkın|konuşalım mı|konuşabilir miyiz|dertleş|geçemeyecekmişim|üstüme geliyor|"
-    r"kötü geçti|bırakmak istiyorum|yoruldum|sıkıldım|zor geçti|ağlamak|teşekkür|sağ ol|dinlediğin için)", re.I)
+    r"kötü geçti|bırakmak istiyorum|yoruldum|sıkıldım|zor geçti|ağlamak|teşekkür|sağ ol|dinlediğin için|"
+    r"yetişemiyorum|nasıl yetişeceğim|bunalıyorum|eğleniyor ben)", re.I)
 # Kullanıcının anmadığı bölüme yönlendirme («ESP bölümüne odaklanabilirsin», «SPİ bölümünü kontrol et»):
 # küçük model bunu her cevaba ekliyordu (klon simülasyonu aşama 1-2). Cümle düşer, kalan söylenir.
-BOLUM_YONLENDIR = re.compile(r"\b(AYS|SPİ|SPI|ESP)\s+bölüm\w*\b[^.!?]*(?:odaklan|kontrol|incele|bak|gözden geçir|değerlendir|ele al)\w*[^.!?]*[.!?]?", re.I)
+BOLUM_YONLENDIR = re.compile(r"\b(AYS|SPİ|SPI|ESP)\s+bölüm\w*", re.I)
 
 
 BOLUM_AD = {"ays": "AYS (sınav hazırlığı)", "spi": "SPİ (sağlık)", "esp": "ESP (kişisel gelişim)"}

@@ -43,6 +43,14 @@
         expect(O().coz('matematik netim son 2 denemede nasıl değişti', BUGUN).cevap).toContain('20 → 23,25 net (+3,25)');
         expect(O().coz('sınava kaç gün kaldı', BUGUN).cevap).toBe('Sınava 223 gün kaldı.');
         expect(O().coz('bu hafta soru sayım geçen haftaya göre arttı mı', BUGUN).cevap).toContain('geçen hafta 30 soru. Arttı (+90)');
+        /* Ay adı: «ekim ayında», «ekimde eylüle göre» (aşama 3: son 7 gün sanılıyordu). */
+        expect(O().donem('ekim ayında kaç soru çözdüm', BUGUN)).toEqual({ bas:'2026-10-01', son:'2026-10-31', ad:'ekim' });
+        expect(O().coz('ekimde eylüle göre daha çok mu soru çözdüm', BUGUN).cevap).toContain('Karşılaştıracak eylül ayında kayıt yok');
+        /* Dönem özeti (aşama 3): modülün ölçüleri tek cevapta. */
+        const oz = O().coz('bu ay genel olarak nasıldım', BUGUN);
+        expect(oz.id).toBe('ozet');
+        expect(oz.satirlar.join(' | ')).toContain('Çözülen soru: 120 soru (3 gün)');
+        expect(oz.satirlar.join(' | ')).toContain('net: 1 deneme, 70 → 70');
       }finally{ O()._sifirla(); }
     });
   });

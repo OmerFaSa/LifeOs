@@ -286,6 +286,13 @@ def run():
         ok("ortalama 40 soru" in c and "80 soru" in c and "%50 daha az" in c and "neden-sonuç değil" in c, c)
         ok("en az 6 gün" in iliski.cevap(con, "az uyuduğum günler daha az soru mu çözüyorum", "2026-07-03"))
         eq(iliski.anla("bu hafta kaç soru çözdüm"), None)
+        # Aşama 3: brifing cümlesinde satırlarda olmayan sayı (uydurma) düşer, kodun cümlesi kalır.
+        from core import kendiliginden
+        t = _tasiyici(("Günümüz planı 100'e odaklanmak. Dün tek bulgu, 50'lik bir artış.", []))
+        r = kendiliginden.kart_cumlesi(_con(), _cfg(), {"tur": "brifing", "satirlar": ["Plan: 3 blok", "Bulgu yok"]}, transport=t)
+        no(r["ok"]); ok("satırlarda olmayan sayı" in r["note"])
+        t2 = _tasiyici(("Bugün 3 blok var.", []))
+        eq(kendiliginden.kart_cumlesi(_con(), _cfg(), {"tur": "brifing", "satirlar": ["Plan: 3 blok"]}, transport=t2)["text"], "Bugün 3 blok var.")
         eq(patron.parse("neden"), "neden")
     test("metne yazılmış araç çağrısı gerçek çağrıya döner; his cümlesi araçsız dinlenir", t_klon_simulasyonu)
 

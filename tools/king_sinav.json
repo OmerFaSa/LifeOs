@@ -2869,6 +2869,86 @@
       "b": [
         "veri"
       ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "eylülde kaç soru çözdüm",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "bu ay genel olarak nasıldım",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "her şey çok hızlı akıyor yetişemiyorum",
+      "b": [
+        "merkez"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "bugün okul açıldı",
+      "b": [
+        "merkez"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "hedef sıralamama yetiyor mu bu netler",
+      "b": [
+        "arac:ays_puan_tahmini"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "AYT netim kaç",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "spi",
+      "m": "spi",
+      "c": "ilaçlarım",
+      "b": [
+        "tur:olcu"
+      ]
+    },
+    {
+      "g": "esp",
+      "m": "esp",
+      "c": "kronolojiye ekle: 1071 Malazgirt Meydan Muharebesi",
+      "b": [
+        "arac:esp_olay"
+      ]
+    },
+    {
+      "g": "esp",
+      "m": "esp",
+      "c": "tez ekle: insan özgür doğmaz",
+      "b": [
+        "arac:esp_arguman"
+      ]
+    },
+    {
+      "g": "spi",
+      "m": "spi",
+      "c": "dolaba 6 yumurta ekle",
+      "b": [
+        "merkez"
+      ]
     }
   ]
 }

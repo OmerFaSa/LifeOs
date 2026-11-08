@@ -301,9 +301,11 @@ LIFEOS.Hafiza = (function(){
     if(!kendi || !sozc.length) return [];
     const kok = w => w.slice(0, Math.max(4, w.length - 2));
     return etkin(liste).filter(x => {
-      /* Tanışma kaydı «soru → cevap»: yalnız kişinin cevabı eşleşir, sorunun kelimeleri değil. */
+      /* Tanışma kaydı «soru → cevap»: yalnız kişinin cevabı eşleşir, sorunun kelimeleri değil; iki kelime gerekir
+         (King 5 tur 5: «hasta olduğum günlerden sonra toparlanmam…» tek kelimeyle bir tanışma kaydına düşüyordu). */
+      const tanisma = String(x.metin).indexOf('→') >= 0;
       const kw = String(x.metin).split('→').pop().toLocaleLowerCase('tr').split(/[^a-zçğıöşü0-9]+/);
-      return sozc.some(w => kw.some(v => v.length >= 4 && v.startsWith(kok(w))));
+      return sozc.filter(w => kw.some(v => v.length >= 4 && v.startsWith(kok(w)))).length >= (tanisma ? 2 : 1);
     }).slice(0, 3);
   }
 

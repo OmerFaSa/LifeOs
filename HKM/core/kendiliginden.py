@@ -280,5 +280,13 @@ def kart_cumlesi(con, cfg, govde, transport=None):
     r = ai.ask(con, cfg, "king", "kart." + tur, [{"role": "user", "content": KART_TALIMAT[tur]}],
                baglam="\n".join(satirlar), sistem=KART_SISTEM, seviye="alt", transport=transport)
     ok = bool(r.get("ok") and (r.get("text") or "").strip())
+    # Kart cümlesi satırları yeniden söyler; satırlarda olmayan HER sayı uydurmadır (King 5 tur 5, klon simülasyonu:
+    # boş günde «Dün tek bulgu, 50'lik bir artış», «verilerin %30 daha hızlı ilerlemesi»). Düşerse istemci kodun cümlesini söyler.
+    if ok:
+        var = set(ai._sayilar("\n".join(satirlar)))
+        fazla = [s for s in ai._sayilar(r.get("text") or "") if s not in var]
+        if fazla:
+            return {"ok": False, "text": None, "note": "satırlarda olmayan sayı: %s" % ", ".join(fazla[:5]),
+                    "model": r.get("model"), "kat": (r.get("motor") or {}).get("kat")}
     return {"ok": ok, "text": (r.get("text") or "").strip() if ok else None, "note": r.get("note"),
             "model": r.get("model"), "kat": (r.get("motor") or {}).get("kat")}

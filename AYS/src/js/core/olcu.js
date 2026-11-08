@@ -40,8 +40,19 @@ window.LIFEOS.OLCU = (function(){
   function kur(o){ ayar = o && Array.isArray(o.olculer) ? o : null; }
 
   /* Dönem: { bas, son, ad } ya da { adet, ad } (son N olay). */
+  const AYLAR = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
+  const AY_RE = new RegExp('(?:^|\\s)(' + AYLAR.join('|') + ')(?:da|de|ta|te|a|e|ya|ye|ın|in|un|ün|ında|inde|unda|ünde)?(?:\\s+ay[ıi]nda)?(?=\\s|$|[?.!,])', 'g');
+  function ayDonem(ay, bugun){
+    let y = Number(bugun.slice(0, 4));
+    if(ay > Number(bugun.slice(5, 7))) y--;                     // söylenen ay bu yıl henüz gelmediyse geçen yılın ayı
+    const bas = y + '-' + String(ay).padStart(2, '0') + '-01';
+    const d = new Date(y, ay, 0), son = iso(d) < bugun ? iso(d) : bugun;
+    return { bas, son, ad:AYLAR[ay - 1] };
+  }
   function donem(t, bugun){
     const n = x => SAYI[x] || Number(x);
+    const aylar = [...t.matchAll(AY_RE)].map(m => AYLAR.indexOf(m[1]) + 1).filter(x => x > 0);
+    if(aylar.length){ const d = ayDonem(aylar[0], bugun); if(aylar.length > 1) d.once = ayDonem(aylar[1], bugun); return d; }
     let m = t.match(/son (\d+|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on) (deneme|sınav)/);
     if(m) return { adet:n(m[1]), ad:'son ' + n(m[1]) + ' deneme' };
     m = t.match(/son (\d+|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on|otuz) (gün|hafta|ay)/);
@@ -56,6 +67,8 @@ window.LIFEOS.OLCU = (function(){
     if(/geçen hafta/.test(t)) return { bas:gunEkle(bugun, -dow - 7), son:gunEkle(bugun, -dow - 1), ad:'geçen hafta' };
     if(/\bdün\b|dünkü/.test(t)) return { bas:gunEkle(bugun, -1), son:gunEkle(bugun, -1), ad:'dün' };
     if(/bugün/.test(t)) return { bas:bugun, son:bugun, ad:'bugün' };
+    if(/(bu yaz|yaz nasıl|yazın\b|yaz tatili)/.test(t)) return { bas:bugun.slice(0, 4) + '-06-21', son:bugun < bugun.slice(0, 4) + '-09-22' ? bugun : bugun.slice(0, 4) + '-09-22', ad:'bu yaz' };
+    if(/bu yıl|bu sene/.test(t)) return { bas:bugun.slice(0, 4) + '-01-01', son:bugun, ad:'bu yıl' };
     return null;
   }
 
@@ -76,9 +89,30 @@ window.LIFEOS.OLCU = (function(){
     return { l, deger:!l.length ? null : o.tur === 'ortalama' ? t / l.length : o.tur === 'son' ? l[l.length - 1].v : t };
   }
 
+  const OZET = /(genel olarak|nasıl geçti|nasıldım|özetle|özetini çıkar)/;
+  /* Dönem özeti: modülün ölçüleri (genel olmayan, toplam/ortalama/son ve deneme) tek cevapta. */
+  function ozet(t, bugun){
+    const d = donem(t, bugun) || { bas:gunEkle(bugun, -29), son:bugun, ad:'son 30 gün' };
+    const satir = [];
+    for(const o of ayar.olculer){
+      if(o.tur === 'anlik' || o.komut) continue;
+      if(o.tur === 'olay'){
+        const l = (o.olaylar(null, t) || []).filter(x => x && x.v != null && x.t >= d.bas && x.t <= d.son).sort((x, y) => x.t < y.t ? -1 : 1);
+        if(l.length) satir.push((typeof o.adOf === 'function' ? o.adOf(t) : o.ad) + ': ' + l.length + ' ' + (o.olayAd || 'deneme') + ', ' + yaz(l[0].v, 100) + ' → ' + yaz(l[l.length - 1].v, 100));
+        continue;
+      }
+      const r = topla(o, null, d);
+      if(r.deger == null) continue;
+      satir.push(o.ad.charAt(0).toLocaleUpperCase('tr') + o.ad.slice(1) + ': ' + (o.tur === 'ortalama' ? 'ortalama ' : '') + yaz(r.deger, o.ondalik ? 10 : 1) + ' ' + o.birim + ' (' + r.l.length + ' gün)');
+    }
+    const bas = d.ad.charAt(0).toLocaleUpperCase('tr') + d.ad.slice(1);
+    return { id:'ozet', cevap:satir.length ? bas + ' kayıtlarından:' : bas + ' için kayıt yok.', satirlar:satir.length ? satir : null };
+  }
+
   function coz(metin, bugun){
     if(!ayar) return null;
     const t = kucuk(metin);
+    if(OZET.test(t) && !BASKA.test(t)) return ozet(t, bugun);
     /* Ölçü değil: hedef/puan karşılaştırması, kart sayısı, tanım sorusu («ne işe yarıyor?»). */
     /* `komut`: kısa ad da sorudur («ilaçlarım»). */
     if((!SORU.test(t) && !ayar.olculer.some(o => o.komut && o.es.test(t))) || BASKA.test(t)) return null;
@@ -132,13 +166,13 @@ window.LIFEOS.OLCU = (function(){
     if(degisim){
       const uzun = gunler(d.bas, d.son).length;
       /* «bu hafta» / «bu ay» tam önceki hafta ve ayla karşılaştırılır (pazartesi günü önceki dönem tek gün oluyordu). */
-      const once = d.ad === 'bu hafta' ? donem('geçen hafta', bugun) : d.ad === 'bu ay' ? donem('geçen ay', bugun)
+      const once = d.once ? d.once : d.ad === 'bu hafta' ? donem('geçen hafta', bugun) : d.ad === 'bu ay' ? donem('geçen ay', bugun)
         : { bas:gunEkle(d.bas, -uzun), son:gunEkle(d.bas, -1) };
       const r0 = topla(o, alt, once);
-      if(r0.deger == null) return { id:o.id, satirlar, cevap:bas + ' ' + ad + ': ' + deger + ' (' + kac + '). Karşılaştıracak önceki dönemde kayıt yok.' };
+      if(r0.deger == null) return { id:o.id, satirlar, cevap:bas + ' ' + ad + ': ' + deger + ' (' + kac + '). Karşılaştıracak ' + (d.once ? d.once.ad + ' ayında' : 'önceki dönemde') + ' kayıt yok.' };
       const fark = r.deger - r0.deger;
       const yon = Math.abs(fark) < (o.tur === 'ortalama' ? 0.05 * Math.abs(r0.deger || 1) : 0.05 * Math.abs(r0.deger || 1)) ? 'aşağı yukarı aynı' : fark > 0 ? 'arttı' : 'azaldı';
-      const onceAd = d.ad === 'bu hafta' ? 'geçen hafta' : d.ad === 'bu ay' ? 'geçen ay' : 'önceki ' + uzun + ' günde';
+      const onceAd = d.once ? d.once.ad + ' ayında' : d.ad === 'bu hafta' ? 'geçen hafta' : d.ad === 'bu ay' ? 'geçen ay' : 'önceki ' + uzun + ' günde';
       return { id:o.id, satirlar, cevap:bas + ' ' + ad + ': ' + deger + '; ' + onceAd + ' ' + yaz(r0.deger, on) + ' ' + o.birim
         + '. ' + yon.charAt(0).toLocaleUpperCase('tr') + yon.slice(1) + ' (' + (fark >= 0 ? '+' : '') + yaz(fark, on) + ').' };
     }

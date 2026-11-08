@@ -105,7 +105,7 @@ def parse(text):
         ilk = ilk.split("@", 1)[0]
     # King 5 tur 5 (klon simülasyonu): ilk kelimesi «neden» olan her cümle «önerinin dayanağı» sayılıyordu
     # («neden hep yorgun uyanıyorum» → «Bugün açık bir öneri yok.»). Komut kısa söylenir.
-    uzun = len(t.split()) > 3
+    uzun = len(t.split()) > 2
     for c in COMMANDS:
         if ilk in c["words"]:
             if uzun and c["id"] in ("neden", "kabul", "ret", "etki", "seri"):

@@ -253,6 +253,12 @@ window.LIFEOS.ARAC = (function(){
         if(v && re.test(t)){ p.islem = v; break; }
       }
     }
+    if(P.alan && P.alan.enum && p.alan == null){
+      const ALAN = { lang:/almanca|ingilizce|dil|kelime/, reading:/kitap|okuma|oku/, music:/gitar|müzik|şarkı/, writing:/yazı|deneme yaz/,
+        philo:/felsefe|tez/, history:/tarih|kronoloji/, diction:/diksiyon|konuşma/ };
+      const a2 = P.alan.enum.find(v => ALAN[v] && ALAN[v].test(t));
+      if(a2) p.alan = a2;
+    }
     if(String(p.islem || '').indexOf('sil') >= 0) return p;
     /* Ana metin yalnız hiçbir metin alanı dolu değilse: kural «alıntı: …»yı metne koyduysa kitap adına yazılmaz. */
     const dizi = Object.keys(P).filter(k => P[k].type === 'string' && k !== 'islem' && k !== 'id' && !P[k].enum);
@@ -275,7 +281,7 @@ window.LIFEOS.ARAC = (function(){
   const KOMUT = [[/^(kronolojiye|zaman şeridine) ekle\b/, 'esp_olay'], [/^repertuvar(a|ıma) ekle\b/, 'esp_eser'],
     [/^(yeni )?tez( ekle)?\s*:/, 'esp_arguman'], [/^(yeni )?(yazı )?taslağ?ı?( ekle)?\s*:/, 'esp_taslak'],
     [/^hedef ekle\b/, 'esp_hedef'], [/^kaynak ekle\b/, 'esp_kaynak'],
-    [/^(market|alışveriş) listesine\b/, 'spi_market'], [/^ilaç ekle\b/, 'spi_ilac']];
+    [/^(market|alışveriş) listesine\b/, 'spi_market'], [/^ilaç ekle\b/, 'spi_ilac'], [/ne kadar (?:para )?harca(?:dım|mışım)|harcamalarım/, 'spi_butce'], [/sıralamama yet|kaç bine gir|puan tahmin|kaç puan alırım/, 'ays_puan_tahmini']];
   function komutla(t){
     for(const [re, ad] of KOMUT){
       const a = re.test(t) && bul(ad);
@@ -430,7 +436,8 @@ window.LIFEOS.ARAC = (function(){
        karnesi «ne işe yarıyor», «karşılaştır» cümlelerine seçilip «giriş yapılmamış» diyordu). Açık
        kural (araç kendi cümlesi) etkilenmez. */
     const tahmin = a => { if(typeof a.tahminle !== 'function') return true; try{ return !!a.tahminle(); }catch(e){ return false; } };
-    const l = liste().filter(a => !NIYET_DIS.test(a.ad) && !a.dis && tahmin(a));   // dış dünya tahminle seçilmez: kural ya da model
+    const tt = kucuk(metin);
+    const l = liste().filter(a => !NIYET_DIS.test(a.ad) && !a.dis && tahmin(a) && (!/_yanlis_teshis$/.test(a.ad) || /yanlış|teşhis/.test(tt)));   // dış dünya tahminle seçilmez: kural ya da model
     /* Açıklamadaki başka aracın adı («… için eylem_kitap_ekle'yi kullan») atıftır, anlam değil. */
     const dok = l.map(a => niyetKelime(a.ad.replace(/^(ays|spi|esp)_/, '').replace(/_/g, ' ') + ' ' + String(a.aciklama).replace(/\w+_\w+/g, ' ')
       + ' ' + (a.ornek || '') + ' ' + (a.anahtar || '')));
