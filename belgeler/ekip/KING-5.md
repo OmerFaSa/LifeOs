@@ -93,6 +93,29 @@ Kalan açıklar (tur 4 denemesinden):
 İyi çalışanlar: geçici süre önizlemesi ve onayı, türev ders kartı (dürüst etiketli), sıcak modelde
 0,6–1,5 sn cevap, onaylanan eylemin `eylem` defterine düşmesi.
 
+**Tur 5 (2026-11-08/09) — tur 4 açıkları ve 233 günlük klon simülasyonu:**
+- Tur 4 açıkları kapandı (8f4c6b05): deneme sohbetten tek kayıt (yalnız net söylenirse uydurulmaz, ne eksik
+  olduğu sorulur), ESP kelime sayımı ve «120. sayfadayım», «sen ne yapabilirsin» kuralla, gerçekçilikte bilinen
+  kısım kalır, «modül» kullanıcıya gitmez.
+- Klon: depo sahibinin canlı King konuşmalarından çıkarılan bir kişi (salt okunur) 21 Mart – 8 Kasım arasını
+  ayrı bir kopyada (HKM 4290, modüller 4281–4283, gemma4) yaşadı; Claude iki haftalık dilimler yazıp King'in
+  cevaplarına tepki verdi. Her mesajda veri izi alındı («ekledim» deyip değişmeyen yakalandı); her üç mesajdan
+  biri King kutusuna gerçekten yazıldı. Betikler oturum scratchpad'inde (sim/klon.js, gercek.js, sinifla.py).
+- Sonuç (708 mesaj): kötü sonuç %33 → %7 → %5, iyi sonuç %37 → %62 → %65; 32 kullanıcı sorusunda doğru
+  cevap 4 → 17. Veri bütünlüğü: deneme, uyku, kilo tam; soru 2.380'de 25 kayıp → kök neden düzeltildi.
+- Düzeltmeler: 8cd5e38c (tanışma yutması, ölçü çekirdeği brand/ortak/olcu.js, hafıza, «X ekle:», boş okumada
+  uydurma, metne yazılmış araç çağrısı, his, olumsuz gün, plan dışı süre), 0c388bec (yazma komutu ön ekleri,
+  TYT/AYT, HKM core/iliski.py modüller arası ilişki, «neden» Patron komutu değil, bölüm yönlendirmesi, uyandırma),
+  cac8512b (ay adları, dönem özeti, brifing sayı uydurması, yanlış defteri, hafıza iki kelime), 550fc0ee
+  (virgülsüz iki sayaç sessiz veri kaybı) ve son ufak düzeltmeler. King sınavı 326 → 358 cümle: 351/358.
+
+Tur 5'ten açık kalanlar (etkiye göre): rütbe atlama ekranı King kutusunu kapatıyor (arayüz, onay gerekir);
+King Bağlam paneli «Çözülen soru · 45 gün: veri yok» (veri varken); geçici/kalıcı süre karışması model
+seçiminde; Hafta sayfası planı sabit akademik takvimle (Mart'ta «Hafta 1 — 14 Eylül»); ilişki için eksik
+ölçüyü King sormuyor; çok adımlı komut yok; hastalık sonrası toparlanma, ESP zaman dağılımı, «hedefimin yüzde
+kaçı» analizi yok; «King ne yaptı» onayla yapılan araç işlerini göstermedi; ilaç alımı, kiler, ESP hedef okuma
+yok; SPİ Ctrl K «analiz» → Rütbe; ESP ilk açılışta «Tekrar hoş geldin»; model tahlil değeri yorumluyor.
+
 ## 2. İlkeler
 
 1. **Ölç → kök neden → düzelt → yeniden ölç.** Ölçüsüz değişiklik yok.

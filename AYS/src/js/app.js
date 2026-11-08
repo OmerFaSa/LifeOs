@@ -1699,6 +1699,15 @@ R.App = (function(){
         const gun = g === bugun ? 'Bugün' : 'Dün';
         return { v:l.length, metin:l.length ? gun + ' şunları kaydetmişsin: ' + l.join(' · ') + '.' : gun + ' için çalışma kaydı yok.' };
       } },
+      { id:'verimli', ad:'en verimli gün', es:/en verimli (?:gün|günüm)|hangi gün daha (?:çok|verimli)/, tur:'anlik', anlik:(t, bugun) => {
+        const AD = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'], top = [0, 0, 0, 0, 0, 0, 0], gun = [0, 0, 0, 0, 0, 0, 0];
+        Object.keys(R.S.days).forEach(g => { if(g > bugun || g < R.U.iso(R.U.addDays(R.U.parse(bugun), -90))) return;
+          const q = R.Calc.gunSorusu(R.S.days[g]); if(!q) return; const w = R.U.parse(g).getDay(); top[w] += q; gun[w]++; });
+        const l = AD.map((a, i) => ({ a, n:gun[i], ort:gun[i] ? top[i] / gun[i] : 0 })).filter(x => x.n).sort((x, y) => y.ort - x.ort);
+        if(l.length < 3) return { v:null, metin:'Gün karşılaştırması için en az üç farklı günde soru kaydı gerekiyor.' };
+        return { v:l[0].ort, metin:'Son 90 günde en verimli günün ' + l[0].a + ': kayıtlı ' + l[0].n + ' günde ortalama ' + Math.round(l[0].ort) + ' soru. '
+          + 'Sıra: ' + l.map(x => x.a + ' ' + Math.round(x.ort)).join(', ') + '. Kayıtsız gün hesaba girmez.' };
+      } },
       { id:'zayif', ad:'en zayıf ders', es:/en zayıf|en güçlü|en kötü|en iyi olduğum/, tur:'anlik', anlik:t => {
         const l = (R.S.exams || []).filter(e => e.family !== 'AYT').slice(-5);
         if(!l.length) return { v:null, metin:'Henüz deneme kaydın yok; dersleri karşılaştırmak için en az bir deneme gerekiyor.' };

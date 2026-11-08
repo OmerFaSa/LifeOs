@@ -24,7 +24,7 @@ window.LIFEOS = window.LIFEOS || {};
 window.LIFEOS.OLCU = (function(){
   let ayar = null;
   const kucuk = s => String(s || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
-  const SORU = /(kaç|ne kadar|ortalama|toplam|değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|gidiyor|nasıl gitti|nasıl geçti|nasıl uyu|ilerle|karşılaştır|daha (?:çok|az|fazla)|ne çalıştım|ne yaptım|en zayıf|en güçlü)/;
+  const SORU = /(kaç|ne kadar|ortalama|toplam|değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|gidiyor|nasıl gitti|nasıl geçti|nasıl uyu|ilerle|karşılaştır|daha (?:çok|az|fazla)|ne çalıştım|ne yaptım|en zayıf|en güçlü|iyi mi|yeterli mi|hangisi)/;
   const BASKA = /(hedef|kaç bine|sıralama|puan|kart|deste|yüzde kaç|ne işe yar|nedir|ne demek|ilişki|etkisi|günler(?:de|i)?\b|neden|sence|doz|almalıyım|içmeliyim|kaç tane)/;
   const DEGISIM = /(değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|ilerle|daha mı|geçen haftaya göre|öncekine göre|karşılaştır|daha (?:çok|az|fazla))/;
   const SAYI = { bir:1, iki:2, üç:3, dört:4, beş:5, altı:6, yedi:7, sekiz:8, dokuz:9, on:10, otuz:30 };
@@ -86,7 +86,7 @@ window.LIFEOS.OLCU = (function(){
     return { l, deger:!l.length ? null : o.tur === 'ortalama' ? t / l.length : o.tur === 'son' ? l[l.length - 1].v : t };
   }
 
-  const OZET = /(genel olarak|nasıl geçti|nasıldım|özetle|özetini çıkar)/;
+  const OZET = /(genel olarak|nasıl geçti|nasıldım|özetle|özetini çıkar|nasıl gidiyorum)/;
   /* Dönem özeti: modülün ölçüleri (genel olmayan, toplam/ortalama/son ve deneme) tek cevapta. */
   function ozet(t, bugun){
     const d = donem(t, bugun) || { bas:gunEkle(bugun, -29), son:bugun, ad:'son 30 gün' };

@@ -2949,6 +2949,51 @@
       "b": [
         "merkez"
       ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "merhaba ne yapabilirsin",
+      "b": [
+        "tur:harita",
+        "arac:sistem_haritasi"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "deneme nasıl eklenir",
+      "b": [
+        "tur:harita",
+        "arac:sistem_haritasi"
+      ]
+    },
+    {
+      "g": "spi",
+      "m": "spi",
+      "c": "uykum iyi mi",
+      "b": [
+        "tur:olcu",
+        "arac:spi_uyku"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "nasıl gidiyorum",
+      "b": [
+        "tur:olcu",
+        "tur:ozet",
+        "arac:bugun_ozeti"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "haftanın en verimli günü hangisi",
+      "b": [
+        "tur:olcu"
+      ]
     }
   ]
 }
