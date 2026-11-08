@@ -45,6 +45,9 @@
           St().next();
           expect(baslik()).toBe('Hedefin ne?');
           St().next();
+          expect(baslik()).toBe('Hedefin ne?');                         /* sıra yok: ilerlemedi (D8) */
+          yaz('sw-rank', '25000');
+          St().next();
           expect(baslik()).toBe('Takvimin');
           yaz('sw-start', '2026-10-05'); yaz('sw-exam', '2026-09-30');   /* sınav önce */
           St().next();
@@ -52,11 +55,6 @@
           yaz('sw-exam', '2027-06-19');
           St().next(); St().next();
           expect(baslik()).toBe('Şu anki seviyen');
-          await St().save();
-          expect(R.S.profile.setupDone).toBe(false);                    /* hedef sırası yok */
-          expect(baslik()).toBe('Hedefin ne?');
-          yaz('sw-rank', '25000');
-          St().next(); St().next(); St().next();
           await St().save();
         });
       });

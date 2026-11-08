@@ -142,7 +142,8 @@ R.KingArac = (function(){
     /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
     denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
     konu_riski:/(risk altında|riskli konu|konu riski|net (?:kayb|kaçır))/,
-    gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç)/,
+    /* «dün ne çalıştım» (King 5 D10): model «araç çağırmam gerekiyor» deyip cevapsız bırakıyordu. */
+    gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç|(?:bugün|dün|önceki gün)(?:kü)? (?:ne|neler|ne kadar) (?:çalıştım|yaptım|çözdüm))/,
     konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
     gunun_akisi:/(günün akışı|bugünün akışı)/,
     durum_ozeti:/(sınava (?:kaç gün|ne kadar)|durum özet|genel durum)/,
@@ -160,7 +161,7 @@ R.KingArac = (function(){
     haftalar:'hafta haftalık review değerlendirme bülten geriye dönük',
     gunler:'gün günlük çözülen süre saat dakika soru',
     hedef_ve_net_matrisi:'hedef net matris tablo karşılaştırma ders',
-    kartlar:'kart tekrar srs aralıklı ezber hatırlama',
+    kartlar:'kart tekrar srs aralıklı ezber',   // «hatırlama» «hatırlat» isteğini kartlara çekiyordu (King 5)
     video_notlari:'video not izleme ders notu kayıt',
     mesgaleler:'meşgale mola kesinti ara duraklama dinlenme',
     enerji_durumu:'enerji yorgunluk zindelik seviye durum güç canlılık',

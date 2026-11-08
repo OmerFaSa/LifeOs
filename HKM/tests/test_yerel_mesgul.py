@@ -269,8 +269,8 @@ def run():
         eski = ollama.isit
         cagri, bitti = [], threading.Event()
 
-        def sahte(c, t, gonder=None, istek=False):
-            cagri.append((t, istek))
+        def sahte(c, t, gonder=None, istek=False, yaziyor=False):
+            cagri.append((t, istek, yaziyor))
             time.sleep(0.2)
             bitti.set()
         ollama.isit = sahte
@@ -281,7 +281,12 @@ def run():
             eq((kod, v["ok"]), (200, True))
             ok(time.perf_counter() - t0 < 0.2, "cevap yuklemeyi beklemez")
             ok(bitti.wait(3))
-            eq(cagri, [({"durum": "bagli"}, True)])
+            eq(cagri, [({"durum": "bagli"}, True, False)])
+            # King 5 D7: yazmaya baslayinca «yaziyor» tasinir.
+            bitti.clear()
+            eq(s.call("/api/ollama/isit", body={"yaziyor": True})[0], 200)
+            ok(bitti.wait(3))
+            eq(cagri[-1], ({"durum": "bagli"}, True, True))
             eq(s.call("/api/ollama/isit", token=None, body={})[0], 401)
         finally:
             ollama.isit = eski

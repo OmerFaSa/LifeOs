@@ -60,6 +60,15 @@ değişikliği, kayıt, soru çözme, ders, hafıza, hatırlatma.
 | D10 | «notlarımı kaydettin mi, dün ne çalıştım?» | dürüst («kaydetmedim») ama «bir araç çağırmam gerekiyor» diyor, dünü söylemiyor | iç terim «araç» akışta süzülüyor ama tam cevapta süzülmüyor; veri sorusu okuma aracına bağlanmadı | açık |
 | D1–D5 doğrulama | aynı cümleler yeni kodla | hatırlatma 07:00 → «onu 8'e al» 08:00, saatsiz istekte «Ne zaman?», «ben ne içmem?» → «Bana şöyle demiştin: «kahve içmem»», ders kartından sonra «örnek ver» → Türev sorusu | — | **canlıda doğrulandı** (3c6073ed) |
 
+**Tur 3 (2026-11-08) — açıkların kapanışı, canlıda doğrulandı:**
+- **D4:** onay beklerken «hayır + düzeltme» öneriyi iptal eder, istek düzeltmeyle yeniden okunur; «X değil» olumsuzluk süzgecini tetiklediği için atılır, düzeltme başa gelir («sadece bugün için, günde 30 dakika çalışacağım» → geçici süre).
+- **D6:** bugün o dersin bloğu yoksa önizleme dersi adıyla söyler («TYT Matematik · Plan dışı»); toplam değişmeden ders ayrımı `day.freeBySubject`'te saklanır, geri al ikisini de çevirir. «Dinlenme» bloğu bugün yeniden üretilemedi (geçici sürenin günü yeniden kurmasıyla oluşmuştu). «Helal olsun» kusur değil: altında «Çalışma kaydına ekleyeyim mi?» ve Evet/Hayır var, kayıt onaysız yazılmıyor.
+- **D7:** «bugün çok yorgunum» «Bugün» sayfasını açıyordu; his sayfa komutu sayılmaz, bugünü kısaltan araç varsa «Bugünü kısalt» önerilir (dakikayı kişi seçer). Yazmaya başlayınca model kısa süreli (10 dk) ısınır, bellek darken de; King açılınca bellek darsa ısınmaz (değişmedi).
+- **D8:** sihirbazda hedef sırası boşken 2. adım ilerlemez.
+- **D9:** sohbet cevabındaki LaTeX düz yazıya döner (`ai.duz_matematik`), akışta da.
+- **D10:** «araç çağırmam gerekiyor» iç konuşması durdurulur; «dün ne çalıştım» AYS gün aracına bağlanır; kart aracının «hatırlama» anahtarı hatırlatma isteğini çekmesin diye kalktı.
+- King sınavına deneme cümleleri eklendi (316 → 321): 314/321, beşi de geçiyor.
+
 İyi çalışanlar: geçici süre önizlemesi ve onayı, türev ders kartı (dürüst etiketli), sıcak modelde
 0,6–1,5 sn cevap, onaylanan eylemin `eylem` defterine düşmesi.
 

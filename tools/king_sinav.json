@@ -2638,6 +2638,46 @@
       "a": {
         "kart": "bir şarkı aç"
       }
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "yarın sabah 7'de bana koşuyu hatırlat",
+      "b": [
+        "tur:hatirlat"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "akşam 9'da su içmeyi hatırlat",
+      "b": [
+        "tur:hatirlat"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "yarın ekmek almayı hatırlat",
+      "b": [
+        "tur:hatirlat-sor"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "kahve içmem, bunu aklında tut",
+      "b": [
+        "tur:hafiza"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "dün ne çalıştım",
+      "b": [
+        "arac:ays_gunler"
+      ]
     }
   ]
 }

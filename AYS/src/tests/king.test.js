@@ -3137,6 +3137,45 @@
       temizle();
     }));
 
+    /* King 5 D4 (deneme 2026-11-08): «hayır, …» düzeltmesi atılmaz; istek düzeltmeyle yeniden okunur. */
+    it('onay beklerken «hayır + düzeltme»: öneri iptal, istek düzeltmeyle yeniden sorulur', () => sahneyle(async () => {
+      const cevap = { ok:true, mode:'arac', text:'', cagrilar:[{ ad:'spi_bolum_ac_kapa', param:{ bolum:'butce', acik:0 }, tur:'yaz' }] };
+      const m = sira(cevap, cevap);
+      const { k } = aracSahne(m);
+      await k.isle('şu kısmı artık görmek istemiyorum');
+      expect(!!k.bekleyenYetki()).toBe(true);
+      await k.isle('hayır, sadece bu hafta olsun');
+      expect(uygulanan).toEqual([]);
+      expect(m.istekler.length).toBe(2);
+      expect(m.istekler[1].govde.text).toBe('sadece bu hafta olsun, şu kısmı artık görmek istemiyorum');
+      expect(k.akis().filter(x => x.kim === 'sen').map(x => x.metin)).toEqual(['şu kısmı artık görmek istemiyorum', 'hayır, sadece bu hafta olsun']);
+      expect(!!k.bekleyenYetki()).toBe(true);
+      expect((await k.isle('hayır')).tur).toBe('hayir');
+      temizle();
+    }));
+
+    /* King 5 D7: «yorgunum» plana bağlanır; dakika uydurulmaz, kutuya doldurulur. */
+    it('yorgunluk: bugünü kısaltan araç varsa ilk öneri «Bugünü kısalt»', () => sahneyle(async () => {
+      const { k, gidilen } = sahne({});
+      const KI = window.LIFEOS.KING_IC;
+      const GECICI = { ad:'spi_gecici_sure', tur:'yaz', ozetAd:'Bugünü kısalt', aciklama:'Bugünün süresini geçici kısaltır.',
+        parametreler:{ type:'object', properties:{ dakika:{ type:'integer', minimum:1, maximum:600 } }, required:['dakika'] },
+        onizle:p => ({ metin:p.dakika + ' dk' }), uygula:async () => ({ metin:'Tamam.' }) };
+      window.LIFEOS.ARAC.kur({ modul:'spi', araclar:[UYKU, GECICI] });
+      /* Canlı deneme: «bugün çok yorgunum» «Bugün» sayfasını açıyordu; his sayfa komutu değildir. */
+      expect(await k.isle('bugün çok yorgunum')).toEqual({ tur:'yorgun' });
+      expect(k.cipler()[0]).toEqual({ ad:'Bugünü kısalt', is:'doldur:sadece bugün 30 dakika çalışacağım' });
+      expect(gidilen).toEqual([]);
+      KI.akis.push({ kim:'sen', metin:'bugün çok yorgunum' });
+      expect(KI.oneriListesi(true)[0]).toEqual({ ad:'Bugünü kısalt', is:'doldur:sadece bugün 30 dakika çalışacağım' });
+      KI.akis.push({ kim:'sen', metin:'türev nedir' });
+      expect(KI.oneriListesi(true)[0].ad).toBe('Detaylandır');
+      window.LIFEOS.ARAC.kur({ modul:'spi', araclar:[UYKU] });
+      KI.akis.push({ kim:'sen', metin:'bugün çok yorgunum' });
+      expect(KI.oneriListesi(true).some(x => x.ad === 'Bugünü kısalt')).toBe(false);
+      temizle();
+    }));
+
     it('bilinmeyen araç ve geçersiz parametre reddedilir; hiçbir şey çalışmaz', () => sahneyle(async () => {
       const m = sira({ ok:true, mode:'arac', text:'', cagrilar:[{ ad:'hepsini_sil', param:{} }, { ad:'spi_uyku', param:{ gun:999 } },
         { ad:'spi_bolum_ac_kapa', param:{ bolum:'butce' } }] });

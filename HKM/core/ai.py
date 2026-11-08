@@ -610,9 +610,28 @@ def _belge(cevap):
     return (metin, None) if metin else (None, "Model boş cevap döndü.")
 
 
+# King 5 D9 (deneme 2026-11-08): model matematigi LaTeX'le yaziyor («$2x + 3 = 11$»); ekran ve ses bunu
+# dolar isaretiyle gosteriyordu. Sohbet cevabi duz yaziya cevrilir (belge/JSON cevabina dokunulmaz).
+_LATEX = ((r"\\left\s*|\\right\s*", ""), (r"\\(?:text|mathrm|mathbf)\{([^{}]*)\}", r"\1"),
+          (r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r"\1/\2"), (r"\\sqrt\{([^{}]*)\}", r"√\1"),
+          (r"\\cdot", "·"), (r"\\times", "×"), (r"\\div", "÷"), (r"\\pm", "±"), (r"\\leq?\b", "≤"),
+          (r"\\geq?\b", "≥"), (r"\\neq\b", "≠"), (r"\\pi\b", "π"), (r"\\infty\b", "∞"), (r"\\approx\b", "≈"),
+          (r"\^\{([^{}]*)\}", r"^\1"), (r"\$\$?([^$\n]{1,300}?)\$\$?", r"\1"))
+
+
+def duz_matematik(metin):
+    """«$\\frac{1}{2} \\cdot x$» → «1/2 · x». Dolar isareti yalniz cift olarak (ifade) kalkar."""
+    t = str(metin or "")
+    if "$" not in t and "\\" not in t:
+        return t
+    for desen, yerine in _LATEX:
+        t = re.sub(desen, yerine, t)
+    return t
+
+
 def _temizle(cevap, baglam, genel=False):
     """(metin, dusurulen_sebep). Dusurulen cevap YUTULMAZ, soylenir."""
-    metin = (cevap or "").strip()
+    metin = duz_matematik((cevap or "").strip())
     if not metin:
         return None, "Model boş cevap döndü."
     suc = manager.imperatives(metin)

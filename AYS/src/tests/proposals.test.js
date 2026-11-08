@@ -742,6 +742,21 @@
       });
     });
 
+    /* King 5 D6 (deneme 2026-11-08): bugün o dersin bloğu yoksa ders adı önizlemede görünür, toplam
+       değişmeden ders ayrımı saklanır; geri alınca ikisi de geri döner. */
+    it('bloğu olmayan ders: önizlemede adıyla, kayıtta ders ayrımıyla, geri alınabilir', async () => {
+      await withTodayAsync(TODAY, async () => {
+        const d = await gun();
+        d.blocks = [];
+        const fiz = (R.SUBJECTS || []).find(x => x.id !== mat().id) || mat();
+        const a = await yaz('soru-yaz', { count:40, correct:32, subjectId:fiz.id });
+        expect(d.freeQ).toBe(40);
+        expect(d.freeBySubject[fiz.id]).toEqual({ q:40, c:32 });
+        await P.undo(a.row.id);
+        expect([d.freeQ, d.freeCorrect, d.freeBySubject[fiz.id]]).toEqual([0, 0, undefined]);
+      });
+    });
+
     it('bloğa yazılan soru ve doğru: girilmemiş alan geri alınınca yine girilmemiş, blok «bekliyor»', async () => {
       await withTodayAsync(TODAY, async () => {
         const d = await gun();

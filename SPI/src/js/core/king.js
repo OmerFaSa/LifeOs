@@ -1195,14 +1195,16 @@ window.LIFEOS.KING_IC = {};
   }
   /* King açıldı: kullanıcı sormak üzere, model arkada ısınsın (soğuk yükleme 9-13 sn ölçüldü).
      Merkez bellek darsa (oyun) yüklemez; hata sessizdir, soru yine çalışır. */
-  KI.modelIsitT = -Infinity;
-  function modelIsit(){
-    const k = baglanti(), su = ortam.simdi().getTime();
-    if(!k || !ortam.fetch || su - KI.modelIsitT < 300000) return;
-    KI.modelIsitT = su;
+  KI.modelIsitT = -Infinity; KI.modelIsitYT = -Infinity;
+  /* `yaziyor` (King 5 D7): kişi yazmaya başladı; Merkez bellek darken de kısa süreli ısıtır (soru zaten
+     yükleyecekti, yalnız birkaç saniye önce başlar). Kendi beş dakikalık sınırı var. */
+  function modelIsit(yaziyor){
+    const k = baglanti(), su = ortam.simdi().getTime(), an = yaziyor ? 'modelIsitYT' : 'modelIsitT';
+    if(!k || !ortam.fetch || su - KI[an] < 300000) return;
+    KI[an] = su;
     try{
       const f = ortam.fetch;
-      const p = f(k.url + '/api/ollama/isit', { method:'POST', body:'{}',
+      const p = f(k.url + '/api/ollama/isit', { method:'POST', body:yaziyor ? '{"yaziyor":true}' : '{}',
         headers:{ 'Content-Type':'application/json', 'Authorization':yz('ortak.king.bearer') + k.token } });
       if(p && p.catch) p.catch(() => {});
     }catch(e){ /* yok */ }

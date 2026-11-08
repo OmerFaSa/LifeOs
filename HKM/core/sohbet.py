@@ -747,7 +747,9 @@ ARAC_IDDIA = re.compile(
     # Soz verme kipi (deneme kullanimi 2026-11-08: «yarin 7'de kosuyu hatirlatirim» dedi, hicbir sey kurulmadi).
     r"hatırlatırım|hatırlatacağım|hatırlattım|hatırlatıcı kurdum|alarm kurdum|kurdum|kuruyorum|kuracağım|"
     r"kurarım|eklerim|kaydederim|ayarlarım|değiştiririm|silerim|not ederim|not aldım|planladım|planlarım|"
-    r"oluşturdum|oluşturacağım|taşıdım|erteledim|ertelerim)\b", re.I)
+    r"oluşturdum|oluşturacağım|taşıdım|erteledim|ertelerim|"
+    # Ic konusma (D10: «dun ne calistigini ogrenmek icin bir arac cagirmam gerekiyor»).
+    r"araç çağırmam|aracı çağırmam|araç çağırmalıyım|araç kullanmam|bir araç çağır\w*)\b", re.I)
 ARAC_DUZELT = ("\n\nÖnceki cevabında bir işi araç çağırmadan yapmış ya da yapacakmış gibi anlattın; "
                "sen hiçbir şeyi kendin yapamazsın. Ya uygun aracı ÇAĞIR ya da yapamadığını açıkça söyle.")
 ARAC_YAPILMADI = ("Bunu şu an buradan yapamadım; hiçbir şeyi değiştirmedim. Daha açık söylersen "
@@ -831,7 +833,7 @@ class CumleAkisi:
             return
         ara = cumle[len(cumle.rstrip()):]
         t, _ = memory.aday_ayikla(cumle.rstrip())
-        t = re.sub(r"^\s*\]+\s*", "", t)
+        t = ai.duz_matematik(re.sub(r"^\s*\]+\s*", "", t))
         if self.serbest:
             t = kalipsiz(t)
         if not t.strip():

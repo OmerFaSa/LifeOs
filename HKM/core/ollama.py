@@ -371,18 +371,24 @@ def gomme(cfg, metinler, gonder=None):
         return None
 
 
-def isit(cfg, tarama, gonder=None, istek=False):
+ISIT_SURE_DAR = "10m"
+
+
+def isit(cfg, tarama, gonder=None, istek=False, yaziyor=False):
     """Kural 6: bagli ekonomik modeli bellekte tutar. Doner: model adi ya da None.
-    `istek`: kullanici King'i acti; «kendi basina» anahtari arka plan isidir, buna engel degil."""
-    if (not settings(cfg)["sicak"] or (not istek and not _kendi.acik(cfg))
+    `istek`: kullanici King'i acti; «kendi basina» anahtari arka plan isidir, buna engel degil.
+    `yaziyor` (King 5 D7): kullanici King'e yazmaya basladi; soru modeli zaten yukleyecek, bellek
+    darken de kisa sureli (ISIT_SURE_DAR) isinir. Olcum (deneme 2026-11-08): soguk ilk soz 10,2 sn."""
+    if (not settings(cfg)["sicak"] or (not (istek or yaziyor) and not _kendi.acik(cfg))
             or (tarama or {}).get("durum") != "bagli"):
         return None
     model = models.yerel_of(cfg).get("ekonomik")
-    if not model or bellek_dar():
+    dar = bellek_dar()
+    if not model or (dar and not yaziyor):
         return None
     try:
         (gonder or VARSAYILAN_GONDER)(models.yerel_kok(cfg) + "/api/generate",
-                                      {"model": model, "keep_alive": ISIT_SURE}, 120)
+                                      {"model": model, "keep_alive": ISIT_SURE_DAR if dar else ISIT_SURE}, 120)
     except Exception:                           # noqa: BLE001 — kapali motor bir durumdur
         return None
     if gonder is None:

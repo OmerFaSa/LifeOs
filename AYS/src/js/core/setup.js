@@ -359,6 +359,8 @@ R.Setup = (function(){
       const p = preview(draft.startDate, draft.examTytISO);
       if(p.days <= 0){ UI.toast(yz('ays.core.setup.sinav-tarihi-baslangictan-so')); return; }
     }
+    /* King 5 D8 (deneme 2026-11-08): boş sıra burada durur; eskiden ancak 5. adımda «2. adıma dön» deniyordu. */
+    if(STEPS[step].id === 'hedef' && !draft.targetRank){ UI.toast(yz('ays.core.setup.hedef-basari-sirasi-gerekli').split(' — ')[0]); return; }
     step = Math.min(step + 1, STEPS.length - 1);
     render();
   }

@@ -235,6 +235,15 @@ def run():
         eq(ollama.isit(dict(cfg, king={}), {"durum": "bagli"}, gonder), None, "anahtar kapali: isitma yok")
         eq(ollama.isit(cfg, {"durum": "bagli"}, lambda *a: (_ for _ in ()).throw(OSError("x"))), None)
         eq(len(giden), 1)
+        # King 5 D7: bellek darken King acilinca isinmaz; yazmaya baslayinca kisa sureli isinir.
+        eski = ollama.VARSAYILAN_BELLEK
+        try:
+            ollama.VARSAYILAN_BELLEK = lambda: 700
+            eq(ollama.isit(cfg, {"durum": "bagli"}, gonder, istek=True), None, "dar: acilista isitma yok")
+            eq(ollama.isit(dict(cfg, king={}), {"durum": "bagli"}, gonder, yaziyor=True), "gemma3:4b")
+            eq(giden[-1], ("http://127.0.0.1:11434/api/generate", {"model": "gemma3:4b", "keep_alive": "10m"}))
+        finally:
+            ollama.VARSAYILAN_BELLEK = eski
     test("sıcak tutma: bağlı model bellekte tutulur; kapalıysa ya da ayar kapalıysa gitmez", t_isit)
 
     def t_gorsel_yerine():

@@ -227,6 +227,16 @@ def run():
         eq(arac.gevsek_json("{bozuk"), None)
     test("arac cagirmadan «yaptim» denmez", t_yapilmamis_is)
 
+    def t_duz_matematik_ve_ic_konusma():
+        # King 5 D9/D10 (deneme 2026-11-08).
+        eq(ai.duz_matematik("Önce $2x + 3 = 11$ yazarız."), "Önce 2x + 3 = 11 yazarız.")
+        eq(ai.duz_matematik("$$\\frac{1}{2} \\cdot x^{2}$$"), "1/2 · x^2")
+        eq(ai.duz_matematik("Fiyat 5$ civarı"), "Fiyat 5$ civarı")
+        t = _tasiyici(("Bunu öğrenmek için bir araç çağırmam gerekiyor.", []), ("Araç çağırmam gerek.", []))
+        r = sohbet.konus(_con(), _cfg(), "dün ne çalıştım", BUGUN, transport=t)
+        eq(r["text"], sohbet.ARAC_YAPILMADI)
+    test("LaTeX düz yazıya döner; «araç çağırmam gerekiyor» kullanıcıya gitmez", t_duz_matematik_ve_ic_konusma)
+
     def t_soz_verme_katalogsuz():
         # Deneme kullanimi (2026-11-08, gemma4): «yarin 7'de kosuyu hatirlatirim» — hicbir sey kurulmadi.
         t = _tasiyici(("Yarın sabah 7'de koşuyu hatırlatırım.", []), ("Tamam, 8'de hatırlatacağım.", []))

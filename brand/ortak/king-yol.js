@@ -196,6 +196,24 @@ window.LIFEOS.KING = (function(){
       await KI.yetkiUygula();
       return { tur:'yetki' };
     }
+    /* «Hayır + düzeltme» (King 5 D4, deneme 2026-11-08: «hayır, kalıcı değil sadece bugün için» yalnız
+       «hayır» sayılıyor, düzeltme atılıyordu): bekleyen öneri iptal edilir, asıl istek düzeltmeyle
+       birlikte yeniden okunur. Akışta kullanıcının kendi cümlesi görünür. */
+    const duz = KI.bekleyenYetki ? t0.match(/^(?:hayır|hayir|yok|öyle değil|değil)\s*[,.!:-]?\s+(.+)$/) : null;
+    if(duz && duz[1].split(' ').length >= 2 && !KI.HAYIR.test(duz[1])){
+      const onceki = KI.akis.filter(m => m.kim === 'sen').pop();
+      /* «kalıcı değil» olumsuzluk süzgecine takılıp isteği durduruyordu (canlı deneme): «X değil» atılır,
+         düzeltme başa gelir: «sadece bugün için, günde 30 dakika çalışacağım». */
+      const ek = duz[1].replace(/(?:^|\s)\S+\s+değil(?=[\s,]|$),?/g, ' ').replace(/\s+/g, ' ').trim();
+      if(onceki && onceki.metin && ek){
+        const birlesik = ek + ', ' + String(onceki.metin).trim().replace(/[.!]+$/, '');
+        vazgec();
+        const r = await isle(birlesik);
+        const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === birlesik).pop();
+        if(sen) sen.metin = String(metin).trim();
+        return r;
+      }
+    }
     if(KI.bekleyenYetki && (KI.EVET.test(t0) || KI.HAYIR.test(t0))){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       if(KI.HAYIR.test(t0)){ vazgec(); return { tur:'hayir' }; }
@@ -420,8 +438,22 @@ window.LIFEOS.KING = (function(){
         return { tur:'beyan', alan:bey.alan };
       }
     }
-    const y = KI.yorumla(metin);
+    let y = KI.yorumla(metin);
     if(y.tur === 'bos') return y;
+    /* Yorgunluk (King 5 D7, canlı deneme: «bugün çok yorgunum» «Bugün» sayfasını açıyordu). Bir his
+       sayfa komutu değildir. Bugünü kısaltan araç varsa King hemen önerir (dakikayı kişi seçer);
+       yoksa cümle sohbete gider. */
+    if(KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri'){
+      const A = KI.ARAC && KI.ARAC();
+      if(A && A.bul && A.bul(KI.ayar.modul + '_gecici_sure')){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+        KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
+        KI.cipler = [{ ad:'Bugünü kısalt', is:'doldur:sadece bugün 30 dakika çalışacağım' }];
+        KI.soyle('Anladım, yorgunsun. İstersen bugünü hafifletelim: «Bugünü kısalt»a dokun, dakikayı sen seç.');
+        return { tur:'yorgun' };
+      }
+      if(y.tur === 'git') y = { tur:'bilinmiyor' };
+    }
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
        kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
        sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),
@@ -909,6 +941,10 @@ window.LIFEOS.KING = (function(){
       const g = e.target && e.target.matches && e.target.matches('[data-king-kv-emoji]') ? e.target : null;
       if(!g || !KI.kvSecili) return;
       KI.kartSus(KI.kvSecili, 'emoji', [...g.value.trim()].slice(0, 4).join('')); KI.ciz(false);
+    });
+    /* King 5 D7: yazmaya başlamak kesin niyettir; model o an ısınır, yazma süresi soğuk yüklemeyi gizler. */
+    document.addEventListener('input', e => {
+      if(e.target && e.target.matches && e.target.matches('.king__girdi') && e.target.value) KI.modelIsit(true);
     });
     document.addEventListener('input', e => {
       const g = e.target && e.target.matches && e.target.matches('[data-king-ara-girdi]') ? e.target : null;

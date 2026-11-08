@@ -90,6 +90,8 @@
         expect(o.params.dakika).toBe(30);
         expect(o.params.from).toBe(o.params.to);
         expect(tek('bugün için 45 dakika yeterli').action).toBe('gecici-sure');
+        /* D4: King «hayır, kalıcı değil sadece bugün için» düzeltmesini böyle birleştirir. */
+        expect(tek('sadece bugün için, günde 30 dakika çalışacağım').action).toBe('gecici-sure');
       });
     });
 

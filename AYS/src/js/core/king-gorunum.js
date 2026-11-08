@@ -463,8 +463,16 @@ window.LIFEOS.PARCA.yazilar({
     if(K && typeof K.istatistik === 'function') l.push([yz('ortak.king-gorunum.kartlari-goster'), 'istatistiklerim']);
     if(K && typeof K.soru === 'function') l.push([yz('ortak.king-gorunum.bana-soru-sor'), 'bana soru sor']);
     if(!cevapSonrasi && K && typeof K.oncelik === 'function') l.unshift([yz('ortak.king-gorunum.neye-calisayim'), 'neye çalışayım']);
-    return l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
+    const out = l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
+    /* King 5 D7 (deneme 2026-11-08): «bugün yorgunum» plana bağlanmıyordu. Modülde bugünü kısaltan araç varsa
+       ilk öneri odur; cümle kutuya doldurulur, dakikayı kişi seçer (sayı uydurulmaz, gönderilmeden önce görünür). */
+    const sen = KI.akis.filter(m => m.kim === 'sen').pop();
+    const A = KI.ARAC && KI.ARAC();
+    if(cevapSonrasi && sen && YORGUN_RE.test(KI.kucuk(sen.metin)) && A && A.bul && KI.ayar && A.bul(KI.ayar.modul + '_gecici_sure'))
+      out.unshift({ ad:'Bugünü kısalt', is:'doldur:sadece bugün 30 dakika çalışacağım' });
+    return out.slice(0, 4);
   }
+  const YORGUN_RE = /(yorgun|yoruldum|bitkin|halsiz|uykusuz|enerjim yok|keyfim yok|hastayım)/;
   /* GÖRÜNÜŞ (kullanıcı, 2026-10-28: «hem erkek hem kadın tarafı: pembe
      yapabilmeliyiz, mavi yapabilmeliyiz»). Köke data-king-gorunus yazılır;
      renk ve taç king-cam.css'te. Sesli okumada cihaz sesi tercihe göre
@@ -1010,5 +1018,5 @@ window.LIFEOS.PARCA.yazilar({
     setTimeout(() => el.remove(), 360);
   }
 
-  Object.assign(KI, { adimHtml, BOLUMLER, listeGorunur, bolumSec, listeGrup, yanBos, alanAc, soyle, oneriListesi, AD_ANAHTAR, ad, adYonelme, GORUNUS, GORUNUSLER, GORUNUS_AD, gorunus, gorunusAyarla, gorunusSeciciHtml, cinsiyetPuan, TARZ, TARZLAR, TARZ_AD, tarz, tarzSec, cizgi, selam, KURE, yuzHtml, NOKTA, ekranAdi, nedenSatirlari, ciz, ac, kucult, buyut, ekranDegisti, kapat });
+  Object.assign(KI, { YORGUN_RE, adimHtml, BOLUMLER, listeGorunur, bolumSec, listeGrup, yanBos, alanAc, soyle, oneriListesi, AD_ANAHTAR, ad, adYonelme, GORUNUS, GORUNUSLER, GORUNUS_AD, gorunus, gorunusAyarla, gorunusSeciciHtml, cinsiyetPuan, TARZ, TARZLAR, TARZ_AD, tarz, tarzSec, cizgi, selam, KURE, yuzHtml, NOKTA, ekranAdi, nedenSatirlari, ciz, ac, kucult, buyut, ekranDegisti, kapat });
 })();

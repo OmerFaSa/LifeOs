@@ -645,7 +645,9 @@ R.Proposals = (function(){
           subject, blok, day });
       },
       preview(p, ctx){
-        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : yz('ays.core.proposals.plan-disi-gunun-toplami');
+        /* King 5 D6 (deneme 2026-11-08): bloğu olmayan dersin adı önizlemede kaybolmasın. */
+        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject
+          : (ctx.subject ? ctx.subject.name + ' · ' : '') + yz('ays.core.proposals.plan-disi-gunun-toplami');
         const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
           : ctx.day.freeQ == null ? 'girilmemiş' : String(ctx.day.freeQ);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
@@ -677,6 +679,13 @@ R.Proposals = (function(){
              DUSUYORDU: onizleme «dogru: 32 yazilacak» diyor ama kayit
              yalniz bloga gidiyordu. Onizlemenin verdigi soz tutulmali. */
           if(ctx.dogru != null) ctx.day.freeCorrect = (ctx.day.freeCorrect || 0) + ctx.dogru;
+          /* Ders ayrımı (King 5 D6): toplam aynı kalır; hangi dersten olduğu ek alanda saklanır, uydurma blok açılmaz. */
+          if(ctx.subject){
+            const fs = ctx.day.freeBySubject = ctx.day.freeBySubject || {};
+            const x = fs[ctx.subject.id] = fs[ctx.subject.id] || { q:0, c:0 };
+            x.q += ctx.n; if(ctx.dogru != null) x.c += ctx.dogru;
+            geri.dersId = ctx.subject.id;
+          }
         }
         await R.Model.saveDay(p.date);
         return geri;
@@ -698,6 +707,11 @@ R.Proposals = (function(){
         }else{
           day.freeQ = farkGeri(day.freeQ, n, s.eskiQ);
           if(d != null) day.freeCorrect = farkGeri(day.freeCorrect, d, s.eskiC);
+          const x = s.dersId && day.freeBySubject && day.freeBySubject[s.dersId];
+          if(x){
+            x.q = Math.max(0, x.q - n); if(d != null) x.c = Math.max(0, x.c - d);
+            if(!x.q && !x.c) delete day.freeBySubject[s.dersId];
+          }
         }
         ayniHedef(o, 'soru-yaz', x => x.date === s.date && (x.blockId || null) === (s.blockId || null))
           .forEach(x => {

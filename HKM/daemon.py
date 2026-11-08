@@ -2003,8 +2003,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200 if r["ok"] else 503, r)
         if u.path == "/api/ollama/isit":
             # King acildi: ilk soru soguk yuklemeyi (9-13 sn) beklemesin. Yukleme arkada, cevap hemen.
+            # {"yaziyor": true}: kullanici yazmaya basladi (King 5 D7), bellek darken de kisa sureli.
+            ham, _ = self._read_body()
+            try:
+                yaziyor = bool(_nesne(ham).get("yaziyor")) if ham else False
+            except ValueError:
+                yaziyor = False
             threading.Thread(target=ollama.isit, args=(self.server.config, {"durum": "bagli"}),
-                             kwargs={"istek": True}, daemon=True).start()
+                             kwargs={"istek": True, "yaziyor": yaziyor}, daemon=True).start()
             return self._send(200, {"ok": True})
         if u.path == "/api/ses/isit":
             ham, hata = self._read_body()
