@@ -801,8 +801,8 @@ window.LIFEOS.PARCA.yazilar({
   }
   /* ---------- söz 36: araç kataloğu (arac.js) ---------- */
   const ARAC = () => (KI.L.ARAC && typeof KI.L.ARAC.liste === 'function') ? KI.L.ARAC : null;
-  const HARITA_RE = /(bu sistemde (?:ne|neler) var|sistemde (?:ne|neler) var|lifeos'?ta (?:ne|neler) var|neler yapabilirsin|ne(?:ler)?i? yapabiliyorsun|neleri yapabilirsin|sistem haritası|(?:^|\s)nasıl yapılır|(?:^|\s)nerede(?:dir)?\s*\??$|nereden (?:girerim|eklerim|yaparım|bakarım|açarım)|nasıl (?:girerim|eklerim|kaydederim|açarım|değiştiririm))/;
-  const HARITA_DOLGU = /(bu sistemde|sistemde|lifeos'?ta|ne var|neler var|neler yapabilirsin|nasıl yapılır|nerede(?:dir)?|nereden|nasıl|girerim|eklerim|yaparım|bakarım|açarım|kaydederim|değiştiririm|king|\?)/g;
+  const HARITA_RE = /(bu sistemde (?:ne|neler) var|sistemde (?:ne|neler) var|lifeos'?ta (?:ne|neler) var|neler yapabilirsin|ne(?:ler)?i? yapabiliyorsun|neleri yapabilirsin|(?:^|\s)ne yapabilirsin|neler yaparsın|(?:^|\s)ne yaparsın\s*\??$|ne işe yararsın|nasıl yardımcı olabilirsin|sistem haritası|(?:^|\s)nasıl yapılır|(?:^|\s)nerede(?:dir)?\s*\??$|nereden (?:girerim|eklerim|yaparım|bakarım|açarım)|nasıl (?:girerim|eklerim|kaydederim|açarım|değiştiririm))/;
+  const HARITA_DOLGU = /(bu sistemde|sistemde|lifeos'?ta|ne var|neler var|neler yapabilirsin|ne yapabilirsin|neler yaparsın|ne yaparsın|ne işe yararsın|nasıl yardımcı olabilirsin|(?<![a-zçğıöşü])(?:sen|bana)(?![a-zçğıöşü])|nasıl yapılır|nerede(?:dir)?|nereden|nasıl|girerim|eklerim|yaparım|bakarım|açarım|kaydederim|değiştiririm|king|\?)/g;
   const YETKI_AYAR = {
     tema:{ id:'tema', degerler:{ koyu:'dark', acik:'light', sistem:'system' } },
     animasyon:{ id:'animasyon', degerler:{ tam:'tam', az:'az', sistem:'sistem' } },

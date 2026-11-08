@@ -1682,6 +1682,7 @@ R.App = (function(){
         if(n) return Object.assign(n, { tur:'not' });
         return R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null;
       },
+      sor:t => (!gkBaglam && R.Palette.kingSor ? R.Palette.kingSor(t) : null),
       ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
     return true;
   }

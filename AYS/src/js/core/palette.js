@@ -301,7 +301,7 @@ R.Palette = (function(){
     if(r.anlasilmayan.length) notlar.push(yz('ays.core.palette.kaydedilmeyecek') + r.anlasilmayan.join('», «') + '»');
     if(r.oneriler.some(o => o.bosVarsayim)) notlar.push(yz('ays.core.palette.bos-soru-soylenmedigi-icin-d'));
     /* tur: King'in sohbet karşılığı (king.js söz 8). */
-    const tur = r.oneriler.every(o => o.action === 'uyku-yaz') ? 'uyku' : 'calisma';
+    const tur = r.oneriler.every(o => o.action === 'uyku-yaz') ? 'uyku' : r.oneriler.every(o => o.action === 'deneme-yaz') ? 'veri' : 'calisma';
     return {
       tur,
       metin:satirlar.join(' · '),
@@ -319,6 +319,17 @@ R.Palette = (function(){
         return { metin:dusen ? n + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı.' : n === 1 ? 'Kaydedildi.' : n + ' kayıt yazıldı.', geriAl };
       },
     };
+  }
+
+  /* Anlaşılan ama yazılamayan deneme cümlesi («78 net: Türkçe 30 …»): ne eksik
+     olduğu söylenir; Deneme sayfası açılmaz (King 5 tur 4 açığı). */
+  function kingSor(q){
+    const t = String(q || '').trim();
+    if(t.length < 4 || !R.Komut) return null;
+    let r;
+    try{ r = R.Komut.anla(t, { date:R.U.todayISO() }); }catch(e){ return null; }
+    const s = !(r.oneriler || []).length && (r.sorular || []).find(x => x.deneme);
+    return s ? s.soru : null;
   }
 
   /* Onizleme: NE anlasildi ve ne degisecek. Kaydedilmeden once
@@ -559,6 +570,6 @@ R.Palette = (function(){
   }
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
-  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock, kingOnizle,
+  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock, kingOnizle, kingSor,
     veriKaydet, veriKomutu, commands, searchContent };
 })();

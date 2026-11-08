@@ -775,24 +775,28 @@ ESP.Model = (function(){
     const o = book ? kitapOkuma(book.id) : null;
     if(!(toplam > 0) || !o || o.sayfa == null) return null;
     const okunan = Math.min(toplam, o.sayfa);
-    const hiz = o.sayfa > 0 && o.dakika > 0 ? o.dakika / o.sayfa : null;
+    const hiz = o.sureliSayfa > 0 && o.dakika > 0 ? o.dakika / o.sureliSayfa : null;
     return { toplam, okunan, oran:100 * okunan / toplam,
       kalanDk:hiz != null ? Math.round((toplam - okunan) * hiz) : null };
   }
 
+  /* Süresiz sayfa kaydı («120. sayfadayım»: King 5 tur 5) sayfaya girer, dakikaya ve hıza girmez. */
   function kitapOkuma(bookId){
-    let dakika = 0, oturum = 0, sayfa = null, sonGun = null, hepsiOlcum = true;
+    let dakika = 0, oturum = 0, sayfa = null, sureliSayfa = 0, sonGun = null, hepsiOlcum = true;
     Object.keys(S.days || {}).forEach(g => {
       arr((S.days[g] || {}).sessions).forEach(s => {
-        if(s.disc !== 'reading' || s.ref !== bookId || s.minutes == null || s.minutesCert === 'missing') return;
-        dakika += s.minutes; oturum++;
-        if(s.minutesCert !== 'measured') hepsiOlcum = false;
-        if(s.count != null && s.countCert !== 'missing') sayfa = (sayfa || 0) + s.count;
+        if(s.disc !== 'reading' || s.ref !== bookId) return;
+        const sureli = s.minutes != null && s.minutesCert !== 'missing';
+        const sayfali = s.count != null && s.countCert !== 'missing';
+        if(!sureli && !sayfali) return;
+        oturum++;
+        if(sureli){ dakika += s.minutes; if(s.minutesCert !== 'measured') hepsiOlcum = false; }
+        if(sayfali){ sayfa = (sayfa || 0) + s.count; if(sureli) sureliSayfa += s.count; }
         if(!sonGun || g > sonGun) sonGun = g;
       });
     });
     if(!oturum) return null;
-    return { dakika, cert:hepsiOlcum ? 'measured' : 'estimated', oturum, sayfa, sonGun };
+    return { dakika, cert:hepsiOlcum ? 'measured' : 'estimated', oturum, sayfa, sureliSayfa, sonGun };
   }
 
   async function deleteBook(id){

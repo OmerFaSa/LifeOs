@@ -10,6 +10,15 @@
 
   describe('oturum ayristirma', () => {
 
+    /* King 5 tur 5 (tur 4 açığı): «15 yeni kelime» ve «120. sayfa» kayda girmiyordu. */
+    it('«15 yeni kelime öğrendim» süresiz bir dil sayımıdır; «120. sayfadayım» kitapta KONUMdur', () => {
+      const k = P.parseSession('bugün 15 yeni kelime öğrendim');
+      expect([k.rows.length, k.rows[0].disc, k.rows[0].count, k.rows[0].countWhat, k.rows[0].minutes]).toEqual([1, 'lang', 15, 'kelime', null]);
+      const s = P.parseSession("Suç ve Ceza'da 120. sayfadayım");
+      expect([s.rows.length, s.rows[0].disc, s.rows[0].konum, s.rows[0].count]).toEqual([1, 'reading', 120, null]);
+      expect(P.parseSession('30 sayfa okudum').rows[0].konum).toBe(undefined);
+    });
+
     it('«45 dakika gitar çalıştım» tek oturum uretir', () => {
       const r = P.parseSession('45 dakika gitar çalıştım');
       expect(r.rows.length).toBe(1);

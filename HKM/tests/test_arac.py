@@ -247,6 +247,12 @@ def run():
         t2 = _tasiyici(("Kesinlikle var.", []), ("Kesinlikle var, şansın yüksek.", []))
         r2 = sohbet.konus(_con(), _cfg(), "uykumun netlerime etkisi var mı", BUGUN, transport=t2)
         eq(r2["text"], sohbet.GERCEK_YOK)
+        # Tur 4 aciği: durust cumleye dusunce bilinen kisim kaybolmaz.
+        t3 = _tasiyici(("Sınava 223 gün kaldı. Bu tempoyla şansın yüksek.", []),
+                       ("Sınava 223 gün kaldı. Kesinlikle başarırsın.", []))
+        r3 = sohbet.konus(_con(), _cfg(), "hedefime ulaşabilir miyim", BUGUN, transport=t3)
+        eq(r3["text"], "Sınava 223 gün kaldı. " + sohbet.GERCEK_KISMI)
+        eq(ai.ic_ad_sil("AYS modülünde 3 konu var. Modüller ayrı."), "AYS bölümünde 3 konu var. Bölümler ayrı.")
         # Talimat profesyonel ve ic adsiz: «merkezi HKM» yok, gercekcilik kurali var.
         no("merkezi HKM" in sohbet.KISA_KIMLIK)
         ok("Gerçekçi ol" in sohbet.KISA_KIMLIK and "Gerçekçi ol" in sohbet.SISTEM_METNI)

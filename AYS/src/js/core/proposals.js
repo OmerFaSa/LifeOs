@@ -778,6 +778,49 @@ R.Proposals = (function(){
       },
     },
 
+    'deneme-yaz':{
+      check(p){
+        const aile = p.family === 'AYT' ? 'AYT' : 'TYT';
+        const sablon = (R.EXAM_TEMPLATES || []).find(t => t.family === aile && t.kind === 'full');
+        if(!p.date || !U.isISO(p.date)) return fail('Deneme tarihi anlaşılmadı.');
+        const testler = String(p.testler || '').split(';').filter(Boolean).map(x => {
+          const [name, c, w, b] = x.split(':');
+          const q = sablon && (sablon.tests.find(s => s.name === name) || {}).q;
+          return { name, correct:Number(c), wrong:Number(w), b, q };
+        });
+        if(!testler.length || testler.some(t => !t.name || !(t.correct >= 0) || !(t.wrong >= 0))) return fail('Deneme testleri anlaşılmadı.');
+        for(const t of testler){
+          if(t.q && t.correct + t.wrong + (Number(t.b) || 0) > t.q) return fail(t.name + ' testinde ' + t.q + ' soru var.');
+        }
+        /* Söylenen test kümesi bir şablona tam uyuyorsa o (branş, kesit); yoksa tam deneme şablonu, kısmi. */
+        const ad = testler.map(t => t.name).sort().join('|');
+        const tam = (R.EXAM_TEMPLATES || []).find(t => t.family === aile && t.tests.map(x => x.name).sort().join('|') === ad);
+        return pass({ testler, sablon:tam || sablon, kind:tam ? tam.kind : 'partial', aile });
+      },
+      preview(p, ctx){
+        const net = t => U.fmtNet(M.testNet(t));
+        return ctx.testler.map(t => ({ label:t.name, before:'—',
+          after:t.correct + ' D · ' + t.wrong + ' Y' + (t.b !== '' && t.b != null ? ' · ' + t.b + ' B' : '') + ' · ' + net(t) + ' net' }))
+          .concat([{ label:'Toplam net', before:'—', after:U.fmtNet(ctx.testler.reduce((s, t) => s + M.testNet(t), 0)) }]);
+      },
+      async apply(p, ctx){
+        const exam = {
+          id:U.uid('e'), date:p.date, type:ctx.sablon ? ctx.sablon.name : ctx.aile, templateId:ctx.sablon ? ctx.sablon.id : null,
+          family:ctx.aile, kind:ctx.kind, publisher:'', duration:ctx.sablon ? ctx.sablon.duration : null,
+          tests:ctx.testler.map(t => {
+            const bos = M.blankCertainty(t.correct, t.wrong, t.b, t.q);
+            return { name:t.name, correct:t.correct, wrong:t.wrong, blank:bos.blank, blankCert:bos.blankCert, minutes:null };
+          }),
+          protocol:{}, createdAt:new Date().toISOString(), analysisCompletedAt:null, kaynak:'king',
+        };
+        await M.saveExam(exam);
+        return { id:exam.id };
+      },
+      async revert(s){
+        if(s && s.id) await M.deleteExam(s.id);
+      },
+    },
+
     'uyku-yaz':{
       check(p){
         const h = Number(p.hours);

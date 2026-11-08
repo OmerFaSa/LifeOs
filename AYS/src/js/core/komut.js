@@ -321,6 +321,13 @@ R.Komut = (function(){
     const butun = turler(t);
     const veri = R.Entry ? R.Entry.fromText(ham, { date:bugun }) : { oneriler:[], engellenen:[] };
     const engelli = (veri.engellenen || []).length > 0;
+    /* Deneme sonucu tek kayıttır (entry.js parseDeneme): virgüllerinden bölünmez. */
+    if(veri.deneme){
+      veri.oneriler.forEach(x => sonuc.oneriler.push({ action:x.action, params:x.params, metin:ham }));
+      (veri.engellenen || []).forEach(e => sonuc.sorular.push({ metin:e.metin, soru:e.soru, deneme:true }));
+      sonuc.komut = true;
+      return sonuc;
+    }
 
     /* Tek komut, veri yok: cümlenin TAMAMI tek komuttur. Bölmek, «gelecek
        hafta, günde 4 saat» gibi bir cümlenin tarihini komutundan koparırdı. */

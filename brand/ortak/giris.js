@@ -198,6 +198,12 @@ window.LIFEOS.GIRIS = (function(){
     };
   }
 
+  /* Modül cümleyi anladı ama yazamıyor (eksik bilgi): ne eksik olduğunu söyler (King 5 tur 5). */
+  function sor(metin){
+    try{ return ayar && typeof ayar.sor === 'function' ? (ayar.sor(String(metin || '').trim()) || null) : null; }
+    catch(e){ return null; }
+  }
+
   /* King ve palet için (söz 3): modülün kapısı. */
   function kaynak(){ return ayar && typeof ayar.onizle === 'function' ? { onizle } : null; }
 
@@ -284,7 +290,8 @@ window.LIFEOS.GIRIS = (function(){
     else{
       bekleyen = null;
       const o = (ayar && ayar.ornekler) || [];
-      const bas = yz('ortak.giris.bunu-anlayamadim-tahminle-ka');
+      const eksik = sor(t);
+      const bas = eksik || yz('ortak.giris.bunu-anlayamadim-tahminle-ka');
       /* metin tam cümle (durum() okuyanlar için); ekranda örnekler çip olur */
       mesaj = { tur:'uyari', ornekli:o.length > 0, kisa:o.length ? bas + ' Şöyle yazabilirsin:' : bas,
         metin:bas + (o.length ? ' Şöyle yazabilirsin: «' + o.slice(0, 3).join('», «') + '».' : '') };
@@ -406,7 +413,7 @@ window.LIFEOS.GIRIS = (function(){
     return out;
   }
 
-  return { kur, kaynak, onizle, kutuHtml, gonder, kaydet, geriAl, metinOf, geriAlOf, kuruluMu:() => !!ayar, bol, BOL_AYRAC,
+  return { kur, kaynak, onizle, sor, kutuHtml, gonder, kaydet, geriAl, metinOf, geriAlOf, kuruluMu:() => !!ayar, bol, BOL_AYRAC,
     durum:() => ({ bekleyen:bekleyen ? bekleyen.p.metin : null, mesaj:mesaj ? mesaj.metin : null }),
     _ortam:ortam, _sifirla };
 })();

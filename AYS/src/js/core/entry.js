@@ -202,6 +202,57 @@ R.Entry = (function(){
     return { kind:'sure', minutes:Math.round(s.minutes), subject };
   }
 
+  /* ------------------------------------------------------ deneme
+
+     King 5 tur 5: «TYT denemesi: Türkçe 32 doğru 6 yanlış, Matematik 25/5,
+     Fen 12 doğru 4 yanlış 4 boş» TEK kayıttır; yan cümlelere bölünmeden okunur.
+     Yalnız net söylenirse («78 net: Türkçe 30, …») yazılmaz: doğru ve yanlış
+     olmadan deneme kaydı uydurma olurdu; ne eksik olduğu sorulur (engel). */
+  const DENEME_TEST = {
+    TYT:[['Türkçe', /turkce/], ['Sosyal Bilimler', /sosyal/], ['Temel Matematik', /matematik|\bmat\b/], ['Fen Bilimleri', /\bfen\b/]],
+    AYT:[['Matematik', /matematik|\bmat\b/], ['Fizik', /fizik/], ['Kimya', /kimya/], ['Biyoloji', /biyoloji|\bbiyo\b/]],
+  };
+  const EK = "(?:'?[sy]?[iu]\\s*)?";
+  const DY_RE = new RegExp('^\\D{0,14}?(\\d+)\\s*' + EK + '(?:dogru|d)(?![a-z])\\D{0,8}?(\\d+)\\s*' + EK + '(?:yanlis|y)(?![a-z])'
+    + '(?:\\D{0,8}?(\\d+)\\s*' + EK + '(?:bos|b)(?![a-z]))?');
+  const CIFT_RE = /^\D{0,14}?(\d+)\s*[\/-]\s*(\d+)(?:\s*[\/-]\s*(\d+))?/;
+  const NET_RE = /^\D{0,14}?(\d+(?:[.,]\d+)?)/;
+  function parseDeneme(text){
+    const n = U.norm(text);
+    const anahtar = /deneme/.test(n), aileSoz = /\b(tyt|ayt)\b/.test(n);
+    const aile = /\bayt\b|fizik|kimya|biyoloji/.test(n) ? 'AYT' : 'TYT';
+    const yer = [];
+    DENEME_TEST[aile].forEach(([ad, re]) => { const m = n.match(re); if(m) yer.push({ ad, i:m.index, son:m.index + m[0].length }); });
+    if(!yer.length) return null;
+    yer.sort((a, b) => a.i - b.i);
+    const testler = yer.map((y, k) => {
+      const parca = n.slice(y.son, k + 1 < yer.length ? yer[k + 1].i : n.length);
+      const m = parca.match(DY_RE) || parca.match(CIFT_RE);
+      if(m) return { ad:y.ad, d:Number(m[1]), y:Number(m[2]), b:m[3] != null ? Number(m[3]) : null };
+      const nm = parca.match(NET_RE);
+      return nm ? { ad:y.ad, net:Number(nm[1].replace(',', '.')) } : null;
+    });
+    if(testler.some(x => !x)) return null;
+    const tam = testler.filter(x => x.d != null);
+    const soruCumlesi = SORU_RE.test(text);
+    if(!(anahtar || (aileSoz && !soruCumlesi) || tam.length >= 2)) return null;
+    if(soruCumlesi && !tam.length) return null;          // «denemede 40 soru çözdüm» bir soru kaydıdır
+    if(tam.length < testler.length){
+      const ozet = testler.map(x => x.ad + ' ' + (x.net != null ? String(x.net).replace('.', ',') + ' net' : x.d + ' doğru ' + x.y + ' yanlış')).join(', ');
+      return { engel:{ deneme:true, neden:'net', soru:'Deneme sonucunu okudum (' + aile + ': ' + ozet + '). Kaydetmem için her testin doğru ve '
+        + 'yanlış sayısı gerekiyor; net tek başına yetmiyor. Şöyle yazabilirsin: «' + aile + ' denemesi: Türkçe 32 doğru 6 yanlış, Matematik 25 doğru 5 yanlış».' } };
+    }
+    const sablon = (R.EXAM_TEMPLATES || []).find(t => t.family === aile && t.kind === 'full');
+    for(const x of tam){
+      const t = sablon && sablon.tests.find(s => s.name === x.ad);
+      if(t && x.d + x.y + (x.b || 0) > t.q){
+        return { engel:{ deneme:true, neden:'fazla', soru:x.ad + ' testinde ' + t.q + ' soru var; ' + x.d + ' doğru ' + x.y + ' yanlış'
+          + (x.b != null ? ' ' + x.b + ' boş' : '') + ' olamaz. Sayıları yeniden yazar mısın?' } };
+      }
+    }
+    return { kind:'deneme', aile, testler:tam };
+  }
+
   /* Sıra: özgülden genele. */
   function parseOne(text){
     const t = String(text || '').trim();
@@ -254,6 +305,14 @@ R.Entry = (function(){
   function fromText(text, opts){
     const o = opts || {};
     const date = o.date || U.todayISO();
+    const dn = parseDeneme(text);
+    if(dn){
+      const metin = String(text).trim();
+      const e = dn.engel || (LIFEOS.Olumsuz && LIFEOS.Olumsuz.olcumEngeli(text));
+      if(e) return { deneme:true, oneriler:[], anlasilmayan:[], engellenen:[Object.assign({ metin, deneme:true }, e)] };
+      return { deneme:true, anlasilmayan:[], engellenen:[], oneriler:[{ action:'deneme-yaz', kaynak:'rules', metin,
+        params:{ date, family:dn.aile, testler:dn.testler.map(x => [x.ad, x.d, x.y, x.b == null ? '' : x.b].join(':')).join(';') } }] };
+    }
     const parcalar = yanCumleler(text);
     const oneriler = [], anlasilmayan = [], engellenen = [];
 
@@ -282,6 +341,6 @@ R.Entry = (function(){
     return { oneriler, anlasilmayan, engellenen };
   }
 
-  return { fromText, parseOne, yanCumleler, dersBul, konuBul, sayi, ilkSayi,
+  return { fromText, parseOne, parseDeneme, yanCumleler, dersBul, konuBul, sayi, ilkSayi,
     parseSoru, parseUyku, parseParagraf, parseProblem, parseSure, sureOku };
 })();

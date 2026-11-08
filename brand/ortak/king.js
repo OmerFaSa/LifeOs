@@ -1080,6 +1080,9 @@ window.LIFEOS.KING_IC = {};
       if(!p && g){ const t2 = gelecekSiz(metin); if(t2) p = dene(t2); }
       if(p) return { tur:'veri', onizleme:p, gelecek:!!g, sohbet:sohbet(p, metin, !!g) };
     }
+    /* Anlaşılan ama eksik kayıt («78 net: Türkçe 30 …»): modül ne eksik olduğunu söyler, sayfa açılmaz. */
+    const eksik = L.GIRIS && typeof L.GIRIS.sor === 'function' ? L.GIRIS.sor(metin) : null;
+    if(eksik) return { tur:'sor', cevap:eksik };
     for(const n of NIYET){
       if(n.es.test(t)) return { tur:'git', hedef:n, cevap:n.cevap, kaynak:'niyet', metin:String(metin).trim() };
     }

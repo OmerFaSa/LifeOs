@@ -61,6 +61,18 @@
       }finally{ G()._sifirla(); }
     });
 
+    it('modül anladığı ama yazamadığı cümlede ne eksik olduğunu söyler (sor, King 5 tur 5)', () => {
+      G()._sifirla();
+      try{
+        G().kur({ modul:'deneme', ornekler:['uyku 7'], onizle:() => null,
+          sor:t => /net/.test(t) ? 'Doğru ve yanlış sayısı gerekiyor.' : null });
+        expect(G().sor('78 net')).toBe('Doğru ve yanlış sayısı gerekiyor.');
+        expect(G().sor('bugün hava güzel')).toBe(null);
+        expect(G().gonder('78 net')).toBe(null);
+        expect(G().durum().mesaj).toContain('Doğru ve yanlış');
+      }finally{ G()._sifirla(); }
+    });
+
     it('kurulmadıysa kutu çizilmez; örnek çipi girdiyi doldurur', () => {
       G()._sifirla();
       expect(G().kutuHtml()).toBe('');

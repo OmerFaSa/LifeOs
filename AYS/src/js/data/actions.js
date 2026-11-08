@@ -273,6 +273,21 @@ R.ACTIONS = [
     why:'Planlanan süre ile gerçekleşen süre arasındaki fark, planın '
       + 'gerçekçi olup olmadığını söyler.',
   },
+  {
+    id:'deneme-yaz',
+    level:'kucuk',
+    olcum:true,
+    title:'Deneme sonucunu yaz',
+    summary:'Söylediğin testlerin doğru, yanlış ve boş sayısı tek deneme olarak kaydedilir.',
+    touches:'Denemeler',
+    icon:'chart',
+    route:'exams',
+    agents:['patron'],
+    /* testler: «Türkçe:32:6:2;Temel Matematik:25:5:» (ad:doğru:yanlış:boş; boş bilinmiyorsa
+       şablonun soru sayısından türetilir). Katalog düz alan taşır (proposals.test). */
+    params:{ date:'string', family:'string', testler:'string' },
+    why:'Deneme, netin tek gerçek ölçüsüdür; sohbetten söylenen sonuç da analiz ekranlarına girmeli.',
+  },
 ];
 
 R.ACTION_BY_ID = R.ACTIONS.reduce((m, a) => { m[a.id] = a; return m; }, {});

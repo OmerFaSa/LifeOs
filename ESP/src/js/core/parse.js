@@ -82,7 +82,7 @@ ESP.Parse = (function(){
   ];
 
   const SAYIM = [
-    { re:/(\d+)\s*(?:kelime)\b/i, field:'count', what:'kelime' },
+    { re:/(\d+)\s*(?:tane\s*)?(?:yeni\s*)?(?:kelime)\b/i, field:'count', what:'kelime' },
     { re:/(\d+)\s*(?:kart)\b/i, field:'count', what:'kart' },
     { re:/(\d+)\s*(?:sayfa)\b/i, field:'count', what:'sayfa' },
     { re:/(\d+)\s*(?:tekrar)\b/i, field:'count', what:'tekrar' },
@@ -103,6 +103,10 @@ ESP.Parse = (function(){
   function parseSession(text){
     const ham = String(text || '').trim();
     if(!ham) return { rows:[], unmatched:[] };
+    /* Kitaptaki yer (King 5 tur 5): «Suç ve Ceza'da 120. sayfadayım» okunan sayfa sayısı değil KONUMdur;
+       bölünmeden okunur («ve», «.» ayıraç değil). Bugün okunan sayfayı app.js kitabın önceki ilerlemesinden hesaplar. */
+    const konum = U.norm(ham).match(/(\d{1,4})\s*\.\s*sayfa/);
+    if(konum) return { rows:[{ disc:'reading', minutes:null, count:null, countWhat:'sayfa', konum:Number(konum[1]), note:ham }], unmatched:[] };
 
     /* Tek kaynak: brand/ortak/giris.js bol() (2026-10-19); yoksa yerel kural. */
     const G = window.LIFEOS && window.LIFEOS.GIRIS;

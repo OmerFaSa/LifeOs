@@ -608,6 +608,8 @@ window.LIFEOS.KING = (function(){
     if(y.tur === 'ozet'){
       const s = KI.ozetSatirlari();
       KI.soyle(s.length ? (KI.MODUL_AD[KI.ayar.modul] || '') + '’de bugün:' : yz('ortak.king-yol.bugun-icin-henuz-bir-sey'), s);
+    }else if(y.tur === 'sor'){
+      KI.soyle(y.cevap);
     }else if(y.tur === 'git' && y.kaynak === 'niyet' && y.hedef.modul !== KI.ayar.modul && KI.veriGibi(y.metin)){
       /* Söz 10: öteki modülün VERİSİ («fasulye yedim») tahmin edilmez; iletilir. */
       const s = KI.SAYFALAR.find(x => x.modul === y.hedef.modul && x.route === y.hedef.route);

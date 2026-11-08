@@ -2718,6 +2718,48 @@
       "b": [
         "merkez"
       ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "78 net yaptım denemede: Türkçe 30, Matematik 25, Sosyal 12, Fen 11",
+      "b": [
+        "tur:sor"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "TYT denemesi: Türkçe 32 doğru 6 yanlış, Matematik 25 doğru 5 yanlış, Sosyal 14 doğru 3 yanlış, Fen 10 doğru 4 yanlış",
+      "b": [
+        "veri"
+      ]
+    },
+    {
+      "g": "esp",
+      "m": "esp",
+      "c": "bugün 15 yeni kelime öğrendim",
+      "b": [
+        "veri"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "sen ne yapabilirsin?",
+      "b": [
+        "tur:harita",
+        "arac:sistem_haritasi"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "ne işe yararsın",
+      "b": [
+        "tur:harita",
+        "arac:sistem_haritasi"
+      ]
     }
   ]
 }

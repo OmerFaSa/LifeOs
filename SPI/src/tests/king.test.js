@@ -3221,6 +3221,12 @@
       expect(k.akis().slice(-1)[0].satirlar[0]).toBe('Barkodu oku — kamera ya da fotoğraf: + › Tüm işler');
       await k.isle('deneme nasıl yapılır?');
       expect(k.akis().slice(-1)[0].satirlar).toContain('Sayfası: Deneme (AYS)');
+      /* King 5 tur 5: yeni kullanıcının ilk sorusu da kuralla, modülün kendi işlerinden cevaplanır. */
+      for(const c of ['sen ne yapabilirsin?', 'ne işe yararsın', 'bana nasıl yardımcı olabilirsin?']){
+        expect((await k.isle(c)).tur).toBe('harita');
+        expect(k.akis().slice(-1)[0].satirlar.length).toBe(5);
+      }
+      expect(m.istekler.length).toBe(0);
       temizle();
     }));
 

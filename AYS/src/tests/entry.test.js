@@ -189,4 +189,49 @@
       expect(c.ok).toBeFalsy();
     });
   });
+
+  /* King 5 tur 5: deneme sonucu sohbetten (tur 4 açığı: «78 net: Türkçe 30 …» Deneme sayfasını açıyordu). */
+  describe('Giriş — deneme sonucu', () => {
+    const D = '2026-11-10';
+    it('çok testli cümle tek deneme önerisidir, virgülden bölünmez', () => {
+      const r = R.Komut.anla('TYT denemesi: Türkçe 32 doğru 6 yanlış, Matematik 25/5, Fen 12 doğru 4 yanlış 4 boş', { date:D });
+      expect(r.oneriler.length).toBe(1);
+      expect(r.oneriler[0].action).toBe('deneme-yaz');
+      expect(r.oneriler[0].params.testler).toBe('Türkçe:32:6:;Temel Matematik:25:5:;Fen Bilimleri:12:4:4');
+      /* «deneme» sözü olmadan da iki testin doğru/yanlışı denemedir; AYT dersi aileyi seçer. */
+      const a = R.Entry.parseDeneme('matematik 30 doğru 6 yanlış, fizik 9 doğru 3 yanlış');
+      expect([a.aile, a.testler.length]).toEqual(['AYT', 2]);
+    });
+    it('yalnız net söylenirse yazılmaz, ne eksik olduğu sorulur', () => {
+      const r = R.Komut.anla('78 net yaptım denemede: Türkçe 30, Matematik 25, Sosyal 12, Fen 11', { date:D });
+      expect(r.oneriler.length).toBe(0);
+      expect(r.sorular[0].deneme).toBe(true);
+      expect(/doğru ve yanlış/.test(r.sorular[0].soru)).toBe(true);
+      expect(R.Palette.kingSor('78 net yaptım denemede: Türkçe 30, Matematik 25, Sosyal 12, Fen 11')).toBe(r.sorular[0].soru);
+      /* Soru sayısından fazla doğru+yanlış kabul edilmez. */
+      expect(/40 soru var/.test(R.Entry.parseDeneme('deneme: türkçe 38 doğru 5 yanlış').engel.soru)).toBe(true);
+    });
+    it('tek ders soru kaydı deneme sanılmaz', () => {
+      expect(R.Entry.parseDeneme('matematikten 40 soru çözdüm 32 doğru 8 yanlış')).toBe(null);
+      expect(R.Entry.parseDeneme('TYT matematikten 40 soru çözdüm')).toBe(null);
+      expect(R.Komut.anla('matematikten 40 soru çözdüm 32 doğru', { date:D }).oneriler[0].action).toBe('soru-yaz');
+    });
+    it('önizleme, kayıt ve geri al', async () => {
+      resetState();
+      await withTodayAsync(D, async () => {
+        const once = (R.S.exams || []).length;
+        const p = R.Palette.kingOnizle('TYT denemesi: Türkçe 32 doğru 6 yanlış, Matematik 25 doğru 5 yanlış');
+        expect(p.tur).toBe('veri');
+        expect(/Toplam net/.test(p.metin)).toBe(true);
+        expect((R.S.exams || []).length).toBe(once);           // önizleme yazmaz
+        const k = await p.kaydet();
+        const ex = R.S.exams[R.S.exams.length - 1];
+        expect([R.S.exams.length, ex.family, ex.templateId, ex.tests.length]).toEqual([once + 1, 'TYT', 'tyt-cut', 2]);
+        expect([ex.tests[0].blank, ex.tests[0].blankCert]).toEqual([2, 'derived']);
+        expect(R.Model.examNet(ex)).toBe(54.25);
+        await k.geriAl();
+        expect(R.S.exams.length).toBe(once);
+      });
+    });
+  });
 })();

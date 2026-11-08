@@ -765,6 +765,15 @@ GERCEK_DUZELT = ("\n\nÖnceki cevabında ölçülerde dayanağı olmayan bir yar
                  "listede dayanak yoksa hangi kaydın eksik olduğunu söyle; genel bilgi veriyorsan genel olduğunu belirt.")
 GERCEK_YOK = ("Bunu söyleyebilmem için yeterli kayıt yok. Birkaç gün düzenli kayıt girersen ölçülere dayanarak "
               "değerlendiririm.")
+GERCEK_KISMI = "Bunun ötesinde bir değerlendirme için yeterli kayıt yok."
+
+
+def gercek_ayikla(metin):
+    """Dayanaksiz yargi tasiyan cumleler atilir, bilinen kisim («223 gun kaldi») kalir."""
+    cumleler = re.split(r"(?<=[.!?])\s+", str(metin or "").strip())
+    return " ".join(c for c in cumleler if c and not GERCEK_DISI.search(c))
+
+
 ARAC_DUZELT = ("\n\nÖnceki cevabında bir işi araç çağırmadan yapmış ya da yapacakmış gibi anlattın; "
                "sen hiçbir şeyi kendin yapamazsın. Ya uygun aracı ÇAĞIR ya da yapamadığını açıkça söyle.")
 ARAC_YAPILMADI = ("Bunu şu an buradan yapamadım; hiçbir şeyi değiştirmedim. Daha açık söylersen "
@@ -848,7 +857,7 @@ class CumleAkisi:
             return
         ara = cumle[len(cumle.rstrip()):]
         t, _ = memory.aday_ayikla(cumle.rstrip())
-        t = ai.duz_matematik(re.sub(r"^\s*\]+\s*", "", t))
+        t = ai.ic_ad_sil(ai.duz_matematik(re.sub(r"^\s*\]+\s*", "", t)))
         if self.serbest:
             t = kalipsiz(t)
         if not t.strip():
@@ -1307,7 +1316,10 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         # Dayanaksiz yargi: bir kez duzeltme; yine olmazsa kodun durust cumlesi.
         r2 = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem + GERCEK_DUZELT,
                     user=user, transport=transport, veri=veri, seviye=sv["seviye"], denetim=denetim)
-        r = r2 if r2.get("ok") and not GERCEK_DISI.search(r2.get("text") or "") else dict(r, text=GERCEK_YOK)
+        if not (r2.get("ok") and not GERCEK_DISI.search(r2.get("text") or "")):
+            kalan = gercek_ayikla((r2 if r2.get("ok") else r).get("text"))
+            r2 = dict(r, text=(kalan + " " + GERCEK_KISMI) if kalan else GERCEK_YOK)
+        r = r2
     red = []
     if r.get("ok") and r.get("cagrilar"):
         # KAPALI KATALOG (core/arac.py): bilinmeyen arac ve gecersiz

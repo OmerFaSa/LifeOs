@@ -629,9 +629,14 @@ def duz_matematik(metin):
     return t
 
 
+def ic_ad_sil(metin):
+    """«AYS modülünde» → «AYS bölümünde»: ic ad kullaniciya gitmez (tur 4: arac sonucu turunda «modül»)."""
+    return re.sub(r"\b([Mm])odül", lambda m: "Bölüm" if m.group(1) == "M" else "bölüm", str(metin or ""))
+
+
 def _temizle(cevap, baglam, genel=False):
     """(metin, dusurulen_sebep). Dusurulen cevap YUTULMAZ, soylenir."""
-    metin = duz_matematik((cevap or "").strip())
+    metin = ic_ad_sil(duz_matematik((cevap or "").strip()))
     if not metin:
         return None, "Model boş cevap döndü."
     suc = manager.imperatives(metin)

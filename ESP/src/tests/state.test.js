@@ -291,6 +291,19 @@
       expect([o.dakika, o.cert, o.oturum, o.sayfa, o.sonGun]).toEqual([50, 'measured', 2, 12, '2026-09-12']);
     });
 
+    it('süresiz sayfa kaydı sayfaya girer, dakikaya ve hıza girmez (King 5 tur 5)', () => {
+      resetState();
+      const b = ESP.Test.pushBook('Suç ve Ceza', 'Dostoyevski');
+      pushSession('2026-09-10', 'reading', 40, { ref:b.id, count:20, countCert:'measured' });
+      ESP.S.days['2026-09-11'] = ESP.S.days['2026-09-11'] || { sessions:[] };
+      ESP.S.days['2026-09-11'].sessions = (ESP.S.days['2026-09-11'].sessions || []).concat([{ id:'s-k', disc:'reading', ref:b.id,
+        minutes:null, minutesCert:'missing', count:100, countCert:'measured' }]);
+      const o = M.kitapOkuma(b.id);
+      expect([o.dakika, o.sayfa, o.sureliSayfa, o.oturum]).toEqual([40, 120, 20, 2]);
+      b.pages = 200;
+      expect(M.okumaIlerlemesi(b).kalanDk).toBe(160);
+    });
+
     it('bir oturum tahminse toplam da tahmindir; sayfa hiç girilmediyse null', () => {
       resetState();
       const b = ESP.Test.pushBook('Devlet', 'Platon');

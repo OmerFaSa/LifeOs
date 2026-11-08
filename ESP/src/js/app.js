@@ -1887,11 +1887,24 @@ ESP.App = (function(){
       onizle:t => {
         const res = ESP.Parse.parseSession(t);
         if(!res || !res.rows.length) return null;
+        /* «120. sayfadayım»: adı geçen kitap, yoksa okunmakta olan tek kitap; bugün okunan = konum − önceki. */
+        for(const r of res.rows.filter(x => x.konum != null)){
+          const kitaplar = (ESP.S.books || []).filter(b => !b.finishedAt);
+          const adli = kitaplar.filter(b => b.title && U.norm(t).indexOf(U.norm(b.title)) >= 0);
+          const b = adli.length === 1 ? adli[0] : kitaplar.length === 1 ? kitaplar[0] : null;
+          if(!b){ res.unmatched.push({ text:r.note, why:kitaplar.length ? 'Hangi kitap? Adını da yaz: «Suç ve Ceza’da ' + r.konum + '. sayfadayım».' : 'Kütüphanende okunan bir kitap yok; önce kitabı ekle.' }); r.dus = true; continue; }
+          const once = (ESP.Model.kitapOkuma(b.id) || {}).sayfa || 0;
+          if(r.konum <= once){ res.unmatched.push({ text:r.note, why:'«' + b.title + '» için zaten ' + once + ' sayfa kayıtlı.' }); r.dus = true; continue; }
+          Object.assign(r, { count:r.konum - once, ref:b.id, kitap:b.title, once });
+        }
+        res.rows = res.rows.filter(r => !r.dus);
+        if(!res.rows.length) return null;
         const ad = r => (ESP.DISCIPLINE_BY_ID[r.disc] || {}).label || r.disc;
         return {
           tur:'oturum',
-          metin:res.rows.map(r => ad(r) + ' ' + U.fmtMin(r.minutes)
-            + (r.count != null ? ' · ' + U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '')).join(' · '),
+          metin:res.rows.map(r => ad(r) + (r.minutes != null ? ' ' + U.fmtMin(r.minutes) : '')
+            + (r.count != null ? ' · ' + U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '')
+            + (r.kitap ? ' (' + r.kitap + ': ' + r.once + ' → ' + r.konum + ')' : '')).join(' · '),
           ipucu:res.unmatched.length ? yz('esp.app.kaydedilmeyecek') + res.unmatched.map(u => u.text).join('», «') + '»'
             : yz('esp.app.bugunun-oturumu-olarak-yazil'),
           async kaydet(){
@@ -1902,7 +1915,7 @@ ESP.App = (function(){
                kalan bütün oturumları silinir (kaydı patlayan da) ve hata fırlar. */
             const once = new Set(ESP.Model.sessionsOf(gun).map(s => s.id));
             try{
-              for(const r of res.rows){ const s = await ESP.Model.addSession(gun, { disc:r.disc, minutes:r.minutes, count:r.count, note:res.rows.length === 1 ? not : (r.note || '') }); if(s && s.id) ids.push(s.id); }
+              for(const r of res.rows){ const s = await ESP.Model.addSession(gun, Object.assign({ disc:r.disc, minutes:r.minutes, count:r.count, note:res.rows.length === 1 ? not : (r.note || '') }, r.ref ? { ref:r.ref } : {})); if(s && s.id) ids.push(s.id); }
             }catch(e){
               for(const s of ESP.Model.sessionsOf(gun).filter(s => !once.has(s.id))){ try{ await ESP.Model.deleteSession(gun, s.id); }catch(e2){ /* kayıt patlasa da bellekten silindi */ } }
               ciz();
