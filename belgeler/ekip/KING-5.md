@@ -57,6 +57,8 @@ değişikliği, kayıt, soru çözme, ders, hafıza, hatırlatma.
 | D7 | «günaydın King, bugün biraz yorgunum» | ilk söz 10,2 sn (soğuk); cevap plana bağlanmadı | soğuk model (K5-05); yorgunluk → «bugünü kısaltayım mı?» önerisi yok | açık |
 | D8 | tanışma sihirbazı | 2. adım (hedef sıralaması) boşken geçiliyor; hata 5. adımın sonunda «2. adıma dön» diye çıkıyor | doğrulama yalnız sonda | açık (AYS, ofise uygun) |
 | D9 | «2x+3=11 ise x kaç?» | doğru, 1,5 sn; cevapta `$2x + 3 = 11$` LaTeX işareti | model biçimi | açık (küçük) |
+| D10 | «notlarımı kaydettin mi, dün ne çalıştım?» | dürüst («kaydetmedim») ama «bir araç çağırmam gerekiyor» diyor, dünü söylemiyor | iç terim «araç» akışta süzülüyor ama tam cevapta süzülmüyor; veri sorusu okuma aracına bağlanmadı | açık |
+| D1–D5 doğrulama | aynı cümleler yeni kodla | hatırlatma 07:00 → «onu 8'e al» 08:00, saatsiz istekte «Ne zaman?», «ben ne içmem?» → «Bana şöyle demiştin: «kahve içmem»», ders kartından sonra «örnek ver» → Türev sorusu | — | **canlıda doğrulandı** (3c6073ed) |
 
 İyi çalışanlar: geçici süre önizlemesi ve onayı, türev ders kartı (dürüst etiketli), sıcak modelde
 0,6–1,5 sn cevap, onaylanan eylemin `eylem` defterine düşmesi.
