@@ -29139,7 +29139,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'62e3c608', at:'2026-11-08 04:57', dirty:true };
+SP.BUILD = { id:'aa063d0b', at:'2026-11-08 11:00', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -48137,7 +48137,11 @@ window.LIFEOS.ARAC = (function(){
     const s = sinif === undefined ? niyetSinif(metin) : sinif;
     const sira = niyetKelime(niyetBas(metin)), ws = Array.from(new Set(sira));
     if(!s || !ws.length || NIYET_DANIS.test(kucuk(metin))) return null;
-    const l = liste().filter(a => !NIYET_DIS.test(a.ad) && !a.dis);   // dış dünya tahminle seçilmez: kural ya da model
+    /* `tahminle`: araç şu an tahminle seçilebilir mi (King 5, deneme 2026-11-08: hesapsız cihazda hayat
+       karnesi «ne işe yarıyor», «karşılaştır» cümlelerine seçilip «giriş yapılmamış» diyordu). Açık
+       kural (araç kendi cümlesi) etkilenmez. */
+    const tahmin = a => { if(typeof a.tahminle !== 'function') return true; try{ return !!a.tahminle(); }catch(e){ return false; } };
+    const l = liste().filter(a => !NIYET_DIS.test(a.ad) && !a.dis && tahmin(a));   // dış dünya tahminle seçilmez: kural ya da model
     /* Açıklamadaki başka aracın adı («… için eylem_kitap_ekle'yi kullan») atıftır, anlam değil. */
     const dok = l.map(a => niyetKelime(a.ad.replace(/^(ays|spi|esp)_/, '').replace(/_/g, ' ') + ' ' + String(a.aciklama).replace(/\w+_\w+/g, ' ')
       + ' ' + (a.ornek || '') + ' ' + (a.anahtar || '')));
@@ -63143,7 +63147,7 @@ window.LIFEOS.PARCA.yazilar({
   const gunOturum = () => !!(KI.L.HESAP && KI.L.HESAP.durum && KI.L.HESAP.durum().oturum && KI.L.HESAP.gunKayit);
   function gunAraclari(){
     return [
-      { ad:'gun_kaydi', tur:'oku', ornek:'bugünkü niyetim ne', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydi-kullani'),
+      { ad:'gun_kaydi', tahminle:gunOturum, tur:'oku', ornek:'bugünkü niyetim ne', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydi-kullani'),
         kural:t => GUN_OKU_RE.test(t),
         calistir:async () => {
           if(!gunOturum()) return { cevap:yz('ortak.king-arac.gun-kaydi-hesap-sunucusunda') };
@@ -63153,7 +63157,7 @@ window.LIFEOS.PARCA.yazilar({
           return { sonuc:v, cevap:yz('ortak.king-arac.bugun-senin-girdigin') + gunKaydiMetin(v) + '.'
             + (b.length ? ' Gün planında ' + b.length + ' iş, ' + b.filter(x => x.bitti).length + ' tanesi bitti.' : '') };
         } },
-      { ad:'gun_kaydi_yaz', tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydini-yazar'),
+      { ad:'gun_kaydi_yaz', tahminle:gunOturum, tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydini-yazar'),
         parametreler:{ type:'object', properties:{ niyet:{ type:'string', maxLength:120 }, enerji:{ type:'integer', minimum:1, maximum:5 },
           hava:{ type:'string', enum:Object.keys(HAVA_AD) } } },
         kural:(t, ham) => gunKaydiCoz(t, ham),
@@ -63193,7 +63197,7 @@ window.LIFEOS.PARCA.yazilar({
   const dk = m => m >= 60 ? Math.floor(m / 60) + ' sa' + (m % 60 ? ' ' + (m % 60) + ' dk' : '') : m + ' dk';
   function senAraclari(){
     return [
-      { ad:'gun_sen', tur:'oku', ornek:'beni ne besliyor', aciklama:yz('ortak.king-arac.gun-sen-kaydini-okur'),
+      { ad:'gun_sen', tahminle:senOturum, tur:'oku', ornek:'beni ne besliyor', aciklama:yz('ortak.king-arac.gun-sen-kaydini-okur'),
         kural:t => SEN_OKU_RE.test(t),
         calistir:async () => {
           if(!senOturum()) return { cevap:yz('ortak.king-arac.sen-kaydi-hesap-sunucusunda') };
@@ -63202,7 +63206,7 @@ window.LIFEOS.PARCA.yazilar({
             (v.calan || []).length ? yz('ortak.king-arac.enerji-calan') + v.calan.join(', ') + '.' : '', (v.deste || []).length ? yz('ortak.king-arac.destende') + v.deste.length + ' kart var.' : ''].filter(Boolean);
           return { sonuc:v, cevap:l.length ? l.join(' ') : yz('ortak.king-arac.sen-bolumu-bos-sozum') };
         } },
-      { ad:'gun_sen_yaz', tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:yz('ortak.king-arac.gun-sen-kaydina-yazar'),
+      { ad:'gun_sen_yaz', tahminle:senOturum, tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:yz('ortak.king-arac.gun-sen-kaydina-yazar'),
         parametreler:{ type:'object', properties:{ soz:{ type:'string', maxLength:160 }, veren:{ type:'string', maxLength:40 }, calan:{ type:'string', maxLength:40 },
           kart:{ type:'string', maxLength:60 }, kart_enerji:{ type:'string', enum:['az', 'cok'] } } },
         kural:(t, ham) => senCoz(t, ham),
@@ -63225,7 +63229,7 @@ window.LIFEOS.PARCA.yazilar({
           await H.gunSenYaz(yeni);
           return { metin:yz('ortak.king-arac.gun-sen-e-yazdim') + senMetin(p) + '.', geriAl:async () => { await H.gunSenYaz(once); } };
         } },
-      { ad:'gun_kart_cek', tur:'oku', ornek:'bir kart çek', aciklama:'«Ne yapsam?» destesinden kuralla bir kart çeker: sık yapılan ve bugünkü enerjiye uyan öne çıkar. Kayıt yazmaz.',
+      { ad:'gun_kart_cek', tahminle:senOturum, tur:'oku', ornek:'bir kart çek', aciklama:'«Ne yapsam?» destesinden kuralla bir kart çeker: sık yapılan ve bugünkü enerjiye uyan öne çıkar. Kayıt yazmaz.',
         kural:t => KART_RE.test(t),
         calistir:async () => {
           if(!senOturum() || !GV()) return { cevap:yz('ortak.king-arac.deste-hesap-sunucusunda-bu-c') };
@@ -63235,7 +63239,7 @@ window.LIFEOS.PARCA.yazilar({
           if(!c) return { cevap:yz('ortak.king-arac.deste-bos') };
           return { sonuc:c, cevap:yz('ortak.king-arac.kartin') + c.kart.ad + '». ' + c.neden + (enerji ? ' (enerjin ' + enerji + '/5)' : '') + '. Yaptıysan Gün › Sen’de «Yaptım» de; deste öğrenir.' };
         } },
-      { ad:'gun_karne', tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:yz('ortak.king-arac.hayat-karnesi-son-7-ya'),
+      { ad:'gun_karne', tahminle:gunOturum, tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:yz('ortak.king-arac.hayat-karnesi-son-7-ya'),
         parametreler:{ type:'object', properties:{ gun:{ type:'integer', enum:[7, 30] } } },
         kural:t => { const m = t.match(KARNE_RE); return m ? { gun:(m[1] || m[2]) === 'ay' ? 30 : 7 } : null; },
         calistir:async p => {
@@ -64540,6 +64544,9 @@ window.LIFEOS.KING = (function(){
   /* Ödeme cümlesi: satın al, sipariş ver, öde(me yap), kart bilgisi; «ödev» değil. */
   const YAPILACAK_RE = /^(yapılacak(lar)?|yapilacak|hatırlat|hatirlat)(?![a-zçğıöşü])/;   // «yapılacak: fatura öde» bir hatırlatmadır, ödeme değil
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
+  const PLAN_SOZ_RE = /(bugünün|bugünkü|günün) (planı|plan|programı|akışı)/;
+  const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
+  const OZET_GUN_RE = /^(?:bana\s+)?(?:bugünün|günün|bugünkü)\s+(?:\S+\s+)?özet(?:i|ini)?(?:\s+(?:çıkar|ver|göster|yaz|nedir|ne))?\s*[?.!]*$/;
   async function isle(metin){
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
     if((KI.bolum === 'araclar' || KI.bolum === 'kutuphane')){ KI.bolum = 'sohbet'; KI.kvGiris = true; }     // sayfadayken sorulan sohbette görünür
@@ -64548,6 +64555,24 @@ window.LIFEOS.KING = (function(){
     if(!KI.akis.some(m => m.kim === 'sen')) KI.sohbetBasYaz();     // söz 33: yeni sohbet ya da yeni gün
     if(KI.ritim) return KI.ritimIsle(metin);                        // söz 34: haftalık gözden geçirme sürüyor
     if(KI.gunlukBekle) return KI.gunlukIsle(metin);                 // söz 34: günlük metni bekleniyor
+    /* İlaç ve doz (AGENTS §1.5; King 5 deneme: «başım ağrıyor, hangi ilacı kaç tane içmeliyim?» yalnız belirti
+       olarak önizleniyor, soru sessizce geçiliyordu). Sınır önce ve açıkça söylenir; belirti kaydı bir dokunuş. */
+    if(ILAC_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
+      const belirti = String(metin).split(/[,;.]/).map(x => x.trim()).find(x => x && !ILAC_RE.test(KI.kucuk(x)));
+      KI.cipler = belirti ? [{ ad:'Belirtiyi kaydet', is:'oner-metin:' + belirti }] : null;
+      KI.soyle('İlaç ya da doz öneremem; bunu hekimin ya da eczacın söyler. Şikâyet şiddetliyse, geçmiyorsa ya da ateş, kusma, görme bozukluğu gibi belirtiler eşlik ediyorsa bir sağlık kuruluşuna başvur.'
+        + (belirti ? ' İstersen «' + belirti + '» belirtisini kaydedeyim.' : ''));
+      return { tur:'ilac-siniri' };
+    }
+    /* «Bugünün (sağlık) özetini çıkar» yerel özettir (deneme: ücretli araştırma iş emri açılıyordu). */
+    if(OZET_GUN_RE.test(t0) && !/^bugünün özeti$/.test(t0)){
+      const r = await isle('bugünün özeti');
+      const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === 'bugünün özeti').pop();
+      if(sen) sen.metin = String(metin).trim();
+      return r;
+    }
     /* Söz 20: büyük eylem yalnız açık onayla. */
     if(KI.bekleyenYetki && /^onayl[ıi]yorum[.!]?$/.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -64617,6 +64642,16 @@ window.LIFEOS.KING = (function(){
       await KI.geriAlYap();
       return { tur:'geri-al' };
     }
+    /* «King ne yaptı?» (King 5, deneme 2026-11-08: «yanlış soru teşhisi» aracına gidiyordu). Eylem defteri
+       kodla okunur: son beş iş, nereden geldiği, geri alınıp alınmadığı. */
+    if(/^(?:king\s+)?(?:ne(?:ler)? yaptın|ne yaptı|son yaptıkların|yaptıkların|eylem(?:ler)?(?:in)?)(?:\s+neler)?\s*[?.!]*$/.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+      const l = KI.eylemListesi ? KI.eylemListesi().slice(0, 5) : [];
+      if(!l.length) KI.soyle('Henüz senin onayınla yaptığım bir iş yok. Önerdiğim her değişiklik önce önizlenir, onaylarsan yapılır ve buraya düşer.');
+      else KI.soyle('Son yaptıklarım (yenisi üstte):', l.map(e => KI.tarihYaz(e.zaman) + ' · ' + (e.ozet || e.arac)
+        + (e.durum === 'geri_alindi' ? ' · geri alındı' : e.geriYolu ? ' · geri alınabilir' : '')));
+      return { tur:'eylem', n:l.length };
+    }
     /* Söz 25: üslup sayacı (yalnız sayı) ve envanter. */
     if(KI.ENV() && KI.hafiza()) KI.ortam.depo.yaz(KI.USLUP, KI.ENV().uslupGuncelle(KI.ortam.depo.oku(KI.USLUP), metin));
     if(KI.envanter){
@@ -64681,7 +64716,8 @@ window.LIFEOS.KING = (function(){
     if(HAFTA_RE.test(t0)) return merkezKomut(metin, 'hafta', yz('ortak.king-yol.haftalik-degerlendirme'));
     if(CAPRAZ_RE.test(t0)) return merkezKomut(metin, 'capraz', yz('ortak.king-yol.moduller-arasi-bulgular'));
     /* Söz 34 */
-    if(KI.ONCELIK_RE.test(t0)) return KI.oncelikIsle(metin);
+    /* «bugünün planı ne, neye çalışmalıyım» önce bugünün planıdır (King 5, deneme: «öncelik için veri yok» diyordu). */
+    if(KI.ONCELIK_RE.test(t0) && !PLAN_SOZ_RE.test(t0)) return KI.oncelikIsle(metin);
     if(KI.RITIM_RE.test(t0)) return KI.ritimBaslat(metin);
     if(KI.YUK_RE.test(t0)) return KI.yukIsle(metin);
     if(KI.GUNLUK_RE.test(t0)){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null; KI.gunlukBekle = true;
@@ -64801,7 +64837,7 @@ window.LIFEOS.KING = (function(){
     /* Yorgunluk (King 5 D7, canlı deneme: «bugün çok yorgunum» «Bugün» sayfasını açıyordu). Bir his
        sayfa komutu değildir. Bugünü kısaltan araç varsa King hemen önerir (dakikayı kişi seçer);
        yoksa cümle sohbete gider. */
-    if(KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri'){
+    if(KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri' && !/(kısalt|azalt|süre|dakika|saat)/.test(t0)){   // açık süre isteği kendi yolunda
       const A = KI.ARAC && KI.ARAC();
       if(A && A.bul && A.bul(KI.ayar.modul + '_gecici_sure')){
         KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -64812,6 +64848,9 @@ window.LIFEOS.KING = (function(){
       }
       if(y.tur === 'git') y = { tur:'bilinmiyor' };
     }
+    /* Anlatım sorusu sayfa açmaz (King 5, deneme: «Almancada der, die, das farkını kısaca anlat» → «Dil
+       açılıyor»). Açık komut («dil sayfasını aç») yine sayfadır. */
+    if(y.tur === 'git' && y.kaynak !== 'komut' && /(anlat|açıkla|nedir|ne demek|farkı|nasıl yapılır|neden|örnek ver)/.test(t0)) y = { tur:'bilinmiyor' };
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
        kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
        sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),
@@ -102508,6 +102547,16 @@ SP.Quick = (function(){
     if(s){
       const f = VITAL_FIELDS.sleep, v = uykuSaati(s);
       if(v != null && v >= f.min && v <= f.max) return { field:f, value:v };
+    }
+    /* YATIŞ VE KALKIŞ SAATİ (King 5, deneme 2026-11-08: «dün gece 01:30'da yattım, 07:45'te kalktım»
+       hiç okunmuyordu). Süre iki saatin farkıdır, gece yarısını geçebilir; iki saat de söylenmeli. */
+    const yk = n.match(/(\d{1,2})(?:[:.](\d{2}))?\s*'?\s*(?:de|da|te|ta)?\s+(?:yattim|uyudum|uyuya kaldim)[^0-9]*?(\d{1,2})(?:[:.](\d{2}))?\s*'?\s*(?:de|da|te|ta)?\s+(?:kalktim|uyandim)/);
+    if(yk){
+      const a = Number(yk[1]) * 60 + Number(yk[2] || 0), b = Number(yk[3]) * 60 + Number(yk[4] || 0);
+      if(Number(yk[1]) < 24 && Number(yk[3]) < 24){
+        const f = VITAL_FIELDS.sleep, v = Math.round(((b - a + 1440) % 1440) / 60 * 100) / 100;
+        if(v > 0 && v <= f.max) return { field:f, value:v };
+      }
     }
     return null;
   }
