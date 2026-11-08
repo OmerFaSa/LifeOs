@@ -279,6 +279,27 @@ R.Entry = (function(){
     return out;
   }
 
+  /* Virgülsüz arka arkaya iki sayaç ya da iki ders (King 5 tur 5, klon simülasyonu, veri bütünlüğü denetimi):
+     «paragraf 20 problem 15» → yalnız paragraf yazılıyor, «problem 15» sessizce düşüyordu; «mat 35 türkçe 40 soru
+     çözdüm» → matematik 35 kayboluyordu. Sayının ardından yeni bir sayaç ya da ders adı gelirse parça orada bölünür;
+     sayaç sözü olmayan sol parça cümledeki «soru»yu alır. */
+  const KW = '(?:paragraf|problem|türkçe|turkce|matematik|mat|geometri|fizik|kimya|biyoloji|tarih|coğrafya|cografya|felsefe)';
+  const ARKA = new RegExp('(\\d+)\\s+(?=' + KW + '\\b)', 'gi');
+  const AD_SAYI = new RegExp('^\\D*' + KW + '\\D*\\d+$', 'i');     // «paragraf 20», «mat 35»: önce ad, sonra sayı
+  function arkaArkaya(p){
+    const t = String(p), out = [];
+    let bas = 0, m;
+    ARKA.lastIndex = 0;
+    while((m = ARKA.exec(t))){
+      const son = m.index + m[1].length, sol = t.slice(bas, son).trim();
+      if(AD_SAYI.test(sol)){ out.push(sol); bas = son; }
+    }
+    if(!out.length) return [p];
+    out.push(t.slice(bas).trim());
+    const soruVar = /soru/i.test(t);
+    return out.filter(Boolean).map(x => (soruVar && !/soru|paragraf|problem/i.test(x) && /\d/.test(x)) ? x + ' soru' : x);
+  }
+
   /* Çözülen her yan cümle için bir katalog eylemi. */
   function toAction(p, date){
     if(!p) return null;
@@ -313,7 +334,7 @@ R.Entry = (function(){
       return { deneme:true, anlasilmayan:[], engellenen:[], oneriler:[{ action:'deneme-yaz', kaynak:'rules', metin,
         params:{ date, family:dn.aile, testler:dn.testler.map(x => [x.ad, x.d, x.y, x.b == null ? '' : x.b].join(':')).join(';') } }] };
     }
-    const parcalar = yanCumleler(text);
+    const parcalar = [].concat.apply([], yanCumleler(text).map(arkaArkaya));
     const oneriler = [], anlasilmayan = [], engellenen = [];
 
     function dene(p){

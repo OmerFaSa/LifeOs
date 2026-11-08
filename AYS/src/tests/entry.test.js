@@ -211,6 +211,13 @@
       /* Soru sayısından fazla doğru+yanlış kabul edilmez. */
       expect(/40 soru var/.test(R.Entry.parseDeneme('deneme: türkçe 38 doğru 5 yanlış').engel.soru)).toBe(true);
     });
+    it('virgülsüz iki sayaç ya da iki ders ayrı kayıttır; hiçbiri düşmez', () => {
+      const a = R.Entry.fromText('paragraf 20 problem 15', { date:D });
+      expect(a.oneriler.map(o => o.action + ':' + o.params.count)).toEqual(['paragraf-yaz:20', 'problem-yaz:15']);
+      const b = R.Entry.fromText('mat 35 türkçe 40 soru çözdüm', { date:D });
+      expect(b.oneriler.map(o => o.action + ':' + o.params.count + ':' + o.params.subjectId)).toEqual(['soru-yaz:35:tyt-matematik', 'soru-yaz:40:tyt-turkce']);
+      expect(R.Entry.fromText('matematikten 40 soru çözdüm 32 doğru', { date:D }).oneriler.length).toBe(1);
+    });
     it('tek ders soru kaydı deneme sanılmaz', () => {
       expect(R.Entry.parseDeneme('matematikten 40 soru çözdüm 32 doğru 8 yanlış')).toBe(null);
       expect(R.Entry.parseDeneme('TYT matematikten 40 soru çözdüm')).toBe(null);
