@@ -3989,4 +3989,36 @@
       }finally{ k._sifirla(); Object.assign(k._ortam, y); }
     });
   });
+  /* KING 5 tur 4 (deneme 2026-11-08, üç modülde sınayan sorular): gerçekçi ve profesyonel yönlendirme. */
+  describe('King 5 — sınayan sorular', () => {
+    async function sahnede(fn){
+      const k = K(); k._sifirla();
+      const y = Object.assign({}, k._ortam), gidilen = [];
+      Object.assign(k._ortam, { zamanla:fn => fn(), simdi:() => new Date(2026, 9, 5, 9, 0) });
+      k.kur({ modul:'spi', git:(r, ek) => gidilen.push([r, ek || {}]), ozet:() => [] });
+      try{ await fn(k, gidilen); }finally{ k._sifirla(); Object.assign(k._ortam, y); }
+    }
+    it('ilaç ve doz sorusu: sınır önce söylenir, belirti bir dokunuşla kaydedilir', () => sahnede(async k => {
+      expect(await k.isle('başım ağrıyor, hangi ilacı kaç tane içmeliyim?')).toEqual({ tur:'ilac-siniri' });
+      expect(k.akis().slice(-1)[0].metin).toContain('İlaç ya da doz öneremem');
+      expect(k.cipler()).toEqual([{ ad:'Belirtiyi kaydet', is:'oner-metin:başım ağrıyor' }]);
+      expect((await k.isle('bugün kaç tane soru çözdüm')).tur !== 'ilac-siniri').toBe(true);
+    }));
+    it('«King ne yaptı?» eylem defterini okur', () => sahnede(async k => {
+      expect(await k.isle('King ne yaptı?')).toEqual({ tur:'eylem', n:0 });
+      expect(k.akis().slice(-1)[0].metin).toContain('Henüz senin onayınla yaptığım bir iş yok');
+    }));
+    it('anlatım sorusu sayfa açmaz; açık komut açar', () => sahnede(async (k, gidilen) => {
+      await k.isle('uyku düzeninin önemini kısaca anlat');
+      expect(gidilen).toEqual([]);
+    }));
+    it('hesapsız cihazda «Gün» araçları tahminle seçilmez', () => sahnede(async () => {
+      const A = window.LIFEOS.ARAC;
+      const oku = (ad, aciklama, tahminle) => ({ ad, tur:'oku', aciklama, tahminle, calistir:() => ({ cevap:'x' }) });
+      A.kur({ modul:'spi', araclar:[oku('spi_karne', 'Hayat karnesi: haftalık karşılaştırma özeti.', () => false), oku('spi_uyku_ozet', 'Uyku özeti.')] });
+      expect(A.niyet('bu hafta karşılaştırma özeti göster')).toBe(null);
+      A.kur({ modul:'spi', araclar:[oku('spi_karne', 'Hayat karnesi: haftalık karşılaştırma özeti.', () => true), oku('spi_uyku_ozet', 'Uyku özeti.')] });
+      expect((A.niyet('bu hafta karşılaştırma özeti göster') || {}).ad).toBe('spi_karne');
+    }));
+  });
 })();

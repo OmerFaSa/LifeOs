@@ -921,7 +921,7 @@ window.LIFEOS.PARCA.yazilar({
   const gunOturum = () => !!(KI.L.HESAP && KI.L.HESAP.durum && KI.L.HESAP.durum().oturum && KI.L.HESAP.gunKayit);
   function gunAraclari(){
     return [
-      { ad:'gun_kaydi', tur:'oku', ornek:'bugünkü niyetim ne', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydi-kullani'),
+      { ad:'gun_kaydi', tahminle:gunOturum, tur:'oku', ornek:'bugünkü niyetim ne', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydi-kullani'),
         kural:t => GUN_OKU_RE.test(t),
         calistir:async () => {
           if(!gunOturum()) return { cevap:yz('ortak.king-arac.gun-kaydi-hesap-sunucusunda') };
@@ -931,7 +931,7 @@ window.LIFEOS.PARCA.yazilar({
           return { sonuc:v, cevap:yz('ortak.king-arac.bugun-senin-girdigin') + gunKaydiMetin(v) + '.'
             + (b.length ? ' Gün planında ' + b.length + ' iş, ' + b.filter(x => x.bitti).length + ' tanesi bitti.' : '') };
         } },
-      { ad:'gun_kaydi_yaz', tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydini-yazar'),
+      { ad:'gun_kaydi_yaz', tahminle:gunOturum, tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:yz('ortak.king-arac.gun-un-bugunku-kaydini-yazar'),
         parametreler:{ type:'object', properties:{ niyet:{ type:'string', maxLength:120 }, enerji:{ type:'integer', minimum:1, maximum:5 },
           hava:{ type:'string', enum:Object.keys(HAVA_AD) } } },
         kural:(t, ham) => gunKaydiCoz(t, ham),
@@ -971,7 +971,7 @@ window.LIFEOS.PARCA.yazilar({
   const dk = m => m >= 60 ? Math.floor(m / 60) + ' sa' + (m % 60 ? ' ' + (m % 60) + ' dk' : '') : m + ' dk';
   function senAraclari(){
     return [
-      { ad:'gun_sen', tur:'oku', ornek:'beni ne besliyor', aciklama:yz('ortak.king-arac.gun-sen-kaydini-okur'),
+      { ad:'gun_sen', tahminle:senOturum, tur:'oku', ornek:'beni ne besliyor', aciklama:yz('ortak.king-arac.gun-sen-kaydini-okur'),
         kural:t => SEN_OKU_RE.test(t),
         calistir:async () => {
           if(!senOturum()) return { cevap:yz('ortak.king-arac.sen-kaydi-hesap-sunucusunda') };
@@ -980,7 +980,7 @@ window.LIFEOS.PARCA.yazilar({
             (v.calan || []).length ? yz('ortak.king-arac.enerji-calan') + v.calan.join(', ') + '.' : '', (v.deste || []).length ? yz('ortak.king-arac.destende') + v.deste.length + ' kart var.' : ''].filter(Boolean);
           return { sonuc:v, cevap:l.length ? l.join(' ') : yz('ortak.king-arac.sen-bolumu-bos-sozum') };
         } },
-      { ad:'gun_sen_yaz', tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:yz('ortak.king-arac.gun-sen-kaydina-yazar'),
+      { ad:'gun_sen_yaz', tahminle:senOturum, tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:yz('ortak.king-arac.gun-sen-kaydina-yazar'),
         parametreler:{ type:'object', properties:{ soz:{ type:'string', maxLength:160 }, veren:{ type:'string', maxLength:40 }, calan:{ type:'string', maxLength:40 },
           kart:{ type:'string', maxLength:60 }, kart_enerji:{ type:'string', enum:['az', 'cok'] } } },
         kural:(t, ham) => senCoz(t, ham),
@@ -1003,7 +1003,7 @@ window.LIFEOS.PARCA.yazilar({
           await H.gunSenYaz(yeni);
           return { metin:yz('ortak.king-arac.gun-sen-e-yazdim') + senMetin(p) + '.', geriAl:async () => { await H.gunSenYaz(once); } };
         } },
-      { ad:'gun_kart_cek', tur:'oku', ornek:'bir kart çek', aciklama:'«Ne yapsam?» destesinden kuralla bir kart çeker: sık yapılan ve bugünkü enerjiye uyan öne çıkar. Kayıt yazmaz.',
+      { ad:'gun_kart_cek', tahminle:senOturum, tur:'oku', ornek:'bir kart çek', aciklama:'«Ne yapsam?» destesinden kuralla bir kart çeker: sık yapılan ve bugünkü enerjiye uyan öne çıkar. Kayıt yazmaz.',
         kural:t => KART_RE.test(t),
         calistir:async () => {
           if(!senOturum() || !GV()) return { cevap:yz('ortak.king-arac.deste-hesap-sunucusunda-bu-c') };
@@ -1013,7 +1013,7 @@ window.LIFEOS.PARCA.yazilar({
           if(!c) return { cevap:yz('ortak.king-arac.deste-bos') };
           return { sonuc:c, cevap:yz('ortak.king-arac.kartin') + c.kart.ad + '». ' + c.neden + (enerji ? ' (enerjin ' + enerji + '/5)' : '') + '. Yaptıysan Gün › Sen’de «Yaptım» de; deste öğrenir.' };
         } },
-      { ad:'gun_karne', tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:yz('ortak.king-arac.hayat-karnesi-son-7-ya'),
+      { ad:'gun_karne', tahminle:gunOturum, tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:yz('ortak.king-arac.hayat-karnesi-son-7-ya'),
         parametreler:{ type:'object', properties:{ gun:{ type:'integer', enum:[7, 30] } } },
         kural:t => { const m = t.match(KARNE_RE); return m ? { gun:(m[1] || m[2]) === 'ay' ? 30 : 7 } : null; },
         calistir:async p => {

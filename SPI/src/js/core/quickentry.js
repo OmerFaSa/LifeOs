@@ -302,6 +302,16 @@ SP.Quick = (function(){
       const f = VITAL_FIELDS.sleep, v = uykuSaati(s);
       if(v != null && v >= f.min && v <= f.max) return { field:f, value:v };
     }
+    /* YATIŞ VE KALKIŞ SAATİ (King 5, deneme 2026-11-08: «dün gece 01:30'da yattım, 07:45'te kalktım»
+       hiç okunmuyordu). Süre iki saatin farkıdır, gece yarısını geçebilir; iki saat de söylenmeli. */
+    const yk = n.match(/(\d{1,2})(?:[:.](\d{2}))?\s*'?\s*(?:de|da|te|ta)?\s+(?:yattim|uyudum|uyuya kaldim)[^0-9]*?(\d{1,2})(?:[:.](\d{2}))?\s*'?\s*(?:de|da|te|ta)?\s+(?:kalktim|uyandim)/);
+    if(yk){
+      const a = Number(yk[1]) * 60 + Number(yk[2] || 0), b = Number(yk[3]) * 60 + Number(yk[4] || 0);
+      if(Number(yk[1]) < 24 && Number(yk[3]) < 24){
+        const f = VITAL_FIELDS.sleep, v = Math.round(((b - a + 1440) % 1440) / 60 * 100) / 100;
+        if(v > 0 && v <= f.max) return { field:f, value:v };
+      }
+    }
     return null;
   }
 

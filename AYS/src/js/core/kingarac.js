@@ -145,7 +145,7 @@ R.KingArac = (function(){
     /* «dün ne çalıştım» (King 5 D10): model «araç çağırmam gerekiyor» deyip cevapsız bırakıyordu. */
     gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç|(?:bugün|dün|önceki gün)(?:kü)? (?:ne|neler|ne kadar) (?:çalıştım|yaptım|çözdüm))/,
     konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
-    gunun_akisi:/(günün akışı|bugünün akışı)/,
+    gunun_akisi:/(günün akışı|bugünün akışı|(?:bugünün|bugünkü|günün) (?:planı|programı)(?= ne(?:ler)?(?:\s|[?,.!]|$)|\s*[?,]|\s*$)|bugün ne(?:ler)? (?:var|çalışacağım))/,   // King 5: «bugünün planı ne»; «planına … ekle» yazmadır
     durum_ozeti:/(sınava (?:kaç gün|ne kadar)|durum özet|genel durum)/,
     kartlar:/((?:tekrar etmem gereken|sırası gelen|geciken) kart|kart borcu)/,
     haftalar:/(?:haftanın|haftalık) review|hafta metni/,

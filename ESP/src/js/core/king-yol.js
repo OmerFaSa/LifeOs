@@ -185,6 +185,9 @@ window.LIFEOS.KING = (function(){
   /* Ödeme cümlesi: satın al, sipariş ver, öde(me yap), kart bilgisi; «ödev» değil. */
   const YAPILACAK_RE = /^(yapılacak(lar)?|yapilacak|hatırlat|hatirlat)(?![a-zçğıöşü])/;   // «yapılacak: fatura öde» bir hatırlatmadır, ödeme değil
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
+  const PLAN_SOZ_RE = /(bugünün|bugünkü|günün) (planı|plan|programı|akışı)/;
+  const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
+  const OZET_GUN_RE = /^(?:bana\s+)?(?:bugünün|günün|bugünkü)\s+(?:\S+\s+)?özet(?:i|ini)?(?:\s+(?:çıkar|ver|göster|yaz|nedir|ne))?\s*[?.!]*$/;
   async function isle(metin){
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
     if((KI.bolum === 'araclar' || KI.bolum === 'kutuphane')){ KI.bolum = 'sohbet'; KI.kvGiris = true; }     // sayfadayken sorulan sohbette görünür
@@ -193,6 +196,24 @@ window.LIFEOS.KING = (function(){
     if(!KI.akis.some(m => m.kim === 'sen')) KI.sohbetBasYaz();     // söz 33: yeni sohbet ya da yeni gün
     if(KI.ritim) return KI.ritimIsle(metin);                        // söz 34: haftalık gözden geçirme sürüyor
     if(KI.gunlukBekle) return KI.gunlukIsle(metin);                 // söz 34: günlük metni bekleniyor
+    /* İlaç ve doz (AGENTS §1.5; King 5 deneme: «başım ağrıyor, hangi ilacı kaç tane içmeliyim?» yalnız belirti
+       olarak önizleniyor, soru sessizce geçiliyordu). Sınır önce ve açıkça söylenir; belirti kaydı bir dokunuş. */
+    if(ILAC_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
+      const belirti = String(metin).split(/[,;.]/).map(x => x.trim()).find(x => x && !ILAC_RE.test(KI.kucuk(x)));
+      KI.cipler = belirti ? [{ ad:'Belirtiyi kaydet', is:'oner-metin:' + belirti }] : null;
+      KI.soyle('İlaç ya da doz öneremem; bunu hekimin ya da eczacın söyler. Şikâyet şiddetliyse, geçmiyorsa ya da ateş, kusma, görme bozukluğu gibi belirtiler eşlik ediyorsa bir sağlık kuruluşuna başvur.'
+        + (belirti ? ' İstersen «' + belirti + '» belirtisini kaydedeyim.' : ''));
+      return { tur:'ilac-siniri' };
+    }
+    /* «Bugünün (sağlık) özetini çıkar» yerel özettir (deneme: ücretli araştırma iş emri açılıyordu). */
+    if(OZET_GUN_RE.test(t0) && !/^bugünün özeti$/.test(t0)){
+      const r = await isle('bugünün özeti');
+      const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === 'bugünün özeti').pop();
+      if(sen) sen.metin = String(metin).trim();
+      return r;
+    }
     /* Söz 20: büyük eylem yalnız açık onayla. */
     if(KI.bekleyenYetki && /^onayl[ıi]yorum[.!]?$/.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -262,6 +283,16 @@ window.LIFEOS.KING = (function(){
       await KI.geriAlYap();
       return { tur:'geri-al' };
     }
+    /* «King ne yaptı?» (King 5, deneme 2026-11-08: «yanlış soru teşhisi» aracına gidiyordu). Eylem defteri
+       kodla okunur: son beş iş, nereden geldiği, geri alınıp alınmadığı. */
+    if(/^(?:king\s+)?(?:ne(?:ler)? yaptın|ne yaptı|son yaptıkların|yaptıkların|eylem(?:ler)?(?:in)?)(?:\s+neler)?\s*[?.!]*$/.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+      const l = KI.eylemListesi ? KI.eylemListesi().slice(0, 5) : [];
+      if(!l.length) KI.soyle('Henüz senin onayınla yaptığım bir iş yok. Önerdiğim her değişiklik önce önizlenir, onaylarsan yapılır ve buraya düşer.');
+      else KI.soyle('Son yaptıklarım (yenisi üstte):', l.map(e => KI.tarihYaz(e.zaman) + ' · ' + (e.ozet || e.arac)
+        + (e.durum === 'geri_alindi' ? ' · geri alındı' : e.geriYolu ? ' · geri alınabilir' : '')));
+      return { tur:'eylem', n:l.length };
+    }
     /* Söz 25: üslup sayacı (yalnız sayı) ve envanter. */
     if(KI.ENV() && KI.hafiza()) KI.ortam.depo.yaz(KI.USLUP, KI.ENV().uslupGuncelle(KI.ortam.depo.oku(KI.USLUP), metin));
     if(KI.envanter){
@@ -326,7 +357,8 @@ window.LIFEOS.KING = (function(){
     if(HAFTA_RE.test(t0)) return merkezKomut(metin, 'hafta', yz('ortak.king-yol.haftalik-degerlendirme'));
     if(CAPRAZ_RE.test(t0)) return merkezKomut(metin, 'capraz', yz('ortak.king-yol.moduller-arasi-bulgular'));
     /* Söz 34 */
-    if(KI.ONCELIK_RE.test(t0)) return KI.oncelikIsle(metin);
+    /* «bugünün planı ne, neye çalışmalıyım» önce bugünün planıdır (King 5, deneme: «öncelik için veri yok» diyordu). */
+    if(KI.ONCELIK_RE.test(t0) && !PLAN_SOZ_RE.test(t0)) return KI.oncelikIsle(metin);
     if(KI.RITIM_RE.test(t0)) return KI.ritimBaslat(metin);
     if(KI.YUK_RE.test(t0)) return KI.yukIsle(metin);
     if(KI.GUNLUK_RE.test(t0)){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null; KI.gunlukBekle = true;
@@ -446,7 +478,7 @@ window.LIFEOS.KING = (function(){
     /* Yorgunluk (King 5 D7, canlı deneme: «bugün çok yorgunum» «Bugün» sayfasını açıyordu). Bir his
        sayfa komutu değildir. Bugünü kısaltan araç varsa King hemen önerir (dakikayı kişi seçer);
        yoksa cümle sohbete gider. */
-    if(KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri'){
+    if(KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri' && !/(kısalt|azalt|süre|dakika|saat)/.test(t0)){   // açık süre isteği kendi yolunda
       const A = KI.ARAC && KI.ARAC();
       if(A && A.bul && A.bul(KI.ayar.modul + '_gecici_sure')){
         KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -457,6 +489,9 @@ window.LIFEOS.KING = (function(){
       }
       if(y.tur === 'git') y = { tur:'bilinmiyor' };
     }
+    /* Anlatım sorusu sayfa açmaz (King 5, deneme: «Almancada der, die, das farkını kısaca anlat» → «Dil
+       açılıyor»). Açık komut («dil sayfasını aç») yine sayfadır. */
+    if(y.tur === 'git' && y.kaynak !== 'komut' && /(anlat|açıkla|nedir|ne demek|farkı|nasıl yapılır|neden|örnek ver)/.test(t0)) y = { tur:'bilinmiyor' };
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
        kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
        sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),

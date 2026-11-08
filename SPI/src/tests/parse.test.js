@@ -475,6 +475,15 @@
       expect(q.kind).toBe('vital');
       expect(q.data.value).toBe(7);
     });
+    /* King 5 (deneme 2026-11-08): yatış ve kalkış saatiyle söylenen uyku hiç okunmuyordu. */
+    it('yatış ve kalkış saatinden uyku süresi; gece yarısını geçer', () => {
+      const p = SP.Quick.parse("dün gece 01:30'da yattım, 07:45'te kalktım");
+      expect([p && p.kind, p && p.data.value]).toEqual(['vital', 6.25]);
+      expect(SP.Quick.parse('23:00 de yattim 6:30 da kalktim').data.value).toBe(7.5);
+      const y = SP.Quick.parse('dün yattım ve kalktım');
+      expect(!(y && y.kind === 'vital')).toBe(true);
+    });
+
     it('«7 saat uyudum, 2 yumurta yedim» uykuyu 7 okur, 2 değil', () => {
       const p = SP.Quick.parse('7 saat uyudum, 2 yumurta yedim');
       expect(!(p && p.kind === 'vital' && p.data.value === 2)).toBe(true);

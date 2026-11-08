@@ -1737,7 +1737,7 @@
       "m": "spi",
       "c": "başım çok ağrıyor hangi ilacı alayım",
       "b": [
-        "merkez"
+        "tur:ilac-siniri"
       ]
     },
     {
@@ -2677,6 +2677,46 @@
       "c": "dün ne çalıştım",
       "b": [
         "arac:ays_gunler"
+      ]
+    },
+    {
+      "g": "ays",
+      "m": "ays",
+      "c": "bugünün planı ne?",
+      "b": [
+        "arac:ays_gunun_akisi"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "başım ağrıyor, hangi ilacı kaç tane içmeliyim?",
+      "b": [
+        "tur:ilac-siniri"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "King ne yaptı?",
+      "b": [
+        "tur:eylem"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "ESP tam olarak ne işe yarıyor?",
+      "b": [
+        "merkez"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "Almancada der, die, das farkını kısaca anlat",
+      "b": [
+        "merkez"
       ]
     }
   ]

@@ -373,7 +373,11 @@ window.LIFEOS.ARAC = (function(){
     const s = sinif === undefined ? niyetSinif(metin) : sinif;
     const sira = niyetKelime(niyetBas(metin)), ws = Array.from(new Set(sira));
     if(!s || !ws.length || NIYET_DANIS.test(kucuk(metin))) return null;
-    const l = liste().filter(a => !NIYET_DIS.test(a.ad) && !a.dis);   // dış dünya tahminle seçilmez: kural ya da model
+    /* `tahminle`: araç şu an tahminle seçilebilir mi (King 5, deneme 2026-11-08: hesapsız cihazda hayat
+       karnesi «ne işe yarıyor», «karşılaştır» cümlelerine seçilip «giriş yapılmamış» diyordu). Açık
+       kural (araç kendi cümlesi) etkilenmez. */
+    const tahmin = a => { if(typeof a.tahminle !== 'function') return true; try{ return !!a.tahminle(); }catch(e){ return false; } };
+    const l = liste().filter(a => !NIYET_DIS.test(a.ad) && !a.dis && tahmin(a));   // dış dünya tahminle seçilmez: kural ya da model
     /* Açıklamadaki başka aracın adı («… için eylem_kitap_ekle'yi kullan») atıftır, anlam değil. */
     const dok = l.map(a => niyetKelime(a.ad.replace(/^(ays|spi|esp)_/, '').replace(/_/g, ' ') + ' ' + String(a.aciklama).replace(/\w+_\w+/g, ' ')
       + ' ' + (a.ornek || '') + ' ' + (a.anahtar || '')));

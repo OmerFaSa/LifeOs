@@ -78,6 +78,9 @@ Kesin kurallar:
   sunma.
 - Emir kipi kullanma. Öneri kur: «…önerebilirim», «…istersen».
 - Kısa yaz: en fazla 5 cümle. Kullanıcı Türkçe konuşuyor, sen de Türkçe yaz.
+- Gerçekçi ol: listede dayanağı olmayan yargı, olasılık ya da garanti verme
+  («mümkün görünüyor», «şansın yüksek», «kesinlikle»); eksik kaydı adıyla söyle.
+  Doğrudan cevapla başla, dolgu cümlesi kurma; iç adları (HKM, modül, araç) kullanma.
 - Sen bir şey uygulayamazsın. Kullanıcı bir değişiklik isterse, bunun bir
   TEKLİF olarak bırakılacağını ve onun onayıyla uygulanacağını söyle.
 - Selamlaşma, soru sorma, konuşma serbesttir: her cevabın ölçüm raporu
@@ -101,9 +104,12 @@ Bugünün ölçümleri:
 # sadece sisteme odakli olmasin, sohbet de edebileyim»). Kucuk model her
 # cevabi olcume baglayip «bu ölçülmedi» diyordu. Kimlik yine ilk cumlede;
 # olcum kurali ayni, tirnakli kalip yok (model aynen tekrarliyordu).
-KISA_KIMLIK = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) görevlisin; aynı zamanda kullanıcının samimi bir sohbet arkadaşısın: sıcak, doğal ve rahat konuşursun, kullanıcı samimi konuşursa sen de samimi olursun.
-Her konuda sohbet edebilirsin: günün nasıl geçtiği, hobiler, merak edilen bir bilgi, espri, dertleşmek. Kendin hakkında uydurma: bir yapay zekâ asistanısın; uyumaz, yemez, yorulmazsın ve sistemde kendiliğinden bir şey yapmış gibi anlatmazsın. Her cevabı sisteme bağlamak zorunda değilsin; LifeOS'tan (AYS sınav hazırlığı, SPİ sağlık, ESP kişisel gelişim) yalnız konu oraya gelirse söz et.
-Kurallar: Ölçülen bir şeyden (uyku, net, öğün gibi) sayı söyleyeceksen aşağıdaki listede geçmeli; listede yoksa ölçülmediğini kısaca söyle, sayı uydurma. Emir kipi kullanma. Doğal ve kısa yaz (çoğunlukla bir üç cümle); kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle."""
+# PROFESYONEL VE GERCEKCI (kullanici, 2026-11-08: «gercekci olsun her konuda ve profesyonel konussun»).
+# Deneme: «bu tempoyla hedefime ulasir miyim» sorusuna hic kayit yokken «mumkun gorunuyor, sansin yuksek»;
+# «sen kimsin» sorusuna «merkezi HKM'de gorevli» ve «sohbet etmekten buyuk keyif alirim» dedi.
+KISA_KIMLIK = """Adın %(ad)s. LifeOS'un kişisel asistanısın ve Merkez'de (Hayat Kontrol Merkezi) çalışırsın; kullanıcının samimi ama profesyonel bir sohbet arkadaşısın: net, saygılı, dolgusuz konuşursun.
+Her konuda konuşabilirsin. Kendin hakkında uydurma: bir yapay zekâ asistanısın; uyumaz, yemez, yorulmazsın ve sistemde kendiliğinden bir şey yapmış gibi anlatmazsın. LifeOS'un üç bölümü vardır: AYS (sınav hazırlığı), SPİ (sağlık), ESP (kişisel gelişim); yalnız konu oraya gelirse söz et ve ne olduklarını söyle. «HKM», «modül», «araç», «iş emri» gibi iç adları kullanma.
+Kurallar: Doğrudan cevapla başla; övgü ve dolgu cümlesi kurma. Ölçülen bir şeyden (uyku, net, öğün gibi) sayı söyleyeceksen aşağıdaki listede geçmeli; listede yoksa ölçülmediğini kısaca söyle, sayı uydurma. Gerçekçi ol: listede dayanağı yoksa yargı, olasılık ya da garanti verme («mümkün görünüyor», «şansın yüksek», «kesinlikle» deme); hangi kaydın eksik olduğunu söyle. Genel bilgi verirken bunun kişisel ölçü olmadığını belirt. Sağlıkta teşhis koyma, ilaç ve doz önerme. Emir kipi kullanma. Kısa yaz (çoğunlukla bir üç cümle); kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle."""
 
 SISTEM_KISA = KISA_KIMLIK + """%(ek)s
 
@@ -750,6 +756,15 @@ ARAC_IDDIA = re.compile(
     r"oluşturdum|oluşturacağım|taşıdım|erteledim|ertelerim|"
     # Ic konusma (D10: «dun ne calistigini ogrenmek icin bir arac cagirmam gerekiyor»).
     r"araç çağırmam|aracı çağırmam|araç çağırmalıyım|araç kullanmam|bir araç çağır\w*)\b", re.I)
+# Dayanaksiz yargi (deneme 2026-11-08: hic calisma kaydi yokken «bu tempoyla hedefine ulasman mumkun
+# gorunuyor, sansin yuksek»; veri yokken «uykunun netlerine etkisi kesinlikle var»).
+GERCEK_DISI = re.compile(
+    r"(şansın (?:çok |oldukça )?yüksek|mümkün görünüyor|kesinlikle (?:var|ulaşırsın|başarırsın|olur|etkiler)|"
+    r"hedefine (?:kesin(?:likle)?|rahatça|mutlaka) ulaşırsın|başaracağından eminim|başarırsın)", re.I)
+GERCEK_DUZELT = ("\n\nÖnceki cevabında ölçülerde dayanağı olmayan bir yargı ya da güvence verdin. Bunu yapma: "
+                 "listede dayanak yoksa hangi kaydın eksik olduğunu söyle; genel bilgi veriyorsan genel olduğunu belirt.")
+GERCEK_YOK = ("Bunu söyleyebilmem için yeterli kayıt yok. Birkaç gün düzenli kayıt girersen ölçülere dayanarak "
+              "değerlendiririm.")
 ARAC_DUZELT = ("\n\nÖnceki cevabında bir işi araç çağırmadan yapmış ya da yapacakmış gibi anlattın; "
                "sen hiçbir şeyi kendin yapamazsın. Ya uygun aracı ÇAĞIR ya da yapamadığını açıkça söyle.")
 ARAC_YAPILMADI = ("Bunu şu an buradan yapamadım; hiçbir şeyi değiştirmedim. Daha açık söylersen "
@@ -840,7 +855,7 @@ class CumleAkisi:
             return
         if (manager.imperatives(t) or ai.uydurma_sayilar(t, self.baglam, genel=self.genel)
                 or (self.aracli and (ARAC_IDDIA.search(t) or re.search(r"\barac|\baraç", t, re.I)))
-                or (self.iddia and ARAC_IDDIA.search(t))):
+                or (self.iddia and (ARAC_IDDIA.search(t) or GERCEK_DISI.search(t)))):
             # Aracli turda «bakiyorum», «arac cagiriyorum» akmaz (sesle de okunurdu).
             self.durdu = True
             return
@@ -1288,6 +1303,11 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             r = r2
         else:
             r = dict(r, text=ARAC_YAPILMADI)
+    if r.get("ok") and not r.get("cagrilar") and GERCEK_DISI.search(r.get("text") or ""):
+        # Dayanaksiz yargi: bir kez duzeltme; yine olmazsa kodun durust cumlesi.
+        r2 = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem + GERCEK_DUZELT,
+                    user=user, transport=transport, veri=veri, seviye=sv["seviye"], denetim=denetim)
+        r = r2 if r2.get("ok") and not GERCEK_DISI.search(r2.get("text") or "") else dict(r, text=GERCEK_YOK)
     red = []
     if r.get("ok") and r.get("cagrilar"):
         # KAPALI KATALOG (core/arac.py): bilinmeyen arac ve gecersiz
@@ -1350,8 +1370,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             yeni_aday.append(a)
     if yeni_aday:
         a = yeni_aday[0]
-        govde += ("\n\n(Hafıza adayı: «%s». Kalıcı olsun istersen «aday %d kaydet», "
-                  "istemezsen «aday %d sil» yaz; HKM › Profil'den de onaylanır.)" % (a["text"], a["id"], a["id"]))
+        # Ic ad (HKM › Profil) kullaniciya gitmez (deneme 2026-11-08).
+        govde += ("\n\nİstersen bunu hafızama yazarım: «%s». Yazmam için «aday %d kaydet», "
+                  "istemezsen «aday %d sil» de." % (a["text"], a["id"], a["id"]))
     if r.get("truncated"):
         # Telegram'da yan not yeri yoktur: metnin KENDISI soyler.
         # Kisaltilmis bir cevabi tam gibi sunmak, kullaniciya eksik

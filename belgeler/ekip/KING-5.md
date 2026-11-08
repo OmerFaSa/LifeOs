@@ -69,6 +69,27 @@ değişikliği, kayıt, soru çözme, ders, hafıza, hatırlatma.
 - **D10:** «araç çağırmam gerekiyor» iç konuşması durdurulur; «dün ne çalıştım» AYS gün aracına bağlanır; kart aracının «hatırlama» anahtarı hatırlatma isteğini çekmesin diye kalktı.
 - King sınavına deneme cümleleri eklendi (316 → 321): 314/321, beşi de geçiyor.
 
+**Tur 4 (2026-11-08) — üç modülde sınayan sorular** (yeni → orta → alışmış kullanıcı; ESP, SPİ, AYS):
+- Sohbet altyapısı: talimat profesyonel ve gerçekçi (dolgu yok, iç ad yok, dayanaksız yargı ve güvence yok,
+  sağlıkta ilaç/doz yok); model yine «şansın yüksek», «kesinlikle» derse bir kez düzeltme, olmazsa dürüst
+  cümle (`sohbet.GERCEK_DISI`, akışta da). Hafıza adayı notu iç ad taşımaz.
+- Yönlendirme: «King ne yaptı?» eylem defterini okur; «bugünün planı ne?» öncelik listesinden önce gelir;
+  anlatım sorusu («… farkını anlat») sayfa açmaz; hesapsız cihazda «Gün» araçları tahminle seçilmez
+  (`arac.js tahminle`; «ne işe yarıyor», «karşılaştır» cümleleri «karne giriş yok» çıkmazına düşüyordu).
+- SPİ: «01:30'da yattım, 07:45'te kalktım» → uyku 6,25 sa; ilaç/doz sorusunda sınır önce söylenir ve
+  «Belirtiyi kaydet» çipi; «bugünün sağlık özetini çıkar» yerel özettir (ücretli iş emri açılmıyordu).
+- King sınavı 321 → 326 cümle: 319/326 (eski 7 yanlış aynı). «başım çok ağrıyor hangi ilacı alayım»
+  beklentisi «merkez»den «tur:ilac-siniri»ne çekildi: sınır artık kuralla ve kesin söyleniyor.
+
+Kalan açıklar (tur 4 denemesinden):
+- AYS'de deneme sonucu sohbetten kaydedilemiyor («78 net: Türkçe 30…» → Deneme sayfası açılıyor); ders
+  netlerini doğrulayıp yazan bir eylem gerekiyor (modül mantığı, ofise uygun).
+- ESP: «15 yeni kelime» ve kitapta «120. sayfa» kayda girmiyor; Almanca soru bankası yok, model yedeği yok.
+- Yeni kullanıcı: ESP tanışma ekranı yok, seçilmemiş bir hedefle açılıyor; «sen ne yapabilirsin?» sorusunun
+  kuralla verilen somut bir cevabı (modülün araçlarından) yok.
+- Gerçekçilik denetimi dürüst cümleye düşünce sorunun bilinen kısmı («223 gün kaldı») da kayboluyor.
+- Model araç sonucu turunda yer yer «modül» diyor.
+
 İyi çalışanlar: geçici süre önizlemesi ve onayı, türev ders kartı (dürüst etiketli), sıcak modelde
 0,6–1,5 sn cevap, onaylanan eylemin `eylem` defterine düşmesi.
 

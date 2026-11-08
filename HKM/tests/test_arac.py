@@ -237,6 +237,21 @@ def run():
         eq(r["text"], sohbet.ARAC_YAPILMADI)
     test("LaTeX düz yazıya döner; «araç çağırmam gerekiyor» kullanıcıya gitmez", t_duz_matematik_ve_ic_konusma)
 
+    def t_gercekci():
+        # King 5 (deneme 2026-11-08): kayit yokken «mumkun gorunuyor, sansin yuksek».
+        t = _tasiyici(("Bu tempoyla hedefine ulaşman mümkün görünüyor, şansın yüksek.", []),
+                      ("Bunu değerlendirmek için çalışma kaydın yok; birkaç gün kayıt girersen bakarım.", []))
+        r = sohbet.konus(_con(), _cfg(), "bu tempoyla hedefime ulaşabilir miyim", BUGUN, transport=t)
+        eq(r["text"], "Bunu değerlendirmek için çalışma kaydın yok; birkaç gün kayıt girersen bakarım.")
+        ok("dayanağı olmayan" in t.gorulen[1]["sistem"])
+        t2 = _tasiyici(("Kesinlikle var.", []), ("Kesinlikle var, şansın yüksek.", []))
+        r2 = sohbet.konus(_con(), _cfg(), "uykumun netlerime etkisi var mı", BUGUN, transport=t2)
+        eq(r2["text"], sohbet.GERCEK_YOK)
+        # Talimat profesyonel ve ic adsiz: «merkezi HKM» yok, gercekcilik kurali var.
+        no("merkezi HKM" in sohbet.KISA_KIMLIK)
+        ok("Gerçekçi ol" in sohbet.KISA_KIMLIK and "Gerçekçi ol" in sohbet.SISTEM_METNI)
+    test("dayanaksız yargı ve güvence düzeltilir; talimat profesyonel", t_gercekci)
+
     def t_soz_verme_katalogsuz():
         # Deneme kullanimi (2026-11-08, gemma4): «yarin 7'de kosuyu hatirlatirim» — hicbir sey kurulmadi.
         t = _tasiyici(("Yarın sabah 7'de koşuyu hatırlatırım.", []), ("Tamam, 8'de hatırlatacağım.", []))
