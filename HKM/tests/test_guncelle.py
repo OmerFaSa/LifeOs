@@ -299,6 +299,23 @@ def run():
             shutil.rmtree(d, ignore_errors=True)
     test("zip ile indirilmis klasorde ne oldugunu soyler", t_git_degil)
 
+    def t_git_okunamaz():
+        """.git varken git klasoru okuyamazsa «zip ile indirilmiş» denmez, gercek hata soylenir."""
+        with _Depo() as r:
+            def calistir(args, **kw):
+                eq(kw.get("stdin"), subprocess.DEVNULL)
+                if "--show-toplevel" in args:
+                    return subprocess.CompletedProcess(args, 128, "", "fatal: detected dubious ownership")
+                return subprocess.run(args, **kw)
+            d = guncelle.durum(r.kul, calistir, getir=False)
+            eq(d["durum"], "hata")
+            ok("dubious" in d["mesaj"])
+            def uyarili(args, **kw):
+                p = subprocess.run(args, **kw)
+                return subprocess.CompletedProcess(args, p.returncode, p.stdout + "warning: x\n", p.stderr) if "--show-toplevel" in args else p
+            eq(guncelle.durum(r.kul, uyarili, getir=False)["durum"], "ok")
+    test("git deposu okunamazsa zip denmez, hata soylenir", t_git_okunamaz)
+
     def t_zip_baglanir():
         """Kullanicinin klasoru zip'ten: .git yok. «Güncelle» onu uzaga
         baglar ve en yeni surumu kurar. Veri (git disi, .gitignore'da)

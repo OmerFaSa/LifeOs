@@ -54,11 +54,14 @@ SARMA_SN = 600      # ileri sarma; yavas diskte 60 sn'de oldurulup yarim kalmama
 def _git(args, kok=KOK, calistir=subprocess.run, timeout=60):
     """(kod, cikti). git yoksa kod None."""
     try:
+        # stdin kapali: arka planda (masaustu uygulamasi) baslayan sunucunun gecersiz stdin'i git'e gecmesin.
         r = calistir(["git"] + list(args), cwd=kok, capture_output=True,
                      text=True, encoding="utf-8", errors="replace",
-                     timeout=timeout)
+                     timeout=timeout, stdin=subprocess.DEVNULL)
     except FileNotFoundError:
         return None, ""
+    except OSError as e:
+        return 1, str(e)
     except subprocess.TimeoutExpired:
         return 124, "zaman aşımı"
     return r.returncode, ((r.stdout or "") + (r.stderr or "")).strip()
@@ -76,8 +79,15 @@ def durum(kok=KOK, calistir=subprocess.run, getir=True, sure=BAKIS_SN):
                 "mesaj": "Bu bilgisayarda git kurulu değil. git-scm.com'dan "
                          "kurduktan sonra güncelleme buradan yapılabilir."}
     kod, cikti = _git(["rev-parse", "--show-toplevel"], kok, calistir)
+    ust = (cikti.strip().splitlines() or [""])[0].strip()   # stderr uyarisi yolun arkasina eklenebilir
+    # Klasorun kendi .git'i varsa zip DEGILDIR (2026-11-09: masaustu uygulamasi git deposuna «zip ile
+    # indirilmiş» deyip «Bağla ve güncelle» oneriyordu). git onu okuyamiyorsa gercek hatasi soylenir.
+    if os.path.exists(os.path.join(kok, ".git")):
+        if kod != 0:
+            return {"durum": "hata",
+                    "mesaj": "git bu klasörü okuyamadı: " + (cikti.strip()[-300:] or "sebep yazılmadı")}
     # Ust klasorlerden birinin deposu bu klasorun deposu DEGILDIR.
-    if kod != 0 or os.path.realpath(cikti.strip()) != os.path.realpath(kok):
+    elif kod != 0 or os.path.realpath(ust) != os.path.realpath(kok):
         return {"durum": "git-degil", "baglanabilir": True,
                 "mesaj": "Bu klasör zip ile indirilmiş. «Güncelle» onu "
                          "GitHub'daki sürüme bağlar ve en yeni sürümü kurar; "

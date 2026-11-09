@@ -546,7 +546,9 @@ SP.Quick = (function(){
     const slot = ogunSozu(t);
     const ml = parseMealLine(slot ? ogunSozunuAt(t) : t);
     if(ml) return { kind:'meal', data:Object.assign(ml, { slot }),
-      label:ml.items.map(i => i.food.name).join(', '),
+      /* Söylenen miktar önizlemede görünür (King-Bench GN-02: «2 dilim ekmek» → «Beyaz ekmek (2 dilim)»). */
+      label:ml.items.map(i => i.food.name + (/\d/.test(i.source || '')
+        ? ' (' + (i.qty != null ? U.fmtNum(i.qty) + ' ' + String(i.portion || '').replace(/\s*\(.*\)$/, '') : U.fmtNum(i.g) + ' g').trim() + ')' : '')).join(', '),
       hint:ml.items.length + ' gıda' };
 
     return null;

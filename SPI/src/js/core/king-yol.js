@@ -865,6 +865,12 @@ window.LIFEOS.KING = (function(){
     }
     let y = KI.yorumla(metin);
     if(y.tur === 'bos') return y;
+    /* King-Bench R-07: uzun anlatımın içindeki sayılı kayıt («…, sonra oturdum ve fizikten 22 soru çözdüm»). */
+    if(y.tur === 'bilinmiyor' && String(metin).length > 100){
+      const par = String(metin).split(/[,;.]|\s+(?:ve|sonra|ardından)\s+/).map(s => s.trim())
+        .filter(s => /\d/.test(s) && /(?:dı|di|du|dü|tı|ti|tu|tü)m(?:\s|$)/.test(s + ' '));
+      for(const p of par.reverse()){ const y2 = KI.yorumla(p); if(y2 && y2.tur === 'veri'){ y = y2; break; } }
+    }
     /* Yorgunluk (King 5 D7, canlı deneme: «bugün çok yorgunum» «Bugün» sayfasını açıyordu). Bir his
        sayfa komutu değildir. Bugünü kısaltan araç varsa King hemen önerir (dakikayı kişi seçer);
        yoksa cümle sohbete gider. */
