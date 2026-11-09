@@ -6,7 +6,7 @@
 "css/base.css": "70a46eddb5b44c48ef5dda284acd7cc00be42a8e1de7feed6705fe78de9a9953",
 "css/cam.css": "6dbb70595cec15d0cbee7a63e8113e4d06052c481413419fb958881716abf184",
 "css/components.css": "776376028aea215203c46a7958cc2009edf63837856860d309941055181de6d6",
-"css/defter.css": "9f4be2371a1725a5b448d6c9dbf333faadaaf8369354c3ff52c17032ac1b7a1a",
+"css/defter.css": "b148bdb0f91a0634ff167f1ff640c990adde582ca6a347435812f318c67bafd2",
 "css/esp.css": "4c41732133a88e18353885baf69442c972101eda93f0692673fa92f4beb4c247",
 "css/fonts.css": "13191dc4cf7c63066293590cc0a4ebc278735a1c171eca956910fa1fbd6e50a1",
 "css/giris.css": "1b8ddf4edcc2491a066328e7c74a9a8b3c943d98ed8ce2383d3a407c45f29a1d",
@@ -76,7 +76,7 @@
 "js/core/coach.js": "23bcf53e36cac4f4b2ea38fcf2ad29ef283235e93fd8becc7279626b9b28d24a",
 "js/core/components.js": "d2f8b1693c903e92dedf666e5c34b64a4653590728e3aaa4d949847d2ca85dd9",
 "js/core/curriculum.js": "162d6f864971205828f040a6ab7768fdf4a86f1ba68b20fb47f541450ef7e0a6",
-"js/core/defter.js": "83ff12caa2ea471beb349ca1ff46e4d11775261bcf70b67d426c3e92c0fa857c",
+"js/core/defter.js": "7de2a6c1b9d013fe97a2bf4e5b12cc1873b8465e283d5356e3bc81e761955f7e",
 "js/core/depo.js": "322644233a137768d95f22676a9c2b001e313571978d107f7ef80b8dbba0de6e",
 "js/core/desk.js": "e92e8f089e7d803175b3bb66c4cf24d3a12b3244ace8d9307ca53bcfc1074336",
 "js/core/dunku.js": "fc4aff7d0e5eb1e1b27d526544aa33ad121150c6d40962c3cf020632cb0b7a0f",
@@ -106,7 +106,7 @@
 "js/core/ice.js": "6e46a6f6884c4c260b41ca94f438c1b9bc321a57e57ab39cf720bf36e22c4e3c",
 "js/core/inceleme.js": "58f315890eca0bea481668f15220958f1a9a6d153d26514773e2559e646898f4",
 "js/core/intellect.js": "89502ea1cc2191bab8e8a49d6651065b4ee8e6604566416de7f52667600c6206",
-"js/core/kabuk.js": "8f1acd8cb94323b1cbbd089d2b5f22586ada05ddf52bd44937cf2e211d400ab6",
+"js/core/kabuk.js": "314a95f3eddb736566b443f7576b5bbc9a29b8089659a9008f78f2c6a67c3500",
 "js/core/karsilama.js": "de499f2954068450e9456b98ab47046dfb78c2aaa78fbd7516978aa6ae136e84",
 "js/core/kavrat.js": "2a02dcd4fba46e1b8300a503bb1f97b5ebe9d6473f9dc6fb5896a162c87d9c08",
 "js/core/kesinlik.js": "bf0bbadb1412b2f7420f07fcd5966825503fe4c2f6943e2c1b2bc690d398ddbb",
@@ -210,7 +210,7 @@
 "js/core/zemin.js": "c7fc53aa417f8e8fccf7bf1ea7e6009af82f957afef61c2756870c804ac328d4",
 "js/data/agents.js": "54724976cff790eb2dc347758c3789c478762b1d1bce0683d0c98986b13035d8",
 "js/data/basarimlar.js": "3aa43feb6cfa75db2788fa9a20e0152c0c4918e7871004b340f2d78657713c40",
-"js/data/build.js": "c17f7ef745b5bfaf1d660897717e2c1763600cf5fe15ed52f2624f98bc7d490c",
+"js/data/build.js": "b7176ef8e16868438d2228f4325eeb52096857d875bdae1325093605ff3b2b91",
 "js/data/canon.js": "b70bdfb623f530ee2b8956dd413bcebbf124eb4ff2e60be379fd4903d53776a1",
 "js/data/curriculum.js": "8274048bed7d6ee034e0c80d2833ebfa1f13aa1881baeb554dbe1c61a7ece1c9",
 "js/data/drills.js": "248902fc251f4d51e27e1c1ddcfae3d7bc08174a62cfde3d3fab6595f9d79521",
@@ -257,6 +257,6 @@
 "js/screens/symposium.js": "270e957302cdf992ee1b714149ac1ea3dfb34c83d24210afa5580ffc66ad5f44",
 "js/screens/team.js": "8ff687b8bbf899e710e03e5ee15353d0988383f2c0657453916ee73a77d6dbd9",
 "js/screens/today.js": "9d53913ac6959129fdebb841776a7be9fc4f8e71302a89767986262b701eb7c3",
-"js/screens/writing.js": "fbd3e3bd00de6c4737f6ef672442047be8588e19392f2488edc3b683f4d02789"
+"js/screens/writing.js": "ac60f2692fe6f3445fa38088e793f42c54592a0c5b7f8bbd0a2d5a87b1f164e4"
 }
 }
