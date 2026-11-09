@@ -321,10 +321,10 @@ LIFEOS.Bilinc = (function(){
     g.dugum.forEach(x => { der[x.id] = x.derece; });
     const sonuk = id => (sec && !yakin[id]) || (bulunan && bulunan.indexOf(id) < 0) || (odak && ((d.dusunceler.filter(x => x.id === id)[0] || {}).konu || 'Konusuz') !== odak);
     const cizgi = g.kenar.map(e => { const a = yer[e.a], b = yer[e.b]; if(!a || !b) return '';
-      return '<line class="bh-k bh-k--' + e.tur + (sonuk(e.a) || sonuk(e.b) ? ' is-sonuk' : '') + '" x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }).join('');
+      return '<line class="bh-k bh-k--' + e.tur + (sonuk(e.a) || sonuk(e.b) ? ' is-sonuk' : '') + '" data-a="' + kac(e.a) + '" data-b="' + kac(e.b) + '" x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>'; }).join('');
     const nokta = d.dusunceler.map(x => { const p = yer[x.id]; if(!p) return '';
       const r = (6 + Math.min(10, (der[x.id] || 0) * 1.6)) * (o.olcek || 1);   // olcek: dar ekranda dokunulur boy
-      return '<g class="bh-d' + (x.id === sec ? ' is-secili' : '') + (sonuk(x.id) ? ' is-sonuk' : '') + (x.ozel ? ' is-ozel' : '') + (x.tur === 'catisma' ? ' is-catisma' + (x.durum === 'cozuldu' ? ' is-cozuldu' : '') : '') + '" data-bh-sec="' + kac(x.id) + '" tabindex="0" role="button" aria-label="' + kac(x.baslik + ', ' + (der[x.id] || 0) + ' bağ') + '" transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')">'
+      return '<g class="bh-d' + (x.id === sec ? ' is-secili' : '') + (sonuk(x.id) ? ' is-sonuk' : '') + (x.ozel ? ' is-ozel' : '') + (x.tur === 'catisma' ? ' is-catisma' + (x.durum === 'cozuldu' ? ' is-cozuldu' : '') : '') + '" data-bh-sec="' + kac(x.id) + '" tabindex="0" role="button" aria-label="' + kac(x.baslik + ', ' + (der[x.id] || 0) + ' bağ') + '" data-x="' + p.x.toFixed(1) + '" data-y="' + p.y.toFixed(1) + '" transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')">'
         + (x.tur === 'catisma' ? '<rect x="' + (-r).toFixed(1) + '" y="' + (-r).toFixed(1) + '" width="' + (2 * r).toFixed(1) + '" height="' + (2 * r).toFixed(1) + '" transform="rotate(45)" style="--r:' + renk(x.konu) + '"/>'
           : '<circle r="' + r.toFixed(1) + '" style="--r:' + renk(x.konu) + '"' + (x.tur === 'soru' ? ' class="is-soru"' : '') + '/>')
         + '<text y="' + (r + 13 * (o.olcek || 1)).toFixed(1) + '"' + (o.olcek ? ' style="font-size:' + (12 * o.olcek).toFixed(1) + 'px"' : '') + '>' + kac(kisa(x.baslik, 22)) + '</text></g>'; }).join('');

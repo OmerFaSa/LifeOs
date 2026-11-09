@@ -994,6 +994,9 @@ html.bh-tam-acik{ overflow:hidden; }
     function boyut(){ var dar = window.innerWidth < 700, w = dar ? 600 : 1200; if(w !== W){ vb = { x:0, y:0, s:1 }; yerCache.anahtar = ''; } W = w; H = dar ? 760 : 720; OLCEK = dar ? 1.9 : 1; }
     var d = null, zaman = 0, sec = null, gor = 'harita', odak = null, aranan = '', bekle = null, not_ = '', saat = null;
     var kip = 'yaz', tam = false, vb = { x:0, y:0, s:1 }, surukle = null, yerCache = { anahtar:'', yer:null };
+    /* Suzulme kipi bu cihazda hatirlanir; secilmemisse sistemin «hareketi azalt» ayarina uyar, elle acilirsa yine calisir. */
+    var suzme = (function(){ var v = null; try{ v = localStorage.getItem('lifeos.bilinc.suz'); }catch(e){}
+      return v === '1' ? true : v === '0' ? false : !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); })();
     var notlar = null, atifAc = false, atifAra = '', odakYaz = false, yvb = { x:0, y:0, s:1 };
     function vbM(h){ var st = h.st; return st.x.toFixed(1) + ' ' + st.y.toFixed(1) + ' ' + (h.w / st.s).toFixed(1) + ' ' + (h.h / st.s).toFixed(1); }
     function odakKur(v){ odakYaz = !!v && !!sec; document.documentElement.classList.toggle('bh-odak-acik', odakYaz); }   // modullerin Defter notlari (/api/hesap/defter), atif secici
@@ -1205,6 +1208,7 @@ html.bh-tam-acik{ overflow:hidden; }
         + '<input name="konu" list="bh-konular" maxlength="40" placeholder="Konu" aria-label="Konu" value="' + kac(odak && odak !== 'Konusuz' ? odak : '') + '"/><button type="submit" class="is-ana">Ekle</button></form>'
         + '<div class="bh-arac__sag"><input type="search" id="bh-ara" class="bh-ara" placeholder="Ara" value="' + kac(aranan) + '" aria-label="Düşüncelerde ara"/>'
         + '<div class="gun-gecis" role="group" aria-label="Görünüm">' + [['harita', 'Harita'], ['gruplar', 'Gruplar'], ['akis', 'Akış']].map(function(x){ return '<button type="button" data-bh-gor="' + x[0] + '" aria-pressed="' + (gor === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>'
+        + '<button type="button" class="bh-dugme" data-bh-suz aria-pressed="' + suzme + '" title="Düğümler uzaydaymış gibi yavaşça süzülür">Süzülme ' + (suzme ? 'açık' : 'kapalı') + '</button>'
         + '<button type="button" class="bh-dugme" data-bh-tam aria-pressed="' + tam + '">' + (tam ? 'Küçült' : 'Tam ekran') + '</button>'
         + (v.dusunceler.length ? '<button type="button" class="bh-dugme" data-bh-yorum' + (bekle ? ' disabled' : '') + '>King haritamı yorumlasın</button>' : '') + '</div></div>'
         + (tam ? '' : '<section class="gun-kart bh-kivilcim"><div class="bh-kivilcim__bas"><b>Bugün kendine sor</b><small>bir soru seç, cevabın haritana düşsün</small></div><div class="bh-kivilcim__l">'
@@ -1280,6 +1284,7 @@ html.bh-tam-acik{ overflow:hidden; }
       if((k = c('[data-bh-kip]'))){ kip = k.getAttribute('data-bh-kip'); ciz(); return true; }
       if((k = c('[data-bh-zum]'))){ var z = Number(k.getAttribute('data-bh-zum')); if(z) yakinlas(z); else { vb = { x:0, y:0, s:1 }; vbYaz(); } return true; }
       if(c('[data-bh-tam]')){ tam = !tam; document.documentElement.classList.toggle('bh-tam-acik', tam); ciz(); return true; }
+      if(c('[data-bh-suz]')){ suzme = !suzme; try{ localStorage.setItem('lifeos.bilinc.suz', suzme ? '1' : '0'); }catch(er){} ciz(); return true; }
       if(c('[data-bh-yorum]')){ haritayiYorumla(); return true; }
       if(c('[data-bh-kapat]')){ sec = null; atifAc = false; odakKur(false); ciz(); return true; }
       if(c('[data-bh-odak-yaz]')){ odakKur(!odakYaz); ciz(); var mo = document.getElementById('bh-metin'); if(mo && odakYaz) try{ mo.focus(); }catch(er){} return true; }
@@ -1361,6 +1366,26 @@ html.bh-tam-acik{ overflow:hidden; }
       var r = s.getBoundingClientRect(), h = hedef(s); surukle = { x:e.clientX, y:e.clientY, vx:h.st.x, vy:h.st.y, k:h.w / h.st.s / r.width, h:h, svg:s };
       s.classList.add('is-surukle');
     });
+    /* Uzay suzulmesi (2026-11-09, kullanici): dugumler yavasca suzulur, baglar onlarla gider. Sus degil, yer degismez:
+       her dugum kendi yerinin cevresinde birkac birim salinir. Hareketi azalt acikken ya da surukerken durur. */
+    function suzul(t){
+      requestAnimationFrame(suzul);
+      if(!suzme || surukle || document.hidden || bolum() !== 'bilinc') return;
+      document.querySelectorAll('.bh-svg').forEach(function(svg){
+        var yer = {};
+        svg.querySelectorAll('.bh-d').forEach(function(g){
+          var id = g.getAttribute('data-bh-sec'), h = 0;
+          for(var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 9973;
+          var x = Number(g.getAttribute('data-x')) + Math.sin(t / (2600 + h % 900) + h) * 4, y = Number(g.getAttribute('data-y')) + Math.cos(t / (3100 + h % 700) + h * 1.7) * 4;
+          yer[id] = [x, y]; g.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')');
+        });
+        svg.querySelectorAll('.bh-k').forEach(function(l){
+          var a = yer[l.getAttribute('data-a')], b = yer[l.getAttribute('data-b')]; if(!a || !b) return;
+          l.setAttribute('x1', a[0].toFixed(1)); l.setAttribute('y1', a[1].toFixed(1)); l.setAttribute('x2', b[0].toFixed(1)); l.setAttribute('y2', b[1].toFixed(1));
+        });
+      });
+    }
+    requestAnimationFrame(suzul);
     /* Bir dusunceye cift tikla: odakta acilir. */
     document.addEventListener('dblclick', function(e){
       var n = e.target.closest && e.target.closest('.bh-d'); if(!n || bolum() !== 'bilinc') return;
