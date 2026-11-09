@@ -265,7 +265,7 @@ BUGUN_RE = re.compile(r"^(ays|spi|esp)/bugun$")      # soz 21: modulun gunluk oz
 BUGUN_EN_UZUN = 400
 GUNPLAN_RE = re.compile(r"^(ays|spi|esp)/gun$")      # soz 22: modulun bugunku bloklari (JSON)
 GUNPLAN_EN_BUYUK = 64 * 1024
-KISI_RE = re.compile(r"^(ays|spi|esp)/kisi$")         # soz 24: modulun kisi kayitlari (JSON)
+KISI_RE = re.compile(r"^(ays|spi|esp|gun)/kisi$")     # soz 24: modulun kisi kayitlari (JSON); gun = Bilinc haritasindan
 KISI_EN_BUYUK = 128 * 1024
 GUNLUK_RE = re.compile(r"^(ays|spi|esp)/gunluk$")     # soz 25: modulun gunluk sayisal ozeti (JSON)
 GUNLUK_EN_BUYUK = 256 * 1024
@@ -278,6 +278,9 @@ NIYET_EN_UZUN = 120
 GUN_BLOK_EN_COK = 20
 # Soz 27: Gun › Sen. Liste tavanlari kucuk: bu bir defter degil, birkac satir.
 GUNSEN_RE = re.compile(r"^gun/sen$")
+# Ana sayfa › Bilinc haritasi (2026-11-09): kisinin dusunceleri; icerik anlasilmaz, yalniz bicim ve boyut.
+BILINC_RE = re.compile(r"^gun/bilinc$")
+BILINC_EN_BUYUK = 1024 * 1024
 SOZ_EN_UZUN = 160
 SEN_SATIR_EN_UZUN = 40
 SEN_LISTE_EN_COK = 12
@@ -1623,9 +1626,19 @@ class Depo:
         metin ve hangi gunun oldugu). Sunucu icerigi anlamaz."""
         if not isinstance(ad, str) or not (YAYIN_RE.match(ad) or BUGUN_RE.match(ad) or GUNPLAN_RE.match(ad)
                                            or KISI_RE.match(ad) or GUNLUK_RE.match(ad) or GUNKAYIT_RE.match(ad)
-                                           or GUNSEN_RE.match(ad)):
+                                           or GUNSEN_RE.match(ad) or BILINC_RE.match(ad)):
             raise Hata(400, "Geçersiz yayın.")
-        if GUNSEN_RE.match(ad):
+        if BILINC_RE.match(ad):
+            if not isinstance(icerik, str) or len(icerik.encode("utf-8")) > BILINC_EN_BUYUK:
+                raise Hata(400, "Bilinç haritası boş ya da çok büyük.")
+            try:
+                v = json.loads(icerik)
+                if not isinstance(v, dict) or not isinstance(v.get("dusunceler"), list):
+                    raise ValueError
+            except ValueError:
+                raise Hata(400, "Bilinç haritası okunamadı.")
+            gun = None
+        elif GUNSEN_RE.match(ad):
             try:
                 v = json.loads(icerik) if isinstance(icerik, str) else None
             except ValueError:
@@ -1835,13 +1848,26 @@ class Depo:
             v = dict(SEN_BOS)
         return dict(v, zaman=int(x["zaman"] * 1000))
 
+    def bilinc(self, kullanici):
+        """Ana sayfa › Bilinc haritasi; yoksa bos (sifir degil, bos liste)."""
+        with self._islem() as c:
+            x = c.execute("SELECT icerik, zaman FROM yayin WHERE kullanici=? AND ad='gun/bilinc'",
+                          (kullanici["id"],)).fetchone()
+        if x is None:
+            return {"dusunceler": [], "zaman": None}
+        try:
+            v = json.loads(x["icerik"])
+        except ValueError:
+            v = {}
+        return dict(v if isinstance(v, dict) else {}, zaman=int(x["zaman"] * 1000))
+
     def kisi(self, kullanici):
         """Soz 24: uc modulun kisi kayitlari, AYS, SPI, ESP sirasiyla; oldugu gibi."""
         with self._islem() as c:
             y = {x["ad"]: x for x in c.execute(
                 "SELECT ad, icerik, zaman FROM yayin WHERE kullanici=? AND ad LIKE '%/kisi'", (kullanici["id"],))}
         moduller = []
-        for modul in ("ays", "spi", "esp"):
+        for modul in ("ays", "spi", "esp", "gun"):
             x = y.get(modul + "/kisi")
             if x is None:
                 continue
@@ -2782,6 +2808,8 @@ def isle(h):
                 return _cevap(h, 200, d.gunluk(k))
             if yol == "/api/hesap/gunkayit":
                 return _cevap(h, 200, d.gun_kayit(k))
+            if yol == "/api/hesap/bilinc":
+                return _cevap(h, 200, d.bilinc(k))
             if yol == "/api/hesap/gunsen":
                 return _cevap(h, 200, d.gun_sen(k))
             if yol == "/api/hesap/uyarilar":

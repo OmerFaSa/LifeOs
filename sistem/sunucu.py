@@ -1816,19 +1816,21 @@ def merkez_izinli(basliklar, kapi):
 def gun_cumlesi(govde):
     """Gun sayfasinin cumlesi (2026-11-03): satirlari Gun'un kodu verir, cumleyi HKM'deki model
     kurar (/api/king/cumle, tur «gun»). Gun HKM'nin jetonunu bilmez; bu sunucu ayni bilgisayarda
-    HKM'nin yapilandirmasindan okur ve yalniz bu cagriyi iletir. HKM kapaliysa ok:false."""
+    HKM'nin yapilandirmasindan okur ve yalniz bu cagriyi iletir. HKM kapaliysa ok:false.
+    tur «bilinc» (2026-11-09): Ana sayfa › Bilinc haritasinda bir dusunce icin King'in gorusu."""
     try:
-        satirlar = [str(x)[:160] for x in (govde or {}).get("satirlar") or [] if str(x or "").strip()][:12]
+        tur = (govde or {}).get("tur") if (govde or {}).get("tur") in ("bilinc", "bilinc_harita") else "gun"
+        satirlar = [str(x)[:160] for x in (govde or {}).get("satirlar") or [] if str(x or "").strip()][:12 if tur == "gun" else 16]
         if not satirlar:
             return {"ok": False, "note": "satır yok"}
         with open(os.path.join(KOK, "HKM", "config.json"), encoding="utf-8") as f:
             jeton = (json.load(f) or {}).get("local_token") or ""
         istek = urllib.request.Request("http://%s:%d/api/king/cumle" % (HOST, HKM_PORT),
-                                       data=json.dumps({"tur": "gun", "satirlar": satirlar}).encode("utf-8"),
+                                       data=json.dumps({"tur": tur, "satirlar": satirlar}).encode("utf-8"),
                                        headers={"Content-Type": "application/json", "Authorization": "Bearer " + jeton})
-        with urllib.request.urlopen(istek, timeout=25) as r:
+        with urllib.request.urlopen(istek, timeout=25 if tur == "gun" else 45) as r:
             v = json.loads(r.read().decode("utf-8") or "{}")
-        return {"ok": bool(v.get("ok")), "text": v.get("text"), "model": v.get("model")}
+        return {"ok": bool(v.get("ok")), "text": v.get("text"), "model": v.get("model"), "note": v.get("note")}
     except Exception:
         return {"ok": False, "note": "Merkez kapalı"}
 
@@ -1907,7 +1909,7 @@ class Giris(SimpleHTTPRequestHandler):
             if self.headers.get("X-LifeOS") != "gun" or koken not in (None, "http://%s:%d" % (HOST, GIRIS_PORT), "http://localhost:%d" % GIRIS_PORT):
                 return self._json(403, {"ok": False})
             try:
-                n = min(int(self.headers.get("Content-Length") or 0), 8192)
+                n = min(int(self.headers.get("Content-Length") or 0), 16384)
                 govde = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
             except (ValueError, UnicodeDecodeError):
                 govde = {}
@@ -1942,6 +1944,15 @@ class Giris(SimpleHTTPRequestHandler):
             return plan_isle(self)
         if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel-apartman.js", "/piksel-doga.js", "/piksel-figur.js", "/piksel-simge.js", "/piksel.css", "/piksel-yazi.css"):
             return self._hesap_dosyasi(yol[1:])
+        # Ana sayfa (2026-11-09, depo sahibi: «ilk giriste bizi karsilayacak yer orasi»): hesabina girmis
+        # kisi kokte Ana sayfaya (/gun/) gider; girmemis kisi giris sayfasini gorur (hesap orada acilir).
+        # Eski kart secimi /kartlar/'da durur: guncelleme kutusu ve Merkez dugmesi orada.
+        if yol == "/" and "lifeos_hesap=" in (self.headers.get("Cookie") or ""):
+            self.send_response(302)
+            self.send_header("Location", "/gun/")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return None
         if yol == "/gun":
             self.send_response(301)
             self.send_header("Location", "/gun/")

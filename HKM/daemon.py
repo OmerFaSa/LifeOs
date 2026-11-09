@@ -96,7 +96,7 @@ Ucnoktalar:
     GET  /api/hafiza                «benim hakkımda ne biliyorsun»: bilgiler, olanlar, beceriler (core/memory.py)
     GET  /api/hafiza/ara?q=&k=      gommeyle arama (motor yoksa kok); {yontem, sonuclar}
     POST /api/hafiza/<id>/duzelt    {text} bilgiyi duzeltir · POST /api/hafiza/<id>/unut unutturur
-    POST /api/king/cumle            {tur: brifing|hafta, satirlar} -> King'in kisa cumlesi (sayi modulden)
+    POST /api/king/cumle            {tur: brifing|hafta|gun|bilinc|bilinc_harita, satirlar} -> King'in kisa cumlesi (sayi modulden)
     POST /api/olay                  modul olayi (belgeler/ekip/KING-OLAY.md) -> kural motoru (core/kendiliginden.py)
     GET  /api/king/kendiliginden    bekleyen kendiliginden mesajlar (neden alaniyla), butce, sessiz saat, kararlar
     POST /api/eylem                 {arac, ozet, param?, geri?:{ad,param}, modul?} modulun uyguladigi yazma

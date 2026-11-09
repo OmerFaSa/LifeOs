@@ -1685,6 +1685,22 @@ def run():
     test("Gun · Sen: soz, veren/calan, deste ve iz denetlenir; bos gun saklanmaz; oteki yayinlara karismaz",
          t_gun_sen)
 
+    def t_bilinc():
+        with _Depo() as r:
+            k, j = _admin(r)
+            eq(r.d.bilinc(k), {"dusunceler": [], "zaman": None})
+            _hata(lambda: r.d.yayinla(k, "gun/bilinc", "{bozuk"), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/bilinc", '{"dusunceler":"x"}'), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/bilinc", json.dumps({"dusunceler": ["a" * (1024 * 1024)]})), 400)
+            r.d.yayinla(k, "gun/bilinc", json.dumps({"dusunceler": [{"id": "a", "baslik": "Disiplin"}], "izin": True}))
+            v = r.d.bilinc(k)
+            eq((v["dusunceler"][0]["baslik"], v["izin"], v["zaman"] is not None), ("Disiplin", True, True))
+            # Bilinc haritasinin King kayitlari kisi modeline «gun» olarak girer; modullerinkiyle karismaz.
+            r.d.yayinla(k, "gun/kisi", json.dumps({"kayitlar": [{"metin": "Merkez düşüncesi «Disiplin»", "katman": "soz", "alan": "gorus"}]}))
+            eq([m["modul"] for m in r.d.kisi(k)["moduller"]], ["gun"])
+            eq(r.d.gun_sen(k)["zaman"], None)
+    test("Ana sayfa · Bilinc haritasi: bicim ve boyut denetlenir; King kayitlari kisi modeline «gun» olarak girer", t_bilinc)
+
     # ------------------------------------------- Kisi modeli (soz 24)
 
     def t_kisi():

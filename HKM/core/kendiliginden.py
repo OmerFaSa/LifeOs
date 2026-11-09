@@ -265,7 +265,18 @@ KART_TALIMAT = {
     # Gun bolumu (2026-11-03): gunun durumu tek cumle; satirlar Gun'un kodundan, sayi uydurulmaz.
     "gun": ("Kullanıcının bugününe tek cümlelik, sıcak ve kısa bir bakış yaz: ne bitti, sırada ne var. "
             "Yalnız verilen sayıları ve adları kullan; yeni sayı, saat ya da öneri ekleme."),
+    # Ana sayfa › Bilinc haritasi (2026-11-09): kisinin bir dusuncesine dusunce ortagi gibi bakar.
+    "bilinc": ("Kullanıcının düşünce haritasından bir düşünceyi ve ona bağlı düşüncelerini görüyorsun. "
+               "Dürüst bir düşünce ortağı ol: kullanıcı bir şey sorduysa önce ona cevap ver; sonra «bence» diyerek "
+               "neyin sağlam göründüğünü ve neyin zayıf, eksik ya da çelişkili göründüğünü söyle; en sonda düşünceyi "
+               "derinleştirecek tek bir soru sor. En çok beş cümle. Yalnız verilenleri kullan; kullanıcı hakkında teşhis "
+               "ya da kişilik yargısı kurma, yeni sayı ekleme, katılmıyorsan nazikçe ama açıkça söyle."),
+    "bilinc_harita": ("Kullanıcının bütün düşünce haritasının özetini görüyorsun (sayılar koddan). Düşünce ortağı gibi bak: "
+                      "düşüncelerinin nerede toplandığını, neyin eksik ya da bağlanmamış kaldığını ve işaretlediği çelişkilerden "
+                      "hangisinin üzerine gitmeye değer olduğunu «bence» diyerek söyle; sonunda haritayı büyütecek tek bir soru sor. "
+                      "En çok beş cümle. Yalnız verilenleri kullan; teşhis ya da kişilik yargısı kurma, yeni sayı ekleme."),
 }
+KART_SEVIYE = {"bilinc": "orta", "bilinc_harita": "orta"}   # dusunce ortakligi tek cumleden derin; obur kartlar alt seviyede
 KART_SISTEM = "Sen King'sin. Türkçe, kısa ve sıcak konuş; buyurgan kip kullanma, madde listesi yazma."
 
 
@@ -276,9 +287,9 @@ def kart_cumlesi(con, cfg, govde, transport=None):
     tur = govde.get("tur")
     satirlar = [str(x)[:160] for x in (govde.get("satirlar") or []) if str(x or "").strip()][:16]
     if tur not in KART_TALIMAT or not satirlar:
-        return {"ok": False, "note": "tur (brifing|hafta|gun) ve satirlar gerekli"}
+        return {"ok": False, "note": "tur (brifing|hafta|gun|bilinc|bilinc_harita) ve satirlar gerekli"}
     r = ai.ask(con, cfg, "king", "kart." + tur, [{"role": "user", "content": KART_TALIMAT[tur]}],
-               baglam="\n".join(satirlar), sistem=KART_SISTEM, seviye="alt", transport=transport)
+               baglam="\n".join(satirlar), sistem=KART_SISTEM, seviye=KART_SEVIYE.get(tur, "alt"), transport=transport)
     ok = bool(r.get("ok") and (r.get("text") or "").strip())
     # Kart cümlesi satırları yeniden söyler; satırlarda olmayan HER sayı uydurmadır (King 5 tur 5, klon simülasyonu:
     # boş günde «Dün tek bulgu, 50'lik bir artış», «verilerin %30 daha hızlı ilerlemesi»). Düşerse istemci kodun cümlesini söyler.

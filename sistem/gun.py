@@ -23,7 +23,7 @@ ORTAK = {
     "layout.css": "text/css; charset=utf-8", "temel.css": "text/css; charset=utf-8",
     "kabuk.css": "text/css; charset=utf-8", "kabuk.js": "text/javascript; charset=utf-8",
     "cam.css": "text/css; charset=utf-8", "hareket.css": "text/css; charset=utf-8",
-    "piksel-yazi.css": "text/css; charset=utf-8", "piksel.css": "text/css; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-apartman.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8", "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
+    "piksel-yazi.css": "text/css; charset=utf-8", "piksel.css": "text/css; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-apartman.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8", "gunveri.js": "text/javascript; charset=utf-8", "bilinc.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
 }
 
 
@@ -39,7 +39,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gün — LifeOS</title>
+<title>Ana sayfa — LifeOS</title>
 <link rel="stylesheet" href="/gun/ortak/jeton.css"/>
 <link rel="stylesheet" href="/gun/ortak/base.css"/>
 <link rel="stylesheet" href="/gun/ortak/layout.css"/>
@@ -71,6 +71,158 @@ GUN_SAYFASI = r"""<!doctype html>
   box-shadow:inset 0 0 0 1px var(--border); }
 .gun-kart__ad{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:2px 12px; margin:0 0 12px; font-size:14px; font-weight:700; color:var(--text); }
 .gun-kart__ad small{ font-weight:500; color:var(--text-3); }
+
+/* Guncelleme karti (ilk ekran Ana sayfa): yalniz yenilik ya da sorun varken gorunur. */
+.gun-guncel{ display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; justify-content:space-between; padding:14px var(--gun-ic); box-shadow:inset 0 0 0 1.5px var(--mod); }
+.gun-guncel[data-hal="uyari"]{ box-shadow:inset 0 0 0 1.5px var(--warn, #c0392b); }
+.gun-guncel b{ display:block; font-size:15px; }
+.gun-guncel small{ display:block; color:var(--text-2); font-size:13px; margin-top:2px; }
+.gun-guncel ul{ margin:6px 0 0; padding-left:18px; color:var(--text-2); font-size:13px; }
+.gun-guncel__d{ display:flex; gap:8px; }
+.gun-guncel button{ min-height:40px; padding:0 16px; border-radius:10px; border:1px solid var(--border); background:none; color:var(--text); font:inherit; font-weight:600; cursor:pointer; }
+.gun-guncel button.is-ana{ border:0; background:var(--mod); color:var(--on-accent, #fff); }
+
+/* Ana sayfa › Kisisel araclar (2026-11-09) */
+.gun-araclar__liste{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+.gun-araclar{ padding:var(--gun-ic); }
+.gun-arac{ display:flex; gap:14px; align-items:center; padding:14px; border-radius:14px; color:inherit; text-decoration:none; box-shadow:inset 0 0 0 1px var(--border); }
+.gun-arac:hover, .gun-arac:focus-visible{ box-shadow:inset 0 0 0 1.5px var(--mod); }
+.gun-arac__simge{ flex:none; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:var(--mod-t); }
+.gun-arac__simge svg{ width:30px; height:30px; fill:var(--mod); stroke:var(--mod); stroke-width:1.5; }
+.gun-arac__simge path{ fill:none; }
+.gun-arac__metin{ display:grid; gap:2px; min-width:0; }
+.gun-arac__metin small{ color:var(--text-2); font-size:13px; }
+.gun-arac__metin i{ font-style:normal; color:var(--text-3); font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Bilinc haritasi: renk konuyu ayirir; golge yok, ince cizgi, tek vurgu. */
+.gun{ --bh-0:var(--mer); --bh-1:var(--ays); --bh-2:var(--spi); --bh-3:var(--esp);
+  --bh-4:color-mix(in oklab, var(--mer) 55%, var(--ays)); --bh-5:color-mix(in oklab, var(--spi) 55%, var(--esp));
+  --bh-6:color-mix(in oklab, var(--ays) 50%, var(--text)); --bh-7:color-mix(in oklab, var(--esp) 50%, var(--text)); }
+.gun:has(.bh){ max-width:min(1600px, 100%); }
+.bh{ display:grid; gap:var(--gun-ara); }
+.bh input, .bh select, .bh textarea{ min-height:40px; padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; }
+.bh input:focus-visible, .bh textarea:focus-visible, .bh select:focus-visible{ outline:2px solid var(--mod); outline-offset:1px; }
+.bh button{ font:inherit; }
+.bh .is-ana, .bh-sor button{ min-height:40px; padding:0 16px; border-radius:10px; border:0; background:var(--mod); color:var(--on-accent, #fff); font-weight:600; cursor:pointer; }
+.bh-sor button[disabled], .bh-dugme[disabled]{ opacity:.55; cursor:default; }
+.bh-dugme{ min-height:40px; padding:0 14px; border-radius:10px; border:1px solid var(--border); background:none; color:var(--text); font-weight:600; cursor:pointer; }
+.bh-dugme[aria-pressed="true"]{ border-color:var(--mod); color:var(--mod-ink, var(--mod)); }
+.bh-arac{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; padding:12px; }
+.bh-yaz{ display:flex; flex-wrap:wrap; gap:8px; flex:1 1 520px; }
+.bh-yaz input[name="baslik"]{ flex:1 1 240px; }
+.bh-yaz input[name="konu"]{ flex:0 1 150px; }
+.bh-arac__sag{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.bh-ara{ width:180px; }
+.bh-yorum{ padding:14px var(--gun-ic); box-shadow:inset 3px 0 0 var(--mod), inset 0 0 0 1px var(--border); }
+.bh-yorum b{ font-size:13px; color:var(--text-2); }
+.bh-yorum p{ margin:4px 0; line-height:1.55; }
+.bh-yorum small{ color:var(--text-3); font-size:12px; }
+.bh-izgara{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(340px, 400px); gap:var(--gun-ara); align-items:start; }
+@media (max-width:980px){ .bh-izgara{ grid-template-columns:1fr; } }
+.bh-harita{ position:relative; padding:0; overflow:hidden; }
+.bh-konular{ position:absolute; z-index:1; top:10px; left:10px; right:120px; display:flex; flex-wrap:wrap; gap:6px; pointer-events:none; }
+.bh-konular > *{ pointer-events:auto; }
+.bh-sayac{ align-self:center; font-size:12.5px; color:var(--text-2); }
+.bh-yakin{ position:absolute; z-index:1; top:10px; right:10px; display:flex; flex-direction:column; border-radius:10px; overflow:hidden; box-shadow:inset 0 0 0 1px var(--border); background:var(--surface); }
+.bh-yakin button{ width:36px; height:36px; border:0; background:none; color:var(--text); font-size:17px; cursor:pointer; }
+.bh-yakin button + button{ border-top:1px solid var(--border); }
+.bh-cip{ display:inline-flex; align-items:center; gap:6px; min-height:28px; padding:2px 10px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--text-2); font-size:12.5px; cursor:pointer; }
+.bh-cip i{ width:8px; height:8px; border-radius:50%; background:var(--r); }
+.bh-cip[aria-pressed="true"]{ border-color:var(--r, var(--mod)); color:var(--text); }
+.bh-cip.is-celiski{ border-style:dashed; border-color:var(--warn, #c0392b); }
+.bh-svg{ display:block; width:100%; height:min(74vh, 780px); min-height:420px; cursor:grab; touch-action:none; user-select:none;
+  background-image:radial-gradient(circle, color-mix(in oklab, var(--text) 10%, transparent) 1px, transparent 1.4px); background-size:24px 24px; }
+.bh-svg.is-surukle{ cursor:grabbing; }
+.bh-k{ stroke:var(--text-3); stroke-width:1.2; opacity:.5; }
+.bh-k--etiket{ stroke-dasharray:2 4; opacity:.3; }
+.bh-k--celiski{ stroke:var(--warn, #c0392b); stroke-dasharray:6 4; opacity:.85; }
+.bh-d{ cursor:pointer; outline:none; }
+.bh-d circle{ fill:color-mix(in oklab, var(--r) 22%, var(--surface)); stroke:var(--r); stroke-width:1.6; }
+.bh-d circle.is-soru{ stroke-dasharray:3 2; }
+.bh-d text{ fill:var(--text-2); font-size:12px; text-anchor:middle; pointer-events:none; paint-order:stroke; stroke:var(--surface); stroke-width:3px; }
+.bh-d:hover circle, .bh-d:focus-visible circle{ stroke-width:2.8; }
+.bh-d:hover text, .bh-d:focus-visible text{ fill:var(--text); }
+.bh-d.is-secili circle{ fill:var(--r); stroke-width:2.8; }
+.bh-d.is-secili text{ fill:var(--text); font-weight:700; }
+.is-sonuk{ opacity:.16; }
+.bh-bos{ display:grid; place-items:center; min-height:420px; text-align:center; color:var(--text-2); padding:24px; }
+.bh-bos p{ max-width:440px; margin:0; }
+.bh-gruplar{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; padding:56px 16px 16px; min-height:420px; align-content:start; }
+.bh-grup h3{ display:flex; justify-content:space-between; margin:0 0 6px; padding-bottom:6px; font-size:13px; border-bottom:2px solid var(--r); }
+.bh-grup h3 small{ color:var(--text-3); font-weight:500; }
+.bh-grup ul, .bh-ozet, .bh-cubuk, .bh-lejant, .bh-sohbet, .bh-oneri, .bh-ipucu{ list-style:none; margin:0; padding:0; }
+.bh-grup button, .bh-ozet button, .bh-profil__alt button{ display:block; width:100%; min-height:32px; padding:4px 6px; border:0; border-radius:8px; background:none; color:var(--text); font-size:13.5px; text-align:left; cursor:pointer; }
+.bh-profil__alt li button{ display:inline; width:auto; padding:2px 4px; }
+.bh-grup button:hover, .bh-ozet button:hover, .bh-grup button[aria-current]{ background:var(--mod-t); }
+.bh-tur{ display:inline-block; min-width:46px; margin-right:6px; color:var(--text-3); font-size:11.5px; }
+.bh-duzen{ display:grid; gap:12px; padding:var(--gun-ic); position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; }
+.bh-duzen--bos p{ margin:0; }
+.bh-ipucu{ display:grid; gap:8px; font-size:13px; color:var(--text-2); }
+.bh-ipucu li{ padding-left:14px; position:relative; }
+.bh-ipucu li::before{ content:''; position:absolute; left:0; top:.55em; width:5px; height:5px; border-radius:50%; background:var(--mod); }
+.bh-duzen__bas{ display:flex; gap:8px; align-items:center; }
+.bh-duzen .bh-baslik{ flex:1; min-width:0; font-size:19px; font-weight:700; border-color:transparent; padding-left:0; background:none; }
+.bh-duzen .bh-baslik:focus{ border-color:var(--border); padding-left:12px; }
+.bh-kapat{ width:36px; height:36px; border-radius:8px; border:0; background:none; color:var(--text-3); font-size:20px; cursor:pointer; }
+.bh-satir{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.bh-satir input{ flex:1 1 140px; min-width:0; }
+.bh-kesin{ display:flex; align-items:center; gap:4px; }
+.bh-kesin button{ width:24px; height:24px; border-radius:50%; border:1.5px solid var(--mod); background:none; cursor:pointer; padding:0; }
+.bh-kesin button[aria-pressed="true"]{ background:var(--mod); }
+.bh-kesin small{ margin-left:6px; color:var(--text-3); font-size:12px; }
+.bh-kip{ display:flex; gap:2px; border-bottom:1px solid var(--border); }
+.bh-kip button{ min-height:34px; padding:0 14px; border:0; border-bottom:2px solid transparent; margin-bottom:-1px; background:none; color:var(--text-2); font-weight:600; cursor:pointer; }
+.bh-kip button[aria-selected="true"]{ color:var(--text); border-bottom-color:var(--mod); }
+.bh-yazi{ position:relative; }
+.bh-yazi textarea{ width:100%; box-sizing:border-box; resize:vertical; line-height:1.6; min-height:180px; }
+.bh-oneri{ position:absolute; z-index:3; left:8px; right:8px; bottom:-4px; transform:translateY(100%); border-radius:10px; background:var(--surface); box-shadow:inset 0 0 0 1px var(--mod); padding:4px; }
+.bh-oneri li{ padding:6px 10px; border-radius:6px; font-size:13.5px; cursor:pointer; }
+.bh-oneri li[aria-selected="true"], .bh-oneri li:hover{ background:var(--mod-t); }
+.bh-onizle{ min-height:180px; line-height:1.65; font-size:14.5px; }
+.bh-onizle p{ margin:0 0 10px; }
+.bh-bosmetin{ color:var(--text-3); }
+.bh-bag{ display:inline; padding:0 4px; border:0; border-radius:4px; background:var(--mod-t); color:var(--mod-ink, var(--text)); font-weight:600; cursor:pointer; }
+.bh-bag.is-celiski{ background:none; box-shadow:inset 0 -2px 0 var(--warn, #c0392b); }
+.bh-bag.is-yok{ background:none; box-shadow:inset 0 0 0 1px dashed var(--border); color:var(--text-2); font-weight:500; border:1px dashed var(--border); }
+.bh-bagl{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.bh-bagl h4{ flex-basis:100%; margin:0; font-size:12px; font-weight:600; color:var(--text-3); }
+.bh-king{ display:grid; gap:8px; padding-top:12px; border-top:1px solid var(--border); }
+.bh-king h3, .bh-profil h3{ display:flex; justify-content:space-between; gap:8px; margin:0; font-size:13px; }
+.bh-king h3 small{ color:var(--text-3); font-weight:500; }
+.bh-sohbet{ display:grid; gap:8px; max-height:320px; overflow:auto; }
+.bh-sohbet li{ padding:8px 12px; border-radius:12px; line-height:1.55; font-size:14px; background:var(--mod-t); }
+.bh-sohbet li.is-sen{ background:none; box-shadow:inset 0 0 0 1px var(--border); margin-left:16%; }
+.bh-sohbet li b{ display:block; font-size:11.5px; color:var(--text-3); }
+.bh-sohbet li.is-bekle{ color:var(--text-3); }
+.bh-not{ margin:0; font-size:13px; color:var(--text-2); }
+.bh-sor{ display:flex; gap:8px; }
+.bh-sor input{ flex:1; min-width:0; }
+.bh-alt{ display:flex; justify-content:space-between; align-items:center; color:var(--text-3); }
+.bh-sil{ min-height:32px; padding:0 12px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--text-2); font-size:13px; cursor:pointer; }
+/* Tam ekran: harita butun pencere, duzenleyici sagda. */
+html.bh-tam-acik{ overflow:hidden; }
+.bh--tam .bh-izgara{ position:fixed; z-index:60; inset:0; padding:12px; gap:12px; background:var(--bg, var(--surface)); grid-template-columns:minmax(0, 1fr) minmax(340px, 420px); }
+.bh--tam .bh-svg{ height:calc(100vh - 24px); }
+.bh--tam .bh-duzen{ max-height:calc(100vh - 24px); top:0; }
+.bh--tam .bh-arac{ position:fixed; z-index:61; left:24px; bottom:24px; right:auto; max-width:calc(100vw - 480px); }
+@media (max-width:980px){ .bh--tam .bh-izgara{ grid-template-columns:1fr; overflow:auto; } .bh--tam .bh-arac{ position:static; } }
+.bh-profil{ padding:var(--gun-ic); display:grid; gap:16px; }
+.bh-profil__ust{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px; }
+.bh-profil__ust h3{ margin-bottom:8px; }
+.bh-cubuk li{ display:grid; grid-template-columns:minmax(80px, 140px) 1fr 28px; gap:8px; align-items:center; font-size:13px; min-height:24px; }
+.bh-cubuk span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bh-cubuk i{ height:6px; border-radius:3px; background:linear-gradient(90deg, var(--mod) var(--o), var(--border) var(--o)); }
+.bh-cubuk b{ text-align:right; font-weight:600; }
+.bh-yigin{ display:flex; height:10px; border-radius:5px; overflow:hidden; gap:2px; }
+.bh-y--fikir{ background:var(--bh-0); } .bh-y--inanc{ background:var(--bh-1); } .bh-y--soru{ background:var(--bh-2); }
+.bh-y--karar{ background:var(--bh-3); } .bh-y--his{ background:var(--bh-6); }
+.bh-lejant{ display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:8px; font-size:12.5px; color:var(--text-2); }
+.bh-lejant i{ display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px; }
+.bh-profil__alt{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; }
+.bh-izin{ display:grid; gap:6px; padding-top:12px; border-top:1px solid var(--border); font-size:13.5px; }
+.bh-izin label{ display:flex; gap:8px; align-items:center; min-height:24px; }
+.bh-izin details ul{ margin:6px 0; padding-left:18px; color:var(--text-2); }
+.bh-izin small{ color:var(--text-3); }
 
 /* ust sira: niyet · enerji · ic hava */
 .gun-ust{ display:grid; grid-template-columns:1.5fr 1fr 1.3fr; padding:var(--gun-ic); }
@@ -347,14 +499,15 @@ GUN_SAYFASI = r"""<!doctype html>
 <script src="/gun/ortak/piksel-apartman.js"></script>
 <script src="/gun/ortak/piksel.js"></script>
 <script src="/gun/ortak/gunveri.js"></script>
+<script src="/gun/ortak/bilinc.js"></script>
 <script>
 (function(){
   'use strict';
   var L = window.LIFEOS || {}, K = L.KABUK;
   var HOST = '__HOST__';
-  var BOLUM = [{ id:'bugun', ad:'Bugün' }, { id:'analiz', ad:'Geçmiş' }, { id:'calisma', ad:'Sen' }];
+  var BOLUM = [{ id:'bugun', ad:'Ana sayfa' }, { id:'bilinc', ad:'Bilinç haritası' }, { id:'analiz', ad:'Geçmiş' }, { id:'calisma', ad:'Sen' }];
   var ALANLAR = [['uyku', 'Uyku', 'spi'], ['beslenme', 'Beslenme', 'spi'], ['hareket', 'Hareket', 'spi'], ['calisma', 'Çalışma', 'ays'], ['gelisim', 'Gelişim', 'esp']];
-  var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP', gun:'Gün' }, MPORT = { ays:4173, spi:4183, esp:4193 };
+  var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP', gun:'Ana sayfa' }, MPORT = { ays:4173, spi:4183, esp:4193 };
   var DILIM_AD = { sabah:'Sabah', ogle:'Öğle', aksam:'Akşam', gece:'Gece', gun:'Gün içinde' };
   function adres(m, rota){ return m === 'gun' ? '#bugun' : 'http://' + HOST + ':' + MPORT[m] + '/' + (rota ? '#king=' + rota : ''); }
   function oturum(){ var m = document.cookie.match(/(?:^|;\s*)lifeos_hesap=([^;]*)/); if(!m) return null;
@@ -570,7 +723,7 @@ GUN_SAYFASI = r"""<!doctype html>
     var saatler = []; for(var h = 7; h <= 22; h++) saatler.push(h);
     var sr = serit(), saatli = sr.bloklar.filter(gorunsun), saatsiz = sr.saatsiz.filter(gorunsun), yer = GV.seritYeri(saatli);
     var bos = veri.durum === 'bekle' ? 'Üç modülün bugünü getiriliyor…<small>&nbsp;</small>'
-      : veri.durum === 'girisyok' ? 'Hesabınla giriş yapılmamış: veri yok<small>Giriş sayfasından hesabına girince AYS, SPİ ve ESP’nin bugünkü blokları burada dizilir</small>'
+      : veri.durum === 'girisyok' ? 'Hesabınla giriş yapılmamış: veri yok<small><a href="/kartlar/">Giriş sayfasından</a> hesabına girince AYS, SPİ ve ESP’nin bugünkü blokları burada dizilir</small>'
       : veri.durum === 'hata' ? 'Veri katmanı yüklenemedi<small>Sayfayı yenile</small>'
       : (gorunum === 'yaptim' ? 'Bugün biten blok yok' : 'Bekleyen blok yok') + '<small>' + (secAlan ? 'Bu alanda; alanı yeniden seçince hepsi döner' : 'Modüller bugün için plan yayınladıkça burada belirir') + '</small>';
     return '<section class="gun-kart gun-serit" style="--i:4"><div class="gun-serit__ust"><h2 class="gun-kart__ad">Günün şeridi</h2>'
@@ -723,6 +876,321 @@ GUN_SAYFASI = r"""<!doctype html>
         + '<button type="submit">Ekle</button></form>' : '')
       + '</div></section>';
   }
+  /* BILINC HARITASI (2026-11-09): Ana sayfa › Kisisel araclar. Saf katman brand/ortak/bilinc.js; burada
+     depo (bu tarayici + hesap sunucusu `gun/bilinc`), cizim, gezinme (surukle, tekerlek, tam ekran), Defter
+     gibi yazma ([[ onerisi, onizleme, geri baglar) ve King. King'in sozu modelden, profil ve sayilar koddan;
+     King'in kisi modeline giden kayitlar `gun/kisi` (izin kapaliysa bos). */
+  var BH = (function(){
+    var B = L.Bilinc, ANA = 'lifeos.bilinc', YORUM = 'lifeos.bilinc.yorum', W = 1200, H = 720;
+    var d = null, zaman = 0, sec = null, gor = 'harita', odak = null, aranan = '', bekle = null, not_ = '', saat = null;
+    var kip = 'yaz', tam = false, vb = { x:0, y:0, s:1 }, surukle = null, yerCache = { anahtar:'', yer:null };
+    var yorum = (function(){ try{ return JSON.parse(localStorage.getItem(YORUM) || 'null'); }catch(e){ return null; } })();
+    function yerel(){ try{ var v = JSON.parse(localStorage.getItem(ANA) || 'null'); if(v && v.veri){ zaman = Number(v.zaman) || 0; return B.temiz(v.veri); } }catch(e){} return B.temiz({}); }
+    function veri(){ if(!d && B) d = yerel(); return d; }
+    function kaydet(){
+      zaman = Date.now();
+      try{ localStorage.setItem(ANA, JSON.stringify({ veri:d, zaman:zaman })); }catch(e){}
+      clearTimeout(saat);
+      saat = setTimeout(function(){
+        var o = oturum(); if(!o) return;
+        var h = { 'Content-Type':'application/json', 'X-LifeOS':'hesap', Authorization:'Bearer ' + o.j };
+        fetch((o.s || '') + '/api/hesap/yayin', { method:'POST', cache:'no-store', credentials:'omit', headers:h,
+          body:JSON.stringify({ ad:'gun/bilinc', icerik:JSON.stringify(d) }) }).catch(function(){ /* yerelde kalir */ });
+        fetch((o.s || '') + '/api/hesap/yayin', { method:'POST', cache:'no-store', credentials:'omit', headers:h,
+          body:JSON.stringify({ ad:'gun/kisi', icerik:JSON.stringify({ kayitlar:B.kisiKayitlari(d) }) }) }).catch(function(){});
+      }, 800);
+    }
+    /* Sunucu asil: daha yeniyse alinir; yerel daha yeniyse yukari cikar. */
+    function yukle(){
+      if(!B || !oturum()) return;
+      api('/api/hesap/bilinc').then(function(s){
+        veri();
+        if(s && s.zaman && s.zaman > zaman){ d = B.temiz(s); zaman = s.zaman; try{ localStorage.setItem(ANA, JSON.stringify({ veri:d, zaman:zaman })); }catch(e){} ciz(true); }
+        else if(d.dusunceler.length && (!s || !s.zaman || zaman > s.zaman)) kaydet();
+      }).catch(function(){});
+    }
+    function bul(id){ var v = veri(); return v ? v.dusunceler.filter(function(x){ return x.id === id; })[0] || null : null; }
+    function adla(ad){ var k = B.kucuk(ad); return veri().dusunceler.filter(function(x){ return B.kucuk(x.baslik) === k; })[0] || null; }
+    function turAd(t){ return (B.TURLER.filter(function(x){ return x.id === t; })[0] || {}).ad || t; }
+    /* Yerlesim yalniz yapi degisince yeniden hesaplanir (yazarken harita kipirdamaz). */
+    function yerlesim(v, g){
+      var a = JSON.stringify([v.dusunceler.map(function(x){ return x.id + '|' + x.konu; }), g.kenar.map(function(e){ return e.a + e.b + e.tur; })]);
+      if(a !== yerCache.anahtar) yerCache = { anahtar:a, yer:B.yerlesim(v, g, W, H) };
+      return yerCache.yer;
+    }
+    function vbMetin(){ var w = W / vb.s, h = H / vb.s; return vb.x.toFixed(1) + ' ' + vb.y.toFixed(1) + ' ' + w.toFixed(1) + ' ' + h.toFixed(1); }
+    function vbYaz(){ var s = document.querySelector('.bh-svg'); if(s) s.setAttribute('viewBox', vbMetin()); }
+    function yakinlas(k, cx, cy){
+      var ns = Math.max(0.5, Math.min(4, vb.s * k)), w0 = W / vb.s, h0 = H / vb.s, w1 = W / ns, h1 = H / ns;
+      cx = cx == null ? 0.5 : cx; cy = cy == null ? 0.5 : cy;
+      vb.x += (w0 - w1) * cx; vb.y += (h0 - h1) * cy; vb.s = ns; vbYaz();
+    }
+    function araclarHtml(){
+      var v = veri();
+      if(!v) return '';
+      var g = B.ag(v), son = v.dusunceler[0], bag = g.kenar.filter(function(e){ return e.tur !== 'etiket'; }).length;
+      return '<section class="gun-kart gun-araclar" style="--i:2"><h2 class="gun-kart__ad">Kişisel araçlar<small>yalnız senin</small></h2><div class="gun-araclar__liste">'
+        + '<a class="gun-arac" href="#bilinc" data-act="go" data-route="bilinc"><span class="gun-arac__simge" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M10 28L20 12L30 24Z"/><circle cx="10" cy="28" r="3.5"/><circle cx="20" cy="12" r="4.5"/><circle cx="30" cy="24" r="3"/></svg></span>'
+        + '<span class="gun-arac__metin"><b>Bilinç haritası</b><small>' + (v.dusunceler.length ? v.dusunceler.length + ' düşünce · ' + bag + ' bağ' : 'Düşüncelerini yaz, bağla, King’le tartış') + '</small>'
+        + (son ? '<i>Son: ' + kac(son.baslik) + '</i>' : '') + '</span></a></div></section>';
+    }
+    /* Onizleme: [[bag]] tiklanir; olmayan bag «+» ile yeni dusunce olur. */
+    function onizle(metin){
+      if(!String(metin || '').trim()) return '<p class="bh-bosmetin">Henüz metin yok.</p>';
+      return String(metin).split(/\n{2,}/).map(function(p){
+        return '<p>' + kac(p).replace(/\[\[(!?)([^\[\]\n]{1,80})\]\]/g, function(m, c, ad){
+          var var_ = !!adla(ad.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+          return '<button type="button" class="bh-bag' + (c ? ' is-celiski' : '') + (var_ ? '' : ' is-yok') + '" data-bh-git="' + ad + '">' + (c ? '≠ ' : '') + ad + (var_ ? '' : ' +') + '</button>';
+        }).replace(/\n/g, '<br/>') + '</p>';
+      }).join('');
+    }
+    function bagListe(baslik, l){
+      return l.length ? '<div class="bh-bagl"><h4>' + baslik + '</h4>' + l.map(function(k){ return '<button type="button" class="bh-cip' + (k.tur === 'celiski' || k.celiski ? ' is-celiski' : '') + '" data-bh-sec="' + kac(k.id) + '">' + (k.tur === 'celiski' || k.celiski ? '≠ ' : '') + kac(k.baslik) + '</button>'; }).join('') + '</div>' : '';
+    }
+    function duzenHtml(x, g){
+      if(!x) return '<aside class="gun-kart bh-duzen bh-duzen--bos"><h2 class="gun-kart__ad">Düşünce</h2><p class="gun-senin">Haritada bir düşünceye dokun ya da yukarıdan yeni bir tane yaz.</p>'
+        + '<ul class="bh-ipucu"><li><code>[[Başlık]]</code> iki düşünceyi bağlar; <code>[[</code> yazınca öneri gelir</li><li><code>[[!Başlık]]</code> «bununla çelişir» der</li><li>Ortak etiket ince bir bağ kurar</li><li>Haritada sürükle, tekerlekle yakınlaş; Esc tam ekrandan çıkar</li></ul></aside>';
+      var kom = B.komsular(veri(), g, x.id), geri = B.geriBaglar(veri(), x.id), gid = {};
+      geri.forEach(function(y){ gid[y.id] = 1; });
+      var cik = kom.filter(function(k){ return k.tur !== 'etiket' && !gid[k.id]; }).map(function(k){ return { id:k.id, tur:k.tur, baslik:(bul(k.id) || {}).baslik }; });
+      var et = kom.filter(function(k){ return k.tur === 'etiket'; }).map(function(k){ return { id:k.id, tur:k.tur, baslik:(bul(k.id) || {}).baslik }; });
+      return '<aside class="gun-kart bh-duzen">'
+        + '<div class="bh-duzen__bas"><input class="bh-baslik" data-bh-alan="baslik" maxlength="80" value="' + kac(x.baslik) + '" aria-label="Başlık"/><button type="button" class="bh-kapat" data-bh-kapat aria-label="Kapat" title="Kapat">×</button></div>'
+        + '<div class="bh-satir"><div class="gun-gecis" role="group" aria-label="Tür">' + B.TURLER.map(function(t){ return '<button type="button" data-bh-tur="' + t.id + '" aria-pressed="' + (x.tur === t.id) + '">' + t.ad + '</button>'; }).join('') + '</div>'
+        + '<div class="bh-kesin" role="group" aria-label="Kesinlik ' + x.kesinlik + '/5">' + [1, 2, 3, 4, 5].map(function(n){ return '<button type="button" data-bh-kesin="' + n + '" aria-pressed="' + (n <= x.kesinlik) + '" aria-label="Kesinlik ' + n + '"></button>'; }).join('') + '<small>ne kadar eminim</small></div></div>'
+        + '<div class="bh-satir"><input data-bh-alan="konu" list="bh-konular" maxlength="40" placeholder="Konu" value="' + kac(x.konu) + '" aria-label="Konu"/>'
+        + '<input data-bh-alan="etiket" maxlength="200" placeholder="Etiketler: virgülle" value="' + kac(x.etiket.join(', ')) + '" aria-label="Etiketler"/></div>'
+        + '<div class="bh-kip" role="tablist">' + [['yaz', 'Yaz'], ['onizle', 'Önizle']].map(function(k){ return '<button type="button" role="tab" data-bh-kip="' + k[0] + '" aria-selected="' + (kip === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>'
+        + (kip === 'yaz' ? '<div class="bh-yazi"><textarea id="bh-metin" data-bh-alan="metin" rows="9" maxlength="2000" placeholder="Ne düşünüyorsun, neden? [[ yazınca başka bir düşünceye bağlarsın." aria-label="Düşüncenin metni" aria-autocomplete="list" aria-controls="bh-oneri">' + kac(x.metin) + '</textarea><ul class="bh-oneri" id="bh-oneri" role="listbox" hidden></ul></div>'
+          : '<div class="bh-onizle">' + onizle(x.metin) + '</div>')
+        + bagListe('Bağladıkların', cik) + bagListe('Sana bağlananlar', geri) + bagListe('Aynı etiket', et)
+        + '<div class="bh-king"><h3>King’le konuş<small>' + (merkez === false ? 'Merkez kapalı' : 'cümle modelden · düşünce senden') + '</small></h3>'
+        + '<ol class="bh-sohbet">' + x.sohbet.map(function(m){ return '<li class="is-' + m.kim + '"><b>' + (m.kim === 'king' ? 'King' : 'Sen') + '</b>' + kac(m.metin) + '</li>'; }).join('')
+        + (bekle === x.id ? '<li class="is-king is-bekle"><b>King</b>düşünüyor…</li>' : '') + '</ol>'
+        + (not_ ? '<p class="bh-not">' + kac(not_) + '</p>' : '')
+        + '<form class="bh-sor" data-bh-sor><input name="soru" maxlength="400" placeholder="Sor ya da boş bırak: King görüşünü söylesin" aria-label="King’e soru"/><button type="submit"' + (bekle ? ' disabled' : '') + '>King’e sor</button></form></div>'
+        + '<div class="bh-alt"><small>' + (x.zaman ? new Date(x.zaman).toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }) : '') + '</small><button type="button" class="bh-sil" data-bh-sil>Sil</button></div></aside>';
+    }
+    function profilHtml(){
+      var v = veri(), p = B.profil(v), kis = B.kisiKayitlari(v), tt = p.toplam || 1;
+      if(!p.toplam) return '';
+      var var_ = B.TURLER.filter(function(t){ return p.turler[t.id]; });
+      var liste = function(baslik, l, f){ return l.length ? '<div><h3>' + baslik + '</h3><ul class="bh-ozet">' + l.map(f).join('') + '</ul></div>' : ''; };
+      var git = function(x){ return '<li><button type="button" data-bh-sec="' + kac(x.id) + '">' + kac(x.baslik) + '</button></li>'; };
+      return '<section class="gun-kart bh-profil" style="--i:3"><h2 class="gun-kart__ad">Düşünce profilin<small>yalnız senin yazdığından sayıldı</small></h2>'
+        + '<div class="bh-profil__ust"><div><h3>Konular</h3><ul class="bh-cubuk">' + p.konular.slice(0, 6).map(function(k){ return '<li><span>' + kac(k[0]) + '</span><i style="--o:' + (k[1] / p.konular[0][1] * 100).toFixed(1) + '%"></i><b>' + k[1] + '</b></li>'; }).join('') + '</ul></div>'
+        + '<div><h3>Nasıl yazıyorsun</h3><div class="bh-yigin" role="img" aria-label="' + var_.map(function(t){ return t.ad + ' ' + p.turler[t.id]; }).join(', ') + '">' + var_.map(function(t){ return '<i class="bh-y--' + t.id + '" style="flex:' + p.turler[t.id] + '"></i>'; }).join('') + '</div>'
+        + '<ul class="bh-lejant">' + var_.map(function(t){ return '<li><i class="bh-y--' + t.id + '"></i>' + t.ad + ' ' + Math.round(p.turler[t.id] / tt * 100) + '%</li>'; }).join('') + '</ul>'
+        + '<p class="gun-senin">' + p.toplam + ' düşünce, ' + p.bag + ' bağ' + (p.yalniz ? '; ' + p.yalniz + ' tanesi henüz hiçbir şeye bağlı değil' : '') + '.</p></div></div>'
+        + '<div class="bh-profil__alt">' + liste('Merkez düşünceler', p.merkez, git) + liste('Emin olduğun', p.kesin, git) + liste('Açık sorular', p.sorular, git)
+        + liste('Çelişkiler', p.celiski, function(c){ return '<li><button type="button" data-bh-sec="' + kac(c[0].id) + '">' + kac(c[0].baslik) + '</button> ≠ <button type="button" data-bh-sec="' + kac(c[1].id) + '">' + kac(c[1].baslik) + '</button></li>'; }) + '</div>'
+        + '<div class="bh-izin"><label><input type="checkbox" data-bh-izin' + (v.izin ? ' checked' : '') + '/> King beni bu haritadan tanısın</label>'
+        + '<details><summary>King’e giden ' + kis.length + ' kayıt</summary><ul>' + kis.map(function(k){ return '<li>' + kac(k.metin) + '</li>'; }).join('') + '</ul><small>Her modüldeki King bunları «senin sözün» olarak görür; ajanlar görmez. Kapatınca King’den silinir.</small></details></div></section>';
+    }
+    function gruplarHtml(v, bulunan){
+      return '<div class="bh-gruplar">' + B.konular(v).map(function(k, i){ return '<div class="bh-grup" style="--r:var(--bh-' + (i < 8 ? i : 0) + ')"><h3>' + kac(k[0]) + '<small>' + k[1] + '</small></h3><ul>'
+        + v.dusunceler.filter(function(x){ return (x.konu || 'Konusuz') === k[0] && (!bulunan || bulunan.indexOf(x.id) >= 0); }).map(function(x){ return '<li><button type="button" data-bh-sec="' + kac(x.id) + '"' + (x.id === sec ? ' aria-current="true"' : '') + '><span class="bh-tur">' + turAd(x.tur) + '</span>' + kac(x.baslik) + '</button></li>'; }).join('') + '</ul></div>'; }).join('') + '</div>';
+    }
+    function sayfaHtml(){
+      var v = veri();
+      if(!v) return '<section class="gun-kart gun-bos"><h2>Bilinç haritası yüklenemedi</h2><p>Sayfayı yenile.</p></section>';
+      if(sec && !bul(sec)) sec = null;
+      var g = B.ag(v), kon = B.konular(v), bulunan = B.ara(v, aranan), harita;
+      if(!v.dusunceler.length) harita = '<div class="bh-bos"><p>Harita boş. İlk düşünceni yaz: bir inanç, bir soru, bir karar. Bağladıkça ağ büyür; King de seni bu ağdan tanır.</p></div>';
+      else if(gor === 'gruplar') harita = gruplarHtml(v, bulunan);
+      else harita = B.haritaSvg(v, g, yerlesim(v, g), { w:W, h:H, secili:sec, odak:odak, bulunan:bulunan, vb:vbMetin() })
+        + '<div class="bh-yakin" role="group" aria-label="Yakınlaştırma"><button type="button" data-bh-zum="1.25" aria-label="Yakınlaş">+</button><button type="button" data-bh-zum="0.8" aria-label="Uzaklaş">−</button><button type="button" data-bh-zum="0" aria-label="Sığdır" title="Sığdır">⤢</button></div>';
+      return '<div class="bh' + (tam ? ' bh--tam' : '') + '">'
+        + '<div class="gun-kart bh-arac" style="--i:1"><form class="bh-yaz" data-bh-yeni><input name="baslik" maxlength="80" placeholder="Aklından ne geçiyor?" aria-label="Yeni düşüncenin başlığı" required/>'
+        + '<select name="tur" aria-label="Tür">' + B.TURLER.map(function(t){ return '<option value="' + t.id + '">' + t.ad + '</option>'; }).join('') + '</select>'
+        + '<input name="konu" list="bh-konular" maxlength="40" placeholder="Konu" aria-label="Konu" value="' + kac(odak && odak !== 'Konusuz' ? odak : '') + '"/><button type="submit" class="is-ana">Ekle</button></form>'
+        + '<div class="bh-arac__sag"><input type="search" id="bh-ara" class="bh-ara" placeholder="Ara" value="' + kac(aranan) + '" aria-label="Düşüncelerde ara"/>'
+        + '<div class="gun-gecis" role="group" aria-label="Görünüm">' + [['harita', 'Harita'], ['gruplar', 'Gruplar']].map(function(x){ return '<button type="button" data-bh-gor="' + x[0] + '" aria-pressed="' + (gor === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>'
+        + '<button type="button" class="bh-dugme" data-bh-tam aria-pressed="' + tam + '">' + (tam ? 'Küçült' : 'Tam ekran') + '</button>'
+        + (v.dusunceler.length ? '<button type="button" class="bh-dugme" data-bh-yorum' + (bekle ? ' disabled' : '') + '>King haritamı yorumlasın</button>' : '') + '</div></div>'
+        + '<datalist id="bh-konular">' + kon.filter(function(k){ return k[0] !== 'Konusuz'; }).map(function(k){ return '<option value="' + kac(k[0]) + '">'; }).join('') + '</datalist>'
+        + (bekle === '*' || yorum ? '<section class="gun-kart bh-yorum" aria-live="polite"><b>King’in haritana bakışı</b>' + (bekle === '*' ? '<p>düşünüyor…</p>' : '<p>' + kac(yorum.metin) + '</p><small>' + new Date(yorum.zaman).toLocaleString('tr-TR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' }) + ' · cümle modelden, sayılar koddan</small>') + '</section>' : '')
+        + (not_ && !sec ? '<p class="bh-not">' + kac(not_) + '</p>' : '')
+        + '<div class="bh-izgara"><section class="gun-kart bh-harita" style="--i:2">'
+        + '<div class="bh-konular">' + kon.slice(0, 8).map(function(k, i){ return '<button type="button" class="bh-cip" style="--r:var(--bh-' + i + ')" data-bh-odak="' + kac(k[0]) + '" aria-pressed="' + (odak === k[0]) + '"><i></i>' + kac(k[0]) + ' ' + k[1] + '</button>'; }).join('')
+        + (bulunan ? '<span class="bh-sayac">' + bulunan.length + ' sonuç</span>' : '') + '</div>'
+        + harita + '</section>' + duzenHtml(bul(sec), g) + '</div>' + (tam ? '' : profilHtml()) + '</div>';
+    }
+    function alanYaz(x, alan, deger){
+      if(alan === 'etiket') x.etiket = deger.split(',').map(function(s){ return s.trim().replace(/^#/, '').toLocaleLowerCase('tr-TR').slice(0, 30); }).filter(function(s, i, l){ return s && l.indexOf(s) === i; }).slice(0, 8);
+      else if(alan === 'baslik'){ deger = deger.replace(/\s+/g, ' ').trim().slice(0, 80); if(deger) x.baslik = deger; }
+      else if(alan === 'konu') x.konu = deger.replace(/\s+/g, ' ').trim().slice(0, 40);
+      else if(alan === 'metin') x.metin = deger.slice(0, 2000);
+    }
+    function kingIste(tur, satir, bitti){
+      fetch('/api/gun/cumle', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'gun' }, body:JSON.stringify({ tur:tur, satirlar:satir }) })
+        .then(function(r){ return r.json(); })
+        .then(function(r){ if(r && r.ok && r.text) bitti(String(r.text).slice(0, 1200), r.model);
+          else not_ = r && r.note === 'Merkez kapalı' ? 'Merkez kapalı: King şu an konuşamıyor. Düşüncen kaydedildi.' : 'King şu an cevap veremedi. Biraz sonra yeniden dene.'; })
+        .catch(function(){ not_ = 'Merkez’e ulaşılamadı. Düşüncen kaydedildi.'; })
+        .then(function(){ bekle = null; ciz(); });
+    }
+    function sor(x, soru){
+      if(bekle) return;
+      soru = String(soru || '').replace(/\s+/g, ' ').trim().slice(0, 400);
+      var satir = B.kingSatirlar(veri(), x.id, soru);
+      if(soru){ x.sohbet.push({ kim:'sen', metin:soru, zaman:Date.now() }); x.sohbet = x.sohbet.slice(-24); kaydet(); }
+      bekle = x.id; not_ = ''; ciz();
+      kingIste('bilinc', satir, function(t, m){ var y = bul(x.id); if(!y) return;
+        y.sohbet.push({ kim:'king', metin:t, zaman:Date.now(), model:m || undefined }); y.sohbet = y.sohbet.slice(-24); kaydet(); });
+    }
+    function haritayiYorumla(){
+      if(bekle) return;
+      bekle = '*'; not_ = ''; ciz();
+      kingIste('bilinc_harita', B.haritaSatirlar(veri()), function(t){ yorum = { metin:t, zaman:Date.now() }; try{ localStorage.setItem(YORUM, JSON.stringify(yorum)); }catch(e){} });
+    }
+    function git(ad){
+      var y = adla(ad), x = bul(sec);
+      if(!y){ y = B.yeni(veri(), { baslik:ad, konu:x ? x.konu : '', tur:'fikir' }); if(!y) return; kaydet(); }
+      sec = y.id; kip = 'yaz'; ciz();
+    }
+    /* [[ onerisi: imlecten once acik bir [[ varsa listele; yalniz liste dugumu degisir (odak kalir). */
+    function oneriDurum(t){ var m = /\[\[!?([^\[\]\n]{0,80})$/.exec(t.value.slice(0, t.selectionStart)); return m ? { q:m[1], bas:t.selectionStart - m[1].length } : null; }
+    function oneriCiz(t){
+      var u = document.getElementById('bh-oneri'), o = oneriDurum(t);
+      if(!u) return;
+      var l = o ? B.oneriler(veri(), o.q, sec, 6) : [];
+      u.hidden = !l.length;
+      u.innerHTML = l.map(function(x, i){ return '<li role="option" data-bh-oneri="' + kac(x.baslik) + '"' + (i ? '' : ' aria-selected="true"') + '>' + kac(x.baslik) + '</li>'; }).join('');
+    }
+    function oneriSec(ad){
+      var t = document.getElementById('bh-metin'), o = t && oneriDurum(t), x = bul(sec);
+      if(!o || !x) return;
+      var son = t.value.slice(t.selectionStart).replace(/^[^\[\]\n]*\]\]/, '');
+      t.value = t.value.slice(0, o.bas) + ad + ']]' + son;
+      var yer = o.bas + ad.length + 2; t.setSelectionRange(yer, yer);
+      alanYaz(x, 'metin', t.value); kaydet(); oneriCiz(t);
+    }
+    function tik(e){
+      var t = e.target, c = function(s){ return t.closest && t.closest(s); }, k;
+      if((k = c('[data-bh-oneri]'))){ oneriSec(k.getAttribute('data-bh-oneri')); var m = document.getElementById('bh-metin'); if(m) m.focus(); return true; }
+      if((k = c('[data-bh-sec]'))){ sec = k.getAttribute('data-bh-sec'); not_ = ''; ciz(); var b = document.querySelector('.bh-duzen'); if(b && window.innerWidth < 980 && !tam) b.scrollIntoView({ block:'start' }); return true; }
+      if((k = c('[data-bh-git]'))){ git(k.getAttribute('data-bh-git')); return true; }
+      if((k = c('[data-bh-odak]'))){ var o = k.getAttribute('data-bh-odak'); odak = odak === o ? null : o; ciz(); return true; }
+      if((k = c('[data-bh-gor]'))){ gor = k.getAttribute('data-bh-gor'); ciz(); return true; }
+      if((k = c('[data-bh-kip]'))){ kip = k.getAttribute('data-bh-kip'); ciz(); return true; }
+      if((k = c('[data-bh-zum]'))){ var z = Number(k.getAttribute('data-bh-zum')); if(z) yakinlas(z); else { vb = { x:0, y:0, s:1 }; vbYaz(); } return true; }
+      if(c('[data-bh-tam]')){ tam = !tam; document.documentElement.classList.toggle('bh-tam-acik', tam); ciz(); return true; }
+      if(c('[data-bh-yorum]')){ haritayiYorumla(); return true; }
+      if(c('[data-bh-kapat]')){ sec = null; ciz(); return true; }
+      var x = bul(sec);
+      if(!x) return false;
+      if((k = c('[data-bh-tur]'))){ x.tur = k.getAttribute('data-bh-tur'); kaydet(); ciz(); return true; }
+      if((k = c('[data-bh-kesin]'))){ x.kesinlik = Number(k.getAttribute('data-bh-kesin')); kaydet(); ciz(); return true; }
+      if(c('[data-bh-sil]')){ if(!window.confirm('«' + x.baslik + '» silinsin mi?')) return true;
+        d.dusunceler = d.dusunceler.filter(function(y){ return y.id !== x.id; }); sec = null; kaydet(); ciz(); return true; }
+      return false;
+    }
+    /* input: model guncellenir, cizim yok (odak kalir); change: harita yeniden cizilir. */
+    function degis(e){
+      var t = e.target;
+      if(t.id === 'bh-ara'){ aranan = t.value; { ciz(); var a = document.getElementById('bh-ara'); if(a){ a.focus(); a.setSelectionRange(a.value.length, a.value.length); } } return true; }
+      if(t.hasAttribute && t.hasAttribute('data-bh-izin')){ if(e.type !== 'change') return true; veri().izin = !!t.checked; kaydet(); ciz(); return true; }
+      var a2 = t.getAttribute && t.getAttribute('data-bh-alan'), x = bul(sec);
+      if(!a2 || !x) return false;
+      alanYaz(x, a2, t.value); kaydet();
+      if(t.id === 'bh-metin' && e.type === 'input') oneriCiz(t);
+      if(e.type === 'change' && t.id !== 'bh-metin'){ var y = window.scrollY; ciz(); window.scrollTo(0, y); }
+      return true;
+    }
+    function tus(e){
+      if(e.key === 'Escape' && tam){ tam = false; document.documentElement.classList.remove('bh-tam-acik'); ciz(); return; }
+      if(e.target && e.target.id === 'bh-metin'){
+        var u = document.getElementById('bh-oneri'), ilk = u && !u.hidden && u.querySelector('[data-bh-oneri]');
+        if(ilk && (e.key === 'Enter' || e.key === 'Tab')){ e.preventDefault(); oneriSec(ilk.getAttribute('data-bh-oneri')); }
+        else if(u && e.key === 'Escape') u.hidden = true;
+      }
+      if(e.target && e.target.id === 'bh-ara' && e.key === 'Enter'){ e.preventDefault(); aranan = e.target.value; ciz(); var a = document.getElementById('bh-ara'); if(a) a.focus(); }
+    }
+    function gonder(e){
+      var f = e.target && e.target.closest ? e.target.closest('[data-bh-yeni], [data-bh-sor]') : null;
+      if(!f) return false;
+      e.preventDefault();
+      if(f.hasAttribute('data-bh-sor')){ var x = bul(sec); if(x) sor(x, f.querySelector('[name="soru"]').value); return true; }
+      var ba = f.querySelector('[name="baslik"]').value.replace(/\s+/g, ' ').trim();
+      if(!ba || !veri()) return true;
+      var var_ = adla(ba);
+      var y = var_ || B.yeni(veri(), { baslik:ba, tur:f.querySelector('[name="tur"]').value, konu:f.querySelector('[name="konu"]').value });
+      if(y){ sec = y.id; kip = 'yaz'; if(!var_) kaydet(); ciz(); var m = document.getElementById('bh-metin'); if(m) try{ m.focus(); }catch(er){} }
+      return true;
+    }
+    /* Gezinme: tekerlek imlecin altina yakinlasir, bos yerde surukleme kaydirir. */
+    document.addEventListener('wheel', function(e){
+      var s = e.target.closest && e.target.closest('.bh-svg'); if(!s) return;
+      e.preventDefault(); var r = s.getBoundingClientRect();
+      yakinlas(e.deltaY < 0 ? 1.15 : 1 / 1.15, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+    }, { passive:false });
+    document.addEventListener('pointerdown', function(e){
+      var s = e.target.closest && e.target.closest('.bh-svg'); if(!s || e.target.closest('.bh-d')) return;
+      var r = s.getBoundingClientRect(); surukle = { x:e.clientX, y:e.clientY, vx:vb.x, vy:vb.y, k:W / vb.s / r.width };
+      s.classList.add('is-surukle');
+    });
+    document.addEventListener('pointermove', function(e){ if(!surukle) return; vb.x = surukle.vx - (e.clientX - surukle.x) * surukle.k; vb.y = surukle.vy - (e.clientY - surukle.y) * surukle.k; vbYaz(); });
+    document.addEventListener('pointerup', function(){ if(!surukle) return; surukle = null; var s = document.querySelector('.bh-svg'); if(s) s.classList.remove('is-surukle'); });
+    document.addEventListener('keydown', function(e){
+      if(bolum() !== 'bilinc') return;
+      tus(e);
+      var n = e.target && e.target.closest && e.target.closest('.bh-d');
+      if(n && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); sec = n.getAttribute('data-bh-sec'); ciz(); }
+    });
+    return { sayfaHtml:sayfaHtml, araclarHtml:araclarHtml, tik:tik, degis:degis, gonder:gonder, yukle:yukle };
+  })();
+  /* GUNCELLEME (2026-11-09): ilk karsilayan ekran artik Ana sayfa; guncelleme giris sayfasindaki kutuyla
+     ayni uclardan (/api/guncelleme, POST /api/guncelle, X-LifeOS: guncelle; ayni koken 4180). Guncelse kart yok. */
+  var GN = (function(){
+    var h = { hal:'bekle' }, is = null;
+    function post(yol){ return fetch(yol, { method:'POST', headers:{ 'X-LifeOS':'guncelle' } }).then(function(r){ return r.json(); }); }
+    function koy(hal, baslik, alt, yeni, dugme, f){ h = { hal:hal, baslik:baslik, alt:alt || '', yeni:(yeni || []).slice(0, 5), dugme:dugme || '' }; is = f || null; var e = document.getElementById('gun-guncel'); if(e) e.outerHTML = html(); else if(bolum() === 'bugun') ciz(true); }
+    function oku(d){
+      if(d.durum === 'git-yok') return koy('uyari', 'Güncelleme için git gerekli', d.mesaj);
+      if(d.durum === 'git-degil') return koy('var', 'Bu klasör zip ile indirilmiş', 'Güncelle, klasörü GitHub’daki sürüme bağlar ve en yenisini kurar. Verin korunur.', null, 'Bağla ve güncelle', guncelle);
+      if(d.durum !== 'ok') return koy('uyari', 'Güncelleme durumu okunamadı', d.mesaj || '');
+      if(d.geride > 0 && d.yedeklenebilir) return koy('var', d.geride + ' yenilik var', 'Bu klasörde GitHub’da olmayan ' + d.ileride + ' kayıt var; önce yedek dala konur, sonra en yeni sürüm kurulur. Verin korunur.', d.yeni, 'Yedekle ve güncelle', function(){ guncelle(true); });
+      if(d.geride > 0) return koy('var', d.geride + ' yenilik var', 'İndirmek bir dakikadan kısa sürer; verin korunur.', d.yeni, 'Güncelle', guncelle);
+      koy('ok', 'Sistem güncel', '');
+    }
+    function kontrol(taze){ fetch('/api/guncelleme' + (taze ? '?taze=1' : ''), { cache:'no-store' }).then(function(r){ return r.json(); }).then(oku).catch(function(){ koy('uyari', 'Güncelleme durumu okunamadı', ''); }); }
+    function guncelle(yedekle){
+      koy('bekle', 'İndiriliyor…', 'Bir dakikadan kısa sürer.');
+      post('/api/guncelle' + (yedekle === true ? '?yedekle=1' : '')).then(function(s){
+        if(s.durum === 'guncellendi'){
+          if(s.yeniden_baslat){ koy('bekle', s.mesaj || 'Güncellendi', 'Yeni sürüm için sistem yeniden başlatılıyor…', s.yeni); return yeniden(); }
+          return koy('ok2', s.mesaj || 'Güncellendi', 'Açık sayfaları yenile.', s.yeni, 'Sayfayı yenile', function(){ location.reload(); });
+        }
+        if(s.durum === 'guncel') return koy('ok', 'Sistem güncel', '');
+        koy('uyari', 'Güncelleme yapılmadı', s.mesaj || '', null, s.yedeklenebilir ? 'Yedekle ve güncelle' : '', s.yedeklenebilir ? function(){ guncelle(true); } : null);
+      }).catch(function(){ koy('uyari', 'Güncelleme isteği gönderilemedi', '', null, 'Yeniden dene', guncelle); });
+    }
+    function yeniden(){
+      post('/api/yeniden').then(function(){
+        var bitis = Date.now() + 60000;
+        (function bekle(){ setTimeout(function(){
+          fetch('/api/durum', { cache:'no-store' }).then(function(r){ if(r.ok) location.reload(); else throw 0; })
+            .catch(function(){ if(Date.now() < bitis) bekle(); else koy('uyari', 'Sistem geri gelmedi', 'Klasördeki BASLAT.bat dosyasını çift tıkla.'); });
+        }, 2500); })();
+      }).catch(function(){ koy('uyari', 'Yeniden başlatılamadı', 'Klasördeki GUNCELLE.bat dosyasını çift tıkla.'); });
+    }
+    function html(){
+      if(h.hal === 'ok') return '<div id="gun-guncel" hidden></div>';
+      if(h.hal === 'bekle' && !h.baslik) return '<div id="gun-guncel" hidden></div>';
+      return '<section class="gun-kart gun-guncel" id="gun-guncel" data-hal="' + h.hal + '" aria-live="polite" aria-label="Güncelleme"><div><b>' + kac(h.baslik) + '</b>'
+        + (h.alt ? '<small>' + kac(h.alt) + '</small>' : '') + (h.yeni.length ? '<ul>' + h.yeni.map(function(x){ return '<li>' + kac(x) + '</li>'; }).join('') + '</ul>' : '') + '</div>'
+        + '<div class="gun-guncel__d">' + (h.hal === 'uyari' ? '<button type="button" data-guncel-bak>Yeniden kontrol et</button>' : '')
+        + (h.dugme && is ? '<button type="button" class="is-ana" data-guncel-is>' + kac(h.dugme) + '</button>' : '') + '</div></section>';
+    }
+    function tik(e){
+      var t = e.target;
+      if(t.closest && t.closest('[data-guncel-is]')){ if(is) is(); return true; }
+      if(t.closest && t.closest('[data-guncel-bak]')){ koy('bekle', 'Güncelleme kontrol ediliyor…', ''); kontrol(true); return true; }
+      return false;
+    }
+    return { html:html, tik:tik, kontrol:kontrol };
+  })();
   function ciz(arka){
     var ae = document.activeElement;                                    // yazarken arka plan tazelemesi kutuyu silmez
     if(ae && (ae.id === 'gun-niyet' || (arka && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && ae.closest && ae.closest('#main')))) return;
@@ -733,17 +1201,17 @@ GUN_SAYFASI = r"""<!doctype html>
       document.getElementById('app').innerHTML = '<div class="site site--v5 site--gun">'
         + (K ? K.iskeletV5({ modul:'gun', baglam:'Günü kur, gidişi gör', cekmeceler:cek }) : '')
         + '<div class="site__body"><div class="wrapc sayfa"><main id="main" tabindex="-1"><div class="gun' + (ilk ? ' gun-gir' : '') + '">'
-        + kahramanHtml(tarih.charAt(0).toLocaleUpperCase('tr-TR') + tarih.slice(1)) + ustHtml(v) + seritHtml() + alanlarHtml() + altHtml() + '</div></main></div></div></div>';
+        + GN.html() + kahramanHtml(tarih.charAt(0).toLocaleUpperCase('tr-TR') + tarih.slice(1)) + BH.araclarHtml() + ustHtml(v) + seritHtml() + alanlarHtml() + altHtml() + '</div></main></div></div></div>';
       ilk = false;
       return;
     }
     var ana = '<div class="gun' + (ilk ? ' gun-gir' : '') + '">'
       + '<header class="gun-bas" style="--i:0"><div><h1 class="gun-selam">' + (b === 'bugun' ? selam() : BOLUM.filter(function(x){ return x.id === b; })[0].ad) + '</h1>'
-      + '<p class="gun-tarih">' + kac(tarih.charAt(0).toLocaleUpperCase('tr-TR') + tarih.slice(1)) + '</p></div>'
+      + '<p class="gun-tarih">' + (b === 'bilinc' ? 'Düşüncelerin, aralarındaki bağlar ve King’in ikinci gözü' : kac(tarih.charAt(0).toLocaleUpperCase('tr-TR') + tarih.slice(1))) + '</p></div>'
       + (b === 'analiz' ? '<div class="gun-gecis" role="group" aria-label="Dönem">'
           + [[7, 'Hafta'], [30, 'Ay']].map(function(d){ return '<button type="button" data-donem="' + d[0] + '" aria-pressed="' + (donemN === d[0]) + '">' + d[1] + '</button>'; }).join('') + '</div>'
         : '<span class="gun-merkez" data-hal="' + (merkez ? 'acik' : 'kapali') + '"><i aria-hidden="true"></i>' + (merkez === null ? 'Merkez’e bakılıyor…' : merkez ? 'Merkez açık' : 'Merkez kapalı · yerel') + '</span>')
-      + '</header>' + (b === 'analiz' ? gecmisHtml() : senHtml()) + '</div>';
+      + '</header>' + (b === 'analiz' ? gecmisHtml() : b === 'bilinc' ? BH.sayfaHtml() : senHtml()) + '</div>';
     document.getElementById('app').innerHTML = '<div class="site site--v5 site--gun">'
       + (K ? K.iskeletV5({ modul:'gun', baglam:'Günü kur, gidişi gör', cekmeceler:cek }) : '')
       + '<div class="site__body"><div class="wrapc sayfa"><main id="main" tabindex="-1">' + ana + '</main></div></div></div>';
@@ -751,6 +1219,8 @@ GUN_SAYFASI = r"""<!doctype html>
   }
   document.addEventListener('click', function(e){
     var t = e.target;
+    if(GN.tik(e)) return;
+    if(bolum() === 'bilinc' && BH.tik(e)) return;
     var go = t.closest && t.closest('[data-act="go"]');
     if(go){ e.preventDefault(); var r = go.getAttribute('data-route'); if(r) { ilk = true; location.hash = r; } return; }
     var mm = t.closest && t.closest('[data-act="modul-menu"]');
@@ -782,11 +1252,14 @@ GUN_SAYFASI = r"""<!doctype html>
     if(ks){ desteDegis(function(d){ d.splice(Number(ks.getAttribute('data-kart-sil')), 1); }); ciz(); return; }
     if(t.closest && t.closest('[data-odak-niyet]')){ e.preventDefault(); var i = document.getElementById('gun-niyet'); if(i) i.focus(); }
   });
+  document.addEventListener('input', function(e){ if(bolum() === 'bilinc') BH.degis(e); });
   document.addEventListener('change', function(e){
+    if(bolum() === 'bilinc' && BH.degis(e)) return;
     if(e.target && e.target.id === 'gun-niyet'){ yaz('niyet', e.target.value.trim()); cumleIste(); }
     if(e.target && e.target.id === 'gun-soz'){ sen.soz = e.target.value.replace(/\s+/g, ' ').trim().slice(0, 160); senYaz(); }
   });
   document.addEventListener('submit', function(e){
+    if(BH.gonder(e)) return;
     var se = e.target && e.target.closest ? e.target.closest('[data-sen-ekle]') : null;
     var ka = e.target && e.target.closest ? e.target.closest('[data-kart-ekle]') : null;
     if(se || ka){
@@ -821,8 +1294,10 @@ GUN_SAYFASI = r"""<!doctype html>
   if(K && K.kur) try{ K.kur(); }catch(e){}
   ciz();
   yukle();
+  BH.yukle();
+  GN.kontrol(false);
   setInterval(yukle, 120000);
-  window.addEventListener('focus', yukle);           // sekmeye donunce taze
+  window.addEventListener('focus', function(){ yukle(); BH.yukle(); });           // sekmeye donunce taze
   fetch('/api/durum').then(function(r){ return r.json(); }).then(function(d){ merkez = !!d.hkm; ciz(); }).catch(function(){ merkez = false; ciz(); });
 })();
 </script>

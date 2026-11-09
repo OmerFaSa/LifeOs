@@ -146,4 +146,9 @@ def run():
         eq(t.kayit, ["yerel"])
         no(kendiliginden.kart_cumlesi(None, _cfg(), {"tur": "x", "satirlar": ["a"]})["ok"])
         no(kendiliginden.kart_cumlesi(None, _cfg(), {"tur": "hafta", "satirlar": []})["ok"])
+        # Ana sayfa › Bilinc haritasi: dusunce ortakligi kabul edilir, orta seviyeden sorulur
+        ok(kendiliginden.kart_cumlesi(db.connect(":memory:"), _cfg(), {"tur": "bilinc", "satirlar": ["Düşünce: «Disiplin özgürlüktür»"]},
+                                      transport=_tas())["ok"])
+        eq(kendiliginden.KART_SEVIYE.get("bilinc"), "orta")
+        ok("bilinc_harita" in kendiliginden.KART_TALIMAT)
     test("kart cümlesi: kolay iş yerelde, biçim denetlenir", t_kart_cumlesi)

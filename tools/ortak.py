@@ -466,6 +466,8 @@ KALIPLAR = {"quota.js", "llm.js", "providers.js", "quota.test.js", "store.test.j
 YALNIZ = {
     # Bos: `llm.js` 2026-09-24'e kadar yalniz SPI ve ESP'ye gidiyordu;
     # AYS'nin gelismis hali tek kaynak olunca ucune birden yayildi.
+    # Bilinc haritasi yalniz Ana sayfada (4180, sistem/gun.py ORTAK); modullere gitmez.
+    "bilinc.js": (),
 }
 
 YERTUTUCU = {
