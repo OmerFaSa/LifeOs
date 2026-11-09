@@ -2,6 +2,8 @@
 // Senaryo (bench.py paketlerden kurar): [{ t, saat, modul, paket, m:[{ id, zor, m, b:{...} }] }]
 // Sert kontroller: modelsiz:true (kuralla cevaplanmalı; modele gitmek kusur) · sure:ms (en çok) · ifade:'js' + ifadeFark|ifadeEsit
 //    (ör. belli günün soru sayısı tam 30 artmalı) · ayni:'grup' (aynı sorunun söylenişleri aynı sayıyı vermeli)
+//    ifadeler:[{ ifade, fark|esit|aralik:[a,b] }] (tek cümlede birden çok hedef) · ifadeAralik:[a,b]
+//    m:null → «gün sonu denetimi»: mesaj gönderilmez, yalnız ifade(ler) okunur (gerçek gün paketi)
 // b: degis:['gün.soru'|'*'] veri artmalı · fark:{'gün.soru':30} tam miktar · degismez:true · icer/icermez:regex · tur:[..] · onay:true (önizleme/yetki gelmeli)
 //    hayir:true (onaya «hayır») · dogru:'js ifade' (cevapta bu değer geçmeli) · veriYokOlur:true · ui:true (gerçek kutuya yaz)
 const fs = require('fs'), path = require('path');
@@ -35,13 +37,13 @@ function puanla(x, o){
   if(o.hata) neden.push('hata: ' + o.hata);
   for(const [re, ad] of KUSUR) if(re.test(c) && !(b.hayir && ad === 'teknik ret')) neden.push(ad);
   if(!b.veriYokOlur && VERIYOK.test(c)) neden.push('«veri yok»');
-  if(o.iddiaBos && !b.ustune && !b.degismez) neden.push('«yaptım» dedi, değişen yok');
+  if(o.iddiaBos && !b.ustune && !b.degismez && !b.ifade && !b.ifadeler) neden.push('«yaptım» dedi, değişen yok');   // kesin değer denetimi varsa o konuşur
   // Birim dönüşümü kusur değil: 1,5 litre → 1.500 ml, 1 saat → 60 dk
   const on = String(o.onizleme || '').replace(/\./g, '');
   // Düzeltmede («50 değil 45») eski sayı önizlemede olmaz: «değil»den önceki sayılar sayılmaz.
   const saat = (String(x.m).match(/(\d{1,2})(?=\s*(?:'?[dt][ae]\b|:\d\d|gün önce))/g) || []);  // «3 gün önce» gün sözüdür  // «2de yattım 9da kalktım» süreye çevrilir
   const eski = saat.concat((String(x.m).match(/(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)/g) || []).map(s => s.match(/\d+(?:[.,]\d+)?/)[0]));
-  const kusku = (o.onizlemeKusku || []).filter(n => eski.indexOf(n) < 0).filter(n => { const v = parseFloat(n.replace(',', '.')); return [1000, 60].every(k => on.indexOf(String(Math.round(v * k))) < 0); });
+  const kusku = (o.onizlemeKusku || []).filter(n => eski.indexOf(n) < 0 && (b.kuskuYoksay || []).indexOf(n) < 0).filter(n => { const v = parseFloat(n.replace(',', '.')); return [1000, 60].every(k => on.indexOf(String(Math.round(v * k))) < 0); });
   if(kusku.length) neden.push('önizlemede sayı yok: ' + kusku.join(','));
   if(o.gitSoruldu && !b.git) neden.push('sayfa açmayı önerdi');
   if(b.degis) for(const k of b.degis){
@@ -67,7 +69,16 @@ function puanla(x, o){
     if(o.ifadeHata) neden.push('ifade: ' + o.ifadeHata);
     else if(b.ifadeFark != null && Math.abs((Number(o.ifadeSonra) || 0) - (Number(o.ifadeOnce) || 0) - b.ifadeFark) > 1e-9) neden.push('hedef gün farkı ' + ((Number(o.ifadeSonra) || 0) - (Number(o.ifadeOnce) || 0)) + ' ≠ ' + b.ifadeFark);
     else if(b.ifadeEsit != null && Number(o.ifadeSonra) !== b.ifadeEsit) neden.push('hedef değer ' + o.ifadeSonra + ' ≠ ' + b.ifadeEsit);
+    else if(b.ifadeAralik && !(Number(o.ifadeSonra) >= b.ifadeAralik[0] && Number(o.ifadeSonra) <= b.ifadeAralik[1])) neden.push('hedef değer ' + o.ifadeSonra + ' ∉ [' + b.ifadeAralik.join(', ') + ']');
   }
+  (b.ifadeler || []).forEach((h, i) => {
+    const r = (o.ifadelerSonuc || [])[i] || {};
+    if(r.hata) return neden.push('ifade ' + (i + 1) + ': ' + r.hata);
+    const f = (Number(r.sonra) || 0) - (Number(r.once) || 0);
+    if(h.fark != null && Math.abs(f - h.fark) > 1e-9) neden.push((h.ad || 'hedef ' + (i + 1)) + ' farkı ' + f + ' ≠ ' + h.fark);
+    if(h.esit != null && Number(r.sonra) !== h.esit) neden.push((h.ad || 'hedef ' + (i + 1)) + ' ' + r.sonra + ' ≠ ' + h.esit);
+    if(h.aralik && !(Number(r.sonra) >= h.aralik[0] && Number(r.sonra) <= h.aralik[1])) neden.push((h.ad || 'hedef ' + (i + 1)) + ' ' + r.sonra + ' ∉ [' + h.aralik.join(', ') + ']');
+  });
   return neden;
 }
 
@@ -95,6 +106,12 @@ function puanla(x, o){
         iz0 = await G.izAl(page);
         dogru = b.dogru ? await page.evaluate(b.dogru).catch(() => null) : null;
         var ifadeOnce = b.ifade ? await page.evaluate(b.ifade).catch(e => ({ hata:String(e.message || e).slice(0, 80) })) : null;
+        const oku = async f => { try{ return { v:await page.evaluate(f) }; }catch(e){ return { hata:String(e.message || e).slice(0, 80) }; } };
+        var cokOnce = []; for(const h of (b.ifadeler || [])) cokOnce.push(await oku(h.ifade));
+        if(x.m == null){
+          if(b.bekle) await page.waitForTimeout(Math.min(15000, b.bekle));
+          o = { yol:'denetim', cevap:'', degisim:{}, secilen:[], chat:0 };
+        }else
         if(b.ui){
           const cv = await G.kutuyaYaz(page, x.m);
           o = { yol:'kutu', metin:x.m, cevap:cv || '' };
@@ -106,6 +123,8 @@ function puanla(x, o){
         }
         o.ms = Date.now() - t0;
         G.denetle(o, iz0, await G.izAl(page), x.m);
+        if((b.ifadeler || []).length){ o.ifadelerSonuc = [];
+          for(let i = 0; i < b.ifadeler.length; i++){ const s2 = await oku(b.ifadeler[i].ifade); o.ifadelerSonuc.push({ once:cokOnce[i].v, sonra:s2.v, hata:cokOnce[i].hata || s2.hata }); } }
         if(b.ifade){ const son = await page.evaluate(b.ifade).catch(e => ({ hata:String(e.message || e).slice(0, 80) }));
           if(ifadeOnce && ifadeOnce.hata || son && son.hata) o.ifadeHata = (ifadeOnce && ifadeOnce.hata) || son.hata; else { o.ifadeOnce = ifadeOnce; o.ifadeSonra = son; } }
         }catch(e){
@@ -134,13 +153,13 @@ function puanla(x, o){
   Object.values(gruplar).forEach(l => { const say = l.map(s => (String(s.cevap).replace(/(\d)\.(\d{3})/g, '$1$2').match(/\d+(?:,\d+)?/) || [''])[0]);
     if(new Set(say).size > 1) l.forEach(s => { s.gecti = false; s.neden.push('tutarsız: ' + say.join(' / ')); }); });
   fs.writeFileSync(CIKTI, JSON.stringify(sonuc, null, 1));
-  const W = { 1:1, 2:2, 3:3 };
+  const W = { 1:1, 2:2, 3:3, 4:4, 5:5 };
   const puan = l => { const t = l.reduce((a, s) => a + W[s.zor], 0); return t ? Math.round(100 * l.reduce((a, s) => a + (s.gecti ? W[s.zor] : 0), 0) / t) : null; };
   const paketler = [...new Set(sonuc.map(s => s.paket))];
   const pp = paketler.map(p => [p, puan(sonuc.filter(s => s.paket === p)), sonuc.filter(s => s.paket === p && s.gecti).length, sonuc.filter(s => s.paket === p).length]);
   const kp = Math.round(pp.reduce((a, x) => a + x[1], 0) / (pp.length || 1));
   console.log('\nKing-Bench ' + etiket + ': King puanı ' + kp + '/100 (zorluk ağırlıklı, paket ortalaması) · ' + sonuc.filter(s => s.gecti).length + '/' + sonuc.length + ' vaka');
-  pp.forEach(([p, v, g, n]) => console.log('  ' + p.padEnd(8) + ' ' + String(v).padStart(3) + '  (' + g + '/' + n + ') · zor3 ' + (puan(sonuc.filter(s => s.paket === p && s.zor === 3)) ?? '—')));
+  pp.forEach(([p, v, g, n]) => console.log('  ' + p.padEnd(8) + ' ' + String(v).padStart(3) + '  (' + g + '/' + n + ') · zor3 ' + (puan(sonuc.filter(s => s.paket === p && s.zor === 3)) ?? '—') + ' · zor4 ' + (puan(sonuc.filter(s => s.paket === p && s.zor === 4)) ?? '—')));
   const ms = sonuc.map(s => s.ms).sort((a, b) => a - b);
   console.log('süre: ortanca ' + ms[ms.length >> 1] + ' ms, en çok ' + ms[ms.length - 1] + ' ms');
   // Verim: modele gitmeden (kural/kod) çözülen oran — hızlı, ucuz, uydurmaz.

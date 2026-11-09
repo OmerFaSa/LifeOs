@@ -458,6 +458,12 @@ R.Ogren = (function(){
       liste:(b.liste || []).map(duzMetin), dikkat:b.dikkat ? duzMetin(b.dikkat) : '' });
     const bolumler = a && Array.isArray(a.bolumler) && a.bolumler.length ? a.bolumler.map(bol)
       : [bol({ baslik:yz('ays.core.ogren.ozet'), liste:oz.ana || [], dikkat:oz.dikkat })].concat(oz.ornek ? [bol({ baslik:yz('ays.core.ogren.ornek'), metin:oz.ornek })] : []);
+    /* King-Bench öğretmen: anlatım + ÇÖZÜLMÜŞ ÖRNEK. Örnek, konunun son sorusudur (sınama ilk cevapsızdan başlar). */
+    /* Konu özetindeki «dikkat» (öğrencinin düştüğü tuzak) anlatımda yoksa ilk bölüme eklenir: «en sık yapılan hata» onu okur. */
+    if(oz && oz.dikkat && bolumler.length && !bolumler.some(b => b.dikkat)) bolumler[0].dikkat = duzMetin(oz.dikkat);
+    const sl = sorular(x.topic.id), oq = sl.length ? sl[sl.length - 1] : null;
+    if(oq && oq.soru && (oq.cozum || []).length && !bolumler.some(b => /örnek/i.test(b.baslik)))
+      bolumler.push(bol({ baslik:'Örnek soru ve çözümü', metin:oq.soru, liste:[].concat(oq.cozum).concat(oq.dogru && oq.sec ? ['Cevap: ' + oq.dogru + ') ' + (oq.sec[HARFLER.indexOf(oq.dogru)] || '')] : []) }));
     return { id:x.topic.id, baslik:x.topic.name, alt:x.subject.name, giris:a && a.giris ? duzMetin(a.giris) : '',
       bolumler, etiket:yz('ays.core.ogren.elle-yazildi-dogrulanmadi'), sorgu:x.topic.name, soruVar:sorular(x.topic.id).length > 0 };
   }

@@ -125,7 +125,15 @@ R.Entry = (function(){
     const a = String(text).match(new RegExp('(\\d+)\\s+[a-zçğıöşü]+\\s+' + ad, 'i'));
     return a ? sayi(a[1]) : null;
   }
-  const DOGRU_RE    = /(\d+)\s*(?:'?[sy]i\s*)?(?:tane\s*)?(?:doğru|dogru|net)/i;
+  const DOGRU_RE    = /(\d+)\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:doğru|dogru|net)/i;
+  /* King-Bench dayanıklılık: «otuz beş soru», «yirmi beşi doğru» — onluk (+birlik) sayı sözü rakama çevrilir
+     («beş» gibi tek sözü sayi() zaten okur). Ek yalnız hâl ekiyse kalır; «onlar», «sonra» dokunulmaz. */
+  const ONLAR = { on:10, yirmi:20, otuz:30, kırk:40, kirk:40, elli:50, altmış:60, altmis:60, yetmiş:70, yetmis:70, seksen:80, doksan:90 };
+  const BIRLER = { bir:1, iki:2, üç:3, uc:3, dört:4, dort:4, beş:5, bes:5, altı:6, alti:6, yedi:7, sekiz:8, dokuz:9 };
+  const SOZ_SAYI = new RegExp('(^|[^a-zçğıöşü])(' + Object.keys(ONLAR).join('|') + ')(?:\\s+(' + Object.keys(BIRLER).join('|') + '))?((?:y?[iıuü]|[dt][ae]|[dt][ae]n|n[ıiuü]n)?)(?=[^a-zçğıöşü]|$)', 'gi');
+  function sayiSozu(text){
+    return String(text).replace(SOZ_SAYI, (m, on, o, b, ek) => on + (ONLAR[o.toLocaleLowerCase('tr')] + (b ? BIRLER[b.toLocaleLowerCase('tr')] : 0)) + (ek || ''));
+  }
   /* «4 yanlış», «4 yanlışım var», «2 boş» (2026-10-19, depo sahibi: «konudan
      şu kadar sorum, şu kadar yanlışım var»). Doğru söylenmemişse doğru =
      çözülen − yanlış − boş; boş söylenmemişse yok sayılır ve önizleme bunu
@@ -333,6 +341,23 @@ R.Entry = (function(){
      Her biri nedenini ve kullanıcıya sorulacak cümleyi taşır; yazılmaz. */
   function fromText(text, opts){
     const o = opts || {};
+    text = sayiSozu(text);
+    /* King-Bench: «dün 40 bugün 30 soru çözdüm» — her gün sözü kendi parçasının günüdür; sayaç söylenmeyen parça
+       («dün 40») son parçanın sayacını alır. */
+    const T0 = window.LIFEOS && LIFEOS.TARIH, taban = o.bugun || U.todayISO();
+    const gunYer = [...String(text).matchAll(/(?:^|\s)(dün|bugün|evvelsi gün|\d{1,2} gün önce)(?=\s)/gi)].map(m => m.index);
+    if(!o.parca && T0 && T0.gunSozu && gunYer.length >= 2){
+      const parca = gunYer.map((b, i) => String(text).slice(b, gunYer[i + 1]).trim()).filter(Boolean);
+      const birim = (parca[parca.length - 1].match(/\b(soru|paragraf|problem|dakika|dk|saat)\b/i) || [])[1];
+      const out = { oneriler:[], anlasilmayan:[], engellenen:[] };
+      parca.forEach(p => { const q = birim && !/\b(soru|paragraf|problem|dakika|dk|saat)\b/i.test(p) ? p + ' ' + birim + ' çözdüm' : p;
+        const r = fromText(q, Object.assign({}, o, { parca:true, date:T0.gunSozu(q, taban) || taban }));
+        out.oneriler.push(...r.oneriler); out.anlasilmayan.push(...(r.anlasilmayan || [])); out.engellenen.push(...(r.engellenen || [])); });
+      if(out.oneriler.length) return out;
+    }
+    /* «arkadaşım 50 soru çözmüş ben 20»: başkasının sayısı yazılmaz; yalnız «ben»den sonrası, sayacıyla. */
+    const bn = /^(.*(?:^|\s)(?:arkadaş[a-zçğıöşü]*|kardeş[a-zçğıöşü]*|annem|babam|sınıf[a-zçğıöşü]*|herkes|o)(?:\s|$).*?)\s+(?:ben(?:\s+de|\s+ise)?|bense)\s+(\d+)\s*([a-zçğıöşü]*)\s*[.!]*$/i.exec(String(text));
+    if(bn){ const birim = bn[3] || (bn[1].match(/\b(soru|paragraf|problem|dakika|dk|saat)\b/i) || [])[1]; if(birim) text = bn[2] + ' ' + birim + ' çözdüm'; }
     const date = o.date || U.todayISO();
     const ts = parseSoru(text);
     if(ts && ts.tutarsiz) return { deneme:true, oneriler:[], anlasilmayan:[], engellenen:[{ metin:String(text).trim(),

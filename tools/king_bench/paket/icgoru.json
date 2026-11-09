@@ -511,6 +511,68 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "21:30",
+   "modul": "ays",
+   "not": "Zor-4: gerçek değer, kırılım, tutarlılık",
+   "m": [
+    {
+     "id": "I4-01",
+     "m": "dün kaç soru çözdüm",
+     "zor": 4,
+     "b": {
+      "dogru": "(R.Calc.gunSorusu(R.S.days['2026-11-13'])||0)",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "I4-02",
+     "m": "bu ay kaç soru çözdüm",
+     "zor": 4,
+     "b": {
+      "modelsiz": true,
+      "ayni": "ay-soru"
+     }
+    },
+    {
+     "id": "I4-03",
+     "m": "kasımda kaç soru çözdüm",
+     "zor": 4,
+     "b": {
+      "modelsiz": true,
+      "ayni": "ay-soru"
+     }
+    },
+    {
+     "id": "I4-04",
+     "m": "bu ayki toplam soru sayım ne",
+     "zor": 4,
+     "b": {
+      "modelsiz": true,
+      "ayni": "ay-soru"
+     }
+    },
+    {
+     "id": "I4-05",
+     "m": "hangi gün en az soru çözüyorum",
+     "zor": 4,
+     "b": {
+      "icer": "pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "I4-06",
+     "m": "son 4 denemede en çok hangi derste net kaybettim",
+     "zor": 4,
+     "b": {
+      "icer": "türkçe|matematik|fen|sosyal",
+      "degismez": true
+     }
+    }
+   ]
   }
  ]
 }

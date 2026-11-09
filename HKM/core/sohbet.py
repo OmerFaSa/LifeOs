@@ -796,6 +796,18 @@ def bolum_ayikla(metin, soru):
     cumleler = re.split(r"(?<=[.!?])\s+", t.strip())
     kalan = [c for c in cumleler if not BOLUM_YONLENDIR.search(c)]
     return " ".join(kalan) if kalan else t
+# King-Bench öğrenme: anlatım istekleri aynı öğretmen yapısıyla cevaplanır (küçük model düz paragraf yazıyordu).
+OGRETMEN_RE = re.compile(r"(anlat|açıkla|örnek ver|örnekle|adım adım|benzetme|nasıl çözülür|neden böyle|anlamadım|"
+                         r"kavrayamadım|basitçe|kolayca|yaşındaki birine|ne demek|nedir)", re.I)
+OGRETMEN_TALIMAT = ("\n\nKişi bir şeyi öğrenmek istiyor. İyi bir öğretmen gibi: 1) önce tek cümlelik özü söyle, "
+                    "2) günlük hayattan somut bir örnek ya da benzetme ver, 3) gerekiyorsa kısa adımlarla göster "
+                    "(sayı varsa işlemi yaz), 4) kişi kendi anlatımını yaptıysa ilk kelimen «Doğru», «Kısmen doğru» ya da «Yanlış» olsun; "
+                    "yanlış bir şey söylediyse nazikçe neyin yanlış olduğunu ve doğrusunu söyle, 5) sonunda anlayıp anlamadığını yoklayan TEK kısa soru sor. Sade Türkçe, "
+                    "kısa cümleler; terim kullanırsan bir cümleyle aç. Görsel anlat: karşılaştırma ya da "
+                    "özellik listesi varsa küçük bir tablo yaz (| başlık | başlık | satırları); bir fonksiyonu, eğimi "
+                    "ya da değişimi anlatıyorsan [[grafik: x^2 - 4; -5..5]] biçiminde bir grafik işareti koy; konuyu "
+                    "bir resim daha iyi anlatacaksa [[görsel: konunun adı]] yaz. İşaretleri yalnız gerçekten "
+                    "yararlıysa kullan; uydurma veri ya da sayı koyma.")
 HIS_TALIMAT = ("\n\nKişi bir duygusunu ya da derdini paylaşıyor. Önce onu dinle: bir iki cümleyle anladığını "
                "göster, sıcak ve sade konuş. Bölüm adı (AYS, SPİ, ESP) verme, sayfaya ya da araca yönlendirme, "
                "öğüt sıralama. Gerekirse tek bir nazik soru sor. Kendine zarar verme sözü geçerse güvendiği "
@@ -1327,6 +1339,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     if sonuclar is None and HIS_RE.search(str(metin or "")):
         ilk_tur = arac_turu = False
         sistem = aracsiz_sistem + HIS_TALIMAT
+    elif sonuclar is None and OGRETMEN_RE.search(str(metin or "")):
+        sistem = sistem + OGRETMEN_TALIMAT
+        aracsiz_sistem = aracsiz_sistem + OGRETMEN_TALIMAT
     r = None
     if yerel_model and aracli and ilk_tur:
         # IKI ASAMA (kucuk model): once yalniz secim, sonra sohbet. Tek turda «samimi sohbet

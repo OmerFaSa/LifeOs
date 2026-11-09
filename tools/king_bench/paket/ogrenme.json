@@ -517,6 +517,60 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "17:00",
+   "modul": "ays",
+   "not": "Zor-4: kavram yanılgısı, yanlışlardan tekrar, öğretme döngüsü",
+   "m": [
+    {
+     "id": "L4-01",
+     "m": "zincir kuralında iç fonksiyonun türeviyle dış fonksiyonun türevi toplanır değil mi",
+     "zor": 4,
+     "b": {
+      "icer": "çarp|değil|hayır",
+      "degismez": true
+     }
+    },
+    {
+     "id": "L4-02",
+     "m": "türevden soru sor",
+     "zor": 4,
+     "b": {
+      "tur": [
+       "kart-soru"
+      ]
+     }
+    },
+    {
+     "id": "L4-03",
+     "m": "cevabım A",
+     "zor": 4,
+     "b": {
+      "icer": "doğru|yanlış|Doğru cevap"
+     }
+    },
+    {
+     "id": "L4-04",
+     "m": "yanlış yaptığım sorulardan bir tane daha sor",
+     "zor": 4,
+     "b": {
+      "tur": [
+       "kart-soru"
+      ]
+     }
+    },
+    {
+     "id": "L4-05",
+     "m": "bu hafta öğrendiklerimden hangisini unutmaya başladım",
+     "zor": 4,
+     "b": {
+      "icer": "\\d|tekrar|konu",
+      "modelsiz": true
+     }
+    }
+   ]
   }
  ]
 }

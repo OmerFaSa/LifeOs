@@ -85,6 +85,33 @@ LIFEOS.Hafiza = (function(){
   }
 
   /* Geçerli kayıt mı? Depodan gelen bozuk kayıt sessizce düşer. */
+  /* BAĞLAM HARİTASI (King-Bench hafıza paketi): her kayıt bir DOSYAYA girer; uzun kullanımda hafıza şişse de
+     ajana yalnız soruyla ilgili kayıtlar gider. Dosya kural motorunun sınıfıdır (kelime haritası), model değil. */
+  const DOSYALAR = [
+    ['saglik', 'Sağlık', /(ilaç|hap|doktor|hekim|alerji|intolerans|hasta|ağrı|tansiyon|vitamin|tahlil|ameliyat|migren|astım|kronik)/],
+    ['uyku', 'Uyku', /(uyku|uyu|yatarım|kalkarım|gece kuşu|sabahçı|horla)/],
+    ['beslenme', 'Beslenme', /(kahve|çay|yemek|yerim|yemem|içerim|içmem|içiyorum|vegan|vejetaryen|şeker|tatlı|kahvaltı|diyet|laktoz|gluten|(?:^|\s)et(?:\s|$))/],
+    ['calisma', 'Çalışma ve öğrenme', /(ders|sınav|soru|çalış|verimli|konu|matematik|fizik|kimya|biyoloji|türkçe|okul|deneme|kitap|okum|kelime|almanca|ingilizce|odak)/],
+    ['aliskanlik', 'Alışkanlıklar', /(her gün|her sabah|her akşam|genelde|alışkanlık|rutin|spor|koşu|yürüyüş|antrenman|oyun)/],
+    ['insanlar', 'İnsanlar', /(annem|babam|kardeş|arkadaş|sevgili|eşim|öğretmen|hoca|ailem)/],
+    ['hedef', 'Hedefler', /(hedef|olmak istiyorum|kazanmak|üniversite|bölüm|meslek)/],
+  ];
+  function dosyaBul(metin){
+    const t = String(metin || '').toLocaleLowerCase('tr');
+    const d = DOSYALAR.find(x => x[2].test(t));
+    return d ? d[0] : 'genel';
+  }
+  const DOSYA_AD = DOSYALAR.reduce((m, d) => { m[d[0]] = d[1]; return m; }, { genel:'Genel' });
+  const DURAK = new Set(['bunu', 'şunu', 'aklında', 'aklinda', 'tut', 'ben', 'benim', 'bana', 'beni', 'çok', 'daha', 'artık', 'bundan', 'sonra',
+    'eskiden', 'hep', 'için', 'olan', 'olarak', 'gibi', 'ama', 'fakat', 'yani', 'şey']);
+  /* Kelime kökü (kaba): 5 harf; Türkçe çekim eklerinde aynı kelimeyi yakalamaya yeter. */
+  function kokler(metin){
+    return [...new Set(String(metin || '').toLocaleLowerCase('tr').split(/[^a-zçğıöşü0-9]+/).filter(w => (w.length >= 3 || /^\d+$/.test(w)) && !DURAK.has(w)).map(w => /^\d+$/.test(w) ? w : w.slice(0, 5)))];
+  }
+  const OLUMSUZ = /(?:mem|mam|meyiz|mayız|miyorum|mıyorum|muyorum|müyorum|mez|maz)(?:\s|$|[.,!])|(?:^|\s)(?:değil|yok|hiç|asla)(?:\s|$)/;
+  /* Gizli bilgi hafızaya yazılmaz (King-Bench güven: «kart numaram 4543 …, hafızana yaz»). */
+  const GIZLI = /(şifre|parola|pin kod|kart numar|kredi kart|iban|kimlik numar|tc kimlik|(?:\d[ -]?){12,19})/i;
+
   function gecerli(k){
     return !!(k && typeof k === 'object' && typeof k.id === 'string'
       && KATMANLAR[k.katman] && temizMetin(k.metin));
@@ -103,9 +130,25 @@ LIFEOS.Hafiza = (function(){
         ? yz('ortak.hafiza.model-hafizaya-yazamaz-yalni')
         : yz('ortak.hafiza.bu-katmana-bu-kaynak-yazamaz') };
     }
+    if(GIZLI.test(metin)) return { ok:false, why:'Şifre, kart, IBAN ya da kimlik numarası gibi bilgileri hafızaya yazmam; bunlar güvenli bir yerde durmalı.' };
     const ayni = l.filter(x => x.durum !== 'unutuldu' && x.katman === katman
       && x.metin.toLocaleLowerCase('tr') === metin.toLocaleLowerCase('tr'))[0];
     if(ayni) return { ok:false, why:yz('ortak.hafiza.bunu-zaten-hatirliyorum'), kayit:ayni };
+    /* Benzer kayıt (kökleri %75 ortak) yeniden yazılmaz: hafıza tekrarla şişmez. */
+    const kk = kokler(metin), ortak = x => { const b = kokler(x.metin); const kes = kk.filter(w => b.indexOf(w) >= 0).length; return { kes, j:kes / (new Set(kk.concat(b)).size || 1) }; };
+    const yeniOlumsuz = OLUMSUZ.test(metin.toLocaleLowerCase('tr') + ' '), degisti = /(?:^|\s)(?:artık|bundan sonra|eskiden|şimdi)(?:\s|$)/i.test(metin);
+    let guncellenen = null;
+    const eskiler = [];
+    /* Yalnız kullanıcının hafıza komutu («aklında tut», «hatırla:») akıllı eklenir; envanter, tanışma gibi
+       kural yazımları aynen yazılır (beş kişilik boyutu birbirinin «güncellemesi» sanılmasın). */
+    for(const x of (k.akilli ? l : []).filter(x => x.durum !== 'unutuldu' && x.katman === katman)){
+      const o2 = ortak(x), xOlumsuz = OLUMSUZ.test(x.metin.toLocaleLowerCase('tr') + ' ');
+      if(kk.length >= 2 && o2.j >= 0.75 && xOlumsuz === yeniOlumsuz && !degisti) return { ok:false, why:yz('ortak.hafiza.bunu-zaten-hatirliyorum'), kayit:x };
+      /* Çelişki: aynı konu (ortak kök), ters yön ya da «artık …» — yeni söz eskisinin yerine geçer. */
+      if(o2.kes >= 1 && (xOlumsuz !== yeniOlumsuz || degisti) && dosyaBul(x.metin) === dosyaBul(metin)) eskiler.push(x);
+    }
+    /* Aynı konudaki BÜTÜN eski sözler yeni sözle yer değiştirir («kahve içmem», «sabahları kahve içmem» → «artık içiyorum»). */
+    if(eskiler.length){ guncellenen = { metin:eskiler.map(x => x.metin).join('», «'), liste:eskiler }; eskiler.forEach(x => l.splice(l.indexOf(x), 1)); }
     const yeni = {
       id:k.id || yeniId(), metin, katman, kaynak,
       kapsam:String(k.kapsam || 'hepsi').slice(0, 24),
@@ -113,6 +156,7 @@ LIFEOS.Hafiza = (function(){
     };
     /* Kişi modeli (kisi.js, 2026-10-17): kaydın yaşam alanı; yoksa «genel». */
     if(typeof k.alan === 'string' && /^[a-z]{2,16}$/.test(k.alan)) yeni.alan = k.alan;
+    yeni.dosya = dosyaBul(metin);
     let sonuc = l.concat([yeni]);
     /* Sınır aşılırsa EN ESKİ çıkarım önce gider, sonra en eski sohbet;
        senin sözün en son gider — o senin yazdığındır. */
@@ -123,7 +167,7 @@ LIFEOS.Hafiza = (function(){
         sonuc = sonuc.slice(0, i).concat(sonuc.slice(i + 1));
       }
     });
-    return { ok:true, liste:sonuc, kayit:yeni };
+    return { ok:true, liste:sonuc, kayit:yeni, guncellenen };
   }
 
   function unut(liste, id){
@@ -146,7 +190,16 @@ LIFEOS.Hafiza = (function(){
     const o = opts || {};
     /* Kişi modeli izni (kisi.js, Faz 5): ajan yalnız izinli alanı görür. */
     const K = (window.LIFEOS || {}).KISI;
-    const l = etkin(liste, o.kapsam).filter(x => !o.ajan || !x.alan || !K || K.izinli(x.alan, o.ajan)).slice(-(o.limit || 12));
+    const hepsi = etkin(liste, o.kapsam).filter(x => !o.ajan || !x.alan || !K || K.izinli(x.alan, o.ajan));
+    let l = hepsi.slice(-(o.limit || 12));
+    if(o.soru && hepsi.length > (o.limit || 12)){
+      /* Şişmeyen bağlam: soruyla kökü ya da dosyası ortak en çok 6 kayıt + en yeni 4 (sıra korunur). */
+      const sk = kokler(o.soru), sd = dosyaBul(o.soru);
+      const puan = x => kokler(x.metin).filter(w => sk.indexOf(w) >= 0).length * 2 + ((x.dosya || dosyaBul(x.metin)) === sd && sd !== 'genel' ? 1 : 0);
+      const ilgili = hepsi.map(x => [x, puan(x)]).filter(p => p[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 6).map(p => p[0]);
+      const sec = new Set(ilgili.concat(hepsi.slice(-4)));
+      l = hepsi.filter(x => sec.has(x));
+    }
     if(!l.length) return '';
     return yz('ortak.hafiza.kullanici-hakkinda-hatirlana')
       + '«senin sözün» kullanıcının kendi cümlesidir, değiştirme):\n'
@@ -179,9 +232,24 @@ LIFEOS.Hafiza = (function(){
       if(b) return { tur:'ekle', metin:ham.slice(k.length - b[1].length, k.length).trim() };
     }
     if(LISTE.indexOf(k) >= 0) return { tur:'liste' };
+    if(/^(?:hafızamı|hafizami|bildiklerini) (?:dosyalara|dosya dosya|konulara|kategorilere) göre (?:göster|ayır|listele)$|^hafıza (?:dosyalarım|haritam)$|^hafızamın haritası$/.test(k)) return { tur:'dosyalar' };
+    const da = k.match(/^(sağlık|uyku|beslenme|çalışma|alışkanlık|insanlar|hedef)\w* dosyamı? (?:göster|aç)$/);
+    if(da) return { tur:'dosya', dosya:(DOSYALAR.find(d => d[1].toLocaleLowerCase('tr').indexOf(da[1].slice(0, 5)) === 0) || [])[0] || 'genel' };
+    const ui = k.match(/^(.{2,40}?)(?:[' ]?(?:la|le|yla|yle))? ilgili (?:hatırladıklarını|hatırladığın her şeyi|olanları|her şeyi|bildiklerini) unut$/);
+    if(ui) return { tur:'unutIcerik', kelime:ui[1].trim() };
     const m = k.match(/^#?(\d+)\s*(?:numarayı|numaralı hafızayı|nolu|\.)?\s*(unut|sil)$/);
     if(m) return { tur:'unut', sira:Number(m[1]) };
     return null;
+  }
+
+  function dosyaMetni(liste, tek){
+    const l = etkin(liste);
+    if(!l.length) return yz('ortak.hafiza.henuz-hatirladigim-bir-sey-y');
+    const g = {};
+    l.forEach((x, i) => { const d = x.dosya || dosyaBul(x.metin); (g[d] = g[d] || []).push((i + 1) + '. ' + x.metin); });
+    const sira = DOSYALAR.map(d => d[0]).concat(['genel']).filter(d => g[d] && (!tek || d === tek));
+    if(!sira.length) return (DOSYA_AD[tek] || 'Bu') + ' dosyasında kayıt yok.';
+    return sira.map(d => DOSYA_AD[d] + ' (' + g[d].length + '): ' + g[d].join(' · ')).join('\n') + '\n\nBirini silmek için «3 unut», bir konudakileri silmek için «sporla ilgili hatırladıklarını unut» yaz.';
   }
 
   function listeMetni(liste){
@@ -267,9 +335,19 @@ LIFEOS.Hafiza = (function(){
       if(!c) return null;
       if(c.tur === 'liste') return { text:listeMetni(liste()) };
       if(c.tur === 'ekle'){
-        const r = await ekleK(c.metin, Object.assign({ katman:'soz', kaynak:'kullanici' }, opts || {}));
-        return { text:r.ok ? yz('ortak.hafiza.hatirliyorum') + r.kayit.metin + '». Silmek istersen «hafızam» de.'
+        const r = await ekleK(c.metin, Object.assign({ katman:'soz', kaynak:'kullanici', akilli:true }, opts || {}));
+        if(r.ok && r.guncellenen) return { text:'Güncelledim: «' + r.guncellenen.metin + '» yerine artık «' + r.kayit.metin + '» (' + DOSYA_AD[r.kayit.dosya] + ' dosyası).', kayit:r.kayit };
+        return { text:r.ok ? yz('ortak.hafiza.hatirliyorum') + r.kayit.metin + '» (' + DOSYA_AD[r.kayit.dosya] + ' dosyası). Silmek istersen «hafızam» de.'
           : r.why, kayit:r.kayit || null };
+      }
+      if(c.tur === 'dosyalar') return { text:dosyaMetni(liste()) };
+      if(c.tur === 'dosya') return { text:dosyaMetni(liste(), c.dosya) };
+      if(c.tur === 'unutIcerik'){
+        const kk = kokler(c.kelime);
+        const l = etkin(liste()).filter(x => kokler(x.metin).some(w => kk.some(v => w.indexOf(v.slice(0, 5)) === 0)));
+        if(!l.length) return { text:'«' + c.kelime + '» ile ilgili bir hafıza kaydı yok.' };
+        for(const x of l) await unutK(x.id);
+        return { text:'Unuttum (' + l.length + '): ' + l.map(x => '«' + x.metin + '»').join(', ') + '.' };
       }
       if(c.tur === 'unut'){
         const k = etkin(liste())[c.sira - 1];
@@ -292,7 +370,7 @@ LIFEOS.Hafiza = (function(){
     'peki', 'king', 'hatırlıyor', 'musun', 'müsün', 'misin', 'mısın', 'mıyım', 'miyim', 'hatırla']);
   function sorudaBul(liste, soru){
     const k = String(soru || '').toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-    if(!/(?:^|\s)(?:ne|neyi|ne zaman|nedir|nerede|hangi|kaç)(?:\s|$)/.test(k)) return [];
+    if(!/(?:^|\s)(?:ne|neyi|neydi|ne zaman|nedir|nerede|hangi|hangisi|hangisiydi|kaç|kimdi|mı|mi|mu|mü|mıyım|miyim|muyum|müyüm)(?:\s|$)/.test(k)) return [];
     /* Geçmiş zaman fiili («çözdüm», «çalıştım») bir ölçü sorusudur, hafıza sorusu değil (King 5 tur 5:
        «bu hafta kaç soru çözdüm» → «Bana şöyle demiştin: … deneme çözdüm 61 net»). */
     const FIIL = /(d|t)(ı|i|u|ü)m$/;
@@ -309,6 +387,6 @@ LIFEOS.Hafiza = (function(){
     }).slice(0, 3);
   }
 
-  return { KATMANLAR, KAYNAK_IZNI, MAX_METIN, MAX_KAYIT, ANAHTAR,
-    ekle, unut, etkin, baglam, komut, listeMetni, gecerli, sorudaBul, kur };
+  return { KATMANLAR, KAYNAK_IZNI, MAX_METIN, MAX_KAYIT, ANAHTAR, DOSYALAR,
+    ekle, unut, etkin, baglam, komut, listeMetni, dosyaMetni, dosyaBul, gecerli, sorudaBul, kur };
 })();

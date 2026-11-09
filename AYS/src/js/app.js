@@ -1699,21 +1699,45 @@ R.App = (function(){
         const gun = g === bugun ? 'Bugün' : 'Dün';
         return { v:l.length, metin:l.length ? gun + ' şunları kaydetmişsin: ' + l.join(' · ') + '.' : gun + ' için çalışma kaydı yok.' };
       } },
-      { id:'verimli', ad:'en verimli gün', es:/en verimli (?:olduğum )?(?:gün|günüm)|hangi gün daha (?:çok|verimli)/, tur:'anlik', anlik:(t, bugun) => {
+      { id:'verimli', ad:'en verimli gün', es:/en verimli (?:olduğum )?(?:gün|günüm)|hangi gün daha (?:çok|verimli)|hangi gün en (?:az|çok)|en (?:az|çok) (?:soru çözdüğüm|çalıştığım) gün/, tur:'anlik', ozel:true, anlik:(t, bugun) => {
         const AD = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'], top = [0, 0, 0, 0, 0, 0, 0], gun = [0, 0, 0, 0, 0, 0, 0];
         Object.keys(R.S.days).forEach(g => { if(g > bugun || g < R.U.iso(R.U.addDays(R.U.parse(bugun), -90))) return;
           const q = R.Calc.gunSorusu(R.S.days[g]); if(!q) return; const w = R.U.parse(g).getDay(); top[w] += q; gun[w]++; });
         const l = AD.map((a, i) => ({ a, n:gun[i], ort:gun[i] ? top[i] / gun[i] : 0 })).filter(x => x.n).sort((x, y) => y.ort - x.ort);
         if(l.length < 3) return { v:null, metin:'Gün karşılaştırması için en az üç farklı günde soru kaydı gerekiyor.' };
+        if(/en az/.test(t)){ const z = l[l.length - 1]; return { v:z.ort, metin:'Son 90 günde en az soru çözdüğün gün ' + z.a + ': kayıtlı ' + z.n + ' günde ortalama ' + Math.round(z.ort) + ' soru. Sıra: ' + l.map(x => x.a + ' ' + Math.round(x.ort)).join(', ') + '.' }; }
         return { v:l[0].ort, metin:'Son 90 günde en verimli günün ' + l[0].a + ': kayıtlı ' + l[0].n + ' günde ortalama ' + Math.round(l[0].ort) + ' soru. '
           + 'Sıra: ' + l.map(x => x.a + ' ' + Math.round(x.ort)).join(', ') + '. Kayıtsız gün hesaba girmez.' };
       } },
       /* King-Bench içgörü: «hedefimin yüzde kaçındayım» — planın konu kapanışı (Calc) ve son deneme neti. */
-      { id:'hedefYuzde', ozel:true, ad:'hedef', es:/hedef\w*.*(?:yüzde|kaçında|ne kadar(?:ını)?|ilerle)|yüzde kaç(?:ı)? tamam/, tur:'anlik', anlik:() => {
+      { id:'hedefYuzde', ozel:true, ad:'hedef', es:/hedef\w*.*(?:yüzde|kaçında|ne kadar(?:ını)?|ilerle|ulaşacak mıyım|yetişecek miyim)|yüzde kaç(?:ı)? tamam/, tur:'anlik', anlik:(t, bugun) => {
         const c = R.Calc.overallClosure ? R.Calc.overallClosure() : null;
         const net = R.Calc.fullExams('TYT').map(M.examNet).filter(n => n != null && isFinite(n));
         if(!c || !c.total) return { v:null, metin:'Plan kurulmadığı için hedef ilerlemesi ölçülemiyor.' };
-        return { v:c.pct, metin:'Planındaki konuların %' + Math.round(c.pct) + '\'i kapandı (' + c.closed + '/' + c.total + ' konu).' + (net.length ? ' Son TYT netin ' + U.round(net[net.length - 1], 2) + (net.length > 1 ? ' (ilk denemen ' + U.round(net[0], 2) + ')' : '') + '.' : '') };
+        const kalanGun = R.PLAN.kalanGun(bugun || R.U.todayISO()), kalanKonu = c.total - c.closed;
+        const tempo = kalanGun > 0 && kalanKonu > 0 ? ' Sınava ' + kalanGun + ' gün var; kalan ' + kalanKonu + ' konu için haftada ≈ ' + Math.ceil(kalanKonu / Math.max(1, kalanGun / 7)) + ' konu kapanmalı.' : '';
+        return { v:c.pct, metin:'Planındaki konuların %' + Math.round(c.pct) + '\'i kapandı (' + c.closed + '/' + c.total + ' konu).' + (net.length ? ' Son TYT netin ' + U.round(net[net.length - 1], 2) + (net.length > 1 ? ' (ilk denemen ' + U.round(net[0], 2) + ')' : '') + '.' : '') + tempo };
+      } },
+      /* King-Bench içgörü: «son 4 denemede en çok hangi derste net kaybettim» — ders ders ilk ve son denemenin neti. */
+      { id:'netKaybi', ozel:true, ad:'ders net değişimi', es:/hangi ders\w*.*net (?:kaybet|düş|art|kazan)|net\w* en çok (?:hangi|düşen|artan)|hangi derste (?:geriledim|ilerledim)/, tur:'anlik', anlik:t => {
+        const n = Number((t.match(/son (\d+)/) || [])[1]) || 4;
+        const l = R.Calc.fullExams('TYT').slice(-n);
+        if(l.length < 2) return { v:null, metin:'Ders ders karşılaştırmak için en az iki TYT denemesi gerekiyor; ' + l.length + ' tane var.' };
+        const net = (e, ad) => { const x = (e.tests || []).find(y => y.name === ad); return x ? M.testNet(x) : null; };
+        const dersler = (l[0].tests || []).map(x => x.name).map(ad => ({ ad, a:net(l[0], ad), b:net(l[l.length - 1], ad) })).filter(x => x.a != null && x.b != null).map(x => Object.assign(x, { f:x.b - x.a }));
+        if(!dersler.length) return { v:null, metin:'Denemelerde karşılaştırılacak ortak ders yok.' };
+        dersler.sort((x, y) => x.f - y.f);
+        const y2 = v => (v >= 0 ? '+' : '') + U.round(v, 2);
+        const k = /art|kazan|ilerle/.test(t) ? dersler[dersler.length - 1] : dersler[0];
+        return { v:k.f, metin:'Son ' + l.length + ' denemede (' + l[0].date + ' → ' + l[l.length - 1].date + ') en çok ' + (k.f < 0 ? 'net kaybettiğin' : 'değişen') + ' ders ' + k.ad + ': ' + U.round(k.a, 2) + ' → ' + U.round(k.b, 2) + ' (' + y2(k.f) + '). Hepsi: ' + dersler.map(x => x.ad + ' ' + y2(x.f)).join(', ') + '.' };
+      } },
+      /* «öğrendiklerimden hangisini unutmaya başladım»: aralıklı tekrarda vadesi geçen kartlar (unutma sinyali). */
+      { id:'unutAys', ozel:true, ad:'unutma', es:/unutmaya başla|unutuyorum|unuttuğum konu|unutmak üzere/, tur:'anlik', anlik:(t, bugun) => {
+        const l = R.Calc.dueCards(bugun);
+        if(!l.length) return { v:0, metin:'Vadesi gelmiş tekrar kartın yok; şu an unutma sinyali görünmüyor.' };
+        const ad = c => String(c.topicName || c.konu || c.topic || c.front || c.q || '').slice(0, 40);
+        const gec = l.filter(c => c.dueAt < bugun).length;
+        return { v:l.length, metin:'Tekrarı gelen ' + l.length + ' kartın var' + (gec ? ', ' + gec + ' tanesi gecikmiş (unutmaya en yakın olanlar)' : '') + ': ' + l.slice(0, 5).map(ad).filter(Boolean).join(', ') + '. «yanlış yaptığım sorulardan sor» dersen oradan başlarım.' };
       } },
       /* «sınava kadar günde kaç soru çözmeliyim»: kalan gün ve kendi temposu; hedef sayı söylenirse günlük payı. */
       { id:'gunlukHedef', ozel:true, ad:'günlük soru hedefi', es:/günde kaç soru (?:çözmeliyim|çözmem lazım|çözmem gerek|yetişir)/, tur:'anlik', anlik:(t, bugun) => {

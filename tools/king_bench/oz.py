@@ -11,7 +11,7 @@ import json, os, sys, collections
 
 BU = os.path.dirname(os.path.abspath(__file__))
 sys.stdout.reconfigure(encoding="utf-8")
-SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk"]
+SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk", "gun", "dayaniklilik", "ogretmen", "hafiza", "gorsel"]
 # fikirler.json'daki eski alan adları → paket
 ALAN = {"kayıt": "kayit", "çok adım": "kayit", "ölçü": "icgoru", "analiz": "icgoru", "öğretme": "ogrenme", "plan": "plan",
         "güvenlik": "guven", "bağlam": "diyalog", "yardım": "diyalog", "hafıza": "diyalog", "destek": "kocluk", "yeni": "kocluk"}
@@ -40,10 +40,10 @@ def main():
     pp = {p: puan(l) for p, l in paket.items()}
     king = round(sum(pp.values()) / len(pp)) if pp else 0
     L = ["# Öz-değerlendirme · %s" % et, "", "King puanı **%d/100** · %d/%d vaka" % (king, sum(s["gecti"] for s in R), len(R)), "",
-         "| Paket | Puan | zor 1 | zor 2 | zor 3 |", "|---|---|---|---|---|"]
+         "| Paket | Puan | zor 1 | zor 2 | zor 3 | zor 4 |", "|---|---|---|---|---|---|"]
     sert = []
     for p, l in paket.items():
-        z = [puan([s for s in l if s.get("zor", 1) == k]) for k in (1, 2, 3)]
+        z = [puan([s for s in l if s.get("zor", 1) == k]) for k in (1, 2, 3, 4)]
         L.append("| %s | %s | %s |" % (p, pp[p], " | ".join("—" if v is None else str(v) for v in z)))
         if all(v is None or v >= 90 for v in z):
             sert.append(p)

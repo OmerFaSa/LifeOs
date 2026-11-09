@@ -1200,6 +1200,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200 if r.get("ok") else 422, r)
         if u.path == "/api/hafiza":
             return self._send(200, memory.bildiklerim(self.con))
+        if u.path in ("/api/gorsel", "/api/ses"):
+            # Görsel öğrenme (core/gorsel.py): lisansı denetlenmiş Wikimedia kaynağı; web kapısı ve sınırı geçerli.
+            from core import gorsel
+            dil = (q.get("dil") or ["tr" if u.path == "/api/gorsel" else "de"])[0][:5]
+            if u.path == "/api/gorsel":
+                return self._send(200, gorsel.resim(self.con, self.server.config, (q.get("konu") or [""])[0], dil=dil))
+            return self._send(200, gorsel.ses(self.con, self.server.config, (q.get("kelime") or [""])[0], dil=dil))
         if u.path == "/api/hafiza/ara":
             try:
                 k = int((q.get("k") or ["8"])[0])

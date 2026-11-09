@@ -1,0 +1,140 @@
+{
+ "ad": "Öğretmen",
+ "aciklama": "Anlatımın yapısı, sadeleştirme, benzetme, adım adım çözüm, kavram yanılgısı, öğrencinin kendi anlatımı, dersten sınama.",
+ "ziyaret": [
+  {
+   "t": "2026-11-22",
+   "saat": "16:00",
+   "modul": "ays",
+   "not": "Öğretmen: yapı, sadeleştirme, benzetme, çözülmüş örnek, kavram yanılgısı, Feynman, sınama",
+   "m": [
+    {
+     "id": "T-01",
+     "m": "türevi anlat",
+     "zor": 2,
+     "b": {
+      "tur": [
+       "ders"
+      ],
+      "ifade": "(()=>{const m=LIFEOS.KING.akis().filter(x=>x.kim==='king'&&x.ders).pop();if(!m)return 0;const d=m.ders;return (d.bolumler.length>=3?1:0)+(d.bolumler.some(b=>/örnek/i.test(b.baslik+' '+b.metin+' '+(b.liste||[]).join(' ')))?1:0)+(d.giris?1:0)})()",
+      "ifadeEsit": 3
+     }
+    },
+    {
+     "id": "T-02",
+     "m": "anlamadım daha basit anlat",
+     "zor": 3,
+     "b": {
+      "icer": "\\?",
+      "icermez": "Ne hakkında|hangi konuyu|belirt|veri yok"
+     }
+    },
+    {
+     "id": "T-03",
+     "m": "bunu bir benzetmeyle anlat",
+     "zor": 3,
+     "b": {
+      "icer": "gibi|benzer|düşün|hayal et",
+      "icermez": "Ne hakkında|hangi konuyu"
+     }
+    },
+    {
+     "id": "T-04",
+     "m": "adım adım çöz: 3x + 5 = 20",
+     "zor": 3,
+     "b": {
+      "icer": "x\\s*=\\s*5\\b"
+     }
+    },
+    {
+     "id": "T-05",
+     "m": "türev bir fonksiyonun altındaki alan demek değil mi",
+     "zor": 4,
+     "b": {
+      "icer": "değil|hayır|eğim|değişim",
+      "degismez": true
+     }
+    },
+    {
+     "id": "T-06",
+     "m": "türevi ben anlatayım: bir şeyin ne kadar hızlı değiştiğini gösterir, doğru mu",
+     "zor": 4,
+     "b": {
+      "icer": "doğru|evet|tam olarak",
+      "degismez": true
+     }
+    },
+    {
+     "id": "T-07",
+     "m": "türevi anlat",
+     "zor": 1,
+     "b": {
+      "tur": [
+       "ders"
+      ]
+     }
+    },
+    {
+     "id": "T-08",
+     "m": "beni test et",
+     "zor": 3,
+     "b": {
+      "tur": [
+       "kart-soru"
+      ]
+     }
+    },
+    {
+     "id": "T-09",
+     "m": "B",
+     "zor": 3,
+     "b": {
+      "icer": "doğru|yanlış|Doğru cevap"
+     }
+    },
+    {
+     "id": "T-10",
+     "m": "neden",
+     "zor": 3,
+     "b": {
+      "icer": "çünkü|adım|Doğru cevap"
+     }
+    },
+    {
+     "id": "T-11",
+     "m": "bu konuda öğrencilerin en sık yaptığı hata ne",
+     "zor": 4,
+     "b": {
+      "icer": "\\w{12}",
+      "icermez": "veri yok|Ne hakkında|belirt"
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-22",
+   "saat": "22:00",
+   "modul": "esp",
+   "m": [
+    {
+     "id": "T-12",
+     "m": "almancada der die das farkını kısaca anlat",
+     "zor": 3,
+     "b": {
+      "icer": "der|die|das",
+      "icermez": "açılıyor"
+     }
+    },
+    {
+     "id": "T-13",
+     "m": "bana bunlarla bir örnek cümle ver",
+     "zor": 4,
+     "b": {
+      "icer": "der |die |das ",
+      "icermez": "açılıyor|Ne hakkında"
+     }
+    }
+   ]
+  }
+ ]
+}

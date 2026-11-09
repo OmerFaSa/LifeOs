@@ -1,0 +1,168 @@
+{
+ "ad": "Görsel öğrenme",
+ "aciklama": "Ders kartında konuyla ilgili, lisansı denetlenmiş görsel (yazar, lisans, kaynak); dil kartında telaffuz kaydı; kişisel/ticari lisans sınıfı.",
+ "ziyaret": [
+  {
+   "t": "2026-11-23",
+   "saat": "16:00",
+   "modul": "ays",
+   "not": "Görsel öğrenme: ders kartına lisanslı görsel, telaffuz kaydı",
+   "m": [
+    {
+     "id": "V-01",
+     "m": "türevi anlat",
+     "zor": 2,
+     "b": {
+      "tur": [
+       "ders"
+      ]
+     }
+    },
+    {
+     "id": "V-02",
+     "m": null,
+     "zor": 3,
+     "b": {
+      "bekle": 6000,
+      "ifade": "(()=>{const m=LIFEOS.KING.akis().filter(x=>x.kim==='king'&&x.ders).pop();const g=m&&m.ders.gorsel;return g&&/^https:/.test(g.url)&&/^(acik|kisisel)$/.test(g.sinif)&&g.lisans&&g.yazar?1:0})()",
+      "ifadeEsit": 1
+     },
+     "not": "türev dersinde lisanslı görsel (yazar + lisans + https)"
+    },
+    {
+     "id": "V-03",
+     "m": "integrali anlat",
+     "zor": 2,
+     "b": {
+      "tur": [
+       "ders"
+      ]
+     }
+    },
+    {
+     "id": "V-04",
+     "m": null,
+     "zor": 3,
+     "b": {
+      "bekle": 6000,
+      "ifade": "(()=>{const m=LIFEOS.KING.akis().filter(x=>x.kim==='king'&&x.ders).pop();const g=m&&m.ders.gorsel;return g&&/^https:/.test(g.url)&&/^(acik|kisisel)$/.test(g.sinif)&&g.lisans&&g.yazar?1:0})()",
+      "ifadeEsit": 1
+     },
+     "not": "integral dersinde lisanslı görsel"
+    }
+   ]
+  },
+  {
+   "t": "2026-11-23",
+   "saat": "22:00",
+   "modul": "esp",
+   "m": [
+    {
+     "id": "V-05",
+     "m": "Haus kelimesi nasıl okunur",
+     "zor": 3,
+     "b": {
+      "tur": [
+       "telaffuz"
+      ],
+      "icer": "\\.(ogg|wav|mp3|oga)",
+      "icermez": "bulamadım"
+     }
+    },
+    {
+     "id": "V-06",
+     "m": "ingilizce thorough nasıl telaffuz edilir",
+     "zor": 4,
+     "b": {
+      "tur": [
+       "telaffuz"
+      ],
+      "icer": "\\.(ogg|wav|mp3|oga)|bulamadım"
+     }
+    },
+    {
+     "id": "V-07",
+     "m": "almanca Schmetterling nasıl okunur",
+     "zor": 4,
+     "b": {
+      "tur": [
+       "telaffuz"
+      ],
+      "icer": "CC|Public|kamu|bulamadım"
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-23",
+   "saat": "17:00",
+   "modul": "ays",
+   "not": "Görsel anlatım: grafik, tablo, görselli anlatım",
+   "m": [
+    {
+     "id": "V-08",
+     "m": "y = x² - 4 grafiğini çiz",
+     "zor": 2,
+     "b": {
+      "tur": [
+       "grafik"
+      ],
+      "modelsiz": true,
+      "ifade": "(t=>{const m=LIFEOS.KING.akis().filter(m=>m.kim==='king').pop();if(!m)return 0;if(t==='gorsel'&&m.ders&&m.ders.gorsel)return 1;return LIFEOS.ANLATIM.zenginlestir(m.metin).ekler.some(e=>e.tur===t)?1:0})('grafik')",
+      "ifadeEsit": 1
+     }
+    },
+    {
+     "id": "V-09",
+     "m": "sin x grafiğini -6 ile 6 arası göster",
+     "zor": 3,
+     "b": {
+      "tur": [
+       "grafik"
+      ],
+      "modelsiz": true,
+      "ifade": "(t=>{const m=LIFEOS.KING.akis().filter(m=>m.kim==='king').pop();if(!m)return 0;if(t==='gorsel'&&m.ders&&m.ders.gorsel)return 1;return LIFEOS.ANLATIM.zenginlestir(m.metin).ekler.some(e=>e.tur===t)?1:0})('grafik')",
+      "ifadeEsit": 1
+     }
+    },
+    {
+     "id": "V-10",
+     "m": "fotosentezi görselle anlat",
+     "zor": 3,
+     "b": {
+      "icermez": "Ne hakkında|belirt"
+     }
+    },
+    {
+     "id": "V-11",
+     "m": null,
+     "zor": 3,
+     "b": {
+      "bekle": 6000,
+      "ifade": "(t=>{const m=LIFEOS.KING.akis().filter(m=>m.kim==='king').pop();if(!m)return 0;if(t==='gorsel'&&m.ders&&m.ders.gorsel)return 1;return LIFEOS.ANLATIM.zenginlestir(m.metin).ekler.some(e=>e.tur===t)?1:0})('gorsel')",
+      "ifadeEsit": 1
+     },
+     "not": "görselli anlatımda görsel var"
+    },
+    {
+     "id": "V-12",
+     "m": "türev ile integral arasındaki farkı tabloyla anlat",
+     "zor": 4,
+     "b": {
+      "ifade": "(t=>{const m=LIFEOS.KING.akis().filter(m=>m.kim==='king').pop();if(!m)return 0;if(t==='gorsel'&&m.ders&&m.ders.gorsel)return 1;return LIFEOS.ANLATIM.zenginlestir(m.metin).ekler.some(e=>e.tur===t)?1:0})('tablo')",
+      "ifadeEsit": 1
+     }
+    },
+    {
+     "id": "V-13",
+     "m": "parabolü bir grafikle açıkla",
+     "zor": 4,
+     "b": {
+      "ifade": "(t=>{const m=LIFEOS.KING.akis().filter(m=>m.kim==='king').pop();if(!m)return 0;if(t==='gorsel'&&m.ders&&m.ders.gorsel)return 1;return LIFEOS.ANLATIM.zenginlestir(m.metin).ekler.some(e=>e.tur===t)?1:0})('grafik')",
+      "ifadeEsit": 1
+     }
+    }
+   ]
+  }
+ ]
+}

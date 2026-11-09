@@ -681,7 +681,7 @@ SP.App = (function(){
       { id:'su', ad:'su', birim:'ml', es:/\bsu\b|su iç/, tur:'ortalama', gun:g => v(g, 'water') },
       /* King-Bench koçluk paketi: «uyku borcum var mı» — son 7 gecenin 7,5 saat hedefine göre açığı; son 3 gece 6 saatin
          altındaysa erken uyarı. Girilmeyen gece sayılmaz (borç uydurulmaz). */
-      { id:'uykuBorcu', ozel:true, ad:'uyku borcu', es:/uyku borc|uykusuz mu(?:yum)?|yeterince uyu|az mı uyu/, tur:'anlik', anlik:(t, bugun) => {
+      { id:'uykuBorcu', ozel:true, ad:'uyku borcu', es:/uyku borc|uykusuz mu(?:yum)?|yeterince uyu|az mı uyu|uyku düzen/, tur:'anlik', anlik:(t, bugun) => {
         const HEDEF = 7.5, l = [];
         for(let i = 0; i < 7; i++){ const g = SP.U.iso(SP.U.addDays(SP.U.parse(bugun), -i)); const x = v(g, 'sleep'); if(x != null) l.push({ g, x }); }
         if(l.length < 3) return { v:null, metin:'Uyku borcunu hesaplamak için son 7 gecenin en az 3\'ünde uyku kaydı gerekiyor; ' + l.length + ' gece var.' };

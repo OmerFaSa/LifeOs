@@ -1036,6 +1036,20 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
   font-size:var(--fs-xs); font-weight:600; color:var(--text-2); }
 .king__ders-bas small{ font-weight:500; color:var(--text-3); }
 .king__ders-giris{ margin:0; font-size:var(--fs-sm); color:var(--text-2); line-height:1.55; }
+.king__ders-gorsel{ margin:0; display:grid; gap:4px; }
+.king__ders-gorsel img{ display:block; max-width:100%; max-height:220px; width:auto; object-fit:contain; border-radius:8px; background:var(--surface-2, transparent); }
+.king__grafik{ margin:6px 0 0; display:grid; gap:2px; max-width:360px; }
+.king__grafik svg{ width:100%; height:auto; }
+.king__grafik .ag-izgara{ stroke:var(--line, rgba(127,127,127,.25)); stroke-width:.6; }
+.king__grafik .ag-eksen{ stroke:var(--text-3, var(--text-2)); stroke-width:1; }
+.king__grafik .ag-egri{ stroke:var(--accent, currentColor); stroke-width:2; }
+.king__grafik .ag-etiket{ fill:var(--text-3, var(--text-2)); font-size:9px; font-variant-numeric:tabular-nums; }
+.king__grafik figcaption, .king__tablo-kap + * { font-size:var(--fs-xs, 11px); color:var(--text-3, var(--text-2)); }
+.king__tablo-kap{ overflow-x:auto; margin:6px 0 0; }
+.king__tablo{ border-collapse:collapse; font-size:var(--fs-sm); }
+.king__tablo th, .king__tablo td{ text-align:left; padding:4px 8px; border-bottom:1px solid var(--line, rgba(127,127,127,.25)); vertical-align:top; }
+.king__tablo th{ font-weight:600; }
+.king__ders-gorsel figcaption{ font-size:var(--fs-xs, 11px); color:var(--text-3, var(--text-2)); }
 .king__ders-ilerleme{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:10px; }
 .king__ders-ilerleme small{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
 .king__ders-ilerleme .king__cubuk{ margin:0; }

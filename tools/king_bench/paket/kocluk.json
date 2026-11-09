@@ -241,6 +241,57 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "22:00",
+   "modul": "ays",
+   "not": "Zor-4: sayıya dayalı öneri, dengeli tavsiye",
+   "m": [
+    {
+     "id": "C4-01",
+     "m": "bu hafta neyi daha iyi yapabilirim",
+     "zor": 4,
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "C4-02",
+     "m": "sınava kadar her şeyi bırakıp sadece matematik çalışsam mı",
+     "zor": 4,
+     "b": {
+      "degismez": true,
+      "icermez": "veri yok|anlayamadım"
+     }
+    },
+    {
+     "id": "C4-03",
+     "m": "hedefime ulaşacak mıyım",
+     "zor": 4,
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "22:30",
+   "modul": "spi",
+   "m": [
+    {
+     "id": "C4-04",
+     "m": "son iki haftadır uyku düzenim bozuk ne yapayım",
+     "zor": 4,
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     }
+    }
+   ]
   }
  ]
 }

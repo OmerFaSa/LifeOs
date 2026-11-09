@@ -224,6 +224,15 @@
       expect(R.Entry.parseDeneme('TYT matematikten 40 soru çözdüm')).toBe(null);
       expect(R.Komut.anla('matematikten 40 soru çözdüm 32 doğru', { date:D }).oneriler[0].action).toBe('soru-yaz');
     });
+    it('King-Bench: sayı sözleri, iki gün tek cümlede, başkasının sayısı, tutarsız doğru+yanlış', () => {
+      const dun = R.U.iso(R.U.addDays(R.U.parse(D), -1));
+      const a = R.Komut.anla('ııı şey bugün matematikten otuz beş soru çözdüm otuzu doğruydu', { date:D }).oneriler[0];
+      expect([a.params.count, a.params.correct]).toEqual([35, 30]);
+      const iki = R.Komut.anla('dün 40 bugün 30 soru çözdüm', { date:D }).oneriler.map(o => o.params.date + ':' + o.params.count);
+      expect(iki).toEqual([dun + ':40', D + ':30']);
+      expect(R.Komut.anla('arkadaşım 50 soru çözmüş ben 20', { date:D }).oneriler.map(o => o.params.count)).toEqual([20]);
+      expect(R.Komut.anla('40 soru çözdüm 32 doğru 12 yanlış', { date:D }).oneriler.length).toBe(0);
+    });
     it('King-Bench: «dün …» rapor cümlesi dünün gününe yazılır', () => {
       const r = R.Komut.anla('dün matematikten 40 soru çözdüm', { date:D });
       expect(r.oneriler[0].params.date).toBe(R.U.iso(R.U.addDays(R.U.parse(D), -1)));

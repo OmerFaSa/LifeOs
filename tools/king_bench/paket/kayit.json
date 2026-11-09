@@ -544,6 +544,128 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "21:00",
+   "modul": "ays",
+   "not": "Zor-4: iki gün tek cümlede, sayı kelimeleri, ses dökümü",
+   "m": [
+    {
+     "id": "K4-01",
+     "m": "dün 40 bugün 30 soru çözdüm",
+     "zor": 4,
+     "b": {
+      "ifadeler": [
+       {
+        "ad": "dün",
+        "ifade": "(R.Calc.gunSorusu(R.S.days['2026-11-13'])||0)",
+        "fark": 40
+       },
+       {
+        "ad": "bugün",
+        "ifade": "(R.Calc.gunSorusu(R.S.days['2026-11-14'])||0)",
+        "fark": 30
+       }
+      ]
+     }
+    },
+    {
+     "id": "K4-02",
+     "m": "ııı şey bugün matematikten yani otuz beş soru çözdüm galiba otuzu doğruydu",
+     "zor": 4,
+     "b": {
+      "fark": {
+       "gün.soru": 35
+      }
+     }
+    },
+    {
+     "id": "K4-03",
+     "m": "sabah 2 saat matematik öğleden sonra 90 dakika fizik çalıştım",
+     "zor": 4,
+     "b": {
+      "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-14'])",
+      "ifadeFark": 210
+     }
+    },
+    {
+     "id": "K4-04",
+     "m": "geçen hafta salı ve çarşamba ikişer saat kimya çalıştım",
+     "zor": 4,
+     "b": {
+      "ifadeler": [
+       {
+        "ad": "salı",
+        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-04'])",
+        "fark": 120
+       },
+       {
+        "ad": "çarşamba",
+        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-05'])",
+        "fark": 120
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "08:00",
+   "modul": "spi",
+   "m": [
+    {
+     "id": "K4-05",
+     "m": "kahvaltı: 2 yumurta, 1 dilim peynir, 5 zeytin; 1,5 litre su; kilo 72,4",
+     "zor": 4,
+     "b": {
+      "ifadeler": [
+       {
+        "ad": "su",
+        "ifade": "(Number((SP.S.vitals['2026-11-14']||{}).water)||0)",
+        "fark": 1500
+       },
+       {
+        "ad": "kilo",
+        "ifade": "(Number((SP.S.vitals['2026-11-14']||{}).weight)||0)",
+        "esit": 72.4
+       },
+       {
+        "ad": "öğün",
+        "ifade": "(new Set((SP.S.meals['2026-11-14']||[]).filter(m=>(m.items||[]).length).map(m=>m.slot)).size)",
+        "fark": 1
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "22:30",
+   "modul": "esp",
+   "m": [
+    {
+     "id": "K4-06",
+     "m": "Kürk Mantolu Madonna 45 dakika okudum 30 sayfa",
+     "zor": 4,
+     "b": {
+      "ifadeler": [
+       {
+        "ad": "dakika",
+        "ifade": "(((ESP.S.days['2026-11-14']||{}).sessions||[]).reduce((s,x)=>s+(Number(x.minutes)||0),0))",
+        "fark": 45
+       },
+       {
+        "ad": "sayfa",
+        "ifade": "(((ESP.S.days['2026-11-14']||{}).sessions||[]).filter(x=>x.disc==='reading').reduce((s,x)=>s+(Number(x.count)||0),0))",
+        "fark": 30
+       }
+      ]
+     }
+    }
+   ]
   }
  ]
 }

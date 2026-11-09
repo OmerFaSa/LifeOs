@@ -12,6 +12,8 @@ Yedi paket (paket/*.json), her biri ayrı bir alan:
   guven    Güven/güvenlik    acil, kriz, ilaç/tahlil sınırı, talimat enjeksiyonu, gizlilik, silme
   diyalog  Diyalog           düzeltme, «aslında», geri al, eksik cümle, hafıza
   kocluk   Koçluk            haftalık değerlendirme, uyku borcu, hedef sapması, motivasyon
+  gun      Gerçek gün        bir günün tamamı üç modülde yaşanır; gün sonunda veri TAM değerle denetlenir
+  dayaniklilik Dayanıklılık  büyük harf, harfsiz yazım, ses dökümü, emoji, uzun mesaj, yanıltıcı zaman
 
 Her vakanın zorluğu 1–3; paket puanı zorluk ağırlıklıdır (zor vaka 3 kat sayılır). King puanı = paket
 puanlarının ortalaması. Bir paket her zorlukta %90'ı geçince öz-değerlendirme «sertleştir» der: o pakete
@@ -33,7 +35,7 @@ KOK = os.path.dirname(os.path.dirname(BU))
 VERI = os.environ.get("KING_BENCH_VERI") or r"C:\Users\ASUS\LifeOS-KingBench"
 TABAN, IS = os.path.join(VERI, "taban"), os.path.join(VERI, "is")
 DURUM = os.path.join(VERI, "durum.json")
-SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk"]
+SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk", "gun", "dayaniklilik", "ogretmen", "hafiza", "gorsel"]
 MODUL = {"AYS": 4281, "SPI": 4282, "ESP": 4283}
 OLLAMA = os.path.expandvars(r"%LOCALAPPDATA%\Programs\Ollama\ollama.exe")
 GIZLI = 0x08000000

@@ -8,7 +8,10 @@
       expect(d.baslik).toBe('Türev');
       expect(d.etiket).toBe('elle yazıldı · doğrulanmadı');
       const a = R.Ogren.anlatim('am-11');
-      expect(d.bolumler.length).toBe(a ? a.bolumler.length : d.bolumler.length);
+      /* King-Bench öğretmen: anlatımın bölümleri + soru bankası varsa «Örnek soru ve çözümü» (çözülmüş örnek). */
+      const ornek = d.bolumler.filter(b => b.baslik === 'Örnek soru ve çözümü').length;
+      expect(d.bolumler.length).toBe(a ? a.bolumler.length + ornek : d.bolumler.length);
+      expect(ornek).toBe(R.Ogren.sorular('am-11').some(q => (q.cozum || []).length) ? 1 : 0);
       d.bolumler.forEach(b => expect(typeof b.metin === 'string' && Array.isArray(b.liste)).toBe(true));
       expect(d.soruVar).toBe(R.Ogren.sorular('am-11').length > 0);
     });

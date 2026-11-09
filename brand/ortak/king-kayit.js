@@ -217,7 +217,7 @@ window.LIFEOS.PARCA.yazilar({
   function sormaKomutu(metin){
     const t = KI.kucuk(metin);
     /* King-Bench öğretme: «en zayıf olduğum konudan bana soru sor» onay ayarı sanılıyordu. */
-    if(/soru sor(?![a-zçğıöşü])|soru(?:su)? (?:ver|getir)|test et|kelime\S* sor/.test(t) && !/sorma/.test(t)) return null;
+    if(/soru\w*.*(?:^|\s)sor(?![a-zçğıöşü])|soru(?:su)? (?:ver|getir)|test et|kelime\S* sor|tane daha sor/.test(t) && !/sorma/.test(t)) return null;
     const sorma = /(sorma(dan|yı bırak|yacaksın)?|onay isteme|direkt (ekle|kaydet)|doğrudan (ekle|kaydet))(?![a-zçğıöşü])/.test(t)
       && !/sorma(mı|lı)/.test(t);
     const sor = !sorma && /(bana |yine |tekrar |her seferinde )?(sor|onay iste|sorarak ekle)(?![a-zçğıöşü])/.test(t);
@@ -313,7 +313,7 @@ window.LIFEOS.PARCA.yazilar({
     if(t.length < 2 || SELAM.test(t) || KI.soruMu(t)) return false;
     if(KENDI_ISI.test(t) || t.split(' ').length > 12) return false;
     /* «bu ay ESP de en çok neye zaman verdim», «hedeflerim» (King 5 tur 5, aşama 2): soru ve istek. */
-    if(/(?:^|\s)(ne|neye|neyi|neler|nasıl|kaç|hangi|nerede|neden|niye|kim)(?:\s|$)|(?:^|\s)m[ıiuü](?:\s|$)/.test(t)) return false;
+    if(/(?:^|\s)(ne|neye|neyi|neler|neydi|nasıl|kaç|hangi[a-zçğıöşü]*|nerede[a-zçğıöşü]*|neden|niye|kim|kimdi)(?:\s|$)|(?:^|\s)m[ıiuü](?:\s|$)/.test(t)) return false;
     if(/^\S+(?:lar|ler)[ıiuü]m$/.test(t)) return false;
     return true;
   }

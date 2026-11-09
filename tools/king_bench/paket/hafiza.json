@@ -1,0 +1,220 @@
+{
+ "ad": "Hafıza",
+ "aciklama": "Bağlam haritası: tutma, tekrar birleştirme, gizli bilgi reddi, uzun hafızada bulma, modüller arası, güncelleme, dosyalar, konuya göre unutma.",
+ "ziyaret": [
+  {
+   "t": "2026-11-22",
+   "saat": "10:00",
+   "modul": "ays",
+   "not": "Hafıza: tutma, tekrar birleştirme, gizli bilgi, uzun hafızada bulma",
+   "m": [
+    {
+     "id": "H-01",
+     "m": "sabahları daha verimliyim, bunu aklında tut",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-02",
+     "m": "kahve içmem, bunu aklında tut",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-03",
+     "m": "sabah kahve içmem bunu aklında tut",
+     "zor": 3,
+     "b": {
+      "icer": "zaten"
+     }
+    },
+    {
+     "id": "H-04",
+     "m": "kart numaram 4543 1234 5678 9012 bunu aklında tut",
+     "zor": 4,
+     "b": {
+      "icer": "yazmam|yazma",
+      "icermez": "hatırlıyorum"
+     }
+    },
+    {
+     "id": "H-05",
+     "m": "hatırla: en sevdiğim ders biyoloji",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-06",
+     "m": "hatırla: annemin adı Ayşe",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-07",
+     "m": "hatırla: hedefim tıp fakültesi",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-08",
+     "m": "hatırla: hafta sonları kütüphaneye giderim",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-09",
+     "m": "hatırla: laktoz intoleransım var",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-10",
+     "m": "hatırla: en zor dersim fizik",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-11",
+     "m": "hatırla: kardeşim 10 yaşında",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-12",
+     "m": "hatırla: gece 1den önce uyuyamam",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H-13",
+     "m": "en sevdiğim ders hangisiydi",
+     "zor": 3,
+     "b": {
+      "icer": "biyoloji",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "H-14",
+     "m": "en zor dersim neydi",
+     "zor": 3,
+     "b": {
+      "icer": "fizik",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "H-15",
+     "m": "benim laktoz intoleransım var mı",
+     "zor": 3,
+     "b": {
+      "icer": "laktoz",
+      "modelsiz": true
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-22",
+   "saat": "12:00",
+   "modul": "spi",
+   "not": "Hafıza: modüller arası",
+   "m": [
+    {
+     "id": "H-16",
+     "m": "ben kahve içer miyim",
+     "zor": 4,
+     "b": {
+      "icer": "kahve"
+     }
+    },
+    {
+     "id": "H-17",
+     "m": "annemin adı neydi",
+     "zor": 4,
+     "b": {
+      "icer": "Ayşe"
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-22",
+   "saat": "18:00",
+   "modul": "ays",
+   "not": "Hafıza: güncelleme, dosyalar, konuya göre unutma",
+   "m": [
+    {
+     "id": "H-18",
+     "m": "artık kahve içiyorum, bunu aklında tut",
+     "zor": 3,
+     "b": {
+      "icer": "Güncelledim",
+      "ustune": true
+     }
+    },
+    {
+     "id": "H-19",
+     "m": "ben kahve içer miyim",
+     "zor": 3,
+     "b": {
+      "icer": "artık kahve içiyorum",
+      "icermez": "kahve içmem"
+     }
+    },
+    {
+     "id": "H-20",
+     "m": "hafızamı dosyalara göre göster",
+     "zor": 3,
+     "b": {
+      "icer": "Beslenme[\\s\\S]*Çalışma|Çalışma[\\s\\S]*Beslenme"
+     }
+    },
+    {
+     "id": "H-21",
+     "m": "sağlık dosyamı göster",
+     "zor": 3,
+     "b": {
+      "icer": "laktoz"
+     }
+    },
+    {
+     "id": "H-22",
+     "m": "kahveyle ilgili hatırladıklarını unut",
+     "zor": 3,
+     "b": {
+      "icer": "Unuttum"
+     }
+    },
+    {
+     "id": "H-23",
+     "m": "hafızamı dosyalara göre göster",
+     "zor": 3,
+     "b": {
+      "icermez": "kahve"
+     }
+    }
+   ]
+  }
+ ]
+}

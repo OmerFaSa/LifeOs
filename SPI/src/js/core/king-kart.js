@@ -793,7 +793,7 @@ window.LIFEOS.PARCA.yazilar({
 
   /* ---------- söz 32: kartlar ---------- */
   const KART_ISTAT = /(istatistik|rakamlar[ıi]m|sayılar[ıi]m|verilerimi göster|kartlar[ıi]? göster|durum kartlar)/;
-  const KART_SORU = /(soru sor|sorusu sor|soru ver|soru getir|soru çek|soru çöz(elim|eyim)|beni test et|test et beni|bir soru daha|kelime(?:ler(?:im)?(?:i|den)?)? sor|kelimelerimi sor|kelime testi)/;
+  const KART_SORU = /(soru sor|sorusu sor|soru ver|soru getir|soru çek|soru çöz(elim|eyim)|beni test et|test et beni|bir soru daha|kelime(?:ler(?:im)?(?:i|den)?)? sor|kelimelerimi sor|kelime testi|sorular\w* .*(?:daha|tekrar) sor|tane daha sor)/;
   const SORU_DOLGU = /(^|\s)(bana|bir|tane|daha|soru|sorusu|sor|sorar|ver|getir|çek|lütfen|king|hakkında|konusunda|ile|ilgili|beni|test|et|çözelim|çözeyim|mısın|misin|musun)(?=\s|$)/g;
   const ETIKETLER = ['ölçüldü', 'hesaplandı', 'tahmin', 'veri yok'];
   function kartNiyeti(t){
@@ -942,6 +942,41 @@ window.LIFEOS.PARCA.yazilar({
       + (q.kaynak ? '<small class="king__soru-kaynak">' + KI.kac(q.kaynak) + '</small>' : '') + '</div>';
   }
   /* Uzun cevapta hafif biçim: **kalın**, madde ve başlık işaretleri (metin önce kaçırılır). */
+  /* GÖRSEL ÖĞRENME (anlatim.js): mesaj metnindeki grafik/tablo/görsel işaretleri ayrıştırılır (metin değişince yeniden).
+     Görsel Merkez'den bir kez istenir (KI.gorseller önbelleği), gelince yeniden çizilir; gelmezse yer tutmaz. */
+  function anlatim(m){
+    const A = window.LIFEOS && window.LIFEOS.ANLATIM;
+    if(!A || m.kim !== 'king') return { metin:m.metin, ekler:[] };
+    if(m._zm !== m.metin){ m._z = A.zenginlestir(m.metin); m._zm = m.metin; }
+    return m._z;
+  }
+  KI.gorseller = KI.gorseller || {};
+  function gorselGetir(konu){
+    if(KI.gorseller[konu] !== undefined || !KI.baglanti || !KI.baglanti()) return;
+    KI.gorseller[konu] = null;
+    KI.hkmIstek('/api/gorsel?konu=' + encodeURIComponent(konu)).then(g => {
+      const x = g && g.ok && (g.liste || [])[0];
+      KI.gorseller[konu] = x ? { url:String(x.url), yazar:String(x.yazar || ''), lisans:String(x.lisans || ''), sayfa:String(x.sayfa || ''), sinif:x.sinif } : false;
+      if(x && KI.acik) KI.ciz(false);
+    }).catch(() => { KI.gorseller[konu] = false; });
+  }
+  function eklerHtml(m){
+    const A = window.LIFEOS && window.LIFEOS.ANLATIM, z = anlatim(m);
+    if(!A || !z.ekler.length) return '';
+    return z.ekler.map(e => {
+      if(e.tur === 'grafik') return A.grafikSvg(e.ifade, e.a, e.b, KI.kac);
+      if(e.tur === 'tablo') return A.tabloHtml(e, KI.bicimli);
+      if(e.tur === 'gorsel'){
+        gorselGetir(e.konu);
+        const g = KI.gorseller[e.konu];
+        if(!g || !/^https:\/\//.test(g.url)) return '';
+        return '<figure class="king__ders-gorsel"><img src="' + KI.kac(g.url) + '" alt="' + KI.kac(e.konu) + '" loading="lazy" referrerpolicy="no-referrer"><figcaption>'
+          + KI.kac(e.konu) + ' · ' + KI.kac(g.yazar) + ' · ' + KI.kac(g.lisans) + (g.sinif === 'kisisel' ? ' · kişisel kullanım' : '')
+          + (/^https:\/\//.test(g.sayfa) ? ' · <a href="' + KI.kac(g.sayfa) + '" target="_blank" rel="noopener">kaynak</a>' : '') + '</figcaption></figure>';
+      }
+      return '';
+    }).join('');
+  }
   function bicimli(s){
     return KI.kac(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/^[ \t]*[*-][ \t]+/gm, '• ').replace(/^#{1,4}[ \t]+/gm, '')
       .replace(/https?:\/\/(?:[^\s<>"'&]|&amp;)+/g, u => {
@@ -1270,5 +1305,5 @@ window.LIFEOS.PARCA.yazilar({
     return '';
   }
 
-  Object.assign(KI, { hkmIstek, yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
+  Object.assign(KI, { anlatim, eklerHtml, gorselGetir, hkmIstek, yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
 })();

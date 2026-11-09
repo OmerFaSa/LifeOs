@@ -770,7 +770,7 @@ window.LIFEOS.PARCA.yazilar({
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div>' + adimHtml(m) + '</div>'
-      : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + (m.onay && i === sonKing && KI.bekleyenYetki ? ' king__balon--onay' : '') + '" style="--yazim:' + KI.yazimSuresi(m.metin) + 'ms"><div>' + adimHtml(m) + '<p>' + KI.bicimli(m.metin) + '</p>'
+      : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + (m.onay && i === sonKing && KI.bekleyenYetki ? ' king__balon--onay' : '') + '" style="--yazim:' + KI.yazimSuresi(m.metin) + 'ms"><div>' + adimHtml(m) + '<p>' + KI.bicimli(KI.anlatim(m).metin) + '</p>' + KI.eklerHtml(m)
         + (m.nedenSimdi ? ('<p class="king__neden-simdi"><span>' + yz('ortak.king-gorunum.neden-simdi') + '</span> ') + KI.kac(m.nedenSimdi) + '</p>' : '')
         + KI.kartlarHtml(m) + KI.yardimHtml(m, ilkSira + i) + KI.yapHtml(m) + KI.nefesHtml(m) + KI.yasaHtml(m, ilkSira + i) + KI.gunKartHtml(m, ilkSira + i) + KI.dersHtml(m, ilkSira + i) + KI.soruHtml(m, ilkSira + i) + KI.siraliHtml(m, ilkSira + i) + KI.bulunanHtml(m, ilkSira + i) + KI.arastirmaHtml(m, ilkSira + i) + KI.k2Html(m, ilkSira + i)
         + (m.onizleme

@@ -116,7 +116,7 @@ window.LIFEOS.OLCU = (function(){
      karşılığı) karşılaştırılır; adil olsun diye yarım hafta tam haftayla kıyaslanmaz. İyi giden = en çok artan,
      aksayan = en çok düşen ya da bu hafta hiç girilmeyen ölçü. Öneri sayıdır: geçen haftayı yakalamak için kalan
      günlerde gün başı ne gerektiği. Kilo gibi yönü kişiye bağlı ölçüler («son») iyi/kötü sayılmaz. */
-  const HAFTA_DEG = /(haftamı (?:değerlendir|özetle|incele)|geçen haftaya göre (?:nasıl|ne durumda)|haftayı değerlendir|haftalık değerlendirme|bu hafta(?:m)? nasıl geçti|bu hafta(?:m)? nasıl gidiyor|bu hafta kendime (?:iyi )?bakt|bu hafta nasıl(?:ım|dım)|haftam nasıl)/;
+  const HAFTA_DEG = /(haftamı (?:değerlendir|özetle|incele)|bu hafta neyi (?:daha iyi|geliştir)|neyi daha iyi yapabilirim|geçen haftaya göre (?:nasıl|ne durumda)|haftayı değerlendir|haftalık değerlendirme|bu hafta(?:m)? nasıl geçti|bu hafta(?:m)? nasıl gidiyor|bu hafta kendime (?:iyi )?bakt|bu hafta nasıl(?:ım|dım)|haftam nasıl)/;
   function haftaDegerlendir(bugun){
     const dow = (new Date(bugun + 'T12:00:00').getDay() + 6) % 7;
     const d = { bas:gunEkle(bugun, -dow), son:bugun }, d0 = { bas:gunEkle(bugun, -dow - 7), son:gunEkle(bugun, -7) };
@@ -177,9 +177,32 @@ window.LIFEOS.OLCU = (function(){
       + yaz(r0.deger, 1) + ' (' + g0 + ' gün, gün başı ' + yaz(p0, 1) + '). Hesaba göre ' + buyuk + '. Kayıt girilmeyen gün sıfır sayılmaz.' };
   }
 
+  /* GÜN DEĞERLENDİRMESİ (King-Bench gerçek gün): bugün, son 14 günün kayıtlı günlerinin ortalamasıyla. */
+  const GUN_DEG = /(bugünümü değerlendir|bugün nasıl geçti|bugün nasıldım|günümü değerlendir|bugünü değerlendir)/;
+  function gunDegerlendir(bugun){
+    const l = [];
+    for(const o of ayar.olculer){
+      if(o.tur !== 'toplam' && o.tur !== 'ortalama' || o.genel || o.komut || typeof o.gun !== 'function') continue;
+      const b = o.gun(bugun), r0 = topla(o, null, { bas:gunEkle(bugun, -14), son:gunEkle(bugun, -1) });
+      if(b == null && r0.deger == null) continue;
+      const ort = r0.l.length ? r0.l.reduce((s, x) => s + x.v, 0) / r0.l.length : null;
+      l.push({ o, b, ort, oran:b != null && ort ? (b - ort) / ort : b != null ? 1 : -1 });
+    }
+    if(!l.length) return { id:'gun', cevap:'Bugün için ve son iki haftada kayıt yok; değerlendirecek bir şey bulamadım.' };
+    const on = o => o.ondalik ? 10 : 1;
+    const satir = l.map(x => x.o.ad.charAt(0).toLocaleUpperCase('tr') + x.o.ad.slice(1) + ': bugün ' + yaz(x.b, on(x.o)) + ' ' + x.o.birim + ' (son 14 günün kayıtlı ortalaması ' + yaz(x.ort, on(x.o)) + ')');
+    const s = l.slice().sort((a, b) => b.oran - a.oran), iyi = s[0].oran > 0.05 ? s[0] : null, kotu = s[s.length - 1].oran < -0.05 ? s[s.length - 1] : null;
+    return { id:'gun', satirlar:satir, cevap:'Bugün ortalamana göre: ' + (iyi ? iyi.o.ad + ' ortalamanın üstünde (' + yaz(iyi.b, on(iyi.o)) + ' / ' + yaz(iyi.ort, on(iyi.o)) + ')' : 'ortalamanın belirgin üstünde ölçü yok')
+      + '; ' + (kotu ? kotu.o.ad + (kotu.b == null ? ' bugün hiç girilmedi' : ' ortalamanın altında (' + yaz(kotu.b, on(kotu.o)) + ' / ' + yaz(kotu.ort, on(kotu.o)) + ')') : 'ortalamanın altında kalan yok') + '.' };
+  }
+  /* Rapor cümlesi («ama yine de 15 soru çözdüm, yarın daha çok çalışırım») soru değildir: sayı + geçmiş fiil, soru eki yok. */
+  const RAPOR = /\d.*(?:çözdüm|çalıştım|okudum|uyudum|yaptım|içtim|yedim|koştum)|(?:çözdüm|çalıştım|okudum|uyudum|yaptım|içtim|yedim|koştum).*\d/;
+  const SORU_EKI = /\?|(?:^|\s)(?:mı|mi|mu|mü|mıyım|miyim|muyum|müyüm)(?:\s|$)|(?:^|\s)(?:kaç|ne|nasıl|hangi|neden)(?:\s|$)/;
   function coz(metin, bugun){
     if(!ayar) return null;
     const t = kucuk(metin);
+    if(RAPOR.test(t) && !SORU_EKI.test(t)) return null;
+    if(GUN_DEG.test(t)) return gunDegerlendir(bugun);
     if(HAFTA_DEG.test(t)) return haftaDegerlendir(bugun);
     if(NEDEN.test(t)){ const n = nedenCoz(t, bugun); if(n) return n; }
     if(OZET.test(t) && !BASKA.test(t)) return ozet(t, bugun);

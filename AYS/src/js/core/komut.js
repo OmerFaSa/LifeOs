@@ -322,7 +322,7 @@ R.Komut = (function(){
     /* King-Bench seviye 2: rapor cümlesinin günü («dün …», «geçen salı …», brand/ortak/tarih.js gunSozu); yoksa bugün. */
     const T = window.LIFEOS && LIFEOS.TARIH;
     const veriGunu = (T && T.gunSozu && T.gunSozu(ham, bugun)) || bugun;
-    const veri = R.Entry ? R.Entry.fromText(ham, { date:veriGunu }) : { oneriler:[], engellenen:[] };
+    const veri = R.Entry ? R.Entry.fromText(ham, { date:veriGunu, bugun }) : { oneriler:[], engellenen:[] };
     const engelli = (veri.engellenen || []).length > 0;
     /* Deneme sonucu tek kayıttır (entry.js parseDeneme): virgüllerinden bölünmez. */
     if(veri.deneme){
@@ -356,7 +356,7 @@ R.Komut = (function(){
         tasinan = null;
         return;
       }
-      const v = R.Entry.fromText(parca, { date:veriGunu });
+      const v = R.Entry.fromText(parca, { date:veriGunu, bugun });
       if(v.oneriler.length || (v.engellenen || []).length){
         v.oneriler.forEach(x => sonuc.oneriler.push({ action:x.action, params:x.params, metin:parca }));
         /* Ölçüm olmayan veri cümlesi yazılmaz, sorulur (KR-1). */

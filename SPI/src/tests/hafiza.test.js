@@ -213,4 +213,33 @@
       expect(r2.kayit.alan).toBe(undefined);
     });
   });
+  describe('Hafıza — bağlam haritası (King-Bench hafıza paketi)', () => {
+    const H = () => window.LIFEOS.Hafiza;
+    const ek = (l, m) => { const r = H().ekle(l, { metin:m, katman:'soz', kaynak:'kullanici', akilli:true }); return r.ok ? r.liste : l; };
+    it('dosyalar, benzer kayıt, çelişkide güncelleme, gizli bilgi reddi', () => {
+      let l = ek([], 'sabahları kahve içmem');
+      expect(H().ekle(l, { metin:'sabah kahve içmem', katman:'soz', kaynak:'kullanici', akilli:true }).ok).toBe(false);
+      expect(H().ekle(l, { metin:'sabah kahve içmem', katman:'soz', kaynak:'kullanici' }).ok).toBe(true);   // kural yazımı aynen
+      const g = H().ekle(l, { metin:'artık kahve içiyorum', katman:'soz', kaynak:'kullanici', akilli:true });
+      expect(g.guncellenen.metin).toBe('sabahları kahve içmem');
+      expect(H().etkin(g.liste).map(x => x.metin)).toEqual(['artık kahve içiyorum']);
+      expect(g.kayit.dosya).toBe('beslenme');
+      expect(H().ekle(l, { metin:'kart numaram 4543 1234 5678 9012', katman:'soz', kaynak:'kullanici' }).ok).toBe(false);
+      expect(H().dosyaBul('sabahları daha verimliyim')).toBe('calisma');
+    });
+    it('uzun hafızada bağlam şişmez: soruyla ilgili kayıt + en yeni birkaç kayıt', () => {
+      let l = ek([], 'sabahları daha verimliyim');
+      for(let i = 0; i < 25; i++) l = ek(l, 'gitar defteri sayfa ' + i);
+      const b = H().baglam(l, { soru:'sabahları mı verimliyim' });
+      expect(b).toContain('verimliyim');
+      expect(b.split('\n').length <= 12).toBe(true);
+    });
+    it('komutlar: dosyalara göre göster, bir dosya, konuya göre unut; evet/hayır sorusu bulunur', () => {
+      expect(H().komut('hafızamı dosyalara göre göster')).toEqual({ tur:'dosyalar' });
+      expect(H().komut('sağlık dosyamı göster')).toEqual({ tur:'dosya', dosya:'saglik' });
+      expect(H().komut('kahveyle ilgili hatırladıklarını unut')).toEqual({ tur:'unutIcerik', kelime:'kahve' });
+      const l = ek([], 'kahve içmem');
+      expect(H().sorudaBul(l, 'ben kahve içer miyim').length).toBe(1);
+    });
+  });
 })();

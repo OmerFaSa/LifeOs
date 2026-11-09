@@ -379,6 +379,63 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "20:00",
+   "modul": "ays",
+   "not": "Zor-4: uzun zincir, zamir, eksik cümle",
+   "m": [
+    {
+     "id": "D4-01",
+     "m": "biyoloji 30 soru çözdüm",
+     "zor": 4,
+     "b": {
+      "fark": {
+       "gün.soru": 30
+      }
+     }
+    },
+    {
+     "id": "D4-02",
+     "m": "kimyadan da 20",
+     "zor": 4,
+     "b": {
+      "fark": {
+       "gün.soru": 20
+      }
+     }
+    },
+    {
+     "id": "D4-03",
+     "m": "yok kimya 25ti",
+     "zor": 4,
+     "b": {
+      "fark": {
+       "gün.soru": 5
+      }
+     }
+    },
+    {
+     "id": "D4-04",
+     "m": "onu sil",
+     "zor": 4,
+     "b": {
+      "fark": {
+       "gün.soru": -25
+      }
+     }
+    },
+    {
+     "id": "D4-05",
+     "m": "bugün kaç soru çözdüm",
+     "zor": 4,
+     "b": {
+      "dogru": "(R.Calc.gunSorusu(R.S.days['2026-11-14'])||0)",
+      "modelsiz": true
+     }
+    }
+   ]
   }
  ]
 }

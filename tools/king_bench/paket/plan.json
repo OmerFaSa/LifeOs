@@ -205,6 +205,49 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-14",
+   "saat": "19:00",
+   "modul": "ays",
+   "not": "Zor-4: göreli zaman, tekrarlayan hatırlatma, plan hafifletme",
+   "m": [
+    {
+     "id": "P4-01",
+     "m": "her akşam 22:30da günü kapatmamı hatırlat",
+     "zor": 4,
+     "b": {
+      "icer": "22",
+      "degismez": true
+     }
+    },
+    {
+     "id": "P4-02",
+     "m": "pazartesi ve salı çalışamayacağım hastaneye gideceğim",
+     "zor": 4,
+     "b": {
+      "onay": true
+     },
+     "not": "günler söylenmiş: doğrudan önizleme doğru"
+    },
+    {
+     "id": "P4-03",
+     "m": "bu hafta yükümü yüzde 30 azalt",
+     "zor": 4,
+     "b": {
+      "onay": true
+     }
+    },
+    {
+     "id": "P4-04",
+     "m": "sınava 100 gün kala bana haber ver",
+     "zor": 4,
+     "b": {
+      "icer": "100|hatırlat",
+      "degismez": true
+     }
+    }
+   ]
   }
  ]
 }

@@ -429,6 +429,11 @@ window.LIFEOS.PARCA.yazilar({
       etiket:yazi(d.etiket, 80), sorgu:yazi(d.sorgu || d.baslik, 120), soruVar:!!d.soruVar && typeof K.soru === 'function',
       acilir:typeof K.dersAc === 'function', bolumler, adim:0 };
     KI.soyle(ders.baslik + ' · ders', null, null, null, { ders });
+    /* Görsel öğrenme: Merkez bağlıysa konunun lisanslı görseli kartın başına gelir (beklenmez; gelmezse kart aynen kalır). */
+    if(KI.baglanti && KI.baglanti()) KI.hkmIstek('/api/gorsel?konu=' + encodeURIComponent(ders.sorgu)).then(g => {
+      const x = g && g.ok && (g.liste || [])[0];
+      if(x){ ders.gorsel = { url:String(x.url), yazar:String(x.yazar || ''), lisans:String(x.lisans || ''), sayfa:String(x.sayfa || ''), sinif:x.sinif }; KI.sakla(); KI.ciz(false); }
+    }).catch(() => null);
     return { tur:'ders', bolum:bolumler.length };
   }
   function dersHtml(m, n){
@@ -438,6 +443,9 @@ window.LIFEOS.PARCA.yazilar({
     return '<div class="king__ders" role="group" aria-label="Ders: ' + KI.kac(d.baslik) + '">'
       + '<div class="king__ders-bas"><span>' + KI.kac(d.alt) + '</span>' + (d.etiket ? '<small>' + KI.kac(d.etiket) + '</small>' : '') + '</div>'
       + (d.adim === 0 && d.giris ? '<p class="king__ders-giris">' + KI.bicimli(d.giris) + '</p>' : '')
+      + (d.adim === 0 && d.gorsel && /^https:\/\//.test(d.gorsel.url) ? '<figure class="king__ders-gorsel"><img src="' + KI.kac(d.gorsel.url) + '" alt="' + KI.kac(d.baslik) + '" loading="lazy" referrerpolicy="no-referrer">'
+        + '<figcaption>' + KI.kac(d.gorsel.yazar) + ' · ' + KI.kac(d.gorsel.lisans) + (d.gorsel.sinif === 'kisisel' ? ' · kişisel kullanım' : '')
+        + (/^https:\/\//.test(d.gorsel.sayfa || '') ? ' · <a href="' + KI.kac(d.gorsel.sayfa) + '" target="_blank" rel="noopener">kaynak</a>' : '') + '</figcaption></figure>' : '')
       + '<div class="king__ders-ilerleme">' + cubukHtml(Math.round((d.adim + 1) * 100 / d.bolumler.length), yz('ortak.king-devrim.bolum') + (d.adim + 1) + ' / ' + d.bolumler.length)
       + '<small>' + (d.adim + 1) + ' / ' + d.bolumler.length + '</small></div>'
       + '<h4 class="king__ders-baslik">' + KI.kac(b.baslik) + '</h4>'
