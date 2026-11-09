@@ -290,6 +290,13 @@ R.Palette = (function(){
     if(!r.oneriler.length) return null;
     const satirlar = r.oneriler.map(o => {
       const ad = ETIKET[o.action] || (R.ACTION_BY_ID[o.action] || {}).title || o.action;
+      /* King-Bench seviye 2: geçmiş günün kaydı henüz açılmamışsa önizleme «o gün açılmamış» diyordu, kayıt ise
+         (Komut.isle günü açar) yazılıyordu. Gün yoksa ne yazılacağı tarihle ve söylenen sayıyla gösterilir. */
+      const P = o.params || {};
+      if(P.date && !R.S.days[P.date] && P.date <= R.U.todayISO() && (P.count != null || P.minutes != null || P.hours != null)){
+        const ne = [P.count != null ? P.count + ' soru' + (P.correct != null ? ' (' + P.correct + ' doğru)' : '') : '', P.minutes != null ? P.minutes + ' dk' : '', P.hours != null ? P.hours + ' saat' : ''].filter(Boolean).join(', ');
+        return ad + ': ' + (R.U.fmtShort ? R.U.fmtShort(P.date) : P.date) + (ne ? ' · ' + ne : '');
+      }
       let pv = null;
       try{ pv = R.Proposals.preview({ action:o.action, agent:'patron', params:o.params }); }catch(e){ pv = null; }
       const deg = pv && pv.ok ? (pv.rows || []).map(x => x.label + ' ' + x.before + ' → ' + x.after).join(', ')

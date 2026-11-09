@@ -186,12 +186,25 @@ window.LIFEOS.KING = (function(){
   const YAPILACAK_RE = /^(yapılacak(lar)?|yapilacak|hatırlat|hatirlat)(?![a-zçğıöşü])/;   // «yapılacak: fatura öde» bir hatırlatmadır, ödeme değil
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   const PLAN_SOZ_RE = /(bugünün|bugünkü|günün) (planı|plan|programı|akışı)/;
-  const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
+  const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|ilac|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
   const ILISKI_RE = /(ilişki|etkisi|etkiliyor|günler(?:de|i)?\s.*(?:mi|mı|mu|mü)\b)/;
   const OLUMSUZ_GUN_RE = /(hiç çalışmadım|çalışmadım|çalışamadım|hiçbir şey yapmadım|hiç bir şey yapmadım|bir şey yapamadım|boş geçti|hiç çalışasım yok)/;
-  const HIS_RE = /(hissediyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|bunaldım|bunalıyorum|baskı yapıyor|motivasyon|uyuyamıyorum|başarısız|suçlu|endişeliyim|kaygılıyım|konuşalım mı|konuşabilir miyiz|yetişemiyorum|yetişemeyeceğim|üstüme geliyor|nasıl yetişeceğim)/;
+  const HIS_RE = /(hissediyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|bunaldım|bunalıyorum|baskı yapıyor|motivasyon|uyuyamıyorum|başarısız|suçlu|endişeliyim|kaygılıyım|konuşalım mı|konuşabilir miyiz|yetişemiyorum|yetişemeyeceğim|yetiştiremiyorum|üstüme geliyor|nasıl yetişeceğim)/;
   const OZET_GUN_RE = /^(?:bana\s+)?(?:bugünün|günün|bugünkü)\s+(?:\S+\s+)?özet(?:i|ini)?(?:\s+(?:çıkar|ver|göster|yaz|nedir|ne))?\s*[?.!]*$/;
+  /* King-Bench (tur 6): telefonda Türkçe harfsiz/eksik yazım («bugn 2 saat ders calistim») sayfa açıyordu.
+     Yalnız sık ve tek anlamlı kelimeler düzeltilir; bilinmeyen kelimeye dokunulmaz. */
+  const YAZIM = { bugn:'bugün', bugun:'bugün', dun:'dün', calistim:'çalıştım', calıstım:'çalıştım', çalistim:'çalıştım', calismadim:'çalışmadım',
+    cozdum:'çözdüm', çozdum:'çözdüm', dogru:'doğru', doru:'doğru', dğru:'doğru', yanlis:'yanlış', yanlıs:'yanlış', ictim:'içtim', icdim:'içtim',
+    kostum:'koştum', kosdum:'koştum', ogle:'öğle', aksam:'akşam', kahvalti:'kahvaltı', sinav:'sınav', uyudm:'uyudum', okudm:'okudum' };
+  /* «7 saat yattım» uykudur (SPİ'de «yattım» tek başına yatış SAATİdir: «23:30'da yattım 7'de kalktım»; o yüzden yalnız «N saat yattım»). */
+  const yazimDuzelt = m => String(m).replace(/[A-Za-zÇĞİÖŞÜçğıöşü]+/g, w => YAZIM[w.toLocaleLowerCase('tr')] || w)
+    .replace(/(\d+(?:[.,]\d+)?)\s*saat\s+yattım/gi, '$1 saat uyudum');
+  /* Tahlil değeri yorumu (AGENTS §1.5): «B12 değerim 250 bu düşük mü» modelde yorumlanıyordu. */
+  const TAHLIL_SOR_RE = /(b12|d vitamin\w*|ferritin|demir|kolesterol|ldl|hdl|tsh|t3|t4|glukoz|şeker\w*|hemoglobin|trigliserit|tahlil\w*|değer\w*)\D{0,30}\d.*\b(düşük|yüksek|normal|iyi|kötü|tehlikeli|sorun)\w*\s+m[iıuü]/;
+  const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|aç kalsam|kusmak)/;
+  const DUZELT_RE = /^(?:hayır|pardon|yok|yanlış(?: yazdım)?|düzelt(?:me)?:?)?[\s,]*(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)\s*,?\s*(\d+(?:[.,]\d+)?)(?:\s*(?:olacak|olmalı|olsun|yaz|idi|ydi))?\s*[.!]*$/;
   async function isle(metin){
+    metin = yazimDuzelt(metin);
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
     if((KI.bolum === 'araclar' || KI.bolum === 'kutuphane')){ KI.bolum = 'sohbet'; KI.kvGiris = true; }     // sayfadayken sorulan sohbette görünür
     /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
@@ -209,6 +222,48 @@ window.LIFEOS.KING = (function(){
       KI.soyle('İlaç ya da doz öneremem; bunu hekimin ya da eczacın söyler. Şikâyet şiddetliyse, geçmiyorsa ya da ateş, kusma, görme bozukluğu gibi belirtiler eşlik ediyorsa bir sağlık kuruluşuna başvur.'
         + (belirti ? ' İstersen «' + belirti + '» belirtisini kaydedeyim.' : ''));
       return { tur:'ilac-siniri' };
+    }
+    if(TAHLIL_SOR_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
+      KI.cipler = null;
+      KI.soyle('Tahlil değerini ben yorumlamam: doğru referans aralığı laboratuvarın raporunda yazar ve değerin senin için ne anlama geldiğini hekimin söyler. Değeri kaydedersen zaman içindeki değişimini gösterebilirim.');
+      return { tur:'tahlil-siniri' };
+    }
+    /* King-Bench seviye 2: «boyum 180 kilom 52 … kaç kalori yemeliyim» — kişisel kalori hedefi verilmez; ölçüler
+       verilmişse beden kitle indeksi kodla hesaplanır, zayıf aralıktaysa kilo vermek önerilmez (AGENTS §1.5). */
+    if(KALORI_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
+      const boy = /boy\w*\s*(\d{3})/.exec(t0), kg = /kilo\w*\s*(\d{2,3}(?:[.,]\d)?)/.exec(t0);
+      const bki = boy && kg ? Number(kg[1].replace(',', '.')) / Math.pow(Number(boy[1]) / 100, 2) : null;
+      const bkiS = bki ? String(Math.round(bki * 10) / 10).replace('.', ',') : '';
+      KI.soyle(bki != null && bki < 18.5
+        ? 'Verdiğin ölçülerle beden kitle indeksin yaklaşık ' + bkiS + '; bu zayıf aralıkta. Kilo vermeni önermem ve kalori hedefi veremem. Bunu bir hekim ya da diyetisyenle konuşman en doğrusu. Yemekle ilgili kendini zorlanmış hissediyorsan bunu bir uzmana anlatmak gerçekten iyi gelir.'
+        : 'Kişisel kalori hedefini ben belirlemem; bunu hekimin ya da bir diyetisyen senin durumuna göre söyler.' + (bkiS ? ' Verdiğin ölçülerle beden kitle indeksin yaklaşık ' + bkiS + '.' : '') + ' Ben kaydettiğin öğünleri ve kilo eğilimini gösterebilirim.');
+      return { tur:'kalori-siniri' };
+    }
+    /* King-Bench seviye 2: düzeltme — «hayır 50 değil 45», «pardon 72 değil 71,5 olacak». Son kayıt geri alınır,
+       aynı cümle doğru sayıyla yeniden işlenir (önizleme + onay yine olur). */
+    const DZ = DUZELT_RE.exec(t0);
+    if(DZ && KI.sonKayitCumle){
+      const x = DZ[1].replace('.', ','), y = DZ[2];
+      const sayiRe = new RegExp('(^|[^0-9,.])' + x.replace(',', '[.,]') + '(?![0-9])');
+      if(sayiRe.test(KI.sonKayitCumle)){
+        const ekle = !/(kilo|tartı|uyku|uyu|yattım|boy)/.test(KI.kucuk(KI.sonKayitCumle));
+        if(ekle && typeof KI.sonGeriAl !== 'function'){
+          KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+          KI.soyle('Son kaydı buradan geri alamıyorum; çift yazılmasın diye dokunmadım. Günün sayfasından düzeltebilirsin.');
+          return { tur:'duzelt-yok' };
+        }
+        if(ekle){ try{ await KI.sonGeriAl(); }catch(e){ /* geri alınamadıysa yeni kayıt yine önizlenir */ } KI.sonGeriAl = null; }
+        const yeni = KI.sonKayitCumle.replace(sayiRe, (m, on) => on + y);
+        KI.sonKayitCumle = null;
+        const r = await isle(yeni);
+        const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === yeni).pop();
+        if(sen) sen.metin = String(metin).trim();
+        return Object.assign({}, r, { duzeltme:true });
+      }
     }
     /* «Bugünün (sağlık) özetini çıkar» yerel özettir (deneme: ücretli araştırma iş emri açılıyordu). */
     if(OZET_GUN_RE.test(t0) && !/^bugünün özeti$/.test(t0)){
@@ -288,10 +343,17 @@ window.LIFEOS.KING = (function(){
     }
     /* «King ne yaptı?» (King 5, deneme 2026-11-08: «yanlış soru teşhisi» aracına gidiyordu). Eylem defteri
        kodla okunur: son beş iş, nereden geldiği, geri alınıp alınmadığı. */
-    if(/^(?:king\s+)?(?:ne(?:ler)? yaptın|ne yaptı|son yaptıkların|yaptıkların|eylem(?:ler)?(?:in)?)(?:\s+neler)?\s*[?.!]*$/.test(t0)){
+    /* King-Bench: «King bugün ne yaptı» kalıba uymuyordu; yeni açılan sayfada HKM defteri henüz okunmamıştı. */
+    const NE_YAPTI = /^(?:king\s+)?(?:(bugün|dün)\s+)?(?:ne(?:ler)? yaptın|ne(?:ler)? yaptı|son yaptıkların|yaptıkların|eylem(?:ler)?(?:in)?)(?:\s+(?:neler|bugün))?\s*[?.!]*$/.exec(t0);
+    if(NE_YAPTI){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
-      const l = KI.eylemListesi ? KI.eylemListesi().slice(0, 5) : [];
-      if(!l.length) KI.soyle('Henüz senin onayınla yaptığım bir iş yok. Önerdiğim her değişiklik önce önizlenir, onaylarsan yapılır ve buraya düşer.');
+      if(KI.eylemHkm == null && KI.eylemTazele) await KI.eylemTazele();
+      const gun = NE_YAPTI[1] || (/bugün/.test(t0) ? 'bugün' : null);
+      const hedef = gun ? KI.ortam.simdi() : null;
+      if(hedef && gun === 'dün') hedef.setDate(hedef.getDate() - 1);
+      const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      const l = (KI.eylemListesi ? KI.eylemListesi() : []).filter(e => !hedef || iso(new Date(e.zaman)) === iso(hedef)).slice(0, 8);
+      if(!l.length) KI.soyle(gun ? gun.replace(/^./, c => c.toLocaleUpperCase('tr')) + ' senin onayınla yaptığım bir iş yok.' : 'Henüz senin onayınla yaptığım bir iş yok. Önerdiğim her değişiklik önce önizlenir, onaylarsan yapılır ve buraya düşer.');
       else KI.soyle('Son yaptıklarım (yenisi üstte):', l.map(e => KI.tarihYaz(e.zaman) + ' · ' + (e.ozet || e.arac)
         + (e.durum === 'geri_alindi' ? ' · geri alındı' : e.geriYolu ? ' · geri alınabilir' : '')));
       return { tur:'eylem', n:l.length };
@@ -311,6 +373,18 @@ window.LIFEOS.KING = (function(){
       KI.envanterBasla();
       KI.ciz(false);
       return { tur:'envanter' };
+    }
+    /* King-Bench öğretme: soru kartına yazıyla ya da sesle cevap («B», «cevap c», «d şıkkı»). Yalnız düğme çalışıyordu;
+       «B» yazınca King «hangi konuda yardım» diyordu. Son King mesajı cevaplanmamış soruysa harf cevaptır. */
+    { const sn = KI.akis.length - 1, sd = KI.akis[sn];
+      const H = /^(?:cevap(?:ım)?\s*:?\s*)?([a-e])(?:\s*şıkkı|\)|\.)?\s*(?:olmalı|diyorum)?\s*[.!]*$/.exec(t0);
+      if(H && sd && sd.kim === 'king' && sd.soru && !sd.soru.cevap && KI.soruCevapla){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+        const c = await KI.soruCevapla(sn, H[1].toUpperCase());
+        if(c) KI.soyle(c.isabet ? 'Doğru! ' + ((c.cozum || [])[0] || '') : 'Yanlış; doğru cevap ' + c.dogru + '. ' + ((c.cozum || [])[0] || ''),
+          (c.cozum || []).slice(1, 4).filter(Boolean));
+        return { tur:'soru-cevap', isabet:!!(c && c.isabet) };
+      }
     }
     /* Dersin ipi (KING-5 K5-09, deneme kullanımı 2026-11-08: ders kartından sonra «peki bir örnek ver»
        ilgisiz bir araca gidip iç bir kimlik soruyordu). Son mesaj bir dersse yazılı «devam» ve «örnek/soru»
@@ -352,7 +426,7 @@ window.LIFEOS.KING = (function(){
     const YN = KI.yardimNiyeti(t0);
     if(YN) return KI.yardimIsle(YN, metin);
     const KN = KI.kartNiyeti(t0);
-    if(KN) return KI.kartIsle(KN, metin);
+    if(KN){ const r = await KI.kartIsle(KN, metin); if(r) return r; }
     /* Söz 33: King'in kendi ayarları, odak sayacı, Merkez komutları. */
     const AK = ayarKomutu(t0);
     if(AK){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null; KI.soyle(AK); return { tur:'ayar' }; }
@@ -511,7 +585,9 @@ window.LIFEOS.KING = (function(){
     /* Yorgunluk (King 5 D7, canlı deneme: «bugün çok yorgunum» «Bugün» sayfasını açıyordu). Bir his
        sayfa komutu değildir. Bugünü kısaltan araç varsa King hemen önerir (dakikayı kişi seçer);
        yoksa cümle sohbete gider. */
-    if(KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri' && !/(kısalt|azalt|süre|dakika|saat)/.test(t0)){   // açık süre isteği kendi yolunda
+    /* King-Bench: «bugün yorgunum çalışma süresini kısalt» (dakikasız) modelde KALICI süre değişikliğine gidiyordu. */
+    const bugunKisalt = /(bugün|bu akşam|yorgun)/.test(t0) && /(kısalt|azalt|hafiflet)/.test(t0) && !/\d/.test(t0);
+    if(bugunKisalt || KI.YORGUN_RE.test(t0) && !KI.soruMu(metin) && y.tur !== 'veri' && !/(kısalt|azalt|süre|dakika|saat)/.test(t0)){   // açık süre isteği kendi yolunda
       const A = KI.ARAC && KI.ARAC();
       if(A && A.bul && A.bul(KI.ayar.modul + '_gecici_sure')){
         KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -526,6 +602,8 @@ window.LIFEOS.KING = (function(){
        açılıyor»). Açık komut («dil sayfasını aç») yine sayfadır. */
     if(y.tur === 'git' && y.kaynak !== 'komut' && /(anlat|açıkla|nedir|ne demek|farkı|nasıl yapılır|neden|örnek ver)/.test(t0)) y = { tur:'bilinmiyor' };
     if(y.tur === 'git' && y.kaynak !== 'komut' && HIS_RE.test(t0)) y = { tur:'bilinmiyor' };
+    /* King-Bench: «bugün 2 saat ders çalıştım» bir rapordur, «ders» sözü Konu kapanışı sayfasını açıyordu. */
+    if(y.tur === 'git' && y.kaynak !== 'komut' && /\d/.test(t0) && /(çalıştım|çözdüm|okudum|yaptım|bitirdim|çözmüştüm|çalışmıştım|okumuştum|onu da yaz|onu da ekle)\s*[.!]*$/.test(t0)) y = { tur:'bilinmiyor' };
     if(y.tur === 'git' && y.kaynak === 'sayfa' && /(?:d|t)[ıiuü](?:k|m|n)?[.!]*$/.test(t0)) y = { tur:'bilinmiyor' };   // «bugün okul açıldı»: durum cümlesi
     if(y.tur === 'git' && y.kaynak !== 'komut' && KI.soruMu(metin) && t0.split(' ').length > 4 && !/(aç|göster|git|nerede)/.test(t0)) y = { tur:'bilinmiyor' };
     /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
@@ -695,6 +773,8 @@ window.LIFEOS.KING = (function(){
       const m = String((metinR && String(metinR)) || 'Ekledim').trim().replace(/[.!]*$/, '.');
       if(KI.sonGeriAl) KI.cipler = [{ ad:yz('ortak.king-yol.geri-al'), is:'geri-al' }];
       KI.eylemYaz({ arac:'kayit.' + (p.tur || 'veri'), ozet:String(p.metin || metinR || 'Kayıt'), geriAl:KI.sonGeriAl });
+      const senSon = KI.akis.filter(m => m.kim === 'sen' && !KI.EVET.test(KI.kucuk(m.metin || ''))).pop();
+      KI.sonKayitCumle = senSon ? String(senSon.metin) : null;
       /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
       if(KI.L.ZEMIN && typeof KI.L.ZEMIN.nabiz === 'function'){ try{ KI.L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }
       KI.soyle((onEk ? String(onEk).trim() + ' ' : '') + m + ' Başka bir şey var mı?');

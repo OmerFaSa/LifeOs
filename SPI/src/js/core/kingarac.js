@@ -242,6 +242,20 @@ SP.KingArac = (function(){
   const kodSema = { type:'string', maxLength:20, description:'barkod numarası (8, 12 ya da 13 hane)' };
   const disOnbellek = {};
   const render = () => { if(SP.App && SP.App.render) SP.App.render(); };
+  /* spi_ilac_alim: cümledeki ad («D vitaminimi») kayıtlı adı içerir ya da onun içindedir; «ilaçlarım» hepsidir. */
+  function ilacAlimBul(p){
+    const etkin = (SP.S.meds || []).filter(m => !m.endDate);
+    if(!etkin.length) return { hata:'Kayıtlı ilaç ya da takviye yok; önce «ilaç ekle: D vitamini» diye ekleyebilirsin.' };
+    const ad = kucuk(p.ad).replace(/\b(bugün|dün|sabah|akşam)\b/g, '').trim();
+    const tarih = p.tarih && /^\d{4}-\d\d-\d\d$/.test(p.tarih) ? p.tarih : U().todayISO();
+    if(/^(ilaç|takviye|hap|vitamin)[a-zçğıöşü]*$|^hepsi/.test(ad)) return { l:etkin, gun:tarih };
+    /* «D vitaminimi» ↔ «D vitamini damla, her sabah 1 kez»: adın ilk kelimeleri cümlenin kelimelerinin başıdır. */
+    const aw = ad.split(/\s+/);
+    const l = etkin.filter(m => { const n = kucuk(m.name).split(',')[0].trim(); const nw = n.split(/\s+/).slice(0, Math.max(1, Math.min(2, aw.length)));
+      return n && (ad.indexOf(n) >= 0 || n.indexOf(ad) >= 0 || nw.every((w, i) => aw[i] && aw[i].indexOf(w) === 0)); });
+    if(!l.length) return { hata:'«' + p.ad + '» kayıtlı ilaçların arasında yok. Kayıtlılar: ' + etkin.map(m => m.name).join(', ') + '.' };
+    return { l, gun:tarih };
+  }
   /* Defter → Open Food Facts; aynı oturumda ikinci kez sorulmaz. */
   async function barkodBul(kod){
     const d = await SP.Barkod.coz(kod);
@@ -1054,6 +1068,25 @@ SP.KingArac = (function(){
       { ad:'spi_gun_kaydi', tur:'oku', aciklama:yz('spi.core.kingarac.bir-gunun-spi-kaydi-uyku'),
         ornek:'dünün özet kaydı', anahtar:'günlük günlüğüm döküm ajanda kaydettiklerim özet',
         parametreler:{ type:'object', properties:{ tarih:gun } }, calistir:gunKaydi },
+      /* King-Bench (tur 6): ilaç/takviye ALIMI. Liste (spi_ilac) vardı, «D vitaminimi içtim» yazılamıyordu.
+         Günün ölçümüne (vitals.medsTaken: ilaç kimlikleri) yazılır; ad cümleden, kayıtlı ilaçla eşleşir. */
+      { ad:'spi_ilac_alim', tur:'yaz', ozetAd:'İlaç/takviye alımı', ornek:'D vitaminimi içtim',
+        aciklama:'Kayıtlı bir ilacın ya da takviyenin bugün (veya verilen gün) alındığını işaretler. «İlaçlarımı aldım» hepsini işaretler.',
+        parametreler:{ type:'object', properties:{ ad:{ type:'string', maxLength:80, description:'ilaç/takviye adı ya da «ilaçlarım»' }, tarih:gun }, required:['ad'] },
+        onizle:p => {
+          const r = ilacAlimBul(p);
+          if(r.hata) return { hata:r.hata };
+          return { metin:r.l.map(m => m.name).join(', ') + ' — ' + (r.gun === U().todayISO() ? 'bugün' : r.gun) + ' alındı olarak işaretlenecek.' };
+        },
+        uygula:async p => {
+          const r = ilacAlimBul(p);
+          if(r.hata) return { ok:false, metin:r.hata };
+          const eski = ((SP.S.vitals[r.gun] || {}).medsTaken || []).slice();
+          const yeni = eski.concat(r.l.map(m => m.id).filter(id => eski.indexOf(id) < 0));
+          await M().saveVitals(r.gun, { medsTaken:yeni });
+          render();
+          return { metin:'İşaretledim: ' + r.l.map(m => m.name).join(', ') + '.', geriAl:async () => { await M().saveVitals(r.gun, { medsTaken:eski }); render(); } };
+        } },
       { ad:'spi_uyku', tur:'oku', aciklama:yz('spi.core.kingarac.son-gunlerin-uyku-saatleri-v'),
         es:/(uykum nasıl|uyku ortalamam|kaç saat uyu(?:dum|muşum)|ortalama .*uyu|uyku.*dağılım)/, ornek:'haftalık uyku ortalamam',
         anahtar:'süre dağılım uykular dinlenme gece saat',

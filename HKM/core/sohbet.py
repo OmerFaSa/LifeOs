@@ -634,6 +634,10 @@ def aday_kapisi(metin):
     t = " ".join(str(metin or "").replace("İ", "i").replace("I", "ı").lower().split())
     if not t or ADAY_SORU.search(t) or ADAY_ISTEK.search(t):
         return False
+    # King-Bench seviye 2: duygu/sıkıntı cümlesi («ailem baskı yapıyor, kavga ediyoruz») hafıza adayı olmaz;
+    # hassas konudur ve model kendi genellemesini aday diye öneriyordu. Kullanıcı isterse kendisi yazar.
+    if HIS_RE.search(t):
+        return False
     return bool(ADAY_BEN.search(t))
 
 
@@ -775,7 +779,7 @@ HIS_RE = re.compile(
     r"baskı yapıyor|motivasyon(?:um)? yok|motivasyon ver|uyuyamıyorum|başarısız|suçlu|korkuyorum|"
     r"endişeliyim|kaygılıyım|canım sıkkın|konuşalım mı|konuşabilir miyiz|dertleş|geçemeyecekmişim|üstüme geliyor|"
     r"kötü geçti|bırakmak istiyorum|yoruldum|sıkıldım|zor geçti|ağlamak|teşekkür|sağ ol|dinlediğin için|"
-    r"yetişemiyorum|nasıl yetişeceğim|bunalıyorum|eğleniyor ben)", re.I)
+    r"yetişemiyorum|yetiştiremiyorum|nasıl yetişeceğim|bunalıyorum|eğleniyor ben)", re.I)
 # Kullanıcının anmadığı bölüme yönlendirme («ESP bölümüne odaklanabilirsin», «SPİ bölümünü kontrol et»):
 # küçük model bunu her cevaba ekliyordu (klon simülasyonu aşama 1-2). Cümle düşer, kalan söylenir.
 BOLUM_YONLENDIR = re.compile(r"\b(AYS|SPİ|SPI|ESP)\s+bölüm\w*", re.I)
@@ -1224,6 +1228,12 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport, modul, katalog)
         if kr is not None:
             return kr
+    elif gorevli == "king":
+        # King-Bench (tur 6): istemci önce bir okuma aracı çalıştırıp sonuçla gelirse kural yolu atlanıyordu;
+        # ilişki sorusunu yine model yorumluyordu («uyku soruyu doğrudan etkilemez»). Sayıyı kod verir.
+        ic = iliski.cevap(con, metin, date)
+        if ic:
+            return {"ok": True, "mode": "komut", "command": "iliski", "text": ic, "agent": gorevli}
 
     rol = GOREVLILER[gorevli]["role"]
     # Mesajin NITELIGI modeli secer (core/seviye.py): duz sohbet alt,

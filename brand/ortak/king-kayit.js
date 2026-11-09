@@ -162,7 +162,7 @@ window.LIFEOS.PARCA.yazilar({
 
   /* ---------- söz 25: kişilik envanteri ---------- */
   const ENV = () => KI.L.ENVANTER || null;
-  const ENV_BASLA = /(kişilik (testi|envanteri|testimi)|kişiliğimi (ölç|test et|analiz et)|beni test et|beş faktör)/;
+  const ENV_BASLA = /(kişilik (testi|envanteri|testimi)|kişiliğimi (ölç|test et|analiz et)|^(?:king\s+)?beni test et\s*[?.!]*$|beş faktör)/;
   function envanterSor(){
     const E = ENV(), i = KI.envanter.i;
     KI.cipler = E.CEVAPLAR.map((ad, k) => ({ is:'env:' + (k + 1), ad:(k + 1) + ' · ' + ad })).concat([{ is:'env-dur', ad:yz('ortak.king-kayit.birak') }]);
@@ -216,6 +216,8 @@ window.LIFEOS.PARCA.yazilar({
   /* «SPİ'de uyku için artık sorma» → { modul, tur, sorma } ya da null. */
   function sormaKomutu(metin){
     const t = KI.kucuk(metin);
+    /* King-Bench öğretme: «en zayıf olduğum konudan bana soru sor» onay ayarı sanılıyordu. */
+    if(/soru sor(?![a-zçğıöşü])|soru(?:su)? (?:ver|getir)|test et|kelime\S* sor/.test(t) && !/sorma/.test(t)) return null;
     const sorma = /(sorma(dan|yı bırak|yacaksın)?|onay isteme|direkt (ekle|kaydet)|doğrudan (ekle|kaydet))(?![a-zçğıöşü])/.test(t)
       && !/sorma(mı|lı)/.test(t);
     const sor = !sorma && /(bana |yine |tekrar |her seferinde )?(sor|onay iste|sorarak ekle)(?![a-zçğıöşü])/.test(t);

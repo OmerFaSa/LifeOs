@@ -35,6 +35,17 @@
         expect(O().coz('bugün 40 soru çözdüm', BUGUN)).toBe(null);
       }finally{ O()._sifirla(); }
     });
+    it('King-Bench tur 6: özel anlık ölçü genel kapılara (hedef, «hangi») takılmaz ve önce seçilir', () => {
+      O().kur({ modul:'esp', olculer:[
+        { id:'genel', genel:true, ad:'çalışma', birim:'dk', es:/çalış|zaman/, tur:'toplam', gun:() => 10 },
+        { id:'hedef', ozel:true, ad:'hedef', es:/hedef\w*.*yüzde/, tur:'anlik', anlik:() => ({ v:40, metin:'Hedefin %40 tamam.' }) },
+        { id:'dagilim', ozel:true, ad:'dağılım', es:/zaman\w*.*en çok/, tur:'anlik', anlik:() => ({ v:1, metin:'En çok gitar.' }) },
+      ] });
+      try{
+        expect(O().coz('hedefimin yüzde kaçını tamamladım', BUGUN).cevap).toContain('%40');
+        expect(O().coz('zamanımı en çok hangi işe harcıyorum', BUGUN).cevap).toContain('gitar');
+      }finally{ O()._sifirla(); }
+    });
     it('değişim: kilo dönemin ilk ve son ölçümü; net olayları ve alt kırılım', () => {
       kur();
       try{

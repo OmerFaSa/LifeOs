@@ -345,7 +345,12 @@ ESP.KingArac = (function(){
     const temiz = String(ad || '').trim();
     if(!temiz) return null;
     const k = kucuk(temiz);
-    const l = (S().books || []).filter(b => kucuk(b.title).indexOf(k) >= 0);
+    let l = (S().books || []).filter(b => kucuk(b.title).indexOf(k) >= 0);
+    /* King-Bench seviye 2: «suç ve cezayı» — Türkçe hâl eki (-yı, -nı, -'yı, -ı …) atılıp yeniden aranır. */
+    if(!l.length){
+      const kok = k.replace(/['’]?(?:y|n)?[ıiuü]$|['’]?(?:y|n)?[ae]$|['’]?d[ae]$|['’]?n[ıiuü]n$/, '');
+      if(kok.length >= 3 && kok !== k) l = (S().books || []).filter(b => kucuk(b.title).indexOf(kok) >= 0);
+    }
     return l.length === 1 ? l[0] : null;
   }
 

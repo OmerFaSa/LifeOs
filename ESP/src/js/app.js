@@ -1942,7 +1942,31 @@ ESP.App = (function(){
         { id:'sayfa', genel:true, ad:'okunan sayfa', birim:'sayfa', es:/sayfa|kaç kitap|okudum|okuma/, tur:'toplam', gun:g => kac(g, 'reading') },
       ].concat((ESP.DISCIPLINES || []).map(d => ({ id:'esp-' + d.id, ad:d.label + ' çalışması', birim:'dk', tur:'toplam',
         es:new RegExp('(' + [d.label, d.short].concat(ad[d.id] || []).filter(x => x && x.length >= 3).map(x => kacis(String(x).toLocaleLowerCase('tr'))).join('|') + ')'),
-        gun:g => dk(g, d.id) }))).concat([{ id:'esp', genel:true, ad:'ESP çalışması', birim:'dk', es:/esp|ne kadar çalış/, tur:'toplam', gun:g => dk(g) }]) });
+        gun:g => dk(g, d.id) }))).concat([{ id:'esp', genel:true, ad:'ESP çalışması', birim:'dk', es:/esp|ne kadar çalış/, tur:'toplam', gun:g => dk(g) }, {
+          /* King-Bench (tur 6): «zamanımı en çok hangi işe harcıyorum» — son 30 günün ölçülen dakikası disipline göre. */
+          id:'dagilim', ozel:true, ad:'zaman dağılımı', es:/(zaman|vakt)\w*.*(en çok|nereye|hangi)|en çok (?:hangi|ne)\w* (?:iş|alan|çalış)/, tur:'anlik', anlik:() => {
+            const top = {};
+            for(let i = 0; i < 30; i++){ const g = ESP.U.iso(ESP.U.addDays(ESP.U.today(), -i)); oturum(g, s => s.minutes != null).forEach(s => { top[s.disc] = (top[s.disc] || 0) + Number(s.minutes); }); }
+            const tum = Object.values(top).reduce((a, b) => a + b, 0);
+            if(!tum) return { v:null, metin:'Son 30 günde süresi yazılmış ESP oturumu yok.' };
+            const adOf = id => ((ESP.DISCIPLINES || []).find(d => d.id === id) || {}).label || id;
+            const l = Object.keys(top).sort((a, b) => top[b] - top[a]);
+            return { v:tum, metin:'Son 30 günde ölçülen ' + Math.round(tum / 6) / 10 + ' saatin dağılımı: ' + l.map(k => adOf(k) + ' ' + Math.round(top[k]) + ' dk (%' + Math.round(top[k] * 100 / tum) + ')').join(', ') + '. En çok ' + adOf(l[0]) + '.' };
+          } }, {
+          /* King-Bench (tur 6): «hedefimin yüzde kaçı», «hedeflerim nasıl gidiyor» — planlı hedefin ölçülen/hedef oranı kodla. */
+          id:'hedef', ozel:true, ad:'hedef', es:/hedef\w*.*(yüzde|kaçı|nasıl gidiyor|ne durumda|neler)|hedeflerim/, tur:'anlik', anlik:() => {
+            const H = ESP.Hedefler, P = ESP.HedefPlan;
+            const l = H && H.aktifler ? H.aktifler() : [];
+            if(!l.length) return { v:null, metin:'Etkin bir ESP hedefin yok. «hedef ekle: …» diye yazabilirsin.' };
+            const satir = l.map(h => {
+              const p = P && P.aktif ? P.aktif(h.id) : null;
+              const il = p ? P.ilerleme(p, ESP.U.todayISO()) : null;
+              const hedefDeger = p && P.beklenenAt && p.bitis ? P.beklenenAt(p, p.bitis) : null;
+              const yuzde = il && il.olculen && hedefDeger ? Math.min(100, Math.round(il.olculen.deger * 100 / hedefDeger)) : null;
+              return H.ozet(h) + (yuzde != null ? ' · %' + yuzde + ' tamam' : '') + (il && il.metin ? ' · ' + il.metin : ' · planı yok, ilerleme ölçülemiyor');
+            });
+            return { v:l.length, metin:l.length + ' etkin hedef: ' + satir.join(' — ') };
+          } }]) });
     }
   }
 
@@ -1952,6 +1976,41 @@ ESP.App = (function(){
      yazılır; sırası gelen kart ÖLÇÜMdür, toplu yazılmaz. Ölçüm ekrandaki tek
      satıra yazılır ve «Ne yaptın?» ayrıştırıcısından (girisKur) geçer:
      yazılan dakika ölçümdür. Depo sahibi 2026-10-25. `o` yalnız testte. */
+  const KELIME_SORU = {};
+  const DIL_SOZ = [[/almanca|alman/, 'de', 'Almanca'], [/ingilizce|ingiliz/, 'en', 'İngilizce'], [/fransızca|fransız/, 'fr', 'Fransızca'],
+    [/ispanyolca|ispanyol/, 'es', 'İspanyolca'], [/italyanca/, 'it', 'İtalyanca'], [/rusça/, 'ru', 'Rusça'], [/arapça/, 'ar', 'Arapça'], [/japonca/, 'ja', 'Japonca']];
+  function kelimeSorusu(konu){
+    const t = String(konu || '').toLocaleLowerCase('tr');
+    const tum = (ESP.S.cards || []).filter(c => c && c.front && c.back);
+    const dil = DIL_SOZ.find(d => d[0].test(t));
+    const havuz = dil ? tum.filter(c => (c.lang || 'en') === dil[1]) : tum;
+    if(havuz.length < 4) return null;
+    const bugun = ESP.U.todayISO();
+    const vade = ESP.SRS && ESP.SRS.dueCards ? ESP.SRS.dueCards(bugun).filter(c => havuz.indexOf(c) >= 0) : [];
+    const sorulan = Object.values(KELIME_SORU).map(x => x.kart.id);
+    const kart = vade.find(c => sorulan.indexOf(c.id) < 0) || havuz.slice().sort((a, b) => (a.history || []).length - (b.history || []).length
+      || String(a.createdAt).localeCompare(String(b.createdAt))).find(c => sorulan.indexOf(c.id) < 0) || havuz[0];
+    const iz = s => { let h = 0; for(const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+    const celdirici = havuz.filter(c => c.id !== kart.id && c.back !== kart.back).sort((a, b) => iz(a.id + kart.id) - iz(b.id + kart.id)).slice(0, 3);
+    if(celdirici.length < 3) return null;
+    const yer = iz(kart.id + bugun) % 4;
+    const sec = celdirici.map(c => c.back);
+    sec.splice(yer, 0, kart.back);
+    const id = 'esp-kelime:' + kart.id + ':' + Object.keys(KELIME_SORU).length;
+    KELIME_SORU[id] = { kart, dogru:'ABCD'[yer] };
+    const dilAd = (DIL_SOZ.find(d => d[1] === (kart.lang || 'en')) || [0, 0, 'Kelime'])[2];
+    return { id, konu:dilAd + ' · kendi desten', soru:'«' + kart.front + '» ne demek?', sec, kaynak:'Kelime kartların (' + havuz.length + ' kart)', not:'' };
+  }
+  async function kelimeCevabi(id, harf){
+    const x = KELIME_SORU[id];
+    if(!x) return null;
+    const isabet = String(harf || '').toUpperCase() === x.dogru;
+    let srs = null;
+    try{ srs = ESP.SRS && ESP.SRS.answer ? await ESP.SRS.answer(x.kart.id, isabet ? 'good' : 'again') : null; }catch(e){ srs = null; }
+    return { dogru:x.dogru, cozum:['«' + x.kart.front + '» = ' + x.kart.back + (x.kart.context ? ' · ' + x.kart.context : '')],
+      not:srs && srs.ok === false ? '' : isabet ? 'Kart tekrar takviminde bir adım ilerledi.' : 'Kart başa döndü; yakında yeniden sorarım.' };
+  }
+
   function gunuKapatKur(o){
     const GK = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
     if(!GK) return;
@@ -2189,6 +2248,11 @@ ESP.App = (function(){
               }), not:r.note || '' };
             },
             istatistik:() => kralIstatistik(),
+            /* Öğretmen (King-Bench öğrenme alanı, tur 6): «almanca kelime sor» AYS'deki soru kartının aynısı, kaynak
+               kullanıcının KENDİ kelime destesi. Vadesi gelen kart önce; şıklar aynı dildeki başka kartların karşılığı.
+               Cevap aralıklı tekrara yazılır (doğru: iyi, yanlış: yine). En az 4 kart gerekir; yoksa soru uydurulmaz. */
+            soru:konu => kelimeSorusu(konu), soruDar:true,
+            cevapla:(id, harf) => kelimeCevabi(id, harf),
             /* Kelime soru kartı ve 1/3/7 tekrar: öğretme motorunun ESP adaptörü
                (core/kingogret.js, brand/ortak/ogret.js). Kartın kendi SRS'i değişmez. */
             soru:konu => ESP.KingOgret.soru(konu),
@@ -2427,7 +2491,7 @@ ESP.App = (function(){
 
   return { sayfaSonuRota, boot, kralIstatistik, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
     sectionOf, routeOn, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest, girisKur, gunuKapatKur,
-    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, arkaPlan };
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, arkaPlan, kelimeSorusu, kelimeCevabi };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)

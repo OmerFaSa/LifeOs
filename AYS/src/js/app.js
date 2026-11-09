@@ -1699,7 +1699,7 @@ R.App = (function(){
         const gun = g === bugun ? 'Bugün' : 'Dün';
         return { v:l.length, metin:l.length ? gun + ' şunları kaydetmişsin: ' + l.join(' · ') + '.' : gun + ' için çalışma kaydı yok.' };
       } },
-      { id:'verimli', ad:'en verimli gün', es:/en verimli (?:gün|günüm)|hangi gün daha (?:çok|verimli)/, tur:'anlik', anlik:(t, bugun) => {
+      { id:'verimli', ad:'en verimli gün', es:/en verimli (?:olduğum )?(?:gün|günüm)|hangi gün daha (?:çok|verimli)/, tur:'anlik', anlik:(t, bugun) => {
         const AD = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'], top = [0, 0, 0, 0, 0, 0, 0], gun = [0, 0, 0, 0, 0, 0, 0];
         Object.keys(R.S.days).forEach(g => { if(g > bugun || g < R.U.iso(R.U.addDays(R.U.parse(bugun), -90))) return;
           const q = R.Calc.gunSorusu(R.S.days[g]); if(!q) return; const w = R.U.parse(g).getDay(); top[w] += q; gun[w]++; });
@@ -1707,6 +1707,14 @@ R.App = (function(){
         if(l.length < 3) return { v:null, metin:'Gün karşılaştırması için en az üç farklı günde soru kaydı gerekiyor.' };
         return { v:l[0].ort, metin:'Son 90 günde en verimli günün ' + l[0].a + ': kayıtlı ' + l[0].n + ' günde ortalama ' + Math.round(l[0].ort) + ' soru. '
           + 'Sıra: ' + l.map(x => x.a + ' ' + Math.round(x.ort)).join(', ') + '. Kayıtsız gün hesaba girmez.' };
+      } },
+      /* King-Bench seviye 2: «bugün neyi çalışmalıyım» — öneri kendi verisinden: en zayıf ders + sırası gelen tekrar. */
+      { id:'oneri', ozel:true, ad:'çalışma önerisi', es:/(?:neyi|ne|hangi (?:dersi|konuyu|derse)) çalış(?:malıyım|sam|ayım)|bugün neye çalış/, tur:'anlik', anlik:t => {
+        const z = window.LIFEOS.OLCU.coz('en zayıf olduğum ders hangisi', R.U.todayISO());
+        const tekrar = R.Calc.dueCards(R.U.todayISO()).length;
+        const zm = z && z.cevap ? String(z.cevap) : '';
+        if(!zm && !tekrar) return { v:null, metin:'Öneri için henüz yeterli kayıt yok: bir deneme ya da birkaç günlük soru kaydı gerekiyor.' };
+        return { v:tekrar, metin:(zm ? zm + ' Bugün önce oraya ağırlık ver. ' : '') + (tekrar ? 'Sırası gelen ' + tekrar + ' tekrar kartın da var; günü onlarla aç.' : 'Bugün sırası gelen tekrar kartı yok.') };
       } },
       { id:'zayif', ad:'en zayıf ders', es:/en zayıf|en güçlü|en kötü|en iyi olduğum/, tur:'anlik', anlik:t => {
         const l = (R.S.exams || []).filter(e => e.family !== 'AYT').slice(-5);
@@ -1981,8 +1989,15 @@ R.App = (function(){
             brifing:simdi => typeof R.KingVeri.brifing === 'function' ? R.KingVeri.brifing(simdi || new Date()) : null,
             sonKayit:() => R.KingVeri.sonKayit(), duzelt:(id, alan, deger) => R.KingVeri.duzelt(id, alan, deger),
             istatistik:() => {
-              let solved = 0, correct = 0;
-              (R.SUBJECTS || []).forEach(s => { const p = R.Calc.topicPractice(s.id, null, 45); solved += p.solved || 0; correct += p.correct || 0; });
+              /* Tur 6: konu pratiği yalnız konusu seçilmiş kayıtları sayıyordu; sohbetten
+                 yazılan «matematik 30 soru» blok olduğu için panel «veri yok» diyordu. Gün sorusu
+                 (gunSorusu, ölçü çekirdeğiyle aynı), doğru oranı ise doğrusu bilinen bloklardan. */
+              let solved = 0, correct = 0, oranQ = 0;
+              for(let i = 0; i < 45; i++){
+                const day = S.days[U.iso(U.addDays(U.today(), -i))];
+                solved += R.Calc.gunSorusu(day) || 0;
+                (day && day.blocks || []).forEach(b => { if(b.actualQ && b.correctQ != null){ oranQ += b.actualQ; correct += b.correctQ; } });
+              }
               const netler = R.Calc.fullExams('TYT').map(M.examNet).filter(n => n != null && isFinite(n));
               /* Söz 34: en verimli saat dilimi — yalnız saati kayıtlı bloklardan (sayaçla başlatılan). */
               const dilim = {};
@@ -2004,14 +2019,15 @@ R.App = (function(){
                 { ad:yz('ays.app.cozulen-soru-45-gun'), deger:solved || null, etiket:yz('ays.app.olculdu') },
                 { ad:yz('ays.app.en-verimli-saat-dilimi'), deger:enIyi != null ? saatAd(enIyi) : null, etiket:yz('ays.app.hesaplandi'),
                   alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : yz('ays.app.saati-bilinen-20-soru-biriki') },
-                { ad:yz('ays.app.dogru-orani-45-gun'), deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:yz('ays.app.hesaplandi'),
-                  alt:solved ? correct + ' / ' + solved : '' },
+                { ad:yz('ays.app.dogru-orani-45-gun'), deger:oranQ ? Math.round(correct * 100 / oranQ) : null, birim:'%', etiket:yz('ays.app.hesaplandi'),
+                  alt:oranQ ? correct + ' / ' + oranQ : '' },
                 { ad:yz('ays.app.bugun-sirasi-gelen-tekrar'), deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:yz('ays.app.hesaplandi') },
                 { ad:yz('ays.app.son-tyt-deneme-neti'), deger:netler.length ? U.round(netler[netler.length - 1], 2) : null, etiket:yz('ays.app.olculdu'),
                   alt:netler.length ? netler.length + ' deneme' : '' },
               ];
             },
-            soru:konu => R.Ogren.kingSoru(konu),
+            /* «en zayıf olduğum konudan soru sor»: konu adı değil, istek; motor vadesi gelen ve yanlış yapılan konudan seçer. */
+            soru:konu => R.Ogren.kingSoru(/zayıf|eksik|yanlış yaptığım|kötü olduğum/.test(String(konu || '')) ? '' : konu),
             cevapla:(id, harf) => R.Ogren.kingCevapla(id, harf),
             /* Öğretmen: konu anlatımı ders olarak; «Modülde aç» Öğren'i o konuda açar. */
             ders:konu => R.Ogren.kingDers(konu),

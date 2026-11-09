@@ -790,7 +790,7 @@ window.LIFEOS.PARCA.yazilar({
 
   /* ---------- söz 32: kartlar ---------- */
   const KART_ISTAT = /(istatistik|rakamlar[ıi]m|sayılar[ıi]m|verilerimi göster|kartlar[ıi]? göster|durum kartlar)/;
-  const KART_SORU = /(soru sor|sorusu sor|soru ver|soru getir|soru çek|soru çöz(elim|eyim)|beni test et|test et beni|bir soru daha)/;
+  const KART_SORU = /(soru sor|sorusu sor|soru ver|soru getir|soru çek|soru çöz(elim|eyim)|beni test et|test et beni|bir soru daha|kelime(?:ler(?:im)?(?:i|den)?)? sor|kelimelerimi sor|kelime testi)/;
   const SORU_DOLGU = /(^|\s)(bana|bir|tane|daha|soru|sorusu|sor|sorar|ver|getir|çek|lütfen|king|hakkında|konusunda|ile|ilgili|beni|test|et|çözelim|çözeyim|mısın|misin|musun)(?=\s|$)/g;
   const ETIKETLER = ['ölçüldü', 'hesaplandı', 'tahmin', 'veri yok'];
   function kartNiyeti(t){
@@ -829,6 +829,9 @@ window.LIFEOS.PARCA.yazilar({
     let q = null;
     try{ q = await K.soru(n.konu || ''); }catch(e){ q = null; }
     if(!q || !q.soru || !Array.isArray(q.sec) || !q.sec.length){
+      /* Bankada yoksa ve modelin soru üreten aracı varsa («almanca gramer hakkında soru sor») yol açık kalır. */
+      const A = KI.ARAC && KI.ARAC();
+      if(n.konu && K.soruDar && A && A.bul && A.bul('soru_sor')){ KI.akis.pop(); return null; }
       KI.soyle(n.konu ? '«' + n.konu + '» için soru bulamadım; başka bir konu dener misin?' : yz('ortak.king-kart.su-an-sorabilecegim-bir-soru'));
       return { tur:'kart-yok' };
     }

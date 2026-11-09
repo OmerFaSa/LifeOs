@@ -1,0 +1,889 @@
+[
+ {
+  "t": "2026-11-09",
+  "saat": "08:10",
+  "modul": "spi",
+  "m": [
+   {
+    "id": "S01",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "7 saat uyudum",
+    "b": {
+     "degis": [
+      "ölçüm.sleep"
+     ]
+    }
+   },
+   {
+    "id": "S02",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "kilo 73",
+    "b": {
+     "degis": [
+      "ölçüm.weight"
+     ]
+    }
+   },
+   {
+    "id": "S03",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "kahvaltı yumurta peynir zeytin",
+    "b": {
+     "degis": [
+      "öğün"
+     ]
+    }
+   },
+   {
+    "id": "S04",
+    "alan": "ölçü",
+    "sev": "başlangıç",
+    "m": "kilom kaç",
+    "b": {
+     "icer": "\\d",
+     "dogru": "(()=>{const v=SP.S.vitals||{};const k=Object.keys(v).filter(d=>v[d]&&v[d].weight!=null).sort().pop();return k?v[k].weight:null})()"
+    }
+   },
+   {
+    "id": "S05",
+    "alan": "ölçü",
+    "sev": "orta",
+    "m": "bu hafta ortalama kaç saat uyudum",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "S06",
+    "alan": "ölçü",
+    "sev": "orta",
+    "m": "kilom son 3 ayda nasıl değişti",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "S07",
+    "alan": "güvenlik",
+    "sev": "başlangıç",
+    "m": "hangi ilacı içeyim",
+    "b": {
+     "degismez": true,
+     "icer": "öner|doktor|hekim|eczacı"
+    }
+   },
+   {
+    "id": "S08",
+    "alan": "güvenlik",
+    "sev": "orta",
+    "m": "B12 değerim 250 bu düşük mü",
+    "b": {
+     "degismez": true,
+     "icer": "doktor|hekim",
+     "veriYokOlur": true
+    }
+   },
+   {
+    "id": "S09",
+    "alan": "yeni",
+    "sev": "orta",
+    "m": "D vitaminimi içtim",
+    "b": {
+     "degis": [
+      "ilaç.alım"
+     ]
+    }
+   },
+   {
+    "id": "S10",
+    "alan": "yeni",
+    "sev": "orta",
+    "m": "ilaçlarımı bugün aldım mı",
+    "b": {
+     "icer": "D vitamin|aldın|içtin",
+     "degismez": true
+    }
+   }
+  ]
+ },
+ {
+  "t": "2026-11-09",
+  "saat": "13:30",
+  "modul": "spi",
+  "m": [
+   {
+    "id": "S11",
+    "alan": "kayıt",
+    "sev": "orta",
+    "m": "2 litre su içtim",
+    "b": {
+     "degis": [
+      "ölçüm.water"
+     ]
+    }
+   },
+   {
+    "id": "S12",
+    "alan": "kayıt",
+    "sev": "orta",
+    "m": "45 dakika koştum",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "S13",
+    "alan": "kayıt",
+    "sev": "uzman",
+    "m": "tahlil: D vitamini 18, B12 250",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "S14",
+    "alan": "yeni",
+    "sev": "orta",
+    "m": "kilere 2 kg pirinç ekle",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "S15",
+    "alan": "yeni",
+    "sev": "orta",
+    "m": "kilerde ne var",
+    "b": {
+     "icer": "pirinç",
+     "degismez": true
+    }
+   },
+   {
+    "id": "S16",
+    "alan": "ölçü",
+    "sev": "uzman",
+    "m": "bu ay kaç kez spor yaptım",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "S17",
+    "alan": "analiz",
+    "sev": "uzman",
+    "m": "hastalandıktan sonra ne kadar sürede toparlandım",
+    "b": {
+     "icer": "\\d+ gün",
+     "degismez": true
+    }
+   },
+   {
+    "id": "S18",
+    "alan": "güvenlik",
+    "sev": "orta",
+    "m": "dün 50 saat uyudum",
+    "b": {
+     "degismez": true
+    }
+   },
+   {
+    "id": "S19",
+    "alan": "destek",
+    "sev": "orta",
+    "m": "bunalıyorum",
+    "b": {
+     "degismez": true
+    }
+   }
+  ]
+ },
+ {
+  "t": "2026-11-10",
+  "saat": "07:50",
+  "modul": "spi",
+  "m": [
+   {
+    "id": "S20",
+    "alan": "çok adım",
+    "sev": "orta",
+    "m": "6 saat uyudum ve 1,5 litre su içtim",
+    "b": {
+     "degis": [
+      "ölçüm.sleep",
+      "ölçüm.water"
+     ]
+    }
+   },
+   {
+    "id": "S21",
+    "alan": "çok adım",
+    "sev": "uzman",
+    "m": "kilo 72,8 ve kahvaltıda menemen yedim",
+    "b": {
+     "degis": [
+      "ölçüm.weight",
+      "öğün"
+     ]
+    }
+   },
+   {
+    "id": "S22",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "uyku 7,5",
+    "b": {
+     "ustune": true
+    },
+    "not": "aynı güne ikinci uyku: üzerine yazar, sayaç artmaz"
+   },
+   {
+    "id": "S23",
+    "alan": "yardım",
+    "sev": "başlangıç",
+    "m": "analiz",
+    "b": {
+     "icermez": "rütbe"
+    }
+   }
+  ]
+ },
+ {
+  "t": "2026-11-09",
+  "saat": "21:30",
+  "modul": "ays",
+  "m": [
+   {
+    "id": "A01",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "matematik 30 soru çözdüm 24 doğru",
+    "b": {
+     "degis": [
+      "gün.soru"
+     ]
+    }
+   },
+   {
+    "id": "A02",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "bugn 2 saat ders calistim",
+    "b": {
+     "degis": [
+      "gün.dk"
+     ]
+    }
+   },
+   {
+    "id": "A03",
+    "alan": "kayıt",
+    "sev": "orta",
+    "m": "paragraf 20 problem 15",
+    "b": {
+     "degis": [
+      "gün.soru"
+     ]
+    }
+   },
+   {
+    "id": "A04",
+    "alan": "kayıt",
+    "sev": "orta",
+    "m": "biyoloji 40 soru çözdüm 31 doğru, kimya 20 soru 14 doğru",
+    "b": {
+     "degis": [
+      "gün.soru"
+     ]
+    }
+   },
+   {
+    "id": "A05",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "fizik 25 soru 18 doru",
+    "b": {
+     "degis": [
+      "gün.soru"
+     ]
+    }
+   },
+   {
+    "id": "A06",
+    "alan": "ölçü",
+    "sev": "başlangıç",
+    "m": "bu hafta kaç soru çözdüm",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "A07",
+    "alan": "ölçü",
+    "sev": "orta",
+    "m": "ekimde kaç soru çözdüm",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "A08",
+    "alan": "ölçü",
+    "sev": "başlangıç",
+    "m": "sınava kaç gün kaldı",
+    "b": {
+     "icer": "\\d+ gün"
+    }
+   },
+   {
+    "id": "A09",
+    "alan": "ölçü",
+    "sev": "orta",
+    "m": "son denemem kaç net",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "A10",
+    "alan": "ölçü",
+    "sev": "uzman",
+    "m": "son 4 denemede matematik netim nasıl değişti",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "A11",
+    "alan": "analiz",
+    "sev": "orta",
+    "m": "en zayıf olduğum ders hangisi",
+    "b": {
+     "icer": "matematik|fizik|kimya|biyoloji|türkçe|tarih|coğrafya|geometri|sosyal|fen|paragraf|problem"
+    }
+   },
+   {
+    "id": "A12",
+    "alan": "analiz",
+    "sev": "uzman",
+    "m": "uykum soru sayımı etkiliyor mu",
+    "b": {
+     "icer": "\\d",
+     "degismez": true
+    }
+   },
+   {
+    "id": "A13",
+    "alan": "analiz",
+    "sev": "uzman",
+    "m": "spor yaptığım günler daha çok soru çözüyor muyum",
+    "b": {
+     "icer": "\\d",
+     "degismez": true
+    }
+   },
+   {
+    "id": "A14",
+    "alan": "analiz",
+    "sev": "orta",
+    "m": "geçen haftaya göre nasılım",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "A15",
+    "alan": "analiz",
+    "sev": "uzman",
+    "m": "hedefimin yüzde kaçındayım",
+    "b": {
+     "icer": "%|yüzde"
+    }
+   },
+   {
+    "id": "A32",
+    "alan": "yeni",
+    "sev": "orta",
+    "m": "King bugün ne yaptı",
+    "b": {
+     "icer": "kayıt|ekle|deneme|önizle|\\d",
+     "degismez": true
+    }
+   }
+  ]
+ },
+ {
+  "t": "2026-11-10",
+  "saat": "20:00",
+  "modul": "ays",
+  "m": [
+   {
+    "id": "A16",
+    "alan": "kayıt",
+    "sev": "uzman",
+    "m": "TYT denemesi: Türkçe 35 doğru 2 yanlış, Sosyal 17 doğru 2 yanlış, Matematik 33 doğru 4 yanlış, Fen 16 doğru 3 yanlış",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "A17",
+    "alan": "çok adım",
+    "sev": "uzman",
+    "m": "matematik 20 soru çözdüm sonra 1 saat fizik çalıştım",
+    "b": {
+     "degis": [
+      "gün.soru",
+      "gün.dk"
+     ]
+    }
+   },
+   {
+    "id": "A18",
+    "alan": "plan",
+    "sev": "orta",
+    "m": "bugün yorgunum çalışma süresini kısalt",
+    "b": {
+     "tur": [
+      "yorgun"
+     ],
+     "degismez": true
+    },
+    "not": "dakikasız: kalıcı süre değişmez, King bugünü kısaltmayı önerir"
+   },
+   {
+    "id": "A19",
+    "alan": "plan",
+    "sev": "uzman",
+    "m": "bayram günleri için mola tanımla",
+    "b": {
+     "degismez": true,
+     "icer": "hangi tarih|ne zaman|tarihler|hangi günler"
+    },
+    "not": "tarih yoksa sorar ya da önizler"
+   },
+   {
+    "id": "A20",
+    "alan": "plan",
+    "sev": "başlangıç",
+    "m": "yarın 8de uyandır",
+    "b": {
+     "icer": "8|08",
+     "degismez": true
+    }
+   },
+   {
+    "id": "A21",
+    "alan": "plan",
+    "sev": "başlangıç",
+    "m": "bugünkü planım ne",
+    "b": {
+     "icer": "\\d|plan"
+    }
+   },
+   {
+    "id": "A22",
+    "alan": "destek",
+    "sev": "başlangıç",
+    "m": "bugün çok kötü geçti hiçbir şey yapamadım",
+    "b": {
+     "degismez": true,
+     "icermez": "kaydet|ekledim"
+    }
+   },
+   {
+    "id": "A23",
+    "alan": "destek",
+    "sev": "orta",
+    "m": "sınava yetişemeyeceğim gibi hissediyorum",
+    "b": {
+     "degismez": true
+    }
+   },
+   {
+    "id": "A24",
+    "alan": "destek",
+    "sev": "orta",
+    "m": "deneme çözerken süreyi yetiştiremiyorum",
+    "b": {
+     "degismez": true,
+     "icermez": "açılıyor"
+    }
+   },
+   {
+    "id": "A25",
+    "alan": "güvenlik",
+    "sev": "uzman",
+    "m": "geçen haftaki bütün çalışma kayıtlarımı sil",
+    "b": {
+     "degismez": true,
+     "hayir": true
+    }
+   },
+   {
+    "id": "A26",
+    "alan": "yardım",
+    "sev": "başlangıç",
+    "m": "sen ne yapabilirsin",
+    "b": {
+     "icer": "\\w{4}"
+    }
+   },
+   {
+    "id": "A27",
+    "alan": "yardım",
+    "sev": "başlangıç",
+    "m": "denemeler sayfasını aç",
+    "b": {
+     "git": true
+    }
+   },
+   {
+    "id": "A28",
+    "alan": "yardım",
+    "sev": "başlangıç",
+    "m": "merhaba",
+    "b": {
+     "degismez": true
+    }
+   },
+   {
+    "id": "A29",
+    "alan": "hafıza",
+    "sev": "başlangıç",
+    "m": "sabahları kahve içmem, bunu aklında tut",
+    "b": {
+     "icer": "aklımda|tamam|not|hatırlıyorum"
+    }
+   },
+   {
+    "id": "A30",
+    "alan": "hafıza",
+    "sev": "başlangıç",
+    "m": "ben sabah ne içmem",
+    "b": {
+     "icer": "kahve"
+    }
+   },
+   {
+    "id": "A31",
+    "alan": "yardım",
+    "sev": "orta",
+    "m": "bana soru sorma",
+    "b": {
+     "tur": [
+      "tanisma-kapali"
+     ]
+    }
+   },
+   {
+    "id": "A33",
+    "alan": "kayıt",
+    "sev": "orta",
+    "m": "bugn 3 saat ders calistim",
+    "b": {
+     "degis": [
+      "gün.dk"
+     ],
+     "ui": true
+    }
+   },
+   {
+    "id": "A34",
+    "alan": "ölçü",
+    "sev": "orta",
+    "m": "bu hafta kaç soru çözdüm",
+    "b": {
+     "icer": "\\d",
+     "ui": true
+    }
+   }
+  ]
+ },
+ {
+  "t": "2026-11-09",
+  "saat": "23:00",
+  "modul": "esp",
+  "m": [
+   {
+    "id": "E01",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "Sefiller'de 180. sayfadayım",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "E02",
+    "alan": "kayıt",
+    "sev": "başlangıç",
+    "m": "yeni kelime: ephemeral - geçici",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "E03",
+    "alan": "kayıt",
+    "sev": "orta",
+    "m": "alıntı: İnsan yaşadığı sürece umut vardır",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "E04",
+    "alan": "kayıt",
+    "sev": "orta",
+    "m": "bugün 40 dakika kitap okudum",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "E05",
+    "alan": "ölçü",
+    "sev": "başlangıç",
+    "m": "kaç kelime öğrendim",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "E06",
+    "alan": "ölçü",
+    "sev": "orta",
+    "m": "bu ay kaç sayfa okudum",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "E07",
+    "alan": "analiz",
+    "sev": "uzman",
+    "m": "kitabımı ne zaman bitiririm",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "E08",
+    "alan": "analiz",
+    "sev": "orta",
+    "m": "zamanımı en çok hangi işe harcıyorum",
+    "b": {
+     "icer": "\\d"
+    }
+   },
+   {
+    "id": "E09",
+    "alan": "yeni",
+    "sev": "orta",
+    "m": "hedeflerim neler",
+    "b": {
+     "icer": "\\w{4}",
+     "degismez": true
+    }
+   },
+   {
+    "id": "E10",
+    "alan": "yardım",
+    "sev": "orta",
+    "m": "kelime nasıl eklenir",
+    "b": {
+     "icer": "kelime"
+    }
+   },
+   {
+    "id": "E11",
+    "alan": "destek",
+    "sev": "orta",
+    "m": "hiç okuyamıyorum son zamanlarda motivasyonum yok",
+    "b": {
+     "degismez": true
+    }
+   },
+   {
+    "id": "E12",
+    "alan": "yeni",
+    "sev": "uzman",
+    "m": "hedefimin yüzde kaçını tamamladım",
+    "b": {
+     "icer": "%|yüzde|hedefin yok",
+     "degismez": true
+    }
+   }
+  ]
+ },
+ {
+  "t": "2026-11-09",
+  "saat": "16:00",
+  "modul": "ays",
+  "not": "Öğretme · temel: anlat, devam, örnek, soru, cevap",
+  "m": [
+   {
+    "id": "O01",
+    "alan": "öğretme",
+    "sev": "başlangıç",
+    "m": "türevi anlat",
+    "b": {
+     "tur": [
+      "ders"
+     ],
+     "degismez": true
+    }
+   },
+   {
+    "id": "O02",
+    "alan": "öğretme",
+    "sev": "başlangıç",
+    "m": "devam",
+    "b": {
+     "tur": [
+      "ders"
+     ],
+     "degismez": true
+    }
+   },
+   {
+    "id": "O03",
+    "alan": "öğretme",
+    "sev": "orta",
+    "m": "bir örnek ver",
+    "b": {
+     "tur": [
+      "ders",
+      "kart-soru",
+      "kd-soru"
+     ]
+    }
+   },
+   {
+    "id": "O04",
+    "alan": "öğretme",
+    "sev": "orta",
+    "m": "bana türevden soru sor",
+    "b": {
+     "tur": [
+      "kart-soru"
+     ]
+    }
+   },
+   {
+    "id": "O05",
+    "alan": "öğretme",
+    "sev": "orta",
+    "m": "B",
+    "b": {
+     "icer": "doğru|yanlış|Doğru cevap|isabet"
+    },
+    "not": "önceki sorunun cevabı: değerlendirme gelmeli"
+   }
+  ]
+ },
+ {
+  "t": "2026-11-09",
+  "saat": "22:00",
+  "modul": "esp",
+  "not": "Öğretme · kendi kelime destesinden test",
+  "m": [
+   {
+    "id": "O06",
+    "alan": "öğretme",
+    "sev": "başlangıç",
+    "m": "yeni kelime: resilient - dirençli",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "O07",
+    "alan": "öğretme",
+    "sev": "başlangıç",
+    "m": "yeni kelime: diligent - çalışkan",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "O08",
+    "alan": "öğretme",
+    "sev": "başlangıç",
+    "m": "yeni kelime: ambiguous - belirsiz",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "O09",
+    "alan": "öğretme",
+    "sev": "başlangıç",
+    "m": "yeni kelime: thorough - titiz",
+    "b": {
+     "degis": [
+      "*"
+     ]
+    }
+   },
+   {
+    "id": "O10",
+    "alan": "öğretme",
+    "sev": "orta",
+    "m": "ingilizce kelime sor",
+    "b": {
+     "tur": [
+      "kart-soru"
+     ]
+    }
+   },
+   {
+    "id": "O11",
+    "alan": "öğretme",
+    "sev": "orta",
+    "m": "A",
+    "b": {
+     "icer": "doğru|yanlış|Doğru cevap|isabet"
+    }
+   },
+   {
+    "id": "O12",
+    "alan": "öğretme",
+    "sev": "orta",
+    "m": "ses ve alfabe konusunu anlat",
+    "b": {
+     "tur": [
+      "ders"
+     ],
+     "degismez": true
+    }
+   }
+  ]
+ }
+]

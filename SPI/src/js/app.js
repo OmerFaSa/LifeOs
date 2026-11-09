@@ -679,7 +679,16 @@ SP.App = (function(){
       { id:'uyku', ad:'uyku', birim:'saat', ondalik:true, es:/uyku|uyu(?:dum|yor|muşum)|nasıl uyu/, tur:'ortalama', gun:g => v(g, 'sleep') },
       { id:'kilo', ad:'kilo', birim:'kg', ondalik:true, es:/kilo|tartı/, tur:'son', gun:g => v(g, 'weight') },
       { id:'su', ad:'su', birim:'ml', es:/\bsu\b|su iç/, tur:'ortalama', gun:g => v(g, 'water') },
-      { id:'ilac', komut:true, ad:'ilaç', es:/^(?:ilaçlarım|ilaç(?:larım)? listem|hangi ilaçları|ilaçlarım neler|takviyelerim)/, tur:'anlik', anlik:() => {
+      { id:'ilacAlim', ozel:true, ad:'ilaç alımı', es:/(ilaç|takviye|vitamin|hap)[a-zçğıöşü]* .*(aldım mı|içtim mi|aldın mı|kaçırdım)/, tur:'anlik', anlik:() => {
+        /* King-Bench (tur 6): alım işareti (vitals.medsTaken, spi_ilac_alim) bugün için okunur. */
+        const l = (SP.S.meds || []).filter(m => !m.endDate);
+        if(!l.length) return { v:null, metin:'Kayıtlı ilaç ya da takviye yok.' };
+        const al = ((SP.S.vitals[SP.U.todayISO()] || {}).medsTaken) || [];
+        const ok = l.filter(m => al.indexOf(m.id) >= 0), yok = l.filter(m => al.indexOf(m.id) < 0);
+        return { v:ok.length, metin:'Bugün ' + (ok.length ? 'aldığın: ' + ok.map(m => m.name).join(', ') + '. ' : 'işaretli alım yok. ')
+          + (yok.length ? 'İşaretlenmemiş: ' + yok.map(m => m.name).join(', ') + '. Aldıysan «' + yok[0].name + ' içtim» yazman yeter.' : 'Hepsi tamam.') };
+      } },
+      { id:'ilac', komut:true, ad:'ilaç', es:/^(?:ilaçlarım(?!ı? (?:bugün |dün )?(?:aldım|içtim))|ilaç(?:larım)? listem|hangi ilaçları|ilaçlarım neler|takviyelerim)/, tur:'anlik', anlik:() => {
         const l = (SP.S.meds || []).filter(m => !m.endDate);
         return { v:l.length, metin:l.length ? 'Kullandığın ' + l.length + ' ilaç/takviye: ' + l.map(m => m.name + (m.dose ? ' (' + m.dose + ')' : '')).join(', ') + '.' : 'Kayıtlı ilaç ya da takviye yok.' };
       } },
@@ -689,6 +698,21 @@ SP.App = (function(){
           return b ? (SP.S.labs || []).map(r => { const c = (r.values || {})[b.id]; const x = c && typeof c === 'object' ? c.v : c; return typeof x === 'number' ? { t:r.date, v:x } : null; }).filter(Boolean) : []; } },
       { id:'spor', genel:true, ad:'antrenman süresi', birim:'dk', es:/spor|antrenman|egzersiz|yürü|koş/, tur:'toplam',
         gun:g => { const l = seans(g); return l.length ? l.reduce((s, w) => s + (Number(w.minutes) || 0), 0) : null; } },
+      /* King-Bench (tur 6): «hastalandıktan sonra ne kadar sürede toparlandım». Belirti girilen günler (ya da 37,5 °C+)
+         iki günden kısa boşlukla tek dönemdir; süre ilk ve son belirti günü arasıdır. Antrenmana dönüş de sayılır. */
+      { id:'toparlanma', ad:'toparlanma', es:/toparlan|iyileş|hastalık\w* sonra|hastaland\w* sonra|hasta(?:yken| olunca)/, tur:'anlik', anlik:() => {
+        const hasta = Object.keys(SP.S.vitals || {}).filter(g => { const x = SP.S.vitals[g]; return x && ((x.symptomsLogged && Object.keys(x.symptoms || {}).length) || Number(x.temp) >= 37.5); }).sort();
+        if(!hasta.length) return { v:null, metin:'Kayıtlı bir hastalık dönemi yok: belirti ya da ateş girilmiş gün bulamadım. Hastayken «boğazım ağrıyor», «ateşim 38» gibi yazarsan bir dahaki sefere hesaplarım.' };
+        let bas = hasta[hasta.length - 1], son = bas;
+        for(let i = hasta.length - 2; i >= 0 && SP.U.diffDays(hasta[i], bas) <= 2; i--) bas = hasta[i];
+        const sure = SP.U.diffDays(bas, son) + 1;
+        let donus = null;
+        for(let i = 1; i <= 30 && !donus; i++){ const g = SP.U.iso(SP.U.addDays(SP.U.parse(son), i)); if(g > SP.U.todayISO()) break; if(seans(g).length) donus = g; }
+        const tr = g => SP.U.fmtShort ? SP.U.fmtShort(g) : g;
+        return { v:sure, metin:'Son hastalık dönemin ' + tr(bas) + ' – ' + tr(son) + ': belirtiler ' + sure + ' gün sürdü.'
+          + (donus ? ' Antrenmana son belirtiden ' + SP.U.diffDays(son, donus) + ' gün sonra döndün (' + tr(donus) + ').' : ' O tarihten sonra kayıtlı antrenman yok.')
+          + ' Belirti girilmeyen gün hesaba girmez.' };
+      } },
     ] });
   }
   function girisKurucu(){ olcuKur(); return window.LIFEOS.GIRIS.kur({ modul:'spi',

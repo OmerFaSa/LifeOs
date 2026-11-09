@@ -1,0 +1,175 @@
+[
+ {
+  "id": "haftalik-oz",
+  "alan": [
+   "analiz",
+   "destek",
+   "plan"
+  ],
+  "ad": "Pazar akşamı haftalık öz-değerlendirme kartı",
+  "etki": 5,
+  "caba": 3,
+  "neden": "Klon 233 günde en çok «bu hafta nasıldım» diye sordu; cevap tek sayıydı. Ne iyi gitti / ne aksadı / gelecek hafta tek öneri, kullanıcının kendi verisiyle. Düzenli geri bildirim alışkanlığı sürdürmenin en güçlü kaldıracı.",
+  "durum": "öneri"
+ },
+ {
+  "id": "uyku-uyari",
+  "alan": [
+   "analiz",
+   "plan"
+  ],
+  "ad": "Uyku borcu erken uyarısı",
+  "etki": 4,
+  "caba": 2,
+  "neden": "Klonda az uyunan haftalarda soru sayısı düştü. Son 3 gece 6 saatin altındaysa King yarının planını hafifletmeyi önerir: yorgunlukla çökmeden önce.",
+  "durum": "öneri"
+ },
+ {
+  "id": "hastalik-modu",
+  "alan": [
+   "analiz",
+   "plan"
+  ],
+  "ad": "Hastalık modu",
+  "etki": 4,
+  "caba": 3,
+  "neden": "Grip haftasında plan kırmızıya döndü, kullanıcı suçluluk yazdı. Belirti girilince plan kendiliğinden hafifler; toparlanma süresi (tur 6'da eklendi) ile birlikte geri dönüş planlanır.",
+  "durum": "kısmen (toparlanma ölçüsü var)"
+ },
+ {
+  "id": "ilac-uyum",
+  "alan": [
+   "yeni",
+   "güvenlik"
+  ],
+  "ad": "İlaç alım serisi ve hatırlatma",
+  "etki": 4,
+  "caba": 2,
+  "neden": "Alım işareti tur 6'da eklendi. Saatinde hatırlatma + «bu hafta 7/7» serisi, takviye kullanan kullanıcıda uyumu doğrudan artırır.",
+  "durum": "kısmen (alım işareti var)"
+ },
+ {
+  "id": "spor-hkm",
+  "alan": [
+   "analiz"
+  ],
+  "ad": "Spor ölçüsünü HKM'ye göndermek",
+  "etki": 3,
+  "caba": 2,
+  "neden": "«Spor yaptığım günler daha çok soru çözüyor muyum» cevapsız kaldı: SPİ işaretinde antrenman dakikası yok. Eklenince modüller arası ilişki sorusu üç ölçüye çıkar.",
+  "durum": "öneri"
+ },
+ {
+  "id": "deneme-hata",
+  "alan": [
+   "analiz",
+   "kayıt"
+  ],
+  "ad": "Deneme sonrası hata analizi → tekrar kartı",
+  "etki": 4,
+  "caba": 3,
+  "neden": "Deneme girildiğinde yanlışların konusu sorulur, her konu tekrar kartına döner. Netin artması için en doğrudan döngü.",
+  "durum": "öneri"
+ },
+ {
+  "id": "esp-sapma",
+  "alan": [
+   "analiz",
+   "yeni"
+  ],
+  "ad": "ESP hedef sapma uyarısı",
+  "etki": 3,
+  "caba": 2,
+  "neden": "Hedef yüzdesi tur 6'da ölçülüyor; planın gerisindeyken King «bu hafta X dk daha» der.",
+  "durum": "öneri"
+ },
+ {
+  "id": "kiler",
+  "alan": [
+   "yeni"
+  ],
+  "ad": "Kiler / dolap envanteri",
+  "etki": 2,
+  "caba": 3,
+  "neden": "«kilere pirinç ekle» barkod aracına düşüyor. Envanter + son kullanma tarihi beslenme planını kolaylaştırır; hayata etkisi diğerlerinden küçük.",
+  "durum": "öneri"
+ },
+ {
+  "id": "kitap-bitis",
+  "alan": [
+   "analiz"
+  ],
+  "ad": "Okunan bütün kitaplar için bitiş tahmini",
+  "etki": 2,
+  "caba": 1,
+  "neden": "«Kitabımı ne zaman bitiririm» iki kitap okunurken hangisi diye soruyor; ikisini birden hesaplamak tek adım.",
+  "durum": "öneri"
+ },
+ {
+  "id": "cok-adim",
+  "alan": [
+   "çok adım",
+   "kayıt"
+  ],
+  "ad": "Genel çok adımlı komut",
+  "etki": 3,
+  "caba": 3,
+  "neden": "«ve/sonra» ile bağlı iki kayıt artık yazılıyor; farklı modüllere düşen iki iş («uyudum ve 30 soru çözdüm») hâlâ tek modülde kalıyor.",
+  "durum": "kısmen"
+ },
+ {
+  "id": "ogren-ozet",
+  "alan": [
+   "öğretme"
+  ],
+  "ad": "Haftalık öğrenme özeti",
+  "etki": 4,
+  "caba": 2,
+  "neden": "«Bu hafta neler öğrendim» — hangi konular çalışıldı, kaç soru doğru, hangi kartlar oturdu. Öğrendiğini görmek, devam etme isteğinin en güçlü kaynağı.",
+  "durum": "öneri"
+ },
+ {
+  "id": "ogren-sadelestir",
+  "alan": [
+   "öğretme"
+  ],
+  "ad": "Seviyeli anlatım («daha basit anlat»)",
+  "etki": 4,
+  "caba": 3,
+  "neden": "Ders kartı tek seviyede; anlamayan öğrenci aynı metni tekrar okuyor. Basit / normal / derin seçimi anlamayı doğrudan artırır.",
+  "durum": "öneri"
+ },
+ {
+  "id": "ogren-unutma",
+  "alan": [
+   "öğretme"
+  ],
+  "ad": "Unutma eğrisi uyarısı",
+  "etki": 4,
+  "caba": 2,
+  "neden": "ESP'de kartların hatırlama oranı hesaplanıyor (SRS) ama King söylemiyor. «Şu 5 kelime unutulmak üzere» tekrarın en verimli anı.",
+  "durum": "öneri"
+ },
+ {
+  "id": "ogren-kisisel",
+  "alan": [
+   "öğretme"
+  ],
+  "ad": "Yanlış defterinden kişiye özel soru",
+  "etki": 5,
+  "caba": 2,
+  "neden": "«En zayıf konumdan soru sor» deneme ve yanlış verisinden seçilirse her soru en çok işe yarayan yere gider.",
+  "durum": "öneri"
+ },
+ {
+  "id": "ogren-kelime-test",
+  "alan": [
+   "öğretme"
+  ],
+  "ad": "Kendi destesinden kelime testi",
+  "etki": 4,
+  "caba": 1,
+  "neden": "Tur 6'da eklendi: King kullanıcının kendi kelime kartlarından çoktan seçmeli sorar, cevabı aralıklı tekrara yazar.",
+  "durum": "yapıldı"
+ }
+]

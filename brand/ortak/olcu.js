@@ -71,7 +71,7 @@ window.LIFEOS.OLCU = (function(){
 
   function olcuBul(t){
     if(!ayar) return null;
-    for(const o of ayar.olculer){
+    for(const o of ayar.olculer.filter(o => o.ozel).concat(ayar.olculer.filter(o => !o.ozel))){
       if(!o.es.test(t)) continue;
       const alt = (o.alt || []).find(a => a[1].test(t));
       return { o, alt:alt ? alt[0] : null };
@@ -112,7 +112,10 @@ window.LIFEOS.OLCU = (function(){
     if(OZET.test(t) && !BASKA.test(t)) return ozet(t, bugun);
     /* Ölçü değil: hedef/puan karşılaştırması, kart sayısı, tanım sorusu («ne işe yarıyor?»). */
     /* `komut`: kısa ad da sorudur («ilaçlarım»). */
-    if((!SORU.test(t) && !ayar.olculer.some(o => o.komut && o.es.test(t))) || BASKA.test(t)) return null;
+    /* Özel soru (King-Bench tur 6): kendi deseni olan «anlık» ölçü («zamanımı en çok hangi işe…», «hedefimin yüzde kaçı»)
+       genel kapılara takılmaz; desenin kendisi sorudur. */
+    const ozel = ayar.olculer.some(o => o.tur === 'anlik' && o.ozel && o.es.test(t));
+    if(!ozel && ((!SORU.test(t) && !ayar.olculer.some(o => o.komut && o.es.test(t))) || BASKA.test(t))) return null;
     const b = olcuBul(t);
     if(!b) return null;
     /* İki ölçü birden («gitar ve dil çalışma saatim»): tek sayıyla cevaplanmaz, yol modülün aracına kalır. */

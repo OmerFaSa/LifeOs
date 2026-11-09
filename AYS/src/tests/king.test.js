@@ -2134,6 +2134,18 @@
       await k2.isle('kuantum hakkında soru sor');
       expect(k2.akis().pop().metin).toBe('«kuantum» için soru bulamadım; başka bir konu dener misin?');
     }));
+    it('King-Bench öğretme: soru kartına yazıyla cevap («B», «cevap c») değerlendirilir ve söylenir', () => sahneyle(async () => {
+      const k = kartSahnesi({ soru:async () => ({ id:'q1', konu:'Toplama', soru:'2+2 kaç?', sec:['3', '4', '5'] }),
+        cevapla:async (id, h) => ({ dogru:'B', cozum:['2+2 = 4'] }) });
+      await k.isle('bana soru sor');
+      expect(await k.isle('B')).toEqual({ tur:'soru-cevap', isabet:true });
+      expect(k.akis().pop().metin).toContain('Doğru');
+      await k.isle('bir soru daha sor');
+      expect(await k.isle('cevap c')).toEqual({ tur:'soru-cevap', isabet:false });
+      expect(k.akis().pop().metin).toContain('doğru cevap B');
+      /* Soru yokken tek harf cevap sayılmaz. */
+      expect((await k.isle('a')).tur !== 'soru-cevap').toBe(true);
+    }));
     it('uzun cevapta **kalın** ve madde işaretleri biçimlenir; HTML kaçırılır', () => sahneyle(async () => {
       const { k } = sahne();
       expect(k.bicimli('**Başlık**\n* bir\n- iki\n## Alt\n<b>x</b>')).toBe('<b>Başlık</b>\n• bir\n• iki\nAlt\n&lt;b&gt;x&lt;/b&gt;');
@@ -4048,6 +4060,21 @@
       expect(KS.tanismaSorusu([], '2026-04-05', '2026-04-04')).toBe(null);
       expect(!!KS.tanismaSorusu([], '2026-04-07', '2026-04-04')).toBe(true);
       expect(KS.tanismaSorusu([], '2026-04-07', 'kapali')).toBe(null);
+    }));
+    it('King-Bench: tahlil yorumu ve kalori hedefi verilmez; zayıf BKİ\'de kilo vermek önerilmez; düzeltme çift yazmaz', () => sahnede(async (k, KI) => {
+      expect(await k.isle('B12 değerim 250 bu düşük mü')).toEqual({ tur:'tahlil-siniri' });
+      expect(k.akis().slice(-1)[0].metin).toContain('hekimin');
+      expect(await k.isle('boyum 180 kilom 52 ama daha çok kilo vermem lazım, günde kaç kalori yemeliyim')).toEqual({ tur:'kalori-siniri' });
+      expect(k.akis().slice(-1)[0].metin).toContain('16');
+      expect(k.akis().slice(-1)[0].metin).toContain('önermem');
+      /* Eklenen kayıt (soru) geri alınamıyorsa düzeltme yeniden yazmaz: çift kayıt olmaz. */
+      KI.sonKayitCumle = 'matematik 50 soru çözdüm'; KI.sonGeriAl = null;
+      expect(await k.isle('hayır 50 değil 45 olacak')).toEqual({ tur:'duzelt-yok' });
+      let geri = 0;
+      KI.sonKayitCumle = 'matematik 50 soru çözdüm'; KI.sonGeriAl = async () => { geri++; };
+      const r = await k.isle('hayır 50 değil 45');
+      expect(geri).toBe(1);
+      expect(r.duzeltme).toBe(true);
     }));
     it('«bana soru sorma artık» tanışmayı kapatır; olumsuz gün teknik retle karşılanmaz', () => sahnede(async (k, KI) => {
       expect(await k.isle('bana soru sorma artık')).toEqual({ tur:'tanisma-kapali' });

@@ -151,6 +151,8 @@ R.Proposals = (function(){
     return st ? st.label : String(id || '—');
   }
   function fail(why){ return { ok:false, why }; }
+  /* Geçmiş güne yazılan kayıt önizlemede günüyle görünür (King-Bench seviye 2: «geçen salı 30 soru»). */
+  function gunEk(d){ return d && d !== R.U.todayISO() && R.U.fmtShort ? R.U.fmtShort(d) + ' · ' : ''; }
   function pass(ctx){ return { ok:true, ctx:ctx || {} }; }
 
   /* ==================== geri alma: fark tabanli ====================
@@ -627,7 +629,7 @@ R.Proposals = (function(){
       check(p){
         const n = Number(p.count);
         if(!isFinite(n) || n <= 0) return fail(yz('ays.core.proposals.soru-sayisi-yok'));
-        if(n > 1000) return fail(n + ' soru bir gün için fazla; yanlış anlaşılmış olabilir.');
+        if(n > 400) return fail(n + ' soru bir gün için gerçekçi görünmüyor; yanlış yazılmış olabilir. Doğruysa günün sayfasından gir.');
         let dogru = p.correct == null ? null : Number(p.correct);
         if(dogru != null && (!isFinite(dogru) || dogru < 0)) dogru = null;
         if(dogru != null && dogru > n) return fail(yz('ays.core.proposals.dogru-sayisi-cozulenden-fazl'));
@@ -652,12 +654,15 @@ R.Proposals = (function(){
           : ctx.day.freeQ == null ? 'girilmemiş' : String(ctx.day.freeQ);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
           : String((ctx.day.freeQ || 0) + ctx.n);
-        const rows = [{ label:nereye + ' · soru', before:once, after:sonra }];
+        /* King-Bench (tur 6): plan dışı kova günün toplamıdır; «biyoloji 40 soru» önizlemede «30 → 70» görünüyordu,
+           söylenen 40 yoktu. Eklenen miktar da yazılır. */
+        const ek = once === 'girilmemiş' ? '' : ' (+' + ctx.n + ')';
+        const rows = [{ label:gunEk(p.date) + nereye + ' · soru', before:once, after:sonra + ek }];
         if(ctx.dogru != null){
           const varOlan = ctx.blok ? ctx.blok.correctQ : ctx.day.freeCorrect;
           rows.push({ label:yz('ays.core.proposals.dogru'),
             before:varOlan == null ? 'girilmemiş' : String(varOlan),
-            after:String((Number(varOlan) || 0) + ctx.dogru) });
+            after:String((Number(varOlan) || 0) + ctx.dogru) + (varOlan == null ? '' : ' (+' + ctx.dogru + ')') });
         }
         return rows;
       },
@@ -857,9 +862,11 @@ R.Proposals = (function(){
         if(!isFinite(dk) || dk <= 0) return fail(yz('ays.core.proposals.sure-yok'));
         if(dk > 960) return fail(dk + ' dakika bir blok için fazla.');
         const subject = (R.SUBJECTS || []).find(x => x.id === p.subjectId);
-        if(!subject) return fail(yz('ays.core.proposals.bu-ders-sistemde-yok'));
+        if(p.subjectId && !subject) return fail(yz('ays.core.proposals.bu-ders-sistemde-yok'));
         const day = R.S.days[p.date];
         if(!day) return fail(yz('ays.core.proposals.o-gunun-kaydi-henuz-acilmami'));
+        /* King-Bench (tur 6): ders söylenmezse günün plan dışı süresine, ders ayrımsız. */
+        if(!subject) return pass({ dk:Math.round(dk), subject:null, blok:null, day });
         const blok = (day.blocks || []).find(b => b.subjectId === subject.id
           || (b.subject && R.U.norm(b.subject) === R.U.norm(subject.name)));
         /* King 5 tur 5 (klon simülasyonu): «1 saat fizik çalıştım» önizlenip «yazılamadı» oluyordu; plansız
@@ -868,7 +875,7 @@ R.Proposals = (function(){
         return pass({ dk:Math.round(dk), subject, blok });
       },
       preview(p, ctx){
-        if(!ctx.blok) return [{ label:ctx.subject.name + ' · ' + yz('ays.core.proposals.plan-disi-gunun-toplami') + ' · süre',
+        if(!ctx.blok) return [{ label:gunEk(p.date) + (ctx.subject ? ctx.subject.name + ' · ' : '') + yz('ays.core.proposals.plan-disi-gunun-toplami') + ' · süre',
           before:ctx.day.freeMin == null ? 'girilmemiş' : ctx.day.freeMin + ' dk', after:((Number(ctx.day.freeMin) || 0) + ctx.dk) + ' dk' }];
         return [{ label:(ctx.blok.topic || ctx.subject.name) + ' · süre',
           before:ctx.blok.actualMin == null ? 'girilmemiş' : ctx.blok.actualMin + ' dk',
@@ -880,11 +887,13 @@ R.Proposals = (function(){
       async apply(p, ctx){
         if(!ctx.blok){
           ctx.day.freeMin = (Number(ctx.day.freeMin) || 0) + ctx.dk;
-          const fs = ctx.day.freeBySubject = ctx.day.freeBySubject || {};
-          const x = fs[ctx.subject.id] = fs[ctx.subject.id] || { q:0, c:0 };
-          x.m = (Number(x.m) || 0) + ctx.dk;
+          if(ctx.subject){
+            const fs = ctx.day.freeBySubject = ctx.day.freeBySubject || {};
+            const x = fs[ctx.subject.id] = fs[ctx.subject.id] || { q:0, c:0 };
+            x.m = (Number(x.m) || 0) + ctx.dk;
+          }
           await R.Model.saveDay(p.date);
-          return { date:p.date, serbest:true, dk:ctx.dk, dersId:ctx.subject.id };
+          return { date:p.date, serbest:true, dk:ctx.dk, dersId:ctx.subject ? ctx.subject.id : null };
         }
         const yerine = ctx.blok.minCert === 'estimated';
         const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin, eskiCert:ctx.blok.minCert, dk:ctx.dk,

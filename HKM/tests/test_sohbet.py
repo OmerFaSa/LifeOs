@@ -253,7 +253,8 @@ def run():
         istek cumlesi kapidan gecmez (kural motoru, model degil)."""
         from core import memory
         for m in ("Merhaba King, bugün nasılsın?", "Bana uyku hakkında kısa bir tavsiye ver.",
-                  "Uykum nasıl?", "durum ne", "hafta planımı göster", "selam"):
+                  "Uykum nasıl?", "durum ne", "hafta planımı göster", "selam",
+                  "ailem baskı yapıyor her gün kavga ediyoruz çalışamıyorum", "çok kötü hissediyorum"):
             no(sohbet.aday_kapisi(m), m)
         for m in ("ben sabahları daha verimliyim", "Sabahları çalışırım.", "Kahve sevmem",
                   "Akşamları kitap okumayı seviyorum", "Benim adım Deniz", "Hafta sonları çalışmam"):

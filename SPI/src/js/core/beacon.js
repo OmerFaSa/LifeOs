@@ -513,6 +513,10 @@ SP.Beacon = (function(){
     const simdi = new Date().toISOString();
     await save(Object.assign({ lastAt:simdi, lastStatus:durum, lastNote:not },
       durum === 202 ? { lastOkAt:simdi } : {}));
+    /* King 5 tur 6: HKM yalnız açılan günün işaretini görüyordu; modüller farklı günlerde
+       açılınca «az uyuduğum günler…» ilişkisi hiç ortak gün bulamıyordu. Başarılı ilk
+       gönderimden sonra günde bir kez son 14 gün de gider (geriye dönük hesaplanabilen alanlar). */
+    if(durum === 202 && !o.date && !o.force) otoGecmis();
     return { ok:durum === 202, status:durum, note:not, payload:body };
   }
 
@@ -522,6 +526,11 @@ SP.Beacon = (function(){
      Capraz bulgu ve yon tahlili GECMIS ister: bugunden itibaren biriken bir
      ambar ilk iki ay hicbir sey soyleyemez. «Gecmisi gonder» o boslugu
      kapatir — ama yalnizca geriye donuk hesaplanabilen alanlarla. */
+  function otoGecmis(){
+    const k = MODULE + '.beacon.otoGecmis', bugun = U.todayISO();
+    try{ if(localStorage.getItem(k) === bugun) return null; localStorage.setItem(k, bugun); }catch(e){ return null; }
+    return backfill(14).catch(function(){ return null; });
+  }
   async function backfill(days, onProgress){
     const a = settings();
     if(!a.enabled) return { ok:false, reason:'off', sent:0 };

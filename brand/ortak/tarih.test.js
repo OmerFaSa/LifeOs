@@ -28,6 +28,21 @@ describe('Tarih çekirdeği — ayrıştırma', () => {
     const a = T().parse('2026-01-10'); a.setDate(20);
     expect(T().iso(T().parse('2026-01-10'))).toBe('2026-01-10');
   });
+  it('King-Bench: rapor cümlesinin geçmiş günü; «geçen» önceki takvim haftası; ders adı «tarih» gün değil', () => {
+    const B = '2026-11-11';   // çarşamba
+    const g = m => T().gunSozu(m, B);
+    expect(g('dün akşam 2 saat fizik çalıştım')).toBe('2026-11-10');
+    expect(g('evvelsi gün 3 saat')).toBe('2026-11-09');
+    expect(g('5 gün önce 40 soru')).toBe('2026-11-06');
+    expect(g('salı 30 soru')).toBe('2026-11-10');
+    expect(g('geçen salı 30 kimya sorusu çözmüştüm')).toBe('2026-11-03');
+    expect(g('cumartesi 10 soru')).toBe('2026-11-07');
+    expect(g('cuma 5 soru')).toBe('2026-11-06');
+    expect(g('pazar günü 20 soru')).toBe('2026-11-08');
+    expect(g('bugün 40 soru')).toBe(null);
+    expect(g('tarih 30 soru çözdüm')).toBe(null);
+    expect(g('pazartesiden beri')).toBe(null);
+  });
 });
 
 describe('Tarih çekirdeği — hesap ve biçim', () => {

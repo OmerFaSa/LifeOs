@@ -53,6 +53,12 @@
       const ayar = K().ayarOku({ selam:'kendi', kendi:['Selam Altay', 'Hadi bakalım'] });
       for(let i = 0; i < 6; i++) expect(['Selam Altay', 'Hadi bakalım'].indexOf(K().selam({ ayar, modul:'spi', simdi:SABAH, tohum:i })) >= 0).toBeTruthy();
     });
+    it('King 5 tur 6: ilk açılışta «Tekrar hoş geldin» gibi dönüş selamı yok', () => {
+      for(let i = 0; i < 200; i++){
+        const s = K().selam({ ayar:{ dil:'tr' }, modul:'esp', simdi:AKSAM, tohum:i, once:[] });
+        expect(/tekrar hoş|yeniden|yine burada|kaldığın yerden/i.test(s)).toBe(false);
+      }
+    });
   });
 
   describe('Karşılama — türlü türlü (kullanıcı, 2026-10-18: «aynısını bir daha görmek zor bir ihtimal olsun»)', () => {

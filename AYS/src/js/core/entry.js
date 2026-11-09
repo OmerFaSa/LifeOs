@@ -198,8 +198,9 @@ R.Entry = (function(){
     const s = sureOku(text);
     if(!s || s.minutes <= 0 || s.minutes > 960) return null;
     const subject = dersBul(text);
-    if(!subject) return null;          /* dersi bilinmeyen süre nereye yazılır? */
-    return { kind:'sure', minutes:Math.round(s.minutes), subject };
+    /* King-Bench (tur 6): «bugün 2 saat ders çalıştım» — ders adı yoksa günün plan dışı süresine (ders ayrımsız). */
+    if(!subject && !/(ders|çalıştım|çalıştık|çalışmıştım)/.test(R.U.norm ? R.U.norm(text) : String(text).toLowerCase()) && !/(ders|çalıştım)/i.test(text)) return null;
+    return { kind:'sure', minutes:Math.round(s.minutes), subject:subject || null };
   }
 
   /* ------------------------------------------------------ deneme
@@ -307,7 +308,7 @@ R.Entry = (function(){
     if(p.kind === 'paragraf') return { action:'paragraf-yaz', params:{ count:p.count, date } };
     if(p.kind === 'problem')  return { action:'problem-yaz', params:{ count:p.count, date } };
     if(p.kind === 'sure')     return { action:'sure-yaz',
-      params:{ minutes:p.minutes, subjectId:p.subject.id, date } };
+      params:{ minutes:p.minutes, subjectId:p.subject ? p.subject.id : null, date } };
     if(p.kind === 'soru')     return { action:'soru-yaz', bosVarsayim:!!p.bosVarsayim,
       params:{ count:p.count, correct:p.correct,
         subjectId:p.subject ? p.subject.id : null,

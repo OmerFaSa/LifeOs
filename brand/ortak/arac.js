@@ -280,6 +280,12 @@ window.LIFEOS.ARAC = (function(){
     [/^hedef ekle\b/, 'esp_hedef'], [/^kaynak ekle\b/, 'esp_kaynak'],
     [/^(market|alışveriş) listesine\b/, 'spi_market'], [/^ilaç ekle\b/, 'spi_ilac'], [/ne kadar (?:para )?harca(?:dım|mışım)|harcamalarım/, 'spi_butce'], [/sıralamama yet|kaç bine gir|puan tahmin|kaç puan alırım/, 'ays_puan_tahmini']];
   function komutla(t){
+    /* King-Bench: «yeni kelime: ephemeral - geçici» Dil sayfasını açıyordu; ön ve arka yüz cümleden. */
+    const k = /^(?:yeni )?kelime\s*:?\s*(.+?)\s+[-–=:]\s+(.+)$/.exec(String(t).trim()) || /^(.+?) kelimesini kart(?:a)? (?:yap|ekle)\s*:\s*(.+)$/.exec(String(t).trim());
+    if(k && bul('esp_kart_ekle')) return { ad:'esp_kart_ekle', param:{ on:k[1].trim().slice(0, 120), arka:k[2].trim().slice(0, 240) } };
+    /* İlaç alımı: «D vitaminimi içtim», «ilaçlarımı aldım» (su/çay içmek değil: ilaç sözü şart). */
+    const ia = /^(?:bugün |sabah |akşam )?(.+?)\s+(?:içtim|aldım|kullandım)\s*[.!]*$/.exec(String(t).trim());
+    if(ia && /(ilaç|hap|takviye|vitamin|omega|magnezyum|demir|b12|çinko|probiyotik)/.test(ia[1]) && bul('spi_ilac_alim')) return { ad:'spi_ilac_alim', param:{ ad:ia[1].slice(0, 80) } };
     for(const [re, ad] of KOMUT){
       const a = re.test(t) && bul(ad);
       if(!a) continue;

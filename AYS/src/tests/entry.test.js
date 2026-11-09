@@ -90,9 +90,10 @@
       expect(R.Entry.parseOne('on soru çözdüm').count).toBe(10);
     });
 
-    it('dersi bilinmeyen süre kaydedilmez', () => {
-      /* Süre nereye yazılacak? Bilinmiyorsa yazılmaz. */
-      expect(R.Entry.parseOne('45 dakika çalıştım')).toBeNull();
+    it('dersi bilinmeyen süre günün plan dışı süresine gider (King-Bench tur 6); çalışma sözü yoksa yazılmaz', () => {
+      /* «bugün 2 saat ders çalıştım» kayboluyordu; ders ayrımsız plan dışı dakikaya yazılır. */
+      expect(R.Entry.parseOne('45 dakika çalıştım')).toEqual({ kind:'sure', minutes:45, subject:null });
+      expect(R.Entry.parseOne('45 dakika')).toBeNull();
     });
 
     it('dersi bilinen süre kaydedilir', () => {
@@ -222,6 +223,10 @@
       expect(R.Entry.parseDeneme('matematikten 40 soru çözdüm 32 doğru 8 yanlış')).toBe(null);
       expect(R.Entry.parseDeneme('TYT matematikten 40 soru çözdüm')).toBe(null);
       expect(R.Komut.anla('matematikten 40 soru çözdüm 32 doğru', { date:D }).oneriler[0].action).toBe('soru-yaz');
+    });
+    it('King-Bench: «dün …» rapor cümlesi dünün gününe yazılır', () => {
+      const r = R.Komut.anla('dün matematikten 40 soru çözdüm', { date:D });
+      expect(r.oneriler[0].params.date).toBe(R.U.iso(R.U.addDays(R.U.parse(D), -1)));
     });
     it('önizleme, kayıt ve geri al', async () => {
       resetState();

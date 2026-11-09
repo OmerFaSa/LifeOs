@@ -191,11 +191,14 @@ LIFEOS.KARSILAMA = (function(){
     const i = Math.abs(Math.floor(Number(tohum) || 0)) % aday.length;
     return aday[i];
   }
+  const DONUS = /tekrar hoş|yeniden|kaldığın yerden|yine burada|bugün de burada|back|again|zurück|revoir|retour|de nuevo|otra vez/i;
   /* o: { ayar, modul, simdi, tohum, once } */
   function selam(o){
     const a = ayarOku(o.ayar);
-    const l = a.selam === 'kendi' && a.kendi.length ? a.kendi : havuz({ dil:a.dil, modul:o.modul, simdi:o.simdi });
-    return sec(l, o.tohum == null ? Math.random() * 1e9 : o.tohum, o.once);
+    let l = a.selam === 'kendi' && a.kendi.length ? a.kendi : havuz({ dil:a.dil, modul:o.modul, simdi:o.simdi });
+    /* İlk açılışta (bu modülde hiç selam görülmemiş) «tekrar/yine/back» gibi dönüş selamı söylenmez. */
+    if(Array.isArray(o.once) && !o.once.length && l.some(x => !DONUS.test(x))) l = l.filter(x => !DONUS.test(x));
+    return sec(l,o.tohum == null ? Math.random() * 1e9 : o.tohum, o.once);
   }
 
   /* ------------------------------------------------------------ not */

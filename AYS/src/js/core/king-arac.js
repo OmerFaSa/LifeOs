@@ -1203,7 +1203,12 @@ window.LIFEOS.PARCA.yazilar({
     const red = (Array.isArray(r.reddedilen) ? r.reddedilen : []).slice();
     const sonuclar = [], dogrudan = [];
     let yazma = null, yerine = false;
-    for(const c of (r.arac || []).slice(0, 3)){
+    /* Geçici/kalıcı karışması (King 5 tur 5-6): model ikisini birden seçince «bugün» cümlesinde kalıcı olan uygulanıyordu. */
+    let cagrilar = (r.arac || []).slice(0, 3);
+    const tk = KI.kucuk(metin || '');
+    if(cagrilar.some(c => /_gecici_sure$/.test(c && c.ad)) && /(bugün|yarın|bu akşam|bu hafta)/.test(tk) && !/(kalıcı|her gün|artık|hep)/.test(tk))
+      cagrilar = cagrilar.filter(c => !/_gunluk_sure$/.test(c && c.ad));
+    for(const c of cagrilar){
       if(c && A.tamamla) c.param = A.tamamla(c.ad, c.param, metin);
       const d = A.dogrula(c && c.ad, c && c.param);
       if(!d.ok){ red.push({ ad:String(c && c.ad || ''), neden:d.hata }); continue; }

@@ -212,4 +212,26 @@
       expect(SRS.activeCount()).toBe(0);
     });
   });
+  /* King-Bench öğretme alanı (tur 6): King «ingilizce kelime sor» deyince soru kullanıcının KENDİ destesinden. */
+  describe('King kelime sorusu (kendi deste)', () => {
+    it('4 karttan azsa soru uydurulmaz; varsa doğru şık kartın karşılığı, cevap tekrar takvimine yazılır', async () => {
+      await withToday('2026-09-12', async () => {
+        resetState();
+        pushCard({ front:'resilient', back:'dirençli', lang:'en', due:'2026-09-12' });
+        pushCard({ front:'diligent', back:'çalışkan', lang:'en', due:'2026-09-20' });
+        pushCard({ front:'ambiguous', back:'belirsiz', lang:'en', due:'2026-09-20' });
+        expect(ESP.App.kelimeSorusu('ingilizce kelime')).toBe(null);
+        pushCard({ front:'thorough', back:'titiz', lang:'en', due:'2026-09-20' });
+        const q = ESP.App.kelimeSorusu('ingilizce kelime');
+        expect(q.soru).toBe('«resilient» ne demek?');        // vadesi gelen kart önce
+        expect(q.sec.length).toBe(4);
+        expect(q.sec.indexOf('dirençli') >= 0).toBe(true);
+        const dogru = 'ABCD'[q.sec.indexOf('dirençli')];
+        const r = await ESP.App.kelimeCevabi(q.id, dogru);
+        expect(r.dogru).toBe(dogru);
+        expect(r.cozum[0]).toBe('«resilient» = dirençli');
+        expect(ESP.App.kelimeSorusu('almanca kelime')).toBe(null);   // o dilde kart yok
+      });
+    });
+  });
 })();

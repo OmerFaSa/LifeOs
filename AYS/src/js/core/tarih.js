@@ -101,6 +101,28 @@ LIFEOS.TARIH = (function(){
   function monthName(d){ const x = parse(d); return x ? MONTHS[x.getMonth()] : ''; }
   function monthKey(d){ const x = parse(d); return x ? x.getFullYear()+'-'+pad2(x.getMonth()+1) : ''; }
 
+  /* Geçmiş gün sözü (King-Bench seviye 2): kayıt cümlesindeki «dün», «evvelsi gün», «3 gün önce», «geçen salı»,
+     «pazartesi» → ISO; yoksa null. Yalnız GEÇMİŞ: rapor cümlesi içindir («yarın» burada okunmaz).
+     Çıplak gün adı bugün dahil son 7 gün; «geçen» ile önceki takvim haftası. */
+  const GUN_ADI = [['pazartesi', 0], ['salı', 1], ['çarşamba', 2], ['perşembe', 3], ['cumartesi', 5], ['cuma', 4], ['pazar', 6]];
+  function gunSozu(metin, bugunISO){
+    const t = ' ' + String(metin || '').toLocaleLowerCase('tr') + ' ';
+    const bugun = bugunISO || todayISO();
+    const geri = n => iso(addDays(bugun, -n));
+    if(/[\s,](evvelsi gün|önceki gün|dünden önceki gün)/.test(t)) return geri(2);
+    const n = /[\s,](\d{1,2}) gün önce/.exec(t);
+    if(n) return Number(n[1]) <= 60 ? geri(Number(n[1])) : null;
+    if(/[\s,]dün(?:kü|ün)?[\s,.!]/.test(t)) return geri(1);
+    for(const [ad, i] of GUN_ADI){
+      const m = new RegExp('[\\s,](geçen\\s+)?' + ad + '(?:\\s+günü|\\s+akşamı|\\s+sabahı|[\'’]?[dt][ae]|[\'’]?(?:y|n)?[ıi])?[\\s,.!]').exec(t);
+      if(!m) continue;
+      const w = weekdayIndex(bugun);
+      /* «geçen salı» = önceki takvim haftasının salısı (çarşamba günü «dün» değil, 8 gün önce). */
+      return geri(m[1] ? w + 7 - i : ((w - i) + 7) % 7);
+    }
+    return null;
+  }
+
   return Object.freeze({ MONTHS, MONTHS_SHORT, DAY_MS, pad2, iso, gunOf, isISO, parse, today, todayISO,
-    addDays, diffDays, weekdayIndex, fmtDate, fmtShort, monthName, monthKey });
+    addDays, diffDays, weekdayIndex, fmtDate, fmtShort, monthName, monthKey, gunSozu });
 })();
