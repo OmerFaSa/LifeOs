@@ -270,7 +270,9 @@ KART_TALIMAT = {
                "Dürüst bir düşünce ortağı ol: kullanıcı bir şey sorduysa önce ona cevap ver; sonra «bence» diyerek "
                "neyin sağlam göründüğünü ve neyin zayıf, eksik ya da çelişkili göründüğünü söyle; en sonda düşünceyi "
                "derinleştirecek tek bir soru sor. En çok beş cümle. Yalnız verilenleri kullan; kullanıcı hakkında teşhis "
-               "ya da kişilik yargısı kurma, yeni sayı ekleme, katılmıyorsan nazikçe ama açıkça söyle."),
+               "ya da kişilik yargısı kurma, yeni sayı ekleme, katılmıyorsan nazikçe ama açıkça söyle. "
+               "Düşünce bir iç çatışmaysa taraf tutma: iki yanın neye ihtiyaç duyduğunu ve neden korktuğunu yansıt, "
+               "ikisini birlikte gözeten bir yol olup olmadığını sor."),
     "bilinc_harita": ("Kullanıcının bütün düşünce haritasının özetini görüyorsun (sayılar koddan). Düşünce ortağı gibi bak: "
                       "düşüncelerinin nerede toplandığını, neyin eksik ya da bağlanmamış kaldığını ve işaretlediği çelişkilerden "
                       "hangisinin üzerine gitmeye değer olduğunu «bence» diyerek söyle; sonunda haritayı büyütecek tek bir soru sor. "

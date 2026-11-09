@@ -101,6 +101,19 @@
       isaret[0].dispatchEvent(new MouseEvent('click', { bubbles:true, detail:1 }));
       expect(!!el.querySelector('.defter__kart')).toBe(false);
     }));
+    it('derin bağlantı: #defter=<id> o notu açar ve adresten silinir (Bilinç haritası atıfları)', () => ile(async () => {
+      const n = await D().yeni('Stoacılık', 'Kontrol edebildiklerin');
+      const eski = location.hash;
+      location.hash = 'defter=' + n.id;
+      D().derinAc();
+      await bekle(); await bekle();
+      const el = document.getElementById('defter');
+      expect(!!el).toBe(true);
+      expect(el.textContent).toContain('Stoacılık');
+      expect(location.hash).toBe('');
+      D().kapat();
+      if(eski) location.hash = eski;
+    }));
     it('kart: fareyle üstüne gelince açılır, ayrılınca kapanır; Enter karta geçirir, Esc yalnız kartı kapatıp işarete döner', () => ile(async () => {
       await D().terimKaydet({ ad:'Renkot', tanim:'astar' });
       const n = await D().yeni('Not', 'Renkot sürüldü');

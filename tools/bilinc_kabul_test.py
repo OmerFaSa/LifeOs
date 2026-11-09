@@ -87,6 +87,34 @@ bekle("harita satırları: sayılar profilden, boşta yok", r["h"][0].startswith
 r = js(ORNEK + " var g = B.ag(d); return B.haritaSvg(d, g, B.yerlesim(d, g, 600, 400), { w:600, h:400, vb:'10 10 300 200', bulunan:['a'] });")
 bekle("harita: görüş kutusu ve arama sönükleştirir", 'viewBox="10 10 300 200"' in r and r.count("is-sonuk") >= 3)
 
+CAT = """var d = B.temiz({ dusunceler:[
+  { id:'k', baslik:'İş mi tutku mu', tur:'catisma', taraf:[{ ad:'Güvenli yan', ister:'düzenli maaş', korkar:'parasız kalmak', fazla:1 }, { ister:'müzik yapmak' }], durum:'garip' },
+  { id:'z', baslik:'Gizli korkum', tur:'his', ozel:true, metin:'[[İş mi tutku mu]]' },
+  { id:'v', baslik:'Dürüstlük', tur:'deger', kesinlik:5, evrim:[{ zaman:9, metin:'Artık daha da eminim', kesinlik:5 }, { metin:'' }] },
+  { id:'f', baslik:'Fikir', tur:'fikir', taraf:[{ ad:'x' }], metin:'Bak [[not:esp/n123|Stoacılık]] ve [[Dürüstlük]] https://youtu.be/dQw4w9WgXcQ' } ] });"""
+r = js(CAT + " var k = d.dusunceler[0]; return { taraf:k.taraf, durum:k.durum, fTaraf:d.dusunceler[3].taraf === undefined, evrim:d.dusunceler[2].evrim.length, ozel:d.dusunceler[1].ozel };")
+bekle("çatışma: iki yan, fazla alan düşer, bilinmeyen durum açık", r["taraf"] == [{"ad": "Güvenli yan", "ister": "düzenli maaş", "korkar": "parasız kalmak"}, {"ad": "", "ister": "müzik yapmak", "korkar": ""}] and r["durum"] == "acik")
+bekle("çatışma olmayanda taraf yok", r["fTaraf"])
+bekle("evrim: boş girdi düşer; yalnız bana korunur", r["evrim"] == 1 and r["ozel"] is True)
+r = js(CAT + " var p = B.profil(d), k = B.kisiKayitlari(d), s = B.kingSatirlar(d, 'k', ''), h = B.haritaSatirlar(d);"
+       " return { cat:p.catisma.map(function(x){return x.id;}), deg:p.degerler.map(function(x){return x.id;}), degisen:p.degisen.map(function(x){return x.id;}),"
+       " kis:k.map(function(x){return x.metin;}).join('|'), s:s, h:h.join('|'), ksz:B.kingSatirlar(d, 'v', '') };")
+bekle("profil: açık çatışma, değer, değişen", r["cat"] == ["k"] and r["deg"] == ["v"] and r["degisen"] == ["v"])
+bekle("yalnız bana: King kayıtlarına ve harita özetine girmez", "Gizli korkum" not in r["kis"] and "Gizli korkum" not in r["h"])
+bekle("King kayıtları: değer ve çatışma", "Değer verdiği: «Dürüstlük»" in r["kis"] and "Yaşadığı iç çatışma" in r["kis"])
+bekle("King satırları: iki yan ve durum", any(x.startswith("Bir yanı («Güvenli yan»)") for x in r["s"]) and any(x.startswith("Öbür yanı") for x in r["s"]) and "Durum: hâlâ açık" in r["s"])
+bekle("King satırları: yeniden düşünme", any("Sonradan şöyle düşündü" in x for x in r["ksz"]))
+r = js(CAT + " var g = B.ag(d); return { k:g.kenar.map(function(e){return e.a+e.b;}), at:B.atiflar(d.dusunceler[3].metin), yaz:B.atifYaz('esp', 'n1', 'A|b]'), akis:B.akis(d).map(function(x){return x.olay;}),"
+       " kv:B.kivilcimlar(d, '2026-11-09', 3).length, kv2:JSON.stringify(B.kivilcimlar(d, '2026-11-09', 3)) === JSON.stringify(B.kivilcimlar(d, '2026-11-09', 3)),"
+       " m:['https://a.com/x.PNG','https://a.com/v.mp4','http://a.com/s.mp3','https://youtu.be/dQw4w9WgXcQ','https://www.youtube.com/watch?v=dQw4w9WgXcQ','javascript:alert(1)','https://www.ornek.org/yazi'].map(function(u){ var t = B.medyaTuru(u); return t ? t.tur : null; }),"
+       " svg:B.haritaSvg(d, g, B.yerlesim(d, g, 600, 400), { w:600, h:400 }) };")
+bekle("atıf düşünce bağı sayılmaz, [[Dürüstlük]] bağlanır", sorted(r["k"]) == ["fv", "kz"] or sorted(r["k"]) == ["fv", "zk"])
+bekle("atıf ayrışır ve güvenli yazılır", r["at"] == [{"modul": "esp", "id": "n123", "baslik": "Stoacılık"}] and r["yaz"] == "[[not:esp/n1|A b ]]")
+bekle("akış: yazılan ve yeniden düşünülen", r["akis"].count("yeniden") == 1 and r["akis"].count("yazdi") == 4)
+bekle("kıvılcım: üç, güne göre sabit", r["kv"] == 3 and r["kv2"])
+bekle("medya türü: görsel, video, ses, YouTube, javascript yok", r["m"] == ["gorsel", "video", "ses", "youtube", "youtube", None, "baglanti"])
+bekle("harita: çatışma eşkenar, yalnız bana işaretli", "is-catisma" in r["svg"] and "<rect" in r["svg"] and "is-ozel" in r["svg"])
+
 if hata:
     print("KIRMIZI: " + "; ".join(hata))
     sys.exit(1)

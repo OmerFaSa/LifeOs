@@ -199,6 +199,55 @@ GUN_SAYFASI = r"""<!doctype html>
 .bh-sor input{ flex:1; min-width:0; }
 .bh-alt{ display:flex; justify-content:space-between; align-items:center; color:var(--text-3); }
 .bh-sil{ min-height:32px; padding:0 12px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--text-2); font-size:13px; cursor:pointer; }
+/* Bilinc haritasi, ic dunya (2026-11-09): kivilcim, ic catisma, yalniz bana, dusuncenin yolu, akis, atif, medya. */
+.bh-kivilcim{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; padding:12px var(--gun-ic); }
+.bh-kivilcim__bas{ display:grid; flex:0 0 auto; }
+.bh-kivilcim__bas b{ font-size:14px; } .bh-kivilcim__bas small{ color:var(--text-3); font-size:12px; }
+.bh-kivilcim__l{ display:flex; flex-wrap:wrap; gap:8px; flex:1 1 400px; }
+.bh-kivilcim__l button{ flex:1 1 220px; display:grid; gap:2px; text-align:left; padding:8px 12px; border-radius:12px; border:1px solid var(--border); background:none; color:var(--text); font-size:13.5px; line-height:1.4; cursor:pointer; }
+.bh-kivilcim__l button:hover{ border-color:var(--mod); background:var(--mod-t); }
+.bh-kivilcim__l small{ color:var(--text-3); font-size:11.5px; }
+.bh-cat{ display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:start; }
+.bh-cat__y{ display:grid; gap:6px; padding:10px; border-radius:12px; box-shadow:inset 0 0 0 1px var(--border); }
+.bh-cat__y:first-child{ box-shadow:inset 3px 0 0 var(--ays), inset 0 0 0 1px var(--border); }
+.bh-cat__y:last-child{ box-shadow:inset -3px 0 0 var(--esp), inset 0 0 0 1px var(--border); }
+.bh-cat__y input, .bh-cat__y textarea{ width:100%; box-sizing:border-box; font-size:13.5px; resize:vertical; }
+.bh-cat__y input{ font-weight:700; }
+.bh-cat__ara{ align-self:center; color:var(--text-3); font-size:18px; }
+@media (max-width:560px){ .bh-cat{ grid-template-columns:1fr; } .bh-cat__ara{ justify-self:center; } }
+.bh-ozel{ display:flex; align-items:center; gap:8px; min-height:24px; font-size:13.5px; }
+.bh-ozel small{ color:var(--text-3); }
+.bh-kip__ek{ margin-left:auto; min-height:30px; padding:0 10px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--text-2); font-size:12.5px; cursor:pointer; }
+.bh-kip__ek[aria-expanded="true"]{ border-color:var(--mod); color:var(--text); }
+.bh-atifp{ display:grid; gap:8px; padding:10px; border-radius:12px; box-shadow:inset 0 0 0 1px var(--mod); }
+.bh-atifp ul{ list-style:none; margin:0; padding:0; display:grid; gap:4px; max-height:240px; overflow:auto; }
+.bh-atifp li button{ display:grid; grid-template-columns:auto 1fr; gap:0 8px; width:100%; padding:6px 8px; border:0; border-radius:8px; background:none; color:var(--text); text-align:left; cursor:pointer; }
+.bh-atifp li button:hover{ background:var(--mod-t); }
+.bh-atifp li i, .bh-atif i{ font-style:normal; font-size:10.5px; font-weight:700; padding:1px 6px; border-radius:6px; color:var(--r); box-shadow:inset 0 0 0 1px var(--r); align-self:center; }
+.bh-atifp li small{ grid-column:2; color:var(--text-3); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bh-atif{ display:inline-flex; align-items:center; gap:6px; padding:1px 8px 1px 3px; border-radius:8px; box-shadow:inset 0 0 0 1px var(--border); color:var(--text); text-decoration:none; font-weight:600; }
+.bh-atif:hover{ box-shadow:inset 0 0 0 1.5px var(--r); }
+.bh-link{ color:var(--mod-ink, var(--mod)); font-weight:600; }
+.bh-m{ display:block; max-width:100%; margin:8px 0; border-radius:10px; }
+.bh-m--gorsel img{ display:block; max-width:100%; max-height:360px; border-radius:10px; }
+.bh-m--ses{ width:100%; }
+.bh-m--yt{ width:100%; aspect-ratio:16/9; border:0; }
+.bh-evrim{ display:grid; gap:8px; padding-top:12px; border-top:1px solid var(--border); }
+.bh-evrim h4{ display:flex; justify-content:space-between; margin:0; font-size:13px; }
+.bh-evrim h4 small{ color:var(--text-3); font-weight:500; }
+.bh-evrim ol{ list-style:none; margin:0; padding:0 0 0 14px; display:grid; gap:8px; border-left:2px solid var(--mod-t); }
+.bh-evrim li{ font-size:13.5px; line-height:1.5; }
+.bh-evrim li small{ display:block; color:var(--text-3); font-size:11.5px; }
+.bh-akis{ display:grid; gap:4px; padding:56px 16px 16px; max-height:min(74vh, 780px); min-height:420px; overflow:auto; align-content:start; }
+.bh-akis h3{ margin:12px 0 4px; font-size:12.5px; color:var(--text-3); font-weight:600; }
+.bh-akis__o{ display:grid; grid-template-columns:110px 1fr; gap:2px 10px; padding:8px 10px; border:0; border-radius:10px; background:none; color:var(--text); text-align:left; cursor:pointer; }
+.bh-akis__o:hover, .bh-akis__o.is-on{ background:var(--mod-t); }
+.bh-akis__o small{ grid-column:2; color:var(--text-2); font-size:13px; }
+.bh-d.is-ozel circle, .bh-d.is-ozel rect{ stroke-dasharray:2 3; }
+.bh-d rect{ fill:color-mix(in oklab, var(--r) 22%, var(--surface)); stroke:var(--warn, #c0392b); stroke-width:1.8; }
+.bh-d.is-cozuldu rect{ stroke:var(--r); }
+.bh-d.is-secili rect{ fill:var(--r); stroke-width:2.8; }
+.bh-y--deger{ background:var(--bh-4); } .bh-y--ozellik{ background:var(--bh-5); } .bh-y--catisma{ background:var(--warn, #c0392b); }
 /* Tam ekran: harita butun pencere, duzenleyici sagda. */
 html.bh-tam-acik{ overflow:hidden; }
 .bh--tam .bh-izgara{ position:fixed; z-index:60; inset:0; padding:12px; gap:12px; background:var(--bg, var(--surface)); grid-template-columns:minmax(0, 1fr) minmax(340px, 420px); }
@@ -884,6 +933,7 @@ html.bh-tam-acik{ overflow:hidden; }
     var B = L.Bilinc, ANA = 'lifeos.bilinc', YORUM = 'lifeos.bilinc.yorum', W = 1200, H = 720;
     var d = null, zaman = 0, sec = null, gor = 'harita', odak = null, aranan = '', bekle = null, not_ = '', saat = null;
     var kip = 'yaz', tam = false, vb = { x:0, y:0, s:1 }, surukle = null, yerCache = { anahtar:'', yer:null };
+    var notlar = null, atifAc = false, atifAra = '';   // modullerin Defter notlari (/api/hesap/defter), atif secici
     var yorum = (function(){ try{ return JSON.parse(localStorage.getItem(YORUM) || 'null'); }catch(e){ return null; } })();
     function yerel(){ try{ var v = JSON.parse(localStorage.getItem(ANA) || 'null'); if(v && v.veri){ zaman = Number(v.zaman) || 0; return B.temiz(v.veri); } }catch(e){} return B.temiz({}); }
     function veri(){ if(!d && B) d = yerel(); return d; }
@@ -935,21 +985,76 @@ html.bh-tam-acik{ overflow:hidden; }
         + (son ? '<i>Son: ' + kac(son.baslik) + '</i>' : '') + '</span></a></div></section>';
     }
     /* Onizleme: [[bag]] tiklanir; olmayan bag «+» ile yeni dusunce olur. */
+    function notAdres(m, id){ return 'http://' + (location.hostname || HOST) + ':' + MPORT[m] + '/#defter=' + encodeURIComponent(id); }
+    /* Medya: yalniz http(s); gorsel, video, ses yerinde oynar, YouTube cerezsiz gomulur, oteki adres baglanti olur. */
+    function medyaHtml(u){
+      var t = B.medyaTuru(u), a = kac(u);
+      if(!t) return a;
+      if(t.tur === 'gorsel') return '<a class="bh-m bh-m--gorsel" href="' + a + '" target="_blank" rel="noopener noreferrer"><img src="' + a + '" alt="Görsel" loading="lazy" referrerpolicy="no-referrer"/></a>';
+      if(t.tur === 'video') return '<video class="bh-m" controls preload="metadata" src="' + a + '"></video>';
+      if(t.tur === 'ses') return '<audio class="bh-m bh-m--ses" controls preload="none" src="' + a + '"></audio>';
+      if(t.tur === 'youtube') return '<iframe class="bh-m bh-m--yt" src="https://www.youtube-nocookie.com/embed/' + t.id + '" title="YouTube videosu" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+      return '<a class="bh-link" href="' + a + '" target="_blank" rel="noopener noreferrer">' + kac(t.ad) + ' ↗</a>';
+    }
     function onizle(metin){
       if(!String(metin || '').trim()) return '<p class="bh-bosmetin">Henüz metin yok.</p>';
       return String(metin).split(/\n{2,}/).map(function(p){
-        return '<p>' + kac(p).replace(/\[\[(!?)([^\[\]\n]{1,80})\]\]/g, function(m, c, ad){
+        var yer = [], tut = function(h){ yer.push(h); return '\u0001' + (yer.length - 1) + '\u0002'; };
+        var t = kac(p).replace(/\[\[not:(ays|spi|esp)\/([\w-]{1,64})\|([^\[\]\n]{1,80})\]\]/gi, function(m, mod, id, ad){
+          mod = mod.toLowerCase(); return tut('<a class="bh-atif" href="' + kac(notAdres(mod, id)) + '" style="--r:var(--' + mod + ')"><i>' + MAD[mod] + '</i>' + ad + '</a>'); });
+        t = t.replace(/https?:\/\/[^\s<>"]+/g, function(u){
+          var son = (/[.,;:!?)]+$/.exec(u) || [''])[0]; u = u.slice(0, u.length - son.length);
+          return tut(medyaHtml(u.replace(/&amp;/g, '&'))) + son; });
+        return '<p>' + t.replace(/\[\[(!?)([^\[\]\n]{1,80})\]\]/g, function(m, c, ad){
           var var_ = !!adla(ad.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
           return '<button type="button" class="bh-bag' + (c ? ' is-celiski' : '') + (var_ ? '' : ' is-yok') + '" data-bh-git="' + ad + '">' + (c ? '≠ ' : '') + ad + (var_ ? '' : ' +') + '</button>';
-        }).replace(/\n/g, '<br/>') + '</p>';
+        }).replace(/\n/g, '<br/>').replace(/\u0001(\d+)\u0002/g, function(m, i){ return yer[Number(i)]; }) + '</p>';
       }).join('');
+    }
+    function notlariAl(){
+      if(notlar || !oturum()) return;
+      notlar = [];
+      api('/api/hesap/defter').then(function(r){
+        notlar = [];
+        ((r && r.moduller) || []).forEach(function(m){ (m.notlar || []).forEach(function(n){ if(n && n.id && String(n.baslik || '').trim()) notlar.push({ modul:m.modul, id:String(n.id), baslik:String(n.baslik).slice(0, 80), govde:String(n.govde || '').slice(0, 160) }); }); });
+        atifListeYaz();
+      }).catch(function(){ notlar = null; });
+    }
+    function atifListe(){
+      if(!oturum()) return '<p class="gun-senin">Hesabına girince AYS, SPİ ve ESP’deki eşitlenmiş notların burada listelenir.</p>';
+      if(!notlar) return '<p class="gun-senin">Notlar yükleniyor…</p>';
+      var q = B.kucuk(atifAra), l = notlar.filter(function(n){ return !q || B.kucuk(n.baslik + ' ' + n.govde).indexOf(q) >= 0; }).slice(0, 30);
+      if(!l.length) return '<p class="gun-senin">' + (notlar.length ? 'Eşleşen not yok.' : 'Eşitlenmiş not yok: modülde Defter’e yazdığın notlar hesabına gidince burada görünür.') + '</p>';
+      return '<ul>' + l.map(function(n){ return '<li><button type="button" data-bh-atif="' + notlar.indexOf(n) + '" style="--r:var(--' + n.modul + ')"><i>' + MAD[n.modul] + '</i><b>' + kac(n.baslik) + '</b>' + (n.govde ? '<small>' + kac(n.govde) + '</small>' : '') + '</button></li>'; }).join('') + '</ul>';
+    }
+    function atifListeYaz(){ var e = document.getElementById('bh-atifl'); if(e) e.innerHTML = atifListe(); }
+    function catismaHtml(x){
+      var yan = function(i){ var t = x.taraf[i]; return '<div class="bh-cat__y"><input data-bh-taraf="' + i + '" data-bh-tk="ad" maxlength="40" placeholder="' + (i ? 'Öbür yanım' : 'Bir yanım') + '" value="' + kac(t.ad) + '" aria-label="' + (i ? 'Öbür yanın adı' : 'Bir yanın adı') + '"/>'
+        + '<textarea data-bh-taraf="' + i + '" data-bh-tk="ister" rows="2" maxlength="240" placeholder="Ne istiyor?" aria-label="Ne istiyor">' + kac(t.ister) + '</textarea>'
+        + '<textarea data-bh-taraf="' + i + '" data-bh-tk="korkar" rows="2" maxlength="240" placeholder="Neden korkuyor?" aria-label="Neden korkuyor">' + kac(t.korkar) + '</textarea></div>'; };
+      return '<div class="bh-cat">' + yan(0) + '<span class="bh-cat__ara" aria-hidden="true">↔</span>' + yan(1) + '</div>'
+        + '<div class="gun-gecis" role="group" aria-label="Çatışmanın durumu">' + [['acik', 'Hâlâ açık'], ['cozuldu', 'Çözüldü']].map(function(k){ return '<button type="button" data-bh-durum="' + k[0] + '" aria-pressed="' + (x.durum === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>';
+    }
+    function evrimHtml(x){
+      return '<div class="bh-evrim"><h4>Düşüncenin yolu<small>' + (x.evrim.length ? x.evrim.length + ' kez yeniden düşündün' : 'fikrin değişirse buraya yaz') + '</small></h4>'
+        + (x.evrim.length ? '<ol>' + x.evrim.slice().reverse().map(function(e){ return '<li><small>' + new Date(e.zaman).toLocaleDateString('tr-TR', { day:'numeric', month:'short', year:'numeric' }) + ' · kesinlik ' + e.kesinlik + '/5</small>' + kac(e.metin) + '</li>'; }).join('') + '</ol>' : '')
+        + '<form class="bh-sor" data-bh-evrim><input name="metin" maxlength="600" placeholder="Şimdi ne düşünüyorum?" aria-label="Yeniden düşündüğün"/><button type="submit" class="bh-dugme">Ekle</button></form></div>';
+    }
+    function akisHtml(v){
+      var gun = '';
+      return '<div class="bh-akis">' + B.akis(v).slice(0, 150).map(function(e){
+        var g = e.zaman ? new Date(e.zaman).toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : 'Tarihsiz', bas = g !== gun ? '<h3>' + g + '</h3>' : '';
+        gun = g;
+        return bas + '<button type="button" class="bh-akis__o' + (e.id === sec ? ' is-on' : '') + '" data-bh-sec="' + kac(e.id) + '"><span class="bh-tur">' + (e.olay === 'yeniden' ? 'yeniden düşündü' : turAd(e.tur)) + '</span><b>' + kac(e.baslik) + '</b>'
+          + (e.metin ? '<small>' + kac(e.metin.slice(0, 160)) + '</small>' : '') + '</button>';
+      }).join('') + '</div>';
     }
     function bagListe(baslik, l){
       return l.length ? '<div class="bh-bagl"><h4>' + baslik + '</h4>' + l.map(function(k){ return '<button type="button" class="bh-cip' + (k.tur === 'celiski' || k.celiski ? ' is-celiski' : '') + '" data-bh-sec="' + kac(k.id) + '">' + (k.tur === 'celiski' || k.celiski ? '≠ ' : '') + kac(k.baslik) + '</button>'; }).join('') + '</div>' : '';
     }
     function duzenHtml(x, g){
       if(!x) return '<aside class="gun-kart bh-duzen bh-duzen--bos"><h2 class="gun-kart__ad">Düşünce</h2><p class="gun-senin">Haritada bir düşünceye dokun ya da yukarıdan yeni bir tane yaz.</p>'
-        + '<ul class="bh-ipucu"><li><code>[[Başlık]]</code> iki düşünceyi bağlar; <code>[[</code> yazınca öneri gelir</li><li><code>[[!Başlık]]</code> «bununla çelişir» der</li><li>Ortak etiket ince bir bağ kurar</li><li>Haritada sürükle, tekerlekle yakınlaş; Esc tam ekrandan çıkar</li></ul></aside>';
+        + '<ul class="bh-ipucu"><li><code>[[Başlık]]</code> iki düşünceyi bağlar; <code>[[</code> yazınca öneri gelir</li><li><code>[[!Başlık]]</code> «bununla çelişir» der</li><li>Ortak etiket ince bir bağ kurar</li><li>«Not ekle» ile AYS, SPİ, ESP’deki bir nota atıf yaparsın; tıklayınca orada açılır</li><li>Görsel, video, ses ya da YouTube adresi yapıştır: önizlemede yerinde açılır</li><li>Haritada sürükle, tekerlekle yakınlaş; Esc tam ekrandan çıkar</li></ul></aside>';
       var kom = B.komsular(veri(), g, x.id), geri = B.geriBaglar(veri(), x.id), gid = {};
       geri.forEach(function(y){ gid[y.id] = 1; });
       var cik = kom.filter(function(k){ return k.tur !== 'etiket' && !gid[k.id]; }).map(function(k){ return { id:k.id, tur:k.tur, baslik:(bul(k.id) || {}).baslik }; });
@@ -960,15 +1065,21 @@ html.bh-tam-acik{ overflow:hidden; }
         + '<div class="bh-kesin" role="group" aria-label="Kesinlik ' + x.kesinlik + '/5">' + [1, 2, 3, 4, 5].map(function(n){ return '<button type="button" data-bh-kesin="' + n + '" aria-pressed="' + (n <= x.kesinlik) + '" aria-label="Kesinlik ' + n + '"></button>'; }).join('') + '<small>ne kadar eminim</small></div></div>'
         + '<div class="bh-satir"><input data-bh-alan="konu" list="bh-konular" maxlength="40" placeholder="Konu" value="' + kac(x.konu) + '" aria-label="Konu"/>'
         + '<input data-bh-alan="etiket" maxlength="200" placeholder="Etiketler: virgülle" value="' + kac(x.etiket.join(', ')) + '" aria-label="Etiketler"/></div>'
-        + '<div class="bh-kip" role="tablist">' + [['yaz', 'Yaz'], ['onizle', 'Önizle']].map(function(k){ return '<button type="button" role="tab" data-bh-kip="' + k[0] + '" aria-selected="' + (kip === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>'
-        + (kip === 'yaz' ? '<div class="bh-yazi"><textarea id="bh-metin" data-bh-alan="metin" rows="9" maxlength="2000" placeholder="Ne düşünüyorsun, neden? [[ yazınca başka bir düşünceye bağlarsın." aria-label="Düşüncenin metni" aria-autocomplete="list" aria-controls="bh-oneri">' + kac(x.metin) + '</textarea><ul class="bh-oneri" id="bh-oneri" role="listbox" hidden></ul></div>'
+        + (x.tur === 'catisma' ? catismaHtml(x) : '')
+        + '<label class="bh-ozel"><input type="checkbox" data-bh-ozel' + (x.ozel ? ' checked' : '') + '/> Yalnız bana <small>King görmez, profiline girmez</small></label>'
+        + '<div class="bh-kip" role="tablist">' + [['yaz', 'Yaz'], ['onizle', 'Önizle']].map(function(k){ return '<button type="button" role="tab" data-bh-kip="' + k[0] + '" aria-selected="' + (kip === k[0]) + '">' + k[1] + '</button>'; }).join('')
+          + '<button type="button" class="bh-kip__ek" data-bh-atif-ac aria-expanded="' + atifAc + '">Not ekle</button></div>'
+        + (atifAc ? '<div class="bh-atifp"><input type="search" id="bh-atif-ara" placeholder="Modüllerdeki notlarda ara" value="' + kac(atifAra) + '" aria-label="Notlarda ara"/><div id="bh-atifl">' + atifListe() + '</div></div>' : '')
+        + (kip === 'yaz' ? '<div class="bh-yazi"><textarea id="bh-metin" data-bh-alan="metin" rows="9" maxlength="2000" placeholder="' + (x.tur === 'catisma' ? 'İkisini birlikte gözeten bir yol var mı?' : 'Ne düşünüyorsun, neden? [[ yazınca başka bir düşünceye bağlarsın; görsel, video ya da ses adresi yapıştırabilirsin.') + '" aria-label="Düşüncenin metni" aria-autocomplete="list" aria-controls="bh-oneri">' + kac(x.metin) + '</textarea><ul class="bh-oneri" id="bh-oneri" role="listbox" hidden></ul></div>'
           : '<div class="bh-onizle">' + onizle(x.metin) + '</div>')
         + bagListe('Bağladıkların', cik) + bagListe('Sana bağlananlar', geri) + bagListe('Aynı etiket', et)
-        + '<div class="bh-king"><h3>King’le konuş<small>' + (merkez === false ? 'Merkez kapalı' : 'cümle modelden · düşünce senden') + '</small></h3>'
+        + (B.atiflar(x.metin).length ? '<div class="bh-bagl"><h4>Atıf yaptığın notlar</h4>' + B.atiflar(x.metin).map(function(a){ return '<a class="bh-atif" href="' + kac(notAdres(a.modul, a.id)) + '" style="--r:var(--' + a.modul + ')"><i>' + MAD[a.modul] + '</i>' + kac(a.baslik) + '</a>'; }).join('') + '</div>' : '')
+        + evrimHtml(x)
+        + (x.ozel ? '<p class="bh-not">Bu düşünce yalnız sende: King’e gönderilmez.</p>' : '<div class="bh-king"><h3>King’le konuş<small>' + (merkez === false ? 'Merkez kapalı' : 'cümle modelden · düşünce senden') + '</small></h3>'
         + '<ol class="bh-sohbet">' + x.sohbet.map(function(m){ return '<li class="is-' + m.kim + '"><b>' + (m.kim === 'king' ? 'King' : 'Sen') + '</b>' + kac(m.metin) + '</li>'; }).join('')
         + (bekle === x.id ? '<li class="is-king is-bekle"><b>King</b>düşünüyor…</li>' : '') + '</ol>'
         + (not_ ? '<p class="bh-not">' + kac(not_) + '</p>' : '')
-        + '<form class="bh-sor" data-bh-sor><input name="soru" maxlength="400" placeholder="Sor ya da boş bırak: King görüşünü söylesin" aria-label="King’e soru"/><button type="submit"' + (bekle ? ' disabled' : '') + '>King’e sor</button></form></div>'
+        + '<form class="bh-sor" data-bh-sor><input name="soru" maxlength="400" placeholder="Sor ya da boş bırak: King görüşünü söylesin" aria-label="King’e soru"/><button type="submit"' + (bekle ? ' disabled' : '') + '>King’e sor</button></form></div>')
         + '<div class="bh-alt"><small>' + (x.zaman ? new Date(x.zaman).toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }) : '') + '</small><button type="button" class="bh-sil" data-bh-sil>Sil</button></div></aside>';
     }
     function profilHtml(){
@@ -983,6 +1094,7 @@ html.bh-tam-acik{ overflow:hidden; }
         + '<ul class="bh-lejant">' + var_.map(function(t){ return '<li><i class="bh-y--' + t.id + '"></i>' + t.ad + ' ' + Math.round(p.turler[t.id] / tt * 100) + '%</li>'; }).join('') + '</ul>'
         + '<p class="gun-senin">' + p.toplam + ' düşünce, ' + p.bag + ' bağ' + (p.yalniz ? '; ' + p.yalniz + ' tanesi henüz hiçbir şeye bağlı değil' : '') + '.</p></div></div>'
         + '<div class="bh-profil__alt">' + liste('Merkez düşünceler', p.merkez, git) + liste('Emin olduğun', p.kesin, git) + liste('Açık sorular', p.sorular, git)
+        + liste('Açık iç çatışmalar' + (p.cozulen ? ' · ' + p.cozulen + ' çözüldü' : ''), p.catisma, git) + liste('Karakterin', p.karakter, git) + liste('Değerlerin', p.degerler, git) + liste('Fikri değişenler', p.degisen, git)
         + liste('Çelişkiler', p.celiski, function(c){ return '<li><button type="button" data-bh-sec="' + kac(c[0].id) + '">' + kac(c[0].baslik) + '</button> ≠ <button type="button" data-bh-sec="' + kac(c[1].id) + '">' + kac(c[1].baslik) + '</button></li>'; }) + '</div>'
         + '<div class="bh-izin"><label><input type="checkbox" data-bh-izin' + (v.izin ? ' checked' : '') + '/> King beni bu haritadan tanısın</label>'
         + '<details><summary>King’e giden ' + kis.length + ' kayıt</summary><ul>' + kis.map(function(k){ return '<li>' + kac(k.metin) + '</li>'; }).join('') + '</ul><small>Her modüldeki King bunları «senin sözün» olarak görür; ajanlar görmez. Kapatınca King’den silinir.</small></details></div></section>';
@@ -998,6 +1110,7 @@ html.bh-tam-acik{ overflow:hidden; }
       var g = B.ag(v), kon = B.konular(v), bulunan = B.ara(v, aranan), harita;
       if(!v.dusunceler.length) harita = '<div class="bh-bos"><p>Harita boş. İlk düşünceni yaz: bir inanç, bir soru, bir karar. Bağladıkça ağ büyür; King de seni bu ağdan tanır.</p></div>';
       else if(gor === 'gruplar') harita = gruplarHtml(v, bulunan);
+      else if(gor === 'akis') harita = akisHtml(v);
       else harita = B.haritaSvg(v, g, yerlesim(v, g), { w:W, h:H, secili:sec, odak:odak, bulunan:bulunan, vb:vbMetin() })
         + '<div class="bh-yakin" role="group" aria-label="Yakınlaştırma"><button type="button" data-bh-zum="1.25" aria-label="Yakınlaş">+</button><button type="button" data-bh-zum="0.8" aria-label="Uzaklaş">−</button><button type="button" data-bh-zum="0" aria-label="Sığdır" title="Sığdır">⤢</button></div>';
       return '<div class="bh' + (tam ? ' bh--tam' : '') + '">'
@@ -1005,9 +1118,12 @@ html.bh-tam-acik{ overflow:hidden; }
         + '<select name="tur" aria-label="Tür">' + B.TURLER.map(function(t){ return '<option value="' + t.id + '">' + t.ad + '</option>'; }).join('') + '</select>'
         + '<input name="konu" list="bh-konular" maxlength="40" placeholder="Konu" aria-label="Konu" value="' + kac(odak && odak !== 'Konusuz' ? odak : '') + '"/><button type="submit" class="is-ana">Ekle</button></form>'
         + '<div class="bh-arac__sag"><input type="search" id="bh-ara" class="bh-ara" placeholder="Ara" value="' + kac(aranan) + '" aria-label="Düşüncelerde ara"/>'
-        + '<div class="gun-gecis" role="group" aria-label="Görünüm">' + [['harita', 'Harita'], ['gruplar', 'Gruplar']].map(function(x){ return '<button type="button" data-bh-gor="' + x[0] + '" aria-pressed="' + (gor === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>'
+        + '<div class="gun-gecis" role="group" aria-label="Görünüm">' + [['harita', 'Harita'], ['gruplar', 'Gruplar'], ['akis', 'Akış']].map(function(x){ return '<button type="button" data-bh-gor="' + x[0] + '" aria-pressed="' + (gor === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>'
         + '<button type="button" class="bh-dugme" data-bh-tam aria-pressed="' + tam + '">' + (tam ? 'Küçült' : 'Tam ekran') + '</button>'
         + (v.dusunceler.length ? '<button type="button" class="bh-dugme" data-bh-yorum' + (bekle ? ' disabled' : '') + '>King haritamı yorumlasın</button>' : '') + '</div></div>'
+        + (tam ? '' : '<section class="gun-kart bh-kivilcim"><div class="bh-kivilcim__bas"><b>Bugün kendine sor</b><small>bir soru seç, cevabın haritana düşsün</small></div><div class="bh-kivilcim__l">'
+          + B.kivilcimlar(v, bugun(), 3).map(function(k){ return '<button type="button" data-bh-kivilcim="' + k.no + '"><small>' + kac(k.alan) + '</small>' + kac(k.soru) + '</button>'; }).join('')
+          + '</div><button type="button" class="bh-dugme" data-bh-catisma-yeni>İç çatışmanı yaz</button></section>')
         + '<datalist id="bh-konular">' + kon.filter(function(k){ return k[0] !== 'Konusuz'; }).map(function(k){ return '<option value="' + kac(k[0]) + '">'; }).join('') + '</datalist>'
         + (bekle === '*' || yorum ? '<section class="gun-kart bh-yorum" aria-live="polite"><b>King’in haritana bakışı</b>' + (bekle === '*' ? '<p>düşünüyor…</p>' : '<p>' + kac(yorum.metin) + '</p><small>' + new Date(yorum.zaman).toLocaleString('tr-TR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' }) + ' · cümle modelden, sayılar koddan</small>') + '</section>' : '')
         + (not_ && !sec ? '<p class="bh-not">' + kac(not_) + '</p>' : '')
@@ -1077,11 +1193,23 @@ html.bh-tam-acik{ overflow:hidden; }
       if((k = c('[data-bh-zum]'))){ var z = Number(k.getAttribute('data-bh-zum')); if(z) yakinlas(z); else { vb = { x:0, y:0, s:1 }; vbYaz(); } return true; }
       if(c('[data-bh-tam]')){ tam = !tam; document.documentElement.classList.toggle('bh-tam-acik', tam); ciz(); return true; }
       if(c('[data-bh-yorum]')){ haritayiYorumla(); return true; }
-      if(c('[data-bh-kapat]')){ sec = null; ciz(); return true; }
+      if(c('[data-bh-kapat]')){ sec = null; atifAc = false; ciz(); return true; }
+      if((k = c('[data-bh-kivilcim]'))){ var kv = B.KIVILCIM[Number(k.getAttribute('data-bh-kivilcim'))]; if(!kv) return true;
+        var yk = B.yeni(veri(), { baslik:kv.soru.slice(0, 80), tur:kv.tur, konu:kv.alan });
+        if(yk){ sec = yk.id; kip = 'yaz'; kaydet(); ciz(); var mk = document.querySelector(kv.tur === 'catisma' ? '[data-bh-taraf="0"][data-bh-tk="ister"]' : '#bh-metin'); if(mk) try{ mk.focus(); }catch(er){} } return true; }
+      if(c('[data-bh-catisma-yeni]')){ var yc = B.yeni(veri(), { baslik:'Yeni iç çatışma', tur:'catisma', konu:'İç çatışma' });
+        if(yc){ sec = yc.id; kip = 'yaz'; kaydet(); ciz(); var bb = document.querySelector('.bh-baslik'); if(bb) try{ bb.focus(); bb.select(); }catch(er){} } return true; }
+      if((k = c('[data-bh-atif]'))){ var n = notlar && notlar[Number(k.getAttribute('data-bh-atif'))], xa = bul(sec); if(!n || !xa) return true;
+        var at = B.atifYaz(n.modul, n.id, n.baslik), ta = document.getElementById('bh-metin');
+        if(ta){ var i0 = ta.selectionStart || ta.value.length; ta.value = ta.value.slice(0, i0) + at + ta.value.slice(i0); alanYaz(xa, 'metin', ta.value); }
+        else alanYaz(xa, 'metin', (xa.metin ? xa.metin + '\n\n' : '') + at);
+        atifAc = false; kaydet(); ciz(); return true; }
+      if(c('[data-bh-atif-ac]')){ atifAc = !atifAc; if(atifAc) notlariAl(); ciz(); var aa = document.getElementById('bh-atif-ara'); if(aa) aa.focus(); return true; }
       var x = bul(sec);
       if(!x) return false;
       if((k = c('[data-bh-tur]'))){ x.tur = k.getAttribute('data-bh-tur'); kaydet(); ciz(); return true; }
       if((k = c('[data-bh-kesin]'))){ x.kesinlik = Number(k.getAttribute('data-bh-kesin')); kaydet(); ciz(); return true; }
+      if((k = c('[data-bh-durum]'))){ x.durum = k.getAttribute('data-bh-durum'); kaydet(); ciz(); return true; }
       if(c('[data-bh-sil]')){ if(!window.confirm('«' + x.baslik + '» silinsin mi?')) return true;
         d.dusunceler = d.dusunceler.filter(function(y){ return y.id !== x.id; }); sec = null; kaydet(); ciz(); return true; }
       return false;
@@ -1089,6 +1217,10 @@ html.bh-tam-acik{ overflow:hidden; }
     /* input: model guncellenir, cizim yok (odak kalir); change: harita yeniden cizilir. */
     function degis(e){
       var t = e.target;
+      if(t.id === 'bh-atif-ara'){ atifAra = t.value; atifListeYaz(); return true; }
+      if(t.hasAttribute && t.hasAttribute('data-bh-ozel')){ var xo = bul(sec); if(e.type !== 'change' || !xo) return true; xo.ozel = !!t.checked; kaydet(); ciz(); return true; }
+      if(t.hasAttribute && t.hasAttribute('data-bh-taraf')){ var xt = bul(sec); if(!xt || !xt.taraf) return true;
+        var tk = t.getAttribute('data-bh-tk'); xt.taraf[Number(t.getAttribute('data-bh-taraf'))][tk] = t.value.replace(/\s+/g, ' ').slice(0, tk === 'ad' ? 40 : 240); kaydet(); return true; }
       if(t.id === 'bh-ara'){ aranan = t.value; { ciz(); var a = document.getElementById('bh-ara'); if(a){ a.focus(); a.setSelectionRange(a.value.length, a.value.length); } } return true; }
       if(t.hasAttribute && t.hasAttribute('data-bh-izin')){ if(e.type !== 'change') return true; veri().izin = !!t.checked; kaydet(); ciz(); return true; }
       var a2 = t.getAttribute && t.getAttribute('data-bh-alan'), x = bul(sec);
@@ -1108,10 +1240,12 @@ html.bh-tam-acik{ overflow:hidden; }
       if(e.target && e.target.id === 'bh-ara' && e.key === 'Enter'){ e.preventDefault(); aranan = e.target.value; ciz(); var a = document.getElementById('bh-ara'); if(a) a.focus(); }
     }
     function gonder(e){
-      var f = e.target && e.target.closest ? e.target.closest('[data-bh-yeni], [data-bh-sor]') : null;
+      var f = e.target && e.target.closest ? e.target.closest('[data-bh-yeni], [data-bh-sor], [data-bh-evrim]') : null;
       if(!f) return false;
       e.preventDefault();
       if(f.hasAttribute('data-bh-sor')){ var x = bul(sec); if(x) sor(x, f.querySelector('[name="soru"]').value); return true; }
+      if(f.hasAttribute('data-bh-evrim')){ var xe = bul(sec), me = f.querySelector('[name="metin"]').value.replace(/\s+/g, ' ').trim().slice(0, 600);
+        if(xe && me){ xe.evrim.push({ zaman:Date.now(), metin:me, kesinlik:xe.kesinlik }); xe.evrim = xe.evrim.slice(-30); kaydet(); ciz(); } return true; }
       var ba = f.querySelector('[name="baslik"]').value.replace(/\s+/g, ' ').trim();
       if(!ba || !veri()) return true;
       var var_ = adla(ba);

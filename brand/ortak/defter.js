@@ -1912,14 +1912,24 @@ LIFEOS.DEFTER = (function(){
     });
   }
 
-  function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); db = null; }
+  function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); db = null; setTimeout(derinAc, 0); }
+  /* Derin bağlantı (2026-11-09): modül adresi #defter=<not id> ile açılırsa o not açılır
+     (Ana sayfa › Bilinç haritasındaki [[not:…]] atıfları buraya gelir). Not yoksa Defter boş açılır. */
+  function derinAc(){
+    if(typeof location === 'undefined' || !ayar) return;
+    const m = /^#defter=([\w-]{1,64})$/.exec(location.hash || '');
+    if(!m) return;
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ }
+    Promise.resolve(notlar.length ? null : yukle()).catch(() => null).then(() => ac(notlar.some(n => n.id === m[1]) ? { id:m[1] } : undefined));
+  }
+  if(typeof window !== 'undefined' && window.addEventListener) window.addEventListener('hashchange', derinAc);
   function _sifirla(){ ayar = null; notlar = []; secili = null; duzen = false; arama = ''; db = null; klasor = null; gorunum = 'liste';
     klasorYeni = false; bosKlasorler = []; agAyar.etiket = false; agAyar.bagsizGizle = false; agAyar.cevre = false;
     terimler = []; dis = null; kapsam = null; disSecili = null; terimSecili = null; gezginAcik = false; kalipBellek = undefined; kapat(); }
 
   return { kur, yukle, ac, kapat, yeni, belgeOlustur, dosyalarEkle, rafHtml, rafBagla, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
-    kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; },
+    kuruluMu:() => !!ayar, derinAc, _ortam:ortam, _sifirla, _db:v => { db = v; },
     klasorAdi, klasorler, klasordeki, klasorEkle, klasorTasi, klasorSil, bosSil, agVeri, yerlesim, klasorSec:k => { klasor = k; },
     terimKaydet, terimSil, terimler:() => terimler.slice(), terimKalibi, terimBul, terimGecenler, terimNotlari, enterDevam, baglantiOneri, disYukle, disKopyala,
     notTasi, panoHtml, panoBagla, rafKlasor:() => rafKlasor, rafKlasorSec:k => { rafKlasor = klasorAdi(k); rafTasi = null; rafKlasorYeni = false; } };
