@@ -70,7 +70,7 @@ window.LIFEOS = window.LIFEOS || {};
     ays:{ harf:'A', ad:'AYS',    uzun:'Akademik Yol Sistemi',      not:'sınav hazırlığı',        kapi:4173 },
     spi:{ harf:'S', ad:'SPİ',    uzun:'Sağlık Performans İzleyicisi', not:'uyku, beslenme, hareket', kapi:4183 },
     esp:{ harf:'E', ad:'ESP',    uzun:'Entelektüel Seviye Planlayıcı', not:'dil, felsefe, müzik',    kapi:4193 },
-    gun:{ harf:'G', ad:'Gün',    uzun:'Günü kur, gidişi gör',      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
+    gun:{ harf:'G', ad:'Giriş',  uzun:'Günü kur, gidişi gör',      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
   mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
   });
   const SIRA = ['ays', 'spi', 'esp', 'gun'];   // Merkez menude yok (arayuzu kalkti); kimligi bildirimler icin durur

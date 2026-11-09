@@ -72,6 +72,11 @@ window.LIFEOS.PARCA.yazilar({
   'esp.writing.puan':'Puan',
   'esp.writing.kelime-cumle':'Kelime/cümle',
   'esp.writing.olculecek-metin-yok':'Ölçülecek metin yok.',
+  'esp.writing.not-motoruyla-yaz':'Not motoruyla yaz',
+  'esp.writing.siir-olarak-yaz':'Şiir olarak yaz',
+  'esp.writing.defterde-ac':'Defter’de aç',
+  'esp.writing.deftere-bagli':'Bu taslak Defter’deki notuna bağlı: orada [[bağlantı]], sözlük, görsel ve şiir düzeniyle yazarsın; ölçüm oradaki metni okur.',
+  'esp.writing.defter-yok':'Defter bu sayfada açılamadı.',
   'esp.writing.pratik-suresi':'Pratik süresi',
   'esp.writing.oturum-girildiginde-olculmey':'Oturum girildiğinde ölçülmeye başlar.',
   'esp.writing.son-14-gun':'Son 14 gün',
@@ -173,8 +178,10 @@ ESP.Screens.writing = (function(){
     const rows = [];
 
     if(acik){
-      const ok = ESP.Intellect.readability(acik.text, acik.id + (acik.updatedAt || ''));
-      const tekrar = ESP.Intellect.repeats(acik.text);
+      /* Not motoru (2026-11-09): taslak Defter'deki bir nota bagliysa metin oradan gelir. */
+      const bagli = bagliNot(acik), metin = bagli ? bagli.govde : acik.text;
+      const ok = ESP.Intellect.readability(metin, acik.id + (bagli ? bagli.guncel : acik.updatedAt || ''));
+      const tekrar = ESP.Intellect.repeats(metin);
       rows.push(K.Entry({
         label:yz('esp.writing.taslak'),
         meta:acik.title || 'başlıksız',
@@ -186,7 +193,7 @@ ESP.Screens.writing = (function(){
         wide:true,
         body:html`
           ${K.Input({ id:'d-title', value:acik.title, placeholder:yz('esp.writing.baslik') })}
-          ${K.Textarea({ id:'d-text', rows:14, value:acik.text,
+          ${K.Textarea({ id:'d-text', rows:14, value:metin,
             placeholder:yz('esp.writing.yazmaya-basla') })}
           <div class="row wrap mt-10">
             ${K.Button({ label:yz('esp.writing.kaydet'), tone:'primary', act:'save-draft',
@@ -195,7 +202,12 @@ ESP.Screens.writing = (function(){
               data:{ 'data-id':acik.id } })}
             ${K.Button({ label:yz('esp.writing.bugune-oturum-yaz'), act:'log-writing',
               data:{ 'data-id':acik.id } })}
+            ${K.Button({ label:yz(bagli ? 'esp.writing.defterde-ac' : 'esp.writing.not-motoruyla-yaz'), act:'defter-taslak',
+              data:{ 'data-id':acik.id, 'data-tur':'deneme' } })}
+            ${when(!bagli, () => K.Button({ label:yz('esp.writing.siir-olarak-yaz'), act:'defter-taslak',
+              data:{ 'data-id':acik.id, 'data-tur':'siir' } }))}
           </div>
+          ${when(bagli, () => html`<p class="small muted mt-8">${yz('esp.writing.deftere-bagli')}</p>`)}
           <p class="small muted mt-8">${yz('esp.writing.revizyon-sayaci-uslup-olcumu')}</p>
 
           ${when(ok.cert !== 'missing', () => html`
@@ -363,6 +375,10 @@ ESP.Screens.writing = (function(){
   function afterRender(){ ESP.Parts.bolumIstegi('writeTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
+  function defter(){ const D = window.LIFEOS && window.LIFEOS.DEFTER; return D && D.kuruluMu && D.kuruluMu() ? D : null; }
+  function bagliNot(d){ const D = defter(); return d && d.notId && D ? D.notlar().find(n => n.id === d.notId) || null : null; }
+  /* Bagli taslak kaydedilince not da guncellenir (tek metin, iki kapi). */
+  async function notaYaz(d){ const n = bagliNot(d), D = defter(); if(n && D) await D.kaydet(Object.assign({}, n, { baslik:d.title || n.baslik, govde:d.text })); }
 
   const handle = {
     async 'belge-iste'(el){
@@ -380,6 +396,21 @@ ESP.Screens.writing = (function(){
       ESP.App.render();
     },
 
+    /* Not motoruyla yaz: taslak Defter'de deneme ya da siir notu olur (Yazilarim klasoru), sonra orada acilir. */
+    async 'defter-taslak'(el){
+      const d = (S.drafts || []).find(x => x.id === el.dataset.id), D = defter();
+      if(!d) return;
+      if(!D){ ESP.UI.toast(yz('esp.writing.defter-yok')); return; }
+      let n = bagliNot(d);
+      if(!n){
+        if(document.getElementById('d-text')){ d.title = val('d-title').trim(); d.text = val('d-text'); }
+        n = await D.yeni(d.title || (el.dataset.tur === 'siir' ? 'Şiir' : 'Yazı'), d.text || '', el.dataset.tur === 'siir' ? 'siir' : 'deneme', 'Yazılarım');
+        d.notId = n.id;
+        await M.saveDraft(d);
+      }
+      D.ac({ id:n.id, duzen:true });
+    },
+
     async 'open-draft'(el){ S.ui.draftOpen = el.dataset.id; ESP.App.render(); },
     async 'son-taslak'(el){ S.ui.draftOpen = el.dataset.id; S.ui.writeTab = 'taslaklar'; ESP.App.render(); },
     async 'close-draft'(){ S.ui.draftOpen = null; ESP.App.render(); },
@@ -390,6 +421,7 @@ ESP.Screens.writing = (function(){
       d.title = val('d-title').trim();
       d.text = val('d-text');
       await M.saveDraft(d);
+      await notaYaz(d);
       ESP.Memo.bitir();
       ESP.UI.toast(yz('esp.writing.kaydedildi'));
       ESP.App.render();
@@ -402,6 +434,7 @@ ESP.Screens.writing = (function(){
       d.text = val('d-text');
       d.revisions = (d.revisions || 0) + 1;
       await M.saveDraft(d);
+      await notaYaz(d);
       ESP.Memo.bitir();
       ESP.UI.toast(yz('esp.writing.revizyon-2') + d.revisions + ' kaydedildi');
       ESP.App.render();

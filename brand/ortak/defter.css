@@ -309,3 +309,14 @@
 @media (hover:none){ .defter-raf__tasi{ opacity:1; } }
 @media (max-width:520px){ .defter-raf__klasorler{ grid-template-columns:repeat(2, minmax(0, 1fr)); } .defter-raf__tasi-sec{ padding-left:4px; } }
 @media (prefers-reduced-motion:reduce){ .defter-raf__klasor, .defter-raf__tasi{ transition:none; } }
+
+/* Edebi yazi (2026-11-09): siir kitalari, kitap icindekiler, adlandirilmis medya. */
+.defter__kita{ margin:0 0 1.1em; line-height:1.75; font-size:1.05em; }
+.defter__icindekiler{ margin:0 0 18px; padding:12px 16px; border-radius:12px; box-shadow:inset 0 0 0 1px var(--border); }
+.defter__icindekiler b{ font-size:13px; color:var(--text-2); }
+.defter__icindekiler ol{ margin:6px 0 0; padding-left:20px; }
+.defter__icindekiler button{ border:0; background:none; padding:2px 0; color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+.defter__icindekiler button:hover{ text-decoration:underline; }
+.defter__medya-ad{ display:flex; gap:8px; align-items:center; margin-top:4px; font-size:12px; color:var(--text-3); }
+.defter__medya-ad code{ font-size:11.5px; }
+.defter__medya-ad button{ min-height:24px; padding:0 8px; border-radius:6px; border:1px solid var(--border); background:none; color:var(--text-2); font:inherit; cursor:pointer; }

@@ -39,7 +39,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ana sayfa — LifeOS</title>
+<title>Giriş — LifeOS</title>
 <link rel="stylesheet" href="/gun/ortak/jeton.css"/>
 <link rel="stylesheet" href="/gun/ortak/base.css"/>
 <link rel="stylesheet" href="/gun/ortak/layout.css"/>
@@ -155,7 +155,7 @@ GUN_SAYFASI = r"""<!doctype html>
 .bh-profil__alt li button{ display:inline; width:auto; padding:2px 4px; }
 .bh-grup button:hover, .bh-ozet button:hover, .bh-grup button[aria-current]{ background:var(--mod-t); }
 .bh-tur{ display:inline-block; min-width:46px; margin-right:6px; color:var(--text-3); font-size:11.5px; }
-.bh-duzen{ display:grid; gap:12px; padding:var(--gun-ic); position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; }
+.bh-duzen{ display:grid; grid-template-columns:minmax(0, 1fr); gap:12px; padding:var(--gun-ic); position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; }
 .bh-duzen--bos p{ margin:0; }
 .bh-ipucu{ display:grid; gap:8px; font-size:13px; color:var(--text-2); }
 .bh-ipucu li{ padding-left:14px; position:relative; }
@@ -248,6 +248,35 @@ GUN_SAYFASI = r"""<!doctype html>
 .bh-d.is-cozuldu rect{ stroke:var(--r); }
 .bh-d.is-secili rect{ fill:var(--r); stroke-width:2.8; }
 .bh-y--deger{ background:var(--bh-4); } .bh-y--ozellik{ background:var(--bh-5); } .bh-y--catisma{ background:var(--warn, #c0392b); }
+/* Telefon ve tablet (2026-11-09, kullanici: «telefon ve tablet boyutunda karmasik»): tek satir arac, tek kivilcim,
+   kayan konu cipleri, bos duzenleyici gizli, secili dusunce alttan acilan sayfa. Masaustu degismez. */
+@media (max-width:980px){
+  .bh-arac{ padding:10px; gap:8px; }
+  .bh-yaz{ flex:1 1 100%; flex-wrap:nowrap; }
+  .bh-yaz select, .bh-yaz input[name="konu"]{ display:none; }
+  .bh-arac__sag{ flex:1 1 100%; display:grid; grid-template-columns:1fr auto; }
+  .bh-ara{ width:auto; min-width:0; }
+  .bh-arac__sag [data-bh-tam]{ display:none; }
+  .bh-arac__sag [data-bh-yorum]{ grid-column:1 / -1; min-height:36px; font-size:13px; }
+  .bh-kivilcim{ padding:10px; gap:8px; }
+  .bh-kivilcim__bas small{ display:none; }
+  .bh-kivilcim__l{ flex:1 1 100%; }
+  .bh-kivilcim__l button:nth-child(n+2){ display:none; }
+  .bh-kivilcim > .bh-dugme{ min-height:36px; font-size:13px; }
+  .bh-konular{ position:static; flex-wrap:nowrap; overflow-x:auto; padding:10px 10px 0; scrollbar-width:none; }
+  .bh-konular .bh-cip{ flex:none; }
+  .bh-yakin{ top:auto; bottom:10px; }
+  .bh-svg{ height:auto; min-height:0; aspect-ratio:5 / 3; }
+  .bh-gruplar, .bh-akis{ padding-top:10px; min-height:0; }
+  .bh-duzen--bos{ display:none; }
+  .bh-duzen.is-dolu{ position:fixed; z-index:70; left:0; right:0; bottom:0; top:auto; max-height:88vh; border-radius:20px 20px 0 0;
+    background:var(--surface); box-shadow:0 -1px 0 var(--border); padding:16px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .bh-duzen .gun-gecis{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; }
+  .bh-duzen .gun-gecis button{ flex:none; }
+  .bh-profil__alt{ grid-template-columns:1fr 1fr; }
+}
+@media (max-width:699px){ .bh-svg{ aspect-ratio:600 / 760; max-height:70vh; } }
+@media (max-width:560px){ .bh-profil__alt{ grid-template-columns:1fr; } }
 /* Tam ekran: harita butun pencere, duzenleyici sagda. */
 html.bh-tam-acik{ overflow:hidden; }
 .bh--tam .bh-izgara{ position:fixed; z-index:60; inset:0; padding:12px; gap:12px; background:var(--bg, var(--surface)); grid-template-columns:minmax(0, 1fr) minmax(340px, 420px); }
@@ -554,9 +583,9 @@ html.bh-tam-acik{ overflow:hidden; }
   'use strict';
   var L = window.LIFEOS || {}, K = L.KABUK;
   var HOST = '__HOST__';
-  var BOLUM = [{ id:'bugun', ad:'Ana sayfa' }, { id:'bilinc', ad:'Bilinç haritası' }, { id:'analiz', ad:'Geçmiş' }, { id:'calisma', ad:'Sen' }];
+  var BOLUM = [{ id:'bugun', ad:'Giriş' }, { id:'bilinc', ad:'Bilinç haritası' }, { id:'analiz', ad:'Geçmiş' }, { id:'calisma', ad:'Sen' }];
   var ALANLAR = [['uyku', 'Uyku', 'spi'], ['beslenme', 'Beslenme', 'spi'], ['hareket', 'Hareket', 'spi'], ['calisma', 'Çalışma', 'ays'], ['gelisim', 'Gelişim', 'esp']];
-  var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP', gun:'Ana sayfa' }, MPORT = { ays:4173, spi:4183, esp:4193 };
+  var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP', gun:'Giriş' }, MPORT = { ays:4173, spi:4183, esp:4193 };
   var DILIM_AD = { sabah:'Sabah', ogle:'Öğle', aksam:'Akşam', gece:'Gece', gun:'Gün içinde' };
   function adres(m, rota){ return m === 'gun' ? '#bugun' : 'http://' + HOST + ':' + MPORT[m] + '/' + (rota ? '#king=' + rota : ''); }
   function oturum(){ var m = document.cookie.match(/(?:^|;\s*)lifeos_hesap=([^;]*)/); if(!m) return null;
@@ -930,7 +959,9 @@ html.bh-tam-acik{ overflow:hidden; }
      gibi yazma ([[ onerisi, onizleme, geri baglar) ve King. King'in sozu modelden, profil ve sayilar koddan;
      King'in kisi modeline giden kayitlar `gun/kisi` (izin kapaliysa bos). */
   var BH = (function(){
-    var B = L.Bilinc, ANA = 'lifeos.bilinc', YORUM = 'lifeos.bilinc.yorum', W = 1200, H = 720;
+    var B = L.Bilinc, ANA = 'lifeos.bilinc', YORUM = 'lifeos.bilinc.yorum', W = 1200, H = 720, OLCEK = 1;
+    /* Dar ekran: dikey cerceve, buyuk nokta ve yazi (telefonda 1200 genislik yazilari 3 piksele dusuruyordu). */
+    function boyut(){ var dar = window.innerWidth < 700, w = dar ? 600 : 1200; if(w !== W){ vb = { x:0, y:0, s:1 }; yerCache.anahtar = ''; } W = w; H = dar ? 760 : 720; OLCEK = dar ? 1.9 : 1; }
     var d = null, zaman = 0, sec = null, gor = 'harita', odak = null, aranan = '', bekle = null, not_ = '', saat = null;
     var kip = 'yaz', tam = false, vb = { x:0, y:0, s:1 }, surukle = null, yerCache = { anahtar:'', yer:null };
     var notlar = null, atifAc = false, atifAra = '';   // modullerin Defter notlari (/api/hesap/defter), atif secici
@@ -965,7 +996,7 @@ html.bh-tam-acik{ overflow:hidden; }
     /* Yerlesim yalniz yapi degisince yeniden hesaplanir (yazarken harita kipirdamaz). */
     function yerlesim(v, g){
       var a = JSON.stringify([v.dusunceler.map(function(x){ return x.id + '|' + x.konu; }), g.kenar.map(function(e){ return e.a + e.b + e.tur; })]);
-      if(a !== yerCache.anahtar) yerCache = { anahtar:a, yer:B.yerlesim(v, g, W, H) };
+      if(a !== yerCache.anahtar) yerCache = { anahtar:a, yer:B.yerlesim(v, g, W, H) };   // anahtar boyut degisince boyut() siler
       return yerCache.yer;
     }
     function vbMetin(){ var w = W / vb.s, h = H / vb.s; return vb.x.toFixed(1) + ' ' + vb.y.toFixed(1) + ' ' + w.toFixed(1) + ' ' + h.toFixed(1); }
@@ -1059,7 +1090,7 @@ html.bh-tam-acik{ overflow:hidden; }
       geri.forEach(function(y){ gid[y.id] = 1; });
       var cik = kom.filter(function(k){ return k.tur !== 'etiket' && !gid[k.id]; }).map(function(k){ return { id:k.id, tur:k.tur, baslik:(bul(k.id) || {}).baslik }; });
       var et = kom.filter(function(k){ return k.tur === 'etiket'; }).map(function(k){ return { id:k.id, tur:k.tur, baslik:(bul(k.id) || {}).baslik }; });
-      return '<aside class="gun-kart bh-duzen">'
+      return '<aside class="gun-kart bh-duzen is-dolu">'
         + '<div class="bh-duzen__bas"><input class="bh-baslik" data-bh-alan="baslik" maxlength="80" value="' + kac(x.baslik) + '" aria-label="Başlık"/><button type="button" class="bh-kapat" data-bh-kapat aria-label="Kapat" title="Kapat">×</button></div>'
         + '<div class="bh-satir"><div class="gun-gecis" role="group" aria-label="Tür">' + B.TURLER.map(function(t){ return '<button type="button" data-bh-tur="' + t.id + '" aria-pressed="' + (x.tur === t.id) + '">' + t.ad + '</button>'; }).join('') + '</div>'
         + '<div class="bh-kesin" role="group" aria-label="Kesinlik ' + x.kesinlik + '/5">' + [1, 2, 3, 4, 5].map(function(n){ return '<button type="button" data-bh-kesin="' + n + '" aria-pressed="' + (n <= x.kesinlik) + '" aria-label="Kesinlik ' + n + '"></button>'; }).join('') + '<small>ne kadar eminim</small></div></div>'
@@ -1104,6 +1135,7 @@ html.bh-tam-acik{ overflow:hidden; }
         + v.dusunceler.filter(function(x){ return (x.konu || 'Konusuz') === k[0] && (!bulunan || bulunan.indexOf(x.id) >= 0); }).map(function(x){ return '<li><button type="button" data-bh-sec="' + kac(x.id) + '"' + (x.id === sec ? ' aria-current="true"' : '') + '><span class="bh-tur">' + turAd(x.tur) + '</span>' + kac(x.baslik) + '</button></li>'; }).join('') + '</ul></div>'; }).join('') + '</div>';
     }
     function sayfaHtml(){
+      boyut();
       var v = veri();
       if(!v) return '<section class="gun-kart gun-bos"><h2>Bilinç haritası yüklenemedi</h2><p>Sayfayı yenile.</p></section>';
       if(sec && !bul(sec)) sec = null;
@@ -1111,7 +1143,7 @@ html.bh-tam-acik{ overflow:hidden; }
       if(!v.dusunceler.length) harita = '<div class="bh-bos"><p>Harita boş. İlk düşünceni yaz: bir inanç, bir soru, bir karar. Bağladıkça ağ büyür; King de seni bu ağdan tanır.</p></div>';
       else if(gor === 'gruplar') harita = gruplarHtml(v, bulunan);
       else if(gor === 'akis') harita = akisHtml(v);
-      else harita = B.haritaSvg(v, g, yerlesim(v, g), { w:W, h:H, secili:sec, odak:odak, bulunan:bulunan, vb:vbMetin() })
+      else harita = B.haritaSvg(v, g, yerlesim(v, g), { w:W, h:H, secili:sec, odak:odak, bulunan:bulunan, vb:vbMetin(), olcek:OLCEK > 1 ? OLCEK : 0 })
         + '<div class="bh-yakin" role="group" aria-label="Yakınlaştırma"><button type="button" data-bh-zum="1.25" aria-label="Yakınlaş">+</button><button type="button" data-bh-zum="0.8" aria-label="Uzaklaş">−</button><button type="button" data-bh-zum="0" aria-label="Sığdır" title="Sığdır">⤢</button></div>';
       return '<div class="bh' + (tam ? ' bh--tam' : '') + '">'
         + '<div class="gun-kart bh-arac" style="--i:1"><form class="bh-yaz" data-bh-yeni><input name="baslik" maxlength="80" placeholder="Aklından ne geçiyor?" aria-label="Yeni düşüncenin başlığı" required/>'

@@ -449,7 +449,7 @@
       const tek = { protocol:'http:', hostname:'127.0.0.1', port:'4173' };
       const d = yerlestir(K.menuSayfasi({ modul:'ays', loc:tek, yerel:false, cekmeceler:[] }));
       const s = Array.from(d.querySelectorAll('.menusayfa__sistem'));
-      expect(s.map(x => x.textContent.trim())).toEqual(['AYS', 'SPİ', 'ESP', 'Gün']);
+      expect(s.map(x => x.textContent.trim())).toEqual(['AYS', 'SPİ', 'ESP', 'Giriş']);
       expect(s[0].getAttribute('aria-current')).toBe('true');
       expect(s[0].tagName).toBe('SPAN');
       expect(s[1].getAttribute('href')).toBe('http://127.0.0.1:4183/');

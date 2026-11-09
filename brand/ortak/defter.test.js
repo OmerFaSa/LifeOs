@@ -98,6 +98,22 @@
       isaret[0].dispatchEvent(new MouseEvent('click', { bubbles:true, detail:1 }));
       expect(!!el.querySelector('.defter__kart')).toBe(false);
     }));
+    it('edebi yazı: şiir kıta kıta, kitap içindekilerle; medya adla çağrılır; şablon türü verir', () => ile(async () => {
+      const s = D().md('ilk dize\nikinci <dize>\n\nyeni kıta', { siir:true });
+      expect(s).toBe('<p class="defter__kita">ilk dize<br/>ikinci &lt;dize&gt;</p><p class="defter__kita">yeni kıta</p>');
+      const k = D().md('# Bir\nmetin\n# İki\n', { kitap:true });
+      expect(k.startsWith('<nav class="defter__icindekiler"')).toBe(true);
+      expect(k).toContain('data-defter-bolum="2"');
+      expect(k).toContain('<h2 id="defter-b-2">İki</h2>');
+      expect(D().md('# Tek', { kitap:true })).toBe('<h2 id="defter-b-1">Tek</h2>');
+      expect(D().md('![[medya:deniz kıyısı]]')).toContain('data-defter-medya="deniz kıyısı"');
+      expect(D().md('![[medya:<x>]]').indexOf('<x>')).toBe(-1);
+      const sb = D().SABLONLAR.filter(x => x.tur).map(x => x.id + ':' + x.tur);
+      expect(sb).toEqual(['siir:siir', 'deneme:deneme', 'oyku:deneme', 'kitapyaz:kitap']);
+      const n = await D().yeni('Deniz', 'dalga\nköpük', 'siir');
+      expect(D().notlar().find(x => x.id === n.id).tur).toBe('siir');
+      expect(D().mdNot(n)).toContain('dalga<br/>köpük');
+    }));
     it('derin bağlantı: #defter=<id> o notu açar ve adresten silinir (Bilinç haritası atıfları)', () => ile(async () => {
       const n = await D().yeni('Stoacılık', 'Kontrol edebildiklerin');
       const eski = location.hash;
@@ -409,7 +425,7 @@
       expect(D().satirOnek(b.metin, 0, b.metin.length, '## ').metin).toBe('bir\niki');
     });
     it('şablonlar ve kelime sayımı', () => {
-      expect(D().SABLONLAR.map(t => t.id)).toEqual(['ders', 'gunluk', 'kitap', 'plan']);
+      expect(D().SABLONLAR.map(t => t.id)).toEqual(['ders', 'gunluk', 'kitap', 'plan', 'siir', 'deneme', 'oyku', 'kitapyaz']);
       expect(D().sayim('bir iki üç ![[medya:mabc1]] **dört**')).toEqual({ kelime:4, dakika:1 });
     });
     it('pencere: şablonla başla, Oku | Yaz seçici', () => ile(async () => {
