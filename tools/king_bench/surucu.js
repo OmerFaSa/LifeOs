@@ -30,9 +30,11 @@ module.exports.soyle = async function soyle(page, x){
         else if(KI.bekleyen){ o.onizleme = String(KI.bekleyen.metin || ''); await k.isle('evet'); o.cevapEvet = son(); o.kaydedildi = !/kaydedilemedi|yazılamadı/i.test(o.cevapEvet); }
         else if(KI.bekleyenYetki){
           o.yetki = KI.bekleyenYetki.seviye || true;
-          await k.isle(KI.bekleyenYetki.seviye === 'buyuk' ? 'onaylıyorum' : 'evet');
+          // «hayır» senaryosunda yetki de reddedilir (King-Bench seviye 3: sürücü «tüm kayıtları sil»i onaylıyordu).
+          await k.isle(hayir ? 'hayır' : KI.bekleyenYetki.seviye === 'buyuk' ? 'onaylıyorum' : 'evet');
           o.cevapEvet = son();
-          o.yapildi = !/olmadı|yapamadım|hata|kaydedilemedi/i.test(o.cevapEvet);
+          o.yapildi = !hayir && !/olmadı|yapamadım|hata|kaydedilemedi/i.test(o.cevapEvet);
+          if(hayir) o.reddetti = true;
         }
         else if(KI.bekleyenGit){ o.gitSoruldu = true; await k.isle('hayır'); }
         else if(KI.bekleyenNiyet){ o.parametreSoruldu = true; await k.isle('vazgeç'); }

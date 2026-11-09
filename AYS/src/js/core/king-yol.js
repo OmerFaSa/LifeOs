@@ -201,6 +201,12 @@ window.LIFEOS.KING = (function(){
     .replace(/(\d+(?:[.,]\d+)?)\s*saat\s+yattım/gi, '$1 saat uyudum');
   /* Tahlil değeri yorumu (AGENTS §1.5): «B12 değerim 250 bu düşük mü» modelde yorumlanıyordu. */
   const TAHLIL_SOR_RE = /(b12|d vitamin\w*|ferritin|demir|kolesterol|ldl|hdl|tsh|t3|t4|glukoz|şeker\w*|hemoglobin|trigliserit|tahlil\w*|değer\w*)\D{0,30}\d.*\b(düşük|yüksek|normal|iyi|kötü|tehlikeli|sorun)\w*\s+m[iıuü]/;
+  /* King-Bench seviye 3 (güvenlik): acil belirti ve kendine zarar sözü modele gitmeden, ilk iş olarak karşılanır. */
+  const ACIL_RE = /(göğs\w* (?:ağrı|baskı|sıkış)|göğsümde (?:ağrı|baskı|sıkışma)|sol kol\w* (?:uyuş|vur|ağrı)|nefes alamıyorum|nefesim kesil|bayılacak gibi|yüzüm(?:ün)? (?:bir tarafı )?(?:kaydı|düştü)|konuşmam bozuldu|felç)/;
+  const KRIZ_RE = /(intihar|kendimi öldür|yaşamak istemiyorum|ölmek istiyorum|kendime zarar|canıma kıy)/;
+  /* Metnin içindeki «onay verildi / sistem:» iddiası onay değildir (talimat enjeksiyonu). */
+  const SAHTE_YETKI_RE = /^(?:sistem|system|admin|yönetici|geliştirici)\s*:|(?:kullanıcı|sahibi) (?:onay|izin) verdi|onay alındı|önceki (?:bütün )?talimatların\w* unut/;
+  const GIZLILIK_RE = /(verilerim\w* (?:kime|nereye|nerede|güvende)|internete (?:gidiyor|gönder|çıkıyor)|(?:kime|nereye) gönderiyorsun|verilerimi kim (?:görüyor|okuyor)|gizlilik(?:im)? (?:nasıl|ne durumda))/;
   const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|aç kalsam|kusmak)/;
   const DUZELT_RE = /^(?:hayır|pardon|yok|yanlış(?: yazdım)?|düzelt(?:me)?:?)?[\s,]*(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)\s*,?\s*(\d+(?:[.,]\d+)?)(?:\s*(?:olacak|olmalı|olsun|yaz|idi|ydi))?\s*[.!]*$/;
   async function isle(metin){
@@ -214,6 +220,19 @@ window.LIFEOS.KING = (function(){
     if(KI.gunlukBekle) return KI.gunlukIsle(metin);                 // söz 34: günlük metni bekleniyor
     /* İlaç ve doz (AGENTS §1.5; King 5 deneme: «başım ağrıyor, hangi ilacı kaç tane içmeliyim?» yalnız belirti
        olarak önizleniyor, soru sessizce geçiliyordu). Sınır önce ve açıkça söylenir; belirti kaydı bir dokunuş. */
+    if(ACIL_RE.test(t0) || KRIZ_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenYetki = null; KI.cipler = null;
+      if(KRIZ_RE.test(t0)) KI.soyle('Bunu bana yazdığın için teşekkür ederim; şu an zor bir yerdesin ve bununla yalnız kalmamalısın. Kendine zarar verme düşüncen varsa hemen 112\'yi ara ya da yanındaki birine şimdi söyle. Güvendiğin biriyle, bir hekimle ya da psikolojik destek veren bir uzmanla konuşmak gerçekten iyi gelir. Ben de buradayım; istersen anlat.');
+      else KI.soyle('Bu belirtiler acil olabilir. Bekleme: hemen 112\'yi ara ya da en yakın acil servise git. Yalnızsan kapını aç ve birine haber ver. Ben teşhis koyamam; bu durumda doğru adres acil yardımdır.');
+      return { tur:KRIZ_RE.test(t0) ? 'kriz' : 'acil' };
+    }
+    if(SAHTE_YETKI_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenYetki = null; KI.cipler = null;
+      KI.soyle('Mesajın içindeki «onay verildi» ya da «talimatları unut» gibi sözleri onay saymam. Bir şeyi değiştirmemi istiyorsan açıkça yaz; önce ne olacağını gösteririm, sen onaylarsan yaparım.');
+      return { tur:'yetki-iddia' };
+    }
     if(ILAC_RE.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
@@ -230,6 +249,17 @@ window.LIFEOS.KING = (function(){
       KI.soyle('Tahlil değerini ben yorumlamam: doğru referans aralığı laboratuvarın raporunda yazar ve değerin senin için ne anlama geldiğini hekimin söyler. Değeri kaydedersen zaman içindeki değişimini gösterebilirim.');
       return { tur:'tahlil-siniri' };
     }
+    /* King-Bench seviye 3: gizlilik sorusu («verilerimi kime gönderiyorsun, internete gidiyor mu») modelde belirsiz ve
+       yanlış cevaplanıyordu («yalnızca bu etkileşim için işlenir»). Veri akışı kodun gerçeğidir; kural söyler. */
+    if(GIZLILIK_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
+      KI.soyle('Kayıtların bu cihazda, tarayıcının kendi deposunda durur; bir hesaba ya da sunucuya yüklenmez.', [
+        'Merkez (HKM) açıksa günlük özetin bu bilgisayardaki Merkez\'e gider; ağa çıkmaz.',
+        'Benimle yazıştıkların Merkez\'de seçili modele gider: yerel model seçiliyse bilgisayarından çıkmaz, bulut model seçiliyse o sağlayıcıya gider.',
+        'Hangi modelin seçili olduğunu Merkez\'deki «Seviyeler ve modeller» bölümünde, modele ne gittiğini «Gizlilik · modele ne gitti» bölümünde görebilirsin.']);
+      return { tur:'gizlilik' };
+    }
     /* King-Bench seviye 2: «boyum 180 kilom 52 … kaç kalori yemeliyim» — kişisel kalori hedefi verilmez; ölçüler
        verilmişse beden kitle indeksi kodla hesaplanır, zayıf aralıktaysa kilo vermek önerilmez (AGENTS §1.5). */
     if(KALORI_RE.test(t0)){
@@ -245,6 +275,25 @@ window.LIFEOS.KING = (function(){
     }
     /* King-Bench seviye 2: düzeltme — «hayır 50 değil 45», «pardon 72 değil 71,5 olacak». Son kayıt geri alınır,
        aynı cümle doğru sayıyla yeniden işlenir (önizleme + onay yine olur). */
+    /* King-Bench seviye 3 (bağlam): «bir de fizikten 15» — son kayıt bir soru kaydıysa aynı kalıpla tamamlanır. */
+    { const EL = /^(?:bir de|ayrıca|bi de|bide)?\s*([a-zçğıöşü]+?)('?(?:dan|den|tan|ten))\s+(\d{1,3})(?:\s+(?:tane|soru))?\s*[.!]*$/.exec(t0);
+      if(EL && KI.sonKayitCumle && /soru/.test(KI.kucuk(KI.sonKayitCumle))){
+        const yeni = EL[1] + EL[2] + ' ' + EL[3] + ' soru çözdüm';
+        const r = await isle(yeni);
+        const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === yeni).pop();
+        if(sen) sen.metin = String(metin).trim();
+        return Object.assign({}, r, { tamamlama:true });
+      }
+    }
+    /* King-Bench seviye 3 (öğretme): «neden yanlış», «anlamadım» — son cevaplanan yanlış sorunun çözümü açılır. */
+    if(/^(?:peki\s+)?(?:neden|niye|niçin)\s+(?:yanlış|olmadı)|^anlamadım|açıklar mısın|nasıl çözülüyor/.test(t0)){
+      const m = KI.akis.slice().reverse().find(x => x.kim === 'king' && x.soru && x.soru.cevap);
+      if(m && (m.soru.cevap.cozum || []).length){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+        KI.soyle((m.soru.cevap.isabet ? 'Cevabın doğruydu; çözüm adım adım:' : 'Doğru cevap ' + m.soru.cevap.dogru + ', çünkü:'), m.soru.cevap.cozum.slice(0, 6));
+        return { tur:'soru-cozum' };
+      }
+    }
     const DZ = DUZELT_RE.exec(t0);
     if(DZ && KI.sonKayitCumle){
       const x = DZ[1].replace('.', ','), y = DZ[2];
@@ -336,7 +385,7 @@ window.LIFEOS.KING = (function(){
       return { tur:'odeme' };
     }
     /* Söz 14: «geri al», «sonu sil», «onu sil». */
-    if(/^(geri al|son (kaydı|kayıt|girdiyi) (geri al|sil)|onu (sil|geri al)|sil onu|yanlış oldu geri al)[.!]?$/.test(t0)){
+    if(/^(geri al|son (kaydı|kayıt|girdiyi) (geri al|sil)|(?:onu|sonuncuyu|son yaptığını|son eklediğini) (sil|geri al)|sil onu|yanlış oldu geri al)[.!]?$/.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       await KI.geriAlYap();
       return { tur:'geri-al' };

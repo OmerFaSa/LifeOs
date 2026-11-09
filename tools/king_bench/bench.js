@@ -31,13 +31,14 @@ function puanla(x, o){
   const d = Object.assign({}, o.degisim || {}), neden = [];
   ['officeBriefings', 'usage', 'kingLog', 'beacon'].forEach(k => delete d[k]);  // King'in işi olmayan arka plan yazımları
   if(o.hata) neden.push('hata: ' + o.hata);
-  for(const [re, ad] of KUSUR) if(re.test(c)) neden.push(ad);
+  for(const [re, ad] of KUSUR) if(re.test(c) && !(b.hayir && ad === 'teknik ret')) neden.push(ad);
   if(!b.veriYokOlur && VERIYOK.test(c)) neden.push('«veri yok»');
   if(o.iddiaBos && !b.ustune) neden.push('«yaptım» dedi, değişen yok');
   // Birim dönüşümü kusur değil: 1,5 litre → 1.500 ml, 1 saat → 60 dk
   const on = String(o.onizleme || '').replace(/\./g, '');
   // Düzeltmede («50 değil 45») eski sayı önizlemede olmaz: «değil»den önceki sayılar sayılmaz.
-  const eski = (String(x.m).match(/(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)/g) || []).map(s => s.match(/\d+(?:[.,]\d+)?/)[0]);
+  const saat = (String(x.m).match(/(\d{1,2})(?=\s*(?:'?[dt][ae]\b|:\d\d))/g) || []);  // «2de yattım 9da kalktım» süreye çevrilir
+  const eski = saat.concat((String(x.m).match(/(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)/g) || []).map(s => s.match(/\d+(?:[.,]\d+)?/)[0]));
   const kusku = (o.onizlemeKusku || []).filter(n => eski.indexOf(n) < 0).filter(n => { const v = parseFloat(n.replace(',', '.')); return [1000, 60].every(k => on.indexOf(String(Math.round(v * k))) < 0); });
   if(kusku.length) neden.push('önizlemede sayı yok: ' + kusku.join(','));
   if(o.gitSoruldu && !b.git) neden.push('sayfa açmayı önerdi');
@@ -77,10 +78,12 @@ function puanla(x, o){
       await page.evaluate(async () => { LIFEOS.KING.ac(); await new Promise(r => setTimeout(r, 2000)); });
       for(const x of vakalar){
         const b = x.b || {};
-        const iz0 = await G.izAl(page);
-        const dogru = b.dogru ? await page.evaluate(b.dogru).catch(() => null) : null;
+        let o, iz0 = {};
         const t0 = Date.now();
-        let o;
+        let dogru = null;
+        try{
+        iz0 = await G.izAl(page);
+        dogru = b.dogru ? await page.evaluate(b.dogru).catch(() => null) : null;
         if(b.ui){
           const cv = await G.kutuyaYaz(page, x.m);
           o = { yol:'kutu', metin:x.m, cevap:cv || '' };
@@ -92,11 +95,19 @@ function puanla(x, o){
         }
         o.ms = Date.now() - t0;
         G.denetle(o, iz0, await G.izAl(page), x.m);
+        }catch(e){
+          /* Sağlamlık: King'in bir işi sayfayı yeniden yüklerse (ör. ayar değişikliği) koşu çökmez; vaka nedeniyle kalır,
+             sayfa yeniden kurulur ve sıradaki vakaya geçilir. */
+          o = Object.assign(o || {}, { hata:'sayfa yeniden yüklendi ya da koptu: ' + String(e.message || e).slice(0, 120), cevap:(o && o.cevap) || '', degisim:{}, secilen:(o && o.secilen) || [], ms:Date.now() - t0 });
+          await page.waitForLoadState('load').catch(() => null);
+          await page.waitForFunction(() => window.LIFEOS && LIFEOS.KING_IC && LIFEOS.KING_IC.ayar, null, { timeout:60000 }).catch(() => null);
+          await page.evaluate(async () => { try{ LIFEOS.KING.ac(); }catch(e){} await new Promise(r => setTimeout(r, 1500)); }).catch(() => null);
+        }
         if(dogru != null) o.dogru = dogru;
         const neden = puanla(x, o);
         const s = { id:x.id, alan:x.alan, sev:x.sev, modul:z.modul, m:x.m, gecti:!neden.length, neden, tur:o.tur, ms:o.ms,
           chat:o.chat, secilen:o.secilen, degisim:o.degisim, onizleme:o.onizleme, dogru:o.dogru,
-          gitSoruldu:o.gitSoruldu, cevap:[o.cevap, o.cevapEvet].filter(Boolean).join(' ¶ ').slice(0, 400) };
+          gitSoruldu:o.gitSoruldu, yetki:o.yetki, hata:o.hata, cevap:[o.cevap, o.cevapEvet].filter(Boolean).join(' ¶ ').slice(0, 400) };
         sonuc.push(s);
         console.log((s.gecti ? '✓' : '✕') + ' ' + x.id + ' [' + x.alan + '] ' + x.m + (s.gecti ? '' : '\n     ' + neden.join(' · ') + '\n     → ' + s.cevap.slice(0, 160)));
         fs.writeFileSync(CIKTI, JSON.stringify(sonuc, null, 1));
