@@ -346,7 +346,9 @@ R.Entry = (function(){
     const dg = /^(.*?)(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|dün|bugün)\s+(?:ve|ile|,)\s+(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|dün|bugün)\s+(birer|ikişer|ikiser|üçer|ucer|dörder|dorder|beşer|beser|yarımşar|onar|yirmişer|otuzar)\s+(.*)$/i.exec(String(text));
     if(!dg) return text;
     const n = DAG[dg[4].toLocaleLowerCase('tr')];
-    return dg[1] + dg[2] + ' ' + n + ' ' + dg[5] + ' ' + dg[3] + ' ' + n + ' ' + dg[5];
+    /* «geçen hafta salı ve çarşamba ikişer saat» → her güne «geçen» (önceki takvim haftası). */
+    const gh = /geçen hafta(?:nın)?\s+$/i.exec(dg[1]), on = gh ? dg[1].slice(0, gh.index) : dg[1], g = gh ? 'geçen ' : '';
+    return on + g + dg[2] + ' ' + n + ' ' + dg[5] + ' ' + g + dg[3] + ' ' + n + ' ' + dg[5];
   }
   function fromText(text, opts){
     const o = opts || {};

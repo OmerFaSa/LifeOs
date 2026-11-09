@@ -30,8 +30,11 @@
      "m": null,
      "zor": 3,
      "b": {
-      "ifade": "(re=>{const l=(window.__acilis||[]).join(' ');return re.test(l)?1:0})(/geçen haftanın aynı günlerine/)",
-      "ifadeEsit": 0
+      "ifade": "LIFEOS.KING.akis().filter(m=>m.kim==='king'&&/geçen haftanın aynı günlerine/.test(String(m.metin||''))).length",
+      "ifadeAralik": [
+       0,
+       1
+      ]
      },
      "not": "aynı gün ikinci açılışta tekrar etmez"
     }

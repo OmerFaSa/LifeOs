@@ -286,6 +286,16 @@ def run():
         ok("ortalama 40 soru" in c and "80 soru" in c and "%50 daha az" in c and "neden-sonuç değil" in c, c)
         ok("en az 6 gün" in iliski.cevap(con, "az uyuduğum günler daha az soru mu çözüyorum", "2026-07-03"))
         eq(iliski.anla("bu hafta kaç soru çözdüm"), None)
+        # Spor: girilmeyen gün (SPİ o gün açıldı) 0 dk; yapılan / yapılmayan günler karşılaştırılır.
+        con2 = db.connect(":memory:")
+        for i in range(10):
+            d = "2026-07-%02d" % (i + 1)
+            m = {"sleep_hours": metric(7)}
+            if i % 2: m["train_minutes"] = metric(45)
+            sync_engine.ingest(con2, {"module": "spi", "date": d, "metrics": m}, now=d + "T09:00:00")
+            sync_engine.ingest(con2, {"module": "ays", "date": d, "metrics": {"questions": metric(60 if i % 2 else 40)}}, now=d + "T21:00:00")
+        c = iliski.cevap(con2, "spor yaptığım günler daha çok soru çözüyor muyum", "2026-07-10")
+        ok("spor yaptığın günlerde (5 gün)" in c and "%50 daha fazla" in c, c)
         # Aşama 3: brifing cümlesinde satırlarda olmayan sayı (uydurma) düşer, kodun cümlesi kalır.
         from core import kendiliginden
         t = _tasiyici(("Günümüz planı 100'e odaklanmak. Dün tek bulgu, 50'lik bir artış.", []))

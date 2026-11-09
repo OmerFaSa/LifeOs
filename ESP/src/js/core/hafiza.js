@@ -148,7 +148,8 @@ LIFEOS.Hafiza = (function(){
       const o2 = ortak(x), xOlumsuz = OLUMSUZ.test(x.metin.toLocaleLowerCase('tr') + ' ');
       if(kk.length >= 2 && o2.j >= 0.75 && xOlumsuz === yeniOlumsuz && !degisti) return { ok:false, why:yz('ortak.hafiza.bunu-zaten-hatirliyorum'), kayit:x };
       /* Çelişki: aynı konu (ortak kök), ters yön ya da «artık …» — yeni söz eskisinin yerine geçer. */
-      if(o2.kes >= 1 && (xOlumsuz !== yeniOlumsuz || degisti) && dosyaBul(x.metin) === dosyaBul(metin)) eskiler.push(x);
+      /* Tanışma cevabı («soru → cevap») güncellenmez; yön farkı tek ortak kökle değil, konu benzerliğiyle (j ≥ 0,3) sayılır. */
+      if(x.metin.indexOf('→') < 0 && o2.kes >= 1 && ((xOlumsuz !== yeniOlumsuz && o2.j >= 0.3) || degisti) && dosyaBul(x.metin) === dosyaBul(metin)) eskiler.push(x);
     }
     /* Aynı konudaki BÜTÜN eski sözler yeni sözle yer değiştirir («kahve içmem», «sabahları kahve içmem» → «artık içiyorum»). */
     if(eskiler.length){ guncellenen = { metin:eskiler.map(x => x.metin).join('», «'), liste:eskiler }; eskiler.forEach(x => l.splice(l.indexOf(x), 1)); }

@@ -286,6 +286,14 @@ window.LIFEOS.ARAC = (function(){
     /* King-Bench: «yeni kelime: ephemeral - geçici» Dil sayfasını açıyordu; ön ve arka yüz cümleden. */
     const k = /^(?:yeni )?kelime\s*:?\s*(.+?)\s+[-–=:]\s+(.+)$/.exec(String(t).trim()) || /^(.+?) kelimesini kart(?:a)? (?:yap|ekle)\s*:\s*(.+)$/.exec(String(t).trim());
     if(k && bul('esp_kart_ekle')) return { ad:'esp_kart_ekle', param:{ on:k[1].trim().slice(0, 120), arka:k[2].trim().slice(0, 240) } };
+    /* Kiler: «kilere 2 kg pirinç ekle», «dolaba 6 yumurta koy», «kilerden pirinç çıkar». */
+    const ke = /^(?:kilere|dolaba|buzdolabına)\s+(?:(\d+(?:[.,]\d+)?)\s*(kg|g|gr|adet|tane|paket|litre|lt|kutu|şişe|kavanoz)?\s+)?(.+?)\s+(?:ekle|koy|aldım|ekledim)\s*[.!]*$/.exec(String(t).trim());
+    if(ke && bul('spi_kiler')) return { ad:'spi_kiler', param:{ islem:'ekle', ad:ke[3].trim().slice(0, 60), miktar:ke[1] != null ? Number(ke[1].replace(',', '.')) : undefined, birim:ke[2] || undefined } };
+    const kc = /^(?:kilerden|dolaptan|buzdolabından)\s+(.+?)\s+(?:çıkar|sil|bitti|kaldır)\s*[.!]*$/.exec(String(t).trim());
+    if(kc && bul('spi_kiler')) return { ad:'spi_kiler', param:{ islem:'sil', ad:kc[1].trim().slice(0, 60) } };
+    /* İlaç bırakma: «doktorum D vitaminini bırak dedi, listeden çıkar» — ilaç listesinden silme (önizleme + onay). */
+    const ib = /(?:^|\s)((?:[a-z0-9]\s)?[a-zçğıöşü0-9-]*(?:vitamin|ilaç|ilac|hap|takviye|omega|demir|b12|magnezyum|çinko)[a-zçğıöşü]*)\s+.*?(?:bırak|listeden çıkar|kullanmayı bıraktım|artık kullanmıyorum)/.exec(String(t));
+    if(ib && bul('spi_ilac')) return { ad:'spi_ilac', param:{ islem:'sil', ad:ib[1].replace(/(?:ni|nı|nu|nü|yi|yı|yu|yü|i|ı|u|ü)$/, '').trim() } };
     /* İlaç alımı: «D vitaminimi içtim», «ilaçlarımı aldım» (su/çay içmek değil: ilaç sözü şart). */
     const ia = /^(?:bugün |sabah |akşam )?(.+?)\s+(?:içtim|aldım|kullandım)\s*[.!]*$/.exec(String(t).trim());
     if(ia && /(ilaç|hap|takviye|vitamin|omega|magnezyum|demir|b12|çinko|probiyotik)/.test(ia[1]) && bul('spi_ilac_alim')) return { ad:'spi_ilac_alim', param:{ ad:ia[1].slice(0, 80) } };

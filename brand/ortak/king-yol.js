@@ -213,7 +213,20 @@ window.LIFEOS.KING = (function(){
   const GIZLILIK_RE = /(verilerim\w* (?:kime|nereye|nerede|güvende)|internete (?:gidiyor|gönder|çıkıyor)|(?:kime|nereye) gönderiyorsun|verilerimi kim (?:görüyor|okuyor)|gizlilik(?:im)? (?:nasıl|ne durumda))/;
   const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kendimi aç bırak|günde \d{2,3} kalori (?:yiyorum|alıyorum)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|\d{2,3}'?[ae] (?:inmek|düşmek) istiyorum|aç kalsam|kusmak|diyet yapıp)/;
   const DUZELT_RE = /^(?:hayır|pardon|yok|yanlış(?: yazdım)?|düzelt(?:me)?:?)?[\s,]*(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)\s*,?\s*(\d+(?:[.,]\d+)?)(?:\s*(?:olacak|olmalı|olsun|yaz|idi|ydi))?\s*[.!]*$/;
+  /* Büyük harfle yazılmış cümle («BUGÜN 3 SAAT ÇALIŞTIM») Türkçe kuralıyla küçültülür (I → ı, İ → i). */
+  const buyukMu = m => { const h = String(m).replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g, ''); return h.length >= 6 && h === h.toLocaleUpperCase('tr'); };
+  /* KAVRAM YANILGISI (King-Bench öğretmen): sık karıştırılan kavram çiftleri; model düzeltmiyordu. */
+  const YANILGI = [
+    [/türev\w*.*(?:alan|altındaki alan)|alan.*türev/, 'Hayır, türev alan değildir: türev bir fonksiyonun o noktadaki değişim hızı, yani teğetin eğimidir. Eğrinin altındaki alanı integral verir. Kısaca: türev → eğim, integral → alan.'],
+    [/integral\w*.*(?:eğim|teğet)/, 'Hayır: integral eğim değil, birikimdir; eğrinin altındaki (işaretli) alanı verir. Eğimi türev verir.'],
+    [/kütle\w*.*ağırlık|ağırlık\w*.*kütle/, 'Kütle ile ağırlık aynı şey değildir: kütle madde miktarıdır (kg), her yerde aynıdır; ağırlık kütleye etki eden yer çekimi kuvvetidir (N), Ay\'da azalır.'],
+    [/hız\w*.*ivme|ivme\w*.*hız/, 'Hız ile ivme aynı değildir: hız konumun zamanla değişimi, ivme hızın zamanla değişimidir. Sabit hızla giden arabanın ivmesi sıfırdır.'],
+    [/mitoz\w*.*mayoz|mayoz\w*.*mitoz/, 'Mitoz ile mayoz aynı değildir: mitoz aynı kromozom sayılı iki hücre verir (büyüme, onarım); mayoz kromozom sayısı yarıya inmiş dört üreme hücresi verir.'],
+    [/ısı\w*.*sıcaklık|sıcaklık\w*.*ısı/, 'Isı ile sıcaklık aynı değildir: sıcaklık taneciklerin ortalama hareket enerjisinin ölçüsüdür (°C), ısı ise sıcaklık farkı yüzünden aktarılan enerjidir (J).'],
+    [/permütasyon\w*.*kombinasyon|kombinasyon\w*.*permütasyon/, 'Permütasyonda sıra önemlidir, kombinasyonda önemli değildir: 3 kişiden 2\'li sıralama 6, 2\'li seçim 3 tanedir.'],
+  ];
   async function isle(metin){
+    if(buyukMu(metin)) metin = String(metin).toLocaleLowerCase('tr');
     metin = yazimDuzelt(metin);
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
     if((KI.bolum === 'araclar' || KI.bolum === 'kutuphane')){ KI.bolum = 'sohbet'; KI.kvGiris = true; }     // sayfadayken sorulan sohbette görünür
@@ -277,8 +290,13 @@ window.LIFEOS.KING = (function(){
       }
     }
     /* «bu konuda en sık yapılan hata ne»: açık dersin «dikkat» notları (öğrencinin düştüğü tuzaklar). */
+    /* Kavram yanılgısı: «… değil mi», «… aynı şey mi», «… demek mi» biçimindeki karıştırma. */
+    if(/(değil mi|aynı şey mi|demek mi|aynı mı|farkı yok mu)\s*[?.!]*$/.test(t0)){
+      const y = YANILGI.find(x => x[0].test(t0));
+      if(y){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null; KI.soyle(y[1]); return { tur:'yanilgi' }; }
+    }
     if(/(en sık|sık yapılan|yaygın|en çok yapılan|en sık yaptığı)\s+(?:\S+\s+)?hata/.test(t0)){
-      const d = KI.akis.slice(-8).reverse().find(m => m.kim === 'king' && m.ders);
+      const d = KI.akis.slice(-20).reverse().find(m => m.kim === 'king' && m.ders);
       const notlar = d ? d.ders.bolumler.map(b => b.dikkat).filter(Boolean) : [];
       if(notlar.length){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
         KI.soyle(d.ders.baslik + ' konusunda sık düşülen tuzaklar:', notlar.slice(0, 5)); return { tur:'ders-dikkat', n:notlar.length }; }

@@ -290,7 +290,7 @@ window.LIFEOS.PARCA.yazilar({
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
   /* Yük: modülün son 7 gün / önceki 7 gün kartları ve sinyali. */
-  const YUK_RE = /(yük durumu|yüküm|yük göstergesi|çok mu yükleniyorum|tükeniyor muyum|yoruldum mu)/;
+  const YUK_RE = /(yük durumu|yüküm(?!ü)|yük göstergesi|çok mu yükleniyorum|tükeniyor muyum|yoruldum mu)/;
   function yukIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const K = KI.ayar && KI.ayar.kartlar;

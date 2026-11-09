@@ -1883,8 +1883,12 @@ ESP.App = (function(){
   function girisKur(o){
     if(!(window.LIFEOS && window.LIFEOS.GIRIS)) return;
     const ciz = (o && o.yenile) || render;
+    /* King-Bench: «Sefiller'de 180. sayfadayım» kayda geçemezse (kitap belirsiz, sayfa zaten geride) nedeni King'e söylenir. */
+    let neden = null;
     window.LIFEOS.GIRIS.kur({ modul:'esp',
+      sor:t => (neden && neden.t === String(t).trim() ? neden.why : null),
       onizle:t => {
+        neden = null;
         const res = ESP.Parse.parseSession(t);
         if(!res || !res.rows.length) return null;
         /* «120. sayfadayım»: adı geçen kitap, yoksa okunmakta olan tek kitap; bugün okunan = konum − önceki. */
@@ -1898,7 +1902,7 @@ ESP.App = (function(){
           Object.assign(r, { count:r.konum - once, ref:b.id, kitap:b.title, once });
         }
         res.rows = res.rows.filter(r => !r.dus);
-        if(!res.rows.length) return null;
+        if(!res.rows.length){ neden = { t:String(t).trim(), why:(res.unmatched || []).map(u => u.why).filter(Boolean)[0] || null }; return null; }
         const ad = r => (ESP.DISCIPLINE_BY_ID[r.disc] || {}).label || r.disc;
         return {
           tur:'oturum',

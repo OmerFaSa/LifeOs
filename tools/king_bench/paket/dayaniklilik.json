@@ -127,9 +127,8 @@
      "m": "su icdim 2 bardak",
      "zor": 3,
      "b": {
-      "degis": [
-       "ölçüm.water"
-      ]
+      "ifade": "(Number((SP.S.vitals['2026-11-14']||{}).water)||0)",
+      "ifadeFark": 500
      }
     }
    ]

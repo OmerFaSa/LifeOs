@@ -242,6 +242,12 @@ SP.KingArac = (function(){
   const kodSema = { type:'string', maxLength:20, description:'barkod numarası (8, 12 ya da 13 hane)' };
   const disOnbellek = {};
   const render = () => { if(SP.App && SP.App.render) SP.App.render(); };
+  /* KİLER (King-Bench tur 10): «kilere 2 kg pirinç ekle», «kilerde ne var», «kilerden pirinç çıkar». Cihazdaki
+     depoda (meta/kiler) tutulur; beslenme kaydı değildir. */
+  const KILER = 'kiler';
+  async function kilerOku(){ try{ const d = await SP.Store.get(KILER); return d && Array.isArray(d.items) ? d.items : []; }catch(e){ return []; } }
+  async function kilerYaz(l){ if(await SP.Store.set(KILER, { items:l.slice(0, 200) }) === false) throw new Error('tarayıcı depolama alanı dolu'); }
+  const kilerSatir = x => (x.miktar != null ? String(x.miktar).replace('.', ',') + (x.birim ? ' ' + x.birim : '') + ' ' : '') + x.ad;
   /* spi_ilac_alim: cümledeki ad («D vitaminimi») kayıtlı adı içerir ya da onun içindedir; «ilaçlarım» hepsidir. */
   function ilacAlimBul(p){
     const etkin = (SP.S.meds || []).filter(m => !m.endDate);
@@ -494,7 +500,9 @@ SP.KingArac = (function(){
       if(p.id) return (SP.S.meds || []).find(m => m.id === p.id) || null;
       if(p.ad){
         const k = kucuk(p.ad);
-        const l = (SP.S.meds || []).filter(m => kucuk(m.name) === k || kucuk(m.name).indexOf(k) >= 0);
+        const aw = k.split(/\s+/);
+        const l = (SP.S.meds || []).filter(m => { const n = kucuk(m.name).split(',')[0].trim(), nw = n.split(/\s+/).slice(0, Math.max(1, Math.min(2, aw.length)));
+          return n === k || n.indexOf(k) >= 0 || k.indexOf(n) >= 0 || nw.every((w, i) => aw[i] && aw[i].indexOf(w) === 0); });
         if(!l.length) return null;
         if(l.length > 1) return { cok:true, sayi:l.length };
         return l[0];
@@ -1087,6 +1095,31 @@ SP.KingArac = (function(){
           render();
           return { metin:'İşaretledim: ' + r.l.map(m => m.name).join(', ') + '.', geriAl:async () => { await M().saveVitals(r.gun, { medsTaken:eski }); render(); } };
         } },
+      { ad:'spi_kiler', tur:'yaz', ozetAd:'Kiler', ornek:'kilere 2 kg pirinç ekle',
+        aciklama:'Kilere / dolaba ürün ekler ya da çıkarır (ad, miktar, birim).',
+        parametreler:{ type:'object', properties:{ islem:{ type:'string', enum:['ekle', 'sil'] }, ad:{ type:'string', maxLength:60 },
+          miktar:{ type:'number', minimum:0, maximum:100000 }, birim:{ type:'string', maxLength:12 } }, required:['islem', 'ad'] },
+        onizle:p => ({ metin:(p.islem === 'sil' ? 'Kilerden çıkarılacak: ' : 'Kilere eklenecek: ') + kilerSatir(p) + '.' }),
+        uygula:async p => {
+          const l = await kilerOku(), eski = l.slice(), k = kucuk(p.ad);
+          if(p.islem === 'sil'){
+            const kalan = l.filter(x => kucuk(x.ad).indexOf(k) < 0 && k.indexOf(kucuk(x.ad)) < 0);
+            if(kalan.length === l.length) return { ok:false, metin:'Kilerde «' + p.ad + '» yok.' };
+            await kilerYaz(kalan);
+            return { metin:'Kilerden çıkardım: ' + p.ad + '.', geriAl:async () => kilerYaz(eski) };
+          }
+          const var0 = l.find(x => kucuk(x.ad) === k && (x.birim || '') === (p.birim || ''));
+          if(var0 && p.miktar != null && var0.miktar != null) var0.miktar = Math.round((var0.miktar + p.miktar) * 100) / 100;
+          else l.push({ ad:String(p.ad).trim(), miktar:p.miktar != null ? p.miktar : null, birim:p.birim || '', at:U().todayISO() });
+          await kilerYaz(l);
+          return { metin:'Kilere ekledim: ' + kilerSatir(p) + '.', geriAl:async () => kilerYaz(eski) };
+        } },
+      { ad:'spi_kiler_oku', tur:'oku', aciklama:'Kilerde / dolapta ne olduğunu listeler.',
+        es:/(?:kiler|dolap|buzdolab)\S*\s+(?:ne var|neler var|nelerim var|ne kaldı)|kilerimi göster|dolabımda ne var/, ornek:'kilerde ne var',
+        parametreler:{ type:'object', properties:{} },
+        calistir:async () => { const l = await kilerOku();
+          return { sonuc:{ toplam:l.length, urunler:l }, satirlar:l.length ? l.map(kilerSatir) : ['Kiler boş. «kilere 2 kg pirinç ekle» diye ekleyebilirsin.'],
+            cevap:l.length ? 'Kilerinde ' + l.length + ' ürün var:' : 'Kiler boş.' }; } },
       { ad:'spi_uyku', tur:'oku', aciklama:yz('spi.core.kingarac.son-gunlerin-uyku-saatleri-v'),
         es:/(uykum nasıl|uyku ortalamam|kaç saat uyu(?:dum|muşum)|ortalama .*uyu|uyku.*dağılım)/, ornek:'haftalık uyku ortalamam',
         anahtar:'süre dağılım uykular dinlenme gece saat',

@@ -250,7 +250,7 @@
    "m": [
     {
      "id": "E01",
-     "m": "Sefiller'de 180. sayfadayım",
+     "m": "Sefiller'de 600. sayfadayım",
      "b": {
       "degis": [
        "*"
@@ -597,12 +597,12 @@
       "ifadeler": [
        {
         "ad": "salı",
-        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-04'])",
+        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-03'])",
         "fark": 120
        },
        {
         "ad": "çarşamba",
-        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-05'])",
+        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-04'])",
         "fark": 120
        }
       ]
@@ -733,7 +733,10 @@
      "zor": 3,
      "b": {
       "ifade": "(Number((SP.S.vitals['2026-11-24']||{}).water)||0)",
-      "ifadeFark": 600
+      "ifadeFark": 750,
+      "kuskuYoksay": [
+       "3"
+      ]
      }
     }
    ]

@@ -111,7 +111,7 @@ LIFEOS.TARIH = (function(){
     if(n) return Number(n[1]) <= 60 ? geri(Number(n[1])) : null;
     if(/[\s,]dün(?:kü|ün)?[\s,.!]/.test(t)) return geri(1);
     for(const [ad, i] of GUN_ADI){
-      const m = new RegExp('[\\s,](geçen\\s+)?' + ad + '(?:\\s+günü|\\s+akşamı|\\s+sabahı|[\'’]?[dt][ae]|[\'’]?(?:y|n)?[ıi])?[\\s,.!]').exec(t);
+      const m = new RegExp('[\\s,](geçen\\s+(?:hafta(?:nın)?\\s+)?)?' + ad + '(?:\\s+günü|\\s+akşamı|\\s+sabahı|[\'’]?[dt][ae]|[\'’]?(?:y|n)?[ıi])?[\\s,.!]').exec(t);
       if(!m) continue;
       const w = weekdayIndex(bugun);
       /* «geçen salı» = önceki takvim haftasının salısı (çarşamba günü «dün» değil, 8 gün önce). */

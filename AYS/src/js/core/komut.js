@@ -313,7 +313,13 @@ R.Komut = (function(){
   function anla(text, opts){
     const o = opts || {};
     const bugun = o.date || U.todayISO();
-    const ham = R.Entry && R.Entry.dagit ? R.Entry.dagit(String(text || '').trim()) : String(text || '').trim();
+    let ham = R.Entry && R.Entry.dagit ? R.Entry.dagit(String(text || '').trim()) : String(text || '').trim();
+    /* King-Bench organizasyon: «bu hafta yükümü yüzde 30 azalt» — temel günlük sürenin %70'i, geçici (söylenen dönem; yoksa bu hafta). */
+    { const yz2 = /(?:yük|plan|çalışma süre|tempo)[a-zçğıöşü]*\s+(?:yüzde|%)\s*(\d{1,2})\s*(?:azalt|düşür|hafiflet|indir)/i.exec(ham);
+      const temel = yz2 && R.Istisna && (R.Istisna.temelDakika() || R.Istisna.sablonDakikasi());
+      if(temel){ const dk = Math.max(30, Math.round(temel * (1 - Number(yz2[1]) / 100) / 5) * 5);
+        const zaman = (ham.toLocaleLowerCase('tr').match(/(bugün|yarın|bu hafta|gelecek hafta|haftaya|önümüzdeki hafta)/) || ['bu hafta'])[0];
+        ham = zaman + ' günde ' + dk + ' dakika çalışacağım'; } }
     const sonuc = { oneriler:[], sorular:[], anlasilmayan:[], komut:false };
     if(ham.length < 3) return sonuc;
 
