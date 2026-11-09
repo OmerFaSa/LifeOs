@@ -51416,7 +51416,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'354ea59a', at:'2026-11-09 14:09', dirty:false };
+R.BUILD = { id:'0762d5d1', at:'2026-11-09 14:39', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -70334,6 +70334,14 @@ window.LIFEOS.ARAC = (function(){
     /* King-Bench: «yeni kelime: ephemeral - geçici» Dil sayfasını açıyordu; ön ve arka yüz cümleden. */
     const k = /^(?:yeni )?kelime\s*:?\s*(.+?)\s+[-–=:]\s+(.+)$/.exec(String(t).trim()) || /^(.+?) kelimesini kart(?:a)? (?:yap|ekle)\s*:\s*(.+)$/.exec(String(t).trim());
     if(k && bul('esp_kart_ekle')) return { ad:'esp_kart_ekle', param:{ on:k[1].trim().slice(0, 120), arka:k[2].trim().slice(0, 240) } };
+    /* Kiler: «kilere 2 kg pirinç ekle», «dolaba 6 yumurta koy», «kilerden pirinç çıkar». */
+    const ke = /^(?:kilere|dolaba|buzdolabına)\s+(?:(\d+(?:[.,]\d+)?)\s*(kg|g|gr|adet|tane|paket|litre|lt|kutu|şişe|kavanoz)?\s+)?(.+?)\s+(?:ekle|koy|aldım|ekledim)\s*[.!]*$/.exec(String(t).trim());
+    if(ke && bul('spi_kiler')) return { ad:'spi_kiler', param:{ islem:'ekle', ad:ke[3].trim().slice(0, 60), miktar:ke[1] != null ? Number(ke[1].replace(',', '.')) : undefined, birim:ke[2] || undefined } };
+    const kc = /^(?:kilerden|dolaptan|buzdolabından)\s+(.+?)\s+(?:çıkar|sil|bitti|kaldır)\s*[.!]*$/.exec(String(t).trim());
+    if(kc && bul('spi_kiler')) return { ad:'spi_kiler', param:{ islem:'sil', ad:kc[1].trim().slice(0, 60) } };
+    /* İlaç bırakma: «doktorum D vitaminini bırak dedi, listeden çıkar» — ilaç listesinden silme (önizleme + onay). */
+    const ib = /(?:^|\s)((?:[a-z0-9]\s)?[a-zçğıöşü0-9-]*(?:vitamin|ilaç|ilac|hap|takviye|omega|demir|b12|magnezyum|çinko)[a-zçğıöşü]*)\s+.*?(?:bırak|listeden çıkar|kullanmayı bıraktım|artık kullanmıyorum)/.exec(String(t));
+    if(ib && bul('spi_ilac')) return { ad:'spi_ilac', param:{ islem:'sil', ad:ib[1].replace(/(?:ni|nı|nu|nü|yi|yı|yu|yü|i|ı|u|ü)$/, '').trim() } };
     /* İlaç alımı: «D vitaminimi içtim», «ilaçlarımı aldım» (su/çay içmek değil: ilaç sözü şart). */
     const ia = /^(?:bugün |sabah |akşam )?(.+?)\s+(?:içtim|aldım|kullandım)\s*[.!]*$/.exec(String(t).trim());
     if(ia && /(ilaç|hap|takviye|vitamin|omega|magnezyum|demir|b12|çinko|probiyotik)/.test(ia[1]) && bul('spi_ilac_alim')) return { ad:'spi_ilac_alim', param:{ ad:ia[1].slice(0, 80) } };
@@ -84921,7 +84929,7 @@ window.LIFEOS.PARCA.yazilar({
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
   /* Yük: modülün son 7 gün / önceki 7 gün kartları ve sinyali. */
-  const YUK_RE = /(yük durumu|yüküm|yük göstergesi|çok mu yükleniyorum|tükeniyor muyum|yoruldum mu)/;
+  const YUK_RE = /(yük durumu|yüküm(?!ü)|yük göstergesi|çok mu yükleniyorum|tükeniyor muyum|yoruldum mu)/;
   function yukIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const K = KI.ayar && KI.ayar.kartlar;
@@ -87428,7 +87436,20 @@ window.LIFEOS.KING = (function(){
   const GIZLILIK_RE = /(verilerim\w* (?:kime|nereye|nerede|güvende)|internete (?:gidiyor|gönder|çıkıyor)|(?:kime|nereye) gönderiyorsun|verilerimi kim (?:görüyor|okuyor)|gizlilik(?:im)? (?:nasıl|ne durumda))/;
   const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kendimi aç bırak|günde \d{2,3} kalori (?:yiyorum|alıyorum)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|\d{2,3}'?[ae] (?:inmek|düşmek) istiyorum|aç kalsam|kusmak|diyet yapıp)/;
   const DUZELT_RE = /^(?:hayır|pardon|yok|yanlış(?: yazdım)?|düzelt(?:me)?:?)?[\s,]*(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)\s*,?\s*(\d+(?:[.,]\d+)?)(?:\s*(?:olacak|olmalı|olsun|yaz|idi|ydi))?\s*[.!]*$/;
+  /* Büyük harfle yazılmış cümle («BUGÜN 3 SAAT ÇALIŞTIM») Türkçe kuralıyla küçültülür (I → ı, İ → i). */
+  const buyukMu = m => { const h = String(m).replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g, ''); return h.length >= 6 && h === h.toLocaleUpperCase('tr'); };
+  /* KAVRAM YANILGISI (King-Bench öğretmen): sık karıştırılan kavram çiftleri; model düzeltmiyordu. */
+  const YANILGI = [
+    [/türev\w*.*(?:alan|altındaki alan)|alan.*türev/, 'Hayır, türev alan değildir: türev bir fonksiyonun o noktadaki değişim hızı, yani teğetin eğimidir. Eğrinin altındaki alanı integral verir. Kısaca: türev → eğim, integral → alan.'],
+    [/integral\w*.*(?:eğim|teğet)/, 'Hayır: integral eğim değil, birikimdir; eğrinin altındaki (işaretli) alanı verir. Eğimi türev verir.'],
+    [/kütle\w*.*ağırlık|ağırlık\w*.*kütle/, 'Kütle ile ağırlık aynı şey değildir: kütle madde miktarıdır (kg), her yerde aynıdır; ağırlık kütleye etki eden yer çekimi kuvvetidir (N), Ay\'da azalır.'],
+    [/hız\w*.*ivme|ivme\w*.*hız/, 'Hız ile ivme aynı değildir: hız konumun zamanla değişimi, ivme hızın zamanla değişimidir. Sabit hızla giden arabanın ivmesi sıfırdır.'],
+    [/mitoz\w*.*mayoz|mayoz\w*.*mitoz/, 'Mitoz ile mayoz aynı değildir: mitoz aynı kromozom sayılı iki hücre verir (büyüme, onarım); mayoz kromozom sayısı yarıya inmiş dört üreme hücresi verir.'],
+    [/ısı\w*.*sıcaklık|sıcaklık\w*.*ısı/, 'Isı ile sıcaklık aynı değildir: sıcaklık taneciklerin ortalama hareket enerjisinin ölçüsüdür (°C), ısı ise sıcaklık farkı yüzünden aktarılan enerjidir (J).'],
+    [/permütasyon\w*.*kombinasyon|kombinasyon\w*.*permütasyon/, 'Permütasyonda sıra önemlidir, kombinasyonda önemli değildir: 3 kişiden 2\'li sıralama 6, 2\'li seçim 3 tanedir.'],
+  ];
   async function isle(metin){
+    if(buyukMu(metin)) metin = String(metin).toLocaleLowerCase('tr');
     metin = yazimDuzelt(metin);
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
     if((KI.bolum === 'araclar' || KI.bolum === 'kutuphane')){ KI.bolum = 'sohbet'; KI.kvGiris = true; }     // sayfadayken sorulan sohbette görünür
@@ -87492,8 +87513,13 @@ window.LIFEOS.KING = (function(){
       }
     }
     /* «bu konuda en sık yapılan hata ne»: açık dersin «dikkat» notları (öğrencinin düştüğü tuzaklar). */
+    /* Kavram yanılgısı: «… değil mi», «… aynı şey mi», «… demek mi» biçimindeki karıştırma. */
+    if(/(değil mi|aynı şey mi|demek mi|aynı mı|farkı yok mu)\s*[?.!]*$/.test(t0)){
+      const y = YANILGI.find(x => x[0].test(t0));
+      if(y){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null; KI.soyle(y[1]); return { tur:'yanilgi' }; }
+    }
     if(/(en sık|sık yapılan|yaygın|en çok yapılan|en sık yaptığı)\s+(?:\S+\s+)?hata/.test(t0)){
-      const d = KI.akis.slice(-8).reverse().find(m => m.kim === 'king' && m.ders);
+      const d = KI.akis.slice(-20).reverse().find(m => m.kim === 'king' && m.ders);
       const notlar = d ? d.ders.bolumler.map(b => b.dikkat).filter(Boolean) : [];
       if(notlar.length){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
         KI.soyle(d.ders.baslik + ' konusunda sık düşülen tuzaklar:', notlar.slice(0, 5)); return { tur:'ders-dikkat', n:notlar.length }; }
@@ -89281,7 +89307,8 @@ LIFEOS.Hafiza = (function(){
       const o2 = ortak(x), xOlumsuz = OLUMSUZ.test(x.metin.toLocaleLowerCase('tr') + ' ');
       if(kk.length >= 2 && o2.j >= 0.75 && xOlumsuz === yeniOlumsuz && !degisti) return { ok:false, why:yz('ortak.hafiza.bunu-zaten-hatirliyorum'), kayit:x };
       /* Çelişki: aynı konu (ortak kök), ters yön ya da «artık …» — yeni söz eskisinin yerine geçer. */
-      if(o2.kes >= 1 && (xOlumsuz !== yeniOlumsuz || degisti) && dosyaBul(x.metin) === dosyaBul(metin)) eskiler.push(x);
+      /* Tanışma cevabı («soru → cevap») güncellenmez; yön farkı tek ortak kökle değil, konu benzerliğiyle (j ≥ 0,3) sayılır. */
+      if(x.metin.indexOf('→') < 0 && o2.kes >= 1 && ((xOlumsuz !== yeniOlumsuz && o2.j >= 0.3) || degisti) && dosyaBul(x.metin) === dosyaBul(metin)) eskiler.push(x);
     }
     /* Aynı konudaki BÜTÜN eski sözler yeni sözle yer değiştirir («kahve içmem», «sabahları kahve içmem» → «artık içiyorum»). */
     if(eskiler.length){ guncellenen = { metin:eskiler.map(x => x.metin).join('», «'), liste:eskiler }; eskiler.forEach(x => l.splice(l.indexOf(x), 1)); }
@@ -99269,7 +99296,7 @@ LIFEOS.TARIH = (function(){
     if(n) return Number(n[1]) <= 60 ? geri(Number(n[1])) : null;
     if(/[\s,]dün(?:kü|ün)?[\s,.!]/.test(t)) return geri(1);
     for(const [ad, i] of GUN_ADI){
-      const m = new RegExp('[\\s,](geçen\\s+)?' + ad + '(?:\\s+günü|\\s+akşamı|\\s+sabahı|[\'’]?[dt][ae]|[\'’]?(?:y|n)?[ıi])?[\\s,.!]').exec(t);
+      const m = new RegExp('[\\s,](geçen\\s+(?:hafta(?:nın)?\\s+)?)?' + ad + '(?:\\s+günü|\\s+akşamı|\\s+sabahı|[\'’]?[dt][ae]|[\'’]?(?:y|n)?[ıi])?[\\s,.!]').exec(t);
       if(!m) continue;
       const w = weekdayIndex(bugun);
       /* «geçen salı» = önceki takvim haftasının salısı (çarşamba günü «dün» değil, 8 gün önce). */
@@ -126690,7 +126717,9 @@ R.Entry = (function(){
     const dg = /^(.*?)(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|dün|bugün)\s+(?:ve|ile|,)\s+(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|dün|bugün)\s+(birer|ikişer|ikiser|üçer|ucer|dörder|dorder|beşer|beser|yarımşar|onar|yirmişer|otuzar)\s+(.*)$/i.exec(String(text));
     if(!dg) return text;
     const n = DAG[dg[4].toLocaleLowerCase('tr')];
-    return dg[1] + dg[2] + ' ' + n + ' ' + dg[5] + ' ' + dg[3] + ' ' + n + ' ' + dg[5];
+    /* «geçen hafta salı ve çarşamba ikişer saat» → her güne «geçen» (önceki takvim haftası). */
+    const gh = /geçen hafta(?:nın)?\s+$/i.exec(dg[1]), on = gh ? dg[1].slice(0, gh.index) : dg[1], g = gh ? 'geçen ' : '';
+    return on + g + dg[2] + ' ' + n + ' ' + dg[5] + ' ' + g + dg[3] + ' ' + n + ' ' + dg[5];
   }
   function fromText(text, opts){
     const o = opts || {};
@@ -127073,7 +127102,13 @@ R.Komut = (function(){
   function anla(text, opts){
     const o = opts || {};
     const bugun = o.date || U.todayISO();
-    const ham = R.Entry && R.Entry.dagit ? R.Entry.dagit(String(text || '').trim()) : String(text || '').trim();
+    let ham = R.Entry && R.Entry.dagit ? R.Entry.dagit(String(text || '').trim()) : String(text || '').trim();
+    /* King-Bench organizasyon: «bu hafta yükümü yüzde 30 azalt» — temel günlük sürenin %70'i, geçici (söylenen dönem; yoksa bu hafta). */
+    { const yz2 = /(?:yük|plan|çalışma süre|tempo)[a-zçğıöşü]*\s+(?:yüzde|%)\s*(\d{1,2})\s*(?:azalt|düşür|hafiflet|indir)/i.exec(ham);
+      const temel = yz2 && R.Istisna && (R.Istisna.temelDakika() || R.Istisna.sablonDakikasi());
+      if(temel){ const dk = Math.max(30, Math.round(temel * (1 - Number(yz2[1]) / 100) / 5) * 5);
+        const zaman = (ham.toLocaleLowerCase('tr').match(/(bugün|yarın|bu hafta|gelecek hafta|haftaya|önümüzdeki hafta)/) || ['bu hafta'])[0];
+        ham = zaman + ' günde ' + dk + ' dakika çalışacağım'; } }
     const sonuc = { oneriler:[], sorular:[], anlasilmayan:[], komut:false };
     if(ham.length < 3) return sonuc;
 
