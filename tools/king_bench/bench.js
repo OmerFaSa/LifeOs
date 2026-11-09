@@ -1,5 +1,7 @@
-// King-Bench sürücüsü: node bench.js ETIKET SEVIYE.json VERI [--sadece id,id]  (bench.py çağırır; sunucular açık olmalı)
-// Senaryo dosyası seviye-N.json: [{ t, saat, modul, m:[{ id, alan, sev, m, b:{...} }] }]
+// King-Bench sürücüsü: node bench.js ETIKET SENARYO.json VERI [--sadece id,id]  (bench.py çağırır; sunucular açık olmalı)
+// Senaryo (bench.py paketlerden kurar): [{ t, saat, modul, paket, m:[{ id, zor, m, b:{...} }] }]
+// Sert kontroller: modelsiz:true (kuralla cevaplanmalı; modele gitmek kusur) · sure:ms (en çok) · ifade:'js' + ifadeFark|ifadeEsit
+//    (ör. belli günün soru sayısı tam 30 artmalı) · ayni:'grup' (aynı sorunun söylenişleri aynı sayıyı vermeli)
 // b: degis:['gün.soru'|'*'] veri artmalı · fark:{'gün.soru':30} tam miktar · degismez:true · icer/icermez:regex · tur:[..] · onay:true (önizleme/yetki gelmeli)
 //    hayir:true (onaya «hayır») · dogru:'js ifade' (cevapta bu değer geçmeli) · veriYokOlur:true · ui:true (gerçek kutuya yaz)
 const fs = require('fs'), path = require('path');
@@ -33,11 +35,11 @@ function puanla(x, o){
   if(o.hata) neden.push('hata: ' + o.hata);
   for(const [re, ad] of KUSUR) if(re.test(c) && !(b.hayir && ad === 'teknik ret')) neden.push(ad);
   if(!b.veriYokOlur && VERIYOK.test(c)) neden.push('«veri yok»');
-  if(o.iddiaBos && !b.ustune) neden.push('«yaptım» dedi, değişen yok');
+  if(o.iddiaBos && !b.ustune && !b.degismez) neden.push('«yaptım» dedi, değişen yok');
   // Birim dönüşümü kusur değil: 1,5 litre → 1.500 ml, 1 saat → 60 dk
   const on = String(o.onizleme || '').replace(/\./g, '');
   // Düzeltmede («50 değil 45») eski sayı önizlemede olmaz: «değil»den önceki sayılar sayılmaz.
-  const saat = (String(x.m).match(/(\d{1,2})(?=\s*(?:'?[dt][ae]\b|:\d\d))/g) || []);  // «2de yattım 9da kalktım» süreye çevrilir
+  const saat = (String(x.m).match(/(\d{1,2})(?=\s*(?:'?[dt][ae]\b|:\d\d|gün önce))/g) || []);  // «3 gün önce» gün sözüdür  // «2de yattım 9da kalktım» süreye çevrilir
   const eski = saat.concat((String(x.m).match(/(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)/g) || []).map(s => s.match(/\d+(?:[.,]\d+)?/)[0]));
   const kusku = (o.onizlemeKusku || []).filter(n => eski.indexOf(n) < 0).filter(n => { const v = parseFloat(n.replace(',', '.')); return [1000, 60].every(k => on.indexOf(String(Math.round(v * k))) < 0); });
   if(kusku.length) neden.push('önizlemede sayı yok: ' + kusku.join(','));
@@ -55,8 +57,16 @@ function puanla(x, o){
   if(b.onay && !(o.onizleme || o.yetki)) neden.push('onaya sunmadı');
   if(b.git && !(o.gitSoruldu || o.tur === 'git')) neden.push('sayfaya götürmedi');
   if(o.dogru != null){
-    const v = String(o.dogru), v2 = v.replace('.', ',');
-    if(c.indexOf(v) < 0 && c.indexOf(v2) < 0) neden.push('doğru değer ' + v + ' yok');
+    const v = String(o.dogru), v2 = v.replace('.', ','), v3 = isFinite(Number(o.dogru)) ? Number(o.dogru).toLocaleString('tr-TR') : v;
+    if(c.indexOf(v) < 0 && c.indexOf(v2) < 0 && c.indexOf(v3) < 0) neden.push('doğru değer ' + v3 + ' yok');
+  }
+  if(b.modelsiz && o.chat) neden.push('modele gitti (kuralla cevaplanmalıydı)');
+  const sinir = b.sure || (b.modelsiz ? 2500 : 0);
+  if(sinir && o.ms > sinir) neden.push('yavaş: ' + o.ms + ' ms > ' + sinir);
+  if(b.ifade){
+    if(o.ifadeHata) neden.push('ifade: ' + o.ifadeHata);
+    else if(b.ifadeFark != null && Math.abs((Number(o.ifadeSonra) || 0) - (Number(o.ifadeOnce) || 0) - b.ifadeFark) > 1e-9) neden.push('hedef gün farkı ' + ((Number(o.ifadeSonra) || 0) - (Number(o.ifadeOnce) || 0)) + ' ≠ ' + b.ifadeFark);
+    else if(b.ifadeEsit != null && Number(o.ifadeSonra) !== b.ifadeEsit) neden.push('hedef değer ' + o.ifadeSonra + ' ≠ ' + b.ifadeEsit);
   }
   return neden;
 }
@@ -84,6 +94,7 @@ function puanla(x, o){
         try{
         iz0 = await G.izAl(page);
         dogru = b.dogru ? await page.evaluate(b.dogru).catch(() => null) : null;
+        var ifadeOnce = b.ifade ? await page.evaluate(b.ifade).catch(e => ({ hata:String(e.message || e).slice(0, 80) })) : null;
         if(b.ui){
           const cv = await G.kutuyaYaz(page, x.m);
           o = { yol:'kutu', metin:x.m, cevap:cv || '' };
@@ -95,6 +106,8 @@ function puanla(x, o){
         }
         o.ms = Date.now() - t0;
         G.denetle(o, iz0, await G.izAl(page), x.m);
+        if(b.ifade){ const son = await page.evaluate(b.ifade).catch(e => ({ hata:String(e.message || e).slice(0, 80) }));
+          if(ifadeOnce && ifadeOnce.hata || son && son.hata) o.ifadeHata = (ifadeOnce && ifadeOnce.hata) || son.hata; else { o.ifadeOnce = ifadeOnce; o.ifadeSonra = son; } }
         }catch(e){
           /* Sağlamlık: King'in bir işi sayfayı yeniden yüklerse (ör. ayar değişikliği) koşu çökmez; vaka nedeniyle kalır,
              sayfa yeniden kurulur ve sıradaki vakaya geçilir. */
@@ -105,20 +118,29 @@ function puanla(x, o){
         }
         if(dogru != null) o.dogru = dogru;
         const neden = puanla(x, o);
-        const s = { id:x.id, alan:x.alan, sev:x.sev, modul:z.modul, m:x.m, gecti:!neden.length, neden, tur:o.tur, ms:o.ms,
+        const s = { id:x.id, paket:z.paket, zor:x.zor || 1, ayni:b.ayni, modul:z.modul, m:x.m, gecti:!neden.length, neden, tur:o.tur, ms:o.ms,
           chat:o.chat, secilen:o.secilen, degisim:o.degisim, onizleme:o.onizleme, dogru:o.dogru,
           gitSoruldu:o.gitSoruldu, yetki:o.yetki, hata:o.hata, cevap:[o.cevap, o.cevapEvet].filter(Boolean).join(' ¶ ').slice(0, 400) };
         sonuc.push(s);
-        console.log((s.gecti ? '✓' : '✕') + ' ' + x.id + ' [' + x.alan + '] ' + x.m + (s.gecti ? '' : '\n     ' + neden.join(' · ') + '\n     → ' + s.cevap.slice(0, 160)));
+        console.log((s.gecti ? '✓' : '✕') + ' ' + x.id + ' [' + z.paket + '·' + (x.zor || 1) + '] ' + x.m + (s.gecti ? '' : '\n     ' + neden.join(' · ') + '\n     → ' + s.cevap.slice(0, 160)));
         fs.writeFileSync(CIKTI, JSON.stringify(sonuc, null, 1));
       }
       await page.close();
     }
   }finally{ await ctx.close(); }
-  const grup = k => { const g = {}; sonuc.forEach(s => { const a = g[s[k]] || (g[s[k]] = [0, 0]); a[1]++; if(s.gecti) a[0]++; }); return g; };
-  const top = sonuc.filter(s => s.gecti).length;
-  console.log('\nKing-Bench ' + etiket + ': ' + top + '/' + sonuc.length + ' (%' + Math.round(100 * top / sonuc.length) + ')');
-  for(const k of ['alan', 'sev', 'modul']) console.log(k + ': ' + Object.entries(grup(k)).map(([a, [g, n]]) => a + ' ' + g + '/' + n).join(' · '));
+  /* Tutarlılık: aynı sorunun farklı söylenişleri aynı ilk sayıyı vermeli; vermiyorsa grubun hepsi kusurlu. */
+  const gruplar = {};
+  sonuc.filter(s => s.ayni).forEach(s => (gruplar[s.ayni] = gruplar[s.ayni] || []).push(s));
+  Object.values(gruplar).forEach(l => { const say = l.map(s => (String(s.cevap).replace(/(\d)\.(\d{3})/g, '$1$2').match(/\d+(?:,\d+)?/) || [''])[0]);
+    if(new Set(say).size > 1) l.forEach(s => { s.gecti = false; s.neden.push('tutarsız: ' + say.join(' / ')); }); });
+  fs.writeFileSync(CIKTI, JSON.stringify(sonuc, null, 1));
+  const W = { 1:1, 2:2, 3:3 };
+  const puan = l => { const t = l.reduce((a, s) => a + W[s.zor], 0); return t ? Math.round(100 * l.reduce((a, s) => a + (s.gecti ? W[s.zor] : 0), 0) / t) : null; };
+  const paketler = [...new Set(sonuc.map(s => s.paket))];
+  const pp = paketler.map(p => [p, puan(sonuc.filter(s => s.paket === p)), sonuc.filter(s => s.paket === p && s.gecti).length, sonuc.filter(s => s.paket === p).length]);
+  const kp = Math.round(pp.reduce((a, x) => a + x[1], 0) / (pp.length || 1));
+  console.log('\nKing-Bench ' + etiket + ': King puanı ' + kp + '/100 (zorluk ağırlıklı, paket ortalaması) · ' + sonuc.filter(s => s.gecti).length + '/' + sonuc.length + ' vaka');
+  pp.forEach(([p, v, g, n]) => console.log('  ' + p.padEnd(8) + ' ' + String(v).padStart(3) + '  (' + g + '/' + n + ') · zor3 ' + (puan(sonuc.filter(s => s.paket === p && s.zor === 3)) ?? '—')));
   const ms = sonuc.map(s => s.ms).sort((a, b) => a - b);
   console.log('süre: ortanca ' + ms[ms.length >> 1] + ' ms, en çok ' + ms[ms.length - 1] + ' ms');
   // Verim: modele gitmeden (kural/kod) çözülen oran — hızlı, ucuz, uydurmaz.

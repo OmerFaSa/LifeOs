@@ -50,7 +50,7 @@ ESP.Parse = (function(){
     philo:['felsefe okudum', 'felsefe çalıştım', 'tez yazdım', 'argüman kurdum',
       'primer metin okudum', 'felsefe', 'argüman', 'tez'],
     music:['gitar çalıştım', 'gitar çaldım', 'metronomla çalıştım', 'gam çalıştım',
-      'parça çalıştım', 'enstrüman çalıştım', 'gitar', 'müzik'],
+      'parça çalıştım', 'enstrüman çalıştım', 'piyano çalıştım', 'keman çalıştım', 'gitar', 'piyano', 'keman', 'müzik'],
     diction:['diksiyon çalıştım', 'tekerleme söyledim', 'nefes çalıştım',
       'sunum provası yaptım', 'yüksek sesle okudum', 'diksiyon', 'tekerleme',
       'ses açma egzersizi yaptım', 'ses açma çalıştım', 'ses açma egzersizi', 'ses açma',

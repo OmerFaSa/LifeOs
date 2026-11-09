@@ -24,7 +24,7 @@ window.LIFEOS = window.LIFEOS || {};
 window.LIFEOS.OLCU = (function(){
   let ayar = null;
   const kucuk = s => String(s || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
-  const SORU = /(kaç|ne kadar|ortalama|toplam|değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|gidiyor|nasıl gitti|nasıl geçti|nasıl uyu|ilerle|karşılaştır|daha (?:çok|az|fazla)|ne çalıştım|ne yaptım|en zayıf|en güçlü|iyi mi|yeterli mi|hangisi)/;
+  const SORU = /(kaç|ne kadar|ortalama|toplam|değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|gidiyor|nasıl gitti|nasıl geçti|nasıl uyu|ilerle|karşılaştır|daha (?:çok|az|fazla)|ne çalıştım|ne yaptım|en zayıf|en güçlü|iyi mi|yeterli mi|hangisi|daha mı|göre|sayı\w* (?:ne|kaç))/;
   const BASKA = /(hedef|kaç bine|sıralama|puan|kart|deste|yüzde kaç|ne işe yar|nedir|ne demek|ilişki|etkisi|günler(?:de|i)?\b|neden|sence|doz|almalıyım|içmeliyim|kaç tane)/;
   const DEGISIM = /(değiş|arttı|azaldı|düştü|yükseldi|verdim mi|aldım mı|trend|ilerle|daha mı|geçen haftaya göre|öncekine göre|karşılaştır|daha (?:çok|az|fazla))/;
   const SAYI = { bir:1, iki:2, üç:3, dört:4, beş:5, altı:6, yedi:7, sekiz:8, dokuz:9, on:10, otuz:30 };
@@ -86,10 +86,14 @@ window.LIFEOS.OLCU = (function(){
     return { l, deger:!l.length ? null : o.tur === 'ortalama' ? t / l.length : o.tur === 'son' ? l[l.length - 1].v : t };
   }
 
-  const OZET = /(genel olarak|nasıl geçti|nasıldım|özetle|özetini çıkar|nasıl gidiyorum)/;
+  const OZET = /(genel olarak|nasıl geçti|nasıldım|nasılım|özetle|özetini çıkar|nasıl gidiyorum)/;
   /* Dönem özeti: modülün ölçüleri (genel olmayan, toplam/ortalama/son ve deneme) tek cevapta. */
   function ozet(t, bugun){
-    const d = donem(t, bugun) || { bas:gunEkle(bugun, -29), son:bugun, ad:'son 30 gün' };
+    const kars = /(göre|karşılaştır|kıyasla)/.test(t);
+    let d = donem(t, bugun) || { bas:gunEkle(bugun, -29), son:bugun, ad:'son 30 gün' };
+    if(kars && /bu ay/.test(t)) d = { bas:bugun.slice(0, 8) + '01', son:bugun, ad:'bu ay' };
+    /* King-Bench: «bu ay geçen aya göre» önceki dönemi de yazar (yalnız «geçen ay» okunuyordu). */
+    const d0 = !kars ? null : d.ad === 'bu ay' ? donem('geçen ay', bugun) : d.ad === 'bu hafta' ? donem('geçen hafta', bugun) : null;
     const satir = [];
     for(const o of ayar.olculer){
       if(o.tur === 'anlik' || o.komut) continue;
@@ -100,15 +104,84 @@ window.LIFEOS.OLCU = (function(){
       }
       const r = topla(o, null, d);
       if(r.deger == null) continue;
-      satir.push(o.ad.charAt(0).toLocaleUpperCase('tr') + o.ad.slice(1) + ': ' + (o.tur === 'ortalama' ? 'ortalama ' : '') + yaz(r.deger, o.ondalik ? 10 : 1) + ' ' + o.birim + ' (' + r.l.length + ' gün)');
+      const r0 = d0 ? topla(o, null, d0) : null;
+      satir.push(o.ad.charAt(0).toLocaleUpperCase('tr') + o.ad.slice(1) + ': ' + (o.tur === 'ortalama' ? 'ortalama ' : '') + yaz(r.deger, o.ondalik ? 10 : 1) + ' ' + o.birim + ' (' + r.l.length + ' gün)'
+        + (r0 && r0.deger != null ? ' · ' + d0.ad + ' ' + yaz(r0.deger, o.ondalik ? 10 : 1) + ' (' + r0.l.length + ' gün)' : ''));
     }
     const bas = d.ad.charAt(0).toLocaleUpperCase('tr') + d.ad.slice(1);
     return { id:'ozet', cevap:satir.length ? bas + ' kayıtlarından:' : bas + ' için kayıt yok.', satirlar:satir.length ? satir : null };
   }
 
+  /* HAFTALIK DEĞERLENDİRME (King-Bench koçluk paketi): bu hafta, geçen haftanın AYNI günleriyle (pazartesi → bugünün
+     karşılığı) karşılaştırılır; adil olsun diye yarım hafta tam haftayla kıyaslanmaz. İyi giden = en çok artan,
+     aksayan = en çok düşen ya da bu hafta hiç girilmeyen ölçü. Öneri sayıdır: geçen haftayı yakalamak için kalan
+     günlerde gün başı ne gerektiği. Kilo gibi yönü kişiye bağlı ölçüler («son») iyi/kötü sayılmaz. */
+  const HAFTA_DEG = /(haftamı (?:değerlendir|özetle|incele)|geçen haftaya göre (?:nasıl|ne durumda)|haftayı değerlendir|haftalık değerlendirme|bu hafta(?:m)? nasıl geçti|bu hafta(?:m)? nasıl gidiyor|bu hafta kendime (?:iyi )?bakt|bu hafta nasıl(?:ım|dım)|haftam nasıl)/;
+  function haftaDegerlendir(bugun){
+    const dow = (new Date(bugun + 'T12:00:00').getDay() + 6) % 7;
+    const d = { bas:gunEkle(bugun, -dow), son:bugun }, d0 = { bas:gunEkle(bugun, -dow - 7), son:gunEkle(bugun, -7) };
+    const l = [];
+    for(const o of ayar.olculer){
+      if(o.tur !== 'toplam' && o.tur !== 'ortalama' || o.genel || o.komut || typeof o.gun !== 'function') continue;
+      const r = topla(o, null, d), r0 = topla(o, null, d0);
+      if(r.deger == null && r0.deger == null) continue;
+      l.push({ o, simdi:r.deger, once:r0.deger, gun:r.l.length, gun0:r0.l.length,
+        oran:r.deger != null && r0.deger ? (r.deger - r0.deger) / Math.abs(r0.deger) : r.deger != null ? 1 : -1 });
+    }
+    const gunAd = dow === 0 ? 'bugün (pazartesi)' : 'pazartesiden bugüne ' + (dow + 1) + ' gün';
+    if(!l.length) return { id:'hafta', cevap:'Bu hafta ve geçen hafta karşılaştıracak kayıt yok. Birkaç gün kayıt girersen haftanı değerlendiririm.' };
+    const on = o => o.ondalik ? 10 : 1;
+    const satir = l.map(x => x.o.ad.charAt(0).toLocaleUpperCase('tr') + x.o.ad.slice(1) + ': ' + (x.o.tur === 'ortalama' ? 'ortalama ' : '')
+      + yaz(x.simdi, on(x.o)) + ' ' + x.o.birim + ' (geçen hafta aynı günlerde ' + yaz(x.once, on(x.o)) + ')');
+    const sirali = l.slice().sort((a, b) => b.oran - a.oran);
+    const iyi = sirali[0].oran > 0.05 ? sirali[0] : null;
+    const kotu = sirali[sirali.length - 1].oran < -0.05 ? sirali[sirali.length - 1] : null;
+    const yuzde = x => x.once ? (x.oran >= 0 ? '+' : '−') + '%' + Math.round(Math.abs(x.oran) * 100) : 'yeni';
+    let oneri;
+    if(kotu && kotu.o.tur === 'toplam'){
+      const kalan = 6 - dow, eksik = (kotu.once || 0) - (kotu.simdi || 0);
+      oneri = kalan > 0 && eksik > 0 ? 'Geçen haftanın ' + kotu.o.ad + ' düzeyine yetişmek için kalan ' + kalan + ' günde günde yaklaşık ' + yaz(Math.ceil(eksik / kalan), 1) + ' ' + kotu.o.birim + ' yeter.'
+        : 'Hafta bitti sayılır; gelecek hafta ' + kotu.o.ad + ' için her gün küçük bir hedef koy.';
+    }else if(kotu){
+      oneri = kotu.o.ad.charAt(0).toLocaleUpperCase('tr') + kotu.o.ad.slice(1) + ' ortalaman düştü; bu hafta hedefin geçen haftanın düzeyi: ' + yaz(kotu.once, on(kotu.o)) + ' ' + kotu.o.birim + '.';
+    }else oneri = 'Ölçülerinin hiçbiri geçen haftanın gerisinde değil; bu ritmi koru.';
+    return { id:'hafta', satirlar:satir,
+      cevap:'Bu hafta (' + gunAd + '), geçen haftanın aynı günlerine göre: '
+        + (iyi ? 'iyi giden ' + iyi.o.ad + ' (' + yuzde(iyi) + ')' : 'belirgin artış yok')
+        + '; ' + (kotu ? 'aksayan ' + kotu.o.ad + ' (' + yuzde(kotu) + (kotu.simdi == null ? ', bu hafta hiç girilmedi' : '') + ')' : 'aksayan yok') + '. ' + oneri };
+  }
+
+  /* NEDEN (King-Bench içgörü paketi): «geçen ay neden daha az soru çözdüm». Toplam = kayıtlı gün × gün başı; değişim
+     bu iki parçaya ayrılır ve büyük olan söylenir. Bu bir hesaptır, neden-sonuç değil: «tembelsin» gibi yargı yoktur. */
+  const NEDEN = /(?:^|\s)(?:neden|niye|niçin)(?=\s).*(?:(?:^|\s)(?:az|çok|fazla)(?=\s|$|[?.!,])|düştü|düşük|azal|arttı|artış|yüksel)/;
+  function nedenCoz(t, bugun){
+    const b = olcuBul(t);
+    if(!b || b.o.tur !== 'toplam' || typeof b.o.gun !== 'function') return null;
+    const { o, alt } = b;
+    const d = donem(t, bugun) || donem('geçen ay', bugun);
+    if(!d.bas) return null;
+    let d0;
+    if(/ay$/.test(d.ad) || AYLAR.indexOf(d.ad) >= 0){ const x = new Date(d.bas + 'T12:00:00'); x.setDate(0); d0 = { bas:iso(x).slice(0, 8) + '01', son:iso(x) }; }
+    else { const n = gunler(d.bas, d.son).length; d0 = { bas:gunEkle(d.bas, -n), son:gunEkle(d.bas, -1) }; }
+    const r = topla(o, alt, d), r0 = topla(o, alt, d0);
+    const ad = (alt ? alt + ' ' : '') + o.ad;
+    if(r.deger == null || r0.deger == null) return { id:o.id + '-neden', cevap:'Karşılaştırmak için iki dönemde de ' + ad + ' kaydı gerekiyor; ' + (r.deger == null ? d.ad : 'önceki dönem') + ' için kayıt yok.' };
+    const g = r.l.length, g0 = r0.l.length, p = r.deger / g, p0 = r0.deger / g0;
+    const gunEtkisi = (g - g0) * p0, tempoEtkisi = (p - p0) * g;
+    const bas = d.ad.charAt(0).toLocaleUpperCase('tr') + d.ad.slice(1);
+    const yon = r.deger < r0.deger ? 'düşüşün' : 'artışın';
+    const buyuk = Math.abs(gunEtkisi) >= Math.abs(tempoEtkisi)
+      ? yon + ' çoğu kayıtlı gün sayısından: ' + Math.abs(g - g0) + ' gün ' + (g < g0 ? 'daha az' : 'daha çok') + ' (≈ ' + yaz(Math.abs(gunEtkisi), 1) + ' ' + o.birim + ')'
+      : yon + ' çoğu gün başı tempodan: gün başı ' + yaz(p0, 1) + ' → ' + yaz(p, 1) + ' ' + o.birim + ' (≈ ' + yaz(Math.abs(tempoEtkisi), 1) + ' ' + o.birim + ')';
+    return { id:o.id + '-neden', cevap:bas + ' ' + ad + ': ' + yaz(r.deger, 1) + ' ' + o.birim + ' (' + g + ' kayıtlı gün, gün başı ' + yaz(p, 1) + '); önceki dönem '
+      + yaz(r0.deger, 1) + ' (' + g0 + ' gün, gün başı ' + yaz(p0, 1) + '). Hesaba göre ' + buyuk + '. Kayıt girilmeyen gün sıfır sayılmaz.' };
+  }
+
   function coz(metin, bugun){
     if(!ayar) return null;
     const t = kucuk(metin);
+    if(HAFTA_DEG.test(t)) return haftaDegerlendir(bugun);
+    if(NEDEN.test(t)){ const n = nedenCoz(t, bugun); if(n) return n; }
     if(OZET.test(t) && !BASKA.test(t)) return ozet(t, bugun);
     /* Ölçü değil: hedef/puan karşılaştırması, kart sayısı, tanım sorusu («ne işe yarıyor?»). */
     /* `komut`: kısa ad da sorudur («ilaçlarım»). */
@@ -119,7 +192,7 @@ window.LIFEOS.OLCU = (function(){
     const b = olcuBul(t);
     if(!b) return null;
     /* İki ölçü birden («gitar ve dil çalışma saatim»): tek sayıyla cevaplanmaz, yol modülün aracına kalır. */
-    if(ayar.olculer.filter(o => !o.genel && o.es.test(t)).length > 1) return null;
+    if(!b.o.ozel && ayar.olculer.filter(o => !o.genel && !o.ozel && o.es.test(t)).length > 1) return null;
     const { o, alt } = b;
     const ad = (alt ? alt + ' ' : '') + (typeof o.adOf === 'function' ? o.adOf(t) : o.ad);
     const on = o.ondalik ? 10 : 1;

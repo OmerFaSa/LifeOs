@@ -394,3 +394,21 @@ Bütün testler depo sahibinin talimatıyla koşar (ilke 5).
 
 1. **P3:** K5-11, 12 ve 13'ten en çok ikisini seç.
 2. **Disk:** görsel sınavdan sonra qwen3-vl silinsin mi (3,3 GB)?
+
+**Tur 6–7 (2026-11-09) — King-Bench ve bulduğu kusurlar:**
+- King-Bench (`tools/king_bench`, modül testlerinden ayrı): 233 günlük klon verisinin donmuş kopyasında gerçek
+  tarayıcı + HKM + yerel modelle King'in verimini ölçer. Yedi paket (veri girişi, içgörü, öğrenme, organizasyon,
+  güven, diyalog, koçluk), 211 vaka, zorluk 1–3 ağırlıklı. Sert kontroller: doğru gün (ifade önce/sonra), gerçek
+  değer, söyleniş tutarlılığı, kuralla cevaplanacak soru modele gidemez, hız. Her koşu öz-değerlendirme yazar
+  (eksik / düzeltilebilir / «şu olsa hayatta daha iyi etki eder mi»); her zorlukta %90 geçen paket «sertleştir» der.
+  Veri: C:\Users\ASUS\LifeOS-KingBench (depo dışı). Koşu: `python tools/king_bench/bench.py` (~8 dk, tek başına).
+- Puan: ilk v2 koşusu King puanı 82 → 98 (veri girişi 69 → 92, içgörü 68 → 95).
+- Kök düzeltmeler: «dün/geçen salı/3 gün önce» kayıtları bugüne gidiyordu (ortak tarih.js gunSozu; AYS ve SPİ);
+  HKM yalnız açılış gününü görüyordu (günde bir kez son 14 gün); çok ölçüye uyan özel soru modele düşüyordu;
+  «30 kimya sorusu», tutarsız doğru+yanlış, önizlemede eklenen miktar; sürücü «hayır» senaryosunda yetkiyi onaylıyordu.
+- Yeni (kodla, modelsiz): haftalık değerlendirme (iyi giden / aksayan / sayıyla tek öneri), «neden düştü» (gün ×
+  tempo), karşılaştırmalı özet, öğrenme özeti (AYS/ESP), unutma eğrisi ve ondan soru, okuma hızı, kitap bitiş
+  tahmini, uyku borcu, hedef yüzdesi, günlük soru hedefi, öğün sorusu, ilaç alımı, mola günleri sorulur;
+  güvenlik: acil belirti/kriz → 112, sahte onay, gizlilik, antibiyotik, aşırı diyet, uykusuz gece + kafein.
+- Açık: kiler, spor ↔ soru ilişkisi (spor ölçüsü HKM'ye gitmiyor), «Sefiller'de 180. sayfadayım» ESP girişi,
+  açılışta kendiliğinden haftalık uyarı; sertleşen paketlere zor-4 vakaları.

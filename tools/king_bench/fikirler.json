@@ -10,7 +10,7 @@
   "etki": 5,
   "caba": 3,
   "neden": "Klon 233 günde en çok «bu hafta nasıldım» diye sordu; cevap tek sayıydı. Ne iyi gitti / ne aksadı / gelecek hafta tek öneri, kullanıcının kendi verisiyle. Düzenli geri bildirim alışkanlığı sürdürmenin en güçlü kaldıracı.",
-  "durum": "öneri"
+  "durum": "yapıldı"
  },
  {
   "id": "uyku-uyari",
@@ -22,7 +22,7 @@
   "etki": 4,
   "caba": 2,
   "neden": "Klonda az uyunan haftalarda soru sayısı düştü. Son 3 gece 6 saatin altındaysa King yarının planını hafifletmeyi önerir: yorgunlukla çökmeden önce.",
-  "durum": "öneri"
+  "durum": "yapıldı"
  },
  {
   "id": "hastalik-modu",
@@ -126,7 +126,7 @@
   "etki": 4,
   "caba": 2,
   "neden": "«Bu hafta neler öğrendim» — hangi konular çalışıldı, kaç soru doğru, hangi kartlar oturdu. Öğrendiğini görmek, devam etme isteğinin en güçlü kaynağı.",
-  "durum": "öneri"
+  "durum": "yapıldı"
  },
  {
   "id": "ogren-sadelestir",
@@ -148,7 +148,7 @@
   "etki": 4,
   "caba": 2,
   "neden": "ESP'de kartların hatırlama oranı hesaplanıyor (SRS) ama King söylemiyor. «Şu 5 kelime unutulmak üzere» tekrarın en verimli anı.",
-  "durum": "öneri"
+  "durum": "yapıldı"
  },
  {
   "id": "ogren-kisisel",
@@ -171,5 +171,28 @@
   "caba": 1,
   "neden": "Tur 6'da eklendi: King kullanıcının kendi kelime kartlarından çoktan seçmeli sorar, cevabı aralıklı tekrara yazar.",
   "durum": "yapıldı"
+ },
+ {
+  "id": "neden-ayristir",
+  "alan": [
+   "analiz"
+  ],
+  "ad": "«Neden düştü» ayrıştırması",
+  "etki": 4,
+  "caba": 2,
+  "neden": "Değişimi kayıtlı gün ve gün başı tempo olarak ayırır; tur 7'de eklendi.",
+  "durum": "yapıldı"
+ },
+ {
+  "id": "proaktif-uyari",
+  "alan": [
+   "destek",
+   "plan"
+  ],
+  "ad": "Kendiliğinden haftalık uyarı (açılışta)",
+  "etki": 5,
+  "caba": 3,
+  "neden": "Haftalık değerlendirme ve uyku borcu şimdilik sorulunca geliyor; King açılışta kendisi söylerse fark edilmeyen düşüş erken yakalanır.",
+  "durum": "öneri"
  }
 ]

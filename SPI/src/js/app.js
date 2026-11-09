@@ -679,6 +679,29 @@ SP.App = (function(){
       { id:'uyku', ad:'uyku', birim:'saat', ondalik:true, es:/uyku|uyu(?:dum|yor|muşum)|nasıl uyu/, tur:'ortalama', gun:g => v(g, 'sleep') },
       { id:'kilo', ad:'kilo', birim:'kg', ondalik:true, es:/kilo|tartı/, tur:'son', gun:g => v(g, 'weight') },
       { id:'su', ad:'su', birim:'ml', es:/\bsu\b|su iç/, tur:'ortalama', gun:g => v(g, 'water') },
+      /* King-Bench koçluk paketi: «uyku borcum var mı» — son 7 gecenin 7,5 saat hedefine göre açığı; son 3 gece 6 saatin
+         altındaysa erken uyarı. Girilmeyen gece sayılmaz (borç uydurulmaz). */
+      { id:'uykuBorcu', ozel:true, ad:'uyku borcu', es:/uyku borc|uykusuz mu(?:yum)?|yeterince uyu|az mı uyu/, tur:'anlik', anlik:(t, bugun) => {
+        const HEDEF = 7.5, l = [];
+        for(let i = 0; i < 7; i++){ const g = SP.U.iso(SP.U.addDays(SP.U.parse(bugun), -i)); const x = v(g, 'sleep'); if(x != null) l.push({ g, x }); }
+        if(l.length < 3) return { v:null, metin:'Uyku borcunu hesaplamak için son 7 gecenin en az 3\'ünde uyku kaydı gerekiyor; ' + l.length + ' gece var.' };
+        const borc = l.reduce((s, y) => s + Math.max(0, HEDEF - y.x), 0), ort = l.reduce((s, y) => s + y.x, 0) / l.length;
+        const son3 = l.filter(y => y.g >= SP.U.iso(SP.U.addDays(SP.U.parse(bugun), -2)));
+        const uyari = son3.length === 3 && son3.every(y => y.x < 6);
+        const y1 = n => String(Math.round(n * 10) / 10).replace('.', ',');
+        return { v:borc, metin:'Son 7 gecede ' + l.length + ' kayıt, ortalama ' + y1(ort) + ' saat; ' + HEDEF.toString().replace('.', ',') + ' saat hedefine göre uyku borcun ' + y1(borc) + ' saat.'
+          + (uyari ? ' Son 3 gece 6 saatin altında: bugün yükü hafiflet ve erken yat.' : borc > 5 ? ' Birkaç gece 30–60 dakika erken yatmak borcu kapatır.' : ' İyi durumdasın.') };
+      } },
+      /* King-Bench diyalog: «bu sabah ne yemiştim», «dün akşam ne yedim» — günün öğünleri kendi kaydından. */
+      { id:'ogunler', ozel:true, ad:'öğünler', es:/ne (?:yedim|yemiştim|yemişim)|neler yedim|(?:kahvaltıda|öğlen|akşam) ne ye/, tur:'anlik', anlik:(t, bugun) => {
+        const gun = /dün/.test(t) ? SP.U.iso(SP.U.addDays(SP.U.parse(bugun), -1)) : bugun;
+        const slot = /sabah|kahvaltı/.test(t) ? 'kahvalti' : /öğle/.test(t) ? 'ogle' : /akşam/.test(t) ? 'aksam' : null;
+        const ad = it => { const f = SP.FOOD_BY_ID && SP.FOOD_BY_ID[it.foodId]; return f ? f.name : String(it.name || it.foodId || ''); };
+        const l = (SP.S.meals[gun] || []).filter(m => !slot || m.slot === slot).filter(m => (m.items || []).length);
+        const g = gun === bugun ? 'Bugün' : 'Dün';
+        if(!l.length) return { v:0, metin:g + (slot ? ' bu öğün için' : '') + ' öğün kaydı yok.' };
+        return { v:l.length, metin:g + ' kaydettiklerin: ' + l.map(m => (SP.Ogun ? SP.Ogun.ad(m.slot) : m.slot) + ': ' + m.items.map(ad).join(', ')).join(' · ') + '.' };
+      } },
       { id:'ilacAlim', ozel:true, ad:'ilaç alımı', es:/(ilaç|takviye|vitamin|hap)[a-zçğıöşü]* .*(aldım mı|içtim mi|aldın mı|kaçırdım)/, tur:'anlik', anlik:() => {
         /* King-Bench (tur 6): alım işareti (vitals.medsTaken, spi_ilac_alim) bugün için okunur. */
         const l = (SP.S.meds || []).filter(m => !m.endDate);

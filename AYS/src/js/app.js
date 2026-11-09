@@ -1708,6 +1708,44 @@ R.App = (function(){
         return { v:l[0].ort, metin:'Son 90 günde en verimli günün ' + l[0].a + ': kayıtlı ' + l[0].n + ' günde ortalama ' + Math.round(l[0].ort) + ' soru. '
           + 'Sıra: ' + l.map(x => x.a + ' ' + Math.round(x.ort)).join(', ') + '. Kayıtsız gün hesaba girmez.' };
       } },
+      /* King-Bench içgörü: «hedefimin yüzde kaçındayım» — planın konu kapanışı (Calc) ve son deneme neti. */
+      { id:'hedefYuzde', ozel:true, ad:'hedef', es:/hedef\w*.*(?:yüzde|kaçında|ne kadar(?:ını)?|ilerle)|yüzde kaç(?:ı)? tamam/, tur:'anlik', anlik:() => {
+        const c = R.Calc.overallClosure ? R.Calc.overallClosure() : null;
+        const net = R.Calc.fullExams('TYT').map(M.examNet).filter(n => n != null && isFinite(n));
+        if(!c || !c.total) return { v:null, metin:'Plan kurulmadığı için hedef ilerlemesi ölçülemiyor.' };
+        return { v:c.pct, metin:'Planındaki konuların %' + Math.round(c.pct) + '\'i kapandı (' + c.closed + '/' + c.total + ' konu).' + (net.length ? ' Son TYT netin ' + U.round(net[net.length - 1], 2) + (net.length > 1 ? ' (ilk denemen ' + U.round(net[0], 2) + ')' : '') + '.' : '') };
+      } },
+      /* «sınava kadar günde kaç soru çözmeliyim»: kalan gün ve kendi temposu; hedef sayı söylenirse günlük payı. */
+      { id:'gunlukHedef', ozel:true, ad:'günlük soru hedefi', es:/günde kaç soru (?:çözmeliyim|çözmem lazım|çözmem gerek|yetişir)/, tur:'anlik', anlik:(t, bugun) => {
+        const k = R.PLAN.kalanGun(bugun);
+        let q = 0, g = 0;
+        for(let i = 0; i < 30; i++){ const v = R.Calc.gunSorusu(R.S.days[R.U.iso(R.U.addDays(R.U.parse(bugun), -i))]); if(v){ q += v; g++; } }
+        const hedef = (t.replace(/\./g, '').match(/(\d{4,6})\s*soru/) || [])[1];
+        const ort = g ? Math.round(q / g) : null;
+        if(k == null) return { v:null, metin:'Sınav tarihin kayıtlı değil; tarihi girersen günlük payı hesaplarım.' };
+        if(hedef) return { v:Math.ceil(Number(hedef) / k), metin:'Sınava ' + k + ' gün var: ' + Number(hedef).toLocaleString('tr-TR') + ' soru için günde ' + Math.ceil(Number(hedef) / k) + ' soru gerekiyor' + (ort ? '; son 30 günde kayıtlı günlerde ortalaman ' + ort + '.' : '.') };
+        return { v:ort, metin:'Sınava ' + k + ' gün var. ' + (ort ? 'Son 30 günde kayıtlı ' + g + ' günde ortalama ' + ort + ' soru çözüyorsun; bu tempoyla sınava kadar ≈ ' + (ort * k).toLocaleString('tr-TR') + ' soru eder. ' : '')
+          + 'Hedef toplamı söylersen («sınava kadar 20000 soru») günlük payı hesaplarım.' };
+      } },
+      /* King-Bench öğrenme paketi: «bu hafta neler öğrendim» — çalışılan konular, soru ve doğru oranı, sırası gelen tekrar. */
+      { id:'ogrendim', ozel:true, ad:'öğrenme özeti', es:/(?:bu hafta|bugün|bu ay) (?:neler|ne) öğrendim|öğrendiklerim(?:i)? (?:özetle|göster)|bu hafta hangi konular/, tur:'anlik', anlik:(t, bugun) => {
+        const dow = (new Date(bugun + 'T12:00:00').getDay() + 6) % 7;
+        const bas = /bugün/.test(t) ? bugun : /bu ay/.test(t) ? bugun.slice(0, 8) + '01' : R.U.iso(R.U.addDays(R.U.parse(bugun), -dow));
+        const konu = {}, ad = id => ((R.SUBJECTS || []).find(s => s.id === id) || {}).name || id;
+        let q = 0, c = 0, cq = 0, dk = 0;
+        Object.keys(R.S.days).filter(g => g >= bas && g <= bugun).forEach(g => { const d = R.S.days[g];
+          (d.blocks || []).forEach(b => { const n = Number(b.actualQ) || 0, m = b.minCert === 'measured' ? Number(b.actualMin) || 0 : 0; if(!n && !m) return;
+            const k = b.topic || b.subject || 'Konu'; const x = konu[k] = konu[k] || { q:0, c:0, cq:0, m:0 }; x.q += n; x.m += m;
+            if(b.correctQ != null && n){ x.c += Number(b.correctQ); x.cq += n; } });
+          Object.keys(d.freeBySubject || {}).forEach(k => { const f = d.freeBySubject[k], x = konu[ad(k)] = konu[ad(k)] || { q:0, c:0, cq:0, m:0 }; x.q += f.q || 0; x.m += f.m || 0; if(f.q && f.c != null){ x.c += f.c; x.cq += f.q; } }); });
+        const l = Object.keys(konu).map(k => Object.assign({ k }, konu[k])).sort((a, b) => b.q + b.m - a.q - a.m);
+        l.forEach(x => { q += x.q; c += x.c; cq += x.cq; dk += x.m; });
+        const tekrar = R.Calc.dueCards(bugun).length;
+        if(!l.length) return { v:null, metin:'Bu dönemde konu kaydın yok. Soru ya da süre girdikçe neyi öğrendiğini buradan özetlerim. Sırası gelen tekrar: ' + tekrar + '.' };
+        const donemAd = /bugün/.test(t) ? 'Bugün' : /bu ay/.test(t) ? 'Bu ay' : 'Bu hafta';
+        return { v:l.length, metin:donemAd + ' ' + l.length + ' konu/derste çalıştın: ' + l.slice(0, 6).map(x => x.k + ' (' + [x.q ? x.q + ' soru' + (x.cq ? ', %' + Math.round(x.c * 100 / x.cq) : '') : '', x.m ? x.m + ' dk' : ''].filter(Boolean).join(', ') + ')').join(' · ')
+          + '. Toplam ' + q + ' soru' + (cq ? ', doğru oranı %' + Math.round(c * 100 / cq) : '') + (dk ? ', ' + dk + ' dk' : '') + '. Sırası gelen tekrar: ' + tekrar + '.' };
+      } },
       /* King-Bench seviye 2: «bugün neyi çalışmalıyım» — öneri kendi verisinden: en zayıf ders + sırası gelen tekrar. */
       { id:'oneri', ozel:true, ad:'çalışma önerisi', es:/(?:neyi|ne|hangi (?:dersi|konuyu|derse)) çalış(?:malıyım|sam|ayım)|bugün neye çalış/, tur:'anlik', anlik:t => {
         const z = window.LIFEOS.OLCU.coz('en zayıf olduğum ders hangisi', R.U.todayISO());

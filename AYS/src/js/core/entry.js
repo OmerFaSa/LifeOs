@@ -120,7 +120,10 @@ R.Entry = (function(){
     const n = sayi(m[1] != null ? m[1] : m[2]);
     if(n != null) return n;
     const s = String(text).match(new RegExp(ad + SONRA, 'i'));
-    return s ? sayi(s[1]) : null;
+    if(s) return sayi(s[1]);
+    /* «30 kimya sorusu çözmüştüm»: sayı, ders adı ve sayaç (King-Bench veri girişi paketi). */
+    const a = String(text).match(new RegExp('(\\d+)\\s+[a-zçğıöşü]+\\s+' + ad, 'i'));
+    return a ? sayi(a[1]) : null;
   }
   const DOGRU_RE    = /(\d+)\s*(?:'?[sy]i\s*)?(?:tane\s*)?(?:doğru|dogru|net)/i;
   /* «4 yanlış», «4 yanlışım var», «2 boş» (2026-10-19, depo sahibi: «konudan
@@ -178,6 +181,10 @@ R.Entry = (function(){
       const yanlis = y ? sayi(y[1]) : null, bos = b ? sayi(b[1]) : null;
       if(yanlis != null){ dogru = n - yanlis - (bos || 0); bosVarsayim = bos == null; }
     }
+    /* King-Bench: «40 soru 32 doğru 12 yanlış» tutarsızdır (44 > 40); sessizce yazılmaz, sorulur. */
+    if(d){ const y2 = String(text).match(YANLIS_RE), b2 = String(text).match(BOS_RE);
+      const yan = y2 ? sayi(y2[1]) : null, bo = b2 ? sayi(b2[1]) : null;
+      if(yan != null && dogru + yan + (bo || 0) > n) return { kind:'soru', tutarsiz:true, count:Math.round(n), dogru, yanlis:yan, bos:bo }; }
     /* Doğru sayısı çözülenden çok olamaz: yanlış okunmuştur. */
     if(dogru != null && (dogru < 0 || dogru > n)){ dogru = null; bosVarsayim = false; }
 
@@ -327,6 +334,9 @@ R.Entry = (function(){
   function fromText(text, opts){
     const o = opts || {};
     const date = o.date || U.todayISO();
+    const ts = parseSoru(text);
+    if(ts && ts.tutarsiz) return { deneme:true, oneriler:[], anlasilmayan:[], engellenen:[{ metin:String(text).trim(),
+      soru:ts.dogru + ' doğru + ' + ts.yanlis + ' yanlış' + (ts.bos ? ' + ' + ts.bos + ' boş' : '') + ' = ' + (ts.dogru + ts.yanlis + (ts.bos || 0)) + '; çözülen ' + ts.count + ' soruyu geçiyor. Hangisi yanlış yazıldı? Düzeltip yeniden yazarsan kaydederim.' }] };
     const dn = parseDeneme(text);
     if(dn){
       const metin = String(text).trim();

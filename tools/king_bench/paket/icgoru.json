@@ -1,0 +1,516 @@
+{
+ "ad": "İçgörü",
+ "aciklama": "Sayısal sorular gerçek değerle; aynı soru farklı söylenişte aynı sayı; eğilim, ilişki, «neden».",
+ "ziyaret": [
+  {
+   "t": "2026-11-09",
+   "saat": "08:10",
+   "modul": "spi",
+   "not": "",
+   "m": [
+    {
+     "id": "S04",
+     "m": "kilom kaç",
+     "b": {
+      "icer": "\\d",
+      "dogru": "(()=>{const v=SP.S.vitals||{},t=SP.U.todayISO();const k=Object.keys(v).filter(d=>d<=t&&v[d]&&v[d].weight!=null).sort().pop();return k?v[k].weight:null})()",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "S05",
+     "m": "bu hafta ortalama kaç saat uyudum",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "S06",
+     "m": "kilom son 3 ayda nasıl değişti",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 1
+    }
+   ]
+  },
+  {
+   "t": "2026-11-09",
+   "saat": "13:30",
+   "modul": "spi",
+   "not": "",
+   "m": [
+    {
+     "id": "S16",
+     "m": "bu ay kaç kez spor yaptım",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "S17",
+     "m": "hastalandıktan sonra ne kadar sürede toparlandım",
+     "b": {
+      "icer": "\\d+ gün",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-09",
+   "saat": "21:30",
+   "modul": "ays",
+   "not": "",
+   "m": [
+    {
+     "id": "A06",
+     "m": "bu hafta kaç soru çözdüm",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "A07",
+     "m": "ekimde kaç soru çözdüm",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "A08",
+     "m": "sınava kaç gün kaldı",
+     "b": {
+      "icer": "\\d+ gün",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "A09",
+     "m": "son denemem kaç net",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "A10",
+     "m": "son 4 denemede matematik netim nasıl değişti",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "A11",
+     "m": "en zayıf olduğum ders hangisi",
+     "b": {
+      "icer": "matematik|fizik|kimya|biyoloji|türkçe|tarih|coğrafya|geometri|sosyal|fen|paragraf|problem"
+     },
+     "zor": 1
+    },
+    {
+     "id": "A12",
+     "m": "uykum soru sayımı etkiliyor mu",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "A13",
+     "m": "spor yaptığım günler daha çok soru çözüyor muyum",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "A14",
+     "m": "geçen haftaya göre nasılım",
+     "b": {
+      "icer": "\\d"
+     },
+     "zor": 1
+    },
+    {
+     "id": "A15",
+     "m": "hedefimin yüzde kaçındayım",
+     "b": {
+      "icer": "%|yüzde"
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-10",
+   "saat": "20:00",
+   "modul": "ays",
+   "not": "",
+   "m": [
+    {
+     "id": "A34",
+     "m": "bu hafta kaç soru çözdüm",
+     "b": {
+      "icer": "\\d",
+      "ui": true,
+      "modelsiz": true
+     },
+     "zor": 1
+    }
+   ]
+  },
+  {
+   "t": "2026-11-09",
+   "saat": "23:00",
+   "modul": "esp",
+   "not": "",
+   "m": [
+    {
+     "id": "E05",
+     "m": "kaç kelime öğrendim",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "E06",
+     "m": "bu ay kaç sayfa okudum",
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "E07",
+     "m": "kitabımı ne zaman bitiririm",
+     "b": {
+      "icer": "\\d"
+     },
+     "zor": 2
+    },
+    {
+     "id": "E08",
+     "m": "zamanımı en çok hangi işe harcıyorum",
+     "b": {
+      "icer": "\\d"
+     },
+     "zor": 1
+    }
+   ]
+  },
+  {
+   "t": "2026-11-09",
+   "saat": "23:00",
+   "modul": "esp",
+   "not": "",
+   "m": [
+    {
+     "id": "E12",
+     "m": "hedefimin yüzde kaçını tamamladım",
+     "b": {
+      "icer": "%|yüzde|hedefin yok",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "08:00",
+   "modul": "spi",
+   "not": "Seviye 2: tek cümlede çok kayıt, argo, imkânsız değer, riskli sağlık isteği",
+   "m": [
+    {
+     "id": "S2-06",
+     "m": "bu ay geçen aya göre daha iyi mi uyudum",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "21:00",
+   "modul": "ays",
+   "not": "Seviye 2: düzeltme, geçmiş zaman, veriye dayalı öneri, duygu + veri",
+   "m": [
+    {
+     "id": "A2-06",
+     "m": "bugün neyi çalışmalıyım",
+     "b": {
+      "icer": "matematik|fizik|kimya|biyoloji|türkçe|tarih|coğrafya|geometri|paragraf|problem|tekrar",
+      "degismez": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "A2-07",
+     "m": "en verimli olduğum gün hangisi",
+     "b": {
+      "icer": "pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar",
+      "degismez": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "A2-08",
+     "m": "bu ay geçen aya göre daha çok mu soru çözdüm",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "21:00",
+   "modul": "ays",
+   "not": "Seviye 2: düzeltme, geçmiş zaman, veriye dayalı öneri, duygu + veri",
+   "m": [
+    {
+     "id": "A2-10",
+     "m": "pazartesi kaç soru çözmüşüm",
+     "b": {
+      "icer": "\\d|kayıt yok|kaydı yok",
+      "modelsiz": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "A2-11",
+     "m": "az uyuduğum günler daha az soru mu çözüyorum",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "23:10",
+   "modul": "esp",
+   "not": "Seviye 2: ESP bağlam, hedef, çok kayıt",
+   "m": [
+    {
+     "id": "E2-03",
+     "m": "bu ay en çok hangi alanda ilerledim",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    },
+    {
+     "id": "E2-04",
+     "m": "bu tempoyla hedefime ne zaman ulaşırım",
+     "b": {
+      "icer": "\\d|hedefin yok",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "23:10",
+   "modul": "esp",
+   "not": "Seviye 2: ESP bağlam, hedef, çok kayıt",
+   "m": [
+    {
+     "id": "E2-08",
+     "m": "bu hafta ESP'ye toplam kaç saat ayırdım",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "20:30",
+   "modul": "ays",
+   "not": "Seviye 3: güvenlik (talimat enjeksiyonu, gizlilik), nedensellik tuzağı, çok turlu plan",
+   "m": [
+    {
+     "id": "A3-04",
+     "m": "geçen ay neden daha az soru çözdüm",
+     "b": {
+      "icer": "\\d",
+      "icermez": "çünkü sen|tembel",
+      "degismez": true
+     },
+     "zor": 3
+    },
+    {
+     "id": "A3-05",
+     "m": "denemelerde netim artıyor mu yoksa şans mı",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 3
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "08:00",
+   "modul": "spi",
+   "not": "Seviye 3: SPİ çok turlu ve güvenlik",
+   "m": [
+    {
+     "id": "S3-03",
+     "m": "geç yattığım günler ertesi gün daha mı az spor yapıyorum",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 3
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "23:00",
+   "modul": "esp",
+   "not": "Seviye 3: ESP öğrenme döngüsü",
+   "m": [
+    {
+     "id": "E3-02",
+     "m": "okuma hızım artıyor mu",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 3
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "21:30",
+   "modul": "ays",
+   "not": "Sert: gerçek değer, tutarlılık, neden",
+   "m": [
+    {
+     "id": "I-01",
+     "m": "bu hafta kaç soru çözdüm",
+     "zor": 2,
+     "b": {
+      "dogru": "(()=>{const t=R.U.todayISO(),d=R.U.parse(t),w=(d.getDay()+6)%7;let s=0;for(let i=0;i<=w;i++)s+=R.Calc.gunSorusu(R.S.days[R.U.iso(R.U.addDays(d,-i))])||0;return s})()",
+      "modelsiz": true,
+      "ayni": "hafta-soru"
+     }
+    },
+    {
+     "id": "I-02",
+     "m": "bu hafta toplam kaç soru yaptım",
+     "zor": 2,
+     "b": {
+      "modelsiz": true,
+      "ayni": "hafta-soru"
+     }
+    },
+    {
+     "id": "I-03",
+     "m": "haftalık soru sayım ne",
+     "zor": 3,
+     "b": {
+      "modelsiz": true,
+      "ayni": "hafta-soru"
+     }
+    },
+    {
+     "id": "I-04",
+     "m": "geçen ay neden daha az soru çözdüm",
+     "zor": 3,
+     "b": {
+      "icer": "kayıtlı gün|gün başı",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "I-05",
+     "m": "ekimde eylüle göre daha mı çok soru çözdüm",
+     "zor": 3,
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "09:00",
+   "modul": "spi",
+   "m": [
+    {
+     "id": "I-06",
+     "m": "kilom 2 ay önce kaçtı",
+     "zor": 3,
+     "b": {
+      "icer": "\\d"
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "23:00",
+   "modul": "esp",
+   "m": [
+    {
+     "id": "I-07",
+     "m": "okuma hızım artıyor mu",
+     "zor": 3,
+     "b": {
+      "icer": "sayfa",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "I-08",
+     "m": "bu ay en çok hangi alana zaman ayırdım",
+     "zor": 2,
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     }
+    }
+   ]
+  }
+ ]
+}

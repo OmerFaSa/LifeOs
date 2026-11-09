@@ -876,10 +876,10 @@ R.Proposals = (function(){
       },
       preview(p, ctx){
         if(!ctx.blok) return [{ label:gunEk(p.date) + (ctx.subject ? ctx.subject.name + ' · ' : '') + yz('ays.core.proposals.plan-disi-gunun-toplami') + ' · süre',
-          before:ctx.day.freeMin == null ? 'girilmemiş' : ctx.day.freeMin + ' dk', after:((Number(ctx.day.freeMin) || 0) + ctx.dk) + ' dk' }];
+          before:ctx.day.freeMin == null ? 'girilmemiş' : ctx.day.freeMin + ' dk', after:((Number(ctx.day.freeMin) || 0) + ctx.dk) + ' dk' + (ctx.day.freeMin ? ' (+' + ctx.dk + ' dk)' : '') }];
         return [{ label:(ctx.blok.topic || ctx.subject.name) + ' · süre',
           before:ctx.blok.actualMin == null ? 'girilmemiş' : ctx.blok.actualMin + ' dk',
-          after:(ctx.blok.minCert === 'estimated' ? ctx.dk : (Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' }];
+          after:(ctx.blok.minCert === 'estimated' ? ctx.dk : (Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' + (ctx.blok.minCert !== 'estimated' && ctx.blok.actualMin ? ' (+' + ctx.dk + ' dk)' : '') }];
       },
       /* Plandan gelen dakika tahmindir (minCert 'estimated'): yazılan süre
          ona EKLENMEZ, yerine geçer (`yerine`). Ölçülmüşe eklenir. Geri al

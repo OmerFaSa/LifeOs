@@ -402,7 +402,8 @@ ESP.KingArac = (function(){
         uygula:async p => {
           const c = await M().saveCard(M().newCard({ front:p.on, back:p.arka, lang:p.dil || (S().ui && S().ui.deckLang) || 'en' }));
           render();
-          return { metin:yz('esp.core.kingarac.karti-ekledim'), geriAl:c && c.id ? async () => { await M().deleteCard(c.id); render(); } : null };
+          /* «King ne yaptı» ve «az önce eklediğim kelime» neyin eklendiğini söyleyebilsin (King-Bench diyalog). */
+          return { metin:'«' + p.on + '» → «' + p.arka + '» kartını ekledim.', geriAl:c && c.id ? async () => { await M().deleteCard(c.id); render(); } : null };
         } },
       { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:yz('esp.core.kingarac.alinti-kaydet'), ornek:'alıntı: Düşünüyorum öyleyse varım',
         aciklama:yz('esp.core.kingarac.bir-kitaptan-alintiyi-ya-da'),

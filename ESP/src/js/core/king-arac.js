@@ -1222,6 +1222,7 @@ window.LIFEOS.PARCA.yazilar({
     if(yazma){
       const o = await A.onizle(yazma.arac.ad, yazma.param, { metin });
       if(!o.ok){
+        if(/zaten/.test(String(o.hata))){ KI.soyle(String(o.hata).replace(/^./, c => c.toLocaleUpperCase('tr')).replace(/[.]*$/, '.') + ' Değiştirmem gereken bir şey yok.'); return { tur:'arac-bilgi' }; }
         KI.soyle(yz('ortak.king-arac.bunu-yapmak-istedim-ama-olma') + o.hata + '. Kendi cümlenle yazarsan ya da sayfasından yaparsan olur.');
         return { tur:'arac-red' };
       }

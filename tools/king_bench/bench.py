@@ -1,23 +1,30 @@
-"""King-Bench: King'in gerçek kullanımdaki verimini ölçen seviyeli benchmark (modül testlerinden ayrı).
+"""King-Bench: King'in ve sistemin gerçek kullanımdaki verimini ölçen benchmark (modül testlerinden ayrı).
 
-Modül testleri (AYS/SPİ/ESP runtests, HKM tests) kodun DOĞRU çalıştığını sınar; King-Bench ise
-bir kullanıcının King'den ne kadar İŞ aldığını ölçer: 233 günlük klon simülasyonunun donmuş verisi
-üzerinde, gerçek tarayıcıda, gerçek HKM ve yerel modelle, kullanıcının cümleleriyle.
+Modül testleri (AYS/SPİ/ESP runtests, HKM tests) kodun DOĞRU çalıştığını sınar; King-Bench bir insanın
+King ve LifeOS ile ne kadar iş çıkardığını ölçer: 233 günlük klon simülasyonunun donmuş verisi üzerinde,
+gerçek tarayıcıda, gerçek Merkez (HKM) ve yerel modelle, kullanıcının kendi cümleleriyle.
 
-  python tools/king_bench/bench.py                 # sıradaki seviye (durum.json)
-  python tools/king_bench/bench.py --seviye 2      # belli bir seviye
-  python tools/king_bench/bench.py --sadece A02,E01
-  python tools/king_bench/bench.py --durum         # seviye geçmişi
+Yedi paket (paket/*.json), her biri ayrı bir alan:
+  kayit    Veri girişi       tek cümleden doğru miktar, doğru GÜN, doğru modül
+  icgoru   İçgörü            sayısal cevap GERÇEK değerle; aynı soru farklı söylenişte aynı sayı; «neden»
+  ogrenme  Öğrenme           anlatım, soru döngüsü, yanlışın açıklaması, unutma eğrisi, öğrenme özeti
+  plan     Organizasyon      plan onaysız değişmez, mola günleri sorulur, hatırlatma, ilaç takibi
+  guven    Güven/güvenlik    acil, kriz, ilaç/tahlil sınırı, talimat enjeksiyonu, gizlilik, silme
+  diyalog  Diyalog           düzeltme, «aslında», geri al, eksik cümle, hafıza
+  kocluk   Koçluk            haftalık değerlendirme, uyku borcu, hedef sapması, motivasyon
 
-Seviyeler (seviye-N.json): bir seviyede %85 ve üstü alınınca sonraki koşu bir üst seviyeye geçer
-(%10'u kovalamak yerine daha zor bir ölçüt). Üst seviye yoksa yenisini yazma zamanıdır.
+Her vakanın zorluğu 1–3; paket puanı zorluk ağırlıklıdır (zor vaka 3 kat sayılır). King puanı = paket
+puanlarının ortalaması. Bir paket her zorlukta %90'ı geçince öz-değerlendirme «sertleştir» der: o pakete
+daha zor vakalar yazma zamanıdır (kolay %10'u kovalamak yerine ölçütü yükselt).
 
-Her koşu: VERI/taban (donmuş hkm.db + tarayıcı profili) → VERI/is kopyalanır, HKM 4290 + modüller
-4281-4283 + Ollama açılır, bench.js koşar, hepsi kapanır (8 GB RAM: tek başına koşturun). Sonra
-oz.py öz-değerlendirmeyi yazar: eksikler / düzeltilebilir / «şu olsa hayatta daha iyi etki eder mi».
+  python tools/king_bench/bench.py                       # bütün paketler
+  python tools/king_bench/bench.py --paket guven,kocluk  # seçili paketler
+  python tools/king_bench/bench.py --sadece K-01,K-02    # tek vakalar
+  python tools/king_bench/bench.py --durum               # geçmiş
 
-VERI: ortam değişkeni KING_BENCH_VERI ya da C:\\Users\\ASUS\\LifeOS-KingBench (depo dışında; kullanıcının
-gerçek verisine ve LifeOS-Sistem'e dokunulmaz).
+Her koşu: VERI/taban (donmuş hkm.db + tarayıcı profili) → VERI/is, HKM 4290 + modüller 4281-4283 + Ollama
+açılır, bench.js koşar, hepsi kapanır (8 GB RAM: tek başına koşturun; ~8 dk). Sonra oz.py öz-değerlendirmeyi
+yazar. VERI: KING_BENCH_VERI ya da C:\\Users\\ASUS\\LifeOS-KingBench (depo dışı; gerçek veriye dokunulmaz).
 """
 import datetime, json, os, shutil, subprocess, sys, time, urllib.request
 
@@ -26,10 +33,10 @@ KOK = os.path.dirname(os.path.dirname(BU))
 VERI = os.environ.get("KING_BENCH_VERI") or r"C:\Users\ASUS\LifeOS-KingBench"
 TABAN, IS = os.path.join(VERI, "taban"), os.path.join(VERI, "is")
 DURUM = os.path.join(VERI, "durum.json")
+SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk"]
 MODUL = {"AYS": 4281, "SPI": 4282, "ESP": 4283}
 OLLAMA = os.path.expandvars(r"%LOCALAPPDATA%\Programs\Ollama\ollama.exe")
 GIZLI = 0x08000000
-ESIK = 0.85
 
 
 def acik(url):
@@ -48,20 +55,25 @@ def bekle(url, n=80):
     return False
 
 
-def durum_oku():
-    return json.load(open(DURUM, encoding="utf-8")) if os.path.exists(DURUM) else {"seviye": 1, "gecmis": []}
+def senaryo(secili):
+    """Paketlerden tek senaryo: ziyaretler paket sırasıyla, her ziyaret paket adını taşır."""
+    out = []
+    for p in SIRA:
+        if secili and p not in secili:
+            continue
+        for z in json.load(open(os.path.join(BU, "paket", p + ".json"), encoding="utf-8"))["ziyaret"]:
+            out.append(dict(z, paket=p))
+    return out
 
 
-def seviyeler():
-    return sorted(int(f[7:-5]) for f in os.listdir(BU) if f.startswith("seviye-") and f.endswith(".json"))
-
-
-def kos(seviye, etiket, ek):
+def kos(etiket, sen, ek):
     shutil.rmtree(IS, ignore_errors=True)
     shutil.copytree(TABAN, IS)
     cfg = json.load(open(os.path.join(VERI, "config.json"), encoding="utf-8"))
     cfg["db_path"] = os.path.join(IS, "hkm.db")
     json.dump(cfg, open(os.path.join(IS, "config.json"), "w", encoding="utf-8"), indent=1)
+    yol = os.path.join(IS, "senaryo.json")
+    json.dump(sen, open(yol, "w", encoding="utf-8"), ensure_ascii=False)
     pids = []
     try:
         if not acik("http://127.0.0.1:11434/api/tags"):
@@ -76,7 +88,7 @@ def kos(seviye, etiket, ek):
                                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=GIZLI).pid)
         if not (bekle("http://127.0.0.1:4290/api/health") and all(bekle("http://127.0.0.1:%d/index.html" % p) for p in MODUL.values())):
             sys.exit("sunucular acilmadi")
-        return subprocess.run(["node", os.path.join(BU, "bench.js"), etiket, os.path.join(BU, "seviye-%d.json" % seviye), VERI] + ek).returncode
+        return subprocess.run(["node", os.path.join(BU, "bench.js"), etiket, yol, VERI] + ek).returncode
     finally:
         for pid in pids:
             subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True)
@@ -84,34 +96,34 @@ def kos(seviye, etiket, ek):
             subprocess.run(["taskkill", "/F", "/IM", ad], capture_output=True)
 
 
+def puan(l):
+    t = sum(s.get("zor", 1) for s in l)
+    return round(100 * sum(s.get("zor", 1) for s in l if s["gecti"]) / t) if t else None
+
+
 def main():
     a = sys.argv[1:]
-    d = durum_oku()
+    d = json.load(open(DURUM, encoding="utf-8")) if os.path.exists(DURUM) else {"gecmis": []}
     if "--durum" in a:
-        print(json.dumps(d, ensure_ascii=False, indent=1))
+        for g in d["gecmis"][-12:]:
+            print(g.get("etiket"), g.get("king", g.get("puan")), g.get("paketler", ""))
         return
-    seviye = int(a[a.index("--seviye") + 1]) if "--seviye" in a else d["seviye"]
+    secili = a[a.index("--paket") + 1].split(",") if "--paket" in a else None
     ek = a[a.index("--sadece"):a.index("--sadece") + 2] if "--sadece" in a else []
-    etiket = "s%d-%s" % (seviye, datetime.datetime.now().strftime("%Y%m%d-%H%M"))
+    etiket = "v2-" + datetime.datetime.now().strftime("%Y%m%d-%H%M")
     if not os.path.isdir(TABAN):
         sys.exit("taban yok: %s (klon simülasyonunun donmuş verisi)" % TABAN)
-    kod = kos(seviye, etiket, ek)
+    kod = kos(etiket, senaryo(secili), ek)
     sonuc = os.path.join(VERI, "sonuc", "bench-%s.json" % etiket)
     if kod or not os.path.exists(sonuc):
         sys.exit("bench.js kod %s" % kod)
     R = json.load(open(sonuc, encoding="utf-8"))
-    oran = sum(s["gecti"] for s in R) / len(R)
-    once = [g for g in d["gecmis"] if g["seviye"] == seviye and not g.get("kismi")]
+    paketler = {p: puan([s for s in R if s.get("paket") == p]) for p in SIRA if any(s.get("paket") == p for s in R)}
+    once = [g for g in d["gecmis"] if g.get("paketler") and not g.get("kismi")]
     onceki = [os.path.join(VERI, "sonuc", "bench-%s.json" % once[-1]["etiket"])] if once else []
     subprocess.run([sys.executable, os.path.join(BU, "oz.py"), sonuc] + onceki)
-    d["gecmis"].append({"etiket": etiket, "seviye": seviye, "puan": round(oran * 100), "n": len(R), "kismi": bool(ek)})
-    if not ek and seviye == d["seviye"] and oran >= ESIK:
-        ust = [s for s in seviyeler() if s > seviye]
-        if ust:
-            d["seviye"] = ust[0]
-            print("Seviye %d %%%d ≥ %%%d: sonraki koşu seviye %d." % (seviye, round(oran * 100), round(ESIK * 100), ust[0]))
-        else:
-            print("Seviye %d %%%d: en üst seviye; daha zor bir seviye-%d.json yazma zamanı." % (seviye, round(oran * 100), seviye + 1))
+    d["gecmis"].append({"etiket": etiket, "king": round(sum(paketler.values()) / len(paketler)), "paketler": paketler,
+                        "n": len(R), "kismi": bool(ek or secili)})
     json.dump(d, open(DURUM, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 

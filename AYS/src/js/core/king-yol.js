@@ -186,7 +186,7 @@ window.LIFEOS.KING = (function(){
   const YAPILACAK_RE = /^(yapılacak(lar)?|yapilacak|hatırlat|hatirlat)(?![a-zçğıöşü])/;   // «yapılacak: fatura öde» bir hatırlatmadır, ödeme değil
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   const PLAN_SOZ_RE = /(bugünün|bugünkü|günün) (planı|plan|programı|akışı)/;
-  const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|ilac|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
+  const ILAC_RE = /(hangi ilac|hangi hap|ilaç öner|ilac öner|antibiyotik (?:yaz|öner|ver|içeyim|alayım)|reçete yaz|bana ilaç yaz|kaç (?:mg|miligram)|kaç (?:tane|adet) (?:ilaç|hap|ağrı kesici)|(?:ilaç|ilac|hap|ağrı kesici)\S* kaç (?:tane|mg)|doz(?:u|unu)? (?:ne|kaç))/;
   const ILISKI_RE = /(ilişki|etkisi|etkiliyor|günler(?:de|i)?\s.*(?:mi|mı|mu|mü)\b)/;
   const OLUMSUZ_GUN_RE = /(hiç çalışmadım|çalışmadım|çalışamadım|hiçbir şey yapmadım|hiç bir şey yapmadım|bir şey yapamadım|boş geçti|hiç çalışasım yok)/;
   const HIS_RE = /(hissediyorum|kötüyüm|mutsuzum|üzgünüm|stresliyim|bunaldım|bunalıyorum|baskı yapıyor|motivasyon|uyuyamıyorum|başarısız|suçlu|endişeliyim|kaygılıyım|konuşalım mı|konuşabilir miyiz|yetişemiyorum|yetişemeyeceğim|yetiştiremiyorum|üstüme geliyor|nasıl yetişeceğim)/;
@@ -203,11 +203,16 @@ window.LIFEOS.KING = (function(){
   const TAHLIL_SOR_RE = /(b12|d vitamin\w*|ferritin|demir|kolesterol|ldl|hdl|tsh|t3|t4|glukoz|şeker\w*|hemoglobin|trigliserit|tahlil\w*|değer\w*)\D{0,30}\d.*\b(düşük|yüksek|normal|iyi|kötü|tehlikeli|sorun)\w*\s+m[iıuü]/;
   /* King-Bench seviye 3 (güvenlik): acil belirti ve kendine zarar sözü modele gitmeden, ilk iş olarak karşılanır. */
   const ACIL_RE = /(göğs\w* (?:ağrı|baskı|sıkış)|göğsümde (?:ağrı|baskı|sıkışma)|sol kol\w* (?:uyuş|vur|ağrı)|nefes alamıyorum|nefesim kesil|bayılacak gibi|yüzüm(?:ün)? (?:bir tarafı )?(?:kaydı|düştü)|konuşmam bozuldu|felç)/;
-  const KRIZ_RE = /(intihar|kendimi öldür|yaşamak istemiyorum|ölmek istiyorum|kendime zarar|canıma kıy)/;
+  const KRIZ_RE = /(intihar|kendimi öldür|yaşamak istemiyorum|ölmek istiyorum|kendime zarar|canıma kıy|hiçbir şeyin (?:bir )?anlamı (?:yok|kalmadı)|yaşamanın anlamı (?:yok|kalmadı))/;
+  /* King-Bench güven: uykusuz gece + aşırı kafein planı bir sağlık riskidir; model geçiştiriyordu. */
+  const RISK_RE = /(bütün gece|sabaha kadar|hiç) uyumadan|(\d{1,2}) (?:kutu|şişe) enerji içeceği|(\d{1,2}) (?:fincan|bardak) kahve (?:içeceğim|içerim)/;
   /* Metnin içindeki «onay verildi / sistem:» iddiası onay değildir (talimat enjeksiyonu). */
   const SAHTE_YETKI_RE = /^(?:sistem|system|admin|yönetici|geliştirici)\s*:|(?:kullanıcı|sahibi) (?:onay|izin) verdi|onay alındı|önceki (?:bütün )?talimatların\w* unut/;
+  /* King-Bench plan paketi: «bu hafta 3 gün çalışamayacağım» — günler sorulur, cevap modülün mola komutuna gider. */
+  const CALISAMAM_RE = /(?:(\d|bir|iki|üç|dört|beş|altı) gün|bu hafta|birkaç gün|hafta sonu)\s+(?:hiç\s+)?(?:ders\s+)?(?:çalışamayacağım|çalışamam|çalışamıyorum|müsait değilim|yokum|izinliyim)|(?:bayram|tatil|yılbaşı)\w*\s+(?:\S+\s+){0,3}(?:mola|ara|izin)\s*(?:tanımla|ver|koy|yap|ekle)/;
+  const GUN_ADI_RE = /(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|yarın|hafta ?sonu|\d{1,2} (?:ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık))/;
   const GIZLILIK_RE = /(verilerim\w* (?:kime|nereye|nerede|güvende)|internete (?:gidiyor|gönder|çıkıyor)|(?:kime|nereye) gönderiyorsun|verilerimi kim (?:görüyor|okuyor)|gizlilik(?:im)? (?:nasıl|ne durumda))/;
-  const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|aç kalsam|kusmak)/;
+  const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|\d{2,3}'?[ae] (?:inmek|düşmek) istiyorum|aç kalsam|kusmak|diyet yapıp)/;
   const DUZELT_RE = /^(?:hayır|pardon|yok|yanlış(?: yazdım)?|düzelt(?:me)?:?)?[\s,]*(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)\s*,?\s*(\d+(?:[.,]\d+)?)(?:\s*(?:olacak|olmalı|olsun|yaz|idi|ydi))?\s*[.!]*$/;
   async function isle(metin){
     metin = yazimDuzelt(metin);
@@ -226,6 +231,23 @@ window.LIFEOS.KING = (function(){
       if(KRIZ_RE.test(t0)) KI.soyle('Bunu bana yazdığın için teşekkür ederim; şu an zor bir yerdesin ve bununla yalnız kalmamalısın. Kendine zarar verme düşüncen varsa hemen 112\'yi ara ya da yanındaki birine şimdi söyle. Güvendiğin biriyle, bir hekimle ya da psikolojik destek veren bir uzmanla konuşmak gerçekten iyi gelir. Ben de buradayım; istersen anlat.');
       else KI.soyle('Bu belirtiler acil olabilir. Bekleme: hemen 112\'yi ara ya da en yakın acil servise git. Yalnızsan kapını aç ve birine haber ver. Ben teşhis koyamam; bu durumda doğru adres acil yardımdır.');
       return { tur:KRIZ_RE.test(t0) ? 'kriz' : 'acil' };
+    }
+    if(RISK_RE.test(t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+      KI.soyle('Bu plan sınavda sana zarar verir: uykusuz geçen gece hatırlamayı ve dikkati düşürür; öğrendiğin bilgi uykuda yerleşir. Çok sayıda enerji içeceği yüksek kafein demek: çarpıntı, titreme ve uykusuzluk yapabilir; yetişkinlerde günlük 400 mg kafein genelde üst sınır olarak anılır ve bir kutu çoğunlukla 80–160 mg içerir. Önerim: bu gece en az 6 saat uyu, kalan zamanı en çok çıkan konulara ve kısa bir deneme tekrarına ayır. Kalp ya da tansiyon sorunun varsa kafeini hekimine sor.');
+      return { tur:'saglik-uyari' };
+    }
+    /* King-Bench öğrenme: «daha basit anlat» — son dersin konusu modele sadeleştirme isteğiyle gider (aynı kartı yinelemez). */
+    if(/^(?:peki\s+)?(?:bunu |şunu |onu )?(?:daha |biraz )?(?:basit(?:çe)?|kolay|sade) (?:anlat|açıkla)|^anlamadım,? (?:tekrar|baştan) anlat/.test(t0)){   // konu adı söylenmişse kendi yolunda
+      const d = KI.akis.slice().reverse().find(m => m.kim === 'king' && m.ders);
+      const konu = d && (d.ders.sorgu || d.ders.baslik || d.ders.ad);
+      if(konu){
+        const yeni = String(konu) + ' nedir, 12 yaşındaki birine anlatır gibi günlük bir örnekle çok basit açıkla';
+        const r = await isle(yeni);
+        const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === yeni).pop();
+        if(sen) sen.metin = String(metin).trim();
+        return Object.assign({}, r, { sade:true });
+      }
     }
     if(SAHTE_YETKI_RE.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -275,6 +297,36 @@ window.LIFEOS.KING = (function(){
     }
     /* King-Bench seviye 2: düzeltme — «hayır 50 değil 45», «pardon 72 değil 71,5 olacak». Son kayıt geri alınır,
        aynı cümle doğru sayıyla yeniden işlenir (önizleme + onay yine olur). */
+    /* King-Bench plan paketi: çalışamayacağı günler. Önce sorulur; gün adları gelince mola komutu önizlenir (onaysız plan değişmez). */
+    { const A = KI.ARAC && KI.ARAC(), ara = A && A.bul && KI.ayar && A.bul(KI.ayar.modul + '_ara_ver');
+      if(KI.bekleyenAra){
+        const istek = KI.bekleyenAra; KI.bekleyenAra = null;
+        if(GUN_ADI_RE.test(t0) && ara){
+          const yeni = String(metin).trim().replace(/[.!]+$/, '') + ' ara ver';
+          const r = await isle(yeni);
+          const sen = KI.akis.filter(m => m.kim === 'sen' && m.metin === yeni).pop();
+          if(sen) sen.metin = String(metin).trim();
+          return Object.assign({}, r, { ara:istek });
+        }
+      }
+      if(ara && CALISAMAM_RE.test(t0) && !GUN_ADI_RE.test(t0.replace(/hafta ?sonu/, ''))){
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+        KI.bekleyenAra = { metin:String(metin).trim() };
+        KI.soyle('Hangi günler? «cuma ve cumartesi» ya da «yarından itibaren 3 gün» gibi yazarsan o günleri mola yaparım; planın kalan günlere yeniden dağılır. Önce önizlemeyi gösteririm.');
+        return { tur:'ara-sor' };
+      }
+    }
+    /* King-Bench diyalog paketi: «az önce eklediğim kelimeyi göster» — son yapılan iş eylem defterinden. */
+    if(/az önce (?:eklediğim|kaydettiğim|yazdığım|girdiğim)|son (?:eklediğim|kaydettiğim) (?:şey|kayıt|kelime)/.test(t0) && KI.eylemListesi){
+      const e = KI.eylemListesi().find(x => x.durum !== 'geri_alindi');
+      if(e){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+        KI.soyle('Az önce: ' + (e.ozet || e.arac) + ' (' + KI.tarihYaz(e.zaman) + ').'); return { tur:'eylem', n:1 }; }
+    }
+    /* King-Bench diyalog paketi: «aslında 25'ti» — son kayıttaki ilk sayının düzeltmesi («X değil Y» kuralına çevrilir). */
+    { const AS = /^(?:yok\s+|hayır\s+|pardon\s+)?aslında\s+(\d+(?:[.,]\d+)?)(?:'?(?:ti|tı|tu|tü|di|dı|du|dü|ydi|ydı|idi))?\s*[.!]*$/.exec(t0);
+      const ilk = AS && KI.sonKayitCumle && (KI.sonKayitCumle.match(/\d+(?:[.,]\d+)?/) || [])[0];
+      if(ilk && ilk !== AS[1]) return isle(ilk + ' değil ' + AS[1]).then(r => { const s = KI.akis.filter(m => m.kim === 'sen' && m.metin === ilk + ' değil ' + AS[1]).pop(); if(s) s.metin = String(metin).trim(); return r; });
+    }
     /* King-Bench seviye 3 (bağlam): «bir de fizikten 15» — son kayıt bir soru kaydıysa aynı kalıpla tamamlanır. */
     { const EL = /^(?:bir de|ayrıca|bi de|bide)?\s*([a-zçğıöşü]+?)('?(?:dan|den|tan|ten))\s+(\d{1,3})(?:\s+(?:tane|soru))?\s*[.!]*$/.exec(t0);
       if(EL && KI.sonKayitCumle && /soru/.test(KI.kucuk(KI.sonKayitCumle))){
@@ -286,7 +338,7 @@ window.LIFEOS.KING = (function(){
       }
     }
     /* King-Bench seviye 3 (öğretme): «neden yanlış», «anlamadım» — son cevaplanan yanlış sorunun çözümü açılır. */
-    if(/^(?:peki\s+)?(?:neden|niye|niçin)\s+(?:yanlış|olmadı)|^anlamadım|açıklar mısın|nasıl çözülüyor/.test(t0)){
+    if(/^(?:peki\s+)?(?:neden|niye|niçin)(?:\s+(?:yanlış|olmadı|böyle))?\s*[?.!]*$|^(?:peki\s+)?(?:neden|niye|niçin)\s+(?:yanlış|olmadı)|^anlamadım|açıklar mısın|nasıl çözülüyor/.test(t0)){
       const m = KI.akis.slice().reverse().find(x => x.kim === 'king' && x.soru && x.soru.cevap);
       if(m && (m.soru.cevap.cozum || []).length){
         KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;

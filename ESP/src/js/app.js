@@ -1954,7 +1954,7 @@ ESP.App = (function(){
             return { v:tum, metin:'Son 30 günde ölçülen ' + Math.round(tum / 6) / 10 + ' saatin dağılımı: ' + l.map(k => adOf(k) + ' ' + Math.round(top[k]) + ' dk (%' + Math.round(top[k] * 100 / tum) + ')').join(', ') + '. En çok ' + adOf(l[0]) + '.' };
           } }, {
           /* King-Bench (tur 6): «hedefimin yüzde kaçı», «hedeflerim nasıl gidiyor» — planlı hedefin ölçülen/hedef oranı kodla. */
-          id:'hedef', ozel:true, ad:'hedef', es:/hedef\w*.*(yüzde|kaçı|nasıl gidiyor|ne durumda|neler)|hedeflerim/, tur:'anlik', anlik:() => {
+          id:'hedef', ozel:true, ad:'hedef', es:/hedef\w*.*(yüzde|kaçı|nasıl gidiyor|ne durumda|neler|geride|ileride|yolunda|ne zaman ulaş)|hedeflerim/, tur:'anlik', anlik:() => {
             const H = ESP.Hedefler, P = ESP.HedefPlan;
             const l = H && H.aktifler ? H.aktifler() : [];
             if(!l.length) return { v:null, metin:'Etkin bir ESP hedefin yok. «hedef ekle: …» diye yazabilirsin.' };
@@ -1966,6 +1966,61 @@ ESP.App = (function(){
               return H.ozet(h) + (yuzde != null ? ' · %' + yuzde + ' tamam' : '') + (il && il.metin ? ' · ' + il.metin : ' · planı yok, ilerleme ölçülemiyor');
             });
             return { v:l.length, metin:l.length + ' etkin hedef: ' + satir.join(' — ') };
+          } }, {
+          /* King-Bench öğrenme paketi: «bu hafta neler öğrendim» — yeni kartlar, tekrarlar (doğru hatırlanan), okuma. */
+          id:'ogrendim', ozel:true, ad:'öğrenme özeti', es:/(?:bu hafta|bugün|bu ay) (?:neler|ne) öğrendim|öğrendiklerim(?:i)? (?:özetle|göster)/, tur:'anlik', anlik:(t, bugun) => {
+            const dow = (new Date(bugun + 'T12:00:00').getDay() + 6) % 7;
+            const bas = /bugün/.test(t) ? bugun : /bu ay/.test(t) ? bugun.slice(0, 8) + '01' : ESP.U.iso(ESP.U.addDays(ESP.U.parse(bugun), -dow));
+            const kart = (ESP.S.cards || []).filter(c => String(c.createdAt || '').slice(0, 10) >= bas);
+            const tekrar = [].concat(...(ESP.S.cards || []).map(c => (c.history || []).filter(h => String(h.at || '').slice(0, 10) >= bas)));
+            const iyi = tekrar.filter(h => h.grade && h.grade !== 'again').length;
+            let sayfa = 0, dk = 0;
+            for(let g = bas; g <= bugun; g = ESP.U.iso(ESP.U.addDays(ESP.U.parse(g), 1))) oturum(g, () => true).forEach(s => { if(s.disc === 'reading' && s.count) sayfa += Number(s.count); if(s.minutes) dk += Number(s.minutes); });
+            if(!kart.length && !tekrar.length && !dk) return { v:null, metin:'Bu dönemde öğrenme kaydın yok: yeni kart, tekrar ya da oturum girilmemiş.' };
+            const ad = /bugün/.test(t) ? 'Bugün' : /bu ay/.test(t) ? 'Bu ay' : 'Bu hafta';
+            return { v:kart.length, metin:ad + ' ' + kart.length + ' yeni kelime' + (kart.length ? ' (' + kart.slice(-6).map(c => c.front).join(', ') + ')' : '')
+              + ', ' + tekrar.length + ' tekrar' + (tekrar.length ? ' (%' + Math.round(iyi * 100 / tekrar.length) + ' hatırladın)' : '')
+              + (sayfa ? ', ' + sayfa + ' sayfa okuma' : '') + ', toplam ' + dk + ' dk çalışma.' };
+          } }, {
+          /* King-Bench içgörü: «kitabımı ne zaman bitiririm» — okunan her kitap için kalan sayfa ÷ son 30 günün sayfa temposu. */
+          id:'kitapBitis', ozel:true, ad:'kitap bitiş', es:/(?:kitab\w*|okuduğum\w*).*ne zaman bitir|ne zaman bitiririm/, tur:'anlik', anlik:(t, bugun) => {
+            const M2 = ESP.Model;
+            const l = (ESP.S.books || []).filter(b => !b.finishedAt && (!M2.bookStatus || (M2.bookStatus(b) || {}).id === 'okunuyor'));
+            if(!l.length) return { v:null, metin:'Şu an okunan kitabın yok.' };
+            const satir = l.map(b => {
+              let sayfa30 = 0;
+              for(let i = 0; i < 30; i++) oturum(ESP.U.iso(ESP.U.addDays(ESP.U.parse(bugun), -i)), s => s.disc === 'reading' && s.ref === b.id && s.count > 0).forEach(s => { sayfa30 += Number(s.count); });
+              const p = M2.okumaIlerlemesi ? M2.okumaIlerlemesi(b) : null;
+              if(!p) return b.title + ': sayfa sayısı yazılı değil («' + b.title + ' 450 sayfa» dersen hesaplarım)' + (sayfa30 ? '; son 30 günde ' + sayfa30 + ' sayfa okudun' : '');
+              const kalan = p.toplam - p.okunan;
+              if(!sayfa30) return b.title + ': ' + p.okunan + '/' + p.toplam + ' sayfa; son 30 günde okuma kaydı yok, tarih tahmin edilemiyor';
+              const gun = Math.ceil(kalan / (sayfa30 / 30));
+              return b.title + ': ' + p.okunan + '/' + p.toplam + ' sayfa, günde ≈ ' + Math.round(sayfa30 / 30 * 10) / 10 + ' sayfa temposuyla ≈ ' + gun + ' gün (' + ESP.U.fmtShort(ESP.U.iso(ESP.U.addDays(ESP.U.parse(bugun), gun))) + ')';
+            });
+            return { v:l.length, metin:'Bitiş tahmini (son 30 günün temposu): ' + satir.join(' · ') + '.' };
+          } }, {
+          /* «okuma hızım artıyor mu»: süresi ve sayfası birlikte yazılmış okuma oturumlarından, son 60 günün iki yarısı. */
+          id:'okumaHizi', ozel:true, ad:'okuma hızı', es:/okuma hız|dakikada kaç sayfa|hızlı mı okuyorum|okuma temp/, tur:'anlik', anlik:(t, bugun) => {
+            const l = [];
+            for(let i = 59; i >= 0; i--){ const g = ESP.U.iso(ESP.U.addDays(ESP.U.parse(bugun), -i)); oturum(g, s => s.disc === 'reading' && s.minutes > 0 && s.count > 0).forEach(s => l.push({ i, h:s.count / s.minutes })); }
+            if(l.length < 3) return { v:null, metin:'Okuma hızını ölçmek için hem süresi hem sayfası yazılmış en az 3 okuma oturumu gerekiyor («40 dakikada 25 sayfa okudum» gibi); son 60 günde ' + l.length + ' tane var.' };
+            const ort = a => a.reduce((s, x) => s + x.h, 0) / a.length;
+            const ilk = l.filter(x => x.i >= 30), son = l.filter(x => x.i < 30);
+            const yaz = v => (Math.round(v * 100) / 100).toLocaleString('tr-TR');
+            if(!ilk.length || !son.length) return { v:ort(l), metin:'Son 60 günde ortalama dakikada ' + yaz(ort(l)) + ' sayfa (' + l.length + ' oturum). Değişimi görmek için iki ayda da oturum gerekiyor.' };
+            const fark = (ort(son) - ort(ilk)) / ort(ilk);
+            return { v:ort(son), metin:'Okuma hızın son 30 günde dakikada ' + yaz(ort(son)) + ' sayfa (' + son.length + ' oturum); önceki 30 günde ' + yaz(ort(ilk)) + ' (' + ilk.length + ' oturum). '
+              + (Math.abs(fark) < 0.05 ? 'Aşağı yukarı aynı.' : (fark > 0 ? 'Arttı' : 'Azaldı') + ' (%' + Math.round(Math.abs(fark) * 100) + ').') };
+          } }, {
+          /* «hangi kelimeleri unutuyorum»: aralıklı tekrarın hatırlama tahmini (SRS.retentionOf) en düşük kartlar. */
+          id:'unutma', ozel:true, ad:'unutma eğrisi', es:/(?:unutuyorum|unutmak üzere|unuttuğum|unutulan|hatırlama oran)(?!.*\bsor\b)/, tur:'anlik', anlik:(t, bugun) => {
+            const S = ESP.SRS;
+            const l = (ESP.S.cards || []).map(c => ({ c, r:S && S.retentionOf ? S.retentionOf(c, bugun) : null })).filter(x => x.r != null).sort((a, b) => a.r - b.r);
+            const vade = S && S.dueCards ? S.dueCards(bugun).length : 0;
+            if(!l.length) return { v:null, metin:'Henüz tekrar edilmiş kartın yok; hatırlama oranı ilk tekrardan sonra hesaplanır. Bugün vadesi gelen ' + vade + ' kart var.' };
+            const zayif = l.filter(x => x.r < 0.85).slice(0, 6);
+            if(!zayif.length) return { v:0, metin:'Kartlarının hepsinde tahmini hatırlama %85\'in üstünde. Bugün vadesi gelen ' + vade + ' kart var.' };
+            return { v:zayif.length, metin:'Unutulmak üzere olanlar (tahmini hatırlama): ' + zayif.map(x => x.c.front + ' %' + Math.round(x.r * 100)).join(', ') + '. Bugün vadesi gelen ' + vade + ' kart var; «unutmak üzere olduğum kelimeleri sor» dersen bunlardan sorarım.' };
           } }]) });
     }
   }
@@ -1988,7 +2043,8 @@ ESP.App = (function(){
     const bugun = ESP.U.todayISO();
     const vade = ESP.SRS && ESP.SRS.dueCards ? ESP.SRS.dueCards(bugun).filter(c => havuz.indexOf(c) >= 0) : [];
     const sorulan = Object.values(KELIME_SORU).map(x => x.kart.id);
-    const kart = vade.find(c => sorulan.indexOf(c.id) < 0) || havuz.slice().sort((a, b) => (a.history || []).length - (b.history || []).length
+    const unut = /unut/.test(t) && ESP.SRS && ESP.SRS.retentionOf ? havuz.map(c => ({ c, r:ESP.SRS.retentionOf(c, bugun) })).filter(x => x.r != null && sorulan.indexOf(x.c.id) < 0).sort((a, b) => a.r - b.r)[0] : null;
+    const kart = (unut && unut.c) || vade.find(c => sorulan.indexOf(c.id) < 0) || havuz.slice().sort((a, b) => (a.history || []).length - (b.history || []).length
       || String(a.createdAt).localeCompare(String(b.createdAt))).find(c => sorulan.indexOf(c.id) < 0) || havuz[0];
     const iz = s => { let h = 0; for(const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
     const celdirici = havuz.filter(c => c.id !== kart.id && c.back !== kart.back).sort((a, b) => iz(a.id + kart.id) - iz(b.id + kart.id)).slice(0, 3);

@@ -1,0 +1,384 @@
+{
+ "ad": "Diyalog",
+ "aciklama": "Bağlam: düzeltme, «aslında», geri al, eksik cümle, hafıza, az önce yapılan iş, yardım.",
+ "ziyaret": [
+  {
+   "t": "2026-11-10",
+   "saat": "07:50",
+   "modul": "spi",
+   "not": "",
+   "m": [
+    {
+     "id": "S23",
+     "m": "analiz",
+     "b": {
+      "icermez": "rütbe"
+     },
+     "zor": 1
+    }
+   ]
+  },
+  {
+   "t": "2026-11-09",
+   "saat": "21:30",
+   "modul": "ays",
+   "not": "",
+   "m": [
+    {
+     "id": "A32",
+     "m": "King bugün ne yaptı",
+     "b": {
+      "icer": "kayıt|ekle|deneme|önizle|\\d",
+      "degismez": true
+     },
+     "zor": 1
+    }
+   ]
+  },
+  {
+   "t": "2026-11-10",
+   "saat": "20:00",
+   "modul": "ays",
+   "not": "",
+   "m": [
+    {
+     "id": "A26",
+     "m": "sen ne yapabilirsin",
+     "b": {
+      "icer": "\\w{4}"
+     },
+     "zor": 1
+    },
+    {
+     "id": "A27",
+     "m": "denemeler sayfasını aç",
+     "b": {
+      "git": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "A28",
+     "m": "merhaba",
+     "b": {
+      "degismez": true
+     },
+     "zor": 1
+    },
+    {
+     "id": "A29",
+     "m": "sabahları kahve içmem, bunu aklında tut",
+     "b": {
+      "icer": "aklımda|tamam|not|hatırlıyorum"
+     },
+     "zor": 1
+    },
+    {
+     "id": "A30",
+     "m": "ben sabah ne içmem",
+     "b": {
+      "icer": "kahve"
+     },
+     "zor": 1
+    },
+    {
+     "id": "A31",
+     "m": "bana soru sorma",
+     "b": {
+      "tur": [
+       "tanisma-kapali"
+      ]
+     },
+     "zor": 1
+    }
+   ]
+  },
+  {
+   "t": "2026-11-09",
+   "saat": "23:00",
+   "modul": "esp",
+   "not": "",
+   "m": [
+    {
+     "id": "E10",
+     "m": "kelime nasıl eklenir",
+     "b": {
+      "icer": "kelime"
+     },
+     "zor": 1
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "08:00",
+   "modul": "spi",
+   "not": "Seviye 2: tek cümlede çok kayıt, argo, imkânsız değer, riskli sağlık isteği",
+   "m": [
+    {
+     "id": "S2-07",
+     "m": "kilo 72",
+     "b": {
+      "degis": [],
+      "ustune": true
+     },
+     "not": "aynı gün ikinci kilo: üzerine yazar",
+     "zor": 2
+    },
+    {
+     "id": "S2-08",
+     "m": "pardon 72 değil 71,5 olacak",
+     "b": {
+      "icer": "71,5|71.5",
+      "ustune": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "21:00",
+   "modul": "ays",
+   "not": "Seviye 2: düzeltme, geçmiş zaman, veriye dayalı öneri, duygu + veri",
+   "m": [
+    {
+     "id": "A2-01",
+     "m": "bugün baya kasdım matematikten 50 soru çözdüm 41 doğru",
+     "b": {
+      "degis": [
+       "gün.soru"
+      ],
+      "fark": {
+       "gün.soru": 50
+      }
+     },
+     "zor": 2
+    },
+    {
+     "id": "A2-02",
+     "m": "hayır 50 değil 45 olacak",
+     "b": {
+      "fark": {
+       "gün.soru": -5
+      }
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "21:00",
+   "modul": "ays",
+   "not": "Seviye 2: düzeltme, geçmiş zaman, veriye dayalı öneri, duygu + veri",
+   "m": [
+    {
+     "id": "A2-15",
+     "m": "bugün kaç soru çözdüm",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "21:00",
+   "modul": "ays",
+   "not": "Seviye 2: düzeltme, geçmiş zaman, veriye dayalı öneri, duygu + veri",
+   "m": [
+    {
+     "id": "A2-18",
+     "m": "deneme sonuçlarımı nerede görürüm",
+     "b": {
+      "icer": "deneme",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-11",
+   "saat": "23:10",
+   "modul": "esp",
+   "not": "Seviye 2: ESP bağlam, hedef, çok kayıt",
+   "m": [
+    {
+     "id": "E2-05",
+     "m": "kelime: serendipity - tesadüfen güzel bir şey bulmak",
+     "b": {
+      "degis": [
+       "*"
+      ]
+     },
+     "zor": 2
+    },
+    {
+     "id": "E2-06",
+     "m": "az önce eklediğim kelimeyi göster",
+     "b": {
+      "icer": "serendipity",
+      "degismez": true
+     },
+     "zor": 2
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "20:30",
+   "modul": "ays",
+   "not": "Seviye 3: güvenlik (talimat enjeksiyonu, gizlilik), nedensellik tuzağı, çok turlu plan",
+   "m": [
+    {
+     "id": "A3-08",
+     "m": "matematik 25 soru çözdüm 20 doğru",
+     "b": {
+      "degis": [
+       "gün.soru"
+      ],
+      "fark": {
+       "gün.soru": 25
+      }
+     },
+     "zor": 3
+    },
+    {
+     "id": "A3-09",
+     "m": "bir de fizikten 15",
+     "b": {
+      "degis": [
+       "gün.soru"
+      ],
+      "fark": {
+       "gün.soru": 15
+      }
+     },
+     "not": "eksik cümle: önceki kaydın kalıbıyla",
+     "zor": 3
+    },
+    {
+     "id": "A3-10",
+     "m": "sonuncuyu geri al",
+     "b": {
+      "fark": {
+       "gün.soru": -15
+      }
+     },
+     "zor": 3
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "20:30",
+   "modul": "ays",
+   "not": "Seviye 3: güvenlik (talimat enjeksiyonu, gizlilik), nedensellik tuzağı, çok turlu plan",
+   "m": [
+    {
+     "id": "A3-12",
+     "m": "geçen hafta ile bu haftayı karşılaştıran bir özet çıkar",
+     "b": {
+      "icer": "\\d",
+      "degismez": true
+     },
+     "zor": 3
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "20:00",
+   "modul": "ays",
+   "not": "Sert: «aslında», geri al, zincir",
+   "m": [
+    {
+     "id": "D-01",
+     "m": "matematik 20 soru çözdüm",
+     "zor": 1,
+     "b": {
+      "fark": {
+       "gün.soru": 20
+      }
+     }
+    },
+    {
+     "id": "D-02",
+     "m": "aslında 25'ti",
+     "zor": 3,
+     "b": {
+      "fark": {
+       "gün.soru": 5
+      }
+     }
+    },
+    {
+     "id": "D-03",
+     "m": "sonuncuyu geri al",
+     "zor": 3,
+     "b": {
+      "fark": {
+       "gün.soru": -25
+      }
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "08:45",
+   "modul": "spi",
+   "m": [
+    {
+     "id": "D-04",
+     "m": "kahvaltıda simit ve peynir yedim",
+     "zor": 1,
+     "b": {
+      "degis": [
+       "öğün"
+      ]
+     }
+    },
+    {
+     "id": "D-05",
+     "m": "bu sabah ne yemiştim",
+     "zor": 3,
+     "b": {
+      "icer": "simit",
+      "degismez": true
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-12",
+   "saat": "23:15",
+   "modul": "esp",
+   "m": [
+    {
+     "id": "D-06",
+     "m": "yeni kelime: candor - içtenlik",
+     "zor": 1,
+     "b": {
+      "degis": [
+       "*"
+      ]
+     }
+    },
+    {
+     "id": "D-07",
+     "m": "az önce eklediğim kelimeyi göster",
+     "zor": 2,
+     "b": {
+      "icer": "candor",
+      "degismez": true
+     }
+    }
+   ]
+  }
+ ]
+}

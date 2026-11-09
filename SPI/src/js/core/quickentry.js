@@ -151,6 +151,9 @@ SP.Quick = (function(){
       return { gun:g.gun, kelime:m[2], gece:g.gun === -1 && /^\s+(gece|akşam)/.test(k.slice(son)),
         metin:(t.slice(0, bas) + t.slice(son)).replace(/\s+/g, ' ').trim() };
     }
+    /* King-Bench: «3 gün önce», «geçen salı» (ortak tarih.js gunSozu) — gün farkı olarak. */
+    const T = window.LIFEOS && LIFEOS.TARIH, g2 = T && T.gunSozu ? T.gunSozu(t, U.todayISO()) : null;
+    if(g2){ const f = U.diffDays(U.todayISO(), g2); if(f < 0 && f >= -60) return { gun:f, kelime:null, gece:false, metin:t }; }
     return { gun:null, kelime:null, gece:false, metin:t };
   }
 

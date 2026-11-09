@@ -43,6 +43,30 @@
         expect(O().coz('zamanımı en çok hangi işe harcıyorum', BUGUN).cevap).toContain('gitar');
       }finally{ O()._sifirla(); }
     });
+    it('King-Bench koçluk/içgörü: haftalık değerlendirme aynı günleri kıyaslar; «neden düştü» gün ve tempoya ayrılır', () => {
+      const B = '2026-11-12';   // perşembe: bu hafta 4 gün
+      const g = n => { const d = new Date(B + 'T12:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+      const soru = {}, uyku = {};
+      [0, -1, -2, -3].forEach(n => { soru[g(n)] = 30; uyku[g(n)] = 7; });        // bu hafta: 120 soru
+      [-7, -8, -9, -10].forEach(n => { soru[g(n)] = 45; uyku[g(n)] = 7; });      // geçen hafta aynı günler: 180
+      soru[g(-4)] = 999;                                                        // geçen haftanın cuması: aynı günlere girmez
+      ['2026-10-02', '2026-10-09', '2026-10-16'].forEach(x => { soru[x] = 50; });                       // ekim: 3 gün × 50
+      ['2026-09-02', '2026-09-03', '2026-09-04', '2026-09-05', '2026-09-06', '2026-09-07'].forEach(x => { soru[x] = 50; });   // eylül: 6 gün × 50
+      O().kur({ modul:'ays', olculer:[
+        { id:'soru', ad:'çözülen soru', birim:'soru', es:/soru/, tur:'toplam', gun:x => soru[x] == null ? null : soru[x] },
+        { id:'uyku', ad:'uyku', birim:'saat', es:/uyku/, tur:'ortalama', ondalik:true, gun:x => uyku[x] == null ? null : uyku[x] },
+      ] });
+      try{
+        const h = O().coz('bu haftamı değerlendir', B);
+        expect(h.id).toBe('hafta');
+        expect(h.cevap).toContain('aksayan çözülen soru (−%33)');
+        expect(h.cevap).toContain('kalan 3 günde günde yaklaşık 20 soru');
+        const n = O().coz('ekimde neden daha az soru çözdüm', '2026-11-12');
+        expect(n.cevap).toContain('150 soru (3 kayıtlı gün');
+        expect(n.cevap).toContain('kayıtlı gün sayısından: 3 gün daha az');
+        expect(O().coz('neden yazdın bunu', B)).toBe(null);
+      }finally{ O()._sifirla(); }
+    });
     it('değişim: kilo dönemin ilk ve son ölçümü; net olayları ve alt kırılım', () => {
       kur();
       try{
