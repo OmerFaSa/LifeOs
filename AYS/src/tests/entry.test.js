@@ -231,6 +231,8 @@
       const iki = R.Komut.anla('dün 40 bugün 30 soru çözdüm', { date:D }).oneriler.map(o => o.params.date + ':' + o.params.count);
       expect(iki).toEqual([dun + ':40', D + ':30']);
       expect(R.Komut.anla('arkadaşım 50 soru çözmüş ben 20', { date:D }).oneriler.map(o => o.params.count)).toEqual([20]);
+      const dag = R.Komut.anla('dün ve bugün ikişer saat kimya çalıştım', { date:D }).oneriler.map(o => o.params.date + ':' + o.params.minutes);
+      expect(dag).toEqual([dun + ':120', D + ':120']);
       expect(R.Komut.anla('40 soru çözdüm 32 doğru 12 yanlış', { date:D }).oneriler.length).toBe(0);
     });
     it('King-Bench: «dün …» rapor cümlesi dünün gününe yazılır', () => {

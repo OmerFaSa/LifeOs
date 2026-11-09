@@ -339,13 +339,24 @@ R.Entry = (function(){
      `engellenen` sayısı bulunmuş ama ÖLÇÜM OLMAYAN parçalardır:
      «40 soru çözmedim», «yarın 40 soru çözeceğim» (belgeler/ekip/HATALAR.md KR-1).
      Her biri nedenini ve kullanıcıya sorulacak cümleyi taşır; yazılmaz. */
+  /* «pazartesi ve salı ikişer saat kimya çalıştım» → «pazartesi 2 saat kimya çalıştım salı 2 saat kimya çalıştım»
+     (dağıtımlı sayı: birer/ikişer/üçer…). Komut cümleyi «ve»den bölmeden ÖNCE uygulanır. */
+  const DAG = { birer:1, ikişer:2, ikiser:2, üçer:3, ucer:3, dörder:4, dorder:4, beşer:5, beser:5, yarımşar:0.5, onar:10, yirmişer:20, otuzar:30 };
+  function dagit(text){
+    const dg = /^(.*?)(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|dün|bugün)\s+(?:ve|ile|,)\s+(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|dün|bugün)\s+(birer|ikişer|ikiser|üçer|ucer|dörder|dorder|beşer|beser|yarımşar|onar|yirmişer|otuzar)\s+(.*)$/i.exec(String(text));
+    if(!dg) return text;
+    const n = DAG[dg[4].toLocaleLowerCase('tr')];
+    return dg[1] + dg[2] + ' ' + n + ' ' + dg[5] + ' ' + dg[3] + ' ' + n + ' ' + dg[5];
+  }
   function fromText(text, opts){
     const o = opts || {};
     text = sayiSozu(text);
     /* King-Bench: «dün 40 bugün 30 soru çözdüm» — her gün sözü kendi parçasının günüdür; sayaç söylenmeyen parça
        («dün 40») son parçanın sayacını alır. */
     const T0 = window.LIFEOS && LIFEOS.TARIH, taban = o.bugun || U.todayISO();
-    const gunYer = [...String(text).matchAll(/(?:^|\s)(dün|bugün|evvelsi gün|\d{1,2} gün önce)(?=\s)/gi)].map(m => m.index);
+    /* «pazartesi ve salı ikişer saat kimya çalıştım» → her gün için ayrı parça (dağıtımlı sayı: birer/ikişer/üçer…). */
+    if(!o.parca) text = dagit(text);
+    const gunYer = [...String(text).matchAll(/(?:^|\s)(dün|bugün|evvelsi gün|\d{1,2} gün önce|(?:geçen\s+)?(?:pazartesi|salı|çarşamba|perşembe|cumartesi|cuma|pazar)(?![a-zçğıöşü]))(?=\s)/gi)].map(m => m.index);
     if(!o.parca && T0 && T0.gunSozu && gunYer.length >= 2){
       const parca = gunYer.map((b, i) => String(text).slice(b, gunYer[i + 1]).trim()).filter(Boolean);
       const birim = (parca[parca.length - 1].match(/\b(soru|paragraf|problem|dakika|dk|saat)\b/i) || [])[1];
@@ -398,6 +409,6 @@ R.Entry = (function(){
     return { oneriler, anlasilmayan, engellenen };
   }
 
-  return { fromText, parseOne, parseDeneme, yanCumleler, dersBul, konuBul, sayi, ilkSayi,
+  return { fromText, dagit, parseOne, parseDeneme, yanCumleler, dersBul, konuBul, sayi, ilkSayi,
     parseSoru, parseUyku, parseParagraf, parseProblem, parseSure, sureOku };
 })();

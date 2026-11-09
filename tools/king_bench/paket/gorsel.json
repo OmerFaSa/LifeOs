@@ -163,6 +163,32 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-24",
+   "saat": "18:00",
+   "modul": "ays",
+   "not": "Tur 9: değer hesabı, grafikli anlatım",
+   "m": [
+    {
+     "id": "V9-01",
+     "m": "f(x) = 2x + 1 için f(3) kaç",
+     "zor": 3,
+     "b": {
+      "icer": "\\b7\\b",
+      "modelsiz": true
+     }
+    },
+    {
+     "id": "V9-02",
+     "m": "doğrusal fonksiyonu grafikle anlat",
+     "zor": 3,
+     "b": {
+      "ifade": "(()=>{const m=LIFEOS.KING.akis().filter(x=>x.kim==='king').pop();return m&&LIFEOS.ANLATIM&&LIFEOS.ANLATIM.zenginlestir(m.metin).ekler.some(e=>e.tur==='grafik')?1:0})()",
+      "ifadeEsit": 1
+     }
+    }
+   ]
   }
  ]
 }

@@ -11,7 +11,7 @@ import json, os, sys, collections
 
 BU = os.path.dirname(os.path.abspath(__file__))
 sys.stdout.reconfigure(encoding="utf-8")
-SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk", "gun", "dayaniklilik", "ogretmen", "hafiza", "gorsel"]
+SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk", "gun", "dayaniklilik", "ogretmen", "hafiza", "gorsel", "proaktif"]
 # fikirler.json'daki eski alan adları → paket
 ALAN = {"kayıt": "kayit", "çok adım": "kayit", "ölçü": "icgoru", "analiz": "icgoru", "öğretme": "ogrenme", "plan": "plan",
         "güvenlik": "guven", "bağlam": "diyalog", "yardım": "diyalog", "hafıza": "diyalog", "destek": "kocluk", "yeni": "kocluk"}

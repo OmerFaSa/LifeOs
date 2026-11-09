@@ -135,6 +135,60 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-24",
+   "saat": "17:00",
+   "modul": "ays",
+   "not": "Tur 9: alıştırma döngüsü ve ders kalitesi",
+   "m": [
+    {
+     "id": "T9-01",
+     "m": "adım adım çöz: 4x - 2 = 10",
+     "zor": 3,
+     "b": {
+      "icer": "x = 3"
+     }
+    },
+    {
+     "id": "T9-02",
+     "m": "x = 7",
+     "zor": 4,
+     "b": {
+      "icer": "Doğru",
+      "icermez": "Ne hakkında|belirt"
+     }
+    },
+    {
+     "id": "T9-03",
+     "m": "adım adım çöz: 5x + 1 = 21",
+     "zor": 3,
+     "b": {
+      "icer": "x = 4"
+     }
+    },
+    {
+     "id": "T9-04",
+     "m": "x = 5",
+     "zor": 4,
+     "b": {
+      "icer": "Yanlış|tam değil|olmadı",
+      "icermez": "Ne hakkında|belirt"
+     }
+    },
+    {
+     "id": "T9-05",
+     "m": "integrali anlat",
+     "zor": 3,
+     "b": {
+      "tur": [
+       "ders"
+      ],
+      "ifade": "(()=>{const m=LIFEOS.KING.akis().filter(x=>x.kim==='king'&&x.ders).pop();if(!m)return 0;const d=m.ders;return (d.bolumler.length>=3?1:0)+(d.bolumler.some(b=>/örnek/i.test(b.baslik+' '+b.metin+' '+(b.liste||[]).join(' ')))?1:0)+(d.giris?1:0)})()",
+      "ifadeEsit": 3
+     }
+    }
+   ]
   }
  ]
 }

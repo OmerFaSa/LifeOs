@@ -1,0 +1,58 @@
+{
+ "ad": "Proaktif",
+ "aciklama": "King açılışta kendiliğinden işe yarar bir şey söyler (haftalık değerlendirme), günde bir kez; tekrar etmez.",
+ "ziyaret": [
+  {
+   "t": "2026-11-27",
+   "saat": "08:30",
+   "modul": "ays",
+   "not": "Proaktif: günün ilk açılışında haftanın kısa değerlendirmesi, ikinci açılışta tekrar yok",
+   "m": [
+    {
+     "id": "PR-01",
+     "m": null,
+     "zor": 4,
+     "b": {
+      "ifade": "(re=>{const l=(window.__acilis||[]).join(' ');return re.test(l)?1:0})(/(Bu hafta|geçen hafta).*\\d/)",
+      "ifadeEsit": 1
+     },
+     "not": "ilk açılışta haftalık değerlendirme cümlesi"
+    }
+   ]
+  },
+  {
+   "t": "2026-11-27",
+   "saat": "12:30",
+   "modul": "ays",
+   "m": [
+    {
+     "id": "PR-02",
+     "m": null,
+     "zor": 3,
+     "b": {
+      "ifade": "(re=>{const l=(window.__acilis||[]).join(' ');return re.test(l)?1:0})(/geçen haftanın aynı günlerine/)",
+      "ifadeEsit": 0
+     },
+     "not": "aynı gün ikinci açılışta tekrar etmez"
+    }
+   ]
+  },
+  {
+   "t": "2026-11-27",
+   "saat": "21:00",
+   "modul": "spi",
+   "m": [
+    {
+     "id": "PR-03",
+     "m": null,
+     "zor": 3,
+     "b": {
+      "ifade": "(re=>{const l=(window.__acilis||[]).join(' ');return re.test(l)?1:0})(/(Bu hafta|geçen hafta).*\\d/)",
+      "ifadeEsit": 1
+     },
+     "not": "SPİ ilk açılışında da haftalık cümle"
+    }
+   ]
+  }
+ ]
+}

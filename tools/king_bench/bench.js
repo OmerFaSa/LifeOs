@@ -96,7 +96,8 @@ function puanla(x, o){
       await page.evaluate(([ns, url, token]) => window[ns].Beacon.save({ enabled:true, token, url }), [NS[z.modul], 'http://127.0.0.1:4290', CFG.local_token]);
       // Günlük otomatik geçmiş gönderimi (tur 6) 233 günde HKM'yi doldururdu: ilk ziyarette bir kez aynısı.
       if(!ilk[z.modul]){ ilk[z.modul] = 1; await page.evaluate(ns => window[ns].Beacon.backfill(240), NS[z.modul]).catch(() => null); }
-      await page.evaluate(async () => { LIFEOS.KING.ac(); await new Promise(r => setTimeout(r, 2000)); });
+      await page.evaluate(async () => { const n = LIFEOS.KING.akis().length; LIFEOS.KING.ac(); await new Promise(r => setTimeout(r, 2500));
+        window.__acilis = LIFEOS.KING.akis().slice(n).filter(m => m.kim === 'king').map(m => String(m.metin || '') + ' ' + (m.satirlar || []).join(' ')); });
       for(const x of vakalar){
         const b = x.b || {};
         let o, iz0 = {};

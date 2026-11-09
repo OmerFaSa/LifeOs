@@ -2029,7 +2029,7 @@ R.App = (function(){
       if(window.LIFEOS && window.LIFEOS.ARAC && R.KingArac) window.LIFEOS.ARAC.kur({ modul:'ays', araclar:() => R.KingArac.liste() });
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM, hafiza:() => R.Hafizam,
+        window.LIFEOS.KING.kur({ modul:'ays', proaktif:true, ekran:() => S.route, model:() => R.LLM, hafiza:() => R.Hafizam,
           /* King'in çıkarımları için (cikarim.js): son 45 günde ders ders çözülen ve doğru soru. */
           cikarimVeri:() => {
             const hatalar = {};

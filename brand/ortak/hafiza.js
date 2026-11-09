@@ -232,6 +232,7 @@ LIFEOS.Hafiza = (function(){
       if(b) return { tur:'ekle', metin:ham.slice(k.length - b[1].length, k.length).trim() };
     }
     if(LISTE.indexOf(k) >= 0) return { tur:'liste' };
+    if(/^(?:hafızamda|hafizamda) (?:kaç|ne kadar) (?:kayıt|şey|bilgi) var$|^kaç (?:şey|kayıt) hatırlıyorsun$/.test(k)) return { tur:'sayim' };
     if(/^(?:hafızamı|hafizami|bildiklerini) (?:dosyalara|dosya dosya|konulara|kategorilere) göre (?:göster|ayır|listele)$|^hafıza (?:dosyalarım|haritam)$|^hafızamın haritası$/.test(k)) return { tur:'dosyalar' };
     const da = k.match(/^(sağlık|uyku|beslenme|çalışma|alışkanlık|insanlar|hedef)\w* dosyamı? (?:göster|aç)$/);
     if(da) return { tur:'dosya', dosya:(DOSYALAR.find(d => d[1].toLocaleLowerCase('tr').indexOf(da[1].slice(0, 5)) === 0) || [])[0] || 'genel' };
@@ -339,6 +340,11 @@ LIFEOS.Hafiza = (function(){
         if(r.ok && r.guncellenen) return { text:'Güncelledim: «' + r.guncellenen.metin + '» yerine artık «' + r.kayit.metin + '» (' + DOSYA_AD[r.kayit.dosya] + ' dosyası).', kayit:r.kayit };
         return { text:r.ok ? yz('ortak.hafiza.hatirliyorum') + r.kayit.metin + '» (' + DOSYA_AD[r.kayit.dosya] + ' dosyası). Silmek istersen «hafızam» de.'
           : r.why, kayit:r.kayit || null };
+      }
+      if(c.tur === 'sayim'){
+        const l = etkin(liste()), g = {};
+        l.forEach(x => { const d = x.dosya || dosyaBul(x.metin); g[d] = (g[d] || 0) + 1; });
+        return { text:'Hafızanda ' + l.length + ' kayıt var' + (l.length ? ': ' + Object.keys(g).sort((a, b) => g[b] - g[a]).map(d => DOSYA_AD[d] + ' ' + g[d]).join(', ') : '') + '. Sınır ' + MAX_KAYIT + '; dolunca önce en eski tahminler gider.' };
       }
       if(c.tur === 'dosyalar') return { text:dosyaMetni(liste()) };
       if(c.tur === 'dosya') return { text:dosyaMetni(liste(), c.dosya) };

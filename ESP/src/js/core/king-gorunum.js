@@ -904,7 +904,7 @@ window.LIFEOS.PARCA.yazilar({
       : KI.geriGetir();
     KI.cipler = null; KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenFoto = null; KI.sesli = false;
     if(o && o.mesaj) KI.akis.push({ kim:'king', metin:o.mesaj });
-    else if(!KI.mini){ KI.bekleyenleriSun(); KI.tanismaHazirla(); KI.kutuyuSun(); KI.ortam.zamanla(KI.sabahYokla, 0); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
+    else if(!KI.mini){ KI.bekleyenleriSun(); KI.tanismaHazirla(); KI.kutuyuSun(); KI.ortam.zamanla(KI.sabahYokla, 0); KI.ortam.zamanla(KI.haftaYokla, 0); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');

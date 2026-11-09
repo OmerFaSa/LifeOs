@@ -313,7 +313,7 @@ R.Komut = (function(){
   function anla(text, opts){
     const o = opts || {};
     const bugun = o.date || U.todayISO();
-    const ham = String(text || '').trim();
+    const ham = R.Entry && R.Entry.dagit ? R.Entry.dagit(String(text || '').trim()) : String(text || '').trim();
     const sonuc = { oneriler:[], sorular:[], anlasilmayan:[], komut:false };
     if(ham.length < 3) return sonuc;
 

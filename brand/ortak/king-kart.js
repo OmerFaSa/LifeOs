@@ -1181,6 +1181,19 @@ window.LIFEOS.PARCA.yazilar({
     return { tur:'yardim-brifing', model:!!model };
   }
   /* Sabah ilk açılışta günde bir kez (05–12). */
+  /* King-Bench proaktif: kullanıcı sormadan haftanın aksayan yanı (ölçü çekirdeği, kodla). Modül başına günde bir kez. */
+  function haftaYokla(){
+    const O = KI.L && KI.L.OLCU;
+    if(!O || !O.kuruluMu || !O.kuruluMu() || !KI.ayar || KI.ayar.proaktif !== true) return false;
+    const anahtar = 'king.haftaYokla.' + KI.ayar.modul;
+    if(KI.ortam.depo.oku(anahtar) === KI.bugunISO()) return false;
+    let r = null;
+    try{ r = O.coz('bu haftamı değerlendir', KI.bugunISO()); }catch(e){ r = null; }
+    if(!r || r.id !== 'hafta' || !/\d/.test(r.cevap)) return false;
+    KI.ortam.depo.yaz(anahtar, KI.bugunISO());
+    KI.soyle('Haftana kısa bir bakış: ' + r.cevap, (r.satirlar || []).slice(0, 4));
+    return true;
+  }
   function sabahYokla(){
     const s = KI.ortam.simdi().getHours();
     if(s < 5 || s >= 12 || KI.ortam.depo.oku(BRIFING_GUN) === KI.bugunISO() || typeof ((KI.ayar && KI.ayar.kartlar) || {}).brifing !== 'function') return false;
@@ -1302,5 +1315,5 @@ window.LIFEOS.PARCA.yazilar({
     return '';
   }
 
-  Object.assign(KI, { anlatim, eklerHtml, gorselGetir, hkmIstek, yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
+  Object.assign(KI, { anlatim, eklerHtml, gorselGetir, hkmIstek, yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, haftaYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
 })();

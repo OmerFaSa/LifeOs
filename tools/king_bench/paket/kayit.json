@@ -666,6 +666,77 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-24",
+   "saat": "20:00",
+   "modul": "ays",
+   "not": "Tur 9: çift gönderim, dağıtımlı süre",
+   "m": [
+    {
+     "id": "K9-01",
+     "m": "fizik 30 soru çözdüm 24 doğru",
+     "zor": 2,
+     "b": {
+      "fark": {
+       "gün.soru": 30
+      }
+     }
+    },
+    {
+     "id": "K9-02",
+     "m": "fizik 30 soru çözdüm 24 doğru",
+     "zor": 4,
+     "b": {
+      "degismez": true,
+      "icer": "az önce|zaten|tekrar|bir daha"
+     }
+    },
+    {
+     "id": "K9-03",
+     "m": "BUGÜN 3 SAAT ÇALIŞTIM!!!",
+     "zor": 3,
+     "b": {
+      "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-24'])",
+      "ifadeFark": 180
+     }
+    },
+    {
+     "id": "K9-04",
+     "m": "pazartesi ve salı ikişer saat kimya çalıştım",
+     "zor": 4,
+     "b": {
+      "ifadeler": [
+       {
+        "ad": "pazartesi",
+        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-23'])",
+        "fark": 120
+       },
+       {
+        "ad": "salı",
+        "ifade": "((d)=>d?((d.blocks||[]).reduce((s,b)=>s+(b.minCert==='measured'?Number(b.actualMin)||0:0),0)+(Number(d.freeMin)||0)):0)(R.S.days['2026-11-24'])",
+        "fark": 120
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-24",
+   "saat": "09:00",
+   "modul": "spi",
+   "m": [
+    {
+     "id": "K9-05",
+     "m": "su içtim 3 bardak",
+     "zor": 3,
+     "b": {
+      "ifade": "(Number((SP.S.vitals['2026-11-24']||{}).water)||0)",
+      "ifadeFark": 600
+     }
+    }
+   ]
   }
  ]
 }

@@ -2260,7 +2260,7 @@ ESP.App = (function(){
          dil kartı ve kitap bitirme (core/kingarac.js). */
       if(window.LIFEOS && window.LIFEOS.ARAC && ESP.KingArac) window.LIFEOS.ARAC.kur({ modul:'esp', araclar:() => ESP.KingArac.liste() });
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
+        window.LIFEOS.KING.kur({ modul:'esp', proaktif:true, ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
           /* King'e gelen fotoğraf ve kamera karesi (king.js söz 11, 37): kitap
              sayfası Merkez'in görsel modeliyle okunur, alıntı onaylı kaydolur. */
           foto:[{ id:'sayfa', ad:yz('esp.app.kitap-sayfasini-oku'), is:(f, y) => ESP.KingArac.sayfaOku(f, y) }],

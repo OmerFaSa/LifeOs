@@ -195,7 +195,8 @@ window.LIFEOS.KING = (function(){
     kostum:'koştum', kosdum:'koştum', ogle:'öğle', aksam:'akşam', kahvalti:'kahvaltı', sinav:'sınav', uyudm:'uyudum', okudm:'okudum' };
   /* «7 saat yattım» uykudur (SPİ'de «yattım» tek başına yatış SAATİdir: «23:30'da yattım 7'de kalktım»; o yüzden yalnız «N saat yattım»). */
   const yazimDuzelt = m => String(m).replace(/[A-Za-zÇĞİÖŞÜçğıöşü]+/g, w => YAZIM[w.toLocaleLowerCase('tr')] || w)
-    .replace(/(\d+(?:[.,]\d+)?)\s*saat\s+yattım/gi, '$1 saat uyudum');
+    .replace(/(\d+(?:[.,]\d+)?)\s*saat\s+yattım/gi, '$1 saat uyudum')
+    .replace(/(?:^|\s)su\s+içtim\s+(\d+(?:[.,]\d+)?)\s*(bardak|litre|lt|ml)/gi, m => ' ' + m.trim().replace(/su\s+içtim\s+(\S+)\s*(\S+)/i, '$1 $2 su içtim'));   // «su içtim 3 bardak»
   /* Tahlil değeri yorumu (AGENTS §1.5): «B12 değerim 250 bu düşük mü» modelde yorumlanıyordu. */
   const TAHLIL_TEDAVI_RE = /(b12|d vitamin\w*|ferritin|demir|kolesterol|tsh|şeker\w*|hemoglobin|tahlil\w*)\D{0,30}\d.*\b(?:iğne|ilaç|takviye|tedavi|serum)\w*\s+(?:mi|mı|olmalı|almalı|kullanmalı|başlamalı)/;
   const TAHLIL_SOR_RE = /(b12|d vitamin\w*|ferritin|demir|kolesterol|ldl|hdl|tsh|t3|t4|glukoz|şeker\w*|hemoglobin|trigliserit|tahlil\w*|değer\w*)\D{0,30}\d.*\b(düşük|yüksek|normal|iyi|kötü|tehlikeli|sorun)\w*\s+m[iıuü]/;
@@ -210,7 +211,7 @@ window.LIFEOS.KING = (function(){
   const CALISAMAM_RE = /(?:(\d|bir|iki|üç|dört|beş|altı) gün|bu hafta|birkaç gün|hafta sonu)\s+(?:hiç\s+)?(?:ders\s+)?(?:çalışamayacağım|çalışamam|çalışamıyorum|müsait değilim|yokum|izinliyim)|(?:bayram|tatil|yılbaşı)\w*\s+(?:\S+\s+){0,3}(?:mola|ara|izin)\s*(?:tanımla|ver|koy|yap|ekle)/;
   const GUN_ADI_RE = /(pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar|yarın|hafta ?sonu|\d{1,2} (?:ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık))/;
   const GIZLILIK_RE = /(verilerim\w* (?:kime|nereye|nerede|güvende)|internete (?:gidiyor|gönder|çıkıyor)|(?:kime|nereye) gönderiyorsun|verilerimi kim (?:görüyor|okuyor)|gizlilik(?:im)? (?:nasıl|ne durumda))/;
-  const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|\d{2,3}'?[ae] (?:inmek|düşmek) istiyorum|aç kalsam|kusmak|diyet yapıp)/;
+  const KALORI_RE = /(kaç kalori (?:yemeliyim|almalıyım|yiyeyim|yemem lazım)|kendimi aç bırak|günde \d{2,3} kalori (?:yiyorum|alıyorum)|kilo vermem (?:lazım|gerek)|zayıflamam (?:lazım|gerek)|\d{2,3}'?[ae] (?:inmek|düşmek) istiyorum|aç kalsam|kusmak|diyet yapıp)/;
   const DUZELT_RE = /^(?:hayır|pardon|yok|yanlış(?: yazdım)?|düzelt(?:me)?:?)?[\s,]*(\d+(?:[.,]\d+)?)\s*(?:değil|yerine)\s*,?\s*(\d+(?:[.,]\d+)?)(?:\s*(?:olacak|olmalı|olsun|yaz|idi|ydi))?\s*[.!]*$/;
   async function isle(metin){
     metin = yazimDuzelt(metin);
@@ -230,6 +231,30 @@ window.LIFEOS.KING = (function(){
       else KI.soyle('Bu belirtiler acil olabilir. Bekleme: hemen 112\'yi ara ya da en yakın acil servise git. Yalnızsan kapını aç ve birine haber ver. Ben teşhis koyamam; bu durumda doğru adres acil yardımdır.');
       return { tur:KRIZ_RE.test(t0) ? 'kriz' : 'acil' };
     }
+    /* Alıştırma döngüsü: King'in «sıra sende» sorusuna cevap («x = 7», «7») kodla denetlenir; yanlışta ipucu. */
+    if(KI.bekleyenAlistirma){
+      const al = KI.bekleyenAlistirma, c = /^(?:x\s*=\s*)?(-?\d+(?:[.,]\d+)?)\s*(?:mi|mı|olur mu)?\s*[?.!]*$/.exec(t0);
+      KI.bekleyenAlistirma = null;
+      if(c){
+        const v = Number(c[1].replace(',', '.'));
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+        if(Math.abs(v - al.x) < 1e-9) KI.soyle('Doğru! ' + al.denklem + ' için x = ' + al.yaz + '. Sağlama: ' + al.saglama + '.');
+        else KI.soyle('Tam değil: x = ' + c[1] + ' yerine konunca sol taraf ' + al.dene(v) + ' oluyor, ' + al.sag + ' değil. İpucu: önce sayıları karşı tarafa at (' + al.ilkAdim + '), sonra katsayıya böl. Bir daha dene.');
+        if(Math.abs(v - al.x) >= 1e-9) KI.bekleyenAlistirma = al;
+        return { tur:'alistirma', dogru:Math.abs(v - al.x) < 1e-9 };
+      }
+    }
+    /* «f(x) = 2x + 1 için f(3) kaç» — değer kodla hesaplanır (güvenli ayrıştırıcı). */
+    { const FA = /f\(x\)\s*=\s*(.+?)\s+(?:için|ise)\s+(?:f\((-?\d+(?:[.,]\d+)?)\)|x\s*=\s*(-?\d+(?:[.,]\d+)?)\s*(?:'?[dt][ae]|iken)?\s*(?:değeri|değer)?)\s*(?:kaç|nedir|ne|bul)/i.exec(String(metin));
+      const AN = window.LIFEOS && window.LIFEOS.ANLATIM, f = FA && AN && AN.ifadeCoz(FA[1]);
+      if(f){
+        const a = Number(String(FA[2] != null ? FA[2] : FA[3]).replace(',', '.')), y = f(a);
+        KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
+        const yz2 = v => String(Math.round(v * 1000) / 1000).replace('.', ',');
+        KI.soyle('f(' + yz2(a) + ') = ' + FA[1].trim().replace(/x/g, '(' + yz2(a) + ')') + ' = ' + (isFinite(y) ? yz2(y) : 'tanımsız') + '.');
+        return { tur:'deger', y };
+      }
+    }
     /* King-Bench öğretmen: «adım adım çöz: 3x + 5 = 20» — birinci dereceden denklem KODLA çözülür, adımlar ve sağlama yazılır. */
     { const DE = /^(?:adım adım\s+)?(?:çöz(?:er misin)?|nasıl çözülür)\s*:?\s*(.+?=.+)$|^(.+?=.+?)\s+(?:denklemini\s+)?(?:adım adım\s+)?(?:çöz|nasıl çözülür)\w*\s*[?.!]*$/.exec(String(metin).trim().toLocaleLowerCase('tr'));
       const AN = window.LIFEOS && window.LIFEOS.ANLATIM;
@@ -244,7 +269,9 @@ window.LIFEOS.KING = (function(){
             '1) x\'li terimleri bir yana, sayıları öbür yana topla: ' + y(a) + 'x = ' + y(-g0),
             '2) Her iki tarafı ' + y(a) + '\'e böl: x = ' + y(x),
             '3) Sağlama: x = ' + y(x) + ' yerine konunca sol taraf ' + y(fl(x)) + ', sağ taraf ' + y(fr(x)) + ' ✓',
-            'Sıra sende: 2x − 4 = 10 denkleminde x kaç?']);
+            'Sıra sende: ' + (Math.round(x) === x ? (Math.abs(a) === 2 ? 3 : 2) + 'x − 4 = ' + ((Math.abs(a) === 2 ? 3 : 2) * (x + 2) - 4) : '2x − 4 = 10') + ' denkleminde x kaç?']);
+          { const k2 = Math.round(x) === x ? (Math.abs(a) === 2 ? 3 : 2) : 2, s2 = Math.round(x) === x ? k2 * (x + 2) - 4 : 10, x2 = (s2 + 4) / k2;
+            KI.bekleyenAlistirma = { denklem:k2 + 'x − 4 = ' + s2, x:x2, yaz:y(x2), sag:y(s2), ilkAdim:k2 + 'x = ' + y(s2 + 4), saglama:k2 + '·' + y(x2) + ' − 4 = ' + y(s2), dene:v => y(k2 * v - 4) }; }
           return { tur:'cozum', x };
         }
       }
@@ -457,6 +484,16 @@ window.LIFEOS.KING = (function(){
         return Object.assign({}, r, { duzeltme:true });
       }
     }
+    /* King-Bench veri girişi: aynı kayıt cümlesi kısa sürede ikinci kez gelirse (yanlışlıkla iki kez gönderim) yazmadan önce sorulur. */
+    if(KI.bekleyenTekrar){ const bt = KI.bekleyenTekrar; KI.bekleyenTekrar = null; if(KI.EVET.test(t0)){ KI.tekrarIzni = bt; return isle(bt); } }
+    if(KI.sonKayitCumle && KI.tekrarIzni !== String(metin).trim() && /\d/.test(t0) && KI.kucuk(KI.sonKayitCumle) === t0 && KI.ortam.simdi().getTime() - (KI.sonKayitZaman || 0) < 15 * 60000
+      && KI.akis.some(m => m.kim === 'sen' && KI.kucuk(m.ham || m.metin) === t0)){
+      KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = [{ ad:'Evet, bir daha ekle', is:'oner-metin:evet' }];
+      KI.bekleyenTekrar = String(metin).trim();
+      KI.soyle('Bunu az önce kaydettim: «' + KI.sonKayitCumle + '». Yanlışlıkla iki kez mi gönderdin? Bir daha eklememi istiyorsan «evet» de.');
+      return { tur:'tekrar-sor' };
+    }
+    if(KI.tekrarIzni === String(metin).trim()) KI.tekrarIzni = null;
     const DZ = DUZELT_RE.exec(t0);
     if(DZ && KI.sonKayitCumle){
       const x = DZ[1].replace('.', ','), y = DZ[2];
@@ -549,6 +586,7 @@ window.LIFEOS.KING = (function(){
     }
     /* Söz 14: «geri al», «sonu sil», «onu sil». */
     if(/^(geri al|son (kaydı|kayıt|girdiyi) (geri al|sil)|(?:onu|sonuncuyu|son yaptığını|son eklediğini) (sil|geri al)|sil onu|yanlış oldu geri al)[.!]?$/.test(t0)){
+      KI.sonKayitCumle = null;   // geri alınan kaydın aynısı yeniden yazılabilir (çift kayıt sorusu sorulmaz)
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       await KI.geriAlYap();
       return { tur:'geri-al' };
@@ -999,6 +1037,7 @@ window.LIFEOS.KING = (function(){
       KI.eylemYaz({ arac:'kayit.' + (p.tur || 'veri'), ozet:String(p.metin || metinR || 'Kayıt'), geriAl:KI.sonGeriAl });
       const senSon = KI.akis.filter(m => m.kim === 'sen' && !KI.EVET.test(KI.kucuk(m.metin || ''))).pop();
       KI.sonKayitCumle = senSon ? String(senSon.ham || senSon.metin) : null;   // yeniden yazılan cümlede çözülebilen iç metin
+      KI.sonKayitZaman = KI.ortam.simdi().getTime();
       /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
       if(KI.L.ZEMIN && typeof KI.L.ZEMIN.nabiz === 'function'){ try{ KI.L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }
       KI.soyle((onEk ? String(onEk).trim() + ' ' : '') + m + ' Başka bir şey var mı?');

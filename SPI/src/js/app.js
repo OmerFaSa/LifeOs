@@ -1952,7 +1952,7 @@ SP.App = (function(){
          SPİ'nin kendi ayrıştırıcısından girer. */
       if(window.LIFEOS && window.LIFEOS.ARAC && SP.KingArac) window.LIFEOS.ARAC.kur({ modul:'spi', araclar:() => SP.KingArac.liste() });
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, model:() => SP.LLM, hafiza:() => SP.Hafizam,
+        window.LIFEOS.KING.kur({ modul:'spi', proaktif:true, ekran:() => S.route, model:() => SP.LLM, hafiza:() => SP.Hafizam,
           /* King'in çıkarımları için (cikarim.js): son 30 günün yatış saatleri, yemek kategorileri, antrenman sayısı. */
           cikarimVeri:() => {
             const yatis = [], kat = {}, uyku = [], hisUyku = [];

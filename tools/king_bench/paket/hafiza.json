@@ -215,6 +215,46 @@
      }
     }
    ]
+  },
+  {
+   "t": "2026-11-24",
+   "saat": "12:00",
+   "modul": "ays",
+   "not": "Tur 9: günler arası hafıza, sayım",
+   "m": [
+    {
+     "id": "H9-01",
+     "m": "hatırla: perşembeleri yüzme dersim var",
+     "zor": 1,
+     "b": {
+      "icer": "hatırlıyorum|zaten"
+     }
+    },
+    {
+     "id": "H9-02",
+     "m": "hafızamda kaç kayıt var",
+     "zor": 3,
+     "b": {
+      "icer": "\\d",
+      "modelsiz": true
+     }
+    }
+   ]
+  },
+  {
+   "t": "2026-11-26",
+   "saat": "19:00",
+   "modul": "ays",
+   "m": [
+    {
+     "id": "H9-03",
+     "m": "perşembe ne yapıyordum",
+     "zor": 4,
+     "b": {
+      "icer": "yüzme"
+     }
+    }
+   ]
   }
  ]
 }

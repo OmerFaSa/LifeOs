@@ -31,11 +31,11 @@ yazar. VERI: KING_BENCH_VERI ya da C:\\Users\\ASUS\\LifeOS-KingBench (depo dış
 import datetime, json, os, shutil, subprocess, sys, time, urllib.request
 
 BU = os.path.dirname(os.path.abspath(__file__))
-KOK = os.path.dirname(os.path.dirname(BU))
+KOK = os.path.dirname(os.path.dirname(BU))   # --kok ile başka bir sürüm (ör. eski commit'in çalışma ağacı) ölçülür
 VERI = os.environ.get("KING_BENCH_VERI") or r"C:\Users\ASUS\LifeOS-KingBench"
 TABAN, IS = os.path.join(VERI, "taban"), os.path.join(VERI, "is")
 DURUM = os.path.join(VERI, "durum.json")
-SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk", "gun", "dayaniklilik", "ogretmen", "hafiza", "gorsel"]
+SIRA = ["kayit", "icgoru", "ogrenme", "plan", "guven", "diyalog", "kocluk", "gun", "dayaniklilik", "ogretmen", "hafiza", "gorsel", "proaktif"]
 MODUL = {"AYS": 4281, "SPI": 4282, "ESP": 4283}
 OLLAMA = os.path.expandvars(r"%LOCALAPPDATA%\Programs\Ollama\ollama.exe")
 GIZLI = 0x08000000
@@ -111,8 +111,11 @@ def main():
             print(g.get("etiket"), g.get("king", g.get("puan")), g.get("paketler", ""))
         return
     secili = a[a.index("--paket") + 1].split(",") if "--paket" in a else None
+    global KOK
+    if "--kok" in a:
+        KOK = a[a.index("--kok") + 1]
     ek = a[a.index("--sadece"):a.index("--sadece") + 2] if "--sadece" in a else []
-    etiket = "v2-" + datetime.datetime.now().strftime("%Y%m%d-%H%M")
+    etiket = ("kok-" + os.path.basename(KOK.rstrip("\/")) + "-" if "--kok" in a else "v2-") + datetime.datetime.now().strftime("%Y%m%d-%H%M")
     if not os.path.isdir(TABAN):
         sys.exit("taban yok: %s (klon simülasyonunun donmuş verisi)" % TABAN)
     kod = kos(etiket, senaryo(secili), ek)
@@ -125,7 +128,7 @@ def main():
     onceki = [os.path.join(VERI, "sonuc", "bench-%s.json" % once[-1]["etiket"])] if once else []
     subprocess.run([sys.executable, os.path.join(BU, "oz.py"), sonuc] + onceki)
     d["gecmis"].append({"etiket": etiket, "king": round(sum(paketler.values()) / len(paketler)), "paketler": paketler,
-                        "n": len(R), "kismi": bool(ek or secili)})
+                        "n": len(R), "kismi": bool(ek or secili or "--kok" in a)})
     json.dump(d, open(DURUM, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 
