@@ -522,6 +522,10 @@ def _yedek_ozeti(kod):
 
 
 class Depo:
+    # sistem/veri.py Kopru (sadelesme Faz 1 P4a): kabul edilen yazimlar tek depoya da gider; yoksa hicbir sey
+    kopru = None
+    kopru_hata = ""
+
     def __init__(self, yol=None, tur=TUR, saat=time.time):
         self.yol = yol or os.path.join(klasor(), "hesap.db")
         os.makedirs(os.path.dirname(self.yol) or ".", exist_ok=True)
@@ -1127,6 +1131,7 @@ class Depo:
         with self._islem() as c:
             sira = self._sira(c)
             kabul = red = 0
+            yazilan = []
             for y, metin, z, ilk in temiz:
                 r = c.execute("SELECT zaman, cihaz FROM kayit WHERE kullanici=? AND alan=? AND yol=?",
                               (kid, alan, y)).fetchone()
@@ -1142,16 +1147,18 @@ class Depo:
                           "deger=excluded.deger, zaman=excluded.zaman, cihaz=excluded.cihaz, "
                           "sira=excluded.sira", (kid, alan, y, metin, z, cihaz, sira))
                 kabul += 1
+                yazilan.append((y, metin, z))
             c.execute("INSERT INTO sayac(ad, deger) VALUES('sira', ?) ON CONFLICT(ad) DO UPDATE "
                       "SET deger=excluded.deger", (sira,))
             if jeton:
                 c.execute("UPDATE oturum SET esitleme=? WHERE ozet=?", (self.saat(), _jeton_ozeti(jeton)))
             donem = self._donem(c)
-            if yalniz_gonder:
-                return {"al": [], "son": son, "daha": False, "kabul": kabul, "red": red, "donem": donem}
-            satirlar = c.execute(
+            satirlar = [] if yalniz_gonder else c.execute(
                 "SELECT yol, deger, zaman, cihaz, sira FROM kayit WHERE kullanici=? AND alan=? "
                 "AND sira>? ORDER BY sira LIMIT ?", (kid, alan, son, sinir + 1)).fetchall()
+        self._kopruye(kid, alan, cihaz, yazilan)            # hesap.db kaydedildikten sonra
+        if yalniz_gonder:
+            return {"al": [], "son": son, "daha": False, "kabul": kabul, "red": red, "donem": donem}
         daha = len(satirlar) > sinir
         satirlar = satirlar[:sinir]
         yeni_son = satirlar[-1]["sira"] if daha else max(son, sira)
@@ -1159,6 +1166,16 @@ class Depo:
                "z": s["zaman"], "s": s["sira"]}
               for s in satirlar if s["cihaz"] != cihaz]
         return {"al": al, "son": yeni_son, "daha": daha, "kabul": kabul, "red": red, "donem": donem}
+
+    def _kopruye(self, kid, alan, cihaz, yazilan):
+        if not (self.kopru and yazilan):
+            return
+        try:
+            self.kopru(kid, alan, cihaz, yazilan)
+            self.kopru_hata = ""
+        except Exception as e:          # tek depo hatasi eski esitlemeyi durdurmaz; veri.karsilastir farki gosterir
+            self.kopru_hata = "%s: %s" % (type(e).__name__, e)
+            sys.stderr.write("Tek depo köprüsü yazamadı: %s\n" % self.kopru_hata)
 
     def ozet(self, kullanici):
         """Alan basina kayit sayisi (hesap panelindeki bilgi)."""
@@ -2367,7 +2384,23 @@ def depo():
     with _DEPO_KILIT:
         if _DEPO is None:
             _DEPO = Depo()
+            _DEPO.kopru = _kopru_ac(_DEPO)
         return _DEPO
+
+
+def _kopru_ac(d):
+    """Tek depo kurulduysa (Faz 1 P6 sonrasi: hesap klasorunun yanindaki veri/lifeos.db) sahibin, yani ilk
+    admin hesabinin kabul edilen yazimlari oraya da gider. Depo yoksa ya da acilamazsa None: esitleme aynen surer."""
+    if not os.path.exists(os.path.join(os.path.dirname(os.path.abspath(klasor())), "veri", "lifeos.db")):
+        return None
+    try:
+        import veri
+        with d._islem() as c:
+            r = c.execute("SELECT min(id) AS id FROM kullanici WHERE rol='admin'").fetchone()
+        return veri.kopru_ac(klasor(), r["id"])
+    except Exception as e:
+        sys.stderr.write("Tek depo köprüsü açılamadı: %s\n" % e)
+        return None
 
 
 def depo_kur(d):

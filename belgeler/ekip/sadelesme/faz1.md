@@ -65,6 +65,17 @@ yazar, `integrity_check` sonra ad verir, üstüne yazmaz. Günlük modu WAL değ
 `05e883396eae657f` P1 raporuyla aynı. Sıradaki: P2 (donmuşlara tek istisna, düğmenin görünüşü önce
 önizlemeyle sorulur) ya da P4 (köprü; istemci sözleşmesi değişmez, eski hesap testleri aynen geçmeli).
 
+**P4 ikiye bölündü; P4a yapıldı (2026-11-13, yerel `sadelesme`, gönderilmedi).** P4a, yazma köprüsü:
+`hesap.Depo.esitle` sözleşmesi ve `hesap.db` aynen sürer; kabul ettiği yazımlar işlem kaydedildikten sonra
+`veri.Kopru` ile sahibin (ilk admin) tek deposuna da yazılır. Köprü yalnız `veri/lifeos.db` varsa açılır
+(yani P6'dan sonra; depoyu kendisi kurmaz), hatası eşitlemeyi durdurmaz. Eski istemci bütün gövde
+yollar: `Depo.degistir` = aynı anda sil + yaz (taban yükselir, eski anahtar dönmez); sözlük olmayan gövde
+(gerçek veride 1 liste kaydı) tek parça. `veri.karsilastir(hesap kopyası, depo, sahip)` farkları listeler
+(P6 kapısı için). Ölçüldü: `tekdepo_test.py` 45 denetim (değiştirme dahil 120 sıra tek sonuç; gerçek
+`hesap.Depo` ile köprü: reddedilen gitmez, türetilmiş girmez, ikinci hesap karışmaz, hata eşitlemeyi
+durdurmaz), HKM takımı 1093/1093. **P4b açık:** eski istemcilerin okuması (`al`, `sira` imleci) tek depodan;
+imleç alanı değişeceği için dönem (`donem`) çevrilip cihazlar baştan indirmeli, bu yüzden P6 ile birlikte yapılır.
+
 ## 3. Faz 1 kapısı (ölçülerek geçilir)
 
 1. Her cihazda, her modülde bekleyen değişiklik 0 (paketteki `bekleyen` alanından, cihaz cihaz).
