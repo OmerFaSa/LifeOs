@@ -65,6 +65,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 
 ## Kabul testleri
 - `ays_sure_kabul_test.py` — Görev 010 kabul testi; AYS konuşarak süre ve uyku girişi ayrıştırmasını sınar, CI'da koşulur.
+- `ays_sinav_sure_kabul_test.py` — 2026-11-01 kararı; AYS deneme sınavında sekme kapalı geçen sürenin sayıldığını, elle duraklatmanın süreyi durdurduğunu sınar, CI'da koşulur.
 - `ays_deney_kabul_test.py` — Görev 073 kabul testi; AYS kişisel deney motoru (R.Deney) atama ve sonucunu sınar, CI'da koşulur.
 - `ays_takvim_tekrar_kabul_test.py` — Görev 013 kabul testi; AYS takvim içe aktarma tekrar kuralı açılımını sınar, CI'da koşulur.
 - `ayar_esit_kabul_test.py` — Görev 081 kabul testi; ortak ayarların telefonla eşitlenmesini (son yazan kazanır, çakışma kaydı, mezar taşı, kapılar) sınar, CI'da koşulur.

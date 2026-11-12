@@ -267,6 +267,7 @@ jobs:
           python3 tools/spi_porsiyon_kabul_test.py
           python3 tools/esp_sure_kabul_test.py
           python3 tools/ays_sure_kabul_test.py
+          python3 tools/ays_sinav_sure_kabul_test.py
           python3 tools/spi_sure_kabul_test.py
           python3 tools/veri_dogrula_test.py
           python3 tools/tarih_ortak_kabul_test.py
