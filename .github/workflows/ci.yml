@@ -200,6 +200,11 @@ jobs:
       - name: Tek depo birleştirme ve yedek
         run: python3 tools/tekdepo_test.py
 
+      # SADELESME FAZ 1 P2 GOC PAKETI (2026-11-13). Cihaz tarafi (node, sahte depolarla) uretir,
+      # PC tarafi kaydeder ve goc okuyucusundan gecirir; sir girmez, ustune yazmaz, ucu yalniz sahip.
+      - name: Göç paketi cihazdan PC'ye
+        run: python3 tools/gocpaket_test.py
+
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi
         run: python3 uygulama/ios/web_paket_test.py

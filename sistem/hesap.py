@@ -2651,6 +2651,27 @@ def isle(h):
                 raise Hata(400, "Geçersiz istek.")
             x = d.kopya_yukle(k, _yerel_mi(h), h.rfile, n, _jeton(h), ip)
             return _cevap(h, 200, dict(d.kopya_durum(k, True), eklenen=x["ad"]))
+        if yontem == "POST" and yol == "/api/hesap/goc-paket":
+            # Sadelesme Faz 1 P2: cihazdaki her sey tek depoya tasinmak uzere PC'ye (sistem/goc.py okur).
+            # Bu bilgisayardan ya da sahibinin (admin) oturumuyla; govde ham JSON, diske akarak yazilir.
+            if h.headers.get("X-LifeOS") != "goc":
+                raise Hata(403, "İzin yok.")
+            if not _yerel_mi(h):
+                k = d.oturum(_jeton(h), ip)
+                if k is None:
+                    raise Hata(401, "Oturum yok ya da süresi doldu; yeniden giriş yap.")
+                if k.get("rol") != "admin":
+                    raise Hata(403, "Göç paketi yalnız bilgisayarın sahibinin hesabıyla gönderilir.")
+            try:
+                n = int(h.headers.get("Content-Length") or 0)
+            except ValueError:
+                raise Hata(400, "Geçersiz istek.")
+            import goc
+            try:
+                return _cevap(h, 200, goc.paket_kaydet(h.rfile, n, os.path.join(
+                    os.path.dirname(os.path.abspath(klasor())), "goc", "paket"), d.saat()))
+            except ValueError as e:
+                raise Hata(*e.args[0])
         if yontem == "POST":
             # Ozel baslik + JSON: baska bir site tarayicidan «basit istek»
             # gonderemez (on-kontrol ister, on-kontrol yalniz uygulamaya acik).

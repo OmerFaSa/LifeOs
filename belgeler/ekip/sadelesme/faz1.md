@@ -76,6 +76,20 @@ yollar: `Depo.degistir` = aynı anda sil + yaz (taban yükselir, eski anahtar d�
 durdurmaz), HKM takımı 1093/1093. **P4b açık:** eski istemcilerin okuması (`al`, `sira` imleci) tek depodan;
 imleç alanı değişeceği için dönem (`donem`) çevrilip cihazlar baştan indirmeli, bu yüzden P6 ile birlikte yapılır.
 
+**P2 arka yüzü yapıldı (2026-11-13, yerel `sadelesme`, gönderilmedi); düğme sahibinin tasarım onayını bekliyor.**
+Cihaz: `brand/ortak/gocpaket.js` (`LIFEOS.GocPaket.yolla`) bütün profillerin ana deposunu (depo.js
+`yerelAnahtar` kalıbından; AYS'nin `main` özel anahtarı dahil, «örnek» ve `.oncesi` hariç), ana depo dışı
+anahtarları, IndexedDB medyasını (yalnız var olan veritabanı; sha256 + base64 + kaydın kendisi) ve
+`lifeos.hesap.sira.*`'dan bekleyen sayısını toplar; sır adlı anahtar girmez, hiçbir şey yazılmaz; medya
+48 MB'lik paketlere bölünüp dolunca yollanır. Uç: planda `/api/goc/paket` yazıyordu, **`/api/hesap/goc-paket`**
+oldu, çünkü `/api/hesap/` zaten bütün modül kapılarında ve 4180'de yönlendiriliyor ve oturum denetimi orada
+(bu bilgisayardan ya da admin oturumuyla, `X-LifeOS: goc`). PC: `goc.paket_kaydet` gövdeyi diske akıtır,
+biçim, cihaz kimliği, sır ve medya özeti denetler, `<kaynak>-<cihaz>-<zaman>-<rastgele>.json` adıyla
+`%LOCALAPPDATA%\LifeOS\goc\paket`'e koyar, üstüne yazmaz, reddedilenden iz bırakmaz (sınır 96 MB).
+Ölçüldü: `gocpaket.test.js` 19, `gocpaket_test.py` 18 denetim (cihazın ürettiği paketler PC'de kabul edilip
+göç okuyucusunda denge tutuyor); HKM 1093/1093. **Kalan:** düğme (Hesap sayfası ve 4180 Gün sayfası),
+`depo.js`'in `yerelAnahtar`/`varsayilanProfil`'i dışa vermesi, `ortak.py` kopyası ve üç modülün derlenmesi.
+
 ## 3. Faz 1 kapısı (ölçülerek geçilir)
 
 1. Her cihazda, her modülde bekleyen değişiklik 0 (paketteki `bekleyen` alanından, cihaz cihaz).

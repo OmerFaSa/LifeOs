@@ -74,6 +74,9 @@ META_RE = re.compile(r"^(id|.*Id|.*_id|rowid|at|.*At|.*_at|ts|z|zaman|tarih|date
 ZAMAN_ALANI = ("updatedAt", "guncel", "at", "createdAt", "ts", "updated_at", "created_at")
 MODULLER = ("ays", "spi", "esp")
 PAKET_KAYNAK = MODULLER + ("gun",)
+CIHAZ_RE = re.compile(r"^[A-Za-z0-9_\-]{6,64}$")       # hesap.py CIHAZ_RE ile ayni; paket adinda da kullanilir
+# Bir paket (JSON). Istemci (brand/ortak/gocpaket.js) medyayi 48 MB'lik parcalara boler: base64 ile ~64 MB.
+PAKET_EN_BUYUK = 96 * 1024 * 1024
 
 SEMA = """
 PRAGMA user_version = 1;
@@ -317,6 +320,60 @@ def topla_paketler(klasor, adaylar, sayim, medya, bilgi, uyari, hata):
                 sayim.atla(etiket, "medya", "aynı dosya bir kez")
                 continue
             medya[m["sha256"]] = dict(veri=veri, tur=m.get("tur") or "", sahip="%s|%s|%s" % (kaynak, m.get("db"), m.get("anahtar")))
+
+
+def paket_kaydet(akis, uzunluk, klasor, zaman=None):
+    """POST /api/hesap/goc-paket govdesi (Faz 1 P2): once yarim adla diske, bicim, sir ve medya denetimi,
+    sonra kendi adiyla klasore. Ustune yazmaz; reddedilen paketten diskte iz kalmaz.
+    Doner: {ad, bayt, kaynak, cihaz, profil, anahtar, medya, bekleyen}. Hata: ValueError((kod, cumle))."""
+    if not isinstance(uzunluk, int) or isinstance(uzunluk, bool) or uzunluk <= 0:
+        raise ValueError((400, "Paket boş."))
+    if uzunluk > PAKET_EN_BUYUK:
+        raise ValueError((413, "Paket çok büyük; medya daha küçük parçalara bölünmeli."))
+    os.makedirs(klasor, exist_ok=True)
+    yarim = os.path.join(klasor, ".yukleniyor-%s" % os.urandom(6).hex())
+    try:
+        kalan = uzunluk
+        with open(yarim, "wb") as f:
+            while kalan > 0:
+                parca = akis.read(min(1 << 16, kalan))
+                if not parca:
+                    break
+                f.write(parca)
+                kalan -= len(parca)
+        if kalan:
+            raise ValueError((400, "Paket yarım geldi."))
+        with open(yarim, "rb") as f:
+            try:
+                p = json.loads(f.read().decode("utf-8"))
+            except (UnicodeDecodeError, ValueError):
+                raise ValueError((400, "Paket okunamadı."))
+        if not isinstance(p, dict) or p.get("lifeos_goc") != 1 or p.get("kaynak") not in PAKET_KAYNAK:
+            raise ValueError((400, "Paket biçimi tanınmadı."))
+        cihaz = p.get("cihaz")
+        if not isinstance(cihaz, str) or not CIHAZ_RE.match(cihaz):
+            raise ValueError((400, "Geçersiz cihaz kimliği."))
+        if any(SIR_RE.search(k) for k in (p.get("anahtarlar") or {})):
+            raise ValueError((400, "Pakette sır adlı anahtar var; kaydedilmedi."))
+        for m in p.get("medya") or []:
+            try:
+                veri = base64.b64decode(m.get("veri") or "", validate=True)
+            except (ValueError, AttributeError):
+                veri = None
+            if veri is None or ozet(veri) != m.get("sha256") or len(veri) != m.get("boyut"):
+                raise ValueError((400, "Pakette bozuk medya var: %s." % str(m.get("anahtar"))[:80]))
+        an = datetime.datetime.fromtimestamp(zaman) if zaman else datetime.datetime.now()
+        ad = "%s-%s-%s-%s.json" % (p["kaynak"], cihaz, an.strftime("%Y%m%d-%H%M%S"), os.urandom(3).hex())
+        hedef = os.path.join(klasor, ad)
+        if os.path.exists(hedef):
+            raise ValueError((409, "Aynı adla paket var."))
+        os.rename(yarim, hedef)                     # Windows'ta rename de var olanin ustune yazmaz
+        return {"ad": ad, "bayt": uzunluk, "kaynak": p["kaynak"], "cihaz": cihaz,
+                "profil": len(p.get("profiller") or {}), "anahtar": len(p.get("anahtarlar") or {}),
+                "medya": len(p.get("medya") or []), "bekleyen": p.get("bekleyen") or {}}
+    finally:
+        if os.path.exists(yarim):
+            os.remove(yarim)
 
 
 def topla_hkm(kopya, adaylar, sayim, bilgi, uyari):
