@@ -99,6 +99,9 @@
    ],
    "rutbe": [
     "istatistikler"
+   ],
+   "kilavuz": [
+    "sayfa_ac"
    ]
   }
  },
@@ -177,6 +180,12 @@
    "guide": "-: rehber metni",
    "rutbe": [
     "istatistikler"
+   ],
+   "kilavuz": [
+    "sayfa_ac"
+   ],
+   "ogrenme": [
+    "sayfa_ac"
    ]
   }
  },
@@ -266,6 +275,12 @@
    "guide": "-: rehber metni",
    "rutbe": [
     "istatistikler"
+   ],
+   "kilavuz": [
+    "sayfa_ac"
+   ],
+   "ogrenme": [
+    "sayfa_ac"
    ]
   }
  }

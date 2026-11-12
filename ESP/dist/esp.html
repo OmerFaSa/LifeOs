@@ -32143,7 +32143,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'4e870a37', at:'2026-11-12 19:08', dirty:true };
+ESP.BUILD = { id:'b8c46a54', at:'2026-11-12 19:53', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -59971,6 +59971,9 @@ window.LIFEOS.PARCA_REHBER = [
   { modul:'esp', route:'symposium', ad:'Felsefe', es:['felsefe', 'sempozyum'] },
   { modul:'esp', route:'history', ad:'Tarih', es:['tarih', 'kronoloji'] },
   { modul:'esp', route:'studio', ad:'Ses', es:['müzik', 'diksiyon', 'stüdyo'] },
+  { modul:'ays', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'spi', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'esp', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
 ];
 
 /* ==== js/core/king.js ==== */
@@ -75100,7 +75103,7 @@ window.LIFEOS.KILAVUZ = (function(){
   /* Modül çağırır (screens/guide.js): sayfa, ekran ve komut buradan kaydedilir. ns: R, SP ya da ESP. */
   function kur(m, ns){
     modul = m;
-    P.sayfa({ id:'kilavuz', modul:m, cekmece:'ayarlar', ad:k('menu'), sira:40 });
+    /* Sayfa kaydı modülün screens/guide.js'inde: King'in sayfa kataloğu (tools/parca.py) oradaki `king` alanını okur. */
     [['ozet', ozetHtml], ['ilk', ilkGunHtml], ['gun', herGunHtml], ['sistemler', sistemlerHtml], ['telefon', telefonHtml], ['takilirsan', takilirsanHtml]].forEach(([id, ciz], i) =>
       P.blok({ id:'kilavuz.' + id, sayfa:'kilavuz', yer:'ana', ad:k('baslik'), sira:(i + 1) * 10, ciz }));
     /* SPİ ve ESP paleti menüden üretir; AYS'ninki elle yazılır. */
@@ -122392,6 +122395,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.guide.rehber':'Rehber',
 });
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'esp', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'kilavuz', modul:'esp', king:{ sira:242, ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] }, cekmece:'ayarlar', ad:'Kılavuz', sira:40 });
 window.LIFEOS.KILAVUZ.kur('esp', ESP);
 
 ESP.Screens.guide = (function(){

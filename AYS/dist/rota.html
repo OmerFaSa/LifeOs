@@ -51427,7 +51427,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'af703989', at:'2026-11-12 19:18', dirty:true };
+R.BUILD = { id:'b8c46a54', at:'2026-11-12 19:53', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -70720,7 +70720,7 @@ R.KingArac = (function(){
     /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
     denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
     konu_riski:/(risk altında|riskli konu|konu riski|net (?:kayb|kaçır))/,
-    /* «dün ne çalıştım» (King 5 D10): model «araç çağırmam gerekiyor» deyip cevapsız bırakıyordu. */
+    /* «dün … çalıştım» sorusu (King 5 D10): model «araç çağırmam gerekiyor» deyip cevapsız bırakıyordu. */
     gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç|(?:bugün|dün|önceki gün)(?:kü)? (?:ne|neler|ne kadar) (?:çalıştım|yaptım|çözdüm))/,
     konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
     gunun_akisi:/(günün akışı|bugünün akışı|(?:bugünün|bugünkü|günün) (?:planı|programı)(?= ne(?:ler)?(?:\s|[?,.!]|$)|\s*[?,]|\s*$)|bugün ne(?:ler)? (?:var|çalışacağım))/,   // King 5: «bugünün planı ne»; «planına … ekle» yazmadır
@@ -78878,6 +78878,9 @@ window.LIFEOS.PARCA_REHBER = [
   { modul:'esp', route:'symposium', ad:'Felsefe', es:['felsefe', 'sempozyum'] },
   { modul:'esp', route:'history', ad:'Tarih', es:['tarih', 'kronoloji'] },
   { modul:'esp', route:'studio', ad:'Ses', es:['müzik', 'diksiyon', 'stüdyo'] },
+  { modul:'ays', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'spi', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'esp', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
 ];
 
 /* ==== js/core/king.js ==== */
@@ -93063,7 +93066,7 @@ window.LIFEOS.KILAVUZ = (function(){
   /* Modül çağırır (screens/guide.js): sayfa, ekran ve komut buradan kaydedilir. ns: R, SP ya da ESP. */
   function kur(m, ns){
     modul = m;
-    P.sayfa({ id:'kilavuz', modul:m, cekmece:'ayarlar', ad:k('menu'), sira:40 });
+    /* Sayfa kaydı modülün screens/guide.js'inde: King'in sayfa kataloğu (tools/parca.py) oradaki `king` alanını okur. */
     [['ozet', ozetHtml], ['ilk', ilkGunHtml], ['gun', herGunHtml], ['sistemler', sistemlerHtml], ['telefon', telefonHtml], ['takilirsan', takilirsanHtml]].forEach(([id, ciz], i) =>
       P.blok({ id:'kilavuz.' + id, sayfa:'kilavuz', yer:'ana', ad:k('baslik'), sira:(i + 1) * 10, ciz }));
     /* SPİ ve ESP paleti menüden üretir; AYS'ninki elle yazılır. */
@@ -144048,6 +144051,7 @@ window.LIFEOS.PARCA.yazilar({
 /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
 buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'ays', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'kilavuz', modul:'ays', king:{ sira:240, ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] }, cekmece:'ayarlar', ad:'Kılavuz', sira:40 });
 window.LIFEOS.KILAVUZ.kur('ays', R);
 
 R.Screens.guide = (function(){

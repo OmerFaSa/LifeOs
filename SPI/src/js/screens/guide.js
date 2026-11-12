@@ -214,6 +214,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.guide.rehber':'Rehber',
 });
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'spi', cekmece:'ayarlar', ad:'Genel', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'kilavuz', modul:'spi', king:{ sira:241, ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] }, cekmece:'ayarlar', ad:'Kılavuz', sira:40 });
 window.LIFEOS.KILAVUZ.kur('spi', SP);
 
 SP.Screens.guide = (function(){

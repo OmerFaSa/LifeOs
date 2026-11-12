@@ -164,7 +164,7 @@ window.LIFEOS.KILAVUZ = (function(){
   /* Modül çağırır (screens/guide.js): sayfa, ekran ve komut buradan kaydedilir. ns: R, SP ya da ESP. */
   function kur(m, ns){
     modul = m;
-    P.sayfa({ id:'kilavuz', modul:m, cekmece:'ayarlar', ad:k('menu'), sira:40 });
+    /* Sayfa kaydı modülün screens/guide.js'inde: King'in sayfa kataloğu (tools/parca.py) oradaki `king` alanını okur. */
     [['ozet', ozetHtml], ['ilk', ilkGunHtml], ['gun', herGunHtml], ['sistemler', sistemlerHtml], ['telefon', telefonHtml], ['takilirsan', takilirsanHtml]].forEach(([id, ciz], i) =>
       P.blok({ id:'kilavuz.' + id, sayfa:'kilavuz', yer:'ana', ad:k('baslik'), sira:(i + 1) * 10, ciz }));
     /* SPİ ve ESP paleti menüden üretir; AYS'ninki elle yazılır. */
