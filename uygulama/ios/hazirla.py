@@ -31,7 +31,8 @@ MEDYA = (".mp4", ".webm", ".png", ".jpg", ".webp", ".svg")
 # Telefon giris sayfasinin yukledigi ortak dosyalar. Windows'taki test (test_guncelle)
 # sayfadaki her adresin burada oldugunu sinar: eksik kalan dosya telefonda 404 olurdu.
 GIRIS_DOSYALARI = ("parca.js", "piksel.js", "piksel-doga.js", "piksel-figur.js", "piksel-simge.js",
-                   "piksel.css", "piksel-yazi.css", "hesap.js", "hesap.css", "animasyon.js", "qr.js")
+                   "piksel.css", "piksel-yazi.css", "hesap.js", "hesap.css", "animasyon.js", "qr.js",
+                   "gocpaket.js")     # sadelesme P2: telefondaki Gun gecmisi de goc paketine girer
 
 
 def ortak_kaynak():

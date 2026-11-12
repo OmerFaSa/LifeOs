@@ -2116,7 +2116,8 @@ window.LIFEOS.HESAP = (function(){
     const o = oturum(), base = sunucuAdresi(), d = ayar && ayar.depo;
     if(!o || base === null){ const h = new Error('Önce giriş yap.'); h.kod = 401; throw h; }
     if(!L.GocPaket) throw new Error('Göç paketi bu sürümde yok; uygulamayı güncelle.');
-    return L.GocPaket.yolla({ kaynak:String((d && d.alan) || '').split('/')[0], cihaz:cihazKimligi(), depo:d,
+    // modül deposu yoksa 4180 kökenindeyiz: orada Gün geçmişi ve ortak anahtarlar durur
+    return L.GocPaket.yolla({ kaynak:d && d.alan ? String(d.alan).split('/')[0] : 'gun', cihaz:cihazKimligi(), depo:d,
       jeton:o.j, adres:base + '/api/hesap/goc-paket' });
   }
   function gocMakbuz(v){
