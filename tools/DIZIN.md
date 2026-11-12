@@ -51,6 +51,8 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `veri_topla.py` — Resmi kaynak listesindeki dosyaları indirip metne çevirir, veri hazırlığında koşulur.
 
 ## Ölçüm
+- `akicilik.js` — Akıcılık bütçesi; üç modülün perfcheck'ini çağırır, süre değil sayı ölçer ve gerilemeyi ilk koşuda yakalar.
+- `king_olcum.py` — King dil modeli ölçümü: ilk söz, toplam süre, jeton ve ses başlama gecikmesi; canlı HKM'ye dokunmaz.
 - `hafiza_olcum.py` — HKM hafıza aramasını kök eşlemesi ve gömme ile karşılaştırıp süre ve doğruluk ölçer, optimizasyonda koşulur.
 - `hafiza_olcum_kume.json` — Hafıza arama ölçüm aracı için 24 adet Türkçe soru ve bilgi çifti içeren test kümesi verisidir.
 - `king_kapsam.js` — King kapsam testi; her modülün yazma işlevi ve rotası bir King aracına bağlı mı, eksik varsa çıkış 1 (KING-4 A2).
@@ -64,6 +66,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `sayilar.py` — Depo genelindeki test, satır ve modül sayılarını tek kaynaktan hesaplayıp belgelere yazar, CI'da denetlenir.
 
 ## Kabul testleri
+- `bilinc_kabul_test.py` — Bilinç haritası (`brand/ortak/bilinc.js`) kabul testi; temizlik, bağ ayrıştırma, ağ ve yerleşim.
 - `ays_sure_kabul_test.py` — Görev 010 kabul testi; AYS konuşarak süre ve uyku girişi ayrıştırmasını sınar, CI'da koşulur.
 - `ays_sinav_sure_kabul_test.py` — 2026-11-01 kararı; AYS deneme sınavında sekme kapalı geçen sürenin sayıldığını, elle duraklatmanın süreyi durdurduğunu sınar, CI'da koşulur.
 - `ays_deney_kabul_test.py` — Görev 073 kabul testi; AYS kişisel deney motoru (R.Deney) atama ve sonucunu sınar, CI'da koşulur.

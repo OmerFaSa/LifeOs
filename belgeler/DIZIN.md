@@ -13,6 +13,26 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [YARIM](ekip/YARIM.md) — Yarım kalan işler, bekleyen kararlar ve gerçek cihazda denenmeyenler; yeni oturum önce bunu okur; durumu: güncel (2026-11-06)
 - [Patron turu yarım](ekip/yarim/patron-tanitim.md) — Patron turunda birleştirmeden önce koşulacak denetimler ve açık kalan ses notu.
 - [SPİ sadelik](ekip/sadelik/spi.md) — SPİ ekranlarının önce/sonra sadelik dökümü, ortak gereken işler ve sorulacak silme önerileri; durumu: 2026-11-06.
+- [AYS sadelik](ekip/sadelik/ays.md) — AYS ekranlarının 6 Kasım sadelik dökümü; durumu: sadeleşme planına girdi (2026-11-12).
+- [ESP sadelik](ekip/sadelik/esp.md) — ESP ekranlarının 6 Kasım sadelik dökümü; durumu: sadeleşme planına girdi (2026-11-12).
+- [Sadeleşme tabanı](ekip/sadelesme/taban-20261112.md) — Tek sisteme geçişin «önce» sayıları; her faz kapısı buna karşı ölçülür. Plan sayfası aynı klasörde `plan.html` (2026-11-12).
+- [Sadeleşme sentezi](ekip/sadelesme/sentez.md) — Dokuz envanter raporunun birleşimi: aday listesi, düzeltilen sayılar, kararlar, riskler, çelişkiler (2026-11-12).
+- [Depo zemini](ekip/sadelesme/depo-zemini.md) — A1: dallar, çalışma kopyaları, ana kopya; sekiz dalın arşivi (2026-11-12).
+- [AYS envanteri](ekip/sadelesme/envanter-ays.md) — A2: AYS ekranları, çekirdek, veri, içerik ve kaldırma adayları (2026-11-12).
+- [SPİ envanteri](ekip/sadelesme/envanter-spi.md) — A2: SPİ ekranları, kural motorları, veri, içerik ve kaldırma adayları (2026-11-12).
+- [ESP envanteri](ekip/sadelesme/envanter-esp.md) — A2: ESP ekranları, merdiven, motorlar, ofis ve kaldırma adayları (2026-11-12).
+- [Kabuk ve sunucu envanteri](ekip/sadelesme/envanter-kabuk-sunucu.md) — A2, A4, A5, A10: kabuk, ayarlar, tema, sunucu, cihaz yolları, seviye (2026-11-12).
+- [King ve HKM keşfi](ekip/sadelesme/king-hkm.md) — A7: yönlendirme, araçlar, sağlayıcılar, hafıza, BAM, HKM, ölçüm, MCP hazırlığı (2026-11-12).
+- [Veri katmanı keşfi](ekip/sadelesme/veri-katmani.md) — A3: verinin altı yeri, eşitleme, kayıt türleri, göç planı ve riskler (2026-11-12).
+- [İçerik hattı](ekip/sadelesme/icerik-hatti.md) — A8: gemini-data, ders biçimi, Felsefe ve Dil yol iskeletleri, pilot önerisi (2026-11-12).
+- [Not ve tekrar keşfi](ekip/sadelesme/not-ve-tekrar.md) — A6: on üç not yapısı, dokuz tekrar zamanlayıcısı, tek Not ve Tekrar motoru önerisi (2026-11-12).
+- [KING-5](ekip/KING-5.md) — Sahada çalışan King: dört tur düzeltme planı; durumu: dört tur gönderildi, sadeleşmede A7'ye bağlandı (2026-11-08).
+- [Güncelleme denemesi](ekip/GUNCELLEME-DENEMESI.md) — PC panelindeki «Güncelle» kutusunun yeni sürümü gösterdiğini sınamak için deneme notu (2026-11-07).
+- [Android yarım](ekip/yarim/android.md) — Android ve kök sertifika durumu; dal birleşmedi (2026-11-06).
+- [Bulut ve ses yarım](ekip/yarim/bulut-ses.md) — Bulut geçişi ve ses listesi; `main`'de, açık kalanlar (2026-11-07).
+- [Her yerden erişim yarım](ekip/yarim/her-yerden-erisim.md) — Tailscale erişimi ve model hızı durumu (2026-11-06).
+- [Not sistemi yarım](ekip/yarim/not-sistemi.md) — Not sistemi turunun açık kalanları; WIP yok.
+- [Telefon hızı yarım](ekip/yarim/telefon-hiz.md) — Telefon ve tablet hızı durumu (2026-11-06).
 - [PLAN](ekip/PLAN.md) — Esnek hedef sistemi mimarisi ve ofisler arası genel planlama motoru; durumu: tamamlandı (2026-09-24)
 - [EKIP-PLANI](ekip/EKIP-PLANI.md) — Üç Claude için tek tasarım ve 183 özelliklik ekip hareket planı; durumu: tamamlandı (2026-09-24)
 - [DEVIR](ekip/DEVIR.md) — Sıradaki Claude için anlık çalışma talimatları ve öncelikli iş listesi; durumu: tamamlandı (2026-09-23)
