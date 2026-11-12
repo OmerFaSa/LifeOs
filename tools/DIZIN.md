@@ -4,6 +4,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 
 ## Denetim
 - `ci_hata.sh` — CI adımını koşar; kalırsa çıktının ilgili satırlarını tek bir açık okunur `::error` bildirimine yazar (iş kaydı yönetici yetkisi ister).
+- `ci_satir.sh` — Çok satırlı bir CI adımının (`run: |`) her satırını ayrı koşar ve kalan her satırı `ci_hata.sh` ile kendi bildirimine yazar; ofis adımının `shell:` koşucusudur.
 - `entegre.js` — Üç arayüz ile HKM servisinin uçtan uca bütünleşmesini denetler, birleştirmeden önce ve CI'da koşulur.
 - `envanter.js` — Tek tasarıma geçişte ekran eylemleri, giriş alanları ve arayüz özellik kayıplarını denetler, CI'da koşulur.
 - `nerede.js` — Ekranlardaki metin ve düğme kalabalığının (sadelik aşımının) yerini tespit eder, gerektiğinde elle koşulur.

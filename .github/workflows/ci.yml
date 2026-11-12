@@ -236,6 +236,16 @@ jobs:
       - name: King guven kurallari (KING-4 §G)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King guven kurallari (KING-4 §G)" node tools/king_guven.js
 
+      # Ofis kabul testlerinin bir kismi (King sinavi ve kapsami, perde hizi) uc arayuzu gercek tarayicida
+      # acar. Bu is baska yerde Playwright kurmaz; 2026-11-09'dan beri bu testler CI'da yalniz bu yuzden
+      # kirmiziydi (yerelde gecer). Tarayicisiz denetimler yine Playwright'siz sinanir (playwrightsiz.test.js engeller).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ofis testleri için Playwright
+        run: for m in AYS SPI ESP; do (cd "$m" && npm ci) || exit 1; done && cd SPI && npx playwright install --with-deps chromium
+
       # OFIS (2026-10-31). Antigravity islerinin kabul testleri (Claude Code yazar) ve
       # Uygulayici'nin birim testleri. «ajan.py birlestir» satir ekler; elle silme.
       - name: Ofis kabul ve birim testleri
