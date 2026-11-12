@@ -1,0 +1,613 @@
+<title>LifeOS Sadeleşme Planı</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+/* Yerleşim: tek sütun plan belgesi; teşhis ve mimari tablolarla, ürün tasarımı uygulamanın kendi renklerinde maketlerle */
+:root{
+  --bg:#eeecf5;--surface:#f9f8fd;--ink:#1d1a33;--muted:#5d5a78;--line:#d2cee3;--accent:#a94c1a;--gold:#775b20;--bad:#9b2c2c;--good:#2c6b45;
+  /* maket renkleri: uygulamanın kendi dünyası, temayla değişmez */
+  --m-bg:#2b211b;--m-panel:#3a2c24;--m-deep:#221914;--m-line:#5f4c3e;--m-gold:#a88c5f;--m-ink:#f3e7d4;--m-mute:#bca88f;--m-acc:#ee9b62;--m-accink:#3a2213;--m-sky:#24215c;
+  --display:"Pixelify Sans",ui-monospace,monospace;--body:"IBM Plex Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14132b;--surface:#1c1b3a;--ink:#ecebf6;--muted:#a6a3c2;--line:#33315c;--accent:#f0a06a;--gold:#cfa860;--bad:#f08a8a;--good:#7fd0a0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14132b;--surface:#1c1b3a;--ink:#ecebf6;--muted:#a6a3c2;--line:#33315c;--accent:#f0a06a;--gold:#cfa860;--bad:#f08a8a;--good:#7fd0a0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:1040px;margin:0 auto;padding-block:36px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:48px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:23px;line-height:1.2;margin:0;text-wrap:balance}
+h3{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
+p{margin:0;max-width:70ch}
+code{font-size:.92em}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lede{font-size:17px;max-width:64ch}
+.note{color:var(--muted);font-size:13px}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+.tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.head{display:flex;flex-direction:column;gap:2px}
+.rec{border-left:3px solid var(--accent);padding:2px 0 2px 12px;max-width:70ch}
+.rec b{color:var(--accent)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;border-block:1px solid var(--line);padding-block:10px}
+ol.rules{margin:0;padding-left:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:6px 36px}
+ol.rules b,ul b,.wp b{font-weight:600}
+ul,ol.plain{margin:0;padding-left:20px;max-width:70ch;display:flex;flex-direction:column;gap:4px}
+.mocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start}
+figure{margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+figcaption{font-size:13px;color:var(--muted)}
+figcaption b{color:var(--ink);font-weight:600}
+.scroll{overflow-x:auto}
+.wide{min-width:600px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 14px 7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td:first-child{font-weight:500}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.was{color:var(--bad)}.to{color:var(--good);font-weight:600}
+/* mimari şema */
+.arch{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start}
+.arch > div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.bx{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;color:var(--muted);min-width:0}
+.bx b{display:block;color:var(--ink);font-size:14px;font-weight:600}
+.bxrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:6px}
+.bx.hot{border-color:var(--accent)}
+.bx.dash{border-style:dashed}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.flow div{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 12px;font-size:13px;flex:1 1 150px;min-width:0;color:var(--muted)}
+.flow div b{display:block;font-size:14px;color:var(--ink)}
+.flow span{align-self:center;color:var(--muted)}
+.curves{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.curves div{background:var(--surface);padding:10px 12px;font-size:13px;color:var(--muted)}
+.curves b{display:block;color:var(--ink);font-size:14px;font-weight:600}
+.curves .sys b{color:var(--gold)}
+/* iş paketleri ve fazlar */
+.wp{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.wp > div{display:grid;grid-template-columns:56px 1.2fr 1fr;gap:6px 18px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.wp .n{font-family:var(--display);color:var(--accent);font-size:16px}
+.wp .done{color:var(--muted)}
+@media (max-width:680px){.wp > div{grid-template-columns:1fr}}
+/* ---- maket seti ---- */
+.scr{background:var(--m-bg);color:var(--m-ink);font-family:var(--display);font-size:12px;line-height:1.45;border:1px solid var(--m-line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:250px;position:relative;overflow:hidden}
+.scr .top{display:flex;justify-content:space-between;gap:8px;color:var(--m-mute);font-size:11px}
+.scr .mid{flex:1;display:flex;flex-direction:column;gap:9px;justify-content:center;align-items:center;text-align:center}
+.scr .big{font-size:20px;font-weight:600;line-height:1.15}
+.scr .mut{color:var(--m-mute)}
+.scr .acc{color:var(--m-acc)}
+.scr .btn{display:inline-block;background:var(--m-acc);color:var(--m-accink);padding:5px 12px;border-radius:3px;font-weight:600}
+.scr .gh{display:inline-block;border:1px solid var(--m-line);padding:3px 8px;border-radius:3px;color:var(--m-mute)}
+.scr .gh.on{border-color:var(--m-gold);color:var(--m-ink)}
+.scr .pan{background:var(--m-panel);border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:7px}
+.scr .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.scr .sp{justify-content:space-between}
+.scr .li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--m-line)}
+.scr .pg{height:4px;background:var(--m-deep);border-radius:2px;flex:1;min-width:40px}
+.scr .pg i{display:block;height:100%;background:var(--m-acc);border-radius:2px}
+.scr .sk{height:6px;background:var(--m-line);border-radius:2px;width:var(--w,100%);max-width:100%}
+.scr .cols{display:grid;gap:12px;flex:1}
+.scr .nav{display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--m-line);padding-right:10px}
+.scr .nav small{color:var(--m-gold);font-size:10px;letter-spacing:.08em;margin-top:6px}
+.scr .nav .on{color:var(--m-acc)}
+.scr .new{font-size:9px;border:1px solid var(--m-gold);color:var(--m-gold);padding:0 4px;border-radius:2px;margin-left:4px}
+.scr .me{align-self:flex-end;background:var(--m-panel);padding:6px 9px;border-radius:4px;max-width:85%}
+.scr .king{align-self:flex-start;border-left:2px solid var(--m-acc);padding:2px 0 2px 9px;max-width:92%;display:flex;flex-direction:column;gap:6px}
+.scr .chip{align-self:flex-end;font-size:10px;color:var(--m-gold)}
+.scr.old{background:var(--m-sky);justify-content:center}
+.scr.old .card{background:var(--m-bg);border:1px solid var(--m-line);border-radius:4px;padding:10px;margin:0 12%;display:flex;flex-direction:column;gap:7px;font-size:10px}
+.scr.old .tabs{background:var(--m-panel);padding:4px;display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+#hold{touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+#hold button{font:inherit;background:none;color:var(--m-mute);border:1px solid var(--m-line);border-radius:3px;padding:3px 8px;cursor:pointer}
+#hold button:focus-visible{outline:2px solid var(--m-acc);outline-offset:2px}
+#ring{position:absolute;width:0;height:0}
+#ring::before{content:"";position:absolute;width:10px;height:10px;left:-5px;top:-5px;background:var(--m-acc);border-radius:50%}
+#ring b{position:absolute;left:0;top:0;transform:translate(-50%,-50%) rotate(var(--a)) translate(66px) rotate(calc(-1*var(--a)));background:var(--m-panel);border:1px solid var(--m-gold);color:var(--m-ink);padding:5px 9px;border-radius:3px;font-weight:400;white-space:nowrap}
+#ring b.on{background:var(--m-acc);color:var(--m-accink);border-color:var(--m-acc)}
+.dock{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:var(--m-panel);border:1px solid var(--m-gold);border-radius:20px;padding:5px 12px;display:flex;gap:12px;white-space:nowrap}
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:14px">
+  <span class="tag">Sürüm 4 · 12 Kasım 2026 · Faz 0 envanteri bitti, uygulama kodunda değişiklik yok</span>
+  <h1>LifeOS Sadeleşme Planı</h1>
+  <p class="lede">Karmaşıklığın kaynağı ekran düzeni değil, yapının kendisi. LifeOS bugün tek bir kişi için dört ayrı ürün olarak kurulu: üç bağımsız uygulama ve yanlarında bir merkez. Yazında istediğin her şey (tam ekran, tek not defteri, sistemi tanıyan King, sade ayarlar, tek cihaz yolu) aynı kararı gerektiriyor: <b>tek kişi, tek sistem, tek veri.</b> Bu belge o geçişin altyapı planıdır.</p>
+  <nav class="toc" aria-label="İçindekiler">
+    <a href="#durum">Faz 0 durumu</a><a href="#envanter">Envanter bulguları</a><a href="#teshis">1 Teşhis</a><a href="#kurallar">2 Kurallar</a><a href="#mimari">3 Hedef mimari</a><a href="#altyapi">4 Altyapı iş paketleri</a><a href="#kalite">Kalite yükseltmeleri</a><a href="#gecis">5 Geçiş</a><a href="#king">6 King ve ölçüm</a><a href="#tasarim">7 Örnek tasarımlar</a><a href="#fazlar">8 Fazlar</a><a href="#duzen">9 Çalışma düzeni</a><a href="#olcut">10 Başarı ölçütleri</a><a href="#kararlar">11 Kararlar</a>
+  </nav>
+</header>
+
+<section id="durum">
+  <div class="head"><span class="tag">Faz 0 · envanter bitti</span><h2>Keşif ve envanter: dokuz rapor tamam</h2></div>
+  <p>Hepsi salt okuma. Güncel koddan ayrı bir çalışma kopyası açtım (<code>LifeOs-sadelesme</code>, dal <code>sadelesme</code>); raporlar orada <code>belgeler/ekip/sadelesme/</code> altında, toplam 2.859 satır. Birleşik özeti <code>sentez.md</code>. Ana kopyaya, çalışan kopyaya ve verine dokunulmadı. Envanter senin onayını bekliyor; Faz 0 kapısının kalan iki maddesi kararlar ve taban ölçümü.</p>
+  <div class="tw"><table>
+    <tr><th>İş kolu</th><th>Paket</th><th>Kim</th><th>Çıktı</th><th>Durum</th></tr>
+    <tr><td>Depo zemini</td><td>A1</td><td>Ben</td><td><code>depo-zemini.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>AYS envanteri</td><td>A2</td><td>Opus ajanı</td><td><code>envanter-ays.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>SPİ envanteri</td><td>A2</td><td>Opus ajanı</td><td><code>envanter-spi.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>ESP envanteri</td><td>A2</td><td>Opus ajanı</td><td><code>envanter-esp.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>Kabuk, ayarlar, sunucu, cihaz</td><td>A2, A4, A5, A10</td><td>Opus ajanı</td><td><code>envanter-kabuk-sunucu.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>King ve HKM</td><td>A7</td><td>Opus ajanı</td><td><code>king-hkm.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>Veri katmanı</td><td>A3</td><td>Opus ajanı</td><td><code>veri-katmani.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>İçerik hattı ve yol haritası iskeletleri</td><td>A8</td><td>Opus ajanı</td><td><code>icerik-hatti.md</code></td><td class="to">Bitti</td></tr>
+    <tr><td>Not ve tekrar motorları</td><td>A6</td><td>Opus ajanı</td><td><code>not-ve-tekrar.md</code></td><td class="to">Bitti</td></tr>
+  </table></div>
+  <h3>Depo zemini: ilk sonuç</h3>
+  <p>Durum beklediğimden iyi. 92 yerel dalın 84'ünün bütün kayıtları ana dalda; silinmeleri kayıp doğurmaz. Yalnız 8 dal ana dala girmemiş toplam 17 kayıt taşıyor. 17 çalışma kopyasından biri dışında hiçbirinde ana dalda olmayan kayıt yok. Çalışan kopya (LifeOS-Sistem) güncel ve temiz. Asıl dikkat isteyen yer ana kopya: 36 kayıt geride, 22 dosyada bitmemiş değişiklik ve kayda girmemiş veri klasörleri var. Onayınla yapılanlar: ana kopyanın bitmemiş işi yerel <code>yedek/ana-kopya-20261112</code> dalına alındı, ana kopya uzak depoyla eşitlendi, birleşmiş 75 dal silindi (listesi <code>silinen-dallar-20261112.txt</code>). Açık kalanlar: 8 birleşmemiş dal için karar ve canlı çalışma kopyalarının kapatılması.</p>
+</section>
+
+<section id="envanter">
+  <div class="head"><span class="tag">Faz 0 · bulgular</span><h2>Envanterin söyledikleri</h2></div>
+  <p>Teşhis doğrulandı, ama bazı sayılar yanlıştı ve iki yük beklenenden büyük çıktı. Aşağıdaki her satırın kaynağı raporlarda dosya ve satır numarasıyla yazılı.</p>
+  <h3>Plandaki sayılar, düzeltilmiş hâliyle</h3>
+  <div class="tw"><table>
+    <tr><th>Ölçüt</th><th>Sürüm 3</th><th>Envanter</th></tr>
+    <tr><td>Üçe kopyalanan ortak dosya</td><td class="num">326</td><td>226 ortak dosya ve 10 seviye dosyası, her biri üç modüle. «244'ü aynı» ölçülmemişti, çıkarıldı.</td></tr>
+    <tr><td>Bir ayar için dokunulan yer</td><td class="num">6</td><td>2. Öbür dördü zaten katalogdan türetiliyor; teknik belge eskimiş. Buna karşılık 8 görünüm seçiminin ekranda denetimi hiç çizilmiyor.</td></tr>
+    <tr><td>King aracı</td><td class="num">≈ 100</td><td>Modelin kataloğunda 124 (57 okur, 67 yazar); yetki ve niyet araçlarıyla 162.</td></tr>
+    <tr><td>Verinin doğrusu</td><td class="num">5 yer</td><td>En az 6: üç modülün tarayıcı deposu, Gün sayfası, HKM veritabanı (50 tablo) ve eşitlenmeyen fotoğraf depoları. Hesap sunucusu kayıtların yalnız kopyası.</td></tr>
+    <tr><td>İç içelik</td><td class="num">3 kat</td><td>ESP'de 4: çekmece, disiplin, sekme, açılır araç (234 araç çağrısı). Uzman masasının içinde bir kat daha.</td></tr>
+    <tr><td>Tekrar düzeni</td><td class="num">3</td><td>9 ayrı zamanlayıcı ve sahipsiz bir tablo; üçü yalnız tarayıcıda, eşitlenmiyor.</td></tr>
+    <tr><td>Not biçimi</td><td class="num">—</td><td>13 not benzeri yapı, 2 ayrı ağ çizimi.</td></tr>
+  </table></div>
+
+  <h3>Birleşik aday listesi: yirmi satır</h3>
+  <p>Raporların kaldırma ve birleştirme adayları tekilleştirildi. Bu, A2 karar matrisinin taslağıdır; hiçbir satır senin onayın olmadan uygulanmaz. Arşiv geri alınabilir, silme yalnız kapanış fazında yapılır.</p>
+  <div class="tw"><table class="wide">
+    <tr><th>#</th><th>Aday</th><th>Hedef</th><th>Paket · faz</th><th>Risk</th></tr>
+    <tr><td>1</td><td>Altı veri yeri → tek depo</td><td>Çekirdek</td><td>A3 · 1</td><td class="was">Yüksek: fotoğraflar, açılmamış profiller, bekleyen sıra, Gün geçmişi</td></tr>
+    <tr><td>2</td><td>HKM ayrı süreci, web yüzü ve üç köprü</td><td>Çekirdek tek sunucuya; köprüler silinir</td><td>A4 · 1, yüz 7</td><td class="was">Yüksek: para, motto, hafıza ve sohbet yalnız HKM'de</td></tr>
+    <tr><td>3</td><td>BAM ve iki ayrı araştırma kodu</td><td>Arama motoru; kalanı arşiv</td><td>A7 · 5</td><td>Orta</td></tr>
+    <tr><td>4</td><td>Üç modülün ofisi ve 20 ajanı, toplantı, brifing</td><td>King; kişilikler kalkar, tutanak arşiv</td><td>A7 · 5-6</td><td>Orta</td></tr>
+    <tr><td>5</td><td>ESP Uzman masası (7 disiplinde)</td><td>Sohbet King'e, ek Not'a, hatırlatma Plan'a</td><td>A6 · 3/6</td><td>Orta: iki koleksiyon taşınmalı</td></tr>
+    <tr><td>6</td><td>Üç öneri kutusu ve Onaylar ekranları</td><td>King'de tek onay kapısı</td><td>A7 · 5</td><td>Orta: onay kapısı korunmalı</td></tr>
+    <tr><td>7</td><td>XP, rütbe, başarım, perde (3 Rütbe sayfası, 84 MB medya)</td><td>Arşiv ya da tek kabuk seviyesi (karar 5)</td><td>A5 · 2</td><td>Orta</td></tr>
+    <tr><td>8</td><td>Kalibrasyon, Goodhart, sürtünme, sinyal, denetim, EHS</td><td>Arşiv; SPİ'nin sinyal ve denetimi Kayıt motoruna</td><td>A2 · 6</td><td>Düşük</td></tr>
+    <tr><td>9</td><td>9 tekrar zamanlayıcısı</td><td>Tek Tekrar motoru</td><td>A6 · 3</td><td>Orta: vadeler aynen taşınmalı</td></tr>
+    <tr><td>10</td><td>13 not benzeri yapı ve 2 ağ çizimi</td><td>Tek Not motoru, tek ağ</td><td>A6 · 3</td><td>Orta</td></tr>
+    <tr><td>11</td><td>Dağınık öğrenme yolları (AYS 2, SPİ 4 yer, ESP 2)</td><td>Yol motoru</td><td>A6, A8 · 3</td><td>Düşük</td></tr>
+    <tr><td>12</td><td>AYS'de 4 pratik yolu, 4 sınav analizi, konu 5 yerde</td><td>Soru ve Yol motorları</td><td>A6 · 6</td><td>Düşük</td></tr>
+    <tr><td>13</td><td>Hedef ve plan 5 yerde</td><td>Plan motoru</td><td>A6 · 6</td><td>Orta: biçimler farklı</td></tr>
+    <tr><td>14</td><td>Özet, analiz ve haftalık rapor tekrarları</td><td>Alanın İlerleme sayfası</td><td>A5, A6 · 6</td><td>Düşük</td></tr>
+    <tr><td>15</td><td>SPİ Bütçe</td><td>Arşiv</td><td>A2 · 6</td><td>Düşük</td></tr>
+    <tr><td>16</td><td>Statik tablo araçları, 11-13 araçlı sekmeler</td><td>Dersin içine</td><td>A8 · 3/6</td><td>Düşük: içerik silinmez</td></tr>
+    <tr><td>17</td><td>King'in sözcükle yönlendirmesi ve 124 araç</td><td>On iki üst araç</td><td>A7 · 5</td><td>Orta: sınav sonuçları değişir</td></tr>
+    <tr><td>18</td><td>Kenar çubuğu, kapı geçişi, üç ayrı yönlendirici</td><td>Kabukta tek yönlendirici</td><td>A5 · 2</td><td>Orta</td></tr>
+    <tr><td>19</td><td>Sahne (14 dosya, 545 KB) ve ölü görünüm seçimleri</td><td>Park; önce piksel stili ikiye bölünür</td><td>A5 · 2</td><td>Orta: 426 kural piksel dilini taşıyor</td></tr>
+    <tr><td>20</td><td>Kopya dağıtımı, ev ağı sertifikası (≈713 satır), tek dosya sürümü</td><td>Silinir</td><td>A10 · 7</td><td>Orta: Tailscale'siz cihaz kesilir</td></tr>
+  </table></div>
+
+  <h3>Plana etkileri</h3>
+  <ul>
+    <li><b>Veri göçü büyüdü.</b> Hesap sunucusundaki kopya yetmiyor. Her cihazdan bütün profilleri ve fotoğrafları taşıyan bir «göç paketi» gerekiyor; bu, dondurulmuş eski modüllere eklenecek tek düğme. Faz 1'in kapısı buna göre düzeltildi.</li>
+    <li><b>Göçten önce iki karar.</b> Göç etiketsiz sayıyı reddeder. SPİ'nin yaşamsal ölçümlerinde kesinlik etiketi yok, AYS boş enerjiyi 3 yazıyor. Nasıl işaretleneceklerine sen karar vermeden Faz 1 kapısı geçilemez (karar 10 ve 11).</li>
+    <li><b>MCP önce salt okur.</b> King'in araçları bugün tarayıcıda çalışıyor. MCP ucu, tek süreç kurulmadan (Faz 1) yazma yapamaz.</li>
+    <li><b>King'in konu kayması modelden değil.</b> Modelden önce 13 düzenli ifadelik niyet tablosu ve 76 sözcüklük sayfa rehberi karar veriyor. Claude'a geçmek bunu tek başına çözmez. Bu küçük ve bağımsız bir düzeltme; önce Anlama tabanı alınırsa öne çekilebilir.</li>
+    <li><b>Ayar şeması sanıldığından küçük, sahne daha bağlı.</b> Sahne park edilmeden önce piksel stil dosyası ikiye bölünmeli; yoksa piksel kimliği de gider.</li>
+    <li><b>Pilot: Felsefe.</b> İlk iki aşamanın 15 dersinden 5'i hazır, 7'si kısmi, 3'ü boş; yalnız metin ister. İngilizcede 16 dersten 1'i hazır ve ses altyapısı yok. Pilot için yazılacak ders ≈10 (tahmin).</li>
+    <li><b>İçeriğin gerçek ölçeği.</b> Akademik dışında ≈900-1.000 ders eksik (tahmin). Tek gerçekçi yol: önce iskelet, ders o adıma gelindiğinde.</li>
+  </ul>
+  <p class="note">Çözülmemiş küçük çelişkiler (AYS konu sayısı 184 mı 192 mi, hesap uçları 70 mi 48 mi, 293/300'ün hangi sınava ait olduğu, canlı ayardaki model ve üç modülün <code>evidence</code>, <code>signals</code>, <code>audit</code>, <code>calib</code> için farklı öneriler vermesi) <code>sentez.md</code> §6'da; A1 ve A2'de kapanır.</p>
+</section>
+
+<section id="teshis">
+  <div class="head"><span class="tag">1 · Teşhis</span><h2>Karmaşıklık görünümde değil, yapıda</h2></div>
+  <p>Aşağıdaki sayıları depodan ve teknik belgeden çıkardım. Her biri senin şikâyet ettiğin bir şeyin yapısal nedeni.</p>
+  <div class="tw"><table>
+    <tr><th>Ölçülen</th><th>Bugün</th><th>Sana yansıması</th></tr>
+    <tr><td>Ayrı uygulama</td><td class="num">4</td><td>AYS, SPİ, ESP ve HKM ayrı ad alanı, ayrı kod, ayrı yüz. Modüller arası geçiş bu yüzden var.</td></tr>
+    <tr><td>Kapı (adres)</td><td class="num">5 + 4</td><td>4180, 4173, 4183, 4193, 4200; ev ağında dört kapı daha. Tarayıcı her kapıyı ayrı site sayar.</td></tr>
+    <tr><td>Verinin doğrusu</td><td class="num">6 yer</td><td>Üç modülün tarayıcı deposu, Gün sayfası, HKM veritabanı (50 tablo) ve eşitlenmeyen fotoğraf depoları. Hesap sunucusu yalnız kopya tutuyor. Notların ve King'in her şeyi tek yerden görememesinin nedeni bu.</td></tr>
+    <tr><td>Üçe kopyalanan dosya</td><td class="num">226 + 10</td><td>Ortak kod ve seviye dosyaları çalışırken paylaşılmıyor, derlemede üç modüle kopyalanıyor.</td></tr>
+    <tr><td>Tekrar zamanlayıcısı · not yapısı</td><td class="num">9 · 13</td><td>Aynı kavram farklı vadelerle sorulabiliyor; notlar on üç ayrı yerde, iki ayrı ağ çizimiyle.</td></tr>
+    <tr><td>King aracı</td><td class="num">124</td><td>Modelin kataloğunda 124, yetki ve niyet araçlarıyla 162. Küçük yerel model bu kadar araç arasından seçim yapamıyor; üstelik modelden önce sözcük tabloları karar veriyor.</td></tr>
+    <tr><td>Kayıtlı parça</td><td class="num">79 · 304 · 69</td><td>64 ekran dosyasında 79 sayfa, 304 blok, 69 komut; ESP'de 4 kat iç içelik. Ekleme kuralı var, çıkarma kuralı yok.</td></tr>
+    <tr><td>Cihaz yolu</td><td class="num">4</td><td>Tek dosya ve yedek, ev ağı ve kendi sertifikamız, Tailscale, iPhone kabuğu. Dördü de yaşıyor.</td></tr>
+    <tr><td>Yerel dal ve çalışma kopyası</td><td class="num">92 · 17</td><td>Dalların 84'ü çoktan birleşmiş ama duruyor. Ana kopya uzak depodan 36 kayıt geride ve içinde bitmemiş iş var.</td></tr>
+  </table></div>
+  <p><b>Önceki turlar neden yetmedi.</b> Yedi haftada üç sadeleştirme turu yapıldı: 24 Eylül (çekmece haritası), Ekim (Kolay LifeOS), 6 Kasım (her alanda aynı dört sekme). Üçü de aynı dört uygulamanın içinde eşyaların yerini değiştirdi. Gönderdiğin ekran görüntüleri üçüncü turun sonucu ve hâlâ sıkışık. Dördüncü bir düzenleme turu aynı yere varır.</p>
+  <p><b>Kökte üç neden var.</b> Birincisi dört ürünlü yapı: her ortak iş (not, ayar, King, eşitleme) dört yerde ayrı çözülmek zorunda. İkincisi büyüme kuralı: her istek yeni parça ekledi, hiçbir kural parça çıkarmayı zorlamadı. Üçüncüsü ölçüm: King sınavı 293/300 gösteriyor (hangi sınav sürümüne ait olduğu doğrulanamadı; bugünkü sınav 358 cümle) ama sen kötü deneyim yaşıyorsun; sınav hazır cümlelerle araç kapsamını ölçüyor, niyeti anlamayı değil.</p>
+</section>
+
+<section id="kurallar">
+  <div class="head"><span class="tag">2 · Kural metriği (taslak)</span><h2>Sekiz kural ve değişmesi gereken eski sözleşmeler</h2></div>
+  <p>Yazında kural metni bölümü boş kalmıştı; taslağı metninden çıkardım. Onayladığında AGENTS.md'nin başına girer, her faz buna göre denetlenir.</p>
+  <ol class="rules">
+    <li><b>Tek kişi, tek sistem, tek veri.</b> Bir uygulama, bir adres, bir depo.</li>
+    <li><b>Tek ekran, tek iş.</b> Her sayfa tam ekrandır ve bir ana eylemi vardır.</li>
+    <li><b>Bir özellik, bir yer.</b> Ortak iş motordur; kopyalanmaz, çağrılır.</li>
+    <li><b>Öğrenme önce.</b> Yol haritasındaki bir adıma hizmet etmeyen özellik kalmaz.</li>
+    <li><b>Bir giren, bir çıkar.</b> Karmaşıklık bütçesi aşılırsa yeni parça ancak eskisi çıkınca girer.</li>
+    <li><b>Önce örnek, sonra kod.</b> Tasarım değişikliği varyasyonla gösterilir, sen seçersin.</li>
+    <li><b>Ölçmeden değişmez.</b> Her değişiklik bir eğriyi yükseltir ya da bir bütçeyi düşürür.</li>
+    <li><b>Sayıyı kod üretir.</b> King açıklar, öğretir, araştırır; hesap ve kayıt koddadır.</li>
+  </ol>
+  <h3>Bu planın değiştirdiği yürürlükteki kararlar</h3>
+  <div class="tw"><table>
+    <tr><th>AGENTS.md</th><th>Bugünkü söz</th><th>Önerilen</th></tr>
+    <tr><td>§0, §1.4</td><td>Dört bağımsız sistem; modüller birbirini bilmez; HKM yanlarında durur, BAM onun alt modülü</td><td>Tek sistem, içinde alanlar ve motorlar. HKM ve BAM ayrı yapı olarak kalkar; çekirdeği sunucuya katılır.</td></tr>
+    <tr><td>§1.10</td><td>Tek tema piksel: üstte akşam odası, bütün içerik tek kâğıt yaprakta</td><td>Tam ekran çerçeve. Piksel kimlik (yazı, renk) kalır; oda ve yaprak park edilir.</td></tr>
+    <tr><td>§1.11</td><td>Her şey Lego parçası olarak kaydedilir</td><td>Kalır; üstüne katman disiplini gelir: parça ya kabuğa, ya bir motora, ya bir alana aittir.</td></tr>
+    <tr><td>§1.6</td><td>Her sistemin kendi seviyesi: 25 basamak, 37 rozet, mühürler</td><td>Karar senin (bkz. Kararlar 5).</td></tr>
+    <tr><td>§1.1, §1.2, §1.3</td><td>Kural motoru otorite; eksik veri sıfır değil; sıfır bağımlılık</td><td>Aynen kalır. Model kapalıyken sistem yine çalışır.</td></tr>
+  </table></div>
+</section>
+
+<section id="mimari">
+  <div class="head"><span class="tag">3 · Hedef mimari</span><h2>Dört üründen tek sisteme: altı katman</h2></div>
+  <div class="arch">
+    <div><h3>Bugün</h3>
+      <div class="bxrow"><div class="bx"><b>Giriş</b>4180</div><div class="bx"><b>AYS</b>4173 · kendi deposu</div><div class="bx"><b>SPİ</b>4183 · kendi deposu</div><div class="bx"><b>ESP</b>4193 · kendi deposu</div><div class="bx"><b>HKM</b>4200 · 50 tablo · BAM</div></div>
+      <div class="bx dash">Ortak kod: derlemede üç modüle kopyalanır (226 + 10 dosya × 3)</div>
+      <div class="bx dash">Hesap sunucusu: her modülün kaydının eşitleme kopyası</div>
+      <div class="bx dash">Ev ağı kapıları ve kendi sertifikamız · Tailscale · iPhone kabuğu · tek dosya ve yedek</div>
+    </div>
+    <div><h3>Hedef</h3>
+      <div class="bx"><b>Cihazlar</b>PC, telefon, tablet: tek adres, tek giriş</div>
+      <div class="bx hot"><b>Kabuk</b>Tam ekran çerçeve · gezinme · sistem haritası · tek ayar şeması</div>
+      <div class="bx"><b>Alanlar</b>Akademik · Dil · Felsefe · Tarih · Müzik · Okuma ve yazı · Beslenme · Hareket · Uyku · Tahlil. Her alan içerik ve alan kuralıdır; kendi kabuğu yoktur.</div>
+      <div class="bx hot"><b>Motorlar</b>Yol · Tekrar · Soru · Kayıt · Plan · Not · Arama · King</div>
+      <div class="bx"><b>Çekirdek</b>Tek veri deposu · eşitleme · hesap · model kapısı · MCP ucu (tek süreç)</div>
+      <div class="bx dash"><b>Kalite</b>Testler · ölçüm motoru · karmaşıklık ve hız bütçesi</div>
+    </div>
+  </div>
+  <div class="tw"><table>
+    <tr><th>Katman</th><th>Sorumluluğu</th><th>Bugünkü karşılığı</th></tr>
+    <tr><td>Kabuk</td><td>Çerçeve, gezinme, ayarlar, tema jetonları. İçerik bilmez.</td><td><code>kabuk.js</code>, <code>ayarlar.js</code>, <code>parca.js</code> üç modülde kopya; ayrıca giriş sayfası ve HKM yüzü</td></tr>
+    <tr><td>Alan</td><td>Yol haritası içeriği, kayıt türleri, alanın kuralları (örneğin SPİ'nin klinik sınırı, AYS'nin net hesabı).</td><td>AYS, SPİ, ESP'nin ekran ve veri dosyaları</td></tr>
+    <tr><td>Motor</td><td>Tek bir işi her alan için yapar: tek arayüz, tek veri türü, tek test takımı.</td><td><code>ogret.js</code>, <code>defter.js</code>, tekrar kartları, deneme ve soru ekranları, <code>gun.py</code>; çoğu var ama modüllere dağılmış</td></tr>
+    <tr><td>King</td><td>Niyet, bağlam, araç, sağlayıcı, hafıza. Motorları kullanıcı gibi kullanır.</td><td>Dokuz istemci dosyası ve HKM'deki <code>king.py</code>, <code>sohbet.py</code>, <code>ai.py</code>, <code>memory.py</code></td></tr>
+    <tr><td>Çekirdek</td><td>Verinin tek doğrusu, cihazlara eşitleme, kimlik, model kapısı.</td><td><code>sunucu.py</code>, <code>hesap.py</code>, <code>ayar.py</code> ve HKM servisi ayrı ayrı</td></tr>
+    <tr><td>Kalite</td><td>Her fazın geçmesi gereken kapılar.</td><td>2.600'ü aşkın test ve denetim araçları var; ölçüm motoru ve bütçe yok</td></tr>
+  </table></div>
+  <p class="note">Sıfır bağımlılık kuralı korunur: çerçeve ve paket eklenmez. Plan yeni teknoloji getirmiyor, var olanı tek çatı altında topluyor.</p>
+</section>
+
+<section id="altyapi">
+  <div class="head"><span class="tag">4 · Altyapı planı</span><h2>On iş paketi</h2></div>
+  <p>Her paketin tek sahibi, tek çıktısı ve ölçülebilir bir çıkış ölçütü var. Sıra bağımlılığa göredir.</p>
+  <div class="wp">
+    <div><span class="n">A1</span><span><b>Zemin.</b> Açık dallar ve çalışma kopyaları ya birleşir ya kapanır; ana kopya uzak depoyla eşitlenir; derlemeler tazelenir; tam yedek alınır.</span><span class="done">Çıkış: tek güncel ana dal, sıfır yarım iş, geri yüklenebilir yedek.</span></div>
+    <div><span class="n">A2</span><span><b>Envanter ve karar matrisi.</b> Her ekran, parça, ayar ve King aracı listelenir; her satıra bir karar yazılır: kalır, motora taşınır, King'e devredilir, arşivlenir, silinir.</span><span class="done">Çıkış: senin onayladığın tek tablo. Hiçbir silme bu tablo dışında yapılmaz.</span></div>
+    <div><span class="n">A3</span><span><b>Veri katmanı.</b> Tek şema (sürümlü kayıt türleri, dört kesinlik etiketi korunur), PC'de tek depo, cihazda çevrimdışı önbellek ve sıra. Göç aracı beş kaynaktan okur: hesap sunucusu, her cihazın göç paketi (bütün profiller ve fotoğraflar), Gün geçmişi, HKM veritabanı, PC dosyaları.</span><span class="done">Çıkış: kuru koşuda kayıt ve fotoğraf sayıları birebir tutuyor; etiketsiz sayı kalmıyor; göç geri alınabiliyor.</span></div>
+    <div><span class="n">A4</span><span><b>Tek kapı, tek süreç.</b> Giriş, üç modül kapısı ve HKM servisi tek sunucuda ve tek adreste birleşir. HKM'nin çekirdeği (hafıza, model kapısı, veritabanı) bu sunucunun parçası olur.</span><span class="done">Çıkış: tek adres, tek süreç; 8 GB bellekte boşta kullanım bugünden düşük.</span></div>
+    <div><span class="n">A5</span><span><b>Kabuk.</b> Tam ekran çerçeve, gezinme, sistem haritası kaydı ve tek ayar şeması. Bir ayar tek yerde tanımlanır; ekran, eşitleme ve sıfırlama o tanımdan türetilir.</span><span class="done">Çıkış: her sayfa aynı çerçevede; ayar eklemek tek satır; her yere en çok iki adım.</span></div>
+    <div><span class="n">A6</span><span><b>Motorlar.</b> Yol, Tekrar, Soru, Kayıt, Plan, Not, Arama. Var olan kod tek kopyaya indirilir ve ortak bir arayüzle çağrılır. Dokuz tekrar zamanlayıcısı tek Tekrar motoruna, on üç not yapısı tek Not motoruna iner.</span><span class="done">Çıkış: her motorun tek kopyası ve kendi test takımı; kopya dağıtımı kalkar.</span></div>
+    <div><span class="n">A7</span><span><b>King çekirdeği.</b> Niyet ayrımı, jeton bütçeli bağlam derleyici, on iki üst düzey araç, sağlayıcı katmanı (Claude, yerel), MCP ucu, hafıza ve ders defteri.</span><span class="done">Çıkış: bölüm 6'daki eğriler tabanın üstünde; istek başına jeton bütçe içinde.</span></div>
+    <div><span class="n">A8</span><span><b>İçerik hattı.</b> Müfredat şeması (alan, aşama, ünite, ders, alıştırma, kaynak). <code>C:\gemini-data</code> bu şemaya doğrulanarak alınır; içerik koddan ayrı paketlenir ve gerektiğinde yüklenir.</span><span class="done">Çıkış: pilot alanın ilk aşaması eksiksiz; her dersin kaynağı ve doğrulama durumu kayıtlı.</span></div>
+    <div><span class="n">A9</span><span><b>Kalite altyapısı.</b> Ölçüm motoru (on üç eğri), karmaşıklık bütçesi ve hız bütçesi otomatik denetime bağlanır. Bütçe aşılırsa birleştirme durur.</span><span class="done">Çıkış: tek komutla tüm eğriler ve bütçeler; sonuçlar zaman içinde kayıtlı.</span></div>
+    <div><span class="n">A10</span><span><b>Cihaz ve güvenlik.</b> Tek yol: PC'deki sunucu ve Tailscale. Cihaz başına ayrı anahtar ve tek dokunuşla çıkarma. Ev ağı sertifikası ve tek dosya yolu emekli olur.</span><span class="done">Çıkış: yeni telefon üç adımda bağlanıyor; kaybolan cihaz hesaptan çıkarılabiliyor.</span></div>
+  </div>
+  <h3>Veri katmanı neden ilk büyük iş</h3>
+  <p>Teknik belge tek kapıya geçişin iki engelini yazıyor: var olan veri eski adreste kalır ve tarayıcı deposunun kotası (yaklaşık 5 MB) üç modüle yetmez. İkisinin de çözümü aynı: verinin doğrusu tarayıcıdan PC'deki depoya taşınır, tarayıcıda yalnız önbellek kalır. Hesap sunucusu her modülün kaydını zaten kopyalıyor; göç o kopyadan başlar ama orada bitmez. Açılmamış profiller, cihazda bekleyen değişiklikler, fotoğraflar, Gün geçmişi ve HKM verisi o kopyada yok. Bunlar için her cihazdan bir göç paketi alınır. Bu adım atılmadan tek not defteri, sistemi bütün gören King ve tek cihaz yolu kurulamaz.</p>
+  <h3>Cihaz güvenliği</h3>
+  <div class="tw"><table>
+    <tr><th></th><th>Bugün</th><th>Hedef</th></tr>
+    <tr><td>Yol</td><td>Dört ayrı yol birlikte yaşıyor</td><td>Yalnız Tailscale: evde ve dışarıda aynı adres, tanınan HTTPS sertifikası, PC internete açılmaz</td></tr>
+    <tr><td>Telefonda kurulum</td><td>Profil ve sertifika kur, tam güven ver</td><td>Tailscale'e gir, adresi aç, ana ekrana ekle</td></tr>
+    <tr><td>Cihaz kimliği</td><td>Merkez anahtarı tek; telefon kaybolursa Tailscale'den çıkarmak gerekiyor</td><td>Cihaz başına anahtar; Hesap › Cihazlar'dan tek dokunuşla iptal</td></tr>
+    <tr><td>Güncelleme</td><td colspan="2">PC güncellenir, öbür cihazlar web uygulaması olduğu için kendiliğinden gelir. Ayrı Android ve iOS uygulaması gerekmiyor; mevcut iPhone kabuğu yalnız ekran kapalıyken rota kaydı için kalır.</td></tr>
+  </table></div>
+  <p class="note">Tailscale kararı 6 Kasım'da verilmiş ve büyük kısmı yazılmış. Samsung, tablet ve gerçek iPhone'da henüz denenmemiş; A10 bu denemeleri de kapsar.</p>
+</section>
+
+<section id="kalite">
+  <div class="head"><span class="tag">Kalite yükseltmeleri</span><h2>Sadeleşirken sistemi daha iyi yapan dokuz karar</h2></div>
+  <p>Bunlar yazında istemediğin ama aynı işi yaparken neredeyse bedavaya gelen iyileştirmeler. Her biri bir iş paketinin içinde çözülür.</p>
+  <div class="tw"><table>
+    <tr><th>Yükseltme</th><th>Ne kazandırır</th><th>Paket</th></tr>
+    <tr><td>Olay günlüğü</td><td>Her yazma sıraya eklenen bir olaydır, güncel durum ondan türetilir. Tek mekanizma beş işi görür: geri al, eşitleme, «King ne yaptı» kaydı, göçün doğrulanması, ölçümün tekrar oynatılması. King'in eylem defteri bunun küçük hâli; bütün veriye yayılır.</td><td>A3</td></tr>
+    <tr><td>Saatten bağımsız eşitleme</td><td>Bugün çakışmada «son yazan kazanır» ve ölçü cihazın saati. Telefonun saati kaymışsa yanlış kayıt kazanır. Mantıksal saat bunu ortadan kaldırır.</td><td>A3</td></tr>
+    <tr><td>Ustalık kapısı ve yer belirleme</td><td>Yol haritasında ilerleme süreyle değil, gösterilen başarıyla olur. Başta kısa bir yer belirleme sınavı vardır: alfabeyi bilen alfabeden başlamaz. Kapıdan geçemeyen madde tekrara düşer.</td><td>A6, A8</td></tr>
+    <tr><td>Hatırlama modeline göre tekrar</td><td>Sabit 1, 3, 7 gün yerine her madde için unutma olasılığı hesaplanır ve tekrar tam unutmak üzereyken gelir. Aynı başarı için daha az tekrar demektir. Tekrar raporu bunun için FSRS biçimini, yayımlanmış varsayılan ağırlıklarla öneriyor; göç mevcut vadeleri değiştirmez (karar 14).</td><td>A6</td></tr>
+    <tr><td>Bağlam kartları</td><td>Her alanın güncel özeti veri değiştikçe kodla hazırlanır. King her soruda bütün sistemi okumaz; kimlik, kurallar ve ilgili kart gider. Daha az jeton, daha hızlı cevap, sistemden haberdar King.</td><td>A7</td></tr>
+    <tr><td>Gerçek kullanımdan ölçüm seti</td><td>King'in cevabının altında tek dokunuşluk «yanlış anladın» işareti. İşaretlenen mesajlar yalnız bu bilgisayarda etiketli sete girer; Anlama eğrisi hazır cümlelerle değil senin gerçek mesajlarınla ölçülür.</td><td>A9</td></tr>
+    <tr><td>Kullanım sayacıyla silme kararı</td><td>Hangi ekranın ve aracın son haftalarda kaç kez açıldığı yalnız bu bilgisayarda sayılır. Envanterdeki «kalır mı, gider mi» kararı görüşe değil kullanıma dayanır.</td><td>A2</td></tr>
+    <tr><td>Bileşen kataloğu</td><td>Kabuk on iki kadar yapı taşı sunar (liste satırı, ders kartı, ilerleme çubuğu, form alanı gibi). Ekranlar yalnız bunlardan kurulur; boyutu ekrandan ekrana değişen kutu sorunu yapısal olarak biter. Tema yalnız jetonlara dokunur, bu yüzden sahneler ileride ekranlara dokunmadan geri gelebilir.</td><td>A5</td></tr>
+    <tr><td>Katman denetimi</td><td>Bir alan başka bir alanın ya da bir motorun içine uzanamaz; yalnız motorun açık arayüzünü çağırır. Otomatik denetim bunu her değişiklikte sınar. Dört ürünün birbirine dolanmasının tekrarını bu engeller.</td><td>A9</td></tr>
+  </table></div>
+</section>
+
+<section id="gecis">
+  <div class="head"><span class="tag">5 · Geçiş stratejisi</span><h2>Yeni kabuk kurulur, alanlar tek tek taşınır, eskisi en son kapanır</h2></div>
+  <div class="tw"><table>
+    <tr><th>Seçenek</th><th>Artısı</th><th>Eksisi</th><th>Karar</th></tr>
+    <tr><td>Yerinde dördüncü düzenleme turu</td><td>Hızlı, risksiz</td><td>Üç kez denendi; yapısal neden yerinde kalıyor</td><td class="was">Önermiyorum</td></tr>
+    <tr><td>Sıfırdan yeniden yazım</td><td>En temiz sonuç</td><td>Çalışan kural motorları ve 2.600 test atılır; aylarca kullanılamaz sistem</td><td class="was">Önermiyorum</td></tr>
+    <tr><td>Yeni kabuk ve kademeli taşıma</td><td>Sistem her gün kullanılabilir kalır; her adım geri alınabilir; çalışan motorlar taşınır, yeniden yazılmaz</td><td>Geçiş boyunca eski ve yeni yan yana yaşar; disiplin ister</td><td class="to">Önerim</td></tr>
+  </table></div>
+  <ol class="plain">
+    <li><b>Yan yana.</b> Yeni kabuk tek adreste açılır. Eski modüller dondurulur (yeni özellik almaz) ama çalışmaya devam eder.</li>
+    <li><b>Veri önce.</b> Tek depo kurulur, eski modüller ona eşitlenmeyi sürdürür. İki taraf aynı veriyi görür.</li>
+    <li><b>Alan alan.</b> Bir alan yeni kabuğa taşınır, verisi doğrulanır, iki hafta sorunsuz kullanılır.</li>
+    <li><b>Silme kapısı.</b> Ancak o zaman alanın eski ekranları kapanır ve kodu silinir. Veri silinmez; taşınır ya da arşivlenir.</li>
+    <li><b>Kapanış.</b> Son alan taşındığında eski kapılar, HKM yüzü, kopya dağıtımı ve ev ağı sertifikası kalkar.</li>
+  </ol>
+</section>
+
+<section id="king">
+  <div class="head"><span class="tag">6 · King ve ölçüm</span><h2>Önce niyeti anlayan, sonra Claude'a bağlanan King</h2></div>
+  <div class="flow"><div><b>Sen</b>yazarsın ya da konuşursun</div><span>→</span><div><b>Niyet</b>sohbet · kayıt · öğren · araştır · yönet</div><span>→</span><div><b>Bağlam derleyici</b>yalnız o niyete gereken özet; jeton bütçesi var</div><span>→</span><div><b>On iki araç</b>motorların kapıları; yüz araç bunların ardında katalogda</div><span>→</span><div><b>Sağlayıcı</b>Claude, yedekte yerel model</div><span>→</span><div><b>Denetim</b>yazma işini kod doğrular, geri alınabilir</div></div>
+  <ul>
+    <li><b>Kayıt niyeti modele gitmez.</b> «Bugün 20 dakika yürüdüm» kural motoruyla yazılır. Bu hem hız hem limit tasarrufu.</li>
+    <li><b>Sohbet niyeti araç çağırmaz.</b> Felsefe konuşurken yemek modülü önerilmez, çünkü o turda yönlendirme aracı masada değildir. Envanter kökü buldu: bugün modelden önce istemcide 13 düzenli ifadelik niyet tablosu ve 76 sözcüklük sayfa rehberi karar veriyor; serbest sohbette modele giden bağlam yalnız tarih satırı.</li>
+    <li><b>Araştırma King'in niyetidir.</b> HKM'de bugün iki ayrı araştırma kodu var (<code>bam.py</code>, <code>arastir.py</code>); Arama motorunda birleşir. BAM 209 dosyada geçtiği için kaldırma, yeni araştırma ölçümde onu geçtikten sonra yapılır.</li>
+    <li><b>Ortak ders havuzu.</b> King'in hatadan çıkardığı ders (kişisel veri içermeyen kural cümlesi) önce senin onayınla güncelleme paketine girer ve her hesaba dağılır. Otomatik toplama ikinci aşamadır ve ayrı bir karar ister.</li>
+  </ul>
+  <div class="tw"><table>
+    <tr><th>Claude'a bağlanma yolu</th><th>Nerede konuşursun</th><th>Bedel</th><th>Sınırı</th></tr>
+    <tr><td>Claude uygulamasında King (MCP)</td><td>Claude masaüstü uygulaması</td><td>Mevcut aboneliğin</td><td>LifeOS ekranının içinde görünmez</td></tr>
+    <tr><td>LifeOS içinde King (API)</td><td>LifeOS'un her ekranı, telefon dahil</td><td>Kullandıkça öde</td><td>Abonelik burada geçmez; anahtar ve harcama sınırı gerekir</td></tr>
+    <tr><td>Yerel model</td><td>LifeOS'un her ekranı</td><td>Ücretsiz</td><td>8 GB bellekte kalite düşük; çevrimdışı yedek</td></tr>
+  </table></div>
+  <p class="rec"><b>Önerim:</b> önce MCP ucu. A7'nin araç kutusu zaten bu ucun kendisi olduğu için ek iş azdır ve Claude'un farkını aboneliğinle ölçeriz. Kodda Anthropic sağlayıcısı da hazır (<code>HKM/core/ai.py</code>); son kayda göre canlı ayarda bütün kademeler yerel modeldeydi, bunu A1'de doğrulayacağım. LifeOS içi API kararını ölçüm sonuçlarıyla veririz. Bir sınır: araçlar bugün tarayıcıda çalıştığı için MCP ucu Faz 1'den önce yalnız okuyabilir; yazma tek süreçle gelir.</p>
+  <h3>Ölçüm motoru: on üç eğri</h3>
+  <p>Bugünkü sınav araç kapsamını ölçüyor. Yeni motor senin yazdığın eğrileri ölçer; yeni eğri eklemek bir dosya eklemektir. Her King değişikliğinden önce ve sonra aynı ölçüm koşar.</p>
+  <div class="curves">
+    <div><b>Tanıma</b>Kişi hakkında yoklama: doğru ve yerinde kullanılan bilgi oranı</div>
+    <div><b>Öğretme</b>Dersten önce ve sonra mini sınav farkı</div>
+    <div><b>Anlama</b>Etiketli gerçek mesajlarda niyet isabeti</div>
+    <div><b>Üretim</b>Üretilen soru ve kartın hakem puanı, hata oranı</div>
+    <div><b>Arama</b>Kaynaklı cevabın doğruluğu, hafızaya eklenenin isabeti</div>
+    <div><b>Kontrol</b>Sistem görevini araçlarla tamamlama oranı</div>
+    <div><b>Kendini eğitme</b>Hatanın derse dönüşme ve havuza girme oranı</div>
+    <div><b>Tekrar</b>Dersi alınmış hatanın yinelenme oranı (düşük iyi)</div>
+    <div><b>Sağlayıcı kalitesi</b>İstek başına jeton, gereksiz çağrı sayısı</div>
+    <div><b>Hafıza</b>Eski bilgiyi doğru hatırlama, bağlam boyutu</div>
+    <div class="sys"><b>Sistem · Optimizasyon</b>Açılış süresi, kare süresi, kod hacmi</div>
+    <div class="sys"><b>Sistem · Anlaşılabilirlik</b>Bir işe kaç adımda varılıyor, iç içelik</div>
+    <div class="sys"><b>Sistem · Hayata etki</b>Haftada tamamlanan öğrenme adımı ve süreklilik</div>
+  </div>
+</section>
+
+<section id="tasarim">
+  <div class="head"><span class="tag">7 · Örnek tasarımlar</span><h2>Yeni kabukta ekranlar</h2></div>
+  <p class="note">Maketlerdeki isim, ders ve sayılar örnektir. Piksel yazı tipi ve kahverengi palet korunur; arka plan sahneleri park edildi.</p>
+
+  <h3>Karşılama (madde 1): istatistik yok, tek soru «şimdi ne yapacağım?»</h3>
+  <div class="mocks">
+    <figure><figcaption><b>A</b> · Tek cümle, tek düğme</figcaption>
+      <div class="scr"><div class="top"><span>Perşembe · 12 Kasım</span><span>King</span></div>
+        <div class="mid"><div class="big">Günaydın Altay.</div><div class="mut">Sırada: Felsefe · Ders 4<br>Argüman nedir?</div><span class="btn">Başla</span></div>
+        <div class="mut" style="text-align:center">sonra: 20 dk yürüyüş · akşam 8 kart</div></div></figure>
+    <figure><figcaption><b>B</b> · Günün üç işi</figcaption>
+      <div class="scr"><div class="top"><span>Perşembe · 12 Kasım</span><span>King</span></div>
+        <div class="big">Bugün</div>
+        <div><div class="li"><span>Felsefe dersi</span><span class="mut">25 dk</span></div><div class="li"><span>Yürüyüş</span><span class="mut">20 dk</span></div><div class="li"><span>Tekrar</span><span class="mut">8 kart</span></div></div>
+        <div class="mut" style="margin-top:auto">Hepsi bu. Sayılar «Gidişat» sayfasında.</div></div></figure>
+    <figure><figcaption><b>Şimdi</b> · karşılaştırma için: sahne üstünde kart, iki kat sekme</figcaption>
+      <div class="scr old"><div class="card"><div style="text-align:center;font-size:13px">Çalışma</div>
+        <div class="tabs"><span>Dil</span><span class="acc">Felsefe</span><span>Tarih</span><span>Ses</span><span>Okuma</span><span>Yazı</span></div>
+        <div class="tabs" style="background:none"><span class="acc">Çalış</span><span>Tezlerim</span><span>Öğren</span><span>İlerleme</span></div>
+        <div class="mut">› Düşünce deneyleri<br>› Argüman alıştırmaları<br>› Uzman masası</div></div></div></figure>
+  </div>
+
+  <h3>Öğrenme (madde 1, 2, 5): alanın sayfası yol haritasının kendisidir, sekme yoktur</h3>
+  <div class="scroll"><div class="scr wide" style="min-height:0">
+    <div class="top"><span>‹ Öğren / Dil · İngilizce</span><span>Not · King</span></div>
+    <div class="row"><span class="gh on">0 · Alfabe ve sesler</span><span class="mut">→</span><span class="gh">A1</span><span class="mut">→</span><span class="gh">A2</span><span class="mut">→</span><span class="gh">B1</span><span class="mut">→</span><span class="gh">B2</span><span class="mut">→</span><span class="gh">C1</span></div>
+    <div class="cols" style="grid-template-columns:1.4fr 1fr">
+      <div><div class="li"><span>1 · Harfler ve sesleri</span><span class="acc">tamam</span></div><div class="li"><span>2 · Ünlüler</span><span class="acc">tamam</span></div><div class="li"><span>3 · Hece ve vurgu</span><span>bugün</span></div><div class="li mut"><span>4 · İlk 100 kelime</span><span>sırada</span></div></div>
+      <div class="pan"><span class="mut">Bugünkü ders</span><span class="big" style="font-size:16px">Hece ve vurgu</span><span class="mut">15 dk · 6 alıştırma</span><span class="btn" style="align-self:flex-start">Başla</span></div>
+    </div></div></div>
+  <div class="mocks">
+    <figure><figcaption>Alan seçimi ayrı bir sayfa</figcaption>
+      <div class="scr"><div class="top"><span>‹ Ana sayfa</span><span>Not · King</span></div><div class="big">Öğren</div>
+        <div><div class="li"><span>Felsefe</span><span class="row" style="flex:1;justify-content:flex-end"><span class="pg" style="max-width:90px"><i style="width:10%"></i></span><span class="mut">4 / 40</span></span></div>
+        <div class="li"><span>Dil · İngilizce</span><span class="row" style="flex:1;justify-content:flex-end"><span class="pg" style="max-width:90px"><i style="width:25%"></i></span><span class="mut">A1</span></span></div>
+        <div class="li"><span>Gitar</span><span class="mut">başlamadı</span></div><div class="li"><span>Beslenme</span><span class="mut">başlamadı</span></div><div class="li"><span>Akademik</span><span class="mut">başlamadı</span></div></div></div></figure>
+    <figure><figcaption>Ders: odak ekranı; araç ancak ders isteyince açılır</figcaption>
+      <div class="scr"><div class="top"><span>✕ Dersten çık</span><span>3 / 6</span></div>
+        <div class="pg" style="flex:none"><i style="width:50%"></i></div>
+        <div class="big">Bu ölçüyü metronomla çal</div>
+        <div class="pan"><div class="row sp"><span class="mut">Metronom</span><span>72</span></div><div class="sk" style="--w:80%"></div></div>
+        <div class="row sp" style="margin-top:auto"><span class="mut">Not · King</span><span class="btn">Devam</span></div></div></figure>
+    <figure><figcaption>King ile öğrenme: konu dışına çıkmaz</figcaption>
+      <div class="scr"><div class="me">Stoacılar kaderi kabul ediyorsa çabalamak neden?</div><span class="chip">niyet: sohbet · felsefe</span>
+        <div class="king"><div class="sk" style="--w:220px"></div><div class="sk" style="--w:190px"></div><div class="sk" style="--w:120px"></div></div>
+        <div class="mut" style="margin-top:auto">Yönlendirme yok, kayıt yok.</div></div></figure>
+  </div>
+  <div class="tw"><table>
+    <tr><th>Alan</th><th>İlk adım</th><th>Son aşama</th></tr>
+    <tr><td>Dil</td><td>Alfabe ve sesler</td><td>C1 akıcılık</td></tr>
+    <tr><td>Gitar</td><td>Klavyedeki notalar</td><td>Repertuar ve doğaçlama</td></tr>
+    <tr><td>Felsefe</td><td>Argüman nedir, nasıl düşünülür</td><td>Kendi tezini savunmak</td></tr>
+    <tr><td>Beslenme</td><td>Besin grupları, tabak nasıl kurulur</td><td>Kendi planını kurmak</td></tr>
+    <tr><td>Spor</td><td>Temel hareket kalıpları, güvenli form</td><td>Kendi programını yazmak</td></tr>
+    <tr><td>Akademik</td><td>Kazanım sırasıyla konu temelleri</td><td>Deneme ve hata analizi</td></tr>
+  </table></div>
+  <p><b>İçerik durumu.</b> <code>C:\gemini-data</code> içinde 650 konu var (1.306 dosya; AYS 147, ESP 125, KING 146, SPİ 214 konu çifti, müfredat 6, medya 12). Hepsi geçerli JSON ama 521 farklı biçimde, ortak şema yok; 2.523 kaynak girdisinin hiçbirinde adres yok, yani hepsi «doğrulanmadı» sayılır. Ana dalda bu dosyaların hiçbiri yok; ana kopyada kayda girmemiş bir aktarım duruyor (<code>veri/taslak</code> altında, 10 Kasım), ikisi henüz karşılaştırılmadı. İçerik bilene başvuru atlası gibi: zengin ama sıralı değil; Dil A1'de, gitar ilk iki aşamada kalıyor. ESP'de yedi disiplin için altı kademeli, beş basamaklı bir merdiven zaten var; aşama kapısı oradan, ders biçimi AYS'nin anlatım dosyalarından alınır.</p>
+  <p class="rec"><b>Önerim:</b> toplu yeni veri toplamaya gerek yok. Önce her alanın iskeleti yazılır (aşama, ünite, ders başlıkları; küçük ve senin onayladığın dosyalar). Eldeki konular adımlara bağlanır. Boş kalan dersi King o adıma gelindiğinde üretir, sen onaylayınca kalıcı olur. Kaynağı doğrulanmamış içerik «doğrulanmadı» etiketiyle görünür.</p>
+
+  <h3>Not motoru (madde 6): her yerden çağrılan tek defter, içinde araçlar</h3>
+  <div class="scroll"><div class="scr wide" style="min-height:0">
+    <div class="top"><span>Notlar</span><span class="row"><span class="gh on">Klasör</span><span class="gh">Ağaç</span><span class="gh">Ağ</span></span></div>
+    <div class="cols" style="grid-template-columns:150px 1fr 150px">
+      <div class="nav"><small>NOTLAR</small><span>▾ Felsefe</span><span class="on">&nbsp;&nbsp;Stoacılık üzerine</span><span>&nbsp;&nbsp;Tezlerim</span><span>▸ Günlük</span><small>ARAÇLAR</small><span>Nöral ağ</span><span class="mut">+ Yeni araç</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><span class="big" style="font-size:16px">Stoacılık üzerine</span><div class="sk"></div><div class="sk" style="--w:88%"></div><span class="acc">[[Kader ve çaba]]</span><div class="sk" style="--w:60%"></div></div>
+      <svg viewBox="0 0 150 110" role="img" aria-label="Notlar arası bağlantı ağı örneği"><g stroke="#5f4c3e" stroke-width="1"><line x1="75" y1="55" x2="30" y2="25"/><line x1="75" y1="55" x2="120" y2="30"/><line x1="75" y1="55" x2="110" y2="90"/><line x1="75" y1="55" x2="35" y2="85"/><line x1="30" y1="25" x2="35" y2="85"/></g><circle cx="75" cy="55" r="7" fill="#ee9b62"/><circle cx="30" cy="25" r="4" fill="#a88c5f"/><circle cx="120" cy="30" r="4" fill="#a88c5f"/><circle cx="110" cy="90" r="4" fill="#a88c5f"/><circle cx="35" cy="85" r="4" fill="#a88c5f"/></svg>
+    </div></div></div>
+  <div class="mocks">
+    <figure><figcaption>Yeni araç: sisteme bırakılan not</figcaption>
+      <div class="scr"><div class="big" style="font-size:16px">Yeni araç</div>
+        <div class="row sp"><span class="mut">Ad</span><span>Düşünce defteri</span></div>
+        <div class="row sp"><span class="mut">Görünüm</span><span class="row"><span class="gh">Liste</span><span class="gh on">Ağ</span></span></div>
+        <div class="row sp"><span class="mut">King okuyabilsin</span><span class="acc">açık</span></div>
+        <div class="pan"><span class="mut">Sisteme not</span><span>Aklıma gelen fikirleri buraya atıyorum. Bunları yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.</span></div>
+        <span class="btn" style="align-self:flex-start">Oluştur</span></div></figure>
+    <figure><figcaption>Dersin içinden çağrı: yan panel, not o bağlamla kaydedilir</figcaption>
+      <div class="scr"><div class="top"><span>‹ Öğren / Felsefe</span><span class="acc">Not · King</span></div>
+        <div class="cols" style="grid-template-columns:1fr 1fr">
+          <div style="display:flex;flex-direction:column;gap:7px"><span>Ders 4</span><div class="sk"></div><div class="sk" style="--w:80%"></div><div class="sk" style="--w:90%"></div></div>
+          <div class="pan"><span class="mut">Not · Felsefe / Ders 4</span><div class="sk"></div><div class="sk" style="--w:55%"></div></div>
+        </div></div></figure>
+  </div>
+  <p class="note">Not sistemi bugün her modülde ayrı duruyor ve modüller arası taşıma bilerek yok; tek veri deposuyla bu sınır kendiliğinden kalkar. Bilinç haritası ayrı sayfa olmaktan çıkar, «Nöral ağ» aracı olur.</p>
+
+  <h3>Ayarlar (madde 3, 7): tam ekran, dört grup, tek şema</h3>
+  <div class="scroll"><div class="scr wide" style="min-height:0">
+    <div class="top"><span>‹ Ana sayfa</span><span>Ayarlar</span></div>
+    <div class="cols" style="grid-template-columns:190px 1fr">
+      <div class="nav"><small>SİSTEM</small><span>Görünüm ve yazı boyutu</span><span>Bildirim saatleri<span class="new">yeni</span></span><span>Yedek ve dışa aktarma<span class="new">yeni</span></span><span>Güncelleme</span>
+        <small>ALANLAR</small><span>Öğren</span><span>Sağlık</span><span>Not</span>
+        <small>KING</small><span class="on">Sağlayıcı</span><span>Hafıza</span><span>İzinler</span>
+        <small>HESAP</small><span>Profil</span><span>Cihazlar</span><span>Güvenlik</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><span class="big" style="font-size:16px">King · Sağlayıcı</span>
+        <div class="li"><span>Claude</span><span class="acc">seçili</span></div><div class="li"><span>Yerel model</span><span class="mut">çevrimdışı yedek</span></div><div class="li"><span>Kapalı</span><span class="mut">sistem King'siz de çalışır</span></div>
+        <div class="li"><span>Günlük kullanım sınırı<span class="new">yeni</span></span><span class="mut">ayarla</span></div></div>
+    </div></div></div>
+  <p class="note">Bugün ayarlar üç yerde: modüllerdeki yan panel, giriş sayfasının levhası ve HKM'nin yedi sekmesi. Üçü bu tek sayfada birleşir; hangi ayarın kalacağı envanterde (A2) belirlenir.</p>
+
+  <h3>Gezinme (madde 8, 10): kenar çubuğu yerine</h3>
+  <div class="mocks">
+    <figure><figcaption><b>A</b> · Basılı tut halkası (dene: basılı tut, sürükle, bırak)</figcaption>
+      <div class="scr" id="hold"><div class="top"><span>‹ Öğren / Felsefe</span><button type="button" id="holdbtn">Halkayı göster</button></div>
+        <div class="mid mut" id="holdout" aria-live="polite">Boş bir yerde basılı tut</div>
+        <div id="ring" hidden><b style="--a:-90deg">Ana sayfa</b><b style="--a:-18deg">Öğren</b><b style="--a:54deg">Sağlık</b><b style="--a:126deg">Not</b><b style="--a:198deg">King</b></div></div></figure>
+    <figure><figcaption><b>B</b> · Komut çubuğu (Ctrl K, telefonda aşağı çek)</figcaption>
+      <div class="scr"><div class="pan" style="border:1px solid var(--m-gold)"><span>fel<span class="acc">|</span></span></div>
+        <div><div class="li"><span>Felsefe · Ders 4</span><span class="mut">ders</span></div><div class="li"><span>Stoacılık üzerine</span><span class="mut">not</span></div><div class="li"><span>Felsefe yol haritası</span><span class="mut">sayfa</span></div></div>
+        <div class="mut" style="margin-top:auto">Her sayfa, not ve ayar buradan bulunur.</div></div></figure>
+    <figure><figcaption><b>C</b> · Alt ada (çalışırken gizlenir)</figcaption>
+      <div class="scr"><div class="top"><span>‹ Öğren / Felsefe</span><span></span></div><div class="sk" style="--w:70%"></div><div class="sk" style="--w:85%"></div><div class="sk" style="--w:50%"></div>
+        <div class="dock"><span class="acc">Ana</span><span>Öğren</span><span>Sağlık</span><span>Not</span><span>King</span></div></div></figure>
+  </div>
+  <p class="rec"><b>Önerim A ile B birlikte.</b> Halka beş ana yere tek hareketle götürür, komut çubuğu geri kalan her şeyi bulur; ekranda kalıcı gezinme parçası durmaz. A'nın zayıf yanı keşfedilmesinin zor olması ve telefonda metin seçimiyle çakışması; ilk açılışta bir kez gösterilir ve boş alanda çalışır. İkisi de aynı kaynaktan beslenir: sistem haritası. Harita beş daldır (Ana sayfa, Öğren, Sağlık, Motorlar, Ayarlar) ve uygulamanın içinde de gösterilir.</p>
+
+  <h3>Tanışma (madde 11): form yerine King ile sohbet</h3>
+  <div class="scroll"><div class="scr wide" style="min-height:0">
+    <div class="cols" style="grid-template-columns:1.5fr 1fr">
+      <div style="display:flex;flex-direction:column;gap:9px"><div class="king"><span>Merhaba, ben King. Şu sıralar hayatında en çok neyi değiştirmek istiyorsun?</span></div>
+        <div class="me">Sınava hazırlanıyorum. Fizikte elektrik hep takılıyor, matematik fena değil. Bir de haftada iki gün spora gidiyorum ama düzensiz.</div>
+        <div class="king"><span>Elektrikte takıldığın yer formüller mi, yoksa devreyi kafanda kurmak mı?</span></div></div>
+      <div class="pan"><span class="mut">King'in anladığı · düzeltebilirsin</span><span>Hedef: sınav</span><span>Zayıf: fizik · elektrik</span><span>İyi: matematik</span><span>Spor: haftada 2, düzensiz</span><span class="mut">soruluyor: elektrikte neresi?</span></div>
+    </div></div></div>
+  <p class="note">Sağdaki panel var olan kişi modeline yazar; her kayıt görünür ve silinebilir. King kapalıysa aynı sorular kısa bir form olarak sorulur.</p>
+</section>
+
+<section id="fazlar">
+  <div class="head"><span class="tag">8 · Yol haritası</span><h2>Sekiz faz, her fazın sonunda çalışan sistem</h2></div>
+  <p>Takvim vermiyorum: gerçekçi süre A2 envanterinden sonra hesaplanır. Aşağıdaki büyüklükler görelidir.</p>
+  <div class="wp">
+    <div><span class="n">Faz 0</span><span><b>Karar ve zemin</b> (küçük). Bu belgedeki kararlar; A1 depo temizliği; A2 envanter; taban ölçümleri.</span><span class="done">Kapı: kararlar yazılı, tek ana dal, onaylı envanter, taban sayıları kayıtlı (Sistem eğrileri dahil: adım sayısı, iç içelik). Envanter yazıldı, onayın bekleniyor.</span></div>
+    <div><span class="n">Faz 1</span><span><b>Veri ve tek kapı</b> (büyük). A3 ve A4. Kullanıcının göreceği tek şey her cihazdaki göç paketi düğmesi.</span><span class="done">Kapı: her cihazda bekleyen değişiklik sıfır; göç kuru koşusu birebir; eski modüller yeni depoyla çalışıyor; geri dönüş denendi; HKM verisi doğrulanmadan HKM kapanmaz.</span></div>
+    <div><span class="n">Faz 2</span><span><b>Kabuk</b> (orta). A5: çerçeve, gezinme, sistem haritası, ayar şeması, Bugün ekranı.</span><span class="done">Kapı: yeni kabuk günlük kullanılabiliyor; anlaşılabilirlik eğrisi tabandan iyi.</span></div>
+    <div><span class="n">Faz 3</span><span><b>Pilot alan</b> (orta). A6'dan Yol, Tekrar, Not; A8 içerik hattı; bir alan uçtan uca.</span><span class="done">Kapı: pilot alanın ilk aşaması baştan sona yürünüyor; eski ekranı kapatıldı.</span></div>
+    <div><span class="n">Faz 4</span><span><b>Ölçüm</b> (orta). A9: on üç eğri ve bütçeler; bugünkü King'in tabanı.</span><span class="done">Kapı: tek komut, kayıtlı sonuç; bütçe aşımı birleştirmeyi durduruyor.</span></div>
+    <div><span class="n">Faz 5</span><span><b>King</b> (büyük). A7: niyet, bağlam, araç kutusu, Claude, araştırma; ardından tanışma sohbeti.</span><span class="done">Kapı: eğriler tabanın üstünde; araştırma BAM'ı geçti ve BAM kaldırıldı.</span></div>
+    <div><span class="n">Faz 6</span><span><b>Kalan alanlar</b> (büyük). Akademik (Soru motoru), Sağlık (Kayıt motoru) ve öbür alanlar tek tek taşınır.</span><span class="done">Kapı: her alan için silme kapısı geçildi; eski modül kodu silindi.</span></div>
+    <div><span class="n">Faz 7</span><span><b>Kapanış</b> (orta). A10 cihaz akışı; eski kapılar, HKM yüzü, kopya dağıtımı ve ev ağı sertifikası kalkar.</span><span class="done">Kapı: bölüm 10'daki hedeflerin hepsi tutuyor.</span></div>
+  </div>
+</section>
+
+<section id="duzen">
+  <div class="head"><span class="tag">9 · Çalışma düzeni</span><h2>Karmaşıklığın geri gelmemesi için</h2></div>
+  <ul>
+    <li><b>Karar kaydı.</b> Her mimari karar tek sayfada tarih, gerekçe ve vazgeçilen seçenekle yazılır. Bu belgedeki kararlar ilk kayıtlardır.</li>
+    <li><b>Faz kapısı.</b> Bir fazın kapısı geçilmeden sonraki başlamaz. Kapı ölçümdür, görüş değildir.</li>
+    <li><b>Özellik yaşam döngüsü.</b> Teklif, örnek tasarım, onay, uygulama, ölçüm. Ölçümde karşılığı çıkmayan özellik geri alınır.</li>
+    <li><b>Karmaşıklık bütçesi.</b> Ekran sayısı, iç içelik, ekran başına ana eylem, ayar sayısı ve King aracı sayısı için üst sınır. Otomatik denetim sınırı aşan değişikliği durdurur.</li>
+    <li><b>Dondurma.</b> Geçiş boyunca eski modüllere yeni özellik eklenmez; yalnız hata düzeltilir. Tek yazılı istisna göç paketi düğmesidir.</li>
+    <li><b>İş bölümü.</b> Kabuk, veri katmanı ve King çekirdeği bende kalır. Mekanik taşıma ve testler kabul testiyle ofise gider. Her tur yeni oturumda başlar, en çok iki paralel oturum açılır.</li>
+  </ul>
+  <h3>Riskler</h3>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th>Önlem</th></tr>
+    <tr><td>Veri kaybı</td><td>Göç önce kuru koşar; her fazdan önce yedek; eski depo kapanış fazına kadar silinmez.</td></tr>
+    <tr><td>Geçişin yarıda kalması</td><td>Her faz kendi başına değer bırakır. Faz 2 sonunda durulsa bile tek kapı ve yeni kabuk kazanılmış olur.</td></tr>
+    <tr><td>Claude'a bağımlılık</td><td>Kayıt, ders ve not kodla çalışır; internet ya da limit bitince King susar, sistem durmaz.</td></tr>
+    <tr><td>İçerik kalitesi</td><td>Her ders kaynak ve doğrulama etiketi taşır; doğrulanmamış içerik öyle görünür.</td></tr>
+    <tr><td>8 GB bellek</td><td>Tek süreç bugünkünden hafiftir; yerel model yalnız gerektiğinde yüklenir.</td></tr>
+    <tr><td>Silinen özelliği özlemek</td><td>Silme iki adımlıdır: önce arşiv, kapanış fazında kalıcı silme. Arşivden geri almak mümkündür.</td></tr>
+    <tr><td>Fotoğraf ve medya kaybı</td><td>Fotoğraflar cihazda ve eşitlenmiyor. Her cihazdan ayrı göç paketi; medya sayısı kuru koşu raporunda.</td></tr>
+    <tr><td>Cihazda bekleyen, PC'ye gitmemiş değişiklik</td><td>Faz 1'den önce her cihazda, her modülde «bekleyen 0» denetimi.</td></tr>
+    <tr><td>Göçte kesinlik etiketinin uydurulması</td><td>Etiketsiz sayı «eski kayıt» işaretiyle taşınır; nasıl işaretleneceğine sen karar verirsin.</td></tr>
+    <tr><td>Geçişte saat kayması ve kayıt ezme</td><td>Eski modülleri bağlayan köprü de mantıksal saat ve alan düzeyi çakışma kullanır; mevcut eşitleme testlerini geçer.</td></tr>
+    <tr><td>Yalnız HKM'deki veri (para, motto, hafıza, sohbet)</td><td>HKM veritabanı ayrı göç kaynağıdır; göç doğrulanmadan HKM kapanmaz.</td></tr>
+    <tr><td>Sahneyle birlikte piksel kimliğinin gitmesi</td><td>Önce piksel stil dosyası ikiye bölünür, sonra sahne park edilir.</td></tr>
+    <tr><td>Sağlık güvenlik metinlerinin ekranla silinmesi</td><td>Kırmızı bayrak eşikleri ve «karar hekimindir» metinleri alan kuralına taşınır; testleri korunur.</td></tr>
+    <tr><td>Sınav puanının yanıltması</td><td>Anlama setine gerçek serbest sohbet cümleleri girer; her King değişikliğinden önce taban alınır.</td></tr>
+    <tr><td>Sırların göç paketine girmesi</td><td>Anahtar dosyaları paketten hariç tutulur.</td></tr>
+    <tr><td>Tek kökende 5 MB tarayıcı sınırı</td><td>Yeni kabuk IndexedDB kullanır ve kalıcı depolama ister.</td></tr>
+  </table></div>
+</section>
+
+<section id="olcut">
+  <div class="head"><span class="tag">10 · Başarı ölçütleri</span><h2>Bitti demek için tutması gereken sayılar</h2></div>
+  <div class="tw"><table>
+    <tr><th>Ölçüt</th><th>Bugün</th><th>Hedef</th></tr>
+    <tr><td>Uygulama</td><td class="num was">4</td><td class="num to">1</td></tr>
+    <tr><td>Kapı (adres)</td><td class="num was">5 + 4</td><td class="num to">1</td></tr>
+    <tr><td>Verinin doğrusu</td><td class="num was">6 ayrı yer</td><td class="num to">1 depo</td></tr>
+    <tr><td>Üçe kopyalanan dosya</td><td class="num was">226 + 10</td><td class="num to">0</td></tr>
+    <tr><td>Elle yazılan ayar yeri · denetimsiz seçim</td><td class="num was">2 · 8</td><td class="num to">1 · 0</td></tr>
+    <tr><td>King'in gördüğü araç</td><td class="num was">124</td><td class="num to">en çok 12</td></tr>
+    <tr><td>İç içelik</td><td class="num was">4 kat</td><td class="num to">en çok 2</td></tr>
+    <tr><td>Tekrar zamanlayıcısı</td><td class="num was">9</td><td class="num to">1</td></tr>
+    <tr><td>Not yapısı · ağ çizimi</td><td class="num was">13 · 2</td><td class="num to">1 · 1</td></tr>
+    <tr><td>Kesinlik etiketi dili</td><td class="num was">2 dil, 4 yerleşim</td><td class="num to">1, her sayıda zorunlu</td></tr>
+    <tr><td>Cihaz yolu</td><td class="num was">4</td><td class="num to">1</td></tr>
+    <tr><td>Sayfa · ekran içi sekme</td><td class="num was">79 · 120</td><td class="num to">en çok 40 · 0 (tahmin)</td></tr>
+    <tr><td>On üç eğri</td><td class="num">ölçülmedi</td><td class="num">taban Faz 4'te, hedef ondan sonra</td></tr>
+  </table></div>
+</section>
+
+<section id="kararlar">
+  <div class="head"><span class="tag">11 · Senden beklediğim</span><h2>On altı karar; ilki ötekilerin hepsini belirler</h2></div>
+  <p>İlk sekizi plandan, son sekizi envanterden geldi. Envanterin kararlara eklediği alt sorular aşağıdaki tabloda.</p>
+  <ol class="plain">
+    <li><b>Tek sisteme geçiş.</b> Dört bağımsız sistem sözleşmesini (AGENTS §0, §1.4) bırakıp tek sistem, tek veri yapısına geçiyor muyuz?</li>
+    <li><b>Geçiş yolu.</b> Yeni kabuk ve kademeli taşıma (önerim) mı?</li>
+    <li><b>Kural metriği.</b> Sekiz kural: onay ya da düzeltme.</li>
+    <li><b>King'in yeri.</b> Önce Claude uygulamasında MCP (önerim), ya da doğrudan LifeOS içinde API.</li>
+    <li><b>Yan sistemler.</b> Rütbe ve rozetler, modül ofislerindeki ajanlar, müzik ve radyo, minikler gibi öğrenmeye doğrudan hizmet etmeyen yapılar: envanterde tek tek mi karar verelim, yoksa hepsi baştan arşive mi?</li>
+    <li><b>Tasarım.</b> Karşılama A mı B mi; gezinme A ile B (önerim) ya da C.</li>
+    <li><b>Pilot alan.</b> Felsefe (önerim; envanter de bunu gösteriyor) mi, Dil mi?</li>
+    <li><b>Cihaz yolu.</b> Ev ağı sertifikası ve tek dosya yolunu emekliye ayırıp yalnız Tailscale ile devam (önerim) mı?</li>
+  </ol>
+  <h3>Envanterden çıkan yeni kararlar</h3>
+  <ol class="plain" start="9">
+    <li><b>Alan listesi.</b> Diksiyon nereye; Okuma ve Yazı tek merdiven mi; hangi diller ve sırası; YKS'de yalnız sayısal mı; Uyku ilk turda mı; İlaç ekranı ve «Testler» adı.</li>
+    <li><b>Göç kapsamı.</b> Türetilmiş kayıtlar, ofis ve XP geçmişi, HKM tabloları ve sahipsiz tekrar tablosu taşınsın mı?</li>
+    <li><b>Etiketsiz sayılar.</b> SPİ'nin etiketsiz yaşamsal ölçümleri ve AYS'nin «boş enerji = 3» kayıtları göçte nasıl işaretlensin?</li>
+    <li><b>Fotoğraf ve medya.</b> PC'ye eşitlensin mi? Eşitlenmezse tek depoda da cihaz kaybında gider.</li>
+    <li><b>İçerik onayı.</b> Onaysız ders tekrara girsin mi; «uzman incelemesi bekliyor» kartları taslak etiketiyle mi girsin; kaynak denetimi yalnız pilotta mı; sağlık içeriğinin sınırı.</li>
+    <li><b>Ustalık kapısı ve tekrar.</b> Basamak geçişinde bilgi sınaması zorunlu mu (86 kapının çoğu bugün hacim ölçüyor); tekrar FSRS mi sabit aralık mı, hedef hatırlama oranı ve günlük tavan.</li>
+    <li><b>King'in veri izni.</b> Notları varsayılan olarak okusun mu; «model hafızaya hiç yazamaz, yalnız önerir» kuralı kalsın mı; ders havuzu hangi hesapları kapsar.</li>
+    <li><b>Diskte şifreleme.</b> Sağlık ve para verisi düz metin duruyor. BitLocker ya da EFS yeterli mi?</li>
+  </ol>
+  <h3>Envanterin kararlara eklediği sorular</h3>
+  <div class="tw"><table>
+    <tr><th>Soru</th><th>Karar</th></tr>
+    <tr><td>Çok profil ve hane kalsın mı; AYS'deki «main» ile SPİ ve ESP'deki «ben» aynı kişi mi; hesap çok kullanıcılı kalsın mı?</td><td class="num">1</td></tr>
+    <tr><td>XP ve rütbe tek genel seviye mi, alan başına mı, tümden arşiv mi; 84 MB perde medyası kalsın mı?</td><td class="num">5</td></tr>
+    <tr><td>Ofis tamamen King'e mi; uzman sesleri (Sokrates, Herodot) King'de kişilik olarak kalsın mı?</td><td class="num">5</td></tr>
+    <tr><td>Kalibrasyon, sürtünme, deney, veli raporu, ruh hâli tahmini, Günün sorusu kalsın mı?</td><td class="num">5</td></tr>
+    <tr><td>Bütçe ve Mutfak; radyo ve kendi müzik dosyaların; sahne tümden park mı?</td><td class="num">5, 6</td></tr>
+    <tr><td>BAM ürünleri, Patron görünürlüğü, WhatsApp ve Telegram kanalı, King'in sesi kalsın mı?</td><td class="num">5</td></tr>
+    <tr><td>Uygulama kapalıyken ya da telefondan King'e kim cevap versin; Claude API için aylık tavan?</td><td class="num">4</td></tr>
+    <tr><td>Sohbette King sayfayı kendisi mi açsın, «açayım mı?» diye mi sorsun?</td><td class="num">4</td></tr>
+    <tr><td>Hızlı giriş kutusu ile King'in kayıt niyeti tek kutu mu; adres çubuğunda sayfa yolu (geri tuşu, yer imi) istiyor musun?</td><td class="num">6</td></tr>
+    <tr><td>Haftalık sözleşme, aylık karar kapısı, telafi, kötü gün, süreölçer: Plan ya da Kayıt motorunun kuralı olarak mı kalsın?</td><td class="num">3</td></tr>
+    <tr><td>iOS kabuğu kalsın mı; Tailscale'siz bağlanan bir cihaz var mı?</td><td class="num">8</td></tr>
+  </table></div>
+  <p class="note">Karar değil, doğrulama: 293/300'ün hangi sınav sürümüne ait olduğu ve canlı ayarda hangi modelin atandığı A1'de kontrol edilir.</p>
+  <p class="note">Bu belge bir plandır. Kararlar gelene kadar kodda hiçbir şey değişmez; ilk iş Faz 0'dır ve o da yalnız temizlik, envanter ve ölçümdür.</p>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var a=document.getElementById('hold'),r=document.getElementById('ring'),o=document.getElementById('holdout'),t,act;
+  function show(x,y){var b=a.getBoundingClientRect();r.style.left=Math.max(100,Math.min(b.width-100,x))+'px';r.style.top=Math.max(95,Math.min(b.height-95,y))+'px';r.hidden=false;}
+  function pick(e){var el=document.elementFromPoint(e.clientX,e.clientY);el=el&&el.closest?el.closest('#ring b'):null;if(act)act.classList.remove('on');act=el;if(act)act.classList.add('on');}
+  function end(e){clearTimeout(t);if(!r.hidden){if(e&&e.clientX!=null)pick(e);o.textContent=act?act.textContent+' açılır':'Vazgeçildi';r.hidden=true;}if(act){act.classList.remove('on');act=null;}}
+  a.addEventListener('pointerdown',function(e){if(e.target.closest('button')||!r.hidden)return;var b=a.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;clearTimeout(t);t=setTimeout(function(){show(x,y);},300);});
+  a.addEventListener('pointermove',function(e){if(!r.hidden)pick(e);});
+  a.addEventListener('pointerup',function(e){if(e.target.closest('button'))return;end(e);});
+  a.addEventListener('pointercancel',end);
+  a.addEventListener('pointerleave',function(){end();});
+  a.addEventListener('contextmenu',function(e){e.preventDefault();});
+  document.getElementById('holdbtn').addEventListener('click',function(){if(r.hidden){var b=a.getBoundingClientRect();show(b.width/2,b.height/2);o.textContent='Bir yere dokun';}else{r.hidden=true;}});
+})();
+</script>
