@@ -195,6 +195,11 @@ jobs:
       - name: Göç aracı kuru koşusu
         run: python3 tools/goc_test.py
 
+      # SADELESME FAZ 1 P3 TEK DEPO (2026-11-13). Ust anahtar duzeyinde son saat kazanir,
+      # saati kayan cihaz kirpilir, silme mezar tasi, sira sonucu degistirmez, yedek ustune yazmaz.
+      - name: Tek depo birleştirme ve yedek
+        run: python3 tools/tekdepo_test.py
+
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi
         run: python3 uygulama/ios/web_paket_test.py

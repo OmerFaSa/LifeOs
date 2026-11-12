@@ -55,6 +55,16 @@ Sıra gerekçesi: P2 olmadan cihazdaki fotoğraf, açılmamış profil ve Gün g
 P4 olmadan eski modüller yeni depoyu göremez; P5 köken değiştirdiği için cihaz verisi tarayıcıdan
 çıkmadan (P2 + P6) yapılamaz. P1 ve P3 bağımsızdır; bu oturum P1'i yapar.
 
+**P3 yapıldı (2026-11-13, yerel `sadelesme`, gönderilmedi).** `sistem/veri.py` `Depo`: şemayı `goc.SEMA`'dan
+açar, sürüm 1'i 2'ye yükseltir (`kayit.saatler`: her üst anahtarın HLC'si, silme tabanı boş anahtarda);
+`yaz` yalnız değişen üst anahtarları alır, `sil` tabanı yükseltir ve ondan eski anahtarları düşürür, ikisi
+de olay defterine yazar; `kirp` gelen saati 5 dk'ya kırpar, `damga` yerel olay saati, `yedekle` yarım adla
+yazar, `integrity_check` sonra ad verir, üstüne yazmaz. Günlük modu WAL değil (§0'daki kayıp). Test
+`tools/tekdepo_test.py` 26 denetim, CI'da (`tools/veri_test.py` adı başka teste ait). Çıkış ölçütü
+(ölçüldü): gerçek kuru koşu hedefi bu modülle açıldı, 394 kaydın 394'ü aynen okundu, göç kimliği
+`05e883396eae657f` P1 raporuyla aynı. Sıradaki: P2 (donmuşlara tek istisna, düğmenin görünüşü önce
+önizlemeyle sorulur) ya da P4 (köprü; istemci sözleşmesi değişmez, eski hesap testleri aynen geçmeli).
+
 ## 3. Faz 1 kapısı (ölçülerek geçilir)
 
 1. Her cihazda, her modülde bekleyen değişiklik 0 (paketteki `bekleyen` alanından, cihaz cihaz).
