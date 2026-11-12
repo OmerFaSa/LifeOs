@@ -93,6 +93,7 @@ js/core/agharita.js
 js/core/qr.js
 js/core/bildirim.js
 js/core/hesap.js
+js/core/gocpaket.js
 js/core/giris.js
 js/core/notum.js
 js/core/kisayol.js
