@@ -3,6 +3,7 @@
 LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlarında kullanılan araçların fihristidir. Araç yolları CI boru hatlarında ve ofis süreçlerinde sabit olduğundan dosyalar taşınmaz; bu dizin hangi betiğin ne amaçla ve ne zaman çalıştırıldığını açıklar.
 
 ## Denetim
+- `ci_hata.sh` — CI adımını koşar; kalırsa çıktının ilgili satırlarını tek bir açık okunur `::error` bildirimine yazar (iş kaydı yönetici yetkisi ister).
 - `entegre.js` — Üç arayüz ile HKM servisinin uçtan uca bütünleşmesini denetler, birleştirmeden önce ve CI'da koşulur.
 - `envanter.js` — Tek tasarıma geçişte ekran eylemleri, giriş alanları ve arayüz özellik kayıplarını denetler, CI'da koşulur.
 - `nerede.js` — Ekranlardaki metin ve düğme kalabalığının (sadelik aşımının) yerini tespit eder, gerektiğinde elle koşulur.

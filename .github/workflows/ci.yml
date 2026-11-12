@@ -95,7 +95,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Birim testleri
-        run: node tools/runtests.js
+        run: bash ../tools/ci_hata.sh "${{ matrix.system }} birim testleri" node tools/runtests.js
 
       - name: Duman testi
         run: node tools/smoke.js
@@ -325,7 +325,7 @@ jobs:
 
       - name: Testler
         working-directory: HKM
-        run: python3 -m tests.run
+        run: bash ../tools/ci_hata.sh "HKM testleri" python3 -m tests.run
 
       - name: Sorgu bütçesi
         working-directory: HKM
@@ -399,7 +399,7 @@ jobs:
         run: node tools/envanter.test.js
 
       - name: Envanter
-        run: node tools/envanter.js --json gezinti.json
+        run: bash tools/ci_hata.sh "Envanter" node tools/envanter.js --json gezinti.json
 
       # Ayni gezintinin olculeri: plan §1.2 sadelik butcesi. Yalniz
       # EKIP-DURUM teslim tablosunda ✅ olan modullerde kirmizi olur.

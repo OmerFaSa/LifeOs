@@ -201,8 +201,12 @@ async function portMuhafizi(portlar, ipucu){
           }
           return toRgb(getComputedStyle(el).backgroundColor);
         };
+        /* Kontrast metnin KENDİ arkasındaki ilk opak katmana göre ölçülür. Piksel temada
+           (2026-11-04) içerik `.sayfa` kâğıdının üstündedir; `.site`'tan başlamak kâğıdı
+           atlayıp kökteki oda rengini ölçüyordu (açık temada 2.12, gerçekte kâğıt üstünde koyu yazı). */
         return {
           siteBg:opakZemin(site),
+          metinBg:opakZemin(main || site),
           footBg:foot ? opakZemin(foot) : [0, 0, 0, 1],
           text:toRgb(getComputedStyle(main || document.body).color),
         };
@@ -210,9 +214,10 @@ async function portMuhafizi(portlar, ipucu){
       const saydam = c => c[3] < 0.9;
       if(saydam(boya.siteBg)) problems.push(design + ': kabuk zemini saydam — jeton döngüsü?');
       if(saydam(boya.footBg)) problems.push(design + ': alt bant zemini saydam — jeton döngüsü?');
-      const kontrast = ratio(boya.text.slice(0, 3), boya.siteBg.slice(0, 3));
+      const kontrast = ratio(boya.text.slice(0, 3), boya.metinBg.slice(0, 3));
       if(kontrast < 4.5)
-        problems.push(design + ': metin/zemin kontrastı ' + kontrast.toFixed(2) + ' < 4.5');
+        problems.push(design + ' (' + tema + '): metin/zemin kontrastı ' + kontrast.toFixed(2) + ' < 4.5'
+          + ' — metin rgb(' + boya.text.slice(0, 3) + '), zemin rgb(' + boya.metinBg.slice(0, 3) + ')');
 
       for(const [w, adi, tamListe] of WIDTHS){
         await page.setViewportSize({ width:w, height:900 });

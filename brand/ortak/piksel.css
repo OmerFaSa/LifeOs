@@ -121,7 +121,7 @@
   transition:transform .18s steps(3), box-shadow .18s steps(3); }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler li:hover{ transform:translate(-2px, -2px);
   box-shadow:inset 4px 0 0 var(--renk), inset 0 3px 0 #ffffff1a, inset 0 -3px 0 #00000033, 4px 4px 0 var(--renk); }
-:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler b{ color:color-mix(in oklab, var(--renk) 45%, #fff); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler b{ color:color-mix(in oklab, var(--renk) 45%, var(--beyaz)); }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler span{ color:var(--piksel-kenar-yazi-2, #e8d4b6); }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sozler svg{ color:var(--text-2); }
 /* King: seçilen karakter, Bağlam sütununun altındaki küçük oda ve seçim düğmeleri */
