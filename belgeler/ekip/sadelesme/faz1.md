@@ -87,8 +87,17 @@ oldu, çünkü `/api/hesap/` zaten bütün modül kapılarında ve 4180'de yönl
 biçim, cihaz kimliği, sır ve medya özeti denetler, `<kaynak>-<cihaz>-<zaman>-<rastgele>.json` adıyla
 `%LOCALAPPDATA%\LifeOS\goc\paket`'e koyar, üstüne yazmaz, reddedilenden iz bırakmaz (sınır 96 MB).
 Ölçüldü: `gocpaket.test.js` 19, `gocpaket_test.py` 18 denetim (cihazın ürettiği paketler PC'de kabul edilip
-göç okuyucusunda denge tutuyor); HKM 1093/1093. **Kalan:** düğme (Hesap sayfası ve 4180 Gün sayfası),
-`depo.js`'in `yerelAnahtar`/`varsayilanProfil`'i dışa vermesi, `ortak.py` kopyası ve üç modülün derlenmesi.
+göç okuyucusunda denge tutuyor); HKM 1093/1093.
+
+**P2 düğmesi yapıldı (2026-11-13, sahibin seçtiği biçim: Verin'de tek satır).** Hesap › Verin'de
+«Bu cihazdakileri tek depoya taşı · Bilgisayara gönder»; gönderince satırda makbuz (profil, kayıt, yan kayıt,
+dosya, bekleyen) ve «Yeniden gönder»; yalnız admin görür. 4180 kökeninde (giriş/seçim sayfası, telefon
+uygulamasının giriş sayfası) modül deposu yoktur, paket kaynağı `gun` olur: Gün geçmişi oradan gelir.
+`depo.js` `yerelAnahtar`/`varsayilanProfil`'i dışa verir; `gocpaket.js` `brand/parcalar.txt`'te, üç modülde
+ve üç dist'te; 4180 onu kapalı listeden sunar, `uygulama/ios` paketine girer. Ölçüldü: modül takımları AYS
+3478/3478, SPİ 3269/3269, ESP 2962/2962 (yeni Verin testi dahil), `giris_sayfa_test` temiz, HKM 1093/1093.
+**P2 çıkış ölçütünün kalanı sahibin elinde:** kod çalışan kopyaya geldikten sonra her cihazda her modülde ve
+4180'de bir kez «Bilgisayara gönder»; ardından `goc.py --kuru` paketleri sunucuyla yol yol karşılaştırır.
 
 ## 3. Faz 1 kapısı (ölçülerek geçilir)
 
