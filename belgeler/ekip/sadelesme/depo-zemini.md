@@ -45,8 +45,18 @@
 | ag/072-ogret-belge | 1 | 2 Kas |
 | claude/charming-brattain-4d21bd | 1 | 2 Eki |
 
-Her biri için karar: içeriği hâlâ isteniyor mu (o zaman `main`'e alınır), yoksa etiketlenip kapatılır mı.
-İçeriklerine bakmadım; «göremedim».
+**İçerik denetimi (2026-11-12, salt okur).** Dalın dokunduğu her dosya `origin/main` ile karşılaştırıldı, commit başlıkları `main` geçmişinde arandı.
+
+| Dal | Bulgu | Öneri |
+|---|---|---|
+| claude/keen-tharp-6c4d6f, claude/stoic-wescoff-1056d4 | «HKM yüzü: kenar açılınca çekmeceler kaymaz» `main`'e aynı başlıkla girmiş (`7fb6ab1c`, 4 Eki); HKM yüzü planda kalkıyor | arşiv |
+| claude/charming-brattain-4d21bd | «Yapışık iki çubuk üst üste binmez» `main`'de (`2a1a90b5`, 4 Eki) | arşiv |
+| ag/072-ogret-belge | `main`'de `4b23c96c` (2 Kas): «072 reddedildi», belgeler King 4 §D ile yazıldı | arşiv |
+| ag/008-veri-dogrula-test | `tools/veri_dogrula_test.py` `main`'de daha yeni hâliyle var (`4067b363`, 21 satır fazla) | arşiv |
+| claude/yasayan-apartman-0339d0 | yalnız `piksel-apartman.js` + derlemeler; `main`'de bir gün sonra `31afbb77` «Mahalle: modül başına çalışma binası»; sahne planda park ediliyor | arşiv |
+| gpt/analiz-duzeltme, gpt/analiz-kalan-duzeltmeler | 19 Eki GPT analiz düzeltmeleri; `main`'de karşılığı bulunamadı, o tarihten beri 727 commit; dokunduğu `audit.js`, `goodhart`, `analytics` plan aday #8'de arşiv, Whisper işi `main`'de ayrıca yapılmış (`e878390a`, `1ef96a16`) | arşiv |
+
+Öneri: sekizi de `arsiv/<ad>` etiketiyle saklanır, yerel dal silinir (etiketten `git branch <ad> arsiv/<ad>` ile geri gelir). Sahibin onayını bekliyor.
 
 ## Ana kopyadaki bitmemiş iş
 
