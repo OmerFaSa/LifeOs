@@ -1,0 +1,136 @@
+# Faz 2 — Kabuk (A5) raporu
+
+Tarih: 2026-11-13 · dal `sadelesme` (993c1b13 üstünde, commit edilmedi) · yalnız `kabuk/` ve bu rapor yazıldı.
+
+## Özet
+Yeni kabuk eskisinin yanında, `kabuk/` altında, sıfır bağımlılık ve derlemesiz kuruldu. `kabuk/index.html`
+doğrudan dosyadan (file://) açılır.
+
+| Dosya | Ne yapar |
+|---|---|
+| `kabuk/index.html` | Tek sayfa: çerçeve, halka, komut çubuğu yuvaları; `brand/ortak/piksel-yazi.css` (gömülü piksel yazı) ve `motor/yol.js` salt okunur yüklenir |
+| `kabuk/kabuk.css` | Jetonlar (açık: `brand/ortak/piksel.css` açık teması; koyu: plan.html maketlerinin `--m-*` değerleri), çerçeve, sayfalar, açılır katmanlar; ayarlardan türeyen kök nitelikleri |
+| `kabuk/kabuk.js` | Yönlendirme (hash), sayfalar, basılı tut halkası, komut çubuğu; saf kısım (Türkçe katlama, sıralama, komut öğeleri) Node'da test edilir |
+| `kabuk/harita.js` | Sistem haritası kaydı: 24 yer (6 kabuk, 10 alan, 7 motor, King), denetim ve adım hesabı |
+| `kabuk/ayar.js` | Tek ayar şeması: 13 ayar; doğrulama, okuma/yazma, sıfırlama, eşitleme dışa/içe aktarımı, kök nitelikleri ve ekran çizimi bu tanımdan türer |
+| `kabuk/kabuk.test.js` | 25 test, `node kabuk/kabuk.test.js` |
+
+Ekranlar: Bugün (karşılama A), Öğren / Sağlık / Araçlar dal sayfaları, Sistem haritası, Ayarlar, Felsefe
+(Yol motoru yuvası), her alan ve motor için yer sayfası (eski alanlarda «Eski sayfada aç»).
+
+## Kararlara uyum
+| Karar (AGENTS §0.1, plan) | Kabukta |
+|---|---|
+| Kural 2: tek ekran tek iş, tam ekran | Her sayfa tam ekran, bir ana düğme; kenar çubuğu, sekme, kâğıt yaprak, piksel oda yok |
+| Kural 3: bir özellik bir yer | Halka, komut çubuğu, harita sayfası ve dal sayfaları aynı `harita.js` listesinden; ayar ekranı, doğrulama, sıfırlama ve eşitleme aynı `ayar.js` satırından |
+| Kural 6: önce örnek | Hiçbir şey eski sisteme bağlanmadı; ekran görüntüleri sahibin önüne konuyor, açık sorular aşağıda |
+| Kural 8: sayıyı kod üretir | Ekranda uydurma sayı yok: harita sayfasındaki sayılar kayıttan; Felsefe birimleri Yol motorunun `durum()`'undan; okunamazsa boş yuva |
+| Karşılama A | Tarih, tek cümle selam, «Sırada: Felsefe · …», tek «Başla» düğmesi |
+| Gezinme B (halka + komut çubuğu) | Basılı tut halkası (Ctrl . ve «Yerler» düğmesiyle de) ve komut çubuğu (Ctrl K, «/», «Ara» düğmesi) |
+| Piksel kimlik kalır | Pixelify Sans (gömülü, ağsız), kahverengi palet, köşesiz yüzey, iki piksel çizgi, piksel gölge |
+| Lego kaydı: her parça kabuğa, motora ya da alana | Haritadaki her satırın `katman`ı kabuk / alan / motor / king |
+| Pilot alan Felsefe; on alan | Felsefe `pilot`, öteki dokuzu `eski` ve eski modül bağlantılı |
+| Motorlara dokunma | `motor/yol.js` yalnız `<script>` ile okunur; hiçbir motor dosyası değişmedi |
+
+## Çerçeve ve gezinme
+- **Çerçeve:** üstte ince şerit (solda tarih ya da «‹ Üst yer / Bu yer», sağda «Ara Ctrl K» ve «Yerler»),
+  altında sayfa. Kalıcı gezinme parçası yok (plan §7 önerisi). Gövde 16 px kenar boşluğu, `env(safe-area-inset-*)`.
+- **Halka:** boş bir yerde basılı tut (fare 380 ms, dokunma 480 ms; 10 px kıpırdarsa iptal, kaydırma bozulmaz).
+  Halka parmağın olduğu yerde açılır, ekrana sığacak biçimde kaydırılır. Basılıyken sürükle, öğe vurgulanır, bırakınca gider;
+  kıpırdamadan bırakırsan açık kalır ve ilk öğe odaklanır. Klavye: Ctrl . açar, oklar / Tab / Home / End dolaşır, Esc kapatır,
+  odak önceki yere döner. Halkada altı yer: Bugün, Öğren, Sağlık, Not, King, Sistem haritası.
+- **Komut çubuğu:** Ctrl K (Mac'te Cmd K) ya da yazı alanında değilken «/». Yerler, ayarlar ve eylemler (koyu/açık tema,
+  tema cihaza uysun, halkayı aç, yeni not) tek listede. Boş sorguda halka yerleri ve Ayarlar. Oklar seçer, Enter çalıştırır,
+  Esc kapatır. Erişilebilirlik: `role=dialog`, `combobox` + `listbox`, `aria-activedescendant`, sonuç sayısı canlı bölgede.
+- **Sıralama (saf, test edildi):** Türkçe katlama (`toLocaleLowerCase('tr')`, sonra ç ğ ı ö ş ü â î û → c g i o s u a i u;
+  İ → i, I → ı → i). Puan: tam ad 100, ad başı 80, kelime başı 60, ad içinde 40, açıklamada 20; çok kelimede her kelime
+  tutmalı (ortalama). Eşitlikte yer › ayar › eylem, sonra kısa ad.
+- **İki adım ölçüsü:** halkadaki yer 1 adım; dal sayfası ya da sistem haritası halkadaysa öteki her yer 2 adım
+  (halka → sayfa → yer). Komut çubuğunda her yer, adı yazılınca ilk sırada (1 adım). İkisi de testte.
+- **Erişilebilirlik:** «İçeriğe geç» bağlantısı, sayfa değişince odak `main`'e, düğmeler en az 44 px, `:focus-visible`
+  çerçevesi (ayarla kalınlaşır), ayar seçimleri `radiogroup` (oklarla değişir), `prefers-reduced-motion` «Cihaza uy»
+  kipinde hareketi sıfırlar, «Az» kipinde her zaman; `forced-colors` desteği.
+- **Temalar:** `prefers-color-scheme` izlenir; Ayarlar › Tema ya da komut çubuğu ile elle seçilir (`data-theme`), «Saate göre tema» 19:00-07:00 koyu.
+- **Bugün:** karşılama A'nın kendisi. «Günün geri kalanı» satırı Plan motoru gelene kadar yer tutucudur.
+  İlk açılışta bir kez «basılı tut ya da Ctrl K» ipucu (durum anahtarı `lifeos.kabuk.ipucu`, ayar değil).
+- **Felsefe yuvası:** `motor/yol.js` file:// üzerinden yüklenir (`LIFEOS.Motor.Yol` var). İçerik
+  `alan/felsefe/asama-1.json` ise `fetch` ile okunur; Chromium file:// üzerinde `fetch`'i engellediği için dosyadan açılınca
+  sayfa açıkça işaretli boş yuva gösterir («Sayfa dosyadan açıldı; içerik LifeOS sunucusuyla açılınca yüklenir»).
+  Sunucudan açılınca aşama adı ve üniteler (ders sayısı, kilit) motorun `durum(y, bosKayit())` çıktısından çizilir.
+  «Başla» ders ekranı bağlanana kadar `aria-disabled`.
+
+## Sistem haritası
+`kabuk/harita.js`, satır `{ id, ad, katman, dal, alan?, yol, ikon?, halka?, durum, eski?, aciklama }`.
+
+| Dal | Yerler |
+|---|---|
+| Ana sayfa | Bugün (halka 1), Sistem haritası (halka 6) |
+| Öğren | Öğren (halka 2) · Akademik (eski → AYS), Dil, Felsefe (pilot), Tarih, Müzik, Okuma ve yazı (eski → ESP) |
+| Sağlık | Sağlık (halka 3) · Beslenme, Hareket, Uyku, Tahlil (eski → SPİ) |
+| Araçlar | Araçlar sayfası · Yol haritası, Tekrar, Not (halka 4) hazır; Soru, Kayıt, Plan, Arama «hazırlanıyor» |
+| King | King (halka 5), hazırlanıyor |
+| Ayarlar | Ayarlar |
+
+- Eski bağlantılar dosya yollarıdır: `../AYS/dist/rota.html`, `../ESP/dist/esp.html`, `../SPI/dist/spi.html`; tek sunucu
+  (A4) gelince adres değişir, tek satır.
+- `denetle()` tekil id ve yol, geçerli katman / dal / durum, `eski` satırda bağlantı, halka 3-6 yer ve her yerin halkadan en çok
+  iki adımda olduğunu denetler; sistem haritası sayfası bu listeden çizilir (dal başına kart, katman rengi, «halkada» ve durum pulu).
+- Ekranda «motor» yerine «Araçlar» yazıyor (iç terim gösterilmesin diye); kayıtta katman adı `motor` kaldı.
+- Alan → eski modül eşlemesi (Müzik ve Okuma ve yazı → ESP, Tahlil → SPİ) envanterden çıkarım; sahibi onaylamalı.
+
+## Ayar şeması
+`kabuk/ayar.js`, satır `{ anahtar, ad, tur: secim|saatAraligi, varsayilan, secenekler?, esitlenir, aciklama, grup, kok?, kaynak }`.
+Türetilenler: `ciz` (ekran), `dogrula`, `oku` (bozuk / geçersiz → varsayılan), `yaz` (geçersizi yazmaz), `sifirla` (tek ya da hepsi,
+şema dışına dokunmaz), `disaAktar` (yalnız `esitlenir`), `iceAl` (bilinmeyen, eşitlenmeyen, geçersiz reddedilir), `kokNitelikleri`
+(CSS'in okuduğu `data-*`). Anahtar adları eski `lifeos.*` adlarıdır; göçte değer olduğu gibi okunur. `esitlenir` eski katalogdaki
+«o» bayrağından (`brand/ortak/animasyon.js` KATALOG).
+
+Yalnız envanterin «tut» dediği satırlar girdi (`envanter-kabuk-sunucu.md`):
+
+| Anahtar | Grup | Envanter satırı |
+|---|---|---|
+| lifeos.tema.secim, lifeos.tema.oto, lifeos.yazi | Görünüm | §3c «Tema, yazı» |
+| lifeos.vurgu | Görünüm | §3b |
+| lifeos.boyut, satir, kontrast, odak, altcizgi | Erişilebilirlik | §3b |
+| lifeos.hareket | Erişilebilirlik | §3c «Animasyon» (hareket tut) |
+| lifeos.rozet | Bildirim | §3b |
+| lifeos.sessiz (saat aralığı) | Bildirim | §3c «Ses ve müzik» (sessiz saatler tut) |
+| lifeos.kilit.odeme | Hesap ve güvenlik | §3c «Diğer» (eşitlenmez: bayrağı yalnız «t») |
+
+Bilerek dışarıda kalanlar: `lifeos.ice.var` (envanter «tut» diyor ama bir **durum** işaretidir, «veri içe alındı»; §3c sonu «durum
+anahtarları şemaya girmez»), `lifeos.sessiz.bitis` (anlık «şimdi sustur» durumu), `lifeos.hareket.hiz` (satırda yalnız «hareket tut»
+yazıyor), SORU ve ARŞİV satırları (profiller, müzik, zemin, minikler), King'in 20 anahtarı (King analistine), `sistem/planlama.py`
+işleri (sunucu tarafı, `sistem/` başka mühendiste). Yazı tipi seçenekleri Piksel ve Cihazın yazısı ile sınırlandı (piksel kimlik kararı);
+eski «modül» vurgu değeri «Alanın rengi» adıyla aynı değer olarak kaldı.
+
+## Ekran görüntüleri
+Klasör `belgeler/ekip/sadelesme/kabuk-onizleme/`, 20 PNG: `{karsilama, halka, komut, harita, ayarlar}-{masaustu (1280), telefon (390)}-{acik, koyu}.png`.
+Tek headless Chromium (Playwright, `SPI/node_modules`), `file://` ile, sunucusuz; tarayıcı iş bitince kapatıldı. Harita ve ayarlar tam sayfa.
+Halka klavye kısayoluyla (ekran ortasında), komut çubuğu «fel» yazılmış hâlde.
+
+Aynı koşuda işlev denetimi (sonuçlar):
+- Gerçek fareyle 550 ms basılı tut → halka açıldı; üçüncü öğeye sürükleyip bırak → `#/saglik`'e gitti.
+- Ctrl K, «muzik» yaz → ilk sonuç «Müzik · alan», Enter → `#/alan/muzik`.
+- `LIFEOS.Motor.Yol` file:// üzerinden yüklendi; Felsefe sayfası işaretli boş yuvayı gösterdi.
+- Dört boyut/tema birleşiminde yatay taşma yok; konsolda hata yok.
+
+## Testler
+`node kabuk/kabuk.test.js` → **25 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
+eski bağlantılar, Felsefe pilot, halkadan ≤ 2 adım, komut çubuğundan 1 adım, bozuk kaydı yakalama), şema türetmeleri (zorunlu alanlar,
+varsayılan geçerli, doğrulama, bozuk değerde varsayılan, sıfırlama, eşitleme süzgeci, kök nitelikleri, çizimde kaçış ve radyo
+sayısı), sıralama (ç ğ ı İ ö ş ü katlama, aksansız arama, ad başı › kelime başı › açıklama, eşitlikte tür ve kısa ad, çok kelime).
+
+## Açık sorular
+1. **Halkada hangi yerler?** Şimdi altı: Bugün, Öğren, Sağlık, Not, King, Sistem haritası. Plan maketinde beş vardı (Ana sayfa,
+   Öğren, Sağlık, Not, King); altıncıyı (harita) her yere iki adım kuralı için ekledim. Ayarlar halkada değil, komut çubuğunda ve haritada.
+2. **«Motorlar» ekranda ne adla?** İç terim görünmesin diye «Araçlar» yazdım. Plan haritası «Motorlar» diyor.
+3. **Karşılama selamında ad:** maket «Günaydın Altay.» diyor; kabukta henüz profil kaynağı yok, ad gelmiyor. Ad nereden okunacak (kişi modeli mi, Hesap mı)?
+4. **Hareket varsayılanı:** eski karar «Tam» (cihazın «hareketi azalt» isteğini de geçersiz kılar). Erişilebilirlik için «Cihaza uy» daha güvenli; hangisi?
+5. **Yazı tipi seçenekleri:** eski listede altı yazı vardı (Inter, Manrope…); piksel kimlik kararıyla «Piksel / Cihazın yazısı» ikiye indirdim. Doğru mu?
+6. **Alan → eski modül eşlemesi:** Müzik ve Okuma ve yazı ESP'ye, Tahlil SPİ'ye bağlandı (çıkarım). Doğru mu?
+7. **Telefonda komut çubuğu:** plandaki «aşağı çek» hareketi yazılmadı; telefonda üst şeritteki «Ara» düğmesi var. Hareket gerekli mi?
+8. **Halka zemini:** okunurluk için yuvarlak bir zemin ekledim (piksel köşeli değil). Kare ya da zeminsiz varyasyon istenirse gösterilebilir.
+9. **«Hepsini varsayılana döndür»** ödeme kilidini de kapatır (güvenli yön). Eski «s» bayrağı (yalnız bazı ayarlar sıfırlanır) şemaya alınmadı; gerekli mi?
+
+Atlananlar: ders ekranı, Not / Tekrar motorlarının ekranları, eski kabuğa bağlantı, sunucu üzerinden Felsefe içeriği denemesi
+(file:// fetch'i engellediği için denenemedi; kod yolu `Yol.yukle` + `Yol.durum`).

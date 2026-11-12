@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>LifeOS</title>
+<link rel="icon" href="../brand/life/favicon.png">
+<!-- piksel yazı tipi gömülü (ağsız); brand/ salt okunur kullanılır -->
+<link rel="stylesheet" href="../brand/ortak/piksel-yazi.css">
+<link rel="stylesheet" href="kabuk.css">
+</head>
+<body>
+<a class="atla" href="#sayfa">İçeriğe geç</a>
+<main id="sayfa" class="cerceve" tabindex="-1"></main>
+<div id="perde" class="perde" hidden></div>
+<div id="halka" class="halka" role="menu" aria-label="Yerler" hidden></div>
+<div id="komut" class="komut" role="dialog" aria-modal="true" aria-label="Ara" hidden>
+  <div class="komut__giris">
+    <input type="text" role="combobox" aria-expanded="false" aria-controls="komut-liste" aria-autocomplete="list"
+      aria-label="Bir yer, ayar ya da eylem ara" placeholder="Bir yer, ayar ya da eylem ara" autocomplete="off" spellcheck="false">
+    <kbd>Esc</kbd>
+  </div>
+  <ul id="komut-liste" class="komut__liste" role="listbox" aria-label="Sonuçlar"></ul>
+  <p id="komut-durum" class="gizli" aria-live="polite"></p>
+</div>
+<!-- motorlar salt okunur: yalnız Felsefe yuvası için Yol -->
+<script src="../motor/yol.js"></script>
+<script src="harita.js"></script>
+<script src="ayar.js"></script>
+<script src="kabuk.js"></script>
+</body>
+</html>

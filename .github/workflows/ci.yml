@@ -220,6 +220,11 @@ jobs:
       - name: Ölçüm motoru sayım ve bütçe kuralları
         run: python3 kalite/olcum_test.py
 
+      # SADELESME FAZ 2 KABUK (2026-11-13). Sistem haritasi: her yer halkadan en cok iki, komut
+      # cubugundan bir adim; ayar tek tanimdan turer; arama Turkce harfleri katlar.
+      - name: Kabuk haritası, ayar şeması ve arama
+        run: node kabuk/kabuk.test.js
+
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi
         run: python3 uygulama/ios/web_paket_test.py
