@@ -108,7 +108,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 <div class="wrap">
 
 <header style="display:flex;flex-direction:column;gap:14px">
-  <span class="tag">Sürüm 4.1 · 12 Kasım 2026 · Faz 0 envanteri bitti, üç karar verildi, uygulama kodunda değişiklik yok</span>
+  <span class="tag">Sürüm 4.2 · 12 Kasım 2026 · on altı karar verildi, Faz 0 kapanıyor, uygulama kodunda değişiklik yok</span>
   <h1>LifeOS Sadeleşme Planı</h1>
   <p class="lede">Karmaşıklığın kaynağı ekran düzeni değil, yapının kendisi. LifeOS bugün tek bir kişi için dört ayrı ürün olarak kurulu: üç bağımsız uygulama ve yanlarında bir merkez. Yazında istediğin her şey (tam ekran, tek not defteri, sistemi tanıyan King, sade ayarlar, tek cihaz yolu) aynı kararı gerektiriyor: <b>tek kişi, tek sistem, tek veri.</b> Bu belge o geçişin altyapı planıdır.</p>
   <nav class="toc" aria-label="İçindekiler">
@@ -552,28 +552,28 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 </section>
 
 <section id="kararlar">
-  <div class="head"><span class="tag">11 · Senden beklediğim</span><h2>On altı karar; üçü verildi</h2></div>
-  <p>İlk sekizi plandan, son sekizi envanterden geldi. 12 Kasım'da 1, 2 ve 7 verildi: tek sistem, yeni kabukla kademeli geçiş, pilot Felsefe. Envanterin kararlara eklediği alt sorular aşağıdaki tabloda.</p>
+  <div class="head"><span class="tag">11 · Senden beklediğim</span><h2>On altı karar; hepsi verildi</h2></div>
+  <p>İlk sekizi plandan, son sekizi envanterden geldi. 12 Kasım'da hepsi verildi; on üçünde önerim kabul edildi. Kararlar <code>AGENTS.md</code> §0.1'e yazıldı. Envanterin kararlara eklediği alt sorular aşağıdaki tabloda.</p>
   <ol class="plain">
     <li><b>Tek sisteme geçiş.</b> Dört bağımsız sistem sözleşmesini (AGENTS §0, §1.4) bırakıp tek sistem, tek veri yapısına geçiyor muyuz? <span class="to">Verildi: evet.</span></li>
     <li><b>Geçiş yolu.</b> Yeni kabuk ve kademeli taşıma (önerim) mı? <span class="to">Verildi: yeni kabuk, kademeli.</span></li>
-    <li><b>Kural metriği.</b> Sekiz kural: onay ya da düzeltme.</li>
-    <li><b>King'in yeri.</b> Önce Claude uygulamasında MCP (önerim), ya da doğrudan LifeOS içinde API.</li>
-    <li><b>Yan sistemler.</b> Rütbe ve rozetler, modül ofislerindeki ajanlar, müzik ve radyo, minikler gibi öğrenmeye doğrudan hizmet etmeyen yapılar: envanterde tek tek mi karar verelim, yoksa hepsi baştan arşive mi?</li>
-    <li><b>Tasarım.</b> Karşılama A mı B mi; gezinme A ile B (önerim) ya da C.</li>
+    <li><b>Kural metriği.</b> Sekiz kural: onay ya da düzeltme. <span class="to">Verildi: aynen.</span></li>
+    <li><b>King'in yeri.</b> Önce Claude uygulamasında MCP (önerim), ya da doğrudan LifeOS içinde API. <span class="to">Verildi: önce MCP.</span></li>
+    <li><b>Yan sistemler.</b> Rütbe ve rozetler, modül ofislerindeki ajanlar, müzik ve radyo, minikler gibi öğrenmeye doğrudan hizmet etmeyen yapılar: envanterde tek tek mi karar verelim, yoksa hepsi baştan arşive mi? <span class="to">Verildi: hepsi arşive.</span></li>
+    <li><b>Tasarım.</b> Karşılama A mı B mi; gezinme A ile B (önerim) ya da C. <span class="to">Verildi: karşılama A, gezinme B (halka ve komut çubuğu).</span></li>
     <li><b>Pilot alan.</b> Felsefe (önerim; envanter de bunu gösteriyor) mi, Dil mi? <span class="to">Verildi: Felsefe.</span></li>
-    <li><b>Cihaz yolu.</b> Ev ağı sertifikası ve tek dosya yolunu emekliye ayırıp yalnız Tailscale ile devam (önerim) mı?</li>
+    <li><b>Cihaz yolu.</b> Ev ağı sertifikası ve tek dosya yolunu emekliye ayırıp yalnız Tailscale ile devam (önerim) mı? <span class="to">Verildi: yalnız Tailscale.</span></li>
   </ol>
   <h3>Envanterden çıkan yeni kararlar</h3>
   <ol class="plain" start="9">
-    <li><b>Alan listesi.</b> Diksiyon nereye; Okuma ve Yazı tek merdiven mi; hangi diller ve sırası; YKS'de yalnız sayısal mı; Uyku ilk turda mı; İlaç ekranı ve «Testler» adı.</li>
-    <li><b>Göç kapsamı.</b> Türetilmiş kayıtlar, ofis ve XP geçmişi, HKM tabloları ve sahipsiz tekrar tablosu taşınsın mı?</li>
-    <li><b>Etiketsiz sayılar.</b> SPİ'nin etiketsiz yaşamsal ölçümleri ve AYS'nin «boş enerji = 3» kayıtları göçte nasıl işaretlensin?</li>
-    <li><b>Fotoğraf ve medya.</b> PC'ye eşitlensin mi? Eşitlenmezse tek depoda da cihaz kaybında gider.</li>
-    <li><b>İçerik onayı.</b> Onaysız ders tekrara girsin mi; «uzman incelemesi bekliyor» kartları taslak etiketiyle mi girsin; kaynak denetimi yalnız pilotta mı; sağlık içeriğinin sınırı.</li>
-    <li><b>Ustalık kapısı ve tekrar.</b> Basamak geçişinde bilgi sınaması zorunlu mu (86 kapının çoğu bugün hacim ölçüyor); tekrar FSRS mi sabit aralık mı, hedef hatırlama oranı ve günlük tavan.</li>
-    <li><b>King'in veri izni.</b> Notları varsayılan olarak okusun mu; «model hafızaya hiç yazamaz, yalnız önerir» kuralı kalsın mı; ders havuzu hangi hesapları kapsar.</li>
-    <li><b>Diskte şifreleme.</b> Sağlık ve para verisi düz metin duruyor. BitLocker ya da EFS yeterli mi?</li>
+    <li><b>Alan listesi.</b> Diksiyon nereye; Okuma ve Yazı tek merdiven mi; hangi diller ve sırası; YKS'de yalnız sayısal mı; Uyku ilk turda mı; İlaç ekranı ve «Testler» adı. <span class="to">Verildi: plandaki on alan; Diksiyon Dil'in içinde.</span></li>
+    <li><b>Göç kapsamı.</b> Türetilmiş kayıtlar, ofis ve XP geçmişi, HKM tabloları ve sahipsiz tekrar tablosu taşınsın mı? <span class="to">Verildi: her şey taşınır, türetilmiş kayıtlar yeniden hesaplanır.</span></li>
+    <li><b>Etiketsiz sayılar.</b> SPİ'nin etiketsiz yaşamsal ölçümleri ve AYS'nin «boş enerji = 3» kayıtları göçte nasıl işaretlensin? <span class="to">Verildi: «eski kayıt» etiketiyle.</span></li>
+    <li><b>Fotoğraf ve medya.</b> PC'ye eşitlensin mi? Eşitlenmezse tek depoda da cihaz kaybında gider. <span class="to">Verildi: PC'ye eşitlenir.</span></li>
+    <li><b>İçerik onayı.</b> Onaysız ders tekrara girsin mi; «uzman incelemesi bekliyor» kartları taslak etiketiyle mi girsin; kaynak denetimi yalnız pilotta mı; sağlık içeriğinin sınırı. <span class="to">Verildi: taslak etiketiyle görünür, tekrara girmez.</span></li>
+    <li><b>Ustalık kapısı ve tekrar.</b> Basamak geçişinde bilgi sınaması zorunlu mu (86 kapının çoğu bugün hacim ölçüyor); tekrar FSRS mi sabit aralık mı, hedef hatırlama oranı ve günlük tavan. <span class="to">Verildi: ustalık kapısı zorunlu, tekrar FSRS.</span></li>
+    <li><b>King'in veri izni.</b> Notları varsayılan olarak okusun mu; «model hafızaya hiç yazamaz, yalnız önerir» kuralı kalsın mı; ders havuzu hangi hesapları kapsar. <span class="to">Verildi: King notları okur, hafızaya yalnız öneri yazar.</span></li>
+    <li><b>Diskte şifreleme.</b> Sağlık ve para verisi düz metin duruyor. BitLocker ya da EFS yeterli mi? <span class="to">Verildi: BitLocker açılır (bu adımı sen yaparsın).</span></li>
   </ol>
   <h3>Envanterin kararlara eklediği sorular</h3>
   <div class="tw"><table>

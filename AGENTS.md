@@ -20,6 +20,46 @@ bütün belgelerin dizini `belgeler/DIZIN.md`, araçlarınki `tools/DIZIN.md`. D
 durur. Başlatıcı, sunucu, güncelleyici `sistem/`; belge, rapor, ekip
 notu `belgeler/`. Köke yeni dosya eklenmez.
 
+## 0.1 Yön: tek sistem (2026-11-12, depo sahibinin kararı)
+
+Dört bağımsız sistem sözleşmesi bırakıldı. Hedef **tek kişi, tek sistem, tek
+veri**: bir uygulama, bir adres, bir depo; katmanlar Kabuk → Alanlar → Motorlar
+→ King → Çekirdek → Kalite. Plan ve on altı karar: `belgeler/ekip/sadelesme/plan.html`
+(envanter ve sentez aynı klasörde).
+
+**Geçiş:** yeni kabuk eskisinin yanında kurulur, alanlar tek tek taşınır, eskisi
+silme kapısından sonra kapanır. Eski modüller (AYS, SPİ, ESP, HKM yüzü)
+**dondurulmuştur**: yeni özellik almaz, yalnız hata düzeltmesi. Tek yazılı
+istisna, her cihazdan veri alan göç paketi düğmesidir. Bir faz kapısı ölçümle
+geçilmeden sonraki faz başlamaz. Aşağıdaki §1 sözleşmeleri, alanı taşınana
+kadar eski modüller için geçerlidir; yeni kod bu bölüme göre yazılır.
+
+**Sekiz kural:**
+1. Tek kişi, tek sistem, tek veri.
+2. Tek ekran, tek iş: her sayfa tam ekrandır ve bir ana eylemi vardır.
+3. Bir özellik, bir yer: ortak iş motordur; kopyalanmaz, çağrılır.
+4. Öğrenme önce: yol haritasındaki bir adıma hizmet etmeyen özellik kalmaz.
+5. Bir giren, bir çıkar: karmaşıklık bütçesi aşılırsa yeni parça ancak eskisi çıkınca girer.
+6. Önce örnek, sonra kod: tasarım değişikliği varyasyonla gösterilir, sahibi seçer.
+7. Ölçmeden değişmez: her değişiklik bir eğriyi yükseltir ya da bir bütçeyi düşürür.
+8. Sayıyı kod üretir: King açıklar, öğretir, araştırır; hesap ve kayıt koddadır (§1.1, §1.2, §1.3 aynen kalır).
+
+**Yeni kodda değişen sözleşmeler:** §0 ve §1.4 → tek sistem; HKM ve BAM ayrı
+yapı olarak kalkar, çekirdekleri tek sunucuya katılır. §1.4 «fotoğraflar
+eşitlenmez» → PC'ye eşitlenir; «son yazan kazanır» → mantıksal saat, alan
+düzeyi çakışma. §1.6 seviye, rütbe, rozet, ofis ajanları, sahne ve radyo →
+arşiv. §1.10 piksel oda ve kâğıt yaprak → tam ekran çerçeve; piksel kimlik
+(yazı, renk jetonu) kalır, oda park edilir. §1.11 Lego kaydı kalır; her parça ya
+kabuğa, ya bir motora, ya bir alana aittir.
+
+**Öteki kararlar:** King önce Claude uygulamasında MCP ile (yazma tek süreçten
+sonra); gezinme basılı tut halkası ve komut çubuğu, karşılama A; cihaz yolu
+yalnız Tailscale; pilot alan Felsefe, alanlar plandaki on alan (Diksiyon Dil'in
+içinde); göçte her şey taşınır, türetilmiş kayıtlar yeniden hesaplanır,
+etiketsiz sayı «eski kayıt» etiketi alır; onaysız içerik taslak etiketiyle
+görünür ve tekrara girmez; aşama geçişinde ustalık kapısı zorunlu, tekrar
+FSRS; King notları okur, hafızaya yalnız öneri yazar.
+
 ## 1. Değişmeyen kurallar
 
 Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
