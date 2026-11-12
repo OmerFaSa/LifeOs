@@ -279,6 +279,8 @@ jobs:
           python3 tools/kabul_js_test.py
           python3 tools/veri_denetle_kabul_test.py
           python3 tools/veri_denetle_test.py
+        # Her satir ayri kosar, kalan her satir kendi ::error bildirimini yazar (is kaydi yetki ister).
+        shell: bash tools/ci_satir.sh {0}
 
       - name: Ölü CSS aracının sınaması
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölü CSS aracının sınaması" python3 tools/olucss.py --sina
