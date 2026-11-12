@@ -16,6 +16,13 @@ kayıtlar yerinde (sunucu kopyadır), sıradaki değişiklikler 401'de korunur (
 Göç aracı bu durumu tanır: canlı depo boşsa ve yedek doluysa en yeni sağlam yedeği kaynak alır ve
 raporda «canlı boş, yedekten okundu» der. Canlı dosyayı geri koymak sahibin kararıdır.
 
+**Geri konuldu (2026-11-12 21:53, sahibinin onayıyla).** Boş canlı dosya `yedek\hesap-once-20261112-215334.db`
+olarak saklandı (dönüş noktası); yanındaki boş `-wal`/`-shm` kenara alındı; 11 Kasım yedeği `hesap.db` yerine
+kondu. Denetim (ölçüldü): canlı dosya yedekle bayt bayt aynı, `integrity_check` temiz, `hesap.Depo` açıyor
+(2 kullanıcı, 78 canlı + 7 silinmiş kayıt); kuru koşu artık canlı depodan okuyor, sayılar ve göç kimliği
+(`05e883396eae657f`) yedekten okunan koşuyla aynı. 5-11 Kasım arası sunucuya hiç kayıt gitmemişti (son yazım
+5 Kasım), bu yüzden geri koymada sunucu tarafında kayıp yok; cihazlar bağlanınca kendi sıralarını yollar.
+
 ## 1. Tasarım (tek sayfa)
 
 | Konu | Karar | Nerede |
