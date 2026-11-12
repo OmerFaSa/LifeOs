@@ -16,6 +16,10 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [AYS sadelik](ekip/sadelik/ays.md) — AYS ekranlarının 6 Kasım sadelik dökümü; durumu: sadeleşme planına girdi (2026-11-12).
 - [ESP sadelik](ekip/sadelik/esp.md) — ESP ekranlarının 6 Kasım sadelik dökümü; durumu: sadeleşme planına girdi (2026-11-12).
 - [Sadeleşme tabanı](ekip/sadelesme/taban-20261112.md) — Tek sisteme geçişin «önce» sayıları; her faz kapısı buna karşı ölçülür. Plan sayfası aynı klasörde `plan.html` (2026-11-12).
+- [Faz 3 · Yol motoru ve içerik](ekip/sadelesme/faz3-yol-icerik.md) — Yol motoru, içerik şeması (`alan/SEMA.md`), Felsefe'nin ilk aşaması ve şema denetimi (2026-11-13).
+- [Faz 3 · Tekrar motoru](ekip/sadelesme/faz3-tekrar.md) — Dokuz zamanlayıcının yerine tek FSRS: formüller, arayüz, on bir göç bağdaştırıcısı, testler (2026-11-13).
+- [Faz 3 · Not motoru](ekip/sadelesme/faz3-not.md) — On üç not yapısının yerine tek kayıt ve tek ağ: bağlar, King erişimi, arama, göç bağdaştırıcıları (2026-11-13).
+- [Faz 4 · Ölçüm motoru](ekip/sadelesme/faz4-olcum.md) — A9: depodan sayılan ölçütler, bugün / taban / hedef, bütçe kuralları, ölçülemeyen eğriler (2026-11-13).
 - [Faz 1 planı](ekip/sadelesme/faz1.md) — A3 veri katmanı ve A4 tek kapı: tasarım, altı iş paketi, testleri ve Faz 1 kapısı (2026-11-12).
 - [Göç kuru koşusu](ekip/sadelesme/goc-kuru-20261112.md) — Gerçek veriyle ilk kuru koşu: kaynak × tür sayıları, etiketler, boş canlı hesap deposu bulgusu (2026-11-12).
 - [Sadeleşme sentezi](ekip/sadelesme/sentez.md) — Dokuz envanter raporunun birleşimi: aday listesi, düzeltilen sayılar, kararlar, riskler, çelişkiler (2026-11-12).

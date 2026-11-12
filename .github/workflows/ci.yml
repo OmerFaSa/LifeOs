@@ -205,6 +205,21 @@ jobs:
       - name: Göç paketi cihazdan PC'ye
         run: python3 tools/gocpaket_test.py
 
+      # SADELESME FAZ 3 MOTORLAR (2026-11-13). Yol, Tekrar, Not: saf (saat disaridan gelir), sifir
+      # bagimlilik. Tekrar testi eski zamanlayicilarin gercek kaynagini yukler: goc vadeyi degistirmez.
+      - name: Motorlar (Yol, Tekrar, Not)
+        run: node motor/yol.test.js && node motor/tekrar.test.js && node motor/not.test.js
+
+      # SADELESME FAZ 3 ICERIK (2026-11-13). Alan icerigi semaya uyar (alan/SEMA.md); onaysiz ders
+      # taslak etiketiyle durur. Denetimin kendisi de sinanir.
+      - name: Alan içeriği şema denetimi
+        run: python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe
+
+      # SADELESME FAZ 4 OLCUM (2026-11-13). Sayim kurallari, butce asimi, ayni girdi ayni kayit,
+      # olculmeyen egri sayi tasimaz. Butce denetiminin kendisi (--denetle) Faz 4 kapisinda baglanir.
+      - name: Ölçüm motoru sayım ve bütçe kuralları
+        run: python3 kalite/olcum_test.py
+
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi
         run: python3 uygulama/ios/web_paket_test.py
