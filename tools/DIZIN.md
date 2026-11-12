@@ -137,6 +137,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `telefon_test.py` — Telefon uygulaması (ev ağı ve yerel sunucu) bağlantı ve güvenlik testleri, kök sertifikanın ad kısıtı, CI'da koşulur.
 - `android_kurulum_test.js` — Android kurulum sayfası: çalışan adresi bulur (Tailscale, `.local`, IP), iPhone akışı değişmez; ağ taklit, sabit port yok, CI'da koşulur.
 - `tasi_test.py` — Yeni bilgisayara taşıma paketi (`sistem/tasi.py`): şifreli, değişmiş dosya açılmaz, üstüne yazmaz; CI'da koşulur.
+- `goc_test.py` — Sadeleşme göç aracı (`sistem/goc.py`): kaynağa yazmaz, sayı dengesi, tek etiket dili, sır pakette durur, aynı rapor, geri alınır; CI'da koşulur.
 - `veri_denetle_test.py` — tools/veri_denetle.py birim testleri; kenar durumları sınar, CI'da koşulur.
 - `veri_dogrula_test.py` — tools/veri_dogrula.py saf işlevlerinin birim testleri, CI'da koşulur.
 - `veri_test.py` — Veri çıkarma ve gece doğrulama kurallarının testi, CI'da koşulur.

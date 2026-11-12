@@ -190,6 +190,11 @@ jobs:
       - name: Taşıma paketi şifreli ve üstüne yazmaz
         run: python3 tools/tasi_test.py
 
+      # SADELESME FAZ 1 GOC (2026-11-12). Kaynaga yazmaz, sayi dengesi, etiket tek dil,
+      # turetilmis tasinmaz, sir pakette durur, ayni girdi ayni rapor, goc_id ile geri alinir.
+      - name: Göç aracı kuru koşusu
+        run: python3 tools/goc_test.py
+
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi
         run: python3 uygulama/ios/web_paket_test.py
