@@ -18,12 +18,13 @@
      node tools/sadelik.js --denetle    # kuralı aşan ekran varsa çıkış 1
      node tools/sadelik.js AYS          # yalnız bir modül
      node tools/sadelik.js --ornek      # örnek veri kipinde (dolu hesap)
+     node tools/sadelik.js --onay       # yalnız 022 kaynak kuralı (tarayıcısız)
 
    Sunucu gerekmez: modülün derlenmiş tek dosyası (dist/*.html) açılır;
    sabit port yoktur, öteki denetimlerle çakışmaz. Önce build.py koşar. */
 
+const fs = require('fs');
 const path = require('path');
-const { chromium } = require(path.join(__dirname, '..', 'ESP', 'node_modules', 'playwright'));
 
 const ESIK_ACIK = 3;
 const KOK = path.join(__dirname, '..');
@@ -41,6 +42,8 @@ const MODULLER = {
 const ORNEK = process.argv.includes('--ornek');
 
 async function olc(ad, m){
+  // --onay ve test Playwright'sız koşar (CI bu işte npm ci yapmaz); tarayıcı yalnız ölçümde
+  const { chromium } = require(path.join(__dirname, '..', 'ESP', 'node_modules', 'playwright'));
   const b = await chromium.launch();
   const p = await b.newPage({ viewport:{ width:1280, height:900 } });
   if(ORNEK) await p.addInitScript(k => { try{ localStorage.setItem(k, 'ornek'); }catch(e){} }, m.profil);
@@ -79,7 +82,64 @@ async function olc(ad, m){
   return { sonuc, hata };
 }
 
-(async () => {
+/* VARSAYILAN ETIKETLI ONAY (katalog 022, statik). `confirmSheet(baslik,
+   mesaj, fn, tehlikeli, onay)` besinci arguman verilmezse dugme «Evet,
+   devam et» yazar. Cagrilar kaynakta sayilir: ust duzey virgulleri sayan
+   kucuk bir tarayici (dize, sablon ve yorum atlanir). 0d5a9dd5'te olcum
+   yeniden yazilirken yanlislikla silinmisti; CI adimi hala bunu sinar. */
+function onaySay(t){
+  const out = [];
+  const re = /confirmSheet\s*\(/g;
+  let m;
+  while((m = re.exec(t))){
+    const once = t.slice(Math.max(0, m.index - 12), m.index);
+    if(/function\s+$/.test(once)) continue;         // tanimin kendisi
+    let i = re.lastIndex, derin = 0, virgul = 0, bos = true;
+    for(; i < t.length; i++){
+      const c = t[i];
+      if(c === '"' || c === "'" || c === '`'){
+        const q = c; i++;
+        while(i < t.length && t[i] !== q){ if(t[i] === '\\') i++; i++; }
+        bos = false; continue;
+      }
+      if(c === '/' && t[i + 1] === '*'){ i = t.indexOf('*/', i + 2) + 1; continue; }
+      if(c === '/' && t[i + 1] === '/'){ i = t.indexOf('\n', i); continue; }
+      if('([{'.indexOf(c) >= 0){ derin++; bos = false; continue; }
+      if(')]}'.indexOf(c) >= 0){ if(derin === 0) break; derin--; continue; }
+      if(c === ',' && derin === 0) virgul++;
+      else if(!/\s/.test(c)) bos = false;
+    }
+    const arguman = bos ? 0 : virgul + 1;
+    if(arguman < 5) out.push(t.slice(0, m.index).split('\n').length);
+  }
+  return out;
+}
+
+function varsayilanOnaylar(ad){
+  const out = [];
+  const gez = d => fs.readdirSync(d, { withFileTypes:true }).forEach(e => {
+    const p = path.join(d, e.name);
+    if(e.isDirectory()) return gez(p);
+    if(!/\.js$/.test(e.name)) return;
+    onaySay(fs.readFileSync(p, 'utf8'))
+      .forEach(satir => out.push(path.relative(path.join(KOK, ad), p) + ':' + satir));
+  });
+  gez(path.join(KOK, ad, 'src', 'js'));
+  return out;
+}
+
+function yalnizOnay(){
+  let n = 0;
+  Object.keys(MODULLER).forEach(ad => {
+    const onay = varsayilanOnaylar(ad);
+    n += onay.length;
+    console.log(ad + ': ' + (onay.length ? '✕ ' + onay.length + ' varsayılan etiketli onay: ' + onay.join(', ')
+      : 'her onay sonucu söylüyor'));
+  });
+  return n ? 1 : 0;
+}
+
+async function main(){
   const sec = process.argv.slice(2).filter(a => !a.startsWith('--'));
   const denetle = process.argv.includes('--denetle');
   const hepsi = [], hatalar = [];
@@ -99,4 +159,11 @@ async function olc(ad, m){
     + (hatalar.length ? ' · sayfa hatası: ' + hatalar.length : ''));
   hatalar.slice(0, 5).forEach(h => console.log('  ' + h));
   process.exit(denetle && (asan.length || hatalar.length) ? 1 : 0);
-})();
+}
+
+module.exports = { onaySay };
+
+if(require.main === module){
+  if(process.argv.includes('--onay')) process.exit(yalnizOnay());
+  main();
+}
