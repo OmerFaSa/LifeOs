@@ -1,0 +1,281 @@
+{
+  "sema": 1,
+  "alan": "felsefe",
+  "id": "felsefe.1",
+  "sira": 1,
+  "ad": "Soruyu tanımak",
+  "hedef": "Felsefenin ne sorduğunu, kavram ve tanımla nasıl çalıştığını ve bilgi, varlık, ahlak alanlarının temel cevaplarını tanımak.",
+  "onKosul": [],
+  "kanitIsi": "Bir kavramı kendi cümlenle tanımlamak (ESP merdiveni, Felsefe 1. basamak). Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "MEB Felsefe öğretim programı kazanımları (10. sınıf), gemini-data tablosu", "tur": "gemini", "yol": "MUFREDAT/felsefe.md", "bolum": "10. Sınıf", "satir": "9-14", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Çeviri kuramı ve etimolojik kök aileleri atlası", "tur": "gemini", "yol": "ESP/dil/ceviri_kurami_etimolojik_kok_aileleri_ve_cok_dilli_dusunme_mimarisi.md", "bolum": "Phil- / Soph- satırı", "satir": "117", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "Felsefe kanonu: Thales satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "15", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "Felsefe kanonu: Sokrates satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "18", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "Felsefe kanonu: Platon satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "19", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "Mağara alegorisi (düşünce deneyi 4)", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "4. Mağara Alegorisi (Platon)", "satir": "75-78", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "Sokratik elenkhos ve maieutik protokolü", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "3.1. Sokratik Elenkhos ve Maieutik Protokolü", "satir": "191-195", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "Felsefe kanonu: Herakleitos satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "16", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "Felsefe kanonu: Aristoteles satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "20", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Felsefe kanonu: Descartes satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "35", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "Felsefe kanonu: Locke satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "37", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "Felsefe kanonu: Hume satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "40", "dogrulama": "dogrulanmamis" },
+    { "id": "k13", "ad": "Felsefe kanonu: Kant satırı", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "1. Düşünce Tarihinin 40 Kurucu Filozofu", "satir": "42", "dogrulama": "dogrulanmamis" },
+    { "id": "k14", "ad": "Klasik mantık: tasavvurat ve tasdikat", "tur": "gemini", "yol": "ESP/felsefe/klasik_mantik_isagoci_beş_sanat_ve_modern_epistemoloji.md", "bolum": "BÖLÜM 1: Klasik Mantık Sistemi", "satir": "13-15", "dogrulama": "dogrulanmamis" },
+    { "id": "k15", "ad": "Klasik mantık: beş tümel (İsagoci)", "tur": "gemini", "yol": "ESP/felsefe/klasik_mantik_isagoci_beş_sanat_ve_modern_epistemoloji.md", "bolum": "1.1 Beş Tümel", "satir": "19-44", "dogrulama": "dogrulanmamis" },
+    { "id": "k16", "ad": "Klasik mantık: tanım teorisi ve tanımın kuralları", "tur": "gemini", "yol": "ESP/felsefe/klasik_mantik_isagoci_beş_sanat_ve_modern_epistemoloji.md", "bolum": "1.2 Tanım Teorisi", "satir": "47-64", "dogrulama": "dogrulanmamis" },
+    { "id": "k17", "ad": "TYT felsefe akımları: bilgi felsefesi", "tur": "gemini", "yol": "AYS/ayt/ayt_felsefe_grubu_psikoloji_sosyoloji_mantik_ve_tyt_felsefe_akimlari_tam_atlasi.md", "bolum": "Bilgi Felsefesi (Epistemoloji)", "satir": "14-28", "dogrulama": "dogrulanmamis" },
+    { "id": "k18", "ad": "TYT felsefe akımları: varlık felsefesi", "tur": "gemini", "yol": "AYS/ayt/ayt_felsefe_grubu_psikoloji_sosyoloji_mantik_ve_tyt_felsefe_akimlari_tam_atlasi.md", "bolum": "Varlık Felsefesi (Ontoloji)", "satir": "50-65", "dogrulama": "dogrulanmamis" },
+    { "id": "k19", "ad": "TYT felsefe akımları: ahlak felsefesi", "tur": "gemini", "yol": "AYS/ayt/ayt_felsefe_grubu_psikoloji_sosyoloji_mantik_ve_tyt_felsefe_akimlari_tam_atlasi.md", "bolum": "Ahlak Felsefesi (Etik)", "satir": "71-79", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "felsefe.1.k1", "tur": "secmeli", "soru": "«Felsefe» sözcüğünün kökündeki anlam nedir?", "sec": ["Doğa bilgisi", "Doğru konuşma", "Bilgelik sevgisi", "Tanrı bilgisi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+      { "id": "felsefe.1.k2", "tur": "secmeli", "soru": "Sokratik yöntemin son adımı (maieutik, doğurtma) neyi amaçlar?", "sec": ["Muhatabı susturmayı", "Doğru tanımı muhataba ezberletmeyi", "Tartışmayı oylamayla bitirmeyi", "Muhatabın, iki durumu da kapsayan daha iyi bir ilkeye kendisinin ulaşmasını"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+      { "id": "felsefe.1.k3", "tur": "secmeli", "soru": "Aşağıdakilerden hangisi tek başına doğru ya da yanlış olamaz?", "sec": ["«Bütün insanlar ölümlüdür.»", "«Cesaret»", "«Bazı kuşlar uçamaz.»", "«Su ısıtılınca buharlaşır.»"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+      { "id": "felsefe.1.k4", "tur": "secmeli", "soru": "«Zihin doğuştan boş bir levhadır» diyen bir düşünür ile «doğru bilgi akılda doğuştan vardır» diyen bir düşünür hangi felsefe alanında tartışır?", "sec": ["Bilgi felsefesi", "Varlık felsefesi", "Ahlak felsefesi", "Estetik"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k17"] },
+      { "id": "felsefe.1.k5", "tur": "secmeli", "soru": "Platon'un mağara alegorisi ile idealizmin ortak noktası nedir?", "sec": ["İkisi de bilginin yalnız deneyimden geldiğini söyler", "İkisi de her şeyin sürekli değiştiğini söyler", "İkisi de maddi dünyayı daha gerçek bir şeyin gölgesi ya da yansıması sayar", "İkisi de varlığı iki ayrı töze ayırır"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6", "k18"] },
+      { "id": "felsefe.1.k6", "tur": "secmeli", "soru": "Tanımın kısır döngü (devir) yasağı neyi yasaklar?", "sec": ["Mecazlı söz kullanmayı", "Tanımlanan şeyin tanımın içinde kullanılmasını", "Uzak cins kullanmayı", "Tanıma örnek eklemeyi"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k16"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "felsefe.1.1",
+      "ad": "Felsefe ne sorar?",
+      "onKosul": [],
+      "kazanim": ["FEL.10.1.1"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "felsefe.1.1.k1", "tur": "secmeli", "soru": "Thales'in sorduğu «arkhe» sorusu neyi arar?", "sec": ["Doğru yaşamın ne olduğunu", "Evrenin ilk maddesini, çokluğun ardındaki temel birliği", "Bilginin sınırlarını", "Devletin en iyi yönetim biçimini"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+          { "id": "felsefe.1.1.k2", "tur": "secmeli", "soru": "Arkadaşın «Cesaret, hiç korkmamaktır» dedi. Sokratik yöntemde bir sonraki adım hangisidir?", "sec": ["Tanımı kabul edip yeni konuya geçmek", "Daha iyi tanımı onun yerine söylemek", "Tanımı zorlayan uç bir örnek sunmak", "Sözcüğün kökenini araştırmak"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+          { "id": "felsefe.1.1.k3", "tur": "secmeli", "soru": "«Bildiğim tek şey hiçbir şey bilmediğimdir» sözü kaynakta hangi filozofa atfedilir?", "sec": ["Platon", "Thales", "Aristoteles", "Sokrates"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+          { "id": "felsefe.1.1.k4", "tur": "secmeli", "soru": "Platon'un ayrımında akılla kavranan, kalıcı ve gerçek olan nedir?", "sec": ["İdealar", "Duvardaki gölgeler", "Duyu dünyası", "Doxa"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k6"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "felsefe.1.1.1",
+          "ad": "Felsefe sözcüğü ve ilk filozof",
+          "onKosul": [],
+          "kazanim": ["FEL.10.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2", "k3"],
+          "ozet": "«Felsefe» Grekçe philosophia'dan gelir: bilgelik sevgisi. Kaynakta ilk sırada anılan Thales, evreni mitlerle değil doğal nedenlerle açıklamaya çalışmıştır.",
+          "metin": [
+            "«Felsefe» sözcüğü Grekçe philosophia'dan gelir. Kökün iki parçası vardır: phil- «sevgi», soph- «bilgelik». Adıyla felsefe, bilgelik sevgisidir. Aynı kök «sofist» ve «Ayasofya» sözcüklerinde de görülür.",
+            "Kaynaktaki kurucu filozoflar listesinin ilk adı Miletli Thales'tir (MÖ yaklaşık 624-546). Sorusu şuydu: Evrenin ilk maddesi (arkhe) nedir; bunca çokluğun ardındaki temel birlik ne?",
+            "Thales'i öne çıkaran, verdiği cevap (su) değil, cevaplama biçimidir: olayları mitik anlatılarla değil, doğal nedenlerle açıklamaya çalıştı. Her canlının neme bağlı olduğunu gözleyip suyun temel madde olduğu sonucuna vardı.",
+            "Bu dersin bağlı olduğu kazanım (FEL.10.1.1): «Felsefenin anlamını, gelişim sürecini ve işlevini sorgulayabilme.»"
+          ],
+          "not": "Kaynak malzemede «felsefe nedir, felsefi soru neye benzer» diye bir giriş dersi yok; bu ders üç dağınık satırdan derlendi (etimoloji satırı bir dil atlasından). Felsefi düşüncenin özellikleri ve felsefi soru ile bilimsel soru farkı için gemini-data'da kaynak bulunamadı.",
+          "alistirmalar": [
+            { "id": "felsefe.1.1.1.a1", "tur": "secmeli", "soru": "«Philosophia» sözcüğünü oluşturan iki kökün anlamı nedir?", "sec": ["Akıl ve dil", "Sevgi ve bilgelik", "Doğa ve düzen", "Soru ve cevap"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "felsefe.1.1.1.a2", "tur": "secmeli", "soru": "Kaynağa göre Thales'i ilk filozoflardan biri yapan nedir?", "sec": ["Suyun en değerli madde olduğunu söylemesi", "Ahlakı bilgiyle temellendirmesi", "Olayları mitik anlatılar yerine doğal nedenlerle açıklamaya çalışması", "Bir okul kurup öğrenci yetiştirmesi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] }
+          ]
+        },
+        {
+          "id": "felsefe.1.1.2",
+          "ad": "Sorarak düşünmek: Sokrates",
+          "onKosul": ["felsefe.1.1.1"],
+          "kazanim": ["FEL.10.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k7"],
+          "ozet": "Sokrates hiçbir şey yazmadı; soru sorarak düşündü. Yöntemi: tanım iste, karşı örnekle sına, çıkmazı göster, daha iyi tanımı muhatap kendisi doğursun.",
+          "metin": [
+            "Sokrates (MÖ 469-399) yazılı eser bırakmadı. Sorusu ahlakla ilgiliydi: Doğru yaşam nedir; erdem bilinebilir ve öğretilebilir mi?",
+            "Kaynak ona iki tez atfeder: «Bildiğim tek şey hiçbir şey bilmediğimdir.» ve «Kimse bilerek kötülük yapmaz; kötülük bilgisizliktir.»",
+            "Yöntemi soru-cevaptır. Kaynaktaki dört adım: (1) Tanım iste: «Cesaret nedir?» (2) Karşı örnekle sına: tanımı zorlayan uç bir durum göster. (3) Çıkmaz (aporia): önceki cevapla yeni örneğin çeliştiğini göster. (4) Doğurtma (maieutik): iki durumu da kapsayan daha iyi, daha genel bir ilkeye muhatabın kendisinin ulaşmasını sağla.",
+            "Çürütme aşamasının adı elenkhos'tur. Kaynağın özetiyle: soru-cevap, zihindeki çelişkileri yıkarak hakikati doğurtur."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.1.1.2.a1", "tur": "secmeli", "soru": "Sokratik yöntemde önceki cevapla yeni örneğin çeliştiğinin gösterildiği adımın adı nedir?", "sec": ["Maieutik (doğurtma)", "Arkhe (ilk madde)", "Logos", "Aporia (çıkmaz)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+            { "id": "felsefe.1.1.2.a2", "tur": "secmeli", "soru": "Kaynağa göre Sokrates kötülüğün nedenini neye bağlar?", "sec": ["Bilgisizliğe", "Yoksulluğa", "Kötü yasalara", "Kıskançlığa"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+          ]
+        },
+        {
+          "id": "felsefe.1.1.3",
+          "ad": "Görünüş ve gerçek: Platon'un mağarası",
+          "onKosul": ["felsefe.1.1.2"],
+          "kazanim": ["FEL.10.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k6"],
+          "ozet": "Platon'a göre duyularla gördüğümüz dünya gölgelerden ibarettir; gerçek varlık akılla kavranan idealardır. Mağara alegorisi bu ayrımı bir hikâyeyle anlatır.",
+          "metin": [
+            "Platon (MÖ 428-348) şunu sorar: Sürekli değişen duyulur dünya karşısında kalıcı ve yetkin bilginin kaynağı nedir?",
+            "Cevabı: Duyu dünyası gölgelerden ibarettir; gerçek varlık akılla kavranan tümel idealardır. Ruh ideaları önceden görmüştür; bu yüzden öğrenmek hatırlamaktır (anamnesis).",
+            "Mağara alegorisi: Zincirli mahkûmlar yalnız duvardaki gölgeleri görür. İçlerinden biri dışarı çıkar, güneşi ve asıl nesneleri görür; geri dönünce ötekiler onu deli sanır.",
+            "Alegorideki ayrım: görünüşler dünyası (doxa) ile gerçeklik dünyası (episteme, idealar). Kaynağın yorumunda güneş İyilik İdeası'dır; mağaradan kurtuluş felsefi eğitimdir."
+          ],
+          "not": "Kaynak doxa'yı «fenomen» ile eşitliyor (satır 77); bu, ileride Kant'ın fenomen kavramıyla karışabilir. Derste «fenomen» sözcüğü kullanılmadı.",
+          "alistirmalar": [
+            { "id": "felsefe.1.1.3.a1", "tur": "secmeli", "soru": "Mağara alegorisinde duvardaki gölgeler neyi temsil eder?", "sec": ["İdeaları", "Felsefi eğitimi", "Duyularla algılanan görünüşler dünyasını", "İyilik İdeası'nı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+            { "id": "felsefe.1.1.3.a2", "tur": "secmeli", "soru": "Platon'a göre «öğrenmek hatırlamaktır» (anamnesis) denmesinin gerekçesi nedir?", "sec": ["Bilginin deneyimle biriktirilmesi", "Ruhun ideaları önceden görmüş olması", "Dilin kuşaktan kuşağa aktarılması", "Duyuların hiç yanılmaması"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "felsefe.1.2",
+      "ad": "Kavram ve tanım",
+      "onKosul": ["felsefe.1.1"],
+      "kazanim": ["FEL.10.2.1", "FEL.10.2.2"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "felsefe.1.2.k1", "tur": "secmeli", "soru": "«İki kavramı birbirine bağlar ve doğru ya da yanlış olabilir.» Bu açıklama hangisine aittir?", "sec": ["Kavrama", "Tümele", "Önermeye", "Tanıma"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+          { "id": "felsefe.1.2.k2", "tur": "secmeli", "soru": "Kaynaktaki örneğe göre «gülmek» insan için hangi tümeldir?", "sec": ["Özgü (hassa)", "Cins", "Ayrım (fasıl)", "Genel ilinti"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] },
+          { "id": "felsefe.1.2.k3", "tur": "secmeli", "soru": "Yakın cins ile yakın ayrımı birleştiren tanımın adı nedir?", "sec": ["Eksik betimsel tanım (resm-i nâkıs)", "Tam betimsel tanım (resm-i tâm)", "Eksik özsel tanım (hadd-i nâkıs)", "Tam özsel tanım (hadd-i tâm)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k16"] },
+          { "id": "felsefe.1.2.k4", "tur": "secmeli", "soru": "«Kuş, uçan hayvandır» tanımına yöneltilebilecek en güçlü itiraz hangisidir?", "sec": ["Kısır döngüye düşüyor", "Uçamayan kuşları dışarıda bırakıyor, uçan başka hayvanları içeri alıyor", "Tanımlanandan daha kapalı", "Hiç cins içermiyor"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k16"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "felsefe.1.2.1",
+          "ad": "Kavram ve önerme",
+          "onKosul": [],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14"],
+          "ozet": "Klasik mantık iki parçaya ayrılır: kavramlar (tek başına doğru ya da yanlış olmayan zihinsel birimler) ve önermeler (iki kavramı bağlayan, doğru ya da yanlış olabilen yargılar).",
+          "metin": [
+            "Kaynağa göre mantık iki ana bölüme ayrılır: tasavvurat (kavramlar) ve tasdikat (hükümler, önermeler).",
+            "Kavram, hüküm içermeyen yalın zihinsel birimdir: «insan», «cesaret», «üçgen». Tek başına bir kavram doğru ya da yanlış olmaz.",
+            "Önerme ise iki kavramı birbirine bağlayan ve doğruluk değeri taşıyan yargıdır: «Bütün insanlar ölümlüdür.» Önermelerden yeni bir yargıya varılan akıl yürütmeye kaynak kıyas der; kıyas bir sonraki aşamanın konusudur."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.1.2.1.a1", "tur": "secmeli", "soru": "Aşağıdakilerden hangisi bir önermedir?", "sec": ["Cesaret", "Üçgen", "Düşünen canlı", "Bütün insanlar ölümlüdür."], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "felsefe.1.2.1.a2", "tur": "secmeli", "soru": "Kavram ile önerme arasındaki fark nedir?", "sec": ["Kavram doğru ya da yanlış olabilir, önerme olamaz", "Önerme doğruluk değeri taşır, kavram tek başına taşımaz", "İkisi aynı şeyin iki adıdır", "Kavram yalnız mantıkta, önerme yalnız ahlakta kullanılır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] }
+          ]
+        },
+        {
+          "id": "felsefe.1.2.2",
+          "ad": "Beş tümel: cins, tür, ayrım, özgü, ilinti",
+          "onKosul": ["felsefe.1.2.1"],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k15"],
+          "ozet": "Porfirios'un İsagoci'sinden gelen beş tümel, bir şeyin ne olduğunu söylerken kullandığımız beş kavram türüdür. Üçü özseldir (cins, tür, ayrım), ikisi ilintiseldir (özgü, genel ilinti).",
+          "metin": [
+            "Kaynak beş tümeli klasik mantığın giriş kapısı sayar; kökeni Porfirios'un İsagoci adlı eseridir.",
+            "Özsel üç tümel. Cins: farklı türlere «Bu nedir?» diye sorulunca verilen geniş cevap (kaynağın örneğinde insan ve kartal için «canlı»). Tür: aynı cinsten bireylere «Bu nedir?» diye sorulunca verilen cevap (Ahmet ve Ayşe için «insan»). Ayrım (fasıl): bir türü aynı cinsin öteki türlerinden ayıran özsel nitelik (insan için «düşünen»).",
+            "İlintisel iki tümel. Özgü (hassa): yalnız o türe ait olan ama özünü oluşturmayan nitelik (insan için «gülmek», «yazı yazmak»). Genel ilinti (araz-ı âm): hem o türde hem başka türlerde bulunabilen nitelik («uyumak», «yürümek», «beyaz olmak»)."
+          ],
+          "not": "Kaynak cins için hem «canlı» (tablo) hem «hayvan / canlı» (şema) diyor ve tam tanım örneğinde insanı «düşünen canlı» diye tanımlıyor. Klasik metinlerde insanın yakın cinsi genellikle «hayvan» olarak verilir; bu yüzden alıştırmalar yakın cinsin adını sormuyor. Sahip birincil kaynakla denetlemeli.",
+          "alistirmalar": [
+            { "id": "felsefe.1.2.2.a1", "tur": "secmeli", "soru": "Kaynaktaki örneğe göre «uyumak» insan için hangi tümeldir?", "sec": ["Ayrım (fasıl)", "Özgü (hassa)", "Genel ilinti (araz-ı âm)", "Tür"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] },
+            { "id": "felsefe.1.2.2.a2", "tur": "secmeli", "soru": "Bir türü aynı cinsin öteki türlerinden ayıran özsel niteliğe ne denir?", "sec": ["Ayrım (fasıl)", "Genel ilinti", "Özgü", "Cins"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] }
+          ]
+        },
+        {
+          "id": "felsefe.1.2.3",
+          "ad": "İyi bir tanım nasıl kurulur?",
+          "onKosul": ["felsefe.1.2.2"],
+          "kazanim": ["FEL.10.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k16", "k7"],
+          "ozet": "En eksiksiz tanım yakın cins ile ayrımı birleştirir. İyi bir tanım kapsadığı her şeyi alır, kapsamadığını dışarıda bırakır, tanımladığından daha kapalı olmaz ve kısır döngüye düşmez.",
+          "metin": [
+            "Kaynak dört tanım düzeyi sayar. En eksiksizi tam özsel tanımdır (hadd-i tâm): yakın cins + yakın ayrım. Kaynağın örneği: «İnsan düşünen canlıdır.»",
+            "Öteki üçü: eksik özsel tanım (hadd-i nâkıs) uzak cins + ayrım ya da yalnız ayrım («İnsan düşünendir»); tam betimsel tanım (resm-i tâm) yakın cins + özgü («İnsan gülen canlıdır»); eksik betimsel tanım (resm-i nâkıs) uzak cins + özgü ya da özgü + genel ilinti.",
+            "Tanımın üç kuralı: (1) Kapsamına giren bütün bireyleri içine almalı, girmeyen hiçbirini içeri sokmamalı (efradını câmi, ağyarını mâni). (2) Açık olmalı: tanımlanan kavramdan daha kapalı, mecazlı ya da muğlak olamaz. (3) Kısır döngüye (devir) düşmemeli: tanımlanan şey tanımın içinde kullanılamaz. Kaynağın hatalı örneği: «Güneş gündüz doğandır; gündüz güneşin doğduğu zamandır.»",
+            "Sokrates'in karşı örnek adımı (1. ünite) birinci kuralı sınar: tanımın dışarıda bırakması gereken bir durumu içine aldığını ya da alması gerekeni dışarıda bıraktığını gösterir."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.1.2.3.a1", "tur": "secmeli", "soru": "«Kare, dört kenarlı şekildir» tanımı hangi kuralı çiğner?", "sec": ["Kısır döngü yasağını", "Açıklık kuralını", "Kapsadığını alıp kapsamadığını dışarıda bırakma kuralını", "Hiçbirini çiğnemez"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k16"], "cozum": ["Dikdörtgen gibi kare olmayan dört kenarlı şekiller de tanıma giriyor: tanım «ağyarını mâni» değil."] },
+            { "id": "felsefe.1.2.3.a2", "tur": "secmeli", "soru": "«Zaman, saatin ölçtüğü şeydir; saat de zamanı ölçen araçtır.» Bu tanım hangi kuralı çiğner?", "sec": ["Açıklık kuralını", "Kısır döngü yasağını", "Kapsam kuralını", "Hiçbirini çiğnemez"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k16"] },
+            { "id": "felsefe.1.2.3.a3", "tur": "acik", "soru": "Kanıt işi: Bir kavram seç (ör. «arkadaşlık») ve kendi cümlenle tanımla. Sonra tanımını üç kurala göre kendin sına.", "dogru": "Örnek: «Arkadaşlık, iki kişinin karşılık beklemeden birbirinin iyiliğini istediği gönüllü bağdır.» Sınama: Akrabalık dışarıda kalıyor mu (gönüllü)? İş ilişkisi dışarıda kalıyor mu (karşılık beklemeden)? Tanımda «arkadaş» sözcüğü geçmiyor: kısır döngü yok.", "olcut": ["Tanımda bir cins (geniş sınıf) ve bir ayrım var mı?", "Tanıma girmemesi gereken bir örnek içeri giriyor mu, girmesi gereken dışarıda kalıyor mu?", "Tanımlanan sözcük tanımın içinde geçiyor mu?", "Tanım, tanımladığı kavramdan daha kapalı mı?"], "durum": "taslak", "yazan": "model", "kaynak": ["k16"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "felsefe.1.3",
+      "ad": "Felsefenin üç temel alanı",
+      "onKosul": ["felsefe.1.2"],
+      "kazanim": ["FEL.10.3.1", "FEL.10.4.1", "FEL.10.5.1"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "felsefe.1.3.k1", "tur": "secmeli", "soru": "«İnsan her şeyin ölçüsüdür» sözü hangi görüşe aittir?", "sec": ["Rasyonalizm", "Sofistler (görecilik)", "Kritisizm", "Empirizm"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k17"] },
+          { "id": "felsefe.1.3.k2", "tur": "secmeli", "soru": "Kaynağa göre Hume nedenselliği nasıl açıklar?", "sec": ["Aklın doğuştan bildiği zorunlu bir yasa", "İdealar dünyasının bir yansıması", "Zihnin, art arda gelen olaylardan edindiği alışkanlık", "Gözlemle kanıtlanmış zorunlu bir bağ"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+          { "id": "felsefe.1.3.k3", "tur": "secmeli", "soru": "«Varlık maddeden ibarettir; düşünce ve bilinç de beynin ürünüdür.» Bu görüş hangisidir?", "sec": ["İdealizm", "Düalizm", "Oluşçuluk", "Materyalizm"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k18"] },
+          { "id": "felsefe.1.3.k4", "tur": "secmeli", "soru": "Bir eylemi yalnız sonucuna, yani olabildiğince çok insanı ne kadar mutlu ettiğine bakarak değerlendiren görüş hangisidir?", "sec": ["Faydacılık (utilitarizm)", "Kant'ın ödev ahlakı", "Aristoteles'in altın ortası", "Sofistlerin göreciliği"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k19"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "felsefe.1.3.1",
+          "ad": "Bilgi felsefesi: Bilgi nereden gelir?",
+          "onKosul": [],
+          "kazanim": ["FEL.10.4.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k17", "k10", "k11", "k12", "k13"],
+          "ozet": "Bilgi felsefesi (epistemoloji) doğru bilginin olup olmadığını ve nereden geldiğini sorar. Akılcılar akla, deneyciler deneyime dayanır; Kant ikisini uzlaştırır.",
+          "metin": [
+            "Kaynaktaki bilgi felsefesi akımları aynı soruya farklı cevap verir: Doğru bilgi var mı, varsa nereden gelir?",
+            "Sofistler (Protagoras, Gorgias): «İnsan her şeyin ölçüsüdür.» Algılar kişiden kişiye değişir; herkes için geçerli mutlak doğru bilgi yoktur (görecilik).",
+            "Rasyonalizm (akılcılık): Doğru bilgi akılda doğuştan vardır; duyular yanıltıcıdır, kesin bilgiye akıl ve mantık kurallarıyla ulaşılır. Descartes her şeyden şüphe edebileceğini, ama şüphe ederken düşündüğünden, yani düşünen bir ben olarak var olduğundan şüphe edemeyeceğini söyler.",
+            "Empirizm (deneycilik): Zihin doğuştan boş bir levhadır (tabula rasa, Locke); bütün bilgi sonradan duyu ve deneyimle kazanılır. Hume'a göre iki olayın art arda gelmesi zorunlu bir bağ kanıtlamaz; nedensellik zihnin alışkanlığıdır.",
+            "Kritisizm (eleştiricilik, Kant): İki görüşü uzlaştırır. Bilgi duyumlarla başlar, akıldaki kategorilerle işlenir. Kaynaktaki sözle: «Görüsüz kavramlar boş, kavramsız görüler kördür.»"
+          ],
+          "not": "Kaynak rasyonalizmi «doğuştan (a priori)» diye tanımlıyor; a priori ile doğuştan aynı kavram değildir. Kant'ın sözü kaynakta «Görüsüz kavramlar boş» diye geçiyor; birincil metinle karşılaştırılmadı. Kaynak rasyonalistler arasında Sokrates ve Aristoteles'i de sayıyor; bu ders o listeyi kullanmadı.",
+          "alistirmalar": [
+            { "id": "felsefe.1.3.1.a1", "tur": "secmeli", "soru": "«Zihin doğuştan boş bir levhadır» görüşü hangi akıma aittir?", "sec": ["Rasyonalizm", "Kritisizm", "Sofistler", "Empirizm"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k17", "k11"] },
+            { "id": "felsefe.1.3.1.a2", "tur": "secmeli", "soru": "Kant'ın bilgi görüşü kaynakta nasıl özetlenir?", "sec": ["Bilgi yalnız akıldan gelir", "Bilgi duyumlarla başlar, akıldaki kategorilerle işlenir", "Bilgi yalnız deneyimden gelir", "Mutlak doğru bilgi yoktur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k17", "k13"] }
+          ]
+        },
+        {
+          "id": "felsefe.1.3.2",
+          "ad": "Varlık felsefesi: Gerçekte ne var?",
+          "onKosul": ["felsefe.1.3.1"],
+          "kazanim": ["FEL.10.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k18", "k8"],
+          "ozet": "Varlık felsefesi (ontoloji) varlığın neden oluştuğunu sorar. İdealistler fikre, materyalistler maddeye dayanır; düalistler iki ayrı töz görür; oluşçular her şeyin değiştiğini söyler.",
+          "metin": [
+            "Kaynak varlık felsefesini (ontoloji) dört temel cevapla anlatır.",
+            "Oluşçuluk (Herakleitos): Evrende durağan hiçbir şey yoktur; her şey sürekli akış ve değişim hâlindedir. «Aynı nehirde iki kez yıkanılmaz.» Kaynağa göre bu akış kör bir kaos değil, logos'a (evrensel ölçü ve akıl) göre gerçekleşir.",
+            "İdealizm: Varlığın ana maddesi ruh, düşünce, akıl ya da ideadır; maddi dünya ideanın bir gölgesi ya da yansımasıdır. Platon'un mağarasını hatırla.",
+            "Materyalizm (Demokritos, Hobbes, Marx): Varlık maddeden ibarettir; düşünce ve bilinç maddenin, beynin ürünüdür.",
+            "Düalizm (Descartes): Varlık birbirine indirgenemeyen iki ayrı tözden oluşur: düşünen töz (ruh) ve yer kaplayan töz (madde)."
+          ],
+          "not": "Kaynak idealizm altında Aristoteles'i de sayıyor (AYS atlası satır 56); aynı derlemenin filozof tablosu ise Aristoteles'i «klasik gerçekçilik» diye anıyor ve formun nesnelerin içinde olduğunu söylüyor (filozoflar_akimlar satır 20). Bu çelişki çözülmeden Aristoteles'in akımı sorulmadı. Materyalizm satırında yazım bozukluğu var («maddenin beynin bir ürünüdür», satır 61).",
+          "alistirmalar": [
+            { "id": "felsefe.1.3.2.a1", "tur": "secmeli", "soru": "«Aynı nehirde iki kez yıkanılmaz» sözü hangi görüşü anlatır?", "sec": ["Materyalizm", "Düalizm", "Oluşçuluk", "İdealizm"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k18"] },
+            { "id": "felsefe.1.3.2.a2", "tur": "secmeli", "soru": "Descartes'ın düalizmine göre varlık neden oluşur?", "sec": ["Birbirine indirgenemeyen iki tözden: düşünen töz ve yer kaplayan töz", "Yalnız maddeden", "Yalnız ideadan", "Sürekli değişen tek bir akıştan"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k18"] }
+          ]
+        },
+        {
+          "id": "felsefe.1.3.3",
+          "ad": "Ahlak felsefesi: Ne yapmalıyım?",
+          "onKosul": ["felsefe.1.3.2"],
+          "kazanim": ["FEL.10.5.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k19", "k9", "k13"],
+          "ozet": "Ahlak felsefesi (etik) bir eylemi neyin iyi yaptığını sorar. Kant niyete ve ödeve, faydacılar sonuca, Aristoteles iki aşırılık arasındaki ölçüye bakar.",
+          "metin": [
+            "Kant'ın ödev ahlakı: Bir eylemin ahlaki değerini sonucu ya da getireceği çıkar değil, arkasındaki iyi niyet ve ödev bilinci belirler; çıkar için yapılan iyilik ahlaki değildir. Koşulsuz buyruk (kategorik imperatif): Eyleminin ilkesi evrensel bir yasa olabilmelidir.",
+            "Faydacılık (utilitarizm; Bentham, Mill): Olabildiğince çok insan için en yüksek mutluluğu sağlayan eylem ahlakidir. Bakılan şey sonuçtur.",
+            "Aristoteles'in altın ortası: Erdem iki aşırı uç arasındaki dengeli orta yoldur. Korkaklık (eksiklik) ile delice atılganlık (aşırılık) arasındaki orta cesarettir; cimrilik ile savurganlık arasındaki orta cömertliktir."
+          ],
+          "not": "Aynı kaynak, bilgi felsefesindeki pragmatizmi de «faydacılık» diye çeviriyor (satır 42); ahlaktaki faydacılıkla (utilitarizm) karışabilir. Bu derste «faydacılık» yalnız utilitarizm anlamında kullanıldı.",
+          "alistirmalar": [
+            { "id": "felsefe.1.3.3.a1", "tur": "secmeli", "soru": "Bir kişi yalnız övgü almak için yardım ediyor. Kant'a göre bu eylem için ne söylenir?", "sec": ["Sonucu iyi olduğu için ahlakidir", "Altın orta olduğu için erdemlidir", "Çok kişiyi mutlu ettiği için ahlakidir", "Çıkar için yapıldığından ahlaki değeri yoktur"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k19"] },
+            { "id": "felsefe.1.3.3.a2", "tur": "secmeli", "soru": "Aristoteles'e göre cimrilik ile savurganlık arasındaki erdem hangisidir?", "sec": ["Cesaret", "Cömertlik", "Ölçülülük", "Adalet"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k19"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
