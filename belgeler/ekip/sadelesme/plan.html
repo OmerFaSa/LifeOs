@@ -108,7 +108,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 <div class="wrap">
 
 <header style="display:flex;flex-direction:column;gap:14px">
-  <span class="tag">Sürüm 4 · 12 Kasım 2026 · Faz 0 envanteri bitti, uygulama kodunda değişiklik yok</span>
+  <span class="tag">Sürüm 4.1 · 12 Kasım 2026 · Faz 0 envanteri bitti, üç karar verildi, uygulama kodunda değişiklik yok</span>
   <h1>LifeOS Sadeleşme Planı</h1>
   <p class="lede">Karmaşıklığın kaynağı ekran düzeni değil, yapının kendisi. LifeOS bugün tek bir kişi için dört ayrı ürün olarak kurulu: üç bağımsız uygulama ve yanlarında bir merkez. Yazında istediğin her şey (tam ekran, tek not defteri, sistemi tanıyan King, sade ayarlar, tek cihaz yolu) aynı kararı gerektiriyor: <b>tek kişi, tek sistem, tek veri.</b> Bu belge o geçişin altyapı planıdır.</p>
   <nav class="toc" aria-label="İçindekiler">
@@ -132,7 +132,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
     <tr><td>Not ve tekrar motorları</td><td>A6</td><td>Opus ajanı</td><td><code>not-ve-tekrar.md</code></td><td class="to">Bitti</td></tr>
   </table></div>
   <h3>Depo zemini: ilk sonuç</h3>
-  <p>Durum beklediğimden iyi. 92 yerel dalın 84'ünün bütün kayıtları ana dalda; silinmeleri kayıp doğurmaz. Yalnız 8 dal ana dala girmemiş toplam 17 kayıt taşıyor. 17 çalışma kopyasından biri dışında hiçbirinde ana dalda olmayan kayıt yok. Çalışan kopya (LifeOS-Sistem) güncel ve temiz. Asıl dikkat isteyen yer ana kopya: 36 kayıt geride, 22 dosyada bitmemiş değişiklik ve kayda girmemiş veri klasörleri var. Onayınla yapılanlar: ana kopyanın bitmemiş işi yerel <code>yedek/ana-kopya-20261112</code> dalına alındı, ana kopya uzak depoyla eşitlendi, birleşmiş 75 dal silindi (listesi <code>silinen-dallar-20261112.txt</code>). Açık kalanlar: 8 birleşmemiş dal için karar ve canlı çalışma kopyalarının kapatılması.</p>
+  <p>Durum beklediğimden iyi. 92 yerel dalın 84'ünün bütün kayıtları ana dalda; silinmeleri kayıp doğurmaz. Yalnız 8 dal ana dala girmemiş toplam 17 kayıt taşıyor. 17 çalışma kopyasından biri dışında hiçbirinde ana dalda olmayan kayıt yok. Çalışan kopya (LifeOS-Sistem) güncel ve temiz. Asıl dikkat isteyen yer ana kopya: 36 kayıt geride, 22 dosyada bitmemiş değişiklik ve kayda girmemiş veri klasörleri var. Onayınla yapılanlar: ana kopyanın bitmemiş işi yerel <code>yedek/ana-kopya-20261112</code> dalına alındı, ana kopya uzak depoyla eşitlendi, birleşmiş 75 dal silindi (listesi <code>silinen-dallar-20261112.txt</code>). Sonra onayınla 8 birleşmemiş dal <code>arsiv/&lt;ad&gt;</code> etiketiyle saklanıp silindi; ana dala girmiş 9 çalışma kopyası kapatıldı (görmezden gelinen deneme verileri yedekte). Kalan kopyalar: ana kopya, sadeleşme, King 5 ve dört ofis kopyası.</p>
 </section>
 
 <section id="envanter">
@@ -552,16 +552,16 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 </section>
 
 <section id="kararlar">
-  <div class="head"><span class="tag">11 · Senden beklediğim</span><h2>On altı karar; ilki ötekilerin hepsini belirler</h2></div>
-  <p>İlk sekizi plandan, son sekizi envanterden geldi. Envanterin kararlara eklediği alt sorular aşağıdaki tabloda.</p>
+  <div class="head"><span class="tag">11 · Senden beklediğim</span><h2>On altı karar; üçü verildi</h2></div>
+  <p>İlk sekizi plandan, son sekizi envanterden geldi. 12 Kasım'da 1, 2 ve 7 verildi: tek sistem, yeni kabukla kademeli geçiş, pilot Felsefe. Envanterin kararlara eklediği alt sorular aşağıdaki tabloda.</p>
   <ol class="plain">
-    <li><b>Tek sisteme geçiş.</b> Dört bağımsız sistem sözleşmesini (AGENTS §0, §1.4) bırakıp tek sistem, tek veri yapısına geçiyor muyuz?</li>
-    <li><b>Geçiş yolu.</b> Yeni kabuk ve kademeli taşıma (önerim) mı?</li>
+    <li><b>Tek sisteme geçiş.</b> Dört bağımsız sistem sözleşmesini (AGENTS §0, §1.4) bırakıp tek sistem, tek veri yapısına geçiyor muyuz? <span class="to">Verildi: evet.</span></li>
+    <li><b>Geçiş yolu.</b> Yeni kabuk ve kademeli taşıma (önerim) mı? <span class="to">Verildi: yeni kabuk, kademeli.</span></li>
     <li><b>Kural metriği.</b> Sekiz kural: onay ya da düzeltme.</li>
     <li><b>King'in yeri.</b> Önce Claude uygulamasında MCP (önerim), ya da doğrudan LifeOS içinde API.</li>
     <li><b>Yan sistemler.</b> Rütbe ve rozetler, modül ofislerindeki ajanlar, müzik ve radyo, minikler gibi öğrenmeye doğrudan hizmet etmeyen yapılar: envanterde tek tek mi karar verelim, yoksa hepsi baştan arşive mi?</li>
     <li><b>Tasarım.</b> Karşılama A mı B mi; gezinme A ile B (önerim) ya da C.</li>
-    <li><b>Pilot alan.</b> Felsefe (önerim; envanter de bunu gösteriyor) mi, Dil mi?</li>
+    <li><b>Pilot alan.</b> Felsefe (önerim; envanter de bunu gösteriyor) mi, Dil mi? <span class="to">Verildi: Felsefe.</span></li>
     <li><b>Cihaz yolu.</b> Ev ağı sertifikası ve tek dosya yolunu emekliye ayırıp yalnız Tailscale ile devam (önerim) mı?</li>
   </ol>
   <h3>Envanterden çıkan yeni kararlar</h3>
