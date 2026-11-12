@@ -115,7 +115,7 @@
   }
 
   /* Paketi hazırlar ve yollar. o: { kaynak, cihaz, depo?, jeton?, adres?, ls?, idb?, subtle?, fetch?, parca? }.
-     Döner: { paket, profil, anahtar, medya, bayt, bekleyen, atlanan, adlar }. */
+     Döner: { paket, profil, kayit, anahtar, medya, bayt, bekleyen, atlanan, adlar }. */
   async function yolla(o){
     o = Object.assign({
       ls:window.localStorage, idb:window.indexedDB, fetch:window.fetch && window.fetch.bind(window),
@@ -125,6 +125,7 @@
     const t = topla(o.ls, o.depo);
     const bas = { lifeos_goc:1, kaynak:o.kaynak, cihaz:o.cihaz };
     const makbuz = { paket:0, profil:Object.keys(t.profiller).length, anahtar:Object.keys(t.anahtarlar).length,
+      kayit:Object.keys(t.profiller).reduce((n, p) => n + Object.keys(t.profiller[p].data).length, 0),
       medya:0, bayt:0, bekleyen:t.bekleyen, atlanan:t.atlanan, adlar:[] };
     let cur = Object.assign({ parca:1, profiller:t.profiller, anahtarlar:t.anahtarlar, bekleyen:t.bekleyen,
       atlanan:t.atlanan, medya:[] }, bas), dolu = 0;

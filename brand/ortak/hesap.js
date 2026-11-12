@@ -528,6 +528,11 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.yeni-hesap-acma-kapali':'Yeni hesap açma kapalı.',
   'ortak.hesap.lifeos-yedek-kodlari':'LifeOS yedek kodları (',
   'ortak.hesap.yedek-alindi':'Yedek alındı',
+  'ortak.hesap.goc-baslik':'Bu cihazdakileri tek depoya taşı',
+  'ortak.hesap.goc-aciklama':'Fotoğraflar, açılmamış profiller ve bekleyen değişiklikler dahil. Hiçbir şey silinmez.',
+  'ortak.hesap.goc-gonder':'Bilgisayara gönder',
+  'ortak.hesap.goc-yeniden':'Yeniden gönder',
+  'ortak.hesap.goc-gonderildi':'Gönderildi',
   'ortak.hesap.i-kinci-yer-kapandi-yedekler':'İkinci yer kapandı; yedekler yalnız bu bilgisayarda.',
   'ortak.hesap.abonelik-acik-adresi-takvim':'Abonelik açık. Adresi takvim uygulamana ekle.',
   'ortak.hesap.adres-yenilendi-eskisi-artik':'Adres yenilendi; eskisi artık çalışmaz.',
@@ -2104,6 +2109,22 @@ window.LIFEOS.HESAP = (function(){
     if(!o || base === null){ const h = new Error('Önce giriş yap.'); h.kod = 401; throw h; }
     return istek(base, yol, govde || null, o.j, govde ? 30000 : 15000);
   }
+
+  /* GÖÇ PAKETİ (sadeleşme Faz 1 P2, donmuş modüllere tek istisna): bu kökendeki her şey tek depoya
+     taşınmak üzere PC'ye gider (gocpaket.js toplar; PC'de goc.paket_kaydet saklar). Hiçbir şey silinmez. */
+  async function gocGonder(){
+    const o = oturum(), base = sunucuAdresi(), d = ayar && ayar.depo;
+    if(!o || base === null){ const h = new Error('Önce giriş yap.'); h.kod = 401; throw h; }
+    if(!L.GocPaket) throw new Error('Göç paketi bu sürümde yok; uygulamayı güncelle.');
+    return L.GocPaket.yolla({ kaynak:String((d && d.alan) || '').split('/')[0], cihaz:cihazKimligi(), depo:d,
+      jeton:o.j, adres:base + '/api/hesap/goc-paket' });
+  }
+  function gocMakbuz(v){
+    const say = (n, ad) => Number(n || 0).toLocaleString('tr-TR') + ' ' + ad;
+    const bek = Object.keys(v.bekleyen || {}).reduce((n, k) => n + (v.bekleyen[k] || 0), 0);
+    return yz('ortak.hesap.goc-gonderildi') + ' · ' + say(v.profil, 'profil') + ', ' + say(v.kayit, 'kayıt') + ', '
+      + say(v.anahtar, 'yan kayıt') + ', ' + say(v.medya, 'dosya') + ' · bekleyen ' + bek;
+  }
   async function ben(){
     const v = await api('/api/hesap/ben');
     if(v && v.kullanici) profilYaz(v.kullanici);
@@ -3253,6 +3274,11 @@ window.LIFEOS.HESAP = (function(){
         + ('<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.verimi-indir') + '</b><small>' + yz('ortak.hesap.bilgisayardaki-kopyanin-tama'))
         + (t ? ' · ' + t.n.toLocaleString('tr-TR') + ' kayıt' + (t.b ? ' · ' + boyut(t.b) : '') : '') + (' ' + yz('ortak.hesap.tek-json-dosyasi') + '</small></span>')
         + ('<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="indir">' + yz('ortak.hesap.i-ndir') + '</button></li></ul>')
+        + (admin ? '<ul class="hesap-liste"><li class="hesap-oge">' + ikon('yedek', 'hesap-satir__ikon')
+          + '<span class="hesap-oge__metin"><b>' + yz('ortak.hesap.goc-baslik') + '</b><small>'
+          + kac(m.goc ? gocMakbuz(m.goc) : yz('ortak.hesap.goc-aciklama')) + '</small></span>'
+          + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="goc">'
+          + yz(m.goc ? 'ortak.hesap.goc-yeniden' : 'ortak.hesap.goc-gonder') + '</button></li></ul>' : '')
         + (!m.silOnay
           ? '<ul class="hesap-liste">' + satir({ ad:yz('ortak.hesap.hesabi-sil'), eylem:'sil-ac', sinif:'is-tehlike' }) + '</ul>'
           : ('<div class="hesap-onay"><p><b>' + yz('ortak.hesap.hesabin-kalici-olarak-silini') + '</b> ' + yz('ortak.hesap.geri-alinamaz') + '</p>')
@@ -3893,6 +3919,13 @@ window.LIFEOS.HESAP = (function(){
       merkezIs(async () => {
         const v = await disaAktar();
         return v.ad + ' hazır · ' + v.kayit.toLocaleString('tr-TR') + ' kayıt.';
+      });
+    }else if(ad === 'goc'){
+      is.disabled = true;
+      merkezIs(async () => {
+        const v = await gocGonder();
+        if(merkez) merkez.goc = v;
+        return gocMakbuz(v) + '.';
       });
     }else if(ad === 'sil-ac' || ad === 'sil-vazgec'){
       if(!merkez) return;

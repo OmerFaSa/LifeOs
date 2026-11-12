@@ -1701,6 +1701,25 @@
       expect(c.ls['lifeos.hesap.sahip.spi/ben']).toBe(undefined);              // bağ çözüldü
     }));
 
+    it('verin: göç paketi bu cihazdakileri PC\'ye yollar (sadeleşme P2), makbuz satırda kalır', () => sahneyle(async () => {
+      const { h } = await girisli();
+      const asil = window.LIFEOS.GocPaket, giden = [];
+      window.LIFEOS.GocPaket = { yolla:async o => { giden.push(o);
+        return { paket:1, profil:2, kayit:340, anahtar:41, medya:12, bayt:5, bekleyen:{ 'spi/ben':0 }, atlanan:{ sir:0, ornek:0 } }; } };
+      try{
+        await h.merkezAc('verin');
+        expect(merkez().textContent).toContain('Bu cihazdakileri tek depoya taşı');
+        tikla('[data-hesap="goc"]');
+        await hazir();
+        expect(giden.length).toBe(1);
+        expect(giden[0].adres).toContain('/api/hesap/goc-paket');
+        expect(!!giden[0].jeton).toBe(true);
+        expect(/^(ays|spi|esp)$/.test(giden[0].kaynak)).toBe(true);
+        expect(merkez().textContent).toContain('340 kayıt');
+        expect(merkez().textContent).toContain('Yeniden gönder');
+      }finally{ window.LIFEOS.GocPaket = asil; }
+    }));
+
     it('oturum başka cihazdan kapatıldıysa sayfa kapanır, giriş ekranı gelir', () => sahneyle(async () => {
       const { h, srv } = await girisli();
       Object.keys(srv.jetonlar).forEach(j => { delete srv.jetonlar[j]; });

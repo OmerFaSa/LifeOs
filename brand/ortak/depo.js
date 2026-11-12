@@ -544,6 +544,8 @@ LIFEOS.Depo = Object.freeze({ kur(o){
   return {
     init, get, set, remove, list, hepsi, uzaktan,
     alan:o.alan + '/' + PROFILE,
+    /* Göç paketi (gocpaket.js) bütün profillerin anahtarını bu kalıptan bulur. */
+    yerelAnahtar:o.yerelAnahtar, varsayilanProfil:o.varsayilanProfil,
     activeProfileId(){ return PROFILE; },
     set onDegisim(fn){ onDegisim = fn; },
     exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, originSize, localQuota, sizeByCollection,

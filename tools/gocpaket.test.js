@@ -99,7 +99,7 @@ const G = pencere.LIFEOS.GocPaket;
   const m = await G.yolla({ kaynak:'spi', cihaz:'cihazTEL01', depo:SPI, jeton:'j1', ls:sahteLs(ls), idb,
     subtle:globalThis.crypto.subtle, fetch, parca:10 });
   const paketler = giden.map(g => JSON.parse(g.o.body));
-  dogru('makbuz', m.paket === 2 && m.profil === 2 && m.medya === 2 && m.bayt === 31, m);
+  dogru('makbuz', m.paket === 2 && m.profil === 2 && m.kayit === 3 && m.medya === 2 && m.bayt === 31, m);
   dogru('istek başlığı ve adres', giden.every(g => g.adres === '/api/hesap/goc-paket' && g.o.headers['X-LifeOS'] === 'goc'
     && g.o.headers.Authorization === 'Bearer j1'));
   dogru('parça sınırında bölünür, veri ilk pakette', paketler[0].medya.length === 1 && paketler[1].medya.length === 1
