@@ -1,0 +1,289 @@
+{
+  "sema": 1,
+  "alan": "uyku",
+  "id": "uyku.1",
+  "sira": 1,
+  "ad": "Uyku ne işe yarar, ritim nasıl kurulur",
+  "hedef": "Uykunun hangi evrelerden oluştuğunu ve ne işe yaradığını, iç saatin ışıkla nasıl ayarlandığını ve uykuyu koruyan temel alışkanlıkları tanımak.",
+  "onKosul": [],
+  "kanitIsi": "Yedi gün boyunca yatış ve kalkış saatini, son kafein saatini ve sabah ışık alıp almadığını yazdığın bir uyku günlüğü. Sahip değerlendirir; puanlanmaz. Bu bir yaşam kalitesi kaydıdır, teşhis aracı değildir.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "Uyku evreleri ve görevleri", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "1.1. Uyku Evreleri ve Nörofizyolojik Görevleri", "satir": "15-20", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Sirkadiyen saat ve nörokimyasal döngüler", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "1.2. Sirkadiyen Saat ve Nörokimyasal Döngüler", "satir": "22-26", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "Uyku hijyeni protokolü", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "1.3. Kanıta Dayalı Uyku Hijyeni Protokolü", "satir": "28-32", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "90 dakikalık döngüler ve evreler", "tur": "gemini", "yol": "SPI/saglik/uyku_mimarisi_rem_nrem_uyku_apnesi_ve_derin_toparlanma_biyofizigi_atlasi.md", "bolum": "1. Uyku Mimarisi ve 90 Dakikalık Ultradian Döngüler", "satir": "7-21", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "Uyku ataleti", "tur": "gemini", "yol": "SPI/saglik/uyku_mimarisi_rem_nrem_uyku_apnesi_ve_derin_toparlanma_biyofizigi_atlasi.md", "bolum": "3. Uyku Ataleti ve Sabah Kortizol Uyanma Yanıtı", "satir": "34-37", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "SCN ve sabah ışığı", "tur": "gemini", "yol": "SPI/saglik/sirkadiyen_biyoloji_kortizol_melatonin_isik_spektrumu_ve_derin_uyku_mimarisi_atlasi.md", "bolum": "1. Suprakiazmatik Çekirdek ve Moleküler Saat Mekanizması", "satir": "9-26", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "Akşam ışığı ve melatonin", "tur": "gemini", "yol": "SPI/saglik/sirkadiyen_biyoloji_kortizol_melatonin_isik_spektrumu_ve_derin_uyku_mimarisi_atlasi.md", "bolum": "2. Mavi ışık ve 2.1 Akşam Işık Hijyeni Protokolü", "satir": "30-46", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "Derin uyku, glimfatik temizlik ve REM", "tur": "gemini", "yol": "SPI/saglik/sirkadiyen_biyoloji_kortizol_melatonin_isik_spektrumu_ve_derin_uyku_mimarisi_atlasi.md", "bolum": "3. Nöral Uyku Mimarisi ve Glimfatik Beyin Temizliği", "satir": "50-74", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "24 saatlik sirkadiyen rehber", "tur": "gemini", "yol": "SPI/saglik/sirkadiyen_biyoloji_kortizol_melatonin_isik_spektrumu_ve_derin_uyku_mimarisi_atlasi.md", "bolum": "4. 24 Saatlik Sirkadiyen Performans Rehberi", "satir": "78-87", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Uyku hijyeni rehberi (el yazısı taslak veri, 7 kayıt)", "tur": "depo", "yol": "veri/taslak/spi/uyku_hijyeni_rehberi.jsonl", "satir": "1-7", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "SPİ biyobelirteç sözlüğü: uyku süresi satırı", "tur": "depo", "yol": "SPI/src/js/data/biomarkers.js", "satir": "86-90", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "Toparlanma piramidi: uyku satırı", "tur": "gemini", "yol": "SPI/hareket/toparlanma_bilimi_doms_kas_hasari_uyku_masaj_kompresyon_ve_deload_mimarisi_atlasi.md", "bolum": "3. Toparlanma Piramidi", "satir": "72-74", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "uyku.1.k1", "tur": "secmeli", "soru": "Gece yarısından sonra uyanıp «derin uykum hep gecenin başında olur» diyen biri kaynaklara göre neyi doğru söylüyor?", "sec": ["Derin uyku (N3) gecenin ilk yarısında baskındır", "Derin uyku yalnız sabaha karşı görülür", "Gecenin her saatinde evreler eşit dağılır", "Derin uyku yalnız öğle uykusunda olur"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k10"] },
+      { "id": "uyku.1.k2", "tur": "secmeli", "soru": "Akşam 21:00'de parlak tavan ışığı altında telefona bakmak, kaynaklara göre hangi düzeneği en çok bozar?", "sec": ["Adenozinin birikmesini", "Karanlıkta başlayan melatonin salınımını", "Sabah kortizol yanıtını", "Kafeinin yarı ömrünü"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k7"] },
+      { "id": "uyku.1.k3", "tur": "secmeli", "soru": "23:00'te yatmayı planlayan biri kaynaktaki 8-10 saat kuralına göre en geç ne zaman son kahvesini içmeli?", "sec": ["13:00 ile 15:00 arasında", "18:00'de", "20:00'de", "22:00'de"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"] },
+      { "id": "uyku.1.k4", "tur": "secmeli", "soru": "Haftalardır uykuya dalamayan ya da uykuda nefesinin durduğu söylenen biri için bu aşamanın doğru tavsiyesi hangisidir?", "sec": ["Kafeini artırmak", "Alışkanlıkları gözden geçirip bir hekime danışmak", "Uyku evrelerini kendi başına ölçüp teşhis koymak", "Hiçbir şey yapmamak, kendiliğinden geçer"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "uyku.1.1",
+      "ad": "Uyku ne işe yarar?",
+      "onKosul": [],
+      "kazanim": ["Bir gecenin döngülerden ve evrelerden oluştuğunu açıklar.", "Derin uykunun ve REM'in görevlerini ayırt eder."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "uyku.1.1.k1", "tur": "secmeli", "soru": "Kaynaklara göre bir gecede kaç uyku döngüsü tamamlanır?", "sec": ["1-2", "4-6", "10-12", "Döngü yoktur, uyku tek parçadır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k10"] },
+          { "id": "uyku.1.1.k2", "tur": "secmeli", "soru": "Büyüme hormonunun tepe salınımı ve doku onarımı kaynaklarda hangi evreye bağlanır?", "sec": ["N1", "N2", "N3 (derin uyku)", "REM"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"] },
+          { "id": "uyku.1.1.k3", "tur": "secmeli", "soru": "Rüyaların görüldüğü ve iskelet kaslarının geçici olarak gevşek kaldığı evre hangisidir?", "sec": ["REM", "N3", "N1", "Uyku ataleti"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] },
+          { "id": "uyku.1.1.k4", "tur": "secmeli", "soru": "Gecenin toplam uykusunun en büyük payını (kaynağa göre yaklaşık yarısını) hangi evre kaplar?", "sec": ["N1", "N2", "N3", "REM"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "uyku.1.1.1",
+          "ad": "Gece bir döngüler dizisidir",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k10"],
+          "ozet": "Uyku tek parça değildir: yaklaşık 90-110 dakikalık döngüler gece boyunca 4-6 kez tekrarlanır. Her döngüde NREM (N1, N2, N3) ve REM evreleri vardır.",
+          "metin": [
+            "Kaynaklara göre gece uykusu her biri yaklaşık 90-110 dakika süren ardışık döngülerden oluşur; bir gecede 4 ile 6 döngü tamamlanır.",
+            "Her döngüde iki ana tür uyku vardır. NREM üç evreden oluşur: N1 uyanıklıktan uykuya geçiştir, N2 temel hafif uykudur, N3 derin (yavaş dalga) uykudur. REM ise gözlerin hızlı hareket ettiği, rüyaların görüldüğü evredir.",
+            "Döngülerin içeriği gece boyunca değişir: gecenin ilk yarısında derin uyku (N3) baskındır, ikinci yarısında REM uzar.",
+            "Bunun pratik sonucu (modelin bağlantı notu): geceyi erken kısaltan biri daha çok derin uykudan, sabahı kısaltan biri daha çok REM'den kaybeder. Hangi evre olursa olsun, kısalan uyku bir şeyi eksik bırakır."
+          ],
+          "alistirmalar": [
+            { "id": "uyku.1.1.1.a1", "tur": "secmeli", "soru": "Kaynaklara göre bir uyku döngüsü yaklaşık ne kadar sürer?", "sec": ["10-20 dakika", "90-110 dakika", "3-4 saat", "Tam gece"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k10"] },
+            { "id": "uyku.1.1.1.a2", "tur": "secmeli", "soru": "Gecenin ikinci yarısında hangi evre uzar?", "sec": ["N1", "N3", "REM", "Hiçbiri, döngüler aynıdır"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "uyku.1.1.1.a3", "tur": "acik", "soru": "Dün gece yaklaşık kaç saat uyudun? Kaynaktaki döngü süresine göre bu kaç döngüye denk gelir? Hesabını yaz.", "dogru": "Örnek: 7,5 saat = 450 dakika; 90 dakikalık döngüyle 5, 110 dakikalık döngüyle 4 döngü civarı.", "olcut": ["Saati dakikaya çevirdi", "90 ve 110 dakikalık uçlarla ayrı ayrı böldü", "Sonucu bir aralık olarak verdi"], "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+          ]
+        },
+        {
+          "id": "uyku.1.1.2",
+          "ad": "Derin uyku: bedenin onarım vardiyası",
+          "onKosul": ["uyku.1.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k4", "k8"],
+          "ozet": "N3, yavaş ve yüksek dalgalı derin uykudur. Kaynaklar büyüme hormonu salınımını, kas onarımını ve beyindeki sıvı akışıyla yapılan temizliği bu evreye bağlar.",
+          "metin": [
+            "N3, beyin dalgalarının en yavaş ve en yüksek olduğu evredir; bu yüzden «yavaş dalga uykusu» da denir. Kaynağa göre toplam uykunun yaklaşık %15-25'idir.",
+            "Kaynaklar bu evrede büyüme hormonunun tepe salınımını, kas proteini sentezini ve doku tamirini anlatır. Yani gün içinde yorulan beden, onarımının önemli bir kısmını derin uykuda yapar.",
+            "Beyin için de bir iş görür: kaynaklara göre derin uykuda beyin hücreleri arasındaki alan genişler, beyin-omurilik sıvısı dokunun içinden akar ve gün boyu biriken bazı proteinleri (beta-amiloid, tau) yıkar. Buna glimfatik temizlik denir.",
+            "Hatırlatma (model): bu ders bir hastalığı açıklamaz ve uykuyla bir hastalık arasında neden-sonuç kurmaz. Amacı, derin uykunun neden korunmaya değer olduğunu göstermektir."
+          ],
+          "not": "Kaynaklar glimfatik temizliği farklı anlatır: biri «astrositler %60 büzülür» (sirkadiyen atlas satır 58), öteki «interstisyel hacim %60 artar» (uyku_sirkadiyen_ve_tahlil satır 19) der; delta dalgası aralığı da 0.5-2.0 Hz ve 0.5-4 Hz diye iki türlü yazılı. Sayılar alınmadı. «Yetersiz derin uyku Alzheimer'ın temelini atar» (satır 66) bir hastalık iddiası olduğu için alınmadı; «GH'nin %70'i bu evrede salgılanır» (satır 54) doğrulanamadı, alınmadı.",
+          "alistirmalar": [
+            { "id": "uyku.1.1.2.a1", "tur": "secmeli", "soru": "Derin uykuya neden «yavaş dalga uykusu» da denir?", "sec": ["Kalp çok yavaş attığı için", "Beyin dalgaları en yavaş ve en yüksek olduğu için", "Uykuya yavaş dalındığı için", "Gözler yavaş hareket ettiği için"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"] },
+            { "id": "uyku.1.1.2.a2", "tur": "secmeli", "soru": "Kaynaklarda derin uykuda beyindeki sıvı akışıyla yapılan temizliğe ne ad verilir?", "sec": ["Glimfatik temizlik", "Uyku ataleti", "Melatonin salınımı", "Kortizol yanıtı"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k8"] }
+          ]
+        },
+        {
+          "id": "uyku.1.1.3",
+          "ad": "N2 ve REM: öğrenme ve duygu",
+          "onKosul": ["uyku.1.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k4", "k8"],
+          "ozet": "N2 gecenin en büyük parçasıdır ve kaynaklar onu motor öğrenmeyle ilişkilendirir. REM rüyaların evresidir; kaslar gevşek kalır, beyin duygusal işlemleme ve hafıza işi yapar.",
+          "metin": [
+            "N2, kaynaklara göre toplam uykunun yaklaşık %45-55'ini kaplar; gecenin en büyük parçasıdır. Bu evrede «uyku iğcikleri» denen kısa dalga patlamaları görülür; talamus dışarıdan gelen uyaranları süzer ve kaynaklar motor hafızanın pekişmesinin burada başladığını yazar.",
+            "REM (hızlı göz hareketi) uykusu toplam uykunun yaklaşık %20-25'idir. Beyin dalgaları uyanıklığa benzer, solunum ve nabız düzensizleşir, rüyalar görülür. Bu sırada iskelet kasları geçici olarak gevşek kalır (kas atonisi); kaynaklar bunu, rüyanın bedene aktarılmamasıyla açıklar.",
+            "Kaynaklar REM'e duygusal işlemleme ve öğrenilen becerilerin kalıcı hafızaya yazılması görevlerini verir.",
+            "Bağlantı (model): yeni bir şey öğrendiğin günün gecesi, hem N2 hem REM o öğrenmenin bir parçasıdır. Bu yüzden «uykudan çalarak çalışmak» öğrendiğinin bir kısmını riske atar."
+          ],
+          "not": "Kaynaktaki «REM bir önceki günün travmatik duygusal yükünü nötralize eder ('gece terapisi')» (sirkadiyen atlas satır 74) ifadesi tedavi iması taşıdığı ve abartılı olduğu için alınmadı; yalnız «duygusal işlemleme» kaldı. İğcik frekansı iki kaynakta farklı (11-16 Hz, 12-14 Hz); sayı verilmedi.",
+          "alistirmalar": [
+            { "id": "uyku.1.1.3.a1", "tur": "secmeli", "soru": "Kaynaklarda «uyku iğcikleri» hangi evreyle anılır?", "sec": ["N1", "N2", "N3", "REM"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"] },
+            { "id": "uyku.1.1.3.a2", "tur": "secmeli", "soru": "REM sırasında iskelet kaslarının geçici olarak gevşek kalmasına ne denir?", "sec": ["Kas atonisi", "Uyku ataleti", "Hipnagojik seğirme", "K-kompleksi"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4", "k8"] },
+            { "id": "uyku.1.1.3.a3", "tur": "acik", "soru": "Sınavdan önceki gece «uyumayıp çalışacağım» diyen bir arkadaşına bu üniteye dayanarak iki cümlelik bir cevap yaz.", "dogru": "Öğrendiklerin uykuda, özellikle N2 ve REM'de pekişir; uykuyu kısarsan çalıştığının bir kısmını kaybedebilirsin. Gecenin sonunu kısaltmak REM'i, başını kısaltmak derin uykuyu azaltır.", "olcut": ["Uykunun öğrenmeyi pekiştirdiğini söyledi", "N2 ya da REM'i adıyla andı", "Teşhis ya da ilaç önermedi"], "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "uyku.1.2",
+      "ad": "Günlük ritim",
+      "onKosul": ["uyku.1.1"],
+      "kazanim": ["İç saatin ışıkla nasıl ayarlandığını açıklar.", "Melatonin, vücut ısısı ve uyku baskısının gün içindeki seyrini anlatır."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "uyku.1.2.k1", "tur": "secmeli", "soru": "Kaynaklara göre vücudun ana saati nerededir?", "sec": ["Kalpte", "Hipotalamustaki suprakiyazmatik çekirdekte (SCN)", "Karaciğerde", "Kaslarda"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k6"] },
+          { "id": "uyku.1.2.k2", "tur": "secmeli", "soru": "Uyanık geçen her saatle birikip uyku baskısını artıran madde hangisidir?", "sec": ["Melatonin", "Kortizol", "Adenozin", "Kafein"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k10"] },
+          { "id": "uyku.1.2.k3", "tur": "secmeli", "soru": "Kaynağa göre akşam saatlerinde vücut çekirdek sıcaklığı nasıl değişir?", "sec": ["Yükselir", "Düşer", "Hiç değişmez", "Yalnız yemekten sonra değişir"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k10"] },
+          { "id": "uyku.1.2.k4", "tur": "secmeli", "soru": "Kaynağın günlük rehberinde öğleden sonra 14:00-15:00 arası nasıl adlandırılır?", "sec": ["Odaklanma zirvesi", "Sirkadiyen dip", "Melatonin başlangıcı", "Kortizol uyanma yanıtı"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "uyku.1.2.1",
+          "ad": "İç saat ve ışık",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k6"],
+          "ozet": "Hipotalamustaki suprakiyazmatik çekirdek (SCN) vücudun ana saatidir. Saat her gün ışıkla ayarlanır: gözdeki özel hücreler ışığı algılayıp SCN'ye iletir.",
+          "metin": [
+            "Kaynaklara göre beynin hipotalamus bölgesinde, görme sinirlerinin kesiştiği yerin hemen üstünde suprakiyazmatik çekirdek (SCN) denen küçük bir hücre topluluğu vardır. SCN vücuttaki öteki saatlerin «orkestra şefi», yani ana saattir.",
+            "Bu saat kendi başına tam 24 saat işlemez; her gün dışarıdan ayarlanır. En güçlü ayar ışıktır. Gözün ağ tabakasında (retina) melanopsin taşıyan özel hücreler (ipRGC) özellikle mavi ışığı algılar ve sinyali SCN'ye götürür.",
+            "Işığın gücü önemlidir. Kaynağa göre oda içi yapay ışık yaklaşık 300-500 lükstür ve SCN'yi tam uyaramaz; dış ortamın gün ışığı bundan çok daha güçlüdür.",
+            "Kaynak ayrıca camın ışığın bir kısmını kırdığını, bu yüzden sabah ışığının pencere arkasından değil dışarıda alınmasını önerir. Güneşe doğrudan bakılmaz."
+          ],
+          "not": "Kaynaktaki «bulutlu bir günde bile dış ortam en az 10.000 lükstür» (sirkadiyen atlas satır 24) kesin bir alt sınır olarak doğrulanamadı; yalnız «iç mekândan çok daha güçlü» karşılaştırması alındı. «Ana saat 24 saat tam işlemez» cümlesi kaynakta yok; kaynağın «saat kalibrasyonu» anlatımından modelin çıkarımıdır.",
+          "alistirmalar": [
+            { "id": "uyku.1.2.1.a1", "tur": "secmeli", "soru": "Gözde ışığı algılayıp iç saate ileten özel hücrelerin taşıdığı pigment hangisidir?", "sec": ["Melatonin", "Melanopsin", "Adenozin", "Kortizol"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k6"] },
+            { "id": "uyku.1.2.1.a2", "tur": "secmeli", "soru": "Kaynağa göre sabah ışığını en iyi nerede almalısın?", "sec": ["Pencere camının arkasında", "Dışarıda, açık havada", "Ekran ışığında", "Karanlık odada"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] }
+          ]
+        },
+        {
+          "id": "uyku.1.2.2",
+          "ad": "Akşam: melatonin ve vücut ısısı",
+          "onKosul": ["uyku.1.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k7", "k10"],
+          "ozet": "Işık azaldığında epifiz bezi melatonin salgılar; kaynağa göre salınım uykudan yaklaşık 2 saat önce başlar. Akşam vücut çekirdek sıcaklığı da düşer. Akşam parlak ve mavi ışık bu hazırlığı bozar.",
+          "metin": [
+            "Melatonin, epifiz bezinin salgıladığı ve karanlıkta tepe yapan bir hormondur. Kaynağa göre ışık yokluğunda salınır ve salınım uykudan yaklaşık 2 saat önce başlar.",
+            "Mavi ışık melanopsin hücrelerini en güçlü uyaran ışıktır. Kaynaklara göre güneş battıktan sonra telefon, tablet ve tavan ışıkları iç saate «hâlâ gündüz» sinyali verir ve melatonin salınımını baskılar.",
+            "Akşamın ikinci işareti ısıdır: kaynağa göre akşam el ve ayak damarları genişler, ısı dışarı verilir ve vücudun çekirdek sıcaklığı düşer. En düşük sıcaklık uyanıştan birkaç saat öncedir.",
+            "Sonuç (model): akşam ışığı azaltmak ve vücudun serinlemesine izin vermek, iç saatin zaten yaptığı hazırlığa yardım etmektir."
+          ],
+          "not": "Kaynaklar sayılarda ayrışıyor: çekirdek sıcaklık düşüşü bir kaynakta 0.5-1.0°C (uyku_sirkadiyen_ve_tahlil satır 26), ötekinde 1-1.5°C (uyku_hijyeni_rehberi satır 5); bu yüzden sayı verilmedi. «Melatonin sentezi %80'e kadar bloke olur» (sirkadiyen atlas satır 36) doğrulanamadı; başlıktaki «mavi ışık toksisitesi ve melatonin felci» abartılı dil, alınmadı.",
+          "alistirmalar": [
+            { "id": "uyku.1.2.2.a1", "tur": "secmeli", "soru": "Melatonin hangi koşulda salınır?", "sec": ["Parlak ışıkta", "Işık azaldığında, karanlıkta", "Yemekten hemen sonra", "Egzersiz sırasında"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k10"] },
+            { "id": "uyku.1.2.2.a2", "tur": "secmeli", "soru": "Akşam el ve ayak damarlarının genişlemesi neye yardım eder?", "sec": ["Çekirdek sıcaklığın düşmesine", "Kortizolun yükselmesine", "Adenozinin birikmesine", "Kafeinin atılmasına"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        },
+        {
+          "id": "uyku.1.2.3",
+          "ad": "Uyku baskısı, kafein ve gün içindeki dalga",
+          "onKosul": ["uyku.1.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k5", "k9", "k10"],
+          "ozet": "Uyanık geçen her saat beyinde adenozin biriktirir ve uyku baskısı artar. Kafein adenozinin bağlandığı yeri tutar; yorgunluğu gidermez, hissedilmesini engeller. Gün içinde dikkat dalgalanır; uyanış sonrası sersemlik ve öğleden sonra dip olağandır.",
+          "metin": [
+            "Kaynaklara göre uyanık kalınan sürede beyinde adenozin birikir ve reseptörlerine bağlanarak «uyku baskısı» oluşturur. Uyku sırasında adenozin temizlenir.",
+            "Kafein bu reseptörlere adenozinin yerine bağlanır. Kaynağın ifadesiyle kafein yorgunluğu gidermez, yalnızca algılanmasını engeller. Kaynaklara göre kafeinin yarı ömrü 5-7 saattir: öğleden sonra içilen bir kahvenin yarısı gece hâlâ kandadır (model hesabı).",
+            "Kaynağın günlük rehberi gün içindeki dalgayı şöyle çizer: sabah uyanma yanıtı, sabah geç saatlerde odaklanma zirvesi, 14:00-15:00 arasında bir dip, akşam melatonin başlangıcı. Öğleden sonraki dipte kaynak hafif yürüyüş ya da yaklaşık 20 dakikalık bir şekerleme önerir.",
+            "Uyanıştan hemen sonraki 15-30 dakikada hissedilen sersemliğe uyku ataleti denir. Kaynağa göre derin uykunun ortasında birden uyanılırsa daha uzun sürebilir."
+          ],
+          "not": "Kaynaktaki saat aralıkları (06:30-07:30, 09:00-11:30 vb.) belirli bir uyku düzenini varsayar; kişiye göre kayar, derste saat verilmedi (14:00-15:00 dibi kaynağın adıyla verildi). «Uyku ataleti 2 saate kadar uzayabilir» (uyku_mimarisi satır 36) doğrulanamadı, alınmadı.",
+          "alistirmalar": [
+            { "id": "uyku.1.2.3.a1", "tur": "secmeli", "soru": "Kaynağa göre kafein yorgunluğa ne yapar?", "sec": ["Yorgunluğu tamamen giderir", "Yorgunluğun algılanmasını engeller", "Adenozini artırır", "Melatonini artırır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+            { "id": "uyku.1.2.3.a2", "tur": "secmeli", "soru": "Kaynaklara göre kafeinin yarı ömrü yaklaşık ne kadardır?", "sec": ["30 dakika", "1-2 saat", "5-7 saat", "24 saat"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k10"] },
+            { "id": "uyku.1.2.3.a3", "tur": "acik", "soru": "Kendi gününde enerjinin en yüksek ve en düşük olduğu saatleri yaz. Kaynağın rehberindeki dalgayla benzerlik ya da farklılık var mı?", "dogru": "Örnek: 10:00 civarı en dinç, 14:30 civarı en uykulu; rehberdeki öğleden sonra dibiyle uyuşuyor. Geç yattığım günlerde dip daha erken geliyor.", "olcut": ["En az bir yüksek ve bir düşük saat yazdı", "Rehberle karşılaştırdı", "Teşhis ya da ilaç önerisi içermiyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k9"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "uyku.1.3",
+      "ad": "Uykuyu koruyan alışkanlıklar",
+      "onKosul": ["uyku.1.2"],
+      "kazanim": ["Sabah ışığı, akşam ışığı, kafein, alkol ve yatak odası koşulları için kaynaktaki alışkanlıkları sayar.", "Kendi uykusunu yaşam kalitesi açısından kaydeder ve hekime gidilecek durumu ayırır."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "uyku.1.3.k1", "tur": "secmeli", "soru": "Kaynaklara göre uyandıktan sonra doğal gün ışığı ne zaman alınmalıdır?", "sec": ["İlk 30-60 dakika içinde", "Öğleden sonra", "Yatmadan hemen önce", "Fark etmez"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"] },
+          { "id": "uyku.1.3.k2", "tur": "secmeli", "soru": "Yatakta 20 dakikadır uykuya dalamayan biri için kaynaktaki uyaran kontrolü kuralı ne der?", "sec": ["Yatakta telefona bakmaya devam et", "Yataktan çık, loş ışıkta sakin bir şey yap, uykun gelince dön", "Kahve iç", "Parlak ışığı aç ve çalış"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+          { "id": "uyku.1.3.k3", "tur": "secmeli", "soru": "Kaynaklara göre alkol hangi uykuyu bozar?", "sec": ["Yalnız N1'i", "REM uykusunu", "Hiçbirini, uykuyu iyileştirir", "Yalnız öğle uykusunu"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+          { "id": "uyku.1.3.k4", "tur": "secmeli", "soru": "Bir uyku günlüğünün bu aşamadaki amacı nedir?", "sec": ["Uyku hastalığına teşhis koymak", "Alışkanlıklarını görüp yaşam kalitesini izlemek", "İlaç dozunu ayarlamak", "Uyku evrelerini ölçmek"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k11"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "uyku.1.3.1",
+          "ad": "Sabah ışığı",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k6", "k10"],
+          "ozet": "Günün ilk alışkanlığı ışıktır: uyandıktan sonraki ilk 30-60 dakika içinde dışarıda doğal gün ışığı almak iç saati ayarlar ve akşamki melatonin zamanlamasını da etkiler.",
+          "metin": [
+            "Kaynaklar sabah için aynı şeyi söyler: uyandıktan sonraki ilk 30-60 dakika içinde dışarıda doğal gün ışığı al.",
+            "Süre için kaynaklar farklı sayılar verir: 10-15, 10-20 ve 10-30 dakika. Ortak nokta en az 10 dakika ve açık havadır (model özeti).",
+            "Kaynağa göre sabah SCN'ye ulaşan ışık sinyali yalnız uyanmayı değil, yaklaşık 14-16 saat sonraki melatonin salınımının zamanlamasını da başlatır. Yani sabah ışığı, akşam uykunun gelmesine de yardım eder.",
+            "Güvenlik: güneşe doğrudan bakılmaz; gökyüzüne ya da çevreye bakmak yeterlidir. Cam arkası yerine dışarısı tercih edilir."
+          ],
+          "not": "Sabah ışığının süresi kaynaklarda üç farklı aralıkla yazılı (uyku_sirkadiyen_ve_tahlil satır 29: 10-30 dk; uyku_hijyeni_rehberi satır 6: 10-20 dk; sirkadiyen atlas satır 26 ve 82: 10-15 dk). «Kortizol tepe noktasını optimize eder» ifadesi alınmadı. Uyku_mimarisi atlasındaki «ilk 90 dakika kafeini ertele, adenozin temizlensin» önerisi (satır 43) gerekçesi doğrulanamadığı için alınmadı.",
+          "alistirmalar": [
+            { "id": "uyku.1.3.1.a1", "tur": "secmeli", "soru": "Sabah ışığı akşamki uykuyu nasıl etkiler?", "sec": ["Etkilemez", "Melatonin salınımının zamanlamasını başlatır", "Kafeinin etkisini artırır", "Derin uykuyu ortadan kaldırır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k6"] },
+            { "id": "uyku.1.3.1.a2", "tur": "acik", "soru": "Yarın sabah ışık almayı gününün hangi anına yerleştirebilirsin? Somut bir plan yaz (ne zaman, nerede, kaç dakika).", "dogru": "Örnek: 07:30'da uyanınca kahvaltıdan önce 15 dakika balkonda ya da bina önünde dururum; yağmurluysa yine çıkarım.", "olcut": ["Uyanıştan sonraki ilk saat içinde", "Açık havada", "En az 10 dakika"], "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"] }
+          ]
+        },
+        {
+          "id": "uyku.1.3.2",
+          "ad": "Akşam ışığı ve yatak kuralı",
+          "onKosul": ["uyku.1.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k7", "k10"],
+          "ozet": "Yatmadan 2-3 saat önce tavan ışıkları yerine göz hizasının altında loş, sıcak renkli ışığa geçilir; ekranlarda sıcak renk filtresi açılır. Yatak uyku ve dinlenme içindir; 20 dakikada uyunamazsa yataktan çıkılır.",
+          "metin": [
+            "Kaynaklara göre yatmadan 2-3 saat önce tepe (tavan) ışıkları kapatılır ve göz hizasının altında kalan loş, sarı ya da kırmızıya yakın ışığa geçilir. Kaynağa göre kırmızı dalga boyu melanopsini uyarmaz.",
+            "Ekranlar için kaynak sıcak renk (amber) filtresini önerir; öteki kaynak uykudan en az 90 dakika önce ekran ışığından kaçınmayı yazar.",
+            "Yatak kuralı (uyaran kontrolü): kaynağa göre yatak yalnız uyku ve dinlenme için kullanılır; çalışma ya da telefon alanı değildir. 20 dakika içinde uykuya dalınamazsa yataktan çıkılır, loş ışıkta sakin bir şey yapılır, uyku gelince yatağa dönülür.",
+            "Amaç (model): beyin yatağı uykuyla eşleştirsin, ışık da iç saate «akşam oldu» desin."
+          ],
+          "not": "Kaynaktaki sabit «saat 20:30'dan sonra tavan ışıklarını söndürün» (sirkadiyen atlas satır 42) kişinin yatış saatine bağlı olmadığı için yerine öteki kaynağın «yatmadan 2-3 saat önce» kuralı alındı. Tuz lambası önerisi (satır 44) kanıtsız ürün önerisi sayılıp alınmadı.",
+          "alistirmalar": [
+            { "id": "uyku.1.3.2.a1", "tur": "secmeli", "soru": "Kaynağa göre akşam ışık nerede olmalıdır?", "sec": ["Tavanda ve parlak", "Göz hizasının altında ve loş", "Doğrudan gözün önünde", "Fark etmez"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k7"] },
+            { "id": "uyku.1.3.2.a2", "tur": "secmeli", "soru": "Uyaran kontrolüne göre yatağın işi nedir?", "sec": ["Uyku ve dinlenme", "Çalışma ve uyku", "Telefon ve dizi", "Yemek"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] }
+          ]
+        },
+        {
+          "id": "uyku.1.3.3",
+          "ad": "Kafein, alkol ve yatak odası",
+          "onKosul": ["uyku.1.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k9", "k10"],
+          "ozet": "Kaynaklara göre son kafein yatmadan en az 8-10 saat önce alınır; alkol REM uykusunu bozar. Yatak odası serin ve karanlık olmalıdır; kaynaklar yaklaşık 17-20°C arası sayılar verir.",
+          "metin": [
+            "Kafein: kaynaklara göre son kafein yatış saatinden en az 8-10 saat önce alınmalıdır. Akşam alınan kafein uykuya dalmayı geciktirir ve kaynağa göre derin uykuyu kısaltır. Kafein yalnız kahvede değil, çay ve kola gibi içeceklerde de bulunur (model).",
+            "Alkol: kaynağa göre alkol REM uykusunu bozar.",
+            "Oda: kaynağa göre serin ortam, uykuya geçerken vücut sıcaklığının düşmesini kolaylaştırır; aşırı sıcak oda gece uyanmalarını artırır. Kaynakların verdiği sıcaklıklar 17-19,5°C, 18-19°C ve 18-20°C'dir; ortak bölge yaklaşık 18-19°C'dir (model özeti). Oda karanlık tutulur.",
+            "Kaynak ayrıca yatmadan yaklaşık 90 dakika önce ılık-sıcak bir duşu önerir; bu da akşamki ısı düşüşüne yardım eden bir alışkanlıktır."
+          ],
+          "not": "Oda sıcaklığı üç kaynakta üç farklı aralık (uyku_sirkadiyen_ve_tahlil satır 31; sirkadiyen atlas satır 87; uyku_hijyeni_rehberi satır 5). Duş sıcaklığı «40°C» sayısı verilmedi. Kafein «çay ve kola» örneği modelin genel bilgisidir, kaynakta yok; sahip isterse çıkarılabilir.",
+          "alistirmalar": [
+            { "id": "uyku.1.3.3.a1", "tur": "secmeli", "soru": "Kaynaklara göre son kafein yatmadan en az kaç saat önce alınmalıdır?", "sec": ["1-2", "3-4", "8-10", "Kafein uykuyu etkilemez"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"] },
+            { "id": "uyku.1.3.3.a2", "tur": "secmeli", "soru": "Kaynaklara göre yatak odası nasıl olmalıdır?", "sec": ["Sıcak ve aydınlık", "Serin ve karanlık", "Sıcak ve karanlık", "Serin ve aydınlık"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k9", "k10"] }
+          ]
+        },
+        {
+          "id": "uyku.1.3.4",
+          "ad": "Ne kadar uyku, ve kendi uykunu kaydetmek",
+          "onKosul": ["uyku.1.3.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10", "k11", "k12"],
+          "ozet": "Kaynaklar yetişkin için gecede 7-9 saat uyku aralığını verir. Kendi uykunu bir süre kaydetmek alışkanlıklarını görmenin en basit yoludur; süren uyku sorunları ise bir hekimin konusudur.",
+          "metin": [
+            "Süre: kaynaklar yetişkinler için gecede 7-9 saat aralığını verir. SPİ'nin kendi tablosunda uyku süresi saat olarak kaydedilir ve yaklaşık 7-8,5 saat hedef bant olarak durur.",
+            "Kayıt: SPİ uyku süresini her gün girilebilen bir ölçüm olarak tutar. Bu aşamanın kanıt işi de budur: bir hafta boyunca yatış ve kalkış saatini, son kafein saatini ve sabah ışık alıp almadığını yaz. Ölçmediğin bir geceyi tahminle doldurma; boş bırak (model, sistem kuralı: eksik veri sıfır değildir).",
+            "Kayıt bir teşhis aracı değildir (model, klinik sınır). Amaç, bu aşamanın alışkanlıklarından hangisinin sende eksik olduğunu görmektir.",
+            "Sınır (model, klinik sınır): alışkanlıkları düzeltmene rağmen haftalarca süren uykusuzluk, gündüz karşı konulamayan uyku hâli ya da uykuda nefesin durduğunun fark edilmesi bir hekimin değerlendireceği konulardır. Sistem uyku bozukluğuna teşhis koymaz, ilaç ya da takviye önermez."
+          ],
+          "not": "Toparlanma atlası 7-9 saati «Derin Uyku (7-9 saat)» diye yazar (SPI/hareket/toparlanma… satır 74); 7-9 saat toplam uykudur, derin uyku onun yalnız bir parçasıdır. Kaynak hatası, düzeltilerek alındı. Yaşam döngüsü atlasındaki «5 saatlik uyku testosteronu %15 düşürür» (SPI/saglik/yasam_dongusu… satır 76) doğrulanamadı, alınmadı. SPİ tablosunun referans bandı 6-9,5 saat, kaynakların 7-9 saatiyle tam örtüşmüyor. Hekime yönlendirme cümleleri kaynakta yok; AGENTS §1.5 gereği model ekledi.",
+          "alistirmalar": [
+            { "id": "uyku.1.3.4.a1", "tur": "secmeli", "soru": "Kaynaklara göre bir yetişkin için önerilen gece uyku süresi hangisidir?", "sec": ["4-5 saat", "5-6 saat", "7-9 saat", "11-12 saat"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k12"] },
+            { "id": "uyku.1.3.4.a2", "tur": "secmeli", "soru": "Uyku günlüğünde bir geceyi ölçmediysen ne yapmalısın?", "sec": ["Ortalamayı yazmak", "Sıfır yazmak", "Boş bırakmak", "Önceki geceyi kopyalamak"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+            { "id": "uyku.1.3.4.a3", "tur": "acik", "soru": "Bu aşamada öğrendiğin alışkanlıklardan sende en çok eksik olan ikisini seç ve önümüzdeki hafta her biri için tek bir küçük adım yaz.", "dogru": "Örnek: 1) Son kahveyi 15:00'e çekerim. 2) Yatmadan 2 saat önce tavan ışığını kapatıp masa lambasına geçerim.", "olcut": ["İki alışkanlık bu aşamanın derslerinden", "Her biri için somut, ölçülebilir bir adım", "İlaç, takviye ya da teşhis içermiyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,276 @@
+{
+  "sema": 1,
+  "alan": "tahlil",
+  "id": "tahlil.1",
+  "sira": 1,
+  "ad": "Bir tahlil raporunu okumak",
+  "hedef": "Bir laboratuvar raporundaki belirteci, değeri, birimi ve referans aralığını tanımak; aralık dışı bir değerin hüküm değil hekime sorulacak bir soru olduğunu bilmek ve kendi sonuçlarını zaman içinde düzenli tutmak.",
+  "onKosul": [],
+  "kanitIsi": "Uydurma (gerçek olmayan) iki tahlil raporundan aynı belirteci bir tabloya taşı: tarih, laboratuvar, açlık durumu, değer, birim, o raporun referans aralığı. Altına hekime soracağın iki soruyu yaz. Kendi gerçek sonuçlarını kullanmak zorunda değilsin. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "Laboratuvar tahlil tablosunun sütunları (kod, ad, kategori, birim, standart referans)", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "37-40", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Hemogram satırları: eritrosit, hemoglobin, lökosit", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "41-44", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "Demir satırları: ferritin, serum demiri, TIBC, transferrin satürasyonu", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "48-51", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "Glukoz satırları: açlık glukozu, HbA1c, açlık insülini, HOMA-IR", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "52-55", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "Lipid satırları: LDL ve HDL kolesterol", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "57-58", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "Böbrek satırları: kreatinin ve tahmini GFR", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "66-67", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "Tiroid satırları: TSH ve serbest T4", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "70-71", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "İnflamasyon ve elektrolit satırları: hs-CRP, sodyum", "tur": "gemini", "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md", "bolum": "2. Temel Laboratuvar ve Tahlil Parametreleri", "satir": "73-80", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "SPİ mimarisi: klinik sınır", "tur": "depo", "yol": "SPI/src/MIMARI.md", "bolum": "Klinik sınır", "satir": "51-55", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "SPİ mimarisi: referans, hedef bant, kırmızı bayrak ve eğilim", "tur": "depo", "yol": "SPI/src/MIMARI.md", "bolum": "Modül 1 — Biyometrik veri ve laboratuvar", "satir": "72-91", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "Biyobelirteç sözlüğü: üç bandın tanımı ve paneller", "tur": "depo", "yol": "SPI/src/js/data/biomarkers.js", "satir": "1-45", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "Biyobelirteç sözlüğü: hemoglobin ve ferritin satırları", "tur": "depo", "yol": "SPI/src/js/data/biomarkers.js", "satir": "114-162", "dogrulama": "dogrulanmamis" },
+    { "id": "k13", "ad": "Laboratuvar referans taslak verisi: ferritin satırları", "tur": "depo", "yol": "veri/taslak/spi/laboratuvar_referans.jsonl", "satir": "40-41", "dogrulama": "dogrulanmamis" },
+    { "id": "k14", "ad": "Tahlil kural motoru: ekrandaki sınır cümleleri", "tur": "depo", "yol": "SPI/src/js/core/bio.js", "satir": "1-30", "dogrulama": "dogrulanmamis" },
+    { "id": "k15", "ad": "Tahlil kaydının alanları ve açlık durumu", "tur": "depo", "yol": "SPI/src/js/core/state.js", "satir": "296-306", "dogrulama": "dogrulanmamis" },
+    { "id": "k16", "ad": "SPİ mimarisi: tahlil verisinin saklanması", "tur": "depo", "yol": "SPI/src/MIMARI.md", "bolum": "Saklama", "satir": "388-391", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "tahlil.1.k1", "tur": "secmeli", "soru": "Raporunda «Ferritin 25 ng/mL (30-400)» yazıyor; arkadaşının raporunda aynı belirteç için «(15-150)» aralığı var. Hangisi doğru davranıştır?", "sec": ["Arkadaşının aralığını kullanmak, çünkü sen içindesin", "Kendi raporunun aralığını kullanmak ve değeri hekime sormak", "İki aralığın ortalamasını almak", "Kendine teşhis koymak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k12", "k13", "k9"] },
+      { "id": "tahlil.1.k2", "tur": "secmeli", "soru": "Aynı belirtecin iki sonucunu karşılaştırmadan önce ilk neye bakarsın?", "sec": ["Değerlerin büyüklüğüne", "Birimlerin aynı olup olmadığına", "Raporun rengine", "Hiçbir şeye, sayılar doğrudan karşılaştırılır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k7"] },
+      { "id": "tahlil.1.k3", "tur": "secmeli", "soru": "Elinde iki tahlil var ve bir belirteç düşmüş görünüyor. SPİ'nin kuralına göre bu nedir?", "sec": ["Kesin bir düşüş eğilimi", "Yalnızca iki ölçüm arasındaki fark; eğilim için en az üç ölçüm gerekir", "Bir hastalık belirtisi", "Ölçüm hatası"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+      { "id": "tahlil.1.k4", "tur": "secmeli", "soru": "Bu aşamada sistem bir tahlil değeri için ne yapmaz?", "sec": ["Değeri raporun aralığıyla yan yana gösterir", "Değeri tarihiyle kaydeder", "Teşhis koyar, ilaç ya da doz önerir", "Hekime sorulacak soruları hazırlamana yardım eder"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k14"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "tahlil.1.1",
+      "ad": "Rapordaki bir satır",
+      "onKosul": [],
+      "kazanim": ["Bir rapor satırında belirteci, değeri, birimi ve referans aralığını ayırt eder.", "Birimi aynı olmayan iki değeri karşılaştırmaması gerektiğini açıklar.", "Yaygın panellerin neyi ölçtüğünü genel olarak söyler."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tahlil.1.1.k1", "tur": "secmeli", "soru": "«Kreatinin 0,9 mg/dL (0,6-1,3)» satırında «mg/dL» nedir?", "sec": ["Belirteç", "Değer", "Birim", "Referans aralığı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k6"] },
+          { "id": "tahlil.1.1.k2", "tur": "secmeli", "soru": "Kaynağa göre ferritin için «ng/mL» ile «µg/L» arasındaki ilişki nedir?", "sec": ["Aynı miktarı gösteren iki yazımdır", "µg/L bin kat büyüktür", "Biri kan, öteki idrar birimidir", "İlişkisizdir"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+          { "id": "tahlil.1.1.k3", "tur": "secmeli", "soru": "SPİ'de «Tam kan sayımı» notuyla gösterilen panel hangisidir?", "sec": ["Lipid paneli", "Hemogram", "Böbrek", "Hormonlar"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+          { "id": "tahlil.1.1.k4", "tur": "secmeli", "soru": "Kaynağa göre HbA1c neyi gösterir?", "sec": ["O sabahki kan şekerini", "Yaklaşık son 8-12 haftanın ortalama kan şekerini", "Kolesterol düzeyini", "Böbreğin süzme hızını"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tahlil.1.1.1",
+          "ad": "Bir satırın dört parçası",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2", "k11"],
+          "ozet": "Bir tahlil raporunun her satırı aynı dört parçadan oluşur: belirteç (ne ölçüldü), değer (kaç çıktı), birim (neyle ölçüldü) ve referans aralığı (o laboratuvarın karşılaştırma bandı).",
+          "metin": [
+            "Bir tahlil raporu ilk bakışta sayı yığını gibi görünür, ama her satır aynı düzendedir. Kaynaktaki tahlil tablosu da her belirteci aynı sütunlarla yazar: kod, ad, kategori (panel), birim ve standart referans.",
+            "Belirteç, kanda ölçülen şeyin adıdır; raporda çoğu zaman kısaltmayla yazılır. Örneğin kaynakta hemoglobin «HGB», lökosit (beyaz kan hücresi) «WBC» kısaltmasıyla geçer. SPİ'nin sözlüğü Türkçe ve İngilizce yazımları ve kısaltmaları aynı belirtece bağlar; yani raporundaki «Hb» ile «Hemoglobin» aynı satırdır.",
+            "Değer, senin kanında ölçülen sayıdır. Birim, o sayının neyle ifade edildiğidir (örneğin g/dL). Referans aralığı, laboratuvarın o belirteç için karşılaştırma olarak verdiği alt ve üst sınırdır; çoğu raporda değerin yanında parantez içinde durur.",
+            "Örnek (uydurma bir satır, model): «Hemoglobin 14,2 g/dL (12,0-15,5)». Belirteç hemoglobin, değer 14,2, birim g/dL, referans aralığı 12,0-15,5.",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin senin için ne anlama geldiğini yorumlamak hekimin işidir. Bu aşama yalnız raporu okumayı öğretir."
+          ],
+          "alistirmalar": [
+            { "id": "tahlil.1.1.1.a1", "tur": "secmeli", "soru": "«TSH 2,1 mIU/L (0,4-4,0)» satırında değer hangisidir?", "sec": ["TSH", "2,1", "mIU/L", "0,4-4,0"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k7"] },
+            { "id": "tahlil.1.1.1.a2", "tur": "secmeli", "soru": "Raporda «WBC» yazıyorsa kaynağa göre bu hangi belirteçtir?", "sec": ["Kırmızı kan hücresi sayısı", "Beyaz kan hücresi (lökosit) sayısı", "Trombosit sayısı", "Kan şekeri"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "tahlil.1.1.1.a3", "tur": "acik", "soru": "Şu uydurma satırı dört parçasına ayır: «Açlık glukozu 88 mg/dL (70-99)».", "dogru": "Belirteç: açlık glukozu; değer: 88; birim: mg/dL; referans aralığı: 70-99 (bu laboratuvarın aralığı).", "olcut": ["Dört parçayı doğru adlandırdı", "Aralığın o laboratuvara ait olduğunu belirtti", "Değeri yorumlamadı, teşhis koymadı"], "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"] }
+          ]
+        },
+        {
+          "id": "tahlil.1.1.2",
+          "ad": "Birim: aynı belirteç, farklı yazım",
+          "onKosul": ["tahlil.1.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2", "k3", "k4", "k7", "k8", "k11"],
+          "ozet": "Aynı belirteç farklı laboratuvarlarda farklı birimle raporlanabilir. Bazı birimler aynı miktarın iki yazımıdır, bazıları gerçekten farklı ölçektir. İki değer ancak birimleri aynıysa doğrudan karşılaştırılır.",
+          "metin": [
+            "Birim bir sayının dilidir: «5» tek başına hiçbir şey söylemez; «5 mg/dL» ile «5 mmol/L» bambaşka miktarlardır.",
+            "Kaynaktaki tablo bazı belirteçler için iki birim yazar. HbA1c «%» ya da «mmol/mol», serbest T4 «ng/dL» ya da «pmol/L» olarak raporlanabilir. Bunlar farklı ölçeklerdir: aynı sonuç iki birimde iki ayrı sayı olarak görünür.",
+            "Bazı birimler ise aynı miktarın iki yazımıdır. Kaynak ferritin için «ng/mL (µg/L)», sodyum için «mmol/L (mEq/L)» yazar; lökosit için «bin/µL (x10^3/µL)» yazar, SPİ'nin sözlüğü aynı birimi «10³/µL» diye gösterir.",
+            "Kural (model): iki sonucu karşılaştırmadan önce birimlerine bak. Birim farklıysa sayıları kendi başına çevirmeye çalışma; laboratuvara ya da hekimine sor.",
+            "Unutma: referans aralığı da birimle birlikte gelir ve laboratuvardan laboratuvara değişir; değerin yorumu hekimin işidir."
+          ],
+          "not": "Sodyumda mmol/L ile mEq/L'nin eşitliği tek değerlikli iyonlar için geçerlidir; kaynak bunu belirtmeden parantezle eşitlemiş. Derste yalnız kaynağın yazımı aktarıldı, genelleme yapılmadı.",
+          "alistirmalar": [
+            { "id": "tahlil.1.1.2.a1", "tur": "secmeli", "soru": "Eski raporunda HbA1c «%» ile, yenisinde «mmol/mol» ile yazılmış. Ne yapmalısın?", "sec": ["Sayıları doğrudan karşılaştırmak", "Birimler farklı olduğu için doğrudan karşılaştırmamak, laboratuvara ya da hekime sormak", "Büyük sayının kötü olduğunu düşünmek", "Eski raporu atmak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "tahlil.1.1.2.a2", "tur": "secmeli", "soru": "Kaynakta «10^3/µL» ile hangisi aynı anlama gelir?", "sec": ["bin/µL", "milyon/µL", "mg/dL", "g/dL"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        },
+        {
+          "id": "tahlil.1.1.3",
+          "ad": "Paneller: hangi grup neyi ölçer",
+          "onKosul": ["tahlil.1.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k11", "k2", "k3", "k4", "k5", "k6"],
+          "ozet": "Belirteçler panel denen gruplarla istenir: hemogram (tam kan sayımı), demir, şeker, lipid, karaciğer, böbrek, tiroid ve öteki paneller. Her belirtecin ne ölçtüğünü bilmek raporu okumanın ilk adımıdır; ne anlama geldiğini söylemek ise hekimin işidir.",
+          "metin": [
+            "SPİ belirteçleri on iki panelde toplar; tahlil raporlarında en sık görülenler şunlardır: hemogram (tam kan sayımı), demir paneli (depo ve taşıma kapasitesi), şeker metabolizması (glukoz, insülin), lipid paneli (kolesterol ve trigliserit), karaciğer (enzimler ve protein), böbrek (atık ürünler ve süzme hızı), hormonlar (tiroit ve steroit), vitamin ve mineral, inflamasyon.",
+            "Birkaç belirtecin ne ölçtüğü, kaynağa göre: hemoglobin kırmızı kan hücrelerinde oksijeni taşıyan proteindir. Ferritin vücudun temel demir depolama proteinidir. HbA1c, hemoglobine bağlanan glukozdan yola çıkarak yaklaşık son 8-12 haftanın ortalama kan şekerini gösterir. LDL karaciğerden dokulara, HDL dokulardan karaciğere kolesterol taşıyan parçacıklardır. Kreatinin kasta oluşan bir yıkım ürünüdür ve böbrekten süzülür.",
+            "Bu bilgi «ne ölçüldü» sorusunun cevabıdır. «Benim değerim ne demek» sorusu başka bir sorudur ve hekime sorulur (model, klinik sınır).",
+            "Unutma: her panelin referans aralıkları laboratuvardan laboratuvara değişir; yorum hekimindir."
+          ],
+          "not": "Kaynak tablosunun «Yüksek» ve «Düşük» sütunları her belirteç için hastalık adları ve teşhis eşikleri sayar (ör. prediyabet/diyabet eşikleri, hipotiroidi, kronik böbrek hastalığı eşiği). Bunlar klinik sınırı aştığı için hiçbiri alınmadı; yalnız «ne ölçer» cümleleri kaldı.",
+          "alistirmalar": [
+            { "id": "tahlil.1.1.3.a1", "tur": "secmeli", "soru": "Kaynağa göre ferritin nedir?", "sec": ["Oksijen taşıyan protein", "Vücudun temel demir depolama proteini", "Bir karaciğer enzimi", "Bir tiroit hormonu"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+            { "id": "tahlil.1.1.3.a2", "tur": "secmeli", "soru": "Kaynağa göre kreatinin nerede oluşur ve nereden süzülür?", "sec": ["Karaciğerde oluşur, akciğerden atılır", "Kasta oluşur, böbrekten süzülür", "Kemikte oluşur, deriden atılır", "Midede oluşur, bağırsaktan atılır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+            { "id": "tahlil.1.1.3.a3", "tur": "secmeli", "soru": "«LDL kolesterol» SPİ'de hangi panelde durur?", "sec": ["Hemogram", "Lipid paneli", "Böbrek", "Demir paneli"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tahlil.1.2",
+      "ad": "Referans aralığı ve sınırı",
+      "onKosul": ["tahlil.1.1"],
+      "kazanim": ["Referans aralığının «yaygın» demek olduğunu, «en iyi» ya da «sağlıklı» demek olmadığını açıklar.", "Aralığın laboratuvara, cinsiyete ve kaynağa göre değiştiğini örnekle gösterir.", "Aralık dışı bir değeri teşhis değil hekime sorulacak bir soru olarak ele alır."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tahlil.1.2.k1", "tur": "secmeli", "soru": "SPİ'nin mimarisine göre laboratuvarın «normal» dediği aralık neyi kapsar?", "sec": ["Herkes için en iyi değeri", "Sağlıklı bir topluluğun yaklaşık %95'ini", "Yalnız sporcuları", "Hastaları"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+          { "id": "tahlil.1.2.k2", "tur": "secmeli", "soru": "Kaynakta TSH aralığının yanında «Laboratuvara göre 0.35-4.5» yazması neyi gösterir?", "sec": ["Kaynağın hatalı olduğunu", "Aralığın laboratuvardan laboratuvara değiştiğini", "TSH'nin ölçülemediğini", "Herkesin TSH'sinin aynı olduğunu"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+          { "id": "tahlil.1.2.k3", "tur": "secmeli", "soru": "Tok karnına verilmiş bir kanda trigliserit aralığın üstünde çıktı. Bu aşamaya göre en doğru ilk düşünce hangisidir?", "sec": ["Kesin bir hastalık var", "Açlık durumu sonucu etkileyebilir; bunu not edip hekime sormak gerekir", "Sonucu yok saymak", "Bir takviye başlamak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k14", "k15"] },
+          { "id": "tahlil.1.2.k4", "tur": "secmeli", "soru": "SPİ bir değer kırmızı bayrak eşiğinin ötesindeyse ne yapar?", "sec": ["Teşhis koyar", "Yorum yapmayı bırakır ve hekime yönlendirir", "Doz önerir", "Değeri gizler"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k14"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tahlil.1.2.1",
+          "ad": "Referans aralığı «yaygın» demektir",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10", "k11", "k12"],
+          "ozet": "Referans aralığı, sağlıklı bir topluluğun yaklaşık %95'inin değerlerinin düştüğü banttır. «En iyi» değil «yaygın» demektir. Bu yüzden aralığın içinde olmak her şeyin yolunda olduğunu, dışında olmak bir hastalık olduğunu tek başına söylemez.",
+          "metin": [
+            "SPİ'nin mimari belgesine göre referans aralığı, laboratuvarın «normal» dediği geniş aralıktır: sağlıklı bir topluluğun yaklaşık %95'ini kapsar; «en iyi» değil «yaygın» demektir.",
+            "Bunun bir sonucu (model hesabı): tanım gereği sağlıklı insanların da yaklaşık yüzde beşi bir belirteçte bu bandın dışında kalır. Bir raporda onlarca belirteç olduğunda, birinin aralık dışına çıkması şaşırtıcı değildir. Bu, dışarıda kalan değerin önemsiz olduğu anlamına da gelmez: anlamını hekim değerlendirir.",
+            "Aralık herkes için tek değildir. SPİ'nin sözlüğü cinsiyete göre değişen aralıkları ayrı yazar; örneğin hemoglobin için erkek ve kadın aralıkları farklıdır.",
+            "SPİ ekranında raporundaki aralıktan başka daha dar bir «hedef bant» da görebilirsin. Mimari belgeye göre bu bant referansın içindedir ve dışında olmak bir uyarı değildir. Bu bant laboratuvar raporunda yoktur; bu aşama yalnız raporun kendi aralığını öğretir (model).",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değeri yorumlamak hekimin işidir."
+          ],
+          "not": "Kaynak tablosundaki «Optimal Hedef» sütunu (sporcu hedefleri) alınmadı: dayanağı belirsiz ve bir yerde laboratuvar aralığıyla çelişiyor (açlık insülini için optimal 2.0-6.0, referansın alt sınırı 2.6'nın altına iniyor; satır 54).",
+          "alistirmalar": [
+            { "id": "tahlil.1.2.1.a1", "tur": "secmeli", "soru": "Referans aralığı en iyi hangi kelimeyle anlatılır?", "sec": ["En iyi", "Yaygın", "Zorunlu", "Tehlikeli"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+            { "id": "tahlil.1.2.1.a2", "tur": "secmeli", "soru": "SPİ'nin sözlüğüne göre hemoglobin aralığı neye göre ayrı yazılır?", "sec": ["Mevsime", "Cinsiyete", "Kan grubuna", "Boy uzunluğuna"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k12"] }
+          ]
+        },
+        {
+          "id": "tahlil.1.2.2",
+          "ad": "Aralık laboratuvara göre değişir",
+          "onKosul": ["tahlil.1.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k7", "k12", "k13"],
+          "ozet": "Aynı belirteç için farklı laboratuvarlar ve farklı kaynaklar farklı aralık verir. Bu sistemdeki üç kaynak bile ferritin için üç ayrı aralık yazar. Bu yüzden değerini her zaman kendi raporunun aralığıyla okursun.",
+          "metin": [
+            "Kaynaktaki tablo TSH için önce bir aralık verir, sonra parantez içinde «laboratuvara göre 0.35-4.5» diye ekler. Yani aynı belirteç için laboratuvarlar farklı sınırlar kullanır.",
+            "Bu sistemin kendi kaynakları da aynı şeyi gösterir. Ferritin için gemini-data tablosu tek bir aralık (15-300 ng/mL) yazar. SPİ'nin sözlüğü cinsiyete göre ayırır: erkek 30-400, kadın 13-150. Depodaki taslak referans verisi erkek için 30-400, kadın için 15-150 yazar. Üç kaynak, üç ayrı alt sınır.",
+            "Sonuç (model): 25 ng/mL gibi bir değer bir kaynağa göre aralığın içinde, ötekine göre dışındadır. Bu yüzden bir değeri başka bir laboratuvarın, internetteki bir tablonun ya da bir arkadaşının raporunun aralığıyla değil, kendi raporunun aralığıyla okursun.",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve aralığın senin için ne anlama geldiğini yorumlamak hekimin işidir."
+          ],
+          "not": "Kaynak tablosu hemoglobin için cinsiyetleri birleştiren tek bir «standart» aralık (12.0-17.5) yazar (satır 42); SPİ sözlüğü erkek 13,5-17,5, kadın 12,0-15,5 diye ayırır. Bu da kaynaklar arası farkın bir örneğidir, derste ferritin örneği yeterli görüldü.",
+          "alistirmalar": [
+            { "id": "tahlil.1.2.2.a1", "tur": "secmeli", "soru": "Değerini hangi aralıkla okumalısın?", "sec": ["İnternetteki ilk tabloyla", "Kendi raporunda yazan aralıkla", "Arkadaşının raporundaki aralıkla", "En geniş aralıkla"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7", "k3"] },
+            { "id": "tahlil.1.2.2.a2", "tur": "secmeli", "soru": "Bu sistemdeki üç kaynağın ferritin aralıkları için hangisi doğrudur?", "sec": ["Üçü de aynıdır", "Alt sınırları birbirinden farklıdır", "Hiçbiri ferritin aralığı vermez", "Yalnız biri birim yazar"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k12", "k13"] }
+          ]
+        },
+        {
+          "id": "tahlil.1.2.3",
+          "ad": "Aralık dışı bir değer bir sorudur, hüküm değil",
+          "onKosul": ["tahlil.1.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k8", "k9", "k14", "k15"],
+          "ozet": "Bir değer pek çok sebeple aralığın dışına çıkabilir: aç ya da tok olmak, günün saati, yakın zamanda yapılan ağır egzersiz. Sistem teşhis koymaz; aralık dışı bir değer, hekime götürülecek bir sorudur.",
+          "metin": [
+            "Bir değer yalnız vücudun genel durumunu değil, kanın alındığı anı da yansıtır. SPİ'nin kural motoruna göre açlık glukozu ve açlık insülini tanım gereği aç karnına ölçülür; trigliserit yemekten sonra saatlerce yüksek kalır. SPİ bu yüzden her tahlilde açlık durumunu (evet, hayır, bilinmiyor) ayrıca tutar.",
+            "Kaynak tablosu başka koşulları da sayar: serum demiri günün saatine ve son öğüne göre çok dalgalanır; ağır antrenmandan sonraki günlerde ferritin ve hs-CRP geçici olarak yükselebilir. Kaynak bu yüzden tahlilin dinlenme gününde verilmesini yazar. Kan vermeden önce laboratuvarın ve hekimin verdiği hazırlık talimatı her zaman önce gelir (model).",
+            "Sistemin sınırı açıktır: SPİ bir hekim değildir; teşhis koymaz, doz önermez, tedaviyi bırakmayı önermez. Bir değer kırmızı bayrak eşiğinin ötesindeyse yorum yapmayı tamamen bırakır ve «bu bir teşhis değil, hekime yönlendirmedir» der.",
+            "Doğru tutum (model): aralık dışı bir değeri gördüğünde onu bir hüküm olarak değil, bir soru olarak yaz. «Bu değer neden böyle çıkmış olabilir, tekrar bakmak gerekir mi?» sorusunu hekimine götür; değeri ve kan alınırken ki koşulları (aç mıydın, ağır egzersiz yaptın mı) yanında getir.",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin ne anlama geldiğini yorumlamak hekimin işidir."
+          ],
+          "not": "Kaynak, ağır antrenman sonrası bazı değerler için «bu durum hastalık değil, kas mikrohasarıdır» (AST, satır 62) ve «zararsızdır» (bilirubin, satır 65) gibi yorumlar yapar; bunlar bir değeri yorumlamak olduğu için alınmadı. Derste yalnız «koşullar değeri etkileyebilir» genellemesi kaldı.",
+          "alistirmalar": [
+            { "id": "tahlil.1.2.3.a1", "tur": "secmeli", "soru": "Kaynağa göre günün saatine ve son öğüne göre çok dalgalanan belirteç hangisidir?", "sec": ["Serum demiri", "Hemoglobin", "Kreatinin", "TSH"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+            { "id": "tahlil.1.2.3.a2", "tur": "secmeli", "soru": "SPİ'nin bir tahlil kaydında açlık durumu için tuttuğu seçenekler hangileridir?", "sec": ["Evet, hayır, bilinmiyor", "Yalnız evet", "Sabah, akşam", "Hiç tutmaz"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] },
+            { "id": "tahlil.1.2.3.a3", "tur": "acik", "soru": "Uydurma bir rapordaki bir değer aralığın dışında çıktı. Hekimine soracağın üç soruyu ve yanında götüreceğin iki bilgiyi yaz.", "dogru": "Sorular: Bu değer neden aralık dışında olabilir? Tekrar ölçmek gerekir mi, ne zaman? Önceki sonuçlarımla birlikte nasıl görünüyor? Bilgiler: kan alınırken aç mıydım; önceki günlerde ağır egzersiz yaptım mı.", "olcut": ["Soru biçiminde yazdı, kendine teşhis koymadı", "Koşulları (açlık, egzersiz, saat) andı", "İlaç, takviye ya da doz önermedi"], "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k15"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tahlil.1.3",
+      "ad": "Sonuçlarını zaman içinde tutmak",
+      "onKosul": ["tahlil.1.2"],
+      "kazanim": ["Bir tahlil sonucunu bağlamıyla (tarih, laboratuvar, açlık, birim, aralık) kaydeder.", "Tek ölçüm ile eğilim arasındaki farkı açıklar.", "Raporda ölçülen ve hesaplanan değerleri ayırt eder."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tahlil.1.3.k1", "tur": "secmeli", "soru": "Bir tahlil sonucunu kaydederken aşağıdakilerden hangisi zorunlu bağlam değildir?", "sec": ["Tarih", "Laboratuvar", "Birim", "Raporun kâğıt rengi"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] },
+          { "id": "tahlil.1.3.k2", "tur": "secmeli", "soru": "SPİ eğilim hesaplamak için en az kaç ölçüm ister?", "sec": ["1", "2", "3", "10"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+          { "id": "tahlil.1.3.k3", "tur": "secmeli", "soru": "Raporda adının başında «tahmini» yazan bir böbrek değeri var. Bu ne demektir?", "sec": ["Doğrudan ölçülmüş bir değer", "Başka değerlerden formülle hesaplanmış bir değer", "Yanlış bir değer", "Sonradan eklenmiş bir not"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+          { "id": "tahlil.1.3.k4", "tur": "secmeli", "soru": "Bir belirteci hiç ölçtürmediysen kayıtta ne olmalıdır?", "sec": ["Sıfır", "Ortalama bir değer", "Boş; ölçülmedi", "Önceki değer"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tahlil.1.3.1",
+          "ad": "Her sonucu bağlamıyla kaydet",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14", "k15", "k16"],
+          "ozet": "Bir sonuç yalnız sayıdan ibaret değildir: tarihi, laboratuvarı, açlık durumu, birimi ve o raporun aralığıyla birlikte kaydedilir. Ölçülmeyen bir belirteç boş kalır; sıfır sayılmaz.",
+          "metin": [
+            "SPİ bir tahlil kaydını şu alanlarla tutar: tarih, laboratuvarın adı, açlık durumu, değerler ve bir not. Bu alanlar keyfî değildir; önceki derslerde gördüğün her etkenin bir yeri vardır.",
+            "Kayıt listesi (model, önceki derslerden): 1) kan alınma tarihi, 2) laboratuvar, 3) aç mıydın (evet, hayır, bilmiyorum), 4) belirteç adı, 5) değer, 6) birim, 7) o raporda yazan referans aralığı, 8) not: son günlerde ağır egzersiz, hastalık ya da olağan dışı bir durum.",
+            "Ölçülmeyen bir belirteç boş kalır. SPİ'nin kuralı açıktır: «Bu ölçüm hiç girilmemiş. Sıfır sayılmaz.» Eksik bir değeri tahminle doldurmak ya da sıfır yazmak, sonradan yapılan her karşılaştırmayı bozar.",
+            "Gizlilik (model): tahlil sonuçları kişisel sağlık verisidir. SPİ onları cihazda tutar; sen de kayıtlarını yalnız güvendiğin yerde sakla.",
+            "Unutma: kaydettiğin referans aralığı o laboratuvara aittir, aralıklar laboratuvardan laboratuvara değişir ve yorum hekimindir."
+          ],
+                    "alistirmalar": [
+            { "id": "tahlil.1.3.1.a1", "tur": "secmeli", "soru": "SPİ'ye göre hiç girilmemiş bir ölçüm nasıl sayılır?", "sec": ["Sıfır", "Ortalama", "Sayılmaz, sıfır değildir", "Aralığın ortası"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "tahlil.1.3.1.a2", "tur": "secmeli", "soru": "Bir tahlil kaydına referans aralığını neden de yazarsın?", "sec": ["Aralık laboratuvara göre değiştiği için, değer o raporun aralığıyla okunur", "Aralık her yerde aynı olduğu için", "Aralık gereksizdir, yazılmaz", "Teşhis koymak için"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15", "k3"] }
+          ]
+        },
+        {
+          "id": "tahlil.1.3.2",
+          "ad": "Tek ölçüm değil, eğilim",
+          "onKosul": ["tahlil.1.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10", "k14"],
+          "ozet": "Tek bir ölçüm bir anın fotoğrafıdır. Aynı belirtecin zaman içindeki ölçümleri bir eğilim gösterir; SPİ eğilim için en az üç ölçüm ister, çünkü iki nokta her zaman bir doğru çizer.",
+          "metin": [
+            "SPİ'nin mimarisi «tekil referans aralıkları yerine bireysel eğilim» ilkesini izler. Kural motoru yalnız «bu değer nerede duruyor?» diye değil, «bu değer nereye gidiyor?» diye de sorar.",
+            "Kaynağın örneği: referans aralığının içinde kalan ama aylar içinde kademeli düşen bir değer, aralığın dışına çıkmış tek bir ölçümden daha çok şey söyleyebilir. Bu yüzden sonuçları atmak yerine biriktirirsin.",
+            "Eğilim için en az üç ölçüm gerekir. Mimari belgenin gerekçesi: iki nokta her zaman bir doğru çizer; bu «eğilim» değil, yalnızca iki ölçüm arasındaki farktır.",
+            "Yön de tek başına yetmez: bir belirtecin düşmesi iyi, ötekinin düşmesi kötü olabilir; mimari belgenin örneğiyle LDL'nin düşmesi iyi, HDL'nin düşmesi kötü sayılır. Eğilimin senin için ne demek olduğunu hekimle konuşursun (model).",
+            "Karşılaştırmayı adil kılmak için (model, önceki derslerden): mümkünse aynı laboratuvar, aynı birim ve benzer koşullar (aynı açlık durumu, ağır egzersizden uzak bir gün). Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve yorum hekimindir."
+          ],
+          "alistirmalar": [
+            { "id": "tahlil.1.3.2.a1", "tur": "secmeli", "soru": "Mimari belgeye göre iki ölçüm neden eğilim sayılmaz?", "sec": ["İki nokta her zaman bir doğru çizer; bu yalnız aradaki farktır", "İki ölçüm hiç yapılamaz", "İki ölçüm her zaman aynıdır", "Laboratuvarlar iki ölçümü kabul etmez"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+            { "id": "tahlil.1.3.2.a2", "tur": "acik", "soru": "Uydurma bir belirteç için üç ölçüm yaz (tarih, değer, birim, aralık). Sonra karşılaştırmayı adil kılmak için üç ölçümde nelerin aynı olması gerektiğini yaz.", "dogru": "Örnek: Ocak 13,8 g/dL (12,0-15,5), Nisan 13,6 g/dL (12,0-15,5), Temmuz 13,9 g/dL (12,0-15,5). Aynı laboratuvar, aynı birim, benzer açlık durumu ve ağır egzersizden uzak bir gün.", "olcut": ["Üç ölçümün her birinde tarih, değer, birim ve aralık var", "Aynı birim kullanıldı", "Laboratuvar ve koşulların benzer olması gerektiğini yazdı", "Değeri yorumlamadı, teşhis koymadı"], "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k15"] }
+          ]
+        },
+        {
+          "id": "tahlil.1.3.3",
+          "ad": "Ölçülen ve hesaplanan değerler",
+          "onKosul": ["tahlil.1.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k4", "k6", "k12"],
+          "ozet": "Raporun bazı satırları doğrudan ölçülmez, başka satırlardan formülle hesaplanır: transferrin satürasyonu, HOMA-IR ve tahmini GFR bunlara örnektir. Hesaplanan bir değer, girdisi olan ölçümler kadar güvenilirdir.",
+          "metin": [
+            "Bir rapordaki her sayı doğrudan kandan ölçülmez. Kaynağa göre transferrin satürasyonu, serum demirinin total demir bağlama kapasitesine (TIBC) bölünüp 100 ile çarpılmasıyla hesaplanır. SPİ de serum demir ve TIBC girildiğinde bu değeri kendiliğinden hesaplar.",
+            "Başka örnekler: HOMA-IR, açlık glukozu ve açlık insülininden bir formülle hesaplanan bir indekstir. Böbrek panelindeki eGFR'nin açık adı «tahmini glomerüler filtrasyon hızı»dır; kaynak bunu bir formülle yapılan tahmin olarak tanımlar.",
+            "Bunun iki sonucu var (model): 1) hesaplanan değer, girdisi olan ölçümlerin koşullarını taşır; örneğin açlık glukozu tok karnına ölçüldüyse ondan hesaplanan indeks de yanıltır. 2) Bu sistemde her sayının bir etiketi vardır: ölçüldü, tahmin, hesaplandı ya da veri yok. Kendi kaydında da hesaplanan bir değeri «hesaplandı» diye işaretlersin.",
+            "Unutma: hesaplanan değerlerin de referans aralıkları laboratuvara ve kaynağa göre değişir ve yorum hekimindir."
+          ],
+          "not": "Kaynak HOMA-IR için eşik ve «belirgin insülin direnci» yorumu verir (satır 55), transferrin satürasyonu için «teşhisi konulabilir» der (satır 51), eGFR için «kronik böbrek hastalığı eşiği» yazar (satır 67). Bunlar teşhis dili olduğu için alınmadı; yalnız «nasıl hesaplanır» bilgisi kaldı. Dört etiket AGENTS §1 kuralıdır, kaynaktan değil.",
+          "alistirmalar": [
+            { "id": "tahlil.1.3.3.a1", "tur": "secmeli", "soru": "Kaynağa göre transferrin satürasyonu nasıl elde edilir?", "sec": ["Doğrudan ölçülür", "Serum demiri / TIBC × 100 ile hesaplanır", "Hemoglobinden tahmin edilir", "Hekim gözle belirler"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k12"] },
+            { "id": "tahlil.1.3.3.a2", "tur": "secmeli", "soru": "Açlık glukozu tok karnına ölçüldüyse, ondan hesaplanan HOMA-IR için ne söylenebilir?", "sec": ["Etkilenmez", "Girdisinin koşulunu taşır, yanıltıcı olabilir", "Daha doğru olur", "Hesaplanamaz hale gelir"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
