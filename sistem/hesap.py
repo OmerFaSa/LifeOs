@@ -185,6 +185,16 @@
       `defterterim/` yollarini oldugu gibi verir, yazmaz. Medya zaten burada
       degildir (cihazda kalir). Modul baska bir modulun notunu
       degistiremez; kopya alabilir (AGENTS §1.4).
+  30. CIHAZ BASINA MERKEZ ANAHTARI (2026-11-13, sadelesme A10: «cihaz basina
+      anahtar; Hesap › Cihazlar'dan tek dokunusla iptal»). Merkez'in jetonu
+      (HKM local_token) bilgisayardan cikmaz. Admin cihazi `/api/hesap/merkez`ten
+      KENDI oturumuna bagli bir Merkez anahtari alir (oturum jetonundan HMAC;
+      yalniz ozeti saklanir; ayni oturum hep ayni anahtari alir) ve Merkez'e/King'e
+      `/api/hesap/hkm/api/...` yolundan gider: sunucu anahtari oturuma
+      cevirir, istegi bilgisayardaki Merkez'e ortak jetonla iletir. Cihaz
+      cikarilinca oturumla birlikte anahtari da gider: sonraki istek 401.
+      Saglik ucu HKM'deki gibi anahtarsizdir; esleme (`/api/pair`) bu yoldan
+      hic gecmez. Bilgisayarin kendisi Merkez'e eskisi gibi dogrudan gider.
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -204,7 +214,9 @@ import struct
 import sys
 import threading
 import time
+import urllib.error
 import urllib.parse
+import urllib.request
 
 SURUM = 8
 SISTEM = {}                     # soz 28: sunucu.py doldurur (durum, baslat, ev_agi_ac)
@@ -556,8 +568,8 @@ class Depo:
         for r in c.execute("SELECT id FROM kullanici WHERE kimlik IS NULL").fetchall():
             c.execute("UPDATE kullanici SET kimlik=? WHERE id=?", (secrets.token_hex(8), r["id"]))
         var = {r["name"] for r in c.execute("PRAGMA table_info(oturum)")}
-        # surum 6 (soz 18): girisin yolu ve son adres.
-        for ad, tur in (("esitleme", "REAL"), ("yontem", "TEXT"), ("ip", "TEXT")):
+        # surum 6 (soz 18): girisin yolu ve son adres; soz 30: cihazin Merkez anahtarinin ozeti.
+        for ad, tur in (("esitleme", "REAL"), ("yontem", "TEXT"), ("ip", "TEXT"), ("merkez", "TEXT")):
             if ad not in var:
                 c.execute("ALTER TABLE oturum ADD COLUMN %s %s" % (ad, tur))
         var = {r["name"] for r in c.execute("PRAGMA table_info(yayin)")}
@@ -844,14 +856,35 @@ class Depo:
     def oturum(self, jeton, ip=None):
         """Jeton gecerliyse kullanici, degilse None. ip: oturumun son
         adresi (soz 18) degistiyse yazilir."""
+        return self._oturum_bul("ozet", jeton, ip)
+
+    def merkez_oturum(self, anahtar, ip=None):
+        """Soz 30: Merkez anahtari hangi oturumun? Oturum kapandiysa (cihaz cikarildi,
+        cikis, kurtarma) None. Iki sir birbirinin yerine gecmez: ayri sutun, ayri ozet."""
+        return self._oturum_bul("merkez", anahtar, ip)
+
+    def merkez_anahtari(self, jeton):
+        """Soz 30: bu oturumun (cihazin) Merkez anahtari. Oturum jetonundan HMAC ile turer: ayni
+        oturum hep ayni anahtari alir (cerez kapilar arasi ortak; uc modul birbirininkini
+        oldurmesin), anahtar oturum jetonunu vermez. Oturum silinince anahtar da gecersiz."""
+        anahtar = base64.urlsafe_b64encode(hmac.new((jeton or "").encode("utf-8"), b"lifeos-merkez-anahtari",
+                                                    hashlib.sha256).digest()).decode("ascii").rstrip("=")
+        with self._islem() as c:
+            if not c.execute("UPDATE oturum SET merkez=? WHERE ozet=?",
+                             (_jeton_ozeti(anahtar), _jeton_ozeti(jeton or ""))).rowcount:
+                raise Hata(401, "Oturum yok ya da süresi doldu; yeniden giriş yap.")
+        return anahtar
+
+    def _oturum_bul(self, sutun, jeton, ip):
         if not jeton or not isinstance(jeton, str) or len(jeton) > 200:
             return None
-        oz = _jeton_ozeti(jeton)
         simdi = self.saat()
         with self._islem() as c:
-            r = c.execute("SELECT kullanici, son, ip FROM oturum WHERE ozet=?", (oz,)).fetchone()
+            r = c.execute("SELECT ozet, kullanici, son, ip FROM oturum WHERE %s=?" % sutun,
+                          (_jeton_ozeti(jeton),)).fetchone()
             if r is None:
                 return None
+            oz = r["ozet"]
             if simdi - r["son"] > OTURUM_GUN * 86400:
                 c.execute("DELETE FROM oturum WHERE ozet=?", (oz,))
                 return None
@@ -2598,6 +2631,73 @@ def _jeton(h):
     return a[7:].strip() if a.startswith("Bearer ") else ""
 
 
+# ------------------------------------------------- Merkez yolu (soz 30)
+
+HKM_YOL = "/api/hesap/hkm"
+# Iletilen yol HKM'nin /api/... yoludur; esleme (/api/pair...) jetonu verir, bu yoldan gecmez.
+HKM_ILET_RE = re.compile(r"^/api/(?!pair(?:/|$))[A-Za-z0-9_\-]+(?:/[A-Za-z0-9_\-][A-Za-z0-9_\-.]*)*$")
+HKM_ILET_SN = 300                     # King'in uzun cevabi; HKM'nin kendi sinirlari once dolar
+
+
+def hkm_hedef():
+    """(onek, jeton): HKM'nin /api'si bu bilgisayarda nerede ve ortak jetonu. Tek kapi
+    (tekkapi.py) HKM'yi ayni surece alinca bunu kendi onekiyle degistirir."""
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "HKM", "config.json"),
+              encoding="utf-8") as f:
+        cfg = json.load(f) or {}
+    return "http://127.0.0.1:%d/api" % int(cfg.get("port") or 4200), cfg.get("local_token") or ""
+
+
+def _merkez_ilet(h, d, ip):
+    """Soz 30: cihazin Merkez anahtariyla gelen istegi bilgisayardaki Merkez'e ortak jetonla iletir.
+    Cevap (kod, tur, govde) oldugu gibi doner; cihazin anahtari Merkez'e, ortak jeton cihaza gitmez."""
+    alt = h.path[len(HKM_YOL):]                        # «/api/king/cumle?x=1»
+    yol = alt.split("?", 1)[0]
+    if h.command not in ("GET", "POST") or not HKM_ILET_RE.match(yol):
+        raise Hata(404, "Böyle bir istek yok.")
+    if not (h.command == "GET" and yol == "/api/health"):
+        k = d.merkez_oturum(_jeton(h), ip)
+        if k is None:
+            raise Hata(401, "Bu cihazın Merkez anahtarı geçersiz ya da cihaz çıkarıldı; yeniden bağlan.")
+        d._admin(k, "Merkez'i yalnız admin kullanır.")      # sonradan uyeye indirilen hesap da kesilir
+    govde = None
+    if h.command == "POST":
+        try:
+            n = int(h.headers.get("Content-Length") or 0)
+        except ValueError:
+            raise Hata(400, "Geçersiz istek.")
+        if n < 0:
+            raise Hata(400, "Geçersiz istek.")              # read(-1) baglanti kapanana dek bekler
+        if n > GOVDE_EN_BUYUK:
+            raise Hata(413, "İstek çok büyük.")
+        govde = h.rfile.read(n) if n else b""
+    try:
+        onek, jeton = hkm_hedef()
+    except (OSError, ValueError):
+        raise Hata(503, "Merkez bu bilgisayarda kurulu değil.")
+    # X-Forwarded-For: HKM bu istegi «yerel» saymasin (esleme kapisi vekili reddeder).
+    istek = urllib.request.Request(onek + alt[len("/api"):], data=govde, method=h.command, headers={
+        "Authorization": "Bearer " + jeton, "X-Forwarded-For": str(ip)[:64],
+        "Content-Type": h.headers.get("Content-Type") or "application/json"})
+    try:
+        with urllib.request.urlopen(istek, timeout=HKM_ILET_SN) as r:
+            kod, tur, ham = r.status, r.headers.get("Content-Type"), r.read()
+    except urllib.error.HTTPError as e:
+        kod, tur, ham = e.code, e.headers.get("Content-Type"), e.read()
+    except (OSError, ValueError):
+        raise Hata(503, "Merkez kapalı.")
+    h.send_response(kod)
+    koken = h.headers.get("Origin")
+    if koken and UYGULAMA_KOKENLERI.match(koken):
+        h.send_header("Access-Control-Allow-Origin", koken)
+        h.send_header("Vary", "Origin")
+    h.send_header("Content-Type", tur or "application/json; charset=utf-8")
+    h.send_header("Content-Length", str(len(ham)))
+    h.send_header("Cache-Control", "no-store")
+    h.end_headers()
+    h.wfile.write(ham)
+
+
 def isle(h):
     """Modul sunucusunun /api/hesap/... istegi. h: BaseHTTPRequestHandler."""
     yol = h.path.split("?", 1)[0]
@@ -2635,6 +2735,9 @@ def isle(h):
                     raise Hata(404, "Bu takvim adresi kapalı ya da yenilendi.")
                 return _ics_cevap(h, ics)
         ip = (h.client_address or ("",))[0]
+        if yol.startswith(HKM_YOL + "/"):
+            # Soz 30: kimlik cihazin Merkez anahtaridir (basliktaki Bearer); X-LifeOS istemez.
+            return _merkez_ilet(h, d, ip)
         if yontem == "GET" and yol in ("/api/hesap/ozet", "/api/hesap/ozet.txt"):
             # Soz 21: Kisayollar/Siri. Kimlik «oku» yetkili erisim anahtari.
             if not yol.endswith(".txt"):
@@ -2818,7 +2921,10 @@ def isle(h):
                 v = SISTEM["merkez"]() if SISTEM else None
                 if not v:
                     raise Hata(409, "Her yerden erişim kapalı.")
-                return _cevap(h, 200, v)
+                # Soz 30: ortak jeton cihaza gitmez; cihaz kendi anahtarini ve iletme yolunu alir.
+                # url eski istemci icindir; yeni istemci yolu kendi sunucu adresine ekler (hesap.js).
+                return _cevap(h, 200, {"url": v["adres"] + HKM_YOL, "yol": HKM_YOL, "adres": v["adres"],
+                                       "token": d.merkez_anahtari(j)})
             if yol == "/api/hesap/bag-kodu":
                 return _cevap(h, 200, d.bag_kodu_ac(k))
             if yol == "/api/hesap/bag-durum":

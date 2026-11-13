@@ -51427,7 +51427,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'29c18bba', at:'2026-11-13 11:40', dirty:true };
+R.BUILD = { id:'7811e90d', at:'2026-11-13 17:08', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -66048,22 +66048,27 @@ window.LIFEOS.HESAP = (function(){
   async function evAgiAc(){ return api('/api/hesap/ev-agi-ac', {}); }
   async function uzakAc(){ return api('/api/hesap/uzak-ac', {}); }
 
-  /* Her yerden erişim (sistem/uzak.py): Merkez'in adresi ve jetonu elle girilmez. Özel ağ adresinden
-     açan cihaz Tailscale kimliğiyle alır (hesap gerekmez), uygulama admin hesabıyla. Oturum başına
-     bir deneme; kapalı ya da ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
+  /* Her yerden erişim (sistem/uzak.py): Merkez'in adresi ve jetonu elle girilmez. Admin hesabıyla
+     girmiş cihaz KENDİ anahtarını alır (hesap.py söz 30): Merkez'e hesap sunucusunun HKM_YOL'undan
+     gider, Hesap › Cihazlar'dan çıkarılınca anahtarı da ölür. Ortak jetonu tutan eski cihaz böyle
+     bir kez yeniden bağlanır. Hesapsız özel ağ cihazı eskisi gibi Tailscale kimliğiyle alır. Oturum
+     başına bir deneme; kapalı ya da ulaşılamazsa sessizce kalır, King kural yoluyla sürer (AGENTS.md §1.4). */
+  const HKM_YOL = '/api/hesap/hkm';
   let merkezDenenen = null;
   async function merkezBagla(){
     const o = oturum(), b = ayar && ayar.hkm && ayar.hkm();
     const deneme = (o && o.j) || 'ozel-ag';
     if(!b || ornekMi() || pcMi() || merkezDenenen === deneme) return false;
     const a = b.settings() || {};
-    if(a.token && /^https:/i.test(a.url || '') && a.lastStatus !== 401) return false;
+    const hesapla = !!(o && o.r === 'admin');
+    if(a.token && /^https:/i.test(a.url || '') && a.lastStatus !== 401
+       && !(hesapla && !String(a.url).endsWith(HKM_YOL))) return false;
     const ozelAg = /\.ts\.net$/i.test(ortam.konum().hostname || '');
-    if(!ozelAg && (!o || o.r !== 'admin')) return false;
+    if(!ozelAg && !hesapla) return false;
     merkezDenenen = deneme;
     let v;
     try{
-      if(ozelAg){
+      if(!hesapla){
         const r = await ortam.fetch('/api/uzak/merkez', { method:'POST', cache:'no-store', headers:{ 'X-LifeOS':'hesap' } });
         if(r.status >= 502 && r.status <= 504) throw new Error('vekil');
         v = r.ok ? await r.json() : null;
@@ -66074,7 +66079,11 @@ window.LIFEOS.HESAP = (function(){
       return false;
     }
     if(!v || !v.url || !v.token) return false;
-    await b.save({ url:v.url, token:v.token, enabled:true, lastStatus:null });
+    /* Söz 30: yol, hesap isteklerinin gittiği sunucuya eklenir: uygulamada her yerde geçen adres
+       (aşağıda çereze de yazılır), tarayıcıda sayfanın kendi kökeni (aynı köken, CORS gerekmez). */
+    const kok = (ortam.yerelUygulama() && v.adres) || sunucuAdresi() || ortam.konum().origin || '';
+    const url = v.yol === HKM_YOL ? kok + HKM_YOL : v.url;
+    await b.save({ url, token:v.token, enabled:true, lastStatus:null });
     /* Uygulama ev ağı adresiyle girmiş olabilir: her yerde geçen adrese geçer. */
     if(o && ortam.yerelUygulama() && v.adres && o.s !== v.adres){
       cerezYaz(CEREZ, Object.assign({}, o, { s:v.adres }));

@@ -32,11 +32,20 @@ KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # modul baglantilari ve adres duzeltme (hesap.js TELEFON_KAPI) degismeden calisir.
 KAPILAR = {5173: 4173, 5183: 4183, 5193: 4193, 443: 4200}
 HESAP_KAPI = 5183
+# Tek kapi (tekkapi.ETKIN, P6): her sey 4180'de, tek adreste (Merkez /api/hkm/ altinda).
+# tekkapi ice aktarilinca kapilari_sec(ETKIN) cagirir; bayrak kapaliyken yukaridakiler aynen kalir.
+ESKI_KAPILAR, TEK_KAPILAR = dict(KAPILAR), {443: 4180}
 VEKIL_IP = "100.64.0.0"     # yerel olmayan, gecerli bicimli isaret adresi
 VEKIL_BASLIKLARI = ("X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "Forwarded",
                     "Tailscale-User-Login", "Tailscale-User-Name")
 YEREL_HOST = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\]|[a-z0-9-]+\.localhost)(:\d+)?$")
 _ONBELLEK = {"t": 0.0, "ad": ""}
+
+
+def kapilari_sec(tek):
+    """Tailscale'in sunacagi kapilar: tek kapi devredeyse yalniz 443 -> 4180, degilse bugunku dort."""
+    global KAPILAR, HESAP_KAPI
+    KAPILAR, HESAP_KAPI = (dict(TEK_KAPILAR), 443) if tek else (dict(ESKI_KAPILAR), 5183)
 
 
 def vekilden_mi(ip, basliklar):
@@ -130,6 +139,9 @@ def ac(calistir=subprocess.run, kok_yaz=_kokenleri_yaz):
         if r.returncode != 0:
             # Sik sebep: agda HTTPS kapali; Tailscale'in yonergesi aynen gosterilir.
             return {"ok": False, "mesaj": (r.stderr or r.stdout or "Tailscale kapıyı açamadı.").strip()[:400]}
+    for dis in ESKI_KAPILAR:
+        if dis not in KAPILAR:      # tek kapiya geciste eski kapi bos bir porta acik kalmasin
+            _tailscale(cli, ["serve", "--https=%d" % dis, "off"], calistir)
     kok_yaz(d["ad"])
     _ONBELLEK["t"] = 0.0
     return {"ok": True, "ad": d["ad"], "mesaj": "Açıldı. Telefon ve tablette sunucu adresi: %s" % d["ad"]}
@@ -139,7 +151,7 @@ def kapat(calistir=subprocess.run):
     cli = _cli()
     if not cli:
         return {"ok": False, "mesaj": "Tailscale kurulu değil."}
-    for dis in KAPILAR:
+    for dis in list(KAPILAR) + [d for d in ESKI_KAPILAR if d not in KAPILAR]:
         _tailscale(cli, ["serve", "--https=%d" % dis, "off"], calistir)
     _ONBELLEK["t"] = 0.0
     return {"ok": True, "mesaj": "Her yerden erişim kapandı."}
@@ -154,7 +166,8 @@ def merkez(oku=durum, yol=None):
         jeton = (json.load(f) or {}).get("local_token") or ""
     if not jeton:
         return None
-    return {"url": "https://%s" % d["ad"], "token": jeton, "adres": "https://%s:%d" % (d["ad"], HESAP_KAPI)}
+    return {"url": "https://%s" % d["ad"], "token": jeton,
+            "adres": "https://%s" % d["ad"] + ("" if HESAP_KAPI == 443 else ":%d" % HESAP_KAPI)}
 
 
 def sahip(calistir=subprocess.run):
@@ -229,5 +242,7 @@ def acilis_ayarla(acik, reg=None):
 if __name__ == "__main__":
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
+    import tekkapi      # gec: tekkapi sunucu'yu, sunucu bu dosyayi ice aktarir
+    kapilari_sec(tekkapi.ETKIN)
     islem = {"--ac": ac, "--kapat": kapat}.get((sys.argv[1:] or [""])[0], durum)
     print(json.dumps(islem(), ensure_ascii=False, indent=2))

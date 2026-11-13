@@ -1892,3 +1892,161 @@ def run():
             except urllib.error.HTTPError as e:
                 eq(e.code, 403)                                           # ozel baslik olmadan olmaz
     test("HTTP: yedek dosya olarak iner (octet-stream), ham govdeyle yuklenir; ozel basliksiz 403", t_http_kopya_dosya)
+
+    # ------------------------------------- soz 30: cihaz basina Merkez anahtari
+
+    def t_merkez_anahtari():
+        with _Depo() as r:
+            k, j_pc = _admin(r)
+            j_tel = r.d.giris("omer", "parola-123", B, "Telefon")["jeton"]
+            j_tab = r.d.giris("omer", "parola-123", "cihazC-111111", "Tablet")["jeton"]
+            ka, kb = r.d.merkez_anahtari(j_tel), r.d.merkez_anahtari(j_tab)
+            ok(ka != kb)
+            eq(r.d.merkez_oturum(ka)["ad"], "omer")
+            eq((r.d.oturum(ka), r.d.merkez_oturum(j_tel)), (None, None))   # iki sir birbirinin yerine gecmez
+            ka2 = r.d.merkez_anahtari(j_tel)
+            eq(ka2, ka)                                  # ayni oturum ayni anahtar: uc modul birbirini oldurmez
+            ok(r.d.merkez_oturum(ka2))
+            no(j_tel in ka or ka in j_tel)
+            _hata(lambda: r.d.merkez_anahtari("yok"), 401)
+            with r.d._islem() as c:
+                ozetler = [x["merkez"] for x in c.execute("SELECT merkez FROM oturum")]
+            no(ka2 in ozetler or kb in ozetler)                                # yalniz ozet saklanir
+            ok(hesap._jeton_ozeti(kb) in ozetler)
+            liste = json.dumps(r.d.cihazlar(k, j_pc))
+            no(any(s in liste for s in (ka2, kb, hesap._jeton_ozeti(kb), j_tel, j_tab)))
+            tel = [x for x in r.d.cihazlar(k, j_pc) if x["cihaz_ad"] == "Telefon"][0]
+            r.d.cihaz_cikar(k, j_pc, tel["id"])
+            eq((r.d.merkez_oturum(ka2), r.d.oturum(j_tel)), (None, None))    # cikarilan cihaz: ikisi de oldu
+            ok(r.d.merkez_oturum(kb) and r.d.oturum(j_tab) and r.d.oturum(j_pc))
+            # Calinan tablet «otekilerden cik» dese de bilgisayar sifreyle geri girer ve tableti cikarir.
+            r.d.otekilerden_cik(r.d.oturum(j_tab), j_tab)
+            eq(r.d.oturum(j_pc), None)
+            j_pc = r.d.giris("omer", "parola-123", A, "PC")["jeton"]
+            tab = [x for x in r.d.cihazlar(k, j_pc) if x["cihaz_ad"] == "Tablet"][0]
+            r.d.cihaz_cikar(k, j_pc, tab["id"])
+            eq((r.d.merkez_oturum(kb), r.d.oturum(j_tab)), (None, None))
+            ok(r.d.oturum(j_pc))
+    test("soz 30: cihaz basina Merkez anahtari; cikarilan cihazin anahtari olur, oteki surer", t_merkez_anahtari)
+
+    def t_http_merkez_yolu():
+        import contextlib
+        import io
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        ORTAK = "ORTAK-hkm-jetonu-0123456789"
+        gorulen = []
+
+        class _Hkm(BaseHTTPRequestHandler):
+            def _yanit(self):
+                n = int(self.headers.get("Content-Length") or 0)
+                gorulen.append((self.command, self.path, self.headers.get("Authorization"),
+                                self.headers.get("X-Forwarded-For"), self.rfile.read(n) if n else b""))
+                ham = json.dumps({"ok": True, "yol": self.path}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(ham)))
+                self.end_headers()
+                self.wfile.write(ham)
+            do_GET = do_POST = _yanit
+
+            def log_message(self, *a):
+                pass
+
+        hkm = ThreadingHTTPServer(("127.0.0.1", 0), _Hkm)
+        threading.Thread(target=hkm.serve_forever, daemon=True).start()
+        eski = (hesap.hkm_hedef, dict(hesap.SISTEM))
+        hesap.hkm_hedef = lambda: ("http://127.0.0.1:%d/api" % hkm.server_address[1], ORTAK)
+        hesap.SISTEM.update(merkez=lambda: {"url": "https://pc.ts.net", "token": ORTAK, "adres": "https://pc.ts.net:5183"},
+                            uzak_durum=lambda: {"acik": True})
+        gunluk = io.StringIO()
+        sirlar = [ORTAK]
+        try:
+            with _Srv() as s, contextlib.redirect_stderr(gunluk):
+                DIS = {"X-Forwarded-For": "100.1.2.3"}                     # Tailscale serve'den gelen cihaz
+                kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+                eq(kod, 200)
+                pc = dict(H, Authorization="Bearer " + v["jeton"])
+                cihaz = {}
+                for ad, kimlik in (("tel", B), ("tab", "cihazC-111111")):
+                    kod, _, v = s.iste("/api/hesap/giris", {"ad": "omer", "parola": "parola-123", "cihaz": kimlik,
+                                                            "cihaz_ad": ad}, dict(H, **DIS))
+                    oturum = dict(H, Authorization="Bearer " + v["jeton"], **DIS)
+                    kod, _, m = s.iste("/api/hesap/merkez", {}, oturum)
+                    eq((kod, m["yol"]), (200, hesap.HKM_YOL))
+                    ok(m["url"].endswith(hesap.HKM_YOL))
+                    no(ORTAK in json.dumps(m))                             # ortak jeton cihaza gitmez
+                    cihaz[ad] = (oturum, dict(DIS, Authorization="Bearer " + m["token"]), m["token"], v["jeton"])
+                    sirlar += [m["token"], v["jeton"]]
+                ok(cihaz["tel"][2] != cihaz["tab"][2])
+                yol = hesap.HKM_YOL + "/api/king/cumle?tur=gun"
+                kod, _, v = s.iste(yol, {"satirlar": ["a"]}, cihaz["tel"][1])
+                eq((kod, v["yol"]), (200, "/api/king/cumle?tur=gun"))
+                eq(gorulen[-1][:3], ("POST", "/api/king/cumle?tur=gun", "Bearer " + ORTAK))
+                ok(gorulen[-1][3])                                        # HKM istegi yerel saymaz
+                eq(json.loads(gorulen[-1][4]), {"satirlar": ["a"]})
+                eq(s.iste(hesap.HKM_YOL + "/api/health", baslik=DIS)[0], 200)   # saglik HKM'deki gibi anahtarsiz
+                n = len(gorulen)
+                for yanlis in ({}, {"Authorization": "Bearer " + cihaz["tel"][3]}, {"Authorization": "Bearer " + ORTAK}):
+                    eq(s.iste(yol, {}, dict(DIS, **yanlis))[0], 401)          # anahtarsiz, oturum jetonu, ortak jeton
+                for kapali in ("/api/pair", "/api/pair/open", "/api/x/../pair", "/api/x//y", "/king"):
+                    eq(s.iste(hesap.HKM_YOL + kapali, {}, cihaz["tel"][1])[0], 404, kapali)
+                eq(len(gorulen), n)                                       # hicbiri Merkez'e ulasmadi
+                # Bilgisayar telefonu cikarir.
+                kod, _, v = s.iste("/api/hesap/cihazlar", baslik=pc)
+                tel = [x for x in v["cihazlar"] if x["cihaz_ad"] == "tel"][0]
+                eq(s.iste("/api/hesap/cihaz-cikar", {"id": tel["id"]}, pc)[0], 200)
+                tel_oturum, tel_merkez = cihaz["tel"][0], cihaz["tel"][1]
+                eq(s.iste(yol, {}, tel_merkez)[0], 401)
+                for r in ("esitle", "ayar-esitle", "gelen-al", "gelen-birak", "gelen-sonuc", "yayin", "merkez",
+                          "bag-kodu", "anahtar", "takvim", "cihaz-cikar", "otekilerden-cik", "profil", "parola",
+                          "sistem", "yedekle", "cikis"):
+                    eq(s.iste("/api/hesap/" + r, {"alan": "spi/ben", "modul": "spi", "son": 0, "gonder": []},
+                              tel_oturum)[0], 401, r)
+                for r in ("ben", "cihazlar", "tekgun", "kisi", "defter", "gunluk", "gunkayit", "bilinc", "gunsen",
+                          "uyarilar", "baglantilar", "etkinlik", "disa", "kullanicilar", "yedekler"):
+                    eq(s.iste("/api/hesap/" + r, baslik=tel_oturum)[0], 401, r)
+                eq(s.iste("/api/hesap/goc-paket", {}, dict(tel_oturum, **{"X-LifeOS": "goc"}))[0], 401)
+                eq(len(gorulen), n)
+                # Tablet surer.
+                tab_oturum, tab_merkez = cihaz["tab"][0], cihaz["tab"][1]
+                eq(s.iste(yol, {"satirlar": ["b"]}, tab_merkez)[0], 200)
+                eq(s.iste("/api/hesap/esitle", {"alan": "spi/ben", "cihaz": "cihazC-111111", "son": 0, "gonder": []},
+                          tab_oturum)[0], 200)
+                eq(s.iste("/api/hesap/gelen-al", {"modul": "spi", "cihaz": "cihazC-111111"}, tab_oturum)[0], 200)
+                # Ayni cihazin oteki modulu (cerez kapilar arasi ortak) ayni anahtari alir; ilki olmez.
+                eq(s.iste("/api/hesap/merkez", {}, tab_oturum)[2]["token"], cihaz["tab"][2])
+                eq(s.iste(yol, {}, tab_merkez)[0], 200)
+                # Govde boyu eksi: okumadan 400, Merkez'e gitmez.
+                n = len(gorulen)
+                import http.client
+                bag = http.client.HTTPConnection("127.0.0.1", s.s.server_address[1], timeout=10)
+                bag.putrequest("POST", yol)
+                for ad, deger in dict(tab_merkez, **{"Content-Length": "-1"}).items():
+                    bag.putheader(ad, deger)
+                bag.endheaders()
+                eq(bag.getresponse().status, 400)
+                bag.close()
+                # Sonradan uyeye indirilen admin: anahtari Merkez'e gecmez (403).
+                omer = s.r.d.oturum(pc["Authorization"][7:])
+                ayse = s.r.d.kullanici_ekle(omer, "ayse", "parola-456", "admin")
+                kod, _, v = s.iste("/api/hesap/giris", {"ad": "ayse", "parola": "parola-456", "cihaz": "cihazD-222222",
+                                                        "cihaz_ad": "ay"}, dict(H, **DIS))
+                m = s.iste("/api/hesap/merkez", {}, dict(H, Authorization="Bearer " + v["jeton"], **DIS))[2]
+                sirlar += [m["token"], v["jeton"]]
+                s.r.d.yonet(omer, ayse["id"], rol="uye")
+                eq(s.iste(yol, {}, dict(DIS, Authorization="Bearer " + m["token"]))[0], 403)
+                eq(len(gorulen), n)
+                # Bilgisayarin kendi yolu etkilenmez: yalniz-bu-bilgisayar islerini PC yapar, tablet yapamaz.
+                eq(s.iste("/api/hesap/uzak-durum", {}, pc)[0], 200)
+                eq(s.iste("/api/hesap/uzak-durum", {}, tab_oturum)[0], 403)
+                eq(s.iste("/api/hesap/ben", baslik=pc)[0], 200)
+                eq(hesap.hkm_hedef()[1], ORTAK)                           # Merkez'in kendi jetonu degismedi
+        finally:
+            hesap.hkm_hedef = eski[0]
+            hesap.SISTEM.clear()
+            hesap.SISTEM.update(eski[1])
+            hkm.shutdown()
+            hkm.server_close()
+        no(any(x in gunluk.getvalue() for x in sirlar), "gunluge sir yazilmadi")
+    test("HTTP soz 30: iki cihaz, biri cikarilir: onun her korumali yolu 401, oteki ve bilgisayar surer; sir sizmaz",
+         t_http_merkez_yolu)

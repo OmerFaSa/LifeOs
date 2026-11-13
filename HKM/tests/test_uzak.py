@@ -108,6 +108,43 @@ def run():
             ok(["serve", "--bg", "--https=443", "http://127.0.0.1:4200"] in kapilar, "Merkez")
         test("yalniz serve; dort kapi; basarida koken yazilir", serve_funnel)
 
+        def tek_kapi_anahtari():
+            yol = list(sys.path)
+            import tekkapi                       # bayrak kapali: ice aktarmak kapilari degistirmez
+            sys.path[:] = yol                    # tekkapi sistem/'i one koyar; HKM modulleri golgelenmesin
+            eski = {5173: 4173, 5183: 4183, 5193: 4193, 443: 4200}
+            eq((tekkapi.ETKIN, uzak.KAPILAR, uzak.HESAP_KAPI), (False, eski, 5183))
+            eq(uzak.TEK_KAPILAR, {443: tekkapi.ETKIN_PORT})
+            kapanan = lambda cagri: [c[1] for c in cagri if c[-1:] == ["off"]]
+            calistir, cagri = _sahte()
+            ok(uzak.ac(calistir, kok_yaz=lambda ad: None)["ok"])
+            eq(kapanan(cagri), [], "bayrak kapali: bugunku gibi hicbir kapi kapanmaz")
+            try:
+                uzak.kapilari_sec(True)          # tekkapi.ETKIN = True iken ice aktarilinca olan
+                calistir, cagri = _sahte()
+                ok(uzak.ac(calistir, kok_yaz=lambda ad: None)["ok"])
+                eq([c for c in cagri if "--bg" in c], [["serve", "--bg", "--https=443", "http://127.0.0.1:4180"]])
+                eq(kapanan(cagri), ["--https=5173", "--https=5183", "--https=5193"], "eski kapilar bos porta acik kalmaz")
+                eq(uzak.durum(_sahte(serve_web=_web())[0])["acik"], True)
+                calistir, cagri = _sahte()
+                uzak.kapat(calistir)
+                eq(kapanan(cagri), ["--https=443", "--https=5173", "--https=5183", "--https=5193"])
+                with tempfile.TemporaryDirectory() as klasor:
+                    cfg = os.path.join(klasor, "config.json")
+                    with open(cfg, "w", encoding="utf-8") as f:
+                        json.dump({"local_token": "gizli", "allowed_origins": ["https://x.y", "https://%s:5183" % AD]}, f)
+                    eq(uzak.merkez(oku=lambda: {"acik": True, "ad": AD}, yol=cfg)["adres"], "https://" + AD)
+                    uzak._kokenleri_yaz(AD, cfg)
+                    with open(cfg, encoding="utf-8") as f:
+                        eq(json.load(f)["allowed_origins"], ["https://x.y"], "tek koken: capraz koken gerekmez")
+            finally:
+                uzak.kapilari_sec(False)
+            eq((uzak.KAPILAR, uzak.HESAP_KAPI), (eski, 5183))
+            calistir, cagri = _sahte()
+            uzak.kapat(calistir)
+            eq(kapanan(cagri), ["--https=5173", "--https=5183", "--https=5193", "--https=443"], "bugunku sira")
+        test("kapi anahtari: tekkapi.ETKIN kapaliyken dort kapi aynen, acikken yalniz 443 -> 4180", tek_kapi_anahtari)
+
         def basarisiz():
             calistir, _ = _sahte(kod=1, stderr="Serve is not enabled on your tailnet")
             yazilan = []

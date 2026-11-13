@@ -1437,27 +1437,43 @@
       srv.merkez = null;
       expect(await h._merkezBagla()).toBe(false);          // kapalı: sessiz, ayar değişmez
       expect(a.token).toBe('');
-      srv.merkez = { url:'https://pc.ts.net', token:'jeton-x', adres:'https://pc.ts.net:5183' };
+      /* Söz 30: cihaz kendi anahtarını alır, Merkez'e hesap sunucusunun yolundan gider. */
+      const yol = '/api/hesap/hkm', konum0 = h._ortam.konum;
+      h._ortam.konum = () => Object.assign({}, konum0(), { origin:'https://192.168.1.5:5183' });  // tarayıcıda hep var
+      srv.merkez = { url:'https://pc.ts.net:5183' + yol, yol, token:'cihaz-1', adres:'https://pc.ts.net:5183' };
       expect(await h._merkezBagla()).toBe(true);
-      expect(a).toEqual({ url:'https://pc.ts.net', token:'jeton-x', enabled:true, lastStatus:null });
-      srv.merkez = { url:'https://baska', token:'y' };
+      expect(a.url).toBe('https://192.168.1.5:5183' + yol);                 // sayfanın kendi kökeni
+      expect([a.token, a.enabled, a.lastStatus]).toEqual(['cihaz-1', true, null]);
+      srv.merkez = { url:'https://baska' + yol, yol, token:'y' };
       expect(await h._merkezBagla()).toBe(false);          // bağ varsa yeniden istemez
       a.lastStatus = 401;
-      expect(await h._merkezBagla()).toBe(true);           // jeton yenilendiyse alır
-      /* Özel ağ adresi: hesapsız, Tailscale kimliğiyle; sunucu reddederse sessiz. */
+      expect(await h._merkezBagla()).toBe(true);           // anahtar öldüyse (cihaz çıkarıldı) yeniden ister
+      expect(a.token).toBe('y');
+      /* Eski cihaz: ortak jetonu tutuyor; hesapla girmişse bir kez kendi anahtarına geçer. */
+      Object.assign(a, { url:'https://pc.ts.net', token:'ortak', lastStatus:null });
+      srv.merkez = { url:'https://pc.ts.net:5183' + yol, yol, token:'cihaz-2' };
+      expect(await h._merkezBagla()).toBe(true);
+      expect([a.token, a.url.endsWith(yol)]).toEqual(['cihaz-2', true]);
+      /* Özel ağ adresi: hesaplı cihaz da kendi anahtarını alır; hesapsız cihaz Tailscale kimliğiyle,
+         sunucu reddederse sessiz. */
       const b = { url:'', token:'' };
       h.kur({ modul:'spi', depo:c.depo, hkm:() => ({ settings:() => b, save:async v => Object.assign(b, v) }) });
-      const konum = h._ortam.konum, fetch0 = h._ortam.fetch, istenen = [];
-      h._ortam.konum = () => ({ protocol:'https:', hostname:'pc.ts.net' });
+      const fetch0 = h._ortam.fetch, istenen = [];
+      h._ortam.konum = () => ({ protocol:'https:', hostname:'pc.ts.net', origin:'https://pc.ts.net:5183' });
       let izin = false;
       h._ortam.fetch = async (u, s) => { if(u === '/api/uzak/merkez'){ istenen.push(s.headers['X-LifeOS']); return { ok:izin, json:async () => ({ url:'https://pc.ts.net', token:'j' }) }; } return fetch0(u, s); };
+      srv.merkez = { url:'https://pc.ts.net:5183' + yol, yol, token:'cihaz-3' };
+      expect(await h._merkezBagla()).toBe(true);
+      expect([b.token, b.url.endsWith(yol), istenen]).toEqual(['cihaz-3', true, []]);
+      await h.cikisYap();
+      Object.assign(b, { url:'', token:'' });
       expect(await h._merkezBagla()).toBe(false);
       expect(b.token).toBe('');
       izin = true;
       expect(await h._merkezBagla()).toBe(true);
       expect(b.token).toBe('j');
       expect(istenen).toEqual(['hesap', 'hesap']);
-      h._ortam.konum = konum; h._ortam.fetch = fetch0;
+      h._ortam.konum = konum0; h._ortam.fetch = fetch0;
     }));
 
     it('kimlik, plan ve gruplar; yönetim yalnız adminde', () => sahneyle(async () => {

@@ -36,6 +36,7 @@ import uzak  # noqa: E402
 
 ETKIN = False          # P6: her cihazin goc paketi geldikten sonra True; o zaman port 4180
 ETKIN_PORT = 4180
+uzak.kapilari_sec(ETKIN)    # Tailscale serve: bayrak kapaliyken eski dort kapi, acikken yalniz 443 -> 4180
 
 MODULLER = {k.lower(): k for k, *_ in sunucu.SISTEMLER}     # ays -> AYS
 _SINIF = {}            # ays -> (Sunucu alt sinifi, src klasoru)
@@ -90,6 +91,8 @@ def _hkm_ayni_surecte(port):
     sunucu.hkm_ac = lambda calistir=None: dict(tamam)
     sunucu.hkm_yeniden = lambda calistir=None: dict(tamam)
     sunucu.gun_cumlesi = partial(sunucu.gun_cumlesi, adres="http://%s:%d/api/hkm/king/cumle" % (HOST, port), jeton=HKM["jeton"])
+    # Cihazin Merkez yolu (hesap.py soz 30) da bu surecin HKM'sine gider, 4200'e degil.
+    sunucu.hesap.hkm_hedef = lambda: ("http://%s:%d/api/hkm" % (HOST, port), HKM["jeton"])
 
 
 class TekKapi(Giris):
