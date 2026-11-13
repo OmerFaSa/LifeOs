@@ -1,0 +1,275 @@
+{
+  "sema": 1,
+  "alan": "dil",
+  "id": "dil.2",
+  "sira": 2,
+  "ad": "İngilizce A1: ilk cümleler",
+  "hedef": "İngilizcenin sesleriyle ve sözcük sırasıyla tanışmak, kendini zamirler ve «to be» ile tanıtmak, en sık fiillerle ilk cümleleri kurmak ve alışkanlık ile şu anı ayırmak.",
+  "onKosul": ["dil.1"],
+  "kanitIsi": "İngilizce kendini üç cümleyle tanıtan bir ses kaydı yap (ESP merdiveni, Dil 1. basamak: «Kendini üç cümleyle tanıtan bir kayıt»): adın, ne olduğun, sevdiğin bir şey. Sahip dinleyip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "İngilizce kelime sıklığı listesi (hermitdave/FrequencyWords, OpenSubtitles 2018, ilk 2000)", "tur": "depo", "yol": "ESP/src/js/data/kelimesiklik.js", "bolum": "ESP.KELIME_SIKLIK, en", "satir": "10-16", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Tatoeba İngilizce-Türkçe cümle çiftleri (sık kelime başına en kısa cümle, CC BY 2.0 FR)", "tur": "depo", "yol": "ESP/src/js/data/kelimeornek.js", "bolum": "ESP.KELIME_ORNEK, en", "satir": "10-15", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "ESP dil üniteleri: Temel fiiller ve Gündelik kalıplar (A1, İngilizce öğeler)", "tur": "depo", "yol": "ESP/src/js/data/lessons.js", "bolum": "ESP.LANG_UNITS temel-fiil, gundelik", "satir": "32-62", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "ESP dilbilgisi haritası: A1 konuları (sözcük sırası, sayı ve belirlilik, şimdiki ve geniş zaman)", "tur": "depo", "yol": "ESP/src/js/data/grammar.js", "bolum": "ESP.GRAMMAR_TOPICS, A1", "satir": "22-31", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "IPA: yabancı dillerde kritik ünlüler (İngilizce)", "tur": "gemini", "yol": "ESP/dil/dunya_alfabeleri_yazi_sistemleri_tipografi_ve_fonetik_transkripsiyon_ipa_atlasi.md", "bolum": "Yabancı Dillerde Kritik IPA Ünlüleri", "satir": "92-96", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "ESP öğrenme kartı «Ses ve alfabe»", "tur": "depo", "yol": "ESP/src/js/data/ogrenmekartlari.js", "bolum": "lesson-l-ses", "satir": "8-30", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "ESP öğrenme kartı «Günlük hayat»", "tur": "depo", "yol": "ESP/src/js/data/ogrenmekartlari.js", "bolum": "lesson-l-gunluk", "satir": "54-77", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "Karşılaştırmalı dil tipolojisi: Türkçe ve İngilizce satırları", "tur": "gemini", "yol": "ESP/dil/ingilizce_c1_c2_ustalik_ve_karsilastirmali_dunya_dilleri.md", "bolum": "2.1 Temel Tipolojik Sistemler, 2.2 Dokuz Büyük Dilin Karşılaştırması", "satir": "90-104", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "CEFR düzeyleri: A1-A2 temel kullanıcı", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "6. CEFR Seviye Standartları", "satir": "112-116", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Nation: kelime sıklığı katmanları", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "4. Paul Nation: Kelime Frekans Mühendisliği", "satir": "75-82", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "dil.2.k1", "tur": "secmeli", "soru": "«Ben çok meşgulüm.» cümlesinin İngilizcesi hangisidir?", "sec": ["I very busy.", "I is very busy.", "Me am very busy.", "I'm very busy."], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+      { "id": "dil.2.k2", "tur": "secmeli", "soru": "«O burada mı yaşıyor?» sorusunun İngilizcesi hangisidir?", "sec": ["Is he live here?", "Does he live here?", "Do he lives here?", "He live here?"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+      { "id": "dil.2.k3", "tur": "secmeli", "soru": "«Our team lost.» (Takımımız kaybetti.) cümlesinde «our» Türkçede neyle karşılanır?", "sec": ["«-ımız» iyelik ekiyle", "«biz» zamiriyle", "«-ler» çoğul ekiyle", "«-dı» geçmiş zaman ekiyle"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+      { "id": "dil.2.k4", "tur": "secmeli", "soru": "«Who is playing the guitar?» (Kim gitar çalıyor?) cümlesi neyi anlatır?", "sec": ["Bir alışkanlığı", "Geçmişte bitmiş bir eylemi", "Şu an olan bir eylemi", "Bir sahipliği"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] },
+      { "id": "dil.2.k5", "tur": "secmeli", "soru": "«These are my books.» (Bunlar benim kitaplarım.) cümlesinde çoğulu gösteren işaretlerden ikisi hangileridir?", "sec": ["«my» ve «books»", "«These» ve «my»", "«are» ve «my»", "«books» sözcüğündeki -s ve «are»"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "dil.2.1",
+      "ad": "İngilizceye ilk adım",
+      "onKosul": [],
+      "kazanim": ["Özne, nesne ve yüklemi doğru sırayla dizebiliyorum (ESP dilbilgisi haritası, A1)."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "dil.2.1.k1", "tur": "secmeli", "soru": "Kaynağa göre /æ/ ünlüsü hangi İngilizce sözcükte geçer?", "sec": ["seat", "cat", "cup", "about"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+          { "id": "dil.2.1.k2", "tur": "secmeli", "soru": "«Fish live in the water.» (Balıklar suda yaşar.) cümlesinin yüklemi hangisidir?", "sec": ["Fish", "live", "in", "water"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k8"] },
+          { "id": "dil.2.1.k3", "tur": "secmeli", "soru": "«Onun adını biliyorum.» cümlesinin doğru İngilizce sırası hangisidir?", "sec": ["I his name know.", "His name I know.", "Know I his name.", "I know his name."], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k8"] },
+          { "id": "dil.2.1.k4", "tur": "secmeli", "soru": "Depodaki İngilizce sıklık listesi hangi metinlerden sayılmıştır?", "sec": ["Gazete arşivlerinden", "Ders kitaplarından", "Film ve dizi altyazılarından (OpenSubtitles)", "Akademik makalelerden"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "dil.2.1.1",
+          "ad": "İngilizcenin sesleri: yazı başka, ses başka",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k6"],
+          "ozet": "İngilizcede Türkçede olmayan ünlüler vardır ve yazım sesi tam göstermez. Bu yüzden sesi IPA ile ve dinleyerek öğrenmek, yazıyla ayrı tutmak gerekir.",
+          "metin": [
+            "1. aşamada IPA'yı ve Türkçenin sekiz ünlüsünü gördün. Kaynağın İngilizce için seçtiği, Türkçede olmayan dört ünlü: /ə/ (schwa: about, banana), /æ/ (cat, black), /ɪ/ (sit /sɪt/; seat /siːt/ ile karşılaştır) ve /ʌ/ (cup, run).",
+            "ESP'nin «Ses ve alfabe» kartı şunu söyler: ses, harf ve yazım aynı nesne değildir. Çalışırken duyduğun sesi ve onu gösteren yazıyı ayrı kaydet; bir sözcüğü doğru yazmak, onu doğru söylediğinin ölçüsü değildir.",
+            "Kartın örneği: ship ile sheep farklı sözcüklerdir; yazımı kopyalamak ses farkını göstermeye yetmez. Modelin bağlantı notu: sit ile seat de aynı türden bir çifttir; ikisini ayırmak, yukarıdaki /ɪ/ ile uzun /iː/ farkını duymak demektir.",
+            "Sınır: depoda İngilizce ses kaydı yok. Kartın uyardığı yanlışa düşme: örnek ses dosyası yokken telaffuz doğrulandı sayılmaz. Bu dersin dinleme kısmı eksiktir; sözcükleri bir sözlüğün sesli okumasıyla karşılaştır."
+          ],
+          "not": "Depoda ve gemini-data'da İngiliz alfabesi ve harf adları için kaynak yok; ders alfabeyi öğretmiyor. Dinleme malzemesi de yok (içerik hattı §6.2).",
+          "alistirmalar": [
+            { "id": "dil.2.1.1.a1", "tur": "secmeli", "soru": "Kaynağa göre «sit» sözcüğünün ünlüsü IPA'da hangi simgeyle yazılır?", "sec": ["/iː/", "/ʌ/", "/ə/", "/ɪ/"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "dil.2.1.1.a2", "tur": "secmeli", "soru": "«Ses ve alfabe» kartına göre bir sözcüğü doğru yazabilmek neyi kanıtlamaz?", "sec": ["Sözcüğü doğru söylediğini", "Sözcüğün harflerini bildiğini", "Sözcüğü tanıdığını", "Sözcüğü gördüğünü"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] }
+          ]
+        },
+        {
+          "id": "dil.2.1.2",
+          "ad": "Sözcük sırası: Türkçe SOV, İngilizce SVO",
+          "onKosul": ["dil.2.1.1"],
+          "kazanim": ["Özne, nesne ve yüklemi doğru sırayla dizebiliyorum (ESP dilbilgisi haritası, A1)."],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k8", "k4", "k2"],
+          "ozet": "Türkçede yüklem sona gelir (özne-nesne-yüklem); İngilizcede yüklem öznenin hemen ardından gelir (özne-yüklem-nesne). Türkçenin sırasını İngilizceye taşımak A1'in ilk tuzağıdır.",
+          "metin": [
+            "Kaynak dilleri cümle dizilişine göre karşılaştırır: Türkçe SOV (özne-nesne-yüklem), İngilizce SVO (özne-yüklem-nesne) dizilir. Kaynağın Türk öğrenen için notu: İngilizcede dilbilgisel cinsiyetin olmaması kolaylık; katı SVO sırası ve edatlar güçlüktür.",
+            "Tatoeba'dan bir çift: «I love you.» = «Seni seviyorum.» İngilizcede sıra I (özne) + love (yüklem) + you (nesne); Türkçede yüklem «seviyorum» en sondadır. Bir çift daha: «I want coffee.» = «Kahve istiyorum.»",
+            "Kaynak Türkçeyi sondan eklemeli bir dil sayar: kök değişmez, her işlev için köke ek eklenir. İngilizceyi ise analitik-yalın diye niteler; böyle dillerde işi ekler yerine ayrı sözcükler ve sözcük sırası görür. Bu yüzden İngilizcede sıra anlamı taşır.",
+            "ESP dilbilgisi haritasının A1 hedefi: «Özne, nesne ve yüklemi doğru sırayla dizebiliyorum.» Aynı satırdaki tuzak: «Ana dilinin sırasını hedef dile taşımak.»"
+          ],
+          "not": "Kaynak tablosu Türkçeyi «Altay» ailesine koyuyor (satır 103); Altay dil ailesi tartışmalı bir sınıflamadır, derse alınmadı.",
+          "alistirmalar": [
+            { "id": "dil.2.1.2.a1", "tur": "secmeli", "soru": "«Kahve istiyorum.» cümlesinin doğru İngilizce sırası hangisidir?", "sec": ["I coffee want.", "I want coffee.", "Coffee want I.", "Want coffee I."], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.1.2.a2", "tur": "secmeli", "soru": "Kaynağa göre İngilizcenin temel cümle dizilişi hangisidir?", "sec": ["SOV (özne-nesne-yüklem)", "VSO (yüklem-özne-nesne)", "SVO (özne-yüklem-nesne)", "Serbest"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] }
+          ]
+        },
+        {
+          "id": "dil.2.1.3",
+          "ad": "Önce sık kelimeler, cümleyle birlikte",
+          "onKosul": ["dil.2.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10", "k1", "k3", "k2"],
+          "ozet": "Bir dilin en sık bin kelimesi gündelik dilin büyük kısmını taşır. Depodaki İngilizce sıklık listesinin başında zamirler ve «olmak» fiilinin biçimleri durur; her kelime bir örnek cümleyle öğrenilir.",
+          "metin": [
+            "1. aşamada Nation'ın sıklık katmanlarını gördün. Kaynağa göre ilk 1.000 kelime ailesi metnin yaklaşık %80-85'ini kapsar ve zamirlerle en sık fiillerin omurgasıdır (kaynağın sayısı, doğrulanmadı).",
+            "Depodaki İngilizce sıklık listesi film ve dizi altyazılarından sayılmıştır (OpenSubtitles 2018, ilk 2000 kelime). İlk on kelime: you, i, the, to, a, it, and, that, of, is. İlk otuzda «olmak» fiilinin dört biçimi (is, was, be, are) ve sık fiiller (have, do, know, can) vardır.",
+            "Depodaki «Temel fiiller» ünitesi (A1) on fiille başlar: to be (olmak), to have (sahip olmak), to do (yapmak), to go (gitmek), to come (gelmek), to want (istemek), to need (ihtiyaç duymak), to know (bilmek), to think (düşünmek), to say (söylemek). Ünitenin görevi: beş fiili kendi cümlende kullan.",
+            "Kelime tek başına değil, cümlesiyle öğrenilir. Depo her sık kelime için Tatoeba'dan en kısa cümle çiftini tutar: «I know his name.» = «Onun adını biliyorum.»; «We need money.» = «Paraya ihtiyacımız var.»",
+            "Modelin notu: altyazı listesi konuşma dilini yansıtır; içinde ünlemler, argo ve küfür de vardır. Bu yüzden liste olduğu gibi ezberlenmez; buradaki dersler listenin başındaki işlev sözcüklerini ve sık fiilleri seçti."
+          ],
+          "alistirmalar": [
+            { "id": "dil.2.1.3.a1", "tur": "secmeli", "soru": "Depodaki İngilizce sıklık listesinde ilk iki kelime hangileridir?", "sec": ["the, a", "you, i", "is, are", "and, of"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "dil.2.1.3.a2", "tur": "secmeli", "soru": "«Temel fiiller» ünitesinde «to need» hangi Türkçe karşılıkla verilir?", "sec": ["İstemek", "Bilmek", "Sahip olmak", "İhtiyaç duymak"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dil.2.2",
+      "ad": "Kendini tanıtmak: zamirler ve «to be»",
+      "onKosul": ["dil.2.1"],
+      "kazanim": ["A1: kendini tanıtma ve basit ihtiyaçları ifade etme (CEFR, kaynaktaki tanım)."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "dil.2.2.k1", "tur": "secmeli", "soru": "«How much is a room?» (Bir oda ne kadar?) sorusunda «is» kullanılmasının nedeni nedir?", "sec": ["Özne (a room) tekildir", "Cümle geçmiş zamandadır", "Özne I'dır", "Özne çoğuldur"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "dil.2.2.k2", "tur": "secmeli", "soru": "«Bu kitaplar senin.» cümlesinin doğru İngilizcesi hangisidir?", "sec": ["These books is yours.", "These books am yours.", "These books are yours.", "This books is yours."], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "dil.2.2.k3", "tur": "secmeli", "soru": "Tatoeba'da «Affedersiniz» diye çevrilen kalıp hangisidir?", "sec": ["Excuse me", "Never mind", "See you soon", "Thank you"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "dil.2.2.k4", "tur": "secmeli", "soru": "«Stay here with us.» (Bizimle burada kal.) cümlesindeki «us» hangi zamirin nesne biçimidir?", "sec": ["they", "you", "we", "I"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "dil.2.2.1",
+          "ad": "Ben, sen, o: zamirler ve iyelik",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k1"],
+          "ozet": "İngilizce zamirler sıklık listesinin en başındadır. Özne, nesne ve iyelik için ayrı biçimler vardır; Türkçede ekle yapılan iyelik İngilizcede ayrı bir sözcükle yapılır.",
+          "metin": [
+            "Özne zamirleri: I (ben), you (sen, siz), we (biz), they (onlar). Türkçede tek bir «o» varken İngilizce cümlelerde he, she ve it görülür: «He is my brother.» = «O benim erkek kardeşim.»; «She is a selfish woman.» = «O bencil bir kadındır.»; «It's hot today.» = «Bugün hava sıcak.» Örneklerden çıkan kalıp (modelin çıkarımı): erkek için he, kadın için she, nesne ya da durum için it.",
+            "Nesne biçimleri: «Can you help me?» = «Bana yardım edebilir misin?»; «I believe in him.» = «Ona inanıyorum.»; «Everyone likes her.» = «Herkes ondan hoşlanıyor.»; «Stay here with us.» = «Bizimle burada kal.»; «I know one of them but not the other.» = «Birini tanıyorum da ötekini değil.» «You» hem özne hem nesne olarak aynı kalır: «I love you.»",
+            "İyelik sözcükleri: «I lost my key.» = «Anahtarımı kaybettim.»; «This is your key.» = «Bu sizin anahtarınız.»; «I know his name.» = «Onun adını biliyorum.»; «She smiled at her baby.» = «O, bebeğine gülümsedi.»; «Our team lost.» = «Takımımız kaybetti.»; «French is their mother tongue.» = «Onların ana dili Fransızca.»",
+            "Dikkat: «her» iki işte görülür: nesne (Everyone likes her: onu, ondan) ve iyelik (her baby: onun bebeği). Modelin bağlantı notu: Türkçede «-ım, -ın, -ımız» ekleriyle yapılan iyelik, İngilizcede adın önüne gelen ayrı bir sözcükle (my, your, our) yapılır; bu, önceki dersteki «işi ekler yerine sözcükler görür» kuralının bir örneğidir."
+          ],
+          "not": "Sözcüklerin sıklık sırası (you 1., i 2., we 13., me 14., he 16., my 18., your 21., they 37., she 40.) depodaki listeden okundu. Tatoeba kimlikleri: 1434, 250680, 853201, 242881, 434410, 260942, 430471, 23491, 27205, 460058, 449118, 487170, 512662, 29216, 34168.",
+          "alistirmalar": [
+            { "id": "dil.2.2.1.a1", "tur": "secmeli", "soru": "«Anahtarımı kaybettim.» cümlesindeki «-ım» ekinin İngilizce karşılığı hangisidir? (I lost ___ key.)", "sec": ["me", "I", "my", "mine"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.2.1.a2", "tur": "secmeli", "soru": "«O benim kız kardeşim.» cümlesi İngilizcede hangi zamirle başlar? (___ is my sister.)", "sec": ["It", "She", "They", "Him"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        },
+        {
+          "id": "dil.2.2.2",
+          "ad": "am, is, are: «olmak» fiili",
+          "onKosul": ["dil.2.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k3", "k1"],
+          "ozet": "Türkçede «-im, -dir» ekleriyle söylenen şey İngilizcede «to be» fiiliyle söylenir: I ile am, he/she/it ve tekil isimle is, you, they ve çoğulla are.",
+          "metin": [
+            "«To be» (olmak) depodaki «Temel fiiller» ünitesinin ilk fiilidir; biçimleri sıklık listesinin ilk otuzundadır. Türkçede ekle söylenen «öğrenciyim» İngilizcede ayrı bir fiille söylenir: «I am a student.» = «Ben bir öğrenciyim.»",
+            "Cümlelerden çıkan kalıp (modelin çıkarımı, örnekler Tatoeba'dan). I ile am: «I am a student.», «I'm very busy.» = «Ben çok meşgulüm.» He, she, it ve tekil isimle is: «He is very kind.» = «O çok kibardır.»; «The girl is a nurse.» = «Kız bir hemşire.»; «My name is Jack.» = «Benim adım Jack.»; «Life is beautiful.» = «Hayat güzeldir.» You, they ve çoğul isimle are: «Are you tired?» = «Yorgun musunuz?»; «Are they friends?» = «Onlar arkadaş mı?»; «Apples are red or green.» = «Elmalar kırmızı veya yeşildir.»",
+            "Kısaltmalar konuşmada sıktır: I'm, he's, she's, it's, you're. «It's hot today.»; «I think you're right.» = «Sanırım sen haklısın.»",
+            "Olumsuz cümlede «not» fiilden sonra gelir: «He is not a doctor.» = «O bir doktor değil.»; «She's not at home now.» = «O şimdi evde değil.»",
+            "Soruda fiil öznenin önüne geçer: «Are you tired?», «Is she young?» Kısa cevap: «Yes, she is.» = «Evet, genç.» Yaş da bu fiille sorulur: «How old are you?» = «Kaç yaşındasın?»"
+          ],
+          "not": "«we are» kalıbının örneği depodaki cümle çiftlerinde yok; ders «we» için ayrı örnek vermiyor. Tatoeba kimlikleri: 252287, 433991, 480142, 46459, 1646, 1829, 317830, 481593, 430088, 242881, 17212, 293617, 313695, 73541, 436243.",
+          "alistirmalar": [
+            { "id": "dil.2.2.2.a1", "tur": "secmeli", "soru": "The girl ___ a nurse. Boşluğa hangisi gelir?", "sec": ["am", "are", "is", "be"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.2.2.a2", "tur": "secmeli", "soru": "«O bir doktor değil.» cümlesinin İngilizcesi hangisidir?", "sec": ["He not is a doctor.", "He is not a doctor.", "He are not a doctor.", "Not he is a doctor."], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.2.2.a3", "tur": "secmeli", "soru": "«Yorgun musunuz?» sorusunun İngilizcesi hangisidir?", "sec": ["You are tired?", "Is you tired?", "Do you tired?", "Are you tired?"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        },
+        {
+          "id": "dil.2.2.3",
+          "ad": "Selamlaşma, tanışma ve kibar kalıplar",
+          "onKosul": ["dil.2.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k9", "k2", "k3", "k7"],
+          "ozet": "A1 düzeyinin işi basit ihtiyaçları söylemek ve kendini tanıtmaktır. Selam, veda, teşekkür, rica ve özür kalıpları bütün olarak, düşünmeden kurulacak kadar öğrenilir.",
+          "metin": [
+            "Kaynağa göre A1-A2 temel kullanıcı basit ihtiyaçlarını ifade eder, kendini tanıtır, yavaş ve net konuşmaları anlar.",
+            "Selam ve veda (Tatoeba): «Hello everyone!» = «Herkese merhaba!»; «Hi! How are you?» = «Merhaba! Nasılsın?»; «Fine, thank you. And you?» = «İyiyim, teşekkürler. Ya siz?»; «Good morning, Mike.» = «Günaydın, Mike.»; «Good night, Mom.» = «İyi geceler, anne.»; «See you soon!» = «Yakında görüşürüz!»; «Welcome to Japan.» = «Japonya'ya hoş geldiniz.»",
+            "Rica, teşekkür ve özür: «Please sit down.» = «Lütfen yerine otur.»; «No, thank you.» = «Hayır, teşekkürler.»; «Excuse me, who is this woman?» = «Affedersiniz, bu kadın kim?»; «I'm sorry I'm so late.» = «Geç kaldığım için üzgünüm.» Öğrenen için en yararlısı: «Could you speak more slowly, please?» = «Lütfen daha yavaş konuşabilir misin?»",
+            "Depodaki «Gündelik kalıplar» ünitesi (A1): «How are you doing?» (Nasıl gidiyor?), «Could you help me?» (Yardım eder misin?), «I'm sorry, I didn't catch that.» (Pardon, anlayamadım.), «Never mind.» (Boş ver.), «It depends.» (Duruma göre değişir.), «I'm on my way.» (Yoldayım.) Ünitenin görevi: bir gün boyunca bu kalıpları içinden kur, akşam hangilerinin eksik kaldığını yaz.",
+            "ESP'nin «Günlük hayat» kartının uyarısı: istek, bilgi sorusu ve teşekkür ayrı iletişim görevleridir; aynı ihtiyaç farklı söylenebilir: «I need a ticket.» / «Could I have a ticket, please?» Bir sözcüğü her cümlede aynı Türkçe karşılıkla çevirmek yanlıştır."
+          ],
+          "not": "Tatoeba kimlikleri: 854117, 30316, 239430, 64918, 64833, 32672, 281616, 415594, 31390, 393492, 277350, 30493.",
+          "alistirmalar": [
+            { "id": "dil.2.2.3.a1", "tur": "secmeli", "soru": "«Pardon, anlayamadım.» için depodaki kalıp hangisidir?", "sec": ["I'm sorry, I didn't catch that.", "It depends.", "Never mind.", "I'm on my way."], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+            { "id": "dil.2.2.3.a2", "tur": "secmeli", "soru": "Sabah karşılaştığın birine ne dersin?", "sec": ["Good night.", "Good morning.", "See you soon.", "Never mind."], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.2.3.a3", "tur": "acik", "soru": "Kanıt işi: Kendini İngilizce üç cümleyle tanıt: adını, ne olduğunu (öğrenci, iş) ve sevdiğin bir şeyi söyle. Yalnız bu ünitede gördüğün kalıpları kullan; sonra sesli oku ve kaydet.", "dogru": "Örnek: «Hello! My name is Ali. I am a student. I like dogs.»", "olcut": ["Her cümlede özne ve yüklem var, yüklem öznenin hemen ardında mı (SVO)?", "«to be» doğru biçimde mi (I am, he is …)?", "«a» gereken yerde unutulmadı mı (a student)?", "Kayıtta her cümle tek nefeste, takılmadan okundu mu?"], "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k9"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dil.2.3",
+      "ad": "İlk cümleler: sahip olmak, istemek, yapmak",
+      "onKosul": ["dil.2.2"],
+      "kazanim": ["Tekil–çoğul ve belirli–belirsiz ayrımını kurabiliyorum (ESP, A1).", "Alışkanlık ile şu an olanı ayırabiliyorum (ESP, A1)."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "dil.2.3.k1", "tur": "secmeli", "soru": "Tatoeba'da «My friend studies Korean.» cümlesi «Arkadaşım Korece öğreniyor.» diye çevrilmiştir. İngilizce cümle hangi kalıptadır?", "sec": ["Şu an olanı anlatan -ing kalıbı", "Geçmiş zaman", "Alışkanlığı anlatan geniş zaman (studies)", "Emir"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] },
+          { "id": "dil.2.3.k2", "tur": "secmeli", "soru": "She ___ coming from England. (O, İngiltere'den geliyor.) Boşluğa hangisi gelir?", "sec": ["is", "are", "does", "has"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "dil.2.3.k3", "tur": "secmeli", "soru": "«Bir köpeğim var.» cümlesinin İngilizcesi hangisidir?", "sec": ["I have dog.", "I has a dog.", "I am a dog.", "I have a dog."], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] },
+          { "id": "dil.2.3.k4", "tur": "secmeli", "soru": "«Nancy is afraid of dogs.» (Nancy köpeklerden korkar.) cümlesinde «dogs» neden -s alır?", "sec": ["Fiil geniş zamanda olduğu için", "Çoğul olduğu için", "İyelik gösterdiği için", "Özne Nancy olduğu için"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "dil.2.3.1",
+          "ad": "a, an, the ve çoğul",
+          "onKosul": [],
+          "kazanim": ["Tekil–çoğul ve belirli–belirsiz ayrımını kurabiliyorum (ESP, A1)."],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k2"],
+          "ozet": "İngilizce tekil sayılabilir adın önüne «a» ya da «an», bilinen adın önüne «the» koyar; çoğul ad -s alır. Türkçede belirsiz tanımlık olmadığı için «a» kolayca unutulur.",
+          "metin": [
+            "ESP dilbilgisi haritasının A1 hedefi: «Tekil–çoğul ve belirli–belirsiz ayrımını kurabiliyorum.» Aynı satırdaki tuzak: «Türkçede belirsiz tanımlık olmadığı için atlanması.»",
+            "Belirsiz «a»: «I have a car.» = «Benim bir arabam var.»; «I am a student.» = «Ben bir öğrenciyim.»; «He is not a doctor.» = «O bir doktor değil.» Türkçe çeviride «bir» bazen görünür, bazen görünmez: «The girl is a nurse.» = «Kız bir hemşire.»; ama İngilizcede «a» hep oradadır.",
+            "«An»: «I have an idea.» = «Bir fikrim var.» Modelin çıkarımı: «an», ünlü sesle başlayan sözcükten (idea) önce gelir; örnek tek olduğu için bu kuralı sahip ya da bir dilbilgisi kaynağı doğrulamalı.",
+            "Belirli «the»: «The sky is blue.» = «Gökyüzü mavidir.» Türkçe çeviride the'nin karşılığı görünmez; the, hangisi olduğu bilinen şeyi gösterir (belirli-belirsiz ayrımı).",
+            "Çoğul -s: «These are my books.» = «Bunlar benim kitaplarım.» (book → books); «I like dogs.» = «Köpekleri severim.»; «There are four members in my family.» = «Ailemde dört kişi var.» Sayıdan sonra Türkçe ad tekil kalır («dört kişi»), İngilizcede -s alır (four members)."
+          ],
+          "not": "Tatoeba kimlikleri: 252272, 252287, 293617, 46459, 34684, 18275, 55021, 252245, 250571. «an» kuralı tek örnekten çıkarıldı (modelin çıkarımı).",
+          "alistirmalar": [
+            { "id": "dil.2.3.1.a1", "tur": "secmeli", "soru": "I have ___ idea. Boşluğa hangisi gelir?", "sec": ["a", "an", "the", "hiçbiri"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.3.1.a2", "tur": "secmeli", "soru": "ESP dilbilgisi haritasına göre Türkçe konuşanın A1'de sık yaptığı hata hangisidir?", "sec": ["Belirsiz tanımlığı (a/an) atlamak", "Çoğulu iki kez yapmak", "Fiili cümle başına koymak", "Zamiri hiç kullanmamak"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+          ]
+        },
+        {
+          "id": "dil.2.3.2",
+          "ad": "have, want, need, like",
+          "onKosul": ["dil.2.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k3", "k1"],
+          "ozet": "Sıklık listesinin ilk yüzündeki dört fiille ilk ihtiyaç cümleleri kurulur: sahip olmak (have), istemek (want), ihtiyaç duymak (need), sevmek (like).",
+          "metin": [
+            "Dört fiil de depodaki sıklık listesinin ilk yüzündedir (have 20., like 38., want 59., need 98.); üçü «Temel fiiller» ünitesindedir.",
+            "Sahip olmak: «I have a car.» = «Benim bir arabam var.»; «She has blue eyes.» = «Onun mavi gözleri var.»; «The room has two windows.» = «Odada 2 tane pencere var.» Türkçede «var» ile söylenen sahiplik İngilizcede have ile söylenir. Örneklerden çıkan kalıp (modelin çıkarımı): he, she, it ve tekil isimle have yerine has gelir.",
+            "İstemek: «I want coffee.» = «Kahve istiyorum.» Tatoeba'da aynı tür istek «I'd like a tea.» = «Bir çay istiyorum.» biçiminde de geçer. İhtiyaç: «We need money.» = «Paraya ihtiyacımız var.»; «You need this.» = «Buna ihtiyacın var.»",
+            "Sevmek: «I like dogs.» = «Köpekleri severim.» Olumsuzu: «I don't like school.» = «Okulu sevmiyorum.» (don't = do not; bir sonraki derste)."
+          ],
+          "not": "Tatoeba kimlikleri: 252272, 472087, 44240, 854401, 64225, 493908, 416869, 252245, 386739.",
+          "alistirmalar": [
+            { "id": "dil.2.3.2.a1", "tur": "secmeli", "soru": "She ___ blue eyes. Boşluğa hangisi gelir?", "sec": ["have", "is", "has", "are"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.3.2.a2", "tur": "secmeli", "soru": "«Okulu sevmiyorum.» cümlesinin İngilizcesi hangisidir?", "sec": ["I don't like school.", "I not like school.", "I am not like school.", "I like not school."], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        },
+        {
+          "id": "dil.2.3.3",
+          "ad": "Geniş zaman ve şimdiki zaman: alışkanlık mı, şu an mı?",
+          "onKosul": ["dil.2.3.2"],
+          "kazanim": ["Alışkanlık ile şu an olanı ayırabiliyorum (ESP, A1)."],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k2"],
+          "ozet": "İngilizce alışkanlığı (I play tennis every day) ve şu an olanı (I'm repairing the house) iki ayrı kalıpla söyler. Türkçede ikisi de çoğu zaman «-iyor» ile çevrildiği için karışır.",
+          "metin": [
+            "ESP dilbilgisi haritasının A1 hedefi: «Alışkanlık ile şu an olanı ayırabiliyorum.» Tuzak: «İkisini tek kalıpla karşılamak.»",
+            "Alışkanlık (geniş zaman): «I play tennis every day.» = «Ben her gün tenis oynarım.»; «I always get up at six.» = «Her zaman saat altıda kalkarım.»; «She cooks well.» = «O iyi yemek yapar.» Örneklerden çıkan kalıp (modelin çıkarımı): he, she ile fiil -s alır (cooks; «John comes from Florida»).",
+            "Şu an olan (şimdiki zaman): am/is/are + fiil-ing. «I'm repairing the house.» = «Evi onarıyorum.»; «It's getting cloudy.» = «Hava bulutlanıyor.»; «I'm doing this for you.» = «Bunu senin için yapıyorum.»",
+            "Geniş zamanda soru ve olumsuz «do / does» ile kurulur: «Do you speak German?» = «Almanca konuşuyor musun?»; «Does he live here?» = «O burada mı yaşıyor?»; «Where do you live?» = «Nerede yaşıyorsun?»; «I don't feel well.» = «İyi hissetmiyorum.»; «I do not understand you.» = «Sizi anlamıyorum.»",
+            "Tuzağın kendisi Tatoeba çevirilerinde görülüyor: «Does Ken play tennis?» → «Ken tenis oynuyor mu?», «Where do you live?» → «Nerede yaşıyorsun?» Türkçe «-iyor» burada alışkanlığı anlatıyor; İngilizce ise alışkanlık için -ing değil, geniş zaman kullanıyor. Türkçeden çevirirken önce sor: alışkanlık mı, şu an mı?"
+          ],
+          "not": "Tatoeba kimlikleri: 473883, 253111, 317439, 52657, 392344, 280741, 413024, 522397, 497731, 370708, 1717, 252832, 62497.",
+          "alistirmalar": [
+            { "id": "dil.2.3.3.a1", "tur": "secmeli", "soru": "«Her gün tenis oynarım.» cümlesinin İngilizcesi hangisidir?", "sec": ["I play tennis every day.", "I am playing tennis every day.", "I playing tennis every day.", "I plays tennis every day."], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] },
+            { "id": "dil.2.3.3.a2", "tur": "secmeli", "soru": "«Evi onarıyorum.» (şu an) cümlesinin İngilizcesi hangisidir?", "sec": ["I repair the house.", "I repairs the house.", "I'm repairing the house.", "I do repair the house."], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.2.3.3.a3", "tur": "secmeli", "soru": "___ he live here? Boşluğa hangisi gelir?", "sec": ["Is", "Do", "Are", "Does"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

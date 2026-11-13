@@ -1,0 +1,280 @@
+{
+  "sema": 1,
+  "alan": "felsefe",
+  "id": "felsefe.2",
+  "sira": 2,
+  "ad": "İlk tez",
+  "hedef": "Önermeden kıyasa bir argümanın yapısını çözmek, geçerlilik ile doğruluğu ayırmak, sık görülen safsataları tanımak ve bir teze dürüstçe itiraz etmeyi öğrenmek.",
+  "onKosul": ["felsefe.1"],
+  "kanitIsi": "Bir teze kendi itirazını yazıp cevaplamak (ESP merdiveni, Felsefe 2. basamak «İlk tez»). Tezi Toulmin parçalarına ayır, çelik adam biçimiyle özetle, itiraz et, sonra itiraza cevap ver. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "MEB Felsefe öğretim programı kazanımları (10. sınıf), gemini-data tablosu", "tur": "gemini", "yol": "MUFREDAT/felsefe.md", "bolum": "10. Sınıf, FEL.10.2.2", "satir": "12", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Klasik mantık: dört önerme biçimi (A, E, I, O)", "tur": "gemini", "yol": "ESP/felsefe/klasik_mantik_isagoci_beş_sanat_ve_modern_epistemoloji.md", "bolum": "2.1 Önermeler ve Karşıolum Karesi", "satir": "66-73", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "Klasik mantık: karşı olum karesindeki dört ilişki", "tur": "gemini", "yol": "ESP/felsefe/klasik_mantik_isagoci_beş_sanat_ve_modern_epistemoloji.md", "bolum": "2.1 Önermeler ve Karşıolum Karesi", "satir": "75-90", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "AYT mantık: karşı olum karesi doğruluk değerleri", "tur": "gemini", "yol": "AYS/ayt/ayt_felsefe_grubu_psikoloji_sosyoloji_mantik_ve_tyt_felsefe_akimlari_tam_atlasi.md", "bolum": "Karşı Olum Karesi (A, E, I, O) Doğruluk Değerleri", "satir": "132-137", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "Klasik mantık: kıyasın yapısı ve şekilleri", "tur": "gemini", "yol": "ESP/felsefe/klasik_mantik_isagoci_beş_sanat_ve_modern_epistemoloji.md", "bolum": "2.2 Kıyas Mimarisi ve Şekilleri", "satir": "94-105", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "AYS TYT felsefe anlatımı ts-f8 «Mantık»: önermeler ve akıl yürütme", "tur": "depo", "yol": "AYS/src/js/data/anlatim-ts.js", "bolum": "ts-f8, Önermeler ve Akıl yürütme", "satir": "650-668", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "AYS derin ders ts-f8: kazanım, örnekler, sık hatalar", "tur": "depo", "yol": "AYS/src/js/data/derin-ts.js", "bolum": "ts-f8", "satir": "1035-1065", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "Mantıksal argüman denetim rubriği", "tur": "gemini", "yol": "ESP/felsefe/filozoflar_akimlar_dusunce_deneyleri.md", "bolum": "3.2. Mantıksal Argüman Denetim Rubriği", "satir": "196-201", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "Popper: tümevarım sorunu", "tur": "gemini", "yol": "ESP/felsefe/etik_siyaset_hukuk_ve_bilim_felsefesi_ustalik.md", "bolum": "4.1 Mantıkçı Pozitivizm vs Karl Popper", "satir": "125-128", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Safsata ansiklopedisi 1-4: biçimsel safsatalar", "tur": "gemini", "yol": "ESP/felsefe/mantik_safsatalar_40_mantik_hatasi_arguman_analizi_ve_elestirel_dusunme_atlasi.md", "bolum": "4. 40 Mantık Safsatası Ansiklopedisi", "satir": "86-89", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "Safsata ansiklopedisi 5-9: kişiye ve konuya yönelen safsatalar", "tur": "gemini", "yol": "ESP/felsefe/mantik_safsatalar_40_mantik_hatasi_arguman_analizi_ve_elestirel_dusunme_atlasi.md", "bolum": "4. 40 Mantık Safsatası Ansiklopedisi", "satir": "90-94", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "Safsata ansiklopedisi 15-27: neden, veri ve ikilem hataları", "tur": "gemini", "yol": "ESP/felsefe/mantik_safsatalar_40_mantik_hatasi_arguman_analizi_ve_elestirel_dusunme_atlasi.md", "bolum": "4. 40 Mantık Safsatası Ansiklopedisi", "satir": "100-112", "dogrulama": "dogrulanmamis" },
+    { "id": "k13", "ad": "Safsata ansiklopedisi 29-37: başvuru safsataları ve döngüsel akıl yürütme", "tur": "gemini", "yol": "ESP/felsefe/mantik_safsatalar_40_mantik_hatasi_arguman_analizi_ve_elestirel_dusunme_atlasi.md", "bolum": "4. 40 Mantık Safsatası Ansiklopedisi", "satir": "114-122", "dogrulama": "dogrulanmamis" },
+    { "id": "k14", "ad": "Toulmin'in altı bileşenli argüman modeli", "tur": "gemini", "yol": "ESP/felsefe/mantik_safsatalar_40_mantik_hatasi_arguman_analizi_ve_elestirel_dusunme_atlasi.md", "bolum": "2. Stephen Toulmin: 6 Bileşenli Argüman Mimarisi", "satir": "35-64", "dogrulama": "dogrulanmamis" },
+    { "id": "k15", "ad": "Çelik adam ve Rapoport'un dört kuralı", "tur": "gemini", "yol": "ESP/felsefe/mantik_safsatalar_40_mantik_hatasi_arguman_analizi_ve_elestirel_dusunme_atlasi.md", "bolum": "3. Entelektüel Dürüstlük", "satir": "68-78", "dogrulama": "dogrulanmamis" },
+    { "id": "k16", "ad": "Beş sanat: burhan, cedel, hitabet, şiir, mugâlata", "tur": "gemini", "yol": "ESP/felsefe/klasik_mantik_isagoci_beş_sanat_ve_modern_epistemoloji.md", "bolum": "BÖLÜM 3: Beş Sanat", "satir": "110-120", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "felsefe.2.k1", "tur": "secmeli", "soru": "«Bazı kitaplar sıkıcıdır» önermesinin çelişiği hangisidir?", "sec": ["Bazı kitaplar sıkıcı değildir", "Hiçbir kitap sıkıcı değildir", "Bütün kitaplar sıkıcıdır", "Bazı kitaplar eğlencelidir"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k4"] },
+      { "id": "felsefe.2.k2", "tur": "secmeli", "soru": "«Bütün yazarlar okurdur. Bütün şairler yazardır. O hâlde bütün şairler okurdur.» kıyasında küçük terim hangisidir?", "sec": ["Okur", "Yazar", "Şair", "Kıyasta küçük terim yoktur"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+      { "id": "felsefe.2.k3", "tur": "secmeli", "soru": "Öncülleri yanlış ama biçimi kusursuz bir tümdengelim için hangisi söylenir?", "sec": ["Geçerlidir ama sağlam değildir", "Sağlamdır ama geçerli değildir", "Hem geçerli hem sağlamdır", "Ne geçerli ne sağlamdır"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k8", "k7"] },
+      { "id": "felsefe.2.k4", "tur": "secmeli", "soru": "«Elektrik kesilirse buzdolabı durur. Buzdolabı durdu; demek ki elektrik kesildi.» Bu akıl yürütmedeki hata hangisidir?", "sec": ["Önbileşeni inkâr etme", "Dört terim safsatası", "Artbileşeni onaylama", "Döngüsel akıl yürütme"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+      { "id": "felsefe.2.k5", "tur": "secmeli", "soru": "«Bu ilacın etkisiz olduğunu söyleyen araştırmacı zaten sigara içiyor; ona kim inanır?» cümlesindeki safsata hangisidir?", "sec": ["Çoğunluğa başvurma", "Kaygan zemin", "Sahte ikilem", "Ad hominem (kişiliğe saldırı)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+      { "id": "felsefe.2.k6", "tur": "secmeli", "soru": "Rapoport'un kurallarına göre bir görüşü eleştirmeden önce son olarak ne yapılır?", "sec": ["Karşı taraftan öğrenilen en az bir şey itiraf edilir", "Karşı tarafın en zayıf cümlesi seçilir", "Karşı tarafın uzmanlığı sorgulanır", "Dinleyicilerin çoğunluğunun görüşü sorulur"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "felsefe.2.1",
+      "ad": "Önermeden kıyasa",
+      "onKosul": [],
+      "kazanim": ["FEL.10.2.2"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "felsefe.2.1.k1", "tur": "secmeli", "soru": "«Hiçbir taş canlı değildir» önermesi hangi biçimdedir?", "sec": ["A (tümel olumlu)", "E (tümel olumsuz)", "I (tikel olumlu)", "O (tikel olumsuz)"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k7"] },
+          { "id": "felsefe.2.1.k2", "tur": "secmeli", "soru": "İkisi birden yanlış olamayan ama ikisi birden doğru olabilen önerme çifti hangisidir?", "sec": ["A ile E (karşıt)", "A ile O (çelişik)", "I ile O (alt karşıt)", "E ile I (çelişik)"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k4"] },
+          { "id": "felsefe.2.1.k3", "tur": "secmeli", "soru": "«Bazı öğrenciler sporcudur» yanlışsa «Bütün öğrenciler sporcudur» için ne söylenir?", "sec": ["Zorunlu olarak doğrudur", "Belirsizdir", "Zorunlu olarak yanlıştır", "Hem doğru hem yanlıştır"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+          { "id": "felsefe.2.1.k4", "tur": "secmeli", "soru": "Kıyasta iki öncülde de bulunan ama sonuca girmeyen terimin adı nedir?", "sec": ["Orta terim", "Büyük terim", "Küçük terim", "Yüklem"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "felsefe.2.1.1",
+          "ad": "Dört önerme: A, E, I, O",
+          "onKosul": [],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k6", "k7", "k1"],
+          "ozet": "Basit önermeler iki soruya göre dörde ayrılır: bütün sınıfı mı, bir kısmını mı kapsıyor (nicelik) ve onaylıyor mu, reddediyor mu (nitelik).",
+          "metin": [
+            "1. aşamada önermeyi gördün: iki kavramı bağlayan, doğru ya da yanlış olabilen yargı. Kaynak basit yüklemli önermeleri dört biçimde sınıflar. Ayrım nicelik (tümel mi, tikel mi) ve nitelik (olumlu mu, olumsuz mu) sorularına dayanır.",
+            "A, tümel olumlu: «Bütün insanlar ölümlüdür.» E, tümel olumsuz: «Hiçbir insan ölümsüz değildir.» I, tikel olumlu: «Bazı insanlar filozoftur.» O, tikel olumsuz: «Bazı insanlar filozof değildir.»",
+            "Ayırt etmenin kısa yolu: «hiçbir» bir sınıfın bütününü kapsar, yani önerme tümeldir; «değildir» ile biten önerme olumsuzdur. «Bazı» ise sınıfın yalnız bir kısmını, yani tikel önermeyi gösterir.",
+            "Bu aşamanın bağlı olduğu kazanım (FEL.10.2.2): «Mantığın temel kavramlarını ve argümantasyon sürecini yorumlayabilme.»"
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.2.1.1.a1", "tur": "secmeli", "soru": "«Bazı öğrenciler sporcu değildir.» önermesi hangi biçimdedir?", "sec": ["A (tümel olumlu)", "E (tümel olumsuz)", "I (tikel olumlu)", "O (tikel olumsuz)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+            { "id": "felsefe.2.1.1.a2", "tur": "secmeli", "soru": "Bir önermenin «tümel» ya da «tikel» oluşu neye göre belirlenir?", "sec": ["Yüklemin olumlu ya da olumsuz olmasına", "Cümlenin uzunluğuna", "Önermenin doğru ya da yanlış olmasına", "Öznenin bütününü mü bir kısmını mı kapsadığına"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k7", "k2"] }
+          ]
+        },
+        {
+          "id": "felsefe.2.1.2",
+          "ad": "Karşı olum karesi",
+          "onKosul": ["felsefe.2.1.1"],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k4", "k7"],
+          "ozet": "Aynı özne ve yüklemle kurulan A, E, I, O önermeleri bir karenin köşelerine yerleşir. Kare, birinin doğruluğunu bilince ötekiler hakkında ne söyleyebileceğini gösterir.",
+          "metin": [
+            "Çelişiklik (A ile O, E ile I): Biri doğruysa öteki kesinlikle yanlıştır; ikisi asla aynı doğruluk değerini almaz. Örnek: «Bütün kuşlar uçar» önermesinin çelişiği «Bazı kuşlar uçmaz»dır.",
+            "Karşıtlık (A ile E; bir kaynakta «üst karşıt»): İkisi aynı anda doğru olamaz, ama ikisi aynı anda yanlış olabilir. Kaynağın örneği: «Bütün kuğular beyazdır» da «Hiçbir kuğu beyaz değildir» de yanlıştır.",
+            "Alt karşıtlık (I ile O): İkisi aynı anda yanlış olamaz; en az biri doğrudur, ikisi birden de doğru olabilir.",
+            "Altıklık (A ile I, E ile O): Tümel doğruysa altındaki tikel de zorunlu olarak doğrudur. Tikel yanlışsa tümel de zorunlu olarak yanlıştır. Tikel doğruysa tümel belirsizdir.",
+            "Kaynağın andığı sık hata: çelişik ile karşıtı karıştırmak. A ile E karşıttır, A ile O çelişiktir."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.2.1.2.a1", "tur": "secmeli", "soru": "«Bütün kuşlar uçar» önermesinin çelişiği hangisidir?", "sec": ["Hiçbir kuş uçmaz", "Bazı kuşlar uçar", "Bazı kuşlar uçmaz", "Bütün kuşlar yürür"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+            { "id": "felsefe.2.1.2.a2", "tur": "secmeli", "soru": "A ve E önermeleri için hangisi doğrudur?", "sec": ["İkisi birden doğru olabilir", "İkisi birden doğru olamaz ama ikisi birden yanlış olabilir", "Biri doğruysa öteki zorunlu doğrudur", "İkisi birden yanlış olamaz"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k4"] },
+            { "id": "felsefe.2.1.2.a3", "tur": "secmeli", "soru": "«Bütün metaller iletkendir» doğruysa «Bazı metaller iletkendir» için ne söylenir?", "sec": ["Zorunlu olarak doğrudur", "Zorunlu olarak yanlıştır", "Belirsizdir", "Önerme değildir"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k4"] }
+          ]
+        },
+        {
+          "id": "felsefe.2.1.3",
+          "ad": "Kıyas: iki öncülden bir sonuç",
+          "onKosul": ["felsefe.2.1.2"],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k6"],
+          "ozet": "Kıyas, iki öncülden zorunlu olarak bir sonucun çıkarıldığı akıl yürütmedir. Üç terimi vardır: büyük terim, küçük terim ve ikisini bağlayan orta terim.",
+          "metin": [
+            "Kaynağa göre kıyas (dedüksiyon), iki öncülden zorunlu olarak bir sonucun çıkarıldığı akıl yürütmedir. Klasik mantığın kurucusu Aristoteles'tir; kıyas onun geliştirdiği tümdengelim biçimidir.",
+            "Kıyasın üç terimi: Büyük terim, sonucun yüklemidir. Küçük terim, sonucun öznesidir. Orta terim iki öncülde de bulunur ama sonuca hiç girmez; kaynak onu iki fikri birbirine bağlayan «menteşe» diye anlatır.",
+            "Kaynağın örneği (Barbara, AAA): «Bütün insanlar canlıdır. Bütün Türkler insandır. O hâlde bütün Türkler canlıdır.» Burada büyük terim «canlı», küçük terim «Türkler», orta terim «insan»dır. Üç önermenin üçü de A (tümel olumlu) biçimindedir; ad buradan gelir.",
+            "Kaynak orta terimin öncüllerdeki yerine göre dört kıyas şekli sayar; örneğin ikinci şekil daima olumsuz, üçüncü şekil daima tikel sonuç verir. Şekillerin ayrıntısı sonraki aşamalara kalır."
+          ],
+          "not": "«Üç önermenin üçü de A biçiminde; ad buradan gelir» cümlesi modelin bağlantı notudur: kaynak yalnız «Barbara (AAA)» yazıyor.",
+          "alistirmalar": [
+            { "id": "felsefe.2.1.3.a1", "tur": "secmeli", "soru": "«Bütün metaller elektriği iletir. Bakır bir metaldir. O hâlde bakır elektriği iletir.» kıyasında orta terim hangisidir?", "sec": ["Bakır", "Metal", "Elektriği iletmek", "Kıyasta orta terim yoktur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6", "k5"] },
+            { "id": "felsefe.2.1.3.a2", "tur": "secmeli", "soru": "Sonucun yüklemi olan terime ne denir?", "sec": ["Küçük terim", "Orta terim", "Büyük terim", "Öncül"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "felsefe.2.2",
+      "ad": "Akıl yürütme ve geçerlilik",
+      "onKosul": ["felsefe.2.1"],
+      "kazanim": ["FEL.10.2.2"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "felsefe.2.2.k1", "tur": "secmeli", "soru": "«Bu bahçedeki üç elma ağacı da ekimde meyve verdi; o hâlde bütün elma ağaçları ekimde meyve verir.» Bu akıl yürütme hangi türdendir?", "sec": ["Tümdengelim", "Tümevarım", "Analoji", "Kıyas"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+          { "id": "felsefe.2.2.k2", "tur": "secmeli", "soru": "Kaynağa göre doğruluk ile geçerlilik neye bakar?", "sec": ["İkisi de önermelerin içeriğine", "Doğruluk biçime, geçerlilik içeriğe", "Doğruluk içeriğe, geçerlilik biçime", "İkisi de akıl yürütmenin biçimine"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+          { "id": "felsefe.2.2.k3", "tur": "secmeli", "soru": "Popper'a göre «Bütün kuğular beyazdır» önermesi için hangisi doğrudur?", "sec": ["Yeterince beyaz kuğu görülünce kesin kanıtlanır", "Hiçbir gözlemle çürütülemez", "Tek bir siyah kuğu onu çürütür; ama beyaz kuğu gözlemleri onu kesin kanıtlamaz", "Bir analojidir"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] },
+          { "id": "felsefe.2.2.k4", "tur": "secmeli", "soru": "«Kalemim masadaysa odadadır. Kalemim masada değil; o hâlde odada değil.» Bu akıl yürütmedeki hata hangisidir?", "sec": ["Önbileşeni inkâr etme", "Artbileşeni onaylama", "Dağıtılmamış orta terim", "Hata yoktur"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "felsefe.2.2.1",
+          "ad": "Tümdengelim, tümevarım, analoji",
+          "onKosul": [],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k7", "k9"],
+          "ozet": "Tümdengelim genelden özele gider ve sonucu zorunludur; tümevarım tek tek gözlemlerden genele, analoji bir benzerlikten öteki duruma gider; ikisinin sonucu olasıdır.",
+          "metin": [
+            "Tümdengelim: genelden özele. Öncüller doğruysa sonuç zorunlu olarak doğrudur. «Bütün insanlar ölümlüdür. Sokrates insandır. O hâlde Sokrates ölümlüdür.» Kıyas bir tümdengelimdir.",
+            "Tümevarım: tek tek gözlemlerden genel bir sonuca. Sonuç olasıdır, zorunlu değildir.",
+            "Analoji: iki şey arasındaki benzerlikten yola çıkarak sonuç çıkarmak. Kaynağın uyarısı: analojiyi tümevarım sanmak sık hatadır; analoji tikelden tikele, tümevarım tikelden tümele gider. Analojinin sonucu da kesin değil, olasıdır.",
+            "Tümevarımın sınırı (Popper): Ne kadar çok beyaz kuğu görülse de «Bütün kuğular beyazdır» tümel önermesi kesin olarak kanıtlanamaz; ama tek bir siyah kuğu onu kesin olarak çürütür. Kaynak bunu doğrulama ile yanlışlama arasındaki mantıksal asimetri diye adlandırır."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.2.2.1.a1", "tur": "secmeli", "soru": "«Ahmet'in kedisi süt içer, Ayşe'nin kedisi süt içer, Can'ın kedisi süt içer; o hâlde bütün kediler süt içer.» Bu akıl yürütme hangisidir?", "sec": ["Tümdengelim", "Analoji", "Tümevarım", "Kıyas"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+            { "id": "felsefe.2.2.1.a2", "tur": "secmeli", "soru": "Kaynağa göre analoji ile tümevarımın farkı nedir?", "sec": ["Analoji tikelden tikele, tümevarım tikelden tümele gider", "Analoji genelden özele, tümevarım özelden genele gider", "İkisinin sonucu da zorunludur", "Analoji kıyasın bir şeklidir"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] }
+          ]
+        },
+        {
+          "id": "felsefe.2.2.2",
+          "ad": "Geçerlilik, doğruluk, sağlamlık",
+          "onKosul": ["felsefe.2.2.1"],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k8", "k7"],
+          "ozet": "Doğruluk önermelerin içeriğiyle, geçerlilik akıl yürütmenin biçimiyle ilgilidir. Hem geçerli hem öncülleri doğru olan argüman sağlamdır.",
+          "metin": [
+            "Kaynak bir düşünceyi değerlendirmek için dört katmanlı bir denetim önerir: (1) Öncüllerin doğruluğu: önermeler gerçekten doğru mu? (2) Biçimsel geçerlilik: öncüller doğru kabul edildiğinde sonuç mantıksal zorunlulukla çıkıyor mu? (3) Sağlamlık: argüman hem geçerli hem öncülleri doğru mu? (4) Safsata taraması (3. ünitenin konusu).",
+            "Doğruluk önermelerin içeriğiyle, geçerlilik akıl yürütmenin biçimiyle ilgilidir. Örnek: «Bütün balıklar uçar. Hamsi bir balıktır. O hâlde hamsi uçar.» Biçimce geçerlidir; ama ilk öncül yanlış olduğu için sonuç da yanlıştır. Bu argüman geçerli ama sağlam değildir.",
+            "Kaynağın andığı sık hata: geçerli bir akıl yürütmenin sonucunun her zaman doğru olduğunu sanmak. Öncül yanlışsa sonuç yanlış olabilir.",
+            "Modelin bağlantı notu: geçerlilik yalnız «öncüller doğruysa sonuç zorunlu mu?» diye sorar. Bu yüzden önce biçimi, sonra öncülleri ayrı ayrı sınamak gerekir; bir sonraki ders, biçimi bozuk olduğu hâlde ikna edici görünen kalıpları gösterir."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.2.2.2.a1", "tur": "secmeli", "soru": "Kaynağa göre sağlam (soundness) argüman hangisidir?", "sec": ["Sonucu doğru olan argüman", "Çoğunluğun kabul ettiği argüman", "Öncülleri çok sayıda olan argüman", "Hem geçerli hem öncülleri doğru olan argüman"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] },
+            { "id": "felsefe.2.2.2.a2", "tur": "secmeli", "soru": "«Bütün kuşlar dört ayaklıdır. Serçe bir kuştur. O hâlde serçe dört ayaklıdır.» Bu argüman için hangisi söylenir?", "sec": ["Geçerli ve sağlamdır", "Geçerli değildir", "Geçerlidir ama sağlam değildir", "Analojidir"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k8", "k7"] }
+          ]
+        },
+        {
+          "id": "felsefe.2.2.3",
+          "ad": "Biçim hataları: dört geçersiz kalıp",
+          "onKosul": ["felsefe.2.2.2"],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10"],
+          "ozet": "Bazı akıl yürütmeler içerikleri yüzünden değil biçimleri yüzünden çöker: artbileşeni onaylama, önbileşeni inkâr etme, dört terim ve dağıtılmamış orta terim.",
+          "metin": [
+            "Artbileşeni onaylama (P ise Q; Q; o hâlde P): «Yağmur yağarsa yerler ıslanır. Yerler ıslak; demek ki yağmur yağdı.» Kaynağın cevabı: sonucun tek bir nedeni yoktur; belediye sulamış olabilir.",
+            "Önbileşeni inkâr etme (P ise Q; P değil; o hâlde Q değil): «Maraton koşucusuysan kalbin sağlıklıdır. Koşucu değilsin; kalbin hastadır.» Cevap: önbileşenin yokluğu sonucu imkânsız kılmaz; sağlıklı kalbin tek yolu koşu değildir.",
+            "Dört terim safsatası: orta terim iki ayrı anlamda kullanılır, kıyasın üç terimi dörde çıkar. Kaynağın örneği: «Yıldızlar göktedir. Tarkan yıldızdır. Tarkan göktedir.» Burada «yıldız» bir öncülde gök cismi, ötekinde ünlü kişi anlamındadır.",
+            "Dağıtılmamış orta terim: iki kümenin tek bir ortak özelliğinden ikisinin aynı olduğu sonucunu çıkarmak. Kaynağın cevabıyla: paylaşılan tek bir özellik iki kümenin özdeş olduğunu kanıtlamaz. Modelin örneği: «Bütün kediler memelidir. Bütün köpekler memelidir. O hâlde bütün köpekler kedidir.»"
+          ],
+          "not": "Kaynağın dağıtılmamış orta terim örneğinde («Tüm insanlar yüzer», satır 89) öncül de yanlış; biçim hatasını içerik hatasından ayırmak için derste modelin örneği kullanıldı.",
+          "alistirmalar": [
+            { "id": "felsefe.2.2.3.a1", "tur": "secmeli", "soru": "«Hasta olan ateşlenir. Ali ateşlendi; demek ki hasta.» Bu akıl yürütme hangi kalıba uyar?", "sec": ["Önbileşeni inkâr etme", "Artbileşeni onaylama", "Dört terim", "Geçerli bir kıyas"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+            { "id": "felsefe.2.2.3.a2", "tur": "secmeli", "soru": "«Ders çalışırsan sınavı geçersin. Çalışmadın; o hâlde geçemezsin.» Bu akıl yürütme hangi kalıba uyar?", "sec": ["Artbileşeni onaylama", "Dağıtılmamış orta terim", "Önbileşeni inkâr etme", "Geçerli bir tümdengelim"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "felsefe.2.3",
+      "ad": "Safsatalar ve dürüst itiraz",
+      "onKosul": ["felsefe.2.2"],
+      "kazanim": ["FEL.10.2.2"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "felsefe.2.3.k1", "tur": "secmeli", "soru": "«Okul formasını kaldıralım» diyen birine «Yani okulda herkes istediği gibi mi gezsin, disiplin mi kalmasın?» diye cevap verilir. Bu hangi safsatadır?", "sec": ["Saman adam", "Tu quoque", "Çoğunluğa başvurma", "Cımbızlama"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+          { "id": "felsefe.2.3.k2", "tur": "secmeli", "soru": "«Şemsiye satışları arttıkça trafik kazaları da artıyor; demek ki şemsiye kazaya yol açıyor.» Bu akıl yürütmede gözden kaçan nedir?", "sec": ["Önbileşen inkâr edilmiştir", "Birlikte artan iki şeyin arkasındaki ortak etken (ör. yağmur)", "Orta terim iki anlamda kullanılmıştır", "Hiçbir hata yoktur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+          { "id": "felsefe.2.3.k3", "tur": "secmeli", "soru": "«Bu kitap değerlidir, çünkü kıymetli bir eserdir.» Bu cümledeki safsata hangisidir?", "sec": ["Otoriteye başvurma", "Aceleci genelleme", "Kaygan zemin", "Döngüsel akıl yürütme"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] },
+          { "id": "felsefe.2.3.k4", "tur": "secmeli", "soru": "Toulmin modelinde argümanın geçerli olmadığı koşulları belirten parça hangisidir?", "sec": ["Dayanak", "Veri", "İstisna", "Niteleyici"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "felsefe.2.3.1",
+          "ad": "Kişiye, konuya ve kalabalığa yönelen safsatalar",
+          "onKosul": [],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k16", "k11", "k13"],
+          "ozet": "Safsata, doğru gibi görünen ama yanıltan akıl yürütmedir. Bu dersteki safsatalar argümanın kendisini değil, kişiyi, başka bir konuyu ya da bir otoriteyi hedef alır.",
+          "metin": [
+            "Klasik mantıkçılar akıl yürütmeyi öncüllerinin kesinliğine göre beş sanata ayırır. Beşincisi mugâlatadır (safsata): doğru gibi görünen aldatıcı vehimlere dayanır ve amacı muhatabı yanıltmaktır.",
+            "Ad hominem (kişiliğe saldırı): fikri değil kişiyi hedef almak. Çıkar ithamı: «Çıkarı var, o hâlde yalan söylüyor» demek; kaynağın cevabıyla, söyleyenin fayda sağlaması söylenen şeyi yanlış kılmaz. Tu quoque (sen de yaptın): «Bana sigarayı bırak diyorsun ama sen de içiyorsun!»; söyleyenin tutarsızlığı iddiayı çürütmez.",
+            "Saman adam (korkuluk): karşı tarafın görüşünü abartıp çarpıtarak zayıf bir kopyasını çürütmek. Kaynağın örneği: «Savunma bütçesini kısıp eğitime verelim» diyene «Ordumuzu dağıtmak istiyorsun!» demek. Kırmızı ringa: konuyu duygusal bir yan alana saptırmak.",
+            "Başvuru safsataları: otoriteye başvurma (alan dışı bir uzmanın sözünü mutlak saymak), çoğunluğa başvurma («Herkes inanıyor, öyleyse doğrudur»), merhamete başvurma (argüman yerine acındırmak).",
+            "Modelin bağlantı notu: bu safsataların ortak yanı, tartışılan iddianın doğruluğu hakkında hiçbir şey söylememeleridir. Karşılık vermenin yolu da aynıdır: konuyu kişiden, duygudan ya da kalabalıktan alıp iddianın kendisine geri getirmek."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.2.3.1.a1", "tur": "secmeli", "soru": "«Bana sigarayı bırak diyorsun ama sen de içiyorsun!» cümlesindeki safsata hangisidir?", "sec": ["Saman adam", "Kırmızı ringa", "Otoriteye başvurma", "Tu quoque (sen de yaptın)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+            { "id": "felsefe.2.3.1.a2", "tur": "secmeli", "soru": "«Ünlü bir futbolcu bu diş macununu öneriyor, demek ki dişler için en iyisi bu.» Bu hangi safsataya örnektir?", "sec": ["Otoriteye başvurma (alan dışı uzman)", "Merhamete başvurma", "Ad hominem", "Döngüsel akıl yürütme"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] }
+          ]
+        },
+        {
+          "id": "felsefe.2.3.2",
+          "ad": "Neden, genelleme ve ikilem hataları",
+          "onKosul": ["felsefe.2.3.1"],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k12", "k13"],
+          "ozet": "Bir sonraki olanı neden sanmak, birlikte değişeni neden sanmak, azdan çoğa genellemek, işine gelen veriyi seçmek, seçenekleri ikiye indirmek ve sonucu öncüle gizlemek sık düşünme hatalarıdır.",
+          "metin": [
+            "Post hoc (ardından, öyleyse ondan): zaman sırasını neden-sonuç sanmak. «Horoz öttü ve güneş doğdu; demek ki horoz güneşi doğduruyor.» Cum hoc (birliktelik nedensellik değildir): birlikte artan iki şeyden birini ötekinin nedeni saymak. Kaynağın örneği: dondurma satışları arttıkça boğulmalar da artar; atlanan ortak etken sıcaklıktır.",
+            "Aceleci genelleme: yetersiz örneklemden genel kural çıkarmak («Paris'teki taksici kabaydı, Fransızlar çok kaba»). Cımbızlama: karşıt verileri gizleyip işine gelen tek veriyi sunmak.",
+            "Sahte ikilem: üçüncü yolu yok sayıp iki uca sıkıştırmak («Ya bizimlesin ya da düşmanımızsın!»). Kaygan zemin: küçük bir adımdan, aradaki bağları kanıtlamadan felaket zinciri çıkarmak.",
+            "Döngüsel akıl yürütme: iddiayı öncülün içine gizlemek. «Yalan söylemek kötüdür, çünkü ahlaksızcadır.» Gerekçe iddiayı başka sözcüklerle tekrar ediyor. Modelin bağlantı notu: bu, 1. aşamadaki tanımın kısır döngü (devir) yasağının argümandaki karşılığıdır."
+          ],
+          "alistirmalar": [
+            { "id": "felsefe.2.3.2.a1", "tur": "secmeli", "soru": "«Yeni ayakkabımı giydiğim gün maçı kazandık; bu ayakkabı şans getiriyor.» Bu akıl yürütmedeki hata hangisidir?", "sec": ["Sahte ikilem", "Post hoc (zaman sırasını neden sanmak)", "Saman adam", "Döngüsel akıl yürütme"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+            { "id": "felsefe.2.3.2.a2", "tur": "secmeli", "soru": "«Ya bu akşam bütün konuyu bitirirsin ya da sınavda sıfır alırsın.» Bu cümle hangi safsataya örnektir?", "sec": ["Sahte ikilem", "Cımbızlama", "Tu quoque", "Otoriteye başvurma"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] }
+          ]
+        },
+        {
+          "id": "felsefe.2.3.3",
+          "ad": "Argüman kurmak ve itiraz etmek",
+          "onKosul": ["felsefe.2.3.2"],
+          "kazanim": ["FEL.10.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14", "k15", "k8"],
+          "ozet": "Toulmin bir argümanı altı parçaya ayırır. Dürüst itiraz, karşı görüşün en güçlü biçimini (çelik adam) kurup ancak ondan sonra eleştirmektir.",
+          "metin": [
+            "Toulmin'in modeli (The Uses of Argument, 1958) bir argümanda altı parça arar: İddia (savunulan sonuç), Veri ya da kanıt (iddiayı destekleyen olgu), Gerekçe (veriyi iddiaya bağlayan kural), Dayanak (gerekçeyi meşru kılan zemin), Niteleyici (kesinliğin sınırı: «büyük çoğunlukla», «muhtemelen») ve İstisna (argümanın geçerli olmadığı koşullar).",
+            "Modelin örneği: İddia «Bu akşam şemsiye almalısın.» Veri «Hava durumu akşam için yağmur bekliyor.» Gerekçe «Yağmur beklenen akşam şemsiye ıslanmayı önler.» Niteleyici «büyük olasılıkla». İstisna «tahmin değişmezse».",
+            "Saman adam, karşı görüşü karikatüre çevirip zayıf kopyasını çürütmektir. Çelik adam (steelmanning) bunun tersidir: muhatabın argümanını onun kurabileceğinden bile daha güçlü ve adil biçime sokup ancak bu en güçlü biçimi çürütmeye girişmek.",
+            "Kaynağın Anatol Rapoport'a atfettiği dört kural: (1) Muhatabının görüşünü öyle açık özetle ki o da «keşke ben de böyle anlatabilseydim» desin. (2) Anlaştığınız noktaları tek tek listele. (3) Ondan öğrendiğin en az bir şeyi söyle. (4) Ancak bu üç adımdan sonra eleştiriye geç.",
+            "Bu aşamanın kanıt işi buradan çıkar: bir tezi Toulmin parçalarına ayır, çelik adam biçimini yaz, itiraz et, sonra itiraza cevap ver. İtirazını yazarken önceki derslerin denetimini kullan: öncüller doğru mu, biçim geçerli mi, bir safsata var mı?"
+          ],
+          "not": "Kaynağın Toulmin örneği («500 kullanıcının odak süresi günde 90 dk artmıştır», satır 60) LifeOS hakkında uydurulmuş bir veri gibi duruyor; derse alınmadı, yerine modelin yansız örneği yazıldı. Kaynaktaki «Daniel Dennett onaylı» nitelemesi de alınmadı.",
+          "alistirmalar": [
+            { "id": "felsefe.2.3.3.a1", "tur": "secmeli", "soru": "Toulmin modelinde veriyi iddiaya bağlayan kurala ne denir?", "sec": ["Niteleyici", "Gerekçe", "İstisna", "Dayanak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "felsefe.2.3.3.a2", "tur": "secmeli", "soru": "Çelik adam yöntemi neyi ister?", "sec": ["Karşı görüşün en zayıf cümlesini bulup çürütmeyi", "Karşı tarafın kişiliğini sorgulamayı", "Tartışmayı çoğunluğun görüşüyle bitirmeyi", "Karşı görüşü onun kurabileceğinden daha güçlü biçime sokup o biçimi eleştirmeyi"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] },
+            { "id": "felsefe.2.3.3.a3", "tur": "acik", "soru": "Kanıt işi: Bir tez seç (ör. «Okullarda ödev kaldırılmalı»). Tezi Toulmin parçalarına ayır, en güçlü biçimini (çelik adam) iki cümleyle yaz, bir itiraz yönelt, sonra o itiraza tezin savunucusu olarak cevap ver.", "dogru": "Örnek: İddia «Ödev kaldırılmalı.» Veri «Öğrenciler okuldan sonra yorgun.» Gerekçe «Yorgun öğrenci ödevden verim alamaz.» Çelik adam: «Ödevin amacı tekrar ise bu tekrar okul içinde daha verimli yapılabilir; okul dışı zaman dinlenmeye ve kendi ilgisine kalmalı.» İtiraz: «Bazı beceriler yalnız tek başına çalışarak pekişir; okul saati buna yetmeyebilir.» Cevap: «O zaman ödev kaldırılmasın, kısa ve isteğe bağlı tekrarla sınırlansın; tez niteleyiciyle daraltılır.»", "olcut": ["Tezin iddia, veri ve gerekçesi ayrı ayrı yazıldı mı?", "Çelik adam biçimi, tezi savunan birinin de kabul edeceği kadar güçlü mü?", "İtiraz tezin kendisine mi yöneliyor, yoksa kişiye ya da bir saman adama mı?", "Cevap itirazı ciddiye alıyor mu (tezi düzeltmek, niteleyici ya da istisna eklemek)?", "Yazıda bu aşamada öğrenilen bir safsata var mı?"], "durum": "taslak", "yazan": "model", "kaynak": ["k14", "k15"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "sema": 1,
+  "alan": "tarih",
+  "id": "tarih.2",
+  "sira": 2,
+  "ad": "İskelet kronoloji",
+  "hedef": "Zamanı takvim, MÖ/MS ve yüzyılla ölçmeyi, tarihin büyük dönemlerini ve sınırlarının neden tartışmalı olduğunu öğrenmek ve dönüm noktalarını zaman şeridine doğru yerleştirmek.",
+  "onKosul": ["tarih.1"],
+  "kanitIsi": "Boş bir zaman şeridine on olayı doğru yerleştir (ESP merdiveni, Tarih 1. basamak «İskelet kronoloji»): her olayın yılını, yüzyılını ve dönemini yaz; yaklaşık ya da kaynaklarda farklı geçen tarihleri işaretle. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "ESP tarih verisi: yaklaşım ve yıl gösterimi", "tur": "depo", "yol": "ESP/src/js/data/history.js", "bolum": "Dosya başı açıklaması", "satir": "1-18", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "ESP tarih verisi: altı dönem, tartışmalı sınırlar ve sınır yılı kuralı", "tur": "depo", "yol": "ESP/src/js/data/history.js", "bolum": "ESP.ERAS", "satir": "22-56", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "ESP tarih verisi: yüzyıl hesabı ve MÖ gösterimi", "tur": "depo", "yol": "ESP/src/js/data/history.js", "bolum": "ESP.centuryOf, centuryLabel, yearLabel", "satir": "69-84", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "ESP tarih verisi: tohum olaylar (dönüm noktaları)", "tur": "depo", "yol": "ESP/src/js/data/history.js", "bolum": "ESP.SEED_EVENTS", "satir": "111-248", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "ESP öğrenme kartı «Kronoloji kurma»", "tur": "depo", "yol": "ESP/src/js/data/ogrenmekartlari.js", "bolum": "lesson-h-kronoloji", "satir": "2678-2722", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "AYS TYT tarih anlatımı ts-t1: takvimler ve tarih öncesi çağlar", "tur": "depo", "yol": "AYS/src/js/data/anlatim-ts.js", "bolum": "ts-t1, Takvimler ve Tarih öncesi çağlar", "satir": "674-686", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "AYS derin ders ts-t1: takvim örneği, Anadolu'da tarih çağları, sık hatalar", "tur": "depo", "yol": "AYS/src/js/data/derin-ts.js", "bolum": "ts-t1", "satir": "1081-1120", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "Dünya ve Türk tarihinin en kritik 50 kırılma noktası (tablo)", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "2. En Kritik 50 Kırılma Noktası (satır = 51 + sıra no)", "satir": "48-101", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "Hititler: Kadeş Barış Antlaşması satırı (MÖ 1258)", "tur": "gemini", "yol": "ESP/tarih/anadolu_uygarliklari_hitit_frig_lidya_urartu_iyon_ve_antik_kentler_atlasi.md", "bolum": "2.1 Hititler", "satir": "40", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Anadolu ve Mezopotamya atlası: Kadeş satırı (MÖ 1280)", "tur": "gemini", "yol": "ESP/tarih/anadolu_ve_mezopotamya_uygarliklari_antik_kentler_arkeoloji_ve_kulturel_miras_atlasi.md", "bolum": "Hititler", "satir": "35", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "ESP merdiveni: Tarih 1. basamak «İskelet kronoloji»", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "history, rank 1", "satir": "417-424", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "tarih.2.k1", "tur": "secmeli", "soru": "1492 yılı hangi yüzyıldadır ve ESP iskeletinde hangi döneme düşer?", "sec": ["14. yüzyıl, Orta Çağ", "15. yüzyıl, Orta Çağ", "16. yüzyıl, Yeni Çağ", "15. yüzyıl, Yeni Çağ"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k3"] },
+      { "id": "tarih.2.k2", "tur": "secmeli", "soru": "İskender'in doğu seferi (MÖ 334-323) hangi döneme düşer?", "sec": ["İlk Çağ", "Tarih öncesi", "Orta Çağ", "Yeni Çağ"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k8"] },
+      { "id": "tarih.2.k3", "tur": "secmeli", "soru": "ESP iskeletinde Çağdaş dönem hangi yılla başlar?", "sec": ["1914", "1918", "1945", "1989"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+      { "id": "tarih.2.k4", "tur": "secmeli", "soru": "Kaynağa göre dönem sınırları için hangisi doğrudur?", "sec": ["Sınırlar ölçümle bulunmuştur ve kesindir", "Sınır, bir karar ve yorumdur; tartışmalıdır", "Bütün bölgelerde aynı yıl geçerlidir", "Yalnız savaşlar sınır olabilir"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+      { "id": "tarih.2.k5", "tur": "secmeli", "soru": "Aşağıdakilerden hangisi doğru zaman sırasıdır?", "sec": ["Malazgirt → Hicret → Tanzimat Fermanı", "Hicret → Malazgirt → Tanzimat Fermanı", "Tanzimat Fermanı → Hicret → Malazgirt", "Hicret → Tanzimat Fermanı → Malazgirt"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "tarih.2.1",
+      "ad": "Zamanı ölçmek",
+      "onKosul": [],
+      "kazanim": ["Takvimleri (güneş yılı, ay yılı) karşılaştırır (AYS ts-t1 kazanımı)."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tarih.2.1.k1", "tur": "secmeli", "soru": "Kaynağa göre hicri takvimin ayları her yıl yaklaşık kaç gün öne kayar?", "sec": ["3", "11", "30", "Hiç kaymaz"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+          { "id": "tarih.2.1.k2", "tur": "secmeli", "soru": "1299 yılı hangi yüzyıldadır?", "sec": ["12. yüzyıl", "14. yüzyıl", "13. yüzyıl", "11. yüzyıl"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+          { "id": "tarih.2.1.k3", "tur": "secmeli", "soru": "MÖ 209 yılı hangi yüzyıldadır?", "sec": ["MÖ 2. yüzyıl", "MÖ 21. yüzyıl", "2. yüzyıl", "MÖ 3. yüzyıl"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+          { "id": "tarih.2.1.k4", "tur": "secmeli", "soru": "«Kronoloji kurma» kartına göre bir tarih kaydında ayrı tutulması gereken bilgiler hangileridir?", "sec": ["Olay tarihi, belge tarihi, kullanılan takvim ve yaklaşık olup olmadığı", "Yalnız olay tarihi", "Olayın tarihi ve önemi", "Belgenin yazarı ve fiyatı"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tarih.2.1.1",
+          "ad": "Takvimler: güneş yılı, ay yılı",
+          "onKosul": [],
+          "kazanim": ["Takvimleri (güneş yılı, ay yılı) karşılaştırır (AYS ts-t1 kazanımı)."],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k7", "k4", "k8"],
+          "ozet": "Tarih olayları yer ve zaman belirterek inceler; zamanı ölçen araç takvimdir. Miladi takvim güneş yılına, hicri takvim ay yılına dayanır; başlangıçları da bir karardır.",
+          "metin": [
+            "Kaynağın tanımıyla tarih, geçmişteki olayları yer ve zaman belirterek, neden-sonuç ilişkisi içinde ve belgelere dayanarak inceleyen bilimdir. Zamanı belirtmenin aracı takvimdir.",
+            "Miladi takvim güneş yılına (365 gün) dayanır ve Hz. İsa'nın doğumunu başlangıç alır; kaynağa göre Türkiye 1926'dan beri bu takvimi kullanır.",
+            "Hicri takvim ay yılına (yaklaşık 354 gün) dayanır ve 622'deki hicreti başlangıç alır. Ay yılı daha kısa olduğu için hicri aylar her yıl yaklaşık 11 gün öne kayar.",
+            "Kaynağın andığı iki takvim daha: Celali takvimi, Büyük Selçuklu döneminde Ömer Hayyam'ın da katıldığı bir heyetçe hazırlandı. On iki hayvanlı Türk takvimi eski Türklerin takvimidir.",
+            "ESP'nin olay listesi hicret için şunu yazar: «Bir takvimin başlangıcı: zaman ölçüsü de bir tarihsel karardır.» Sık hata (kaynağın listesinden): hicri takvimi güneş yılına dayalı sanmak."
+          ],
+          "alistirmalar": [
+            { "id": "tarih.2.1.1.a1", "tur": "secmeli", "soru": "Ay yılına dayanan ve 622'yi başlangıç alan takvim hangisidir?", "sec": ["Miladi takvim", "Hicri takvim", "Celali takvimi", "On iki hayvanlı Türk takvimi"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6", "k7"] },
+            { "id": "tarih.2.1.1.a2", "tur": "secmeli", "soru": "Kaynağa göre Celali takvimi hangi devlet döneminde hazırlandı?", "sec": ["Göktürkler", "Osmanlı", "Büyük Selçuklu", "Uygurlar"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] }
+          ]
+        },
+        {
+          "id": "tarih.2.1.2",
+          "ad": "MÖ, MS ve yüzyıl hesabı",
+          "onKosul": ["tarih.2.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k1", "k5"],
+          "ozet": "MÖ yılları geriye doğru sayılır. Yüzyılı bulmak için yıl 100'e bölünüp yukarı yuvarlanır: 1-100 birinci yüzyıldır, 1453 on beşinci yüzyıldır. Sıfırıncı yüzyıl yoktur.",
+          "metin": [
+            "Miladi takvimde başlangıçtan önceki yıllar MÖ (milattan önce), sonrakiler MS (milattan sonra) diye yazılır. ESP, MÖ yılını eksi sayıyla tutar (MÖ 753 = -753). Kaynağa göre tek sayı kullanmak karşılaştırmayı aritmetiğe indirger: -753, -508'den küçüktür; yani MÖ 753, MÖ 508'den daha eskidir.",
+            "Yüzyıl hesabı (kaynaktaki kural): MS 1-100 birinci yüzyıldır; MÖ 100-1 MÖ birinci yüzyıldır. Sıfırıncı yüzyıl yoktur ve hesap 0 yılını kabul etmez. Kaynağın hesabı: yılı 100'e böl, yukarı yuvarla.",
+            "Örnekler (aynı kuralla, modelin hesabı): 1453 → 15. yüzyıl; 1900 → 19. yüzyıl (100'e bölünce tam 19 çıkar); 1901 → 20. yüzyıl; MÖ 753 → MÖ 8. yüzyıl. Tuzak: «1900'ler» sözü 20. yüzyılı anlatır, ama 1900 yılının kendisi 19. yüzyılın son yılıdır.",
+            "ESP'nin «Kronoloji kurma» kartı bu basamağın konularını şöyle sıralar: yüzyıl hesabı ve MÖ/MS, dönem sınırları ve tartışmalılığı, eşzamanlılık (aynı anda başka yerde), uzun süre ve kısa olay. Bu aşamanın üç ünitesi bu sırayı izler."
+          ],
+          "not": "«1900'ler» tuzak cümlesi modelin örneğidir; kural kaynaktaki hesaptan (Math.ceil(yıl / 100)) çıkar.",
+          "alistirmalar": [
+            { "id": "tarih.2.1.2.a1", "tur": "secmeli", "soru": "1071 yılı hangi yüzyıldadır?", "sec": ["10. yüzyıl", "11. yüzyıl", "12. yüzyıl", "7. yüzyıl"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+            { "id": "tarih.2.1.2.a2", "tur": "secmeli", "soru": "1900 yılı hangi yüzyıldadır?", "sec": ["20. yüzyıl", "18. yüzyıl", "19. yüzyıl", "Sıfırıncı yüzyıl"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+            { "id": "tarih.2.1.2.a3", "tur": "secmeli", "soru": "MÖ 508 ile MÖ 753'ten hangisi daha eskidir?", "sec": ["MÖ 508", "İkisi aynı yüzyıldadır", "Karşılaştırılamaz", "MÖ 753"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] }
+          ]
+        },
+        {
+          "id": "tarih.2.1.3",
+          "ad": "Olay tarihi, belge tarihi, yaklaşık tarih",
+          "onKosul": ["tarih.2.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k9", "k8", "k10", "k4"],
+          "ozet": "Bir tarihin ne olduğunu bilmeden onu şeride koyma: olay tarihi mi, belge tarihi mi, yaklaşık mı? Kaynaklar aynı olaya farklı yıllar verdiğinde dürüst yol, kesin yıl yerine yüzyılı yazmaktır.",
+          "metin": [
+            "«Kronoloji kurma» kartının kuralı: Tarih kaydında olay tarihi, belge tarihi, kullanılan takvim ve yaklaşık olma durumu ayrı tutulur. Sıralama tek başına neden açıklaması değildir.",
+            "Kartın kurgusal örneği: Bir belge 1910 tarihli, anlattığı olay 1908. Belgeyi olayın yerine 1910 çizgisine koymak başka bir şeyi gösterir. Kartın andığı sık hata: belge tarihiyle olay tarihini karıştırmak.",
+            "Yaklaşık tarih: kaynaklar kesin bilinmeyen yılı «~» ya da «dolayları» ile yazar. Kırılma tablosu yazının icadını «MÖ ~3200» diye verir.",
+            "Kaynaklar aynı olaya farklı yıl verebilir. Kadeş için: bir atlas MÖ 1258, kırılma tablosu MÖ ~1259, öteki atlas MÖ 1280 diyor; ESP olay listesi «Kadeş Savaşı ve antlaşması»nı tek satırda MÖ 1274'e koyuyor. Modelin notu: son satır bir savaşı ve bir antlaşmayı tek yılda birleştiriyor; bu, olay tarihlerini ayrı tutma kuralının tam ihlalidir. Dört yılın dördü de MÖ 13. yüzyıldadır; kanıt el verene kadar dürüst yazım budur.",
+            "İkinci örnek: Osmanlı Beyliği'nin başlangıcı ESP listesinde 1299, kırılma tablosunda (Bafeus Savaşı) 1302. Bu iki yıl ayrı yüzyıllara düşer (13. ve 14.); bu yüzden «13. yüzyıl sonu - 14. yüzyıl başı» demek daha doğrudur. 1. aşamadaki iç ve dış tenkit soruları burada da geçerlidir."
+          ],
+          "not": "Kadeş tarihleri: k9 satır 40 (1258), k8 satır 53 (~1259), k10 satır 35 (1280), k4 satır 126-127 (-1274). Hangisinin doğru olduğu bu aşamada çözülmedi; ders yalnız yüzyılı öğretiyor. Kaynakların «tarihin ilk yazılı barış antlaşması» nitelemesi alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.2.1.3.a1", "tur": "secmeli", "soru": "1923 tarihli bir gazete 1919'da olan bir toplantıyı anlatıyor. Toplantıyı zaman şeridinde hangi yıla koyarsın?", "sec": ["1919", "1923", "İkisinin ortasına, 1921'e", "Gazeteye bakmadan karar verilemez"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "tarih.2.1.3.a2", "tur": "secmeli", "soru": "Kadeş için kaynaklarda geçen MÖ 1258, 1259, 1274 ve 1280 yıllarının ortak yüzyılı hangisidir?", "sec": ["MÖ 12. yüzyıl", "MÖ 13. yüzyıl", "MÖ 14. yüzyıl", "Ortak yüzyılları yoktur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k9", "k8", "k10", "k4"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tarih.2.2",
+      "ad": "Büyük dönemler ve sınırları",
+      "onKosul": ["tarih.2.1"],
+      "kazanim": ["Tarih öncesi çağları karşılaştırır (AYS ts-t1 kazanımı).", "Büyük dönemler ve sınırları (ESP merdiveni, Tarih 1. basamak)."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tarih.2.2.k1", "tur": "secmeli", "soru": "Kaynağa göre maden çağlarında hangi madenler kullanılmaya başlandı?", "sec": ["Altın ve gümüş", "Bakır, tunç ve demir", "Yalnız demir", "Kömür ve petrol"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+          { "id": "tarih.2.2.k2", "tur": "secmeli", "soru": "ESP iskeletinde 1789 hangi dönemin ilk yılıdır?", "sec": ["Yeni Çağ", "Çağdaş", "Orta Çağ", "Yakın Çağ"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "tarih.2.2.k3", "tur": "secmeli", "soru": "«Feodalite, üç büyük dinin kurumsallaşması, İslam biliminin yükselişi» notu hangi döneme aittir?", "sec": ["Orta Çağ", "İlk Çağ", "Yeni Çağ", "Yakın Çağ"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "tarih.2.2.k4", "tur": "secmeli", "soru": "Kaynağa göre Yeni Çağ'ın başlangıcı için hangi iki yıl tartışılır?", "sec": ["476 ve 1453", "1453 ve 1492", "1492 ve 1789", "1517 ve 1648"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tarih.2.2.1",
+          "ad": "Tarih öncesi: taş ve maden çağları",
+          "onKosul": [],
+          "kazanim": ["Tarih öncesi çağları karşılaştırır (AYS ts-t1 kazanımı)."],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k7", "k2"],
+          "ozet": "Tarih öncesi, yazıdan önceki dönemdir; bilgisi arkeolojiden gelir. Yontma Taş, Cilalı Taş ve maden çağları diye ayrılır; yazının icadı tarih çağlarını başlatır.",
+          "metin": [
+            "ESP iskeletinde tarih öncesi «yazıdan önce» diye tanımlanır: bilgimiz arkeoloji ve antropolojiden gelir, yazılı tanık yoktur. Bitişi yazının bulunuşuna bağlanır; kaynağın uyarısıyla yazı her yerde aynı anda çıkmadı.",
+            "Kaynağın üç ayrımı: Yontma Taş (Paleolitik): avcı-toplayıcı yaşam, mağaralar. Cilalı Taş (Neolitik): tarım ve yerleşik hayatın başlaması; Çatalhöyük. Maden çağları: bakır, tunç ve demirin kullanılması.",
+            "Yazının icadıyla (Sümerler, çivi yazısı, MÖ 3200 dolayları) tarih çağları başlar. Anadolu'da tarih çağları, Asurlu tüccarların Kültepe (Kaniş) ticaret kolonileriyle gelen çivi yazısı ve Kültepe tabletleriyle başlar.",
+            "Modelin bağlantı notu: 1. aşamada gördüğün Göbeklitepe ve Çatalhöyük bu dönemin yerleşimleridir. Kaynağın andığı sık hata: tarım ve yerleşik hayatın başladığı çağı Kaba (Yontma) Taş sanmak; doğrusu Cilalı Taş'tır."
+          ],
+          "alistirmalar": [
+            { "id": "tarih.2.2.1.a1", "tur": "secmeli", "soru": "Tarım ve yerleşik hayat hangi çağda başlar?", "sec": ["Yontma Taş (Paleolitik)", "Demir Çağı", "Cilalı Taş (Neolitik)", "Tunç Çağı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6", "k7"] },
+            { "id": "tarih.2.2.1.a2", "tur": "secmeli", "soru": "Tarih öncesi ile tarih çağlarını ayıran gelişme hangisidir?", "sec": ["Ateşin bulunması", "Tarıma geçilmesi", "Paranın kullanılması", "Yazının bulunması"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k6"] }
+          ]
+        },
+        {
+          "id": "tarih.2.2.2",
+          "ad": "Altı dönem: İlk Çağ'dan Çağdaş'a",
+          "onKosul": ["tarih.2.2.1"],
+          "kazanim": ["Büyük dönemler ve sınırları (ESP merdiveni, Tarih 1. basamak)."],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k8"],
+          "ozet": "ESP iskeleti tarihi altı döneme ayırır: Tarih öncesi, İlk Çağ, Orta Çağ, Yeni Çağ, Yakın Çağ, Çağdaş. Sınırlar 476, 1453, 1789 ve 1945'tir; sınır yılı sonraki dönemin ilk yılıdır.",
+          "metin": [
+            "İlk Çağ: yazının bulunuşundan (MÖ 3200 dolayları) Batı Roma'nın yıkılışına (476) kadar.",
+            "Orta Çağ (476-1453): kaynağın notu: feodalite, üç büyük dinin kurumsallaşması, İslam biliminin yükselişi.",
+            "Yeni Çağ (1453-1789): coğrafi keşifler, Rönesans, Reform, mutlak monarşiler, bilim devrimi.",
+            "Yakın Çağ (1789-1945): devrimler, sanayileşme, ulus-devlet, sömürgecilik, iki dünya savaşı. Çağdaş (1945'ten bugüne): Soğuk Savaş, dekolonizasyon, bilgi çağı.",
+            "Sınır kuralı (kaynakta): sınır yılı bir sonraki dönemin ilk yılıdır. 476 Orta Çağ'a, 1453 Yeni Çağ'a, 1789 Yakın Çağ'a, 1945 Çağdaş'a düşer. Böylece fetih ve devrim gibi olaylar «bitirdikleri» değil «başlattıkları» dönemde durur. Kırılma tablosu da İstanbul'un fethini (1453) «Orta Çağ'ın kapanışı, Yeni Çağ'ın açılışı» diye anar."
+          ],
+          "not": "Yakın Çağ'ın 1945'te bitişi ESP'nin kendi seçimidir; kaynak bunu tartışmalı sayar (bkz. sonraki ders). Türkiye'deki okul kitaplarının dönemlemesiyle karşılaştırılmadı.",
+          "alistirmalar": [
+            { "id": "tarih.2.2.2.a1", "tur": "secmeli", "soru": "ESP'nin sınır kuralına göre 1453 hangi döneme düşer?", "sec": ["Orta Çağ", "Yeni Çağ", "Yakın Çağ", "İki döneme birden"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "tarih.2.2.2.a2", "tur": "secmeli", "soru": "Coğrafi keşifler, Rönesans ve Reform hangi dönemin notunda geçer?", "sec": ["Orta Çağ", "Yakın Çağ", "Yeni Çağ", "Çağdaş"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "tarih.2.2.2.a3", "tur": "secmeli", "soru": "Malazgirt (1071) hangi döneme düşer?", "sec": ["İlk Çağ", "Yeni Çağ", "Yakın Çağ", "Orta Çağ"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] }
+          ]
+        },
+        {
+          "id": "tarih.2.2.3",
+          "ad": "Dönem sınırları birer karardır",
+          "onKosul": ["tarih.2.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k1", "k5"],
+          "ozet": "«Orta Çağ 476'da başladı» demek bir ölçüm değil, bir karardır. Kaynak her sınırın neden tartışmalı olduğunu yazar; çoğu sınır Avrupa'nın bakışından seçilmiştir.",
+          "metin": [
+            "Kaynağın ilkesi: Dönem sınırları tartışmalıdır ve öyle gösterilmelidir; «Orta Çağ 476'da başladı» demek bir karardır, bir ölçüm değil. Öğrenen, sınırın kendisinin bir yorum olduğunu bilmelidir.",
+            "Kaynaktaki tartışma notları: 476 Batı'ya özgü bir tarihtir; Doğu Roma 1453'e kadar sürdü. Orta Çağ için «karanlık çağ» adlandırması 19. yüzyıl Avrupa merkezli bir yargıdır. Yeni Çağ'ın başı 1453 mü, 1492 mi tartışmalıdır; ikisi de Avrupa merkezlidir.",
+            "Yakın Çağ'ın bitişi 1914, 1918 ya da 1945 sayılabilir; kaynağa göre her biri ayrı bir tezdir. Çağdaş dönem için: yaşanan dönemin tarihi yazılamaz denir, çünkü belgeler açılmamıştır.",
+            "Kaynağın iskelet benzetmesi: ezber yalnız iskelettir; iskeletsiz beden durmaz, ama iskelet tek başına beden değildir. Olay listesi bir müfredat değil bir tohumdur; öğrenen kendi olaylarını ekler.",
+            "Modelin bağlantı notu: 1. aşamada Braudel'in zaman katmanlarını gördün. Dönem adları da olaylar gibi bir bakış açısından seçilir; şeride bir olayı koyarken hangi bölgenin takvimine ve dönemine baktığını sor."
+          ],
+          "alistirmalar": [
+            { "id": "tarih.2.2.3.a1", "tur": "secmeli", "soru": "Kaynağa göre 476'nın dönem sınırı olarak «Batı'ya özgü» sayılmasının nedeni nedir?", "sec": ["Doğu Roma'nın 1453'e kadar sürmesi", "O yıl yazının bulunması", "Orta Çağ'ın aslında 1492'de başlaması", "476'da hiçbir olay olmaması"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "tarih.2.2.3.a2", "tur": "secmeli", "soru": "Kaynağa göre Orta Çağ için kullanılan «karanlık çağ» adı nedir?", "sec": ["Orta Çağ insanlarının kendi adlandırması", "Arkeolojik bir ölçüm", "19. yüzyıl Avrupa merkezli bir yargı", "İslam tarihçilerinin terimi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tarih.2.3",
+      "ad": "Zaman şeridi: dönüm noktaları",
+      "onKosul": ["tarih.2.2"],
+      "kazanim": ["On dönüm noktasını yerleştirmek (ESP merdiveni, Tarih 1. basamak)."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tarih.2.3.k1", "tur": "secmeli", "soru": "Talas Savaşı (751) hangi döneme ve yüzyıla düşer?", "sec": ["İlk Çağ, 7. yüzyıl", "Orta Çağ, 8. yüzyıl", "Orta Çağ, 7. yüzyıl", "Yeni Çağ, 8. yüzyıl"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k3", "k4"] },
+          { "id": "tarih.2.3.k2", "tur": "secmeli", "soru": "Hangisi doğru zaman sırasıdır?", "sec": ["İstanbul'un fethi → Magna Carta → Vestfalya Barışı", "Vestfalya Barışı → Magna Carta → İstanbul'un fethi", "Magna Carta → İstanbul'un fethi → Vestfalya Barışı", "Magna Carta → Vestfalya Barışı → İstanbul'un fethi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] },
+          { "id": "tarih.2.3.k3", "tur": "secmeli", "soru": "İki kaynakta da Sanayi Devrimi hangi değişimle anlatılır?", "sec": ["Kas gücünden kömür ve fosil yakıta geçiş", "Tarımdan avcılığa dönüş", "Kâğıdın batıya geçişi", "Yazının bulunuşu"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] },
+          { "id": "tarih.2.3.k4", "tur": "secmeli", "soru": "İki kaynakta da Fransız Devrimi'ni (1789) dönüm noktası yapan değişim nasıl özetlenir?", "sec": ["Yazının yaygınlaşması", "Matbaanın bulunuşu", "Ay'a iniş", "Egemenliğin hanedandan (kraldan) ulusa geçişi"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tarih.2.3.1",
+          "ad": "Yazıdan Charlemagne'a: İlk Çağ ve erken Orta Çağ",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k8"],
+          "ozet": "İki kaynakta da aynı yılla geçen sekiz dönüm noktası: yazı, Atina demokrasisi, İskender'in seferi, Milano Fermanı, Batı Roma'nın yıkılışı, hicret, Talas ve Charlemagne'ın taç giymesi.",
+          "metin": [
+            "Bu ünitedeki olaylar, ESP olay listesi ile gemini-data kırılma tablosunda aynı yılla (ya da aynı aralıkla) geçenlerden seçildi. Her olayın yanında dönemi var; kendi zaman şeridine koyarak oku.",
+            "İlk Çağ: Yazının icadı (MÖ ~3200): kırılma tablosuna göre artan artı ürünün kaydı ve muhasebe ihtiyacından doğdu. Atina demokrasisi (MÖ 508): Kleisthenes reformu; ESP'nin notuyla yurttaşın yönetime doğrudan katılımı, sınırlı ama ilk. İskender'in doğu seferi (MÖ 334-323; ESP listesi MÖ 331'i verir): Helenizm, kültürlerin karışması. Milano Fermanı (313): Hristiyanlığa serbestlik.",
+            "Sınır: Batı Roma'nın yıkılışı (476): Kavimler Göçü'nün sonunda son imparatorun indirilmesi; ESP'nin notuyla «dönem sınırı olarak seçilmiş tarih».",
+            "Erken Orta Çağ: Hicret (622): hicri takvimin başlangıcı. Talas Savaşı (751): Abbasi ve Tang Çin orduları çarpıştı; iki kaynakta da kâğıdın Çin'den batıya geçişiyle anılır. Charlemagne'ın taç giymesi (800).",
+            "Kırılma tablosu Türk tarihinden iki satır ekler; ESP listesinde yoklar: Mete Han'ın tahta çıkışı (MÖ 209) ve Göktürk Devleti'nin kuruluşu (552). Modelin notu: ikisini de şeride koy; MÖ 209 İlk Çağ'a, 552 Orta Çağ'a düşer."
+          ],
+          "not": "Satırlar: k4 satır 120-121, 134-135, 140-141, 148-149, 152-155, 156-159; k8 satır 52, 55, 56, 57, 59, 60, 61, 62, 63, 64. Kırılma tablosundaki abartılı nitelemeler (Mete Han «ilk organize Türk bozkır devleti», Göktürk «Türk adının ilk kez…») ve satır sonlarındaki «Ders:» yorumları alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.2.3.1.a1", "tur": "secmeli", "soru": "Hangisi doğru zaman sırasıdır?", "sec": ["Milano Fermanı → Atina demokrasisi → Hicret", "Atina demokrasisi → Milano Fermanı → Hicret", "Hicret → Milano Fermanı → Atina demokrasisi", "Atina demokrasisi → Hicret → Milano Fermanı"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] },
+            { "id": "tarih.2.3.1.a2", "tur": "secmeli", "soru": "İki kaynakta da Talas Savaşı (751) hangi gelişmeyle anılır?", "sec": ["Matbaanın bulunuşu", "Hristiyanlığa serbestlik", "Kâğıdın Çin'den batıya geçişi", "Yazının icadı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] }
+          ]
+        },
+        {
+          "id": "tarih.2.3.2",
+          "ad": "Malazgirt'ten Karlofça'ya: Orta Çağ ve Yeni Çağ",
+          "onKosul": ["tarih.2.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k8", "k5"],
+          "ozet": "Malazgirt'ten Karlofça'ya on dönüm noktası. Aynı yılda dünyanın iki ucunda olan olaylar (1517) eşzamanlılığı gösterir.",
+          "metin": [
+            "Orta Çağ: Malazgirt (1071): iki kaynakta da Anadolu'nun Türkleşmesinin başlangıcı. Moğol İmparatorluğu (1206): Avrasya'yı tek bir ticaret ağına bağladı. Magna Carta (1215): kralın da hukukun altında olduğu fikri. Kara Veba (1347; tabloda 1347-1351): emek kıtlaşınca feodal bağın çözülmesi. Osmanlı Beyliği: 1299 ya da 1302 (önceki ünitedeki tartışma).",
+            "Sınır: İstanbul'un fethi (1453): Doğu Roma'nın sonu; ESP sınır kuralıyla Yeni Çağ'ın ilk yılı.",
+            "Yeni Çağ: Amerika'ya varış (1492): kırılma tablosuna göre küresel ağırlık merkezi Akdeniz'den Atlantik'e kaydı. Reform (1517): Luther'in tezleri; dinî otoritenin bölünmesi. Vestfalya Barışı (1648): egemen devletler sisteminin doğuşu. Karlofça (1699): Osmanlı'nın büyük toprak kaybı.",
+            "Eşzamanlılık (kartın konusu: aynı anda başka yerde): 1517'de Avrupa'da Reform başlarken kırılma tablosuna göre Yavuz Sultan Selim Ridaniye'de Memlükleri yıktı; Mısır, Suriye ve Hicaz Osmanlı'ya geçti. Bir yılın şeridinde tek bir olay yoktur."
+          ],
+          "not": "Satırlar: k4 satır 160-175, 178-181, 186-187, 190-191; k8 satır 67, 69, 70, 72, 73, 75, 76, 77, 78, 79, 80. Kara Veba'nın ölüm oranı (iki kaynakta «nüfusun üçte biri») bir tahmindir, derse alınmadı. Karlofça için ESP «ilk büyük toprak kaybı», tablo «1921 Sakarya'ya kadar sürecek 238 yıllık ricat» diyor; ikisi de alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.2.3.2.a1", "tur": "secmeli", "soru": "Kaynaklara göre 1517'de aynı yıl olan iki olay hangileridir?", "sec": ["Reform ve Ridaniye Savaşı", "Magna Carta ve Malazgirt", "İstanbul'un fethi ve Amerika'ya varış", "Vestfalya Barışı ve Karlofça"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] },
+            { "id": "tarih.2.3.2.a2", "tur": "secmeli", "soru": "Magna Carta (1215) hangi döneme ve yüzyıla düşer?", "sec": ["Yeni Çağ, 12. yüzyıl", "Orta Çağ, 12. yüzyıl", "İlk Çağ, 13. yüzyıl", "Orta Çağ, 13. yüzyıl"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k3", "k4"] }
+          ]
+        },
+        {
+          "id": "tarih.2.3.3",
+          "ad": "Devrimlerden bugüne: Yakın Çağ ve Çağdaş dönem",
+          "onKosul": ["tarih.2.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k8", "k11"],
+          "ozet": "Sanayi Devrimi ve Fransız Devrimi'nden SSCB'nin dağılmasına on dört dönüm noktası; bunların altısı Osmanlı ve Türkiye tarihindendir.",
+          "metin": [
+            "Yeni Çağ'ın sonu: Sanayi Devrimi (ESP 1760; tablo 1760-1840): iki kaynakta da kas gücünden kömüre, fosil yakıta geçiş. Amerikan Bağımsızlık Bildirgesi (1776).",
+            "Yakın Çağ: Fransız Devrimi (1789): iki kaynakta da egemenliğin hanedandan (kraldan) ulusa geçişi. Tanzimat Fermanı (1839). I. Meşrutiyet (1876): anayasa ve meclis. II. Meşrutiyet (1908): siyasi partiler ve basın hayatı. I. Dünya Savaşı (1914-1918): ESP'ye göre imparatorluklar çağının sonu. Rus Devrimi (1917). Kurtuluş Savaşı (1919-1922). Cumhuriyet'in ilanı (1923). Büyük Buhran (1929). II. Dünya Savaşı (1939-1945).",
+            "Çağdaş dönem: Birleşmiş Milletler'in kuruluşu ve atom bombası (1945). SSCB'nin dağılması (1991): kırılma tablosuna göre Türk cumhuriyetlerinin bağımsızlığı da bu olaya bağlanır.",
+            "ESP merdiveni bu basamağı şöyle kapatır: «Boş bir zaman şeridine on olayı doğru yerleştirmek.» Aşağıdaki açık alıştırma bu işin provasıdır; kendi olaylarını da ekleyebilirsin."
+          ],
+          "not": "Satırlar: k4 satır 192-199, 206-207, 210-215, 218-227, 242-243; k8 satır 83, 84, 85, 87, 88, 90, 91, 93, 94, 95, 96, 97, 98, 100. Kurtuluş Savaşı için tablodaki «tarihin ilk başarılı milli kurtuluş savaşı» ve ESP'nin İsrail satırındaki değerlendirme gibi tartışmalı nitelemeler alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.2.3.3.a1", "tur": "secmeli", "soru": "Hangisi doğru zaman sırasıdır?", "sec": ["I. Meşrutiyet → Tanzimat Fermanı → II. Meşrutiyet", "II. Meşrutiyet → I. Meşrutiyet → Tanzimat Fermanı", "Tanzimat Fermanı → II. Meşrutiyet → I. Meşrutiyet", "Tanzimat Fermanı → I. Meşrutiyet → II. Meşrutiyet"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k8"] },
+            { "id": "tarih.2.3.3.a2", "tur": "secmeli", "soru": "ESP iskeletine göre Cumhuriyet'in ilanı (1923) hangi döneme düşer?", "sec": ["Yeni Çağ", "Yakın Çağ", "Çağdaş", "Orta Çağ"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "tarih.2.3.3.a3", "tur": "acik", "soru": "Kanıt işi: Bir kâğıda MÖ 3500'den 2000'e uzanan boş bir zaman şeridi çiz, dönem sınırlarını (476, 1453, 1789, 1945) işaretle. Bu aşamada gördüğün olaylardan on tanesini ezberden şeride koy; her birinin yanına yüzyılını yaz. Sonra derslere bakıp kendini düzelt.", "dogru": "Örnek: yazı (MÖ ~3200, MÖ 32. yüzyıl, İlk Çağ başı) · Atina demokrasisi (MÖ 508, MÖ 6. yy) · Batı Roma (476, 5. yy, Orta Çağ başı) · Hicret (622, 7. yy) · Malazgirt (1071, 11. yy) · İstanbul'un fethi (1453, 15. yy, Yeni Çağ başı) · Reform (1517, 16. yy) · Fransız Devrimi (1789, 18. yy, Yakın Çağ başı) · Cumhuriyet (1923, 20. yy) · BM (1945, 20. yy, Çağdaş başı).", "olcut": ["On olayın her biri doğru dönemin içinde mi?", "Yüzyıllar kuralla (100'e böl, yukarı yuvarla) doğru hesaplandı mı?", "Kaynaklarda farklı geçen ya da yaklaşık tarihler («~», iki yıl) işaretlendi mi?", "En az iki olay Avrupa dışından mı (dönem adlarının Avrupa merkezli olduğunu hatırla)?"], "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k2", "k3"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
