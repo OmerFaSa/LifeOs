@@ -271,6 +271,8 @@ jobs:
       # SADELESME FAZ 7 TANISMA (2026-11-13). Dil modelsiz gorusme: desenler, onaysiz yazim yok, geri alma.
       - name: Tanışma görüşmesi kuralları
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Tanışma görüşmesi kuralları" node kabuk/tanisma.test.js
+      - name: Süreli deneme kuralları
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Süreli deneme kuralları" node kabuk/deneme.test.js
 
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi

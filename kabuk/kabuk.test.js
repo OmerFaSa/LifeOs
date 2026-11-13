@@ -196,12 +196,74 @@ t('harita: on alanın onu da taşındı: pilot ve aşamalı, içerik dosyası ye
   const alanlar = H.YERLER.filter(y => y.katman === 'alan'), tasinan = alanlar.filter(y => y.asama);
   esit(tasinan.map(y => y.id), ['akademik', 'dil', 'felsefe', 'tarih', 'muzik', 'okuma', 'beslenme', 'hareket', 'uyku', 'tahlil']);
   tasinan.forEach(y => {
-    esit([y.durum, y.asama], ['pilot', 1], y.id);
+    esit(y.durum, 'pilot', y.id);
+    dogru(Number.isInteger(y.asama) && y.asama >= 1, y.id + ' aşama numarası');
     dogru(fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'asama-1.json')), y.id + ' içeriği yok');
     esit(require('../alan/' + y.id + '/asama-1.json').id, y.id + '.1', y.id + ' aşama kimliği (kayıt anahtarı buna dayanır)');
+    // haritadaki sayıdan sonraki aşama dosyası yazıldıysa kabuk onu istemez: sayı artırılmalı
+    dogru(!fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'asama-' + (y.asama + 1) + '.json')), y.id + ': asama-' + (y.asama + 1) + '.json var ama haritada asama ' + y.asama);
   });
   alanlar.filter(y => !y.asama).forEach(y => { esit(y.durum, 'eski', y.id); dogru(/\.html$/.test(y.eski), y.id + ' bağlantı'); });
   alanlar.forEach(y => dogru(/\.html$/.test(y.eski), y.id + ' eski sayfa bağlantısı'));
+});
+// ---- aşamalar: asama-N.json, aşama başına kayıt, eski birinci aşama kaydı ----
+const As = K.Asama;
+// Felsefe'nin birinci aşamasından türetilen yapay ikinci aşama (gerçek asama-2.json olsa da olmasa da test aynı çalışsın)
+const ikinci = onKosul => Object.assign(JSON.parse(JSON.stringify(require('../alan/felsefe/asama-1.json')).replace(/"felsefe\.1/g, '"felsefe.2')), { sira: 2, onKosul });
+t('aşama: kimliği tutmayan, bozuk ya da eksik aşama gösterilmez; ilk eksikte durulur', () => {
+  const Yol = require('../motor/yol.js'), v1 = require('../alan/felsefe/asama-1.json');
+  esit(As.kur(Yol, 'felsefe', [v1, null, ikinci([])]).length, 1, 'ikinci yoksa üçüncüye bakılmaz');
+  esit(As.kur(Yol, 'felsefe', [v1, Object.assign(ikinci([]), { id: 'felsefe.9' })]).length, 1, 'kimlik felsefe.2 değil');
+  esit(As.kur(Yol, 'felsefe', [v1, { id: 'felsefe.2', uniteler: [] }]).length, 1, 'Yol yükleyemiyor');
+  esit(As.kur(Yol, 'felsefe', [null]).length, 0);
+  esit(As.kur(Yol, 'felsefe', [v1, ikinci(['felsefe.1'])]).map(y => y.id), ['felsefe.1', 'felsefe.2']);
+});
+t('aşama: ikinci aşama ancak birincinin kapısı geçilince açılır (önkoşulu boş yazılmış olsa da); kayıtlar ayrı', () => {
+  const Yol = require('../motor/yol.js'), ys = As.kur(Yol, 'felsefe', [require('../alan/felsefe/asama-1.json'), ikinci([])]), [y1, y2] = ys, depo = sahteDepo();
+  esit(y2.veri.onKosul, ['felsefe.1'], 'önceki aşama önkoşula eklendi');
+  const liste = () => As.liste(Yol, ys, n => As.kayit(depo, Yol, 'felsefe', n, 2));
+  esit(liste().map(x => [x.n, x.acik, x.gecti]), [[1, true, false], [2, false, false]]);
+  esit(As.calisilan(liste()), 1);
+  dogru(!Yol.acikMi(y2, As.kayit(depo, Yol, 'felsefe', 2, 2), y2.veri.uniteler[0].dersler[0].id), 'kilitli aşamanın dersi de kilitli');
+  // birinci aşamayı baştan sona geç: bütün ünite kapıları, sonra aşama kapısı
+  const dogrular = (y, id) => Object.fromEntries(y.oge[id].kapi.sorular.map(q => [q.id, q.dogru]));
+  let k = As.kayit(depo, Yol, 'felsefe', 1, 2);
+  y1.veri.uniteler.forEach(u => { k = Yol.kapiDene(y1, k, u.id, dogrular(y1, u.id), 5).kayit; });
+  k = Yol.kapiDene(y1, k, y1.id, dogrular(y1, y1.id), 6).kayit;
+  As.yaz(depo, 'felsefe', 1, k);
+  esit(liste().map(x => [x.n, x.acik, x.gecti]), [[1, true, true], [2, true, false]]);
+  esit(As.calisilan(liste()), 2, 'çalışılan aşama ikinciye geçti');
+  // ikinci aşamada ilerle ve yaz: birinci aşamanın kaydı değişmez, ikincinin kaydı birincinin geçişini taşımaz
+  const once = depo.v['lifeos.yol.felsefe.1'];
+  let k2 = As.kayit(depo, Yol, 'felsefe', 2, 2);
+  k2 = Yol.dersOku(y2, k2, y2.veri.uniteler[0].dersler[0].id, 7);
+  As.yaz(depo, 'felsefe', 2, k2);
+  esit(depo.v['lifeos.yol.felsefe.1'], once, 'birinci aşama kaydı aynen');
+  esit(JSON.parse(depo.v['lifeos.yol.felsefe.2']).asamalar, {}, 'ikinci kayıtta yalnız kendi aşaması');
+  esit(Object.keys(JSON.parse(depo.v['lifeos.yol.felsefe.2']).dersler), [y2.veri.uniteler[0].dersler[0].id]);
+  esit(Yol.durum(y1, As.kayit(depo, Yol, 'felsefe', 1, 2)).ilerleme.gecilenUnite.deger, 3, 'birinci aşamanın ilerlemesi yerinde');
+});
+t('eski kayıt: tek aşamalı dönemde yazılmış lifeos.yol.felsefe.1 aynen okunur, yazılınca hiçbir alanı kaybolmaz', () => {
+  const Yol = require('../motor/yol.js'), y1 = Yol.yukle(require('../alan/felsefe/asama-1.json')), u1 = y1.veri.uniteler[0];
+  // eski kabuğun (68e721aa) yazdığı biçim: dört alan + göçten gelen «eski», bilinmeyen bir alan da korunur
+  const eski = { dersler: { [u1.dersler[0].id]: { okundu: 1731400000000 }, [u1.dersler[1].id]: { okundu: 1731400100000 } },
+    cevaplar: { [u1.dersler[0].alistirmalar[0].id]: [{ cevap: 'B', dogru: false, zaman: 1731400050000 }] },
+    kapilar: { [u1.id]: [{ zaman: 1731400200000, dogruSayisi: 4, toplam: 4, oran: 1, esik: 0.75, gecti: true, taslak: true }] }, asamalar: {},
+    eski: { 'ays:x/y': { konu: 'y', durum: 'closed', etiket: 'eski kayıt' } }, gelecekAlan: 1 };
+  const ham = JSON.stringify(eski), depo = sahteDepo({ 'lifeos.yol.felsefe.1': ham });
+  esit(As.kayitAnahtari('felsefe', 1), 'lifeos.yol.felsefe.1', 'birinci aşamanın anahtarı eskisinin aynısı');
+  esit(As.kayit(depo, Yol, 'felsefe', 1, 1), eski, 'tek aşamayla okunan kayıt eskisinin aynısı');
+  esit(As.kayit(depo, Yol, 'felsefe', 1, 2), eski, 'ikinci aşama eklenince de aynısı');
+  const dr = Yol.durum(y1, As.kayit(depo, Yol, 'felsefe', 1, 2));
+  esit([dr.ilerleme.okunanDers.deger, dr.ilerleme.gecilenUnite.deger, dr.uniteler[1].acik], [2, 1, true], 'ilerleme ve açılan ünite yerinde');
+  As.yaz(depo, 'felsefe', 1, As.kayit(depo, Yol, 'felsefe', 1, 2));
+  esit(depo.v['lifeos.yol.felsefe.1'], ham, 'okuyup yazınca bayt bayt aynı');
+  const k = Yol.dersOku(y1, As.kayit(depo, Yol, 'felsefe', 1, 2), u1.dersler[2].id, 1731400300000);
+  As.yaz(depo, 'felsefe', 1, k);
+  const son = JSON.parse(depo.v['lifeos.yol.felsefe.1']);
+  esit([son.eski, son.gelecekAlan, son.kapilar, son.cevaplar], [eski.eski, 1, eski.kapilar, eski.cevaplar], 'yeni dersle birlikte eski her şey duruyor');
+  esit(Object.keys(son.dersler).length, 3);
+  dogru(depo.v['lifeos.yol.felsefe.2'] === undefined, 'ikinci aşamaya kendiliğinden kayıt yazılmaz');
 });
 t('yol: on alanın içeriği Yol motoruna yüklenir ve ilk adım bir derstir', () => {
   const Yol = require('../motor/yol.js');

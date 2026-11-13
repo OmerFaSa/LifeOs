@@ -233,3 +233,18 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .karsila__plan{ color:inherit; padding:10px 6px; display:inline-block; }
 @media (max-width:480px){ .blok{ grid-template-columns:auto 1fr; grid-template-areas:'saat ad' 'saat not' 'eylem eylem'; } .blok__eylem{ justify-content:flex-start; } }
 .secenek[disabled]{ cursor:default; opacity:1; color:inherit; }
+
+/* ---------------- süreli deneme ve prova (kabuk/deneme.js) ---------------- */
+.deneme__ust{ position:sticky; top:0; z-index:2; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 14px;
+  background:var(--yuzey-2); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.deneme__baslik{ font-family:var(--piksel); min-width:0; } .deneme__baslik .soluk{ font-family:var(--govde); font-size:.85rem; }
+.sayac{ font-family:var(--piksel); font-size:1.5rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+/* son dakika: renk tek başına değil, kalın çerçeveyle de ayrılır; yanıp sönme yok */
+.sayac--az{ color:var(--vurgu); box-shadow:inset 0 0 0 3px var(--vurgu); padding:0 8px; }
+.deneme__no{ display:flex; flex-wrap:wrap; gap:6px; }
+.deneme__nobt{ min-width:44px; min-height:44px; font:inherit; font-family:var(--piksel); color:var(--yazi); background:transparent; border:0; box-shadow:inset 0 0 0 2px var(--cizgi); cursor:pointer; }
+.deneme__nobt--cevapli{ background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.deneme__nobt[aria-current]{ box-shadow:inset 0 0 0 3px var(--vurgu); }
+.ozet li.ozet__not{ display:block; font-size:.85rem; }
+.asamalar .satir[aria-current]{ box-shadow:inset 0 0 0 3px var(--vurgu); }
+.deneme__anahtar{ margin:6px 0 0; padding-left:28px; display:flex; flex-direction:column; gap:2px; }

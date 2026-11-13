@@ -1,5 +1,6 @@
 // KABUK GEZISI: tek kapiyi yalitilmis ortamda (gecici LOCALAPPDATA, HKM'siz, deneme portu) acar ve yeni kabukta
-// on alani ve arac ekranlarini gercek tarayiciyla yurur: Bugun, ders, alistirma, unite kapisi, Not, Tekrar, Kayit, Plan, Soru, Tanisma.
+// on alani ve arac ekranlarini gercek tarayiciyla yurur: Bugun, ders, alistirma, unite kapisi, Not, Tekrar, Kayit, Plan, Soru,
+// sureli deneme ve prova, Tanisma, asamalar (Felsefe'nin ikinci asamasi; dosya yoksa yapay asama yalniz tarayiciya verilir).
 // Kullanim: node tools/kabuk_gez.js [--goruntu]   (--goruntu: belgeler/ekip/sadelesme/kabuk-onizleme/ goruntulerini yeniler)
 const kok = require('path').resolve(__dirname, '..'), GORUNTU = process.argv.includes('--goruntu');
 const { chromium } = require(kok + '/SPI/node_modules/playwright');
@@ -19,6 +20,15 @@ const bekle = () => new Promise((res, rej) => {
 const cikti = path.join(kok, 'belgeler/ekip/sadelesme/kabuk-onizleme');
 let kalan = 0;
 const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓ ' : '✕ ') + ad + (kosul || ek == null ? '' : '  → ' + ek)); };
+// dört görünüm (1280/390 × açık/koyu) aynı sayfada; telefonda yatay taşma her koşuda denetlenir, görüntü yalnız --goruntu ile
+async function goruntu(p, ad) {
+  for (const [w, h, vad] of [[1280, 800, 'masaustu'], [390, 844, 'telefon']]) for (const tm of ['acik', 'koyu']) {
+    await p.setViewportSize({ width: w, height: h }); await p.emulateMedia({ colorScheme: tm === 'koyu' ? 'dark' : 'light' });
+    if (w === 390 && tm === 'acik') dene(ad + ': telefonda yatay taşma yok', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), await p.evaluate(() => document.documentElement.scrollWidth));
+    if (GORUNTU) await p.screenshot({ path: path.join(cikti, ad + '-' + vad + '-' + tm + '.png'), fullPage: true });
+  }
+  await p.setViewportSize({ width: 1280, height: 800 }); await p.emulateMedia({ colorScheme: 'dark' });
+}
 
 (async () => {
   const y = JSON.parse(fs.readFileSync(path.join(kok, 'alan/felsefe/asama-1.json'), 'utf8'));
@@ -29,7 +39,12 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     const c = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' });
     const p = await c.newPage(); const hata = [];
     p.on('pageerror', e => { hata.push(e.message); console.log('  sayfa hatası: ' + e.message); });
-    p.on('console', m => { if (m.type() === 'error') hata.push(m.text()); });
+    // dosyası henüz yazılmamış aşamanın 404'ü beklenir (kabuk o aşamayı göstermez); başka her hata sayılır
+    p.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) hata.push(m.text()); });
+    // Felsefe'nin ikinci aşaması: gerçek dosya varsa o, yoksa birinciden türetilmiş yapay aşama (yalnız bu tarayıcıya verilir)
+    const y2yol = path.join(kok, 'alan/felsefe/asama-2.json'), y2gercek = fs.existsSync(y2yol);
+    const y2 = y2gercek ? JSON.parse(fs.readFileSync(y2yol, 'utf8')) : Object.assign(JSON.parse(JSON.stringify(y).replace(/"felsefe\.1/g, '"felsefe.2')), { sira: 2, onKosul: ['felsefe.1'] });
+    if (!y2gercek) await p.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
 
     await p.goto(T + '/kabuk/');
     await p.waitForSelector('.karsila .dugme--ana');
@@ -310,6 +325,68 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.waitForSelector('[data-arac-ac="soru-basla"]');
     dene('soru: biten test «Son testler»de', /1 doğru · 1 yanlış/.test(await p.textContent('[data-arac="soru"] .ozet')));
 
+    // ---- Süreli deneme (Felsefe) ve sınav provası (Akademik) ----
+    await p.click('a[href="#/motor/soru/deneme"]');
+    await p.waitForSelector('[data-deneme="basla"]');
+    dene('deneme: başlangıçta testler ve süre «hesaplandı» etiketiyle', /Felsefe ne sorar\?/.test(await p.textContent('[data-deneme-sayfa] .ozet')) && /Süre\s*\d+ dk\s*hesaplandı/.test(await p.textContent('[data-deneme-sayfa] .ozet')));
+    dene('deneme: Felsefe\'de sınav provası yok', (await p.locator('[data-deneme="prova"]').count()) === 0);
+    await goruntu(p, 'deneme-baslangic');
+    await p.click('[data-deneme="basla"]');
+    await p.waitForSelector('[data-deneme-sayfa] .sayac[role="timer"]');
+    const sayac1 = await p.textContent('.sayac');
+    await p.waitForFunction(s => document.querySelector('.sayac').textContent !== s, sayac1, { timeout: 3000 }).catch(() => {});
+    dene('deneme: geri sayım görünür ve akar', /^\d\d:\d\d$/.test(sayac1) && (await p.textContent('.sayac')) !== sayac1, sayac1);
+    let dq = await soruMetni();
+    await p.keyboard.press(dq.dogru.toLowerCase());
+    dene('deneme: klavyeyle (harf) cevap seçilir, doğru/yanlış söylenmez', (await p.getAttribute('[data-deneme="cevap"][data-h="' + dq.dogru + '"]', 'aria-pressed')) === 'true' && !/Doğru|Yanlış/.test(await p.textContent('.soru')));
+    await p.keyboard.press('ArrowRight');
+    await p.waitForSelector('.deneme__nobt[data-i="1"][aria-current]');
+    dq = await soruMetni();
+    await p.click('[data-deneme="cevap"][data-h="' + 'ABCD'[('ABCD'.indexOf(dq.dogru) + 1) % dq.sec.length] + '"]');
+    await p.click('[data-deneme="cevap"][data-h="' + dq.dogru + '"]');
+    dene('deneme: cevap bitirene kadar değişir', (await p.getAttribute('[data-deneme="cevap"][data-h="' + dq.dogru + '"]', 'aria-pressed')) === 'true' && (await p.locator('[data-deneme="cevap"][aria-pressed="true"]').count()) === 1);
+    await p.reload();
+    await p.waitForSelector('.sayac');
+    dene('deneme: yenilemeden sonra kaldığı sorudan, cevaplarıyla sürer', (await p.getAttribute('.deneme__nobt[aria-current]', 'data-i')) === '1' && (await p.locator('.deneme__nobt--cevapli').count()) === 2);
+    await goruntu(p, 'deneme-soru');
+    await p.click('[data-deneme="bitir"]');
+    await p.waitForSelector('[data-deneme-sayfa] .kapisonuc');
+    const dSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
+    dene('deneme: sonuç net «hesaplandı», doğru ve süre «ölçüldü», boş «hesaplandı»', /Deneme bitti\s*2 net\s*hesaplandı\s*2 doğru, 0 yanlış \(ölçüldü\)/.test(dSonuc) && /boş \(hesaplandı\)/.test(dSonuc) && /dk \(ölçüldü\)/.test(dSonuc), dSonuc.slice(0, 220));
+    dene('deneme: Felsefe sonucunda sınav puanı tahmini yok', !/Puan ve sıra/.test(dSonuc));
+    dene('deneme: biten deneme kaydedildi, süren silindi', await p.evaluate(() => JSON.parse(localStorage.getItem('lifeos.soru.denemeler')).length === 1 && !localStorage.getItem('lifeos.soru.deneme')));
+    await goruntu(p, 'deneme-sonuc');
+    await p.click('[data-deneme="yeni"]');
+    await p.waitForSelector('[data-deneme="basla"]');
+    dene('deneme: «Son denemeler»de net etiketiyle', /Felsefe · .*2 net\s*hesaplandı/.test(await p.textContent('[data-deneme-sayfa] section')));
+    await p.click('[data-deneme="basla"]');
+    await p.waitForSelector('.sayac');
+    await p.evaluate(() => { const v = JSON.parse(localStorage.getItem('lifeos.soru.deneme')); v.oturum.bas -= (v.oturum.sure * 60 + 2) * 1000; localStorage.setItem('lifeos.soru.deneme', JSON.stringify(v)); });
+    await p.waitForSelector('[data-deneme-sayfa] .kapisonuc', { timeout: 4000 }).catch(() => {});
+    dene('deneme: süre dolunca kendiliğinden biter, «süre doldu» yazar', /süre doldu/.test(await p.textContent('[data-deneme-sayfa]').catch(() => '')));
+    await p.goto(T + '/kabuk/#/alan/akademik');
+    await p.waitForSelector('.unitekutu');
+    await p.goto(T + '/kabuk/#/motor/soru/deneme');
+    await p.waitForSelector('[data-deneme="prova"]');
+    dene('prova: Akademik\'te TYT provası açık, AYT kilitli üniteler yüzünden kapalı', (await p.locator('[data-deneme="prova"][data-sinav="TYT"]').count()) === 2 && /açık soru yetmiyor/.test(await p.textContent('section')));
+    await p.click('[data-deneme="prova"][data-sinav="TYT"][data-boy="20"]');
+    await p.waitForSelector('.sayac');
+    dene('prova: 20 soru, süre 28 dakikadan geri sayar', (await p.locator('.deneme__nobt').count()) === 20 && /^2[78]:\d\d$/.test(await p.textContent('.sayac')), await p.textContent('.sayac'));
+    await p.click('[data-deneme="cevap"][data-h="A"]');
+    await p.waitForSelector('[data-deneme="cevap"][disabled]');
+    dene('prova: ilk cevap kilitlenir, doğru/yanlış söylenmez', (await p.locator('[data-deneme="cevap"][disabled]').count()) >= 2 && /kaydedildi/.test(await p.textContent('.soru')) && !/Doğru\.|Yanlış\./.test(await p.textContent('.soru')));
+    await p.click('[data-deneme="bitir"]');
+    await p.waitForSelector('[data-deneme-sayfa] .kapisonuc');
+    const pSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
+    dene('prova: sonuç net «hesaplandı», ders ders, süre «ölçüldü»', /TYT provası bitti/.test(pSonuc) && /net hesaplandı/.test(pSonuc) && /Türkçe/.test(pSonuc) && /Fen bilimleri/.test(pSonuc) && /\/ 28 dk \(ölçüldü\)/.test(pSonuc), pSonuc.slice(0, 220));
+    dene('prova: puan ve sıra tahmini motorun cümlesiyle «veri yok»', /Puan ve sıra\s*tahmin yok\s*veri yok/.test(pSonuc) && /En az 3 tam TYT denemesi gerekir/.test(pSonuc), pSonuc.slice(-400));
+    await goruntu(p, 'deneme-prova-sonuc');
+    await p.goto(T + '/kabuk/#/motor/soru');
+    await p.waitForSelector('[data-arac="soru"] .ozet');
+    dene('prova: «Son testler»de provası adıyla', /Akademik · TYT provası/.test(await p.textContent('[data-arac="soru"] .ozet')));
+    await p.goto(T + '/kabuk/#/alan/felsefe');                 // aşağıdaki akışlar Felsefe'yi etkin alan bekler
+    await p.waitForSelector('.unitekutu');
+
     // ---- Tanışma: onaydan önce kayıt yok, onayla yazılır ----
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('.tn-davet');
@@ -344,6 +421,44 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP);
     dene('Hesap yüklendi; oturum yokken selam adsız', await p.evaluate(() => LIFEOS.HESAP.durum().oturum === null && /^(Günaydın|İyi günler|İyi akşamlar|İyi geceler)\.$/.test(document.querySelector('.karsila__selam').textContent)), await p.textContent('.karsila__selam'));
+
+    // ---- Aşamalar: Felsefe'nin ikinci aşaması (eski birinci aşama kaydı yerinde kalır) ----
+    await p.goto(T + '/kabuk/#/alan/felsefe');
+    await p.waitForSelector('.asamalar');
+    const kayit1 = await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.1'));
+    dene('aşama: alan sayfası iki aşamayı listeler, ikincisi kilitli ve nedenini söyler', (await p.locator('.asamalar .satir').count()) === 2 && (await p.locator('.asamalar .satir--kilitli').count()) === 1 && /önce Aşama 1 kapısı/.test(await p.textContent('.asamalar')), y2gercek ? 'gerçek asama-2.json' : 'yapay ikinci aşama');
+    dene('aşama: birinci aşamanın eski anahtarlı kaydı aynen okunuyor (3/9 ders, 1/3 kapı)', /3\/9 ders okundu · 1\/3/.test(await p.textContent('.govde')) && !!kayit1 && (await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.2'))) === null);
+    await p.goto(T + '/kabuk/#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
+    await p.waitForSelector('.yuva');
+    dene('aşama: kilitli aşamanın dersi açılmaz, neden aşama kilidi', /Bu aşama kilitli/.test(await p.textContent('.yuva')));
+    await p.goto(T + '/kabuk/#/alan/felsefe/asama/2');
+    await p.waitForSelector('.govde .yuva');
+    dene('aşama: kilitli aşama sayfası listeyi ve kilidi gösterir', /Bu aşama kilitli/.test(await p.textContent('.govde .yuva')) && (await p.locator('.unitekutu').count()) === 0);
+    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'asama-kilitli-masaustu-koyu.png'), fullPage: true });
+    for (const sahip of y.uniteler.slice(1).concat([y])) {                   // ikinci ve üçüncü ünite kapısı, sonra aşama kapısı
+      await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + sahip.id);
+      await p.waitForSelector('form.kapi');
+      for (const q of sahip.kapi.sorular) await p.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
+      await p.click('form.kapi button[type=submit]');
+      await p.waitForSelector('.kapisonuc--gecti');
+    }
+    dene('aşama: aşama kapısı geçilince «Sonraki aşama» ikinci aşamaya götürür', (await p.getAttribute('.kapisonuc .dugme--ana', 'href')) === '#/alan/felsefe/asama/2' && /Sonraki aşama/.test(await p.textContent('.kapisonuc .dugme--ana')));
+    await p.click('.kapisonuc .dugme--ana');
+    await p.waitForFunction(() => /Aşama 2/.test((document.querySelector('.govde .asama') || {}).textContent || ''));
+    dene('aşama: ikinci aşama açıldı; birincisi «geçildi», ikincisi şu an burada', /geçildi/.test(await p.textContent('.asamalar .satir >> nth=0')) && (await p.getAttribute('.asamalar .satir >> nth=1', 'aria-current')) === 'page'
+      && (await p.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
+    await goruntu(p, 'asama-liste');
+    const kayit1b = await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.1'));
+    await p.click('.eylemler .dugme--ana');
+    await p.waitForSelector('article.ders h1');
+    await p.click('[data-ac="okudum"]');
+    await p.waitForFunction(() => !!localStorage.getItem('lifeos.yol.felsefe.2'));
+    const k2 = await p.evaluate(() => JSON.parse(localStorage.getItem('lifeos.yol.felsefe.2')));
+    dene('aşama: ikinci aşamanın kaydı kendi anahtarında; birincinin kaydı değişmedi', Object.keys(k2.dersler).length === 1 && Object.keys(k2.asamalar).length === 0 && (await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.1'))) === kayit1b);
+    await p.reload();
+    await p.goto(T + '/kabuk/#/bugun');
+    await p.waitForFunction(t => (document.querySelector('.karsila__sira') || {}).textContent.indexOf(t) >= 0, y2.ad, { timeout: 5000 }).catch(() => {});
+    dene('aşama: Bugün yenilemeden sonra ikinci aşamayla karşılar', ((await p.textContent('.karsila__sira')) || '').indexOf(y2.ad) >= 0, await p.textContent('.karsila__sira'));
     dene('konsolda hata yok', hata.length === 0, hata.join(' | '));
     await c.close();
 

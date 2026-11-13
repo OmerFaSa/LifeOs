@@ -265,10 +265,9 @@
   var gosterilen = null; // arkası açılmış kartın kimliği
   function kartlar() {
     var l = oku(KART_ANAHTAR, []), I = ic(), ilk = l;
-    // yüklenmiş her alanın onaylı ders alıştırmaları kendiliğinden kart olur (taslak içerik aday çıkarmaz)
+    // yüklenmiş her alanın her aşamasının onaylı ders alıştırmaları kendiliğinden kart olur (taslak içerik aday çıkarmaz)
     I.tasinanlar().forEach(function (yer) {
-      var f = I.al(yer.id);
-      if (f && f.y) l = kartlariEsitle(Tekrar, l, I.Yol.tekrarAdaylari(f.y, I.kayitOku(yer.id)), f.y);
+      (I.asamalar(yer.id) || []).forEach(function (y, j) { l = kartlariEsitle(Tekrar, l, I.Yol.tekrarAdaylari(y, I.kayitOku(yer.id, j + 1)), y); });
     });
     if (l !== ilk) yaz(KART_ANAHTAR, l);
     return l;
@@ -318,7 +317,7 @@
       '<div class="liste">' + alanlar.map(function (a) {
         var dr = I.fDurum(a.id), il = dr && dr.ilerleme;
         return '<a class="satir" href="' + a.yol + '"><span class="satir__ad">' + k(a.ad) + '</span><span class="satir__not">' +
-          (il ? k(dr.asama.ad) + ' · ' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' kapı geçildi' : 'Aşama 1') +
+          (il ? 'Aşama ' + I.al(a.id).n + ' · ' + k(dr.asama.ad) + ' · ' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' kapı geçildi' : 'Aşama 1') +
           '</span><span class="pul pul--pilot">taşınıyor</span><span class="satir__ok" aria-hidden="true">›</span></a>';
       }).join('') + '</div></div>';
   }
@@ -493,6 +492,7 @@
           : '<div class="eylemler">' + Soru.BOYLAR.filter(function (n, i) { return !i || b.havuz.length > Soru.BOYLAR[i - 1]; }).map(function (n, i) { // havuz küçükse aynı boyda iki düğme çıkmasın
             return '<button type="button" class="dugme' + (i ? '' : ' dugme--ana') + '" data-arac-ac="soru-basla" data-boy="' + n + '">' + Math.min(n, b.havuz.length) + ' soruluk test</button>';
           }).join('') + '</div>') +
+        '<div class="eylemler"><a class="dugme" href="#/motor/soru/deneme">Süreli deneme' + (oku('lifeos.soru.deneme', {}).oturum ? ' · sürüyor' : '') + '</a></div>' +
         (son.length ? '<section><h2>Son testler</h2><ul class="ozet">' + son.map(function (g) {
           var r = g.sayilar;
           return '<li><span>' + k(g.alanAd) + ' · ' + tarih(g.bitti) + '</span><b>' + r.dogru + ' doğru · ' + r.yanlis + ' yanlış · ' + (r.bos + r.bakildi) + ' boş</b><span class="pul">ölçüldü</span></li>';
