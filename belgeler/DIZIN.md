@@ -27,6 +27,10 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 5 · Arama motoru](ekip/sadelesme/faz5-arama.md) — King'in araştır niyeti: HKM kodunu kullanır, hafızaya yazmaz; BAM karşılaştırması ve geçilmeyen kapı (2026-11-13).
 - [Faz 6 · Akademik içeriği](ekip/sadelesme/faz6-akademik-icerik.md) — AYS içeriğinden dönüştürülen ilk aşama: 30 ünite, 368 ders, hepsi taslak; dışarıda kalanlar (2026-11-13).
 - [Faz 6 · Tarih ve Dil içeriği](ekip/sadelesme/faz6-tarih-dil-icerik.md) — İki alanın ilk aşaması (`C:\gemini-data`'dan, hepsi taslak): üniteler, kaynaktaki hatalar, eksikler (2026-11-13).
+- [Faz 6 · Müzik ve Okuma-yazı içeriği](ekip/sadelesme/faz6-muzik-okuma-icerik.md) — İki alanın ilk aşaması (hepsi taslak): klavyedeki notalar, etkin okuma, cümle ve paragraf; eksik kaynaklar (2026-11-13).
+- [Faz 6 · Beslenme ve Hareket içeriği](ekip/sadelesme/faz6-beslenme-hareket-icerik.md) — İki sağlık alanının ilk aşaması (hepsi taslak): tabak, hareket kalıpları, klinik sınır için dışarıda kalanlar (2026-11-13).
+- [Faz 6 · Uyku ve Tahlil içeriği](ekip/sadelesme/faz6-uyku-tahlil-icerik.md) — İki sağlık alanının ilk aşaması (hepsi taslak): uyku ritmi, tahlil kâğıdını okumak; teşhis ve doz yok (2026-11-13).
+- [Faz 1 · AYS konu durumu](ekip/sadelesme/faz1-yol-konu-durumu.md) — Göçten önceki son sahipsiz kayıt: AYS konu durumu Yol motorunda; taşınanlar, taşınamayanlar (2026-11-13).
 - [Faz 4 · Ölçüm motoru](ekip/sadelesme/faz4-olcum.md) — A9: depodan sayılan ölçütler, bugün / taban / hedef, bütçe kuralları, ölçülemeyen eğriler (2026-11-13).
 - [Faz 4 · On üç eğri](ekip/sadelesme/faz4-egriler.md) — Her eğri bir dosya (`kalite/egri/`): ölçülenler, vekil ölçümler, ölçülemeyenler ve gerekenler (2026-11-13).
 - [Faz 5 · King MCP ucu](ekip/sadelesme/faz5-mcp.md) — Claude uygulamasından salt okur King: sekiz araç, gizlilik, kurulum (`king/KURULUM.md`) (2026-11-13).

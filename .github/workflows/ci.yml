@@ -227,7 +227,7 @@ jobs:
       # SADELESME FAZ 3 ICERIK (2026-11-13). Alan icerigi semaya uyar (alan/SEMA.md); onaysiz ders
       # taslak etiketiyle durur. Denetimin kendisi de sinanir.
       - name: Alan içeriği şema denetimi
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Alan içeriği şema denetimi" bash -c 'python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe && python3 alan/denetle.py alan/akademik && python3 alan/denetle.py alan/tarih && python3 alan/denetle.py alan/dil'
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Alan içeriği şema denetimi" bash -c 'python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe && python3 alan/denetle.py alan/akademik && python3 alan/denetle.py alan/tarih && python3 alan/denetle.py alan/dil && for a in muzik okuma beslenme hareket uyku tahlil; do python3 alan/denetle.py alan/$a || exit 1; done'
 
       # SADELESME FAZ 4 OLCUM (2026-11-13). Sayim kurallari, butce asimi, ayni girdi ayni kayit,
       # olculmeyen egri sayi tasimaz. Butce denetimi asagidaki adimda.
