@@ -1,0 +1,272 @@
+{
+  "sema": 1,
+  "alan": "tarih",
+  "id": "tarih.1",
+  "sira": 1,
+  "ad": "Kanıt ve ilk uygarlıklar",
+  "hedef": "Tarihin kanıtla nasıl kurulduğunu öğrenmek ve bu yöntemle Anadolu ile Mezopotamya'nın ilk yerleşim ve devletlerini tanımak.",
+  "onKosul": [],
+  "kanitIsi": "Bir antik uygarlık hakkında kaynakta okuduğun bir iddiayı seç; onu hangi tür kanıtın (kitabe, sikke, tablet, kazı) destekleyebileceğini ve hangi soruyu sorman gerektiğini yarım sayfada yaz. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "Dünya ve Türk tarihinin kırılma noktaları: tarih metodolojisine giriş", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "1. Profesyonel Tarih Metodolojisi ve Epistemolojisi", "satir": "11-13", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Kaynak tenkidi: dış ve iç tenkit", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "1.1. Kaynak Tenkidi (Heuristik ve Hermeneutik)", "satir": "15-26", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "Anakronizm tuzağı", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "1.2. Anakronizm Tuzağı ve Zihniyet Dünyası", "satir": "28-30", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "Nedensellik ve çok faktörlülük", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "1.3. Nedensellik ve Çok Faktörlülük", "satir": "32-38", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "Annales Okulu ve Braudel'in üç zaman katmanı", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "1.4. Annales Okulu ve Katmanlı Zaman Kuramı", "satir": "40-44", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "Kırılma noktası 1: yazının icadı", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "2. En Kritik 50 Kırılma Noktası", "satir": "52", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "Kırılma noktaları 2-3: Kadeş Antlaşması ve Geç Tunç Çağı çöküşü", "tur": "gemini", "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md", "bolum": "2. En Kritik 50 Kırılma Noktası", "satir": "53-54", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "Göbeklitepe ve Karahantepe", "tur": "gemini", "yol": "ESP/tarih/anadolu_uygarliklari_hitit_frig_lidya_urartu_iyon_ve_antik_kentler_atlasi.md", "bolum": "1.1 Göbeklitepe ve Karahantepe", "satir": "15-22", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "Çatalhöyük", "tur": "gemini", "yol": "ESP/tarih/anadolu_uygarliklari_hitit_frig_lidya_urartu_iyon_ve_antik_kentler_atlasi.md", "bolum": "1.2 Çatalhöyük", "satir": "24-30", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Neolitik Devrim: kazıyı yürütenler ve Çatalhöyük kent dokusu", "tur": "gemini", "yol": "ESP/tarih/anadolu_ve_mezopotamya_uygarliklari_antik_kentler_arkeoloji_ve_kulturel_miras_atlasi.md", "bolum": "1.1 Neolitik Devrim ve Taş Tepeler Projesi", "satir": "14-20", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "Mezopotamya'nın kurucu dörtlüsü", "tur": "gemini", "yol": "ESP/tarih/anadolu_ve_mezopotamya_uygarliklari_antik_kentler_arkeoloji_ve_kulturel_miras_atlasi.md", "bolum": "1.2 Mezopotamya'nın Kurucu Dörtlüsü", "satir": "22-26", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "Hititler", "tur": "gemini", "yol": "ESP/tarih/anadolu_uygarliklari_hitit_frig_lidya_urartu_iyon_ve_antik_kentler_atlasi.md", "bolum": "2.1 Hititler", "satir": "38-44", "dogrulama": "dogrulanmamis" },
+    { "id": "k13", "ad": "Frigler ve Lidyalılar", "tur": "gemini", "yol": "ESP/tarih/anadolu_uygarliklari_hitit_frig_lidya_urartu_iyon_ve_antik_kentler_atlasi.md", "bolum": "2.2 Frigler, 2.3 Lidyalılar", "satir": "46-57", "dogrulama": "dogrulanmamis" },
+    { "id": "k14", "ad": "Urartular", "tur": "gemini", "yol": "ESP/tarih/anadolu_uygarliklari_hitit_frig_lidya_urartu_iyon_ve_antik_kentler_atlasi.md", "bolum": "2.4 Urartular", "satir": "59-62", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "tarih.1.k1", "tur": "secmeli", "soru": "Bir kil tabletin gerçekten iddia edilen çağa ait olup olmadığını malzemesine ve yazı türüne bakarak sınamak hangi işlemdir?", "sec": ["İç tenkit", "Dış tenkit", "Anakronizm", "Tetikleyici neden"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+      { "id": "tarih.1.k2", "tur": "secmeli", "soru": "Kaynağa göre çivi yazısını Anadolu'ya Kültepe (Kaniş) ticaret kolonileri aracılığıyla getiren halk hangisidir?", "sec": ["Sümerler", "Babiller", "Asurlular", "Lidyalılar"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+      { "id": "tarih.1.k3", "tur": "secmeli", "soru": "Aşağıdaki sıralamalardan hangisi kaynaktaki tarihlere göre eskiden yeniye doğrudur?", "sec": ["Çatalhöyük, Göbeklitepe, Hititler, Lidyalılar", "Göbeklitepe, Çatalhöyük, Hititler, Lidyalılar", "Göbeklitepe, Hititler, Çatalhöyük, Urartular", "Hititler, Göbeklitepe, Lidyalılar, Çatalhöyük"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k8", "k9", "k12", "k13"] },
+      { "id": "tarih.1.k4", "tur": "secmeli", "soru": "«Lidya'da para icat edildi, sonra Pers saldırısıyla devlet yıkıldı; demek ki parayı icat etmek devleti yıktı.» Bu akıl yürütmedeki hata hangisidir?", "sec": ["Zamansal ardışıklığı nedensellik saymak (post hoc)", "Dış tenkit yapmamak", "Uzun erimi görmezden gelmek", "Anakronizm"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k13"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "tarih.1.1",
+      "ad": "Tarih nasıl bilinir?",
+      "onKosul": [],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tarih.1.1.k1", "tur": "secmeli", "soru": "Bir kronikçinin olayı bizzat görüp görmediğini ve hangi hanedana bağlı olduğunu sormak hangi tenkide girer?", "sec": ["Dış tenkit", "Nümizmatik", "İç tenkit", "Paleografi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "tarih.1.1.k2", "tur": "secmeli", "soru": "Madeni paraları inceleyen yardımcı bilim hangisidir?", "sec": ["Epigrafi", "Nümizmatik", "Diplomatik", "Paleografi"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "tarih.1.1.k3", "tur": "secmeli", "soru": "Bir isyanı anlatırken «Vergi artışı son damlaydı» denirse, vergi artışı kaynaktaki üç katmanlı neden modelinde hangi yere oturur?", "sec": ["Yapısal neden", "Konjonktürel neden", "Tetikleyici kıvılcım", "Uzun erim"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+          { "id": "tarih.1.1.k4", "tur": "secmeli", "soru": "Braudel'in benzetmesinde «derin okyanus dalgalarının üzerindeki köpükler» hangi zaman katmanıdır?", "sec": ["Coğrafi zaman (uzun erim)", "Sosyo-ekonomik konjonktürler", "Olaylar zamanı (kısa erim)", "Takvim zamanı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tarih.1.1.1",
+          "ad": "Tarih ezber değil, kanıt işidir",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2"],
+          "ozet": "Tarih, kanıtların denetlendiği bir anlama disiplinidir. Her belge bir niyet taşır; tarihçi onu önce dıştan (malzeme, yazı, mühür), sonra içten (yazarın konumu ve çıkarı) sınar.",
+          "metin": [
+            "Kaynağın ilk cümlesi tarihi şöyle tanımlar: tarih bir tarih ezberi ya da masal değil, kanıtların denetlendiği ve nedenlerin çok yönlü kurulduğu bir anlama disiplinidir.",
+            "Bir belge (vesika) geçmişin masum aynası değildir; her metnin bir niyeti, bir iktidar ilişkisi ve bir sınırı vardır. Bu yüzden tarihçi belgeyi iki aşamada sınar. Buna kaynak tenkidi denir.",
+            "Dış tenkit belgenin kendisine bakar: yazıldığı malzeme (papirüs, parşömen, kâğıt, kil tablet), mürekkep, mühür ve biçim, iddia edilen çağa uyuyor mu? Sahte belgeler bu yolla ayıklanır; kaynağın örneği, Papalığın dünyevi egemenliğini dayandırdığı sahte Donatio Constantini belgesidir.",
+            "Dış tenkide yardım eden bilimler: paleografi (yazı türleri), diplomatik (resmî belge üslubu), epigrafi (kitabeler), nümizmatik (madeni paralar) ve kronoloji (takvim hesapları).",
+            "İç tenkit belgenin söylediğine bakar: yazar olayı kendisi mi gördü, duyduğunu mu aktarıyor? Dini, hanedanı ya da sınıfı ona nasıl bir önyargı yüklüyor? Metin sansür, korku ya da propaganda altında mı yazıldı? Kendi içinde ya da başka bağımsız kaynaklarla çelişiyor mu?"
+          ],
+          "alistirmalar": [
+            { "id": "tarih.1.1.1.a1", "tur": "secmeli", "soru": "Bir fermanın kâğıdının ve mührünün döneme uyup uymadığını incelemek hangi işlemdir?", "sec": ["İç tenkit", "Dış tenkit", "Hermeneutik empati", "Nedensellik analizi"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "tarih.1.1.1.a2", "tur": "secmeli", "soru": "Kitabeleri inceleyen yardımcı bilim hangisidir?", "sec": ["Epigrafi", "Nümizmatik", "Kronoloji", "Diplomatik"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "tarih.1.1.1.a3", "tur": "acik", "soru": "Bir kralın kendi saray tarihçisine yazdırdığı zafer anlatısını okuyorsun. İç tenkit için soracağın üç soruyu yaz.", "dogru": "Yazar olayı kendisi gördü mü? Kralın hizmetinde olduğu için zaferi büyütmüş olabilir mi? Aynı savaşı karşı taraftan ya da bağımsız biri nasıl anlatıyor?", "olcut": ["Yazarın görgü tanığı olup olmadığını soruyor", "Yazarın çıkarını ya da bağlılığını soruyor", "Başka bağımsız kaynakla karşılaştırmayı öneriyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        },
+        {
+          "id": "tarih.1.1.2",
+          "ad": "Geçmişi kendi çağında okumak: anakronizm",
+          "onKosul": ["tarih.1.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3"],
+          "ozet": "Anakronizm, geçmişi bugünün değerleri, hukuku ya da bilgisiyle yargılama hatasıdır. Bir aktörün niyeti ancak kendi çağının dünyası içinde anlaşılır.",
+          "metin": [
+            "Kaynak anakronizmi şöyle tanımlar: geçmişi bugünün ahlak normları, hukuk kavramları, değerleri ya da teknolojik bilgisiyle yargılamak.",
+            "Kural: geçmişteki bir kişinin neden öyle davrandığı, ancak içinde yaşadığı çağın inanç, düşünce ve kurum dünyası içinde anlaşılabilir. Kaynak buna hermeneutik empati der.",
+            "Kaynağın örneği: Orta Çağ engizisyonunu ya da bir bozkır hanının kut anlayışını 21. yüzyılın insan hakları kavramlarıyla okumak tarih bilimiyle bağdaşmaz.",
+            "Anlamak onaylamak demek değildir (bu cümle modelin bağlantı notudur): tarihçi önce olayı kendi çağında anlar, değerlendirmesini sonra ve bunu ayrı tutarak yapar."
+          ],
+          "alistirmalar": [
+            { "id": "tarih.1.1.2.a1", "tur": "secmeli", "soru": "Hangisi anakronizme örnektir?", "sec": ["Bir antik kralın kararını kendi çağının inançlarıyla açıklamak", "MÖ 1200'de yaşamış bir kralı, sosyal medyayı iyi kullanmadığı için başarısız saymak", "Bir belgeyi başka kaynaklarla karşılaştırmak", "Bir sikkenin madenini incelemek"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+            { "id": "tarih.1.1.2.a2", "tur": "secmeli", "soru": "Kaynakta, geçmişteki aktörü kendi çağının dünyası içinden anlama tutumuna ne ad verilir?", "sec": ["Monokazalizm", "Hermeneutik empati", "Dış tenkit", "Kısa erim"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] }
+          ]
+        },
+        {
+          "id": "tarih.1.1.3",
+          "ad": "Neden oldu? Çok nedenli düşünmek ve zaman katmanları",
+          "onKosul": ["tarih.1.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k5"],
+          "ozet": "Büyük olaylar tek bir nedene indirgenmez: yapısal, konjonktürel ve tetikleyici nedenler birlikte çalışır. Braudel tarihi uzun, orta ve kısa erimli üç zaman katmanında okur.",
+          "metin": [
+            "Tek nedencilik (monokazalizm) hatası, büyük bir dönüşümü salt dine, salt ırka ya da salt ekonomik krize bağlamaktır. Kaynak bunun yerine üç katmanlı bir neden modeli önerir.",
+            "Yapısal nedenler derin zemindir: coğrafya, nüfus artışı, ticaret yolları, iklim; yüzyıllar sürer. Konjonktürel nedenler orta erimli krizlerdir: kıtlıklar, bütçe açıkları, hanedan çekişmeleri; on-yirmi yıl sürer. Tetikleyici kıvılcım ani bir olaydır: bir suikast, bir vergi artışı, bir çatışma.",
+            "Uyarı: «Bundan sonra oldu, öyleyse bundan ötürü oldu» (post hoc ergo propter hoc) bir yanılgıdır. Bir olayın ötekinden sonra gelmesi, onun nedeni olduğunu göstermez.",
+            "Fransız Annales okulu (Marc Bloch, Lucien Febvre, Fernand Braudel) tarihi kralların ve savaşların anlatısından çıkarıp üç zaman katmanına ayırdı: neredeyse hiç değişmeyen coğrafi zaman (uzun erim); 20-100 yıllık nüfus, salgın, fiyat ve ticaret döngüleri; ve savaşlar, antlaşmalar, taht değişiklikleri gibi olaylar zamanı (kısa erim).",
+            "Braudel'in benzetmesiyle olaylar, derin okyanus dalgalarının üzerindeki köpüklerdir: en görünür olan, en derin olan değildir."
+          ],
+          "alistirmalar": [
+            { "id": "tarih.1.1.3.a1", "tur": "secmeli", "soru": "Yüzyıllar boyunca süren iklim değişikliği, üç katmanlı neden modelinde hangi türdür?", "sec": ["Tetikleyici kıvılcım", "Konjonktürel neden", "Yapısal neden", "Post hoc yanılgısı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "tarih.1.1.3.a2", "tur": "secmeli", "soru": "Annales okulunun öne çıkan isimlerinden biri olarak kaynakta anılan tarihçi hangisidir?", "sec": ["Fernand Braudel", "Herodot", "İbn Haldun", "Leopold von Ranke"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "tarih.1.1.3.a3", "tur": "acik", "soru": "Yaşadığın şehirde son yıllarda olan bir değişikliği (ör. bir semtin boşalması) seç; ona bir yapısal, bir konjonktürel, bir tetikleyici neden öner.", "dogru": "Yapısal: şehrin sanayi bölgesinin taşınması; konjonktürel: son on yılda kiraların hızla artması; tetikleyici: semtteki büyük fabrikanın kapanma kararı.", "olcut": ["Üç ayrı neden yazdı", "Her neden doğru katmana yerleştirildi (uzun, orta, ani)", "Nedenleri yalnız sıra ile değil, bağla ilişkilendirdi"], "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tarih.1.2",
+      "ad": "İlk yerleşimler ve yazının doğuşu",
+      "onKosul": ["tarih.1.1"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tarih.1.2.k1", "tur": "secmeli", "soru": "Kaynağa göre Göbeklitepe hangi klasik görüşü sarsmıştır?", "sec": ["Önce tarım, sonra yerleşik hayat ve din", "Yazıyı Sümerlerin icat ettiği", "Paranın Lidya'da doğduğu", "Hititlerin bir meclisi olduğu"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] },
+          { "id": "tarih.1.2.k2", "tur": "secmeli", "soru": "Evlere çatılardaki açıklıklardan merdivenle girilen, sokaksız Neolitik yerleşim hangisidir?", "sec": ["Göbeklitepe", "Hattuşa", "Çatalhöyük", "Sardes"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] },
+          { "id": "tarih.1.2.k3", "tur": "secmeli", "soru": "Kaynakta yazının ortaya çıkışını tetikleyen ihtiyaç hangisi olarak gösterilir?", "sec": ["Dini şiirleri saklamak", "Artan tarım ürününü depolama ve hesabını tutma", "Savaş haberlerini iletmek", "Mektuplaşmak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+          { "id": "tarih.1.2.k4", "tur": "secmeli", "soru": "Kaynağa göre tarihin ilk düzenli ordusunu ve ilk merkezî imparatorluğunu kuran halk hangisidir?", "sec": ["Sümerler", "Akadlar", "Babiller", "Asurlular"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tarih.1.2.1",
+          "ad": "Göbeklitepe: önce tapınak mı, önce tarla mı?",
+          "onKosul": ["tarih.1.1.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k8", "k10"],
+          "ozet": "Şanlıurfa'daki Göbeklitepe ve Karahantepe MÖ 9600-8200'e tarihlenir. Kaynağa göre bu yapılar, tarımın yerleşik hayattan ve dinden önce geldiği görüşünü sarsmıştır.",
+          "metin": [
+            "Göbeklitepe ve Karahantepe, Şanlıurfa'da, Güneydoğu Anadolu'dadır. Kaynak onları MÖ 9600 - MÖ 8200'e (Çanak Çömleksiz Neolitik dönem) tarihler. Kazıları kaynağa göre Klaus Schmidt ve Necmi Karul yürütmüştür.",
+            "Klasik görüş şöyleydi: önce tarım başladı, ardından yerleşik hayat ve din doğdu. Kaynağın aktardığı yorum tersini söyler: insanlar önce büyük bir tapınak yapmak için bir araya geldi; bu kadar insanı doyurma ihtiyacı tarımı tetikledi.",
+            "Yapılarda boyu 6 metreye ulaşan, T biçimli, tek parça kireçtaşı dikilitaşlar vardır. T biçimi stilize bir insandır: yatay üst parça baş, dikey parça gövde; yan yüzlere kollar ve eller oyulmuştur. Taşlarda yılan, tilki, yaban domuzu, akbaba gibi hayvan kabartmaları bulunur.",
+            "Yöntem notu (modelin bağlantı notu, önceki üniteye dayanır): «tapınak tarımı tetikledi» bir kazı sonucuna dayanan yorumdur. Kanıtın ne gösterdiği ile ondan çıkarılan sonuç ayrı tutulmalıdır; kaynak bu yorumu «kanıtlamıştır» diye kesinleştirir."
+          ],
+          "not": "Kaynak (k8 satır 18, k10 satır 16) Göbeklitepe yorumunu «tezi yerle bir etmiştir», «kanıtlamıştır» diye kesin bir dille sunuyor; derste yorum olarak verildi. Kaynaklardan biri hayvanlar arasında leopar, öteki aslan sayıyor; çelişki yüzünden ikisi de alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.1.2.1.a1", "tur": "secmeli", "soru": "Göbeklitepe'deki T biçimli dikilitaşlar kaynağa göre neyi simgeler?", "sec": ["Bir ağacı", "Stilize bir insan bedenini", "Bir hayvanı", "Bir dağı"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] },
+            { "id": "tarih.1.2.1.a2", "tur": "secmeli", "soru": "Göbeklitepe hangi ildedir?", "sec": ["Konya", "Çorum", "Şanlıurfa", "Van"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] }
+          ]
+        },
+        {
+          "id": "tarih.1.2.2",
+          "ad": "Çatalhöyük: sokaksız bir köy-kent",
+          "onKosul": ["tarih.1.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k9", "k10"],
+          "ozet": "Konya Çumra'daki Çatalhöyük MÖ 7400-5200'e tarihlenir. Bitişik kerpiç evlere çatıdan girilir; kaynak toplumu eşitlikçi olarak tanımlar.",
+          "metin": [
+            "Çatalhöyük Konya'nın Çumra ilçesindedir. Kaynak onu MÖ 7400 - MÖ 5200'e (Çanak Çömlekli Neolitik) tarihler; yani Göbeklitepe'den sonraya.",
+            "Yerleşimde sokak ve kapı yoktur. Kerpiç evler bitişik yapılmıştır; içeri çatıdaki açıklıktan tahta merdivenle inilir. Damlar ortak meydan gibi kullanılır.",
+            "Kaynak toplumu sınıfsız ve eşitlikçi olarak tanımlar. Ölüler evlerin tabanındaki sekilerin altına gömülürdü.",
+            "Duvar resimlerinde kaynağa göre Hasan Dağı'nın bir püskürmesini gösteren bir harita, leopar motifleri ve sıvalı boğa başları (bukranyum) vardır. Kazıyı yürütenler olarak James Mellaart ve Ian Hodder anılır."
+          ],
+          "not": "Kaynak (k10 satır 20) nüfus için «8.000 kişilik» der; öteki atlasta sayı yok ve doğrulanamadı, derse alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.1.2.2.a1", "tur": "secmeli", "soru": "Çatalhöyük'te ölüler nereye gömülürdü?", "sec": ["Şehir dışındaki mezarlığa", "Evlerin tabanındaki sekilerin altına", "Tapınağın avlusuna", "Nehre"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] },
+            { "id": "tarih.1.2.2.a2", "tur": "secmeli", "soru": "Kaynaktaki tarihlere göre hangisi doğrudur?", "sec": ["Çatalhöyük Göbeklitepe'den eskidir", "Göbeklitepe Çatalhöyük'ten eskidir", "İkisi aynı yıllardadır", "Çatalhöyük Hititlerle çağdaştır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k8", "k9"] }
+          ]
+        },
+        {
+          "id": "tarih.1.2.3",
+          "ad": "Mezopotamya ve yazının icadı",
+          "onKosul": ["tarih.1.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k11"],
+          "ozet": "Yazı MÖ 3200 dolayında, artan ürünün hesabını tutma ihtiyacıyla Sümerlerde doğdu. Mezopotamya'nın dört kurucu halkı Sümerler, Akadlar, Babiller ve Asurlulardır.",
+          "metin": [
+            "Kaynağın kırılma noktaları listesinin ilk maddesi yazının icadıdır (MÖ yaklaşık 3200). Zincir şöyle kurulur: tarımda artan artı ürünü saklamak ve hesabını tutmak gerekti; resim yazısından çivi yazısı doğdu; yazı sonra kanunların kayda geçirilmesini sağladı. Kaynağın dersi: kayıt tutamayan bir toplum karmaşık bir devlet kuramaz.",
+            "Sümerler: çivi yazısı (MÖ 3200), ziggurat tapınakları, tekerlek ve saban, 60 tabanlı sayı sistemi ve Gılgamış Destanı.",
+            "Akadlar: Kral Sargon önderliğinde kaynağa göre tarihin ilk düzenli ordusu ve ilk merkezî imparatorluğu; Sami bir dil devlet dili oldu.",
+            "Babiller: Hammurabi Kanunları (MÖ 1750 dolayı, 282 maddelik bir stel; kısasa kısas, hekimin sorumluluğu, kadın ve borç hukuku), İştar Kapısı ve matematiksel astronomi.",
+            "Asurlular: Kültepe (Kaniş) ticaret kolonileriyle çivi yazısını Anadolu'ya getirdiler; kaynağa göre Anadolu'da tarihî çağlar bununla, MÖ 1950 dolayında başladı. Asurbanipal'in Ninova'daki tablet kütüphanesi de onlarındır.",
+            "Bağlantı notu (model): yazıyla birlikte tarihçinin elinde ilk kez yazılı belge olur; önceki iki dersteki yerleşimleri ise yalnız kazı buluntularından tanıyoruz."
+          ],
+          "not": "Kaynak (k11 satır 23) «tarihin ilk yazılı kanunları» olarak Urukagina'yı (MÖ 2375) verir; Urukagina metinleri bir kanun derlemesi değil reform yazıtıdır ve bu iddia doğrulanamadı, derse alınmadı. Asma Bahçeler'in Babil'deki varlığı tartışmalı olduğundan o da alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.1.2.3.a1", "tur": "secmeli", "soru": "60 tabanlı sayı sistemi kaynakta hangi halka bağlanır?", "sec": ["Akadlar", "Asurlular", "Sümerler", "Babiller"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+            { "id": "tarih.1.2.3.a2", "tur": "secmeli", "soru": "282 maddelik kanun steli hangi hükümdarla anılır?", "sec": ["Sargon", "Hammurabi", "Asurbanipal", "Gılgamış"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+            { "id": "tarih.1.2.3.a3", "tur": "acik", "soru": "Göbeklitepe ile Hammurabi Kanunları'nı bilmenin yolu neden farklıdır? İki üç cümleyle açıkla.", "dogru": "Göbeklitepe yazıdan önceye aittir; onu yalnız kazı buluntularından, taşlardan ve kabartmalardan yorumlarız. Hammurabi Kanunları ise yazılı bir belgedir; ne dediğini doğrudan okuyabilir, iç ve dış tenkitle sınayabiliriz.", "olcut": ["Yazıdan önce ve sonra ayrımını yaptı", "Kazı buluntusu ile yazılı belgeyi kanıt türü olarak ayırdı"], "durum": "taslak", "yazan": "model", "kaynak": ["k6", "k8", "k11"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tarih.1.3",
+      "ad": "Anadolu'nun ilk devletleri",
+      "onKosul": ["tarih.1.2"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "tarih.1.3.k1", "tur": "secmeli", "soru": "Hititlerin başkenti hangisidir?", "sec": ["Gordion", "Hattuşa", "Tuşpa", "Sardes"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+          { "id": "tarih.1.3.k2", "tur": "secmeli", "soru": "Elektron madenine devlet mührü basarak sikkeyi ortaya çıkaran Anadolu devleti hangisidir?", "sec": ["Frigler", "Urartular", "Lidyalılar", "Hititler"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] },
+          { "id": "tarih.1.3.k3", "tur": "secmeli", "soru": "Kral Midas ve Gordion düğümü hangi uygarlıkla anılır?", "sec": ["Frigler", "Lidyalılar", "Urartular", "Asurlular"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] },
+          { "id": "tarih.1.3.k4", "tur": "secmeli", "soru": "Kaynağa göre Hitit, Miken ve Ugarit'in yıkıldığı Geç Tunç Çağı çöküşü hangi tarihe yerleştirilir?", "sec": ["MÖ ~3200", "MÖ ~1750", "MÖ ~1200", "MÖ 546"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tarih.1.3.1",
+          "ad": "Hititler: meclis, kraliçe ve antlaşma",
+          "onKosul": ["tarih.1.2.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k12", "k7"],
+          "ozet": "Hititler (MÖ 1650-1200) Hattuşa'dan yönetildi. Kaynak Pankuş meclisini, Tavananna'yı, Mısır'la Kadeş Antlaşması'nı ve fethedilen halkların tanrılarını kabul eden «bin tanrı» anlayışını öne çıkarır.",
+          "metin": [
+            "Hititler (kaynakta Nesitler olarak da anılır) kaynağa göre MÖ 1650 - MÖ 1200 arasında Anadolu'da hüküm sürdü. Başkentleri Hattuşa'dır (Boğazkale, Çorum).",
+            "Pankuş: soylular ve komutanlardan oluşan, kralın yetkilerini sınırlayabilen bir meclis. Tavananna: kendi mührünü basan, dinî törenleri yöneten, antlaşmalara ortak imza koyan büyük kraliçe.",
+            "Kadeş Antlaşması: Hitit kralı III. Hattuşili ile Mısır firavunu II. Ramses arasında imzalandı. Kaynak onu bilinen ilk yazılı uluslararası barış antlaşması sayar; Hitit nüshası Akadca çivi yazısıyla gümüş tablete yazılmıştır. Kaynağın yorumu: iki rakip, yükselen ortak bir tehdit (Asur) karşısında barışa yöneldi.",
+            "Anal (yıllık) yazıcılığı: krallar zaferlerinin yanında yenilgilerini de kaydettirdi. Bin Tanrı İli: Hititler fethettikleri halkların tanrılarını kendi tanrılar topluluğuna kattı.",
+            "Kaynak notu (model): Kadeş'in tarihi kaynaklarda MÖ 1258, MÖ 1259 ve MÖ 1280 olarak üç farklı biçimde geçiyor; bu derste yalnız «MÖ 13. yüzyıl» denir."
+          ],
+          "not": "Aynı antlaşma için üç tarih: k12 (satır 40) MÖ 1258, k7 (satır 53) MÖ ~1259, anadolu_ve_mezopotamya atlası (satır 35) MÖ 1280. 1280 öteki ikisiyle uyuşmuyor; kesin yıl derse konmadı. Kaynağın «ilk meşruti meclis» ve anal yıllıkları için «ilk tarafsız tarih yazıcılığı» nitelemeleri abartılı bulunup alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.1.3.1.a1", "tur": "secmeli", "soru": "Kadeş Antlaşması hangi iki devlet arasında imzalandı?", "sec": ["Hititler ve Asurlular", "Hititler ve Mısır", "Frigler ve Lidyalılar", "Babiller ve Mısır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+            { "id": "tarih.1.3.1.a2", "tur": "secmeli", "soru": "Hitit büyük kraliçesinin unvanı nedir?", "sec": ["Pankuş", "Tavananna", "Kibele", "Matar"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] }
+          ]
+        },
+        {
+          "id": "tarih.1.3.2",
+          "ad": "Frigler ve Lidyalılar: tarım yasası ve ilk sikke",
+          "onKosul": ["tarih.1.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k13"],
+          "ozet": "Frigler (MÖ 1200-675) Gordion'dan, Lidyalılar (MÖ 680-546) Sardes'ten yönetildi. Friglerin sert tarım yasaları, Lidya'nın sikkesi ve Kral Yolu kaynağın öne çıkardıklarıdır.",
+          "metin": [
+            "Frigler kaynağa göre MÖ 1200 - MÖ 675 arasında yaşadı; başkentleri Gordion'dur (Polatlı, Ankara). Kral Midas ve Büyük İskender'in kılıçla kestiği anlatılan Gordion düğümü onlarla anılır.",
+            "Frig ekonomisi tarıma dayanıyordu; kaynağa göre öküz öldüren ya da saban kıran idamla cezalandırılırdı. Çengelli iğnenin atası fibula ve çivisiz geçme ahşap işçiliği de onlara bağlanır. Ana tanrıça Kibele (Matar) kültü önemliydi.",
+            "Lidyalılar MÖ 680 - MÖ 546 arasında yaşadı; başkentleri Sardes'tir (Salihli, Manisa). Paktolos Çayı'ndan çıkan doğal altın-gümüş alaşımına (elektron) devlet mührü basarak sikkeyi ortaya çıkardılar (MÖ 7. yüzyıl). Böylece değer, devletin güvencesi altında taşınabilir oldu.",
+            "Kral Yolu, Sardes'ten Pers başkenti Susa'ya uzanan, kaynağa göre 2.700 km'lik bir ticaret ve haberleşme yoludur. Lidya'nın son kralı Kroisos (Karun) Pers kralı Kyros'a yenildi ve devlet sona erdi."
+          ],
+          "not": "Kaynak sikkeyle «küresel serbest piyasa ticareti başlamıştır» der; abartılı bulunup alınmadı. Kral Yolu'nun Persler döneminde düzenlendiği bilgisi kaynakta yok; yol yalnız kaynaktaki tanımıyla verildi.",
+          "alistirmalar": [
+            { "id": "tarih.1.3.2.a1", "tur": "secmeli", "soru": "Lidyalıların sikkede kullandığı doğal altın-gümüş alaşımının adı nedir?", "sec": ["Tunç", "Elektron", "Fibula", "Bronz"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] },
+            { "id": "tarih.1.3.2.a2", "tur": "secmeli", "soru": "Friglerde öküz öldürene idam cezası verilmesi en çok neyi gösterir?", "sec": ["Ekonominin tarıma dayandığını", "Denizciliğin önemini", "Paranın yaygınlığını", "Yazının yokluğunu"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] }
+          ]
+        },
+        {
+          "id": "tarih.1.3.3",
+          "ad": "Urartular ve Tunç Çağı'nın çöküşü",
+          "onKosul": ["tarih.1.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14", "k7"],
+          "ozet": "Urartular (MÖ 860-590) Van'daki Tuşpa'dan yönetildi ve su mühendisliğiyle tanınır. MÖ 1200 dolayındaki Geç Tunç Çağı çöküşünde Hititler dahil saray ekonomileri birlikte yıkıldı.",
+          "metin": [
+            "Urartular (kendi adlarıyla Biainili) kaynağa göre MÖ 860 - MÖ 590 arasında yaşadı; başkentleri Tuşpa'dır (Van Kalesi).",
+            "Şamran (Menua) Kanalı: kaynağa göre MÖ 800 dolayında yapılmış, 56 km uzunluğunda, dev destek duvarlarıyla bugüne dek çalışan bir su kanalı. Urartular ayrıca kayalara oyulmuş çok odalı mezarlar, bronz kazanlar ve aslan başlı kalkanlar bıraktı.",
+            "Geç Tunç Çağı çöküşü (MÖ yaklaşık 1200): kaynak kuraklık, kıtlık ve depremleri, ardından Deniz Kavimleri istilasını sayar; Hitit, Miken ve Ugarit yıkıldı, ticaret ağları koptu. Sonuç: bronz ticaretine dayalı merkezî saray ekonomileri çözüldü, Demir Çağı'na geçildi.",
+            "Kaynağın dersi: birbirine aşırı bağlı karmaşık sistemler, çok sayıda kriz üst üste gelince zincirleme çöker. Bu, birinci ünitedeki çok nedenli düşünmenin bir örneğidir (modelin bağlantı notu): kuraklık yapısal, kıtlık konjonktürel, istila tetikleyici bir neden olarak okunabilir.",
+            "Kronoloji özeti (model, kaynaktaki tarihlerden): Hititler MÖ 1650-1200 → Frigler MÖ 1200-675 → Urartular MÖ 860-590 → Lidyalılar MÖ 680-546. Frig, Urartu ve Lidya dönemleri kısmen örtüşür."
+          ],
+          "not": "Kaynak Şamran Kanalı için «suyu sıfır kayıpla taşıyan» der; ölçülemeyen bir abartı olduğundan alınmadı.",
+          "alistirmalar": [
+            { "id": "tarih.1.3.3.a1", "tur": "secmeli", "soru": "Urartuların başkenti Tuşpa bugün hangi ildedir?", "sec": ["Van", "Manisa", "Ankara", "Çorum"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "tarih.1.3.3.a2", "tur": "secmeli", "soru": "Kaynakta Geç Tunç Çağı çöküşünün sonuçlarından biri olarak hangisi sayılır?", "sec": ["Yazının icadı", "Demir Çağı'na geçiş", "Sikkenin icadı", "Göbeklitepe'nin kurulması"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+            { "id": "tarih.1.3.3.a3", "tur": "acik", "soru": "Bu aşamada tanıdığın dört Anadolu devletini kaynaktaki tarihlere göre sırala ve her birinin yanına kaynağın öne çıkardığı birer özelliği yaz.", "dogru": "Hititler (MÖ 1650-1200): Kadeş Antlaşması; Frigler (MÖ 1200-675): sert tarım yasaları; Urartular (MÖ 860-590): Şamran Kanalı; Lidyalılar (MÖ 680-546): sikke.", "olcut": ["Sıra Hitit, Frig, Urartu, Lidya", "Her devlete kaynaktaki bir özellik yazıldı"], "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13", "k14"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

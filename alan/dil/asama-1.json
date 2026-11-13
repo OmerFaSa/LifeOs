@@ -1,0 +1,295 @@
+{
+  "sema": 1,
+  "alan": "dil",
+  "id": "dil.1",
+  "sira": 1,
+  "ad": "Ses, yazı ve öğrenme yolu",
+  "hedef": "Sesin yazıya nasıl geçtiğini ve IPA ile nasıl gösterildiğini, Türkçe diksiyonun temel kurallarını ve bir dilin nasıl edinildiğini tanımak.",
+  "onKosul": [],
+  "kanitIsi": "Kendini üç cümleyle tanıttığın bir ses kaydı yap: ğ, açık-kapalı e ve ulama kurallarına dikkat et, virgüllerde es ver. Sahip dinleyip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "Dünya yazı sistemlerinin yapısal tipolojisi", "tur": "gemini", "yol": "ESP/dil/dunya_alfabeleri_yazi_sistemleri_tipografi_ve_fonetik_transkripsiyon_ipa_atlasi.md", "bolum": "1. Dünya Yazı Sistemlerinin Evrimi ve Yapısal Tipolojisi", "satir": "13-22", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Akrofoni devrimi: Fenike alfabesinden Latin harflerine", "tur": "gemini", "yol": "ESP/dil/dunya_alfabeleri_yazi_sistemleri_tipografi_ve_fonetik_transkripsiyon_ipa_atlasi.md", "bolum": "Akrofoni Devrimi: Alfabelerin Doğuşu", "satir": "42-47", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "Kore Hangul ve Orhun (Köktürk) yazısı", "tur": "gemini", "yol": "ESP/dil/dunya_alfabeleri_yazi_sistemleri_tipografi_ve_fonetik_transkripsiyon_ipa_atlasi.md", "bolum": "4. Kore Hangul ve Türk Orhun Yazıtları Mimarisi", "satir": "61-71", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "IPA: Türkçenin 8 ünlüsü ve İngilizcenin kritik ünlüleri", "tur": "gemini", "yol": "ESP/dil/dunya_alfabeleri_yazi_sistemleri_tipografi_ve_fonetik_transkripsiyon_ipa_atlasi.md", "bolum": "5. Uluslararası Fonetik Alfabe (IPA)", "satir": "75-96", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "Diyafram nefesi ve ses mekaniği", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "2.1. Diyafram Nefesi ve Ses Mekaniği", "satir": "93-97", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "Türkçe fonetik kuralları: ğ, açık ve kapalı e, ulama", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "2.2. Türkçe Fonetik Kuralları ve Doğru Telaffuz", "satir": "101-116", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "Türkçede vurgu", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "2.2. Türkçe Fonetik Kuralları, madde 4", "satir": "118-122", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "Kalem tekniği ve tekerlemeler", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "2.3. Kalem Tekniği ve Profesyonel Tekerlemeler", "satir": "126-136", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "Es verme (dramatik sessizlik)", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "'Es' Verme Sanatı", "satir": "158-161", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Sesin üretimi ve rezonans boşlukları", "tur": "gemini", "yol": "ESP/muzik_diksiyon/vokal_rezonans_ses_akustigi_ve_cicero_hitabet_kanonlari.md", "bolum": "1.1 Larenks Biyomekaniği, 1.2 Dört Rezonans Boşluğu", "satir": "13-40", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "Vokal hijyen", "tur": "gemini", "yol": "ESP/muzik_diksiyon/vokal_rezonans_ses_akustigi_ve_cicero_hitabet_kanonlari.md", "bolum": "1.4 Vokal Hijyen Protokolü", "satir": "50-54", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "Krashen'in beş dil edinimi hipotezi", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "2. Stephen Krashen'in 5 Temel Dil Edinimi Hipotezi", "satir": "36-63", "dogrulama": "dogrulanmamis" },
+    { "id": "k13", "ad": "Swain: anlaşılabilir çıktı ve boşluğu fark etme", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "3. Merrill Swain", "satir": "67-71", "dogrulama": "dogrulanmamis" },
+    { "id": "k14", "ad": "Nation: kelime sıklığı katmanları ve eşdizim", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "4. Paul Nation: Kelime Frekans Mühendisliği", "satir": "75-86", "dogrulama": "dogrulanmamis" },
+    { "id": "k15", "ad": "CEFR düzeyleri (A1 → C2)", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "6. CEFR Seviye Standartları", "satir": "112-116", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "dil.1.k1", "tur": "secmeli", "soru": "IPA'da /y/ simgesi Türkçede hangi harfin sesini gösterir?", "sec": ["y", "ü", "ı", "i"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+      { "id": "dil.1.k2", "tur": "secmeli", "soru": "«Yağmur» sözcüğü kaynağa göre nasıl söylenir?", "sec": ["Gırtlaktan hırıltılı bir ğ ile", "«Yaymur» diye", "Önceki ünlü uzatılarak «Yaamur» diye", "«Yagmur» diye"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+      { "id": "dil.1.k3", "tur": "secmeli", "soru": "Yalnız ünsüzlerin yazıldığı, ünlüleri okuyucunun tamamladığı yazı türü hangisidir?", "sec": ["Abugida", "Ebced (abjad)", "Hece yazısı", "Tam alfabe"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+      { "id": "dil.1.k4", "tur": "secmeli", "soru": "Krashen'e göre ilerleme hangi girdiyle olur?", "sec": ["Seviyenin çok üstündeki zor metinlerle", "Tamamen bildiğin metinlerle", "Seviyenin bir adım üstündeki anlaşılır girdiyle (i+1)", "Yalnız gramer kurallarını ezberleyerek"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "dil.1.1",
+      "ad": "Yazı ve ses",
+      "onKosul": [],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "dil.1.1.k1", "tur": "secmeli", "soru": "Japon hiragana ve katakana hangi yazı türüne örnektir?", "sec": ["Logografik", "Hece yazısı", "Ebced", "Özelliksel"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+          { "id": "dil.1.1.k2", "tur": "secmeli", "soru": "Fenike harfi «aleph» (öküz başı) hangi Latin harfinin atasıdır?", "sec": ["E", "O", "A", "B"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "dil.1.1.k3", "tur": "secmeli", "soru": "Kaynağa göre Orhun yazısında bazı ünsüzlerin kalın ve ince ünlülerle ayrı damgaları olması neyi yansıtır?", "sec": ["Türkçenin büyük ses uyumunu (kalınlık-incelik)", "Soldan sağa yazılışı", "Çince etkisini", "Vurgunun son hecede olmasını"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+          { "id": "dil.1.1.k4", "tur": "secmeli", "soru": "İngilizce «sit» ile «seat» arasındaki ünlü farkı IPA'da hangi ikiliyle gösterilir?", "sec": ["/ə/ ve /ʌ/", "/æ/ ve /a/", "/ɪ/ ve /iː/", "/u/ ve /o/"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "dil.1.1.1",
+          "ad": "Konuşmayı yazıya geçirmenin yolları",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1"],
+          "ozet": "Yazı sistemleri, işaretin neyi gösterdiğine göre ayrılır: bir kavramı, bir heceyi, yalnız ünsüzü, ünlüsü bağlı ünsüzü ya da her sesi ayrı bir harfle.",
+          "metin": [
+            "Bir yazı sisteminde işaret neyi temsil eder? Kaynak altı tür sayar.",
+            "Logografik (ideografik) yazı: işaret doğrudan bir kavramı ya da sözcüğü gösterir. Örnekler: Sümer çivi yazısı, Mısır hiyeroglifleri, Çin yazısı (Hanzi).",
+            "Hece yazısı: her işaret bir ünsüz + ünlü birleşimidir. Örnekler: Japon hiragana ve katakana, Linear B.",
+            "Ebced (abjad): yalnız ünsüzler yazılır, ünlüleri okuyan zihninde tamamlar. Örnekler: Fenike, İbrani, klasik Arap yazısı.",
+            "Abugida: her ünsüz doğal bir ünlü taşır (genelde /a/); öteki ünlüler küçük işaretlerle eklenir. Örnek: Devanagari (Sanskrit, Hintçe).",
+            "Alfabe: ünsüzler de ünlüler de ayrı harflerle yazılır. Örnekler: Grek, Latin, Kiril, Ermeni, Gürcü. Bugünkü Türkçe Latin alfabesiyle yazılır (modelin bağlantı notu).",
+            "Özelliksel yazı: harfin biçimi, sesin ağızda çıkarıldığı organı çizer. Örnek: Kore Hangul alfabesi."
+          ],
+          "not": "Kaynak (satır 18) hece yazısı örnekleri arasında Çerkesçeyi sayar; Çerkesçe bugün Kiril alfabesiyle yazılır, hece yazısı değildir. Hata olarak bırakıldı.",
+          "alistirmalar": [
+            { "id": "dil.1.1.1.a1", "tur": "secmeli", "soru": "Her sesin ayrı bir harfle yazıldığı tür hangisidir?", "sec": ["Logografik", "Abugida", "Alfabe", "Ebced"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "dil.1.1.1.a2", "tur": "secmeli", "soru": "Mısır hiyeroglifleri kaynakta hangi türün örneğidir?", "sec": ["Hece yazısı", "Logografik", "Alfabe", "Özelliksel"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] }
+          ]
+        },
+        {
+          "id": "dil.1.1.2",
+          "ad": "Alfabe nereden geldi: akrofoni ve Orhun yazısı",
+          "onKosul": ["dil.1.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k3"],
+          "ozet": "Fenike yazıcıları her ses için o sesle başlayan bir nesnenin resmini seçti; bu harfler Grekçeden Latin harflerine geçti. Orhun yazısı ise Türkçenin kalınlık-incelik uyumunu damgalarına yansıtır.",
+          "metin": [
+            "Akrofoni: binlerce resim işareti ezberlemek yerine, konuşmadaki her ses için o sesle başlayan bir nesnenin resmi seçildi. Kaynak örnekleri: aleph (öküz başı) → Grek alpha → Latin A; beth (ev) → beta → B; gimel (deve ya da fırlatma sopası) → gamma → C/G; daleth (çadır kapısı) → delta → D.",
+            "Yani bugün okuduğun A harfi, çok eski bir öküz başı resminin sadeleşmiş hâlidir (modelin bağlantı notu).",
+            "Orhun (Köktürk) yazısı 8. yüzyıldan kalmadır. Kaynağa göre 38 damgadan oluşur ve sağdan sola yazılır.",
+            "Orhun yazısında b, d, k, t, r, s, y gibi ünsüzlerin kalın ünlülerle (a, ı, o, u) kullanılan damgaları ile ince ünlülerle (e, i, ö, ü) kullanılan damgaları ayrıdır. Böylece yazı, Türkçenin büyük ses uyumunu (kalınlık-incelik) doğrudan gösterir.",
+            "Hangul ise başka bir yol izler: kaynağa göre ㄱ (k, g) dil kökünün damağa kalkışını, ㅁ (m) kapanan dudakları, ㅅ (s) kesici dişleri çizer. Harf, sesin ağızdaki biçimidir."
+          ],
+          "not": "Kaynak Hangul için «dünyanın en rasyonel alfabesi» der; değer yargısı olduğundan alınmadı.",
+          "alistirmalar": [
+            { "id": "dil.1.1.2.a1", "tur": "secmeli", "soru": "Akrofoni ilkesi nedir?", "sec": ["Her kavrama ayrı işaret vermek", "Bir sese, o sesle başlayan nesnenin resmini işaret seçmek", "Yalnız ünlüleri yazmak", "Sağdan sola yazmak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "dil.1.1.2.a2", "tur": "secmeli", "soru": "Orhun yazısı kaynağa göre hangi yönde yazılır?", "sec": ["Soldan sağa", "Yukarıdan aşağıya", "Sağdan sola", "Satır satır yön değiştirerek"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] }
+          ]
+        },
+        {
+          "id": "dil.1.1.3",
+          "ad": "Sesi yazmak: IPA ve Türkçenin sekiz ünlüsü",
+          "onKosul": ["dil.1.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4"],
+          "ozet": "IPA, dünya dillerindeki sesleri tek bir simge takımıyla yazar. Türkçenin sekiz ünlüsü üç ölçüyle ayrılır: dar-geniş, ön (ince)-arka (kalın), düz-yuvarlak.",
+          "metin": [
+            "Uluslararası Fonetik Alfabe (IPA), bir dilin yazım kurallarına takılmadan sesin kendisini kaydetmeyi sağlar. Sözlüklerdeki /…/ arasındaki simgeler IPA'dır (modelin bağlantı notu).",
+            "Türkçenin sekiz ünlüsü ve IPA simgeleri (kaynaktaki tablo): i /i/, e /e/ ya da /ɛ/, ü /y/, ö /œ/, ı /ɯ/, a /a/ ya da /ɑ/, u /u/, o /o/. Dikkat: IPA'daki /y/ Türkçedeki y harfi değil, ü sesidir.",
+            "Ünlüler üç ölçüyle ayrılır. Ağız açıklığı: i, ü, ı, u kapalıdır (dar); e, ö, a, o açıktır (geniş). Dilin yeri: i, e, ü, ö öndedir (ince); ı, a, u, o arkadadır (kalın). Dudak: ü, ö, u, o yuvarlak; i, e, ı, a düzdür.",
+            "Bu ön-arka ayrımı, önceki dersteki Orhun damgalarının ayırdığı kalınlık-inceliğin ta kendisidir (modelin bağlantı notu).",
+            "İngilizcede Türkçede olmayan ünlüler vardır. Kaynağın seçtikleri: /ə/ (schwa; about, banana), /æ/ (cat, black), /ɪ/ (sit /sɪt/; seat /siːt/ ile karşılaştır), /ʌ/ (cup, run)."
+          ],
+          "alistirmalar": [
+            { "id": "dil.1.1.3.a1", "tur": "secmeli", "soru": "Türkçede hem ön (ince) hem yuvarlak olan ünlüler hangileridir?", "sec": ["i, e", "ü, ö", "u, o", "ı, a"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "dil.1.1.3.a2", "tur": "secmeli", "soru": "IPA'da /ɯ/ Türkçede hangi ünlüdür?", "sec": ["u", "ü", "ı", "o"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "dil.1.1.3.a3", "tur": "acik", "soru": "Adını ve soyadını IPA simgeleriyle yaz; her ünlünün dar mı geniş mi, ince mi kalın mı olduğunu yanına not et.", "dogru": "Örnek: Ayşe → /ajʃe/: a geniş, kalın, düz; e geniş, ince, düz.", "olcut": ["Ünlüler kaynaktaki IPA simgeleriyle yazıldı (ü için /y/, ı için /ɯ/)", "Her ünlünün açıklık ve ön-arka özelliği doğru"], "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dil.1.2",
+      "ad": "Diksiyonun temelleri",
+      "onKosul": ["dil.1.1"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "dil.1.2.k1", "tur": "secmeli", "soru": "Kaynağa göre diyafram nefesinde ne olur?", "sec": ["Omuzlar ve göğüs kalkar", "Diyafram aşağı iner, karın ve yan kaburgalar dışa genişler", "Nefes yalnız ağızdan alınır", "Karın içeri çekilir ve tutulur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+          { "id": "dil.1.2.k2", "tur": "secmeli", "soru": "«Değil» sözcüğünde iki ince ünlü arasındaki ğ nasıl söylenir?", "sec": ["y sesine yakın: «deyil»", "g gibi: «degil»", "Hiç söylenmez: «deil»", "Gırtlaktan hırıltıyla"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+          { "id": "dil.1.2.k3", "tur": "secmeli", "soru": "Kaynağa göre «İstanbul» sözcüğünde vurgu nerededir?", "sec": ["Son hecede (-bul)", "İkinci hecede (-tan-)", "İlk hecede (İs-)", "Vurgu yoktur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+          { "id": "dil.1.2.k4", "tur": "secmeli", "soru": "Ses kısıldığında kaynağa göre ne yapılmamalıdır?", "sec": ["Sessiz kalmak", "Ilık su içmek", "Fısıldayarak konuşmak", "Yutkunmak"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "dil.1.2.1",
+          "ad": "Ses nasıl çıkar: nefes, ses telleri, rezonans",
+          "onKosul": ["dil.1.1.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k10"],
+          "ozet": "Ses, akciğerden gelen havanın gırtlaktaki ses tellerini titreştirmesiyle doğar ve vücuttaki boşluklarda yankılanarak güçlenir. Doğru konuşmanın yakıtı diyafram nefesidir.",
+          "metin": [
+            "Kaynağa göre insan sesi, akciğerlerden gelen havanın gırtlaktaki (larenks) ses tellerini titreştirmesiyle üretilir. Tellerin yüzeyi titreşirken dalga gibi kıvrılır; bu dalga bozulursa ses kısılır ya da çatlar.",
+            "Tellerde çıkan ham ses cılızdır; onu dolgun yapan, vücuttaki boşluklarda yankılanmasıdır (rezonans). Kaynak dört boşluk sayar: göğüs (pes, ağırlık ve güven), yutak (sesin gövdesi), ağız (dil, dudak ve çeneyle ünlü ve ünsüzlerin netleşmesi; diksiyonun asıl alanı) ve burun-maske bölgesi (parlaklık ve yorulmadan duyulma).",
+            "Nefes: kaynağa göre göğüs nefesi ses tellerini yorar ve heyecanda nefesi daraltır. Diyafram nefesinde omuzlar ve göğüs kalkmaz; diyafram aşağı iner, karın ve yan kaburgalar dışa doğru genişler.",
+            "Kaynağın iki alıştırması: (1) burundan 4 saniye diyafram nefesi al, sonra dişlerin arasından düz ve pürüzsüz bir «sssss» sesiyle yavaşça boşalt; (2) karın duvarını içeri sıçratarak kısa «ha! ha! ha!» sesleri çıkar."
+          ],
+          "not": "Kaynak (k5 satır 96) nefesi 16 saniye tutmayı da önerir; nefes tutma herkese uygun olmayabileceği için derse alınmadı. Rezonans tablosundaki frekans aralıkları (k10 satır 37-40) ve «konuşmacı formantı» bölümü doğrulanamadı, alınmadı.",
+          "alistirmalar": [
+            { "id": "dil.1.2.1.a1", "tur": "secmeli", "soru": "Kaynakta diksiyonun asıl alanı olarak hangi rezonans boşluğu gösterilir?", "sec": ["Göğüs", "Yutak", "Ağız", "Burun-maske"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+            { "id": "dil.1.2.1.a2", "tur": "secmeli", "soru": "Ses telleri hangi organdadır?", "sec": ["Gırtlakta (larenks)", "Akciğerde", "Damakta", "Burunda"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] }
+          ]
+        },
+        {
+          "id": "dil.1.2.2",
+          "ad": "Doğru telaffuz: ğ, iki e ve ulama",
+          "onKosul": ["dil.1.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6"],
+          "ozet": "Ğ ayrı bir ses gibi gırtlaktan çıkarılmaz: önceki ünlüyü uzatır ya da ince ünlüler arasında y'ye döner. İstanbul Türkçesinde açık ve kapalı iki e vardır. Ulama, ünsüzle biten sözcüğü ünlüyle başlayana bağlar; virgülde yapılmaz.",
+          "metin": [
+            "Yumuşak g (ğ): kaynağa göre gırtlaktan hırıltıyla söylenmez. Ya önceki ünlüyü uzatır: dağ → «daa», yağmur → «yaamur», ağaç → «aaç», boğaz → «boaz». Ya da iki ince ünlü arasında y sesine döner: değil → «deyil», eğlence → «eylence», eğitim → «eyitim».",
+            "İki e: İstanbul Türkçesinde açık e (çene açık) ve kapalı e (çene kısık, i'ye çalan) vardır. Kaynağın açık e örnekleri: el, yer, sel, gelmek, kelime. Kapalı e örnekleri: gece, kendi, mendil, pencere, tencere, zengin, teyze, genç, elli.",
+            "Ulama: ünsüzle biten sözcük, ünlüyle başlayan sözcüğe bağlanarak söylenir: «dün akşam» → «dü-nak-şam». Ama iki sözcük arasında virgül ya da noktalı virgül varsa ulama yapılmaz; orada kısa bir es verilir.",
+            "Önceki ünitedeki ince ünlüler (e, i, ö, ü) burada işe yarar: ğ'nin y'ye döndüğü yer, iki ince ünlünün arasıdır (modelin bağlantı notu)."
+          ],
+          "not": "Kaynağın kapalı e listesindeki «ben (zamir)» ve açık e listesindeki «sen» örnekleri ağızdan ağıza değiştiği ve doğrulanamadığı için alınmadı. Gelecek zaman ekinin konuşmada daralması («yapıcaam») bir kural değil, konuşma dili gözlemi olduğundan alınmadı.",
+          "alistirmalar": [
+            { "id": "dil.1.2.2.a1", "tur": "secmeli", "soru": "Hangi söyleyişte ulama YAPILMAMALIDIR?", "sec": ["«Dün akşam geldi»", "«Kalem aldım»", "«Geldi, oturdu»", "«Kitap okudum»"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+            { "id": "dil.1.2.2.a2", "tur": "secmeli", "soru": "«Ağaç» sözcüğü kaynağa göre nasıl söylenir?", "sec": ["«Ayaç»", "«Aaç»", "«Agaç»", "«Ağhaç»"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+            { "id": "dil.1.2.2.a3", "tur": "acik", "soru": "«Değirmenin önünde, dağın eteğinde bir ağaç var.» cümlesini sesli oku ve kaydet. Kaydı dinleyip ğ'leri ve virgüldeki duruşu kendin değerlendir.", "dogru": "«Deyirmenin önünde, daaın eteyinde bir aaç var.» Virgülden sonra kısa bir es; «önünde» ile «dağın» birbirine bağlanmaz.", "olcut": ["Hiçbir ğ gırtlaktan hırıltıyla söylenmedi", "İnce ünlüler arasındaki ğ'ler (değirmen, eteğinde) y'ye yakın söylendi", "Virgülde es verildi, ulama yapılmadı"], "durum": "taslak", "yazan": "model", "kaynak": ["k6"] }
+          ]
+        },
+        {
+          "id": "dil.1.2.3",
+          "ad": "Vurgu, es ve tekerleme",
+          "onKosul": ["dil.1.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k7", "k8", "k9"],
+          "ozet": "Türkçe sözcüklerde vurgu genelde son hecededir; yer adlarında, zarf ve bağlaçlarda öne kayar. Dolgu sesleri yerine kısa bir sessizlik vermek konuşmayı güçlendirir. Tekerlemeler dil ve dudak tembelliğini kırar.",
+          "metin": [
+            "Vurgu, kaynağa göre: genel kural son hecedir (çi'çek, ki'tap). Yer adlarında vurgu başa ya da ortaya kayar ('Ankara, İz'mir, İs'tanbul). Zarf ve bağlaçlarda vurgu çoğunlukla ilk hecededir ('şimdi, 'yalnız, 'sonra). Olumsuzluk eki -me/-ma vurguyu kendinden önceki heceye çeker: gele'cek ama 'gelmeyecek.",
+            "Es: kaynağa göre aklına sözcük gelmediğinde «eee», «ııı», «şey» gibi dolgu sesleri çıkarmak yerine ağzını kapatıp yaklaşık iki saniye susmak, dinleyicinin dikkatini toplar.",
+            "Kalem tekniği: yatay bir kalem ön azı dişlerin arasına konur ve tekerlemeler heceler abartılarak okunur; amaç dil, dudak, çene ve damağın tembelliğini kırmaktır.",
+            "Kaynağın tekerlemelerinden ikisi: (r, l, k) «Bir tarlaya kemken eken kel Kenan'ın kürkünü kırk kürkçü kırk yerinden kırpmış.» (ş, s, ç) «Şu köşe yaz köşesi, şu köşe kış köşesi, ortada su şişesi.»"
+          ],
+          "not": "Kaynağın dudak sesleri (p, b, m) tekerlemesi (k8 satır 130) kaba bir sözcük içerdiğinden alınmadı.",
+          "alistirmalar": [
+            { "id": "dil.1.2.3.a1", "tur": "secmeli", "soru": "Kaynağın genel kuralına göre «kitap» sözcüğünde vurgu hangi hecededir?", "sec": ["ki-", "-tap", "İki hecede eşit", "Vurgu yoktur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+            { "id": "dil.1.2.3.a2", "tur": "secmeli", "soru": "Konuşurken aklına sözcük gelmediğinde kaynak ne önerir?", "sec": ["«Eee» diyerek zaman kazanmak", "Hızlanmak", "Ağzını kapatıp kısa bir sessizlik vermek", "Konuyu değiştirmek"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] }
+          ]
+        },
+        {
+          "id": "dil.1.2.4",
+          "ad": "Sesini korumak",
+          "onKosul": ["dil.1.2.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k11"],
+          "ozet": "Kaynak ses sağlığı için dört alışkanlık önerir: gün boyu düzenli ılık su, kısıklıkta fısıldamamak, boğaz temizlemek yerine yutkunmak ve geç saatte yemekten kaçınmak.",
+          "metin": [
+            "Su: kaynağa göre içilen su ses tellerine doğrudan değmez; tellerin esnek kalması için gün boyu düzenli ve ılık su içilir.",
+            "Fısıltı: ses kısıldığında fısıldayarak konuşmak, kaynağa göre telleri normal konuşmadan daha çok zorlar. Kısıklıkta susmak ya da hafif, alçak sesle konuşmak önerilir.",
+            "Boğaz temizleme: «hımm» diye boğazı kazımak telleri birbirine sürter. Gıcık olunca yutkunmak ya da bir yudum su içmek önerilir.",
+            "Reflü: kaynağa göre gece mide asidinin gırtlağa çıkması sabah ses kısıklığına yol açabilir; bu yüzden uykudan önceki saatlerde yemek kesilir.",
+            "Sınır notu (model): bu ders tıbbi tavsiye değildir. Uzun süren ses kısıklığında bir hekime başvurulur."
+          ],
+          "not": "Kaynak fısıltı için «iki kat daha fazla doku travması», reflü için «bir numaralı sebep» ve «uykudan 3 saat önce» der; sayılar ve sıralama doğrulanamadı, derse alınmadı.",
+          "alistirmalar": [
+            { "id": "dil.1.2.4.a1", "tur": "secmeli", "soru": "Boğazda gıcık hissedince kaynak ne önerir?", "sec": ["Boğazı güçlüce temizlemek", "Yutkunmak ya da bir yudum su içmek", "Fısıldamak", "Bağırarak sesi açmak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+            { "id": "dil.1.2.4.a2", "tur": "secmeli", "soru": "Kaynağa göre ses tellerinin esnek kalması için su nasıl içilmelidir?", "sec": ["Yalnız konuşmadan hemen önce, soğuk", "Gün boyu düzenli ve ılık", "Hiç içilmemeli", "Yalnız akşamları, bol miktarda"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dil.1.3",
+      "ad": "Dil nasıl öğrenilir?",
+      "onKosul": ["dil.1.2"],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "dil.1.3.k1", "tur": "secmeli", "soru": "Krashen'e göre bilinçli öğrenilen gramer kurallarının görevi nedir?", "sec": ["Konuşmayı başlatmak", "Üretilen cümleyi denetleyen bir iç editör olmak", "Kelime ezberletmek", "Duyuşsal filtreyi yükseltmek"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+          { "id": "dil.1.3.k2", "tur": "secmeli", "soru": "Kaygı ve hata yapma korkusunun girdinin işlenmesini engellediğini söyleyen hipotez hangisidir?", "sec": ["Doğal sıra", "Monitör", "Duyuşsal filtre", "Edinim-öğrenme ayrımı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+          { "id": "dil.1.3.k3", "tur": "secmeli", "soru": "Swain'e göre konuşmaya ya da yazmaya çalışmak neden gereklidir?", "sec": ["Dinlemeyi gereksiz kıldığı için", "Söylemek istediğinle söyleyebildiğin arasındaki boşluğu fark ettirdiği için", "Kelime sayısını kendiliğinden artırdığı için", "Kaygıyı her zaman yükselttiği için"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] },
+          { "id": "dil.1.3.k4", "tur": "secmeli", "soru": "Kaynağa göre «kendini tanıtma, basit ihtiyaçları ifade etme» hangi CEFR bandına aittir?", "sec": ["A1-A2", "B1-B2", "C1", "C2"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "dil.1.3.1",
+          "ad": "Edinim ve öğrenme: Krashen'in hipotezleri",
+          "onKosul": ["dil.1.2.4"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k12"],
+          "ozet": "Krashen, dilin kural ezberiyle değil, anlaşılır girdiye maruz kalarak edinildiğini öne sürer. Beş hipotezi: edinim-öğrenme ayrımı, monitör, doğal sıra, anlaşılır girdi (i+1) ve duyuşsal filtre.",
+          "metin": [
+            "Stephen Krashen'in Monitör Modeli (1982) beş hipotezden oluşur. Kaynak bunları kanıtlanmış diye sunar; doğrusu, bunlar dil öğrenme araştırmalarında etkili ama tartışılan hipotezlerdir (modelin düzeltme notu).",
+            "1. Edinim ve öğrenme ayrımı: edinim, çocuğun anadilini kazandığı gibi doğal, bilinçdışı ve anlama odaklıdır; akıcı konuşmayı o üretir. Öğrenme ise kuralları bilinçli ezberleme ve çözümlemedir.",
+            "2. Monitör: bilinçli öğrenilen kurallar konuşmayı başlatmaz, yalnız üretilen cümleyi denetleyen bir iç editördür. Fazlası akıcılığı bozar, azı hataları görünmez kılar.",
+            "3. Doğal sıra: gramer yapıları öğretim sırasından bağımsız, öngörülebilir bir sırayla edinilir.",
+            "4. Anlaşılır girdi (i+1): ilerleme, mevcut düzeyinin (i) bir adım üstündeki (i+1), bağlamdan anlayabildiğin okuma ve dinlemeyle olur.",
+            "5. Duyuşsal filtre: kaygı, hata korkusu ve özgüven eksikliği girdinin işlenmesini engeller; ortam rahatsa dil daha kolay alınır."
+          ],
+          "not": "Kaynak (satır 38) Krashen'in bu süreci «kanıtlamıştır» der ve i+1'i «tek motor» sayar; bunlar tartışmalı hipotezlerdir, derste öyle sunuldu.",
+          "alistirmalar": [
+            { "id": "dil.1.3.1.a1", "tur": "secmeli", "soru": "«i+1» ifadesindeki «i» neyi gösterir?", "sec": ["İngilizceyi", "Öğrenenin mevcut düzeyini", "İlk 1.000 kelimeyi", "İç editörü"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
+            { "id": "dil.1.3.1.a2", "tur": "secmeli", "soru": "Çocuğun anadilini kazanma biçimine en yakın süreç Krashen'de hangisidir?", "sec": ["Öğrenme", "Monitör", "Edinim", "Çeviri"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] }
+          ]
+        },
+        {
+          "id": "dil.1.3.2",
+          "ad": "Konuşarak fark etmek: Swain'in anlaşılır çıktısı",
+          "onKosul": ["dil.1.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k13"],
+          "ozet": "Swain, yalnız girdinin yetmediğini, konuşma ve yazmanın (çıktının) gerekli olduğunu söyler: üretmeye çalışan kişi, söylemek istediği ile söyleyebildiği arasındaki boşluğu fark eder.",
+          "metin": [
+            "Merrill Swain (1985), Krashen'in yalnız girdiye dayanan modelini eleştirip anlaşılır çıktının da gerekli olduğunu öne sürdü.",
+            "Dinlerken ya da okurken ana fikri yakalamak anlamaya yeter (anlamsal işleme). Konuşurken ya da yazarken ise özne-yüklem uyumunu, edatları ve zaman eklerini kendin kurmak zorundasındır (sözdizimsel işleme).",
+            "Boşluğu fark etme: konuşmaya çalışan kişi, aklındaki düşünce ile söyleyebildiği sözler arasındaki farkı yaşar. Kaynağa göre bu farkındalık, bir sonraki dinlemede eksik yapının dikkatini çekmesini sağlar.",
+            "Bağlantı notu (model): bu aşamanın kanıt işi olan üç cümlelik tanıtım kaydı, tam da böyle bir çıktı alıştırmasıdır."
+          ],
+          "alistirmalar": [
+            { "id": "dil.1.3.2.a1", "tur": "secmeli", "soru": "Kaynağa göre konuşurken ya da yazarken yapılan, yapıları kendin kurduğun işleme türü hangisidir?", "sec": ["Anlamsal işleme", "Sözdizimsel işleme", "Duyuşsal işleme", "Monitör kapatma"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] },
+            { "id": "dil.1.3.2.a2", "tur": "acik", "soru": "Öğrenmek istediğin dilde (ya da Türkçede yeni bir konuda) bir dakika konuşmayı dene. Söylemek isteyip söyleyemediğin üç şeyi yaz.", "dogru": "1) «Dün» demek istedim ama geçmiş zaman ekini bilmiyordum. 2) Bir eşyanın adını bilmiyordum. 3) İki cümleyi «çünkü» ile bağlayamadım.", "olcut": ["Üç somut boşluk yazıldı", "Her boşluğun türü belli (kelime, ek, bağlaç ya da yapı)"], "durum": "taslak", "yazan": "model", "kaynak": ["k13"] }
+          ]
+        },
+        {
+          "id": "dil.1.3.3",
+          "ad": "Önce sık kelimeler: sıklık, eşdizim ve CEFR düzeyleri",
+          "onKosul": ["dil.1.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14", "k15"],
+          "ozet": "Kelimeler rastgele değil, sıklık sırasıyla öğrenilir: en sık bin kelime ailesi gündelik metnin büyük kısmını karşılar. Kelimeler tek tek değil, doğal öbekler halinde öğrenilir. CEFR, düzeyleri A1'den C2'ye üç banda ayırır.",
+          "metin": [
+            "Paul Nation'a dayanan tablo (kaynak): ilk 1.000 kelime ailesi gündelik çekirdektir ve kaynağa göre metnin yaklaşık %80-85'ini karşılar; ilk 3.000 kelime ailesi genel metinlerin %90-95'ini; ilk 9.000 kelime ailesi %98'ini, yani sözlüksüz akıcı okuma eşiğini.",
+            "Akademik Kelime Listesi (AWL): Averil Coxhead'in derlediği 570 kelime ailesi; kaynağa göre akademik metinlerin yaklaşık %10'unu oluşturur.",
+            "Eşdizim: kelimeler doğal öbekler halinde öğrenilmelidir. Kaynağın örnekleri: İngilizcede «heavy rain» denir, «strong rain» denmez; «take a risk» denir, «make a risk» denmez.",
+            "CEFR bantları (kaynak): A1-A2 temel kullanıcı (basit ihtiyaçları ifade etme, kendini tanıtma, yavaş ve net konuşmayı anlama); B1-B2 bağımsız kullanıcı (seyahatte idare etme, somut ve soyut konuların ana fikrini anlama, kendiliğinden sohbet); C1-C2 usta kullanıcı (uzun, karmaşık metinleri zorlanmadan anlama; dili akademik, mesleki ve edebî amaçla esnek kullanma).",
+            "Bağlantı notu (model): bu aşama hangi dili öğrendiğinden bağımsızdır; hedef dilin A1 dersleri 2. aşamada başlar."
+          ],
+          "not": "Kaynak Nation'ın çalışmasını «Cambridge araştırmaları (2001)» diye anar; Nation'ın kitabı Cambridge University Press'ten çıkmıştır ama araştırmacı Cambridge'de değildir, bu ifade alınmadı. Kapsama yüzdeleri kaynağın verdiği haliyle «kaynağa göre» diye aktarıldı; literatürde sayılar ölçülen metin türüne göre değişir, doğrulanmadı.",
+          "alistirmalar": [
+            { "id": "dil.1.3.3.a1", "tur": "secmeli", "soru": "Kaynağa göre sözlüksüz akıcı okuma eşiği (%98) yaklaşık kaç kelime ailesidir?", "sec": ["1.000", "3.000", "9.000", "570"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "dil.1.3.3.a2", "tur": "secmeli", "soru": "Hangisi kaynaktaki doğru İngilizce eşdizimdir?", "sec": ["make a risk", "strong rain", "take a risk", "do a risk"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
