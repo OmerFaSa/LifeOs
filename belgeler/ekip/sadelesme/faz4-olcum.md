@@ -165,7 +165,7 @@ Yeni ekran yazılmadı: var olan Kılavuz sayfası King kataloğuna kaydedildi (
 kapatmak için, dondurulmuş eski modüllerde). Sayım kuralı kayıt satırını saydığı için ölçüt yükseldi.
 Kayıt bilerek yenilenmedi: `--kaydet` aşımı sessizce başvuru yapar (açık soru 8). Karar sahibinin:
 ya artış gerekçesiyle kabul edilir ve kayıt yenilenir, ya da kural 5 gereği karşılığında bir parça çıkar.
-`--denetle` CI'a bağlı olmadığı için bu aşım CI'ı kızartmaz.
+O gün `--denetle` CI'a bağlı değildi, aşım CI'ı kızartmadı.
 
 **Karar (sahibi, 13 Kasım 2026): artış kabul edildi, kayıt yenilendi.** Gerekçe: yeni ekran yok, var olan
 Kılavuz sayfasının King kataloğuna kaydı; satırlar dondurulmuş eski modüllerde ve Faz 5'te kalkacak. `--kaydet` ile
@@ -189,7 +189,7 @@ Kılavuz sayfasının King kataloğuna kaydı; satırlar dondurulmuş eski modü
    zamanlayıcı imzaları eski koddan). Yeni motorun kayıt biçimi belli olunca imza ve desen eklenmeli;
    yoksa yeni yapı bütçeye girmeden büyüyebilir. Yalnız `kod_hacmi` onları sayıyor (izlenir).
 6. **Birleştirmeyi durdurma** (A9 çıkışı) için `python kalite/olcum.py --denetle` CI'a ve birleştirme
-   denetimine bağlanmalı; bu görevde başka dosyaya dokunulmadığı için bağlanmadı.
+   denetimine bağlanmalı; bu görevde başka dosyaya dokunulmadığı için bağlanmadı. **Bağlandı (13 Kasım 2026):** CI'da «Karmaşıklık bütçesi aşılmadı» adımı; aşım kabul edilip kayıt yenilendikten sonra.
 7. **Kod hacmi hedefi** yok; geçişte yeni kod eskinin yanında yazıldığı için bütçeye bağlanmadı.
 8. **Kayıt aynı gün üzerine yazılır.** `--kaydet` günde tek dosya tutar; gün içinde bir artıştan sonra
    yeniden kaydetmek o artışı sessizce başvuru yapar. Kaydetme yalnız birleştirme sonrasına mı bağlansın?

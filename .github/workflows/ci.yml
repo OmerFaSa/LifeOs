@@ -221,9 +221,14 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Alan içeriği şema denetimi" bash -c 'python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe'
 
       # SADELESME FAZ 4 OLCUM (2026-11-13). Sayim kurallari, butce asimi, ayni girdi ayni kayit,
-      # olculmeyen egri sayi tasimaz. Butce denetiminin kendisi (--denetle) Faz 4 kapisinda baglanir.
+      # olculmeyen egri sayi tasimaz. Butce denetimi asagidaki adimda.
       - name: Ölçüm motoru sayım ve bütçe kuralları
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölçüm motoru sayım ve bütçe kuralları" python3 kalite/olcum_test.py
+
+      # A9 cikisi (2026-11-13, sahibin karariyla asim kabul edilip kayit yenilendikten sonra baglandi):
+      # son kayda (kalite/kayit/) gore artan butce birlestirmeyi durdurur (AGENTS 0.1 kural 5).
+      - name: Karmaşıklık bütçesi aşılmadı
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Karmaşıklık bütçesi aşılmadı" python3 kalite/olcum.py --denetle
 
       # SADELESME FAZ 2 KABUK (2026-11-13). Sistem haritasi: her yer halkadan en cok iki, komut
       # cubugundan bir adim; ayar tek tanimdan turer; arama Turkce harfleri katlar.
