@@ -88,6 +88,19 @@ t('tekrar: taslak ders alıştırması kart olmaz; onaylanınca cevaplanan alı�
   esit(Tekrar.cevapla(l[0], 3, 1000).ok, true);
 });
 
+t('not ağı: yerleşim belirlenimci, çerçeve içinde; bağlı notlar bağsızlardan yakın; 300 not akıcı', () => {
+  let l = [];
+  for (let i = 0; i < 300; i++) l.push(Not.yeni({ id: 'n' + String(i).padStart(3, '0'), baslik: 'Not ' + i, govde: i % 3 ? Not.bagYaz('n' + String(i - 1).padStart(3, '0'), 'x') : 'yalnız', olusturma: 1 }));
+  const ag = Not.ag(l), bas = Date.now(), p = R.agYerlesim(ag, 640, 400), sure = Date.now() - bas;
+  esit(p.length, 300); dogru(p.every(q => q.x >= 24 && q.x <= 616 && q.y >= 24 && q.y <= 376), 'çerçeve içinde');
+  esit(R.agYerlesim(ag, 640, 400), p, 'aynı girdi aynı yerleşim');
+  dogru(sure < 1500, 'yerleşim ' + sure + ' ms (ölçüldü)');
+  console.log('    300 not, ' + ag.kenar.length + ' bağ: yerleşim ' + sure + ' ms');
+  const kucuk = Not.ag(l.slice(0, 6)), q = R.agYerlesim(kucuk, 640, 400), ix = Object.fromEntries(q.map(x => [x.id, x]));
+  const uz = (a, b) => Math.hypot(ix[a].x - ix[b].x, ix[a].y - ix[b].y);
+  dogru(uz('n001', 'n002') < uz('n000', 'n003'), 'bağlı çift (n001–n002) bağsız çiftten (n000–n003) yakın');
+  esit(R.agYerlesim({ dugum: [{ id: 'a' }], kenar: [] }, 640, 400), [{ id: 'a', x: 320, y: 200 }]);
+});
 t('kayıt: formdan kayıt; virgüllü sayı, tahmin etiketi, boş alan yollanmaz; hata motorun cümlesi ve liste değişmez', () => {
   const Kayit = require('../motor/kayit.js'), gun = '2026-11-13';
   let r = R.kayitEkle(Kayit, [], 'su', { ml: '500' }, false, gun, 1000);
@@ -264,6 +277,39 @@ t('eski kayıt: tek aşamalı dönemde yazılmış lifeos.yol.felsefe.1 aynen ok
   esit([son.eski, son.gelecekAlan, son.kapilar, son.cevaplar], [eski.eski, 1, eski.kapilar, eski.cevaplar], 'yeni dersle birlikte eski her şey duruyor');
   esit(Object.keys(son.dersler).length, 3);
   dogru(depo.v['lifeos.yol.felsefe.2'] === undefined, 'ikinci aşamaya kendiliğinden kayıt yazılmaz');
+});
+t('yerleştirme: yalnız boş alanda; geçilen aşama atlandı (tahmin), sonraki açılır; ünite kapısı geçilince tahmin bütün aşamalarda silinir', () => {
+  const Yol = require('../motor/yol.js'), ys = As.kur(Yol, 'felsefe', [require('../alan/felsefe/asama-1.json'), ikinci([])]), [y1, y2] = ys, depo = sahteDepo();
+  const cevap = (y, n) => Object.fromEntries(Yol.yerlestirmeSorulari(y).map((id, i) => [id, i < n ? y.oge[id].dogru : 'X']));
+  dogru(As.yeniMi(Yol, depo, 'felsefe', 2), 'boş alan yeni');
+  const r = As.yerlestir(Yol, depo, 'felsefe', ys, [cevap(y1, 6), cevap(y2, 1)], 10, false);
+  esit([r.seviye, r.sonuclar.map(s => s.gecti)], [2, [true, false]]);
+  dogru(!As.yeniMi(Yol, depo, 'felsefe', 2), 'yerleştirmeden sonra yeni değil');
+  const liste = As.liste(Yol, ys, n => As.kayit(depo, Yol, 'felsefe', n, 2));
+  esit(liste.map(x => [x.acik, x.gecti]), [[true, false], [true, false]], 'birinci atlandı (geçilmedi), ikinci açık');
+  esit(As.calisilan(liste), 2);
+  esit(Yol.durum(y1, As.kayit(depo, Yol, 'felsefe', 1, 2)).ilerleme.atlananUnite.etiket, 'tahmin');
+  let h = ''; try { As.yerlestir(Yol, depo, 'felsefe', ys, [cevap(y1, 6)], 11, false); } catch (e) { h = e.message; }
+  dogru(/hiç kaydı olmayan/.test(h), 'ikinci yerleştirme reddedilir');
+  // ikinci aşamanın ilk ünite kapısı ölçülerek geçilir: iki aşamada da tahmin silinir
+  const u = y2.veri.uniteler[0], k2 = Yol.kapiDene(y2, As.kayit(depo, Yol, 'felsefe', 2, 2), u.id, Object.fromEntries(u.kapi.sorular.map(q => [q.id, q.dogru])), 12).kayit;
+  As.yaz(depo, 'felsefe', 2, k2);
+  As.tahminSil(Yol, depo, 'felsefe', 2, 12);
+  esit([1, 2].map(n => JSON.parse(depo.v['lifeos.yol.felsefe.' + n]).yerlestirme.etiket), [undefined, undefined]);
+  esit(Yol.durum(y1, As.kayit(depo, Yol, 'felsefe', 1, 2)).ilerleme.atlananUnite.etiket, 'hesaplandı');
+  // eski kayıt: yerleştirmesiz dolu kayıt yeni sayılmaz
+  dogru(!As.yeniMi(Yol, sahteDepo({ 'lifeos.yol.felsefe.1': JSON.stringify(Yol.dersOku(y1, Yol.bosKayit(), y1.veri.uniteler[0].dersler[0].id, 1)) }), 'felsefe', 2));
+});
+t('kapıda kalınca: yanlış ve boş kapı soruları kaynağıyla bir kez kart olur; taslak kart planlanmaz', () => {
+  const Yol = require('../motor/yol.js'), y = Yol.yukle(require('../alan/felsefe/asama-1.json')), u = y.veri.uniteler[0];
+  const c = { [u.kapi.sorular[0].id]: u.kapi.sorular[0].dogru, [u.kapi.sorular[1].id]: 'X' };
+  const a = Yol.kapiTekrarAdaylari(y, u.id, c), l = R.kartlariEsitle(Tekrar, [], a, y);
+  esit(l.map(x => x.id), u.kapi.sorular.slice(1).map(q => q.id), 'yanlış ve boş olanlar');
+  const q = u.kapi.sorular[1];
+  esit([l[0].kaynak, l[0].alan, l[0].asama, l[0].unite, l[0].kapi, l[0].icerik, l[0].on, l[0].arka], ['kapi', 'felsefe', 'felsefe.1', u.id, u.id, 'taslak', q.soru, q.sec['ABCD'.indexOf(q.dogru)]]);
+  dogru(R.kartlariEsitle(Tekrar, l, Yol.kapiTekrarAdaylari(y, u.id, c), y) === l, 'aynı soru ikinci kez eklenmez');
+  esit(R.kartlariEsitle(Tekrar, l, Yol.kapiTekrarAdaylari(y, u.id, {}), y).length, 4, 'yalnız yeni yanlış eklenir');
+  esit(Tekrar.plan(l, 1000, {}).yeni.length, 0, 'taslak tekrara girmez');
 });
 t('yol: on alanın içeriği Yol motoruna yüklenir ve ilk adım bir derstir', () => {
   const Yol = require('../motor/yol.js');

@@ -280,5 +280,121 @@ t('göç aysKonu: AYS konu alanlarının hepsi okunuyor ya da EKSIK\'te', functi
   ['h', 'd', 'at', 'ip', 'sure', 'bak'].forEach(function (a) { dogru(new RegExp('c\\.' + a + '\\b').test(kaynak), 'ornek.' + a); });
 });
 
+// ---- Yerleştirme («Seviyemi bul», icerik-hatti.md §4.3) ----
+function cevapVer(y, n) { // yerleştirme sorularının ilk n'ine doğru, kalanına yanlış cevap
+  var c = {};
+  Yol.yerlestirmeSorulari(y).forEach(function (id, i) { var d = y.oge[id].dogru; c[id] = i < n ? d : (d === 'A' ? 'B' : 'A'); });
+  return c;
+}
+var F1 = JSON.parse(fs.readFileSync(path.join(__dirname, '../alan/felsefe/asama-1.json'), 'utf8'));
+var F2 = JSON.parse(fs.readFileSync(path.join(__dirname, '../alan/felsefe/asama-2.json'), 'utf8'));
+
+t('yerleştirme soruları: aşama başına 5-8, ünite kapılarından, kolaydan zora (ünite sırası, içinde seviye)', function () {
+  var y = Yol.yukle(F1), ids = Yol.yerlestirmeSorulari(y);
+  esit(ids.length, 6); dogru(ids.every(function (id) { return y.tur[id] === 'kapiSorusu' && y.tur[y.ust[id]] === 'unite'; }), 'yalnız ünite kapısı');
+  esit(ids.map(function (id) { return y.ust[id]; }).join(), [1, 1, 2, 2, 3, 3].map(function (n) { return 'felsefe.1.' + n; }).join());
+  var a = Yol.yukle(JSON.parse(fs.readFileSync(path.join(__dirname, '../alan/akademik/asama-1.json'), 'utf8'))), ai = Yol.yerlestirmeSorulari(a);
+  esit(ai.length, 8);
+  var sira = ai.map(function (id) { return a.veri.uniteler.indexOf(a.oge[a.ust[id]]); });
+  dogru(sira.every(function (x, i) { return !i || x > sira[i - 1]; }) && sira[0] === 0 && sira[7] === 29, 'otuz üniteden eşit aralıklı sekiz: ' + sira);
+  // içinde seviye: «ileri» önde yazılmış olsa da «orta» önce sorulur
+  var v = ornek(); v.uniteler[0].kapi.sorular[0].seviye = 'ileri'; v.uniteler[0].kapi.sorular[1].seviye = 'orta';
+  var o = Yol.yerlestirmeSorulari(Yol.yukle(v));
+  // etiketsiz soru «orta» sayılır: k3, k4 «ileri» k1'den önce; ünitede üç yer olduğundan k1 dışarıda kalır
+  esit(o.join(), 't.1.1.k2,t.1.1.k3,t.1.1.k4,t.1.2.k1,t.1.2.k2');
+  // ünitelerden beşten az soru çıkarsa aşama kapısından tamamlanır
+  v = ornek(); v.uniteler = [v.uniteler[0]]; v.uniteler[0].kapi.sorular = v.uniteler[0].kapi.sorular.slice(0, 2);
+  esit(Yol.yerlestirmeSorulari(Yol.yukle(v)).join(), 't.1.1.k1,t.1.1.k2,t.1.k1,t.1.k2,t.1.k3');
+});
+
+t('yerleştirme: eşik 2/3; 4/6 geçer, 3/6 geçmez; ölçüm yalnız sorulan sorulardan', function () {
+  var y = Yol.yukle(F1), s = Yol.yerlestirmeDegerlendir(y, cevapVer(y, 4));
+  esit(s.gecti, true); esit(s.dogruSayisi, 4); esit(s.toplam, 6); esit(s.esik, 2 / 3); esit(s.taslak, true);
+  esit(Yol.yerlestirmeDegerlendir(y, cevapVer(y, 3)).gecti, false);
+  esit(Yol.yerlestirmeDegerlendir(y, {}).dogruSayisi, 0, 'boş yanlış sayılır');
+});
+
+t('yerleştirme: geçilen aşama «atlandı» (geçildi değil, tahmin), ilk kalınan aşamada durulur, sonraki açılır', function () {
+  var y1 = Yol.yukle(F1), y2 = Yol.yukle(F2);
+  var r = Yol.yerlestir([y1, y2], [Yol.bosKayit(), Yol.bosKayit()], [cevapVer(y1, 6), cevapVer(y2, 2)], Z);
+  esit(r.seviye, 2); esit(r.sonuclar.length, 2);
+  var k1 = r.kayitlar[0], k2 = r.kayitlar[1];
+  esit(k1.yerlestirme.sonuc, 'atlandi'); esit(k1.yerlestirme.etiket, 'tahmin'); esit(k2.yerlestirme.sonuc, 'burada');
+  esit(Yol.asamaGectiMi(y1, k1), false, 'atlanan aşama geçilmiş sayılmaz');
+  var d1 = Yol.durum(y1, k1);
+  esit(d1.asama.atlandi, true); esit(d1.asama.gecti, false);
+  dogru(d1.uniteler.every(function (u) { return u.atlandi && !u.gecti && u.acik; }), 'üniteler atlandı ve açık');
+  esit(d1.ilerleme.gecilenUnite.deger, 0); esit(d1.ilerleme.asama.deger, 0);
+  esit(d1.ilerleme.atlananUnite.deger, 3); esit(d1.ilerleme.atlananUnite.etiket, 'tahmin');
+  dogru(Yol.acikMi(y1, k1, y1.veri.uniteler[2].dersler[0].id), 'atlanan ünitenin dersi açılabilir');
+  // ikinci aşama, kabuğun yaptığı gibi birincinin aşama satırı eklenince açılır
+  var k2b = JSON.parse(JSON.stringify(k2)); k2b.asamalar['felsefe.1'] = k1.asamalar['felsefe.1'];
+  dogru(!Yol.acikMi(y2, k2, 'felsefe.2') && Yol.acikMi(y2, k2b, 'felsefe.2'));
+  // birinci aşamada kalınırsa ikinci aşamanın cevapları yok sayılır
+  var r2 = Yol.yerlestir([y1, y2], [Yol.bosKayit(), Yol.bosKayit()], [cevapVer(y1, 3), cevapVer(y2, 6)], Z);
+  esit(r2.seviye, 1); esit(r2.sonuclar.length, 1); esit(r2.kayitlar[0].yerlestirme.sonuc, 'burada');
+  esit(JSON.stringify(r2.kayitlar[1]), JSON.stringify(Yol.bosKayit()));
+  esit(Object.keys(r2.kayitlar[0].asamalar).length, 0);
+  // hepsi geçilirse seviye aşama sayısı + 1
+  esit(Yol.yerlestir([y1, y2], [Yol.bosKayit(), Yol.bosKayit()], [cevapVer(y1, 6), cevapVer(y2, 6)], Z).seviye, 3);
+});
+
+t('yerleştirme: yalnız boş kayıtta; beceri alanında üretim görevi bekliyor; atlanan ünite tekrara girmez', function () {
+  var y1 = Yol.yukle(F1), dolu = Yol.dersOku(y1, Yol.bosKayit(), y1.veri.uniteler[0].dersler[0].id, Z);
+  atar(function () { Yol.yerlestir([y1], [dolu], [cevapVer(y1, 6)], Z); }, 'hiç kaydı olmayan');
+  atar(function () { Yol.yerlestir([y1], [{ dersler: {}, cevaplar: {}, kapilar: {}, asamalar: {}, eski: { a: 1 } }], [cevapVer(y1, 6)], Z); }, 'hiç kaydı olmayan');
+  atar(function () { Yol.yerlestir([y1], [], [], Z); }, 'eşit sayıda');
+  esit(Yol.bosMu(Yol.bosKayit()), true); esit(Yol.bosMu(dolu), false);
+  var k = Yol.yerlestir([y1], [Yol.bosKayit()], [cevapVer(y1, 6)], Z, { uretim: true }).kayitlar[0];
+  esit(k.yerlestirme.uretim, 'bekliyor'); esit(Yol.durum(y1, k).asama.yerlestirme.uretim, 'bekliyor');
+  atar(function () { Yol.yerlestir([y1], [k], [cevapVer(y1, 6)], Z); }, 'hiç kaydı olmayan');
+  // onaylı içerikte bile: atlanan ünitede cevaplanan alıştırma kart adayı olmaz; kapısı ölçülünce olur
+  var y = Yol.yukle(ornek('onayli')), ka = Yol.yerlestir([y], [Yol.bosKayit()], [cevapVer(y, 5)], Z).kayitlar[0];
+  ka = Yol.cevapla(y, ka, 't.1.1.1.a1', 'B', Z + 1).kayit;
+  esit(Yol.tekrarAdaylari(y, ka).length, 0);
+  ka = Yol.kapiDene(y, ka, 't.1.1', hepsiDogru(y, 't.1.1'), Z + 2).kayit;
+  esit(Yol.tekrarAdaylari(y, ka).length, 1);
+});
+
+t('yerleştirme: ilk ölçülen ünite kapısı geçilince tahmin silinir; kalan deneme silmez', function () {
+  var y1 = Yol.yukle(F1), y2 = Yol.yukle(F2);
+  var r = Yol.yerlestir([y1, y2], [Yol.bosKayit(), Yol.bosKayit()], [cevapVer(y1, 6), cevapVer(y2, 0)], Z), k2 = r.kayitlar[1];
+  k2.asamalar['felsefe.1'] = r.kayitlar[0].asamalar['felsefe.1'];
+  var u = y2.veri.uniteler[0].id;
+  k2 = Yol.kapiDene(y2, k2, u, {}, Z + 1).kayit;
+  esit(k2.yerlestirme.etiket, 'tahmin', 'kalınca tahmin kalır');
+  k2 = Yol.kapiDene(y2, k2, u, hepsiDogru(y2, u), Z + 2).kayit;
+  esit(k2.yerlestirme.etiket, undefined); esit(k2.yerlestirme.olcum, Z + 2); esit(k2.yerlestirme.sonuc, 'burada');
+  var k1 = Yol.tahminSil(r.kayitlar[0], Z + 2);
+  esit(k1.yerlestirme.etiket, undefined); esit(r.kayitlar[0].yerlestirme.etiket, 'tahmin', 'saf');
+  esit(Yol.durum(y1, k1).ilerleme.atlananUnite.etiket, 'hesaplandı');
+  esit(Yol.tahminSil(k1, Z + 3), k1, 'silinecek tahmin yoksa aynı kayıt');
+  // atlanan aşamanın kapısı sonradan ölçülerek geçilirse aşama geçilmiş olur, yerleştirme izi kalır
+  var ka = r.kayitlar[0];
+  y1.veri.uniteler.forEach(function (x) { ka = Yol.kapiDene(y1, ka, x.id, hepsiDogru(y1, x.id), Z + 3).kayit; });
+  ka = Yol.kapiDene(y1, ka, 'felsefe.1', hepsiDogru(y1, 'felsefe.1'), Z + 4).kayit;
+  esit(Yol.asamaGectiMi(y1, ka), true); esit(ka.asamalar['felsefe.1'].yerlestirme, Z); esit(Yol.durum(y1, ka).asama.atlandi, false);
+});
+
+t('eski kayıt: yerleştirmesiz kayıt aynı okunur (atlandı yok, ek satır yok)', function () {
+  var y = Yol.yukle(F1), d = Yol.durum(y, Yol.bosKayit());
+  esit(d.asama.atlandi, false); esit(d.asama.yerlestirme, null); esit(d.ilerleme.atlananUnite, undefined);
+  dogru(d.uniteler.every(function (u) { return u.atlandi === false; }));
+  dogru(!Yol.acikMi(y, Yol.bosKayit(), y.veri.uniteler[1].id), 'ikinci ünite yine kilitli');
+});
+
+// ---- Kapıda kalınca Tekrar ----
+t('kapı tekrar adayları: yanlış ve boş sorular, kimlik soru kimliği, kaynak taşır, doğru cevap yok', function () {
+  var y = Yol.yukle(ornek()), c = hepsiDogru(y, 't.1.1');
+  c['t.1.1.k2'] = 'B'; delete c['t.1.1.k3'];
+  var a = Yol.kapiTekrarAdaylari(y, 't.1.1', c);
+  esit(a.map(function (x) { return x.id; }).join(), 't.1.1.k2,t.1.1.k3');
+  esit(JSON.stringify(a[0]), JSON.stringify({ id: 't.1.1.k2', kapi: 't.1.1', unite: 't.1.1', asama: 't.1', icerik: 'taslak' }));
+  var b = Yol.kapiTekrarAdaylari(Yol.yukle(ornek('onayli')), 't.1', {});
+  esit(b.length, 3); esit(b[0].unite, null); esit(b[0].icerik, 'onayli');
+  esit(Yol.kapiTekrarAdaylari(y, 't.1.1', hepsiDogru(y, 't.1.1')).length, 0);
+  atar(function () { Yol.kapiTekrarAdaylari(y, 't.1.1.1', {}); }, 'kapı sahibi');
+});
+
 console.log((sayac - hatali) + '/' + sayac + ' test geçti');
 process.exit(hatali ? 1 : 0);

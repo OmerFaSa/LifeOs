@@ -83,6 +83,9 @@ async function goruntu(p, ad) {
     await p.click('form.kapi button[type=submit]');
     await p.waitForSelector('.kapisonuc');
     dene('kapı: boş deneme geçirmez', /olmadı/.test(await p.textContent('.kapisonuc')) && /0\/4/.test(await p.textContent('.kapisonuc')));
+    dene('kapıda kalınca: 4 soru Tekrar\'a düştü; kapıda doğru cevap gösterilmez', /4 soru Tekrar'a düştü/.test(await p.textContent('.kapisonuc'))
+      && (await p.locator('a.dugme[href="#/motor/tekrar"]').count()) === 1 && (await p.locator('.secenek--dogru, .secenek__im').count()) === 0
+      && !(await p.textContent('.govde')).includes('doğru cevap:'));
     for (const q of u1.kapi.sorular) await p.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
     await p.click('form.kapi button[type=submit]');
     await p.waitForSelector('.kapisonuc--gecti');
@@ -171,11 +174,27 @@ async function goruntu(p, ad) {
     await p.reload();
     await p.waitForSelector('#not-liste a.satir');
     dene('not: yenilemeden sonra iki not duruyor', (await p.locator('#not-liste a.satir').count()) === 2);
+    // not ağı: iki düğüm, bir bağ; düğüm klavyeyle (Sekme + Enter) notu açar
+    dene('not ağı: iki düğüm ve Sokrates→Erdem bağı çizildi', (await p.locator('[data-not-ag] svg a').count()) === 2 && (await p.locator('[data-not-ag] line.notag__bag').count()) === 1);
+    await p.focus('[data-not-ag] svg a[aria-label^="Erdem"]');
+    await p.keyboard.press('Enter');
+    await p.waitForFunction(h => location.hash === h, erdem);
+    dene('not ağı: düğüm klavyeyle açılır', (await p.inputValue('input[name=baslik]')) === 'Erdem');
+    await p.goto(T + '/kabuk/#/motor/not');
+    await p.waitForSelector('[data-not-ag] svg');
+    await goruntu(p, 'not-agi');
 
     // ---- Tekrar ----
     await p.goto(T + '/kabuk/#/motor/tekrar');
     await p.waitForSelector('form.kartform');
     dene('tekrar: kartsız açılış öyle der', /Henüz kart yok/.test(await p.textContent('[data-arac="tekrar"]')));
+    // kapıda kalınan dört soru: taslak olduğu için kuyruğa girmez, kendi listesinde kaynağıyla; açılınca doğru cevap
+    const kk = u1.kapi.sorular[0];
+    dene('kapıda kalınca: Tekrar\'da 4 kart, kaynağı «Felsefe · ' + u1.ad + ' kapısı», tekilleşmiş', (await p.locator('[data-kapi-kartlari] li').count()) === 4
+      && (await p.textContent('[data-kapi-kartlari]')).includes('Felsefe · ' + u1.ad + ' kapısı') && /taslak/.test(await p.textContent('[data-kapi-kartlari]')),
+      await p.textContent('[data-kapi-kartlari]').catch(() => 'liste yok'));
+    await p.click('[data-kapi-kartlari] summary >> nth=0');
+    dene('kapıda kalınca: kart açılınca doğru cevap görünür', (await p.textContent('[data-kapi-kartlari] details[open] p')) === kk.sec[harf.indexOf(kk.dogru)]);
     await p.click('form.kartform button[type=submit]');
     dene('tekrar: boş kart eklenmez', /iki yüzü de dolu/.test(await p.textContent('.kartform .notform__ileti')));
     await p.fill('input[name=on]', 'Arkhe nedir?');
@@ -461,6 +480,61 @@ async function goruntu(p, ad) {
     dene('aşama: Bugün yenilemeden sonra ikinci aşamayla karşılar', ((await p.textContent('.karsila__sira')) || '').indexOf(y2.ad) >= 0, await p.textContent('.karsila__sira'));
     dene('konsolda hata yok', hata.length === 0, hata.join(' | '));
     await c.close();
+
+    // ---- Seviyemi bul (icerik-hatti §4.3): boş kayıtlı Dil, iki aşama; birinci bilinir, ikincide kalınır ----
+    const yc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), yp = await yc.newPage(), yhata = [];
+    yp.on('pageerror', e => yhata.push(e.message));
+    yp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) yhata.push(m.text()); });
+    const dil = [1, 2].map(n => JSON.parse(fs.readFileSync(path.join(kok, 'alan/dil/asama-' + n + '.json'), 'utf8'))), dogruHarf = {};
+    dil.forEach(v => v.uniteler.forEach(u => u.kapi.sorular.forEach(q => { dogruHarf[q.id] = q.dogru; })));
+    const yerCevapla = async dogru => {
+      for (const ad of await yp.$$eval('form.kapi[data-yer] input[type=radio]', l => [...new Set(l.map(x => x.name))])) {
+        await yp.check('input[name="' + ad + '"][value="' + (dogru ? dogruHarf[ad] : (dogruHarf[ad] === 'A' ? 'B' : 'A')) + '"]');
+      }
+      await yp.click('form.kapi[data-yer] button[type=submit]');
+    };
+    await yp.goto(T + '/kabuk/#/alan/dil');
+    await yp.waitForSelector('#yer-baslik');
+    dene('yerleştirme: boş alanda iki seçenek', (await yp.textContent('section.yuva .dugme--ana')) === 'Baştan başla' && (await yp.getAttribute('section.yuva a.dugme >> nth=1', 'href')) === '#/alan/dil/yer/1'
+      && (await yp.getAttribute('section.yuva .dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id);
+    await yp.click('section.yuva a.dugme >> nth=1');
+    await yp.waitForSelector('form.kapi[data-yer="1"]');
+    const n1 = await yp.locator('form.kapi[data-yer="1"] fieldset').count();
+    dene('yerleştirme: aşama 1, 5–8 soru, yalnız ünite kapılarından, doğru cevap yok', n1 >= 5 && n1 <= 8 && (await yp.locator('.secenek--dogru').count()) === 0
+      && (await yp.$$eval('form.kapi[data-yer] input[type=radio]', l => l.map(x => x.name))).every(id => dil[0].uniteler.some(u => u.kapi.sorular.some(q => q.id === id))), n1);
+    await goruntu(yp, 'yerlestirme-soru');
+    await yerCevapla(true);
+    await yp.waitForSelector('form.kapi[data-yer="2"]');
+    dene('yerleştirme: birinci aşama bilinince ikinciye geçer', /Aşama 2 \/ 2/.test(await yp.textContent('.govde .asama')));
+    await yerCevapla(false);
+    await yp.waitForSelector('.kapisonuc');
+    const ys = await yp.textContent('.govde');
+    dene('yerleştirme: sonuç «Aşama 2», tahmin etiketli; birinci atlandı, ikinci buradan', /Başlangıç: Aşama 2/.test(ys) && /tahmin/.test(await yp.textContent('.kapisonuc'))
+      && /atlandı/.test(await yp.textContent('.ozet li >> nth=0')) && /buradan/.test(await yp.textContent('.ozet li >> nth=1')), ys);
+    dene('yerleştirme: Dil beceri alanı, üretim görevi bekliyor', /üretim görevi bekliyor/.test(ys));
+    await goruntu(yp, 'yerlestirme-sonuc');
+    const kd = await yp.evaluate(() => [1, 2].map(n => JSON.parse(localStorage.getItem('lifeos.yol.dil.' + n))));
+    dene('yerleştirme: kayıt atlandı/tahmin, «geçildi» yazılmadı', kd[0].yerlestirme.sonuc === 'atlandi' && kd[0].yerlestirme.etiket === 'tahmin' && kd[0].asamalar['dil.1'].gecti === undefined
+      && kd[1].yerlestirme.sonuc === 'burada', JSON.stringify(kd));
+    dene('yerleştirme: «Başla» ikinci aşamanın ilk dersine', (await yp.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[1].uniteler[0].dersler[0].id);
+    await yp.goto(T + '/kabuk/#/alan/dil/asama/1');
+    await yp.waitForSelector('.unitekutu');
+    dene('yerleştirme: birinci aşama listede «atlandı · tahmin», üniteleri atlandı ve açık', /atlandı · tahmin/.test(await yp.textContent('.asamalar .satir >> nth=0'))
+      && (await yp.locator('.unitekutu summary', { hasText: 'atlandı (tahmin)' }).count()) === dil[0].uniteler.length && (await yp.locator('#yer-baslik').count()) === 0
+      && (await yp.locator('.unitekutu >> nth=2').locator('a.satir').count()) >= 1);
+    await yp.goto(T + '/kabuk/#/alan/dil/yer/1');
+    await yp.waitForSelector('.yuva');
+    dene('yerleştirme: kaydı olan alanda yeniden yapılmaz', /yalnız hiç başlanmamış/.test(await yp.textContent('.yuva')));
+    const du = dil[1].uniteler[0];
+    await yp.goto(T + '/kabuk/#/alan/dil/kapi/' + du.id);
+    await yp.waitForSelector('form.kapi');
+    for (const q of du.kapi.sorular) await yp.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
+    await yp.click('form.kapi button[type=submit]');
+    await yp.waitForSelector('.kapisonuc--gecti');
+    const kd2 = await yp.evaluate(() => [1, 2].map(n => JSON.parse(localStorage.getItem('lifeos.yol.dil.' + n)).yerlestirme));
+    dene('yerleştirme: ilk ölçülen ünite kapısı geçilince tahmin iki aşamada da silinir', kd2.every(x => x.etiket === undefined && x.olcum > 0), JSON.stringify(kd2));
+    dene('yerleştirme: konsolda hata yok', yhata.length === 0, yhata.join(' | '));
+    await yc.close();
 
     const t = await b.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light' });
     const tp = await t.newPage();

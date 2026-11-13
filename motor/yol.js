@@ -5,6 +5,9 @@
  *   { dersler: {id: {okundu}}, cevaplar: {id: [{cevap, dogru, zaman}]},
  *     kapilar: {sahipId: [{zaman, dogruSayisi, toplam, oran, esik, gecti, taslak}]}, asamalar: {id: {gecti}},
  *     eski?: {anahtar: {durum, etiket:'eski kayıt', ...}} }  (eski: yalniz gocten; hicbir seyi gecirmez, bkz. GOC)
+ *     yerlestirme?: {zaman, sonuc:'atlandi'|'burada', dogruSayisi, toplam, oran, esik, etiket?:'tahmin', uretim?:'bekliyor', olcum?}
+ *   («Seviyemi bul», icerik-hatti.md §4.3; atlanan asamada ayrica asamalar[id] = {yerlestirme: zaman}, gecti YOK:
+ *   atlanan «ogrenildi» degildir, yalniz sonraki asamayi acar. Ilk olculen unite kapisi gecilince etiket silinir.)
  * Kural (AGENTS 0.1): asama/unite yalniz bilgi olcen kapi esigi tutunca gecer; okumak ve alistirma
  * cozmek (hacim) tek basina hicbir seyi gecirmez. Taslak icerik tekrara girmez.
  */
@@ -65,14 +68,18 @@
   }
 
   function asamaGectiMi(y, kayit, id) { return !!(kayit.asamalar[id] && kayit.asamalar[id].gecti != null); }
+  // Bu kaydin asamasi yerlestirmeyle atlandi mi (uniteleri «atlandi»; gecildi sayilmaz)
+  function atlandiMi(kayit) { return !!(kayit.yerlestirme && kayit.yerlestirme.sonuc === 'atlandi'); }
 
   // Bir onkosulun karsilanmasi: asama/unite icin kapi, ders icin okuma, alistirma icin dogru cevap.
+  // Yerlestirmeyle atlanan asama ve uniteleri onkosul olarak karsilanir (acilir), gecilmis sayilmaz.
   function karsilandi(y, kayit, id) {
     var t = y.tur[id];
-    if (t === 'unite') return kapiGectiMi(kayit, id);
+    if (t === 'unite') return kapiGectiMi(kayit, id) || atlandiMi(kayit);
     if (t === 'ders') return !!kayit.dersler[id];
     if (t === 'alistirma') return (kayit.cevaplar[id] || []).some(function (c) { return c.dogru === true; });
-    return asamaGectiMi(y, kayit, id); // yuklu olmayan asama da kayittan okunur
+    // yuklu olmayan asama da kayittan okunur
+    return asamaGectiMi(y, kayit, id) || !!(kayit.asamalar[id] && kayit.asamalar[id].yerlestirme != null);
   }
 
   function hepsi(y, kayit, liste) {
@@ -136,8 +143,89 @@
     };
     var k = kopya(kayit);
     (k.kapilar[sahipId] = k.kapilar[sahipId] || []).push(sonuc);
-    if (t === 'asama' && sonuc.gecti && !k.asamalar[sahipId]) k.asamalar[sahipId] = { gecti: zaman };
+    if (t === 'asama' && sonuc.gecti && !(k.asamalar[sahipId] && k.asamalar[sahipId].gecti != null)) {
+      k.asamalar[sahipId] = Object.assign({}, k.asamalar[sahipId], { gecti: zaman }); // yerlestirme izi kalir
+    }
+    if (t === 'unite' && sonuc.gecti) k = tahminSil(k, zaman); // ilk olculen unite kapisi yerlestirme tahminini siler
     return { kayit: k, sonuc: sonuc };
+  }
+
+  // Kapida yanlis ya da bos birakilan sorular: Tekrar karti adayi. Kimlik sorunun kimligidir (tekillestirme
+  // cagiranda: ayni kimlikte kart varsa eklenmez). icerik taslaksa Tekrar motoru karti planlamaz (AGENTS 0.1).
+  // Dogru cevap burada da donmez; karti kuran cagiran icerikten okur ve yalniz Tekrar'da gosterir.
+  function kapiTekrarAdaylari(y, sahipId, cevaplar) {
+    var t = y.tur[sahipId];
+    if (t !== 'unite' && t !== 'asama') hata('kapı sahibi ünite ya da aşama olmalı: ' + sahipId);
+    cevaplar = cevaplar || {};
+    return y.oge[sahipId].kapi.sorular.filter(function (s) { return cevaplar[s.id] !== s.dogru; }).map(function (s) {
+      return { id: s.id, kapi: sahipId, unite: t === 'unite' ? sahipId : null, asama: y.id, icerik: etiket(s) };
+    });
+  }
+
+  /* ---- Yerlestirme («Seviyemi bul», icerik-hatti.md §4.3) ----
+   * Her asamanin unite kapi sorularindan asama basina 5-8 soru, kolaydan zora (unite sirasi, unite icinde `seviye`).
+   * Asamalar sirayla sorulur; esigin (2/3) altina dusulen ilk asamada durulur. Gecilen asamalarin uniteleri
+   * «atlandi» olur (ogrenildi degil), sayi etiketi tahmin; bunlar tekrar adayi cikarmaz ama acik kalir. */
+  var YER = { ESIK: 2 / 3, EN_AZ: 5, EN_COK: 8 };
+  var SEVIYE = { temel: 0, kolay: 0, orta: 1, ileri: 2, zor: 2 };
+  function seviyeSira(s) { return s.seviye in SEVIYE ? SEVIYE[s.seviye] : 1; }
+
+  function yerlestirmeSorulari(y) {
+    var us = y.veri.uniteler, hedef = Math.min(YER.EN_COK, Math.max(YER.EN_AZ, 2 * us.length));
+    // ünite hedeften çoksa eşit aralıklı seçilir (Akademik: 30 üniteden 8'i), sırası korunur
+    var secili = us.length <= hedef ? us : Array.apply(null, Array(hedef)).map(function (_, i) { return us[Math.round(i * (us.length - 1) / (hedef - 1))]; });
+    var listeler = secili.map(function (u) {
+      return u.kapi.sorular.map(function (s, i) { return { s: s, i: i }; })
+        .sort(function (a, b) { return seviyeSira(a.s) - seviyeSira(b.s) || a.i - b.i; }).map(function (x) { return x.s; });
+    });
+    var sec = [];
+    for (var tur = 0; sec.length < hedef && listeler.some(function (l) { return l.length > tur; }); tur++) {
+      listeler.forEach(function (l, j) { if (sec.length < hedef && l[tur]) sec.push({ s: l[tur], u: j, tur: tur }); });
+    }
+    // ünitelerden 5'ten az soru çıkarsa aşama kapısından tamamlanır (en zor sayılır, sona)
+    y.veri.kapi.sorular.forEach(function (s, i) { if (sec.length < YER.EN_AZ) sec.push({ s: s, u: secili.length, tur: i }); });
+    return sec.sort(function (a, b) { return a.u - b.u || a.tur - b.tur; }).map(function (x) { return x.s.id; });
+  }
+
+  function yerlestirmeDegerlendir(y, cevaplar) {
+    cevaplar = cevaplar || {};
+    var ids = yerlestirmeSorulari(y), dogruSayisi = ids.filter(function (id) { return cevaplar[id] === y.oge[id].dogru; }).length;
+    var oran = dogruSayisi / ids.length;
+    return { asama: y.id, dogruSayisi: dogruSayisi, toplam: ids.length, oran: oran, esik: YER.ESIK, gecti: oran >= YER.ESIK - 1e-9,
+      taslak: !ids.every(function (id) { return onayliMi(y.oge[id]); }) };
+  }
+
+  function bosMu(k) {
+    return !k.yerlestirme && ['dersler', 'cevaplar', 'kapilar', 'asamalar', 'eski'].every(function (a) { return !k[a] || !Object.keys(k[a]).length; });
+  }
+  // ys: alanin asamalari sirayla (yukle ciktilari); kayitlar: ayni sirayla asama kayitlari (hepsi bos olmali);
+  // cevaplar: asama basina {soruId: harf}. Ilk kalinan asamada durur, sonraki cevaplar yok sayilir.
+  // ayar.uretim: beceri alani (dil, muzik): soru yetmez, atlanan asamaya «uretim gorevi bekliyor» yazilir.
+  // Doner: { kayitlar, sonuclar, seviye (baslanacak asama sirasi; hepsi gecildiyse asama sayisi + 1) }
+  function yerlestir(ys, kayitlar, cevaplar, zaman, ayar) {
+    zamanDenetle(zaman);
+    if (!ys || !ys.length || !kayitlar || kayitlar.length !== ys.length) hata('yerleştirme için aşamalar ve kayıtları eşit sayıda verilmeli');
+    if (!kayitlar.every(bosMu)) hata('yerleştirme yalnız hiç kaydı olmayan alanda yapılır');
+    var out = kayitlar.map(kopya), sonuclar = [];
+    for (var i = 0; i < ys.length && i < (cevaplar || []).length; i++) {
+      var s = yerlestirmeDegerlendir(ys[i], cevaplar[i]);
+      sonuclar.push(s);
+      out[i].yerlestirme = { zaman: zaman, sonuc: s.gecti ? 'atlandi' : 'burada', dogruSayisi: s.dogruSayisi, toplam: s.toplam, oran: s.oran, esik: s.esik, etiket: ETIKET.TAHMIN };
+      if (s.gecti && ayar && ayar.uretim) out[i].yerlestirme.uretim = 'bekliyor';
+      if (!s.gecti) break;
+      out[i].asamalar[ys[i].id] = { yerlestirme: zaman };
+    }
+    var son = sonuclar[sonuclar.length - 1];
+    return { kayitlar: out, sonuclar: sonuclar, seviye: !son ? 1 : son.gecti ? sonuclar.length + 1 : sonuclar.length };
+  }
+
+  // Yerlestirme tahmini silinir (ilk olculen unite kapisi gecilince). Degisecek bir sey yoksa ayni kayit doner.
+  function tahminSil(kayit, zaman) {
+    if (!kayit.yerlestirme || !kayit.yerlestirme.etiket) return kayit;
+    var k = kopya(kayit);
+    delete k.yerlestirme.etiket;
+    k.yerlestirme.olcum = zaman;
+    return k;
   }
 
   // Tekrar kartina donusebilecek ogeler: onayli ders icindeki onayli, puanlanan ve en az bir kez
@@ -148,6 +236,7 @@
       if (y.tur[id] !== 'alistirma') return;
       var a = y.oge[id], ders = y.oge[y.ust[id]];
       if (a.tur !== 'secmeli' || !onayliMi(a) || !onayliMi(ders) || !(kayit.cevaplar[id] || []).length) return;
+      if (atlandiMi(kayit) && !kapiGectiMi(kayit, y.ust[ders.id])) return; // yerlestirmeyle atlanan unite tekrara girmez
       out.push({ id: id, ders: ders.id, unite: y.ust[ders.id], icerik: 'onayli' }); // icerik: Tekrar kartinin alani
     });
     return out;
@@ -172,12 +261,12 @@
 
   // Butun durum: neyin acik oldugu, neyin gecildigi ve etiketli ilerleme sayilari.
   function durum(y, kayit) {
-    var dersSay = 0, okunan = 0, cevapli = 0, dogru = 0, gecilen = 0;
+    var dersSay = 0, okunan = 0, cevapli = 0, dogru = 0, gecilen = 0, atlanan = 0, atla = atlandiMi(kayit), yer = kayit.yerlestirme;
     var uniteler = y.veri.uniteler.map(function (u) {
       var kp = kapiOzeti(kayit, u.id);
-      if (kp.gecti) gecilen++;
+      if (kp.gecti) gecilen++; else if (atla) atlanan++;
       return {
-        id: u.id, ad: u.ad, acik: acikMi(y, kayit, u.id), gecti: kp.gecti, kapi: kp,
+        id: u.id, ad: u.ad, acik: acikMi(y, kayit, u.id), gecti: kp.gecti, atlandi: atla && !kp.gecti, kapi: kp,
         dersler: u.dersler.map(function (d) {
           dersSay++;
           if (kayit.dersler[d.id]) okunan++;
@@ -191,18 +280,22 @@
         })
       };
     });
-    var ak = kapiOzeti(kayit, y.id), adim = y.veri.uniteler.length + 1;
-    return {
-      asama: { id: y.id, ad: y.veri.ad, acik: acikMi(y, kayit, y.id), gecti: asamaGectiMi(y, kayit, y.id), kapi: ak },
-      uniteler: uniteler,
-      ilerleme: {
+    var ak = kapiOzeti(kayit, y.id), adim = y.veri.uniteler.length + 1, gectiA = asamaGectiMi(y, kayit, y.id);
+    var ilerleme = {
         okunanDers: sayi(okunan, ETIKET.OLCULDU, { toplam: dersSay }),
         gecilenUnite: sayi(gecilen, ETIKET.HESAPLANDI, { toplam: y.veri.uniteler.length }),
         // asama ilerlemesi yalniz gecilen kapilardan hesaplanir; okuma ve alistirma sayilmaz
         asama: sayi((gecilen + (asamaGectiMi(y, kayit, y.id) ? 1 : 0)) / adim, ETIKET.HESAPLANDI),
         alistirmaDogruluk: cevapli ? sayi(dogru / cevapli, ETIKET.HESAPLANDI, { cevapli: cevapli })
                                    : sayi(null, ETIKET.VERI_YOK)
-      }
+    };
+    // atlanan unite sayisi ayri satirdir; gecilen uniteye ve asama ilerlemesine girmez
+    if (atla) ilerleme.atlananUnite = sayi(atlanan, yer.etiket || ETIKET.HESAPLANDI, { toplam: y.veri.uniteler.length });
+    return {
+      asama: { id: y.id, ad: y.veri.ad, acik: acikMi(y, kayit, y.id), gecti: gectiA, atlandi: atla && !gectiA, kapi: ak,
+        yerlestirme: yer ? { sonuc: yer.sonuc, etiket: yer.etiket || null, uretim: yer.uretim || null, dogruSayisi: yer.dogruSayisi, toplam: yer.toplam, esik: yer.esik } : null },
+      uniteler: uniteler,
+      ilerleme: ilerleme
     };
   }
 
@@ -280,7 +373,8 @@
   var Yol = {
     ETIKET: ETIKET, yukle: yukle, bosKayit: bosKayit, acikMi: acikMi, uniteGectiMi: uniteGectiMi,
     asamaGectiMi: function (y, kayit) { return asamaGectiMi(y, kayit, y.id); },
-    dersOku: dersOku, cevapla: cevapla, kapiDene: kapiDene, tekrarAdaylari: tekrarAdaylari,
+    dersOku: dersOku, cevapla: cevapla, kapiDene: kapiDene, tekrarAdaylari: tekrarAdaylari, kapiTekrarAdaylari: kapiTekrarAdaylari,
+    YER: YER, yerlestirmeSorulari: yerlestirmeSorulari, yerlestirmeDegerlendir: yerlestirmeDegerlendir, yerlestir: yerlestir, tahminSil: tahminSil, bosMu: bosMu,
     durum: durum, etiket: etiket, GOC: GOC, EKSIK: EKSIK
   };
 

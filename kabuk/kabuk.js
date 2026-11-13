@@ -123,10 +123,26 @@
   }
   // Üzerinde çalışılan aşama: açık olanların sonuncusu (hiçbiri açık değilse birinci).
   function calisilanAsama(liste) { var a = liste.filter(function (x) { return x.acik; }); return a.length ? a[a.length - 1].n : 1; }
+  // Alanda hiç kayıt yok mu: «Seviyemi bul» yalnız o zaman önerilir (kural Yol.bosMu).
+  function alanYeniMi(Yol, depo, alan, sayi) {
+    for (var n = 1; n <= sayi; n++) if (!Yol.bosMu(asamaKaydi(depo, Yol, alan, n, sayi))) return false;
+    return true;
+  }
+  // «Seviyemi bul» sonucu: Yol.yerlestir ölçülen aşamaların kaydını verir, burada yazılır. Kayıt boş değilse Yol hata fırlatır, hiçbir şey yazılmaz.
+  function yerlestirYaz(Yol, depo, alan, ys, cevaplar, zaman, uretim) {
+    var r = Yol.yerlestir(ys, ys.map(function (_, j) { return asamaKaydi(depo, Yol, alan, j + 1, ys.length); }), cevaplar, zaman, uretim ? { uretim: true } : undefined);
+    r.sonuclar.forEach(function (_, j) { asamaYaz(depo, alan, j + 1, r.kayitlar[j]); });
+    return r;
+  }
+  // İlk ölçülen ünite kapısı geçilince alanın bütün aşamalarındaki yerleştirme tahmini silinir (icerik-hatti §4.3/4).
+  function tahminSilHepsi(Yol, depo, alan, sayi, zaman) {
+    for (var n = 1; n <= sayi; n++) { var k = asamaKaydi(depo, Yol, alan, n, sayi), s = Yol.tahminSil(k, zaman); if (s !== k) asamaYaz(depo, alan, n, s); }
+  }
 
   var Kabuk = kok.LIFEOS && kok.LIFEOS.Kabuk || {};
   Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.selam = selam; Kabuk.siradaki = siradaki;
-  Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama };
+  Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
+    yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
   if (typeof module !== 'undefined' && module.exports) module.exports = Kabuk;
   if (typeof document === 'undefined') return;
@@ -200,6 +216,9 @@
     }));
   }
   function asamaYolu(n) { return F() + '/asama/' + n; }
+  // «Seviyemi bul»: beceri alanında soru yetmez, üretim görevi de ister (icerik-hatti §4.3/5)
+  var BECERI = { dil: 1, muzik: 1 }, yerCevap = {}, yerSonuc = null; // yerCevap: alan → aşama başına cevaplar (yalnız akış boyunca bellekte)
+  function alanYeni(id) { return Kabuk.Asama.yeniMi(Yol, depo, id, asamaSayisi(id)); }
 
   /* ---------------- sayfalar ---------------- */
   function ust(sol) {
@@ -274,7 +293,8 @@
     var l = asamaListe(etkinAlan);
     if (l.length < 2) return '';
     return '<section aria-labelledby="asamalar-baslik"><h2 id="asamalar-baslik">Aşamalar</h2><nav class="liste asamalar" aria-labelledby="asamalar-baslik">' + l.map(function (x) {
-      var not = x.gecti ? 'geçildi' : x.acik ? 'açık' : 'kilitli · önce Aşama ' + (x.n - 1) + ' kapısı';
+      var da = Yol.durum(alanlar[etkinAlan].ys[x.n - 1], kayitOku(etkinAlan, x.n)).asama;
+      var not = x.gecti ? 'geçildi' : da.atlandi ? 'atlandı' + (da.yerlestirme.etiket ? ' · ' + da.yerlestirme.etiket : '') : x.acik ? 'açık' : 'kilitli · önce Aşama ' + (x.n - 1) + ' kapısı';
       return x.acik ? '<a class="satir" href="' + asamaYolu(x.n) + '"' + (x.n === n ? ' aria-current="page"' : '') + '><span class="satir__ad">Aşama ' + x.n + ' · ' + kac(x.ad) +
         '</span><span class="satir__not">' + not + (x.n === n ? ' · şu an burada' : '') + '</span>' + (x.gecti ? '<span class="pul pul--pilot">geçildi</span>' : '') + '<span class="satir__ok" aria-hidden="true">›</span></a>'
         : '<div class="satir satir--kilitli"><span class="satir__ad">Aşama ' + x.n + ' · ' + kac(x.ad) + '</span><span class="satir__not">' + not + '</span></div>';
@@ -282,22 +302,27 @@
   }
   var KILITLI_ASAMA = 'Bu aşama kilitli: önce önceki aşamanın kapısını geç.';
   function sayfaAlan(yer) {
-    var f = al(), dr = fDurum(), ic, a = dr && siradaki(dr), sonraki = null;
+    var f = al(), dr = fDurum(), ic, a = dr && siradaki(dr), sonraki = null, yeni = false;
     if (!f) ic = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
     else if (f.hata) ic = '<div class="yuva" role="note"><b>Yol haritası bu açılışta gösterilemiyor.</b><span>' +
       (f.hata === 'motor' ? 'Yol aracı yüklenemedi.' : 'Sayfa dosyadan açıldı; içerik LifeOS sunucusuyla açılınca yüklenir.') + '</span></div>';
     else if (!dr.asama.acik) ic = asamalarHtml(f.n) + '<p class="asama"><span class="soluk">Aşama ' + f.n + '</span><br>' + kac(dr.asama.ad) + '</p>' +
       '<div class="yuva" role="note"><b>' + KILITLI_ASAMA + '</b></div>';
     else {
-      var il = dr.ilerleme, hepsiAcik = dr.uniteler.length <= 4, simdiki = a && (a.tur === 'kapi' ? a.id : f.y.ust[a.id]);
+      var il = dr.ilerleme, hepsiAcik = dr.uniteler.length <= 4, simdiki = a && (a.tur === 'kapi' ? a.id : f.y.ust[a.id]), yer_ = dr.asama.yerlestirme;
       if (dr.asama.gecti) sonraki = asamaListe(etkinAlan).filter(function (x) { return x.n === f.n + 1 && x.acik; })[0] || null;
-      ic = asamalarHtml(f.n) + '<p class="asama"><span class="soluk">Aşama ' + f.n + '</span><br>' + kac(dr.asama.ad) + '</p>' +
-        '<p class="soluk">' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' ünite kapısı geçildi</p>' +
+      yeni = a && alanYeni(etkinAlan);
+      ic = (yeni ? '<section class="yuva" aria-labelledby="yer-baslik"><b id="yer-baslik">Nereden başlayalım?</b><span>Konuyu biliyorsan «Seviyemi bul»: aşama başına 5–8 soru, bildiğin aşamalar atlanır.</span>' +
+          '<div class="eylemler"><a class="dugme dugme--ana" href="' + adimYolu(a) + '">Baştan başla</a><a class="dugme" href="' + F() + '/yer/1">Seviyemi bul</a></div></section>' : '') +
+        asamalarHtml(f.n) + '<p class="asama"><span class="soluk">Aşama ' + f.n + '</span><br>' + kac(dr.asama.ad) + '</p>' +
+        '<p class="soluk">' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' ünite kapısı geçildi' +
+        (il.atlananUnite ? ' · ' + il.atlananUnite.deger + ' ünite atlandı (' + il.atlananUnite.etiket + ')' : '') + '</p>' +
+        (yer_ && yer_.uretim === 'bekliyor' ? '<p class="soluk">Yerleştirme tahmini; üretim görevi bekliyor.</p>' : '') +
         dr.uniteler.map(function (u) {
           var okunan = u.dersler.filter(function (x) { return x.okundu; }).length;
           // kalabalık alanda (Akademik: 30 ünite) yalnız üzerinde çalışılan ünite açık gelir
           return '<details class="unitekutu"' + (hepsiAcik || u.id === simdiki ? ' open' : '') + '><summary><h2>' + kac(u.ad) + '</h2><span class="soluk">' +
-            (u.gecti ? 'geçildi' : u.acik ? okunan + '/' + u.dersler.length + ' ders' : 'kilitli') + '</span></summary>' +
+            (u.gecti ? 'geçildi' : u.atlandi ? 'atlandı' + (yer_.etiket ? ' (' + yer_.etiket + ')' : '') + ' · ' + okunan + '/' + u.dersler.length + ' ders' : u.acik ? okunan + '/' + u.dersler.length + ' ders' : 'kilitli') + '</span></summary>' +
             u.dersler.map(function (x) {
               return x.acik ? '<a class="satir" href="' + F() + '/ders/' + x.id + '"><span class="satir__ad">' + kac(x.ad) + '</span><span class="satir__not">' + (x.okundu ? 'okundu' : 'okunmadı') +
                 '</span>' + (x.etiket === 'taslak' ? '<span class="pul">taslak</span>' : '') + '<span class="satir__ok" aria-hidden="true">›</span></a>'
@@ -307,7 +332,7 @@
         '<section class="unitekutu unitekutu--asama"><h2>Aşama kapısı</h2>' + kapiSatiri(dr.asama.id, 'Aşama kapısı', dr.uniteler.every(function (u) { return u.gecti; }), dr.asama.kapi) + '</section>';
     }
     return ust(kirinti(yer)) + '<div class="govde"><h1>' + kac(yer.ad) + '</h1>' + ic + '<div class="eylemler">' +
-      (a ? '<a class="dugme dugme--ana" href="' + adimYolu(a) + '">' + (dr.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla') + '</a>'
+      (yeni ? '' : a ? '<a class="dugme dugme--ana" href="' + adimYolu(a) + '">' + (dr.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla') + '</a>'
          : dr && dr.asama.gecti ? '<span class="pul pul--pilot">Aşama tamamlandı</span>' + (sonraki ? '<a class="dugme dugme--ana" href="' + asamaYolu(sonraki.n) + '">Sonraki aşama</a>' : '') : '') +
       (yer.eski ? '<a class="dugme dugme--sade" href="' + eskiYol(yer.eski) + '">Eski ' + kac(yer.ad) + ' sayfası</a>' : '') + '</div></div>';
   }
@@ -365,20 +390,54 @@
     if (!Yol.acikMi(y, kayit, id) || (t === 'asama' && !dr.uniteler.every(function (u) { return u.gecti; }))) {
       return yok(t === 'asama' ? 'Aşama kapısı, bütün ünite kapıları geçilince açılır.' : 'Bu ünite kilitli: önce önceki ünitenin kapısını geç.');
     }
-    var s = kapiSonuc && kapiSonuc.id === id ? kapiSonuc.sonuc : null, a = siradaki(dr), n = al().n;
+    var s = kapiSonuc && kapiSonuc.id === id ? kapiSonuc.sonuc : null, tekrarda = s ? kapiSonuc.tekrar : 0, a = siradaki(dr), n = al().n;
     kapiSonuc = null;
     // aşama kapısı geçilince sıradaki adım bir sonraki aşamadadır (varsa; Yol onu bu geçişle açar)
     var ileri = s && s.gecti ? (a ? adimYolu(a) : t === 'asama' && asamaSayisi(etkinAlan) > n ? asamaYolu(n + 1) : null) : null;
     var sonuc = s ? '<div class="kapisonuc' + (s.gecti ? ' kapisonuc--gecti' : '') + '" tabindex="-1" role="status"><b>' + (s.gecti ? 'Geçtin.' : 'Bu kez olmadı.') + '</b> ' +
       s.dogruSayisi + '/' + s.toplam + ' doğru (%' + yuzde(s.oran) + '), eşik %' + yuzde(s.esik) + '. <span class="soluk">ölçüldü' + (s.taslak ? ' · sorular taslak' : '') + '</span>' +
-      '<div class="eylemler">' + (ileri ? '<a class="dugme dugme--ana" href="' + ileri + '">' + (a ? 'Sıradaki' : 'Sonraki aşama') + '</a>' : '') + '<a class="dugme dugme--sade" href="' + F() + '">Yol haritası</a></div></div>' : '';
+      // doğru cevap kapıda gösterilmez; yanlışlar Tekrar'a düşer, cevap orada açılınca görünür
+      (tekrarda ? '<p>' + tekrarda + ' soru Tekrar\'a düştü; doğru cevabı orada görürsün.</p>' : '') +
+      '<div class="eylemler">' + (ileri ? '<a class="dugme dugme--ana" href="' + ileri + '">' + (a ? 'Sıradaki' : 'Sonraki aşama') + '</a>' : '') +
+      (tekrarda ? '<a class="dugme" href="#/motor/tekrar">Tekrar\'a git</a>' : '') + '<a class="dugme dugme--sade" href="' + F() + '">Yol haritası</a></div></div>' : '';
     return ust(altKirinti(ad)) + '<div class="govde"><h1>' + kac(ad) + '</h1>' + sonuc +
       '<p class="soluk">' + o.kapi.sorular.length + ' soru. Geçmek için en az %' + yuzde(o.kapi.esik) + ' doğru gerekir; boş bırakılan yanlış sayılır. Doğru cevaplar gösterilmez.</p>' +
-      '<form class="kapi" data-kapi="' + id + '">' + o.kapi.sorular.map(function (q) {
-        return '<fieldset class="soru"><legend>' + kac(q.soru) + '</legend><div class="secenekler">' + q.sec.map(function (m, i) {
-          return '<label class="secenek"><input type="radio" name="' + q.id + '" value="' + HARF[i] + '"><b>' + HARF[i] + '</b><span>' + kac(m) + '</span></label>';
-        }).join('') + '</div></fieldset>';
-      }).join('') + '<div class="eylemler"><button type="submit" class="dugme dugme--ana">Bitir</button></div></form></div>';
+      '<form class="kapi" data-kapi="' + id + '">' + kapiSorulari(o.kapi.sorular) + '<div class="eylemler"><button type="submit" class="dugme dugme--ana">Bitir</button></div></form></div>';
+  }
+  function kapiSorulari(sorular) {
+    return sorular.map(function (q) {
+      return '<fieldset class="soru"><legend>' + kac(q.soru) + '</legend><div class="secenekler">' + q.sec.map(function (m, i) {
+        return '<label class="secenek"><input type="radio" name="' + q.id + '" value="' + HARF[i] + '"><b>' + HARF[i] + '</b><span>' + kac(m) + '</span></label>';
+      }).join('') + '</div></fieldset>';
+    }).join('');
+  }
+  // «Seviyemi bul» (icerik-hatti §4.3): alt «1», «2»… aşama sırası, «sonuc» son ekran. Kural Yol'da; burada çizim ve kayıt.
+  function sayfaYerlestir(alt) {
+    var ad = 'Seviyemi bul', f = al();
+    if (!f) return ust(altKirinti(ad)) + '<div class="govde"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
+    if (f.hata) return yok('İçerik bu açılışta yüklenemedi.');
+    var ys = alanlar[etkinAlan].ys;
+    if (alt === 'sonuc') {
+      var r = yerSonuc && yerSonuc.alan === etkinAlan ? yerSonuc.r : null;
+      if (!r) return yok('Gösterilecek yerleştirme sonucu yok.');
+      var hepsi = r.seviye > ys.length, a = siradaki(fDurum()), uretim = BECERI[etkinAlan] && r.sonuclar.some(function (x) { return x.gecti; });
+      return ust(altKirinti(ad)) + '<div class="govde"><h1>' + ad + '</h1>' +
+        '<div class="kapisonuc' + (r.seviye > 1 ? ' kapisonuc--gecti' : '') + '" tabindex="-1" role="status"><b>' +
+        (hepsi ? 'Bütün aşamalar atlandı; son aşamada devam.' : r.seviye > 1 ? 'Başlangıç: Aşama ' + r.seviye + '.' : 'Baştan başlıyorsun.') + '</b> <span class="soluk">tahmin</span></div>' +
+        '<ul class="ozet">' + r.sonuclar.map(function (s, j) {
+          return '<li><span>Aşama ' + (j + 1) + ' · ' + kac(ys[j].veri.ad) + '</span><b>' + s.dogruSayisi + '/' + s.toplam + '</b><span class="pul' + (s.gecti ? ' pul--pilot' : '') + '">' + (s.gecti ? 'atlandı' : 'buradan') + '</span></li>';
+        }).join('') + '</ul>' +
+        (r.sonuclar.some(function (x) { return x.gecti; }) ? '<p class="soluk">Atlanan üniteler «öğrenildi» sayılmaz ve tekrar listesine girmez; istersen açıp çalışırsın. İlk ünite kapısını geçince tahmin silinir.</p>' : '') +
+        (uretim ? '<div class="yuva" role="note"><b>Yerleştirme tahmini; üretim görevi bekliyor.</b><span>Beceri alanında soru yetmez: atlanan aşamada yazma ya da çalma görevi de gerekir. Bu görev henüz yok.</span></div>' : '') +
+        '<div class="eylemler">' + (a ? '<a class="dugme dugme--ana" href="' + adimYolu(a) + '">Başla</a>' : '') + '<a class="dugme dugme--sade" href="' + F() + '">Yol haritası</a></div></div>';
+    }
+    if (!alanYeni(etkinAlan)) return yok('Seviye yalnız hiç başlanmamış alanda bulunur; bu alanda kaydın var.');
+    var n = Math.max(1, Math.min(+alt || 1, (yerCevap[etkinAlan] || []).length + 1, ys.length)), y = ys[n - 1], ids = Yol.yerlestirmeSorulari(y);
+    return ust(altKirinti(ad)) + '<div class="govde"><h1>' + ad + '</h1><p class="asama"><span class="soluk">Aşama ' + n + ' / ' + ys.length + '</span><br>' + kac(y.veri.ad) + '</p>' +
+      '<p class="soluk">' + ids.length + ' soru, kolaydan zora. Üçte ikisi doğruysa bu aşama atlanır' + (n < ys.length ? ' ve sonrakine geçersin' : '') +
+      '; değilse buradan başlarsın. Boş bırakılan yanlış sayılır. Doğru cevaplar gösterilmez.</p>' +
+      '<form class="kapi" data-yer="' + n + '">' + kapiSorulari(ids.map(function (id) { return y.oge[id]; })) +
+      '<div class="eylemler"><button type="submit" class="dugme dugme--ana">' + (n < ys.length ? 'Devam' : 'Bitir') + '</button><a class="dugme dugme--sade" href="' + F() + '">Vazgeç</a></div></form></div>';
   }
   function sayfaYer(yer) {
     var metin = yer.durum === 'eski' ? 'Bu alan henüz yeni sisteme taşınmadı. Şimdilik eski sayfasında çalışıyor.'
@@ -392,11 +451,12 @@
     // «#/alan/tarih/ders/x», «#/motor/not/yeni»: ilk üç parça yerin yolu, kalanı o sayfanın alt yolu
     var h = location.hash || '#/bugun', parca = h.split('?'), alt = /^(#\/(?:alan|motor)\/[a-z-]+)\/([\w./-]+)$/.exec(parca[0]), taban = alt ? alt[1] : parca[0];
     var yer = H.YERLER.filter(function (y) { return y.yol === taban; })[0] || H.bul('bugun');
-    var html, tasindi = yer.katman === 'alan' && yer.asama, fa = alt && tasindi && /^(ders|kapi|asama)\/([\w.-]+)$/.exec(alt[2]), ek = Kabuk.ek && Kabuk.ek[yer.id];
+    var html, tasindi = yer.katman === 'alan' && yer.asama, fa = alt && tasindi && /^(ders|kapi|asama|yer)\/([\w.-]+)$/.exec(alt[2]), ek = Kabuk.ek && Kabuk.ek[yer.id];
     if (tasindi) { etkinYap(yer.id); if (!al()) alanYukle(yer.id).then(function () { if (sayfaEl.getAttribute('data-yer') === yer.id) rota(); }); }
     // aşama: «asama/2» ya da ders/kapı kimliğinin ikinci parçası (felsefe.2.1.3 → 2)
     if (fa) { var an = +(fa[1] === 'asama' ? fa[2] : fa[2].split('.')[1]); if (an >= 1) seciliAsama[yer.id] = an; }
     if (fa && fa[1] === 'asama') html = sayfaAlan(yer);
+    else if (fa && fa[1] === 'yer') html = sayfaYerlestir(fa[2]);
     else if (fa) html = fa[1] === 'ders' ? sayfaDers(fa[2]) : sayfaKapi(fa[2]);
     else if (ek) html = ek(yer, alt ? alt[2] : '');
     else if (yer.id === 'bugun') html = sayfaBugun();
@@ -588,12 +648,29 @@
     var a = siradaki(fDurum());
     git(a ? adimYolu(a) : F());
   }
+  function formCevaplari(form) {
+    var c = {};
+    [].forEach.call(form.querySelectorAll('input[type="radio"]:checked'), function (r) { c[r.name] = r.value; });
+    return c;
+  }
   function kapiBitir(form) {
-    var id = form.getAttribute('data-kapi'), cevaplar = {};
-    [].forEach.call(form.querySelectorAll('input[type="radio"]:checked'), function (r) { cevaplar[r.name] = r.value; });
-    try { var r = Yol.kapiDene(al().y, kayitOku(), id, cevaplar, Date.now()); kayitYaz(r.kayit); kapiSonuc = { id: id, sonuc: r.sonuc }; } catch (e) { /* kilitli */ }
+    var id = form.getAttribute('data-kapi'), cevaplar = formCevaplari(form), y = al().y, z = Date.now();
+    try {
+      var r = Yol.kapiDene(y, kayitOku(), id, cevaplar, z); kayitYaz(r.kayit);
+      if (r.sonuc.gecti && y.tur[id] === 'unite') Kabuk.Asama.tahminSil(Yol, depo, etkinAlan, asamaSayisi(etkinAlan), z);
+      kapiSonuc = { id: id, sonuc: r.sonuc, tekrar: Kabuk.kapiTekrar ? Kabuk.kapiTekrar(y, id, cevaplar) : 0 };
+    } catch (e) { /* kilitli */ }
     rota(); scrollTo(0, 0);
     var s = $('.kapisonuc'); if (s) s.focus({ preventScroll: true });
+  }
+  // Bir aşamanın yerleştirme soruları bitti: eşik tutarsa sonraki aşama, tutmazsa (ya da son aşamaysa) sonuç yazılır.
+  function yerBitir(form) {
+    var n = +form.getAttribute('data-yer'), ys = alanlar[etkinAlan].ys, c = formCevaplari(form), cv = (yerCevap[etkinAlan] || []).slice(0, n - 1);
+    cv[n - 1] = c; yerCevap[etkinAlan] = cv;
+    if (n < ys.length && Yol.yerlestirmeDegerlendir(ys[n - 1], c).gecti) return git(F() + '/yer/' + (n + 1));
+    try { yerSonuc = { alan: etkinAlan, r: Kabuk.Asama.yerlestir(Yol, depo, etkinAlan, ys, cv, Date.now(), !!BECERI[etkinAlan]) }; } catch (e) { yerSonuc = null; }
+    delete yerCevap[etkinAlan]; delete seciliAsama[etkinAlan];
+    git(F() + '/yer/sonuc');
   }
 
   function baslat() {
@@ -604,7 +681,7 @@
     addEventListener('hashchange', function () { halkaKapat(false); komutKapat(false); rota(); sayfaEl.focus({ preventScroll: true }); scrollTo(0, 0); });
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);
-    d.addEventListener('submit', function (e) { var f = e.target.closest('form.kapi'); if (f) { e.preventDefault(); kapiBitir(f); } });
+    d.addEventListener('submit', function (e) { var f = e.target.closest('form.kapi'); if (f) { e.preventDefault(); if (f.hasAttribute('data-yer')) yerBitir(f); else kapiBitir(f); } });
     d.addEventListener('change', function (e) {
       if (e.target.closest('.aralik [data-ayar]')) aralikYaz(e.target);
       else if (e.target.matches('.sayiayar [data-ayar]')) sayiYaz(e.target);

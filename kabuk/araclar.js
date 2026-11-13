@@ -31,15 +31,52 @@
     return { id: id, notlar: l };
   }
 
-  // Yol'un tekrar adayları (yalnız onaylı içerik) için eksik kartları ekler; var olan karta dokunmaz.
+  // Yol'un tekrar adayları için eksik kartları ekler (kimlikle tekil); var olan karta dokunmaz. Kapı adayı
+  // (Yol.kapiTekrarAdaylari) kaynağını taşır: alan, aşama, ünite, kapı. Taslaksa Tekrar motoru planlamaz.
   function kartlariEsitle(Tekrar, kartlar, adaylar, y) {
     var varMi = {};
     kartlar.forEach(function (k) { varMi[k.id] = true; });
     var ek = adaylar.filter(function (a) { return !varMi[a.id]; }).map(function (a) {
-      var o = y.oge[a.id];
-      return Tekrar.yeniKart(a.id, { icerik: a.icerik, on: o.soru, arka: o.sec[HARF.indexOf(o.dogru)], kaynak: 'yol' });
+      var o = y.oge[a.id], ek = { icerik: a.icerik, on: o.soru, arka: o.sec[HARF.indexOf(o.dogru)], kaynak: a.kapi ? 'kapi' : 'yol' };
+      if (a.kapi) { ek.alan = y.veri.alan; ek.asama = a.asama; ek.unite = a.unite; ek.kapi = a.kapi; }
+      return Tekrar.yeniKart(a.id, ek);
     });
     return ek.length ? kartlar.concat(ek) : kartlar;
+  }
+  // Not ağının yerleşimi (Not.ag düğüm+kenar verir, yeri ekran seçer): halkadan başlayan basit kuvvet yerleşimi.
+  // Saf ve belirlenimci (rastgele yok). Adım sayısı kalabalıkta düşer: 300 düğüm ~60 adım (n² itme).
+  function agYerlesim(ag, en, boy) {
+    var n = ag.dugum.length, pay = 24, ix = {}, p = ag.dugum.map(function (d, i) {
+      ix[d.id] = i;
+      var a = 2 * Math.PI * i / Math.max(1, n);
+      return { id: d.id, x: en / 2 + (en / 2 - pay) * Math.cos(a), y: boy / 2 + (boy / 2 - pay) * Math.sin(a), dx: 0, dy: 0 };
+    });
+    if (n < 2) return p.map(function (q) { return { id: q.id, x: en / 2, y: boy / 2 }; });
+    var k = Math.sqrt(en * boy / n) * 0.6, adim = n > 150 ? 60 : n > 50 ? 120 : 200, sicak = en / 8;
+    for (var t = 0; t < adim; t++) {
+      for (var i = 0; i < n; i++) { p[i].dx = 0; p[i].dy = 0; }
+      for (i = 0; i < n; i++) for (var j = i + 1; j < n; j++) {
+        var x = p[i].x - p[j].x, y = p[i].y - p[j].y, d2 = x * x + y * y || 0.01, f = k * k / d2;
+        p[i].dx += x * f; p[i].dy += y * f; p[j].dx -= x * f; p[j].dy -= y * f;
+      }
+      ag.kenar.forEach(function (e) {
+        var a = p[ix[e.a]], b = p[ix[e.b]], x = a.x - b.x, y = a.y - b.y, d = Math.sqrt(x * x + y * y) || 0.01, f = d / k;
+        a.dx -= x * f; a.dy -= y * f; b.dx += x * f; b.dy += y * f;
+      });
+      p.forEach(function (q) {
+        q.dx += (en / 2 - q.x) * 0.05; q.dy += (boy / 2 - q.y) * 0.05; // bağsız düğümler uzağa kaçmasın
+        var d = Math.sqrt(q.dx * q.dx + q.dy * q.dy) || 1, s = Math.min(d, sicak);
+        q.x += q.dx / d * s; q.y += q.dy / d * s;
+      });
+      sicak = Math.max(1, sicak * 0.96);
+    }
+    // kenara yığılmasın diye adımlarda sınır yok; sonunda çerçeveye sığdırılır (eksen başına ölçek)
+    var sig = function (a, bas, son) {
+      var en_ = Math.min.apply(null, p.map(function (q) { return q[a]; })), bo = Math.max.apply(null, p.map(function (q) { return q[a]; })) - en_;
+      p.forEach(function (q) { q[a] = Math.round(bo < 1 ? (bas + son) / 2 : bas + (q[a] - en_) / bo * (son - bas)); });
+    };
+    sig('x', pay, en - pay); sig('y', pay, boy - pay);
+    return p.map(function (q) { return { id: q.id, x: q.x, y: q.y }; });
   }
   function gunSonu(simdi) { var d = new Date(simdi); d.setHours(23, 59, 59, 999); return d.getTime(); }
   function gunAdi(simdi) { var d = new Date(simdi), iki = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + iki(d.getMonth() + 1) + '-' + iki(d.getDate()); }
@@ -170,7 +207,7 @@
     return -1;
   }
 
-  var Arac = { kimlik: kimlik, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
+  var Arac = { kimlik: kimlik, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -203,6 +240,29 @@
     var s = Not.ara(notlar, sorgu, { sinir: 50 });
     return s.length ? s.map(function (x) { return notSatiri(harita[x.id], x.parca); }).join('') : '<p class="soluk">Bu aramaya uyan not yok.</p>';
   }
+  // Not ağı: Not.ag verisi SVG'ye çizilir; düğüm bağlantıdır (Sekme ile gezilir, Enter notu açar). Renkler kabuk.css tokenlarından.
+  var AG_EN = 640, AG_BOY = 400;
+  function notAgi(notlar) {
+    var k = ic().kac, ag = Not.ag(notlar), n = ag.dugum.length;
+    if (n < 2) return '';
+    var yer = {};
+    agYerlesim(ag, AG_EN, AG_BOY).forEach(function (q) { yer[q.id] = q; });
+    var kisa = function (s) { return s.length > 22 ? s.slice(0, 21) + '…' : s; };
+    var bagli = ag.dugum.filter(function (d) { return d.derece; }).length;
+    return '<section data-not-ag aria-labelledby="ag-baslik"><h2 id="ag-baslik">Not ağı</h2>' +
+      '<p class="soluk">' + n + ' not · ' + ag.kenar.length + ' bağ · ' + (n - bagli) + ' bağsız. Çizgi: bağ; kesik: aynı etiket; kalın kesik: çelişki.</p>' +
+      '<svg class="notag' + (n > 40 ? ' notag--kalabalik' : '') + '" viewBox="0 0 ' + AG_EN + ' ' + AG_BOY + '" role="group" aria-label="Not ağı: ' + n + ' not, ' + ag.kenar.length + ' bağ">' +
+      ag.kenar.map(function (e) {
+        var a = yer[e.a], b = yer[e.b];
+        return '<line class="notag__' + e.tur + '" x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '"/>';
+      }).join('') +
+      ag.dugum.map(function (d) {
+        var q = yer[d.id], sag = q.x < AG_EN - 140;
+        return '<a href="#/motor/not/' + k(d.id) + '" aria-label="' + k(d.ad) + (d.derece ? ', ' + d.derece + ' bağ' : ', bağsız') + '"><title>' + k(d.ad) + '</title>' +
+          '<circle cx="' + q.x + '" cy="' + q.y + '" r="' + Math.min(12, 6 + d.derece) + '"/>' +
+          '<text x="' + (q.x + (sag ? 14 : -14)) + '" y="' + (q.y + 4) + '"' + (sag ? '' : ' text-anchor="end"') + '>' + k(kisa(d.ad)) + '</text></a>';
+      }).join('') + '</svg></section>';
+  }
   function sayfaNot(yer, alt) {
     var I = ic(), k = I.kac;
     if (!Not) return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Not</h1>' + eksik('Not') + '</div>';
@@ -212,7 +272,7 @@
         '<div class="aracust"><input type="search" class="giris" data-not-ara aria-label="Notlarda ara" placeholder="Notlarda ara (#etiket de olur)" autocomplete="off">' +
         '<a class="dugme dugme--ana" href="#/motor/not/yeni">Yeni not</a></div>' +
         '<div id="not-liste" class="liste" aria-live="polite">' + notListesi(notlar, '') + '</div>' +
-        '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p></div>';
+        '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' + notAgi(notlar) + '</div>';
     }
     var n = alt === 'yeni' ? null : notlar.filter(function (x) { return x.id === alt; })[0];
     var geri = '<a class="kirinti" href="#/motor/not"><span aria-hidden="true">‹ </span>Not</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>' + k(n ? Not.ad(n) : 'Yeni not') + '</span>';
@@ -272,11 +332,24 @@
     if (l !== ilk) yaz(KART_ANAHTAR, l);
     return l;
   }
+  // Kapıda yanlış ya da boş bırakılan sorular kart olur (kabuk.js kapiBitir çağırır); dönen: yanlış soru sayısı
+  Kabuk.kapiTekrar = function (y, kapiId, cevaplar) {
+    if (!Tekrar) return 0;
+    var a = ic().Yol.kapiTekrarAdaylari(y, kapiId, cevaplar), l = oku(KART_ANAHTAR, []), l2 = kartlariEsitle(Tekrar, l, a, y);
+    if (l2 !== l) yaz(KART_ANAHTAR, l2);
+    return a.length;
+  };
+  function kapiKaynak(x) {
+    var I = ic(), y = I.asamaY(x.alan, x.asama), alan = I.tasinanlar().filter(function (a) { return a.id === x.alan; })[0], u = x.unite && y && y.oge[x.unite];
+    return (alan ? alan.ad : x.alan) + ' · ' + (x.unite ? (u ? u.ad : x.unite) + ' kapısı' : 'Aşama ' + String(x.asama).split('.')[1] + ' kapısı');
+  }
   function sayac(simdi) { var s = oku(SAYAC_ANAHTAR, {}); return s.gun === gunAdi(simdi) ? s : { gun: gunAdi(simdi), yeni: 0, tekrar: 0 }; }
   function sayfaTekrar(yer) {
     var I = ic(), k = I.kac;
     if (!Tekrar) return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Tekrar</h1>' + eksik('Tekrar') + '</div>';
-    var simdi = Date.now(), l = kartlar(), s = sayac(simdi), q = kuyruk(Tekrar, l, simdi, s), kart = q.sira[0], govde;
+    // taslak içerikten gelen kapı kartları tekrara girmez (AGENTS 0.1): ayrı listede durur, açılınca doğru cevabı gösterir
+    var simdi = Date.now(), hepsi = kartlar(), kapiT = hepsi.filter(function (x) { return x.kaynak === 'kapi' && x.icerik !== 'onayli'; });
+    var l = hepsi.filter(function (x) { return kapiT.indexOf(x) < 0; }), s = sayac(simdi), q = kuyruk(Tekrar, l, simdi, s), kart = q.sira[0], govde;
     if (!l.length) govde = '<p class="soluk">Henüz kart yok. Aşağıdan ilk kartını ekle; onaylanmış derslerin alıştırmaları da buraya kendiliğinden gelir.</p>';
     else if (!kart) govde = '<div class="kapisonuc kapisonuc--gecti" role="status"><b>Bugünlük bitti.</b> ' + (s.yeni + s.tekrar) + ' cevap verdin.' +
       (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar ? ' <span class="soluk">Günlük tavan doldu; ' + (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar) + ' kart yarına kaldı.</span>' : '') + '</div>';
@@ -292,9 +365,14 @@
     }
     var liste = l.length ? '<details class="kaynak"><summary>Bütün kartlar (' + l.length + ')</summary><ul class="kartliste">' + l.map(function (x) {
       var h = Tekrar.hatirlama(x, simdi), vade = x.sonraki == null ? 'yeni' : x.sonraki <= gunSonu(simdi) ? 'bugün' : tarih(x.sonraki);
-      return '<li><span>' + k(x.on) + '</span><span class="soluk">' + vade + ' · hatırlama ' + (h.deger == null ? '—' : '%' + Math.round(h.deger * 100)) + ' (' + h.etiket + ')</span>' +
+      return '<li><span>' + k(x.on) + '</span><span class="soluk">' + vade + ' · hatırlama ' + (h.deger == null ? '—' : '%' + Math.round(h.deger * 100)) + ' (' + h.etiket + ')' +
+        (x.kaynak === 'kapi' ? ' · ' + k(kapiKaynak(x)) : '') + '</span>' +
         (x.kaynak === 'yol' ? '' : '<button type="button" class="dugme dugme--sade" data-arac-ac="kart-sil" data-id="' + k(x.id) + '" aria-label="Kartı sil: ' + k(x.on) + '">Sil</button>') + '</li>';
     }).join('') + '</ul></details>' : '';
+    liste += kapiT.length ? '<section data-kapi-kartlari><h2>Kapıda kalınan sorular (' + kapiT.length + ')</h2><p class="soluk">Sorular taslak: onaylanınca tekrara girer. Açınca doğru cevap görünür.</p><ul class="kartliste">' +
+      kapiT.map(function (x) {
+        return '<li><details><summary>' + k(x.on) + '</summary><p>' + k(x.arka) + '</p></details><span class="soluk">' + k(kapiKaynak(x)) + ' · taslak</span></li>';
+      }).join('') + '</ul></section>' : '';
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="tekrar"><h1>Tekrar</h1>' + govde +
       '<form class="kartform" novalidate><h2>Kart ekle</h2><div class="notform__ileti" role="alert" tabindex="-1"></div>' +
       '<label class="alanet">Ön yüz (soru)<input type="text" class="giris" name="on" maxlength="300" autocomplete="off"></label>' +
