@@ -191,10 +191,10 @@ t('harita: yedi motor ve King var', () => {
   esit(H.YERLER.filter(y => y.katman === 'motor').map(y => y.id), ['yol', 'tekrar', 'soru', 'kayit', 'plan', 'not', 'arama']);
   esit(H.YERLER.filter(y => y.katman === 'king').length, 1);
 });
-t('harita: içeriği taşınan dört alan pilot ve aşamalı, içerik dosyası yerinde; kalanlar eski ve bağlantılı', () => {
+t('harita: on alanın onu da taşındı: pilot ve aşamalı, içerik dosyası yerinde, eski sayfa bağlantısı duruyor', () => {
   const fs = require('fs'), path = require('path');
   const alanlar = H.YERLER.filter(y => y.katman === 'alan'), tasinan = alanlar.filter(y => y.asama);
-  esit(tasinan.map(y => y.id), ['akademik', 'dil', 'felsefe', 'tarih']);
+  esit(tasinan.map(y => y.id), ['akademik', 'dil', 'felsefe', 'tarih', 'muzik', 'okuma', 'beslenme', 'hareket', 'uyku', 'tahlil']);
   tasinan.forEach(y => {
     esit([y.durum, y.asama], ['pilot', 1], y.id);
     dogru(fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'asama-1.json')), y.id + ' içeriği yok');
@@ -203,7 +203,7 @@ t('harita: içeriği taşınan dört alan pilot ve aşamalı, içerik dosyası y
   alanlar.filter(y => !y.asama).forEach(y => { esit(y.durum, 'eski', y.id); dogru(/\.html$/.test(y.eski), y.id + ' bağlantı'); });
   alanlar.forEach(y => dogru(/\.html$/.test(y.eski), y.id + ' eski sayfa bağlantısı'));
 });
-t('yol: dört alanın içeriği Yol motoruna yüklenir ve ilk adım bir derstir', () => {
+t('yol: on alanın içeriği Yol motoruna yüklenir ve ilk adım bir derstir', () => {
   const Yol = require('../motor/yol.js');
   H.YERLER.filter(y => y.asama).forEach(a => {
     const y = Yol.yukle(require('../alan/' + a.id + '/asama-1.json')), adim = K.siradaki(Yol.durum(y, Yol.bosKayit()));

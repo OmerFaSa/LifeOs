@@ -87,7 +87,7 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.waitForSelector('.yuva');
     dene('bilinmeyen ders açık bir iletiyle karşılanır', /Böyle bir ders yok/.test(await p.textContent('.yuva')));
     // ---- öteki taşınan alanlar: Tarih, Dil, Akademik ----
-    for (const alan of ['tarih', 'dil', 'akademik']) {
+    for (const alan of ['tarih', 'dil', 'muzik', 'okuma', 'beslenme', 'hareket', 'uyku', 'tahlil', 'akademik']) {
       const v = JSON.parse(fs.readFileSync(path.join(kok, 'alan', alan, 'asama-1.json'), 'utf8')), d1 = v.uniteler[0].dersler[0];
       await p.goto(T + '/kabuk/#/alan/' + alan);
       await p.waitForSelector('.unitekutu');
@@ -315,7 +315,7 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.waitForSelector('a.satir[href="#/alan/felsefe"]');
     dene('yol: Felsefe ilerlemesiyle listelenir', /3\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/felsefe"]')));
     await p.waitForFunction(() => /1\/368 ders okundu/.test((document.querySelector('a.satir[href="#/alan/akademik"]') || {}).textContent || '')).catch(() => {});
-    dene('yol: dört alan ilerlemesiyle listelenir', (await p.locator('[data-arac="yol"] a.satir').count()) === 4 && /1\/368 ders okundu/.test(await p.textContent('a.satir[href="#/alan/akademik"]')) && /1\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/tarih"]')));
+    dene('yol: on alan ilerlemesiyle listelenir', (await p.locator('[data-arac="yol"] a.satir').count()) === 10 && /1\/368 ders okundu/.test(await p.textContent('a.satir[href="#/alan/akademik"]')) && /1\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/tarih"]')));
     await p.keyboard.press('Control+k');
     await p.fill('#komut input', 'yeni not');
     await p.keyboard.press('Enter');

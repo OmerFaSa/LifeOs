@@ -218,4 +218,9 @@ Felsefe pilotunun yol haritası, ders ve kapı ekranları alan adından bağıms
 - **Bağlanmadı:** hafta planı (`Plan.haftaPlani`), şablon günler, sabit bloklar, kısmen yapılan süre girişi, günlük süre sınırı ayarı,
   hareket çarpanı (`Kayit.Kural.gununEmri`), eski AYS planlarının göçü.
 
+## On alanın onu da kabukta (2026-11-13)
+Müzik, Okuma ve yazı, Beslenme, Hareket, Uyku ve Tahlil'in ilk aşamaları yazıldı (hepsi taslak) ve haritada açıldı (`asama: 1`, `pilot`).
+Artık hiçbir alan sayfası eski modüle düşmüyor; her alanda «Eski … sayfası» bağlantısı duruyor. Kabuk birim testi 39/39,
+`tools/kabuk_gez.js` her alanda yol haritası, ilk ders, alıştırma ve «Okudum» adımını yürür.
+
 Atlananlar (ilk iskelette; ders, Not ve Tekrar ekranları ile sunucu denemesi yukarıdaki bölümlerde kapandı): eski kabuğa bağlantı.
