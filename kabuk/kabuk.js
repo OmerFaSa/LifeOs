@@ -57,7 +57,7 @@
       { tur: 'eylem', id: 'tema-acik', ad: 'Açık temaya geç', etiket: 'eylem', eylem: ['lifeos.tema.secim', 'light'], ek: 'tema aydınlık gündüz renk' },
       { tur: 'eylem', id: 'tema-sistem', ad: 'Tema cihaza uysun', etiket: 'eylem', eylem: ['lifeos.tema.secim', 'system'], ek: 'tema otomatik renk' },
       { tur: 'eylem', id: 'halka', ad: 'Yerler halkasını aç', etiket: 'eylem', eylem: 'halka', ek: 'gezinme menü git' },
-      { tur: 'eylem', id: 'yeni-not', ad: 'Yeni not', etiket: 'eylem', yol: '#/motor/not', ek: 'not yaz defter' }
+      { tur: 'eylem', id: 'yeni-not', ad: 'Yeni not', etiket: 'eylem', yol: '#/motor/not/yeni', ek: 'not yaz defter' }
     ];
     return yerler.concat(ayarlar, eylemler);
   }
@@ -110,7 +110,7 @@
   function tarih(t) { return GUN[t.getDay()] + ' · ' + t.getDate() + ' ' + AY[t.getMonth()]; }
   // ad Hesap oturumundan (hitap, yoksa görünen ad); Hesap yüklü değilse ya da oturum yoksa adsız selam
   function hesapAdi() {
-    try { var o = kok.LIFEOS.Hesap.durum().oturum; return o ? (o.hitap || o.gorunen_ad || '') : ''; } catch (e) { return ''; }
+    try { var o = kok.LIFEOS.HESAP.durum().oturum; return o ? (o.hitap || o.gorunen_ad || '') : ''; } catch (e) { return ''; }
   }
   var DURUM_AD = { eski: 'eski sayfada', pilot: 'taşınıyor', plan: 'hazırlanıyor', yeni: '' };
 
@@ -303,9 +303,12 @@
 
   var sayfaEl;
   function rota() {
-    var h = location.hash || '#/bugun', parca = h.split('?'), yer = H.YERLER.filter(function (y) { return y.yol === parca[0]; })[0] || H.bul('bugun');
-    var html, alt = /^#\/alan\/felsefe\/(ders|kapi)\/([\w.]+)$/.exec(parca[0]);
-    if (alt) { yer = H.bul('felsefe'); html = alt[1] === 'ders' ? sayfaDers(alt[2]) : sayfaKapi(alt[2]); }
+    // «#/alan/felsefe/ders/x», «#/motor/not/yeni»: ilk üç parça yerin yolu, kalanı o sayfanın alt yolu
+    var h = location.hash || '#/bugun', parca = h.split('?'), alt = /^(#\/(?:alan|motor)\/[a-z-]+)\/([\w./-]+)$/.exec(parca[0]), taban = alt ? alt[1] : parca[0];
+    var yer = H.YERLER.filter(function (y) { return y.yol === taban; })[0] || H.bul('bugun');
+    var html, fa = alt && yer.id === 'felsefe' && /^(ders|kapi)\/([\w.]+)$/.exec(alt[2]), ek = Kabuk.ek && Kabuk.ek[yer.id];
+    if (fa) html = fa[1] === 'ders' ? sayfaDers(fa[2]) : sayfaKapi(fa[2]);
+    else if (ek) html = ek(yer, alt ? alt[2] : '');
     else if (yer.id === 'bugun') html = sayfaBugun();
     else if (yer.id === 'harita') html = sayfaHarita(yer);
     else if (yer.id === 'ayarlar') html = sayfaAyarlar(yer, parca[1] && decodeURIComponent(parca[1]));
@@ -515,8 +518,14 @@
     $('input', komutEl).addEventListener('input', function (e) { komutCiz(e.target.value); });
     if (matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', uygula);
     rota();
+    if (location.protocol !== 'file:' && !kok.LIFEOS.HESAP) {
+      // hesap.js yazılarını parça kaydına yazar: önce /parca.js, sonra /hesap.js (giriş sayfasındaki sıra)
+      var betik = function (yol, sonra) { var b = d.createElement('script'); b.src = yol; b.onload = sonra; d.head.appendChild(b); };
+      betik('/parca.js', function () { betik('/hesap.js', function () { if (sayfaEl.getAttribute('data-yer') === 'bugun' && hesapAdi()) rota(); }); });
+    }
     felsefeYukle().then(function () { var y = sayfaEl.getAttribute('data-yer'); if (y === 'felsefe' || y === 'bugun') rota(); });
   }
+  Kabuk.ic = { kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, felsefe: function () { return felsefe; } };
   Kabuk.ac = { halka: halkaAcOdakli, komut: function () { komutAc(); }, git: function (y) { git(y); } };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', baslat); else baslat();
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -194,3 +194,21 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .soru__sonuc:empty{ display:none; } .soru__sonuc ul{ margin:6px 0; padding-left:18px; } .soru__sonuc p{ margin:6px 0 0; }
 .kapi{ display:flex; flex-direction:column; gap:12px; }
 .kapisonuc{ padding:14px; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); } .kapisonuc--gecti{ box-shadow:inset 0 0 0 3px var(--altin); }
+
+/* ---------------- araç ekranları: Not, Tekrar (kabuk/araclar.js) ---------------- */
+.giris{ font:inherit; color:var(--yazi); background:var(--yuzey); border:0; box-shadow:inset 0 0 0 2px var(--cizgi); padding:10px 12px; min-height:44px; width:100%; }
+.giris:focus-visible{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); } textarea.giris{ resize:vertical; line-height:var(--satir); }
+.aracust{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; } .aracust .giris{ flex:1; min-width:180px; }
+.liste{ display:flex; flex-direction:column; gap:6px; }
+.notform, .kartform{ display:flex; flex-direction:column; gap:12px; }
+.alanet{ display:flex; flex-direction:column; gap:4px; font-size:.85rem; color:var(--yazi-2); }
+.isaret{ display:inline-flex; align-items:center; gap:8px; min-height:44px; } .isaret input{ width:20px; height:20px; accent-color:var(--vurgu); }
+.notform__ileti:empty{ display:none; } .notform__ileti{ padding:10px 12px; box-shadow:inset 0 0 0 2px var(--cizgi-guclu); background:var(--yuzey); }
+.baglar{ margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px; }
+.kart{ display:flex; flex-direction:column; gap:14px; padding:20px; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.kart p{ margin:0; } .kart__on{ font-family:var(--piksel); font-size:1.15rem; } .kart__arka{ padding-top:14px; box-shadow:inset 0 2px 0 var(--cizgi); white-space:pre-wrap; }
+.notlar{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; } .notlar .dugme{ flex-direction:column; gap:0; padding:6px 4px; min-height:52px; } .notlar small{ color:var(--soluk); font-size:.72rem; }
+.kartliste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.kartliste li{ display:grid; grid-template-columns:1fr auto; align-items:center; column-gap:10px; padding:8px 0; box-shadow:inset 0 -2px 0 var(--cizgi); }
+.kartliste li .soluk{ grid-column:1; font-size:.8rem; } .kartliste li .dugme{ grid-column:2; grid-row:1 / span 2; }
+@media (max-width:480px){ .notlar{ grid-template-columns:repeat(2,1fr); } }

@@ -115,7 +115,7 @@ Aynı koşuda işlev denetimi (sonuçlar):
 - Dört boyut/tema birleşiminde yatay taşma yok; konsolda hata yok.
 
 ## Testler
-`node kabuk/kabuk.test.js` → **28 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
+`node kabuk/kabuk.test.js` → **32 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
 eski bağlantılar, Felsefe pilot, halkadan ≤ 2 adım, komut çubuğundan 1 adım, bozuk kaydı yakalama), şema türetmeleri (zorunlu alanlar,
 varsayılan geçerli, doğrulama, bozuk değerde varsayılan, sıfırlama, eşitleme süzgeci, kök nitelikleri, çizimde kaçış ve radyo
 sayısı), sıralama (ç ğ ı İ ö ş ü katlama, aksansız arama, ad başı › kelime başı › açıklama, eşitlikte tür ve kısa ad, çok kelime).
@@ -136,7 +136,7 @@ Dokuz açık sorunun hepsi cevaplandı. Yedisi iskeletteki hâli onayladı, ikis
 | 9 | «Hepsini varsayılana döndür» | Ödeme kilidi dahil hepsini sıfırlar; «s» bayrağı alınmaz | değişmedi |
 
 - Karar 3'ün sınırı: kabuk henüz `brand/ortak/hesap.js`'i yüklemiyor (hiçbir yerden sunulmuyor), bu yüzden ad ekranda
-  **henüz görünmez**; kabuk tek sunucuya bağlanıp Hesap yüklendiğinde kendiliğinden gelir. Okunan yer `LIFEOS.Hesap.durum().oturum`.
+  **henüz görünmez**; kabuk tek sunucuya bağlanıp Hesap yüklendiğinde kendiliğinden gelir. Okunan yer `LIFEOS.HESAP.durum().oturum`.
 - Karar 4: eski kullanıcıda kayıtlı değer varsa o geçerlidir; yalnız hiç seçmemiş olanlar «Cihaza uy» ile başlar.
 - İki karar testte (`karar: …`); ayarlar ekranının dört görüntüsü yeni varsayılanla yeniden çekildi.
 
@@ -158,7 +158,26 @@ Kabuk artık tek kapıdan sunuluyor ve Felsefe'nin birinci aşaması baştan son
 - **Ölçüldü:** `node kabuk/kabuk.test.js` 28/28; `python tools/tekkapi_test.py` (kabuk yolları dahil); `node tools/kabuk_gez.js` 23/23
   (gerçek Chromium, yalıtılmış veri: yanlış ve doğru cevap, üç ders, boş kapı denemesi kalır, dört doğruyla geçilir, yenilemeden sonra kayıt durur,
   ikinci ünite açılır, telefonda yatay taşma yok, konsolda hata yok). Görüntüler: `felsefe-`, `ders-`, `kapi-masaustu-koyu.png`, `ders-telefon-acik.png`.
-- **Bağlanmadı:** geçilen içeriğin Tekrar motoruna aktarımı (içerik taslak olduğu için zaten aday çıkmaz), Not motoru ekranı, selamdaki ad
-  (kabuk `hesap.js`'i yüklemiyor), kaydın tek depoya yazılması.
+- **Bağlanmadı:** kaydın tek depoya yazılması (Tekrar aktarımı, Not ekranı ve selamdaki ad sonraki bölümde bağlandı).
 
-Atlananlar (ilk iskelette; ders ekranı ve sunucu denemesi yukarıdaki bölümde kapandı): Not / Tekrar motorlarının ekranları, eski kabuğa bağlantı.
+## Not ve Tekrar ekranları, selamda ad (2026-11-13)
+`kabuk/araclar.js` (kabuk.js'ten önce yüklenir; sayfalar `Kabuk.ek[yerId]` ile kaydolur, `rota()` alt yolu verir).
+
+- **Not** (`#/motor/not`): liste (üstte tutulan önce, sonra son değişen), arama (`Not.ara`; `#etiket` süzer), «Yeni not».
+  Düzenleme (`#/motor/not/<kimlik>`): başlık, gövde, «Özel (King görmez)», «Üstte tut», «Başka bir nota bağ ekle» (gövdeye kimlikli
+  bağ yazar), «Bu nottaki bağlar» ve «Bu nota bağlananlar». Başlık değişince öbür notlardaki görünen ad tazelenir, takma ad kalır
+  (`Not.yenidenAdlandir`). Geçersiz not motorun Türkçe cümlesiyle reddedilir, yazılan kaybolmaz. Silme onay ister.
+- **Tekrar** (`#/motor/tekrar`): bugünün kuyruğu motorun planından (önce vadesi gelenler, sonra yeni kartlar; günlük tavanlar).
+  Kartın önü, «Cevabı göster», dört not (Yine / Zor / İyi / Kolay) ve her birinin FSRS aralığı. «Yine» aynı gün yeniden sorar.
+  Kart ekleme formu; kart listesinde vade ve hatırlama olasılığı «tahmin» etiketiyle. Onaylı ders alıştırmaları cevaplandıkça
+  kendiliğinden kart olur (`kartlariEsitle`); içerik taslak olduğu sürece hiçbiri gelmez.
+- **Yol haritası** (`#/motor/yol`): taşınan alanların listesi (şimdilik Felsefe, ilerlemesiyle).
+- **Selamda ad (karar 3):** kabuk sunucudan açılınca `/parca.js` ve `/hesap.js` yüklenir; ad `LIFEOS.HESAP.durum().oturum`'dan
+  (hitap, yoksa görünen ad). Oturum yokken selam adsız. Oturum açıkken adın göründüğü gerçek tarayıcıda denenmedi (yalıtılmış ortamda hesap yok).
+- **Kayıt:** `lifeos.not.kayit`, `lifeos.tekrar.kartlar`, `lifeos.tekrar.bugun`; yalnız bu tarayıcıda, eşitlenmez (P6 sonrası tek depo).
+- **Ölçüldü:** `node kabuk/kabuk.test.js` 32/32 (not kaydı ve yeniden adlandırma, kuyruk ve cevap, taslak / onaylı kart);
+  `node tools/kabuk_gez.js` 44/44. Görüntüler: `not-masaustu-koyu.png`, `tekrar-masaustu-koyu.png`.
+- **Bağlanmadı:** nota King önerisi, not ağı çizimi, eski yapılardan not ve tekrar göçü (`Not.goc`, `Tekrar.GOC`; P6 ile),
+  Soru / Kayıt / Plan / Arama araçları (motorları yazılmadı).
+
+Atlananlar (ilk iskelette; ders, Not ve Tekrar ekranları ile sunucu denemesi yukarıdaki bölümlerde kapandı): eski kabuğa bağlantı.

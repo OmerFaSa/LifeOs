@@ -43,6 +43,51 @@ t('yol: sıradaki adım ders → kapı → sonraki ünite → aşama kapısı �
   esit(adim(), null);
 });
 
+// ---- araç ekranları (kabuk/araclar.js): Not ve Tekrar, gerçek motorlarla ----
+const R = require('./araclar.js'), Not = require('../motor/not.js'), Tekrar = require('../motor/tekrar.js');
+t('not: yeni not kaydolur; boş not motorun cümlesiyle reddedilir ve liste değişmez', () => {
+  const r = R.notKaydet(Not, [], 'yeni', { baslik: ' Erdem ', govde: 'Bilgi mi?', ozel: true }, 1000, 'n1');
+  esit(r.id, 'n1'); esit(r.notlar.length, 1); esit(r.notlar[0].baslik, 'Erdem'); esit(r.notlar[0].ozel, true); esit(r.notlar[0].olusturma, 1000);
+  let h = ''; try { R.notKaydet(Not, r.notlar, 'yeni', { baslik: '  ', govde: '' }, 2000, 'n2'); } catch (e) { h = e.message; }
+  dogru(/boş not kaydedilmez/.test(h), h);
+});
+t('not: başlık değişince öbür nottaki bağın görünen adı tazelenir, takma ad kalır; gövde ve işaretler güncellenir', () => {
+  let l = R.notKaydet(Not, [], 'yeni', { baslik: 'Erdem', govde: 'a' }, 1000, 'n1').notlar;
+  l = R.notKaydet(Not, l, 'yeni', { baslik: 'Sokrates', govde: 'Bkz. ' + Not.bagYaz('n1', 'Erdem') + ' ve ' + Not.bagYaz('n1', 'şu fikir') }, 1100, 'n2').notlar;
+  const r = R.notKaydet(Not, l, 'n1', { baslik: 'Erdem nedir', govde: 'b', sabit: true }, 2000, 'x');
+  const n1 = r.notlar.find(n => n.id === 'n1'), n2 = r.notlar.find(n => n.id === 'n2');
+  esit([n1.baslik, n1.govde, n1.sabit, n1.guncelleme], ['Erdem nedir', 'b', true, 2000]);
+  esit(Not.baglar(n2.govde).map(b => b.ad), ['Erdem nedir', 'şu fikir']);
+  esit(Not.geriBaglar(r.notlar, 'n1').map(b => b.id), ['n2']);
+  esit(r.notlar.slice().sort(R.notSira)[0].id, 'n1', 'sabit not üstte');
+});
+t('tekrar: yeni kart bugünün kuyruğunda; «Yine» kuyrukta tutar, «İyi» yarına atar; sayaç günlüktür', () => {
+  const simdi = new Date(2026, 10, 13, 10).getTime();
+  let l = [Tekrar.yeniKart('k1', { on: 'S', arka: 'C' })], s = null;
+  esit(R.kuyruk(Tekrar, l, simdi, s).sira.map(k => k.id), ['k1']);
+  let r = R.kartCevapla(Tekrar, l, 'k1', 1, simdi, s);
+  esit([r.ok, r.gun, r.sayac], [true, 0, { gun: '2026-11-13', yeni: 1, tekrar: 0 }]);
+  esit(R.kuyruk(Tekrar, r.kartlar, simdi + 60000, r.sayac).sira.map(k => k.id), ['k1'], '«Yine» aynı gün yeniden sorulur');
+  r = R.kartCevapla(Tekrar, r.kartlar, 'k1', 3, simdi + 60000, r.sayac);
+  esit(r.sayac, { gun: '2026-11-13', yeni: 1, tekrar: 1 });
+  esit(R.kuyruk(Tekrar, r.kartlar, simdi + 120000, r.sayac).sira, []);
+  esit(R.kuyruk(Tekrar, r.kartlar, simdi + r.gun * 864e5, null).sira.map(k => k.id), ['k1'], 'vadesi gelince döner');
+  esit(R.kartCevapla(Tekrar, r.kartlar, 'yok', 3, simdi, null).ok, false);
+  esit([R.aralikAdi(0), R.aralikAdi(3), R.aralikAdi(60), R.aralikAdi(730)], ['şimdi', '3 gün', '2 ay', '2 yıl']);
+});
+t('tekrar: taslak ders alıştırması kart olmaz; onaylanınca cevaplanan alıştırma bir kez kart olur', () => {
+  const Yol = require('../motor/yol.js'), veri = JSON.parse(JSON.stringify(require('../alan/felsefe/asama-1.json')));
+  const d1 = veri.uniteler[0].dersler[0], a1 = d1.alistirmalar[0];
+  let y = Yol.yukle(veri), k = Yol.cevapla(y, Yol.bosKayit(), a1.id, a1.dogru, 1).kayit;
+  esit(R.kartlariEsitle(Tekrar, [], Yol.tekrarAdaylari(y, k), y), [], 'taslak');
+  d1.durum = 'onayli'; d1.onaylayan = 'sahip'; d1.onayTarihi = '2026-11-13'; a1.durum = 'onayli';
+  y = Yol.yukle(veri);
+  const l = R.kartlariEsitle(Tekrar, [], Yol.tekrarAdaylari(y, k), y);
+  esit(l.map(x => [x.id, x.icerik, x.on, x.arka, x.durum]), [[a1.id, 'onayli', a1.soru, a1.sec['ABCD'.indexOf(a1.dogru)], 'yeni']]);
+  dogru(R.kartlariEsitle(Tekrar, l, Yol.tekrarAdaylari(y, k), y) === l, 'ikinci kez eklenmez');
+  esit(Tekrar.cevapla(l[0], 3, 1000).ok, true);
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {
