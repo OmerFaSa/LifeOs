@@ -82,128 +82,298 @@
   },
   "egri_anlama": {
    "ad": "Anlama",
-   "ayrinti": {},
+   "ayrinti": {
+    "etiketli": 0,
+    "gecersiz_satir": 0,
+    "gereken": "sahibinin etiketlediği gerçek mesajlar; her satırda King'in o an seçtiği niyet (king). «Yanlış anladın» işareti (plan: gerçek kullanımdan ölçüm seti) yazılınca set dolar; yalnız işaretlenen mesaj girerse isabet hep 0 çıkar, işaretlenmeyenlerden de örneklem gerekir",
+    "king_kararli": 0,
+    "set": "kalite/veri/anlama.jsonl",
+    "vekil": {
+     "ad": "vekil: sınav cümleleri",
+     "birim": "oran",
+     "cumle": 350,
+     "deger": 0.989,
+     "disarida": 8,
+     "etiket": "tahmin",
+     "isabet": 346,
+     "kod": "00788b3a",
+     "komut": "python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
+     "neden_tahmin": "cümleler sahibinin gerçek mesajı değil, bugünkü King'e göre yazılmış hazır cümleler; karar→niyet eşlemesi kalite/egri/_sinav.py ESLEME (sahibinin etiketi değil); «arastir» niyetli cümle yok; model çağrılmaz, Merkez'e giden cümle «sohbet» sayılır",
+     "niyet_basina": {
+      "kayit": "82/82",
+      "ogren": "3/3",
+      "sohbet": "40/41",
+      "yonet": "221/224"
+     },
+     "olculdu": "2026-11-13",
+     "sinav_tam_karar": "353/358"
+    }
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_anlama",
    "katman": "egri",
-   "komut": "node tools/king_sinav.js (Playwright + çalışan sunucu); yapılacak: «yanlış anladın» etiketli set",
+   "komut": "kalite/veri/anlama.jsonl doldurulunca python kalite/olcum.py; vekil: python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
    "yol": "etiketli gerçek mesajlarda niyet isabeti"
   },
   "egri_anlasilabilirlik": {
    "ad": "Sistem · Anlaşılabilirlik",
-   "ayrinti": {},
-   "deger": null,
-   "durum": "ölçülmedi",
-   "etiket": "veri yok",
+   "ayrinti": {
+    "en_cok": 6,
+    "eski_modul_kat": {
+     "AYS": 2,
+     "ESP": 4,
+     "SPI": 3
+    },
+    "eski_yer": 9,
+    "kabuk_en_cok": 2,
+    "kabuk_ortalama": 1.75,
+    "komut_cubugu": "her yer 1 adım (kural; kabuk/kabuk.test.js sınar, bu araç saymaz)",
+    "sinir": "kabuk adımı kuraldan hesaplanır, tarayıcıda tıklanmaz; eski modül katı en derin yolun üst sınırıdır",
+    "ulasilmayan": [],
+    "yer": 24,
+    "yer_adimi": {
+     "akademik": 4,
+     "arama": 2,
+     "ayarlar": 2,
+     "beslenme": 5,
+     "bugun": 1,
+     "dil": 6,
+     "felsefe": 2,
+     "hareket": 5,
+     "harita": 1,
+     "kayit": 2,
+     "king": 1,
+     "motorlar": 2,
+     "muzik": 6,
+     "not": 1,
+     "ogren": 1,
+     "okuma": 6,
+     "plan": 2,
+     "saglik": 1,
+     "soru": 2,
+     "tahlil": 5,
+     "tarih": 6,
+     "tekrar": 2,
+     "uyku": 5,
+     "yol": 2
+    }
+   },
+   "birim": "adım (yer başına ortalama)",
+   "deger": 3.0,
+   "durum": "ölçüldü",
+   "etiket": "hesaplandı",
    "id": "egri_anlasilabilirlik",
    "katman": "egri",
-   "komut": "yapılacak: tarayıcıda adım sayımı; iç içelik statik: ic_icelik",
+   "komut": "python kalite/olcum.py (node ile kabuk/harita.js okunur)",
    "yol": "bir işe kaç adımda varılıyor, iç içelik"
   },
   "egri_arama": {
    "ad": "Arama",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "gerçek sorgu seti, her sorgu için doğru cevap ve kaynak etiketi; tek Arama motoru (A7: bam.py ve arastir.py birleşince)"
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_arama",
    "katman": "egri",
-   "komut": "yapılacak: gerçek sorgu seti (A7 Arama motoru)",
+   "komut": "yapılacak: gerçek sorgu seti + A7 Arama motoru",
    "yol": "kaynaklı cevabın doğruluğu, hafızaya eklenenin isabeti"
   },
   "egri_hafiza": {
    "ad": "Hafıza",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "HKM hafızası ve gömme modeli (Ollama) çalışırken arama doğruluğu; bağlam boyutu ekseni (jeton bütçeli bağlam derleyici, A7) yok"
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_hafiza",
    "katman": "egri",
-   "komut": "python tools/hafiza_olcum.py (arama doğruluğu p1/p3); yapılacak: bağlam bütçesi ekseni",
+   "komut": "python tools/hafiza_olcum.py (p1/p3; HKM + Ollama); yapılacak: bağlam bütçesi ekseni",
    "yol": "eski bilgiyi doğru hatırlama, bağlam boyutu"
   },
   "egri_hayata_etki": {
    "ad": "Sistem · Hayata etki",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "göç sonrası tek veride sahibinin gerçek kullanımı (Yol motorunda tamamlanan adımlar ve günler); bu araç sahibinin verisini okumaz"
+   },
+   "birim": "adım/hafta",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_hayata_etki",
    "katman": "egri",
-   "komut": "yapılacak: sahibinin canlı verisi gerekir (bu araç okumaz)",
+   "komut": "yapılacak: göç sonrası tek depodan haftalık özet (Yol motoru kaydı)",
    "yol": "haftada tamamlanan öğrenme adımı, süreklilik"
   },
   "egri_kendini_egitme": {
    "ad": "Kendini eğitme",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "hata kaydı ve ders defteri (hata → kural cümlesi → sahibinin onayı → ortak havuz); ikisi de bugün yok"
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_kendini_egitme",
    "katman": "egri",
-   "komut": "yapılacak: ders defteri (düzenek yok)",
+   "komut": "yapılacak: A7 ders defteri; oran = derse dönen hata / kaydedilen hata",
    "yol": "hatanın derse dönüşme ve havuza girme oranı"
   },
   "egri_kontrol": {
    "ad": "Kontrol",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "çalışan King (tarayıcı + HKM + model) ve görevin sonunda verinin doğru yazıldığının denetimi; King-Bench'in donmuş klon verisiyle koşar",
+    "vekil": {
+     "ad": "vekil: sınav, araç seçimi",
+     "birim": "oran",
+     "deger": 0.987,
+     "dogru": 305,
+     "etiket": "tahmin",
+     "gorev_cumlesi": 309,
+     "kod": "00788b3a",
+     "komut": "python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
+     "neden_tahmin": "araç seçilir, çalıştırılmaz (görevin bittiği denetlenmez); cümleler bugünkü King'e göre yazılmış; argüman yalnız 'a' alanı olan 9 cümlede denetlenir",
+     "olculdu": "2026-11-13"
+    }
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_kontrol",
    "katman": "egri",
-   "komut": "python tools/king_bench/bench.py (gerçek tarayıcı + HKM + model) --paket kayit,plan,gun",
+   "komut": "python tools/king_bench/bench.py --paket kayit,plan,gun (gerçek tarayıcı + HKM + model); vekil: python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
    "yol": "sistem görevini araçlarla tamamlama oranı"
   },
   "egri_ogretme": {
    "ad": "Öğretme",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "ön test → King'in dersi → son test düzeneği (yok) ve dersi anlatan çalışan model; gerçek ölçüm için sahibinin ön ve son test cevapları"
+   },
+   "birim": "puan farkı",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_ogretme",
    "katman": "egri",
-   "komut": "python tools/king_bench/bench.py (gerçek tarayıcı + HKM + model) --paket ogretmen,ogrenme",
+   "komut": "python tools/king_bench/bench.py --paket ogretmen,ogrenme (gerçek tarayıcı + HKM + model); yapılacak: ön/son test düzeneği",
    "yol": "dersten önce/sonra mini sınav farkı"
   },
   "egri_optimizasyon": {
    "ad": "Sistem · Optimizasyon",
-   "ayrinti": {},
-   "deger": null,
-   "durum": "ölçülmedi",
-   "etiket": "veri yok",
+   "ayrinti": {
+    "acilis": {
+     "etiket": "ölçüldü",
+     "kabuk": "veri yok: olcum_modul.js yalnız AYS/SPI/ESP ölçer",
+     "kod": "00788b3a",
+     "moduller": {
+      "AYS": {
+       "betikMs": 310.9,
+       "cizimMs": 1151.7,
+       "stilMs": 130.2,
+       "tekrar": 3,
+       "yerlesimMs": 61.3
+      },
+      "ESP": {
+       "betikMs": 284.6,
+       "cizimMs": 957.8,
+       "stilMs": 109.4,
+       "tekrar": 3,
+       "yerlesimMs": 45.6
+      },
+      "SPI": {
+       "betikMs": 242.1,
+       "cizimMs": 799.5,
+       "stilMs": 88.8,
+       "tekrar": 3,
+       "yerlesimMs": 38.7
+      }
+     },
+     "tarih": "2026-11-13",
+     "yontem": "tools/olcum_modul.js: <modül>/src http.server ile, başsız Chromium, her tekrar yeni bağlam (boş tarayıcı verisi); cizimMs = sayfaya gitmeden .site görünene kadar; 3 tekrarın ortancası"
+    },
+    "kare_suresi": {
+     "etiket": "veri yok",
+     "gereken": "kaydırma/geçiş sırasında kare süresi izi (CDP); tools/akicilik.js süre değil stil hesabı sayar"
+    },
+    "motor_kabukta": {
+     "bayt": 65698,
+     "dosya": 3,
+     "satir": 1009
+    },
+    "uygulama": {
+     "AYS": {
+      "bayt": 9700284,
+      "dosya": 2,
+      "satir": 153185
+     },
+     "ESP": {
+      "bayt": 8155639,
+      "dosya": 2,
+      "satir": 128054
+     },
+     "SPI": {
+      "bayt": 7734671,
+      "dosya": 2,
+      "satir": 128306
+     },
+     "kabuk": {
+      "bayt": 194947,
+      "dosya": 10,
+      "satir": 2283
+     }
+    }
+   },
+   "birim": "bayt (dağıtılan kod)",
+   "deger": 25785541,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
    "id": "egri_optimizasyon",
    "katman": "egri",
-   "komut": "node tools/akicilik.js (tarayıcıda stil hesabı sayısı); yapılacak: açılış/kare süresi CDP izi; kod hacmi statik: kod_hacmi",
+   "komut": "python kalite/olcum.py (kod hacmi); açılış: python kalite/egri/optimizasyon.py --acilis (node tools/olcum_modul.js <modül> --port 4571.. --tekrar 3)",
    "yol": "açılış süresi, kare süresi, kod hacmi"
   },
   "egri_saglayici": {
    "ad": "Sağlayıcı kalitesi",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "gerçek sağlayıcıya (Claude ya da yerel model) giden istekler ve boşa çağrı sayacı (yok); king_olcum.py --kuru sahte taşıyıcıyla koşar, gerçek jeton vermez"
+   },
+   "birim": "jeton/istek",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_saglayici",
    "katman": "egri",
-   "komut": "python tools/king_olcum.py (model çağırır: süre, jeton); yapılacak: boşa çağrı sayısı",
+   "komut": "python tools/king_olcum.py sohbet --config <ayar> (model çağırır: süre, jeton); yapılacak: boşa çağrı sayacı",
    "yol": "istek başına jeton, gereksiz çağrı"
   },
   "egri_tanima": {
    "ad": "Tanıma",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "sahibinin doğruladığı kişi bilgisi yoklama seti ve çalışan King (tarayıcı + HKM + model); King-Bench hafiza paketi 233 günlük klonla koşar, sahibinin kendisiyle değil"
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_tanima",
    "katman": "egri",
-   "komut": "python tools/king_bench/bench.py (gerçek tarayıcı + HKM + model) --paket hafiza; python tools/king_bench/bilinc_bench.py",
+   "komut": "python tools/king_bench/bench.py --paket hafiza; python tools/king_bench/bilinc_bench.py (gerçek tarayıcı + HKM + model)",
    "yol": "doğru ve yerinde kullanılan kişi bilgisi oranı"
   },
   "egri_tekrar": {
    "ad": "Tekrar",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "aynı hatayı tanıyan hata kimliği ve sayacı (yok), ders defteri ve ardışık iki King-Bench sonucu (çalışan King)"
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
@@ -214,13 +384,16 @@
   },
   "egri_uretim": {
    "ad": "Üretim",
-   "ayrinti": {},
+   "ayrinti": {
+    "gereken": "King'in ürettiği soru ve kartlardan örneklem, cevap anahtarı ve sahibinin (insan hakem) puanı; üretim için çalışan model"
+   },
+   "birim": "oran",
    "deger": null,
    "durum": "ölçülmedi",
    "etiket": "veri yok",
    "id": "egri_uretim",
    "katman": "egri",
-   "komut": "yapılacak: örneklem + cevap anahtarı + insan puanı seti",
+   "komut": "yapılacak: örneklem + cevap anahtarı + hakem puanı seti (kalite/veri/uretim.jsonl) ve puanlayan dosya",
    "yol": "üretilen soru/kartın hakem puanı, hata oranı"
   },
   "ekran_dosyasi": {
@@ -438,10 +611,10 @@
   "kod_hacmi": {
    "ad": "Kod hacmi (satır)",
    "ayrinti": {
-    "bayt": 33851041,
-    "dosya": 1142
+    "bayt": 33931943,
+    "dosya": 1145
    },
-   "deger": 553521,
+   "deger": 554786,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kod_hacmi",

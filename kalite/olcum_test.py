@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -97,6 +98,99 @@ with tempfile.TemporaryDirectory() as d:
     kontrol("iki koşu bayt bayt aynı kayıt metni", m1 == m2)
     mutlak = [s for s in (str(kok), str(kok).replace("\\", "/"), str(kok).replace("\\", "\\\\")) if s in m1]
     kontrol("kayıtta mutlak yol yok", not mutlak and not re.search(r'"[A-Za-z]:[\\/]', m1), mutlak)
+
+# --- eğri dosyaları: keşif, sözleşme, vekil ---
+ESKI_KIMLIK = {"egri_" + a for a in ("tanima", "ogretme", "anlama", "uretim", "arama", "kontrol", "kendini_egitme",
+                                     "tekrar", "saglayici", "hafiza", "optimizasyon", "anlasilabilirlik", "hayata_etki")}
+kontrol("keşif: kalite/egri/ on üç dosya, kimlikler eski kayıtla aynı", set(x["id"] for x in egri) == ESKI_KIMLIK,
+        sorted(x["id"] for x in egri))
+
+EGRI_ORNEK = {
+    "deneme.py": 'AD = "Deneme"\nTANIM = "t"\ndef olc(kok):\n    return {"deger": 7, "birim": "adet", "etiket": "ölçüldü", '
+                 '"durum": "ölçüldü", "ayrinti": {}, "komut": "k"}\n',
+    "_yardimci.py": "X = 1\n",  # alt çizgili: eğri değil
+    "bozuk.py": 'AD = "Bozuk"\nTANIM = "t"\ndef olc(kok):\n    raise RuntimeError("kırık")\n',
+    "yalanci_bos.py": 'AD = "Y"\nTANIM = "t"\ndef olc(kok):\n    return {"deger": None, "etiket": "ölçüldü", "durum": "ölçüldü", '
+                      '"ayrinti": {}, "komut": "k"}\n',
+    "yalanci_sayi.py": 'AD = "Y"\nTANIM = "t"\ndef olc(kok):\n    return {"deger": 5, "etiket": "veri yok", "durum": "ölçüldü", '
+                       '"ayrinti": {}, "komut": "k"}\n',
+}
+with tempfile.TemporaryDirectory() as d:
+    for ad, metin in EGRI_ORNEK.items():
+        (Path(d) / ad).write_text(metin, encoding="utf-8")
+    asil, olcum.EGRI_DIZIN = olcum.EGRI_DIZIN, Path(d)
+    try:
+        e = {x["id"]: x for x in olcum.egriler(Path(d))}
+    finally:
+        olcum.EGRI_DIZIN = asil
+    kontrol("keşif: yeni dosya eğri olur, alt çizgili dosya olmaz",
+            set(e) == {"egri_deneme", "egri_bozuk", "egri_yalanci_bos", "egri_yalanci_sayi"}, sorted(e))
+    kontrol("keşif: eğrinin değeri, birimi ve etiketi kayda geçer", e["egri_deneme"]["deger"] == 7
+            and e["egri_deneme"]["birim"] == "adet" and e["egri_deneme"]["durum"] == "ölçüldü", e["egri_deneme"])
+    kontrol("bozuk ya da sözleşmeyi bozan eğri sayı almaz: değersiz, ölçülmedi, hatası yazılı",
+            all(e[k]["deger"] is None and e[k]["durum"] == "ölçülmedi" and e[k]["etiket"] == "veri yok"
+                and "hata" in e[k]["ayrinti"] for k in ("egri_bozuk", "egri_yalanci_bos", "egri_yalanci_sayi")),
+            {k: (e[k]["deger"], e[k]["ayrinti"]) for k in e})
+
+SINAV_EK = {
+    "tools/king_sinav.json": json.dumps({"cumleler": [
+        {"m": "ays", "c": "40 soru çözdüm", "b": ["veri"]},
+        {"m": "ays", "c": "deneme sayfasını aç", "b": ["git:ays:exams"]},
+        {"m": "spi", "c": "stoacılık nedir", "b": ["merkez"]},
+        {"m": "esp", "c": "iki niyetli", "b": ["merkez", "veri"]}]}, ensure_ascii=False),
+    "kalite/veri/sinav-sonuc.json": json.dumps({"tarih": "2026-01-01", "kod": "abc", "satirlar": [
+        {"m": "ays", "c": "40 soru çözdüm", "karar": "veri", "ok": True},
+        {"m": "ays", "c": "deneme sayfasını aç", "karar": "arac:ays_denemeler", "ok": False},  # niyet doğru, araç yanlış
+        {"m": "spi", "c": "stoacılık nedir", "karar": "tur:yok", "ok": False},
+        {"m": "esp", "c": "iki niyetli", "karar": "veri", "ok": True}]}, ensure_ascii=False),
+    "kalite/veri/anlama.jsonl": '{"metin": "yürüdüm", "niyet": "kayit", "kaynak": "ornek"}\n{"metin": "", "niyet": "uydurma"}\n',
+    "AYS/dist/rota.html": "a\nb\n",
+    "AYS/dist/fonts/f.woff2": "xxxxxxxx",
+    "kabuk/index.html": '<link href="kabuk.css"><script src="../motor/m.js"></script>\n',
+    "kabuk/kabuk.css": "c\n",
+    "motor/m.js": "m\n",
+}
+with tempfile.TemporaryDirectory() as d:
+    kok = sahte_depo(d, SINAV_EK)
+    o = olcum.olc(kok)
+    an, ko = o["egri_anlama"], o["egri_kontrol"]
+    va, vk = an["ayrinti"].get("vekil", {}), ko["ayrinti"].get("vekil", {})
+    kontrol("vekil eğrinin değeri olmaz: Anlama ve Kontrol değersiz, ölçülmedi",
+            an["deger"] is None and ko["deger"] is None and an["durum"] == ko["durum"] == "ölçülmedi", (an, ko))
+    kontrol("vekil etiketli: «tahmin», adı «vekil: …», ölçüm günü ve kodu yazılı",
+            all(v.get("etiket") == "tahmin" and v.get("ad", "").startswith("vekil:") and v.get("olculdu") == "2026-01-01"
+                and v.get("kod") == "abc" for v in (va, vk)), (va, vk))
+    kontrol("Anlama vekili niyet düzeyinde sayar: 3 cümlenin 2'si, iki niyetli cümle dışarıda",
+            va.get("deger") == 0.667 and va.get("cumle") == 3 and va.get("disarida") == 1, va)
+    kontrol("Kontrol vekili yalnız görev cümlelerinde tam kararı sayar: 2'de 1", vk.get("deger") == 0.5
+            and vk.get("gorev_cumlesi") == 2, vk)
+    kontrol("etiketli set: geçerli satır sayılır, bozuk satır ayrılır, King kararı yoksa değer yok",
+            an["ayrinti"]["etiketli"] == 1 and an["ayrinti"]["gecersiz_satir"] == 1, an["ayrinti"])
+    kontrol("--md vekili «eğri değil» diye yazar, tabloya koymaz",
+            "(tahmin, eğri değil)" in olcum.md(o, {}) and "| Anlama |" not in olcum.md(o, {}))
+    op = o["egri_optimizasyon"]
+    kontrol("Optimizasyon: dist kodu + kabuk index.html'in bağladıkları (motor dahil); yazı tipi sayılmaz",
+            op["deger"] == sum((kok / p).stat().st_size for p in ("AYS/dist/rota.html", "kabuk/index.html",
+                                                                   "kabuk/kabuk.css", "motor/m.js"))
+            and op["ayrinti"]["motor_kabukta"]["bayt"] == (kok / "motor/m.js").stat().st_size
+            and op["ayrinti"]["acilis"]["etiket"] == "veri yok", op)
+    (kok / "kalite/veri/anlama.jsonl").write_text(
+        '{"metin": "a", "niyet": "kayit", "kaynak": "ornek", "king": "kayit"}\n'
+        '{"metin": "b", "niyet": "sohbet", "kaynak": "ornek", "king": "yonet"}\n', encoding="utf-8")
+    an = olcum.olc(kok)["egri_anlama"]
+    kontrol("etiketli sette King kararı varsa gerçek eğri ölçülür, vekil yine ayrıdır",
+            an["deger"] == 0.5 and an["etiket"] == "ölçüldü" and an["ayrinti"]["vekil"]["deger"] == 0.667, an)
+
+if shutil.which("node"):
+    with tempfile.TemporaryDirectory() as d:
+        kok = sahte_depo(d, {"kabuk/harita.js": "module.exports={YERLER:[{id:'a',durum:'yeni'},{id:'b',durum:'eski',"
+                                                "eski:'../AYS/dist/rota.html'},{id:'c',durum:'plan'}],"
+                                                "halkaAdimi:i=>({a:1,b:2,c:Infinity})[i]};\n"})
+        an = olcum.olc(kok)["egri_anlasilabilirlik"]
+        # sahte AYS'de iç içe kat: TABS ve SayfaBolumleri → 1
+        kontrol("Anlaşılabilirlik: kabuk adımı + eski modülün katı; halkadan ulaşılmayan ayrı",
+                an["ayrinti"].get("yer_adimi") == {"a": 1, "b": 3} and an["deger"] == 2.0
+                and an["ayrinti"]["ulasilmayan"] == ["c"] and an["etiket"] == "hesaplandı", an)
 
 # --- bütçe denetimi (bellekte) ---
 B = {"a": {"taban": 5, "yon": "azalmali", "grup": "g"}, "b": {"taban": 5, "yon": "azalmali", "grup": "g"},

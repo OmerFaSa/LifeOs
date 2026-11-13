@@ -3,8 +3,10 @@
 
 Depoyu yalnız OKUR; sunucu, tarayıcı, derleme yok. Her sayı bir kesinlik
 etiketi taşır (AGENTS §1.2: ölçüldü / tahmin / hesaplandı / veri yok).
-Çalışan King ya da tarayıcı isteyen eğriler `ölçülmedi` durumunda, değersiz
-ve onları ölçecek komutla listelenir; uydurma sayı yok.
+On üç eğri kalite/egri/*.py'dedir (bir dosya bir eğri). Tarayıcı isteyen
+ölçüm kendi komutuyla kalite/veri/'ye yazar, eğri oradan okur. Çalışan King
+isteyen eğriler `ölçülmedi`, değersiz ve ölçecek komutla listelenir; vekil
+ölçüm `tahmin` etiketiyle ayrıntıda durur, eğrinin değeri olmaz.
 
   python kalite/olcum.py            ölçer, JSON basar
   python kalite/olcum.py --md       kısa Türkçe tablo
@@ -17,6 +19,7 @@ yöntemlerin aynısıdır; farklar belgeler/ekip/sadelesme/faz4-olcum.md'de.
 import argparse
 import ast
 import datetime
+import importlib.util
 import json
 import os
 import re
@@ -457,28 +460,32 @@ def king(kok):
 
 
 # ---------- Eğriler (plan §6: 10 King + 3 Sistem) ----------
+# Eğri eklemek dosya eklemektir: kalite/egri/<ad>.py → AD, TANIM ve
+# olc(kok) -> {deger, birim, etiket, durum, ayrinti, komut}. Alt çizgili dosya yardımcıdır.
 
-SINAV = "node tools/king_sinav.js (Playwright + çalışan sunucu)"
-BENCH = "python tools/king_bench/bench.py (gerçek tarayıcı + HKM + model)"
-EGRILER = [
-    ("egri_tanima", "Tanıma", "doğru ve yerinde kullanılan kişi bilgisi oranı", BENCH + " --paket hafiza; python tools/king_bench/bilinc_bench.py"),
-    ("egri_ogretme", "Öğretme", "dersten önce/sonra mini sınav farkı", BENCH + " --paket ogretmen,ogrenme"),
-    ("egri_anlama", "Anlama", "etiketli gerçek mesajlarda niyet isabeti", SINAV + "; yapılacak: «yanlış anladın» etiketli set"),
-    ("egri_uretim", "Üretim", "üretilen soru/kartın hakem puanı, hata oranı", "yapılacak: örneklem + cevap anahtarı + insan puanı seti"),
-    ("egri_arama", "Arama", "kaynaklı cevabın doğruluğu, hafızaya eklenenin isabeti", "yapılacak: gerçek sorgu seti (A7 Arama motoru)"),
-    ("egri_kontrol", "Kontrol", "sistem görevini araçlarla tamamlama oranı", BENCH + " --paket kayit,plan,gun"),
-    ("egri_kendini_egitme", "Kendini eğitme", "hatanın derse dönüşme ve havuza girme oranı", "yapılacak: ders defteri (düzenek yok)"),
-    ("egri_tekrar", "Tekrar", "dersi alınmış hatanın yinelenme oranı (düşük iyi)", "python tools/king_bench/oz.py <bench-sonuc.json> <önceki.json>; yapılacak: hata kimliği ve sayacı"),
-    ("egri_saglayici", "Sağlayıcı kalitesi", "istek başına jeton, gereksiz çağrı", "python tools/king_olcum.py (model çağırır: süre, jeton); yapılacak: boşa çağrı sayısı"),
-    ("egri_hafiza", "Hafıza", "eski bilgiyi doğru hatırlama, bağlam boyutu", "python tools/hafiza_olcum.py (arama doğruluğu p1/p3); yapılacak: bağlam bütçesi ekseni"),
-    ("egri_optimizasyon", "Sistem · Optimizasyon", "açılış süresi, kare süresi, kod hacmi", "node tools/akicilik.js (tarayıcıda stil hesabı sayısı); yapılacak: açılış/kare süresi CDP izi; kod hacmi statik: kod_hacmi"),
-    ("egri_anlasilabilirlik", "Sistem · Anlaşılabilirlik", "bir işe kaç adımda varılıyor, iç içelik", "yapılacak: tarayıcıda adım sayımı; iç içelik statik: ic_icelik"),
-    ("egri_hayata_etki", "Sistem · Hayata etki", "haftada tamamlanan öğrenme adımı, süreklilik", "yapılacak: sahibinin canlı verisi gerekir (bu araç okumaz)"),
-]
+EGRI_DIZIN = BURASI / "egri"
 
 
 def egriler(kok):
-    return [dict(olcut(i, ad, None, "veri yok", tanim, "egri"), komut=komut) for i, ad, tanim, komut in EGRILER]
+    if str(EGRI_DIZIN) not in sys.path:
+        sys.path.insert(0, str(EGRI_DIZIN))  # eğriler ortak yardımcıyı (_sinav) adıyla alır
+    sonuc = []
+    for yol in sorted(EGRI_DIZIN.glob("[!_]*.py")):
+        try:
+            spec = importlib.util.spec_from_file_location("egri_" + yol.stem, yol)
+            m = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(m)
+            r = m.olc(kok)
+            o = dict(olcut("egri_" + yol.stem, m.AD, r["deger"], r["etiket"], m.TANIM, "egri", r.get("ayrinti")),
+                     birim=r.get("birim"), komut=r["komut"])
+            # sözleşme: değer yoksa durum ölçülmedi ve etiket «veri yok»; değer varsa etiket «veri yok» olamaz
+            assert o["durum"] == r["durum"] and (r["deger"] is None) == (r["etiket"] == "veri yok"), "eğri sözleşmesi bozuk"
+        except Exception as e:  # bozuk bir eğri ölçümün tamamını düşürmesin; değersiz kalır, hatası yazılır
+            o = dict(olcut("egri_" + yol.stem, yol.stem, None, "veri yok", "", "egri",
+                           {"hata": type(e).__name__ + ": " + str(e)}),
+                     birim=None, komut=f"kalite/egri/{yol.name} düzeltilmeli")
+        sonuc.append(o)
+    return sonuc
 
 
 OLCUMLER = [uygulamalar, kapilar, kopyalar, ayarlar, ic_icelik, parcalar, sekmeler, ekranlar,
@@ -549,9 +556,13 @@ def md(olcum, butce):
             continue
         b = butce.get(id_, {})
         taban, hedef = (("—" if b.get(k) is None else b[k]) for k in ("taban", "hedef"))
-        s.append(f"| {o['ad']} | {o['deger']} | {taban} | {hedef} | {o['etiket']} |")
+        birim = f" {o['birim']}" if o.get("birim") else ""
+        s.append(f"| {o['ad']} | {o['deger']}{birim} | {taban} | {hedef} | {o['etiket']} |")
     s += ["", "Ölçülmedi (değer yok; ölçecek komut):"]
-    s += [f"- {o['ad']}: {o['komut']}" for _, o in sorted(olcum.items()) if o["durum"] == "ölçülmedi"]
+    for _, o in sorted(olcum.items()):
+        if o["durum"] == "ölçülmedi":
+            v = o["ayrinti"].get("vekil") or {}
+            s.append(f"- {o['ad']}: {o['komut']}" + (f" · {v['ad']} = {v['deger']} ({v['etiket']}, eğri değil)" if v else ""))
     return "\n".join(s)
 
 

@@ -1,0 +1,29 @@
+{
+ "kabuk": "veri yok: olcum_modul.js yalnız AYS/SPI/ESP ölçer",
+ "kod": "00788b3a",
+ "moduller": {
+  "AYS": {
+   "betikMs": 310.9,
+   "cizimMs": 1151.7,
+   "stilMs": 130.2,
+   "tekrar": 3,
+   "yerlesimMs": 61.3
+  },
+  "ESP": {
+   "betikMs": 284.6,
+   "cizimMs": 957.8,
+   "stilMs": 109.4,
+   "tekrar": 3,
+   "yerlesimMs": 45.6
+  },
+  "SPI": {
+   "betikMs": 242.1,
+   "cizimMs": 799.5,
+   "stilMs": 88.8,
+   "tekrar": 3,
+   "yerlesimMs": 38.7
+  }
+ },
+ "tarih": "2026-11-13",
+ "yontem": "tools/olcum_modul.js: <modül>/src http.server ile, başsız Chromium, her tekrar yeni bağlam (boş tarayıcı verisi); cizimMs = sayfaya gitmeden .site görünene kadar; 3 tekrarın ortancası"
+}
