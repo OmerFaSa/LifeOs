@@ -36,7 +36,7 @@
       secenekler: { normal: 'Normal', belirgin: 'Belirgin' }, aciklama: 'Klavyeyle gezerken seçili yerin çerçevesi.', kaynak: ENV + ' §3b lifeos.odak' },
     { anahtar: 'lifeos.altcizgi', ad: 'Bağlantıların altı çizili', tur: 'secim', varsayilan: 'hayir', grup: 'erisim', kok: 'data-altcizgi', esitlenir: true,
       secenekler: { hayir: 'Hayır', evet: 'Evet' }, aciklama: 'Bağlantıları renkten bağımsız ayırır.', kaynak: ENV + ' §3b lifeos.altcizgi' },
-    { anahtar: 'lifeos.hareket', ad: 'Hareket', tur: 'secim', varsayilan: 'tam', grup: 'erisim', kok: 'data-hareket', esitlenir: true,
+    { anahtar: 'lifeos.hareket', ad: 'Hareket', tur: 'secim', varsayilan: 'sistem', grup: 'erisim', kok: 'data-hareket', esitlenir: true,
       secenekler: { tam: 'Tam', az: 'Az', sistem: 'Cihaza uy' }, aciklama: 'Geçişler ve açılır katmanların hareketi.', kaynak: ENV + ' §3c Animasyon: hareket' },
     { anahtar: 'lifeos.rozet', ad: 'Sayaçlar ve noktalar', tur: 'secim', varsayilan: 'acik', grup: 'bildirim', kok: 'data-rozet', esitlenir: true,
       secenekler: { acik: 'Göster', kapali: 'Gizle' }, aciklama: 'Bekleyen işleri gösteren küçük işaretler.', kaynak: ENV + ' §3b lifeos.rozet' },

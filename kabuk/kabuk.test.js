@@ -15,6 +15,14 @@ function sahteDepo(ilk) {
   return { v, getItem: k => (k in v ? v[k] : null), setItem: (k, x) => { v[k] = String(x); }, removeItem: k => { delete v[k]; } };
 }
 
+// ---- sahibinin kararları (faz2-kabuk.md «Kararlar», 2026-11-13) ----
+t('karar: selam adı ekler, adsızsa yalın, saat dilimleri', () => {
+  const s = (saat, ad) => K.selam(new Date(2026, 10, 13, saat), ad);
+  esit([s(3), s(8), s(13), s(20)], ['İyi geceler.', 'Günaydın.', 'İyi günler.', 'İyi akşamlar.']);
+  esit(s(8, 'Altay'), 'Günaydın Altay.'); esit(s(8, '  '), 'Günaydın.'); esit(s(8, null), 'Günaydın.');
+});
+t('karar: hareket varsayılanı cihaza uyar', () => esit(A.tanim('lifeos.hareket').varsayilan, 'sistem'));
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {

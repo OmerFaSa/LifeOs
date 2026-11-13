@@ -115,22 +115,30 @@ Aynı koşuda işlev denetimi (sonuçlar):
 - Dört boyut/tema birleşiminde yatay taşma yok; konsolda hata yok.
 
 ## Testler
-`node kabuk/kabuk.test.js` → **25 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
+`node kabuk/kabuk.test.js` → **27 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
 eski bağlantılar, Felsefe pilot, halkadan ≤ 2 adım, komut çubuğundan 1 adım, bozuk kaydı yakalama), şema türetmeleri (zorunlu alanlar,
 varsayılan geçerli, doğrulama, bozuk değerde varsayılan, sıfırlama, eşitleme süzgeci, kök nitelikleri, çizimde kaçış ve radyo
 sayısı), sıralama (ç ğ ı İ ö ş ü katlama, aksansız arama, ad başı › kelime başı › açıklama, eşitlikte tür ve kısa ad, çok kelime).
 
-## Açık sorular
-1. **Halkada hangi yerler?** Şimdi altı: Bugün, Öğren, Sağlık, Not, King, Sistem haritası. Plan maketinde beş vardı (Ana sayfa,
-   Öğren, Sağlık, Not, King); altıncıyı (harita) her yere iki adım kuralı için ekledim. Ayarlar halkada değil, komut çubuğunda ve haritada.
-2. **«Motorlar» ekranda ne adla?** İç terim görünmesin diye «Araçlar» yazdım. Plan haritası «Motorlar» diyor.
-3. **Karşılama selamında ad:** maket «Günaydın Altay.» diyor; kabukta henüz profil kaynağı yok, ad gelmiyor. Ad nereden okunacak (kişi modeli mi, Hesap mı)?
-4. **Hareket varsayılanı:** eski karar «Tam» (cihazın «hareketi azalt» isteğini de geçersiz kılar). Erişilebilirlik için «Cihaza uy» daha güvenli; hangisi?
-5. **Yazı tipi seçenekleri:** eski listede altı yazı vardı (Inter, Manrope…); piksel kimlik kararıyla «Piksel / Cihazın yazısı» ikiye indirdim. Doğru mu?
-6. **Alan → eski modül eşlemesi:** Müzik ve Okuma ve yazı ESP'ye, Tahlil SPİ'ye bağlandı (çıkarım). Doğru mu?
-7. **Telefonda komut çubuğu:** plandaki «aşağı çek» hareketi yazılmadı; telefonda üst şeritteki «Ara» düğmesi var. Hareket gerekli mi?
-8. **Halka zemini:** okunurluk için yuvarlak bir zemin ekledim (piksel köşeli değil). Kare ya da zeminsiz varyasyon istenirse gösterilebilir.
-9. **«Hepsini varsayılana döndür»** ödeme kilidini de kapatır (güvenli yön). Eski «s» bayrağı (yalnız bazı ayarlar sıfırlanır) şemaya alınmadı; gerekli mi?
+## Kararlar (sahibi, 2026-11-13)
+Dokuz açık sorunun hepsi cevaplandı. Yedisi iskeletteki hâli onayladı, ikisi kodu değiştirdi (3 ve 4).
+
+| # | Soru | Karar | Kodda |
+|---|---|---|---|
+| 1 | Halkada hangi yerler | Altı yer: Bugün, Öğren, Sağlık, Not, King, Sistem haritası. Ayarlar komut çubuğunda ve haritada | değişmedi |
+| 2 | «Motorlar» ekranda ne adla | «Araçlar»; iç ad `motor` kalır | değişmedi |
+| 3 | Selamda ad | Evet, Hesap'tan (hitap, yoksa görünen ad); oturum yoksa adsız | `kabuk.js` `selam(t, ad)` + `hesapAdi()` |
+| 4 | Hareket varsayılanı | «Cihaza uy» (eski «Tam» kararının yerini alır) | `ayar.js` `lifeos.hareket` varsayılan `sistem` |
+| 5 | Yazı tipi seçenekleri | İki: Piksel / Cihazın yazısı | değişmedi |
+| 6 | Alan → eski modül eşlemesi | Doğru: Müzik ve Okuma ve yazı → ESP, Tahlil → SPİ | değişmedi |
+| 7 | Telefonda «aşağı çek» | Yazılmayacak; yalnız «Ara» düğmesi | değişmedi |
+| 8 | Halka zemini | Yuvarlak kalır | değişmedi |
+| 9 | «Hepsini varsayılana döndür» | Ödeme kilidi dahil hepsini sıfırlar; «s» bayrağı alınmaz | değişmedi |
+
+- Karar 3'ün sınırı: kabuk henüz `brand/ortak/hesap.js`'i yüklemiyor (hiçbir yerden sunulmuyor), bu yüzden ad ekranda
+  **henüz görünmez**; kabuk tek sunucuya bağlanıp Hesap yüklendiğinde kendiliğinden gelir. Okunan yer `LIFEOS.Hesap.durum().oturum`.
+- Karar 4: eski kullanıcıda kayıtlı değer varsa o geçerlidir; yalnız hiç seçmemiş olanlar «Cihaza uy» ile başlar.
+- İki karar testte (`karar: …`); ayarlar ekranının dört görüntüsü yeni varsayılanla yeniden çekildi.
 
 Atlananlar: ders ekranı, Not / Tekrar motorlarının ekranları, eski kabuğa bağlantı, sunucu üzerinden Felsefe içeriği denemesi
 (file:// fetch'i engellediği için denenemedi; kod yolu `Yol.yukle` + `Yol.durum`).

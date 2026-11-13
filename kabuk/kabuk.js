@@ -62,8 +62,13 @@
     return yerler.concat(ayarlar, eylemler);
   }
 
+  function selam(t, ad) {
+    var s = t.getHours(), soz = s < 5 ? 'İyi geceler' : s < 12 ? 'Günaydın' : s < 18 ? 'İyi günler' : 'İyi akşamlar';
+    ad = String(ad || '').trim();
+    return soz + (ad ? ' ' + ad : '') + '.';
+  }
   var Kabuk = kok.LIFEOS && kok.LIFEOS.Kabuk || {};
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri;
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.selam = selam;
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
   if (typeof module !== 'undefined' && module.exports) module.exports = Kabuk;
   if (typeof document === 'undefined') return;
@@ -88,7 +93,10 @@
   var GUN = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
   var AY = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   function tarih(t) { return GUN[t.getDay()] + ' · ' + t.getDate() + ' ' + AY[t.getMonth()]; }
-  function selam(t) { var s = t.getHours(); return s < 5 ? 'İyi geceler.' : s < 12 ? 'Günaydın.' : s < 18 ? 'İyi günler.' : 'İyi akşamlar.'; }
+  // ad Hesap oturumundan (hitap, yoksa görünen ad); Hesap yüklü değilse ya da oturum yoksa adsız selam
+  function hesapAdi() {
+    try { var o = kok.LIFEOS.Hesap.durum().oturum; return o ? (o.hitap || o.gorunen_ad || '') : ''; } catch (e) { return ''; }
+  }
   var DURUM_AD = { eski: 'eski sayfada', pilot: 'taşınıyor', plan: 'hazırlanıyor', yeni: '' };
 
   /* ---- Felsefe: Yol motoru salt okunur yüklenir; içerik dosyası file:// üzerinden okunamazsa yuva boş kalır ---- */
@@ -124,7 +132,7 @@
     var t = new Date(), ipucu = depo.getItem('lifeos.kabuk.ipucu') !== 'goruldu';
     var f = felsefe && !felsefe.hata ? felsefe : null;
     return ust('<span class="ust__tarih">' + tarih(t) + '</span>') +
-      '<div class="karsila"><h1 class="karsila__selam">' + selam(t) + '</h1>' +
+      '<div class="karsila"><h1 class="karsila__selam">' + kac(selam(t, hesapAdi())) + '</h1>' +
       '<p class="karsila__sira"><span class="soluk">Sırada</span><br>Felsefe · ' + (f ? kac(f.asama.ad) : 'ilk aşama') + '</p>' +
       '<a class="dugme dugme--ana" href="#/alan/felsefe">Başla</a>' +
       '<p class="karsila__sonra soluk">Günün geri kalanı plan aracı gelince burada görünür.</p>' +
