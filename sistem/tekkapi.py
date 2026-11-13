@@ -8,7 +8,7 @@
      /                 giris sayfasi (sunucu.Giris), /gun/ Ana sayfa (gun.py)
      /ays/ /spi/ /esp/ uc modulun dist'i (sunucu.Sunucu, yolun oneki atilarak)
      /api/...          4180'in butun API'leri (hesap, ayar, ice, muzik, zemin, planlama,
-                       gun/cumle, guncelle, durum) + modul kapisinin merkez/ac, uzak/merkez
+                       gun/cumle, guncelle, durum) + modul kapisinin merkez/ac (uzak/merkez tek kapida 410)
      /api/hkm/<yol>    HKM cekirdegi AYNI SURECTE (HKM/daemon.Handler, /api/<yol> olarak)
      /kabuk/           yeni kabuk (Faz 2): kabuk/ + onun istedigi motor/, alan/ icerigi; kapali liste
 
@@ -141,7 +141,11 @@ class TekKapi(Giris):
             if not HKM["srv"]:
                 return self._json(503, {"ok": False, "mesaj": "Merkez bu süreçte açık değil."}) or True
             return self._devret(HKM["sinif"], "/api/" + self.path[len("/api/hkm/"):], server=HKM["srv"]) or True
-        if yol in ("/api/merkez/ac", "/api/uzak/merkez") or yol in (sunucu.DIST_BETIK, sunucu.DIST_STIL) \
+        if yol == "/api/uzak/merkez":
+            # A10 (faz7-cihaz-zemini.md acik soru 2): tek kapida hesapsiz Merkez yolu yok; ortak jeton cihaza
+            # gitmez, cihaz hesabiyla girip kendi anahtarini /api/hesap/merkez'den alir. hesap.js 410'da sessizce vazgecer.
+            return self._json(410, {"hata": "Bu yol kapandı: hesabınla gir, Merkez bağlantısı Hesap › Merkez'de."}) or True
+        if yol == "/api/merkez/ac" or yol in (sunucu.DIST_BETIK, sunucu.DIST_STIL) \
                 or yol.startswith(("/img/seviye/", "/img/marka/")):
             sahip = self._dist_sahibi() if yol in (sunucu.DIST_BETIK, sunucu.DIST_STIL) else next(iter(_SINIF.values()))
             if not sahip:                                   # surum hicbir modulun degil

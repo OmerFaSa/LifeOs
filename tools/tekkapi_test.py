@@ -226,7 +226,11 @@ def sina(eski, tek):
     ayni("POST /api/gun/cumle başlıksız 403", iste(g, "/api/gun/cumle", "POST", b"{}"), iste(T, "/api/gun/cumle", "POST", b"{}"))
     ayni("POST /api/hkm izinsiz 403", iste(g, "/api/hkm", "POST", b""), iste(T, "/api/hkm", "POST", b""))
     ayni("POST /api/merkez/ac izinsiz 403", iste(eski["ays"], "/api/merkez/ac", "POST", b""), iste(T, "/api/merkez/ac", "POST", b""))
-    ayni("POST /api/uzak/merkez yerelden 403", iste(eski["ays"], "/api/uzak/merkez", "POST", b""), iste(T, "/api/uzak/merkez", "POST", b""))
+    dene("eski kapı: POST /api/uzak/merkez yerelden 403", iste(eski["ays"], "/api/uzak/merkez", "POST", b"")[0] == 403)
+    for bas in ({}, {"X-LifeOS": "hesap", "X-Forwarded-For": "100.64.0.9"}):
+        k, _, gv = iste(T, "/api/uzak/merkez", "POST", b"", bas)
+        dene("tek kapı: hesapsız Merkez yolu kapalı (410), ortak jeton yok%s" % (" (vekil)" if bas else ""),
+             k == 410 and b"tekkapi-test-jetonu" not in gv, (k, gv[:120]))
     izin = {"X-LifeOS": "guncelle"}
     dene("deneme kapısı güncellemez (POST /api/guncelle 403)", iste(T, "/api/guncelle", "POST", b"", izin)[0] == 403)
     dene("deneme kapısı yeniden başlatmaz (POST /api/yeniden 403)", iste(T, "/api/yeniden", "POST", b"", izin)[0] == 403)
