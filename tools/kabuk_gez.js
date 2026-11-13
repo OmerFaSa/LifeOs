@@ -68,13 +68,13 @@ async function goruntu(p, ad) {
       await p.waitForSelector('article.ders h1');
       dene('ders ' + (i + 1) + ': başlık ve ' + d.metin.length + ' paragraf', (await p.textContent('article.ders h1')) === d.ad && (await p.locator('article.ders > p').count()) >= d.metin.length + 1);
       const a = d.alistirmalar[0], yanlis = harf[(harf.indexOf(a.dogru) + 1) % a.sec.length];
-      const soru = p.locator('.soru[data-soru="' + a.id + '"]');
+      const soru = p.locator('.b-soru[data-soru="' + a.id + '"]');
       if (i === 0) {
-        await soru.locator('[data-cevap="' + yanlis + '"]').click();
-        dene('ders 1: yanlış cevap «Yanlış.» der ve doğruyu işaretler', /Yanlış/.test(await soru.locator('.soru__sonuc').textContent()) && (await soru.locator('.secenek--dogru').getAttribute('data-cevap')) === a.dogru);
+        await soru.locator('[data-h="' + yanlis + '"]').click();
+        dene('ders 1: yanlış cevap «Yanlış.» der ve doğruyu işaretler', /Yanlış/.test(await soru.locator('.b-soru__sonuc').textContent()) && (await soru.locator('.b-soru__sik--dogru').getAttribute('data-h')) === a.dogru);
       }
-      await soru.locator('[data-cevap="' + a.dogru + '"]').click();
-      dene('ders ' + (i + 1) + ': doğru cevap «Doğru.» der', /Doğru/.test(await soru.locator('.soru__sonuc').textContent()));
+      await soru.locator('[data-h="' + a.dogru + '"]').click();
+      dene('ders ' + (i + 1) + ': doğru cevap «Doğru.» der', /Doğru/.test(await soru.locator('.b-soru__sonuc').textContent()));
       if (GORUNTU && i === 0) await p.screenshot({ path: path.join(cikti, 'ders-masaustu-koyu.png'), fullPage: true });
       await p.click('[data-ac="okudum"]');
       const beklenen = i < u1.dersler.length - 1 ? '#/alan/felsefe/ders/' + u1.dersler[i + 1].id : '#/alan/felsefe/kapi/' + u1.id;
@@ -88,7 +88,7 @@ async function goruntu(p, ad) {
     await p.waitForSelector('[data-sonuc]');
     dene('kapı: boş deneme geçirmez', /olmadı/.test(await p.textContent('[data-sonuc]')) && /0\/4/.test(await p.textContent('[data-sonuc]')));
     dene('kapıda kalınca: 4 soru Tekrar\'a düştü; kapıda doğru cevap gösterilmez', /4 soru Tekrar'a düştü/.test(await p.textContent('[data-sonuc]'))
-      && (await p.locator('a.b-dugme[href="#/motor/tekrar"]').count()) === 1 && (await p.locator('.secenek--dogru, .secenek__im').count()) === 0
+      && (await p.locator('a.b-dugme[href="#/motor/tekrar"]').count()) === 1 && (await p.locator('.b-soru__sik--dogru, .b-soru__im').count()) === 0
       && !(await p.textContent('.govde')).includes('doğru cevap:'));
     for (const q of u1.kapi.sorular) await p.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
     await p.click('form.kapi button[type=submit]');
@@ -122,8 +122,8 @@ async function goruntu(p, ad) {
       dene(alan + ': ilk ders açılır', (await p.textContent('article.ders h1')) === d1.ad);
       const a = d1.alistirmalar.find(x => x.tur === 'secmeli');
       if (a) {
-        await p.click('.soru[data-soru="' + a.id + '"] [data-cevap="' + a.dogru + '"]');
-        dene(alan + ': alıştırma doğru cevabı tanır', /Doğru/.test(await p.textContent('.soru[data-soru="' + a.id + '"] .soru__sonuc')));
+        await p.click('.b-soru[data-soru="' + a.id + '"] [data-h="' + a.dogru + '"]');
+        dene(alan + ': alıştırma doğru cevabı tanır', /Doğru/.test(await p.textContent('.b-soru[data-soru="' + a.id + '"] .b-soru__sonuc')));
       }
       await p.click('[data-ac="okudum"]');
       await p.waitForFunction(h => location.hash !== h, '#/alan/' + alan + '/ders/' + d1.id);
@@ -148,12 +148,12 @@ async function goruntu(p, ad) {
     await p.click('a[href="#/motor/not/yeni"]');
     await p.waitForSelector('form.notform');
     await p.click('form.notform button[type=submit]');
-    dene('not: boş not kaydedilmez, nedeni yazılır', /boş not kaydedilmez/.test(await p.textContent('.notform__ileti')));
+    dene('not: boş not kaydedilmez, nedeni yazılır', /boş not kaydedilmez/.test(await p.textContent('.notform .b-uyari')));
     await p.fill('input[name=baslik]', 'Erdem');
     await p.fill('textarea[name=govde]', 'Erdem bilgi midir? #etik');
     await p.click('form.notform button[type=submit]');
-    await p.waitForFunction(() => /^#\/motor\/not\/n\w+$/.test(location.hash) && /Kaydedildi/.test((document.querySelector('.notform__ileti') || {}).textContent || ''));
-    dene('not: kaydedildi ve kendi adresine geçti', /Kaydedildi/.test(await p.textContent('.notform__ileti')));
+    await p.waitForFunction(() => /^#\/motor\/not\/n\w+$/.test(location.hash) && /Kaydedildi/.test((document.querySelector('.notform .b-uyari') || {}).textContent || ''));
+    dene('not: kaydedildi ve kendi adresine geçti', /Kaydedildi/.test(await p.textContent('.notform .b-uyari')));
     const erdem = await p.evaluate(() => location.hash);
     await p.goto(T + '/kabuk/#/motor/not/yeni');
     await p.waitForSelector('select[data-bag-ekle]');
@@ -163,11 +163,11 @@ async function goruntu(p, ad) {
     dene('not: bağ ekle gövdeye kimlikli bağ yazar', /\[\[not:n\w+\|Erdem\]\]/.test(await p.inputValue('textarea[name=govde]')), await p.inputValue('textarea[name=govde]'));
     await p.click('form.notform button[type=submit]');
     await p.waitForFunction(h => /^#\/motor\/not\/n\w+$/.test(location.hash) && location.hash !== h, erdem);
-    dene('not: «Bu nottaki bağlar» Erdem notuna gider', (await p.getAttribute('.baglar a', 'href')) === erdem);
+    dene('not: «Bu nottaki bağlar» Erdem notuna gider', (await p.getAttribute('[aria-label="Bu nottaki bağlar"] a', 'href')) === erdem);
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'not-masaustu-koyu.png'), fullPage: true });
     await p.goto(T + '/kabuk/' + erdem);
-    await p.waitForSelector('.baglar');
-    dene('not: «Bu nota bağlananlar» Sokrates notunu gösterir', /Sokrates/.test(await p.textContent('.baglar')));
+    await p.waitForSelector('[aria-label="Bu nota bağlananlar"]');
+    dene('not: «Bu nota bağlananlar» Sokrates notunu gösterir', /Sokrates/.test(await p.textContent('[aria-label="Bu nota bağlananlar"]')));
     await p.goto(T + '/kabuk/#/motor/not');
     await p.waitForSelector('#not-liste a.b-satir');
     dene('not: iki not listede', (await p.locator('#not-liste a.b-satir').count()) === 2);
@@ -193,7 +193,7 @@ async function goruntu(p, ad) {
     await p.waitForSelector('form.aracform');
     dene('sisteme not: «King okuyabilsin» varsayılan kapalı', !(await p.isChecked('form.aracform input[name=kingOkur]')));
     await p.click('form.aracform button[type=submit]');
-    await p.waitForFunction(() => /adı yazılmalı/.test(document.querySelector('.aracform .notform__ileti').textContent));
+    await p.waitForFunction(() => /adı yazılmalı/.test(document.querySelector('.aracform .b-uyari').textContent));
     dene('sisteme not: adsız araç motorun cümlesiyle reddedilir', true);
     await p.fill('form.aracform input[name=ad]', 'Düşünce defteri');
     await p.check('form.aracform input[name=gorunum][value=ag]');
@@ -243,7 +243,7 @@ async function goruntu(p, ad) {
     await p.click('[data-kapi-kartlari] summary >> nth=0');
     dene('kapıda kalınca: kart açılınca doğru cevap görünür', (await p.textContent('[data-kapi-kartlari] details[open] p')) === kk.sec[harf.indexOf(kk.dogru)]);
     await p.click('form.kartform button[type=submit]');
-    dene('tekrar: boş kart eklenmez', /iki yüzü de dolu/.test(await p.textContent('.kartform .notform__ileti')));
+    dene('tekrar: boş kart eklenmez', /iki yüzü de dolu/.test(await p.textContent('.kartform .b-uyari')));
     await p.fill('input[name=on]', 'Arkhe nedir?');
     await p.fill('textarea[name=arka]', 'Evrenin ilk maddesi.');
     await p.click('form.kartform button[type=submit]');
@@ -274,7 +274,7 @@ async function goruntu(p, ad) {
       && !/kcal/.test(await p.textContent('[data-kural]')));
     await p.fill('input[name=ml]', '99999');
     await p.click('form.kayitform button[type=submit]');
-    dene('kayıt: sınır dışı sayı motorun cümlesiyle reddedilir, yazılan durur', /1 ile 8000 ml/.test(await p.textContent('.kayitform .notform__ileti')) && (await p.inputValue('input[name=ml]')) === '99999');
+    dene('kayıt: sınır dışı sayı motorun cümlesiyle reddedilir, yazılan durur', /1 ile 8000 ml/.test(await p.textContent('.kayitform .b-uyari')) && (await p.inputValue('input[name=ml]')) === '99999');
     await p.fill('input[name=ml]', '500');
     await p.click('form.kayitform button[type=submit]');
     await p.waitForSelector('[aria-label="Gün özeti"] li');
@@ -325,7 +325,7 @@ async function goruntu(p, ad) {
     await p.waitForFunction(() => /Dün/.test(document.querySelector('[data-arac="kayit"] section h2').textContent));
     dene('kayıt: gün değişince yazılan sayı kalır, özet o güne geçer', (await p.inputValue('input[name=ml]')) === '300' && /Dün için kayıt yok/.test(await p.textContent('[data-arac="kayit"]')));
     await p.click('form.kayitform button[type=submit]');
-    await p.waitForFunction(() => /Kaydedildi \(Dün\)/.test(document.querySelector('.kayitform .notform__ileti').textContent));
+    await p.waitForFunction(() => /Kaydedildi \(Dün\)/.test(document.querySelector('.kayitform .b-uyari').textContent));
     dene('kayıt: düne kayıt yazıldı, özeti dünün', /300 ml/.test(await p.textContent('[aria-label="Gün özeti"]')));
     await p.click('a[href="#/motor/kayit/hafta"]');
     await p.waitForSelector('[data-kayit-hafta] .khafta__tablo');
@@ -342,7 +342,7 @@ async function goruntu(p, ad) {
     await p.fill('form[data-plan="aralik"] input[name=bas]', '12:00');
     await p.fill('form[data-plan="aralik"] input[name=bit]', '09:00');
     await p.click('form[data-plan="aralik"] button[type=submit]');
-    dene('plan: ters aralık motorun cümlesiyle reddedilir', /başlamadan bitiyor/.test(await p.textContent('[data-arac="plan"] .notform__ileti')));
+    dene('plan: ters aralık motorun cümlesiyle reddedilir', /başlamadan bitiyor/.test(await p.textContent('[data-arac="plan"] .b-uyari--hata')));
     await p.fill('form[data-plan="aralik"] input[name=bas]', '09:00');
     await p.fill('form[data-plan="aralik"] input[name=bit]', '12:00');
     await p.click('form[data-plan="aralik"] button[type=submit]');
@@ -350,28 +350,28 @@ async function goruntu(p, ad) {
     await p.fill('form[data-plan="is"] input[name=ad]', 'Rapor');
     await p.fill('form[data-plan="is"] input[name=dk]', 'abc');
     await p.click('form[data-plan="is"] button[type=submit]');
-    dene('plan: süresi sayı olmayan iş reddedilir', /süresi 1–720 dakika/.test(await p.textContent('[data-arac="plan"] .notform__ileti')));
+    dene('plan: süresi sayı olmayan iş reddedilir', /süresi 1–720 dakika/.test(await p.textContent('[data-arac="plan"] .b-uyari--hata')));
     await p.fill('form[data-plan="is"] input[name=ad]', 'Rapor');
     await p.fill('form[data-plan="is"] input[name=dk]', '30');
     await p.click('form[data-plan="is"] button[type=submit]');
     await p.waitForSelector('[data-arac-ac="plan-is-sil"]');
     await p.click('[data-arac-ac="plan-kur"]');
-    await p.waitForSelector('.bloklar .blok');
-    const blokMetni = await p.textContent('.bloklar');
-    dene('plan: iş 09:00\'da, dersler ve mola ardından yerleşir', /09:00–09:30/.test(blokMetni) && /Rapor/.test(blokMetni) && /Mola/.test(blokMetni) && (await p.locator('.blok--ders').count()) >= 1, blokMetni.slice(0, 200));
+    await p.waitForSelector('[aria-label="Bugünün blokları"] [data-blok]');
+    const blokMetni = await p.textContent('[aria-label="Bugünün blokları"]');
+    dene('plan: iş 09:00\'da, dersler ve mola ardından yerleşir', /09:00–09:30/.test(blokMetni) && /Rapor/.test(blokMetni) && /Mola/.test(blokMetni) && (await p.locator('[data-blok="ders"]').count()) >= 1, blokMetni.slice(0, 200));
     dene('plan: özet etiketli (hesaplandı)', /Planlanan \d+ dk \(hesaplandı\)/.test(await p.textContent('[data-arac="plan"]')));
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'plan-masaustu-koyu.png'), fullPage: true });
-    await p.click('.blok--is [data-durum="atlandi"]');
-    dene('plan: nedensiz atlama motorun cümlesiyle reddedilir', /neden yazılmalı/.test(await p.textContent('[data-arac="plan"] .notform__ileti')));
-    await p.click('.blok--is [data-durum="yapildi"]');
-    await p.waitForSelector('.blok--is.blok--bitti');
-    dene('plan: «Yapıldı» bloğu işaretler', /yapıldı/.test(await p.textContent('.blok--is')));
+    await p.click('[data-blok="is"] [data-durum="atlandi"]');
+    dene('plan: nedensiz atlama motorun cümlesiyle reddedilir', /neden yazılmalı/.test(await p.textContent('[data-arac="plan"] .b-uyari--hata')));
+    await p.click('[data-blok="is"] [data-durum="yapildi"]');
+    await p.waitForSelector('[data-blok="is"]:not([data-blok-durum="bekliyor"])');
+    dene('plan: «Yapıldı» bloğu işaretler', /yapıldı/.test(await p.textContent('[data-blok="is"]')));
     await p.click('[data-arac-ac="plan-kur"]');
-    await p.waitForSelector('.blok--is.blok--bitti');
-    dene('plan: yeniden kurunca yapılan blok yerinde kalır', /09:00–09:30/.test(await p.textContent('.blok--is')));
+    await p.waitForSelector('[data-blok="is"]:not([data-blok-durum="bekliyor"])');
+    dene('plan: yeniden kurunca yapılan blok yerinde kalır', /09:00–09:30/.test(await p.textContent('[data-blok="is"]')));
     await p.reload();
-    await p.waitForSelector('.bloklar .blok');
-    dene('plan: yenilemeden sonra plan duruyor', (await p.locator('.blok--is.blok--bitti').count()) === 1);
+    await p.waitForSelector('[aria-label="Bugünün blokları"] [data-blok]');
+    dene('plan: yenilemeden sonra plan duruyor', (await p.locator('[data-blok="is"]:not([data-blok-durum="bekliyor"])').count()) === 1);
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('.karsila__plan');
     dene('Bugün: planın sıradaki bloğunu gösterir', /Planda sırada: \d\d:\d\d/.test(await p.textContent('.karsila__plan')), await p.textContent('.karsila__plan'));
@@ -379,14 +379,14 @@ async function goruntu(p, ad) {
     // ---- Hafta planı ve sabit bloklar (şablon bir kez yazılır, her güne girer) ----
     await p.goto(T + '/kabuk/#/motor/plan');
     await p.click('a[href="#/motor/plan/hafta"]');
-    await p.waitForSelector('[data-hafta] .hafta__gun');
-    dene('hafta: bugünden yedi gün çizildi, ilki «bugün»', (await p.locator('.hafta__gun').count()) === 7 && /bugün/.test(await p.textContent('.hafta__gun >> nth=0')));
-    await p.waitForSelector('.hafta .blok--ders');
+    await p.waitForSelector('[data-hafta] [data-gun]');
+    dene('hafta: bugünden yedi gün çizildi, ilki «bugün»', (await p.locator('[data-gun]').count()) === 7 && /bugün/.test(await p.textContent('[data-gun] >> nth=0')));
+    await p.waitForSelector('.hafta [data-blok="ders"]');
     dene('hafta: sıradaki ders öngörüde; bugün yapılan «Rapor» girmez; özet etiketli', !/Rapor/.test(await p.textContent('.hafta')) && /planlanan \d+ dk \(hesaplandı\)/.test(await p.textContent('[data-hafta]')));
     await p.fill('form[data-plan="sabit"] input[name=bas]', '10:00');
     await p.fill('form[data-plan="sabit"] input[name=bit]', '11:00');
     await p.click('form[data-plan="sabit"] button[type=submit]');
-    dene('hafta: adsız sabit blok reddedilir', /adı yazılmalı/.test(await p.textContent('[data-hafta] .notform__ileti')));
+    dene('hafta: adsız sabit blok reddedilir', /adı yazılmalı/.test(await p.textContent('[data-hafta] .b-uyari--hata')));
     await p.fill('form[data-plan="sabit"] input[name=ad]', 'Okul');
     await p.fill('form[data-plan="sabit"] input[name=bas]', '10:00');
     await p.fill('form[data-plan="sabit"] input[name=bit]', '11:00');
@@ -398,9 +398,9 @@ async function goruntu(p, ad) {
     for (const g of ['5', '6']) await p.check('form[data-plan="sabit"] input[name=gun][value="' + g + '"]');
     await p.click('form[data-plan="sabit"] button[type=submit]');
     await p.waitForFunction(() => document.querySelectorAll('[data-arac-ac="plan-sabit-sil"]').length === 2);
-    const gunMetni = await p.locator('.hafta__gun').allTextContents();
+    const gunMetni = await p.locator('[data-gun]').allTextContents();
     dene('hafta: okul yalnız hafta içi beş güne, uyku her güne girdi', gunMetni.filter(x => /Okul/.test(x)).length === 5 && gunMetni.every(x => /23:00–24:00\s*Uyku/.test(x) && /00:00–07:00\s*Uyku/.test(x)), gunMetni.map(x => x.slice(0, 60)).join(' | '));
-    dene('hafta: gece yarısını geçen blok listede işaretli', /gece yarısını geçer/.test(await p.textContent('[data-hafta] .kartliste')));
+    dene('hafta: gece yarısını geçen blok listede işaretli', /gece yarısını geçer/.test(await p.textContent('[data-hafta] [aria-label="Sabit bloklar"]')));
     await p.reload();
     await p.waitForSelector('[data-arac-ac="plan-sabit-sil"]');
     dene('hafta: şablon yenilemeden sonra duruyor', (await p.locator('[data-arac-ac="plan-sabit-sil"]').count()) === 2);
@@ -416,33 +416,33 @@ async function goruntu(p, ad) {
     await p.waitForSelector('[data-arac-ac="soru-basla"]');
     dene('soru: başlangıçta alan ve havuz yazılı', /Felsefe alanının/.test(await p.textContent('[data-arac="soru"]')) && /Havuzda \d+ soru/.test(await p.textContent('[data-arac="soru"]')));
     await p.click('[data-arac-ac="soru-basla"]');
-    await p.waitForSelector('.soru[data-sira="0"]');
+    await p.waitForSelector('.b-soru[data-sira="0"]');
     const felsefeSorular = {};
     y.uniteler.forEach(u => u.dersler.forEach(dd => dd.alistirmalar.forEach(a => { felsefeSorular[a.soru] = a; })));
-    const soruMetni = async () => felsefeSorular[await p.textContent('.soru legend')];
+    const soruMetni = async () => felsefeSorular[await p.textContent('.b-soru legend')];
     let sq = await soruMetni();
     await p.click('[data-arac-ac="soru-cevap"][data-h="' + sq.dogru + '"]');
-    dene('soru: doğru cevap «Doğru.» der, şıklar kilitlenir', /Doğru/.test(await p.textContent('.soru__sonuc')) && (await p.locator('.secenek[disabled]').count()) === sq.sec.length);
+    dene('soru: doğru cevap «Doğru.» der, şıklar kilitlenir', /Doğru/.test(await p.textContent('.b-soru__sonuc')) && (await p.locator('.b-soru__sik[disabled]').count()) === sq.sec.length);
     await p.click('[data-arac-ac="soru-sonraki"]');
-    await p.waitForSelector('.soru[data-sira="1"]');
+    await p.waitForSelector('.b-soru[data-sira="1"]');
     sq = await soruMetni();
     await p.click('[data-arac-ac="soru-cevap"][data-h="' + 'ABCD'[('ABCD'.indexOf(sq.dogru) + 1) % sq.sec.length] + '"]');
-    dene('soru: yanlış cevap «Yanlış.» der ve doğruyu işaretler', /Yanlış/.test(await p.textContent('.soru__sonuc')) && (await p.getAttribute('.secenek--dogru', 'data-h')) === sq.dogru);
+    dene('soru: yanlış cevap «Yanlış.» der ve doğruyu işaretler', /Yanlış/.test(await p.textContent('.b-soru__sonuc')) && (await p.getAttribute('.b-soru__sik--dogru', 'data-h')) === sq.dogru);
     await p.click('[data-arac-ac="soru-sonraki"]');
-    await p.waitForSelector('.soru[data-sira="2"]');
+    await p.waitForSelector('.b-soru[data-sira="2"]');
     await p.click('[data-arac-ac="soru-bak"]');
-    dene('soru: çözüme bakınca doğru sayılmaz', /doğru sayılmaz/.test(await p.textContent('.soru__sonuc')));
+    dene('soru: çözüme bakınca doğru sayılmaz', /doğru sayılmaz/.test(await p.textContent('.b-soru__sonuc')));
     await p.reload();
-    await p.waitForSelector('.soru[data-sira]');
-    dene('soru: yenilemeden sonra test kaldığı yerden sürer', (await p.getAttribute('.soru[data-sira]', 'data-sira')) === '3');
+    await p.waitForSelector('.b-soru[data-sira]');
+    dene('soru: yenilemeden sonra test kaldığı yerden sürer', (await p.getAttribute('.b-soru[data-sira]', 'data-sira')) === '3');
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'soru-masaustu-koyu.png'), fullPage: true });
     await p.click('[data-arac-ac="soru-bitir"]');
-    await p.waitForSelector('.kapisonuc');
-    const sonucMetni = await p.textContent('.kapisonuc');
+    await p.waitForSelector('[data-sonuc="soru"]');
+    const sonucMetni = await p.textContent('[data-sonuc="soru"]');
     dene('soru: sonuç 1 doğru, 1 yanlış, 1 bakıldı, kalanı boş; etiketli', /^1 \/ \d+ doğru/.test(sonucMetni) && /1 yanlış/.test(sonucMetni) && /1 çözüme bakıldı/.test(sonucMetni) && /ölçüldü/.test(sonucMetni), sonucMetni);
     await p.click('[data-arac-ac="soru-yeni"]');
     await p.waitForSelector('[data-arac-ac="soru-basla"]');
-    dene('soru: biten test «Son testler»de', /1 doğru · 1 yanlış/.test(await p.textContent('[data-arac="soru"] .ozet')));
+    dene('soru: biten test «Son testler»de', /1 doğru · 1 yanlış/.test(await p.textContent('[data-arac="soru"] [aria-label="Son testler"]')));
 
     // ---- Süreli deneme (Felsefe) ve sınav provası (Akademik) ----
     await p.click('a[href="#/motor/soru/deneme"]');
@@ -457,7 +457,7 @@ async function goruntu(p, ad) {
     dene('deneme: geri sayım görünür ve akar', /^\d\d:\d\d$/.test(sayac1) && (await p.textContent('.sayac')) !== sayac1, sayac1);
     let dq = await soruMetni();
     await p.keyboard.press(dq.dogru.toLowerCase());
-    dene('deneme: klavyeyle (harf) cevap seçilir, doğru/yanlış söylenmez', (await p.getAttribute('[data-deneme="cevap"][data-h="' + dq.dogru + '"]', 'aria-pressed')) === 'true' && !/Doğru|Yanlış/.test(await p.textContent('.soru')));
+    dene('deneme: klavyeyle (harf) cevap seçilir, doğru/yanlış söylenmez', (await p.getAttribute('[data-deneme="cevap"][data-h="' + dq.dogru + '"]', 'aria-pressed')) === 'true' && !/Doğru|Yanlış/.test(await p.textContent('.b-soru')));
     await p.keyboard.press('ArrowRight');
     await p.waitForSelector('.deneme__nobt[data-i="1"][aria-current]');
     dq = await soruMetni();
@@ -473,6 +473,15 @@ async function goruntu(p, ad) {
     const dSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
     dene('deneme: sonuç net «hesaplandı», doğru ve süre «ölçüldü», boş «hesaplandı»', /Deneme bitti\s*2 net\s*hesaplandı\s*2 doğru, 0 yanlış \(ölçüldü\)/.test(dSonuc) && /boş \(hesaplandı\)/.test(dSonuc) && /dk \(ölçüldü\)/.test(dSonuc), dSonuc.slice(0, 220));
     dene('deneme: Felsefe sonucunda sınav puanı tahmini yok', !/Puan ve sıra/.test(dSonuc));
+    const vp = p.viewportSize();
+    await p.setViewportSize({ width: 390, height: 844 });
+    await p.evaluate(() => document.documentElement.setAttribute('data-rozet', 'kapali'));
+    const gizle = await p.evaluate(() => [...document.querySelectorAll('[data-deneme-sayfa] .b-pul')].filter(x => /^(ölçüldü|tahmin|hesaplandı|veri yok|eski kayıt)$/.test(x.textContent)).map(x => getComputedStyle(x).display));
+    dene('«Sayaçlar ve noktalar: Gizle» kesinlik etiketlerini gizlemez (AGENTS §1.2)', gizle.length > 0 && gizle.every(x => x !== 'none'), gizle.join(','));
+    const kesik = await p.evaluate(() => [...document.querySelectorAll('[aria-label="Testlere göre"] .b-satir__not, [aria-label="Testlere göre"] .b-satir__ad')].filter(x => x.scrollWidth > x.clientWidth + 1).length);
+    dene('deneme: test notu 390 px\'te kesilmez (satır uzar)', kesik === 0 && (await p.locator('[aria-label="Testlere göre"] .b-satir--uzun').count()) > 0, String(kesik));
+    await p.evaluate(() => document.documentElement.removeAttribute('data-rozet'));
+    await p.setViewportSize(vp);
     dene('deneme: biten deneme kaydedildi, süren silindi', await p.evaluate(() => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.soru.denemeler')).length === 1 && !LIFEOS.Kabuk.ic.depo.getItem('lifeos.soru.deneme')));
     await goruntu(p, 'deneme-sonuc');
     await p.click('[data-deneme="yeni"]');
@@ -493,7 +502,7 @@ async function goruntu(p, ad) {
     dene('prova: 20 soru, süre 28 dakikadan geri sayar', (await p.locator('.deneme__nobt').count()) === 20 && /^2[78]:\d\d$/.test(await p.textContent('.sayac')), await p.textContent('.sayac'));
     await p.click('[data-deneme="cevap"][data-h="A"]');
     await p.waitForSelector('[data-deneme="cevap"][disabled]');
-    dene('prova: ilk cevap kilitlenir, doğru/yanlış söylenmez', (await p.locator('[data-deneme="cevap"][disabled]').count()) >= 2 && /kaydedildi/.test(await p.textContent('.soru')) && !/Doğru\.|Yanlış\./.test(await p.textContent('.soru')));
+    dene('prova: ilk cevap kilitlenir, doğru/yanlış söylenmez', (await p.locator('[data-deneme="cevap"][disabled]').count()) >= 2 && /kaydedildi/.test(await p.textContent('.b-soru')) && !/Doğru\.|Yanlış\./.test(await p.textContent('.b-soru')));
     await p.click('[data-deneme="bitir"]');
     await p.waitForSelector('[data-deneme-sayfa] [data-sonuc]');
     const pSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
@@ -501,8 +510,8 @@ async function goruntu(p, ad) {
     dene('prova: puan ve sıra tahmini motorun cümlesiyle «veri yok»', /Puan ve sıra\s*tahmin yok\s*veri yok/.test(pSonuc) && /En az 3 tam TYT denemesi gerekir/.test(pSonuc), pSonuc.slice(-400));
     await goruntu(p, 'deneme-prova-sonuc');
     await p.goto(T + '/kabuk/#/motor/soru');
-    await p.waitForSelector('[data-arac="soru"] .ozet');
-    dene('prova: «Son testler»de provası adıyla', /Akademik · TYT provası/.test(await p.textContent('[data-arac="soru"] .ozet')));
+    await p.waitForSelector('[data-arac="soru"] [aria-label="Son testler"]');
+    dene('prova: «Son testler»de provası adıyla', /Akademik · TYT provası/.test(await p.textContent('[data-arac="soru"] [aria-label="Son testler"]')));
     await p.goto(T + '/kabuk/#/alan/felsefe');                 // aşağıdaki akışlar Felsefe'yi etkin alan bekler
     await p.waitForSelector('.b-acilir');
 
@@ -630,7 +639,7 @@ async function goruntu(p, ad) {
     await yp.click('[aria-labelledby="yer-baslik"] a.b-dugme >> nth=1');
     await yp.waitForSelector('form.kapi[data-yer="1"]');
     const n1 = await yp.locator('form.kapi[data-yer="1"] fieldset').count();
-    dene('yerleştirme: aşama 1, 5–8 soru, yalnız ünite kapılarından, doğru cevap yok', n1 >= 5 && n1 <= 8 && (await yp.locator('.secenek--dogru').count()) === 0
+    dene('yerleştirme: aşama 1, 5–8 soru, yalnız ünite kapılarından, doğru cevap yok', n1 >= 5 && n1 <= 8 && (await yp.locator('.b-soru__sik--dogru').count()) === 0
       && (await yp.$$eval('form.kapi[data-yer] input[type=radio]', l => l.map(x => x.name))).every(id => dil[0].uniteler.some(u => u.kapi.sorular.some(q => q.id === id))), n1);
     await goruntu(yp, 'yerlestirme-soru');
     await yerCevapla(true);

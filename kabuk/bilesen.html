@@ -12,8 +12,8 @@
 <style>
   /* yalnız katalog sayfasının düzeni; taşların kendisi bilesen.css'te */
   .katalog{ width:100%; max-width:1040px; margin:0 auto; padding:24px 0 48px; display:flex; flex-direction:column; gap:32px; }
-  body[data-en="390"] .katalog{ max-width:390px; padding:24px 16px 48px; box-shadow:0 0 0 2px var(--cizgi); }
-  body[data-en="1280"] .katalog{ max-width:1280px; }
+  body[data-en="dar"] .katalog{ max-width:390px; padding:24px 16px 48px; box-shadow:0 0 0 2px var(--cizgi); }
+  body[data-en="genis"] .katalog{ max-width:1280px; }
   .denetim{ display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center; font-size:.85rem; color:var(--yazi-2); }
   .denetim > div{ display:flex; align-items:center; gap:8px; }
   .ornekler{ display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; }
@@ -37,16 +37,12 @@
     return B.bolum({ baslik: n + ' · ' + ad, id: 'tas-' + n, govde: ['<p class="kural">' + B.kac(kural) + '</p>', govde] });
   }
   function seg(ad, ad2, secenekler, secili) {
-    return '<div><span id="seg-' + ad + '">' + ad2 + '</span><div class="seg" role="radiogroup" aria-labelledby="seg-' + ad + '">' +
-      secenekler.map(function (s) {
-        var on = s[0] === secili;
-        return '<button type="button" role="radio" data-seg="' + ad + '" data-deger="' + s[0] + '" aria-checked="' + on + '" tabindex="' + (on ? 0 : -1) + '">' + s[1] + '</button>';
-      }).join('') + '</div></div>';
+    return '<div><span id="seg-' + ad + '">' + ad2 + '</span>' + B.tercih({ etiket: 'seg-' + ad, secenekler: secenekler, deger: secili, veri: { seg: ad } }) + '</div>';
   }
 
-  var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'On iki yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
-    '<div class="denetim">' + seg('tema', 'Tema', [['sistem', 'Cihaza uy'], ['light', 'Açık'], ['dark', 'Koyu']], 'sistem') +
-    seg('en', 'Genişlik', [['tam', 'Pencere'], ['390', '390 px'], ['1280', '1280 px']], 'tam') + '</div>';
+  var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'On altı yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
+    '<div class="denetim">' + seg('tema', 'Tema', { sistem: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, 'sistem') +
+    seg('en', 'Genişlik', { tam: 'Pencere', dar: '390 px', genis: '1280 px' }, 'tam') + '</div>';
 
   h += tas(1, 'Düğme', 'Yükseklik 44 px (ana 52 px), yazı 1 rem (ana 1,15 rem), tek satır, en çok 40 karakter. Kapalıyken odakta kalır, «kapalı» okunur.', ornekler([
     ornek('ana', B.dugme({ metin: 'Başla', tur: 'ana' })),
@@ -134,6 +130,17 @@
       { baslik: 'Sanı ve bilgi', ozet: 'Bilmek ile sanmak arasındaki fark.', durum: 'okundu', href: '#/a' }, { baslik: 'Gerekçe', ozet: 'Bir inancı bilgi yapan şey.', href: '#/b', taslak: true }] }) }),
     B.acilir({ baslik: 'Varlık', not: 'kilitli', govde: B.bos({ baslik: 'Önce önceki ünitenin kapısını geç.' }) }),
     B.eylemler([{ metin: 'Felsefe', basili: true }, { metin: 'Tarih', basili: false }, { metin: 'Ara', tur: 'sade', kisayol: 'Control+K', tus: 'Ctrl K' }])
+  ], 'tam'));
+
+  h += tas(15, 'Soru', 'Soru metni ve şıklar (A, B, …) ya da açık uçlu gövde; şık en az 44 px, 8 px aralık. Seçili 3 px vurgu çizgisi; doğru şık 3 px altın çizgi ve «✓ doğru», seçilen yanlış kesik çizgi ve «✕ senin cevabın»: renk tek başına anlam taşımaz. Sonuç satırı ekran okuyucuya söylenir.', ornekler([
+    B.soru({ soru: 'Felsefenin ilk sorusu neydi?', ust: 'Soru 1 / 10 · Felsefe ne sorar?', secenekler: ['Arkhe nedir?', 'Tanrı var mı?', 'Bilgi nedir?', 'Güzel nedir?'] }),
+    B.soru({ soru: 'Sokrates neyi bildiğini söyler?', secenekler: ['Her şeyi', 'Hiçbir şey bilmediğini', 'Yalnız matematiği'], secili: 'A', dogru: 'B', kilitli: true,
+      sonuc: { baslik: 'Yanlış.', metin: 'Sokrates bilmediğini bildiğini söyler.' } }),
+    B.soru({ kip: 'radyo', isim: 'ornek-kapi', soru: 'Kapı sorusu: radyo grubu, ok tuşlarıyla gezilir.', secenekler: ['Birinci', 'İkinci', 'Üçüncü'], secili: 'B' })
+  ], 'yigin'));
+
+  h += tas(16, 'Tercih düğmeleri', 'Kısa seçenekler yan yana, 44 px, 4 px aralık; seçili dolu vurgu. Tek sekme durağı, ok tuşları gezer (radyo grubu). Ayarlar satırları ve bu sayfanın tema düğmeleri.', ornekler([
+    B.tercih({ ad: 'Yazı boyutu', secenekler: { kucuk: 'Küçük', normal: 'Normal', buyuk: 'Büyük', enbuyuk: 'En büyük' }, deger: 'normal' })
   ], 'tam'));
 
   var kok = document.getElementById('katalog');

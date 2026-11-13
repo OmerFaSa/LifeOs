@@ -131,15 +131,11 @@
       '</span><span class="ayar__not">' + kac(t.aciklama) + '</span></div>';
     var govde;
     if (t.tur === 'secim') {
-      govde = '<div class="seg" role="radiogroup" aria-labelledby="' + id + '">' + Object.keys(t.secenekler).map(function (k) {
-        var on = k === v;
-        return '<button type="button" role="radio" aria-checked="' + on + '" tabindex="' + (on ? 0 : -1) + '" data-ayar="' + kac(t.anahtar) +
-          '" data-deger="' + kac(k) + '">' + kac(t.secenekler[k]) + '</button>';
-      }).join('') + '</div>';
+      govde = (kok.LIFEOS.Kabuk.Bilesen || require('./bilesen.js')).tercih({ etiket: id, secenekler: t.secenekler, deger: v, veri: { ayar: t.anahtar } });
     } else if (t.tur === 'bilgi') {
       govde = '<span class="ayar__ad">' + kac(t.secenekler[String(v)]) + '</span>';
     } else if (t.tur === 'sayi') {
-      govde = '<label class="sayiayar"><input type="number" inputmode="numeric" class="giris" aria-labelledby="' + id + '" data-ayar="' + kac(t.anahtar) +
+      govde = '<label class="sayiayar"><input type="number" inputmode="numeric" aria-labelledby="' + id + '" data-ayar="' + kac(t.anahtar) +
         '" min="' + t.alt + '" max="' + t.ust + '" value="' + (v == null ? '' : kac(v)) + '">' + (t.birim ? '<span>' + kac(t.birim) + '</span>' : '') + '</label>';
     } else {
       govde = '<div class="aralik" role="group" aria-labelledby="' + id + '">' +

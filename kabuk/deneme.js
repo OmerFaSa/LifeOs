@@ -219,11 +219,8 @@
           ' aria-label="Soru ' + (j + 1) + (cevabi(dr, j) ? ', cevaplandı' : '') + '">' + (j + 1) + '</button>';
       }).join('') + '</nav>' +
       (!q ? B.bos({ baslik: 'Bu soru artık içerikte yok; boş sayılır.' })
-        : '<fieldset class="soru" tabindex="-1" data-deneme-soru="' + k(x.id) + '"><legend>' + k(q.soru) + '</legend><p class="soluk">Soru ' + (i + 1) + ' / ' + l.length + ' · ' + k(q.konu) + '</p><div class="secenekler">' +
-          q.sec.map(function (m, j) {
-            var hf = HARF[j], kilit = prova && !!h;
-            return '<button type="button" class="secenek" data-deneme="cevap" data-h="' + hf + '" aria-pressed="' + (h === hf) + '"' + (kilit ? ' disabled' : '') + '><b>' + hf + '</b><span>' + k(m) + '</span></button>';
-          }).join('') + '</div>' + (prova && h ? '<p class="soluk" role="status">Cevabın kaydedildi; provada değişmez. Doğrusu sonda görünür.</p>' : '') + '</fieldset>') +
+        : B.soru({ soru: q.soru, ust: 'Soru ' + (i + 1) + ' / ' + l.length + ' · ' + q.konu, secenekler: q.sec, secili: h || null, kilitli: prova && !!h,
+          sikVeri: { deneme: 'cevap' }, veri: { 'deneme-soru': x.id }, sonuc: prova && h ? { baslik: 'Cevabın kaydedildi;', metin: 'provada değişmez. Doğrusu sonda görünür.' } : null })) +
       B.eylemler([i > 0 ? { metin: 'Önceki', veri: { deneme: 'git', yon: -1, i: i - 1 } } : null,
         i < l.length - 1 ? { metin: 'Sonraki', tur: 'ana', veri: { deneme: 'git', yon: 1, i: i + 1 } } : null,
         { metin: 'Bitir', tur: i === l.length - 1 ? 'ana' : 'sade', veri: { deneme: 'bitir' } }]) +
@@ -239,7 +236,7 @@
         '<p>' + r.dogru + ' doğru, ' + r.yanlis + ' yanlış, ' + r.bos + ' boş <span class="soluk">(' + k(s.ozet.etiket) + ')</span> · ' +
         (s.sureDoldu ? 'süre doldu (' + p.sureDk + ' dk)' : 'kullanılan ' + p.kullanilanDk.deger + ' dk / ' + p.sureDk + ' dk') + ' <span class="soluk">(' + k(p.kullanilanDk.etiket) + ')</span></p>'] }) +
         B.bolum({ baslik: 'Derslere göre', govde: B.liste({ ad: 'Derslere göre', ogeler: p.dersler.map(function (x) {
-          return { ad: dersAdi(x.ders) + ' · ' + virgul(x.net.deger) + ' net', pul: x.net.etiket, not: x.dogru + ' doğru · ' + x.yanlis + ' yanlış · ' + x.bos + ' boş (' + s.ozet.etiket + ')' };
+          return { ad: dersAdi(x.ders) + ' · ' + virgul(x.net.deger) + ' net', pul: x.net.etiket, uzun: true, not: x.dogru + ' doğru · ' + x.yanlis + ' yanlış · ' + x.bos + ' boş (' + s.ozet.etiket + ')' };
         }) }) });
     } else {
       var an = s.analiz, top = { d: 0, y: 0 };
@@ -249,7 +246,7 @@
         '<p>' + top.d + ' doğru, ' + top.y + ' yanlış <span class="soluk">(ölçüldü)</span> · ' +
         (s.sureDoldu ? 'süre doldu (' + s.deneme.sure + ' dk)' : 'süre ' + dakikaYaz(s.toplamSn) + ' / ' + s.deneme.sure + ' dk') + ' <span class="soluk">(ölçüldü)</span></p>'] }) +
         B.bolum({ baslik: 'Testlere göre', govde: B.liste({ ad: 'Testlere göre', ogeler: an.testler.map(function (t) {
-          return { ad: t.ad + ' · ' + virgul(t.net.deger) + ' net', pul: t.net.etiket, not: t.dogru.deger + ' doğru · ' + t.yanlis.deger + ' yanlış (' + t.dogru.etiket + ') · ' +
+          return { ad: t.ad + ' · ' + virgul(t.net.deger) + ' net', pul: t.net.etiket, uzun: true, not: t.dogru.deger + ' doğru · ' + t.yanlis.deger + ' yanlış (' + t.dogru.etiket + ') · ' +
             (t.bos.deger == null ? 'boş: ' + t.bos.etiket : t.bos.deger + ' boş (' + t.bos.etiket + ')') + ' · ' + (t.dakika.deger == null ? 'süre: ' + t.dakika.etiket : t.dakika.deger + ' dk (' + t.dakika.etiket + ')') };
         }) }) }) +
         B.acilir({ baslik: 'Cevap anahtarı (' + s.sorular.length + ' soru)', govde: '<ol class="deneme__anahtar">' + s.sorular.map(function (x) {
@@ -258,7 +255,7 @@
     }
     if (alanAkademik) {
       var ts = tahminSatirlari(Soru.puanTahmini(oku(BITEN, []).map(function (g) { return g.deneme; }), {})), sat = ts.filter(function (x) { return !x.not; });
-      h += B.bolum({ baslik: 'Puan ve sıra tahmini', govde: [sat.length ? B.liste({ ad: 'Puan ve sıra tahmini', ogeler: sat.map(function (x) { return { ad: x.ad, not: x.metin, pul: x.etiket }; }) }) : '']
+      h += B.bolum({ baslik: 'Puan ve sıra tahmini', govde: [sat.length ? B.liste({ ad: 'Puan ve sıra tahmini', ogeler: sat.map(function (x) { return { ad: x.ad, not: x.metin, pul: x.etiket, uzun: true }; }) }) : '']
         .concat(ts.filter(function (x) { return x.not; }).map(function (x) { return '<p class="soluk">' + k(x.not) + '</p>'; })) });
     }
     return h + B.eylemler([{ metin: 'Yeni deneme', tur: 'ana', veri: { deneme: 'yeni' } }, { metin: 'Soru', tur: 'sade', href: '#/motor/soru' }]);

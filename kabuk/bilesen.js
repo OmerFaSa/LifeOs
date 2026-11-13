@@ -1,4 +1,4 @@
-/* LIFEOS.Kabuk.Bilesen (global `Bilesen`) — A2 bileşen kataloğu: kabuğun on dört yapı taşı.
+/* LIFEOS.Kabuk.Bilesen (global `Bilesen`) — A2 bileşen kataloğu: kabuğun on altı yapı taşı.
  * Ekranlar yalnız bunlardan kurulur; her ölçü kabuk/bilesen.css'tedir ve bağlama göre değişmez.
  * Her işlev saf: bir seçenek nesnesi alır, HTML metni döndürür (kabuğun öteki dosyaları gibi). Bütün metin kaçışlıdır;
  * yanlış girdi TypeError atar (sessizce bozuk HTML çizilmez). İç içe parça HTML olarak değil, seçenek nesnesi olarak
@@ -81,19 +81,20 @@
 
   /* 3 · Liste satırı ve liste. Satır yüksekliği sabit (ad ve not birer satır, taşan kısaltılır).
    * durum: acik | kilitli | secili. Liste <ul aria-label>; tur: satir | ders.
-   * eylemler: bağlantı olmayan satırın sağındaki düğmeler (Sil, Düzelt…); bağlantı satırında iç içe etkileşim olmaz. */
+   * eylemler: bağlantı olmayan satırın sağındaki düğmeler (Sil, Düzelt…); bağlantı satırında iç içe etkileşim olmaz.
+   * uzun: ad ve not kısaltılmaz, sarılır; satır en az standart boyda, gerekirse uzar (sayı + kesinlik etiketi taşıyan notlar, saatli plan blokları). */
   function satir(o) {
     nesne('satir', o);
-    var durum = sec('satir', 'durum', o.durum, ['acik', 'kilitli', 'secili']), ad = metin('satir', 'ad', o.ad, false);
+    var durum = sec('satir', 'durum', o.durum, ['acik', 'kilitli', 'secili']), ad = metin('satir', 'ad', o.ad, false), sinif = 'b-satir' + (o.uzun ? ' b-satir--uzun' : '');
     if (o.eylemler != null && o.href != null) hata('satir', 'bağlantı satırında eylem olmaz');
     var ic = '<span class="b-satir__metin"><span class="b-satir__ad">' + kac(ad) + '</span>' +
       (o.not != null && o.not !== '' ? '<span class="b-satir__not">' + kac(metin('satir', 'not', o.not)) + '</span>' : '') + '</span>' +
       (durum === 'kilitli' ? pul({ metin: 'kilitli' }) : o.pul != null ? pul(o.pul) : '') + (o.eylemler != null ? eylemler(o.eylemler) : '');
-    if (durum === 'kilitli') return '<div class="b-satir b-satir--kilitli" aria-disabled="true">' + ic + '</div>';
+    if (durum === 'kilitli') return '<div class="' + sinif + ' b-satir--kilitli" aria-disabled="true">' + ic + '</div>';
     var cur = durum === 'secili' ? ' aria-current="true"' : '';
-    if (o.href != null) return '<a class="b-satir" href="' + kac(yol('satir', o.href)) + '"' + cur + veri('satir', o.veri) + '>' + ic +
+    if (o.href != null) return '<a class="' + sinif + '" href="' + kac(yol('satir', o.href)) + '"' + cur + veri('satir', o.veri) + '>' + ic +
       '<span class="b-satir__ok" aria-hidden="true">›</span></a>';
-    return '<div class="b-satir"' + cur + veri('satir', o.veri) + '>' + ic + '</div>';
+    return '<div class="' + sinif + '"' + cur + veri('satir', o.veri) + '>' + ic + '</div>';
   }
   function liste(o) {
     nesne('liste', o);
@@ -134,36 +135,56 @@
       '" aria-valuenow="' + d + '" aria-valuetext="' + t + ' içinden ' + d + '">' + dolgu + '</div></div>';
   }
 
-  /* 6 · Form alanı. tur: metin | cok | sayi | tarih | saat | secim | onay. Etiket her zaman görünür (for/id);
-   * ipucu ve hata aria-describedby ile bağlı; hata aria-invalid + «Hata:» öneki (renk tek başına değil). */
-  var GIRIS = { metin: 'text', sayi: 'number', tarih: 'date', saat: 'time' };
+  /* 6 · Form alanı. tur: metin | cok | sayi | tarih | saat | arama | secim | onay | coklu | radyo. Etiket her zaman görünür (for/id;
+   * coklu ve radyo: fieldset + legend, aynı isimli onay kutuları / radyolar); ipucu ve hata aria-describedby ile bağlı;
+   * hata aria-invalid + «Hata:» öneki (renk tek başına değil). sayi metin kutusudur (inputmode decimal): Türkçe virgül yazılabilsin,
+   * geçerliliğe motor karar verir. salt: readonly; uzun: çok satır 12 satır; yerTutucu: placeholder; veri: denetimin data-*'ı;
+   * secim'de değeri nesne olan seçenek <optgroup> olur. */
+  var GIRIS = { metin: 'text', sayi: 'text', tarih: 'date', saat: 'time', arama: 'search' };
   function alan(o) {
     nesne('alan', o);
-    var tur = sec('alan', 'tur', o.tur, ['metin', 'cok', 'sayi', 'tarih', 'saat', 'secim', 'onay']), ad = metin('alan', 'ad', o.ad);
+    var tur = sec('alan', 'tur', o.tur, ['metin', 'cok', 'sayi', 'tarih', 'saat', 'arama', 'secim', 'onay', 'coklu', 'radyo']), ad = metin('alan', 'ad', o.ad);
     if (typeof o.isim !== 'string' || !/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(o.isim)) hata('alan', 'isim harfle başlayan [a-zA-Z0-9_-] olmalı');
     var id = 'b-alan-' + o.isim, ipucu = metin('alan', 'ipucu', o.ipucu, true), h = metin('alan', 'hata', o.hata, true);
     if (o.tarif != null && (typeof o.tarif !== 'string' || !AD.test(o.tarif))) hata('alan', 'tarif bir öğe kimliği olmalı');
     var tarif = [o.tarif, ipucu ? id + '-ipucu' : '', h ? id + '-hata' : ''].filter(Boolean).join(' ');
-    var ortak = ' id="' + id + '" name="' + kac(o.isim) + '"' + (tarif ? ' aria-describedby="' + tarif + '"' : '') + (h ? ' aria-invalid="true"' : '') + (o.zorunlu ? ' required' : '');
+    var nit = ' name="' + kac(o.isim) + '"' + veri('alan', o.veri), ek = (tarif ? ' aria-describedby="' + tarif + '"' : '') + (h ? ' aria-invalid="true"' : '');
+    var ortak = ' id="' + id + '"' + nit + ek + (o.zorunlu ? ' required' : '');
     var alt = (ipucu ? '<p class="b-alan__ipucu" id="' + id + '-ipucu">' + kac(ipucu) + '</p>' : '') +
       (h ? '<p class="b-alan__hata" id="' + id + '-hata"><b>Hata:</b> ' + kac(h) + '</p>' : '');
     if (tur === 'onay') {
       if (o.deger != null && typeof o.deger !== 'boolean') hata('alan', 'onay değeri true/false olmalı');
       return '<div class="b-alan"><label class="b-alan__onay"><input type="checkbox"' + ortak + (o.deger ? ' checked' : '') + '><span>' + kac(ad) + '</span></label>' + alt + '</div>';
     }
-    var deger = metin('alan', 'deger', o.deger, true), denetim;
+    if (tur === 'coklu' || tur === 'radyo') {
+      var gs = nesne('alan', o.secenekler), gl = Object.keys(gs), dz = tur === 'coklu' ? (o.deger == null ? [] : o.deger) : [metin('alan', 'deger', o.deger, true)];
+      if (!gl.length) hata('alan', 'secenekler boş');
+      if (!Array.isArray(dz)) hata('alan', 'coklu değeri dizi olmalı');
+      dz = dz.map(String).filter(Boolean);
+      dz.forEach(function (v) { if (gl.indexOf(v) < 0) hata('alan', 'deger seçeneklerde yok'); });
+      return '<fieldset class="b-alan b-alan--grup"' + ek + '><legend class="b-alan__ad">' + kac(ad) + '</legend><div class="b-alan__secenekler">' + gl.map(function (k) {
+        return '<label class="b-alan__onay"><input type="' + (tur === 'coklu' ? 'checkbox' : 'radio') + '"' + nit + ' value="' + kac(k) + '"' + (dz.indexOf(k) >= 0 ? ' checked' : '') + '><span>' +
+          kac(metin('alan', 'secenek', gs[k])) + '</span></label>';
+      }).join('') + '</div>' + alt + '</fieldset>';
+    }
+    var deger = metin('alan', 'deger', o.deger, true), denetim, duz = {};
+    var yt = (o.yerTutucu ? ' placeholder="' + kac(metin('alan', 'yerTutucu', o.yerTutucu)) + '"' : '') + (o.salt ? ' readonly' : '') + (o.enCok ? ' maxlength="' + (o.enCok | 0) + '"' : '');
     if (tur === 'secim') {
-      var s = nesne('alan', o.secenekler), anahtarlar = Object.keys(s);
-      if (!anahtarlar.length) hata('alan', 'secenekler boş');
-      if (deger && anahtarlar.indexOf(deger) < 0) hata('alan', 'deger seçeneklerde yok');
-      denetim = '<select class="b-alan__giris"' + ortak + '>' + anahtarlar.map(function (k) {
-        return '<option value="' + kac(k) + '"' + (k === deger ? ' selected' : '') + '>' + kac(metin('alan', 'secenek', s[k])) + '</option>';
-      }).join('') + '</select>';
+      var secenek = function (g) {
+        return Object.keys(nesne('alan', g)).map(function (k) {
+          if (g[k] && typeof g[k] === 'object') return '<optgroup label="' + kac(k) + '">' + secenek(g[k]) + '</optgroup>';
+          duz[k] = true;
+          return '<option value="' + kac(k) + '"' + (k === deger ? ' selected' : '') + '>' + kac(metin('alan', 'secenek', g[k])) + '</option>';
+        }).join('');
+      };
+      var ic = secenek(o.secenekler);
+      if (!Object.keys(duz).length) hata('alan', 'secenekler boş');
+      if (deger && !duz[deger]) hata('alan', 'deger seçeneklerde yok');
+      denetim = '<select class="b-alan__giris"' + ortak + '>' + ic + '</select>';
     } else if (tur === 'cok') {
-      denetim = '<textarea class="b-alan__giris b-alan__giris--cok" rows="4"' + ortak + (o.enCok ? ' maxlength="' + (o.enCok | 0) + '"' : '') + '>' + kac(deger) + '</textarea>';
+      denetim = '<textarea class="b-alan__giris b-alan__giris--cok' + (o.uzun ? ' b-alan__giris--uzun" rows="12"' : '" rows="4"') + ortak + yt + '>' + kac(deger) + '</textarea>';
     } else {
-      denetim = '<input type="' + GIRIS[tur] + '" class="b-alan__giris"' + ortak + ' value="' + kac(deger) + '"' + (o.enCok ? ' maxlength="' + (o.enCok | 0) + '"' : '') +
-        (tur === 'sayi' ? ' inputmode="decimal"' : '') + ' autocomplete="off">';
+      denetim = '<input type="' + GIRIS[tur] + '" class="b-alan__giris"' + ortak + ' value="' + kac(deger) + '"' + yt + (tur === 'sayi' ? ' inputmode="decimal"' : '') + ' autocomplete="off">';
     }
     return '<div class="b-alan' + (h ? ' b-alan--hata' : '') + '"><label class="b-alan__ad" for="' + id + '">' + kac(ad) +
       (o.zorunlu ? ' <span class="b-alan__zorunlu">· gerekli</span>' : '') + '</label>' + denetim + alt + '</div>';
@@ -208,12 +229,13 @@
   }
 
   /* 10 · Uyarı / bilgi satırı. tur: bilgi (note) | tamam (status) | dikkat (note) | hata (alert).
-   * Tür renkle değil, önündeki sözcükle de ayrılır. eylem: bir düğme ya da düğme dizisi (sağda). */
+   * Tür renkle değil, önündeki sözcükle de ayrılır. eylem: bir düğme ya da düğme dizisi (sağda).
+   * hata ve tamam odak alabilir (tabindex=-1): form gönderilince ekran iletinin üstüne odaklanır, ekran okuyucu okur. */
   var UYARI = { bilgi: ['Bilgi', 'note'], tamam: ['Tamam', 'status'], dikkat: ['Dikkat', 'note'], hata: ['Hata', 'alert'] };
   function uyari(o) {
     nesne('uyari', o);
     var tur = sec('uyari', 'tur', o.tur, ['bilgi', 'tamam', 'dikkat', 'hata']);
-    return '<div class="b-uyari b-uyari--' + tur + '" role="' + UYARI[tur][1] + '"' + veri('uyari', o.veri) + '><span class="b-uyari__tur">' + UYARI[tur][0] + '</span>' +
+    return '<div class="b-uyari b-uyari--' + tur + '" role="' + UYARI[tur][1] + '"' + (tur === 'hata' || tur === 'tamam' ? ' tabindex="-1"' : '') + veri('uyari', o.veri) + '><span class="b-uyari__tur">' + UYARI[tur][0] + '</span>' +
       '<p class="b-uyari__metin">' + kac(metin('uyari', 'metin', o.metin)) + '</p>' + (o.eylem ? (Array.isArray(o.eylem) ? eylemler(o.eylem) : dugme(o.eylem)) : '') + '</div>';
   }
 
@@ -245,11 +267,57 @@
       '</summary><div class="b-acilir__govde">' + govde('acilir', o.govde) + '</div></details>';
   }
 
+  /* 15 · Soru. Soru metni (legend) ve şıklar A, B, … ya da şıksız (açık uçlu) gövde; altında sonuç satırı (role=status, odak alır, boşken görünmez).
+   * kip: dugme (her şık bir <button> + data-h harfi; sikVeri her şıkka) | radyo (form içinde radyo grubu, isim gerekli; ok tuşlarını tarayıcı yönetir).
+   * secili: seçilen harf (aria-pressed / checked). dogru verilirse işaretlenir: doğru şık 3 px altın çizgi + «✓ doğru», seçilen yanlış şık kesik çizgi
+   * + «✕ senin cevabın» (renk tek başına değil). kilitli: şıklar kapalı. ust: legend altında kısa soluk not. sonuc: {baslik, metin?, maddeler?, not?}. */
+  var HARF = 'ABCDEFGH';
+  function soru(o) {
+    nesne('soru', o);
+    var kip = sec('soru', 'kip', o.kip, ['dugme', 'radyo']), s = o.secenekler, ic;
+    if (s != null) {
+      if (!Array.isArray(s) || s.length < 2 || s.length > HARF.length) hata('soru', 'secenekler 2–8 öğeli dizi olmalı');
+      var harf = HARF.slice(0, s.length);
+      ['secili', 'dogru'].forEach(function (a) { if (o[a] != null && (typeof o[a] !== 'string' || o[a].length !== 1 || harf.indexOf(o[a]) < 0)) hata('soru', a + ' şıklardan birinin harfi olmalı'); });
+      var isim = kip === 'radyo' ? kac(metin('soru', 'isim', o.isim)) : '';
+      ic = '<div class="b-soru__siklar">' + s.map(function (m, i) {
+        var h = harf[i], im = o.dogru == null ? '' : h === o.dogru ? 'dogru' : h === o.secili ? 'yanlis' : '';
+        var yazi = '<b class="b-soru__harf">' + h + '</b><span class="b-soru__yazi">' + kac(metin('soru', 'secenek', m)) + '</span>' +
+          (im ? '<span class="b-soru__im">' + (im === 'dogru' ? '✓ doğru' : '✕ senin cevabın') + '</span>' : '');
+        var sinif = 'b-soru__sik' + (im ? ' b-soru__sik--' + im : ''), kapali = o.kilitli ? ' disabled' : '';
+        if (kip === 'radyo') return '<label class="' + sinif + '"><input type="radio" name="' + isim + '" value="' + h + '"' + (h === o.secili ? ' checked' : '') + kapali + '>' + yazi + '</label>';
+        return '<button type="button" class="' + sinif + '"' + veri('soru', o.sikVeri) + ' data-h="' + h + '" aria-pressed="' + (h === o.secili) + '"' + kapali + '>' + yazi + '</button>';
+      }).join('') + '</div>';
+    } else if (o.govde != null) ic = govde('soru', o.govde);
+    else hata('soru', 'secenekler ya da govde gerekli');
+    var r = o.sonuc == null ? null : nesne('soru', o.sonuc);
+    if (r && r.maddeler != null && !Array.isArray(r.maddeler)) hata('soru', 'sonuc.maddeler dizi olmalı');
+    var sonuc = !r ? '' : '<b>' + kac(metin('soru', 'sonuc.baslik', r.baslik)) + '</b>' + (r.metin ? ' ' + kac(metin('soru', 'sonuc.metin', r.metin)) : '') +
+      (r.maddeler && r.maddeler.length ? '<ul>' + r.maddeler.map(function (x) { return '<li>' + kac(metin('soru', 'madde', x)) + '</li>'; }).join('') + '</ul>' : '') +
+      (r.not ? '<p class="b-soru__not">' + kac(metin('soru', 'sonuc.not', r.not)) + '</p>' : '');
+    return '<fieldset class="b-soru" tabindex="-1"' + veri('soru', o.veri) + '><legend class="b-soru__metin">' + kac(metin('soru', 'soru', o.soru)) + '</legend>' +
+      (o.ust ? '<p class="b-soru__ust">' + kac(metin('soru', 'ust', o.ust)) + '</p>' : '') + ic + '<div class="b-soru__sonuc" tabindex="-1" role="status">' + sonuc + '</div></fieldset>';
+  }
+
+  /* 16 · Tercih düğmeleri. Kısa seçenekler yan yana: radiogroup + radio (aria-checked); seçili tek, sekme durağı tek (seçili, yoksa ilki).
+   * Ok tuşları ve seçim olayı ekranın işidir (kabuk.js ayar satırı, katalog sayfası). etiket: başlığın kimliği (aria-labelledby) ya da
+   * ad (aria-label); secenekler {deger: ad}; deger: seçili anahtar; veri her düğmeye (data-deger ayrıca). */
+  function tercih(o) {
+    nesne('tercih', o);
+    var s = nesne('tercih', o.secenekler), l = Object.keys(s), odak = l.indexOf(o.deger) < 0 ? l[0] : o.deger;
+    if (!l.length) hata('tercih', 'secenekler boş');
+    if (o.etiket != null && (typeof o.etiket !== 'string' || !AD.test(o.etiket))) hata('tercih', 'etiket bir öğe kimliği olmalı');
+    return '<div class="b-tercih" role="radiogroup"' + (o.etiket ? ' aria-labelledby="' + o.etiket + '"' : ' aria-label="' + kac(metin('tercih', 'ad', o.ad)) + '"') + '>' + l.map(function (k) {
+      return '<button type="button" class="b-tercih__sec" role="radio" aria-checked="' + (k === o.deger) + '" tabindex="' + (k === odak ? 0 : -1) + '"' + veri('tercih', o.veri) +
+        ' data-deger="' + kac(k) + '">' + kac(metin('tercih', 'secenek', s[k], false, 40)) + '</button>';
+    }).join('') + '</div>';
+  }
+
   var Bilesen = {
-    TASLAR: ['dugme', 'pul', 'satir', 'ders', 'ilerleme', 'alan', 'bos', 'baslik', 'sayi', 'uyari', 'bolum', 'panel', 'eylemler', 'acilir'],
+    TASLAR: ['dugme', 'pul', 'satir', 'ders', 'ilerleme', 'alan', 'bos', 'baslik', 'sayi', 'uyari', 'bolum', 'panel', 'eylemler', 'acilir', 'soru', 'tercih'],
     ETIKET: ETIKET, kac: kac,
     dugme: dugme, pul: pul, satir: satir, liste: liste, ders: ders, ilerleme: ilerleme, alan: alan, bos: bos,
-    baslik: baslik, sayi: sayi, sayilar: sayilar, uyari: uyari, bolum: bolum, panel: panel, eylemler: eylemler, acilir: acilir
+    baslik: baslik, sayi: sayi, sayilar: sayilar, uyari: uyari, bolum: bolum, panel: panel, eylemler: eylemler, acilir: acilir, soru: soru, tercih: tercih
   };
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Kabuk = kok.LIFEOS.Kabuk || {};

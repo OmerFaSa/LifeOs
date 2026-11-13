@@ -29,11 +29,13 @@ const ORNEK = {
   bolum: () => B.bolum({ baslik: K, govde: B.pul('x') }),
   panel: () => B.panel({ baslik: K, govde: [B.pul('x')] }),
   eylemler: () => B.eylemler([{ metin: K.slice(0, 40), veri: { ac: K } }, null, { yazi: K }]),
-  acilir: () => B.acilir({ baslik: K, not: K, govde: B.pul('x'), veri: { a: K } })
+  acilir: () => B.acilir({ baslik: K, not: K, govde: B.pul('x'), veri: { a: K } }),
+  soru: () => B.soru({ soru: K, ust: K, secenekler: [K, K], secili: 'A', dogru: 'B', sikVeri: { ac: K }, veri: { s: K }, sonuc: { baslik: K, metin: K, maddeler: [K], not: K } }),
+  tercih: () => B.tercih({ ad: K, secenekler: { a: K.slice(0, 40), b: 'B' }, deger: 'a', veri: { ayar: K } })
 };
 
-t('katalog on dört taş sunar ve her biri test örneğine sahip', () => {
-  dogru(B.TASLAR.length === 14, 'taş sayısı ' + B.TASLAR.length);
+t('katalog on altı taş sunar ve her biri test örneğine sahip', () => {
+  dogru(B.TASLAR.length === 16, 'taş sayısı ' + B.TASLAR.length);
   B.TASLAR.forEach(ad => dogru(typeof B[ad] === 'function' && ORNEK[ad], ad));
 });
 t('kaçış: hiçbir taş ham etiket ya da tırnak sızdırmaz', () => {
@@ -153,6 +155,61 @@ t('sayı kutusu: kesinlik etiketi zorunlu, eksik veri sıfır değildir', () => 
   dogru(/b-pul--kesik">tahmin/.test(B.sayi({ ad: 'Su', deger: 1, etiket: 'estimated' })), 'tahmin kesik çizgiyle de ayrılır');
 });
 
+t('soru: şıklar, seçili, doğru/yanlış yazıyla, kilit, radyo, açık uçlu, sonuç', () => {
+  const s = B.soru({ soru: 'Arkhe?', ust: 'Soru 1 / 3', secenekler: ['Su', 'Hava', 'Ateş'], secili: 'A', dogru: 'B', kilitli: true, sikVeri: { 'arac-ac': 'soru-cevap' }, veri: { sira: 0 },
+    sonuc: { baslik: 'Yanlış.', metin: 'Thales suyu söyler.' } });
+  dogru(/^<fieldset class="b-soru" tabindex="-1" data-sira="0"><legend class="b-soru__metin">Arkhe\?<\/legend><p class="b-soru__ust">Soru 1 \/ 3<\/p>/.test(s), s);
+  dogru((s.match(/<button type="button" class="b-soru__sik[^"]*" data-arac-ac="soru-cevap" data-h="[ABC]" aria-pressed="(true|false)" disabled>/g) || []).length === 3, 'üç kapalı şık düğmesi');
+  dogru(/b-soru__sik b-soru__sik--yanlis" [^>]*data-h="A" aria-pressed="true"/.test(s) && /✕ senin cevabın/.test(s), 'seçilen yanlış kesik çizgi + yazı');
+  dogru(/b-soru__sik b-soru__sik--dogru" [^>]*data-h="B" aria-pressed="false"/.test(s) && /✓ doğru/.test(s), 'doğru şık işaretli + yazı');
+  dogru(/<div class="b-soru__sonuc" tabindex="-1" role="status"><b>Yanlış\.<\/b> Thales suyu söyler\.<\/div><\/fieldset>$/.test(s), 'sonuç satırı');
+  const bos = B.soru({ soru: 'S', secenekler: ['a', 'b'] });
+  dogru(!/b-soru__im|disabled|aria-pressed="true"/.test(bos) && /<div class="b-soru__sonuc" tabindex="-1" role="status"><\/div>/.test(bos), 'cevapsız soru: işaret yok, sonuç boş');
+  dogru(!/b-soru__sik--/.test(B.soru({ soru: 'S', secenekler: ['a', 'b'], secili: 'A' })), 'doğru verilmezse (deneme) doğru/yanlış söylenmez');
+  const r = B.soru({ kip: 'radyo', isim: 'f.u1.k1', soru: 'S', secenekler: ['a', 'b'], secili: 'B' });
+  dogru((r.match(/<label class="b-soru__sik"><input type="radio" name="f\.u1\.k1" value="[AB]"/g) || []).length === 2 && /value="B" checked>/.test(r), 'radyo grubu, içerik kimliği ad');
+  const a = B.soru({ soru: 'Neden?', govde: B.alan({ ad: 'Cevabın', isim: 'c', tur: 'cok' }), sonuc: { baslik: 'Kaydedildi.', maddeler: ['ölçüt 1'], not: 'Örnek cevap: x' } });
+  dogru(/<textarea/.test(a) && !/b-soru__siklar/.test(a) && /<ul><li>ölçüt 1<\/li><\/ul><p class="b-soru__not">Örnek cevap: x<\/p>/.test(a), 'açık uçlu');
+  atar(() => B.soru({ soru: 'S' }), /secenekler ya da govde/);
+  atar(() => B.soru({ soru: 'S', secenekler: ['a'] }), /2–8/);
+  atar(() => B.soru({ soru: 'S', secenekler: ['a', 'b'], secili: 'C' }), /secili/);
+  atar(() => B.soru({ soru: 'S', secenekler: ['a', 'b'], dogru: 'ab' }), /dogru/);
+  atar(() => B.soru({ kip: 'radyo', soru: 'S', secenekler: ['a', 'b'] }), /isim gerekli/);
+  atar(() => B.soru({ soru: 'S', secenekler: ['a', 'b'], sonuc: { metin: 'x' } }), /sonuc\.baslik gerekli/);
+  atar(() => B.soru({ soru: 'S', secenekler: ['a', 'b'], sonuc: { baslik: 'x', maddeler: 'y' } }), /maddeler dizi/);
+  atar(() => B.soru({ soru: 'S', secenekler: ['a', 'b'], kip: 'cizgi' }), /kip/);
+});
+t('tercih: radyo grubu, tek seçili, tek sekme durağı, veri her düğmede', () => {
+  const h = B.tercih({ etiket: 'ayar-boyut', secenekler: { kucuk: 'Küçük', buyuk: 'Büyük' }, deger: 'buyuk', veri: { ayar: 'lifeos.boyut' } });
+  dogru(/^<div class="b-tercih" role="radiogroup" aria-labelledby="ayar-boyut">/.test(h), h);
+  dogru((h.match(/role="radio"/g) || []).length === 2 && /aria-checked="true" tabindex="0" data-ayar="lifeos\.boyut" data-deger="buyuk">Büyük/.test(h), 'seçili');
+  dogru(/aria-checked="false" tabindex="-1" data-ayar="lifeos\.boyut" data-deger="kucuk"/.test(h), 'seçili olmayan sekmede değil');
+  dogru(/aria-checked="false" tabindex="0"[^>]*data-deger="a"/.test(B.tercih({ ad: 'X', secenekler: { a: 'A', b: 'B' } })), 'seçim yoksa ilki sekme durağı');
+  dogru(/aria-label="X"/.test(B.tercih({ ad: 'X', secenekler: { a: 'A' } })), 'ad');
+  atar(() => B.tercih({ ad: 'X', secenekler: {} }), /boş/);
+  atar(() => B.tercih({ etiket: 'Kötü id', secenekler: { a: 'A' } }), /etiket/);
+  atar(() => B.tercih({ secenekler: { a: 'A' } }), /ad gerekli/);
+});
+t('alan: arama, salt, uzun, yer tutucu, veri, optgroup, çoklu ve radyo grubu, Türkçe ondalık', () => {
+  const s = B.alan({ ad: 'Su', isim: 'su', tur: 'sayi', yerTutucu: '0 – 5', veri: { 'kayit-gun': '' } });
+  dogru(/type="text"[^>]*data-kayit-gun=""[^>]*placeholder="0 – 5"[^>]* inputmode="decimal"/.test(s), 'sayı metin kutusu, virgül yazılır: ' + s);
+  dogru(/type="search"/.test(B.alan({ ad: 'Ara', isim: 'ara', tur: 'arama' })) && / readonly/.test(B.alan({ ad: 'K', isim: 'k', salt: true })), 'arama, salt');
+  dogru(/b-alan__giris--uzun" rows="12"/.test(B.alan({ ad: 'N', isim: 'n', tur: 'cok', uzun: true })), 'uzun');
+  const g = B.alan({ ad: 'Tür', isim: 't', tur: 'secim', deger: 'su', secenekler: { Genel: { su: 'Su' }, Spor: { kosu: 'Koşu' } } });
+  dogru(/<optgroup label="Genel"><option value="su" selected>Su<\/option><\/optgroup><optgroup label="Spor">/.test(g), 'optgroup');
+  const c = B.alan({ ad: 'Günler', isim: 'gun', tur: 'coklu', secenekler: { 0: 'Pzt', 1: 'Sal', 2: 'Çar' }, deger: [0, 2] });
+  dogru(/^<fieldset class="b-alan b-alan--grup"><legend class="b-alan__ad">Günler<\/legend>/.test(c) && (c.match(/type="checkbox" name="gun" value="\d"/g) || []).length === 3, 'çoklu: ' + c);
+  dogru(/value="0" checked/.test(c) && !/value="1" checked/.test(c) && /value="2" checked/.test(c) && !/id="b-alan-gun"/.test(c), 'işaretliler, yinelenen kimlik yok');
+  dogru(/type="radio" name="g" value="ag" checked/.test(B.alan({ ad: 'Görünüm', isim: 'g', tur: 'radyo', secenekler: { liste: 'Liste', ag: 'Ağ' }, deger: 'ag' })), 'radyo');
+  atar(() => B.alan({ ad: 'G', isim: 'g', tur: 'coklu', secenekler: { a: 'A' }, deger: 'a' }), /dizi/);
+  atar(() => B.alan({ ad: 'G', isim: 'g', tur: 'radyo', secenekler: { a: 'A' }, deger: 'z' }), /seçeneklerde yok/);
+  atar(() => B.alan({ ad: 'G', isim: 'g', tur: 'secim', secenekler: { G: { a: 'A' } }, deger: 'G' }), /seçeneklerde yok/, 'grup adı değer değil');
+});
+t('uzun satır ve odaklanan ileti', () => {
+  dogru(/^<div class="b-satir b-satir--uzun">/.test(B.satir({ ad: 'Test', not: '2 doğru (ölçüldü)', uzun: true })) && !/--uzun/.test(B.satir({ ad: 'x' })), 'uzun');
+  dogru(/role="alert" tabindex="-1"/.test(B.uyari({ tur: 'hata', metin: 'x' })) && /role="status" tabindex="-1"/.test(B.uyari({ tur: 'tamam', metin: 'x' })) && !/tabindex/.test(B.uyari({ tur: 'bilgi', metin: 'x' })), 'ileti odaklanır');
+});
+
 // ---- CSS ve katalog sayfası: A2 kuralları yapısal olarak ----
 const css = fs.readFileSync(path.join(__dirname, 'bilesen.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 const kabukCss = fs.readFileSync(path.join(__dirname, 'kabuk.css'), 'utf8');
@@ -169,11 +226,11 @@ t('bilesen.css bağlam seçicisi yazmaz: her kural bir .b- taşıyla başlar', (
   dogru(kurallar.length > 40, 'kural sayısı ' + kurallar.length);
   kurallar.forEach(k => k.split(',').forEach(s => dogru(/^(a|textarea|select|input)?\.b-[a-z]/.test(s.trim()), 'bağlam seçicisi: ' + s.trim())));
 });
-t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; on dört taşı gösterir', () => {
+t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; on altı taşı gösterir', () => {
   const h = fs.readFileSync(path.join(__dirname, 'bilesen.html'), 'utf8');
   const yuk = (h.match(/(?:href|src)="[^"#]+\.(?:css|js)"/g) || []).map(x => x.replace(/^(href|src)="|"$/g, ''));
   dogru(JSON.stringify(yuk) === JSON.stringify(['../brand/ortak/piksel-yazi.css', 'kabuk.css', 'bilesen.css', 'bilesen.js']), yuk.join(', '));
-  for (let n = 1; n <= 14; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
+  for (let n = 1; n <= 16; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
 });
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');

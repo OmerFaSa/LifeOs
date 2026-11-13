@@ -411,16 +411,14 @@
     var f = dr && dr.form || (a ? { ad: a.ad, klasor: a.klasor, gorunum: a.gorunum, kingOkur: a.sistemNotu.kingOkur, anlam: a.sistemNotu.anlam, kullanim: a.sistemNotu.kullanim }
       : { ad: '', klasor: '', gorunum: 'liste', kingOkur: false, anlam: '', kullanim: '' }); // King okuma izni varsayılan kapalı (Not.yeniArac)
     return I.ust(geri(a ? 'Düzenle' : 'Yeni araç')) + '<div class="govde" data-arac="not">' + B.baslik({ metin: a ? 'Aracı düzenle' : 'Yeni araç' }) +
-      '<form class="aracform" data-arac-id="' + k(id) + '" novalidate><div class="notform__ileti" role="alert" tabindex="-1">' + (dr ? k(dr.metin) : '') + '</div>' +
-      '<label class="alanet">Ad<input type="text" class="giris" name="ad" maxlength="60" value="' + k(f.ad) + '" autocomplete="off"></label>' +
-      '<label class="alanet">Klasör' + (a ? ' · oluştururken seçilir, değişmez' : ' · boş bırakırsan adı') + '<input type="text" class="giris" name="klasor" maxlength="120" value="' + k(f.klasor) + '" autocomplete="off"' + (a ? ' readonly' : '') + '></label>' +
-      '<fieldset class="gunsec"><legend>Görünüm</legend>' + [['liste', 'Liste'], ['ag', 'Ağ']].map(function (g) {
-        return '<label class="isaret"><input type="radio" name="gorunum" value="' + g[0] + '"' + (f.gorunum === g[0] ? ' checked' : '') + '> ' + g[1] + '</label>';
-      }).join('') + '</fieldset>' +
-      '<fieldset class="sistemnot"><legend>Sisteme not</legend><p class="soluk">King\'e bu araç hakkında bıraktığın not. King yalnız izin verirsen okur; özel notlar her durumda kapalı kalır.</p>' +
-      B.alan({ ad: 'King okuyabilsin', isim: 'kingOkur', tur: 'onay', deger: !!f.kingOkur }) +
-      '<label class="alanet">King bundan ne anlamalı?<textarea class="giris" name="anlam" rows="3" maxlength="1000" placeholder="Aklıma gelen fikirleri buraya atıyorum.">' + k(f.anlam) + '</textarea></label>' +
-      '<label class="alanet">King bunu nasıl kullanmalı?<textarea class="giris" name="kullanim" rows="3" maxlength="1000" placeholder="Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.">' + k(f.kullanim) + '</textarea></label></fieldset>' +
+      '<form class="aracform" data-arac-id="' + k(id) + '" novalidate>' + (dr ? B.uyari({ tur: 'hata', metin: dr.metin }) : '') +
+      B.alan({ ad: 'Ad', isim: 'ad', deger: f.ad, enCok: 60 }) +
+      B.alan({ ad: 'Klasör' + (a ? ' · oluştururken seçilir, değişmez' : ' · boş bırakırsan adı'), isim: 'klasor', deger: f.klasor, enCok: 120, salt: !!a }) +
+      B.alan({ ad: 'Görünüm', isim: 'gorunum', tur: 'radyo', secenekler: { liste: 'Liste', ag: 'Ağ' }, deger: f.gorunum === 'ag' ? 'ag' : 'liste' }) +
+      B.panel({ baslik: 'Sisteme not', id: 'sn-form', tur: 'guclu', govde: ['<p class="soluk">King\'e bu araç hakkında bıraktığın not. King yalnız izin verirsen okur; özel notlar her durumda kapalı kalır.</p>',
+        B.alan({ ad: 'King okuyabilsin', isim: 'kingOkur', tur: 'onay', deger: !!f.kingOkur }),
+        B.alan({ ad: 'King bundan ne anlamalı?', isim: 'anlam', tur: 'cok', enCok: 1000, deger: f.anlam, yerTutucu: 'Aklıma gelen fikirleri buraya atıyorum.' }),
+        B.alan({ ad: 'King bunu nasıl kullanmalı?', isim: 'kullanim', tur: 'cok', enCok: 1000, deger: f.kullanim, yerTutucu: 'Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.' })] }) +
       B.eylemler([{ metin: a ? 'Kaydet' : 'Oluştur', tur: 'ana', tip: 'submit' }, { metin: 'Vazgeç', tur: 'sade', href: a ? '#/motor/not/arac/' + a.id : '#/motor/not' }]) + '</form></div>';
   }
   function aracFormKaydet(form) {
@@ -433,7 +431,7 @@
     } catch (x) {
       aracDurum = { id: id, metin: x.message, form: veri }; // yazılan kaybolmasın
       ic().rota();
-      var il = d.querySelector('.aracform .notform__ileti'); if (il) il.focus();
+      var il = d.querySelector('.aracform .b-uyari'); if (il) il.focus();
     }
   }
   function sayfaNot(yer, alt) {
@@ -443,9 +441,8 @@
     var notlar = oku(NOT_ANAHTAR, []);
     if (!alt) {
       var araclar = oku(ARAC_ANAHTAR, []);
-      return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not' }) +
-        '<div class="aracust"><input type="search" class="giris" data-not-ara aria-label="Notlarda ara" placeholder="Notlarda ara (#etiket de olur)" autocomplete="off">' +
-        B.dugme({ metin: 'Yeni not', tur: 'ana', href: '#/motor/not/yeni' }) + '</div>' +
+      return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not', eylem: { metin: 'Yeni not', tur: 'ana', href: '#/motor/not/yeni' } }) +
+        B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: '#etiket de olur', veri: { 'not-ara': '' } }) +
         '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div>' +
         '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' +
         B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', govde: ['<p class="soluk">Bir araç notlarını kendi klasöründe toplar ve King\'e bıraktığın notu taşır.</p>',
@@ -463,23 +460,21 @@
     var oteki = notlar.filter(function (x) { return !n || x.id !== n.id; }).sort(notSira);
     var adlar = {}; notlar.forEach(function (x) { adlar[x.id] = Not.ad(x); });
     var giden = n ? Not.baglar(n.govde) : [], gelen = n ? Not.geriBaglar(notlar, n.id) : [];
-    var bagSatiri = function (b) {
-      var varMi = adlar[b.id] != null;
-      return '<li>' + (varMi ? '<a href="#/motor/not/' + b.id + '">' + k(b.ad || adlar[b.id]) + '</a>' : '<span class="soluk">' + k(b.ad || 'silinmiş not') + ' (silinmiş)</span>') +
-        (b.celiski ? ' ' + B.pul('çelişki') : '') + '</li>';
+    var bagSatiri = function (b) { // var olan not bağlantı, silinmiş not düz satır
+      var pul = b.celiski ? 'çelişki' : null;
+      return adlar[b.id] != null ? { ad: b.ad || adlar[b.id] || 'Adsız not', href: '#/motor/not/' + b.id, pul: pul } : { ad: (b.ad || 'silinmiş not') + ' (silinmiş)', pul: pul };
     };
     return I.ust(geri) + '<div class="govde" data-arac="not">' + B.baslik({ metin: n ? 'Notu düzenle' : 'Yeni not' }) +
       '<form class="notform" data-not="' + k(alt) + '" novalidate>' +
-      '<div class="notform__ileti" role="alert" tabindex="-1">' + (durum ? k(durum.metin) : '') + '</div>' +
+      (durum ? B.uyari({ tur: durum.tamam ? 'tamam' : 'hata', metin: durum.metin }) : '') +
       (aracA ? '<input type="hidden" name="klasor" value="' + k(aracA.klasor) + '"><p class="soluk">Araç: ' + k(aracA.ad) + ' · ' + (aracA.sistemNotu.kingOkur ? 'King okur' : 'King okumaz') + '</p>' : '') +
-      '<label class="alanet">Başlık<input type="text" class="giris" name="baslik" maxlength="120" value="' + k(f.baslik) + '" autocomplete="off"></label>' +
-      '<label class="alanet">Not<textarea class="giris" name="govde" rows="12">' + k(f.govde) + '</textarea></label>' +
-      (oteki.length ? '<label class="alanet">Başka bir nota bağ ekle<select class="giris" data-bag-ekle><option value="">Not seç…</option>' +
-        oteki.map(function (x) { return '<option value="' + k(x.id) + '">' + k(Not.ad(x)) + '</option>'; }).join('') + '</select></label>' : '') +
+      B.alan({ ad: 'Başlık', isim: 'baslik', deger: f.baslik, enCok: 120 }) + B.alan({ ad: 'Not', isim: 'govde', tur: 'cok', uzun: true, deger: f.govde }) +
+      (oteki.length ? B.alan({ ad: 'Başka bir nota bağ ekle', isim: 'bagEkle', tur: 'secim', veri: { 'bag-ekle': '' },
+        secenekler: oteki.reduce(function (o, x) { o[x.id] = Not.ad(x) || 'Adsız not'; return o; }, { '': 'Not seç…' }) }) : '') +
       B.alan({ ad: 'Özel (King görmez)', isim: 'ozel', tur: 'onay', deger: !!f.ozel }) + B.alan({ ad: 'Üstte tut', isim: 'sabit', tur: 'onay', deger: !!f.sabit }) +
       B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, n ? { metin: 'Sil', tur: 'sade', veri: { 'arac-ac': 'not-sil', id: n.id } } : null, { metin: 'Notlara dön', tur: 'sade', href: '#/motor/not' }]) + '</form>' +
-      (giden.length ? B.bolum({ baslik: 'Bu nottaki bağlar', govde: '<ul class="baglar">' + giden.map(bagSatiri).join('') + '</ul>' }) : '') +
-      (gelen.length ? B.bolum({ baslik: 'Bu nota bağlananlar', govde: '<ul class="baglar">' + gelen.map(bagSatiri).join('') + '</ul>' }) : '') +
+      (giden.length ? B.bolum({ baslik: 'Bu nottaki bağlar', govde: B.liste({ ad: 'Bu nottaki bağlar', ogeler: giden.map(bagSatiri) }) }) : '') +
+      (gelen.length ? B.bolum({ baslik: 'Bu nota bağlananlar', govde: B.liste({ ad: 'Bu nota bağlananlar', ogeler: gelen.map(bagSatiri) }) }) : '') +
       (n ? '<p class="soluk">Son değişiklik ' + tarih(n.guncelleme) + '</p>' : '') + '</div>';
   }
   function notFormKaydet(form) {
@@ -489,13 +484,13 @@
     try {
       var r = notKaydet(Not, oku(NOT_ANAHTAR, []), id, veri, simdi, kimlik('n', simdi, Math.random()));
       yaz(NOT_ANAHTAR, r.notlar);
-      notDurum = { id: r.id, metin: 'Kaydedildi.' };
+      notDurum = { id: r.id, metin: 'Kaydedildi.', tamam: true };
       ic().git('#/motor/not/' + r.id);
     } catch (e) {
       notDurum = { id: id, metin: e.message, form: veri }; // yazılan kaybolmasın
       ic().rota();
     }
-    setTimeout(function () { var il = d.querySelector('.notform__ileti'); if (il && il.textContent) il.focus(); }, 0); // çizimden sonra: ileti ekran okuyucuya da ulaşsın
+    setTimeout(function () { var il = d.querySelector('.notform .b-uyari'); if (il) il.focus(); }, 0); // çizimden sonra: ileti ekran okuyucuya da ulaşsın
   }
 
   /* ---- Tekrar ---- */
@@ -549,14 +544,16 @@
     liste += kapiT.length ? B.bolum({ baslik: 'Kapıda kalınan sorular (' + kapiT.length + ')', veri: { 'kapi-kartlari': '' }, govde: ['<p class="soluk">Sorular taslak: onaylanınca tekrara girer. Açınca doğru cevap görünür.</p>']
       .concat(kapiT.map(function (x) { return B.acilir({ baslik: x.on, duzey: 3, govde: '<p>' + k(x.arka) + '</p><p class="soluk">' + k(kapiKaynak(x)) + ' · taslak</p>' }); })) }) : '';
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="tekrar">' + B.baslik({ metin: 'Tekrar' }) + govde +
-      '<form class="kartform" novalidate><h2>Kart ekle</h2><div class="notform__ileti" role="alert" tabindex="-1"></div>' +
-      '<label class="alanet">Ön yüz (soru)<input type="text" class="giris" name="on" maxlength="300" autocomplete="off"></label>' +
-      '<label class="alanet">Arka yüz (cevap)<textarea class="giris" name="arka" rows="3" maxlength="2000"></textarea></label>' +
+      '<form class="kartform" novalidate>' + B.baslik({ metin: 'Kart ekle', duzey: 2 }) +
+      B.alan({ ad: 'Ön yüz (soru)', isim: 'on', enCok: 300 }) + B.alan({ ad: 'Arka yüz (cevap)', isim: 'arka', tur: 'cok', enCok: 2000 }) +
       B.eylemler([{ metin: 'Kartı ekle', tip: 'submit' }]) + '</form>' + liste + '</div>';
   }
   function kartEkle(form) {
     var on = form.elements.on.value.trim(), arka = form.elements.arka.value.trim(), simdi = Date.now();
-    if (!on || !arka) { var il = form.querySelector('.notform__ileti'); il.textContent = 'Kartın iki yüzü de dolu olmalı.'; il.focus(); return; }
+    if (!on || !arka) { // yeniden çizilmez: yazılan yüz kaybolmasın
+      if (!form.querySelector('.b-uyari')) form.querySelector('.b-baslik').insertAdjacentHTML('afterend', B.uyari({ tur: 'hata', metin: 'Kartın iki yüzü de dolu olmalı.' }));
+      return form.querySelector('.b-uyari').focus();
+    }
     yaz(KART_ANAHTAR, oku(KART_ANAHTAR, []).concat([Tekrar.yeniKart(kimlik('k', simdi, Math.random()), { on: on, arka: arka, kaynak: 'elle', olusturma: simdi })]));
     ic().rota();
   }
@@ -583,16 +580,14 @@
     return new Date(g + 'T12:00:00').toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' });
   }
   function kayitAlanlari(t, f) {
-    var k = ic().kac;
     return Object.keys(t.sayilar || {}).map(function (a) {
       var x = t.sayilar[a], birim = x.birim && x.birim !== '1-5' ? ' (' + x.birim + ')' : '';
-      return '<label class="alanet">' + k(x.ad + birim) + (x.zorunlu ? '' : ' · isteğe bağlı') +
-        '<input type="text" inputmode="decimal" class="giris" name="' + a + '" autocomplete="off" value="' + k(f[a] || '') + '" placeholder="' + k(String(x.min).replace('.', ',') + ' – ' + String(x.max).replace('.', ',')) + '"></label>';
+      return B.alan({ ad: x.ad + birim + (x.zorunlu ? '' : ' · isteğe bağlı'), isim: a, tur: 'sayi', deger: f[a] || '',
+        yerTutucu: String(x.min).replace('.', ',') + ' – ' + String(x.max).replace('.', ',') });
     }).join('') + Object.keys(t.metinler || {}).map(function (a) {
-      var x = t.metinler[a], et = k(x.ad) + (x.zorunlu ? '' : ' · isteğe bağlı');
-      if (x.secim) return '<label class="alanet">' + et + '<select class="giris" name="' + a + '"><option value="">Seç…</option>' +
-        x.secim.map(function (o) { return '<option value="' + k(o) + '"' + (f[a] === o ? ' selected' : '') + '>' + k(o) + '</option>'; }).join('') + '</select></label>';
-      return '<label class="alanet">' + et + '<input type="text" class="giris" name="' + a + '" autocomplete="off" value="' + k(f[a] || '') + '"' + (x.desenMetni ? ' placeholder="12:30"' : '') + '></label>';
+      var x = t.metinler[a], ad = x.ad + (x.zorunlu ? '' : ' · isteğe bağlı');
+      if (x.secim) return B.alan({ ad: ad, isim: a, tur: 'secim', deger: f[a] || '', secenekler: x.secim.reduce(function (o, v) { o[v] = v; return o; }, { '': 'Seç…' }) });
+      return B.alan({ ad: ad, isim: a, deger: f[a] || '', yerTutucu: x.desenMetni ? '12:30' : '' });
     }).join('');
   }
   function sayfaKayit(yer, alt) {
@@ -611,13 +606,11 @@
       dogumYili: ay('lifeos.beden.dogumYili'), hedef: ay('lifeos.beden.hedef') }, new Date(simdi).getFullYear());
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="kayit">' + B.baslik({ metin: 'Kayıt' }) +
       '<form class="kayitform" novalidate>' +
-      '<div class="notform__ileti" role="alert" tabindex="-1">' + (il ? (il.hatalar ? il.hatalar.map(k).join('<br>') : k(il.tamam || '')) : '') + '</div>' +
-      '<label class="alanet">Hangi gün?<select class="giris" name="gun" data-kayit-gun>' + gunler.map(function (g) {
-        return '<option value="' + g + '"' + (g === secili ? ' selected' : '') + '>' + k(gunYazi(g, gun)) + '</option>';
-      }).join('') + '</select></label>' +
-      '<label class="alanet">Ne kaydediyorsun?<select class="giris" data-kayit-tur>' + Object.keys(gruplar).map(function (g) {
-        return '<optgroup label="' + k(g) + '">' + gruplar[g].map(function (id) { return '<option value="' + id + '"' + (id === kayitTur ? ' selected' : '') + '>' + k(T[id].ad) + '</option>'; }).join('') + '</optgroup>';
-      }).join('') + '</select></label>' + kayitAlanlari(t, f) +
+      (il && (il.hatalar || il.tamam) ? B.uyari({ tur: il.hatalar ? 'hata' : 'tamam', metin: il.hatalar ? il.hatalar.join(' ') : il.tamam }) : '') +
+      B.alan({ ad: 'Hangi gün?', isim: 'gun', tur: 'secim', deger: secili, veri: { 'kayit-gun': '' }, secenekler: gunler.reduce(function (o, g) { o[g] = gunYazi(g, gun); return o; }, {}) }) +
+      B.alan({ ad: 'Ne kaydediyorsun?', isim: 'kayitTur', tur: 'secim', deger: T[kayitTur] ? kayitTur : 'su', veri: { 'kayit-tur': '' }, secenekler: Object.keys(gruplar).reduce(function (o, g) {
+        o[g] = gruplar[g].reduce(function (q, id) { q[id] = T[id].ad; return q; }, {}); return o;
+      }, {}) }) + kayitAlanlari(t, f) +
       (Object.keys(t.sayilar || {}).length ? B.alan({ ad: 'Sayılar tahmin (ölçmedim)', isim: 'tahmin', tur: 'onay', deger: !!(il && il.tahmin) }) : '') +
       B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, { metin: 'Haftalık özet', tur: 'sade', href: '#/motor/kayit/hafta' }]) + '</form>' +
       B.bolum({ baslik: sAd, govde: ozet.length ? B.liste({ ad: 'Gün özeti', ogeler: ozet.map(ozetSatiri) })
@@ -658,13 +651,13 @@
   }
   function kayitGonder(form) {
     var veri = {}, simdi = Date.now();
-    [].forEach.call(form.elements, function (e) { if (e.name && e.name !== 'tahmin' && e.name !== 'gun') veri[e.name] = e.value; });
+    [].forEach.call(form.elements, function (e) { if (e.name && e.name !== 'tahmin' && e.name !== 'gun' && e.name !== 'kayitTur') veri[e.name] = e.value; });
     var tahmin = !!(form.elements.tahmin && form.elements.tahmin.checked), bugun = gunAdi(simdi), gun = form.elements.gun.value || bugun;
     var r = kayitEkle(Kayit, oku(KAYIT_ANAHTAR, []), kayitTur, veri, tahmin, gun, simdi, bugun); // pencereye motor karar verir
     if (r.ok) { yaz(KAYIT_ANAHTAR, r.kayitlar); kayitIleti = { tamam: 'Kaydedildi' + (gun === bugun ? '' : ' (' + gunYazi(gun, bugun) + ')') + ': ' + kayitMetni(Kayit, r.kayit) }; }
     else kayitIleti = { hatalar: r.hatalar, form: veri, tahmin: tahmin }; // yazılan kaybolmasın
     ic().rota();
-    var ileti = d.querySelector('.kayitform .notform__ileti'); if (ileti) ileti.focus();
+    var ileti = d.querySelector('.kayitform .b-uyari'); if (ileti) ileti.focus();
   }
 
   /* ---- Plan ---- */
@@ -690,94 +683,82 @@
     var v = oku(PLAN_SABLON, { sabitler: [] });
     return { sabitler: (Array.isArray(v.sabitler) ? v.sabitler : []).filter(function (s) { return s && s.id && Array.isArray(s.gunler); }) };
   }
+  // plan bloğu (B.liste öğesi): saat ve ad bir satırda, süre ve etiketler notta; uzun satır (metin kısaltılmaz)
   function blokSatiri(b, salt) {
-    var k = ic().kac, eylem = '';
+    var eylem = null, pul = null, dg = function (metin, durum) { return { metin: metin, tur: 'sade', veri: { 'arac-ac': 'plan-durum', id: b.id, durum: durum } }; };
     if (!salt && b.tur !== 'mola' && b.tur !== 'sabit') {
-      eylem = b.durum === 'bekliyor'
-        ? '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-durum" data-id="' + k(b.id) + '" data-durum="yapildi">Yapıldı</button>' +
-          '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-durum" data-id="' + k(b.id) + '" data-durum="atlandi">Atla</button>'
-        : '<span class="pul' + (b.durum === 'yapildi' ? ' pul--pilot' : '') + '">' + (b.durum === 'yapildi' ? 'yapıldı' : b.durum === 'atlandi' ? 'atlandı' : 'kısmen') + '</span>' +
-          '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-durum" data-id="' + k(b.id) + '" data-durum="bekliyor">Geri al</button>';
+      if (b.durum === 'bekliyor') eylem = [dg('Yapıldı', 'yapildi'), dg('Atla', 'atlandi')];
+      else { pul = b.durum === 'yapildi' ? { metin: 'yapıldı', tur: 'altin' } : b.durum === 'atlandi' ? 'atlandı' : 'kısmen'; eylem = [dg('Geri al', 'bekliyor')]; }
     }
     var sabit = b.tur === 'sabit'; // sabit blok: süre yazılmaz; gece bölünen bloğun 23:59'u 24:00 okunur
-    return '<li class="blok blok--' + b.tur + (b.durum !== 'bekliyor' ? ' blok--bitti' : '') + '"><span class="blok__saat">' + k(b.bas) + '–' + k(sabit && b.bit === '23:59' ? '24:00' : b.bit) + '</span><span class="blok__ad">' + k(b.ad) +
-      (b.neden ? ' <span class="soluk">(' + k(b.neden) + ')</span>' : '') + '</span><span class="soluk">' + (sabit ? 'sabit' : b.dk + ' dk') +
-      (b.dkEtiket === 'estimated' ? ' · tahmin' : '') + (b.sinif ? ' · ' + SINIF_AD[b.sinif] : '') + (b.devir ? ' · ' + b.devir + '. gün' : '') + '</span><span class="blok__eylem">' + eylem + '</span></li>';
+    return { ad: b.bas + '–' + (sabit && b.bit === '23:59' ? '24:00' : b.bit) + ' ' + b.ad + (b.neden ? ' (' + b.neden + ')' : ''), uzun: true, pul: pul, eylemler: eylem, veri: { blok: b.tur, 'blok-durum': b.durum },
+      not: (sabit ? 'sabit' : b.dk + ' dk') + (b.dkEtiket === 'estimated' ? ' · tahmin' : '') + (b.sinif ? ' · ' + SINIF_AD[b.sinif] : '') + (b.devir ? ' · ' + b.devir + '. gün' : '') };
   }
+  function planIletisi(il) { return il ? B.uyari({ tur: 'hata', metin: il.join(' ') }) : ''; }
+  function silEylemi(etiket, veri) { return [{ metin: 'Sil', tur: 'sade', etiket: etiket, veri: veri }]; }
+  function saatAraligi() { return '<div class="ikili">' + B.alan({ ad: 'Başlangıç', isim: 'bas', tur: 'saat' }) + B.alan({ ad: 'Bitiş', isim: 'bit', tur: 'saat' }) + '</div>'; }
   // Hafta planı (#/motor/plan/hafta): bugünden yedi gün, motorun haftaPlani öngörüsü; altta sabit bloklar şablonu.
   function sayfaPlanHafta() {
-    var I = ic(), k = I.kac, simdi = Date.now(), bugun = gunAdi(simdi), dr = planDurum(simdi), sab = planSablon(), il = planIleti; planIleti = null;
+    var I = ic(), simdi = Date.now(), bugun = gunAdi(simdi), dr = planDurum(simdi), sab = planSablon(), il = planIleti; planIleti = null;
     var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' };
     // sıradaki ders üzerinde çalışılan alanın içeriğinden gelir; doğrudan açılışta içerik yüklenince bir kez daha çizilir
     if (!I.al(I.etkin())) I.alanYukle(I.etkin()).then(function () { if (d.querySelector('[data-hafta]') && I.al(I.etkin())) I.rota(); });
     var geri = '<a class="kirinti" href="#/motor/plan"><span aria-hidden="true">‹ </span>Plan</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>Hafta</span>';
     var gunAd = function (g) { return new Date(g + 'T12:00:00').toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }); };
-    var isListe = function (l) { return l.map(function (x) { return '<li><span>' + k(x.ad) + '</span><span class="soluk">' + x.dk + ' dk' + (x.devir ? ' · ' + x.devir + ' kez devretti' : '') + '</span></li>'; }).join(''); };
+    var isListe = function (ad, l) { return B.liste({ ad: ad, ogeler: l.map(function (x) { return { ad: x.ad, not: x.dk + ' dk' + (x.devir ? ' · ' + x.devir + ' kez devretti' : '') }; }) }); };
     var govde;
-    if (!dr.ayar.musait.length) govde = '<p class="soluk">Hafta, Plan sayfasındaki boş zamanına kurulur. <a href="#/motor/plan">Önce boş zamanını yaz</a>.</p>';
+    if (!dr.ayar.musait.length) govde = B.bos({ baslik: 'Hafta, Plan sayfasındaki boş zamanına kurulur.', eylem: { metin: 'Önce boş zamanını yaz', href: '#/motor/plan' } });
     else {
       var r = haftaKur(Plan, dr, sab, bugun, planEk(simdi)), h = r.ok && r.hafta;
-      govde = !r.ok ? '<div class="yuva" role="note">' + r.hatalar.map(function (x) { return '<span>' + k(x) + '</span>'; }).join('') + '</div>'
-        : '<p class="soluk">' + k(gunAd(h.bas)) + ' – ' + k(gunAd(h.bitis)) + ' · ' + (h.ozet.planlananDk.v ? 'planlanan ' + h.ozet.planlananDk.v + ' dk (' + E[h.ozet.planlananDk.k] + ')' : 'plana girecek iş yok') +
+      govde = !r.ok ? B.uyari({ tur: 'dikkat', metin: r.hatalar.join(' ') })
+        : '<p class="soluk">' + I.kac(gunAd(h.bas)) + ' – ' + I.kac(gunAd(h.bitis)) + ' · ' + (h.ozet.planlananDk.v ? 'planlanan ' + h.ozet.planlananDk.v + ' dk (' + E[h.ozet.planlananDk.k] + ')' : 'plana girecek iş yok') +
           (h.ozet.araGunu ? ' · ' + h.ozet.araGunu + ' ara günü' : '') + '. Öngörüdür: planlanan blok yapılacak sayılır.</p>' +
-          '<ol class="hafta">' + h.gunler.map(function (p) {
-            return '<li class="hafta__gun" aria-labelledby="hg-' + p.gun + '"><h2 id="hg-' + p.gun + '">' + k(gunAd(p.gun)) + (p.gun === bugun ? ' <span class="pul pul--pilot">bugün</span>' : '') + '</h2>' +
-              (p.bloklar.length ? '<ol class="bloklar">' + p.bloklar.map(function (b) { return blokSatiri(b, true); }).join('') + '</ol>' : '<p class="soluk">Blok yok.</p>') +
-              '<p class="soluk">' + (p.ozet.planlananDk.v ? p.ozet.planlananDk.v + ' dk (' + E[p.ozet.planlananDk.k] + ')' : 'Planlanan iş yok') + '</p>' +
-              (p.sigmayan.length ? '<p class="soluk">Sığmayan: ' + p.sigmayan.map(function (x) { return k(x.ad) + ' (' + k(x.neden) + ')'; }).join(', ') + '</p>' : '') + '</li>';
-          }).join('') + '</ol>' +
-          (h.devir.length ? '<section><h2>Gelecek haftaya devreder (' + h.devir.length + ')</h2><ul class="kartliste">' + isListe(h.devir) + '</ul></section>' : '') +
-          (h.bekleyen.length ? '<section><h2>Bekleyen (' + h.bekleyen.length + ')</h2><p class="soluk">Haftaya sığmadı; devirden sonra sıradadır, kaybolmaz.</p><ul class="kartliste">' + isListe(h.bekleyen) + '</ul></section>' : '');
+          '<div class="hafta">' + h.gunler.map(function (p) { // yalnız yerleşim: günler ızgarada yan yana
+            return B.bolum({ baslik: gunAd(p.gun) + (p.gun === bugun ? ' · bugün' : ''), id: 'hg-' + p.gun, veri: { gun: p.gun }, govde: [
+              p.bloklar.length ? B.liste({ ad: gunAd(p.gun) + ' blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, true); }) }) : '<p class="soluk">Blok yok.</p>',
+              '<p class="soluk">' + (p.ozet.planlananDk.v ? p.ozet.planlananDk.v + ' dk (' + E[p.ozet.planlananDk.k] + ')' : 'Planlanan iş yok') + '</p>',
+              p.sigmayan.length ? '<p class="soluk">Sığmayan: ' + I.kac(p.sigmayan.map(function (x) { return x.ad + ' (' + x.neden + ')'; }).join(', ')) + '</p>' : ''] });
+          }).join('') + '</div>' +
+          (h.devir.length ? B.bolum({ baslik: 'Gelecek haftaya devreder (' + h.devir.length + ')', govde: isListe('Gelecek haftaya devreder', h.devir) }) : '') +
+          (h.bekleyen.length ? B.bolum({ baslik: 'Bekleyen (' + h.bekleyen.length + ')', govde: ['<p class="soluk">Haftaya sığmadı; devirden sonra sıradadır, kaybolmaz.</p>', isListe('Bekleyen', h.bekleyen)] }) : '');
     }
-    return I.ust(geri) + '<div class="govde" data-arac="plan" data-hafta><h1>Hafta planı</h1>' +
-      '<div class="notform__ileti" role="alert" tabindex="-1">' + (il ? il.map(k).join('<br>') : '') + '</div>' + govde +
-      '<section aria-labelledby="sabit-baslik"><h2 id="sabit-baslik">Sabit bloklar</h2><p class="soluk">Uyku, okul, iş, antrenman: bir kez yaz, her hafta seçtiğin günlere girer. Plan bunların dışına kurulur.</p>' +
-      (sab.sabitler.length ? '<ul class="kartliste">' + sab.sabitler.map(function (s) {
-        var gunler = s.gunler.length === 7 ? 'her gün' : s.gunler.map(function (g) { return GUN_KISA[g]; }).join(', ');
-        return '<li><span>' + k(s.ad) + ' · ' + k(s.bas) + '–' + k(s.bit) + '</span><span class="soluk">' + gunler + (s.bit < s.bas ? ' · gece yarısını geçer' : '') + '</span>' +
-          '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-sabit-sil" data-id="' + k(s.id) + '" aria-label="Sabit bloğu sil: ' + k(s.ad) + '">Sil</button></li>';
-      }).join('') + '</ul>' : '') +
-      '<form class="planform" data-plan="sabit" novalidate><label class="alanet">Ad<input type="text" class="giris" name="ad" maxlength="60" autocomplete="off"></label>' +
-      '<div class="ikili"><label class="alanet">Başlangıç<input type="time" class="giris" name="bas"></label><label class="alanet">Bitiş<input type="time" class="giris" name="bit"></label></div>' +
-      '<fieldset class="gunsec"><legend>Günler</legend>' + GUN_KISA.map(function (g, i) {
-        return '<label class="isaret"><input type="checkbox" name="gun" value="' + i + '"' + (i < 5 ? ' checked' : '') + '> ' + g + '</label>';
-      }).join('') + '</fieldset><div class="eylemler"><button type="submit" class="dugme">Sabit blok ekle</button></div></form></section></div>';
+    return I.ust(geri) + '<div class="govde" data-arac="plan" data-hafta>' + B.baslik({ metin: 'Hafta planı' }) + planIletisi(il) + govde +
+      B.bolum({ baslik: 'Sabit bloklar', id: 'sabit-baslik', govde: ['<p class="soluk">Uyku, okul, iş, antrenman: bir kez yaz, her hafta seçtiğin günlere girer. Plan bunların dışına kurulur.</p>',
+        sab.sabitler.length ? B.liste({ ad: 'Sabit bloklar', ogeler: sab.sabitler.map(function (s) {
+          var gunler = s.gunler.length === 7 ? 'her gün' : s.gunler.map(function (g) { return GUN_KISA[g]; }).join(', ');
+          return { ad: s.ad + ' · ' + s.bas + '–' + s.bit, not: gunler + (s.bit < s.bas ? ' · gece yarısını geçer' : ''), eylemler: silEylemi('Sabit bloğu sil: ' + s.ad, { 'arac-ac': 'plan-sabit-sil', id: s.id }) };
+        }) }) : '',
+        '<form class="planform" data-plan="sabit" novalidate>' + B.alan({ ad: 'Ad', isim: 'ad', enCok: 60 }) + saatAraligi() +
+        B.alan({ ad: 'Günler', isim: 'gun', tur: 'coklu', secenekler: Object.assign({}, GUN_KISA), deger: [0, 1, 2, 3, 4] }) + B.eylemler([{ metin: 'Sabit blok ekle', tip: 'submit' }]) + '</form>'] }) + '</div>';
   }
   function sayfaPlan(yer, alt) {
-    var I = ic(), k = I.kac;
-    if (!Plan) return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Plan</h1>' + eksik('Plan') + '</div>';
+    var I = ic();
+    if (!Plan) return I.ust(I.kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: 'Plan' }) + eksik('Plan') + '</div>';
     if (alt === 'hafta') return sayfaPlanHafta();
-    var simdi = Date.now(), gun = gunAdi(simdi), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan, il = planIleti; planIleti = null;
+    var simdi = Date.now(), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan, il = planIleti; planIleti = null;
     var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' };
     var planHtml = !dr.ayar.musait.length ? '<p class="soluk">Önce aşağıya bugün çalışabileceğin saat aralığını yaz; plan o boşluğa kurulur.</p>'
       : !p ? '<p class="soluk">Bugün için plan kurulmadı.</p>'
-      : (p.bloklar.length ? '<ol class="bloklar">' + p.bloklar.map(function (b) { return blokSatiri(b); }).join('') + '</ol>' : '<p class="soluk">Plana girecek iş yok: iş ekle ya da bir alanda derse başla.</p>') +
+      : (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b); }) }) : '<p class="soluk">Plana girecek iş yok: iş ekle ya da bir alanda derse başla.</p>') +
         '<p class="soluk">Planlanan ' + (p.ozet.planlananDk.v || 0) + ' dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan ' + p.ozet.bosDk.v + ' dk (' + E[p.ozet.bosDk.k] + ')' +
         (p.ozet.molaSayisi ? ' · ' + p.ozet.molaSayisi + ' mola' : '') + '</p>' +
-        (p.sigmayan.length ? '<div class="yuva" role="note"><b>Sığmayanlar (' + p.sigmayan.length + ')</b>' + p.sigmayan.map(function (x) {
-          return '<span>' + k(x.ad) + ' · ' + x.dk + ' dk · ' + k(x.neden) + '</span>';
-        }).join('') + '</div>' : '');
-    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan"><h1>Plan</h1>' +
-      '<div class="notform__ileti" role="alert" tabindex="-1">' + (il ? il.map(k).join('<br>') : '') + '</div>' +
-      '<section><h2>Bugünün planı</h2>' + planHtml +
-      '<div class="eylemler">' + (dr.ayar.musait.length ? '<button type="button" class="dugme dugme--ana" data-arac-ac="plan-kur">' + (p ? 'Yeniden kur' : 'Planı kur') + '</button>' : '') +
-      '<a class="dugme dugme--sade" href="#/motor/plan/hafta">Hafta planı ve sabit bloklar</a></div></section>' +
-      '<section><h2>Boş zamanım</h2>' + (dr.ayar.musait.length ? '<ul class="kartliste">' + dr.ayar.musait.map(function (m, i) {
-        return '<li><span>' + k(m.bas) + '–' + k(m.bit) + '</span><button type="button" class="dugme dugme--sade" data-arac-ac="plan-aralik-sil" data-i="' + i + '" aria-label="Aralığı sil: ' + k(m.bas) + '–' + k(m.bit) + '">Sil</button></li>';
-      }).join('') + '</ul>' : '') +
-      '<form class="planform" data-plan="aralik" novalidate><div class="ikili"><label class="alanet">Başlangıç<input type="time" class="giris" name="bas"></label>' +
-      '<label class="alanet">Bitiş<input type="time" class="giris" name="bit"></label></div><div class="eylemler"><button type="submit" class="dugme">Aralık ekle</button></div></form></section>' +
-      '<section><h2>İşler</h2>' + (dr.isler.length ? '<ul class="kartliste">' + dr.isler.map(function (x) {
-        return '<li><span>' + k(x.ad) + '</span><span class="soluk">' + x.dk + ' dk' + (x.son ? ' · son ' + k(x.son) : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : '') + '</span>' +
-          '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-is-sil" data-id="' + k(x.id) + '" aria-label="İşi sil: ' + k(x.ad) + '">Sil</button></li>';
-      }).join('') + '</ul>' : '<p class="soluk">İş yok. Dersler ve tekrar kartları plana kendiliğinden girer.</p>') +
-      '<form class="planform" data-plan="is" novalidate><label class="alanet">İş<input type="text" class="giris" name="ad" maxlength="120" autocomplete="off"></label>' +
-      '<div class="ikili"><label class="alanet">Süre (dk)<input type="text" inputmode="numeric" class="giris" name="dk" autocomplete="off"></label>' +
-      '<label class="alanet">Son tarih · isteğe bağlı<input type="date" class="giris" name="son"></label></div>' +
-      '<div class="eylemler"><button type="submit" class="dugme">İş ekle</button></div></form></section></div>';
+        (p.sigmayan.length ? B.uyari({ tur: 'dikkat', metin: 'Sığmayanlar (' + p.sigmayan.length + '): ' + p.sigmayan.map(function (x) { return x.ad + ' · ' + x.dk + ' dk · ' + x.neden; }).join('; ') }) : '');
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan">' + B.baslik({ metin: 'Plan' }) + planIletisi(il) +
+      B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([dr.ayar.musait.length ? { metin: p ? 'Yeniden kur' : 'Planı kur', tur: 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,
+        { metin: 'Hafta planı ve sabit bloklar', tur: 'sade', href: '#/motor/plan/hafta' }])] }) +
+      B.bolum({ baslik: 'Boş zamanım', govde: [dr.ayar.musait.length ? B.liste({ ad: 'Boş zaman aralıkları', ogeler: dr.ayar.musait.map(function (m, i) {
+          return { ad: m.bas + '–' + m.bit, eylemler: silEylemi('Aralığı sil: ' + m.bas + '–' + m.bit, { 'arac-ac': 'plan-aralik-sil', i: i }) };
+        }) }) : '',
+        '<form class="planform" data-plan="aralik" novalidate>' + saatAraligi() + B.eylemler([{ metin: 'Aralık ekle', tip: 'submit' }]) + '</form>'] }) +
+      B.bolum({ baslik: 'İşler', govde: [dr.isler.length ? B.liste({ ad: 'İşler', ogeler: dr.isler.map(function (x) {
+          return { ad: x.ad, not: x.dk + ' dk' + (x.son ? ' · son ' + x.son : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : ''), eylemler: silEylemi('İşi sil: ' + x.ad, { 'arac-ac': 'plan-is-sil', id: x.id }) };
+        }) }) : '<p class="soluk">İş yok. Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
+        '<form class="planform" data-plan="is" novalidate>' + B.alan({ ad: 'İş', isim: 'ad', enCok: 120 }) +
+        '<div class="ikili">' + B.alan({ ad: 'Süre (dk)', isim: 'dk', tur: 'sayi' }) + B.alan({ ad: 'Son tarih · isteğe bağlı', isim: 'son', tur: 'tarih' }) + '</div>' +
+        B.eylemler([{ metin: 'İş ekle', tip: 'submit' }]) + '</form>'] }) + '</div>';
   }
-  function planYaz(dr, ileti) { yaz(PLAN_ANAHTAR, dr); planIleti = ileti || null; ic().rota(); if (ileti) { var el = d.querySelector('[data-arac="plan"] .notform__ileti'); if (el) el.focus(); } }
-  function planHata(hatalar) { planIleti = hatalar; ic().rota(); var el = d.querySelector('[data-arac="plan"] .notform__ileti'); if (el) el.focus(); }
+  function planYaz(dr, ileti) { yaz(PLAN_ANAHTAR, dr); planIleti = ileti || null; ic().rota(); if (ileti) { var el = d.querySelector('[data-arac="plan"] .b-uyari--hata'); if (el) el.focus(); } }
+  function planHata(hatalar) { planIleti = hatalar; ic().rota(); var el = d.querySelector('[data-arac="plan"] .b-uyari--hata'); if (el) el.focus(); }
   function planFormu(form) {
     var simdi = Date.now(), dr = planDurum(simdi), ne = form.getAttribute('data-plan'), e = form.elements, veri;
     if (ne === 'sabit') {
@@ -813,52 +794,45 @@
     return { alan: I.tasinanlar().filter(function (a) { return a.id === id; })[0], havuz: h.havuz, sozluk: h.sozluk };
   }
   function sayfaSoru(yer) {
-    var I = ic(), k = I.kac;
-    if (!Soru) return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Soru</h1>' + eksik('Soru') + '</div>';
-    var b = soruBaglam(), bas = I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="soru"><h1>Soru</h1>';
+    var I = ic();
+    if (!Soru) return I.ust(I.kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: 'Soru' }) + eksik('Soru') + '</div>';
+    var b = soruBaglam(), bas = I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="soru">' + B.baslik({ metin: 'Soru' });
     if (!b) {
       if (!I.al(I.etkin())) I.alanYukle(I.etkin()).then(function () { if (d.querySelector('[data-arac="soru"]')) I.rota(); });
-      return bas + (I.al(I.etkin()) ? '<div class="yuva" role="note"><b>Sorular bu açılışta yüklenemedi.</b><span>Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.</span></div>'
+      return bas + (I.al(I.etkin()) ? B.bos({ baslik: 'Sorular bu açılışta yüklenemedi.', metin: 'Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.' })
         : '<p class="soluk" aria-busy="true">Yükleniyor…</p>') + '</div>';
     }
     var kayit = oku(SORU_ANAHTAR, {}), o = kayit.oturum && kayit.alan === b.alan.id ? kayit.oturum : null, gecmis = oku(SORU_GECMIS, []);
     if (!o) {
       var son = gecmis.slice(-5).reverse();
-      return bas + '<p class="soluk">' + k(b.alan.ad) + ' alanının açık ünitelerinden karma test. Havuzda ' + b.havuz.length + ' soru var. Alanı değiştirmek için o alanın sayfasını aç.</p>' +
-        (b.havuz.length < Soru.EN_AZ ? '<div class="yuva" role="note"><b>Test için en az ' + Soru.EN_AZ + ' soru gerekir.</b></div>'
-          : '<div class="eylemler">' + Soru.BOYLAR.filter(function (n, i) { return !i || b.havuz.length > Soru.BOYLAR[i - 1]; }).map(function (n, i) { // havuz küçükse aynı boyda iki düğme çıkmasın
-            return '<button type="button" class="dugme' + (i ? '' : ' dugme--ana') + '" data-arac-ac="soru-basla" data-boy="' + n + '">' + Math.min(n, b.havuz.length) + ' soruluk test</button>';
-          }).join('') + '</div>') +
-        '<div class="eylemler"><a class="dugme" href="#/motor/soru/deneme">Süreli deneme' + (oku('lifeos.soru.deneme', {}).oturum ? ' · sürüyor' : '') + '</a></div>' +
-        (son.length ? '<section><h2>Son testler</h2><ul class="ozet">' + son.map(function (g) {
+      return bas + '<p class="soluk">' + I.kac(b.alan.ad) + ' alanının açık ünitelerinden karma test. Havuzda ' + b.havuz.length + ' soru var. Alanı değiştirmek için o alanın sayfasını aç.</p>' +
+        (b.havuz.length < Soru.EN_AZ ? B.bos({ baslik: 'Test için en az ' + Soru.EN_AZ + ' soru gerekir.' })
+          : B.eylemler(Soru.BOYLAR.filter(function (n, i) { return !i || b.havuz.length > Soru.BOYLAR[i - 1]; }).map(function (n, i) { // havuz küçükse aynı boyda iki düğme çıkmasın
+            return { metin: Math.min(n, b.havuz.length) + ' soruluk test', tur: i ? 'ikincil' : 'ana', veri: { 'arac-ac': 'soru-basla', boy: n } };
+          }))) +
+        B.eylemler([{ metin: 'Süreli deneme' + (oku('lifeos.soru.deneme', {}).oturum ? ' · sürüyor' : ''), href: '#/motor/soru/deneme' }]) +
+        (son.length ? B.bolum({ baslik: 'Son testler', govde: B.liste({ ad: 'Son testler', ogeler: son.map(function (g) {
           var r = g.sayilar;
-          return '<li><span>' + k(g.alanAd) + ' · ' + tarih(g.bitti) + '</span><b>' + r.dogru + ' doğru · ' + r.yanlis + ' yanlış · ' + (r.bos + r.bakildi) + ' boş</b><span class="pul">ölçüldü</span></li>';
-        }).join('') + '</ul></section>' : '') + '</div>';
+          return { ad: g.alanAd + ' · ' + tarih(g.bitti), not: r.dogru + ' doğru · ' + r.yanlis + ' yanlış · ' + (r.bos + r.bakildi) + ' boş', pul: 'ölçüldü', uzun: true };
+        }) }) }) : '') + '</div>';
     }
     var sira = soruGoster >= 0 ? soruGoster : soruSirasi(o);
     if (sira < 0) sira = o.sorular.length - 1;
     var q = b.sozluk[o.sorular[sira]], cv = o.cevaplar[sira], bitti = soruSirasi(o) < 0;
-    if (!q) return bas + '<div class="yuva" role="note"><b>Bu testin sorusu artık içerikte yok.</b></div><div class="eylemler"><button type="button" class="dugme dugme--ana" data-arac-ac="soru-birak">Testi kapat</button></div></div>';
-    return bas + '<p class="soluk">' + k(b.alan.ad) + ' · soru ' + (sira + 1) + ' / ' + o.sorular.length + ' · ' + k(q.konu) + '</p>' +
-      '<fieldset class="soru" data-sira="' + sira + '"><legend>' + k(q.soru) + '</legend><div class="secenekler">' + q.sec.map(function (m, i) {
-        var h = HARF[i], cls = !cv ? '' : h === q.dogru ? ' secenek--dogru' : h === cv.h ? ' secenek--yanlis' : '';
-        return '<button type="button" class="secenek' + cls + '" data-arac-ac="soru-cevap" data-h="' + h + '"' + (cv ? ' disabled' : '') + ' aria-pressed="' + (!!cv && cv.h === h) + '"><b>' + h + '</b><span>' + k(m) + '</span>' +
-          (cls ? '<span class="secenek__im">' + (h === q.dogru ? '✓ doğru' : '✕ senin cevabın') + '</span>' : '') + '</button>';
-      }).join('') + '</div><div class="soru__sonuc" tabindex="-1" role="status">' +
-      (cv ? '<b>' + (cv.bak ? 'Çözüme baktın; bu soru doğru sayılmaz.' : cv.h === q.dogru ? 'Doğru.' : 'Yanlış.') + '</b>' + (q.cozum ? ' ' + q.cozum.map(k).join(' ') : '') : '') + '</div></fieldset>' +
-      '<div class="eylemler">' + (cv ? '<button type="button" class="dugme dugme--ana" data-arac-ac="' + (bitti ? 'soru-bitir' : 'soru-sonraki') + '">' + (bitti ? 'Sonucu gör' : 'Sonraki') + '</button>'
-        : '<button type="button" class="dugme dugme--sade" data-arac-ac="soru-bak">Çözüme bak</button>') +
-      '<button type="button" class="dugme dugme--sade" data-arac-ac="soru-bitir">Testi bitir</button></div></div>';
+    if (!q) return bas + B.bos({ baslik: 'Bu testin sorusu artık içerikte yok.', eylem: { metin: 'Testi kapat', tur: 'ana', veri: { 'arac-ac': 'soru-birak' } } }) + '</div>';
+    return bas + B.soru({ soru: q.soru, ust: b.alan.ad + ' · soru ' + (sira + 1) + ' / ' + o.sorular.length + ' · ' + q.konu, secenekler: q.sec, secili: cv && cv.h || null,
+        dogru: cv ? q.dogru : null, kilitli: !!cv, sikVeri: { 'arac-ac': 'soru-cevap' }, veri: { sira: sira },
+        sonuc: cv ? { baslik: cv.bak ? 'Çözüme baktın; bu soru doğru sayılmaz.' : cv.h === q.dogru ? 'Doğru.' : 'Yanlış.', metin: q.cozum ? q.cozum.join(' ') : '' } : null }) +
+      B.eylemler([cv ? { metin: bitti ? 'Sonucu gör' : 'Sonraki', tur: 'ana', veri: { 'arac-ac': bitti ? 'soru-bitir' : 'soru-sonraki' } } : { metin: 'Çözüme bak', tur: 'sade', veri: { 'arac-ac': 'soru-bak' } },
+        { metin: 'Testi bitir', tur: 'sade', veri: { 'arac-ac': 'soru-bitir' } }]) + '</div>';
   }
   var soruSonuc = null; // biten testin özeti, yalnız hemen ardından gösterilir
   function sayfaSoruSonuc(yer) {
-    var I = ic(), k = I.kac, g = soruSonuc, r = g.sayilar;
-    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="soru"><h1>Test bitti</h1>' +
-      '<div class="kapisonuc" tabindex="-1" role="status"><b>' + r.dogru + ' / ' + r.toplam + ' doğru.</b> ' + r.yanlis + ' yanlış, ' + r.bos + ' boş, ' + r.bakildi + ' çözüme bakıldı. <span class="soluk">ölçüldü</span></div>' +
-      (g.konular.length ? '<section><h2>Derslere göre</h2><ul class="ozet">' + g.konular.map(function (x) {
-        return '<li><span>' + k(x.konu) + '</span><b>' + x.dogru + ' / ' + x.n + '</b><span class="pul">ölçüldü</span></li>';
-      }).join('') + '</ul></section>' : '') +
-      '<div class="eylemler"><button type="button" class="dugme dugme--ana" data-arac-ac="soru-yeni">Yeni test</button><a class="dugme dugme--sade" href="' + k(g.alanYol) + '">' + k(g.alanAd) + ' sayfası</a></div></div>';
+    var I = ic(), g = soruSonuc, r = g.sayilar;
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="soru">' + B.baslik({ metin: 'Test bitti' }) +
+      B.panel({ tur: 'guclu', durum: true, veri: { sonuc: 'soru' }, govde: '<p><b>' + r.dogru + ' / ' + r.toplam + ' doğru.</b> ' + r.yanlis + ' yanlış, ' + r.bos + ' boş, ' + r.bakildi + ' çözüme bakıldı. <span class="soluk">ölçüldü</span></p>' }) +
+      (g.konular.length ? B.bolum({ baslik: 'Derslere göre', govde: B.liste({ ad: 'Derslere göre', ogeler: g.konular.map(function (x) { return { ad: x.konu, not: x.dogru + ' / ' + x.n, pul: 'ölçüldü' }; }) }) }) : '') +
+      B.eylemler([{ metin: 'Yeni test', tur: 'ana', veri: { 'arac-ac': 'soru-yeni' } }, { metin: g.alanAd + ' sayfası', tur: 'sade', href: g.alanYol }]) + '</div>';
   }
   function soruEylem(ne, b) {
     var I = ic(), bg = soruBaglam(), simdi = Date.now();
@@ -871,12 +845,12 @@
       return I.rota();
     }
     if (!o) return I.rota();
-    var sira = +(d.querySelector('.soru[data-sira]') || { getAttribute: function () { return -1; } }).getAttribute('data-sira');
+    var sira = +(d.querySelector('.b-soru[data-sira]') || { getAttribute: function () { return -1; } }).getAttribute('data-sira');
     if (ne === 'soru-cevap' || ne === 'soru-bak') {
       var c = ne === 'soru-bak' ? Soru.bak(o, sira, simdi) : Soru.cevapla(o, sira, b.getAttribute('data-h'), bg.sozluk, simdi);
       if (c.ok) { yaz(SORU_ANAHTAR, { alan: kayit.alan, oturum: c.oturum }); soruGoster = sira; }
       I.rota();
-      var s = d.querySelector('.soru__sonuc'); if (s) s.focus({ preventScroll: true });
+      var s = d.querySelector('.b-soru__sonuc'); if (s) s.focus({ preventScroll: true });
       return;
     }
     if (ne === 'soru-sonraki') { soruGoster = -1; return I.rota(); }
@@ -887,7 +861,7 @@
       yaz(SORU_GECMIS, oku(SORU_GECMIS, []).concat([{ bitti: simdi, alan: bg.alan.id, alanAd: bg.alan.ad, sayilar: bit.ozet.sayilar, sonuc: bit.sonuc }]).slice(-50));
       yaz(SORU_ANAHTAR, {}); soruGoster = -1;
       I.rota();
-      var ks = d.querySelector('.kapisonuc'); if (ks) ks.focus({ preventScroll: true });
+      var ks = d.querySelector('[data-sonuc="soru"]'); if (ks) ks.focus({ preventScroll: true });
     }
   }
 
@@ -912,7 +886,7 @@
   d.addEventListener('change', function (e) {
     var s = e.target;
     if (s.matches('select[data-kayit-gun]')) { // gün değişince yazılanlar kalır; özet seçili güne geçer
-      var fv = {}; [].forEach.call(s.form.elements, function (e) { if (e.name && e.name !== 'tahmin' && e.name !== 'gun') fv[e.name] = e.value; });
+      var fv = {}; [].forEach.call(s.form.elements, function (e) { if (e.name && e.name !== 'tahmin' && e.name !== 'gun' && e.name !== 'kayitTur') fv[e.name] = e.value; });
       kayitIleti = { form: fv, tahmin: !!(s.form.elements.tahmin && s.form.elements.tahmin.checked) };
       kayitGun = s.value; ic().rota(); var yg = d.querySelector('select[data-kayit-gun]'); if (yg) yg.focus(); return; }
     if (s.matches('select[data-kayit-tur]')) { kayitTur = s.value; ic().rota(); var ys = d.querySelector('select[data-kayit-tur]'); if (ys) ys.focus(); return; }

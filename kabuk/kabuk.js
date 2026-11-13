@@ -347,20 +347,14 @@
     }).join('') + '</ul>' }) : '';
   }
   function soruHtml(a, kayit) {
-    var c = kayit.cevaplar[a.id], son = c && c[c.length - 1], bas = '<fieldset class="soru" data-soru="' + a.id + '"><legend>' + kac(a.soru) + '</legend>';
+    var c = kayit.cevaplar[a.id], son = c && c[c.length - 1];
     if (a.tur !== 'secmeli') {
-      return bas + B.alan({ ad: 'Cevabın', isim: 'cevap-' + a.id.replace(/[^\w-]/g, '-'), tur: 'cok', deger: son ? son.cevap : '' }) +
-        B.eylemler([{ metin: 'Kaydet', veri: { ac: 'acik-kaydet' } }, { yazi: 'Puanlanmaz; kendin değerlendirirsin.' }]) +
-        '<div class="soru__sonuc" tabindex="-1" role="status">' + (son ? '<b>Kaydedildi.</b>' +
-          (a.olcut ? '<ul>' + a.olcut.map(function (o) { return '<li>' + kac(o) + '</li>'; }).join('') + '</ul>' : '') +
-          (a.dogru ? '<p class="soluk">Örnek cevap: ' + kac(a.dogru) + '</p>' : '') : '') + '</div></fieldset>';
+      return B.soru({ soru: a.soru, veri: { soru: a.id }, govde: [B.alan({ ad: 'Cevabın', isim: 'cevap-' + a.id.replace(/[^\w-]/g, '-'), tur: 'cok', deger: son ? son.cevap : '' }),
+        B.eylemler([{ metin: 'Kaydet', veri: { ac: 'acik-kaydet' } }, { yazi: 'Puanlanmaz; kendin değerlendirirsin.' }])],
+        sonuc: son ? { baslik: 'Kaydedildi.', maddeler: a.olcut, not: a.dogru ? 'Örnek cevap: ' + a.dogru : '' } : null });
     }
-    return bas + '<div class="secenekler">' + a.sec.map(function (m, i) {
-      var h = HARF[i], cls = !son ? '' : h === a.dogru ? ' secenek--dogru' : h === son.cevap ? ' secenek--yanlis' : '';
-      return '<button type="button" class="secenek' + cls + '" data-cevap="' + h + '" aria-pressed="' + (!!son && son.cevap === h) + '"><b>' + h + '</b><span>' + kac(m) + '</span>' +
-        (cls ? '<span class="secenek__im">' + (h === a.dogru ? '✓ doğru' : '✕ senin cevabın') + '</span>' : '') + '</button>';
-    }).join('') + '</div><div class="soru__sonuc" tabindex="-1" role="status">' + (son ? '<b>' + (son.dogru ? 'Doğru.' : 'Yanlış.') + '</b>' +
-      (a.cozum ? ' ' + a.cozum.map(kac).join(' ') : '') : '') + '</div></fieldset>';
+    return B.soru({ soru: a.soru, veri: { soru: a.id }, secenekler: a.sec, secili: son ? son.cevap : null, dogru: son ? a.dogru : null,
+      sonuc: son ? { baslik: son.dogru ? 'Doğru.' : 'Yanlış.', metin: a.cozum ? a.cozum.join(' ') : '' } : null });
   }
   function sayfaDers(id) {
     if (!al()) return ust(altKirinti('Ders')) + '<div class="govde"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
@@ -400,11 +394,7 @@
       '<form class="kapi" data-kapi="' + id + '">' + kapiSorulari(o.kapi.sorular) + B.eylemler([{ metin: 'Bitir', tur: 'ana', tip: 'submit' }]) + '</form></div>';
   }
   function kapiSorulari(sorular) {
-    return sorular.map(function (q) {
-      return '<fieldset class="soru"><legend>' + kac(q.soru) + '</legend><div class="secenekler">' + q.sec.map(function (m, i) {
-        return '<label class="secenek"><input type="radio" name="' + q.id + '" value="' + HARF[i] + '"><b>' + HARF[i] + '</b><span>' + kac(m) + '</span></label>';
-      }).join('') + '</div></fieldset>';
-    }).join('');
+    return sorular.map(function (q) { return B.soru({ kip: 'radyo', isim: q.id, soru: q.soru, secenekler: q.sec }); }).join('');
   }
   // «Seviyemi bul» (icerik-hatti §4.3): alt «1», «2»… aşama sırası, «sonuc» son ekran. Kural Yol'da; burada çizim ve kayıt.
   function sayfaYerlestir(alt) {
@@ -620,10 +610,10 @@
       if (n === 'halka') return halkaAcOdakli();
       if (n === 'ipucu') { depo.setItem('lifeos.kabuk.ipucu', 'goruldu'); var ip = ac.closest('.b-uyari'); if (ip) ip.remove(); return; }
       if (n === 'okudum') return dersBitir(ac.getAttribute('data-ders'));
-      if (n === 'acik-kaydet') { var sk = ac.closest('.soru'); return soruCevapla(sk.getAttribute('data-soru'), $('textarea', sk).value.trim()); }
+      if (n === 'acik-kaydet') { var sk = ac.closest('.b-soru'); return soruCevapla(sk.getAttribute('data-soru'), $('textarea', sk).value.trim()); }
       if (n === 'sifirla') { if (confirm('Bütün ayarlar varsayılana dönsün mü?')) { A.sifirla(depo); uygula(); rota(); } return; }
     }
-    var cv = t.closest('.soru[data-soru] [data-cevap]'); if (cv) return soruCevapla(cv.closest('.soru').getAttribute('data-soru'), cv.getAttribute('data-cevap'));
+    var cv = t.closest('.b-soru[data-soru] [data-h]'); if (cv) return soruCevapla(cv.closest('.b-soru').getAttribute('data-soru'), cv.getAttribute('data-h'));
     var hb = t.closest('.halka__oge'); if (hb) { var y = hb.getAttribute('data-yol'); halkaKapat(false); return git(y); }
     var li = t.closest('#komut-liste [data-i]'); if (li) return calistir(sonuc[+li.getAttribute('data-i')]);
     if (t === perdeEl) { halkaKapat(); komutKapat(); return; }
@@ -636,7 +626,7 @@
     if (!cevap) return;
     try { kayitYaz(Yol.cevapla(al().y, kayitOku(), id, cevap, Date.now()).kayit); } catch (e) { /* kilitli: kayıt aynı */ }
     rota();
-    var s = $('.soru[data-soru="' + id + '"] .soru__sonuc'); if (s) s.focus({ preventScroll: true });
+    var s = $('.b-soru[data-soru="' + id + '"] .b-soru__sonuc'); if (s) s.focus({ preventScroll: true });
   }
   function dersBitir(id) {
     try { kayitYaz(Yol.dersOku(al().y, kayitOku(), id, Date.now())); } catch (e) { /* kilitli */ }
