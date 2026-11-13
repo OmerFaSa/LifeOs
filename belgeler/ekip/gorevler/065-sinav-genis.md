@@ -1,6 +1,6 @@
 # 065 · King sınavını her modül aracına genişlet (53 araç, 2'şer cümle)
 
-**Durum:** bekliyor
+**Durum:** bekliyor · Faz 5'e bağlandı, 2026-11-12 (sözcük yönlendirmesi 12 üst araca iniyor; o güne dek `king_sinav_300_kabul_test.py` BORC kümesi, yalnız küçülür)
 **Dal:** `ag/065-sinav-genis`
 **Efor:** yüksek
 **Kabul testi:** `tools/king_sinav_genis_kabul_test.py`

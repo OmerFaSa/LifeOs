@@ -389,8 +389,10 @@
       "m": "spi",
       "c": "dün ne yedim",
       "b": [
-        "arac:spi_gun_kaydi"
-      ]
+        "arac:spi_gun_kaydi",
+        "tur:olcu"
+      ],
+      "not": "KING-5 tur 6-7: öğün sorusu kodla (SPI app.js ogunler ölçüsü)"
     },
     {
       "g": "spi",
@@ -785,8 +787,10 @@
       "m": "ays",
       "c": "haftalık değerlendirme",
       "b": [
-        "arac:merkez_raporu"
-      ]
+        "arac:merkez_raporu",
+        "tur:olcu"
+      ],
+      "not": "KING-5 tur 6-7: haftalık değerlendirme kodla, modelsiz (olcu.js HAFTA_DEG)"
     },
     {
       "g": "genel",
@@ -955,8 +959,10 @@
       "m": "ays",
       "c": "hedef netlerime ne kadar yaklaştım",
       "b": [
-        "arac:ays_hedef_ve_net_matrisi"
-      ]
+        "arac:ays_hedef_ve_net_matrisi",
+        "tur:olcu"
+      ],
+      "not": "KING-5 tur 6-7: hedef yüzdesi kodla (AYS app.js hedefYuzde ölçüsü)"
     },
     {
       "g": "ays",
@@ -2947,8 +2953,9 @@
       "m": "spi",
       "c": "dolaba 6 yumurta ekle",
       "b": [
-        "merkez"
-      ]
+        "arac:spi_kiler"
+      ],
+      "not": "King-Bench tur 10 (0762d5d1): kiler artık SPİ aracı (spi_kiler)"
     },
     {
       "g": "genel",

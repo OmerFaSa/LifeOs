@@ -86,7 +86,7 @@ jobs:
       # degisip dist unutulursa test edilen sey kaynak olmaz; derleyici
       # bellekte derler ve depodaki dist ile karsilastirir.
       - name: Tek dosya kaynaktan derlenmiş hâliyle aynı mı
-        run: python3 build.py --denetle
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Tek dosya kaynaktan derlenmiş hâliyle aynı mı" python3 build.py --denetle
 
       - name: Bağımlılıkları kur
         run: npm ci
@@ -95,22 +95,22 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Birim testleri
-        run: node tools/runtests.js
+        run: bash ../tools/ci_hata.sh "${{ matrix.system }} birim testleri" node tools/runtests.js
 
       - name: Duman testi
-        run: node tools/smoke.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Duman testi" node tools/smoke.js
 
       - name: Erişilebilirlik
-        run: node tools/a11ycheck.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Erişilebilirlik" node tools/a11ycheck.js
 
       - name: Telefon ve tablet düzeni (390 ve 820px)
-        run: node tools/layoutcheck.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Telefon ve tablet düzeni (390 ve 820px)" node tools/layoutcheck.js
 
       - name: Palet kontrastı
-        run: node tools/palettecheck.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Palet kontrastı" node tools/palettecheck.js
 
       - name: Çizim bütçesi (dokuz aylık veri)
-        run: node tools/perfcheck.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Çizim bütçesi (dokuz aylık veri)" node tools/perfcheck.js
 
       # Bugun yalniz SPI'de olan denetimler. `if: matrix.system == 'SPI'`
       # yerine DOSYA VARLIGINA bakilir: bir denetim yarin AYS'ye de
@@ -145,15 +145,15 @@ jobs:
       # bu ancak iki ekran yan yana konunca fark edilir. Denetim o sessiz
       # hali gurultuluye cevirir.
       - name: Kopyalar kaynakla aynı mı
-        run: python3 tools/seviye.py --denetle
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kopyalar kaynakla aynı mı" python3 tools/seviye.py --denetle
 
       # Ortak CSS de ayni mekanizmayla yayiliyor (brand/ortak/ -> uc
       # arayuz). Ayni gerekce: elle duzenlenen bir kopya bir gun ayrisir.
       - name: Ortak CSS kaynakla aynı mı
-        run: python3 tools/ortak.py --denetle
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ortak CSS kaynakla aynı mı" python3 tools/ortak.py --denetle
 
       - name: Parca kaydi ve blok adlari
-        run: python3 tools/parca_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Parca kaydi ve blok adlari" python3 tools/parca_test.py
 
       # MARKA ADLANDIRMASI VE YOL MUHAFIZI. Bu denetim bir suredir
       # yalnizca `tools/sayilar.py --tam` icinden kosuyordu, yani
@@ -163,7 +163,7 @@ jobs:
       # dizin gezinme kapisi degildir. Bir gun o muhafizi kiran bir
       # degisiklik, ancak CI kirmizi olursa fark edilir.
       - name: Marka adlandırması ve yol muhafızı
-        run: python3 tools/marka.py --sina
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Marka adlandırması ve yol muhafızı" python3 tools/marka.py --sina
 
       # DİNLEME KUYRUĞU. Python sunucusu varsayılan olarak listen(5) ile
       # açılır; Windows taşan bağlantıyı reddeder ve sayfa bir betiği hiç
@@ -171,110 +171,120 @@ jobs:
       # fazlası). Linux taşanı reddetmez; burada test kuyruk boyunu, yani
       # listen()'e giden sayıyı sınar.
       - name: Sunucular bekleyen bağlantıyı reddetmez
-        run: python3 tools/kuyruk_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sunucular bekleyen bağlantıyı reddetmez" python3 tools/kuyruk_test.py
 
       # GÜNCEL TEK DOSYA. Modül kapısının kökü dist'i yalnız kaynaklar
       # aynıysa sunar (230 istek yerine 3); değilse src. dist/kaynak.json
       # build.py'den, denetimi build.py --denetle'de de.
       - name: Modül kapısı yalnız güncel dist'i sunar
-        run: python3 tools/dist_sun_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Modül kapısı yalnız güncel dist i sunar" python3 tools/dist_sun_test.py
 
       # TELEFON (ev ağı + https). Sertifika yokken hiçbir kapı ev ağına
       # açılmaz; varsa üç modül https ile açılır, kurulum sayfası özel
       # anahtarı ve depo dosyalarını asla vermez. Geçici klasörde koşar.
       - name: Telefon kapıları yalnız bilinçli kurulumla ve https ile açılır
-        run: python3 tools/telefon_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Telefon kapıları yalnız bilinçli kurulumla ve https ile açılır" python3 tools/telefon_test.py
 
       # YENI BILGISAYARA TASIMA (2026-11-05). Paket sifresiz acilmaz, degismis dosya
       # acilmaz, var olan silinmez, listede olmayan yola yazilmaz.
       - name: Taşıma paketi şifreli ve üstüne yazmaz
-        run: python3 tools/tasi_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Taşıma paketi şifreli ve üstüne yazmaz" python3 tools/tasi_test.py
 
       # SADELESME FAZ 1 GOC (2026-11-12). Kaynaga yazmaz, sayi dengesi, etiket tek dil,
       # turetilmis tasinmaz, sir pakette durur, ayni girdi ayni rapor, goc_id ile geri alinir.
       - name: Göç aracı kuru koşusu
-        run: python3 tools/goc_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Göç aracı kuru koşusu" python3 tools/goc_test.py
 
       # SADELESME FAZ 1 P3 TEK DEPO (2026-11-13). Ust anahtar duzeyinde son saat kazanir,
       # saati kayan cihaz kirpilir, silme mezar tasi, sira sonucu degistirmez, yedek ustune yazmaz.
       - name: Tek depo birleştirme ve yedek
-        run: python3 tools/tekdepo_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Tek depo birleştirme ve yedek" python3 tools/tekdepo_test.py
 
       # SADELESME FAZ 1 P2 GOC PAKETI (2026-11-13). Cihaz tarafi (node, sahte depolarla) uretir,
       # PC tarafi kaydeder ve goc okuyucusundan gecirir; sir girmez, ustune yazmaz, ucu yalniz sahip.
       - name: Göç paketi cihazdan PC'ye
-        run: python3 tools/gocpaket_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Göç paketi cihazdan PC'ye" python3 tools/gocpaket_test.py
 
       # SADELESME FAZ 1 P5 TEK KAPI (2026-11-13). Tek surec, tek adres; eski isleyiciler yeniden
       # yazilmaz, ayni cevabi verir. ETKIN kapali: eski kapilar P6'ya kadar yerinde.
       - name: Tek kapı, tek süreç
-        run: python3 tools/tekkapi_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Tek kapı, tek süreç" python3 tools/tekkapi_test.py
 
       # SADELESME FAZ 3 MOTORLAR (2026-11-13). Yol, Tekrar, Not: saf (saat disaridan gelir), sifir
       # bagimlilik. Tekrar testi eski zamanlayicilarin gercek kaynagini yukler: goc vadeyi degistirmez.
       - name: Motorlar (Yol, Tekrar, Not)
-        run: node motor/yol.test.js && node motor/tekrar.test.js && node motor/not.test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Motorlar (Yol, Tekrar, Not)" bash -c 'node motor/yol.test.js && node motor/tekrar.test.js && node motor/not.test.js'
 
       # SADELESME FAZ 3 ICERIK (2026-11-13). Alan icerigi semaya uyar (alan/SEMA.md); onaysiz ders
       # taslak etiketiyle durur. Denetimin kendisi de sinanir.
       - name: Alan içeriği şema denetimi
-        run: python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Alan içeriği şema denetimi" bash -c 'python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe'
 
       # SADELESME FAZ 4 OLCUM (2026-11-13). Sayim kurallari, butce asimi, ayni girdi ayni kayit,
       # olculmeyen egri sayi tasimaz. Butce denetiminin kendisi (--denetle) Faz 4 kapisinda baglanir.
       - name: Ölçüm motoru sayım ve bütçe kuralları
-        run: python3 kalite/olcum_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölçüm motoru sayım ve bütçe kuralları" python3 kalite/olcum_test.py
 
       # SADELESME FAZ 2 KABUK (2026-11-13). Sistem haritasi: her yer halkadan en cok iki, komut
       # cubugundan bir adim; ayar tek tanimdan turer; arama Turkce harfleri katlar.
       - name: Kabuk haritası, ayar şeması ve arama
-        run: node kabuk/kabuk.test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk haritası, ayar şeması ve arama" node kabuk/kabuk.test.js
 
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi
-        run: python3 uygulama/ios/web_paket_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Web paketi üreticisi" python3 uygulama/ios/web_paket_test.py
 
       # KENDİ ARKA PLANIN (2026-10-29). Kullanıcının fotoğrafı/videosu PC'de
       # durur; yalnız bu bilgisayardan okunur ve yazılır, tür içerikle uyuşmalı.
       - name: Arka plan dosyası yalnız bu bilgisayardan ve doğru türle
-        run: python3 tools/zemin_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Arka plan dosyası yalnız bu bilgisayardan ve doğru türle" python3 tools/zemin_test.py
 
       # SİSTEM PLANLAMASI (2026-10-29). Haftalık vade, kaçan iş (hemen/onay),
       # kapanış, Windows açılış görevi komutu, salt okunur veri denetimi.
       - name: Sistem planlaması vadeyi ve kaçan işi doğru sayar
-        run: python3 tools/planlama_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sistem planlaması vadeyi ve kaçan işi doğru sayar" python3 tools/planlama_test.py
 
       # MÜZİK (2026-10-30). Kullanıcının parçaları ve listeleri PC'de durur;
       # yalnız bu bilgisayardan, doğru türle; listede yalnız var olan parça.
       - name: Müzik dosyaları ve listeleri yalnız bu bilgisayardan
-        run: python3 tools/muzik_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Müzik dosyaları ve listeleri yalnız bu bilgisayardan" python3 tools/muzik_test.py
 
       # İÇE AKTARMA (2026-10-30). Google verisi hesap bağlanmadan: takvimin gizli
       # iCal adresi ve Takeout özeti; yalnız bu bilgisayardan, adres dışarı verilmez.
       - name: Google verisi hesap bağlanmadan, yalnız bu bilgisayardan
-        run: python3 tools/ice_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Google verisi hesap bağlanmadan  yalnız bu bilgisayardan" python3 tools/ice_test.py
 
       # ORTAK AYARLAR (2026-10-30). Sistem ayarları PC'de tek kopya; her kapı sayfanın
       # başına koyar. Yalnız tercih anahtarları; kilit, veri ve modül yüzeyi yazılamaz.
       - name: Sistem ayarları tek kopya, yalnız tercih
-        run: python3 tools/ayar_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sistem ayarları tek kopya  yalnız tercih" python3 tools/ayar_test.py
 
       - name: Görev takip okuyucusu
-        run: python3 tools/gorev_takip_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Görev takip okuyucusu" python3 tools/gorev_takip_test.py
 
       # AJANLAR (2026-10-31). Claude Code Antigravity'yi surer; konusma kaydi okuyucu,
       # efor -> model, yuva -> port (carpismaz), istem. Antigravity CI'da yok: sahte kayitla.
       - name: Ajan okuyucusu ve istemi
-        run: python3 tools/ajan_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ajan okuyucusu ve istemi" python3 tools/ajan_test.py
 
       # OFIS PILOTU (2026-10-31). Pilot kuyrugu yurutur (Denetci turu, Testci, kota dususu);
       # birlestirmez, push etmez. Karar tablosu saf islevdir; tur sahte ajanlarla sinanir.
       - name: Ofis pilotu ve Testçi
-        run: python3 tools/ofis_pilot_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ofis pilotu ve Testçi" python3 tools/ofis_pilot_test.py
       - name: Bilgisayar platform katmani kabul (ofis 080, KING-4 §E)
-        run: python3 tools/bilgisayar_kabul_test.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Bilgisayar platform katmani kabul (ofis 080  KING-4 §E)" python3 tools/bilgisayar_kabul_test.py
       - name: King guven kurallari (KING-4 §G)
-        run: node tools/king_guven.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King guven kurallari (KING-4 §G)" node tools/king_guven.js
+
+      # Ofis kabul testlerinin bir kismi (King sinavi ve kapsami, perde hizi) uc arayuzu gercek tarayicida
+      # acar. Bu is baska yerde Playwright kurmaz; 2026-11-09'dan beri bu testler CI'da yalniz bu yuzden
+      # kirmiziydi (yerelde gecer). Tarayicisiz denetimler yine Playwright'siz sinanir (playwrightsiz.test.js engeller).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ofis testleri için Playwright
+        run: for m in AYS SPI ESP; do (cd "$m" && npm ci) || exit 1; done && cd SPI && npx playwright install --with-deps chromium
 
       # OFIS (2026-10-31). Antigravity islerinin kabul testleri (Claude Code yazar) ve
       # Uygulayici'nin birim testleri. «ajan.py birlestir» satir ekler; elle silme.
@@ -319,9 +329,11 @@ jobs:
           python3 tools/kabul_js_test.py
           python3 tools/veri_denetle_kabul_test.py
           python3 tools/veri_denetle_test.py
+        # Her satir ayri kosar, kalan her satir kendi ::error bildirimini yazar (is kaydi yetki ister).
+        shell: bash tools/ci_satir.sh {0}
 
       - name: Ölü CSS aracının sınaması
-        run: python3 tools/olucss.py --sina
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölü CSS aracının sınaması" python3 tools/olucss.py --sina
 
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
@@ -329,11 +341,11 @@ jobs:
       # kullanılmaz, ya da silinmiş bir görsel her açılışta 404 döner.
       # Üretici saf Python — bu iş node istemez.
       - name: Medya künyesi taze mi
-        run: python3 tools/marka.py --kunye --denetle
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Medya künyesi taze mi" python3 tools/marka.py --kunye --denetle
       # Vitrin kartlarının biçimi vitrinden ÜRETİLİR (tools/vitrin.py);
       # vitrin değişip vitrin.css yeniden yazılmazsa sistem eski kartı çizer.
       - name: Vitrin kart biçimi taze mi
-        run: python3 tools/vitrin.py --denetle
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Vitrin kart biçimi taze mi" python3 tools/vitrin.py --denetle
       # ONAY DÜĞMESİ SONUCU SÖYLER (katalog 022). `confirmSheet`'e etiket
       # verilmezse düğme «Evet, devam et» yazar ve basınca ne olacağını
       # söylemez. Kural kaynakta sayılır (tarayıcı istemez); önce sayacın
@@ -347,7 +359,7 @@ jobs:
       # hiçbir şey başlatmadan 2 ile çıkmalı. Test tarayıcı, python3 ve alt
       # süreç istemez (hepsi engellenir) — bu hızlı işte koşar.
       - name: Sabit portlu denetimler port doluysa başlamaz
-        run: node tools/portmuhafiz.test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sabit portlu denetimler port doluysa başlamaz" node tools/portmuhafiz.test.js
 
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü
@@ -365,11 +377,11 @@ jobs:
 
       - name: Testler
         working-directory: HKM
-        run: python3 -m tests.run
+        run: bash ../tools/ci_hata.sh "HKM testleri" python3 -m tests.run
 
       - name: Sorgu bütçesi
         working-directory: HKM
-        run: python3 tools/perf.py
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sorgu bütçesi" python3 tools/perf.py
 
       # yuz.js kendi Playwright'ini tasimaz; ESP'nin kurulumunu kullanir.
       # Bagimliligi burada kuruyoruz ki denetim tek komutla kossun.
@@ -378,10 +390,10 @@ jobs:
         run: npm ci && npx playwright install --with-deps chromium
 
       - name: Panonun yüzü (erişilebilirlik, telefon, kontrast)
-        run: node HKM/tools/yuz.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Panonun yüzü (erişilebilirlik  telefon  kontrast)" node HKM/tools/yuz.js
 
       - name: Giriş ve Gün sayfası açılıyor mu
-        run: node tools/giris_sayfa_test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Giriş ve Gün sayfası açılıyor mu" node tools/giris_sayfa_test.js
 
   butunlesme:
     name: Üç arayüz + HKM uçtan uca
@@ -405,10 +417,10 @@ jobs:
       # HKM kapaliyken uc arayuzun bozulmadigini da bu dogrular: bagin
       # TEK YONLU oldugu sozu burada olculur (AGENTS.md §1.4).
       - name: Uçtan uca
-        run: node tools/entegre.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Uçtan uca" node tools/entegre.js
 
       - name: Android kurulum sayfası çalışan adresi bulur
-        run: node tools/android_kurulum_test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Android kurulum sayfası çalışan adresi bulur" node tools/android_kurulum_test.js
 
   envanter:
     name: Envanter + sadelik — tek tasarıma geçerken kayıp yok
@@ -436,10 +448,10 @@ jobs:
       # Olcunun kendisi once denenir: yanlis sayan bir olcu butun
       # ekranlari kirmizi (ya da yesil) gosterir (tools/envanter.test.js).
       - name: Ölçü testi
-        run: node tools/envanter.test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölçü testi" node tools/envanter.test.js
 
       - name: Envanter
-        run: node tools/envanter.js --json gezinti.json
+        run: bash tools/ci_hata.sh "Envanter" node tools/envanter.js --json gezinti.json
 
       # Ayni gezintinin olculeri: plan §1.2 sadelik butcesi. Yalniz
       # EKIP-DURUM teslim tablosunda ✅ olan modullerde kirmizi olur.
@@ -484,4 +496,4 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Beş yıllık veriyle çizim
-        run: node tools/loadcheck.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Beş yıllık veriyle çizim" node tools/loadcheck.js

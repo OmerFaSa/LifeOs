@@ -11,7 +11,24 @@
  *   node tools/envanter.test.js      (cikis 0 temiz, 1 kirmizi, 2 arac yok)
  */
 const path = require('path');
-const { topla, SEKME, SEKME_GRUBU } = require('./envanter.js');
+const assert = require('assert');
+const { topla, SEKME, SEKME_GRUBU, kaynakAdlari, kaynakTara, karsilastir } = require('./envanter.js');
+
+/* KAYNAK KANITI (tarayicisiz, 2026-11-12): yalniz kosullu cizilen giris alanlari ve
+   P.empty'nin eylemi «hala var» sayilir; siradan bir kutunun kimligi sayilmaz. */
+{
+  const k = kaynakAdlari(`K.Textarea({ id:'q-text', rows:4 }) <input type="file" id="q-file" />
+    P.empty(yz('a.b'), yz('a.c'), 'focus-meal', null, true) <div id="q-ozet"></div> act:'ac'`);
+  assert.deepStrictEqual([...k.alan].sort(), ['q-file', 'q-text']);
+  assert.deepStrictEqual([...k.eylem].sort(), ['ac', 'focus-meal']);
+  const t = { eylemler:{}, ekranKaydi:{}, rotalar:{ r:{ alanlar:['q-file', 'silinmis'] } } };
+  const s = { eylemler:{}, ekranKaydi:{}, rotalar:{}, kaynakEylemleri:[], kaynakAlanlari:['q-file'] };
+  assert.deepStrictEqual(karsilastir('AYS', t, s, {}).kayip.alan, ['silinmis']);
+  const gercek = { AYS:['q-file', 'q-note', 'q-text'], SPI:['quick-meal'], ESP:['quick-text'] };
+  Object.keys(gercek).forEach(m => gercek[m].forEach(a =>
+    assert.ok(kaynakTara(m).alanlar.includes(a), m + ' kaynaginda alan ' + a)));
+  assert.ok(kaynakTara('SPI').eylemler.includes('focus-meal'), 'SPI kaynaginda eylem focus-meal');
+}
 
 const KOK = path.resolve(__dirname, '..');
 let chromium;

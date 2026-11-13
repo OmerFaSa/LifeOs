@@ -143,6 +143,9 @@ async function portMuhafizi(portlar, ipucu){
           if(t){
             const btn = await page.$('.subtabs .subtab[data-tab="' + t + '"]');
             if(!btn) continue;
+            /* Dar kenar fare ustune gelince acilir (kabuk.css .kenar-dar :hover); onceki
+               tiklamadan kalan fare kenarin ustundeyse acik kenar sekmeyi orter (CI, 820 px). */
+            await page.mouse.move(G.w - 2, G.h - 2);
             await btn.click();
             await page.waitForTimeout(120);
           }

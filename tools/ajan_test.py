@@ -123,6 +123,7 @@ for (arac, args, mini), (karar, ust) in (
         (("run_command", {"CommandLine": "cd %s; git commit -m x" % WT}, True), ("deny", False)),
         (("write_file", {"TargetFile": r"C:\Users\ASUS\LifeOs\brand\ortak\cam.css"}, False), ("deny", False)),
         (("write_file", {"TargetFile": WT + r"\sistem\ice.py"}, False), ("allow", False)),
+        (("write_file", {"TargetFile": WT + r"\..\LifeOs\AGENTS.md"}, False), ("deny", False)),
         (("write_file", {"TargetFile": WT + r"\x.md"}, True), ("deny", False)),
         (("mcp_hkm-sqlite_write_query", {}, False), ("deny", False)),
         (("mcp_notion_notion_notion-create-pages", {}, False), ("deny", False)),

@@ -19,6 +19,7 @@ kendi Antigravity konusmalarina notr cevap doner (notr() bakiniz), davranislarin
 Her karar LifeOs-ajan/olay/<ad>.jsonl'e yazilir; Gorev Takibi oradan okur.
 """
 import json
+import ntpath
 import re
 import subprocess
 import sys
@@ -81,6 +82,16 @@ def olay_yaz(ad, kayit):
         f.write(json.dumps(dict(kayit, t=int(time.time())), ensure_ascii=False) + "\n")
 
 
+def _goreli(yol, wt):
+    """Yolun ofis klasorune gore goreli hali, klasor disindaysa None. Saf islev.
+    Yollar Windows yoludur (ofis yalniz Windows'ta); ntpath her platformda «\\» ve «/»
+    ayirir ve «..» bolumlerini cozer: «klasor\\..\\disari» klasorun icinde sayilmaz."""
+    y, k = ntpath.normpath(yol.strip("'\" ")), ntpath.normpath(wt).rstrip("\\")
+    if y.lower() == k.lower():
+        return ""
+    return y[len(k) + 1:] if y.lower().startswith(k.lower() + "\\") else None
+
+
 def arac_karari(ad_arac, args, wt, mini, kabul=()):
     """(karar, neden, ust_yazim) — saf islev; testler bunu dogrudan cagirir. kabul: korunan dosyalar (depo-goreli)."""
     if ad_arac in KAPALI_ARAC:
@@ -111,13 +122,14 @@ def arac_karari(ad_arac, args, wt, mini, kabul=()):
         yol = str(arg(args, "TargetFile") or arg(args, "Path") or arg(args, "AbsolutePath") or arg(args, "FilePath") or "")
         if mini:
             return "deny", "Mini ajan salt okunur: dosya yazmaz.", None
-        if yol and any(Path(yol).resolve() == (Path(wt) / k).resolve() for k in kabul):
+        rel = _goreli(yol, wt) if yol else None
+        if rel is not None and any(rel.lower() == ntpath.normpath(k).lower() for k in kabul):
             return "deny", "Kabul testi Claude Code'un; değiştirme. Kod onu geçmeli; yanlışsa nedenini «Sonuç»a yaz.", None
-        if yol and A._icinde(yol, wt):
-            yasak = A.yasak_bolge([Path(yol).resolve().relative_to(Path(wt).resolve())])
+        if rel is not None:
+            yasak = A.yasak_bolge([rel])
             if yasak:
                 return "deny", "%s: %s ofisin değil; dokunma, gerekiyorsa «Sonuç»a yaz." % (yasak[0][1], yasak[0][0]), None
-        if yol and not A._icinde(yol, wt) and not A._icinde(yol, str(Path.home() / ".gemini" / "antigravity" / "brain")):
+        if yol and rel is None and not A._icinde(ntpath.normpath(yol), str(Path.home() / ".gemini" / "antigravity" / "brain")):
             return "deny", "Yalnız kendi klasörüne yaz: %s" % wt, None
     return "allow", "", None
 

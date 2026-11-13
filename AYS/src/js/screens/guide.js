@@ -287,6 +287,7 @@ window.LIFEOS.PARCA.yazilar({
 /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
 buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'ays', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'kilavuz', modul:'ays', king:{ sira:240, ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] }, cekmece:'ayarlar', ad:'Kılavuz', sira:40 });
 window.LIFEOS.KILAVUZ.kur('ays', R);
 
 R.Screens.guide = (function(){

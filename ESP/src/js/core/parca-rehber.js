@@ -30,4 +30,7 @@ window.LIFEOS.PARCA_REHBER = [
   { modul:'esp', route:'symposium', ad:'Felsefe', es:['felsefe', 'sempozyum'] },
   { modul:'esp', route:'history', ad:'Tarih', es:['tarih', 'kronoloji'] },
   { modul:'esp', route:'studio', ad:'Ses', es:['müzik', 'diksiyon', 'stüdyo'] },
+  { modul:'ays', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'spi', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'esp', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
 ];

@@ -22,23 +22,47 @@
       "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
       "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
       "office-3d": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar",
-      "office-3d-meeting": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar"
+      "office-3d-meeting": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar",
+      "clear-chat": "yeni ad: sohbet-yeni · kullanıcı isteği (2026-10-18, King büyük sohbet «GPT gibi»): Ofis Danışma'da «Sohbeti temizle» yerine «Yeni sohbet» (sohbeti temizler ve geçmişe yazar); clear-chat işleyicisi yerinde · commit ee6ea6d5",
+      "pick-agenda": "kullanıcı kararı (2026-10-20, «Ofis toplantısı yüzeysel ve uydurma; ya kaldır ya da … profesyonel bir yere dönüştür», SPI/src/js/core/inceleme.js başı): Toplantı → İnceleme; ajanların sırayla konuştuğu tur ve gündem seçimi kalktı, inceleme kural motorunun verisinden kurulur · commit a3fa372d",
+      "run-meeting": "kullanıcı kararı (2026-10-20, «Ofis toplantısı yüzeysel ve uydurma; ya kaldır ya da … profesyonel bir yere dönüştür», SPI/src/js/core/inceleme.js başı): Toplantı → İnceleme; ajanların sırayla konuştuğu tur ve gündem seçimi kalktı, inceleme kural motorunun verisinden kurulur · commit a3fa372d",
+      "save-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı; AYS bunu doğru yapıyor», SPI/src/js/screens/guide.js «MODEL MERKEZ'DE»): Rehber › Ofis'teki sağlayıcı/model seçimi, Kaydet ve Bağlantıyı dene kalktı; seçim HKM › Modeller'de · commit a3fa372d",
+      "test-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı; AYS bunu doğru yapıyor», SPI/src/js/screens/guide.js «MODEL MERKEZ'DE»): Rehber › Ofis'teki sağlayıcı/model seçimi, Kaydet ve Bağlantıyı dene kalktı; seçim HKM › Modeller'de · commit a3fa372d"
     },
     "isleyici": {
       "office-3d": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar",
-      "office-3d-meeting": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar"
+      "office-3d-meeting": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar",
+      "save-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı; AYS bunu doğru yapıyor», SPI/src/js/screens/guide.js «MODEL MERKEZ'DE»): Rehber › Ofis'teki sağlayıcı/model seçimi, Kaydet ve Bağlantıyı dene kalktı; seçim HKM › Modeller'de · commit a3fa372d",
+      "test-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı; AYS bunu doğru yapıyor», SPI/src/js/screens/guide.js «MODEL MERKEZ'DE»): Rehber › Ofis'teki sağlayıcı/model seçimi, Kaydet ve Bağlantıyı dene kalktı; seçim HKM › Modeller'de · commit a3fa372d",
+      "pick-agenda": "kullanıcı kararı (2026-10-20, «Ofis toplantısı yüzeysel ve uydurma; ya kaldır ya da … profesyonel bir yere dönüştür», SPI/src/js/core/inceleme.js başı): Toplantı → İnceleme; ajanların sırayla konuştuğu tur ve gündem seçimi kalktı, inceleme kural motorunun verisinden kurulur · commit a3fa372d",
+      "run-meeting": "kullanıcı kararı (2026-10-20, «Ofis toplantısı yüzeysel ve uydurma; ya kaldır ya da … profesyonel bir yere dönüştür», SPI/src/js/core/inceleme.js başı): Toplantı → İnceleme; ajanların sırayla konuştuğu tur ve gündem seçimi kalktı, inceleme kural motorunun verisinden kurulur · commit a3fa372d"
     },
     "alan": {
       "pref-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
-      "pref-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+      "pref-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "p-activity": "kullanıcı kararı (2026-10-20, «hareket verisi girilmeden 2600 kcal söylüyor; tahmin yapılmasın, ihtiyaç günden güne değişsin», SPI/src/js/core/nutri.js): Profil'deki Hareket düzeyi seçimi kalktı; ihtiyaç = BMR + o gün girilen hareket · commit a3fa372d",
+      "m-provider": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı; AYS bunu doğru yapıyor», SPI/src/js/screens/guide.js «MODEL MERKEZ'DE»): Rehber › Ofis'teki sağlayıcı/model seçimi, Kaydet ve Bağlantıyı dene kalktı; seçim HKM › Modeller'de · commit a3fa372d",
+      "m-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı; AYS bunu doğru yapıyor», SPI/src/js/screens/guide.js «MODEL MERKEZ'DE»): Rehber › Ofis'teki sağlayıcı/model seçimi, Kaydet ve Bağlantıyı dene kalktı; seçim HKM › Modeller'de · commit a3fa372d"
     }
   },
   "ESP": {
     "eylem": {
       "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
-      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "pick-agenda": "kullanıcı kararı (2026-10-20, SPİ için «Ofis toplantısı yüzeysel ve uydurma…»; aynı turda ESP'ye uygulandı, ESP/src/js/core/inceleme.js başı): Toplantı → İnceleme; altı uzmanın sırayla konuştuğu tur ve gündem seçimi kalktı · commit fc20477a",
+      "run-meeting": "kullanıcı kararı (2026-10-20, SPİ için «Ofis toplantısı yüzeysel ve uydurma…»; aynı turda ESP'ye uygulandı, ESP/src/js/core/inceleme.js başı): Toplantı → İnceleme; altı uzmanın sırayla konuştuğu tur ve gündem seçimi kalktı · commit fc20477a",
+      "save-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı», ESP/src/js/core/office.js «MERKEZ MODELİ»): Rehber › Ofis'teki sağlayıcı/model/anahtar alanları ve Kaydet kalktı; seçim HKM › Modeller'de · commit 0b4351b4"
     },
-    "isleyici": {},
-    "alan": {}
+    "isleyici": {
+      "save-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı», ESP/src/js/core/office.js «MERKEZ MODELİ»): Rehber › Ofis'teki sağlayıcı/model/anahtar alanları ve Kaydet kalktı; seçim HKM › Modeller'de · commit 0b4351b4",
+      "pick-agenda": "kullanıcı kararı (2026-10-20, SPİ için «Ofis toplantısı yüzeysel ve uydurma…»; aynı turda ESP'ye uygulandı, ESP/src/js/core/inceleme.js başı): Toplantı → İnceleme; altı uzmanın sırayla konuştuğu tur ve gündem seçimi kalktı · commit fc20477a",
+      "run-meeting": "kullanıcı kararı (2026-10-20, SPİ için «Ofis toplantısı yüzeysel ve uydurma…»; aynı turda ESP'ye uygulandı, ESP/src/js/core/inceleme.js başı): Toplantı → İnceleme; altı uzmanın sırayla konuştuğu tur ve gündem seçimi kalktı · commit fc20477a",
+      "track-decision": "yeni ad: inceleme-takip · kullanıcı kararı (2026-10-20, SPİ için «Ofis toplantısı yüzeysel ve uydurma…»; aynı turda ESP'ye uygulandı, ESP/src/js/core/inceleme.js başı): Toplantı → İnceleme; altı uzmanın sırayla konuştuğu tur ve gündem seçimi kalktı · commit fc20477a"
+    },
+    "alan": {
+      "md-provider": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı», ESP/src/js/core/office.js «MERKEZ MODELİ»): Rehber › Ofis'teki sağlayıcı/model/anahtar alanları ve Kaydet kalktı; seçim HKM › Modeller'de · commit 0b4351b4",
+      "md-model": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı», ESP/src/js/core/office.js «MERKEZ MODELİ»): Rehber › Ofis'teki sağlayıcı/model/anahtar alanları ve Kaydet kalktı; seçim HKM › Modeller'de · commit 0b4351b4",
+      "md-key": "kullanıcı kararı (2026-10-20, «model ayarlarının hepsi HKM'de olmalı», ESP/src/js/core/office.js «MERKEZ MODELİ»): Rehber › Ofis'teki sağlayıcı/model/anahtar alanları ve Kaydet kalktı; seçim HKM › Modeller'de · commit 0b4351b4"
+    }
   }
 }

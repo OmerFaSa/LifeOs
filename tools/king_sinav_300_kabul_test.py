@@ -14,10 +14,19 @@ from collections import Counter
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parent.parent
-ILK_100 = "1f6cf270657aab377fd846eabcf0331fb7c1d2ab0fa1788932bc92de6f4cdd4a"
+# 2026-11-12: King 5 tur 5-7 kodla cevaplanan olcu sorulari (tur:olcu) ve kiler araci beklentiye eklendi (KING-5.md).
+ILK_100 = "a544f2a99607d34a783f645462179979140d990cefb5ade0cf93815bdfcc2793"
 KARAR = re.compile(r"^(veri|merkez|ayar|git:(ays|spi|esp):[a-z_]+|arac:[a-z0-9_]+|tur:[a-z-]+)$")
 EN_AZ = {"ays": 95, "spi": 90, "esp": 70, "genel": 45}
 MODUL_ARACI = re.compile(r"^(ays_|spi_|esp_|eylem_)")
+# Borc (2026-11-12): bu araclarin sinav cumlesi yok; gorev 065 sadelesme Faz 5'e baglandi (sozcuk yonlendirmesi
+# 12 ust araca iner, AGENTS.md 0.1). Kume yalniz kuculur: yeni arac kuralda kirmizi, 2 cumlesi olan borctan cikar.
+BORC = {
+    "ays": {"ays_deneme", "ays_enerji", "ays_etkinlik", "ays_hafta_degerlendirme", "ays_kart", "ays_konu_durumu", "ays_mesgale_ekle", "ays_mola", "ays_profil", "ays_profiller", "ays_takvim", "ays_tekrarlarim", "ays_telafi", "ays_video_notu", "ays_yanlis", "ays_yanlis_teshis"},
+    "spi": {"spi_antrenman_sil", "spi_butce", "spi_gida", "spi_hane", "spi_hane_oku", "spi_hedefler", "spi_ilac", "spi_ilac_alim", "spi_karar_kapat", "spi_kiler", "spi_kiler_oku", "spi_market", "spi_mutfak", "spi_ogun_sil", "spi_planlar", "spi_profil", "spi_tahlil_sil", "spi_tekrarlarim", "spi_yanlis_teshis"},
+    "esp": {"esp_arguman", "esp_argumanlar", "esp_dosya", "esp_eser", "esp_hatirlatma", "esp_hedef", "esp_karar_kapat", "esp_kart_sil", "esp_kaynak", "esp_kitap", "esp_merdiven", "esp_not_sil", "esp_olay", "esp_olaylar", "esp_oturum", "esp_repertuvar", "esp_ses_kaydi", "esp_taslak", "esp_tekrarlarim", "esp_yanlis_teshis", "esp_zincir"},
+}
+BORC_EN_COK = 56
 
 
 def hata(m):
@@ -80,9 +89,19 @@ def main():
                 beklenen[(x["m"], k[5:])] += 1
             if k.startswith("git:") and k[4:] not in adlar[x["m"]]["rotalar"]:
                 hata("%d: %s King'in sayfa katalogunda yok" % (i, k))
+    if sum(len(v) for v in BORC.values()) > BORC_EN_COK:
+        hata("borc kumesi buyumus (en cok %d); yeni araca 2 sinav cumlesi yaz" % BORC_EN_COK)
     for m, d in adlar.items():
+        borc = BORC.get(m, set())
+        for a in sorted(borc - set(d["araclar"])):
+            hata("%s borcundaki %s artik arac kaydinda yok; BORC'tan cikar" % (m, a))
         for a in d["araclar"]:
-            if MODUL_ARACI.match(a) and beklenen[(m, a)] < 2:
+            if not MODUL_ARACI.match(a):
+                continue
+            if a in borc:
+                if beklenen[(m, a)] >= 2:
+                    hata("%s araci %s artik %d cumlede; BORC'tan cikar" % (m, a, beklenen[(m, a)]))
+            elif beklenen[(m, a)] < 2:
                 hata("%s araci %s yalniz %d cumlede beklenmis (en az 2)" % (m, a, beklenen[(m, a)]))
 
     cikti = node()

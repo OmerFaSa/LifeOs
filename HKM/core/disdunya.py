@@ -16,6 +16,7 @@
    4. PLATFORM KATMANI sistem/bilgisayar.py (Windows). Yoksa yetenek «bu
       makinede yok» der; uydurma basari yoktur."""
 import datetime
+import ntpath
 import os
 import sys
 
@@ -94,7 +95,8 @@ def uygula(con, cfg, is_, govde, now=None):
     if not r.get("ok"):
         ek = " Hangisi: %s?" % ", ".join(r["adaylar"][:5]) if r.get("adaylar") else ""
         return {"ok": False, "note": "%s%s" % (r.get("hata") or "Olmadı.", ek), "adaylar": r.get("adaylar")}
-    ad = os.path.basename(hedef.rstrip("\\/")) or hedef if is_ == "ac" else r.get("ad") or hedef
+    # Hedef bir Windows yoludur (araclar yalniz Windows'ta); ntpath her platformda «\» ve «/» ayirir.
+    ad = ntpath.basename(hedef.rstrip("\\/")) or hedef if is_ == "ac" else r.get("ad") or hedef
     pid = r.get("pid")
     eid = eylem.kaydet(con, "dis." + is_, ("Açıldı: " if is_ == "ac" else "Başlatıldı: ") + ad,
                        {"hkm": "bilgisayar", "pid": pid} if pid else None, {"hedef": hedef}, now=now)

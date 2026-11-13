@@ -19366,7 +19366,7 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
   transition:transform .18s steps(3), box-shadow .18s steps(3); }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler li:hover{ transform:translate(-2px, -2px);
   box-shadow:inset 4px 0 0 var(--renk), inset 0 3px 0 #ffffff1a, inset 0 -3px 0 #00000033, 4px 4px 0 var(--renk); }
-:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler b{ color:color-mix(in oklab, var(--renk) 45%, #fff); }
+:root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler b{ color:color-mix(in oklab, var(--renk) 45%, var(--beyaz)); }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sistemler span{ color:var(--piksel-kenar-yazi-2, #e8d4b6); }
 :root[data-sahne="doga"][data-zemin="piksel"] .hesap-kapi__sozler svg{ color:var(--text-2); }
 /* King: seçilen karakter, Bağlam sütununun altındaki küçük oda ve seçim düğmeleri */
@@ -29164,7 +29164,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'ff47ceea', at:'2026-11-12 23:21', dirty:true };
+SP.BUILD = { id:'80ccaeef', at:'2026-11-13 00:06', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -56892,6 +56892,9 @@ window.LIFEOS.PARCA_REHBER = [
   { modul:'esp', route:'symposium', ad:'Felsefe', es:['felsefe', 'sempozyum'] },
   { modul:'esp', route:'history', ad:'Tarih', es:['tarih', 'kronoloji'] },
   { modul:'esp', route:'studio', ad:'Ses', es:['müzik', 'diksiyon', 'stüdyo'] },
+  { modul:'ays', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'spi', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
+  { modul:'esp', route:'kilavuz', ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] },
 ];
 
 /* ==== js/core/king.js ==== */
@@ -72759,7 +72762,7 @@ window.LIFEOS.KILAVUZ = (function(){
   /* Modül çağırır (screens/guide.js): sayfa, ekran ve komut buradan kaydedilir. ns: R, SP ya da ESP. */
   function kur(m, ns){
     modul = m;
-    P.sayfa({ id:'kilavuz', modul:m, cekmece:'ayarlar', ad:k('menu'), sira:40 });
+    /* Sayfa kaydı modülün screens/guide.js'inde: King'in sayfa kataloğu (tools/parca.py) oradaki `king` alanını okur. */
     [['ozet', ozetHtml], ['ilk', ilkGunHtml], ['gun', herGunHtml], ['sistemler', sistemlerHtml], ['telefon', telefonHtml], ['takilirsan', takilirsanHtml]].forEach(([id, ciz], i) =>
       P.blok({ id:'kilavuz.' + id, sayfa:'kilavuz', yer:'ana', ad:k('baslik'), sira:(i + 1) * 10, ciz }));
     /* SPİ ve ESP paleti menüden üretir; AYS'ninki elle yazılır. */
@@ -122852,6 +122855,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.guide.rehber':'Rehber',
 });
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'spi', cekmece:'ayarlar', ad:'Genel', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'kilavuz', modul:'spi', king:{ sira:241, ad:'Kılavuz', es:['kılavuz', 'kullanım kılavuzu'] }, cekmece:'ayarlar', ad:'Kılavuz', sira:40 });
 window.LIFEOS.KILAVUZ.kur('spi', SP);
 
 SP.Screens.guide = (function(){

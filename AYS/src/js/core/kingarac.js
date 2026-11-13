@@ -142,7 +142,7 @@ R.KingArac = (function(){
     /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
     denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
     konu_riski:/(risk altında|riskli konu|konu riski|net (?:kayb|kaçır))/,
-    /* «dün ne çalıştım» (King 5 D10): model «araç çağırmam gerekiyor» deyip cevapsız bırakıyordu. */
+    /* «dün … çalıştım» sorusu (King 5 D10): model «araç çağırmam gerekiyor» deyip cevapsız bırakıyordu. */
     gunler:/((?:bugün|dün)(?: toplam)? kaç (?:dakika|saat|soru)|kaç (?:dakika|saat)(?: ders)? çalıştım|(?:hangi gün|hangi günler) kaç|(?:bugün|dün|önceki gün)(?:kü)? (?:ne|neler|ne kadar) (?:çalıştım|yaptım|çözdüm))/,
     konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
     gunun_akisi:/(günün akışı|bugünün akışı|(?:bugünün|bugünkü|günün) (?:planı|programı)(?= ne(?:ler)?(?:\s|[?,.!]|$)|\s*[?,]|\s*$)|bugün ne(?:ler)? (?:var|çalışacağım))/,   // King 5: «bugünün planı ne»; «planına … ekle» yazmadır

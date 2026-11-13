@@ -577,20 +577,38 @@ async function gezinti(tarayici, ad, base, profil, genislik, sonuc){
 /* Kaynakta yazili eylem adlari: acilir pencere ve alt cekmece gibi
    yalniz tiklayinca cizilen yerlerdeki eylemler gezintide gorunmez;
    kaynaktaki sablon onlarin «hala var» kanitidir. */
-function kaynakEylemleri(ad){
+/* Ayni kanit giris alanlari icin de gecerli (2026-11-12): yalniz model bagliyken
+   (AYS soru formu) ya da ortak giris kutusu yokken cizilen alanlar gezintide
+   gorunmez. Yalniz GIRIS ogeleri sayilir (input/textarea/select etiketi ya da
+   K.Input/Select/Textarea/Checkbox/Drop); herhangi bir ogenin kimligi sayilmaz,
+   yoksa gercek bir kayip ayni adli bir kutunun arkasina saklanirdi.
+   P.empty(baslik, etiket, eylem, ...) ucuncu degiskende eylem adini tasir. */
+function kaynakAdlari(t){
+  const eylem = new Set(), alan = new Set();
+  const ad = '([a-z0-9][a-z0-9_-]*)';
+  const ic = "(?:[^,()]|\\([^()]*\\))*";   // bir degisken: virgulsuz, bir kat parantezli
+  const desen = [
+    [eylem, new RegExp('data-act="' + ad + '"|\\bact\\s*:\\s*[\'"]' + ad + '[\'"]', 'gi')],
+    [eylem, new RegExp('\\bP\\.empty\\(' + ic + ',' + ic + ',\\s*[\'"]' + ad + '[\'"]', 'g')],
+    [alan, new RegExp('<(?:input|textarea|select)\\b[^>]*?\\bid="' + ad + '"', 'gi')],
+    [alan, new RegExp('\\bK\\.(?:Input|Textarea|Select|Checkbox|Drop)\\(\\{\\s*id\\s*:\\s*[\'"]' + ad + '[\'"]', 'g')],
+  ];
+  desen.forEach(([kume, re]) => { let m; while((m = re.exec(t))) kume.add(m[1] || m[2]); });
+  return { eylem, alan };
+}
+
+function kaynakTara(ad){
   const kok = path.join(KOK, ad, 'src', 'js');
-  const out = new Set();
+  const eylem = new Set(), alan = new Set();
   const gez = d => fs.readdirSync(d, { withFileTypes:true }).forEach(e => {
     const p = path.join(d, e.name);
     if(e.isDirectory()) return gez(p);
     if(!/\.js$/.test(e.name)) return;
-    const t = fs.readFileSync(p, 'utf8');
-    const re = /data-act="([a-z0-9][a-z0-9_-]*)"|\bact\s*:\s*['"]([a-z0-9][a-z0-9_-]*)['"]/gi;
-    let m;
-    while((m = re.exec(t))) out.add(m[1] || m[2]);
+    const k = kaynakAdlari(fs.readFileSync(p, 'utf8'));
+    k.eylem.forEach(x => eylem.add(x)); k.alan.forEach(x => alan.add(x));
   });
   gez(kok);
-  return Array.from(out).sort();
+  return { eylemler:Array.from(eylem).sort(), alanlar:Array.from(alan).sort() };
 }
 
 async function modulGez(tarayici, ad){
@@ -615,7 +633,7 @@ async function modulGez(tarayici, ad){
     rotalar: sonuc.rotalar,
     eylemler: sortObj(sonuc.eylemler),
     ekranKaydi: sonuc.ekranKaydi || {},
-    kaynakEylemleri: kaynakEylemleri(ad),
+    ...(k => ({ kaynakEylemleri:k.eylemler, kaynakAlanlari:k.alanlar }))(kaynakTara(ad)),
     olcu: sonuc.olcu,
     oz: Array.from(sonuc.oz).sort(),
     hatalar: sonuc.hatalar,
@@ -691,6 +709,7 @@ function karsilastir(ad, taban, simdi, izin){
   const simdiKaynak = new Set(simdi.kaynakEylemleri);
   const simdiIsleyici = isleyiciKumesi(simdi.ekranKaydi);
   const simdiAlan = alanKumesi(simdi.rotalar);
+  const simdiKaynakAlan = new Set(simdi.kaynakAlanlari || []);
 
   const kayip = { eylem:[], isleyici:[], alan:[] };
   const gizlenen = [];
@@ -709,7 +728,7 @@ function karsilastir(ad, taban, simdi, izin){
     if(!izinli('isleyici', h)) kayip.isleyici.push(h);
   });
   alanKumesi(taban.rotalar).forEach(a => {
-    if(simdiAlan.has(a)) return;
+    if(simdiAlan.has(a) || simdiKaynakAlan.has(a)) return;
     if(!izinli('alan', a)) kayip.alan.push(a);
   });
   return { kayip, gizlenen };
@@ -898,7 +917,7 @@ async function main(){
 const DOLDUR_KAYNAK = {};
 Object.keys(DOLDUR).forEach(ad => { DOLDUR_KAYNAK[ad] = '(' + DOLDUR[ad].toString() + ')()'; });
 
-module.exports = { testOzellikleri, gez, karsilastir, rotalariBul, DOLDUR_KAYNAK, MODUL, GENISLIK, PROFIL,
+module.exports = { testOzellikleri, gez, karsilastir, kaynakAdlari, kaynakTara, rotalariBul, DOLDUR_KAYNAK, MODUL, GENISLIK, PROFIL,
   sonTaban, katalogSayisi, topla, SEKME, SEKME_GRUBU };
 
 if(require.main === module){
