@@ -191,6 +191,41 @@ kod = goc.main(["--kuru", "--cikti", cikti, "--hesap", hesap_yol, "--hkm", hkm_y
 dogru("--kuru rapor yazar, geçici hedef kalmaz", kod == 0 and os.path.isfile(os.path.join(cikti, "goc-kuru.md"))
       and "Sayı dengesi: **tutuyor**" in open(os.path.join(cikti, "goc-kuru.md"), encoding="utf-8").read())
 
+print("gerçek göç (P6)")
+p6 = os.path.join(t, "p6")
+kod, sat = goc.gercek(os.path.join(p6, "h1"), os.path.join(p6, "y1"), hesap_yol, hkm_yol, pk, pc)
+dogru("cihazda gönderilmemiş değişiklik varsa yazmaz", kod == 1 and any("gönderilmemiş değişiklik var: 2" in x for x in sat)
+      and not os.path.exists(os.path.join(p6, "h1", "lifeos.db")), sat)
+dogru("durunca bile dönüş noktası alınmış", os.path.isdir(os.path.join(p6, "y1", "paket"))
+      and any(a.endswith("-hesap.db") for a in os.listdir(os.path.join(p6, "y1"))))
+kod, sat = goc.gercek(os.path.join(p6, "h0"), os.path.join(p6, "y0"), hesap_yol, hkm_yol, None, pc)
+dogru("paket yoksa yazmaz", kod == 1 and any("cihaz paketi yok" in x for x in sat), sat)
+ev6 = os.path.join(p6, "ev", "hesap.db")
+d6 = hesap_db(ev6, [("ays/main", "cards/k1", {"front": "a", "stage": 2}, 5),
+                    ("esp/ben", "days/2026-10-31", {"sessions": [{"minutes": 20, "minutesCert": "estimated"}]}, 5)])
+with d6._islem() as c:
+    d6._kullanici_yaz(c, "sahip", "p6-sinama-parolasi-42", "admin")
+pk6 = os.path.join(p6, "paket")
+paket(pk6, "tablet-esp.json", kaynak="esp", cihaz="cTAB", bekleyen={"esp/ben": 0},
+      profiller={"ben": {"data": {"days/2026-11-01": {"sessions": [{"minutes": 45, "minutesCert": "estimated"}]}}}})
+h6, y6 = os.path.join(p6, "veri"), os.path.join(p6, "yedek")
+canli_once = ozetler(os.path.dirname(ev6))
+kod = goc.main(["--gercek", "--hedef", h6, "--yedek", y6, "--hesap", ev6, "--hkm", hkm_yol, "--paket", pk6, "--pc", pc])
+rapor = open(os.path.join(y6, "goc-gercek.md"), encoding="utf-8").read() if os.path.isfile(os.path.join(y6, "goc-gercek.md")) else ""
+dogru("temiz kaynakla gerçek göç yazılır", kod == 0 and os.path.isfile(os.path.join(h6, "lifeos.db")), rapor[-800:])
+dogru("rapor: geri dönüş kopyada denendi, karşılaştırma 0 fark", "0 kaldı" in rapor and "0 fark" in rapor, rapor[-800:])
+dogru("canlı hesap.db'ye dokunulmadı", ozetler(os.path.dirname(ev6)) == canli_once)
+gid = rapor.split("göç kimliği `", 1)[1].split("`", 1)[0] if "göç kimliği `" in rapor else ""
+dogru("ikinci gerçek göç üstüne yazmaz", goc.gercek(h6, os.path.join(p6, "y2"), ev6, hkm_yol, pk6, pc)[0] == 1)
+c = sqlite3.connect(os.path.join(h6, "lifeos.db"))
+once = c.execute("SELECT count(*) FROM kayit").fetchone()[0]
+c.close()
+kod = goc.main(["--geri-al", gid, "--hedef", h6])
+c = sqlite3.connect(os.path.join(h6, "lifeos.db"))
+sonra = c.execute("SELECT count(*) FROM kayit").fetchone()[0]
+c.close()
+dogru("--geri-al göç turunu tümden siler (%d → %d)" % (once, sonra), kod == 0 and once > 0 and sonra == 0)
+
 shutil.rmtree(t, ignore_errors=True)
 print("KIRMIZI: %d" % kirmizi if kirmizi else "temiz")
 sys.exit(1 if kirmizi else 0)

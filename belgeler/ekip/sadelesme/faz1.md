@@ -126,3 +126,20 @@ Gerçek göçten ve HKM'yi kapatmadan önce sahibinden açık onay alınır.
 Canlı veriye (`LifeOS-Sistem`, tarayıcı depoları, `hkm.db`, `hesap.db`) yalnız okuma; okuma dosya
 kopyasından. Sıfır bağımlılık (AGENTS §1.3). Masaüstü kabuğunun Chromium profili (LevelDB) dosyadan
 okunmaz; PC'deki modül verisi de paket düğmesiyle alınır (veri-katmani §6).
+
+## P6 aracı hazır (2026-11-13)
+`python sistem/goc.py --gercek` P6'yı tek komutta yürütür; kapılardan biri tutmazsa hedefe hiçbir şey yazmaz:
+1. Canlı `hesap.db` ve `hkm.db` (yanlarındaki -wal ve -shm ile) ve paket klasörü `%LOCALAPPDATA%\LifeOS\yedek\p6-<zaman>\` altına bir kez kopyalanır. Bu kopya dönüş noktasıdır. Sonraki bütün koşular bu anlık kopyadan okur.
+2. İki kuru koşu yapılır. Göç şu durumlarda durur:
+   - paket yoksa;
+   - cihazlarda gönderilmemiş değişiklik varsa;
+   - canlı hesap deposu boşsa;
+   - çatışma ya da hata varsa;
+   - sayı dengesi ya da gidiş-dönüş bozuksa;
+   - iki kuru koşu bayt bayt aynı değilse.
+3. Kapılar geçilirse gerçek hedefe göç yazılır: `%LOCALAPPDATA%\LifeOS\veri\lifeos.db`. Hedefte depo varsa üstüne yazılmaz.
+4. Gerçek koşunun raporu kuru koşunun raporuyla aynı olmalı.
+5. Geri dönüş gerçek depoda değil, kopyasında denenir: `geri_al` çalıştırılır ve kopyada 0 kayıt kalmalı.
+6. Sahip için `veri.karsilastir` farkı yazılır.
+
+Rapor `goc-gercek.md` olarak dönüş noktası klasörüne yazılır. Gerçek geri dönüş: `python sistem/goc.py --geri-al <goc_id>`. `tools/goc_test.py` bu adımları geçici veriyle dener (ölçüldü). Canlı veriyle geçici hedefe denendi (ölçüldü): «cihaz paketi yok» kapısında durdu.

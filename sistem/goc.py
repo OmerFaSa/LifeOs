@@ -2,10 +2,12 @@
 """Goc araci (sadelesme Faz 1, A3): bes kaynaktan tek depoya. Plan: belgeler/ekip/sadelesme/faz1.md
 
     python sistem/goc.py --kuru [--cikti KLASOR] [--hesap DB] [--hkm DB] [--paket KLASOR] [--pc KLASOR]
+    python sistem/goc.py --gercek [--hedef KLASOR] [--yedek KLASOR] [kaynaklar kuru gibi]     (P6)
+    python sistem/goc.py --geri-al GOC_ID [--hedef KLASOR]
 
 Kuru kosu goce GECICI bir lifeos.db'ye yapar, geri okur, kaynak x tur sayar ve raporu
-(goc-kuru.json + goc-kuru.md) yazar. Gercek goc (P6) ayni `goc()` islevidir, baska hedefle;
-sahibinin acik onayi olmadan bu dosyadan cagrilmaz.
+(goc-kuru.json + goc-kuru.md) yazar. Gercek goc (P6) ayni `goc()` islevidir, baska hedefle: `--gercek` once
+donus noktasi alir ve kapilari dener (gercek() belgesi). Sahibin onayi: 2026-11-13 «sormadan yap», paketler gelince.
 
 Sozler:
 1. Kaynaga yazmaz. Her SQLite dosyasi (+ -wal, -shm) once gecici klasore KOPYALANIR, kopya acilir;
@@ -577,6 +579,84 @@ def geri_al(hedef_klasor, goc_id):
         c.close()
 
 
+def gercek(hedef, yedek, hesap, hkm, paket, pc):
+    """P6 (faz1.md §2-3): donus noktasi → iki kuru kosu bayt bayt ayni → gercek hedef → geri donus kopyada denenir
+    → veri.karsilastir. Butun kosular AYNI anlik kopyadan okur (canli dosya bir kez kopyalanir). Doner (kod, satirlar).
+    Hedef varsa, paket yoksa, cihazda bekleyen/catisma/hata varsa ya da canli hesap bossa yazmadan durur."""
+    db = os.path.join(hedef, "lifeos.db")
+    if os.path.exists(db):
+        return 1, ["Hedefte zaten depo var, üstüne yazılmaz: " + db]
+    os.makedirs(yedek)                                    # var olan klasore yazmaz
+    an = {"hesap": kopyala(hesap, yedek), "hkm": kopyala(hkm, yedek), "paket": None}
+    if paket and os.path.isdir(paket):
+        an["paket"] = os.path.join(yedek, "paket")
+        shutil.copytree(paket, an["paket"])
+    s = ["Dönüş noktası: " + yedek] + ["- %s: %s" % (k, v or "yok") for k, v in an.items()]
+    raporlar = []
+    for _ in range(2):
+        t = tempfile.mkdtemp(prefix="lifeos-goc-p6-")
+        try:
+            raporlar.append(goc(t, an["hesap"], an["hkm"], an["paket"], pc))
+        finally:
+            shutil.rmtree(t, ignore_errors=True)
+    r, engel = raporlar[0], []
+    if r["bekleyen_toplam"] is None:
+        engel.append("cihaz paketi yok (cihazlarda «Bilgisayara gönder» bekleniyor)")
+    elif r["bekleyen_toplam"]:
+        engel.append("cihazlarda gönderilmemiş değişiklik var: %d" % r["bekleyen_toplam"])
+    if r["kaynak"]["hesap"].get("durum") != "okundu" or not an["hesap"] or _hesap_dolu_mu(an["hesap"]) <= 0:
+        engel.append("canlı hesap deposu boş ya da yok (%s): yedekten göç sahibinin ayrı kararı" % r["kaynak"]["hesap"].get("durum"))
+    if r["catisma"]:
+        engel.append("çatışma var: %d (sahibi görmeden göç yok)" % len(r["catisma"]))
+    engel += ["hata: " + x for x in r["hata"]]
+    if not (r["denge"] and r["gidis_donus"]):
+        engel.append("kuru koşu dengesi ya da gidiş-dönüşü bozuk")
+    if kanon(raporlar[0]) != kanon(raporlar[1]):
+        engel.append("iki kuru koşu aynı değil")
+    if engel:
+        return 1, s + ["", "Gerçek göç YAPILMADI:"] + ["- " + x for x in engel]
+    g = goc(hedef, an["hesap"], an["hkm"], an["paket"], pc)
+    s += ["", "Gerçek göç: %s, göç kimliği `%s`." % (db, g["goc_id"])]
+    sorun = [] if kanon(g) == kanon(r) else ["gerçek koşunun raporu kuru koşudan farklı"]
+    t = tempfile.mkdtemp(prefix="lifeos-goc-geri-")
+    try:                                                  # geri donus gercek depoda degil, kopyasinda denenir
+        shutil.copyfile(db, os.path.join(t, "lifeos.db"))
+        if os.path.isdir(os.path.join(hedef, "medya")):
+            shutil.copytree(os.path.join(hedef, "medya"), os.path.join(t, "medya"))
+        silinen = geri_al(t, g["goc_id"])
+        c = sqlite3.connect(os.path.join(t, "lifeos.db"))
+        try:
+            kalan = c.execute("SELECT count(*) FROM kayit").fetchone()[0]
+        finally:
+            c.close()
+        s.append("Geri dönüş kopyada denendi: %d kayıt silindi, %d kaldı." % (silinen, kalan))
+        if kalan:
+            sorun.append("geri dönüş tam silmedi")
+    finally:
+        shutil.rmtree(t, ignore_errors=True)
+    import veri                                           # veri goc'u ice aktarir; dongu olmasin diye burada
+    c = sqlite3.connect(an["hesap"])
+    try:
+        sahip = c.execute("SELECT min(id) FROM kullanici WHERE rol='admin'").fetchone()[0]
+    finally:
+        c.close()
+    d = veri.Depo(hedef)
+    try:
+        fark = veri.karsilastir(an["hesap"], d, sahip)
+    finally:
+        d.c.close()
+    s.append("veri.karsilastir (sahip %s): %d fark%s" % (sahip, len(fark), "" if not fark else
+             "; ilk 10: " + ", ".join("%s (%s)" % x for x in fark[:10])))
+    s += ["", "Sonraki adımlar: LifeOS'u yeniden başlat (köprü açılır), `veri.esle` ile anlık kopyadan sonra gelenleri"
+          " geçir, fark 0 olunca `veri.OKU` ve `tekkapi.ETKIN` açılır (kod değişikliği, ayrı commit).",
+          "Geri dönüş: python sistem/goc.py --geri-al %s --hedef \"%s\"" % (g["goc_id"], hedef)]
+    if sorun:
+        s += ["", "SORUN:"] + ["- " + x for x in sorun]
+    with open(os.path.join(yedek, "goc-gercek.md"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(md(g).replace("# Göç kuru koşusu", "# Gerçek göç (P6)", 1) + "\n## P6\n\n" + "\n".join(s) + "\n")
+    return (1 if sorun else 0), s
+
+
 ETIKET_ADI = {"measured": "ölçüldü", "estimated": "tahmin", "computed": "hesaplandı", "missing": "veri yok",
               "eski": "eski kayıt", "derived_cevrim": "derived → hesaplandı", "bilinmeyen_etiket": "tanınmayan etiket"}
 KAYNAK_ADI = {"hesap": "Hesap sunucusu (hesap.db)", "paket": "Cihazların göç paketleri", "gun": "Gün geçmişi",
@@ -614,21 +694,36 @@ def varsayilan():
     yerel = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
     sistem = os.path.join(os.path.expanduser("~"), "LifeOS-Sistem")
     return dict(hesap=os.path.join(yerel, "LifeOS", "hesap", "hesap.db"), hkm=os.path.join(sistem, "HKM", "db", "hkm.db"),
-                paket=os.path.join(yerel, "LifeOS", "goc", "paket"), pc=os.path.join(yerel, "LifeOS"))
+                paket=os.path.join(yerel, "LifeOS", "goc", "paket"), pc=os.path.join(yerel, "LifeOS"),
+                hedef=os.path.join(yerel, "LifeOS", "veri"),   # veri.kopru_ac: hesap klasorunun yanindaki veri/
+                yedek=os.path.join(yerel, "LifeOS", "yedek", "p6-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
 
 
 def main(argv=None):
     v = varsayilan()
-    ap = argparse.ArgumentParser(description="LifeOS göç aracı (Faz 1). Yalnız kuru koşu.")
-    ap.add_argument("--kuru", action="store_true", required=True, help="geçici hedefe göç et, say, raporla")
+    ap = argparse.ArgumentParser(description="LifeOS göç aracı (Faz 1).")
+    kip = ap.add_mutually_exclusive_group(required=True)
+    kip.add_argument("--kuru", action="store_true", help="geçici hedefe göç et, say, raporla")
+    kip.add_argument("--gercek", action="store_true", help="P6: dönüş noktası, iki kuru koşu, gerçek hedef, geri dönüş denemesi")
+    kip.add_argument("--geri-al", metavar="GOC_ID", help="hedefteki bir göç turunu tümden sil")
     ap.add_argument("--cikti", default=os.path.join(tempfile.gettempdir(), "lifeos-goc-kuru"))
-    for ad in ("hesap", "hkm", "paket", "pc"):
+    for ad in ("hesap", "hkm", "paket", "pc", "hedef", "yedek"):
         ap.add_argument("--" + ad, default=v[ad])
     a = ap.parse_args(argv)
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
+    if a.geri_al:
+        if not os.path.isfile(os.path.join(a.hedef, "lifeos.db")):
+            print("Hedefte depo yok: " + a.hedef)
+            return 1
+        print("Silinen kayıt: %d (göç %s)" % (geri_al(a.hedef, a.geri_al), a.geri_al))
+        return 0
+    if a.gercek:
+        kod, satirlar = gercek(a.hedef, a.yedek, a.hesap, a.hkm, a.paket, a.pc)
+        print("\n".join(satirlar))
+        return kod
     hedef = tempfile.mkdtemp(prefix="lifeos-goc-hedef-")
     try:
         r = goc(hedef, a.hesap, a.hkm, a.paket, a.pc)
