@@ -148,6 +148,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `gocpaket_test.py` — Göç paketinin PC tarafı: cihazın paketleri `goc.paket_kaydet` ve göç okuyucusundan geçer, sınırlar ve `/api/hesap/goc-paket` ucu; CI'da koşulur.
 - `tekkapi_test.py` — Tek kapı (`sistem/tekkapi.py`): giriş, üç modül `/ays/` `/spi/` `/esp/` yolunda, yeni kabuk `/kabuk/` kapalı listeyle, API'ler ve HKM `/api/hkm/` aynı süreçte eski sunucuyla aynı cevabı verir, bilinmeyen yol 404, köken kuralları durur, kapalıyken açılmaz; geçici veri ve boş portla, CI'da koşulur.
 - `kabuk_gez.js` — Yeni kabuğu (`kabuk/`) tek kapıdan yalıtılmış ortamda açar, Felsefe pilotunun ilk ünitesini, Not ve Tekrar ekranlarını gerçek tarayıcıda yürür (ders, alıştırma, ünite kapısı, not ve bağ, kart ve cevap, kayıt); `--goruntu` önizleme görüntülerini yeniler; CI'da koşulur.
+- `bilesen_goruntu.js` — Bileşen kataloğunu (`kabuk/bilesen.html`) Chromium'da file:// ile açar, 390/1280 genişlikte açık ve koyu dört önizleme görüntüsü çeker (`belgeler/ekip/sadelesme/kabuk-onizleme/bilesen-*.png`); elle koşulur.
 - `veri_denetle_test.py` — tools/veri_denetle.py birim testleri; kenar durumları sınar, CI'da koşulur.
 - `veri_dogrula_test.py` — tools/veri_dogrula.py saf işlevlerinin birim testleri, CI'da koşulur.
 - `veri_test.py` — Veri çıkarma ve gece doğrulama kurallarının testi, CI'da koşulur.
