@@ -152,6 +152,21 @@ kaydetme bayt bayt aynı), ardından `--denetle` çıkış 0 («26 bütçe, aş�
 `olcum.py`'de tek düzeltme: aşım satırındaki kaynak, ölçüt kayıtta değersiz (`null`) olduğunda da
 «son kayıt» yazıyordu; artık başvuru tabansa «taban» yazar.
 
+## Aşım kaydı
+
+**13 Kasım 2026, ana dal bu dala alındıktan sonra (birleştirme `867bde14`): `--denetle` çıkış 1, iki aşım.**
+
+| Ölçüt | Son kayıt | Şimdi | Nedeni |
+|---|---|---|---|
+| Sayfa | 79 | 81 | Ana daldaki `913e1222`: Kılavuz sayfasının kaydı üç modülün `guide.js` dosyasına taşındı |
+| Sözcük yönlendirmesi (sayfa rehberi sözcüğü) | 76 | 82 | Aynı kayıt: `brand/ortak/parca-rehber.js`'e üç satır, her biri iki sözcük |
+
+Yeni ekran yazılmadı: var olan Kılavuz sayfası King kataloğuna kaydedildi (King sınavındaki kapsam kırmızısını
+kapatmak için, dondurulmuş eski modüllerde). Sayım kuralı kayıt satırını saydığı için ölçüt yükseldi.
+Kayıt bilerek yenilenmedi: `--kaydet` aşımı sessizce başvuru yapar (açık soru 8). Karar sahibinin:
+ya artış gerekçesiyle kabul edilir ve kayıt yenilenir, ya da kural 5 gereği karşılığında bir parça çıkar.
+`--denetle` CI'a bağlı olmadığı için bu aşım CI'ı kızartmaz.
+
 ## Açık sorular
 
 1. **Kopya dosya 236 → 237.** `gocpaket.js` (göç paketi, AGENTS'teki yazılı istisna) üç modüle kopyalanıyor.
