@@ -19,6 +19,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 1 P5 · Tek kapı](ekip/sadelesme/faz1-p5-tekkapi.md) — A4: tek süreç, tek adres; yollar tablosu, dokunulan dosyalar, boşta bellek ölçümü, devreye alma adımları (kapalı, P6 ile açılır) (2026-11-13).
 - [Faz 2 · Kabuk](ekip/sadelesme/faz2-kabuk.md) — A5: tam ekran çerçeve, halka ve komut çubuğu, sistem haritası, tek ayar şeması; ekran görüntüleri `kabuk-onizleme/` altında, sahibinin onayını bekler (2026-11-13).
 - [Faz 2 · Kayıt deposu IndexedDB](ekip/sadelesme/faz2-indexeddb.md) — Kabuğun kayıtları IndexedDB'de, ayarlar localStorage'da; tek seferlik, geri okumadan silmeyen taşıma, kalıcı depolama isteği (2026-11-14).
+- [Faz 2 · Bileşen kataloğu](ekip/sadelesme/faz2-bilesen.md) — On iki yapı taşı (`kabuk/bilesen.*`), sabit ölçüler, yalnız kabuk jetonları; katalog sayfası sahibe gösterilecek örnek (2026-11-14).
 - [Faz 3 · Yol motoru ve içerik](ekip/sadelesme/faz3-yol-icerik.md) — Yol motoru, içerik şeması (`alan/SEMA.md`), Felsefe'nin ilk aşaması ve şema denetimi (2026-11-13).
 - [Faz 3 · Tekrar motoru](ekip/sadelesme/faz3-tekrar.md) — Dokuz zamanlayıcının yerine tek FSRS: formüller, arayüz, on bir göç bağdaştırıcısı, testler (2026-11-13).
 - [Faz 3 · Not motoru](ekip/sadelesme/faz3-not.md) — On üç not yapısının yerine tek kayıt ve tek ağ: bağlar, King erişimi, arama, göç bağdaştırıcıları (2026-11-13).

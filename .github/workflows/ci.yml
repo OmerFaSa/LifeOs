@@ -276,6 +276,8 @@ jobs:
       # Kayit deposu (faz2-indexeddb.md): kayit IndexedDB'de, ayar localStorage'da; tasima hicbir seyi kaybetmez.
       - name: Kabuk kayıt deposu
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk kayıt deposu" node kabuk/depo.test.js
+      - name: Kabuk bileşen kataloğu
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk bileşen kataloğu" node kabuk/bilesen.test.js
 
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi

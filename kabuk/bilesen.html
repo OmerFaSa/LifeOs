@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Bileşen kataloğu</title>
+<!-- piksel yazı tipi gömülü (ağsız): index.html ile aynı görünsün diye; bileşen kodu değildir -->
+<link rel="stylesheet" href="../brand/ortak/piksel-yazi.css">
+<link rel="stylesheet" href="kabuk.css">
+<link rel="stylesheet" href="bilesen.css">
+<style>
+  /* yalnız katalog sayfasının düzeni; taşların kendisi bilesen.css'te */
+  .katalog{ width:100%; max-width:1040px; margin:0 auto; padding:24px 0 48px; display:flex; flex-direction:column; gap:32px; }
+  body[data-en="390"] .katalog{ max-width:390px; padding:24px 16px 48px; box-shadow:0 0 0 2px var(--cizgi); }
+  body[data-en="1280"] .katalog{ max-width:1280px; }
+  .denetim{ display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center; font-size:.85rem; color:var(--yazi-2); }
+  .denetim > div{ display:flex; align-items:center; gap:8px; }
+  .ornekler{ display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+  .ornekler--yigin{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr)); align-items:start; }
+  .ornekler--tam{ flex-direction:column; align-items:stretch; }
+  .ornek{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .ornek > small{ font-size:.72rem; color:var(--soluk); }
+  .kural{ font-size:.85rem; color:var(--soluk); max-width:72ch; }
+</style>
+</head>
+<body class="cerceve">
+<main id="katalog" class="katalog"></main>
+<script src="bilesen.js"></script>
+<script>
+(function () {
+  'use strict';
+  var B = window.Bilesen;
+  function ornek(ad, html) { return '<div class="ornek">' + html + '<small>' + B.kac(ad) + '</small></div>'; }
+  function ornekler(list, dizilis) { return '<div class="ornekler' + (dizilis ? ' ornekler--' + dizilis : '') + '">' + list.join('') + '</div>'; }
+  function tas(n, ad, kural, govde) {
+    return B.bolum({ baslik: n + ' · ' + ad, id: 'tas-' + n, govde: ['<p class="kural">' + B.kac(kural) + '</p>', govde] });
+  }
+  function seg(ad, ad2, secenekler, secili) {
+    return '<div><span id="seg-' + ad + '">' + ad2 + '</span><div class="seg" role="radiogroup" aria-labelledby="seg-' + ad + '">' +
+      secenekler.map(function (s) {
+        var on = s[0] === secili;
+        return '<button type="button" role="radio" data-seg="' + ad + '" data-deger="' + s[0] + '" aria-checked="' + on + '" tabindex="' + (on ? 0 : -1) + '">' + s[1] + '</button>';
+      }).join('') + '</div></div>';
+  }
+
+  var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'On iki yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
+    '<div class="denetim">' + seg('tema', 'Tema', [['sistem', 'Cihaza uy'], ['light', 'Açık'], ['dark', 'Koyu']], 'sistem') +
+    seg('en', 'Genişlik', [['tam', 'Pencere'], ['390', '390 px'], ['1280', '1280 px']], 'tam') + '</div>';
+
+  h += tas(1, 'Düğme', 'Yükseklik 44 px (ana 52 px), yazı 1 rem (ana 1,15 rem), tek satır, en çok 40 karakter. Kapalıyken odakta kalır, «kapalı» okunur.', ornekler([
+    ornek('ana', B.dugme({ metin: 'Başla', tur: 'ana' })),
+    ornek('ikincil', B.dugme({ metin: 'Seviyemi bul' })),
+    ornek('sade', B.dugme({ metin: 'Vazgeç', tur: 'sade' })),
+    ornek('bağlantı', B.dugme({ metin: 'Haftalık özet', href: '#/motor/kayit/hafta' })),
+    ornek('kapalı', B.dugme({ metin: 'Kaydet', tur: 'ana', kapali: true }))
+  ]));
+
+  h += tas(2, 'Rozet', 'Yükseklik 1,5 rem, yazı .72 rem, en çok 24 karakter; kesilmez. Kesik çizgi: kesin olmayan (tahmin, taslak).', ornekler([
+    ornek('normal', B.pul('hesaplandı')), ornek('vurgu', B.pul({ metin: 'pilot', tur: 'vurgu' })),
+    ornek('altın', B.pul({ metin: 'okundu', tur: 'altin' })), ornek('kesik', B.pul({ metin: 'tahmin', tur: 'kesik' }))
+  ]));
+
+  h += tas(3, 'Liste satırı', 'Yükseklik sabit: iki satır yazı + 24 px dolgu, notu olmayan satır da aynı boyda. Ad ve not tek satır; taşan kısaltılır, tamamı ekran okuyucuda.', B.liste({ ad: 'Örnek satırlar', ogeler: [
+    { ad: 'Felsefe', not: 'Aşama 1 · Bilgi felsefesi', pul: { metin: 'pilot', tur: 'vurgu' }, href: '#/alan/felsefe' },
+    { ad: 'Not', href: '#/motor/not' },
+    { ad: 'Şu anki ders', not: 'seçili satır (aria-current)', durum: 'secili', href: '#/x' },
+    { ad: 'Aşama 2 · Ahlak felsefesi', not: 'Önce önceki aşamanın kapısını geç.', durum: 'kilitli' },
+    { ad: 'Çok uzun bir yer adı: Bilgi felsefesinde gerekçelendirme ve şüphecilik üzerine uzun bir ders başlığı', not: 'Uzun not da tek satırda kısaltılır; satırın yüksekliği değişmez, ekran okuyucu tamamını okur.', pul: 'taslak', href: '#/y' }
+  ] }));
+
+  h += tas(4, 'Ders kartı', 'Yükseklik sabit: başlık 1 satır, özet en çok 2 satır, alt satırda durum, taslak ve süre. Izgarada sütun en az 280 px.', B.liste({ ad: 'Örnek dersler', tur: 'ders', ogeler: [
+    { baslik: 'Bilgi nedir?', ozet: 'Gerekçelendirilmiş doğru inanç tanımı ve Gettier örnekleri.', durum: 'yeni', sure: 12, href: '#/d1' },
+    { baslik: 'Şüphecilik', ozet: 'Descartes\'ın kötü cin düşüncesi ve yöntemsel şüphe; bilginin sınırları üzerine uzun bir özet ki iki satırı aşsın ve kesilsin.', durum: 'okundu', sure: 9, href: '#/d2' },
+    { baslik: 'Akılcılık ve deneycilik', ozet: 'Taslak içerik: onaylanana kadar tekrara girmez.', durum: 'yeni', taslak: true, href: '#/d3' },
+    { baslik: 'Kant\'ın uzlaştırması', ozet: 'Önce ünite kapısını geç.', durum: 'kilitli' }
+  ] }));
+
+  h += tas(5, 'İlerleme çubuğu', 'Yalnız hedefi olan tam sayı; hedef yoksa çubuk yok. Çubuk 16 px; 12 adıma kadar tik tik, üstü sürekli. Sayı her zaman yazılı.', ornekler([
+    B.ilerleme({ ad: 'Ders okundu', deger: 3, toplam: 8 }), B.ilerleme({ ad: 'Ünite kapısı', deger: 0, toplam: 4 }),
+    B.ilerleme({ ad: 'Aşama tamam', deger: 5, toplam: 5 }), B.ilerleme({ ad: 'Akademik dersler', deger: 47, toplam: 120 })
+  ], 'yigin'));
+
+  h += tas(6, 'Form alanı', 'Etiket her zaman görünür ve bağlı; giriş 44 px, çok satırlı 4 satır. Hata kalın çizgi ve «Hata:» önekiyle, renk tek başına değil.', ornekler([
+    B.alan({ ad: 'Ad', isim: 'ad', deger: 'Okuma listesi', ipucu: 'En çok 60 karakter.', zorunlu: true }),
+    B.alan({ ad: 'Su', isim: 'su', tur: 'sayi', deger: '-5', hata: 'Sıfırdan küçük olamaz.' }),
+    B.alan({ ad: 'Görünüm', isim: 'gorunum', tur: 'secim', deger: 'liste', secenekler: { liste: 'Liste', ag: 'Ağ' } }),
+    B.alan({ ad: 'Gün', isim: 'gun', tur: 'tarih', deger: '2026-11-14' }),
+    B.alan({ ad: 'Not', isim: 'not', tur: 'cok', deger: 'Aklıma gelen fikirleri buraya atıyorum.' }),
+    B.alan({ ad: 'Sayılar tahmin (ölçmedim)', isim: 'tahmin', tur: 'onay', deger: true })
+  ], 'yigin'));
+
+  h += tas(7, 'Boş durum', 'Veri yoksa sıfır yerine bu. 16 px dolgu, kesik çizgi; en çok bir eylem.', ornekler([
+    B.bos({ baslik: 'Bugün için kayıt yok.', metin: 'Boş, sıfır demek değildir. İlk kaydı girince özet burada görünür.', eylem: { metin: 'Kayıt gir', href: '#/motor/kayit' } }),
+    B.bos({ baslik: 'Bu not bulunamadı.', metin: 'Silinmiş ya da başka bir cihazda yazılmış olabilir.' })
+  ], 'yigin'));
+
+  h += tas(8, 'Başlık + eylem', 'Sayfa (h1) ya da bölüm (h2) başlığı; sağda en çok bir eylem, her genişlikte sağda kalır; uzun başlık kendi sütununda sarar. Yükseklik en az 44 px.', ornekler([
+    B.baslik({ metin: 'Tekrar', alt: 'Bugün 12 kart sırada.', eylem: { metin: 'Yeni kart', href: '#/motor/tekrar/yeni' }, id: 'ornek-baslik-1' }),
+    B.baslik({ metin: 'Son denemeler', duzey: 2, eylem: { metin: 'Hepsi', tur: 'sade', href: '#/motor/soru' }, id: 'ornek-baslik-2' })
+  ], 'tam'));
+
+  h += tas(9, 'Sayı kutusu', 'Kesinlik etiketi zorunlu (ölçüldü, tahmin, hesaplandı, veri yok, eski kayıt). Yükseklik sabit; veri yoksa «—», sıfır değil. Izgarada sütun en az 9 rem.', B.sayilar({ ad: 'Örnek sayılar', ogeler: [
+    { ad: 'Uyku', deger: 7.5, birim: 'sa', etiket: 'measured' }, { ad: 'Su', deger: 1.8, birim: 'L', etiket: 'estimated' },
+    { ad: 'Net', deger: 23.25, etiket: 'computed' }, { ad: 'Nabız', deger: null, etiket: 'missing' },
+    { ad: 'Kilo', deger: 71, birim: 'kg', etiket: 'eski' }
+  ] }));
+
+  h += tas(10, 'Uyarı / bilgi satırı', 'En az 44 px; tür sol çizgi ve öndeki sözcükle ayrılır. Hata role=alert, tamam role=status, ötekiler not.', ornekler([
+    B.uyari({ tur: 'bilgi', metin: 'Sayfa dosyadan açıldı; içerik LifeOS sunucusuyla açılınca yüklenir.' }),
+    B.uyari({ tur: 'tamam', metin: 'Kaydedildi.' }),
+    B.uyari({ tur: 'dikkat', metin: 'Yerleştirme tahmini; üretim görevi bekliyor.' }),
+    B.uyari({ tur: 'hata', metin: 'Kaydedilemedi: depo kapalı.' })
+  ], 'tam'));
+
+  h += tas(11, 'Bölüm', 'h2 başlık + en çok bir eylem, içerik 12 px aralıkla; bu sayfadaki her taş da bir bölümdür.', B.bolum({ baslik: 'Bugün', id: 'ornek-bolum', eylem: { metin: 'Plan', tur: 'sade', href: '#/motor/plan' },
+    govde: B.liste({ ad: 'Bugün', ogeler: [{ ad: 'Felsefe', not: 'Ders: Bilgi nedir?', href: '#/a' }, { ad: 'Tekrar', not: '12 kart', href: '#/b' }] }) }));
+
+  h += tas(12, 'Panel', '16 px dolgu, 12 px aralık; normal, güçlü ve başarı (3 px altın çizgi). Sonuç, kart ve özet kutuları bunun içine girer.', ornekler([
+    B.panel({ baslik: 'Ünite kapısı', id: 'ornek-panel-1', govde: [B.ilerleme({ ad: 'Doğru', deger: 4, toplam: 5 }), B.uyari({ tur: 'tamam', metin: 'Geçtin; sonraki ünite açıldı.' })], tur: 'basari' }),
+    B.panel({ baslik: 'Deneme sonucu', id: 'ornek-panel-2', tur: 'guclu', govde: B.sayilar({ ad: 'Sonuç', ogeler: [{ ad: 'Net', deger: 31.5, etiket: 'computed' }, { ad: 'Süre', deger: 42, birim: 'dk', etiket: 'measured' }] }) }),
+    B.panel({ govde: '<p>Başlıksız panel: düz bir yüzey.</p>' })
+  ], 'yigin'));
+
+  var kok = document.getElementById('katalog');
+  kok.innerHTML = h;
+  kok.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]'); if (a) e.preventDefault(); // katalogda bağlantılar bir yere gitmez
+    var b = e.target.closest('[data-seg]'); if (b) segSec(b);
+  });
+  kok.addEventListener('keydown', function (e) {
+    var b = e.target.closest('[data-seg]'); if (!b || ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(e.key) < 0) return;
+    var hep = [].slice.call(b.parentNode.children), i = hep.indexOf(b) + (e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1);
+    e.preventDefault(); segSec(hep[(i + hep.length) % hep.length]);
+  });
+  function segSec(b) {
+    [].forEach.call(b.parentNode.children, function (x) { var on = x === b; x.setAttribute('aria-checked', on); x.tabIndex = on ? 0 : -1; });
+    b.focus();
+    var v = b.getAttribute('data-deger');
+    if (b.getAttribute('data-seg') === 'tema') { if (v === 'sistem') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', v); }
+    else document.body.setAttribute('data-en', v);
+  }
+})();
+</script>
+</body>
+</html>
