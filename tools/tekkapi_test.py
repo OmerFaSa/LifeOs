@@ -283,6 +283,45 @@ def sina(eski, tek):
          subprocess.run([sys.executable, os.path.join(SISTEM, "tekkapi.py")], capture_output=True, timeout=60).returncode == 2)
 
 
+def ilet_sina(T, kok):
+    """Soz 30 iletme yolu uctan uca: tek kapida /api/hesap/hkm/api/... → ayni surecin /api/hkm/.
+    Anahtari /api/hesap/merkez verir ama o Tailscale ister; burada ayni hesap.db'de merkez_anahtari ile alinir."""
+    print("\nMerkez iletme yolu (cihaz anahtarı → /api/hesap/hkm → /api/hkm/)")
+    hesap_izin = {"X-LifeOS": "hesap", "Content-Type": "application/json"}
+    k, _, gv = iste(T, "/api/hesap/kur", "POST", json.dumps({"ad": "sinama", "parola": "tekkapi-sinama-parolasi-42"}).encode(), hesap_izin)
+    dene("admin kurulur (yerel)", k == 200, gv[:200])
+    if k != 200:
+        return
+    oturum = json.loads(gv)["jeton"]
+    sys.path.insert(0, SISTEM)
+    import hesap
+    anahtar = hesap.Depo(os.path.join(kok, "hesap", "hesap.db")).merkez_anahtari(oturum)
+    ortak = {"Authorization": "Bearer tekkapi-test-jetonu-" + "x" * 24}
+
+    def b(j):
+        return {"Authorization": "Bearer " + j}
+
+    a, c = iste(T, "/api/hkm/health"), iste(T, "/api/hesap/hkm/api/health")
+    dene("GET health anahtarsız iletilir, Merkez'in kendisiyle aynı", a[0] == c[0] == 200 and set(json.loads(a[2])) == set(json.loads(c[2])),
+         (a[0], c[0]))
+    for yol in ("/memory", "/hedefler", "/gizlilik"):
+        a, c = iste(T, "/api/hkm" + yol, basliklar=ortak), iste(T, "/api/hesap/hkm/api" + yol, basliklar=b(anahtar))
+        dene("GET %s: cihaz anahtarıyla = ortak jetonla (%s)" % (yol, a[0]), a[0] == c[0] == 200 and a[2] == c[2], (a[0], c[0]))
+        dene("GET %s: anahtarsız 401" % yol, iste(T, "/api/hesap/hkm/api" + yol)[0] == 401)
+    dene("oturum jetonu Merkez anahtarı yerine geçmez (401)", iste(T, "/api/hesap/hkm/api/memory", basliklar=b(oturum))[0] == 401)
+    dene("ortak jeton bu yoldan geçmez (401)", iste(T, "/api/hesap/hkm/api/memory", basliklar=ortak)[0] == 401)
+    for yol in ("/api/pair", "/api/pair/onay", "/api/x/../pair", "/memory", "/api/"):
+        dene("%s iletilmez (404)" % yol, iste(T, "/api/hesap/hkm" + yol, basliklar=b(anahtar))[0] == 404)
+    k = iste(T, "/api/hesap/hkm/api/memory", "PUT", b"{}", b(anahtar))[0]
+    dene("PUT iletilmez (%s)" % k, k in (404, 405, 501))
+    gecerli = iste(T, "/api/hkm/motto/edit", "POST", b"{}", dict(ortak, **{"Content-Type": "application/json"}))[0]
+    dene("POST gövdeyle iletilir, Merkez'in kendi cevabı döner (%s)" % gecerli, gecerli != 404 and
+         iste(T, "/api/hesap/hkm/api/motto/edit", "POST", b"{}", dict(b(anahtar), **{"Content-Type": "application/json"}))[0] == gecerli)
+    k, _, _ = iste(T, "/api/hesap/cikis", "POST", b"{}", dict(hesap_izin, **b(oturum)))
+    dene("çıkış yapılır", k == 200)
+    dene("çıkıştan sonra cihaz anahtarı kesilir (401)", iste(T, "/api/hesap/hkm/api/memory", basliklar=b(anahtar))[0] == 401)
+
+
 # ---------------------------------------------------------------- bellek
 def rss_mb(pid):
     """Windows calisma kumesi (tasklist «Mem Usage»), MB; olculemezse None."""
@@ -350,6 +389,7 @@ def main():
             print("koşulamadı: sunucular açılmadı (eski %s, tek %s)" % (eok, tok))
             return 1
         sina(eport, tport)
+        ilet_sina(tport, tek_kok)
     finally:
         for x in (e, t):
             if x:

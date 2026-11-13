@@ -212,8 +212,9 @@ Yalnız gerçek telefon/tabletle kanıtlanır (Samsung, iPad, gerçek iPhone):
    cihaz başına değil, Hesap › Cihazlar'da da görünmez. Bayrak açıkken bu yolun Merkez adresi de eşleşmez
    (Merkez tek kapıda `/api/hkm/` altında, eski istemci `url + '/api/...'` kurar). Öneri: tek kapıda bu yol
    kapansın, cihaz admin hesabıyla girip kendi anahtarını alsın. Karar gerekiyor; kod değişmedi.
-3. **Tek kapı ucuna uçtan uca test.** Tek kapıda `/api/hesap/hkm/...` → aynı sürecin `/api/hkm/` zinciri birim
-   olarak değil, yalnız satır olarak var (`tools/tekkapi_test.py` açık erişim ister, anahtar Tailscale'siz
-   alınamıyor). P6'da bayrak açılmadan önce bu kapıda bir kez denenmeli.
+3. **Tek kapı ucuna uçtan uca test.** Kapandı (2026-11-13): `tools/tekkapi_test.py` «Merkez iletme yolu» bölümü tek kapıyı
+   geçici veriyle açar, yerelden admin kurar, anahtarı aynı hesap.db'de `merkez_anahtari` ile alır ve zinciri dener: anahtarla
+   üç okuma ortak jetonla aynı gövdeyi verir; anahtarsız, oturum jetonuyla ya da ortak jetonla 401; `/api/pair`, `..`, PUT
+   iletilmez; POST gövdesi Merkez'in kendi cevabını alır; çıkıştan sonra anahtar 401. 19 denetim, ölçüldü (125/125 yeşil).
 4. **Eski «sertifika» yolu (telefon.py, kendi CA).** Plan gereği emekliye ayrılacak; bu işte dokunulmadı. Ev ağı
    kapısı kapanınca sağlık ucunun ev ağına görünmesi de (not 11) kendiliğinden biter.
