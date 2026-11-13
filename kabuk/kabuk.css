@@ -221,3 +221,11 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .ozet{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
 .ozet li{ display:grid; grid-template-columns:1fr auto auto; align-items:center; column-gap:12px; padding:10px 0; box-shadow:inset 0 -2px 0 var(--cizgi); }
 .ozet b{ font-family:var(--piksel); font-weight:400; }
+.planform{ display:flex; flex-direction:column; gap:12px; margin-top:8px; } .ikili{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.bloklar{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.blok{ display:grid; grid-template-columns:auto 1fr auto; grid-template-areas:'saat ad eylem' 'saat not eylem'; align-items:center; column-gap:14px; padding:10px 14px; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi); }
+.blok__saat{ grid-area:saat; font-family:var(--piksel); color:var(--yazi-2); white-space:nowrap; } .blok__ad{ grid-area:ad; } .blok > .soluk{ grid-area:not; font-size:.8rem; }
+.blok__eylem{ grid-area:eylem; display:flex; align-items:center; gap:4px; flex-wrap:wrap; justify-content:flex-end; }
+.blok--mola{ background:transparent; color:var(--soluk); } .blok--bitti .blok__ad{ color:var(--soluk); }
+.karsila__plan{ color:inherit; padding:10px 6px; display:inline-block; }
+@media (max-width:480px){ .blok{ grid-template-columns:auto 1fr; grid-template-areas:'saat ad' 'saat not' 'eylem eylem'; } .blok__eylem{ justify-content:flex-start; } }

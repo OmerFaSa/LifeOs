@@ -105,6 +105,35 @@ t('kayıt: formdan kayıt; virgüllü sayı, tahmin etiketi, boş alan yollanmaz
   esit(R.kayitMetni(Kayit, l.kayitlar[1]), 'Gece uykusu · 7,5 saat (tahmin)');
 });
 
+t('plan: boş zamana iş, ders ve mola yerleşir; geçersiz iş ve aralık motorun cümlesiyle reddedilir', () => {
+  const Plan = require('../motor/plan.js'), gun = '2026-11-13';
+  let dr = R.planBos();
+  esit(R.planEkle(Plan, dr, 'aralik', { bas: '12:00', bit: '09:00' }, gun).ok, false);
+  let r = R.planEkle(Plan, dr, 'aralik', { bas: '14:00', bit: '15:00' }, gun); dr = r.durum;
+  dr = R.planEkle(Plan, dr, 'aralik', { bas: '09:00', bit: '10:00' }, gun).durum;
+  esit(dr.ayar.musait.map(m => m.bas), ['09:00', '14:00'], 'aralıklar saate göre sıralı');
+  const kotu = R.planEkle(Plan, dr, 'is', { id: 'i1', ad: 'Rapor', dk: 0 }, gun);
+  esit(kotu.ok, false); dogru(/süresi 1–720 dakika/.test(kotu.hatalar[0]), kotu.hatalar[0]);
+  dr = R.planEkle(Plan, dr, 'is', { id: 'i1', ad: 'Rapor', dk: 30 }, gun).durum;
+  r = R.planKur(Plan, dr, gun, { dersler: [{ id: 'd1', ad: 'Felsefe: Ders', dk: 20 }], tekrar: null });
+  esit(r.ok, true);
+  esit(r.plan.bloklar.map(b => [b.tur, b.bas, b.dk]), [['is', '09:00', 30], ['mola', '09:30', 5], ['ders', '09:35', 20]]);
+  esit([r.plan.ozet.planlananDk, r.plan.sigmayan.length], [{ v: 50, k: 'computed' }, 0]);
+});
+t('plan: yeniden kurunca yapılan blok yerinde kalır; ertesi gün yapılan iş listeden çıkar, bitmeyen devreder', () => {
+  const Plan = require('../motor/plan.js'), gun = '2026-11-13';
+  let dr = { ayar: { musait: [{ bas: '09:00', bit: '10:00' }] }, isler: [{ id: 'a', ad: 'A', dk: 30 }, { id: 'b', ad: 'B', dk: 40 }], gunPlan: null };
+  let p = R.planKur(Plan, dr, gun, {}).plan;
+  esit(p.sigmayan.map(x => [x.id, x.neden]), [['b', 'boş zaman yetmedi']]);
+  p = Plan.durumYaz(p, 'a', { durum: 'yapildi' }).plan;
+  dr = { ayar: dr.ayar, isler: dr.isler, gunPlan: { gun, plan: p } };
+  const y = R.planKur(Plan, dr, gun, {}).plan;
+  esit(y.bloklar.filter(b => b.kaynakId === 'a' || b.id === 'a').map(b => b.durum), ['yapildi']);
+  dogru(R.planGunDevri(Plan, dr, gun) === dr, 'aynı gün: durum aynen');
+  const ertesi = R.planGunDevri(Plan, dr, '2026-11-14');
+  esit([ertesi.gunPlan, ertesi.isler.map(x => [x.id, x.dk, x.devir])], [null, [['b', 40, 1]]]);
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {

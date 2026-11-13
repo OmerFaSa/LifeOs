@@ -115,7 +115,7 @@ Aynı koşuda işlev denetimi (sonuçlar):
 - Dört boyut/tema birleşiminde yatay taşma yok; konsolda hata yok.
 
 ## Testler
-`node kabuk/kabuk.test.js` → **34 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
+`node kabuk/kabuk.test.js` → **36 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
 eski bağlantılar, Felsefe pilot, halkadan ≤ 2 adım, komut çubuğundan 1 adım, bozuk kaydı yakalama), şema türetmeleri (zorunlu alanlar,
 varsayılan geçerli, doğrulama, bozuk değerde varsayılan, sıfırlama, eşitleme süzgeci, kök nitelikleri, çizimde kaçış ve radyo
 sayısı), sıralama (ç ğ ı İ ö ş ü katlama, aksansız arama, ad başı › kelime başı › açıklama, eşitlikte tür ve kısa ad, çok kelime).
@@ -203,5 +203,19 @@ Felsefe pilotunun yol haritası, ders ve kapı ekranları alan adından bağıms
 - **Ölçüldü:** kabuk birim testi 34/34 (kayıt ekleme, etiketler, özet), `tools/kabuk_gez.js` 68/68. Görüntü: `kayit-masaustu-koyu.png`.
 - **Bağlanmadı:** enerji hedefi, toparlanma, yük ve «günün emri» kuralları (`Kayit.Kural`; profil gerekir), haftalık özet, geçmiş günlere kayıt,
   eski SPİ / AYS kayıtlarının göçü (`Kayit.GOC`, P6 ile). Sağlık alan sayfaları hâlâ eski modüle gider.
+
+## Plan ekranı (2026-11-13)
+`#/motor/plan` (`kabuk/araclar.js`): günün planı `motor/plan.js` ile kurulur; ekran girdiyi toplar ve sonucu çizer.
+
+- **Girdiler:** «Boş zamanım» (saat aralıkları), «İşler» (ad, süre, isteğe bağlı son tarih), üzerinde çalışılan alanın sıradaki dersi ve
+  Tekrar'ın günlük kart planı. Geçerliliğe motor karar verir: ters aralık, süresiz iş ve nedensiz atlama motorun cümlesiyle reddedilir.
+- **Plan:** bloklar saatleriyle (iş, ders, tekrar, mola), sınıf ve devir bilgisiyle; sığmayanlar nedenleriyle listelenir. Özet dakikaları etiketli
+  (plan `hesaplandı`, tekrar bloğu `tahmin`). «Yapıldı / Atla / Geri al» `Plan.durumYaz` ile; «Yeniden kur» ilerlemesi başlamış bloğu yerinde bırakır.
+- **Gün devri:** ertesi gün yapılan işler listeden çıkar, bitmeyenler `Plan.devret` kuralıyla (kalan süre, devir sayısı) kalır.
+- **Bugün sayfası** artık planın sıradaki bloğunu ya da «Günü planla» bağlantısını gösterir.
+- Kayıt: `lifeos.plan.durum`, yalnız bu tarayıcıda. Ders süresi içerikte olmadığı için 20 dk varsayılır (kodda `shortcut:` notu).
+- **Ölçüldü:** kabuk birim testi 36/36, `tools/kabuk_gez.js` 78/78. Görüntü: `plan-masaustu-koyu.png`.
+- **Bağlanmadı:** hafta planı (`Plan.haftaPlani`), şablon günler, sabit bloklar, kısmen yapılan süre girişi, günlük süre sınırı ayarı,
+  hareket çarpanı (`Kayit.Kural.gununEmri`), eski AYS planlarının göçü.
 
 Atlananlar (ilk iskelette; ders, Not ve Tekrar ekranları ile sunucu denemesi yukarıdaki bölümlerde kapandı): eski kabuğa bağlantı.

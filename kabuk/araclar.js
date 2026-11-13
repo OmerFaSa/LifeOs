@@ -1,7 +1,7 @@
 /* LIFEOS.Kabuk araç ekranları — Not, Tekrar ve Yol haritası listesi (sadeleşme Faz 2/3).
  * Kural motorlardadır (motor/not.js, motor/tekrar.js, motor/yol.js); burası çizer ve kaydeder.
  * Sayfalar Kabuk.ek[yerId](yer, alt) ile kaydolur; kabuk.js rota() onları çağırır. Bu dosya kabuk.js'ten ÖNCE yüklenir.
- * shortcut: kayıtlar bu tarayıcının deposunda durur (lifeos.not.kayit, lifeos.tekrar.kartlar, lifeos.kayit.kayitlar), cihazlar arası eşitlenmez; tek depoya (sistem/veri.py) P6 göçünden sonra bağlanır.
+ * shortcut: kayıtlar bu tarayıcının deposunda durur (lifeos.not.kayit, lifeos.tekrar.kartlar, lifeos.kayit.kayitlar, lifeos.plan.durum), cihazlar arası eşitlenmez; tek depoya (sistem/veri.py) P6 göçünden sonra bağlanır.
  * Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.Arac, Node'da module.exports (yalnız saf kısım). */
 (function (kok) {
   'use strict';
@@ -103,7 +103,37 @@
     return t.ad + ' · ' + p.join(' · ');
   }
 
-  var Arac = { kimlik: kimlik, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
+  /* ---- Plan (motor/plan.js) ---- */
+  // durum: { ayar: { musait: [{bas, bit}], gunlukDakika? }, isler: [{id, ad, dk, son?}], gunPlan: { gun, plan } | null }
+  function planBos() { return { ayar: { musait: [] }, isler: [], gunPlan: null }; }
+  // Günün planını kurar; aynı günün planı varsa ilerlemesi başlamış bloklar yerinde kalır (Plan.yenidenKur).
+  // ek: { dersler: [{id, ad, dk}], tekrar: Tekrar.plan() çıktısı }. Sıra, mola ve sığmayanlar motorun kuralıdır.
+  function planKur(Plan, durum, gun, ek) {
+    var girdi = { gun: gun, bugun: gun, musait: durum.ayar.musait, isler: durum.isler, dersler: (ek && ek.dersler) || [], tekrar: ek && ek.tekrar };
+    if (durum.ayar.gunlukDakika) girdi.gunlukDakika = durum.ayar.gunlukDakika;
+    var eski = durum.gunPlan && durum.gunPlan.gun === gun ? durum.gunPlan.plan : null;
+    return eski ? Plan.yenidenKur(eski, girdi) : Plan.gunPlani(girdi);
+  }
+  // Gün değiştiyse: yapılan işler listeden çıkar, bitmeyenler motorun devir kuralıyla (kalan süre, devir sayısı) kalır, eski plan silinir.
+  function planGunDevri(Plan, durum, gun) {
+    if (!durum.gunPlan || durum.gunPlan.gun >= gun) return durum;
+    var devir = {}, yapilan = {};
+    Plan.devret(durum.gunPlan.plan).forEach(function (x) { devir[x.id] = x; });
+    durum.gunPlan.plan.bloklar.forEach(function (b) { if (b.tur === 'is' && b.durum === 'yapildi') yapilan[b.kaynakId || b.id] = true; });
+    return { ayar: durum.ayar, gunPlan: null, isler: durum.isler.filter(function (x) { return !yapilan[x.id] || devir[x.id]; }).map(function (x) {
+      return devir[x.id] ? Object.assign({}, x, { dk: devir[x.id].dk, devir: devir[x.id].devir }) : x;
+    }) };
+  }
+  // Yeni iş ya da boş zaman aralığı: geçerliliğe motor karar verir (aynı cümleler); geçersizse durum değişmez.
+  function planEkle(Plan, durum, ne, veri, gun) {
+    var aday = ne === 'is' ? { gun: gun, musait: [], isler: durum.isler.concat([veri]) } : { gun: gun, musait: durum.ayar.musait.concat([veri]) };
+    var r = Plan.gunPlani(aday);
+    if (!r.ok) return { ok: false, hatalar: r.hatalar };
+    return { ok: true, durum: ne === 'is' ? { ayar: durum.ayar, gunPlan: durum.gunPlan, isler: aday.isler }
+      : { ayar: Object.assign({}, durum.ayar, { musait: aday.musait.slice().sort(function (a, b) { return a.bas < b.bas ? -1 : 1; }) }), isler: durum.isler, gunPlan: durum.gunPlan } };
+  }
+
+  var Arac = { kimlik: kimlik, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -308,7 +338,91 @@
     var ileti = d.querySelector('.kayitform .notform__ileti'); if (ileti) ileti.focus();
   }
 
+  /* ---- Plan ---- */
+  var PLAN_ANAHTAR = 'lifeos.plan.durum', Plan = L.Motor && L.Motor.Plan, planIleti = null;
+  var DERS_DK = 20; // shortcut: içerik şemasında ders süresi yok, 20 dk varsayım; şemaya süre gelince oradan okunur
+  var SINIF_AD = { temel: 'temel', sureli: 'süreli', vadeli: 'tekrar', sentez: 'sentez', yeni: 'yeni' };
+  function planDurum(simdi) {
+    var v = oku(PLAN_ANAHTAR, {}), dr = v && v.ayar && Array.isArray(v.ayar.musait) && Array.isArray(v.isler) ? v : planBos();
+    var y = planGunDevri(Plan, dr, gunAdi(simdi));
+    if (y !== dr) yaz(PLAN_ANAHTAR, y);
+    return y;
+  }
+  function planEk(simdi) { // motorun girdileri: etkin alanın sıradaki dersi ve Tekrar'ın günlük planı
+    var I = ic(), dersler = [];
+    I.tasinanlar().filter(function (a) { return a.id === I.etkin(); }).forEach(function (a) { // yalnız üzerinde çalışılan alan: plan neyin yüklü olduğuna göre değişmesin
+      var dr = I.fDurum(a.id), adim = dr && Kabuk.siradaki(dr);
+      if (adim && adim.tur === 'ders') dersler.push({ id: adim.id, ad: a.ad + ': ' + adim.ad, dk: DERS_DK, alan: a.id });
+    });
+    return { dersler: dersler, tekrar: Tekrar ? kuyruk(Tekrar, kartlar(), simdi, sayac(simdi)).plan : null };
+  }
+  function blokSatiri(b) {
+    var k = ic().kac, eylem = '';
+    if (b.tur !== 'mola' && b.tur !== 'sabit') {
+      eylem = b.durum === 'bekliyor'
+        ? '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-durum" data-id="' + k(b.id) + '" data-durum="yapildi">Yapıldı</button>' +
+          '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-durum" data-id="' + k(b.id) + '" data-durum="atlandi">Atla</button>'
+        : '<span class="pul' + (b.durum === 'yapildi' ? ' pul--pilot' : '') + '">' + (b.durum === 'yapildi' ? 'yapıldı' : b.durum === 'atlandi' ? 'atlandı' : 'kısmen') + '</span>' +
+          '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-durum" data-id="' + k(b.id) + '" data-durum="bekliyor">Geri al</button>';
+    }
+    return '<li class="blok blok--' + b.tur + (b.durum !== 'bekliyor' ? ' blok--bitti' : '') + '"><span class="blok__saat">' + k(b.bas) + '–' + k(b.bit) + '</span><span class="blok__ad">' + k(b.ad) +
+      (b.neden ? ' <span class="soluk">(' + k(b.neden) + ')</span>' : '') + '</span><span class="soluk">' + b.dk + ' dk' +
+      (b.dkEtiket === 'estimated' ? ' · tahmin' : '') + (b.sinif ? ' · ' + SINIF_AD[b.sinif] : '') + (b.devir ? ' · ' + b.devir + '. gün' : '') + '</span><span class="blok__eylem">' + eylem + '</span></li>';
+  }
+  function sayfaPlan(yer) {
+    var I = ic(), k = I.kac;
+    if (!Plan) return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Plan</h1>' + eksik('Plan') + '</div>';
+    var simdi = Date.now(), gun = gunAdi(simdi), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan, il = planIleti; planIleti = null;
+    var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' };
+    var planHtml = !dr.ayar.musait.length ? '<p class="soluk">Önce aşağıya bugün çalışabileceğin saat aralığını yaz; plan o boşluğa kurulur.</p>'
+      : !p ? '<p class="soluk">Bugün için plan kurulmadı.</p>'
+      : (p.bloklar.length ? '<ol class="bloklar">' + p.bloklar.map(blokSatiri).join('') + '</ol>' : '<p class="soluk">Plana girecek iş yok: iş ekle ya da bir alanda derse başla.</p>') +
+        '<p class="soluk">Planlanan ' + (p.ozet.planlananDk.v || 0) + ' dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan ' + p.ozet.bosDk.v + ' dk (' + E[p.ozet.bosDk.k] + ')' +
+        (p.ozet.molaSayisi ? ' · ' + p.ozet.molaSayisi + ' mola' : '') + '</p>' +
+        (p.sigmayan.length ? '<div class="yuva" role="note"><b>Sığmayanlar (' + p.sigmayan.length + ')</b>' + p.sigmayan.map(function (x) {
+          return '<span>' + k(x.ad) + ' · ' + x.dk + ' dk · ' + k(x.neden) + '</span>';
+        }).join('') + '</div>' : '');
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan"><h1>Plan</h1>' +
+      '<div class="notform__ileti" role="alert" tabindex="-1">' + (il ? il.map(k).join('<br>') : '') + '</div>' +
+      '<section><h2>Bugünün planı</h2>' + planHtml +
+      (dr.ayar.musait.length ? '<div class="eylemler"><button type="button" class="dugme dugme--ana" data-arac-ac="plan-kur">' + (p ? 'Yeniden kur' : 'Planı kur') + '</button></div>' : '') + '</section>' +
+      '<section><h2>Boş zamanım</h2>' + (dr.ayar.musait.length ? '<ul class="kartliste">' + dr.ayar.musait.map(function (m, i) {
+        return '<li><span>' + k(m.bas) + '–' + k(m.bit) + '</span><button type="button" class="dugme dugme--sade" data-arac-ac="plan-aralik-sil" data-i="' + i + '" aria-label="Aralığı sil: ' + k(m.bas) + '–' + k(m.bit) + '">Sil</button></li>';
+      }).join('') + '</ul>' : '') +
+      '<form class="planform" data-plan="aralik" novalidate><div class="ikili"><label class="alanet">Başlangıç<input type="time" class="giris" name="bas"></label>' +
+      '<label class="alanet">Bitiş<input type="time" class="giris" name="bit"></label></div><div class="eylemler"><button type="submit" class="dugme">Aralık ekle</button></div></form></section>' +
+      '<section><h2>İşler</h2>' + (dr.isler.length ? '<ul class="kartliste">' + dr.isler.map(function (x) {
+        return '<li><span>' + k(x.ad) + '</span><span class="soluk">' + x.dk + ' dk' + (x.son ? ' · son ' + k(x.son) : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : '') + '</span>' +
+          '<button type="button" class="dugme dugme--sade" data-arac-ac="plan-is-sil" data-id="' + k(x.id) + '" aria-label="İşi sil: ' + k(x.ad) + '">Sil</button></li>';
+      }).join('') + '</ul>' : '<p class="soluk">İş yok. Dersler ve tekrar kartları plana kendiliğinden girer.</p>') +
+      '<form class="planform" data-plan="is" novalidate><label class="alanet">İş<input type="text" class="giris" name="ad" maxlength="120" autocomplete="off"></label>' +
+      '<div class="ikili"><label class="alanet">Süre (dk)<input type="text" inputmode="numeric" class="giris" name="dk" autocomplete="off"></label>' +
+      '<label class="alanet">Son tarih · isteğe bağlı<input type="date" class="giris" name="son"></label></div>' +
+      '<div class="eylemler"><button type="submit" class="dugme">İş ekle</button></div></form></section></div>';
+  }
+  function planYaz(dr, ileti) { yaz(PLAN_ANAHTAR, dr); planIleti = ileti || null; ic().rota(); if (ileti) { var el = d.querySelector('[data-arac="plan"] .notform__ileti'); if (el) el.focus(); } }
+  function planHata(hatalar) { planIleti = hatalar; ic().rota(); var el = d.querySelector('[data-arac="plan"] .notform__ileti'); if (el) el.focus(); }
+  function planFormu(form) {
+    var simdi = Date.now(), dr = planDurum(simdi), ne = form.getAttribute('data-plan'), e = form.elements, veri;
+    if (ne === 'is') {
+      if (!e.ad.value.trim()) return planHata(['İşin adı yazılmalı.']);
+      veri = { id: kimlik('i', simdi, Math.random()), ad: e.ad.value.trim(), dk: Number(e.dk.value.trim()) };
+      if (e.son.value) veri.son = e.son.value;
+    } else veri = { bas: e.bas.value, bit: e.bit.value };
+    var r = planEkle(Plan, dr, ne, veri, gunAdi(simdi));
+    return r.ok ? planYaz(r.durum) : planHata(r.hatalar);
+  }
+  // Bugün sayfasının alt satırı: plan varsa sıradaki blok, yoksa plana davet
+  Kabuk.bugunEk = function () {
+    if (!Plan) return '';
+    var k = ic().kac, simdi = Date.now(), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan;
+    var sira = p && p.bloklar.filter(function (b) { return b.durum === 'bekliyor' && b.tur !== 'mola' && b.tur !== 'sabit'; });
+    if (!p) return '<a class="karsila__plan" href="#/motor/plan">Günü planla</a>';
+    return '<a class="karsila__plan" href="#/motor/plan">' + (sira.length ? 'Planda sırada: ' + k(sira[0].bas) + ' ' + k(sira[0].ad) + (sira.length > 1 ? ' · ' + (sira.length - 1) + ' blok daha' : '') : 'Bugünün planı bitti') + '</a>';
+  };
+
   Kabuk.ek = Kabuk.ek || {};
+  Kabuk.ek.plan = sayfaPlan;
   Kabuk.ek.kayit = sayfaKayit;
   Kabuk.ek.not = sayfaNot; Kabuk.ek.tekrar = sayfaTekrar; Kabuk.ek.yol = sayfaYol;
 
@@ -318,6 +432,7 @@
     if (f.matches('form.notform')) { e.preventDefault(); notFormKaydet(f); }
     else if (f.matches('form.kartform')) { e.preventDefault(); kartEkle(f); }
     else if (f.matches('form.kayitform')) { e.preventDefault(); kayitGonder(f); }
+    else if (f.matches('form.planform')) { e.preventDefault(); planFormu(f); }
   });
   d.addEventListener('input', function (e) {
     if (e.target.matches('[data-not-ara]')) d.getElementById('not-liste').innerHTML = notListesi(oku(NOT_ANAHTAR, []), e.target.value);
@@ -338,6 +453,21 @@
       if (!confirm('Bu not silinsin mi? Geri alınamaz.')) return;
       yaz(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== b.getAttribute('data-id'); }));
       return I.git('#/motor/not');
+    }
+    if (ne.indexOf('plan-') === 0) {
+      var simdiP = Date.now(), dr = planDurum(simdiP), gunP = gunAdi(simdiP);
+      if (ne === 'plan-kur') {
+        var r = planKur(Plan, dr, gunP, planEk(simdiP));
+        return r.ok ? planYaz({ ayar: dr.ayar, isler: dr.isler, gunPlan: { gun: gunP, plan: r.plan } }) : planHata(r.hatalar);
+      }
+      if (ne === 'plan-durum') {
+        var hedef = b.getAttribute('data-durum'), veriD = { durum: hedef };
+        if (hedef === 'atlandi') { veriD.neden = prompt('Neden atlıyorsun? (kısa bir not)'); if (veriD.neden == null) return; }
+        var rd = Plan.durumYaz(dr.gunPlan.plan, b.getAttribute('data-id'), veriD);
+        return rd.ok ? planYaz({ ayar: dr.ayar, isler: dr.isler, gunPlan: { gun: dr.gunPlan.gun, plan: rd.plan } }) : planHata([rd.neden]);
+      }
+      if (ne === 'plan-aralik-sil') return planYaz({ ayar: Object.assign({}, dr.ayar, { musait: dr.ayar.musait.filter(function (_, i) { return i !== +b.getAttribute('data-i'); }) }), isler: dr.isler, gunPlan: dr.gunPlan });
+      if (ne === 'plan-is-sil') return planYaz({ ayar: dr.ayar, gunPlan: dr.gunPlan, isler: dr.isler.filter(function (x) { return x.id !== b.getAttribute('data-id'); }) });
     }
     if (ne === 'kayit-sil') {
       if (!confirm('Bu kayıt silinsin mi?')) return;

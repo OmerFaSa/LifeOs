@@ -37,7 +37,7 @@
     { id: 'tekrar', ad: 'Tekrar', katman: 'motor', dal: 'motorlar', yol: '#/motor/tekrar', ikon: 'dongu', durum: 'yeni', aciklama: 'Aralıklı tekrar kartları' },
     { id: 'soru', ad: 'Soru', katman: 'motor', dal: 'motorlar', yol: '#/motor/soru', ikon: 'soru', durum: 'plan', aciklama: 'Deneme ve soru çözme' },
     { id: 'kayit', ad: 'Kayıt', katman: 'motor', dal: 'motorlar', yol: '#/motor/kayit', ikon: 'liste', durum: 'yeni', aciklama: 'Ölçülen her şeyin kaydı' },
-    { id: 'plan', ad: 'Plan', katman: 'motor', dal: 'motorlar', yol: '#/motor/plan', ikon: 'takvim', durum: 'plan', aciklama: 'Günün ve haftanın planı' },
+    { id: 'plan', ad: 'Plan', katman: 'motor', dal: 'motorlar', yol: '#/motor/plan', ikon: 'takvim', durum: 'yeni', aciklama: 'Günün ve haftanın planı' },
     { id: 'not', ad: 'Not', katman: 'motor', dal: 'motorlar', yol: '#/motor/not', ikon: 'not', halka: 4, durum: 'yeni', aciklama: 'Her yerden açılan tek defter' },
     { id: 'arama', ad: 'Arama', katman: 'motor', dal: 'motorlar', yol: '#/motor/arama', ikon: 'buyutec', durum: 'plan', aciklama: 'Her şeyde arama' },
     // King

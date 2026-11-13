@@ -211,6 +211,47 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.waitForFunction(() => document.querySelectorAll('.kartliste li').length === 1);
     dene('kayıt: kayıt silinir, özet güncellenir', !/Gece uykusu/.test(await p.textContent('.ozet')));
 
+    // ---- Plan ----
+    await p.goto(T + '/kabuk/#/motor/plan');
+    await p.waitForSelector('[data-arac="plan"]');
+    dene('plan: boş zaman yokken önce onu ister', /Önce aşağıya/.test(await p.textContent('[data-arac="plan"]')) && (await p.locator('[data-arac-ac="plan-kur"]').count()) === 0);
+    await p.fill('form[data-plan="aralik"] input[name=bas]', '12:00');
+    await p.fill('form[data-plan="aralik"] input[name=bit]', '09:00');
+    await p.click('form[data-plan="aralik"] button[type=submit]');
+    dene('plan: ters aralık motorun cümlesiyle reddedilir', /başlamadan bitiyor/.test(await p.textContent('[data-arac="plan"] .notform__ileti')));
+    await p.fill('form[data-plan="aralik"] input[name=bas]', '09:00');
+    await p.fill('form[data-plan="aralik"] input[name=bit]', '12:00');
+    await p.click('form[data-plan="aralik"] button[type=submit]');
+    await p.waitForSelector('[data-arac-ac="plan-kur"]');
+    await p.fill('form[data-plan="is"] input[name=ad]', 'Rapor');
+    await p.fill('form[data-plan="is"] input[name=dk]', 'abc');
+    await p.click('form[data-plan="is"] button[type=submit]');
+    dene('plan: süresi sayı olmayan iş reddedilir', /süresi 1–720 dakika/.test(await p.textContent('[data-arac="plan"] .notform__ileti')));
+    await p.fill('form[data-plan="is"] input[name=ad]', 'Rapor');
+    await p.fill('form[data-plan="is"] input[name=dk]', '30');
+    await p.click('form[data-plan="is"] button[type=submit]');
+    await p.waitForSelector('[data-arac-ac="plan-is-sil"]');
+    await p.click('[data-arac-ac="plan-kur"]');
+    await p.waitForSelector('.bloklar .blok');
+    const blokMetni = await p.textContent('.bloklar');
+    dene('plan: iş 09:00\'da, dersler ve mola ardından yerleşir', /09:00–09:30/.test(blokMetni) && /Rapor/.test(blokMetni) && /Mola/.test(blokMetni) && (await p.locator('.blok--ders').count()) >= 1, blokMetni.slice(0, 200));
+    dene('plan: özet etiketli (hesaplandı)', /Planlanan \d+ dk \(hesaplandı\)/.test(await p.textContent('[data-arac="plan"]')));
+    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'plan-masaustu-koyu.png'), fullPage: true });
+    await p.click('.blok--is [data-durum="atlandi"]');
+    dene('plan: nedensiz atlama motorun cümlesiyle reddedilir', /neden yazılmalı/.test(await p.textContent('[data-arac="plan"] .notform__ileti')));
+    await p.click('.blok--is [data-durum="yapildi"]');
+    await p.waitForSelector('.blok--is.blok--bitti');
+    dene('plan: «Yapıldı» bloğu işaretler', /yapıldı/.test(await p.textContent('.blok--is')));
+    await p.click('[data-arac-ac="plan-kur"]');
+    await p.waitForSelector('.blok--is.blok--bitti');
+    dene('plan: yeniden kurunca yapılan blok yerinde kalır', /09:00–09:30/.test(await p.textContent('.blok--is')));
+    await p.reload();
+    await p.waitForSelector('.bloklar .blok');
+    dene('plan: yenilemeden sonra plan duruyor', (await p.locator('.blok--is.blok--bitti').count()) === 1);
+    await p.goto(T + '/kabuk/#/bugun');
+    await p.waitForSelector('.karsila__plan');
+    dene('Bugün: planın sıradaki bloğunu gösterir', /Planda sırada: \d\d:\d\d/.test(await p.textContent('.karsila__plan')), await p.textContent('.karsila__plan'));
+
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');
     await p.waitForSelector('a.satir[href="#/alan/felsefe"]');

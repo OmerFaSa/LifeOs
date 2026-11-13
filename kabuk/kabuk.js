@@ -168,7 +168,7 @@
       '<p class="karsila__sira"><span class="soluk">Sırada</span><br>' + kac(H.bul(etkinAlan).ad) + ' · ' + (f ? kac(f.asama.ad) : 'ilk aşama') + '</p>' +
       (a ? '<p class="soluk">' + (a.tur === 'ders' ? 'Ders: ' : 'Kapı: ') + kac(a.ad) + '</p>' : '') +
       '<a class="dugme dugme--ana" href="' + (a ? adimYolu(a) : F()) + '">' + (f && f.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla') + '</a>' +
-      '<p class="karsila__sonra soluk">Günün geri kalanı plan aracı gelince burada görünür.</p>' +
+      '<p class="karsila__sonra soluk">' + (Kabuk.bugunEk ? Kabuk.bugunEk() : '') + '</p>' +
       (ipucu ? '<div class="ipucu" role="note"><span>Bir yere gitmek için boş bir yerde basılı tut ya da <kbd>Ctrl K</kbd> ile ara.</span>' +
         '<button type="button" class="dugme dugme--sade" data-ac="ipucu">Anladım</button></div>' : '') + '</div>';
   }
@@ -535,7 +535,7 @@
     }
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') rota(); }); // Bugün'ün «sırada» satırı için
   }
-  Kabuk.ic = { kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukle,
+  Kabuk.ic = { kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukle, etkin: function () { return etkinAlan; },
     tasinanlar: function () { return H.YERLER.filter(function (y) { return tasinan(y.id); }); } };
   Kabuk.ac = { halka: halkaAcOdakli, komut: function () { komutAc(); }, git: function (y) { git(y); } };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', baslat); else baslat();
