@@ -1,0 +1,274 @@
+{
+  "sema": 1,
+  "alan": "muzik",
+  "id": "muzik.1",
+  "sira": 1,
+  "ad": "Sesler, klavye ve ilk akorlar",
+  "hedef": "On iki sesi adlandırmak, gitar klavyesinde boş tellerden başlayarak her notayı bulmak ve ilk açık akorları metronomla çalmaya başlamak.",
+  "onKosul": [],
+  "kanitIsi": "Metronomu kendi rahat temponda kur; C, Am, G, Em ve D akorlarından ikisi arasında bir ölçüde bir akor olacak biçimde geçiş yap ve kaydet. Kaydın sonunda 6. teldeki doğal notaları (Fa'dan 12. perdedeki Mi'ye kadar) sesli say. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "ESP gitar verisi: on iki nota, Türkçe adları ve gam hesabı", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "ESP.NOTES, ESP.NOTE_TR, ESP.SCALES, ESP.scaleNotes", "satir": "13-46", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "Aralıklar ve yarım ses tablosu", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "1.1. Aralıklar (Intervals) ve Akustik Hiyerarşi", "satir": "13-29", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "Oktav oranı ve eşit temperament", "tur": "gemini", "yol": "ESP/muzik_diksiyon/akustik_fizigi_armoni_kompozisyon_ve_mikrofon_dublaj_ustaligi.md", "bolum": "1.2 Akort Sistemleri Matematiği", "satir": "38-56", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "Gam formülleri: tam ve yarım adımlar", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "1.2. Gam Yapıları ve Formülleri", "satir": "33-35", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "Açık akor kataloğu: C, Am, G, Em, D (tab ve parmaklar)", "tur": "depo", "yol": "veri/taslak/esp/gitar_akor_gam_katalogu.jsonl", "bolum": "Akor kayıtları", "satir": "1-5", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "Bareli akorlar: F ve Bm (tab ve parmaklar)", "tur": "depo", "yol": "veri/taslak/esp/gitar_akor_gam_katalogu.jsonl", "bolum": "Akor kayıtları", "satir": "6-7", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "CAGED şekilleri ve kök seslerin telleri", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "1.4. CAGED Sistemi ve Gitar Geometrisi", "satir": "57-67", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "ESP kulak verisi: CAGED şekillerinin kök telleri", "tur": "depo", "yol": "ESP/src/js/data/eartraining.js", "bolum": "ESP.CAGED", "satir": "54-62", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "Akor kurulum formülleri: üçlüler", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "1.5. Akor Kurulum Formülleri", "satir": "71-78", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "ESP gitar verisi: başlangıç temposu ilkesi", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "Dosya başlığı", "satir": "1-9", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "ESP gitar verisi: teknikler, ölçü türleri, ısınma sırası", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "ESP.TECHNIQUES, ESP.TIME_SIGNATURES, ESP.WARMUP", "satir": "65-114", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "ESP müzik konuları: başlangıç sırası", "tur": "depo", "yol": "ESP/src/js/data/topics.js", "bolum": "music: m-temel, m-acik", "satir": "161-172", "dogrulama": "dogrulanmamis" },
+    { "id": "k13", "ad": "ESP merdiveni: müzik 1. basamak «El ve ses»", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "music.levels rank 1", "satir": "198-204", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "muzik.1.k1", "tur": "secmeli", "soru": "5. teli boşta çalıp sonra aynı telde 12. perdeye basarsan ne duyarsın?", "sec": ["Aynı notanın bir oktav üstünü (La)", "Tam beşli üstünü (Mi)", "Yarım ses üstünü (La#)", "Bir oktav altını"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k3"] },
+      { "id": "muzik.1.k2", "tur": "secmeli", "soru": "Tab «x-x-0-2-3-2» olan akorda 2. tel 3. perdede hangi nota çalar?", "sec": ["Do (C)", "Re (D)", "Mi (E)", "Fa# (F#)"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+      { "id": "muzik.1.k3", "tur": "secmeli", "soru": "Notaları D - F# - A olan akor majör mü, minör mü ve neden?", "sec": ["Minör; D ile F# arası 3 yarım ses", "Majör; D ile F# arası 4 yarım ses", "Majör; D ile A arası 5 yarım ses", "Minör; içinde diyez var"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k9"] },
+      { "id": "muzik.1.k4", "tur": "secmeli", "soru": "Metronomla ilk çalışmanda hangi tempoyu seçmelisin?", "sec": ["Kaynaktaki hedef tempoyu (targetBpm)", "Temiz çalabildiğin ve kendin ölçtüğün tempoyu", "Her zaman 120 BPM", "Şarkının kayıttaki temposunu"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "muzik.1.1",
+      "ad": "Ses adları ve perde",
+      "onKosul": [],
+      "kazanim": ["On iki sesi Latin ve Türkçe adlarıyla sıralar.", "Perde, yarım ses, tam ses ve oktav arasındaki ilişkiyi açıklar.", "Tab yazısını okur."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "muzik.1.1.k1", "tur": "secmeli", "soru": "La (A) notasından başlayıp yarım ses yarım ses çıkarsan üçüncü adımda hangi notaya varırsın?", "sec": ["B", "C", "C#", "D"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+          { "id": "muzik.1.1.k2", "tur": "secmeli", "soru": "Aynı telde 7 perde yukarı çıkmak hangi aralığa denk gelir?", "sec": ["Tam 4'lü", "Tam 5'li", "Büyük 6'lı", "Oktav"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+          { "id": "muzik.1.1.k3", "tur": "secmeli", "soru": "Majör gamın adım dizisi «T - T - Y - T - T - T - Y» ise toplam kaç yarım ses eder?", "sec": ["7", "10", "12", "14"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k2"] },
+          { "id": "muzik.1.1.k4", "tur": "secmeli", "soru": "Tab «0-2-2-0-0-0» için hangisi doğrudur?", "sec": ["Altı telin hepsi çalınır; 5. ve 4. tel 2. perdede basılı", "Yalnız 2. ve 3. teller çalınır", "1. tel 2. perdede basılı", "İlk tel çalınmaz"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "muzik.1.1.1",
+          "ad": "On iki ses ve adları",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1"],
+          "ozet": "Batı müziğinde bir oktav on iki sesten oluşur. Yedisinin kendi adı vardır (C D E F G A B = Do Re Mi Fa Sol La Si); öteki beşi diyezle (#) yazılır.",
+          "metin": [
+            "ESP'nin gitar verisi on iki notayı şu sırayla tutar: C, C#, D, D#, E, F, F#, G, G#, A, A#, B. Bu dizide her adım bir yarım sestir; gam hesabı da notaları bu sıradaki yarım ses uzaklığıyla bulur (Majör: 0, 2, 4, 5, 7, 9, 11).",
+            "Türkçe adlar aynı dosyada verilir: C = Do, D = Re, E = Mi, F = Fa, G = Sol, A = La, B = Si. Diyezli sesler Do#, Re#, Fa#, Sol#, La# diye okunur.",
+            "Dizide iki yere dikkat et: E'den sonra doğrudan F, B'den sonra doğrudan C gelir. Yani Mi–Fa ve Si–Do arasında diyezli bir ses yoktur; bu ikili arası yalnız yarım sestir. Öteki komşu doğal notaların arası (Do–Re, Re–Mi, Fa–Sol, Sol–La, La–Si) iki yarım sestir (model: dizinin sırasından okunur).",
+            "B'den sonra dizi yeniden C ile başlar; on ikinci adımdan sonra gelen ses bir oktav üstteki aynı addır. Hesaplarda bu yüzden «12'ye göre kalan» kullanılır (kaynaktaki hesap: (kök + adım) % 12)."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.1.1.a1", "tur": "secmeli", "soru": "E (Mi) notasından yarım ses yukarısı hangisidir?", "sec": ["E#", "F", "F#", "D#"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "muzik.1.1.1.a2", "tur": "secmeli", "soru": "«Sol» notasının harf adı hangisidir?", "sec": ["A", "F", "G", "D"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "muzik.1.1.1.a3", "tur": "secmeli", "soru": "Aşağıdaki doğal nota ikililerinden hangisinin arasında diyezli ses yoktur?", "sec": ["C–D", "F–G", "B–C", "G–A"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "muzik.1.1.1.a4", "tur": "acik", "soru": "La (A) notasından başlayarak on iki sesi sırayla yaz, sonra Türkçe adlarıyla bir kez sesli say.", "dogru": "A, A#, B, C, C#, D, D#, E, F, F#, G, G#, sonra yeniden A. Türkçe: La, La#, Si, Do, Do#, Re, Re#, Mi, Fa, Fa#, Sol, Sol#.", "olcut": ["On iki sesin hepsi var, tekrar yok", "B'den sonra C, E'den sonra F geliyor (arada diyez yok)", "Türkçe adlar doğru eşleşmiş"], "durum": "taslak", "yazan": "model", "kaynak": ["k1"] }
+          ]
+        },
+        {
+          "id": "muzik.1.1.2",
+          "ad": "Perde, yarım ses ve oktav",
+          "onKosul": ["muzik.1.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k2", "k3", "k4"],
+          "ozet": "Gitarda bir perde bir yarım sestir. İki perde bir tam ses, on iki perde bir oktav eder; oktavın iki ucundaki sesin frekans oranı 2:1'dir.",
+          "metin": [
+            "Aralık, iki ses arasındaki perde farkıdır. Kaynaktaki aralık tablosu her aralığı «yarım ses (perde)» sayısıyla verir: küçük 2'li 1, büyük 2'li 2, küçük 3'lü 3, büyük 3'lü 4, tam 4'lü 5, tam 5'li 7, oktav 12 perde.",
+            "Bu yüzden gitarda bir teli bir perde yukarıda basmak sesi bir yarım ses tizleştirir. İki perde (büyük 2'li) bir tam sestir; gam formüllerindeki T (tam) ve Y (yarım) adımları bunu kullanır: majör gam T - T - Y - T - T - T - Y.",
+            "On iki yarım ses bir oktavdır. Oktavın frekans oranı 2:1'dir; eşit temperamentte bu oktav 12 eşit yarım tona bölünür ve her yarım ton 100 senttir. Sonuç (model): bir telde 12 perde yukarı çıktığında aynı adı taşıyan notayı bir oktav tizde duyarsın.",
+            "Kaynak tabloda her aralığa bir duygu adı ve bir şarkı örneği de koyar; ses örneği olmadığı için bunlar bu derse alınmadı. Önce sayıyı öğren: kaç perde, kaç yarım ses."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.1.2.a1", "tur": "secmeli", "soru": "Aynı telde 4 perde yukarı basmak hangi aralıktır?", "sec": ["Küçük 3'lü", "Büyük 3'lü", "Tam 4'lü", "Büyük 2'li"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "muzik.1.1.2.a2", "tur": "secmeli", "soru": "Bir tam ses kaç perdedir?", "sec": ["1", "2", "3", "12"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k4"] },
+            { "id": "muzik.1.1.2.a3", "tur": "secmeli", "soru": "Oktavın iki ucundaki seslerin frekans oranı nedir?", "sec": ["3:2", "4:3", "2:1", "5:4"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k2"] }
+          ]
+        },
+        {
+          "id": "muzik.1.1.3",
+          "ad": "Tel numaraları ve tab okumak",
+          "onKosul": ["muzik.1.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k7", "k8"],
+          "ozet": "Gitarın telleri 1'den 6'ya numaralanır; tab yazısı altı rakamla hangi telin hangi perdesine basılacağını söyler.",
+          "metin": [
+            "Akor kataloğu her akoru bir tab satırıyla ve parmak tarifiyle verir. Do majör: tab «x-3-2-0-1-0», parmaklar «Yüzük: 5. tel 3. perde, Orta: 4. tel 2. perde, İşaret: 2. tel 1. perde».",
+            "İkisini yan yana okuyunca (model) tab satırının düzeni çıkar: soldan sağa 6., 5., 4., 3., 2., 1. tel. Rakam basılacak perdedir; 0 o telin boş (basılmadan) çalınacağını, x o telin çalınmayacağını gösterir. Do majörde 6. tel x, 3. ve 1. tel 0'dır; parmak tarifinde bu tellere parmak yoktur.",
+            "Hangi teller ince? Kaynak D şeklini «tiz tellerde» kurulan bir form olarak anar ve kökünü 4. ile 2. tele koyar; ESP verisi de aynı şekil için «ince tellerde» der. Yani küçük numaralı teller ince ve tiz, büyük numaralı teller kalın ve pestir (model: iki kaynağın birleşimi).",
+            "Tab yalnız nereye basılacağını söyler; ritmi ve süreyi söylemez. Ritim için metronoma ve ölçüye ayrı bakılır (3. ünite)."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.1.3.a1", "tur": "secmeli", "soru": "Tab «x-0-2-2-1-0» (La minör) için hangi tel çalınmaz?", "sec": ["1. tel", "5. tel", "6. tel", "3. tel"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "muzik.1.1.3.a2", "tur": "secmeli", "soru": "Tab «3-2-0-0-0-3» (Sol majör) satırında en sağdaki 3 hangi teli gösterir?", "sec": ["6. tel 3. perde", "1. tel 3. perde", "3. tel boş", "2. tel 3. perde"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "muzik.1.1.3.a3", "tur": "acik", "soru": "Mi minörün tabı «0-2-2-0-0-0». Her tel için ne yapacağını tek tek yaz (6. telden 1. tele).", "dogru": "6. tel boş; 5. tel 2. perde; 4. tel 2. perde; 3. tel boş; 2. tel boş; 1. tel boş. Altı tel de çalınır.", "olcut": ["Sırayı 6. telden 1. tele doğru kuruyor", "0'ı boş tel olarak okuyor", "Basılı iki teli ve perdesini doğru söylüyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "muzik.1.2",
+      "ad": "Klavyede notalar",
+      "onKosul": ["muzik.1.1"],
+      "kazanim": ["Altı boş telin notasını söyler.", "Bir telin herhangi bir perdesindeki notayı boş telden sayarak bulur.", "Bir akorun tabından çalınan notaları çıkarır."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "muzik.1.2.k1", "tur": "secmeli", "soru": "4. tel 5. perdede hangi nota çalar?", "sec": ["F", "G", "A", "G#"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k5"] },
+          { "id": "muzik.1.2.k2", "tur": "secmeli", "soru": "1. tel 3. perde hangi notadır?", "sec": ["F", "F#", "G", "A"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k5"] },
+          { "id": "muzik.1.2.k3", "tur": "secmeli", "soru": "6. telde Re (D) notası kaçıncı perdededir?", "sec": ["8", "9", "10", "12"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k6"] },
+          { "id": "muzik.1.2.k4", "tur": "secmeli", "soru": "Si minör tabı «x-2-4-4-3-2». Bu akorda 4. tel 4. perde hangi notayı verir?", "sec": ["E", "F", "F#", "G"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k6", "k1"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "muzik.1.2.1",
+          "ad": "Boş tellerin notaları",
+          "onKosul": ["muzik.1.1.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k6", "k7"],
+          "ozet": "Altı boş tel, 6. telden 1. tele Mi, La, Re, Sol, Si, Mi (E A D G B E) notalarını verir. Bu sonuç kaynaktaki akor tablarından adım adım çıkarılır.",
+          "not": "Kaynaklarda standart akort (boş tellerin notaları) hiçbir yerde açıkça yazılı değil. Bu dersteki sonuç modelin, akor kataloğundaki tab + nota bilgisinden yaptığı çıkarımdır; sahibin onayını bekler.",
+          "metin": [
+            "Kaynaklar boş tellerin notalarını doğrudan yazmıyor; ama akor kataloğu her akorun notalarını ve tabını birlikte veriyor. Boş (0) çalınan bir tel, o akorun notalarından biri olmak zorundadır. Bu ipucuyla her teli bulabiliriz (model: aşağıdaki çıkarım).",
+            "1. tel: Do majörde (C E G), La minörde (A C E) ve Mi minörde (E G B) boş çalınıyor. Üç akorda ortak tek nota E'dir. 1. tel Mi'dir. 5. tel: La minörde boş (A, C ya da E) ve Mi minörde 2. perdede (E, G ya da B). Yalnız A iki perde sonra B'ye varır; 5. tel La'dır.",
+            "4. tel: Re majörde (D F# A) ve Sol majörde (G B D) boş; ortak nota D, 4. tel Re'dir. 3. tel: Do, Mi minör ve Sol majörde boş; üçünde ortak nota G, 3. tel Sol'dür. 2. tel: Mi minör ve Sol majörde boş (G ya da B), Do majörde 1. perdede bir C, E ya da G vermeli; G'nin bir perde üstü G#, B'nin bir perde üstü C olduğu için 2. tel Si'dir.",
+            "6. tel: Kaynağa göre E şeklinin kök sesi 6., 4. ve 1. teldedir ve bu şekil F bareli akorunun temelidir. Katalogdaki Fa majör «1-3-3-2-1-1» tabında 6. tel 1. perdede kök F'yi verir; F'nin bir perde altı E'dir. 6. tel de Mi'dir.",
+            "Sonuç, 6. telden 1. tele: E A D G B E (Mi La Re Sol Si Mi). Kontrol: Sol majörde 6. tel 3. perde E'den üç yarım ses sonra G'ye, Do majörde 5. tel 3. perde A'dan üç yarım ses sonra C'ye varır; ikisi de akorun kök sesidir."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.2.1.a1", "tur": "secmeli", "soru": "5. telin boş notası hangisidir?", "sec": ["E", "A", "D", "G"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "muzik.1.2.1.a2", "tur": "secmeli", "soru": "Hangi iki boş tel aynı adı taşır?", "sec": ["6. ve 1. tel", "5. ve 2. tel", "4. ve 3. tel", "6. ve 4. tel"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k7"] },
+            { "id": "muzik.1.2.1.a3", "tur": "secmeli", "soru": "Boş tellerin 6. telden 1. tele sırası hangisidir?", "sec": ["E B G D A E", "E A D G B E", "A D G C E A", "E A D G C E"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k6", "k7"] },
+            { "id": "muzik.1.2.1.a4", "tur": "acik", "soru": "3. telin neden Sol olduğunu, katalogdaki üç akoru kullanarak kendi cümlelerinle açıkla.", "dogru": "3. tel Do majörde (C E G), Mi minörde (E G B) ve Sol majörde (G B D) boş çalınıyor. Boş tel her akorun notalarından biri olmalı; üç listede ortak olan tek nota G.", "olcut": ["Boş telin akorun notası olması gerektiğini söylüyor", "Üç akorun notalarını doğru veriyor", "Ortak notayı (G) buluyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+          ]
+        },
+        {
+          "id": "muzik.1.2.2",
+          "ad": "Bir telde nota bulmak",
+          "onKosul": ["muzik.1.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2", "k5", "k6"],
+          "ozet": "Bir telin her perdesi boş tel notasından o kadar yarım ses yukarıdır. On iki sesin sırasını bilen, klavyede her notayı sayarak bulur.",
+          "metin": [
+            "Kural (model, 1. ünitenin birleşimi): perde sayısı = boş telden yarım ses sayısı. Boş telin notasından başla, on iki sesin dizisinde perde sayısı kadar ilerle.",
+            "6. tel (E) üzerinde doğal notalar (model hesabı): F 1. perde, G 3, A 5, B 7, C 8, D 10, E 12. 5. tel (A) üzerinde: B 2, C 3, D 5, E 7, F 8, G 10, A 12. Her iki telde de 12. perde boş telin oktavıdır.",
+            "Katalog bu hesabı doğrular: Sol majörde orta parmak 6. tel 3. perdeye basar ve akorun kökü G'dir; Do majörde yüzük parmağı 5. tel 3. perdede kök C'yi verir; Fa bareli akorda 6. tel 1. perde F, Si minör bareli akorda 5. tel 2. perde B'dir.",
+            "Bu ikisi neden önce? Kaynakta E ve A şekilli bareli akorların kökü bu iki teldedir (E şekli 6. tel, A şekli 5. tel). İki teldeki notaları bilmek, ileride aynı akoru klavyenin başka yerinde kurmanın anahtarıdır; bu sonraki aşamanın işidir."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.2.2.a1", "tur": "secmeli", "soru": "6. tel 5. perde hangi notadır?", "sec": ["G", "G#", "A", "B"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "muzik.1.2.2.a2", "tur": "secmeli", "soru": "5. telde Do (C) kaçıncı perdededir?", "sec": ["2", "3", "5", "8"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k5"] },
+            { "id": "muzik.1.2.2.a3", "tur": "secmeli", "soru": "6. tel 8. perde hangi notadır?", "sec": ["B", "C", "C#", "D"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "muzik.1.2.2.a4", "tur": "acik", "soru": "Gitarın başında: 6. telde F'den 12. perdeye kadar doğal notaları basarak sesli say. Sonra aynısını 5. telde yap. Hangi perdeleri karıştırdığını yaz.", "dogru": "6. tel: F1, G3, A5, B7, C8, D10, E12. 5. tel: B2, C3, D5, E7, F8, G10, A12. Karışan perdeler not edilir.", "olcut": ["İki telde de 12. perdeye kadar çıkıyor", "B–C ve E–F arasında tek perde bırakıyor", "Karıştırdığı yerleri adıyla yazıyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k5"] }
+          ]
+        },
+        {
+          "id": "muzik.1.2.3",
+          "ad": "Akordaki notaları okumak",
+          "onKosul": ["muzik.1.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k1"],
+          "ozet": "Bir akorun tabını tel tel notaya çevirirsen akorun hangi seslerden oluştuğunu görürsün; aynı nota birkaç telde tekrar edebilir.",
+          "metin": [
+            "Do majör «x-3-2-0-1-0» tel tel (model hesabı): 5. tel 3. perde C, 4. tel 2. perde E, 3. tel boş G, 2. tel 1. perde C, 1. tel boş E. Çıkan sesler C, E, G; katalog akorun notalarını «C - E - G» diye verir.",
+            "Re majör «x-x-0-2-3-2»: 4. tel boş D, 3. tel 2. perde A, 2. tel 3. perde D, 1. tel 2. perde F#. Sesler D, F#, A; katalogla aynı.",
+            "Akorda üç ayrı ses vardır ama beş ya da altı tel çalınır; bu yüzden bazı sesler tekrar eder (Do majörde C ve E iki kez). Hangi telin çalınmadığı (x) da akorun parçasıdır: çalınmaması gereken tel akorda olmayan bir ses ekleyebilir.",
+            "Bu dersin işi parmak değil, okumaktır: tabı gördüğünde çalmadan önce notaları söyleyebilmek. Parmak yerleri 3. ünitede."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.2.3.a1", "tur": "secmeli", "soru": "La minör «x-0-2-2-1-0» akorunda 2. tel 1. perde hangi notadır?", "sec": ["B", "C", "C#", "D"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k1"] },
+            { "id": "muzik.1.2.3.a2", "tur": "secmeli", "soru": "Mi minör «0-2-2-0-0-0» akorunda 5. tel 2. perde hangi notayı verir?", "sec": ["A", "A#", "B", "C"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k1"] },
+            { "id": "muzik.1.2.3.a3", "tur": "acik", "soru": "Sol majör «3-2-0-0-0-3» tabını tel tel notaya çevir ve akorun üç sesini yaz.", "dogru": "6. tel 3. perde G, 5. tel 2. perde B, 4. tel boş D, 3. tel boş G, 2. tel boş B, 1. tel 3. perde G. Üç ses: G, B, D.", "olcut": ["Altı telin her birinin notasını veriyor", "Tekrar eden sesleri ayırıyor", "Üç sesi G, B, D olarak buluyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k1"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "muzik.1.3",
+      "ad": "İlk akorlar ve düzenli vuruş",
+      "onKosul": ["muzik.1.2"],
+      "kazanim": ["Majör ve minör üçlüyü formülüyle ayırır.", "Beş açık akoru (C, Am, G, Em, D) katalogdaki parmaklarla kurar.", "Kendi ölçtüğü tempoda metronomla vuruş ve akor geçişi çalışır."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "muzik.1.3.k1", "tur": "secmeli", "soru": "Notaları E - G# - B olan akor hangisidir?", "sec": ["Mi minör", "Mi majör", "Sol majör", "Si minör"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k1"] },
+          { "id": "muzik.1.3.k2", "tur": "secmeli", "soru": "Katalogdaki Sol majörde 6. tel 3. perdeye hangi parmak basar?", "sec": ["İşaret", "Orta", "Yüzük", "Serçe"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+          { "id": "muzik.1.3.k3", "tur": "secmeli", "soru": "ESP'nin önerdiği ısınma sırası hangi adımla başlar?", "sec": ["Repertuar", "Teknik", "Kromatik ısınma", "Gam"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+          { "id": "muzik.1.3.k4", "tur": "secmeli", "soru": "La minörde (A C E) kök ile üçlü arasında kaç yarım ses vardır?", "sec": ["2", "3", "4", "5"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k2"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "muzik.1.3.1",
+          "ad": "Majör ve minör üçlü",
+          "onKosul": ["muzik.1.2.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k9", "k2", "k5"],
+          "ozet": "Majör üçlü 1 - 3 - 5, minör üçlü 1 - b3 - 5 formülüyle kurulur. Fark yalnız ortadaki sestedir: kökten 4 yarım ses (büyük 3'lü) ya da 3 yarım ses (küçük 3'lü).",
+          "metin": [
+            "Kaynağa göre üçlü akor (triad) formülleri: majör 1 - 3 - 5, minör 1 - b3 - 5. Sayılar gamın derecelerini, b ise o derecenin yarım ses pesleştirildiğini gösterir.",
+            "Aralık tablosuyla birleştirince (model): 3 büyük 3'lüdür (4 yarım ses), b3 küçük 3'lüdür (3 yarım ses), 5 tam 5'lidir (7 yarım ses).",
+            "Katalogla sına: Do majör C - E - G. C'den E'ye 4 yarım ses, C'den G'ye 7 yarım ses; majör. La minör A - C - E. A'dan C'ye 3 yarım ses, A'dan E'ye 7 yarım ses; minör.",
+            "Kaynak tabloda büyük 3'lüye «neşe/parlak», küçük 3'lüye «hüzün» rengi verir. Bunu kendi kulağınla sınamak için aynı kökten iki akoru (örneğin Mi minör ve sonra 3. teli 1. perdeye basarak) arka arkaya çal; ne duyduğunu kendi sözlerinle yaz. Duygu adı bir ezber değil, dinleme sorusudur."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.3.1.a1", "tur": "secmeli", "soru": "G - B - D akoru majör mü minör mü?", "sec": ["Majör; G ile B arası 4 yarım ses", "Minör; G ile B arası 3 yarım ses", "Majör; G ile D arası 5 yarım ses", "Belirlenemez"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k1"] },
+            { "id": "muzik.1.3.1.a2", "tur": "secmeli", "soru": "Minör üçlünün formülü hangisidir?", "sec": ["1 - 3 - 5", "1 - b3 - 5", "1 - 4 - 5", "1 - 3 - #5"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] },
+            { "id": "muzik.1.3.1.a3", "tur": "acik", "soru": "Mi minörü (0-2-2-0-0-0) çal, sonra 3. teli 1. perdeye basarak yeniden çal. 3. tel G'den hangi notaya geçti, akor ne oldu ve kulağına nasıl geldi?", "dogru": "3. tel G'den G#'ye çıktı. E - G - B (minör) akoru E - G# - B (majör) oldu; ikincisi daha parlak duyuluyor (kişisel gözlem).", "olcut": ["G'nin yarım ses üstünü G# olarak buluyor", "Akorun minörden majöre geçtiğini formülle gösteriyor", "Kendi dinleme gözlemini yazıyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k5", "k2"] }
+          ]
+        },
+        {
+          "id": "muzik.1.3.2",
+          "ad": "İlk beş açık akor",
+          "onKosul": ["muzik.1.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k12", "k11"],
+          "ozet": "Do majör, La minör, Sol majör, Mi minör ve Re majör katalogda tab ve parmak tarifiyle verilir. Akoru bilmek ile ona durmadan geçmek ayrı becerilerdir.",
+          "metin": [
+            "ESP'nin müzik konu sırası gitara duruş ve akortla başlar, ardından açık akorlar ve ritme geçer. Katalogda parmak tarifiyle verilen beş açık akor şunlardır:",
+            "Do majör «x-3-2-0-1-0»: yüzük 5. tel 3. perde, orta 4. tel 2. perde, işaret 2. tel 1. perde. La minör «x-0-2-2-1-0»: orta 4. tel 2. perde, yüzük 3. tel 2. perde, işaret 2. tel 1. perde.",
+            "Sol majör «3-2-0-0-0-3» (katalogda bir de «3-2-0-0-3-3» biçimi var): orta 6. tel 3. perde, işaret 5. tel 2. perde, yüzük 1. tel 3. perde. Mi minör «0-2-2-0-0-0»: orta 5. tel 2. perde, yüzük 4. tel 2. perde. Re majör «x-x-0-2-3-2»: işaret 3. tel 2. perde, yüzük 2. tel 3. perde, orta 1. tel 2. perde.",
+            "Do majör ile La minörün işaret ve orta parmakları aynı yerdedir (2. tel 1. perde, 4. tel 2. perde); aralarında yalnız yüzük parmağı yer değiştirir (model gözlemi). Böyle ortak parmaklar geçişi kolaylaştırır.",
+            "ESP verisi akor geçişi için ölçütü şöyle koyar: bir ölçüde bir akor; geçişte boşluk kalmaması ölçülür. Her akoru tek tek temiz çalabilmek, ikisi arasında durmadan geçebildiğini göstermez; ikisini ayrı çalış."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.3.2.a1", "tur": "secmeli", "soru": "Re majörde 2. tel 3. perdeye hangi parmak basar?", "sec": ["İşaret", "Orta", "Yüzük", "Serçe"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "muzik.1.3.2.a2", "tur": "secmeli", "soru": "Mi minörde kaç parmak kullanılır?", "sec": ["1", "2", "3", "4"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "muzik.1.3.2.a3", "tur": "secmeli", "soru": "Do majörden La minöre geçerken hangi parmak yer değiştirir?", "sec": ["İşaret", "Orta", "Yüzük", "Hiçbiri"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "muzik.1.3.2.a4", "tur": "acik", "soru": "Beş akoru tek tek kur; her birinde telleri teker teker çal ve boğuk ya da susan teli not et. Sonra C → Am geçişini on kez yap.", "dogru": "Her akor için boğuk tel listesi (ör. Do majörde 1. tel yüzük parmağına değip susuyor) ve on geçişten kaçında duraksadığın.", "olcut": ["Her akor için tel tel kontrol yapılmış", "Sorunlu teller adıyla yazılmış", "Geçiş denemesi sayıyla kaydedilmiş"], "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k11"] }
+          ]
+        },
+        {
+          "id": "muzik.1.3.3",
+          "ad": "Metronom, ölçü ve ısınma",
+          "onKosul": ["muzik.1.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10", "k11", "k13"],
+          "ozet": "Tempo hedefi kaynaktan değil, senin temiz çalabildiğin ölçümden başlar. 4/4 ölçüde dört vuruş sayılır; ısınma kısa bir kromatik çalışmayla açılır.",
+          "metin": [
+            "ESP merdiveninin müzik 1. basamağı «El ve ses»tir ve çalışma listesinde «Metronomla dörtlük vuruş» vardır. Ölçü türleri metronomun vurgu koyduğu yeri belirler; varsayılan 4/4'tür ve dört vuruş sayılır. 3/4 üç vuruştur (vals).",
+            "Tempo için kaynağın ilkesi açık: tekniklerdeki başlangıç temposu (startBpm) bir hedef değil, bir öneridir. Temiz çalınabilen tempo kişiden kişiye değişir; sistem senin kendi ölçümünü bekler ve ilk tempo girilene kadar eşik üretmez. Hedef tempo (targetBpm) yalnız «referans»tır.",
+            "Vuruş kalıpları için not: bilek serbest olmalı, kolun tamamı değil; boş vuruşlar da tempoda olmalı. Akor geçişi için not: bir ölçüde bir akor, geçişte boşluk kalmaması ölçülür.",
+            "Önerilen ısınma sırası (zorunlu değil): kromatik ısınma 3 dakika (dört parmak, tek tel, yavaş; tempo değil eşitlik), gam 5 dakika, günün tek tekniği 10 dakika, repertuar 15 dakika. Bu aşamada «gam» yerine 2. ünitedeki tel tel nota sayma çalışmasını koyabilirsin (model önerisi)."
+          ],
+          "alistirmalar": [
+            { "id": "muzik.1.3.3.a1", "tur": "secmeli", "soru": "Kaynağa göre startBpm nedir?", "sec": ["Ulaşılması gereken hedef", "Bir başlangıç önerisi", "Herkes için sabit eşik", "Şarkının temposu"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"] },
+            { "id": "muzik.1.3.3.a2", "tur": "secmeli", "soru": "4/4 ölçüde bir ölçü kaç vuruştur?", "sec": ["2", "3", "4", "6"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+            { "id": "muzik.1.3.3.a3", "tur": "acik", "soru": "Metronomu kur ve Em ile C arasında bir ölçüde bir akor (4 vuruş) geçiş yap. Durmadan dört ölçü çalabildiğin en yüksek tempoyu yaz; bu senin başlangıç ölçümündür.", "dogru": "Örnek: 52 BPM'de dört ölçü durmadan çalındı, 60 BPM'de ikinci geçişte duraksadı; başlangıç ölçümü 52 BPM.", "olcut": ["Tempo sayıyla yazılmış", "«Durmadan dört ölçü» koşulu sınanmış", "Hedefi değil kendi ölçümünü kaydetmiş"], "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k11"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

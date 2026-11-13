@@ -1,0 +1,297 @@
+{
+  "sema": 1,
+  "alan": "okuma",
+  "id": "okuma.1",
+  "sira": 1,
+  "ad": "Etkin okuma, cümle ve paragraf",
+  "hedef": "Bir metni amaçla ve düzeyini bilerek okumak, ana düşüncesini kendi cümlenle kaydetmek ve düzgün bir cümle ile paragraf kurmak.",
+  "onKosul": [],
+  "kanitIsi": "Okumakta olduğun bir kitaptan ya da uzun bir yazıdan: (1) gözden geçirme notu (tür, konu, okumaya değer mi), (2) «ne hakkında» sorusuna tek cümlelik cevap, (3) kendi cümlenle üç not, (4) bu notlardan kurulmuş, giriş, gelişme ve sonuç cümlesi belli tek bir paragraf. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    { "id": "k1", "ad": "Adler: okumanın dört düzeyi ve inceleyici okuma", "tur": "gemini", "yol": "ESP/okuma_ve_sentez/adler_analitik_syntopical_okuma_ve_polimat_calisma_sistemleri.md", "bolum": "1.1 Okumanın 4 Düzeyi", "satir": "30-43", "dogrulama": "dogrulanmamis" },
+    { "id": "k2", "ad": "ESP okuma yöntemi: dört düzey ölçeği", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.READING_LEVELS", "satir": "1-26", "dogrulama": "dogrulanmamis" },
+    { "id": "k3", "ad": "ESP okuma yöntemi: kitabı bırakma izni", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.ABANDON_RULE", "satir": "71-76", "dogrulama": "dogrulanmamis" },
+    { "id": "k4", "ad": "ESP okuma yöntemi: okuma protokolü", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.READING_PROTOCOL", "satir": "60-69", "dogrulama": "dogrulanmamis" },
+    { "id": "k5", "ad": "ESP merdiveni: okuma 1. basamak «Düzenli okuma»", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "reading.levels rank 1", "satir": "308-314", "dogrulama": "dogrulanmamis" },
+    { "id": "k6", "ad": "Adler: analitik okumanın kuralları (yapı, yorum, eleştiri)", "tur": "gemini", "yol": "ESP/okuma_ve_sentez/adler_analitik_syntopical_okuma_ve_polimat_calisma_sistemleri.md", "bolum": "1.2 Analitik Okuma", "satir": "47-69", "dogrulama": "dogrulanmamis" },
+    { "id": "k7", "ad": "ESP okuma yöntemi: analitik okumanın dört sorusu", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.ANALYTIC_QUESTIONS", "satir": "28-39", "dogrulama": "dogrulanmamis" },
+    { "id": "k8", "ad": "ESP okuma yöntemi: not şablonları", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.NOTE_TEMPLATES", "satir": "41-58", "dogrulama": "dogrulanmamis" },
+    { "id": "k9", "ad": "Zettelkasten: edebiyat notu ve tek fikirli not", "tur": "gemini", "yol": "ESP/yazi_ve_kompozisyon/retorik_kompozisyon_ve_mantiksal_safsatalar.md", "bolum": "1.2. Niklas Luhmann'ın Zettelkasten Not Sistemi", "satir": "42-52", "dogrulama": "dogrulanmamis" },
+    { "id": "k10", "ad": "Açımlama ve «patchwriting» tuzağı", "tur": "gemini", "yol": "ESP/yazi_ve_kompozisyon/deneme_akademik_makale_ve_dramatik_hikaye_yazim_mimarisi.md", "bolum": "2.3 Paraphrasing (Açımlama) ve Sentez Kuralları", "satir": "73-74", "dogrulama": "dogrulanmamis" },
+    { "id": "k11", "ad": "Paragrafın üç taşıyıcı kolonu ve metne bağlı kalma", "tur": "gemini", "yol": "AYS/tyt/tyt_paragraf_12_soru_tipi_ve_metin_mimarisi_cozum_algoritmalari_atlasi.md", "bolum": "Bölüm 1: Paragrafın mimarisi", "satir": "19-40", "dogrulama": "dogrulanmamis" },
+    { "id": "k12", "ad": "Ana düşünceyi bulmak", "tur": "gemini", "yol": "AYS/tyt/tyt_paragraf_12_soru_tipi_ve_metin_mimarisi_cozum_algoritmalari_atlasi.md", "bolum": "1. Ana Düşünce", "satir": "46-54", "dogrulama": "dogrulanmamis" },
+    { "id": "k13", "ad": "Ana düşünce: tümdengelim ve tümevarım metinleri", "tur": "gemini", "yol": "AYS/tyt/tyt_turkce_paragraf_algoritmalari_ve_tdk_yazim_noktalama_kesin_kurallar_atlasi.md", "bolum": "[PAR-001] Ana Düşünce (Ana Fikir) Bulma", "satir": "11-16", "dogrulama": "dogrulanmamis" },
+    { "id": "k14", "ad": "Cümlenin öğeleri ve yapısına göre cümle türleri", "tur": "gemini", "yol": "AYS/tyt/tyt_turkce_dil_bilgisi_ses_yazim_noktalama_cumle_ogeleri_ve_fiilimsi_kesin_kurallar_atlasi.md", "bolum": "3-4. Çatı, cümlenin öğeleri ve cümle türleri", "satir": "60-77", "dogrulama": "dogrulanmamis" },
+    { "id": "k15", "ad": "Orwell'in altı kuralı (yazım cerrahisi)", "tur": "gemini", "yol": "ESP/yazi_ve_kompozisyon/akademik_makale_deneme_hikaye_ve_ikna_edici_kompozisyon_yazim_mimarisi_atlasi.md", "bolum": "2. George Orwell ve Strunk & White", "satir": "36-46", "dogrulama": "dogrulanmamis" },
+    { "id": "k16", "ad": "Orwell'in altı kuralı (ikinci aktarım)", "tur": "gemini", "yol": "ESP/yazi_ve_kompozisyon/retorik_kompozisyon_ve_mantiksal_safsatalar.md", "bolum": "1.3. Üslup Berraklığı ve Metin Budama Sanatı", "satir": "54-62", "dogrulama": "dogrulanmamis" },
+    { "id": "k17", "ad": "Paragrafı bölmek, akışı bozan cümle, cümle eklemek", "tur": "gemini", "yol": "AYS/tyt/tyt_paragraf_12_soru_tipi_ve_metin_mimarisi_cozum_algoritmalari_atlasi.md", "bolum": "3-5. Paragrafı ikiye bölme, akışı bozan cümle, cümle ekleme", "satir": "67-95", "dogrulama": "dogrulanmamis" },
+    { "id": "k18", "ad": "Cümle sıralama: anahtar kelime zinciri", "tur": "gemini", "yol": "AYS/tyt/tyt_turkce_paragraf_algoritmalari_ve_tdk_yazim_noktalama_kesin_kurallar_atlasi.md", "bolum": "[PAR-008] Cümle Oluşturma ve Paragraf Sıralama", "satir": "60-65", "dogrulama": "dogrulanmamis" },
+    { "id": "k19", "ad": "Düşünceyi geliştirme yolları", "tur": "gemini", "yol": "AYS/tyt/tyt_paragraf_12_soru_tipi_ve_metin_mimarisi_cozum_algoritmalari_atlasi.md", "bolum": "12. Anlatım biçimleri ve düşünceyi geliştirme yolları", "satir": "148-160", "dogrulama": "dogrulanmamis" },
+    { "id": "k20", "ad": "ESP retorik verisi: revizyon geçişleri", "tur": "depo", "yol": "ESP/src/js/data/rhetoric.js", "bolum": "ESP.REVISION_PASSES", "satir": "65-90", "dogrulama": "dogrulanmamis" },
+    { "id": "k21", "ad": "ESP merdiveni: yazı 1. basamak «Sayfayı doldurmak»", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "writing.levels rank 1", "satir": "363-369", "dogrulama": "dogrulanmamis" }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      { "id": "okuma.1.k1", "tur": "secmeli", "soru": "Bir kitabın içindekiler sayfasına ve son bölümünün ilk ve son paragraflarına bakıp «bu kitap bana şimdi gerekmiyor» diye karar veren okur hangi düzeyde okumuştur?", "sec": ["Temel okuma", "Gözden geçirme (inceleyici okuma)", "Analitik okuma", "Sentopik okuma"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k2"] },
+      { "id": "okuma.1.k2", "tur": "secmeli", "soru": "Bir kaynağın cümlesindeki kelimeleri yalnız eşanlamlılarıyla değiştirip not almak neden hatalıdır?", "sec": ["Not çok kısa kalır", "Bu, kendi cümlenle kurmak değil; kaynağa göre intihaldir", "Sayfa numarası yazılamaz", "Alıntı işareti gerekir ama koyulmaz"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k9"] },
+      { "id": "okuma.1.k3", "tur": "secmeli", "soru": "«Komite raporu inceledi.» cümlesinde yüklem ve özne hangisidir?", "sec": ["Yüklem: inceledi · Özne: Komite", "Yüklem: raporu · Özne: Komite", "Yüklem: inceledi · Özne: raporu", "Yüklem: Komite · Özne: inceledi"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k14", "k15"] },
+      { "id": "okuma.1.k4", "tur": "secmeli", "soru": "Bir paragrafta ilk cümle «Bu yüzden çoğu okur kitabı yarıda bırakır.» ise sorun nedir?", "sec": ["Cümle çok kısadır", "«Bu yüzden» önceki bir cümleye gönderme yapar; giriş cümlesi bağımsız olmalı", "Cümlede nesne yoktur", "Sonuç cümlesi başta olamaz çünkü fiil geçmiş zamandadır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k17"] }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "okuma.1.1",
+      "ad": "Etkin okumaya başlamak",
+      "onKosul": [],
+      "kazanim": ["Okumanın dört düzeyini ayırır ve hangi düzeyde okuduğunu söyler.", "Bir kitabı kısa sürede gözden geçirip okuma kararı verir.", "Bir okuma oturumunu amaç, işaret ve not adımlarıyla yürütür."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "okuma.1.1.k1", "tur": "secmeli", "soru": "«Bu soruya farklı yazarlar ne diyor?» sorusu hangi okuma düzeyine aittir?", "sec": ["Temel", "Gözden geçirme", "Analitik", "Sentopik"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k1"] },
+          { "id": "okuma.1.1.k2", "tur": "secmeli", "soru": "Zor bir kitabı ilk kez okurken kaynağın önerdiği yüzeysel okuma nasıl yapılır?", "sec": ["Her bilinmeyen kelimede sözlüğe bakılır", "Anlaşılmayan yerlerde durmadan baştan sona okunur", "Yalnız dipnotlar okunur", "Her paragraf iki kez okunur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+          { "id": "okuma.1.1.k3", "tur": "secmeli", "soru": "ESP okuma protokolüne göre okurken ne yapılır?", "sec": ["Her sayfada durup uzun not yazılır", "Yalnız işaretlenir; notlar oturum sonunda çıkarılır", "Hiçbir şey yapılmaz, sonra hatırlanır", "Her cümle deftere kopyalanır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+          { "id": "okuma.1.1.k4", "tur": "secmeli", "soru": "ESP'ye göre kitabı bırakma kararı en iyi ne zaman verilir?", "sec": ["Kitabın yarısında", "Gözden geçirme düzeyinde", "Kitap bitince", "Hiçbir zaman; her kitap bitirilmeli"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k2"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "okuma.1.1.1",
+          "ad": "Okumanın dört düzeyi",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2"],
+          "ozet": "Mortimer Adler ve Charles Van Doren okumayı dört düzeye ayırır: temel, gözden geçirme, analitik ve sentopik. Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten çok şey söyler.",
+          "metin": [
+            "«Okudum» cümlesi ölçülebilir bir şey söylemez: göz gezdirmek de okumaktır, bir bölümü üç kez dönüp çıkarmak da. ESP bu yüzden Adler'in dört düzeyini bir otorite olarak değil, bir ölçek olarak kullanır.",
+            "1. Temel okuma: «Cümle ne diyor?» Dili, kelimeleri ve dil bilgisini çözmek. Yabancı dilde okurken insan çoğu zaman bu düzeydedir.",
+            "2. Gözden geçirme (inceleyici okuma): «Bu kitap ne hakkında ve okumaya değer mi?» Kısa sürede kitabın iskeletini ve amacını kavramak. Bir sonraki dersin konusu.",
+            "3. Analitik okuma: «Yazar ne iddia ediyor, nasıl savunuyor, nerede haklı?» Tek bir kitabı sonuna kadar anlamak. 4. Sentopik okuma: «Bu soruya farklı yazarlar ne diyor?» Merkezde kitap değil soru vardır; kaynağa göre en zor ve en verimli düzeydir. Bu aşama ilk üç düzeye çalışır; sentopik okuma ileri aşamaların işidir."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.1.1.a1", "tur": "secmeli", "soru": "«Cümle ne diyor?» sorusu hangi düzeyin sorusudur?", "sec": ["Temel okuma", "Gözden geçirme", "Analitik okuma", "Sentopik okuma"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k1"] },
+            { "id": "okuma.1.1.1.a2", "tur": "secmeli", "soru": "Tek bir kitabı sonuna kadar anlamaya ve yazarın nerede haklı olduğunu yargılamaya çalışan okur hangi düzeydedir?", "sec": ["Temel", "Gözden geçirme", "Analitik", "Sentopik"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
+            { "id": "okuma.1.1.1.a3", "tur": "acik", "soru": "Son bir haftada okuduğun üç şeyi (kitap, makale, haber) yaz ve her birini hangi düzeyde okuduğunu bir gerekçeyle belirt.", "dogru": "Örnek: Haber: gözden geçirme, yalnız başlık ve ilk paragraf. Roman: temel okuma, olayı takip ettim, iddia aramadım. Makale: analitik, yazarın savını ve kanıtını not ettim.", "olcut": ["Üç ayrı okuma adı verilmiş", "Her biri dört düzeyden birine bağlanmış", "Gerekçe okuma sırasında yapılan şeye dayanıyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k2"] }
+          ]
+        },
+        {
+          "id": "okuma.1.1.2",
+          "ad": "Gözden geçirme: kitabı tanımak",
+          "onKosul": ["okuma.1.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2", "k3"],
+          "ozet": "Gözden geçirme kısa sürede bir kitabın iskeletini çıkarır ve okuma kararını verdirir. Kitabı bırakmak bu düzeyde verilen bir karardır, başarısızlık değildir.",
+          "metin": [
+            "Adler'e göre inceleyici okuma zamanın kısıtlı olduğu durumlarda (kaynağa göre 15-30 dakika) yapılır ve iki parçadır. Sistematik tarama: başlığı, alt başlığı ve önsözü dikkatle oku; içindekiler tablosunu bir yol haritası gibi incele; dizine ve anahtar kavramlara göz at; can alıcı bölümlerin ilk ve son paragraflarını oku.",
+            "ESP'nin özeti aynı işi şöyle tarif eder: içindekiler, giriş, sonuç, rastgele iki paragraf; on beş dakika.",
+            "Yüzeysel okuma: zor ve hacimli bir kitabı ilk kez okurken anlamadığın yerlerde durmadan, dipnotlara ya da sözlüğe boğulmadan baştan sona oku. Anlamadığın yerler ikinci, analitik okumanın işidir.",
+            "Gözden geçirmenin sonunda bir karar verilir: bu kitabı şimdi okuyacak mıyım? ESP'ye göre kitabı bırakmak bir başarısızlık değildir; gözden geçirmede verilen «bu kitap şu an bana gerekmiyor» kararı, yarısında sıkılıp suçluluk duymaktan iyidir. Bırakılan kitap kayıtta kalır."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.1.2.a1", "tur": "secmeli", "soru": "Aşağıdakilerden hangisi sistematik taramanın bir adımı değildir?", "sec": ["İçindekiler tablosunu incelemek", "Önsözü okumak", "Her bölümü baştan sona not alarak okumak", "Can alıcı bölümlerin ilk ve son paragraflarını okumak"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "okuma.1.1.2.a2", "tur": "secmeli", "soru": "Yüzeysel okumada anlaşılmayan bir paragrafla karşılaşınca ne yapılır?", "sec": ["Anlaşılana kadar tekrar okunur", "Durmadan devam edilir", "Kitap bırakılır", "Sözlükten her kelimeye bakılır"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "okuma.1.1.2.a3", "tur": "acik", "soru": "Elindeki bir kitabı 15-30 dakikada gözden geçir. Türünü, konusunu, ana bölümlerini ve «okuyacak mıyım» kararını gerekçesiyle yaz.", "dogru": "Örnek: Tür: popüler bilim. Konu: uykunun öğrenmeye etkisi. Bölümler: uyku evreleri, bellek, uygulama. Karar: okuyacağım; son bölüm kendi düzenimle ilgili.", "olcut": ["Tür ve konu ayrı yazılmış", "Ana bölümler içindekilerden çıkarılmış", "Karar ve gerekçesi var"], "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k3"] }
+          ]
+        },
+        {
+          "id": "okuma.1.1.3",
+          "ad": "Bir okuma oturumu",
+          "onKosul": ["okuma.1.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k5"],
+          "ozet": "Etkin okuma oturumu beş adımdır: amaç, süre, işaretle, çıkar, bağla. Merdivenin ilk basamağı düzenli okumadır.",
+          "metin": [
+            "ESP'nin okuma protokolü bir oturumun şeklini verir. 1. Amaç: bu oturumda hangi soruyu kovaladığını bir cümleyle yaz. 2. Süre: zamanlayıcıyı kur; telefon başka odada.",
+            "3. İşaretle: okurken yalnızca işaretle, not yazmak için durma. 4. Çıkar: oturum sonunda işaretlerinden 3-5 atomik not çıkar. 5. Bağla: her yeni notu en az bir eski notla bağlamayı dene; bağ bulamıyorsan zorlama, uydurulmuş bağ anlamsızdır.",
+            "ESP merdiveninde okumanın 1. basamağı «Düzenli okuma»dır. Çalışma listesi: günde 20 dakika, okurken altını çizme, kaynak kaydı. Basamağın kanıt işi: bir kitabı bitirip üç cümleyle özetlemek.",
+            "Bu aşamada «atomik not» kendi cümlenle yazılmış tek fikirli nottur; nasıl yazıldığı 2. ünitede."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.1.3.a1", "tur": "secmeli", "soru": "Okuma protokolünün ilk adımı nedir?", "sec": ["Not çıkarmak", "Bu oturumda hangi soruyu kovaladığını bir cümleyle yazmak", "Zamanlayıcıyı kurmak", "Notları bağlamak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "okuma.1.1.3.a2", "tur": "secmeli", "soru": "Yeni bir not eski notların hiçbiriyle bağlanmıyorsa ne yapılır?", "sec": ["Bir bağ uydurulur", "Not silinir", "Zorlanmaz; not bağsız kalır", "Kitap baştan okunur"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "okuma.1.1.3.a3", "tur": "acik", "soru": "20 dakikalık bir okuma oturumu yap: başlamadan amacını bir cümleyle yaz, okurken yalnız işaretle, sonunda 3 not çıkar.", "dogru": "Amaç: «Yazar dikkat dağınıklığının nedenini ne sayıyor?» İşaret: 6 yer. Notlar: üç ayrı fikir, her biri kendi cümlemle ve sayfa numarasıyla.", "olcut": ["Amaç bir soru ya da tek cümle olarak önceden yazılmış", "Okurken not için durulmamış", "Oturum sonunda 3-5 not çıkarılmış"], "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "okuma.1.2",
+      "ad": "Anlamak ve kaydetmek",
+      "onKosul": ["okuma.1.1"],
+      "kazanim": ["Bir kitabın ne hakkında olduğunu bir iki cümleyle söyler.", "Bir paragrafın ana düşüncesini yan ayrıntıdan ayırır.", "Okuduğunu kendi cümlesiyle, tek fikirli notlar hâlinde kaydeder."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "okuma.1.2.k1", "tur": "secmeli", "soru": "Adler'e göre bir kitabı eleştirmeden önce ne gerekir?", "sec": ["Yazarın ünlü olması", "Kitabı tam olarak anlamak", "En az iki kez okumak", "Başka bir kitapla karşılaştırmak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+          { "id": "okuma.1.2.k2", "tur": "secmeli", "soru": "Bir paragrafta olaylar ve durumlar anlatılıp sonuç son cümlelerde bildiriliyorsa ana düşünce en çok nerede aranır?", "sec": ["İlk cümlede", "Son bir iki cümlede", "Ortadaki örnekte", "Başlıkta"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k13", "k12"] },
+          { "id": "okuma.1.2.k3", "tur": "secmeli", "soru": "«<kavram> burada şu anlamda: …» kalıbı hangi not şablonudur?", "sec": ["İddia notu", "Tanım notu", "Bağlantı notu", "Soru notu"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] },
+          { "id": "okuma.1.2.k4", "tur": "secmeli", "soru": "Zettelkasten'deki kalıcı notun «kendi kendine yetebilirlik» ilkesi ne ister?", "sec": ["Not en az bir sayfa olmalı", "Not, kitaba bakmadan tek başına anlaşılabilmeli", "Not yalnız alıntıdan oluşmalı", "Not hiçbir notla bağlanmamalı"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "okuma.1.2.1",
+          "ad": "Kitap ne hakkında?",
+          "onKosul": ["okuma.1.1.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k7"],
+          "ozet": "Analitik okuma önce kitabın yapısını çıkarır: türü, bir iki cümlelik özeti, ana bölümleri ve yazarın sorusu. Anlamadan övmek de yermek de okuma değildir.",
+          "metin": [
+            "Adler'in analitik okumasının ilk aşaması kitabın iskeletini çıkarmaktır. Kural 1: kitabın türünü ve konusunu en başta sınıflandır (tarih mi, kuramsal felsefe mi, pratik rehber mi?). Kural 2: kitabın bütününü en fazla bir iki cümleyle özetle.",
+            "Kural 3: ana bölümleri bir plan olarak listele ve birbirine nasıl bağlandığını göster. Kural 4: yazarın çözmeye çalıştığı temel soruyu tanımla.",
+            "İkinci aşamanın ilk iki kuralı bu aşamaya da girer. Kural 5: yazarın anahtar terimlerini bul ve onların anlamında onunla uzlaş. Kural 6: yazarın en kritik cümlelerini bulup temel önermelerini çıkar. Eleştiriye ait kural 9 da şimdiden geçerlidir: «tam olarak anladım» diyene kadar övme ya da yerme.",
+            "ESP bunu dört soruya indirir: Kitap bir bütün olarak ne hakkında? (Tek cümlede söyleyemiyorsan henüz bitmemiştir.) Ayrıntıda ne söyleniyor ve nasıl? Kitap doğru mu, tamamı mı, bir kısmı mı? Ne olmuş yani, doğruysa senin için ne değişiyor? Bu aşamada ilk iki soruya çalışılır."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.2.1.a1", "tur": "secmeli", "soru": "Adler'in analitik okumasında «kitabın bütününü bir iki cümleyle özetle» kaçıncı kuraldır?", "sec": ["Kural 1", "Kural 2", "Kural 5", "Kural 9"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
+            { "id": "okuma.1.2.1.a2", "tur": "secmeli", "soru": "ESP'ye göre bir kitabı tek cümlede anlatamıyorsan bu ne demektir?", "sec": ["Kitap kötüdür", "Okuman henüz bitmemiştir", "Kitap sentopik okunmalıdır", "Özet gereksizdir"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+            { "id": "okuma.1.2.1.a3", "tur": "acik", "soru": "Okumakta olduğun kitap için kural 1-4'ü uygula: tür, bir iki cümlelik özet, ana bölümler planı, yazarın sorusu.", "dogru": "Örnek: Tür: pratik rehber. Özet: Yazar dikkatin bir beceri gibi eğitilebileceğini savunuyor ve bunun için günlük bir düzen öneriyor. Plan: 1. sorun, 2. neden, 3. yöntem. Soru: Dağınık dikkat nasıl toparlanır?", "olcut": ["Dört kuralın dördü de cevaplanmış", "Özet en fazla iki cümle", "Yazarın sorusu soru biçiminde yazılmış"], "durum": "taslak", "yazan": "model", "kaynak": ["k6"] }
+          ]
+        },
+        {
+          "id": "okuma.1.2.2",
+          "ad": "Ana düşünceyi bulmak",
+          "onKosul": ["okuma.1.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k11", "k12", "k13"],
+          "ozet": "Bir paragrafın ana düşüncesi yazarın kanıtlamak istediği tek yargıdır. Metne bağlı kal, kırılma bağlaçlarına ve paragrafın başına ya da sonuna bak, örneği ana fikirle karıştırma.",
+          "metin": [
+            "Kaynakların sorusu: yazar bu parçayı hangi tek cümleyi kanıtlamak için yazdı? Ana düşünce, metnin tamamını bir şemsiye gibi örten yargıdır.",
+            "Nerede aranır? Tümdengelimli metinlerde ana fikir ilk bir iki cümlededir; kalan cümleler açıklama, örnek ve kanıttır. Tümevarımlı metinlerde olaylar ve durumlar anlatılır, sonuç son bir iki cümlede bildirilir.",
+            "Kırılma ve toparlama sözlerine dikkat et: oysa, ne var ki, fakat, ancak, asıl mesele, kısacası, özetle, demek ki. Bunlardan sonra gelen cümle çoğu zaman yazarın vurgusunu taşır.",
+            "Tuzaklar: metinde örnek olarak verilen yan ayrıntı ana fikir olamaz; metinde savunulmayan ama genel olarak doğru bir yargı da ana fikir değildir. Kaynağın «altın kuralı»: cevabı metne göre ver; dışarıdan genel kültür ya da kendi fikrini katma. Bu, okurken yazarın ne dediğini kendi düşüncenden ayırmanın ilk alıştırmasıdır (model)."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.2.2.a1", "tur": "secmeli", "soru": "«Kitap okumak dikkat ister. Uzun bir romanı bitirmek günler sürer. Oysa asıl kazanç, okurken kurulan sabırdır.» Bu paragrafın ana düşüncesi hangisidir?", "sec": ["Kitap okumak dikkat ister", "Romanlar uzundur", "Okumanın asıl kazancı sabırdır", "Romanı bitirmek günler sürer"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13"] },
+            { "id": "okuma.1.2.2.a2", "tur": "secmeli", "soru": "Ana fikri ilk cümlede verip sonraki cümlelerde açıklayan ve örnekleyen metin nasıl bir metindir?", "sec": ["Tümevarımlı", "Tümdengelimli", "Öyküleyici", "Karşılaştırmalı"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k13"] },
+            { "id": "okuma.1.2.2.a3", "tur": "acik", "soru": "Okuduğun bir yazıdan üç paragraf seç. Her birinin ana düşüncesini tek cümleyle yaz ve onu paragrafın neresinde bulduğunu belirt.", "dogru": "Örnek: 1. paragraf: ana fikir ilk cümlede (tümdengelim). 2. paragraf: «ne var ki» sonrası. 3. paragraf: son cümlede, «kısacası» ile.", "olcut": ["Her paragraf için tek cümlelik ana düşünce var", "Yeri (baş, son, kırılma sözü) belirtilmiş", "Örnek ya da yan ayrıntı ana fikir diye yazılmamış"], "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13"] }
+          ]
+        },
+        {
+          "id": "okuma.1.2.3",
+          "ad": "Kendi cümlenle not almak",
+          "onKosul": ["okuma.1.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k8", "k9", "k10"],
+          "ozet": "İyi not bir soruya cevap verir, tek fikir taşır ve kendi cümlenle yazılır. Kelimeleri eşanlamlıyla değiştirmek kendi cümlen değildir.",
+          "metin": [
+            "ESP'nin not şablonları her biri bir soruya cevap verir: İddia notu «<yazar> şunu savunuyor: …», kanıt notu «Bu iddianın dayanağı: …», itiraz notu «Buna şöyle itiraz edilebilir: …», tanım notu «<kavram> burada şu anlamda: …», bağlantı notu, soru notu «Bu beni şunu sormaya götürüyor: …». Alıntı notu «…» (s. …) az kullanılır: alıntı yığını not değildir.",
+            "Zettelkasten anlatımına göre okurken yazarın cümleleri doğrudan kopyalanmaz; kendi kelimelerinle bir iki cümleyle özetlenir ve sayfa numarası kaydedilir. Kalıcı notta iki ilke vardır: her kartta tek bir düşünce; kart, kitaba bakmadan tek başına anlaşılabilecek kadar net.",
+            "Kaynağın uyardığı tuzak: bir yazarın cümlesindeki kelimeleri yalnız eşanlamlılarıyla değiştirmek («patchwriting») kaynağa göre intihaldir. Doğru yol: metni okuyup kapat, ana fikri kendi cümlenle baştan kur.",
+            "Uygulama sırası (model): önce metni kapat, sonra notu yaz, en son metne dönüp doğruluğunu ve sayfa numarasını kontrol et."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.2.3.a1", "tur": "secmeli", "soru": "Bir iddiayı taşıyan veriyi ayrı tutmak için hangi not kullanılır?", "sec": ["Kanıt notu", "Soru notu", "Alıntı notu", "Bağlantı notu"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] },
+            { "id": "okuma.1.2.3.a2", "tur": "secmeli", "soru": "Aşağıdakilerden hangisi kalıcı (atomik) notun ilkesidir?", "sec": ["Bir kartta birkaç fikir toplamak", "Her kartta tek bir düşünce", "Notu yazarın cümlesiyle yazmak", "Sayfa numarasını yazmamak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9"] },
+            { "id": "okuma.1.2.3.a3", "tur": "acik", "soru": "Okuduğun bir paragrafı kapat ve ana fikrini kendi cümlenle bir iddia notu olarak yaz; sonra metne dönüp kaynak cümleyle karşılaştır. Kaç kelime aynı kaldı?", "dogru": "Örnek: «Yazar, dikkatin kas gibi çalıştırıldıkça güçlendiğini savunuyor (s. 42).» Kaynakla ortak yalnız «dikkat» kelimesi.", "olcut": ["Not metin kapalıyken yazılmış", "İddia notu kalıbına uyuyor ve sayfa numarası var", "Kaynak cümleyle karşılaştırılmış; eşanlamlı değiştirme yok"], "durum": "taslak", "yazan": "model", "kaynak": ["k8", "k9", "k10"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "okuma.1.3",
+      "ad": "Cümle ve paragraf kurmak",
+      "onKosul": ["okuma.1.2"],
+      "kazanim": ["Bir cümlenin yüklemini, öznesini ve nesnesini bulur; cümle türünü söyler.", "Cümleyi gereksiz kelimeden arındırır ve etken çatıyla kurar.", "Giriş, gelişme ve sonuç cümlesi belli, akışı kopmayan bir paragraf yazar."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          { "id": "okuma.1.3.k1", "tur": "secmeli", "soru": "«Hava kararınca eve döndük.» cümlesi yapısına göre hangi türdür?", "sec": ["Basit", "Birleşik", "Sıralı", "Bağlı"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+          { "id": "okuma.1.3.k2", "tur": "secmeli", "soru": "Orwell'in kurallarına göre «Kararın kurul tarafından alınması sağlandı.» cümlesinin en iyi düzeltmesi hangisidir?", "sec": ["Kurul kararı aldı.", "Karar alınmıştır.", "Kurul tarafından karar alındı.", "Kararın alınması kurulca sağlanmıştır."], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15", "k16"] },
+          { "id": "okuma.1.3.k3", "tur": "secmeli", "soru": "Bir cümleyi paragraftan çıkardığında önceki ve sonraki cümle pürüzsüz bağlanıyorsa bu ne gösterir?", "sec": ["O cümle ana fikirdir", "O cümle akışı bozuyor olabilir", "Paragraf ikiye bölünmelidir", "O cümle giriş cümlesidir"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k17"] },
+          { "id": "okuma.1.3.k4", "tur": "secmeli", "soru": "ESP'nin revizyon geçişlerine göre bir taslağı düzeltmeye nereden başlanır?", "sec": ["Cümle uzunluğundan", "Yazım hatalarından", "Yapıdan: her paragraf bir iş yapıyor mu?", "Sesli okumadan"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k20"] }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "okuma.1.3.1",
+          "ad": "Cümlenin iskeleti",
+          "onKosul": ["okuma.1.2.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14"],
+          "ozet": "Bir cümlenin öğeleri bulunurken önce yüklem, sonra özne, sonra nesne aranır. Yapısına göre cümle basit, birleşik, sıralı ya da bağlıdır.",
+          "metin": [
+            "Kaynağın kuralı: cümle öğeleri bulunurken önce yüklem, sonra özne, sonra nesne bulunur (Y-Ö-N). Yüklem fiil olabilir (okudu) ya da isim olabilir (öğretmendir); özne işi yapandır. Tamlamalar, deyimler, birleşik fiiller ve edat grupları bölünmez; tek öğe sayılır.",
+            "Örnek (model): «Ali dün kitabı bitirdi.» Yüklem: bitirdi. Özne: Ali (kim bitirdi?). Nesne: kitabı (neyi bitirdi?). «dün» zaman bildiren başka bir öğedir.",
+            "Yapısına göre cümle türleri: basit cümle tek yüklemlidir ve içinde yan cümle (fiilimsi) yoktur. Birleşik cümle tek yüklemlidir ama içinde en az bir fiilimsi ya da yan cümle vardır. Sıralı cümlede en az iki yüklem virgül ya da noktalı virgülle bağlanır. Bağlı cümlede en az iki yüklem ve, ama, çünkü gibi bir bağlaçla bağlanır.",
+            "Kaynağa göre etken çatıda işi yapan bellidir; edilgen çatıda fiil -l ya da -n eki alır ve işi yapan belli değildir («Yollar asfaltlandı»). Bu ayrım bir sonraki dersin kuralına zemin olur."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.3.1.a1", "tur": "secmeli", "soru": "«Öğrenciler sabah erkenden kütüphaneye gitti.» cümlesinin yüklemi hangisidir?", "sec": ["Öğrenciler", "sabah erkenden", "kütüphaneye", "gitti"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "okuma.1.3.1.a2", "tur": "secmeli", "soru": "«Kitabı okudum, notlarımı çıkardım.» cümlesi yapısına göre hangisidir?", "sec": ["Basit", "Birleşik", "Sıralı", "Bağlı"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "okuma.1.3.1.a3", "tur": "secmeli", "soru": "«Yorgundum ama okumaya devam ettim.» cümlesi yapısına göre hangisidir?", "sec": ["Basit", "Birleşik", "Sıralı", "Bağlı"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
+            { "id": "okuma.1.3.1.a4", "tur": "acik", "soru": "Bugün yaptığın üç şeyi üç ayrı basit cümleyle yaz; her birinde yüklemi, özneyi ve (varsa) nesneyi işaretle.", "dogru": "Örnek: «Ben kahvaltıyı hazırladım.» Y: hazırladım, Ö: Ben, N: kahvaltıyı. «Annem beni aradı.» Y: aradı, Ö: Annem, N: beni. «Yağmur yağdı.» Y: yağdı, Ö: Yağmur.", "olcut": ["Üç cümlenin her biri tek yüklemli", "Yüklem önce, sonra özne bulunmuş", "Nesne yoksa bu belirtilmiş"], "durum": "taslak", "yazan": "model", "kaynak": ["k14"] }
+          ]
+        },
+        {
+          "id": "okuma.1.3.2",
+          "ad": "Açık cümle",
+          "onKosul": ["okuma.1.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k15", "k16"],
+          "ozet": "Yazmak süslemek değil, düşünceyi örten fazlalığı yontmaktır. Orwell'in altı kuralı açık cümlenin ölçütüdür.",
+          "metin": [
+            "İki kaynak George Orwell'in «Politics and the English Language» (1946) yazısındaki altı kuralı aktarır: 1. Basında ya da kitaplarda görmeye alıştığın basmakalıp metaforu ve klişeyi kullanma. 2. Kısa bir kelime işini görüyorsa uzununu seçme. 3. Bir kelimeyi cümleden atmak mümkünse at.",
+            "4. Etken çatı kurabileceğin yerde edilgen çatı kullanma: «Rapor komite tarafından incelendi» yerine «Komite raporu inceledi». 5. Gündelik dilde karşılığı varken yabancı, jargonsu ya da teknik kelimeye kaçma. 6. Bu kurallardan birine uymak barbarca ya da anlaşılmaz bir cümle kurduracaksa o kuralı çiğne.",
+            "Kural 3'ün sınaması (kaynak): kelimeyi cümleden çıkardığında anlam eksilmiyorsa o kelime atılmalıdır.",
+            "Uygulama (model): önce cümlenin yüklemini ve öznesini bul (önceki ders). İşi yapan özne olarak görünüyorsa cümle etkendir. Sonra her kelimeyi tek tek çıkararak dene."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.3.2.a1", "tur": "secmeli", "soru": "«Toplantıda konuyla ilgili olarak bir değerlendirme yapılması gerçekleştirildi.» cümlesinin en açık hâli hangisidir?", "sec": ["Toplantıda konu değerlendirildi.", "Toplantıda konuyla ilgili değerlendirme yapılması sağlandı.", "Toplantıda konuyla alakalı bir değerlendirme gerçekleştirilmiştir.", "Konu, toplantıda değerlendirilmesi yapılarak ele alındı."], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k15", "k16"] },
+            { "id": "okuma.1.3.2.a2", "tur": "secmeli", "soru": "Orwell'in altıncı kuralı ne söyler?", "sec": ["Her zaman en kısa kelimeyi seç", "Kurala uymak cümleyi anlaşılmaz yapacaksa kuralı çiğne", "Hiç metafor kullanma", "Edilgen çatıyı hiç kullanma"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k15", "k16"] },
+            { "id": "okuma.1.3.2.a3", "tur": "acik", "soru": "Daha önce yazdığın bir paragraftan üç cümle al. Her birini Orwell'in 3. ve 4. kuralına göre yeniden yaz; çıkardığın kelimeleri listele.", "dogru": "Örnek: «Bu konunun incelenmesi tarafımızca yapılacaktır.» → «Bu konuyu inceleyeceğiz.» Çıkan: konunun incelenmesi, tarafımızca, yapılacaktır.", "olcut": ["Üç cümlenin hepsi kısalmış", "Anlam kaybı yok", "Edilgen çatı varsa etkene çevrilmiş"], "durum": "taslak", "yazan": "model", "kaynak": ["k15", "k16"] }
+          ]
+        },
+        {
+          "id": "okuma.1.3.3",
+          "ad": "Paragrafı kurmak",
+          "onKosul": ["okuma.1.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k11", "k17", "k18", "k19"],
+          "ozet": "Paragrafın üç taşıyıcısı vardır: konuyu açan giriş cümlesi, örnek ve karşıtlıkla ilerleyen gelişme cümleleri, yargıyı veren sonuç cümlesi. Her cümle bir öncekine bir kavramla bağlanır.",
+          "metin": [
+            "Kaynağa göre paragrafın üç taşıyıcı kolonu: 1. Giriş cümlesi: metinde neyin tartışılacağını ilan eder; önceki bir cümleye gönderme yapan söz (bu yüzden, oysa, nitekim, söz konusu) taşımaz. 2. Gelişme cümleleri: konu örneklenir, tanık gösterilir, zıt görüşle karşılaştırılır; dönüşüm bağlaçları (oysa, ancak, fakat, ne var ki) burada çalışır. 3. Sonuç cümlesi: yazarın okuru getirmek istediği hüküm; en dar ve en net mesaj burada söylenir.",
+            "Akış: bağımsız giriş cümlesini bul ya da yaz; ardından bir cümlenin sonundaki kavram bir sonrakinin başında aranır (anahtar kelime zinciri). Sıra zamana ya da nedene göre korunur; bitince paragraf baştan sona bir kez okunup kopukluk aranır.",
+            "Akışı bozan cümle sınaması: şüpheli cümleyi zihninde çıkar; önceki ve sonraki cümle pürüzsüz bağlanıyorsa o cümle akışı bozuyordur. Kaynağa göre bu cümle çoğu zaman ilgisiz bir konu değil, aynı konu içinde zamansız bir sıçrama ya da aşırı özele veya aşırı genele ani bir geçiştir. Konunun başka bir boyutuna geçince yeni paragraf, bağımsız bir giriş cümlesiyle başlar.",
+            "Gelişme cümlelerini neyle doldurursun? Kaynaktaki düşünceyi geliştirme yollarından ilk üçü: tanımlama («… nedir?» sorusunun cevabı), tanık gösterme (yetkin birinin sözünü aktarma) ve karşılaştırma (en, daha, göre, kadar gibi kıyas sözleriyle iki durumu yan yana koyma)."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.3.3.a1", "tur": "secmeli", "soru": "Aşağıdakilerden hangisi bir paragrafın giriş cümlesi olmaya en uygundur?", "sec": ["Bu nedenle okuma saatini sabaha aldım.", "Nitekim çoğu insan akşam yorgundur.", "Okumanın en verimli saati kişiden kişiye değişir.", "Söz konusu alışkanlık zamanla yerleşti."], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k18"] },
+            { "id": "okuma.1.3.3.a2", "tur": "secmeli", "soru": "(I) Not almak okumayı yavaşlatır gibi görünür. (II) Oysa yazılan not, okunanı belleğe bağlar. (III) Kâğıt defterler pahalılaştı. (IV) Bu yüzden kısa bir not, uzun bir tekrardan çok kazandırır. Hangi cümle akışı bozar?", "sec": ["I", "II", "III", "IV"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k17"] },
+            { "id": "okuma.1.3.3.a3", "tur": "secmeli", "soru": "Yazar, görüşünü desteklemek için alanında yetkin bir araştırmacının sözünü aynen aktarıyor. Bu hangi düşünceyi geliştirme yoludur?", "sec": ["Tanımlama", "Tanık gösterme", "Karşılaştırma", "Öyküleme"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k19"] },
+            { "id": "okuma.1.3.3.a4", "tur": "acik", "soru": "Bu aşamada aldığın notlardan birini seç ve 5-7 cümlelik tek bir paragraf yaz: bağımsız bir giriş cümlesi, en az bir örnek ya da karşıtlık içeren gelişme cümleleri, yargıyı veren bir sonuç cümlesi.", "dogru": "Örnek: Giriş: «Okurken not almak okumayı yavaşlatmaz, derinleştirir.» Gelişme: örnek ve «oysa» ile karşıt görüş. Sonuç: «Kısacası not, okumanın kaydı değil devamıdır.»", "olcut": ["Giriş cümlesi önceki bir cümleye gönderme yapmıyor", "Gelişmede en az bir örnek ya da karşıtlık var", "Son cümle bir yargı veriyor", "Her cümle bir öncekine bir kavramla bağlanıyor"], "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k18", "k19"] }
+          ]
+        },
+        {
+          "id": "okuma.1.3.4",
+          "ad": "İlk taslak ve ilk düzeltme",
+          "onKosul": ["okuma.1.3.3"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k21", "k20"],
+          "ozet": "Yazının ilk basamağı sayfayı doldurmaktır: düzeltmeden yaz. Düzeltirken sıra önemlidir: önce yapı ve iddia, sonra kısaltma ve cümle.",
+          "metin": [
+            "ESP merdiveninde yazının 1. basamağı «Sayfayı doldurmak»tır. Çalışma listesi: günde 200 kelime, düzeltmeden yazma, günlük tutma. Basamağın kanıt işi: tek oturuşta bitmiş 500 kelimelik bir metin.",
+            "Yazarken düzeltme; düzeltmeyi sonraya bırak. ESP'nin revizyon geçişleri bu sonrası için bir sıra verir ve sıranın önemli olduğunu söyler: yapı düzelmeden cümle cilalamak, silinecek paragrafı güzelleştirmektir.",
+            "Geçişler: 1. Yapı: her paragraf bir iş yapıyor mu? 2. İddia: metnin tek cümlelik iddiası ne, metin onu mu savunuyor? 3. Kanıt: her iddianın arkasında bir örnek, sayı ya da alıntı var mı? 4. Kısaltma: hangi kelime çıkarılsa anlam değişmez? 5. Cümle: uzun cümleler bölünebilir mi? 6. Tekrar: aynı kelime kaç kez geçiyor? 7. Sesli okuma: nerede nefesin kesiliyor?",
+            "Bu aşamada ilk dört geçiş yeter (model önerisi): yapı ve iddia için paragraf dersini, kısaltma için Orwell'in kurallarını kullan. Üslup ve ritim ileri basamakların işidir."
+          ],
+          "alistirmalar": [
+            { "id": "okuma.1.3.4.a1", "tur": "secmeli", "soru": "ESP merdiveninde yazının 1. basamağının çalışma listesinde hangisi vardır?", "sec": ["Düzeltmeden yazma", "Okunabilirlik ölçümü", "Bölüm mimarisi", "Aynı fikri üç üslupta yazma"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k21"] },
+            { "id": "okuma.1.3.4.a2", "tur": "secmeli", "soru": "Revizyonda yapı geçişinden önce cümleleri cilalamak neden hatalıdır?", "sec": ["Cümleler kısalır", "Sonradan silinecek bir paragrafı güzelleştirmiş olabilirsin", "Yazım kuralları bozulur", "İddia değişir"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k20"] },
+            { "id": "okuma.1.3.4.a3", "tur": "acik", "soru": "Bir konuda 15 dakika durmadan, düzeltmeden yaz. Ertesi gün metne yalnız ilk iki geçişi uygula: işe yaramayan paragrafı işaretle ve metnin tek cümlelik iddiasını kenara yaz.", "dogru": "Örnek: 310 kelimelik taslak. Yapı: 3. paragraf girişi tekrar ediyor, çıkarılabilir. İddia: «Sabah okumak, akşam okumaktan daha az dağınık.» Metin bunu yalnız iki paragrafta savunuyor.", "olcut": ["Taslak düzeltilmeden, tek oturuşta yazılmış", "Düzeltme ayrı bir günde yapılmış", "Yapı ve iddia geçişleri sırayla uygulanmış"], "durum": "taslak", "yazan": "model", "kaynak": ["k21", "k20"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
