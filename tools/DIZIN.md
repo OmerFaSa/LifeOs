@@ -143,7 +143,8 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `tekdepo_test.py` — Tek depo (`sistem/veri.py`) ve hesap köprüsü: üst anahtar düzeyinde son saat kazanır, silme mezar taşı, sıra sonucu değiştirmez, yedek üstüne yazmaz; CI'da koşulur.
 - `gocpaket.test.js` — Göç paketinin cihaz tarafı (`brand/ortak/gocpaket.js`): bütün profiller, sır girmez, bekleyen sayılır, medya sha256 ve parçalama; sahte depolarla, tarayıcısız.
 - `gocpaket_test.py` — Göç paketinin PC tarafı: cihazın paketleri `goc.paket_kaydet` ve göç okuyucusundan geçer, sınırlar ve `/api/hesap/goc-paket` ucu; CI'da koşulur.
-- `tekkapi_test.py` — Tek kapı (`sistem/tekkapi.py`): giriş, üç modül `/ays/` `/spi/` `/esp/` yolunda, API'ler ve HKM `/api/hkm/` aynı süreçte eski sunucuyla aynı cevabı verir, bilinmeyen yol 404, köken kuralları durur, kapalıyken açılmaz; geçici veri ve boş portla, CI'da koşulur.
+- `tekkapi_test.py` — Tek kapı (`sistem/tekkapi.py`): giriş, üç modül `/ays/` `/spi/` `/esp/` yolunda, yeni kabuk `/kabuk/` kapalı listeyle, API'ler ve HKM `/api/hkm/` aynı süreçte eski sunucuyla aynı cevabı verir, bilinmeyen yol 404, köken kuralları durur, kapalıyken açılmaz; geçici veri ve boş portla, CI'da koşulur.
+- `kabuk_gez.js` — Yeni kabuğu (`kabuk/`) tek kapıdan yalıtılmış ortamda açar, Felsefe pilotunun ilk ünitesini gerçek tarayıcıda yürür (ders, alıştırma, ünite kapısı, kayıt); `--goruntu` önizleme görüntülerini yeniler; CI'da koşulur.
 - `veri_denetle_test.py` — tools/veri_denetle.py birim testleri; kenar durumları sınar, CI'da koşulur.
 - `veri_dogrula_test.py` — tools/veri_dogrula.py saf işlevlerinin birim testleri, CI'da koşulur.
 - `veri_test.py` — Veri çıkarma ve gece doğrulama kurallarının testi, CI'da koşulur.

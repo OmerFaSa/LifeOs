@@ -170,3 +170,27 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .komut__bos{ color:var(--soluk); cursor:default; }
 [hidden]{ display:none !important; }
 @media (forced-colors: active){ .seg button[aria-checked="true"],.halka__oge.secili{ outline:2px solid CanvasText; } }
+
+/* ---------------- ders ve kapı (Felsefe pilotu) ---------------- */
+.unitekutu{ display:flex; flex-direction:column; gap:6px; }
+.unitekutu h2{ font-size:1.05rem; margin:8px 0 2px; display:flex; gap:8px; align-items:center; }
+.satir--kilitli{ background:transparent; color:var(--soluk); box-shadow:inset 0 0 0 2px var(--cizgi); }
+.satir--kapi{ background:var(--yuzey-2); }
+.ders p{ margin:0; max-width:64ch; }
+.ders__ozet{ font-size:1.08rem; color:var(--yazi-2); padding-left:12px; box-shadow:inset 4px 0 0 var(--vurgu); }
+.kaynak{ color:var(--soluk); font-size:.85rem; } .kaynak summary{ cursor:pointer; min-height:44px; display:flex; align-items:center; } .kaynak ul{ margin:0; padding-left:18px; }
+.soru{ border:0; margin:0; padding:14px; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi); display:flex; flex-direction:column; gap:10px; min-width:0; }
+.soru legend{ float:left; width:100%; padding:0; font-family:var(--piksel); } .soru legend + *{ clear:both; }
+.secenekler{ display:flex; flex-direction:column; gap:6px; }
+.secenek{ display:flex; align-items:center; gap:10px; min-height:44px; padding:6px 12px; text-align:left; font:inherit; color:inherit; background:var(--bg); border:0;
+  box-shadow:inset 0 0 0 2px var(--cizgi); cursor:pointer; }
+.secenek:hover{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.secenek b{ font-family:var(--piksel); min-width:1.2em; } .secenek span{ flex:1; } .secenek .secenek__im{ flex:none; font-size:.8rem; }
+.secenek input{ accent-color:var(--vurgu); width:18px; height:18px; flex:none; }
+.secenek:has(input:checked), .secenek[aria-pressed="true"]{ box-shadow:inset 0 0 0 3px var(--vurgu); }
+/* doğru/yanlış renkle değil çizgi ve yazıyla ayrılır */
+.secenek--dogru{ box-shadow:inset 0 0 0 3px var(--altin) !important; } .secenek--yanlis{ box-shadow:none !important; outline:2px dashed var(--cizgi-guclu); outline-offset:-2px; }
+.soru__yazi{ font:inherit; color:inherit; background:var(--bg); border:0; box-shadow:inset 0 0 0 2px var(--cizgi); padding:10px; resize:vertical; width:100%; }
+.soru__sonuc:empty{ display:none; } .soru__sonuc ul{ margin:6px 0; padding-left:18px; } .soru__sonuc p{ margin:6px 0 0; }
+.kapi{ display:flex; flex-direction:column; gap:12px; }
+.kapisonuc{ padding:14px; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); } .kapisonuc--gecti{ box-shadow:inset 0 0 0 3px var(--altin); }

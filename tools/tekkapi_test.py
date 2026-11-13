@@ -250,7 +250,21 @@ def sina(eski, tek):
     print("\nBilinmeyen ve ayrılmış yollar")
     for yol in ("/yok-boyle", "/favicon.ico", "/api/yok", "/AYS/", "/HKM/config.example.json"):
         dene("%s → 404" % yol, iste(T, yol)[0] == 404, iste(T, yol)[0])
-    dene("/kabuk/ ayrıldı (404, JSON)", iste(T, "/kabuk/")[0] == 404 and b"Kabuk" in iste(T, "/kabuk/")[2])
+    k, b, gv = iste(T, "/kabuk/")
+    dene("/kabuk/ yeni kabuğu verir", k == 200 and "text/html" in b.get("Content-Type", "") and b"kabuk.js" in gv, k)
+    dene("/kabuk → 301 /kabuk/", iste_yonsuz(T, "/kabuk")[0] == 301)
+    for yol, tur in (("/kabuk/kabuk.js", "javascript"), ("/kabuk/kabuk.css", "text/css"), ("/motor/yol.js", "javascript"),
+                     ("/alan/felsefe/asama-1.json", "application/json"), ("/brand/ortak/piksel-yazi.css", "text/css"),
+                     ("/brand/life/favicon.png", "image/png")):
+        k, b, gv = iste(T, yol)
+        dene("%s 200 (%s)" % (yol, tur), k == 200 and tur in b.get("Content-Type", "") and len(gv) > 0, k)
+    for yol in ("/kabuk/kabuk.test.js", "/motor/yol.test.js", "/alan/SEMA.md", "/alan/denetle.py", "/kabuk/%2e%2e/sistem/tekkapi.py",
+                "/alan/..%2fHKM/config.example.json", "/brand/ortak/hesap.js", "/motor/", "/kabuk/yok.js"):
+        dene("%s kabuk yolundan çıkmaz (404)" % yol, iste(T, yol)[0] == 404, iste(T, yol)[0])
+    k, b, gv = iste(T, "/kabuk/kabuk.js", "HEAD")
+    dene("HEAD /kabuk/kabuk.js gövdesiz 200", k == 200 and gv == b"" and int(b.get("Content-Length", 0)) > 0, k)
+    dene("POST /kabuk/ 405", iste(T, "/kabuk/", "POST", b"")[0] == 405)
+
     dene("kökte HEAD dosya vermez", iste(T, "/sistem/tekkapi.py", "HEAD")[0] in (404, 405))
     dene("tek kapı --port'suz açılmaz (ETKIN kapalı)",
          subprocess.run([sys.executable, os.path.join(SISTEM, "tekkapi.py")], capture_output=True, timeout=60).returncode == 2)

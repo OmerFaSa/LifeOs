@@ -337,6 +337,11 @@ jobs:
         # Her satir ayri kosar, kalan her satir kendi ::error bildirimini yazar (is kaydi yetki ister).
         shell: bash tools/ci_satir.sh {0}
 
+      # SADELESME FAZ 2 (2026-11-13). Yeni kabuk tek kapidan sunulur; Felsefe pilotunun ilk unitesi gercek
+      # tarayicida yurunur (ders, alistirma, unite kapisi, kayit). Playwright yukaridaki adimda kuruldu.
+      - name: Kabuk gezisi (tek kapı + Felsefe pilotu, gerçek tarayıcı)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk gezisi" node tools/kabuk_gez.js
+
       - name: Ölü CSS aracının sınaması
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölü CSS aracının sınaması" python3 tools/olucss.py --sina
 

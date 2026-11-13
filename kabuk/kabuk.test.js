@@ -23,6 +23,26 @@ t('karar: selam adı ekler, adsızsa yalın, saat dilimleri', () => {
 });
 t('karar: hareket varsayılanı cihaza uyar', () => esit(A.tanim('lifeos.hareket').varsayilan, 'sistem'));
 
+// ---- Felsefe pilotu: sıradaki adım, gerçek içerik ve gerçek Yol motoruyla ----
+t('yol: sıradaki adım ders → kapı → sonraki ünite → aşama kapısı → bitti; okumak üniteyi geçirmez', () => {
+  const Yol = require('../motor/yol.js'), y = Yol.yukle(require('../alan/felsefe/asama-1.json'));
+  let k = Yol.bosKayit(), z = 1;
+  const adim = () => K.siradaki(Yol.durum(y, k));
+  const dogrular = sahip => Object.fromEntries(y.oge[sahip].kapi.sorular.map(q => [q.id, q.dogru]));
+  const iz = [];
+  for (const u of y.veri.uniteler) {
+    for (const d of u.dersler) { esit(adim(), { tur: 'ders', id: d.id, ad: d.ad }); iz.push(d.id); k = Yol.dersOku(y, k, d.id, z++); }
+    esit(adim(), { tur: 'kapi', id: u.id, ad: u.ad });
+    k = Yol.kapiDene(y, k, u.id, {}, z++).kayit;                       // boş deneme: kalır, adım değişmez
+    esit(adim(), { tur: 'kapi', id: u.id, ad: u.ad }, 'kalınca aynı kapı');
+    k = Yol.kapiDene(y, k, u.id, dogrular(u.id), z++).kayit;
+  }
+  esit(iz.length, 9);
+  esit(adim(), { tur: 'kapi', id: y.id, ad: y.veri.ad });
+  k = Yol.kapiDene(y, k, y.id, dogrular(y.id), z++).kayit;
+  esit(adim(), null);
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {

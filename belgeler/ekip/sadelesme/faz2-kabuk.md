@@ -115,7 +115,7 @@ Aynı koşuda işlev denetimi (sonuçlar):
 - Dört boyut/tema birleşiminde yatay taşma yok; konsolda hata yok.
 
 ## Testler
-`node kabuk/kabuk.test.js` → **27 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
+`node kabuk/kabuk.test.js` → **28 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
 eski bağlantılar, Felsefe pilot, halkadan ≤ 2 adım, komut çubuğundan 1 adım, bozuk kaydı yakalama), şema türetmeleri (zorunlu alanlar,
 varsayılan geçerli, doğrulama, bozuk değerde varsayılan, sıfırlama, eşitleme süzgeci, kök nitelikleri, çizimde kaçış ve radyo
 sayısı), sıralama (ç ğ ı İ ö ş ü katlama, aksansız arama, ad başı › kelime başı › açıklama, eşitlikte tür ve kısa ad, çok kelime).
@@ -140,5 +140,25 @@ Dokuz açık sorunun hepsi cevaplandı. Yedisi iskeletteki hâli onayladı, ikis
 - Karar 4: eski kullanıcıda kayıtlı değer varsa o geçerlidir; yalnız hiç seçmemiş olanlar «Cihaza uy» ile başlar.
 - İki karar testte (`karar: …`); ayarlar ekranının dört görüntüsü yeni varsayılanla yeniden çekildi.
 
-Atlananlar: ders ekranı, Not / Tekrar motorlarının ekranları, eski kabuğa bağlantı, sunucu üzerinden Felsefe içeriği denemesi
-(file:// fetch'i engellediği için denenemedi; kod yolu `Yol.yukle` + `Yol.durum`).
+## Felsefe pilotu bağlandı (2026-11-13)
+Kabuk artık tek kapıdan sunuluyor ve Felsefe'nin birinci aşaması baştan sona yürünebiliyor.
+
+- **Sunum:** `sistem/tekkapi.py` `/kabuk/` yolunu kapalı listeyle verir: `kabuk/` (.html .js .css), `motor/` (.js), `alan/` (.json) ve iki marka
+  dosyası. Test dosyası, `.py`, `.md`, üst klasör ve listede olmayan her şey 404. Tek kapı hâlâ `ETKIN = False`; yalnız deneme portunda açılır.
+- **Yol haritası sayfası** (`#/alan/felsefe`): üç ünite, dersleri, ünite kapıları ve aşama kapısı; kilitli olan kilitli görünür,
+  ilerleme satırı okunan ders ve geçilen kapıyı sayar. «Başla / Devam et» sıradaki adıma götürür (Bugün sayfasındaki düğme de).
+- **Ders ekranı** (`#/alan/felsefe/ders/<id>`): özet, metin, kaynak notu, kaynak listesi (doğrulanmamış olan öyle yazar), alıştırmalar.
+  Seçmeli alıştırma anında doğru/yanlış der ve varsa çözümü gösterir; açık uçlu cevap kaydedilir, puanlanmaz, ölçütler ve örnek cevap sonra görünür.
+  Onaysız ders «taslak» etiketiyle görünür. «Okudum, sıradaki» dersi okundu sayar.
+- **Kapı ekranı** (`#/alan/felsefe/kapi/<id>`): sorular tek formda, doğru cevap gösterilmez; sonuç «3/4 doğru, eşik %75, ölçüldü · sorular taslak»
+  biçiminde. Ünite yalnız kapısı geçilince biter; okumak ve alıştırma geçirmez (AGENTS §0.1). Aşama kapısı bütün ünite kapıları geçilince açılır.
+- **Kural hep motorda:** kilit, puan ve geçiş `motor/yol.js`'ten gelir; kabuk yalnız çizer. Sıradaki adım `Kabuk.siradaki` (saf, testte).
+- **Kayıt:** `localStorage` `lifeos.yol.felsefe.1`, yalnız bu tarayıcıda; cihazlar arası eşitlenmez. Tek depoya P6 göçünden sonra bağlanır.
+- **Eski bağlantılar:** sunucudan açılınca `/ays/`, `/esp/`, `/spi/`; dosyadan açılınca eski dosya yolu.
+- **Ölçüldü:** `node kabuk/kabuk.test.js` 28/28; `python tools/tekkapi_test.py` (kabuk yolları dahil); `node tools/kabuk_gez.js` 23/23
+  (gerçek Chromium, yalıtılmış veri: yanlış ve doğru cevap, üç ders, boş kapı denemesi kalır, dört doğruyla geçilir, yenilemeden sonra kayıt durur,
+  ikinci ünite açılır, telefonda yatay taşma yok, konsolda hata yok). Görüntüler: `felsefe-`, `ders-`, `kapi-masaustu-koyu.png`, `ders-telefon-acik.png`.
+- **Bağlanmadı:** geçilen içeriğin Tekrar motoruna aktarımı (içerik taslak olduğu için zaten aday çıkmaz), Not motoru ekranı, selamdaki ad
+  (kabuk `hesap.js`'i yüklemiyor), kaydın tek depoya yazılması.
+
+Atlananlar (ilk iskelette; ders ekranı ve sunucu denemesi yukarıdaki bölümde kapandı): Not / Tekrar motorlarının ekranları, eski kabuğa bağlantı.

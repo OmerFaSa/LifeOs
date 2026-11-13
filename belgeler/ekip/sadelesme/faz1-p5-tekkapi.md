@@ -29,7 +29,7 @@
 | `POST /api/hkm`, `/api/hkm/yeniden` (`X-LifeOS: guncelle`) | 4180 | aynı izin; HKM aynı süreçteyse açma/yeniden başlatma yok, `ok` | `Giris` |
 | `POST /api/merkez/ac`, `/api/uzak/merkez` | modül kapıları | kökte | modül `Sunucu.do_POST` |
 | `/api/hkm/<yol>` | 4200 `/api/<yol>` | aynı süreç; HKM yoksa 503 | `HKM/daemon.Handler` |
-| `/kabuk/…` | — | ayrıldı: 404 «Kabuk henüz bağlanmadı» | — (kabuk/ başka mühendiste) |
+| `/kabuk/…`, `/motor/*.js`, `/alan/**/*.json` | — | yeni kabuk, kapalı liste (2026-11-13; ayrıntı `faz2-kabuk.md`) | `kabuk_dosyasi` + `_kabuk_sun` |
 | başka her yol | 4180'de giriş sayfası | 404 | — |
 
 ## Dokunulan mevcut dosyalar

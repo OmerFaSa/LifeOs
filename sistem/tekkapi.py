@@ -10,7 +10,7 @@
      /api/...          4180'in butun API'leri (hesap, ayar, ice, muzik, zemin, planlama,
                        gun/cumle, guncelle, durum) + modul kapisinin merkez/ac, uzak/merkez
      /api/hkm/<yol>    HKM cekirdegi AYNI SURECTE (HKM/daemon.Handler, /api/<yol> olarak)
-     /kabuk/           yeni kabuk icin ayrildi (kabuk/ baska bir muhendiste)
+     /kabuk/           yeni kabuk (Faz 2): kabuk/ + onun istedigi motor/, alan/ icerigi; kapali liste
 
    ISLEYICILER YENIDEN YAZILMADI: her istek mevcut isleyici sinifina devredilir
    (_devret: ayni soket, ayni basliklar, yol degistirilmis). Davranis eskisiyle ayni.
@@ -25,6 +25,7 @@ import argparse
 import os
 import sys
 import threading
+import urllib.parse
 from functools import partial
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
@@ -54,6 +55,29 @@ KOK_ONEKLER = ("/api/hesap/", "/api/ayar", "/api/ice", "/api/muzik", "/api/zemin
                "/gun/ortak/", "/logo/", "/marka/")
 _ISTEK = ("rfile", "wfile", "connection", "request", "client_address", "server", "headers", "command",
           "path", "request_version", "requestline", "raw_requestline", "close_connection")
+
+# Yeni kabuk: klasor -> izinli uzantilar. index.html kardeslerini ../ ile ister (/motor/, /alan/, iki marka
+# dosyasi). Kapali liste: test dosyasi, .py, .md ve ust klasor verilmez.
+KABUK_KOKLER = {"kabuk": (".html", ".js", ".css"), "motor": (".js",), "alan": (".json",)}
+KABUK_TEK = ("/brand/ortak/piksel-yazi.css", "/brand/life/favicon.png")
+_TUR = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
+        ".json": "application/json; charset=utf-8", ".png": "image/png"}
+
+
+def kabuk_dosyasi(yol):
+    """Istek yolu -> diskteki dosya ya da None (yukaridaki kapali liste)."""
+    yol = urllib.parse.unquote(yol)
+    if yol == "/kabuk/":
+        yol = "/kabuk/index.html"
+    parca = yol.split("/")[1:]
+    if any(p in ("", ".", "..") or "\\" in p or ":" in p for p in parca):
+        return None
+    if yol not in KABUK_TEK and (len(parca) < 2 or parca[0] not in KABUK_KOKLER
+                                 or not yol.endswith(KABUK_KOKLER[parca[0]]) or ".test." in parca[-1]):
+        return None
+    tam = os.path.join(KOK, *parca)
+    return tam if os.path.isfile(tam) else None
+
 
 HKM = {"srv": None, "jeton": "", "sinif": None}     # ayni surecte HKM cekirdegi (hkm_kur)
 
@@ -147,12 +171,28 @@ class TekKapi(Giris):
         if not ETKIN and yol in ("/api/guncelle", "/api/yeniden"):
             # Deneme kapisi calisan sistemi guncellemez, yeniden baslatmaz (o is eski 4180'in).
             return self._json(403, {"durum": "engel", "mesaj": "Deneme kapısında kapalı."}) or True
-        if yol == "/kabuk" or yol.startswith("/kabuk/"):
-            return self._json(404, {"ok": False, "mesaj": "Kabuk henüz bağlanmadı."}) or True   # ayrildi: kabuk/
+        if yol == "/kabuk":
+            return self._yonlendir("/kabuk/") or True
+        if yol in KABUK_TEK or yol.split("/")[1] in KABUK_KOKLER:
+            return self._kabuk_sun(kabuk_dosyasi(yol)) or True
         if yol in KOK_SAYFALAR or yol in KOK_DOSYALAR or yol.startswith(KOK_ONEKLER) or yol == "/api/gun/cumle" \
                 or yol in ("/api/guncelle", "/api/yeniden"):
             return False
         return self.send_error(404) or True
+
+    def _kabuk_sun(self, tam):
+        if not tam or self.command not in ("GET", "HEAD"):
+            return self.send_error(404 if not tam else 405)
+        with open(tam, "rb") as f:
+            govde = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", _TUR[os.path.splitext(tam)[1]])
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        if self.command == "GET":
+            self.wfile.write(govde)
 
     def _dist_sahibi(self):
         """/dist-betik.js?v=X: surum hangi modulun dist'iyse onun isleyicisi (ucunun adresi ayni)."""
