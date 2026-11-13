@@ -1,0 +1,1171 @@
+{
+  "sema": 1,
+  "alan": "beslenme",
+  "id": "beslenme.1",
+  "sira": 1,
+  "ad": "Temeller: besinler ve dengeli tabak",
+  "hedef": "Besinlerin ne verdiğini, besin gruplarını ve dengeli bir tabağın nasıl kurulduğunu öğrenip market ve sofrada bilinçli seçim yapabilmek.",
+  "onKosul": [],
+  "kanitIsi": "Sıradan bir gününün üç öğününü yaz; her öğünü tabak modeline göre değerlendir (yarısı sebze-meyve mi, tahıl ve protein dörtte birer mi), bir paketli ürünün etiketini oku ve her öğün için tek bir küçük değişiklik öner. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    {
+      "id": "k1",
+      "ad": "SPİ Öğren: Sağlıklı beslenmenin temelleri (makro besinler, tabak modeli, lif-tuz-şeker, su)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "beslenme-temel",
+      "satir": "128-143",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k2",
+      "ad": "SPİ Öğren: Kalori ve enerji dengesi",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "kalori",
+      "satir": "145-163",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k3",
+      "ad": "Türk mutfağı ve temel besinler: Atwater enerji katsayıları",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/turk_mutfagi_ve_temel_besinler_kalori_makro.md",
+      "bolum": "Seviye ve Kullanılabilirlik Filtresi",
+      "satir": "3-4",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k4",
+      "ad": "Türk mutfağı ve temel besinler: bazal metabolizma, günlük harcama ve besinlerin termik etkisi",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/turk_mutfagi_ve_temel_besinler_kalori_makro.md",
+      "bolum": "1.1 BMH ve Enerji Harcaması, 1.2 TEF",
+      "satir": "13-29",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k5",
+      "ad": "Sebze ve meyvelerde renk spektrumu: kırmızı (likopen) ve turuncu-sarı (turunçgil lifi)",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/sebzeler_meyveler_renk_fitokimyasallari_mevsimsel_takvim_ve_biyoyararlanim_atlasi.md",
+      "bolum": "1. Altı Renk Spektrumunda 50 Temel Sebze ve Meyve",
+      "satir": "20-40",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k6",
+      "ad": "Sebze ve meyvelerde renk spektrumu: yeşil, mor ve beyaz gruplar",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/sebzeler_meyveler_renk_fitokimyasallari_mevsimsel_takvim_ve_biyoyararlanim_atlasi.md",
+      "bolum": "1.3, 1.4, 1.5",
+      "satir": "54-91",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k7",
+      "ad": "Türkiye 12 ay doğal tarla mevsim takvimi",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/sebzeler_meyveler_renk_fitokimyasallari_mevsimsel_takvim_ve_biyoyararlanim_atlasi.md",
+      "bolum": "2. Türkiye 12 Ay Doğal Tarla Mevsimsellik Takvimi",
+      "satir": "115-131",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k8",
+      "ad": "Sınırlayıcı amino asit ve tamamlayıcı protein ilkesi",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/bitkisel_bazli_beslenme_vegan_vejetaryen_aminoasit_tamamlama_ve_mikro_eksiklik_matrisi.md",
+      "bolum": "1. Sınırlayıcı Amino Asit ve Tamamlayıcı Protein Prensibi",
+      "satir": "9-16",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k9",
+      "ad": "Geleneksel tamamlayıcı protein örnekleri (fasulye-pilav, mercimek-ekmek, humus, mücendra)",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/bitkisel_bazli_beslenme_vegan_vejetaryen_aminoasit_tamamlama_ve_mikro_eksiklik_matrisi.md",
+      "bolum": "2. 20 Geleneksel ve Modern Tamamlayıcı Protein Kombinasyonu",
+      "satir": "21-27",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k10",
+      "ad": "Tokluk indeksi: haşlanmış patates ve kruvasan karşılaştırması",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/tokluk_indeksi_satiety_index_hacimsel_beslenme_ve_duygusal_yeme_norobiyolojisi.md",
+      "bolum": "1. Holt Tokluk İndeksi",
+      "satir": "19-26",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k11",
+      "ad": "Volumetrik beslenme ve dört kalori yoğunluğu kategorisi",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/tokluk_indeksi_satiety_index_hacimsel_beslenme_ve_duygusal_yeme_norobiyolojisi.md",
+      "bolum": "2. Volumetrik Beslenme, 2.1 Dört Kalori Yoğunluğu Kategorisi",
+      "satir": "73-85",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k12",
+      "ad": "Fizyolojik ve duygusal açlık ayrımı",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/tokluk_indeksi_satiety_index_hacimsel_beslenme_ve_duygusal_yeme_norobiyolojisi.md",
+      "bolum": "3. Homeostatik vs Hedonik Açlık",
+      "satir": "93-104",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k13",
+      "ad": "NOVA gıda işleme sınıflandırması (Grup 1-4)",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/etiket_okuryazarligi_nova_ultra_islenmis_gidalar_ve_katki_maddeleri.md",
+      "bolum": "1. NOVA Gıda İşleme Sınıflandırması",
+      "satir": "12-31",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k14",
+      "ad": "Hall ve ark. (NIH, 2019) ultra-işlenmiş gıda çalışması",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/etiket_okuryazarligi_nova_ultra_islenmis_gidalar_ve_katki_maddeleri.md",
+      "bolum": "2. Kevin Hall (NIH) Klinik Çalışması",
+      "satir": "35-45",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k15",
+      "ad": "İçindekiler etiketi: şekerin farklı adları ve hidrojenize yağ",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/etiket_okuryazarligi_nova_ultra_islenmis_gidalar_ve_katki_maddeleri.md",
+      "bolum": "3.1 Gizli Şekerler, 3.2 Hidrojenize ve Trans Yağ",
+      "satir": "50-99",
+      "dogrulama": "dogrulanmamis"
+    }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {
+        "id": "beslenme.1.k1",
+        "tur": "secmeli",
+        "soru": "Bir öğünde 50 g karbonhidrat, 25 g protein ve 10 g yağ var. Yaklaşık enerjisi kaçtır?",
+        "sec": [
+          "390 kcal",
+          "300 kcal",
+          "85 kcal",
+          "765 kcal"
+        ],
+        "dogru": "A",
+        "cozum": [
+          "50 × 4 = 200, 25 × 4 = 100, 10 × 9 = 90; toplam 390 kcal."
+        ],
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k1",
+          "k2"
+        ]
+      },
+      {
+        "id": "beslenme.1.k2",
+        "tur": "secmeli",
+        "soru": "Mercimek çorbası, tam buğday ekmeği ve büyük bir salatadan oluşan öğün için hangisi doğrudur?",
+        "sec": [
+          "Tabak modelinin üç bölümü de karşılanır ve tahıl-baklagil eşleşmesi kurulur",
+          "Protein yoktur",
+          "Sebze yoktur",
+          "Yalnız yağdan oluşur"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k1",
+          "k9"
+        ]
+      },
+      {
+        "id": "beslenme.1.k3",
+        "tur": "secmeli",
+        "soru": "Aynı kaloride hangisi kaynağa göre daha tok tutar ve daha az işlenmiştir?",
+        "sec": [
+          "Haşlanmış patates",
+          "Kruvasan",
+          "Paketli kek",
+          "Cips"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k10",
+          "k13"
+        ]
+      },
+      {
+        "id": "beslenme.1.k4",
+        "tur": "secmeli",
+        "soru": "«Şeker ilavesiz» yazan bir meyveli barın içindekilerinde «elma suyu konsantresi» var. En doğru yorum hangisi?",
+        "sec": [
+          "Ürüne şeker kaynağı eklenmiştir; etiket ön yüzü tek başına yeterli değildir",
+          "Ürün hiç şeker içermez",
+          "Ürün protein kaynağıdır",
+          "Ürün Grup 1 gıdadır"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k15"
+        ]
+      },
+      {
+        "id": "beslenme.1.k5",
+        "tur": "secmeli",
+        "soru": "Haftalık beslenmeyi değerlendirirken en doğru yaklaşım hangisi?",
+        "sec": [
+          "Tek bir mucize besine yönelmek",
+          "Haftanın toplamında besin gruplarının, renklerin ve işlenmemiş gıdaların dengesine bakmak",
+          "Bir besin grubunu tamamen yasaklamak",
+          "Yalnız tek günün tartısına bakmak"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k1",
+          "k2",
+          "k5"
+        ]
+      }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "beslenme.1.1",
+      "ad": "Besinler ne verir?",
+      "onKosul": [],
+      "kazanim": [
+        "Üç makro besinin görevini ve gram başına enerjisini bilir.",
+        "Bir öğünün enerjisini makro besinlerden kabaca hesaplar.",
+        "Enerji dengesinin iki yanını (alınan, harcanan) ayırt eder."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "beslenme.1.1.k1",
+            "tur": "secmeli",
+            "soru": "Kas ve doku onarımında ana görevi olan makro besin hangisidir?",
+            "sec": [
+              "Karbonhidrat",
+              "Protein",
+              "Yağ",
+              "Su"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1"
+            ]
+          },
+          {
+            "id": "beslenme.1.1.k2",
+            "tur": "secmeli",
+            "soru": "20 g karbonhidrat ve 10 g protein içeren bir atıştırmalık (yağsız) yaklaşık kaç kcal'dir?",
+            "sec": [
+              "30 kcal",
+              "120 kcal",
+              "150 kcal",
+              "270 kcal"
+            ],
+            "dogru": "B",
+            "cozum": [
+              "20 × 4 = 80, 10 × 4 = 40; toplam 120 kcal."
+            ],
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1",
+              "k2"
+            ]
+          },
+          {
+            "id": "beslenme.1.1.k3",
+            "tur": "secmeli",
+            "soru": "Harcanandan daha az enerji alınırsa ne olur?",
+            "sec": [
+              "Enerji fazlası oluşur, vücut depolar",
+              "Enerji açığı oluşur, vücut depolarını kullanır",
+              "Hiçbir şey değişmez",
+              "Bazal metabolizma sıfırlanır"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k2"
+            ]
+          },
+          {
+            "id": "beslenme.1.1.k4",
+            "tur": "secmeli",
+            "soru": "Bazal metabolizma denklemleriyle bulunan sayı için hangisi doğrudur?",
+            "sec": [
+              "Kişinin kesin harcamasıdır",
+              "Bir ortalamaya dayanan tahmindir",
+              "Yalnız sporcular için geçerlidir",
+              "Kiloyla ilgisi yoktur"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k2"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "beslenme.1.1.1",
+          "ad": "Üç makro besin",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k3"
+          ],
+          "ozet": "Enerji veren üç ana besin öğesi karbonhidrat, protein ve yağdır; her birinin ayrı bir görevi vardır ve biri tamamen dışlanınca denge bozulur.",
+          "metin": [
+            "Besinlerde enerji veren üç ana öğe vardır: karbonhidrat, protein ve yağ. Bunlara makro besin denir, çünkü günde gramlarca alınırlar.",
+            "Karbonhidrat beynin ve kasların hızlı yakıtıdır; tam tahıl, baklagil, meyve ve sebzede bulunur. Protein kas, bağışıklık ve onarım için gereklidir; et, balık, yumurta, süt ürünleri ve baklagilden gelir. Yağ hormonlar ve yağda çözünen vitaminler için gereklidir; zeytinyağı, kuruyemiş ve balıkta bulunur.",
+            "Kaynaklar gram başına enerjiyi şöyle verir: karbonhidrat ve protein 4 kcal, yağ 9 kcal. Yani yağ gram başına iki kattan fazla enerji taşır. Gemini kaynağı ayrıca diyet lifini 2 kcal/g sayar; bu yüzden lifli besinlerde lif, karbonhidratın geri kalanından ayrı hesaplanabilir.",
+            "Alkol de enerji verir (7 kcal/g) ama besin değeri yoktur; bu yüzden makro besinlerden sayılmaz."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.1.1.a1",
+              "tur": "secmeli",
+              "soru": "Hangisi gram başına en çok enerji veren makro besindir?",
+              "sec": [
+                "Karbonhidrat",
+                "Protein",
+                "Yağ"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "Yağ 9 kcal/g; karbonhidrat ve protein 4 kcal/g."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "beslenme.1.1.1.a2",
+              "tur": "secmeli",
+              "soru": "Mercimek hangi makro besinlerin kaynağı olarak anılır?",
+              "sec": [
+                "Yalnız yağ",
+                "Karbonhidrat ve protein",
+                "Yalnız alkol",
+                "Hiçbiri"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "Baklagil hem karbonhidrat hem protein kaynakları arasında sayılır."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "beslenme.1.1.1.a3",
+              "tur": "acik",
+              "soru": "Dünkü öğünlerinden birini düşün: içindeki her yiyeceği karbonhidrat, protein ya da yağ kaynağı olarak sınıflandır.",
+              "dogru": "Örnek: menemen (yumurta = protein ve yağ, domates-biber = karbonhidrat, zeytinyağı = yağ) ve ekmek (karbonhidrat).",
+              "olcut": [
+                "En az üç yiyecek sınıflandırıldı",
+                "Birden çok makro taşıyan yiyecek fark edildi"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beslenme.1.1.2",
+          "ad": "Kalori: bir öğünün enerjisi",
+          "onKosul": [
+            "beslenme.1.1.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k2",
+            "k3"
+          ],
+          "ozet": "Etiketteki «kalori» aslında kilokaloridir; bir besinin enerjisi içindeki karbonhidrat, protein ve yağ gramından hesaplanır.",
+          "metin": [
+            "Besin etiketlerinde «kalori» diye yazan sayı aslında kilokaloridir (kcal). Bir besinin enerjisi, içindeki makro besinlerin gramı ile gram başına enerjilerinin çarpılıp toplanmasıyla bulunur.",
+            "Örnek: 30 g karbonhidrat, 20 g protein ve 10 g yağ içeren bir öğün. Karbonhidrat 30 × 4 = 120 kcal, protein 20 × 4 = 80 kcal, yağ 10 × 9 = 90 kcal; toplam yaklaşık 290 kcal.",
+            "Bu hesap bir kavram aracıdır: kişiye kaç kalori yemesi gerektiğini söylemez. Kişisel hedefler ileri aşamaların ve SPİ'nin kendi hesaplarının işidir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.1.2.a1",
+              "tur": "secmeli",
+              "soru": "40 g karbonhidrat, 10 g protein ve 5 g yağ içeren bir öğün kaç kcal'dir?",
+              "sec": [
+                "205 kcal",
+                "245 kcal",
+                "220 kcal",
+                "55 kcal"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "40 × 4 = 160",
+                "10 × 4 = 40",
+                "5 × 9 = 45",
+                "160 + 40 + 45 = 245 kcal."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k2"
+              ]
+            },
+            {
+              "id": "beslenme.1.1.2.a2",
+              "tur": "secmeli",
+              "soru": "Bir yemek kaşığı (10 g) saf yağ yaklaşık kaç kcal'dir?",
+              "sec": [
+                "10 kcal",
+                "40 kcal",
+                "90 kcal",
+                "900 kcal"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "10 × 9 = 90 kcal."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beslenme.1.1.3",
+          "ad": "Harcama ve enerji dengesi",
+          "onKosul": [
+            "beslenme.1.1.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k2",
+            "k4"
+          ],
+          "ozet": "Vücut dinlenirken de enerji harcar (bazal metabolizma); üzerine hareket, egzersiz ve sindirim eklenince günlük toplam harcama çıkar. Alınan ve harcanan arasındaki fark enerji dengesidir.",
+          "metin": [
+            "Vücudun dinlenirken yaşamak için harcadığı enerjiye bazal metabolizma denir; günlük harcamanın en büyük kısmıdır. Üzerine günlük hareket, egzersiz ve sindirim eklenince günlük toplam harcama çıkar.",
+            "Sindirim de enerji ister: kaynak buna besinlerin termik etkisi der ve proteinin sindiriminin karbonhidrat ve yağdan daha çok enerji harcattığını yazar.",
+            "Harcanandan az enerji alınırsa enerji açığı oluşur ve vücut depolarını kullanır; fazlası alınırsa depolar. Bazal metabolizmayı tahmin eden denklemler (ör. Mifflin–St Jeor) bir ortalama verir; aynı boy ve kilodaki iki kişinin gerçek harcaması yüzlerce kcal farklı olabilir. Bu yüzden bu hesaplar pusuladır, kesin takvim değildir.",
+            "Tartı gün içinde su, tuz ve sindirimle oynar; tek bir güne değil haftalık ortalamaya bakmak daha doğrudur."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.1.3.a1",
+              "tur": "secmeli",
+              "soru": "Aşağıdakilerden hangisi günlük toplam harcamanın parçası değildir?",
+              "sec": [
+                "Bazal metabolizma",
+                "Egzersiz",
+                "Sindirim",
+                "Etiketteki kalori"
+              ],
+              "dogru": "D",
+              "cozum": [
+                "Etiketteki kalori alınan enerjidir, harcama değil."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k2"
+              ]
+            },
+            {
+              "id": "beslenme.1.1.3.a2",
+              "tur": "secmeli",
+              "soru": "Bir gün tartı bir önceki güne göre 1 kg yüksek çıktı. En doğru yorum hangisi?",
+              "sec": [
+                "Bir günde 1 kg yağ alınmıştır",
+                "Su, tuz ve sindirim etkisi olabilir; haftalık ortalamaya bakılır",
+                "Bazal metabolizma durmuştur",
+                "Tartı kesin bozuktur"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beslenme.1.2",
+      "ad": "Tabağı kurmak",
+      "onKosul": [
+        "beslenme.1.1"
+      ],
+      "kazanim": [
+        "Bir öğündeki yiyecekleri besin gruplarına ayırır.",
+        "Tabak modeliyle bir öğünü değerlendirir ve düzeltir.",
+        "Sebze-meyvede renk ve mevsim çeşitliliğini gözetir.",
+        "Bitkisel öğünde tahıl ile baklagili eşleştirir."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "beslenme.1.2.k1",
+            "tur": "secmeli",
+            "soru": "Tabak modelinde tabağın yarısını hangi grup kaplar?",
+            "sec": [
+              "Tam tahıl",
+              "Protein",
+              "Sebze ve meyve",
+              "Yağ"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1"
+            ]
+          },
+          {
+            "id": "beslenme.1.2.k2",
+            "tur": "secmeli",
+            "soru": "Tabağın yarısı bulgur pilavı, kalanı tavuk; sebze yok. Tabak modeline göre ilk düzeltme hangisi?",
+            "sec": [
+              "Tavuğu çıkarmak",
+              "Pilavı dörtte bire indirip yarıya sebze eklemek",
+              "Pilavı ikiye katlamak",
+              "Yanına meyve suyu eklemek"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1"
+            ]
+          },
+          {
+            "id": "beslenme.1.2.k3",
+            "tur": "secmeli",
+            "soru": "Tahılların kaynağa göre düşük olduğu amino asit hangisidir?",
+            "sec": [
+              "Metiyonin",
+              "Lizin",
+              "Sistein",
+              "Hiçbiri"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k8"
+            ]
+          },
+          {
+            "id": "beslenme.1.2.k4",
+            "tur": "secmeli",
+            "soru": "Haftalık sebze-meyve seçiminde renk çeşitliliği neden gözetilir?",
+            "sec": [
+              "Renkler farklı bitki bileşiklerinin işaretidir",
+              "Renkli olanların kalorisi sıfırdır",
+              "Yalnız görünüş içindir",
+              "Tek renk tüm ihtiyacı karşılar"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k5",
+              "k6"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "beslenme.1.2.1",
+          "ad": "Besin grupları",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k13"
+          ],
+          "ozet": "Sofradaki yiyecekler birkaç gruba ayrılır: sebze ve meyve, tahıllar, protein kaynakları ve sağlıklı yağlar. Dengeli beslenme bu grupların haftanın toplamında yer almasıdır.",
+          "metin": [
+            "Sağlıklı beslenme tek bir mucize besin ya da yasaklı bir liste değil, haftanın toplamındaki dengedir. Bu dengeyi kurmanın ilk adımı yiyecekleri gruplara ayırmaktır.",
+            "Sebze ve meyve: tabağın en büyük kısmı; lif ve bitki bileşiklerinin kaynağıdır. Tahıllar: bulgur, pirinç, yulaf, ekmek gibi; tam tahıllı olanı tercih edilir. Protein kaynakları: et, tavuk, balık, yumurta, süt ürünleri ve kuru baklagiller (mercimek, nohut, fasulye). Sağlıklı yağlar: zeytinyağı, kuruyemiş, yağlı balık.",
+            "Kaynak ayrıca yiyecekleri işlenme derecesine göre de ayırır. En az işlenmiş grubun örnekleri (taze sebze-meyve, et, tavuk, balık, yumurta, süt, sade yoğurt, kuru baklagil, pirinç, yulaf, çiğ kuruyemiş) aynı zamanda besin gruplarının temel taşlarıdır. İşlenme konusu 3. ünitede ayrıca işlenir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.2.1.a1",
+              "tur": "secmeli",
+              "soru": "Nohut hangi gruptadır?",
+              "sec": [
+                "Yalnız tahıl",
+                "Protein kaynakları (baklagil)",
+                "Sağlıklı yağ",
+                "Hiçbir grupta değil"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "beslenme.1.2.1.a2",
+              "tur": "secmeli",
+              "soru": "Hangisi tahıl grubundan tam tahıllı bir seçimdir?",
+              "sec": [
+                "Yulaf",
+                "Ceviz",
+                "Yoğurt",
+                "Zeytinyağı"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k13"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beslenme.1.2.2",
+          "ad": "Tabak modeli",
+          "onKosul": [
+            "beslenme.1.2.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1"
+          ],
+          "ozet": "Ölçmeden pratik bir denge için tabak gözle bölünür: yarısı sebze ve meyve, dörtte biri tam tahıl, dörtte biri protein; yanında su ve az miktarda sağlıklı yağ.",
+          "metin": [
+            "Her öğünü tartmak gerekmez. Tabak modeli, gözle uygulanan bir denge kuralıdır: tabağın yarısı sebze ve meyve, dörtte biri tam tahıl, dörtte biri protein. Yanına su ve az miktarda sağlıklı yağ eklenir.",
+            "Örnek: büyük bir tabak makarna ve yanında biraz salata. Makarna tabağın dörtte birine iner ve tam tahıllı olabilir; salata ve sebze yarıya çıkar; kalan dörtte birlik yere tavuk, balık, yumurta ya da nohut gibi bir protein eklenir.",
+            "Su: ihtiyacın bir kısmı yiyeceklerden gelir. Kaynak, Avrupa Gıda Güvenliği Otoritesi'nin toplam su için kadınlarda yaklaşık 2,0 L, erkeklerde 2,5 L referansını aktarır; sıcakta ve terlerken ihtiyaç artar. İdrarın açık renkte olması pratik bir işarettir.",
+            "Tabak modeli bir başlangıç aracıdır; porsiyon ölçmek, öğünü hedefe göre ayarlamak sonraki aşamaların konusudur."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.2.2.a1",
+              "tur": "secmeli",
+              "soru": "Tabak modelinde tam tahılın payı nedir?",
+              "sec": [
+                "Yarısı",
+                "Dörtte biri",
+                "Tamamı",
+                "Hiç"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "beslenme.1.2.2.a2",
+              "tur": "secmeli",
+              "soru": "Akşam yemeğinde yalnız kuru fasulye ve pilav var. Tabak modeline göre en çok eksik olan nedir?",
+              "sec": [
+                "Protein",
+                "Tahıl",
+                "Sebze ve meyve",
+                "Yağ"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "Fasulye protein, pilav tahıl payını karşılar; yarıyı dolduracak sebze-meyve (salata, sebze yemeği, meyve) eksiktir."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "beslenme.1.2.2.a3",
+              "tur": "acik",
+              "soru": "Bugünkü öğle yemeğini tabak modeline göre çiz: hangi yarı ve çeyrekler neyle dolu? Tek bir değişiklik öner.",
+              "dogru": "Örnek: tabağın yarısı pilav, yarısı köfte; sebze yok. Değişiklik: pilavı yarıya indirip yanına büyük bir çoban salatası eklemek.",
+              "olcut": [
+                "Üç bölüm (sebze-meyve, tahıl, protein) ayrı ayrı değerlendirildi",
+                "Öneri tek ve uygulanabilir"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beslenme.1.2.3",
+          "ad": "Renk ve mevsim",
+          "onKosul": [
+            "beslenme.1.2.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k5",
+            "k6",
+            "k7"
+          ],
+          "ozet": "Tabağın sebze-meyve yarısında çeşitlilik önemlidir: farklı renkler farklı bitki bileşiklerini taşır; mevsiminde ürün seçmek çeşitliliği kendiliğinden artırır.",
+          "metin": [
+            "Kaynak sebze ve meyveleri renk gruplarına ayırır: kırmızı (domates gibi, likopen), turuncu-sarı (havuç, turunçgiller, karotenoidler), yeşil ve turpgiller (brokoli, lahana), mor-mavi-siyah (patlıcan kabuğu, böğürtlen, antosiyaninler), beyaz ve kükürtlü (sarımsak, soğan). Her grup ayrı bileşikler taşıdığı için haftaya birkaç renk yaymak tek renge bağlı kalmaktan iyidir.",
+            "Hazırlama da önemlidir. Kaynak, domatesin zeytinyağıyla pişirildiğinde (salça, menemen, sos) likopenin daha kolay emildiğini yazar. Turunçgillerde lifli beyaz zar ve dilim zarları meyvenin lifini taşır; bu yüzden meyvenin bütün yenmesi, sıkma suyuna tercih edilir.",
+            "Mevsim takvimi çeşitliliğin pratik yoludur: örneğin kışın pırasa, ıspanak, lahana, portakal ve mandalina; yazın domates, biber, patlıcan, kiraz ve karpuz. Takvimi izleyen biri yıl içinde kendiliğinden birçok renge uğrar."
+          ],
+          "not": "Kaynakta «meyve suyu sadece fruktoz ve sitrik asit içerir» (satır 40) yanlış bir genellemedir ve sağlık iddiaları («antikanserojen», «vasküler geçirgenliği onarır», emilimin «3-4 katına» çıkması) doğrulanamadı; derse alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.2.3.a1",
+              "tur": "secmeli",
+              "soru": "Domatesteki likopenin daha kolay emilmesi için kaynak hangi hazırlamayı önerir?",
+              "sec": [
+                "Zeytinyağıyla pişirmek",
+                "Dondurup çiğ yemek",
+                "Suyunu sıkıp atmak",
+                "Kurutup toz etmek"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k5"
+              ]
+            },
+            {
+              "id": "beslenme.1.2.3.a2",
+              "tur": "secmeli",
+              "soru": "Kaynağın takvimine göre Kasım'da hangisi mevsimindedir?",
+              "sec": [
+                "Karpuz",
+                "Kiraz",
+                "Mandalina",
+                "Çilek"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k7"
+              ]
+            },
+            {
+              "id": "beslenme.1.2.3.a3",
+              "tur": "acik",
+              "soru": "Geçen haftanın sebze ve meyvelerini renk gruplarına yaz. Hangi renk hiç yoktu, mevsiminden hangi ürünle tamamlarsın?",
+              "dogru": "Örnek: kırmızı (domates), yeşil (ıspanak), turuncu (portakal) var; mor yok. Mor lahana salatası eklenebilir.",
+              "olcut": [
+                "En az üç renk grubu yazıldı",
+                "Eksik renk için mevsiminde bir ürün seçildi"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k5",
+                "k6",
+                "k7"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beslenme.1.2.4",
+          "ad": "Bitkisel protein: tahıl ile baklagil",
+          "onKosul": [
+            "beslenme.1.2.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k8",
+            "k9"
+          ],
+          "ozet": "Bitkisel proteinler eksik değildir ama amino asit oranları farklıdır; tahıl ile baklagil aynı öğünde ya da gün içinde birlikte yenince birbirini tamamlar.",
+          "metin": [
+            "Kaynağa göre bitkisel proteinler sanıldığı gibi «eksik» değildir; yalnız bazı amino asitlerin oranı hayvansal proteinlerden düşüktür.",
+            "Tahıllar (buğday, pirinç, bulgur, mısır, yulaf) lizin bakımından fakir, metiyonin bakımından zengindir. Baklagiller (mercimek, nohut, kuru fasulye) tam tersine metiyonin bakımından fakir, lizin bakımından zengindir. İkisi aynı öğünde ya da gün içinde yenince birbirinin eksiğini tamamlar.",
+            "Türk mutfağı bunu zaten yapar: kuru fasulye ile pilav, mercimek çorbası ile tam buğday ekmeği, nohut ile tahinden yapılan humus, yeşil mercimek ile bulgurdan mücendra. Bitkisel bir öğünde tabağın protein çeyreğini baklagil, tahıl çeyreğini tahıl doldurursa eşleşme kendiliğinden kurulur."
+          ],
+          "not": "Kaynağın aynı bölümündeki «anabolik lösin eşiği» ve öğün başına gram hedefleri (satır 18-19, tablodaki eşik sütunu) ileri ve kişiye özgü hedeflerdir; bu aşamaya alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.2.4.a1",
+              "tur": "secmeli",
+              "soru": "Baklagillerin kaynağa göre zengin olduğu amino asit hangisidir?",
+              "sec": [
+                "Lizin",
+                "Metiyonin",
+                "Hiçbiri",
+                "Yalnız sistein"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k8"
+              ]
+            },
+            {
+              "id": "beslenme.1.2.4.a2",
+              "tur": "secmeli",
+              "soru": "Hangisi tahıl ile baklagili birleştiren geleneksel bir eşleşmedir?",
+              "sec": [
+                "Kuru fasulye ve pilav",
+                "Çay ve şeker",
+                "Zeytin ve peynir",
+                "Meyve ve yoğurt"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k9"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beslenme.1.3",
+      "ad": "Bilinçli seçim",
+      "onKosul": [
+        "beslenme.1.2"
+      ],
+      "kazanim": [
+        "Tokluk ile enerji yoğunluğu arasındaki ilişkiyi açıklar.",
+        "Bir ürünü işlenme derecesine göre sınıflandırır.",
+        "İçindekiler listesinde şekerin farklı adlarını ve hidrojenize yağı tanır.",
+        "Tuz, eklenmiş şeker ve lif için genel önerileri bilir."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "beslenme.1.3.k1",
+            "tur": "secmeli",
+            "soru": "Aynı enerjiyi veren haşlanmış patates ve kruvasandan hangisi kaynakta daha tok tutar?",
+            "sec": [
+              "Kruvasan",
+              "Haşlanmış patates",
+              "İkisi eşit",
+              "Hiçbiri tok tutmaz"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k10"
+            ]
+          },
+          {
+            "id": "beslenme.1.3.k2",
+            "tur": "secmeli",
+            "soru": "Ambalajlı, emülgatör ve aroma verici içeren bir kek NOVA'da hangi gruptadır?",
+            "sec": [
+              "Grup 1",
+              "Grup 2",
+              "Grup 3",
+              "Grup 4"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k13"
+            ]
+          },
+          {
+            "id": "beslenme.1.3.k3",
+            "tur": "secmeli",
+            "soru": "İçindekiler listesinde «glikoz şurubu» görmek ne anlama gelir?",
+            "sec": [
+              "Ürüne şeker eklenmiştir",
+              "Ürün şekersizdir",
+              "Ürün yalnız lif içerir",
+              "Ürün tuzsuzdur"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k15"
+            ]
+          },
+          {
+            "id": "beslenme.1.3.k4",
+            "tur": "secmeli",
+            "soru": "Kaynağa göre günlük tuzun büyük kısmı nereden gelir?",
+            "sec": [
+              "Tuzluktan",
+              "Ekmek, peynir, hazır çorba, işlenmiş et ve atıştırmalıklardan",
+              "Sudan",
+              "Taze meyveden"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "beslenme.1.3.1",
+          "ad": "Tokluk ve enerji yoğunluğu",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k10",
+            "k11",
+            "k12"
+          ],
+          "ozet": "Bazı besinler aynı enerjiyle çok daha uzun tok tutar. Su, lif ve protein oranı yüksek, enerji yoğunluğu düşük besinler mideyi daha çok doldurur.",
+          "metin": [
+            "Kaynak, Holt ve arkadaşlarının (1995) tokluk indeksini aktarır: eşit enerjili (240 kcal) besinler yedirilmiş ve sonraki iki saatteki tokluk ölçülmüştür. Beyaz ekmek 100 sayıldığında haşlanmış patates en yüksek (323), kruvasan en düşük (47) çıkmıştır. Aynı enerji için çok daha fazla patates gerekir; patatesin suyu mideyi doldurur.",
+            "Bunun arkasındaki kavram enerji yoğunluğudur: bir gram besindeki kalori. Kaynak dört kategori verir: çok düşük (gram başına 0,6 kcal altı; çiğ sebze, yeşillik, sebze çorbası), düşük (0,6–1,5; haşlanmış patates, pişmiş baklagil, taze meyve, yulaf lapası, yağsız beyaz balık), orta (1,5–4; tam buğday ekmeği, peynir, kuru meyve), yüksek (4–9; kraker, cips, çikolata, kuruyemiş, yağlar).",
+            "Pratik sonuç: tabağın yarısının sebze-meyve olması yalnız vitamin için değil tokluk için de işe yarar. Mide hacmi doldurur, kaloriyi saymaz.",
+            "Açlığın iki yüzü vardır. Kaynak, yavaş gelen, midede hissedilen ve sade bir yemekle geçen fiziksel açlık ile aniden gelen, belirli bir yiyeceğe kilitlenen, doyunca da sürebilen duygusal açlığı ayırır. Hangisini yaşadığını fark etmek, seçimi bilinçli yapmanın ilk adımıdır."
+          ],
+          "not": "Kaynaktaki 38 gıdalık tablonun bazı satırları (tofu, haşlanmış tavuk göğsü, «soğutulmuş» patates gibi) özgün çalışmada olmayabilir, mercimek değeri farklı olabilir; tablonun tamamı derse alınmadı, yalnız patates-kruvasan uçları aktarıldı. «Reaktif hipoglisemi», ön yüklemenin «%20» etkisi, açlık tablosunun «tanı matrisi» adı ve «brokoli testi kesin kanıttır» ifadesi alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.3.1.a1",
+              "tur": "secmeli",
+              "soru": "Hangisi kaynağa göre en düşük enerji yoğunluğu kategorisindedir?",
+              "sec": [
+                "Salatalık",
+                "Peynir",
+                "Cips",
+                "Zeytinyağı"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k11"
+              ]
+            },
+            {
+              "id": "beslenme.1.3.1.a2",
+              "tur": "secmeli",
+              "soru": "Haşlanmış patatesin kruvasandan daha tok tutmasının kaynakta verilen ana nedeni nedir?",
+              "sec": [
+                "Aynı enerji için çok daha fazla hacim ve su",
+                "Daha fazla şeker",
+                "Daha fazla yağ",
+                "Daha hızlı sindirilmesi"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beslenme.1.3.2",
+          "ad": "İşlenme derecesi: NOVA",
+          "onKosul": [
+            "beslenme.1.3.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k13",
+            "k14"
+          ],
+          "ozet": "NOVA, gıdaları besin öğelerine göre değil işlenme derecesine göre dört gruba ayırır; ultra-işlenmiş ürünler kolay ve hızlı yenir, fazla yemeye yatkınlaştırır.",
+          "metin": [
+            "Carlos Monteiro ve ekibinin NOVA sınıflandırması dört grup tanımlar. Grup 1, işlenmemiş ya da en az işlenmiş gıdalardır (taze sebze-meyve, et, balık, yumurta, süt, sade yoğurt, kuru baklagil, pirinç, yulaf). Grup 2, mutfakta kullanılan işlenmiş malzemelerdir (zeytinyağı, tereyağı, tuz, şeker, sirke, bal). Grup 3, Grup 1 gıdalarına tuz, yağ ya da şeker eklenerek yapılan geleneksel işlenmiş gıdalardır (konserve baklagil, peynir, mayalı ekmek). Grup 4, ev mutfağında bulunmayan katkılarla formüle edilen ultra-işlenmiş ürünlerdir (gazlı içecek, paketli bisküvi ve kek, hazır noodle, nugget, aromalı yoğurt).",
+            "Kaynak, Kevin Hall ve arkadaşlarının (NIH, 2019) çalışmasını aktarır: 20 yetişkin iki hafta ultra-işlenmiş, iki hafta işlenmemiş ağırlıklı beslenmiş ve istedikleri kadar yemiştir. Sunulan öğünler kalori, makro besin, şeker, tuz ve lif bakımından eşleştirilmiştir. Ultra-işlenmiş dönemde katılımcılar günde ortalama yaklaşık 500 kcal daha fazla yemiş ve kilo almıştır.",
+            "Kaynağa göre bunun bir nedeni yeme hızıdır: ultra-işlenmiş ürünler az çiğneme ister, hızlı yenir ve tokluk sinyali gelmeden fazlası yenmiş olur. Öteki nedeni enerji yoğunluğudur (önceki ders).",
+            "Pratik sonuç: tabağın çoğunu Grup 1 gıdalardan kurmak, Grup 2 malzemeleri ölçülü kullanmak ve Grup 4 ürünleri ara sıra yemek."
+          ],
+          "not": "Kaynaktaki «%100 birebir eşitlenmiş» ifadesi yalnız sunulan öğünler için geçerlidir; yenen miktar farklıdır. Dakikadaki gram/kcal hızları ve «Bliss Point» oranları (satır 44-46) doğrulanamadı, alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.3.2.a1",
+              "tur": "secmeli",
+              "soru": "Sade yoğurt NOVA'da hangi gruptadır?",
+              "sec": [
+                "Grup 1",
+                "Grup 2",
+                "Grup 3",
+                "Grup 4"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13"
+              ]
+            },
+            {
+              "id": "beslenme.1.3.2.a2",
+              "tur": "secmeli",
+              "soru": "Hall çalışmasında ultra-işlenmiş dönemde ne gözlenmiştir?",
+              "sec": [
+                "Katılımcılar daha az yemiştir",
+                "Katılımcılar günde yaklaşık 500 kcal daha fazla yemiştir",
+                "Hiç fark yoktur",
+                "Katılımcılar yalnız su içmiştir"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14"
+              ]
+            },
+            {
+              "id": "beslenme.1.3.2.a3",
+              "tur": "acik",
+              "soru": "Mutfağındaki beş ürünü NOVA gruplarına ayır. Grup 4 olanlardan biri için Grup 1-3'ten bir yerine koyma öner.",
+              "dogru": "Örnek: yulaf (1), zeytinyağı (2), beyaz peynir (3), aromalı yoğurt (4), paketli bisküvi (4). Aromalı yoğurt yerine sade yoğurt ve taze meyve.",
+              "olcut": [
+                "Beş ürün gruplandı",
+                "Yerine koyma aynı ihtiyacı karşılıyor"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beslenme.1.3.3",
+          "ad": "Etiket okumak: şeker, yağ, tuz ve lif",
+          "onKosul": [
+            "beslenme.1.3.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k15",
+            "k1"
+          ],
+          "ozet": "İçindekiler listesi ürünün gerçek bileşimini söyler: şeker birçok farklı adla yazılabilir, «hidrojenize» kelimesi trans yağ işaretidir; tuz, eklenmiş şeker ve lif için genel öneriler seçimi kolaylaştırır.",
+          "metin": [
+            "Ürünün ön yüzü pazarlamadır; içindekiler listesi bileşimdir. Kaynak, şekerin etikette onlarca farklı adla geçebildiğini gösterir: glikoz şurubu, früktoz şurubu, yüksek früktozlu mısır şurubu, invert şeker, dekstroz, maltodekstrin, malt şurubu, meyve suyu konsantresi, agave ya da pirinç şurubu. Listede bu adlardan biri varsa ürüne şeker eklenmiştir; «şeker ilavesiz» yazısı tek başına yeterli değildir.",
+            "Yağ tarafında kaynak, «kısmi hidrojenize» ya da «hidrojenize bitkisel yağ» ifadesinin trans yağ işareti olduğunu yazar. Porsiyondaki trans yağ belli bir eşiğin altındaysa etikette «0 g» yazılabildiği için, içindekiler listesine bakmak sayıya bakmaktan daha güvenlidir.",
+            "Genel öneriler: Dünya Sağlık Örgütü tuzu günde 5 g'ın altında, eklenmiş şekeri günlük enerjinin %10'undan az (mümkünse %5) tutmayı önerir; lif için yetişkinlerde günde 25 g ve üzeri önerilir ve tam tahıl, baklagil, sebze ve meyveden gelir. Tuzun çoğu tuzluktan değil; ekmek, peynir, hazır çorba, işlenmiş et ve atıştırmalıklardan gelir.",
+            "Bu öneriler toplum için genel çerçevedir; kişiye özel bir hedef değildir."
+          ],
+          "not": "Kaynaktaki şeker tablosunda her ada verilen metabolik yorumlar («glisemik yük bombası», agave için «HFCS'den daha zararlı»), trans yağ için «ölümcül» nitelemesi, «mono ve digliseritler»in trans yağ terimi sayılması ve emülgatörlerin «geçirgen bağırsak», otoimmün hastalık ve karaciğer yağlanmasına yol açtığı iddiası (satır 102-105), tatlandırıcı tablosundaki mikrobiyom yüzdeleri derse alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "beslenme.1.3.3.a1",
+              "tur": "secmeli",
+              "soru": "Etikette hangisi trans yağ işareti olarak anılır?",
+              "sec": [
+                "Soğuk sıkım zeytinyağı",
+                "Kısmi hidrojenize bitkisel yağ",
+                "Tereyağı",
+                "Fındık"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k15"
+              ]
+            },
+            {
+              "id": "beslenme.1.3.3.a2",
+              "tur": "secmeli",
+              "soru": "DSÖ'nün tuz için genel önerisi hangisidir?",
+              "sec": [
+                "Günde 5 g'ın altı",
+                "Günde 15 g",
+                "Sınır yok",
+                "Günde 1 kg"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "beslenme.1.3.3.a3",
+              "tur": "acik",
+              "soru": "Evdeki bir paketli ürünün içindekiler listesini oku: şekerin hangi adları geçiyor, hidrojenize yağ var mı, tuz kaçıncı sırada?",
+              "dogru": "Örnek: kahvaltılık gevrek: şeker, glikoz şurubu ve malt ekstraktı; hidrojenize yağ yok; tuz listenin ortasında.",
+              "olcut": [
+                "Şekerin en az bir adı arandı",
+                "Yağ türüne bakıldı",
+                "Sonuçtan bir karar çıkarıldı (al, azalt, yerine koy)"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k15",
+                "k1"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
