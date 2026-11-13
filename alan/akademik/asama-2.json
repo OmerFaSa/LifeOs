@@ -1,0 +1,306 @@
+{
+  "sema": 1,
+  "alan": "akademik",
+  "id": "akademik.2",
+  "sira": 2,
+  "ad": "Deneme analizi ve soru kalıpları",
+  "hedef": "Bir denemeyi net ve süreyle okumayı, her yanlışı K/İ/Y/S/D etiketi ve tek somut kök nedenle kaydetmeyi, soru kökünü ve öncüllü soruları karşıt örnekle çözmeyi, seçeneklerden elemeyi ve üç AYT Sayısal konusunun (diziler, kimyasal denge, genden proteine) sık soru kalıplarını tanımayı öğrenmek.",
+  "onKosul": ["akademik.1"],
+  "kanitIsi": "Bir deneme sınavını süre tutarak çöz ve en geç 24 saat içinde AYS'nin yedi adımlı protokolüyle çözümle: her yanlış ve boşu K/İ/Y/S/D ile etiketle, her birine tek cümlelik somut kök neden yaz, en sık iki etiketin tamir reçetesini uygula ve yanlışları 1 ve 7 gün sonra çözümsüz yeniden çöz. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    {"id": "k1", "ad": "AYS deneme analizi protokolü ve hata etiketleri (K/İ/Y/S/D)", "tur": "depo", "yol": "AYS/src/js/data/reference.js", "bolum": "R.ANALYSIS_PROTOCOL, R.ERROR_TAGS", "satir": "109-125", "dogrulama": "dogrulanmamis"},
+    {"id": "k2", "ad": "AYS yanlış defteri alanları", "tur": "depo", "yol": "AYS/src/js/data/reference.js", "bolum": "R.NOTEBOOK_FIELDS", "satir": "126-136", "dogrulama": "dogrulanmamis"},
+    {"id": "k3", "ad": "AYS ipuçları: net hesabı, analiz protokolü, analiz borcu, hata etiketleri, süre kaydı", "tur": "depo", "yol": "AYS/src/js/data/hints.js", "bolum": "net, analysis-protocol, analysis-debt, error-tags, time-drift", "satir": "60-71", "dogrulama": "dogrulanmamis"},
+    {"id": "k4", "ad": "Deneme hata kök neden taksonomisi (15 kod)", "tur": "gemini", "yol": "AYS/deneme_ve_analiz_motoru/hata_kok_neden_taksonomisi_ve_net_esik_gecis_protokolleri.md", "bolum": "2. 15 Kök Neden Hata Taksonomisi", "satir": "13-31", "dogrulama": "dogrulanmamis"},
+    {"id": "k5", "ad": "Kesinlik ve öncüllü sorular: karşıt örnek yöntemi ve matematik karşıt örnekleri", "tur": "gemini", "yol": "AYS/soru_bankasi_kaliplari/kesinlik_ve_oncul_sorulari_100_karsit_ornek_ve_istisna_matrisi.md", "bolum": "1. Mantıksal çerçeve; 2. tablo, CE_MAT_01-25", "satir": "7-44", "dogrulama": "dogrulanmamis"},
+    {"id": "k6", "ad": "Seçeneklerden eleme stratejileri", "tur": "gemini", "yol": "AYS/soru_bankasi_kaliplari/yks_matematik_ve_geometri_islem_hatasi_onleme_ve_seceneklerden_eleme_stratejileri_atlasi.md", "bolum": "1. Zor sorularda 5 eleme stratejisi", "satir": "11-17", "dogrulama": "dogrulanmamis"},
+    {"id": "k7", "ad": "İşlem tuzakları 1-3: eksi dağıtma, kök yutma, eşitsizlikte payda", "tur": "gemini", "yol": "AYS/soru_bankasi_kaliplari/yks_matematik_ve_geometri_islem_hatasi_onleme_ve_seceneklerden_eleme_stratejileri_atlasi.md", "bolum": "Tuzak 1-3", "satir": "21-39", "dogrulama": "dogrulanmamis"},
+    {"id": "k8", "ad": "İşlem tuzakları 23-25: indirgeme bağıntısı, limit, kesinlik/olabilir ayrımı", "tur": "gemini", "yol": "AYS/soru_bankasi_kaliplari/yks_matematik_ve_geometri_islem_hatasi_onleme_ve_seceneklerden_eleme_stratejileri_atlasi.md", "bolum": "Tuzak 23-25", "satir": "155-171", "dogrulama": "dogrulanmamis"},
+    {"id": "k9", "ad": "AYT diziler atlası: tanım, aritmetik ve geometrik dizi bağıntıları", "tur": "gemini", "yol": "AYS/ayt/ayt_matematik_diziler_aritmetik_geometrik_ve_toplam_sembolu_cerrahi_cozum_atlasi.md", "bolum": "Bölüm 1-3", "satir": "16-71", "dogrulama": "dogrulanmamis"},
+    {"id": "k10", "ad": "AYS AYT Matematik anlatımı am-09: Diziler", "tur": "depo", "yol": "AYS/src/js/data/anlatim-am.js", "bolum": "R.KONU_ANLATIM['am-09']", "satir": "261-290", "dogrulama": "dogrulanmamis"},
+    {"id": "k11", "ad": "AYT kimyasal denge atlası: şartlar, Kc, Kp, Qc, Le Chatelier", "tur": "gemini", "yol": "AYS/ayt/ayt_kimya_kimyasal_tepkimelerde_denge_kc_kp_ve_le_chatelier_ilkesi_atlasi.md", "bolum": "Bölüm 1-3", "satir": "16-70", "dogrulama": "dogrulanmamis"},
+    {"id": "k12", "ad": "AYS AYT Kimya anlatımı ak-07: Kimyasal denge", "tur": "depo", "yol": "AYS/src/js/data/anlatim-ak.js", "bolum": "R.KONU_ANLATIM['ak-07']", "satir": "200-231", "dogrulama": "dogrulanmamis"},
+    {"id": "k13", "ad": "Karşıt örnek CE_KIM_07: katalizör ve denge", "tur": "gemini", "yol": "AYS/soru_bankasi_kaliplari/kesinlik_ve_oncul_sorulari_100_karsit_ornek_ve_istisna_matrisi.md", "bolum": "2. tablo, CE_KIM_07", "satir": "86", "dogrulama": "dogrulanmamis"},
+    {"id": "k14", "ad": "AYT nükleik asitler atlası: genetik kod, translasyon, tuzaklar, örnek çözüm", "tur": "gemini", "yol": "AYS/ayt/ayt_biyoloji_nukleik_asitler_protein_sentezi_ve_genetik_sifre_atlasi.md", "bolum": "3. Santral doğma, 4. Tuzaklar, 5. Örnek", "satir": "54-99", "dogrulama": "dogrulanmamis"},
+    {"id": "k15", "ad": "AYS AYT Biyoloji anlatımı ab-04: Nükleik asitler ve protein sentezi", "tur": "depo", "yol": "AYS/src/js/data/anlatim-ab.js", "bolum": "R.KONU_ANLATIM['ab-04']", "satir": "102-133", "dogrulama": "dogrulanmamis"},
+    {"id": "k16", "ad": "AYS derin ders ab-04: kalıplar, sık hatalar, kodon sayımı örneği", "tur": "depo", "yol": "AYS/src/js/data/derin-ab.js", "bolum": "R.KONU_DERIN['ab-04']", "satir": "177-200", "dogrulama": "dogrulanmamis"},
+    {"id": "k17", "ad": "MEB Matematik öğretim programı kazanımı MAT.12.1.1 (gemini-data tablosu)", "tur": "gemini", "yol": "MUFREDAT/matematik.md", "bolum": "12. Sınıf, MAT.12.1.1", "satir": "79", "dogrulama": "dogrulanmamis"},
+    {"id": "k18", "ad": "MEB Kimya öğretim programı kazanımları KİM.11.2.2-11.2.5 (gemini-data tablosu)", "tur": "gemini", "yol": "MUFREDAT/kimya.md", "bolum": "11. Sınıf, KİM.11.2.2-5", "satir": "77-80", "dogrulama": "dogrulanmamis"},
+    {"id": "k19", "ad": "MEB Biyoloji öğretim programı kazanımları BİY.12.2.1-12.2.3 (gemini-data tablosu)", "tur": "gemini", "yol": "MUFREDAT/biyoloji.md", "bolum": "12. Sınıf, BİY.12.2.1-3", "satir": "89-92", "dogrulama": "dogrulanmamis"}
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {"id": "akademik.2.k1", "tur": "secmeli", "soru": "Bir testte 35 doğru, 12 yanlış ve 3 boş var. AYS'nin net kuralına göre net kaçtır?", "sec": ["23", "32", "35", "29"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"]},
+      {"id": "akademik.2.k2", "tur": "secmeli", "soru": "AYS'nin yanlış defterinde «Doğru ilke» alanı için kural hangisidir?", "sec": ["Sorunun tam çözümü adım adım kopyalanır", "Yalnız doğru şıkkın harfi yazılır", "Boş bırakılır, tekrar gününde doldurulur", "En fazla 2-3 satır yazılır; tam çözüm kopyalanmaz"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2"]},
+      {"id": "akademik.2.k3", "tur": "secmeli", "soru": "«x tam sayıdır ve x² > x ise kesinlikle x > 1'dir» önermesini hangi değer çürütür?", "sec": ["x = −1", "x = 2", "x = 3", "x = 1"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]},
+      {"id": "akademik.2.k4", "tur": "secmeli", "soru": "Pozitif terimli bir geometrik dizide a₃ = 4 ve a₇ = 64 ise a₅ kaçtır?", "sec": ["34", "32", "16", "8"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k10"]},
+      {"id": "akademik.2.k5", "tur": "secmeli", "soru": "200 amino asitlik bir polipeptidi şifreleyen mRNA bölgesinde, durdurma kodonu dahil en az kaç kodon bulunur?", "sec": ["199", "200", "201", "600"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14", "k16"]},
+      {"id": "akademik.2.k6", "tur": "secmeli", "soru": "Bir tepkimede tepkime oranı Q, denge sabiti K'den büyükse ne olur?", "sec": ["Tepkime girenler yönüne (geri) yürür", "Tepkime ürünler yönüne (ileri) yürür", "Sistem dengededir", "K değeri Q'ya eşitlenene kadar büyür"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k12"]}
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "akademik.2.1",
+      "ad": "Denemeyi okumak: net, süre ve hata etiketi",
+      "onKosul": [],
+      "kazanim": [
+        "Bir denemenin netini ve test sürelerini kaydeder (AYS deneme analizi protokolü).",
+        "Her yanlışı K/İ/Y/S/D etiketi ve tek somut kök nedenle yanlış defterine yazar (AYS yanlış defteri)."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "akademik.2.1.k1", "tur": "secmeli", "soru": "AYS'ye göre bir testin neti nasıl hesaplanır?", "sec": ["Doğru − yanlış", "Doğru − (yanlış + boş)/4", "Doğru/4 − yanlış", "Doğru − yanlış/4"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k3"]},
+          {"id": "akademik.2.1.k2", "tur": "secmeli", "soru": "Bir testte 16 doğru, 8 yanlış ve 6 boş var. Net kaçtır?", "sec": ["8", "14", "12,5", "16"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"]},
+          {"id": "akademik.2.1.k3", "tur": "secmeli", "soru": "AYS protokolünde, cevap anahtarı açılmadan yanlış ve boşların yeniden denendiği adım hangisidir?", "sec": ["Skor", "Tamir reçetesi", "Plan etkisi", "Yeniden çözüm"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k1"]},
+          {"id": "akademik.2.1.k4", "tur": "secmeli", "soru": "Öğrenci sınavın sonunda yetiştiremeyip boş bıraktığı altı soruyu evde süre tutmadan rahatça doğru çözüyor. Bu boşlar için en uygun AYS etiketi hangisidir?", "sec": ["K (konu eksiği)", "S (süre)", "İ (işlem hatası)", "Y (yorum / kök okuma)"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "akademik.2.1.1",
+          "ad": "Net ve süre: denemenin kaydı",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k1"],
+          "ozet": "Net = doğru − yanlış/4; testler ayrı hesaplanıp toplanır. Skorla birlikte her testin gerçek süresi de kaydedilir, çünkü net artarken süre bozulabilir.",
+          "metin": [
+            "AYS'nin kuralı: Net = doğru − yanlış/4. Testler ayrı ayrı hesaplanıp toplanır. Formülde boş yer almaz; boş soru neti ne artırır ne azaltır (modelin bağlantı notu).",
+            "Örnek (modelin hesabı): 40 soruluk bir testte 28 doğru, 8 yanlış, 4 boş → 28 − 8/4 = 28 − 2 = 26 net.",
+            "AYS analiz protokolünün ilk adımı «Skor»dur (5 dk): doğru, yanlış, boş, net ve test süresi kaydedilir.",
+            "Süre kaydı: test başına gerçek süre tutulur. AYS ipucunun kuralı: net artarken süre bozuluyorsa hız çalışılır.",
+            "Modelin bağlantı notu: 1. aşamanın kanıt işi bir denemeyi süre tutarak çözmekti. Bu ders o denemenin kaydını kurar; sonraki iki ders kaydı çözümlemeyi öğretir."
+          ],
+          "alistirmalar": [
+            {"id": "akademik.2.1.1.a1", "tur": "secmeli", "soru": "Bir testte 30 doğru, 12 yanlış ve 3 boş var. Net kaçtır?", "sec": ["18", "30", "27", "26,25"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3"]},
+            {"id": "akademik.2.1.1.a2", "tur": "secmeli", "soru": "Aynı testte bir yanlışı boş bırakmış olsaydın netin nasıl değişirdi?", "sec": ["0,25 artardı", "1 artardı", "Değişmezdi", "0,25 azalırdı"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3"]}
+          ]
+        },
+        {
+          "id": "akademik.2.1.2",
+          "ad": "Yedi adımlı analiz",
+          "onKosul": ["akademik.2.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k3"],
+          "ozet": "AYS denemeyi en geç 24 saat içinde yedi adımda çözümler: skor, yeniden çözüm, etiket, kök neden, tamir reçetesi, tekrar, plan etkisi. Analiz edilmeyen deneme daha az değerlidir.",
+          "metin": [
+            "AYS ipucuna göre deneme en geç 24 saat içinde yedi adımda çözümlenir.",
+            "1) Skor (5 dk): doğru, yanlış, boş, net, süre. 2) Yeniden çözüm (20–30 dk): cevap anahtarı açılmadan yanlış ve boşlar yeniden denenir. 3) Etiket (30–45 dk): her soru K, İ, Y, S ya da D olarak ayrılır.",
+            "4) Kök neden: «dikkatsizlik» son açıklama değildir; yanlış işaretleme, satır kayması, birim atlama gibi somut davranış yazılır. 5) Tamir reçetesi: her etiketin varsayılan reçetesi uygulanır (sonraki ders).",
+            "6) Tekrar: yanlış soru 1 gün ve 7 gün sonra çözümsüz yeniden yapılır. 7) Plan etkisi: en yüksek frekanslı iki etiket gelecek hafta toplam iki blok alır.",
+            "Analiz borcu (AYS ipucu): çözülüp analiz edilmeyen deneme, analiz edilenden daha düşük değerlidir. Analiz yetişmiyorsa deneme sayısı azaltılır; hedef daha çok deneme değil, daha iyi çözümlenmiş denemedir."
+          ],
+          "not": "Adımlar ve süreler k1 satır 110-116'dan, 24 saat ve analiz borcu k3 satır 61-64'ten. Süreler AYS'nin kendi önerisidir; doğrulanmamıştır.",
+          "alistirmalar": [
+            {"id": "akademik.2.1.2.a1", "tur": "secmeli", "soru": "Yanlış sorular protokole göre ne zaman yeniden çözülür?", "sec": ["1 gün ve 7 gün sonra, çözüme bakmadan", "Aynı gün, çözüme bakarak", "Yalnız bir sonraki denemeden önce", "Bir ay sonra bir kez"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k1"]},
+            {"id": "akademik.2.1.2.a2", "tur": "secmeli", "soru": "Haftada üç deneme çözüyorsun ama hiçbirini analiz etmeye vaktin kalmıyor. AYS ipucuna göre ne yapılır?", "sec": ["Deneme sayısı artırılır", "Analiz atlanır, yalnız net kaydedilir", "Deneme sayısı azaltılır, analiz yapılır", "Yalnız en kötü deneme analiz edilir"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3"]}
+          ]
+        },
+        {
+          "id": "akademik.2.1.3",
+          "ad": "Hata etiketleri ve yanlış defteri",
+          "onKosul": ["akademik.2.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2", "k4", "k3"],
+          "ozet": "Beş etiket: K konu eksiği, İ işlem hatası, Y yorum/kök okuma, S süre, D dikkat. Her etiketin bir tamir reçetesi var. Yanlış defterine tek somut kök neden ve en fazla 2-3 satırlık doğru ilke yazılır.",
+          "metin": [
+            "AYS'nin beş etiketi ve reçeteleri: K konu eksiği → 20 dk konu anlatımı + 20 soru; İ işlem hatası → 3 gün boyunca 10 benzer soru; Y yorum/kök okuma → kökü işaretle + 10 soru; S süre → süreli 20 soruluk branş seti; D dikkat → somut tetikleyiciyi belirle + kontrol rutini.",
+            "gemini-data'daki taksonomi aynı ayrımı daha ince yapar (15 kod). Modelin eşlemesi: ERR_01 kavramsal eksiklik ve ERR_02 kavram yanılgısı → K; ERR_03 işlemsel hata → İ; ERR_04 kökü yanlış okuma ve ERR_06 ara değeri işaretleme → Y; ERR_07 zaman baskısı ve ERR_10 soruya saplanma → S; ERR_13 optik kayması → D.",
+            "Kaynağın kavram yanılgısı tarifi: öğrenci soruyu rahat çözdüğünden emindir ama sonuç yanlıştır ve yanlış şıkkı güçlü argümanla savunur. Bu, «bilmiyordum»dan (ERR_01) farklıdır; tamiri de farklıdır.",
+            "Yanlış defteri alanları (AYS): kimlik (tarih, yayın, deneme, soru no, ders-konu) · ilk durum (yanlış / boş / yavaş ve süre) · etiket · kök neden (tek somut cümle) · doğru ilke (en fazla 2-3 satır; tam çözüm kopyalanmaz) · benzer soru · tekrar tarihleri · kapanış (çözümsüz doğru ve süre uygun mu?).",
+            "Kaynak içi fark: protokol yanlışı 1 ve 7 gün sonra yeniden çözdürür; defter alanı +1 gün, +3 gün, +1 hafta, +1 ay der. İkisi de AYS'nin kendi önerisidir; birini seç ve tutarlı uygula (modelin notu)."
+          ],
+          "not": "gemini-data taksonomisinin süre kotaları («Türkçe max 45 dk …»), «3 kat fazla» gibi oranları ve ERR_15'in glukoz/prefrontal korteks açıklaması kaynaksız olduğu için alınmadı. Aynı dosya başında kendini «YKS kapsam dışı» diye etiketliyor; içerik ise YKS denemesi üzerine.",
+          "alistirmalar": [
+            {"id": "akademik.2.1.3.a1", "tur": "secmeli", "soru": "Öğrenci formülü ve denklemi doğru kurmuş, son satırda (−3)·(−2)'yi −6 yazmış. Hangi etiket uygundur?", "sec": ["K (konu eksiği)", "İ (işlem hatası)", "S (süre)", "Y (yorum / kök okuma)"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4"]},
+            {"id": "akademik.2.1.3.a2", "tur": "secmeli", "soru": "Yanlış defterine kök neden olarak hangisi yazılmalıdır?", "sec": ["«Dikkatsizlik.»", "«Bu konuyu tekrar et.»", "«Soru zordu.»", "«Paydadaki birimi cm yerine m okudum.»"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k2"]},
+            {"id": "akademik.2.1.3.a3", "tur": "acik", "soru": "Kanıt işi provası: Son çözdüğün denemeden beş yanlış ya da boş seç. Her biri için yanlış defterinin sekiz alanını doldur; etiketi (K/İ/Y/S/D) ve tek cümlelik somut kök nedeni mutlaka yaz. Sonra en sık iki etiketi ve onların tamir reçetesini belirt.", "dogru": "Örnek kayıt (modelin örneği): 2026-11-14 · X yayını deneme 3 · AYT Mat 17 · diziler | yanlış, 3 dk | İ | «a₁₀'u bulurken toplamı 1'den 10'a kadar aldım; 9'da bitmeliydi.» | indirgemede ilk ve son iki satırı alt alta yaz | benzer: aynı yayın test 4 | tekrar +1 gün, +7 gün | kapanış: çözümsüz doğru, 2 dk. Beş kayıt sonunda örneğin «İ 3, Y 2» → gelecek hafta İ ve Y için birer blok.", "olcut": ["Beş kaydın her birinde sekiz alan dolu mu?", "Kök neden «dikkatsizlik» gibi genel bir söz değil, somut bir davranış mı?", "Doğru ilke 2-3 satırı aşmıyor ve tam çözüm kopyalanmamış mı?", "En sık iki etiket ve reçeteleri yazılmış mı?"], "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k2"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "akademik.2.2",
+      "ad": "Soru kökü, öncüllü sorular ve eleme",
+      "onKosul": ["akademik.2.1"],
+      "kazanim": [
+        "Soru kökündeki olumsuz ve sınırlayıcı ifadeleri, tanım kümesi şartını ve istenen niceliği ayırt eder.",
+        "«Kesinlikle doğrudur» öncüllerini karşıt örnekle sınar; seçenekleri birim, sınır ve uç değerle eler."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "akademik.2.2.k1", "tur": "secmeli", "soru": "Kökü «Aşağıdakilerden hangisi olamaz?» olan bir soruda ne aranır?", "sec": ["En az bir durumda sağlanan seçenek", "Hiçbir durumda sağlanmayan seçenek", "Her durumda sağlanan seçenek", "En büyük değeri veren seçenek"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k5"]},
+          {"id": "akademik.2.2.k2", "tur": "secmeli", "soru": "«Hangileri kesinlikle doğrudur?» sorusunda bir öncülü elemek için ne yeterlidir?", "sec": ["Öncülü sağlayan iki örnek", "Öncülün bir kez sağlanması", "Öncülün en uzun öncül olması", "Öncülü bozan tek bir karşıt örnek"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k8"]},
+          {"id": "akademik.2.2.k3", "tur": "secmeli", "soru": "|x + y| = |x| + |y| eşitliğinin her zaman doğru olmadığını hangi seçim gösterir?", "sec": ["x = 3, y = −5", "x = 3, y = 5", "x = −3, y = −5", "x = 0, y = −5"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]},
+          {"id": "akademik.2.2.k4", "tur": "secmeli", "soru": "x(x − 3) = 2(x − 3) denkleminin çözüm kümesi hangisidir?", "sec": ["{2}", "{3}", "{2, 3}", "{−2, 3}"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k7"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "akademik.2.2.1",
+          "ad": "Kökü okumak: ne isteniyor, hangi şartla?",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k8"],
+          "ozet": "Üç kök hatası: olumsuz/sınırlayıcı sözü kaçırmak, verilen tanım kümesi şartını unutmak, ara değeri bulup istenen yerine onu işaretlemek. Panzehir: kökün altını çiz, şartı daire içine al, işaretlemeden önce «ne isteniyordu?» diye sor.",
+          "metin": [
+            "ERR_04 (kökü yanlış okuma): «değildir», «kesinlikle», «en az», «hangisi olamaz» gibi ifadelerin tersi aranır. Kaynağın panzehiri: kökün altını çiz ve başlamadan önce içinden söyle: «Ben şu an olamayacak olanı arıyorum.»",
+            "ERR_05 (tanım kümesi şartı): «x, y pozitif tam sayıdır», «a ≠ 1» gibi şartlar unutulur; kesirli ya da negatif kökler çözüme katılır. Panzehir: şartı daire içine al, bulunan kökleri bu kümeyle süzmeden seçeneklere bakma.",
+            "ERR_06 (ara değeri işaretleme): x bulunur bulunmaz seçeneklerde x görülür ve işaretlenir; oysa soru 2x + 1'i ya da y'yi sormaktadır. Panzehir: işaretlemeden önce son iki saniye «Soru benden tam olarak neyi istiyordu?»",
+            "Kesinlik ve olabilirlik (kaynağın Tuzak 25'i): «kesinlikle doğrudur» sorusunda tek bir özel sayının sağlaması öncülü doğru yapmaz. Bu ayrım bir sonraki dersin konusudur."
+          ],
+          "alistirmalar": [
+            {"id": "akademik.2.2.1.a1", "tur": "secmeli", "soru": "x + 3 = 7 olduğuna göre 2x + 1 kaçtır?", "sec": ["4", "8", "9", "7"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"]},
+            {"id": "akademik.2.2.1.a2", "tur": "secmeli", "soru": "x pozitif tam sayı ve x² = 9 ise çözüm kümesi hangisidir?", "sec": ["{3}", "{−3, 3}", "{−3}", "{9}"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4"]}
+          ]
+        },
+        {
+          "id": "akademik.2.2.2",
+          "ad": "Kesinlikle doğru mu, olabilir mi: karşıt örnek",
+          "onKosul": ["akademik.2.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k8"],
+          "ozet": "«Kesinlikle doğrudur» sorusunda öncülü yıkacak tek bir karşıt örnek aranır; bulunursa öncül elenir. «Olabilir» sorusunda sağlayan tek örnek yeter. Aday karşıt örnekler: 0, −1, 1/2, negatif ve irrasyonel sayılar.",
+          "metin": [
+            "Kaynağın tespiti: zihin öncülü doğrulayan tipik örnekleri arar. a > b ⇒ a² > b² denince 3 > 2 ⇒ 9 > 4 düşünülür ve öncül doğru sanılır.",
+            "Yöntem: öncülü doğrulamaya değil, onu yıkacak tek bir karşıt örnek bulmaya çalış. Bulunursa öncül elenir. «Olabilir» sorularında tersi geçerlidir: sağlayan tek bir örnek öncülü kabul etmeye yeter.",
+            "Kaynağın karşıt örneklerinden: a = 2, b = −5 için 2 > −5 ama 4 < 25. x = −2 için x² = 4 > −2 ama x > 1 değil. 12 hem 4'e hem 6'ya bölünür ama 24'e bölünmez (kural ancak sayılar aralarında asalsa geçerli). x = 3, y = −5 için |x + y| = 2, |x| + |y| = 8.",
+            "Aynı tablodan: √(x²) = x değil |x|'tir (x = −4 için sonuç 4). a·x = a·y ise x = y ancak a ≠ 0 ise doğrudur (0·5 = 0·8). 2 çift olan tek asaldır; iki asalın toplamı tekse biri kesinlikle 2'dir.",
+            "Hangi sayıları dene? Kaynağın listesi: 0, −1, 1/2 (0 ile 1 arası kesir), negatif sayılar, irrasyonel sayılar."
+          ],
+          "not": "Örneklerin hepsi kaynağın tablosundan (k5 satır 20-44: CE_MAT_01, 02, 04, 06, 18, 23, 25) ve modelce yeniden hesaplandı. Kaynak yöntemi «Popper yanlışlanabilirlik ilkesi» diye adlandırıyor; ad alınmadı, yöntem alındı.",
+          "alistirmalar": [
+            {"id": "akademik.2.2.2.a1", "tur": "secmeli", "soru": "«a > b ise a² > b²» önermesini hangi seçim çürütür?", "sec": ["a = 3, b = 2", "a = 5, b = 1", "a = 4, b = 0", "a = 2, b = −5"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]},
+            {"id": "akademik.2.2.2.a2", "tur": "secmeli", "soru": "«Bir sayı a'ya ve b'ye tam bölünüyorsa a·b'ye de tam bölünür.» Bu önerme hangi durumda kesinlikle doğrudur?", "sec": ["a ile b çift ise", "a ile b aralarında asal ise", "a ile b eşit ise", "Her durumda"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]}
+          ]
+        },
+        {
+          "id": "akademik.2.2.3",
+          "ad": "Seçeneklerden eleme ve işlem tuzakları",
+          "onKosul": ["akademik.2.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k7"],
+          "ozet": "Seçenekleri birim ve işaret, tek-çift, uç değer ve geometrik sınırla ele. Üç işlem tuzağı: eksiyi dağıtmamak, bilinmeyenli çarpanı sadeleştirip kök yutmak, işareti bilinmeyen paydayla içler-dışlar yapmak.",
+          "metin": [
+            "Kaynağın eleme stratejileri: (1) birim ve işaret: alan, uzunluk ve olasılık negatif olamaz; (2) tek-çift: tam sayılı toplam ve çarpımda sonucun paritesine bak; (3) uç değer: formülü hatırlamıyorsan x yerine 0 ya da 1, açı yerine 30° ya da 45° koy, aynı değeri vermeyen seçenekleri ele; (4) zıt çift: seçeneklerde k ile −k ya da 1/k birlikteyse ikisini dikkatle karşılaştır; (5) sınır: hipotenüsten uzun dik kenar, çaptan uzun kiriş olamaz; üçgen eşitsizliği |b − c| < a < b + c sağlanmalı.",
+            "Tuzak 1, eksi dağıtma: a − (b − c) = a − b + c. Parantezin önünde eksi varsa içerideki her terimin işareti döner.",
+            "Tuzak 2, kök yutma: x(x − 2) = 3(x − 2) denkleminde iki yanı (x − 2)'ye bölen yalnız x = 3 bulur. Doğrusu: (x − 2)(x − 3) = 0 → {2, 3}. Bilinmeyen içeren çarpanı sadeleştirme; sola topla ve ortak paranteze al.",
+            "Tuzak 3, eşitsizlikte payda: (x + 2)/x > 1 eşitsizliğinde iki yanı x ile çarpmak yanlıştır, çünkü x'in işareti bilinmiyor. Doğrusu: (x + 2)/x − 1 > 0 → 2/x > 0 → x > 0."
+          ],
+          "not": "Kaynağın zıt çift stratejisindeki «doğru cevap %80 bu ikiliden biridir» sayısı kaynaksız olduğu için alınmadı; strateji yalnız «ikisini dikkatle karşılaştır» diye verildi.",
+          "alistirmalar": [
+            {"id": "akademik.2.2.3.a1", "tur": "secmeli", "soru": "a − (b − c) ifadesinin eşiti hangisidir?", "sec": ["a − b − c", "a + b − c", "a + b + c", "a − b + c"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k7"]},
+            {"id": "akademik.2.2.3.a2", "tur": "secmeli", "soru": "Bir üçgenin iki kenarı 3 ve 5 birimdir. Üçüncü kenar hangisi olamaz?", "sec": ["4", "1", "6", "7"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"]},
+            {"id": "akademik.2.2.3.a3", "tur": "secmeli", "soru": "(x + 2)/x > 1 eşitsizliğinin çözüm kümesi hangisidir?", "sec": ["Bütün gerçel sayılar", "x < 0", "x > 0", "x > −2"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k7"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "akademik.2.3",
+      "ad": "AYT Sayısal: üç konunun soru kalıpları",
+      "onKosul": ["akademik.2.2"],
+      "kazanim": [
+        "MAT.12.1.1 Aritmetik ve geometrik dizilerin özelliklerine ilişkin muhakeme yapabilme.",
+        "KİM.11.2.4 Tersinir tepkimelerin dengeye ulaşıp ulaşmadığını bilimsel veriye dayalı tahmin edebilme.",
+        "BİY.12.2.3 Genetik bilginin ürüne dönüşüm sürecini çözümleyebilme."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "akademik.2.3.k1", "tur": "secmeli", "soru": "Durdurma kodonları (UAA, UAG, UGA) için hangisi doğrudur?", "sec": ["Amino asit şifrelemezler", "Metiyonin şifrelerler", "Her biri bir tRNA ile eşleşir", "Translasyonu başlatırlar"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k14", "k15"]},
+          {"id": "akademik.2.3.k2", "tur": "secmeli", "soru": "Bir aritmetik dizide a₂ = 5 ve a₅ = 14 ise a₁₀ kaçtır?", "sec": ["29", "32", "26", "28"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k10"]},
+          {"id": "akademik.2.3.k3", "tur": "secmeli", "soru": "Dengedeki bir sisteme katalizör eklenirse ne olur?", "sec": ["K büyür, ürün verimi artar", "Denge ürünler yönüne kayar", "K ve denge verimi değişmez; dengeye daha çabuk ulaşılır", "K küçülür, tepkime yavaşlar"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13"]},
+          {"id": "akademik.2.3.k4", "tur": "secmeli", "soru": "2SO₂(g) + O₂(g) ⇌ 2SO₃(g) tepkimesi için Kp ile Kc arasındaki bağıntı hangisidir?", "sec": ["Kp = Kc", "Kp = Kc·(RT)⁻¹", "Kp = Kc·(RT)", "Kp = Kc·(RT)³"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "akademik.2.3.1",
+          "ad": "Diziler: genel terim, indeks toplamı ve indirgeme",
+          "onKosul": [],
+          "kazanim": [
+            "MAT.12.1.1 Aritmetik ve geometrik dizilerin özelliklerine ilişkin muhakeme yapabilme (MEB programı, gemini-data tablosu)."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k9", "k10", "k8", "k17"],
+          "ozet": "Dizi her pozitif tam sayıda tanımlı olmalıdır. Aritmetik dizide indeksleri toplamı eşit terimlerin toplamı, geometrik dizide çarpımı eşittir. İndirgeme bağıntısında toplam bir eksik terimde biter.",
+          "metin": [
+            "Tanım (iki kaynakta aynı): dizi, pozitif tam sayılardan gerçel sayılara bir fonksiyondur. Bir ifade, her n ∈ Z⁺ için tanımlıysa dizi belirtir. Kaynağın tuzağı: aₙ = (2n + 5)/(n − 3) n = 3'te tanımsızdır; dizi belirtmez.",
+            "Aritmetik dizi: aₙ = a₁ + (n − 1)d; herhangi iki terim için aₙ = aₖ + (n − k)d; Sₙ = n(a₁ + aₙ)/2. İndeks kuralı: k + m = p + r ise aₖ + aₘ = aₚ + aᵣ (ör. a₃ + a₁₂ = a₇ + a₈, çünkü 3 + 12 = 7 + 8). Sₙ ile terim: aₙ = Sₙ − Sₙ₋₁.",
+            "Geometrik dizi: aₙ = a₁·rⁿ⁻¹; eşit uzaklıktaki terimler için (aₙ)² = aₙ₋ₖ·aₙ₊ₖ; k + m = p + r ise aₖ·aₘ = aₚ·aᵣ. AYS'nin uyarısı: pozitif terimli dizide karekök alınırken pozitif değer seçilir.",
+            "Kaynağın kuralı: bir dizi hem aritmetik hem geometrik ise sabit dizidir.",
+            "İndirgeme tuzağı (kaynağın Tuzak 23'ü): aₙ₊₁ = aₙ + 2n bağıntısında a₁'den a₁₀'a giderken toplam n = 1'den 9'a kadar gider: a₁₀ = a₁ + 2(1 + 2 + … + 9). Panzehir: ilk iki ve son iki satırı alt alta yaz."
+          ],
+          "not": "1. aşamadaki karşılığı akademik.1.16.17 «Diziler» (aynı AYS anlatımı, am-09). Bu ders yalnız soru kalıplarını ekler. Fibonacci ve altın oran bölümü (k9 satır 76 sonrası) sınav kalıbı olmadığı için alınmadı.",
+          "alistirmalar": [
+            {"id": "akademik.2.3.1.a1", "tur": "secmeli", "soru": "Bir aritmetik dizide a₃ + a₁₂ = 30 ise a₇ + a₈ kaçtır?", "sec": ["15", "60", "Bilinemez", "30"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k9"]},
+            {"id": "akademik.2.3.1.a2", "tur": "secmeli", "soru": "a₁ = 5 ve aₙ₊₁ = aₙ + 2n ise a₁₀ kaçtır?", "sec": ["115", "95", "105", "25"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k8"]},
+            {"id": "akademik.2.3.1.a3", "tur": "secmeli", "soru": "aₙ = (2n + 5)/(n − 3) ifadesi neden bir dizi belirtmez?", "sec": ["Terimleri tam sayı değildir", "Azalan değildir", "Paydası negatif olabilir", "n = 3 için tanımsızdır"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k9"]}
+          ]
+        },
+        {
+          "id": "akademik.2.3.2",
+          "ad": "Kimyasal denge: Q, Kp ve Le Chatelier",
+          "onKosul": ["akademik.2.3.1"],
+          "kazanim": [
+            "KİM.11.2.3 Denge sabiti ifadesinin oluşturulmasına ilişkin tümevarımsal akıl yürütebilme.",
+            "KİM.11.2.4 Tersinir tepkimelerin dengeye ulaşıp ulaşmadığını bilimsel veriye dayalı tahmin edebilme.",
+            "KİM.11.2.5 Dengeye etki eden faktörleri bilimsel sorgulayabilme (MEB programı, gemini-data tablosu)."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k11", "k12", "k13", "k18"],
+          "ozet": "Denge, kapalı sistemde sabit sıcaklıkta ileri ve geri hızların eşitlendiği dinamik durumdur. Q ile K karşılaştırılarak yön bulunur; Kp = Kc(RT)^Δn. K'yi yalnız sıcaklık değiştirir; katalizör dengeyi kaydırmaz.",
+          "metin": [
+            "Denge şartları (atlas): sistem kapalı, sıcaklık sabit, ileri hız geri hıza eşit. Denge dinamiktir: renk, basınç gibi gözlenen özellikler sabittir ama ileri ve geri tepkimeler eşit hızla sürer (AYS anlatımı da aynısını söyler).",
+            "Denge ifadesi: saf katı ve saf sıvı yazılmaz (iki kaynakta aynı). Atlasın ek kuralı: Kp ifadesine yalnız gaz fazındakiler yazılır.",
+            "Kp = Kc·(RT)^Δn; Δn = ürünlerdeki gaz katsayıları toplamı − girenlerdeki gaz katsayıları toplamı. Δn = 0 ise Kp = Kc.",
+            "Yön (iki kaynakta aynı): Q < K ise ileri, Q > K ise geri yönde yürür; Q = K ise sistem dengededir.",
+            "Le Chatelier: eklenen madde harcanacak yöne kayılır; basınç artınca (hacim küçülünce) gaz mol sayısı az olan yöne kayılır. K'nin değerini yalnız sıcaklık değiştirir: sıcaklık artınca endotermik tepkimede K büyür, ekzotermik tepkimede K küçülür. Katalizör K'yi ve verimi değiştirmez, yalnız dengeye daha çabuk ulaştırır (AYS anlatımı ve karşıt örnek tablosu CE_KIM_07)."
+          ],
+          "not": "1. aşamadaki karşılığı akademik.1.25.5 «Kimyasal denge» (ak-07). Atlasın «köpek kaçırtan» akrostişi ve «minimum enerji / maksimum düzensizlik eğilimi» kutusu (k11 satır 25-31) alınmadı: biri ezber hilesi, öteki AYS anlatımında yok ve ifadesi kaba.",
+          "alistirmalar": [
+            {"id": "akademik.2.3.2.a1", "tur": "secmeli", "soru": "H₂(g) + I₂(g) ⇌ 2HI(g) tepkimesinde Kp ile Kc arasındaki ilişki hangisidir?", "sec": ["Kp = Kc", "Kp = Kc·RT", "Kp = Kc·(RT)²", "Kp = Kc/(RT)"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]},
+            {"id": "akademik.2.3.2.a2", "tur": "secmeli", "soru": "N₂(g) + 3H₂(g) ⇌ 2NH₃(g), ΔH < 0 dengesinde sıcaklık artırılırsa K ne olur?", "sec": ["Büyür", "Değişmez", "Küçülür", "Önce büyür, sonra eski değerine döner"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k12"]},
+            {"id": "akademik.2.3.2.a3", "tur": "secmeli", "soru": "Bir anda Q = 2 ve aynı sıcaklıkta K = 5 ise tepkime hangi yöne yürür?", "sec": ["Geri (girenler) yönüne", "Hiçbir yöne; dengededir", "İleri (ürünler) yönüne", "K, 2'ye düşene kadar bekler"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k12"]}
+          ]
+        },
+        {
+          "id": "akademik.2.3.3",
+          "ad": "Genden proteine: kodon ve sayım kalıpları",
+          "onKosul": ["akademik.2.3.2"],
+          "kazanim": [
+            "BİY.12.2.3 Genetik bilginin ürüne dönüşüm sürecini çözümleyebilme (MEB programı, gemini-data tablosu)."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14", "k15", "k16", "k19"],
+          "ozet": "DNA'daki bilgi mRNA'ya yazılır (transkripsiyon), ribozomda üçlü kodonlar okunur (translasyon). 64 kodon var; AUG başlatır, UAA, UAG, UGA durdurur ve amino asit şifrelemez. n amino asitlik zincirde n − 1 peptit bağı kurulur.",
+          "metin": [
+            "Akış: DNA → (transkripsiyon) mRNA → (translasyon) protein. mRNA kalıp DNA zincirinin tamamlayıcısıdır ve T yerine U taşır (AYS): kalıp 3′-TAC GGA-5′ → mRNA 5′-AUG CCU-3′.",
+            "Genetik kod (atlas): 4³ = 64 kodon. AUG başlatma kodonudur (metiyonin). UAA, UAG ve UGA durdurma kodonlarıdır; amino asit şifrelemezler, tRNA karşılıkları yoktur. Birden çok kodon aynı amino asidi şifreleyebilir.",
+            "Sayım kalıpları: n amino asitlik bir zincirde n − 1 peptit bağı kurulur ve n − 1 su açığa çıkar; mRNA'da durdurma kodonu dahil en az n + 1 kodon bulunur (atlasın örnek çözümü: 150 amino asit → en az 151 kodon, 149 su).",
+            "AYS'nin derin örneği: başlangıç kodonuyla başlayıp bitiş kodonuyla biten 450 nükleotitlik mRNA bölgesi = 150 kodon; bitiş kodonu amino asit kodlamaz → en çok 149 amino asit.",
+            "Sık hata (AYS): bitiş kodonunun bir amino asit kodladığını sanmak. Atlasın tuzağı aynı: durdurma kodonunun tRNA karşılığı yoktur."
+          ],
+          "not": "1. aşamadaki karşılığı akademik.1.27.7 «Genden proteine: nükleik asitler» (ab-04). Kaynak içi çelişki: atlas «en çok 61 çeşit tRNA görev alabilir» diyor (k14 satır 98), aynı atlas wobble ile 61 kodon için ~30-40 tRNA'nın yettiğini söylüyor (satır 63). Bu yüzden tRNA çeşidi sorusu derse alınmadı.",
+          "alistirmalar": [
+            {"id": "akademik.2.3.3.a1", "tur": "secmeli", "soru": "120 amino asitlik bir polipeptidin sentezinde kaç peptit bağı kurulur?", "sec": ["119", "120", "121", "360"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k14", "k16"]},
+            {"id": "akademik.2.3.3.a2", "tur": "secmeli", "soru": "Kalıp DNA zincirinde 3′-TAC-5′ dizisi varsa mRNA'daki karşılığı (5′→3′) hangisidir?", "sec": ["ATG", "UAC", "TAC", "AUG"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k15"]},
+            {"id": "akademik.2.3.3.a3", "tur": "secmeli", "soru": "Başlangıç kodonuyla başlayıp bitiş kodonuyla biten 300 nükleotitlik bir mRNA bölgesinden en çok kaç amino asitlik zincir sentezlenir?", "sec": ["100", "99", "300", "101"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k16"]}
+          ]
+        }
+      ]
+    }
+  ]
+}

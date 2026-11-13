@@ -1,0 +1,294 @@
+{
+  "sema": 1,
+  "alan": "muzik",
+  "id": "muzik.2",
+  "sira": 2,
+  "ad": "Temiz tempo",
+  "hedef": "Vuruşu bölüp düz ve aksak ölçüleri saymayı, kendi temiz temponu ölçmeyi, majör gamın derecelerinden yaygın akor ilerlemelerini kurmayı, E ve A şekilli barre ile minör pentatonik kalıp 1'i çalmayı ve bir parçayı baştan sona duraksamadan bitirmeyi öğrenmek.",
+  "onKosul": ["muzik.1"],
+  "kanitIsi": "Sol majörde 12 ölçü blues'u (G, C, D; her ölçüde bir akor, 4/4) metronomla kendi temiz temponda baştan sona duraksamadan çal ve kaydet (ESP merdiveni, müzik 2. basamak kanıtı: bir parçayı baştan sona duraksamadan çalmak). Kaydı dinle; duraksadığın ya da geçişte boşluk kalan ölçüleri numarasıyla işaretle. Ardından La minör pentatonik kalıp 1'i bir kez yukarı ve aşağı çal. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    {"id": "k1", "ad": "ESP merdiveni: müzik 2. basamak «Temiz tempo»", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "music, rank 2", "satir": "206-213", "dogrulama": "dogrulanmamis"},
+    {"id": "k2", "ad": "ESP gitar verisi: başlangıç ve hedef tempo ilkesi", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "Dosya başı açıklaması", "satir": "1-9", "dogrulama": "dogrulanmamis"},
+    {"id": "k3", "ad": "ESP gitar verisi: notalar, gamlar ve gam hesabı", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "ESP.NOTES, ESP.SCALES, ESP.scaleNotes", "satir": "13-46", "dogrulama": "dogrulanmamis"},
+    {"id": "k4", "ad": "ESP gitar verisi: akor ilerlemeleri (derece rakamlarıyla)", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "ESP.PROGRESSIONS", "satir": "48-63", "dogrulama": "dogrulanmamis"},
+    {"id": "k5", "ad": "ESP gitar verisi: teknikler ve temizlik ölçütleri", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "ESP.TECHNIQUES", "satir": "65-88", "dogrulama": "dogrulanmamis"},
+    {"id": "k6", "ad": "ESP gitar verisi: ölçü türleri", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "ESP.TIME_SIGNATURES", "satir": "92-100", "dogrulama": "dogrulanmamis"},
+    {"id": "k7", "ad": "ESP gitar verisi: ısınma sırası", "tur": "depo", "yol": "ESP/src/js/data/guitar_tabs.js", "bolum": "ESP.WARMUP", "satir": "102-114", "dogrulama": "dogrulanmamis"},
+    {"id": "k8", "ad": "Gitar akor kataloğu: beş açık akor (taslak veri)", "tur": "depo", "yol": "veri/taslak/esp/gitar_akor_gam_katalogu.jsonl", "bolum": "C, Am, G, Em, D", "satir": "1-5", "dogrulama": "dogrulanmamis"},
+    {"id": "k9", "ad": "Gitar akor kataloğu: F ve Bm bareli (taslak veri)", "tur": "depo", "yol": "veri/taslak/esp/gitar_akor_gam_katalogu.jsonl", "bolum": "F Major bareli, B Minor bareli", "satir": "6-7", "dogrulama": "dogrulanmamis"},
+    {"id": "k10", "ad": "Gitar armonisi atlası: gam yapıları ve formülleri", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "1.2 Gam yapıları ve formülleri", "satir": "33-39", "dogrulama": "dogrulanmamis"},
+    {"id": "k11", "ad": "Gitar armonisi atlası: kilise modları (derece nitelikleri)", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "1.3 Kilise modları", "satir": "43-53", "dogrulama": "dogrulanmamis"},
+    {"id": "k12", "ad": "Gitar armonisi atlası: CAGED sistemi", "tur": "gemini", "yol": "ESP/muzik_diksiyon/gitar_armoni_ve_diksiyon_ustalik.md", "bolum": "1.4 CAGED sistemi", "satir": "57-67", "dogrulama": "dogrulanmamis"},
+    {"id": "k13", "ad": "Ritim atlası: Türk musikisi usulleri ve aksak usuller", "tur": "gemini", "yol": "ESP/muzik_diksiyon/ritim_matematigi_poliritim_turk_aksak_usulleri_ve_konnakol_sistemi.md", "bolum": "3. Usul mimarisi ve aksak usuller", "satir": "81-108", "dogrulama": "dogrulanmamis"},
+    {"id": "k14", "ad": "Ritim atlası: Solkattu hece blokları", "tur": "gemini", "yol": "ESP/muzik_diksiyon/ritim_matematigi_poliritim_turk_aksak_usulleri_ve_konnakol_sistemi.md", "bolum": "4. Konnakol, Solkattu tablosu", "satir": "116-128", "dogrulama": "dogrulanmamis"},
+    {"id": "k15", "ad": "ESP müzik konu listesi: açık akorlar ve ritim, barre ve CAGED, temel teori", "tur": "depo", "yol": "ESP/src/js/data/topics.js", "bolum": "music: m-acik, m-barre, m-teori", "satir": "167-182", "dogrulama": "dogrulanmamis"}
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {"id": "muzik.2.k1", "tur": "secmeli", "soru": "ESP merdiveninin müzik 2. basamağını kapatan kanıt işi hangisidir?", "sec": ["Bir akor geçişini 60 BPM'de temiz çalmak", "Bir parçayı baştan sona duraksamadan çalmak", "Üç parçalık bir seti hatasız çalmak", "Bir akor dizisi üzerine 12 ölçü doğaçlama"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"]},
+      {"id": "muzik.2.k2", "tur": "secmeli", "soru": "Do majör gamında V. derecenin akoru hangisidir?", "sec": ["Fa majör (F)", "La minör (Am)", "Si eksilmiş (B°)", "Sol majör (G)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11"]},
+      {"id": "muzik.2.k3", "tur": "secmeli", "soru": "E şekilli bare akoru 8. perdede kurarsan hangi majör akoru çalarsın?", "sec": ["Do majör (C)", "Si majör (B)", "La majör (A)", "Re majör (D)"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k9"]},
+      {"id": "muzik.2.k4", "tur": "secmeli", "soru": "Devr-i Tûrân usulünün (7/8) iç bölüntüsü hangisidir?", "sec": ["3 + 2 + 2", "3 + 4", "2 + 2 + 3", "2 + 3 + 2"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k13"]},
+      {"id": "muzik.2.k5", "tur": "secmeli", "soru": "Mi minör pentatoniğin b7 derecesi hangi notadır?", "sec": ["D# (Re#)", "C (Do)", "D (Re)", "B (Si)"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"]},
+      {"id": "muzik.2.k6", "tur": "secmeli", "soru": "Re majörde I–V–vi–IV ilerlemesinin akorları hangileridir?", "sec": ["D – A – Bm – G", "D – G – Em – A", "D – A – F#m – G", "D – Bm – G – A"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k4", "k11"]}
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "muzik.2.1",
+      "ad": "Vuruş, ölçü ve temiz tempo",
+      "onKosul": [],
+      "kazanim": [
+        "Ritim kalıpları (ESP merdiveni, müzik 2. basamak).",
+        "Metronomla dörtlük ve sekizlik; vuruş kalıpları (ESP konu listesi, m-acik)."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "muzik.2.1.k1", "tur": "secmeli", "soru": "ESP verisine göre 6/8 ölçü nasıl tarif edilir?", "sec": ["Altı eşit büyük vuruş", "Üç büyük vuruş, sekiz küçük", "Aksak; vurgu 3 + 2", "İki büyük vuruş, altı küçük"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k6"]},
+          {"id": "muzik.2.1.k2", "tur": "secmeli", "soru": "Usul atlasına göre «Türk Aksağı» usulünün iç bölüntüsü hangisidir?", "sec": ["3 + 3", "2 + 3", "2 + 2", "2 + 2 + 2 + 3"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k13"]},
+          {"id": "muzik.2.1.k3", "tur": "secmeli", "soru": "ESP'ye göre vuruş kalıplarında temizliğin ölçütlerinden biri hangisidir?", "sec": ["Kolun tamamı vuruşa katılmalı", "Her vuruş aşağı yönde olmalı", "Tempo her gün artırılmalı", "Boş vuruşlar da tempoda olmalı"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]},
+          {"id": "muzik.2.1.k4", "tur": "secmeli", "soru": "Metronom 120 BPM'deyken her vuruşu «Ta-Ka-Di-Mi» diye dört heceye bölersen bir hece kaç saniye sürer?", "sec": ["0,25 saniye", "0,125 saniye", "0,5 saniye", "0,03 saniye"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k14"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "muzik.2.1.1",
+          "ad": "Vuruşu bölmek: Ta-Ka ve Ta-Ka-Di-Mi",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k14", "k5", "k15"],
+          "ozet": "Vuruş, ölçüde saydığın birimdir; bu ders bir vuruşun içini böler. Karnatik hece blokları bölmeyi sesli saymanın yoludur: ikiye «Ta-Ka», üçe «Ta-Ki-Ta», dörde «Ta-Ka-Di-Mi».",
+          "metin": [
+            "1. aşamada 4/4 ölçüde dört vuruş saymayı ve metronomla dörtlük vurmayı gördün. ESP konu listesi bir sonraki adımı «metronomla dörtlük ve sekizlik» diye yazar: vuruşun içini bölmek.",
+            "Ritim atlasındaki Karnatik hece blokları (Solkattu) bölmeyi sesli saymanın bir yoludur: 1 vuruş «Ta», 2 «Ta-Ka», 3 «Ta-Ki-Ta», 4 «Ta-Ka-Di-Mi». Aynı tempoda bir vuruşa «Ta-Ka» sığdırmak onu ikiye, «Ta-Ka-Di-Mi» sığdırmak dörde böler.",
+            "Modelin bağlantı notu: 4/4'te vuruş dörtlük olduğunda ikiye bölünmüşü sekizliktir; ESP konu listesindeki «dörtlük ve sekizlik» budur.",
+            "ESP'nin vuruş kalıbı notu: bilek serbest, kolun tamamı değil; boş vuruşlar da tempoda olmalı. Konu listesi vuruş yönünü (aşağı ve yukarı vuruş) ayrı bir madde sayar.",
+            "Modelin önerisi: metronomu kendi rahat temponda kur, «Ta»da aşağı, «Ka»da yukarı vur. Akor değiştirirken bile el «Ta-Ka» salınımını sürdürsün; tele değmeyen salınım boş vuruştur ve o da tempoda olmalıdır."
+          ],
+          "not": "Hece blokları k14'ten (satır 119-122). Aşağı-yukarı vuruşun «Ta» ve «Ka»ya eşlenmesi kaynakta yok, modelin önerisidir.",
+          "alistirmalar": [
+            {"id": "muzik.2.1.1.a1", "tur": "secmeli", "soru": "Bir vuruşu dört eşit parçaya bölerken hangi hece dizisi söylenir?", "sec": ["Ta-Ka", "Ta-Ki-Ta", "Ta-Ka-Di-Mi", "Düm-Tek"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"]},
+            {"id": "muzik.2.1.1.a2", "tur": "secmeli", "soru": "Metronom 60 BPM'de. Her vuruşu «Ta-Ka» diye ikiye bölersen saniyede kaç hece söylersin?", "sec": ["2", "1", "4", "60"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k14"]}
+          ]
+        },
+        {
+          "id": "muzik.2.1.2",
+          "ad": "Ölçü türleri: düz ve aksak",
+          "onKosul": ["muzik.2.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k13", "k14"],
+          "ozet": "Düz usul simetrik bölünür (2 + 2, 3 + 3), aksak usul asimetrik (2 + 3, 2 + 2 + 2 + 3). İki kaynak da 9/8'i zeybekle eşler; 7/8 ve 5/8 Türk müziğinde yaygın aksaklardır.",
+          "metin": [
+            "ESP'nin ölçü listesi: 4/4 varsayılan; 3/4 vals; 6/8 iki büyük vuruş, altı küçük; 5/4 aksak, vurgu 3 + 2 ya da 2 + 3; 7/8 Türk müziğinde yaygın aksak; 9/8 zeybek ve karşılama.",
+            "Usul atlasının ayrımı: düz (simetrik) usul [2 + 2] ya da [3 + 3]; aksak (asimetrik) usul [2 + 3] ya da [2 + 2 + 2 + 3].",
+            "Atlastaki örnekler: Türk Aksağı 5/8 = 2 + 3; Yürük Semâî 6/8 = 3 + 3; Devr-i Hindî 7/8 = 3 + 2 + 2 (başı uzun); Devr-i Tûrân 7/8 = 2 + 2 + 3 (sonu uzun); Aksak 9/8 = 2 + 2 + 2 + 3 (zeybek); Curcuna 10/8 = 3 + 2 + 2 + 3.",
+            "Kaynaklar arası not: ESP beşli ölçüyü 5/4, atlas Türk Aksağı'nı 5/8 yazar; ikisinde de iç bölüntü 2 ile 3'ün birleşimidir. 9/8'in zeybekle eşlenmesinde iki kaynak aynı.",
+            "Aksağı saymak: atlasın 9 heceli bloğu «Ta-Ka-Di-Mi Ta-Ka-Ta-Ki-Ta» (4 + 5) aslında 2 + 2 + 2 + 3'tür (modelin gözlemi). Her grubun ilk hecesine vurgu koy; metronomu sekizlik birime kur (modelin önerisi)."
+          ],
+          "not": "Atlasın darp heceleri (Düm-Tek dizileri, k13 satır 95-108) bu aşamaya alınmadı; hece sayıları bazı satırlarda bölüntüyle doğrudan eşleşmiyor ve ses olmadan sınanamıyor.",
+          "alistirmalar": [
+            {"id": "muzik.2.1.2.a1", "tur": "secmeli", "soru": "Devr-i Hindî usulünün (7/8) iç bölüntüsü hangisidir?", "sec": ["3 + 2 + 2", "2 + 2 + 3", "4 + 3", "2 + 3 + 2"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k13"]},
+            {"id": "muzik.2.1.2.a2", "tur": "secmeli", "soru": "Hangisi düz (simetrik) bir usuldür?", "sec": ["Türk Aksağı, 5/8 (2 + 3)", "Aksak, 9/8 (2 + 2 + 2 + 3)", "Yürük Semâî, 6/8 (3 + 3)", "Devr-i Tûrân, 7/8 (2 + 2 + 3)"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k13"]},
+            {"id": "muzik.2.1.2.a3", "tur": "secmeli", "soru": "2 + 2 + 2 + 3 bölüntülü bir ölçü kaç zamanlıdır?", "sec": ["4", "9", "7", "8"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k13"]}
+          ]
+        },
+        {
+          "id": "muzik.2.1.3",
+          "ad": "Temiz eşiği ölçmek",
+          "onKosul": ["muzik.2.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k2", "k5", "k7"],
+          "ozet": "Merdivenin 2. basamağı «Temiz tempo»dur. ESP verisi tempoyu senin ölçümünden başlatır: başlangıç temposu öneri, hedef tempo referanstır. Her tekniğin «temiz» ölçütü ayrıdır.",
+          "metin": [
+            "ESP merdiveni müzik 2. basamak «Temiz tempo»: çalışma listesi barre akorlar, pentatonik kalıp 1 ve ritim kalıpları; kapıları temiz eşik ≥ 80 BPM, 3 parça/teknik ve 30 günde 450 dakika; kanıtı bir parçayı baştan sona duraksamadan çalmak.",
+            "Aynı ESP'nin gitar verisi şunu söyler: başlangıç temposu bir hedef değil, bir öneridir; temiz çalınabilen tempo kişiden kişiye değişir ve ilk tempo girilene kadar hiçbir eşik üretilmez. Hedef tempo yalnız «referans»tır.",
+            "Tekniklere göre «temiz»in ölçütü (ESP): barre'da her telin ayrı ayrı temiz çıkması, akorun bütünü değil; akor geçişinde bir ölçüde bir akor ve geçişte boşluk kalmaması; vuruş kalıplarında boş vuruşların da tempoda olması; deşifrede durmadan çalmak, doğru çalmaktan önce gelir.",
+            "Isınma kuralı (ESP, zorunlu değil): gamı metronomla, önceki eşiğin 10 BPM altından başlat; günün tek tekniğinde eşiği ölç; repertuarda tempo eşiği değil, baştan sona bütünlük aranır.",
+            "Modelin bağlantı notu: merdivenin 80 BPM kapısı ile verinin «senin ölçümün» ilkesi gerilimli (1. aşama raporu da yazdı). Bu aşamada her teknik için kendi temiz eşiğini kaydet; 80 BPM'i merdivenin referansı say, hedefin değil."
+          ],
+          "alistirmalar": [
+            {"id": "muzik.2.1.3.a1", "tur": "secmeli", "soru": "Dün gamda temiz eşiğin 72 BPM idi. ESP'nin ısınma kuralına göre bugün gama hangi tempodan başlarsın?", "sec": ["72 BPM", "82 BPM", "80 BPM", "62 BPM"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k7"]},
+            {"id": "muzik.2.1.3.a2", "tur": "secmeli", "soru": "ESP'ye göre barre akorda «temiz» neyle ölçülür?", "sec": ["Akorun bütününün yüksek sesle çıkmasıyla", "Her telin ayrı ayrı temiz çıkmasıyla", "Akoru bir dakika basılı tutabilmekle", "100 BPM'e ulaşmakla"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]},
+            {"id": "muzik.2.1.3.a3", "tur": "secmeli", "soru": "ESP gitar verisine göre bir tekniğin başlangıç temposu (startBpm) nedir?", "sec": ["Ulaşılması zorunlu bir hedef", "Herkes için aynı temiz eşik", "Merdiven kapısının kendisi", "Bir öneri; eşik senin ilk ölçümünle başlar"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k2"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "muzik.2.2",
+      "ad": "Dereceler ve akor ilerlemeleri",
+      "onKosul": ["muzik.2.1"],
+      "kazanim": [
+        "Majör gam formülü; derece ve fonksiyon (I–IV–V) (ESP konu listesi, m-teori).",
+        "Akor geçişinde ölü zamanı azaltır (ESP konu listesi, m-acik)."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "muzik.2.2.k1", "tur": "secmeli", "soru": "ESP verisine göre I–V–vi–IV ilerlemesi için hangisi söylenir?", "sec": ["Pop'un en yaygın dört akoru; her tonda çalışmaya değer", "Caz armonisinin temel hücresi", "Blues formu", "İnen minör yürüyüş"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4"]},
+          {"id": "muzik.2.2.k2", "tur": "secmeli", "soru": "Do majör gamında vi. derecenin akoru hangisidir?", "sec": ["Fa majör (F)", "Mi minör (Em)", "La minör (Am)", "Re minör (Dm)"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11"]},
+          {"id": "muzik.2.2.k3", "tur": "secmeli", "soru": "Sol majörde I–vi–IV–V ilerlemesinin akorları hangileridir?", "sec": ["G – Am – C – D", "G – Em – D – C", "G – Em – C – D", "G – Bm – C – D"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k4", "k11"]},
+          {"id": "muzik.2.2.k4", "tur": "secmeli", "soru": "La majörde I–IV–V akorları hangileridir?", "sec": ["A – D – E", "A – C#m – E", "A – E – F#m", "A – D – G"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "muzik.2.2.1",
+          "ad": "Majör gamda yedi akor",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k3", "k10", "k11", "k15"],
+          "ozet": "Majör gamın her derecesine gamın kendi notalarından bir üçlü kurulur. Sonuç her majör tonda aynıdır: I, IV, V majör; ii, iii, vi minör; vii eksilmiş. Do majörde C, Dm, Em, F, G, Am, B°.",
+          "metin": [
+            "Majör gam formülü 1 - 2 - 3 - 4 - 5 - 6 - 7, adımları tam - tam - yarım - tam - tam - tam - yarım (atlas). ESP aynı gamı yarım ses aralıklarıyla tutar: 0, 2, 4, 5, 7, 9, 11. Do majör: C D E F G A B. Sol majör: G A B C D E F# (ESP'nin gam hesabıyla, modelin hesabı).",
+            "Her derecenin üzerine, gamın içinden birer nota atlayarak üçlü kurulur (modelin yöntemi). Do majörde: C-E-G majör, D-F-A minör, E-G-B minör, F-A-C majör, G-B-D majör, A-C-E minör, B-D-F eksilmiş. 1. aşamadaki kural burada işe yarar: kökle orta ses arası 4 yarım ses ise majör, 3 ise minör.",
+            "Kontrol: atlasın mod listesi derecelerin niteliğini aynı sırayla verir: 1. derece majör, 2. minör, 3. minör, 4. majör, 5. baskın, 6. minör, 7. eksilmiş.",
+            "Roma rakamıyla yazım: büyük harf majör, küçük harf minör akordur; ESP'nin ilerleme listesi bu yazımı kullanır (I, V, vi, IV). Eksilmiş akor için yaygın yazım vii°'dir (modelin notu).",
+            "Sol majörde yedi akor: G, Am, Bm, C, D, Em, F#°. 1. aşamanın beş açık akorundan dördü (G, C, D, Em) bu tondadır; Am de tondadır (modelin hesabı)."
+          ],
+          "not": "Derece akorları kaynakta tablo olarak yok; ESP gam adımlarından (k3 satır 22) modelce hesaplandı ve atlasın mod niteliklerine (k11 satır 47-53) karşı denetlendi.",
+          "alistirmalar": [
+            {"id": "muzik.2.2.1.a1", "tur": "secmeli", "soru": "Do majör gamında IV. derecenin akoru hangisidir?", "sec": ["Re minör (Dm)", "Sol majör (G)", "Mi minör (Em)", "Fa majör (F)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11"]},
+            {"id": "muzik.2.2.1.a2", "tur": "secmeli", "soru": "Sol majörde vi. derecenin akoru hangisidir?", "sec": ["La minör (Am)", "Mi minör (Em)", "Si minör (Bm)", "Do majör (C)"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11"]},
+            {"id": "muzik.2.2.1.a3", "tur": "secmeli", "soru": "Majör bir tonda eksilmiş akor hangi derecede kurulur?", "sec": ["5. derece", "2. derece", "4. derece", "7. derece"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]}
+          ]
+        },
+        {
+          "id": "muzik.2.2.2",
+          "ad": "Dört yaygın ilerleme",
+          "onKosul": ["muzik.2.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k4", "k3", "k8"],
+          "ozet": "ESP ilerlemeleri tondan bağımsız derece rakamlarıyla tutar. Sol majöre çevrildiğinde I–V–vi–IV, I–vi–IV–V ve 12 ölçü blues yalnız 1. aşamanın açık akorlarıyla çalınır.",
+          "metin": [
+            "ESP'nin ilerleme listesi ve notları: I–V–vi–IV «pop'un en yaygın dört akoru, her tonda çalışmaya değer»; I–vi–IV–V «geçişleri temiz yapmak için iyi bir ölçüt»; 12 ölçü blues I I I I · IV IV I I · V IV I V «metronomla en çok şey öğreten alıştırma»; ii–V–I «caz armonisinin temel hücresi».",
+            "Derecelerin tondan bağımsız tutulması kasıtlıdır: aynı ilerleme her tonda çalışılabilir (ESP).",
+            "Sol majöre çevirince (modelin hesabı): I–V–vi–IV = G – D – Em – C; I–vi–IV–V = G – Em – C – D; 12 ölçü blues = G G G G · C C G G · D C G D. Hepsi 1. aşamada öğrendiğin açık akorlarla (katalog tablarıyla) çalınır.",
+            "Do majörde I–V–vi–IV = C – G – Am – F. F bareli bir akordur; onu 3. ünitede göreceksin.",
+            "ii–V–I bu aşamada yalnız adıyla geçiyor; yedili akorlar sonraki aşamanın işi."
+          ],
+          "not": "ESP verisi ii–V–I için «önce tek tonda, sonra çeyrek tonlarla» diyor (k4 satır 54); «çeyrek ton» bu bağlamda anlamsız görünüyor, alınmadı.",
+          "alistirmalar": [
+            {"id": "muzik.2.2.2.a1", "tur": "secmeli", "soru": "Sol majörde I–V–vi–IV ilerlemesinin akorları hangileridir?", "sec": ["G – C – Em – D", "G – D – Em – C", "G – D – Am – C", "G – Em – C – D"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k4"]},
+            {"id": "muzik.2.2.2.a2", "tur": "secmeli", "soru": "ESP'nin 12 ölçü blues dizisinde 9. ölçünün derecesi hangisidir?", "sec": ["I", "IV", "V", "vi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4"]},
+            {"id": "muzik.2.2.2.a3", "tur": "secmeli", "soru": "Re majörde I–IV–V akorları hangileridir?", "sec": ["D – G – A", "D – F#m – A", "D – G – Em", "D – A – Bm"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11"]}
+          ]
+        },
+        {
+          "id": "muzik.2.2.3",
+          "ad": "Geçişi temizlemek",
+          "onKosul": ["muzik.2.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k8", "k15", "k4"],
+          "ozet": "ESP'nin ölçütü: bir ölçüde bir akor, geçişte boşluk yok. Konu listesi buna «akor geçişinde ölü zaman» der. Ortak parmağı kaldırma, zor geçişi ayrı çalış, tempoyu geçişe göre seç.",
+          "metin": [
+            "ESP akor geçişi ölçütü: bir ölçüde bir akor; geçişte boşluk kalmaması ölçülür. ESP konu listesi bu boşluğa «akor geçişinde ölü zaman» der.",
+            "Ortak parmak: katalogdaki parmak tariflerinde Do majör ile La minörün işaret (2. tel 1. perde) ve orta (4. tel 2. perde) parmakları aynı yerdedir; geçişte yalnız yüzük parmağı yer değiştirir (1. aşama). Ortak parmağı kaldırma.",
+            "Dikkat (modelin gözlemi): ortak bir nokta her zaman ortak parmak değildir. Katalogda 5. telin 2. perdesine Sol majörde işaret, Mi minörde orta parmak basar. Böyle geçişlerde nokta aynı olsa da parmak değişir.",
+            "Modelin önerisi: bir ilerlemede en zor geçişi bul (çoğu zaman ortak parmağı olmayan ikili), onu ayrı çal: iki akor, her ölçüde bir akor, metronomla. Tempo, en zor geçişin temiz eşiğidir; ilerlemenin tamamı o tempoda çalınır.",
+            "ESP'nin notuna göre I–vi–IV–V geçiş temizliği için iyi bir ölçüttür: Sol majörde G – Em – C – D."
+          ],
+          "alistirmalar": [
+            {"id": "muzik.2.2.3.a1", "tur": "secmeli", "soru": "ESP'ye göre akor geçişinde ne ölçülür?", "sec": ["Geçişte boşluk kalmaması", "Geçişin kaç parmakla yapıldığı", "Akorun ne kadar yüksek çıktığı", "Geçişte tellerin susturulması"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]},
+            {"id": "muzik.2.2.3.a2", "tur": "secmeli", "soru": "Katalogdaki parmak tariflerine göre Do majör ile La minör arasında hangi parmaklar yerinde kalır?", "sec": ["Yüzük ve orta parmak", "İşaret ve yüzük parmak", "İşaret ve orta parmak", "Hiçbiri"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k8"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "muzik.2.3",
+      "ad": "Barre, pentatonik ve bir parçayı bitirmek",
+      "onKosul": ["muzik.2.2"],
+      "kazanim": [
+        "Barre akorlar ve pentatonik kalıp 1 (ESP merdiveni, müzik 2. basamak).",
+        "E ve A şekilli barre; kök sesi bulma (ESP konu listesi, m-barre)."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "muzik.2.3.k1", "tur": "secmeli", "soru": "Minör pentatoniğin formülü hangisidir?", "sec": ["1 - 2 - 3 - 5 - 6", "1 - b3 - 4 - 5 - b7", "1 - b3 - 4 - b5 - 5 - b7", "1 - 2 - b3 - 4 - 5 - b6 - b7"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k3"]},
+          {"id": "muzik.2.3.k2", "tur": "secmeli", "soru": "La minör pentatonik hangi notalardan oluşur?", "sec": ["A B C D E", "A C D E F", "A C# E F# G", "A C D E G"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"]},
+          {"id": "muzik.2.3.k3", "tur": "secmeli", "soru": "A şekilli minör bare akoru 5. perdede kurarsan hangi akoru çalarsın?", "sec": ["La minör (Am)", "Re minör (Dm)", "Mi minör (Em)", "Do minör (Cm)"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k12"]},
+          {"id": "muzik.2.3.k4", "tur": "secmeli", "soru": "Sol majörde 12 ölçü blues'un 10. ölçüsünde hangi akor çalınır?", "sec": ["D", "G", "Em", "C"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k3"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "muzik.2.3.1",
+          "ad": "E ve A şekilli barre",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k9", "k12", "k5", "k15"],
+          "ozet": "Barre'da işaret parmağı bir perdede birkaç teli birden basar. F (E şekli) ve Bm (A şekli) ilk iki bareli akordur. Şekil kaydırılınca akorun adı kök sesin notasıyla değişir.",
+          "metin": [
+            "Katalog: Fa majör bareli «1-3-3-2-1-1»: işaret 1. perdede tam bare, yüzük 5. tel 3. perde, serçe 4. tel 3. perde, orta 3. tel 2. perde; «E-şekli bare akorunun temel örneği». Si minör bareli «x-2-4-4-3-2»: işaret 2. perdede 5 telli bare, yüzük 4. tel 4. perde, serçe 3. tel 4. perde, orta 2. tel 3. perde; «A-şekli minör bare akoru».",
+            "CAGED atlasına göre E şeklinin kök sesleri 6., 4. ve 1. teldedir; A şeklininkiler 5. ve 3. telde. Kontrol (modelin hesabı, 1. aşamanın tel-perde hesabıyla): F'de 6. tel 1. perde = F; Bm'de 5. tel 2. perde = B.",
+            "Kaydırmak (modelin bağlantı notu; ESP konu listesinde «kök sesi bulma»): aynı parmak şekli başka perdeye taşınınca akorun türü aynı kalır, adı kök sesin notası olur. E şekli 3. perdede: 6. tel 3. perde = G → Sol majör. A şekilli minör 5. perdede: 5. tel 5. perde = D → Re minör.",
+            "ESP'nin barre notu: her telin ayrı ayrı temiz çıkması ölçülür, akorun bütünü değil. Modelin önerisi: akoru bas, telleri 6'dan 1'e tek tek çal ve susan teli işaretle; temizlik o telden ölçülür.",
+            "Atlasın «CAGED'i çözen gitarist klavyenin hiçbir yerinde kaybolmaz» cümlesi bir vaattir, alınmadı; beş şeklin bağlanması 3. düzey konusu (ESP konu listesi)."
+          ],
+          "not": "Barre'ın el tekniği (bilek, baş parmak, baskı) hiçbir kaynakta yok; yazılmadı.",
+          "alistirmalar": [
+            {"id": "muzik.2.3.1.a1", "tur": "secmeli", "soru": "E şekilli bare akoru 5. perdede kurarsan hangi majör akoru çalarsın?", "sec": ["La majör (A)", "Sol majör (G)", "Si majör (B)", "Mi majör (E)"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k9"]},
+            {"id": "muzik.2.3.1.a2", "tur": "secmeli", "soru": "A şekilli minör bare akoru 7. perdede kurarsan hangi akoru çalarsın?", "sec": ["Re minör (Dm)", "Si minör (Bm)", "Mi minör (Em)", "Fa# minör (F#m)"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k9"]},
+            {"id": "muzik.2.3.1.a3", "tur": "secmeli", "soru": "CAGED atlasına göre E şekilli barre akorun kök sesleri hangi tellerdedir?", "sec": ["5. ve 3. tel", "5. ve 2. tel", "6., 4. ve 1. tel", "4. ve 2. tel"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12"]}
+          ]
+        },
+        {
+          "id": "muzik.2.3.2",
+          "ad": "Minör pentatonik: kalıp 1",
+          "onKosul": ["muzik.2.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10", "k3", "k1", "k15"],
+          "ozet": "Minör pentatonik beş seslidir: 1 - b3 - 4 - 5 - b7 (ESP: 0, 3, 5, 7, 10). La minör pentatonik A C D E G'dir. Kalıp 1, bu notaları 5.-8. perdelerde altı tele yerleştirir.",
+          "metin": [
+            "Formül (atlas): 1 - b3 - 4 - 5 - b7; yarım ses içermez. ESP aynı gamı 0, 3, 5, 7, 10 yarım ses adımlarıyla tutar ve «blues ve rock'ın omurgası» diye niteler; atlas da «rock ve blues sololarının omurgası» der.",
+            "Hesap (ESP'nin gam hesabıyla, modelin hesabı): La minör pentatonik A C D E G; Mi minör pentatonik E G A B D; Sol minör pentatonik G A# C D F (ESP notaları diyezle yazar; A# = Si bemol).",
+            "Kalıp 1, La'da (kaynakta tab yok; boş tel notalarından modelin hesabı, 5.-8. perdeler): 6. tel 5 (A), 8 (C) · 5. tel 5 (D), 7 (E) · 4. tel 5 (G), 7 (A) · 3. tel 5 (C), 7 (D) · 2. tel 5 (E), 8 (G) · 1. tel 5 (A), 8 (C). Kök La üç yerde: 6. tel 5, 4. tel 7, 1. tel 5.",
+            "Kalıbı kaydırmak: bütün kalıbı iki perde aşağı (3.-6. perdeler) alırsan Sol minör pentatonik olur (modelin hesabı). Merdivenin 2. basamağı yalnız kalıp 1'i ister; ESP konu listesi beş kalıbı 3. düzeye koyar.",
+            "Blues gamı (atlas ve ESP): pentatoniğe b5 eklenir: 1 - b3 - 4 - b5 - 5 - b7. La blues: A C D D# E G (modelin hesabı)."
+          ],
+          "not": "Kalıp 1'in perde yerleri hiçbir kaynakta yazılı değil; k3'teki gam adımları ve 1. aşamadaki boş tel notalarıyla (E A D G B E, o da katalogdan çıkarımdı) hesaplandı. Sahip bir tab kaynağıyla doğrulamalı.",
+          "alistirmalar": [
+            {"id": "muzik.2.3.2.a1", "tur": "secmeli", "soru": "Mi minör pentatonik hangi notalardan oluşur?", "sec": ["E G A B D", "E F# G A B", "E G A B C", "E G# B C# D"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k10"]},
+            {"id": "muzik.2.3.2.a2", "tur": "secmeli", "soru": "La minör pentatonik kalıp 1'de 3. telin 7. perdesi hangi notadır?", "sec": ["C (Do)", "E (Mi)", "A (La)", "D (Re)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k3"]},
+            {"id": "muzik.2.3.2.a3", "tur": "secmeli", "soru": "Blues gamı minör pentatoniğe hangi derece eklenerek kurulur?", "sec": ["6", "b5", "2", "7"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k3"]}
+          ]
+        },
+        {
+          "id": "muzik.2.3.3",
+          "ad": "Bir parçayı baştan sona: 12 ölçü blues",
+          "onKosul": ["muzik.2.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k1", "k7", "k5", "k4", "k8"],
+          "ozet": "Merdivenin kanıtı bir parçayı baştan sona duraksamadan çalmaktır. Parça olarak Sol majörde 12 ölçü blues (G, C, D) seçildi; tempo senin en zor geçişteki temiz eşiğindir, hata olursa durmadan bir sonraki ölçüye yetişirsin.",
+          "metin": [
+            "ESP merdiveni 2. basamağı şöyle kapatır: «Bir parçayı baştan sona duraksamadan çalmak.» ESP'nin ısınma notu repertuar için aynı şeyi söyler: tempo eşiği değil, baştan sona bütünlük. Deşifre notu: durmadan çalmak, doğru çalmaktan önce gelir.",
+            "Parça (modelin seçimi): ESP'nin 12 ölçü blues dizisi Sol majörde: G G G G · C C G G · D C G D, 4/4, her ölçüde bir akor. Üç akor da 1. aşamanın kataloğunda var.",
+            "Çalışma sırası (modelin önerisi): (1) üç geçişi ayrı ayrı çal: G–C, G–D, D–C; (2) en zor geçişin temiz eşiğini ölç; (3) 12 ölçüyü o tempoda baştan sona çal; (4) kaydet ve dinle.",
+            "Durmamak: bir ölçüde hata yaparsan durup düzeltme; bir sonraki ölçünün ilk vuruşuna yetiş (ESP'nin deşifre notundan modelin çıkarımı). Düzeltme kayıttan sonra, işaretlediğin ölçüde yapılır.",
+            "Merdivenin kör nokta listesi de hatırlatır: kapılar müzikal ifadeyi ölçemez. Bu aşamanın ölçtüğü bütünlüktür; ifade sonraki basamakların işi (modelin bağlantı notu)."
+          ],
+          "not": "Kör nokta listesi k1'in dışında, curriculum.js satır 191-196'da; bu cümle modelin bağlantı notudur.",
+          "alistirmalar": [
+            {"id": "muzik.2.3.3.a1", "tur": "secmeli", "soru": "Sol majörde 12 ölçü blues'un 5. ve 6. ölçülerinde hangi akor çalınır?", "sec": ["G", "D", "Em", "C"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k3"]},
+            {"id": "muzik.2.3.3.a2", "tur": "secmeli", "soru": "Parçayı baştan sona çalarken bir ölçüde hata yaptın. Bu dersin kuralına göre ne yaparsın?", "sec": ["Durur, o ölçüyü doğru çalana kadar tekrarlarım", "Durmadan bir sonraki ölçünün ilk vuruşuna yetişirim", "Parçaya baştan başlarım", "Tempoyu o anda yarıya indiririm"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5", "k7"]},
+            {"id": "muzik.2.3.3.a3", "tur": "acik", "soru": "Kanıt işi (çal ve işaretle): Sol majörde 12 ölçü blues'u (G G G G · C C G G · D C G D) metronomla kendi temiz temponda baştan sona duraksamadan çal ve kaydet. Kaydı dinle; duraksadığın ya da geçişte boşluk kalan ölçüleri numarasıyla yaz. Sonra La minör pentatonik kalıp 1'i bir kez yukarı ve aşağı çal. Tempoyu, işaretli ölçüleri ve bir sonraki çalışmada hangi geçişe odaklanacağını not et.", "dogru": "Örnek not (modelin örneği): «Tempo 64 BPM (G–D geçişindeki temiz eşiğim). Baştan sona durmadan çaldım. Boşluk: 8→9 (G→D) ve 12→baş (D→G). Pentatonik: 2. telde 8. perdeye geçerken aksadım. Sonraki çalışma: G–D geçişi, iki akor, ölçüde bir akor, 10 dakika.»", "olcut": ["Kayıt 12 ölçünün tamamını kapsıyor ve parça hiç durmadan bitiyor mu?", "Her ölçüde bir akor, doğru sırada mı (G G G G · C C G G · D C G D)?", "Tempo yazılmış ve öğrenenin kendi ölçtüğü temiz eşik mi?", "Boşluk kalan ölçüler numarasıyla işaretlenmiş ve bir sonraki odak geçiş seçilmiş mi?"], "durum": "taslak", "yazan": "model", "kaynak": ["k1", "k4", "k5", "k7"]}
+          ]
+        }
+      ]
+    }
+  ]
+}

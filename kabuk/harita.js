@@ -23,12 +23,12 @@
     { id: 'tanisma', ad: 'Tanışma', katman: 'kabuk', dal: 'ana', yol: '#/tanisma', ikon: 'el', durum: 'yeni', aciklama: 'Kendini kendi sözlerinle anlat; başlangıcın buna göre önerilir' },
     { id: 'ayarlar', ad: 'Ayarlar', katman: 'kabuk', dal: 'ayarlar', yol: '#/ayarlar', ikon: 'ayar', durum: 'yeni', aciklama: 'Görünüm, erişilebilirlik, bildirim, hesap' },
     // alanlar (plan §3, on alan); Öğren dalı
-    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 1, eski: AYS, aciklama: 'Sınav hazırlığı' },
+    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 2, eski: AYS, aciklama: 'Sınav hazırlığı' },
     { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Diller ve diksiyon' },
     { id: 'felsefe', ad: 'Felsefe', katman: 'alan', alan: 'felsefe', dal: 'ogren', yol: '#/alan/felsefe', ikon: 'soru', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Soru, kavram, tanım' },
     { id: 'tarih', ad: 'Tarih', katman: 'alan', alan: 'tarih', dal: 'ogren', yol: '#/alan/tarih', ikon: 'kum', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Olaylar ve dönemler' },
-    { id: 'muzik', ad: 'Müzik', katman: 'alan', alan: 'muzik', dal: 'ogren', yol: '#/alan/muzik', ikon: 'nota', durum: 'pilot', asama: 1, eski: ESP, aciklama: 'Çalgı ve kulak' },
-    { id: 'okuma', ad: 'Okuma ve yazı', katman: 'alan', alan: 'okuma', dal: 'ogren', yol: '#/alan/okuma', ikon: 'sayfa', durum: 'pilot', asama: 1, eski: ESP, aciklama: 'Okumak ve yazmak' },
+    { id: 'muzik', ad: 'Müzik', katman: 'alan', alan: 'muzik', dal: 'ogren', yol: '#/alan/muzik', ikon: 'nota', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Çalgı ve kulak' },
+    { id: 'okuma', ad: 'Okuma ve yazı', katman: 'alan', alan: 'okuma', dal: 'ogren', yol: '#/alan/okuma', ikon: 'sayfa', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Okumak ve yazmak' },
     // alanlar; Sağlık dalı
     { id: 'beslenme', ad: 'Beslenme', katman: 'alan', alan: 'beslenme', dal: 'saglik', yol: '#/alan/beslenme', ikon: 'tabak', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Öğünler ve tabak' },
     { id: 'hareket', ad: 'Hareket', katman: 'alan', alan: 'hareket', dal: 'saglik', yol: '#/alan/hareket', ikon: 'kos', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Spor ve yürüyüş' },

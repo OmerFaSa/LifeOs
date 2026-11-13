@@ -1,0 +1,277 @@
+{
+  "sema": 1,
+  "alan": "okuma",
+  "id": "okuma.2",
+  "sira": 2,
+  "ad": "Atomik not ve revizyon",
+  "hedef": "Okuduğunu tek fikirli, kendi cümlenle yazılmış, etiketli notlara ayırmayı; yazarın terimlerini, önermelerini ve argümanını çıkarıp ancak anladıktan sonra gerekçeli itiraz etmeyi; bir metni sıralı revizyon geçişleriyle kısaltıp güçlendirmeyi öğrenmek.",
+  "onKosul": ["okuma.1"],
+  "kanitIsi": "İki parçalı iş (ESP merdiveni, okuma ve yazı 2. basamak kanıtları): (1) okuduğun bir kitaptan bir bölümü on atomik nota ayır: her not tek fikir, kendi cümlen, sayfa numarası ve bir kavram etiketi taşısın; (2) kendi yazdığın 300-400 kelimelik bir metni (bu notlardan kurulmuş olabilir) revizyon geçişleriyle yarı uzunluğa indir; ilk ve son taslağı ve iki kelime sayısını yan yana koy. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    {"id": "k1", "ad": "ESP merdiveni: okuma 2. basamak «Atomik not»", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "reading, rank 2", "satir": "316-322", "dogrulama": "dogrulanmamis"},
+    {"id": "k2", "ad": "ESP merdiveni: yazı 2. basamak «Revizyon»", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "writing, rank 2", "satir": "371-377", "dogrulama": "dogrulanmamis"},
+    {"id": "k3", "ad": "ESP okuma yöntemi: okumanın dört düzeyi", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.READING_LEVELS", "satir": "12-26", "dogrulama": "dogrulanmamis"},
+    {"id": "k4", "ad": "ESP okuma yöntemi: analitik okumanın dört sorusu", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.ANALYTIC_QUESTIONS", "satir": "28-39", "dogrulama": "dogrulanmamis"},
+    {"id": "k5", "ad": "ESP okuma yöntemi: not şablonları", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.NOTE_TEMPLATES", "satir": "41-58", "dogrulama": "dogrulanmamis"},
+    {"id": "k6", "ad": "ESP okuma yöntemi: okuma protokolü", "tur": "depo", "yol": "ESP/src/js/data/reading_method.js", "bolum": "ESP.READING_PROTOCOL", "satir": "60-69", "dogrulama": "dogrulanmamis"},
+    {"id": "k7", "ad": "Retorik atlası: Luhmann'ın not sistemi (geçici, edebiyat, kalıcı not)", "tur": "gemini", "yol": "ESP/yazi_ve_kompozisyon/retorik_kompozisyon_ve_mantiksal_safsatalar.md", "bolum": "1.2 Zettelkasten", "satir": "42-50", "dogrulama": "dogrulanmamis"},
+    {"id": "k8", "ad": "Not tutma atlası: atomik not, bağlantı, kendi cümlenle yazma", "tur": "gemini", "yol": "AYS/ogrenme_bilimi/not_tutma_sistemleri_cornell_zettelkasten_zihin_haritalari_ve_aktif_ozetleme_mimarisi.md", "bolum": "3. Zettelkasten ilkeleri", "satir": "36-43", "dogrulama": "dogrulanmamis"},
+    {"id": "k9", "ad": "Adler atlası: analitik okuma 2. aşama, kural 5-8", "tur": "gemini", "yol": "ESP/okuma_ve_sentez/adler_analitik_syntopical_okuma_ve_polimat_calisma_sistemleri.md", "bolum": "1.2 Aşama 2: içeriği yorumlama", "satir": "56-60", "dogrulama": "dogrulanmamis"},
+    {"id": "k10", "ad": "Adler atlası: analitik okuma 3. aşama, kural 9-11", "tur": "gemini", "yol": "ESP/okuma_ve_sentez/adler_analitik_syntopical_okuma_ve_polimat_calisma_sistemleri.md", "bolum": "1.2 Aşama 3: eleştirme", "satir": "62-69", "dogrulama": "dogrulanmamis"},
+    {"id": "k11", "ad": "ESP retorik verisi: revizyon geçişleri", "tur": "depo", "yol": "ESP/src/js/data/rhetoric.js", "bolum": "ESP.REVISION_PASSES", "satir": "65-90", "dogrulama": "dogrulanmamis"},
+    {"id": "k12", "ad": "Akademik yazı atlası: Orwell ve Strunk & White", "tur": "gemini", "yol": "ESP/yazi_ve_kompozisyon/akademik_makale_deneme_hikaye_ve_ikna_edici_kompozisyon_yazim_mimarisi_atlasi.md", "bolum": "2. Yazım cerrahisi, Orwell'in 6 kuralı", "satir": "36-45", "dogrulama": "dogrulanmamis"},
+    {"id": "k13", "ad": "Retorik atlası: Orwell'in 6 kuralı", "tur": "gemini", "yol": "ESP/yazi_ve_kompozisyon/retorik_kompozisyon_ve_mantiksal_safsatalar.md", "bolum": "1.3 Üslup berraklığı", "satir": "54-62", "dogrulama": "dogrulanmamis"},
+    {"id": "k14", "ad": "ESP merdiveni: yazı 3. basamak «Yapı» (okunabilirlik ölçümü)", "tur": "depo", "yol": "ESP/src/js/data/curriculum.js", "bolum": "writing, rank 3", "satir": "379-386", "dogrulama": "dogrulanmamis"}
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {"id": "okuma.2.k1", "tur": "secmeli", "soru": "ESP merdiveninde okumanın 2. basamağının kanıt işi hangisidir?", "sec": ["Bir kitabı bitirip üç cümleyle özetlemek", "Bir bölümü on nota ayırmak", "Farklı iki kitaptan iki notu gerekçeli bağlamak", "Bir soruyu beş yazar üzerinden karşılaştırmak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k1"]},
+      {"id": "okuma.2.k2", "tur": "secmeli", "soru": "«Yazar, sosyal medyanın dikkat süresini kısalttığını ve bunun okul başarısını düşürdüğünü savunuyor.» Bu not atomik not ilkesine göre nasıl düzeltilir?", "sec": ["Yazarın cümlesi aynen alıntılanır", "Sayfa numarası eklenince yeterli olur", "Daha genel tek bir başlığa indirilir", "İki nota bölünür: biri dikkat süresi, öteki okul başarısı iddiası"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k7", "k8"]},
+      {"id": "okuma.2.k3", "tur": "secmeli", "soru": "Adler atlasına göre yazarın fikri tartışılmadan önce hangi adım gelir?", "sec": ["Anahtar terimlerin anlamı üzerinde yazarla uzlaşmak", "Yazarın biyografisini okumak", "Kitabın satış sayısına bakmak", "Bütün itirazları önceden yazmak"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k9"]},
+      {"id": "okuma.2.k4", "tur": "secmeli", "soru": "Atlasın kural 11'ine göre aşağıdakilerden hangisi geçerli bir itiraz gerekçesi değildir?", "sec": ["Yazarın dayandığı bir olgunun yanlış olması", "Argümanda bir çelişki bulunması", "Yazarın vardığı sonucu sevmemek", "Sorunun can alıcı bir boyutunun atlanması"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k10"]},
+      {"id": "okuma.2.k5", "tur": "secmeli", "soru": "ESP'nin revizyon sırasına göre kısaltma geçişinden önce hangisi yapılır?", "sec": ["Sesli okuma", "Tekrar geçişi", "Yapı ve iddia geçişleri", "Cümle geçişi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]},
+      {"id": "okuma.2.k6", "tur": "secmeli", "soru": "Orwell'in kurallarına göre «Rapor komite tarafından incelendi» cümlesinin önerilen biçimi hangisidir?", "sec": ["Komite raporu inceledi.", "Rapor, komitece incelenmiş bulunmaktadır.", "Rapor incelendi.", "Komite tarafından raporun incelenmesi yapıldı."], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13"]}
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "okuma.2.1",
+      "ad": "Atomik not: bir bölümü on nota ayırmak",
+      "onKosul": [],
+      "kazanim": [
+        "Tek fikir = tek not; kendi cümlenle yazma; kavram etiketi (ESP merdiveni, okuma 2. basamak)."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "okuma.2.1.k1", "tur": "secmeli", "soru": "Atomik not ilkesi neyi söyler?", "sec": ["Her kitap için tek bir not tutulur", "Not en az bir sayfa olmalıdır", "Not yalnız alıntılardan oluşur", "Her not yalnız tek bir fikir taşır"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k7", "k8"]},
+          {"id": "okuma.2.1.k2", "tur": "secmeli", "soru": "Kalıcı notun «kendi kendine yetebilirlik» ilkesi neyi ister?", "sec": ["Not başka hiçbir notla bağlanmamalı", "Not, kitaba bakmadan tek başına anlaşılabilmeli", "Not yazarın kendi cümlesi olmalı", "Not yalnız bir anahtar kelimeden oluşmalı"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k7"]},
+          {"id": "okuma.2.1.k3", "tur": "secmeli", "soru": "ESP okuma protokolüne göre bir oturumun sonunda kaç atomik not çıkarılır?", "sec": ["1", "10-15", "Sınır yok, ne kadar çok o kadar iyi", "3-5"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k6"]},
+          {"id": "okuma.2.1.k4", "tur": "secmeli", "soru": "Yeni bir notu eski bir notla bağlamaya çalışıyorsun ama anlamlı bir bağ bulamıyorsun. ESP'ye göre ne yaparsın?", "sec": ["En yakın konudaki notla yine de bağlarım", "Zorlamam; uydurulmuş bağ ağı anlamsız yapar", "Notu silerim", "Yeni bir genel başlık açıp ikisini oraya koyarım"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "okuma.2.1.1",
+          "ad": "Tek fikir = tek not",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k7", "k8", "k1"],
+          "ozet": "Atomik not tek bir bağımsız düşünce taşır ve kitaba bakmadan tek başına anlaşılır. İçinde iki iddia olan not ikiye bölünür.",
+          "metin": [
+            "ESP merdiveninde okumanın 2. basamağı «Atomik not»tur. Çalışma listesi: tek fikir = tek not, kendi cümlenle yazma, kavram etiketi. Kanıt işi: bir bölümü on nota ayırmak.",
+            "Retorik atlası Luhmann'ın sisteminde üç not türü sayar: geçici notlar (gün içinde akla gelen; 24 saat içinde ya kalıcı nota çevrilir ya atılır), edebiyat notları (okurken kendi kelimelerinle 1-2 cümle ve sayfa numarası), kalıcı notlar.",
+            "Kalıcı notun iki ilkesi (iki atlasta aynı): her kartta yalnız tek bir bağımsız düşünce; kart, kitaba gerek kalmadan tek başına anlaşılacak kadar net. Not tutma atlası aynı ilkeyi «farklı konular birbirine karıştırılmaz» diye söyler.",
+            "Bölme sınaması (modelin önerisi): notta «ve», «ayrıca», «üstelik» ile bağlanmış iki ayrı iddia varsa, her birini ayrı bir nota yaz. Bir iddia ile onun kanıtı ise aynı notta kalabilir; ya da ESP şablonlarıyla iddia notu ve kanıt notu olarak ayrılır.",
+            "Tek başına anlaşılma sınaması (modelin önerisi): notu bir hafta sonra kitabı açmadan oku. «Bu», «o», «yukarıdaki» gibi kitaba gönderen sözler varsa yerine neyi kastettiğini yaz."
+          ],
+          "not": "Atlasların «Luhmann'ın 70 kitap ve 400 makale» sayısı (k7 satır 43; aynı sayı not tutma atlasında satır 34) doğrulanmadı, alınmadı (1. aşama raporu da yazdı).",
+          "alistirmalar": [
+            {"id": "okuma.2.1.1.a1", "tur": "secmeli", "soru": "Hangisi atomik bir nottur?", "sec": ["«Bölüm 3: alışkanlık, ortam, ödül, kimlik, tekrar, irade üzerine.»", "«Yazar ortamı, ödülü ve kimliği anlatıyor; ayrıca iradenin abartıldığını ve tekrarın gereksiz olduğunu söylüyor.»", "«Yazar, alışkanlığın tekrarla değil ortamla kurulduğunu savunuyor (s. 42).»", "«Çok önemli bir bölüm, tekrar oku.»"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k7", "k8"]},
+            {"id": "okuma.2.1.1.a2", "tur": "secmeli", "soru": "Notunda «Bu yüzden yazar ona karşı çıkıyor.» yazıyor. Kendi kendine yetebilirlik ilkesine göre sorun nedir?", "sec": ["«Bu» ve «ona» kitaba bakmadan anlaşılmıyor", "Not fazla kısa", "Sayfa numarası olsa sorun kalmazdı", "Not bir itiraz içeriyor"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k7"]}
+          ]
+        },
+        {
+          "id": "okuma.2.1.2",
+          "ad": "Notun türü ve kavram etiketi",
+          "onKosul": ["okuma.2.1.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k5", "k1", "k8"],
+          "ozet": "ESP'de her not bir soruya cevap verir: iddia, kanıt, itiraz, tanım, bağlantı, soru, alıntı. Kavram etiketi notun hangi kavram hakkında olduğunu söyler; böylece not sonradan bulunur ve bağlanır.",
+          "metin": [
+            "ESP'nin kuralı: her not şablonu bir soruya cevap verir; şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur. 1. aşamada şablonları gördün; bu ders not ayırırken hangisini seçeceğini öğretir.",
+            "Seçim (modelin özeti, şablonların «kullanım» satırlarından): yazarın tezini kaydediyorsan iddia notu; iddiayı taşıyan veriyi ayrı tutuyorsan kanıt notu; kendi karşı çıkışın için itiraz notu; bir kavramın bu metindeki anlamını sabitlemek için tanım notu; başka bir yazarla ilişki için bağlantı notu; cevabı henüz olmayan soru için soru notu.",
+            "Alıntı notu az kullanılır; ESP'nin uyarısı: alıntı yığını not değildir. Not tutma atlası daha sert: «kitaptan doğrudan alıntı yapmak yasaktır». Kaynaklar burada ayrılıyor; ESP'nin ölçülü kuralı (az ve sayfa numarasıyla) bu derste esas alındı.",
+            "Kavram etiketi merdivenin çalışma listesinde bir başlık olarak geçer; nasıl yazılacağını kaynak söylemez. Modelin önerisi: notun hangi kavram hakkında olduğunu bir iki kelimeyle yaz (ör. «alışkanlık», «ortam»), aynı kavram için hep aynı kelimeyi kullan. Tanım notu, o etiketin bu yazardaki anlamını sabitler.",
+            "Not tutma atlasına göre notlar klasörlere hapsedilmez, birbirine referansla bağlanır. Bağ kurmak merdivenin bir sonraki basamağıdır («Bağ»); etiket o işin ön hazırlığıdır (modelin bağlantı notu)."
+          ],
+          "alistirmalar": [
+            {"id": "okuma.2.1.2.a1", "tur": "secmeli", "soru": "Yazarın «özgürlük» sözünü bu kitapta «seçeneklerin çokluğu» anlamında kullandığını kaydetmek istiyorsun. Hangi not türü uygundur?", "sec": ["Tanım notu", "İddia notu", "Alıntı notu", "Soru notu"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]},
+            {"id": "okuma.2.1.2.a2", "tur": "secmeli", "soru": "Okurken aklına «Bu kural çocuklar için de geçerli mi?» sorusu geldi; cevabı kitapta yok. Hangi not türünü kullanırsın?", "sec": ["İtiraz notu", "Kanıt notu", "Soru notu", "Bağlantı notu"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k5"]}
+          ]
+        },
+        {
+          "id": "okuma.2.1.3",
+          "ad": "Bir bölümü on nota ayırmak",
+          "onKosul": ["okuma.2.1.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k6", "k3", "k1"],
+          "ozet": "Oturumun şekli: amaç, süre, okurken yalnız işaretle, sonda 3-5 atomik not çıkar, bağlamayı dene ama zorlama. On not, birkaç oturumun ürünüdür; atomik notların çoğu analitik okumadan çıkar.",
+          "metin": [
+            "ESP okuma protokolü: (1) Amaç: bu oturumda hangi soruyu kovaladığını bir cümleyle yaz. (2) Süre: zamanlayıcıyı kur, telefon başka odada. (3) İşaretle: okurken yalnız işaretle, not yazmak için durma. (4) Çıkar: oturum sonunda işaretlerinden 3-5 atomik not çıkar. (5) Bağla: her yeni notu en az bir eski notla bağlamayı dene; bağ bulamıyorsan zorlama, uydurulmuş bağ ağı görünür ama anlamsız yapar.",
+            "Okuma düzeyleri listesine göre atomik notların çoğu analitik okumadan çıkar: «Yazar ne iddia ediyor, nasıl savunuyor, nerede haklı?»",
+            "Hesap (modelin): oturum başına 3-5 not ile on not iki ya da üç oturum eder. Merdivenin kanıtı «bir bölümü on nota ayırmak» olduğu için bölüm seçimi önemli: on ayrı fikir taşıyacak kadar dolu, ama tek oturuşta işaretlenebilecek bir bölüm seç (modelin önerisi).",
+            "Merdivenin bu basamaktaki sayaçları: 30 atomik not ve 3 kaynak. Bunlar motorun ölçtüğü sayılardır; bu aşamanın kanıtı ise tek bir bölümdür."
+          ],
+          "alistirmalar": [
+            {"id": "okuma.2.1.3.a1", "tur": "secmeli", "soru": "ESP protokolüne göre okurken ne yaparsın?", "sec": ["Her paragrafta durup not yazarım", "Yalnız işaretlerim; notu oturum sonunda çıkarırım", "Hiç işaretlemem, sonunda hatırladıklarımı yazarım", "Önemli cümleleri deftere aynen kopyalarım"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k6"]},
+            {"id": "okuma.2.1.3.a2", "tur": "secmeli", "soru": "Oturum başına 3-5 not çıkarırsan on nota en az kaç oturumda ulaşırsın?", "sec": ["1", "4", "10", "2"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k6"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "okuma.2.2",
+      "ad": "Yazarı anlamak, sonra yargılamak",
+      "onKosul": ["okuma.2.1"],
+      "kazanim": ["Analitik okumanın yorumlama ve eleştirme aşamalarını (Adler atlası, kural 5-11) uygular."],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "okuma.2.2.k1", "tur": "secmeli", "soru": "Adler atlasının kural 9'una göre eleştiriye ne zaman başlanır?", "sec": ["Kitabın ilk bölümünü bitirince", "«Tam olarak anladım» diyebildikten sonra", "Yazara katılmadığın ilk cümlede", "Başka bir eleştiriyi okuduktan sonra"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10"]},
+          {"id": "okuma.2.2.k2", "tur": "secmeli", "soru": "ESP'nin analitik okuma sorularından «Ayrıntıda ne söyleniyor ve nasıl?» sorusunun notu hangisidir?", "sec": ["Tek cümlede söyleyemiyorsan henüz bitmemiştir", "Anlamadan katılmak da karşı çıkmak da okuma değildir", "Doğruysa senin için ne değişiyor?", "Ana savı ve onu taşıyan iskeleti çıkar"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k4"]},
+          {"id": "okuma.2.2.k3", "tur": "secmeli", "soru": "Kural 8 okurdan ne ister?", "sec": ["Yazarın hangi problemleri çözüp hangilerini çözemediğini belirlemeyi", "Kitabın türünü sınıflandırmayı", "Kitabı bir iki cümleyle özetlemeyi", "Yazara itiraz için dört gerekçe aramayı"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k9"]},
+          {"id": "okuma.2.2.k4", "tur": "secmeli", "soru": "Bir yazarın, 2010 sonrası bir araştırmayı bilmeden eski bir bulguya dayandığını gösteriyorsun. Bu, kural 11'in hangi gerekçesidir?", "sec": ["Yazar mantıksızdır (11c)", "Yazarın analizi eksiktir (11d)", "Yazar bilgisizdir (11a)", "Bu bir itiraz gerekçesi değildir"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k10"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "okuma.2.2.1",
+          "ad": "Terimler ve önermeler",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k9", "k5", "k4"],
+          "ozet": "Yazarı anlamanın ilk iki adımı: anahtar terimleri bulup anlamlarında yazarla uzlaşmak ve en kritik cümlelerden temel önermeleri çıkarmak. Terim tanım notuna, önerme iddia notuna gider.",
+          "metin": [
+            "1. aşamada analitik okumanın birinci aşamasını gördün: kitap ne hakkında (kural 1-4). Adler atlası ikinci aşamayı «kitap neyi nasıl söylüyor?» diye adlandırır ve dört kural koyar.",
+            "Kural 5: yazarın anahtar terimlerini bul ve bu terimlerin anlamı üzerinde onunla uzlaş; atlasa göre terminoloji birliği kurmadan fikir tartışılamaz. Kural 6: en kritik cümleleri tespit edip yazarın temel önermelerini (savlarını) açığa çıkar.",
+            "Not karşılığı (modelin bağlantı notu): kural 5'in ürünü tanım notudur («<kavram> burada şu anlamda: …»), kural 6'nınki iddia notudur («<yazar> şunu savunuyor: …»).",
+            "Modelin örneği: bir kitapta «disiplin» sözü kimi yerde «kurala uymak», kimi yerde «uzun vadeli hedef için kısa vadeli isteği ertelemek» anlamında geçiyorsa, önce yazarın hangisini kastettiğini sabitle; yoksa ona katılıp katılmadığını söyleyemezsin.",
+            "Kritik cümle nasıl bulunur? Atlas yalnız «en kritik cümleler» der; ölçüt vermez. 1. aşamadaki ana düşünce dersi yardımcı olur: paragrafın sonuç cümlesi çoğu zaman yazarın hükmünü taşır (modelin bağlantı notu)."
+          ],
+          "alistirmalar": [
+            {"id": "okuma.2.2.1.a1", "tur": "secmeli", "soru": "Kural 5'e göre yazarla neyde uzlaşmak gerekir?", "sec": ["Kitabın vardığı sonuçta", "Kitabın türünde", "Anahtar terimlerin anlamında", "Yazarın siyasi görüşünde"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k9"]},
+            {"id": "okuma.2.2.1.a2", "tur": "secmeli", "soru": "Kural 6'nın ürünü olarak hangi not türü yazılır?", "sec": ["İddia notu", "Soru notu", "Alıntı notu", "Bağlantı notu"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k9", "k5"]}
+          ]
+        },
+        {
+          "id": "okuma.2.2.2",
+          "ad": "Argümanı yeniden kurmak",
+          "onKosul": ["okuma.2.2.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k9", "k4", "k5"],
+          "ozet": "Önermeleri bulduktan sonra onları birbirine bağlayan argüman zinciri yeniden kurulur (kural 7) ve yazarın hangi problemleri çözüp hangilerini çözemediği belirlenir (kural 8).",
+          "metin": [
+            "Kural 7: önermelerin dayandığı argüman zincirini (tasım ve mantıksal kanıtları) yeniden inşa et. ESP'nin analitik sorusu aynı işi şöyle tarif eder: «Ayrıntıda ne söyleniyor ve nasıl? Ana savı ve onu taşıyan iskeleti çıkar.»",
+            "Yeniden kurmanın biçimi (modelin önerisi): her öncülü ayrı bir kanıt notu olarak yaz («Bu iddianın dayanağı: …»), sonra iddia notunun altına sırayla diz: öncül 1, öncül 2 → sonuç. Felsefe alanının öncül-sonuç dersleri aynı araçtır (modelin bağlantı notu).",
+            "Kural 8: yazarın hangi problemleri çözdüğünü, hangilerini çözemediğini ve çözemediklerinin farkında olup olmadığını belirle. 1. aşamada kitabın çözmeye çalıştığı soruyu (kural 4) bulmuştun; kural 8 o soruya dönüp bilanço çıkarır.",
+            "Modelin örneği: «Ekran süresi uykuyu bozar (öncül 1). Bozuk uyku dikkati düşürür (öncül 2). O hâlde ekran süresi dikkati düşürür (sonuç).» Yeniden kurunca her öncülün ayrı kanıt istediği görünür; kitap yalnız birini kanıtlıyorsa bu, kural 8'in «çözemediği» tarafına yazılır."
+          ],
+          "alistirmalar": [
+            {"id": "okuma.2.2.2.a1", "tur": "secmeli", "soru": "Modelin örneğinde («Ekran süresi uykuyu bozar. Bozuk uyku dikkati düşürür. O hâlde…») sonuç hangisidir?", "sec": ["Ekran süresi uykuyu bozar", "Bozuk uyku dikkati düşürür", "Uyku ekran süresini azaltır", "Ekran süresi dikkati düşürür"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k9"]},
+            {"id": "okuma.2.2.2.a2", "tur": "secmeli", "soru": "Kitap öncüllerden yalnız birini kanıtlıyor, ötekini kanıtsız bırakıyor. Kural 8'e göre bunu nereye yazarsın?", "sec": ["Kitabın türü sınıflamasına", "Yazarın çözemediği problemler arasına", "Terim listesine", "Hiçbir yere; önemli değil"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k9"]}
+          ]
+        },
+        {
+          "id": "okuma.2.2.3",
+          "ad": "Anlamadan eleştirme: dört itiraz gerekçesi",
+          "onKosul": ["okuma.2.2.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k10", "k4", "k5"],
+          "ozet": "Anlamadan ne katılmak ne karşı çıkmak okumadır. İtiraz dört gerekçeden birine dayanır: yazar bilgisiz, yanlış bilgilendirilmiş, mantıksız ya da analizi eksik. Her itiraz bir itiraz notuna yazılır.",
+          "metin": [
+            "Kural 9: «Tam olarak anladım» diyene kadar övgü de yergi de yapma; anlamadan eleştiri geçersizdir. ESP'nin analitik sorusu aynı yerde durur: «Kitap doğru mu, tamamı mı, bir kısmı mı? Anlamadan katılmak da karşı çıkmak da okuma değildir.»",
+            "Kural 10: haklı çıkmak için değil, hakikati bulmak için tartış; itirazını öfkeyle değil gerekçeyle sun.",
+            "Kural 11, dört gerekçe: (a) yazar bilgisizdir: konuyla ilgili temel bir olgudan habersizdir; (b) yazar yanlış bilgilendirilmiştir: dayandığı veri ya da öncül olgusal olarak yanlıştır; (c) yazar mantıksızdır: argümanında safsata, çelişki ya da geçersiz çıkarım vardır; (d) yazarın analizi eksiktir: sorunun can alıcı boyutlarını atlamıştır.",
+            "Not karşılığı: itiraz notu «Buna şöyle itiraz edilebilir: …». Modelin önerisi: notun sonuna gerekçenin harfini yaz (11a-d); gerekçesini koyamadığın itiraz henüz bir izlenimdir.",
+            "Son soru (ESP): «Ne olmuş yani? Doğruysa senin için ne değişiyor?» Eleştiri kitabı kapatmaz; senin için ne değiştiğini yazınca okuma biter."
+          ],
+          "not": "Atlasın başlığı «15 altın kural» der, liste 11'de biter (k10 satır 69; 1. aşama raporu da yazdı). Ders kural numaralarını listedeki gibi kullanıyor.",
+          "alistirmalar": [
+            {"id": "okuma.2.2.3.a1", "tur": "secmeli", "soru": "«Yazarın hesapladığı oran, kendi verdiği tablodaki sayılarla çelişiyor.» Bu itiraz hangi gerekçeye dayanır?", "sec": ["Yazar bilgisizdir (11a)", "Yazar yanlış bilgilendirilmiştir (11b)", "Yazarın analizi eksiktir (11d)", "Yazar mantıksızdır (11c)"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k10"]},
+            {"id": "okuma.2.2.3.a2", "tur": "secmeli", "soru": "Kitabın ilk yirmi sayfasını okudun ve sonucuna katılmıyorsun. Kural 9'a göre ne yaparsın?", "sec": ["Hemen itiraz notu yazarım", "Önce yazarı tam anladığımdan emin olurum, sonra yargılarım", "Kitabı kötü diye bırakırım", "Yazarın sonucunu aynen kabul ederim"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k10", "k4"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "okuma.2.3",
+      "ad": "Revizyon: metni kısaltıp güçlendirmek",
+      "onKosul": ["okuma.2.2"],
+      "kazanim": [
+        "İkinci taslak; gereksiz kelime avı; cümle uzunluğu dengesi (ESP merdiveni, yazı 2. basamak)."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {"id": "okuma.2.3.k1", "tur": "secmeli", "soru": "ESP merdiveninde yazının 2. basamağının kanıt işi hangisidir?", "sec": ["Tek oturuşta bitmiş 500 kelimelik bir metin", "Bir argümanı 1500 kelimede eksiksiz kurmak", "Bir metni yarı uzunluğa indirip güçlendirmek", "Günde 200 kelime yazmak"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"]},
+          {"id": "okuma.2.3.k2", "tur": "secmeli", "soru": "ESP'nin kısaltma geçişinin sorusu hangisidir?", "sec": ["Hangi kelime çıkarılsa anlam değişmez?", "Her paragraf bir iş yapıyor mu?", "Nerede nefesin kesiliyor?", "Her iddianın arkasında bir örnek var mı?"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]},
+          {"id": "okuma.2.3.k3", "tur": "secmeli", "soru": "ESP'ye göre okunabilirlik ölçümü ne zaman alınır?", "sec": ["Cümle geçişinden sonra", "Yazmaya başlamadan önce", "Yapı geçişinden önce", "Hiç alınmaz"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]},
+          {"id": "okuma.2.3.k4", "tur": "secmeli", "soru": "Orwell'in 6. kuralı ne der?", "sec": ["Hiçbir kural çiğnenmez", "Edilgen çatı hiç kullanılmaz", "Kurallardan birine uymak cümleyi anlaşılmaz yapacaksa o kural çiğnenir", "Yabancı kelime yerine her zaman uzun Türkçe karşılık kullanılır"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13"]}
+        ]
+      },
+      "dersler": [
+        {
+          "id": "okuma.2.3.1",
+          "ad": "Gereksiz kelime avı",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k12", "k13", "k11", "k2"],
+          "ozet": "Kısaltma geçişinin tek sorusu: hangi kelime çıkarılsa anlam değişmez? Orwell'in altı kuralı avın listesidir: klişe, uzun kelime, atılabilir kelime, edilgen çatı, gereksiz jargon ve hepsinin üstünde anlaşılırlık.",
+          "metin": [
+            "ESP merdiveninde yazının 2. basamağı «Revizyon»dur. Çalışma listesi: ikinci taslak, gereksiz kelime avı, cümle uzunluğu dengesi. Kanıt işi: bir metni yarı uzunluğa indirip güçlendirmek.",
+            "Orwell'in altı kuralı (iki atlasta aynı sırayla): (1) basmakalıp metafor ve klişe kullanma; (2) kısa kelime iş görüyorsa uzununu seçme; (3) bir kelimeyi atmak mümkünse at; (4) etken çatı kurabileceğin yerde edilgen çatı kullanma; (5) gündelik karşılığı olan kavram için jargon ya da yabancı kelime kullanma; (6) bu kurallardan birine uymak cümleyi barbarca ya da anlaşılmaz yapacaksa kuralı çiğne.",
+            "Atlasın etken çatı örneği: «Rapor komite tarafından incelendi» yerine «Komite raporu inceledi».",
+            "ESP'nin kısaltma geçişi: «Hangi kelime çıkarılsa anlam değişmez?» ve notu: kısalan metin hızlanmaz, netleşir.",
+            "Modelin örnekleri: «Sonuç olarak, en nihayetinde bu yöntemi seçtik» → «Sonunda bu yöntemi seçtik» (iki söz aynı işi yapıyor). «Bu konu hakkında bir değerlendirme yapmak istiyorum» → «Bu konuyu değerlendirmek istiyorum» (ad + yapmak yerine fiil)."
+          ],
+          "not": "Atlasın Orwell kuralı 3'e eklediği «Omit needless words!» Strunk'a aittir (k12 satır 42; 1. aşama raporu da yazdı); ders kuralı alıntısız verdi. ESP'nin «hedef yüzde yirmi» notu (k11 satır 80) kaynaksız olduğu için 1. aşamada olduğu gibi alınmadı.",
+          "alistirmalar": [
+            {"id": "okuma.2.3.1.a1", "tur": "secmeli", "soru": "«Toplantıda kararlar yönetim tarafından alındı» cümlesinin etken çatılı biçimi hangisidir?", "sec": ["Toplantıda kararlar alındı.", "Yönetim toplantıda kararları aldı.", "Kararlar, yönetimce toplantıda alınmıştır.", "Toplantıda yönetim tarafından karar alınması yapıldı."], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13"]},
+            {"id": "okuma.2.3.1.a2", "tur": "secmeli", "soru": "«Sonuç olarak, en nihayetinde bu yöntemi seçtik» cümlesinde ne fazladır?", "sec": ["«Seçtik» fiili", "«Bu yöntemi» nesnesi", "Hiçbir şey; cümle zaten kısa", "Aynı işi yapan iki söz: «sonuç olarak» ve «en nihayetinde»"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k11", "k13"]},
+            {"id": "okuma.2.3.1.a3", "tur": "secmeli", "soru": "Orwell'in 2. kuralı neyi söyler?", "sec": ["Her cümle en fazla on kelime olmalı", "Kısa kelime iş görüyorsa uzun olanı seçme", "Kısa cümle yerine uzun cümle kur", "Yabancı kelimeleri kısalt"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k12", "k13"]}
+          ]
+        },
+        {
+          "id": "okuma.2.3.2",
+          "ad": "Cümle uzunluğu, tekrar ve sesli okuma",
+          "onKosul": ["okuma.2.3.1"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k11", "k14", "k2"],
+          "ozet": "Cümle geçişi uzun cümleleri böler ve art arda gelen uzunları sayar; tekrar geçişi farkında olunmayan tekrarı bulur; sesli okuma nefesin kesildiği yeri gösterir. Okunabilirlik bu geçişlerden sonra ölçülür.",
+          "metin": [
+            "ESP'nin cümle geçişi: «Uzun cümleler bölünebilir mi? Art arda kaç uzun cümle var?» Notu: okunabilirlik ölçümü bu geçişten sonra alınır. Kaynak «uzun»a bir kelime sınırı koymaz; dengeyi art arda gelişe bakarak arar.",
+            "Tekrar geçişi: «Aynı kelime üç paragrafta kaç kez geçiyor?» Not: bilerek yapılan tekrar figürdür; farkında olunmayan tekrar gürültüdür.",
+            "Sesli okuma: «Nerede nefesin kesiliyor?» Not: kulağın gözden daha iyi bulduğu tek şey ritimdir.",
+            "Bölme (modelin örneği): «Kitabı okurken altını çizdiğim yerleri akşam not defterime geçirmeye çalıştığım için okuma hızım düştü ama notlarım daha düzenli oldu.» → «Altını çizdiğim yerleri akşam not defterime geçiriyorum. Bu yüzden okuma hızım düştü, ama notlarım daha düzenli.» Bölerken 1. aşamadaki cümle iskeletini (yüklem, özne) her parçada koru.",
+            "Okunabilirliğin sayıyla ölçülmesi (Ateşman ≥ 45) merdivenin bir sonraki basamağındadır; bu aşamada denge gözle ve kulakla kurulur (modelin bağlantı notu)."
+          ],
+          "alistirmalar": [
+            {"id": "okuma.2.3.2.a1", "tur": "secmeli", "soru": "ESP'ye göre bilerek yapılan tekrar nedir?", "sec": ["Her zaman bir hata", "Gürültü", "Kısaltma geçişinin hedefi", "Bir figür"], "dogru": "D", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]},
+            {"id": "okuma.2.3.2.a2", "tur": "secmeli", "soru": "ESP'nin cümle geçişi hangi soruyu sorar?", "sec": ["Uzun cümleler bölünebilir mi, art arda kaç uzun cümle var?", "Her cümle 15 kelimenin altında mı?", "Her paragraf bir iş yapıyor mu?", "Metnin tek cümlelik iddiası ne?"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]}
+          ]
+        },
+        {
+          "id": "okuma.2.3.3",
+          "ad": "Yarı uzunluğa indirmek",
+          "onKosul": ["okuma.2.3.2"],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": ["k11", "k2", "k12"],
+          "ozet": "Metni yarıya indirmek kelime silmekle başlamaz: önce yapı (iş yapmayan paragraf), sonra iddia (metnin tek cümlelik iddiası), sonra kanıt, en son kelime ve cümle. Güçlendirmek, iddiayı daha görünür kılmaktır.",
+          "metin": [
+            "ESP'nin sırası ve gerekçesi: yapı düzelmeden cümle cilalamak, silinecek paragrafı güzelleştirmektir. Sıra: yapı → iddia → kanıt → kısaltma → cümle → tekrar → sesli okuma.",
+            "Yarıya indirmenin büyük payı ilk iki geçişten gelir (modelin bağlantı notu): iş yapmayan paragrafı silmek tek tek kelime atmaktan çok kısaltır. Yapı geçişinin sorusu: «Her paragraf bir iş yapıyor mu? Yapmayan paragraf hangisi?»",
+            "İddia geçişi: metnin tek cümlelik iddiasını yazının dışına, kenara yaz; metinde bulamıyorsan okur da bulamaz. Kanıt geçişi: her iddianın arkasında bir örnek, sayı ya da alıntı var mı? Kanıtsız iddia bir görüştür; görüş olduğunu söylemek de bir çözümdür.",
+            "Merdivenin kanıtı metni «yarı uzunluğa indirip güçlendirmek»tir. Modelin notu: yarı uzunluk bir alıştırma ölçüsüdür, her metnin hedefi değil; güçlenmenin ölçüsü, kenara yazdığın iddianın kısalan metinde daha erken ve daha açık görünmesidir.",
+            "Kelime sayısını ilk taslakta ve son taslakta say ve yan yana yaz (modelin önerisi); merdivenin sayacı da taslak başına en az bir revizyon ister."
+          ],
+          "alistirmalar": [
+            {"id": "okuma.2.3.3.a1", "tur": "secmeli", "soru": "400 kelimelik bir metni merdivenin kanıtına göre kaç kelimeye indirirsin?", "sec": ["Yaklaşık 320", "Yaklaşık 100", "Yaklaşık 200", "Yaklaşık 380"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k2"]},
+            {"id": "okuma.2.3.3.a2", "tur": "secmeli", "soru": "Yarıya indirmeye hangi geçişle başlarsın?", "sec": ["Kısaltma geçişi: tek tek kelime atmak", "Sesli okuma", "Yapı geçişi: iş yapmayan paragrafı bulmak", "Tekrar geçişi"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k11"]},
+            {"id": "okuma.2.3.3.a3", "tur": "acik", "soru": "Kanıt işi provası: Kendi yazdığın 300-400 kelimelik bir metni al. (1) Tek cümlelik iddiasını kenara yaz. (2) Yapı, iddia, kanıt, kısaltma ve cümle geçişlerini bu sırayla uygula. (3) Metni yarı uzunluğa indir. (4) İlk ve son kelime sayısını yaz; her geçişte en çok neyi sildiğini birer cümleyle not et.", "dogru": "Örnek kayıt (modelin örneği): «İddia: Sabah okumak akşam okumaktan daha verimli. Yapı: 5. paragraf (kendi okuma geçmişim) iddiaya hizmet etmiyordu, silindi. İddia: iddia 3. paragraftaydı, ilk cümleye taşındı. Kanıt: ‹herkes bilir ki› cümlesi kanıtsızdı, ‹bende böyle oldu› diye görüş olarak yazıldı. Kısaltma: ‹sonuç olarak, en nihayetinde› gibi çift sözler atıldı. Cümle: iki uzun cümle bölündü. 372 → 181 kelime.»", "olcut": ["Tek cümlelik iddia kenara yazılmış ve son metinde ilk paragrafta görünüyor mu?", "Geçişler doğru sırada uygulanmış ve her biri için bir not var mı?", "Son metin ilkinin yaklaşık yarısı mı ve iki sayı yazılmış mı?", "Kısalan metin iddiayı kaybetmeden daha açık mı (sahibin yargısı)?"], "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k11"]}
+          ]
+        }
+      ]
+    }
+  ]
+}
