@@ -406,6 +406,16 @@ it('her bağdaştırıcının taşınamayanlar listesi var', () => {
   Object.keys(K.GOC).forEach(a => assert.ok(Array.isArray(K.EKSIK[a]) && K.EKSIK[a].length, a));
 });
 
+it('geriye yazma penceresi: bugün verilirse gelecek ve 7 günden eskisi reddedilir; göç (bugünsüz) etkilenmez', () => {
+  const b = { bugun:'2026-11-14', zaman:1 };
+  assert.ok(K.kaydet('su', { ml:'300' }, Object.assign({ gun:'2026-11-14' }, b)).ok);
+  assert.ok(K.kaydet('su', { ml:'300' }, Object.assign({ gun:'2026-11-07' }, b)).ok, '7 gün geri');
+  assert.deepStrictEqual(K.kaydet('su', { ml:'300' }, Object.assign({ gun:'2026-11-06' }, b)).hatalar, ['En çok 7 gün geriye kayıt yazılır.']);
+  assert.deepStrictEqual(K.kaydet('su', { ml:'300' }, Object.assign({ gun:'2026-11-15' }, b)).hatalar, ['Gelecek bir güne kayıt yazılmaz.']);
+  assert.ok(K.kaydet('su', { ml:'300' }, { gun:'2020-01-01', zaman:1 }).ok, 'bugün verilmezse pencere yok (göç)');
+  assert.strictEqual(K.GERI_GUN, 7);
+});
+
 it('saflık: motor saat okumaz (Date.now / new Date() yok)', () => {
   const src = kaynak('motor/kayit.js');
   assert.ok(!/Date\.now\(|new Date\(\)/.test(src));

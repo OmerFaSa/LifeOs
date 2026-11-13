@@ -208,7 +208,7 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .giris:focus-visible{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); } textarea.giris{ resize:vertical; line-height:var(--satir); }
 .aracust{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; } .aracust .giris{ flex:1; min-width:180px; }
 .liste{ display:flex; flex-direction:column; gap:6px; }
-.notform, .kartform{ display:flex; flex-direction:column; gap:12px; }
+.notform, .kartform, .aracform{ display:flex; flex-direction:column; gap:12px; }
 .alanet{ display:flex; flex-direction:column; gap:4px; font-size:.85rem; color:var(--yazi-2); }
 .isaret{ display:inline-flex; align-items:center; gap:8px; min-height:44px; } .isaret input{ width:20px; height:20px; accent-color:var(--vurgu); }
 .notform__ileti:empty{ display:none; } .notform__ileti{ padding:10px 12px; box-shadow:inset 0 0 0 2px var(--cizgi-guclu); background:var(--yuzey); }
@@ -256,3 +256,32 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .ozet li.ozet__not{ display:block; font-size:.85rem; }
 .asamalar .satir[aria-current]{ box-shadow:inset 0 0 0 3px var(--vurgu); }
 .deneme__anahtar{ margin:6px 0 0; padding-left:28px; display:flex; flex-direction:column; gap:2px; }
+
+/* ---------------- hafta planı (kabuk/araclar.js sayfaPlanHafta) ---------------- */
+.hafta{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr)); gap:16px; }
+.hafta__gun{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+.hafta__gun h2{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.hafta .blok{ padding:8px 10px; column-gap:10px; }
+.blok--sabit{ background:var(--yuzey-2); color:var(--yazi-2); }
+.gunsec{ border:0; margin:0; padding:0; display:flex; flex-wrap:wrap; column-gap:14px; }
+.gunsec legend{ padding:0; font-size:.85rem; color:var(--yazi-2); width:100%; }
+
+/* ---------------- kayıt haftası (kabuk/araclar.js sayfaKayitHafta) ---------------- */
+.khafta{ position:relative; overflow-x:auto; width:100%; } /* tablo kendi içinde kayar; position: gizli etiketler (absolute) kabın dışına taşmasın */
+.khafta__tablo{ border-collapse:collapse; width:100%; min-width:560px; font-size:.9rem; }
+.khafta__tablo th, .khafta__tablo td{ padding:8px 6px; text-align:center; box-shadow:inset 0 -2px 0 var(--cizgi); font-variant-numeric:tabular-nums; vertical-align:middle; }
+.khafta__tablo thead th{ font-family:var(--piksel); font-weight:400; color:var(--yazi-2); }
+.khafta__tablo thead th[aria-current]{ color:var(--yazi); box-shadow:inset 0 -3px 0 var(--vurgu); }
+.khafta__tablo th small, .khafta__tablo td small{ display:block; font-size:.72rem; color:var(--soluk); }
+.khafta__tablo tbody th{ text-align:left; font-weight:400; }
+.khafta__tablo tbody th small{ display:inline; }
+.khafta__tablo tbody th .pul{ display:inline-block; margin-left:4px; }
+.khafta__yok{ color:var(--soluk); font-size:1.4rem; line-height:1; }
+.khafta__tablo thead th:first-child{ text-align:left; }
+
+/* ---------------- araç ve sisteme not (kabuk/araclar.js sayfaArac) ---------------- */
+.sistemnot{ display:flex; flex-direction:column; gap:10px; padding:16px; margin:0; border:0; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); min-width:0; }
+.sistemnot legend{ float:left; width:100%; padding:0; font-family:var(--piksel); font-weight:600; } .sistemnot legend + *{ clear:both; }
+.sistemnot h2{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.sistemnot h3{ font-size:.85rem; font-weight:400; color:var(--soluk); margin:4px 0 0; }
+.sistemnot p{ overflow-wrap:anywhere; }

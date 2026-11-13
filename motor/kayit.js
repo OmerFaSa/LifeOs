@@ -26,6 +26,7 @@
   const GOC_IZNI = ['measured', 'estimated', 'computed', 'eski'];
   const GUN_RE = /^\d{4}-\d{2}-\d{2}$/;
   const SAAT_RE = /^([01]\d|2[0-3]):[0-5]\d$/;              // SPI core/uyku.js:29
+  const GERI_GUN = 7;                                         // SPI core/xp.js:93: «pencere bir hafta: bundan eskisi ve gelecek reddedilir»
 
   const S = (ad, birim, min, max, ek) => Object.assign({ ad, birim, min, max }, ek);
   const Z = { zorunlu:true }, ZT = { zorunlu:true, tam:true };
@@ -89,6 +90,13 @@
     const sayilar = t.sayilar || {}, metinler = t.metinler || {};
     if(!GUN_RE.test(b.gun || '')) hatalar.push('Gün YYYY-AA-GG biçiminde olmalı.');
     if(b.zaman != null && !(typeof b.zaman === 'number' && isFinite(b.zaman))) hatalar.push('Zaman milisaniye olmalı.');
+    /* Geriye yazma penceresi (SPI core/xp.js:85-93 GERI_GUN): bugun verilirse gelecek ve 7 günden eskisi reddedilir.
+       Göç bugun vermez: eski kayıt tarihine bakılmadan taşınır. */
+    if(b.bugun != null && GUN_RE.test(b.gun || '')){
+      if(!GUN_RE.test(b.bugun)) hatalar.push('Bugün YYYY-AA-GG biçiminde olmalı.');
+      else if(b.gun > b.bugun) hatalar.push('Gelecek bir güne kayıt yazılmaz.');
+      else if(gunFarki(b.gun, b.bugun) > GERI_GUN) hatalar.push('En çok ' + GERI_GUN + ' gün geriye kayıt yazılır.');
+    }
     Object.keys(g).forEach(a => { if(!sayilar[a] && !metinler[a]) hatalar.push(t.ad + ' kaydında «' + a + '» alanı yok.'); });
     Object.keys(sayilar).forEach(a => {
       const f = sayilar[a], c = cozSayi(g[a]);
@@ -117,7 +125,7 @@
     if(b.kalemler) kayit.kalemler = b.kalemler;
     return { ok:true, kayit };
   }
-  /* Kullanıcı girişi: çıplak sayı «ölçüldü»; { v, k:'estimated' } «tahmin». bag: { gun, zaman, id, mevcut } */
+  /* Kullanıcı girişi: çıplak sayı «ölçüldü»; { v, k:'estimated' } «tahmin». bag: { gun, zaman, id, mevcut, bugun? } */
   const kaydet = (tur, girdi, bag) => kur(tur, girdi, bag, KULLANICI);
   const deger = (r, a) => (r && r.deger && r.deger[a]) || yok();
 
@@ -506,7 +514,7 @@
     espGun:['kalite aralığı: göremedim (0-10 kabul edildi)', 'günün ve seansın notu (note, sessions[].note): Not motoru (Not.goc.gunNotu)'],
   });
 
-  const Kayit = Object.freeze({ ETIKET, TURLER, kaydet, deger, birlesik, gunluk, haftalik, Kural, GOC, EKSIK,
+  const Kayit = Object.freeze({ ETIKET, TURLER, GERI_GUN, kaydet, deger, birlesik, gunluk, haftalik, Kural, GOC, EKSIK,
     yardimci:Object.freeze({ gunEkle, gunFarki, turde }) });
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Motor = kok.LIFEOS.Motor || {};

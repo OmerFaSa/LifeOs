@@ -147,6 +147,46 @@ t('plan: yeniden kurunca yapılan blok yerinde kalır; ertesi gün yapılan iş 
   esit([ertesi.gunPlan, ertesi.isler.map(x => [x.id, x.dk, x.devir])], [null, [['b', 40, 1]]]);
 });
 
+t('hafta: sabit blok şablonu; gece yarısını geçen blok ikiye bölünür; geçersiz blok motorun cümlesiyle reddedilir', () => {
+  const Plan = require('../motor/plan.js'), gun = '2026-11-16';                          // Pazartesi
+  esit(R.sabitEkle(Plan, null, { id: 's0', ad: ' ', bas: '08:00', bit: '15:00', gunler: [0] }, gun).ok, false);
+  esit(R.sabitEkle(Plan, null, { id: 's0', ad: 'Okul', bas: '08:00', bit: '15:00', gunler: [] }, gun).hatalar, ['En az bir gün seçilmeli.']);
+  const ters = R.sabitEkle(Plan, null, { id: 's0', ad: 'Okul', bas: '08:00', bit: '08:00', gunler: [0] }, gun);
+  dogru(!ters.ok && /saatleri geçersiz/.test(ters.hatalar[0]), JSON.stringify(ters));
+  let s = R.sabitEkle(Plan, null, { id: 'okul', ad: 'Okul', bas: '08:00', bit: '15:00', gunler: [4, 0, 1, 2, 3] }, gun).sablon;
+  s = R.sabitEkle(Plan, s, { id: 'uyku', ad: 'Uyku', bas: '23:00', bit: '07:00', gunler: [0, 1, 2, 3, 4, 5, 6] }, gun).sablon;
+  esit(s.sabitler[0].gunler, [0, 1, 2, 3, 4], 'günler sıralı');
+  esit(R.sabitlerGunu(s, 0).map(x => [x.ad, x.bas, x.bit]), [['Uyku', '00:00', '07:00'], ['Okul', '08:00', '15:00'], ['Uyku', '23:00', '23:59']]);
+  esit(R.sabitlerGunu(s, 5).map(x => x.ad), ['Uyku', 'Uyku'], 'cumartesi okul yok');
+  const yalniz = { sabitler: [{ id: 'g', ad: 'Gece işi', bas: '22:00', bit: '02:00', gunler: [4] }] };   // yalnız cuma gecesi
+  esit([R.sabitlerGunu(yalniz, 4).map(x => x.bas), R.sabitlerGunu(yalniz, 5).map(x => x.bas), R.sabitlerGunu(yalniz, 0)], [['22:00'], ['00:00'], []]);
+  esit(R.sabitlerGunu(undefined, 0), []);
+});
+t('hafta: yedi gün motorun haftaPlani\'nden; sabitler her güne, sığmayan ertesi güne devreder, hafta sonunda en çok 2 iş gelecek haftaya', () => {
+  const Plan = require('../motor/plan.js'), bugun = '2026-11-14';                       // Cumartesi
+  const s = { sabitler: [{ id: 'okul', ad: 'Okul', bas: '09:00', bit: '10:00', gunler: [0, 1, 2, 3, 4] }] };
+  const dr = { ayar: { musait: [{ bas: '09:00', bit: '11:00' }] }, gunPlan: null,
+    isler: [60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60].map((dk, i) => ({ id: 'i' + i, ad: 'İş ' + i, dk })) };
+  const r = R.haftaKur(Plan, dr, s, bugun, { dersler: [{ id: 'd1', ad: 'Ders', dk: 20 }] });
+  esit(r.ok, true);
+  const h = r.hafta;
+  esit([h.bas, h.bitis, h.gunler.length], [bugun, '2026-11-20', 7]);
+  const pzt = h.gunler[2];                                                              // 16 Kasım Pazartesi
+  esit(pzt.bloklar.filter(b => b.tur === 'sabit').map(b => [b.ad, b.bas]), [['Okul', '09:00']]);
+  dogru(pzt.bloklar.every(b => b.tur === 'sabit' || b.bas >= '10:00'), 'pazartesi okulun dışına kurulur');
+  esit(h.gunler[0].bloklar.filter(b => b.tur === 'sabit').length, 0, 'cumartesi okul yok');
+  const tum = [].concat(...h.gunler.map(p => p.bloklar.filter(b => b.tur === 'is').map(b => b.kaynakId)));
+  esit(new Set(tum).size, tum.length, 'bir iş haftada iki kez planlanmaz');
+  dogru(h.gunler[1].bloklar.some(b => b.tur === 'is' && b.devir === 1), 'pazar günü cumartesiden devreden iş var');
+  esit(tum.length + h.devir.length + h.bekleyen.length, 12, 'hiçbir iş kaybolmaz');
+  dogru(h.devir.length <= 2, 'gelecek haftaya en çok 2');
+  esit(h.ozet.planlananDk.k, 'computed');
+  const bitti = R.haftaKur(Plan, Object.assign({}, dr, { gunPlan: { gun: bugun, plan: { bloklar: [{ tur: 'is', id: 'i0', kaynakId: 'i0', durum: 'yapildi' }] } } }), s, bugun, {});
+  dogru(![].concat(...bitti.hafta.gunler.map(p => p.bloklar)).some(b => b.kaynakId === 'i0'), 'bugün yapılan iş öngörüye girmez');
+  const gun = R.planKur(Plan, { ayar: dr.ayar, isler: [], gunPlan: null }, '2026-11-16', { sablon: s }).plan;
+  esit(gun.bloklar.filter(b => b.tur === 'sabit').map(b => b.ad), ['Okul'], 'günün planı da şablonun sabitlerini alır');
+});
+
 t('soru: havuz yalnız açık ünitelerin seçmeli alıştırmalarından; karma test motorla kurulur ve puanlanır', () => {
   const Soru = require('../motor/soru.js'), Yol = require('../motor/yol.js'), y = Yol.yukle(require('../alan/felsefe/asama-1.json'));
   const bos = R.soruHavuzu(Yol, y, Yol.bosKayit()), u1 = y.veri.uniteler[0];
@@ -188,6 +228,73 @@ t('kayıt kuralları: profil tamsa enerji hedefi ve bazal hesaplanır; eksikse a
   const eks = R.kuralOzeti(Kayit, [], gun, { cinsiyet: null, boy: null, dogumYili: null, hedef: 'saglik' }, 2026);
   esit(eks.eksik.slice().sort(), ['boy', 'cinsiyet', 'doğum yılı', 'kilo'].sort());
   dogru(eks.emirVeriYok && !eks.satirlar.some(s => s.ad === 'Bugünkü antrenman'), 'toparlanma verisi yoksa karar sayısı gösterilmez');
+});
+t('kayıt geçmiş gün: motorun penceresi (bugün ve 7 gün geri), gelecek yok; geçmiş güne kayıt o günün özetine girer', () => {
+  const Kayit = require('../motor/kayit.js'), bugun = '2026-11-14';
+  const gunler = R.kayitGunleri(Kayit, bugun);
+  esit([gunler.length, gunler[0], gunler[gunler.length - 1]], [8, bugun, '2026-11-07']);
+  dogru(gunler.every(g => g <= bugun), 'gelecek gün listede yok');
+  const r = R.kayitEkle(Kayit, [], 'su', { ml: '400' }, false, '2026-11-12', 5000, bugun);
+  esit([r.ok, r.kayit.gun], [true, '2026-11-12']);
+  esit(R.gunOzeti(Kayit, r.kayitlar, '2026-11-12')[0].metin, '400 ml');
+  esit(R.kayitEkle(Kayit, [], 'su', { ml: '400' }, false, '2026-11-15', 5000, bugun).hatalar, ['Gelecek bir güne kayıt yazılmaz.']);
+  esit(R.kayitEkle(Kayit, [], 'su', { ml: '400' }, false, '2026-11-06', 5000, bugun).hatalar, ['En çok 7 gün geriye kayıt yazılır.']);
+});
+t('kayıt haftası: tür başına yedi gün motorun haftalik çıktısından; boş gün null (nokta), sıfır değil; tek etiket satırda, karışık etiket hücrede', () => {
+  const Kayit = require('../motor/kayit.js'), bugun = '2026-11-14';
+  let l = [], ekle = (tur, f, tahmin, gun, z) => { l = R.kayitEkle(Kayit, l, tur, f, tahmin, gun, z, bugun).kayitlar; };
+  ekle('su', { ml: '500' }, false, '2026-11-08', 1); ekle('su', { ml: '700' }, false, bugun, 2);
+  ekle('uyku', { saat: '7' }, true, '2026-11-13', 3); ekle('uyku', { saat: '8' }, false, bugun, 4);
+  const h = R.haftaOzeti(Kayit, l, bugun);
+  esit([h.bas, h.bitis, h.gunler.length, h.veriGunu], ['2026-11-08', bugun, 7, 3]);
+  const su = h.satirlar.find(x => x.ad === 'Su'), uyku = h.satirlar.find(x => x.ad === 'Gece uykusu');
+  esit(su.hucreler.map(c => c && c.v), [500, null, null, null, null, null, 700], 'boş gün null');
+  esit([su.etiket, uyku.etiket], ['hesaplandı', null], 'su hep toplam (hesaplandı); uyku tahmin + ölçüldü karışık');
+  esit(uyku.hucreler.filter(Boolean).map(c => c.etiket), ['tahmin', 'ölçüldü']);
+  dogru(!h.satirlar.some(x => x.ad === 'Hareket'), 'verisi olmayan tür satırı yok');
+  const suOrt = h.toplam.find(x => x.ad === 'Su');
+  esit([suOrt.metin, suOrt.etiket], ['600 ml · 2 günün ortalaması', 'hesaplandı']);
+  esit(R.haftaOzeti(Kayit, [], bugun).satirlar, []);
+});
+t('kayıt haftası: toparlanma ve yük motorun döndürdüğü gibi; veri yoksa motorun cümlesi; teşhis ve doz dili yok', () => {
+  const Kayit = require('../motor/kayit.js'), K = Kayit.Kural, bugun = '2026-11-14';
+  const bos = R.yukOzeti(Kayit, [], bugun);
+  esit(bos.satirlar, [], 'veri yokken sayı yok');
+  dogru(bos.notlar.includes(K.akutKronik([], bugun).neden) && bos.notlar.some(n => /toparlanma için kayıt yok/.test(n)), bos.notlar.join(' | '));
+  let l = [], z = 1;
+  const ekle = (tur, f, gun) => { const r = Kayit.kaydet(tur, f, { gun, zaman: z++ }); dogru(r.ok, JSON.stringify(r.hatalar)); l.push(r.kayit); };
+  for (let i = 0; i < 28; i += 2) ekle('hareket', { dk: '40', rpe: String(5 + (i % 3)) }, Kayit.yardimci.gunEkle(bugun, -i));
+  ekle('uyku', { saat: '7,5' }, bugun); ekle('enerji', { puan: '4' }, bugun); ekle('ates', { derece: '38,6' }, bugun);
+  const y = R.yukOzeti(Kayit, l, bugun), tp = K.toparlanma(l, bugun), a = K.akutKronik(l, bugun), b = K.haftalikBuyume(l, bugun);
+  esit(y.satirlar.find(s => s.ad === 'Toparlanma puanı').metin, tp.puan.v + ' / 100 · dinlenme', 'ateş bayrağı bandı dinlenmeye çeker');
+  dogru(y.notlar.some(n => /Ateş kaydı 38,5 °C ya da üstünde/.test(n)), 'bayrak gerekçesi yazılır');
+  esit(y.satirlar.find(s => /^Son hafta/.test(s.ad)).metin.split(' · ')[0], String(a.oran.v).replace('.', ','));
+  esit(y.satirlar.find(s => s.ad === 'Bu haftaya en çok yük').metin, String(b.enCok.v));
+  dogru(y.satirlar.every(s => ['hesaplandı', 'tahmin', 'ölçüldü'].includes(s.etiket)), 'her sayı etiketli');
+  const metin = JSON.stringify([bos, y]);
+  const yasak = /(^|[^a-zçğıöşü])(teşhis|tanı|hastalık|doz|ilaç|tedavi|reçete)/i;   // kelime başı: «haftanın» içindeki «tanı» sayılmaz
+  dogru(!yasak.test(metin), 'teşhis/doz dili: ' + metin.match(yasak));
+});
+t('sisteme not: yeni araç King okumaz (varsayılan); kapalı aracın ve özel notun King yolundan geçmediği motorun süzgeciyle; klasör sonradan değişmez', () => {
+  const T0 = 1700000000000;
+  let r = R.aracKaydet(Not, [], 'yeni', { ad: 'Düşünce defteri', klasor: '', gorunum: 'ag', anlam: ' Fikirlerim. ', kullanim: 'Yalnız bağla.' }, T0, 'a1');
+  const a1 = r.araclar[0];
+  esit([r.id, a1.klasor, a1.gorunum, a1.sistemNotu], ['a1', 'Düşünce defteri', 'ag', { kingOkur: false, anlam: 'Fikirlerim.', kullanim: 'Yalnız bağla.' }]);
+  r = R.aracKaydet(Not, r.araclar, 'yeni', { ad: 'Okuma', kingOkur: true, anlam: 'Alıntılar', kullanim: '' }, T0, 'a2');
+  let hata = ''; try { R.aracKaydet(Not, r.araclar, 'yeni', { ad: 'Başka', klasor: 'Okuma' }, T0, 'a3'); } catch (e) { hata = e.message; }
+  dogru(/«Okuma» aracı kullanıyor/.test(hata), hata);
+  hata = ''; try { R.aracKaydet(Not, r.araclar, 'yeni', { ad: '  ' }, T0, 'a3'); } catch (e) { hata = e.message; }
+  dogru(/adı yazılmalı/.test(hata), 'motorun cümlesi: ' + hata);
+  const duz = R.aracKaydet(Not, r.araclar, 'a1', { ad: 'Defter', klasor: 'Başka yer', gorunum: 'liste', kingOkur: false, anlam: 'x', kullanim: 'y' }, T0 + 5, 'yok');
+  esit([duz.araclar[0].ad, duz.araclar[0].klasor, duz.araclar[0].guncelleme, duz.araclar.length], ['Defter', 'Düşünce defteri', T0 + 5, 2], 'klasör değişmez');
+  let notlar = [];
+  [['g', { baslik: 'Gizli fikir', govde: 'iç', klasor: 'Düşünce defteri' }], ['o', { baslik: 'Alıntı', govde: '[[not:g|Gizli fikir]] [[not:p|Özel]]', klasor: 'Okuma' }],
+    ['p', { baslik: 'Özel', govde: 'x', klasor: 'Okuma', ozel: true }]].forEach(([id, f]) => { notlar = R.notKaydet(Not, notlar, 'yeni', f, T0, id).notlar; });
+  esit(R.aracNotlari(Not, notlar, r.araclar[1]).map(n => n.id), ['o', 'p']);
+  const king = Not.kingOkur(notlar, { araclar: r.araclar });
+  esit(king.map(n => n.id), ['o'], 'King yalnız açık aracın özel olmayan notunu okur');
+  dogru(!/Gizli|Özel/.test(JSON.stringify(king)), 'kapalı ve özel notun adı bağ yoluyla da sızmaz');
+  esit(Not.kingAraclar(r.araclar).map(a => a.id), ['a2'], 'King yalnız izinli aracın sistem notunu okur');
 });
 
 // ---- harita ----

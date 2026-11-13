@@ -15,7 +15,7 @@
         eski adı taşıyan görünen metinleri tazeler, kişinin yazdığı takma adı ezmez.
      3. TEK AĞ. ag() düğüm ve kenar verir, yerleşim vermez (çizim ekranın işi);
         sıra kimliğe göredir, girdi sırası sonucu değiştirmez.
-     4. KING ÖZEL NOTU GÖRMEZ. kingOkur() özel notları ve kapalı klasörleri
+     4. KING ÖZEL NOTU GÖRMEZ. kingOkur() özel notları, kapalı klasörleri ve King'e kapalı araçların klasörlerini
         atar, okunabilir notta özel nota giden bağın adını da siler. King
         yazmaz, önerir: oneriUygula() sahibin onayı olmadan çalışmaz.
      5. GÖÇ TAHMİN ETMEZ. goc.* her eski yapıyı bu kayda çevirir, taşıyamadığını
@@ -192,10 +192,51 @@
   }
 
   /* ---------------------------------------------------------- King */
-  /* King bu notu okuyabilir mi: özel değil ve kapalı bir klasörde (ya da altında) değil. */
+  /* ---------------------------------------------------------- araç («Yeni araç», not-ve-tekrar.md §3a arac/<id>)
+     Kodsuz araç: notlarını bir klasörde toplar (kapsam = klasor ve altı), bir görünümü vardır ve sahibin King'e
+     bıraktığı «sisteme not»u taşır: King okuyabilir mi (kingOkur), bundan ne anlamalı (anlam), nasıl kullanmalı (kullanim).
+     GÜVENLİ VARSAYILAN: kingOkur false. Sahip açıkça izin vermeden King aracın notlarını ve sistem notunu görmez. */
+  const GORUNUMLER = Object.freeze(['liste', 'ag']);
+  const ARAC_ALANLARI = Object.freeze(['id', 'ad', 'klasor', 'gorunum', 'sistemNotu', 'olusturma', 'guncelleme']);
+  const SISTEM_NOTU = 1000;
+  function aracDogrula(a){
+    if(!a || typeof a !== 'object' || Array.isArray(a)) return 'Araç bir nesne olmalı.';
+    const fazla = Object.keys(a).filter(k => ARAC_ALANLARI.indexOf(k) < 0);
+    if(fazla.length) return 'Araçta bilinmeyen alan var: «' + fazla[0] + '».';
+    if(typeof a.id !== 'string' || !KIMLIK_RE.test(a.id)) return 'Aracın kimliği yok ya da boşluk, «|», «[», «]» içeriyor.';
+    if(typeof a.ad !== 'string' || !a.ad.trim() || a.ad.length > 60) return 'Aracın adı yazılmalı (en çok 60 karakter).';
+    if(typeof a.klasor !== 'string' || !a.klasor || a.klasor !== klasorAdi(a.klasor)) return 'Aracın klasörü «Felsefe/Düşünceler» biçiminde olmalı: boş olamaz, en çok 3 kat.';
+    if(GORUNUMLER.indexOf(a.gorunum) < 0) return 'Görünüm «liste» ya da «ag» olmalı.';
+    const sn = a.sistemNotu;
+    if(!sn || typeof sn !== 'object' || Object.keys(sn).some(k => ['kingOkur', 'anlam', 'kullanim'].indexOf(k) < 0)) return 'Sistem notu yalnız kingOkur, anlam ve kullanim alanlarını taşır.';
+    if(typeof sn.kingOkur !== 'boolean') return '«King okuyabilsin» evet/hayır (true/false) olmalı.';
+    if(typeof sn.anlam !== 'string' || typeof sn.kullanim !== 'string' || sn.anlam.length > SISTEM_NOTU || sn.kullanim.length > SISTEM_NOTU)
+      return 'Sistem notunun iki metni de en çok ' + SISTEM_NOTU + ' karakter olmalı.';
+    if(!zamanMi(a.olusturma) || !zamanMi(a.guncelleme) || a.guncelleme < a.olusturma) return 'Oluşturma ve güncelleme milisaniye cinsinden zaman olmalı; güncelleme oluşturmadan önce olamaz.';
+    return '';
+  }
+  /* Eksikleri doldurur (klasör adından, görünüm liste, King okumaz), doğrular; kimlik ve zaman çağırandan. */
+  function yeniArac(o){
+    const x = o || {}, sn = Object.assign({ kingOkur:false, anlam:'', kullanim:'' }, x.sistemNotu);
+    const a = Object.assign({ gorunum:'liste' }, x, { klasor:klasorAdi(x.klasor || x.ad), sistemNotu:{ kingOkur:sn.kingOkur, anlam:String(sn.anlam).trim(), kullanim:String(sn.kullanim).trim() } });
+    if(a.guncelleme == null) a.guncelleme = a.olusturma;
+    const h = aracDogrula(a);
+    if(h) throw new Error(h);
+    return a;
+  }
+  /* King'e kapalı araçların klasörleri: kingOkur açıkça true olmayan her araç (bozuk kayıt da) kapalıdır. */
+  const kapaliAraclar = araclar => (araclar || []).filter(a => !(a && a.sistemNotu && a.sistemNotu.kingOkur === true)).map(a => klasorAdi(a && a.klasor)).filter(Boolean);
+  /* King'in okuyacağı sistem notları: yalnız izin verilen ve kapalı bir aracın klasörü altında olmayan araçlar. */
+  function kingAraclar(araclar){
+    const kapali = kapaliAraclar(araclar);
+    return (araclar || []).filter(a => a && a.sistemNotu && a.sistemNotu.kingOkur === true && !kapali.some(k => icinde({ klasor:klasorAdi(a.klasor) }, k)))
+      .map(a => ({ id:a.id, ad:a.ad, klasor:a.klasor, gorunum:a.gorunum, anlam:a.sistemNotu.anlam, kullanim:a.sistemNotu.kullanim }));
+  }
+
+  /* King bu notu okuyabilir mi: özel değil, kapalı bir klasörde (ya da altında) değil, King'e kapalı bir aracın klasöründe değil. */
   function kingIzin(n, o){
     if(!n || n.ozel) return false;
-    const kapali = ((o && o.kapaliKlasorler) || []).map(klasorAdi).filter(Boolean);
+    const kapali = ((o && o.kapaliKlasorler) || []).map(klasorAdi).filter(Boolean).concat(kapaliAraclar(o && o.araclar));
     return !kapali.some(k => icinde(n, k));
   }
   /* King'e gidecek notlar: izinliler, kopya olarak; izinsiz nota giden bağın adı silinir (başlık sızmasın). */
@@ -513,7 +554,8 @@
   };
 
   const Not = Object.freeze({ TURLER, DUSUNCE_TURLERI, SINIR, KAYIT_ALANLARI, dogrula, yeni, ad, kucuk, katla, klasorAdi,
-    baglar, bagYaz, etiketleri, geriBaglar, yenidenAdlandir, ag, kingIzin, kingOkur, oneri, oneriUygula, ara, goc });
+    baglar, bagYaz, etiketleri, geriBaglar, yenidenAdlandir, ag, kingIzin, kingOkur, oneri, oneriUygula, ara, goc,
+    GORUNUMLER, ARAC_ALANLARI, aracDogrula, yeniArac, kingAraclar, klasorde:icinde });
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Motor = kok.LIFEOS.Motor || {};
   kok.LIFEOS.Motor.Not = Not;

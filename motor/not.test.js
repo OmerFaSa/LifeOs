@@ -125,6 +125,29 @@ it('King: özel notu ve kapalı klasörü okumaz; özel nota giden bağın adı 
   assert.deepStrictEqual(ids(N.kingOkur(l)), ['acik', 'diger', 'saglik', 'klasorsuz'], 'varsayılan: King okur (plan kararı)');
   assert.ok(N.ara(N.kingOkur(l), 'kavga').length === 0);
 });
+it('araç ve sisteme not: King okuma izni varsayılan kapalı; kapalı aracın notu ve özel not King yolundan hiç geçmez', () => {
+  const a0 = N.yeniArac({ id:'a-dusunce', ad:'Düşünce defteri', olusturma:T0 });
+  assert.deepStrictEqual([a0.klasor, a0.gorunum, a0.sistemNotu], ['Düşünce defteri', 'liste', { kingOkur:false, anlam:'', kullanim:'' }], 'güvenli varsayılan: King okumaz');
+  const acik = N.yeniArac({ id:'a-okuma', ad:'Okuma', klasor:'Okuma', gorunum:'ag', olusturma:T0,
+    sistemNotu:{ kingOkur:true, anlam:'Kitaplardan alıntılar.', kullanim:'Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.' } });
+  const ic = N.yeniArac({ id:'a-ic', ad:'İç', klasor:'Düşünce defteri/İç', olusturma:T0, sistemNotu:{ kingOkur:true } });
+  const araclar = [a0, acik, ic];
+  const l = [not('k1', { klasor:'Okuma', govde:'Bkz. [[not:d1|Gizli düşünce]] ve [[not:oz|Özel]]' }), not('d1', { baslik:'Gizli düşünce', klasor:'Düşünce defteri' }),
+    not('d2', { klasor:'Düşünce defteri/İç' }), not('oz', { baslik:'Özel', klasor:'Okuma', ozel:true }), not('serbest')];
+  const k = N.kingOkur(l, { araclar });
+  assert.deepStrictEqual(ids(k), ['k1', 'serbest'], 'kapalı aracın notu (alt klasörü dahil, açık işaretli iç araç olsa da) ve özel not dışarıda');
+  assert.strictEqual(k[0].govde, 'Bkz. «özel not» ve «özel not»', 'kapalı nota giden bağın adı da sızmaz');
+  assert.ok(JSON.stringify(k).indexOf('Gizli') < 0 && JSON.stringify(k).indexOf('Özel') < 0);
+  assert.strictEqual(N.ara(N.kingOkur(l, { araclar }), 'gizli').length, 0, 'King araması kapalı notu bulamaz');
+  assert.deepStrictEqual(N.kingAraclar(araclar).map(a => [a.id, a.kullanim]), [['a-okuma', 'Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.']],
+    'King yalnız izinli aracın sistem notunu okur; kapalı aracın altındaki araç da kapalı');
+  assert.deepStrictEqual(ids(N.kingOkur(l, { araclar:[Object.assign({}, a0, { sistemNotu:{ kingOkur:'evet', anlam:'', kullanim:'' } })] })), ['k1', 'serbest'], 'bozuk izin kapalı sayılır');
+  assert.throws(() => N.yeniArac({ id:'x', ad:' ', olusturma:T0 }), /adı yazılmalı/);
+  assert.throws(() => N.yeniArac({ id:'x', ad:'A', gorunum:'tablo', olusturma:T0 }), /Görünüm/);
+  assert.throws(() => N.yeniArac({ id:'x', ad:'A', olusturma:T0, sistemNotu:{ kingOkur:true, anlam:'x'.repeat(1001), kullanim:'' } }), /1000/);
+  assert.match(N.aracDogrula(Object.assign({}, acik, { gizli:1 })), /bilinmeyen alan/);
+  assert.strictEqual(N.aracDogrula(acik), '');
+});
 it('King önerisi: sahibin onayı olmadan uygulanmaz; yasak alan, eski sürüm ve özel hedef reddedilir', () => {
   const l = [not('a', { govde:'eski metin', guncelleme:T0 + 1 }), not('o', { ozel:true })];
   const on = N.oneri({ id:'k1', tur:'degistir', hedef:'a', taban:T0 + 1, zaman:T0 + 2, alanlar:{ etiketler:['stoa'] }, gerekce:'Stoa ile ilgili' });

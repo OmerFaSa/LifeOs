@@ -1,8 +1,10 @@
 // KABUK GEZISI: tek kapiyi yalitilmis ortamda (gecici LOCALAPPDATA, HKM'siz, deneme portu) acar ve yeni kabukta
 // on alani ve arac ekranlarini gercek tarayiciyla yurur: Bugun, ders, alistirma, unite kapisi, Not, Tekrar, Kayit, Plan, Soru,
 // sureli deneme ve prova, Tanisma, asamalar (Felsefe'nin ikinci asamasi; dosya yoksa yapay asama yalniz tarayiciya verilir).
-// Kullanim: node tools/kabuk_gez.js [--goruntu]   (--goruntu: belgeler/ekip/sadelesme/kabuk-onizleme/ goruntulerini yeniler)
+// Kullanim: node tools/kabuk_gez.js [--goruntu | --goruntu=hafta,kayit-hafta]   (--goruntu: belgeler/ekip/sadelesme/kabuk-onizleme/ goruntulerini yeniler;
+// =onekler: yalniz adi bu oneklerle baslayan dort gorunumlu goruntuler, otekilere dokunulmaz)
 const kok = require('path').resolve(__dirname, '..'), GORUNTU = process.argv.includes('--goruntu');
+const SECILI = ((process.argv.find(a => a.indexOf('--goruntu=') === 0) || '').slice(10)).split(',').filter(Boolean);
 const { chromium } = require(kok + '/SPI/node_modules/playwright');
 const { spawn } = require('child_process');
 const fs = require('fs'), os = require('os'), path = require('path'), http = require('http');
@@ -25,7 +27,7 @@ async function goruntu(p, ad) {
   for (const [w, h, vad] of [[1280, 800, 'masaustu'], [390, 844, 'telefon']]) for (const tm of ['acik', 'koyu']) {
     await p.setViewportSize({ width: w, height: h }); await p.emulateMedia({ colorScheme: tm === 'koyu' ? 'dark' : 'light' });
     if (w === 390 && tm === 'acik') dene(ad + ': telefonda yatay taşma yok', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), await p.evaluate(() => document.documentElement.scrollWidth));
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, ad + '-' + vad + '-' + tm + '.png'), fullPage: true });
+    if (GORUNTU || SECILI.some(x => ad.indexOf(x) === 0)) await p.screenshot({ path: path.join(cikti, ad + '-' + vad + '-' + tm + '.png'), fullPage: true });
   }
   await p.setViewportSize({ width: 1280, height: 800 }); await p.emulateMedia({ colorScheme: 'dark' });
 }
@@ -184,6 +186,49 @@ async function goruntu(p, ad) {
     await p.waitForSelector('[data-not-ag] svg');
     await goruntu(p, 'not-agi');
 
+    // ---- Sisteme not: «Yeni araç», King okuma izni varsayılan kapalı; kapalı aracın notu King süzgecinden geçmez ----
+    await p.click('a[href="#/motor/not/arac/yeni"]');
+    await p.waitForSelector('form.aracform');
+    dene('sisteme not: «King okuyabilsin» varsayılan kapalı', !(await p.isChecked('form.aracform input[name=kingOkur]')));
+    await p.click('form.aracform button[type=submit]');
+    await p.waitForFunction(() => /adı yazılmalı/.test(document.querySelector('.aracform .notform__ileti').textContent));
+    dene('sisteme not: adsız araç motorun cümlesiyle reddedilir', true);
+    await p.fill('form.aracform input[name=ad]', 'Düşünce defteri');
+    await p.check('form.aracform input[name=gorunum][value=ag]');
+    await p.fill('form.aracform textarea[name=anlam]', 'Aklıma gelen fikirleri buraya atıyorum.');
+    await p.fill('form.aracform textarea[name=kullanim]', 'Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.');
+    await goruntu(p, 'sisteme-not-form');
+    await p.click('form.aracform button[type=submit]');
+    await p.waitForSelector('[data-arac-sayfa] .sistemnot');
+    const aracHash = await p.evaluate(() => location.hash);
+    dene('sisteme not: araç sayfası notu ve «King okumaz» gösterir', /King okumaz/.test(await p.textContent('.sistemnot')) && /hakkımda çıkarım yapma/.test(await p.textContent('.sistemnot')), await p.textContent('.sistemnot'));
+    await p.click('a[href^="#/motor/not/yeni?arac="]');
+    await p.waitForSelector('form.notform input[name=klasor]', { state: 'attached' });
+    dene('sisteme not: araçta yeni not aracın adını ve iznini söyler', /Araç: Düşünce defteri · King okumaz/.test(await p.textContent('form.notform')));
+    await p.fill('input[name=baslik]', 'Kader');
+    await p.fill('textarea[name=govde]', 'Kader ve çaba üzerine bir fikir.');
+    await p.click('form.notform button[type=submit]');
+    await p.waitForFunction(() => /^#\/motor\/not\/n\w+$/.test(location.hash));
+    const kral = () => p.evaluate(() => { const N = LIFEOS.Motor.Not, l = JSON.parse(localStorage.getItem('lifeos.not.kayit')), a = JSON.parse(localStorage.getItem('lifeos.not.araclar'));
+      return { klasor: l.find(n => n.baslik === 'Kader').klasor, okur: N.kingOkur(l, { araclar: a }).map(n => n.baslik), sistem: N.kingAraclar(a).length }; });
+    let kr = await kral();
+    dene('sisteme not: not aracın klasöründe; King süzgeci onu ve sistem notunu dışarıda bırakır', kr.klasor === 'Düşünce defteri' && kr.okur.indexOf('Kader') < 0 && kr.okur.indexOf('Erdem') >= 0 && kr.sistem === 0, JSON.stringify(kr));
+    await p.goto(T + '/kabuk/' + aracHash);
+    await p.waitForSelector('[data-arac-sayfa] .liste a.satir');
+    dene('sisteme not: araç sayfasında notu listelenir', /Kader/.test(await p.textContent('[data-arac-sayfa] .liste')));
+    await goruntu(p, 'sisteme-not');
+    await p.click('a[href$="/duzenle"]');
+    await p.waitForSelector('form.aracform');
+    dene('sisteme not: düzenlerken klasör değişmez (salt okunur)', (await p.getAttribute('form.aracform input[name=klasor]', 'readonly')) !== null);
+    await p.check('form.aracform input[name=kingOkur]');
+    await p.click('form.aracform button[type=submit]');
+    await p.waitForFunction(() => /King okur/.test((document.querySelector('.sistemnot') || {}).textContent || ''));
+    kr = await kral();
+    dene('sisteme not: izin açılınca King notu ve sistem notunu okur', kr.okur.indexOf('Kader') >= 0 && kr.sistem === 1, JSON.stringify(kr));
+    await p.goto(T + '/kabuk/#/motor/not');
+    await p.waitForSelector('[aria-labelledby="araclar-baslik"] a.satir');
+    dene('sisteme not: Not sayfasında araç, not sayısı ve King izniyle listelenir', /Düşünce defteri.*1 not.*King okur/.test((await p.textContent('[aria-labelledby="araclar-baslik"]')).replace(/\s+/g, ' ')));
+
     // ---- Tekrar ----
     await p.goto(T + '/kabuk/#/motor/tekrar');
     await p.waitForSelector('form.kartform');
@@ -267,6 +312,26 @@ async function goruntu(p, ad) {
     await p.click('[data-arac-ac="kayit-sil"] >> nth=0');
     await p.waitForFunction(() => document.querySelectorAll('.kartliste li').length === 1);
     dene('kayıt: kayıt silinir, özet güncellenir', !/Gece uykusu/.test(await p.textContent('.ozet')));
+    // geçmiş güne kayıt: motorun penceresi (bugün + 7 gün geri), gelecek yok
+    const kGunler = await p.$$eval('select[data-kayit-gun] option', o => o.map(x => x.value));
+    const bugunK = await p.evaluate(() => { const d = new Date(), i = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + i(d.getMonth() + 1) + '-' + i(d.getDate()); });
+    dene('kayıt: gün seçiminde bugün ve 7 gün geri var, gelecek yok', kGunler.length === 8 && kGunler[0] === bugunK && kGunler.every(g => g <= bugunK), kGunler.join(','));
+    await p.selectOption('select[data-kayit-tur]', 'su');
+    await p.waitForSelector('input[name=ml]');
+    await p.fill('input[name=ml]', '300');
+    await p.selectOption('select[data-kayit-gun]', kGunler[1]);
+    await p.waitForFunction(() => /Dün/.test(document.querySelector('[data-arac="kayit"] section h2').textContent));
+    dene('kayıt: gün değişince yazılan sayı kalır, özet o güne geçer', (await p.inputValue('input[name=ml]')) === '300' && /Dün için kayıt yok/.test(await p.textContent('[data-arac="kayit"]')));
+    await p.click('form.kayitform button[type=submit]');
+    await p.waitForFunction(() => /Kaydedildi \(Dün\)/.test(document.querySelector('.kayitform .notform__ileti').textContent));
+    dene('kayıt: düne kayıt yazıldı, özeti dünün', /300 ml/.test(await p.textContent('.ozet')));
+    await p.click('a[href="#/motor/kayit/hafta"]');
+    await p.waitForSelector('[data-kayit-hafta] .khafta__tablo');
+    const suSatir = await p.$$eval('.khafta__tablo tbody tr', tr => tr.map(r => [...r.children].map(c => c.textContent.trim())).find(r => /^Su/.test(r[0])));
+    dene('kayıt haftası: su satırında dün 300, bugün 500 (etiket ekran okuyucuya da), boş günler nokta (sıfır değil)', !!suSatir && suSatir[6] === '300 hesaplandı' && suSatir[7] === '500 hesaplandı' && suSatir.slice(1, 6).every(x => x === '·veri yok'), JSON.stringify(suSatir));
+    dene('kayıt haftası: satır etiketi ve haftanın toplamı etiketli', /hesaplandı/.test(suSatir && suSatir[0]) && /400 ml · 2 günün ortalaması\s*hesaplandı/.test(await p.textContent('[data-kayit-hafta] .ozet')));
+    dene('kayıt haftası: toparlanma ve yük motorun cümlesiyle (antrenman kaydı yok)', /Henüz antrenman kaydı yok/.test(await p.textContent('[data-yuk]')) && /Toparlanma puanı|toparlanma için kayıt yok/.test(await p.textContent('[data-yuk]')), await p.textContent('[data-yuk]'));
+    await goruntu(p, 'kayit-hafta');
 
     // ---- Plan ----
     await p.goto(T + '/kabuk/#/motor/plan');
@@ -308,6 +373,39 @@ async function goruntu(p, ad) {
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('.karsila__plan');
     dene('Bugün: planın sıradaki bloğunu gösterir', /Planda sırada: \d\d:\d\d/.test(await p.textContent('.karsila__plan')), await p.textContent('.karsila__plan'));
+
+    // ---- Hafta planı ve sabit bloklar (şablon bir kez yazılır, her güne girer) ----
+    await p.goto(T + '/kabuk/#/motor/plan');
+    await p.click('a[href="#/motor/plan/hafta"]');
+    await p.waitForSelector('[data-hafta] .hafta__gun');
+    dene('hafta: bugünden yedi gün çizildi, ilki «bugün»', (await p.locator('.hafta__gun').count()) === 7 && /bugün/.test(await p.textContent('.hafta__gun >> nth=0')));
+    await p.waitForSelector('.hafta .blok--ders');
+    dene('hafta: sıradaki ders öngörüde; bugün yapılan «Rapor» girmez; özet etiketli', !/Rapor/.test(await p.textContent('.hafta')) && /planlanan \d+ dk \(hesaplandı\)/.test(await p.textContent('[data-hafta]')));
+    await p.fill('form[data-plan="sabit"] input[name=bas]', '10:00');
+    await p.fill('form[data-plan="sabit"] input[name=bit]', '11:00');
+    await p.click('form[data-plan="sabit"] button[type=submit]');
+    dene('hafta: adsız sabit blok reddedilir', /adı yazılmalı/.test(await p.textContent('[data-hafta] .notform__ileti')));
+    await p.fill('form[data-plan="sabit"] input[name=ad]', 'Okul');
+    await p.fill('form[data-plan="sabit"] input[name=bas]', '10:00');
+    await p.fill('form[data-plan="sabit"] input[name=bit]', '11:00');
+    await p.click('form[data-plan="sabit"] button[type=submit]');
+    await p.waitForSelector('[data-arac-ac="plan-sabit-sil"]');
+    await p.fill('form[data-plan="sabit"] input[name=ad]', 'Uyku');
+    await p.fill('form[data-plan="sabit"] input[name=bas]', '23:00');
+    await p.fill('form[data-plan="sabit"] input[name=bit]', '07:00');
+    for (const g of ['5', '6']) await p.check('form[data-plan="sabit"] input[name=gun][value="' + g + '"]');
+    await p.click('form[data-plan="sabit"] button[type=submit]');
+    await p.waitForFunction(() => document.querySelectorAll('[data-arac-ac="plan-sabit-sil"]').length === 2);
+    const gunMetni = await p.locator('.hafta__gun').allTextContents();
+    dene('hafta: okul yalnız hafta içi beş güne, uyku her güne girdi', gunMetni.filter(x => /Okul/.test(x)).length === 5 && gunMetni.every(x => /23:00–24:00\s*Uyku/.test(x) && /00:00–07:00\s*Uyku/.test(x)), gunMetni.map(x => x.slice(0, 60)).join(' | '));
+    dene('hafta: gece yarısını geçen blok listede işaretli', /gece yarısını geçer/.test(await p.textContent('[data-hafta] .kartliste')));
+    await p.reload();
+    await p.waitForSelector('[data-arac-ac="plan-sabit-sil"]');
+    dene('hafta: şablon yenilemeden sonra duruyor', (await p.locator('[data-arac-ac="plan-sabit-sil"]').count()) === 2);
+    await goruntu(p, 'hafta');
+    await p.click('[data-arac-ac="plan-sabit-sil"][aria-label="Sabit bloğu sil: Okul"]');
+    await p.waitForFunction(() => document.querySelectorAll('[data-arac-ac="plan-sabit-sil"]').length === 1);
+    dene('hafta: sabit blok silinir, günlerden çıkar', !/Okul/.test(await p.textContent('.hafta')));
 
     // ---- Soru: karma test (etkin alan Felsefe) ----
     await p.goto(T + '/kabuk/#/alan/felsefe');
