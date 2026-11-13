@@ -492,18 +492,18 @@
   });
   const EKSIK = Object.freeze({
     spiVitals:['semptomlar (symptoms, symptomsLogged) ve adet günü (period): Tahlil alanının türü, bu motorda yok',
-      'günün notu (note): Not motoruna', 'vitals sayıları etiketsiz: hepsi «eski kayıt» (karar 11)'],
+      'günün notu (note): Not motoru (Not.goc.gunNotu, koleksiyon vitals)', 'vitals sayıları etiketsiz: hepsi «eski kayıt» (karar 11)'],
     spiOgun:['kcal ve besin değerleri besin tablosundan hesaplanır: tablo bu motorda yok, Beslenme alanı taşınınca yeniden hesaplanır (türetilmiş)',
       'kalemlerin besin adı: yalnız foodId taşınır', 'öğün saati (at) kayıt zamanıdır, yemek saati değil: göremedim'],
-    spiAntrenman:['templateId ve basamak (levelId): Hareket yol haritasının kaydı', 'seans notu: Not motoruna',
+    spiAntrenman:['templateId ve basamak (levelId): Hareket yol haritasının kaydı', 'seans notu (note): Not motoru (Not.goc.gunNotu, koleksiyon workouts)',
       'süre ve RPE etiketsiz: «eski kayıt»; boş süre 40 dk varsayılanla doluyordu (state.js:690), ayırt edilemez'],
     spiProfil:['hedef dışı alanlar (koşullar: conditions; görünüm: theme, design; ad ve rol: name, role; sabitler: pinned; kimlik: id, createdAt): Çekirdek profil',
       'etkinlik düzeyi (activity): hiçbir hedefe girmiyordu (nutri.js:74-82), taşınmaz'],
     aysMood:['enerji 3 gerçek mi varsayılan mı: göremedim (state.js:189), «eski kayıt»'],
     aysMola:['etkinlik (activityId): göremedim, taşınmaz', 'boş süre 5 dk varsayılanla doluyordu (activities.js:103), ayırt edilemez'],
-    aysGun:['blok hedefleri, durum, atlama nedeni: Plan motorunun bağdaştırıcısı (Plan.GOC.aysGun)', 'paragraf/problem sayıları ve serbest soru: Soru motoru',
-      'doğru sayısı (correctQ): Soru motoru', 'dikkat dağılması sayısı (distractions): göremedim, taşınmaz'],
-    espGun:['kalite aralığı: göremedim (0-10 kabul edildi)', 'günün notu: Not motoruna'],
+    aysGun:['blok hedefleri, durum, atlama nedeni: Plan motorunun bağdaştırıcısı (Plan.GOC.aysGun)', 'paragraf/problem sayıları ve serbest soru: Soru motoru (Soru.GOC.aysGun)',
+      'doğru sayısı (correctQ): Soru motoru (Soru.GOC.aysGun)', 'günün notu (note): Not motoru (Not.goc.gunNotu)', 'dikkat dağılması sayısı (distractions): göremedim, taşınmaz'],
+    espGun:['kalite aralığı: göremedim (0-10 kabul edildi)', 'günün ve seansın notu (note, sessions[].note): Not motoru (Not.goc.gunNotu)'],
   });
 
   const Kayit = Object.freeze({ ETIKET, TURLER, kaydet, deger, birlesik, gunluk, haftalik, Kural, GOC, EKSIK,

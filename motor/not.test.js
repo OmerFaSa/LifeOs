@@ -312,6 +312,24 @@ it('göç: her bağdaştırıcı raporu taşıyamadığını söyler; bozuk kay�
     assert.ok(Array.isArray(x.rapor.tasinamayan) && x.rapor.tasinamayan.length, a);
   });
 });
+/* Modül boşlukları (faz1-modul-bosluklari.md): Kayıt/Plan gün bağdaştırıcılarının «Not motoru» dediği alanlar; gerçek biçim, uydurma metin. */
+it('göç gün notu: AYS günü, SPİ vitals ve seansı, ESP günü ve seans notları; boş not yazılmaz; gün bağlamı ve kaynak yolu', () => {
+  const ays = N.goc.gunNotu([{ id:'g1', date:'2026-11-02', note:'Yorgundum', blocks:[] }, { id:'g2', date:'2026-11-03', note:'  ' }], { modul:'ays', zaman:GOC });
+  assert.deepStrictEqual(ids(ays.notlar), ['gun/ays/days/2026-11-02']);
+  const n = ays.notlar[0];
+  assert.deepStrictEqual([n.baslik, n.govde, n.olusturma, n.baglam, n.kaynak], ['Gün notu 2026-11-02', 'Yorgundum', Date.UTC(2026, 10, 2),
+    { modul:'ays', gun:'2026-11-02' }, { yapi:'gun-notu', modul:'ays', yol:'days/2026-11-02' }]);
+  const spi = N.goc.gunNotu([{ date:'2026-11-02', weight:70, water:0, note:'Baş ağrısı' }], { modul:'spi', zaman:GOC, koleksiyon:'vitals' });
+  assert.deepStrictEqual(ids(spi.notlar), ['gun/spi/vitals/2026-11-02']);
+  const seans = N.goc.gunNotu([{ id:'w1', date:'2026-11-02', kind:'cardio', minutes:30, note:'Dizim ağrıdı' }], { modul:'spi', zaman:GOC, koleksiyon:'workouts' });
+  assert.deepStrictEqual([ids(seans.notlar), seans.notlar[0].baslik, seans.notlar[0].baglam.kayit], [['gun/spi/workouts/w1'], 'Seans notu 2026-11-02', 'workouts/w1']);
+  const esp = N.goc.gunNotu([{ date:'2026-11-02', note:'İyi gün', updatedAt:'2026-11-02T20:00:00.000Z',
+    sessions:[{ id:'s1', disc:'lang', minutes:30, note:'Fiiller' }, { id:'s2', disc:'math', note:'' }] }, { date:'2026-11-04', note:'', sessions:[{ id:'s3', note:'Yalnız seans' }] }], { modul:'esp', zaman:GOC });
+  assert.deepStrictEqual(esp.notlar.map(x => x.govde), ['İyi gün\n\nlang: Fiiller', 'Yalnız seans']);
+  assert.strictEqual(esp.notlar[0].guncelleme, Date.parse('2026-11-02T20:00:00.000Z'));
+  assert.ok(esp.rapor.tasinamayan.length && !esp.rapor.reddedilen.length);
+  assert.throws(() => N.goc.gunNotu([], { zaman:GOC }), /modül/);
+});
 
 /* ------------------------------------------------------------- saflık */
 it('saflık: motor saati ve rastgeleyi kendisi okumaz; tarayıcıda LIFEOS.Motor.Not', () => {

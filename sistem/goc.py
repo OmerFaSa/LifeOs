@@ -56,11 +56,24 @@ HKM_GERCEK = {
     "king_beceriler": "king", "king_sozler": "king", "king_bekleyen": "king",
     "zaman_butcesi": "plan_blogu", "susturmalar": "tercih", "sorular": "olcum",
     "meydan_deste": "kart", "meydan_isaret": "kart", "meydan_not": "not", "meydan_yanit": "kart",
-    "bam_isler": "bam", "bam_kayitlar": "bam", "intents": "akis", "outbox": "akis",
+    "bam_isler": "bam", "bam_kayitlar": "bam", "bam_iz": "bam", "intents": "akis", "outbox": "akis",
     "inbox_seen": "akis", "bildirimler": "akis", "is_emirleri": "akis", "usage": "kullanim",
 }
+# HKM ayri yapi olarak kalkar (AGENTS §0.1): kuyrugu ve BAM'in is durumu tek sistemde surmez; satirlari tek depoda
+# SALT OKUR kalir, hicbir motor yazmaz. Sahibi olan tablolar: King (king/hafiza.py GOC), Not (bam_kayitlar), Tekrar
+# (meydan_deste). Rapor: belgeler/ekip/sadelesme/faz1-hkm-sahiplik.md
+HKM_ARSIV = {
+    "intents": "niyet kuyruğu: tek süreçte teklif yerine doğrulanmış yazma gelir; bekleyen niyet yeniden önerilmez",
+    "bildirimler": "iş emri bildirimi: kuyruk kalkar, okunmamışlar yeniden gösterilmez",
+    "is_emirleri": "BAM'a giden iş emri: ofis ajanları arşivde, iş zinciri yeniden başlatılmaz",
+    "bam_isler": "BAM işinin ofis adımları: ofisler arşivde, iş yeniden koşmaz",
+    "bam_iz": "BAM kökeni (iz_zinciri, kayıt ← iş ← kaynak): yeniden hesaplanamaz, Not'taki bam kaydının kökü",
+    "outbox": "giden kutusu: gönderilmemiş mesaj yeniden gönderilmez",
+    "inbox_seen": "gelen mesaj defteri (tekrar işlememe): kanal tek süreçte yeniden kurulur",
+    "attachments": "Telegram eki kuyruğu: dosyanın kendisi depoda değil, yalnız iz",
+}
 HKM_TURETILMIS = {
-    "raw_events", "audits", "decisions", "decision_sources", "hedef_ozet", "hafiza_gomme", "bam_iz",
+    "raw_events", "audits", "decisions", "decision_sources", "hedef_ozet", "hafiza_gomme",
     "bam_depo_rapor", "meydan_hikaye", "duyurular", "yarin_ozet", "tatil_ozet", "dil_karti",
     "goruntu_sira", "web_onbellek", "web_sayac", "model_tarife", "aktif_tur", "aktif_is", "para_taslak",
 }

@@ -214,6 +214,57 @@ Yalnız tanım; büyük ya da karar isteyen işler.
    (`|| undefined`), JSON'da düşer.
 7. `tools/tools_dizin_kabul_test.py` üç yeni dosya commit'lenene dek kırmızı (yalnız `git ls-files`'ı sayar).
 
+## Modül boşlukları sonrası
+
+Kalanlar 2 (gün alanları) ve 3 (`ays:plan`, `ays:weeks`, `spi:haftaplan`) kapatıldı; ayrıntı
+[faz1-modul-bosluklari.md](faz1-modul-bosluklari.md). Aynı komutla yeniden koşu (2026-11-13): çıkış 0, çökme 0,
+ret yalnız eski 1 (not.defter), sessiz düşen alan 0, yeni bağdaştırıcılarda tanımsız alan 0. Yalnız bu paketin
+değiştirdiği rotalar:
+
+| Rota | Bağdaştırıcı | Okunan | Çıktı | Ret | Boş | Çöktü | Önce |
+|---|---|---:|---:|---:|---:|---:|---|
+| ays:plan | plan.aysPlan | 1 | 41 | 0 | 0 | 0 | sahipsiz |
+| ays:weeks | plan.aysHafta | 2 | 2 | 0 | 0 | 0 | sahipsiz |
+| spi:haftaplan | plan.spiHaftaplan | 2 | 2 | 0 | 0 | 0 | sahipsiz |
+| ays:days | soru.aysGun | 7 | 0 | 0 | 7 | 0 | yok |
+| ays:days | not.gunNotu | 7 | 0 | 0 | 7 | 0 | yok |
+| spi:vitals | not.gunNotu | 4 | 0 | 0 | 4 | 0 | yok |
+
+`ays:plan` çıktısı 1 program özeti + 40 hafta hedefi. Soru ve Not gün bağdaştırıcılarının boşları gerçek boş:
+yedi günün soru sayılarının hepsi 0 ya da boş (AYS `gunSorusu` da 0), notlar boş. Üç plan koleksiyonunun iç içe
+alan adları (4 düzeye dek) aynı kopya düzeneğiyle ayrıca okundu: bağdaştırıcıda ya da taşınamayan listesinde adı
+geçmeyen alan 0. `esp:days` ve `spi:workouts` rotalarına da `not.gunNotu` eklendi; gerçek kayıt yok (paket bekler).
+
+## HKM sonrası
+
+Kalanlar 3'ün HKM kısmı kapatıldı: gerçek satırı olan her HKM tablosunun sahibi var; ayrıntı ve tablo tablo neden
+[faz1-hkm-sahiplik.md](faz1-hkm-sahiplik.md). `goc.py`'de `bam_iz` (BAM köken zinciri, yeniden hesaplanamaz)
+türetilmişten gerçeğe alındı: canlı kayıt 394 → 397, göç kimliği `b0ad37c8b0aa6e58` (sayı dengesi tutuyor,
+gidiş-dönüş birebir). Aynı komutla yeniden koşu (2026-11-13): çıkış 0, çökme 0, HKM'de ret 0, sessiz düşen alan 0,
+tanımsız alan 0. **HKM'de sahipsiz kayıt 350 → 0**; bütün depoda sahipsiz 376 → 21 (kalanlar modül meta/profil,
+`esp:prefs`, `spi:basarim/seviye/chats`, `ays:defterklasor`, `gun_kopya`, PC tercih ve planlama: HKM değil).
+
+| Rota | Bağdaştırıcı | Okunan | Çıktı | Ret | Boş | Çöktü | Önce |
+|---|---|---:|---:|---:|---:|---:|---|
+| hkm:conversations | king.sohbet | 168 | 168 | 0 | 0 | 0 | sahipsiz |
+| hkm:usage | king.kullanim | 166 | 166 | 0 | 0 | 0 | sahipsiz |
+| hkm:memories | king.hafiza | 5 | 5 | 0 | 0 | 0 | sahipsiz |
+| hkm:bam_kayitlar | not.bamKayit | 1 | 1 | 0 | 0 | 0 | sahipsiz |
+| hkm:bildirimler | arşiv | 6 | 6 | 0 | 0 | 0 | sahipsiz |
+| hkm:bam_iz | arşiv | 3 | 3 | 0 | 0 | 0 | türetilmiş (atlanıyordu) |
+| hkm:is_emirleri | arşiv | 2 | 2 | 0 | 0 | 0 | sahipsiz |
+| hkm:intents | arşiv | 1 | 1 | 0 | 0 | 0 | sahipsiz |
+| hkm:bam_isler | arşiv | 1 | 1 | 0 | 0 | 0 | sahipsiz |
+
+Arşiv: satır tek depoda `goc.py`'nin yazdığı gibi salt okur kalır, hiçbir motor yazmaz; nedeni `goc.HKM_ARSIV`'de
+ve koşunun taşınamayan tablosunda («salt okur: …»). Hafızada öneriye inen (izinsiz kaynak) 0, «ben» olmayan kişi
+adı 0.
+
+**Yeni kapı satırı:** koşu artık HKM `raw_events`'i (modülün HKM'ye yolladığı gün kopyası; türetilmiş, taşınmaz)
+kuru depoyla karşılaştırır: 47 modül-günün **38'inin** depoda karşılığı yok (AYS 14, ESP 13, SPİ 11). Aslı
+cihazlarda; P2 paketleriyle gelmeli. Paketlerden sonra 0 değilse sahibi karar verir (raw_events'ten «eski kayıt»
+olarak mı taşınsın).
+
 ## Testler
 
 - `python tools/gercek_kosu_test.py`: 19/19 yeşil. Sayılar; ret nedeni gruplu ve rakamsız; silinen kayıt
@@ -223,3 +274,5 @@ Yalnız tanım; büyük ya da karar isteyen işler.
 - Motor testleri: kayıt 29/29, tekrar 21/21, not 26/26, soru 32/32, plan 24/24, yol 13/13.
 - `belge_dizin_kabul_test.py` yeşil; `tools_dizin_kabul_test.py` yalnız commit'lenmemiş üç dosya için kırmızı.
 - Gerçek koşu: çıkış 0, canlı 12 dosya değişmedi, geçici klasör kalmadı.
+- HKM sonrası: `gercek_kosu_test.py` 26/26 (King, Not, arşiv, sahipsiz HKM, sessiz sütun, `raw_events`
+  kapsamı, King çökmesi `king/hafiza.py:`), `king/hafiza_test.py` 29/29, `motor/not-hkm.test.js` 7/7.

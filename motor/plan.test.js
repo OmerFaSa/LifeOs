@@ -285,6 +285,71 @@ it('göç AYS şablonu: 7 gün, Pazartesi başta, ritüeller korunur; her bağda
   assert.strictEqual(s[0].ad, 'Pazartesi');
   Object.keys(P.GOC).forEach(a => assert.ok(K_EKSIK(a), a));
 });
+
+/* Modül boşlukları (faz1-modul-bosluklari.md): gerçek kayıtların biçiminde, değerleri uydurma. Okunmayan her alan EKSIK'te adıyla. */
+const sessizAlan = (ad, ...nesneler) => {
+  const yardimci = kaynak('motor/plan.js').split(/\r?\n/).filter(l => /^\s*const (konu|hafta) =/.test(l)).join(' ');   // GOC'un ortak yardımcıları
+  const bilinen = String(P.GOC[ad]) + ' ' + yardimci + ' ' + P.EKSIK[ad].join(' ');
+  return [].concat(...nesneler.map(Object.keys)).filter(a => !new RegExp('[^\\w$]' + a + '[^\\w$]').test(bilinen));
+};
+it('göç AYS hafta sözleşmesi: hedef, konular, devir, imza ve revizyon taşınır; hafta başı programın ilk gününden', () => {
+  const w = { n:3, title:'Temel — Matematik', questionTarget:420, planLoad:0.9, examPlan:'Haftada 1 branş denemesi', checkpoint:'Doğruluk %60?',
+    capacityMin:1260, signedAt:'2026-10-20T08:00:00.000Z', behaviorGoal:'6 gün 7.5 saat uyku', carryIn:['Konu A', 'Konu B'],
+    revisions:[{ at:'2026-10-22T09:00:00.000Z', reason:'hastalık' }],
+    mainTopics:[{ name:'Konu A', questionTarget:140, accuracy:70, subjectId:'tyt-mat', topicId:'m-sayi' }, { name:'Serbest', questionTarget:100, accuracy:70, subjectId:null, topicId:null }] };
+  const h = P.GOC.aysHafta(w, '2026-10-06');
+  assert.deepStrictEqual([h.id, h.tur, h.hafta, h.bas, h.soru, h.dk, h.yuk, h.imza], ['goc:ays:hafta:w03', 'hafta-hedefi', 3, '2026-10-20', 420, 1260, 0.9, w.signedAt]);
+  assert.deepStrictEqual(h.konular[0], { ad:'Konu A', dersId:'tyt-mat', konuId:'m-sayi', soru:140, dogruluk:70 });
+  assert.deepStrictEqual([h.devir, h.revizyonlar], [['Konu A', 'Konu B'], [{ an:'2026-10-22T09:00:00.000Z', neden:'hastalık' }]]);
+  assert.strictEqual(P.GOC.aysHafta(w).bas, null);
+  assert.strictEqual(P.GOC.aysHafta({ title:'numarasız' }), null);
+  assert.ok(!JSON.stringify(h).includes('undefined'));
+  assert.deepStrictEqual(sessizAlan('aysHafta', w, w.mainTopics[0], w.revisions[0]), []);
+});
+it('göç AYS programı: bir özet + hafta başına hedef; düşenler korunur; istisnalar ara ve geçici süre olur', () => {
+  const meta = { total:2, perWeek:2, gates:[2], productive:2, level:'orta', capacityHoursPerWeek:21, placed:3, poolSize:4, leftover:0,
+    dropped:[{ subjectId:'tyt-fiz', subjectName:'TYT Fizik', topicId:'f-opt', name:'Optik', freq:2 }], coverage:75, tavan:4,
+    capacityForFull:30, kapsamaEngeli:null, gerekenKonu:2, generatedAt:'2026-09-01T10:00:00.000Z', version:1, replannedAt:'2026-10-01T10:00:00.000Z', replannedFrom:5, carried:1 };
+  const hf = n => ({ n, phase:'temel', phaseLabel:'Temel', theme:'Çekirdek', title:'Temel — Mat ' + n, topics:['Sayılar'],
+    items:[{ subjectId:'tyt-mat', topicId:'m-sayi', name:'Sayılar' }], recurring:['Paragraf'], q:300, load:1, exam:'Haftada 1 branş', check:'Kapı?', gate:n === 2 });
+  const l = P.GOC.aysPlan({ weeks:[hf(1), hf(2)], meta }, '2026-09-01');
+  assert.deepStrictEqual(l.map(x => [x.tur, x.bas || null]), [['program', null], ['hafta-hedefi', '2026-09-01'], ['hafta-hedefi', '2026-09-08']]);
+  assert.deepStrictEqual([l[0].hafta, l[0].uretildi, l[0].dusen], [2, meta.replannedAt, [{ ad:'Optik', dersId:'tyt-fiz', konuId:'f-opt' }]]);
+  assert.deepStrictEqual([l[2].soru, l[2].evre, l[2].kapi, l[2].konular, l[2].tekrar], [300, 'temel', true, [{ ad:'Sayılar', dersId:'tyt-mat', konuId:'m-sayi' }], ['Paragraf']]);
+  assert.deepStrictEqual(sessizAlan('aysPlan', { weeks:1, meta:1 }, meta, hf(1), meta.dropped[0]), []);
+  const ist = P.GOC.aysPlan({ items:[{ id:'ist1', tur:'ara', from:'2026-11-03', to:'2026-11-05', dakika:null, neden:'tatil', at:'2026-11-01T08:00:00Z' },
+    { id:'ist2', tur:'sure', from:'2026-11-10', to:'2026-11-10', dakika:90, neden:'', at:'2026-11-01T08:00:00Z' }, { id:'bozuk', tur:'ara', from:'yarın' }] });
+  assert.deepStrictEqual(ist.map(x => [x.tur, x.bas, x.bit, x.ara, x.gunlukDakika]), [['istisna', '2026-11-03', '2026-11-05', true, null], ['istisna', '2026-11-10', '2026-11-10', false, 90]]);
+  assert.deepStrictEqual(P.GOC.aysPlan({}), []);
+});
+it('göç SPİ haftalık planları: hareket şablonu haftaPlani\'na girer, dinlenme günü sırayı kaydırmaz; su maddeleri ve işaretler korunur', () => {
+  const har = { id:'hp1', tur:'hareket', ad:'Hareket planı', at:'2026-10-17T08:00:00Z', guncel:'2026-10-20T08:00:00Z',
+    gunler:[{ ne:'Yürüyüş', dk:30, zaman:{ dilim:'sabah', saat:null } }, null, { ne:'Koşu', dk:20, zaman:null }, null, null, null, null] };
+  const h = P.GOC.spiHaftaplan(har);
+  assert.deepStrictEqual([h.id, h.tur, h.alan, h.gunler.length, h.gunler[0].sablon.ad], ['spi:haftaplan:hp1', 'hafta-sablonu', 'hareket', 7, 'Pazartesi']);
+  assert.deepStrictEqual(h.gunler.map(g => g.sablon.bloklar.map(b => b.ad + ':' + b.dk)), [['Yürüyüş:30'], [], ['Koşu:20'], [], [], [], []]);
+  assert.deepStrictEqual(h.gunler[0].sablon.bloklar[0].zaman, { dilim:'sabah', saat:null });
+  const hp = P.haftaPlani({ bas:PZT, gunler:h.gunler.map(g => Object.assign({ musait:[{ bas:'07:00', bit:'09:00' }] }, g)) });
+  assert.ok(hp.ok, JSON.stringify(hp.hatalar));
+  assert.deepStrictEqual(hp.hafta.gunler.map(g => g.bloklar.filter(b => b.alan === 'hareket').map(b => b.dk)), [[30], [], [20], [], [], [], []]);
+  const su = { id:'hp2', tur:'su', ad:'Su ve alışkanlık', at:null, guncel:null, suMl:2000,
+    maddeler:[{ id:'m1', metin:'Esneme', gunler:[0, 2], zaman:{ dilim:null, saat:'07:30' }, simge:'esneme', hedef:1, bag:null },
+      { id:'m2', metin:'Bardak su', gunler:[], zaman:null, simge:'su', hedef:8, bag:null }, { id:'m3', metin:'  ', gunler:[], hedef:1 }],
+    isaret:{ '2026-11-10':['m1'] }, sayac:{ '2026-11-10':{ m2:5 }, '2026-11-11':{ m2:8 } } };
+  const s = P.GOC.spiHaftaplan(su);
+  assert.deepStrictEqual([s.suMl, s.maddeler.map(m => [m.ad, m.hedef, m.gunler.length])], [2000, [['Esneme', 1, 2], ['Bardak su', 8, 0]]]);
+  assert.deepStrictEqual(s.yapilan, { '2026-11-10':{ m1:1, m2:5 }, '2026-11-11':{ m2:8 } });
+  const uyG = { id:'hp3', tur:'uyku', ad:'Uyku planı', kip:'hafta', her:{ yat:'', kalk:'' }, haftaici:{ yat:'23:00', kalk:'07:00' },
+    haftasonu:{ yat:'00:00', kalk:'09:00' }, gunluk:[], kestirmeler:[{ id:'k1', ad:'Öğle uykusu', bas:'13:30', dk:20, gunler:[5, 6] }] }, uy = P.GOC.spiHaftaplan(uyG);
+  assert.deepStrictEqual([uy.gunler[0].uyku, uy.gunler[6].uyku], [{ yat:'23:00', kalk:'07:00' }, { yat:'00:00', kalk:'09:00' }]);
+  assert.deepStrictEqual(uy.gunler.map(g => g.sablon.bloklar.length), [0, 0, 0, 0, 0, 1, 1]);
+  const bes = P.GOC.spiHaftaplan({ id:'hp4', tur:'beslenme', ad:'Beslenme planı', gunler:[{ kahvalti:'Yulaf' }, {}, {}, {}, {}, {}, {}] });
+  assert.deepStrictEqual([bes.gunler[0].ogunler, bes.gunler[1].ogunler], [{ kahvalti:'Yulaf' }, undefined]);
+  assert.strictEqual(P.GOC.spiHaftaplan({ id:'x', tur:'bilinmeyen' }), null);
+  [h, s, uy, bes].forEach(o => assert.ok(!JSON.stringify(o).includes('undefined')));
+  const sessiz = sessizAlan('spiHaftaplan', har, su, su.maddeler[0], uyG, uyG.kestirmeler[0]);
+  assert.deepStrictEqual(sessiz, []);
+});
 function K_EKSIK(a){ return Array.isArray(P.EKSIK[a]) && P.EKSIK[a].length; }
 
 it('saflık: motor saat okumaz (Date.now / new Date() yok)', () => {

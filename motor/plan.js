@@ -310,6 +310,13 @@
   /* ============================================================= GÖÇ
      AYS gün kaydı → plan; AYS haftalık şablon → gün şablonu. Saatleri yoktu: bas/bit null. */
   const DURUM_CEVIR = { pending:'bekliyor', done:'yapildi', partial:'kismen', skipped:'atlandi' };
+  const GUN_ADI = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+  const dizi = v => Array.isArray(v) ? v.filter(e => e != null) : [];
+  const sayiYa = v => v == null || v === '' || !isFinite(Number(v)) ? null : Number(v);
+  const konu = (t, ek) => Object.assign({ ad:String(t.name || ''), dersId:t.subjectId || null, konuId:t.topicId || null }, ek);
+  /* Hafta hedefi: { id, tur:'hafta-hedefi', hafta, bas, ad, kaynak, soru, yuk, deneme, kontrol, konular:[{ ad, dersId, konuId, soru?, dogruluk? }], … } */
+  const hafta = (kaynak, n, bas, ad, o) => Object.assign({ id:kaynak + ':w' + String(n).padStart(2, '0'), tur:'hafta-hedefi', hafta:n,
+    bas:GUN_RE.test(bas || '') ? gunEkle(bas, (n - 1) * 7) : null, ad:String(ad || ''), kaynak }, o);   // AYS state.js:215 weekStart
   const GOC = Object.freeze({
     /* AYS days/<gün> (AYS state.js:379-412 defaultDay, istisna.js:280-294 öne alınan blok). */
     aysGun(day){
@@ -331,16 +338,86 @@
       return (weekdays || []).map(w => ({ ad:w.label, ritual:w.ritual || null,
         bloklar:(w.blocks || []).map(b => ({ slot:b.slot, ad:b.subject, dk:Number(b.min) || 0, alan:'akademik' })) }));
     },
+    /* AYS weeks/wNN, hafta sözleşmesi (state.js:137 normWeek, :307-344 defaultWeek; week.js:789-847 imza, revizyon,
+       devir) → hafta hedefi. baslangic = AYS programın ilk günü (R.PLAN.startISO); yoksa bas null. */
+    aysHafta(w, baslangic){
+      const x = w || {}, n = Number(x.n);
+      if(!(Number.isInteger(n) && n >= 1)) return null;
+      return hafta('goc:ays:hafta', n, baslangic, x.title, { soru:sayiYa(x.questionTarget), dk:sayiYa(x.capacityMin), yuk:sayiYa(x.planLoad),
+        deneme:x.examPlan || '', kontrol:x.checkpoint || '', davranis:x.behaviorGoal || '',
+        konular:dizi(x.mainTopics).map(t => konu(t, { soru:sayiYa(t.questionTarget), dogruluk:sayiYa(t.accuracy) })),
+        devir:dizi(x.carryIn).map(String), imza:x.signedAt || null,
+        revizyonlar:dizi(x.revisions).map(r => ({ an:r.at || null, neden:String(r.reason || '') })) });
+    },
+    /* AYS plan/main, üretilmiş program (planner.js:296-341 generate, :470-476 replan) → bir program özeti + hafta
+       başına hafta hedefi; plan/istisnalar (istisna.js:101 { items }, :403-411) → tarihli istisnalar. */
+    aysPlan(doc, baslangic){
+      const x = doc || {};
+      if(Array.isArray(x.items)) return x.items.filter(i => i && i.id && GUN_RE.test(i.from || '')).map(i => ({ id:'ays:istisna:' + i.id, tur:'istisna',
+        bas:i.from, bit:GUN_RE.test(i.to || '') ? i.to : i.from, ara:i.tur === 'ara', gunlukDakika:i.tur === 'sure' ? sayiYa(i.dakika) : null,
+        neden:String(i.neden || ''), an:i.at || null, kaynak:'goc:ays:istisna' }));
+      if(!Array.isArray(x.weeks)) return [];
+      const m = x.meta || {};
+      return [{ id:'goc:ays:program', tur:'program', kaynak:'goc:ays:program', hafta:x.weeks.length, uretildi:m.replannedAt || m.generatedAt || null,
+        dusen:dizi(m.dropped).map(t => konu(t)) }].concat(x.weeks.filter(w => w && Number.isInteger(w.n) && w.n >= 1)
+        .map(w => hafta('goc:ays:program', w.n, baslangic, w.title, { soru:sayiYa(w.q), yuk:sayiYa(w.load), deneme:w.exam || '', kontrol:w.check || '',
+          evre:w.phase || null, kapi:!!w.gate, konular:dizi(w.items).map(t => konu(t)), tekrar:dizi(w.recurring).map(String) })));
+    },
+    /* SPİ haftaplan/<id> (SPI core/haftaplan.js:174-193 yeni, :196-243 dogrula) → hafta şablonu. gunler[i] (0 =
+       Pazartesi, haftaplan.js gunNo) haftaPlani'nin gün girdisi olarak kullanılır: hareket ve kısa uyku şablon bloğu olur. */
+    spiHaftaplan(p){
+      const x = p || {}, tur = x.tur;
+      if(!x.id || !['beslenme', 'hareket', 'uyku', 'su', 'serbest'].includes(tur)) return null;
+      const gunler = GUN_ADI.map(ad => ({ sablon:{ ad, ritual:null, bloklar:[] } }));
+      const blok = (i, b) => gunler[i].sablon.bloklar.push(b);
+      const zaman = z => z && (z.dilim || z.saat) ? { dilim:z.dilim || null, saat:z.saat || null } : null;
+      const yedi = Array.isArray(x.gunler) ? x.gunler.slice(0, 7) : [];   // dinlenme günü null: sıra korunmalı, süzülmez
+      if(tur === 'hareket') yedi.forEach((g, i) => { if(g && Number(g.dk) > 0) blok(i, { slot:'Hareket', ad:String(g.ne || ''), dk:Number(g.dk), alan:'hareket', zaman:zaman(g.zaman) }); });
+      if(tur === 'beslenme') yedi.forEach((g, i) => { if(g && Object.keys(g).length) gunler[i].ogunler = Object.assign({}, g); });
+      if(tur === 'uyku'){
+        const kip = ['her', 'hafta', 'gun'].includes(x.kip) ? x.kip : 'hafta';   // haftaplan.js uykuKip, uykuOf
+        gunler.forEach((g, i) => { const u = kip === 'her' ? x.her : kip === 'gun' ? (x.gunluk || [])[i] : i >= 5 ? x.haftasonu : x.haftaici;
+          if(u && SAAT_RE.test(u.yat || '') && SAAT_RE.test(u.kalk || '')) g.uyku = { yat:u.yat, kalk:u.kalk }; });
+        dizi(x.kestirmeler).filter(k => Number(k.dk) > 0).forEach(k => gunler.forEach((g, i) => {
+          if(!dizi(k.gunler).length || k.gunler.indexOf(i) >= 0) blok(i, { slot:'Kısa uyku', ad:String(k.ad || ''), dk:Number(k.dk), alan:'uyku', zaman:zaman({ saat:SAAT_RE.test(k.bas || '') ? k.bas : null }) });
+        }));
+      }
+      const o = { id:'spi:haftaplan:' + x.id, tur:'hafta-sablonu', alan:tur, ad:String(x.ad || ''), kaynak:'goc:spi', olusturma:x.at || null, guncelleme:x.guncel || null, gunler };
+      if(tur === 'su' || tur === 'serbest'){
+        o.maddeler = dizi(x.maddeler).filter(m => m.id && String(m.metin || '').trim()).map(m => ({ id:m.id, ad:String(m.metin), gunler:dizi(m.gunler).slice(),
+          zaman:zaman(m.zaman), hedef:Number.isInteger(m.hedef) && m.hedef >= 1 ? m.hedef : 1, bag:m.bag || null, simge:m.simge || null }));
+        o.yapilan = {};   // gün → { madde: kaç kez }; isaret hedefi 1 olan, sayac büyük olan maddenin (haftaplan.js:296-306)
+        Object.keys(x.isaret || {}).forEach(g => dizi(x.isaret[g]).forEach(id => { (o.yapilan[g] = o.yapilan[g] || {})[id] = 1; }));
+        Object.keys(x.sayac || {}).forEach(g => Object.assign(o.yapilan[g] = o.yapilan[g] || {}, x.sayac[g]));
+      }
+      if(tur === 'su') o.suMl = sayiYa(x.suMl);
+      return o;
+    },
   });
   const EKSIK = Object.freeze({
-    aysGun:['blok soru hedefi (targetQ), çözülen ve doğru soru (actualQ, correctQ): Soru motoru',
-      'paragraf/problem hedefleri ve serbest soru (paragraphTarget, problemTarget, paragraphActual, problemActual, freeQ, freeCorrect): Soru motoru',
-      'kontrol listesi (checklist): Akademik alanın günlük ritüeli; göremedim', 'günün notu (note): Not motoruna', 'uyku saati (sleepHours): Kayıt motoru (Kayit.GOC.aysGun)',
+    aysGun:['blok soru hedefi (targetQ), çözülen ve doğru soru (actualQ, correctQ): Soru motoru (Soru.GOC.aysGun); çözülen sayı Kayıt çalışma kaydında da (Kayit.GOC.aysGun)',
+      'paragraf/problem hedefleri ve serbest soru (paragraphTarget, problemTarget, paragraphActual, problemActual, freeQ, freeCorrect): Soru motoru (Soru.GOC.aysGun)',
+      'kontrol listesi (checklist): Akademik alanın günlük ritüeli; göremedim', 'günün notu (note): Not motoru (Not.goc.gunNotu)', 'uyku saati (sleepHours): Kayıt motoru (Kayit.GOC.aysGun)',
       'kötü gün işareti (badDay, badDayTargets, badDaySoruYok; AYS state.js:1067): blokların «atlandı» durumu ve nedeni taşınır, işaret ve eski hedefler taşınmaz',
       'günün ritüeli (ritual): gün şablonundan gelir (aysSablon), gün kaydından taşınmaz', 'haftanın günü (dow): tarihten yeniden hesaplanır',
       'dikkat dağılması sayısı (distractions): göremedim, taşınmaz', 'blok başlama anı (startedAt): planın saati değil; Kayıt motoru çalışma kaydının zamanı',
       'blok saatleri: AYS bloklarının saati yoktu; bas/bit null', 'konu kimlikleri (subjectId, topicId): Akademik alanın müfredat bağı'],
     aysSablon:['ritüel türleri (contract, exam, review) korunur; ritüelin içeriği Akademik alanda'],
+    aysHafta:['hafta başı tarihi kayıtta yok: programın ilk gününden hesaplanır (AYS profili startDate, yoksa 2026-09-14; curriculum.js:24-27, state.js:215 weekStart); çağıran baslangic vermezse bas null',
+      'hafta numarası (n) olmayan kayıt alınmaz (boş döner): hangi haftaya ait olduğu bilinemez',
+      'gerçekleşme (çözülen soru, tamamlanan blok, tamamlanma yüzdesi) haftada saklanmıyordu: günlerden yeniden sayılır (calc.js:224-245); hafta değerlendirmesi (reviews) ayrı koleksiyon',
+      'Plan motoru hafta hedefini bugün okumaz: haftaPlani gün girdisi ister; hedef ve konular hafta ekranının verisidir'],
+    aysPlan:['üreticinin iç sayıları (meta: total, perWeek, gates, productive, level, capacityHoursPerWeek, placed, poolSize, leftover, coverage, tavan, capacityForFull, kapsamaEngeli, gerekenKonu, version, replannedFrom, carried): profilden yeniden hesaplanır (planner.js generate), taşınmaz',
+      'evre adı ve teması (phaseLabel, theme), konu ad listesi (topics): evre anahtarından (evre) ve konulardan yeniden çıkar',
+      'düşen konuların ders adı ve sıklığı (subjectName, freq): müfredattan (data/subjects.js) yeniden okunur',
+      'hafta başı tarihi: aysHafta ile aynı (baslangic verilmezse bas null)',
+      'istisnanın çarpanı ve türü (carpan, kind) takvimden türetilen istisnadadır (istisna.js:152), saklanmıyordu'],
+    spiHaftaplan:['madde, hareket ve kısa uyku zamanı (zaman: dilim, saat): blokta ve maddede saklanır; Plan motoru yerleştirirken okumaz',
+      'uyku kipi (kip: her, hafta, gun): yedi güne açılır (her, haftaici, haftasonu, gunluk), kip seçimi taşınmaz',
+      'öğün metinleri (beslenme gunler), uyku saatleri, su hedefi (suMl) ve maddeler: şablonda taşınır; Plan motoru bugün planlamaz (öğün, uyku ve alışkanlık şekli yok)',
+      'işaretler (isaret, sayac): Kayıt motorunda alışkanlık türü yok; şablonun yapilan alanında kalır (gün → madde → kaç kez)',
+      'süresi olmayan hareket günü ya da kısa uyku, metni boş madde: dogrula (haftaplan.js:196-243) zaten yazdırmıyordu; gelirse alınmaz',
+      'bilinmeyen tür (beslenme, hareket, uyku, su, serbest dışı) ya da kimliksiz plan: alınmaz (boş döner)'],
     espPlanner:['ESP «sıradaki tek iş» kaydedilmiyordu, her açılışta hesaplanıyordu: taşınacak kayıt yok; sıra kuralı SIRA olarak taşındı'],
   });
 

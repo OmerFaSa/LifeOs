@@ -43,27 +43,33 @@ const tekKayit = (ad, ek) => Object.assign(g => {
   return r && r.kayitlar ? { cikti:r.kayitlar, red:r.reddedilen.map(x => x.tur + ': ' + x.hatalar.join(' ')) } : { cikti:[r] };
 }, { kaynak:String(Kayit.GOC[ad]) + (ek || ''), eksik:Kayit.EKSIK[ad] });
 const tekrarTek = (ad, cagir) => Object.assign(g => ({ cikti:cagir(g[0]) }), { kaynak:String(Tekrar.GOC[ad]), eksik:Tekrar.EKSIK[ad] });
-const notListe = (ad, modulGerek) => Object.assign((govdeler, grup) => {
+const notListe = (ad, modulGerek, ek) => Object.assign((govdeler, grup) => {
   const modul = String(grup[0].alan || '').split('/')[0];
-  const r = Not.goc[ad](govdeler, Object.assign({ zaman:ZAMAN }, modulGerek ? { modul } : {}));
+  const r = Not.goc[ad](govdeler, Object.assign({ zaman:ZAMAN }, modulGerek ? { modul } : {}, ek));
   return { cikti:r.notlar, red:r.rapor.reddedilen.map(x => x.neden), tasinamayan:r.rapor.tasinamayan,
     ekSay:{ 'bağ belirsiz (birden çok aday)':r.rapor.belirsiz.length, 'bağ kopuk (hedef yok)':r.rapor.kopuk.length, 'zamanı okunamadı (göç anı verildi)':r.rapor.zamanYok } };
 }, { liste:true, kaynak:String(Not.goc[ad]) });
 const duz = (fn, kaynak) => Object.assign(g => ({ cikti:fn(g[0]) }), { kaynak:String(kaynak) });
+const motorDuz = (M, ad) => Object.assign(duz(M.GOC[ad], M.GOC[ad]), { eksik:M.EKSIK[ad] });
+const gunNotu = koleksiyon => ['not.gunNotu', notListe('gunNotu', true, { koleksiyon })];
 
 const ROTA = {
-  'spi:vitals':[['kayit.spiVitals', tekKayit('spiVitals')]],
+  'spi:vitals':[['kayit.spiVitals', tekKayit('spiVitals')], gunNotu('vitals')],
   'spi:meals':[['kayit.spiOgun', tekKayit('spiOgun')]],
-  'spi:workouts':[['kayit.spiAntrenman', tekKayit('spiAntrenman')]],
+  'spi:workouts':[['kayit.spiAntrenman', tekKayit('spiAntrenman')], gunNotu('workouts')],
   'spi:profile':[['kayit.spiProfil', tekKayit('spiProfil')]],
   'ays:mood':[['kayit.aysMood', tekKayit('aysMood')]],
   'ays:breaks':[['kayit.aysMola', tekKayit('aysMola')]],
-  'ays:days':[['kayit.aysGun', tekKayit('aysGun')], ['plan.aysGun', Object.assign(duz(Plan.GOC.aysGun, Plan.GOC.aysGun), { eksik:Plan.EKSIK.aysGun })]],
-  'esp:days':[['kayit.espGun', tekKayit('espGun')]],
+  'ays:days':[['kayit.aysGun', tekKayit('aysGun')], ['plan.aysGun', motorDuz(Plan, 'aysGun')], ['soru.aysGun', motorDuz(Soru, 'aysGun')], gunNotu('days')],
+  'ays:weeks':[['plan.aysHafta', motorDuz(Plan, 'aysHafta')]],
+  'ays:plan':[['plan.aysPlan', motorDuz(Plan, 'aysPlan')]],
+  'spi:haftaplan':[['plan.spiHaftaplan', motorDuz(Plan, 'spiHaftaplan')]],
+  'esp:days':[['kayit.espGun', tekKayit('espGun')], gunNotu('days')],
   'ays:cards':[['tekrar.aysKart', tekrarTek('aysKart', c => c && c.source === 'error' ? Tekrar.GOC.aysYanlis(c) : Tekrar.GOC.aysKart(c))]],
   'esp:cards':[['tekrar.espKart', tekrarTek('espKart', c => Tekrar.GOC.espKart(c))]],
   'ays:hedefPlanlar':[['tekrar.aysHedefTekrar', tekrarTek('aysHedefTekrar', p => Tekrar.GOC.aysHedefTekrar(p))]],
   'hkm:meydan_deste':[['tekrar.meydan', tekrarTek('meydan', r => Tekrar.GOC.meydan(r, ZAMAN))]],
+  'hkm:bam_kayitlar':[['not.bamKayit', notListe('bamKayit', false)]],   // King ve arşiv tabloları Python'da: gercek_kosu.py kos_py
   'ays:topics':[
     ['tekrar.aysKapanis', Object.assign(g => ({ cikti:Object.keys((g[0] && g[0].states) || {}).map(k => Tekrar.GOC.aysKapanis(g[0].states[k], k)) }),
       { kaynak:String(Tekrar.GOC.aysKapanis) + 'states', eksik:Tekrar.EKSIK.aysKapanis })],

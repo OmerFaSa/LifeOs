@@ -491,6 +491,27 @@ it('saflık: saat ve rastgele dışarıdan; dondurulmuş girdiyle çalışır', 
   S.denemeBitir(S.sonrakiTest(S.isaretle(o, 'ok', T0 + 5000).oturum, T0 + 9000).oturum, [], T0 + DK);
 });
 
+/* Modül boşlukları (faz1-modul-bosluklari.md): gerçek AYS gün kaydının biçimi, değerler uydurma. */
+it('göç AYS gün soruları: yalnız çözülmüş kalem yazılır; toplam AYS gunSorusu ile aynı; soru alanlarının hepsi okunur ya da EKSIK\'te', () => {
+  const blok = (id, o) => Object.assign({ id, slot:'Ana ders', subject:'Ders', subjectId:'tyt-mat', topic:'Konu', topicId:'m-sayi', targetMin:75, targetQ:15,
+    status:'done', skipReason:null, actualMin:70, actualQ:null, correctQ:null, startedAt:null }, o);
+  const gun = { id:'g1', date:'2026-11-02', dow:0, ritual:null, paragraphTarget:18, paragraphActual:12, problemTarget:18, problemActual:null,
+    freeQ:10, freeCorrect:7, sleepHours:null, note:'', checklist:{}, distractions:0, badDay:false,
+    blocks:[blok('b0', { actualQ:30, correctQ:24 }), blok('b1', { actualQ:0, correctQ:0 }), blok('b2', { slot:'Dinlenme', targetQ:0, actualMin:null })] };
+  const r = S.GOC.aysGun(gun);
+  assert.deepStrictEqual([r.id, r.tarih, r.etiket], ['ays:gun:2026-11-02', '2026-11-02', 'eski kayıt']);
+  assert.deepStrictEqual(r.kalemler.map(k => [k.kalem, k.hedef, k.cozulen, k.dogru]), [['blok', 15, 30, 24], ['paragraf', 18, 12, null], ['serbest', null, 10, 7]]);
+  assert.deepStrictEqual([r.kalemler[0].ders, r.kalemler[0].konu, r.kalemler[0].blok], ['tyt-mat', 'm-sayi', 'b0']);
+  assert.strictEqual(r.kalemler.reduce((s, k) => s + k.cozulen, 0), R.Calc.gunSorusu(gun));
+  const bos = Object.assign({}, gun, { paragraphActual:null, freeQ:0, freeCorrect:0, blocks:[blok('b0', { status:'pending', actualMin:null })] });
+  assert.strictEqual(S.GOC.aysGun(bos), null);
+  assert.strictEqual(R.Calc.gunSorusu(bos), 0);
+  assert.strictEqual(S.GOC.aysGun({ blocks:[] }), null);
+  const bilinen = String(S.GOC.aysGun) + ' ' + S.EKSIK.aysGun.join(' ');
+  ['paragraphTarget', 'paragraphActual', 'problemTarget', 'problemActual', 'freeQ', 'freeCorrect', 'targetQ', 'actualQ', 'correctQ', 'badDayTargets', 'badDaySoruYok']
+    .forEach(a => assert.ok(new RegExp('[^\\w$]' + a + '[^\\w$]').test(bilinen), a));
+});
+
 (async () => {
   let kirmizi = 0;
   for(const [ad, f] of testler){

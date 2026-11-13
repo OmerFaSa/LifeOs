@@ -702,6 +702,27 @@
       return q ? { id, tur:'secmeli', soru:q.soru, sec:(q.sec || []).slice(), dogru:q.dogru, cozum:q.cozum, ipucu:q.ipucu,
         seviye:q.seviye || null, konu:konu || q.konu || null, ders:ders || null, durum:'taslak' } : null;
     },
+    /* AYS days/<gün> soru sayıları (state.js:379-412 defaultDay; calc.js:224 gunSorusu) → günlük soru kaydı:
+       { id, tarih, kaynak, etiket, kalemler:[{ kalem:'blok'|'paragraf'|'problem'|'serbest', hedef, cozulen, dogru, … }] }.
+       Yalnız çözülmüş kalem yazılır (gunSorusu 0 ile boşu aynı sayar); hiç kalem yoksa null. */
+    aysGun(d){
+      if(!d || !/^\d{4}-\d{2}-\d{2}$/.test(d.date || '')) return null;
+      const n = v => Number(v) > 0 ? Number(v) : null, kalemler = [];
+      const ekle = (o, coz, dog) => { if(n(coz) || n(dog)) kalemler.push(Object.assign(o, { cozulen:n(coz), dogru:n(dog) })); };
+      (Array.isArray(d.blocks) ? d.blocks : []).forEach(b => {
+        if(b && b.slot !== 'Dinlenme') ekle({ kalem:'blok', blok:String(b.id), ad:b.topic || b.subject || b.slot || '', ders:b.subjectId || null, konu:b.topicId || null, hedef:n(b.targetQ) }, b.actualQ, b.correctQ);
+      });
+      ekle({ kalem:'paragraf', hedef:n(d.paragraphTarget) }, d.paragraphActual, null);
+      ekle({ kalem:'problem', hedef:n(d.problemTarget) }, d.problemActual, null);
+      ekle({ kalem:'serbest', hedef:null }, d.freeQ, d.freeCorrect);
+      return kalemler.length ? { id:'ays:gun:' + d.date, tarih:d.date, kaynak:'ays:days/' + d.date, etiket:'eski kayıt', kalemler } : null;
+    },
+  });
+  const EKSIK = Object.freeze({
+    aysGun:['yalnız hedefi olan kalem (paragraphTarget, problemTarget, blok targetQ; çözülen boş ya da 0): soru kaydı değil, yazılmaz; günün planı Plan motorunda (Plan.GOC.aysGun)',
+      'kötü gün hedefleri (badDayTargets, badDaySoruYok): Plan motorunun listesinde, taşınmaz',
+      'blokta çözülen soru (actualQ) Kayıt çalışma kaydının sayısında da durur (Kayit.GOC.aysGun): günün toplamı buradan alınır, ikisi toplanmaz',
+      'sayılar etiketsiz: hepsi «eski kayıt» (karar 11); doğru sayısı çözülenden büyük olsa da düzeltilmez'],
   });
 
   const Soru = Object.freeze({
@@ -717,7 +738,7 @@
     // puan, sıra, gidiş
     obp, yarimGenislik, hamPuan, siraTahmini, puanTahmini, hedefFarki, theilSen, izdusum, gidisSerisi,
     // bağlar ve göç
-    yolGirdisi, tekrarOnerileri, GOC,
+    yolGirdisi, tekrarOnerileri, GOC, EKSIK,
   });
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Motor = kok.LIFEOS.Motor || {};

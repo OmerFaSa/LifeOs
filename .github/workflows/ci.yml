@@ -217,7 +217,7 @@ jobs:
       # SADELESME FAZ 3 MOTORLAR (2026-11-13). Yol, Tekrar, Not: saf (saat disaridan gelir), sifir
       # bagimlilik. Tekrar testi eski zamanlayicilarin gercek kaynagini yukler: goc vadeyi degistirmez.
       - name: Motorlar (Yol, Tekrar, Not)
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Motorlar (Yol, Tekrar, Not)" bash -c 'node motor/yol.test.js && node motor/tekrar.test.js && node motor/not.test.js'
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Motorlar (Yol, Tekrar, Not)" bash -c 'node motor/yol.test.js && node motor/tekrar.test.js && node motor/not.test.js && node motor/not-hkm.test.js'
 
       # SADELESME FAZ 3 MOTORLAR 2 (2026-11-13). Soru: AYS net ve siralama kurallariyla esdeger, her sayi
       # etiketli. Kayit: gercek SPI kurallariyla gun gun ayni. Plan: ESP onceligi, AYS istisnalari.
@@ -242,7 +242,7 @@ jobs:
       # SADELESME FAZ 5 KING CEKIRDEGI (2026-11-13). Bes niyet; 141 eski arac 12 kapiya bir kez eslenir;
       # baglam jeton butcesini asmaz, ozel isaretli parca girmez. Ag yok, yazma yok.
       - name: King çekirdeği (niyet, katalog, bağlam)
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King çekirdeği (niyet, katalog, bağlam)" bash -c 'python3 king/niyet_test.py && python3 king/katalog_test.py && python3 king/baglam_test.py'
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King çekirdeği (niyet, katalog, bağlam)" bash -c 'python3 king/niyet_test.py && python3 king/katalog_test.py && python3 king/baglam_test.py && python3 king/hafiza_test.py'
 
       # SADELESME FAZ 5 ARAMA (2026-11-13). Arastir niyeti HKM'nin arastirma kodunu kullanir, hafizaya
       # yazmaz, yalniz onerir. Test cevrimdisi. BAM'a dokunulmaz (gercek soru setiyle gecene kadar).

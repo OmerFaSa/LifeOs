@@ -381,6 +381,24 @@
       }));
       return sonuc(r, out);
     },
+    /* Gün ve seans notu: Kayıt/Plan gün bağdaştırıcılarının «Not motoru» dediği alan. AYS days/<gün>.note (state.js:414),
+       SPİ vitals/<gün>.note (state.js:612), SPİ workouts/<id>.note (state.js:694), ESP days/<gün>.note ve sessions[].note
+       (ESP state.js:359-395). o.koleksiyon kaynak yolunu verir: days (varsayılan), vitals, workouts. */
+    gunNotu(liste, o){
+      const g = gocAyar(o, 'Gün notu', true), out = [], kol = String((o && o.koleksiyon) || 'days'), seans = kol === 'workouts';
+      const r = rapor('gun-notu', ['Notun yazılma anı gün kaydında yok: günün başı (UTC 00:00) yazılır; ESP günü güncelleme anını (updatedAt) taşır.',
+        'ESP seans notu ayrı not olmaz: günün notuna seansın disipliniyle (disc) eklenir.']);
+      (liste || []).filter(x => x && /^\d{4}-\d{2}-\d{2}$/.test(x.date || '')).forEach(x => {
+        const govde = [String(x.note || '')].concat((Array.isArray(x.sessions) ? x.sessions : []).filter(s => s && String(s.note || '').trim())
+          .map(s => (s.disc ? s.disc + ': ' : '') + s.note)).map(s => s.trim()).filter(Boolean).join('\n\n');
+        if(!govde) return;
+        const anahtar = seans ? String(x.id) : x.date, gun = Date.UTC(+x.date.slice(0, 4), +x.date.slice(5, 7) - 1, +x.date.slice(8, 10));
+        koy(r, out, { id:'gun/' + g.modul + '/' + kol + '/' + kimlikParca(anahtar), baslik:(seans ? 'Seans notu ' : 'Gün notu ') + x.date, govde, alan:g.alan,
+          kaynak:{ yapi:'gun-notu', modul:g.modul, yol:kol + '/' + anahtar }, olusturma:gun, guncelleme:Math.max(zamanOku(x.updatedAt, gun).t, gun),
+          baglam:Object.assign({ modul:g.modul, gun:x.date }, seans ? { kayit:'workouts/' + anahtar } : {}) });
+      });
+      return sonuc(r, out);
+    },
     /* AYS video notu (state.js:749 newVideoNote): segments [{ ts, text, tag }] (screens/learn.js:586). */
     aysVideo(liste, o){
       const g = gocAyar(o, 'AYS video notu', false), out = [];
@@ -500,4 +518,39 @@
   kok.LIFEOS.Motor = kok.LIFEOS.Motor || {};
   kok.LIFEOS.Motor.Not = Not;
   if(typeof module !== 'undefined' && module.exports) module.exports = Not;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* HKM BAM araştırma kaydı → Not (sadelesme P6 öncesi HKM sahipliği; belgeler/ekip/sadelesme/faz1-hkm-sahiplik.md).
+   Var olan satırlara dokunmadan eklenir; yalnız açık işlevleri (yeni, SINIR) kullanır. Yalnız ek, ayrı blok. */
+(function(kok){
+  const Not = kok.LIFEOS.Motor.Not;
+  const json = v => { if(v && typeof v === 'object') return v; try{ const j = JSON.parse(v); return j && typeof j === 'object' ? j : null; }catch(e){ return null; } };
+  /* bam_kayitlar satırı (HKM/core/db.py; bam.py:1376 yazar): { id, tur (arastirma|plan|materyal), baslik, govde (JSON:
+     ozet, bulgular[{iddia}], kaynaklar…), dogruluk, etiketler (işin talep cümlesi, bam.py:531), surum, onceki_id,
+     is_id, created_at (ISO), anahtar, denetim (JSON) }. Liste alır: { notlar, rapor } (öteki goc.* gibi). */
+  Not.goc.bamKayit = function(liste, o){
+    if(!o || !(Number.isInteger(o.zaman) && o.zaman >= 0)) throw new Error('Göç anı (zaman, ms) verilmeli; motor saati kendisi okumaz.');
+    const r = { yapi:'bam', sayi:0, belirsiz:[], kopuk:[], reddedilen:[], zamanYok:0, tasinamayan:[
+      'Sürüm zinciri (onceki_id) bağ değil: her sürüm ayrı not; önceki sürümün kimliği ozellik.bam içinde.',
+      'Doğruluk (dogruluk), güncellik denetimi (denetim), konu anahtarı (anahtar) ve kaynakça ozellik.bam içinde; etiket olmaz.',
+      'etiketler sütunu etiket değil, işin talep cümlesi: Not etiketi olmaz, ozellik.bam.talep içinde.',
+      'BAM işi (is_id) ve köken izi (bam_iz) arşivde (goc.HKM_ARSIV): not yalnız kimliği taşır.'] };
+    const notlar = [];
+    (liste || []).filter(x => x && x.id != null).forEach(x => {
+      const id = 'bam/' + x.id, g = json(x.govde), t = Date.parse(String(x.created_at || ''));
+      if(!isFinite(t)) r.zamanYok++;
+      const govde = g ? [typeof g.ozet === 'string' ? g.ozet.trim() : ''].concat((Array.isArray(g.bulgular) ? g.bulgular : [])
+        .map(b => b && typeof b.iddia === 'string' && b.iddia.trim() ? '- ' + b.iddia.trim() : '')).filter(Boolean).join('\n')
+        : String(x.govde == null ? '' : x.govde);
+      try{
+        if(notlar.some(n => n.id === id)) throw new Error('Aynı kimlik ikinci kez geldi; ilki alındı.');
+        notlar.push(Not.yeni({ id, baslik:String(x.baslik == null ? '' : x.baslik).trim().slice(0, Not.SINIR.baslik),
+          govde:govde.slice(0, Not.SINIR.govde), tur:'belge', kaynak:{ yapi:'bam', yol:'bam_kayitlar/' + x.id },
+          olusturma:isFinite(t) && t >= 0 ? t : o.zaman, ozellik:{ bam:{ tur:x.tur, dogruluk:x.dogruluk, surum:x.surum,
+            onceki_id:x.onceki_id, is_id:x.is_id, anahtar:x.anahtar, talep:x.etiketler, denetim:json(x.denetim), govde:g } } }));
+        r.sayi++;
+      }catch(e){ r.reddedilen.push({ id, neden:e.message }); }
+    });
+    return { notlar, rapor:r };
+  };
 })(typeof window !== 'undefined' ? window : globalThis);

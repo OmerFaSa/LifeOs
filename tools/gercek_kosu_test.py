@@ -57,8 +57,23 @@ def canli_kur(kok, cokertici=False):
     c = sqlite3.connect(str(kok / "hkm" / "hkm.db"))
     c.execute("CREATE TABLE meydan_deste(anahtar TEXT, vade TEXT, on_yuz TEXT, arka_yuz TEXT, tekrar INTEGER, silindi INTEGER)")
     c.execute("INSERT INTO meydan_deste VALUES ('m1', '2026-12-01T00:00:00+00:00', ?, ?, 2, 0)", (GIZLI, GIZLI))
-    c.execute("CREATE TABLE memories(metin TEXT)")
-    c.execute("INSERT INTO memories VALUES (?)", (GIZLI,))
+    # HKM/core/db.py biciminde: King (memories), Not (bam_kayitlar), arsiv (bildirimler), sahipsiz (para).
+    # Cokertici: memories'te id sutunu yok -> King baglastiricisi atar (yer king/hafiza.py:).
+    c.execute("CREATE TABLE memories(%suser TEXT, scope TEXT, text TEXT, source TEXT, state TEXT, created_at TEXT, yeniSutun TEXT)"
+              % ("" if cokertici else "id INTEGER PRIMARY KEY, "))
+    c.execute("INSERT INTO memories(user, scope, text, source, state, created_at, yeniSutun) VALUES ('ben', 'all', ?, 'explicit', 'active', '2026-11-01T10:00:00', ?)", (GIZLI, GIZLI))
+    c.execute("INSERT INTO memories(user, scope, text, source, state, created_at) VALUES ('ben', 'all', ' ', 'explicit', 'active', '2026-11-01T10:00:00')")
+    c.execute("CREATE TABLE bam_kayitlar(id INTEGER PRIMARY KEY, tur TEXT, baslik TEXT, govde TEXT, dogruluk TEXT, etiketler TEXT, surum INTEGER,"
+              " onceki_id INTEGER, is_id INTEGER, created_at TEXT, anahtar TEXT, denetim TEXT)")
+    c.execute("INSERT INTO bam_kayitlar(tur, baslik, govde, dogruluk, etiketler, surum, created_at) VALUES ('arastirma', ?, ?, 'kaynakli', ?, 1, '2026-11-01T10:00:00Z')",
+              (GIZLI, json.dumps({"ozet": GIZLI}), GIZLI))
+    c.execute("CREATE TABLE bildirimler(id INTEGER PRIMARY KEY, modul TEXT, emir_id INTEGER, tur TEXT, metin TEXT, created_at TEXT, okundu_at TEXT)")
+    c.execute("INSERT INTO bildirimler(modul, tur, metin, created_at) VALUES ('ays', 'bitti', ?, '2026-11-01T10:00:00')", (GIZLI,))
+    c.execute("CREATE TABLE raw_events(id INTEGER PRIMARY KEY, module TEXT, date TEXT, received_at TEXT, payload TEXT)")
+    c.executemany("INSERT INTO raw_events(module, date, received_at, payload) VALUES (?, ?, '', ?)",
+                  [("spi", "2026-11-01", GIZLI), ("esp", "2026-11-05", GIZLI)])   # spi gunu depoda var, esp yok
+    c.execute("CREATE TABLE para(id INTEGER PRIMARY KEY, gun TEXT, yon TEXT, kurus INTEGER, kategori TEXT, kaynak TEXT, created_at TEXT)")
+    c.execute("INSERT INTO para(gun, yon, kurus, kategori, kaynak, created_at) VALUES ('2026-11-01', 'gider', 987654, ?, 'local', '2026-11-01')", (GIZLI,))
     c.commit()
     c.close()
 
@@ -100,7 +115,12 @@ try:
     for satir in ("| hesap | olcum | spi:vitals | kayit.spiVitals | 2 | 2 | 1 | 0 | 0 |",
                   "| hesap | not | ays:defter | not.defter | 2 | 1 | 1 | 0 | 0 |",
                   "| hkm | kart | hkm:meydan_deste | tekrar.meydan | 1 | 1 | 0 | 0 | 0 |",
-                  "| hesap | esp.prefs | esp:prefs | 1 |", "| hkm | kisi_bilgisi | hkm:memories | 1 |",
+                  "| hesap | esp.prefs | esp:prefs | 1 |", "| hkm | para_hareketi | hkm:para | 1 |",
+                  "| hkm | kisi_bilgisi | hkm:memories | king.hafiza | 2 | 1 | 1 | 0 | 0 |",
+                  "| hkm | bam | hkm:bam_kayitlar | not.bamKayit | 1 | 1 | 0 | 0 | 0 |",
+                  "| hkm | akis | hkm:bildirimler | arşiv | 1 | 1 | 0 | 0 | 0 |",
+                  "| king.hafiza | Metni boş hafıza kaydı taşınmaz. | 1 |",
+                  "modül-gün: 2; depoda karşılığı olmayan: 1 (esp 1, spi 0).", "| hkm:memories | yeniSutun | 1 |",
                   "| not.defter | Başlığı da gövdesi de boş not kaydedilmez. | 1 |", "| spi:vitals | yeniAlan | 1 |"):
         dogru("satır: " + satir, satir in rapor, rapor)
     dogru("ret nedeni gruplu, sayısı #'e döndü", "| kayit.spiVitals | hrv: HRV # ile # ms arasında olmalı. | 1 |" in rapor, rapor)
@@ -116,11 +136,23 @@ try:
     canli_kur(canli2, cokertici=True)
     kod, cik, _ = kos(canli2, t / "cikti2", gecici2)
     dogru("çökmede çıkış 1", kod == 1, kod)
-    dogru("çökme yeriyle sayıldı", "@ motor/kayit.js:" in cik and "@ motor/plan.js:" in cik, cik)
+    dogru("çökme yeriyle sayıldı", "@ motor/kayit.js:" in cik and "@ motor/plan.js:" in cik and "@ king/hafiza.py:" in cik, cik)
     dogru("çökmede de geçici kopyalar silindi", os.listdir(gecici2) == [], os.listdir(gecici2))
     dogru("çökmede de içerik basılmadı", GIZLI not in cik)
 finally:
     shutil.rmtree(t, ignore_errors=True)
+
+# Modül boşlukları (faz1-modul-bosluklari.md): eski sahipsiz plan koleksiyonları ve gün alanları sahibine gider.
+gun = {"date": "2026-11-02", "note": GIZLI, "freeQ": 4, "freeCorrect": 3, "blocks": []}
+yeni = gercek_kosu.node([
+    {"no": 1, "rota": "ays:weeks", "alan": "ays", "kayitlar": [{"yol": "weeks/w01", "govde": {"n": 1, "title": GIZLI, "mainTopics": []}}]},
+    {"no": 2, "rota": "ays:plan", "alan": "ays", "kayitlar": [{"yol": "plan/main", "govde": {"weeks": [{"n": 1}, {"n": 2}], "meta": {}}}]},
+    {"no": 3, "rota": "spi:haftaplan", "alan": "spi", "kayitlar": [{"yol": "haftaplan/hp1", "govde": {"id": "hp1", "tur": "su", "ad": GIZLI}}]},
+    {"no": 4, "rota": "ays:days", "alan": "ays", "kayitlar": [{"yol": "days/2026-11-02", "govde": gun}]}])
+ozet = {s["bag"]: s["cikti"] for no in "1234" for s in yeni[no]}
+dogru("plan koleksiyonları ve gün alanları sahibine gider",
+      ozet == {"plan.aysHafta": 1, "plan.aysPlan": 3, "plan.spiHaftaplan": 1, "kayit.aysGun": 0, "plan.aysGun": 1, "soru.aysGun": 1, "not.gunNotu": 1}, ozet)
+dogru("yeni rotalarda da içerik basılmadı", GIZLI not in json.dumps(yeni, ensure_ascii=False))
 
 print(("✕ %d kırmızı" % kirmizi) if kirmizi else "✓ hepsi yeşil")
 sys.exit(1 if kirmizi else 0)
