@@ -195,7 +195,9 @@ def bulgular(kok=KOK):
                         sonuc.append((rel, satir_no(kod, m.start()), "motor-ic", f"{ad}.{m.group(1)}",
                                       f"{ad} motorunun açık arayüzünde olmayan «{m.group(1)}»a uzanıyor "
                                       f"(açık arayüz: LIFEOS.Motor.{ad} nesnesinin anahtarları)"))
-    alanlar = sorted(p.name for p in (kok / "alan").iterdir() if p.is_dir()) if (kok / "alan").is_dir() else []
+    # _/. ile baslayan klasor alan degildir: CI'da alan/denetle_test.py denetle'yi ice aktarinca alan/__pycache__ olusur
+    alanlar = sorted(p.name for p in (kok / "alan").iterdir()
+                     if p.is_dir() and not p.name.startswith(("_", "."))) if (kok / "alan").is_dir() else []
     for a in alanlar:
         for p in sorted((kok / "alan" / a).rglob("*")):
             if not p.is_file():

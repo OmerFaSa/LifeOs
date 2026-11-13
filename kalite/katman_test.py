@@ -1,5 +1,6 @@
 """python kalite/katman_test.py — katman denetiminin testi (geçici klasörde sahte depo + bugünkü ağaç). Çıkış 0/1."""
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -73,6 +74,9 @@ with tempfile.TemporaryDirectory() as d:
     dene("motor dosyası adıyla eşlenir", dosya_motor == {"motor/a.js": "A"})
     hata, bilinen = katman.denetle(Path(d), istisnalar={})
     dene("temiz ağaç geçer (yorum, dizgi, düzenli ifade, test dosyası, künye sayılmaz)", hata == [] and bilinen == [])
+    os.makedirs(os.path.join(d, "alan", "__pycache__"), exist_ok=True)
+    open(os.path.join(d, "alan", "__pycache__", "denetle.cpython-312.pyc"), "wb").close()
+    dene("alan/__pycache__ alan sayılmaz (CI'da denetle_test bayt kodu yazar)", katman.denetle(Path(d), istisnalar={})[0] == [])
 
     kur(d, BOZUK)
     b = katman.bulgular(Path(d))
