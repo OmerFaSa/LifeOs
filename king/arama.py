@@ -141,7 +141,9 @@ def alan_kaynaklari(konu, terimler, kok=None):
                 d = json.load(f)
         except (OSError, ValueError):
             continue
-        parca = [(y, s) for y, s in _dizgeler(d) if len(s) >= 30 and not re.match(r"^[\w./-]+$", s)]
+        # Kapi sorulari ve cevaplari kaynak olmaz: ustalik kapisi olcumdur (mcp.py yol_haritasi da vermez)
+        parca = [(y, s) for y, s in _dizgeler(d) if len(s) >= 30 and not re.match(r"^[\w./-]+$", s)
+                 and not re.search(r"(?:^|\.)kapi\b", y)]
         uyan = [(y, s) for y, s in parca if _uyar(s, terimler)]
         if not uyan:
             continue

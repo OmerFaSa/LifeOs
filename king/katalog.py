@@ -28,12 +28,12 @@ def _sema(eylemler, **ek):
 
 _METIN = {"type": "string", "maxLength": 200}
 
-# ad: (motor, açıklama, okuyan eylemler, bütün eylemler, mcp.py'de bugün okuyan araçlar)
+# ad: (motor, açıklama, okuyan eylemler, bütün eylemler, mcp.py'de bugün okuyan araçlar; kaydet'inki yalnız öneri gösterir)
 # Okuyan eylemler dışındaki her eylem yazar: kod doğrular, onay ister, geri alınır.
 KAPILAR = {
     "kaydet": ("Kayıt", "Bir kaydı ekler, düzeltir ya da siler: süre, mesafe, öğün, uyku, ölçüm, çalışma oturumu. "
                "Sayıyı yalnız kullanıcı söylediyse «ölçüldü» yazar; uydurmaz.",
-               (), ("ekle", "duzelt", "sil"), ()),
+               (), ("ekle", "duzelt", "sil"), ("kayit_cozumle",)),
     "kayit_oku": ("Kayıt", "Kayıtları ve günü okur: bugünün özeti, istatistik, hafta raporu, tek kayıt. Her sayı "
                   "kesinlik etiketiyle gelir.", ("ara", "oku", "bugun", "ozet"), ("ara", "oku", "bugun", "ozet"),
                   ("kayit_ara", "kayit_oku", "bugun_ozeti")),
@@ -49,13 +49,14 @@ KAPILAR = {
     "not": ("Not", "Notları okur (özel notlar hiç gelmez) ve not önerir; not yazmak kullanıcının onayıyladır.",
             ("ara", "oku"), ("ara", "oku", "oner"), ("notlar",)),
     "ara": ("Arama", "Kaynak, besin ve barkod araması; araştırma niyetinin kapısı.",
-            ("kaynak", "besin", "barkod"), ("kaynak", "besin", "barkod"), ()),
+            ("kaynak", "besin", "barkod"), ("kaynak", "besin", "barkod"), ("arastir",)),
     "ayar": ("Kabuk", "Ayarlar, açık bölümler, profil, tema; büyük eylemden (sıfırdan başlat) önce dönüş noktası.",
              ("oku",), ("oku", "degistir", "bolum", "profil", "sifirdan"), ()),
     "onay": ("Kabuk", "Bekleyen öneriler: listele, onayla, geç, hepsi; dönüş noktasına dön.",
              ("listele",), ("listele", "onayla", "gec", "hepsi", "geri_al"), ()),
     "sistem": ("Kabuk", "Sistem haritası, sayfa açma, ölçüm ve bütçe, King'in harcaması.",
-               ("harita", "olcum", "harcama"), ("harita", "sayfa_ac", "olcum", "harcama"), ("sistem_haritasi", "olcum")),
+               ("harita", "olcum", "harcama"), ("harita", "sayfa_ac", "olcum", "harcama"),
+               ("sistem_haritasi", "olcum", "niyet")),
     "dis_dunya": ("Dış dünya", "Bilgisayarda dosya/uygulama açma, ekran okuma, telefona gönderme; her biri ayrı izinle.",
                   (), ("dosya_ac", "uygulama", "ekran_oku", "telefona", "izin"), ()),
 }

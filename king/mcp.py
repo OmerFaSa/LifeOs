@@ -16,11 +16,16 @@ Sozler:
 4. Ozel not King'e gelmez. Notlar yalniz Not motorunun kingOkur suzgecinden gecer (motor/not.js; Bilinc `ozel`,
    Bilinc haritasi izni kapaliysa butun dusunceler, ozel nota giden bagin adi). Kayit araclari notlari, Bilinc'i,
    sir adli yollari ve govdesinde ozel:true olani hic gostermez; sir adli anahtarin degeri «gizli» olur.
-5. Motorlar cagrilir, kopyalanmaz: harita, Not ve Tekrar king/kopru.js uzerinden Node ile (AGENTS §0.1 kural 3).
+5. Motorlar cagrilir, kopyalanmaz: harita, Not ve Tekrar king/kopru.js uzerinden Node ile (AGENTS §0.1 kural 3);
+   King cekirdegi (king/niyet.py, baglam.py, katalog.py) ve Arama (king/arama.py) Python'dan dogrudan.
 6. stdout yalniz JSON-RPC; gunluk stderr'e.
+7. Ag yalniz `arastir`ta: Arama motorunun butcesi (ag cagrisi, kaynak, sure) ve onbellegi; her iddia kaynakli.
+   Web onbellegi surec ici (:memory:), sahibin HKM deposuna yazilmaz. LIFEOS_KING_CEVRIMDISI=1 agi kapatir.
+   `kayit_cozumle` yalniz oneri gosterir; yazma tek surecten sonra kaydet kapisindan gelir.
 
 Ortam degiskenleri: LIFEOS_VERI_DB, LIFEOS_HESAP_DB (varsayilan %LOCALAPPDATA%\\LifeOS\\...), LIFEOS_ICERIK
-(alan/, kabuk/harita.js, kalite/ icin depo koku; varsayilan bu depo), LIFEOS_NODE (varsayilan PATH'teki node).
+(alan/, kabuk/harita.js, kalite/ icin depo koku; varsayilan bu depo), LIFEOS_NODE (varsayilan PATH'teki node),
+LIFEOS_KING_CEVRIMDISI (1 ise arastir aga cikmaz).
 """
 import collections
 import datetime
@@ -47,7 +52,7 @@ ESKI_SURUMLER = ("2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05")   # ini
 YENI_SURUMLER = ("2026-07-28",)                                             # istek basina _meta, el sikismasiz
 SURUM_ANAHTARI = "io.modelcontextprotocol/protocolVersion"
 ETIKET_TR = {"measured": "ölçüldü", "estimated": "tahmin", "computed": "hesaplandı", "missing": "veri yok",
-             "eski": "eski kayıt"}
+             "eski": "eski kayıt", "verified": "kaynakta birebir"}
 MODULLER = ("ays", "spi", "esp")
 # Not motorunun goc bagdastiricisina giden koleksiyonlar (motor/not.js goc.*): koleksiyon -> (yapi, modul)
 NOT_YAPI = {"defter": ("defter", None), "defterterim": ("terim", None), "notum": ("notum", None),
@@ -446,6 +451,99 @@ def t_olcum(arg):
             "butce_asimi": asim, "butce_notlari": notlar}
 
 
+# ---------------------------------------------------------------- King cekirdegi ve Arama (Faz 5, King yolu)
+# Cekirdek modulleri bu dosyadan katla/t_* alir: dongusel ice aktarma olmasin diye cagri aninda yuklenir.
+
+YAZMA_YOK = ("Yazılmadı: bu bir öneri. King hafızaya ve depoya yazmaz. Kayıt, tek süreç (tek sunucu, tek depo) "
+             "kurulduktan sonra kural motorunun kaydet kapısından ve senin onayınla yazılır; bugün LifeOS'ta kendin kaydet.")
+
+
+def vk(x):
+    """Cekirdegin {v, k} sayisi -> {deger, kesinlik} (oteki araclarla ayni bicim)."""
+    if isinstance(x, dict):
+        if set(x) == {"v", "k"}:
+            return {"deger": x["v"], "kesinlik": ETIKET_TR.get(x["k"], x["k"])}
+        return {k: vk(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [vk(v) for v in x]
+    return x
+
+
+def tahmin(n):
+    return {"deger": n, "kesinlik": "tahmin"}
+
+
+def t_niyet(arg):
+    import baglam
+    import katalog
+    b = baglam.derle(arg["metin"])
+    kapilar = ("kaydet",) if b["niyet"] == "kayit" else b["araclar"]
+    return {"niyet": b["niyet"], "guven": tahmin(b["guven"]), "neden": b["neden"],
+            "yol": {"kayit": "Model yolu yok: cümle kural motorunda ayrıştırılır, Kayıt motorunun kaydet kapısı yazar "
+                             "(MCP'de yazma yok; öneriyi kayit_cozumle gösterir).",
+                    "sohbet": "Model araçsız cevaplar; bağlamı yalnız bugünün özeti."}.get(
+                        b["niyet"], "Model, masadaki kapılarla cevaplar."),
+            "kapilar": [{"kapi": k, "motor": katalog.KAPILAR[k][0], "ne": katalog.KAPILAR[k][1]} for k in kapilar],
+            "baglam": {"butce": b["butce"], "jeton": tahmin(b["jeton"]), "kapi_semalari_jeton": tahmin(b["arac_jeton"]),
+                       "dilimler": b["dilimler"], "disarida": b["disarida"],
+                       "gizlilik": "Notlar Not motorunun King süzgecinden gelir; özel işaretli her parça bağlama "
+                                   "girmeden ayrıca atılır. Jeton: JSON uzunluğu / 3 (tahmin)."},
+            "kayit_onerisi": dict(vk(b["kayit"]), yazildi=False) if "kayit" in b else None}
+
+
+def t_kayit_cozumle(arg):
+    import niyet
+    n = niyet.siniflandir(arg["metin"])
+    if "kayit" not in n:
+        return {"metin": arg["metin"], "yazildi": False,
+                "durum": "Kayıt değil: niyet «%s» (%s). Kayıt cümlesi olmuş bir şeyi söyler: «Bugün 20 dakika "
+                         "yürüdüm», «Kilom 72,5»." % (n["niyet"], n["neden"])}
+    return {"metin": arg["metin"], "yazildi": False, "yazma": YAZMA_YOK, "guven": tahmin(n["guven"]),
+            "oneri": vk(n["kayit"]),
+            "kural": "Sayı yalnız cümlede söylendiyse «ölçüldü»; söylenmeyen alan hiç yazılmaz (eksik veri sıfır değildir)."}
+
+
+_ARAMA_CON = []   # surec boyu web onbellegi ve gunluk sayac (HKM web_onbellek, :memory:); diske yazilmaz
+ARAMA_SURE = 25   # sn: istemcinin 60 sn istek sinirinin altinda kalsin (tek sayfa okuma 12 sn'ye dek surer)
+
+
+def t_arastir(arg):
+    import arama   # HKM'yi yalniz bu arac yukler
+    from core import db
+    if not _ARAMA_CON:
+        _ARAMA_CON.append(db.connect(":memory:"))
+    if len(arg["soru"].strip()) < 3:
+        raise AracHatasi("Soru en az üç harf olmalı.")
+    cevrimdisi, uyari = os.environ.get("LIFEOS_KING_CEVRIMDISI") == "1", []
+
+    def notlar(konu):   # Not kapisi (kingOkur); arama metni «parca»dan okur
+        try:
+            return [dict(n, metin=n.get("parca") or "") for n in t_notlar({"ara": konu, "sinir": 10}).get("notlar") or []]
+        except AracHatasi as e:
+            uyari.append("Notlara bakılamadı: %s" % e)
+            return []
+
+    r = arama.ara(arg["soru"], butce={"sure": ARAMA_SURE}, con=_ARAMA_CON[0], cfg={}, notlar=notlar,
+                  alan_kok=yollar()[2], cevrimdisi=cevrimdisi)
+    web_plan = any(a["kaynak"] == "web" for a in r["plan"])
+    if cevrimdisi:
+        ag = "çevrimdışı kip (LIFEOS_KING_CEVRIMDISI=1): web'e çıkılmadı; cevap yalnız notlarından ve alan içeriğinden."
+    elif not web_plan:
+        ag = "Yerel soru: web'e çıkılmadı."
+    elif not any(k["tur"] == "web" for k in r["kaynaklar"]):
+        ag = "Web'den kaynak gelmedi (ağ yok, zaman aşımı ya da sonuç yok); cevap yalnız yerel kaynaklardan."
+    else:
+        ag = "web: %d ağ çağrısı (sınır %d)%s" % (r["butce"]["ag_cagrisi"], r["butce"]["ag_siniri"],
+                                                 "; sınır doldu" if r["butce"]["butce_doldu"] else "")
+    return {"konu": r["konu"], "ag": ag, "plan": r["plan"],
+            "iddialar": [dict(i, kesinlik=ETIKET_TR.get(i["kesinlik"], i["kesinlik"])) for i in r["iddialar"]],
+            "kaynaklar": r["kaynaklar"], "atilan_cumle": hes(len(r["atilan"])), "butce": r["butce"],
+            "onbellekten": r["onbellekten"], "hafiza_onerisi": r["hafiza_onerisi"], "durum": r["note"] or "tamam",
+            "uyari": uyari, "izler": r["izler"],
+            "kural": "Her iddia kaynağıyla gelir; kaynaksız cümle atıldı. «kaynakta birebir» kaynağın bunu söylediğidir, "
+                     "doğru olduğu değil. Hafıza önerisi yazılmadı; onay sahibinde."}
+
+
 def nesne(**ozellik):
     return {"type": "object", "properties": ozellik, "additionalProperties": False}
 
@@ -487,10 +585,26 @@ ARACLAR = [
      nesne(olcut=METIN("Tek ölçütün kimliği: nasıl ölçüldüğü ve komutu.", 60)),
      "Son kalite kaydındaki ölçütler (eğriler, karmaşıklık) kesinlik etiketleriyle ve karmaşıklık bütçesinin "
      "denetimi (aşım var mı). Kalite katmanının kapısı."),
+    ("niyet", "Niyet ve bağlam", t_niyet,
+     dict(nesne(metin=METIN("Kullanıcının mesajı, olduğu gibi.", 300)), required=["metin"]),
+     "King bu mesajı nasıl anlar: beş niyetten hangisi (sohbet, kayıt, öğren, araştır, yönet), hangi kural, hangi "
+     "motor kapıları masada ve King'in derleyeceği bağlam (dilimler, jeton tahmini, bütçe; özel notlar hariç). "
+     "King çekirdeğinin kapısı."),
+    ("kayit_cozumle", "Kayıt önerisi", t_kayit_cozumle,
+     dict(nesne(metin=METIN("Kayıt cümlesi: «Bugün 20 dakika yürüdüm».", 300)), required=["metin"]),
+     "Kayıt cümlesini tipli kayıt ÖNERİSİNE çevirir (tür, gün, alanlar; her sayı kesinlik etiketiyle). Hiçbir şey "
+     "yazmaz: kayıt tek süreçten sonra kaydet kapısından ve sahibin onayıyla gelir; bugün LifeOS'ta kaydedilir."),
+    ("arastir", "Araştır", t_arastir,
+     dict(nesne(soru=METIN("Araştırılacak soru ya da konu; «notlarımda …» yalnız notlara bakar.", 200)),
+          required=["soru"]),
+     "Arama motoru: önce kendi notların (özel olanlar hariç) ve alan içeriği, sonra web (Vikipedi). Bütçeli ve "
+     "önbellekli; her iddia kaynağıyla gelir, kaynaksız cümle atılır. Sorunun konusu web'e gider. Hafızaya yazmaz."),
 ]
 ARAC = {ad: (fn, sema) for ad, _, fn, sema, _ in ARACLAR}
+ACIK_DUNYA = {"arastir"}   # web'e cikan tek arac
 TALIMAT = ("LifeOS King'in salt okur kapıları. Sayıyı uydurma: her sayı kesinlik etiketiyle gelir; «veri yok» "
-           "diyorsa öyle söyle. Yazma yok: kayıt, not ve onay için LifeOS'u açmasını söyle. Özel notlar gelmez.")
+           "diyorsa öyle söyle. Yazma yok: kayit_cozumle yalnız öneri gösterir; kayıt, not ve onay için LifeOS'u "
+           "açmasını söyle. arastir'in iddialarını kaynağıyla aktar. Özel notlar gelmez.")
 
 
 # ---------------------------------------------------------------- JSON-RPC / MCP
@@ -512,7 +626,8 @@ def dogrula(sema, arg):
 
 
 def arac_listesi():
-    return [{"name": ad, "title": baslik, "description": aciklama, "inputSchema": sema, "annotations": OKUR}
+    return [{"name": ad, "title": baslik, "description": aciklama, "inputSchema": sema,
+             "annotations": dict(OKUR, openWorldHint=True, idempotentHint=False) if ad in ACIK_DUNYA else OKUR}
             for ad, baslik, _, sema, aciklama in ARACLAR]
 
 
@@ -626,14 +741,21 @@ def denetle():
            "yol_haritasi": lambda r: "aşama %d, ders %d" % (len(r["asamalar"]), sum(
                len(u["dersler"]) for s in r["asamalar"] for u in s["uniteler"])),
            "tekrar_durumu": lambda r: "kart %d" % r["kart"]["deger"],
-           "olcum": lambda r: "ölçüt %d, aşım %d" % (r["olcut"]["deger"], len(r["butce_asimi"])) if "olcut" in r else "veri yok"}
+           "olcum": lambda r: "ölçüt %d, aşım %d" % (r["olcut"]["deger"], len(r["butce_asimi"])) if "olcut" in r else "veri yok",
+           "niyet": lambda r: "niyet %s, dilim %d, jeton %d/%d" % (r["niyet"], len(r["baglam"]["dilimler"]),
+                                                                  r["baglam"]["jeton"]["deger"], r["baglam"]["butce"]),
+           "kayit_cozumle": lambda r: "öneri %s, yazıldı %s" % (r.get("oneri", {}).get("tur"), r["yazildi"]),
+           "arastir": lambda r: "iddia %d, kaynak %d, ağ çağrısı %d" % (len(r["iddialar"]), len(r["kaynaklar"]),
+                                                                       r["butce"]["ag_cagrisi"])}
     ilk = (t_kayit_ara({})["kayitlar"] or [{}])[0].get("kimlik")
+    ornek = {"kayit_oku": {"kimlik": ilk}, "niyet": {"metin": "bugünün planı ne?"},
+             "kayit_cozumle": {"metin": "Bugün 20 dakika yürüdüm"}, "arastir": {"soru": "mağara benzetmesi"}}
     for ad, (fn, _) in ARAC.items():
         try:
             if ad == "kayit_oku" and not ilk:
                 print("%-16s veri yok · okunacak kayıt yok" % ad)
                 continue
-            print("%-16s tamam · %s" % (ad, say[ad](fn({"kimlik": ilk} if ad == "kayit_oku" else {}))))
+            print("%-16s tamam · %s" % (ad, say[ad](fn(ornek.get(ad, {})))))
         except AracHatasi as e:
             print("%-16s araç hatası · %s" % (ad, e))
     return 0

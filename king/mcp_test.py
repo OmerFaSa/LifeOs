@@ -96,10 +96,13 @@ os.makedirs(os.path.join(ICERIK, "alan", "felsefe"))
 os.makedirs(os.path.join(ICERIK, "kabuk"))
 os.makedirs(os.path.join(ICERIK, "kalite", "kayit"))
 shutil.copyfile(KOK / "kabuk" / "harita.js", os.path.join(ICERIK, "kabuk", "harita.js"))
-kapi = {"esik": 0.7, "sorular": [{"id": "q1", "tur": "secmeli", "soru": "KAPI-SORUSU-XYZ", "sec": ["a", "b"], "dogru": "a"}]}
+# kapı sorusu konuyla eşleşir: araştır onu kaynak yapmamalı (ustalık kapısı ölçümdür)
+kapi = {"esik": 0.7, "sorular": [{"id": "q1", "tur": "secmeli", "soru": "KAPI-SORUSU-XYZ: Platon mağara benzetmesinde "
+                                  "gölgeler neyi temsil eder?", "sec": ["a", "b"], "dogru": "a"}]}
 asama = {"id": "f1", "ad": "Aşama 1", "hedef": "Düşünmeyi tanımak", "kapi": kapi, "uniteler": [
     {"id": "u1", "ad": "Ünite 1", "kazanim": ["k"], "kapi": kapi, "dersler": [
-        {"id": "ders1", "ad": "Ders 1", "durum": "onayli", "ozet": "özet", "metin": "DERS-METNI"},
+        {"id": "ders1", "ad": "Ders 1", "durum": "onayli", "metin": "DERS-METNI",
+         "ozet": "Platon mağara benzetmesinde gölgeleri gerçek sanan insanları anlatır."},
         {"id": "ders2", "ad": "Ders 2", "durum": "taslak", "ozet": "özet 2", "metin": "..."}]}]}
 Path(ICERIK, "alan", "felsefe", "asama-1.json").write_text(json.dumps(asama, ensure_ascii=False), encoding="utf-8")
 olc = lambda deger: {"sayfa": {"id": "sayfa", "ad": "Sayfa", "deger": deger, "etiket": "ölçüldü", "durum": "ölçüldü",
@@ -145,7 +148,8 @@ _connect = sqlite3.connect
 
 
 def izli_connect(yol, *a, **k):
-    acilan.append(os.path.abspath(str(yol)))
+    if str(yol) != ":memory:":   # arastir'in süreç içi web önbelleği dosya değildir
+        acilan.append(os.path.abspath(str(yol)))
     return _connect(yol, *a, **k)
 
 
@@ -178,6 +182,10 @@ dogru("her araç salt okur işaretli", all(a["annotations"]["readOnlyHint"] and 
                                          for a in araclar))
 dogru("yazan araç yok (ad)", not any(v in a for a in adlar for v in ("kaydet", "yaz", "sil", "ekle", "degistir",
                                                                         "guncelle", "onayla", "oner")), adlar)
+dogru("King yolu: çekirdek ve Arama kapıları, toplam on bir", {"niyet", "kayit_cozumle", "arastir"} <= set(adlar)
+      and len(adlar) == 11, adlar)
+dogru("yalnız arastir web'e çıkar (openWorldHint)", [a["name"] for a in araclar if a["annotations"]["openWorldHint"]]
+      == ["arastir"], adlar)
 
 print("Hatalar")
 dogru("bozuk JSON -32700, id null", mcp.satir_isle("bozuk") == {"jsonrpc": "2.0", "id": None,
@@ -259,7 +267,55 @@ dogru("ölçüm: tek ölçüt komutuyla", arac("olcum", olcut="egri_x")[1]["komu
 os.environ["LIFEOS_NODE"] = os.path.join(t, "node-yok.exe")
 h, r = arac("notlar")
 dogru("Node yoksa notlar süzgeçsiz dönmez (araç hatası)", h and "köprü" in r, r)
+os.environ["LIFEOS_KING_CEVRIMDISI"] = "1"
+h, r = arac("arastir", soru="notlarımda kant ödev")
+dogru("Node yoksa araştır notsuz sürer ve söyler", not h and r["uyari"] and "köprü" in r["uyari"][0]
+      and not [k for k in r["kaynaklar"] if k["tur"] == "not"], r)
 os.environ.pop("LIFEOS_NODE")
+
+print("King çekirdeği ve Arama (King yolu)")
+h, r = arac("kayit_cozumle", metin="Bugün 20 dakika yürüdüm")
+dogru("kayıt önerisi: tipli, sayı depodaki etiket biçiminde", not h and r["oneri"]["tur"] == "antrenman"
+      and r["oneri"]["gun"] == BUGUN and r["oneri"]["alanlar"]["sure_dk"] == {"deger": 20, "kesinlik": "ölçüldü"}, r)
+dogru("kayıt önerisi: yazılmadı, yazmanın tek süreçten sonra geldiğini söyler", r["yazildi"] is False
+      and "tek süreç" in r["yazma"] and r["oneri"]["durum"] == "oneri", r)
+h, r = arac("kayit_cozumle", metin="Bugün ne yapayım?")
+dogru("kayıt değil: öneri yok, niyetiyle söyler", not h and "oneri" not in r and r["durum"].startswith("Kayıt değil"), r)
+h, r = arac("niyet", metin="Bugün 20 dakika yürüdüm")
+dogru("niyet: kayıt modele gitmez, kaydet kapısı (Kayıt motoru)", not h and r["niyet"] == "kayit"
+      and r["kapilar"][0]["kapi"] == "kaydet" and r["kapilar"][0]["motor"] == "Kayıt" and r["baglam"]["dilimler"] == []
+      and r["kayit_onerisi"]["yazildi"] is False, r)
+h, r = arac("niyet", metin="bana felsefe öğret")
+dogru("niyet: öğren; kapılar, notlu bağlam bütçe içinde", not h and r["niyet"] == "ogren"
+      and "ogren" in [k["kapi"] for k in r["kapilar"]] and "notlar" in [d["ad"] for d in r["baglam"]["dilimler"]]
+      and r["baglam"]["jeton"]["deger"] <= r["baglam"]["butce"] and r["baglam"]["jeton"]["kesinlik"] == "tahmin", r)
+from core import web  # noqa: E402  (mcp_test'te arastir HKM'yi yükledi)
+ag, eski_ag = [], web._ag
+
+
+def ag_yok(*a, **k):
+    ag.append(a[0] if a else None)
+    raise OSError("ağ yok")
+
+
+web._ag = ag_yok   # gerçek ağa hiç çıkılmaz
+h, r = arac("arastir", soru="Platon mağara benzetmesi")
+dogru("araştır çevrimdışı: ağa çıkmaz ve söyler", not h and not ag and "çevrimdışı" in r["ag"]
+      and r["butce"]["ag_cagrisi"] == 0 and [a["kaynak"] for a in r["plan"]] == ["not", "alan"], r)
+dogru("araştır: her iddia kaynaklı", r["iddialar"] and all(i["kaynaklar"] and i["kaynaklar"][0].get("url")
+                                                           for i in r["iddialar"]), r["iddialar"])
+dogru("araştır: alan içeriğinden birebir; kapı sorusu kaynak olmaz", any(
+    "gerçek sanan" in i["metin"] and i["kesinlik"] == "kaynakta birebir" for i in r["iddialar"]), r["iddialar"])
+dogru("araştır: hafızaya yazmaz (yalnız öneri)", r["hafiza_onerisi"]["yazildi"] is False, r["hafiza_onerisi"])
+h, r = arac("arastir", soru="notlarımda açık düşünce")
+dogru("araştır: notlar süzgeçten, özel nota giden bağın adı silinmiş", not h and any(
+    k["tur"] == "not" for k in r["kaynaklar"]) and "web" not in [a["kaynak"] for a in r["plan"]], r)
+os.environ.pop("LIFEOS_KING_CEVRIMDISI")
+web.VARSAYILAN_TASIYICI = ag_yok
+h, r = arac("arastir", soru="Platon mağara benzetmesi")
+dogru("araştır ağ yoksa: yerel kaynakla cevaplar ve söyler", not h and ag and "gelmedi" in r["ag"]
+      and r["iddialar"] and r["butce"]["ag_cagrisi"] <= r["butce"]["ag_siniri"], r)
+web.VARSAYILAN_TASIYICI, web._ag = None, eski_ag
 
 print("Gizlilik ve canlı dosya")
 hepsi = "\n".join(ciktilar)
@@ -300,7 +356,9 @@ girdi = "\n".join(json.dumps(x) for x in (
                                                                   "clientInfo": {"name": "t", "version": "1"}}},
     {"jsonrpc": "2.0", "method": "notifications/initialized"},
     {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
-    {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "notlar", "arguments": {}}})) + "\n"
+    {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "notlar", "arguments": {}}},
+    {"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "niyet", "arguments": {"metin": "bana felsefe öğret"}}},
+)) + "\n"
 p = subprocess.run([sys.executable, str(KOK / "king" / "mcp.py")], input=girdi.encode("utf-8"), capture_output=True,
                    timeout=60, env=dict(os.environ))
 satirlar = p.stdout.decode("utf-8").splitlines()
@@ -308,8 +366,9 @@ try:
     yanit = [json.loads(s) for s in satirlar]
 except ValueError:
     yanit = []
-dogru("stdout yalnız JSON-RPC, üç yanıt", [y.get("id") for y in yanit] == [1, 2, 3], satirlar[:3])
-dogru("stdio: araç çağrısı sonuç verir", yanit and yanit[-1]["result"]["isError"] is False, yanit[-1:] if yanit else p.stderr[-300:])
+dogru("stdout yalnız JSON-RPC, dört yanıt", [y.get("id") for y in yanit] == [1, 2, 3, 4], satirlar[:4])
+dogru("stdio: araç çağrıları sonuç verir (notlar, niyet)", len(yanit) == 4 and all(y["result"]["isError"] is False for y in yanit[2:]),
+      yanit[2:] if yanit else p.stderr[-300:])
 dogru("stdio: günlük stderr'de", b"king-mcp" in p.stderr)
 
 shutil.rmtree(t, ignore_errors=True)
