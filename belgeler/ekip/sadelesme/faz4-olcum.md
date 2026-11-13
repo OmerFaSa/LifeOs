@@ -167,6 +167,11 @@ Kayıt bilerek yenilenmedi: `--kaydet` aşımı sessizce başvuru yapar (açık 
 ya artış gerekçesiyle kabul edilir ve kayıt yenilenir, ya da kural 5 gereği karşılığında bir parça çıkar.
 `--denetle` CI'a bağlı olmadığı için bu aşım CI'ı kızartmaz.
 
+**Karar (sahibi, 13 Kasım 2026): artış kabul edildi, kayıt yenilendi.** Gerekçe: yeni ekran yok, var olan
+Kılavuz sayfasının King kataloğuna kaydı; satırlar dondurulmuş eski modüllerde ve Faz 5'te kalkacak. `--kaydet` ile
+`kalite/kayit/2026-11-13.json` Sayfa 81 ve sayfa rehberi sözcüğü 82 olarak yazıldı; `--denetle` «26 bütçe, aşım yok».
+`butce.json` tabanları (79 ve 76) ve hedefler değişmedi; yeni başvuru 81 ve 82'dir, bundan sonraki her artış yine aşımdır.
+
 ## Açık sorular
 
 1. **Kopya dosya 236 → 237.** `gocpaket.js` (göç paketi, AGENTS'teki yazılı istisna) üç modüle kopyalanıyor.
