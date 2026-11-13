@@ -215,10 +215,15 @@ jobs:
       - name: Motorlar (Yol, Tekrar, Not)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Motorlar (Yol, Tekrar, Not)" bash -c 'node motor/yol.test.js && node motor/tekrar.test.js && node motor/not.test.js'
 
+      # SADELESME FAZ 3 MOTORLAR 2 (2026-11-13). Soru: AYS net ve siralama kurallariyla esdeger, her sayi
+      # etiketli. Kayit: gercek SPI kurallariyla gun gun ayni. Plan: ESP onceligi, AYS istisnalari.
+      - name: Motorlar (Soru, Kayıt, Plan)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Motorlar (Soru, Kayıt, Plan)" bash -c 'node motor/soru.test.js && node motor/kayit.test.js && node motor/plan.test.js'
+
       # SADELESME FAZ 3 ICERIK (2026-11-13). Alan icerigi semaya uyar (alan/SEMA.md); onaysiz ders
       # taslak etiketiyle durur. Denetimin kendisi de sinanir.
       - name: Alan içeriği şema denetimi
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Alan içeriği şema denetimi" bash -c 'python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe'
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Alan içeriği şema denetimi" bash -c 'python3 alan/denetle_test.py && python3 alan/denetle.py alan/felsefe && python3 alan/denetle.py alan/akademik && python3 alan/denetle.py alan/tarih && python3 alan/denetle.py alan/dil'
 
       # SADELESME FAZ 4 OLCUM (2026-11-13). Sayim kurallari, butce asimi, ayni girdi ayni kayit,
       # olculmeyen egri sayi tasimaz. Butce denetimi asagidaki adimda.
@@ -229,6 +234,16 @@ jobs:
       # canli dosya acilmaz (yalniz kopya), yazma araci yok.
       - name: King MCP ucu salt okur
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King MCP ucu salt okur" python3 king/mcp_test.py
+
+      # SADELESME FAZ 5 KING CEKIRDEGI (2026-11-13). Bes niyet; 141 eski arac 12 kapiya bir kez eslenir;
+      # baglam jeton butcesini asmaz, ozel isaretli parca girmez. Ag yok, yazma yok.
+      - name: King çekirdeği (niyet, katalog, bağlam)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King çekirdeği (niyet, katalog, bağlam)" bash -c 'python3 king/niyet_test.py && python3 king/katalog_test.py && python3 king/baglam_test.py'
+
+      # SADELESME FAZ 5 ARAMA (2026-11-13). Arastir niyeti HKM'nin arastirma kodunu kullanir, hafizaya
+      # yazmaz, yalniz onerir. Test cevrimdisi. BAM'a dokunulmaz (gercek soru setiyle gecene kadar).
+      - name: Arama motoru (çevrimdışı)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Arama motoru (çevrimdışı)" python3 king/arama_test.py
 
       # A9 cikisi (2026-11-13, sahibin karariyla asim kabul edilip kayit yenilendikten sonra baglandi):
       # son kayda (kalite/kayit/) gore artan butce birlestirmeyi durdurur (AGENTS 0.1 kural 5).

@@ -21,6 +21,12 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 3 · Yol motoru ve içerik](ekip/sadelesme/faz3-yol-icerik.md) — Yol motoru, içerik şeması (`alan/SEMA.md`), Felsefe'nin ilk aşaması ve şema denetimi (2026-11-13).
 - [Faz 3 · Tekrar motoru](ekip/sadelesme/faz3-tekrar.md) — Dokuz zamanlayıcının yerine tek FSRS: formüller, arayüz, on bir göç bağdaştırıcısı, testler (2026-11-13).
 - [Faz 3 · Not motoru](ekip/sadelesme/faz3-not.md) — On üç not yapısının yerine tek kayıt ve tek ağ: bağlar, King erişimi, arama, göç bağdaştırıcıları (2026-11-13).
+- [Faz 3 · Soru motoru](ekip/sadelesme/faz3-soru.md) — AYS net ve sıralama kuralları tek motorda: arayüz, AYS ile eşdeğerlik, etiketler, açık sorular (2026-11-13).
+- [Faz 3 · Kayıt ve Plan motorları](ekip/sadelesme/faz3-kayit-plan.md) — Tipli kayıtlar ve günün planı: SPİ kurallarıyla eşdeğerlik, göç bağdaştırıcıları, davranış farkları (2026-11-13).
+- [Faz 5 · King çekirdeği](ekip/sadelesme/faz5-king-cekirdek.md) — A7: beş niyet, on iki kapılı katalog (141 araç), jeton bütçeli bağlam derleyici (2026-11-13).
+- [Faz 5 · Arama motoru](ekip/sadelesme/faz5-arama.md) — King'in araştır niyeti: HKM kodunu kullanır, hafızaya yazmaz; BAM karşılaştırması ve geçilmeyen kapı (2026-11-13).
+- [Faz 6 · Akademik içeriği](ekip/sadelesme/faz6-akademik-icerik.md) — AYS içeriğinden dönüştürülen ilk aşama: 30 ünite, 368 ders, hepsi taslak; dışarıda kalanlar (2026-11-13).
+- [Faz 6 · Tarih ve Dil içeriği](ekip/sadelesme/faz6-tarih-dil-icerik.md) — İki alanın ilk aşaması (`C:\gemini-data`'dan, hepsi taslak): üniteler, kaynaktaki hatalar, eksikler (2026-11-13).
 - [Faz 4 · Ölçüm motoru](ekip/sadelesme/faz4-olcum.md) — A9: depodan sayılan ölçütler, bugün / taban / hedef, bütçe kuralları, ölçülemeyen eğriler (2026-11-13).
 - [Faz 4 · On üç eğri](ekip/sadelesme/faz4-egriler.md) — Her eğri bir dosya (`kalite/egri/`): ölçülenler, vekil ölçümler, ölçülemeyenler ve gerekenler (2026-11-13).
 - [Faz 5 · King MCP ucu](ekip/sadelesme/faz5-mcp.md) — Claude uygulamasından salt okur King: sekiz araç, gizlilik, kurulum (`king/KURULUM.md`) (2026-11-13).
