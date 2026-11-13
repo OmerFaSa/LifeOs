@@ -27,11 +27,13 @@ const ORNEK = {
   sayi: () => B.sayi({ ad: K, deger: 3, birim: '<x-b>', etiket: 'measured' }),
   uyari: () => B.uyari({ tur: 'hata', metin: K }),
   bolum: () => B.bolum({ baslik: K, govde: B.pul('x') }),
-  panel: () => B.panel({ baslik: K, govde: [B.pul('x')] })
+  panel: () => B.panel({ baslik: K, govde: [B.pul('x')] }),
+  eylemler: () => B.eylemler([{ metin: K.slice(0, 40), veri: { ac: K } }, null, { yazi: K }]),
+  acilir: () => B.acilir({ baslik: K, not: K, govde: B.pul('x'), veri: { a: K } })
 };
 
-t('katalog on iki taş sunar ve her biri test örneğine sahip', () => {
-  dogru(B.TASLAR.length === 12, 'taş sayısı ' + B.TASLAR.length);
+t('katalog on dört taş sunar ve her biri test örneğine sahip', () => {
+  dogru(B.TASLAR.length === 14, 'taş sayısı ' + B.TASLAR.length);
   B.TASLAR.forEach(ad => dogru(typeof B[ad] === 'function' && ORNEK[ad], ad));
 });
 t('kaçış: hiçbir taş ham etiket ya da tırnak sızdırmaz', () => {
@@ -79,6 +81,21 @@ t('rol ve etiket: ilerleme, alan, boş, başlık, uyarı, bölüm, panel, sayıl
   dogru(/^<section class="b-panel b-panel--basari" aria-labelledby="p">/.test(B.panel({ baslik: 'K', id: 'p', tur: 'basari', govde: '' })));
   dogru(/^<div class="b-panel b-panel--normal">/.test(B.panel({ govde: '' })), 'başlıksız panel bölge değil');
   dogru(/^<ul class="b-sayilar" aria-label="Gün"><li><div class="b-sayi"/.test(B.sayilar({ ad: 'Gün', ogeler: [{ ad: 'Su', deger: 1, etiket: 'measured' }] })));
+  // ekranların istediği eklemeler: aç/kapa ve kısayollu düğme, eylemli satır ve uyarı, eylem sırası, açılır bölüm, kök yolu
+  dogru(/aria-pressed="true"/.test(B.dugme({ metin: 'A', basili: true })) && /aria-pressed="false"/.test(B.dugme({ metin: 'A', basili: false })) && !/aria-pressed/.test(B.dugme({ metin: 'A' })), 'basılı');
+  dogru(/aria-keyshortcuts="Control\+K"[^>]*>Ara<kbd>Ctrl K<\/kbd><\/button>/.test(B.dugme({ metin: 'Ara', kisayol: 'Control+K', tus: 'Ctrl K' })), 'kısayol');
+  dogru(/^<div class="b-satir"><span class="b-satir__metin">.*<div class="b-eylemler"><button[^>]*data-ac="sil"/.test(B.satir({ ad: 'Kart', eylemler: [{ metin: 'Sil', veri: { ac: 'sil' } }] })), 'eylemli satır');
+  dogru(/<\/p><button[^>]*>Anladım<\/button><\/div>$/.test(B.uyari({ tur: 'bilgi', metin: 'x', eylem: { metin: 'Anladım' } })), 'eylemli uyarı');
+  dogru(B.eylemler([null, false]) === '' && /^<div class="b-eylemler"><a class="b-dugme b-dugme--ana" href="#\/x">Git<\/a><span class="b-eylemler__yazi">ya da<\/span>/.test(B.eylemler([{ metin: 'Git', tur: 'ana', href: '#/x' }, { yazi: 'ya da' }])), 'eylem sırası');
+  const ac = B.acilir({ baslik: 'Ünite 1', not: '2/3 ders', govde: B.pul('x'), acik: true });
+  dogru(/^<details class="b-acilir" open><summary class="b-acilir__ust"><h2 class="b-acilir__baslik">Ünite 1<\/h2><span class="b-acilir__not">2\/3 ders<\/span><\/summary><div class="b-acilir__govde">/.test(ac), ac);
+  dogru(/<h3/.test(B.acilir({ baslik: 'K', govde: '', duzey: 3 })) && !/ open/.test(B.acilir({ baslik: 'K', govde: '' })), 'düzey ve kapalı');
+  dogru(/href="\/esp\/"/.test(B.dugme({ metin: 'Eski', href: '/esp/' })), 'kök yolu');
+  dogru(/^<div class="b-panel b-panel--normal" id="tn-bitti">/.test(B.panel({ id: 'tn-bitti', govde: '' })), 'başlıksız panelde kimlik');
+  dogru(/^<section class="b-bolum" aria-labelledby="b-kurallar" data-kural="">/.test(B.bolum({ baslik: 'Kurallar', veri: { kural: '' }, govde: '' })), 'bölümde veri');
+  dogru(/aria-describedby="soru-1 b-alan-m-ipucu"/.test(B.alan({ ad: 'M', isim: 'm', tarif: 'soru-1', ipucu: 'i' })), 'ek tarif');
+  dogru(/<\/p><div class="b-eylemler"><a[^>]*>Git<\/a><button[^>]*>Sonra<\/button><\/div><\/div>$/.test(B.uyari({ tur: 'bilgi', metin: 'x', eylem: [{ metin: 'Git', href: '#/g' }, { metin: 'Sonra' }] })), 'iki eylemli uyarı');
+  dogru(/^<div class="b-panel b-panel--basari" role="status" tabindex="-1" data-sonuc="gecti">/.test(B.panel({ tur: 'basari', durum: true, veri: { sonuc: 'gecti' }, govde: '' })), 'sonuç paneli');
   function esitRol(tur, rol) { dogru(B.uyari({ tur, metin: 'x' }).indexOf('role="' + rol + '"') > 0, tur); }
 });
 t('kötü girdi: eksik metin, yanlış tür, tehlikeli bağlantı reddedilir', () => {
@@ -108,6 +125,13 @@ t('kötü girdi: eksik metin, yanlış tür, tehlikeli bağlantı reddedilir', (
   atar(() => B.uyari({ tur: 'kirmizi', metin: 'x' }), /tur/);
   atar(() => B.bolum({ baslik: 'A', govde: { html: 'x' } }), /govde/);
   atar(() => B.panel({ govde: 5 }), /govde/);
+  atar(() => B.dugme({ metin: 'x', basili: 'evet' }), /basili/);
+  atar(() => B.alan({ ad: 'A', isim: 'a', tarif: 'x" onfocus="y' }), /tarif/);
+  atar(() => B.satir({ ad: 'x', href: '#/a', eylemler: [{ metin: 'Sil' }] }), /eylem olmaz/, 'bağlantı içinde düğme');
+  atar(() => B.eylemler({ metin: 'x' }), /dizisi/);
+  atar(() => B.eylemler(['<b>x</b>']), /seçenek nesnesi/, 'HTML metni öğe olamaz');
+  atar(() => B.acilir({ baslik: 'A', govde: {} }), /govde/);
+  atar(() => B.acilir({ baslik: 'A', govde: '', duzey: 1 }), /duzey/);
 });
 t('sayı kutusu: kesinlik etiketi zorunlu, eksik veri sıfır değildir', () => {
   atar(() => B.sayi({ ad: 'Su', deger: 2 }), /etiket zorunlu/);
@@ -145,11 +169,11 @@ t('bilesen.css bağlam seçicisi yazmaz: her kural bir .b- taşıyla başlar', (
   dogru(kurallar.length > 40, 'kural sayısı ' + kurallar.length);
   kurallar.forEach(k => k.split(',').forEach(s => dogru(/^(a|textarea|select|input)?\.b-[a-z]/.test(s.trim()), 'bağlam seçicisi: ' + s.trim())));
 });
-t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; on iki taşı gösterir', () => {
+t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; on dört taşı gösterir', () => {
   const h = fs.readFileSync(path.join(__dirname, 'bilesen.html'), 'utf8');
   const yuk = (h.match(/(?:href|src)="[^"#]+\.(?:css|js)"/g) || []).map(x => x.replace(/^(href|src)="|"$/g, ''));
   dogru(JSON.stringify(yuk) === JSON.stringify(['../brand/ortak/piksel-yazi.css', 'kabuk.css', 'bilesen.css', 'bilesen.js']), yuk.join(', '));
-  for (let n = 1; n <= 12; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
+  for (let n = 1; n <= 14; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
 });
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');

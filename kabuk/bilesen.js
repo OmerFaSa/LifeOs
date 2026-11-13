@@ -1,4 +1,4 @@
-/* LIFEOS.Kabuk.Bilesen (global `Bilesen`) — A2 bileşen kataloğu: kabuğun on iki yapı taşı.
+/* LIFEOS.Kabuk.Bilesen (global `Bilesen`) — A2 bileşen kataloğu: kabuğun on dört yapı taşı.
  * Ekranlar yalnız bunlardan kurulur; her ölçü kabuk/bilesen.css'tedir ve bağlama göre değişmez.
  * Her işlev saf: bir seçenek nesnesi alır, HTML metni döndürür (kabuğun öteki dosyaları gibi). Bütün metin kaçışlıdır;
  * yanlış girdi TypeError atar (sessizce bozuk HTML çizilmez). İç içe parça HTML olarak değil, seçenek nesnesi olarak
@@ -24,9 +24,9 @@
     if (izinli.indexOf(v) < 0) hata(tas, ad + ' şunlardan biri olmalı: ' + izinli.join(', '));
     return v;
   }
-  // bağlantı: kabuk yolu (#/…), göreli dosya (./ ../) ya da http(s); javascript: vb. reddedilir
-  var YOL = /^(#\/|\.{1,2}\/|https?:\/\/)[^\s]*$/;
-  function yol(tas, v) { if (typeof v !== 'string' || !YOL.test(v)) hata(tas, 'href #/, ./, ../ ya da http(s):// ile başlamalı'); return v; }
+  // bağlantı: kabuk yolu (#/…), göreli dosya (./ ../), aynı kökte kök yolu (/esp/; //alan değil) ya da http(s); javascript: vb. reddedilir
+  var YOL = /^(#\/|\.{1,2}\/|\/(?!\/)|https?:\/\/)[^\s]*$/;
+  function yol(tas, v) { if (typeof v !== 'string' || !YOL.test(v)) hata(tas, 'href #/, ./, ../, / ya da http(s):// ile başlamalı'); return v; }
   var AD = /^[a-z][a-z0-9-]*$/;
   function veri(tas, o) {
     if (o == null) return '';
@@ -48,15 +48,27 @@
   }
   function sayiYaz(n) { return Number(n).toLocaleString('tr-TR', { maximumFractionDigits: 2 }); }
 
-  /* 1 · Düğme. tur: ikincil | ana | sade. href varsa bağlantı; kapali: aria-disabled (odakta kalır, okunur). */
+  /* 1 · Düğme. tur: ikincil | ana | sade. href varsa bağlantı; kapali: aria-disabled (odakta kalır, okunur).
+   * basili: aç/kapa düğmesi (aria-pressed, seçili 3 px çizgi); kisayol: aria-keyshortcuts, tus: görünen kısayol (<kbd>). */
   function dugme(o) {
     nesne('dugme', o);
     var m = metin('dugme', 'metin', o.metin, false, 40), tur = sec('dugme', 'tur', o.tur, ['ikincil', 'ana', 'sade']);
     var tip = sec('dugme', 'tip', o.tip, ['button', 'submit']);
-    var ek = ' class="b-dugme b-dugme--' + tur + '"' + (o.etiket ? ' aria-label="' + kac(metin('dugme', 'etiket', o.etiket)) + '"' : '') + veri('dugme', o.veri);
-    if (o.kapali) return '<button type="button"' + ek + ' aria-disabled="true">' + kac(m) + '</button>';
-    if (o.href != null) return '<a' + ek + ' href="' + kac(yol('dugme', o.href)) + '">' + kac(m) + '</a>';
-    return '<button type="' + tip + '"' + ek + '>' + kac(m) + '</button>';
+    if (o.basili != null && typeof o.basili !== 'boolean') hata('dugme', 'basili true/false olmalı');
+    var ek = ' class="b-dugme b-dugme--' + tur + '"' + (o.etiket ? ' aria-label="' + kac(metin('dugme', 'etiket', o.etiket)) + '"' : '') +
+      (o.kisayol ? ' aria-keyshortcuts="' + kac(metin('dugme', 'kisayol', o.kisayol)) + '"' : '') + (o.basili != null ? ' aria-pressed="' + o.basili + '"' : '') + veri('dugme', o.veri);
+    var ic = kac(m) + (o.tus ? '<kbd>' + kac(metin('dugme', 'tus', o.tus, false, 12)) + '</kbd>' : '');
+    if (o.kapali) return '<button type="button"' + ek + ' aria-disabled="true">' + ic + '</button>';
+    if (o.href != null) return '<a' + ek + ' href="' + kac(yol('dugme', o.href)) + '">' + ic + '</a>';
+    return '<button type="' + tip + '"' + ek + '>' + ic + '</button>';
+  }
+  /* 13 · Eylem sırası. Düğme seçenekleri dizisi (boş öğe atlanır); {yazi} öğesi kısa soluk açıklamadır. Hepsi boşsa hiçbir şey çizilmez. */
+  function eylemler(l) {
+    if (!Array.isArray(l)) hata('eylemler', 'seçenek nesnesi dizisi gerekli');
+    var ic = l.filter(Boolean).map(function (x) {
+      return nesne('eylemler', x).yazi != null ? '<span class="b-eylemler__yazi">' + kac(metin('eylemler', 'yazi', x.yazi)) + '</span>' : dugme(x);
+    }).join('');
+    return ic ? '<div class="b-eylemler">' + ic + '</div>' : '';
   }
 
   /* 2 · Rozet. Kısa etiket (≤ 24 karakter, kesilmez). tur: normal | vurgu | altin | kesik (tahmin gibi kesin olmayan). */
@@ -68,13 +80,15 @@
   }
 
   /* 3 · Liste satırı ve liste. Satır yüksekliği sabit (ad ve not birer satır, taşan kısaltılır).
-   * durum: acik | kilitli | secili. Liste <ul aria-label>; tur: satir | ders. */
+   * durum: acik | kilitli | secili. Liste <ul aria-label>; tur: satir | ders.
+   * eylemler: bağlantı olmayan satırın sağındaki düğmeler (Sil, Düzelt…); bağlantı satırında iç içe etkileşim olmaz. */
   function satir(o) {
     nesne('satir', o);
     var durum = sec('satir', 'durum', o.durum, ['acik', 'kilitli', 'secili']), ad = metin('satir', 'ad', o.ad, false);
+    if (o.eylemler != null && o.href != null) hata('satir', 'bağlantı satırında eylem olmaz');
     var ic = '<span class="b-satir__metin"><span class="b-satir__ad">' + kac(ad) + '</span>' +
       (o.not != null && o.not !== '' ? '<span class="b-satir__not">' + kac(metin('satir', 'not', o.not)) + '</span>' : '') + '</span>' +
-      (durum === 'kilitli' ? pul({ metin: 'kilitli' }) : o.pul != null ? pul(o.pul) : '');
+      (durum === 'kilitli' ? pul({ metin: 'kilitli' }) : o.pul != null ? pul(o.pul) : '') + (o.eylemler != null ? eylemler(o.eylemler) : '');
     if (durum === 'kilitli') return '<div class="b-satir b-satir--kilitli" aria-disabled="true">' + ic + '</div>';
     var cur = durum === 'secili' ? ' aria-current="true"' : '';
     if (o.href != null) return '<a class="b-satir" href="' + kac(yol('satir', o.href)) + '"' + cur + veri('satir', o.veri) + '>' + ic +
@@ -128,7 +142,8 @@
     var tur = sec('alan', 'tur', o.tur, ['metin', 'cok', 'sayi', 'tarih', 'saat', 'secim', 'onay']), ad = metin('alan', 'ad', o.ad);
     if (typeof o.isim !== 'string' || !/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(o.isim)) hata('alan', 'isim harfle başlayan [a-zA-Z0-9_-] olmalı');
     var id = 'b-alan-' + o.isim, ipucu = metin('alan', 'ipucu', o.ipucu, true), h = metin('alan', 'hata', o.hata, true);
-    var tarif = [ipucu ? id + '-ipucu' : '', h ? id + '-hata' : ''].filter(Boolean).join(' ');
+    if (o.tarif != null && (typeof o.tarif !== 'string' || !AD.test(o.tarif))) hata('alan', 'tarif bir öğe kimliği olmalı');
+    var tarif = [o.tarif, ipucu ? id + '-ipucu' : '', h ? id + '-hata' : ''].filter(Boolean).join(' ');
     var ortak = ' id="' + id + '" name="' + kac(o.isim) + '"' + (tarif ? ' aria-describedby="' + tarif + '"' : '') + (h ? ' aria-invalid="true"' : '') + (o.zorunlu ? ' required' : '');
     var alt = (ipucu ? '<p class="b-alan__ipucu" id="' + id + '-ipucu">' + kac(ipucu) + '</p>' : '') +
       (h ? '<p class="b-alan__hata" id="' + id + '-hata"><b>Hata:</b> ' + kac(h) + '</p>' : '');
@@ -193,37 +208,48 @@
   }
 
   /* 10 · Uyarı / bilgi satırı. tur: bilgi (note) | tamam (status) | dikkat (note) | hata (alert).
-   * Tür renkle değil, önündeki sözcükle de ayrılır. */
+   * Tür renkle değil, önündeki sözcükle de ayrılır. eylem: bir düğme ya da düğme dizisi (sağda). */
   var UYARI = { bilgi: ['Bilgi', 'note'], tamam: ['Tamam', 'status'], dikkat: ['Dikkat', 'note'], hata: ['Hata', 'alert'] };
   function uyari(o) {
     nesne('uyari', o);
     var tur = sec('uyari', 'tur', o.tur, ['bilgi', 'tamam', 'dikkat', 'hata']);
-    return '<div class="b-uyari b-uyari--' + tur + '" role="' + UYARI[tur][1] + '"><span class="b-uyari__tur">' + UYARI[tur][0] + '</span>' +
-      '<p class="b-uyari__metin">' + kac(metin('uyari', 'metin', o.metin)) + '</p></div>';
+    return '<div class="b-uyari b-uyari--' + tur + '" role="' + UYARI[tur][1] + '"' + veri('uyari', o.veri) + '><span class="b-uyari__tur">' + UYARI[tur][0] + '</span>' +
+      '<p class="b-uyari__metin">' + kac(metin('uyari', 'metin', o.metin)) + '</p>' + (o.eylem ? (Array.isArray(o.eylem) ? eylemler(o.eylem) : dugme(o.eylem)) : '') + '</div>';
   }
 
   /* 11 · Bölüm. <section aria-labelledby> + h2 + isteğe bağlı tek eylem; aralıklar sabit. */
   function bolum(o) {
     nesne('bolum', o);
     var b = metin('bolum', 'baslik', o.baslik), id = kimlik('bolum', o, b);
-    return '<section class="b-bolum" aria-labelledby="' + id + '"><div class="b-bolum__ust"><h2 id="' + id + '">' + kac(b) + '</h2>' +
+    return '<section class="b-bolum" aria-labelledby="' + id + '"' + veri('bolum', o.veri) + '><div class="b-bolum__ust"><h2 id="' + id + '">' + kac(b) + '</h2>' +
       (o.eylem ? dugme(o.eylem) : '') + '</div>' + govde('bolum', o.govde) + '</section>';
   }
 
-  /* 12 · Panel. Yüzeyli kutu; tur: normal | guclu | basari (kalın altın çizgi). Başlık varsa <section aria-labelledby>. */
+  /* 12 · Panel. Yüzeyli kutu; tur: normal | guclu | basari (kalın altın çizgi). Başlık varsa <section aria-labelledby>.
+   * durum: sonuç kutusu (role=status, odak alabilir: tabindex=-1; sonuç çizilince ekran okuyucu söyler). */
   function panel(o) {
     nesne('panel', o);
-    var tur = sec('panel', 'tur', o.tur, ['normal', 'guclu', 'basari']), sinif = 'b-panel b-panel--' + tur, g = govde('panel', o.govde);
-    if (o.baslik == null) return '<div class="' + sinif + '">' + g + '</div>';
+    var tur = sec('panel', 'tur', o.tur, ['normal', 'guclu', 'basari']), g = govde('panel', o.govde);
+    var sinif = 'b-panel b-panel--' + tur + '"' + (o.durum ? ' role="status" tabindex="-1"' : '') + veri('panel', o.veri);
+    if (o.baslik == null) return '<div class="' + sinif + (o.id != null ? ' id="' + kimlik('panel', o, '') + '"' : '') + '>' + g + '</div>';
     var b = metin('panel', 'baslik', o.baslik), id = kimlik('panel', o, b);
-    return '<section class="' + sinif + '" aria-labelledby="' + id + '"><h2 id="' + id + '">' + kac(b) + '</h2>' + g + '</section>';
+    return '<section class="' + sinif + ' aria-labelledby="' + id + '"><h2 id="' + id + '">' + kac(b) + '</h2>' + g + '</section>';
+  }
+
+  /* 14 · Açılır bölüm. <details>/<summary>; başlık h2 (ya da h3) ve kısa not üst sırada, gövde başka taşların çıktısı. */
+  function acilir(o) {
+    nesne('acilir', o);
+    var d = o.duzey == null ? 2 : sec('acilir', 'duzey', o.duzey, [2, 3]);
+    return '<details class="b-acilir"' + (o.acik ? ' open' : '') + veri('acilir', o.veri) + '><summary class="b-acilir__ust"><h' + d + ' class="b-acilir__baslik">' +
+      kac(metin('acilir', 'baslik', o.baslik)) + '</h' + d + '>' + (o.not ? '<span class="b-acilir__not">' + kac(metin('acilir', 'not', o.not)) + '</span>' : '') +
+      '</summary><div class="b-acilir__govde">' + govde('acilir', o.govde) + '</div></details>';
   }
 
   var Bilesen = {
-    TASLAR: ['dugme', 'pul', 'satir', 'ders', 'ilerleme', 'alan', 'bos', 'baslik', 'sayi', 'uyari', 'bolum', 'panel'],
+    TASLAR: ['dugme', 'pul', 'satir', 'ders', 'ilerleme', 'alan', 'bos', 'baslik', 'sayi', 'uyari', 'bolum', 'panel', 'eylemler', 'acilir'],
     ETIKET: ETIKET, kac: kac,
     dugme: dugme, pul: pul, satir: satir, liste: liste, ders: ders, ilerleme: ilerleme, alan: alan, bos: bos,
-    baslik: baslik, sayi: sayi, sayilar: sayilar, uyari: uyari, bolum: bolum, panel: panel
+    baslik: baslik, sayi: sayi, sayilar: sayilar, uyari: uyari, bolum: bolum, panel: panel, eylemler: eylemler, acilir: acilir
   };
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Kabuk = kok.LIFEOS.Kabuk || {};

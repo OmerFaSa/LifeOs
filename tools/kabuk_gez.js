@@ -22,6 +22,8 @@ const bekle = () => new Promise((res, rej) => {
 const cikti = path.join(kok, 'belgeler/ekip/sadelesme/kabuk-onizleme');
 let kalan = 0;
 const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓ ' : '✕ ') + ad + (kosul || ek == null ? '' : '  → ' + ek)); };
+// alan sayfasının ilerleme çubukları «değer/toplam · …» (okunan ders, geçilen ünite kapısı)
+const ilerleme = s => s.$$eval('.govde [role=progressbar]', l => l.map(x => x.getAttribute('aria-valuenow') + '/' + x.getAttribute('aria-valuemax')).join(' · '));
 // dört görünüm (1280/390 × açık/koyu) aynı sayfada; telefonda yatay taşma her koşuda denetlenir, görüntü yalnız --goruntu ile
 async function goruntu(p, ad) {
   for (const [w, h, vad] of [[1280, 800, 'masaustu'], [390, 844, 'telefon']]) for (const tm of ['acik', 'koyu']) {
@@ -49,15 +51,15 @@ async function goruntu(p, ad) {
     if (!y2gercek) await p.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
 
     await p.goto(T + '/kabuk/');
-    await p.waitForSelector('.karsila .dugme--ana');
-    await p.waitForFunction(() => /ders\//.test(document.querySelector('.karsila .dugme--ana').getAttribute('href')));
-    dene('Bugün: «Başla» ilk derse götürür', (await p.getAttribute('.karsila .dugme--ana', 'href')) === '#/alan/felsefe/ders/' + u1.dersler[0].id);
+    await p.waitForSelector('.karsila .b-dugme--ana');
+    await p.waitForFunction(() => /ders\//.test(document.querySelector('.karsila .b-dugme--ana').getAttribute('href')));
+    dene('Bugün: «Başla» ilk derse götürür', (await p.getAttribute('.karsila .b-dugme--ana', 'href')) === '#/alan/felsefe/ders/' + u1.dersler[0].id);
 
     await p.goto(T + '/kabuk/#/alan/felsefe');
-    await p.waitForSelector('.unitekutu');
-    dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.unitekutu').count()) === 4);
-    dene('Felsefe: ikinci ünite kilitli', (await p.locator('.unitekutu').nth(1).locator('.satir--kilitli').count()) >= 3);
-    dene('Felsefe: eski sayfa bağlantısı tek kapı yolunda', (await p.getAttribute('.eylemler .dugme--sade', 'href')) === '/esp/');
+    await p.waitForSelector('.b-acilir');
+    dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
+    dene('Felsefe: ikinci ünite kilitli', (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli, .b-satir--kilitli').count()) >= 3);
+    dene('Felsefe: eski sayfa bağlantısı tek kapı yolunda', (await p.getAttribute('.b-eylemler .b-dugme--sade', 'href')) === '/esp/');
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'felsefe-masaustu-koyu.png'), fullPage: true });
 
     for (let i = 0; i < u1.dersler.length; i++) {
@@ -83,39 +85,39 @@ async function goruntu(p, ad) {
     await p.waitForSelector('form.kapi');
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'kapi-masaustu-koyu.png'), fullPage: true });
     await p.click('form.kapi button[type=submit]');
-    await p.waitForSelector('.kapisonuc');
-    dene('kapı: boş deneme geçirmez', /olmadı/.test(await p.textContent('.kapisonuc')) && /0\/4/.test(await p.textContent('.kapisonuc')));
-    dene('kapıda kalınca: 4 soru Tekrar\'a düştü; kapıda doğru cevap gösterilmez', /4 soru Tekrar'a düştü/.test(await p.textContent('.kapisonuc'))
-      && (await p.locator('a.dugme[href="#/motor/tekrar"]').count()) === 1 && (await p.locator('.secenek--dogru, .secenek__im').count()) === 0
+    await p.waitForSelector('[data-sonuc]');
+    dene('kapı: boş deneme geçirmez', /olmadı/.test(await p.textContent('[data-sonuc]')) && /0\/4/.test(await p.textContent('[data-sonuc]')));
+    dene('kapıda kalınca: 4 soru Tekrar\'a düştü; kapıda doğru cevap gösterilmez', /4 soru Tekrar'a düştü/.test(await p.textContent('[data-sonuc]'))
+      && (await p.locator('a.b-dugme[href="#/motor/tekrar"]').count()) === 1 && (await p.locator('.secenek--dogru, .secenek__im').count()) === 0
       && !(await p.textContent('.govde')).includes('doğru cevap:'));
     for (const q of u1.kapi.sorular) await p.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
     await p.click('form.kapi button[type=submit]');
-    await p.waitForSelector('.kapisonuc--gecti');
-    const metin = await p.textContent('.kapisonuc');
+    await p.waitForSelector('[data-sonuc="gecti"]');
+    const metin = await p.textContent('[data-sonuc]');
     dene('kapı: dört doğruyla geçilir, sonuç etiketli', /Geçtin/.test(metin) && /4\/4/.test(metin) && /ölçüldü/.test(metin) && /taslak/.test(metin), metin);
-    dene('kapı: «Sıradaki» ikinci ünitenin ilk dersi', (await p.getAttribute('.kapisonuc .dugme--ana', 'href')) === '#/alan/felsefe/ders/' + y.uniteler[1].dersler[0].id);
+    dene('kapı: «Sıradaki» ikinci ünitenin ilk dersi', (await p.getAttribute('[data-sonuc] .b-dugme--ana', 'href')) === '#/alan/felsefe/ders/' + y.uniteler[1].dersler[0].id);
 
     await p.reload();
     await p.goto(T + '/kabuk/#/alan/felsefe');
-    await p.waitForSelector('.unitekutu');
-    dene('kayıt yenilemeden sonra duruyor: 3/9 ders, 1/3 kapı', /3\/9 ders okundu · 1\/3/.test(await p.textContent('.govde')));
-    dene('ikinci ünite açıldı: ilk dersi ve kapısı bağlantı, sonraki iki ders kilitli', (await p.locator('.unitekutu').nth(1).locator('a.satir').count()) === 2 && (await p.locator('.unitekutu').nth(1).locator('.satir--kilitli').count()) === 2);
+    await p.waitForSelector('.b-acilir');
+    dene('kayıt yenilemeden sonra duruyor: 3/9 ders, 1/3 kapı', (await ilerleme(p)) === '3/9 · 1/3');
+    dene('ikinci ünite açıldı: ilk dersi ve kapısı bağlantı, sonraki iki ders kilitli', (await p.locator('.b-acilir').nth(1).locator('a.b-ders, a.b-satir').count()) === 2 && (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli').count()) === 2);
     await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + y.id);
-    await p.waitForSelector('.yuva');
-    dene('aşama kapısı üniteler bitmeden kilitli', /bütün ünite kapıları/.test(await p.textContent('.yuva')));
+    await p.waitForSelector('.b-bos');
+    dene('aşama kapısı üniteler bitmeden kilitli', /bütün ünite kapıları/.test(await p.textContent('.b-bos')));
     await p.goto(T + '/kabuk/#/alan/felsefe/ders/yok.boyle');
-    await p.waitForSelector('.yuva');
-    dene('bilinmeyen ders açık bir iletiyle karşılanır', /Böyle bir ders yok/.test(await p.textContent('.yuva')));
+    await p.waitForSelector('.b-bos');
+    dene('bilinmeyen ders açık bir iletiyle karşılanır', /Böyle bir ders yok/.test(await p.textContent('.b-bos')));
     // ---- öteki taşınan alanlar: Tarih, Dil, Akademik ----
     for (const alan of ['tarih', 'dil', 'muzik', 'okuma', 'beslenme', 'hareket', 'uyku', 'tahlil', 'akademik']) {
       const v = JSON.parse(fs.readFileSync(path.join(kok, 'alan', alan, 'asama-1.json'), 'utf8')), d1 = v.uniteler[0].dersler[0];
       await p.goto(T + '/kabuk/#/alan/' + alan);
-      await p.waitForSelector('.unitekutu');
-      dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.unitekutu').count()) === v.uniteler.length + 1);
+      await p.waitForSelector('.b-acilir');
+      dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
       dene(alan + ': ' + (v.uniteler.length > 4 ? 'yalnız ilk ünite açık gelir' : 'bütün üniteler açık gelir'),
-        (await p.locator('details.unitekutu[open]').count()) === (v.uniteler.length > 4 ? 1 : v.uniteler.length));
-      dene(alan + ': «Başla» ilk derse götürür', (await p.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
-      await p.click('.eylemler .dugme--ana');
+        (await p.locator('details.b-acilir[open]').count()) === (v.uniteler.length > 4 ? 1 : v.uniteler.length));
+      dene(alan + ': «Başla» ilk derse götürür', (await p.getAttribute('.b-eylemler .b-dugme--ana', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
+      await p.click('.b-eylemler .b-dugme--ana');
       await p.waitForSelector('article.ders h1');
       dene(alan + ': ilk ders açılır', (await p.textContent('article.ders h1')) === d1.ad);
       const a = d1.alistirmalar.find(x => x.tur === 'secmeli');
@@ -125,18 +127,18 @@ async function goruntu(p, ad) {
       }
       await p.click('[data-ac="okudum"]');
       await p.waitForFunction(h => location.hash !== h, '#/alan/' + alan + '/ders/' + d1.id);
-      if (GORUNTU && alan === 'akademik') { await p.goto(T + '/kabuk/#/alan/akademik'); await p.waitForSelector('.unitekutu'); await p.screenshot({ path: path.join(cikti, 'akademik-masaustu-koyu.png') }); }
+      if (GORUNTU && alan === 'akademik') { await p.goto(T + '/kabuk/#/alan/akademik'); await p.waitForSelector('.b-acilir'); await p.screenshot({ path: path.join(cikti, 'akademik-masaustu-koyu.png') }); }
     }
     await p.goto(T + '/kabuk/#/alan/felsefe');
-    await p.waitForSelector('.unitekutu');
-    dene('alanların kaydı ayrı: Felsefe hâlâ 3/9 ders, 1/3 kapı', /3\/9 ders okundu · 1\/3/.test(await p.textContent('.govde')));
+    await p.waitForSelector('.b-acilir');
+    dene('alanların kaydı ayrı: Felsefe hâlâ 3/9 ders, 1/3 kapı', (await ilerleme(p)) === '3/9 · 1/3');
     await p.goto(T + '/kabuk/#/alan/akademik');
-    await p.waitForSelector('.unitekutu');
+    await p.waitForSelector('.b-acilir');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => /Akademik/.test((document.querySelector('.karsila__sira') || {}).textContent || ''));
-    dene('Bugün son çalışılan alanla karşılar (Akademik)', /akademik\/(ders|kapi)\//.test(await p.getAttribute('.karsila .dugme--ana', 'href')));
+    dene('Bugün son çalışılan alanla karşılar (Akademik)', /akademik\/(ders|kapi)\//.test(await p.getAttribute('.karsila .b-dugme--ana', 'href')));
     await p.goto(T + '/kabuk/#/alan/felsefe');
-    await p.waitForSelector('.unitekutu');
+    await p.waitForSelector('.b-acilir');
 
     // ---- Not ----
     p.on('dialog', x => x.accept());
@@ -167,15 +169,15 @@ async function goruntu(p, ad) {
     await p.waitForSelector('.baglar');
     dene('not: «Bu nota bağlananlar» Sokrates notunu gösterir', /Sokrates/.test(await p.textContent('.baglar')));
     await p.goto(T + '/kabuk/#/motor/not');
-    await p.waitForSelector('#not-liste a.satir');
-    dene('not: iki not listede', (await p.locator('#not-liste a.satir').count()) === 2);
+    await p.waitForSelector('#not-liste a.b-satir');
+    dene('not: iki not listede', (await p.locator('#not-liste a.b-satir').count()) === 2);
     await p.fill('[data-not-ara]', 'sokr');
-    dene('not: arama «sokr» tek notu bulur', (await p.locator('#not-liste a.satir').count()) === 1 && /Sokrates/.test(await p.textContent('#not-liste')));
+    dene('not: arama «sokr» tek notu bulur', (await p.locator('#not-liste a.b-satir').count()) === 1 && /Sokrates/.test(await p.textContent('#not-liste')));
     await p.fill('[data-not-ara]', '#etik');
-    dene('not: «#etik» etiketli notu süzer', (await p.locator('#not-liste a.satir').count()) === 1 && /Erdem/.test(await p.textContent('#not-liste')));
+    dene('not: «#etik» etiketli notu süzer', (await p.locator('#not-liste a.b-satir').count()) === 1 && /Erdem/.test(await p.textContent('#not-liste')));
     await p.reload();
-    await p.waitForSelector('#not-liste a.satir');
-    dene('not: yenilemeden sonra iki not duruyor', (await p.locator('#not-liste a.satir').count()) === 2);
+    await p.waitForSelector('#not-liste a.b-satir');
+    dene('not: yenilemeden sonra iki not duruyor', (await p.locator('#not-liste a.b-satir').count()) === 2);
     // not ağı: iki düğüm, bir bağ; düğüm klavyeyle (Sekme + Enter) notu açar
     dene('not ağı: iki düğüm ve Sokrates→Erdem bağı çizildi', (await p.locator('[data-not-ag] svg a').count()) === 2 && (await p.locator('[data-not-ag] line.notag__bag').count()) === 1);
     await p.focus('[data-not-ag] svg a[aria-label^="Erdem"]');
@@ -199,9 +201,9 @@ async function goruntu(p, ad) {
     await p.fill('form.aracform textarea[name=kullanim]', 'Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.');
     await goruntu(p, 'sisteme-not-form');
     await p.click('form.aracform button[type=submit]');
-    await p.waitForSelector('[data-arac-sayfa] .sistemnot');
+    await p.waitForSelector('[data-arac-sayfa] [data-sistemnot]');
     const aracHash = await p.evaluate(() => location.hash);
-    dene('sisteme not: araç sayfası notu ve «King okumaz» gösterir', /King okumaz/.test(await p.textContent('.sistemnot')) && /hakkımda çıkarım yapma/.test(await p.textContent('.sistemnot')), await p.textContent('.sistemnot'));
+    dene('sisteme not: araç sayfası notu ve «King okumaz» gösterir', /King okumaz/.test(await p.textContent('[data-sistemnot]')) && /hakkımda çıkarım yapma/.test(await p.textContent('[data-sistemnot]')), await p.textContent('[data-sistemnot]'));
     await p.click('a[href^="#/motor/not/yeni?arac="]');
     await p.waitForSelector('form.notform input[name=klasor]', { state: 'attached' });
     dene('sisteme not: araçta yeni not aracın adını ve iznini söyler', /Araç: Düşünce defteri · King okumaz/.test(await p.textContent('form.notform')));
@@ -214,19 +216,19 @@ async function goruntu(p, ad) {
     let kr = await kral();
     dene('sisteme not: not aracın klasöründe; King süzgeci onu ve sistem notunu dışarıda bırakır', kr.klasor === 'Düşünce defteri' && kr.okur.indexOf('Kader') < 0 && kr.okur.indexOf('Erdem') >= 0 && kr.sistem === 0, JSON.stringify(kr));
     await p.goto(T + '/kabuk/' + aracHash);
-    await p.waitForSelector('[data-arac-sayfa] .liste a.satir');
-    dene('sisteme not: araç sayfasında notu listelenir', /Kader/.test(await p.textContent('[data-arac-sayfa] .liste')));
+    await p.waitForSelector('[data-arac-sayfa] .b-liste a.b-satir');
+    dene('sisteme not: araç sayfasında notu listelenir', /Kader/.test(await p.textContent('[data-arac-sayfa] .b-liste')));
     await goruntu(p, 'sisteme-not');
     await p.click('a[href$="/duzenle"]');
     await p.waitForSelector('form.aracform');
     dene('sisteme not: düzenlerken klasör değişmez (salt okunur)', (await p.getAttribute('form.aracform input[name=klasor]', 'readonly')) !== null);
     await p.check('form.aracform input[name=kingOkur]');
     await p.click('form.aracform button[type=submit]');
-    await p.waitForFunction(() => /King okur/.test((document.querySelector('.sistemnot') || {}).textContent || ''));
+    await p.waitForFunction(() => /King okur/.test((document.querySelector('[data-sistemnot]') || {}).textContent || ''));
     kr = await kral();
     dene('sisteme not: izin açılınca King notu ve sistem notunu okur', kr.okur.indexOf('Kader') >= 0 && kr.sistem === 1, JSON.stringify(kr));
     await p.goto(T + '/kabuk/#/motor/not');
-    await p.waitForSelector('[aria-labelledby="araclar-baslik"] a.satir');
+    await p.waitForSelector('[aria-labelledby="araclar-baslik"] a.b-satir');
     dene('sisteme not: Not sayfasında araç, not sayısı ve King izniyle listelenir', /Düşünce defteri.*1 not.*King okur/.test((await p.textContent('[aria-labelledby="araclar-baslik"]')).replace(/\s+/g, ' ')));
 
     // ---- Tekrar ----
@@ -235,7 +237,7 @@ async function goruntu(p, ad) {
     dene('tekrar: kartsız açılış öyle der', /Henüz kart yok/.test(await p.textContent('[data-arac="tekrar"]')));
     // kapıda kalınan dört soru: taslak olduğu için kuyruğa girmez, kendi listesinde kaynağıyla; açılınca doğru cevap
     const kk = u1.kapi.sorular[0];
-    dene('kapıda kalınca: Tekrar\'da 4 kart, kaynağı «Felsefe · ' + u1.ad + ' kapısı», tekilleşmiş', (await p.locator('[data-kapi-kartlari] li').count()) === 4
+    dene('kapıda kalınca: Tekrar\'da 4 kart, kaynağı «Felsefe · ' + u1.ad + ' kapısı», tekilleşmiş', (await p.locator('[data-kapi-kartlari] .b-acilir').count()) === 4
       && (await p.textContent('[data-kapi-kartlari]')).includes('Felsefe · ' + u1.ad + ' kapısı') && /taslak/.test(await p.textContent('[data-kapi-kartlari]')),
       await p.textContent('[data-kapi-kartlari]').catch(() => 'liste yok'));
     await p.click('[data-kapi-kartlari] summary >> nth=0');
@@ -249,17 +251,17 @@ async function goruntu(p, ad) {
     dene('tekrar: kartın önü görünür, arkası gizli', /Arkhe/.test(await p.textContent('.kart__on')) && (await p.locator('.kart__arka').count()) === 0);
     await p.click('[data-arac-ac="kart-goster"]');
     await p.waitForSelector('.kart__arka');
-    dene('tekrar: cevap ve dört not düğmesi aralıklarıyla', /ilk maddesi/.test(await p.textContent('.kart__arka')) && (await p.locator('.notlar .dugme').count()) === 4 && /şimdi/.test(await p.textContent('.notlar .dugme >> nth=0')) && /gün/.test(await p.textContent('.notlar .dugme >> nth=2')));
+    dene('tekrar: cevap ve dört not düğmesi aralıklarıyla', /ilk maddesi/.test(await p.textContent('.kart__arka')) && (await p.locator('.notlar .b-dugme').count()) === 4 && /şimdi/.test(await p.textContent('.notlar .b-dugme >> nth=0')) && /gün/.test(await p.textContent('.notlar .b-dugme >> nth=2')));
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'tekrar-masaustu-koyu.png'), fullPage: true });
     await p.click('[data-arac-ac="kart-not"][data-not="1"]');
     await p.waitForSelector('[data-arac-ac="kart-goster"]');
     dene('tekrar: «Yine» kartı aynı gün yeniden sorar', /Arkhe/.test(await p.textContent('.kart__on')));
     await p.click('[data-arac-ac="kart-goster"]');
     await p.click('[data-arac-ac="kart-not"][data-not="3"]');
-    await p.waitForSelector('.kapisonuc--gecti');
-    dene('tekrar: «İyi» sonrası bugünlük biter, iki cevap sayılır', /Bugünlük bitti/.test(await p.textContent('.kapisonuc')) && /2 cevap/.test(await p.textContent('.kapisonuc')));
-    await p.click('details.kaynak summary');
-    dene('tekrar: kart listesinde hatırlama tahmin etiketli', /\(tahmin\)/.test(await p.textContent('.kartliste')));
+    await p.waitForSelector('[data-sonuc="gecti"]');
+    dene('tekrar: «İyi» sonrası bugünlük biter, iki cevap sayılır', /Bugünlük bitti/.test(await p.textContent('[data-sonuc]')) && /2 cevap/.test(await p.textContent('[data-sonuc]')));
+    await p.click('[data-arac="tekrar"] .b-acilir summary');
+    dene('tekrar: kart listesinde hatırlama tahmin etiketli', /\(tahmin\)/.test(await p.textContent('[aria-label="Kartlar"]')));
     await p.click('[data-arac-ac="kart-sil"]');
     await p.waitForFunction(() => /Henüz kart yok/.test(document.querySelector('[data-arac="tekrar"]').textContent));
     dene('tekrar: kart silinir', true);
@@ -275,15 +277,15 @@ async function goruntu(p, ad) {
     dene('kayıt: sınır dışı sayı motorun cümlesiyle reddedilir, yazılan durur', /1 ile 8000 ml/.test(await p.textContent('.kayitform .notform__ileti')) && (await p.inputValue('input[name=ml]')) === '99999');
     await p.fill('input[name=ml]', '500');
     await p.click('form.kayitform button[type=submit]');
-    await p.waitForSelector('.ozet li');
-    dene('kayıt: su toplamı özetinde «hesaplandı», kaydın kendisi «ölçüldü» etiketiyle', /500 ml/.test(await p.textContent('.ozet')) && /hesaplandı/.test(await p.textContent('.ozet')) && /500 ml \(ölçüldü\)/.test(await p.textContent('.kartliste')));
+    await p.waitForSelector('[aria-label="Gün özeti"] li');
+    dene('kayıt: su toplamı özetinde «hesaplandı», kaydın kendisi «ölçüldü» etiketiyle', /500 ml/.test(await p.textContent('[aria-label="Gün özeti"]')) && /hesaplandı/.test(await p.textContent('[aria-label="Gün özeti"]')) && /500 ml \(ölçüldü\)/.test(await p.textContent('[aria-label="Kayıtlar"]')));
     await p.selectOption('select[data-kayit-tur]', 'uyku');
     await p.waitForSelector('input[name=saat]');
     await p.fill('input[name=saat]', '7,5');
     await p.check('input[name=tahmin]');
     await p.click('form.kayitform button[type=submit]');
-    await p.waitForFunction(() => /Gece uykusu/.test(document.querySelector('.ozet').textContent));
-    dene('kayıt: tahmin işaretli uyku «tahmin» etiketiyle', /7,5 saat/.test(await p.textContent('.ozet')) && /tahmin/.test(await p.textContent('.ozet')));
+    await p.waitForFunction(() => /Gece uykusu/.test(document.querySelector('[aria-label="Gün özeti"]').textContent));
+    dene('kayıt: tahmin işaretli uyku «tahmin» etiketiyle', /7,5 saat/.test(await p.textContent('[aria-label="Gün özeti"]')) && /tahmin/.test(await p.textContent('[aria-label="Gün özeti"]')));
     dene('kayıt: uyku girilince günün antrenman kararı etiketli', /Bugünkü antrenman/.test(await p.textContent('[data-kural]')) && /hesaplandı/.test(await p.textContent('[data-kural]')));
     await p.goto(T + '/kabuk/#/ayarlar');
     await p.waitForSelector('[data-ayar-satir="lifeos.beden.boy"] input');
@@ -304,14 +306,14 @@ async function goruntu(p, ad) {
     dene('kayıt: profil ve tartı varken enerji hedefi ve bazal hesaplanır (kadın 60 kg 165 cm 36 yaş: bazal 1290)',
       /Bazal metabolizma\s*1290 kcal/.test((await p.textContent('[data-kural]')).replace(/\s+/g, ' ')));
     await p.click('[data-arac-ac="kayit-sil"][aria-label^="Kaydı sil: Kilo"]');            // aşağıdaki iki kayıt akışı aynen sürsün
-    await p.waitForFunction(() => document.querySelectorAll('.kartliste li').length === 2);
+    await p.waitForFunction(() => document.querySelectorAll('[aria-label="Kayıtlar"] li').length === 2);
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'kayit-masaustu-koyu.png'), fullPage: true });
     await p.reload();
-    await p.waitForSelector('.kartliste li');
-    dene('kayıt: yenilemeden sonra iki kayıt duruyor', (await p.locator('.kartliste li').count()) === 2);
+    await p.waitForSelector('[aria-label="Kayıtlar"] li');
+    dene('kayıt: yenilemeden sonra iki kayıt duruyor', (await p.locator('[aria-label="Kayıtlar"] li').count()) === 2);
     await p.click('[data-arac-ac="kayit-sil"] >> nth=0');
-    await p.waitForFunction(() => document.querySelectorAll('.kartliste li').length === 1);
-    dene('kayıt: kayıt silinir, özet güncellenir', !/Gece uykusu/.test(await p.textContent('.ozet')));
+    await p.waitForFunction(() => document.querySelectorAll('[aria-label="Kayıtlar"] li').length === 1);
+    dene('kayıt: kayıt silinir, özet güncellenir', !/Gece uykusu/.test(await p.textContent('[aria-label="Gün özeti"]')));
     // geçmiş güne kayıt: motorun penceresi (bugün + 7 gün geri), gelecek yok
     const kGunler = await p.$$eval('select[data-kayit-gun] option', o => o.map(x => x.value));
     const bugunK = await p.evaluate(() => { const d = new Date(), i = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + i(d.getMonth() + 1) + '-' + i(d.getDate()); });
@@ -324,12 +326,12 @@ async function goruntu(p, ad) {
     dene('kayıt: gün değişince yazılan sayı kalır, özet o güne geçer', (await p.inputValue('input[name=ml]')) === '300' && /Dün için kayıt yok/.test(await p.textContent('[data-arac="kayit"]')));
     await p.click('form.kayitform button[type=submit]');
     await p.waitForFunction(() => /Kaydedildi \(Dün\)/.test(document.querySelector('.kayitform .notform__ileti').textContent));
-    dene('kayıt: düne kayıt yazıldı, özeti dünün', /300 ml/.test(await p.textContent('.ozet')));
+    dene('kayıt: düne kayıt yazıldı, özeti dünün', /300 ml/.test(await p.textContent('[aria-label="Gün özeti"]')));
     await p.click('a[href="#/motor/kayit/hafta"]');
     await p.waitForSelector('[data-kayit-hafta] .khafta__tablo');
     const suSatir = await p.$$eval('.khafta__tablo tbody tr', tr => tr.map(r => [...r.children].map(c => c.textContent.trim())).find(r => /^Su/.test(r[0])));
     dene('kayıt haftası: su satırında dün 300, bugün 500 (etiket ekran okuyucuya da), boş günler nokta (sıfır değil)', !!suSatir && suSatir[6] === '300 hesaplandı' && suSatir[7] === '500 hesaplandı' && suSatir.slice(1, 6).every(x => x === '·veri yok'), JSON.stringify(suSatir));
-    dene('kayıt haftası: satır etiketi ve haftanın toplamı etiketli', /hesaplandı/.test(suSatir && suSatir[0]) && /400 ml · 2 günün ortalaması\s*hesaplandı/.test(await p.textContent('[data-kayit-hafta] .ozet')));
+    dene('kayıt haftası: satır etiketi ve haftanın toplamı etiketli', /hesaplandı/.test(suSatir && suSatir[0]) && /400 ml · 2 günün ortalaması\s*hesaplandı/.test(await p.textContent('[aria-label="Haftanın toplamı"]')));
     dene('kayıt haftası: toparlanma ve yük motorun cümlesiyle (antrenman kaydı yok)', /Henüz antrenman kaydı yok/.test(await p.textContent('[data-yuk]')) && /Toparlanma puanı|toparlanma için kayıt yok/.test(await p.textContent('[data-yuk]')), await p.textContent('[data-yuk]'));
     await goruntu(p, 'kayit-hafta');
 
@@ -409,7 +411,7 @@ async function goruntu(p, ad) {
 
     // ---- Soru: karma test (etkin alan Felsefe) ----
     await p.goto(T + '/kabuk/#/alan/felsefe');
-    await p.waitForSelector('.unitekutu');
+    await p.waitForSelector('.b-acilir');
     await p.goto(T + '/kabuk/#/motor/soru');
     await p.waitForSelector('[data-arac-ac="soru-basla"]');
     dene('soru: başlangıçta alan ve havuz yazılı', /Felsefe alanının/.test(await p.textContent('[data-arac="soru"]')) && /Havuzda \d+ soru/.test(await p.textContent('[data-arac="soru"]')));
@@ -445,7 +447,7 @@ async function goruntu(p, ad) {
     // ---- Süreli deneme (Felsefe) ve sınav provası (Akademik) ----
     await p.click('a[href="#/motor/soru/deneme"]');
     await p.waitForSelector('[data-deneme="basla"]');
-    dene('deneme: başlangıçta testler ve süre «hesaplandı» etiketiyle', /Felsefe ne sorar\?/.test(await p.textContent('[data-deneme-sayfa] .ozet')) && /Süre\s*\d+ dk\s*hesaplandı/.test(await p.textContent('[data-deneme-sayfa] .ozet')));
+    dene('deneme: başlangıçta testler ve süre «hesaplandı» etiketiyle', /Felsefe ne sorar\?/.test(await p.textContent('[aria-label="Deneme testleri"]')) && /Süre\s*\d+ dk\s*hesaplandı/.test(await p.textContent('[aria-label="Deneme testleri"]')));
     dene('deneme: Felsefe\'de sınav provası yok', (await p.locator('[data-deneme="prova"]').count()) === 0);
     await goruntu(p, 'deneme-baslangic');
     await p.click('[data-deneme="basla"]');
@@ -467,7 +469,7 @@ async function goruntu(p, ad) {
     dene('deneme: yenilemeden sonra kaldığı sorudan, cevaplarıyla sürer', (await p.getAttribute('.deneme__nobt[aria-current]', 'data-i')) === '1' && (await p.locator('.deneme__nobt--cevapli').count()) === 2);
     await goruntu(p, 'deneme-soru');
     await p.click('[data-deneme="bitir"]');
-    await p.waitForSelector('[data-deneme-sayfa] .kapisonuc');
+    await p.waitForSelector('[data-deneme-sayfa] [data-sonuc]');
     const dSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
     dene('deneme: sonuç net «hesaplandı», doğru ve süre «ölçüldü», boş «hesaplandı»', /Deneme bitti\s*2 net\s*hesaplandı\s*2 doğru, 0 yanlış \(ölçüldü\)/.test(dSonuc) && /boş \(hesaplandı\)/.test(dSonuc) && /dk \(ölçüldü\)/.test(dSonuc), dSonuc.slice(0, 220));
     dene('deneme: Felsefe sonucunda sınav puanı tahmini yok', !/Puan ve sıra/.test(dSonuc));
@@ -479,10 +481,10 @@ async function goruntu(p, ad) {
     await p.click('[data-deneme="basla"]');
     await p.waitForSelector('.sayac');
     await p.evaluate(() => { const v = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.soru.deneme')); v.oturum.bas -= (v.oturum.sure * 60 + 2) * 1000; LIFEOS.Kabuk.ic.depo.setItem('lifeos.soru.deneme', JSON.stringify(v)); });
-    await p.waitForSelector('[data-deneme-sayfa] .kapisonuc', { timeout: 4000 }).catch(() => {});
+    await p.waitForSelector('[data-deneme-sayfa] [data-sonuc]', { timeout: 4000 }).catch(() => {});
     dene('deneme: süre dolunca kendiliğinden biter, «süre doldu» yazar', /süre doldu/.test(await p.textContent('[data-deneme-sayfa]').catch(() => '')));
     await p.goto(T + '/kabuk/#/alan/akademik');
-    await p.waitForSelector('.unitekutu');
+    await p.waitForSelector('.b-acilir');
     await p.goto(T + '/kabuk/#/motor/soru/deneme');
     await p.waitForSelector('[data-deneme="prova"]');
     dene('prova: Akademik\'te TYT provası açık, AYT kilitli üniteler yüzünden kapalı', (await p.locator('[data-deneme="prova"][data-sinav="TYT"]').count()) === 2 && /açık soru yetmiyor/.test(await p.textContent('section')));
@@ -493,7 +495,7 @@ async function goruntu(p, ad) {
     await p.waitForSelector('[data-deneme="cevap"][disabled]');
     dene('prova: ilk cevap kilitlenir, doğru/yanlış söylenmez', (await p.locator('[data-deneme="cevap"][disabled]').count()) >= 2 && /kaydedildi/.test(await p.textContent('.soru')) && !/Doğru\.|Yanlış\./.test(await p.textContent('.soru')));
     await p.click('[data-deneme="bitir"]');
-    await p.waitForSelector('[data-deneme-sayfa] .kapisonuc');
+    await p.waitForSelector('[data-deneme-sayfa] [data-sonuc]');
     const pSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
     dene('prova: sonuç net «hesaplandı», ders ders, süre «ölçüldü»', /TYT provası bitti/.test(pSonuc) && /net hesaplandı/.test(pSonuc) && /Türkçe/.test(pSonuc) && /Fen bilimleri/.test(pSonuc) && /\/ 28 dk \(ölçüldü\)/.test(pSonuc), pSonuc.slice(0, 220));
     dene('prova: puan ve sıra tahmini motorun cümlesiyle «veri yok»', /Puan ve sıra\s*tahmin yok\s*veri yok/.test(pSonuc) && /En az 3 tam TYT denemesi gerekir/.test(pSonuc), pSonuc.slice(-400));
@@ -502,15 +504,15 @@ async function goruntu(p, ad) {
     await p.waitForSelector('[data-arac="soru"] .ozet');
     dene('prova: «Son testler»de provası adıyla', /Akademik · TYT provası/.test(await p.textContent('[data-arac="soru"] .ozet')));
     await p.goto(T + '/kabuk/#/alan/felsefe');                 // aşağıdaki akışlar Felsefe'yi etkin alan bekler
-    await p.waitForSelector('.unitekutu');
+    await p.waitForSelector('.b-acilir');
 
     // ---- Tanışma: onaydan önce kayıt yok, onayla yazılır ----
     await p.goto(T + '/kabuk/#/bugun');
-    await p.waitForSelector('.tn-davet');
-    dene('tanışma: kayıt yokken Bugün\'de davet satırı', /tanıyayım/.test(await p.textContent('.tn-davet')));
+    await p.waitForSelector('[data-tn-davet]');
+    dene('tanışma: kayıt yokken Bugün\'de davet satırı', /tanıyayım/.test(await p.textContent('[data-tn-davet]')));
     await p.goto(T + '/kabuk/#/tanisma');
-    await p.waitForSelector('#tn-yazi');
-    await p.fill('#tn-yazi', 'Felsefe çalışmak istiyorum, günde 30 dakika ayırabilirim');
+    await p.waitForSelector('#b-alan-metin');
+    await p.fill('#b-alan-metin', 'Felsefe çalışmak istiyorum, günde 30 dakika ayırabilirim');
     await p.keyboard.press('Enter');
     await p.waitForFunction(() => !!LIFEOS.Kabuk.ic.depo.getItem('lifeos.tanisma.taslak'));
     dene('tanışma: cevap taslakta, kayıt henüz yok', await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.tanisma.kayit') === null));
@@ -522,15 +524,15 @@ async function goruntu(p, ad) {
     dene('tanışma: onayla kayıt yazılır', await p.evaluate(() => { const k = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.tanisma.kayit')); return !!k && JSON.stringify(k).length > 20; }));
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('.karsila');
-    dene('tanışma: kayıt varken davet gösterilmez', (await p.locator('.tn-davet').count()) === 0);
+    dene('tanışma: kayıt varken davet gösterilmez', (await p.locator('[data-tn-davet]').count()) === 0);
 
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');
-    await p.waitForSelector('a.satir[href="#/alan/felsefe"]');
-    dene('yol: Felsefe ilerlemesiyle listelenir', /3\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/felsefe"]')));
+    await p.waitForSelector('a.b-satir[href="#/alan/felsefe"]');
+    dene('yol: Felsefe ilerlemesiyle listelenir', /3\/9 ders okundu/.test(await p.textContent('a.b-satir[href="#/alan/felsefe"]')));
     // her alanın içeriği ayrı yüklenir (iki aşama dosyası); denetlenen iki satır da dolana kadar beklenir
-    await p.waitForFunction(() => ['akademik', 'tarih'].every(a => /ders okundu/.test((document.querySelector('a.satir[href="#/alan/' + a + '"]') || {}).textContent || ''))).catch(() => {});
-    dene('yol: on alan ilerlemesiyle listelenir', (await p.locator('[data-arac="yol"] a.satir').count()) === 10 && /1\/368 ders okundu/.test(await p.textContent('a.satir[href="#/alan/akademik"]')) && /1\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/tarih"]')));
+    await p.waitForFunction(() => ['akademik', 'tarih'].every(a => /ders okundu/.test((document.querySelector('a.b-satir[href="#/alan/' + a + '"]') || {}).textContent || ''))).catch(() => {});
+    dene('yol: on alan ilerlemesiyle listelenir', (await p.locator('[data-arac="yol"] a.b-satir').count()) === 10 && /1\/368 ders okundu/.test(await p.textContent('a.b-satir[href="#/alan/akademik"]')) && /1\/9 ders okundu/.test(await p.textContent('a.b-satir[href="#/alan/tarih"]')));
     await p.keyboard.press('Control+k');
     await p.fill('#komut input', 'yeni not');
     await p.keyboard.press('Enter');
@@ -542,32 +544,32 @@ async function goruntu(p, ad) {
 
     // ---- Aşamalar: Felsefe'nin ikinci aşaması (eski birinci aşama kaydı yerinde kalır) ----
     await p.goto(T + '/kabuk/#/alan/felsefe');
-    await p.waitForSelector('.asamalar');
+    await p.waitForSelector('ul[aria-label="Aşamalar"]');
     const kayit1 = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'));
-    dene('aşama: alan sayfası iki aşamayı listeler, ikincisi kilitli ve nedenini söyler', (await p.locator('.asamalar .satir').count()) === 2 && (await p.locator('.asamalar .satir--kilitli').count()) === 1 && /önce Aşama 1 kapısı/.test(await p.textContent('.asamalar')), y2gercek ? 'gerçek asama-2.json' : 'yapay ikinci aşama');
-    dene('aşama: birinci aşamanın eski anahtarlı kaydı aynen okunuyor (3/9 ders, 1/3 kapı)', /3\/9 ders okundu · 1\/3/.test(await p.textContent('.govde')) && !!kayit1 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'))) === null);
+    dene('aşama: alan sayfası iki aşamayı listeler, ikincisi kilitli ve nedenini söyler', (await p.locator('ul[aria-label="Aşamalar"] .b-satir').count()) === 2 && (await p.locator('ul[aria-label="Aşamalar"] .b-satir--kilitli').count()) === 1 && /önce Aşama 1 kapısı/.test(await p.textContent('ul[aria-label="Aşamalar"]')), y2gercek ? 'gerçek asama-2.json' : 'yapay ikinci aşama');
+    dene('aşama: birinci aşamanın eski anahtarlı kaydı aynen okunuyor (3/9 ders, 1/3 kapı)', (await ilerleme(p)) === '3/9 · 1/3' && !!kayit1 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'))) === null);
     await p.goto(T + '/kabuk/#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
-    await p.waitForSelector('.yuva');
-    dene('aşama: kilitli aşamanın dersi açılmaz, neden aşama kilidi', /Bu aşama kilitli/.test(await p.textContent('.yuva')));
+    await p.waitForSelector('.b-bos');
+    dene('aşama: kilitli aşamanın dersi açılmaz, neden aşama kilidi', /Bu aşama kilitli/.test(await p.textContent('.b-bos')));
     await p.goto(T + '/kabuk/#/alan/felsefe/asama/2');
-    await p.waitForSelector('.govde .yuva');
-    dene('aşama: kilitli aşama sayfası listeyi ve kilidi gösterir', /Bu aşama kilitli/.test(await p.textContent('.govde .yuva')) && (await p.locator('.unitekutu').count()) === 0);
+    await p.waitForSelector('.govde .b-bos');
+    dene('aşama: kilitli aşama sayfası listeyi ve kilidi gösterir', /Bu aşama kilitli/.test(await p.textContent('.govde .b-bos')) && (await p.locator('.b-acilir').count()) === 0);
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'asama-kilitli-masaustu-koyu.png'), fullPage: true });
     for (const sahip of y.uniteler.slice(1).concat([y])) {                   // ikinci ve üçüncü ünite kapısı, sonra aşama kapısı
       await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + sahip.id);
       await p.waitForSelector('form.kapi');
       for (const q of sahip.kapi.sorular) await p.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
       await p.click('form.kapi button[type=submit]');
-      await p.waitForSelector('.kapisonuc--gecti');
+      await p.waitForSelector('[data-sonuc="gecti"]');
     }
-    dene('aşama: aşama kapısı geçilince «Sonraki aşama» ikinci aşamaya götürür', (await p.getAttribute('.kapisonuc .dugme--ana', 'href')) === '#/alan/felsefe/asama/2' && /Sonraki aşama/.test(await p.textContent('.kapisonuc .dugme--ana')));
-    await p.click('.kapisonuc .dugme--ana');
-    await p.waitForFunction(() => /Aşama 2/.test((document.querySelector('.govde .asama') || {}).textContent || ''));
-    dene('aşama: ikinci aşama açıldı; birincisi «geçildi», ikincisi şu an burada', /geçildi/.test(await p.textContent('.asamalar .satir >> nth=0')) && (await p.getAttribute('.asamalar .satir >> nth=1', 'aria-current')) === 'page'
-      && (await p.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
+    dene('aşama: aşama kapısı geçilince «Sonraki aşama» ikinci aşamaya götürür', (await p.getAttribute('[data-sonuc] .b-dugme--ana', 'href')) === '#/alan/felsefe/asama/2' && /Sonraki aşama/.test(await p.textContent('[data-sonuc] .b-dugme--ana')));
+    await p.click('[data-sonuc] .b-dugme--ana');
+    await p.waitForFunction(() => /Aşama 2/.test((document.querySelector('#asama-ad') || {}).textContent || ''));
+    dene('aşama: ikinci aşama açıldı; birincisi «geçildi», ikincisi şu an burada', /geçildi/.test(await p.textContent('ul[aria-label="Aşamalar"] .b-satir >> nth=0')) && (await p.getAttribute('ul[aria-label="Aşamalar"] .b-satir >> nth=1', 'aria-current')) === 'true'
+      && (await p.getAttribute('.b-eylemler .b-dugme--ana', 'href')) === '#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
     await goruntu(p, 'asama-liste');
     const kayit1b = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'));
-    await p.click('.eylemler .dugme--ana');
+    await p.click('.b-eylemler .b-dugme--ana');
     await p.waitForSelector('article.ders h1');
     await p.click('[data-ac="okudum"]');
     await p.waitForFunction(() => !!LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'));
@@ -599,13 +601,13 @@ async function goruntu(p, ad) {
     await mp.goto(T + '/kabuk/harita.js'); // aynı köken, kabuk henüz açılmadı
     await mp.evaluate(k => { localStorage.setItem('lifeos.yol.felsefe.1', k); localStorage.setItem('lifeos.tema.secim', 'light'); }, kayit1);
     await mp.goto(T + '/kabuk/#/alan/felsefe');
-    await mp.waitForSelector('.asamalar');
-    dene('taşıma: eski localStorage kaydı ilk açılışta okunur (3/9 ders, 1/3 kapı)', /3\/9 ders okundu · 1\/3/.test(await mp.textContent('.govde')));
+    await mp.waitForSelector('ul[aria-label="Aşamalar"]');
+    dene('taşıma: eski localStorage kaydı ilk açılışta okunur (3/9 ders, 1/3 kapı)', (await ilerleme(mp)) === '3/9 · 1/3');
     dene('taşıma: kayıt IndexedDB içinde aynen, localStorage içinden silindi; ayar yerinde ve uygulandı', (await idbOku(mp, 'lifeos.yol.felsefe.1')) === kayit1 && (await yerelKayit(mp)).length === 0
       && (await mp.evaluate(() => localStorage.getItem('lifeos.tema.secim') + ' ' + document.documentElement.getAttribute('data-theme'))) === 'light light');
     await mp.reload();
-    await mp.waitForSelector('.asamalar');
-    dene('taşıma: yenilemeden sonra kayıt IndexedDB içinden okunur', /3\/9 ders okundu · 1\/3/.test(await mp.textContent('.govde')));
+    await mp.waitForSelector('ul[aria-label="Aşamalar"]');
+    dene('taşıma: yenilemeden sonra kayıt IndexedDB içinden okunur', (await ilerleme(mp)) === '3/9 · 1/3');
     dene('taşıma: konsolda hata yok', mhata.length === 0, mhata.join(' | '));
     await mc.close();
 
@@ -623,9 +625,9 @@ async function goruntu(p, ad) {
     };
     await yp.goto(T + '/kabuk/#/alan/dil');
     await yp.waitForSelector('#yer-baslik');
-    dene('yerleştirme: boş alanda iki seçenek', (await yp.textContent('section.yuva .dugme--ana')) === 'Baştan başla' && (await yp.getAttribute('section.yuva a.dugme >> nth=1', 'href')) === '#/alan/dil/yer/1'
-      && (await yp.getAttribute('section.yuva .dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id);
-    await yp.click('section.yuva a.dugme >> nth=1');
+    dene('yerleştirme: boş alanda iki seçenek', (await yp.textContent('[aria-labelledby="yer-baslik"] .b-dugme--ana')) === 'Baştan başla' && (await yp.getAttribute('[aria-labelledby="yer-baslik"] a.b-dugme >> nth=1', 'href')) === '#/alan/dil/yer/1'
+      && (await yp.getAttribute('[aria-labelledby="yer-baslik"] .b-dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id);
+    await yp.click('[aria-labelledby="yer-baslik"] a.b-dugme >> nth=1');
     await yp.waitForSelector('form.kapi[data-yer="1"]');
     const n1 = await yp.locator('form.kapi[data-yer="1"] fieldset').count();
     dene('yerleştirme: aşama 1, 5–8 soru, yalnız ünite kapılarından, doğru cevap yok', n1 >= 5 && n1 <= 8 && (await yp.locator('.secenek--dogru').count()) === 0
@@ -633,32 +635,32 @@ async function goruntu(p, ad) {
     await goruntu(yp, 'yerlestirme-soru');
     await yerCevapla(true);
     await yp.waitForSelector('form.kapi[data-yer="2"]');
-    dene('yerleştirme: birinci aşama bilinince ikinciye geçer', /Aşama 2 \/ 2/.test(await yp.textContent('.govde .asama')));
+    dene('yerleştirme: birinci aşama bilinince ikinciye geçer', /Aşama 2 \/ 2/.test(await yp.textContent('#asama-ad')));
     await yerCevapla(false);
-    await yp.waitForSelector('.kapisonuc');
+    await yp.waitForSelector('[data-sonuc]');
     const ys = await yp.textContent('.govde');
-    dene('yerleştirme: sonuç «Aşama 2», tahmin etiketli; birinci atlandı, ikinci buradan', /Başlangıç: Aşama 2/.test(ys) && /tahmin/.test(await yp.textContent('.kapisonuc'))
-      && /atlandı/.test(await yp.textContent('.ozet li >> nth=0')) && /buradan/.test(await yp.textContent('.ozet li >> nth=1')), ys);
+    dene('yerleştirme: sonuç «Aşama 2», tahmin etiketli; birinci atlandı, ikinci buradan', /Başlangıç: Aşama 2/.test(ys) && /tahmin/.test(await yp.textContent('[data-sonuc]'))
+      && /atlandı/.test(await yp.textContent('[aria-label="Yerleştirme sonucu"] li >> nth=0')) && /buradan/.test(await yp.textContent('[aria-label="Yerleştirme sonucu"] li >> nth=1')), ys);
     dene('yerleştirme: Dil beceri alanı, üretim görevi bekliyor', /üretim görevi bekliyor/.test(ys));
     await goruntu(yp, 'yerlestirme-sonuc');
     const kd = await yp.evaluate(() => [1, 2].map(n => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.dil.' + n))));
     dene('yerleştirme: kayıt atlandı/tahmin, «geçildi» yazılmadı', kd[0].yerlestirme.sonuc === 'atlandi' && kd[0].yerlestirme.etiket === 'tahmin' && kd[0].asamalar['dil.1'].gecti === undefined
       && kd[1].yerlestirme.sonuc === 'burada', JSON.stringify(kd));
-    dene('yerleştirme: «Başla» ikinci aşamanın ilk dersine', (await yp.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[1].uniteler[0].dersler[0].id);
+    dene('yerleştirme: «Başla» ikinci aşamanın ilk dersine', (await yp.getAttribute('.b-eylemler .b-dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[1].uniteler[0].dersler[0].id);
     await yp.goto(T + '/kabuk/#/alan/dil/asama/1');
-    await yp.waitForSelector('.unitekutu');
-    dene('yerleştirme: birinci aşama listede «atlandı · tahmin», üniteleri atlandı ve açık', /atlandı · tahmin/.test(await yp.textContent('.asamalar .satir >> nth=0'))
-      && (await yp.locator('.unitekutu summary', { hasText: 'atlandı (tahmin)' }).count()) === dil[0].uniteler.length && (await yp.locator('#yer-baslik').count()) === 0
-      && (await yp.locator('.unitekutu >> nth=2').locator('a.satir').count()) >= 1);
+    await yp.waitForSelector('.b-acilir');
+    dene('yerleştirme: birinci aşama listede «atlandı · tahmin», üniteleri atlandı ve açık', /atlandı · tahmin/.test(await yp.textContent('ul[aria-label="Aşamalar"] .b-satir >> nth=0'))
+      && (await yp.locator('.b-acilir summary', { hasText: 'atlandı (tahmin)' }).count()) === dil[0].uniteler.length && (await yp.locator('#yer-baslik').count()) === 0
+      && (await yp.locator('.b-acilir >> nth=2').locator('a.b-ders, a.b-satir').count()) >= 1);
     await yp.goto(T + '/kabuk/#/alan/dil/yer/1');
-    await yp.waitForSelector('.yuva');
-    dene('yerleştirme: kaydı olan alanda yeniden yapılmaz', /yalnız hiç başlanmamış/.test(await yp.textContent('.yuva')));
+    await yp.waitForSelector('.b-bos');
+    dene('yerleştirme: kaydı olan alanda yeniden yapılmaz', /yalnız hiç başlanmamış/.test(await yp.textContent('.b-bos')));
     const du = dil[1].uniteler[0];
     await yp.goto(T + '/kabuk/#/alan/dil/kapi/' + du.id);
     await yp.waitForSelector('form.kapi');
     for (const q of du.kapi.sorular) await yp.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
     await yp.click('form.kapi button[type=submit]');
-    await yp.waitForSelector('.kapisonuc--gecti');
+    await yp.waitForSelector('[data-sonuc="gecti"]');
     const kd2 = await yp.evaluate(() => [1, 2].map(n => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.dil.' + n)).yerlestirme));
     dene('yerleştirme: ilk ölçülen ünite kapısı geçilince tahmin iki aşamada da silinir', kd2.every(x => x.etiket === undefined && x.olcum > 0), JSON.stringify(kd2));
     dene('yerleştirme: konsolda hata yok', yhata.length === 0, yhata.join(' | '));

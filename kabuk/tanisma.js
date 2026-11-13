@@ -311,34 +311,7 @@
   if (typeof document === 'undefined') return;
 
   /* ---------------- tarayıcı ---------------- */
-  var d = document, ic = function () { return Kabuk.ic; };
-  var STIL = '.tn__izgara{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start;margin-top:8px}' +
-    '@media (max-width:820px){.tn__izgara{grid-template-columns:minmax(0,1fr)}}' +
-    '.tn__akis{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}' +
-    '.tn__soru,.tn__ben{max-width:88%;padding:10px 14px;line-height:var(--satir)}' +
-    '.tn__soru{align-self:flex-start;background:var(--yuzey);box-shadow:inset 0 0 0 2px var(--cizgi)}' +
-    '.tn__ben{align-self:flex-end;background:var(--yuzey-2);display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}' +
-    '.tn__ben .dugme{min-height:36px;padding:0 6px;font-size:.8rem;color:var(--soluk)}' +
-    '.tn__simdi{display:flex;flex-direction:column;gap:12px;margin-top:16px}' +
-    '.tn__simdi .tn__soru{max-width:100%;font-size:1.08rem;box-shadow:inset 4px 0 0 var(--vurgu),inset 0 0 0 2px var(--cizgi)}' +
-    '.tn__secim{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;border:0}' +
-    '.tn__cip{font:inherit;color:var(--yazi);background:var(--bg);border:0;min-height:44px;padding:4px 14px;cursor:pointer;box-shadow:inset 0 0 0 2px var(--cizgi)}' +
-    '.tn__cip:hover{box-shadow:inset 0 0 0 2px var(--cizgi-guclu)}.tn__cip[aria-pressed="true"]{background:var(--yuzey);box-shadow:inset 0 0 0 3px var(--vurgu)}' +
-    '.tn__panel{position:sticky;top:16px;display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--yuzey);box-shadow:inset 0 0 0 2px var(--cizgi)}' +
-    '@media (max-width:820px){.tn__panel{position:static}}' +
-    '.tn__panel h2{font-size:.9rem;color:var(--soluk);font-weight:400}' +
-    '.tn__olgular{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}' +
-    '.tn__olgu{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;padding:8px 0;border-top:2px solid var(--cizgi)}' +
-    '.tn__olgu:first-child{border-top:0}.tn__konu{font-size:.78rem;color:var(--soluk)}.tn__metin{overflow-wrap:anywhere}' +
-    '.tn__olgu .pul{justify-self:start;margin-top:2px}.tn__olgu--not .tn__metin{font-style:italic}' +
-    '.tn__dug{grid-column:2;grid-row:1 / span 3;display:flex;align-items:flex-start}.tn__dug .dugme{min-height:44px;padding:0 8px;font-size:.85rem}' +
-    '.tn__duzelt{grid-column:1 / -1;display:flex;flex-direction:column;gap:6px}' +
-    '.tn__oneri{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}' +
-    '.tn__oneri li{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 14px;background:var(--yuzey);box-shadow:inset 0 0 0 2px var(--cizgi)}' +
-    '.tn__oneri li.tn__ilk{box-shadow:inset 0 0 0 3px var(--altin)}.tn__oneri b{font-family:var(--piksel)}.tn__oneri span.soluk{flex:1 1 220px}' +
-    '.tn__yeni{animation:tn-gir calc(var(--sure) * 2) ease-out both}@keyframes tn-gir{from{opacity:0;transform:translateY(4px)}}' +
-    '.tn-davet{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;font-size:.9rem;color:var(--soluk)}';
-  function stil() { if (!d.getElementById('tanisma-stil')) { var s = d.createElement('style'); s.id = 'tanisma-stil'; s.textContent = STIL; d.head.appendChild(s); } }
+  var d = document, ic = function () { return Kabuk.ic; }, B = Kabuk.Bilesen; // biçim kabuk.css «tanışma» bölümünde ve kataloğun taşlarında
   var degistir = null, duzenlenen = null, odakla = null; // yeniden cevaplanan soru, düzeltilen satır, çizimden sonra odaklanacak seçici
 
   function cevapYazisi(s, c, k) {
@@ -350,60 +323,55 @@
     return '<form class="tn__simdi tn__yeni" data-tn-soru="' + k(id) + '" novalidate>' +
       '<p class="tn__soru" id="tn-soru-metni" aria-live="polite">' + k(s.metin) + '</p>' +
       '<fieldset class="tn__secim"><legend class="gizli">Hızlı seçenekler' + (s.coklu ? ', birden çok seçilebilir' : ', biri seçilir') + '</legend>' +
-      s.secenek.map(function (x) {
-        return '<button type="button" class="tn__cip" data-tn-cip="' + k(x[0]) + '" aria-pressed="' + (basili.indexOf(x[0]) >= 0) + '">' + k(x[1]) + '</button>';
-      }).join('') + '</fieldset>' +
-      '<label class="gizli" for="tn-yazi">Kendi sözlerinle cevap</label>' +
-      '<textarea id="tn-yazi" class="giris" name="metin" rows="3" maxlength="1000" aria-describedby="tn-soru-metni" placeholder="' + k(s.ipucu) + '">' + k(c && !c.atlandi ? c.metin : '') + '</textarea>' +
-      '<div class="eylemler"><button type="submit" class="dugme dugme--ana">Gönder</button><button type="button" class="dugme dugme--sade" data-tn-ac="atla">Atla</button>' +
-      (degistir ? '<button type="button" class="dugme dugme--sade" data-tn-ac="vazgec-soru">Vazgeç</button>' : '') +
-      '<span class="soluk">Enter gönderir, Shift Enter yeni satır.</span></div></form>';
+      B.eylemler(s.secenek.map(function (x) { return { metin: x[1], basili: basili.indexOf(x[0]) >= 0, veri: { 'tn-cip': x[0] } }; })) + '</fieldset>' +
+      B.alan({ ad: 'Kendi sözlerinle cevap', isim: 'metin', tur: 'cok', deger: c && !c.atlandi ? c.metin : '', ipucu: s.ipucu, tarif: 'tn-soru-metni', enCok: 1000 }) +
+      B.eylemler([{ metin: 'Gönder', tur: 'ana', tip: 'submit' }, { metin: 'Atla', tur: 'sade', veri: { 'tn-ac': 'atla' } },
+        degistir ? { metin: 'Vazgeç', tur: 'sade', veri: { 'tn-ac': 'vazgec-soru' } } : null, { yazi: 'Enter gönderir, Shift Enter yeni satır.' }]) + '</form>';
   }
   function olguSatiri(o, k, onayli) {
-    var duz = !onayli && duzenlenen === o.id;
+    var duz = !onayli && duzenlenen === o.id, ozet = o.konu + ', ' + o.metin;
     return '<li class="tn__olgu' + (o.tur === 'not' ? ' tn__olgu--not' : '') + '"><span class="tn__konu">' + k(o.konu) + '</span>' +
-      (duz ? '<form class="tn__duzelt" data-tn-olgu="' + k(o.id) + '" novalidate><label class="gizli" for="tn-duzelt">Düzelt: ' + k(o.konu) + '</label>' +
-        '<input id="tn-duzelt" class="giris" name="metin" maxlength="1000" value="' + k(o.metin) + '" autocomplete="off">' +
-        '<div class="eylemler"><button type="submit" class="dugme">Kaydet</button><button type="button" class="dugme dugme--sade" data-tn-ac="vazgec-duzelt">Vazgeç</button></div></form>'
-        : '<span class="tn__metin">' + (o.tur === 'not' ? '«' + k(o.metin) + '»' : k(o.metin)) + '</span><span class="pul">' + k(TUR_AD[o.tur]) + '</span>' +
-          '<span class="tn__dug">' + (onayli ? '' : '<button type="button" class="dugme dugme--sade" data-tn-ac="duzelt" data-id="' + k(o.id) + '" aria-label="Düzelt: ' + k(o.konu + ', ' + o.metin) + '">Düzelt</button>') +
-          '<button type="button" class="dugme dugme--sade" data-tn-ac="' + (onayli ? 'geri-al' : 'sil') + '" data-id="' + k(o.id) + '" aria-label="' + (onayli ? 'Geri al: ' : 'Sil: ') + k(o.konu + ', ' + o.metin) + '">' + (onayli ? 'Geri al' : 'Sil') + '</button></span>') + '</li>';
+      (duz ? '<form class="tn__duzelt" data-tn-olgu="' + k(o.id) + '" novalidate>' + B.alan({ ad: 'Düzelt: ' + o.konu, isim: 'duzelt', tur: 'metin', deger: o.metin, enCok: 1000 }) +
+        B.eylemler([{ metin: 'Kaydet', tip: 'submit' }, { metin: 'Vazgeç', tur: 'sade', veri: { 'tn-ac': 'vazgec-duzelt' } }]) + '</form>'
+        // metin kısaltılmaz (King'in anladığı tam okunmalı), bu yüzden satır taşı değil
+        : '<span class="tn__metin">' + (o.tur === 'not' ? '«' + k(o.metin) + '»' : k(o.metin)) + '</span><span>' + B.pul(TUR_AD[o.tur]) + '</span>' +
+          '<span class="tn__dug">' + B.eylemler([onayli ? null : { metin: 'Düzelt', tur: 'sade', etiket: 'Düzelt: ' + ozet, veri: { 'tn-ac': 'duzelt', id: o.id } },
+            { metin: onayli ? 'Geri al' : 'Sil', tur: 'sade', etiket: (onayli ? 'Geri al: ' : 'Sil: ') + ozet, veri: { 'tn-ac': onayli ? 'geri-al' : 'sil', id: o.id } }]) + '</span>') + '</li>';
   }
   function sayfa(yer) {
-    stil();
     var I = ic(), k = I.kac, t = taslakOku(I.depo), kayit = kayitOku(I.depo), sira = siradaki(t);
     var simdi = degistir && sorular(t).indexOf(degistir) >= 0 ? degistir : sira, temiz = kayit && kayit.zaman >= t.guncel && !simdi;
     var gecmis = sorular(t).filter(function (id) { return t.cevaplar[id] && id !== simdi; }).map(function (id) {
       var s = soru(id, t);
       return '<li class="tn__soru">' + k(s.metin) + '</li><li class="tn__ben">' + cevapYazisi(s, t.cevaplar[id], k) +
-        '<button type="button" class="dugme dugme--sade" data-tn-ac="degistir" data-soru="' + k(id) + '" aria-label="Cevabı değiştir: ' + k(s.metin) + '">Değiştir</button></li>';
+        B.dugme({ metin: 'Değiştir', tur: 'sade', etiket: 'Cevabı değiştir: ' + s.metin, veri: { 'tn-ac': 'degistir', soru: id } }) + '</li>';
     }).join('');
     var olgular = temiz ? kayit.olgular : anla(t), oner = temiz ? kayit.oneriler : oneriler(t), sag;
-    var oneriHtml = oner.length ? '<h2>Başlangıç önerisi</h2><ul class="tn__oneri">' + oner.map(function (o) {
-      return '<li' + (o.ilk ? ' class="tn__ilk"' : '') + '><b>' + k(o.ad) + (o.ilk ? ' · önce bu' : '') + '</b><span class="soluk">' + k(o.metin) + '</span>' +
-        (temiz && o.baslangic !== 'eski' ? (o.onay ? '<span class="pul pul--pilot">başladın</span>' : '') + '<button type="button" class="dugme' + (o.ilk ? ' dugme--ana' : '') + '" data-tn-ac="basla" data-alan="' + k(o.alan) + '">Buradan başla</button>' : '') + '</li>';
-    }).join('') + '</ul>' : '';
+    var oneriHtml = oner.length ? B.bolum({ baslik: 'Başlangıç önerisi', govde: oner.map(function (o) {
+      return B.panel({ tur: o.ilk ? 'basari' : 'normal', govde: ['<p><b>' + k(o.ad) + (o.ilk ? ' · önce bu' : '') + '</b></p>', '<p class="soluk">' + k(o.metin) + '</p>',
+        temiz && o.baslangic !== 'eski' ? B.eylemler([{ metin: 'Buradan başla', tur: o.ilk ? 'ana' : 'ikincil', veri: { 'tn-ac': 'basla', alan: o.alan } }, o.onay ? { yazi: 'başladın' } : null]) : ''] });
+    }) }) : '';
     if (simdi) sag = soruFormu(t, simdi, k);
-    else if (temiz) sag = '<section class="tn__simdi tn__yeni" aria-labelledby="tn-bitti"><div class="kapisonuc kapisonuc--gecti" role="status" tabindex="-1" id="tn-bitti"><b>Kaydedildi.</b> ' +
-      kayit.olgular.length + ' satır. Listedeki her satırı tek tek geri alabilirsin.</div>' + oneriHtml +
-      '<div class="eylemler">' + (sira || t.bitir && siradaki(Object.assign({}, t, { bitir: false })) ? '<button type="button" class="dugme" data-tn-ac="devam">Kalan sorulara devam et</button>' : '') +
-      '<button type="button" class="dugme dugme--sade" data-tn-ac="hepsini-geri-al">Hepsini geri al</button></div></section>';
+    else if (temiz) sag = '<section class="tn__simdi tn__yeni" aria-labelledby="tn-bitti">' + B.panel({ tur: 'basari', durum: true, id: 'tn-bitti', govde: '<p><b>Kaydedildi.</b> ' +
+      kayit.olgular.length + ' satır. Listedeki her satırı tek tek geri alabilirsin.</p>' }) + oneriHtml +
+      B.eylemler([sira || t.bitir && siradaki(Object.assign({}, t, { bitir: false })) ? { metin: 'Kalan sorulara devam et', veri: { 'tn-ac': 'devam' } } : null,
+        { metin: 'Hepsini geri al', tur: 'sade', veri: { 'tn-ac': 'hepsini-geri-al' } }]) + '</section>';
     else sag = '<section class="tn__simdi tn__yeni" aria-labelledby="tn-onay"><p class="tn__soru" id="tn-onay" tabindex="-1">' +
       (olgular.length ? 'Anladıklarımı kaydedeyim mi? Kaydetmeden önce «King\'in anladığı» listesindeki her satırı düzeltebilir ya da silebilirsin.' : 'Kaydedilecek bir şey yok. İstersen bir cevabı değiştir.') + '</p>' + oneriHtml +
-      '<div class="eylemler">' + (olgular.length ? '<button type="button" class="dugme dugme--ana" data-tn-ac="onayla">Onayla ve kaydet</button>' : '') +
-      (siradaki(Object.assign({}, t, { bitir: false })) ? '<button type="button" class="dugme dugme--sade" data-tn-ac="devam">Sorulara devam et</button>' : '') + '</div>' +
+      B.eylemler([olgular.length ? { metin: 'Onayla ve kaydet', tur: 'ana', veri: { 'tn-ac': 'onayla' } } : null,
+        siradaki(Object.assign({}, t, { bitir: false })) ? { metin: 'Sorulara devam et', tur: 'sade', veri: { 'tn-ac': 'devam' } } : null]) +
       '<p class="soluk">Onaylamadan hiçbir şey kaydedilmez. Boy, doğum yılı ve cinsiyet Ayarlar › Beden\'e yazılır.</p></section>';
-    var panel = '<aside class="tn__panel" aria-labelledby="tn-panel"><h2 id="tn-panel">King\'in anladığı · ' + (temiz ? 'kaydedildi, geri alabilirsin' : 'düzeltebilirsin') + '</h2>' +
-      (olgular.length ? '<ul class="tn__olgular" aria-live="polite">' + olgular.map(function (o) { return olguSatiri(o, k, temiz); }).join('') + '</ul>'
-        : '<p class="soluk">Cevap verdikçe burada görünür. Yalnız seçtiklerin ve açıkça yazdığın sayılar anlaşılır; geri kalanı kendi sözün olarak aynen durur.</p>') +
-      (!temiz && simdi && olgular.length ? '<button type="button" class="dugme dugme--sade" data-tn-ac="bitir">Şimdilik bu kadar, kaydetmeye geç</button>' : '') + '</aside>';
-    return I.ust(I.kirinti(yer)) + '<div class="govde govde--genis" data-arac="tanisma"><h1>Tanışma</h1>' +
-      '<p class="soluk">Kendi sözlerinle anlat. Anladıklarım ayrı bir listede görünür; düzeltebilir, silebilirsin. Sen onaylamadan hiçbir şey kaydedilmez.</p>' +
+    var panel = '<aside class="tn__panel">' + B.panel({ baslik: 'King\'in anladığı · ' + (temiz ? 'kaydedildi, geri alabilirsin' : 'düzeltebilirsin'), id: 'tn-panel', govde: [
+      olgular.length ? '<ul class="tn__olgular" aria-live="polite">' + olgular.map(function (o) { return olguSatiri(o, k, temiz); }).join('') + '</ul>'
+        : '<p class="soluk">Cevap verdikçe burada görünür. Yalnız seçtiklerin ve açıkça yazdığın sayılar anlaşılır; geri kalanı kendi sözün olarak aynen durur.</p>',
+      B.eylemler([!temiz && simdi && olgular.length ? { metin: 'Şimdilik bu kadar, kaydetmeye geç', tur: 'sade', veri: { 'tn-ac': 'bitir' } } : null])] }) + '</aside>';
+    return I.ust(I.kirinti(yer)) + '<div class="govde govde--genis" data-arac="tanisma">' +
+      B.baslik({ metin: 'Tanışma', alt: 'Kendi sözlerinle anlat. Anladıklarım ayrı bir listede görünür; düzeltebilir, silebilirsin. Sen onaylamadan hiçbir şey kaydedilmez.' }) +
       '<div class="tn__izgara"><section class="tn__sohbet" aria-label="Sohbet">' + (gecmis ? '<ol class="tn__akis">' + gecmis + '</ol>' : '') + sag + '</section>' + panel + '</div></div>';
   }
   function ciz(secici) {
     ic().rota();
-    var el = d.querySelector(secici || '#tn-yazi') || d.querySelector('#tn-onay, #tn-bitti');
+    var el = d.querySelector(secici || '#b-alan-metin') || d.querySelector('#tn-onay, #tn-bitti');
     if (el) el.focus({ preventScroll: !!secici });
   }
   function kaydet(t) { taslakYaz(ic().depo, t); }
@@ -419,9 +387,8 @@
     var I = ic(); if (!I) return '';
     if (kayitOku(I.depo) || I.depo.getItem(DAVET) === 'kapali') return '';
     var t = taslakOku(I.depo), yarim = Object.keys(t.cevaplar).length > 0;
-    return '<p class="tn-davet" role="note"><span>' + (yarim ? 'Tanışmayı yarıda bıraktın.' : 'Seni biraz tanıyayım mı? Birkaç kısa soru.') + '</span>' +
-      '<a class="dugme dugme--sade" href="#/tanisma">' + (yarim ? 'Devam et' : 'Tanışalım') + '</a>' +
-      '<button type="button" class="dugme dugme--sade" data-tn-ac="davet-kapat">Sonra</button></p>';
+    return B.uyari({ tur: 'bilgi', veri: { 'tn-davet': '' }, metin: yarim ? 'Tanışmayı yarıda bıraktın.' : 'Seni biraz tanıyayım mı? Birkaç kısa soru.',
+      eylem: [{ metin: yarim ? 'Devam et' : 'Tanışalım', tur: 'sade', href: '#/tanisma' }, { metin: 'Sonra', tur: 'sade', veri: { 'tn-ac': 'davet-kapat' } }] });
   };
   Kabuk.ek = Kabuk.ek || {};
   Kabuk.ek.tanisma = sayfa;
@@ -432,12 +399,12 @@
     if (f.matches('form[data-tn-olgu]')) {
       e.preventDefault();
       var I = ic(), id = f.getAttribute('data-tn-olgu');
-      kaydet(duzelt(taslakOku(I.depo), id, f.elements.metin.value, Date.now()));
+      kaydet(duzelt(taslakOku(I.depo), id, f.elements.duzelt.value, Date.now()));
       duzenlenen = null; ciz('[data-tn-ac="duzelt"][data-id="' + id + '"]');
     }
   });
   d.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'tn-yazi') { e.preventDefault(); gonder(e.target.form); }
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'b-alan-metin') { e.preventDefault(); gonder(e.target.form); }
   });
   d.addEventListener('click', function (e) {
     var cip = e.target.closest('[data-tn-cip]');
@@ -450,11 +417,11 @@
     var b = e.target.closest('[data-tn-ac]');
     if (!b) return;
     var I = ic(), ne = b.getAttribute('data-tn-ac'), t = taslakOku(I.depo), simdi = Date.now(), id = b.getAttribute('data-id');
-    if (ne === 'davet-kapat') { I.depo.setItem(DAVET, 'kapali'); var p = b.closest('.tn-davet'); if (p) p.remove(); return; }
+    if (ne === 'davet-kapat') { I.depo.setItem(DAVET, 'kapali'); var p = b.closest('[data-tn-davet]'); if (p) p.remove(); return; }
     if (ne === 'atla') { var fs = b.closest('form'); try { kaydet(atla(t, fs.getAttribute('data-tn-soru'), simdi)); } catch (x) { /* akışta değil */ } degistir = null; return ciz(); }
     if (ne === 'degistir') { degistir = b.getAttribute('data-soru'); return ciz(); }
     if (ne === 'vazgec-soru') { degistir = null; return ciz(); }
-    if (ne === 'duzelt') { duzenlenen = id; return ciz('#tn-duzelt'); }
+    if (ne === 'duzelt') { duzenlenen = id; return ciz('#b-alan-duzelt'); }
     if (ne === 'vazgec-duzelt') { var eskiId = duzenlenen; duzenlenen = null; return ciz('[data-tn-ac="duzelt"][data-id="' + eskiId + '"]'); }
     if (ne === 'sil') { kaydet(sil(t, id, simdi)); return ciz(); }
     if (ne === 'bitir') { t.bitir = true; kaydet(t); return ciz(); }

@@ -140,7 +140,7 @@
   if (typeof document === 'undefined') return;
 
   /* ---------------- tarayıcı ---------------- */
-  var d = document, Soru = L.Motor && L.Motor.Soru;
+  var d = document, Soru = L.Motor && L.Motor.Soru, B = Kabuk.Bilesen;
   var DURUM = 'lifeos.soru.deneme', BITEN = 'lifeos.soru.denemeler', GECMIS = 'lifeos.soru.gecmis';
   var ic = function () { return Kabuk.ic; };
   function oku(a, bos) {
@@ -163,12 +163,12 @@
   }
   function sayfa(yer) {
     var I = ic(), k = I.kac, bas = I.ust(kirinti()) + '<div class="govde" data-deneme-sayfa>';
-    if (!Soru) return bas + '<h1>Süreli deneme</h1><div class="yuva" role="note"><b>Soru aracı yüklenemedi.</b><span>Sayfayı yenile; sürerse LifeOS sunucusundan aç.</span></div></div>';
+    if (!Soru) return bas + B.baslik({ metin: 'Süreli deneme' }) + B.bos({ baslik: 'Soru aracı yüklenemedi.', metin: 'Sayfayı yenile; sürerse LifeOS sunucusundan aç.' }) + '</div>';
     if (son) { var h = sonucHtml(son); son = null; return bas + h + '</div>'; }
     var dr = durumOku();
     if (dr) {
       var y = asamaY(dr.alan, dr.asama);
-      if (!y) return bas + '<h1>Süreli deneme</h1>' + (I.al(dr.alan) ? '<div class="yuva" role="note"><b>Bu denemenin soruları bu açılışta yüklenemedi.</b><span>LifeOS sunucusundan aç.</span></div>' : '<p class="soluk" aria-busy="true">Yükleniyor…</p>') + '</div>';
+      if (!y) return bas + B.baslik({ metin: 'Süreli deneme' }) + (I.al(dr.alan) ? B.bos({ baslik: 'Bu denemenin soruları bu açılışta yüklenemedi.', metin: 'LifeOS sunucusundan aç.' }) : '<p class="soluk" aria-busy="true">Yükleniyor…</p>') + '</div>';
       var sz = sozluk(y), simdi = Date.now();
       if (kalan(Soru, dr, simdi) === 0) { sonlandir(dr, y, simdi); var h2 = sonucHtml(son); son = null; return bas + h2 + '</div>'; }
       saatKur();
@@ -179,31 +179,30 @@
 
   function baslangicHtml() {
     var I = ic(), k = I.kac, id = I.etkin(), f = I.al(id), yer = I.tasinanlar().filter(function (a) { return a.id === id; })[0];
-    var h = '<h1>Süreli deneme</h1>';
+    var h = B.baslik({ metin: 'Süreli deneme' });
     if (!f) { I.alanYukle(id).then(function () { if (d.querySelector('[data-deneme-sayfa]')) I.rota(); }); return h + '<p class="soluk" aria-busy="true">Yükleniyor…</p>'; }
-    if (!f.y) return h + '<div class="yuva" role="note"><b>Sorular bu açılışta yüklenemedi.</b><span>Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.</span></div>';
+    if (!f.y) return h + B.bos({ baslik: 'Sorular bu açılışta yüklenemedi.', metin: 'Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.' });
     var y = f.y, kayit = I.kayitOku(id), simdi = Date.now(), r = denemeKur(Soru, I.Yol, y, kayit, yer.ad, simdi, Math.random);
     h += '<p class="soluk">' + k(yer.ad) + ' · ' + k(y.veri.ad) + '. Açık ünitelerden süreli bir deneme: her ünite bir test, süre sınav ölçeğinde. ' +
       'Cevaplar bitirene kadar değişebilir; doğrular sonda görünür. Alanı değiştirmek için o alanın sayfasını aç.</p>';
     if (r.ok) {
       var o = r.durum.oturum, n = o.testler.reduce(function (a, t) { return a + t.q; }, 0);
-      h += '<ul class="ozet">' + o.testler.map(function (t) { return '<li><span>' + k(t.ad) + '</span><b>' + t.q + ' soru</b><span></span></li>'; }).join('') +
-        '<li><span>Süre</span><b>' + o.sure + ' dk</b><span class="pul">hesaplandı</span></li></ul>' +
-        '<div class="eylemler"><button type="button" class="dugme dugme--ana" data-deneme="basla">' + n + ' soruluk denemeyi başlat</button></div>';
-    } else h += '<div class="yuva" role="note"><b>' + k(r.neden) + '</b></div>';
+      h += B.liste({ ad: 'Deneme testleri', ogeler: o.testler.map(function (t) { return { ad: t.ad, not: t.q + ' soru' }; }).concat([{ ad: 'Süre', not: o.sure + ' dk', pul: 'hesaplandı' }]) }) +
+        B.eylemler([{ metin: n + ' soruluk denemeyi başlat', tur: 'ana', veri: { deneme: 'basla' } }]);
+    } else h += B.bos({ baslik: r.neden });
     if (provaVar(y)) {
-      h += '<section><h2>Sınav provası</h2><p class="soluk">TYT ya da AYT dağılımında, süreli, cevap anında kilitlenir; sonuç sonda. Açık ünitelerin sorularından kurulur.</p><div class="eylemler">' +
-        [['TYT', 20], ['TYT', 40], ['AYT', 20], ['AYT', 40]].map(function (x) {
+      h += B.bolum({ baslik: 'Sınav provası', govde: ['<p class="soluk">TYT ya da AYT dağılımında, süreli, cevap anında kilitlenir; sonuç sonda. Açık ünitelerin sorularından kurulur.</p>',
+        B.eylemler([].concat.apply([], [['TYT', 20], ['TYT', 40], ['AYT', 20], ['AYT', 40]].map(function (x) {
           var p = provaKur(Soru, I.Yol, y, kayit, x[0], x[1], simdi, Math.random), et = x[0] + ' · ' + x[1] + ' soru';
-          return p.ok ? '<button type="button" class="dugme" data-deneme="prova" data-sinav="' + x[0] + '" data-boy="' + x[1] + '">' + et + ' · ' + p.durum.oturum.sureDk + ' dk</button>'
-            : '<span class="dugme dugme--sade" aria-disabled="true">' + et + ' <span class="soluk">· açık soru yetmiyor (' + p.n + ')</span></span>';
-        }).join('') + '</div></section>';
+          return p.ok ? [{ metin: et + ' · ' + p.durum.oturum.sureDk + ' dk', veri: { deneme: 'prova', sinav: x[0], boy: x[1] } }]
+            : [{ metin: et, tur: 'sade', kapali: true, etiket: et + ', açık soru yetmiyor' }, { yazi: 'açık soru yetmiyor (' + p.n + ')' }];
+        })))] });
     }
     var gecmis = oku(BITEN, []).slice(-5).reverse();
-    if (gecmis.length) h += '<section><h2>Son denemeler</h2><ul class="ozet">' + gecmis.map(function (g) {
+    if (gecmis.length) h += B.bolum({ baslik: 'Son denemeler', govde: B.liste({ ad: 'Son denemeler', ogeler: gecmis.map(function (g) {
       var an = Soru.denemeAnalizi(g.deneme);
-      return '<li><span>' + k(g.alanAd) + ' · ' + tarih(g.bitti) + '</span><b>' + virgul(an.net.deger) + ' net</b><span class="pul">' + an.net.etiket + '</span></li>';
-    }).join('') + '</ul></section>';
+      return { ad: g.alanAd + ' · ' + tarih(g.bitti), not: virgul(an.net.deger) + ' net', pul: an.net.etiket };
+    }) }) });
     return h;
   }
 
@@ -219,15 +218,15 @@
         return '<button type="button" class="deneme__nobt' + (cevabi(dr, j) ? ' deneme__nobt--cevapli' : '') + '" data-deneme="git" data-i="' + j + '"' + (j === i ? ' aria-current="step"' : '') +
           ' aria-label="Soru ' + (j + 1) + (cevabi(dr, j) ? ', cevaplandı' : '') + '">' + (j + 1) + '</button>';
       }).join('') + '</nav>' +
-      (!q ? '<div class="yuva" role="note"><b>Bu soru artık içerikte yok; boş sayılır.</b></div>'
+      (!q ? B.bos({ baslik: 'Bu soru artık içerikte yok; boş sayılır.' })
         : '<fieldset class="soru" tabindex="-1" data-deneme-soru="' + k(x.id) + '"><legend>' + k(q.soru) + '</legend><p class="soluk">Soru ' + (i + 1) + ' / ' + l.length + ' · ' + k(q.konu) + '</p><div class="secenekler">' +
           q.sec.map(function (m, j) {
             var hf = HARF[j], kilit = prova && !!h;
             return '<button type="button" class="secenek" data-deneme="cevap" data-h="' + hf + '" aria-pressed="' + (h === hf) + '"' + (kilit ? ' disabled' : '') + '><b>' + hf + '</b><span>' + k(m) + '</span></button>';
           }).join('') + '</div>' + (prova && h ? '<p class="soluk" role="status">Cevabın kaydedildi; provada değişmez. Doğrusu sonda görünür.</p>' : '') + '</fieldset>') +
-      '<div class="eylemler">' + (i > 0 ? '<button type="button" class="dugme" data-deneme="git" data-yon="-1" data-i="' + (i - 1) + '">Önceki</button>' : '') +
-      (i < l.length - 1 ? '<button type="button" class="dugme dugme--ana" data-deneme="git" data-yon="1" data-i="' + (i + 1) + '">Sonraki</button>' : '') +
-      '<button type="button" class="dugme' + (i === l.length - 1 ? ' dugme--ana' : ' dugme--sade') + '" data-deneme="bitir">Bitir</button></div>' +
+      B.eylemler([i > 0 ? { metin: 'Önceki', veri: { deneme: 'git', yon: -1, i: i - 1 } } : null,
+        i < l.length - 1 ? { metin: 'Sonraki', tur: 'ana', veri: { deneme: 'git', yon: 1, i: i + 1 } } : null,
+        { metin: 'Bitir', tur: i === l.length - 1 ? 'ana' : 'sade', veri: { deneme: 'bitir' } }]) +
       '<p class="soluk">' + (prova ? 'Provada ilk cevap kilitlenir.' : 'Cevabını bitirene kadar değiştirebilirsin.') + ' Süre dolunca deneme kendiliğinden biter; sekmeyi kapatsan da süre akar. Klavye: A–E seçer, ← → gezer.</p>';
   }
 
@@ -235,31 +234,34 @@
     var k = ic().kac, alanAkademik = s.akademik, h;
     if (s.mod === 'prova') {
       var p = s.ozet.prova, r = s.ozet.sayilar;
-      h = '<h1>' + k(p.sinav) + ' provası bitti</h1><div class="kapisonuc" tabindex="-1" role="status"><b>' + virgul(p.net.deger) + ' net</b> <span class="soluk">' + p.net.etiket + '</span>' +
-        '<p>' + r.dogru + ' doğru, ' + r.yanlis + ' yanlış, ' + r.bos + ' boş <span class="soluk">(' + s.ozet.etiket + ')</span> · ' +
-        (s.sureDoldu ? 'süre doldu (' + p.sureDk + ' dk)' : 'kullanılan ' + p.kullanilanDk.deger + ' dk / ' + p.sureDk + ' dk') + ' <span class="soluk">(' + p.kullanilanDk.etiket + ')</span></p></div>' +
-        '<section><h2>Derslere göre</h2><ul class="ozet">' + p.dersler.map(function (x) {
-          return '<li><span>' + k(dersAdi(x.ders)) + '<br><small class="soluk">' + x.dogru + ' doğru · ' + x.yanlis + ' yanlış · ' + x.bos + ' boş (' + s.ozet.etiket + ')</small></span><b>' + virgul(x.net.deger) + ' net</b><span class="pul">' + x.net.etiket + '</span></li>';
-        }).join('') + '</ul></section>';
+      h = B.baslik({ metin: p.sinav + ' provası bitti' }) + B.panel({ tur: 'guclu', durum: true, veri: { sonuc: 'bitti' }, govde: [
+        '<p><b>' + virgul(p.net.deger) + ' net</b> <span class="soluk">' + k(p.net.etiket) + '</span></p>',
+        '<p>' + r.dogru + ' doğru, ' + r.yanlis + ' yanlış, ' + r.bos + ' boş <span class="soluk">(' + k(s.ozet.etiket) + ')</span> · ' +
+        (s.sureDoldu ? 'süre doldu (' + p.sureDk + ' dk)' : 'kullanılan ' + p.kullanilanDk.deger + ' dk / ' + p.sureDk + ' dk') + ' <span class="soluk">(' + k(p.kullanilanDk.etiket) + ')</span></p>'] }) +
+        B.bolum({ baslik: 'Derslere göre', govde: B.liste({ ad: 'Derslere göre', ogeler: p.dersler.map(function (x) {
+          return { ad: dersAdi(x.ders) + ' · ' + virgul(x.net.deger) + ' net', pul: x.net.etiket, not: x.dogru + ' doğru · ' + x.yanlis + ' yanlış · ' + x.bos + ' boş (' + s.ozet.etiket + ')' };
+        }) }) });
     } else {
       var an = s.analiz, top = { d: 0, y: 0 };
       an.testler.forEach(function (t) { top.d += t.dogru.deger; top.y += t.yanlis.deger; });
-      h = '<h1>Deneme bitti</h1><div class="kapisonuc" tabindex="-1" role="status"><b>' + virgul(an.net.deger) + ' net</b> <span class="soluk">' + an.net.etiket + '</span>' +
+      h = B.baslik({ metin: 'Deneme bitti' }) + B.panel({ tur: 'guclu', durum: true, veri: { sonuc: 'bitti' }, govde: [
+        '<p><b>' + virgul(an.net.deger) + ' net</b> <span class="soluk">' + k(an.net.etiket) + '</span></p>',
         '<p>' + top.d + ' doğru, ' + top.y + ' yanlış <span class="soluk">(ölçüldü)</span> · ' +
-        (s.sureDoldu ? 'süre doldu (' + s.deneme.sure + ' dk)' : 'süre ' + dakikaYaz(s.toplamSn) + ' / ' + s.deneme.sure + ' dk') + ' <span class="soluk">(ölçüldü)</span></p></div>' +
-        '<section><h2>Testlere göre</h2><ul class="ozet">' + an.testler.map(function (t) {
-          return '<li><span>' + k(t.ad) + '<br><small class="soluk">' + t.dogru.deger + ' doğru · ' + t.yanlis.deger + ' yanlış (' + t.dogru.etiket + ') · ' +
-            (t.bos.deger == null ? 'boş: ' + t.bos.etiket : t.bos.deger + ' boş (' + t.bos.etiket + ')') + ' · ' + (t.dakika.deger == null ? 'süre: ' + t.dakika.etiket : t.dakika.deger + ' dk (' + t.dakika.etiket + ')') + '</small></span>' +
-            '<b>' + virgul(t.net.deger) + ' net</b><span class="pul">' + t.net.etiket + '</span></li>';
-        }).join('') + '</ul></section>' +
-        '<details class="kaynak"><summary>Cevap anahtarı (' + s.sorular.length + ' soru)</summary><ol class="deneme__anahtar">' + s.sorular.map(function (x) {
+        (s.sureDoldu ? 'süre doldu (' + s.deneme.sure + ' dk)' : 'süre ' + dakikaYaz(s.toplamSn) + ' / ' + s.deneme.sure + ' dk') + ' <span class="soluk">(ölçüldü)</span></p>'] }) +
+        B.bolum({ baslik: 'Testlere göre', govde: B.liste({ ad: 'Testlere göre', ogeler: an.testler.map(function (t) {
+          return { ad: t.ad + ' · ' + virgul(t.net.deger) + ' net', pul: t.net.etiket, not: t.dogru.deger + ' doğru · ' + t.yanlis.deger + ' yanlış (' + t.dogru.etiket + ') · ' +
+            (t.bos.deger == null ? 'boş: ' + t.bos.etiket : t.bos.deger + ' boş (' + t.bos.etiket + ')') + ' · ' + (t.dakika.deger == null ? 'süre: ' + t.dakika.etiket : t.dakika.deger + ' dk (' + t.dakika.etiket + ')') };
+        }) }) }) +
+        B.acilir({ baslik: 'Cevap anahtarı (' + s.sorular.length + ' soru)', govde: '<ol class="deneme__anahtar">' + s.sorular.map(function (x) {
           return '<li>' + (x.h ? 'Cevabın ' + x.h : 'Boş') + ' · doğrusu ' + k(x.dogru || '—') + (x.h ? (x.h === x.dogru ? ' · doğru' : ' · yanlış') : '') + '</li>';
-        }).join('') + '</ol></details>';
+        }).join('') + '</ol>' });
     }
-    if (alanAkademik) h += '<section><h2>Puan ve sıra tahmini</h2><ul class="ozet">' + tahminSatirlari(Soru.puanTahmini(oku(BITEN, []).map(function (g) { return g.deneme; }), {})).map(function (x) {
-      return x.not ? '<li class="ozet__not"><span class="soluk">' + k(x.not) + '</span></li>' : '<li><span>' + k(x.ad) + '</span><b>' + k(x.metin) + '</b><span class="pul">' + k(x.etiket) + '</span></li>';
-    }).join('') + '</ul></section>';
-    return h + '<div class="eylemler"><button type="button" class="dugme dugme--ana" data-deneme="yeni">Yeni deneme</button><a class="dugme dugme--sade" href="#/motor/soru">Soru</a></div>';
+    if (alanAkademik) {
+      var ts = tahminSatirlari(Soru.puanTahmini(oku(BITEN, []).map(function (g) { return g.deneme; }), {})), sat = ts.filter(function (x) { return !x.not; });
+      h += B.bolum({ baslik: 'Puan ve sıra tahmini', govde: [sat.length ? B.liste({ ad: 'Puan ve sıra tahmini', ogeler: sat.map(function (x) { return { ad: x.ad, not: x.metin, pul: x.etiket }; }) }) : '']
+        .concat(ts.filter(function (x) { return x.not; }).map(function (x) { return '<p class="soluk">' + k(x.not) + '</p>'; })) });
+    }
+    return h + B.eylemler([{ metin: 'Yeni deneme', tur: 'ana', veri: { deneme: 'yeni' } }, { metin: 'Soru', tur: 'sade', href: '#/motor/soru' }]);
   }
 
   // Bitir ve kaydet: deneme lifeos.soru.denemeler'e (motorun Deneme kaydı), prova lifeos.soru.gecmis'e (karma testle aynı biçim).
@@ -277,7 +279,7 @@
       var el = d.querySelector('[data-deneme-sayfa] .sayac'), dr = el && durumOku();
       if (!dr) { clearInterval(saat); saat = null; return; }
       var kal = kalan(Soru, dr, Date.now());
-      if (kal === 0) { clearInterval(saat); saat = null; ic().rota(); var ks = d.querySelector('.kapisonuc'); if (ks) ks.focus(); return; } // sayfa çizilirken biter ve kaydolur
+      if (kal === 0) { clearInterval(saat); saat = null; ic().rota(); var ks = d.querySelector('[data-sonuc]'); if (ks) ks.focus(); return; } // sayfa çizilirken biter ve kaydolur
       el.textContent = sureYaz(kal);
       el.classList.toggle('sayac--az', kal <= 60);
       [[300, '5 dakika kaldı.'], [60, '1 dakika kaldı.']].forEach(function (e) {
@@ -309,7 +311,7 @@
     if (ne === 'bitir') {
       var bos = duz(dr).filter(function (_, j) { return !cevabi(dr, j); }).length;
       if (kalan(Soru, dr, simdi) > 0 && !confirm(bos ? 'Deneme bitsin mi? Cevaplanmamış ' + bos + ' soru boş sayılır.' : 'Deneme bitsin mi?')) return;
-      sonlandir(dr, y, simdi); I.rota(); scrollTo(0, 0); return odak('.kapisonuc');
+      sonlandir(dr, y, simdi); I.rota(); scrollTo(0, 0); return odak('[data-sonuc]');
     }
   }
 

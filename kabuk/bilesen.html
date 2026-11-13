@@ -122,6 +122,20 @@
     B.panel({ govde: '<p>Başlıksız panel: düz bir yüzey.</p>' })
   ], 'yigin'));
 
+  h += tas(13, 'Eylem sırası', 'Düğmeler 8 px aralıkla yan yana, dar ekranda alt satıra geçer; kısa açıklama soluk yazıyla. Bağlantı olmayan satıra ve uyarıya da eylem verilebilir.', ornekler([
+    B.eylemler([{ metin: 'Sıradaki', tur: 'ana', href: '#/a' }, { metin: 'Tekrar\'a git', href: '#/b' }, { metin: 'Yol haritası', tur: 'sade', href: '#/c' }]),
+    B.eylemler([{ metin: 'Kaydet', tip: 'submit' }, { yazi: 'Puanlanmaz; kendin değerlendirirsin.' }]),
+    B.liste({ ad: 'Kartlar', ogeler: [{ ad: 'Arkhe nedir?', not: 'yarın · hatırlama %80 · tahmin', eylemler: [{ metin: 'Sil', tur: 'sade', etiket: 'Kartı sil: Arkhe nedir?' }] }] }),
+    B.uyari({ tur: 'bilgi', metin: 'Bir yere gitmek için boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade' } })
+  ], 'tam'));
+
+  h += tas(14, 'Açılır bölüm', 'Üst sıra en az 44 px: işaret, başlık (h2 ya da h3), kısa not. Kalabalık listede yalnız üzerinde çalışılan açık gelir. Aç/kapa ve kısayollu düğme de burada.', ornekler([
+    B.acilir({ baslik: 'Bilgi nedir?', not: '1/2 ders', acik: true, govde: B.liste({ ad: 'Bilgi nedir? dersleri', tur: 'ders', ogeler: [
+      { baslik: 'Sanı ve bilgi', ozet: 'Bilmek ile sanmak arasındaki fark.', durum: 'okundu', href: '#/a' }, { baslik: 'Gerekçe', ozet: 'Bir inancı bilgi yapan şey.', href: '#/b', taslak: true }] }) }),
+    B.acilir({ baslik: 'Varlık', not: 'kilitli', govde: B.bos({ baslik: 'Önce önceki ünitenin kapısını geç.' }) }),
+    B.eylemler([{ metin: 'Felsefe', basili: true }, { metin: 'Tarih', basili: false }, { metin: 'Ara', tur: 'sade', kisayol: 'Control+K', tus: 'Ctrl K' }])
+  ], 'tam'));
+
   var kok = document.getElementById('katalog');
   kok.innerHTML = h;
   kok.addEventListener('click', function (e) {

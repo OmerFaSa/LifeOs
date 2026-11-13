@@ -1,7 +1,8 @@
 /* LIFEOS.Kabuk.Ayar — tek ayar şeması. Bir ayar yalnız burada tanımlanır; ekran (ciz), doğrulama
  * (dogrula), okuma/yazma (oku, yaz), sıfırlama (sifirla) ve eşitleme dışa aktarımı (disaAktar, iceAl)
  * bu tanımdan türetilir. Yeni ayar = SEMA'ya tek satır.
- * Satır: { anahtar, ad, tur: secim|saatAraligi, varsayilan, secenekler?, esitlenir, aciklama, grup, kok?, kaynak }
+ * Satır: { anahtar, ad, tur: secim|saatAraligi|sayi|bilgi, varsayilan, secenekler?, esitlenir, aciklama, grup, kok?, kaynak }
+ *   bilgi    : salt okunur durum (depoya yazılmaz); değer satırın oku() işlevinden, görünen ad secenekler[String(değer)]
  *   kok      : değer köke yazılan data-* niteliği (CSS onu okur)
  *   esitlenir: cihazlar arası eşitlenir mi (eski katalogdaki «o» bayrağı)
  *   kaynak   : envanter-kabuk-sunucu.md'de «tut» diyen satır
@@ -45,6 +46,11 @@
       aciklama: 'Bu aralıkta sesler ve sesli okuma susar; gece yarısını geçebilir.', kaynak: ENV + ' §3c Ses ve müzik: sessiz saatler' },
     { anahtar: 'lifeos.kilit.odeme', ad: 'Satın alma ve kart işlemleri', tur: 'secim', varsayilan: 'kapali', grup: 'hesap', esitlenir: false,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Kapalıyken King ödeme, sipariş ya da kart işine girmez.', kaynak: ENV + ' §3c Diğer: kilit.odeme' },
+    // Salt bilgi: tarayıcı kalıcı depolamaya izin verdi mi (kabuk/depo.js kalici(): true/false/null)
+    { anahtar: 'depo.kalici', ad: 'Bu cihazdaki kayıtlar', tur: 'bilgi', varsayilan: null, grup: 'hesap', esitlenir: false,
+      oku: function () { var D = kok.LIFEOS && kok.LIFEOS.Kabuk && kok.LIFEOS.Kabuk.Depo; return D && D.kalici ? D.kalici() : null; },
+      secenekler: { 'true': 'Kalıcı', 'false': 'Tarayıcı silebilir', 'null': 'Bilinmiyor' },
+      aciklama: 'Kalıcıysa tarayıcı yer açmak için kayıtlarını kendiliğinden silmez. Yalnız bilgi; buradan değişmez.', kaynak: 'faz2-indexeddb.md §Açık noktalar 1: kalıcı depolama' },
     // Beden: Kayıt motorunun enerji hedefi (bazal metabolizma) bunları ister; kilo son tartıdan gelir.
     { anahtar: 'lifeos.beden.cinsiyet', ad: 'Cinsiyet', tur: 'secim', varsayilan: 'belirtilmedi', grup: 'beden', esitlenir: true,
       secenekler: { belirtilmedi: 'Belirtilmedi', kadin: 'Kadın', erkek: 'Erkek' }, aciklama: 'Yalnız bazal metabolizma hesabı için. Belirtilmezse enerji hedefi hesaplanmaz.', kaynak: SPI + ': sex' },
@@ -66,6 +72,7 @@
     if (t.tur === 'secim') return typeof v === 'string' && Object.prototype.hasOwnProperty.call(t.secenekler, v);
     if (t.tur === 'saatAraligi') return !!v && typeof v === 'object' && typeof v.acik === 'boolean' && SAAT.test(v.bas) && SAAT.test(v.bit);
     if (t.tur === 'sayi') return v === null || (typeof v === 'number' && isFinite(v) && v >= t.alt && v <= t.ust); // null: girilmedi
+    if (t.tur === 'bilgi') return v === true || v === false || v === null;
     return false;
   }
   // depoda düz metin (secim) ya da JSON (saatAraligi); bozuk ya da geçersiz değer varsayılana düşer
@@ -77,11 +84,12 @@
   }
   function oku(depo, anahtar) {
     var t = tanim(anahtar); if (!t) throw new Error('Ayar: bilinmeyen anahtar ' + anahtar);
+    if (t.tur === 'bilgi') { var b = t.oku(); return dogrula(t, b) ? b : null; }
     var ham = null; try { ham = depo.getItem(anahtar); } catch (e) { /* depo kapalı */ }
     return coz(t, ham);
   }
   function yaz(depo, anahtar, v) {
-    var t = tanim(anahtar); if (!t || !dogrula(t, v)) return false;
+    var t = tanim(anahtar); if (!t || t.tur === 'bilgi' || !dogrula(t, v)) return false;
     try { depo.setItem(anahtar, t.tur === 'secim' ? v : JSON.stringify(v)); return true; } catch (e) { return false; }
   }
   function sifirla(depo, anahtar) {
@@ -128,6 +136,8 @@
         return '<button type="button" role="radio" aria-checked="' + on + '" tabindex="' + (on ? 0 : -1) + '" data-ayar="' + kac(t.anahtar) +
           '" data-deger="' + kac(k) + '">' + kac(t.secenekler[k]) + '</button>';
       }).join('') + '</div>';
+    } else if (t.tur === 'bilgi') {
+      govde = '<span class="ayar__ad">' + kac(t.secenekler[String(v)]) + '</span>';
     } else if (t.tur === 'sayi') {
       govde = '<label class="sayiayar"><input type="number" inputmode="numeric" class="giris" aria-labelledby="' + id + '" data-ayar="' + kac(t.anahtar) +
         '" min="' + t.alt + '" max="' + t.ust + '" value="' + (v == null ? '' : kac(v)) + '">' + (t.birim ? '<span>' + kac(t.birim) + '</span>' : '') + '</label>';

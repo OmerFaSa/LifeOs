@@ -454,8 +454,15 @@ t('ayar: her satırın zorunlu alanları var ve varsayılan geçerli', () => {
     dogru(g.indexOf(s.grup) >= 0, s.anahtar + ' grup');
     dogru(A.dogrula(s, s.varsayilan), s.anahtar + ' varsayılan');
     dogru(!gor[s.anahtar], s.anahtar + ' tekrar'); gor[s.anahtar] = 1;
-    dogru(/envanter-kabuk-sunucu\.md §3[bc]|envanter-spi\.md §/.test(s.kaynak), s.anahtar + ' kaynak');
+    dogru(/envanter-kabuk-sunucu\.md §3[bc]|envanter-spi\.md §|faz2-indexeddb\.md §/.test(s.kaynak), s.anahtar + ' kaynak');
   });
+});
+t('ayar: salt bilgi satırı (kalıcı depolama) okunur, yazılmaz, üç durumu da yazıyla çizer', () => {
+  const t = A.tanim('depo.kalici'), d = sahteDepo({});
+  esit(A.yaz(d, 'depo.kalici', true), false); esit(d.v['depo.kalici'], undefined);
+  esit(A.oku(d, 'depo.kalici'), null, 'depo yokken bilinmiyor');
+  dogru(/Kalıcı</.test(A.ciz(t, true)) && /Tarayıcı silebilir</.test(A.ciz(t, false)) && /Bilinmiyor</.test(A.ciz(t, null)) && !/<button|<input/.test(A.ciz(t, true)));
+  esit(Object.keys(A.disaAktar(d)).indexOf('depo.kalici'), -1, 'eşitlenmez');
 });
 t('ayar: doğrulama yanlış değeri reddeder', () => {
   dogru(!A.dogrula(A.tanim('lifeos.boyut'), 'dev'));
