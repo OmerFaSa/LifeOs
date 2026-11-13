@@ -59,7 +59,7 @@ Kokenler değişir (`127.0.0.1:4173` → `127.0.0.1:4180/ays/`): tarayıcı depo
 1. `sistem/tekkapi.py`'de `ETKIN = True` (o zaman `--port`'suz 4180'de açılır ve zamanlayıcıyı başlatır); `sistem/baslat.py` `sunucu.py` yerine `tekkapi.py`'yi başlatır, HKM'yi ayrıca başlatmaz (`--hkmsiz` yolu gibi).
 2. Aynı anda 4180'de yalnız biri çalışabilir: eski `sunucu.py` ve HKM daemon'u kapanır (4173/4183/4193/4200 ve ev ağı 51xx kapanır, karar 8).
 3. `uzak.KAPILAR` (Tailscale serve: 5173/5183/5193→modüller, 443→4200) tek hedefe, 4180'e iner.
-4. İstemciler: `brand/ortak/kabuk.js adres()`, `gun.py` `MPORT`, modüllerin HKM taban adresi (4200) port yerine yol kurmalı (`/ays/`, `/api/hkm/`); bu kabuk/ işinin parçası.
+4. İstemciler: `brand/ortak/kabuk.js adres()`, `gun.py` `MPORT`, modüllerin HKM taban adresi (4200) port yerine yol kurmalı (`/ays/`, `/api/hkm/`); bu kabuk/ işinin parçası. **Adresler yapıldı (2026-11-13):** `kabuk.js adres()` modül `/ays/…` yolunda açılmışsa ötekileri aynı kökenin yolundan verir (Merkez yok), `girisAdres()` kökü verir; Gün sayfası `TEK` bayrağıyla (`sunucu.TEK_KAPI`, `tekkapi.kur()` açar) modülleri yoldan açar. Eski kapılarda davranış aynı. Ölçüldü: gerçek tarayıcıda tek kapıdan üç modül hatasız açıldı ve dördü de doğru adresi kurdu; modül takımları 3478 / 3269 / 2962, `tekkapi_test` 106/106, HKM 1093/1093. Kalan: modüllerin HKM taban adresi (4200 → `/api/hkm/`) ve HKM jetonu (açık soru 1); HKM'siz açılışta modüller çalışır, King ve eşitleme bağlanmaz.
 5. Deneme: `python sistem/tekkapi.py --port 4380` (boş bir port) ile bugün de açılabilir; çalışan sistemi güncellemez, yeniden başlatmaz, zamanlamaz.
 
 ## Açık sorular

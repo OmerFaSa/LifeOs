@@ -169,7 +169,10 @@ def sina(eski, tek):
     print("\nGiris ve Gun (4180 ↔ /)")
     for yol in ("/", "/kartlar/", "/gun/", "/hesap.js", "/piksel.css", "/gun/ortak/kabuk.js", "/logo/ays.png",
                 "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
-        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme",))
+        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/gun/"))
+    eg, tg = iste(g, "/gun/")[2], iste(T, "/gun/")[2]
+    dene("Gün sayfası: eski kapıda modüller porttan, tek kapıda yoldan açılır; başka fark yok",
+         b"var TEK = false;" in eg and b"var TEK = true;" in tg and eg.replace(b"var TEK = false;", b"var TEK = true;") == tg)
     ayni("GET /api/zemin/gunduz", iste(g, "/api/zemin/gunduz"), iste(T, "/api/zemin/gunduz"))
     ayni("GET /api/muzik", iste(g, "/api/muzik"), iste(T, "/api/muzik"))
     ayni("GET /api/ice", iste(g, "/api/ice"), iste(T, "/api/ice"))

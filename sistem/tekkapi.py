@@ -190,6 +190,7 @@ def kur(port, hkm=True, hkm_config=None):
     """Tek kapi sunucusu (henuz serve_forever yok). hkm=False: HKM ayri surecte kalir, /api/hkm/ 503."""
     srv = KuyrukluSunucu((HOST, port), TekKapi)
     sunucu.GIRIS_PORT = srv.server_address[1]     # guncelleme/gun cumlesi Origin denetimi bu kapiya bakar
+    sunucu.TEK_KAPI = True                        # Gun sayfasi modulleri /ays/ /spi/ /esp/ yolundan acar
     if hkm and hkm_kur(hkm_config):
         _hkm_ayni_surecte(srv.server_address[1])
     for sinif, _ in _SINIF.values():

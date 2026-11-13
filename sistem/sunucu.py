@@ -92,6 +92,7 @@ BEKCI_SN = 60
 # AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
 ALTSTORE_KAYNAK = "https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
 GIRIS_PORT = 4180
+TEK_KAPI = False        # tekkapi.kur() True yapar: Gun sayfasi modulleri port yerine yoldan (/ays/) acar
 HKM_PORT = 4200
 
 # (klasor, ad, port, dist dosyasi)
@@ -2034,7 +2035,7 @@ class Giris(SimpleHTTPRequestHandler):
             self.wfile.write(govde)
             return None
         if yol == "/gun/":
-            govde = ayar.sayfaya_ekle(gun.gun_html(tema=ayar.oku()["ayar"].get("lifeos.tema.secim"), host=HOST)).encode("utf-8")
+            govde = ayar.sayfaya_ekle(gun.gun_html(tema=ayar.oku()["ayar"].get("lifeos.tema.secim"), host=HOST, tek=TEK_KAPI)).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(govde)))

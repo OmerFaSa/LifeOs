@@ -1,5 +1,5 @@
 // KABUK GEZISI: tek kapiyi yalitilmis ortamda (gecici LOCALAPPDATA, HKM'siz, deneme portu) acar ve yeni kabukta
-// Felsefe pilotunun ilk unitesini gercek tarayiciyla yurur: Bugun, ders, alistirma, «Okudum», unite kapisi, kayit.
+// on alani ve arac ekranlarini gercek tarayiciyla yurur: Bugun, ders, alistirma, unite kapisi, Not, Tekrar, Kayit, Plan, Soru, Tanisma.
 // Kullanim: node tools/kabuk_gez.js [--goruntu]   (--goruntu: belgeler/ekip/sadelesme/kabuk-onizleme/ goruntulerini yeniler)
 const kok = require('path').resolve(__dirname, '..'), GORUNTU = process.argv.includes('--goruntu');
 const { chromium } = require(kok + '/SPI/node_modules/playwright');
@@ -309,6 +309,26 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.click('[data-arac-ac="soru-yeni"]');
     await p.waitForSelector('[data-arac-ac="soru-basla"]');
     dene('soru: biten test «Son testler»de', /1 doğru · 1 yanlış/.test(await p.textContent('[data-arac="soru"] .ozet')));
+
+    // ---- Tanışma: onaydan önce kayıt yok, onayla yazılır ----
+    await p.goto(T + '/kabuk/#/bugun');
+    await p.waitForSelector('.tn-davet');
+    dene('tanışma: kayıt yokken Bugün\'de davet satırı', /tanıyayım/.test(await p.textContent('.tn-davet')));
+    await p.goto(T + '/kabuk/#/tanisma');
+    await p.waitForSelector('#tn-yazi');
+    await p.fill('#tn-yazi', 'Felsefe çalışmak istiyorum, günde 30 dakika ayırabilirim');
+    await p.keyboard.press('Enter');
+    await p.waitForFunction(() => !!localStorage.getItem('lifeos.tanisma.taslak'));
+    dene('tanışma: cevap taslakta, kayıt henüz yok', await p.evaluate(() => localStorage.getItem('lifeos.tanisma.kayit') === null));
+    await p.click('[data-tn-ac="bitir"]');
+    await p.waitForSelector('[data-tn-ac="onayla"]');
+    dene('tanışma: onay adımında hâlâ kayıt yok', await p.evaluate(() => localStorage.getItem('lifeos.tanisma.kayit') === null));
+    await p.click('[data-tn-ac="onayla"]');
+    await p.waitForSelector('#tn-bitti');
+    dene('tanışma: onayla kayıt yazılır', await p.evaluate(() => { const k = JSON.parse(localStorage.getItem('lifeos.tanisma.kayit')); return !!k && JSON.stringify(k).length > 20; }));
+    await p.goto(T + '/kabuk/#/bugun');
+    await p.waitForSelector('.karsila');
+    dene('tanışma: kayıt varken davet gösterilmez', (await p.locator('.tn-davet').count()) === 0);
 
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');

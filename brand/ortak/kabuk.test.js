@@ -157,6 +157,15 @@
       expect(K.adres('spi', tek)).toBe('http://127.0.0.1:4183/');
       expect(K.adres('mer', tek)).toBe('http://127.0.0.1:4200/');
       expect(K.adres('gun', tek)).toBe('http://127.0.0.1:4180/gun/');
+      /* Tek kapı (P6'dan sonra): modül /ays/ yolunda açılmışsa ötekiler aynı kökenin yolunda; Merkez yok. */
+      const yol = { protocol:'http:', hostname:'127.0.0.1', port:'4180', pathname:'/ays/' };
+      expect(K.adres('spi', yol)).toBe('http://127.0.0.1:4180/spi/');
+      expect(K.adres('ays', yol)).toBe('http://127.0.0.1:4180/ays/');
+      expect(K.adres('gun', yol)).toBe('http://127.0.0.1:4180/gun/');
+      expect(K.adres('mer', yol)).toBe(null);
+      expect(K.adres('esp', { protocol:'https:', hostname:'pc.tail.ts.net', port:'', pathname:'/spi/' })).toBe('https://pc.tail.ts.net/esp/');
+      /* Kökte (pathname '/') eski kapı kuralları geçerli: 4180 bir modül kapısıdır (Giriş). */
+      expect(K.adres('spi', { protocol:'http:', hostname:'127.0.0.1', port:'4180', pathname:'/gun/' })).toBe('http://127.0.0.1:4183/');
       /* Tek dosya (file://) ya da bilinmeyen bir sunucu: adres YOK. */
       expect(K.adres('spi', { protocol:'file:', hostname:'', port:'' })).toBe(null);
       expect(K.adres('spi', { protocol:'https:', hostname:'ornek.com', port:'' })).toBe(null);

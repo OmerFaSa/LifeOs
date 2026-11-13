@@ -32143,7 +32143,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'80ccaeef', at:'2026-11-13 00:06', dirty:true };
+ESP.BUILD = { id:'29c18bba', at:'2026-11-13 11:40', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -37786,10 +37786,15 @@ window.LIFEOS = window.LIFEOS || {};
   /* Ev ağı kapıları (sistem/telefon.py PORTLAR): telefon ve tablet PC'ye
      bunlarla, https ile girer. Merkez (HKM) ev ağına açılmaz. */
   const EV_AGI = Object.freeze({ ays:5173, spi:5183, esp:5193 });
+  const tekKapida = loc => /^\/(ays|spi|esp)\//.test((loc && loc.pathname) || '');
+  const tekKok = loc => loc.protocol + '//' + loc.hostname + (loc.port ? ':' + loc.port : '') + '/';
   function adres(k, loc){
     loc = loc || window.location;
     const m = MODULLER[k];
     if(!m || !loc || !/^https?:$/.test(loc.protocol || '')) return null;
+    /* Tek kapı (sistem/tekkapi.py; sadeleşme P6'dan sonra): modül kendi yolunda (/ays/…) açılmışsa
+       ötekiler de aynı kökenin yolundadır. Merkez'in arayüzü tek kapıda yok: adres uydurulmaz. */
+    if(tekKapida(loc)) return k === 'mer' ? null : tekKok(loc) + (k === 'gun' ? m.yol : k + '/');
     const kapi = Number(loc.port);
     const kok = loc.protocol + '//' + loc.hostname + ':';
     if(SIRA.some(x => MODULLER[x].kapi === kapi)) return kok + m.kapi + '/' + (m.yol || '');
@@ -37800,7 +37805,9 @@ window.LIFEOS = window.LIFEOS || {};
   /* Giriş sayfası (sistem/sunucu.py GIRIS_PORT): yalnız LifeOS kapılarında. */
   function girisAdres(loc){
     loc = loc || window.location;
-    if(!loc || !/^https?:$/.test(loc.protocol || '') || !SIRA.some(x => MODULLER[x].kapi === Number(loc.port))) return null;
+    if(!loc || !/^https?:$/.test(loc.protocol || '')) return null;
+    if(tekKapida(loc)) return tekKok(loc);
+    if(!SIRA.some(x => MODULLER[x].kapi === Number(loc.port))) return null;
     return loc.protocol + '//' + loc.hostname + ':4180/';
   }
 

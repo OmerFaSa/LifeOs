@@ -27,8 +27,8 @@ ORTAK = {
 }
 
 
-def gun_html(tema=None, host="127.0.0.1"):
-    sayfa = GUN_SAYFASI.replace("__HOST__", host)
+def gun_html(tema=None, host="127.0.0.1", tek=False):
+    sayfa = GUN_SAYFASI.replace("__HOST__", host).replace("__TEK__", "true" if tek else "false")
     if tema in ("light", "dark"):
         sayfa = sayfa.replace('<html lang="tr" data-zemin="piksel">', '<html lang="tr" data-zemin="piksel" data-theme="%s">' % tema, 1)
     return sayfa
@@ -617,7 +617,9 @@ html.bh-tam-acik{ overflow:hidden; }
   var ALANLAR = [['uyku', 'Uyku', 'spi'], ['beslenme', 'Beslenme', 'spi'], ['hareket', 'Hareket', 'spi'], ['calisma', 'Çalışma', 'ays'], ['gelisim', 'Gelişim', 'esp']];
   var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP', gun:'Giriş' }, MPORT = { ays:4173, spi:4183, esp:4193 };
   var DILIM_AD = { sabah:'Sabah', ogle:'Öğle', aksam:'Akşam', gece:'Gece', gun:'Gün içinde' };
-  function adres(m, rota){ return m === 'gun' ? '#bugun' : 'http://' + HOST + ':' + MPORT[m] + '/' + (rota ? '#king=' + rota : ''); }
+  var TEK = __TEK__;   /* tek kapı (sistem/tekkapi.py): modüller aynı kökenin /ays/ /spi/ /esp/ yolunda */
+  function modulKok(m, ev){ return TEK ? '/' + m + '/' : 'http://' + (ev || HOST) + ':' + MPORT[m] + '/'; }
+  function adres(m, rota){ return m === 'gun' ? '#bugun' : modulKok(m) + (rota ? '#king=' + rota : ''); }
   function oturum(){ var m = document.cookie.match(/(?:^|;\s*)lifeos_hesap=([^;]*)/); if(!m) return null;
     try{ var o = JSON.parse(decodeURIComponent(m[1])); return o && o.j ? o : null; }catch(e){ return null; } }
   function api(yol){ var o = oturum(); if(!o) return Promise.reject({ kod:401 });
@@ -1051,7 +1053,7 @@ html.bh-tam-acik{ overflow:hidden; }
         + (son ? '<i>Son: ' + kac(son.baslik) + '</i>' : '') + '</span></a></div></section>';
     }
     /* Onizleme: [[bag]] tiklanir; olmayan bag «+» ile yeni dusunce olur. */
-    function notAdres(m, id){ return 'http://' + (location.hostname || HOST) + ':' + MPORT[m] + '/#defter=' + encodeURIComponent(id); }
+    function notAdres(m, id){ return modulKok(m, location.hostname) + '#defter=' + encodeURIComponent(id); }
     /* Medya: yalniz http(s); gorsel, video, ses yerinde oynar, YouTube cerezsiz gomulur, oteki adres baglanti olur. */
     function medyaHtml(u){
       var t = B.medyaTuru(u), a = kac(u);
