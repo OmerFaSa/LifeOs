@@ -90,7 +90,7 @@ Yeni testler:
 - `kabuk/kabuk.test.js` (+3): yerleştirmenin depoya yazılması ve tahminin bütün aşamalarda silinmesi; kapı kartının kaynağı ve tekilleşmesi, taslak kartın planlanmaması; ağ yerleşimi (çerçeve, belirlenim, bağlı çift yakın, 300 not süresi).
 - `tools/kabuk_gez.js` (+19 denetim, 154 → 173; hesaplandı): kapı sonucunda «4 soru Tekrar'a düştü», kapıda doğru cevap yok; Tekrar'da 4 kapı kartı kaynağıyla, açılınca doğru cevap; Not ağı 2 düğüm 1 bağ, Sekme+Enter ile not açılır; Dil'de «Seviyemi bul» yürüyüşü (ayrı tarayıcı bağlamı: aşama 1 bilinir, aşama 2'de kalınır, kayıt `atlandi`/`tahmin`, `gecti` yok, üretim notu, atlanan üniteler açık, yeniden yerleştirme reddi, ünite kapısı geçilince iki aşamada tahmin silinir, konsol temiz). Yeni ekranlar telefonda yatay taşmaz (4 görünüm).
 
-Ekran görüntüleri (1280 koyu + 390 açık): `C:\Users\ASUS\AppData\Local\Temp\claude\a07d60aca3a8e2f6\df6f0734-faa7-4ab9-af03-94033824adef\scratchpad\faz3-goruntu\` (14 dosya: alan seçimi, yerleştirme sorusu, sonuç, atlanan aşama, kapıda kalınca, Tekrar kapı kartları, Not ağı). `kabuk-onizleme/` klasörünü yenilemedim (gezi `--goruntu` bütün eski görüntüleri yeniden yazardı).
+Ekran görüntüleri (1280 koyu + 390 açık): `belgeler/ekip/sadelesme/kabuk-onizleme/` altında, adları `yer-` ile başlar.
 
 ## Eksikler
 
