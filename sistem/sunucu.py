@@ -1851,6 +1851,30 @@ def guncelleme_izinli(basliklar):
                      "http://localhost:%d" % GIRIS_PORT)
 
 
+# YENI KABUK (sadelesme Faz 2, 2026-11-13). kabuk/index.html kardeslerini ../ ile ister (/motor/, /alan/, iki
+# marka dosyasi). Kapali liste: klasor -> izinli uzantilar; test dosyasi, .py, .md ve ust klasor verilmez.
+# Eski sayfalarin yaninda durur (4180/kabuk/); tek kapi (tekkapi.py) ayni isleyiciyi kullanir, koken degismez.
+KABUK_KOKLER = {"kabuk": (".html", ".js", ".css"), "motor": (".js",), "alan": (".json",)}
+KABUK_TEK = ("/brand/ortak/piksel-yazi.css", "/brand/life/favicon.png")
+_KABUK_TUR = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
+              ".json": "application/json; charset=utf-8", ".png": "image/png"}
+
+
+def kabuk_dosyasi(yol):
+    """Istek yolu -> diskteki dosya ya da None (yukaridaki kapali liste)."""
+    yol = _unquote(yol)
+    if yol == "/kabuk/":
+        yol = "/kabuk/index.html"
+    parca = yol.split("/")[1:]
+    if any(p in ("", ".", "..") or "\\" in p or ":" in p for p in parca):
+        return None
+    if yol not in KABUK_TEK and (len(parca) < 2 or parca[0] not in KABUK_KOKLER
+                                 or not yol.endswith(KABUK_KOKLER[parca[0]]) or ".test." in parca[-1]):
+        return None
+    tam = os.path.join(KOK, *parca)
+    return tam if os.path.isfile(tam) else None
+
+
 class Giris(SimpleHTTPRequestHandler):
     def _json(self, kod, veri):
         govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
@@ -1932,8 +1956,40 @@ class Giris(SimpleHTTPRequestHandler):
         # yedekle=1 yalniz kutudaki «Yedekle ve güncelle» dugmesinden gelir.
         return self._json(200, guncelle_kur(yedekle="yedekle=1" in self.path))
 
+    def _kabuk_sun(self, tam):
+        if not tam or self.command not in ("GET", "HEAD"):
+            return self.send_error(404 if not tam else 405)
+        with open(tam, "rb") as f:
+            govde = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", _KABUK_TUR[os.path.splitext(tam)[1]])
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        if self.command == "GET":
+            self.wfile.write(govde)
+
     def do_GET(self):
         yol = self.path.split("?", 1)[0]
+        if yol == "/kabuk" or yol in KABUK_TEK or yol.split("/")[1] in KABUK_KOKLER:
+            if yol == "/kabuk":
+                self.send_response(301)
+                self.send_header("Location", "/kabuk/")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return None
+            return self._kabuk_sun(kabuk_dosyasi(yol))
+        # Kabuk eski alanlara /ays/ /spi/ /esp/ yoluyla gider. Tek kapida modul o yoldadir (tekkapi.py);
+        # bugunku duzende kendi kapisindadir, oraya yonlendirilir.
+        modul_port = {k.lower(): port for k, _ad, port, *_ in SISTEMLER}.get(yol.strip("/"))
+        if modul_port:
+            ev = (self.headers.get("Host") or "").split(":")[0]
+            self.send_response(302)
+            self.send_header("Location", "http://%s:%d/" % (ev if ev in (HOST, "localhost") else HOST, modul_port))
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return None
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
         if yol == "/api/ayar":

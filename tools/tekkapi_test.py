@@ -261,6 +261,16 @@ def sina(eski, tek):
     for yol in ("/kabuk/kabuk.test.js", "/motor/yol.test.js", "/alan/SEMA.md", "/alan/denetle.py", "/kabuk/%2e%2e/sistem/tekkapi.py",
                 "/alan/..%2fHKM/config.example.json", "/brand/ortak/hesap.js", "/motor/", "/kabuk/yok.js"):
         dene("%s kabuk yolundan çıkmaz (404)" % yol, iste(T, yol)[0] == 404, iste(T, yol)[0])
+    for yol in ("/kabuk/", "/kabuk/araclar.js", "/motor/not.js", "/alan/felsefe/asama-1.json", "/brand/ortak/piksel-yazi.css"):
+        ayni("GET %s (eski 4180 de verir)" % yol, iste(g, yol), iste(T, yol))
+    dene("eski 4180: /kabuk → 301 /kabuk/", iste_yonsuz(g, "/kabuk")[0] == 301)
+    for ad in ("ays", "spi", "esp"):
+        k, b = iste_yonsuz(g, "/%s/" % ad)
+        dene("eski 4180: /%s/ modülün kendi kapısına yönlenir" % ad, k == 302 and b.get("Location", "").endswith(":%d/" % eski[ad]), "%s %s" % (k, b.get("Location")))
+
+    for yol in ("/kabuk/kabuk.test.js", "/alan/denetle.py", "/kabuk/%2e%2e/sistem/sunucu.py", "/motor/"):
+        dene("eski 4180: %s 404" % yol, iste(g, yol)[0] == 404, iste(g, yol)[0])
+
     k, b, gv = iste(T, "/kabuk/kabuk.js", "HEAD")
     dene("HEAD /kabuk/kabuk.js gövdesiz 200", k == 200 and gv == b"" and int(b.get("Content-Length", 0)) > 0, k)
     dene("POST /kabuk/ 405", iste(T, "/kabuk/", "POST", b"")[0] == 405)
