@@ -31,6 +31,10 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 6 · Beslenme ve Hareket içeriği](ekip/sadelesme/faz6-beslenme-hareket-icerik.md) — İki sağlık alanının ilk aşaması (hepsi taslak): tabak, hareket kalıpları, klinik sınır için dışarıda kalanlar (2026-11-13).
 - [Faz 6 · Uyku ve Tahlil içeriği](ekip/sadelesme/faz6-uyku-tahlil-icerik.md) — İki sağlık alanının ilk aşaması (hepsi taslak): uyku ritmi, tahlil kâğıdını okumak; teşhis ve doz yok (2026-11-13).
 - [Faz 6 · Felsefe, Dil, Tarih 2. aşama](ekip/sadelesme/faz6-asama2-felsefe-dil-tarih.md) — Üç alanın ikinci aşaması (hepsi taslak, kaynaklar satır aralığıyla): üniteler, düzeltilen kaynak hataları, açık tarih çelişkileri (2026-11-13).
+- [Faz 6 · Akademik, Müzik, Okuma 2. aşama](ekip/sadelesme/faz6-asama2-akademik-muzik-okuma.md) — Üç alanın ikinci aşaması (hepsi taslak): deneme analizi, temiz tempo, atomik not ve revizyon; doğrulanmayanlar (2026-11-14).
+- [Faz 6 · Beslenme ve Hareket 2. aşama](ekip/sadelesme/faz6-asama2-beslenme-hareket.md) — İki sağlık alanının ikinci aşaması (hepsi taslak); klinik sınır için dışarıda kalanlar (2026-11-14).
+- [Faz 6 · Uyku ve Tahlil 2. aşama](ekip/sadelesme/faz6-asama2-uyku-tahlil.md) — Kendi ritmini kurmak, paneller ne ölçer (hepsi taslak); teşhis eşiği ve değer yorumu yok (2026-11-14).
+- [Faz 3 · Yer belirleme ve not ağı](ekip/sadelesme/faz3-yer-ve-not-agi.md) — Seviyemi bul, kapıda kalınan soruların tekrara düşmesi, not ağı çizimi (2026-11-14).
 - [Faz 7 · Cihaz zemini (A10)](ekip/sadelesme/faz7-cihaz-zemini.md) — Cihaz başına Merkez anahtarı ve iptal, ortak jeton bilgisayardan çıkmaz; tek kapıda Tailscale yalnız 443 (bayrak kapalı); satır satır güvenlik notları (2026-11-13).
 - [Faz 3 · Süreli deneme ve aşamalar](ekip/sadelesme/faz3-deneme-asama.md) — Kabukta süreli deneme ve prova, net ve sonuç ekranı; aşama farkındalığı (eski 1. aşama kaydı bayt bayt korunur) (2026-11-13).
 - [Faz 7 · Tanışma ekranı](ekip/sadelesme/faz7-tanisma.md) — Kabukta dil modelsiz tanışma görüşmesi: kural tablosundan sorular, desenle anlaşılanlar, onaysız yazım yok, başlangıç önerisi (2026-11-13).

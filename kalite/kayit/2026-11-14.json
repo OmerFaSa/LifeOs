@@ -1,0 +1,796 @@
+{
+ "olcutler": {
+  "ag_cizimi": {
+   "ad": "Ağ çizimi",
+   "ayrinti": {
+    "var": [
+     "bilinc_ag",
+     "defter_ag"
+    ]
+   },
+   "deger": 2,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "ag_cizimi",
+   "katman": "sistem",
+   "yol": "defter.js agCiz + bilinc.js haritaSvg"
+  },
+  "alan_paketi_en_buyuk": {
+   "ad": "En büyük alan paketi (bayt)",
+   "ayrinti": {
+    "dosya": "alan/akademik/asama-1.json"
+   },
+   "deger": 2224187,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "alan_paketi_en_buyuk",
+   "katman": "sistem",
+   "yol": "alan/*/asama-*.json içinde en büyüğü (alan açılınca tek seferde yüklenen paket)"
+  },
+  "ayar_yeri": {
+   "ad": "Elle yazılan ayar yeri",
+   "ayrinti": {},
+   "deger": 2,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "ayar_yeri",
+   "katman": "sistem",
+   "yol": "SECIMLER + secimHtml paneli; TASINAN/PROFIL_KAPSAR/SIFIRLANAN/ORTAK katalogdan türemiyorsa +1"
+  },
+  "blok": {
+   "ad": "Blok",
+   "ayrinti": {
+    "AYS": 160,
+    "ESP": 54,
+    "SPI": 76,
+    "brand/ortak": 14
+   },
+   "deger": 304,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "blok",
+   "katman": "sistem",
+   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi)"
+  },
+  "cihaz_yolu": {
+   "ad": "Cihaz yolu (ağ yolu)",
+   "ayrinti": {
+    "ag_yolu": [
+     "ev_agi",
+     "ios_kabugu",
+     "tailscale",
+     "tek_dosya"
+    ],
+    "baglanma_bicimi": 9
+   },
+   "deger": 4,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "cihaz_yolu",
+   "katman": "sistem",
+   "yol": "tek dosya (modül build.py) + ev ağı (telefon.py) + Tailscale (uzak.py) + iOS kabuğu"
+  },
+  "denetimsiz_secim": {
+   "ad": "Denetimsiz seçim",
+   "ayrinti": {
+    "denetimsiz": [
+     "bulanik",
+     "buzluKart",
+     "buzluMenu",
+     "buzluPencere",
+     "cam",
+     "isik",
+     "kenar",
+     "perde"
+    ],
+    "secim": 15
+   },
+   "deger": 8,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "denetimsiz_secim",
+   "katman": "sistem",
+   "yol": "SECIMLER anahtarı − secimHtml('…') ile çizilenler − vurguHtml"
+  },
+  "egri_anlama": {
+   "ad": "Anlama",
+   "ayrinti": {
+    "etiket_bekleyen": 0,
+    "etiketli": 0,
+    "gecersiz_satir": 0,
+    "gereken": "sahibinin etiketlediği gerçek mesajlar; her satırda King'in o an seçtiği niyet (king). «Yanlış anladın» işareti seti doldurur ama yalnız işaretli satırla isabet hep 0 çıkar: değer için işaretlenmemiş (King'in doğru anladığı) örneklem de gerekir",
+    "king_kararli": 0,
+    "set": "kalite/veri/yerel/anlama.jsonl",
+    "vekil": {
+     "ad": "vekil: sınav cümleleri",
+     "birim": "oran",
+     "cumle": 350,
+     "deger": 0.989,
+     "disarida": 8,
+     "etiket": "tahmin",
+     "isabet": 346,
+     "kod": "00788b3a",
+     "komut": "python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
+     "neden_tahmin": "cümleler sahibinin gerçek mesajı değil, bugünkü King'e göre yazılmış hazır cümleler; karar→niyet eşlemesi kalite/egri/_sinav.py ESLEME (sahibinin etiketi değil); «arastir» niyetli cümle yok; model çağrılmaz, Merkez'e giden cümle «sohbet» sayılır",
+     "niyet_basina": {
+      "kayit": "82/82",
+      "ogren": "3/3",
+      "sohbet": "40/41",
+      "yonet": "221/224"
+     },
+     "olculdu": "2026-11-13",
+     "sinav_tam_karar": "353/358"
+    },
+    "yanlis_anladin": 0
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_anlama",
+   "katman": "egri",
+   "komut": "kalite/veri/yerel/anlama.jsonl doldurulunca python kalite/olcum.py; vekil: python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
+   "yol": "etiketli gerçek mesajlarda niyet isabeti"
+  },
+  "egri_anlasilabilirlik": {
+   "ad": "Sistem · Anlaşılabilirlik",
+   "ayrinti": {
+    "en_cok": 2,
+    "eski_modul_kat": {
+     "AYS": 2,
+     "ESP": 4,
+     "SPI": 3
+    },
+    "eski_yer": 0,
+    "kabuk_en_cok": 2,
+    "kabuk_ortalama": 1.76,
+    "komut_cubugu": "her yer 1 adım (kural; kabuk/kabuk.test.js sınar, bu araç saymaz)",
+    "sinir": "kabuk adımı kuraldan hesaplanır, tarayıcıda tıklanmaz; eski modül katı en derin yolun üst sınırıdır",
+    "ulasilmayan": [],
+    "yer": 25,
+    "yer_adimi": {
+     "akademik": 2,
+     "arama": 2,
+     "ayarlar": 2,
+     "beslenme": 2,
+     "bugun": 1,
+     "dil": 2,
+     "felsefe": 2,
+     "hareket": 2,
+     "harita": 1,
+     "kayit": 2,
+     "king": 1,
+     "motorlar": 2,
+     "muzik": 2,
+     "not": 1,
+     "ogren": 1,
+     "okuma": 2,
+     "plan": 2,
+     "saglik": 1,
+     "soru": 2,
+     "tahlil": 2,
+     "tanisma": 2,
+     "tarih": 2,
+     "tekrar": 2,
+     "uyku": 2,
+     "yol": 2
+    }
+   },
+   "birim": "adım (yer başına ortalama)",
+   "deger": 1.76,
+   "durum": "ölçüldü",
+   "etiket": "hesaplandı",
+   "id": "egri_anlasilabilirlik",
+   "katman": "egri",
+   "komut": "python kalite/olcum.py (node ile kabuk/harita.js okunur)",
+   "yol": "bir işe kaç adımda varılıyor, iç içelik"
+  },
+  "egri_arama": {
+   "ad": "Arama",
+   "ayrinti": {
+    "gereken": "gerçek sorgu seti, her sorgu için doğru cevap ve kaynak etiketi; tek Arama motoru (A7: bam.py ve arastir.py birleşince)"
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_arama",
+   "katman": "egri",
+   "komut": "yapılacak: gerçek sorgu seti + A7 Arama motoru",
+   "yol": "kaynaklı cevabın doğruluğu, hafızaya eklenenin isabeti"
+  },
+  "egri_hafiza": {
+   "ad": "Hafıza",
+   "ayrinti": {
+    "gereken": "HKM hafızası ve gömme modeli (Ollama) çalışırken arama doğruluğu; bağlam boyutu ekseni (jeton bütçeli bağlam derleyici, A7) yok"
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_hafiza",
+   "katman": "egri",
+   "komut": "python tools/hafiza_olcum.py (p1/p3; HKM + Ollama); yapılacak: bağlam bütçesi ekseni",
+   "yol": "eski bilgiyi doğru hatırlama, bağlam boyutu"
+  },
+  "egri_hayata_etki": {
+   "ad": "Sistem · Hayata etki",
+   "ayrinti": {
+    "gereken": "göç sonrası tek veride sahibinin gerçek kullanımı (Yol motorunda tamamlanan adımlar ve günler); bu araç sahibinin verisini okumaz"
+   },
+   "birim": "adım/hafta",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_hayata_etki",
+   "katman": "egri",
+   "komut": "yapılacak: göç sonrası tek depodan haftalık özet (Yol motoru kaydı)",
+   "yol": "haftada tamamlanan öğrenme adımı, süreklilik"
+  },
+  "egri_kendini_egitme": {
+   "ad": "Kendini eğitme",
+   "ayrinti": {
+    "gereken": "hata kaydı ve ders defteri (hata → kural cümlesi → sahibinin onayı → ortak havuz); ikisi de bugün yok"
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_kendini_egitme",
+   "katman": "egri",
+   "komut": "yapılacak: A7 ders defteri; oran = derse dönen hata / kaydedilen hata",
+   "yol": "hatanın derse dönüşme ve havuza girme oranı"
+  },
+  "egri_kontrol": {
+   "ad": "Kontrol",
+   "ayrinti": {
+    "gereken": "çalışan King (tarayıcı + HKM + model) ve görevin sonunda verinin doğru yazıldığının denetimi; King-Bench'in donmuş klon verisiyle koşar",
+    "vekil": {
+     "ad": "vekil: sınav, araç seçimi",
+     "birim": "oran",
+     "deger": 0.987,
+     "dogru": 305,
+     "etiket": "tahmin",
+     "gorev_cumlesi": 309,
+     "kod": "00788b3a",
+     "komut": "python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
+     "neden_tahmin": "araç seçilir, çalıştırılmaz (görevin bittiği denetlenmez); cümleler bugünkü King'e göre yazılmış; argüman yalnız 'a' alanı olan 9 cümlede denetlenir",
+     "olculdu": "2026-11-13"
+    }
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_kontrol",
+   "katman": "egri",
+   "komut": "python tools/king_bench/bench.py --paket kayit,plan,gun (gerçek tarayıcı + HKM + model); vekil: python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
+   "yol": "sistem görevini araçlarla tamamlama oranı"
+  },
+  "egri_ogretme": {
+   "ad": "Öğretme",
+   "ayrinti": {
+    "gereken": "ön test → King'in dersi → son test düzeneği (yok) ve dersi anlatan çalışan model; gerçek ölçüm için sahibinin ön ve son test cevapları"
+   },
+   "birim": "puan farkı",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_ogretme",
+   "katman": "egri",
+   "komut": "python tools/king_bench/bench.py --paket ogretmen,ogrenme (gerçek tarayıcı + HKM + model); yapılacak: ön/son test düzeneği",
+   "yol": "dersten önce/sonra mini sınav farkı"
+  },
+  "egri_optimizasyon": {
+   "ad": "Sistem · Optimizasyon",
+   "ayrinti": {
+    "acilis": {
+     "etiket": "ölçüldü",
+     "kabuk": "veri yok: olcum_modul.js yalnız AYS/SPI/ESP ölçer",
+     "kod": "00788b3a",
+     "moduller": {
+      "AYS": {
+       "betikMs": 310.9,
+       "cizimMs": 1151.7,
+       "stilMs": 130.2,
+       "tekrar": 3,
+       "yerlesimMs": 61.3
+      },
+      "ESP": {
+       "betikMs": 284.6,
+       "cizimMs": 957.8,
+       "stilMs": 109.4,
+       "tekrar": 3,
+       "yerlesimMs": 45.6
+      },
+      "SPI": {
+       "betikMs": 242.1,
+       "cizimMs": 799.5,
+       "stilMs": 88.8,
+       "tekrar": 3,
+       "yerlesimMs": 38.7
+      }
+     },
+     "tarih": "2026-11-13",
+     "yontem": "tools/olcum_modul.js: <modül>/src http.server ile, başsız Chromium, her tekrar yeni bağlam (boş tarayıcı verisi); cizimMs = sayfaya gitmeden .site görünene kadar; 3 tekrarın ortancası"
+    },
+    "kare_suresi": {
+     "etiket": "veri yok",
+     "gereken": "kaydırma/geçiş sırasında kare süresi izi (CDP); tools/akicilik.js süre değil stil hesabı sayar"
+    },
+    "motor_kabukta": {
+     "bayt": 195955,
+     "dosya": 6,
+     "satir": 2920
+    },
+    "uygulama": {
+     "AYS": {
+      "bayt": 9701574,
+      "dosya": 2,
+      "satir": 153201
+     },
+     "ESP": {
+      "bayt": 8156929,
+      "dosya": 2,
+      "satir": 128070
+     },
+     "SPI": {
+      "bayt": 7735961,
+      "dosya": 2,
+      "satir": 128322
+     },
+     "kabuk": {
+      "bayt": 449139,
+      "dosya": 15,
+      "satir": 5694
+     }
+    }
+   },
+   "birim": "bayt (dağıtılan kod)",
+   "deger": 26043603,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "egri_optimizasyon",
+   "katman": "egri",
+   "komut": "python kalite/olcum.py (kod hacmi); açılış: python kalite/egri/optimizasyon.py --acilis (node tools/olcum_modul.js <modül> --port 4571.. --tekrar 3)",
+   "yol": "açılış süresi, kare süresi, kod hacmi"
+  },
+  "egri_saglayici": {
+   "ad": "Sağlayıcı kalitesi",
+   "ayrinti": {
+    "gereken": "gerçek sağlayıcıya (Claude ya da yerel model) giden istekler ve boşa çağrı sayacı (yok); king_olcum.py --kuru sahte taşıyıcıyla koşar, gerçek jeton vermez"
+   },
+   "birim": "jeton/istek",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_saglayici",
+   "katman": "egri",
+   "komut": "python tools/king_olcum.py sohbet --config <ayar> (model çağırır: süre, jeton); yapılacak: boşa çağrı sayacı",
+   "yol": "istek başına jeton, gereksiz çağrı"
+  },
+  "egri_tanima": {
+   "ad": "Tanıma",
+   "ayrinti": {
+    "gereken": "sahibinin doğruladığı kişi bilgisi yoklama seti ve çalışan King (tarayıcı + HKM + model); King-Bench hafiza paketi 233 günlük klonla koşar, sahibinin kendisiyle değil"
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_tanima",
+   "katman": "egri",
+   "komut": "python tools/king_bench/bench.py --paket hafiza; python tools/king_bench/bilinc_bench.py (gerçek tarayıcı + HKM + model)",
+   "yol": "doğru ve yerinde kullanılan kişi bilgisi oranı"
+  },
+  "egri_tekrar": {
+   "ad": "Tekrar",
+   "ayrinti": {
+    "gereken": "aynı hatayı tanıyan hata kimliği ve sayacı (yok), ders defteri ve ardışık iki King-Bench sonucu (çalışan King)"
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_tekrar",
+   "katman": "egri",
+   "komut": "python tools/king_bench/oz.py <bench-sonuc.json> <önceki.json>; yapılacak: hata kimliği ve sayacı",
+   "yol": "dersi alınmış hatanın yinelenme oranı (düşük iyi)"
+  },
+  "egri_uretim": {
+   "ad": "Üretim",
+   "ayrinti": {
+    "gereken": "King'in ürettiği soru ve kartlardan örneklem, cevap anahtarı ve sahibinin (insan hakem) puanı; üretim için çalışan model"
+   },
+   "birim": "oran",
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "egri_uretim",
+   "katman": "egri",
+   "komut": "yapılacak: örneklem + cevap anahtarı + hakem puanı seti (kalite/veri/uretim.jsonl) ve puanlayan dosya",
+   "yol": "üretilen soru/kartın hakem puanı, hata oranı"
+  },
+  "ekran_dosyasi": {
+   "ad": "Ekran dosyası",
+   "ayrinti": {
+    "AYS": 25,
+    "ESP": 19,
+    "SPI": 20
+   },
+   "deger": 64,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "ekran_dosyasi",
+   "katman": "sistem",
+   "yol": "ls <modül>/src/js/screens/*.js"
+  },
+  "ekran_ici_sekme": {
+   "ad": "Ekran içi sekme",
+   "ayrinti": {
+    "AYS": 32,
+    "ESP": 45,
+    "SPI": 38
+   },
+   "deger": 115,
+   "durum": "ölçüldü",
+   "etiket": "tahmin",
+   "id": "ekran_ici_sekme",
+   "katman": "sistem",
+   "yol": "screens/*.js: TABS dizisi öğeleri + SayfaBolumleri({bolumler:[…]}) / GRUPLAR.map öğeleri; çalışma anında kurulan diziler (TABS.concat, bolumler()) sayılmaz"
+  },
+  "hkm_api": {
+   "ad": "HKM /api/ yolu",
+   "ayrinti": {},
+   "deger": 126,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "hkm_api",
+   "katman": "sistem",
+   "yol": "HKM/daemon.py tırnak içindeki benzersiz /api/… dizgesi"
+  },
+  "hkm_cekirdek": {
+   "ad": "HKM çekirdek dosyası",
+   "ayrinti": {},
+   "deger": 93,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "hkm_cekirdek",
+   "katman": "sistem",
+   "yol": "ls HKM/core/*.py (__init__ dahil)"
+  },
+  "hkm_tablo": {
+   "ad": "HKM tablo",
+   "ayrinti": {},
+   "deger": 50,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "hkm_tablo",
+   "katman": "sistem",
+   "yol": "HKM/core/db.py CREATE TABLE (yorum satırı hariç)"
+  },
+  "ic_icelik": {
+   "ad": "İç içelik (kat)",
+   "ayrinti": {
+    "AYS": 2,
+    "ESP": 4,
+    "SPI": 3
+   },
+   "deger": 4,
+   "durum": "ölçüldü",
+   "etiket": "hesaplandı",
+   "id": "ic_icelik",
+   "katman": "sistem",
+   "yol": "modül başına var olan katlar: çekmece › disiplin (ek:{disc}) › sekme (TABS/SayfaBolumleri) › açılır araç (K.Entry); en derini"
+  },
+  "kabuk_acilis_yuku": {
+   "ad": "Kabuk açılış yükü (bayt)",
+   "ayrinti": {
+    "dosya": 15
+   },
+   "deger": 449139,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "kabuk_acilis_yuku",
+   "katman": "sistem",
+   "yol": "kabuk/index.html + src/href ile bağladığı .js/.css (motor/ ve brand/ dahil; yazı tipi, görsel, sonradan yüklenen alan paketi hariç)"
+  },
+  "kapi_ev_agi": {
+   "ad": "Kapı (ev ağı)",
+   "ayrinti": {
+    "portlar": [
+     5173,
+     5180,
+     5183,
+     5193
+    ],
+    "tailscale": [
+     443,
+     5173,
+     5183,
+     5193
+    ]
+   },
+   "deger": 4,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "kapi_ev_agi",
+   "katman": "sistem",
+   "yol": "sistem/telefon.py PORTLAR + KURULUM_PORT"
+  },
+  "kapi_yerel": {
+   "ad": "Kapı (yerel adres)",
+   "ayrinti": {
+    "portlar": [
+     4173,
+     4180,
+     4183,
+     4193,
+     4200
+    ]
+   },
+   "deger": 5,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "kapi_yerel",
+   "katman": "sistem",
+   "yol": "sistem/sunucu.py SISTEMLER portları + GIRIS_PORT + HKM_PORT"
+  },
+  "kesinlik_dili": {
+   "ad": "Kesinlik etiketi dili",
+   "ayrinti": {
+    "derived_dosya": 16
+   },
+   "deger": 2,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "kesinlik_dili",
+   "katman": "sistem",
+   "yol": "«hesaplandı» için koddaki ayrı yazımlar: 'computed' ve 'derived' (testler hariç)"
+  },
+  "king_bench_vaka": {
+   "ad": "King-Bench vakası",
+   "ayrinti": {},
+   "deger": 350,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "king_bench_vaka",
+   "katman": "king",
+   "yol": "tools/king_bench/paket/*.json \"id\""
+  },
+  "king_bench_yamasi": {
+   "ad": "Bench yaması",
+   "ayrinti": {},
+   "deger": 23,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "king_bench_yamasi",
+   "katman": "king",
+   "yol": "brand/ortak/king-yol.js içinde «Bench» geçen yorum"
+  },
+  "king_gorunen_arac": {
+   "ad": "King'in gördüğü araç",
+   "ayrinti": {
+    "kirilim": {
+     "AYS": 38,
+     "ESP": 27,
+     "SPI": 25,
+     "ogretme": 6,
+     "ortak": 32
+    },
+    "oku": 60,
+    "yaz": 68
+   },
+   "deger": 128,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "king_gorunen_arac",
+   "katman": "king",
+   "yol": "model kataloğu: king-arac.js + 3 kingarac.js ad/tur + AYS tools.js name + actions.js (modelYok/olcum hariç) + ogret.js 2×3 (king-hkm §3)"
+  },
+  "king_niyet_kurali": {
+   "ad": "Sözcük yönlendirmesi: NIYET kuralı",
+   "ayrinti": {},
+   "deger": 13,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "king_niyet_kurali",
+   "katman": "king",
+   "yol": "brand/ortak/king.js const NIYET dizisinin öğesi"
+  },
+  "king_rehber_sozcuk": {
+   "ad": "Sözcük yönlendirmesi: sayfa rehberi sözcüğü",
+   "ayrinti": {
+    "sayfa": 29
+   },
+   "deger": 82,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "king_rehber_sozcuk",
+   "katman": "king",
+   "yol": "brand/ortak/parca-rehber.js es:[…] dizgeleri"
+  },
+  "king_sinav_cumle": {
+   "ad": "Sınav cümlesi",
+   "ayrinti": {},
+   "deger": 358,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "king_sinav_cumle",
+   "katman": "king",
+   "yol": "tools/king_sinav.json cumleler"
+  },
+  "king_toplam_arac": {
+   "ad": "King aracı (toplam)",
+   "ayrinti": {
+    "modul_eki": 4,
+    "niyet_turu": 16,
+    "patron_komutu": 9,
+    "yetki": 9
+   },
+   "deger": 166,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "king_toplam_arac",
+   "katman": "king",
+   "yol": "görünen + yetki.js seviyeli eylem + modül eki (app.js eylemler) + intents KINDS + patron COMMANDS"
+  },
+  "kod_hacmi": {
+   "ad": "Kod hacmi (satır)",
+   "ayrinti": {
+    "bayt": 34294873,
+    "dosya": 1157
+   },
+   "deger": 560133,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "kod_hacmi",
+   "katman": "sistem",
+   "yol": "test dışı .js/.css/.py/.html satırı; tools, belgeler, veri, kalite, dist, testler hariç; kopyalar dahil (dağıtılan kod)"
+  },
+  "komut": {
+   "ad": "Komut",
+   "ayrinti": {
+    "AYS": 35,
+    "ESP": 17,
+    "SPI": 9,
+    "brand/ortak": 8
+   },
+   "deger": 69,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "komut",
+   "katman": "sistem",
+   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi)"
+  },
+  "kopya_dosya": {
+   "ad": "Üçe kopyalanan dosya",
+   "ayrinti": {
+    "diskteki_kopya": 711,
+    "hedef_modul": 3,
+    "ortak": 227,
+    "seviye": 10
+   },
+   "deger": 237,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "kopya_dosya",
+   "katman": "sistem",
+   "yol": "tools/ortak.py DOSYALAR girdisi + tools/seviye.py DOSYALAR girdisi (ast, çalıştırmadan)"
+  },
+  "kullanim": {
+   "ad": "Kullanım (son 28 gün açılış)",
+   "ayrinti": {
+    "dosya": "kalite/veri/yerel/kullanim.json",
+    "pencere_gun": 28
+   },
+   "deger": null,
+   "durum": "ölçülmedi",
+   "etiket": "veri yok",
+   "id": "kullanim",
+   "katman": "sistem",
+   "komut": "kabuk kalite/kullanim.js ile sayınca tarayıcı deposundaki «lifeos.kullanim» değeri kalite/veri/yerel/kullanim.json'a yazılır",
+   "yol": "kalite/kullanim.js'nin bu bilgisayarda gün gün saydığı ekran/araç açılışı; kalite/veri/yerel/kullanim.json"
+  },
+  "not_yapisi": {
+   "ad": "Not yapısı",
+   "ayrinti": {
+    "var": [
+     "ays_konu_notu",
+     "ays_video_notu",
+     "ays_yanlis_defteri",
+     "bilinc",
+     "defter",
+     "defter_sozluk",
+     "esp_kitap",
+     "esp_not",
+     "esp_taslak",
+     "esp_tez",
+     "hafiza_katman",
+     "king_hafiza",
+     "meydan_deste",
+     "notum",
+     "ogrenmotor_notu",
+     "spi_kayit_notu"
+    ]
+   },
+   "deger": 16,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "not_yapisi",
+   "katman": "sistem",
+   "yol": "not-ve-tekrar §1-2'deki yapıların imzası: defter + §2 tablosunun 15 satırı"
+  },
+  "sayfa": {
+   "ad": "Sayfa",
+   "ayrinti": {
+    "AYS": 30,
+    "ESP": 19,
+    "SPI": 21,
+    "brand/ortak": 11
+   },
+   "deger": 81,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "sayfa",
+   "katman": "sistem",
+   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi)"
+  },
+  "tekrar_zamanlayici": {
+   "ad": "Tekrar zamanlayıcısı",
+   "ayrinti": {
+    "var": [
+     "ays_hedef_tekrar",
+     "ays_kart",
+     "ays_konu_kapanis",
+     "ays_yanlis_kart",
+     "esp_srs",
+     "kavrat_ogrenmotor",
+     "king_devrim",
+     "ogret",
+     "usta"
+    ],
+    "yetim_tablo": 1
+   },
+   "deger": 9,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "tekrar_zamanlayici",
+   "katman": "sistem",
+   "yol": "not-ve-tekrar §4'teki 9 uygulamanın imzası (dosya + desen) hâlâ var mı"
+  },
+  "uygulama": {
+   "ad": "Uygulama",
+   "ayrinti": {
+    "klasorler": [
+     "AYS",
+     "ESP",
+     "HKM",
+     "SPI"
+    ]
+   },
+   "deger": 4,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
+   "id": "uygulama",
+   "katman": "sistem",
+   "yol": "kendi index.html'i olan üst klasör: */src/index.html + */web/index.html"
+  },
+  "veri_yeri": {
+   "ad": "Verinin doğrusu (yer)",
+   "ayrinti": {
+    "hkm_db": 1,
+    "indexeddb": 1,
+    "koken": 4
+   },
+   "deger": 6,
+   "durum": "ölçüldü",
+   "etiket": "hesaplandı",
+   "id": "veri_yeri",
+   "katman": "sistem",
+   "yol": "modül kökenleri + 4180 kökeni + hkm.db + IndexedDB medya (veri-katmani §1a-c)"
+  }
+ },
+ "surum": 1,
+ "tarih": "2026-11-14"
+}
