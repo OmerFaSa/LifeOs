@@ -34,6 +34,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 1 · AYS konu durumu](ekip/sadelesme/faz1-yol-konu-durumu.md) — Göçten önceki son sahipsiz kayıt: AYS konu durumu Yol motorunda; taşınanlar, taşınamayanlar (2026-11-13).
 - [Faz 4 · Ölçüm motoru](ekip/sadelesme/faz4-olcum.md) — A9: depodan sayılan ölçütler, bugün / taban / hedef, bütçe kuralları, ölçülemeyen eğriler (2026-11-13).
 - [Faz 4 · On üç eğri](ekip/sadelesme/faz4-egriler.md) — Her eğri bir dosya (`kalite/egri/`): ölçülenler, vekil ölçümler, ölçülemeyenler ve gerekenler (2026-11-13).
+- [Faz 4 · A9 kalanları](ekip/sadelesme/faz4-a9-kalanlar.md) — Katman denetimi, yerel kullanım sayacı, «yanlış anladın» seti biçimi, hız bütçesi bulgusu ve doğrulamalar (2026-11-13).
 - [Faz 5 · King MCP ucu](ekip/sadelesme/faz5-mcp.md) — Claude uygulamasından salt okur King: sekiz araç, gizlilik, kurulum (`king/KURULUM.md`) (2026-11-13).
 - [Faz 5 · King yolu](ekip/sadelesme/faz5-king-yolu.md) — MCP ucuna King çekirdeği ve Arama: `niyet`, `kayit_cozumle` (yazmaz, önerir), `arastir` (kaynaklı, bütçeli, çevrimdışı kipli); on bir araç (2026-11-13).
 - [Faz 1 planı](ekip/sadelesme/faz1.md) — A3 veri katmanı ve A4 tek kapı: tasarım, altı iş paketi, testleri ve Faz 1 kapısı (2026-11-12).

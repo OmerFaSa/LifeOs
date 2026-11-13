@@ -1,37 +1,100 @@
 """Anlama (plan §6, King): etiketli gerçek mesajlarda niyet isabeti.
 
-Gerçek eğri kalite/veri/anlama.jsonl'den okunur (sahibinin etiketlediği mesaj; biçim kalite/veri/README.md).
-Set boşken eğri ölçülmedi kalır. Yanındaki «vekil: sınav cümleleri» tahmin etiketlidir, eğrinin yerine geçmez.
+Gerçek eğri «yanlış anladın» setinden okunur (plan A7): kalite/veri/yerel/anlama.jsonl, git dışı, yalnız bu
+bilgisayarda. Biçim kalite/veri/README.md'de; her satır SATIR_KURALI'na göre denetlenir:
+
+  python kalite/egri/anlama.py --denetle    seti denetler, bozuk satırı Türkçe yazar (çıkış 0/1)
+
+Set boşken eğri ölçülmedi kalır. Yalnız işaretlenmiş («yanlış anladın») satır varsa da ölçülmez: o örneklemde
+isabet hep 0'dır, sayı yanıltır. Yanındaki «vekil: sınav cümleleri» tahmin etiketlidir, eğrinin yerine geçmez.
 """
+import datetime
 import json
+import sys
 from pathlib import Path
 
-import _sinav
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # betik olarak da _sinav bulunsun
+import _sinav  # noqa: E402
 
 AD = "Anlama"
 TANIM = "etiketli gerçek mesajlarda niyet isabeti"
-SET = "kalite/veri/anlama.jsonl"
+SET = "kalite/veri/yerel/anlama.jsonl"
+ISARET = "yanlis-anladin"  # King'in cevabının altındaki tek dokunuşluk işaretten gelen satırın kaynağı
+ALANLAR = {"metin", "niyet", "kaynak", "king", "tarih"}
+METIN_SINIR = 2000
+
+
+def satir_hatalari(r):
+    """Bir satırın Türkçe hata listesi (boşsa geçerli). Kişisel veri sızmasın diye bilinmeyen alan da hatadır."""
+    if not isinstance(r, dict):
+        return ["satır bir JSON nesnesi değil"]
+    h = []
+    fazla = sorted(set(r) - ALANLAR)
+    if fazla:
+        h.append(f"bilinmeyen alan: {', '.join(fazla)} (izinli: {', '.join(sorted(ALANLAR))})")
+    m = r.get("metin")
+    if not (isinstance(m, str) and m.strip()):
+        h.append("metin boş ya da dizge değil")
+    elif len(m) > METIN_SINIR:
+        h.append(f"metin {METIN_SINIR} karakterden uzun")
+    if not (isinstance(r.get("kaynak"), str) and r["kaynak"].strip()):
+        h.append("kaynak yok (ör. «yanlis-anladin», «ornek»)")
+    isaretli = r.get("kaynak") == ISARET
+    niyet, king = r.get("niyet"), r.get("king")
+    if niyet is None and not isaretli:
+        h.append("niyet yok; etiketsiz satır yalnız «yanlis-anladin» kaynağında olabilir")
+    elif niyet is not None and niyet not in _sinav.NIYETLER:
+        h.append(f"niyet «{niyet}» beşten biri değil ({', '.join(_sinav.NIYETLER)})")
+    if king is not None and king not in _sinav.NIYETLER:
+        h.append(f"king «{king}» beşten biri değil")
+    if isaretli and king is None:
+        h.append("«yanlis-anladin» satırında King'in seçtiği niyet (king) zorunlu")
+    if isaretli and niyet is not None and niyet == king:
+        h.append("«yanlis-anladin» işaretli ama niyet King'inkiyle aynı: çelişki")
+    t = r.get("tarih")
+    if t is not None:
+        try:
+            datetime.date.fromisoformat(t)
+        except (TypeError, ValueError):
+            h.append("tarih YYYY-AA-GG değil")
+    return h
 
 
 def etiketli(kok):
-    """Geçerli satırlar ve geçersiz satır sayısı (sahibinin elle yazdığı dosya: biçim denetlenir)."""
-    gecerli, gecersiz = [], 0
+    """(geçerli satırlar, [(satır no, hatalar)]). Dosya yoksa boş."""
+    gecerli, bozuk = [], []
     try:
         metin = (Path(kok) / SET).read_text(encoding="utf-8")
     except OSError:
-        return gecerli, gecersiz
-    for satir in filter(str.strip, metin.splitlines()):
+        return gecerli, bozuk
+    for no, satir in enumerate(metin.splitlines(), 1):
+        if not satir.strip():
+            continue
         try:
             r = json.loads(satir)
-            tamam = (isinstance(r.get("metin"), str) and r["metin"].strip() and r.get("niyet") in _sinav.NIYETLER
-                     and isinstance(r.get("kaynak"), str) and r.get("king", r["niyet"]) in _sinav.NIYETLER)
-        except (ValueError, AttributeError):
-            tamam = False
-        if tamam:
-            gecerli.append(r)
+        except ValueError as e:
+            bozuk.append((no, [f"JSON okunamadı: {e.msg}"]))
+            continue
+        h = satir_hatalari(r)
+        if h:
+            bozuk.append((no, h))
         else:
-            gecersiz += 1
-    return gecerli, gecersiz
+            gecerli.append(r)
+    return gecerli, bozuk
+
+
+def isaretle(kok, metin, king, niyet=None, tarih=None):
+    """«Yanlış anladın» işaretini sete ekler (sunucudaki tek yazma yolu; doğrulanmayan satır yazılmaz).
+    Döner: hata listesi (boşsa yazıldı)."""
+    r = {"metin": metin, "kaynak": ISARET, "king": king, "niyet": niyet,
+         "tarih": tarih or datetime.date.today().isoformat()}
+    h = satir_hatalari(r)
+    if not h:
+        yol = Path(kok) / SET
+        yol.parent.mkdir(parents=True, exist_ok=True)
+        with open(yol, "a", encoding="utf-8") as f:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    return h
 
 
 def vekil(kok):
@@ -60,16 +123,32 @@ def vekil(kok):
 
 
 def olc(kok):
-    satir, gecersiz = etiketli(kok)
-    kingli = [r for r in satir if "king" in r]
-    deger = round(sum(r["king"] == r["niyet"] for r in kingli) / len(kingli), 3) if kingli else None
-    ayrinti = {"etiketli": len(satir), "gecersiz_satir": gecersiz, "king_kararli": len(kingli), "set": SET,
+    satir, bozuk = etiketli(kok)
+    kingli = [r for r in satir if r.get("king") is not None and r.get("niyet") is not None]
+    isaretsiz = [r for r in kingli if r["kaynak"] != ISARET]
+    deger = round(sum(r["king"] == r["niyet"] for r in kingli) / len(kingli), 3) if isaretsiz else None
+    ayrinti = {"etiketli": len(satir), "gecersiz_satir": len(bozuk), "king_kararli": len(kingli),
+               "yanlis_anladin": sum(r["kaynak"] == ISARET for r in satir),
+               "etiket_bekleyen": sum(r.get("niyet") is None for r in satir), "set": SET,
                "gereken": "sahibinin etiketlediği gerçek mesajlar; her satırda King'in o an seçtiği niyet (king). "
-                          "«Yanlış anladın» işareti (plan: gerçek kullanımdan ölçüm seti) yazılınca set dolar; yalnız işaretlenen mesaj girerse "
-                          "isabet hep 0 çıkar, işaretlenmeyenlerden de örneklem gerekir"}
+                          "«Yanlış anladın» işareti seti doldurur ama yalnız işaretli satırla isabet hep 0 çıkar: "
+                          "değer için işaretlenmemiş (King'in doğru anladığı) örneklem de gerekir"}
+    if kingli and not isaretsiz:
+        ayrinti["neden_degersiz"] = "yalnız «yanlış anladın» satırı var; örneklem yanlı, isabet yazılmaz"
     v = vekil(kok)
     if v:
         ayrinti["vekil"] = v
     return {"deger": deger, "birim": "oran", "etiket": "ölçüldü" if deger is not None else "veri yok",
             "durum": "ölçüldü" if deger is not None else "ölçülmedi", "ayrinti": ayrinti,
             "komut": f"{SET} doldurulunca python kalite/olcum.py; vekil: {_sinav.KOMUT}"}
+
+
+if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")
+    if "--denetle" not in sys.argv:
+        sys.exit(__doc__)
+    iyi, kotu = etiketli(Path(__file__).resolve().parents[2])
+    for no, h in kotu:
+        print(f"{SET}:{no}: " + "; ".join(h))
+    print(f"{len(iyi)} geçerli, {len(kotu)} bozuk satır" + ("" if iyi or kotu else " (set boş ya da yok)"))
+    sys.exit(1 if kotu else 0)

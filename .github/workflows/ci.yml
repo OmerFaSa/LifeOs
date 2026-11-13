@@ -249,6 +249,15 @@ jobs:
       - name: Arama motoru (çevrimdışı)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Arama motoru (çevrimdışı)" python3 king/arama_test.py
 
+      # SADELESME FAZ 4 A9 KALANLAR (2026-11-13). Katman kurali: motor kabugu bilmez, kimse bir motorun
+      # acik arayuzu (LIFEOS.Motor.<Ad> nesnesinin anahtarlari) disina uzanamaz, alan yalniz veridir ve
+      # baska alana uzanamaz; bilinen istisnalar yalniz kuculur. Kullanim sayaci yalniz bu bilgisayarda
+      # sayar (ag cagrisi yok); "yanlis anladin" seti bicim denetimi, yalniz isaretli satirla deger yazilmaz.
+      - name: Katman denetimi
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Katman denetimi" bash -c 'python3 kalite/katman_test.py && python3 kalite/katman.py'
+      - name: Kullanım sayacı ve «yanlış anladın» seti
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kullanım sayacı ve «yanlış anladın» seti" bash -c 'node kalite/kullanim.test.js && python3 kalite/anlama_test.py && python3 kalite/egri/anlama.py --denetle'
+
       # A9 cikisi (2026-11-13, sahibin karariyla asim kabul edilip kayit yenilendikten sonra baglandi):
       # son kayda (kalite/kayit/) gore artan butce birlestirmeyi durdurur (AGENTS 0.1 kural 5).
       - name: Karmaşıklık bütçesi aşılmadı

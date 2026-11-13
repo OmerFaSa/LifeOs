@@ -1,5 +1,5 @@
 {
- "_aciklama": "Karmaşıklık bütçesi (AGENTS §0.1 kural 5 ve 7). taban: bu aracın 12 Kasım koduyla aynı sayım yolundan çıkan sayı (belge farklıysa 'belge' alanında). yon: azalmali = hedef tabanın altında, artış aşımdır; artmamali = hedef yok, artış aşımdır; izlenir = kaydedilir, denetlenmez. grup: kural 5 takası; aynı gruptan bir parça çıktıysa (grup toplamı artmadıysa) artış aşım sayılmaz. Denetim son kayda (kalite/kayit/), kayıt yoksa tabana karşıdır.",
+ "_aciklama": "Karmaşıklık bütçesi (AGENTS §0.1 kural 5 ve 7). taban: bu aracın 12 Kasım koduyla aynı sayım yolundan çıkan sayı (belge farklıysa 'belge' alanında). yon: azalmali = hedef tabanın altında, artış aşımdır; artmamali = hedef yok, artış aşımdır; izlenir = kaydedilir, denetlenmez; tavan = hız bütçesi, değer 'tavan'ı geçerse aşım (kayda değil sabit sınıra karşı, takas yok). grup: kural 5 takası; aynı gruptan bir parça çıktıysa (grup toplamı artmadıysa) artış aşım sayılmaz. Denetim son kayda (kalite/kayit/), kayıt yoksa tabana karşıdır.",
  "olcutler": {
   "uygulama": {"taban": 4, "hedef": 1, "yon": "azalmali", "grup": "yapi"},
   "kapi_yerel": {"taban": 5, "hedef": 1, "yon": "azalmali", "grup": "yapi"},
@@ -29,6 +29,8 @@
   "king_bench_yamasi": {"taban": 23, "hedef": 0, "yon": "azalmali", "grup": "yonlendirme"},
   "king_sinav_cumle": {"taban": 358, "hedef": null, "yon": "izlenir"},
   "king_bench_vaka": {"taban": 350, "hedef": null, "yon": "izlenir"},
+  "kabuk_acilis_yuku": {"taban": 420794, "tavan": 1000000, "yon": "tavan", "not": "hız bütçesinin statik parçası (2026-11-13): yeni kabuk açılışta en çok 1 MB kod yükler; en hafif eski modülün (SPİ dist 7,7 MB) sekizde biri. Süre CI'da oynar, bayt oynamaz"},
+  "alan_paketi_en_buyuk": {"taban": 2224187, "tavan": 2500000, "yon": "tavan", "not": "bir alan açılınca tek seferde yüklenen en büyük asama-N.json; bugünkü en büyük (akademik 2,2 MB) üstünde %12 pay"},
   "kod_hacmi": {"taban": null, "hedef": null, "yon": "izlenir", "not": "Optimizasyon eğrisinin statik parçası; geçişte yeni kod eskinin yanında yazıldığı için hedef Faz 4 sonrası"}
  }
 }

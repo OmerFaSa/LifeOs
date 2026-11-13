@@ -99,6 +99,23 @@ with tempfile.TemporaryDirectory() as d:
     mutlak = [s for s in (str(kok), str(kok).replace("\\", "/"), str(kok).replace("\\", "\\\\")) if s in m1]
     kontrol("kayıtta mutlak yol yok", not mutlak and not re.search(r'"[A-Za-z]:[\\/]', m1), mutlak)
 
+# --- kullanım sayacı: veri yokken değersiz; veriyle son 28 gün, en yeni güne göre ---
+kontrol("kullanım: dosya yokken «veri yok», ölçülmedi, komutlu",
+        o["kullanim"]["deger"] is None and o["kullanim"]["etiket"] == "veri yok" and o["kullanim"]["komut"], o["kullanim"])
+with tempfile.TemporaryDirectory() as d:
+    kok = sahte_depo(d, {olcum.KULLANIM: json.dumps({"surum": 1, "gunler": {
+        "2026-03-01": {"ekran/felsefe": 2, "arac/not": 1, "ekran/Kötü Ad": 5, "ekran/x": -3},
+        "2026-02-02": {"ekran/felsefe": 1},   # pencere başı (28. gün): sayılır
+        "2026-02-01": {"ekran/uyku": 9}}}),    # pencere dışı
+        "kabuk/harita.js": "var YERLER = [\n { id: 'felsefe' },\n { id: 'uyku' },\n { id: 'not' }];\n"})
+    k = olcum.olc(kok)["kullanim"]
+    kontrol("kullanım: pencere içi geçerli anahtarlar toplanır, bozuk anahtar ve eksi sayı atlanır",
+            k["deger"] == 4 and k["etiket"] == "ölçüldü" and k["ayrinti"]["sayim"] == {"ekran/felsefe": 3, "arac/not": 1}
+            and k["ayrinti"]["bas"] == "2026-02-02", k)
+    kontrol("kullanım: haritada olup hiç açılmayan yer listelenir", k["ayrinti"]["hic_acilmayan_yer"] == ["uyku"], k)
+    (kok / olcum.KULLANIM).write_text("{bozuk", encoding="utf-8")
+    kontrol("kullanım: bozuk dosya «veri yok»", olcum.olc(kok)["kullanim"]["deger"] is None)
+
 # --- eğri dosyaları: keşif, sözleşme, vekil ---
 ESKI_KIMLIK = {"egri_" + a for a in ("tanima", "ogretme", "anlama", "uretim", "arama", "kontrol", "kendini_egitme",
                                      "tekrar", "saglayici", "hafiza", "optimizasyon", "anlasilabilirlik", "hayata_etki")}
@@ -143,7 +160,7 @@ SINAV_EK = {
         {"m": "ays", "c": "deneme sayfasını aç", "karar": "arac:ays_denemeler", "ok": False},  # niyet doğru, araç yanlış
         {"m": "spi", "c": "stoacılık nedir", "karar": "tur:yok", "ok": False},
         {"m": "esp", "c": "iki niyetli", "karar": "veri", "ok": True}]}, ensure_ascii=False),
-    "kalite/veri/anlama.jsonl": '{"metin": "yürüdüm", "niyet": "kayit", "kaynak": "ornek"}\n{"metin": "", "niyet": "uydurma"}\n',
+    "kalite/veri/yerel/anlama.jsonl": '{"metin": "yürüdüm", "niyet": "kayit", "kaynak": "ornek"}\n{"metin": "", "niyet": "uydurma"}\n',
     "AYS/dist/rota.html": "a\nb\n",
     "AYS/dist/fonts/f.woff2": "xxxxxxxx",
     "kabuk/index.html": '<link href="kabuk.css"><script src="../motor/m.js"></script>\n',
@@ -174,7 +191,16 @@ with tempfile.TemporaryDirectory() as d:
                                                                    "kabuk/kabuk.css", "motor/m.js"))
             and op["ayrinti"]["motor_kabukta"]["bayt"] == (kok / "motor/m.js").stat().st_size
             and op["ayrinti"]["acilis"]["etiket"] == "veri yok", op)
-    (kok / "kalite/veri/anlama.jsonl").write_text(
+    hz = olcum.olc(kok)
+    kontrol("hız: kabuk açılış yükü Optimizasyon'un kabuk sayımıyla aynı; alan paketi yokken değersiz",
+            hz["kabuk_acilis_yuku"]["deger"] == op["ayrinti"]["uygulama"]["kabuk"]["bayt"]
+            and hz["alan_paketi_en_buyuk"]["deger"] is None, (hz["kabuk_acilis_yuku"], hz["alan_paketi_en_buyuk"]))
+    for ad, metin in (("alan/a/asama-1.json", "{}"), ("alan/b/asama-2.json", '{"x": 1}')):
+        (kok / ad).parent.mkdir(parents=True, exist_ok=True)
+        (kok / ad).write_text(metin, encoding="utf-8")
+    ap = olcum.olc(kok)["alan_paketi_en_buyuk"]
+    kontrol("hız: en büyük alan paketi dosyasıyla", ap["deger"] == 8 and ap["ayrinti"]["dosya"] == "alan/b/asama-2.json", ap)
+    (kok / "kalite/veri/yerel/anlama.jsonl").write_text(
         '{"metin": "a", "niyet": "kayit", "kaynak": "ornek", "king": "kayit"}\n'
         '{"metin": "b", "niyet": "sohbet", "kaynak": "ornek", "king": "yonet"}\n', encoding="utf-8")
     an = olcum.olc(kok)["egri_anlama"]
@@ -213,6 +239,13 @@ s, _ = olcum.denetle(ol(a=5, b=5, c=3), B, {"c": {"deger": 2}}, "2026-01-01")
 kontrol("başvuru son kayıttır (taban değil)", len(s) == 1 and "c 2 → 3 (son kayıt 2026-01-01)" in s[0], s)
 s, n = olcum.denetle({"a": {"ad": "a", "deger": None}, **ol(b=5, c=3)}, B, {})
 kontrol("ölçülemeyen bütçe aşım sayılmaz, uyarı verir", s == [] and any("UYARI: a" in x for x in n), (s, n))
+T = {"h": {"taban": 1, "tavan": 10, "yon": "tavan"}}
+s, _ = olcum.denetle(ol(h=10), T, {"h": {"deger": 2}})
+kontrol("hız tavanı: tavana eşit geçer (kayıttaki artış önemsiz)", s == [], s)
+s, _ = olcum.denetle(ol(h=11), T, {})
+kontrol("hız tavanı: aşan değer AŞIM satırı verir", len(s) == 1 and s[0].startswith("AŞIM: h 11 > tavan 10"), s)
+s, n = olcum.denetle(ol(), T, {})
+kontrol("hız tavanı: ölçülemezse uyarı, aşım değil", s == [] and any("UYARI: h" in x for x in n), (s, n))
 
 # --- komut satırı: --kaydet, --denetle çıkış kodları ---
 with tempfile.TemporaryDirectory() as d:

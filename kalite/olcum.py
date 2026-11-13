@@ -459,6 +459,57 @@ def king(kok):
     ]
 
 
+# ---------- Hız bütçesinin statik parçası (plan A9; süre ölçmez, CI'da oynamaz) ----------
+
+def hiz(kok):
+    spec = importlib.util.spec_from_file_location("egri_optimizasyon_hiz", EGRI_DIZIN / "optimizasyon.py")
+    opt = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(opt)
+    kabuk = opt.dagitilan(kok).get("kabuk", [])  # Optimizasyon eğrisiyle aynı sayım: index.html + bağladıkları
+    paket = {p.relative_to(kok).as_posix(): p.stat().st_size for p in sorted(kok.glob("alan/*/asama-*.json"))}
+    en = max(paket.items(), key=lambda kv: (kv[1], kv[0])) if paket else (None, None)
+    return [
+        olcut("kabuk_acilis_yuku", "Kabuk açılış yükü (bayt)", sum(p.stat().st_size for p in kabuk) if kabuk else None,
+              "ölçüldü", "kabuk/index.html + src/href ile bağladığı .js/.css (motor/ ve brand/ dahil; yazı tipi, görsel, "
+              "sonradan yüklenen alan paketi hariç)", ayrinti={"dosya": len(kabuk)}),
+        olcut("alan_paketi_en_buyuk", "En büyük alan paketi (bayt)", en[1], "ölçüldü",
+              "alan/*/asama-*.json içinde en büyüğü (alan açılınca tek seferde yüklenen paket)", ayrinti={"dosya": en[0]}),
+    ]
+
+
+# ---------- Kullanım sayacı (plan A2; yazan kalite/kullanim.js) ----------
+
+KULLANIM = "kalite/veri/yerel/kullanim.json"  # git dışı (kalite/veri/yerel/.gitignore): yalnız bu bilgisayar
+KULLANIM_GUN = 28
+
+
+def kullanim(kok):
+    """Son 28 gün (verideki en yeni güne kadar; bugünün tarihine değil, aynı girdi aynı kayıt) açılış sayısı."""
+    komut = f"kabuk kalite/kullanim.js ile sayınca tarayıcı deposundaki «lifeos.kullanim» değeri {KULLANIM}'a yazılır"
+    try:
+        v = json.loads(oku(kok, KULLANIM) or "null")
+        gunler = v["gunler"] if v and v.get("surum") == 1 and isinstance(v.get("gunler"), dict) else {}
+        gunler = {g: s for g, s in gunler.items() if re.fullmatch(r"\d{4}-\d{2}-\d{2}", g) and isinstance(s, dict)}
+    except (ValueError, AttributeError, TypeError):
+        gunler = {}
+    sayi, ayr = {}, {"dosya": KULLANIM, "pencere_gun": KULLANIM_GUN}
+    if gunler:
+        son = datetime.date.fromisoformat(max(gunler))
+        bas = (son - datetime.timedelta(days=KULLANIM_GUN - 1)).isoformat()
+        for g, s in gunler.items():
+            for k, n in s.items():
+                if g >= bas and isinstance(n, int) and n > 0 and re.fullmatch(r"(?:ekran|arac)/[a-z0-9-]+", k):
+                    sayi[k] = sayi.get(k, 0) + n
+        yerler = set(re.findall(r"\{\s*id\s*:\s*'([a-z0-9-]+)'", oku(kok, "kabuk/harita.js")))
+        acilan = {k.split("/", 1)[1] for k in sayi}
+        ayr.update(bas=bas, son=son.isoformat(), sayim=dict(sorted(sayi.items(), key=lambda kv: (-kv[1], kv[0]))),
+                   hic_acilmayan_yer=sorted(yerler - acilan))
+    deger = sum(sayi.values()) or None
+    return [dict(olcut("kullanim", "Kullanım (son 28 gün açılış)", deger, "ölçüldü" if deger else "veri yok",
+                       "kalite/kullanim.js'nin bu bilgisayarda gün gün saydığı ekran/araç açılışı; " + KULLANIM,
+                       ayrinti=ayr), komut=komut)]
+
+
 # ---------- Eğriler (plan §6: 10 King + 3 Sistem) ----------
 # Eğri eklemek dosya eklemektir: kalite/egri/<ad>.py → AD, TANIM ve
 # olc(kok) -> {deger, birim, etiket, durum, ayrinti, komut}. Alt çizgili dosya yardımcıdır.
@@ -489,7 +540,7 @@ def egriler(kok):
 
 
 OLCUMLER = [uygulamalar, kapilar, kopyalar, ayarlar, ic_icelik, parcalar, sekmeler, ekranlar,
-            motor_yapilari, kesinlik, hkm, kod_hacmi, king, egriler]
+            motor_yapilari, kesinlik, hkm, kod_hacmi, king, hiz, kullanim, egriler]
 
 
 def olc(kok=KOK):
@@ -522,8 +573,16 @@ def denetle(olcum, butce, onceki, onceki_ad=None):
         v = (onceki.get(id_) or {}).get("deger")
         return v if isinstance(v, (int, float)) else butce[id_].get("taban")
 
-    artis, notlar, gruplar = {}, [], {}
+    artis, notlar, gruplar, tavan = {}, [], {}, []
     for id_, b in sorted(butce.items()):
+        if b.get("yon") == "tavan":  # hız bütçesi: kayda değil sabit tavana karşı; takas yok
+            o = olcum.get(id_)
+            if not o or o["deger"] is None:
+                notlar.append(f"UYARI: {id_} ölçülemedi; tavanı denetlenmedi.")
+            elif o["deger"] > b["tavan"]:
+                tavan.append(f"AŞIM: {o['ad']} {o['deger']} > tavan {b['tavan']}; hız bütçesi. "
+                             "Yük azaltılmadan birleştirilmez.")
+            continue
         if b.get("yon") not in ("artmamali", "azalmali"):
             continue
         o = olcum.get(id_)
@@ -534,7 +593,7 @@ def denetle(olcum, butce, onceki, onceki_ad=None):
             gruplar.setdefault(b["grup"], []).append(id_)
         if o["deger"] > ref(id_):
             artis[id_] = (ref(id_), o["deger"])
-    satirlar = []
+    satirlar = tavan
     for id_, (once_v, simdi) in sorted(artis.items()):
         grup = butce[id_].get("grup")
         if grup:
@@ -555,14 +614,15 @@ def md(olcum, butce):
         if o["durum"] != "ölçüldü":
             continue
         b = butce.get(id_, {})
-        taban, hedef = (("—" if b.get(k) is None else b[k]) for k in ("taban", "hedef"))
+        taban, hedef = (("—" if b.get(k) is None else b[k]) for k in ("taban", "tavan" if "tavan" in b else "hedef"))
+        hedef = f"≤ {hedef}" if "tavan" in b else hedef
         birim = f" {o['birim']}" if o.get("birim") else ""
         s.append(f"| {o['ad']} | {o['deger']}{birim} | {taban} | {hedef} | {o['etiket']} |")
     s += ["", "Ölçülmedi (değer yok; ölçecek komut):"]
     for _, o in sorted(olcum.items()):
         if o["durum"] == "ölçülmedi":
             v = o["ayrinti"].get("vekil") or {}
-            s.append(f"- {o['ad']}: {o['komut']}" + (f" · {v['ad']} = {v['deger']} ({v['etiket']}, eğri değil)" if v else ""))
+            s.append(f"- {o['ad']}: {o.get('komut') or o['yol']}" + (f" · {v['ad']} = {v['deger']} ({v['etiket']}, eğri değil)" if v else ""))
     return "\n".join(s)
 
 
@@ -598,7 +658,7 @@ def main(argv=None):
             print(s)
         if satirlar:
             return 1
-        print(f"Bütçe tamam: {sum(1 for b in butce.values() if b.get('yon') in ('artmamali', 'azalmali'))} bütçe, aşım yok.")
+        print(f"Bütçe tamam: {sum(1 for b in butce.values() if b.get('yon') in ('artmamali', 'azalmali', 'tavan'))} bütçe, aşım yok.")
     if a.md:
         print(md(olcum, butce))
     if not (a.kaydet or a.denetle or a.md):
