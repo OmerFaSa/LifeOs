@@ -1,0 +1,317 @@
+#!/usr/bin/env python3
+"""King MCP sunucusu testi: python king/mcp_test.py   (cikis 0 temiz, 1 kirmizi)
+
+Gecici klasorde, gercek hesap.db semasiyla (sistem/hesap.py Depo) ve depo benzeri icerik dosyalariyla.
+Korunan sozler king/mcp.py basligindaki 1-6. Kullanicinin hicbir dosyasina dokunmaz."""
+import datetime
+import hashlib
+import json
+import os
+import shutil
+import sqlite3
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+KOK = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(KOK / "sistem"))
+sys.path.insert(0, str(KOK / "king"))
+sys.dont_write_bytecode = True
+
+import goc  # noqa: E402
+import hesap  # noqa: E402
+import mcp  # noqa: E402
+
+kirmizi = 0
+
+
+def dogru(ad, kosul, ek=""):
+    global kirmizi
+    print(("  ✓ " if kosul else "  ✕ ") + ad + ("" if kosul else "  %r" % (ek,)))
+    kirmizi += 0 if kosul else 1
+
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
+t = tempfile.mkdtemp(prefix="lifeos-king-test-")
+CANLI = os.path.join(t, "canli")
+HESAP = os.path.join(CANLI, "hesap", "hesap.db")
+TEK = os.path.join(CANLI, "veri", "lifeos.db")
+ICERIK = os.path.join(t, "depo")
+os.environ.update(LIFEOS_HESAP_DB=HESAP, LIFEOS_VERI_DB=TEK, LIFEOS_ICERIK=ICERIK)
+os.environ.pop("LIFEOS_NODE", None)
+
+simdi = datetime.datetime.now()
+BUGUN, DUN, YARIN = (str(simdi.date() + datetime.timedelta(days=d)) for d in (0, -1, 1))
+MS = int(simdi.timestamp() * 1000)
+GIZLI = ("GIZLI-", "OZEL-KAYIT-XYZ", "BASKA-KULLANICI-XYZ", "sk-ANAHTAR-XYZ", "KAPI-SORUSU-XYZ", "TURETILMIS-XYZ")
+
+# --- canli hesap deposu (gercek sema) ---
+d = hesap.Depo(HESAP)
+with d._islem() as c:
+    for i, ad, rol in ((1, "sahip", "admin"), (2, "misafir", "uye")):
+        c.execute("INSERT INTO kullanici(id, ad, rol, tuz, ozet, tur, olusturma) VALUES (?,?,?,?,?,?,?)",
+                  (i, ad, rol, b"t", b"o", 1, "2026-11-01"))
+    kayitlar = [
+        (1, "ays/main", "days/" + BUGUN, {"date": BUGUN, "minutes": 50, "minutesCert": "measured", "su": 3}),
+        (1, "spi/ben", "vitals/v1", {"id": "v1", "weight": 72.5, "cert": "measured", "at": MS}),
+        (1, "spi/ben", "meta/ayar", {"apiKey": "sk-ANAHTAR-XYZ", "llm": {"keys": {"a": "sk-ANAHTAR-XYZ"}}, "tema": "Piksel"}),
+        (1, "ays/main", "defter/n1", {"id": "n1", "baslik": "Açık not", "govde": "Platon üzerine", "at": "2026-11-10T10:00:00Z",
+                                      "guncel": "2026-11-11T10:00:00Z", "sabit": False, "tur": "not", "klasor": ""}),
+        (1, "esp/ben", "notes/e1", {"id": "e1", "text": "Kant ve ödev", "createdAt": MS}),
+        (1, "ays/main", "cards/c1", {"id": "c1", "front": "Soru bir", "back": "Cevap", "dueAt": BUGUN,
+                                     "lastReviewedAt": DUN, "history": [{"rating": "good"}]}),
+        (1, "esp/ben", "cards/k1", {"id": "k1", "front": "word", "back": "kelime", "due": YARIN, "interval": 2,
+                                    "reps": 1, "lapses": 0, "lang": "en"}),
+        (1, "ays/main", "briefings/b1", {"metin": "TURETILMIS-XYZ"}),
+        (1, "ays/main", "usage/u1", {"metin": "TURETILMIS-XYZ"}),
+        (1, "ays/main", "cards/silinen", None),
+        (1, "ays/main", "ozel/o1", {"ozel": True, "metin": "OZEL-KAYIT-XYZ"}),
+        (2, "ays/main", "days/" + BUGUN, {"minutes": 999, "not": "BASKA-KULLANICI-XYZ"}),
+    ]
+    for kul, alan, yol, deger in kayitlar:
+        c.execute("INSERT INTO kayit(kullanici, alan, yol, deger, zaman, cihaz, sira) VALUES (?,?,?,?,?,?,1)",
+                  (kul, alan, yol, None if deger is None else json.dumps(deger, ensure_ascii=False), MS, "cPC"))
+    bilinc = {"izin": True, "dusunceler": [
+        {"id": "d1", "baslik": "Açık düşünce", "metin": "Bkz. [[GIZLI-BASLIK]]", "tur": "fikir", "kesinlik": 3, "zaman": MS},
+        {"id": "d2", "baslik": "GIZLI-BASLIK", "metin": "GIZLI-METIN", "tur": "his", "ozel": True, "zaman": MS}]}
+    yayin = [("ays/bugun", "3 blok planlı", BUGUN), ("spi/bugun", "eski özet", DUN),
+             ("ays/gun", json.dumps({"bloklar": [{"ad": "Felsefe", "dk": 30}]}), BUGUN),
+             ("ays/gunluk", json.dumps({"gunler": {BUGUN: {"soru": 40}}}), None),
+             ("gun/kayit", json.dumps({"niyet": "oku", "enerji": 4, "hava": 3, "bloklar": []}), BUGUN),
+             ("gun/bilinc", json.dumps(bilinc, ensure_ascii=False), None)]
+    for ad, icerik, gun in yayin:
+        c.execute("INSERT INTO yayin(kullanici, ad, icerik, adet, zaman, gun) VALUES (1,?,?,1,?,?)",
+                  (ad, icerik, MS / 1000, gun))
+    c.execute("INSERT INTO yayin(kullanici, ad, icerik, adet, zaman, gun) VALUES (2,'ays/bugun','BASKA-KULLANICI-XYZ',1,1,?)",
+              (BUGUN,))
+del d
+
+# --- depo benzeri icerik ---
+os.makedirs(os.path.join(ICERIK, "alan", "felsefe"))
+os.makedirs(os.path.join(ICERIK, "kabuk"))
+os.makedirs(os.path.join(ICERIK, "kalite", "kayit"))
+shutil.copyfile(KOK / "kabuk" / "harita.js", os.path.join(ICERIK, "kabuk", "harita.js"))
+kapi = {"esik": 0.7, "sorular": [{"id": "q1", "tur": "secmeli", "soru": "KAPI-SORUSU-XYZ", "sec": ["a", "b"], "dogru": "a"}]}
+asama = {"id": "f1", "ad": "Aşama 1", "hedef": "Düşünmeyi tanımak", "kapi": kapi, "uniteler": [
+    {"id": "u1", "ad": "Ünite 1", "kazanim": ["k"], "kapi": kapi, "dersler": [
+        {"id": "ders1", "ad": "Ders 1", "durum": "onayli", "ozet": "özet", "metin": "DERS-METNI"},
+        {"id": "ders2", "ad": "Ders 2", "durum": "taslak", "ozet": "özet 2", "metin": "..."}]}]}
+Path(ICERIK, "alan", "felsefe", "asama-1.json").write_text(json.dumps(asama, ensure_ascii=False), encoding="utf-8")
+olc = lambda deger: {"sayfa": {"id": "sayfa", "ad": "Sayfa", "deger": deger, "etiket": "ölçüldü", "durum": "ölçüldü",
+                               "katman": "sistem"},
+                     "egri_x": {"id": "egri_x", "ad": "Eğri", "deger": None, "etiket": "veri yok", "durum": "ölçülmedi",
+                                "katman": "king", "komut": "python x.py"}}  # noqa: E731
+for gun, v in (("2026-11-12", 79), ("2026-11-13", 80)):
+    Path(ICERIK, "kalite", "kayit", gun + ".json").write_text(json.dumps({"tarih": gun, "surum": 1, "olcutler": olc(v)}),
+                                                             encoding="utf-8")
+Path(ICERIK, "kalite", "butce.json").write_text(json.dumps({"olcutler": {"sayfa": {"taban": 79, "hedef": 40, "yon": "azalmali"}}}),
+                                                encoding="utf-8")
+
+
+# --- yardimcilar ---
+def rpc(yontem, params=None, id_=1):
+    m = {"jsonrpc": "2.0", "id": id_, "method": yontem}
+    if params is not None:
+        m["params"] = params
+    return mcp.satir_isle(json.dumps(m))
+
+
+ciktilar = []
+
+
+def arac(ad, **arg):
+    r = rpc("tools/call", {"name": ad, "arguments": arg})
+    metin = r["result"]["content"][0]["text"]
+    ciktilar.append(metin)
+    return r["result"]["isError"], (json.loads(metin) if not r["result"]["isError"] else metin)
+
+
+def iz(kok):
+    out = {}
+    for dz, _, adlar in os.walk(kok):
+        for a in adlar:
+            p = os.path.join(dz, a)
+            out[p] = (hashlib.sha256(open(p, "rb").read()).hexdigest(), os.stat(p).st_mtime_ns)
+    return out
+
+
+acilan = []
+_connect = sqlite3.connect
+
+
+def izli_connect(yol, *a, **k):
+    acilan.append(os.path.abspath(str(yol)))
+    return _connect(yol, *a, **k)
+
+
+once = iz(CANLI)
+sqlite3.connect = izli_connect
+
+print("El sıkışma")
+r = rpc("initialize", {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "t", "version": "1"}})
+dogru("initialize desteklenen sürümü aynen döner", r["result"]["protocolVersion"] == "2025-06-18", r)
+dogru("initialize araç yeteneği ve sunucu kimliği", r["result"]["capabilities"] == {"tools": {"listChanged": False}}
+      and r["result"]["serverInfo"]["name"] == "lifeos-king" and r["result"]["instructions"], r)
+r = rpc("initialize", {"protocolVersion": "1999-01-01", "capabilities": {}, "clientInfo": {"name": "t", "version": "1"}})
+dogru("bilinmeyen sürümde en yeni eski sürüm önerilir", r["result"]["protocolVersion"] == "2025-11-25", r)
+dogru("notifications/initialized yanıtsız", mcp.satir_isle('{"jsonrpc":"2.0","method":"notifications/initialized"}') is None)
+dogru("ping boş sonuç", rpc("ping")["result"] == {})
+r = rpc("server/discover", {"_meta": {mcp.SURUM_ANAHTARI: "2026-07-28"}})
+dogru("server/discover güncel sürümü ve kimliği verir", "2026-07-28" in r["result"]["supportedVersions"]
+      and r["result"]["resultType"] == "complete" and r["result"]["_meta"]["io.modelcontextprotocol/serverInfo"]["name"] == "lifeos-king", r)
+r = rpc("tools/list", {"_meta": {mcp.SURUM_ANAHTARI: "1900-01-01"}})
+dogru("desteklenmeyen _meta sürümü -32022 ve desteklenen liste", r["error"]["code"] == -32022
+      and "2026-07-28" in r["error"]["data"]["supported"] and r["error"]["data"]["requested"] == "1900-01-01", r)
+
+print("Araç listesi")
+araclar = rpc("tools/list", {"_meta": {mcp.SURUM_ANAHTARI: "2026-07-28"}})["result"]["tools"]
+adlar = [a["name"] for a in araclar]
+dogru("en çok 12 araç", 1 <= len(araclar) <= 12, adlar)
+dogru("her araçta ad, Türkçe açıklama, nesne şeması", all(a["description"] and a["title"] and a["inputSchema"]["type"] == "object"
+                                                       and a["inputSchema"].get("additionalProperties") is False for a in araclar))
+dogru("her araç salt okur işaretli", all(a["annotations"]["readOnlyHint"] and not a["annotations"]["destructiveHint"]
+                                         for a in araclar))
+dogru("yazan araç yok (ad)", not any(v in a for a in adlar for v in ("kaydet", "yaz", "sil", "ekle", "degistir",
+                                                                        "guncelle", "onayla", "oner")), adlar)
+
+print("Hatalar")
+dogru("bozuk JSON -32700, id null", mcp.satir_isle("bozuk") == {"jsonrpc": "2.0", "id": None,
+                                                                 "error": {"code": -32700, "message": "Parse error"}})
+dogru("boş toplu istek -32600", mcp.satir_isle("[]")["error"]["code"] == -32600)
+r = mcp.satir_isle('{"jsonrpc":"1.0","id":7,"method":"ping"}')
+dogru("jsonrpc 2.0 değil -32600, id korunur", r["error"]["code"] == -32600 and r["id"] == 7, r)
+dogru("method yok -32600", mcp.satir_isle('{"jsonrpc":"2.0","id":1}')["error"]["code"] == -32600)
+r = mcp.satir_isle('{"jsonrpc":"2.0","id":{"a":1},"method":"ping"}')
+dogru("geçersiz id -32600, id null", r["error"]["code"] == -32600 and r["id"] is None, r)
+dogru("bilinmeyen yöntem -32601", rpc("resources/write")["error"]["code"] == -32601)
+dogru("params nesne değil -32602", rpc("tools/list", [1])["error"]["code"] == -32602)
+dogru("bilinmeyen araç -32602", rpc("tools/call", {"name": "kayit_yaz", "arguments": {}})["error"]["code"] == -32602)
+dogru("arguments nesne değil -32602", rpc("tools/call", {"name": "notlar", "arguments": "x"})["error"]["code"] == -32602)
+dogru("sınır dışı sayı araç hatası", arac("kayit_ara", sinir=0)[0])
+dogru("bilinmeyen argüman araç hatası", arac("kayit_ara", yaz=True)[0])
+dogru("eksik zorunlu argüman araç hatası", arac("kayit_oku")[0])
+r = mcp.satir_isle('[{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","method":"notifications/x"}]')
+dogru("toplu istek: bildirime yanıt yok", isinstance(r, list) and len(r) == 1 and r[0]["id"] == 1, r)
+
+print("Araçlar (hesap.db kopyası)")
+h, r = arac("sistem_haritasi")
+dogru("sistem haritası: yerler ve veri kaynağı", not h and len(r["yerler"]) > 10 and "hesap.db" in r["veri"]["kaynak"]
+      and r["veri"]["okunabilir_kayit"]["ays/main"] == {"deger": 2, "kesinlik": "hesaplandı"}, r if h else r["veri"])
+h, r = arac("kayit_ara")
+kim = {k["kimlik"] for k in r["kayitlar"]}
+dogru("kayıt ara: sahibin açık kayıtları", kim == {"ays/main|days/" + BUGUN, "spi/ben|vitals/v1", "spi/ben|meta/ayar",
+                                                   "ays/main|cards/c1", "esp/ben|cards/k1"}, kim)
+dogru("kayıt ara: sayım etiketli", r["eslesen"] == {"deger": 5, "kesinlik": "hesaplandı"}, r["eslesen"])
+dogru("kayıt ara: Türkçe katlamayla metin", [k["kimlik"] for k in arac("kayit_ara", metin="PİKSEL")[1]["kayitlar"]]
+      == ["spi/ben|meta/ayar"])
+dogru("kayıt ara: sır aranamaz", arac("kayit_ara", metin="sk-ANAHTAR")[1]["kayitlar"] == [])
+dogru("kayıt ara: alan ve yol öneki", [k["kimlik"] for k in arac("kayit_ara", alan="spi", yol="vitals/")[1]["kayitlar"]]
+      == ["spi/ben|vitals/v1"])
+h, r = arac("kayit_oku", kimlik="ays/main|days/" + BUGUN)
+dogru("kayıt oku: etiketli sayı depodaki etiketle", r["govde"]["minutes"] == {"deger": 50, "kesinlik": "ölçüldü"}, r)
+dogru("kayıt oku: etiketsiz eski sayı «eski kayıt»", r["govde"]["su"] == {"deger": 3, "kesinlik": "eski kayıt"}, r)
+h, r = arac("kayit_oku", kimlik="spi/ben|vitals/v1")
+dogru("kayıt oku: ortak cert etiketi", r["govde"]["weight"] == {"deger": 72.5, "kesinlik": "ölçüldü"}, r)
+h, r = arac("kayit_oku", kimlik="spi/ben|meta/ayar")
+dogru("kayıt oku: sır anahtarın değeri gizli", r["govde"]["apiKey"] == "«gizli»" and r["govde"]["llm"]["keys"] == "«gizli»", r)
+dogru("kayıt oku: not kayıt aracından okunmaz", arac("kayit_oku", kimlik="ays/main|defter/n1")[0])
+dogru("kayıt oku: özel işaretli kayıt kapalı", arac("kayit_oku", kimlik="ays/main|ozel/o1")[0])
+dogru("kayıt oku: türetilmiş kayıt yok", arac("kayit_oku", kimlik="ays/main|briefings/b1")[0])
+h, r = arac("bugun_ozeti")
+m = {x["modul"]: x for x in r["moduller"]}
+dogru("bugün: modülün gün cümlesi", m["ays"]["ozet"] == "3 blok planlı" and m["ays"]["ozet_durumu"] == "bugünün", m.get("ays"))
+dogru("bugün: dünkü özet bugünmüş gibi sunulmaz", m["spi"]["ozet"] is None and DUN in m["spi"]["ozet_durumu"], m.get("spi"))
+dogru("bugün: plan ve sayısal özet etiketli", m["ays"]["plan"]["bloklar"][0]["dk"] == {"deger": 30, "kesinlik": "eski kayıt"}
+      and m["ays"]["sayisal"]["soru"] == {"deger": 40, "kesinlik": "eski kayıt"}, m.get("ays"))
+dogru("bugün: Gün kaydı", r["gun_kaydi"]["kayit"]["enerji"] == {"deger": 4, "kesinlik": "eski kayıt"}, r["gun_kaydi"])
+dogru("bugün: bugünün kayıtları", [k["kimlik"] for k in r["bugunun_kayitlari"]] == ["ays/main|days/" + BUGUN], r["bugunun_kayitlari"])
+h, r = arac("notlar")
+dogru("notlar: dört not, biri özel olduğu için dışarıda", (r["toplam"]["deger"], r["okunabilir"]["deger"],
+                                                         r["ozel_oldugu_icin_disarida"]["deger"]) == (4, 3, 1), r if h else r["toplam"])
+dogru("notlar: süzgeç açıklaması", "Bilinç" in r["gizlilik"])
+h, r = arac("notlar", kimlik="bilinc/d1")
+dogru("notlar: özel nota giden bağın adı silinir", "«özel not»" in r["not"]["govde"], r)
+dogru("notlar: özel not kimlikle de gelmez", arac("notlar", kimlik="bilinc/d2") == (True, "Bu not King'e kapalı (özel)."))
+h, r = arac("notlar", ara="kant")
+dogru("notlar: arama Not motoruyla", not h and any("e1" in n["kimlik"] for n in r["notlar"]), r)
+h, r = arac("yol_haritasi")
+dersler = r["asamalar"][0]["uniteler"][0]["dersler"]
+dogru("yol: aşama, ünite, ders; taslak işaretli", [x["durum"][:6] for x in dersler] == ["onaylı", "taslak"], dersler)
+dogru("yol: ilerleme veri yok", r["ilerleme"].startswith("veri yok"))
+dogru("yol: kapı sayısı etiketli, cevap yok", r["asamalar"][0]["kapi"]["soru"] == {"deger": 1, "kesinlik": "hesaplandı"}
+      and "%70" in r["asamalar"][0]["kapi"]["gecme"], r["asamalar"][0]["kapi"])
+dogru("yol: ders metni kimlikle", arac("yol_haritasi", ders="ders1")[1]["ders"]["metin"] == "DERS-METNI")
+dogru("yol: olmayan alan araç hatası", arac("yol_haritasi", alan="tarih")[0])
+h, r = arac("tekrar_durumu")
+dogru("tekrar: iki kart, biri bugün", not h and r["kart"]["deger"] == 2 and r["bugun_tekrar"]["deger"] == 1
+      and r["siradaki_vade"] != "veri yok", r)
+h, r = arac("olcum")
+dogru("ölçüm: değer etiketli, ölçülmeyen veri yok", {o["id"]: o["deger"] for o in r["olcutler"]}
+      == {"sayfa": {"deger": 80, "kesinlik": "ölçüldü"}, "egri_x": "veri yok"}, r)
+dogru("ölçüm: bütçe aşımı kalite motorunca bulunur", len(r["butce_asimi"]) == 1 and "AŞIM" in r["butce_asimi"][0], r["butce_asimi"])
+dogru("ölçüm: tek ölçüt komutuyla", arac("olcum", olcut="egri_x")[1]["komut"] == "python x.py")
+
+os.environ["LIFEOS_NODE"] = os.path.join(t, "node-yok.exe")
+h, r = arac("notlar")
+dogru("Node yoksa notlar süzgeçsiz dönmez (araç hatası)", h and "köprü" in r, r)
+os.environ.pop("LIFEOS_NODE")
+
+print("Gizlilik ve canlı dosya")
+hepsi = "\n".join(ciktilar)
+dogru("özel, sır, türetilmiş, kapı sorusu ve öbür kullanıcı hiçbir çıktıda yok",
+      not [g for g in GIZLI if g in hepsi], [g for g in GIZLI if g in hepsi])
+canli_acilan = [p for p in acilan if p.startswith(os.path.abspath(CANLI))]
+dogru("canlı dosya hiç açılmadı (yalnız kopya)", acilan and not canli_acilan, canli_acilan or "hiç açılış yok")
+dogru("canlı klasör bayt bayt aynı, yanında -wal/-shm doğmadı", iz(CANLI) == once,
+      sorted(set(iz(CANLI)) ^ set(once)))
+dogru("geçici kopyalar silindi", not any(os.path.exists(os.path.dirname(p)) for p in acilan))
+
+print("Tek depo (lifeos.db) önce gelir")
+sqlite3.connect = _connect
+os.makedirs(os.path.dirname(TEK))
+c = sqlite3.connect(TEK)
+c.executescript(goc.SEMA)
+for alan, yol, tur, govde, etiket in (("spi/ben", "vitals/t1", "olcum", {"weight": 70}, {"weight": "measured"}),
+                                      ("gun/sunucu", "gun/bilinc", "gun_kopya", bilinc, {})):
+    c.execute("INSERT INTO kayit VALUES (?,?,1,?,?,?,?,?,'pc',0,'goc','g1')",
+              (alan + "|" + yol, tur, alan, yol, json.dumps(govde, ensure_ascii=False), json.dumps(etiket),
+               "%013d:0000:pc" % MS))
+c.commit()
+c.close()
+once = iz(CANLI)
+sqlite3.connect = izli_connect
+acilan.clear()
+h, r = arac("kayit_oku", kimlik="spi/ben|vitals/t1")
+dogru("tek depo: kaynak ve etiket", "lifeos.db" in r["kaynak"] and r["govde"]["weight"] == {"deger": 70, "kesinlik": "ölçüldü"}, r)
+h, r = arac("notlar")
+dogru("tek depo: Bilinç süzgeçten geçer", (r["okunabilir"]["deger"], r["ozel_oldugu_icin_disarida"]["deger"]) == (1, 1), r)
+dogru("tek depo: canlı dosya açılmadı, değişmedi", acilan and not [p for p in acilan if p.startswith(os.path.abspath(CANLI))]
+      and iz(CANLI) == once)
+sqlite3.connect = _connect
+
+print("stdio uçtan uca")
+girdi = "\n".join(json.dumps(x) for x in (
+    {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-11-25", "capabilities": {},
+                                                                  "clientInfo": {"name": "t", "version": "1"}}},
+    {"jsonrpc": "2.0", "method": "notifications/initialized"},
+    {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
+    {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "notlar", "arguments": {}}})) + "\n"
+p = subprocess.run([sys.executable, str(KOK / "king" / "mcp.py")], input=girdi.encode("utf-8"), capture_output=True,
+                   timeout=60, env=dict(os.environ))
+satirlar = p.stdout.decode("utf-8").splitlines()
+try:
+    yanit = [json.loads(s) for s in satirlar]
+except ValueError:
+    yanit = []
+dogru("stdout yalnız JSON-RPC, üç yanıt", [y.get("id") for y in yanit] == [1, 2, 3], satirlar[:3])
+dogru("stdio: araç çağrısı sonuç verir", yanit and yanit[-1]["result"]["isError"] is False, yanit[-1:] if yanit else p.stderr[-300:])
+dogru("stdio: günlük stderr'de", b"king-mcp" in p.stderr)
+
+shutil.rmtree(t, ignore_errors=True)
+print("\n%s · %d kırmızı" % ("TEMİZ" if not kirmizi else "KIRMIZI", kirmizi))
+sys.exit(1 if kirmizi else 0)

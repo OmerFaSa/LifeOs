@@ -225,6 +225,11 @@ jobs:
       - name: Ölçüm motoru sayım ve bütçe kuralları
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölçüm motoru sayım ve bütçe kuralları" python3 kalite/olcum_test.py
 
+      # SADELESME FAZ 5 (2026-11-13). King'in salt okur MCP ucu: el sikisma, en cok 12 arac, ozel not donmez,
+      # canli dosya acilmaz (yalniz kopya), yazma araci yok.
+      - name: King MCP ucu salt okur
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King MCP ucu salt okur" python3 king/mcp_test.py
+
       # A9 cikisi (2026-11-13, sahibin karariyla asim kabul edilip kayit yenilendikten sonra baglandi):
       # son kayda (kalite/kayit/) gore artan butce birlestirmeyi durdurur (AGENTS 0.1 kural 5).
       - name: Karmaşıklık bütçesi aşılmadı

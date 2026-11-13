@@ -22,6 +22,8 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 3 · Tekrar motoru](ekip/sadelesme/faz3-tekrar.md) — Dokuz zamanlayıcının yerine tek FSRS: formüller, arayüz, on bir göç bağdaştırıcısı, testler (2026-11-13).
 - [Faz 3 · Not motoru](ekip/sadelesme/faz3-not.md) — On üç not yapısının yerine tek kayıt ve tek ağ: bağlar, King erişimi, arama, göç bağdaştırıcıları (2026-11-13).
 - [Faz 4 · Ölçüm motoru](ekip/sadelesme/faz4-olcum.md) — A9: depodan sayılan ölçütler, bugün / taban / hedef, bütçe kuralları, ölçülemeyen eğriler (2026-11-13).
+- [Faz 4 · On üç eğri](ekip/sadelesme/faz4-egriler.md) — Her eğri bir dosya (`kalite/egri/`): ölçülenler, vekil ölçümler, ölçülemeyenler ve gerekenler (2026-11-13).
+- [Faz 5 · King MCP ucu](ekip/sadelesme/faz5-mcp.md) — Claude uygulamasından salt okur King: sekiz araç, gizlilik, kurulum (`king/KURULUM.md`) (2026-11-13).
 - [Faz 1 planı](ekip/sadelesme/faz1.md) — A3 veri katmanı ve A4 tek kapı: tasarım, altı iş paketi, testleri ve Faz 1 kapısı (2026-11-12).
 - [Göç kuru koşusu](ekip/sadelesme/goc-kuru-20261112.md) — Gerçek veriyle ilk kuru koşu: kaynak × tür sayıları, etiketler, boş canlı hesap deposu bulgusu (2026-11-12).
 - [Sadeleşme sentezi](ekip/sadelesme/sentez.md) — Dokuz envanter raporunun birleşimi: aday listesi, düzeltilen sayılar, kararlar, riskler, çelişkiler (2026-11-12).
