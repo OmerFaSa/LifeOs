@@ -3,7 +3,8 @@
  * yapisal denetim yapar ve bozuk veride hata firlatir.
  * Kayit (ogrenenin durumu) duz JSON'dur; her yazan fonksiyon yeni kayit dondurur, eskisine dokunmaz:
  *   { dersler: {id: {okundu}}, cevaplar: {id: [{cevap, dogru, zaman}]},
- *     kapilar: {sahipId: [{zaman, dogruSayisi, toplam, oran, esik, gecti, taslak}]}, asamalar: {id: {gecti}} }
+ *     kapilar: {sahipId: [{zaman, dogruSayisi, toplam, oran, esik, gecti, taslak}]}, asamalar: {id: {gecti}},
+ *     eski?: {anahtar: {durum, etiket:'eski kayıt', ...}} }  (eski: yalniz gocten; hicbir seyi gecirmez, bkz. GOC)
  * Kural (AGENTS 0.1): asama/unite yalniz bilgi olcen kapi esigi tutunca gecer; okumak ve alistirma
  * cozmek (hacim) tek basina hicbir seyi gecirmez. Taslak icerik tekrara girmez.
  */
@@ -205,11 +206,82 @@
     };
   }
 
+  /* ---- Goc: AYS konu durumu → Yol ilerlemesi (Akademik alan) ----
+   * Girdi: AYS topics/<ders> = { subjectId, states: { [konu]: { state, okunduAt, ornek, first, firstAt,
+   * second, secondAt, note } } } (AYS core/state.js 454-481, core/ogren.js 228-253, core/ogrenyolu.js 132).
+   * y: Yol.yukle(alan/akademik/asama-1.json). Konu → ders eslemesi asamanin kaynaklarindan okunur
+   * (donustur.js: anlatim dersinin ilk kaynagi «R.KONU_ANLATIM['<konu>']»). Anlatim dersinin alistirmalari
+   * AYS'nin taban sorulariyla ayni sirada (184 konunun 184'u, olculdu 2026-11-13), derin sorular sona eklenir.
+   * Cikti: { kayit: { dersler, cevaplar, kapilar:{}, asamalar:{}, eski }, red:[{konu, neden}], say:{neden:n} }.
+   * kayit.eski['ays:<ders>/<konu>'] = { konu, ders, dersId, durum, etiket:'eski kayıt', kaynak }: durum AYS
+   * degeridir, zamansizdir ve hicbir kapiyi gecirmez (AGENTS 0.1). first/second → Tekrar, note → Not. */
+  var AYS_DURUM = ['not_started', 'learning', 'practicing', 'provisional', 'closed', 'reopened'];
+  var AYS_ALAN = ['state', 'okunduAt', 'ornek', 'first', 'firstAt', 'second', 'secondAt', 'note'];
+  var GOC = {
+    aysKonu: function (belge, y) {
+      var r = { kayit: { dersler: {}, cevaplar: {}, kapilar: {}, asamalar: {}, eski: {} }, red: [], say: {} };
+      function red(konu, neden) { r.red.push({ konu: konu, neden: neden }); }
+      function say(n) { r.say[n] = (r.say[n] || 0) + 1; }
+      if (!belge || typeof belge !== 'object' || !belge.states || typeof belge.states !== 'object') { red(null, 'konu belgesi ya da states yok'); return r; }
+      if (!belge.subjectId) { red(null, 'ders kimliği (subjectId) yok: konular eşlenemez'); return r; }
+      var dersOf = {};
+      if (y) {
+        var kb = {};
+        (y.veri.kaynaklar || []).forEach(function (k) { var m = /^R\.KONU_ANLATIM\['([^']+)'\]$/.exec(k.bolum || ''); if (m) kb[k.id] = m[1]; });
+        y.veri.uniteler.forEach(function (u) { u.dersler.forEach(function (d) { var k = kb[(d.kaynak || [])[0]]; if (k && !dersOf[k]) dersOf[k] = d; }); });
+      }
+      var ders = String(belge.subjectId);
+      Object.keys(belge.states).sort().forEach(function (konu) {
+        var st = belge.states[konu];
+        if (!st || typeof st !== 'object' || Array.isArray(st)) { red(konu, 'konu durumu nesne değil'); return; }
+        Object.keys(st).forEach(function (a) { if (AYS_ALAN.indexOf(a) < 0) say('bilinmeyen konu alanı «' + a + '»: göremedim'); });
+        var d = dersOf[konu] || null, tasindi = false, ornek = st.ornek || {};
+        var durum = st.state == null || st.state === 'not_started' ? null : st.state;
+        if (durum != null && AYS_DURUM.indexOf(durum) < 0) { red(konu, 'bilinmeyen durum: göremedim'); durum = null; }
+        if (typeof ornek !== 'object' || Array.isArray(ornek)) { red(konu, 'örnek cevaplar (ornek) nesne değil'); ornek = {}; }
+        var veriVar = st.okunduAt || Object.keys(ornek).length;
+        if (veriVar && !d) red(konu, y ? 'Yol içeriğinde konunun dersi yok: okuma ve cevaplar taşınamadı' : 'aşama verilmedi: okuma ve cevaplar taşınamadı');
+        if (st.okunduAt && d) {
+          var z = Date.parse(st.okunduAt);
+          if (isNaN(z)) red(konu, 'okuma zamanı (okunduAt) okunamadı'); // tarih uydurulmaz
+          else { r.kayit.dersler[d.id] = { okundu: z }; tasindi = true; }
+        }
+        if (d) Object.keys(ornek).sort(function (a, b) { return a - b; }).forEach(function (i) {
+          var c = ornek[i], a = /^\d+$/.test(i) ? d.alistirmalar[+i] : undefined, z = c && Date.parse(c.at);
+          if (!/^\d+$/.test(i)) { red(konu, 'örnek cevap anahtarı sıra değil: göremedim'); return; }
+          if (!a) { say('derin soru cevabı: Yol\'da kapı sorusu, tek cevap kapı denemesi sayılmaz'); return; }
+          if (!c || typeof c !== 'object' || isNaN(z)) { red(konu, 'örnek cevap bozuk ya da zamanı yok'); return; }
+          if (!c.bak && (typeof c.h !== 'string' || (c.h === a.dogru) !== (c.d === true))) { red(konu, 'cevap anahtarı tutmuyor (soru yenilenmiş olabilir)'); return; }
+          var o = { cevap: c.bak ? null : c.h, dogru: c.bak ? false : c.d === true, zaman: z };
+          if (c.bak) o.bakildi = true;  // AYS: çözüme bakıldı, yanlış sayılır
+          if (c.ip) o.ipucu = true;
+          if (typeof c.sure === 'number') o.sure = c.sure;
+          r.kayit.cevaplar[a.id] = [o]; tasindi = true;
+        });
+        if (durum || tasindi) {
+          r.kayit.eski['ays:' + ders + '/' + konu] = { konu: konu, ders: ders, dersId: d ? d.id : null, durum: durum,
+            etiket: 'eski kayıt', kaynak: 'ays:topics/' + ders + '#' + konu };
+        }
+      });
+      return r;
+    }
+  };
+  var EKSIK = Object.freeze({
+    aysKonu: [
+      'ilk ve ikinci ölçüm (first, firstAt, second, secondAt): kapanış ölçümü → Tekrar.GOC.aysKapanis; Yol taşımaz',
+      'konu notu (note) → Not.goc.aysKonu; Yol taşımaz',
+      'durumun değiştiği an: göremedim (konu durumunda yok); durum zamansız, «eski kayıt» etiketiyle',
+      'kapalı (closed) konu kapı geçmiş sayılmaz (AGENTS 0.1 ustalık kapısı): ünite kapısı yeniden ölçülür',
+      'derin soru cevabı (ornek sırası anlatım alıştırmalarından büyük): Yol\'da kapı sorusu; taşınmaz',
+      'yenilenen sorunun önceki cevabı: Yol içeriğinde yenilenme tarihi yok, yalnız harf tutarlılığı denetlenir'
+    ]
+  });
+
   var Yol = {
     ETIKET: ETIKET, yukle: yukle, bosKayit: bosKayit, acikMi: acikMi, uniteGectiMi: uniteGectiMi,
     asamaGectiMi: function (y, kayit) { return asamaGectiMi(y, kayit, y.id); },
     dersOku: dersOku, cevapla: cevapla, kapiDene: kapiDene, tekrarAdaylari: tekrarAdaylari,
-    durum: durum, etiket: etiket
+    durum: durum, etiket: etiket, GOC: GOC, EKSIK: EKSIK
   };
 
   kok.LIFEOS = kok.LIFEOS || {};

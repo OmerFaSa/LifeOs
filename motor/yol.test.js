@@ -194,5 +194,91 @@ t('Felsefe: alan/felsefe yüklenir ve baştan sona yürünür', function () {
   });
 });
 
+// ---- Goc: AYS konu durumu (gercek Akademik asama, AYS'nin eski bicimi) ----
+var Tekrar = require('./tekrar.js'), Not = require('./not.js');
+var AK = Yol.yukle(JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'alan', 'akademik', 'asama-1.json'), 'utf8')));
+function akDers(konu) {
+  var kid = AK.veri.kaynaklar.filter(function (k) { return k.bolum === "R.KONU_ANLATIM['" + konu + "']"; })[0].id, bulunan;
+  AK.veri.uniteler.forEach(function (u) { u.dersler.forEach(function (d) { if (!bulunan && d.kaynak[0] === kid) bulunan = d; }); });
+  return bulunan;
+}
+var D1 = akDers('tr-01'), A0 = D1.alistirmalar[0], A1 = D1.alistirmalar[1];
+var yanlisHarf = A1.dogru === 'A' ? 'B' : 'A';
+function aysBelge() {
+  return { subjectId: 'tyt-turkce', states: {
+    'tr-01': { state: 'closed', first: 82, firstAt: '2026-10-01', second: 74, secondAt: '2026-10-08', note: 'gizli konu notu',
+      okunduAt: '2026-09-30T08:00:00.000Z',
+      ornek: { 0: { h: A0.dogru, d: true, at: '2026-09-30T09:00:00.000Z', ip: true, sure: 40 },
+               1: { h: yanlisHarf, d: false, at: '2026-09-30T09:01:00.000Z' },
+               2: { h: null, d: false, bak: true, at: '2026-09-30T09:02:00.000Z' },
+               999: { h: 'A', d: true, at: '2026-09-30T09:03:00.000Z' } } },
+    'tr-02': { state: 'learning', first: null, firstAt: null, second: null, secondAt: null, note: '' },
+    'tr-03': { state: 'not_started', first: null, firstAt: null, second: null, secondAt: null, note: '' }
+  } };
+}
+
+t('göç aysKonu: okuma, cevaplar ve durum taşınır; kapı geçmez', function () {
+  var r = Yol.GOC.aysKonu(aysBelge(), AK), k = r.kayit;
+  esit(r.red.length, 0, 'ret');
+  esit(k.dersler[D1.id].okundu, Date.parse('2026-09-30T08:00:00.000Z'));
+  esit(k.cevaplar[A0.id][0].dogru, true); esit(k.cevaplar[A0.id][0].ipucu, true); esit(k.cevaplar[A0.id][0].sure, 40);
+  esit(k.cevaplar[A1.id][0].dogru, false); esit(k.cevaplar[A1.id][0].cevap, yanlisHarf);
+  var a2 = D1.alistirmalar[2].id;
+  esit(k.cevaplar[a2][0].bakildi, true); esit(k.cevaplar[a2][0].dogru, false);
+  esit(Object.keys(k.cevaplar).length, 3, 'derin soru cevabı alıştırmaya yazılmaz');
+  esit(r.say['derin soru cevabı: Yol\'da kapı sorusu, tek cevap kapı denemesi sayılmaz'], 1);
+  esit(k.eski['ays:tyt-turkce/tr-01'].durum, 'closed'); esit(k.eski['ays:tyt-turkce/tr-01'].etiket, 'eski kayıt');
+  esit(k.eski['ays:tyt-turkce/tr-01'].dersId, D1.id);
+  esit(k.eski['ays:tyt-turkce/tr-02'].durum, 'learning'); esit(k.eski['ays:tyt-turkce/tr-02'].dersId, akDers('tr-02').id);
+  dogru(!k.eski['ays:tyt-turkce/tr-03'], 'başlanmamış ve verisiz konu yazılmaz');
+  esit(Object.keys(k.kapilar).length + Object.keys(k.asamalar).length, 0, 'kapalı konu kapı geçirmez');
+  var d = Yol.durum(AK, k), u = d.uniteler.filter(function (x) { return x.id === AK.ust[D1.id]; })[0];
+  esit(u.gecti, false); esit(d.ilerleme.okunanDers.deger, 1); esit(d.asama.gecti, false);
+});
+
+t('göç aysKonu: Tekrar ve Not ile çift sayım yok', function () {
+  var b = aysBelge(), metin = JSON.stringify(Yol.GOC.aysKonu(b, AK));
+  ['"first"', '"second"', '"firstAt"', '"secondAt"', '"note"', '2026-10-01', '2026-10-08', 'gizli konu notu'].forEach(function (x) {
+    dogru(metin.indexOf(x) < 0, 'Yol çıktısında ' + x + ' var');
+  });
+  var kart = Tekrar.GOC.aysKapanis(b.states['tr-01'], 'tr-01');
+  dogru(kart && kart.son === Date.parse('2026-10-01'), 'kapanış Tekrar\'da');
+  esit(Not.goc.aysKonu([b], { zaman: 0 }).notlar.length, 1, 'not Not\'ta');
+  dogru(Yol.EKSIK.aysKonu.some(function (x) { return x.indexOf('Tekrar.GOC.aysKapanis') >= 0; }));
+  dogru(Yol.EKSIK.aysKonu.some(function (x) { return x.indexOf('Not.goc.aysKonu') >= 0; }));
+});
+
+t('göç aysKonu: boş ve bozuk girdi sessizce düşmez', function () {
+  var bos = Yol.GOC.aysKonu({ subjectId: 'tyt-turkce', states: {} }, AK);
+  esit(bos.red.length + Object.keys(bos.kayit.eski).length + Object.keys(bos.kayit.dersler).length, 0, 'boş belge');
+  esit(Yol.GOC.aysKonu(null, AK).red.length, 1);
+  esit(Yol.GOC.aysKonu({ subjectId: 'x' }, AK).red.length, 1);
+  esit(Yol.GOC.aysKonu({ states: { 'tr-01': { state: 'closed' } } }, AK).red[0].neden.indexOf('subjectId') >= 0, true);
+  var r = Yol.GOC.aysKonu({ subjectId: 'tyt-turkce', states: {
+    'tr-01': { state: 'uydurma', okunduAt: 'dün', ornek: { 0: { h: A0.dogru, d: false, at: '2026-09-30T09:00:00Z' }, 1: { h: 'A', d: true }, x: {} }, eskiAlan: 1 },
+    'tr-02': 'kapalı', 'tr-03': { state: 'practicing', ornek: [1] },
+    'yok-99': { state: 'closed', okunduAt: '2026-09-30T08:00:00Z' }
+  } }, AK);
+  var neden = r.red.map(function (x) { return x.konu + ': ' + x.neden; }).join('\n');
+  ['tr-01: bilinmeyen durum', 'tr-01: okuma zamanı', 'tr-01: cevap anahtarı tutmuyor', 'tr-01: örnek cevap bozuk', 'tr-01: örnek cevap anahtarı sıra değil',
+   'tr-02: konu durumu nesne değil', 'tr-03: örnek cevaplar (ornek) nesne değil', 'yok-99: Yol içeriğinde konunun dersi yok'].forEach(function (x) {
+    dogru(neden.indexOf(x) >= 0, 'ret yok: ' + x);
+  });
+  esit(r.say['bilinmeyen konu alanı «eskiAlan»: göremedim'], 1);
+  esit(Object.keys(r.kayit.dersler).length + Object.keys(r.kayit.cevaplar).length, 0, 'bozuk okuma/cevap taşınmaz');
+  esit(r.kayit.eski['ays:tyt-turkce/tr-03'].durum, 'practicing');
+  esit(r.kayit.eski['ays:tyt-turkce/yok-99'].dersId, null, 'eşlenemeyen konunun durumu yine taşınır');
+  dogru(!r.kayit.eski['ays:tyt-turkce/tr-01'], 'bilinmeyen durum ve taşınamayan veri: eski kayıt yazılmaz, ret var');
+  esit(Yol.GOC.aysKonu(aysBelge()).red.filter(function (x) { return x.neden.indexOf('aşama verilmedi') >= 0; }).length, 1, 'aşamasız çağrı söyler');
+});
+
+t('göç aysKonu: AYS konu alanlarının hepsi okunuyor ya da EKSIK\'te', function () {
+  var kaynak = String(Yol.GOC.aysKonu) + Yol.EKSIK.aysKonu.join('\n');
+  ['state', 'okunduAt', 'ornek', 'first', 'firstAt', 'second', 'secondAt', 'note'].forEach(function (a) {
+    dogru(new RegExp('(^|[^\\w$])' + a + '([^\\w$]|$)').test(kaynak), a + ' sessiz düşüyor');
+  });
+  ['h', 'd', 'at', 'ip', 'sure', 'bak'].forEach(function (a) { dogru(new RegExp('c\\.' + a + '\\b').test(kaynak), 'ornek.' + a); });
+});
+
 console.log((sayac - hatali) + '/' + sayac + ' test geçti');
 process.exit(hatali ? 1 : 0);

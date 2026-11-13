@@ -6,7 +6,9 @@
    kendi metinleri, onlar da temiz()'den geçer (rakam → #, kimlik olmayan «…» → «…»). */
 const path = require('path');
 const M = ad => require(path.join(__dirname, '..', 'motor', ad + '.js'));
-const Kayit = M('kayit'), Tekrar = M('tekrar'), Not = M('not'), Soru = M('soru'), Plan = M('plan');
+const Kayit = M('kayit'), Tekrar = M('tekrar'), Not = M('not'), Soru = M('soru'), Plan = M('plan'), Yol = M('yol');
+let akademik;   // Yol konu eşlemesi için Akademik aşama (alan/akademik/asama-1.json), yalnız okunur
+const AKADEMIK = () => akademik || (akademik = Yol.yukle(JSON.parse(require('fs').readFileSync(path.join(__dirname, '..', 'alan', 'akademik', 'asama-1.json'), 'utf8'))));
 
 const temiz = s => String(s == null ? '' : s).replace(/«([^»]*)»/g, (t, i) => /^[A-Za-z_]{1,24}$/.test(i) ? t : '«…»')
   .replace(/\d+([.,]\d+)?/g, '#').slice(0, 200);
@@ -73,7 +75,9 @@ const ROTA = {
   'ays:topics':[
     ['tekrar.aysKapanis', Object.assign(g => ({ cikti:Object.keys((g[0] && g[0].states) || {}).map(k => Tekrar.GOC.aysKapanis(g[0].states[k], k)) }),
       { kaynak:String(Tekrar.GOC.aysKapanis) + 'states', eksik:Tekrar.EKSIK.aysKapanis })],
-    ['not.aysKonu', notListe('aysKonu', false)]],
+    ['not.aysKonu', notListe('aysKonu', false)],
+    ['yol.aysKonu', Object.assign(g => { const r = Yol.GOC.aysKonu(g[0], AKADEMIK()); return { cikti:Object.values(r.kayit.eski), red:r.red.map(x => x.neden), ekSay:r.say }; },
+      { kaynak:String(Yol.GOC.aysKonu), eksik:Yol.EKSIK.aysKonu })]],
   'ays:defter':[['not.defter', notListe('defter', true)]], 'spi:defter':[['not.defter', notListe('defter', true)]], 'esp:defter':[['not.defter', notListe('defter', true)]],
   'ays:defterterim':[['not.terim', notListe('terim', true)]], 'spi:defterterim':[['not.terim', notListe('terim', true)]], 'esp:defterterim':[['not.terim', notListe('terim', true)]],
   'ays:notum':[['not.notum', notListe('notum', true)]], 'spi:notum':[['not.notum', notListe('notum', true)]], 'esp:notum':[['not.notum', notListe('notum', true)]],
