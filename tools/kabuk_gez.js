@@ -430,7 +430,8 @@ async function goruntu(p, ad) {
     await p.goto(T + '/kabuk/#/motor/yol');
     await p.waitForSelector('a.satir[href="#/alan/felsefe"]');
     dene('yol: Felsefe ilerlemesiyle listelenir', /3\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/felsefe"]')));
-    await p.waitForFunction(() => /1\/368 ders okundu/.test((document.querySelector('a.satir[href="#/alan/akademik"]') || {}).textContent || '')).catch(() => {});
+    // her alanın içeriği ayrı yüklenir (iki aşama dosyası); denetlenen iki satır da dolana kadar beklenir
+    await p.waitForFunction(() => ['akademik', 'tarih'].every(a => /ders okundu/.test((document.querySelector('a.satir[href="#/alan/' + a + '"]') || {}).textContent || ''))).catch(() => {});
     dene('yol: on alan ilerlemesiyle listelenir', (await p.locator('[data-arac="yol"] a.satir').count()) === 10 && /1\/368 ders okundu/.test(await p.textContent('a.satir[href="#/alan/akademik"]')) && /1\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/tarih"]')));
     await p.keyboard.press('Control+k');
     await p.fill('#komut input', 'yeni not');
