@@ -1814,7 +1814,7 @@ def merkez_izinli(basliklar, kapi):
     return koken in (None, "http://%s:%d" % (HOST, kapi), "http://localhost:%d" % kapi)
 
 
-def gun_cumlesi(govde):
+def gun_cumlesi(govde, adres=None, jeton=None):
     """Gun sayfasinin cumlesi (2026-11-03): satirlari Gun'un kodu verir, cumleyi HKM'deki model
     kurar (/api/king/cumle, tur «gun»). Gun HKM'nin jetonunu bilmez; bu sunucu ayni bilgisayarda
     HKM'nin yapilandirmasindan okur ve yalniz bu cagriyi iletir. HKM kapaliysa ok:false.
@@ -1824,9 +1824,10 @@ def gun_cumlesi(govde):
         satirlar = [str(x)[:160] for x in (govde or {}).get("satirlar") or [] if str(x or "").strip()][:12 if tur == "gun" else 16]
         if not satirlar:
             return {"ok": False, "note": "satır yok"}
-        with open(os.path.join(KOK, "HKM", "config.json"), encoding="utf-8") as f:
-            jeton = (json.load(f) or {}).get("local_token") or ""
-        istek = urllib.request.Request("http://%s:%d/api/king/cumle" % (HOST, HKM_PORT),
+        if jeton is None:   # tek kapi (tekkapi.py) HKM ayni surecteyse adresi ve jetonu kendi verir
+            with open(os.path.join(KOK, "HKM", "config.json"), encoding="utf-8") as f:
+                jeton = (json.load(f) or {}).get("local_token") or ""
+        istek = urllib.request.Request(adres or "http://%s:%d/api/king/cumle" % (HOST, HKM_PORT),
                                        data=json.dumps({"tur": tur, "satirlar": satirlar}).encode("utf-8"),
                                        headers={"Content-Type": "application/json", "Authorization": "Bearer " + jeton})
         with urllib.request.urlopen(istek, timeout=25 if tur == "gun" else 45) as r:

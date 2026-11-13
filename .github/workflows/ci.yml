@@ -205,6 +205,11 @@ jobs:
       - name: Göç paketi cihazdan PC'ye
         run: python3 tools/gocpaket_test.py
 
+      # SADELESME FAZ 1 P5 TEK KAPI (2026-11-13). Tek surec, tek adres; eski isleyiciler yeniden
+      # yazilmaz, ayni cevabi verir. ETKIN kapali: eski kapilar P6'ya kadar yerinde.
+      - name: Tek kapı, tek süreç
+        run: python3 tools/tekkapi_test.py
+
       # SADELESME FAZ 3 MOTORLAR (2026-11-13). Yol, Tekrar, Not: saf (saat disaridan gelir), sifir
       # bagimlilik. Tekrar testi eski zamanlayicilarin gercek kaynagini yukler: goc vadeyi degistirmez.
       - name: Motorlar (Yol, Tekrar, Not)

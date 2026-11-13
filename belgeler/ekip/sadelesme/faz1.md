@@ -99,6 +99,17 @@ ve üç dist'te; 4180 onu kapalı listeden sunar, `uygulama/ios` paketine girer.
 **P2 çıkış ölçütünün kalanı sahibin elinde:** kod çalışan kopyaya geldikten sonra her cihazda her modülde ve
 4180'de bir kez «Bilgisayara gönder»; ardından `goc.py --kuru` paketleri sunucuyla yol yol karşılaştırır.
 
+**P5 yapıldı, kapalı duruyor (2026-11-13, yerel `sadelesme`, gönderilmedi).** `sistem/tekkapi.py` (223 satır):
+tek süreç, tek adres. Giriş ve Gün (bugünkü 4180), üç modül `/ays/` `/spi/` `/esp/` yolunda, API'ler ve HKM
+çekirdeği `/api/hkm/` altında aynı süreçte; `/kabuk/` ayrıldı. Hiçbir işleyici yeniden yazılmadı: istek var olan
+sınıflara (`Giris`, modül `Sunucu`, `daemon.Handler`) verilir. Dokunulan iki dosya: `HKM/daemon.py` (kurulum
+`main()`'den `hazirla()`'ya taşındı) ve `sistem/sunucu.py` (`gun_cumlesi` iki isteğe bağlı parametre aldı);
+ikisi de davranışı korur. `ETKIN = False`: `baslat.py` ve eski kapılar değişmedi, tek kapı yalnız `--port` ile
+deneme için açılır. Ölçüldü: `tools/tekkapi_test.py` 74/74, HKM 1093/1093, `giris_sayfa_test` ve `dist_sun_test`
+temiz, `entegre.js` temiz. Boşta bellek (ölçüldü, üç koşunun ortancası): eski düzen 97,7 MB, tek süreç 65,6 MB.
+Denenmedi: akışlı sohbet ve modüllerin gerçek tarayıcıda yeni yoldan açılması. Devreye alma P6 ile: ayrıntı ve
+üç açık soru `faz1-p5-tekkapi.md`'de.
+
 ## 3. Faz 1 kapısı (ölçülerek geçilir)
 
 1. Her cihazda, her modülde bekleyen değişiklik 0 (paketteki `bekleyen` alanından, cihaz cihaz).

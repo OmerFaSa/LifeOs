@@ -2346,12 +2346,31 @@ def main():
             "kopyalayip uzun rastgele bir token koy.\n")
         return 1
     srv = ThreadingHTTPServer((cfg["host"], int(cfg["port"])), Handler)
+    hazirla(srv, cfg)
+    zaman = schedule.settings(cfg)
+    sys.stderr.write("[hkm] http://%s:%s · ritim %s\n"
+                     % (cfg["host"], cfg["port"],
+                        "acik (%s)" % zaman.get("morning") if zaman.get("enabled")
+                        else "kapali"))
+    try:
+        _surekli_hizmet(srv)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        srv.dur.set()
+    return 0
+
+
+def hazirla(srv, cfg, config_path=None):
+    """HKM cekirdegini `srv` uzerine kurar (ayar, veritabani, ritim, isci, yoklama).
+    main() ve tek kapi (sistem/tekkapi.py, sadelesme P5: HKM ayni surecte) ayni kurulumu kullanir;
+    `srv` bir HTTP sunucusu olmak zorunda degil: Handler yalniz bu nitelikleri okur."""
     srv.config = cfg
-    srv.config_path = CONFIG_PATH
+    srv.config_path = config_path or CONFIG_PATH
     srv.local = threading.local()
     srv.db_path = cfg.get("db_path") or db.DB_PATH
     from core import izin
-    daraltilan = izin.sikilastir(CONFIG_PATH, srv.db_path)
+    daraltilan = izin.sikilastir(srv.config_path, srv.db_path)
     if daraltilan:
         sys.stderr.write("[hkm] %d dosyanin izni yalniz sahibine daraltildi.\n"
                          % daraltilan)
@@ -2372,18 +2391,6 @@ def main():
     yok = threading.Thread(target=yoklama.dongu, args=(srv, srv.db_path),
                            daemon=True)
     yok.start()
-    zaman = schedule.settings(cfg)
-    sys.stderr.write("[hkm] http://%s:%s · ritim %s\n"
-                     % (cfg["host"], cfg["port"],
-                        "acik (%s)" % zaman.get("morning") if zaman.get("enabled")
-                        else "kapali"))
-    try:
-        _surekli_hizmet(srv)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        srv.dur.set()
-    return 0
 
 
 def _surekli_hizmet(srv, bekle=time.sleep, en_cok=None):
