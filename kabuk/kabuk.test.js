@@ -88,6 +88,23 @@ t('tekrar: taslak ders alıştırması kart olmaz; onaylanınca cevaplanan alı�
   esit(Tekrar.cevapla(l[0], 3, 1000).ok, true);
 });
 
+t('kayıt: formdan kayıt; virgüllü sayı, tahmin etiketi, boş alan yollanmaz; hata motorun cümlesi ve liste değişmez', () => {
+  const Kayit = require('../motor/kayit.js'), gun = '2026-11-13';
+  let r = R.kayitEkle(Kayit, [], 'su', { ml: '500' }, false, gun, 1000);
+  esit([r.ok, r.kayit.deger.ml], [true, { v: 500, k: 'measured' }]);
+  r = R.kayitEkle(Kayit, r.kayitlar, 'uyku', { saat: '7,5' }, true, gun, 2000);
+  esit(r.kayit.deger.saat, { v: 7.5, k: 'estimated' });
+  const l = R.kayitEkle(Kayit, r.kayitlar, 'ogun', { icerik: 'Mercimek çorbası', kcal: '', protein: ' ', ogun: 'ogle' }, false, gun, 3000);
+  esit([l.ok, l.kayit.deger, l.kayit.ek], [true, {}, { icerik: 'Mercimek çorbası', ogun: 'ogle' }]);
+  const kotu = R.kayitEkle(Kayit, l.kayitlar, 'su', { ml: '99999' }, false, gun, 4000);
+  esit(kotu.ok, false); dogru(/Su 1 ile 8000 ml arasında olmalı/.test(kotu.hatalar[0]), kotu.hatalar[0]);
+  esit(R.kayitEkle(Kayit, [], 'yok', {}, false, gun, 1).ok, false);
+  esit(R.gunOzeti(Kayit, l.kayitlar, gun), [
+    { ad: 'Su', metin: '500 ml', etiket: 'hesaplandı' }, { ad: 'Gece uykusu', metin: '7,5 saat', etiket: 'tahmin' }, { ad: 'Öğün', metin: '1', etiket: 'hesaplandı' }]);
+  esit(R.gunOzeti(Kayit, l.kayitlar, '2026-11-14'), [], 'veri olmayan gün boş: sıfır gösterilmez');
+  esit(R.kayitMetni(Kayit, l.kayitlar[1]), 'Gece uykusu · 7,5 saat (tahmin)');
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {

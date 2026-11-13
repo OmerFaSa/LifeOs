@@ -115,7 +115,7 @@ Aynı koşuda işlev denetimi (sonuçlar):
 - Dört boyut/tema birleşiminde yatay taşma yok; konsolda hata yok.
 
 ## Testler
-`node kabuk/kabuk.test.js` → **33 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
+`node kabuk/kabuk.test.js` → **34 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
 eski bağlantılar, Felsefe pilot, halkadan ≤ 2 adım, komut çubuğundan 1 adım, bozuk kaydı yakalama), şema türetmeleri (zorunlu alanlar,
 varsayılan geçerli, doğrulama, bozuk değerde varsayılan, sıfırlama, eşitleme süzgeci, kök nitelikleri, çizimde kaçış ve radyo
 sayısı), sıralama (ç ğ ı İ ö ş ü katlama, aksansız arama, ad başı › kelime başı › açıklama, eşitlikte tür ve kısa ad, çok kelime).
@@ -192,5 +192,16 @@ Felsefe pilotunun yol haritası, ders ve kapı ekranları alan adından bağıms
 - **Ölçüldü:** `node kabuk/kabuk.test.js` 33/33 (dört alanın içeriği motora yüklenir, ilk adım açık bir derstir, aşama kimliği kayıt anahtarıyla uyumlu);
   `node tools/kabuk_gez.js` 62/62 (her alanda yol haritası, ilk ders, alıştırma, «Okudum»; kayıtlar birbirine karışmıyor; Bugün son alanı gösteriyor).
 - **Sınır:** dört alanın bütün dersleri taslak (sahibin onayı bekliyor); Akademik'in 368 dersinden yalnız ilki tarayıcıda açılıp denendi.
+
+## Kayıt ekranı (2026-11-13)
+`#/motor/kayit` (`kabuk/araclar.js`): `motor/kayit.js`'in tür tablosundan (16 tür: su, öğün, uyku, hareket, ölçümler, çalışma…) üretilen tek form.
+
+- Alanlar, birimler, sınırlar ve hata cümleleri motordan gelir; ekranda kural yok. Virgüllü sayı kabul edilir; boş bırakılan alan yollanmaz.
+- «Sayılar tahmin (ölçmedim)» işaretlenirse sayılar `tahmin` etiketiyle kaydolur, yoksa `ölçüldü` (AGENTS §1.2).
+- «Bugün» özeti `Kayit.gunluk`'tan: yalnız verisi olan satırlar, her sayı etiketiyle (toplam `hesaplandı`); veri yoksa sıfır değil «kayıt yok» yazar.
+- Bugünün kayıtları listesi ve silme. Kayıt: `lifeos.kayit.kayitlar`, yalnız bu tarayıcıda (P6 sonrası tek depo).
+- **Ölçüldü:** kabuk birim testi 34/34 (kayıt ekleme, etiketler, özet), `tools/kabuk_gez.js` 68/68. Görüntü: `kayit-masaustu-koyu.png`.
+- **Bağlanmadı:** enerji hedefi, toparlanma, yük ve «günün emri» kuralları (`Kayit.Kural`; profil gerekir), haftalık özet, geçmiş günlere kayıt,
+  eski SPİ / AYS kayıtlarının göçü (`Kayit.GOC`, P6 ile). Sağlık alan sayfaları hâlâ eski modüle gider.
 
 Atlananlar (ilk iskelette; ders, Not ve Tekrar ekranları ile sunucu denemesi yukarıdaki bölümlerde kapandı): eski kabuğa bağlantı.

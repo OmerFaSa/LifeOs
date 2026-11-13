@@ -1,7 +1,7 @@
 /* LIFEOS.Kabuk araç ekranları — Not, Tekrar ve Yol haritası listesi (sadeleşme Faz 2/3).
  * Kural motorlardadır (motor/not.js, motor/tekrar.js, motor/yol.js); burası çizer ve kaydeder.
  * Sayfalar Kabuk.ek[yerId](yer, alt) ile kaydolur; kabuk.js rota() onları çağırır. Bu dosya kabuk.js'ten ÖNCE yüklenir.
- * shortcut: kayıtlar bu tarayıcının deposunda durur (lifeos.not.kayit, lifeos.tekrar.kartlar), cihazlar arası eşitlenmez; tek depoya (sistem/veri.py) P6 göçünden sonra bağlanır.
+ * shortcut: kayıtlar bu tarayıcının deposunda durur (lifeos.not.kayit, lifeos.tekrar.kartlar, lifeos.kayit.kayitlar), cihazlar arası eşitlenmez; tek depoya (sistem/veri.py) P6 göçünden sonra bağlanır.
  * Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.Arac, Node'da module.exports (yalnız saf kısım). */
 (function (kok) {
   'use strict';
@@ -58,7 +58,52 @@
   }
   function aralikAdi(gun) { return gun === 0 ? 'şimdi' : gun < 30 ? gun + ' gün' : gun < 365 ? Math.round(gun / 30) + ' ay' : (Math.round(gun / 36.5) / 10) + ' yıl'; }
 
-  var Arac = { kimlik: kimlik, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
+  /* ---- Kayıt (motor/kayit.js) ---- */
+  // Formdan kayıt: boş bırakılan alan yollanmaz; «tahmin» işaretliyse sayılar tahmin etiketiyle gider (AGENTS §1.2).
+  // Geçersizse motorun Türkçe cümleleri döner, liste değişmez.
+  function kayitEkle(Kayit, kayitlar, tur, form, tahmin, gun, zaman) {
+    var t = Kayit.TURLER[tur], girdi = {};
+    if (!t) return { ok: false, hatalar: ['Bilinmeyen kayıt türü.'] };
+    Object.keys(t.sayilar || {}).forEach(function (a) {
+      var v = form[a] == null ? '' : String(form[a]).trim();
+      if (v) girdi[a] = tahmin ? { v: v, k: 'estimated' } : v;
+    });
+    Object.keys(t.metinler || {}).forEach(function (a) {
+      var v = form[a] == null ? '' : String(form[a]).trim();
+      if (v) girdi[a] = v;
+    });
+    var r = Kayit.kaydet(tur, girdi, { gun: gun, zaman: zaman, mevcut: kayitlar });
+    return r.ok ? { ok: true, kayit: r.kayit, kayitlar: kayitlar.concat([r.kayit]) } : { ok: false, hatalar: r.hatalar };
+  }
+  function sayiYaz(v) { return String(Math.round(v * 100) / 100).replace('.', ','); }
+  // Günün özeti: yalnız verisi olan satırlar; her sayı kesinlik etiketiyle. Eksik veri sıfır diye gösterilmez.
+  function gunOzeti(Kayit, kayitlar, gun) {
+    var g = Kayit.gunluk(kayitlar, gun), E = Kayit.ETIKET, l = [];
+    var ekle = function (ad, d, birim) { if (d && d.v != null) l.push({ ad: ad, metin: sayiYaz(d.v) + (birim ? ' ' + birim : ''), etiket: E[d.k] }); };
+    ekle('Su', g.su, 'ml');
+    ekle('Gece uykusu', g.uyku.gece, 'saat');
+    ekle('Kısa uyku', g.uyku.kestirmeDk, 'dk');
+    ekle('Hareket', g.hareket.dk, 'dk');
+    ekle('Çalışma', g.calisma.dk, 'dk');
+    ekle('Öğün', g.ogun.sayi, '');
+    ekle('Enerji (öğünlerden)', g.ogun.kcal, 'kcal');
+    ekle('Enerji ve ruh hâli', g.enerji, '/ 5');
+    ekle('Mola', g.mola, 'dk');
+    Object.keys(g.olcum).forEach(function (t) {
+      var tablo = Kayit.TURLER[t].sayilar;
+      Object.keys(g.olcum[t]).forEach(function (a) { ekle(tablo[a].ad, g.olcum[t][a], tablo[a].birim); });
+    });
+    return l;
+  }
+  // Bir kaydın tek satırlık okunuşu: «Su · 500 ml (ölçüldü)»
+  function kayitMetni(Kayit, r) {
+    var t = Kayit.TURLER[r.tur], p = [];
+    Object.keys(r.deger || {}).forEach(function (a) { var f = t.sayilar[a]; p.push(sayiYaz(r.deger[a].v) + (f.birim && f.birim !== '1-5' ? ' ' + f.birim : '') + ' (' + Kayit.ETIKET[r.deger[a].k] + ')'); });
+    Object.keys(r.ek || {}).forEach(function (a) { p.push(r.ek[a]); });
+    return t.ad + ' · ' + p.join(' · ');
+  }
+
+  var Arac = { kimlik: kimlik, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -211,7 +256,60 @@
       }).join('') + '</div></div>';
   }
 
+  /* ---- Kayıt ---- */
+  var KAYIT_ANAHTAR = 'lifeos.kayit.kayitlar', Kayit = L.Motor && L.Motor.Kayit;
+  var kayitTur = 'su', kayitIleti = null; // seçili tür; son gönderimin iletisi { hatalar?, tamam?, form?, tahmin? }
+  function kayitAlanlari(t, f) {
+    var k = ic().kac;
+    return Object.keys(t.sayilar || {}).map(function (a) {
+      var x = t.sayilar[a], birim = x.birim && x.birim !== '1-5' ? ' (' + x.birim + ')' : '';
+      return '<label class="alanet">' + k(x.ad + birim) + (x.zorunlu ? '' : ' · isteğe bağlı') +
+        '<input type="text" inputmode="decimal" class="giris" name="' + a + '" autocomplete="off" value="' + k(f[a] || '') + '" placeholder="' + k(String(x.min).replace('.', ',') + ' – ' + String(x.max).replace('.', ',')) + '"></label>';
+    }).join('') + Object.keys(t.metinler || {}).map(function (a) {
+      var x = t.metinler[a], et = k(x.ad) + (x.zorunlu ? '' : ' · isteğe bağlı');
+      if (x.secim) return '<label class="alanet">' + et + '<select class="giris" name="' + a + '"><option value="">Seç…</option>' +
+        x.secim.map(function (o) { return '<option value="' + k(o) + '"' + (f[a] === o ? ' selected' : '') + '>' + k(o) + '</option>'; }).join('') + '</select></label>';
+      return '<label class="alanet">' + et + '<input type="text" class="giris" name="' + a + '" autocomplete="off" value="' + k(f[a] || '') + '"' + (x.desenMetni ? ' placeholder="12:30"' : '') + '></label>';
+    }).join('');
+  }
+  function sayfaKayit(yer) {
+    var I = ic(), k = I.kac;
+    if (!Kayit) return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Kayıt</h1>' + eksik('Kayıt') + '</div>';
+    var simdi = Date.now(), gun = gunAdi(simdi), l = oku(KAYIT_ANAHTAR, []), T = Kayit.TURLER, t = T[kayitTur] || T.su;
+    var il = kayitIleti; kayitIleti = null;
+    var f = il && il.form || {}, gruplar = {};
+    Object.keys(T).forEach(function (id) { var a = T[id].alan === '*' ? 'Genel' : T[id].alan; (gruplar[a] = gruplar[a] || []).push(id); });
+    var ozet = gunOzeti(Kayit, l, gun), bugun = l.filter(function (r) { return r.gun === gun; }).reverse();
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="kayit"><h1>Kayıt</h1>' +
+      '<form class="kayitform" novalidate>' +
+      '<div class="notform__ileti" role="alert" tabindex="-1">' + (il ? (il.hatalar ? il.hatalar.map(k).join('<br>') : k(il.tamam)) : '') + '</div>' +
+      '<label class="alanet">Ne kaydediyorsun?<select class="giris" data-kayit-tur>' + Object.keys(gruplar).map(function (g) {
+        return '<optgroup label="' + k(g) + '">' + gruplar[g].map(function (id) { return '<option value="' + id + '"' + (id === kayitTur ? ' selected' : '') + '>' + k(T[id].ad) + '</option>'; }).join('') + '</optgroup>';
+      }).join('') + '</select></label>' + kayitAlanlari(t, f) +
+      (Object.keys(t.sayilar || {}).length ? '<label class="isaret"><input type="checkbox" name="tahmin"' + (il && il.tahmin ? ' checked' : '') + '> Sayılar tahmin (ölçmedim)</label>' : '') +
+      '<div class="eylemler"><button type="submit" class="dugme dugme--ana">Kaydet</button></div></form>' +
+      '<section><h2>Bugün</h2>' + (ozet.length ? '<ul class="ozet">' + ozet.map(function (o) {
+        return '<li><span>' + k(o.ad) + '</span><b>' + k(o.metin) + '</b><span class="pul">' + k(o.etiket) + '</span></li>';
+      }).join('') + '</ul>' : '<p class="soluk">Bugün için kayıt yok. Veri olmayan satır gösterilmez; boş, sıfır demek değildir.</p>') + '</section>' +
+      (bugun.length ? '<details class="kaynak" open><summary>Bugünün kayıtları (' + bugun.length + ')</summary><ul class="kartliste">' + bugun.map(function (r) {
+        return '<li><span>' + k(kayitMetni(Kayit, r)) + '</span><span class="soluk">' + (r.zaman ? new Date(r.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '') + '</span>' +
+          '<button type="button" class="dugme dugme--sade" data-arac-ac="kayit-sil" data-id="' + k(r.id) + '" aria-label="Kaydı sil: ' + k(kayitMetni(Kayit, r)) + '">Sil</button></li>';
+      }).join('') + '</ul></details>' : '') +
+      '<p class="soluk">' + l.length + ' kayıt · bu cihazda durur</p></div>';
+  }
+  function kayitGonder(form) {
+    var veri = {}, simdi = Date.now();
+    [].forEach.call(form.elements, function (e) { if (e.name && e.name !== 'tahmin') veri[e.name] = e.value; });
+    var tahmin = !!(form.elements.tahmin && form.elements.tahmin.checked);
+    var r = kayitEkle(Kayit, oku(KAYIT_ANAHTAR, []), kayitTur, veri, tahmin, gunAdi(simdi), simdi);
+    if (r.ok) { yaz(KAYIT_ANAHTAR, r.kayitlar); kayitIleti = { tamam: 'Kaydedildi: ' + kayitMetni(Kayit, r.kayit) }; }
+    else kayitIleti = { hatalar: r.hatalar, form: veri, tahmin: tahmin }; // yazılan kaybolmasın
+    ic().rota();
+    var ileti = d.querySelector('.kayitform .notform__ileti'); if (ileti) ileti.focus();
+  }
+
   Kabuk.ek = Kabuk.ek || {};
+  Kabuk.ek.kayit = sayfaKayit;
   Kabuk.ek.not = sayfaNot; Kabuk.ek.tekrar = sayfaTekrar; Kabuk.ek.yol = sayfaYol;
 
   /* ---- olaylar (yalnız bu dosyanın çizdiği öğeler) ---- */
@@ -219,12 +317,14 @@
     var f = e.target;
     if (f.matches('form.notform')) { e.preventDefault(); notFormKaydet(f); }
     else if (f.matches('form.kartform')) { e.preventDefault(); kartEkle(f); }
+    else if (f.matches('form.kayitform')) { e.preventDefault(); kayitGonder(f); }
   });
   d.addEventListener('input', function (e) {
     if (e.target.matches('[data-not-ara]')) d.getElementById('not-liste').innerHTML = notListesi(oku(NOT_ANAHTAR, []), e.target.value);
   });
   d.addEventListener('change', function (e) {
     var s = e.target;
+    if (s.matches('select[data-kayit-tur]')) { kayitTur = s.value; ic().rota(); var ys = d.querySelector('select[data-kayit-tur]'); if (ys) ys.focus(); return; }
     if (!s.matches('select[data-bag-ekle]') || !s.value) return;
     var n = oku(NOT_ANAHTAR, []).filter(function (x) { return x.id === s.value; })[0], t = s.form.elements.govde;
     if (n) { var bag = Not.bagYaz(n.id, Not.ad(n)), i = t.selectionStart == null ? t.value.length : t.selectionStart; t.value = t.value.slice(0, i) + bag + t.value.slice(t.selectionEnd == null ? i : t.selectionEnd); }
@@ -238,6 +338,11 @@
       if (!confirm('Bu not silinsin mi? Geri alınamaz.')) return;
       yaz(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== b.getAttribute('data-id'); }));
       return I.git('#/motor/not');
+    }
+    if (ne === 'kayit-sil') {
+      if (!confirm('Bu kayıt silinsin mi?')) return;
+      yaz(KAYIT_ANAHTAR, oku(KAYIT_ANAHTAR, []).filter(function (r) { return r.id !== b.getAttribute('data-id'); }));
+      return I.rota();
     }
     if (ne === 'kart-goster') { gosterilen = b.closest('[data-kart]').getAttribute('data-kart'); I.rota(); var a = d.querySelector('.kart__arka'); if (a) a.focus({ preventScroll: true }); return; }
     if (ne === 'kart-not') {

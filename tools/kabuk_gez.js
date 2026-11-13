@@ -185,6 +185,32 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.waitForFunction(() => /Henüz kart yok/.test(document.querySelector('[data-arac="tekrar"]').textContent));
     dene('tekrar: kart silinir', true);
 
+    // ---- Kayıt ----
+    await p.goto(T + '/kabuk/#/motor/kayit');
+    await p.waitForSelector('form.kayitform');
+    dene('kayıt: boş gün öyle der, sıfır göstermez', /Bugün için kayıt yok/.test(await p.textContent('[data-arac="kayit"]')));
+    await p.fill('input[name=ml]', '99999');
+    await p.click('form.kayitform button[type=submit]');
+    dene('kayıt: sınır dışı sayı motorun cümlesiyle reddedilir, yazılan durur', /1 ile 8000 ml/.test(await p.textContent('.kayitform .notform__ileti')) && (await p.inputValue('input[name=ml]')) === '99999');
+    await p.fill('input[name=ml]', '500');
+    await p.click('form.kayitform button[type=submit]');
+    await p.waitForSelector('.ozet li');
+    dene('kayıt: su toplamı özetinde «hesaplandı», kaydın kendisi «ölçüldü» etiketiyle', /500 ml/.test(await p.textContent('.ozet')) && /hesaplandı/.test(await p.textContent('.ozet')) && /500 ml \(ölçüldü\)/.test(await p.textContent('.kartliste')));
+    await p.selectOption('select[data-kayit-tur]', 'uyku');
+    await p.waitForSelector('input[name=saat]');
+    await p.fill('input[name=saat]', '7,5');
+    await p.check('input[name=tahmin]');
+    await p.click('form.kayitform button[type=submit]');
+    await p.waitForFunction(() => /Gece uykusu/.test(document.querySelector('.ozet').textContent));
+    dene('kayıt: tahmin işaretli uyku «tahmin» etiketiyle', /7,5 saat/.test(await p.textContent('.ozet')) && /tahmin/.test(await p.textContent('.ozet')));
+    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'kayit-masaustu-koyu.png'), fullPage: true });
+    await p.reload();
+    await p.waitForSelector('.kartliste li');
+    dene('kayıt: yenilemeden sonra iki kayıt duruyor', (await p.locator('.kartliste li').count()) === 2);
+    await p.click('[data-arac-ac="kayit-sil"] >> nth=0');
+    await p.waitForFunction(() => document.querySelectorAll('.kartliste li').length === 1);
+    dene('kayıt: kayıt silinir, özet güncellenir', !/Gece uykusu/.test(await p.textContent('.ozet')));
+
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');
     await p.waitForSelector('a.satir[href="#/alan/felsefe"]');
