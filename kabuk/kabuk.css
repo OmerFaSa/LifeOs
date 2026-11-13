@@ -132,6 +132,9 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .ayar__ad{ font-family:var(--piksel); }
 .ayar__not{ font-size:.82rem; color:var(--soluk); }
 .seg{ display:flex; flex-wrap:wrap; gap:4px; }
+.sayiayar{ display:flex; align-items:center; gap:8px; }
+.sayiayar .giris{ width:7.5em; }
+.sayiayar .giris[aria-invalid="true"]{ box-shadow:inset 0 0 0 2px var(--hata, #c0392b); }
 .seg button{ min-height:40px; padding:0 12px; border:0; cursor:pointer; font:inherit; font-size:.85rem; color:var(--yazi-2); background:transparent; box-shadow:inset 0 0 0 2px var(--cizgi); }
 .seg button:hover{ color:var(--yazi); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
 .seg button[aria-checked="true"]{ background:var(--vurgu); color:var(--vurgu-yazi); box-shadow:none; }

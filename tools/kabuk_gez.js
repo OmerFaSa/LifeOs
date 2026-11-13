@@ -189,6 +189,8 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.goto(T + '/kabuk/#/motor/kayit');
     await p.waitForSelector('form.kayitform');
     dene('kayıt: boş gün öyle der, sıfır göstermez', /Bugün için kayıt yok/.test(await p.textContent('[data-arac="kayit"]')));
+    dene('kayıt: kural bölümü eksik profili adıyla söyler, sayı uydurmaz', /Enerji hedefi için eksik: .*boy/.test(await p.textContent('[data-kural]'))
+      && !/kcal/.test(await p.textContent('[data-kural]')));
     await p.fill('input[name=ml]', '99999');
     await p.click('form.kayitform button[type=submit]');
     dene('kayıt: sınır dışı sayı motorun cümlesiyle reddedilir, yazılan durur', /1 ile 8000 ml/.test(await p.textContent('.kayitform .notform__ileti')) && (await p.inputValue('input[name=ml]')) === '99999');
@@ -203,6 +205,27 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.click('form.kayitform button[type=submit]');
     await p.waitForFunction(() => /Gece uykusu/.test(document.querySelector('.ozet').textContent));
     dene('kayıt: tahmin işaretli uyku «tahmin» etiketiyle', /7,5 saat/.test(await p.textContent('.ozet')) && /tahmin/.test(await p.textContent('.ozet')));
+    dene('kayıt: uyku girilince günün antrenman kararı etiketli', /Bugünkü antrenman/.test(await p.textContent('[data-kural]')) && /hesaplandı/.test(await p.textContent('[data-kural]')));
+    await p.goto(T + '/kabuk/#/ayarlar');
+    await p.waitForSelector('[data-ayar-satir="lifeos.beden.boy"] input');
+    await p.fill('[data-ayar-satir="lifeos.beden.boy"] input', '165');
+    await p.fill('[data-ayar-satir="lifeos.beden.dogumYili"] input', '1990');
+    await p.click('[data-ayar-satir="lifeos.beden.cinsiyet"] [data-deger="kadin"]');
+    await p.fill('[data-ayar-satir="lifeos.beden.boy"] input', '999');
+    await p.dispatchEvent('[data-ayar-satir="lifeos.beden.boy"] input', 'change');
+    dene('ayarlar: Beden › boy aralık dışını yazmaz, alanı geçersiz işaretler', (await p.evaluate(() => localStorage.getItem('lifeos.beden.boy'))) === '165'
+      && (await p.getAttribute('[data-ayar-satir="lifeos.beden.boy"] input', 'aria-invalid')) === 'true');
+    await p.goto(T + '/kabuk/#/motor/kayit');
+    await p.waitForSelector('select[data-kayit-tur]');
+    await p.selectOption('select[data-kayit-tur]', 'kilo');
+    await p.waitForSelector('input[name=kg]');
+    await p.fill('input[name=kg]', '60');
+    await p.click('form.kayitform button[type=submit]');
+    await p.waitForFunction(() => /Enerji hedefi/.test(document.querySelector('[data-kural]').textContent));
+    dene('kayıt: profil ve tartı varken enerji hedefi ve bazal hesaplanır (kadın 60 kg 165 cm 36 yaş: bazal 1290)',
+      /Bazal metabolizma\s*1290 kcal/.test((await p.textContent('[data-kural]')).replace(/\s+/g, ' ')));
+    await p.click('[data-arac-ac="kayit-sil"][aria-label^="Kaydı sil: Kilo"]');            // aşağıdaki iki kayıt akışı aynen sürsün
+    await p.waitForFunction(() => document.querySelectorAll('.kartliste li').length === 2);
     if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'kayit-masaustu-koyu.png'), fullPage: true });
     await p.reload();
     await p.waitForSelector('.kartliste li');

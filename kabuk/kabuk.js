@@ -465,6 +465,12 @@
     var satirEl = b.closest('.ayar'); satirEl.outerHTML = A.ciz(A.tanim(a), A.oku(depo, a));
     var yeni = $('[data-ayar-satir="' + a + '"] [data-deger="' + v + '"]'); if (yeni) yeni.focus();
   }
+  // Boş = girilmedi (null); aralık dışı yazılmaz ve alan geçersiz işaretlenir, eski değer depoda kalır.
+  function sayiYaz(el) {
+    var ham = el.value.trim(), v = ham === '' ? null : Number(ham.replace(',', '.'));
+    var ok = A.yaz(depo, el.getAttribute('data-ayar'), v);
+    if (ok) el.removeAttribute('aria-invalid'); else el.setAttribute('aria-invalid', 'true');
+  }
   function aralikYaz(el) {
     var a = el.getAttribute('data-ayar'), s = el.closest('.ayar'), v = A.oku(depo, a);
     v.acik = $('[data-parca="acik"]', s).checked; v.bas = $('[data-parca="bas"]', s).value; v.bit = $('[data-parca="bit"]', s).value;
@@ -519,7 +525,10 @@
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);
     d.addEventListener('submit', function (e) { var f = e.target.closest('form.kapi'); if (f) { e.preventDefault(); kapiBitir(f); } });
-    d.addEventListener('change', function (e) { if (e.target.closest('.aralik [data-ayar]')) aralikYaz(e.target); });
+    d.addEventListener('change', function (e) {
+      if (e.target.closest('.aralik [data-ayar]')) aralikYaz(e.target);
+      else if (e.target.matches('.sayiayar [data-ayar]')) sayiYaz(e.target);
+    });
     d.addEventListener('pointerdown', basBasla);
     d.addEventListener('pointermove', basHareket);
     d.addEventListener('pointerup', basBitir);

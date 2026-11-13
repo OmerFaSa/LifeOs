@@ -157,6 +157,26 @@ t('soru: havuz yalnız açık ünitelerin seçmeli alıştırmalarından; karma 
   esit([ozet.dogru, ozet.bakildi, ozet.yanlis, ozet.bos, ozet.toplam], [1, 1, 0, o.sorular.length - 2, o.sorular.length]);
 });
 
+t('ayar: sayı türü boş (null) ya da aralıkta; dışı ve metin reddedilir; gidiş-dönüş', () => {
+  const b = A.tanim('lifeos.beden.boy'), dp = {}, depo = { getItem: k => (k in dp ? dp[k] : null), setItem: (k, v) => { dp[k] = String(v); }, removeItem: k => { delete dp[k]; } };
+  esit([A.dogrula(b, null), A.dogrula(b, 175), A.dogrula(b, 99), A.dogrula(b, 231), A.dogrula(b, '175'), A.dogrula(b, NaN)], [true, true, false, false, false, false]);
+  esit([A.yaz(depo, 'lifeos.beden.boy', 182.5), A.oku(depo, 'lifeos.beden.boy'), A.yaz(depo, 'lifeos.beden.boy', 500), A.oku(depo, 'lifeos.beden.boy')], [true, 182.5, false, 182.5]);
+  dogru(/type="number"/.test(A.ciz(b, 175)) && /value="175"/.test(A.ciz(b, 175)) && /value=""/.test(A.ciz(b, null)), 'sayı alanı çizilir');
+});
+t('kayıt kuralları: profil tamsa enerji hedefi ve bazal hesaplanır; eksikse adıyla söylenir; hedef bazalın altına inmez', () => {
+  const Kayit = require('../motor/kayit.js'), gun = '2026-11-13';
+  const r = Kayit.kaydet('kilo', { kg: '70' }, { gun, zaman: 1 });
+  dogru(r.ok, 'kilo kaydı kurulur');
+  const tam = R.kuralOzeti(Kayit, [r.kayit], gun, { cinsiyet: 'erkek', boy: 175, dogumYili: 1996, hedef: 'ver' }, 2026);
+  const enerji = tam.satirlar.find(s => s.ad === 'Enerji hedefi'), bazal = tam.satirlar.find(s => s.ad === 'Bazal metabolizma');
+  dogru(enerji && bazal && enerji.etiket === 'hesaplandı', 'enerji ve bazal etiketli');
+  esit(bazal.metin, '1649 kcal');                       // 10·70 + 6,25·175 − 5·30 + 5 (Mifflin-St Jeor, erkek)
+  dogru(Number(enerji.metin.split(' ')[0]) >= 1649, 'hedef bazalın altına inmez (kilo verme hedefinde bile)');
+  const eks = R.kuralOzeti(Kayit, [], gun, { cinsiyet: null, boy: null, dogumYili: null, hedef: 'saglik' }, 2026);
+  esit(eks.eksik.slice().sort(), ['boy', 'cinsiyet', 'doğum yılı', 'kilo'].sort());
+  dogru(eks.emirVeriYok && !eks.satirlar.some(s => s.ad === 'Bugünkü antrenman'), 'toparlanma verisi yoksa karar sayısı gösterilmez');
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {
@@ -219,7 +239,7 @@ t('ayar: her satırın zorunlu alanları var ve varsayılan geçerli', () => {
     dogru(g.indexOf(s.grup) >= 0, s.anahtar + ' grup');
     dogru(A.dogrula(s, s.varsayilan), s.anahtar + ' varsayılan');
     dogru(!gor[s.anahtar], s.anahtar + ' tekrar'); gor[s.anahtar] = 1;
-    dogru(/envanter-kabuk-sunucu\.md §3[bc]/.test(s.kaynak), s.anahtar + ' kaynak');
+    dogru(/envanter-kabuk-sunucu\.md §3[bc]|envanter-spi\.md §/.test(s.kaynak), s.anahtar + ' kaynak');
   });
 });
 t('ayar: doğrulama yanlış değeri reddeder', () => {

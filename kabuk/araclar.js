@@ -95,6 +95,20 @@
     });
     return l;
   }
+  /* Kural satırları (Kayit.Kural, SPİ'nin güvenlik sınırlarıyla): enerji hedefi ve günün antrenman kararı.
+     profil: Ayarlar › Beden (cinsiyet, boy, doğum yılı, hedef); kilo son tartıdan. Eksik girdi adıyla söylenir. */
+  var EMIR = { full: 'Tam yük', reduced: 'Azaltılmış yük', light: 'Hafif', rest: 'Dinlenme' };
+  function kuralOzeti(Kayit, kayitlar, gun, profil, yil) {
+    var K = Kayit.Kural, E = Kayit.ETIKET, l = [], eksik = null;
+    var e = K.enerjiHedefi(profil, kayitlar, gun, yil);
+    if (e.deger && e.deger.v != null) {
+      l.push({ ad: 'Enerji hedefi', metin: sayiYaz(e.deger.v) + ' kcal' + (e.bmrTaban ? ' (bazal tabanı)' : ''), etiket: E[e.deger.k] });
+      l.push({ ad: 'Bazal metabolizma', metin: sayiYaz(e.bmr.v) + ' kcal', etiket: E[e.bmr.k] });
+    } else eksik = e.eksik;
+    var g = K.gununEmri(kayitlar, gun), veriYok = g.gerekce.indexOf('veri-yok') >= 0;
+    if (!veriYok) l.push({ ad: 'Bugünkü antrenman', metin: EMIR[g.tur] + ' · çarpan ' + sayiYaz(g.carpan.v), etiket: E[g.carpan.k] });
+    return { satirlar: l, eksik: eksik, emirVeriYok: veriYok };
+  }
   // Bir kaydın tek satırlık okunuşu: «Su · 500 ml (ölçüldü)»
   function kayitMetni(Kayit, r) {
     var t = Kayit.TURLER[r.tur], p = [];
@@ -156,7 +170,7 @@
     return -1;
   }
 
-  var Arac = { kimlik: kimlik, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
+  var Arac = { kimlik: kimlik, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -333,6 +347,10 @@
     var f = il && il.form || {}, gruplar = {};
     Object.keys(T).forEach(function (id) { var a = T[id].alan === '*' ? 'Genel' : T[id].alan; (gruplar[a] = gruplar[a] || []).push(id); });
     var ozet = gunOzeti(Kayit, l, gun), bugun = l.filter(function (r) { return r.gun === gun; }).reverse();
+    var Ay = L.Kabuk && L.Kabuk.Ayar, ay = function (a) { return Ay ? Ay.oku(I.depo, a) : null; };
+    var cins = ay('lifeos.beden.cinsiyet');
+    var kural = kuralOzeti(Kayit, l, gun, { cinsiyet: cins === 'belirtilmedi' ? null : cins, boy: ay('lifeos.beden.boy'),
+      dogumYili: ay('lifeos.beden.dogumYili'), hedef: ay('lifeos.beden.hedef') }, new Date(simdi).getFullYear());
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="kayit"><h1>Kayıt</h1>' +
       '<form class="kayitform" novalidate>' +
       '<div class="notform__ileti" role="alert" tabindex="-1">' + (il ? (il.hatalar ? il.hatalar.map(k).join('<br>') : k(il.tamam)) : '') + '</div>' +
@@ -344,6 +362,11 @@
       '<section><h2>Bugün</h2>' + (ozet.length ? '<ul class="ozet">' + ozet.map(function (o) {
         return '<li><span>' + k(o.ad) + '</span><b>' + k(o.metin) + '</b><span class="pul">' + k(o.etiket) + '</span></li>';
       }).join('') + '</ul>' : '<p class="soluk">Bugün için kayıt yok. Veri olmayan satır gösterilmez; boş, sıfır demek değildir.</p>') + '</section>' +
+      '<section data-kural><h2>Kurallar</h2>' + (kural.satirlar.length ? '<ul class="ozet">' + kural.satirlar.map(function (o) {
+        return '<li><span>' + k(o.ad) + '</span><b>' + k(o.metin) + '</b><span class="pul">' + k(o.etiket) + '</span></li>';
+      }).join('') + '</ul>' : '') +
+      (kural.eksik ? '<p class="soluk">Enerji hedefi için eksik: ' + k(kural.eksik.join(', ')) + '. <a href="#/ayarlar">Ayarlar › Beden</a>; kilo, Kayıt › Kilo kaydından gelir.</p>' : '') +
+      (kural.emirVeriYok ? '<p class="soluk">Antrenman kararı için toparlanma verisi yok: uyku, nabız ya da enerji kaydı girince hesaplanır.</p>' : '') + '</section>' +
       (bugun.length ? '<details class="kaynak" open><summary>Bugünün kayıtları (' + bugun.length + ')</summary><ul class="kartliste">' + bugun.map(function (r) {
         return '<li><span>' + k(kayitMetni(Kayit, r)) + '</span><span class="soluk">' + (r.zaman ? new Date(r.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '') + '</span>' +
           '<button type="button" class="dugme dugme--sade" data-arac-ac="kayit-sil" data-id="' + k(r.id) + '" aria-label="Kaydı sil: ' + k(kayitMetni(Kayit, r)) + '">Sil</button></li>';

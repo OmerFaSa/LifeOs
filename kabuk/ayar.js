@@ -13,8 +13,9 @@
   var ENV = 'envanter-kabuk-sunucu.md';
   var GRUPLAR = [
     { id: 'gorunum', ad: 'Görünüm' }, { id: 'erisim', ad: 'Erişilebilirlik' },
-    { id: 'bildirim', ad: 'Bildirim' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
+    { id: 'bildirim', ad: 'Bildirim' }, { id: 'beden', ad: 'Beden' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
   ];
+  var SPI = 'envanter-spi.md §2 Ayarlar › Profil (family.js) ve §5 profile (state.js:178-200)';
 
   var SEMA = [
     { anahtar: 'lifeos.tema.secim', ad: 'Tema', tur: 'secim', varsayilan: 'system', grup: 'gorunum', kok: 'data-theme', esitlenir: true,
@@ -43,7 +44,17 @@
     { anahtar: 'lifeos.sessiz', ad: 'Sessiz saatler', tur: 'saatAraligi', varsayilan: { acik: false, bas: '22:00', bit: '07:00' }, grup: 'bildirim', esitlenir: true,
       aciklama: 'Bu aralıkta sesler ve sesli okuma susar; gece yarısını geçebilir.', kaynak: ENV + ' §3c Ses ve müzik: sessiz saatler' },
     { anahtar: 'lifeos.kilit.odeme', ad: 'Satın alma ve kart işlemleri', tur: 'secim', varsayilan: 'kapali', grup: 'hesap', esitlenir: false,
-      secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Kapalıyken King ödeme, sipariş ya da kart işine girmez.', kaynak: ENV + ' §3c Diğer: kilit.odeme' }
+      secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Kapalıyken King ödeme, sipariş ya da kart işine girmez.', kaynak: ENV + ' §3c Diğer: kilit.odeme' },
+    // Beden: Kayıt motorunun enerji hedefi (bazal metabolizma) bunları ister; kilo son tartıdan gelir.
+    { anahtar: 'lifeos.beden.cinsiyet', ad: 'Cinsiyet', tur: 'secim', varsayilan: 'belirtilmedi', grup: 'beden', esitlenir: true,
+      secenekler: { belirtilmedi: 'Belirtilmedi', kadin: 'Kadın', erkek: 'Erkek' }, aciklama: 'Yalnız bazal metabolizma hesabı için. Belirtilmezse enerji hedefi hesaplanmaz.', kaynak: SPI + ': sex' },
+    { anahtar: 'lifeos.beden.boy', ad: 'Boy', tur: 'sayi', varsayilan: null, alt: 100, ust: 230, birim: 'cm', grup: 'beden', esitlenir: true,
+      aciklama: 'Bazal metabolizma hesabı için.', kaynak: SPI + ': heightCm' },
+    { anahtar: 'lifeos.beden.dogumYili', ad: 'Doğum yılı', tur: 'sayi', varsayilan: null, alt: 1920, ust: 2020, birim: '', grup: 'beden', esitlenir: true,
+      aciklama: 'Yaş, bazal metabolizma hesabına girer.', kaynak: SPI + ': birthYear' },
+    { anahtar: 'lifeos.beden.hedef', ad: 'Beslenme hedefi', tur: 'secim', varsayilan: 'saglik', grup: 'beden', esitlenir: true,
+      secenekler: { saglik: 'Sağlıklı beslenmek', koru: 'Kilomu korumak', ver: 'Kilo vermek', al: 'Kilo almak' },
+      aciklama: 'Enerji hedefinin yönü. Hedef hiçbir zaman bazal metabolizmanın altına inmez.', kaynak: SPI + ': goal' }
   ];
 
   var SAAT = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -54,6 +65,7 @@
     if (!t) return false;
     if (t.tur === 'secim') return typeof v === 'string' && Object.prototype.hasOwnProperty.call(t.secenekler, v);
     if (t.tur === 'saatAraligi') return !!v && typeof v === 'object' && typeof v.acik === 'boolean' && SAAT.test(v.bas) && SAAT.test(v.bit);
+    if (t.tur === 'sayi') return v === null || (typeof v === 'number' && isFinite(v) && v >= t.alt && v <= t.ust); // null: girilmedi
     return false;
   }
   // depoda düz metin (secim) ya da JSON (saatAraligi); bozuk ya da geçersiz değer varsayılana düşer
@@ -116,6 +128,9 @@
         return '<button type="button" role="radio" aria-checked="' + on + '" tabindex="' + (on ? 0 : -1) + '" data-ayar="' + kac(t.anahtar) +
           '" data-deger="' + kac(k) + '">' + kac(t.secenekler[k]) + '</button>';
       }).join('') + '</div>';
+    } else if (t.tur === 'sayi') {
+      govde = '<label class="sayiayar"><input type="number" inputmode="numeric" class="giris" aria-labelledby="' + id + '" data-ayar="' + kac(t.anahtar) +
+        '" min="' + t.alt + '" max="' + t.ust + '" value="' + (v == null ? '' : kac(v)) + '">' + (t.birim ? '<span>' + kac(t.birim) + '</span>' : '') + '</label>';
     } else {
       govde = '<div class="aralik" role="group" aria-labelledby="' + id + '">' +
         '<label class="anahtar"><input type="checkbox" data-ayar="' + kac(t.anahtar) + '" data-parca="acik"' + (v.acik ? ' checked' : '') + '><span>Açık</span></label>' +
