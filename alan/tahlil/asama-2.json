@@ -1,0 +1,1261 @@
+{
+  "sema": 1,
+  "alan": "tahlil",
+  "id": "tahlil.2",
+  "sira": 2,
+  "ad": "Paneller ne ölçer",
+  "hedef": "Yaygın tahlil panellerindeki satırların neyi ölçtüğünü ve hangilerinin hesaplandığını bilmek, sonucu etkileyen ölçüm koşullarını kaydetmek, bir eşiğin dayanağını sorgulamak ve sonuçları hekime soru olarak götürmek.",
+  "onKosul": [
+    "tahlil.1"
+  ],
+  "kanitIsi": "Uydurma bir raporun sekiz satırı için «ne ölçer» açıklaması, iki hesaplanan değer (TSAT, non-HDL), kan verme koşulları listesi ve hekime üç soru; hiçbir satır yorumlanmaz (ders tahlil.2.3.3, alıştırma a3). Kendi gerçek sonuçlarını kullanmak zorunda değilsin. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    {
+      "id": "k1",
+      "ad": "Laboratuvar tablosu: hemogram satırları (RBC, HGB, HCT, WBC, PLT, MCV, RDW)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md",
+      "bolum": "Laboratuvar tablosu, «Fizyolojik Görev» sütunu (Yüksek/Düşük ve Optimal sütunları alınmadı)",
+      "satir": "41-47",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k2",
+      "ad": "Laboratuvar tablosu: demir satırları (ferritin, serum demiri, TIBC, TSAT)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md",
+      "bolum": "Laboratuvar tablosu, «Fizyolojik Görev» sütunu (Yüksek/Düşük ve Optimal sütunları alınmadı)",
+      "satir": "48-51",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k3",
+      "ad": "Laboratuvar tablosu: şeker satırları (açlık glukozu, HbA1c, insülin, HOMA-IR)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md",
+      "bolum": "Laboratuvar tablosu, «Fizyolojik Görev» sütunu (Yüksek/Düşük ve Optimal sütunları alınmadı)",
+      "satir": "52-55",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k4",
+      "ad": "Laboratuvar tablosu: lipid satırları (total kolesterol, LDL, HDL, trigliserit, TG/HDL)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md",
+      "bolum": "Laboratuvar tablosu, «Fizyolojik Görev» sütunu (Yüksek/Düşük ve Optimal sütunları alınmadı)",
+      "satir": "56-60",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k5",
+      "ad": "Laboratuvar tablosu: karaciğer satırları (ALT, AST, GGT, albümin, bilirubin)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md",
+      "bolum": "Laboratuvar tablosu, «Fizyolojik Görev» sütunu (Yüksek/Düşük ve Optimal sütunları alınmadı)",
+      "satir": "61-65",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k6",
+      "ad": "Laboratuvar tablosu: böbrek satırları (kreatinin, eGFR, üre, ürik asit)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md",
+      "bolum": "Laboratuvar tablosu, «Fizyolojik Görev» sütunu (Yüksek/Düşük ve Optimal sütunları alınmadı)",
+      "satir": "66-69",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k7",
+      "ad": "Laboratuvar tablosu: tiroid satırları (TSH, serbest T4, serbest T3)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_sirkadiyen_ve_tahlil_referanslari.md",
+      "bolum": "Laboratuvar tablosu, «Fizyolojik Görev» sütunu (Yüksek/Düşük ve Optimal sütunları alınmadı)",
+      "satir": "70-72",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k8",
+      "ad": "SPİ biyobelirteç sözlüğü: panel adları ve notları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "SP.PANELS",
+      "satir": "32-45",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k9",
+      "ad": "SPİ biyobelirteç sözlüğü: hemogram satırları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "hemogram",
+      "satir": "114-152",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k10",
+      "ad": "SPİ biyobelirteç sözlüğü: demir satırları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "demir",
+      "satir": "155-180",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k11",
+      "ad": "SPİ biyobelirteç sözlüğü: şeker metabolizması satırları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "metabolik",
+      "satir": "183-218",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k12",
+      "ad": "SPİ biyobelirteç sözlüğü: lipid satırları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "lipid",
+      "satir": "220-256",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k13",
+      "ad": "SPİ biyobelirteç sözlüğü: karaciğer ve böbrek satırları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "karaciğer, böbrek",
+      "satir": "259-326",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k14",
+      "ad": "SPİ biyobelirteç sözlüğü: hormon ve inflamasyon satırları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "hormonlar, inflamasyon",
+      "satir": "386-425",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k15",
+      "ad": "SPİ biyobelirteç sözlüğü: türetilmiş ölçümlerin formülleri",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/biomarkers.js",
+      "bolum": "Türetilmiş ölçümlerin formülleri",
+      "satir": "440-520",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k16",
+      "ad": "SPİ kanıt katmanı: dört kaynak türü",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/evidence.js",
+      "bolum": "SP.EVIDENCE_SOURCES",
+      "satir": "59-67",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k17",
+      "ad": "SPİ kanıt katmanı: kesinlik ve uygulanabilirlik eksenleri",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/evidence.js",
+      "bolum": "SP.EVIDENCE_CERTAINTY, SP.EVIDENCE_APPLICABILITY",
+      "satir": "69-92",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k18",
+      "ad": "SPİ kanıt katmanı: istirahat nabzı, HRV ve uyku eşiklerinin dayanağı",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/evidence.js",
+      "bolum": "SP.EVIDENCE satırları",
+      "satir": "196-216",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k19",
+      "ad": "SPİ mimarisi: klinik sınır",
+      "tur": "depo",
+      "yol": "SPI/src/MIMARI.md",
+      "bolum": "Klinik sınır",
+      "satir": "51-55",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k20",
+      "ad": "SPİ mimarisi: referans, hedef bant ve kırmızı bayrak",
+      "tur": "depo",
+      "yol": "SPI/src/MIMARI.md",
+      "bolum": "Modül 1",
+      "satir": "72-81",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k21",
+      "ad": "SPİ semptom sözlüğü: amaç ve değişmezler",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/symptoms.js",
+      "bolum": "SEMPTOM SÖZLÜĞÜ",
+      "satir": "1-28",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k22",
+      "ad": "SPİ ipuçları: şikâyet kaydı ve çapraz bağlar",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/hints.js",
+      "bolum": "not-sikayet, not-capraz-baglar",
+      "satir": "132-133",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k23",
+      "ad": "SPİ durum modeli: tahlil kaydı ve açlık durumu",
+      "tur": "depo",
+      "yol": "SPI/src/js/core/state.js",
+      "bolum": "newLab",
+      "satir": "296-306",
+      "dogrulama": "dogrulanmamis"
+    }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {
+        "id": "tahlil.2.k1",
+        "tur": "secmeli",
+        "soru": "Demir panelinde anlık değeri, depoyu ve taşıma kapasitesini sırasıyla gösteren satırlar hangisidir?",
+        "sec": [
+          "Ferritin, serum demiri, TSAT",
+          "Serum demiri, ferritin, TIBC",
+          "TIBC, ferritin, serum demiri",
+          "TSAT, TIBC, ferritin"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k2",
+          "k10"
+        ]
+      },
+      {
+        "id": "tahlil.2.k2",
+        "tur": "secmeli",
+        "soru": "Hangisi ölçülmeyip hesaplanan bir satırdır?",
+        "sec": [
+          "Non-HDL kolesterol",
+          "HDL",
+          "Kreatinin",
+          "Ferritin"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k15"
+        ]
+      },
+      {
+        "id": "tahlil.2.k3",
+        "tur": "secmeli",
+        "soru": "SPİ sözlüğü AST için hangi ölçüm koşulunu yazar?",
+        "sec": [
+          "Gece yarısı ölçülmelidir",
+          "Yalnız tok karnına ölçülür",
+          "Ağır antrenmandan sonra geçici yükselir; ölçüm antrenmansız günde yapılır",
+          "Hiçbir koşuldan etkilenmez"
+        ],
+        "dogru": "C",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k13"
+        ]
+      },
+      {
+        "id": "tahlil.2.k4",
+        "tur": "secmeli",
+        "soru": "SPİ kanıt katmanında bir eşiğin «bu kişiye ne kadar uyduğunu» soran eksen hangisidir?",
+        "sec": [
+          "Kesinlik",
+          "Kaynak türü",
+          "Birim",
+          "Uygulanabilirlik"
+        ],
+        "dogru": "D",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k17"
+        ]
+      },
+      {
+        "id": "tahlil.2.k5",
+        "tur": "secmeli",
+        "soru": "Bu yol bir tahlil değeri için ne yapar?",
+        "sec": [
+          "Satırın neyi ölçtüğünü ve ölçüm koşullarını anlatır; yorumu hekime bırakır",
+          "Değere göre teşhis koyar",
+          "Takviye ve doz önerir",
+          "Tek ölçümden hastalık riskini hesaplar"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k19"
+        ]
+      },
+      {
+        "id": "tahlil.2.k6",
+        "tur": "secmeli",
+        "soru": "İki farklı laboratuvarın raporunda aynı belirtecin aralıkları farklı. Hangisi doğrudur?",
+        "sec": [
+          "Dar olan aralık doğrudur",
+          "Her değer kendi raporunun aralığıyla okunur; aralıklar laboratuvara göre değişir, yorum hekimindir",
+          "Geniş olan aralık doğrudur",
+          "İki aralığın ortalaması alınır"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k20",
+          "k19"
+        ]
+      }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "tahlil.2.1",
+      "ad": "Kan sayımı ve demir: ne ölçer?",
+      "onKosul": [],
+      "kazanim": [
+        "Hemogramın temel satırlarının neyi ölçtüğünü söyler.",
+        "Demir panelinde depo, anlık değer, taşıma kapasitesi ve doluluk oranını ayırır.",
+        "Su ve antrenmanın bu satırlar için bir ölçüm koşulu olduğunu bilir."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "tahlil.2.1.k1",
+            "tur": "secmeli",
+            "soru": "Hemogramda oksijeni bağlayan protein hangisidir?",
+            "sec": [
+              "Hemoglobin",
+              "Ferritin",
+              "Albümin",
+              "Trombosit"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1",
+              "k9"
+            ]
+          },
+          {
+            "id": "tahlil.2.1.k2",
+            "tur": "secmeli",
+            "soru": "Ferritin neyi gösterir?",
+            "sec": [
+              "Kandaki anlık şekeri",
+              "Vücudun demir deposunu",
+              "Pıhtılaşma hücrelerini",
+              "Tiroidi uyaran sinyali"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k2",
+              "k10"
+            ]
+          },
+          {
+            "id": "tahlil.2.1.k3",
+            "tur": "secmeli",
+            "soru": "Transferrin satürasyonu nasıl elde edilir?",
+            "sec": [
+              "Ferritin ÷ hemoglobin ile hesaplanır",
+              "Laboratuvar cihazında doğrudan ölçülür",
+              "Serum demiri ÷ TIBC × 100 ile hesaplanır",
+              "Lökosit ile trombosit çarpılarak bulunur"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k2",
+              "k15"
+            ]
+          },
+          {
+            "id": "tahlil.2.1.k4",
+            "tur": "secmeli",
+            "soru": "Bir kişinin serum demiri iki raporda farklı çıkmış: ilk kan öğleden sonra yemekten sonra, ikincisi sabah aç karnına alınmış. Bu ünitenin ilkesine göre en doğru tutum hangisi?",
+            "sec": [
+              "Demir deposu kesin olarak azalmıştır",
+              "Laboratuvar hata yapmıştır",
+              "Yüksek olan sonuç doğru sayılır",
+              "Serum demiri günün saatine ve son öğüne göre dalgalanır; koşullar farklı, fark hekimle konuşulur"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k2",
+              "k10"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tahlil.2.1.1",
+          "ad": "Hemogram: kırmızı hücreler",
+          "onKosul": [],
+          "kazanim": [
+            "Hemogramın kırmızı hücre satırlarının neyi ölçtüğünü söyler."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k9",
+            "k8"
+          ],
+          "ozet": "Hemogramın kırmızı hücre satırları oksijen taşıyan hücreleri sayar (RBC), oksijeni bağlayan proteini ölçer (hemoglobin), kanın ne kadarının bu hücrelerden oluştuğunu (hematokrit), hücrelerin ortalama büyüklüğünü (MCV) ve boyut çeşitliliğini (RDW) verir.",
+          "metin": [
+            "Hemogram (tam kan sayımı) kandaki hücreleri sayar ve ölçer. 1. aşamada bir rapor satırını okumayı öğrendin; bu ünite her satırın neyi ölçtüğünü anlatır. «Benim değerim ne demek» sorusu hekime sorulur.",
+            "Kırmızı hücre satırları (kaynak tablosunun «görev» sütunu ve SPİ sözlüğü): Eritrosit (RBC) kırmızı kan hücrelerinin sayısıdır; bu hücreler hemoglobin aracılığıyla akciğerlerden dokulara oksijen taşır, karbondioksidi akciğerlere geri getirir. Hemoglobin oksijeni bağlayan proteindir; SPİ sözlüğü onu «kanın oksijen taşıma kapasitesi» diye anar. Hematokrit, kan hacminin yüzde kaçının kırmızı hücrelerden oluştuğunu verir. MCV tek bir kırmızı hücrenin ortalama büyüklüğünü, RDW hücrelerin boyut çeşitliliğini gösterir.",
+            "Ölçüm koşulu: SPİ sözlüğü hematokritin susuz kalındığında yapay olarak yükseldiğini yazar. Bu bir hastalık bilgisi değil, ölçüm koşulu bilgisidir: kan verdiğin gün ne kadar su içtiğini de kaydına yazarsın (model, 1. aşamadaki «bağlamıyla kaydet» kuralı).",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin senin için ne anlama geldiğini yorumlamak hekimin işidir. Bu ders yalnız «ne ölçülür» sorusunu cevaplar."
+          ],
+          "not": "Alınmayanlar: kaynak tablosunun «Yüksek/Düşük» hastalık listeleri ve «Optimal Hedef» sütunu (41-47); «Hb değerindeki her 1 g/dL düşüş VO2max değerinde yaklaşık %4-5'lik bir kayba neden olur» (42); hematokrit «kan vizkozitesini logaritmik olarak artırarak» (43); MCV «gizli demir yetersizliği araştırılmalıdır» (46); RDW «kardiyovasküler mortalite riski göstergesi» (47). SPİ sözlüğünün yorum notları: hemoglobin «düşüşü önce dayanıklılığı, sonra dikkati bozar» (biomarkers.js 120), MCV «küçükse demir, büyükse B12/folat eksikliğini işaret eder» (134), RDW «erken demir eksikliğinde ferritinden önce yükselebilir» (140). Hepsi bir değeri yorumladığı ya da doğrulanmamış bir sayı verdiği için.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.1.1.a1",
+              "tur": "secmeli",
+              "soru": "Hemogramda tek bir kırmızı hücrenin ortalama büyüklüğünü gösteren satır hangisidir?",
+              "sec": [
+                "RDW",
+                "Hematokrit",
+                "Lökosit",
+                "MCV"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "tahlil.2.1.1.a2",
+              "tur": "secmeli",
+              "soru": "Hematokrit neyi verir?",
+              "sec": [
+                "Tek bir hücrenin büyüklüğünü",
+                "Kandaki şeker miktarını",
+                "Kan hacminin yüzde kaçının kırmızı hücrelerden oluştuğunu",
+                "Bağışıklık hücrelerinin sayısını"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k9"
+              ]
+            },
+            {
+              "id": "tahlil.2.1.1.a3",
+              "tur": "secmeli",
+              "soru": "SPİ sözlüğüne göre hangi ölçüm koşulu hematokriti yapay olarak yükseltir?",
+              "sec": [
+                "Susuz kalmak",
+                "Kanın sabah alınması",
+                "Kanın sol koldan alınması",
+                "Laboratuvarın birimi"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k9"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tahlil.2.1.2",
+          "ad": "Beyaz hücreler ve trombosit",
+          "onKosul": [
+            "tahlil.2.1.1"
+          ],
+          "kazanim": [
+            "Lökosit ve trombositin neyi ölçtüğünü ve antrenmanın bir ölçüm koşulu olduğunu söyler."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k9"
+          ],
+          "ozet": "Lökosit bağışıklık savunmasının hücrelerini, trombosit pıhtılaşmada görev alan hücreleri sayar. Çok ağır bir antrenman lökositi geçici olarak değiştirebilir; bu bir ölçüm koşuludur.",
+          "metin": [
+            "Lökosit (WBC) bağışıklık savunmasının hücrelerini sayar. Kaynak tablosu beş alt türünü adlandırır: nötrofil, lenfosit, monosit, eozinofil, bazofil.",
+            "Trombosit (PLT) pıhtılaşmada görev alan hücrelerdir; kaynak tablosu onları pıhtılaşma tıkacı oluşturma ve doku iyileşmesini başlatma görevleriyle anar. SPİ sözlüğü kısaca «pıhtılaşma hücreleri» der.",
+            "Ölçüm koşulu: kaynak tablosu çok ağır bir antrenmandan hemen sonra lökositin geçici olarak yükselebildiğini yazar. Bu yüzden kan vermeden önceki gün ağır antrenman yapıp yapmadığın da kaydın bağlamına girer (model).",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin senin için ne anlama geldiğini yorumlamak hekimin işidir. Bu ders yalnız «ne ölçülür» sorusunu cevaplar."
+          ],
+          "not": "Alınmayanlar: lökosit ve trombositin «Yüksek/Düşük» hastalık listeleri (44-45), tükeniş antrenmanından sonra verilen sayı (44) ve «24 saatte normale dönmelidir» yorumu (44), SPİ sözlüğünün «ani yükselişler enfeksiyon işaretidir» notu (biomarkers.js 146). Bir değeri yorumladıkları için.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.1.2.a1",
+              "tur": "secmeli",
+              "soru": "Hemogramda bağışıklık hücrelerini sayan satır hangisidir?",
+              "sec": [
+                "Trombosit (PLT)",
+                "Lökosit (WBC)",
+                "Hemoglobin",
+                "MCV"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k9"
+              ]
+            },
+            {
+              "id": "tahlil.2.1.2.a2",
+              "tur": "secmeli",
+              "soru": "Kaynak tablosunda trombositin anılan görevi hangisidir?",
+              "sec": [
+                "Pıhtılaşma tıkacı oluşturmak",
+                "Oksijen taşımak",
+                "Şekeri hücreye sokmak",
+                "Demir depolamak"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tahlil.2.1.3",
+          "ad": "Demir paneli: depo, anlık değer, taşıma",
+          "onKosul": [
+            "tahlil.2.1.2"
+          ],
+          "kazanim": [
+            "Demir panelinde depo, anlık değer, taşıma kapasitesi ve doluluk oranını ayırır."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k2",
+            "k10",
+            "k15"
+          ],
+          "ozet": "Ferritin depoyu, serum demiri o anki kandaki demiri, TIBC taşıyıcının bağlayabileceği en fazla demiri gösterir; transferrin satürasyonu bu ikisinden hesaplanan doluluk oranıdır. Serum demiri gün içinde çok oynar ve tek başına okunmaz.",
+          "metin": [
+            "Demir paneli dört satırdan oluşur ve her biri başka bir şeyi ölçer (kaynak tablosunun «görev» sütunu, SPİ sözlüğü).",
+            "Ferritin vücudun temel demir depolama proteinidir; SPİ sözlüğü kısaca «demir deposu» der. Serum demiri o anda kanda transferrine bağlı taşınan demirdir; iki kaynak da günün saatine ve son öğüne göre çok dalgalandığını, tek başına yeterli olmadığını yazar. TIBC (toplam demir bağlama kapasitesi), kandaki taşıyıcı proteinin (transferrin) bağlayabileceği en fazla demir miktarıdır; dolaylı bir ölçümdür. Transferrin satürasyonu (TSAT) taşıyıcının yüzde kaçının dolu olduğudur; ölçülmez, hesaplanır: serum demiri ÷ TIBC × 100.",
+            "Modelin örneği (uydurma sayılar, yorum değil): serum demiri 90 µg/dL ve TIBC 300 µg/dL ise TSAT = 90 ÷ 300 × 100 = %30. Hesap bir sayının nereden geldiğini gösterir; sonucun senin için anlamını hekim değerlendirir.",
+            "Modelin bağlantı notu: 1. aşamada ferritin aralığının kaynaktan kaynağa değiştiğini gördün. Aralığa bakmadan önce bir satırın depoyu mu, anlık değeri mi, yoksa hesaplanmış bir oranı mı gösterdiğini bilmek gerekir.",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin senin için ne anlama geldiğini yorumlamak hekimin işidir. Bu ders yalnız «ne ölçülür» sorusunu cevaplar."
+          ],
+          "not": "Alınmayanlar: ferritin satırındaki depo tükenmesi eşiği ve akut faz yorumu (48); serum demirindeki takviye ve kanama listesi (49); TIBC «demir eksikliği gelişiminde ilk artan parametrelerden biri» (50); TSAT için verilen eşik ve «fonksiyonel demir eksikliği teşhisi konulabilir» cümlesi (51). SPİ sözlüğünün «referans aralığının alt ucu depo tükenmiş demektir; yorgunluk çoğu zaman anemiden önce burada görünür» (biomarkers.js 161-162) ve TIBC «depo boşaldıkça yükselir» (174) notları. Hepsi bir değeri yorumluyor ya da teşhis eşiği veriyor.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.1.3.a1",
+              "tur": "secmeli",
+              "soru": "Demir panelinde ölçülmeyip hesaplanan satır hangisidir?",
+              "sec": [
+                "Ferritin",
+                "Transferrin satürasyonu (TSAT)",
+                "Serum demiri",
+                "TIBC"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k2",
+                "k15"
+              ]
+            },
+            {
+              "id": "tahlil.2.1.3.a2",
+              "tur": "secmeli",
+              "soru": "Serum demiri 80, TIBC 320 (aynı birim) ise transferrin satürasyonu yüzde kaçtır? (uydurma sayılar)",
+              "sec": [
+                "%40",
+                "%80",
+                "%4",
+                "%25"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k15"
+              ]
+            },
+            {
+              "id": "tahlil.2.1.3.a3",
+              "tur": "secmeli",
+              "soru": "Hangi satır için iki kaynak da günün saatine ve son öğüne göre çok dalgalandığını yazar?",
+              "sec": [
+                "Ferritin",
+                "Hematokrit",
+                "Serum demiri",
+                "Trombosit"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k2",
+                "k10"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tahlil.2.2",
+      "ad": "Şeker, yağlar, karaciğer, böbrek, tiroid: ne ölçer?",
+      "onKosul": [
+        "tahlil.2.1"
+      ],
+      "kazanim": [
+        "Açlık glukozu ile HbA1c arasındaki an–ortalama farkını açıklar.",
+        "Lipid, karaciğer, böbrek ve tiroid satırlarının neyi ölçtüğünü söyler.",
+        "Raporda ölçülen ve hesaplanan satırları ayırır."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "tahlil.2.2.k1",
+            "tur": "secmeli",
+            "soru": "HbA1c neyi gösterir?",
+            "sec": [
+              "Kanın alındığı andaki şekeri",
+              "Kandaki kolesterolü",
+              "Böbreğin süzme hızını",
+              "Son birkaç ayın ortalama kan şekerini"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k3",
+              "k11"
+            ]
+          },
+          {
+            "id": "tahlil.2.2.k2",
+            "tur": "secmeli",
+            "soru": "Kolesterolü karaciğerden dokulara taşıyan parçacık hangisidir?",
+            "sec": [
+              "HDL",
+              "Trigliserit",
+              "Albümin",
+              "LDL"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k4"
+            ]
+          },
+          {
+            "id": "tahlil.2.2.k3",
+            "tur": "secmeli",
+            "soru": "Hangisi ölçülmez, başka satırlardan hesaplanır?",
+            "sec": [
+              "Kreatinin",
+              "eGFR",
+              "ALT",
+              "TSH"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k6",
+              "k15"
+            ]
+          },
+          {
+            "id": "tahlil.2.2.k4",
+            "tur": "secmeli",
+            "soru": "Bir raporda TSH ve serbest T4 var. SPİ sözlüğüne ve bu yolun sınırına göre hangisi doğrudur?",
+            "sec": [
+              "Serbest T4, TSH ile birlikte okunur; ne anlama geldiğini hekim söyler",
+              "TSH tek başına teşhis koydurur",
+              "Serbest T4 bir karaciğer enzimidir",
+              "İkisinin aralığı bütün laboratuvarlarda aynıdır"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k7",
+              "k14",
+              "k19"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tahlil.2.2.1",
+          "ad": "Şeker paneli: an ve ortalama",
+          "onKosul": [],
+          "kazanim": [
+            "Açlık glukozu ile HbA1c arasındaki an–ortalama farkını açıklar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k3",
+            "k11",
+            "k15",
+            "k23"
+          ],
+          "ozet": "Açlık glukozu bir anın, HbA1c son birkaç ayın ortalama kan şekerini gösterir. İnsülin bir hormondur; HOMA-IR ve tahmini ortalama glukoz (eAG) ölçülmez, hesaplanır.",
+          "metin": [
+            "Açlık glukozu, kanın alındığı andaki kan şekeridir; kaynak tablosu glukozu beynin ve kırmızı kan hücrelerinin birincil yakıtı olarak anar.",
+            "HbA1c, glukozun kırmızı hücrelerdeki hemoglobine bağlanmasıyla oluşur ve bir ortalamayı gösterir: kaynak tablosu son 8-12 haftanın, SPİ sözlüğü son 3 ayın ortalama kan şekeri der; iki ifade aynı aralığa düşer. SPİ sözlüğünün cümlesiyle: tek günün kaçamağı bunu değiştirmez. SPİ, HbA1c'den gündelik birimle bir ortalama glukoz (eAG) da hesaplar: 28,7 × HbA1c − 46,7.",
+            "Açlık insülini, pankreasın salgıladığı ve hücrelerin glukoz alımını yöneten hormondur. HOMA-IR ölçülmez; açlık glukozu ve açlık insülininden hesaplanır (açlık glukozu × açlık insülini ÷ 405).",
+            "Ölçüm koşulu: SPİ tahlil kaydına göre açlık glukozu ve insülin yalnız aç karnına alınan kandan yorumlanır; kayıt bu yüzden açlık durumunu ayrıca sorar (1. aşama, ders 1.3.1).",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin senin için ne anlama geldiğini yorumlamak hekimin işidir. Bu ders yalnız «ne ölçülür» sorusunu cevaplar."
+          ],
+          "not": "Alınmayanlar: kaynak tablosundaki açlık glukozu ve HbA1c tanı eşikleri (52-53); açlık insülini için verilen «metabolik direnç başlamış demektir» eşiği (54); HOMA-IR için verilen «belirgin insülin direnci» eşiği (55); SPİ sözlüğünün glukoz notundaki hekim görüşmesi eşiği (biomarkers.js 187). 1. aşamada da alınmamışlardı. Kaynak tablosunun egzersiz cümleleri (52, 55) bir değeri değiştirme önerisi olduğu için alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.2.1.a1",
+              "tur": "secmeli",
+              "soru": "Hangi satır son birkaç ayın ortalama kan şekerini gösterir?",
+              "sec": [
+                "Açlık glukozu",
+                "Açlık insülini",
+                "Trigliserit",
+                "HbA1c"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3",
+                "k11"
+              ]
+            },
+            {
+              "id": "tahlil.2.2.1.a2",
+              "tur": "secmeli",
+              "soru": "HOMA-IR için hangisi doğrudur?",
+              "sec": [
+                "Açlık glukozu ve açlık insülininden hesaplanır",
+                "Laboratuvar cihazında doğrudan ölçülür",
+                "Yalnız tok karnına alınan kandan bulunur",
+                "İdrardan ölçülür"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3",
+                "k15"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tahlil.2.2.2",
+          "ad": "Lipid paneli",
+          "onKosul": [
+            "tahlil.2.2.1"
+          ],
+          "kazanim": [
+            "Lipid panelindeki satırların neyi ölçtüğünü ve hangilerinin hesaplandığını söyler."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k4",
+            "k12",
+            "k15",
+            "k23"
+          ],
+          "ozet": "Total kolesterol, LDL, HDL ve trigliserit kandaki yağları ve taşıyıcılarını ölçer: LDL kolesterolü dokulara götürür, HDL geri getirir. Non-HDL ve bazen LDL hesaplanır; total kolesterol tek başına okunmaz.",
+          "metin": [
+            "Lipid paneli kandaki yağları ve onları taşıyan parçacıkları ölçer (kaynak tablosunun «görev» sütunu). Total kolesterol hücre zarı, safra asitleri, D vitamini ve steroit hormonlar için öncül moleküldür. LDL, kolesterolü karaciğerden dokulara taşıyan parçacıktır. HDL, kolesterolü damar duvarlarından toplayıp karaciğere geri taşır. Trigliserit, yağ asitlerinin depolama ve enerji taşıma biçimidir.",
+            "Hesaplanan satırlar: non-HDL kolesterol = total kolesterol − HDL. LDL bazen ölçülmez, Friedewald formülüyle hesaplanır (total kolesterol − HDL − trigliserit ÷ 5); SPİ'nin formül notu, trigliserit 400 mg/dL'nin üstündeyken bu formülün geçersiz olduğunu yazar. Raporundaki LDL'nin ölçülmüş mü hesaplanmış mı olduğunu laboratuvara sorabilirsin (model).",
+            "Birlikte okuma: SPİ sözlüğü total kolesterolün tek başına zayıf bir gösterge olduğunu, LDL ve trigliseritle birlikte okunduğunu yazar; kaynak tablosu da total kolesterolün tek başına yetersiz olduğunu söyler.",
+            "Ölçüm koşulu: SPİ tahlil kaydı trigliseritin yalnız aç karnına alınan kandan yorumlandığını not eder.",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin senin için ne anlama geldiğini yorumlamak hekimin işidir. Bu ders yalnız «ne ölçülür» sorusunu cevaplar."
+          ],
+          "not": "Alınmayanlar: kaynak tablosunun total kolesterol, LDL ve trigliserit risk sınıfları (56-59); LDL «aterojenik risk faktörü» ve egzersizin parçacık boyutunu değiştirdiği iddiası (57); HDL için verilen «disfonksiyonel HDL» eşiği (58); TG/HDL «en güçlü klinik göstergesidir» (60). SPİ sözlüğünün TG/HDL için verdiği iyi/dikkat eşikleri (biomarkers.js 250) ve non-HDL için «riski LDL'den daha iyi özetler» (256) notları. Eşik ya da risk yorumu oldukları için. Friedewald'ın geçersizlik sınırı (biomarkers.js 471) bir yöntem koşuludur, bir değerin yorumu değildir; bu yüzden alındı.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.2.2.a1",
+              "tur": "secmeli",
+              "soru": "Kolesterolü damar duvarlarından toplayıp karaciğere geri taşıyan parçacık hangisidir?",
+              "sec": [
+                "LDL",
+                "HDL",
+                "Trigliserit",
+                "Total kolesterol"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4"
+              ]
+            },
+            {
+              "id": "tahlil.2.2.2.a2",
+              "tur": "secmeli",
+              "soru": "Total kolesterol 190, HDL 50 (aynı birim) ise non-HDL kolesterol kaçtır? (uydurma sayılar)",
+              "sec": [
+                "240",
+                "95",
+                "140",
+                "3,8"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k15"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tahlil.2.2.3",
+          "ad": "Karaciğer, böbrek ve tiroid",
+          "onKosul": [
+            "tahlil.2.2.2"
+          ],
+          "kazanim": [
+            "Karaciğer, böbrek ve tiroid satırlarının neyi ölçtüğünü ve hangilerinin hesaplandığını söyler."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k5",
+            "k6",
+            "k7",
+            "k13",
+            "k14",
+            "k15"
+          ],
+          "ozet": "ALT, AST ve GGT enzimdir; albümin karaciğerin yaptığı ana kan proteinidir. Kreatinin kas kaynaklı bir atıktır, eGFR ondan hesaplanır. TSH tiroidi uyaran sinyaldir, serbest T4 tiroidin ana hormonudur.",
+          "metin": [
+            "Karaciğer satırları (kaynak tablosunun «görev» sütunu): ALT ve AST, amino grubu aktaran enzimlerdir (transaminaz). Kaynağa göre ALT karaciğer hücrelerinde bulunur; AST hem karaciğerde hem de iskelet ve kalp kasında bulunur. GGT safra kanalları boyunca yer alan bir enzimdir. Albümin karaciğerde yapılan ana kan proteinidir.",
+            "Ölçüm koşulu: SPİ sözlüğü AST'nin ağır antrenmandan sonra geçici yükseldiğini ve ölçümün antrenmansız bir günde yapıldığını yazar.",
+            "Böbrek satırları: kreatinin, kastaki fosfokreatinin kendiliğinden yıkılmasıyla oluşan bir atıktır ve böbrekten süzülür. eGFR (tahmini süzme hızı) ölçülmez; SPİ onu CKD-EPI 2021 formülüyle kreatinin, yaş ve cinsiyetten hesaplar. Üre, protein ve amino asit yıkımından doğan son atık üründür.",
+            "Tiroid satırları: TSH hipofizden salgılanır ve tiroid bezini hormon üretmeye uyarır. Serbest T4 tiroidin ana salgı ürünüdür; dokularda etkin hormon T3'e dönüştürülür. SPİ sözlüğü serbest T4'ün TSH ile birlikte okunduğunu, tek başına yorumlanmadığını yazar.",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir değerin senin için ne anlama geldiğini yorumlamak hekimin işidir. Bu ders yalnız «ne ölçülür» sorusunu cevaplar."
+          ],
+          "not": "Alınmayanlar: AST «bu durum karaciğer hastalığı değil, kas mikro-hasarıdır» ve verilen sayılar (62); bilirubin «Gilbert … zararsızdır» (65); kreatinin «sistatin C testi istenmelidir» (66, test isteme önerisi); eGFR ve TSH tanı eşikleri (67, 70); albümin «yetersiz protein/kalori alımını … düşündürmelidir» (64). SPİ sözlüğünün ALT «yağlı karaciğerde sessizce yükselir» (biomarkers.js 265), kreatinin «kas kütlesi yüksek olanlarda doğal olarak yüksektir» (306), eGFR için verilen hekim değerlendirmesi eşiği (326), TSH «yüksekse tiroid yavaş çalışıyor demektir» (392) notları. Hepsi bir değeri yorumluyor, bir eşik ya da test öneriyor.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.2.3.a1",
+              "tur": "secmeli",
+              "soru": "Kaynak tablosuna göre hem karaciğerde hem kasta bulunan enzim hangisidir?",
+              "sec": [
+                "ALT",
+                "AST",
+                "GGT",
+                "Albümin"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k5"
+              ]
+            },
+            {
+              "id": "tahlil.2.2.3.a2",
+              "tur": "secmeli",
+              "soru": "eGFR için hangisi doğrudur?",
+              "sec": [
+                "Ölçülmez; kreatinin, yaş ve cinsiyetten hesaplanır",
+                "İdrardan doğrudan ölçülür",
+                "Bir tiroid hormonudur",
+                "Bir karaciğer enzimidir"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k6",
+                "k15"
+              ]
+            },
+            {
+              "id": "tahlil.2.2.3.a3",
+              "tur": "secmeli",
+              "soru": "SPİ sözlüğüne göre serbest T4 nasıl okunur?",
+              "sec": [
+                "Tek başına yeterlidir",
+                "Yalnız akşam ölçülür",
+                "TSH ile birlikte; tek başına yorumlanmaz",
+                "Hemogramla birlikte"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tahlil.2.3",
+      "ad": "Ölçüm koşulları, dayanak ve hekime hazırlık",
+      "onKosul": [
+        "tahlil.2.2"
+      ],
+      "kazanim": [
+        "Sonucu etkileyebilen ölçüm koşullarını kaydeder.",
+        "Bir eşiğin dayanağını sorgular.",
+        "Sonuçlarını hekime soru olarak götürür."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "tahlil.2.3.k1",
+            "tur": "secmeli",
+            "soru": "Kan vermeden önce hangi talimat her zaman önce gelir?",
+            "sec": [
+              "Laboratuvarın ve hekimin hazırlık talimatı",
+              "Bir arkadaşın önerisi",
+              "İnternetteki bir tablo",
+              "Uygulamadaki hedef bant"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k23",
+              "k19"
+            ]
+          },
+          {
+            "id": "tahlil.2.3.k2",
+            "tur": "secmeli",
+            "soru": "SPİ kanıt katmanının dört kaynak türü hangi seçenekte doğru verilmiştir?",
+            "sec": [
+              "Yüksek, orta, düşük, bilinmiyor",
+              "Kılavuz, uzlaşı, gözlemsel, sistem ayarı",
+              "Doğrudan, dolaylı, yerel, genel",
+              "Kan, idrar, tükürük, saç"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k16",
+              "k17"
+            ]
+          },
+          {
+            "id": "tahlil.2.3.k3",
+            "tur": "secmeli",
+            "soru": "SPİ şikâyet kaydında işaretlenmemiş bir gün ne demektir?",
+            "sec": [
+              "Şikâyet yok",
+              "Hastalık geçti",
+              "Girilmemiş",
+              "Değerler normal"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k21"
+            ]
+          },
+          {
+            "id": "tahlil.2.3.k4",
+            "tur": "secmeli",
+            "soru": "Bir uygulamada bir belirteç için «hedef bant» görüyorsun ve değerin bandın dışında. Bu ünitenin ilkelerine göre ilk ne yaparsın?",
+            "sec": [
+              "Hemen bir takviyeye başlarım",
+              "Değeri bir hastalık sayarım",
+              "Bandı bütün laboratuvarlar için geçerli sayarım",
+              "Bandın dayanağına bakar, değeri koşullarıyla kaydeder ve anlamını hekime sorarım"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k16",
+              "k18",
+              "k19"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "tahlil.2.3.1",
+          "ad": "Kan vermeden önceki gün",
+          "onKosul": [],
+          "kazanim": [
+            "Açlık, saat, antrenman, hastalık ve su durumunun bazı belirteçleri etkileyebildiğini bilir ve bunları sonuçla birlikte kaydeder."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k23",
+            "k9",
+            "k10",
+            "k13",
+            "k14"
+          ],
+          "ozet": "Açlık, kan alma saati, önceki günün ağır antrenmanı, geçirilen bir enfeksiyon ve su durumu bazı belirteçleri değiştirebilir. Hazırlık talimatı laboratuvardan ve hekimden alınır; koşullar sonuçla birlikte kaydedilir.",
+          "metin": [
+            "1. aşamada bir sonucun yalnız sayı olmadığını, bağlamıyla kaydedildiğini gördün. Bu ders bağlamın neden önemli olduğunu toplar: kaynaklar bazı belirteçlerin ölçüm koşuluna göre değiştiğini yazar.",
+            "Açlık: SPİ tahlil kaydına göre açlık glukozu, insülin, trigliserit ve onlardan türeyen TyG ile TG/HDL yalnız aç karnına alınan kandan yorumlanır.",
+            "Saat: SPİ sözlüğü testosteronun sabah 8-10 arası ölçüldüğünü ve gün içinde belirgin düştüğünü, sabah kortizolünün sabah aç karnına ölçüldüğünü yazar. Serum demiri de gün içinde çok oynar (ders 2.1.3).",
+            "Antrenman, hastalık, su: SPİ sözlüğüne göre AST ağır antrenmandan sonra geçici yükselir (ölçüm antrenmansız günde yapılır); hs-CRP enfeksiyon sırasında geçici yükselir (ölçüm sağlıklı bir günde yapılır); hematokrit susuz kalındığında yapay olarak yükselir.",
+            "Kural (model): kan vermeden önce laboratuvarın ve hekimin verdiği hazırlık talimatı her zaman önce gelir. Kendi kaydına şunları yaz: açlık durumu, kan alma saati, önceki gün ağır antrenman, yakın zamanda geçirilen hastalık, ne kadar su içtiğin.",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve bir koşulun senin sonucunu nasıl etkilediğini yorumlamak hekimin işidir."
+          ],
+          "not": "Alınmayanlar: kaynak tablosunun hs-CRP için «Tahlil için 48 saat dinlenme gerekir» süresi (73) ve verdiği sayılar; laboratuvar talimatının yerine geçmesin diye. SPİ sözlüğünün kortizol notundaki «uykusuzluk ve aşırı antrenman yükseltir» kısmı (biomarkers.js 418) bir değeri yoruma açtığı için alınmadı; yalnız ölçüm zamanı alındı. 1. aşamanın ders 1.2.3'ü serum demiri, ferritin ve hs-CRP için antrenman etkisini zaten anmıştı; bu ders onu açlık, saat, hastalık ve su ile tamamlar.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.3.1.a1",
+              "tur": "secmeli",
+              "soru": "SPİ tahlil kaydına göre hangisi yalnız aç karnına alınan kandan yorumlanır?",
+              "sec": [
+                "Hematokrit",
+                "Lökosit",
+                "Trigliserit",
+                "Trombosit"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k23"
+              ]
+            },
+            {
+              "id": "tahlil.2.3.1.a2",
+              "tur": "secmeli",
+              "soru": "SPİ sözlüğüne göre testosteron günün hangi saatinde ölçülür?",
+              "sec": [
+                "Gece yarısı",
+                "Öğleden sonra 15-17 arası",
+                "Saatin önemi yoktur",
+                "Sabah 8-10 arası"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14"
+              ]
+            },
+            {
+              "id": "tahlil.2.3.1.a3",
+              "tur": "secmeli",
+              "soru": "Dün ağır bir bacak antrenmanı yaptın, bugün kan vereceksin. Bu derse göre en doğru davranış hangisi?",
+              "sec": [
+                "Sonucu sonra kendi başına düzeltmek",
+                "Antrenmanı kayda yazmak ve laboratuvarın ya da hekimin hazırlık talimatına uymak",
+                "Antrenmanı kimseye söylememek",
+                "İki laboratuvarda kan verip düşük çıkanı seçmek"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13",
+                "k23"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tahlil.2.3.2",
+          "ad": "Dayanağı ne? Kılavuz, uzlaşı, gözlem, sistem ayarı",
+          "onKosul": [
+            "tahlil.2.3.1"
+          ],
+          "kazanim": [
+            "Bir eşiğin dayanağını kaynak türü, kesinlik ve uygulanabilirlik açısından sorgular."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k16",
+            "k17",
+            "k18",
+            "k20"
+          ],
+          "ozet": "Bir eşiğin dayanağı bir kılavuz, bir uzlaşı, gözlemsel bir çalışma ya da sistemin kendi ayarı olabilir; bunlar aynı türden şeyler değildir. Bir sayıyı okumadan önce nereden geldiğini, ne kadar kesin olduğunu ve sana ne kadar uyduğunu sor.",
+          "metin": [
+            "Bir sayı ekranda ne kadar kesin yazılırsa yazılsın, nereden geldiği ayrı bir sorudur. SPİ'nin kanıt katmanı her eşiğin dayanağını dört türden biriyle etiketler: kılavuz (adı konmuş bir klinik kılavuzun karar eşiği), uzlaşı (laboratuvar ve klinik pratikte yaygın, tek kılavuza bağlı olmayan uzlaşı), gözlemsel (gözlemsel çalışmalardan gelen, karar eşiği olarak tasarlanmamış bir ilişki) ve sistem ayarı (yazılımın pratik sebeplerle seçtiği, bilimsel bulgu olmayan sayı).",
+            "Aynı katman iki soruyu daha sorar. Kesinlik: elimizdekine ne kadar güveniyoruz (yüksek, orta, düşük, bilinmiyor)? Uygulanabilirlik: eşiğin tanımlandığı topluluk seninle ne kadar örtüşüyor (doğrudan, dolaylı, yerel)? Bir eşik bir topluluk için tanımlandıysa başka bir topluluğa aynen taşınmayabilir.",
+            "Örnekler (SPİ kanıt listesi): yetişkin uyku süresi önerisi «kılavuz» diye etiketli; istirahat nabzının hedef bandı «gözlemsel» ve notu «ilişki, nedensellik değildir»; kalp atım değişkenliği (HRV) hedef bandı «bu sistemin seçimi», çünkü HRV kişiye ve cihaza özeldir.",
+            "Modelin bağlantı notu: 1. aşamada referans aralığı ile hedef bandın (optimal) farklı şeyler olduğunu gördün. Bir uygulamada ya da bir atlasta hedef bant gördüğünde ilk soru şudur: dayanağı ne? Bu yolun kaynak tablosundaki «Optimal Hedef» sütunu bir dayanak göstermediği için hiç alınmadı.",
+            "Unutma: dayanağı güçlü bir eşik bile senin değerini yorumlamaz; referans aralıkları laboratuvardan laboratuvara değişir ve yorum hekimindir."
+          ],
+          "not": "SPİ kanıt listesi (evidence.js) sistemin kendi eşlemesidir; atıfların hiçbiri bu koşuda bir dış kaynakla karşılaştırılmadı. Kaynak türü listede «system_tuning» kimliğiyle tanımlı (evidence.js 66), satırlarda «convention» diye yazılıyor (206); ad farkı kodun işidir, derse etkisi yok. Uyku satırının nüfusu «18–64 yaş erişkin» (214), SPİ öğrenme verisindeki CDC iddiası «18–60 yaş» (ogrenme.js 1358); fark Uyku 2. aşamasında da not edildi.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.3.2.a1",
+              "tur": "secmeli",
+              "soru": "SPİ kanıt katmanına göre «yazılımın pratik sebeplerle seçtiği, bilimsel bulgu olmayan sayı» hangi türdür?",
+              "sec": [
+                "Sistem ayarı",
+                "Kılavuz",
+                "Uzlaşı",
+                "Gözlemsel"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k16"
+              ]
+            },
+            {
+              "id": "tahlil.2.3.2.a2",
+              "tur": "secmeli",
+              "soru": "SPİ'de HRV hedef bandının dayanağı nedir?",
+              "sec": [
+                "Adı konmuş bir klinik kılavuz",
+                "Geniş bir laboratuvar uzlaşısı",
+                "Sistemin kendi seçimi; HRV kişiye ve cihaza özeldir",
+                "Gözlemsel bir çalışmadaki ilişki"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k18"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tahlil.2.3.3",
+          "ad": "Hekime götürmek: tablo, şikâyet, soru",
+          "onKosul": [
+            "tahlil.2.3.2"
+          ],
+          "kazanim": [
+            "Hekime sonuç tablosunu koşullarıyla, şikâyetlerini ve sorularını hazırlayarak götürür."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k19",
+            "k21",
+            "k22",
+            "k23"
+          ],
+          "ozet": "Hekime sonuç tablonu koşullarıyla, şikâyetlerini ve sorularını götürürsün. Şikâyet bir bulgudur, hastalık değil; birlikte değişen iki ölçüm sebep anlamına gelmez. Yorum hekimindir.",
+          "metin": [
+            "Bu yolun son adımı bir yorum değil, iyi hazırlanmış bir konuşmadır. SPİ'nin klinik sınırı şöyledir: sistem bir hekim değildir; teşhis koymaz, doz önermez, tedaviyi bırakmayı önermez, sonuç garantisi vermez.",
+            "Götürülecek üç şey (model, bu aşamanın özeti): (1) sonuç tablon: tarih, laboratuvar, açlık durumu, değer, birim, o raporun aralığı ve kan vermeden önceki koşullar; (2) şikâyetlerin; (3) soruların.",
+            "Şikâyetler: SPİ şikâyetleri yapılı kaydeder ve hekim çıktısında gösterir. İlkeleri: bir şikâyet bir bulgudur, hastalık değildir; işaretlenmemiş bir gün «şikâyet yok» değil «girilmemiş» demektir; şiddeti sen verirsin, sistem onu başka bir ölçümden türetmez.",
+            "İki ölçüm birlikte değişiyorsa: SPİ'nin çapraz bağ ekranı bunun birinin ötekine sebep olduğu anlamına gelmediğini yazar. Hekime «bu ikisi birlikte değişiyor, bir anlamı var mı?» diye sorabilirsin; cevabı sen vermezsin (model).",
+            "Soru örnekleri (model): «Bu değer benim için ne anlama geliyor?», «Tekrar ölçülmesi gerekir mi, ne zaman?», «Kan verirken açtım ama önceki gün ağır antrenman yaptım; bu sonucu etkilemiş olabilir mi?»",
+            "Unutma: referans aralıkları laboratuvardan laboratuvara değişir ve yorum hekimindir. Bu yol teşhis koymaz; ilaç, takviye ya da doz önermez."
+          ],
+          "not": "Semptom sözlüğünün başındaki «Ferritin kan değeri deponun yalnızca %1'ini gösterir» cümlesi (symptoms.js 7) ve aynı fikrin ipucu metni (hints.js 132, «kan değeri deponun bir kısmını gösterir») doğrulanmamış bir oran içerdiği için alınmadı; yalnız şikâyetlerin hekim çıktısında göründüğü bilgisi alındı. Sözlüğün örnekleri («düşük ferritin + yorgunluk», «bir ilaç başlangıcından sonra artan şikâyet»; symptoms.js 14-15) bir değeri ya da ilacı yoruma açtığı için alınmadı. Soru örnekleri ve «üç şey» listesi kaynakta yok, model yazdı.",
+          "alistirmalar": [
+            {
+              "id": "tahlil.2.3.3.a1",
+              "tur": "secmeli",
+              "soru": "SPİ'nin şikâyet kaydına göre bir şikâyet nedir?",
+              "sec": [
+                "Bir teşhis",
+                "Bir tedavi önerisi",
+                "Bir bulgu; hastalık değil",
+                "Önemsiz bir not"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k21"
+              ]
+            },
+            {
+              "id": "tahlil.2.3.3.a2",
+              "tur": "secmeli",
+              "soru": "Hangisi bu yolun hekime hazırlık ilkesine uyar?",
+              "sec": [
+                "Değere bakıp kendi teşhisini koymak",
+                "İnternetten bir takviye seçip başlamak",
+                "Aralık dışı bir değeri görmezden gelmek",
+                "Değeri koşullarıyla birlikte götürüp anlamını hekime sormak"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k19",
+                "k23"
+              ]
+            },
+            {
+              "id": "tahlil.2.3.3.a3",
+              "tur": "acik",
+              "soru": "Kanıt işi: Aşağıdaki uydurma rapor satırları için (referans aralıkları bilerek yazılmadı; gerçek bir raporda o laboratuvarın aralığı okunur): Hemoglobin 14,1 g/dL · Hematokrit %42 · Serum demiri 90 µg/dL · TIBC 300 µg/dL · Ferritin 55 ng/mL · Açlık glukozu 88 mg/dL · Total kolesterol 190 mg/dL · HDL 55 mg/dL. (1) Her satırın neyi ölçtüğünü bir cümleyle yaz. (2) Bu satırlardan hesaplanabilen iki değeri (TSAT ve non-HDL) hesapla ve formülünü yaz. (3) Kan verme koşulları için kaydına yazacağın beş alanı sırala. (4) Hekime soracağın üç soruyu yaz. Hiçbir satıra «yüksek», «düşük» ya da bir hastalık adı yazma.",
+              "dogru": "Örnek: (1) Hemoglobin oksijeni bağlayan proteindir; hematokrit kanın yüzde kaçının kırmızı hücre olduğunu verir; serum demiri o anki kandaki demirdir; TIBC taşıyıcının bağlayabileceği en fazla demirdir; ferritin depo proteinidir; açlık glukozu o anki kan şekeridir; total kolesterol kandaki toplam kolesteroldür; HDL kolesterolü karaciğere geri taşıyan parçacıktır. (2) TSAT = 90 ÷ 300 × 100 = %30; non-HDL = 190 − 55 = 135 mg/dL. (3) Açlık durumu, kan alma saati, önceki gün ağır antrenman, yakın zamanda hastalık, içtiğim su. (4) «Bu değerler benim için ne anlama geliyor?», «Serum demiri saate göre oynuyorsa tekrar ölçülmesi gerekir mi?», «LDL bu raporda neden yok, ayrıca istenmeli mi?»",
+              "olcut": [
+                "Her satırın açıklaması «ne ölçer» düzeyinde mi, yorum içermiyor mu?",
+                "İki hesap doğru formülle ve doğru sayılarla yapıldı mı?",
+                "Koşul listesinde açlık, saat, antrenman, hastalık ve su var mı?",
+                "Sorular hekime yöneltilmiş ve yorumu hekime bırakıyor mu?",
+                "Metinde teşhis, ilaç, takviye ya da doz önerisi yok mu?"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k2",
+                "k15",
+                "k23"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

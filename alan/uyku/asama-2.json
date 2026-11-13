@@ -1,0 +1,1233 @@
+{
+  "sema": 1,
+  "alan": "uyku",
+  "id": "uyku.2",
+  "sira": 2,
+  "ad": "Kendi ritmini kurmak",
+  "hedef": "Düzenli kalkışın ve uyku borcunun önemini, kendi ritmini (sabahçıl ya da akşamcıl olmak, şekerleme, sınav dönemi) ve uykuyu bozan durumlarla ne zaman hekime gidileceğini tanımak.",
+  "onKosul": [
+    "uyku.1"
+  ],
+  "kanitIsi": "Yedi gün boyunca her sabah aynı saatte kalkıp yatış, kalkış, şekerleme, akşam yemeği ve egzersiz saatini ve sabah uyanıklığını kaydettiğin bir tablo; altında iki gözlem ve «birlikte görüldü» ile «sebep oldu» ayrımı (ders uyku.2.3.3, alıştırma a3). Sahip değerlendirir; puanlanmaz. Bu bir alışkanlık kaydıdır, teşhis aracı değildir.",
+  "kaynaklar": [
+    {
+      "id": "k1",
+      "ad": "SPİ rehber kartı «Uyku ve toparlanma»: giriş, süre ve düzen, hafta sonu uyarısı",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "uyku-toparlanma, «Ne kadar uyku?»",
+      "satir": "200-205",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k2",
+      "ad": "SPİ rehber kartı «Uyku ve toparlanma»: uyku ve iştah",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "«Uyku, iştah ve kilo»",
+      "satir": "206",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k3",
+      "ad": "SPİ rehber kartı «Uyku ve toparlanma»: uyku düzeni alışkanlıkları ve kafein örneği",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "«Uyku düzeni için alışkanlıklar»",
+      "satir": "207-210",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k4",
+      "ad": "SPİ hareket rehberi: düzenli hareketin faydaları",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "«Neden işe yarar?»",
+      "satir": "34",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k5",
+      "ad": "SPİ öğrenme verisi: CDC uyku iddiaları E18-E19 (kaynak: cdc.gov/sleep/about, erişim 2026-10-12)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/ogrenme.js",
+      "bolum": "E18 «Uyku», E19 «Uyku yaşı»",
+      "satir": "1344-1365",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k6",
+      "ad": "SPİ öğrenme verisi: «İlişki ve neden» kavramı",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/ogrenme.js",
+      "bolum": "concept-neden-sonuc",
+      "satir": "326-332",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k7",
+      "ad": "SPİ ipuçları: «Çapraz bağlar»",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/hints.js",
+      "bolum": "not-capraz-baglar",
+      "satir": "133",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k8",
+      "ad": "Koçluk vaka atlası: Vaka 12, alarm ve uyku borcu",
+      "tur": "gemini",
+      "yol": "KING/iletisim_ve_karizma/kocluk_diyalog_senaryolari_50_vaka_zayif_koc_vs_king_elit_mudahale_atlasi.md",
+      "bolum": "Vaka #12",
+      "satir": "137-145",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k9",
+      "ad": "Sirkadiyen atlas: 24 saatlik performans rehberi",
+      "tur": "gemini",
+      "yol": "SPI/saglik/sirkadiyen_biyoloji_kortizol_melatonin_isik_spektrumu_ve_derin_uyku_mimarisi_atlasi.md",
+      "bolum": "4. 24 Saatlik Sirkadiyen Performans Rehberi",
+      "satir": "80-87",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k10",
+      "ad": "Zaman bloklama atlası: Breus'un dört kronotipi",
+      "tur": "gemini",
+      "yol": "KING/yasam_tasarimi/zaman_bloklama_timeboxing_derin_is_takvimi_ve_enerji_yonetimli_haftalik_sablon.md",
+      "bolum": "3. Dr. Michael Breus — Dört Kronotip",
+      "satir": "55-64",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k11",
+      "ad": "Enerji atlası: 20 dakikalık güç uykusu ya da NSDR",
+      "tur": "gemini",
+      "yol": "KING/yasam_tasarimi/enerji_denetimi_fiziksel_duygusal_zihinsel_ve_ruhsal_4_boyutlu_pil_mimarisi.md",
+      "bolum": "4. Mikro-Yenilenme Menüsü",
+      "satir": "53",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k12",
+      "ad": "Uyku mimarisi atlası: uyku ataleti",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_mimarisi_rem_nrem_uyku_apnesi_ve_derin_toparlanma_biyofizigi_atlasi.md",
+      "bolum": "3. Uyku Ataleti",
+      "satir": "34-36",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k13",
+      "ad": "YKS son 30 gün atlası: son gün satırı",
+      "tur": "gemini",
+      "yol": "AYS/ogrenme_bilimi/yks_son_30_gun_zihinsel_toparlanma_tapering_ve_sinav_sabahi_bilissel_isinma_rutini.md",
+      "bolum": "2. Son 30 günlük çizelge, «Son Gün»",
+      "satir": "38",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k14",
+      "ad": "YKS son 30 gün atlası: sirkadiyen ritim ve biyolojik saat kalibrasyonu",
+      "tur": "gemini",
+      "yol": "AYS/ogrenme_bilimi/yks_son_30_gun_zihinsel_toparlanma_tapering_ve_sinav_sabahi_bilissel_isinma_rutini.md",
+      "bolum": "3. Sirkadiyen ritim ve biyolojik saat kalibrasyonu",
+      "satir": "42-48",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k15",
+      "ad": "YKS zaman yönetimi atlası: 10:15 senkronizasyonu ve son 30 gün kuralı",
+      "tur": "gemini",
+      "yol": "AYS/yks_genel/yks_soru_cozerken_sure_ve_zaman_yonetimi_biyolojik_saat_ve_deneme_stratejisi.md",
+      "bolum": "Bölüm 4: Biyolojik Saat",
+      "satir": "77-81",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k16",
+      "ad": "YKS stres atlası: sınav öncesi gece uyku",
+      "tur": "gemini",
+      "yol": "AYS/yks_genel/yks_stres_ve_sinav_kortizol_yonetimi_psikolojik_dayaniklilik_atlasi.md",
+      "bolum": "4.2 Uyku ve Sirkadiyen Ritim Yönetimi",
+      "satir": "90-91",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k17",
+      "ad": "DSÖ fiziksel aktivite bilgi notu, temiz katman kaydı (who.int/news-room/fact-sheets/detail/physical-activity, alınma 2026-10-22)",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "physical-activity",
+      "satir": "7-9",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k18",
+      "ad": "Seyahat ve vardiya atlası: ana saat ve çevre saatler",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/seyahat_vardiyali_calisma_sinav_kampi_ve_kriz_donemleri_beslenme_protokolleri.md",
+      "bolum": "2. Jet-Lag, biyolojik ilke",
+      "satir": "41",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k19",
+      "ad": "Koçluk modelleri atlası: klinik sevk protokolü ve kırmızı bayraklar",
+      "tur": "gemini",
+      "yol": "KING/kocluk_metodolojisi/elit_kocluk_modelleri_icf_yetkinlikleri_grow_coactive_ve_ontolojik_kocluk_atlasi.md",
+      "bolum": "1.3 Klinik Sevk Protokolü",
+      "satir": "40-45",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k20",
+      "ad": "Uyku mimarisi atlası: uyku apnesi indeksi (yalnız tanım; sınıflama alınmadı)",
+      "tur": "gemini",
+      "yol": "SPI/saglik/uyku_mimarisi_rem_nrem_uyku_apnesi_ve_derin_toparlanma_biyofizigi_atlasi.md",
+      "bolum": "2. Solunum Biyofiziği",
+      "satir": "29",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k21",
+      "ad": "SPİ semptom sözlüğü: değişmezler (teşhis yok, eksik veri sıfır değil)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/symptoms.js",
+      "bolum": "DEĞİŞMEZLER",
+      "satir": "19-28",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k22",
+      "ad": "SPİ semptom sözlüğü: «Uykuya dalamama»",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/symptoms.js",
+      "bolum": "uykusuzluk",
+      "satir": "88-90",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k23",
+      "ad": "SPİ ipuçları: şikâyet kaydı ve hekim çıktısı",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/hints.js",
+      "bolum": "not-sikayet",
+      "satir": "132",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k24",
+      "ad": "SPİ mimarisi: klinik sınır",
+      "tur": "depo",
+      "yol": "SPI/src/MIMARI.md",
+      "bolum": "Klinik sınır",
+      "satir": "51-55",
+      "dogrulama": "dogrulanmamis"
+    }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {
+        "id": "uyku.2.k1",
+        "tur": "secmeli",
+        "soru": "Hangisi bu aşamanın uyku düzeni için temel kuralıdır?",
+        "sec": [
+          "Hafta sonu açığı uzun uykuyla kapatmak",
+          "Her gün farklı saatte yatmak",
+          "Her gün benzer saatte kalkmak",
+          "Uyku gelmese de yatakta beklemek"
+        ],
+        "dogru": "C",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k1"
+        ]
+      },
+      {
+        "id": "uyku.2.k2",
+        "tur": "secmeli",
+        "soru": "Gündüz şekerlemesi için kaynakların ortak önerisi hangisidir?",
+        "sec": [
+          "Akşam 20:00'de iki saat",
+          "Hiç şekerleme yapmamak",
+          "Yatmadan hemen önce bir saat",
+          "Öğleden sonra erken saatte yaklaşık 20 dakika"
+        ],
+        "dogru": "D",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k9",
+          "k11"
+        ]
+      },
+      {
+        "id": "uyku.2.k3",
+        "tur": "secmeli",
+        "soru": "Breus'un kronotiplerini belirleyen bir ölçüm kaynakta var mı?",
+        "sec": [
+          "Evet, on soruluk bir anket",
+          "Hayır; kaynak tipleri anlatır ama bir ölçüm yöntemi vermez",
+          "Evet, bir kan tahlili",
+          "Evet, uyku laboratuvarı ölçümü"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k10"
+        ]
+      },
+      {
+        "id": "uyku.2.k4",
+        "tur": "secmeli",
+        "soru": "Kaydında akşam geç antrenman yaptığın günlerde yatış saatin de geç. Hangisi doğrudur?",
+        "sec": [
+          "Birlikte hareket ediyorlar; sebep olup olmadığını bir şeyi değiştirip yeniden kaydederek anlarsın",
+          "Antrenman kesin sebeptir",
+          "Yatış saati antrenmanı geciktiriyor",
+          "Kayıt yanlıştır"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k6",
+          "k7"
+        ]
+      },
+      {
+        "id": "uyku.2.k5",
+        "tur": "secmeli",
+        "soru": "Uyku apnesi için bu yolun tutumu hangisidir?",
+        "sec": [
+          "Kaynaktaki eşiklerle kendi durumunu sınıflandırmak",
+          "Ağız bandı denemek",
+          "Uyku ilacı almak",
+          "Horlama ve uykuda nefes durması fark edilirse hekime gitmek"
+        ],
+        "dogru": "D",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k20"
+        ]
+      },
+      {
+        "id": "uyku.2.k6",
+        "tur": "secmeli",
+        "soru": "Sınavdan önceki son gün için atlasın önerisi hangisidir?",
+        "sec": [
+          "Gece geç saate kadar tekrar yapmak",
+          "Dinlenmek ve gündüz uyumamak",
+          "Yeni konu öğrenmek",
+          "Gündüz uzun uyumak"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k13"
+        ]
+      }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "uyku.2.1",
+      "ad": "Düzen ve uyku borcu",
+      "onKosul": [],
+      "kazanim": [
+        "Her gün aynı saatte kalkmanın iç saate etkisini açıklar.",
+        "Uyku borcunu ve hafta sonu telafisinin sınırını açıklar.",
+        "Kendi kaydında birlikte görülen iki şeyi sebep saymaz."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "uyku.2.1.k1",
+            "tur": "secmeli",
+            "soru": "SPİ'nin kanıt listesine göre CDC 18-60 yaş için günde en az kaç saat uyku belirtir?",
+            "sec": [
+              "5 saat",
+              "6 saat",
+              "7 saat",
+              "10 saat"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k5"
+            ]
+          },
+          {
+            "id": "uyku.2.1.k2",
+            "tur": "secmeli",
+            "soru": "Bu ünitedeki tanımla «uyku borcu» nedir?",
+            "sec": [
+              "Gece kaç kez uyanıldığı",
+              "Derin uykunun gecedeki oranı",
+              "Gündüz şekerlemelerinin toplamı",
+              "İhtiyaç duyulan ile alınan uyku arasındaki farkın birikmesi"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k8"
+            ]
+          },
+          {
+            "id": "uyku.2.1.k3",
+            "tur": "secmeli",
+            "soru": "Hafta içi 06:30'da, hafta sonu 10:30'da kalkan biri için SPİ rehber kartının uyarısı hangisidir?",
+            "sec": [
+              "Hafta sonu uzun uyku açığı tam kapatmaz ve iç saati kaydırır",
+              "Hafta sonu uyku açığı tamamen kapatır",
+              "Kalkış saatinin önemi yoktur, yalnız süre önemlidir",
+              "Hafta içi kalkış saati de 10:30 olmalıdır"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1"
+            ]
+          },
+          {
+            "id": "uyku.2.1.k4",
+            "tur": "secmeli",
+            "soru": "Bir ay boyunca kaydında, 6 saatten az uyuduğun günlerde ders çalışma süren de kısa görünüyor. Bu ünitenin ilkesine göre en doğru yorum hangisi?",
+            "sec": [
+              "Az uyku kesin sebeptir",
+              "İki ölçüm birlikte hareket ediyor; sebep olup olmadığı başka koşullara bakılarak ve deneyerek anlaşılır",
+              "Ders çalışmak uykuyu bozuyor",
+              "Kayıt yanlıştır, silinmelidir"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k6",
+              "k7"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "uyku.2.1.1",
+          "ad": "Her gün aynı saatte kalkmak",
+          "onKosul": [],
+          "kazanim": [
+            "Her gün aynı saatte kalkmanın iç saate etkisini açıklar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k14",
+            "k15"
+          ],
+          "ozet": "Uyku süresi kadar düzen de önemlidir: her gün benzer saatte yatıp kalkmak iç saati dengeler. Sınav atlasları bu kuralı sınavdan haftalar önce sabit bir kalkış saatiyle uygular.",
+          "metin": [
+            "SPİ'nin «Uyku ve toparlanma» rehber kartı, yetişkinler için gecede 7 saat ve üzeri uykuyu verdikten sonra süre kadar düzenin de önemli olduğunu yazar: her gün benzer saatte yatıp kalkmak iç saati dengeler.",
+            "Sınav hazırlığı atlasları aynı kuralı sınav saatine uyarlar. Biri sınavdan 15 gün önce her sabah, hafta sonları dahil, 07:00'de kalkmayı yazar; öteki sınavdan en az 30 gün önce her sabah en geç 07:30'da kalkmayı. Süre ve saat ayrışıyor; ortak fikir kalkış saatinin her gün aynı kalmasıdır (model özeti).",
+            "Modelin bağlantı notu: 1. aşamada iç saatin sabah ışığıyla ayarlandığını gördün. Kalkış saati her gün değişirse sabah ışığı da her gün başka bir saate düşer; sabit kalkış bu sinyali de sabitler.",
+            "Pratik (modelin örneği): önce kalkış saatini seç, yatış saatini ondan geriye doğru hesapla. 07:00'de kalkıp 8 saat uyumak isteyen biri 23:00'te uyumuş olmalıdır; uykuya dalma süresi de buna eklenir."
+          ],
+          "not": "1. aşama raporu düzenli uyku saatini «kaynaklarda açık bir kural olarak yok» diye eksik saymıştı; kural SPİ rehber kartında var (rehber.js 204). Kart model yazımıdır; atfı «AASM ve Uyku Araştırmaları Derneği ortak bildirisi (2015)» (rehber.js 214) bu koşuda doğrulanmadı. AYS atlasının «kortizolün tepe noktasını tam sınav saati olan 10:15'e kilitler» iddiası (yks_son_30_gun… 47) aşırı kesin olduğu için alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.1.1.a1",
+              "tur": "secmeli",
+              "soru": "SPİ rehber kartına göre uyku süresi kadar önemli olan nedir?",
+              "sec": [
+                "Her gün benzer saatte yatıp kalkmak",
+                "Hafta sonu uzun uyumak",
+                "Yatmadan önce bol su içmek",
+                "Gece en az bir kez uyanmak"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "uyku.2.1.1.a2",
+              "tur": "secmeli",
+              "soru": "07:00'de kalkmak ve 8 saat uyumak isteyen biri en geç saat kaçta uyumuş olmalıdır? (modelin örneği)",
+              "sec": [
+                "22:00",
+                "00:00",
+                "23:00",
+                "01:00"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "uyku.2.1.1.a3",
+              "tur": "secmeli",
+              "soru": "İki sınav atlası kalkış kuralını farklı yazar (15 gün önce 07:00; 30 gün önce en geç 07:30). Ders bu farkı nasıl ele alır?",
+              "sec": [
+                "Yalnız birini doğru sayar",
+                "İkisini de dersten çıkarır",
+                "Ortalamasını alır: 22 gün, 07:15",
+                "İkisini de verir, ortak fikri sabit kalkış olarak özetler"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14",
+                "k15"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "uyku.2.1.2",
+          "ad": "Uyku borcu ve hafta sonu",
+          "onKosul": [
+            "uyku.2.1.1"
+          ],
+          "kazanim": [
+            "Uyku borcunu ve hafta sonu telafisinin sınırını açıklar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k5",
+            "k8"
+          ],
+          "ozet": "İhtiyaç duyulan ile alınan uyku arasındaki fark birikir. Hafta sonu uzun uyumak bu açığı tam kapatmaz ve iç saati kaydırır; çözüm çoğu zaman yatış saatini öne almaktır.",
+          "metin": [
+            "Uyku borcu (modelin tanımı): ihtiyacın olan uyku ile aldığın uyku arasındaki farkın gün gün birikmesi. Terim bir koçluk atlasında geçer, orada tanımı verilmez.",
+            "Ne kadar uyku? SPİ'nin kanıt listesi CDC'nin 18-60 yaş için günde en az 7 saat uyku belirttiğini yazar ve bu eşiğin başka yaş gruplarına aynen taşınmayacağını not eder. Aynı listeye göre CDC süre kadar uyku niteliğini de önemser.",
+            "Hafta sonu telafisi: SPİ rehber kartı, hafta içi az uyuyup hafta sonu çok uyumanın açığı tam kapatmadığını ve iç saati kaydırdığını yazar.",
+            "Bir örnek (koçluk atlası, Vaka 12): gece 01:30'da yatıp 06:00'ya alarm kuran biri alarmı kapatıp 09:30'a kadar uyuyor ve günü kötü geçiyor. Atlasın önerisi iradeyi suçlamak değil, yatış saatini öne almaktır. Modelin hesabı: 01:30 ile 06:00 arası 4,5 saattir; CDC'nin en az 7 saatinin altında kalır."
+          ],
+          "not": "Vaka 12'deki gerekçeler («REM uykusunu kesintiye uğratır», 139; «adenozini temizleyemeden», 143) ve dil («biyolojik cehalettir», «zombi gibi», 143) alınmadı; yalnız durum ve «yatış saatini disipline et» önerisi (144) alındı. CDC iddiaları (ogrenme.js E18-E19) SPİ'nin kendi kaynak eşlemesidir; kayıtlar bağımsız uzman incelemesi olmadığını kendileri yazar (1351, 1362). SPİ kanıt listesinde uyku satırının nüfusu «18–64 yaş erişkin» (evidence.js 214), öğrenme verisindeki CDC iddiası «18–60 yaş»; fark çözülmedi.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.1.2.a1",
+              "tur": "secmeli",
+              "soru": "SPİ rehber kartına göre hafta içi az uyuyup hafta sonu çok uyumak ne yapar?",
+              "sec": [
+                "Açığı tamamen kapatır",
+                "Açığı tam kapatmaz ve iç saati kaydırır",
+                "Yalnız rüyaları artırır",
+                "Hiçbir etkisi yoktur"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "uyku.2.1.2.a2",
+              "tur": "secmeli",
+              "soru": "Beş gece 6'şar saat uyuyan 30 yaşında biri, CDC'nin «en az 7 saat» eşiğine göre bu beş gecede toplam en az kaç saat eksik uyumuştur? (modelin hesabı)",
+              "sec": [
+                "1 saat",
+                "3 saat",
+                "5 saat",
+                "7 saat"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k5"
+              ]
+            },
+            {
+              "id": "uyku.2.1.2.a3",
+              "tur": "secmeli",
+              "soru": "Vaka 12'deki kişi 01:30'da yatıp 06:00'ya alarm kuruyor ve alarmı kapatıp uyumaya devam ediyor. Atlasın önerisi hangisidir?",
+              "sec": [
+                "Yatış saatini öne almak",
+                "Alarmı daha erkene kurmak",
+                "Uyanınca daha çok kahve içmek",
+                "Açığı hafta sonu kapatmak"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k8"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "uyku.2.1.3",
+          "ad": "Az uyku ve kendi kaydını okumak",
+          "onKosul": [
+            "uyku.2.1.2"
+          ],
+          "kazanim": [
+            "Az uykunun gündüze etkilerini sayar ve kendi kaydında birlikte görülen iki şeyi sebep saymaz."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k2",
+            "k6",
+            "k7"
+          ],
+          "ozet": "Az uyku performansı, iştahı ve ruh hâlini etkiler. Ama kendi kaydında kısa uyku ile kötü bir günün aynı güne düşmesi tek başına sebep kanıtı değildir.",
+          "metin": [
+            "SPİ rehber kartına göre yetersiz uyku hem performansı hem iştahı hem de ruh hâlini etkiler. Kart, kısa süreli uyku kısıtlamasının açlık hissini ve yüksek enerjili yiyeceklere isteği artırdığının deneylerde gösterildiğini yazar.",
+            "Kendi kaydına gelince: bir gece az uyuyup ertesi gün kötü bir antrenman ya da dağınık bir gün yaşayabilirsin. SPİ'nin öğrenme notu tam burada uyarır: uyku ve performans kaydından tek başına kesin neden çıkarılmaz; kısa uyku ile düşük tekrar aynı gün olsa da diğer koşullar sorgulanır.",
+            "SPİ'nin çapraz bağ ekranı da aynı ilkeyle çalışır: iki ölçümün birlikte hareket edip etmediğini söyler, birinin ötekine sebep olduğunu söylemez; bunu ancak deneyerek anlarsın.",
+            "Deneme (model): bu aşamanın kanıt işinde bir hafta kalkış saatini sabit tutarsın. Bir şeyi sabit tutup ötekileri kaydetmek, «birlikte görüldü» ile «sebep oldu» arasındaki farkı kendi kaydında görmenin ilk adımıdır. Bu bir alışkanlık gözlemidir, teşhis değildir."
+          ],
+          "not": "Kartın deney atfı «Spiegel ve ark., 2004» (rehber.js 214) bu koşuda doğrulanmadı. Kartın «kilo vermeye çalışırken yetersiz uyku hem iradeyi hem de kas korumayı zorlaştırır» cümlesi (206) uyku dersi için gerekli olmadığından alınmadı.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.1.3.a1",
+              "tur": "secmeli",
+              "soru": "SPİ rehber kartına göre kısa süreli uyku kısıtlamasının deneylerde gösterilen etkisi hangisidir?",
+              "sec": [
+                "İştahı tamamen keser",
+                "Ruh hâlini iyileştirir",
+                "Kafein ihtiyacını azaltır",
+                "Açlık hissini ve yüksek enerjili yiyeceklere isteği artırır"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k2"
+              ]
+            },
+            {
+              "id": "uyku.2.1.3.a2",
+              "tur": "secmeli",
+              "soru": "Kaydında kısa uyku ile düşük antrenman aynı güne düşmüş. SPİ'nin öğrenme notuna göre ne söylenir?",
+              "sec": [
+                "Kısa uyku kesin sebeptir",
+                "Aynı gün görüldüler; neden tek başına çıkarılmaz, diğer koşullar sorgulanır",
+                "Uyku kaydı bir işe yaramaz",
+                "Antrenman uykuyu bozmuştur"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k6",
+                "k7"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "uyku.2.2",
+      "ad": "Kendi ritmin",
+      "onKosul": [
+        "uyku.2.1"
+      ],
+      "kazanim": [
+        "Uyku saatlerinin kişiden kişiye kaydığını açıklar.",
+        "Kısa şekerlemenin yerini ve sınırını bilir.",
+        "Sınav saatine göre uyku düzenini haftalar önceden kurar."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "uyku.2.2.k1",
+            "tur": "secmeli",
+            "soru": "Breus'un dört tipinden erken yatıp erken kalkan hangisidir?",
+            "sec": [
+              "Aslan",
+              "Kurt",
+              "Yunus",
+              "Ayı"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k10"
+            ]
+          },
+          {
+            "id": "uyku.2.2.k2",
+            "tur": "secmeli",
+            "soru": "24 saatlik rehber 14:00-15:00 arası için hangisini önerir?",
+            "sec": [
+              "Hafif yürüyüş ya da 20 dakikalık kısa uyku",
+              "Günün en ağır antrenmanı",
+              "Günün ikinci kahvesi",
+              "Ekranları kapatıp yatmak"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k9"
+            ]
+          },
+          {
+            "id": "uyku.2.2.k3",
+            "tur": "secmeli",
+            "soru": "Uykudan uyanınca hissedilen sersemlik ve bulanıklığın adı nedir?",
+            "sec": [
+              "Uyku borcu",
+              "Kronotip",
+              "Uyku baskısı",
+              "Uyku ataleti"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k12"
+            ]
+          },
+          {
+            "id": "uyku.2.2.k4",
+            "tur": "secmeli",
+            "soru": "Sınav sabah 10:15'te. Her gün 09:30'da kalkan biri sınavdan iki gün önce kalkış saatini 07:00'ye çekmeyi planlıyor. Atlaslara göre bu planın eksiği nedir?",
+            "sec": [
+              "Kalkış saati hiç değiştirilmemelidir",
+              "07:00 geçtir, 05:00 olmalıdır",
+              "Atlaslar kalkış saatini sınavdan haftalar önce (15-30 gün) sabitlemeyi önerir; iki gün kısa kalır",
+              "Sınav sabahı kalkış saatinin önemi yoktur"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k14",
+              "k15"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "uyku.2.2.1",
+          "ad": "Sabahçıl ve akşamcıl",
+          "onKosul": [],
+          "kazanim": [
+            "İnsanların uyku saatlerinin kaydığını ve sabit saatli tabloların ortalama olduğunu açıklar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k10",
+            "k9",
+            "k15"
+          ],
+          "ozet": "İnsanların uyku saatleri birbirinden kayar: kimi sabahçıl, kimi akşamcıldır. Sabit saatli tablolar ortalama bir gün içindir; sınav gibi sabit bir saat geldiğinde kalkış saati haftalar önceden ona alıştırılır.",
+          "metin": [
+            "İnsanların uyku ve uyanıklık saatleri aynı değildir. Bir atlas bunu Michael Breus'un «The Power of When» kitabındaki dört tiple anlatır: Aslan (erken yatar, erken kalkar; kaynağa göre 05:30 uyanış, 22:00 yatış), Ayı (07:00 uyanış, 23:00 yatış; kaynağa göre çoğunluk), Kurt (geç yatar, geç kalkar; 08:30 sonrası uyanış, 00:30 sonrası yatış) ve Yunus (düzensiz, hafif uyuyan).",
+            "Kaynak bu tipler için bir ölçüm yöntemi vermez: tipini belirleyen bir test ya da anket yoktur. Kaynağın nüfus oranları, «verimi üçe katlar» iddiası ve tiplere yüklediği kişilik nitelemeleri için bir dayanak gösterilmediğinden alınmadı. Dersten alınacak şey şu: saatler kişiden kişiye kayar.",
+            "1. aşamada gördüğün 24 saatlik rehber her şeyi saatle verir (ör. 20:30-21:30 melatonin salınımının başlaması). Modelin bağlantı notu: bu saatler ortalama bir gün için yazılmıştır; senin saatin daha erken ya da daha geç olabilir.",
+            "Hayat her zaman tipine uymaz: ÖSYM sınavları saat 10:15'te başlar. Sınav atlası, saat 09:00'da uyanan bir adayın 10:15'te sınav salonunda uyku sersemliği yaşayacağını yazar ve sınavdan en az 30 gün önce her sabah en geç 07:30'da kalkmaya alışmayı önerir."
+          ],
+          "not": "Breus tablosundan alınmayanlar (zaman_bloklama… 57-64): kronotipi «genetik olarak belirleyen» nitelemesi ve «verimi üçe katlar» (57), nüfus oranları %15 / %55 / %15 / %15 (61-64), Kurt için «yaratıcılar» (63), Yunus için «yüksek zekalı ve nörotik tipler» (64), tiplerin «tepe odak» saatleri (61-64). Kronotipi belirleyecek bir ölçüm kaynaklarda yok. Başlığında «kronotip kalibrasyonu» geçen koçluk atlasının (KING/kocluk_metodolojisi/zaman_psikolojisi_…) gövdesinde kronotip bölümü yok.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.2.1.a1",
+              "tur": "secmeli",
+              "soru": "Breus'un dört tipinde gece geç yatıp sabah geç kalkan tip hangisidir?",
+              "sec": [
+                "Aslan",
+                "Ayı",
+                "Yunus",
+                "Kurt"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            },
+            {
+              "id": "uyku.2.2.1.a2",
+              "tur": "secmeli",
+              "soru": "Ders, kaynağın kronotip nüfus oranlarını neden almadı?",
+              "sec": [
+                "Oranların toplamı yüzde yüz etmiyor",
+                "Kaynak bu oranların dayanağını göstermiyor",
+                "Oranlar yalnız çocuklar için",
+                "Oranlar 1. aşamada zaten verildi"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            },
+            {
+              "id": "uyku.2.2.1.a3",
+              "tur": "secmeli",
+              "soru": "Akşamcıl biri sabah 10:15'teki bir sınava hazırlanıyor. Sınav atlasının önerisi hangisidir?",
+              "sec": [
+                "Haftalar önceden her sabah aynı erken saatte kalkmaya alışmak",
+                "Sınav sabahı iki alarm kurmak",
+                "Sınavdan önceki gece hiç uyumamak",
+                "Sınav günü öğlene kadar uyumak"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k15"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "uyku.2.2.2",
+          "ad": "Gündüz şekerlemesi",
+          "onKosul": [
+            "uyku.2.2.1"
+          ],
+          "kazanim": [
+            "Kısa şekerlemenin kaynaklardaki yerini ve uzun şekerlemenin gece uykusuna etkisini açıklar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k9",
+            "k10",
+            "k11",
+            "k12",
+            "k13"
+          ],
+          "ozet": "Kaynaklar öğleden sonraki düşüş için yaklaşık 20 dakikalık kısa bir şekerleme ya da hafif yürüyüş önerir. Uzun ya da akşama yakın bir şekerleme uyanınca sersemlik yaratabilir ve gece uykusunu kaçırabilir.",
+          "metin": [
+            "Öğleden sonra bir düşüş: 24 saatlik rehber 14:00-15:00 arasını yemek sonrası bir dip olarak gösterir ve hafif yürüyüş ya da 20 dakikalık kısa uyku (power nap) önerir. Breus tablosu da çoğunluk tipi için 14:00-15:30'u düşük enerji saati sayar ve 20 dakikalık güç uykusunu anar. Bir enerji atlası 20 dakikalık güç uykusunu ya da uyumadan derin dinlenmeyi (NSDR) bir yenilenme molası olarak listeler.",
+            "Uyku ataleti, uyanmanın hemen ardından gelen sersemlik ve bulanıklıktır; kaynak bunun derin uykunun ortasında aniden uyanınca uzayabildiğini yazar. Modelin çıkarımı (kaynakta yok, doğrulanmalı): 1. aşamada uykunun döngülerle ilerlediğini ve derin uykunun döngünün içinde olduğunu gördün; şekerlemenin kısa tutulması bu sersemliği azaltmak içindir.",
+            "Gece uykusunu korumak: sınav atlası, sınavdan önceki gün gündüz uyumanın gece uykusunu kaçırdığını yazar. Modelin bağlantı notu: 1. aşamadaki uyku baskısı gün boyu birikir; uzun ya da akşama yakın bir şekerleme geceye kalan baskıyı azaltabilir.",
+            "Şekerleme gece uykusunun yerine geçmez (model). Gündüz karşı konulamayan uyku hâli ise bir hekimin değerlendireceği konudur (1. aşama, klinik sınır)."
+          ],
+          "not": "Uyku ataletinin «2 saate kadar» uzayabileceği (uyku_mimarisi… 36) 1. aşamada da alınmamıştı, yine alınmadı. NSDR'nin «vagal tonusu hızla yeniler» iddiası (uyku_sirkadiyen… 33) alınmadı. Enerji atlasının «panoramik görüş amigdalayı anında yatıştırır» cümlesi (52) konu dışı ve doğrulanmadı. Şekerlemenin kısa tutulmasının gerekçesi kaynaklarda açıkça yazmıyor; metindeki gerekçe modelin çıkarımıdır.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.2.2.a1",
+              "tur": "secmeli",
+              "soru": "Kaynaklar öğleden sonraki düşüş için kısa uykuya yaklaşık kaç dakika der?",
+              "sec": [
+                "Yaklaşık 90 dakika",
+                "Yaklaşık 2 saat",
+                "Yaklaşık 20 dakika",
+                "Kaynaklar süre vermez"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k9",
+                "k10",
+                "k11"
+              ]
+            },
+            {
+              "id": "uyku.2.2.2.a2",
+              "tur": "secmeli",
+              "soru": "Sınav atlasına göre sınavdan önceki gün gündüz uyumak neden önerilmez?",
+              "sec": [
+                "Rüya görmeyi azalttığı için",
+                "Kafeinin etkisini artırdığı için",
+                "Sabah ışığını engellediği için",
+                "Gece uykusunu kaçırdığı için"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "uyku.2.2.3",
+          "ad": "Sınav döneminde uyku",
+          "onKosul": [
+            "uyku.2.2.2"
+          ],
+          "kazanim": [
+            "Sınav saatine göre uyku düzenini haftalar önceden kurmayı açıklar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k13",
+            "k14",
+            "k15",
+            "k16"
+          ],
+          "ozet": "Sınav sabah 10:15'te başlar; kalkış saati haftalar önceden sabitlenir, sabah ışığı ve akşam ekran sınırı buna eşlik eder. Tek bir kötü gece her şeyi bitirmez; uyuyamama kaygısı uykuyu daha çok kaçırır.",
+          "metin": [
+            "ÖSYM sınavları saat 10:15'te başlar. İki sınav atlası, beynin uyandıktan birkaç saat sonra en uyanık hâline geldiğini yazar ama süre konusunda ayrışır: biri yaklaşık 2-2,5 saat, öteki 2,5-3 saat der. Ortak sonuç: sınav sabahı geç kalkılmaz (model özeti).",
+            "Alıştırma haftalar önceden başlar. Atlaslardan biri sınavdan 15 gün önce her sabah, hafta sonları dahil, 07:00'de kalkmayı; uyandıktan sonraki ilk 30 dakika içinde 15-20 dakika gün ışığı almayı ve akşam 22:00'den sonra ekranı kapatmayı yazar. Öteki sınavdan en az 30 gün önce her sabah en geç 07:30'da kalkmayı ve deneme sınavlarını saat 10:15'te başlatmayı önerir.",
+            "Son gün: aynı atlas sınavdan önceki gün ders çalışmamayı, dinlenmeyi ve gündüz uyumamayı önerir; gündüz uykusu gece uykusunu kaçırır.",
+            "Sınavdan önceki gece kötü uyursan: kaygı atlası «sınavdan bir gece önce uyuyamamak dünyanın sonu değildir» der ve uyku kaçıran asıl etkenin «uyuyamazsam biterim» kaygısı olduğunu yazar. Kaynağın bunun için verdiği yüzde doğrulanamadığından alınmadı."
+          ],
+          "not": "Alınmayanlar: «Melatoninsiz uyku derin REM ve Delta dalgalarına geçemez; beyin… hafızaya kaydedemez» (yks_son_30_gun… 48) ve «kortizolün tepe noktasını tam sınav saati olan 10:15'e kilitler» (47) aşırı kesin; «son gece 3-4 saat uyusa dahi bilişsel performansını %95 oranında korur» (yks_stres… 91) dayanağı gösterilmeyen bir sayı. Atlaslar süre ve saatte ayrışıyor (2-2,5 / 2,5-3 saat; 15 gün 07:00 / 30 gün 07:30); ikisi birlikte verildi. Ekran saati için yalnız «22:00» kuralı alındı; mavi ışığın melatonine etkisi 1. aşamada işlendi.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.2.3.a1",
+              "tur": "secmeli",
+              "soru": "İki sınav atlası, uyandıktan sonra zihnin en uyanık hâline gelmesi için hangi süreyi verir?",
+              "sec": [
+                "15-30 dakika",
+                "6-8 saat",
+                "Birkaç saat: biri 2-2,5, öteki 2,5-3 saat",
+                "Atlaslar süre vermez"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14",
+                "k15"
+              ]
+            },
+            {
+              "id": "uyku.2.2.3.a2",
+              "tur": "secmeli",
+              "soru": "Sınavdan önceki gece iyi uyuyamadın. Kaygı atlasına göre en doğru tutum hangisi?",
+              "sec": [
+                "Sabah sınava gitmemek",
+                "Bir kötü gecenin her şeyi bitirmediğini, uykuyu asıl kaygının kaçırdığını hatırlamak",
+                "Sabah çok kahve içmek",
+                "Ertesi gün uzun uyuyup telafi etmek"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k16"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "uyku.2.3",
+      "ad": "Uykuyu bozanlar ve yardım istemek",
+      "onKosul": [
+        "uyku.2.2"
+      ],
+      "kazanim": [
+        "Egzersiz ve akşam yemeğinin saatini uyku açısından değerlendirir.",
+        "Uyku gelmediğinde ne yapacağını bilir.",
+        "Hekime gidilecek uyku durumlarını ayırır."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "uyku.2.3.k1",
+            "tur": "secmeli",
+            "soru": "SPİ rehber kartına göre yatmadan önce nelerden kaçınılır?",
+            "sec": [
+              "Bir bardak su",
+              "Kitap okumak",
+              "Loş ışık",
+              "Ağır yemek ve yoğun egzersiz"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k3"
+            ]
+          },
+          {
+            "id": "uyku.2.3.k2",
+            "tur": "secmeli",
+            "soru": "Yatakta uyku gelmediğinde rehber kartının önerdiği yaklaşık bekleme süresi hangisidir?",
+            "sec": [
+              "5 dakika",
+              "20 dakika",
+              "60 dakika",
+              "2 saat"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k3"
+            ]
+          },
+          {
+            "id": "uyku.2.3.k3",
+            "tur": "secmeli",
+            "soru": "Bir beslenme atlasına göre karaciğer ve bağırsaktaki çevre saatler neyle ayarlanır?",
+            "sec": [
+              "Besin girişiyle",
+              "Işıkla",
+              "Sesle",
+              "Oda sıcaklığıyla"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k18"
+            ]
+          },
+          {
+            "id": "uyku.2.3.k4",
+            "tur": "secmeli",
+            "soru": "Arkadaşın haftalardır uykuya dalamadığını, gündüz işlerini aksattığını ve internetten bulduğu bir uyku hapına başlamayı düşündüğünü söylüyor. Bu yolun ilkelerine göre en doğru öneri hangisi?",
+            "sec": [
+              "Hekime gitmesi; ilaç kararının hekime ait olduğunu bilmesi",
+              "Hapı az miktarla denemesi",
+              "Alışkanlıklarını bir hafta daha zorlaması, sonra karar vermesi",
+              "Haptan önce melatonin denemesi"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k19",
+              "k24"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "uyku.2.3.1",
+          "ad": "Akşam yemeği ve egzersizin saati",
+          "onKosul": [],
+          "kazanim": [
+            "Egzersiz ve akşam yemeğinin saatini uyku açısından değerlendirir."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k3",
+            "k4",
+            "k17",
+            "k9",
+            "k18"
+          ],
+          "ozet": "Düzenli hareket daha iyi uykuyla ilişkilidir. Kaynaklar yatmadan hemen önce ağır yemekten ve yoğun egzersizden kaçınmayı önerir; ağır antrenmanı öğleden sonraya koyar.",
+          "metin": [
+            "Hareket ve uyku: DSÖ'nün fiziksel aktivite bilgi notu, düzenli fiziksel aktiviteyi yetişkinlerde ve yaşlılarda daha iyi uyku ile ilişkilendirir (özgün metin: «improved … sleep»). SPİ'nin hareket rehberi de düzenli hareketin uyku kalitesini iyileştirdiğini yazar. DSÖ cümlesi bir ilişki bildirir; tek başına neden-sonuç değildir (model, 2.1.3'teki ilke).",
+            "Saat önemlidir: SPİ rehber kartı yatmadan önce ağır yemekten ve yoğun egzersizden kaçınmayı önerir. 24 saatlik rehber ise günün en ağır antrenmanını vücut sıcaklığının ve koordinasyonun en yüksek olduğu 16:00-18:30 arasına koyar.",
+            "Yemek de bir saat sinyalidir: bir beslenme atlası, beyindeki ana saatin ışıkla, karaciğer, mide ve bağırsaktaki çevre saatlerin ise besin girişiyle ayarlandığını yazar. Modelin bağlantı notu: düzenli öğün saatleri, düzenli kalkış saatiyle aynı yöne çalışır.",
+            "Kaynaklar «yatmadan kaç saat önce» için bir sayı vermez; ders de bir süre yazmaz."
+          ],
+          "not": "Beslenme atlasının jet-lag için önerdiği 14-16 saatlik kesintisiz açlık ve «iç biyolojik saati tek bir günde yeni yerel saate sıfırlar» iddiası (seyahat… 43-45) alınmadı: bir sağlık müdahalesidir ve dayanağı doğrulanmadı. Gece vardiyası satırlarındaki insülin ve glukoz yüzdeleri (23-25) uyku dersi için gerekli değil, alınmadı. Plan başlığı 2.O.17 (vardiyalı çalışma ve jet-lag) bu yüzden ayrı ders olmadı.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.3.1.a1",
+              "tur": "secmeli",
+              "soru": "DSÖ'nün bilgi notu düzenli fiziksel aktivite ile uyku arasında ne bildirir?",
+              "sec": [
+                "Egzersizin uykuya zararlı olduğunu",
+                "Yetişkinlerde daha iyi uyku ile ilişkili olduğunu",
+                "Egzersizin uykunun yerini tuttuğunu",
+                "Aralarında ilişki olmadığını"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ]
+            },
+            {
+              "id": "uyku.2.3.1.a2",
+              "tur": "secmeli",
+              "soru": "SPİ rehber kartının akşam kuralı hangisidir?",
+              "sec": [
+                "Akşam yemeğini hiç yememek",
+                "Yatmadan önce ağır yemekten ve yoğun egzersizden kaçınmak",
+                "Yatmadan hemen önce koşuya çıkmak",
+                "Akşam hiç su içmemek"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "uyku.2.3.2",
+          "ad": "Uyuyamadığında",
+          "onKosul": [
+            "uyku.2.3.1"
+          ],
+          "kazanim": [
+            "Uyku gelmediğinde ne yapacağını ve kaygının uykuya etkisini açıklar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k3",
+            "k16",
+            "k24"
+          ],
+          "ozet": "Uyku gelmiyorsa yaklaşık 20 dakika sonra kalk, sakin bir şey yap, uykun gelince dön. Uyuyamama kaygısı uykuyu daha çok kaçırır; her akşam aynı sakin sıra modelin önerisidir.",
+          "metin": [
+            "Yatağa girdin ama uyku gelmiyor. SPİ rehber kartının önerisi: yaklaşık 20 dakika sonra kalk, sakin bir şey yap, uykun gelince yatağa dön.",
+            "Modelin bağlantı notu: 1. aşamada yatağın uyku için kullanılması kuralını gördün. Uyanık uzanıp beklemek yerine kalkmak bu kuralın devamıdır.",
+            "Kaygı uykuyu kaçırır: sınav kaygısı atlası, «uyuyamazsam biterim» düşüncesinin uyku kaçıran asıl etken olduğunu yazar.",
+            "Rutin (modelin önerisi, kaynakta hazır bir rutin yok): yatmadan önceki saati her akşam aynı sırayla geçir: loş ışık, ekranı bırakmak, sakin bir iş. Bu sıra 1. aşamanın akşam alışkanlıklarını tek bir zincire bağlar.",
+            "Sınır (model, klinik sınır): uyku ilacı ve melatonin bu yolun konusu değildir; böyle bir şeyi kullanma ya da bırakma kararı hekimindir. Haftalarca süren uykusuzluk bir sonraki dersin konusudur."
+          ],
+          "not": "Rehber kartının «Uyku hijyeni denen küçük alışkanlıklar çoğu zaman ilaçtan önce gelir» cümlesi (207) ilaçla karşılaştırma yaptığı için alınmadı. Uykuya dalma rutini (plan 2.O.18) için kaynak yok; metindeki sıra modelin önerisidir. İlaç/melatonin sınır cümlesi kaynakta yok; AGENTS §1.5 gereği model ekledi.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.3.2.a1",
+              "tur": "secmeli",
+              "soru": "SPİ rehber kartına göre yatakta uyku gelmezse ne yapılır?",
+              "sec": [
+                "Saatlerce yatakta kalınır",
+                "Telefonla vakit geçirilir",
+                "Yaklaşık 20 dakika sonra kalkılır, sakin bir şey yapılır, uyku gelince dönülür",
+                "Ağır bir yemek yenir"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3"
+              ]
+            },
+            {
+              "id": "uyku.2.3.2.a2",
+              "tur": "secmeli",
+              "soru": "Bu yol uyku ilacı ve melatonin için ne söyler?",
+              "sec": [
+                "Düşük miktarla başlanmasını",
+                "Yalnız sınav döneminde kullanılmasını",
+                "Bitkisel olanların her zaman zararsız olduğunu",
+                "Konusu olmadığını; kullanma ya da bırakma kararının hekime ait olduğunu"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k24"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "uyku.2.3.3",
+          "ad": "Ne zaman hekime",
+          "onKosul": [
+            "uyku.2.3.2"
+          ],
+          "kazanim": [
+            "Uyku sorunlarında hekime gidilecek durumları ayırır ve hekime götüreceği kaydı hazırlar."
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k19",
+            "k20",
+            "k21",
+            "k22",
+            "k23",
+            "k24"
+          ],
+          "ozet": "Uykuda nefesin durduğunun fark edilmesi, haftalarca süren uykusuzluk ve günlük işleri aksatan yorgunluk bir hekimin konusudur. Bu yol teşhis koymaz; kendi kaydın hekimle konuşurken işe yarar.",
+          "metin": [
+            "Bu yol uyku alışkanlıklarını öğretir, uyku bozukluklarına teşhis koymaz (model, klinik sınır). Bazı durumlar alışkanlıkla değil, bir hekimle konuşulur.",
+            "Uyku apnesi: kaynak, uykuda solunumun durmasını ya da azalmasını saat başına sayan bir indeksten söz eder. Bu ölçümün nasıl yapılacağı ve sonucun ne anlama geldiği hekimin işidir; ders kaynaktaki sınıflama eşiklerini almaz. Yanındakinin senin horladığını ve uykuda nefesinin durduğunu fark etmesi hekime gitmek için yeterli bir sebeptir (model, klinik sınır).",
+            "Haftalarca süren uykusuzluk: bir koçluk atlası, «haftalar süren uykusuzluk» ile birlikte temel günlük işlevlerin kaybını, koçluğun durup kişiyi bir uzmana yönlendirdiği kırmızı bayraklar arasında sayar.",
+            "Hekime ne götürülür: SPİ «uykuya dalamama»yı yapılı bir şikâyet olarak kaydeder; işaretlediğin şikâyetler hekim çıktısında görünür. Sistem bir şikâyeti bulgu sayar, hastalık saymaz; işaretlenmemiş bir gün «şikâyet yok» değil «girilmemiş» demektir. Bu aşamanın haftalık kaydı da hekimle konuşurken işe yarar (model).",
+            "Sınır (model, klinik sınır): uykuda nefesin durduğunun fark edilmesi, alışkanlıklara rağmen haftalarca süren uykusuzluk ya da gündüz karşı konulamayan uyku hâli bir hekimin değerlendireceği konulardır. Bu yol uyku bozukluğuna teşhis koymaz; ilaç, melatonin ya da takviye önermez."
+          ],
+          "not": "Kaynaktaki uyku apnesi sınıflama eşikleri (uyku_mimarisi… 29) teşhis ölçütüdür, alınmadı; yalnız indeksin neyi saydığı anıldı. Aynı dosyadaki ağız bandı önerisi ve «horlama indeksini %65 düşürmüş» iddiası (30) tedavi iddiasıdır, alınmadı. Koçluk atlasının kırmızı bayrak listesindeki öteki maddeler (44, 46-48) uyku dışıdır; ruh sağlığı için sevk dili bu derse alınmadı. Semptom sözlüğü uykuya dalamamayı kortizol, magnezyum ve TSH ölçümleriyle bağlar (symptoms.js 89); bu bağ bir değeri şikâyete göre okumaya kapı açtığı için alınmadı. Hekime yönlendirme cümleleri kaynakta yok; AGENTS §1.5 gereği model ekledi.",
+          "alistirmalar": [
+            {
+              "id": "uyku.2.3.3.a1",
+              "tur": "secmeli",
+              "soru": "Hangisi bu yolda alışkanlıkla değil, hekimle konuşulacak bir durumdur?",
+              "sec": [
+                "Yanındakinin, horlarken uykuda nefesinin durduğunu fark etmesi",
+                "Bir gece geç yatmak",
+                "Hafta sonu bir saat geç kalkmak",
+                "Öğleden sonra esnemek"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k20"
+              ]
+            },
+            {
+              "id": "uyku.2.3.3.a2",
+              "tur": "secmeli",
+              "soru": "SPİ şikâyet kaydında işaretlenmemiş bir gün ne demektir?",
+              "sec": [
+                "Şikâyet yok",
+                "Hastalık geçti",
+                "Girilmemiş",
+                "Sistem hata verdi"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k21"
+              ]
+            },
+            {
+              "id": "uyku.2.3.3.a3",
+              "tur": "acik",
+              "soru": "Kanıt işi: yedi gün boyunca her sabah aynı saatte kalk (hafta sonu dahil) ve bir tablo tut: yatış saati, kalkış saati, gündüz şekerlemesi (saat ve süre), akşam yemeği ve egzersizin saati, sabah 10:00'da kendini ne kadar uyanık hissettiğin (1-5). Hafta bitince iki gözlem yaz ve birinin «birlikte görüldü» mü yoksa «sebep oldu» mu olduğunu tartış. Bu bir alışkanlık kaydıdır, teşhis aracı değildir.",
+              "dogru": "Örnek: Kalkış her gün 07:00. Yatış 23:10-00:40 arası, iki gün 20'şer dakika şekerleme (13:30), akşam antrenmanı iki gün 20:30'da. Gözlem 1: antrenman yaptığım iki akşam yatışım geç kaldı; bu birlikte görüldü, sebep olduğunu bilmiyorum, gelecek hafta antrenmanı 18:00'e alıp yeniden bakarım. Gözlem 2: kalkış sabit kalınca dördüncü günden sonra sabah uyanıklığım 2'den 3-4'e çıktı; tek haftalık bir kayıt, kesin değil.",
+              "olcut": [
+                "Yedi günün kalkış saati gerçekten aynı mı, eksik gün boş bırakıldı mı?",
+                "Tabloda istenen sütunların hepsi var mı?",
+                "Gözlemlerden biri «birlikte görüldü» ile «sebep oldu» ayrımını yapıyor mu?",
+                "Kayıt teşhis, ilaç, melatonin ya da takviye içermiyor mu?",
+                "Uykuda nefes durması ya da haftalarca süren uykusuzluk gibi bir durum varsa hekime gitme notu düşüldü mü?"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k6",
+                "k21"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
