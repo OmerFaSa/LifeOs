@@ -218,7 +218,60 @@ try:
     shutil.copyfile(kd.yol, os.path.join(t, "ev", "veri", "lifeos.db"))
     k2 = veri.kopru_ac(os.path.join(t, "ev", "hesap"), 1)
     dogru("köprü: tek depo varsa açılır", isinstance(k2, veri.Kopru) and k2.sahip == 1)
+    dogru("köprü: okuma P6'ya dek kapalı (veri.OKU)", veri.OKU is False and k2.oku is False)
     k2.depo.kapat()
+
+    # --- P4b: sahibin okumasi tek depodan; ayni yazim dizisi eski ve yeni okumada ayni sonucu verir ---
+    def senaryo(kok, oku):
+        hdx = hesap.Depo(os.path.join(t, kok, "hesap.db"))
+        if oku:
+            hdx.kopru = veri.Kopru(veri.Depo(os.path.join(t, kok, "veri"), saat=lambda: SIMDI), 1, oku=True)
+        yaz = lambda cihaz, g, kim=ben: hdx.esitle(kim, "spi/ben", cihaz, 0, g)
+        yaz("cihazTEL01", [{"y": "a/%d" % i, "d": {"n": i}, "z": ms + i} for i in range(5)])
+        yaz("cihazPC0001", [{"y": "a/1", "d": {"n": 10}, "z": ms + 50}, {"y": "a/2", "d": None, "z": ms + 50},
+                            {"y": "a/3", "d": {"n": 0}, "z": ms - 99}])          # sonuncusu eski: reddedilir
+        yaz("cihazTEL01", [{"y": "b/x", "d": [1, 2], "z": ms}])
+        yaz("cihazTEL02", [{"y": "c/o", "d": {"x": 1}, "z": ms}], oteki)   # ikinci hesap
+        gelen, son, donem, tur = {}, 0, None, 0
+        while True:                                                   # ucuncu cihaz sayfa sayfa (sinir 2) indirir
+            v = hdx.esitle(ben, "spi/ben", "cihazTAB01", son, [], sinir=2)
+            gelen.update({x["y"]: (x["d"], x["z"]) for x in v["al"]})
+            son, donem, tur = v["son"], v["donem"], tur + 1
+            if not v["daha"]:
+                break
+        kendi = hdx.esitle(ben, "spi/ben", "cihazTEL01", 0, [], sinir=50)["al"]
+        o2 = hdx.esitle(oteki, "spi/ben", "cihazTAB01", 0, [])
+        return hdx, gelen, donem, tur, {x["y"] for x in kendi}, o2
+
+    h_eski, g_eski, d_eski, _, kendi_eski, o_eski = senaryo("p4-eski", False)
+    h_yeni, g_yeni, d_yeni, tur, kendi_yeni, o_yeni = senaryo("p4-yeni", True)
+    dogru("P4b: üçüncü cihaz eski ve yeni okumada aynı kayıtları alır", g_yeni == g_eski and len(g_eski) == 6,
+          (sorted(g_eski.items()), sorted(g_yeni.items())))
+    dogru("P4b: sayfalama (sınır 2) tümünü getirir", tur >= 3, tur)
+    dogru("P4b: dönem değişir, cihaz bir kez baştan indirir", d_yeni == d_eski.split(":")[0] + ":tek" or
+          (d_yeni.endswith(":tek") and not d_eski.endswith(":tek")), (d_eski, d_yeni))
+    dogru("P4b: cihaz kendi yazdığını geri almaz", kendi_yeni == kendi_eski and "b/x" not in kendi_yeni, (kendi_eski, kendi_yeni))
+    dogru("P4b: ikinci hesap eski yoldan okur, dönemi değişmez", o_yeni["al"] == o_eski["al"] and not o_yeni["donem"].endswith(":tek"))
+    tek = h_yeni.kopru.depo
+    h_yeni.kopru, kopru = (lambda *a: 1 / 0), h_yeni.kopru
+    h_yeni.kopru.oku, h_yeni.kopru.sahip = True, 1
+    try:
+        h_yeni.esitle(ben, "spi/ben", "cihazPC0001", 0, [{"y": "d/1", "d": {"k": 1}, "z": ms}])
+        dogru("P4b: köprü yazamazsa 503 (okuma tek depodan, kayıp sessiz kalmaz)", False)
+    except hesap.Hata as e:
+        dogru("P4b: köprü yazamazsa 503 (okuma tek depodan, kayıp sessiz kalmaz)", e.kod == 503, e.kod)
+    h_yeni.kopru = kopru
+    dogru("P4b: hesap.db yazdı ama tek depo kaçırdı", tek.oku("spi/ben", "d/1") is None)
+    v = h_yeni.esitle(ben, "spi/ben", "cihazPC0001", 0, [{"y": "d/1", "d": {"k": 1}, "z": ms}])
+    dogru("P4b: aynı yazımın yeniden gönderimi kaçanı onarır", v["red"] == 1 and tek.oku("spi/ben", "d/1") == {"k": 1}, v)
+    shutil.copyfile(h_eski.yol, os.path.join(t, "p4-kopya.db"))
+    bos = veri.Depo(os.path.join(t, "p4-esle"), saat=lambda: SIMDI)
+    n = veri.esle(os.path.join(t, "p4-kopya.db"), bos, 1)
+    dogru("eşle: hesap kopyasından tek depo kurulur, sonra fark yok", n > 0
+          and veri.karsilastir(os.path.join(t, "p4-kopya.db"), bos, 1) == [], n)
+    dogru("eşle: ikinci kez bir şey değiştirmez", veri.esle(os.path.join(t, "p4-kopya.db"), bos, 1) == 0)
+    bos.kapat()
+    tek.kapat()
 finally:
     shutil.rmtree(t, ignore_errors=True)
 

@@ -1128,6 +1128,8 @@ class Depo:
             temiz.append((y, metin, z, bool(g.get("ilk"))))
 
         kid = kullanici["id"]
+        # P4b: sahibin okumasi tek depodan (veri.OKU, P6 ile acilir); yazim kurali hesap.db'de aynen kalir.
+        okur = self.kopru if (self.kopru and getattr(self.kopru, "oku", False) and kid == self.kopru.sahip) else None
         with self._islem() as c:
             sira = self._sira(c)
             kabul = red = 0
@@ -1138,6 +1140,8 @@ class Depo:
                 if r is not None:
                     if ilk or (z, cihaz) <= (r["zaman"], r["cihaz"]):
                         red += 1
+                        if okur and not ilk and (z, cihaz) == (r["zaman"], r["cihaz"]):
+                            yazilan.append((y, metin, z))   # yeniden gonderim: kopru es guclu, kacirdigini onarir
                         continue
                 elif ilk and metin is None:
                     continue                    # ilk esitlemede silme anlamsiz
@@ -1153,12 +1157,25 @@ class Depo:
             if jeton:
                 c.execute("UPDATE oturum SET esitleme=? WHERE ozet=?", (self.saat(), _jeton_ozeti(jeton)))
             donem = self._donem(c)
-            satirlar = [] if yalniz_gonder else c.execute(
+            satirlar = [] if (yalniz_gonder or okur) else c.execute(
                 "SELECT yol, deger, zaman, cihaz, sira FROM kayit WHERE kullanici=? AND alan=? "
                 "AND sira>? ORDER BY sira LIMIT ?", (kid, alan, son, sinir + 1)).fetchall()
-        self._kopruye(kid, alan, cihaz, yazilan)            # hesap.db kaydedildikten sonra
+        if not self._kopruye(kid, alan, cihaz, yazilan) and okur:
+            raise Hata(503, "Kayıt tek depoya yazılamadı; eşitleme yeniden denenecek.")
+        if okur:
+            donem += ":tek"                 # imlec alani degisti: cihaz bir kez bastan indirir (hesap.js soz 23)
         if yalniz_gonder:
             return {"al": [], "son": son, "daha": False, "kabul": kabul, "red": red, "donem": donem}
+        if okur:
+            try:
+                tek, en_son = okur.depo.degisenler(alan, son, sinir + 1)
+            except Exception as e:          # okuma tek depodan gelir; hesap.db'nin imleci baska alanda, geri donulmez
+                raise Hata(503, "Tek depo okunamadı (%s); eşitleme yeniden denenecek." % type(e).__name__)
+            daha = len(tek) > sinir
+            tek = tek[:sinir]
+            return {"al": [{"y": y, "d": d, "z": z, "s": s} for y, d, z, kim, s in tek if kim != cihaz],
+                    "son": tek[-1][4] if daha else max(son, en_son), "daha": daha, "kabul": kabul, "red": red,
+                    "donem": donem}
         daha = len(satirlar) > sinir
         satirlar = satirlar[:sinir]
         yeni_son = satirlar[-1]["sira"] if daha else max(son, sira)
@@ -1168,14 +1185,17 @@ class Depo:
         return {"al": al, "son": yeni_son, "daha": daha, "kabul": kabul, "red": red, "donem": donem}
 
     def _kopruye(self, kid, alan, cihaz, yazilan):
+        """Doner: yazildi mi (kopru yoksa ya da yazilacak yoksa True)."""
         if not (self.kopru and yazilan):
-            return
+            return True
         try:
             self.kopru(kid, alan, cihaz, yazilan)
             self.kopru_hata = ""
-        except Exception as e:          # tek depo hatasi eski esitlemeyi durdurmaz; veri.karsilastir farki gosterir
+            return True
+        except Exception as e:          # okuma hesap.db'den geliyorsa esitlemeyi durdurmaz; veri.karsilastir gosterir
             self.kopru_hata = "%s: %s" % (type(e).__name__, e)
             sys.stderr.write("Tek depo köprüsü yazamadı: %s\n" % self.kopru_hata)
+            return False
 
     def ozet(self, kullanici):
         """Alan basina kayit sayisi (hesap panelindeki bilgi)."""

@@ -229,12 +229,32 @@ class Depo:
         return hedef
 
 
-class Kopru:
-    """Hesap esitlemesinin (sistem/hesap.py esitle) kabul ettigi yazimlari tek depoya da yazar (P4a).
-    Yalniz sahibin kayitlari: tek depo tek kisinindir, ikinci hesabin verisi karismaz."""
+    def degisenler(self, alan, son, sinir):
+        """Eski esitleme sozlesmesinin okumasi (P4b): imlec olay defterinin sirasidir. Doner: (satirlar, en_son);
+        satirlar [(yol, govde | None, ms, cihaz, sira)] sira > son, sira sirasinda, en cok `sinir` tane;
+        en_son defterin son sirasi (AUTOINCREMENT: sonradan yazilan hep daha buyuk sira alir)."""
+        with self._kilit:
+            # shortcut: her cekiste olay kayit basina toplanir; kayitlar on binleri asarsa olay(kayit_id, sira) dizini ekle
+            satir = self.c.execute(
+                "SELECT k.yol, k.govde, k.silindi, k.hlc, k.cihaz, MAX(o.sira) AS s FROM kayit k "
+                "JOIN olay o ON o.kayit_id = k.id WHERE k.alan=? GROUP BY k.id HAVING s > ? ORDER BY s LIMIT ?",
+                (alan, son, sinir)).fetchall()
+            en_son = self.c.execute("SELECT COALESCE(MAX(sira), 0) FROM olay").fetchone()[0]
+        return [(y, None if sil or g is None else json.loads(g), hlc_coz(h)[0], c, s)
+                for y, g, sil, h, c, s in satir], en_son
 
-    def __init__(self, depo, sahip):
-        self.depo, self.sahip = depo, sahip
+
+# P6: goc dogrulanip her cihazin paketi geldikten sonra True. O zaman sahibin cihazlari okumayi tek depodan alir;
+# imlec alani degistigi icin hesap.esitle donemi degistirir, cihazlar bir kez bastan indirir (hesap.js soz 23).
+OKU = False
+
+
+class Kopru:
+    """Hesap esitlemesinin (sistem/hesap.py esitle) kabul ettigi yazimlari tek depoya da yazar (P4a); `oku` ise
+    sahibin okumasi da oradan gelir (P4b). Yalniz sahibin kayitlari: tek depo tek kisinindir."""
+
+    def __init__(self, depo, sahip, oku=False):
+        self.depo, self.sahip, self.oku = depo, sahip, oku
 
     def __call__(self, kullanici, alan, cihaz, yazimlar):
         """yazimlar: [(yol, metin | None, z)] hesap.db'ye yazildigi bicimde. Doner: tek depoda degisen sayisi."""
@@ -258,7 +278,22 @@ def kopru_ac(hesap_klasoru, sahip):
     klasor = os.path.join(os.path.dirname(os.path.abspath(hesap_klasoru)), "veri")
     if sahip is None or not os.path.exists(os.path.join(klasor, "lifeos.db")):
         return None
-    return Kopru(Depo(klasor), sahip)
+    return Kopru(Depo(klasor), sahip, OKU)
+
+
+def esle(hesap_yol, depo, sahip):
+    """Hesap.db'deki sahibin her kaydini koprudan gecirir (P6: goc ile okumanin acilmasi arasinda gelenler, ya da
+    kopru hatasindan sonra onarim). Kopru islemleri es guclu: zaten olan bir sey degismez. hesap_yol bir KOPYA olmali.
+    Doner: tek depoda degisen sayisi."""
+    k, n = Kopru(depo, sahip), 0
+    c = sqlite3.connect(hesap_yol)
+    try:
+        for alan, yol, deger, zaman, cihaz in c.execute(
+                "SELECT alan, yol, deger, zaman, cihaz FROM kayit WHERE kullanici=? ORDER BY sira", (sahip,)):
+            n += k(sahip, alan, cihaz or "sunucu", [(yol, deger, zaman)])
+    finally:
+        c.close()
+    return n
 
 
 def karsilastir(hesap_yol, depo, sahip):
