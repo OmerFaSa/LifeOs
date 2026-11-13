@@ -209,7 +209,7 @@ async function goruntu(p, ad) {
     await p.fill('textarea[name=govde]', 'Kader ve çaba üzerine bir fikir.');
     await p.click('form.notform button[type=submit]');
     await p.waitForFunction(() => /^#\/motor\/not\/n\w+$/.test(location.hash));
-    const kral = () => p.evaluate(() => { const N = LIFEOS.Motor.Not, l = JSON.parse(localStorage.getItem('lifeos.not.kayit')), a = JSON.parse(localStorage.getItem('lifeos.not.araclar'));
+    const kral = () => p.evaluate(() => { const N = LIFEOS.Motor.Not, l = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.not.kayit')), a = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.not.araclar'));
       return { klasor: l.find(n => n.baslik === 'Kader').klasor, okur: N.kingOkur(l, { araclar: a }).map(n => n.baslik), sistem: N.kingAraclar(a).length }; });
     let kr = await kral();
     dene('sisteme not: not aracın klasöründe; King süzgeci onu ve sistem notunu dışarıda bırakır', kr.klasor === 'Düşünce defteri' && kr.okur.indexOf('Kader') < 0 && kr.okur.indexOf('Erdem') >= 0 && kr.sistem === 0, JSON.stringify(kr));
@@ -292,7 +292,7 @@ async function goruntu(p, ad) {
     await p.click('[data-ayar-satir="lifeos.beden.cinsiyet"] [data-deger="kadin"]');
     await p.fill('[data-ayar-satir="lifeos.beden.boy"] input', '999');
     await p.dispatchEvent('[data-ayar-satir="lifeos.beden.boy"] input', 'change');
-    dene('ayarlar: Beden › boy aralık dışını yazmaz, alanı geçersiz işaretler', (await p.evaluate(() => localStorage.getItem('lifeos.beden.boy'))) === '165'
+    dene('ayarlar: Beden › boy aralık dışını yazmaz, alanı geçersiz işaretler', (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.beden.boy'))) === '165'
       && (await p.getAttribute('[data-ayar-satir="lifeos.beden.boy"] input', 'aria-invalid')) === 'true');
     await p.goto(T + '/kabuk/#/motor/kayit');
     await p.waitForSelector('select[data-kayit-tur]');
@@ -471,14 +471,14 @@ async function goruntu(p, ad) {
     const dSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
     dene('deneme: sonuç net «hesaplandı», doğru ve süre «ölçüldü», boş «hesaplandı»', /Deneme bitti\s*2 net\s*hesaplandı\s*2 doğru, 0 yanlış \(ölçüldü\)/.test(dSonuc) && /boş \(hesaplandı\)/.test(dSonuc) && /dk \(ölçüldü\)/.test(dSonuc), dSonuc.slice(0, 220));
     dene('deneme: Felsefe sonucunda sınav puanı tahmini yok', !/Puan ve sıra/.test(dSonuc));
-    dene('deneme: biten deneme kaydedildi, süren silindi', await p.evaluate(() => JSON.parse(localStorage.getItem('lifeos.soru.denemeler')).length === 1 && !localStorage.getItem('lifeos.soru.deneme')));
+    dene('deneme: biten deneme kaydedildi, süren silindi', await p.evaluate(() => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.soru.denemeler')).length === 1 && !LIFEOS.Kabuk.ic.depo.getItem('lifeos.soru.deneme')));
     await goruntu(p, 'deneme-sonuc');
     await p.click('[data-deneme="yeni"]');
     await p.waitForSelector('[data-deneme="basla"]');
     dene('deneme: «Son denemeler»de net etiketiyle', /Felsefe · .*2 net\s*hesaplandı/.test(await p.textContent('[data-deneme-sayfa] section')));
     await p.click('[data-deneme="basla"]');
     await p.waitForSelector('.sayac');
-    await p.evaluate(() => { const v = JSON.parse(localStorage.getItem('lifeos.soru.deneme')); v.oturum.bas -= (v.oturum.sure * 60 + 2) * 1000; localStorage.setItem('lifeos.soru.deneme', JSON.stringify(v)); });
+    await p.evaluate(() => { const v = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.soru.deneme')); v.oturum.bas -= (v.oturum.sure * 60 + 2) * 1000; LIFEOS.Kabuk.ic.depo.setItem('lifeos.soru.deneme', JSON.stringify(v)); });
     await p.waitForSelector('[data-deneme-sayfa] .kapisonuc', { timeout: 4000 }).catch(() => {});
     dene('deneme: süre dolunca kendiliğinden biter, «süre doldu» yazar', /süre doldu/.test(await p.textContent('[data-deneme-sayfa]').catch(() => '')));
     await p.goto(T + '/kabuk/#/alan/akademik');
@@ -512,14 +512,14 @@ async function goruntu(p, ad) {
     await p.waitForSelector('#tn-yazi');
     await p.fill('#tn-yazi', 'Felsefe çalışmak istiyorum, günde 30 dakika ayırabilirim');
     await p.keyboard.press('Enter');
-    await p.waitForFunction(() => !!localStorage.getItem('lifeos.tanisma.taslak'));
-    dene('tanışma: cevap taslakta, kayıt henüz yok', await p.evaluate(() => localStorage.getItem('lifeos.tanisma.kayit') === null));
+    await p.waitForFunction(() => !!LIFEOS.Kabuk.ic.depo.getItem('lifeos.tanisma.taslak'));
+    dene('tanışma: cevap taslakta, kayıt henüz yok', await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.tanisma.kayit') === null));
     await p.click('[data-tn-ac="bitir"]');
     await p.waitForSelector('[data-tn-ac="onayla"]');
-    dene('tanışma: onay adımında hâlâ kayıt yok', await p.evaluate(() => localStorage.getItem('lifeos.tanisma.kayit') === null));
+    dene('tanışma: onay adımında hâlâ kayıt yok', await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.tanisma.kayit') === null));
     await p.click('[data-tn-ac="onayla"]');
     await p.waitForSelector('#tn-bitti');
-    dene('tanışma: onayla kayıt yazılır', await p.evaluate(() => { const k = JSON.parse(localStorage.getItem('lifeos.tanisma.kayit')); return !!k && JSON.stringify(k).length > 20; }));
+    dene('tanışma: onayla kayıt yazılır', await p.evaluate(() => { const k = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.tanisma.kayit')); return !!k && JSON.stringify(k).length > 20; }));
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('.karsila');
     dene('tanışma: kayıt varken davet gösterilmez', (await p.locator('.tn-davet').count()) === 0);
@@ -543,9 +543,9 @@ async function goruntu(p, ad) {
     // ---- Aşamalar: Felsefe'nin ikinci aşaması (eski birinci aşama kaydı yerinde kalır) ----
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.asamalar');
-    const kayit1 = await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.1'));
+    const kayit1 = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'));
     dene('aşama: alan sayfası iki aşamayı listeler, ikincisi kilitli ve nedenini söyler', (await p.locator('.asamalar .satir').count()) === 2 && (await p.locator('.asamalar .satir--kilitli').count()) === 1 && /önce Aşama 1 kapısı/.test(await p.textContent('.asamalar')), y2gercek ? 'gerçek asama-2.json' : 'yapay ikinci aşama');
-    dene('aşama: birinci aşamanın eski anahtarlı kaydı aynen okunuyor (3/9 ders, 1/3 kapı)', /3\/9 ders okundu · 1\/3/.test(await p.textContent('.govde')) && !!kayit1 && (await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.2'))) === null);
+    dene('aşama: birinci aşamanın eski anahtarlı kaydı aynen okunuyor (3/9 ders, 1/3 kapı)', /3\/9 ders okundu · 1\/3/.test(await p.textContent('.govde')) && !!kayit1 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'))) === null);
     await p.goto(T + '/kabuk/#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
     await p.waitForSelector('.yuva');
     dene('aşama: kilitli aşamanın dersi açılmaz, neden aşama kilidi', /Bu aşama kilitli/.test(await p.textContent('.yuva')));
@@ -566,19 +566,48 @@ async function goruntu(p, ad) {
     dene('aşama: ikinci aşama açıldı; birincisi «geçildi», ikincisi şu an burada', /geçildi/.test(await p.textContent('.asamalar .satir >> nth=0')) && (await p.getAttribute('.asamalar .satir >> nth=1', 'aria-current')) === 'page'
       && (await p.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
     await goruntu(p, 'asama-liste');
-    const kayit1b = await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.1'));
+    const kayit1b = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'));
     await p.click('.eylemler .dugme--ana');
     await p.waitForSelector('article.ders h1');
     await p.click('[data-ac="okudum"]');
-    await p.waitForFunction(() => !!localStorage.getItem('lifeos.yol.felsefe.2'));
-    const k2 = await p.evaluate(() => JSON.parse(localStorage.getItem('lifeos.yol.felsefe.2')));
-    dene('aşama: ikinci aşamanın kaydı kendi anahtarında; birincinin kaydı değişmedi', Object.keys(k2.dersler).length === 1 && Object.keys(k2.asamalar).length === 0 && (await p.evaluate(() => localStorage.getItem('lifeos.yol.felsefe.1'))) === kayit1b);
+    await p.waitForFunction(() => !!LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'));
+    const k2 = await p.evaluate(() => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2')));
+    dene('aşama: ikinci aşamanın kaydı kendi anahtarında; birincinin kaydı değişmedi', Object.keys(k2.dersler).length === 1 && Object.keys(k2.asamalar).length === 0 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'))) === kayit1b);
     await p.reload();
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(t => (document.querySelector('.karsila__sira') || {}).textContent.indexOf(t) >= 0, y2.ad, { timeout: 5000 }).catch(() => {});
     dene('aşama: Bugün yenilemeden sonra ikinci aşamayla karşılar', ((await p.textContent('.karsila__sira')) || '').indexOf(y2.ad) >= 0, await p.textContent('.karsila__sira'));
+    // ---- Kayıt deposu (faz2-indexeddb.md): kayıt IndexedDB'de, ayar localStorage'da; yazıdan hemen sonra yenilense de kalır ----
+    const idbOku = (sayfa, k) => sayfa.evaluate(k => new Promise((ok, red) => { const r = indexedDB.open('lifeos-kabuk'); r.onerror = () => red(r.error);
+      r.onsuccess = () => { const q = r.result.transaction('kayit').objectStore('kayit').get(k); q.onsuccess = () => { r.result.close(); ok(q.result === undefined ? null : q.result); }; }; }), k);
+    const yerelKayit = sayfa => sayfa.evaluate(() => Object.keys(localStorage).filter(k => LIFEOS.Kabuk.Depo.kayitMi(k)));
+    await p.waitForFunction(() => typeof LIFEOS.Kabuk.Depo.kalici() === 'boolean', null, { timeout: 5000 }).catch(() => {});
+    dene('depo: kip idb, kalıcı depolama soruldu ve yanıtlandı', (await p.evaluate(() => LIFEOS.Kabuk.Depo.kip() + ' ' + typeof LIFEOS.Kabuk.Depo.kalici())) === 'idb boolean',
+      await p.evaluate(() => LIFEOS.Kabuk.Depo.kip() + ' ' + LIFEOS.Kabuk.Depo.kalici()));
+    const k2son = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'));
+    dene('depo: yazıdan hemen sonra yenilenen kayıt kaldı, IndexedDB içinde; localStorage içinde hiç kayıt anahtarı yok, ayar orada',
+      JSON.parse(k2son).dersler && Object.keys(JSON.parse(k2son).dersler).length === 1 && (await idbOku(p, 'lifeos.yol.felsefe.2')) === k2son
+      && (await yerelKayit(p)).length === 0 && (await p.evaluate(() => localStorage.getItem('lifeos.kabuk.depo'))) === 'idb', JSON.stringify(await yerelKayit(p)));
     dene('konsolda hata yok', hata.length === 0, hata.join(' | '));
     await c.close();
+
+    // ---- Taşıma: eski localStorage kaydı ilk açılışta IndexedDB'ye geçer, ekran onu okur, localStorage'dan silinir ----
+    const mc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), mp = await mc.newPage(), mhata = [];
+    mp.on('pageerror', e => mhata.push(e.message));
+    mp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) mhata.push(m.text()); });
+    if (!y2gercek) await mp.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
+    await mp.goto(T + '/kabuk/harita.js'); // aynı köken, kabuk henüz açılmadı
+    await mp.evaluate(k => { localStorage.setItem('lifeos.yol.felsefe.1', k); localStorage.setItem('lifeos.tema.secim', 'light'); }, kayit1);
+    await mp.goto(T + '/kabuk/#/alan/felsefe');
+    await mp.waitForSelector('.asamalar');
+    dene('taşıma: eski localStorage kaydı ilk açılışta okunur (3/9 ders, 1/3 kapı)', /3\/9 ders okundu · 1\/3/.test(await mp.textContent('.govde')));
+    dene('taşıma: kayıt IndexedDB içinde aynen, localStorage içinden silindi; ayar yerinde ve uygulandı', (await idbOku(mp, 'lifeos.yol.felsefe.1')) === kayit1 && (await yerelKayit(mp)).length === 0
+      && (await mp.evaluate(() => localStorage.getItem('lifeos.tema.secim') + ' ' + document.documentElement.getAttribute('data-theme'))) === 'light light');
+    await mp.reload();
+    await mp.waitForSelector('.asamalar');
+    dene('taşıma: yenilemeden sonra kayıt IndexedDB içinden okunur', /3\/9 ders okundu · 1\/3/.test(await mp.textContent('.govde')));
+    dene('taşıma: konsolda hata yok', mhata.length === 0, mhata.join(' | '));
+    await mc.close();
 
     // ---- Seviyemi bul (icerik-hatti §4.3): boş kayıtlı Dil, iki aşama; birinci bilinir, ikincide kalınır ----
     const yc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), yp = await yc.newPage(), yhata = [];
@@ -612,7 +641,7 @@ async function goruntu(p, ad) {
       && /atlandı/.test(await yp.textContent('.ozet li >> nth=0')) && /buradan/.test(await yp.textContent('.ozet li >> nth=1')), ys);
     dene('yerleştirme: Dil beceri alanı, üretim görevi bekliyor', /üretim görevi bekliyor/.test(ys));
     await goruntu(yp, 'yerlestirme-sonuc');
-    const kd = await yp.evaluate(() => [1, 2].map(n => JSON.parse(localStorage.getItem('lifeos.yol.dil.' + n))));
+    const kd = await yp.evaluate(() => [1, 2].map(n => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.dil.' + n))));
     dene('yerleştirme: kayıt atlandı/tahmin, «geçildi» yazılmadı', kd[0].yerlestirme.sonuc === 'atlandi' && kd[0].yerlestirme.etiket === 'tahmin' && kd[0].asamalar['dil.1'].gecti === undefined
       && kd[1].yerlestirme.sonuc === 'burada', JSON.stringify(kd));
     dene('yerleştirme: «Başla» ikinci aşamanın ilk dersine', (await yp.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[1].uniteler[0].dersler[0].id);
@@ -630,7 +659,7 @@ async function goruntu(p, ad) {
     for (const q of du.kapi.sorular) await yp.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
     await yp.click('form.kapi button[type=submit]');
     await yp.waitForSelector('.kapisonuc--gecti');
-    const kd2 = await yp.evaluate(() => [1, 2].map(n => JSON.parse(localStorage.getItem('lifeos.yol.dil.' + n)).yerlestirme));
+    const kd2 = await yp.evaluate(() => [1, 2].map(n => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.dil.' + n)).yerlestirme));
     dene('yerleştirme: ilk ölçülen ünite kapısı geçilince tahmin iki aşamada da silinir', kd2.every(x => x.etiket === undefined && x.olcum > 0), JSON.stringify(kd2));
     dene('yerleştirme: konsolda hata yok', yhata.length === 0, yhata.join(' | '));
     await yc.close();

@@ -150,11 +150,13 @@
   /* ---------------- tarayıcı ---------------- */
   var H = Kabuk.Harita, A = Kabuk.Ayar, d = document, kokEl = d.documentElement;
   var bellek = {};
-  var depo = (function () {
+  var yerel = (function () {
     try { var t = '__k'; localStorage.setItem(t, t); localStorage.removeItem(t); return localStorage; } catch (e) {
       return { getItem: function (k) { return k in bellek ? bellek[k] : null; }, setItem: function (k, v) { bellek[k] = String(v); }, removeItem: function (k) { delete bellek[k]; } };
     }
   })();
+  // kayıtlar IndexedDB'de (depo.js: kayıt/ayar ayrımı orada), ayarlar yerel depoda; sayfa kayıtlar belleğe yüklenince çizilir
+  var depo = Kabuk.Depo, hazir = depo.ac(yerel);
   var $ = function (s, k) { return (k || d).querySelector(s); };
   function kac(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
@@ -706,5 +708,6 @@
     asamaY: function (id, asamaId) { var a = alanlar[id]; return a && a.ys ? a.ys.filter(function (y) { return y.id === asamaId; })[0] || null : null; },
     tasinanlar: function () { return H.YERLER.filter(function (y) { return tasinan(y.id); }); } };
   Kabuk.ac = { halka: halkaAcOdakli, komut: function () { komutAc(); }, git: function (y) { git(y); } };
-  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', baslat); else baslat();
+  function basla() { uygula(); hazir.then(baslat); } // tema ilk boyamadan önce (ayar eşzamanlı okunur), sayfa depo hazır olunca
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', basla); else basla();
 })(typeof window !== 'undefined' ? window : globalThis);
