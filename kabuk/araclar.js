@@ -1,7 +1,7 @@
 /* LIFEOS.Kabuk araç ekranları — Not, Tekrar ve Yol haritası listesi (sadeleşme Faz 2/3).
  * Kural motorlardadır (motor/not.js, motor/tekrar.js, motor/yol.js); burası çizer ve kaydeder.
  * Sayfalar Kabuk.ek[yerId](yer, alt) ile kaydolur; kabuk.js rota() onları çağırır. Bu dosya kabuk.js'ten ÖNCE yüklenir.
- * shortcut: kayıtlar bu tarayıcının deposunda durur (lifeos.not.kayit, lifeos.tekrar.kartlar, lifeos.kayit.kayitlar, lifeos.plan.durum), cihazlar arası eşitlenmez; tek depoya (sistem/veri.py) P6 göçünden sonra bağlanır.
+ * shortcut: kayıtlar bu tarayıcının deposunda durur (lifeos.not.kayit, lifeos.tekrar.kartlar, lifeos.kayit.kayitlar, lifeos.plan.durum, lifeos.soru.*), cihazlar arası eşitlenmez; tek depoya (sistem/veri.py) P6 göçünden sonra bağlanır.
  * Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.Arac, Node'da module.exports (yalnız saf kısım). */
 (function (kok) {
   'use strict';
@@ -133,7 +133,30 @@
       : { ayar: Object.assign({}, durum.ayar, { musait: aday.musait.slice().sort(function (a, b) { return a.bas < b.bas ? -1 : 1; }) }), isler: durum.isler, gunPlan: durum.gunPlan } };
   }
 
-  var Arac = { kimlik: kimlik, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
+  /* ---- Soru (motor/soru.js) ---- */
+  // Bir alanın karma test havuzu: seçmeli alıştırmalar; konu = ders (aynı dersten iki soru ard arda gelmesin diye).
+  // sozluk: { id: soru } (soruya `konu` ders adı olarak eklenir; içerik değişmez). Yalnız açık ünitelerin soruları girer.
+  function soruHavuzu(Yol, y, kayit) {
+    var havuz = [], sozluk = {};
+    y.veri.uniteler.forEach(function (u) {
+      if (!Yol.acikMi(y, kayit, u.id)) return;
+      u.dersler.forEach(function (ders) {
+        ders.alistirmalar.forEach(function (a) {
+          if (a.tur !== 'secmeli') return;
+          havuz.push({ id: a.id, konu: ders.id });
+          sozluk[a.id] = Object.assign({}, a, { konu: ders.ad });
+        });
+      });
+    });
+    return { havuz: havuz, sozluk: sozluk };
+  }
+  // Oturumda sıradaki cevapsız sorunun sırası; hepsi cevaplandıysa -1.
+  function soruSirasi(oturum) {
+    for (var i = 0; i < oturum.sorular.length; i++) if (!oturum.cevaplar[i]) return i;
+    return -1;
+  }
+
+  var Arac = { kimlik: kimlik, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, kartlariEsitle: kartlariEsitle, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -421,7 +444,95 @@
     return '<a class="karsila__plan" href="#/motor/plan">' + (sira.length ? 'Planda sırada: ' + k(sira[0].bas) + ' ' + k(sira[0].ad) + (sira.length > 1 ? ' · ' + (sira.length - 1) + ' blok daha' : '') : 'Bugünün planı bitti') + '</a>';
   };
 
+  /* ---- Soru: karma test ---- */
+  var SORU_ANAHTAR = 'lifeos.soru.oturum', SORU_GECMIS = 'lifeos.soru.gecmis', Soru = L.Motor && L.Motor.Soru;
+  var soruGoster = -1; // cevabı az önce verilen sorunun sırası: sonucu ekranda kalır, «Sonraki» ile geçilir
+  function soruBaglam() { // etkin alanın içeriği ve havuzu; içerik yüklenmediyse null
+    var I = ic(), id = I.etkin(), f = I.al(id);
+    if (!f || !f.y) return null;
+    var h = soruHavuzu(I.Yol, f.y, I.kayitOku(id));
+    return { alan: I.tasinanlar().filter(function (a) { return a.id === id; })[0], havuz: h.havuz, sozluk: h.sozluk };
+  }
+  function sayfaSoru(yer) {
+    var I = ic(), k = I.kac;
+    if (!Soru) return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Soru</h1>' + eksik('Soru') + '</div>';
+    var b = soruBaglam(), bas = I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="soru"><h1>Soru</h1>';
+    if (!b) {
+      if (!I.al(I.etkin())) I.alanYukle(I.etkin()).then(function () { if (d.querySelector('[data-arac="soru"]')) I.rota(); });
+      return bas + (I.al(I.etkin()) ? '<div class="yuva" role="note"><b>Sorular bu açılışta yüklenemedi.</b><span>Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.</span></div>'
+        : '<p class="soluk" aria-busy="true">Yükleniyor…</p>') + '</div>';
+    }
+    var kayit = oku(SORU_ANAHTAR, {}), o = kayit.oturum && kayit.alan === b.alan.id ? kayit.oturum : null, gecmis = oku(SORU_GECMIS, []);
+    if (!o) {
+      var son = gecmis.slice(-5).reverse();
+      return bas + '<p class="soluk">' + k(b.alan.ad) + ' alanının açık ünitelerinden karma test. Havuzda ' + b.havuz.length + ' soru var. Alanı değiştirmek için o alanın sayfasını aç.</p>' +
+        (b.havuz.length < Soru.EN_AZ ? '<div class="yuva" role="note"><b>Test için en az ' + Soru.EN_AZ + ' soru gerekir.</b></div>'
+          : '<div class="eylemler">' + Soru.BOYLAR.filter(function (n, i) { return !i || b.havuz.length > Soru.BOYLAR[i - 1]; }).map(function (n, i) { // havuz küçükse aynı boyda iki düğme çıkmasın
+            return '<button type="button" class="dugme' + (i ? '' : ' dugme--ana') + '" data-arac-ac="soru-basla" data-boy="' + n + '">' + Math.min(n, b.havuz.length) + ' soruluk test</button>';
+          }).join('') + '</div>') +
+        (son.length ? '<section><h2>Son testler</h2><ul class="ozet">' + son.map(function (g) {
+          var r = g.sayilar;
+          return '<li><span>' + k(g.alanAd) + ' · ' + tarih(g.bitti) + '</span><b>' + r.dogru + ' doğru · ' + r.yanlis + ' yanlış · ' + (r.bos + r.bakildi) + ' boş</b><span class="pul">ölçüldü</span></li>';
+        }).join('') + '</ul></section>' : '') + '</div>';
+    }
+    var sira = soruGoster >= 0 ? soruGoster : soruSirasi(o);
+    if (sira < 0) sira = o.sorular.length - 1;
+    var q = b.sozluk[o.sorular[sira]], cv = o.cevaplar[sira], bitti = soruSirasi(o) < 0;
+    if (!q) return bas + '<div class="yuva" role="note"><b>Bu testin sorusu artık içerikte yok.</b></div><div class="eylemler"><button type="button" class="dugme dugme--ana" data-arac-ac="soru-birak">Testi kapat</button></div></div>';
+    return bas + '<p class="soluk">' + k(b.alan.ad) + ' · soru ' + (sira + 1) + ' / ' + o.sorular.length + ' · ' + k(q.konu) + '</p>' +
+      '<fieldset class="soru" data-sira="' + sira + '"><legend>' + k(q.soru) + '</legend><div class="secenekler">' + q.sec.map(function (m, i) {
+        var h = HARF[i], cls = !cv ? '' : h === q.dogru ? ' secenek--dogru' : h === cv.h ? ' secenek--yanlis' : '';
+        return '<button type="button" class="secenek' + cls + '" data-arac-ac="soru-cevap" data-h="' + h + '"' + (cv ? ' disabled' : '') + ' aria-pressed="' + (!!cv && cv.h === h) + '"><b>' + h + '</b><span>' + k(m) + '</span>' +
+          (cls ? '<span class="secenek__im">' + (h === q.dogru ? '✓ doğru' : '✕ senin cevabın') + '</span>' : '') + '</button>';
+      }).join('') + '</div><div class="soru__sonuc" tabindex="-1" role="status">' +
+      (cv ? '<b>' + (cv.bak ? 'Çözüme baktın; bu soru doğru sayılmaz.' : cv.h === q.dogru ? 'Doğru.' : 'Yanlış.') + '</b>' + (q.cozum ? ' ' + q.cozum.map(k).join(' ') : '') : '') + '</div></fieldset>' +
+      '<div class="eylemler">' + (cv ? '<button type="button" class="dugme dugme--ana" data-arac-ac="' + (bitti ? 'soru-bitir' : 'soru-sonraki') + '">' + (bitti ? 'Sonucu gör' : 'Sonraki') + '</button>'
+        : '<button type="button" class="dugme dugme--sade" data-arac-ac="soru-bak">Çözüme bak</button>') +
+      '<button type="button" class="dugme dugme--sade" data-arac-ac="soru-bitir">Testi bitir</button></div></div>';
+  }
+  var soruSonuc = null; // biten testin özeti, yalnız hemen ardından gösterilir
+  function sayfaSoruSonuc(yer) {
+    var I = ic(), k = I.kac, g = soruSonuc, r = g.sayilar;
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="soru"><h1>Test bitti</h1>' +
+      '<div class="kapisonuc" tabindex="-1" role="status"><b>' + r.dogru + ' / ' + r.toplam + ' doğru.</b> ' + r.yanlis + ' yanlış, ' + r.bos + ' boş, ' + r.bakildi + ' çözüme bakıldı. <span class="soluk">ölçüldü</span></div>' +
+      (g.konular.length ? '<section><h2>Derslere göre</h2><ul class="ozet">' + g.konular.map(function (x) {
+        return '<li><span>' + k(x.konu) + '</span><b>' + x.dogru + ' / ' + x.n + '</b><span class="pul">ölçüldü</span></li>';
+      }).join('') + '</ul></section>' : '') +
+      '<div class="eylemler"><button type="button" class="dugme dugme--ana" data-arac-ac="soru-yeni">Yeni test</button><a class="dugme dugme--sade" href="' + k(g.alanYol) + '">' + k(g.alanAd) + ' sayfası</a></div></div>';
+  }
+  function soruEylem(ne, b) {
+    var I = ic(), bg = soruBaglam(), simdi = Date.now();
+    if (ne === 'soru-yeni') return I.rota(); // sonuç sayfası aynı adreste: bağlantı değil, yeniden çizim
+    if (!bg) return;
+    var kayit = oku(SORU_ANAHTAR, {}), o = kayit.oturum;
+    if (ne === 'soru-basla') {
+      var r = Soru.alistirmaKur(bg.havuz, +b.getAttribute('data-boy'), simdi, Math.random);
+      if (r.ok) { yaz(SORU_ANAHTAR, { alan: bg.alan.id, oturum: r.oturum }); soruGoster = -1; }
+      return I.rota();
+    }
+    if (!o) return I.rota();
+    var sira = +(d.querySelector('.soru[data-sira]') || { getAttribute: function () { return -1; } }).getAttribute('data-sira');
+    if (ne === 'soru-cevap' || ne === 'soru-bak') {
+      var c = ne === 'soru-bak' ? Soru.bak(o, sira, simdi) : Soru.cevapla(o, sira, b.getAttribute('data-h'), bg.sozluk, simdi);
+      if (c.ok) { yaz(SORU_ANAHTAR, { alan: kayit.alan, oturum: c.oturum }); soruGoster = sira; }
+      I.rota();
+      var s = d.querySelector('.soru__sonuc'); if (s) s.focus({ preventScroll: true });
+      return;
+    }
+    if (ne === 'soru-sonraki') { soruGoster = -1; return I.rota(); }
+    if (ne === 'soru-birak') { yaz(SORU_ANAHTAR, {}); soruGoster = -1; return I.rota(); }
+    if (ne === 'soru-bitir') {
+      var bit = Soru.oturumBitir(o, bg.sozluk, simdi);
+      soruSonuc = { bitti: simdi, alan: bg.alan.id, alanAd: bg.alan.ad, alanYol: bg.alan.yol, sayilar: bit.ozet.sayilar, konular: bit.ozet.konular };
+      yaz(SORU_GECMIS, oku(SORU_GECMIS, []).concat([{ bitti: simdi, alan: bg.alan.id, alanAd: bg.alan.ad, sayilar: bit.ozet.sayilar, sonuc: bit.sonuc }]).slice(-50));
+      yaz(SORU_ANAHTAR, {}); soruGoster = -1;
+      I.rota();
+      var ks = d.querySelector('.kapisonuc'); if (ks) ks.focus({ preventScroll: true });
+    }
+  }
+
   Kabuk.ek = Kabuk.ek || {};
+  Kabuk.ek.soru = function (yer) { if (soruSonuc) { var h = sayfaSoruSonuc(yer); soruSonuc = null; return h; } return sayfaSoru(yer); };
   Kabuk.ek.plan = sayfaPlan;
   Kabuk.ek.kayit = sayfaKayit;
   Kabuk.ek.not = sayfaNot; Kabuk.ek.tekrar = sayfaTekrar; Kabuk.ek.yol = sayfaYol;
@@ -454,6 +565,7 @@
       yaz(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== b.getAttribute('data-id'); }));
       return I.git('#/motor/not');
     }
+    if (ne.indexOf('soru-') === 0) return soruEylem(ne, b);
     if (ne.indexOf('plan-') === 0) {
       var simdiP = Date.now(), dr = planDurum(simdiP), gunP = gunAdi(simdiP);
       if (ne === 'plan-kur') {

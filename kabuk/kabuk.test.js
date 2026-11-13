@@ -134,6 +134,29 @@ t('plan: yeniden kurunca yapılan blok yerinde kalır; ertesi gün yapılan iş 
   esit([ertesi.gunPlan, ertesi.isler.map(x => [x.id, x.dk, x.devir])], [null, [['b', 40, 1]]]);
 });
 
+t('soru: havuz yalnız açık ünitelerin seçmeli alıştırmalarından; karma test motorla kurulur ve puanlanır', () => {
+  const Soru = require('../motor/soru.js'), Yol = require('../motor/yol.js'), y = Yol.yukle(require('../alan/felsefe/asama-1.json'));
+  const bos = R.soruHavuzu(Yol, y, Yol.bosKayit()), u1 = y.veri.uniteler[0];
+  const beklenen = u1.dersler.reduce((n, d) => n + d.alistirmalar.filter(a => a.tur === 'secmeli').length, 0);
+  esit(bos.havuz.length, beklenen, 'ilk ünite açık, ötekiler kilitli');
+  dogru(bos.havuz.every(h => bos.sozluk[h.id] && y.tur[h.konu] === 'ders'), 'her soru sözlükte, konu = ders');
+  esit(bos.sozluk[bos.havuz[0].id].konu, u1.dersler[0].ad, 'sözlükte konu ders adıdır');
+  let k = Yol.bosKayit();
+  k = Yol.kapiDene(y, k, u1.id, Object.fromEntries(u1.kapi.sorular.map(q => [q.id, q.dogru])), 1).kayit;
+  dogru(R.soruHavuzu(Yol, y, k).havuz.length > beklenen, 'kapı geçilince ikinci ünitenin soruları da girer');
+  let i = 0; const rnd = () => (i++ * 0.37) % 1;
+  const r = Soru.alistirmaKur(bos.havuz, 10, 1000, rnd);
+  esit([r.ok, r.oturum.sorular.length], [true, Math.min(10, beklenen)]);
+  let o = r.oturum;
+  esit(R.soruSirasi(o), 0);
+  const q0 = bos.sozluk[o.sorular[0]];
+  o = Soru.cevapla(o, 0, q0.dogru, bos.sozluk, 2000).oturum;
+  o = Soru.bak(o, 1, 3000).oturum;
+  esit(R.soruSirasi(o), 2);
+  const ozet = Soru.oturumBitir(o, bos.sozluk, 4000).ozet.sayilar;
+  esit([ozet.dogru, ozet.bakildi, ozet.yanlis, ozet.bos, ozet.toplam], [1, 1, 0, o.sorular.length - 2, o.sorular.length]);
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {

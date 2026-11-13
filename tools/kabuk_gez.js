@@ -28,7 +28,7 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
   try {
     const c = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' });
     const p = await c.newPage(); const hata = [];
-    p.on('pageerror', e => hata.push(e.message));
+    p.on('pageerror', e => { hata.push(e.message); console.log('  sayfa hatası: ' + e.message); });
     p.on('console', m => { if (m.type() === 'error') hata.push(m.text()); });
 
     await p.goto(T + '/kabuk/');
@@ -251,6 +251,41 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('.karsila__plan');
     dene('Bugün: planın sıradaki bloğunu gösterir', /Planda sırada: \d\d:\d\d/.test(await p.textContent('.karsila__plan')), await p.textContent('.karsila__plan'));
+
+    // ---- Soru: karma test (etkin alan Felsefe) ----
+    await p.goto(T + '/kabuk/#/alan/felsefe');
+    await p.waitForSelector('.unitekutu');
+    await p.goto(T + '/kabuk/#/motor/soru');
+    await p.waitForSelector('[data-arac-ac="soru-basla"]');
+    dene('soru: başlangıçta alan ve havuz yazılı', /Felsefe alanının/.test(await p.textContent('[data-arac="soru"]')) && /Havuzda \d+ soru/.test(await p.textContent('[data-arac="soru"]')));
+    await p.click('[data-arac-ac="soru-basla"]');
+    await p.waitForSelector('.soru[data-sira="0"]');
+    const felsefeSorular = {};
+    y.uniteler.forEach(u => u.dersler.forEach(dd => dd.alistirmalar.forEach(a => { felsefeSorular[a.soru] = a; })));
+    const soruMetni = async () => felsefeSorular[await p.textContent('.soru legend')];
+    let sq = await soruMetni();
+    await p.click('[data-arac-ac="soru-cevap"][data-h="' + sq.dogru + '"]');
+    dene('soru: doğru cevap «Doğru.» der, şıklar kilitlenir', /Doğru/.test(await p.textContent('.soru__sonuc')) && (await p.locator('.secenek[disabled]').count()) === sq.sec.length);
+    await p.click('[data-arac-ac="soru-sonraki"]');
+    await p.waitForSelector('.soru[data-sira="1"]');
+    sq = await soruMetni();
+    await p.click('[data-arac-ac="soru-cevap"][data-h="' + 'ABCD'[('ABCD'.indexOf(sq.dogru) + 1) % sq.sec.length] + '"]');
+    dene('soru: yanlış cevap «Yanlış.» der ve doğruyu işaretler', /Yanlış/.test(await p.textContent('.soru__sonuc')) && (await p.getAttribute('.secenek--dogru', 'data-h')) === sq.dogru);
+    await p.click('[data-arac-ac="soru-sonraki"]');
+    await p.waitForSelector('.soru[data-sira="2"]');
+    await p.click('[data-arac-ac="soru-bak"]');
+    dene('soru: çözüme bakınca doğru sayılmaz', /doğru sayılmaz/.test(await p.textContent('.soru__sonuc')));
+    await p.reload();
+    await p.waitForSelector('.soru[data-sira]');
+    dene('soru: yenilemeden sonra test kaldığı yerden sürer', (await p.getAttribute('.soru[data-sira]', 'data-sira')) === '3');
+    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'soru-masaustu-koyu.png'), fullPage: true });
+    await p.click('[data-arac-ac="soru-bitir"]');
+    await p.waitForSelector('.kapisonuc');
+    const sonucMetni = await p.textContent('.kapisonuc');
+    dene('soru: sonuç 1 doğru, 1 yanlış, 1 bakıldı, kalanı boş; etiketli', /^1 \/ \d+ doğru/.test(sonucMetni) && /1 yanlış/.test(sonucMetni) && /1 çözüme bakıldı/.test(sonucMetni) && /ölçüldü/.test(sonucMetni), sonucMetni);
+    await p.click('[data-arac-ac="soru-yeni"]');
+    await p.waitForSelector('[data-arac-ac="soru-basla"]');
+    dene('soru: biten test «Son testler»de', /1 doğru · 1 yanlış/.test(await p.textContent('[data-arac="soru"] .ozet')));
 
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');

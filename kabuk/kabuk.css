@@ -229,3 +229,4 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .blok--mola{ background:transparent; color:var(--soluk); } .blok--bitti .blok__ad{ color:var(--soluk); }
 .karsila__plan{ color:inherit; padding:10px 6px; display:inline-block; }
 @media (max-width:480px){ .blok{ grid-template-columns:auto 1fr; grid-template-areas:'saat ad' 'saat not' 'eylem eylem'; } .blok__eylem{ justify-content:flex-start; } }
+.secenek[disabled]{ cursor:default; opacity:1; color:inherit; }
