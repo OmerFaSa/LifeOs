@@ -1,0 +1,1274 @@
+{
+  "sema": 1,
+  "alan": "hareket",
+  "id": "hareket.2",
+  "sira": 2,
+  "ad": "Düzenli program: haftalık plan ve ilerleme",
+  "hedef": "Haftada üç günlük bir tam vücut programını dinlenme ve yürüyüş günleriyle kurmak, yükü SPİ'nin kurallarıyla (haftalık %10 sınırı, beş haftada bir yük indirme) küçük adımlarla artırmak ve programı kayda ve toparlanmaya göre uyarlamak.",
+  "onKosul": [
+    "hareket.1"
+  ],
+  "kanitIsi": "Dört haftalık kendi programını yaz ve uygula: haftada üç tam vücut günü (her kalıptan bir hareket, başlangıç aşaması, set × tekrar ve hedef kalan tekrar), aralarda dinlenme ya da yürüyüş günü, her antrenmanın kaydı (tarih, hareket, aşama, set, tekrar, yük, kalan tekrar) ve dört haftanın sonunda hangi harekette ilerlediğini, neyi değiştirdiğini anlatan kısa bir not. Ağrı ya da uyarı işareti olursa kaydına yaz ve o hareketi durdur. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    {
+      "id": "k1",
+      "ad": "SPİ Öğren: Fiziksel aktivite, egzersiz ve spor (haftalık öneri, güvenlik uyarısı)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "spor-temel",
+      "satir": "30-35",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k2",
+      "ad": "SPİ Öğren: Yürüyüş, başlamak ve sürdürmek",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "yuruyus · Başlamak ve sürdürmek",
+      "satir": "48-50",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k3",
+      "ad": "SPİ Öğren: Koşuya başlamak (koş-yürü, yükü yavaş artırmak, ağrı, zemin)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "kosu",
+      "satir": "59-75",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k4",
+      "ad": "SPİ Öğren: Kalistenik (kalıplar, kolaydan zora, form, haftalık düzen)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "kalistenik",
+      "satir": "98-106",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k5",
+      "ad": "SPİ Öğren: Kuvvet antrenmanının temel kavramları (set, tekrar, yük, aşamalı yüklenme, kalan tekrar)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "kuvvet",
+      "satir": "115-122",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k6",
+      "ad": "SPİ Öğren: Uyku ve toparlanma, dinlenme günü",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "uyku-toparlanma · Dinlenme günü",
+      "satir": "211",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k7",
+      "ad": "SPİ toparlanma girdileri ve bantları (günün yük emri)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/movement.js",
+      "bolum": "SP.READINESS_INPUTS, SP.READINESS_BANDS",
+      "satir": "286-316",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k8",
+      "ad": "SPİ yük kuralları: akut/kronik oran, haftalık %10 sınırı, yük indirme haftası, kötü gün alt sınırı",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/movement.js",
+      "bolum": "SP.LOAD_RULES",
+      "satir": "318-347",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k9",
+      "ad": "SPİ hazır seans şablonları (Tam vücut A ve B, yürüyüş günü, mobilite)",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/movement.js",
+      "bolum": "SP.SESSION_TEMPLATES",
+      "satir": "349-367",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k10",
+      "ad": "SPİ hareket motoru: ateşte antrenman yok",
+      "tur": "depo",
+      "yol": "SPI/src/js/core/move.js",
+      "bolum": "readiness · ateş",
+      "satir": "126-130",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k11",
+      "ad": "SPİ hareket motoru: yük indirme sayacı ve haftalık büyüme sınırı",
+      "tur": "depo",
+      "yol": "SPI/src/js/core/move.js",
+      "bolum": "deloadWeek, weeklyGrowth",
+      "satir": "267-303",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k12",
+      "ad": "SPİ hareket motoru: ince ölçüm yükü artıramaz, emir yalnız daha temkinli olur",
+      "tur": "depo",
+      "yol": "SPI/src/js/core/move.js",
+      "bolum": "prescription",
+      "satir": "306-334",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k13",
+      "ad": "Antrenman bölünme mimarileri: haftada 3 gün tam vücut",
+      "tur": "gemini",
+      "yol": "SPI/hareket/antrenman_programlama_mimarileri_cns_yorgunlugu_ve_deload.md",
+      "bolum": "1. Antrenman Bölünme (Split) Mimarileri",
+      "satir": "12-16",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k14",
+      "ad": "Eşzamanlı antrenman: egzersiz sıralaması önceliği",
+      "tur": "gemini",
+      "yol": "SPI/hareket/antrenman_programlama_mimarileri_cns_yorgunlugu_ve_deload.md",
+      "bolum": "Egzersiz Sıralaması Önceliği",
+      "satir": "41-42",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k15",
+      "ad": "Yük indirme (deload) protokolü",
+      "tur": "gemini",
+      "yol": "SPI/hareket/antrenman_programlama_mimarileri_cns_yorgunlugu_ve_deload.md",
+      "bolum": "3.3 Matematiksel Deload (Yük Azaltma) Protokolü",
+      "satir": "66-73",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k16",
+      "ad": "Toparlanma piramidi: uyku ve aktif toparlanma",
+      "tur": "gemini",
+      "yol": "SPI/hareket/toparlanma_bilimi_doms_kas_hasari_uyku_masaj_kompresyon_ve_deload_mimarisi_atlasi.md",
+      "bolum": "3. Toparlanma Piramidi",
+      "satir": "71-78",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k17",
+      "ad": "Altın yük indirme kuralları",
+      "tur": "gemini",
+      "yol": "SPI/hareket/toparlanma_bilimi_doms_kas_hasari_uyku_masaj_kompresyon_ve_deload_mimarisi_atlasi.md",
+      "bolum": "4. Deload Haftası Mühendisliği, 4.1",
+      "satir": "86-94",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k18",
+      "ad": "Kalistenik: kaldıraç kolu ilkesi",
+      "tur": "gemini",
+      "yol": "SPI/hareket/kalistenik_ilerleme_ve_dayaniklilik_sporlari_biyomekanigi.md",
+      "bolum": "1. Kalistenik Biyomekaniği ve Mekanik İlkeler",
+      "satir": "12-14",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k19",
+      "ad": "Kalistenik ustalık merdiveni: itme, çekme ve tek bacak zincirleri",
+      "tur": "gemini",
+      "yol": "SPI/hareket/kalistenik_ilerleme_ve_dayaniklilik_sporlari_biyomekanigi.md",
+      "bolum": "2. Kalistenik Ustalık Merdiveni, 2.1-2.3",
+      "satir": "46-76",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k20",
+      "ad": "DSÖ Fiziksel Aktivite bilgi notu: her miktar hiç yoktan iyidir, kas güçlendirme herkese yararlıdır",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "physical-activity (indirilmiş, temiz katman)",
+      "satir": "14",
+      "dogrulama": "dogrulanmamis"
+    }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {
+        "id": "hareket.2.k1",
+        "tur": "secmeli",
+        "soru": "Kaynağa göre haftada 3 günlük tam vücut seansının her birinde neler bulunur?",
+        "sec": [
+          "Yalnız göğüs ve kol",
+          "Yalnız koşu",
+          "Her gün tek bir kas grubu",
+          "Bir itme, bir çekme, bir çömelme ya da menteşe ve bir gövde hareketi"
+        ],
+        "dogru": "D",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k13"
+        ]
+      },
+      {
+        "id": "hareket.2.k2",
+        "tur": "secmeli",
+        "soru": "Bu hafta 50 dakika koş-yürü yapan biri SPİ'nin kuralına göre gelecek hafta en çok kaç dakika yapabilir?",
+        "sec": [
+          "50 dakika",
+          "55 dakika",
+          "60 dakika",
+          "100 dakika"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k8"
+        ]
+      },
+      {
+        "id": "hareket.2.k3",
+        "tur": "secmeli",
+        "soru": "Kaynaklara göre yük indirme haftasında set sayısına ne olur?",
+        "sec": [
+          "%40-50 azaltılır",
+          "İki katına çıkar",
+          "Değişmez",
+          "Sıfırlanır"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k15",
+          "k17"
+        ]
+      },
+      {
+        "id": "hareket.2.k4",
+        "tur": "secmeli",
+        "soru": "Aynı seansta kuvvet ve hafif koşu yapacak, hedefi kuvvet olan biri için doğru sıra hangisidir?",
+        "sec": [
+          "Önce kuvvet, sonra hafif koşu",
+          "Önce ağır koşu, sonra kuvvet",
+          "Sıra önemsiz",
+          "Kuvvet hiç yapılmaz"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k14"
+        ]
+      },
+      {
+        "id": "hareket.2.k5",
+        "tur": "secmeli",
+        "soru": "Toparlanma skoru «iyi» bantta (65-79) ise SPİ'nin emri nedir?",
+        "sec": [
+          "Yükü yarıya indir",
+          "Bugün antrenman yok",
+          "Planlanan yükü olduğu gibi uygula",
+          "Ağır gün, ilerleme denemesi bugün"
+        ],
+        "dogru": "C",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k7"
+        ]
+      },
+      {
+        "id": "hareket.2.k6",
+        "tur": "secmeli",
+        "soru": "Antrenman sırasında göğüs ağrısı ve baş dönmesi başlarsa ne yapılır?",
+        "sec": [
+          "Tempo düşürülüp devam edilir",
+          "Su içip sete devam edilir",
+          "Ertesi gün daha ağır yapılır",
+          "Durulur ve hekime danışılır"
+        ],
+        "dogru": "D",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k1"
+        ]
+      }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "hareket.2.1",
+      "ad": "Haftayı kurmak",
+      "onKosul": [],
+      "kazanim": [
+        "Haftalık hareket çerçevesini kuvvet, yürüyüş ve dinlenme günlerine böler.",
+        "Bir tam vücut seansını kalıplara göre kurar ve A-B şablonlarını dönüşümlü kullanır.",
+        "Kuvvet ve koşuyu aynı haftaya doğru sırayla yerleştirir."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "hareket.2.1.k1",
+            "tur": "secmeli",
+            "soru": "SPİ anlatımına göre yeni başlayan biri için haftada kaç gün tam vücut antrenmanı yeterlidir?",
+            "sec": [
+              "2-3 gün",
+              "1 gün",
+              "6 gün",
+              "Her gün"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k4"
+            ]
+          },
+          {
+            "id": "hareket.2.1.k2",
+            "tur": "secmeli",
+            "soru": "Kaynağa göre haftada 3 günlük tam vücut düzeninin bir avantajı hangisidir?",
+            "sec": [
+              "Her gün tek kas çalıştırılması",
+              "Dinlenme gerektirmemesi",
+              "En uzun seansları vermesi",
+              "Kaçırılan bir seansın kolayca telafi edilmesi"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k13"
+            ]
+          },
+          {
+            "id": "hareket.2.1.k3",
+            "tur": "secmeli",
+            "soru": "Plan: Pazartesi, Çarşamba, Cuma kuvvet; Salı ve Perşembe 40'ar, Cumartesi 45 dakika tempolu yürüyüş; Pazar dinlenme. DSÖ çerçevesine göre hangisi doğrudur?",
+            "sec": [
+              "İki parça da karşılanıyor",
+              "Kas güçlendirme karşılanıyor; aerobik 125 dakikayla 150'nin altında",
+              "Kas güçlendirme eksik",
+              "İki parça da eksik"
+            ],
+            "dogru": "B",
+            "cozum": [
+              "40 + 40 + 45 = 125 dakika orta şiddet; 3 kuvvet günü ≥ 2."
+            ],
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1"
+            ]
+          },
+          {
+            "id": "hareket.2.1.k4",
+            "tur": "secmeli",
+            "soru": "Koşu ve kuvveti aynı haftaya koyan yeni başlayan biri için hangi plan kaynaklarla en uyumludur?",
+            "sec": [
+              "Her gün kuvvetten hemen önce ağır koşu",
+              "Haftada yedi gün sürekli koşu",
+              "Pazartesi-Çarşamba-Cuma kuvvet, Salı-Perşembe-Cumartesi koş-yürü, Pazar dinlenme; aynı güne düşerse önce kuvvet",
+              "Koşuya ilk gün 60 dakika kesintisiz başlamak"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k13",
+              "k14",
+              "k3"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "hareket.2.1.1",
+          "ad": "Haftanın iskeleti: kuvvet, yürüyüş, dinlenme",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k20",
+            "k4",
+            "k2",
+            "k6"
+          ],
+          "ozet": "Program, haftanın hangi günü ne yapılacağını önceden yazan plandır. İskelet: haftada 2-3 tam vücut günü, aerobik dakika için yürüyüş ve planın parçası olan dinlenme günleri.",
+          "metin": [
+            "Program, haftanın hangi günü ne yapılacağını önceden yazan plandır. Dünya Sağlık Örgütü'nün genel çerçevesi iki parçalıdır (1. aşama): haftada 150-300 dakika orta şiddette aerobik hareket (ya da 75-150 dakika yüksek şiddet) ve haftada en az 2 gün kas güçlendirme. DSÖ'nün kendi metni ayrıca her miktarın hiç yoktan iyi olduğunu, her hareketin sayıldığını ve kas güçlendirmenin herkese yararlı olduğunu vurgular.",
+            "SPİ anlatımı yeni başlayan biri için haftada 2-3 gün, her gün bütün kalıpları içeren bir tam vücut antrenmanını yeterli sayar. Aerobik kısma yürüyüşle başlamak kolaydır: hiç yürümeyen biri için günde 10 dakika bile anlamlı bir başlangıçtır; önce süre artar, sonra tempo; yürüyüşü yemekten sonra ya da işe gidiş gibi bir alışkanlığa bağlamak unutmayı azaltır.",
+            "Dinlenme günü boşluk değil planın parçasıdır: SPİ anlatımına göre aynı kas grubunu art arda zorlamamak, hafif hareketle geçen dinlenme günleri ve yeterli beslenme toparlanmanın parçasıdır.",
+            "Modelin örneği: Pazartesi, Çarşamba, Cuma tam vücut; Salı ve Perşembe 30'ar dakika tempolu yürüyüş; Cumartesi 60 dakika tempolu yürüyüş; Pazar dinlenme. Bu hafta 3 kuvvet günü ve 30 + 30 + 60 = 120 dakika orta şiddet içerir; 150 dakikaya ulaşmak için kuvvet günlerine 10'ar dakikalık yürüyüş eklemek yeter.",
+            "Güvenlik sınırı (1. aşama): göğüs ağrısı, nefes darlığı, baş dönmesi ya da çarpıntı egzersizde normal değildir; durulur ve hekime danışılır. Kronik bir hastalık, gebelik, düzenli ilaç ya da geçmeyen bir ağrı varsa programa başlamadan önce hekimle konuşulur."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.1.1.a1",
+              "tur": "secmeli",
+              "soru": "DSÖ'nün yetişkinler için hareket çerçevesindeki iki parça hangisidir?",
+              "sec": [
+                "Yalnız günlük adım sayısı",
+                "Her gün bir saat koşu",
+                "Haftalık aerobik dakika ve haftada en az 2 gün kas güçlendirme",
+                "Yalnız esneme hareketleri"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "hareket.2.1.1.a2",
+              "tur": "secmeli",
+              "soru": "Örnek haftada Salı ve Perşembe 30'ar, Cumartesi 60 dakika tempolu yürüyüş var. 150 dakikaya ulaşmak için üç kuvvet gününe eşit bölünmüş kaç dakikalık ek yürüyüş gerekir?",
+              "sec": [
+                "5 dakika",
+                "10 dakika",
+                "20 dakika",
+                "30 dakika"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "30 + 30 + 60 = 120; 150 − 120 = 30; 30 ÷ 3 = 10 dakika."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1"
+              ]
+            },
+            {
+              "id": "hareket.2.1.1.a3",
+              "tur": "secmeli",
+              "soru": "Dinlenme günü için SPİ anlatımı ne der?",
+              "sec": [
+                "Planda yeri olmayan boş bir gündür",
+                "Toparlanmanın parçasıdır; hafif hareketle geçebilir",
+                "Yalnız sakatlıkta verilir"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k6"
+              ]
+            }
+          ],
+          "not": "Haftalık örnek ve 10 dakikalık ek hesap modelin örneğidir; çerçevenin sayıları SPİ anlatımından (k1, DSÖ 2020 kılavuzuna dayanır) ve DSÖ bilgi notundan (k20)."
+        },
+        {
+          "id": "hareket.2.1.2",
+          "ad": "Tam vücut seansı",
+          "onKosul": [
+            "hareket.2.1.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k13",
+            "k9",
+            "k4"
+          ],
+          "ozet": "Haftada 3 günlük tam vücut düzeninde her seans bir itme, bir çekme, bir çömelme ya da menteşe ve bir gövde hareketi içerir. SPİ bunu iki dönüşümlü şablona, A ve B'ye böler.",
+          "metin": [
+            "Kaynak haftada 3 günlük tam vücut düzenini (ör. Pazartesi, Çarşamba, Cuma) başlangıç ve orta düzey ile zamanı kısıtlı kişiler için uygun sayar: her seansta bir itme, bir çekme, bir çömelme ya da menteşe ve bir gövde (kor) hareketi. Kaynağa göre avantajlarından biri, kaçırılan bir seansın kolayca telafi edilmesidir.",
+            "SPİ'nin hazır şablonları bu düzeni iki seansa böler: «Tam vücut A» (şınav, barfiks, squat, plank: itme, çekme, çömelme ve gövde) ve «Tam vücut B» (şınav, kalça köprüsü, çiftçi taşıması, plank: kalça menteşesi ve taşıma öne çıkar). İkisi de yaklaşık 45 dakikadır.",
+            "A ve B dönüşümlü yapılınca (bir hafta A-B-A, ertesi hafta B-A-B) 1. aşamadaki altı kalıbın hepsi her hafta çalışılmış olur (modelin bağlantı notu).",
+            "Kaynak tam vücut düzeninin sınırını da yazar: ileri düzeyde her seansta bütün kasları tükenişe yakın çalıştırmak aşırı yorgunluk yaratabilir ve seans uzar. Başlangıçta setlerin 1-3 tekrar kala bitmesi (1. aşama) bu yükü sınırlar (modelin bağlantı notu)."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.1.2.a1",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre haftada 3 günlük tam vücut seansında hangi yapı vardır?",
+              "sec": [
+                "Her seansta bir itme, bir çekme, bir çömelme ya da menteşe ve bir gövde hareketi",
+                "Her gün tek bir kas grubu",
+                "Yalnız kardiyo",
+                "Yalnız bacak hareketleri"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13"
+              ]
+            },
+            {
+              "id": "hareket.2.1.2.a2",
+              "tur": "secmeli",
+              "soru": "SPİ'nin «Tam vücut B» şablonunda hangi kalıplar öne çıkar?",
+              "sec": [
+                "Kalça menteşesi ve taşıma",
+                "Yalnız itme",
+                "Koşu",
+                "Sprint"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k9"
+              ]
+            },
+            {
+              "id": "hareket.2.1.2.a3",
+              "tur": "secmeli",
+              "soru": "Haftada üç gün A ve B dönüşümlü yapılırsa (A-B-A, sonra B-A-B) iki haftada kaç A seansı yapılır?",
+              "sec": [
+                "2",
+                "3",
+                "4",
+                "6"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k9"
+              ]
+            }
+          ],
+          "not": "Kaynağın öteki bölünme düzenleri (üst-alt gövde, itme-çekme-bacak, Arnold, PHUL, PHAT; satır 17-21) bu aşamaya alınmadı. «Haftada 3 kez tüm kasları uyarmak kas protein sentezini sürekli tavanda tutar» (16) ile «altın standart», «omuz sıkışma riski sıfıra yakın» nitelemeleri doğrulanmadığı için alınmadı."
+        },
+        {
+          "id": "hareket.2.1.3",
+          "ad": "Aynı haftada kuvvet ve koşu",
+          "onKosul": [
+            "hareket.2.1.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k14",
+            "k3"
+          ],
+          "ozet": "Kuvvet ve dayanıklılık aynı haftada birlikte yapılabilir: aynı seanstaysa önce ağırlık, sonra hafif kardiyo. Koşuya koş-yürüyle, konuşma temposunda, haftada 3 günle başlanır.",
+          "metin": [
+            "Kuvvet ve dayanıklılık aynı haftada birlikte yapılabilir. Kaynak, ikisi aynı seansta yapılacaksa ve hedef kuvvetse önce ağırlık antrenmanının, sonra hafif kardiyonun yapılmasını; ağırlıktan hemen önce ağır kardiyo yapılmamasını önerir.",
+            "Koşuya yeni başlayan için SPİ anlatımı koş-yürü yöntemini önerir: örneğin 1 dakika hafif koşu, 2 dakika yürüyüş, 6-8 tekrar. Her çıkış 5 dakikalık yürüyüşle başlar ve biter; anlatımın örnek seansı yaklaşık 28 dakikadır. Haftalar içinde koşu aralığı uzar, yürüyüş kısalır.",
+            "Haftada 3 gün ve aralarda dinlenme günü yeterli bir başlangıçtır. Koşu temposu konuşabileceğin kadar rahat olmalıdır.",
+            "Modelin örneği: Pazartesi-Çarşamba-Cuma tam vücut, Salı-Perşembe-Cumartesi koş-yürü, Pazar dinlenme. Koş-yürü bir kuvvet günüyle aynı güne düşerse önce kuvvet yapılır."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.1.3.a1",
+              "tur": "secmeli",
+              "soru": "Aynı seansta kuvvet ve hafif kardiyo yapacak, hedefi kuvvet olan biri için kaynağın önerdiği sıra hangisidir?",
+              "sec": [
+                "Önce ağır kardiyo, sonra ağırlık",
+                "Sıra fark etmez",
+                "Yalnız kardiyo",
+                "Önce ağırlık, sonra hafif kardiyo"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14"
+              ]
+            },
+            {
+              "id": "hareket.2.1.3.a2",
+              "tur": "secmeli",
+              "soru": "Koş-yürü seansı: 6 kez (1 dakika koşu + 2 dakika yürüyüş), başta ve sonda 5'er dakika yürüyüş. Seans kaç dakika sürer?",
+              "sec": [
+                "18 dakika",
+                "23 dakika",
+                "28 dakika",
+                "33 dakika"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "6 × 3 = 18; 18 + 5 + 5 = 28 dakika."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3"
+              ]
+            },
+            {
+              "id": "hareket.2.1.3.a3",
+              "tur": "secmeli",
+              "soru": "SPİ anlatımına göre koşu temposunun ölçütü hangisidir?",
+              "sec": [
+                "Konuşabilecek kadar rahat olmak",
+                "Nefes nefese kalmak",
+                "Olabildiğince hızlı koşmak",
+                "Her turda hızlanmak"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3"
+              ]
+            }
+          ],
+          "not": "Kaynaktaki «6-8 saat kuralı», molekül düzeyindeki girişim etkisi anlatımı (AMPK, mTORC1; satır 30-39), Hickson deneyinin «kanıtlamıştır» dili (28) ve «bisiklet koşuya göre %50 daha az girişim yaratır» sayısı (45) bu aşamaya alınmadı: başlangıç düzeyinde gerekmez ve sayılar doğrulanmadı."
+        }
+      ]
+    },
+    {
+      "id": "hareket.2.2",
+      "ad": "İlerleme kuralı",
+      "onKosul": [
+        "hareket.2.1"
+      ],
+      "kazanim": [
+        "Vücut ağırlığı hareketlerinde merdiven aşamalarını okur ve geçiş kuralını uygular.",
+        "Haftalık yük artışını %10 sınırıyla hesaplar.",
+        "Yük indirme haftasının ne zaman geldiğini ve nasıl uygulandığını bilir."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "hareket.2.2.k1",
+            "tur": "secmeli",
+            "soru": "Vücut ağırlığıyla çalışan biri için ilerleme neyle olur?",
+            "sec": [
+              "Bir üst zorluk aşamasına geçmekle",
+              "Formu bozmakla",
+              "Isınmayı atlamakla",
+              "Dinlenme günlerini kaldırmakla"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k4"
+            ]
+          },
+          {
+            "id": "hareket.2.2.k2",
+            "tur": "secmeli",
+            "soru": "Bu hafta toplam 40 set yapan biri SPİ'nin %10 kuralına göre gelecek hafta en çok kaç set yapar?",
+            "sec": [
+              "40 set",
+              "50 set",
+              "44 set",
+              "80 set"
+            ],
+            "dogru": "C",
+            "cozum": [
+              "40 × 0,10 = 4; 40 + 4 = 44."
+            ],
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k8"
+            ]
+          },
+          {
+            "id": "hareket.2.2.k3",
+            "tur": "secmeli",
+            "soru": "SPİ'nin sayacına göre ilk antrenmanından bu yana 5. haftasında olan biri için hangisi doğrudur?",
+            "sec": [
+              "Yük %10 artırılır",
+              "Antrenman bırakılır",
+              "Yalnız koşu yapılır",
+              "Bu hafta yük indirme haftasıdır"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k8",
+              "k11"
+            ]
+          },
+          {
+            "id": "hareket.2.2.k4",
+            "tur": "secmeli",
+            "soru": "Üç hafta ara veren biri antrenmana dönerken ne yapmalı?",
+            "sec": [
+              "Eski yükünden %10 fazlasıyla başlamalı",
+              "Eski yükünün altında, daha hafif başlayıp küçük adımlarla artırmalı",
+              "Kaybı kapatmak için yükü iki katına çıkarmalı",
+              "Doğrudan bir üst aşamaya geçmeli"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k3"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "hareket.2.2.1",
+          "ad": "Kalistenik merdiveni",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k4",
+            "k18",
+            "k19"
+          ],
+          "ozet": "Vücut ağırlığıyla ilerleme, ağırlık eklemekle değil, hareketin zorluk aşamasını yükseltmekle olur. Belirlenen tekrar temiz formla rahatça yapılınca bir üst basamağa geçilir.",
+          "metin": [
+            "Vücut ağırlığıyla çalışırken ilerleme ağırlık eklemekle değil, hareketin zorluk aşamasını yükseltmekle olur. Kaynak bunu kaldıraç kolunun uzamasıyla açıklar: vücudun ağırlık merkezi destek noktasından uzaklaştıkça hareket zorlaşır.",
+            "SPİ anlatımındaki üç merdiven: şınav (duvar → eğimli, masada → diz → tam → ayak yükseltilmiş), barfiks (asılı durma → negatif, yavaş iniş → bantlı → tam), squat (sandalyeye otur-kalk → tam squat → bulgar split squat).",
+            "Geçiş kuralı: bir aşamada temiz formla belirlenen tekrar sayısını rahatça yapabildiğinde bir sonrakine geçilir; yeni aşamada tekrar düşer ve bu beklenen bir durumdur (1. aşama). Programda her hareketin yanına bulunduğun aşama yazılır.",
+            "Gemini kaynağı merdivenleri ileri basamaklara uzatır: itmede duvar ya da eğimli şınavdan standart şınava, sonra dar ve tek kola ağırlık veren şınavlara; çekmede ters kürek (Avustralya barfiksi) ve asılı durmadan tam barfikse; bacakta derin squattan bulgar split squata ve tek bacak squata. Bu aşama yalnız ilk basamaklarla ilgilenir; planche, front lever ve muscle-up gibi ileri basamaklar kaynağın kendi ön koşul ölçütlerini ve uzun bir tendon uyumunu gerektirir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.2.1.a1",
+              "tur": "secmeli",
+              "soru": "Kalistenikte ilerlemenin yolu hangisidir?",
+              "sec": [
+                "Hareketin zorluk aşamasını yükseltmek",
+                "Formu bozarak tekrar artırmak",
+                "Hep aynı aşamada kalmak",
+                "Dinlenme günlerini kaldırmak"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4",
+                "k18"
+              ]
+            },
+            {
+              "id": "hareket.2.2.1.a2",
+              "tur": "secmeli",
+              "soru": "SPİ anlatımına göre şınav merdiveninde diz şınavından sonraki aşama hangisidir?",
+              "sec": [
+                "Duvar şınavı",
+                "Eğimli şınav",
+                "Ayak yükseltilmiş şınav",
+                "Tam şınav"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4"
+              ]
+            },
+            {
+              "id": "hareket.2.2.1.a3",
+              "tur": "secmeli",
+              "soru": "Barfiks yapamayan biri için SPİ merdiveninin ilk aşaması hangisidir?",
+              "sec": [
+                "Bantlı barfiks",
+                "Tam barfiks",
+                "Asılı durma",
+                "Negatif barfiks"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4"
+              ]
+            }
+          ],
+          "not": "Kaynağın basamak açıklamalarındaki yüzdeler (ör. şınavda «vücut ağırlığının %64'ü», split squatta «%80-85»; satır 49-50, 72), ön koşul ölçütleri (37-42) ve tendon tablosundaki «hayati risk» sütunu ile 12-24 hafta uyum süreleri (27-35) alınmadı; doğrulanmadı ve başlangıç düzeyini aşıyor."
+        },
+        {
+          "id": "hareket.2.2.2",
+          "ad": "Haftalık %10 sınırı",
+          "onKosul": [
+            "hareket.2.2.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k8",
+            "k3",
+            "k11"
+          ],
+          "ozet": "SPİ'nin yük kuralı: haftalık toplam yük bir önceki haftadan %10'dan fazla artmaz; kural koşu mesafesi, set sayısı ve toplam süre için ayrı ayrı geçerlidir. Kesin bir bilimsel sınır değil, temkin kuralıdır.",
+          "metin": [
+            "SPİ'nin yük kuralı: haftalık toplam yük bir önceki haftadan %10'dan fazla artmaz. Kural koşu mesafesi, set sayısı ve toplam süre için ayrı ayrı geçerlidir.",
+            "SPİ anlatımı bu kuralın kesin bir bilimsel sınır değil, makul bir temkin kuralı olduğunu açıkça söyler. Gerekçe 1. aşamadan tanıdık: kas birkaç haftada güçlenir, tendon ve kemik daha uzun sürede uyum sağlar.",
+            "Hesap: bu hafta toplam 60 dakika koşan biri gelecek hafta en çok 66 dakika koşar (60 × 0,10 = 6). Kuvvette, bu hafta toplam 30 set yapan biri gelecek hafta en çok 33 set yapar (modelin örneği).",
+            "Ara veren biri eski formuyla başlamaz; ara ne kadar uzunsa başlangıç o kadar hafif olur. Zemin değişikliği (asfalttan patikaya, düzden yokuşa) da bir yük artışıdır ve kademeli yapılır.",
+            "SPİ ayrıca son haftanın yükünü son bir ayın ortalamasıyla karşılaştırır (akut/kronik oran). SPİ'nin kuralına göre oran 1,5'in üstündeyse son hafta belirgin ağır geçmiştir ve sakatlanma riski yükselir; 0,8'in altındaysa kondisyon korunmuyordur."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.2.2.a1",
+              "tur": "secmeli",
+              "soru": "SPİ'nin haftalık yük kuralı hangisidir?",
+              "sec": [
+                "Yük her hafta iki katına çıkar",
+                "Haftalık toplam yük önceki haftadan %10'dan fazla artmaz",
+                "Yük hiç artmaz",
+                "Kural yalnız koşu için geçerlidir"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k8"
+              ]
+            },
+            {
+              "id": "hareket.2.2.2.a2",
+              "tur": "secmeli",
+              "soru": "Bu hafta toplam 80 dakika koşan biri bu kurala göre gelecek hafta en çok kaç dakika koşar?",
+              "sec": [
+                "88 dakika",
+                "80 dakika",
+                "96 dakika",
+                "120 dakika"
+              ],
+              "dogru": "A",
+              "cozum": [
+                "80 × 0,10 = 8; 80 + 8 = 88."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k8",
+                "k3"
+              ]
+            },
+            {
+              "id": "hareket.2.2.2.a3",
+              "tur": "secmeli",
+              "soru": "«Haftada en çok %10» kuralı için SPİ anlatımı ne der?",
+              "sec": [
+                "Kesin bilimsel bir sınırdır",
+                "Yalnız profesyoneller içindir",
+                "Yanlıştır, uygulanmaz",
+                "Kesin bir sınır değil, makul bir temkin kuralıdır; asıl fikir küçük adımlarla artırmaktır"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3"
+              ]
+            }
+          ],
+          "not": "Akut/kronik oranın eşikleri (0,8 ve 1,5) ve sakatlanma riski cümlesi SPİ'nin kendi veri dosyasındaki kuraldır (k8), dayanağı dosyada adıyla verilmiyor; doğrulanmadı. 30 set örneği modelin örneğidir."
+        },
+        {
+          "id": "hareket.2.2.3",
+          "ad": "Yük indirme haftası",
+          "onKosul": [
+            "hareket.2.2.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k8",
+            "k11",
+            "k15",
+            "k17"
+          ],
+          "ozet": "Sürekli artan yük yorgunluk biriktirir; programa düzenli aralıkla hafif bir hafta konur. SPİ'de beş haftada bir yük %40 azaltılır; gemini kaynakları da 4-6 haftada bir set sayısını %40-50 azaltmayı ve tükenişten uzak durmayı önerir.",
+          "metin": [
+            "Sürekli artan yük bir süre sonra yorgunluk biriktirir. Bu yüzden programlara düzenli aralıklarla hafif bir hafta konur; buna yük indirme haftası (İngilizce deload) denir.",
+            "SPİ'nin kuralı: beş haftada bir yük %40 azaltılır, yani planlanan yükün %60'ı uygulanır. Sayaç ilk antrenmandan başlar; hiç seans kaydı yoksa döngü henüz başlamamıştır. SPİ'nin gerekçesi: kazanç antrenmanda değil, antrenmandan sonraki toparlanmada oluşur.",
+            "İki gemini kaynağı aynı fikri benzer sayılarla verir: her 4-6 haftalık yoğun dönemin ardından bir hafta; set sayısı %40-50 azaltılır (ör. 4 set yapılan hareket 2 sete iner) ve setler tükenişten 3-4 tekrar uzakta bitirilir.",
+            "Kaynaklar ağırlıkta ayrışır: biri ağırlığın tamamen korunmasını, öteki %85-90'ına inilmesini yazar; SPİ ise toplam yükü %40 azaltır. SPİ'nin kendi kuralı, yük indirme haftasının günün emrini yalnız daha temkinli yapabileceğidir (modelin bağlantı notu: başlangıçta hafifletme yönünde kalmak SPİ'yle uyumludur)."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.2.3.a1",
+              "tur": "secmeli",
+              "soru": "SPİ'ye göre yük indirme haftası ne sıklıkla gelir?",
+              "sec": [
+                "Her hafta",
+                "Beş haftada bir",
+                "Yılda bir",
+                "Hiç gelmez"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k8"
+              ]
+            },
+            {
+              "id": "hareket.2.2.3.a2",
+              "tur": "secmeli",
+              "soru": "Normalde bir harekette 4 set yapan biri, gemini kaynaklarının yük indirme haftasında kaç set yapar?",
+              "sec": [
+                "1 set",
+                "4 set",
+                "2 set",
+                "6 set"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k15",
+                "k17"
+              ]
+            },
+            {
+              "id": "hareket.2.2.3.a3",
+              "tur": "secmeli",
+              "soru": "Kaynaklara göre yük indirme haftasında setler nasıl bitirilir?",
+              "sec": [
+                "Tükenişe kadar",
+                "Tükenişten 3-4 tekrar uzakta",
+                "Her set bir öncekinden ağır",
+                "Hiç set yapılmaz"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k15",
+                "k17"
+              ]
+            }
+          ],
+          "not": "Kaynakların «ağırlık asla hafifletilmez» (k15 satır 72) ve «süperkompansasyon patlaması, yeni kişisel rekorlar» (75, k17 88) kesinlikleri alınmadı. Sinir sistemi yorgunluğunun «5-14 gün» toparlanması (53-56) ve sabah kavrama kuvveti, istirahat nabzı, HRV ile «sürantrenman erken tespiti» tablosu (58-64) tanıya benzeyen eşikler taşıdığı için alınmadı."
+        }
+      ]
+    },
+    {
+      "id": "hareket.2.3",
+      "ad": "Kayıt ve uyarlama",
+      "onKosul": [
+        "hareket.2.2"
+      ],
+      "kazanim": [
+        "Antrenmanı set, tekrar, yük ve kalan tekrarla kaydeder ve ilerlemeyi okur.",
+        "Toparlanma bandına göre günün yükünü uyarlar.",
+        "Dört haftalık programını yazar; güvenlik sınırını bilir."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "hareket.2.3.k1",
+            "tur": "secmeli",
+            "soru": "SPİ'de günün yükünü ne belirler?",
+            "sec": [
+              "Toparlanma",
+              "İstek",
+              "Hava durumu",
+              "Haftanın günü"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k7"
+            ]
+          },
+          {
+            "id": "hareket.2.3.k2",
+            "tur": "secmeli",
+            "soru": "Toparlanma skoru 35'in altında olan bir gün için SPİ'nin emri nedir?",
+            "sec": [
+              "Planlanan yükü olduğu gibi uygula",
+              "Yükü %10 artır",
+              "Bugün antrenman yok; yürüyüş, mobilite ve uyku",
+              "Sprint günü yap"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k7"
+            ]
+          },
+          {
+            "id": "hareket.2.3.k3",
+            "tur": "secmeli",
+            "soru": "Antrenman kaydında «diz şınavı 3 × 10 → 3 × 11 → 3 × 12» haftalık ilerlemesi ve «setler 2 kala bitti» notu varsa, bir sonraki adım hangisi olabilir?",
+            "sec": [
+              "Set sayısını birden 8'e çıkarmak",
+              "Belirlenen tekrara temiz formla rahatça ulaşılmışsa bir üst aşamaya, tam şınava geçmek",
+              "Hareketi bırakmak",
+              "Formu bozarak 3 × 20 denemek"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k4",
+              "k5"
+            ]
+          },
+          {
+            "id": "hareket.2.3.k4",
+            "tur": "secmeli",
+            "soru": "Skor «yüksek» çıkmış ama ölçüm ince (yalnız ağrı-enerji girilmiş) ve bu hafta yük indirme haftası. SPİ'nin kurallarına göre hangisi doğrudur?",
+            "sec": [
+              "Skor yüksek olduğu için yük artırılır",
+              "İki kural birbirini siler, yük iki katına çıkar",
+              "Antrenman tamamen yasaklanır",
+              "İnce ölçüm yükü artıramaz, yük indirme haftası emri daha temkinli yapar: hafif hafta uygulanır"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k12",
+              "k8"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "hareket.2.3.1",
+          "ad": "Antrenman kaydı",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k5",
+            "k3",
+            "k8"
+          ],
+          "ozet": "Program ancak kaydedilirse okunur: tarih, hareket ve aşaması, set × tekrar, ekipmanla birlikte yük ve kalan tekrar. Kayıt ilerlemeyi, %10 sınırını ve uyarı işaretlerini gösterir.",
+          "metin": [
+            "Program ancak kaydedilirse okunur. Her antrenmandan sonra şunlar yazılır: tarih, hareket ve bulunduğun aşama, set × tekrar, yük (ekipmanla birlikte; ör. «her el 8 kg, toplam 16 kg») ve setlerin kaç tekrar kala bittiği (1. aşama).",
+            "Kayıt üç soruya cevap verir (modelin bağlantı notu): Geçen haftaya göre ilerledim mi (bir tekrar, bir set ya da bir üst aşama)? Haftalık toplam %10 sınırını aştı mı? Yük indirme haftası geldi mi?",
+            "Kayıt örneği (modelin örneği): «Pazartesi · Tam vücut A · diz şınavı 3 × 12, 2 kala · ters kürek 3 × 8, 2 kala · goblet squat tek dambıl 8 kg, 3 × 10, 3 kala · plank 3 × 20 sn». Ertesi pazartesi diz şınavı 3 × 13 yapılırsa ilerleme vardır: toplam tekrar 36'dan 39'a çıkmıştır.",
+            "Ağrı ya da uyarı işareti de kayda yazılır. Kaslarda yaygın, bir iki günde geçen gerginlik olağandır; bir noktaya sabitlenen, hareketle artan ya da topallatan ağrı ise uyarıdır: o hareket kesilir, geçmeyen ağrıda bir sağlık uzmanına danışılır (1. aşama)."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.3.1.a1",
+              "tur": "secmeli",
+              "soru": "Antrenman kaydında yük nasıl yazılır?",
+              "sec": [
+                "Yalnız «ağır» ya da «hafif» diye",
+                "Hiç yazılmaz",
+                "Ekipmanla birlikte, ör. «her el 8 kg (toplam 16 kg)»",
+                "Yalnız toplam tekrar yazılır"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k5"
+              ]
+            },
+            {
+              "id": "hareket.2.3.1.a2",
+              "tur": "secmeli",
+              "soru": "Geçen hafta diz şınavı 3 × 12, bu hafta 3 × 13 yapan birinin bu hareketteki toplam tekrarı kaç arttı?",
+              "sec": [
+                "1",
+                "3",
+                "13",
+                "39"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "3 × 12 = 36, 3 × 13 = 39; fark 3."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k5"
+              ]
+            },
+            {
+              "id": "hareket.2.3.1.a3",
+              "tur": "acik",
+              "soru": "Bir hafta boyunca her antrenmanını bu dersteki biçimle kaydet: tarih, seans (A ya da B), her hareket için aşama, set × tekrar, yük ve kalan tekrar; hafta sonunda geçen haftayla karşılaştır.",
+              "dogru": "Örnek kayıt satırı: «Çarşamba · Tam vücut B · şınav (diz) 3 × 10, 2 kala · kalça köprüsü 3 × 12, 3 kala · çiftçi taşıması 2 × 30 m, her el 8 kg · plank 3 × 20 sn · not: sağ omuzda hafif gerginlik, ağrı yok.» Hafta sonu: «Diz şınavında toplam tekrar 30'dan 33'e çıktı (+%10), sınırda kaldım; köprüde aynı.»",
+              "olcut": [
+                "Her antrenmanda tarih, seans ve her hareket için aşama, set × tekrar, yük ve kalan tekrar yazıldı",
+                "Yük ekipmanla birlikte yazıldı",
+                "Hafta sonunda geçen haftayla karşılaştırma ve %10 sınırı kontrolü yapıldı",
+                "Ağrı ya da uyarı işareti varsa kayda girdi"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k5",
+                "k8"
+              ]
+            }
+          ],
+          "not": "Kayıt biçimi ve örnek satırlar modelin örneğidir; ağrı ayrımı 1. aşamadaki SPİ anlatımından (k3, satır 73-74)."
+        },
+        {
+          "id": "hareket.2.3.2",
+          "ad": "Toparlanmaya göre günün yükü",
+          "onKosul": [
+            "hareket.2.3.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k7",
+            "k12",
+            "k8",
+            "k10",
+            "k16"
+          ],
+          "ozet": "SPİ'de günün yükünü istek değil toparlanma belirler. Dört girdiden gelen skor beş banda düşer ve her bandın bir emri vardır; ince ölçüm yükü artıramaz, ateşte antrenman yapılmaz, kötü günün alt sınırı 15 dakika yürüyüştür.",
+          "metin": [
+            "SPİ'de günün yükünü istek değil toparlanma belirler. Toparlanma skoru dört girdiden gelir: uyku (en ağır girdi), kalp atım hızı değişkenliği (HRV), istirahat nabzı ve kendi bildirdiğin ağrı ve enerji. HRV ve nabız başkasınınkiyle değil kendi ortalamanla karşılaştırılır; eksik girdi sıfır sayılmaz, ağırlığı kalan girdilere dağıtılır.",
+            "Bantlar ve günün emri: 80 ve üstü «yüksek» (ağır gün için uygun; planlanan yük, ilerleme denemesi bugün); 65-79 «iyi» (planlanan yük olduğu gibi); 50-64 «orta» (yükü beşte bir azalt, set sayısını düşür, ağırlığı koru); 35-49 «düşük» (yarısını yap ya da mobiliteye çevir); 35'in altı «toparlanma günü» (bugün antrenman yok; yürüyüş, mobilite ve uyku).",
+            "İki güvenlik kuralı: ölçüm ince olduğunda skor yükü artıramaz; akut/kronik oran ve yük indirme haftası günün emrini yalnız daha temkinli yapabilir, asla daha ağır yapamaz. SPİ'nin bir kuralı daha: ateş 38,5 °C ve üzerindeyse antrenman yapılmaz.",
+            "Kötü günün alt sınırı: 15 dakika yürüyüş ve bir mobilite akışı. SPİ'nin deyişiyle zincir kopmaz, yük de birikmez.",
+            "Gemini kaynağı toparlanmanın tabanına uyku ve beslenmeyi koyar; hafif yürüyüş ya da bisiklet gibi aktif toparlanma ve dinamik mobilite bir üst basamaktır.",
+            "Bu bantlar antrenman yükü içindir, hastalık belirtisi okumaz. Güvenlik sınırı (1. aşama): göğüs ağrısı, nefes darlığı, baş dönmesi ya da çarpıntı egzersizde normal değildir; durulur ve hekime danışılır. Kronik bir hastalık, gebelik, düzenli ilaç ya da geçmeyen bir ağrı varsa programa başlamadan önce hekimle konuşulur."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.3.2.a1",
+              "tur": "secmeli",
+              "soru": "SPİ'de toparlanma skoru «orta» bantta (50-64) ise günün emri nedir?",
+              "sec": [
+                "Ağır gün; ilerleme denemesi bugün",
+                "Yükü beşte bir azalt, set sayısını düşür, ağırlığı koru",
+                "Bugün antrenman yok",
+                "Yükü iki katına çıkar"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k7"
+              ]
+            },
+            {
+              "id": "hareket.2.3.2.a2",
+              "tur": "secmeli",
+              "soru": "Akıllı saati olmayan, yalnız uyku ve ağrı-enerji giren biri için SPİ ne yapar?",
+              "sec": [
+                "Skoru sıfır sayar",
+                "Antrenmanı yasaklar",
+                "Başkasının ortalamasını kullanır",
+                "Eksik girdiyi sıfır saymaz, ağırlığını kalan girdilere dağıtır"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k7"
+              ]
+            },
+            {
+              "id": "hareket.2.3.2.a3",
+              "tur": "secmeli",
+              "soru": "Planlanan seans her hareket için 4 set; skor «düşük» bantta (35-49). SPİ'nin emrine göre ne yapılır?",
+              "sec": [
+                "Yarısı (2 set) yapılır ya da seans mobiliteye çevrilir",
+                "4 set olduğu gibi",
+                "6 set",
+                "8 set"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k7"
+              ]
+            }
+          ],
+          "not": "Gemini toparlanma kaynağının piramit yüzdeleri (%80, %15, %5), protein miktarı (satır 75, kg başına gram) ve masaj, kompresyon, soğuk su iddiaları (80-82) alınmadı. Aynı kaynağın ağrı kesici (NSAİİ) bölümü (63-67) ilaç hakkında bir iddia taşıdığı için alınmadı. SPİ'nin oksijen satürasyonu eşiği (move.js 131-134) ölçüm cihazı ve klinik yorum gerektirdiği için anılmadı. Bant sınırları ve girdi ağırlıkları SPİ'nin veri dosyasındaki kurallardır, dayanakları dosyada verilmiyor; doğrulanmadı."
+        },
+        {
+          "id": "hareket.2.3.3",
+          "ad": "Dört haftalık programını yazmak",
+          "onKosul": [
+            "hareket.2.3.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k4",
+            "k8",
+            "k9",
+            "k1"
+          ],
+          "ozet": "Aşamanın parçaları tek bir planda birleşir: haftada üç tam vücut günü (A-B dönüşümlü), arada yürüyüş ya da koş-yürü, bir dinlenme günü; ilerleme küçük adımlarla ve %10 sınırı içinde; 5. hafta yük indirme.",
+          "metin": [
+            "Bu aşamanın parçaları tek bir plana dönüşür (modelin bağlantı notu): haftada üç tam vücut günü (A ve B dönüşümlü), aralarda yürüyüş ya da koş-yürü günleri, en az bir tam dinlenme günü.",
+            "Başlangıç noktası: her kalıp için 1. aşamada seçtiğin başlangıç aşaması; setler 1-3 tekrar kala biter.",
+            "İlerleme kuralı: hedef tekrara temiz formla rahatça ulaşan harekette bir üst aşamaya geçilir; ulaşamayan harekette bir tekrar ya da bir set eklenir; haftalık toplam %10'dan fazla artmaz. SPİ'nin sayacıyla 5. hafta yük indirme haftasıdır; dört haftalık ilk plan, beş haftalık bir döngünün ilk dört haftasıdır.",
+            "Modelin örnek iskeleti: 1. hafta A-B-A, her hareket 3 set; 2. hafta B-A-B, uygun hareketlerde birer tekrar ekle; 3. hafta A-B-A, hedef tekrara ulaşan harekette bir üst aşama; 4. hafta B-A-B, kayıtları oku; 5. hafta (planın dışında) yük indirme.",
+            "Güvenlik sınırı (1. aşama): göğüs ağrısı, nefes darlığı, baş dönmesi ya da çarpıntı egzersizde normal değildir; durulur ve hekime danışılır. Kronik bir hastalık, gebelik, düzenli ilaç ya da geçmeyen bir ağrı varsa programa başlamadan önce hekimle konuşulur."
+          ],
+          "alistirmalar": [
+            {
+              "id": "hareket.2.3.3.a1",
+              "tur": "secmeli",
+              "soru": "Örnek planın 3. haftasında diz şınavında belirlediği tekrar sayısına temiz formla rahatça ulaşan biri ne yapar?",
+              "sec": [
+                "Bir üst aşamaya, tam şınava geçer",
+                "Aynı aşamada kalıp set sayısını ikiye katlar",
+                "Hareketi programdan çıkarır",
+                "Formu bozarak tekrar artırır"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4"
+              ]
+            },
+            {
+              "id": "hareket.2.3.3.a2",
+              "tur": "secmeli",
+              "soru": "Pazartesi programa başlayan biri SPİ'nin sayacına göre yük indirme haftasına kaçıncı haftada girer?",
+              "sec": [
+                "2. hafta",
+                "4. hafta",
+                "5. hafta",
+                "10. hafta"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k8",
+                "k11"
+              ]
+            },
+            {
+              "id": "hareket.2.3.3.a3",
+              "tur": "acik",
+              "soru": "Kanıt işi: Dört haftalık kendi programını yaz ve uygula. Haftada üç tam vücut günü (her kalıptan bir hareket, başlangıç aşaması, set × tekrar ve hedef kalan tekrar), aralarda dinlenme ya da yürüyüş günü; her antrenmanın kaydı; dört haftanın sonunda hangi harekette ilerlediğini ve neyi değiştirdiğini anlatan kısa bir not.",
+              "dogru": "Örnek iskelet: «Pzt A · Sal 30 dk yürüyüş · Çar B · Per 30 dk yürüyüş · Cum A · Cmt 60 dk yürüyüş · Paz dinlenme. A: diz şınavı 3 × 8-12, ters kürek 3 × 6-10, goblet squat 3 × 10, plank 3 × 20 sn; B: diz şınavı, kalça köprüsü 3 × 12, çiftçi taşıması 3 × 30 m, yan plank. Hedef: setler 1-3 tekrar kala biter.» Dört hafta sonu notu: «Diz şınavında 3 × 12'ye ulaştım, 4. hafta tam şınava geçtim (3 × 4). Ters kürekte ilerleme yok; tutuşu değiştireceğim. 5. hafta yük indirme haftası. 2. haftada iki gün dizimde ağrı oldu, squatı bıraktım, geçti.»",
+              "olcut": [
+                "Her gün ve her hareket yazıldı; her kalıp haftada en az bir kez var",
+                "Her hareketin başlangıç aşaması, set × tekrar ve hedef kalan tekrarı var",
+                "Dinlenme ya da yürüyüş günleri plana konmuş",
+                "Haftalık artış %10 sınırı içinde ve 5. hafta yük indirme olarak işaretli",
+                "Dört haftanın kaydı tutuldu, sonunda ilerleme ve değişiklik notu yazıldı",
+                "Ağrı ya da uyarı işareti olduysa kaydedildi ve hareket durduruldu"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4",
+                "k8",
+                "k9"
+              ]
+            }
+          ],
+          "not": "Örnek iskelet ve kanıt işinin örnek cevabı modelin örneğidir; kurallar SPİ anlatımından (k4) ve SPİ yük kurallarından (k8)."
+        }
+      ]
+    }
+  ]
+}

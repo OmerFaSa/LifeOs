@@ -1,0 +1,1285 @@
+{
+  "sema": 1,
+  "alan": "beslenme",
+  "id": "beslenme.2",
+  "sira": 2,
+  "ad": "Uygulama: ölçü, öğün ve dışarıda yemek",
+  "hedef": "Çiğ ve pişmiş ağırlığı ve ev ölçülerini doğru okuyup tabak modeline göre öğün kurmak, önceden güvenle hazırlamak ve dışarıda bilinçli sipariş vermek.",
+  "onKosul": [
+    "beslenme.1"
+  ],
+  "kanitIsi": "Üç günlük öğün günlüğü tut: her öğünü ev ölçüsüyle (kaşık, bardak, avuç, adet) ve tahıl ya da et için çiğ mi pişmiş mi olduğunu belirterek yaz; her öğünü tabak modeline göre değerlendir; günlerden birinde dışarıda yenen bir öğün için sipariş planını (neyi ayrı isteyeceğin, neyi takas edeceğin) yaz. Kalori hedefi konmaz. Sahip değerlendirir; puanlanmaz.",
+  "kaynaklar": [
+    {
+      "id": "k1",
+      "ad": "SPİ Öğren: Sağlıklı beslenmenin temelleri, tabak modeli",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "beslenme-temel · Tabak modeli",
+      "satir": "135-137",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k2",
+      "ad": "SPİ Öğren: Kalori ve enerji dengesi, enerji açığı ve hesabın yaklaşıklığı",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "kalori · Enerji açığı ve fazlası, Hesap neden yaklaşıktır?",
+      "satir": "157-160",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k3",
+      "ad": "SPİ Öğren: Kilo vermenin temelleri, makul hız, tartıyı okumak, sürdürülebilirlik",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rehber.js",
+      "bolum": "kilo-verme",
+      "satir": "169-177",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k4",
+      "ad": "SPİ plan motoru: enerji hedefi bazal metabolizmanın altına inmez",
+      "tur": "depo",
+      "yol": "SPI/src/js/core/plan.js",
+      "bolum": "enerji hedefi",
+      "satir": "202-213",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k5",
+      "ad": "SPİ beslenme motoru: hedef bazal metabolizmada tabanlanır",
+      "tur": "depo",
+      "yol": "SPI/src/js/core/nutri.js",
+      "bolum": "targets",
+      "satir": "310-311",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k6",
+      "ad": "SPİ klinik sınırı: hekim değildir, teşhis koymaz, doz önermez, ölçülmemiş sayı üretmez, takviye tutumu",
+      "tur": "depo",
+      "yol": "SPI/src/js/data/rules.js",
+      "bolum": "SP.CLINICAL",
+      "satir": "36-60",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k7",
+      "ad": "Çiğ ve pişmiş ağırlık karışıklığı: pirinç ve tavuk göğsü örnekleri",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/cig_pismis_agirlik_donusum_katsayilari_ve_mutfak_olcu_birimleri_atlasi.md",
+      "bolum": "1. Çiğ vs Pişmiş Ağırlık Biyokimyası ve Ölçüm Hataları",
+      "satir": "9-13",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k8",
+      "ad": "Tahıl ve bakliyat su çekme (şişme) katsayıları tablosu",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/cig_pismis_agirlik_donusum_katsayilari_ve_mutfak_olcu_birimleri_atlasi.md",
+      "bolum": "2. Tahıl ve Bakliyat Su Çekme (Şişme) Katsayıları Tablosu",
+      "satir": "15-32",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k9",
+      "ad": "Et, tavuk, balık ve sebzelerde su kaybı (çekme) tablosu",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/cig_pismis_agirlik_donusum_katsayilari_ve_mutfak_olcu_birimleri_atlasi.md",
+      "bolum": "3. Et, Tavuk, Balık ve Sebzelerde Su Kaybı (Çekme) ve Yoğunlaşma Tablosu",
+      "satir": "34-51",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k10",
+      "ad": "80 temel mutfak malzemesi için ev ölçüsü ve net gramaj tablosu",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/cig_pismis_agirlik_donusum_katsayilari_ve_mutfak_olcu_birimleri_atlasi.md",
+      "bolum": "4. 80 Temel Mutfak Malzemesi İçin Standart Ev Ölçüsü ve Net Gramaj",
+      "satir": "53-129",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k11",
+      "ad": "Kahvaltı kombinasyonları: dengeli Türk kahvaltı tabağı ve iki menemen",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/kahvalti_kombinasyonlari_ev_yapimi_soslar_ve_pratik_hazirlik_meal_prep_atlasi.md",
+      "bolum": "1. 45 Standart Kahvaltı Kombinasyonu ve Makro/Tokluk Analizi",
+      "satir": "20-26",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k12",
+      "ad": "Salata ve yemek sosları karşılaştırmalı tablo (ilk dört satır)",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/kahvalti_kombinasyonlari_ev_yapimi_soslar_ve_pratik_hazirlik_meal_prep_atlasi.md",
+      "bolum": "2. 25 Salata ve Yemek Sosu Karşılaştırmalı Makro Matrisi",
+      "satir": "72-79",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k13",
+      "ad": "Önceden hazırlık: tehlike bölgesi, soğutma kuralı ve buzdolabı süreleri",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/kahvalti_kombinasyonlari_ev_yapimi_soslar_ve_pratik_hazirlik_meal_prep_atlasi.md",
+      "bolum": "3.1 Bacillus cereus, 3.2 Buzdolabı ve Derin Dondurucu Raf Ömrü",
+      "satir": "104-122",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k14",
+      "ad": "Dışarıda beslenme ilkeleri: sulu yemek, lokanta pilavı, lahmacun, salata",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/yemekhane_restoran_kantin_ve_disarida_beslenme_hayatta_kalma_100_menu_kalori_makro_atlasi.md",
+      "bolum": "1. Giriş ve Biyokimyasal Prensipler",
+      "satir": "13-22",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k15",
+      "ad": "Yemekhane ve esnaf lokantası: sipariş önerileri (çorba, köfte, sote, kuru fasulye, makarna, tatlı, meyve)",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/yemekhane_restoran_kantin_ve_disarida_beslenme_hayatta_kalma_100_menu_kalori_makro_atlasi.md",
+      "bolum": "Detaylı Yağ Tuzağı Analizleri ve Akıllı Sipariş Tüyoları",
+      "satir": "145-199",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k16",
+      "ad": "Kantin: karışık tost",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/yemekhane_restoran_kantin_ve_disarida_beslenme_hayatta_kalma_100_menu_kalori_makro_atlasi.md",
+      "bolum": "28. Karışık Tost",
+      "satir": "201-205",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k17",
+      "ad": "Kafe: şuruplu latte ve kutu meyve suyu",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/yemekhane_restoran_kantin_ve_disarida_beslenme_hayatta_kalma_100_menu_kalori_makro_atlasi.md",
+      "bolum": "46. Caramel Macchiato, 49. Hazır Kutu Meyve Suyu",
+      "satir": "237-247",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k18",
+      "ad": "Kebapçı ve AVM: köz sebze tabağı, çiğ köfte dürüm, Sezar salata",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/yemekhane_restoran_kantin_ve_disarida_beslenme_hayatta_kalma_100_menu_kalori_makro_atlasi.md",
+      "bolum": "70., 73., 76. maddeler",
+      "satir": "285-301",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k19",
+      "ad": "Dışarıda beslenmede «hasar kontrolü» ilkeleri ve simit satırı",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/turk_sokak_lezzetleri_pastane_hamurisleri_ve_disarida_yeme_makro_rehberi.md",
+      "bolum": "1. Dışarıda Beslenmede 'Hasar Kontrolü' İlkeleri; 2. tablo ilk satır",
+      "satir": "9-19",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k20",
+      "ad": "DSÖ Sağlıklı Beslenme bilgi notu: sebze-meyve, lif ve serbest şeker",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "healthy-diet (indirilmiş, temiz katman)",
+      "satir": "36-38",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k21",
+      "ad": "DSÖ Sağlıklı Beslenme bilgi notu: pişirmede doymuş yağı azaltmak",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "healthy-diet (indirilmiş, temiz katman)",
+      "satir": "43",
+      "dogrulama": "dogrulanmamis"
+    }
+  ],
+  "kapi": {
+    "esik": 0.8,
+    "sorular": [
+      {
+        "id": "beslenme.2.k1",
+        "tur": "secmeli",
+        "soru": "Kaynağa göre 100 g pişmiş tavuk göğsü yaklaşık kaç gram çiğ etten gelir?",
+        "sec": [
+          "75 g",
+          "100 g",
+          "133 g",
+          "175 g"
+        ],
+        "dogru": "C",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k7"
+        ]
+      },
+      {
+        "id": "beslenme.2.k2",
+        "tur": "secmeli",
+        "soru": "«1 tepeleme yemek kaşığı» ile «1 silme yemek kaşığı» ayrımı neden kayda yazılır?",
+        "sec": [
+          "Aynı kaşıkta miktar belirgin farklı olabilir",
+          "Kaşıklar farklı renktedir",
+          "Silme kaşık yalnız sıvılar içindir",
+          "Arada fark yoktur"
+        ],
+        "dogru": "A",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k10"
+        ]
+      },
+      {
+        "id": "beslenme.2.k3",
+        "tur": "secmeli",
+        "soru": "Kaynağa göre doğranmış çiğ sebze için hangisi doğrudur?",
+        "sec": [
+          "Buzdolabında yalnız 1 gün saklanır",
+          "Buzdolabında 4-6 gün saklanır, dondurucu önerilmez",
+          "İki hafta oda sıcaklığında kalır",
+          "Hiç saklanamaz"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k13"
+        ]
+      },
+      {
+        "id": "beslenme.2.k4",
+        "tur": "secmeli",
+        "soru": "Kaynak büyük boy şuruplu latte için hangi nitelemeyi kullanır?",
+        "sec": [
+          "Su yerine geçen içecek",
+          "Protein kaynağı",
+          "Lif kaynağı",
+          "Sıvı tatlı"
+        ],
+        "dogru": "D",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k17"
+        ]
+      },
+      {
+        "id": "beslenme.2.k5",
+        "tur": "secmeli",
+        "soru": "200 g pişmiş pilavı çiğ pirinç değeriyle (100 g'da 360 kcal) kaydeden biri, pişmiş değerine (100 g'da 138 kcal) göre kaç kcal fazla yazar?",
+        "sec": [
+          "138 kcal",
+          "276 kcal",
+          "444 kcal",
+          "720 kcal"
+        ],
+        "dogru": "C",
+        "cozum": [
+          "720 − 276 = 444 kcal."
+        ],
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k7"
+        ]
+      },
+      {
+        "id": "beslenme.2.k6",
+        "tur": "secmeli",
+        "soru": "Gebelikte ya da yeme bozukluğu geçmişinde kilo ya da öğün düzenini değiştirmek isteyen biri için doğru ilk adım hangisidir?",
+        "sec": [
+          "Enerji hedefini kendisi düşürmek",
+          "Önce hekim veya diyetisyenle konuşmak",
+          "Öğün atlamak",
+          "Takviye başlamak"
+        ],
+        "dogru": "B",
+        "durum": "taslak",
+        "yazan": "model",
+        "kaynak": [
+          "k3"
+        ]
+      }
+    ]
+  },
+  "uniteler": [
+    {
+      "id": "beslenme.2.1",
+      "ad": "Ölçmek: çiğ, pişmiş ve ev ölçüsü",
+      "onKosul": [],
+      "kazanim": [
+        "Çiğ ve pişmiş ağırlığı ayırır ve kaydı tartıldığı hâliyle yapar.",
+        "Kaşık, bardak ve avuç ölçülerini yaklaşık grama çevirir.",
+        "Görünmeyen yağ, sos ve şekeri fark edip ölçer."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "beslenme.2.1.k1",
+            "tur": "secmeli",
+            "soru": "Kuru baklagil ve tahıl pişerken ağırlığına ne olur?",
+            "sec": [
+              "Su çekip artar",
+              "Su kaybedip azalır",
+              "Değişmez",
+              "Tam yarıya iner"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k8"
+            ]
+          },
+          {
+            "id": "beslenme.2.1.k2",
+            "tur": "secmeli",
+            "soru": "Bir öğünü kaydederken hangisi doğru alışkanlıktır?",
+            "sec": [
+              "Pişmiş tartılanı çiğ değeriyle yazmak",
+              "Ölçü yazmadan yalnız «bir tabak» demek",
+              "Yağı ve sosu kaydetmemek",
+              "Tartıldığı hâlini (çiğ ya da pişmiş) yazıp o değeri kullanmak"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k7"
+            ]
+          },
+          {
+            "id": "beslenme.2.1.k3",
+            "tur": "secmeli",
+            "soru": "Kaynağa göre 100 g kuru kırmızı mercimek haşlanınca yaklaşık 260 g olur. Pişmiş 130 g mercimek yaklaşık kaç gram kuru mercimekten gelir?",
+            "sec": [
+              "26 g",
+              "50 g",
+              "130 g",
+              "338 g"
+            ],
+            "dogru": "B",
+            "cozum": [
+              "130 ÷ 2,6 = 50 g."
+            ],
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k8"
+            ]
+          },
+          {
+            "id": "beslenme.2.1.k4",
+            "tur": "secmeli",
+            "soru": "Kaynağa göre 1 silme yemek kaşığı zeytinyağı 10 g ve 88 kcal'dir. Salataya gözle dökülen 30 g yağ, ölçülü bir kaşığa göre yaklaşık kaç kcal fazladır?",
+            "sec": [
+              "88 kcal",
+              "264 kcal",
+              "352 kcal",
+              "176 kcal"
+            ],
+            "dogru": "D",
+            "cozum": [
+              "30 g = 3 kaşık ≈ 264 kcal; 264 − 88 = 176 kcal."
+            ],
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k10"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "beslenme.2.1.1",
+          "ad": "Çiğ mi, pişmiş mi?",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k7",
+            "k8",
+            "k9"
+          ],
+          "ozet": "Tahıl ve kuru baklagil pişerken su çekip ağırlaşır, et ve çoğu sebze su kaybedip hafifler. Aynı besinin çiğ ve pişmiş 100 gramı farklı enerji taşır; kayıt, tartıldığı hâliyle yapılır.",
+          "metin": [
+            "Bir besinin 100 gramındaki enerji pişirmeyle değişir. Tahıl ve kuru baklagil pişerken su çeker ve ağırlaşır; et, tavuk, balık ve çoğu sebze pişerken su kaybeder ve hafifler. İçindeki enerji büyük ölçüde aynı kalır; değişen, ağırlıktır ve bu yüzden 100 gramdaki enerji de değişir.",
+            "Kaynağın örneği: 100 g çiğ beyaz pirinç pişince yaklaşık 260 g pilav olur (verim katsayısı 2,6). Kaynağa göre çiğ pirincin 100 gramı 360 kcal, pişmiş pilavın 100 gramı 138 kcal'dir. Tabaktaki 200 g pilavı «200 g pirinç» diye kaydetmek, yaklaşık 276 kcal yerine 720 kcal yazmak demektir.",
+            "Ette tersi olur: kaynağa göre 100 g çiğ tavuk göğsü tavada yaklaşık 75 grama iner (verim %75). Bu yüzden 100 g pişmiş tavuk göğsü yaklaşık 133 g çiğ etten gelir; kaynağa göre çiğ 100 gramda 23 g olan protein, pişmiş 100 gramda yaklaşık 30,7 g'dır. Yapraklı sebzeler en çok çeker: kaynağa göre 100 g çiğ ıspanak pişince yaklaşık 22 g kalır.",
+            "Pratik kural (modelin bağlantı notu): tarttığın hâliyle kaydet ve hangisi olduğunu yaz. Çiğ tarttıysan çiğ değerini, pişmiş tarttıysan pişmiş değerini kullan; ikisini karıştırma."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.1.1.a1",
+              "tur": "secmeli",
+              "soru": "Tabağında 200 g pişmiş pilav var. Bunu çiğ pirinç değeriyle kaydetmek ne yapar?",
+              "sec": [
+                "Öğünün enerjisini olduğundan az gösterir",
+                "Hiçbir şey değiştirmez",
+                "Öğünün enerjisini olduğundan çok gösterir",
+                "Yalnız proteini değiştirir"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "Kaynağa göre 200 g pişmiş pilav yaklaşık 276 kcal; çiğ değeriyle 720 kcal yazılır."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k7"
+              ]
+            },
+            {
+              "id": "beslenme.2.1.1.a2",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre 100 g çiğ tavuk göğsü tavada pişince yaklaşık kaç gram kalır?",
+              "sec": [
+                "75 g",
+                "100 g",
+                "130 g",
+                "50 g"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k7",
+                "k9"
+              ]
+            },
+            {
+              "id": "beslenme.2.1.1.a3",
+              "tur": "secmeli",
+              "soru": "Hangisi pişerken ağırlaşır?",
+              "sec": [
+                "Tavuk göğsü",
+                "Ispanak",
+                "Kıyma",
+                "Kuru nohut"
+              ],
+              "dogru": "D",
+              "cozum": [
+                "Kuru baklagil su çeker (kaynağa göre nohutta 2,25 kat); et ve ıspanak su kaybeder."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k8",
+                "k9"
+              ]
+            }
+          ],
+          "not": "Kaynağın bu bölümdeki «klinik diyetetikte en ölümcül hata» nitelemesi (satır 11) abartılı bulunduğu için alınmadı; örnek sayılar (138 × 2 = 276, 360 × 2 = 720) kaynağın kendi tablosuyla tutarlı."
+        },
+        {
+          "id": "beslenme.2.1.2",
+          "ad": "Ev ölçüleri: kaşık, bardak, avuç",
+          "onKosul": [
+            "beslenme.2.1.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k10"
+          ],
+          "ozet": "Her öğünü tartmak gerekmez; ev ölçüsünün yaklaşık gramı bilinirse kayıt yeter. Silme ile tepeleme kaşık, aynı bardağa giren farklı malzemeler belirgin farklı gram verir.",
+          "metin": [
+            "Her öğünü tartmak gerekmez; kaynak 80 temel malzeme için ev ölçüsünün yaklaşık gramını verir. Önemli olan ölçünün adını doğru yazmaktır: silme kaşık ile tepeleme kaşık farklıdır, «1 bardak» da neyin bardağı olduğuna göre değişir.",
+            "Kaynaktan örnekler: 1 silme yemek kaşığı zeytinyağı 10 g (88 kcal), 1 tatlı kaşığı 5 g; 1 kibrit kutusu büyüklüğünde beyaz peynir 30 g; 1 büyük boy yumurta yaklaşık 55 g; 1 su bardağı (200 ml) süt yaklaşık 205 g; 1 avuç badem ya da fındık yaklaşık 25 g.",
+            "Silme ile tepeleme: kaynağa göre fıstık ezmesinin silme yemek kaşığı 15 g (yaklaşık 90 kcal), tepeleme kaşığı 25-30 g (yaklaşık 150-180 kcal); tereyağında silme kaşık 12-14 g iken tepeleme kaşık 20 g'ı aşar. Kaşık aynı, miktar neredeyse iki katı.",
+            "Bardak bir hacimdir: kaynağa göre aynı 200 ml su bardağına 180 g çiğ pirinç, 120 g elenmiş un ya da yalnız 75 g yulaf ezmesi sığar, çünkü yulaf hafif ve hacimlidir.",
+            "Kaynağın gramları ortalamadır; kendi kaşığın ve bardağın farklı olabilir. Bir kez mutfak tartısıyla tartıp not etmek bu farkı kapatır (modelin önerisi)."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.1.2.a1",
+              "tur": "secmeli",
+              "soru": "Fıstık ezmesinde «1 tepeleme yemek kaşığı» ile «1 silme yemek kaşığı» için kaynak ne der?",
+              "sec": [
+                "Tepeleme kaşık, silme kaşığın neredeyse iki katıdır",
+                "İkisi aynı miktardır",
+                "Silme kaşık daha fazladır",
+                "Kaşık ölçüsü kullanılmaz"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            },
+            {
+              "id": "beslenme.2.1.2.a2",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre bir su bardağına hangisinden gram olarak en az sığar?",
+              "sec": [
+                "Çiğ pirinç",
+                "Elenmiş un",
+                "Kuru yulaf ezmesi"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "Kaynağa göre pirinç 180 g, un 120 g, yulaf 75 g."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            },
+            {
+              "id": "beslenme.2.1.2.a3",
+              "tur": "acik",
+              "soru": "Mutfağındaki yemek kaşığıyla ve su bardağıyla bir malzemeyi (ör. yulaf, pirinç ya da yoğurt) silme ve tepeleme olarak tart; sonucu kaynağın gramıyla karşılaştır.",
+              "dogru": "Cevap biçimi: «Yulaf · silme kaşık __ g, tepeleme kaşık __ g; kaynak tepeleme kaşık için 12 g diyor; benim kaşığım __ g daha az/fazla. Bundan sonra kayıtta kendi değerimi kullanacağım.» Boşluklar kendi tartının sonucudur; sayı uydurulmaz.",
+              "olcut": [
+                "Silme ve tepeleme ölçü ayrı ayrı tartıldı",
+                "Kaynağın değeriyle fark yazıldı",
+                "Kayıtta hangi değerin kullanılacağı not edildi"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            }
+          ],
+          "not": "Kaynağın tablo başlığında (satır 53) bozuk LaTeX var («Ev Ölçüsü $<TAB>o$ Net Gramaj»; içerik hattı raporundaki bilinen kusur). Tablodaki sağlık nitelemeleri (tarçın «GLUT-4 sinyalini destekler» 135, elma sirkesi «mide boşalmasını yavaşlatır» 129) ve protein tozu ölçeği (95) alınmadı; derste yalnız ölçü-gram eşleşmeleri kullanıldı."
+        },
+        {
+          "id": "beslenme.2.1.3",
+          "ad": "Görünmeyen eklemeler: yağ, sos ve şeker",
+          "onKosul": [
+            "beslenme.2.1.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k10",
+            "k12",
+            "k20"
+          ],
+          "ozet": "Öğünün enerjisini en çok değiştiren çoğu zaman görünmeyen eklemelerdir: gözle dökülen yağ, sos ve çaya atılan şeker. Ölçülü kaşık ve ev yapımı sos farkı büyüktür.",
+          "metin": [
+            "Bir öğünün enerjisini en çok değiştiren, çoğu zaman görünmeyen eklemelerdir: yağ, sos ve şeker. Az hacimde çok enerji taşırlar; 1. aşamada yağın gram başına 9 kcal olduğunu görmüştün.",
+            "Kaynak, salataya şişeden doğrudan dökülen zeytinyağının farkında olmadan 30-40 g (270-360 kcal) olabildiğini yazar; ölçülü 1 yemek kaşığı 10 g'dır. Kaynağa göre tam yağlı mayonezin tepeleme yemek kaşığı 140 kcal'dir.",
+            "Sosların farkı büyüktür: kaynağın tablosunda 40 g ev yapımı yoğurtlu-kefirli ranch sos 55 kcal, aynı miktar hazır şişe ranch sos 190 kcal'dir. Zeytinyağı-limon-hardallı sos 30 g'da 165 kcal taşır; sağlıklı bir yağdır ama azı yeter.",
+            "Şeker: kaynağa göre 1 silme tatlı kaşığı toz şeker ya da çaya atılan 1 küp şeker yaklaşık 4 g'dır. Dünya Sağlık Örgütü serbest şekeri günlük enerjinin %10'undan az tutmayı önerir ve bunu günde yaklaşık 2000 kcal alan biri için 50 g, yani yaklaşık 12 silme çay kaşığı diye örnekler. Bu bir toplum önerisidir, kişiye özel hedef değildir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.1.3.a1",
+              "tur": "secmeli",
+              "soru": "Salataya şişeden gözle dökülen zeytinyağı için kaynak ne uyarır?",
+              "sec": [
+                "Farkında olmadan 30-40 g olabilir",
+                "Miktar genelde bir tatlı kaşığından azdır",
+                "Zeytinyağının enerjisi yoktur",
+                "Yalnız soğuk sıkım yağ sayılır"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            },
+            {
+              "id": "beslenme.2.1.3.a2",
+              "tur": "secmeli",
+              "soru": "Günde 5 bardak çaya ikişer küp şeker atan biri, kaynağın değeriyle (1 küp ≈ 4 g) günde yaklaşık kaç gram şeker ekler?",
+              "sec": [
+                "10 g",
+                "20 g",
+                "40 g",
+                "80 g"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "5 × 2 × 4 = 40 g."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10"
+              ]
+            },
+            {
+              "id": "beslenme.2.1.3.a3",
+              "tur": "secmeli",
+              "soru": "40 g hazır şişe ranch sos yerine 40 g ev yapımı yoğurtlu sos seçilirse, kaynağın tablosuna göre fark yaklaşık kaç kcal'dir?",
+              "sec": [
+                "35 kcal",
+                "135 kcal",
+                "190 kcal",
+                "245 kcal"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "190 − 55 = 135 kcal."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k12"
+              ]
+            }
+          ],
+          "not": "Kaynaktaki sağlık nitelemeleri alınmadı: hazır sos için «yüksek omega-6 inflamatuar yük» (k12 satır 79), şeker satırındaki «boş kcal» hesapları dışında kalan yorumlar. DSÖ'nün 12 çay kaşığı örneği DSÖ bilgi notundan (k20, satır 38); kaynaktaki «tatlı kaşığı» ile DSÖ'nün «çay kaşığı» aynı ölçü değil, ikisi de yaklaşık 4 g'a denk geliyor (50 ÷ 12 ≈ 4,2; modelin hesabı)."
+        }
+      ]
+    },
+    {
+      "id": "beslenme.2.2",
+      "ad": "Öğün kurmak",
+      "onKosul": [
+        "beslenme.2.1"
+      ],
+      "kazanim": [
+        "Kahvaltıyı ve ana öğünü tabak modeline göre ev ölçüsüyle kurar.",
+        "Pişirme yöntemini öğünün parçası olarak seçer.",
+        "Önceden hazırlanan yemeği gıda güvenliği kurallarıyla saklar."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "beslenme.2.2.k1",
+            "tur": "secmeli",
+            "soru": "Tabak modelinde öğünün yarısını ne oluşturur?",
+            "sec": [
+              "Tahıl",
+              "Protein",
+              "Sebze ve meyve",
+              "Yağ"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1"
+            ]
+          },
+          {
+            "id": "beslenme.2.2.k2",
+            "tur": "secmeli",
+            "soru": "Kaynağa göre 4 °C ile 60 °C arası neden önemlidir?",
+            "sec": [
+              "Bakterilerin hızla çoğaldığı tehlike bölgesidir",
+              "Besinlerin vitamini artar",
+              "Yemeğin enerjisi düşer",
+              "Yağ katılaşır"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k13"
+            ]
+          },
+          {
+            "id": "beslenme.2.2.k3",
+            "tur": "secmeli",
+            "soru": "Ev ölçüleriyle kurulan hangi tabak, tabak modeline en yakındır?",
+            "sec": [
+              "Yarısı pilav, dörtte biri köfte, dörtte biri patates kızartması",
+              "Bütün tabak makarna",
+              "Yarısı köfte, yarısı pilav",
+              "Yarısı salata ve közlenmiş sebze, dörtte biri bulgur pilavı, dörtte biri ızgara tavuk"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k1",
+              "k10"
+            ]
+          },
+          {
+            "id": "beslenme.2.2.k4",
+            "tur": "secmeli",
+            "soru": "Pazartesi akşamı pişirilen tavuk, pilav ve haşlanmış nohut sığ kaplarda hızla soğutulup buzdolabına konuyor. Kaynağın sürelerine göre hangisi doğrudur?",
+            "sec": [
+              "Üçü de on gün dayanır",
+              "Tavuk ve pilav 3-4 gün, nohut 4-5 gün içinde yenmelidir",
+              "Pilav hiç saklanamaz",
+              "Hepsi yalnız ertesi gün yenebilir"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k13"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "beslenme.2.2.1",
+          "ad": "Kahvaltıyı kurmak",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k11",
+            "k1",
+            "k19"
+          ],
+          "ozet": "Tabak modeli kahvaltıya da uygulanır: protein, tahıl ve sebze aynı tabakta. Aynı yumurtanın enerjisini eklenen yağ ve peynir belirler.",
+          "metin": [
+            "1. aşamadaki tabak modeli (yarısı sebze ve meyve, dörtte biri tam tahıl, dörtte biri protein) kahvaltıya da uygulanabilir. Kaynak 45 kahvaltıyı porsiyon, makro besin ve tahmini tokluk süresiyle karşılaştırır.",
+            "Kaynağın «klasik dengeli Türk kahvaltı tabağı»: 2 haşlanmış yumurta, 50 g beyaz peynir, 5 zeytin, 1 dilim tam buğday ekmeği ve bol domates, salatalık ve yeşillik; kaynağa göre yaklaşık 465 kcal ve 24,5 g protein. Bu tabakta protein (yumurta, peynir), tahıl (ekmek) ve sebze aynı yerde buluşur.",
+            "Aynı yumurta farklı hazırlanınca enerji değişir: kaynağa göre 2 yumurtalı, 1 tatlı kaşığı zeytinyağlı menemen yaklaşık 310 kcal; 15 g tereyağı ve 40 g kaşar eklenmiş köy menemeni yaklaşık 445 kcal. Fark yumurtadan değil, eklenen yağ ve peynirden gelir.",
+            "Tek başına simit gibi tahıl ağırlıklı bir kahvaltı için başka bir kaynak, yanına peynir ya da haşlanmış yumurta ve söğüş yeşillik eklemeyi önerir; bu da tabak modeline yaklaştırır (modelin bağlantı notu).",
+            "Kaynağın tablosundaki «tokluk süresi» sütunu kaynağın kendi tahminidir, doğrulanmadı; bir kahvaltıyı seçerken tek ölçüt yapılmaz."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.2.1.a1",
+              "tur": "secmeli",
+              "soru": "Zeytinyağlı menemen ile tereyağlı-kaşarlı köy menemeni arasındaki enerji farkı kaynağa göre en çok nereden gelir?",
+              "sec": [
+                "Yumurta sayısından",
+                "Eklenen tereyağı ve kaşardan",
+                "Domatesten",
+                "Pişirme süresinden"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k11"
+              ]
+            },
+            {
+              "id": "beslenme.2.2.1.a2",
+              "tur": "secmeli",
+              "soru": "Yalnız simit ve çaydan oluşan bir kahvaltıyı tabak modeline yaklaştırmak için hangisi eklenir?",
+              "sec": [
+                "Bir kutu meyve suyu",
+                "İkinci bir simit",
+                "Reçel ve bal",
+                "Bir haşlanmış yumurta ya da peynir ve söğüş yeşillik"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k19",
+                "k1"
+              ]
+            },
+            {
+              "id": "beslenme.2.2.1.a3",
+              "tur": "secmeli",
+              "soru": "Kaynağın kahvaltı tablosundaki tokluk süreleri için hangisi doğrudur?",
+              "sec": [
+                "Kaynağın tahminidir, doğrulanmamıştır",
+                "Ölçülmüş kesin değerlerdir",
+                "Herkes için aynıdır"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k11"
+              ]
+            }
+          ],
+          "not": "Simit satırındaki «glukoz tepe noktasını %40 düzleştirin» (k19 satır 19) ve tablodaki tokluk süreleri doğrulanmadı; tokluk süresi yalnız «kaynağın tahmini» diye anıldı."
+        },
+        {
+          "id": "beslenme.2.2.2",
+          "ad": "Ana öğünü ölçüyle kurmak",
+          "onKosul": [
+            "beslenme.2.2.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k1",
+            "k10",
+            "k21",
+            "k20"
+          ],
+          "ozet": "Tabak modeli oranı, ev ölçüsü miktarı söyler. İkisi birleşince ölçülebilir bir öğün çıkar; pişirme yöntemi de öğünün parçasıdır.",
+          "metin": [
+            "Tabak modeli oranı söyler, ev ölçüsü miktarı söyler. Bu derste ikisi birleşiyor (modelin bağlantı notu).",
+            "Kaynaktaki ev ölçüleriyle bir tabak (modelin örneği): yarısı sebze (1 orta domates 120 g, 1 orta salatalık 120 g, yeşillik), dörtte biri baklagil ya da tahıl (1 su bardağı haşlanmış nohut kaynağa göre 160 g), dörtte biri protein (avuç içi büyüklüğünde ızgara tavuk filetosu), yanında 1 tatlı kaşığı zeytinyağı (5 g).",
+            "El ve avuç ölçüsü pratiktir ama kişiden kişiye değişir: kaynak «avuç içi ebatında» tavuk filetosunu yetişkin bir erkek avucu için yaklaşık 120-130 g pişmiş et sayar. Bu yüzden el ölçüsü kendi elinle, bir kez tartarak ayarlanır (modelin önerisi).",
+            "Pişirme yöntemi de öğünün parçasıdır: Dünya Sağlık Örgütü doymuş yağı azaltmak için kızartmak yerine buharda pişirmeyi ya da haşlamayı, tereyağı ve iç yağı yerine bitkisel sıvı yağları, yağı azaltılmış süt ürünlerini ve yağsız eti önerir.",
+            "Dünya Sağlık Örgütü 10 yaşından büyük herkes için günde en az 400 g sebze ve meyve önerir. Kaynağın ev ölçüleriyle bu, ör. bir orta elma (150 g), bir orta domates (120 g) ve bir salatalıkla (120 g) neredeyse karşılanır: 150 + 120 + 120 = 390 g (modelin hesabı). Bu bir toplum önerisidir, kişiye özel hedef değildir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.2.2.a1",
+              "tur": "secmeli",
+              "soru": "Tabak modeli ve ev ölçüsü bir öğün için neyi söyler?",
+              "sec": [
+                "İkisi de yalnız kaloriyi",
+                "Model miktarı, ev ölçüsü oranı",
+                "Model oranı, ev ölçüsü miktarı",
+                "İkisi de yalnız proteini"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k10"
+              ]
+            },
+            {
+              "id": "beslenme.2.2.2.a2",
+              "tur": "secmeli",
+              "soru": "DSÖ'nün pişirmede doymuş yağı azaltmak için önerdiği yöntem hangisidir?",
+              "sec": [
+                "Kızartmak",
+                "Tereyağında kavurmak",
+                "İç yağıyla pişirmek",
+                "Buharda pişirmek ya da haşlamak"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k21"
+              ]
+            },
+            {
+              "id": "beslenme.2.2.2.a3",
+              "tur": "secmeli",
+              "soru": "Bir gün 1 orta elma (150 g), 2 orta domates (2 × 120 g) ve 1 orta havuç (80 g) yiyen biri, kaynağın değerleriyle yaklaşık kaç gram sebze-meyve yemiştir?",
+              "sec": [
+                "350 g",
+                "390 g",
+                "470 g",
+                "550 g"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "150 + 240 + 80 = 470 g; DSÖ'nün toplum önerisi olan 400 g'ın üstünde."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k10",
+                "k20"
+              ]
+            }
+          ],
+          "not": "DSÖ bilgi notundaki protein oranları ve gramları (who_rehberler.jsonl satır 44-45) kişiye özgü hedefe dönüşebileceği için alınmadı. Avuç ölçüsünün tek bir el için verilmesi kaynağın kendi sınırı."
+        },
+        {
+          "id": "beslenme.2.2.3",
+          "ad": "Önceden hazırlamak ve güvenle saklamak",
+          "onKosul": [
+            "beslenme.2.2.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k13"
+          ],
+          "ozet": "Önceden pişirip bölmek yoğun günde dengeli yemeyi kolaylaştırır; bunun şartı gıda güvenliğidir: yemek oda sıcaklığında 2 saatten fazla beklemez, sığ kaplarda hızla soğutulur, buzdolabında sınırlı gün kalır.",
+          "metin": [
+            "Birkaç öğünü önceden pişirip bölmek (İngilizce meal prep) yoğun günlerde dengeli yemeyi kolaylaştırır. Kaynak bunun gıda güvenliği tarafını öne çıkarır.",
+            "Kaynağa göre 4 °C ile 60 °C arası bakterilerin hızla çoğaldığı «tehlike bölgesi»dir. Toplu pişirilen yemek oda sıcaklığında 2 saatten fazla bekletilmez; pişirdikten sonra en geç 90-120 dakika içinde sığ kaplara bölünüp buzdolabına (+4 °C altına) kaldırılır.",
+            "Pirinç ve makarna gibi nişastalı yemekler için kaynak ayrıca uyarır: yavaş soğumaya bırakılan pişmiş pirinçte bir bakterinin (Bacillus cereus) ısıya dayanıklı toksini oluşabilir ve yeniden ısıtmak onu yok etmez. Bu yüzden pilav ve makarna sığ kaba yayılıp hızla soğutulur.",
+            "Kaynağın buzdolabı süreleri (+4 °C): pişmiş tavuk ve kırmızı et 3-4 gün, pişmiş balık 1-2 gün, haşlanmış baklagil 4-5 gün, hızla soğutulmuş pilav, bulgur ve makarna 3-4 gün, çorbalar 3-4 gün, doğranmış çiğ sebze 4-6 gün (dondurucu önerilmez). Kaynak, yeniden ısıtılan tavuk etinin iç sıcaklığının en az 74 °C'ye ulaşması gerektiğini yazar."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.2.3.a1",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre toplu pişirilmiş yemek oda sıcaklığında en çok ne kadar bekletilmelidir?",
+              "sec": [
+                "30 dakika",
+                "2 saat",
+                "6 saat",
+                "Bir gece"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13"
+              ]
+            },
+            {
+              "id": "beslenme.2.2.3.a2",
+              "tur": "secmeli",
+              "soru": "Pişmiş pilavı güvenle saklamanın yolu hangisidir?",
+              "sec": [
+                "Tencerede yavaşça soğumaya bırakmak",
+                "Ertesi gün iyice ısıtmanın toksini yok edeceğine güvenmek",
+                "Sığ kaba yayıp hızla soğutmak ve buzdolabına koymak",
+                "Oda sıcaklığında saklamak"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13"
+              ]
+            },
+            {
+              "id": "beslenme.2.2.3.a3",
+              "tur": "secmeli",
+              "soru": "Pazar akşamı pişirilen balık, kaynağın buzdolabı süresine göre en geç ne zamana kadar yenmelidir?",
+              "sec": [
+                "Pazartesi ya da Salı",
+                "Perşembe",
+                "Cuma",
+                "Bir hafta sonra"
+              ],
+              "dogru": "A",
+              "cozum": [
+                "Kaynağa göre pişmiş balık buzdolabında 1-2 gün."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k13"
+              ]
+            }
+          ],
+          "not": "Kaynağın bu bölümündeki şu cümleler alınmadı: toksinin «akut karaciğer toksisitesine» yol açtığı ve «120 °C'de 90 dakika» dayandığı (satır 108) ayrıntısı, balık satırındaki histamin açıklaması (118) ve dirençli nişasta bölümünün kan şekeri ve insülini «%30-40» düşürdüğü, «bağırsak bariyerini onardığı», enerjiyi 2,5 kcal/g'a indirdiği iddiaları (124-131): sağlık iddiasıdır ve doğrulanmadı. Gıda güvenliği süreleri kaynağın tablosundan, doğrulanmamış; resmî bir gıda güvenliği kaynağıyla karşılaştırılmalı."
+        }
+      ]
+    },
+    {
+      "id": "beslenme.2.3",
+      "ad": "Dışarıda yemek ve kaydı okumak",
+      "onKosul": [
+        "beslenme.2.2"
+      ],
+      "kazanim": [
+        "Lokanta, yemekhane, sokak ve kafede bilinçli sipariş verir.",
+        "Öğün kaydını ve tartıyı haftalık eğilimle okur.",
+        "SPİ'nin sınırlarını ve hekime danışılacak durumları bilir."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "beslenme.2.3.k1",
+            "tur": "secmeli",
+            "soru": "Lokantada salata sipariş eden biri için kaynağın kuralı hangisidir?",
+            "sec": [
+              "Sosu ayrı kapta istemek",
+              "Ekstra kruton istemek",
+              "Sosu iki kat istemek",
+              "Salatayı ekmekle doyurmak"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k14"
+            ]
+          },
+          {
+            "id": "beslenme.2.3.k2",
+            "tur": "secmeli",
+            "soru": "SPİ'nin yapmayacağı şeylerden biri hangisidir?",
+            "sec": [
+              "Öğün düzeni önermek",
+              "Tabak modelini anlatmak",
+              "Takviye dozu önermek",
+              "Haftalık ortalamayı göstermek"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k6"
+            ]
+          },
+          {
+            "id": "beslenme.2.3.k3",
+            "tur": "secmeli",
+            "soru": "Pazartesi 82,0, Salı 83,1, Çarşamba 82,4 kg tartan biri Salı'yı nasıl okumalı?",
+            "sec": [
+              "Bir günde 1 kg yağ aldı",
+              "Öğünlerini yarıya indirmeli",
+              "Tartı kesin bozuktur",
+              "Gün içi dalgalanma olabilir; haftalık ortalamaya bakılır"
+            ],
+            "dogru": "D",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k3"
+            ]
+          },
+          {
+            "id": "beslenme.2.3.k4",
+            "tur": "secmeli",
+            "soru": "Lokantada etli kuru fasulye, tam porsiyon tereyağlı pilav ve şerbetli tatlıdan oluşan bir öğünü kaynağın önerileriyle değiştiriyorsun. Hangisi üç öneriyi birden uygular?",
+            "sec": [
+              "Suyuna ekmek banmak, pilavı ikiye çıkarmak, tatlıyı tutmak",
+              "Taneleri yiyip suyu bırakmak, pilavı yarım istemek, tatlı yerine meyve ya da ayran almak",
+              "Yalnız tatlıyı bırakmak",
+              "Fasulyeyi bırakıp yalnız pilav yemek"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k14",
+              "k15"
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "beslenme.2.3.1",
+          "ad": "Lokanta ve yemekhane",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k14",
+            "k15",
+            "k18"
+          ],
+          "ozet": "Dışarıda farkı çoğu zaman görünmeyen yağ ve porsiyon yaratır. Kaynakların önerisi yasaklamak değil, birkaç bilinçli seçimdir: suyu tabakta bırakmak, pilavı yarım istemek, sosu ayrı almak, tatlıyı meyveyle takas etmek.",
+          "metin": [
+            "Dışarıda yemek kaçınılmazdır; kaynaklar yasaklamak yerine birkaç bilinçli seçim önerir. Kaynağa göre dışarıdaki farkı çoğu zaman görünmeyen yağ ve porsiyon büyüklüğü yaratır.",
+            "Sulu yemekler: kaynak, lokantada kuru fasulye gibi sulu yemeklerin dibindeki yağlı salçalı suya ekmek banmanın öğünün enerjisini belirgin artırdığını yazar ve kuralını şöyle koyar: taneleri çatalla ye, suyu tabakta bırak.",
+            "Pilav ve garnitür: kaynağa göre lokanta pilavı evdekinden daha yağlı pişirilir. Kaynağın önerisi, kuru fasulyenin yanındaki pilavı yarım porsiyon isteyip yanına cacık ya da salata almaktır; makarnada sossuz haşlama isteyip üzerine yoğurt eklemektir.",
+            "Salata her zaman hafif değildir: kaynağa göre kruton ve bol soslu ızgara tavuklu Sezar salata 700-850 kcal'ye çıkabilir. Kaynağın kuralı: sosu ayrı bir kapta iste, krutonları çıkarttır.",
+            "Tatlı ve masa: kaynak, tabldotta şerbetli tatlı yerine mevsim meyvesini ya da ayranı önerir; kebapçıda yemek gelmeden masadaki köz sebzeleri yemeyi porsiyon kontrolü için önerir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.3.1.a1",
+              "tur": "secmeli",
+              "soru": "Kaynağın lokantadaki sulu yemekler için kuralı hangisidir?",
+              "sec": [
+                "Suyuna ekmek ban",
+                "Taneleri çatalla ye, suyu tabakta bırak",
+                "Hiç sipariş etme",
+                "Yanına iki porsiyon pilav al"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14",
+                "k15"
+              ]
+            },
+            {
+              "id": "beslenme.2.3.1.a2",
+              "tur": "secmeli",
+              "soru": "Izgara tavuklu Sezar salatada kaynağa göre enerjinin çoğu nereden gelir?",
+              "sec": [
+                "Kruton, mayonezli sos ve peynirden",
+                "Marul",
+                "Limon",
+                "Domates"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14",
+                "k18"
+              ]
+            },
+            {
+              "id": "beslenme.2.3.1.a3",
+              "tur": "secmeli",
+              "soru": "Kebapçıda yemek beklerken porsiyon kontrolü için kaynağın önerisi nedir?",
+              "sec": [
+                "Ekmeği bitirmek",
+                "Şekerli içecek içmek",
+                "Hiçbir şey yememek",
+                "Masadaki köz sebzeleri yemek"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k18"
+              ]
+            }
+          ],
+          "not": "Kaynakta kendi içinde çelişen sayılar var, derse alınmadı: lokanta pilavı 200 g için giriş bölümünde 340-360 kcal (satır 18), tabloda 472 kcal (satır 43); Adana kebap girişte (İskender'le birlikte) 900-1.100 kcal (20), detay bölümünde bir şiş 379 kcal (257); Sezar salata girişte 750-850 (22), detayda 700-800 ve 805 kcal (299-300). Şişirilmiş genellemeler alınmadı: dışarıdaki tuzakların kilo almanın «1 numaralı sebebi» olduğu (15), Sezar salatanın «tek bir hamburgerden daha yağlı» olduğu (22), lahmacunun «en temiz, en dengeli kebapçı menüsü» olduğu (20)."
+        },
+        {
+          "id": "beslenme.2.3.2",
+          "ad": "Sokak, fırın ve kafe",
+          "onKosul": [
+            "beslenme.2.3.1"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k19",
+            "k16",
+            "k17"
+          ],
+          "ozet": "Kaynağın dışarıda yeme ilkesi «hasar kontrolü»dür: yanına protein ve sebze eklemek, görünmeyen eklemeleri ayıklamak. Şuruplu kahve bir içecek değil sıvı tatlıdır.",
+          "metin": [
+            "Kaynağın dışarıda yeme ilkesi «hasar kontrolü»dür: yasaklamak değil, dengelemek. İki yol öne çıkar: yanına protein ve sebze eklemek, görünmeyen eklemeleri ayıklamak.",
+            "Yanına eklemek: kaynak simidin tek başına çabuk acıktırdığını yazar ve yanına peynir ya da haşlanmış yumurta ve söğüş yeşillik eklemeyi önerir.",
+            "Ayıklamak: kaynağa göre tostun dışına sürülen margarin, dürüme bastırılan fazla yağ, kumpirdeki mayonezli soslar ve kahvedeki şurup ve krema, öğünden belirgin enerji çıkarmanın en kolay yeridir. Kantin tostunda sucuk yerine yumurta ya da beyaz peynir seçmek de kaynağın önerisidir.",
+            "İçecekler: kaynağa göre büyük boy şuruplu latte bir içecek değil «sıvı tatlı»dır (kaynağın tablosunda yaklaşık 378 kcal); sade americano ya da şurupsuz sütlü kahve önerilir. Kutu meyve suyu «%100» yazsa da lifi alınmıştır; kaynak meyvenin kendisini yemeyi önerir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.3.2.a1",
+              "tur": "secmeli",
+              "soru": "Kaynağın dışarıda yemek için «hasar kontrolü» ilkesi neyi önerir?",
+              "sec": [
+                "Dışarıda hiç yememek",
+                "Yalnız tatlı yemek",
+                "Yasaklamak yerine dengelemek: yanına protein ve sebze eklemek, görünmeyen eklemeleri ayıklamak",
+                "Öğün atlamak"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k19"
+              ]
+            },
+            {
+              "id": "beslenme.2.3.2.a2",
+              "tur": "secmeli",
+              "soru": "Kafede hangi değişiklik kaynağa göre en çok enerji azaltır?",
+              "sec": [
+                "Büyük boy şuruplu latte yerine şurupsuz sütlü kahve",
+                "Americano'ya buz eklemek",
+                "Küçük bardak yerine büyük bardak almak",
+                "Lattenin üstüne krema eklemek"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ]
+            },
+            {
+              "id": "beslenme.2.3.2.a3",
+              "tur": "secmeli",
+              "soru": "Kantinde sucuklu-kaşarlı tost yerine kaynağın önerdiği seçim hangisidir?",
+              "sec": [
+                "Çift sucuklu tost",
+                "Yumurtalı ya da beyaz peynirli tost",
+                "Tostun dışına margarin sürdürmek",
+                "Yanına kutu meyve suyu"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k16"
+              ]
+            }
+          ],
+          "not": "Sağlık iddiası ya da doğrulanmamış sayı olarak alınmadı: simidin yanına protein eklemenin «insülin zirvesini %30-40 baskıladığı» (k19 satır 12, 19), yemek sonrası yürüyüşün «GLUT-4 taşıyıcılarını aktive edip yağ depolama kapısını kapattığı» (14), kutu meyve suyunun «karaciğere doğrudan yağ depolattığı» (k17 satır 246), sucuğun nitrit/nitrat açıklaması (k16 satır 204). Şuruplu latte için kaynak aynı maddede hem 378 kcal (239) hem 300-350 kcal (240) veriyor; derste tablo değeri «yaklaşık» diye kullanıldı."
+        },
+        {
+          "id": "beslenme.2.3.3",
+          "ad": "Kaydı okumak ve sınırlar",
+          "onKosul": [
+            "beslenme.2.3.2"
+          ],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k2",
+            "k3",
+            "k4",
+            "k5",
+            "k6"
+          ],
+          "ozet": "Öğün kaydı bir pusuladır: tek güne değil haftaya bakılır. SPİ'nin hedefi bazal metabolizmanın altına inmez; SPİ teşhis koymaz, doz önermez, ölçülmemiş sayı uydurmaz. Özel durumlarda önce hekim ya da diyetisyen.",
+          "metin": [
+            "Öğün kaydı bir pusuladır, kesin bir hesap değildir (1. aşama). Kayıt en çok, aynı yanlışın her gün tekrarlandığı yerde yanılır: çiğ-pişmiş karışıklığı, unutulan yağ ve sos, gözle tahmin edilen porsiyon. Bu aşamanın ölçü dersleri bu üçünü kapatır (modelin bağlantı notu).",
+            "Tek güne değil haftaya bak: kaynak, tartının gün içinde 1-2 kg oynayabildiğini (su, tuz, karbonhidrat, sindirim ve adet döngüsü), bu yüzden tek tartıya değil haftalık ortalamaya ve bel çevresi gibi ikinci bir ölçüye bakmanın daha doğru olduğunu yazar. Bir hafta değişmedi diye öğünleri sertleştirmek yerine birkaç haftalık eğilime bakılır.",
+            "SPİ'nin kuralı: hesaplanan enerji hedefi hiçbir gün bazal metabolizmanın altına inmez. Hareket girilmeyen günde hedef bazal metabolizmada kalır.",
+            "SPİ'nin sınırı: SPİ bir hekim değildir; teşhis koymaz, ilaç ya da takviye dozu önermez, hekimin başlattığı bir tedaviyi bırakmayı önermez ve ölçülmemiş bir sayıyı (ör. tartılmamış bir gramajı) uydurmaz. Takviye konusunda yalnız «bu öğe gıdadan şu kaynaklarla kapatılabilir» der; doz kararı hekime aittir.",
+            "Gebelikte, emzirirken, yeme bozukluğu geçmişinde ya da kronik bir hastalıkta kilo ya da öğün düzenini değiştirmeye yönelik bir plan önce hekim veya diyetisyenle konuşulur. Öğün kaydı kaygı ya da suçluluk yaratıyorsa ara verilir ve bir uzmana danışılır (modelin notu)."
+          ],
+          "alistirmalar": [
+            {
+              "id": "beslenme.2.3.3.a1",
+              "tur": "secmeli",
+              "soru": "Bir haftanın sabah tartıları dalgalanıyor. Hangisi daha doğru okumadır?",
+              "sec": [
+                "En düşük günü esas almak",
+                "Yalnız bugünkü tartıya bakmak",
+                "Her saat yeniden tartılmak",
+                "Haftalık ortalamaya ve ikinci bir ölçüye (ör. bel çevresi) bakmak"
+              ],
+              "dogru": "D",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3"
+              ]
+            },
+            {
+              "id": "beslenme.2.3.3.a2",
+              "tur": "secmeli",
+              "soru": "SPİ'de hesaplanan günlük enerji hedefi için hangi kural geçerlidir?",
+              "sec": [
+                "Hedef bazal metabolizmanın altına inmez",
+                "Hedef istenirse sıfıra inebilir",
+                "Hedef her gün aynıdır",
+                "Hedef yalnız kiloya bağlıdır"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4",
+                "k5"
+              ]
+            },
+            {
+              "id": "beslenme.2.3.3.a3",
+              "tur": "acik",
+              "soru": "Kanıt işi: Üç günlük öğün günlüğü tut. Her öğünü ev ölçüsüyle (kaşık, bardak, avuç, adet ya da gram) yaz ve tahıl ya da et için çiğ mi pişmiş mi olduğunu belirt; her öğünü tabak modeline göre değerlendir. Günlerden birinde dışarıda yediğin (ya da yiyeceğin) bir öğün için sipariş planını yaz: neyi ayrı isteyeceksin, neyi takas edeceksin? Kalori hedefi koyma.",
+              "dogru": "Örnek bir satır: «Salı öğle · esnaf lokantası · etli kuru fasulye 1 porsiyon (taneleri yedim, suyu bıraktım), pirinç pilavı yarım porsiyon, cacık 1 kase, ekmek 1 dilim · tabak: protein ve baklagil var, sebze az, yanına salata eklenmeli.» Akşam: «bulgur pilavı 1 su bardağı pişmiş, tavuk göğsü avuç içi (pişmiş), salata 1 kase, zeytinyağı 1 tatlı kaşığı (ölçerek).» Sipariş planı: «Sezar salatada sosu ayrı isteyeceğim, krutonu çıkarttıracağım; tatlı yerine meyve.»",
+              "olcut": [
+                "Üç günün her öğünü ev ölçüsüyle yazıldı",
+                "Tahıl ve ette çiğ ya da pişmiş olduğu belirtildi",
+                "Görünmeyen eklemeler (yağ, sos, şeker) kayda girdi",
+                "Her öğün tabak modeline göre değerlendirildi",
+                "Dışarıda yemek için en az iki somut sipariş seçimi yazıldı",
+                "Kalori hedefi ya da kısıtlama konmadı"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k1",
+                "k10",
+                "k14"
+              ]
+            }
+          ],
+          "not": "Son paragrafın ikinci cümlesi (kaydın kaygı yaratması) kaynakta yok; modelin güvenlik notudur, sahip onaylamalı. İlk cümle SPİ anlatımındaki uyarıdan (k3, satır 170) uyarlandı; aynı anlatımdaki «haftada 0,5-1 kg» ve «800 kcal altı» sayıları kişiye özgü hedefe dönüşebileceği için bu aşamaya alınmadı (hedefe göre beslenme 3. aşamanın işi)."
+        }
+      ]
+    }
+  ]
+}

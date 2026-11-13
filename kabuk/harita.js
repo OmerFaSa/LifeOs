@@ -30,8 +30,8 @@
     { id: 'muzik', ad: 'Müzik', katman: 'alan', alan: 'muzik', dal: 'ogren', yol: '#/alan/muzik', ikon: 'nota', durum: 'pilot', asama: 1, eski: ESP, aciklama: 'Çalgı ve kulak' },
     { id: 'okuma', ad: 'Okuma ve yazı', katman: 'alan', alan: 'okuma', dal: 'ogren', yol: '#/alan/okuma', ikon: 'sayfa', durum: 'pilot', asama: 1, eski: ESP, aciklama: 'Okumak ve yazmak' },
     // alanlar; Sağlık dalı
-    { id: 'beslenme', ad: 'Beslenme', katman: 'alan', alan: 'beslenme', dal: 'saglik', yol: '#/alan/beslenme', ikon: 'tabak', durum: 'pilot', asama: 1, eski: SPI, aciklama: 'Öğünler ve tabak' },
-    { id: 'hareket', ad: 'Hareket', katman: 'alan', alan: 'hareket', dal: 'saglik', yol: '#/alan/hareket', ikon: 'kos', durum: 'pilot', asama: 1, eski: SPI, aciklama: 'Spor ve yürüyüş' },
+    { id: 'beslenme', ad: 'Beslenme', katman: 'alan', alan: 'beslenme', dal: 'saglik', yol: '#/alan/beslenme', ikon: 'tabak', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Öğünler ve tabak' },
+    { id: 'hareket', ad: 'Hareket', katman: 'alan', alan: 'hareket', dal: 'saglik', yol: '#/alan/hareket', ikon: 'kos', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Spor ve yürüyüş' },
     { id: 'uyku', ad: 'Uyku', katman: 'alan', alan: 'uyku', dal: 'saglik', yol: '#/alan/uyku', ikon: 'ay', durum: 'pilot', asama: 1, eski: SPI, aciklama: 'Uyku ve şekerleme' },
     { id: 'tahlil', ad: 'Tahlil', katman: 'alan', alan: 'tahlil', dal: 'saglik', yol: '#/alan/tahlil', ikon: 'damla', durum: 'pilot', asama: 1, eski: SPI, aciklama: 'Tahlil sonuçları' },
     // motorlar (plan §3); Araçlar dalı. Not halkada: her yerden çağrılan defter.
