@@ -82,10 +82,13 @@ def iste(port, yol, yontem="GET", govde=None, basliklar=None):
     r = urllib.request.Request("http://%s:%d%s" % (H, port, yol), data=govde, method=yontem,
                                headers=basliklar or {})
     try:
-        with urllib.request.urlopen(r, timeout=30) as c:
+        # 120 sn: /api/guncelleme git fetch ile aga cikar; CI'da 30 sn ara sira yetmedi (2026-11-13)
+        with urllib.request.urlopen(r, timeout=120) as c:
             return c.status, c.headers, c.read()
     except urllib.error.HTTPError as e:
         return e.code, e.headers, e.read()
+    except OSError as e:  # hangi istegin takildigi CI bildiriminde gorunsun
+        raise RuntimeError("istek yanitsiz kaldi: %s %s (port %d): %s" % (yontem, yol, port, e)) from e
 
 
 class _Yonlenmesiz(urllib.request.HTTPRedirectHandler):
