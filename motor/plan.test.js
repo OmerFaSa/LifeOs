@@ -261,6 +261,24 @@ it('göç AYS gün: bloklar plana, durum ve atlama nedeni korunur, Dinlenme dü�
   assert.deepStrictEqual(P.devret(p).map(x => [x.ad, x.dk]), [['Biyoloji', 65], ['Mol', 20]]);
 });
 
+/* Gerçek koşu (tools/gercek_kosu.py, 2026-11-13): canlı AYS gün kaydının bütün alanları. Değerler uydurma;
+   her alan ya bağdaştırıcıda okunur ya EKSIK'te adıyla söylenir: sessizce düşen alan kalmaz. */
+it('göç AYS gün, gerçek biçim: kötü gün atlamaları taşınır, okunmayan her alan EKSIK listesinde adıyla', () => {
+  const gun = { id:'g1', date:PZT, dow:1, ritual:null, badDay:true, badDayTargets:{ paragraph:20, problem:20 }, badDaySoruYok:false,
+    checklist:{}, distractions:0, note:'', sleepHours:null, freeQ:0, freeCorrect:0, paragraphTarget:10, problemTarget:10,
+    paragraphActual:null, problemActual:null, blocks:[
+      { id:'b0', slot:'Ana ders', subject:'Ders', subjectId:null, topic:'Konu', topicId:null, targetMin:75, targetQ:15,
+        status:'skipped', skipReason:'kötü gün', actualMin:null, actualQ:null, correctQ:null, startedAt:null },
+      { id:'b1', slot:'Dinlenme', subject:'Dinlenme', subjectId:null, topic:'Dinlenme', topicId:null, targetMin:0, targetQ:0,
+        status:'pending', skipReason:null, actualMin:null, actualQ:null, correctQ:null, startedAt:null }] };
+  const p = P.GOC.aysGun(gun);
+  assert.deepStrictEqual(p.bloklar.map(b => [b.durum, b.neden, b.dk]), [['atlandi', 'kötü gün', 75]]);
+  const okunan = String(P.GOC.aysGun), bildirilen = P.EKSIK.aysGun.join(' ');
+  const sessiz = Object.keys(gun).concat(Object.keys(gun.blocks[0]))
+    .filter(a => !new RegExp('[^\\w$]' + a + '[^\\w$]').test(okunan + ' ' + bildirilen));
+  assert.deepStrictEqual(sessiz, []);
+});
+
 it('göç AYS şablonu: 7 gün, Pazartesi başta, ritüeller korunur; her bağdaştırıcının taşınamayanlar listesi var', () => {
   const s = P.GOC.aysSablon(AYS.WEEKDAYS);
   assert.deepStrictEqual(s.map(g => g.ritual), ['contract', null, null, null, null, 'exam', 'review']);

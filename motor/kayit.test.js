@@ -392,6 +392,16 @@ it('göç AYS gün, ruh hâli, mola; ESP oturum etiketleri korunur', () => {
   assert.deepStrictEqual([es.deger.dk.k, es.deger.sayi.k, es.deger.kalite.k, es.ek.alan, es.ek.konu], ['measured', 'computed', 'estimated', 'esp', 'kitap']);
 });
 
+/* Gerçek koşu (tools/gercek_kosu.py, 2026-11-13): canlı SPİ profilinin bütün alanları, değerler uydurma.
+   Her alan ya bağdaştırıcıda okunur ya EKSIK listesinde adıyla söylenir: sessizce düşen alan kalmaz. */
+it('göç SPİ profili, gerçek biçim: okunmayan her alan EKSIK listesinde adıyla', () => {
+  const p = { id:'p1', name:'Ad', role:'sahip', createdAt:'2026-01-01T00:00:00.000Z', design:'d', theme:'t', pinned:[], conditions:[],
+    activity:'orta', goal:'maintain', sex:'male', birthYear:1990, heightCm:180, weightKg:80 };
+  assert.deepStrictEqual([K.GOC.spiProfil(p).hedef, K.GOC.spiProfil(p).kilo], ['koru', 80]);
+  const bilinen = String(K.GOC.spiProfil) + ' ' + K.EKSIK.spiProfil.join(' ');
+  assert.deepStrictEqual(Object.keys(p).filter(a => !new RegExp('[^\\w$]' + a + '[^\\w$]').test(bilinen)), []);
+});
+
 it('her bağdaştırıcının taşınamayanlar listesi var', () => {
   Object.keys(K.GOC).forEach(a => assert.ok(Array.isArray(K.EKSIK[a]) && K.EKSIK[a].length, a));
 });

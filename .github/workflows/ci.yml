@@ -205,6 +205,10 @@ jobs:
       - name: Göç paketi cihazdan PC'ye
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Göç paketi cihazdan PC'ye" python3 tools/gocpaket_test.py
 
+      # Motorlarin gercek veri kosusu araci (sentetik veriyle): yalniz sayi yazar, canli dosya acmaz, gecici siler.
+      - name: Gerçek veri koşusu aracı
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Gerçek veri koşusu aracı" python3 tools/gercek_kosu_test.py
+
       # SADELESME FAZ 1 P5 TEK KAPI (2026-11-13). Tek surec, tek adres; eski isleyiciler yeniden
       # yazilmaz, ayni cevabi verir. ETKIN kapali: eski kapilar P6'ya kadar yerinde.
       - name: Tek kapı, tek süreç

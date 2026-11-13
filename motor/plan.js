@@ -333,8 +333,12 @@
     },
   });
   const EKSIK = Object.freeze({
-    aysGun:['blok soru hedefi (targetQ), çözülen ve doğru soru: Soru motoru', 'paragraf/problem hedefleri ve serbest soru: Soru motoru',
-      'kontrol listesi (checklist): Akademik alanın günlük ritüeli; göremedim', 'günün notu: Not motoruna', 'uyku saati: Kayıt motoru (Kayit.GOC.aysGun)',
+    aysGun:['blok soru hedefi (targetQ), çözülen ve doğru soru (actualQ, correctQ): Soru motoru',
+      'paragraf/problem hedefleri ve serbest soru (paragraphTarget, problemTarget, paragraphActual, problemActual, freeQ, freeCorrect): Soru motoru',
+      'kontrol listesi (checklist): Akademik alanın günlük ritüeli; göremedim', 'günün notu (note): Not motoruna', 'uyku saati (sleepHours): Kayıt motoru (Kayit.GOC.aysGun)',
+      'kötü gün işareti (badDay, badDayTargets, badDaySoruYok; AYS state.js:1067): blokların «atlandı» durumu ve nedeni taşınır, işaret ve eski hedefler taşınmaz',
+      'günün ritüeli (ritual): gün şablonundan gelir (aysSablon), gün kaydından taşınmaz', 'haftanın günü (dow): tarihten yeniden hesaplanır',
+      'dikkat dağılması sayısı (distractions): göremedim, taşınmaz', 'blok başlama anı (startedAt): planın saati değil; Kayıt motoru çalışma kaydının zamanı',
       'blok saatleri: AYS bloklarının saati yoktu; bas/bit null', 'konu kimlikleri (subjectId, topicId): Akademik alanın müfredat bağı'],
     aysSablon:['ritüel türleri (contract, exam, review) korunur; ritüelin içeriği Akademik alanda'],
     espPlanner:['ESP «sıradaki tek iş» kaydedilmiyordu, her açılışta hesaplanıyordu: taşınacak kayıt yok; sıra kuralı SIRA olarak taşındı'],
