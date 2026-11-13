@@ -5,6 +5,7 @@
  *   durum  : "yeni" (kabukta), "pilot" (taşınıyor), "eski" (henüz eski modülde, `eski` bağlantısı var),
  *            "plan" (motor henüz yazılmadı)
  *   halka  : halkadaki sırası (yoksa halkada değil)
+ *   asama  : alanın kabuğa taşınmış aşama sayısı (alan/<id>/asama-N.json); yoksa alan henüz eski modülde
  * Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.Harita, Node'da module.exports. */
 (function (kok) {
   'use strict';
@@ -20,10 +21,10 @@
     { id: 'harita', ad: 'Sistem haritası', katman: 'kabuk', dal: 'ana', yol: '#/harita', ikon: 'harita', halka: 6, durum: 'yeni', aciklama: 'Bütün yerler tek sayfada' },
     { id: 'ayarlar', ad: 'Ayarlar', katman: 'kabuk', dal: 'ayarlar', yol: '#/ayarlar', ikon: 'ayar', durum: 'yeni', aciklama: 'Görünüm, erişilebilirlik, bildirim, hesap' },
     // alanlar (plan §3, on alan); Öğren dalı
-    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'eski', eski: AYS, aciklama: 'Sınav hazırlığı' },
-    { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'eski', eski: ESP, aciklama: 'Diller ve diksiyon' },
-    { id: 'felsefe', ad: 'Felsefe', katman: 'alan', alan: 'felsefe', dal: 'ogren', yol: '#/alan/felsefe', ikon: 'soru', durum: 'pilot', eski: ESP, aciklama: 'İlk taşınan alan' },
-    { id: 'tarih', ad: 'Tarih', katman: 'alan', alan: 'tarih', dal: 'ogren', yol: '#/alan/tarih', ikon: 'kum', durum: 'eski', eski: ESP, aciklama: 'Olaylar ve dönemler' },
+    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 1, eski: AYS, aciklama: 'Sınav hazırlığı' },
+    { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'pilot', asama: 1, eski: ESP, aciklama: 'Diller ve diksiyon' },
+    { id: 'felsefe', ad: 'Felsefe', katman: 'alan', alan: 'felsefe', dal: 'ogren', yol: '#/alan/felsefe', ikon: 'soru', durum: 'pilot', asama: 1, eski: ESP, aciklama: 'Soru, kavram, tanım' },
+    { id: 'tarih', ad: 'Tarih', katman: 'alan', alan: 'tarih', dal: 'ogren', yol: '#/alan/tarih', ikon: 'kum', durum: 'pilot', asama: 1, eski: ESP, aciklama: 'Olaylar ve dönemler' },
     { id: 'muzik', ad: 'Müzik', katman: 'alan', alan: 'muzik', dal: 'ogren', yol: '#/alan/muzik', ikon: 'nota', durum: 'eski', eski: ESP, aciklama: 'Çalgı ve kulak' },
     { id: 'okuma', ad: 'Okuma ve yazı', katman: 'alan', alan: 'okuma', dal: 'ogren', yol: '#/alan/okuma', ikon: 'sayfa', durum: 'eski', eski: ESP, aciklama: 'Okumak ve yazmak' },
     // alanlar; Sağlık dalı

@@ -115,7 +115,7 @@ Aynı koşuda işlev denetimi (sonuçlar):
 - Dört boyut/tema birleşiminde yatay taşma yok; konsolda hata yok.
 
 ## Testler
-`node kabuk/kabuk.test.js` → **32 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
+`node kabuk/kabuk.test.js` → **33 geçti, 0 kaldı** (çıkış 0). Kapsam: kayıt geçerliliği (tekil id/yol, on alan, yedi motor ve King,
 eski bağlantılar, Felsefe pilot, halkadan ≤ 2 adım, komut çubuğundan 1 adım, bozuk kaydı yakalama), şema türetmeleri (zorunlu alanlar,
 varsayılan geçerli, doğrulama, bozuk değerde varsayılan, sıfırlama, eşitleme süzgeci, kök nitelikleri, çizimde kaçış ve radyo
 sayısı), sıralama (ç ğ ı İ ö ş ü katlama, aksansız arama, ad başı › kelime başı › açıklama, eşitlikte tür ve kısa ad, çok kelime).
@@ -179,5 +179,18 @@ Kabuk artık tek kapıdan sunuluyor ve Felsefe'nin birinci aşaması baştan son
   `node tools/kabuk_gez.js` 44/44. Görüntüler: `not-masaustu-koyu.png`, `tekrar-masaustu-koyu.png`.
 - **Bağlanmadı:** nota King önerisi, not ağı çizimi, eski yapılardan not ve tekrar göçü (`Not.goc`, `Tekrar.GOC`; P6 ile),
   Soru / Kayıt / Plan / Arama araçları (motorları yazılmadı).
+
+## Dört alan kabukta: Akademik, Dil, Felsefe, Tarih (2026-11-13)
+Felsefe pilotunun yol haritası, ders ve kapı ekranları alan adından bağımsız hâle geldi; içeriği yazılmış her alan aynı ekranlarla açılır.
+
+- **Kayıt:** `kabuk/harita.js` satırında `asama: 1` (taşınmış aşama sayısı; içerik `alan/<id>/asama-1.json`). Dört alan `pilot`, kalan altısı `eski`.
+- **Etkin alan:** son açılan alan (`lifeos.yol.son`); Bugün sayfası onunla karşılar, «Başla / Devam et» onun sıradaki adımına gider.
+- **Öğrenme kaydı alan başına ayrı:** `lifeos.yol.<alan>.1` (Felsefe'nin eski anahtarı aynı kaldı, kayıt kaybolmaz).
+- **Kalabalık alan:** ünite sayısı dördü geçince (Akademik: 30 ünite, 368 ders) üniteler katlanır, yalnız üzerinde çalışılan açık gelir.
+- **Yol haritası listesi** dört alanı ilerlemesiyle gösterir; **Tekrar** yüklenmiş her alanın onaylı alıştırmalarını karta çevirir.
+- İçerik isteğe bağlı yüklenir (alan açılınca); Akademik dosyası 2,1 MB'tır, yalnız Akademik ya da Yol haritası listesi açılınca iner.
+- **Ölçüldü:** `node kabuk/kabuk.test.js` 33/33 (dört alanın içeriği motora yüklenir, ilk adım açık bir derstir, aşama kimliği kayıt anahtarıyla uyumlu);
+  `node tools/kabuk_gez.js` 62/62 (her alanda yol haritası, ilk ders, alıştırma, «Okudum»; kayıtlar birbirine karışmıyor; Bugün son alanı gösteriyor).
+- **Sınır:** dört alanın bütün dersleri taslak (sahibin onayı bekliyor); Akademik'in 368 dersinden yalnız ilki tarayıcıda açılıp denendi.
 
 Atlananlar (ilk iskelette; ders, Not ve Tekrar ekranları ile sunucu denemesi yukarıdaki bölümlerde kapandı): eski kabuğa bağlantı.

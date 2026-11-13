@@ -172,8 +172,13 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 @media (forced-colors: active){ .seg button[aria-checked="true"],.halka__oge.secili{ outline:2px solid CanvasText; } }
 
 /* ---------------- ders ve kapı (Felsefe pilotu) ---------------- */
-.unitekutu{ display:flex; flex-direction:column; gap:6px; }
-.unitekutu h2{ font-size:1.05rem; margin:8px 0 2px; display:flex; gap:8px; align-items:center; }
+.unitekutu{ display:flex; flex-direction:column; gap:6px; } details.unitekutu[open]{ display:flex; } details.unitekutu > .satir{ margin-top:6px; }
+.unitekutu h2{ font-size:1.05rem; margin:0; }
+.unitekutu summary{ display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:44px; margin-top:8px; cursor:pointer; list-style:none; }
+.unitekutu summary::-webkit-details-marker{ display:none; }
+.unitekutu summary::before{ content:'+'; font-family:var(--piksel); color:var(--cizgi-guclu); width:1em; } .unitekutu[open] summary::before{ content:'−'; }
+.unitekutu summary h2{ flex:1; } .unitekutu summary .soluk{ font-size:.8rem; }
+.unitekutu--asama h2{ margin:8px 0 2px; }
 .satir--kilitli{ background:transparent; color:var(--soluk); box-shadow:inset 0 0 0 2px var(--cizgi); }
 .satir--kapi{ background:var(--yuzey-2); }
 .ders p{ margin:0; max-width:64ch; }

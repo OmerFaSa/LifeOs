@@ -152,11 +152,13 @@
   /* ---- Tekrar ---- */
   var gosterilen = null; // arkası açılmış kartın kimliği
   function kartlar() {
-    var l = oku(KART_ANAHTAR, []), I = ic(), f = I.felsefe();
-    if (f && f.y) { // onaylı ders alıştırmaları kendiliğinden kart olur (taslak içerik aday çıkarmaz)
-      var y = kartlariEsitle(Tekrar, l, I.Yol.tekrarAdaylari(f.y, I.kayitOku()), f.y);
-      if (y !== l) { yaz(KART_ANAHTAR, y); l = y; }
-    }
+    var l = oku(KART_ANAHTAR, []), I = ic(), ilk = l;
+    // yüklenmiş her alanın onaylı ders alıştırmaları kendiliğinden kart olur (taslak içerik aday çıkarmaz)
+    I.tasinanlar().forEach(function (yer) {
+      var f = I.al(yer.id);
+      if (f && f.y) l = kartlariEsitle(Tekrar, l, I.Yol.tekrarAdaylari(f.y, I.kayitOku(yer.id)), f.y);
+    });
+    if (l !== ilk) yaz(KART_ANAHTAR, l);
     return l;
   }
   function sayac(simdi) { var s = oku(SAYAC_ANAHTAR, {}); return s.gun === gunAdi(simdi) ? s : { gun: gunAdi(simdi), yeni: 0, tekrar: 0 }; }
@@ -197,11 +199,16 @@
 
   /* ---- Yol haritası listesi ---- */
   function sayfaYol(yer) {
-    var I = ic(), dr = I.fDurum(), il = dr && dr.ilerleme;
-    return I.ust(I.kirinti(yer)) + '<div class="govde"><h1>Yol haritası</h1><p class="soluk">Her alanın aşama, ünite, ders ve kapıları. Şimdilik bir alan taşındı.</p>' +
-      '<a class="satir" href="#/alan/felsefe"><span class="satir__ad">Felsefe</span><span class="satir__not">' +
-      (il ? 'Aşama 1 · ' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' kapı geçildi' : 'Aşama 1') +
-      '</span><span class="pul pul--pilot">taşınıyor</span><span class="satir__ok" aria-hidden="true">›</span></a></div>';
+    var I = ic(), k = I.kac, alanlar = I.tasinanlar(), eksik_ = alanlar.filter(function (a) { return !I.al(a.id); });
+    // ilerleme içerik yüklenince hesaplanır; eksik olanlar istenir, gelince sayfa bir kez daha çizilir
+    if (eksik_.length) Promise.all(eksik_.map(function (a) { return I.alanYukle(a.id); })).then(function () { if (d.querySelector('[data-arac="yol"]')) I.rota(); });
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="yol"><h1>Yol haritası</h1><p class="soluk">Her alanın aşama, ünite, ders ve kapıları. ' + alanlar.length + ' alan taşındı.</p>' +
+      '<div class="liste">' + alanlar.map(function (a) {
+        var dr = I.fDurum(a.id), il = dr && dr.ilerleme;
+        return '<a class="satir" href="' + a.yol + '"><span class="satir__ad">' + k(a.ad) + '</span><span class="satir__not">' +
+          (il ? k(dr.asama.ad) + ' · ' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' kapı geçildi' : 'Aşama 1') +
+          '</span><span class="pul pul--pilot">taşınıyor</span><span class="satir__ok" aria-hidden="true">›</span></a>';
+      }).join('') + '</div></div>';
   }
 
   Kabuk.ek = Kabuk.ek || {};

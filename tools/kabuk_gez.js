@@ -86,6 +86,38 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.goto(T + '/kabuk/#/alan/felsefe/ders/yok.boyle');
     await p.waitForSelector('.yuva');
     dene('bilinmeyen ders açık bir iletiyle karşılanır', /Böyle bir ders yok/.test(await p.textContent('.yuva')));
+    // ---- öteki taşınan alanlar: Tarih, Dil, Akademik ----
+    for (const alan of ['tarih', 'dil', 'akademik']) {
+      const v = JSON.parse(fs.readFileSync(path.join(kok, 'alan', alan, 'asama-1.json'), 'utf8')), d1 = v.uniteler[0].dersler[0];
+      await p.goto(T + '/kabuk/#/alan/' + alan);
+      await p.waitForSelector('.unitekutu');
+      dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.unitekutu').count()) === v.uniteler.length + 1);
+      dene(alan + ': ' + (v.uniteler.length > 4 ? 'yalnız ilk ünite açık gelir' : 'bütün üniteler açık gelir'),
+        (await p.locator('details.unitekutu[open]').count()) === (v.uniteler.length > 4 ? 1 : v.uniteler.length));
+      dene(alan + ': «Başla» ilk derse götürür', (await p.getAttribute('.eylemler .dugme--ana', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
+      await p.click('.eylemler .dugme--ana');
+      await p.waitForSelector('article.ders h1');
+      dene(alan + ': ilk ders açılır', (await p.textContent('article.ders h1')) === d1.ad);
+      const a = d1.alistirmalar.find(x => x.tur === 'secmeli');
+      if (a) {
+        await p.click('.soru[data-soru="' + a.id + '"] [data-cevap="' + a.dogru + '"]');
+        dene(alan + ': alıştırma doğru cevabı tanır', /Doğru/.test(await p.textContent('.soru[data-soru="' + a.id + '"] .soru__sonuc')));
+      }
+      await p.click('[data-ac="okudum"]');
+      await p.waitForFunction(h => location.hash !== h, '#/alan/' + alan + '/ders/' + d1.id);
+      if (GORUNTU && alan === 'akademik') { await p.goto(T + '/kabuk/#/alan/akademik'); await p.waitForSelector('.unitekutu'); await p.screenshot({ path: path.join(cikti, 'akademik-masaustu-koyu.png') }); }
+    }
+    await p.goto(T + '/kabuk/#/alan/felsefe');
+    await p.waitForSelector('.unitekutu');
+    dene('alanların kaydı ayrı: Felsefe hâlâ 3/9 ders, 1/3 kapı', /3\/9 ders okundu · 1\/3/.test(await p.textContent('.govde')));
+    await p.goto(T + '/kabuk/#/alan/akademik');
+    await p.waitForSelector('.unitekutu');
+    await p.goto(T + '/kabuk/#/bugun');
+    await p.waitForFunction(() => /Akademik/.test((document.querySelector('.karsila__sira') || {}).textContent || ''));
+    dene('Bugün son çalışılan alanla karşılar (Akademik)', /akademik\/(ders|kapi)\//.test(await p.getAttribute('.karsila .dugme--ana', 'href')));
+    await p.goto(T + '/kabuk/#/alan/felsefe');
+    await p.waitForSelector('.unitekutu');
+
     // ---- Not ----
     p.on('dialog', x => x.accept());
     await p.goto(T + '/kabuk/#/motor/not');
@@ -157,6 +189,8 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     await p.goto(T + '/kabuk/#/motor/yol');
     await p.waitForSelector('a.satir[href="#/alan/felsefe"]');
     dene('yol: Felsefe ilerlemesiyle listelenir', /3\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/felsefe"]')));
+    await p.waitForFunction(() => /1\/368 ders okundu/.test((document.querySelector('a.satir[href="#/alan/akademik"]') || {}).textContent || '')).catch(() => {});
+    dene('yol: dört alan ilerlemesiyle listelenir', (await p.locator('[data-arac="yol"] a.satir').count()) === 4 && /1\/368 ders okundu/.test(await p.textContent('a.satir[href="#/alan/akademik"]')) && /1\/9 ders okundu/.test(await p.textContent('a.satir[href="#/alan/tarih"]')));
     await p.keyboard.press('Control+k');
     await p.fill('#komut input', 'yeni not');
     await p.keyboard.press('Enter');

@@ -102,9 +102,25 @@ t('harita: yedi motor ve King var', () => {
   esit(H.YERLER.filter(y => y.katman === 'motor').map(y => y.id), ['yol', 'tekrar', 'soru', 'kayit', 'plan', 'not', 'arama']);
   esit(H.YERLER.filter(y => y.katman === 'king').length, 1);
 });
-t('harita: taşınmamış alanlar eski ve bağlantılı; Felsefe pilot', () => {
-  H.YERLER.filter(y => y.katman === 'alan' && y.id !== 'felsefe').forEach(y => { esit(y.durum, 'eski', y.id); dogru(/\.html$/.test(y.eski), y.id + ' bağlantı'); });
-  esit(H.bul('felsefe').durum, 'pilot');
+t('harita: içeriği taşınan dört alan pilot ve aşamalı, içerik dosyası yerinde; kalanlar eski ve bağlantılı', () => {
+  const fs = require('fs'), path = require('path');
+  const alanlar = H.YERLER.filter(y => y.katman === 'alan'), tasinan = alanlar.filter(y => y.asama);
+  esit(tasinan.map(y => y.id), ['akademik', 'dil', 'felsefe', 'tarih']);
+  tasinan.forEach(y => {
+    esit([y.durum, y.asama], ['pilot', 1], y.id);
+    dogru(fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'asama-1.json')), y.id + ' içeriği yok');
+    esit(require('../alan/' + y.id + '/asama-1.json').id, y.id + '.1', y.id + ' aşama kimliği (kayıt anahtarı buna dayanır)');
+  });
+  alanlar.filter(y => !y.asama).forEach(y => { esit(y.durum, 'eski', y.id); dogru(/\.html$/.test(y.eski), y.id + ' bağlantı'); });
+  alanlar.forEach(y => dogru(/\.html$/.test(y.eski), y.id + ' eski sayfa bağlantısı'));
+});
+t('yol: dört alanın içeriği Yol motoruna yüklenir ve ilk adım bir derstir', () => {
+  const Yol = require('../motor/yol.js');
+  H.YERLER.filter(y => y.asama).forEach(a => {
+    const y = Yol.yukle(require('../alan/' + a.id + '/asama-1.json')), adim = K.siradaki(Yol.durum(y, Yol.bosKayit()));
+    esit(adim && adim.tur, 'ders', a.id);
+    dogru(y.tur[adim.id] === 'ders' && Yol.acikMi(y, Yol.bosKayit(), adim.id), a.id + ' ilk ders açık');
+  });
 });
 t('harita: her yer halkadan en çok iki adımda', () => {
   H.YERLER.forEach(y => dogru(H.halkaAdimi(y.id) <= 2, y.id + ' ' + H.halkaAdimi(y.id)));
@@ -194,11 +210,11 @@ t('ara: aksansız yazınca bulur (muzik → Müzik, saglik → Sağlık, uyku)',
   esit(K.ara('saglik', og, 1)[0].id, 'saglik');
   esit(K.ara('UYKU', og, 1)[0].id, 'uyku');
 });
-t('ara: büyük İ ve I doğru katlanır (YAZI → yazı, İLK → ilk)', () => {
+t('ara: büyük İ ve I doğru katlanır (YAZI → yazı, DİKSİYON → diksiyon)', () => {
   const y = K.ara('YAZI', og, 3).map(o => o.id);
   esit(y.slice(0, 2).sort(), ['lifeos.boyut', 'lifeos.yazi'], 'ad başı (Yazı …) önce'); esit(y[2], 'okuma', 'kelime başı sonra');
   esit(K.ara('SATIN', og, 1)[0].id, 'lifeos.kilit.odeme');
-  esit(K.ara('İLK TAŞINAN', og, 1)[0].id, 'felsefe');
+  esit(K.ara('DİLLER DİKSİYON', og, 1)[0].id, 'dil');
 });
 t('ara: ad başı önce, eşit puanda kısa ad önce, ad içi sonra', () => {
   const r = K.ara('fel', og, 3).map(o => o.id);
