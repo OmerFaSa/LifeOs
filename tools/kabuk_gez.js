@@ -599,6 +599,63 @@ async function goruntu(p, ad) {
     await p.keyboard.press('Enter');
     const acildi = await p.waitForSelector('form.notform[data-not="yeni"]', { timeout: 5000 }).then(() => true, () => false);
     dene('komut çubuğu: «Yeni not» boş not formunu açar', acildi && (await p.evaluate(() => location.hash)) === '#/motor/not/yeni');
+
+    // ---- «taşınıyor» rozeti yok: Öğren, Sağlık, Sistem haritası, Yol haritası listesi (yol sayfası yukarıda içerikle doldu) ----
+    for (const [h, ad] of [['#/ogren', 'Öğren'], ['#/saglik', 'Sağlık'], ['#/harita', 'Sistem haritası'], ['#/motor/yol', 'Yol haritası']]) {
+      await p.goto(T + '/kabuk/' + h);
+      await p.waitForFunction(x => document.getElementById('sayfa').getAttribute('data-yer') === x && document.querySelector('#sayfa a.b-satir'), h.split('/').pop() === 'yol' ? 'yol' : h.slice(2));
+      dene(ad + ': «taşınıyor» rozeti yok', !/taşınıyor/.test(await p.textContent('#sayfa')));
+    }
+    // ---- Her şeyde arama: komut çubuğunun son öğesi; bilinen bir ders ve bilinen bir not bulunur ve açılır ----
+    await p.keyboard.press('Control+k');
+    await p.fill('#komut input', 'sokrates');
+    dene('komut çubuğu: son öğe «Her şeyde ara: sokrates»', (await p.textContent('#komut-liste li:last-child')).indexOf('Her şeyde ara: sokrates') === 0, await p.textContent('#komut-liste li:last-child'));
+    await p.click('#komut-liste li:last-child');
+    // ders dizini ilk aramada kurulur (on alan, yirmi dosya): ders grubu dolana kadar beklenir
+    await p.waitForSelector('[data-arama-grup="ders"]', { timeout: 20000 });
+    const olcum1 = await p.evaluate(() => Object.assign({}, LIFEOS.Kabuk.Arama.olcum));
+    dene('arama: adres ve alan sorguyu taşır', (await p.evaluate(() => location.hash)) === '#/motor/arama?sokrates' && (await p.inputValue('[data-her-ara]')) === 'sokrates');
+    dene('arama: Sokrates dersi bulunur, taslak işaretli', (await p.locator('[data-arama-grup="ders"] a.b-satir[href="#/alan/felsefe/ders/felsefe.1.1.2"]').count()) === 1 &&
+      /taslak/.test(await p.textContent('[data-arama-grup="ders"] a.b-satir[href="#/alan/felsefe/ders/felsefe.1.1.2"]')));
+    dene('arama: Sokrates notu bulunur', /Sokrates/.test(await p.textContent('[data-arama-grup="not"]').catch(() => '')));
+    dene('arama: on alanın dersleri dizinde', olcum1.ders > 500, JSON.stringify(olcum1));
+    // bir sorgunun süresi: yazılan her harfte olduğu gibi (arama + çizim), beş sorgunun ortancası
+    const sureler = await p.evaluate(() => ['tanım', 'kan şekeri', 'SORARAK DUSUNMEK', 'uyku', 'erdem'].map(q => {
+      const g = document.querySelector('[data-her-ara]'), t0 = performance.now(); g.value = q; g.dispatchEvent(new Event('input', { bubbles: true })); return performance.now() - t0;
+    }).sort((a, b) => a - b));
+    console.log('  ölçüldü: ' + olcum1.ders + ' ders, dizin (yükleme dahil) ' + olcum1.dizinMs + ' ms, bir sorgu + çizim ortanca ' + sureler[2].toFixed(1) + ' ms (en çok ' + sureler[4].toFixed(1) + ' ms)');
+    dene('arama: bir sorgu (arama + çizim) 100 ms altında', sureler[2] < 100, sureler.join(', '));
+    await p.fill('[data-her-ara]', 'SORARAK DUSUNMEK');
+    dene('arama: büyük harf ve aksansız yazım aynı dersi ilk sıraya koyar', (await p.getAttribute('[data-arama-grup="ders"] a.b-satir', 'href')) === '#/alan/felsefe/ders/felsefe.1.1.2');
+    await p.click('[data-arama-grup="ders"] a.b-satir');
+    await p.waitForSelector('article.ders h1');
+    dene('arama: ders bağlantısı dersi açar', (await p.textContent('article.ders h1')) === 'Sorarak düşünmek: Sokrates', await p.textContent('article.ders h1'));
+    await p.goBack();
+    await p.waitForSelector('[data-arama-grup="ders"]');
+    dene('arama: geri gelince sorgu duruyor', (await p.inputValue('[data-her-ara]')) === 'SORARAK DUSUNMEK');
+    await p.fill('[data-her-ara]', 'erdem bilgi');
+    await p.waitForSelector('[data-arama-grup="not"] a.b-satir');
+    await p.click('[data-arama-grup="not"] a.b-satir');
+    await p.waitForSelector('form.notform');
+    dene('arama: not bağlantısı notu açar', (await p.inputValue('input[name=baslik]')) === 'Erdem');
+    await p.goto(T + '/kabuk/#/motor/arama?' + encodeURIComponent('sokrates'));
+    await p.waitForSelector('[data-arama-grup="not"]');
+    await goruntu(p, 'arama');
+    // soğuk açılış: sayfa doğrudan aramayla açılır; dizin on alanın yirmi dosyasını isteyerek kurulur
+    const ap = await c.newPage();
+    await ap.goto(T + '/kabuk/#/motor/arama?' + encodeURIComponent('tanım'));
+    await ap.waitForSelector('[data-arama-grup="ders"]', { timeout: 20000 });
+    const olcum2 = await ap.evaluate(() => Object.assign({}, LIFEOS.Kabuk.Arama.olcum));
+    console.log('  ölçüldü (soğuk açılış): dizin yükleme dahil ' + olcum2.dizinMs + ' ms, ilk sorgu ' + olcum2.sorguMs + ' ms');
+    dene('arama: doğrudan açılışta dizin kurulur ve dersler gelir', olcum2.ders === olcum1.ders && (await ap.locator('[data-arama-grup="ders"] a.b-satir').count()) > 0, JSON.stringify(olcum2));
+    await ap.close();
+    // ---- King: açıklama sayfası, sohbet taklidi yok ----
+    await p.goto(T + '/kabuk/#/king');
+    await p.waitForSelector('[data-sayfa="king"]');
+    const kingMetin = await p.textContent('#sayfa');
+    dene('King: nerede konuşulacağını, neyi gördüğünü ve sahibin adımını söyler', /Claude masaüstü uygulamasında/.test(kingMetin) && /Özel notlarını görmez/.test(kingMetin) && /tamamen kapat/.test(kingMetin) && !/hazırlanıyor/.test(kingMetin));
+    dene('King: sohbet kutusu yok', (await p.locator('[data-sayfa="king"] input, [data-sayfa="king"] textarea, [data-sayfa="king"] form').count()) === 0);
+    await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP);
     dene('Hesap yüklendi; oturum yokken selam adsız', await p.evaluate(() => LIFEOS.HESAP.durum().oturum === null && /^(Günaydın|İyi günler|İyi akşamlar|İyi geceler)\.$/.test(document.querySelector('.karsila__selam').textContent)), await p.textContent('.karsila__selam'));

@@ -40,6 +40,11 @@
       })
       .slice(0, en || 8).map(function (x) { return x.o; });
   }
+  // Komut çubuğunun sonuçları: yazılı sorguda en çok 8 öğe ve en sonda «Her şeyde ara: <sorgu>» (kabuk/arama.js sayfası).
+  function komutSonucu(sorgu, ogeler) {
+    var q = String(sorgu || '').trim(), s = ara(q, ogeler, 8);
+    return katla(q) ? s.concat([{ tur: 'arama', id: 'her-sey', ad: 'Her şeyde ara: ' + q, etiket: 'arama', yol: '#/motor/arama?' + encodeURIComponent(q) }]) : s;
+  }
   var KATMAN_AD = { kabuk: 'sayfa', alan: 'alan', motor: 'araç', king: 'King' };
   // komut çubuğunun bütün öğeleri haritadan ve şemadan türetilir; elle liste yok
   function komutOgeleri(H, A) {
@@ -81,6 +86,36 @@
     return dr.asama.gecti ? null : { tur: 'kapi', id: dr.asama.id, ad: dr.asama.ad };
   }
   var HARF = 'ABCDEFGH';
+  /* King sayfasının gövdesi (#/king). King Claude masaüstü uygulamasında konuşur, LifeOS'u salt okur; LifeOS'ta dil modeli ve
+   * sohbet yok (AGENTS §0.1). Metin king/KURULUM.md'nin sahibe dönük kısmı; dış bağlantı yok. B: bileşen kataloğu (kabuk/bilesen.js). */
+  function kingGovde(B) {
+    var l = function (ad, ogeler) { return B.liste({ ad: ad, ogeler: ogeler.map(function (x) { return { ad: x[0], not: x[1], uzun: true }; }) }); };
+    return B.baslik({ metin: 'King', alt: 'Düşünce ortağın: açıklar, öğretir, araştırır. Sayıyı ve kaydı LifeOS tutar; King sayı uydurmaz.' }) +
+      B.bolum({ baslik: 'Nerede konuşursun', id: 'king-nerede', govde: '<p>King\'le Claude masaüstü uygulamasında konuşursun. LifeOS\'un içinde ayrıca bir sohbet yok.</p>' }) +
+      B.bolum({ baslik: 'Ne görür', id: 'king-gorur', govde: l('King ne görür', [
+        ['Nerede ne var', 'Sistem haritası: bütün yerler ve durumları'],
+        ['Bugünün özeti ve planı', 'Bugüne ait olmayan bir şeyi bugünmüş gibi sunmaz'],
+        ['Kayıtların', 'Her sayı kesinlik etiketiyle; olmayan veri için «veri yok» der'],
+        ['Notların', 'Özel işaretli olanlar hariç'],
+        ['Yol haritan ve tekrar kartların', 'Kapı soruları hariç'],
+        ['Araştırma', 'Notlarında, ders içeriğinde ve Vikipedi\'de kaynaklı cevap arar; internete yalnız konunun adı gider']]) }) +
+      B.bolum({ baslik: 'Ne yapmaz', id: 'king-yapmaz', govde: l('King ne yapmaz', [
+        ['Yalnız okur', 'Kayıt, not, onay ya da ayar yazmaz; kaydı LifeOS\'ta sen yaparsın'],
+        ['Özel notlarını görmez', 'Özel işaretli düşünceler de buna dahil'],
+        ['King\'e kapalı araçların notlarını görmez', 'Araçta «King okuyabilsin» kapalıysa o aracın notları ve sisteme notu ona gitmez'],
+        ['Sırları görmez', 'Parola, anahtar ve jeton adlı alanlar hiç verilmez'],
+        ['Bu tarayıcıdaki yeni kayıtları henüz görmez', 'Yeni sistemdeki notlar, kartlar ve yol ilerlemesi tek depoya geçişten sonra görünür']]) }) +
+      B.bolum({ baslik: 'Senin adımın', id: 'king-adim', govde: ['<p>Kurulum yapıldıktan sonra tek adım kalıyor:</p>', l('King için adımlar', [
+        ['Claude uygulamasını tamamen kapat', 'Görev çubuğundaki simgeden «Çık»; pencereyi kapatmak yetmez'],
+        ['Claude\'u yeniden aç', 'Sohbet kutusunun araç menüsünde «lifeos-king» görünür'],
+        ['Bir şey sor', '«Bugün ne var?» ya da «Felsefe yol haritamda neredeyim?»; Claude okumadan önce izin ister']]),
+        '<p class="soluk">Görünmüyorsa Claude\'da Ayarlar › Geliştirici bölümündeki günlüğe bak.</p>'] }) +
+      B.uyari({ tur: 'bilgi', metin: 'King\'in okuduğu her şey o sohbette Claude\'a, yani Anthropic\'in sunucusuna gider. Özel notların ve sırların gitmez; öbür kayıtlar sen sordukça gider.' });
+  }
+  // Yerin durum rozeti: yalnız eski sayfaya giden ve henüz yazılmamış yerde. «pilot» (kabuğa taşınmış alan) ekranda rozet almaz:
+  // iç göç durumu sahibe bir şey söylemez (faz3-arama-king-sayfa.md); taslak içeriği Onaylar ve ders kartındaki «taslak» söyler.
+  var DURUM_AD = { eski: 'eski sayfada', plan: 'hazırlanıyor' };
+  function durumPul(y) { var a = DURUM_AD[y.durum]; return a ? { metin: a, tur: 'normal' } : null; }
 
   /* ---------------- saf: aşamalar (alan/<id>/asama-N.json, N = 1, 2, …) ---------------- */
   // Kayıt aşama başına ayrı. Birinci aşamanın anahtarı eski anahtarın kendisidir: eski kayıt olduğu gibi okunur.
@@ -140,7 +175,7 @@
   }
 
   var Kabuk = kok.LIFEOS && kok.LIFEOS.Kabuk || {};
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.selam = selam; Kabuk.siradaki = siradaki;
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde;
   Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
     yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
@@ -173,7 +208,6 @@
   function hesapAdi() {
     try { var o = kok.LIFEOS.HESAP.durum().oturum; return o ? (o.hitap || o.gorunen_ad || '') : ''; } catch (e) { return ''; }
   }
-  var DURUM_AD = { eski: 'eski sayfada', pilot: 'taşınıyor', plan: 'hazırlanıyor', yeni: '' };
 
   /* ---- Felsefe: Yol motoru salt okunur yüklenir; içerik dosyası file:// üzerinden okunamazsa yuva boş kalır ---- */
   var alanlar = {}; // alan kimliği → { ys: [aşama 1, 2, … (Yol.yukle çıktısı)] } ya da { hata }
@@ -237,8 +271,6 @@
     if (!ustYer || ustYer.id === yer.id) ustYer = H.bul('bugun');
     return '<a class="kirinti" href="' + ustYer.yol + '"><span aria-hidden="true">‹ </span>' + kac(ustYer.ad) + '</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>' + kac(yer.ad) + '</span>';
   }
-  // yerin taşınma durumu rozeti (yeni yerde yok; «taşınıyor» altın)
-  function durumPul(y) { var a = DURUM_AD[y.durum]; return a ? { metin: a, tur: y.durum === 'pilot' ? 'altin' : 'normal' } : null; }
 
   function sayfaBugun() {
     var t = new Date(), ipucu = depo.getItem('lifeos.kabuk.ipucu') !== 'goruldu';
@@ -459,6 +491,7 @@
     else if (ek) html = ek(yer, alt ? alt[2] : '');
     else if (yer.id === 'bugun') html = sayfaBugun();
     else if (yer.id === 'harita') html = sayfaHarita(yer);
+    else if (yer.id === 'king') html = ust(kirinti(yer)) + '<div class="govde" data-sayfa="king">' + kingGovde(B) + '</div>';
     else if (yer.id === 'ayarlar') html = sayfaAyarlar(yer, parca[1] && decodeURIComponent(parca[1]));
     else if (tasindi) html = sayfaAlan(yer);
     else if (H.DAL_SAYFASI[yer.dal] === yer.id && yer.dal !== 'king') html = sayfaDal(yer);
@@ -539,7 +572,7 @@
   }
   function komutCiz(q) {
     // boş sorgu: halkadaki yerler ve Ayarlar
-    sonuc = q ? ara(q, ogeler, 8) : ogeler.filter(function (o) { var y = o.tur === 'yer' && H.bul(o.id); return y && (y.halka || y.id === 'ayarlar'); });
+    sonuc = katla(q) ? komutSonucu(q, ogeler) : ogeler.filter(function (o) { var y = o.tur === 'yer' && H.bul(o.id); return y && (y.halka || y.id === 'ayarlar'); });
     etkin = 0;
     var liste = $('#komut-liste'), g = $('input', komutEl);
     liste.innerHTML = sonuc.length ? sonuc.map(function (o, i) {

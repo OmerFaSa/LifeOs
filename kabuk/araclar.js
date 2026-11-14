@@ -596,7 +596,7 @@
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="yol">' + B.baslik({ metin: 'Yol haritası', alt: 'Her alanın aşama, ünite, ders ve kapıları. ' + alanlar.length + ' alan taşındı.' }) +
       B.liste({ ad: 'Alanlar', ogeler: alanlar.map(function (a) {
         var dr = I.fDurum(a.id), il = dr && dr.ilerleme;
-        return { ad: a.ad, href: a.yol, pul: { metin: 'taşınıyor', tur: 'altin' },
+        return { ad: a.ad, href: a.yol,
           not: il ? 'Aşama ' + I.al(a.id).n + ' · ' + dr.asama.ad + ' · ' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' kapı geçildi' : 'Aşama 1' };
       }) }) + '</div>';
   }
@@ -624,8 +624,11 @@
     var I = ic(), k = I.kac;
     if (!Kayit) return I.ust(I.kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: 'Kayıt' }) + eksik('Kayıt') + '</div>';
     if (alt === 'hafta') return sayfaKayitHafta();
+    var ag = /^gun\/(\d{4}-\d{2}-\d{2})$/.exec(alt || ''); if (ag) kayitGun = ag[1]; // Her şeyde arama bir kaydın gününü açar
     var simdi = Date.now(), gun = gunAdi(simdi), l = oku(KAYIT_ANAHTAR, []), T = Kayit.TURLER, t = T[kayitTur] || T.su;
-    var gunler = kayitGunleri(Kayit, gun), secili = gunler.indexOf(kayitGun) > 0 ? kayitGun : gun, sAd = gunYazi(secili, gun);
+    var gunler = kayitGunleri(Kayit, gun);
+    if (kayitGun && kayitGun < gun && gunler.indexOf(kayitGun) < 0) gunler.push(kayitGun); // pencereden eski gün okunur; yazmayı motor reddeder
+    var secili = gunler.indexOf(kayitGun) > 0 ? kayitGun : gun, sAd = gunYazi(secili, gun);
     var il = kayitIleti; kayitIleti = null;
     var f = il && il.form || {}, gruplar = {};
     Object.keys(T).forEach(function (id) { var a = T[id].alan === '*' ? 'Genel' : T[id].alan; (gruplar[a] = gruplar[a] || []).push(id); });

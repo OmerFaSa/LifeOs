@@ -593,6 +593,114 @@ t('ara: ayarlar ve eylemler de aranır (koyu, sessiz)', () => {
 t('ara: boş sorgu hepsine 1 puan, sonuç sınırı uygulanır', () => {
   esit(K.puan('', og[0]), 1); esit(K.ara('', og, 5).length, 5); esit(K.ara('zzzz', og).length, 0);
 });
+t('rozet: kabuğa taşınmış alan («pilot») rozet almaz; eski ve hazırlanıyor yazıyla kalır', () => {
+  H.YERLER.filter(y => y.durum === 'pilot' || y.durum === 'yeni').forEach(y => esit(K.durumPul(y), null, y.id));
+  esit(K.durumPul(H.bul('eskisistem')), { metin: 'eski sayfada', tur: 'normal' });
+  esit(K.durumPul({ durum: 'plan' }), { metin: 'hazırlanıyor', tur: 'normal' });
+  // ekran kodunda «taşınıyor» yazısı kalmadı (harita, dal sayfaları, Yol haritası listesi)
+  const fs = require('fs');
+  ['kabuk.js', 'araclar.js'].forEach(f => dogru(!/'taşınıyor'/.test(fs.readFileSync(__dirname + '/' + f, 'utf8')), f + ' hâlâ «taşınıyor» çiziyor'));
+});
+
+// ---- Her şeyde arama (kabuk/arama.js): gerçek içerik, gerçek Yol, Not ve Kayıt motorlarıyla ----
+const Ar = require('./arama.js'), YolM = require('../motor/yol.js'), KayitM = require('../motor/kayit.js');
+// bütün taşınmış alanların bütün aşamaları, kabuğun kendi aşama kurucusuyla (tarayıcıdaki alanYukle ile aynı yol)
+function gercekAlanlar() {
+  const fs = require('fs');
+  return H.YERLER.filter(y => y.katman === 'alan' && y.asama).map(y => {
+    const vs = []; for (let n = 1; n <= y.asama; n++) { const p = __dirname + '/../alan/' + y.id + '/asama-' + n + '.json'; vs.push(fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null); }
+    return { id: y.id, ad: y.ad, ys: K.Asama.kur(YolM, y.id, vs) };
+  });
+}
+const arAlan = gercekAlanlar();
+let arDizin, arSure;
+t('arama: on alanın bütün aşamalarındaki her ders dizinde; bir sorgu hızlı (süre yazılır)', () => {
+  let t0 = process.hrtime.bigint();
+  arDizin = Ar.dersDizini(YolM, arAlan);
+  const kurMs = Number(process.hrtime.bigint() - t0) / 1e6;
+  esit(arAlan.length, 10);
+  const beklenen = arAlan.reduce((s, a) => s + a.ys.reduce((q, y) => q + Object.keys(y.tur).filter(id => y.tur[id] === 'ders').length, 0), 0);
+  esit(arDizin.length, beklenen, 'ders sayısı');
+  dogru(arDizin.length > 500 && arDizin.some(x => x.alan === 'akademik'), 'Akademik dahil 544 ders (2026-11-14) beklenir: ' + arDizin.length);
+  dogru(arAlan.every(a => a.ys.length >= 2), 'her alan iki aşamasıyla');
+  t0 = process.hrtime.bigint(); Ar.dersAra(arDizin, 'tanım', 20); Ar.dersAra(arDizin, 'kan şekeri', 20);
+  arSure = Number(process.hrtime.bigint() - t0) / 2e6;
+  console.log('    ölçüldü: ' + arDizin.length + ' ders, dizin ' + kurMs.toFixed(1) + ' ms, bir sorgu ' + arSure.toFixed(1) + ' ms');
+  dogru(arSure < 250, 'bir sorgu çok yavaş: ' + arSure + ' ms');
+});
+t('arama: başlık önce gelir; Türkçe katlama (büyük İ, ı/i, ş/s) ve aksansız yazım tutar; bağlantı dersi açar', () => {
+  ['SOKRATES', 'sorarak düşünmek', 'SORARAK DUSUNMEK', 'Sorarak dusunmek sokrates'].forEach(q => {
+    const r = Ar.dersAra(arDizin, q, 5).sonuclar[0];
+    esit([r.id, r.yol, r.alan, r.n], ['felsefe.1.1.2', '#/alan/felsefe/ders/felsefe.1.1.2', 'felsefe', 1], q);
+  });
+  esit(Ar.dersAra(arDizin, 'İYİ BİR TANIM NASIL KURULUR', 1).sonuclar[0].id, 'felsefe.1.2.3', 'büyük İ');
+  esit(Ar.dersAra(arDizin, 'sokrates zzqx', 5).toplam, 0, 'her kelime tutmalı');
+  esit(Ar.dersAra(arDizin, '  ', 5), { sonuclar: [], toplam: 0 });
+});
+t('arama: alıştırma sorusu ve ders metni de aranır; parça eşleşmenin yerinden', () => {
+  const r = Ar.dersAra(arDizin, 'cimrilik savurganlık', 5).sonuclar;
+  dogru(r.some(x => x.id === 'felsefe.1.3.3'), 'alıştırma sorusundaki kelimeler bulunmalı');
+  const x = r.find(x => x.id === 'felsefe.1.3.3');
+  dogru(/cimrilik/i.test(x.parca), 'parça: ' + x.parca);
+  // yalnız metinde geçen bir kelime (başlıkta, özette yok): parça metinden
+  const d = arDizin.find(z => z.alan === 'felsefe' && z.metin.length > 200), kel = d.k.metin.split(/[^\p{L}]+/u).find(w => w.length > 6 && d.k.ad.indexOf(w) < 0 && d.k.ozet.indexOf(w) < 0);
+  const m = Ar.dersAra(arDizin, kel, 200).sonuclar.find(z => z.id === d.id);
+  dogru(m && K.katla(m.parca).indexOf(kel) >= 0, kel + ' metinde bulunmalı');
+});
+t('arama: taslak ders taslak işaretli; sahibin onayı bindirilince işaret kalkar', () => {
+  esit(Ar.dersAra(arDizin, 'sorarak düşünmek', 1).sonuclar[0].taslak, true);
+  const v = JSON.parse(JSON.stringify(require('../alan/felsefe/asama-1.json')));
+  v.uniteler[0].dersler[1].durum = 'onayli';
+  const dz = Ar.dersDizini(YolM, [{ id: 'felsefe', ad: 'Felsefe', ys: [YolM.yukle(v)] }]);
+  esit(Ar.dersAra(dz, 'sorarak düşünmek', 1).sonuclar[0].taslak, false);
+});
+t('arama: kayıtlar yalnız metin alanından, yeni olan önce; sayıdan ibaret kayıt aranmaz', () => {
+  const l = [
+    { id: 'a', tur: 'besin', gun: '2026-11-10', zaman: 1, ek: { icerik: 'Mercimek çorbası', ogun: 'ogle' }, deger: {} },
+    { id: 'b', tur: 'besin', gun: '2026-11-12', zaman: 3, ek: { icerik: 'mercimek köftesi' }, deger: {} },
+    { id: 'c', tur: 'su', gun: '2026-11-12', zaman: 2, deger: { ml: { v: 500, k: 'measured' } } }
+  ];
+  esit(Ar.kayitAra(l, 'MERCİMEK', 10).sonuclar.map(r => r.id), ['b', 'a']);
+  esit(Ar.kayitAra(l, 'mercimek corbasi', 10).sonuclar.map(r => r.id), ['a']);
+  esit(Ar.kayitAra(l, 'su', 10).toplam, 0, 'tür adı ve sayı aranmaz');
+});
+t('arama: hepsi birlikte; notlar Not motorunun aramasıyla (özel not da), yerler ve ayarlar komut çubuğundan', () => {
+  const Not = require('../motor/not.js');
+  const notlar = [Not.yeni({ id: 'n1', baslik: 'Mağara üstüne', govde: 'Platon gölgeleri anlatır.', olusturma: 1, guncelleme: 1 }),
+    Not.yeni({ id: 'n2', baslik: 'Gizli düşünce', govde: 'platon ile tartıştım', ozel: true, olusturma: 2, guncelleme: 2 })];
+  const og = K.komutOgeleri(H, A);
+  const g = Ar.ara('platon', { dizin: arDizin, notlar, kayitlar: [], ogeler: og }, { Not });
+  esit(g.map(x => x.tur), ['ders', 'not', 'kayit', 'yer']);
+  dogru(g[0].hazir && g[0].sonuclar.some(x => x.id === 'felsefe.1.1.3'), 'Platon dersi');
+  esit(g[1].sonuclar.map(x => x.id).sort(), ['n1', 'n2'], 'özel not da aranır (sahibin ekranı)');
+  esit(Ar.ara('tekrar', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not }).map(x => [x.tur, x.hazir, x.toplam > 0]).slice(0, 1), [['ders', false, false]], 'dizin yokken dersler hazır değil');
+  const y = Ar.ara('tekrar', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not })[3].sonuclar;
+  esit(y[0].id, 'tekrar'); dogru(y.every(o => o.yol), 'yalnız açılabilen öğeler');
+  dogru(Ar.ara('koyu', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not })[3].sonuclar.every(o => o.tur !== 'eylem' || o.yol), 'yolsuz eylem sonuçta yok');
+  esit(Ar.ara('', { dizin: arDizin, notlar, kayitlar: [], ogeler: og }, { Not }).map(x => x.toplam), [0, 0, 0, 0]);
+});
+t('arama: komut çubuğu son öğe olarak «Her şeyde ara» önerir; adres sorguyu taşır', () => {
+  const og = K.komutOgeleri(H, A), s = K.komutSonucu(' felsefe ', og), son = s[s.length - 1];
+  esit(s[0].id, 'felsefe');
+  esit([son.ad, son.yol], ['Her şeyde ara: felsefe', '#/motor/arama?felsefe']);
+  esit(K.komutSonucu('zzqx', og).map(o => o.id), ['her-sey'], 'sonuç yokken de arama önerilir');
+  esit(K.komutSonucu('  ', og).length, 8, 'boş sorguda öneri yok');
+  esit(Ar.sorguYolu('İyi ve kötü'), '#/motor/arama?' + encodeURIComponent('İyi ve kötü'));
+  esit(Ar.sorguYolu(' '), '#/motor/arama');
+  esit(H.bul('arama').durum, 'yeni');
+});
+
+// ---- King sayfası (#/king): yalnız açıklama; sohbet kutusu, form ya da bağlantı yok ----
+t('king: sayfa King\'in Claude uygulamasında olduğunu, neyi gördüğünü ve sahibin tek adımını söyler; sohbet taklidi yok', () => {
+  const B = require('./bilesen.js'), h = K.kingGovde(B), duz = h.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'");
+  ['Claude masaüstü uygulamasında', 'Yalnız okur', 'Özel notlarını görmez', 'King\'e kapalı araçların notlarını görmez', 'tamamen kapat', 'yeniden aç', 'Anthropic']
+    .forEach(m => dogru(duz.indexOf(m) >= 0, '«' + m + '» yok'));
+  dogru(!/<(input|textarea|form|button)\b/.test(h), 'sohbet kutusu ya da düğme olmamalı');
+  dogru(!/href=/.test(h), 'bağlantı olmamalı');
+  dogru(!/MCP|hazırlanıyor/.test(duz), 'iç terim ya da «hazırlanıyor» ekranda');
+  esit(H.bul('king').durum, 'yeni');
+  esit(H.YERLER.filter(y => y.durum === 'plan').map(y => y.id), [], 'motoru yazılmamış yer kalmadı');
+});
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);
