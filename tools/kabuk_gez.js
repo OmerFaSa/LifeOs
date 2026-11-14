@@ -16,7 +16,7 @@ const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUT
 // Başlangıç paketi (tools/kabuk_baslangic.py çıktısının biçimi): eski sistemden bir not ve bir kayıt
 fs.mkdirSync(path.join(gecici, 'LifeOS', 'veri'), { recursive: true });
 fs.writeFileSync(path.join(gecici, 'LifeOS', 'veri', 'kabuk-baslangic.json'), JSON.stringify({ lifeos_kabuk_baslangic: 1, kimlik: 'gezi-paketi', uretildi: 1,
-  say: { notlar: 1, kayitlar: 1, kartlar: 0 },
+  say: { notlar: 1, kayitlar: 1, kartlar: 0 }, beden: { boy: 175, dogumYili: 2001 },
   notlar: [{ id: 'eski-not-1', baslik: 'Eski defterden', govde: 'Eski sistemde yazılmış not.', alan: '', etiketler: [], kaynak: { yapi: 'defter' }, olusturma: 1000, guncelleme: 1000,
     ozel: false, tur: 'not', klasor: '', sabit: false, baglam: null, ozellik: {} }],
   kayitlar: [{ id: 'kilo:2026-10-20:0', tur: 'kilo', gun: '2026-10-20', zaman: null, kaynak: 'goc', deger: { kg: { v: 70, k: 'eski' } }, ek: {} }], kartlar: [] }));
@@ -562,7 +562,9 @@ async function goruntu(p, ad) {
     dene('başlangıç: Bugün\'de teklif sayılarıyla çıkar', /1 not, 1 kayıt/.test(await p.textContent('[data-baslangic="teklif"]')));
     await p.click('[data-arac-ac="baslangic-getir"]');
     await p.waitForSelector('[data-baslangic="bitti"]');
-    dene('başlangıç: «Getir» sonucu söyler', /Getirildi: 1 not, 1 kayıt/.test(await p.textContent('[data-baslangic="bitti"]')));
+    dene('başlangıç: «Getir» sonucu söyler', /Getirildi: 1 not, 1 kayıt/.test(await p.textContent('[data-baslangic="bitti"]')), await p.textContent('[data-baslangic="bitti"]'));
+    // beden alanları yalnız varsayılandaysa yazılır; bu gezide Beden daha önce elle girildi, o yüzden burada sayılmaz (kural birim testinde)
+    dene('başlangıç: elle girilmiş Beden ayarının üstüne yazılmadı', await p.evaluate(() => window.LIFEOS.Kabuk.Ayar.oku(window.LIFEOS.Kabuk.Depo, 'lifeos.beden.boy') !== null).catch(() => false));
     await p.goto(T + '/kabuk/#/motor/not');
     await p.waitForFunction(n => document.querySelectorAll('#not-liste a').length === n + 1, notOnce);
     dene('başlangıç: eski not Not aracında', /Eski defterden/.test(await p.textContent('#not-liste')));

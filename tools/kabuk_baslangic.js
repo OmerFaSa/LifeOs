@@ -5,7 +5,7 @@
    kaydı), kart (motor/tekrar.js kartı; ön ve arka yüzü olan). Plan, Yol ve Soru çıktıları kabuğun bugünkü
    depolarına karşılık gelmez (geçmiş gün planı, konu durumu): sayılır, pakete girmez.
    Girdi (stdin, JSON): [{ rota, alan, kayitlar:[{ yol, govde }] }]. Çıktı (stdout, JSON):
-   { notlar, kayitlar, kartlar, say:{ bağdaştırıcı: { girdi, cikti, ret, cokme } }, disarida:{ bağdaştırıcı: n } } */
+   { notlar, kayitlar, kartlar, beden:{ cinsiyet?, boy?, dogumYili?, hedef? }, say:{ bağdaştırıcı: { girdi, cikti, ret, cokme } }, disarida:{ bağdaştırıcı: n } } */
 const path = require('path');
 const { ROTA } = require('./gercek_kosu.js');
 const Not = require(path.join(__dirname, '..', 'motor', 'not.js'));
@@ -13,7 +13,7 @@ const Kayit = require(path.join(__dirname, '..', 'motor', 'kayit.js'));
 const liste = x => x == null ? [] : Array.isArray(x) ? x : [x];
 
 function topla(gruplar){
-  const out = { notlar:[], kayitlar:[], kartlar:[], say:{}, disarida:{} };
+  const out = { notlar:[], kayitlar:[], kartlar:[], beden:{}, say:{}, disarida:{} };
   const gor = { notlar:new Set(), kayitlar:new Set(), kartlar:new Set() };
   const ekle = (ad, o) => { if(o && typeof o.id === 'string' && !gor[ad].has(o.id)){ gor[ad].add(o.id); out[ad].push(o); return true; } return false; };
   (gruplar || []).forEach(g => {
@@ -31,6 +31,11 @@ function topla(gruplar){
           else if(bag.indexOf('kayit.') === 0){
             // profil gibi kayıt olmayan çıktılar (tur ve gün taşımaz) kabuğun kayıt listesine girmez
             if(o && Kayit.TURLER[o.tur] && typeof o.gun === 'string'){ if(ekle('kayitlar', o)) s.cikti++; }
+            else if(bag === 'kayit.spiProfil' && o){
+              // eski profil: kabukta Ayarlar › Beden (kabuk/ayar.js lifeos.beden.*). Kilo ayar değil, kayıttır.
+              ['cinsiyet', 'boy', 'dogumYili', 'hedef'].forEach(a => { if(o[a] != null && out.beden[a] == null) out.beden[a] = o[a]; });
+              s.cikti++;
+            }
             else out.disarida[bag] = (out.disarida[bag] || 0) + 1;
           }
           else if(bag.indexOf('tekrar.') === 0){

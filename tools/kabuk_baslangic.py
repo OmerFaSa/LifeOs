@@ -7,7 +7,7 @@
 
    Ne yapar: tek depoyu KOPYADAN okur (canli dosya SQLite ile acilmaz), her canli kaydi rotasina gore motorlarin
    goc bagdastiricilarina verir (tools/kabuk_baslangic.js; yonlendirme tools/gercek_kosu.js ROTA) ve ciktiyi tek
-   dosyaya yazar: { lifeos_kabuk_baslangic, kimlik, uretildi, say, notlar, kayitlar, kartlar }.
+   dosyaya yazar: { lifeos_kabuk_baslangic, kimlik, uretildi, say, notlar, kayitlar, kartlar, beden }.
    Kabuk bu dosyayi /api/kabuk/baslangic ile (yalniz bu bilgisayardan) gorur ve «Eski kayitlarimi getir» der.
    Tek depoya ve eski depolara yazmaz. Ekrana yalniz sayi basar; icerik dosyada, bu bilgisayarda kalir.
 """
@@ -60,7 +60,7 @@ def gruplar_oku(depo):
 
 def cevir(gruplar):
     """Node yardimcisina en cok PARTI kayitlik partiler verir; ciktilari kimlikle tekillestirerek birlestirir."""
-    out = {"notlar": [], "kayitlar": [], "kartlar": [], "say": {}, "disarida": {}}
+    out = {"notlar": [], "kayitlar": [], "kartlar": [], "beden": {}, "say": {}, "disarida": {}}
     gor = {k: set() for k in ("notlar", "kayitlar", "kartlar")}
     parti, n = [], 0
     for g in gruplar + [None]:
@@ -77,6 +77,8 @@ def cevir(gruplar):
                     if o["id"] not in gor[ad]:
                         gor[ad].add(o["id"])
                         out[ad].append(o)
+            for a, v in (r.get("beden") or {}).items():
+                out["beden"].setdefault(a, v)
             for bag, s in r["say"].items():
                 t = out["say"].setdefault(bag, {"girdi": 0, "cikti": 0, "ret": 0, "cokme": 0})
                 for k in t:
@@ -89,11 +91,11 @@ def cevir(gruplar):
 
 def paket(depo, zaman):
     r = cevir(gruplar_oku(depo))
-    icerik = {k: r[k] for k in ("notlar", "kayitlar", "kartlar")}
+    icerik = {k: r[k] for k in ("notlar", "kayitlar", "kartlar", "beden")}
     # kimlik icerikten: ayni depo ayni paketi verir, kabuk ayni paketi iki kez onermez
     kimlik = hashlib.sha256(json.dumps(icerik, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:16]
     return dict({"lifeos_kabuk_baslangic": 1, "kimlik": kimlik, "uretildi": zaman,
-                 "say": {k: len(v) for k, v in icerik.items()}}, **icerik), r
+                 "say": {k: len(icerik[k]) for k in ("notlar", "kayitlar", "kartlar")}}, **icerik), r
 
 
 def main(argv=None):
@@ -117,7 +119,8 @@ def main(argv=None):
     with open(yarim, "w", encoding="utf-8", newline="\n") as f:
         f.write(json.dumps(p, ensure_ascii=False, sort_keys=True) + "\n")
     os.replace(yarim, a.cikti)
-    print("Kabuk başlangıç paketi `%s`: %d not, %d kayıt, %d kart → %s" % (p["kimlik"], p["say"]["notlar"], p["say"]["kayitlar"], p["say"]["kartlar"], a.cikti))
+    print("Kabuk başlangıç paketi `%s`: %d not, %d kayıt, %d kart, %d beden alanı → %s" % (
+        p["kimlik"], p["say"]["notlar"], p["say"]["kayitlar"], p["say"]["kartlar"], len(p["beden"]), a.cikti))
     print("| Bağdaştırıcı | Girdi | Pakete giren | Ret | Çöktü | Kabuk deposu dışında |")
     print("|---|---:|---:|---:|---:|---:|")
     for bag in sorted(r["say"]):

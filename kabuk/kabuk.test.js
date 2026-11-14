@@ -332,6 +332,15 @@ t('köken taşıması: paket yeni kökenin deposuna geri yazılır; var olan ana
   esit([yeni.yazilan, d.v['rota84285.v2'], d.v.yeniAnahtar, yeni.iz.ays], [1, '{"benim":true}', '5', 'ays-c-2.json'], 'yeni pakette yalnız eksik anahtar yazılır');
 });
 
+t('başlangıç paketi: eski profil yalnız varsayılanda duran Beden ayarına yazılır; geçersiz değer şemadan geçmez', () => {
+  const d = sahteDepo({ 'lifeos.beden.boy': '180' });
+  esit(R.baslangicBeden(A, d, { cinsiyet: 'erkek', boy: 175, dogumYili: 2001, hedef: 'ver', bilinmeyen: 1 }), 3);
+  esit([A.oku(d, 'lifeos.beden.cinsiyet'), A.oku(d, 'lifeos.beden.boy'), A.oku(d, 'lifeos.beden.dogumYili'), A.oku(d, 'lifeos.beden.hedef')], ['erkek', 180, 2001, 'ver'], 'girilmiş boy kalır');
+  const e = sahteDepo();
+  esit([R.baslangicBeden(A, e, { boy: 999, cinsiyet: 'baska' }), A.oku(e, 'lifeos.beden.boy')], [0, null]);
+  esit(R.baslangicBeden(A, e, null), 0);
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {
