@@ -318,7 +318,7 @@
     var eksik = I.tasinanlar().filter(function (a) { return !I.al(a.id); });
     if (!eksik.length) return bugunSatiri(I);
     Promise.all(eksik.map(function (a) { return I.alanYukle(a.id); })).then(function () {
-      var el = d.querySelector('[data-onay-yer]'); if (el) el.outerHTML = bugunSatiri(I);
+      var el = d.querySelector('[data-onay-yer]'); if (el) el.outerHTML = bugunSatiri(I).replace('class="b-uyari ', 'class="b-uyari b-uyari--satir '); // Bugün'ün bekleyenler kartında satır biçimi (bilesen.js karsilama)
     });
     return '<div data-onay-yer hidden></div>';
   };

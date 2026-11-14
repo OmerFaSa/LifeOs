@@ -275,7 +275,9 @@
   function sayfaBugun() {
     var t = new Date(), ipucu = depo.getItem('lifeos.kabuk.ipucu') !== 'goruldu';
     var f = fDurum(), a = f && siradaki(f);
-    return ust('<span class="ust__tarih">' + tarih(t) + '</span>') + B.karsilama({ selam: selam(t, hesapAdi()),
+    var od = f && f.ilerleme && f.ilerleme.okunanDers;
+    return ust('<span class="ust__tarih">' + tarih(t) + '</span>') + B.karsilama({ tarih: tarih(t), selam: selam(t, hesapAdi()),
+      ilerleme: od && od.toplam ? { deger: od.deger, toplam: od.toplam } : null, alanlar: alanKartlari(f, od),
       sira: { ust: 'Sırada', metin: H.bul(etkinAlan).ad + ' · ' + (f ? f.asama.ad : 'ilk aşama') }, adim: a ? (a.tur === 'ders' ? 'Ders: ' : 'Kapı: ') + a.ad : null,
       eylem: { metin: f && f.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla', href: a ? adimYolu(a) : F() },
       baglanti: Kabuk.bugunEk ? Kabuk.bugunEk() : null, ekler: [ // araclar.js: planın sıradaki bloğu ya da plana davet
@@ -285,6 +287,26 @@
         Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '', // tanisma.js: kayıt yoksa tek satırlık davet
         Kabuk.onayBugun ? Kabuk.onayBugun() : '', // onay.js: «Onay bekleyen N ders», yalnız N > 0 iken
         ipucu ? B.uyari({ tur: 'bilgi', metin: 'Bir yere gitmek için boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : ''] });
+  }
+  // Bugün'ün alan ızgarası: haritadaki taşınmış alanlar; simge index.html'deki #i-<alan>, ilerleme yalnız açık alan için bilinir
+  var ALAN_RENK = { felsefe: 'turuncu', akademik: 'mavi', dil: 'yesil', tarih: 'pembe', okuma: 'sari', hareket: 'deniz', muzik: 'mor', beslenme: 'yesil', uyku: 'gok', tahlil: 'pembe' };
+  function alanKartlari(f, od) {
+    return H.YERLER.filter(function (y) { return y.katman === 'alan' && y.asama; }).map(function (y) {
+      var bu = y.id === etkinAlan && od && od.toplam && od.deger;
+      return { ad: y.ad, not: y.aciklama, href: y.yol, simge: y.id, renk: ALAN_RENK[y.id], yuzde: bu ? Math.round(100 * od.deger / od.toplam) : null };
+    });
+  }
+  // manzara: sahibin piksel sahnesi (brand/ortak/piksel-doga.js, sunucu /piksel-doga.js verir); süstür, çizilmezse gök rengi kalır
+  var manzaraIstendi = false;
+  function manzara() {
+    var c = sayfaEl.querySelector('.b-karsilama__manzara'), D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA;
+    if (!c) return;
+    if (!D) {
+      if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
+      return;
+    }
+    if (innerWidth < 640) { c.width = 200; c.height = 134; }
+    try { D.binaCiz(c.getContext('2d'), D.yerlesim(c.width, c.height, D.vakit(new Date().getHours()), 'yayla')); } catch (e) { /* süs */ }
   }
   function sayfaDal(yer) {
     var ys = H.dalinYerleri(yer.dal);
@@ -497,6 +519,7 @@
     sayfaEl.innerHTML = html;
     sayfaEl.setAttribute('data-yer', yer.id);
     d.title = yer.ad + ' · LifeOS';
+    if (yer.id === 'bugun') manzara();
     return yer;
   }
   function git(yol) { if (location.hash === yol) rota(); else location.hash = yol; }

@@ -236,7 +236,7 @@ t('bilesen.css yalnız kabuk.css jetonlarını kullanır; yeni jeton ve renk yok
   dogru(!/(^|[;{\s])--[a-z0-9-]+\s*:/.test(css), 'yeni jeton tanımı var');
   dogru(!/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(css), 'elle renk var');
   (css.match(/font-family:[^;}]+/g) || []).forEach(f => dogru(/font-family:var\(--(piksel|govde)\)/.test(f), f));
-  dogru(!/border-radius/.test(css), 'köşe yuvarlatma');
+  (css.match(/border-radius:[^;}]+/g) || []).forEach(k => dogru(/^border-radius:(0|var\(--kose(-k)?\))$/.test(k), 'köşe yalnız jetondan: ' + k));
 });
 t('bilesen.css bağlam seçicisi yazmaz: her kural bir .b- taşıyla başlar', () => {
   const kurallar = css.replace(/@media[^{]+\{/g, '').split('}').map(x => x.split('{')[0].trim()).filter(Boolean);
@@ -300,15 +300,20 @@ t('ağ: düğümler bağlantı, kenar türleri, açıklama örnek çizgili, köt
   atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: d, kenarlar: [{ a: 'a', b: 'b', tur: 'mor' }] }), /kenar.tur/, 'bilinmeyen çizgi');
   atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: [d[0], Object.assign({}, d[1], { href: 'javascript:alert(1)' })] }), /href/, 'javascript: bağlantısı');
 });
-t('karşılama: h1 selam, sırada, tek ana düğme, bağlantı ve bilgi satırları; boşsa kap çizilmez', () => {
-  const h = B.karsilama({ selam: 'Günaydın.', sira: { ust: 'Sırada', metin: 'Felsefe · Bilgi' }, adim: 'Ders: Sanı', eylem: { metin: 'Başla', href: '#/alan/felsefe/ders/x' },
-    baglanti: { metin: 'Günü planla', href: '#/motor/plan' }, ekler: ['', B.uyari({ tur: 'bilgi', metin: 'İpucu' })] });
-  dogru(h === '<div class="b-karsilama"><h1 class="b-karsilama__selam">Günaydın.</h1><p class="b-karsilama__sira"><span class="b-karsilama__ust">Sırada</span><br>Felsefe · Bilgi</p>' +
-    '<p class="b-karsilama__adim">Ders: Sanı</p><a class="b-dugme b-dugme--ana" href="#/alan/felsefe/ders/x">Başla</a><a class="b-karsilama__baglanti" href="#/motor/plan">Günü planla</a>' +
-    '<div class="b-karsilama__ek"><div class="b-uyari b-uyari--bilgi" role="note"><span class="b-uyari__tur">Bilgi</span><p class="b-uyari__metin">İpucu</p></div></div></div>', h);
-  dogru(!/b-karsilama__ek|b-karsilama__baglanti|b-karsilama__adim/.test(B.karsilama({ selam: 'Selam.', eylem: { metin: 'Başla', href: '#/a' }, ekler: ['', ''] })), 'boş ekler ve bağlantısız: kap yok');
+t('karşılama (Manzara): manzara şeridi + h1 selam, iş kartında sırada/adım/tek ana düğme/bağlantı/halka, bekleyenler tek kartta, alanlar; boşsa kap çizilmez', () => {
+  const h = B.karsilama({ tarih: 'Cumartesi · 14 Kasım', selam: 'Günaydın.', sira: { ust: 'Sırada', metin: 'Felsefe · Bilgi' }, adim: 'Ders: Sanı', eylem: { metin: 'Başla', href: '#/alan/felsefe/ders/x' },
+    baglanti: { metin: 'Günü planla', href: '#/motor/plan' }, ilerleme: { deger: 2, toplam: 8 }, ekler: ['', B.uyari({ tur: 'bilgi', metin: 'İpucu' })],
+    alanlar: [{ ad: 'Felsefe', not: 'Soru, kavram', href: '#/alan/felsefe', simge: 'felsefe', renk: 'turuncu', yuzde: 25 }, { ad: 'Dil', href: '#/alan/dil', simge: 'dil', renk: 'yok' }] });
+  dogru(h.startsWith('<div class="b-karsilama"><div class="b-karsilama__sahne"><canvas class="b-karsilama__manzara" width="384" height="96" aria-hidden="true"></canvas><div class="b-karsilama__ic"><p class="b-karsilama__tarih">Cumartesi · 14 Kasım</p><h1 class="b-karsilama__selam">Günaydın.</h1></div></div>'), h);
+  dogru(h.includes('<p class="b-karsilama__sira"><span class="b-karsilama__ust">Sırada</span><br>Felsefe · Bilgi</p><p class="b-karsilama__adim">Ders: Sanı</p><div class="b-karsilama__eylem"><a class="b-dugme b-dugme--ana" href="#/alan/felsefe/ders/x">Başla</a><a class="b-karsilama__baglanti" href="#/motor/plan">Günü planla</a></div>'), 'iş kartı');
+  dogru(/aria-label="İlerleme yüzde 25"[\s\S]*stroke-dashoffset="188\.5"[\s\S]*%25<small>2 \/ 8 ders<\/small>/.test(h), 'halka');
+  dogru(h.includes('<h2 class="b-karsilama__baslik">Bekleyenler</h2><div class="b-karsilama__ek"><div class="b-uyari b-uyari--satir b-uyari--bilgi" role="note">'), 'bekleyenler');
+  dogru(h.includes('b-karsilama__simge--turuncu') && h.includes('<use href="#i-felsefe"/>') && h.includes('%25</span>') && /b-karsilama__simge--turuncu[\s\S]*Dil/.test(h) && h.includes('#i-sag'), 'alanlar: renk, simge, yüzde, bilinmeyen renk turuncuya düşer');
+  dogru((h.match(/<h1/g) || []).length === 1 && (h.match(/b-dugme--ana/g) || []).length === 1, 'tek h1, tek ana düğme');
+  dogru(!/b-karsilama__ek|b-karsilama__baglanti|b-karsilama__adim|b-karsilama__halka|b-karsilama__alanlar/.test(B.karsilama({ selam: 'Selam.', eylem: { metin: 'Başla', href: '#/a' }, ekler: ['', ''] })), 'boş ekler, bağlantısız, ilerlemesiz, alansız: kap yok');
   atar(() => B.karsilama({ selam: 'S' }), /seçenek nesnesi/, 'düğmesiz karşılama');
   atar(() => B.karsilama({ selam: 'S', eylem: { metin: 'B', href: '#/a' }, baglanti: { metin: 'x', href: 'javascript:alert(1)' } }), /href/, 'tehlikeli bağlantı');
+  atar(() => B.karsilama({ selam: 'S', eylem: { metin: 'B', href: '#/a' }, alanlar: [{ ad: 'x', href: 'javascript:alert(1)' }] }), /href/, 'tehlikeli alan bağlantısı');
 });
 t('halka ve komut çubuğu: menü/menuitem, dialog/combobox/listbox, gizli çizilir; sonuç öğeleri option, boşsa «Sonuç yok»', () => {
   const h = B.halka({ id: 'halka', ad: 'Yerler', ogeler: ['Bugün', 'Öğren', 'Sağlık', 'Ayarlar'].map((ad, i) => ({ ad, yol: '#/y' + i })) });

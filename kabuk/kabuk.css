@@ -1,29 +1,36 @@
-/* KABUK — tam ekran çerçeve. Piksel kimlik korunur: Pixelify Sans (brand/ortak/piksel-yazi.css),
-   sıcak kahverengi palet, köşesiz yüzey, iki piksellik çizgi. Açık değerler brand/ortak/piksel.css'in
+/* KABUK — tam ekran çerçeve. Piksel kimlik başlıkta, rakamda ve manzarada (Pixelify Sans, brand/ortak/piksel-yazi.css);
+   gövde okunur yazı, sıcak kahverengi palet, yumuşak köşe ve gölgeli yüzey (2026-11-14, sahibin isteği «profesyonel»).
+   Öneri: belgeler/tasarim/kabuk-pro/. Açık değerler brand/ortak/piksel.css'in
    açık temasından, koyu değerler plan.html'deki onaylı maketlerden (--m-*) alındı. */
 :root{
-  --bg:#f6e6ca; --yuzey:#fffaef; --yuzey-2:#f1dcb8; --cizgi:#e3c9a0; --cizgi-guclu:#b8946c;
-  --yazi:#42291f; --yazi-2:#65443a; --soluk:#6f4f42;
-  --ana:#b1461f; --ana-yazi:#fff8ea; --altin:#7f5a00; --perde:rgba(50,28,30,.42);
+  --bg:#faf8f5; --yuzey:#ffffff; --yuzey-2:#f4f1ec; --cizgi:#ebe6de; --cizgi-guclu:#d6cdbf;
+  --yazi:#1f1b16; --yazi-2:#4a433b; --soluk:#7a7067;
+  --ana:#b4461f; --ana-yazi:#ffffff; --altin:#7f5a00; --perde:rgba(50,28,30,.42);
   --vurgu:var(--ana); --vurgu-yazi:var(--ana-yazi);
-  --golge:4px 4px 0 #3f282c40;
+  --golge:4px 4px 0 #3f282c40; --golge-yumusak:0 1px 2px #1f1b160a, 0 4px 16px #1f1b160f; --golge-buyuk:0 12px 40px #1f1b1624;
+  --kose:16px; --kose-k:10px;
+  --dugme-ana:#1f1b16; --dugme-ana-yazi:#ffffff;
+  --gok:#5b5a9c; --sahne-yazi:#ffffff; --sahne-golge:0 2px 12px #00000040;
+  --sahne-ortu:linear-gradient(180deg, #140e1e73 0%, #140e0a1a 30%, #140e0a40 55%, #140e0ab3 100%);
+  --r-mavi:#4f46e5; --r-yesil:#047857; --r-turuncu:#c2410c; --r-pembe:#be185d; --r-gok:#0369a1; --r-sari:#a16207; --r-mor:#6d28d9; --r-deniz:#0f766e;
   --piksel:'Piksel Rakam','Pixelify Sans',ui-monospace,monospace;
-  --govde:var(--piksel);
+  --govde:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  --baslik:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
   --sure:.16s; --boy:16px; --satir:1.5; --odak:3px;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#2b211b; --yuzey:#3a2c24; --yuzey-2:#221914; --cizgi:#5f4c3e; --cizgi-guclu:#a88c5f;
+    --bg:#141210; --yuzey:#1c1a17; --yuzey-2:#24211d; --cizgi:#2f2b26; --cizgi-guclu:#4a443c;
     --yazi:#f3e7d4; --yazi-2:#e3d2b8; --soluk:#bca88f;
-    --ana:#ee9b62; --ana-yazi:#3a2213; --altin:#cfa860; --perde:rgba(10,6,4,.55); --golge:4px 4px 0 #0d070488;
+    --ana:#ee9b62; --ana-yazi:#3a2213; --altin:#cfa860; --perde:rgba(10,6,4,.55); --golge:4px 4px 0 #0d070488; --golge-yumusak:0 1px 2px #0000004d, 0 10px 30px #00000059; --golge-buyuk:0 16px 48px #00000080; --dugme-ana:#f3ede4; --dugme-ana-yazi:#1c1a17; --r-mavi:#a5b4fc; --r-yesil:#6ee7b7; --r-turuncu:#fdba74; --r-pembe:#f9a8d4; --r-gok:#7dd3fc; --r-sari:#fde047; --r-mor:#c4b5fd; --r-deniz:#5eead4;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#2b211b; --yuzey:#3a2c24; --yuzey-2:#221914; --cizgi:#5f4c3e; --cizgi-guclu:#a88c5f;
+  --bg:#141210; --yuzey:#1c1a17; --yuzey-2:#24211d; --cizgi:#2f2b26; --cizgi-guclu:#4a443c;
   --yazi:#f3e7d4; --yazi-2:#e3d2b8; --soluk:#bca88f;
-  --ana:#ee9b62; --ana-yazi:#3a2213; --altin:#cfa860; --perde:rgba(10,6,4,.55); --golge:4px 4px 0 #0d070488;
+  --ana:#ee9b62; --ana-yazi:#3a2213; --altin:#cfa860; --perde:rgba(10,6,4,.55); --golge:4px 4px 0 #0d070488; --golge-yumusak:0 1px 2px #0000004d, 0 10px 30px #00000059; --golge-buyuk:0 16px 48px #00000080; --dugme-ana:#f3ede4; --dugme-ana-yazi:#1c1a17; --r-mavi:#a5b4fc; --r-yesil:#6ee7b7; --r-turuncu:#fdba74; --r-pembe:#f9a8d4; --r-gok:#7dd3fc; --r-sari:#fde047; --r-mor:#c4b5fd; --r-deniz:#5eead4;
   color-scheme:dark;
 }
 /* ayarlardan türeyen kök nitelikleri (kabuk/ayar.js `kok`) */
@@ -34,7 +41,7 @@
 :root[data-satir="genis"]{ --satir:1.85; }
 :root[data-kontrast="yuksek"]{ --soluk:var(--yazi-2); --cizgi:var(--cizgi-guclu); }
 :root[data-odak="belirgin"]{ --odak:5px; }
-:root[data-yazi="sistem"]{ --govde:system-ui,-apple-system,"Segoe UI",sans-serif; }
+:root[data-yazi="piksel"]{ --govde:var(--piksel); }
 :root[data-altcizgi="evet"] .govde a:not(.b-dugme):not(.b-satir):not(.b-ders){ text-decoration:underline; }
 :root[data-hareket="az"]{ --sure:0s; }
 @media (prefers-reduced-motion: reduce){ :root[data-hareket="sistem"]{ --sure:0s; } }
@@ -43,8 +50,8 @@
 html{ font-size:var(--boy); -webkit-text-size-adjust:100%; }
 body{ margin:0; min-height:100dvh; background:var(--bg); color:var(--yazi); font-family:var(--govde); line-height:var(--satir);
   overflow-x:hidden; -webkit-tap-highlight-color:transparent; }
-h1,h2,kbd{ font-family:var(--piksel); }
-h1{ font-size:clamp(1.6rem,4vw,2.1rem); font-weight:600; line-height:1.15; margin:0; text-wrap:balance; }
+h1,h2{ font-family:var(--baslik); letter-spacing:-.02em; } kbd{ font-family:var(--govde); }
+h1{ font-size:clamp(1.6rem,4vw,2.1rem); font-weight:650; line-height:1.15; margin:0; text-wrap:balance; }
 h2{ font-size:1rem; font-weight:600; margin:0; }
 p{ margin:0; }
 a{ color:inherit; text-decoration:none; }
@@ -62,7 +69,7 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
 .cerceve p,.cerceve h1,.cerceve li span{ -webkit-user-select:text; user-select:text; }
 .ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px; }
-.ust__sol{ display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:var(--soluk); font-family:var(--piksel); }
+.ust__sol{ display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:var(--soluk); font-family:var(--govde); }
 .ust__sol > span:last-child{ overflow:hidden; text-overflow:ellipsis; }
 .ust__sag{ display:flex; gap:6px; flex:none; }
 .kirinti{ color:var(--yazi); padding:6px 2px; }
@@ -97,3 +104,11 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 
 /* yeni adımın girişi (bilesen.css 26 · sohbet kullanır; @keyframes taş seçicisi değil, burada durur) */
 @keyframes gir{ from{ opacity:0; transform:translateY(4px); } }
+
+/* Bugün («Manzara»): üst çubuk manzaranın üstüne biner, tarih selamın üstünde durur */
+#sayfa[data-yer="bugun"]{ padding-top:0; }
+#sayfa[data-yer="bugun"] > .ust{ position:absolute; z-index:3; top:max(10px,env(safe-area-inset-top)); left:0; right:0; max-width:752px; margin:0 auto; padding:0 16px; }
+#sayfa[data-yer="bugun"] > .ust .ust__sol{ visibility:hidden; }
+#sayfa[data-yer="bugun"] > .ust .b-dugme--sade{ color:var(--sahne-yazi); }
+#sayfa[data-yer="bugun"] > .ust .b-dugme--sade:hover{ background:#ffffff26; }
+#sayfa[data-yer="bugun"] > .ust kbd{ color:var(--sahne-yazi); border-color:#ffffff59; }

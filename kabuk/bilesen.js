@@ -414,18 +414,39 @@
       (l ? '<ul class="b-ag__aciklama">' + l + '</ul>' : '') + '</figcaption>' : '') + '</figure>';
   }
 
-  /* 23 · Karşılama (Bugün; karşılama A: tek cümle, tek düğme). Ortada selam (h1, büyük piksel yazı), «sırada» satırı (sira {ust, metin}), sıradaki adım,
-   * tek ana düğme (eylem: dugme seçenekleri, tür varsayılan ana); altında isteğe bağlı tek bağlantı (baglanti {metin, href}) ve bilgi satırları
-   * (ekler: uyarı taşlarının çıktısı; hepsi aynı genişlikte, en çok 760 px). */
+  /* 23 · Karşılama (Bugün, «Manzara» yönü, sahibin seçimi 2026-11-14; örnek belgeler/tasarim/kabuk-pro/v2/odak.html?manzara=1).
+   * Üstte manzara şeridi (canvas.b-karsilama__manzara: çizimi ekran yapar, çizilmezse gökyüzü rengi kalır), tarih ve selam (tek h1);
+   * altında şeride binen iş kartı: «sırada» satırı (sira {ust, metin}), sıradaki adım, tek ana düğme (eylem), isteğe bağlı bağlantı
+   * (baglanti {metin, href}) ve ilerleme halkası (ilerleme {deger, toplam}); altında «Bekleyenler» (ekler: uyarı taşları tek liste kartında)
+   * ve «Alanlar» (alanlar [{ad, not?, href, simge (index.html'deki #i-<simge>), renk?, yuzde?}]). */
+  var RENK = ['mavi', 'yesil', 'turuncu', 'pembe', 'gok', 'sari', 'mor', 'deniz'];
   function karsilama(o) {
     nesne('karsilama', o);
     var s = o.sira == null ? null : nesne('karsilama', o.sira), b = o.baglanti == null ? null : nesne('karsilama', o.baglanti), ek = o.ekler == null ? '' : govde('karsilama', o.ekler);
-    return '<div class="b-karsilama"><h1 class="b-karsilama__selam">' + kac(metin('karsilama', 'selam', o.selam)) + '</h1>' +
+    var il = o.ilerleme == null ? null : nesne('karsilama', o.ilerleme), oran = il && il.toplam > 0 ? Math.max(0, Math.min(1, il.deger / il.toplam)) : null;
+    var yuzde = oran == null ? 0 : Math.round(oran * 100);
+    var halka = oran == null ? '' : '<div class="b-karsilama__halka" role="img" aria-label="İlerleme yüzde ' + yuzde + '"><svg viewBox="0 0 96 96" aria-hidden="true">' +
+      '<circle class="b-karsilama__iz" cx="48" cy="48" r="40"/><circle class="b-karsilama__dolu" cx="48" cy="48" r="40" stroke-dasharray="251.3" stroke-dashoffset="' + (251.3 * (1 - oran)).toFixed(1) + '"/></svg>' +
+      '<span class="b-karsilama__oran">%' + yuzde + '<small>' + (+il.deger) + ' / ' + (+il.toplam) + ' ders</small></span></div>';
+    var al = (o.alanlar || []).map(function (a) {
+      nesne('karsilama', a);
+      var renk = RENK.indexOf(a.renk) >= 0 ? a.renk : 'turuncu';
+      return '<a class="b-karsilama__alan" href="' + kac(yol('karsilama', a.href)) + '"><span class="b-karsilama__simge b-karsilama__simge--' + renk + '" aria-hidden="true"><svg><use href="#i-' + kac(String(a.simge || 'nokta')) + '"/></svg></span>' +
+        '<span class="b-karsilama__alanmetin"><span class="b-karsilama__alanad">' + kac(metin('karsilama', 'alanlar.ad', a.ad)) + '</span>' +
+        (a.not ? '<span class="b-karsilama__alannot">' + kac(metin('karsilama', 'alanlar.not', a.not)) + '</span>' : '') + '</span>' +
+        (a.yuzde != null ? '<span class="b-karsilama__yuzde">%' + Math.round(+a.yuzde) + '</span>' : '<svg class="b-karsilama__ok" aria-hidden="true"><use href="#i-sag"/></svg>') + '</a>';
+    }).join('');
+    return '<div class="b-karsilama"><div class="b-karsilama__sahne"><canvas class="b-karsilama__manzara" width="384" height="96" aria-hidden="true"></canvas>' +
+      '<div class="b-karsilama__ic">' + (o.tarih ? '<p class="b-karsilama__tarih">' + kac(metin('karsilama', 'tarih', o.tarih)) + '</p>' : '') +
+      '<h1 class="b-karsilama__selam">' + kac(metin('karsilama', 'selam', o.selam)) + '</h1></div></div>' +
+      '<section class="b-karsilama__is" aria-label="Sıradaki"><div class="b-karsilama__govde">' +
       (s ? '<p class="b-karsilama__sira"><span class="b-karsilama__ust">' + kac(metin('karsilama', 'sira.ust', s.ust)) + '</span><br>' + kac(metin('karsilama', 'sira.metin', s.metin)) + '</p>' : '') +
       (o.adim ? '<p class="b-karsilama__adim">' + kac(metin('karsilama', 'adim', o.adim)) + '</p>' : '') +
-      dugme(Object.assign({ tur: 'ana' }, nesne('karsilama', o.eylem))) +
-      (b ? '<a class="b-karsilama__baglanti" href="' + kac(yol('karsilama', b.href)) + '">' + kac(metin('karsilama', 'baglanti.metin', b.metin)) + '</a>' : '') +
-      (ek ? '<div class="b-karsilama__ek">' + ek + '</div>' : '') + '</div>';
+      '<div class="b-karsilama__eylem">' + dugme(Object.assign({ tur: 'ana' }, nesne('karsilama', o.eylem))) +
+      (b ? '<a class="b-karsilama__baglanti" href="' + kac(yol('karsilama', b.href)) + '">' + kac(metin('karsilama', 'baglanti.metin', b.metin)) + '</a>' : '') + '</div></div>' + halka + '</section>' +
+      (ek ? '<section class="b-karsilama__bolum" aria-label="Bekleyenler"><h2 class="b-karsilama__baslik">Bekleyenler</h2><div class="b-karsilama__ek">' +
+        ek.replace(/class="b-uyari /g, 'class="b-uyari b-uyari--satir ') + '</div></section>' : '') +
+      (al ? '<section class="b-karsilama__bolum" aria-label="Alanlar"><h2 class="b-karsilama__baslik">Alanlar</h2><nav class="b-karsilama__alanlar" aria-label="Alanlar">' + al + '</nav></section>' : '') + '</div>';
   }
 
   /* 24 · Halka (Yerler). Basılı tutunca ya da Ctrl . ile açılan dairesel menü: role=menu, öğeler menuitem düğmeleri (data-yol); ilki tepede, saat yönünde

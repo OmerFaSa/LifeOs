@@ -91,7 +91,7 @@ async function goruntu(p, ad, sec = {}) {
       localStorage.getItem('lifeos.gezi.metin') === 'duz metin' && JSON.parse(localStorage.getItem('lifeos.tasima')).ays === 'ays-cGEZ-20261114-000000-abcdef.json'));
     dene('Bugün: «Başla» ilk derse götürür', (await p.getAttribute('.b-karsilama .b-dugme--ana', 'href')) === '#/alan/felsefe/ders/' + u1.dersler[0].id);
     dene('Bugün: karşılama taşı tek h1 selam, «Sırada» satırı, tek ana düğme', (await p.locator('#sayfa h1.b-karsilama__selam').count()) === 1 && (await p.locator('#sayfa h1').count()) === 1
-      && /^Sırada/.test(await p.textContent('.b-karsilama__sira')) && (await p.locator('.b-karsilama > .b-dugme--ana').count()) === 1);
+      && /^Sırada/.test(await p.textContent('.b-karsilama__sira')) && (await p.locator('.b-karsilama__is .b-dugme--ana').count()) === 1);
     await goruntu(p, 'karsilama');
     // ---- Halka (taş 24): Ctrl . ile ortada açılır, menü/menuitem, ok tuşu gezer, Esc kapatır ve odak geri döner ----
     const halkaAcik = () => p.evaluate(() => !document.getElementById('halka').hidden); // halka kabı 0 × 0: görünürlüğü hidden niteliğinden

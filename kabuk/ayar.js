@@ -23,7 +23,7 @@
       secenekler: { system: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, aciklama: 'Açık ya da koyu renkler.', kaynak: ENV + ' §3c Tema, yazı: tema.secim' },
     { anahtar: 'lifeos.tema.oto', ad: 'Saate göre tema', tur: 'secim', varsayilan: 'kapali', grup: 'gorunum', esitlenir: true,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Akşam koyu, sabah açık tema.', kaynak: ENV + ' §3c Tema, yazı: tema.oto' },
-    { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'piksel', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
+    { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'sistem', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
       secenekler: { piksel: 'Piksel', sistem: 'Cihazın yazısı' }, aciklama: 'Başlıklar her zaman piksel kalır.', kaynak: ENV + ' §3c Tema, yazı: yazi' },
     { anahtar: 'lifeos.vurgu', ad: 'Vurgu rengi', tur: 'secim', varsayilan: 'modul', grup: 'gorunum', kok: 'data-vurgu', esitlenir: true,
       secenekler: { modul: 'Alanın rengi', mavi: 'Mavi', yesil: 'Yeşil', mor: 'Mor', turuncu: 'Turuncu', pembe: 'Pembe', grafit: 'Grafit' },
