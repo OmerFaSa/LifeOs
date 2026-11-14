@@ -47,7 +47,7 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 - `hafiza_olcum.py` — HKM hafıza aramasını kök eşlemesi ve gömme ile karşılaştırıp süre ve doğruluk ölçer, optimizasyonda koşulur.
 - `hafiza_olcum_kume.json` — Hafıza arama ölçüm aracı için 24 adet Türkçe soru ve bilgi çifti içeren test kümesi verisidir.
 - `merdiven_olcum.py` — KING-4 A6 model merdivenini (kolay yerel, zor bulut, kota düşüşü) ölçer, gerektiğinde koşulur.
-- `sayilar.py` — Depo genelindeki test, satır ve modül sayılarını tek kaynaktan hesaplayıp belgelere yazar, CI'da denetlenir.
+- `sayilar.py` — Tek sistemin test takımlarını (ve `--tam` ile tarayıcı gezilerini) koşturup her birinin son satırını `belgeler/NOTLAR.md`'ye yazar.
 
 ## Kabul testleri
 - `bilinc_kabul_test.py` — Bilinç haritası (`brand/ortak/bilinc.js`) kabul testi; temizlik, bağ ayrıştırma, ağ ve yerleşim.
@@ -91,6 +91,7 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 - `tekkapi_test.py` — Tek kapı (`sistem/tekkapi.py`): giriş, üç modül `/ays/` `/spi/` `/esp/` yolunda, yeni kabuk `/kabuk/` kapalı listeyle, API'ler ve HKM `/api/hkm/` aynı süreçte eski sunucuyla aynı cevabı verir, bilinmeyen yol 404, köken kuralları durur, kapalıyken açılmaz; geçici veri ve boş portla, CI'da koşulur.
 - `kalite_etiket_test.py` — Sahibin etiket kapısı (`sistem/etiket.py`, `/api/kalite/etiket…`): yalnız bu bilgisayardan, en çok 20 bekleyen satır yalnız gösterilecek alanlarla, bilinmeyen set/kimlik/etiket ve bozuk set yazılmaz, dosya bütün yazılır; geçici klasör ve boş portla, CI'da koşulur.
 - `kabuk_gez.js` — Yeni kabuğu (`kabuk/`) tek kapıdan yalıtılmış ortamda açar, Felsefe pilotunun ilk ünitesini, Not ve Tekrar ekranlarını gerçek tarayıcıda yürür (ders, alıştırma, ünite kapısı, not ve bağ, kart ve cevap, kayıt); `--goruntu` önizleme görüntülerini yeniler; CI'da koşulur.
+- `ortak_test.js` — `brand/ortak/*.test.js`'yi ortak modüllerle gerçek tarayıcıda koşar (eski modüllerin koşucusunun yerine); silinen modül ortamını isteyen vakalar açık listede atlanır ve sayılır; CI'da koşulur.
 - `kabuk_esit_gez.js` — Kabuk kayıtlarının tek depoya eşitlenmesini gerçek tarayıcıda iki cihazla yürür (yazı dosyadan okunan tek depoda, öbür cihazda görünür, çakışmada ezilen değer saklanır, silme yayılır, günlük yedek); yalıtılmış ortam, CI'da koşulur.
 - `bilesen_goruntu.js` — Bileşen kataloğunu (`kabuk/bilesen.html`) Chromium'da file:// ile açar, 390/1280 genişlikte açık ve koyu dört önizleme görüntüsü çeker (`belgeler/ekip/sadelesme/kabuk-onizleme/bilesen-*.png`); elle koşulur.
 - `veri_denetle_test.py` — tools/veri_denetle.py birim testleri; kenar durumları sınar, CI'da koşulur.
