@@ -2,6 +2,8 @@
 
 LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlarında kullanılan araçların fihristidir. Araç yolları CI boru hatlarında ve ofis süreçlerinde sabit olduğundan dosyalar taşınmaz; bu dizin hangi betiğin ne amaçla ve ne zaman çalıştırıldığını açıklar.
 
+Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını sınayan araçlar kalktı (liste: `belgeler/ekip/sadelesme/faz7-kapanis.md`); Playwright yalnız `tools/package.json`'dadır.
+
 ## Denetim
 - `ci_hata.sh` — CI adımını koşar; kalırsa çıktının ilgili satırlarını tek bir açık okunur `::error` bildirimine yazar (iş kaydı yönetici yetkisi ister).
 - `ci_satir.sh` — Çok satırlı bir CI adımının (`run: |`) her satırını ayrı koşar ve kalan her satırı `ci_hata.sh` ile kendi bildirimine yazar; ofis adımının `shell:` koşucusudur.

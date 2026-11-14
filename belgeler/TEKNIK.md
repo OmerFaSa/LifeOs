@@ -5,6 +5,20 @@
 > Kısa tanıtım ve başlangıç: [`README.md`](../README.md). Bu belge ayrıntıdır:
 > sistemlerin ne paylaşıp ne paylaşmadığı, çalıştırma, telefon, sayılar, sınırlar.
 
+## Bugünkü sistem (kapanış, Faz 7)
+
+| Parça | Nerede | Not |
+|---|---|---|
+| Tek kapı | `sistem/tekkapi.py` (4180, `ETKIN = True`) | `/` → `/kabuk/` (sorgu korunur), `/kabuk/`, `/motor/*.js`, `/alan/**/*.json`, bütün `/api/...`, Merkez `/api/hkm/<yol>` aynı süreçte (`HKM/daemon.Handler`'a devir). Bilinmeyen yol 404. `--port <boş port>` sınama kapısı: zamanlayıcı yok, güncelleme ve yeniden başlatma 403. |
+| Başlatıcı | `sistem/baslat.py` | yalnız tek kapıyı açar; `--dur` kapanıştan önce açılmış `sunucu.py`/HKM daemon'unu da adıyla kapatır. |
+| İşleyiciler | `sistem/sunucu.py` | `Giris` (hesap ve sistem paneli `/kartlar/`, `/api/...`), kabuk dosyaları, planlama, güncelleme; kendi kapısı yok. |
+| Cihaz yolu | `sistem/uzak.py` | yalnız Tailscale `serve` 443 → 4180 (asla `funnel`); eski dış kapılar (5173/5183/5193, 443→4200) `ac/kapat` ile kapanır. Ev ağı sertifikası (`telefon.py`) yok. |
+| Hesap ve eşitleme | `sistem/hesap.py`, `brand/ortak/hesap.js` | `ev_agi` yalnız Tailscale adı; QR doğrudan Tailscale adresine. |
+| Merkez çekirdeği | `HKM/core`, `HKM/daemon.py` | yüz (`HKM/web`) yok; BAM kayıt deposu olarak duruyor (`faz7-kapanis.md` açık soru 2). |
+| Eski modül kaynağı | `motor/eski/` | yalnız motor eşitlik testleri okur; sunulmaz. |
+
+Aşağıdaki bölümler kapanıştan önceki üç modüllü düzeni anlatır; tarihçedir. Kod `c293d421`'de.
+
 Tek kişinin gündelik hayatını yöneten üç bağımsız sistem.
 
 <p align="center"><img src="../brand/medya/harita/harita-sistem.webp" alt="AYS, SPİ, ESP ve yanlarında HKM" width="820"/></p>
@@ -229,7 +243,7 @@ tek dosya (`file://`) ya da ev ağından `http` ile SPİ'nin kamerası ve canlı
 rota kaydı çalışmaz. Bir kez:
 
 ```bash
-python3 sistem/telefon.py            # yerel kök + sunucu sertifikası (openssl yalnız burada)
+# (kapanış) sistem/telefon.py ve ev ağı sertifikası kalktı; cihaz yolu yalnız Tailscale
 python3 sistem/baslat.py --yeniden   # sunucu ev ağında https kapılarını da açar
 ```
 

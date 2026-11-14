@@ -142,9 +142,9 @@ def olcut(id_, ad, deger, etiket, yol, katman="sistem", ayrinti=None):
 # ---------- Sistem ölçütleri ----------
 
 def uygulamalar(kok):
-    ust = sorted({y.split("/")[0] for y in bul(kok, "*/src/index.html") + bul(kok, "*/web/index.html")})
+    ust = sorted({y.split("/")[0] for y in bul(kok, "*/src/index.html") + bul(kok, "*/web/index.html") + bul(kok, "kabuk/index.html")})
     return [olcut("uygulama", "Uygulama", len(ust), "ölçüldü",
-                  "kendi index.html'i olan üst klasör: */src/index.html + */web/index.html",
+                  "kendi index.html'i olan üst klasör: */src/index.html + */web/index.html + kabuk/index.html (tek kapı)",
                   ayrinti={"klasorler": ust})]
 
 

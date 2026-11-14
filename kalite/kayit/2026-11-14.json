@@ -4,11 +4,10 @@
    "ad": "Ağ çizimi",
    "ayrinti": {
     "var": [
-     "bilinc_ag",
-     "defter_ag"
+     "bilinc_ag"
     ]
    },
-   "deger": 2,
+   "deger": 1,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "ag_cizimi",
@@ -20,7 +19,7 @@
    "ayrinti": {
     "dosya": "alan/akademik/asama-1.json"
    },
-   "deger": 2224187,
+   "deger": 2283941,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "alan_paketi_en_buyuk",
@@ -30,7 +29,7 @@
   "ayar_yeri": {
    "ad": "Elle yazılan ayar yeri",
    "ayrinti": {},
-   "deger": 2,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "ayar_yeri",
@@ -40,12 +39,12 @@
   "blok": {
    "ad": "Blok",
    "ayrinti": {
-    "AYS": 160,
-    "ESP": 54,
-    "SPI": 76,
-    "brand/ortak": 14
+    "AYS": 0,
+    "ESP": 0,
+    "SPI": 0,
+    "brand/ortak": 13
    },
-   "deger": 304,
+   "deger": 13,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "blok",
@@ -56,14 +55,12 @@
    "ad": "Cihaz yolu (ağ yolu)",
    "ayrinti": {
     "ag_yolu": [
-     "ev_agi",
      "ios_kabugu",
-     "tailscale",
-     "tek_dosya"
+     "tailscale"
     ],
-    "baglanma_bicimi": 9
+    "baglanma_bicimi": 7
    },
-   "deger": 4,
+   "deger": 2,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "cihaz_yolu",
@@ -73,19 +70,10 @@
   "denetimsiz_secim": {
    "ad": "Denetimsiz seçim",
    "ayrinti": {
-    "denetimsiz": [
-     "bulanik",
-     "buzluKart",
-     "buzluMenu",
-     "buzluPencere",
-     "cam",
-     "isik",
-     "kenar",
-     "perde"
-    ],
-    "secim": 15
+    "denetimsiz": [],
+    "secim": 0
    },
-   "deger": 8,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "denetimsiz_secim",
@@ -99,36 +87,16 @@
     "etiketli": 0,
     "gecersiz_satir": 0,
     "gercek_mesaj": {
-     "bekleyen": 62,
+     "bekleyen": 0,
      "isabet": null,
      "king": "bugünkü king/niyet.py (o anki King'in niyeti kaydedilmemiş)",
      "sahip_etiketli": 0,
-     "satir": 62,
+     "satir": 0,
      "set": "kalite/veri/yerel/anlama-aday.jsonl"
     },
     "gereken": "sahibinin etiketlediği gerçek mesajlar; her satırda King'in o an seçtiği niyet (king). «Yanlış anladın» işareti seti doldurur ama yalnız işaretli satırla isabet hep 0 çıkar: değer için işaretlenmemiş (King'in doğru anladığı) örneklem de gerekir",
     "king_kararli": 0,
     "set": "kalite/veri/yerel/anlama.jsonl",
-    "vekil": {
-     "ad": "vekil: sınav cümleleri",
-     "birim": "oran",
-     "cumle": 350,
-     "deger": 0.989,
-     "disarida": 8,
-     "etiket": "tahmin",
-     "isabet": 346,
-     "kod": "00788b3a",
-     "komut": "python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
-     "neden_tahmin": "cümleler sahibinin gerçek mesajı değil, bugünkü King'e göre yazılmış hazır cümleler; karar→niyet eşlemesi kalite/egri/_sinav.py ESLEME (sahibinin etiketi değil); «arastir» niyetli cümle yok; model çağrılmaz, Merkez'e giden cümle «sohbet» sayılır",
-     "niyet_basina": {
-      "kayit": "82/82",
-      "ogren": "3/3",
-      "sohbet": "40/41",
-      "yonet": "221/224"
-     },
-     "olculdu": "2026-11-13",
-     "sinav_tam_karar": "353/358"
-    },
     "yanlis_anladin": 0
    },
    "birim": "oran",
@@ -144,11 +112,7 @@
    "ad": "Sistem · Anlaşılabilirlik",
    "ayrinti": {
     "en_cok": 2,
-    "eski_modul_kat": {
-     "AYS": 2,
-     "ESP": 4,
-     "SPI": 3
-    },
+    "eski_modul_kat": {},
     "eski_yer": 1,
     "kabuk_en_cok": 2,
     "kabuk_ortalama": 1.78,
@@ -199,14 +163,14 @@
    "ad": "Arama",
    "ayrinti": {
     "adayli": {
-     "arama": 12,
+     "arama": 0,
      "bam": 0
     },
-    "bekleyen": 29,
+    "bekleyen": 0,
     "bozuk_dosya": 0,
     "gereken": "sahibin etiketi (POST /api/kalite/etiket, set=arama); BAM kapısı için en az 30 arama sorusu ve canlı web koşusu (king/arama_olc.py shortcut); hafızaya eklenenin isabeti ölçülmüyor",
     "kosul": "adaylar çevrimdışı: ağ ve model yok; BAM'in tek kaynağı web olduğundan çevrimdışı boş döner",
-    "neden_degersiz": "sahip etiketi bekleniyor",
+    "neden_degersiz": "sahibin etiketlediği arama sorusu yok",
     "sahip": {
      "arama": {
       "ilgisiz_gosterim": 0,
@@ -222,28 +186,8 @@
      "soru": 0
     },
     "sahip_etiketli": 0,
-    "satir": 29,
-    "set": "kalite/veri/yerel/arama-aday.jsonl",
-    "vekil": {
-     "ad": "vekil: model etiketi, gerçek sorular",
-     "arama": {
-      "ilgisiz_gosterim": 3,
-      "isabet": 2,
-      "oran": 0.2
-     },
-     "arama_degil": 19,
-     "bam": {
-      "ilgisiz_gosterim": 0,
-      "isabet": 0,
-      "oran": 0.0
-     },
-     "birim": "oran",
-     "deger": 0.2,
-     "etiket": "tahmin",
-     "neden_tahmin": "etiketleri model (Claude) taslak olarak yazdı; sahibin etiketi değil",
-     "satir": 29,
-     "soru": 10
-    }
+    "satir": 0,
+    "set": "kalite/veri/yerel/arama-aday.jsonl"
    },
    "birim": "oran",
    "deger": null,
@@ -336,7 +280,7 @@
     },
     "sayilmayan_turler": {
      "akis": 9,
-     "anahtar": 217,
+     "anahtar": 219,
      "ays.topics": 1,
      "bam": 5,
      "esp.prefs": 1,
@@ -392,19 +336,7 @@
   "egri_kontrol": {
    "ad": "Kontrol",
    "ayrinti": {
-    "gereken": "çalışan King (tarayıcı + HKM + model) ve görevin sonunda verinin doğru yazıldığının denetimi; King-Bench'in donmuş klon verisiyle koşar",
-    "vekil": {
-     "ad": "vekil: sınav, araç seçimi",
-     "birim": "oran",
-     "deger": 0.987,
-     "dogru": 305,
-     "etiket": "tahmin",
-     "gorev_cumlesi": 309,
-     "kod": "00788b3a",
-     "komut": "python kalite/egri/_sinav.py (node tools/king_sinav.js --port=4571 --json; Playwright, model ve HKM yok)",
-     "neden_tahmin": "araç seçilir, çalıştırılmaz (görevin bittiği denetlenmez); cümleler bugünkü King'e göre yazılmış; argüman yalnız 'a' alanı olan 9 cümlede denetlenir",
-     "olculdu": "2026-11-13"
-    }
+    "gereken": "çalışan King (tarayıcı + HKM + model) ve görevin sonunda verinin doğru yazıldığının denetimi; King-Bench'in donmuş klon verisiyle koşar"
    },
    "birim": "oran",
    "deger": null,
@@ -467,35 +399,20 @@
      "gereken": "kaydırma/geçiş sırasında kare süresi izi (CDP); tools/akicilik.js süre değil stil hesabı sayar"
     },
     "motor_kabukta": {
-     "bayt": 200543,
+     "bayt": 203513,
      "dosya": 6,
      "satir": 2970
     },
     "uygulama": {
-     "AYS": {
-      "bayt": 9701574,
-      "dosya": 2,
-      "satir": 153201
-     },
-     "ESP": {
-      "bayt": 8156929,
-      "dosya": 2,
-      "satir": 128070
-     },
-     "SPI": {
-      "bayt": 7735961,
-      "dosya": 2,
-      "satir": 128322
-     },
      "kabuk": {
-      "bayt": 541292,
-      "dosya": 20,
-      "satir": 6922
+      "bayt": 579942,
+      "dosya": 21,
+      "satir": 7288
      }
     }
    },
    "birim": "bayt (dağıtılan kod)",
-   "deger": 26135756,
+   "deger": 579942,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "egri_optimizasyon",
@@ -591,11 +508,11 @@
   "ekran_dosyasi": {
    "ad": "Ekran dosyası",
    "ayrinti": {
-    "AYS": 25,
-    "ESP": 19,
-    "SPI": 20
+    "AYS": 0,
+    "ESP": 0,
+    "SPI": 0
    },
-   "deger": 64,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "ekran_dosyasi",
@@ -605,11 +522,11 @@
   "ekran_ici_sekme": {
    "ad": "Ekran içi sekme",
    "ayrinti": {
-    "AYS": 32,
-    "ESP": 45,
-    "SPI": 38
+    "AYS": 0,
+    "ESP": 0,
+    "SPI": 0
    },
-   "deger": 115,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "tahmin",
    "id": "ekran_ici_sekme",
@@ -648,12 +565,8 @@
   },
   "ic_icelik": {
    "ad": "İç içelik (kat)",
-   "ayrinti": {
-    "AYS": 2,
-    "ESP": 4,
-    "SPI": 3
-   },
-   "deger": 4,
+   "ayrinti": {},
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "hesaplandı",
    "id": "ic_icelik",
@@ -663,9 +576,9 @@
   "kabuk_acilis_yuku": {
    "ad": "Kabuk açılış yükü (bayt)",
    "ayrinti": {
-    "dosya": 20
+    "dosya": 21
    },
-   "deger": 541292,
+   "deger": 579942,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kabuk_acilis_yuku",
@@ -675,20 +588,12 @@
   "kapi_ev_agi": {
    "ad": "Kapı (ev ağı)",
    "ayrinti": {
-    "portlar": [
-     5173,
-     5180,
-     5183,
-     5193
-    ],
+    "portlar": [],
     "tailscale": [
-     443,
-     5173,
-     5183,
-     5193
+     443
     ]
    },
-   "deger": 4,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kapi_ev_agi",
@@ -699,14 +604,10 @@
    "ad": "Kapı (yerel adres)",
    "ayrinti": {
     "portlar": [
-     4173,
-     4180,
-     4183,
-     4193,
-     4200
+     4180
     ]
    },
-   "deger": 5,
+   "deger": 1,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kapi_yerel",
@@ -716,9 +617,9 @@
   "kesinlik_dili": {
    "ad": "Kesinlik etiketi dili",
    "ayrinti": {
-    "derived_dosya": 16
+    "derived_dosya": 0
    },
-   "deger": 2,
+   "deger": 1,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kesinlik_dili",
@@ -728,7 +629,7 @@
   "king_bench_vaka": {
    "ad": "King-Bench vakası",
    "ayrinti": {},
-   "deger": 350,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "king_bench_vaka",
@@ -738,7 +639,7 @@
   "king_bench_yamasi": {
    "ad": "Bench yaması",
    "ayrinti": {},
-   "deger": 23,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "king_bench_yamasi",
@@ -749,16 +650,16 @@
    "ad": "King'in gördüğü araç",
    "ayrinti": {
     "kirilim": {
-     "AYS": 38,
-     "ESP": 27,
-     "SPI": 25,
+     "AYS": 0,
+     "ESP": 0,
+     "SPI": 0,
      "ogretme": 6,
      "ortak": 32
     },
-    "oku": 60,
-    "yaz": 68
+    "oku": 24,
+    "yaz": 14
    },
-   "deger": 128,
+   "deger": 38,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "king_gorunen_arac",
@@ -768,7 +669,7 @@
   "king_niyet_kurali": {
    "ad": "Sözcük yönlendirmesi: NIYET kuralı",
    "ayrinti": {},
-   "deger": 13,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "king_niyet_kurali",
@@ -778,9 +679,9 @@
   "king_rehber_sozcuk": {
    "ad": "Sözcük yönlendirmesi: sayfa rehberi sözcüğü",
    "ayrinti": {
-    "sayfa": 29
+    "sayfa": 0
    },
-   "deger": 82,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "king_rehber_sozcuk",
@@ -790,7 +691,7 @@
   "king_sinav_cumle": {
    "ad": "Sınav cümlesi",
    "ayrinti": {},
-   "deger": 358,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "king_sinav_cumle",
@@ -800,12 +701,12 @@
   "king_toplam_arac": {
    "ad": "King aracı (toplam)",
    "ayrinti": {
-    "modul_eki": 4,
+    "modul_eki": 0,
     "niyet_turu": 16,
     "patron_komutu": 9,
     "yetki": 9
    },
-   "deger": 166,
+   "deger": 72,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "king_toplam_arac",
@@ -815,10 +716,10 @@
   "kod_hacmi": {
    "ad": "Kod hacmi (satır)",
    "ayrinti": {
-    "bayt": 34411262,
-    "dosya": 1164
+    "bayt": 5358997,
+    "dosya": 224
    },
-   "deger": 561736,
+   "deger": 96492,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kod_hacmi",
@@ -828,12 +729,12 @@
   "komut": {
    "ad": "Komut",
    "ayrinti": {
-    "AYS": 35,
-    "ESP": 17,
-    "SPI": 9,
-    "brand/ortak": 8
+    "AYS": 0,
+    "ESP": 0,
+    "SPI": 0,
+    "brand/ortak": 7
    },
-   "deger": 69,
+   "deger": 7,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "komut",
@@ -843,12 +744,12 @@
   "kopya_dosya": {
    "ad": "Üçe kopyalanan dosya",
    "ayrinti": {
-    "diskteki_kopya": 711,
-    "hedef_modul": 3,
-    "ortak": 227,
-    "seviye": 10
+    "diskteki_kopya": 0,
+    "hedef_modul": 0,
+    "ortak": 0,
+    "seviye": 0
    },
-   "deger": 237,
+   "deger": 0,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kopya_dosya",
@@ -873,25 +774,12 @@
    "ad": "Not yapısı",
    "ayrinti": {
     "var": [
-     "ays_konu_notu",
-     "ays_video_notu",
-     "ays_yanlis_defteri",
      "bilinc",
-     "defter",
-     "defter_sozluk",
-     "esp_kitap",
-     "esp_not",
-     "esp_taslak",
-     "esp_tez",
-     "hafiza_katman",
      "king_hafiza",
-     "meydan_deste",
-     "notum",
-     "ogrenmotor_notu",
-     "spi_kayit_notu"
+     "meydan_deste"
     ]
    },
-   "deger": 16,
+   "deger": 3,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "not_yapisi",
@@ -901,12 +789,12 @@
   "sayfa": {
    "ad": "Sayfa",
    "ayrinti": {
-    "AYS": 30,
-    "ESP": 19,
-    "SPI": 21,
+    "AYS": 0,
+    "ESP": 0,
+    "SPI": 0,
     "brand/ortak": 11
    },
-   "deger": 81,
+   "deger": 11,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "sayfa",
@@ -917,19 +805,12 @@
    "ad": "Tekrar zamanlayıcısı",
    "ayrinti": {
     "var": [
-     "ays_hedef_tekrar",
-     "ays_kart",
-     "ays_konu_kapanis",
-     "ays_yanlis_kart",
-     "esp_srs",
-     "kavrat_ogrenmotor",
-     "king_devrim",
      "ogret",
      "usta"
     ],
     "yetim_tablo": 1
    },
-   "deger": 9,
+   "deger": 2,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "tekrar_zamanlayici",
@@ -940,27 +821,24 @@
    "ad": "Uygulama",
    "ayrinti": {
     "klasorler": [
-     "AYS",
-     "ESP",
-     "HKM",
-     "SPI"
+     "kabuk"
     ]
    },
-   "deger": 4,
+   "deger": 1,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "uygulama",
    "katman": "sistem",
-   "yol": "kendi index.html'i olan üst klasör: */src/index.html + */web/index.html"
+   "yol": "kendi index.html'i olan üst klasör: */src/index.html + */web/index.html + kabuk/index.html (tek kapı)"
   },
   "veri_yeri": {
    "ad": "Verinin doğrusu (yer)",
    "ayrinti": {
     "hkm_db": 1,
     "indexeddb": 1,
-    "koken": 4
+    "koken": 1
    },
-   "deger": 6,
+   "deger": 3,
    "durum": "ölçüldü",
    "etiket": "hesaplandı",
    "id": "veri_yeri",

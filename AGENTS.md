@@ -7,13 +7,13 @@
 
 ## 0. Otuz saniyede depo
 
-Dört bağımsız sistem: **AYS** (sınav), **SPİ** (sağlık), **ESP** (gelişim)
-tarayıcıda çalışan sıfır bağımlılıklı tek sayfa uygulamalarıdır; **HKM**
-onların yanında duran isteğe bağlı bir Python servisidir. Ayrıntı:
-`README.md` (kısa), `belgeler/TEKNIK.md` (ayrıntı), her sistemin `MIMARI.md`'si;
-bütün belgelerin dizini `belgeler/DIZIN.md`, araçlarınki `tools/DIZIN.md`. Dış inceleme için hazır özet
-`python3 tools/paket.py` ile ÜRETİLİR (`PAKET.md`); depoda durmaz, çünkü
-üretilmiş bir dosya bir gün kaynağıyla ayrışır.
+Tek sistem (kapanış, Faz 7): bir uygulama, bir adres, bir süreç. `sistem/tekkapi.py` 4180'de
+kabuğu (`kabuk/`), alan içeriğini (`alan/`), motorları (`motor/`), bütün `/api/...` yollarını ve
+Merkez çekirdeğini (`HKM/core`, `/api/hkm/`) aynı süreçte sunar; King `king/` (MCP ucu dahil),
+kalite `kalite/`. Hesap, cihaz ve güncelleme paneli `/kartlar/`. Cihaz yolu yalnız Tailscale.
+Eski üç modül (AYS, SPİ, ESP), HKM yüzü, kopya dağıtımı ve ev ağı sertifikası kalktı; kodları
+`c293d421`'de. Ayrıntı: `README.md` (kısa), `belgeler/TEKNIK.md`; belgelerin dizini
+`belgeler/DIZIN.md`, araçlarınki `tools/DIZIN.md`.
 
 **Kök klasör sade kalır** (depo sahibinin isteği): kökte yalnız
 `BASLAT.bat`, `GUNCELLE.bat`, `README.md`, `AGENTS.md` ve klasörler
@@ -28,7 +28,8 @@ veri**: bir uygulama, bir adres, bir depo; katmanlar Kabuk → Alanlar → Motor
 (envanter ve sentez aynı klasörde).
 
 **Geçiş:** yeni kabuk eskisinin yanında kurulur, alanlar tek tek taşınır, eskisi
-silme kapısından sonra kapanır. Eski modüller (AYS, SPİ, ESP, HKM yüzü)
+silme kapısından sonra kapanır. **Kapanış yapıldı** (`belgeler/ekip/sadelesme/faz7-kapanis.md`):
+aşağıdaki eski modül sözleşmeleri artık tarihçedir. Eski modüller (AYS, SPİ, ESP, HKM yüzü)
 **dondurulmuştur**: yeni özellik almaz, yalnız hata düzeltmesi. Tek yazılı
 istisna, her cihazdan veri alan göç paketi düğmesidir. Bir faz kapısı ölçümle
 geçilmeden sonraki faz başlamaz. Aşağıdaki §1 sözleşmeleri, alanı taşınana
@@ -199,67 +200,28 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
 ## 2. Denetimler — birleştirmeden önce koşar
 
 ```bash
-# depo koku: tek kaynaktan yayilan iki sey
-python3 tools/seviye.py --yay        # brand/seviye/ -> uc arayuz
-python3 tools/seviye.py --denetle    # kopyalar kaynakla ayni mi (CI de kosar)
-python3 tools/ortak.py --yay         # brand/ortak/  -> uc arayuze
-python3 tools/ortak.py --denetle     # kopyalar kaynakla ayni mi (CI de kosar)
-python3 tools/parca_test.py          # parca kaydi: sayfalar brand/parcalar.txt'ten uretilir (ortak.py --yay/--denetle de kosar)
-python3 tools/marka.py --kunye       # brand/medya/ -> brand/ortak/medya.js
-python3 tools/marka.py --kunye --denetle   # kunye taze mi (CI de kosar)
-python3 tools/marka.py --sina        # ad kurali ve yol muhafizi (CI de kosar)
-python3 tools/vitrin.py              # belgeler/ekip/vitrin.html -> brand/ortak/vitrin.css (kart bicimi)
-python3 tools/vitrin.py --denetle    # vitrin.css vitrinle ayni mi (CI de kosar)
-python3 tools/rutbe.py <klasor>      # rutbe gorsellerini medya/'ya isler (kayipsiz)
-python3 tools/rutbe.py --liste       # medya/ altinda ne var
-python3 tools/rutbe.py --eksik       # katalog ne bekliyor da yok (node ile)
-python3 tools/yazi.py --denetle      # ekran basliklari: cumle duzeni, «&» yok, emoji ve ic terim yok
-python3 tools/olucss.py              # hicbir ogeye uyamayan CSS kurali (--sil ile siler, sonra --yay + build)
-node tools/css_onemli.js             # her !important'i olcer: gerekli, gereksiz, gorulmedi (--sil kanitliyi siler)
-node tools/parca_kanit.js --durum     # kac ekran, blok, komut, yazi, bilgi parcaya gecti
-node tools/piksel_denetim.js          # temaya uymayan izler: bulaniklik, bulanik golge, gecis, soluk yazi, yapisik serit ve yazi
-python3 tools/piksel_rakam.py --denetle  # gomulu rakam yazi tipi cizimle ayni mi
-python3 tools/piksel_bulut.py --denetle  # gecis perdesinin bulut resmi cizimle ayni mi
-node tools/bulut_gecis.js             # uc modul arasi gercek gecis, iki yonde: bulut ilk karede yerinde, sicramaz, ortada kesilmez; ses kapaliyken ve azaltilmis harekette sessiz (once build.py)
-node tools/giris_sayfa_test.js        # giris ve Gun sayfasi gercekten aciliyor mu (modul denetimleri bunlari acmaz)
-node tools/patrontur_kosu.js          # patron turu: yeni hesap, uc kapi, 1280 ve 390 piksel, klavye; 4180/4173/4183/4193 bos olmali (~6 dk)
-node tools/parca_tembel_test.js       # tembel veri (parcalar.txt [tembel]): dist kaynak surumle ayni, acilista calismiyor (once build.py)
-node tools/mobil_tara.js SPI         # telefon/tablet: dokunmatik, yatay, King bolumleri (AYS, ESP de; modul basina ~2 dk)
-node tools/android_kurulum_test.js   # Android kurulum sayfasi calisan adresi bulur, iPhone akisi degismez
-node tools/pusula.js                 # Kolay LifeOS pusulasi: iyi gun kaydi eylem sayisi, Bugun ve menu (belgeler/ekip/KOLAY-PLANI.md)
-
-# her sistem kendi dizininde
-node tools/runtests.js      # birim testleri
-node tools/smoke.js         # uygulamayı gerçekten açar, ekranları gezer
-node tools/a11ycheck.js     # erişilebilirlik
-node tools/layoutcheck.js   # 390 pikselde taşma ve 24px dokunma hedefi
-node tools/palettecheck.js  # bütün paletlerde kontrast
-node tools/perfcheck.js     # dokuz aylık veriyle çizim bütçesi
-node tools/loadcheck.js     # BEŞ YILLIK veriyle çizim (ağır; haftalık CI işi)
-
-# depo koku: kapsam OLCULUR, elle yazilmaz
-node tools/kapsam.js                # uc arayuzun islev kapsami
-node tools/kapsam.js AYS --ayrinti  # hangi islev hic kosmadi
-node tools/kapsam.js --esik 40      # esigin alti KIRMIZI (cikis 1)
-
-# HKM
-cd HKM && python3 -m tests.run && python3 tools/perf.py && node tools/yuz.js
-
-# depo kökü: hepsi + belgelerdeki sayıları tazeler
-python3 tools/sayilar.py --tam --yaz
-node tools/entegre.js       # üç arayüz + HKM uçtan uca
-node tools/portmuhafiz.test.js  # sabit portlu her denetim port doluysa başlamaz (çıkış 2)
-python3 tools/tasi_test.py          # yeni bilgisayara taşıma paketi: şifreli, üstüne yazmaz
-python3 uygulama/ios/web_paket_test.py  # telefonun PC'siz indirdiği web paketi
+# tek sistem (her biri kendi kodunu doner; CI ayni listeyi kosar)
+for f in kabuk/*.test.js motor/*.test.js kalite/*.test.js; do node "$f"; done
+for f in king/*_test.py kalite/*_test.py alan/denetle_test.py; do python3 "$f"; done
+python3 kalite/katman.py            # katman denetimi (motor/kabuk/alan sinirlari)
+python3 kalite/olcum.py --denetle   # karmasiklik ve hiz butcesi (son kayda ve tabana karsi)
+python3 tools/tekkapi_test.py       # tek kapi: gecici veri, bos portlar, eski kapi yollari 404
+python3 tools/goc_test.py && python3 tools/tekdepo_test.py && python3 tools/tasi_test.py
+python3 tools/tools_dizin_kabul_test.py && python3 tools/belge_dizin_kabul_test.py
+(cd tools && npm ci) && node tools/kabuk_gez.js   # yeni kabuk gercek tarayicida (Playwright yalniz denetimde)
+python3 tools/marka.py --sina        # /marka/ yol muhafizi
+python3 tools/marka.py --kunye --denetle && python3 tools/vitrin.py --denetle
+cd HKM && python3 -m tests.run && python3 tools/perf.py   # Merkez cekirdegi
+python3 uygulama/ios/web_paket_test.py
 ```
 
 **Kural:** bir değişiklik, dokunduğu sistemin testleri ve duman testi
 geçmeden önerilmez. Yeni davranış **testsiz gelmez**; düzeltilen her hata
 için önce o hatayı yakalayan bir test yazılır.
 
-**Uçtan uca kural:** `brand/ortak/`, `HKM/core/`, `HKM/daemon.py` ya da
-`HKM/web/`'e dokunan bir değişiklik commit'ten önce `node tools/entegre.js`
-koşar (~1,5 dk). Bunlar sistemlerin birbirine değdiği yerlerdir; tek
+**Uçtan uca kural:** `sistem/`, `kabuk/`, `HKM/core/` ya da `HKM/daemon.py`'ye dokunan bir
+değişiklik commit'ten önce `python3 tools/tekkapi_test.py` ve `node tools/kabuk_gez.js` koşar
+(eski `tools/entegre.js` modüllerle kalktı). Bunlar sistemlerin birbirine değdiği yerlerdir; tek
 sistemin testi oradaki kırılmayı görmez. Kırmızı «bilinen aralıklı hata»
 diye geçilmez: ya düzeltilir ya da değişikliksiz HEAD'de de kırmızı olduğu
 **gösterilir** ve commit mesajına yazılır. Zaten kırmızı bir alarm yeni

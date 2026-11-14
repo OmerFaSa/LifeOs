@@ -1,43 +1,10 @@
 name: CI
 
-# AGENTS.md §2: "bir değişiklik, dokunduğu sistemin testleri ve duman testi
-# geçmeden önerilmez." Bu iş akışı o kuralı otomatikleştirir — insan elle
-# koşturmayı unutsa da PR kırmızı/yeşil kalır.
-#
-# ---------------------------------------------------------------------
-# NEDEN BUTUN DENETIMLER BURADA
-#
-# Depoda on dort denetim araci yazili; bu is akisi uzun sure bunlardan
-# IKISINI kosturuyordu (runtests + smoke). Geri kalanlar yazildiklari
-# gun kosmus, sonra yalnizca elle cagrildiklarinda kosmustu. Sonucu
-# olculdu: seviye paneli eklendiginde SPI'nin layoutcheck'i ve ESP'nin
-# a11ycheck'i kirmiziya dondu — ikisi de gercek kullanici hatasiydi
-# (yazarken kaybolan odak, calinan ilk Tab duragi) ve ikisi de CI'dan
-# YESIL gececekti.
-#
+# AGENTS.md §2: "bir değişiklik, dokunduğu sistemin testleri geçmeden önerilmez."
+# Kapanıştan (Faz 7) sonra tek sistem: tek kapı (sistem/tekkapi.py), kabuk, motorlar, King,
+# kalite ve Merkez çekirdeği (HKM). Eski üç modülün matris işi, uçtan uca (entegre),
+# envanter/sadelik ve beş yıllık yük işleri modüllerle birlikte kalktı.
 # Kosmayan bir denetim, yazilmis bir denetim degildir.
-#
-# ---------------------------------------------------------------------
-# SURE
-#
-# `arayuz` isi uc sistemi PARALEL kosar, yani toplam sure bir sistemin
-# kendi denetimleri kadar uzar — ucune bolunmez. Agir olan tek denetim
-# (`loadcheck`, bes yillik veri uretir) her PR'da degil, haftada bir
-# ayri bir iste kosar: asagidaki `yuk` isi.
-#
-# ---------------------------------------------------------------------
-# BURADA KOSMAYAN IKI ARAC — VE NEDEN
-#
-#   AYS/tools/audit.py       rapor uretir, HICBIR KOSULDA cikis kodu 1
-#                            vermez. Kirmiziya donmeyen bir denetim,
-#                            denetim degil bir olcumdur; CI'a konsa
-#                            yalnizca gurultu eklerdi.
-#   AYS/tools/evalagents.js  gercek bir dil modeli saglayicisina anahtar
-#                            ister (ROTA_KEY). CI'da ne anahtar vardir
-#                            ne de her PR'da para harcamak dogrudur.
-#
-# Ikisi de elle kosulur; `python3 tools/sayilar.py --tam` ciktisinda
-# yerleri yazilidir.
 
 on:
   push:
@@ -51,86 +18,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  arayuz:
-    name: ${{ matrix.system }} — bütün denetimler
-    runs-on: ubuntu-latest
-    # Bir sistemin kirmizisi digerlerinin olcumunu gizlemesin: uc sistemin
-    # de raporu ayni kosumda gorunsun.
-    strategy:
-      fail-fast: false
-      matrix:
-        system: [AYS, SPI, ESP]
-    defaults:
-      run:
-        working-directory: ${{ matrix.system }}
-    env:
-      # Bütçeler yerel bir makinede ölçülerek yazıldı; paylaşımlı koşum
-      # makinesi aynı kodu düzenli olarak daha yavaş ölçer. Bütçeyi
-      # gevşetmek yerine ORTAM kendi payını açıkça söylüyor — araç bu
-      # payı çıktısına da yazar (bkz. tools/perfcheck.js, PERF_PAY).
-      PERF_PAY: '1.5'
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      # Denetimlerin cogu sayfayi `devserver.py` ile servis eder: node
-      # tek basina yetmez.
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      # HATALAR D-14: duman testi dist/'teki TEK DOSYAYI geziyor. Kaynak
-      # degisip dist unutulursa test edilen sey kaynak olmaz; derleyici
-      # bellekte derler ve depodaki dist ile karsilastirir.
-      - name: Tek dosya kaynaktan derlenmiş hâliyle aynı mı
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Tek dosya kaynaktan derlenmiş hâliyle aynı mı" python3 build.py --denetle
-
-      - name: Bağımlılıkları kur
-        run: npm ci
-
-      - name: Chromium kur
-        run: npx playwright install --with-deps chromium
-
-      - name: Birim testleri
-        run: bash ../tools/ci_hata.sh "${{ matrix.system }} birim testleri" node tools/runtests.js
-
-      - name: Duman testi
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Duman testi" node tools/smoke.js
-
-      - name: Erişilebilirlik
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Erişilebilirlik" node tools/a11ycheck.js
-
-      - name: Telefon ve tablet düzeni (390 ve 820px)
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Telefon ve tablet düzeni (390 ve 820px)" node tools/layoutcheck.js
-
-      - name: Palet kontrastı
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Palet kontrastı" node tools/palettecheck.js
-
-      - name: Çizim bütçesi (dokuz aylık veri)
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Çizim bütçesi (dokuz aylık veri)" node tools/perfcheck.js
-
-      # Bugun yalniz SPI'de olan denetimler. `if: matrix.system == 'SPI'`
-      # yerine DOSYA VARLIGINA bakilir: bir denetim yarin AYS'ye de
-      # tasindiginda bu is akisini duzenlemek gerekmesin — tasiyan kisi
-      # dosyayi koyar, CI onu kendiliginden kosar.
-      - name: Sisteme özel denetimler
-        run: |
-          set -e
-          bulundu=0
-          for t in ledgercheck designcheck tasarimcheck; do
-            if [ -f "tools/$t.js" ]; then
-              echo "→ $t"
-              node "tools/$t.js"
-              bulundu=$((bulundu + 1))
-            fi
-          done
-          echo "$bulundu sisteme özel denetim koştu."
-
   tekkaynak:
-    name: Tek kaynaklar — üç kopya kaynakla aynı mı
+    name: Tek sistem — sunucu, kabuk, motorlar, King, kalite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -138,11 +27,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-
-
-      - name: Parca kaydi ve blok adlari
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Parca kaydi ve blok adlari" python3 tools/parca_test.py
 
       # MARKA ADLANDIRMASI VE YOL MUHAFIZI. Bu denetim bir suredir
       # yalnizca `tools/sayilar.py --tam` icinden kosuyordu, yani
@@ -161,12 +45,6 @@ jobs:
       # listen()'e giden sayıyı sınar.
       - name: Sunucular bekleyen bağlantıyı reddetmez
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sunucular bekleyen bağlantıyı reddetmez" python3 tools/kuyruk_test.py
-
-      # GÜNCEL TEK DOSYA. Modül kapısının kökü dist'i yalnız kaynaklar
-      # aynıysa sunar (230 istek yerine 3); değilse src. dist/kaynak.json
-      # build.py'den, denetimi build.py --denetle'de de.
-      - name: Modül kapısı yalnız güncel dist'i sunar
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Modül kapısı yalnız güncel dist i sunar" python3 tools/dist_sun_test.py
 
       # YENI BILGISAYARA TASIMA (2026-11-05). Paket sifresiz acilmaz, degismis dosya
       # acilmaz, var olan silinmez, listede olmayan yola yazilmaz.
@@ -317,55 +195,22 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ofis pilotu ve Testçi" python3 tools/ofis_pilot_test.py
       - name: Bilgisayar platform katmani kabul (ofis 080, KING-4 §E)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Bilgisayar platform katmani kabul (ofis 080  KING-4 §E)" python3 tools/bilgisayar_kabul_test.py
-      - name: King guven kurallari (KING-4 §G)
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King guven kurallari (KING-4 §G)" node tools/king_guven.js
 
-      # Ofis kabul testlerinin bir kismi (King sinavi ve kapsami, perde hizi) uc arayuzu gercek tarayicida
-      # acar. Bu is baska yerde Playwright kurmaz; 2026-11-09'dan beri bu testler CI'da yalniz bu yuzden
-      # kirmiziydi (yerelde gecer). Tarayicisiz denetimler yine Playwright'siz sinanir (playwrightsiz.test.js engeller).
+      # Playwright yalniz kabuk gezisi icin (asagida, tools/package.json); tarayicisiz denetimler onsuz kosar.
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Ofis testleri için Playwright
-        run: for m in AYS SPI ESP; do (cd "$m" && npm ci) || exit 1; done && cd SPI && npx playwright install --with-deps chromium
 
       # OFIS (2026-10-31). Antigravity islerinin kabul testleri (Claude Code yazar) ve
       # Uygulayici'nin birim testleri. «ajan.py birlestir» satir ekler; elle silme.
       - name: Ofis kabul ve birim testleri
         run: |
           python3 tools/ayar_esit_kabul_test.py
-          python3 tools/ays_deney_kabul_test.py
           python3 tools/merdiven_uc_kabul_test.py
           python3 tools/merdiven_olcum_kabul_test.py
-          python3 tools/kingveri_brifing_spi_kabul_test.py
-          python3 tools/kingveri_brifing_esp_kabul_test.py
-          python3 tools/kingveri_brifing_ays_kabul_test.py
           python3 tools/hafiza_olcum_kabul_test.py
           python3 tools/hafiza_uc_kabul_test.py
-          python3 tools/king_sinav_ays_kabul_test.py
-          python3 tools/king_sinav_spi_kabul_test.py
-          python3 tools/king_sinav_esp_kabul_test.py
-          python3 tools/kingveri_ays_kabul_test.py
-          python3 tools/kingveri_spi_kabul_test.py
-          python3 tools/kingveri_esp_kabul_test.py
-          python3 tools/ogret_spi_kabul_test.py
-          python3 tools/ogret_esp_kabul_test.py
-          python3 tools/ogret_belge_kabul_test.py
-          python3 tools/king_olay_uctan_test.py
-          python3 tools/king_kapsam_esp_kabul_test.py
-          python3 tools/king_kapsam_spi_kabul_test.py
-          python3 tools/king_kapsam_ays_kabul_test.py
-          python3 tools/king_sinav_300_kabul_test.py
-          python3 tools/ays_takvim_tekrar_kabul_test.py
-          python3 tools/spi_porsiyon_kabul_test.py
-          python3 tools/esp_sure_kabul_test.py
-          python3 tools/ays_sure_kabul_test.py
-          python3 tools/ays_sinav_sure_kabul_test.py
-          python3 tools/spi_sure_kabul_test.py
           python3 tools/veri_dogrula_test.py
-          python3 tools/tarih_ortak_kabul_test.py
-          python3 tools/perde_test_hiz_kabul_test.py
           python3 tools/tools_dizin_kabul_test.py
           python3 tools/belge_dizin_kabul_test.py
           python3 tools/portreonar_test.py
@@ -378,11 +223,12 @@ jobs:
 
       # SADELESME FAZ 2 (2026-11-13). Yeni kabuk tek kapidan sunulur; Felsefe pilotunun ilk unitesi gercek
       # tarayicida yurunur (ders, alistirma, unite kapisi, kayit). Playwright yukaridaki adimda kuruldu.
+      - name: Denetim için Playwright (tools/package.json)
+        working-directory: tools
+        run: npm ci && npx playwright install --with-deps chromium
+
       - name: Kabuk gezisi (tek kapı + Felsefe pilotu, gerçek tarayıcı)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk gezisi" node tools/kabuk_gez.js
-
-      - name: Ölü CSS aracının sınaması
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölü CSS aracının sınaması" python3 tools/olucss.py --sina
 
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
@@ -395,20 +241,6 @@ jobs:
       # vitrin değişip vitrin.css yeniden yazılmazsa sistem eski kartı çizer.
       - name: Vitrin kart biçimi taze mi
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Vitrin kart biçimi taze mi" python3 tools/vitrin.py --denetle
-      # ONAY DÜĞMESİ SONUCU SÖYLER (katalog 022). `confirmSheet`'e etiket
-      # verilmezse düğme «Evet, devam et» yazar ve basınca ne olacağını
-      # söylemez. Kural kaynakta sayılır (tarayıcı istemez); önce sayacın
-      # kendisi denenir, sonra üç arayüz. Bu iş npm ci yapmaz: önce
-      # tarayıcısız denetimlerin Playwright istemediği sınanır.
-      - name: Onay düğmeleri sonucu söylüyor mu
-        run: node tools/playwrightsiz.test.js && node tools/envanterhkm.test.js && node tools/sadelik.test.js && node tools/sadelik.js --onay
-      # PORT MUHAFIZI. Denetimlerin portları sabittir; iki worktree aynı
-      # denetimi aynı anda koşunca ikincisi ötekinin sunucusunu ölçüyordu
-      # (2026-10-03, entegre.js: üç geçersiz koşu). Her araç port doluysa
-      # hiçbir şey başlatmadan 2 ile çıkmalı. Test tarayıcı, python3 ve alt
-      # süreç istemez (hepsi engellenir) — bu hızlı işte koşar.
-      - name: Sabit portlu denetimler port doluysa başlamaz
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sabit portlu denetimler port doluysa başlamaz" node tools/portmuhafiz.test.js
 
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü
@@ -432,114 +264,3 @@ jobs:
         working-directory: HKM
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sorgu bütçesi" python3 tools/perf.py
 
-      # yuz.js kendi Playwright'ini tasimaz; ESP'nin kurulumunu kullanir.
-      # Bagimliligi burada kuruyoruz ki denetim tek komutla kossun.
-      - name: Playwright (ESP'nin kurulumu)
-        working-directory: ESP
-        run: npm ci && npx playwright install --with-deps chromium
-
-      - name: Panonun yüzü (erişilebilirlik, telefon, kontrast)
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Panonun yüzü (erişilebilirlik  telefon  kontrast)" node HKM/tools/yuz.js
-
-      - name: Giriş ve Gün sayfası açılıyor mu
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Giriş ve Gün sayfası açılıyor mu" node tools/giris_sayfa_test.js
-
-  butunlesme:
-    name: Üç arayüz + HKM uçtan uca
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      # entegre.js de ESP'nin Playwright'ini kullanir.
-      - name: Bağımlılıklar
-        working-directory: ESP
-        run: npm ci && npx playwright install --with-deps chromium
-
-      # HKM kapaliyken uc arayuzun bozulmadigini da bu dogrular: bagin
-      # TEK YONLU oldugu sozu burada olculur (AGENTS.md §1.4).
-      - name: Uçtan uca
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Uçtan uca" node tools/entegre.js
-
-  envanter:
-    name: Envanter + sadelik — tek tasarıma geçerken kayıp yok
-    # belgeler/ekip/EKIP-PLANI.md: «hicbir sey silinmez, katmanlanir». Tabandaki
-    # (belgeler/ekip/envanter/taban-*.json) her eylem, isleyici ve giris alani
-    # bugunku kodda da bulunmali; bilerek kaldirilan yalniz kullanici
-    # onayiyla belgeler/ekip/envanter/kaldirilan.json'a yazilir. Uc arayuzu iki
-    # profil ve iki genislikte gezer (~4 dk).
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Bağımlılıklar
-        working-directory: ESP
-        run: npm ci && npx playwright install --with-deps chromium
-
-      # Olcunun kendisi once denenir: yanlis sayan bir olcu butun
-      # ekranlari kirmizi (ya da yesil) gosterir (tools/envanter.test.js).
-      - name: Ölçü testi
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ölçü testi" node tools/envanter.test.js
-
-      - name: Envanter
-        run: bash tools/ci_hata.sh "Envanter" node tools/envanter.js --json gezinti.json
-
-      # Ayni gezintinin olculeri: plan §1.2 sadelik butcesi. Yalniz
-      # EKIP-DURUM teslim tablosunda ✅ olan modullerde kirmizi olur.
-      - name: Sadelik
-        if: always()
-        run: test -f gezinti.json && node tools/sadelik.js --gezinti gezinti.json
-
-  yuk:
-    name: ${{ matrix.system }} — beş yıllık yük denetimi
-    # Agir is: bes yillik veri uretir ve butun ekranlari cizer. Her PR'da
-    # kosturmak, her PR'a birkac dakika eklemek demekti — yavaslama veri
-    # biriktikce gelir, bir gunde degil. Haftada bir yeter; elle de
-    # baslatilabilir (workflow_dispatch).
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        system: [AYS, SPI, ESP]
-    defaults:
-      run:
-        working-directory: ${{ matrix.system }}
-    env:
-      # `perfcheck` ile aynı gerekçe: eşik değil ORTAM payı esner ve
-      # araç bu payı çıktısına yazar (tools/loadcheck.js, PERF_PAY).
-      PERF_PAY: '1.5'
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Bağımlılıkları kur
-        run: npm ci
-
-      - name: Chromium kur
-        run: npx playwright install --with-deps chromium
-
-      - name: Beş yıllık veriyle çizim
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Beş yıllık veriyle çizim" node tools/loadcheck.js
