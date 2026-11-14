@@ -1991,6 +1991,24 @@ class Giris(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", "0")
             self.end_headers()
             return None
+        if yol == "/api/kabuk/baslangic":
+            # Tek depodan uretilen baslangic paketi (tools/kabuk_baslangic.py): eski notlar ve kayitlar yeni kabuga
+            # buradan gecer. Paket kisisel icerik tasir ve oturum denetimi yoktur: YALNIZ bu bilgisayardan okunur.
+            if not hesap._yerel_mi(self):
+                return self._json(403, {"ok": False, "mesaj": "Yalnız bu bilgisayardan."})
+            dosya = os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "LifeOS", "veri", "kabuk-baslangic.json")
+            if not os.path.isfile(dosya):
+                return self._json(404, {"ok": False, "mesaj": "Başlangıç paketi yok."})
+            with open(dosya, "rb") as f:
+                govde = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(govde)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            self.wfile.write(govde)
+            return None
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
         if yol == "/api/ayar":

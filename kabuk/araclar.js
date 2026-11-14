@@ -325,7 +325,36 @@
     return -1;
   }
 
-  var Arac = { kimlik: kimlik, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
+  /* ---- Başlangıç paketi (tools/kabuk_baslangic.py): eski sistemdeki not, kayıt ve kartlar ---- */
+  // Paketi var olan listelere kimlikle ekler: var olan kimliğe dokunmaz (iki kez getirmek zararsız), motorun
+  // kabul etmediği kaydı almaz. Girdi değişmez; dönen: yeni listeler ve sayılar.
+  function baslangicBirlestir(Not, Kayit, mevcut, paket) {
+    var say = { not: 0, kayit: 0, kart: 0, atlanan: 0 };
+    var ekle = function (liste, gelen, ad, gecerli) {
+      var varMi = {}, yeni = liste.slice();
+      liste.forEach(function (x) { varMi[x.id] = true; });
+      (Array.isArray(gelen) ? gelen : []).forEach(function (x) {
+        if (!x || typeof x.id !== 'string' || varMi[x.id] || !gecerli(x)) { say.atlanan++; return; }
+        varMi[x.id] = true; yeni.push(x); say[ad]++;
+      });
+      return yeni;
+    };
+    return {
+      notlar: ekle(mevcut.notlar || [], paket.notlar, 'not', function (n) { return !Not.dogrula(n); }),
+      kayitlar: ekle(mevcut.kayitlar || [], paket.kayitlar, 'kayit', function (r) { return !!Kayit.TURLER[r.tur] && typeof r.gun === 'string' && r.deger && typeof r.deger === 'object'; }),
+      kartlar: ekle(mevcut.kartlar || [], paket.kartlar, 'kart', function (k) { return typeof k.on === 'string' && !!k.on.trim() && typeof k.arka === 'string' && !!k.arka.trim(); }),
+      say: say
+    };
+  }
+  function baslangicMetni(say) {
+    var p = [];
+    if (say.notlar || say.not) p.push((say.notlar || say.not) + ' not');
+    if (say.kayitlar || say.kayit) p.push((say.kayitlar || say.kayit) + ' kayıt');
+    if (say.kartlar || say.kart) p.push((say.kartlar || say.kart) + ' kart');
+    return p.join(', ');
+  }
+
+  var Arac = { kimlik: kimlik, baslangicBirlestir: baslangicBirlestir, baslangicMetni: baslangicMetni, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -865,6 +894,40 @@
     }
   }
 
+  /* ---- Başlangıç paketi: Bugün'de tek satırlık teklif ---- */
+  var BASLANGIC_IZ = 'lifeos.kabuk.baslangic', baslangic = null, baslangicSoruldu = false, baslangicBitti = '';
+  function baslangicYokla() { // yalnız sunucudan açılınca; paket bu bilgisayardan okunur (sunucu başkasına vermez)
+    baslangicSoruldu = true;
+    if (location.protocol === 'file:' || !window.fetch) return;
+    fetch('/api/kabuk/baslangic', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
+      if (!v || v.lifeos_kabuk_baslangic !== 1 || !v.kimlik || !v.say || ic().depo.getItem(BASLANGIC_IZ) === v.kimlik) return;
+      if (!(v.say.notlar + v.say.kayitlar + v.say.kartlar)) return;
+      baslangic = v;
+      if (d.querySelector('.karsila')) ic().rota();
+    }).catch(function () { /* sunucu yok ya da paket yok: teklif çıkmaz */ });
+  }
+  Kabuk.baslangicDavet = function () {
+    var B = Kabuk.Bilesen;
+    if (!baslangicSoruldu) baslangicYokla();
+    if (baslangicBitti) { var m = baslangicBitti; baslangicBitti = ''; return B.uyari({ tur: 'tamam', metin: m, veri: { baslangic: 'bitti' } }); }
+    if (!baslangic) return '';
+    return B.uyari({ tur: 'bilgi', veri: { baslangic: 'teklif' },
+      metin: 'Eski sistemdeki kayıtların hazır: ' + baslangicMetni(baslangic.say) + '. Buraya getirilsin mi? Eski yerlerinde de durmaya devam eder.',
+      eylem: [{ metin: 'Getir', tur: 'ana', veri: { 'arac-ac': 'baslangic-getir' } }, { metin: 'Sonra', tur: 'sade', veri: { 'arac-ac': 'baslangic-sonra' } }] });
+  };
+  function baslangicGetir() {
+    if (!baslangic || !Not || !Kayit) return;
+    var r = baslangicBirlestir(Not, Kayit, { notlar: oku(NOT_ANAHTAR, []), kayitlar: oku(KAYIT_ANAHTAR, []), kartlar: oku(KART_ANAHTAR, []) }, baslangic);
+    if (r.say.not) yaz(NOT_ANAHTAR, r.notlar);
+    if (r.say.kayit) yaz(KAYIT_ANAHTAR, r.kayitlar);
+    if (r.say.kart) yaz(KART_ANAHTAR, r.kartlar);
+    ic().depo.setItem(BASLANGIC_IZ, baslangic.kimlik);
+    baslangicBitti = (r.say.not + r.say.kayit + r.say.kart) ? 'Getirildi: ' + baslangicMetni(r.say) + '. Not ve Kayıt araçlarında görünür.' : 'Bu kayıtlar zaten buradaydı.';
+    baslangic = null;
+    ic().rota();
+    var el = d.querySelector('[data-baslangic="bitti"]'); if (el) el.focus();
+  }
+
   Kabuk.ek = Kabuk.ek || {};
   Kabuk.ek.soru = function (yer) { if (soruSonuc) { var h = sayfaSoruSonuc(yer); soruSonuc = null; return h; } return sayfaSoru(yer); };
   Kabuk.ek.plan = sayfaPlan;
@@ -904,6 +967,8 @@
       yaz(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== b.getAttribute('data-id'); }));
       return I.git('#/motor/not');
     }
+    if (ne === 'baslangic-getir') return baslangicGetir();
+    if (ne === 'baslangic-sonra') { baslangic = null; return ic().rota(); } // bu açılışta sorma; sonraki açılışta yine sorulur
     if (ne.indexOf('soru-') === 0) return soruEylem(ne, b);
     if (ne.indexOf('plan-') === 0) {
       var simdiP = Date.now(), dr = planDurum(simdiP), gunP = gunAdi(simdiP);

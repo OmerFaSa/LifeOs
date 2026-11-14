@@ -143,3 +143,29 @@ okunmaz; PC'deki modül verisi de paket düğmesiyle alınır (veri-katmani §6)
 6. Sahip için `veri.karsilastir` farkı yazılır.
 
 Rapor `goc-gercek.md` olarak dönüş noktası klasörüne yazılır. Gerçek geri dönüş: `python sistem/goc.py --geri-al <goc_id>`. `tools/goc_test.py` bu adımları geçici veriyle dener (ölçüldü). Canlı veriyle geçici hedefe denendi (ölçüldü): «cihaz paketi yok» kapısında durdu.
+
+## P6 koşuldu: gerçek göç (2026-11-14)
+Sahibin «benim yapabileceklerimi de yap» talimatıyla, bu bilgisayarda.
+
+1. **Göç paketleri.** LifeOS uygulaması açılıp dört kökenin (Giriş/Gün 4180, AYS, SPİ, ESP) paketi uygulamanın kendi
+   `LIFEOS.GocPaket.yolla` işleviyle gönderildi (hesap oturumu yoktu; uç bu bilgisayardan gelen isteği oturumsuz kabul eder).
+   Ölçüldü: 4 paket; AYS 62, SPİ 40, ESP 22 kayıt; medya 0; tek cihaz kimliği. Sunucuya gitmemiş değişiklik 29 (oturum yok).
+2. **İki karar (araca işlendi, `tools/goc_test.py`'de):**
+   - *Aynı cihazın iki kopyası:* sunucudaki eski hâl ile paketteki bugünkü hâl çatışırsa paket seçilir (`goc.sec`). Canlı veride
+     iki kayıt böyleydi (`spi/ben|meta`: yedek izi eklenmiş; `spi/ben|vitals/2026-11-05`: su miktarı değişmiş). Başka cihaz karışırsa kural çalışmaz.
+   - *Bekleyen değişiklik:* `--bekleyen-pakette` bayrağı. Paket cihazın bütün deposunu taşıdığı için gitmemiş değişiklik paketin içindedir;
+     bayrak «paketler az önce alındı, cihaz o andan beri kullanılmadı» beyanıdır. Bayraksız koşu eskisi gibi durur.
+3. **HKM gün kopyaları (`raw_events`).** 25 modül-gününün depoda karşılığı yok (ESP 14, SPİ 11). İncelendi: bunlar modül açıldığında
+   giden günlük ölçü özetleridir (`metrics`), asıl kayıt değil; o günlerde kullanıcı kaydı yok. Karar 10 gereği türetilmiş sayılır, taşınmaz.
+4. **Gerçek koşu.** `python sistem/goc.py --gercek --bekleyen-pakette` → dönüş noktası `%LOCALAPPDATA%\LifeOS\yedek\p6-20261114-035826\`,
+   iki kuru koşu bayt bayt aynı, sayı dengesi tutuyor, gidiş-dönüş birebir, çatışma 0; tek depo `veri\lifeos.db` 638 kayıt, göç kimliği
+   `5bc3fdae1eaf4adc`; geri dönüş kopyada denendi (638 silindi, 0 kaldı). `veri.karsilastir`: 2 fark, ikisi de yukarıdaki aynı-cihaz
+   kayıtları (depo, hesap deposundan yenidir). **`veri.esle` bu yüzden körlemesine koşulmamalı:** o iki kaydı eski hâline çevirir.
+5. **Bağdaştırıcılar gerçek veride, paketlerle** (`tools/gercek_kosu.py`): çökme 0, sessiz düşen alan 0; ret 1 (boş not, kural doğru).
+6. **Eski kayıtlar yeni kabuğa.** `python tools/kabuk_baslangic.py` tek depodan başlangıç paketi üretir (ölçüldü: 5 not, 5 kayıt, 0 kart);
+   sunucu `/api/kabuk/baslangic` ile yalnız bu bilgisayara verir; kabuk Bugün'de «Eski sistemdeki kayıtların hazır … Getir» der, kimlikle
+   ekler, aynı paketi ikinci kez önermez. Plan geçmişi, konu durumu ve profil kabuğun bugünkü depolarına karşılık gelmediği için pakete girmez.
+
+**Açılmayanlar (bilerek):** `veri.OKU` ve `tekkapi.ETKIN` kapalı. Açılınca köken değişir ve eski modüller boş görünür: uygulamada hesap
+oturumu yok, eski modüllerin tek depodan okuması oturum ister. Önce oturum açılmalı (şifre sahibindir), sonra taze paketle göç yenilenip
+(`--geri-al` + `--gercek`) bayraklar açılmalı. Telefon ya da başka cihaz varsa onların paketi de o zaman alınır (hesapta kayıtlı oturum: 0).

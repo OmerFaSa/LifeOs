@@ -247,6 +247,7 @@
       '<p class="karsila__sonra soluk">' + (Kabuk.bugunEk ? Kabuk.bugunEk() : '') + '</p>' +
       // depo «bellek» kipinde (faz2-indexeddb.md, taşıma kuralı 4) bu oturumun yazdıkları yenilemede kalmaz
       (depo.kip() === 'bellek' ? B.uyari({ tur: 'dikkat', metin: 'Kayıtlarına bu açılışta ulaşılamadı. Önceki kayıtların silinmedi, ama bu oturumda yaptıkların sayfa yenilenince kaybolur.' }) : '') +
+      (Kabuk.baslangicDavet ? Kabuk.baslangicDavet() : '') + // araclar.js: eski sistemdeki kayıtları getirme teklifi (göçten sonra)
       (Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '') + // tanisma.js: kayıt yoksa tek satırlık davet
       (ipucu ? B.uyari({ tur: 'bilgi', metin: 'Bir yere gitmek için boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : '') + '</div>';
   }

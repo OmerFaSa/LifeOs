@@ -51,7 +51,7 @@ KOK_SAYFALAR = ("/", "/index.html", "/kartlar", "/kartlar/")
 KOK_DOSYALAR = ("/hesap.js", "/gocpaket.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js",
                 "/piksel.js", "/piksel-apartman.js", "/piksel-doga.js", "/piksel-figur.js", "/piksel-simge.js",
                 "/piksel.css", "/piksel-yazi.css", "/gun", "/gun/", "/api/guncelleme", "/api/durum")
-KOK_ONEKLER = ("/api/hesap/", "/api/ayar", "/api/ice", "/api/muzik", "/api/zemin/", "/api/planlama",
+KOK_ONEKLER = ("/api/hesap/", "/api/kabuk/", "/api/ayar", "/api/ice", "/api/muzik", "/api/zemin/", "/api/planlama",
                "/gun/ortak/", "/logo/", "/marka/")
 _ISTEK = ("rfile", "wfile", "connection", "request", "client_address", "server", "headers", "command",
           "path", "request_version", "requestline", "raw_requestline", "close_connection")

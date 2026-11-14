@@ -12,6 +12,13 @@ const fs = require('fs'), os = require('os'), path = require('path'), http = req
 const PORT = 4397, T = 'http://127.0.0.1:' + PORT;
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'kabuk-gez-'));
 const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici });
+// Başlangıç paketi (tools/kabuk_baslangic.py çıktısının biçimi): eski sistemden bir not ve bir kayıt
+fs.mkdirSync(path.join(gecici, 'LifeOS', 'veri'), { recursive: true });
+fs.writeFileSync(path.join(gecici, 'LifeOS', 'veri', 'kabuk-baslangic.json'), JSON.stringify({ lifeos_kabuk_baslangic: 1, kimlik: 'gezi-paketi', uretildi: 1,
+  say: { notlar: 1, kayitlar: 1, kartlar: 0 },
+  notlar: [{ id: 'eski-not-1', baslik: 'Eski defterden', govde: 'Eski sistemde yazılmış not.', alan: '', etiketler: [], kaynak: { yapi: 'defter' }, olusturma: 1000, guncelleme: 1000,
+    ozel: false, tur: 'not', klasor: '', sabit: false, baglam: null, ozellik: {} }],
+  kayitlar: [{ id: 'kilo:2026-10-20:0', tur: 'kilo', gun: '2026-10-20', zaman: null, kaynak: 'goc', deger: { kg: { v: 70, k: 'eski' } }, ek: {} }], kartlar: [] }));
 const srv = spawn(process.platform === 'win32' ? 'python' : 'python3', [path.join(kok, 'sistem/tekkapi.py'), '--port', String(PORT), '--hkm-ayri'], { env, stdio: 'ignore' });
 const bekle = () => new Promise((res, rej) => {
   const son = Date.now() + 40000;
@@ -534,6 +541,28 @@ async function goruntu(p, ad) {
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('.karsila');
     dene('tanışma: kayıt varken davet gösterilmez', (await p.locator('[data-tn-davet]').count()) === 0);
+
+    // ---- Başlangıç paketi: eski sistemdeki kayıtlar tek dokunuşla gelir, ikinci kez sorulmaz ----
+    await p.goto(T + '/kabuk/#/motor/not');
+    await p.waitForSelector('[data-arac="not"]');
+    const notOnce = await p.locator('#not-liste a').count();
+    await p.goto(T + '/kabuk/#/bugun');
+    await p.waitForSelector('[data-baslangic="teklif"]');
+    dene('başlangıç: Bugün\'de teklif sayılarıyla çıkar', /1 not, 1 kayıt/.test(await p.textContent('[data-baslangic="teklif"]')));
+    await p.click('[data-arac-ac="baslangic-getir"]');
+    await p.waitForSelector('[data-baslangic="bitti"]');
+    dene('başlangıç: «Getir» sonucu söyler', /Getirildi: 1 not, 1 kayıt/.test(await p.textContent('[data-baslangic="bitti"]')));
+    await p.goto(T + '/kabuk/#/motor/not');
+    await p.waitForFunction(n => document.querySelectorAll('#not-liste a').length === n + 1, notOnce);
+    dene('başlangıç: eski not Not aracında', /Eski defterden/.test(await p.textContent('#not-liste')));
+    await p.reload();
+    await p.goto(T + '/kabuk/#/bugun');
+    await p.waitForSelector('.karsila');
+    await p.waitForTimeout(800);
+    dene('başlangıç: aynı paket ikinci kez teklif edilmez', (await p.locator('[data-baslangic="teklif"]').count()) === 0);
+    dene('başlangıç: eski kayıt deposunda, «eski kayıt» etiketiyle', await p.evaluate(async () => {
+      const v = await window.LIFEOS.Kabuk.Depo.al('lifeos.kayit.kayitlar'); const l = JSON.parse(v || '[]');
+      return l.some(r => r.id === 'kilo:2026-10-20:0' && r.deger.kg.k === 'eski'); }).catch(() => false));
 
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');

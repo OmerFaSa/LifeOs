@@ -143,6 +143,9 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `tasi_test.py` — Yeni bilgisayara taşıma paketi (`sistem/tasi.py`): şifreli, değişmiş dosya açılmaz, üstüne yazmaz; CI'da koşulur.
 - `goc_test.py` — Sadeleşme göç aracı (`sistem/goc.py`): kaynağa yazmaz, sayı dengesi, tek etiket dili, sır pakette durur, aynı rapor, geri alınır; CI'da koşulur.
 - `gercek_kosu_test.py` — Gerçek koşu aracı uydurma veriyle: sayılar doğru, kişisel içerik basılmaz, canlı dosya açılmaz ve değişmez, geçici kopyalar silinir, çökmede çıkış 1; CI'da koşulabilir.
+- `kabuk_baslangic.py` — Tek depodaki eski kayıtları (kopyadan) motorların göç bağdaştırıcılarından geçirip yeni kabuğun başlangıç paketine yazar (`veri/kabuk-baslangic.json`: not, kayıt, kart); kabuk Bugün'de «Getir» diye sunar; göçten sonra bir kez koşulur.
+- `kabuk_baslangic.js` — `kabuk_baslangic.py`'nin Node yardımcısı: `gercek_kosu.js` ROTA'sıyla bağdaştırıcıları koşar, kabuk deposuna girecek çıktıyı döndürür.
+- `kabuk_baslangic_test.py` — Başlangıç paketi aracını uydurma tek depoyla sınar (geçerli not ve ölçü girer, boş ve sınır dışı girmez, içerik ekrana basılmaz, depo değişmez); CI'da koşulur.
 - `tekdepo_test.py` — Tek depo (`sistem/veri.py`) ve hesap köprüsü: üst anahtar düzeyinde son saat kazanır, silme mezar taşı, sıra sonucu değiştirmez, yedek üstüne yazmaz; CI'da koşulur.
 - `gocpaket.test.js` — Göç paketinin cihaz tarafı (`brand/ortak/gocpaket.js`): bütün profiller, sır girmez, bekleyen sayılır, medya sha256 ve parçalama; sahte depolarla, tarayıcısız.
 - `gocpaket_test.py` — Göç paketinin PC tarafı: cihazın paketleri `goc.paket_kaydet` ve göç okuyucusundan geçer, sınırlar ve `/api/hesap/goc-paket` ucu; CI'da koşulur.

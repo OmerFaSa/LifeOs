@@ -209,6 +209,11 @@ jobs:
       - name: Gerçek veri koşusu aracı
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Gerçek veri koşusu aracı" python3 tools/gercek_kosu_test.py
 
+      # P6 SONRASI (2026-11-14). Tek depodaki eski not ve kayitlar motor bagdastiricilarindan gecip yeni kabugun
+      # baslangic paketine doner; icerik ekrana basilmaz, depo degismez.
+      - name: Kabuk başlangıç paketi (eski kayıtlar yeni kabuğa)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk başlangıç paketi" python3 tools/kabuk_baslangic_test.py
+
       # SADELESME FAZ 1 P5 TEK KAPI (2026-11-13). Tek surec, tek adres; eski isleyiciler yeniden
       # yazilmaz, ayni cevabi verir. ETKIN kapali: eski kapilar P6'ya kadar yerinde.
       - name: Tek kapı, tek süreç

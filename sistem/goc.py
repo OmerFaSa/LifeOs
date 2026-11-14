@@ -456,6 +456,13 @@ def sec(adaylar_):
         tekil.setdefault(ozet(kanon(json.loads(a["metin"]))), []).append(a)
     if len(tekil) == 1:
         return adaylar_[0], [a for a in adaylar_[1:]], None
+    # Ayni cihazin iki kopyasi (sunucudaki eski hali, paketteki bugunku hali): paket o cihazin son halidir ve
+    # sunucuya gitmemis degisikligi de tasir; sunucu kopyasinin esitleme saati bunu yenemez. Baska bir cihaz
+    # karisiyorsa bu kural calismaz, karar yine kaydin kendi zamanina ya da sahibine kalir (2026-11-14, canli
+    # veride iki kayit: yedek izi ve gun icinde degisen su miktari).
+    paketten = [a for a in adaylar_ if a["kaynak"] == "paket"]
+    if len({a["cihaz"] for a in adaylar_}) == 1 and len(paketten) == 1:
+        return paketten[0], [a for a in adaylar_ if a is not paketten[0]], None
     sirali = sorted(adaylar_, key=lambda a: a["zaman"], reverse=True)
     if sirali[0]["zaman"] > 0 and sirali[0]["zaman"] > sirali[1]["zaman"]:
         return sirali[0], sirali[1:], None
@@ -579,10 +586,12 @@ def geri_al(hedef_klasor, goc_id):
         c.close()
 
 
-def gercek(hedef, yedek, hesap, hkm, paket, pc):
+def gercek(hedef, yedek, hesap, hkm, paket, pc, bekleyen_pakette=False):
     """P6 (faz1.md §2-3): donus noktasi → iki kuru kosu bayt bayt ayni → gercek hedef → geri donus kopyada denenir
     → veri.karsilastir. Butun kosular AYNI anlik kopyadan okur (canli dosya bir kez kopyalanir). Doner (kod, satirlar).
-    Hedef varsa, paket yoksa, cihazda bekleyen/catisma/hata varsa ya da canli hesap bossa yazmadan durur."""
+    Hedef varsa, paket yoksa, cihazda bekleyen/catisma/hata varsa ya da canli hesap bossa yazmadan durur.
+    bekleyen_pakette: sahibin beyani — paketler az once alindi ve cihazlar o andan beri kullanilmadi; sunucuya
+    gitmemis degisiklikler paketin icindedir (paket cihazin butun deposunu tasir), goc onlari paketten alir."""
     db = os.path.join(hedef, "lifeos.db")
     if os.path.exists(db):
         return 1, ["Hedefte zaten depo var, üstüne yazılmaz: " + db]
@@ -602,6 +611,8 @@ def gercek(hedef, yedek, hesap, hkm, paket, pc):
     r, engel = raporlar[0], []
     if r["bekleyen_toplam"] is None:
         engel.append("cihaz paketi yok (cihazlarda «Bilgisayara gönder» bekleniyor)")
+    elif r["bekleyen_toplam"] and bekleyen_pakette:
+        s.append("Cihazlarda sunucuya gitmemiş %d değişiklik var; sahibin beyanıyla paketten alındı (--bekleyen-pakette)." % r["bekleyen_toplam"])
     elif r["bekleyen_toplam"]:
         engel.append("cihazlarda gönderilmemiş değişiklik var: %d" % r["bekleyen_toplam"])
     if r["kaynak"]["hesap"].get("durum") != "okundu" or not an["hesap"] or _hesap_dolu_mu(an["hesap"]) <= 0:
@@ -709,6 +720,8 @@ def main(argv=None):
     ap.add_argument("--cikti", default=os.path.join(tempfile.gettempdir(), "lifeos-goc-kuru"))
     for ad in ("hesap", "hkm", "paket", "pc", "hedef", "yedek"):
         ap.add_argument("--" + ad, default=v[ad])
+    ap.add_argument("--bekleyen-pakette", action="store_true",
+                    help="--gercek ile: paketler az önce alındı, cihazlar o andan beri kullanılmadı; bekleyen değişiklik paketten alınır")
     a = ap.parse_args(argv)
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -721,7 +734,7 @@ def main(argv=None):
         print("Silinen kayıt: %d (göç %s)" % (geri_al(a.hedef, a.geri_al), a.geri_al))
         return 0
     if a.gercek:
-        kod, satirlar = gercek(a.hedef, a.yedek, a.hesap, a.hkm, a.paket, a.pc)
+        kod, satirlar = gercek(a.hedef, a.yedek, a.hesap, a.hkm, a.paket, a.pc, a.bekleyen_pakette)
         print("\n".join(satirlar))
         return kod
     hedef = tempfile.mkdtemp(prefix="lifeos-goc-hedef-")

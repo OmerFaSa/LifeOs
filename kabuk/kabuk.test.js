@@ -297,6 +297,21 @@ t('sisteme not: yeni araç King okumaz (varsayılan); kapalı aracın ve özel n
   esit(Not.kingAraclar(r.araclar).map(a => a.id), ['a2'], 'King yalnız izinli aracın sistem notunu okur');
 });
 
+t('başlangıç paketi: kimlikle eklenir, var olana dokunmaz, geçersizi almaz; ikinci kez getirmek bir şey eklemez', () => {
+  const Kayit = require('../motor/kayit.js');
+  const n1 = Not.yeni({ id: 'eski1', baslik: 'Eski not', govde: 'x', olusturma: 5, kaynak: { yapi: 'defter' } });
+  const benim = Not.yeni({ id: 'eski1', baslik: 'Benim sürümüm', govde: 'y', olusturma: 9 });
+  const k1 = Kayit.kaydet('su', { ml: 500 }, { gun: '2026-11-01', zaman: 1 }).kayit;
+  const paket = { notlar: [n1, { id: 'bozuk', baslik: '', govde: '' }, null], kayitlar: [k1, { id: 'k2', tur: 'yok', gun: '2026-11-01', deger: {} }], kartlar: [{ id: 'c1', on: 'S', arka: 'C' }, { id: 'c2', on: 'S' }] };
+  const r = R.baslangicBirlestir(Not, Kayit, { notlar: [], kayitlar: [], kartlar: [] }, paket);
+  esit([r.notlar.map(n => n.id), r.kayitlar.map(k => k.id), r.kartlar.map(k => k.id), r.say], [['eski1'], [k1.id], ['c1'], { not: 1, kayit: 1, kart: 1, atlanan: 4 }]);
+  const iki = R.baslangicBirlestir(Not, Kayit, r, paket);
+  esit([iki.say.not, iki.say.kayit, iki.say.kart, iki.notlar.length], [0, 0, 0, 1]);
+  const korur = R.baslangicBirlestir(Not, Kayit, { notlar: [benim], kayitlar: [], kartlar: [] }, paket);
+  esit(korur.notlar[0].baslik, 'Benim sürümüm', 'aynı kimlikte buradaki sürüm kalır');
+  esit([R.baslangicMetni({ notlar: 5, kayitlar: 5, kartlar: 0 }), R.baslangicMetni({ not: 1, kayit: 0, kart: 2 })], ['5 not, 5 kayıt', '1 not, 2 kart']);
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {

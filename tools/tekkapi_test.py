@@ -164,7 +164,7 @@ def ayni(ad, a, b, govde=True):
     dene(ad, not fark, "; ".join(fark))
 
 
-def sina(eski, tek):
+def sina(eski, tek, kokler=()):
     g, T = eski["giris"], tek
     print("\nGiris ve Gun (4180 ↔ /)")
     for yol in ("/", "/kartlar/", "/gun/", "/hesap.js", "/piksel.css", "/gun/ortak/kabuk.js", "/logo/ays.png",
@@ -271,6 +271,19 @@ def sina(eski, tek):
     for yol in ("/kabuk/", "/kabuk/araclar.js", "/motor/not.js", "/alan/felsefe/asama-1.json", "/brand/ortak/piksel-yazi.css"):
         ayni("GET %s (eski 4180 de verir)" % yol, iste(g, yol), iste(T, yol))
     dene("eski 4180: /kabuk → 301 /kabuk/", iste_yonsuz(g, "/kabuk")[0] == 301)
+    # Baslangic paketi (tools/kabuk_baslangic.py ciktisi): yalniz bu bilgisayardan, dosya yoksa 404.
+    ayni("GET /api/kabuk/baslangic paket yokken 404", iste(g, "/api/kabuk/baslangic"), iste(T, "/api/kabuk/baslangic"))
+    dene("başlangıç paketi yokken 404", iste(T, "/api/kabuk/baslangic")[0] == 404)
+    for kok_ in kokler:
+        os.makedirs(os.path.join(kok_, "LifeOS", "veri"), exist_ok=True)
+        with open(os.path.join(kok_, "LifeOS", "veri", "kabuk-baslangic.json"), "w", encoding="utf-8") as f_:
+            f_.write('{"lifeos_kabuk_baslangic": 1, "kimlik": "sinama", "say": {"notlar": 0, "kayitlar": 0, "kartlar": 0}}')
+    k, b, gv = iste(T, "/api/kabuk/baslangic")
+    dene("başlangıç paketi bu bilgisayara verilir (no-store, JSON)", k == 200 and b"sinama" in gv and b.get("Cache-Control") == "no-store"
+         and "application/json" in b.get("Content-Type", ""), k)
+    ayni("GET /api/kabuk/baslangic paket varken (eski 4180 de verir)", iste(g, "/api/kabuk/baslangic"), iste(T, "/api/kabuk/baslangic"))
+    dene("başlangıç paketi vekilden (Tailscale) gelen isteğe verilmez", iste(T, "/api/kabuk/baslangic", basliklar=vekil)[0] == 403,
+         iste(T, "/api/kabuk/baslangic", basliklar=vekil)[0])
     for ad in ("ays", "spi", "esp"):
         k, b = iste_yonsuz(g, "/%s/" % ad)
         dene("eski 4180: /%s/ modülün kendi kapısına yönlenir" % ad, k == 302 and b.get("Location", "").endswith(":%d/" % eski[ad]), "%s %s" % (k, b.get("Location")))
@@ -392,7 +405,7 @@ def main():
                         print(k, f, open(os.path.join(k, f), encoding="utf-8", errors="replace").read()[-1500:])
             print("koşulamadı: sunucular açılmadı (eski %s, tek %s)" % (eok, tok))
             return 1
-        sina(eport, tport)
+        sina(eport, tport, (eski_kok, tek_kok))
         ilet_sina(tport, tek_kok)
     finally:
         for x in (e, t):
