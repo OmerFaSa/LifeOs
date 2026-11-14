@@ -1116,7 +1116,8 @@ async function goruntu(p, ad, sec = {}) {
     await hp.click('a[href="#/hesap"]');
     await hp.waitForSelector('[data-arac="hesap"]');
     await hp.waitForFunction(() => /giriş yapılmadı|henüz hesap yok/.test(document.querySelector('[data-arac="hesap"]').textContent));
-    dene('hesap: Ayarlar › Hesap ve güvenlik ekranı açar; girişsiz cihaz girişe eski panelden gider', (await hp.locator('[data-arac="hesap"] a[href="/kartlar/"]').count()) === 2
+    // giriş uzantısı (kabuk/hesap-giris.js) Oturum bölümünün yerine kendi formunu çizer: eski panele gitmeye gerek yok
+    dene('hesap: Ayarlar › Hesap ve güvenlik ekranı açar; girişsiz cihaz giriş ya da kurulum formunu burada görür', (await hp.locator('[data-arac="hesap"] form[data-hg-form]').count()) >= 1
       && (await hp.locator('#hs-cihazlar').count()) === 0);
     const hk = { headers: { 'X-LifeOS': 'hesap' } };
     const kurul = await hp.request.post(T + '/api/hesap/kur', Object.assign({ data: { ad: 'sahip', parola: 'gezi-parolasi-1', cihaz: 'cihazGEZ00002', cihaz_ad: 'iPhone' } }, hk));

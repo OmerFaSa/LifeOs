@@ -50,6 +50,9 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 7 · Cihaz zemini (A10)](ekip/sadelesme/faz7-cihaz-zemini.md) — Cihaz başına Merkez anahtarı ve iptal, ortak jeton bilgisayardan çıkmaz; tek kapıda Tailscale yalnız 443 (bayrak kapalı); satır satır güvenlik notları (2026-11-13).
 - [Faz 7 · Kapanış](ekip/sadelesme/faz7-kapanis.md) — Kapanış dalı (`kapanis`): tek kapı devrede; eski modüller, eski kapılar, ev ağı sertifikası, HKM yüzü ve kopya dağıtımı kalkıyor; silinen, tutulan, birleştirme sırası (2026-11-14).
 - [Faz 7 · Hesap ekranı kabukta](ekip/sadelesme/faz7-hesap-kabuk.md) — `#/hesap`: oturum, cihazlar (kod + QR, onaylı çıkarma), güncelleme; `/kartlar/`'da kalanlar ve nedenleri (2026-11-14).
+- [Faz 7 · Hesap: giriş ve güvenlik](ekip/sadelesme/faz7-hesap-giris.md) — Kabukta giriş, ilk hesap, şifremi unuttum, kodla bağlan; şifre, kurtarma sorusu, iki adımlı doğrulama ve yedek kodlar (2026-11-15).
+- [Faz 7 · Hesap: bağlantılar ve erişim](ekip/sadelesme/faz7-hesap-baglanti.md) — Kabukta erişim anahtarları, takvim adresi ve uzaktan erişim bölümleri (2026-11-15).
+- [Faz 7 · Hesap: yönetim, yedek, profil](ekip/sadelesme/faz7-hesap-yonetim.md) — Kabukta profil, kullanıcılar, yedekler, dışa aktarma ve hesabı silme (2026-11-15).
 - [Faz 3 · Süreli deneme ve aşamalar](ekip/sadelesme/faz3-deneme-asama.md) — Kabukta süreli deneme ve prova, net ve sonuç ekranı; aşama farkındalığı (eski 1. aşama kaydı bayt bayt korunur) (2026-11-13).
 - [Faz 7 · Tanışma ekranı](ekip/sadelesme/faz7-tanisma.md) — Kabukta dil modelsiz tanışma görüşmesi: kural tablosundan sorular, desenle anlaşılanlar, onaysız yazım yok, başlangıç önerisi (2026-11-13).
 - [Faz 1 · AYS konu durumu](ekip/sadelesme/faz1-yol-konu-durumu.md) — Göçten önceki son sahipsiz kayıt: AYS konu durumu Yol motorunda; taşınanlar, taşınamayanlar (2026-11-13).
