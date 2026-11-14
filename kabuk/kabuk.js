@@ -72,6 +72,16 @@
     ad = String(ad || '').trim();
     return soz + (ad ? ' ' + ad : '') + '.';
   }
+  // Selamın altındaki cümle: yalnız bilinen sayılar; son öğe iyelik alır («bir ders, 3 tekrar ve 2 bekleyen işin var»)
+  function ozetCumle(a, tekrar, bekleyen) {
+    var l = [];
+    if (a) l.push(a.tur === 'ders' ? ['bir ders', 'bir dersin'] : ['bir kapı sınavı', 'bir kapı sınavın']);
+    if (tekrar > 0) l.push([(tekrar === 1 ? 'bir' : tekrar) + ' tekrar', (tekrar === 1 ? 'bir' : tekrar) + ' tekrarın']);
+    if (bekleyen > 0) l.push([(bekleyen === 1 ? 'bir' : bekleyen) + ' bekleyen iş', (bekleyen === 1 ? 'bir' : bekleyen) + ' bekleyen işin']);
+    if (!l.length) return 'Bugün için bekleyen bir şey yok.';
+    var s = l.map(function (x, i) { return x[i === l.length - 1 ? 1 : 0]; });
+    return 'Bugün ' + (s.length > 1 ? s.slice(0, -1).join(', ') + ' ve ' : '') + s[s.length - 1] + ' var.';
+  }
   // Yol durumundan (motor/yol.js durum()) sıradaki adım: geçilmemiş ilk açık ünitede okunmamış ilk ders,
   // dersler bittiyse o ünitenin kapısı; bütün üniteler geçildiyse aşama kapısı; o da geçildiyse null.
   // Okumak hiçbir şeyi geçirmez (AGENTS 0.1): ünite ancak kapısıyla biter.
@@ -80,8 +90,8 @@
       var u = dr.uniteler[i];
       if (u.gecti) continue;
       if (!u.acik) return null;
-      for (var j = 0; j < u.dersler.length; j++) if (u.dersler[j].acik && !u.dersler[j].okundu) return { tur: 'ders', id: u.dersler[j].id, ad: u.dersler[j].ad };
-      return { tur: 'kapi', id: u.id, ad: u.ad };
+      for (var j = 0; j < u.dersler.length; j++) if (u.dersler[j].acik && !u.dersler[j].okundu) return { tur: 'ders', id: u.dersler[j].id, ad: u.dersler[j].ad, unite: i + 1, sira: j + 1, toplam: u.dersler.length, okunan: u.dersler.filter(function (x) { return x.okundu; }).length };
+      return { tur: 'kapi', id: u.id, ad: u.ad, unite: i + 1 };
     }
     return dr.asama.gecti ? null : { tur: 'kapi', id: dr.asama.id, ad: dr.asama.ad };
   }
@@ -175,7 +185,7 @@
   }
 
   var Kabuk = kok.LIFEOS && kok.LIFEOS.Kabuk || {};
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde;
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde;
   Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
     yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
@@ -272,28 +282,50 @@
     return '<a class="kirinti" href="' + ustYer.yol + '"><span aria-hidden="true">‹ </span>' + kac(ustYer.ad) + '</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>' + kac(yer.ad) + '</span>';
   }
 
+  // Bugün'ün üst çubuğu (Manzara): logo, ana bölümler, arama kutusu (komut çubuğu), hesap; öbür sayfalar ust() kırıntısını kullanır
+  var SEKME = [['bugun', 'Bugün', '#/bugun'], ['ogren', 'Alanlar', '#/ogren'], ['not', 'Notlar', '#/motor/not'], ['plan', 'Plan', '#/motor/plan']];
+  function ustBugun() {
+    var ad = hesapAdi();
+    return '<header class="ust ust--sahne"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">L</span>LifeOS</a>' +
+      '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + SEKME.map(function (s) { return '<a href="' + s[2] + '"' + (s[0] === 'bugun' ? ' aria-current="page"' : '') + '>' + s[1] + '</a>'; }).join('') + '</nav>' +
+      '<button type="button" class="ust__ara" data-ac="komut" aria-keyshortcuts="Control+K /" aria-label="Ara"><svg aria-hidden="true"><use href="#i-ara"/></svg><span aria-hidden="true">Ara</span><kbd>Ctrl K</kbd></button>' +
+      '<a class="ust__hesap" href="#/ayarlar" aria-label="Ayarlar">' + (ad ? kac(ad.charAt(0).toLocaleUpperCase('tr')) : '<svg aria-hidden="true"><use href="#i-kisi"/></svg>') + '</a></header>';
+  }
+  // Bekleyenler satırlarından «iş» sayılanlar (ipucu, uyarı ve bitti iletisi sayılmaz); onay satırı geç gelir (onay.js ozetYenile çağırır)
+  var BEKLEYEN = '[data-baslangic="teklif"],[data-tn-davet],[data-onay-bekleyen]', BEKLEYEN_RE = /data-(baslangic="teklif"|tn-davet|onay-bekleyen)/, sonOzet = null;
+  function ozetYenile() {
+    var el = sayfaEl.querySelector('.b-karsilama__ozet');
+    if (el && sonOzet) el.textContent = ozetCumle(sonOzet.a, sonOzet.tekrar, sayfaEl.querySelectorAll(BEKLEYEN).length);
+  }
+
   function sayfaBugun() {
     var t = new Date(), ipucu = depo.getItem('lifeos.kabuk.ipucu') !== 'goruldu';
-    var f = fDurum(), a = f && siradaki(f);
-    var od = f && f.ilerleme && f.ilerleme.okunanDers;
-    return ust('<span class="ust__tarih">' + tarih(t) + '</span>') + B.karsilama({ tarih: tarih(t), selam: selam(t, hesapAdi()),
-      ilerleme: od && od.toplam ? { deger: od.deger, toplam: od.toplam } : null, alanlar: alanKartlari(f, od),
-      sira: { ust: 'Sırada', metin: H.bul(etkinAlan).ad + ' · ' + (f ? f.asama.ad : 'ilk aşama') }, adim: a ? (a.tur === 'ders' ? 'Ders: ' : 'Kapı: ') + a.ad : null,
-      eylem: { metin: f && f.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla', href: a ? adimYolu(a) : F() },
-      baglanti: Kabuk.bugunEk ? Kabuk.bugunEk() : null, ekler: [ // araclar.js: planın sıradaki bloğu ya da plana davet
-        // depo «bellek» kipinde (faz2-indexeddb.md, taşıma kuralı 4) bu oturumun yazdıkları yenilemede kalmaz
-        depo.kip() === 'bellek' ? B.uyari({ tur: 'dikkat', metin: 'Kayıtlarına bu açılışta ulaşılamadı. Önceki kayıtların silinmedi, ama bu oturumda yaptıkların sayfa yenilenince kaybolur.' }) : '',
-        Kabuk.baslangicDavet ? Kabuk.baslangicDavet() : '', // araclar.js: eski sistemdeki kayıtları getirme teklifi (göçten sonra)
-        Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '', // tanisma.js: kayıt yoksa tek satırlık davet
-        Kabuk.onayBugun ? Kabuk.onayBugun() : '', // onay.js: «Onay bekleyen N ders», yalnız N > 0 iken
-        ipucu ? B.uyari({ tur: 'bilgi', metin: 'Bir yere gitmek için boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : ''] });
+    var f = fDurum(), a = f && siradaki(f), alan = H.bul(etkinAlan);
+    var od = f && f.ilerleme && f.ilerleme.okunanDers, v = Kabuk.bugunVeri ? Kabuk.bugunVeri() : { plan: null, tekrar: 0 }; // araclar.js
+    var ekler = [
+      // depo «bellek» kipinde (faz2-indexeddb.md, taşıma kuralı 4) bu oturumun yazdıkları yenilemede kalmaz
+      depo.kip() === 'bellek' ? B.uyari({ tur: 'dikkat', simge: 'dikkat', renk: 'turuncu', metin: 'Kayıtlarına bu açılışta ulaşılamadı', alt: 'Önceki kayıtların silinmedi, ama bu oturumda yaptıkların sayfa yenilenince kaybolur.' }) : '',
+      Kabuk.baslangicDavet ? Kabuk.baslangicDavet() : '', // araclar.js: eski sistemdeki kayıtları getirme teklifi (göçten sonra)
+      Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '', // tanisma.js: kayıt yoksa tek satırlık davet
+      Kabuk.onayBugun ? Kabuk.onayBugun() : '', // onay.js: «N ders onayını bekliyor», yalnız N > 0 iken
+      ipucu ? B.uyari({ tur: 'bilgi', simge: 'ipucu', renk: 'sari', metin: 'Her yere iki adımda', alt: 'Boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : ''];
+    sonOzet = { a: a, tekrar: v.tekrar };
+    return ustBugun() + B.karsilama({ tarih: tarih(t), selam: selam(t, hesapAdi()),
+      ozet: ozetCumle(a, v.tekrar, ekler.filter(function (s) { return BEKLEYEN_RE.test(s); }).length),
+      ilerleme: od && od.toplam ? { deger: od.deger, toplam: od.toplam } : null, alanlar: alanKartlari(f, od, a),
+      sira: { simge: etkinAlan, ust: alan.ad + (a && a.unite ? ' · Ünite ' + a.unite : ''), metin: !f ? alan.ad : !a ? f.asama.ad + ' tamamlandı' : a.tur === 'kapi' ? a.ad + ' · kapı' : a.ad },
+      adim: !a ? null : a.tur === 'ders' ? 'Ders ' + a.sira + ' / ' + a.toplam : a.unite ? 'Ünitenin dersleri bitti; kapıdan geçince sonraki ünite açılır' : 'Aşamanın son kapısı',
+      eylem: { metin: !a ? 'Aç' : a.tur === 'kapi' ? 'Kapıya git' : od.deger ? 'Derse devam et' : 'Derse başla', href: a ? adimYolu(a) : F() },
+      baglanti: v.plan ? { metin: 'Başka bir şey seç', href: '#/ogren' } : { metin: 'Günü planla', href: '#/motor/plan' },
+      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler });
   }
   // Bugün'ün alan ızgarası: haritadaki taşınmış alanlar; simge index.html'deki #i-<alan>, ilerleme yalnız açık alan için bilinir
   var ALAN_RENK = { felsefe: 'turuncu', akademik: 'mavi', dil: 'yesil', tarih: 'pembe', okuma: 'sari', hareket: 'deniz', muzik: 'mor', beslenme: 'yesil', uyku: 'gok', tahlil: 'pembe' };
-  function alanKartlari(f, od) {
+  function alanKartlari(f, od, a) {
     return H.YERLER.filter(function (y) { return y.katman === 'alan' && y.asama; }).map(function (y) {
-      var bu = y.id === etkinAlan && od && od.toplam && od.deger;
-      return { ad: y.ad, not: y.aciklama, href: y.yol, simge: y.id, renk: ALAN_RENK[y.id], yuzde: bu ? Math.round(100 * od.deger / od.toplam) : null };
+      var bu = y.id === etkinAlan && od && od.toplam;
+      return { ad: y.ad, not: bu && a && a.tur === 'ders' ? 'Ünite ' + a.unite + ' · ' + a.okunan + '/' + a.toplam + ' ders' : y.aciklama, href: y.yol, simge: y.id, renk: ALAN_RENK[y.id],
+        yuzde: bu && od.deger ? Math.round(100 * od.deger / od.toplam) : null };
     });
   }
   // manzara: sahibin piksel sahnesi (brand/ortak/piksel-doga.js, sunucu /piksel-doga.js verir); süstür, çizilmezse gök rengi kalır
@@ -753,7 +785,7 @@
     dersMetni: dersMetni, onayDegisti: function (id) { if (hamlar[id]) alanKur(id); },
     asamalar: function (id) { var a = alanlar[id]; return a && a.ys ? a.ys : null; },
     asamaY: function (id, asamaId) { var a = alanlar[id]; return a && a.ys ? a.ys.filter(function (y) { return y.id === asamaId; })[0] || null : null; },
-    tasinanlar: function () { return H.YERLER.filter(function (y) { return tasinan(y.id); }); } };
+    tasinanlar: function () { return H.YERLER.filter(function (y) { return tasinan(y.id); }); }, ozetYenile: ozetYenile };
   Kabuk.ac = { halka: halkaAcOdakli, komut: function () { komutAc(); }, git: function (y) { git(y); } };
   function basla() { uygula(); hazir.then(baslat); } // tema ilk boyamadan önce (ayar eşzamanlı okunur), sayfa depo hazır olunca
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', basla); else basla();

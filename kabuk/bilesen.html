@@ -169,10 +169,13 @@
   h += tas(22, 'Ağ çizimi', 'Düğüm bir bağlantıdır (Sekme ile gezilir); çizgi türleri düz, kesik, kalın kesik; altında özet ve örnek çizgili açıklama (renk tek başına değil). Telefonda ad ~11 px kalır; kırktan çok düğümde ad yalnız odakta.', B.ag({ ad: 'Örnek ağ: 4 not, 3 bağ', en: 640, boy: 240,
     dugumler: [{ id: 'a', ad: 'Sokrates', x: 120, y: 60, href: '#/a' }, { id: 'b', ad: 'Erdem bilgidir', x: 320, y: 140, r: 10, href: '#/b' }, { id: 'c', ad: 'Sofistler', x: 540, y: 60, href: '#/c' }, { id: 'd', ad: 'Bağsız not', x: 560, y: 200, r: 6, href: '#/d' }],
     kenarlar: [{ a: 'a', b: 'b', tur: 'duz' }, { a: 'b', b: 'c', tur: 'kesik' }, { a: 'a', b: 'c', tur: 'kalin' }], ozet: '4 not · 3 bağ · 1 bağsız', aciklama: { duz: 'bağ', kesik: 'aynı etiket', kalin: 'çelişki' } }));
-  h += tas(23, 'Karşılama', 'Bugün: ortada tek cümle selam (ölçeğin dışındaki tek yazı boyu, karşılama A), sırada satırı, tek ana düğme; altında tek bağlantı ve aynı genişlikte bilgi satırları (en çok 760 px).',
-    B.karsilama({ selam: 'Günaydın Ece.', sira: { ust: 'Sırada', metin: 'Felsefe · Bilgi felsefesi' }, adim: 'Ders: Sanı ve bilgi', eylem: { metin: 'Devam et', href: '#/a' },
-      baglanti: { metin: 'Planda sırada: 09:00 Felsefe · 2 blok daha', href: '#/motor/plan' },
-      ekler: [B.uyari({ tur: 'bilgi', metin: 'Seni biraz tanıyayım mı? Birkaç kısa soru.', eylem: [{ metin: 'Tanışalım', tur: 'sade', href: '#/tanisma' }, { metin: 'Sonra', tur: 'sade' }] })] }));
+  h += tas(23, 'Karşılama', 'Bugün («Manzara»): piksel manzara şeridi, tarih, tek h1 selam ve gerçek sayılarla özet cümlesi; şeride binen iş kartı (alan simgeli etiket, ders başlığı, «Ders 3 / 9», oklu tek ana düğme, ilerleme halkası); günün planı (saat · tik · ad · süre, yalnız plan varsa), simgeli bekleyen satırları, alan kartları.',
+    B.karsilama({ tarih: 'Cumartesi · 14 Kasım', selam: 'Günaydın Ece.', ozet: 'Bugün bir ders, bir tekrar ve 2 bekleyen işin var.', sira: { simge: 'felsefe', ust: 'Felsefe · Ünite 1', metin: 'Sanı ve bilgi' }, adim: 'Ders 3 / 9',
+      eylem: { metin: 'Derse devam et', href: '#/a' }, baglanti: { metin: 'Başka bir şey seç', href: '#/ogren' }, ilerleme: { deger: 2, toplam: 9 },
+      plan: { href: '#/motor/plan', satirlar: [{ saat: '18:30', ad: 'Okuma', dk: 30, bitti: true }, { saat: '19:30', ad: 'Felsefe: Sanı ve bilgi', dk: 25 }, { saat: '20:00', ad: 'Tekrar', dk: 5 }] },
+      ekler: [B.uyari({ tur: 'bilgi', simge: 'indir', renk: 'turuncu', metin: 'Eski sistemdeki kayıtların hazır', alt: '69 plan, 2 Yol ilerlemesi getirilebilir.', eylem: [{ metin: 'Getir', tur: 'ana' }, { metin: 'Sonra', tur: 'sade' }] }),
+        B.uyari({ tur: 'bilgi', simge: 'onay', renk: 'mavi', metin: 'Onay bekleyen 544 ders', alt: 'Taslak dersler onaylanınca tekrara girer.', eylem: { metin: 'İncele', tur: 'sade', href: '#/onay' } })],
+      alanlar: [{ ad: 'Felsefe', not: 'Ünite 1 · 2/9 ders', href: '#/a', simge: 'felsefe', renk: 'turuncu', yuzde: 22 }, { ad: 'Dil', not: 'Diller ve diksiyon', href: '#/b', simge: 'dil', renk: 'yesil' }] }));
   // halka ve komut çubuğu gizli çizilir; katalogda açık hâlleri dönüşümlü kabın içinde gösterilir
   h += tas(24, 'Halka', 'Boş yerde basılı tutunca (ya da Ctrl .) basılan yerde açılır: yuvarlak zemin, ortada nokta, en çok altı yer; öğe en az 88 × 44 px, ilki tepede, saat yönünde. Seçili öğe dolu vurgu. Ok tuşları, Home/End, Esc.',
     '<div class="katman">' + B.halka({ id: 'ornek-halka', ad: 'Yerler', ogeler: [{ ad: 'Bugün', yol: '#/bugun' }, { ad: 'Öğren', yol: '#/ogren' }, { ad: 'Sağlık', yol: '#/saglik' },

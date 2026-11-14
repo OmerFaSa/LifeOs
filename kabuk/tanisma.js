@@ -382,7 +382,8 @@
     var I = ic(); if (!I) return '';
     if (kayitOku(I.depo) || I.depo.getItem(DAVET) === 'kapali') return '';
     var t = taslakOku(I.depo), yarim = Object.keys(t.cevaplar).length > 0;
-    return B.uyari({ tur: 'bilgi', veri: { 'tn-davet': '' }, metin: yarim ? 'Tanışmayı yarıda bıraktın.' : 'Seni biraz tanıyayım mı? Birkaç kısa soru.',
+    return B.uyari({ tur: 'bilgi', veri: { 'tn-davet': '' }, simge: 'kisi', renk: 'mor', metin: yarim ? 'Tanışmayı yarıda bıraktın' : 'Seni biraz tanıyayım mı?',
+      alt: yarim ? 'Kaldığın yerden sürer.' : 'Birkaç kısa soru; başlangıcın buna göre önerilir.',
       eylem: [{ metin: yarim ? 'Devam et' : 'Tanışalım', tur: 'sade', href: '#/tanisma' }, { metin: 'Sonra', tur: 'sade', veri: { 'tn-ac': 'davet-kapat' } }] });
   };
   Kabuk.ek = Kabuk.ek || {};

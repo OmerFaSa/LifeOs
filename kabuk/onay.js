@@ -311,7 +311,8 @@
   // varsa önce boş yer tutucu çizilir, içerik gelince yalnız o satır yerine konur (sayfa yeniden çizilmez).
   function bugunSatiri(I) {
     var n = bekleyenSayisi(I);
-    return n ? B.uyari({ tur: 'bilgi', veri: { 'onay-bekleyen': String(n) }, metin: 'Onay bekleyen ' + n + ' ders.', eylem: { metin: 'Onaylar', tur: 'sade', href: '#/onay' } }) : '';
+    return n ? B.uyari({ tur: 'bilgi', veri: { 'onay-bekleyen': String(n) }, simge: 'onay', renk: 'mavi', metin: 'Onay bekleyen ' + n + ' ders',
+      alt: 'Taslak dersler onaylanınca tekrara girer.', eylem: { metin: 'İncele', tur: 'sade', href: '#/onay' } }) : '';
   }
   Kabuk.onayBugun = function () {
     var I = ic(); if (!I) return '';
@@ -319,6 +320,7 @@
     if (!eksik.length) return bugunSatiri(I);
     Promise.all(eksik.map(function (a) { return I.alanYukle(a.id); })).then(function () {
       var el = d.querySelector('[data-onay-yer]'); if (el) el.outerHTML = bugunSatiri(I).replace('class="b-uyari ', 'class="b-uyari b-uyari--satir '); // Bugün'ün bekleyenler kartında satır biçimi (bilesen.js karsilama)
+      if (I.ozetYenile) I.ozetYenile(); // selamın altındaki cümle bekleyen işi de saysın
     });
     return '<div data-onay-yer hidden></div>';
   };

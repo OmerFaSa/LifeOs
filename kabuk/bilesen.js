@@ -232,13 +232,21 @@
 
   /* 10 · Uyarı / bilgi satırı. tur: bilgi (note) | tamam (status) | dikkat (note) | hata (alert).
    * Tür renkle değil, önündeki sözcükle de ayrılır. eylem: bir düğme ya da düğme dizisi (sağda).
-   * hata ve tamam odak alabilir (tabindex=-1): form gönderilince ekran iletinin üstüne odaklanır, ekran okuyucu okur. */
+   * hata ve tamam odak alabilir (tabindex=-1): form gönderilince ekran iletinin üstüne odaklanır, ekran okuyucu okur.
+   * İsteğe bağlı: alt (ikinci, soluk satır), simge (#i-<simge> renkli karoda; renk RENK'ten, yoksa mavi). */
   var UYARI = { bilgi: ['Bilgi', 'note'], tamam: ['Tamam', 'status'], dikkat: ['Dikkat', 'note'], hata: ['Hata', 'alert'] };
   function uyari(o) {
     nesne('uyari', o);
     var tur = sec('uyari', 'tur', o.tur, ['bilgi', 'tamam', 'dikkat', 'hata']);
-    return '<div class="b-uyari b-uyari--' + tur + '" role="' + UYARI[tur][1] + '"' + (tur === 'hata' || tur === 'tamam' ? ' tabindex="-1"' : '') + veri('uyari', o.veri) + '><span class="b-uyari__tur">' + UYARI[tur][0] + '</span>' +
-      '<p class="b-uyari__metin">' + kac(metin('uyari', 'metin', o.metin)) + '</p>' + (o.eylem ? (Array.isArray(o.eylem) ? eylemler(o.eylem) : dugme(o.eylem)) : '') + '</div>';
+    return '<div class="b-uyari b-uyari--' + tur + (o.simge ? ' b-uyari--simgeli' : '') + '" role="' + UYARI[tur][1] + '"' + (tur === 'hata' || tur === 'tamam' ? ' tabindex="-1"' : '') + veri('uyari', o.veri) + '>' +
+      (o.simge ? simge(o.simge, o.renk || 'mavi') : '') + '<span class="b-uyari__tur">' + UYARI[tur][0] + '</span>' +
+      '<p class="b-uyari__metin">' + kac(metin('uyari', 'metin', o.metin)) + (o.alt ? '<span class="b-uyari__alt">' + kac(metin('uyari', 'alt', o.alt)) + '</span>' : '') + '</p>' +
+      (o.eylem ? (Array.isArray(o.eylem) ? eylemler(o.eylem) : dugme(o.eylem)) : '') + '</div>';
+  }
+  // renkli simge karosu (Bugün'ün alan kartları, bekleyen satırları); bilinmeyen renk turuncuya düşer
+  var RENK = ['mavi', 'yesil', 'turuncu', 'pembe', 'gok', 'sari', 'mor', 'deniz'];
+  function simge(ad, renk) {
+    return '<span class="b-simge b-simge--' + (RENK.indexOf(renk) >= 0 ? renk : 'turuncu') + '" aria-hidden="true"><svg><use href="#i-' + kac(String(ad || 'nokta')) + '"/></svg></span>';
   }
 
   /* 11 · Bölüm. <section aria-labelledby> + h2 + isteğe bağlı tek eylem; aralıklar sabit. */
@@ -415,14 +423,27 @@
   }
 
   /* 23 · Karşılama (Bugün, «Manzara» yönü, sahibin seçimi 2026-11-14; örnek belgeler/tasarim/kabuk-pro/v2/odak.html?manzara=1).
-   * Üstte manzara şeridi (canvas.b-karsilama__manzara: çizimi ekran yapar, çizilmezse gökyüzü rengi kalır), tarih ve selam (tek h1);
-   * altında şeride binen iş kartı: «sırada» satırı (sira {ust, metin}), sıradaki adım, tek ana düğme (eylem), isteğe bağlı bağlantı
-   * (baglanti {metin, href}) ve ilerleme halkası (ilerleme {deger, toplam}); altında «Bekleyenler» (ekler: uyarı taşları tek liste kartında)
+   * Üstte manzara şeridi (canvas.b-karsilama__manzara: çizimi ekran yapar, çizilmezse gökyüzü rengi kalır), tarih, selam (tek h1) ve
+   * özet cümlesi (ozet); altında şeride binen iş kartı: etiket satırı ve başlık (sira {ust, metin, simge?}), sıradaki adım, tek ana düğme
+   * (eylem, oklu), isteğe bağlı bağlantı (baglanti {metin, href}) ve ilerleme halkası (ilerleme {deger, toplam}); altında «Bugünün planı»
+   * (plan {href, satirlar [{saat, ad, not?, dk?, bitti?}]}, satır yoksa çizilmez), «Bekleyenler» (ekler: uyarı taşları tek liste kartında)
    * ve «Alanlar» (alanlar [{ad, not?, href, simge (index.html'deki #i-<simge>), renk?, yuzde?}]). */
-  var RENK = ['mavi', 'yesil', 'turuncu', 'pembe', 'gok', 'sari', 'mor', 'deniz'];
+  function kBolum(id, baslik, sag, ic) {
+    return '<section class="b-karsilama__bolum" aria-labelledby="b-k-' + id + '"><div class="b-karsilama__bolumust"><h2 class="b-karsilama__baslik" id="b-k-' + id + '">' + baslik + '</h2>' +
+      (sag ? '<a class="b-karsilama__tumu" href="' + kac(yol('karsilama', sag.href)) + '">' + kac(sag.metin) + '</a>' : '') + '</div>' + ic + '</section>';
+  }
   function karsilama(o) {
     nesne('karsilama', o);
     var s = o.sira == null ? null : nesne('karsilama', o.sira), b = o.baglanti == null ? null : nesne('karsilama', o.baglanti), ek = o.ekler == null ? '' : govde('karsilama', o.ekler);
+    var pl = o.plan == null ? null : nesne('karsilama', o.plan), ps = pl && Array.isArray(pl.satirlar) ? pl.satirlar : [];
+    var plan = ps.map(function (x) {
+      nesne('karsilama', x);
+      return '<li class="b-karsilama__blok' + (x.bitti ? ' b-karsilama__blok--bitti' : '') + '"><span class="b-karsilama__saat">' + kac(metin('karsilama', 'plan.saat', x.saat)) + '</span>' +
+        '<span class="b-karsilama__tik" aria-hidden="true">' + (x.bitti ? '<svg><use href="#i-tik"/></svg>' : '') + '</span>' +
+        '<span class="b-karsilama__alanmetin"><span class="b-karsilama__alanad">' + kac(metin('karsilama', 'plan.ad', x.ad)) + '</span>' +
+        (x.not ? '<span class="b-karsilama__alannot">' + kac(metin('karsilama', 'plan.not', x.not)) + '</span>' : '') + '</span>' +
+        '<span class="b-karsilama__sure">' + (x.bitti ? 'tamamlandı' : x.dk > 0 ? '<svg aria-hidden="true"><use href="#i-saat"/></svg>' + Math.round(+x.dk) + ' dk' : '') + '</span></li>';
+    }).join('');
     var il = o.ilerleme == null ? null : nesne('karsilama', o.ilerleme), oran = il && il.toplam > 0 ? Math.max(0, Math.min(1, il.deger / il.toplam)) : null;
     var yuzde = oran == null ? 0 : Math.round(oran * 100);
     var halka = oran == null ? '' : '<div class="b-karsilama__halka" role="img" aria-label="İlerleme yüzde ' + yuzde + '"><svg viewBox="0 0 96 96" aria-hidden="true">' +
@@ -430,23 +451,24 @@
       '<span class="b-karsilama__oran">%' + yuzde + '<small>' + (+il.deger) + ' / ' + (+il.toplam) + ' ders</small></span></div>';
     var al = (o.alanlar || []).map(function (a) {
       nesne('karsilama', a);
-      var renk = RENK.indexOf(a.renk) >= 0 ? a.renk : 'turuncu';
-      return '<a class="b-karsilama__alan" href="' + kac(yol('karsilama', a.href)) + '"><span class="b-karsilama__simge b-karsilama__simge--' + renk + '" aria-hidden="true"><svg><use href="#i-' + kac(String(a.simge || 'nokta')) + '"/></svg></span>' +
+      return '<a class="b-karsilama__alan" href="' + kac(yol('karsilama', a.href)) + '">' + simge(a.simge, a.renk) +
         '<span class="b-karsilama__alanmetin"><span class="b-karsilama__alanad">' + kac(metin('karsilama', 'alanlar.ad', a.ad)) + '</span>' +
         (a.not ? '<span class="b-karsilama__alannot">' + kac(metin('karsilama', 'alanlar.not', a.not)) + '</span>' : '') + '</span>' +
         (a.yuzde != null ? '<span class="b-karsilama__yuzde">%' + Math.round(+a.yuzde) + '</span>' : '<svg class="b-karsilama__ok" aria-hidden="true"><use href="#i-sag"/></svg>') + '</a>';
     }).join('');
     return '<div class="b-karsilama"><div class="b-karsilama__sahne"><canvas class="b-karsilama__manzara" width="384" height="96" aria-hidden="true"></canvas>' +
       '<div class="b-karsilama__ic">' + (o.tarih ? '<p class="b-karsilama__tarih">' + kac(metin('karsilama', 'tarih', o.tarih)) + '</p>' : '') +
-      '<h1 class="b-karsilama__selam">' + kac(metin('karsilama', 'selam', o.selam)) + '</h1></div></div>' +
+      '<h1 class="b-karsilama__selam">' + kac(metin('karsilama', 'selam', o.selam)) + '</h1>' +
+      (o.ozet ? '<p class="b-karsilama__ozet">' + kac(metin('karsilama', 'ozet', o.ozet)) + '</p>' : '') + '</div></div>' +
       '<section class="b-karsilama__is" aria-label="Sıradaki"><div class="b-karsilama__govde">' +
-      (s ? '<p class="b-karsilama__sira"><span class="b-karsilama__ust">' + kac(metin('karsilama', 'sira.ust', s.ust)) + '</span><br>' + kac(metin('karsilama', 'sira.metin', s.metin)) + '</p>' : '') +
+      (s ? '<p class="b-karsilama__ust">' + (s.simge ? '<svg aria-hidden="true"><use href="#i-' + kac(String(s.simge)) + '"/></svg>' : '') + kac(metin('karsilama', 'sira.ust', s.ust)) + '</p>' +
+        '<h2 class="b-karsilama__sira">' + kac(metin('karsilama', 'sira.metin', s.metin)) + '</h2>' : '') +
       (o.adim ? '<p class="b-karsilama__adim">' + kac(metin('karsilama', 'adim', o.adim)) + '</p>' : '') +
-      '<div class="b-karsilama__eylem">' + dugme(Object.assign({ tur: 'ana' }, nesne('karsilama', o.eylem))) +
+      '<div class="b-karsilama__eylem">' + dugme(Object.assign({ tur: 'ana' }, nesne('karsilama', o.eylem))).replace(/<\/(a|button)>$/, '<svg class="b-karsilama__ileri" aria-hidden="true"><use href="#i-ok"/></svg></$1>') +
       (b ? '<a class="b-karsilama__baglanti" href="' + kac(yol('karsilama', b.href)) + '">' + kac(metin('karsilama', 'baglanti.metin', b.metin)) + '</a>' : '') + '</div></div>' + halka + '</section>' +
-      (ek ? '<section class="b-karsilama__bolum" aria-label="Bekleyenler"><h2 class="b-karsilama__baslik">Bekleyenler</h2><div class="b-karsilama__ek">' +
-        ek.replace(/class="b-uyari /g, 'class="b-uyari b-uyari--satir ') + '</div></section>' : '') +
-      (al ? '<section class="b-karsilama__bolum" aria-label="Alanlar"><h2 class="b-karsilama__baslik">Alanlar</h2><nav class="b-karsilama__alanlar" aria-label="Alanlar">' + al + '</nav></section>' : '') + '</div>';
+      (plan ? kBolum('plan', 'Bugünün planı', pl.href ? { href: pl.href, metin: 'Planı aç' } : null, '<ol class="b-karsilama__plan">' + plan + '</ol>') : '') +
+      (ek ? kBolum('bekleyen', 'Bekleyenler', null, '<div class="b-karsilama__ek">' + ek.replace(/class="b-uyari /g, 'class="b-uyari b-uyari--satir ') + '</div>') : '') +
+      (al ? kBolum('alanlar', 'Alanlar', null, '<nav class="b-karsilama__alanlar" aria-labelledby="b-k-alanlar">' + al + '</nav>') : '') + '</div>';
   }
 
   /* 24 · Halka (Yerler). Basılı tutunca ya da Ctrl . ile açılan dairesel menü: role=menu, öğeler menuitem düğmeleri (data-yol); ilki tepede, saat yönünde

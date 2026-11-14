@@ -90,8 +90,12 @@ async function goruntu(p, ad, sec = {}) {
       localStorage.getItem('rota84285.v2') === '{"gezi":{"isaret":"eski-kokenden"}}' && localStorage.getItem('lifeos.king.bas.ays') === '{"x":1}' &&
       localStorage.getItem('lifeos.gezi.metin') === 'duz metin' && JSON.parse(localStorage.getItem('lifeos.tasima')).ays === 'ays-cGEZ-20261114-000000-abcdef.json'));
     dene('Bugün: «Başla» ilk derse götürür', (await p.getAttribute('.b-karsilama .b-dugme--ana', 'href')) === '#/alan/felsefe/ders/' + u1.dersler[0].id);
-    dene('Bugün: karşılama taşı tek h1 selam, «Sırada» satırı, tek ana düğme', (await p.locator('#sayfa h1.b-karsilama__selam').count()) === 1 && (await p.locator('#sayfa h1').count()) === 1
-      && /^Sırada/.test(await p.textContent('.b-karsilama__sira')) && (await p.locator('.b-karsilama__is .b-dugme--ana').count()) === 1);
+    dene('Bugün: karşılama taşı tek h1 selam, özet cümlesi, «Felsefe · Ünite 1» etiketi, ders başlığı, tek ana düğme', (await p.locator('#sayfa h1.b-karsilama__selam').count()) === 1 && (await p.locator('#sayfa h1').count()) === 1
+      && /^Bugün .* var\.$/.test(await p.textContent('.b-karsilama__ozet')) && (await p.textContent('.b-karsilama__ust')) === 'Felsefe · Ünite 1'
+      && (await p.textContent('.b-karsilama__sira')) === u1.dersler[0].ad && (await p.textContent('.b-karsilama__adim')) === 'Ders 1 / ' + u1.dersler.length
+      && (await p.locator('.b-karsilama__is .b-dugme--ana').count()) === 1, await p.textContent('.b-karsilama__is'));
+    dene('Bugün: üst çubukta logo, dört bölüm (Bugün seçili), arama komut çubuğunu açar', (await p.locator('.ust--sahne .ust__sekmeler a').count()) === 4
+      && (await p.getAttribute('.ust__sekmeler a[aria-current="page"]', 'href')) === '#/bugun' && (await p.getAttribute('.ust__ara', 'data-ac')) === 'komut');
     await goruntu(p, 'karsilama');
     // ---- Halka (taş 24): Ctrl . ile ortada açılır, menü/menuitem, ok tuşu gezer, Esc kapatır ve odak geri döner ----
     const halkaAcik = () => p.evaluate(() => !document.getElementById('halka').hidden); // halka kabı 0 × 0: görünürlüğü hidden niteliğinden
@@ -207,7 +211,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/alan/akademik');
     await p.waitForSelector('.b-acilir');
     await p.goto(T + '/kabuk/#/bugun');
-    await p.waitForFunction(() => /Akademik/.test((document.querySelector('.b-karsilama__sira') || {}).textContent || ''));
+    await p.waitForFunction(() => /^Akademik/.test((document.querySelector('.b-karsilama__ust') || {}).textContent || ''));
     dene('Bugün son çalışılan alanla karşılar (Akademik)', /akademik\/(ders|kapi)\//.test(await p.getAttribute('.b-karsilama .b-dugme--ana', 'href')));
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.b-acilir');
@@ -452,8 +456,9 @@ async function goruntu(p, ad, sec = {}) {
     await p.waitForSelector('[aria-label="Bugünün blokları"] [data-blok]');
     dene('plan: yenilemeden sonra plan duruyor', (await p.locator('[data-blok="is"]:not([data-blok-durum="bekliyor"])').count()) === 1);
     await p.goto(T + '/kabuk/#/bugun');
-    await p.waitForSelector('.b-karsilama__baglanti');
-    dene('Bugün: planın sıradaki bloğunu gösterir', /Planda sırada: \d\d:\d\d/.test(await p.textContent('.b-karsilama__baglanti')), await p.textContent('.b-karsilama__baglanti'));
+    await p.waitForSelector('.b-karsilama__plan');
+    dene('Bugün: günün planı saatli satırlar, yapılan blok «tamamlandı», «Planı aç» plana götürür', /^\d\d:\d\d$/.test(await p.textContent('.b-karsilama__blok .b-karsilama__saat'))
+      && (await p.locator('.b-karsilama__blok--bitti').count()) >= 1 && (await p.getAttribute('#b-k-plan + .b-karsilama__tumu', 'href')) === '#/motor/plan', await p.textContent('.b-karsilama__plan'));
 
     // ---- Hafta planı ve sabit bloklar (şablon bir kez yazılır, her güne girer) ----
     await p.goto(T + '/kabuk/#/motor/plan');
@@ -843,8 +848,9 @@ async function goruntu(p, ad, sec = {}) {
     dene('aşama: ikinci aşamanın kaydı kendi anahtarında; birincinin kaydı değişmedi', Object.keys(k2.dersler).length === 1 && Object.keys(k2.asamalar).length === 0 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'))) === kayit1b);
     await p.reload();
     await p.goto(T + '/kabuk/#/bugun');
-    await p.waitForFunction(t => (document.querySelector('.b-karsilama__sira') || {}).textContent.indexOf(t) >= 0, y2.ad, { timeout: 5000 }).catch(() => {});
-    dene('aşama: Bugün yenilemeden sonra ikinci aşamayla karşılar', ((await p.textContent('.b-karsilama__sira')) || '').indexOf(y2.ad) >= 0, await p.textContent('.b-karsilama__sira'));
+    await p.waitForFunction(t => ((document.querySelector('.b-karsilama .b-dugme--ana') || { getAttribute: () => '' }).getAttribute('href') || '').indexOf(t) >= 0, '/' + y2.id + '.', { timeout: 5000 }).catch(() => {});
+    const ana2 = await p.getAttribute('.b-karsilama .b-dugme--ana', 'href');
+    dene('aşama: Bugün yenilemeden sonra ikinci aşamayla karşılar', (ana2 || '').indexOf('/' + y2.id + '.') >= 0, ana2);
     // ---- Kayıt deposu (faz2-indexeddb.md): kayıt IndexedDB'de, ayar localStorage'da; yazıdan hemen sonra yenilense de kalır ----
     const idbOku = (sayfa, k) => sayfa.evaluate(k => new Promise((ok, red) => { const r = indexedDB.open('lifeos-kabuk'); r.onerror = () => red(r.error);
       r.onsuccess = () => { const q = r.result.transaction('kayit').objectStore('kayit').get(k); q.onsuccess = () => { r.result.close(); ok(q.result === undefined ? null : q.result); }; }; }), k);

@@ -30,17 +30,25 @@ t('yol: sıradaki adım ders → kapı → sonraki ünite → aşama kapısı �
   const adim = () => K.siradaki(Yol.durum(y, k));
   const dogrular = sahip => Object.fromEntries(y.oge[sahip].kapi.sorular.map(q => [q.id, q.dogru]));
   const iz = [];
-  for (const u of y.veri.uniteler) {
-    for (const d of u.dersler) { esit(adim(), { tur: 'ders', id: d.id, ad: d.ad }); iz.push(d.id); k = Yol.dersOku(y, k, d.id, z++); }
-    esit(adim(), { tur: 'kapi', id: u.id, ad: u.ad });
+  y.veri.uniteler.forEach((u, i) => {
+    u.dersler.forEach((d, j) => { esit(adim(), { tur: 'ders', id: d.id, ad: d.ad, unite: i + 1, sira: j + 1, toplam: u.dersler.length, okunan: j }); iz.push(d.id); k = Yol.dersOku(y, k, d.id, z++); });
+    esit(adim(), { tur: 'kapi', id: u.id, ad: u.ad, unite: i + 1 });
     k = Yol.kapiDene(y, k, u.id, {}, z++).kayit;                       // boş deneme: kalır, adım değişmez
-    esit(adim(), { tur: 'kapi', id: u.id, ad: u.ad }, 'kalınca aynı kapı');
+    esit(adim(), { tur: 'kapi', id: u.id, ad: u.ad, unite: i + 1 }, 'kalınca aynı kapı');
     k = Yol.kapiDene(y, k, u.id, dogrular(u.id), z++).kayit;
-  }
+  });
   esit(iz.length, 9);
   esit(adim(), { tur: 'kapi', id: y.id, ad: y.veri.ad });
   k = Yol.kapiDene(y, k, y.id, dogrular(y.id), z++).kayit;
   esit(adim(), null);
+});
+
+t('Bugün özet cümlesi: yalnız bilinen sayılar, son öğe iyelik alır, hiçbiri yoksa sakin cümle', () => {
+  esit(K.ozetCumle({ tur: 'ders' }, 1, 2), 'Bugün bir ders, bir tekrar ve 2 bekleyen işin var.');
+  esit(K.ozetCumle({ tur: 'ders' }, 0, 0), 'Bugün bir dersin var.');
+  esit(K.ozetCumle({ tur: 'kapi' }, 5, 0), 'Bugün bir kapı sınavı ve 5 tekrarın var.');
+  esit(K.ozetCumle(null, 0, 1), 'Bugün bir bekleyen işin var.');
+  esit(K.ozetCumle(null, 0, 0), 'Bugün için bekleyen bir şey yok.');
 });
 
 // ---- araç ekranları (kabuk/araclar.js): Not ve Tekrar, gerçek motorlarla ----

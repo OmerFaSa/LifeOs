@@ -885,12 +885,13 @@
     var r = planEkle(Plan, dr, ne, veri, gunAdi(simdi));
     return r.ok ? planYaz(r.durum) : planHata(r.hatalar);
   }
-  // Bugün sayfasının alt bağlantısı (karşılama taşının baglanti'sı): plan varsa sıradaki blok, yoksa plana davet
-  Kabuk.bugunEk = function () {
-    if (!Plan) return null;
-    var simdi = Date.now(), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan;
-    var sira = p && p.bloklar.filter(function (b) { return b.durum === 'bekliyor' && b.tur !== 'mola' && b.tur !== 'sabit'; });
-    return { href: '#/motor/plan', metin: !p ? 'Günü planla' : sira.length ? 'Planda sırada: ' + sira[0].bas + ' ' + sira[0].ad + (sira.length > 1 ? ' · ' + (sira.length - 1) + ' blok daha' : '') : 'Bugünün planı bitti' };
+  // Bugün sayfasının verisi: günün planı (molasız bloklar; plan yoksa null) ve bugünkü tekrar sırası (Tekrar sayfasının sayısı:
+  // taslak içerikten gelen kapı kartları sayılmaz)
+  Kabuk.bugunVeri = function () {
+    var simdi = Date.now(), p = Plan && planDurum(simdi).gunPlan, n = 0;
+    p = p && p.plan && p.plan.bloklar.filter(function (b) { return b.tur !== 'mola' && b.bas; });
+    if (Tekrar) n = kuyruk(Tekrar, kartlar().filter(function (x) { return !(x.kaynak === 'kapi' && x.icerik !== 'onayli'); }), simdi, sayac(simdi)).sira.length;
+    return { tekrar: n, plan: p && p.length ? p.map(function (b) { return { saat: b.bas, ad: b.ad, dk: b.dk, bitti: b.durum === 'yapildi' }; }) : null };
   };
 
   /* ---- Soru: karma test ---- */
@@ -1023,9 +1024,9 @@
     if (!baslangicSoruldu) baslangicYokla();
     if (baslangicBitti) { var m = baslangicBitti; baslangicBitti = ''; return B.uyari({ tur: 'tamam', metin: m, veri: { baslangic: 'bitti' } }); }
     if (!baslangic) return '';
-    return B.uyari({ tur: 'bilgi', veri: { baslangic: 'teklif' },
-      metin: 'Eski sistemdeki kayıtların hazır: ' + [baslangicMetni(baslangicYeni), bedenBos(baslangic.beden) ? 'beden bilgilerin' : ''].filter(Boolean).join(', ') +
-        '. Buraya getirilsin mi? Burada yazdıkların değişmez; eski yerlerinde de durmaya devam eder.',
+    return B.uyari({ tur: 'bilgi', veri: { baslangic: 'teklif' }, simge: 'indir', renk: 'turuncu', metin: 'Eski sistemdeki kayıtların hazır',
+      alt: [baslangicMetni(baslangicYeni), bedenBos(baslangic.beden) ? 'beden bilgilerin' : ''].filter(Boolean).join(', ') +
+        ' getirilebilir. Burada yazdıkların değişmez; eski yerlerinde de durmaya devam eder.',
       eylem: [{ metin: 'Getir', tur: 'ana', veri: { 'arac-ac': 'baslangic-getir' } }, { metin: 'Sonra', tur: 'sade', veri: { 'arac-ac': 'baslangic-sonra' } }] });
   };
   function baslangicGetir() {
