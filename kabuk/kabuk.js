@@ -382,7 +382,7 @@
   }
   function sayfaAyarlar(yer, odak) {
     var gruplar = A.GRUPLAR.map(function (g) {
-      return B.bolum({ baslik: g.ad, id: 'grup-' + g.id, govde: A.SEMA.filter(function (t) { return t.grup === g.id; }).map(function (t) { return A.ciz(t, A.oku(depo, t.anahtar)); }) });
+      return B.bolum({ baslik: g.ad, id: 'grup-' + g.id, eylem: g.id === 'hesap' ? { metin: 'Hesap ve cihazlar', tur: 'sade', href: '#/hesap' } : null, govde: A.SEMA.filter(function (t) { return t.grup === g.id; }).map(function (t) { return A.ciz(t, A.oku(depo, t.anahtar)); }) });
     }).join('');
     setTimeout(function () {
       if (!odak) return;

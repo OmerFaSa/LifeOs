@@ -693,10 +693,10 @@ async function goruntu(p, ad, sec = {}) {
       const k = JSON.parse(window.LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.akademik.1') || '{}');
       return !!(k.cevaplar && k.cevaplar[a0] && k.eski && Object.keys(k.kapilar || {}).every(id => !k.kapilar[id].gecti)); }, AK_A0.id));
 
-    // ---- Hesap ve sistem paneli (/kartlar/): kabuktan bir adım; modül kartı yok (kapanış) ----
-    await p.goto(T + '/kabuk/#/eski');
+    // ---- Hesap ve sistem paneli (/kartlar/): kabuktan bir adım (Hesap ekranının «Eski panelde kalanlar»ı); modül kartı yok (kapanış) ----
+    await p.goto(T + '/kabuk/#/hesap');
     await p.waitForSelector('a[href="/kartlar/"]');
-    dene('hesap ve sistem: kabuktan panele bağlantı', /Hesap ve sistem/.test(await p.textContent('#sayfa')));
+    dene('hesap ve sistem: kabuktan panele bağlantı', /Hesap ve sistem paneli/.test(await p.textContent('#sayfa')));
     const kartlar = await p.request.get(T + '/kartlar/');
     dene('hesap ve sistem: /kartlar/ açılır, modül kartı yok', kartlar.status() === 200 && !/href="\/(ays|spi|esp)\/"/.test(await kartlar.text()));
 
@@ -1106,6 +1106,54 @@ async function goruntu(p, ad, sec = {}) {
     dene('onay: «Aşamanın onayını geri al» kaydı boşaltır', (await onayKaydi()) === null);
     dene('onay: konsolda hata yok', ohata.length === 0, ohata.join(' | '));
     await oc.close();
+
+    // ---- Hesap (#/hesap, faz7-hesap-kabuk.md): girişsiz, uydurma sahip hesabıyla oturum, cihaz çıkarma, kodla bağlama, güncelleme, çıkış.
+    // En sonda: hesap kurulunca öteki adımların ortamı değişmesin. Güncelleme yanıtı taklit edilir (ağ yok); «Güncelle»ye basılmaz.
+    const hc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), hp = await hc.newPage(), hhata = [];
+    hp.on('pageerror', e => hhata.push(e.message));
+    hp.on('console', m => { if (m.type() === 'error' && !/\/api\/hesap\/kabuk/.test(m.location().url || '')) hhata.push(m.text()); });
+    await hp.goto(T + '/kabuk/#/ayarlar');
+    await hp.click('a[href="#/hesap"]');
+    await hp.waitForSelector('[data-arac="hesap"]');
+    await hp.waitForFunction(() => /giriş yapılmadı|henüz hesap yok/.test(document.querySelector('[data-arac="hesap"]').textContent));
+    dene('hesap: Ayarlar › Hesap ve güvenlik ekranı açar; girişsiz cihaz girişe eski panelden gider', (await hp.locator('[data-arac="hesap"] a[href="/kartlar/"]').count()) === 2
+      && (await hp.locator('#hs-cihazlar').count()) === 0);
+    const hk = { headers: { 'X-LifeOS': 'hesap' } };
+    const kurul = await hp.request.post(T + '/api/hesap/kur', Object.assign({ data: { ad: 'sahip', parola: 'gezi-parolasi-1', cihaz: 'cihazGEZ00002', cihaz_ad: 'iPhone' } }, hk));
+    await hp.evaluate(() => window.LIFEOS.HESAP.girisYap('sahip', 'gezi-parolasi-1'));
+    await hp.reload();
+    await hp.waitForSelector('[aria-label="Bağlı cihazlar"]');
+    const cihazSay = () => hp.locator('[aria-label="Bağlı cihazlar"] > li').count();
+    dene('hesap: oturumda hesap adı, rol ve iki cihaz (bu cihaz işaretli, çıkarılamaz)', kurul.ok() && /sahip/.test(await hp.textContent('[data-arac="hesap"]')) && (await cihazSay()) === 2
+      && (await hp.locator('[aria-label="Bağlı cihazlar"] li:has-text("bu cihaz") [data-hs-ac]').count()) === 0);
+    dene('hesap: jeton çerezde, sayfada değil', await hp.evaluate(() => { const m = document.cookie.match(/lifeos_hesap=([^;]*)/), j = m && JSON.parse(decodeURIComponent(m[1])).j; return !!j && document.documentElement.outerHTML.indexOf(j) < 0; }));
+    await hp.click('[data-hs-ac="cikar-sor"]');
+    await hp.click('[data-hs-ac="vazgec"]');
+    dene('hesap: cihaz çıkarma önce sorar; vazgeçince cihaz kalır', (await cihazSay()) === 2);
+    await hp.click('[data-hs-ac="cikar-sor"]');
+    await hp.click('[data-hs-ac="cikar"]');
+    await hp.waitForFunction(() => /iPhone çıkarıldı/.test(document.querySelector('[data-arac="hesap"]').textContent));
+    dene('hesap: onaylanınca öteki cihaz çıkar', (await cihazSay()) === 1);
+    await hp.click('[data-hs-ac="bag"]');
+    await hp.waitForSelector('[data-hs-kod]');
+    const bkod = await hp.getAttribute('[data-hs-kod]', 'data-hs-kod');
+    dene('hesap: yeni cihaz için altı haneli kod ve geri sayım', /^\d{6}$/.test(bkod) && /\d:\d\d kaldı/.test(await hp.textContent('[data-hs-sure]')), bkod);
+    await goruntu(hp, 'hesap');
+    const bag = await hp.request.post(T + '/api/hesap/bagla', Object.assign({ data: { kod: bkod, cihaz: 'cihazGEZ00003', cihaz_ad: 'iPad' } }, hk));
+    const baglandi = await hp.waitForFunction(() => /iPad bağlandı/.test(document.querySelector('[data-arac="hesap"]').textContent), null, { timeout: 10000 }).then(() => true, () => false);
+    await hp.waitForFunction(() => document.querySelectorAll('[aria-label="Bağlı cihazlar"] > li').length === 2, null, { timeout: 5000 }).catch(() => {});
+    dene('hesap: kod kullanılınca ekran «bağlandı» der, cihaz listeye girer', bag.ok() && baglandi && (await cihazSay()) === 2);
+    await hp.route('**/api/guncelleme**', r => r.fulfill({ json: { durum: 'ok', geride: 2, ileride: 0, yeni: ['Yeni Hesap ekranı', 'Düzeltme'], ag: true, surum: { tarih: '14.11.2026', kisa: 'abc1234' } } }));
+    await hp.click('[data-hs-ac="denetle"]');
+    await hp.waitForSelector('[data-hs-ac="guncelle"]');
+    const gm = await hp.textContent('[aria-labelledby="hs-guncel"]');
+    dene('hesap: güncelleme denetlenir; kurulu sürüm, yenilikler ve bu bilgisayarda «Güncelle»', /14\.11\.2026 · abc1234/.test(gm) && /2 yenilik var/.test(gm) && /Yeni Hesap ekranı/.test(gm), gm);
+    await hp.click('[data-hs-ac="cikis-sor"]');
+    await hp.click('[data-hs-ac="cikis"]');
+    await hp.waitForFunction(() => /giriş yapılmadı/.test(document.querySelector('[data-arac="hesap"]').textContent));
+    dene('hesap: çıkış onaylanınca oturum kapanır, cihaz bölümü gider', (await hp.locator('#hs-cihazlar').count()) === 0 && !(await hp.evaluate(() => /lifeos_hesap=[^;]/.test(document.cookie))));
+    dene('hesap: konsolda hata yok', hhata.length === 0, hhata.join(' | '));
+    await hc.close();
   } finally {
     await b.close(); srv.kill();
     try { fs.rmSync(gecici, { recursive: true, force: true }); } catch (e) { /* geçici klasör kalabilir */ }

@@ -1418,7 +1418,8 @@ class Giris(SimpleHTTPRequestHandler):
             self.end_headers()
             return None
         if yol == "/api/guncelleme":
-            return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))
+            # surum: kabuk Hesap ekrani kurulu surumu jetonsuz okur (onbellekteki sozluge dokunulmaz)
+            return self._json(200, dict(guncelleme_durumu(taze="taze=1" in self.path), surum=guncelle.surum()))
         if yol == "/api/durum":
             ayakta = hkm_ayakta()
             return self._json(200, {"hkm": ayakta, "hkm_eski": bool(ayakta and hkm_eski())})

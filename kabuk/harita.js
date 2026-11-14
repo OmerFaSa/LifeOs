@@ -21,7 +21,7 @@
     { id: 'onay', ad: 'Onaylar', katman: 'kabuk', dal: 'ana', yol: '#/onay', ikon: 'tik', durum: 'yeni', aciklama: 'Taslak dersleri oku ve onayla; senin yapacağın adımlar' },
     { id: 'tanisma', ad: 'Tanışma', katman: 'kabuk', dal: 'ana', yol: '#/tanisma', ikon: 'el', durum: 'yeni', aciklama: 'Kendini kendi sözlerinle anlat; başlangıcın buna göre önerilir' },
     { id: 'ayarlar', ad: 'Ayarlar', katman: 'kabuk', dal: 'ayarlar', yol: '#/ayarlar', ikon: 'ayar', durum: 'yeni', aciklama: 'Görünüm, erişilebilirlik, bildirim, hesap' },
-    { id: 'eskisistem', ad: 'Hesap ve sistem', katman: 'kabuk', dal: 'ayarlar', yol: '#/eski', ikon: 'kutu', durum: 'eski', eski: '/kartlar/', aciklama: 'Hesap, cihazlar, güncelleme (kabukta karşılığı yazılana dek eski panelde)' },
+    { id: 'hesap', ad: 'Hesap', katman: 'kabuk', dal: 'ayarlar', yol: '#/hesap', ikon: 'kisi', durum: 'yeni', aciklama: 'Oturum, bağlı cihazlar, güncelleme; geri kalanı eski panelde (/kartlar/)' },
     // alanlar (plan §3, on alan); Öğren dalı
     { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 2, aciklama: 'Sınav hazırlığı' },
     { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'pilot', asama: 2, aciklama: 'Diller ve diksiyon' },

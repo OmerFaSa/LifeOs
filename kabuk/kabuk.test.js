@@ -631,7 +631,7 @@ t('ara: boş sorgu hepsine 1 puan, sonuç sınırı uygulanır', () => {
 });
 t('rozet: kabuğa taşınmış alan («pilot») rozet almaz; eski ve hazırlanıyor yazıyla kalır', () => {
   H.YERLER.filter(y => y.durum === 'pilot' || y.durum === 'yeni').forEach(y => esit(K.durumPul(y), null, y.id));
-  esit(K.durumPul(H.bul('eskisistem')), { metin: 'eski sayfada', tur: 'normal' });
+  esit(K.durumPul({ durum: 'eski', eski: '/kartlar/' }), { metin: 'eski sayfada', tur: 'normal' });
   esit(K.durumPul({ durum: 'plan' }), { metin: 'hazırlanıyor', tur: 'normal' });
   // ekran kodunda «taşınıyor» yazısı kalmadı (harita, dal sayfaları, Yol haritası listesi)
   const fs = require('fs');

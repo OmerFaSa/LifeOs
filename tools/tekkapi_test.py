@@ -167,6 +167,7 @@ def sina(eski, tek, kokler=()):
     print("\nGiris (4180 ↔ /)")
     for yol in ("/kartlar/", "/hesap.js", "/piksel.css", "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
         ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/kartlar/"))
+    dene("güncelleme durumu kurulu sürümü de söyler (kabuk Hesap ekranı)", "surum" in json.loads(iste(T, "/api/guncelleme")[2]))
     k, b = iste_yonsuz(T, "/")
     ke, be = iste_yonsuz(g, "/")
     dene("kök iki kapıda da yeni kabuğa gider (302 /kabuk/)", (k, b.get("Location")) == (302, "/kabuk/") == (ke, be.get("Location")),

@@ -151,6 +151,9 @@ jobs:
       # Onaylar (faz6-onay-ekrani.md): sahibin onayı içeriğe Yol'dan önce bindirilir; onay_uygula dosyaya biçimi bozmadan yazar.
       - name: Onay bindirmesi ve onay aracı
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay bindirmesi" node kabuk/onay.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay aracı" python3 tools/onay_uygula_test.py
+      # Hesap ekrani (faz7-hesap-kabuk.md): oturum, cihazlar, guncelleme; jeton ekrana gelmez.
+      - name: Kabuk hesap ekranı
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hesap ekranı" node kabuk/hesap.test.js
 
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi
