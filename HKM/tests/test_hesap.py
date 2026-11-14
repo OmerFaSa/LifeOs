@@ -913,6 +913,22 @@ def run():
                                                    "cevap": "cevap", "cihaz": B}, H)
             eq(kod, 200)
             misafir_j = v["jeton"]
+            # depo sunucu acildiktan sonra kurulursa (P6) ya da acilista acilamadiysa uc kopruyu yeniden dener
+            tv, eski_k = tempfile.mkdtemp(prefix="lifeos-kabuk-gec-"), os.environ.get("LIFEOS_HESAP_KLASOR")
+            os.environ["LIFEOS_HESAP_KLASOR"] = os.path.join(tv, "hesap")
+            try:
+                eq(s.iste("/api/hesap/kabuk?son=0", baslik=KB)[0], 404)
+                veri.Depo(os.path.join(tv, "veri")).kapat()
+                eq(s.iste("/api/hesap/kabuk?son=0", baslik=KB)[0], 200)
+                eq(s.r.d.kopru.sahip, 1)
+                s.r.d.kopru.depo.kapat()
+            finally:
+                s.r.d.kopru = None
+                if eski_k is None:
+                    os.environ.pop("LIFEOS_HESAP_KLASOR", None)
+                else:
+                    os.environ["LIFEOS_HESAP_KLASOR"] = eski_k
+                shutil.rmtree(tv, ignore_errors=True)
             tk = tempfile.mkdtemp(prefix="lifeos-kabuk-http-")
             try:
                 depo = veri.Depo(tk)

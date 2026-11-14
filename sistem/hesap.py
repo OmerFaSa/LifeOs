@@ -2758,6 +2758,10 @@ def isle(h):
             if h.headers.get("X-LifeOS") != "kabuk":
                 raise Hata(403, "İzin yok.")
             if d.kopru is None:
+                with _DEPO_KILIT:       # acilista acilamadiysa ya da depo sonradan kurulduysa (P6) yeniden dene
+                    if d.kopru is None:
+                        d.kopru = _kopru_ac(d)
+            if d.kopru is None:
                 raise Hata(404, "Tek depo yok.")
             yerel = _yerel_mi(h) and _yerel_host(h)
             if not yerel:
