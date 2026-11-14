@@ -123,11 +123,17 @@
       (yeni.length ? B.liste({ ad: 'Yenilikler', ogeler: yeni.map(function (x) { return { ad: String(x), uzun: true }; }) }) : '') +
       B.eylemler([{ metin: 'Yeniden denetle', tur: 'sade', veri: { 'hs-ac': 'denetle' } }]);
   }
+  /* Uzantılar (kabuk/hesap-*.js): Kabuk.hesapUzanti'ya { ad, sira, giris?, ciz? } ekler. giris(baglam, B): oturum yokken Oturum bölümünün
+   * yerine çizilir (ilk giris'i olan kazanır). ciz(baglam, B): oturum varken Cihazlar'ın ardına, sira'ya göre bir ya da birkaç B.bolum.
+   * baglam salt okunur: { oturum, sunucu (/api/hesap/durum), dosya, simdi }. Her uzantı kendi durumunu ve tıklamalarını
+   * (data-<önek>-ac) kendisi tutar, yeniden çizim için Kabuk.ic.rota() çağırır; jeton ona da gelmez (LIFEOS.HESAP üzerinden). */
+  function uzantilar() { return (Kabuk.hesapUzanti || []).slice().sort(function (a, b) { return (a.sira || 0) - (b.sira || 0); }); }
   function ekran(s, B, simdi) {
-    var bu = (s.cihazlar || []).filter(function (c) { return c.bu; })[0] || null;
+    var bu = (s.cihazlar || []).filter(function (c) { return c.bu; })[0] || null, u = uzantilar();
+    var bag = { oturum: s.oturum, sunucu: s.sunucu, dosya: s.dosya, simdi: simdi }, gir = s.hesap && !s.oturum && u.filter(function (x) { return x.giris; })[0];
     return B.baslik({ metin: 'Hesap', alt: 'Oturumun, bağlı cihazların ve sistemin güncelliği.' }) +
-      B.bolum({ baslik: 'Oturum', id: 'hs-oturum', govde: oturumHtml(s, B, bu) }) +
-      (s.oturum ? cihazlarHtml(s, B, simdi) : '') +
+      B.bolum({ baslik: 'Oturum', id: 'hs-oturum', govde: gir ? gir.giris(bag, B) : oturumHtml(s, B, bu) }) +
+      (s.oturum ? cihazlarHtml(s, B, simdi) + u.filter(function (x) { return x.ciz; }).map(function (x) { return x.ciz(bag, B) || ''; }).join('') : '') +
       B.bolum({ baslik: 'Güncelleme', id: 'hs-guncel', govde: guncelHtml(s, B) }) +
       B.bolum({ baslik: 'Eski panelde kalanlar', id: 'hs-eski', govde: ['<p class="soluk">' + ESKI + '</p>',
         B.eylemler([{ metin: 'Hesap ve sistem paneli', tur: 'sade', href: '/kartlar/' }])] });
