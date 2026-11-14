@@ -269,7 +269,7 @@ def run():
                                cwd=kok, env=dict(os.environ, HKM_CONFIG=yol),
                                capture_output=True, text=True, timeout=60)
             eq(r.stdout.strip(), yol)
-        araclar = (os.path.join(kok, "tools", "yuz.js"),)
+        araclar = ()
         for a in araclar:
             with open(a, encoding="utf-8") as f:
                 metin = f.read()

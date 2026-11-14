@@ -216,25 +216,14 @@ def _run():
             eq(S.call("/api/twin?date=%s&days=abc" % BUGUN)[0], 400)
         test("ikiz ucnoktasi calisir ve bozuk gunu reddeder", t_twin_endpoint)
 
-        def t_page_served_without_token():
-            """Sayfanin KENDISI veri tasimaz; veri /api/* uzerinden gelir
-            ve orasi jeton ister. Yuzu jeton arkasina koymak, kullaniciyi
-            jetonu bir yere yapistirmadan once hicbir sey goremez birakirdi."""
-            req = urllib.request.Request(S.url("/"))
-            with urllib.request.urlopen(req, timeout=10) as r:
-                govde = r.read().decode("utf-8")
-                eq(r.status, 200)
-                ok("text/html" in r.headers.get("Content-Type", ""))
-            ok("HKM" in govde)
-            # Sayfa VERI uzerinde hesap yapmaz: kural motoru otoritedir.
-            # (Cizim koordinatlari — spark() icindeki min/max — piksel
-            # uretir, kullaniciya gosterilen sayi degil.)
-            gövde_veri = govde.split("function spark(")[0] \
-                + govde.split("return '<svg class=\"spark\"")[-1]
-            no("Math.round" in gövde_veri, "yuz kendi sayisini uretiyor")
-            # Ve hicbir jeton gomulu degildir.
-            no(TOKEN in govde, "jeton sayfaya gomulmus")
-        test("yerel yuz jetonsuz servis edilir", t_page_served_without_token)
+        def t_yuz_yok():
+            """HKM yuzu kapanista kalkti (plan Faz 7): kok artik sayfa vermez; veri yalniz /api/* (jetonla)."""
+            try:
+                urllib.request.urlopen(urllib.request.Request(S.url("/")), timeout=10)
+                ok(False, "kok sayfa vermemeli")
+            except urllib.error.HTTPError as e:
+                ok(e.code in (401, 404), e.code)
+        test("HKM yuzu yok: kok sayfa vermez", t_yuz_yok)
 
         def t_unknown_path():
             eq(S.call("/api/yok")[0], 404)

@@ -441,18 +441,9 @@ def run():
     # surucuye atlatir; /dist/E:/LifeOS-yedek/ telefon portundan depo
     # disini (hesap yedegi dahil) listeliyordu. Dort sunucu ve HKM sinanir.
     def t_surucu_harfi():
-        import importlib.util
-        from unittest import mock
         import daemon
-        icinde = lambda p, k: (os.path.abspath(p) + os.sep).startswith(os.path.join(k, ""))
         eq(daemon._ortak_seviye_yolu("/img/seviye/D:foto.png", KOK), None)
-        h = daemon.Handler.__new__(daemon.Handler)
-        h._send = lambda kod, veri: kod
-        gorulen = []
-        with mock.patch.object(daemon.os.path, "exists", side_effect=lambda p: gorulen.append(p) or False):
-            eq(h._send_brand("D:logo.png"), 404)
-        ok(all(icinde(p, os.path.join(daemon.ROOT, "brand")) for p in gorulen), gorulen)
-    test("yol muhafizi surucu harfiyle depo disina cikmaz (HKM brand, seviye)", t_surucu_harfi)
+    test("yol muhafizi surucu harfiyle depo disina cikmaz (seviye)", t_surucu_harfi)
 
     def t_sayfa():
         """Giris sayfasi: dort sistemin KENDI logosu, surum, guncelleme kutusu."""

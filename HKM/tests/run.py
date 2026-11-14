@@ -17,7 +17,7 @@ from tests import (harness, test_aktif, test_arac, test_arastir, test_seviye, te
                    test_manager, test_media, test_memory, test_models, test_motto,
                    test_precedence, test_profil, test_ritim,
                    test_sohbet, test_streak, test_sync, test_twin,
-                   test_vps, test_yoklama, test_yuz, test_ollama, test_ses, test_dinle, test_kasa, test_ofismodel, test_olcum, test_dongu, test_hafiza3, test_hafiza_uc, test_merdiven_uc, test_king_altyapi)
+                   test_vps, test_yoklama, test_ollama, test_ses, test_dinle, test_kasa, test_ofismodel, test_olcum, test_dongu, test_hafiza3, test_hafiza_uc, test_merdiven_uc, test_king_altyapi)
 
 
 # SAAT DILIMI SIZMAZ: `hkm.main` ve daemon sureci saat dilimini kurar
@@ -50,7 +50,7 @@ def main():
                 test_daemon, test_models, test_butce, test_media, test_memory,
                 test_motto, test_yoklama, test_kanal, test_bam, test_king, test_mufredat, test_kitap, test_web, test_gorsel, test_kaynakli, test_kodlama, test_urun, test_pdf, test_depo, test_program, test_hedefag, test_teklif, test_yedek, test_izin, test_disdunya, test_saat, test_spibilgi, test_tani,
                 test_unite, test_espbelge, test_para, test_kapi, test_fis, test_cozumle, test_cakisma, test_bildirim,
-                test_sohbet, test_seviye, test_motor, test_merdiven, test_baslat, test_guncelle, test_hesap, test_uzak, test_yerel_mesgul, test_yuz, test_meydan, test_merkez, test_aktif, test_ollama, test_ses, test_dinle, test_kasa, test_ofismodel, test_arac, test_arastir, test_ekip, test_beceri, test_olcum, test_dongu, test_hafiza3, test_king_altyapi):
+                test_sohbet, test_seviye, test_motor, test_merdiven, test_baslat, test_guncelle, test_hesap, test_uzak, test_yerel_mesgul, test_meydan, test_merkez, test_aktif, test_ollama, test_ses, test_dinle, test_kasa, test_ofismodel, test_arac, test_arastir, test_ekip, test_beceri, test_olcum, test_dongu, test_hafiza3, test_king_altyapi):
         mod.run()
         _dilim_muhafizi(mod)
     test_channels.run_bot()

@@ -22,9 +22,7 @@ def run():
     def t_dosyalar():
         no(os.path.exists(os.path.join(KOK, "core", "meydan.py")), "core/meydan.py yok")
         no(os.path.exists(os.path.join(KOK, "web", "meydan.html")), "web/meydan.html yok")
-        with open(os.path.join(KOK, "web", "index.html"), encoding="utf-8") as f:
-            yuz = f.read()
-        no("meydan-ac" in yuz or "/api/meydan" in yuz or "<!-- MEYDAN" in yuz, "yuzde Meydan blogu yok")
+        no(os.path.exists(os.path.join(KOK, "web")), "HKM yuzu kapanista kalkti")
 
     def t_iz_durur():
         con = db.connect(":memory:")

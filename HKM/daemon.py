@@ -820,80 +820,6 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(200, {"token": self.server.config.get("local_token"),
                                 "note": "Bu jeton yalnız bu cihazda saklanır."})
 
-    def _send_page(self):
-        """Yerel yuz — tek dosya, sifir bagimlilik.
-
-        Sayfanin KENDISI jeton istemez cunku icinde veri yoktur: butun
-        veri /api/* uzerinden gelir ve orasi bearer ister. Kullanici jetonu
-        sayfaya girer, sayfa da kendi tarayicisinda saklar. Ad sabittir,
-        istekten gelmez (Meydan sayfasi 2026-10-18'de kaldirildi)."""
-        # Gun plani (2026-11-03, «HKM'yi komple kaldir, ayarlara tasi»): kok artik
-        # kisa bir bilgi sayfasi; eski yuz yalniz /atolye'de (sahibin arsivi:
-        # Motto, Para, ofis ekranlari baska yere tasinana dek).
-        ad = "index.html" if getattr(self, "_atolye", False) else "merkez.html"
-        yol = os.path.join(ROOT, "web", ad)
-        if not os.path.exists(yol):
-            return self._send(404, {"error": "yuz kurulu degil"})
-        with open(yol, "rb") as f:
-            body = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(body)
-
-    def _send_seviye(self, yol):
-        """Rutbe kartlari, kademe sahneleri ve basarim rozetleri.
-
-        Uc arayuzun okudugu AYNI dosyalar (`brand/seviye/medya/`);
-        merkez profili de ayni gorselleri gosterir. Marka kapisi gibi
-        jeton ISTEMEZ: bir rozette veri yoktur. Yol muhafizi tek
-        kaynaktan yayilan blokta (`_ortak_seviye_yolu`)."""
-        kok = os.path.dirname(ROOT)
-        dosya = _ortak_seviye_yolu(yol, kok) or _ortak_marka_yolu(yol, kok)
-        if not dosya or not os.path.exists(dosya):
-            return self._send(404, {"error": "yok"})
-        tur = MEDYA_TURLERI.get(os.path.splitext(dosya)[1].lower())
-        if not tur:
-            return self._send(404, {"error": "yok"})
-        with open(dosya, "rb") as f:
-            body = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", tur)
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(body)
-
-    def _send_brand(self, ad):
-        """Marka gorseli — HKM/brand/ altindaki sabit adli dosya.
-
-        Yuzun kendisi gibi jeton ISTEMEZ: bir logoda veri yoktur. Yalniz
-        duz dosya adi kabul edilir ve yalniz gorsel uzantilari; bir
-        gorsel kapisinin dosya sistemine acilan bir pencereye donusmesi
-        bu depoda kabul edilebilir bir bedel degil."""
-        # Muhafiz tek kaynaktan (`_guvenli_medya_adi`, brand/seviye/ortak_yol.py):
-        # kendi kopyasi `D:logo.png`u geciriyordu (Windows'ta baska surucu).
-        turler = {".png": "image/png", ".jpg": "image/jpeg",
-                  ".jpeg": "image/jpeg", ".webp": "image/webp",
-                  ".svg": "image/svg+xml", ".mp4": "video/mp4"}
-        ad = _guvenli_medya_adi(ad, turler)
-        if not ad:
-            return self._send(404, {"error": "yok"})
-        uzanti = os.path.splitext(ad)[1].lower()
-        yol = os.path.join(ROOT, "brand", ad)
-        if not os.path.exists(yol):
-            return self._send(404, {"error": "yok"})
-        with open(yol, "rb") as f:
-            body = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", turler[uzanti])
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(body)
-
     # --------------------------------------------------------- guvenlik agi
     # HATALAR O-7: beklenmeyen bir hata istegi CEVAPSIZ kapatiyordu; istemci
     # bunu «HKM ulasilamiyor» diye goruyordu. Her istek bir cevap alir ve
@@ -954,16 +880,6 @@ class Handler(BaseHTTPRequestHandler):
 
     def _get(self):
         u = urlparse(self.path)
-        if u.path in ("/", "/index.html"):
-            self._atolye = False
-            return self._send_page()
-        if u.path in ("/atolye", "/atolye/"):
-            self._atolye = True
-            return self._send_page()
-        if u.path.startswith("/img/seviye/") or u.path.startswith("/img/marka/"):
-            return self._send_seviye(u.path)
-        if u.path.startswith("/brand/"):
-            return self._send_brand(u.path[len("/brand/"):])
         if u.path == "/api/health":
             # «baslangic»: surecin acilis zamani; panel kodun daha yeni olup
             # olmadigina bakar (eski surumle calisan HKM uyarisi).
