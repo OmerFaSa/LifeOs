@@ -42,6 +42,10 @@
     if (t === 'unite') return dizi(o.dersler).reduce(function (l, d) { return l.concat(kimlikler(y, d.id)); }, []).concat(kimlikler(y, id, true));
     return [];
   }
+  // aşamanın hepsi: her ünite (dersler, alıştırmalar, ünite kapısı) ve aşama kapısı
+  function asamaKimlikleri(y) {
+    return dizi(y && y.veri && y.veri.uniteler).reduce(function (l, u) { return l.concat(kimlikler(y, u.id)); }, []).concat(y ? kimlikler(y, y.id, true) : []);
+  }
   function onayla(onay, alan, n, ids, tarih) {
     var m = Object.assign({}, onay);
     ids.forEach(function (id) { m[anahtar(alan, n, id)] = { durum: 'onayli', onaylayan: ONAYLAYAN, onayTarihi: tarih }; });
@@ -73,7 +77,7 @@
     return e === ARAMA_DEGIL || (Array.isArray(e) && e.every(function (x, i) { return typeof x === 'string' && nolar.indexOf(x) >= 0 && e.indexOf(x) === i; }));
   }
 
-  var Onay = { ANAHTAR: ANAHTAR, anahtar: anahtar, gecerli: gecerli, uygula: uygula, kimlikler: kimlikler, onayla: onayla, geriAl: geriAl,
+  var Onay = { ANAHTAR: ANAHTAR, anahtar: anahtar, gecerli: gecerli, uygula: uygula, kimlikler: kimlikler, asamaKimlikleri: asamaKimlikleri, onayla: onayla, geriAl: geriAl,
     sayim: sayim, hepsiOnayli: hepsiOnayli, tarihYaz: tarihYaz, oku: oku, NIYETLER: NIYETLER, ARAMA_DEGIL: ARAMA_DEGIL, etiketGecerli: etiketGecerli };
   Kabuk.Onay = Onay;
   if (typeof module !== 'undefined' && module.exports) module.exports = Onay;
@@ -82,6 +86,7 @@
   /* ---------------- tarayıcı ---------------- */
   var d = document, ic = function () { return Kabuk.ic; }, B = Kabuk.Bilesen;
   var soruluyor = null; // «Ünitenin hepsini onayla» onay bloğu açık olan ünite
+  var soruluyorAsama = null; // «Aşamanın hepsini onayla» onay bloğu açık olan aşama: alan/n
 
   // Sahibin kendi yapması gereken, sistemin yapamadığı adımlar (düz Türkçe, durağan)
   var ADIMLAR = [
@@ -218,8 +223,21 @@
         return B.bolum({ baslik: 'Aşama ' + n + ' · ' + y.veri.ad, govde: B.liste({ ad: 'Aşama ' + n + ' üniteleri', ogeler: y.veri.uniteler.map(function (u) {
           var s = sayim({ uniteler: [u] }), tamam = hepsiOnayli(y, kimlikler(y, u.id));
           return { ad: u.ad, href: kok_ + u.id, not: s.onayli + '/' + (s.taslak + s.onayli) + ' ders onaylı · ölçüldü', pul: durumPul(tamam) };
-        }).concat([{ ad: 'Aşama kapısı', href: kok_ + y.id + '/kapi', not: y.veri.kapi.sorular.length + ' soru', pul: durumPul(hepsiOnayli(y, kimlikler(y, y.id, true))) }]) }) });
+        }).concat([{ ad: 'Aşama kapısı', href: kok_ + y.id + '/kapi', not: y.veri.kapi.sorular.length + ' soru', pul: durumPul(hepsiOnayli(y, kimlikler(y, y.id, true))) }]) }) +
+          asamaEylemi(I, a, y, n) });
       }).join('') : B.bos({ baslik: 'Bu alanın içeriği bu açılışta yüklenemedi.' })) + '</div>';
+  }
+  function asamaEylemi(I, a, y, n) {
+    var ids = asamaKimlikleri(y), m = oku(I.depo), bizde = ids.some(function (id) { return m[anahtar(a.id, n, id)]; });
+    var bekleyen = y.veri.uniteler.reduce(function (t, u) { return t + u.dersler.filter(function (x) { return !hepsiOnayli(y, kimlikler(y, x.id)); }).length; }, 0);
+    var veri = function (ne) { return { 'onay-ac': ne, asama: String(n) }; };
+    if (soruluyorAsama === a.id + '/' + n && bekleyen) {
+      return B.panel({ tur: 'guclu', id: 'onay-asama-sor', durum: true, govde: ['<p><b>Aşama ' + n + ': ' + bekleyen + ' ders onaylansın mı?</b></p>',
+        '<p>Alıştırmalar, ünite kapıları ve aşama kapısının soruları da onaylanır. Okumadığın ders de onaylanmış sayılır; sonra ünite ünite ya da ders ders geri alabilirsin.</p>',
+        B.eylemler([{ metin: bekleyen + ' dersi onayla', tur: 'ana', veri: veri('asama-onayla') }, { metin: 'Vazgeç', tur: 'sade', veri: veri('asama-vazgec') }])] });
+    }
+    return B.eylemler([bekleyen ? { metin: 'Aşamanın hepsini onayla', etiket: 'Aşama ' + n + ': ' + bekleyen + ' dersin hepsini onayla', veri: veri('asama-sor') } : null,
+      bizde ? { metin: 'Aşamanın onayını geri al', tur: 'sade', etiket: 'Aşama ' + n + ' onayını geri al', veri: veri('asama-geri-al') } : null]);
   }
   function uniteSayfasi(I, a, y, n, u) {
     var kok_ = '#/onay/' + a.id + '/' + n + '/', ids = kimlikler(y, u.id), m = oku(I.depo);
@@ -313,6 +331,20 @@
     var I = ic(), ne = b.getAttribute('data-onay-ac'), k = konum(), y = k.alan && asamalar(I, k.alan)[k.n - 1];
     if (ne === 'disari') return disari();
     if (ne.indexOf('etiket-') === 0) return etEylem(ne, b);
+    if (ne.indexOf('asama-') === 0) {
+      var na = +b.getAttribute('data-asama'), ya = k.alan && asamalar(I, k.alan)[na - 1];
+      if (!ya) return;
+      if (ne === 'asama-sor') soruluyorAsama = k.alan + '/' + na;
+      else if (ne === 'asama-vazgec') soruluyorAsama = null;
+      else {
+        var ia = asamaKimlikleri(ya), ma = oku(I.depo);
+        yaz(I, k.alan, ne === 'asama-onayla' ? onayla(ma, k.alan, na, ia, tarihYaz(new Date())) : geriAl(ma, k.alan, na, ia));
+        soruluyorAsama = null;
+      }
+      I.rota();
+      var ea = ne === 'asama-sor' && d.querySelector('#onay-asama-sor'); if (ea) ea.focus({ preventScroll: true });
+      return;
+    }
     if (!y || !y.oge[k.id]) return;
     var odak = null;
     if (ne === 'sor') { soruluyor = k.id; odak = '#onay-sor'; }

@@ -1039,6 +1039,23 @@ async function goruntu(p, ad, sec = {}) {
     await op.click('[data-onay-ac="geri-al"]');
     await op.waitForSelector('[data-onay-ac="sor"]');
     dene('onay: «Ünitenin onayını geri al» kaydı boşaltır', (await onayKaydi()) === null);
+    // aşamanın hepsi: önce sorar, vazgeç yazmaz; onay yalnız aşama 1'i yazar, aşama 2 taslak kalır; geri al boşaltır
+    await op.goto(T + '/kabuk/#/onay/felsefe');
+    await op.click('[data-onay-ac="asama-sor"][data-asama="1"]');
+    await op.waitForSelector('#onay-asama-sor');
+    await op.click('[data-onay-ac="asama-vazgec"]');
+    await op.waitForSelector('[data-onay-ac="asama-sor"][data-asama="1"]');
+    dene('onay: «Aşamanın hepsini onayla» önce sorar; vazgeçince hiçbir şey yazılmaz', (await onayKaydi()) === null);
+    await op.click('[data-onay-ac="asama-sor"][data-asama="1"]');
+    await op.click('[data-onay-ac="asama-onayla"]');
+    await op.waitForSelector('[data-onay-ac="asama-geri-al"][data-asama="1"]');
+    const asamaKayit = Object.keys(JSON.parse((await onayKaydi()) || '{}'));
+    dene('onay: aşama onayı yalnız aşama 1\'i yazar, orada bekleyen ders kalmaz; aşama 2 taslak kalır', asamaKayit.length > 0
+      && asamaKayit.every(x => x.indexOf('felsefe/1/') === 0) && (await op.locator('[data-onay-ac="asama-sor"][data-asama="1"]').count()) === 0
+      && (await op.locator('[data-onay-ac="asama-sor"][data-asama="2"]').count()) === 1, asamaKayit.length);
+    await op.click('[data-onay-ac="asama-geri-al"][data-asama="1"]');
+    await op.waitForSelector('[data-onay-ac="asama-sor"][data-asama="1"]');
+    dene('onay: «Aşamanın onayını geri al» kaydı boşaltır', (await onayKaydi()) === null);
     dene('onay: konsolda hata yok', ohata.length === 0, ohata.join(' | '));
     await oc.close();
   } finally {

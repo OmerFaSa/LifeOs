@@ -68,6 +68,16 @@ t('kimlikler: ders + alıştırmaları; ünite = dersler + kapı; kapı = yalnı
   esit(O.kimlikler(y, v1.id, true), v1.kapi.sorular.map(s => s.id));
   esit([O.kimlikler(y, 'yok.boyle'), O.kimlikler(y, a1.id), O.kimlikler(y, d1.id, true), O.kimlikler(y, v1.id)], [[], [], [], []]);
 });
+t('asamaKimlikleri: bütün üniteler (ders, alıştırma, ünite kapısı) ve aşama kapısı; tekrar yok', () => {
+  const y = Yol.yukle(v1), ids = O.asamaKimlikleri(y);
+  const beklenen = v1.uniteler.reduce((l, u) => l.concat(O.kimlikler(y, u.id)), []).concat(v1.kapi.sorular.map(s => s.id));
+  esit(ids, beklenen);
+  esit(new Set(ids).size, ids.length, 'aynı kimlik iki kez');
+  const m = O.onayla({}, 'felsefe', 1, ids, '2026-11-14'), v = O.uygula(v1, 'felsefe', 1, m);
+  esit(O.sayim(v).taslak, 0, 'aşama onayından sonra taslak ders kalmamalı');
+  esit(Object.keys(O.geriAl(m, 'felsefe', 1, ids)).length, 0, 'geri al hepsini kaldırmalı');
+  esit([O.asamaKimlikleri(null), O.asamaKimlikleri({ veri: {} , oge: {}, tur: {} })], [[], []]);
+});
 t('onayla / geriAl: girdiyi değiştirmez, biçim SEMA «Onay» ile aynı, geri al eski hâle döner', () => {
   const ilk = { 'tarih/1/x': G }, m = O.onayla(ilk, 'felsefe', 1, [d1.id, a1.id], '2026-11-14');
   esit(Object.keys(ilk), ['tarih/1/x']);
