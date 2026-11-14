@@ -1467,7 +1467,8 @@ def giris_html(telefon=False, tema=None):
     # HKM ustteki kavisli seridin ortasinda.
     duzen = {"esp": 0, "spi": 1, "ays": 2, "hkm": 3}  # hkm karti cizilmez; M ucu var
     for anahtar, kisa, ad, aciklama, port in sorted(KARTLAR, key=lambda k: duzen.get(k[0], 9)):
-        adres = "http://%s:%d/" % (HOST, port)
+        # Tek kapida (tekkapi.py) modul ayni kokenin yolundadir; eski duzende kendi kapisinda.
+        adres = "/%s/" % anahtar if TEK_KAPI and anahtar != "hkm" else "http://%s:%d/" % (HOST, port)
         hkm = anahtar == "hkm"
         if telefon and hkm:
             continue

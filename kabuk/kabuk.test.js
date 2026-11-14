@@ -312,6 +312,26 @@ t('başlangıç paketi: kimlikle eklenir, var olana dokunmaz, geçersizi almaz; 
   esit([R.baslangicMetni({ notlar: 5, kayitlar: 5, kartlar: 0 }), R.baslangicMetni({ not: 1, kayit: 0, kart: 2 })], ['5 not, 5 kayıt', '1 not, 2 kart']);
 });
 
+t('köken taşıması: paket yeni kökenin deposuna geri yazılır; var olan anahtarın üstüne yazılmaz; aynı paket iki kez işlenmez', () => {
+  const T = require('./tasima.js'), d = sahteDepo({ 'lifeos.tema.secim': 'dark' });
+  const paketler = [
+    { ad: 'ays-c-1.json', kaynak: 'ays', profiller: { main: { data: { days: { a: 1 } } }, ikinci: { data: { x: 2 } } }, anahtarlar: { 'lifeos.tema.secim': 'light', 'lifeos.king.bas.ays': { a: 1 }, 'lifeos.ses': 'acik', bos: null } },
+    { ad: 'spi-c-1.json', kaynak: 'spi', profiller: { ben: { data: { meta: 1 } } }, anahtarlar: {} },
+    { ad: 'esp-c-1.json', kaynak: 'esp', profiller: { ben: { data: { p: 1 } } }, anahtarlar: {} },
+    { ad: 'gun-c-1.json', kaynak: 'gun', profiller: {}, anahtarlar: { 'lifeos.gun.2026-11-01': { not: 'x' } } },
+    null, { kaynak: 'ays' },
+  ];
+  const r = T.geriYukle(paketler, d, {});
+  esit([d.v['rota84285.v2'], d.v['rota84285.v2.ikinci'], d.v['spi.v1.ben'], d.v['esp.v1.ben']], ['{"days":{"a":1}}', '{"x":2}', '{"meta":1}', '{"p":1}'], 'ana depo anahtarları modülün kendi adıyla');
+  esit([d.v['lifeos.tema.secim'], d.v['lifeos.king.bas.ays'], d.v['lifeos.ses'], 'bos' in d.v], ['dark', '{"a":1}', 'acik', false], 'buradaki ayar kalır; metin aynen, nesne JSON');
+  esit([r.yazilan, r.atlanan, r.iz], [7, 1, { ays: 'ays-c-1.json', spi: 'spi-c-1.json', esp: 'esp-c-1.json', gun: 'gun-c-1.json' }]);
+  d.v['rota84285.v2'] = '{"benim":true}';
+  const iki = T.geriYukle(paketler, d, r.iz);
+  esit([iki.yazilan, iki.atlanan, d.v['rota84285.v2']], [0, 0, '{"benim":true}'], 'işlenmiş paket atlanır');
+  const yeni = T.geriYukle([{ ad: 'ays-c-2.json', kaynak: 'ays', profiller: { main: { data: { eski: 1 } } }, anahtarlar: { yeniAnahtar: 5 } }], d, r.iz);
+  esit([yeni.yazilan, d.v['rota84285.v2'], d.v.yeniAnahtar, yeni.iz.ays], [1, '{"benim":true}', '5', 'ays-c-2.json'], 'yeni pakette yalnız eksik anahtar yazılır');
+});
+
 // ---- harita ----
 t('harita: kayıt geçerli (denetle boş liste)', () => esit(H.denetle(), []));
 t('harita: id ve yol tekil', () => {

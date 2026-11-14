@@ -11,7 +11,7 @@ const fs = require('fs'), os = require('os'), path = require('path'), http = req
 
 const PORT = 4397, T = 'http://127.0.0.1:' + PORT;
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'kabuk-gez-'));
-const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici });
+const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici, LIFEOS_TASIMA: '1' }); // köken taşıması ucu: gerçekte yalnız tek kapı devredeyken açık
 // Başlangıç paketi (tools/kabuk_baslangic.py çıktısının biçimi): eski sistemden bir not ve bir kayıt
 fs.mkdirSync(path.join(gecici, 'LifeOS', 'veri'), { recursive: true });
 fs.writeFileSync(path.join(gecici, 'LifeOS', 'veri', 'kabuk-baslangic.json'), JSON.stringify({ lifeos_kabuk_baslangic: 1, kimlik: 'gezi-paketi', uretildi: 1,
@@ -19,6 +19,10 @@ fs.writeFileSync(path.join(gecici, 'LifeOS', 'veri', 'kabuk-baslangic.json'), JS
   notlar: [{ id: 'eski-not-1', baslik: 'Eski defterden', govde: 'Eski sistemde yazılmış not.', alan: '', etiketler: [], kaynak: { yapi: 'defter' }, olusturma: 1000, guncelleme: 1000,
     ozel: false, tur: 'not', klasor: '', sabit: false, baglam: null, ozellik: {} }],
   kayitlar: [{ id: 'kilo:2026-10-20:0', tur: 'kilo', gun: '2026-10-20', zaman: null, kaynak: 'goc', deger: { kg: { v: 70, k: 'eski' } }, ek: {} }], kartlar: [] }));
+// Köken taşıması: eski AYS kökeninin göç paketi (biçim brand/ortak/gocpaket.js)
+fs.mkdirSync(path.join(gecici, 'LifeOS', 'goc', 'paket'), { recursive: true });
+fs.writeFileSync(path.join(gecici, 'LifeOS', 'goc', 'paket', 'ays-cGEZ-20261114-000000-abcdef.json'), JSON.stringify({ lifeos_goc: 1, kaynak: 'ays', cihaz: 'cGEZ', parca: 1,
+  profiller: { main: { data: { gezi: { isaret: 'eski-kokenden' } } } }, anahtarlar: { 'lifeos.king.bas.ays': { x: 1 }, 'lifeos.gezi.metin': 'duz metin' }, bekleyen: {}, atlanan: { sir: 0, ornek: 0 }, medya: [] }));
 const srv = spawn(process.platform === 'win32' ? 'python' : 'python3', [path.join(kok, 'sistem/tekkapi.py'), '--port', String(PORT), '--hkm-ayri'], { env, stdio: 'ignore' });
 const bekle = () => new Promise((res, rej) => {
   const son = Date.now() + 40000;
@@ -60,6 +64,12 @@ async function goruntu(p, ad) {
     await p.goto(T + '/kabuk/');
     await p.waitForSelector('.karsila .b-dugme--ana');
     await p.waitForFunction(() => /ders\//.test(document.querySelector('.karsila .b-dugme--ana').getAttribute('href')));
+    const kokCevap = await p.request.get(T + '/', { maxRedirects: 0 });
+    dene('tek kapıda kök yeni kabuğa yönlenir', kokCevap.status() === 302 && kokCevap.headers().location === '/kabuk/', kokCevap.status());
+    await p.waitForFunction(() => !!localStorage.getItem('lifeos.tasima'));
+    dene('köken taşıması: eski modülün deposu bu kökene geri yazıldı (ana depo, nesne ve düz metin anahtar)', await p.evaluate(() =>
+      localStorage.getItem('rota84285.v2') === '{"gezi":{"isaret":"eski-kokenden"}}' && localStorage.getItem('lifeos.king.bas.ays') === '{"x":1}' &&
+      localStorage.getItem('lifeos.gezi.metin') === 'duz metin' && JSON.parse(localStorage.getItem('lifeos.tasima')).ays === 'ays-cGEZ-20261114-000000-abcdef.json'));
     dene('Bugün: «Başla» ilk derse götürür', (await p.getAttribute('.karsila .b-dugme--ana', 'href')) === '#/alan/felsefe/ders/' + u1.dersler[0].id);
 
     await p.goto(T + '/kabuk/#/alan/felsefe');

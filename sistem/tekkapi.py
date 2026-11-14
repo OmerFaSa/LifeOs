@@ -119,8 +119,8 @@ class TekKapi(Giris):
         finally:
             self.close_connection = h.close_connection
 
-    def _yonlendir(self, yer):
-        self.send_response(301)
+    def _yonlendir(self, yer, kod=301):
+        self.send_response(kod)
         self.send_header("Location", yer)
         self.send_header("Content-Length", "0")
         self.end_headers()
@@ -135,6 +135,10 @@ class TekKapi(Giris):
                 return self._yonlendir("/%s/%s" % (ad, self.path[len(yol):])) or True
             sinif, src = _SINIF[ad]
             return self._devret(sinif, self.path[len(ad) + 1:], directory=src) or True
+        if yol in ("/", "/index.html"):
+            # Tek kapida ilk ekran yeni kabuktur (plan: yeni kabuk kurulur, eskisi en son kapanir). Eski giris
+            # sayfasi ve kontrol paneli /kartlar/ adresinde durur.
+            return self._yonlendir("/kabuk/", 302) or True    # 302: bayrak geri alinirsa tarayici ezberlemesin
         if yol == "/api/hkm" or yol == "/api/hkm/yeniden":
             return False                                    # 4180'in eski anlami (guncelleme_izinli)
         if yol.startswith("/api/hkm/"):
@@ -198,6 +202,8 @@ def kur(port, hkm=True, hkm_config=None):
     srv = KuyrukluSunucu((HOST, port), TekKapi)
     sunucu.GIRIS_PORT = srv.server_address[1]     # guncelleme/gun cumlesi Origin denetimi bu kapiya bakar
     sunucu.TEK_KAPI = True                        # Gun sayfasi modulleri /ays/ /spi/ /esp/ yolundan acar
+    if ETKIN:
+        os.environ["LIFEOS_TASIMA"] = "1"         # koken tasimasi (kabuk/tasima.js): yalniz tek kapi devredeyken
     if hkm and hkm_kur(hkm_config):
         _hkm_ayni_surecte(srv.server_address[1])
     for sinif, _ in _SINIF.values():

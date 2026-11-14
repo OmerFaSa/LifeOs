@@ -2774,6 +2774,30 @@ def isle(h):
                 raise Hata(400, "Geçersiz istek.")
             x = d.kopya_yukle(k, _yerel_mi(h), h.rfile, n, _jeton(h), ip)
             return _cevap(h, 200, dict(d.kopya_durum(k, True), eklenen=x["ad"]))
+        if yontem == "GET" and yol == "/api/hesap/goc-paket/son":
+            # Koken tasimasi (kabuk/tasima.js): tek kapiya gecince eski modullerin deposu yeni kokene geri yazilir.
+            # Paket kisisel veridir: YALNIZ bu bilgisayardan, yalniz tek kapi devredeyken (LIFEOS_TASIMA=1;
+            # tekkapi.py ETKIN iken koyar) ve ozel baslikla. Her kaynak icin en yeni paket; medya gonderilmez.
+            if h.headers.get("X-LifeOS") != "goc" or not _yerel_mi(h):
+                raise Hata(403, "İzin yok.")
+            if os.environ.get("LIFEOS_TASIMA") != "1":
+                raise Hata(404, "Köken taşıması kapalı.")
+            pk = os.path.join(os.path.dirname(os.path.abspath(klasor())), "goc", "paket")
+            son = {}
+            for ad in sorted(os.listdir(pk)) if os.path.isdir(pk) else []:
+                if not ad.endswith(".json"):
+                    continue
+                try:
+                    with open(os.path.join(pk, ad), "rb") as f:
+                        p = json.loads(f.read().decode("utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if p.get("lifeos_goc") != 1 or p.get("kaynak") not in ("ays", "spi", "esp", "gun"):
+                    continue
+                # ad = <kaynak>-<cihaz>-<zaman>-<rastgele>.json: sirali listede sonuncu en yenidir
+                son[p["kaynak"]] = {"ad": ad, "kaynak": p["kaynak"], "cihaz": p.get("cihaz"),
+                                    "profiller": p.get("profiller") or {}, "anahtarlar": p.get("anahtarlar") or {}}
+            return _cevap(h, 200, {"paketler": [son[k] for k in sorted(son)]})
         if yontem == "POST" and yol == "/api/hesap/goc-paket":
             # Sadelesme Faz 1 P2: cihazdaki her sey tek depoya tasinmak uzere PC'ye (sistem/goc.py okur).
             # Bu bilgisayardan ya da sahibinin (admin) oturumuyla; govde ham JSON, diske akarak yazilir.

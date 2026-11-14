@@ -137,6 +137,7 @@ def eski_ac(kok):
 def tek_ac(kok):
     port = bos_port()
     o = ortam(kok, bos_port())
+    o["LIFEOS_TASIMA"] = "1"          # koken tasimasi ucu: gercekte yalniz ETKIN iken acilir (tekkapi.kur)
     t = Topoloji(kok)
     t.ac([os.path.join(SISTEM, "tekkapi.py"), "--port", str(port)], o)
     return t, port, bekle(port)
@@ -167,9 +168,16 @@ def ayni(ad, a, b, govde=True):
 def sina(eski, tek, kokler=()):
     g, T = eski["giris"], tek
     print("\nGiris ve Gun (4180 ↔ /)")
-    for yol in ("/", "/kartlar/", "/gun/", "/hesap.js", "/piksel.css", "/gun/ortak/kabuk.js", "/logo/ays.png",
+    for yol in ("/kartlar/", "/gun/", "/hesap.js", "/piksel.css", "/gun/ortak/kabuk.js", "/logo/ays.png",
                 "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
-        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/gun/"))
+        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/gun/", "/kartlar/"))
+    k, b = iste_yonsuz(T, "/")
+    dene("tek kapıda kök yeni kabuğa gider (302 /kabuk/); eski kapıda giriş sayfası", k == 302 and b.get("Location") == "/kabuk/"
+         and iste(g, "/")[0] == 200, "%s %s" % (k, b.get("Location")))
+    ek, tk = iste(g, "/kartlar/")[2].decode("utf-8"), iste(T, "/kartlar/")[2].decode("utf-8")
+    dene("giriş kartları: eski kapıda porta, tek kapıda yola bağlanır",
+         all('href="http://%s:%d/"' % (H, p_) in ek and 'href="/%s/"' % m in tk and 'href="http://%s:%d/"' % (H, p_) not in tk
+             for m, p_ in (("ays", 4173), ("spi", 4183), ("esp", 4193))))     # kart adresleri KARTLAR'dan: sabit kapilar
     eg, tg = iste(g, "/gun/")[2], iste(T, "/gun/")[2]
     dene("Gün sayfası: eski kapıda modüller porttan, tek kapıda yoldan açılır; başka fark yok",
          b"var TEK = false;" in eg and b"var TEK = true;" in tg and eg.replace(b"var TEK = false;", b"var TEK = true;") == tg)
@@ -177,7 +185,7 @@ def sina(eski, tek, kokler=()):
     ayni("GET /api/muzik", iste(g, "/api/muzik"), iste(T, "/api/muzik"))
     ayni("GET /api/ice", iste(g, "/api/ice"), iste(T, "/api/ice"))
     k, b = iste_yonsuz(T, "/", {"Cookie": "lifeos_hesap=1"})
-    dene("çerezle / → 302 /gun/", k == 302 and b.get("Location") == "/gun/", (k, b.get("Location")))
+    dene("çerezle de / → 302 /kabuk/ (tek kapıda ilk ekran yeni kabuk)", k == 302 and b.get("Location") == "/kabuk/", (k, b.get("Location")))
     dene("/gun → 301 /gun/", iste_yonsuz(T, "/gun")[0] == 301)
 
     print("\nModüller (4173/4183/4193 ↔ /ays/ /spi/ /esp/)")
@@ -271,6 +279,23 @@ def sina(eski, tek, kokler=()):
     for yol in ("/kabuk/", "/kabuk/araclar.js", "/motor/not.js", "/alan/felsefe/asama-1.json", "/brand/ortak/piksel-yazi.css"):
         ayni("GET %s (eski 4180 de verir)" % yol, iste(g, yol), iste(T, yol))
     dene("eski 4180: /kabuk → 301 /kabuk/", iste_yonsuz(g, "/kabuk")[0] == 301)
+    # Koken tasimasi (kabuk/tasima.js): son goc paketleri yalniz bu bilgisayara, ozel baslikla, tek kapi devredeyken.
+    goc_b = {"X-LifeOS": "goc"}
+    dene("köken taşıması: eski kapıda kapalı (404)", iste(g, "/api/hesap/goc-paket/son", basliklar=goc_b)[0] == 404, iste(g, "/api/hesap/goc-paket/son", basliklar=goc_b)[0])
+    dene("köken taşıması: özel başlıksız 403", iste(T, "/api/hesap/goc-paket/son")[0] == 403)
+    dene("köken taşıması: vekilden (Tailscale) 403", iste(T, "/api/hesap/goc-paket/son", basliklar=dict(goc_b, **vekil))[0] == 403)
+    k, b, gv = iste(T, "/api/hesap/goc-paket/son", basliklar=goc_b)
+    dene("köken taşıması: paket yokken boş liste", k == 200 and json.loads(gv) == {"paketler": []}, (k, gv[:80]))
+    pk_ = os.path.join(kokler[1], "goc", "paket")
+    os.makedirs(pk_, exist_ok=True)
+    for ad_, govde_ in (("ays-cX-20261101-000000-aaaaaa.json", {"lifeos_goc": 1, "kaynak": "ays", "cihaz": "cX", "profiller": {"main": {"data": {"eski": 1}}}, "anahtarlar": {"a": 1}}),
+                        ("ays-cX-20261102-000000-bbbbbb.json", {"lifeos_goc": 1, "kaynak": "ays", "cihaz": "cX", "profiller": {"main": {"data": {"yeni": 2}}}, "anahtarlar": {"a": 2}, "medya": [{"veri": "x"}]}),
+                        ("bozuk.json", {"lifeos_goc": 2})):
+        with open(os.path.join(pk_, ad_), "w", encoding="utf-8") as f_:
+            json.dump(govde_, f_)
+    v_ = json.loads(iste(T, "/api/hesap/goc-paket/son", basliklar=goc_b)[2])["paketler"]
+    dene("köken taşıması: kaynak başına en yeni paket, medyasız, bozuk paket yok",
+         len(v_) == 1 and v_[0]["ad"].startswith("ays-cX-20261102") and v_[0]["profiller"] == {"main": {"data": {"yeni": 2}}} and "medya" not in v_[0], v_)
     # Baslangic paketi (tools/kabuk_baslangic.py ciktisi): yalniz bu bilgisayardan, dosya yoksa 404.
     ayni("GET /api/kabuk/baslangic paket yokken 404", iste(g, "/api/kabuk/baslangic"), iste(T, "/api/kabuk/baslangic"))
     dene("başlangıç paketi yokken 404", iste(T, "/api/kabuk/baslangic")[0] == 404)

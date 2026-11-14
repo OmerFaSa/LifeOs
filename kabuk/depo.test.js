@@ -66,7 +66,8 @@ const KAYITLAR = ['lifeos.yol.felsefe.1', 'lifeos.yol.dil.2', 'lifeos.not.kayit'
   'lifeos.kayit.kayitlar', 'lifeos.plan.durum', 'lifeos.plan.sablon', 'lifeos.soru.oturum', 'lifeos.soru.gecmis', 'lifeos.soru.deneme',
   'lifeos.soru.denemeler', 'lifeos.tanisma.kayit', 'lifeos.tanisma.taslak', 'lifeos.beden.boy', 'lifeos.beden.cinsiyet',
   'lifeos.beden.dogumYili', 'lifeos.beden.hedef'];
-const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.tanisma.davet', 'lifeos.kullanim']
+// lifeos.kabuk.baslangic: getirilen başlangıç paketinin kimliği; lifeos.tasima: köken taşımasında işlenen paket adları (ikisi de iz, kayıt değil)
+const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.tanisma.davet', 'lifeos.kullanim', 'lifeos.kabuk.baslangic', 'lifeos.tasima']
   .concat(A.SEMA.filter(s => s.grup !== 'beden').map(s => s.anahtar));
 const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit': '[{"id":"n1"}]', 'lifeos.beden.boy': '170',
   'lifeos.tema.secim': 'dark', 'lifeos.yol.son': 'dil', 'lifeos.tanisma.davet': 'kapali' };
@@ -80,7 +81,7 @@ const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit
   });
   await t('anahtar: kabuk dosyalarındaki her lifeos.* anahtarı sınıflanmış', () => {
     const bilinen = new Set(KAYITLAR.concat(AYARLAR)), yeni = [];
-    ['kabuk.js', 'araclar.js', 'deneme.js', 'tanisma.js', 'harita.js', 'ayar.js'].forEach(f => {
+    ['kabuk.js', 'araclar.js', 'deneme.js', 'tanisma.js', 'tasima.js', 'harita.js', 'ayar.js'].forEach(f => {
       (fs.readFileSync(path.join(__dirname, f), 'utf8').match(/'lifeos\.[\w.]+'/g) || []).map(s => s.slice(1, -1))
         .filter(k => !k.endsWith('.') && !bilinen.has(k)).forEach(k => yeni.push(f + ': ' + k));
     });

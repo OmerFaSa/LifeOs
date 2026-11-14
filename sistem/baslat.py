@@ -84,6 +84,24 @@ def hkm_baslat():
     return False, (son[-1].strip() if son else "sebep yazılmadı")
 
 
+def tek_kapi_etkin():
+    """sistem/tekkapi.py'deki ETKIN bayragi (P6 gecisi). Dosya ice aktarilmaz (sunucuyu ve HKM'yi yukler):
+    yalniz o satir okunur. Okunamazsa eski duzen."""
+    try:
+        with open(os.path.join(SISTEM, "tekkapi.py"), encoding="utf-8") as f:
+            for satir in f:
+                if satir.startswith("ETKIN ="):
+                    return satir.split("=", 1)[1].split("#", 1)[0].strip() == "True"
+    except OSError:
+        pass
+    return False
+
+
+def sunucu_dosyasi():
+    """Tek kapi devredeyse giris, uc modul ve Merkez tek surecte (tekkapi.py); degilse eski sunucu.py."""
+    return "tekkapi.py" if tek_kapi_etkin() else "sunucu.py"
+
+
 def sistemler_baslat():
     """Uc sistemin sunucusu AYRI bir surecte kosar: cikti yutulmaz,
     gunluge yazilir."""
@@ -95,7 +113,7 @@ def sistemler_baslat():
               "env": cocuk_ortami()}
     if os.name == "posix":
         kwargs["start_new_session"] = True
-    p = subprocess.Popen([sys.executable, os.path.join(SISTEM, "sunucu.py")],
+    p = subprocess.Popen([sys.executable, os.path.join(SISTEM, sunucu_dosyasi())],
                          **kwargs)
     son = time.time() + BEKLE_SANIYE
     while time.time() < son:
@@ -165,8 +183,12 @@ def sistemler_dur():
     if not _cevap_veriyor(GIRIS):
         _yaz("yok", "Sistem sunucusu zaten çalışmıyor")
         return 0
-    hedef = os.path.join(SISTEM, "sunucu.py")
+    hedef = os.path.join(SISTEM, sunucu_dosyasi())
     ok_, not_ = adiyla_durdur(hedef)
+    if hedef.endswith("tekkapi.py"):
+        adiyla_durdur(os.path.join(SISTEM, "sunucu.py"))    # gecisten once acilmis eski sunucu kalmis olabilir
+    else:
+        adiyla_durdur(os.path.join(SISTEM, "tekkapi.py"))   # bayrak geri alindiysa tek kapi kalmis olabilir
     # Eski duzende sunucu kok klasordeydi; guncellemeden once acilmis
     # bir sunucu o adla calisiyor olabilir. Onu da ayni yolla kapat.
     adiyla_durdur(os.path.join(KOK, "sunucu.py"))
@@ -240,7 +262,9 @@ def main():
             return 1
 
     # 2 — HKM. ISTEGE BAGLI: acilmazsa uc sistem yine calisir.
-    if "--hkmsiz" in sys.argv:
+    if tek_kapi_etkin():
+        _yaz("ok", "Merkez tek kapının içinde", GIRIS + "/api/hkm/")      # ayri surec yok (tekkapi.py hkm_kur)
+    elif "--hkmsiz" in sys.argv:
         _yaz("yok", "HKM açılmadı", "--hkmsiz")
     elif _cevap_veriyor("http://127.0.0.1:4200/api/health"):
         _yaz("ok", "HKM zaten çalışıyor", "http://127.0.0.1:4200")

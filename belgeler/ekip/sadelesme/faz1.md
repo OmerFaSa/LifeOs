@@ -169,3 +169,21 @@ Sahibin «benim yapabileceklerimi de yap» talimatıyla, bu bilgisayarda.
 **Açılmayanlar (bilerek):** `veri.OKU` ve `tekkapi.ETKIN` kapalı. Açılınca köken değişir ve eski modüller boş görünür: uygulamada hesap
 oturumu yok, eski modüllerin tek depodan okuması oturum ister. Önce oturum açılmalı (şifre sahibindir), sonra taze paketle göç yenilenip
 (`--geri-al` + `--gercek`) bayraklar açılmalı. Telefon ya da başka cihaz varsa onların paketi de o zaman alınır (hesapta kayıtlı oturum: 0).
+
+## Geçiş hazırlığı: bayrak açılınca olacaklar (2026-11-14)
+`tekkapi.ETKIN = True` yapılınca (tek satır) şunlar kendiliğinden devreye girer; hepsi bayrak kapalıyken sınandı:
+
+- **Başlatıcı** (`sistem/baslat.py`): `sunucu.py` yerine `tekkapi.py`'yi başlatır ve durdurur; Merkez ayrı süreç olarak açılmaz
+  (tek kapının içinde). Bayrağı dosyadan okur, tekkapi'yi içe aktarmaz.
+- **İlk ekran:** tek kapıda kök (`/`) yeni kabuğa gider (302 `/kabuk/`); eski giriş ve kontrol paneli `/kartlar/`'da durur ve
+  kartları modüllere port yerine yoldan bağlanır (`/ays/`, `/spi/`, `/esp/`).
+- **Köken taşıması** (`kabuk/tasima.js` + `GET /api/hesap/goc-paket/son`): köken değişince eski modüllerin tarayıcı deposu yeni
+  adreste görünmez. Kabuk açılınca her kaynağın en yeni göç paketini alır ve yeni kökenin localStorage'ına geri yazar; modül eski
+  verisiyle açılır, oturum gerekmez. Var olan anahtarın üstüne yazılmaz; uç yalnız bu bilgisayara, özel başlıkla ve yalnız tek kapı
+  devredeyken (`LIFEOS_TASIMA=1`, `tekkapi.kur` ETKIN iken koyar) cevap verir. Medya (IndexedDB) geri yazılmaz; bugün hiçbir pakette medya yok.
+- **Ölçüldü:** gerçek paketlerin kopyasıyla yalıtılmış tek kapıda kabuk dört kaynağı geri yazdı; AYS, SPİ ve ESP kendi depolarıyla
+  (62, 40, 22 üst anahtar; boyut birebir) hatasız açıldı. `tools/tekkapi_test.py` 138/138, `tools/kabuk_gez.js` (kök yönlendirme ve
+  taşıma dahil), kabuk birim testi 54/54.
+- **Bayrağı açmadan önce:** uygulama kapatılır, taze paket alınır (uygulamada «Bilgisayara gönder» ya da P6 adım 1), göç yenilenir
+  (`goc.py --geri-al <kimlik>` + `--gercek --bekleyen-pakette`), `tools/kabuk_baslangic.py` yeniden koşulur. Geri dönüş: bayrak
+  `False`, yeniden başlat; eski kökenlerdeki veri yerinde durur (hiçbir şey silinmez).

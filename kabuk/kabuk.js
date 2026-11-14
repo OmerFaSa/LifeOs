@@ -685,6 +685,7 @@
       var betik = function (yol, sonra) { var b = d.createElement('script'); b.src = yol; b.onload = sonra; d.head.appendChild(b); };
       betik('/parca.js', function () { betik('/hesap.js', function () { if (sayfaEl.getAttribute('data-yer') === 'bugun' && hesapAdi()) rota(); }); });
     }
+    if (Kabuk.Tasima && Kabuk.Tasima.calis) Kabuk.Tasima.calis(); // tek kapıya geçişte eski modüllerin deposu bu kökene geri yazılır
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') rota(); }); // Bugün'ün «sırada» satırı için
   }
   Kabuk.ic = { kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukle, etkin: function () { return etkinAlan; },
