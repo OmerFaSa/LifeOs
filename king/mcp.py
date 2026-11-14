@@ -141,6 +141,22 @@ def tek_oku(c, a):
             continue
         if alan == "gun/sunucu":   # sunucunun Gun yayini (goc: gun_kopya); hangi gunun oldugu tasinmadi
             a["yayin"][yol] = dict(icerik=govde, gun=None, zaman=int(hlc[:13]))
+        elif alan == "kabuk-cakisma":
+            continue   # ustune yazilan eski surumler (sistem/veri.py kabuk_yaz): sahibin kurtarma kopyasi, King'e kapali
+        elif alan == "kabuk":
+            # Yeni kabugun kayitlari (kabuk/depo.js esitler): her anahtar tarayicidaki dizgi, yani JSON metni. Ham hali
+            # kayit araclarina CIKMAZ (not listesi ozel notlari da tasir); motorlar suzerek okur: notlar (kingOkur),
+            # tekrar_durumu, yol_haritasi. Yalniz Kayit motorunun kayitlari tek tek kayit olarak acilir.
+            try:
+                v = json.loads(g) if isinstance(g, str) else g
+            except ValueError:
+                continue
+            a.setdefault("kabuk", {})[yol] = v
+            if yol == "lifeos.kayit.kayitlar" and isinstance(v, list):
+                for r in v:
+                    if isinstance(r, dict) and isinstance(r.get("id"), str) and isinstance(r.get("gun"), str):
+                        a["kayitlar"].append(dict(alan="kabuk/kayit", yol="%s/%s/%s" % (r.get("tur"), r["gun"], r["id"]), tur="kayit",
+                                                  govde=r, etiket={}, zaman=r.get("zaman") or int(hlc[:13])))
         else:
             a["kayitlar"].append(dict(alan=alan, yol=yol, tur=tur, govde=g, etiket=e, zaman=int(hlc[:13])))
 
@@ -329,7 +345,9 @@ def t_notlar(arg):
     b = json_mu(a["yayin"].get("gun/bilinc", {}).get("icerik"))
     paket["bilinc"] = [b] if isinstance(b, dict) else []
     sinir = arg.get("sinir", 20)
+    kabuk_notlari = a.get("kabuk", {}).get("lifeos.not.kayit")
     r = kopru({"is": "notlar", "zaman": int(datetime.datetime.now().timestamp() * 1000), "kaynak": paket,
+               "kabuk": kabuk_notlari if isinstance(kabuk_notlari, list) else [],
                "kapali": [], "ara": arg.get("ara"), "kimlik": arg.get("kimlik"), "sinir": sinir})
     for n in ([r["not"]] if r.get("not") else []) + r.get("bulunan", []):
         n["guncelleme"] = zaman_yazi(n.get("guncelleme"))
@@ -373,9 +391,17 @@ def t_yol(arg):
                     if d.get("id") == arg["ders"]:
                         return {"asama": s.get("ad"), "unite": u.get("ad"), "ders": dict(d, durum=durum(d))}
         raise AracHatasi("Bu kimlikte ders yok. Kimlikleri yol_haritasi (derssiz) verir.")
+    kabuk, ilerleme = anlik().get("kabuk", {}), []
+    for s in asamalar:   # kabugun ogrenme kaydi (motor/yol.js): okunan ders, gecilen kapi; okumak asamayi gecirmez
+        k = kabuk.get("lifeos.yol.%s" % s.get("id"))
+        if isinstance(k, dict):
+            ilerleme.append({"asama": s.get("id"), "okunan_ders": hes(len(k.get("dersler") or {})),
+                             "gecilen_kapi": hes(sum(1 for d in (k.get("kapilar") or {}).values()
+                                                     if any(isinstance(x, dict) and x.get("gecti") for x in d))),
+                             "asama_gecildi": bool((k.get("asamalar") or {}).get(s.get("id")))})
     return {"alan": alan, "alanlar": alanlar,
-            "ilerleme": "veri yok: ilerleme bugün yalnız yeni kabuğun tarayıcı deposunda (lifeos.yol.<alan>.<aşama>); "
-                        "tek depoya göçten sonra okunur.",
+            "ilerleme": ilerleme or "veri yok: bu alanda henüz öğrenme kaydı yok (kabukta ders okununca ya da kapı "
+                                    "denenince tek depoya yazılır).",
             "kapi_sorulari": "Kapı soruları ve cevapları verilmez: ustalık kapısı ölçümdür.",
             "asamalar": [{"id": s.get("id"), "ad": s.get("ad"), "hedef": s.get("hedef"), "kanit_isi": s.get("kanitIsi"),
                           "kapi": kapi(s.get("kapi")),
@@ -392,13 +418,15 @@ def t_tekrar(_):
         modul = k["alan"].split("/", 1)[0]
         if modul in kartlar and k["yol"].startswith("cards/"):
             kartlar[modul].append(k["govde"])
-    bos = "Yeni kabuğun kartları (lifeos.tekrar.kartlar) bugün yalnız o tarayıcıda; tek depoya göçten sonra görünür."
-    if not kartlar["ays"] and not kartlar["esp"]:
+    kabuk_kart = a.get("kabuk", {}).get("lifeos.tekrar.kartlar")
+    kabuk_kart = [x for x in kabuk_kart if isinstance(x, dict) and x.get("id")] if isinstance(kabuk_kart, list) else []
+    bos = "Yeni kabuğun kartları (lifeos.tekrar.kartlar) tek depodan okunur; kabukta yazılan kart eşitlenince burada görünür."
+    if not kartlar["ays"] and not kartlar["esp"] and not kabuk_kart:
         return {"kaynak": a["kaynak"], "kart": hes(0), "durum": "veri yok: depoda tekrar kartı yok. " + bos}
     simdi = datetime.datetime.now()
     gun_sonu = datetime.datetime.combine(simdi.date(), datetime.time.max)
     r = kopru({"is": "tekrar", "simdi": int(simdi.timestamp() * 1000), "gunSonu": int(gun_sonu.timestamp() * 1000),
-               "kartlar": kartlar})
+               "kartlar": kartlar, "kabuk": kabuk_kart})
     return {"kaynak": a["kaynak"], "motor": "Tekrar (FSRS-4.5, eski vadeler aynen)", "kart": hes(r["toplam"]),
             "okunamayan": hes(r["okunamayan"]), "bugun_tekrar": hes(r["bugunTekrar"]), "bugun_yeni": hes(r["bugunYeni"]),
             "tavan_ustu_bekleyen": hes(r["bekleyenTekrar"] + r["bekleyenYeni"]), "taslak_ya_da_kapali": hes(r["disarida"]),

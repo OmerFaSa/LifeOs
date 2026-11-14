@@ -115,3 +115,30 @@ CI: `.github/workflows/ci.yml`'ye «Kabuk kayıt deposu» adımı eklendi (ötek
 7. Eski modüller (AYS, SPİ, ESP) bu kayıt anahtarlarını kullanmıyor (depoda arandı; `king/mcp.py` yalnız ileti metninde anıyor),
    bu yüzden aynı kökende localStorage'dan silmek onları etkilemez. Bir eski modül bu adlardan birine yazmaya başlarsa çakışma
    kuralı (madde 6) gözden geçirilmeli.
+
+## Tek depo eşitlemesi (2026-11-14)
+Kabukta girilen kayıtlar artık yalnız tarayıcıda durmaz: bilgisayardaki tek depoya (`veri/lifeos.db`) da yazılır.
+Böylece yedeklenir, King okur, ikinci cihaz (telefon) aynı kayıtları görür. Planın «verinin doğrusu tek yerde» hedefinin kabuk payı budur.
+
+- **Ne gider:** yalnız kayıt anahtarları (`kabuk/depo.js` `KAYIT`: Yol, Not, Tekrar, Kayıt, Plan, Soru, Tanışma, Beden, onay). Ayarlar gitmez.
+  Sunucudaki kapalı liste (`sistem/veri.py` `KABUK_ANAHTAR`) aynı önekten kurulur; test ikisini karşılaştırır.
+- **Biçim:** her anahtar tek kayıttır (`alan = kabuk`, `yol = anahtar`); gövde tarayıcıdaki dizginin aynısıdır, geri dönüşte bayt bayt aynı gelir.
+- **Uç:** `GET /api/hesap/kabuk?son=<imleç>` ve `POST /api/hesap/kabuk`, özel başlık `X-LifeOS: kabuk`. Bu bilgisayardan oturumsuz
+  (bağlantı yerel **ve** `Host` yerel olmalı: DNS yeniden bağlama ile başka bir site okuyamasın); başka cihazdan yalnız sahibin oturumuyla.
+  Tek depo yoksa 404: kabuk o açılışta eşitlemeyi kapatır ve eskisi gibi çalışır.
+- **Kural:** çek, sonra gönder. Son yazan kazanır; ama bir cihaz ötekinin yazdığını görmeden üstüne yazarsa (taban sürümü eski) ezilen değer
+  `kabuk-cakisma` alanında saklanır. Bir cihaz ilk katıldığında sunucudaki değeri alır; kendi farklı değeri «sakla» olarak sunucuya gider.
+  Gönderilmemiş yerel yazı çekişte ezilmez. Ağ yoksa bekleyen kalır, sonraki açılışta gider. Öbür cihazdan gelen kayıt sayfayı yeniler
+  (yazı alanı odaktayken beklenir).
+- **Yedek:** tek depo günde bir kez `veri/yedek/lifeos-gunluk-<gün>.db` olarak kopyalanır, son 7 gün tutulur (`hesap.Depo.tek_depo_gunluk`).
+- **King:** `king/mcp.py` kabuk kayıtlarını tek depodan okur: notlar Not motorunun King süzgecinden (özel not gelmez), kartlar `tekrar_durumu`nda,
+  Kayıt motorunun kayıtları tek tek kayıt olarak, öğrenme kaydı `yol_haritasi` ilerlemesinde. Ham kabuk anahtarları ve çakışma kopyaları
+  kayıt araçlarına çıkmaz.
+- **Ayarlar › Hesap:** «Bilgisayardaki depo» satırı durumu söyler (eşit / ulaşılamıyor / bağlı değil).
+- **Ölçüldü:** `kabuk/depo.test.js` 19 (altısı eşitleme), `tools/tekdepo_test.py` (doğrulama, sürüm, çakışma, silme, sayfalama, günlük yedek),
+  HKM takımında HTTP ucu (başlık, yabancı Host, başka hesap, sahibin oturumu), `king/mcp_test.py` (özel not sızmaz),
+  `tools/kabuk_esit_gez.js` 15 denetim: gerçek tarayıcıda iki cihaz, yazı dosyadan okunan tek depoda, öbür cihazda görünür, çakışmada ezilen değer
+  saklanır, silme yayılır, günlük yedek alınır.
+- **Sınır (shortcut):** eşitleme anahtar düzeyindedir: iki cihaz aynı anahtarı (ör. bütün not listesi) aynı anda değiştirirse son yazan
+  kazanır, öteki sürüm çakışma alanında kalır ama kendiliğinden birleşmez; kurtarma ekranı yok. Kayıt düzeyinde birleştirme motorların
+  işidir, sonraki adım.

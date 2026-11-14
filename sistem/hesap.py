@@ -2189,8 +2189,26 @@ class Depo:
         def is_():
             with contextlib.suppress(Exception):
                 self.kopya_gunluk()
+            with contextlib.suppress(Exception):
+                self.tek_depo_gunluk()
         threading.Thread(target=is_, daemon=True, name="hesap-yedek").start()
         return True
+
+    def tek_depo_gunluk(self):
+        """Tek depo (veri/lifeos.db: kabugun kayitlari orada) da her gun bir kez yedeklenir: veri/yedek, son 7 gun.
+        Doner: yazilan yol ya da None (depo yok ya da bugunku var)."""
+        if self.kopru is None:
+            return None
+        k = os.path.join(os.path.dirname(self.kopru.depo.yol), "yedek")
+        os.makedirs(k, exist_ok=True)
+        hedef = os.path.join(k, "lifeos-gunluk-%s.db" % time.strftime("%Y%m%d", time.localtime(self.saat())))
+        if os.path.exists(hedef):
+            return None
+        self.kopru.depo.yedekle(hedef)
+        for a in sorted(a for a in os.listdir(k) if re.fullmatch(r"lifeos-gunluk-\d{8}\.db", a))[:-7]:
+            with contextlib.suppress(OSError):
+                os.remove(os.path.join(k, a))
+        return hedef
 
     @staticmethod
     def _admin(yapan, mesaj="Bunu yalnız admin yapar."):
@@ -2487,6 +2505,11 @@ def _yerel_mi(h):
     return ip in ("127.0.0.1", "::1", "::ffff:127.0.0.1")
 
 
+def _yerel_host(h):
+    """Istek bu bilgisayarin adresine mi yazilmis (Host). DNS yeniden baglamada baglanti yerel, Host yabancidir."""
+    return (h.headers.get("Host") or "").rsplit(":", 1)[0].lower() in ("127.0.0.1", "localhost", "[::1]")
+
+
 def _cevap(h, kod, veri):
     govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
     h.send_response(kod)
@@ -2728,6 +2751,33 @@ def isle(h):
         if yol.startswith(HKM_YOL + "/"):
             # Soz 30: kimlik cihazin Merkez anahtaridir (basliktaki Bearer); X-LifeOS istemez.
             return _merkez_ilet(h, d, ip)
+        if yol == "/api/hesap/kabuk":
+            # Yeni kabugun kayitlari tek depoda (sistem/veri.py kabuk_*; kabuk/depo.js esitler). Bu bilgisayardan
+            # (Host da yerel olmali: DNS yeniden baglama ile baska bir site okuyamasin) ya da sahibin oturumuyla
+            # (telefon, Tailscale). Ozel baslik: baska bir site tarayicidan on-kontrolu gecemez.
+            if h.headers.get("X-LifeOS") != "kabuk":
+                raise Hata(403, "İzin yok.")
+            if d.kopru is None:
+                raise Hata(404, "Tek depo yok.")
+            yerel = _yerel_mi(h) and _yerel_host(h)
+            if not yerel:
+                k = d.oturum(_jeton(h), ip)
+                if k is None:
+                    raise Hata(401, "Oturum yok ya da süresi doldu; yeniden giriş yap.")
+                if k["id"] != d.kopru.sahip:
+                    raise Hata(403, "Kabuk kayıtları yalnız bilgisayarın sahibinin hesabıyla eşitlenir.")
+            import veri
+            if yontem == "GET":
+                q = urllib.parse.parse_qs(h.path.split("?", 1)[1] if "?" in h.path else "").get("son", ["0"])[0]
+                if not re.fullmatch(r"\d{1,15}", q):
+                    raise Hata(400, "«son» sıfır ya da pozitif tam sayı olmalı.")
+                return _cevap(h, 200, veri.kabuk_cek(d.kopru.depo, int(q)))
+            if yontem != "POST":
+                raise Hata(405, "Yalnız GET ve POST.")
+            yazimlar, hata = veri.kabuk_yazimlari(_govde(h))
+            if hata:
+                raise Hata(400, hata)
+            return _cevap(h, 200, veri.kabuk_yaz(d.kopru.depo, yazimlar, "pc" if yerel else "uzak"))
         if yontem == "GET" and yol in ("/api/hesap/ozet", "/api/hesap/ozet.txt"):
             # Soz 21: Kisayollar/Siri. Kimlik «oku» yetkili erisim anahtari.
             if not yol.endswith(".txt"):

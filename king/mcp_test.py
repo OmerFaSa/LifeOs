@@ -350,6 +350,51 @@ dogru("tek depo: canlı dosya açılmadı, değişmedi", acilan and not [p for p
       and iz(CANLI) == once)
 sqlite3.connect = _connect
 
+print("Yeni kabuğun kayıtları tek depodan (kabuk/depo.js eşitler)")
+GIZLI_NOT = "COK-OZEL-ICERIK-41"
+kabuk_notlar = [
+    {"id": "kn1", "baslik": "Erdem üzerine", "govde": "Kabukta yazıldı.", "alan": "", "etiketler": [], "kaynak": {"yapi": "not"},
+     "olusturma": MS, "guncelleme": MS, "ozel": False, "tur": "not", "klasor": "", "sabit": False, "baglam": None, "ozellik": {}},
+    {"id": "kn2", "baslik": "Özel defter", "govde": GIZLI_NOT, "alan": "", "etiketler": [], "kaynak": {"yapi": "not"},
+     "olusturma": MS, "guncelleme": MS, "ozel": True, "tur": "not", "klasor": "", "sabit": False, "baglam": None, "ozellik": {}},
+    {"id": "bozuk", "baslik": "", "govde": ""}]
+kabuk_kartlar = [{"id": "kk1", "zorluk": None, "kararlilik": None, "son": None, "sonraki": None, "tekrar": 0, "unutma": 0,
+                  "durum": "yeni", "on": "Arkhe nedir?", "arka": "İlk madde."}]
+bugun_ = datetime.date.today().isoformat()
+kabuk_kayit = [{"id": "su:%s:1" % bugun_, "tur": "su", "gun": bugun_, "zaman": MS, "kaynak": "kullanici",
+                "deger": {"ml": {"v": 500, "k": "measured"}}, "ek": {}}]
+kabuk_yol = {"dersler": {"felsefe.1.1.1": {"okundu": MS}}, "cevaplar": {}, "kapilar": {"felsefe.1.1": [{"gecti": True}]}, "asamalar": {}}
+c = _connect(TEK)
+for yol, deger in (("lifeos.not.kayit", kabuk_notlar), ("lifeos.tekrar.kartlar", kabuk_kartlar), ("lifeos.kayit.kayitlar", kabuk_kayit),
+                   ("lifeos.yol.f1", kabuk_yol), ("lifeos.tanisma.kayit", {"olgular": [GIZLI_NOT]})):
+    # sistem/veri.py kabuk_yaz ile ayni bicim: govde, tarayicidaki dizginin (JSON metni) JSON'u
+    c.execute("INSERT INTO kayit VALUES (?,?,1,?,?,?,?,?,'pc',0,'kabuk',NULL)",
+              ("kabuk|" + yol, "kabuk", "kabuk", yol, json.dumps(json.dumps(deger, ensure_ascii=False), ensure_ascii=False), "{}",
+               "%013d:0000:pc" % MS))
+c.execute("INSERT INTO kayit VALUES (?,?,1,?,?,?,?,?,'pc',0,'kabuk',NULL)",
+          ("kabuk-cakisma|lifeos.kayit.kayitlar|7", "kabuk-cakisma", "kabuk-cakisma", "lifeos.kayit.kayitlar|7",
+           json.dumps(json.dumps([{"eski": GIZLI_NOT}])), "{}", "%013d:0000:pc" % MS))
+c.commit()
+c.close()
+h, r = arac("notlar")
+adlar = [n["baslik"] for n in r["notlar"]]
+dogru("kabuk notu King'e gelir; özel kabuk notu gelmez; geçersiz not alınmaz", not h and "Erdem üzerine" in adlar and "Özel defter" not in adlar
+      and GIZLI_NOT not in json.dumps(r, ensure_ascii=False), r)
+dogru("özel kabuk notu kimlikle de kapalı", arac("notlar", kimlik="kn2") == (True, "Bu not King'e kapalı (özel)."))
+h, r = arac("tekrar_durumu")
+dogru("kabuk kartı tekrar durumunda", not h and r["kart"]["deger"] == 1 and r["bugun_yeni"]["deger"] == 1
+      and r["bugunun_kartlari"][0]["on"] == "Arkhe nedir?", r)
+h, r = arac("kayit_ara", metin="su")
+dogru("kabuk kaydı tek tek kayıt olarak bulunur", not h and any(x.get("kimlik", "").startswith("kabuk/kayit|su/" + bugun_) for x in r.get("kayitlar", r.get("bulunan", []))), r)
+h, r = arac("bugun_ozeti")
+dogru("bugün özeti kabuk kaydını gösterir", not h and any(x["kimlik"].startswith("kabuk/kayit|") for x in r["bugunun_kayitlari"]), r)
+h, r = arac("yol_haritasi", alan="felsefe")
+dogru("yol haritası öğrenme kaydını sayar", not h and isinstance(r["ilerleme"], list) and r["ilerleme"][0]["okunan_ders"]["deger"] == 1
+      and r["ilerleme"][0]["gecilen_kapi"]["deger"] == 1, r.get("ilerleme"))
+tum_ = json.dumps([arac("kayit_ara", metin=x)[1] for x in ("lifeos", "kabuk", "OZEL", "tanisma", "eski")], ensure_ascii=False)
+dogru("ham kabuk anahtarları ve çakışma kopyaları kayıt araçlarına çıkmaz", GIZLI_NOT not in tum_ and "lifeos.not.kayit" not in tum_
+      and "kabuk-cakisma" not in tum_, tum_[:300])
+
 print("stdio uçtan uca")
 girdi = "\n".join(json.dumps(x) for x in (
     {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-11-25", "capabilities": {},

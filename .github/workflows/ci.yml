@@ -230,6 +230,10 @@ jobs:
       - name: Kabuk gezisi (tek kapı + Felsefe pilotu, gerçek tarayıcı)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk gezisi" node tools/kabuk_gez.js
 
+      # TEK DEPO ESITLEMESI (2026-11-14). Kabukta yazilan kayit bilgisayardaki tek depoya gider, ikinci cihazda gorunur.
+      - name: Kabuk eşitleme gezisi (iki cihaz, tek depo, gerçek tarayıcı)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk eşitleme gezisi" node tools/kabuk_esit_gez.js
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

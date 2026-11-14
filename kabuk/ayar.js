@@ -51,6 +51,14 @@
       oku: function () { var D = kok.LIFEOS && kok.LIFEOS.Kabuk && kok.LIFEOS.Kabuk.Depo; return D && D.kalici ? D.kalici() : null; },
       secenekler: { 'true': 'Kalıcı', 'false': 'Tarayıcı silebilir', 'null': 'Bilinmiyor' },
       aciklama: 'Kalıcıysa tarayıcı yer açmak için kayıtlarını kendiliğinden silmez. Yalnız bilgi; buradan değişmez.', kaynak: 'faz2-indexeddb.md §Açık noktalar 1: kalıcı depolama' },
+    // Salt bilgi: kayıtlar bilgisayardaki tek depoya gidiyor mu (kabuk/depo.js esitleme(): açık değil null, hata false)
+    { anahtar: 'depo.esitleme', ad: 'Bilgisayardaki depo', tur: 'bilgi', varsayilan: null, grup: 'hesap', esitlenir: false,
+      oku: function () {
+        var D = kok.LIFEOS && kok.LIFEOS.Kabuk && kok.LIFEOS.Kabuk.Depo, e = D && D.esitleme ? D.esitleme() : null;
+        return !e || !e.acik ? null : !e.hata;
+      },
+      secenekler: { 'true': 'Eşit: kayıtların orada da duruyor ve yedekleniyor', 'false': 'Şu an ulaşılamıyor; kayıtların bu cihazda, sonra gönderilir', 'null': 'Bağlı değil' },
+      aciklama: 'Yazdığın her kayıt bilgisayardaki tek depoya da gider; King oradan okur, telefon oradan alır. Yalnız bilgi.', kaynak: 'faz2-indexeddb.md §Tek depo eşitlemesi (sistem/veri.py kabuk_yaz)' },
     // Beden: Kayıt motorunun enerji hedefi (bazal metabolizma) bunları ister; kilo son tartıdan gelir.
     { anahtar: 'lifeos.beden.cinsiyet', ad: 'Cinsiyet', tur: 'secim', varsayilan: 'belirtilmedi', grup: 'beden', esitlenir: true,
       secenekler: { belirtilmedi: 'Belirtilmedi', kadin: 'Kadın', erkek: 'Erkek' }, aciklama: 'Yalnız bazal metabolizma hesabı için. Belirtilmezse enerji hedefi hesaplanmaz.', kaynak: SPI + ': sex' },

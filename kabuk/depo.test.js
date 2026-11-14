@@ -67,7 +67,7 @@ const KAYITLAR = ['lifeos.yol.felsefe.1', 'lifeos.yol.dil.2', 'lifeos.not.kayit'
   'lifeos.soru.denemeler', 'lifeos.tanisma.kayit', 'lifeos.tanisma.taslak', 'lifeos.beden.boy', 'lifeos.beden.cinsiyet',
   'lifeos.beden.dogumYili', 'lifeos.beden.hedef', 'lifeos.onay', 'lifeos.plan.eski', 'lifeos.soru.eski'];
 // lifeos.kabuk.baslangic: getirilen başlangıç paketinin kimliği; lifeos.tasima: köken taşımasında işlenen paket adları (ikisi de iz, kayıt değil)
-const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.tanisma.davet', 'lifeos.kullanim', 'lifeos.kabuk.baslangic', 'lifeos.tasima']
+const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.kabuk.esitle','lifeos.tanisma.davet', 'lifeos.kullanim', 'lifeos.kabuk.baslangic', 'lifeos.tasima']
   .concat(A.SEMA.filter(s => s.grup !== 'beden').map(s => s.anahtar));
 const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit': '[{"id":"n1"}]', 'lifeos.beden.boy': '170',
   'lifeos.tema.secim': 'dark', 'lifeos.yol.son': 'dil', 'lifeos.tanisma.davet': 'kapali' };
@@ -213,6 +213,101 @@ const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit
     esit([D2.getItem('lifeos.plan.sablon'), D2.getItem('lifeos.not.araclar')], ['{"a":1}', '[]']);
     D1.removeItem('lifeos.not.araclar'); await uyu(20);
     esit(D2.getItem('lifeos.not.araclar'), null, 'silme de düşer');
+  });
+
+  // Eşitleme: sistem/veri.py kabuk_yaz/kabuk_cek kurallarının aynısıyla çalışan sahte sunucu (gerçeği tools/tekdepo_test.py ve
+  // HKM/tests/test_hesap.py sınar). Her cihaz kendi localStorage + IndexedDB'siyle.
+  function sahteSunucu() {
+    const kayit = new Map(), cakisma = [], istekler = []; let sira = 0, kapali = 0;
+    const cevap = (status, v) => ({ ok: status < 400, status, json: async () => v });
+    return {
+      kayit, cakisma, istekler, kapat(kod) { kapali = kod; },
+      yaz(k, v) { kayit.set(k, { v, surum: ++sira }); },
+      ag: async (url, o) => {
+        istekler.push([o.method, url, o.headers]);
+        if (kapali) { if (kapali === 'ag') throw new TypeError('Failed to fetch'); return cevap(kapali, {}); }
+        if (o.method === 'GET') {
+          const son = +url.split('son=')[1];
+          const l = [...kayit].filter(([, x]) => x.surum > son).sort((a, b) => a[1].surum - b[1].surum).map(([k, x]) => ({ k, v: x.v, surum: x.surum }));
+          return cevap(200, { kayitlar: l, son: Math.max(sira, son), daha: false });
+        }
+        const surumler = {};
+        for (const y of JSON.parse(o.body).yazimlar) {
+          const x = kayit.get(y.k), simdi = x ? x.v : null;
+          if (y.sakla) { if (y.v != null && y.v !== simdi) cakisma.push([y.k, y.v]); continue; }
+          if (simdi === y.v) { surumler[y.k] = x ? x.surum : 0; continue; }
+          if (simdi != null && x.surum !== y.taban) cakisma.push([y.k, simdi]);
+          kayit.set(y.k, { v: y.v, surum: ++sira }); surumler[y.k] = sira;
+        }
+        return cevap(200, { surumler, cakisma: 0 });
+      }
+    };
+  }
+  async function cihaz(s, ls, idb) { const D = taze(); D.ag = s.ag; D.bekle = 5; await D.ac(ls || sahteYerel(), idb || sahteIdb()); await D.esitle(); return D; }
+
+  await t('eşitleme: ilk cihaz yerel kayıtlarını gönderir; ayarlar gitmez; istek özel başlıklı', async () => {
+    const s = sahteSunucu(), ls = sahteYerel(ORNEK), D = await cihaz(s, ls);
+    esit([...s.kayit.keys()].sort(), ['lifeos.beden.boy', 'lifeos.not.kayit', 'lifeos.yol.felsefe.1']);
+    esit(s.kayit.get('lifeos.not.kayit').v, ORNEK['lifeos.not.kayit']);
+    dogru(s.istekler.every(x => x[2]['X-LifeOS'] === 'kabuk' && !x[2].Authorization), 'X-LifeOS: kabuk, oturumsuz');
+    esit([D.esitleme().bekleyen, D.esitleme().acik, D.esitleme().hata], [0, true, '']);
+    dogru(!D.kayitMi('lifeos.kabuk.esitle') && 'lifeos.kabuk.esitle' in ls.v, 'durum localStorage\'da, kayıt değil');
+  });
+
+  await t('eşitleme: katılan cihaz sunucudakini alır, dinleyen haber alır; farklı yerel değeri kaybolmaz (sakla)', async () => {
+    const s = sahteSunucu();
+    s.yaz('lifeos.not.kayit', '[{"id":"pc"}]'); s.yaz('lifeos.plan.durum', '{"p":1}');
+    const D = taze(); D.ag = s.ag; D.bekle = 5; let gelen = [];
+    D.dinle(l => { gelen = gelen.concat(l); });
+    await D.ac(sahteYerel({ 'lifeos.not.kayit': '[{"id":"tel"}]', 'lifeos.soru.gecmis': '[7]' }), sahteIdb()); await D.esitle();
+    esit([D.getItem('lifeos.not.kayit'), D.getItem('lifeos.plan.durum')], ['[{"id":"pc"}]', '{"p":1}']);
+    esit(gelen.sort(), ['lifeos.not.kayit', 'lifeos.plan.durum']);
+    esit(s.cakisma, [['lifeos.not.kayit', '[{"id":"tel"}]']], 'telefonun eski notu sunucuda saklandı');
+    esit(s.kayit.get('lifeos.soru.gecmis').v, '[7]', 'sunucuda olmayan yerel kayıt gönderildi');
+    esit(s.kayit.get('lifeos.not.kayit').v, '[{"id":"pc"}]', 'sunucudaki ezilmedi');
+  });
+
+  await t('eşitleme: bir cihazın yazısı öbürüne gider; silme de gider', async () => {
+    const s = sahteSunucu(), A = await cihaz(s), B = await cihaz(s);
+    A.setItem('lifeos.tekrar.kartlar', '[1]'); await uyu(20); await A.esitle();
+    await B.esitle();
+    esit(B.getItem('lifeos.tekrar.kartlar'), '[1]');
+    B.removeItem('lifeos.tekrar.kartlar'); await B.esitle();
+    await A.esitle();
+    esit([A.getItem('lifeos.tekrar.kartlar'), s.kayit.get('lifeos.tekrar.kartlar').v, s.cakisma.length], [null, null, 0]);
+  });
+
+  await t('eşitleme: görmeden yazan cihaz kazanır ama öbürünün değeri sunucuda saklanır; bekleyen yerel yazı çekişte ezilmez', async () => {
+    const s = sahteSunucu(), A = await cihaz(s), B = await cihaz(s);
+    A.setItem('lifeos.not.kayit', '["A1"]'); await A.esitle(); await B.esitle();
+    s.kapat('ag'); B.setItem('lifeos.not.kayit', '["B"]'); await B.esitle(); s.kapat(0); // B çevrimdışı yazdı
+    A.setItem('lifeos.not.kayit', '["A2"]'); await A.esitle();
+    await B.esitle();
+    esit(B.getItem('lifeos.not.kayit'), '["B"]', 'çekiş B\'nin bekleyen yazısını ezmedi');
+    esit([s.kayit.get('lifeos.not.kayit').v, s.cakisma], ['["B"]', [['lifeos.not.kayit', '["A2"]']]]);
+    await A.esitle();
+    esit(A.getItem('lifeos.not.kayit'), '["B"]');
+  });
+
+  await t('eşitleme: ağ yoksa bekleyen kalır, yeniden açılışta gider; uç yoksa (404) kapanır, kabuk çalışır', async () => {
+    const s = sahteSunucu(), ls = sahteYerel(), idb = sahteIdb();
+    let D = await cihaz(s, ls, idb);
+    s.kapat('ag'); D.setItem('lifeos.onay', '{"x":1}'); await D.esitle();
+    esit([D.esitleme().bekleyen, D.esitleme().hata], [1, 'Sunucuya ulaşılamadı']);
+    s.kapat(0); await uyu(5);
+    D = await cihaz(s, ls, idb);
+    esit([s.kayit.get('lifeos.onay').v, D.esitleme().bekleyen], ['{"x":1}', 0]);
+    const s2 = sahteSunucu(); s2.kapat(404);
+    const E = await cihaz(s2);
+    E.setItem('lifeos.onay', '{}'); await E.esitle();
+    esit([E.getItem('lifeos.onay'), E.esitleme().acik, s2.istekler.length], ['{}', false, 1]);
+  });
+
+  await t('eşitleme: telefonda sahibin oturum jetonu gider (hesap.js çerezi)', async () => {
+    const s = sahteSunucu(), eski = globalThis.document;
+    globalThis.document = { cookie: 'x=1; lifeos_hesap=' + encodeURIComponent(JSON.stringify({ j: 'jeton-123', a: 'omer' })) };
+    try { await cihaz(s, sahteYerel(ORNEK)); } finally { if (eski === undefined) delete globalThis.document; else globalThis.document = eski; }
+    dogru(s.istekler.length && s.istekler.every(x => x[2].Authorization === 'Bearer jeton-123'));
   });
 
   console.log(kalan ? '\n' + kalan + ' test kaldı, ' + gecen + ' geçti' : '\n' + gecen + ' test geçti');

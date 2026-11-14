@@ -715,6 +715,8 @@
     d.addEventListener('contextmenu', function (e) { if (basili || !halkaEl.hidden) e.preventDefault(); });
     $('input', komutEl).addEventListener('input', function (e) { komutCiz(e.target.value); });
     if (matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', uygula);
+    // öbür cihazdan kayıt geldi (depo.js eşitleme): sayfa yeniden çizilir; yazı alanı odaktaysa yazılan silinmesin diye beklenir
+    depo.dinle(function () { if (!/^(INPUT|TEXTAREA|SELECT)$/.test((d.activeElement || {}).tagName || '')) rota(); });
     rota();
     if (location.protocol !== 'file:' && !kok.LIFEOS.HESAP) {
       // hesap.js yazılarını parça kaydına yazar: önce /parca.js, sonra /hesap.js (giriş sayfasındaki sıra)

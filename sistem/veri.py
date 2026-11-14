@@ -22,6 +22,7 @@ Sozler:
 import contextlib
 import json
 import os
+import re
 import sqlite3
 import sys
 import threading
@@ -229,6 +230,13 @@ class Depo:
         return hedef
 
 
+    def surum(self, alan, yol):
+        """Kaydin olay defterindeki son sirasi; kayit yoksa 0. Istemcinin «gordugum surum» tabani (kabuk_yaz)."""
+        with self._kilit:
+            # shortcut: kayit_id dizini yok; kabuk kayitlari onlarca, olay binlerce. Olay on binleri asarsa olay(kayit_id) dizini ekle
+            return self.c.execute("SELECT COALESCE(MAX(sira), 0) FROM olay WHERE kayit_id=?",
+                                  (alan + "|" + yol,)).fetchone()[0]
+
     def degisenler(self, alan, son, sinir):
         """Eski esitleme sozlesmesinin okumasi (P4b): imlec olay defterinin sirasidir. Doner: (satirlar, en_son);
         satirlar [(yol, govde | None, ms, cihaz, sira)] sira > son, sira sirasinda, en cok `sinir` tane;
@@ -270,6 +278,75 @@ class Kopru:
             else:
                 n += self.depo.degistir(alan, yol, json.loads(metin), h, cihaz, kaynak="hesap")
         return n
+
+
+# Yeni kabugun kayitlari (kabuk/depo.js KAYIT). Her anahtar tek parca kayittir: govde tarayicidaki dizginin aynisi
+# (JSON metni), boylece geri donuste bayt bayt ayni gelir. Onek kabuk/depo.js KAYIT ile ayni olmali (test denetler).
+KABUK = "kabuk"
+KABUK_CAKISMA = "kabuk-cakisma"
+KABUK_ANAHTAR = re.compile(r"^lifeos\.(yol\.(?!son$)|not\.|tekrar\.|kayit\.kayitlar$|plan\.|soru\.|tanisma\.(kayit|taslak)$"
+                           r"|beden\.|onay$)[A-Za-z0-9_.\-]{0,100}$")
+KABUK_DEGER_EN_BUYUK = 8 * 1024 * 1024
+
+
+def kabuk_cek(depo, son, sinir=200):
+    """Imlec `son`dan sonra degisen kabuk kayitlari. Doner: {kayitlar: [{k, v (dizgi | None = silindi), surum}],
+    son, daha}. Imlec olay defterinin sirasidir; sinir dolduysa son satirin sirasinda durur, kalan sonraki cekiste."""
+    satir, en_son = depo.degisenler(KABUK, son, sinir)
+    daha = len(satir) >= sinir
+    return {"kayitlar": [{"k": y, "v": g, "surum": s} for y, g, _ms, _c, s in satir],
+            "son": satir[-1][4] if daha else max(en_son, son), "daha": daha}
+
+
+def kabuk_yaz(depo, yazimlar, cihaz):
+    """yazimlar: [{k, v (dizgi | None = sil), taban (istemcinin gordugu surum), sakla?}]. Son gelen kazanir (sunucu saati);
+    istemci yazarken araya baska bir cihazin yazimi girdiyse (taban eski) ustune yazilan deger kaybolmaz:
+    kabuk-cakisma alanina «<anahtar>|<surum>» olarak saklanir. Doner: {surumler: {k: surum}, cakisma: n}."""
+    surumler, cakisma = {}, 0
+    with depo._kilit:                   # oku-karsilastir-yaz tek parca: iki istek ayni anahtarda karismasin
+        for y in yazimlar:
+            k, v, taban = y["k"], y["v"], y["taban"]
+            simdi, sur = depo.oku(KABUK, k), depo.surum(KABUK, k)
+            if y.get("sakla"):          # katilan cihazin sunucununkiyle cakisan degeri: yalniz saklanir
+                if v is not None and v != simdi:
+                    h = depo.damga()
+                    depo.degistir(KABUK_CAKISMA, "%s|katilim|%s" % (k, h), v, h, cihaz, tur=KABUK_CAKISMA, kaynak=KABUK)
+                    cakisma += 1
+                continue
+            if simdi == v:
+                surumler[k] = sur
+                continue
+            if simdi is not None and sur != taban:
+                depo.degistir(KABUK_CAKISMA, "%s|%d" % (k, sur), simdi, depo.damga(), cihaz, tur=KABUK_CAKISMA,
+                              kaynak=KABUK)
+                cakisma += 1
+            if v is None:
+                depo.sil(KABUK, k, depo.damga(), cihaz, tur=KABUK, kaynak=KABUK)
+            else:
+                depo.degistir(KABUK, k, v, depo.damga(), cihaz, tur=KABUK, kaynak=KABUK)
+            surumler[k] = depo.surum(KABUK, k)
+    return {"surumler": surumler, "cakisma": cakisma}
+
+
+def kabuk_yazimlari(govde):
+    """Istemciden gelen POST govdesini dogrular. Doner: (yazimlar, hata). Guven siniri: anahtar kapali listede,
+    deger dizgi ya da null, boy sinirli."""
+    l = govde.get("yazimlar") if isinstance(govde, dict) else None
+    if not isinstance(l, list) or not 0 < len(l) <= 200:
+        return None, "«yazimlar» 1-200 öğelik liste olmalı."
+    out = []
+    for y in l:
+        if not isinstance(y, dict) or not isinstance(y.get("k"), str) or not KABUK_ANAHTAR.match(y["k"]):
+            return None, "Kabuk kaydı olmayan anahtar."
+        v, taban = y.get("v"), y.get("taban", 0)
+        if not (v is None or isinstance(v, str) and len(v) <= KABUK_DEGER_EN_BUYUK):
+            return None, "Değer metin ya da null olmalı (en çok 8 MB)."
+        if not isinstance(taban, int) or isinstance(taban, bool) or taban < 0:
+            return None, "«taban» sıfır ya da pozitif tam sayı olmalı."
+        if not isinstance(y.get("sakla", False), bool):      # 1 == True: «in (True, False)» sayiyi da gecirirdi
+            return None, "«sakla» doğru/yanlış olmalı."
+        out.append({"k": y["k"], "v": v, "taban": taban, "sakla": y.get("sakla") is True})
+    return out, None
 
 
 def kopru_ac(hesap_klasoru, sahip):

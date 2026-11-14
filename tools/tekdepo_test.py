@@ -272,6 +272,72 @@ try:
     dogru("eşle: ikinci kez bir şey değiştirmez", veri.esle(os.path.join(t, "p4-kopya.db"), bos, 1) == 0)
     bos.kapat()
     tek.kapat()
+
+    print("\nKabuk kayıtları (kabuk/depo.js ↔ tek depo)")
+    import re
+    kb = veri.Depo(os.path.join(t, "kabuk-depo"), saat=lambda: SIMDI)
+    js = open(os.path.join(KOK, "kabuk", "depo.js"), encoding="utf-8").read()
+    js_onek = re.search(r"var KAYIT = /\^(.+?)/;", js).group(1)
+    dogru("anahtar listesi kabuk/depo.js KAYIT ile aynı önekten", veri.KABUK_ANAHTAR.pattern.startswith("^" + js_onek[:-1])
+          and all(veri.KABUK_ANAHTAR.match(k) for k in ("lifeos.not.kayit", "lifeos.yol.felsefe.1", "lifeos.kayit.kayitlar", "lifeos.onay", "lifeos.beden.boy"))
+          and not any(veri.KABUK_ANAHTAR.match(k) for k in ("lifeos.yol.son", "lifeos.tema.secim", "lifeos.kayit.baska", "lifeos.not.../x", "lifeos.not." + "a" * 200, "baska")),
+          js_onek)
+    for kotu, neden in (({}, "liste"), ({"yazimlar": []}, "boş"), ({"yazimlar": [{"k": "lifeos.tema.secim", "v": "x"}]}, "ayar anahtarı"),
+                        ({"yazimlar": [{"k": "lifeos.not.kayit", "v": 5}]}, "metin olmayan değer"),
+                        ({"yazimlar": [{"k": "lifeos.not.kayit", "v": "x", "taban": -1}]}, "eksi taban"),
+                        ({"yazimlar": [{"k": "lifeos.not.kayit", "v": "x", "taban": True}]}, "mantıksal taban"),
+                        ({"yazimlar": [{"k": "lifeos.not.kayit", "v": "x", "sakla": 1}]}, "sakla sayı"),
+                        ({"yazimlar": [{"k": "lifeos.not.kayit", "v": "x"}] * 201}, "201 yazım")):
+        l, hata = veri.kabuk_yazimlari(kotu)
+        dogru("doğrulama reddeder: " + neden, l is None and hata, (l, hata))
+    l, hata = veri.kabuk_yazimlari({"yazimlar": [{"k": "lifeos.not.kayit", "v": "[1]"}, {"k": "lifeos.plan.durum", "v": None, "taban": 3, "sakla": False}]})
+    dogru("doğrulama: taban ve sakla varsayılanı", hata is None and l == [{"k": "lifeos.not.kayit", "v": "[1]", "taban": 0, "sakla": False},
+                                                                     {"k": "lifeos.plan.durum", "v": None, "taban": 3, "sakla": False}], l)
+    metin = '[{"id":"n1","baslik":"Çıtır «not»","govde":"satır\\n2"}]'
+    r1 = veri.kabuk_yaz(kb, [{"k": "lifeos.not.kayit", "v": metin, "taban": 0}], "pc")
+    s1 = r1["surumler"]["lifeos.not.kayit"]
+    cek = veri.kabuk_cek(kb, 0)
+    dogru("yazılan kayıt bayt bayt aynı döner, sürüm ve imleç verir", s1 > 0 and r1["cakisma"] == 0
+          and cek["kayitlar"] == [{"k": "lifeos.not.kayit", "v": metin, "surum": s1}] and cek["son"] >= s1 and cek["daha"] is False, cek)
+    dogru("imleçten sonrası boş", veri.kabuk_cek(kb, cek["son"])["kayitlar"] == [])
+    r2 = veri.kabuk_yaz(kb, [{"k": "lifeos.not.kayit", "v": metin, "taban": 0}], "uzak")
+    dogru("aynı değer yeniden yazılmaz (sürüm aynı, çakışma yok)", r2 == {"surumler": {"lifeos.not.kayit": s1}, "cakisma": 0}, r2)
+    r3 = veri.kabuk_yaz(kb, [{"k": "lifeos.not.kayit", "v": "[2]", "taban": s1}], "uzak")
+    s3 = r3["surumler"]["lifeos.not.kayit"]
+    dogru("güncel tabanla yazan çakışmasız günceller", s3 > s1 and r3["cakisma"] == 0 and kb.oku(veri.KABUK, "lifeos.not.kayit") == "[2]", r3)
+    r4 = veri.kabuk_yaz(kb, [{"k": "lifeos.not.kayit", "v": "[3]", "taban": s1}], "pc")
+    cak = [y for y, *_ in kb.degisenler(veri.KABUK_CAKISMA, 0, 50)[0]]
+    dogru("eski tabanla yazan kazanır ama üstüne yazılan değer saklanır", r4["cakisma"] == 1 and kb.oku(veri.KABUK, "lifeos.not.kayit") == "[3]"
+          and cak == ["lifeos.not.kayit|%d" % s3] and kb.oku(veri.KABUK_CAKISMA, cak[0]) == "[2]", (r4, cak))
+    r5 = veri.kabuk_yaz(kb, [{"k": "lifeos.not.kayit", "v": "[yerel]", "taban": 0, "sakla": True}], "uzak")
+    dogru("«sakla» asıl kaydı değiştirmez, değeri çakışma alanına koyar", r5 == {"surumler": {}, "cakisma": 1}
+          and kb.oku(veri.KABUK, "lifeos.not.kayit") == "[3]"
+          and any(y.startswith("lifeos.not.kayit|katilim|") for y, *_ in kb.degisenler(veri.KABUK_CAKISMA, 0, 50)[0]), r5)
+    veri.kabuk_yaz(kb, [{"k": "lifeos.plan.durum", "v": "{}", "taban": 0}, {"k": "lifeos.kayit.kayitlar", "v": "[]", "taban": 0}], "pc")
+    son_ = veri.kabuk_cek(kb, 0)["son"]
+    r6 = veri.kabuk_yaz(kb, [{"k": "lifeos.plan.durum", "v": None, "taban": veri.kabuk_cek(kb, 0)["kayitlar"][-2]["surum"]}], "pc")
+    silme = veri.kabuk_cek(kb, son_)
+    dogru("silme öbür cihaza null olarak gider", r6["cakisma"] == 0 and silme["kayitlar"] == [{"k": "lifeos.plan.durum", "v": None, "surum": r6["surumler"]["lifeos.plan.durum"]}], silme)
+    sayfa, imlec, tur = [], 0, 0
+    while True:
+        v = veri.kabuk_cek(kb, imlec, sinir=2)
+        sayfa += [x["k"] for x in v["kayitlar"]]
+        imlec, tur = v["son"], tur + 1
+        if not v["daha"]:
+            break
+    dogru("sayfalama (sınır 2) her kaydı bir kez getirir", sorted(sayfa) == ["lifeos.kayit.kayitlar", "lifeos.not.kayit", "lifeos.plan.durum"] and tur >= 2, (sayfa, tur))
+    dogru("çakışma alanı kabuk çekişine karışmaz", all(x["k"].startswith("lifeos.") and "|" not in x["k"] for x in veri.kabuk_cek(kb, 0)["kayitlar"]))
+    h_yeni.kopru = veri.Kopru(kb, 1)
+    yol1 = h_yeni.tek_depo_gunluk()
+    dogru("günlük yedek: tek depo veri/yedek altına, günde bir kez", yol1 and os.path.isfile(yol1) and os.path.basename(yol1).startswith("lifeos-gunluk-")
+          and h_yeni.tek_depo_gunluk() is None, yol1)
+    yd = veri.Depo(os.path.dirname(yol1), saat=lambda: SIMDI) if False else None   # yedek dosyasi ayri adla: asagida dogrudan okunur
+    cy = __import__("sqlite3").connect(yol1)
+    dogru("günlük yedek kabuk kaydını taşır", cy.execute("SELECT count(*) FROM kayit WHERE alan=?", (veri.KABUK,)).fetchone()[0] >= 2)
+    cy.close()
+    h_yeni.kopru = None
+    dogru("günlük yedek: tek depo yoksa hiçbir şey yapmaz", h_yeni.tek_depo_gunluk() is None)
+    kb.kapat()
 finally:
     shutil.rmtree(t, ignore_errors=True)
 

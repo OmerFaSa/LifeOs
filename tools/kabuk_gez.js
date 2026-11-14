@@ -73,8 +73,8 @@ async function goruntu(p, ad, sec = {}) {
     const c = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' });
     const p = await c.newPage(); const hata = [];
     p.on('pageerror', e => { hata.push(e.message); console.log('  sayfa hatası: ' + e.message); });
-    // dosyası henüz yazılmamış aşamanın 404'ü beklenir (kabuk o aşamayı göstermez); başka her hata sayılır
-    p.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) hata.push(m.text()); });
+    // dosyası henüz yazılmamış aşamanın 404u ve tek deposu olmayan bu ortamda eşitleme ucunun 404ü beklenir (kabuk eşitlemeyi kapatır; gerçek yol tools/kabuk_esit_gez.js); başka her hata sayılır
+    p.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) hata.push(m.text()); });
     // Felsefe'nin ikinci aşaması: gerçek dosya varsa o, yoksa birinciden türetilmiş yapay aşama (yalnız bu tarayıcıya verilir)
     const y2yol = path.join(kok, 'alan/felsefe/asama-2.json'), y2gercek = fs.existsSync(y2yol);
     const y2 = y2gercek ? JSON.parse(fs.readFileSync(y2yol, 'utf8')) : Object.assign(JSON.parse(JSON.stringify(y).replace(/"felsefe\.1/g, '"felsefe.2')), { sira: 2, onKosul: ['felsefe.1'] });
@@ -862,7 +862,7 @@ async function goruntu(p, ad, sec = {}) {
     // ---- Taşıma: eski localStorage kaydı ilk açılışta IndexedDB'ye geçer, ekran onu okur, localStorage'dan silinir ----
     const mc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), mp = await mc.newPage(), mhata = [];
     mp.on('pageerror', e => mhata.push(e.message));
-    mp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) mhata.push(m.text()); });
+    mp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) mhata.push(m.text()); });
     if (!y2gercek) await mp.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
     await mp.goto(T + '/kabuk/harita.js'); // aynı köken, kabuk henüz açılmadı
     await mp.evaluate(k => { localStorage.setItem('lifeos.yol.felsefe.1', k); localStorage.setItem('lifeos.tema.secim', 'light'); }, kayit1);
@@ -880,7 +880,7 @@ async function goruntu(p, ad, sec = {}) {
     // ---- Seviyemi bul (icerik-hatti §4.3): boş kayıtlı Dil, iki aşama; birinci bilinir, ikincide kalınır ----
     const yc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), yp = await yc.newPage(), yhata = [];
     yp.on('pageerror', e => yhata.push(e.message));
-    yp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) yhata.push(m.text()); });
+    yp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) yhata.push(m.text()); });
     const dil = [1, 2].map(n => JSON.parse(fs.readFileSync(path.join(kok, 'alan/dil/asama-' + n + '.json'), 'utf8'))), dogruHarf = {};
     dil.forEach(v => v.uniteler.forEach(u => u.kapi.sorular.forEach(q => { dogruHarf[q.id] = q.dogru; })));
     const yerCevapla = async dogru => {
@@ -969,7 +969,7 @@ async function goruntu(p, ad, sec = {}) {
       return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, set, bekleyen: l.length, satirlar: l }) });
     });
     // etiketin 403'ü gezinin kendi sınaması (sahte cevap); tarayıcı onu konsola yazar
-    op.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/kalite\/etiket/.test(m.location().url || '')) ohata.push(m.text()); });
+    op.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/kalite\/etiket|\/api\/hesap\/kabuk/.test(m.location().url || '')) ohata.push(m.text()); });
     if (!y2gercek) await op.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
     let bekleyen = 0; // dosyalardan sayılan taslak ders (haritadaki aşama sayısı kadar)
     require(kok + '/kabuk/harita.js').YERLER.filter(x => x.katman === 'alan' && x.asama).forEach(x => { for (let n = 1; n <= x.asama; n++) {

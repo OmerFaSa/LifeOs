@@ -900,6 +900,52 @@ def run():
             eq(s.iste("/api/hesap/ben", baslik={"Authorization": "Bearer " + j})[0], 401)
     test("HTTP: kurulum, eslesme basligi, jetonla esitleme, cikis", t_http_akis)
 
+    def t_http_kabuk():
+        import veri
+        KB = {"X-LifeOS": "kabuk"}
+        yaz1 = {"yazimlar": [{"k": "lifeos.not.kayit", "v": "[1]", "taban": 0}]}
+        with _Srv() as s:
+            eq(s.iste("/api/hesap/kabuk?son=0")[0], 403)                          # ozel basliksiz
+            eq(s.iste("/api/hesap/kabuk?son=0", baslik=KB)[0], 404)               # tek depo yok
+            kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+            sahip_j = v["jeton"]
+            kod, _, v = s.iste("/api/hesap/kayit", {"ad": "misafir", "parola": "parola-456", "soru": "Soru nedir?",
+                                                   "cevap": "cevap", "cihaz": B}, H)
+            eq(kod, 200)
+            misafir_j = v["jeton"]
+            tk = tempfile.mkdtemp(prefix="lifeos-kabuk-http-")
+            try:
+                depo = veri.Depo(tk)
+                s.r.d.kopru = veri.Kopru(depo, 1)
+                kod, _, v = s.iste("/api/hesap/kabuk?son=0", baslik=KB)           # bu bilgisayar: oturumsuz
+                eq((kod, v["kayitlar"], v["daha"]), (200, [], False))
+                kod, _, v = s.iste("/api/hesap/kabuk", yaz1, KB)
+                eq((kod, v["cakisma"]), (200, 0))
+                surum = v["surumler"]["lifeos.not.kayit"]
+                kod, _, v = s.iste("/api/hesap/kabuk?son=0", baslik=KB)
+                eq(v["kayitlar"], [{"k": "lifeos.not.kayit", "v": "[1]", "surum": surum}])
+                eq(depo.oku(veri.KABUK, "lifeos.not.kayit"), "[1]")
+                eq(s.iste("/api/hesap/kabuk?son=x", baslik=KB)[0], 400)
+                eq(s.iste("/api/hesap/kabuk", {"yazimlar": [{"k": "lifeos.tema.secim", "v": "x"}]}, KB)[0], 400)   # kayit olmayan anahtar
+                eq(s.iste("/api/hesap/kabuk", {"yazimlar": []}, KB)[0], 400)
+                eq(s.iste("/api/hesap/kabuk", yaz1, KB, yontem="DELETE")[0] in (403, 405, 501), True)
+                # Host yabanciysa (DNS yeniden baglama) baglanti yerel olsa da «bu bilgisayar» sayilmaz: oturum ister
+                dis = dict(KB, Host="kotu.example:4180")
+                eq(s.iste("/api/hesap/kabuk?son=0", baslik=dis)[0], 401)
+                eq(s.iste("/api/hesap/kabuk", yaz1, dis)[0], 401)
+                eq(s.iste("/api/hesap/kabuk?son=0", baslik=dict(dis, Authorization="Bearer " + misafir_j))[0], 403)   # sahibi degil
+                kod, _, v = s.iste("/api/hesap/kabuk?son=0", baslik=dict(dis, Authorization="Bearer " + sahip_j))    # telefon: sahibin oturumu
+                eq((kod, len(v["kayitlar"])), (200, 1))
+                kod, _, v = s.iste("/api/hesap/kabuk", {"yazimlar": [{"k": "lifeos.not.kayit", "v": "[2]", "taban": surum}]},
+                                   dict(dis, Authorization="Bearer " + sahip_j))
+                eq((kod, v["cakisma"], depo.oku(veri.KABUK, "lifeos.not.kayit")), (200, 0, "[2]"))
+                depo.kapat()
+            finally:
+                s.r.d.kopru = None
+                shutil.rmtree(tk, ignore_errors=True)
+    test("HTTP kabuk kayitlari: ozel baslik, tek depo, bu bilgisayar oturumsuz, yabanci Host ve baska hesap giremez, sahibin oturumu girer",
+         t_http_kabuk)
+
     def t_http_kayit():
         with _Srv() as s:
             kod, _, v = s.iste("/api/hesap/kayit", {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?",
