@@ -731,6 +731,92 @@ async function goruntu(p, ad) {
     dene('telefon: yatay taşma yok', await tp.evaluate(() => document.documentElement.scrollWidth <= innerWidth), await tp.evaluate(() => document.documentElement.scrollWidth));
     if (GORUNTU) await tp.screenshot({ path: path.join(cikti, 'ders-telefon-acik.png'), fullPage: true });
     await t.close();
+
+    // ---- Onaylar (faz6-onay-ekrani.md): onay kayda yazılır, yenilemede kalır, ders ekranında taslak uyarısı kalkar, geri alınır, dosyaya iner ----
+    const oc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark', acceptDownloads: true }), op = await oc.newPage(), ohata = [];
+    op.on('pageerror', e => ohata.push(e.message));
+    op.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) ohata.push(m.text()); });
+    if (!y2gercek) await op.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
+    let bekleyen = 0; // dosyalardan sayılan taslak ders (haritadaki aşama sayısı kadar)
+    require(kok + '/kabuk/harita.js').YERLER.filter(x => x.katman === 'alan' && x.asama).forEach(x => { for (let n = 1; n <= x.asama; n++) {
+      const f = path.join(kok, 'alan', x.alan, 'asama-' + n + '.json'), v = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : x.alan === 'felsefe' && n === 2 ? y2 : null;
+      if (v) v.uniteler.forEach(u => u.dersler.forEach(dd => { if (dd.durum !== 'onayli') bekleyen++; }));
+    } });
+    const onayKaydi = () => op.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.onay'));
+    const taslakUyari = () => op.locator('.b-uyari', { hasText: 'Taslak: bu ders henüz onaylanmadı' }).count();
+    const od = u1.dersler[0], odIds = [od.id].concat(od.alistirmalar.map(a => a.id));
+    await op.goto(T + '/kabuk/#/bugun');
+    await op.waitForSelector('[data-onay-bekleyen]', { timeout: 20000 }).catch(() => {});
+    dene('onay: Bugün\'de «Onay bekleyen N ders» satırı #/onay\'a götürür', (await op.getAttribute('[data-onay-bekleyen]', 'data-onay-bekleyen').catch(() => null)) === String(bekleyen)
+      && /Onay bekleyen \d+ ders/.test(await op.textContent('[data-onay-bekleyen]')) && (await op.getAttribute('[data-onay-bekleyen] a', 'href')) === '#/onay', bekleyen);
+    await goruntu(op, 'onay-bugun');
+    await op.goto(T + '/kabuk/#/onay');
+    await op.waitForSelector('[data-onay-sayfa="ana"]', { timeout: 20000 });
+    dene('onay: on alan, alan ve aşama başına taslak/onaylı sayısı «ölçüldü»', (await op.locator('a.b-satir[href^="#/onay/"]').count()) === 10
+      && /Aşama 1: \d+ taslak, \d+ onaylı · Aşama 2: \d+ taslak, \d+ onaylı · ölçüldü/.test(await op.textContent('a.b-satir[href="#/onay/felsefe"]'))
+      && (await op.getAttribute('.b-sayi', 'aria-label')) === 'Onay bekleyen: ' + bekleyen.toLocaleString('tr-TR') + ' ders, ölçüldü', await op.getAttribute('.b-sayi', 'aria-label'));
+    dene('onay: «Senin adımın» üç adım; onay yokken dosya düğmesi kapalı, «hepsini onayla» yok', (await op.locator('[aria-label="Senin adımın"] li').count()) === 3
+      && (await op.getAttribute('[data-onay-ac="disari"]', 'aria-disabled')) === 'true' && (await op.locator('text=/hepsini onayla/i').count()) === 0);
+    await goruntu(op, 'onay');
+    await op.goto(T + '/kabuk/#/onay/felsefe/1/' + od.id);
+    await op.waitForSelector('[data-onay-sayfa="ders"]');
+    dene('onay: ders ekranı metni, açık kaynakları, «kaynaklar doğrulanmadı» notunu ve cevap anahtarını gösterir',
+      (await op.textContent('article.ders h1')) === od.ad && (await op.locator('.b-uyari', { hasText: 'Kaynaklar doğrulanmadı' }).count()) === 1
+      && (await op.locator('details.b-acilir[open]').count()) === 1 && (await taslakUyari()) === 1
+      && (await op.locator('.b-soru__sik--dogru').count()) === od.alistirmalar.filter(a => a.tur === 'secmeli').length && (await op.locator('.b-soru[data-soru]').count()) === 0);
+    await goruntu(op, 'onay-ders');
+    await op.click('[data-onay-ac="onayla"]');
+    await op.waitForSelector('#onay-durum');
+    const ok1 = JSON.parse(await onayKaydi() || '{}');
+    dene('onay: «Onayla» dersi alıştırmalarıyla kayda yazar (sahip, tarih)', JSON.stringify(Object.keys(ok1).sort()) === JSON.stringify(odIds.map(i => 'felsefe/1/' + i).sort())
+      && Object.values(ok1).every(g => g.durum === 'onayli' && g.onaylayan === 'sahip' && /^\d{4}-\d{2}-\d{2}$/.test(g.onayTarihi)), JSON.stringify(ok1));
+    await op.reload();
+    await op.waitForSelector('[data-onay-sayfa="ders"]', { timeout: 20000 });
+    dene('onay: yenilemeden sonra onaylı kalır (kayıt IndexedDB\'de)', (await op.locator('#onay-durum').count()) === 1 && (await taslakUyari()) === 0
+      && (await idbOku(op, 'lifeos.onay')) === JSON.stringify(ok1));
+    await op.goto(T + '/kabuk/#/alan/felsefe/ders/' + od.id);
+    await op.waitForSelector('article.ders h1');
+    dene('onay: öğrenenin ders ekranında taslak uyarısı yok', (await taslakUyari()) === 0);
+    await op.goto(T + '/kabuk/#/bugun');
+    await op.waitForSelector('[data-onay-bekleyen]');
+    dene('onay: Bugün\'deki sayı bir azaldı', (await op.getAttribute('[data-onay-bekleyen]', 'data-onay-bekleyen')) === String(bekleyen - 1));
+    await op.goto(T + '/kabuk/#/onay/felsefe/1/' + od.id);
+    await op.click('[data-onay-ac="geri-al"]');
+    await op.waitForSelector('[data-onay-ac="onayla"]');
+    await op.goto(T + '/kabuk/#/alan/felsefe/ders/' + od.id);
+    await op.waitForSelector('article.ders h1');
+    dene('onay: «Geri al» kaydı siler, ders yeniden taslak', (await onayKaydi()) === null && (await taslakUyari()) === 1);
+    // ünitenin hepsi: önce düz onay bloğu, Vazgeç hiçbir şey yazmaz
+    await op.goto(T + '/kabuk/#/onay/felsefe/1/' + u1.id);
+    await op.click('[data-onay-ac="sor"]');
+    await op.waitForSelector('#onay-sor');
+    dene('onay: «Ünitenin hepsini onayla» önce kaç ders olduğunu sorar, henüz yazmaz', (await op.textContent('#onay-sor')).indexOf(u1.dersler.length + ' ders onaylansın mı?') >= 0 && (await onayKaydi()) === null);
+    await goruntu(op, 'onay-unite');
+    await op.click('#onay-sor [data-onay-ac="vazgec"]');
+    await op.waitForSelector('[data-onay-ac="sor"]');
+    dene('onay: Vazgeç hiçbir şey onaylamaz', (await onayKaydi()) === null && (await op.locator('#onay-sor').count()) === 0);
+    await op.click('[data-onay-ac="sor"]');
+    await op.click('#onay-sor [data-onay-ac="onayla"]');
+    await op.waitForSelector('[data-onay-ac="geri-al"]');
+    const uIds = u1.dersler.reduce((l, dd) => l.concat([dd.id], dd.alistirmalar.map(a => a.id)), []).concat(u1.kapi.sorular.map(s => s.id));
+    const ok2 = JSON.parse(await onayKaydi() || '{}');
+    dene('onay: ünite onayı dersleri, alıştırmaları ve kapı sorularını yazar; her ders «onaylı»', Object.keys(ok2).length === uIds.length && uIds.every(i => ok2['felsefe/1/' + i])
+      && (await op.locator('[data-onay-sayfa="unite"] .b-pul--altin').count()) === u1.dersler.length + 1);
+    await op.goto(T + '/kabuk/#/onay');
+    await op.waitForSelector('[data-onay-sayfa="ana"]');
+    const [indi] = await Promise.all([op.waitForEvent('download'), op.click('[data-onay-ac="disari"]')]);
+    const indiYol = path.join(gecici, 'onay-indi.json');
+    await indi.saveAs(indiYol);
+    const indiVeri = JSON.parse(fs.readFileSync(indiYol, 'utf8'));
+    dene('onay: «Onayları dosya olarak al» kaydın aynısını JSON indirir', /^lifeos-onay-\d{4}-\d{2}-\d{2}\.json$/.test(indi.suggestedFilename()) && JSON.stringify(indiVeri) === JSON.stringify(ok2), indi.suggestedFilename());
+    const kuru = require('child_process').spawnSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(kok, 'tools/onay_uygula.py'), indiYol], { env, encoding: 'utf8' });
+    dene('onay: indirilen dosya onay_uygula.py kuru koşusunda birebir eşleşir (yazmaz)', kuru.status === 0 && kuru.stdout.indexOf('alan/felsefe/asama-1.json: ' + uIds.length + ' öğe yazılacak') >= 0, kuru.stdout + kuru.stderr);
+    await op.goto(T + '/kabuk/#/onay/felsefe/1/' + u1.id);
+    await op.click('[data-onay-ac="geri-al"]');
+    await op.waitForSelector('[data-onay-ac="sor"]');
+    dene('onay: «Ünitenin onayını geri al» kaydı boşaltır', (await onayKaydi()) === null);
+    dene('onay: konsolda hata yok', ohata.length === 0, ohata.join(' | '));
+    await oc.close();
   } finally {
     await b.close(); srv.kill();
     try { fs.rmSync(gecici, { recursive: true, force: true }); } catch (e) { /* geçici klasör kalabilir */ }

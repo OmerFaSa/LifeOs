@@ -53,6 +53,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `veri_modelfile.py` — Ana metinden Ollama için Modelfile.lifeos-ana tanımını üretir, metin güncellendiğinde koşulur.
 - `veri_plan.py` — Konu planı metinlerini birleştirir ve dosyaların güncelliğini denetler, CI'da denetim olarak koşulur.
 - `veri_topla.py` — Resmi kaynak listesindeki dosyaları indirip metne çevirir, veri hazırlığında koşulur.
+- `onay_uygula.py` — Kabuktaki «Onayları dosya olarak al» ile inen sahip onaylarını `alan/<id>/asama-N.json` öğelerine (`durum`, `onaylayan`, `onayTarihi`) yazar; kimlik birebir eşleşir, bilinmeyen raporlanır; kuru koşu varsayılan, `--yaz` ile yazar, dosya biçimi korunur; elle koşulur.
 
 ## Ölçüm
 - `akicilik.js` — Akıcılık bütçesi; üç modülün perfcheck'ini çağırır, süre değil sayı ölçer ve gerilemeyi ilk koşuda yakalar.
@@ -146,6 +147,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `kabuk_baslangic.py` — Tek depodaki eski kayıtları (kopyadan) motorların göç bağdaştırıcılarından geçirip yeni kabuğun başlangıç paketine yazar (`veri/kabuk-baslangic.json`: not, kayıt, kart); kabuk Bugün'de «Getir» diye sunar; göçten sonra bir kez koşulur.
 - `kabuk_baslangic.js` — `kabuk_baslangic.py`'nin Node yardımcısı: `gercek_kosu.js` ROTA'sıyla bağdaştırıcıları koşar, kabuk deposuna girecek çıktıyı döndürür.
 - `kabuk_baslangic_test.py` — Başlangıç paketi aracını uydurma tek depoyla sınar (geçerli not ve ölçü girer, boş ve sınır dışı girmez, içerik ekrana basılmaz, depo değişmez); CI'da koşulur.
+- `onay_uygula_test.py` — `onay_uygula.py`yi gerçek içeriğin geçici kopyasında sınar (kuru koşu yazmaz, LF/CRLF ve girinti korunur, denetçi temiz, bilinmeyen kimlik tahmin edilmez); CI'da koşulur.
 - `tekdepo_test.py` — Tek depo (`sistem/veri.py`) ve hesap köprüsü: üst anahtar düzeyinde son saat kazanır, silme mezar taşı, sıra sonucu değiştirmez, yedek üstüne yazmaz; CI'da koşulur.
 - `gocpaket.test.js` — Göç paketinin cihaz tarafı (`brand/ortak/gocpaket.js`): bütün profiller, sır girmez, bekleyen sayılır, medya sha256 ve parçalama; sahte depolarla, tarayıcısız.
 - `gocpaket_test.py` — Göç paketinin PC tarafı: cihazın paketleri `goc.paket_kaydet` ve göç okuyucusundan geçer, sınırlar ve `/api/hesap/goc-paket` ucu; CI'da koşulur.

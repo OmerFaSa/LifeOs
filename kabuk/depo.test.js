@@ -65,7 +65,7 @@ function sahteIdb(o = {}) {
 const KAYITLAR = ['lifeos.yol.felsefe.1', 'lifeos.yol.dil.2', 'lifeos.not.kayit', 'lifeos.not.araclar', 'lifeos.tekrar.kartlar', 'lifeos.tekrar.bugun',
   'lifeos.kayit.kayitlar', 'lifeos.plan.durum', 'lifeos.plan.sablon', 'lifeos.soru.oturum', 'lifeos.soru.gecmis', 'lifeos.soru.deneme',
   'lifeos.soru.denemeler', 'lifeos.tanisma.kayit', 'lifeos.tanisma.taslak', 'lifeos.beden.boy', 'lifeos.beden.cinsiyet',
-  'lifeos.beden.dogumYili', 'lifeos.beden.hedef'];
+  'lifeos.beden.dogumYili', 'lifeos.beden.hedef', 'lifeos.onay'];
 // lifeos.kabuk.baslangic: getirilen başlangıç paketinin kimliği; lifeos.tasima: köken taşımasında işlenen paket adları (ikisi de iz, kayıt değil)
 const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.tanisma.davet', 'lifeos.kullanim', 'lifeos.kabuk.baslangic', 'lifeos.tasima']
   .concat(A.SEMA.filter(s => s.grup !== 'beden').map(s => s.anahtar));
@@ -77,11 +77,11 @@ const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit
     const D = taze();
     esit(KAYITLAR.filter(k => !D.kayitMi(k)), [], 'kayıt sayılmayan:');
     esit(AYARLAR.filter(k => D.kayitMi(k)), [], 'kayıt sayılan ayar:');
-    dogru(!D.kayitMi('lifeos.kayit.baska') && !D.kayitMi('lifeos.tanisma.davetX') && D.kayitMi('lifeos.yol.sonra.1'), 'yalnız tam ad; «sonra» alanı kayıttır');
+    dogru(!D.kayitMi('lifeos.kayit.baska') && !D.kayitMi('lifeos.tanisma.davetX') && D.kayitMi('lifeos.yol.sonra.1') && !D.kayitMi('lifeos.onay.x') && !D.kayitMi('lifeos.onaylar'), 'yalnız tam ad; «sonra» alanı kayıttır');
   });
   await t('anahtar: kabuk dosyalarındaki her lifeos.* anahtarı sınıflanmış', () => {
     const bilinen = new Set(KAYITLAR.concat(AYARLAR)), yeni = [];
-    ['kabuk.js', 'araclar.js', 'deneme.js', 'tanisma.js', 'tasima.js', 'harita.js', 'ayar.js'].forEach(f => {
+    ['kabuk.js', 'araclar.js', 'deneme.js', 'tanisma.js', 'tasima.js', 'harita.js', 'ayar.js', 'onay.js'].forEach(f => {
       (fs.readFileSync(path.join(__dirname, f), 'utf8').match(/'lifeos\.[\w.]+'/g) || []).map(s => s.slice(1, -1))
         .filter(k => !k.endsWith('.') && !bilinen.has(k)).forEach(k => yeni.push(f + ': ' + k));
     });

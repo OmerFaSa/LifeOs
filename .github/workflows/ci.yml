@@ -283,6 +283,9 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk kayıt deposu" node kabuk/depo.test.js
       - name: Kabuk bileşen kataloğu
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk bileşen kataloğu" node kabuk/bilesen.test.js
+      # Onaylar (faz6-onay-ekrani.md): sahibin onayı içeriğe Yol'dan önce bindirilir; onay_uygula dosyaya biçimi bozmadan yazar.
+      - name: Onay bindirmesi ve onay aracı
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay bindirmesi" node kabuk/onay.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay aracı" python3 tools/onay_uygula_test.py
 
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi

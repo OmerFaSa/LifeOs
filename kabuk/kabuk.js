@@ -212,10 +212,14 @@
     for (var n = 1; n <= ((H.bul(id) || {}).asama || 1); n++) {
       istek.push(fetch('../alan/' + id + '/asama-' + n + '.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).catch(function () { return null; }));
     }
-    return (bekleyen[id] = Promise.all(istek).then(function (vs) {
-      var ys = Kabuk.Asama.kur(Yol, id, vs);
-      return (alanlar[id] = ys.length ? { ys: ys } : { hata: 'icerik' });
-    }));
+    return (bekleyen[id] = Promise.all(istek).then(function (vs) { hamlar[id] = vs; return alanKur(id); }));
+  }
+  // Sahibin onay kaydı (kabuk/onay.js) dosya içeriğinin üstüne Yol.yukle'den ÖNCE bindirilir; onay değişince ham içerikten yeniden kurulur
+  var hamlar = {};
+  function alanKur(id) {
+    var On = Kabuk.Onay, onay = On ? On.oku(depo) : null;
+    var ys = Kabuk.Asama.kur(Yol, id, hamlar[id].map(function (v, i) { return On ? On.uygula(v, id, i + 1, onay) : v; }));
+    return (alanlar[id] = ys.length ? { ys: ys } : { hata: 'icerik' });
   }
   function asamaYolu(n) { return F() + '/asama/' + n; }
   // «Seviyemi bul»: beceri alanında soru yetmez, üretim görevi de ister (icerik-hatti §4.3/5)
@@ -249,6 +253,7 @@
       (depo.kip() === 'bellek' ? B.uyari({ tur: 'dikkat', metin: 'Kayıtlarına bu açılışta ulaşılamadı. Önceki kayıtların silinmedi, ama bu oturumda yaptıkların sayfa yenilenince kaybolur.' }) : '') +
       (Kabuk.baslangicDavet ? Kabuk.baslangicDavet() : '') + // araclar.js: eski sistemdeki kayıtları getirme teklifi (göçten sonra)
       (Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '') + // tanisma.js: kayıt yoksa tek satırlık davet
+      (Kabuk.onayBugun ? Kabuk.onayBugun() : '') + // onay.js: «Onay bekleyen N ders», yalnız N > 0 iken
       (ipucu ? B.uyari({ tur: 'bilgi', metin: 'Bir yere gitmek için boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : '') + '</div>';
   }
   function sayfaDal(yer) {
@@ -339,13 +344,16 @@
   function yok(metin) {
     return ust(altKirinti('Bulunamadı')) + '<div class="govde">' + B.bos({ baslik: metin, eylem: { metin: H.bul(etkinAlan).ad + ' sayfasına dön', tur: 'ana', href: F() } }) + '</div>';
   }
-  function kaynaklar(y, idler) {
+  // inceleme (Onaylar ekranı): kaynaklar açık, yolu ve satırıyla; doğrulanmamış kaynak varsa «kaynaklar doğrulanmadı» notu
+  function kaynaklar(y, idler, inceleme) {
     var ad = {}; (y.veri.kaynaklar || []).forEach(function (k) { ad[k.id] = k; });
-    var l = (idler || []).filter(function (i) { return ad[i]; });
+    var l = (idler || []).filter(function (i) { return ad[i]; }), dg = l.filter(function (i) { return ad[i].dogrulama === 'dogrulanmamis'; }).length;
     // künye kısaltılmasın diye düz liste (satır taşı tek satıra keser)
-    return l.length ? B.acilir({ baslik: 'Kaynaklar (' + l.length + ')', govde: '<ul>' + l.map(function (i) {
-      return '<li>' + kac(ad[i].ad) + (ad[i].dogrulama === 'dogrulanmamis' ? ' <span class="soluk">· doğrulanmamış</span>' : '') + '</li>';
-    }).join('') + '</ul>' }) : '';
+    return (inceleme && dg ? B.uyari({ tur: 'dikkat', metin: 'Kaynaklar doğrulanmadı: ' + l.length + ' kaynaktan ' + dg + ' tanesi henüz kontrol edilmedi.' }) : '') +
+      (l.length ? B.acilir({ baslik: 'Kaynaklar (' + l.length + ')', acik: !!inceleme, govde: '<ul>' + l.map(function (i) {
+        var k = ad[i], yer = inceleme ? [k.yol, k.bolum, k.satir ? 'satır ' + k.satir : ''].filter(Boolean).join(' · ') : '';
+        return '<li>' + kac(k.ad) + (k.dogrulama === 'dogrulanmamis' ? ' <span class="soluk">· doğrulanmamış</span>' : '') + (yer ? '<br><span class="soluk">' + kac(yer) + '</span>' : '') + '</li>';
+      }).join('') + '</ul>' }) : '');
   }
   function soruHtml(a, kayit) {
     var c = kayit.cevaplar[a.id], son = c && c[c.length - 1];
@@ -357,6 +365,13 @@
     return B.soru({ soru: a.soru, veri: { soru: a.id }, secenekler: a.sec, secili: son ? son.cevap : null, dogru: son ? a.dogru : null,
       sonuc: son ? { baslik: son.dogru ? 'Doğru.' : 'Yanlış.', metin: a.cozum ? a.cozum.join(' ') : '' } : null });
   }
+  // dersin öğrenenin gördüğü metni (Onaylar ekranı da bunu çizer; inceleme: kaynaklar açık)
+  function dersMetni(y, x, inceleme) {
+    return B.baslik({ metin: x.ad }) +
+      (Yol.etiket(x) === 'taslak' ? B.uyari({ tur: 'dikkat', metin: 'Taslak: bu ders henüz onaylanmadı; tekrara girmez.' }) : '') +
+      '<p class="ders__ozet">' + kac(x.ozet) + '</p>' + (x.metin || []).map(function (m) { return '<p>' + kac(m) + '</p>'; }).join('') +
+      (x.not ? B.uyari({ tur: 'bilgi', metin: 'Kaynak notu: ' + x.not }) : '') + kaynaklar(y, x.kaynak, inceleme);
+  }
   function sayfaDers(id) {
     if (!al()) return ust(altKirinti('Ders')) + '<div class="govde"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
     var y = al().y, x = y && y.tur[id] === 'ders' && y.oge[id];
@@ -364,10 +379,7 @@
     var kayit = kayitOku();
     if (!Yol.acikMi(y, kayit, id)) return yok(Yol.acikMi(y, kayit, y.id) ? 'Bu ders kilitli: önce önceki dersi oku ya da ünite kapısını geç.' : KILITLI_ASAMA);
     var okundu = !!kayit.dersler[id];
-    return ust(altKirinti(x.ad)) + '<article class="govde ders">' + B.baslik({ metin: x.ad }) +
-      (Yol.etiket(x) === 'taslak' ? B.uyari({ tur: 'dikkat', metin: 'Taslak: bu ders henüz onaylanmadı; tekrara girmez.' }) : '') +
-      '<p class="ders__ozet">' + kac(x.ozet) + '</p>' + (x.metin || []).map(function (m) { return '<p>' + kac(m) + '</p>'; }).join('') +
-      (x.not ? B.uyari({ tur: 'bilgi', metin: 'Kaynak notu: ' + x.not }) : '') + kaynaklar(y, x.kaynak) +
+    return ust(altKirinti(x.ad)) + '<article class="govde ders">' + dersMetni(y, x) +
       B.bolum({ baslik: 'Alıştırmalar', govde: x.alistirmalar.map(function (a) { return soruHtml(a, kayit); }) }) +
       B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Okudum, sıradaki', tur: 'ana', veri: { ac: 'okudum', ders: id } }, { metin: 'Yol haritası', tur: 'sade', href: F() }]) + '</article>';
   }
@@ -435,7 +447,7 @@
   var sayfaEl;
   function rota() {
     // «#/alan/tarih/ders/x», «#/motor/not/yeni»: ilk üç parça yerin yolu, kalanı o sayfanın alt yolu
-    var h = location.hash || '#/bugun', parca = h.split('?'), alt = /^(#\/(?:alan|motor)\/[a-z-]+)\/([\w./-]+)$/.exec(parca[0]), taban = alt ? alt[1] : parca[0];
+    var h = location.hash || '#/bugun', parca = h.split('?'), alt = /^(#\/(?:(?:alan|motor)\/[a-z-]+|onay))\/([\w./-]+)$/.exec(parca[0]), taban = alt ? alt[1] : parca[0];
     var yer = H.YERLER.filter(function (y) { return y.yol === taban; })[0] || H.bul('bugun');
     var html, tasindi = yer.katman === 'alan' && yer.asama, fa = alt && tasindi && /^(ders|kapi|asama|yer)\/([\w.-]+)$/.exec(alt[2]), ek = Kabuk.ek && Kabuk.ek[yer.id];
     if (tasindi) { etkinYap(yer.id); if (!al()) alanYukle(yer.id).then(function () { if (sayfaEl.getAttribute('data-yer') === yer.id) rota(); }); }
@@ -689,6 +701,7 @@
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') rota(); }); // Bugün'ün «sırada» satırı için
   }
   Kabuk.ic = { kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukle, etkin: function () { return etkinAlan; },
+    dersMetni: dersMetni, onayDegisti: function (id) { if (hamlar[id]) alanKur(id); },
     asamalar: function (id) { var a = alanlar[id]; return a && a.ys ? a.ys : null; },
     asamaY: function (id, asamaId) { var a = alanlar[id]; return a && a.ys ? a.ys.filter(function (y) { return y.id === asamaId; })[0] || null : null; },
     tasinanlar: function () { return H.YERLER.filter(function (y) { return tasinan(y.id); }); } };

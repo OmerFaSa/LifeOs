@@ -11,7 +11,7 @@
   'use strict';
 
   var AD = 'lifeos-kabuk', TABLO = 'kayit', IZ = 'lifeos.kabuk.depo';
-  var KAYIT = /^lifeos\.(yol\.(?!son$)|not\.|tekrar\.|kayit\.kayitlar$|plan\.|soru\.|tanisma\.(kayit|taslak)$|beden\.)/;
+  var KAYIT = /^lifeos\.(yol\.(?!son$)|not\.|tekrar\.|kayit\.kayitlar$|plan\.|soru\.|tanisma\.(kayit|taslak)$|beden\.|onay$)/;
   var ls = null, db = null, kip = 'yerel', bellek = {}, kalici = null, kanal = null;
 
   function bizde(k) { return kip !== 'yerel' && KAYIT.test(k); }

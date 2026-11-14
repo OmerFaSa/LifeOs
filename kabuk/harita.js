@@ -20,6 +20,7 @@
     { id: 'saglik', ad: 'Sağlık', katman: 'kabuk', dal: 'saglik', yol: '#/saglik', ikon: 'kalp', halka: 3, durum: 'yeni', aciklama: 'Beslenme, hareket, uyku, tahlil' },
     { id: 'motorlar', ad: 'Araçlar', katman: 'kabuk', dal: 'motorlar', yol: '#/motorlar', ikon: 'cark', durum: 'yeni', aciklama: 'Her alanın ortak araçları' },
     { id: 'harita', ad: 'Sistem haritası', katman: 'kabuk', dal: 'ana', yol: '#/harita', ikon: 'harita', halka: 6, durum: 'yeni', aciklama: 'Bütün yerler tek sayfada' },
+    { id: 'onay', ad: 'Onaylar', katman: 'kabuk', dal: 'ana', yol: '#/onay', ikon: 'tik', durum: 'yeni', aciklama: 'Taslak dersleri oku ve onayla; senin yapacağın adımlar' },
     { id: 'tanisma', ad: 'Tanışma', katman: 'kabuk', dal: 'ana', yol: '#/tanisma', ikon: 'el', durum: 'yeni', aciklama: 'Kendini kendi sözlerinle anlat; başlangıcın buna göre önerilir' },
     { id: 'ayarlar', ad: 'Ayarlar', katman: 'kabuk', dal: 'ayarlar', yol: '#/ayarlar', ikon: 'ayar', durum: 'yeni', aciklama: 'Görünüm, erişilebilirlik, bildirim, hesap' },
     { id: 'eskisistem', ad: 'Eski sistem', katman: 'kabuk', dal: 'ayarlar', yol: '#/eski', ikon: 'kutu', durum: 'eski', eski: '/kartlar/', aciklama: 'Kontrol paneli, güncelleme, AYS · SPİ · ESP' },
