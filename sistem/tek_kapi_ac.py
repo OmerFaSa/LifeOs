@@ -273,7 +273,7 @@ def yedek_girdileri(y):
     return out
 
 
-def denetle(y=None, telefon_yok=False, simdi=None):
+def denetle(y=None, telefon_yok=False, simdi=None, bu_cihaz=None):
     """Hicbir seyi degistirmez. Doner: {satirlar, eksik, secim, hb, ...}."""
     y = y or yollar()
     simdi = simdi or datetime.datetime.now()
@@ -284,6 +284,14 @@ def denetle(y=None, telefon_yok=False, simdi=None):
     s.append("Paket klasörü: %s (%d dosya)" % (y["paket"], len(liste) + len(bozuk)))
     cihazlar = sorted({c for _, c in secim} | {p["cihaz"] for p in liste})
     tur = {c: cihaz_turu(c, hb) for c in cihazlar}
+    if bu_cihaz is not None:
+        # beyan: bu kimlik bu bilgisayarin cihazidir (oturum acilmamis PC; kimlik uygulamanin kendisinden okunur)
+        uyan = [c for c in cihazlar if len(bu_cihaz) >= 6 and c.startswith(bu_cihaz)]
+        if len(uyan) == 1:
+            tur[uyan[0]] = ("bilgisayar", "bu bilgisayar (beyan: --bu-cihaz %s)" % bu_cihaz)
+        else:
+            eksik.append("--bu-cihaz %s %s" % (bu_cihaz, "en az 6 karakter olmalı" if len(bu_cihaz) < 6 else
+                         "hiçbir paketin cihazına uymuyor" if not uyan else "birden çok cihaza uyuyor; daha uzun yaz"))
     taze = lambda p: (simdi - p["zaman"]).total_seconds() <= TAZE_DK * 60
     for c in cihazlar:
         s.append("- Cihaz %s… · %s" % (c[:8], tur[c][1]))
@@ -600,15 +608,15 @@ Sahibin göreceği:
 """
 
 
-def ac(telefon_yok=False):
+def ac(telefon_yok=False, bu_cihaz=None):
     y = yollar()
-    dn = denetle(y, telefon_yok)
+    dn = denetle(y, telefon_yok, bu_cihaz=bu_cihaz)
     s = ["LifeOS tek kapıyı açma", ""] + dn["satirlar"]
     if dn["eksik"]:
         return 1, s + ["", "Hiçbir şey değiştirilmedi."]
     klasor = os.path.join(y["yedek"], "tek-kapi-" + an())
     d = {"lifeos_tek_kapi": 1, "basla": datetime.datetime.now().isoformat(timespec="seconds"), "tamam": False,
-         "veri_onceki": None, "telefon_yok": bool(telefon_yok), "goc_id": None}
+         "veri_onceki": None, "telefon_yok": bool(telefon_yok), "bu_cihaz": bu_cihaz, "goc_id": None}
     mf, geri = {}, []
 
     def veri_geri():
@@ -751,14 +759,16 @@ def main(argv=None):
     kip.add_argument("--geri", action="store_true", help="başarılı bir geçişi yedeğinden geri alır")
     ap.add_argument("--telefon-yok", action="store_true",
                     help="sahibin beyanı: bu bilgisayardan başka hiçbir cihazda (telefon, tablet) LifeOS verisi yok")
+    ap.add_argument("--bu-cihaz", metavar="KIMLIK",
+                    help="beyan: bu cihaz kimliği (ya da en az 6 karakterlik başı) bu bilgisayarındır; hesaba hiç girilmemiş PC için")
     ap.add_argument("--yedek", help="--geri ile: kullanılacak yedek klasörü")
     a = ap.parse_args(argv)
     if a.ac:
-        kod, s = ac(a.telefon_yok)
+        kod, s = ac(a.telefon_yok, a.bu_cihaz)
     elif a.geri:
         kod, s = geri_al(a.yedek)
     else:
-        dn = denetle(telefon_yok=a.telefon_yok)
+        dn = denetle(telefon_yok=a.telefon_yok, bu_cihaz=a.bu_cihaz)
         kod, s = (0 if not dn["eksik"] else 1), ["LifeOS tek kapı denetimi (hiçbir şeyi değiştirmez)", ""] + dn["satirlar"]
         s += ["", "--telefon-yok şu demektir: telefonda ya da tablette LifeOS'ta hiç kayıt yok (ya da kaybı göze"
               " alıyorsun); onların eski adreslerdeki verisi tek depoya taşınmaz, telefon tek kapıya bağlanınca boş başlar."]

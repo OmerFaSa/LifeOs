@@ -297,6 +297,14 @@ try:
     kod, out = kos(w)
     dogru("bu bilgisayar tanınamazsa «göremedim» ve ne yapılacağı söylenir", kod == 1 and "türünü göremedim" in out
           and "paketlerini tanıyamadım" in out, out)
+    kod, out = kos(w, "--bu-cihaz", PC[:8])
+    dogru("--bu-cihaz ile oturumsuz PC tanınır; «tanıyamadım» kalkar ve beyan yazılır", "paketlerini tanıyamadım" not in out
+          and "beyan: --bu-cihaz" in out and "bu bilgisayardan «ays» paketi yok" not in out, out)
+    kod, out = kos(w, "--bu-cihaz", "zzzzzzzz")
+    dogru("--bu-cihaz hiçbir cihaza uymazsa Hazır değil", kod == 1 and "hiçbir paketin cihazına uymuyor" in out, out)
+    kod, out = kos(w, "--bu-cihaz", "ab")
+    dogru("--bu-cihaz 6 karakterden kısaysa Hazır değil", kod == 1 and "en az 6 karakter" in out, out)
+    dogru("--bu-cihaz denetimleri hiçbir dosyayı değiştirmedi", izler(w) == w["ilk"])
 
     w = dunya("pc-eski", pc_taze=False)
     kod, out = kos(w)
