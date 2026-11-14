@@ -57,7 +57,6 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 - `ice_suren_kabul_test.py` — Görev 007 kabul testi; Google Takvim içe aktarımında süren etkinliklerin doğru çözümlenmesini sınar, CI'da koşulur.
 - `hafiza_olcum_kabul_test.py` — Görev 050 kabul testi; HKM hafıza aramasının kök ve gömme ile ölçümünü sınar.
 - `hafiza_uc_kabul_test.py` — Görev 051 kabul testi; hafıza ve kendiliğinden King uçlarını HTTP'den sınar.
-- `hkm_olcum_kabul_test.py` — Görev 030 kabul testi; test HKM'sini açıp başlangıç ve GET uçlarını ölçen aracı sınar.
 - `merdiven_olcum_kabul_test.py` — Görev 063 kabul testi; A6 model merdiveni ölçüm betiğini kuru koşuyla sınar.
 - `merdiven_uc_kabul_test.py` — Görev 064 kabul testi; A6 merdiveni ve kart cümlesi uçlarının HTTP testini ve HKM belgesini sınar.
 - `merkezayar_kabul_test.py` — Ayarlar › Merkez: açık şema, sır okunmaz, yalnız şemadaki alan yazılır.
