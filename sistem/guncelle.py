@@ -210,6 +210,26 @@ def kabuk_tazele(kok=KOK, hedef=None):
     return degisen
 
 
+def baslangic_tazele(kok=KOK, depo=None, cikti=None, kos=subprocess.run):
+    """Kabugun baslangic paketini (veri/kabuk-baslangic.json) yeni surumun ureticisiyle yeniden uretir:
+    yeni kod eski kayitlardan daha fazlasini tasiyabilir (2026-11-14: plan ve Yol paketi eski bicimde kaldi).
+    Kimlik icerikten: degismediyse kabuk yeniden sormaz. Yalniz calisan kopyada ve tek depo varken;
+    basarisizlik guncellemeyi durdurmaz. Doner: uretildiyse True."""
+    if depo is None:
+        if os.path.realpath(kok) != os.path.realpath(_calisan_kopya()):
+            return False
+        veri = os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "LifeOS", "veri")
+        depo, cikti = os.path.join(veri, "lifeos.db"), os.path.join(veri, "kabuk-baslangic.json")
+    arac = os.path.join(kok, "tools", "kabuk_baslangic.py")
+    if not (os.path.isfile(arac) and os.path.isfile(depo)):
+        return False
+    try:
+        return kos([sys.executable, arac, "--depo", depo, "--cikti", cikti], cwd=kok, capture_output=True,
+                   timeout=180).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False        # eski paket yerinde kalir; bir dahaki sefere
+
+
 def _ayni(a, b):
     try:
         with open(a, "rb") as x, open(b, "rb") as y:
@@ -387,6 +407,7 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
     hkm = any(s.startswith("HKM/") and s.endswith(".py") for s in degisen)
     artiklari_temizle(kok)
     kabuk_tazele(kok)
+    baslangic_tazele(kok)
     return dict(d, durum="guncellendi", degisen=len(degisen),
                 yeniden_baslat=yeniden, hkm_degisti=hkm, yedek_dal=yedek_dal,
                 mesaj="%d yenilik indirildi." % d["geride"]

@@ -215,6 +215,28 @@ def run():
             shutil.rmtree(d, ignore_errors=True)
     test("masaustu kabugu guncelleme ile gelir; gelistirme deposu kurulu uygulamaya dokunmaz", t_kabuk)
 
+    def t_baslangic():
+        d = tempfile.mkdtemp(prefix="lifeos-baslangic-")
+        try:
+            kok, depo, cikti = os.path.join(d, "depo"), os.path.join(d, "lifeos.db"), os.path.join(d, "paket.json")
+            _yaz(kok, "tools/kabuk_baslangic.py", "")
+            cagri = []
+            kos = lambda arg, **kw: cagri.append((arg, kw.get("cwd"))) or subprocess.CompletedProcess(arg, 0)
+            eq(guncelle.baslangic_tazele(kok, depo, cikti, kos), False)      # tek depo yok: uretilmez
+            eq(cagri, [])
+            _yaz(d, "lifeos.db", "")
+            eq(guncelle.baslangic_tazele(kok, depo, cikti, kos), True)
+            eq(cagri[-1], ([sys.executable, os.path.join(kok, "tools", "kabuk_baslangic.py"), "--depo", depo, "--cikti", cikti], kok))
+            eq(guncelle.baslangic_tazele(kok, depo, cikti, lambda arg, **kw: subprocess.CompletedProcess(arg, 1)), False)
+            def bozuk(arg, **kw):
+                raise subprocess.TimeoutExpired(arg, 1)
+            eq(guncelle.baslangic_tazele(kok, depo, cikti, bozuk), False)    # guncellemeyi durdurmaz
+            eq(guncelle.baslangic_tazele(kok, kos=kos), False)               # calisan kopya degil: veriye dokunmaz
+            eq(len(cagri), 1)
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+    test("baslangic paketi guncellemeyle yeni ureticiyle yenilenir; yalniz calisan kopyada, hata durdurmaz", t_baslangic)
+
     def t_izlenmeyen():
         with _Depo() as r:
             r.yeni("OKU.md", "iki\n", "x")
