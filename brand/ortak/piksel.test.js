@@ -431,7 +431,8 @@
         expect(raf <= 16).toBe(true);
         k.setAttribute('data-hareket', 'az');
         P.uygula();
-        await new Promise(r => setTimeout(r, 120));
+        /* önceden istenmiş son çerçeve yavaş makinede (CI) geç gelebilir: kapanış ve bir uyanış aralığı (1/24 sn) için bol pay */
+        await new Promise(r => setTimeout(r, 400));
         raf = 0;
         await new Promise(r => setTimeout(r, 250));
         expect(raf).toBe(0);
