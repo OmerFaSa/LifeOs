@@ -281,13 +281,25 @@
     return yer.dal === 'ogren' || yer.dal === 'saglik' ? yer.dal : '';
   }
   function cubuk(sahne) {
-    var ad = hesapAdi(), se = sahne ? 'bugun' : sekmeOf(simdiYer);
+    var ad = hesapAdi(), se = sekmeOf(simdiYer);
     return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">L</span>LifeOS</a>' +
       '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + SEKME.map(function (s) { return '<a href="' + s[2] + '"' + (s[0] === se ? ' aria-current="page"' : '') + '>' + s[1] + '</a>'; }).join('') + '</nav>' +
       '<button type="button" class="ust__ara" data-ac="komut" aria-keyshortcuts="Control+K /" aria-label="Ara"><svg aria-hidden="true"><use href="#i-ara"/></svg><span aria-hidden="true">Ara</span><kbd>Ctrl K</kbd></button>' +
       '<a class="ust__hesap" href="#/ayarlar" aria-label="Ayarlar">' + (ad ? kac(ad.charAt(0).toLocaleUpperCase('tr')) : '<svg aria-hidden="true"><use href="#i-kisi"/></svg>') + '</a></header>';
   }
-  function ust(sol) { return cubuk(false) + '<nav class="konum" aria-label="Konum">' + sol + '</nav>'; }
+  // Kapak: ana sayfaların başında kendi piksel sahnesinden ince şerit ve üstüne binen renkli simge (okuma ve form sayfalarında yok).
+  // [sahne (brand/ortak/piksel-doga.js TUR_LISTE), renk]; simge index.html'deki #i-<yer kimliği>
+  var KAPAK = { felsefe: ['magara', 'turuncu'], akademik: ['tarla', 'mavi'], dil: ['deniz', 'yesil'], tarih: ['col', 'pembe'], muzik: ['selale', 'mor'],
+    okuma: ['kiraz', 'sari'], beslenme: ['tarla', 'yesil'], hareket: ['dag', 'deniz'], uyku: ['gol', 'gok'], tahlil: ['kis', 'pembe'],
+    ogren: ['yayla', 'mavi'], saglik: ['gol', 'yesil'], motorlar: ['dag', 'deniz'], yol: ['yayla', 'mavi'], tekrar: ['kis', 'mor'], soru: ['selale', 'turuncu'],
+    kayit: ['dag', 'deniz'], plan: ['tarla', 'yesil'], not: ['kiraz', 'sari'], arama: ['deniz', 'gok'], onay: ['kiraz', 'mavi'], king: ['dag', 'sari'], harita: ['yayla', 'mavi'] };
+  var kapakYer = null; // rota çizerken: bu sayfa kapaklı mı
+  function ust(sol) {
+    var k = kapakYer && KAPAK[kapakYer.id];
+    return cubuk(!!k) + (k ? '<div class="kapak" aria-hidden="true"><canvas class="kapak__sahne" width="480" height="72" data-sahne="' + k[0] + '"></canvas></div>' +
+      '<div class="kapak-alt" aria-hidden="true"><span class="kapak__simge"><span class="b-simge b-simge--' + k[1] + '"><svg><use href="#i-' + kapakYer.id + '"/></svg></span></span></div>' : '') +
+      '<nav class="konum" aria-label="Konum">' + sol + '</nav>';
+  }
   function kirinti(yer) {
     var ustYer = H.bul(H.DAL_SAYFASI[yer.dal]);
     if (!ustYer || ustYer.id === yer.id) ustYer = H.bul('bugun');
@@ -334,15 +346,23 @@
   }
   // manzara: sahibin piksel sahnesi (brand/ortak/piksel-doga.js, sunucu /piksel-doga.js verir); süstür, çizilmezse gök rengi kalır
   var manzaraIstendi = false;
+  // sahne çizimi önbellekte: aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
+  var sahneOnbellek = {};
   function manzara() {
-    var c = sayfaEl.querySelector('.b-karsilama__manzara'), D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA;
+    var c = sayfaEl.querySelector('.b-karsilama__manzara, .kapak__sahne'), D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA;
     if (!c) return;
     if (!D) {
       if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
       return;
     }
-    if (innerWidth < 640) { c.width = 200; c.height = 134; }
-    try { D.binaCiz(c.getContext('2d'), D.yerlesim(c.width, c.height, D.vakit(new Date().getHours()), 'yayla')); } catch (e) { /* süs */ }
+    var kapak = c.classList.contains('kapak__sahne');
+    if (innerWidth < 640) { c.width = kapak ? 220 : 200; c.height = kapak ? 72 : 134; }
+    var saat = new Date().getHours(), tur = c.getAttribute('data-sahne') || 'yayla', ad = [tur, saat, c.width, c.height].join();
+    try {
+      var o = sahneOnbellek[ad];
+      if (!o) { o = d.createElement('canvas'); o.width = c.width; o.height = c.height; D.binaCiz(o.getContext('2d'), D.yerlesim(c.width, c.height, D.vakit(saat), tur)); sahneOnbellek[ad] = o; }
+      c.getContext('2d').drawImage(o, 0, 0);
+    } catch (e) { /* süs */ }
   }
   function sayfaDal(yer) {
     var ys = H.dalinYerleri(yer.dal);
@@ -413,9 +433,9 @@
           // kalabalık alanda (Akademik: 30 ünite) yalnız üzerinde çalışılan ünite açık gelir
           return B.acilir({ baslik: u.ad, acik: hepsiAcik || u.id === simdiki,
             not: u.gecti ? 'geçildi' : u.atlandi ? 'atlandı' + (yer_.etiket ? ' (' + yer_.etiket + ')' : '') + ' · ' + okunan + '/' + u.dersler.length + ' ders' : u.acik ? okunan + '/' + u.dersler.length + ' ders' : 'kilitli',
-            govde: [u.dersler.length ? B.liste({ ad: u.ad + ' dersleri', tur: 'ders', ogeler: u.dersler.map(function (x) {
+            govde: [u.dersler.length ? B.liste({ ad: u.ad + ' dersleri', tur: 'ders', ogeler: u.dersler.map(function (x, i) {
               var oz = (f.y.oge[x.id] || {}).ozet;
-              return x.acik ? { baslik: x.ad, ozet: oz, durum: x.okundu ? 'okundu' : 'yeni', taslak: x.etiket === 'taslak', href: F() + '/ders/' + x.id } : { baslik: x.ad, ozet: oz, durum: 'kilitli' };
+              return x.acik ? { no: i + 1, baslik: x.ad, ozet: oz, durum: x.okundu ? 'okundu' : 'yeni', taslak: x.etiket === 'taslak', href: F() + '/ders/' + x.id } : { no: i + 1, baslik: x.ad, ozet: oz, durum: 'kilitli' };
             }) }) : '', B.liste({ ad: u.ad + ' kapısı', ogeler: [kapiSatiri(u.id, 'Ünite kapısı', u.acik, u.kapi)] })] });
         }).join('') +
         B.bolum({ baslik: 'Aşama kapısı', govde: B.liste({ ad: 'Aşama kapısı', ogeler: [kapiSatiri(dr.asama.id, 'Aşama kapısı', dr.uniteler.every(function (u) { return u.gecti; }), dr.asama.kapi)] }) });
@@ -539,6 +559,7 @@
     var yer = H.YERLER.filter(function (y) { return y.yol === taban; })[0] || H.bul('bugun');
     simdiYer = yer;
     var html, tasindi = yer.katman === 'alan' && yer.asama, fa = alt && tasindi && /^(ders|kapi|asama|yer)\/([\w.-]+)$/.exec(alt[2]), ek = Kabuk.ek && Kabuk.ek[yer.id];
+    kapakYer = KAPAK[yer.id] && (!alt || (fa && fa[1] === 'asama')) ? yer : null;
     if (tasindi) { etkinYap(yer.id); if (!al()) alanYukle(yer.id).then(function () { if (sayfaEl.getAttribute('data-yer') === yer.id) rota(); }); }
     // aşama: «asama/2» ya da ders/kapı kimliğinin ikinci parçası (felsefe.2.1.3 → 2)
     if (fa) { var an = +(fa[1] === 'asama' ? fa[2] : fa[2].split('.')[1]); if (an >= 1) seciliAsama[yer.id] = an; }
@@ -556,7 +577,7 @@
     sayfaEl.innerHTML = html;
     sayfaEl.setAttribute('data-yer', yer.id);
     d.title = yer.ad + ' · LifeOS';
-    if (yer.id === 'bugun') manzara();
+    manzara();
     return yer;
   }
   function git(yol) { if (location.hash === yol) rota(); else location.hash = yol; }

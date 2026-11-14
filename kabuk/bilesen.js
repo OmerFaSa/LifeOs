@@ -113,7 +113,8 @@
     nesne('ders', o);
     var durum = sec('ders', 'durum', o.durum, ['yeni', 'okundu', 'kilitli']);
     var sure = o.sure == null ? '' : (typeof o.sure === 'number' && o.sure > 0 && isFinite(o.sure) ? o.sure : hata('ders', 'sure pozitif dakika olmalı'));
-    var ic = '<span class="b-ders__baslik">' + kac(metin('ders', 'baslik', o.baslik)) + '</span>' +
+    var no = o.no == null ? '' : '<span class="b-ders__no" aria-hidden="true">' + (durum === 'okundu' ? '<svg><use href="#i-tik"/></svg>' : (+o.no || '')) + '</span>';
+    var ic = '<span class="b-ders__baslik">' + no + kac(metin('ders', 'baslik', o.baslik)) + '</span>' +
       '<span class="b-ders__ozet">' + kac(metin('ders', 'ozet', o.ozet, true)) + '</span>' +
       '<span class="b-ders__alt">' + pul(DERS_DURUM[durum]) + (o.taslak ? pul({ metin: 'taslak', tur: 'kesik' }) : '') +
       (sure ? '<span>' + sayiYaz(sure) + ' dk</span>' : '') + '</span>';

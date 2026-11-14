@@ -59,6 +59,10 @@ a.b-ders:hover{ box-shadow:inset 0 0 0 1px var(--cizgi-guclu), var(--golge-yumus
 .b-ders__baslik{ font-family:var(--govde); font-weight:600; font-size:1.05rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .b-ders__ozet{ flex:1; font-size:1rem; color:var(--yazi-2); overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; }
 .b-ders__alt{ display:flex; align-items:center; gap:8px; height:1.5rem; font-size:.85rem; color:var(--soluk); white-space:nowrap; }
+.b-ders__no{ display:inline-grid; place-items:center; width:24px; height:24px; margin-right:10px; vertical-align:2px; border-radius:var(--kose); font-size:.75rem; font-weight:650;
+  color:var(--yazi-2); background:var(--yuzey-2); box-shadow:inset 0 0 0 1px var(--cizgi); font-variant-numeric:tabular-nums; }
+.b-ders__no svg{ width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.b-ders--okundu .b-ders__no{ color:var(--vurgu-yazi); background:var(--vurgu); box-shadow:none; }
 .b-ders--kilitli{ color:var(--soluk); background:transparent; box-shadow:inset 0 0 0 1px var(--cizgi); }
 .b-ders--kilitli .b-ders__baslik{ color:var(--soluk); }
 .b-ders--kilitli .b-ders__ozet{ color:var(--soluk); }
