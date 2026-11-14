@@ -66,6 +66,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Veri katmanı keşfi](ekip/sadelesme/veri-katmani.md) — A3: verinin altı yeri, eşitleme, kayıt türleri, göç planı ve riskler (2026-11-12).
 - [İçerik hattı](ekip/sadelesme/icerik-hatti.md) — A8: gemini-data, ders biçimi, Felsefe ve Dil yol iskeletleri, pilot önerisi (2026-11-12).
 - [Not ve tekrar keşfi](ekip/sadelesme/not-ve-tekrar.md) — A6: on üç not yapısı, dokuz tekrar zamanlayıcısı, tek Not ve Tekrar motoru önerisi (2026-11-12).
+- [CI'da kararsız iki test](ekip/sadelesme/ci-kararsiz-testler.md) — AYS paragraf yazımı (aynı milisaniyede kurulan setin anahtarı önceki testinkiyle çakışıyordu) ve Defter gezgini (rastgele kimlikte «s1» geçiyordu): kanıt, kök neden, düzeltme, önce/sonra zorlama koşuları (2026-11-14).
 - [KING-5](ekip/KING-5.md) — Sahada çalışan King: dört tur düzeltme planı; durumu: dört tur gönderildi, sadeleşmede A7'ye bağlandı (2026-11-08).
 - [Güncelleme denemesi](ekip/GUNCELLEME-DENEMESI.md) — PC panelindeki «Güncelle» kutusunun yeni sürümü gösterdiğini sınamak için deneme notu (2026-11-07).
 - [Android yarım](ekip/yarim/android.md) — Android ve kök sertifika durumu; dal birleşmedi (2026-11-06).

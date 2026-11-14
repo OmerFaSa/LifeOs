@@ -26,6 +26,10 @@
 
   async function temiz(){
     resetState();
+    /* resetState öneri kuyruğunu ve tek-uygulama anahtarlarını silmez. İki test setini aynı
+       milisaniyede kurarsa yeni setin anahtarı ('ogren-paragraf:<gün>:<kuruldu>:1') öncekiyle
+       aynı çıkar ve yazım «öneri kurulamadı» diye düşerdi (CI 2026-11-13, e3f76523). */
+    R.S.officeProposals = []; R.S.officeProposalKeys = [];
     await R.Store.remove(P().STORE);
     await R.Store.remove(T().STORE);
     await R.Store.remove(C().STORE);

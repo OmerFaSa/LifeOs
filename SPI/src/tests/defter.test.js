@@ -260,7 +260,7 @@
       }finally{ H().defter = eski; }
     }
     it('gezgin öbür modülleri gösterir; notu açınca yalnız okunur, kutu kilitli, medya «orada» der', () => disli(async s => {
-      await D().yeni('Benim', 'Melatonin aldım');
+      const benim = await D().yeni('Benim', 'Melatonin aldım');
       D().ac();
       await bekle(20);
       const el = document.getElementById('defter');
@@ -285,7 +285,10 @@
       await bekle();
       expect(sag.textContent).toContain('protein');
       expect(D().notlar().length).toBe(sayi);
-      expect(Object.keys(s.depo).some(k => k.indexOf('s1') >= 0)).toBe(false);           // öbür modülün kaydı buraya yazılmaz
+      /* Öbür modülün kaydı buraya yazılmaz: depoda yalnız bu modülün notu var. Kimlikte «s1»
+         aramak kararsızdı: rastgele not kimliği ~%0,75 olasılıkla «s1» içerir (CI 2026-11-13). */
+      expect(Object.keys(s.depo).filter(k => k.indexOf('defter/') === 0)).toEqual(['defter/' + benim.id]);
+      expect(Object.values(s.depo).some(d => d && (d.id === 's1' || d.id === 's2' || d.baslik === 'Uyku' || d.baslik === 'Beslenme'))).toBe(false);
     }));
     it('buraya kopyala: metin bu modüle gelir, medya yerine not kalır; kaynak değişmez', () => disli(async () => {
       await D().disYukle();
