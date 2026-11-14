@@ -69,6 +69,7 @@ import sys
 import threading
 import time
 import urllib.request
+from urllib.parse import parse_qs
 from functools import lru_cache, partial
 from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -86,12 +87,14 @@ import gun  # noqa: E402  (Gun bolumu, Gun plani F2: /gun/ yolu, yeni port yok)
 import uzak  # noqa: E402  (her yerden erisim, sistem/uzak.py)
 import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
+import etiket  # noqa: E402  (sahibin kalite etiketleri, sistem/etiket.py; yalniz bu bilgisayardan)
 
 HOST = "127.0.0.1"
 BEKCI_SN = 60
 # AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
 ALTSTORE_KAYNAK = "https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
 GIRIS_PORT = 4180
+ETIKET_DIZIN = os.path.join(KOK, "kalite", "veri", "yerel")  # gercek setler (git disi); sistem/etiket.py
 ILK_EKRAN_KABUK = True  # kok (/) yeni kabuga gider (sadelesme: yeni kabuk ilk ekran); eski giris ve kontrol paneli /kartlar/'da
 TEK_KAPI = False        # tekkapi.kur() True yapar: Gun sayfasi modulleri port yerine yoldan (/ays/) acar
 HKM_PORT = 4200
@@ -1934,6 +1937,21 @@ class Giris(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
             return plan_isle(self)
+        if yol == "/api/kalite/etiket":
+            # Sahibin etiketi kalite/veri/yerel'e yazilir: yalniz bu bilgisayardan ve baska bir sayfanin
+            # (Origin) gonderdigi istek degilse; govde kucuk.
+            koken = self.headers.get("Origin")
+            if not hesap._yerel_mi(self) or koken not in (None, "http://%s:%d" % (HOST, GIRIS_PORT), "http://localhost:%d" % GIRIS_PORT):
+                return self._json(403, {"ok": False, "mesaj": "Yalnız bu bilgisayardan."})
+            try:
+                n = min(int(self.headers.get("Content-Length") or 0), 16384)
+                g = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+            except (ValueError, UnicodeDecodeError):
+                g = None
+            if not isinstance(g, dict):
+                return self._json(400, {"ok": False, "mesaj": "Gövde JSON nesnesi olmalı."})
+            hata = etiket.etiketle(ETIKET_DIZIN, g.get("set"), g.get("id"), g.get("etiket"))
+            return self._json(400 if hata else 200, {"ok": not hata, "mesaj": hata} if hata else {"ok": True})
         if yol == "/api/gun/cumle":
             # Yalniz Gun sayfasindan (X-LifeOS: gun, ayni koken); govde kucuk.
             koken = self.headers.get("Origin")
@@ -2011,6 +2029,18 @@ class Giris(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(govde)
             return None
+        if yol == "/api/kalite/etiket/adaylar":
+            # Gercek mesajlar tasir ve oturum denetimi yoktur: baslangic paketi gibi YALNIZ bu bilgisayardan.
+            if not hesap._yerel_mi(self):
+                return self._json(403, {"ok": False, "mesaj": "Yalnız bu bilgisayardan."})
+            set_ = parse_qs(self.path.split("?", 1)[1] if "?" in self.path else "").get("set", [""])[0]
+            if set_ not in etiket.SETLER:
+                return self._json(400, {"ok": False, "mesaj": "set «arama» ya da «anlama» olmalı."})
+            try:
+                satirlar, bekleyen = etiket.adaylar(ETIKET_DIZIN, set_)
+            except ValueError:
+                return self._json(500, {"ok": False, "mesaj": "Set okunamadı (bozuk satır)."})
+            return self._json(200, {"ok": True, "set": set_, "bekleyen": bekleyen, "satirlar": satirlar})
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
         if yol == "/api/ayar":

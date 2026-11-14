@@ -5,5 +5,5 @@ TANIM = 'eski bilgiyi doğru hatırlama, bağlam boyutu'
 
 def olc(kok):
     return {"deger": None, "birim": 'oran', "etiket": "veri yok", "durum": "ölçülmedi",
-            "ayrinti": {"gereken": 'HKM hafızası ve gömme modeli (Ollama) çalışırken arama doğruluğu; bağlam boyutu ekseni (jeton bütçeli bağlam derleyici, A7) yok'},
+            "ayrinti": {"gereken": 'HKM hafızası ve gömme modeli (Ollama) çalışırken arama doğruluğu; P6 sonrası hafıza kaydı tek depoda (kisi_bilgisi) ama gömme yok (türetilmiş, taşınmadı) ve yoklama seti yok; bağlam boyutu ekseni (jeton bütçeli bağlam derleyici, A7) yok'},
             "komut": 'python tools/hafiza_olcum.py (p1/p3; HKM + Ollama); yapılacak: bağlam bütçesi ekseni'}

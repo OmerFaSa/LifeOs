@@ -118,6 +118,8 @@ def eski_bam(s):
     eski_t, bam.web_tasiyici = bam.web_tasiyici, ag
     try:
         i = bam.is_ac(con, s["soru"], now=AN)
+        if not i.get("ok"):          # BAM geri sordu ya da talebi almadi (gercek mesajlarda olur): iddia yok
+            return [], len(ag.cagri), _fark(once, _yazim(con))
         for _ in range(12):
             bam.ilerlet(con, ta._cfg(), transport=_model(s["model"], konu), now=AN)
             j = bam.is_getir(con, i["id"])

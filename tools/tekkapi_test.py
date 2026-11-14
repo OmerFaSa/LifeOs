@@ -310,6 +310,11 @@ def sina(eski, tek, kokler=()):
     ayni("GET /api/kabuk/baslangic paket varken (eski 4180 de verir)", iste(g, "/api/kabuk/baslangic"), iste(T, "/api/kabuk/baslangic"))
     dene("başlangıç paketi vekilden (Tailscale) gelen isteğe verilmez", iste(T, "/api/kabuk/baslangic", basliklar=vekil)[0] == 403,
          iste(T, "/api/kabuk/baslangic", basliklar=vekil)[0])
+    # Etiket kapisi (sistem/etiket.py; ayrintili sinama tools/kalite_etiket_test.py): tek kapi da Giris'e verir.
+    dene("tek kapı /api/kalite/ yolunu Giris'e verir (bilinmeyen set 400)", iste(T, "/api/kalite/etiket/adaylar?set=x")[0] == 400,
+         iste(T, "/api/kalite/etiket/adaylar?set=x")[0])
+    dene("etiket adayları vekilden (Tailscale) gelen isteğe verilmez", iste(T, "/api/kalite/etiket/adaylar?set=arama", basliklar=vekil)[0] == 403,
+         iste(T, "/api/kalite/etiket/adaylar?set=arama", basliklar=vekil)[0])
     for ad in ("ays", "spi", "esp"):
         k, b = iste_yonsuz(g, "/%s/" % ad)
         dene("eski 4180: /%s/ modülün kendi kapısına yönlenir" % ad, k == 302 and b.get("Location", "").endswith(":%d/" % eski[ad]), "%s %s" % (k, b.get("Location")))

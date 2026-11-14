@@ -15,10 +15,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # betik olarak da _sinav bulunsun
 import _sinav  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "sistem"))
+import etiket  # noqa: E402  sahibin etiket kapısı (anlama-aday.jsonl)
 
 AD = "Anlama"
 TANIM = "etiketli gerçek mesajlarda niyet isabeti"
 SET = "kalite/veri/yerel/anlama.jsonl"
+# Sahibin gerçek mesajları (kurucu: kalite/egri/_yerel_set.py), etiket POST /api/kalite/etiket ile. Satırdaki
+# king_bugun bugünkü king/niyet.py'nin kararıdır, o anki King'in değil: isabeti ayrı tutulur.
+ADAY = "kalite/veri/yerel/anlama-aday.jsonl"
 ISARET = "yanlis-anladin"  # King'in cevabının altındaki tek dokunuşluk işaretten gelen satırın kaynağı
 ALANLAR = {"metin", "niyet", "kaynak", "king", "tarih"}
 METIN_SINIR = 2000
@@ -122,6 +127,20 @@ def vekil(kok):
                             "«arastir» niyetli cümle yok; model çağrılmaz, Merkez'e giden cümle «sohbet» sayılır"}
 
 
+def aday(kok):
+    """Gerçek mesaj seti: bekleyen ve sahibin etiketlediği satır sayısı; sahip etiketi varsa bugünkü niyet.py isabeti."""
+    try:
+        satirlar = etiket.oku(str(Path(kok) / ADAY))
+    except ValueError:
+        return {"set": ADAY, "bozuk_dosya": 1}
+    sahip = [r for r in satirlar if isinstance(r, dict) and r.get("etiketleyen") == "sahip"
+             and r.get("etiket") in _sinav.NIYETLER and r.get("king_bugun") in _sinav.NIYETLER]
+    o = {"set": ADAY, "satir": len(satirlar), "sahip_etiketli": len(sahip), "bekleyen": len(satirlar) - len(sahip),
+         "isabet": round(sum(r["king_bugun"] == r["etiket"] for r in sahip) / len(sahip), 3) if sahip else None,
+         "king": "bugünkü king/niyet.py (o anki King'in niyeti kaydedilmemiş)"}
+    return o
+
+
 def olc(kok):
     satir, bozuk = etiketli(kok)
     kingli = [r for r in satir if r.get("king") is not None and r.get("niyet") is not None]
@@ -135,6 +154,11 @@ def olc(kok):
                           "değer için işaretlenmemiş (King'in doğru anladığı) örneklem de gerekir"}
     if kingli and not isaretsiz:
         ayrinti["neden_degersiz"] = "yalnız «yanlış anladın» satırı var; örneklem yanlı, isabet yazılmaz"
+    gercek = aday(kok)
+    ayrinti["gercek_mesaj"] = gercek
+    if deger is None and gercek.get("isabet") is not None:
+        deger = gercek["isabet"]  # gerçek mesaj + sahip etiketi; karar bugünkü niyet.py'nin (gercek_mesaj.king)
+        ayrinti.pop("neden_degersiz", None)
     v = vekil(kok)
     if v:
         ayrinti["vekil"] = v

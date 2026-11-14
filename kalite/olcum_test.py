@@ -10,6 +10,9 @@ from pathlib import Path
 
 BURASI = Path(__file__).resolve().parent
 sys.path.insert(0, str(BURASI))
+# Sınama sahibin gerçek verisini okumaz: tek depo yok sayılır, Arama seti sahte depodan okunur (alt süreçler de miras alır).
+os.environ["LIFEOS_TEK_DEPO"] = ""
+os.environ["LIFEOS_ARAMA_SET"] = ""
 import olcum  # noqa: E402
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -217,6 +220,109 @@ if shutil.which("node"):
         kontrol("Anlaşılabilirlik: kabuk adımı + eski modülün katı; halkadan ulaşılmayan ayrı",
                 an["ayrinti"].get("yer_adimi") == {"a": 1, "b": 3} and an["deger"] == 2.0
                 and an["ayrinti"]["ulasilmayan"] == ["c"] and an["etiket"] == "hesaplandı", an)
+
+# --- gerçek veri eğrileri: sahte tek depo ve sahte yerel setlerle (sahibin verisi okunmaz) ---
+import sqlite3  # noqa: E402
+sys.path.insert(0, str(BURASI.parent / "sistem"))
+import goc  # noqa: E402  tek deponun şeması (tek kaynak)
+
+
+def sahte_tekdepo(yol, kayitlar):
+    c = sqlite3.connect(yol)
+    c.executescript(goc.SEMA)
+    for n, (tur, govde) in enumerate(kayitlar):
+        c.execute("INSERT INTO kayit(id, tur, tur_surum, alan, yol, govde, etiket, hlc, cihaz, kaynak) "
+                  "VALUES (?, ?, 1, 'x', ?, ?, '', '0000000000000:0000:pc', 'pc', 'sinama')",
+                  ("x|%d" % n, tur, str(n), json.dumps(govde)))
+    c.commit()
+    c.close()
+
+
+TEK = [("sohbet", {"role": "user", "text": "a", "created_at": "2026-11-02T10:00:00"}),        # W45 pazartesi
+       ("sohbet", {"role": "manager", "text": "b", "created_at": "2026-11-03T10:00:00"}),     # King'in cevabı sayılmaz
+       ("ays.days", {"date": "2026-11-04", "blocks": [{"status": "done"}, {"status": "pending"}], "note": "x"}),
+       ("ays.days", {"date": "2026-11-05", "blocks": [{"status": "done"}], "dow": 3, "note": ""}),  # boş kabuk
+       ("olcum", {"date": "2026-10-20", "weight": 70}),                                            # W43
+       ("not", {"at": "2026-11-11T23:00:00.000Z", "baslik": "n"}),                                 # W46
+       ("plan_blogu", {"signedAt": None}),                                                         # tarihsiz
+       ("kullanim", {"ok": 1, "in_tok": 100, "out_tok": 20, "note": "seviye=alt", "provider": "yerel", "day": "2026-11-02", "ms": 10}),
+       ("kullanim", {"ok": 1, "in_tok": 900, "out_tok": 0, "note": "tahmini-jeton", "provider": "yerel", "day": "2026-11-02", "ms": 30}),
+       ("kullanim", {"ok": 0, "in_tok": 0, "out_tok": 0, "note": "URLError", "provider": "google", "day": "2026-11-03", "ms": 20})]
+sys.path.insert(0, str(BURASI / "egri"))
+import hayata_etki  # noqa: E402
+import saglayici  # noqa: E402
+
+with tempfile.TemporaryDirectory() as d:
+    db = Path(d) / "lifeos.db"
+    sahte_tekdepo(db, TEK)
+    once = (db.read_bytes(), db.stat().st_mtime_ns)
+    os.environ["LIFEOS_TEK_DEPO"] = str(db)
+    try:
+        he, sg = hayata_etki.olc(d), saglayici.olc(d)
+        e = {x["id"]: x for x in olcum.egriler(Path(d))}
+    finally:
+        os.environ["LIFEOS_TEK_DEPO"] = ""
+    a = he["ayrinti"]
+    kontrol("Hayata etki: tek depodan haftalık etkin gün; King'in cevabı, boş gün kabuğu ve tarihsiz kayıt sayılmaz",
+            he["deger"] == 1.0 and he["etiket"] == "ölçüldü" and a["pencere"] == ["2026-W43", "2026-W44", "2026-W45", "2026-W46"]
+            and a["pencere_etkin_gun"] == [1, 0, 2, 1] and a["bos_kabuk"] == {"ays.days": 1}
+            and a["tarihsiz"] == {"plan_blogu": 1} and a["haftalar"]["2026-W45"]["biten_blok_ays"] == 1
+            and a["haftalar"]["2026-W45"]["etkinlik"] == {"kayit": 1, "king": 1} and a["sayilmayan_turler"] == {"kullanim": 3}
+            and a["yol_adim"]["etiket"] == "veri yok", he)
+    kontrol("pencere verinin en yeni haftasıyla biter; «Z»li not kendi UTC gününün haftasında",
+            a["haftalar"]["2026-W46"] == {"etkin_gun": 1, "etkinlik": {"not": 1}, "biten_blok_ays": 0}, a["haftalar"])
+    kontrol("Sağlayıcı: başarılı ve jetonu ölçülen çağrı ortalaması; tahmini jetonlu ve başarısız ayrı",
+            sg["deger"] == 120.0 and sg["etiket"] == "ölçüldü" and sg["ayrinti"]["basarisiz"] == 1
+            and sg["ayrinti"]["tahmini_jetonlu"] == 1 and sg["ayrinti"]["basarisiz_oran"] == 0.333, sg)
+    kontrol("tek depo eğrileri olcum sözleşmesinden geçer (hatasız, ölçüldü)",
+            all(e[k]["durum"] == "ölçüldü" and "hata" not in e[k]["ayrinti"] for k in ("egri_hayata_etki", "egri_saglayici")),
+            {k: e[k]["ayrinti"].get("hata") for k in ("egri_hayata_etki", "egri_saglayici")})
+    kontrol("tek depo yalnız okunur: dosya bayt bayt ve zaman olarak aynı", once == (db.read_bytes(), db.stat().st_mtime_ns))
+he, sg = hayata_etki.olc("."), saglayici.olc(".")
+kontrol("tek depo yokken (CI) Hayata etki ve Sağlayıcı ölçülmedi, «veri yok»",
+        all(x["deger"] is None and x["durum"] == "ölçülmedi" and x["etiket"] == "veri yok" for x in (he, sg)), (he, sg))
+
+ARAMA = [{"id": "s1", "soru": "q1", "adaylar": [{"no": "a1", "motor": "arama"}, {"no": "a2", "motor": "bam"}],
+          "etiket": ["a1"], "etiketleyen": "sahip"},
+         {"id": "s2", "soru": "q2", "adaylar": [{"no": "a1", "motor": "arama"}], "etiket": [], "etiketleyen": "sahip"},
+         {"id": "s3", "soru": "q3", "adaylar": [], "etiket": "arama-degil", "etiketleyen": "sahip"},
+         {"id": "s4", "soru": "q4", "adaylar": [{"no": "a1", "motor": "bam"}], "etiket": ["a1"], "etiketleyen": "model"},
+         {"id": "s5", "soru": "q5", "adaylar": [{"no": "a1", "motor": "arama"}], "etiket": ["a9"], "etiketleyen": "sahip"},
+         {"id": "s6", "soru": "q6", "adaylar": [{"no": "a1", "motor": "arama"}], "etiket": None, "etiketleyen": None}]
+
+
+def satirla(yol, satirlar):
+    yol.write_text("".join(json.dumps(r) + "\n" for r in satirlar), encoding="utf-8")
+
+
+with tempfile.TemporaryDirectory() as d:
+    kok = sahte_depo(d)
+    yerel = kok / "kalite/veri/yerel"
+    yerel.mkdir(parents=True)
+    satirla(yerel / "arama-aday.jsonl", ARAMA[3:4])
+    ar = olcum.olc(kok)["egri_arama"]
+    kontrol("Arama: yalnız model etiketi varken eğri ölçülmedi, model puanı «vekil» ve tahmin",
+            ar["deger"] is None and ar["durum"] == "ölçülmedi" and ar["ayrinti"]["vekil"]["etiket"] == "tahmin"
+            and ar["ayrinti"]["vekil"]["bam"]["isabet"] == 1 and ar["ayrinti"]["vekil"]["arama"]["isabet"] == 0, ar)
+    satirla(yerel / "arama-aday.jsonl", ARAMA)
+    ar = olcum.olc(kok)["egri_arama"]
+    s_ = ar["ayrinti"]["sahip"]
+    kontrol("Arama: sahip etiketi ölçüldü (geçersiz etiket ve arama-degil dışarıda), model taslağı ayrı",
+            ar["deger"] == 0.5 and ar["etiket"] == "ölçüldü" and s_["soru"] == 2 and s_["arama_degil"] == 1
+            and s_["arama"]["ilgisiz_gosterim"] == 1 and s_["bam"]["isabet"] == 0 and ar["ayrinti"]["sahip_etiketli"] == 3
+            and ar["ayrinti"]["bekleyen"] == 3 and ar["ayrinti"]["vekil"]["satir"] == 1, ar)
+    (yerel / "arama-aday.jsonl").write_text("{bozuk\n", encoding="utf-8")
+    ar = olcum.olc(kok)["egri_arama"]
+    kontrol("Arama: bozuk set hata vermez, ölçülmedi", ar["deger"] is None and ar["ayrinti"]["bozuk_dosya"] == 1
+            and "hata" not in ar["ayrinti"], ar)
+    satirla(yerel / "anlama-aday.jsonl", (
+        {"id": "n1", "metin": "a", "king_bugun": "sohbet", "etiket": "sohbet", "etiketleyen": "sahip"},
+        {"id": "n2", "metin": "b", "king_bugun": "sohbet", "etiket": "yonet", "etiketleyen": "sahip"},
+        {"id": "n3", "metin": "c", "king_bugun": "kayit", "etiket": None, "etiketleyen": None}))
+    an = olcum.olc(kok)["egri_anlama"]
+    g_ = an["ayrinti"]["gercek_mesaj"]
+    kontrol("Anlama: gerçek mesaj setinde sahip etiketi varsa bugünkü niyet.py isabeti ölçülür, bekleyen sayılır",
+            an["deger"] == 0.5 and an["etiket"] == "ölçüldü" and g_["sahip_etiketli"] == 2 and g_["bekleyen"] == 1, an)
 
 # --- bütçe denetimi (bellekte) ---
 B = {"a": {"taban": 5, "yon": "azalmali", "grup": "g"}, "b": {"taban": 5, "yon": "azalmali", "grup": "g"},

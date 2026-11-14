@@ -98,6 +98,14 @@
     "etiket_bekleyen": 0,
     "etiketli": 0,
     "gecersiz_satir": 0,
+    "gercek_mesaj": {
+     "bekleyen": 62,
+     "isabet": null,
+     "king": "bugünkü king/niyet.py (o anki King'in niyeti kaydedilmemiş)",
+     "sahip_etiketli": 0,
+     "satir": 62,
+     "set": "kalite/veri/yerel/anlama-aday.jsonl"
+    },
     "gereken": "sahibinin etiketlediği gerçek mesajlar; her satırda King'in o an seçtiği niyet (king). «Yanlış anladın» işareti seti doldurur ama yalnız işaretli satırla isabet hep 0 çıkar: değer için işaretlenmemiş (King'in doğru anladığı) örneklem de gerekir",
     "king_kararli": 0,
     "set": "kalite/veri/yerel/anlama.jsonl",
@@ -141,13 +149,13 @@
      "ESP": 4,
      "SPI": 3
     },
-    "eski_yer": 0,
+    "eski_yer": 1,
     "kabuk_en_cok": 2,
-    "kabuk_ortalama": 1.76,
+    "kabuk_ortalama": 1.78,
     "komut_cubugu": "her yer 1 adım (kural; kabuk/kabuk.test.js sınar, bu araç saymaz)",
     "sinir": "kabuk adımı kuraldan hesaplanır, tarayıcıda tıklanmaz; eski modül katı en derin yolun üst sınırıdır",
     "ulasilmayan": [],
-    "yer": 25,
+    "yer": 27,
     "yer_adimi": {
      "akademik": 2,
      "arama": 2,
@@ -155,6 +163,7 @@
      "beslenme": 2,
      "bugun": 1,
      "dil": 2,
+     "eskisistem": 2,
      "felsefe": 2,
      "hareket": 2,
      "harita": 1,
@@ -165,6 +174,7 @@
      "not": 1,
      "ogren": 1,
      "okuma": 2,
+     "onay": 2,
      "plan": 2,
      "saglik": 1,
      "soru": 2,
@@ -177,7 +187,7 @@
     }
    },
    "birim": "adım (yer başına ortalama)",
-   "deger": 1.76,
+   "deger": 1.78,
    "durum": "ölçüldü",
    "etiket": "hesaplandı",
    "id": "egri_anlasilabilirlik",
@@ -188,7 +198,52 @@
   "egri_arama": {
    "ad": "Arama",
    "ayrinti": {
-    "gereken": "gerçek sorgu seti, her sorgu için doğru cevap ve kaynak etiketi; tek Arama motoru (A7: bam.py ve arastir.py birleşince)"
+    "adayli": {
+     "arama": 12,
+     "bam": 0
+    },
+    "bekleyen": 29,
+    "bozuk_dosya": 0,
+    "gereken": "sahibin etiketi (POST /api/kalite/etiket, set=arama); BAM kapısı için en az 30 arama sorusu ve canlı web koşusu (king/arama_olc.py shortcut); hafızaya eklenenin isabeti ölçülmüyor",
+    "kosul": "adaylar çevrimdışı: ağ ve model yok; BAM'in tek kaynağı web olduğundan çevrimdışı boş döner",
+    "neden_degersiz": "sahip etiketi bekleniyor",
+    "sahip": {
+     "arama": {
+      "ilgisiz_gosterim": 0,
+      "isabet": 0,
+      "oran": null
+     },
+     "arama_degil": 0,
+     "bam": {
+      "ilgisiz_gosterim": 0,
+      "isabet": 0,
+      "oran": null
+     },
+     "soru": 0
+    },
+    "sahip_etiketli": 0,
+    "satir": 29,
+    "set": "kalite/veri/yerel/arama-aday.jsonl",
+    "vekil": {
+     "ad": "vekil: model etiketi, gerçek sorular",
+     "arama": {
+      "ilgisiz_gosterim": 3,
+      "isabet": 2,
+      "oran": 0.2
+     },
+     "arama_degil": 19,
+     "bam": {
+      "ilgisiz_gosterim": 0,
+      "isabet": 0,
+      "oran": 0.0
+     },
+     "birim": "oran",
+     "deger": 0.2,
+     "etiket": "tahmin",
+     "neden_tahmin": "etiketleri model (Claude) taslak olarak yazdı; sahibin etiketi değil",
+     "satir": 29,
+     "soru": 10
+    }
    },
    "birim": "oran",
    "deger": null,
@@ -196,13 +251,13 @@
    "etiket": "veri yok",
    "id": "egri_arama",
    "katman": "egri",
-   "komut": "yapılacak: gerçek sorgu seti + A7 Arama motoru",
+   "komut": "python kalite/egri/_yerel_set.py (set) → sahip etiketler (/api/kalite/etiket) → python kalite/olcum.py",
    "yol": "kaynaklı cevabın doğruluğu, hafızaya eklenenin isabeti"
   },
   "egri_hafiza": {
    "ad": "Hafıza",
    "ayrinti": {
-    "gereken": "HKM hafızası ve gömme modeli (Ollama) çalışırken arama doğruluğu; bağlam boyutu ekseni (jeton bütçeli bağlam derleyici, A7) yok"
+    "gereken": "HKM hafızası ve gömme modeli (Ollama) çalışırken arama doğruluğu; P6 sonrası hafıza kaydı tek depoda (kisi_bilgisi) ama gömme yok (türetilmiş, taşınmadı) ve yoklama seti yok; bağlam boyutu ekseni (jeton bütçeli bağlam derleyici, A7) yok"
    },
    "birim": "oran",
    "deger": null,
@@ -216,15 +271,108 @@
   "egri_hayata_etki": {
    "ad": "Sistem · Hayata etki",
    "ayrinti": {
-    "gereken": "göç sonrası tek veride sahibinin gerçek kullanımı (Yol motorunda tamamlanan adımlar ve günler); bu araç sahibinin verisini okumaz"
+    "bos_kabuk": {
+     "ays.days": 13
+    },
+    "gereken": "tek depo (P6 göçü) bu bilgisayarda; Yol adımı için kabuk kayıtlarının tek depoya geçmesi",
+    "hafta_sayisi": 4,
+    "haftalar": {
+     "2026-W43": {
+      "biten_blok_ays": 0,
+      "etkin_gun": 7,
+      "etkinlik": {
+       "kayit": 4,
+       "king": 23,
+       "not": 5,
+       "plan": 2
+      }
+     },
+     "2026-W44": {
+      "biten_blok_ays": 0,
+      "etkin_gun": 6,
+      "etkinlik": {
+       "kayit": 3,
+       "king": 15
+      }
+     },
+     "2026-W45": {
+      "biten_blok_ays": 0,
+      "etkin_gun": 5,
+      "etkinlik": {
+       "kayit": 6,
+       "king": 15
+      }
+     },
+     "2026-W46": {
+      "biten_blok_ays": 0,
+      "etkin_gun": 2,
+      "etkinlik": {
+       "kayit": 2,
+       "king": 30
+      }
+     }
+    },
+    "kaynak": "tek depo, salt-okur kopya (kalite/egri/_tekdepo.py)",
+    "pencere": [
+     "2026-W43",
+     "2026-W44",
+     "2026-W45",
+     "2026-W46"
+    ],
+    "pencere_etkin_gun": [
+     7,
+     6,
+     5,
+     2
+    ],
+    "sayilan_turler": {
+     "ays.days": "kayit",
+     "gun_kaydi": "kayit",
+     "not": "not",
+     "olcum": "kayit",
+     "plan_blogu": "plan",
+     "sohbet": "king",
+     "spi.haftaplan": "plan"
+    },
+    "sayilmayan_turler": {
+     "akis": 9,
+     "anahtar": 217,
+     "ays.topics": 1,
+     "bam": 5,
+     "esp.prefs": 1,
+     "gun_kopya": 2,
+     "kisi_bilgisi": 5,
+     "kullanim": 169,
+     "meta": 7,
+     "planlama": 1,
+     "profil": 3,
+     "spi.basarim": 1,
+     "spi.chats": 1,
+     "spi.seviye": 1,
+     "tercih": 4
+    },
+    "soru": {
+     "etiket": "veri yok",
+     "neden": "soru bankası cevapları (motor/soru.js) aynı nedenle tek depoda yok"
+    },
+    "tarihsiz": {
+     "gun_kaydi": 2,
+     "not": 1,
+     "plan_blogu": 5
+    },
+    "toplam_etkin_gun": 20,
+    "yol_adim": {
+     "etiket": "veri yok",
+     "neden": "tek depoda Yol kaydı yok: kabuğun Yol/Soru/Tekrar kayıtları hâlâ tarayıcıda (kabuk/depo.js, IndexedDB «lifeos-kabuk»), tek kapı bayrağı kapalı; P6 göçü yalnız eski modül ve HKM verisini taşıdı"
+    }
    },
-   "birim": "adım/hafta",
-   "deger": null,
-   "durum": "ölçülmedi",
-   "etiket": "veri yok",
+   "birim": "gün/hafta",
+   "deger": 5.0,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
    "id": "egri_hayata_etki",
    "katman": "egri",
-   "komut": "yapılacak: göç sonrası tek depodan haftalık özet (Yol motoru kaydı)",
+   "komut": "python kalite/olcum.py (tek depo varken); ayrıntı: python kalite/egri/hayata_etki.py",
    "yol": "haftada tamamlanan öğrenme adımı, süreklilik"
   },
   "egri_kendini_egitme": {
@@ -319,9 +467,9 @@
      "gereken": "kaydırma/geçiş sırasında kare süresi izi (CDP); tools/akicilik.js süre değil stil hesabı sayar"
     },
     "motor_kabukta": {
-     "bayt": 195955,
+     "bayt": 200543,
      "dosya": 6,
-     "satir": 2920
+     "satir": 2970
     },
     "uygulama": {
      "AYS": {
@@ -340,14 +488,14 @@
       "satir": 128322
      },
      "kabuk": {
-      "bayt": 449139,
-      "dosya": 15,
-      "satir": 5694
+      "bayt": 541292,
+      "dosya": 20,
+      "satir": 6922
      }
     }
    },
    "birim": "bayt (dağıtılan kod)",
-   "deger": 26043603,
+   "deger": 26135756,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "egri_optimizasyon",
@@ -358,21 +506,50 @@
   "egri_saglayici": {
    "ad": "Sağlayıcı kalitesi",
    "ayrinti": {
-    "gereken": "gerçek sağlayıcıya (Claude ya da yerel model) giden istekler ve boşa çağrı sayacı (yok); king_olcum.py --kuru sahte taşıyıcıyla koşar, gerçek jeton vermez"
+    "basarili": 118,
+    "basarisiz": 51,
+    "basarisiz_oran": 0.302,
+    "cagri": 169,
+    "gereken": "gereksiz çağrı sayacı (cevap için gerekmeyen çağrı) yok; bugünkü defter yalnız başarısız çağrıyı gösterir. Tahmini jetonlu satır (sağlayıcı sayı vermedi) başlık değerine girmez",
+    "gun": [
+     "2026-10-20",
+     "2026-11-14"
+    ],
+    "kaynak": "tek depo, kullanim (HKM usage), salt-okur kopya",
+    "olculen_cagri": 94,
+    "onbellekli": 52,
+    "ortanca_jeton": 938.0,
+    "ortanca_ms": 1070,
+    "rol": {
+     "ays.gorsel": 4,
+     "ays.sohbet": 13,
+     "bam.arastirma": 1,
+     "dinle": 11,
+     "esp.sohbet": 10,
+     "king": 106,
+     "ses": 3,
+     "spi.sohbet": 21
+    },
+    "saglayici": {
+     "google": 14,
+     "yerel": 155
+    },
+    "tahmini_jetonlu": 24,
+    "yukseltilen": 0
    },
    "birim": "jeton/istek",
-   "deger": null,
-   "durum": "ölçülmedi",
-   "etiket": "veri yok",
+   "deger": 1436.1,
+   "durum": "ölçüldü",
+   "etiket": "ölçüldü",
    "id": "egri_saglayici",
    "katman": "egri",
-   "komut": "python tools/king_olcum.py sohbet --config <ayar> (model çağırır: süre, jeton); yapılacak: boşa çağrı sayacı",
+   "komut": "python kalite/olcum.py (tek depo varken); canlı: python tools/king_olcum.py sohbet --config <ayar>",
    "yol": "istek başına jeton, gereksiz çağrı"
   },
   "egri_tanima": {
    "ad": "Tanıma",
    "ayrinti": {
-    "gereken": "sahibinin doğruladığı kişi bilgisi yoklama seti ve çalışan King (tarayıcı + HKM + model); King-Bench hafiza paketi 233 günlük klonla koşar, sahibinin kendisiyle değil"
+    "gereken": "sahibinin doğruladığı kişi bilgisi yoklama seti ve çalışan King; P6 sonrası hafıza kayıtları tek depoda (kisi_bilgisi) ama yoklama sorusu ve doğru cevap yok (tarayıcı + HKM + model); King-Bench hafiza paketi 233 günlük klonla koşar, sahibinin kendisiyle değil"
    },
    "birim": "oran",
    "deger": null,
@@ -486,9 +663,9 @@
   "kabuk_acilis_yuku": {
    "ad": "Kabuk açılış yükü (bayt)",
    "ayrinti": {
-    "dosya": 15
+    "dosya": 20
    },
-   "deger": 449139,
+   "deger": 541292,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kabuk_acilis_yuku",
@@ -638,10 +815,10 @@
   "kod_hacmi": {
    "ad": "Kod hacmi (satır)",
    "ayrinti": {
-    "bayt": 34294873,
-    "dosya": 1157
+    "bayt": 34411262,
+    "dosya": 1164
    },
-   "deger": 560133,
+   "deger": 561736,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kod_hacmi",

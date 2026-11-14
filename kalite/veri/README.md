@@ -22,6 +22,11 @@ Sahibinin gerçek kullanımından gelen veri. Depoya girmez, hiçbir yere gönde
   - Denetim: `python kalite/egri/anlama.py --denetle`. Sunucunun yazma yolu `anlama.isaretle(kok, metin, king, niyet?)`:
     doğrulanmayan satırı yazmaz.
   - Yalnız işaretli satır varken eğri değer almaz: o örneklemde isabet hep 0'dır.
+- `yerel/arama-aday.jsonl`, `yerel/anlama-aday.jsonl` — sahibin King'e gerçek mesajlarından kurulan setler
+  (`python kalite/egri/_yerel_set.py`; kaynak tek depo, salt-okur kopya). Satırda `etiket` ve `etiketleyen`
+  (`"sahip"` ya da `"model"`) durur; yalnız sahibin etiketi eğriye «ölçüldü» olarak girer, model taslağı «tahmin».
+  Etiketleme `GET /api/kalite/etiket/adaylar?set=…` ve `POST /api/kalite/etiket` (yalnız bu bilgisayardan; `sistem/etiket.py`).
+  Arama setinin yolu `LIFEOS_ARAMA_SET` ile değişir. Tek deponun yolu `LIFEOS_TEK_DEPO` (boş = yok; testler böyle).
 - `yerel/kullanim.json` — kullanım sayacı (plan A2). Tarayıcıdaki `localStorage['lifeos.kullanim']` değerinin aynısı:
   `{"surum": 1, "gunler": {"YYYY-AA-GG": {"ekran/<yer>": n, "arac/<yer>": n}}}`. Yazan `kalite/kullanim.js`,
   okuyan `kalite/olcum.py` `kullanim` ölçütü (son 28 gün, verideki en yeni güne göre).
