@@ -64,7 +64,8 @@
 
   /* Ekran gövdesi (saf: durum + Bilesen → HTML). s: { hesap, dosya, oturum, sunucu, cihazlar, hata, cikisSor, cikarSor, bag, bagHata, qr,
    * ileti, guncel, guncelHata, guncelIs }. Oturum nesnesinden yalnız ad, görünen ad ve rol okunur. */
-  var ESKI = 'Giriş ve hesap açma, iki adımlı doğrulama, bağlantılar (takvim, erişim anahtarları), profil, yedekler, kullanıcılar ve her yerden erişim şimdilik eski panelde.';
+  // Hesap ekranının uzantıları (hesap-giris, hesap-baglanti, hesap-yonetim) gelince eski panelde yalnız bunlar kaldı (faz7-hesap-*.md «Açık kalanlar»)
+  var ESKI = 'Gelen kutusu, «Bu cihazdakileri tek depoya taşı» düğmesi ve açılış videosu şimdilik eski panelde.';
   var YUKLENIYOR = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
   function oturumHtml(s, B, bu) {
     var o = s.oturum;
@@ -98,7 +99,7 @@
       B.ayar({ id: 'hs-kod', ad: 'Bağlama kodu', not: 'Yeni cihazda LifeOS\'u aç, «Kodla bağlan»a dokun ve bu kodu yaz. Kod tek kullanımlık.', deger: kodYaz(b.kod), veri: { 'hs-kod': b.kod } }),
       '<p class="soluk" data-hs-sure aria-live="off">' + kalanMetni(b.bitis, simdi) + '</p>',
       s.qr ? '<div>' + s.qr + '</div><p class="soluk">Tailscale açıksa QR\'ı yeni cihazın kamerasıyla okutmak da olur.</p>' : '',
-      s.qr ? '' : '<p class="soluk">QR için telefonun bu bilgisayara her yerden erişimle (Tailscale) ulaşması gerekir; açmak şimdilik eski panelde.</p>',
+      s.qr ? '' : '<p class="soluk">QR için telefonun bu bilgisayara her yerden erişimle (Tailscale) ulaşması gerekir; açmak aşağıdaki «Her yerden erişim» bölümünde.</p>',
       B.eylemler([{ metin: 'Vazgeç', tur: 'sade', veri: { 'hs-ac': 'bag-kapat' } }])] });
   }
   function cihazlarHtml(s, B, simdi) {
