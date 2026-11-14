@@ -53,6 +53,8 @@ const notListe = (ad, modulGerek, ek) => Object.assign((govdeler, grup) => {
 }, { liste:true, kaynak:String(Not.goc[ad]) });
 const duz = (fn, kaynak) => Object.assign(g => ({ cikti:fn(g[0]) }), { kaynak:String(kaynak) });
 const motorDuz = (M, ad) => Object.assign(duz(M.GOC[ad], M.GOC[ad]), { eksik:M.EKSIK[ad] });
+// AYS hafta tarihleri programın ilk gününden: baglam.baslangic (kabuk_baslangic AYS profilinden verir; burada verilmez → bas null)
+const planBas = ad => Object.assign((g, grup, baglam) => ({ cikti:Plan.GOC[ad](g[0], baglam && baglam.baslangic) }), { kaynak:String(Plan.GOC[ad]), eksik:Plan.EKSIK[ad] });
 const gunNotu = koleksiyon => ['not.gunNotu', notListe('gunNotu', true, { koleksiyon })];
 
 const ROTA = {
@@ -63,8 +65,8 @@ const ROTA = {
   'ays:mood':[['kayit.aysMood', tekKayit('aysMood')]],
   'ays:breaks':[['kayit.aysMola', tekKayit('aysMola')]],
   'ays:days':[['kayit.aysGun', tekKayit('aysGun')], ['plan.aysGun', motorDuz(Plan, 'aysGun')], ['soru.aysGun', motorDuz(Soru, 'aysGun')], gunNotu('days')],
-  'ays:weeks':[['plan.aysHafta', motorDuz(Plan, 'aysHafta')]],
-  'ays:plan':[['plan.aysPlan', motorDuz(Plan, 'aysPlan')]],
+  'ays:weeks':[['plan.aysHafta', planBas('aysHafta')]],
+  'ays:plan':[['plan.aysPlan', planBas('aysPlan')]],
   'spi:haftaplan':[['plan.spiHaftaplan', motorDuz(Plan, 'spiHaftaplan')]],
   'esp:days':[['kayit.espGun', tekKayit('espGun')], gunNotu('days')],
   'ays:cards':[['tekrar.aysKart', tekrarTek('aysKart', c => c && c.source === 'error' ? Tekrar.GOC.aysYanlis(c) : Tekrar.GOC.aysKart(c))]],
@@ -76,7 +78,7 @@ const ROTA = {
     ['tekrar.aysKapanis', Object.assign(g => ({ cikti:Object.keys((g[0] && g[0].states) || {}).map(k => Tekrar.GOC.aysKapanis(g[0].states[k], k)) }),
       { kaynak:String(Tekrar.GOC.aysKapanis) + 'states', eksik:Tekrar.EKSIK.aysKapanis })],
     ['not.aysKonu', notListe('aysKonu', false)],
-    ['yol.aysKonu', Object.assign(g => { const r = Yol.GOC.aysKonu(g[0], AKADEMIK()); return { cikti:Object.values(r.kayit.eski), red:r.red.map(x => x.neden), ekSay:r.say }; },
+    ['yol.aysKonu', Object.assign(g => { const r = Yol.GOC.aysKonu(g[0], AKADEMIK()); return { cikti:Object.values(r.kayit.eski), red:r.red.map(x => x.neden), ekSay:r.say, kayit:r.kayit }; },
       { kaynak:String(Yol.GOC.aysKonu), eksik:Yol.EKSIK.aysKonu })]],
   'ays:defter':[['not.defter', notListe('defter', true)]], 'spi:defter':[['not.defter', notListe('defter', true)]], 'esp:defter':[['not.defter', notListe('defter', true)]],
   'ays:defterterim':[['not.terim', notListe('terim', true)]], 'spi:defterterim':[['not.terim', notListe('terim', true)]], 'esp:defterterim':[['not.terim', notListe('terim', true)]],

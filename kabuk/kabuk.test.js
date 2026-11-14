@@ -304,12 +304,40 @@ t('başlangıç paketi: kimlikle eklenir, var olana dokunmaz, geçersizi almaz; 
   const k1 = Kayit.kaydet('su', { ml: 500 }, { gun: '2026-11-01', zaman: 1 }).kayit;
   const paket = { notlar: [n1, { id: 'bozuk', baslik: '', govde: '' }, null], kayitlar: [k1, { id: 'k2', tur: 'yok', gun: '2026-11-01', deger: {} }], kartlar: [{ id: 'c1', on: 'S', arka: 'C' }, { id: 'c2', on: 'S' }] };
   const r = R.baslangicBirlestir(Not, Kayit, { notlar: [], kayitlar: [], kartlar: [] }, paket);
-  esit([r.notlar.map(n => n.id), r.kayitlar.map(k => k.id), r.kartlar.map(k => k.id), r.say], [['eski1'], [k1.id], ['c1'], { not: 1, kayit: 1, kart: 1, atlanan: 4 }]);
+  esit([r.notlar.map(n => n.id), r.kayitlar.map(k => k.id), r.kartlar.map(k => k.id), r.say], [['eski1'], [k1.id], ['c1'], { not: 1, kayit: 1, kart: 1, plan: 0, soru: 0, yol: 0, atlanan: 4 }]);
   const iki = R.baslangicBirlestir(Not, Kayit, r, paket);
   esit([iki.say.not, iki.say.kayit, iki.say.kart, iki.notlar.length], [0, 0, 0, 1]);
   const korur = R.baslangicBirlestir(Not, Kayit, { notlar: [benim], kayitlar: [], kartlar: [] }, paket);
   esit(korur.notlar[0].baslik, 'Benim sürümüm', 'aynı kimlikte buradaki sürüm kalır');
   esit([R.baslangicMetni({ notlar: 5, kayitlar: 5, kartlar: 0 }), R.baslangicMetni({ not: 1, kayit: 0, kart: 2 })], ['5 not, 5 kayıt', '1 not, 2 kart']);
+});
+
+t('başlangıç paketi: plan, soru ve Yol motorların göç çıktısıyla gelir; var olan kalır, ikinci kez bir şey eklemez', () => {
+  const Kayit = require('../motor/kayit.js'), Plan = require('../motor/plan.js'), Soru = require('../motor/soru.js'), Yol = require('../motor/yol.js');
+  // eski modüllerin gerçek biçimleri, motorun kendi bağdaştırıcısından (tools/kabuk_baslangic.js aynı çağrıları yapar)
+  const gun = Plan.GOC.aysGun({ date: '2026-11-03', blocks: [{ id: 'b1', slot: 'Sabah', subject: 'Matematik', targetMin: 50, actualMin: 45, status: 'done', actualQ: 28, correctQ: 20 },
+    { id: 'b2', slot: 'Öğle', subject: 'Fizik', targetMin: 40, status: 'skipped' }] });
+  const hafta = Plan.GOC.aysHafta({ n: 2, title: 'Hafta iki', questionTarget: 400 }, '2026-09-07');
+  const sablon = Plan.GOC.spiHaftaplan({ id: 'h1', tur: 'hareket', ad: 'Yürüyüş', gunler: [{ ne: 'yürü', dk: 30 }, null, null, null, null, null, null] });
+  const deneme = Soru.GOC.aysDeneme({ id: 'd1', date: '2026-10-19', type: 'Tam TYT', family: 'TYT', kind: 'full', duration: 165, tests: [{ name: 'Türkçe', correct: 30, wrong: 8, blank: 2 }] });
+  const sgun = Soru.GOC.aysGun({ date: '2026-11-03', blocks: [{ id: 'b1', slot: 'Sabah', actualQ: 28, correctQ: 20 }] });
+  const yolP = { dersler: { d1: { okundu: 5 } }, cevaplar: { a1: [{ cevap: 'A', dogru: true, zaman: 5 }], a2: [{ cevap: 'B', dogru: false, zaman: 6 }] },
+    eski: { 'ays:tyt-turkce/tr-01': { konu: 'tr-01', durum: 'closed', etiket: 'eski kayıt' } } };
+  const paket = { plan: { gunler: [gun, { gun: 'bozuk' }], hedefler: [hafta, { id: 'x', tur: 'baska' }], sablonlar: [sablon] },
+    soru: { denemeler: [deneme], hatalar: [Soru.GOC.aysHata({ id: 'r1', tag: 'K' })], gunler: [sgun] }, yol: { 'akademik.1': yolP, 'Kötü anahtar': yolP } };
+  const benimYol = Object.assign(Yol.bosKayit(), { cevaplar: { a1: [{ cevap: 'C', dogru: false, zaman: 99 }] }, kapilar: { k: { gecti: true } } });
+  const bos = { notlar: [], kayitlar: [], kartlar: [], plan: {}, soru: {}, yol: { 'akademik.1': benimYol } };
+  const r = R.baslangicBirlestir(Not, Kayit, bos, paket);
+  esit([r.say.plan, r.say.soru, r.say.yol, r.say.atlanan], [3, 3, 3, 2], 'bozuk gün ve tanınmayan hedef alınmaz');
+  esit([r.plan.gunler[0].gun, r.plan.gunler[0].bloklar.map(b => b.durum), r.plan.hedefler[0].bas, r.soru.gunler[0].etiket], ['2026-11-03', ['yapildi', 'atlandi'], '2026-09-14', 'eski kayıt']);
+  const y = r.yol['akademik.1'];
+  esit([y.cevaplar.a1[0].cevap, y.cevaplar.a2[0].cevap, y.dersler.d1.okundu, y.kapilar.k.gecti, Object.keys(r.yol)], ['C', 'B', 5, true, ['akademik.1']], 'kabukta verilen cevap ve kapı kalır; eksik anahtar eklenir; bozuk aşama adı alınmaz');
+  const dr = Yol.durum(Yol.yukle(require('../alan/akademik/asama-1.json')), Object.assign(Yol.bosKayit(), { eski: y.eski }));
+  esit([dr.asama.gecti, dr.ilerleme.gecilenUnite.deger], [false, 0], 'eski «closed» hiçbir kapıyı geçirmez');
+  const iki = R.baslangicBirlestir(Not, Kayit, Object.assign({}, r, { yol: { 'akademik.1': y } }), paket);
+  esit([iki.say.plan, iki.say.soru, iki.say.yol, Object.keys(iki.yol)], [0, 0, 0, []], 'ikinci kez: değişen yok');
+  esit(R.baslangicMetni({ not: 1, plan: 69, soru: 2, yol: 2 }), '1 not, 69 plan, 2 soru kaydı, 2 Yol ilerlemesi');
+  esit([R.baslangicYerleri({ not: 1, plan: 3, yol: 1 }), R.baslangicYerleri({ kart: 1 }), R.baslangicYerleri({})], ['Not, Plan ve Yol', 'Tekrar', '']);
 });
 
 t('köken taşıması: paket yeni kökenin deposuna geri yazılır; var olan anahtarın üstüne yazılmaz; aynı paket iki kez işlenmez', () => {

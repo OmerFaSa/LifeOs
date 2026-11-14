@@ -65,7 +65,7 @@ function sahteIdb(o = {}) {
 const KAYITLAR = ['lifeos.yol.felsefe.1', 'lifeos.yol.dil.2', 'lifeos.not.kayit', 'lifeos.not.araclar', 'lifeos.tekrar.kartlar', 'lifeos.tekrar.bugun',
   'lifeos.kayit.kayitlar', 'lifeos.plan.durum', 'lifeos.plan.sablon', 'lifeos.soru.oturum', 'lifeos.soru.gecmis', 'lifeos.soru.deneme',
   'lifeos.soru.denemeler', 'lifeos.tanisma.kayit', 'lifeos.tanisma.taslak', 'lifeos.beden.boy', 'lifeos.beden.cinsiyet',
-  'lifeos.beden.dogumYili', 'lifeos.beden.hedef', 'lifeos.onay'];
+  'lifeos.beden.dogumYili', 'lifeos.beden.hedef', 'lifeos.onay', 'lifeos.plan.eski', 'lifeos.soru.eski'];
 // lifeos.kabuk.baslangic: getirilen başlangıç paketinin kimliği; lifeos.tasima: köken taşımasında işlenen paket adları (ikisi de iz, kayıt değil)
 const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.tanisma.davet', 'lifeos.kullanim', 'lifeos.kabuk.baslangic', 'lifeos.tasima']
   .concat(A.SEMA.filter(s => s.grup !== 'beden').map(s => s.anahtar));

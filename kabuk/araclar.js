@@ -325,26 +325,61 @@
     return -1;
   }
 
-  /* ---- Başlangıç paketi (tools/kabuk_baslangic.py): eski sistemdeki not, kayıt ve kartlar ---- */
+  /* ---- Başlangıç paketi (tools/kabuk_baslangic.py): eski sistemdeki not, kayıt, kart, plan, soru ve Yol ilerlemesi ---- */
+  // Plan gün kaydının kimliği yok: kaynak ve günle tekilleşir (tools/kabuk_baslangic.js anahtar ile aynı)
+  function baslangicAnahtar(x) { return !x ? null : typeof x.id === 'string' ? x.id : typeof x.gun === 'string' && x.kaynak ? x.kaynak + ':' + x.gun : null; }
+  var BASLANGIC_ALT = { plan: { gunler: function (g) { return typeof g.gun === 'string' && Array.isArray(g.bloklar); },
+      hedefler: function (h) { return ['hafta-hedefi', 'program', 'istisna'].indexOf(h.tur) >= 0; },
+      sablonlar: function (s) { return s.tur === 'hafta-sablonu' && Array.isArray(s.gunler); } },
+    soru: { denemeler: function (e) { return Array.isArray(e.testler); }, hatalar: function () { return true; },
+      gunler: function (g) { return typeof g.tarih === 'string' && Array.isArray(g.kalemler); } } };
+  // Yol kaydı parçası (dersler, cevaplar, eski): yalnız eksik anahtar eklenir, burada yazılmış olan kalır
+  function baslangicYol(mevcut, gelen) {
+    var k = mevcut && mevcut.dersler && mevcut.cevaplar && mevcut.kapilar && mevcut.asamalar ? mevcut : { dersler: {}, cevaplar: {}, kapilar: {}, asamalar: {} };
+    var yeni = Object.assign({}, k), n = 0;
+    ['dersler', 'cevaplar', 'eski'].forEach(function (a) {
+      var g = gelen && gelen[a];
+      if (!g || typeof g !== 'object') return;
+      yeni[a] = Object.assign({}, k[a] || {});
+      Object.keys(g).forEach(function (id) {
+        if (id in yeni[a] || !(a === 'cevaplar' ? Array.isArray(g[id]) : g[id] && typeof g[id] === 'object')) return;
+        yeni[a][id] = g[id]; n++;
+      });
+    });
+    return { kayit: yeni, say: n };
+  }
   // Paketi var olan listelere kimlikle ekler: var olan kimliğe dokunmaz (iki kez getirmek zararsız), motorun
-  // kabul etmediği kaydı almaz. Girdi değişmez; dönen: yeni listeler ve sayılar.
+  // kabul etmediği kaydı almaz. Girdi değişmez; dönen: yeni listeler ve sayılar. mevcut.yol: { 'alan.n': o aşamanın kaydı ya da null };
+  // dönen yol yalnız değişen aşamaları taşır.
   function baslangicBirlestir(Not, Kayit, mevcut, paket) {
-    var say = { not: 0, kayit: 0, kart: 0, atlanan: 0 };
+    var say = { not: 0, kayit: 0, kart: 0, plan: 0, soru: 0, yol: 0, atlanan: 0 };
     var ekle = function (liste, gelen, ad, gecerli) {
       var varMi = {}, yeni = liste.slice();
-      liste.forEach(function (x) { varMi[x.id] = true; });
+      liste.forEach(function (x) { varMi[baslangicAnahtar(x)] = true; });
       (Array.isArray(gelen) ? gelen : []).forEach(function (x) {
-        if (!x || typeof x.id !== 'string' || varMi[x.id] || !gecerli(x)) { say.atlanan++; return; }
-        varMi[x.id] = true; yeni.push(x); say[ad]++;
+        var k = baslangicAnahtar(x);
+        if (k == null || varMi[k] || !gecerli(x)) { say.atlanan++; return; }
+        varMi[k] = true; yeni.push(x); say[ad]++;
       });
       return yeni;
     };
-    return {
+    var r = {
       notlar: ekle(mevcut.notlar || [], paket.notlar, 'not', function (n) { return !Not.dogrula(n); }),
       kayitlar: ekle(mevcut.kayitlar || [], paket.kayitlar, 'kayit', function (r) { return !!Kayit.TURLER[r.tur] && typeof r.gun === 'string' && r.deger && typeof r.deger === 'object'; }),
       kartlar: ekle(mevcut.kartlar || [], paket.kartlar, 'kart', function (k) { return typeof k.on === 'string' && !!k.on.trim() && typeof k.arka === 'string' && !!k.arka.trim(); }),
-      say: say
+      yol: {}, say: say
     };
+    Object.keys(BASLANGIC_ALT).forEach(function (bol) {
+      var m = mevcut[bol] || {}, p = paket[bol] && typeof paket[bol] === 'object' ? paket[bol] : {};
+      r[bol] = {};
+      Object.keys(BASLANGIC_ALT[bol]).forEach(function (a) { r[bol][a] = ekle(Array.isArray(m[a]) ? m[a] : [], p[a], bol, BASLANGIC_ALT[bol][a]); });
+    });
+    Object.keys(paket.yol && typeof paket.yol === 'object' ? paket.yol : {}).forEach(function (a) {
+      if (!/^[a-z]+\.\d+$/.test(a)) return;
+      var y = baslangicYol((mevcut.yol || {})[a], paket.yol[a]);
+      if (y.say) { r.yol[a] = y.kayit; say.yol += y.say; }
+    });
+    return r;
   }
   // Eski profil → Ayarlar › Beden: yalnız hâlâ varsayılanda duran ayar yazılır (kullanıcının girdiği kalır); değer şemadan geçer.
   function baslangicBeden(Ayar, depo, beden) {
@@ -361,10 +396,18 @@
     if (say.notlar || say.not) p.push((say.notlar || say.not) + ' not');
     if (say.kayitlar || say.kayit) p.push((say.kayitlar || say.kayit) + ' kayıt');
     if (say.kartlar || say.kart) p.push((say.kartlar || say.kart) + ' kart');
+    if (say.plan) p.push(say.plan + ' plan');
+    if (say.soru) p.push(say.soru + ' soru kaydı');
+    if (say.yol) p.push(say.yol + ' Yol ilerlemesi');
     return p.join(', ');
   }
+  // Getirilenin göründüğü araçlar: «Not, Plan ve Yol»
+  function baslangicYerleri(say) {
+    var l = [['not', 'Not'], ['kayit', 'Kayıt'], ['kart', 'Tekrar'], ['plan', 'Plan'], ['soru', 'Soru'], ['yol', 'Yol']].filter(function (x) { return say[x[0]]; }).map(function (x) { return x[1]; });
+    return l.length > 1 ? l.slice(0, -1).join(', ') + ' ve ' + l[l.length - 1] : l.join('');
+  }
 
-  var Arac = { kimlik: kimlik, baslangicBirlestir: baslangicBirlestir, baslangicBeden: baslangicBeden, baslangicMetni: baslangicMetni, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
+  var Arac = { kimlik: kimlik, baslangicBirlestir: baslangicBirlestir, baslangicYol: baslangicYol, baslangicYerleri: baslangicYerleri, baslangicBeden: baslangicBeden, baslangicMetni: baslangicMetni, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -373,6 +416,7 @@
   /* ---------------- tarayıcı ---------------- */
   var d = document, Not = L.Motor && L.Motor.Not, Tekrar = L.Motor && L.Motor.Tekrar, B = Kabuk.Bilesen;
   var NOT_ANAHTAR = 'lifeos.not.kayit', KART_ANAHTAR = 'lifeos.tekrar.kartlar', SAYAC_ANAHTAR = 'lifeos.tekrar.bugun';
+  var PLAN_ESKI = 'lifeos.plan.eski', SORU_ESKI = 'lifeos.soru.eski', ESKI_PUL = { metin: 'eski kayıt', tur: 'kesik' }; // başlangıç paketinden gelen eski plan ve soru kayıtları
   var ic = function () { return Kabuk.ic; }; // kabuk.js sonra yüklenir; çizim anında hazırdır
   function oku(anahtar, bos) {
     try { var v = JSON.parse(ic().depo.getItem(anahtar)); if (v && typeof v === 'object' && Array.isArray(v) === Array.isArray(bos)) return v; } catch (e) { /* bozuk kayıt: boş başla */ }
@@ -608,9 +652,10 @@
     if (eksik_.length) Promise.all(eksik_.map(function (a) { return I.alanYukle(a.id); })).then(function () { if (d.querySelector('[data-arac="yol"]')) I.rota(); });
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="yol">' + B.baslik({ metin: 'Yol haritası', alt: 'Her alanın aşama, ünite, ders ve kapıları. ' + alanlar.length + ' alan taşındı.' }) +
       B.liste({ ad: 'Alanlar', ogeler: alanlar.map(function (a) {
-        var dr = I.fDurum(a.id), il = dr && dr.ilerleme;
+        var dr = I.fDurum(a.id), il = dr && dr.ilerleme, eski = Object.keys(I.kayitOku(a.id, 1).eski || {}).length; // başlangıç paketinden (Yol.GOC.aysKonu)
         return { ad: a.ad, href: a.yol,
-          not: il ? 'Aşama ' + I.al(a.id).n + ' · ' + dr.asama.ad + ' · ' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' kapı geçildi' : 'Aşama 1' };
+          not: (il ? 'Aşama ' + I.al(a.id).n + ' · ' + dr.asama.ad + ' · ' + il.okunanDers.deger + '/' + il.okunanDers.toplam + ' ders okundu · ' + il.gecilenUnite.deger + '/' + il.gecilenUnite.toplam + ' kapı geçildi' : 'Aşama 1') +
+            (eski ? ' · ' + eski + ' konu eski sistemden (eski kayıt)' : '') };
       }) }) + '</div>';
   }
 
@@ -796,7 +841,31 @@
         }) }) : '<p class="soluk">Eklediğin iş yok. Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
         '<form class="planform" data-plan="is" novalidate>' + B.alan({ ad: 'İş', isim: 'ad', enCok: 120 }) +
         '<div class="ikili">' + B.alan({ ad: 'Süre (dk)', isim: 'dk', tur: 'sayi' }) + B.alan({ ad: 'Son tarih · isteğe bağlı', isim: 'son', tur: 'tarih' }) + '</div>' +
-        B.eylemler([{ metin: 'İş ekle', tip: 'submit' }]) + '</form>'] }) + '</div>';
+        B.eylemler([{ metin: 'İş ekle', tip: 'submit' }]) + '</form>'] }) + planEski() + '</div>';
+  }
+  // Başlangıç paketiyle gelen eski planlar (lifeos.plan.eski; Plan.GOC çıktısı): salt okunur, «eski kayıt»
+  function planEski() {
+    var v = oku(PLAN_ESKI, {}), g = v.gunler || [], h = v.hedefler || [], s = v.sablonlar || [];
+    if (!g.length && !h.length && !s.length) return '';
+    var gunAd = function (x) { return new Date(x + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }); };
+    var KAYNAK = { 'goc:ays:hafta': 'hafta sözleşmesi', 'goc:ays:program': 'program', 'goc:ays:istisna': 'istisna' };
+    var acil = function (baslik, ad, l) { return l.length ? B.acilir({ baslik: baslik + ' (' + l.length + ')', duzey: 3, govde: B.liste({ ad: ad, ogeler: l }) }) : ''; };
+    return B.bolum({ baslik: 'Eski sistemden', id: 'plan-eski', veri: { 'plan-eski': '' }, govde: ['<p class="soluk">AYS ve SPİ\'den gelen planlar. Değişmez, «eski kayıt» olarak durur.</p>',
+      acil('Gün planları', 'Eski gün planları', g.slice().sort(function (a, b) { return a.gun < b.gun ? 1 : -1; }).map(function (p) {
+        var yap = p.bloklar.filter(function (b) { return b.durum === 'yapildi'; }).length, dk = p.bloklar.reduce(function (a, b) { return a + (Number(b.dk) || 0); }, 0);
+        return { ad: gunAd(p.gun) + (p.ara ? ' · ara günü' : ''), pul: ESKI_PUL,
+          not: p.bloklar.length ? yap + '/' + p.bloklar.length + ' blok yapıldı · planlanan ' + dk + ' dk (hesaplandı)' : 'blok yok' };
+      })),
+      acil('Hafta hedefleri ve program', 'Eski hafta hedefleri', h.slice().sort(function (a, b) { return (a.hafta || 0) - (b.hafta || 0) || (a.kaynak < b.kaynak ? -1 : 1); }).map(function (x) {
+        var ad = x.tur === 'program' ? 'Program · ' + x.hafta + ' hafta' : x.tur === 'istisna' ? 'İstisna · ' + gunAd(x.bas) + (x.bit !== x.bas ? ' – ' + gunAd(x.bit) : '') : 'Hafta ' + x.hafta + (x.ad ? ' · ' + x.ad : '');
+        var not = [KAYNAK[x.kaynak] || null, x.tur === 'hafta-hedefi' && x.bas ? gunAd(x.bas) + ' başlar' : null, x.soru != null ? x.soru + ' soru hedefi' : null,
+          x.dk != null ? x.dk + ' dk kapasite' : null, x.konular && x.konular.length ? x.konular.length + ' konu' : null, x.ara ? 'ara' : null, x.neden || null].filter(Boolean).join(' · ');
+        return { ad: ad, not: not, pul: ESKI_PUL, uzun: true };
+      })),
+      acil('Hafta şablonları', 'Eski hafta şablonları', s.map(function (x) {
+        var blok = x.gunler.reduce(function (a, y) { return a + ((y.sablon && y.sablon.bloklar) || []).length; }, 0);
+        return { ad: x.ad || x.alan, not: x.alan + (x.maddeler ? ' · ' + x.maddeler.length + ' madde' : '') + (blok ? ' · haftada ' + blok + ' blok' : ''), pul: ESKI_PUL };
+      }))] });
   }
   function planYaz(dr, ileti) { yaz(PLAN_ANAHTAR, dr); planIleti = ileti || null; ic().rota(); if (ileti) { var el = d.querySelector('[data-arac="plan"] .b-uyari--hata'); if (el) el.focus(); } }
   function planHata(hatalar) { planIleti = hatalar; ic().rota(); var el = d.querySelector('[data-arac="plan"] .b-uyari--hata'); if (el) el.focus(); }
@@ -827,6 +896,25 @@
   /* ---- Soru: karma test ---- */
   var SORU_ANAHTAR = 'lifeos.soru.oturum', SORU_GECMIS = 'lifeos.soru.gecmis', Soru = L.Motor && L.Motor.Soru;
   var soruGoster = -1; // cevabı az önce verilen sorunun sırası: sonucu ekranda kalır, «Sonraki» ile geçilir
+  // Başlangıç paketiyle gelen eski sınav ve soru kayıtları (lifeos.soru.eski; Soru.GOC çıktısı): salt okunur, «eski kayıt»
+  function soruEski() {
+    var v = oku(SORU_ESKI, {}), e = v.denemeler || [], g = v.gunler || [], h = v.hatalar || [];
+    if (!e.length && !g.length && !h.length) return '';
+    var gunAd = function (x) { return x ? new Date(String(x).slice(0, 10) + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'tarihsiz'; };
+    var acil = function (baslik, ad, l) { return l.length ? B.acilir({ baslik: baslik + ' (' + l.length + ')', duzey: 3, govde: B.liste({ ad: ad, ogeler: l }) }) : ''; };
+    var top = function (l, a) { var n = l.filter(function (x) { return x[a] != null; }); return n.length ? n.reduce(function (s, x) { return s + x[a]; }, 0) : null; };
+    var tur = {}; h.forEach(function (x) { var k = x.tur || 'etiketsiz'; tur[k] = (tur[k] || 0) + 1; });
+    return B.bolum({ baslik: 'Eski sistemden', id: 'soru-eski', veri: { 'soru-eski': '' }, govde: ['<p class="soluk">AYS\'den gelen denemeler ve soru sayıları. Değişmez, «eski kayıt» olarak durur.</p>',
+      acil('Denemeler', 'Eski denemeler', e.slice().sort(function (a, b) { return a.tarih < b.tarih ? 1 : -1; }).map(function (x) {
+        var an = Soru.denemeAnalizi(x);
+        return { ad: (x.ad || x.aile || 'Deneme') + ' · ' + gunAd(x.tarih), not: String(an.net.deger).replace('.', ',') + ' net (' + an.net.etiket + ') · ' + x.testler.length + ' test', pul: ESKI_PUL, uzun: true };
+      })),
+      acil('Günlük soru sayıları', 'Eski günlük soru sayıları', g.slice().sort(function (a, b) { return a.tarih < b.tarih ? 1 : -1; }).map(function (x) {
+        var c = top(x.kalemler, 'cozulen'), dg = top(x.kalemler, 'dogru');
+        return { ad: gunAd(x.tarih), not: (c == null ? 'çözülen veri yok' : c + ' çözüldü') + (dg == null ? '' : ' · ' + dg + ' doğru'), pul: ESKI_PUL };
+      })),
+      h.length ? '<p class="soluk">Hata defteri: ' + Object.keys(tur).sort().map(function (k) { return ic().kac((Soru.HATA_TURLERI[k] || { ad: k }).ad) + ' ' + tur[k]; }).join(' · ') + ' (eski kayıt)</p>' : ''] });
+  }
   function soruBaglam() { // etkin alanın içeriği ve havuzu; içerik yüklenmediyse null
     var I = ic(), id = I.etkin(), f = I.al(id);
     if (!f || !f.y) return null;
@@ -854,7 +942,7 @@
         (son.length ? B.bolum({ baslik: 'Son testler', govde: B.liste({ ad: 'Son testler', ogeler: son.map(function (g) {
           var r = g.sayilar;
           return { ad: g.alanAd + ' · ' + tarih(g.bitti), not: r.dogru + ' doğru · ' + r.yanlis + ' yanlış · ' + (r.bos + r.bakildi) + ' boş', pul: 'ölçüldü', uzun: true };
-        }) }) }) : '') + '</div>';
+        }) }) }) : '') + soruEski() + '</div>';
     }
     var sira = soruGoster >= 0 ? soruGoster : soruSirasi(o);
     if (sira < 0) sira = o.sorular.length - 1;
@@ -911,33 +999,49 @@
     baslangicSoruldu = true;
     if (location.protocol === 'file:' || !window.fetch) return;
     fetch('/api/kabuk/baslangic', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
-      if (!v || v.lifeos_kabuk_baslangic !== 1 || !v.kimlik || !v.say || ic().depo.getItem(BASLANGIC_IZ) === v.kimlik) return;
-      if (!(v.say.notlar + v.say.kayitlar + v.say.kartlar + Object.keys(v.beden || {}).length)) return;
-      baslangic = v;
+      if (!v || v.lifeos_kabuk_baslangic !== 1 || !v.kimlik || !v.say || !Not || !Kayit || ic().depo.getItem(BASLANGIC_IZ) === v.kimlik) return;
+      // yeni paket (kimlik değişti): yalnız buraya henüz gelmemiş olan teklif edilir; hiçbiri yoksa sorulmaz, iz yazılır
+      var yeni = baslangicBirlestir(Not, Kayit, baslangicMevcut(v), v).say, ys = yeni.not + yeni.kayit + yeni.kart + yeni.plan + yeni.soru + yeni.yol;
+      if (!(ys + bedenBos(v.beden))) { ic().depo.setItem(BASLANGIC_IZ, v.kimlik); return; }
+      baslangic = v; baslangicYeni = yeni;
       if (d.querySelector('.b-karsilama')) ic().rota();
     }).catch(function () { /* sunucu yok ya da paket yok: teklif çıkmaz */ });
   }
+  // Paketin dokunacağı yerlerin buradaki hâli: listeler ve paketteki her Yol aşamasının kaydı
+  function baslangicMevcut(v) {
+    var yol = {};
+    Object.keys(v.yol || {}).forEach(function (a) { var m = /^([a-z]+)\.(\d+)$/.exec(a); if (m) yol[a] = oku(Kabuk.Asama.kayitAnahtari(m[1], +m[2]), null); });
+    return { notlar: oku(NOT_ANAHTAR, []), kayitlar: oku(KAYIT_ANAHTAR, []), kartlar: oku(KART_ANAHTAR, []), plan: oku(PLAN_ESKI, {}), soru: oku(SORU_ESKI, {}), yol: yol };
+  }
+  function bedenBos(beden) { // varsayılanda duran, paketin dolduracağı Beden ayarı sayısı
+    var A = Kabuk.Ayar;
+    return Object.keys(beden || {}).filter(function (a) { var t = A.tanim('lifeos.beden.' + a); return t && beden[a] != null && A.oku(ic().depo, 'lifeos.beden.' + a) === t.varsayilan; }).length;
+  }
+  var baslangicYeni = null;
   Kabuk.baslangicDavet = function () {
     var B = Kabuk.Bilesen;
     if (!baslangicSoruldu) baslangicYokla();
     if (baslangicBitti) { var m = baslangicBitti; baslangicBitti = ''; return B.uyari({ tur: 'tamam', metin: m, veri: { baslangic: 'bitti' } }); }
     if (!baslangic) return '';
     return B.uyari({ tur: 'bilgi', veri: { baslangic: 'teklif' },
-      metin: 'Eski sistemdeki kayıtların hazır: ' + [baslangicMetni(baslangic.say), Object.keys(baslangic.beden || {}).length ? 'beden bilgilerin' : ''].filter(Boolean).join(', ') +
-        '. Buraya getirilsin mi? Eski yerlerinde de durmaya devam eder.',
+      metin: 'Eski sistemdeki kayıtların hazır: ' + [baslangicMetni(baslangicYeni), bedenBos(baslangic.beden) ? 'beden bilgilerin' : ''].filter(Boolean).join(', ') +
+        '. Buraya getirilsin mi? Burada yazdıkların değişmez; eski yerlerinde de durmaya devam eder.',
       eylem: [{ metin: 'Getir', tur: 'ana', veri: { 'arac-ac': 'baslangic-getir' } }, { metin: 'Sonra', tur: 'sade', veri: { 'arac-ac': 'baslangic-sonra' } }] });
   };
   function baslangicGetir() {
     if (!baslangic || !Not || !Kayit) return;
-    var r = baslangicBirlestir(Not, Kayit, { notlar: oku(NOT_ANAHTAR, []), kayitlar: oku(KAYIT_ANAHTAR, []), kartlar: oku(KART_ANAHTAR, []) }, baslangic);
+    var r = baslangicBirlestir(Not, Kayit, baslangicMevcut(baslangic), baslangic), I = ic();
     if (r.say.not) yaz(NOT_ANAHTAR, r.notlar);
     if (r.say.kayit) yaz(KAYIT_ANAHTAR, r.kayitlar);
     if (r.say.kart) yaz(KART_ANAHTAR, r.kartlar);
-    var bedenSay = baslangicBeden(Kabuk.Ayar, ic().depo, baslangic.beden);
-    ic().depo.setItem(BASLANGIC_IZ, baslangic.kimlik);
-    baslangicBitti = (r.say.not + r.say.kayit + r.say.kart + bedenSay) ? 'Getirildi: ' + [baslangicMetni(r.say), bedenSay ? bedenSay + ' beden bilgisi (Ayarlar › Beden)' : ''].filter(Boolean).join(', ') +
-      '. Not ve Kayıt araçlarında görünür.' : 'Bu kayıtlar zaten buradaydı.';
-    baslangic = null;
+    if (r.say.plan) yaz(PLAN_ESKI, r.plan);
+    if (r.say.soru) yaz(SORU_ESKI, r.soru);
+    Object.keys(r.yol).forEach(function (a) { var p = a.split('.'); Kabuk.Asama.yaz(I.depo, p[0], +p[1], r.yol[a]); });
+    var bedenSay = baslangicBeden(Kabuk.Ayar, I.depo, baslangic.beden);
+    I.depo.setItem(BASLANGIC_IZ, baslangic.kimlik);
+    baslangicBitti = (r.say.not + r.say.kayit + r.say.kart + r.say.plan + r.say.soru + r.say.yol + bedenSay) ? 'Getirildi: ' + [baslangicMetni(r.say), bedenSay ? bedenSay + ' beden bilgisi (Ayarlar › Beden)' : ''].filter(Boolean).join(', ') +
+      (baslangicYerleri(r.say) ? '. ' + baslangicYerleri(r.say) + ' araçlarında görünür.' : '.') : 'Bu kayıtlar zaten buradaydı.';
+    baslangic = null; baslangicYeni = null;
     ic().rota();
     var el = d.querySelector('[data-baslangic="bitti"]'); if (el) el.focus();
   }

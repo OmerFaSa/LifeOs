@@ -13,13 +13,26 @@ const PORT = 4397, T = 'http://127.0.0.1:' + PORT;
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'kabuk-gez-'));
 const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici, LIFEOS_TASIMA: '1',
   LIFEOS_HESAP_KLASOR: path.join(gecici, 'LifeOS', 'hesap') }); // hesap klasörü Linux'ta LOCALAPPDATA'ya bakmaz: göç paketleri onun yanındaki goc/paket'ten okunur // köken taşıması ucu: gerçekte yalnız tek kapı devredeyken açık
-// Başlangıç paketi (tools/kabuk_baslangic.py çıktısının biçimi): eski sistemden bir not ve bir kayıt
+// Başlangıç paketi (tools/kabuk_baslangic.py çıktısının biçimi): eski modüllerin gerçek biçimindeki kayıtlar motorların göç
+// bağdaştırıcılarından geçer (tools/kabuk_baslangic.js topla, tek depodan okuyan aracın kendi zinciri) + elle bir not ve bir ölçü
+const AK = JSON.parse(fs.readFileSync(path.join(kok, 'alan/akademik/asama-1.json'), 'utf8'));
+const AK_KAYNAK = AK.kaynaklar.filter(k => k.bolum === "R.KONU_ANLATIM['tr-01']")[0].id;
+const AK_A0 = [].concat(...AK.uniteler.map(u => u.dersler)).filter(d => d.kaynak[0] === AK_KAYNAK)[0].alistirmalar[0];
+const grup = (rota, alan, yol, govde) => ({ rota, alan, kayitlar: [{ yol, govde }] });
+const eski = require(path.join(kok, 'tools/kabuk_baslangic.js')).topla({ baglam: { baslangic: '2026-09-07' }, gruplar: [
+  grup('ays:days', 'ays/main', 'days/2026-10-21', { date: '2026-10-21', blocks: [{ id: 'b1', slot: 'Sabah', subject: 'Matematik', topic: 'Türev', targetMin: 50, actualMin: 45, status: 'done', actualQ: 28, correctQ: 20 }] }),
+  grup('ays:weeks', 'ays/main', 'weeks/w02', { n: 2, title: 'Hafta iki', questionTarget: 400 }),
+  grup('spi:haftaplan', 'spi/ben', 'haftaplan/h1', { id: 'h1', tur: 'hareket', ad: 'Yürüyüş', gunler: [{ ne: 'yürü', dk: 30 }, null, null, null, null, null, null] }),
+  grup('ays:exams', 'ays/main', 'exams/d1', { id: 'd1', date: '2026-10-19', type: 'Tam TYT', family: 'TYT', kind: 'full', duration: 165, tests: [{ name: 'Türkçe', correct: 30, wrong: 8, blank: 2 }] }),
+  grup('ays:cards', 'ays/main', 'cards/c1', { id: 'c1', front: 'Eski AYS kartı', back: 'Cevabı', dueAt: '2026-10-20', lastReviewedAt: '2026-10-13', history: [{ rating: 'good' }] }),
+  grup('ays:topics', 'ays/main', 'topics/tyt-turkce', { subjectId: 'tyt-turkce', states: { 'tr-01': { state: 'practicing', ornek: { 0: { h: AK_A0.dogru, d: true, at: '2026-09-30T09:00:00.000Z' } } } } })] });
 fs.mkdirSync(path.join(gecici, 'LifeOS', 'veri'), { recursive: true });
 fs.writeFileSync(path.join(gecici, 'LifeOS', 'veri', 'kabuk-baslangic.json'), JSON.stringify({ lifeos_kabuk_baslangic: 1, kimlik: 'gezi-paketi', uretildi: 1,
-  say: { notlar: 1, kayitlar: 1, kartlar: 0 }, beden: { boy: 175, dogumYili: 2001 },
+  say: { notlar: 1, kayitlar: 1 + eski.kayitlar.length, kartlar: eski.kartlar.length, plan: 3, soru: 2, yol: 2 }, beden: { boy: 175, dogumYili: 2001 },
   notlar: [{ id: 'eski-not-1', baslik: 'Eski defterden', govde: 'Eski sistemde yazılmış not.', alan: '', etiketler: [], kaynak: { yapi: 'defter' }, olusturma: 1000, guncelleme: 1000,
     ozel: false, tur: 'not', klasor: '', sabit: false, baglam: null, ozellik: {} }],
-  kayitlar: [{ id: 'kilo:2026-10-20:0', tur: 'kilo', gun: '2026-10-20', zaman: null, kaynak: 'goc', deger: { kg: { v: 70, k: 'eski' } }, ek: {} }], kartlar: [] }));
+  kayitlar: [{ id: 'kilo:2026-10-20:0', tur: 'kilo', gun: '2026-10-20', zaman: null, kaynak: 'goc', deger: { kg: { v: 70, k: 'eski' } }, ek: {} }].concat(eski.kayitlar),
+  kartlar: eski.kartlar, plan: eski.plan, soru: eski.soru, yol: eski.yol }));
 // Köken taşıması: eski AYS kökeninin göç paketi (biçim brand/ortak/gocpaket.js)
 fs.mkdirSync(path.join(gecici, 'LifeOS', 'goc', 'paket'), { recursive: true });
 fs.writeFileSync(path.join(gecici, 'LifeOS', 'goc', 'paket', 'ays-cGEZ-20261114-000000-abcdef.json'), JSON.stringify({ lifeos_goc: 1, kaynak: 'ays', cihaz: 'cGEZ', parca: 1,
@@ -628,10 +641,16 @@ async function goruntu(p, ad, sec = {}) {
     const notOnce = await p.locator('#not-liste a').count();
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForSelector('[data-baslangic="teklif"]');
-    dene('başlangıç: Bugün\'de teklif sayılarıyla çıkar', /1 not, 1 kayıt/.test(await p.textContent('[data-baslangic="teklif"]')));
+    // gezi bu alıştırmayı kabukta daha önce cevapladıysa o cevap kalır, paketten yalnız eski konu durumu gelir (Yol 1, yoksa 2)
+    const yolCevap = () => p.evaluate(a0 => JSON.stringify((JSON.parse(window.LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.akademik.1') || '{}').cevaplar || {})[a0] || null), AK_A0.id);
+    const cevapOnce = await yolCevap();
+    const HEPSI = new RegExp('1 not, 2 kayıt, 1 kart, 3 plan, 2 soru kaydı, ' + (cevapOnce === 'null' ? 2 : 1) + ' Yol ilerlemesi');
+    dene('başlangıç: Bugün\'de teklif yalnız gelecek olanı sayar (not, kayıt, kart, plan, soru, Yol)', HEPSI.test(await p.textContent('[data-baslangic="teklif"]')), await p.textContent('[data-baslangic="teklif"]'));
     await p.click('[data-arac-ac="baslangic-getir"]');
     await p.waitForSelector('[data-baslangic="bitti"]');
-    dene('başlangıç: «Getir» sonucu söyler', /Getirildi: 1 not, 1 kayıt/.test(await p.textContent('[data-baslangic="bitti"]')), await p.textContent('[data-baslangic="bitti"]'));
+    const bitti = await p.textContent('[data-baslangic="bitti"]');
+    dene('başlangıç: «Getir» sonucu ve görüneceği araçları söyler', /Getirildi: /.test(bitti) && HEPSI.test(bitti) && /Not, Kayıt, Tekrar, Plan, Soru ve Yol araçlarında/.test(bitti), bitti);
+    dene('başlangıç: kabukta verilmiş Yol cevabının üstüne yazılmadı', cevapOnce === 'null' || (await yolCevap()) === cevapOnce);
     // beden alanları yalnız varsayılandaysa yazılır; bu gezide Beden daha önce elle girildi, o yüzden burada sayılmaz (kural birim testinde)
     dene('başlangıç: elle girilmiş Beden ayarının üstüne yazılmadı', await p.evaluate(() => window.LIFEOS.Kabuk.Ayar.oku(window.LIFEOS.Kabuk.Depo, 'lifeos.beden.boy') !== null).catch(() => false));
     await p.goto(T + '/kabuk/#/motor/not');
@@ -645,6 +664,29 @@ async function goruntu(p, ad, sec = {}) {
     dene('başlangıç: eski kayıt deposunda, «eski kayıt» etiketiyle', await p.evaluate(async () => {
       const v = await window.LIFEOS.Kabuk.Depo.al('lifeos.kayit.kayitlar'); const l = JSON.parse(v || '[]');
       return l.some(r => r.id === 'kilo:2026-10-20:0' && r.deger.kg.k === 'eski'); }).catch(() => false));
+    dene('başlangıç: AYS çalışması Kayıt deposunda, değeri kesinlik etiketiyle', await p.evaluate(async () => {
+      const l = JSON.parse(await window.LIFEOS.Kabuk.Depo.al('lifeos.kayit.kayitlar') || '[]');
+      return l.some(r => r.tur === 'calisma' && r.gun === '2026-10-21' && Object.values(r.deger).every(v => v && 'v' in v && 'k' in v)); }).catch(() => false));
+    // her ekran kendi deposundan: Plan (gün planı, hafta hedefi, şablon), Soru (deneme, gün sorusu), Tekrar (kart), Yol (eski konu durumu)
+    await p.goto(T + '/kabuk/#/motor/plan');
+    await p.waitForSelector('[data-plan-eski]');
+    const planEski = await p.textContent('[data-plan-eski]');
+    dene('başlangıç: Plan\'da eski gün planı, hafta hedefi (başlangıç günüyle) ve şablon', /1\/1 blok yapıldı · planlanan 50 dk/.test(planEski) && /Hafta 2 · Hafta iki/.test(planEski)
+      && /14 Eyl 2026 başlar · 400 soru hedefi/.test(planEski) && /Yürüyüş/.test(planEski) && /eski kayıt/.test(planEski), planEski);
+    await goruntu(p, 'baslangic-plan-eski', { hazirla: () => p.$$eval('[data-plan-eski] details', l => l.forEach(x => { x.open = true; })) });
+    await p.goto(T + '/kabuk/#/motor/soru');
+    await p.waitForSelector('[data-soru-eski]');
+    const soruEski = await p.textContent('[data-soru-eski]');
+    dene('başlangıç: Soru\'da eski deneme neti (hesaplandı) ve gün sorusu', /Tam TYT · 19 Eki 2026/.test(soruEski) && /28 net \(hesaplandı\)/.test(soruEski) && /28 çözüldü · 20 doğru/.test(soruEski), soruEski);
+    await p.goto(T + '/kabuk/#/motor/tekrar');
+    await p.waitForSelector('[data-arac="tekrar"]');
+    dene('başlangıç: Tekrar\'da eski AYS kartı', /Eski AYS kartı/.test(await p.textContent('[data-arac="tekrar"]')));
+    await p.goto(T + '/kabuk/#/motor/yol');
+    await p.waitForSelector('a.b-satir[href="#/alan/akademik"]');
+    dene('başlangıç: Yol haritasında Akademik satırı eski konu durumunu sayar', /1 konu eski sistemden \(eski kayıt\)/.test(await p.textContent('a.b-satir[href="#/alan/akademik"]')), await p.textContent('a.b-satir[href="#/alan/akademik"]'));
+    dene('başlangıç: Yol cevabı gerçek Akademik alıştırmasına, kapı geçmedi', await p.evaluate(a0 => {
+      const k = JSON.parse(window.LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.akademik.1') || '{}');
+      return !!(k.cevaplar && k.cevaplar[a0] && k.eski && Object.keys(k.kapilar || {}).every(id => !k.kapilar[id].gecti)); }, AK_A0.id));
 
     // ---- Eski sistem: kontrol paneli ve üç modül yeni kabuktan bir adım ----
     await p.goto(T + '/kabuk/#/eski');
