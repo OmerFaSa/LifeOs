@@ -53,7 +53,9 @@
     if (location.protocol === 'file:' || !window.fetch) return Promise.resolve(null);
     var ls = window.localStorage, once = {};
     try { once = JSON.parse(ls.getItem(IZ)) || {}; } catch (e) { once = {}; }
-    return fetch('/api/hesap/goc-paket/son', { cache: 'no-store', headers: { 'X-LifeOS': 'goc' } })
+    // cihaz kimliği çerezde (kapıdan bağımsız): yalnız bu cihazın paketleri istenir, başka cihazınki buraya yazılmaz
+    var c = (/(?:^|;\s*)lifeos_cihaz=([A-Za-z0-9_-]{6,64})(?:;|$)/.exec(document.cookie || '') || [])[1];
+    return fetch('/api/hesap/goc-paket/son' + (c ? '?cihaz=' + encodeURIComponent(c) : ''), { cache: 'no-store', headers: { 'X-LifeOS': 'goc' } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (v) {
         if (!v || !Array.isArray(v.paketler)) return null;

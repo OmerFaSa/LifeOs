@@ -2783,8 +2783,13 @@ def isle(h):
             if os.environ.get("LIFEOS_TASIMA") != "1":
                 raise Hata(404, "Köken taşıması kapalı.")
             pk = os.path.join(os.path.dirname(os.path.abspath(klasor())), "goc", "paket")
+            # ?cihaz=<kimlik>: yalniz o cihazin paketleri (telefonun daha yeni paketi bu tarayiciya yazilmasin)
+            q = urllib.parse.parse_qs(h.path.split("?", 1)[1] if "?" in h.path else "").get("cihaz", [""])[0]
+            cihaz = q if re.fullmatch(r"[A-Za-z0-9_-]{6,64}", q or "") else None
             son = {}
-            for ad in sorted(os.listdir(pk)) if os.path.isdir(pk) else []:
+            # ad = <kaynak>-<cihaz>-<YYYYAAGG-SSDDss>-<rastgele>.json: sira adin zaman parcasina gore (cihaz kimligi siralamayi bozmasin)
+            zaman = lambda a: (re.search(r"-(\d{8}-\d{6})-[0-9a-f]+\.json$", a) or re.match(r"", a)).group(0)
+            for ad in sorted(os.listdir(pk) if os.path.isdir(pk) else [], key=lambda a: (zaman(a), a)):
                 if not ad.endswith(".json"):
                     continue
                 try:
@@ -2794,7 +2799,9 @@ def isle(h):
                     continue
                 if p.get("lifeos_goc") != 1 or p.get("kaynak") not in ("ays", "spi", "esp", "gun"):
                     continue
-                # ad = <kaynak>-<cihaz>-<zaman>-<rastgele>.json: sirali listede sonuncu en yenidir
+                if cihaz and p.get("cihaz") != cihaz:
+                    continue
+                # zaman sirasinda sonuncu en yenidir
                 son[p["kaynak"]] = {"ad": ad, "kaynak": p["kaynak"], "cihaz": p.get("cihaz"),
                                     "profiller": p.get("profiller") or {}, "anahtarlar": p.get("anahtarlar") or {}}
             return _cevap(h, 200, {"paketler": [son[k] for k in sorted(son)]})

@@ -297,6 +297,15 @@ def sina(eski, tek, kokler=()):
     v_ = json.loads(iste(T, "/api/hesap/goc-paket/son", basliklar=goc_b)[2])["paketler"]
     dene("köken taşıması: kaynak başına en yeni paket, medyasız, bozuk paket yok",
          len(v_) == 1 and v_[0]["ad"].startswith("ays-cX-20261102") and v_[0]["profiller"] == {"main": {"data": {"yeni": 2}}} and "medya" not in v_[0], v_)
+    with open(os.path.join(pk_, "ays-cTelefon1-20261103-000000-cccccc.json"), "w", encoding="utf-8") as f_:
+        json.dump({"lifeos_goc": 1, "kaynak": "ays", "cihaz": "cTelefon1", "profiller": {"main": {"data": {"telefon": 3}}}, "anahtarlar": {}}, f_)
+    with open(os.path.join(pk_, "ays-cBilgisayar1-20261102-120000-dddddd.json"), "w", encoding="utf-8") as f_:
+        json.dump({"lifeos_goc": 1, "kaynak": "ays", "cihaz": "cBilgisayar1", "profiller": {"main": {"data": {"pc": 4}}}, "anahtarlar": {}}, f_)
+    v_ = json.loads(iste(T, "/api/hesap/goc-paket/son?cihaz=cBilgisayar1", basliklar=goc_b)[2])["paketler"]
+    dene("köken taşıması: ?cihaz= yalnız o cihazın en yeni paketini verir (başka cihazın daha yeni paketi değil)",
+         len(v_) == 1 and v_[0]["ad"].startswith("ays-cBilgisayar1-20261102"), v_)
+    v_ = json.loads(iste(T, "/api/hesap/goc-paket/son?cihaz=../x", basliklar=goc_b)[2])["paketler"]
+    dene("köken taşıması: geçersiz cihaz kimliği süzgeç sayılmaz", len(v_) == 1 and v_[0]["ad"].startswith("ays-cTelefon1"), v_)
     # Baslangic paketi (tools/kabuk_baslangic.py ciktisi): yalniz bu bilgisayardan, dosya yoksa 404.
     ayni("GET /api/kabuk/baslangic paket yokken 404", iste(g, "/api/kabuk/baslangic"), iste(T, "/api/kabuk/baslangic"))
     dene("başlangıç paketi yokken 404", iste(T, "/api/kabuk/baslangic")[0] == 404)
