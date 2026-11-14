@@ -114,6 +114,51 @@ body{ margin:0; background:var(--bg); color:var(--yazi); font:15px/1.5 var(--met
   .selam{ left:18px; bottom:16px; }
   .selam h1{ font-size:30px; }
 }
+
+/* ===== B · GECE MANZARA: manzara bütün ekranı kaplar, kartlar buzlu cam ===== */
+html[data-tasarim="b"]{ --bg:#120d12; --yuzey:rgba(30,22,26,.62); --yuzey-2:rgba(255,255,255,.06); --cizgi:rgba(255,255,255,.12); --cizgi-2:rgba(255,255,255,.22);
+  --yazi:#f7efe4; --yazi-2:#e2d4c2; --soluk:#bba98f; --ana:#f0a36b; --ana-2:#ffc48f; --ana-yazi:#24140a; --ana-zemin:rgba(240,163,107,.18);
+  --mavi:#8dbbf0; --yesil:#8fd3ad; --golge:0 10px 40px rgba(0,0,0,.35); --golge-px:none; --r:18px; --r-k:12px; color-scheme:dark; }
+html[data-tasarim="b"] .kahraman{ background:none; box-shadow:none; height:210px; }
+html[data-tasarim="b"] .kahraman::after{ display:none; }
+html[data-tasarim="b"] .kahraman canvas{ position:fixed; inset:0; width:100vw; height:100vh; z-index:-1; filter:brightness(.62) saturate(1.1); }
+html[data-tasarim="b"] .selam{ left:4px; bottom:18px; }
+html[data-tasarim="b"] .selam h1{ font-size:52px; }
+html[data-tasarim="b"] .kart, html[data-tasarim="b"] .alan, html[data-tasarim="b"] .ara, html[data-tasarim="b"] .ikon-dugme{ backdrop-filter:blur(14px) saturate(1.2); -webkit-backdrop-filter:blur(14px) saturate(1.2); }
+html[data-tasarim="b"] .alan{ background:var(--yuzey); }
+html[data-tasarim="b"] .dugme{ border-radius:999px; }
+html[data-tasarim="b"] .marka, html[data-tasarim="b"] .tarih{ color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+
+/* ===== C · SADE: nötr, beyaz, manzarasız; tipografi ve boşluk taşır, piksel yalnız logoda ve rakamda ===== */
+html[data-tasarim="c"]{ --bg:#fafaf9; --yuzey:#ffffff; --yuzey-2:#f5f5f4; --cizgi:#e7e5e4; --cizgi-2:#d6d3d1; --yazi:#1c1917; --yazi-2:#44403c; --soluk:#78716c;
+  --ana:#b1461f; --ana-2:#c2410c; --ana-zemin:#fdf0ea; --golge:none; --golge-px:none; --r:12px; --r-k:8px; }
+html[data-tasarim="c"] .kahraman{ background:none; box-shadow:none; border-radius:0; }
+html[data-tasarim="c"] .kahraman canvas, html[data-tasarim="c"] .kahraman::after{ display:none; }
+html[data-tasarim="c"] .selam{ position:static; color:var(--yazi); text-shadow:none; padding:28px 0 8px; }
+html[data-tasarim="c"] .selam h1{ font:600 34px/1.15 var(--metin); letter-spacing:-.02em; }
+html[data-tasarim="c"] .selam p{ color:var(--soluk); opacity:1; }
+html[data-tasarim="c"] .siradaki h3{ font:600 24px/1.25 var(--metin); letter-spacing:-.01em; }
+html[data-tasarim="c"] .kart{ box-shadow:none; }
+html[data-tasarim="c"] .kart h2, html[data-tasarim="c"] .bolum-baslik h2{ text-transform:none; letter-spacing:0; font-size:14px; color:var(--yazi); }
+html[data-tasarim="c"] .sayi{ background:var(--yuzey); }
+html[data-tasarim="c"] .cubuk{ height:6px; border:0; }
+html[data-tasarim="c"] .cubuk i{ background:var(--ana); }
+html[data-tasarim="c"] .dugme{ box-shadow:none; padding:10px 18px; }
+html[data-tasarim="c"] .alan .cubuk{ height:4px; }
+
+/* ===== D · PİKSEL ATÖLYE: köşesiz, iki piksellik çizgi, sert gölge; piksel yazı başlıkta, etikette ve düğmede ===== */
+html[data-tasarim="d"]{ --bg:#efe0c4; --yuzey:#fff8ea; --yuzey-2:#f6e7cb; --cizgi:#3f282c; --cizgi-2:#3f282c; --yazi:#2e1c16; --yazi-2:#4f362c; --soluk:#6f4f42;
+  --ana:#c2521f; --ana-2:#e0782f; --ana-zemin:#ffd9b8; --mavi:#2f5fd0; --yesil:#1c7f57; --golge:4px 4px 0 #3f282c; --golge-px:4px 4px 0 #3f282c; --r:0px; --r-k:0px; }
+html[data-tasarim="d"] .kart, html[data-tasarim="d"] .alan, html[data-tasarim="d"] .sayi, html[data-tasarim="d"] .ara, html[data-tasarim="d"] .ikon-dugme, html[data-tasarim="d"] .kahraman{ border:2px solid var(--cizgi); border-radius:0; }
+html[data-tasarim="d"] .alan, html[data-tasarim="d"] .sayi{ box-shadow:3px 3px 0 #3f282c; }
+html[data-tasarim="d"] .kahraman canvas{ height:200px; }
+html[data-tasarim="d"] .kart h2, html[data-tasarim="d"] .bolum-baslik h2, html[data-tasarim="d"] .dugme, html[data-tasarim="d"] .alan .ad, html[data-tasarim="d"] .liste .baslik, html[data-tasarim="d"] .cip{ font-family:var(--baslik); letter-spacing:.02em; }
+html[data-tasarim="d"] .cip, html[data-tasarim="d"] .simge, html[data-tasarim="d"] .cubuk, html[data-tasarim="d"] .cubuk i, html[data-tasarim="d"] .ara, html[data-tasarim="d"] .ikon-dugme, html[data-tasarim="d"] .ara kbd{ border-radius:0; }
+html[data-tasarim="d"] .cubuk{ height:12px; border:2px solid var(--cizgi); padding:2px; }
+html[data-tasarim="d"] .cubuk i{ background:repeating-linear-gradient(90deg, var(--ana) 0 8px, transparent 8px 10px); }
+html[data-tasarim="d"] .dugme.ikincil{ border:2px solid var(--cizgi); }
+html[data-tasarim="d"] .liste li + li{ border-top:2px dashed var(--cizgi-2); }
+html[data-tasarim="d"] .alan.etkin{ box-shadow:3px 3px 0 var(--ana); border-color:var(--ana); }
 </style>
 </head>
 <body>
@@ -165,9 +210,13 @@ body{ margin:0; background:var(--bg); color:var(--yazi); font:15px/1.5 var(--met
 </div>
 <script src="../../../brand/ortak/piksel-doga.js"></script>
 <script>
+  // ?tasarim=a|b|c|d: dört yön aynı içerikle (a sıcak kâğıt, b gece manzara, c sade, d piksel atölye)
+  var TS = new URLSearchParams(location.search).get('tasarim') || 'a';
+  document.documentElement.setAttribute('data-tasarim', TS);
   // Manzara: sahibin kendi piksel sahnesi (yeni çizim yok). Saat → vakit.
   try {
     var D = window.LIFEOS.PIKSEL_DOGA, c = document.getElementById('manzara'), g = c.getContext('2d');
+    if (TS === 'b') { c.width = 320; c.height = Math.round(320 * innerHeight / innerWidth); } // bütün ekran: oran ekranınki
     var saat = new URLSearchParams(location.search).get('saat'); saat = saat == null ? new Date().getHours() : +saat;
     D.binaCiz(g, D.yerlesim(c.width, c.height, D.vakit(saat), new URLSearchParams(location.search).get('tur') || 'yayla'));
   } catch (e) { console.warn('manzara çizilemedi', e); }
