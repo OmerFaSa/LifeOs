@@ -11,7 +11,8 @@ const fs = require('fs'), os = require('os'), path = require('path'), http = req
 
 const PORT = 4397, T = 'http://127.0.0.1:' + PORT;
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'kabuk-gez-'));
-const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici, LIFEOS_TASIMA: '1' }); // köken taşıması ucu: gerçekte yalnız tek kapı devredeyken açık
+const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici, LIFEOS_TASIMA: '1',
+  LIFEOS_HESAP_KLASOR: path.join(gecici, 'LifeOS', 'hesap') }); // hesap klasörü Linux'ta LOCALAPPDATA'ya bakmaz: göç paketleri onun yanındaki goc/paket'ten okunur // köken taşıması ucu: gerçekte yalnız tek kapı devredeyken açık
 // Başlangıç paketi (tools/kabuk_baslangic.py çıktısının biçimi): eski sistemden bir not ve bir kayıt
 fs.mkdirSync(path.join(gecici, 'LifeOS', 'veri'), { recursive: true });
 fs.writeFileSync(path.join(gecici, 'LifeOS', 'veri', 'kabuk-baslangic.json'), JSON.stringify({ lifeos_kabuk_baslangic: 1, kimlik: 'gezi-paketi', uretildi: 1,
