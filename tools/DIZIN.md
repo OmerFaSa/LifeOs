@@ -139,8 +139,6 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `portreonar_test.py` — marka.py --onar görsel onarma mantığının birim testi; Pillow yoksa atlanır, CI'da koşar.
 - `sadelik.test.js` — sadelik.js kaynak kurallarının ve onay penceresi etiketlerinin testi, CI'da koşulur.
 - `sayilar_test.py` — sayilar.py çıktı okuma ve sayı ayrıştırma testi, CI'da koşulur.
-- `telefon_test.py` — Telefon uygulaması (ev ağı ve yerel sunucu) bağlantı ve güvenlik testleri, kök sertifikanın ad kısıtı, CI'da koşulur.
-- `android_kurulum_test.js` — Android kurulum sayfası: çalışan adresi bulur (Tailscale, `.local`, IP), iPhone akışı değişmez; ağ taklit, sabit port yok, CI'da koşulur.
 - `tasi_test.py` — Yeni bilgisayara taşıma paketi (`sistem/tasi.py`): şifreli, değişmiş dosya açılmaz, üstüne yazmaz; CI'da koşulur.
 - `goc_test.py` — Sadeleşme göç aracı (`sistem/goc.py`): kaynağa yazmaz, sayı dengesi, tek etiket dili, sır pakette durur, aynı rapor, geri alınır; CI'da koşulur.
 - `gercek_kosu_test.py` — Gerçek koşu aracı uydurma veriyle: sayılar doğru, kişisel içerik basılmaz, canlı dosya açılmaz ve değişmez, geçici kopyalar silinir, çökmede çıkış 1; CI'da koşulabilir.

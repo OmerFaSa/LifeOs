@@ -15,10 +15,9 @@
    ISLEYICILER YENIDEN YAZILMADI: her istek mevcut isleyici sinifina devredilir
    (_devret: ayni soket, ayni basliklar, yol degistirilmis). Davranis eskisiyle ayni.
 
-   DEVREDE DEGIL. Kokenler degisir (localStorage koken basinadir): 4173'teki AYS
-   verisi /ays/'de gorunmez. Her cihaz goc paketini yollamadan (P6) eski kapilar
-   kapanmaz. ETKIN = False iken yalniz --port ile deneme kapisi acilir; o kipte
-   zamanlayici ve bekci baslamaz (eski sunucu zaten calistiriyor, iki kez calismasin).
+   DEVREDE (kapanis, Faz 7): ETKIN = True. `--port`'suz 4180'de acilir ve zamanlanmis isleri
+   calistirir; `--port <bos port>` deneme/sinama kapisidir (zamanlayici baslamaz). Eski kapilar
+   (sunucu.py'nin modul kapilari, ayri HKM sureci, ev agi) kalkti; geri donus = kapanis dalini geri al.
 """
 
 import argparse
@@ -34,9 +33,9 @@ import sunucu  # noqa: E402
 from sunucu import Giris, KOK, HOST, KuyrukluSunucu, Sunucu, KABUK_KOKLER, KABUK_TEK, kabuk_dosyasi  # noqa: E402
 import uzak  # noqa: E402
 
-ETKIN = False          # P6: her cihazin goc paketi geldikten sonra True; o zaman port 4180
+ETKIN = True           # kapanis: tek kapi devrede (sahibin anahtari main'de bu satirdir)
 ETKIN_PORT = 4180
-uzak.kapilari_sec(ETKIN)    # Tailscale serve: bayrak kapaliyken eski dort kapi, acikken yalniz 443 -> 4180
+DENEME = False         # main: --port ile acilan deneme/sinama kapisi calisan sistemi guncellemez, yeniden baslatmaz
 
 MODULLER = {k.lower(): k for k, *_ in sunucu.SISTEMLER}     # ays -> AYS
 _SINIF = {}            # ays -> (Sunucu alt sinifi, src klasoru)
@@ -56,7 +55,7 @@ KOK_ONEKLER = ("/api/hesap/", "/api/kabuk/", "/api/kalite/", "/api/ayar", "/api/
 _ISTEK = ("rfile", "wfile", "connection", "request", "client_address", "server", "headers", "command",
           "path", "request_version", "requestline", "raw_requestline", "close_connection")
 
-HKM = {"srv": None, "jeton": "", "sinif": None}     # ayni surecte HKM cekirdegi (hkm_kur)
+HKM = sunucu.HKM     # ayni surecte HKM cekirdegi (hkm_kur); sunucu.hkm_ayakta/hkm_ac buna bakar
 
 
 def hkm_kur(config_yolu=None):
@@ -83,13 +82,7 @@ def hkm_kur(config_yolu=None):
 
 
 def _hkm_ayni_surecte(port):
-    """HKM bu surecteyken sunucu.py'nin «HKM'yi 4200'de ac/yokla» yollari ayni surece bakar.
-    Yalniz tek kapi surecinde cagrilir (main); sunucu.py'yi ice aktaran baska sey etkilenmez."""
-    tamam = {"ok": True, "durum": "ayni-surec", "mesaj": "Merkez bu süreçte çalışıyor."}
-    sunucu.hkm_ayakta = lambda timeout=1.0: True
-    sunucu.hkm_eski = lambda timeout=1.0: False
-    sunucu.hkm_ac = lambda calistir=None: dict(tamam)
-    sunucu.hkm_yeniden = lambda calistir=None: dict(tamam)
+    """Gun cumlesi ve cihazin Merkez yolu bu surecin HKM'sine, bu kapinin portundan gider."""
     sunucu.gun_cumlesi = partial(sunucu.gun_cumlesi, adres="http://%s:%d/api/hkm/king/cumle" % (HOST, port), jeton=HKM["jeton"])
     # Cihazin Merkez yolu (hesap.py soz 30) da bu surecin HKM'sine gider, 4200'e degil.
     sunucu.hesap.hkm_hedef = lambda: ("http://%s:%d/api/hkm" % (HOST, port), HKM["jeton"])
@@ -155,8 +148,7 @@ class TekKapi(Giris):
             if not sahip:                                   # surum hicbir modulun degil
                 return self.send_error(404) or True
             return self._devret(sahip[0], self.path, directory=sahip[1]) or True
-        if not ETKIN and yol in ("/api/guncelle", "/api/yeniden"):
-            # Deneme kapisi calisan sistemi guncellemez, yeniden baslatmaz (o is eski 4180'in).
+        if DENEME and yol in ("/api/guncelle", "/api/yeniden"):
             return self._json(403, {"durum": "engel", "mesaj": "Deneme kapısında kapalı."}) or True
         if yol == "/kabuk":
             return self._yonlendir("/kabuk/") or True
@@ -202,8 +194,7 @@ def kur(port, hkm=True, hkm_config=None):
     srv = KuyrukluSunucu((HOST, port), TekKapi)
     sunucu.GIRIS_PORT = srv.server_address[1]     # guncelleme/gun cumlesi Origin denetimi bu kapiya bakar
     sunucu.TEK_KAPI = True                        # Gun sayfasi modulleri /ays/ /spi/ /esp/ yolundan acar
-    if ETKIN:
-        os.environ["LIFEOS_TASIMA"] = "1"         # koken tasimasi (kabuk/tasima.js): yalniz tek kapi devredeyken
+    os.environ["LIFEOS_TASIMA"] = "1"             # koken tasimasi (kabuk/tasima.js): yalniz tek kapi devredeyken
     if hkm and hkm_kur(hkm_config):
         _hkm_ayni_surecte(srv.server_address[1])
     for sinif, _ in _SINIF.values():
@@ -213,17 +204,16 @@ def kur(port, hkm=True, hkm_config=None):
 
 def main(argv=None):
     sunucu._cikti_utf8()
-    p = argparse.ArgumentParser(description="LifeOS tek kapı (P5). P6'ya kadar yalnız deneme kapısı.")
+    p = argparse.ArgumentParser(description="LifeOS tek kapı: tek adres, tek süreç (4180).")
     p.add_argument("--port", type=int, help="deneme kapısı (boş bir yüksek port)")
     p.add_argument("--hkm-ayri", action="store_true", help="HKM'yi bu sürece alma")
     a = p.parse_args(argv)
-    if a.port is None and not ETKIN:
-        print("Tek kapı henüz devrede değil (P6: göç paketleri). Denemek için: --port <boş port>")
-        return 2
+    global DENEME
+    DENEME = a.port is not None
     srv = kur(a.port or ETKIN_PORT, hkm=not a.hkm_ayri)
     print("LifeOS tek kapı: http://%s:%d  (Merkez %s)" % (HOST, srv.server_address[1],
           "aynı süreçte" if HKM["srv"] else "kapalı"), flush=True)
-    if ETKIN and a.port is None:
+    if a.port is None:
         sunucu.plan_zamanlayici().baslat()           # eski sunucu kapandiginda zamanlanmis isler burada
     try:
         sunucu.surekli_hizmet(srv)

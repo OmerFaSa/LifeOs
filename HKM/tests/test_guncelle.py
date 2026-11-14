@@ -576,21 +576,6 @@ def run():
         sunucu._GUNCEL.update(zaman=0.0, veri=None)
     test("baska cihazdan guncelleme: arkada yurur, ikincisi baslamaz, yalniz gerekirse yeniden baslar", t_sistem_baslat)
 
-    def t_ev_agi_ac():
-        yeniden = []
-        eq(sunucu.ev_agi_ac(lambda: None, lambda: yeniden.append(1))["ok"], True)
-        eq(yeniden, [1])
-
-        def openssl_yok():
-            raise RuntimeError("openssl bulunamadı.")
-        try:
-            sunucu.ev_agi_ac(openssl_yok, lambda: yeniden.append(1))
-            ok(False, "hata bekleniyordu")
-        except sunucu.hesap.Hata as e:
-            eq(e.kod, 500)
-        eq(yeniden, [1])                                    # basarisizsa yeniden baslamaz
-    test("ev agini ac: yapilamazsa nedenini soyler, sistemi yeniden baslatmaz", t_ev_agi_ac)
-
     def t_telefon_sayfa():
         """Telefon uygulamasinin giris sayfasi (uygulama/ios, 2026-10-04): ayni
         sayfa ve ayni kartlar; telefonda olmayan HKM, guncelleme ve bilgisayarin

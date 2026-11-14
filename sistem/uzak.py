@@ -28,24 +28,16 @@ import tempfile
 import time
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# dis kapi -> bilgisayardaki kapi. Dis modul kapilari telefon.PORTLAR ile ayni:
-# modul baglantilari ve adres duzeltme (hesap.js TELEFON_KAPI) degismeden calisir.
-KAPILAR = {5173: 4173, 5183: 4183, 5193: 4193, 443: 4200}
-HESAP_KAPI = 5183
-# Tek kapi (tekkapi.ETKIN, P6): her sey 4180'de, tek adreste (Merkez /api/hkm/ altinda).
-# tekkapi ice aktarilinca kapilari_sec(ETKIN) cagirir; bayrak kapaliyken yukaridakiler aynen kalir.
-ESKI_KAPILAR, TEK_KAPILAR = dict(KAPILAR), {443: 4180}
+# dis kapi -> bilgisayardaki kapi: tek kapi (sistem/tekkapi.py), her sey 4180'de (Merkez /api/hkm/ altinda).
+KAPILAR = {443: 4180}
+HESAP_KAPI = 443
+# Kapanistan once acilmis eski dis kapilar (modul 5173/5183/5193, Merkez 443->4200): ac/kapat bunlari kapatir.
+ESKI_KAPILAR = {5173: 4173, 5183: 4183, 5193: 4193, 443: 4200}
 VEKIL_IP = "100.64.0.0"     # yerel olmayan, gecerli bicimli isaret adresi
 VEKIL_BASLIKLARI = ("X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "Forwarded",
                     "Tailscale-User-Login", "Tailscale-User-Name")
 YEREL_HOST = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\]|[a-z0-9-]+\.localhost)(:\d+)?$")
 _ONBELLEK = {"t": 0.0, "ad": ""}
-
-
-def kapilari_sec(tek):
-    """Tailscale'in sunacagi kapilar: tek kapi devredeyse yalniz 443 -> 4180, degilse bugunku dort."""
-    global KAPILAR, HESAP_KAPI
-    KAPILAR, HESAP_KAPI = (dict(TEK_KAPILAR), 443) if tek else (dict(ESKI_KAPILAR), 5183)
 
 
 def vekilden_mi(ip, basliklar):
@@ -242,7 +234,5 @@ def acilis_ayarla(acik, reg=None):
 if __name__ == "__main__":
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    import tekkapi      # gec: tekkapi sunucu'yu, sunucu bu dosyayi ice aktarir
-    kapilari_sec(tekkapi.ETKIN)
     islem = {"--ac": ac, "--kapat": kapat}.get((sys.argv[1:] or [""])[0], durum)
     print(json.dumps(islem(), ensure_ascii=False, indent=2))

@@ -179,12 +179,6 @@ jobs:
       - name: Modül kapısı yalnız güncel dist'i sunar
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Modül kapısı yalnız güncel dist i sunar" python3 tools/dist_sun_test.py
 
-      # TELEFON (ev ağı + https). Sertifika yokken hiçbir kapı ev ağına
-      # açılmaz; varsa üç modül https ile açılır, kurulum sayfası özel
-      # anahtarı ve depo dosyalarını asla vermez. Geçici klasörde koşar.
-      - name: Telefon kapıları yalnız bilinçli kurulumla ve https ile açılır
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Telefon kapıları yalnız bilinçli kurulumla ve https ile açılır" python3 tools/telefon_test.py
-
       # YENI BILGISAYARA TASIMA (2026-11-05). Paket sifresiz acilmaz, degismis dosya
       # acilmaz, var olan silinmez, listede olmayan yola yazilmaz.
       - name: Taşıma paketi şifreli ve üstüne yazmaz
@@ -484,9 +478,6 @@ jobs:
       # TEK YONLU oldugu sozu burada olculur (AGENTS.md §1.4).
       - name: Uçtan uca
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Uçtan uca" node tools/entegre.js
-
-      - name: Android kurulum sayfası çalışan adresi bulur
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Android kurulum sayfası çalışan adresi bulur" node tools/android_kurulum_test.js
 
   envanter:
     name: Envanter + sadelik — tek tasarıma geçerken kayıp yok

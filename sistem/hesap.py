@@ -176,9 +176,8 @@
       Admin, sifresiyle, telefondan ya da tabletten bilgisayardaki LifeOS'u
       gunceller (`/sistem`, `/sistem-guncelle`). guncelle.py'nin sozleri aynen
       gecerli: yalniz ileri sarar, veriye dokunmaz, elle degistirilmis dosyanin
-      ustune yazmaz. Isin kendisi sunucu.py'dedir (SISTEM kancasi). Ev agini
-      acmak (`/ev-agi-ac`) yalniz bilgisayarin kendisinden: disari acma karari
-      ev aginda alinamaz.
+      ustune yazmaz. Isin kendisi sunucu.py'dedir (SISTEM kancasi). Ev agi kapisi
+      kapanista kalkti; disari tek yol Tailscale (uzak-ac, yalniz bu bilgisayardan).
   29. DEFTER GEZGINI (2026-11-06, «notlarimizi modul modul yonetebilelim»). Uc
       modulun notlari ve sozlugu oturumla, salt okunur verilir (`GET
       /api/hesap/defter`). Sunucu ANLAMAZ: esitlenmis kayitlardan `defter/` ve
@@ -219,7 +218,7 @@ import urllib.parse
 import urllib.request
 
 SURUM = 8
-SISTEM = {}                     # soz 28: sunucu.py doldurur (durum, baslat, ev_agi_ac)
+SISTEM = {}                     # soz 28: sunucu.py doldurur (durum, baslat, uzak_*)
 TUR = 600000                    # PBKDF2 tur sayisi (OWASP 2023, SHA-256)
 EN_KISA_PAROLA = 8
 EN_UZUN_PAROLA = 256
@@ -2464,19 +2463,12 @@ def depo_kur(d):
 
 
 def ev_agi():
-    """Telefon ve tabletin yazacagi adres(ler): ev agi https acik ise
-    bilgisayarin agdaki IP'leri, degilse bos liste (sistem/telefon.py)."""
-    uzak_ad = []
+    """Telefon ve tabletin yazacagi adres: Tailscale aciksa onun adi (tek cihaz yolu), degilse bos liste."""
     try:
         import uzak
-        uzak_ad = [uzak.acik_ad()] if uzak.acik_ad() else []    # her yerde gecen adres once
+        return [uzak.acik_ad()] if uzak.acik_ad() else []
     except Exception:
-        pass
-    try:
-        import telefon
-        return uzak_ad + (list(telefon.ipler()) if telefon.acik_mi() else [])
-    except Exception:          # telefon modulu yoksa ya da ag okunamadiysa
-        return uzak_ad
+        return []
 
 
 def _koken_izinli(h):
@@ -2722,10 +2714,8 @@ def isle(h):
         d = depo()
         d.kopya_tetikle()                       # soz 20: gunluk yedek, arkada
         if yontem == "GET" and yol == "/api/hesap/durum":
-            yerel, yenilendi = _yerel_mi(h), SISTEM.get("sertifika_yenilendi")
             return _cevap(h, 200, {"surum": SURUM, "kurulum": d.kurulum_gerekli(), "kayit": d.kayit_acik(),
-                                   "yerel": yerel, "ev_agi": ev_agi(),
-                                   "sertifika_yenilendi": bool(yerel and yenilendi and yenilendi())})
+                                   "yerel": _yerel_mi(h), "ev_agi": ev_agi()})
         if yontem == "GET":
             m = TAKVIM_YOL_RE.match(yol)
             if m:
@@ -2917,21 +2907,6 @@ def isle(h):
                     raise Hata(503, "Bu sunucuda sistem güncellemesi yok.")
                 d.sistem_onay(k, v.get("parola"), j, ip)
                 return _cevap(h, 202, SISTEM["baslat"]())
-            if yol == "/api/hesap/ev-agi-ac":
-                d._admin(k, "Ev ağını yalnız admin açar.")
-                if not _yerel_mi(h):
-                    raise Hata(403, "Ev ağı yalnız bu bilgisayardan açılır.")
-                if not SISTEM:
-                    raise Hata(503, "Bu sunucuda ev ağı açılamaz.")
-                return _cevap(h, 200, SISTEM["ev_agi_ac"]())
-            if yol == "/api/hesap/sertifika-tamam":
-                d._admin(k, "Bu notu yalnız admin kapatır.")
-                if not _yerel_mi(h):
-                    raise Hata(403, "Bu not yalnız bu bilgisayardan kapatılır.")
-                if not SISTEM:
-                    raise Hata(503, "Bu sunucuda ev ağı yok.")
-                SISTEM["sertifika_tamam"]()
-                return _cevap(h, 200, {"ok": True})
             if yol in ("/api/hesap/uzak-ac", "/api/hesap/uzak-kapat"):
                 d._admin(k, "Her yerden erişimi yalnız admin değiştirir.")
                 if not _yerel_mi(h):

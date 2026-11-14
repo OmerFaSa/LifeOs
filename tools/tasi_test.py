@@ -32,8 +32,7 @@ except Exception:
 
 t = tempfile.mkdtemp(prefix="lifeos-tasi-")
 ortam = {}
-for ad, alt in (("LIFEOS_PLAN_KLASOR", "ev"), ("LIFEOS_HESAP_KLASOR", "ev/hesap"), ("LIFEOS_TELEFON_KLASOR", "ev/telefon"),
-                ("LIFEOS_ZEMIN_KLASOR", "ev/zemin"), ("LIFEOS_MUZIK_KLASOR", "ev/muzik"), ("LIFEOS_AYAR_KLASOR", "ev"), ("APPDATA", "appdata")):
+for ad, alt in (("LIFEOS_PLAN_KLASOR", "ev"), ("LIFEOS_HESAP_KLASOR", "ev/hesap"), ("LIFEOS_ZEMIN_KLASOR", "ev/zemin"), ("LIFEOS_MUZIK_KLASOR", "ev/muzik"), ("LIFEOS_AYAR_KLASOR", "ev"), ("APPDATA", "appdata")):
     ortam[ad] = os.environ.get(ad)
     os.environ[ad] = os.path.join(t, alt)
 
@@ -62,7 +61,7 @@ def oku(yol):
 try:
     eski = os.path.join(t, "depo-eski")
     ev = os.path.join(t, "ev")
-    yaz(os.path.join(ev, "telefon", "kok.key"), GIZLI)
+    yaz(os.path.join(ev, "muzik", "gizli.key"), GIZLI)
     yaz(os.path.join(ev, "zemin", "gunduz.mp4"), bytes(range(256)) * 400)
     yaz(os.path.join(ev, "muzik", "liste.json"), b"[]")
     yaz(os.path.join(ev, "ayar.json"), b'{"a":1}')
@@ -94,7 +93,7 @@ try:
     dogru("yarim dosya kalmaz", not os.path.exists(paket + ".yaziliyor"))
 
     # Yeni bilgisayar: temiz + bir de var olan dosya.
-    for x in ("ev/telefon", "ev/zemin", "ev/muzik", "ev/hesap", "appdata"):
+    for x in ("ev/zemin", "ev/muzik", "ev/hesap", "appdata"):
         shutil.rmtree(os.path.join(t, x))
     os.remove(os.path.join(ev, "ayar.json"))
     os.remove(os.path.join(ev, "planlama.json"))
@@ -108,7 +107,7 @@ try:
             dogru("yanlis sifre acmaz", False)
         except tasi.Hata as e:
             dogru("yanlis sifre acmaz ve soyler", str(e) == beklenen, str(e))
-    dogru("yanlis sifre hicbir sey yazmaz", not os.path.exists(os.path.join(ev, "telefon")))
+    dogru("yanlis sifre hicbir sey yazmaz", not os.path.exists(os.path.join(ev, "zemin")))
 
     bozuk = os.path.join(t, "bozuk.lifeos")
     b = bytearray(ham)
@@ -119,7 +118,7 @@ try:
         dogru("degismis paket acilmaz", False)
     except tasi.Hata as e:
         dogru("degismis paket acilmaz", str(e) == tasi.BOZUK, str(e))
-    dogru("degismis paket hicbir sey yazmaz", not os.path.exists(os.path.join(ev, "telefon")))
+    dogru("degismis paket hicbir sey yazmaz", not os.path.exists(os.path.join(ev, "zemin")))
     yaz(bozuk, ham[:-40])
     try:
         tasi.paket_ac(bozuk, parola, kok=yeni)
@@ -129,7 +128,7 @@ try:
 
     a = tasi.paket_ac(paket, parola, kok=yeni, simdi=1_800_000_000)
     dogru("acildi", a["dosya"] == 9, a)
-    dogru("anahtar geri geldi", oku(os.path.join(ev, "telefon", "kok.key")) == GIZLI)
+    dogru("anahtar geri geldi", oku(os.path.join(ev, "muzik", "gizli.key")) == GIZLI)
     dogru("medya bayt bayt ayni", oku(os.path.join(ev, "zemin", "gunduz.mp4")) == bytes(range(256)) * 400)
     dogru("HKM alt klasor", oku(os.path.join(yeni, "HKM", "db", "alt", "hkm.db")) == b"hkm")
     dogru("uygulama deposu", oku(os.path.join(t, "appdata", "LifeOS", "Local Storage", "leveldb", "000.log")) == b"depo")

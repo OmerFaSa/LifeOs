@@ -93,8 +93,7 @@ for sistem in ("AYS", "SPI", "ESP"):
     sina("%s/devserver.py" % sistem, devserver.sunucu_kur(0))
 
 sunucu = yukle("sunucu", KOK / "sistem" / "sunucu.py")
-for sistem in ("AYS", "SPI", "ESP"):
-    sina("sistem/sunucu.py (%s kapisi)" % sistem, sunucu._sunucu_kur(sistem, 0))
+sina("sistem/tekkapi.py (tek kapi)", sunucu.KuyrukluSunucu((sunucu.HOST, 0), sunucu.Giris))
 
 
 # Hata (2026-11-05): select() WinError 10055 («arabellek yok») firlatti, giris

@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — HEPSI, TEK KOMUT.
+"""LifeOS — TEK KOMUT, TEK KAPI.
 
-     python3 sistem/baslat.py     # uc sistem + HKM + giris sayfasi
-     python3 sistem/baslat.py --dur # uc sistemi VE HKM daemon'unu durdurur
+     python3 sistem/baslat.py            # tek kapi (sistem/tekkapi.py, 4180) + tarayici
+     python3 sistem/baslat.py --dur      # tek kapiyi (ve kapanistan once acilmis eski sunuculari) durdurur
      python3 sistem/baslat.py --yeniden  # durdurur ve yeniden acar
-     python3 sistem/baslat.py --hkmsiz # yalniz uc sistem (HKM hic acilmaz)
 
    Ne yapar:
 
-     1. HKM'yi kurar ve baslatir (HKM/baslat.py ile ayni yol),
-     2. uc sistemin sunucusunu tek surecte acar (sunucu.py),
-     3. giris sayfasini tarayicida acar.
+     1. tek kapiyi acar: kabuk, butun /api/... ve Merkez cekirdegi ayni surecte (/api/hkm/),
+     2. tarayicida acar.
 
    Iki kural:
 
-   1. HKM ZORUNLU DEGILDIR. `--hkmsiz` ile ya da HKM acilmazsa uc sistem
-      yine acilir. Bu bir nezaket degil SOZLESMEDIR: uc sistem HKM'nin var
-      oldugunu bilmez ve o kapaliyken bozulmaz. Baslaticinin bu sozu
-      kirmasi, sozun kendisini bos yapardi.
+   1. MERKEZ ZORUNLU DEGILDIR. Merkez kurulamazsa (ayar yok) tek kapi yine acilir, /api/hkm/ 503 verir.
 
    2. BIR SEY ACILMADIYSA SOYLENIR. «Hazir» yazisi, kapinin GERCEKTEN
       cevap vermesiyle yazilir; denenmeden basilan bir onay isareti, yalan
@@ -35,7 +30,6 @@ import webbrowser
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
 KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
-HKM = os.path.join(KOK, "HKM")
 GIRIS = "http://127.0.0.1:4180"
 BEKLE_SANIYE = 15.0
 
@@ -68,43 +62,8 @@ def _cevap_veriyor(url, timeout=1.0):
         return False
 
 
-def hkm_baslat():
-    """HKM'nin kendi baslaticisini cagirir: iki yerde iki baslatma mantigi
-    olsaydi, bir gun ikisi ayrisirdi."""
-    try:
-        p = subprocess.run([sys.executable, os.path.join(HKM, "baslat.py"),
-                            "--tarayicisiz"], cwd=HKM, capture_output=True,
-                           text=True, encoding="utf-8", errors="replace",
-                           env=cocuk_ortami(), timeout=90)
-    except Exception as e:
-        return False, str(e)
-    if _cevap_veriyor("http://127.0.0.1:4200/api/health"):
-        return True, ""
-    son = [s for s in (p.stdout or "").splitlines() if s.strip()]
-    return False, (son[-1].strip() if son else "sebep yazılmadı")
-
-
-def tek_kapi_etkin():
-    """sistem/tekkapi.py'deki ETKIN bayragi (P6 gecisi). Dosya ice aktarilmaz (sunucuyu ve HKM'yi yukler):
-    yalniz o satir okunur. Okunamazsa eski duzen."""
-    try:
-        with open(os.path.join(SISTEM, "tekkapi.py"), encoding="utf-8") as f:
-            for satir in f:
-                if satir.startswith("ETKIN ="):
-                    return satir.split("=", 1)[1].split("#", 1)[0].strip() == "True"
-    except OSError:
-        pass
-    return False
-
-
-def sunucu_dosyasi():
-    """Tek kapi devredeyse giris, uc modul ve Merkez tek surecte (tekkapi.py); degilse eski sunucu.py."""
-    return "tekkapi.py" if tek_kapi_etkin() else "sunucu.py"
-
-
 def sistemler_baslat():
-    """Uc sistemin sunucusu AYRI bir surecte kosar: cikti yutulmaz,
-    gunluge yazilir."""
+    """Tek kapi AYRI bir surecte kosar: cikti yutulmaz, gunluge yazilir."""
     # Gunluk kok klasorde durmaz: her acilista biriken bir dosya klasoru
     # kalabaliklastiriyordu. Yolu acilamazsa ekrana yazilir.
     gunluk_yolu = os.path.join(tempfile.gettempdir(), "lifeos-sunucu.log")
@@ -113,7 +72,7 @@ def sistemler_baslat():
               "env": cocuk_ortami()}
     if os.name == "posix":
         kwargs["start_new_session"] = True
-    p = subprocess.Popen([sys.executable, os.path.join(SISTEM, sunucu_dosyasi())],
+    p = subprocess.Popen([sys.executable, os.path.join(SISTEM, "tekkapi.py")],
                          **kwargs)
     son = time.time() + BEKLE_SANIYE
     while time.time() < son:
@@ -177,21 +136,15 @@ def adiyla_durdur(hedef, calistir=subprocess.run, isletim=None):
 
 
 def sistemler_dur():
-    """Uc sistemin sunucusunu ADIYLA durdurur — HKM'nin kendi durdur()'uyla
+    """Tek kapiyi ADIYLA durdurur — HKM'nin kendi durdur()'uyla
     AYNI desen: port dinleyen her seyi oldurmek, baska bir programi
     kapatmak olabilirdi."""
     if not _cevap_veriyor(GIRIS):
         _yaz("yok", "Sistem sunucusu zaten çalışmıyor")
         return 0
-    hedef = os.path.join(SISTEM, sunucu_dosyasi())
+    hedef = os.path.join(SISTEM, "tekkapi.py")
     ok_, not_ = adiyla_durdur(hedef)
-    if hedef.endswith("tekkapi.py"):
-        adiyla_durdur(os.path.join(SISTEM, "sunucu.py"))    # gecisten once acilmis eski sunucu kalmis olabilir
-    else:
-        adiyla_durdur(os.path.join(SISTEM, "tekkapi.py"))   # bayrak geri alindiysa tek kapi kalmis olabilir
-    # Eski duzende sunucu kok klasordeydi; guncellemeden once acilmis
-    # bir sunucu o adla calisiyor olabilir. Onu da ayni yolla kapat.
-    adiyla_durdur(os.path.join(KOK, "sunucu.py"))
+    eski_durdur()
     if not ok_:
         _yaz("hata", "Sistem sunucusu durdurulamadı", not_)
         return 1
@@ -203,6 +156,13 @@ def sistemler_dur():
         time.sleep(0.3)
     _yaz("hata", "Sistem sunucusu durmadı", "elle kapat: " + hedef)
     return 1
+
+
+def eski_durdur():
+    """Kapanistan once acilmis eski sunucular (sistem/sunucu.py ya da kokteki sunucu.py, ayri HKM daemon'u)
+    guncellemeden sonra calisir kalmis olabilir: 4173/4183/4193/4200 bos kalsin. Adiyla bulunur."""
+    for yol in (os.path.join(SISTEM, "sunucu.py"), os.path.join(KOK, "sunucu.py"), os.path.join(KOK, "HKM", "daemon.py")):
+        adiyla_durdur(yol)
 
 
 def _cikti_utf8():
@@ -228,11 +188,7 @@ def main():
     _cikti_utf8()
     if "--dur" in sys.argv:
         print("")
-        kod_sistem = sistemler_dur()
-        kod_hkm = subprocess.call([sys.executable,
-                                   os.path.join(HKM, "baslat.py"), "--dur"],
-                                  cwd=HKM)
-        return kod_sistem or kod_hkm
+        return sistemler_dur()
 
     if "--yeniden" in sys.argv:
         # Giris sayfasindaki «Yeniden başlat»: once her sey durur, sonra
@@ -241,41 +197,23 @@ def main():
         time.sleep(1.5)
         print("")
         sistemler_dur()
-        subprocess.call([sys.executable, os.path.join(HKM, "baslat.py"), "--dur"],
-                        cwd=HKM, env=cocuk_ortami())
         son = time.time() + 10
         while _cevap_veriyor(GIRIS, timeout=0.5) and time.time() < son:
             time.sleep(0.3)
 
     print("\nLifeOS başlatılıyor\n")
 
-    # 1 — uc sistem. HKM'den ONCE: asil is bu, HKM ek katman.
+    # 1 — tek kapi (Merkez ayni surecte: tekkapi.hkm_kur).
     if _cevap_veriyor(GIRIS):
         _yaz("ok", "Sistem sunucusu zaten çalışıyor", GIRIS)
     else:
         oldu, surec, gunluk = sistemler_baslat()
         if oldu:
-            _yaz("ok", "AYS · SPİ · ESP açıldı", GIRIS)
+            _yaz("ok", "LifeOS açıldı", GIRIS)
         else:
             _yaz("hata", "Sistem sunucusu açılamadı", "günlük: " + gunluk)
-            print("\n  Ne olduğunu görmek için:  python3 sistem/sunucu.py\n")
+            print("\n  Ne olduğunu görmek için:  python3 sistem/tekkapi.py\n")
             return 1
-
-    # 2 — HKM. ISTEGE BAGLI: acilmazsa uc sistem yine calisir.
-    if tek_kapi_etkin():
-        _yaz("ok", "Merkez tek kapının içinde", GIRIS + "/api/hkm/")      # ayri surec yok (tekkapi.py hkm_kur)
-    elif "--hkmsiz" in sys.argv:
-        _yaz("yok", "HKM açılmadı", "--hkmsiz")
-    elif _cevap_veriyor("http://127.0.0.1:4200/api/health"):
-        _yaz("ok", "HKM zaten çalışıyor", "http://127.0.0.1:4200")
-    else:
-        oldu, sebep = hkm_baslat()
-        if oldu:
-            _yaz("ok", "HKM açıldı", "http://127.0.0.1:4200")
-        else:
-            _yaz("yok", "HKM açılamadı", sebep)
-            print("     Üç sistem bundan etkilenmez; HKM kapalıyken de"
-                  " çalışırlar.")
 
     # 2b — AltServer (iPhone uygulamasinin haftalik imza yenilemesi). Yoksa sessiz.
     durum, not_ = altserver_baslat()
@@ -294,11 +232,11 @@ def main():
             _yaz("yok", "Tarayıcı açılamadı", "elle aç: " + GIRIS)
 
     print("""
-  Giriş sayfası:  %s
+  LifeOS:  %s
 
-  Sunucular ARKA PLANDA çalışır; bu pencereyi kapatmak onları durdurmaz.
+  Sunucu ARKA PLANDA çalışır; bu pencereyi kapatmak onu durdurmaz.
   Durdurmak için:
-      python3 sistem/baslat.py --dur   (üç sistem + HKM, hepsi)
+      python3 sistem/baslat.py --dur
 """ % GIRIS)
     return 0
 

@@ -1434,12 +1434,10 @@ def run():
     def t_http_sistem():
         eski = dict(hesap.SISTEM)
         yerel0 = hesap._yerel_mi
-        basladi, acildi, sertifika = [], [], [1]
+        basladi, acildi = [], []
         hesap.SISTEM.clear()
         hesap.SISTEM.update(durum=lambda taze: {"geride": 2, "taze": taze},
                             baslat=lambda: basladi.append(1) or {"calisiyor": True},
-                            ev_agi_ac=lambda: acildi.append(1) or {"ok": True},
-                            sertifika_yenilendi=lambda: bool(sertifika), sertifika_tamam=sertifika.clear,
                             uzak_durum=lambda: {"acik": True, "acilis": False},
                             uzak_acilis=lambda acik: acildi.append(acik) or {"ok": True, "acilis": acik})
         try:
@@ -1461,36 +1459,27 @@ def run():
                 u = dict(H, Authorization="Bearer " + g["jeton"])
                 eq(s.iste("/api/hesap/sistem", {}, u)[0], 403)
                 eq(s.iste("/api/hesap/sistem-guncelle", {"parola": "parola-456"}, u)[0], 403)
-                eq(s.iste("/api/hesap/ev-agi-ac", {}, u)[0], 403)
                 eq(basladi, [1])
-                # Ev agi yalniz bilgisayarin kendisinden acilir.
+                # Her yerden erisim yalniz bilgisayarin kendisinden (ev agi kapisi kapanista kalkti: yol yok).
                 hesap._yerel_mi = lambda h: False
-                eq(s.iste("/api/hesap/ev-agi-ac", {}, y)[0], 403)
                 eq(s.iste("/api/hesap/uzak-durum", {}, y)[0], 403)
                 eq(s.iste("/api/hesap/uzak-acilis", {"acik": True}, y)[0], 403)
                 eq(acildi, [])
-                # Sertifika notu yalniz bilgisayarda gorunur ve yalniz orada kapanir.
-                eq(s.iste("/api/hesap/durum")[2]["sertifika_yenilendi"], False)
-                eq(s.iste("/api/hesap/sertifika-tamam", {}, y)[0], 403)
                 hesap._yerel_mi = yerel0
-                eq(s.iste("/api/hesap/durum")[2]["sertifika_yenilendi"], True)
-                eq(s.iste("/api/hesap/sertifika-tamam", {}, u)[0], 403)
-                eq(s.iste("/api/hesap/sertifika-tamam", {}, y)[0], 200)
-                eq(s.iste("/api/hesap/durum")[2]["sertifika_yenilendi"], False)
-                eq(s.iste("/api/hesap/ev-agi-ac", {}, y)[0], 200)
-                eq(acildi, [1])
+                no("sertifika_yenilendi" in s.iste("/api/hesap/durum")[2])       # kendi CA kalkti
+                eq(s.iste("/api/hesap/ev-agi-ac", {}, y)[0], 404)
                 eq(s.iste("/api/hesap/uzak-durum", {}, u)[0], 403)              # uye degistiremez, goremez
                 eq(s.iste("/api/hesap/uzak-acilis", {"acik": True}, u)[0], 403)
                 eq(s.iste("/api/hesap/uzak-durum", {}, y)[2], {"acik": True, "acilis": False})
                 eq(s.iste("/api/hesap/uzak-acilis", {"acik": True}, y)[2]["acilis"], True)
-                eq(acildi, [1, True])
+                eq(acildi, [True])
                 hesap.SISTEM.clear()
                 eq(s.iste("/api/hesap/sistem", {}, y)[0], 503)                 # kancasiz sunucu: ne oldugunu soyler
         finally:
             hesap._yerel_mi = yerel0
             hesap.SISTEM.clear()
             hesap.SISTEM.update(eski)
-    test("sistemi baska cihazdan guncelleme: admin + sifre, defterde gorunur; ev agi yalniz PC'den", t_http_sistem)
+    test("sistemi baska cihazdan guncelleme: admin + sifre, defterde gorunur; her yerden erisim yalniz PC'den", t_http_sistem)
 
     def t_http_yedek():
         with _Srv() as s:

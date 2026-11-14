@@ -28,16 +28,22 @@ SISTEM = os.path.join(KOK, "sistem")
 H = "127.0.0.1"
 YASAK = {4173, 4180, 4183, 4193, 4200} | set(range(5100, 5200))
 
+# Karsilastirma tabani: kapanistan once sunucu.main()'in kurdugu kapilarin aynisi (Giris + uc modul Sunucu'su),
+# ama sunucu.py artik kendi kapisini acmadigi icin burada elle kurulur. Zamanlayici yok.
 ESKI = r"""
-import os, sys
+import os, sys, threading
+from functools import partial
 sys.path.insert(0, %r)
 import sunucu
 g, a, s, e = map(int, os.environ["TK_PORTLAR"].split(","))
-sunucu.SISTEMLER = [(k, ad, p, d, t) for (k, ad, _, d, t), p in zip(sunucu.SISTEMLER, (a, s, e))]
 sunucu.GIRIS_PORT = g
-sunucu._bekci_dongusu = lambda: None          # bekci 4200'de HKM acabilir; tek kapi deneme kipinde de yok
-sunucu.planlama.Zamanlayici.baslat = lambda self: None   # zamanlanmis isler gercek isleri calistirir
-sys.exit(sunucu.main())
+sunucu.SISTEMLER = [(k, ad, p, d, t) for (k, ad, _, d, t), p in zip(sunucu.SISTEMLER, (a, s, e))]   # Giris /ays/ -> modul kapisi
+for (k, *_), p in zip(sunucu.SISTEMLER, (a, s, e)):
+    kok = os.path.join(sunucu.KOK, k)
+    sinif = type("Sunucu_" + k, (sunucu.Sunucu,), {"repo": kok})
+    m = sunucu.KuyrukluSunucu((sunucu.HOST, p), partial(sinif, directory=os.path.join(kok, "src")))
+    threading.Thread(target=sunucu.surekli_hizmet, args=(m,), daemon=True).start()
+sunucu.surekli_hizmet(sunucu.KuyrukluSunucu((sunucu.HOST, g), sunucu.Giris))
 """ % SISTEM
 
 
@@ -336,8 +342,7 @@ def sina(eski, tek, kokler=()):
     dene("POST /kabuk/ 405", iste(T, "/kabuk/", "POST", b"")[0] == 405)
 
     dene("kökte HEAD dosya vermez", iste(T, "/sistem/tekkapi.py", "HEAD")[0] in (404, 405))
-    dene("tek kapı --port'suz açılmaz (ETKIN kapalı)",
-         subprocess.run([sys.executable, os.path.join(SISTEM, "tekkapi.py")], capture_output=True, timeout=60).returncode == 2)
+    # --port'suz tek kapi 4180'de acilir (ETKIN): sinama onu hic calistirmaz.
 
 
 def ilet_sina(T, kok):

@@ -1,58 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — TEK SUNUCU.
+"""LifeOS — sunucunun cekirdegi (kapanis: tek kapi sistem/tekkapi.py bunu ice aktarir).
 
-   Dort ayri terminalde dort komut calistirmak, sistemi acmanin en olasi
-   vazgecme noktasiydi. Bu betik hepsini TEK SURECTE ayaga kaldirir:
+   Burada isleyiciler durur: Giris (kok sayfalar ve /api/...), Sunucu (dist), Gun, hesap/ayar/ice/
+   muzik/zemin/planlama baglantilari. Kendi basina kapi acmaz: eski uc modul kapisi (4173/4183/4193),
+   ayri HKM sureci (4200) ve ev agi kapilari (51xx, kendi CA) kapanista kalkti; tek yol tek kapi +
+   Tailscale (sistem/uzak.py).
 
-     http://127.0.0.1:4180   giris sayfasi (hangi sistem nerede)
-     http://127.0.0.1:4173   AYS
-     http://127.0.0.1:4183   SPI
-     http://127.0.0.1:4193   ESP
-
-   «Tek sunucu» ama NEDEN TEK PORT DEGIL
-
-   Uc uygulamayi tek porta koymak en kolayi olurdu ve iki sey kirardi:
-
-   1. VERI TASINMIS GORUNURDU. Tarayici depolamasi KOKENE baglidir ve
-      koken porttur: 4173'te duran AYS verisi, 4180'de acilan AYS'e
-      gorunmez. Kullanici «her sey silinmis» sanirdi — oysa duruyordur,
-      baska bir kapinin ardinda.
-
-   2. UC UYGULAMA TEK KOTAYI PAYLASIRDI. localStorage siniri koken
-      basinadir (~5 MB). Ayri portlarda her sistemin kendi 5 MB'i var;
-      tek portta ucu birden ayni 5 MB'i boluserdi ve dokuz aylik
-      ufuk hesabi (her sistemin `perfcheck`/depo projeksiyonu) sessizce
-      yanlis olurdu.
-
-   Bu yuzden: TEK KOMUT, TEK SUREC, AYRI KAPILAR. Kullanicinin sayaci
-   dort degil bir; sistemlerin sinirlari yine ayri.
-
-   Uc kural:
-
-   1. HKM'YE BAGLI DEGILDIR. Bu sunucu HKM'yi bilmez ve HKM kapaliyken de
-      uc sistemi acar. Uc sistemin HKM'den bagimsizligi bir slogan degil,
-      calisma bicimidir; sunucu katmaninda da boyle kalir.
-
-   2. ESKI SURUM CALISMAZ. Bu bilgisayarda her yanit no-store tasir: kaynak
-      duzenlendikten sonra eski surumun calismaya devam etmesi, saatler yiyen
-      bir hatadir. Telefon ve tablette (2026-11-06, 4G'de 13,7 MB) dosyalar
-      saklanir ama her acilista sorulur (no-cache + 304); yalniz adresinde
-      surum olan betik ve stil sorulmaz, icerigi adresiyle degisir.
-
-   3. YALNIZ YEREL. 127.0.0.1'e baglanir. Disari acmak ayri ve BILINCLI
-      bir karardir; bu betik o karari kullanici yerine vermez.
-      Tek istisna o kararin kendisidir: kullanici `python sistem/telefon.py`
-      ile sertifika urettiyse uc modul ev aginda https ile DE acilir
-      (5173/5183/5193; kurulum sayfasi http 5180). Bilgisayardaki 127.0.0.1
-      kapilari ve onlarin verisi degismez; giris sayfasi ve onun API'leri
-      ev agina hic acilmaz. `telefon.py --kapat` geri alir.
-
-   4. HESAP API'SI MODUL KAPILARINDADIR (2026-10-04, depo sahibinin
-      karari). /api/hesap/... (sistem/hesap.py) hem 127.0.0.1 hem ev agi
-      kapilarinda calisir: PC, telefon ve tablet ayni hesapla girer, verinin
-      kopyasi bu bilgisayarda durur. Jetonsuz istek veri goremez; admin
-      yalniz bu bilgisayardan kurulur.
+   Iki kural kalir:
+   1. ESKI SURUM CALISMAZ. Bu bilgisayarda her yanit no-store tasir; telefon ve tablette dosyalar
+      saklanir ama her acilista sorulur (no-cache + 304); adresinde surum olan betik/stil sorulmaz.
+   2. YALNIZ YEREL. 127.0.0.1'e baglanir; disari yalniz Tailscale serve (vekil) ile gidilir.
 """
 
 import gzip
@@ -62,16 +20,14 @@ import importlib.util
 import json
 import os
 import re
-import socket
-import ssl
 import subprocess
 import sys
 import threading
 import time
 import urllib.request
 from urllib.parse import parse_qs
-from functools import lru_cache, partial
-from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, ThreadingHTTPServer
+from functools import lru_cache
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
 KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
@@ -86,13 +42,10 @@ import ayar  # noqa: E402  (sistem ayarlarinin tek kopyasi, sistem/ayar.py)
 import gun  # noqa: E402  (Gun bolumu, Gun plani F2: /gun/ yolu, yeni port yok)
 import uzak  # noqa: E402  (her yerden erisim, sistem/uzak.py)
 import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
-import telefon  # noqa: E402
 import etiket  # noqa: E402  (sahibin kalite etiketleri, sistem/etiket.py; yalniz bu bilgisayardan)
 
 HOST = "127.0.0.1"
-BEKCI_SN = 60
 # AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
-ALTSTORE_KAYNAK = "https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
 GIRIS_PORT = 4180
 ETIKET_DIZIN = os.path.join(KOK, "kalite", "veri", "yerel")  # gercek setler (git disi); sistem/etiket.py
 ILK_EKRAN_KABUK = True  # kok (/) yeni kabuga gider (sadelesme: yeni kabuk ilk ekran); eski giris ve kontrol paneli /kartlar/'da
@@ -1545,70 +1498,24 @@ def _telefon_iskeleti(sayfa):
     return sayfa[:i] + dip + sayfa[j:]
 
 
+HKM = {"srv": None, "jeton": "", "sinif": None}   # tek kapinin ayni surecteki HKM cekirdegi (tekkapi.hkm_kur)
+_HKM_TAMAM = {"ok": True, "durum": "ayni-surec", "mesaj": "Merkez bu süreçte çalışıyor."}
+
+
 def hkm_ayakta(timeout=1.0):
-    try:
-        with urllib.request.urlopen("http://%s:%d/api/health" % (HOST, HKM_PORT),
-                                    timeout=timeout) as r:
-            return r.status < 500
-    except Exception:
-        return False
-
-
-def hkm_ac(calistir=subprocess.run):
-    """HKM'yi baslatir (kapaliysa) ve yuz icin kisa bir esleme penceresi
-    acar — HKM'nin KENDI baslaticisiyla: iki yerde iki baslatma mantigi
-    olsaydi bir gun ayrisirdi. Acik olsa da cagrilir: pencere yeniden
-    acilir, yuz anahtar sormadan baglanir."""
-    betik = os.path.join(KOK, "HKM", "baslat.py")
-    if not os.path.exists(betik):
-        return {"ok": False, "mesaj": "HKM klasörü bulunamadı."}
-    try:
-        calistir([sys.executable, betik, "--tarayicisiz"], cwd=os.path.dirname(betik),
-                 capture_output=True, timeout=120,
-                 env=dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1",
-                          PYTHONDONTWRITEBYTECODE="1"))
-    except Exception as e:
-        return {"ok": False, "mesaj": "HKM başlatılamadı: %s" % e}
-    if hkm_ayakta(timeout=2.0):
-        return {"ok": True, "adres": "http://%s:%d/" % (HOST, HKM_PORT)}
-    return {"ok": False, "mesaj": "HKM açılamadı. Ayrıntı: HKM klasöründeki günlük."}
-
-
-def hkm_kod_zamani():
-    """HKM'nin Python dosyalarinin en yeni degisme zamani (epoch)."""
-    en = 0.0
-    for klasor in (os.path.join(KOK, "HKM"), os.path.join(KOK, "HKM", "core")):
-        try:
-            for ad in os.listdir(klasor):
-                if ad.endswith(".py"):
-                    en = max(en, os.path.getmtime(os.path.join(klasor, ad)))
-        except OSError:
-            pass
-    return en
+    """Merkez bu surecte kurulu mu (ayri HKM sureci kapanista kalkti)."""
+    return bool(HKM["srv"])
 
 
 def hkm_eski(timeout=1.0):
-    """Calisan HKM, dosyalardaki koddan eski mi? HKM /api/health «baslangic»
-    (surecin acilis zamani) dondurur; bilinmiyorsa None (eski sayilmaz)."""
-    try:
-        with urllib.request.urlopen("http://%s:%d/api/health" % (HOST, HKM_PORT), timeout=timeout) as r:
-            b = json.loads(r.read().decode("utf-8") or "{}").get("baslangic")
-    except Exception:
-        return None
-    return bool(isinstance(b, (int, float)) and hkm_kod_zamani() > b + 2)
+    return False                    # ayni surec: kod degisince butun surec yeniden baslar
 
 
-def hkm_yeniden(calistir=subprocess.run):
-    """HKM'yi durdurup KENDI baslaticisiyla yeniden acar (yeni kod yuklensin)."""
-    betik = os.path.join(KOK, "HKM", "baslat.py")
-    if not os.path.exists(betik):
-        return {"ok": False, "mesaj": "HKM klasörü bulunamadı."}
-    try:
-        calistir([sys.executable, betik, "--dur"], cwd=os.path.dirname(betik), capture_output=True, timeout=60,
-                 env=dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1", PYTHONDONTWRITEBYTECODE="1"))
-    except Exception:
-        pass
-    return hkm_ac(calistir)
+def hkm_ac(calistir=None):
+    return dict(_HKM_TAMAM) if HKM["srv"] else {"ok": False, "mesaj": "Merkez bu süreçte açık değil."}
+
+
+hkm_yeniden = hkm_ac
 
 
 def yeniden_baslat_zamanla(popen=subprocess.Popen, isletim=None):
@@ -1768,16 +1675,6 @@ def sistem_baslat(kur=guncelle_kur, yeniden=yeniden_baslat_zamanla):
     return {"calisiyor": True}
 
 
-def ev_agi_ac(kur=None, yeniden=yeniden_baslat_zamanla):
-    """Hesap sayfasindaki «Ev ağını aç»: `python sistem/telefon.py` + yeniden baslatma."""
-    try:
-        (kur or telefon.kur)()
-    except (RuntimeError, OSError) as e:
-        raise hesap.Hata(500, str(e))
-    yeniden()
-    return {"ok": True, "mesaj": "Ev ağı açılıyor; LifeOS birkaç saniyede geri gelir."}
-
-
 def uzak_ac():
     """Hesap sayfasindaki «Her yerden erişim»: kapilar + Merkez yeni kokenlerle yeniden baslar."""
     sonuc = uzak.ac()
@@ -1790,25 +1687,7 @@ def uzak_durum():
     return dict(uzak.durum(), merkez=hkm_ayakta(), acilis=uzak.acilis_acik())
 
 
-def merkez_bekci(ayakta=hkm_ayakta, oku=uzak.durum, ac=hkm_ac):
-    """Dis cihaz Merkez'i baslatamaz: erisim aciksa ve Merkez dustuyse burasi kaldirir. Tek seferlik
-    denetim acilista Tailscale henuz hazir degilse bir daha bakmiyordu. Doner: acmayi denedi mi."""
-    if ayakta() or not oku()["acik"]:
-        return False
-    ac()
-    return True
-
-
-def _bekci_dongusu():
-    while True:
-        time.sleep(BEKCI_SN)
-        if merkez_bekci() and not hkm_ayakta():
-            time.sleep(BEKCI_SN * 4)                # acilamiyor: her dakika surec acmasin
-
-
-hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, ev_agi_ac=ev_agi_ac,
-                    sertifika_yenilendi=telefon.kok_yenilendi_mi, sertifika_tamam=telefon.kok_yenilendi_tamam,
-                    uzak_ac=uzak_ac, uzak_kapat=uzak.kapat, merkez=uzak.merkez,
+hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, uzak_ac=uzak_ac, uzak_kapat=uzak.kapat, merkez=uzak.merkez,
                     uzak_durum=uzak_durum, uzak_acilis=uzak.acilis_ayarla)
 
 
@@ -2177,309 +2056,12 @@ class KuyrukluSunucu(ThreadingHTTPServer):
         super().handle_error(request, client_address)
 
 
-def _sunucu_kur(klasor, port):
-    """Bir sistemin sunucusu. Klasor yoksa None doner: olmayan bir sistemi
-    «ayakta» gostermek, bulunmayan bir kapiya isaret etmek olurdu."""
-    kok = os.path.join(KOK, klasor)
-    src = os.path.join(kok, "src")
-    if not os.path.isdir(src):
-        return None
-    sinif = type("Sunucu_" + klasor, (Sunucu,), {"repo": kok})
-    sunucu = KuyrukluSunucu((HOST, port), partial(sinif, directory=src))
-    threading.Thread(target=_dist_isit, args=(kok,), daemon=True).start()
-    return sunucu
-
-
 def _dist_isit(kok):
     """Ilk bolme ~100 ms; ilk acilis beklemesin diye sunucu kurulunca yapilir."""
     try:
         _dist_parcalari(kok)
     except OSError:
         pass
-
-
-# ------------------------------------------------------------ telefon
-# Ev agi kapilari (telefon.py ile sertifika uretildiyse). Ayni dosya
-# sunucusu, yalniz https ve 0.0.0.0: kodu ve gorselleri verir, bir de
-# hesap API'sini (kural 4; jetonsuz istek veri goremez). Giris sayfasi
-# (4180) ve onun API'leri ev agina ACILMAZ.
-TELEFON_HOST = "0.0.0.0"
-EL_SIKISMA_SN = 15
-
-
-class HttpsYonlendir(BaseHTTPRequestHandler):
-    """https kapisina duz http gelirse: ayni adresin https'ine 301. Adres
-    semasiz ya da http:// ile yazilinca «bos yanit» yerine sayfa acilir."""
-    def _yonlendir(self):
-        host = (self.headers.get("Host") or "").strip()
-        if not host or any(c in host for c in "\r\n /\\@"):
-            return self.send_error(400)
-        self.send_response(301)
-        self.send_header("Location", "https://" + host + self.path)
-        self.send_header("Content-Length", "0")
-        self.end_headers()
-
-    do_GET = do_HEAD = _yonlendir
-
-    def log_message(self, fmt, *args):
-        return
-
-
-class TelefonSunucu(KuyrukluSunucu):
-    """Ev agi kapisi. Ilk bayta bakar (okumadan, MSG_PEEK): 0x16 TLS el
-    sikismasidir → https; oteki duz http'dir → `duz_isleyici` (modul
-    kapisinda https'e yonlendirme, kurulum kapisinda ayni sayfa). Telefonda
-    «güvenli bağlantı sağlanamıyor» buydu: semasiz yazilan adreste tarayici
-    http kapisina https deniyordu (2026-10-04).
-    El sikisma kabul dongusunde DEGIL, istegin kendi is parcaciginda
-    yapilir: sertifikaya henuz guvenmeyen bir telefon ya da yarim kalan bir
-    baglanti kapiyi kilitlemez; basarisiz el sikisma sessizce duser."""
-    ssl_baglam = None
-    duz_isleyici = HttpsYonlendir
-
-    def finish_request(self, request, client_address):
-        request.settimeout(EL_SIKISMA_SN)
-        try:
-            ilk = request.recv(1, socket.MSG_PEEK)
-        except OSError:
-            return
-        if not ilk:
-            return
-        if ilk != b"\x16":
-            self.duz_isleyici(request, client_address, self)
-            return
-        try:
-            guvenli = self.ssl_baglam.wrap_socket(request, server_side=True)
-        except (ssl.SSLError, OSError):
-            return
-        try:
-            self.RequestHandlerClass(guvenli, client_address, self)
-        finally:
-            try:
-                guvenli.close()
-            except OSError:
-                pass
-
-
-def telefon_baglami(y):
-    b = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    b.minimum_version = ssl.TLSVersion.TLSv1_2
-    b.load_cert_chain(y["sertifika"], y["anahtar"])
-    return b
-
-
-def telefon_sunuculari(k=None, portlar=None, host=TELEFON_HOST):
-    """Doner: ([(ad, port, sunucu)], [sorun]). Sertifika yoksa iki liste de
-    bostur: sunucu eskisi gibi yalniz 127.0.0.1'dedir (kural 3). Acilamayan
-    kapi atlanir ve sorun olarak yazilir; bilgisayardaki sistemler bundan
-    etkilenmez."""
-    if not telefon.acik_mi(k):
-        return [], []
-    try:
-        baglam = telefon_baglami(telefon.yollar(k))
-    except (ssl.SSLError, OSError) as e:
-        return [], ["sertifika okunamadı: %s" % e]
-    portlar = portlar or telefon.PORTLAR
-    acik, sorun = [], []
-    for klasor, ad, _, _, _ in SISTEMLER:
-        port = portlar.get(klasor)
-        src = os.path.join(KOK, klasor, "src")
-        if port is None or not os.path.isdir(src):
-            continue
-        sinif = type("Telefon_" + klasor, (Sunucu,), {"repo": os.path.join(KOK, klasor)})
-        try:
-            s = TelefonSunucu((host, port), partial(sinif, directory=src))
-        except OSError as e:
-            sorun.append("%s (%s): %s" % (ad, port, e))
-            continue
-        s.ssl_baglam = baglam
-        acik.append((ad, port, s))
-    return acik, sorun
-
-
-def telefon_kurulum_html(bilgisayar, ip_listesi, parmak, uzak_ad=""):
-    a = telefon.adresler(bilgisayar, ip_listesi)
-    # Android once calisan adresi arar: Tailscale (sertifika istemez, her yerde ayni koken), .local, IP.
-    aday = (["https://" + uzak_ad] if uzak_ad else []) + ["https://%s.local" % bilgisayar]
-    tailscale = ('''<h3>Tailscale ile (önerilen)</h3>
-<p>Sertifika istemez, evden uzakta da çalışır.</p>
-<ol><li><a class="dugme" href="https://play.google.com/store/apps/details?id=com.tailscale.ipn">Tailscale'i kur</a> ve bilgisayardaki hesabınla gir.</li>
-<li>Bu sayfaya dön: kendiliğinden devam eder.</li></ol>
-<p>Devam etmezse Ayarlar'da <b>Özel DNS</b> ara, «Otomatik» ya da «Kapalı» yap. Samsung'da <b>pil</b> ara, Tailscale'i hiç uyutulmayan uygulamalara ekle.</p>
-<h3>Yalnız ev ağında</h3>''' if uzak_ad else "")
-    modul = "".join(
-        '<li><b>%s</b> <a data-kapi="%d" href="%s">%s</a>%s</li>' % (
-            _kac(m), telefon.PORTLAR[m], _kac(a[m][0]), _kac(a[m][0]),
-            (' <span class="yedek">yedek: <a href="%s">%s</a></span>' % (_kac(a[m][1]), _kac(a[m][1]))
-             if len(a[m]) > 1 else ""))
-        for m in ("AYS", "SPI", "ESP"))
-    return """<!doctype html><html lang="tr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LifeOS — cihaz kurulumu</title>
-<style>
-:root{ --bg:#f6f6f8; --kart:#fff; --yazi:#1d1d22; --ikinci:#5c5c66; --vurgu:#3d3f8f; }
-@media (prefers-color-scheme:dark){ :root{ --bg:#16171b; --kart:#202227; --yazi:#ececf1; --ikinci:#a3a3ad; --vurgu:#a7a9ff; } }
-body{ margin:0; padding:24px 16px 40px; background:var(--bg); color:var(--yazi);
-  font:16px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; }
-main{ max-width:560px; margin:0 auto; }
-section{ background:var(--kart); border-radius:16px; padding:16px 18px; margin:0 0 14px; }
-h1{ font-size:22px; margin:0 0 16px; } h2{ font-size:16px; margin:0 0 8px; } h3{ font-size:15px; margin:14px 0 4px; }
-p, li{ color:var(--ikinci); } b{ color:var(--yazi); } a{ color:var(--vurgu); word-break:break-all; }
-.dugme{ display:inline-block; margin-top:6px; padding:12px 18px; border-radius:999px;
-  background:var(--vurgu); color:#fff; text-decoration:none; font-weight:600; }
-@media (prefers-color-scheme:dark){ .dugme{ color:#16171b; } }
-ul, ol{ padding-left:18px; margin:6px 0; } ol li{ margin:8px 0; } [hidden]{ display:none !important; } .yedek{ font-size:13px; } code{ font-size:12px; word-break:break-all; }
-</style></head><body><main>
-<h1>LifeOS'u bu cihaza kur</h1>
-<section id="bagla" hidden><h2>Bu cihazı hesabına bağla</h2>
-<p id="bagla-durum">Sertifika denetleniyor…</p>
-<a class="dugme" id="bagla-tarayici" hidden>Tarayıcıda devam et</a>
-<a class="dugme" id="bagla-uygulama" hidden>LifeOS uygulamasında aç</a></section>
-<section data-cihaz="ios"><h2>iPhone ve iPad</h2>
-<ol><li><a class="dugme" href="/lifeos.mobileconfig">LifeOS profilini indir</a> › İzin ver.</li>
-<li>Ayarlar › <b>İndirilen Profil</b> › Yükle.</li>
-<li>Ayarlar › Genel › Hakkında › <b>Sertifika Güven Ayarları</b> › «LifeOS Yerel Kök»ü aç.</li></ol>
-<p>AYS, SPİ ve ESP ana ekrana gelir. Profil yalnız LifeOS adreslerine (ev ağı, bu bilgisayar) etki eder; başka sitelere ve internete dokunmaz.</p>
-<p>Eski LifeOS profili varsa önce kaldır: Ayarlar › Genel › <b>VPN ve Cihaz Yönetimi</b> › LifeOS › Profili Kaldır.</p></section>
-<section data-cihaz="ios" id="iphone-uygulama"><h2>iPhone uygulaması (isteğe bağlı)</h2>
-<p>Ekran kapalıyken rota ve bildirim için. AltStore'u bilgisayardaki AltServer ile
-bir kez kur, sonra dokun: LifeOS kaynağı AltStore'a eklenir.</p>
-<a class="dugme" href="altstore://source?url=%s">AltStore'a LifeOS'u ekle</a>
-<p>AltStore › Browse › LifeOS › Free. Web kodu sonra kendiliğinden güncellenir.
-Haftalık imza yenilemesi: Kısayollar › Otomasyon › Her gün › AltStore «Refresh All Apps»,
-«Çalıştırmadan önce sor» kapalı. LifeOS açıkken AltServer da açılır.</p></section>
-<section data-cihaz="android" id="android-hazir" hidden><h2>Android telefon ve tablet</h2>
-<p>Bu cihaz LifeOS'a bağlanıyor. Aşağıdaki her modülü bir kez aç, altta çıkan <b>Kur</b>'a dokun (çıkmazsa ⋮ menüsü › <b>Ana ekrana ekle</b>).
-Bir kez açılan modül bilgisayar kapalıyken de açılır.</p></section>
-<section data-cihaz="android" id="android-kur"><h2>Android telefon ve tablet</h2>
-%s<ol><li><a class="dugme" href="/lifeos-kok.cer">Sertifikayı indir</a></li>
-<li>Ayarlar'ın arama kutusuna <b>CA sertifikası</b> yaz › CA sertifikası › Yine de yükle › İndirilenler › lifeos-kok.cer.</li>
-<li>Bu sayfaya dön: kendiliğinden devam eder.</li></ol>
-<p>Sertifika yalnız LifeOS adreslerine (ev ağı, bu bilgisayar) etki eder; başka sitelere dokunmaz.</p>
-<p>Eski LifeOS sertifikası varsa önce kaldır: Ayarlar › Güvenlik › <b>Kullanıcı sertifikaları</b> › «LifeOS Yerel Kok» › Kaldır («Kok 2» kalsın).</p></section>
-<section><h2>Modüller</h2>
-<ul>%s</ul>
-<p>Bir modülü hep aynı adresten aç: adres değişirse verin ayrı bir kökende
-kalır ve «silinmiş» görünür. <b>.local</b> açılmazsa yedek adresi kullan.</p>
-<p>Evde bir kez açınca dosyalar cihaza kaydedilir; sonra dışarıda internetsiz de açılır.
-Harita karoları için mobil internet gerekir. Güncellemeler bilgisayardan kendiliğinden gelir.</p>
-<p>Parmak izi (profilde aynı olmalı):<br><code>%s</code></p></section>
-</main>
-<script>
-/* Cihaza gore tek yol: oteki cihazin adimlari gizlenir (betik yoksa hepsi gorunur). */
-(function(){
-  var ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  var cihaz = ios ? 'ios' : /Android/.test(ua) || (/Linux/.test(ua) && navigator.maxTouchPoints > 1) ? 'android' : '';
-  if(cihaz) document.querySelectorAll('[data-cihaz]').forEach(function(e){ e.hidden = e.getAttribute('data-cihaz') !== cihaz || e.id === 'android-hazir'; });
-})();
-/* Tek QR (hesap sayfasi › Yeni cihaz bagla): adrese ulasilinca (sertifika kuruluysa ya da
-   Tailscale aciksa) kendiliginden hesaba baglar. Kod rakam degilse hic okunmaz. Android'de
-   kod olmadan da calisan adres aranir: modul baglantilari ona doner, koken hep ayni kalir. */
-(function(){
-  var kod = (new URLSearchParams(location.search).get('bagla') || '').replace(/[^0-9]/g, '');
-  if(kod.length !== 6) kod = '';
-  var ua = navigator.userAgent, iphone = /iPhone|iPad|iPod/.test(ua);
-  var android = !iphone && (/Android/.test(ua) || (/Linux/.test(ua) && navigator.maxTouchPoints > 1));
-  if(!kod && !android) return;
-  if(kod) history.replaceState(null, '', location.pathname);
-  var ip = location.hostname, KAPI = %d, aday = (android ? %s : []);
-  if(aday.indexOf('https://' + ip) < 0) aday.push('https://' + ip);
-  var $ = function(i){ return document.getElementById(i); };
-  if(kod){
-    $('bagla').hidden = false;
-    $('bagla-tarayici').href = 'https://' + ip + ':' + KAPI + '/?bagla=' + kod;
-    $('bagla-uygulama').href = 'lifeos://bagla?adres=' + encodeURIComponent(ip) + '&kod=' + kod;
-  }
-  function dene(i, bitti){
-    if(i >= aday.length) return bitti('');
-    var d = new AbortController(), t = setTimeout(function(){ d.abort(); }, 4000);
-    fetch(aday[i] + ':' + KAPI + '/sw.js', { mode:'no-cors', cache:'no-store', signal:d.signal }).then(function(){
-      clearTimeout(t); bitti(aday[i]);
-    }, function(){ clearTimeout(t); dene(i + 1, bitti); });
-  }
-  function hazir(adres){
-    if(iphone){
-      $('bagla-durum').textContent = 'Sertifika hazır. Uygulamayı kurduysan oradan aç.';
-      $('bagla-uygulama').hidden = $('bagla-tarayici').hidden = false;
-    }else if(kod) location.replace(adres + ':' + KAPI + '/?bagla=' + kod);
-    else{
-      $('android-kur').hidden = true;
-      $('android-hazir').hidden = false;
-      document.querySelectorAll('a[data-kapi]').forEach(function(a){
-        a.href = a.textContent = adres + ':' + a.getAttribute('data-kapi') + '/';
-      });
-      document.querySelectorAll('.yedek').forEach(function(y){ y.hidden = true; });
-    }
-  }
-  function bak(){
-    dene(0, function(adres){
-      if(adres) return hazir(adres);
-      if(kod) $('bagla-durum').textContent = android ? 'Önce aşağıdaki adımlardan birini yap; olunca bu cihaz kendiliğinden bağlanır.'
-        : 'Önce aşağıdaki sertifikayı indirip kur; kurulunca bu cihaz kendiliğinden bağlanır.';
-      setTimeout(bak, 2000);
-    });
-  }
-  bak();
-})();
-</script></body></html>""" % (_kac(ALTSTORE_KAYNAK), tailscale, modul, _kac(parmak), telefon.PORTLAR["SPI"],
-                               json.dumps(aday).replace("<", "\\u003c"))
-
-
-class TelefonKurulum(BaseHTTPRequestHandler):
-    """Ev agindan http ile acilan TEK sayfa: yonerge ve kok sertifikanin
-    ACIK kismi. BaseHTTPRequestHandler bilincli: SimpleHTTPRequestHandler'in
-    HEAD'i calisma klasorunu (deponun koku: veri/, HKM/db/) sunardi. Burada
-    tanimlanmayan her yol ve yontem 404/501'dir; ozel anahtar hic okunmaz."""
-    klasor = None
-
-    def do_GET(self):
-        yol = self.path.split("?", 1)[0]
-        y = telefon.yollar(self.klasor)
-        if yol == "/lifeos-kok.cer":
-            try:
-                with open(y["kok_der"], "rb") as f:
-                    govde = f.read()
-            except OSError:
-                return self.send_error(404)
-            self.send_response(200)
-            self.send_header("Content-Type", "application/x-x509-ca-cert")
-            self.send_header("Content-Disposition", 'attachment; filename="lifeos-kok.cer"')
-        elif yol == "/lifeos.mobileconfig":
-            # iPhone/iPad: kok sertifika + uc ana ekran simgesi tek profilde.
-            try:
-                govde = telefon.profil(self.klasor, telefon.ad(), telefon.ipler())
-            except OSError:
-                return self.send_error(404)
-            self.send_response(200)
-            self.send_header("Content-Type", "application/x-apple-aspen-config")
-            self.send_header("Content-Disposition", 'attachment; filename="LifeOS.mobileconfig"')
-        elif yol in ("/", "/index.html"):
-            ipl = telefon.ipler()
-            govde = telefon_kurulum_html(telefon.ad(), ipl, telefon.parmak_izi(y), uzak.acik_ad()).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-        else:
-            return self.send_error(404)
-        self.send_header("Content-Length", str(len(govde)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(govde)
-
-    def log_message(self, fmt, *args):
-        return
-
-
-def telefon_kurulum_sunucusu(k=None, port=None, host=TELEFON_HOST):
-    """Kurulum kapisi hem http hem https konusur: kok kurulmadan once
-    https'te tarayici uyari verir (gecilebilir), sonra temiz acilir."""
-    if not telefon.acik_mi(k):
-        return None
-    sinif = type("TelefonKurulum_", (TelefonKurulum,), {"klasor": k})
-    s = TelefonSunucu((host, telefon.KURULUM_PORT if port is None else port), sinif)
-    s.ssl_baglam = telefon_baglami(telefon.yollar(k))
-    s.duz_isleyici = sinif
-    return s
-
 
 
 def _cikti_utf8():
@@ -2501,75 +2083,6 @@ def _cikti_utf8():
             pass
 
 
-def main():
-    _cikti_utf8()
-    sunucular = []
-    eksik = []
-    for klasor, ad, port, _, _ in SISTEMLER:
-        try:
-            s = _sunucu_kur(klasor, port)
-        except OSError as e:
-            print("  ✕ %s açılamadı (%s): %s" % (ad, port, e))
-            print("    Bu port başka bir şey tarafından kullanılıyor olabilir.")
-            return 1
-        if s is None:
-            eksik.append(klasor)
-            continue
-        sunucular.append((ad, port, s))
-
-    if not sunucular:
-        print("Hiçbir sistem bulunamadı. Bu betik deponun kökünden çalışır.")
-        return 1
-
-    try:
-        giris = KuyrukluSunucu((HOST, GIRIS_PORT), Giris)
-    except OSError as e:
-        print("  ✕ Giriş sayfası açılamadı (%s): %s" % (GIRIS_PORT, e))
-        return 1
-
-    print("\nLifeOS — tek sunucu\n")
-    for ad, port, _ in sunucular:
-        print("  ✓ %-38s http://%s:%d" % (ad, HOST, port))
-    for k in eksik:
-        print("  • %-38s klasör yok, atlandı" % k)
-    print("\n  Giriş sayfası:  http://%s:%d\n" % (HOST, GIRIS_PORT))
-
-    # Telefon: yalniz telefon.py ile sertifika uretildiyse. Acilamazsa
-    # bilgisayardaki sistemler yine calisir.
-    if telefon.tazele():
-        print("  • Güvenlik sertifikası yenilendi: her cihazda bir kez yeniden kur (Hesap › Cihazlar)."
-              if telefon.kok_yenilendi_mi() else
-              "  • Bu bilgisayarın adresi değişti: sunucu sertifikası yenilendi (telefona yeniden kurulmaz).")
-    tel, tel_sorun = telefon_sunuculari()
-    threading.Thread(target=_bekci_dongusu, daemon=True).start()
-    kurulum = None
-    if tel:
-        try:
-            kurulum = telefon_kurulum_sunucusu()
-        except OSError as e:
-            tel_sorun.append("kurulum sayfası (%s): %s" % (telefon.KURULUM_PORT, e))
-        ipl = telefon.ipler()
-        print("  Telefon (ev ağı, https):")
-        for ad, port, _ in tel:
-            print("  ✓ %-38s https://%s.local:%d" % (ad, telefon.ad(), port))
-        if kurulum and ipl:
-            print("  Telefon kurulumu:  http://%s:%d\n" % (ipl[0], telefon.KURULUM_PORT))
-    for s in tel_sorun:
-        print("  • Telefon kapısı açılamadı — " + s)
-    print("  Durdurmak için: Ctrl+C\n")
-
-    for _, _, s in sunucular + tel:
-        threading.Thread(target=surekli_hizmet, args=(s,), daemon=True).start()
-    plan_zamanlayici().baslat()
-    if kurulum:
-        threading.Thread(target=surekli_hizmet, args=(kurulum,), daemon=True).start()
-    try:
-        surekli_hizmet(giris)
-    except KeyboardInterrupt:
-        print("\nDurduruldu.")
-    return 0
-
-
 def surekli_hizmet(srv, bekle=time.sleep):
     """Gecici ag hatasinda sunucuyu yeniden baslatir. Sahada (2026-11-05) select()
     WinError 10055 firlatti; giris dusunce surecle birlikte uc modul ve guncelleme de
@@ -2586,4 +2099,5 @@ def surekli_hizmet(srv, bekle=time.sleep):
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    import tekkapi      # eski komut (python sistem/sunucu.py) tek kapiyi acar
+    raise SystemExit(tekkapi.main())

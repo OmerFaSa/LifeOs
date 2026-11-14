@@ -6,7 +6,7 @@
      python sistem/tasi.py --ac <dosya>      # yeni bilgisayarda (kur.ps1 de sorar)
 
    Sozler:
-     1. HEPSI TEK DOSYADA. Hesap deposu, kok sertifika (telefona yeniden kurulmaz),
+     1. HEPSI TEK DOSYADA. Hesap deposu,
         HKM verisi ve ayari, kendi arka planin ve muzigin, uygulamanin depolari.
         Oturum cerezleri tasinmaz (Windows bu makineye sifreler): yeniden girilir.
      2. SIFRELI. Paket sifresiz acilmaz; icindeki anahtarlar USB'de acik durmaz.
@@ -45,7 +45,6 @@ import ayar  # noqa: E402
 import hesap  # noqa: E402
 import muzik  # noqa: E402
 import planlama  # noqa: E402
-import telefon  # noqa: E402
 import zemin  # noqa: E402
 
 BASLIK = b"LIFEOSTASI1\n"
@@ -66,7 +65,6 @@ def yerler(kok=KOK, profil=None):
         temel = os.environ.get("APPDATA") or os.path.expanduser("~")
         profil = os.path.join(temel, "LifeOS")
     return {
-        "ev/telefon": telefon.klasor(),
         "ev/zemin": zemin.klasor(),
         "ev/muzik": muzik.klasor(),
         "ev/ayar.json": os.path.join(ayar.klasor(), "ayar.json"),
