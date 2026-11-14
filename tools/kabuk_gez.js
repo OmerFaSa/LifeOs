@@ -574,6 +574,13 @@ async function goruntu(p, ad) {
       const v = await window.LIFEOS.Kabuk.Depo.al('lifeos.kayit.kayitlar'); const l = JSON.parse(v || '[]');
       return l.some(r => r.id === 'kilo:2026-10-20:0' && r.deger.kg.k === 'eski'); }).catch(() => false));
 
+    // ---- Eski sistem: kontrol paneli ve üç modül yeni kabuktan bir adım ----
+    await p.goto(T + '/kabuk/#/eski');
+    await p.waitForSelector('a[href="/kartlar/"]');
+    dene('eski sistem: kabuktan eski kontrol paneline bağlantı', /Eski sistem/.test(await p.textContent('#sayfa')));
+    const kartlar = await p.request.get(T + '/kartlar/');
+    dene('eski sistem: /kartlar/ eski giriş sayfasını verir, kartlar modül yoluna bağlı', kartlar.status() === 200 && /href="\/ays\/"/.test(await kartlar.text()));
+
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');
     await p.waitForSelector('a.b-satir[href="#/alan/felsefe"]');

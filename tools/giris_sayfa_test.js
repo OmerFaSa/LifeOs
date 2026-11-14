@@ -37,7 +37,7 @@ function dolu(){
   try{
     for(let i = 0; i < 50 && !await dolu(); i++) await new Promise(r => setTimeout(r, 200));
     for(const [ad, yol, kontrol] of [
-      ['giris', '/', () => !!(window.LIFEOS && window.LIFEOS.HESAP && window.LIFEOS.PARCA)],
+      ['giris', '/kartlar/', () => !!(window.LIFEOS && window.LIFEOS.HESAP && window.LIFEOS.PARCA)],
       ['gun', '/gun/', () => !!(document.querySelector('.site') || document.querySelector('#app').children.length)],
     ]){
       const p = await t.newPage(), hata = [], yok = [];

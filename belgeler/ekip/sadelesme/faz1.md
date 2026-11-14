@@ -187,3 +187,14 @@ oturumu yok, eski modüllerin tek depodan okuması oturum ister. Önce oturum a�
 - **Bayrağı açmadan önce:** uygulama kapatılır, taze paket alınır (uygulamada «Bilgisayara gönder» ya da P6 adım 1), göç yenilenir
   (`goc.py --geri-al <kimlik>` + `--gercek --bekleyen-pakette`), `tools/kabuk_baslangic.py` yeniden koşulur. Geri dönüş: bayrak
   `False`, yeniden başlat; eski kökenlerdeki veri yerinde durur (hiçbir şey silinmez).
+
+## İlk ekran yeni kabuk; tek kapı bayrağı neden açılmadı (2026-11-14)
+- **Bayrak açılmadı.** Bu bilgisayarda ev ağı kapıları (5173/5183/5193/5180) ve Tailscale serve (443 ve 51xx) dinliyor: telefon
+  bağlı kullanılıyor ve kendi verisi kendi tarayıcı deposunda. Telefonun göç paketi gelmedi (hesapta oturum yok; telefondan gönderim
+  admin oturumu ister, şifre sahibindir). Bayrak açılırsa o kapılar kapanır ve telefondaki veri eski adreste mahsur kalır. Kapı
+  maddesi 1 («her cihazın paketi») bu yüzden tutmuyor; bayrak telefon paketinden sonra açılır.
+- **İlk ekran.** Veri riski olmayan adım atıldı: `sunucu.ILK_EKRAN_KABUK = True`. Bilgisayarda kök (`/`) eski kapıda da yeni kabuğa
+  gider (302 `/kabuk/`); eski giriş, güncelleme kutusu ve kart seçimi `/kartlar/`'da, Ana sayfa `/gun/`'da durur. Kabukta «Eski sistem»
+  yeri (Sistem haritası, komut çubuğu) oraya götürür. Eski modüller kendi kapılarında ve kendi verileriyle aynen çalışır.
+  Geri dönüş: bayrak `False`.
+- Telefon tarafı değişmedi: 5180 kurulum sayfası ve 51xx modül kapıları ayrı işleyicilerdir.

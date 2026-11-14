@@ -172,8 +172,9 @@ def sina(eski, tek, kokler=()):
                 "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
         ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/gun/", "/kartlar/"))
     k, b = iste_yonsuz(T, "/")
-    dene("tek kapıda kök yeni kabuğa gider (302 /kabuk/); eski kapıda giriş sayfası", k == 302 and b.get("Location") == "/kabuk/"
-         and iste(g, "/")[0] == 200, "%s %s" % (k, b.get("Location")))
+    ke, be = iste_yonsuz(g, "/")
+    dene("kök iki kapıda da yeni kabuğa gider (302 /kabuk/)", (k, b.get("Location")) == (302, "/kabuk/") == (ke, be.get("Location")),
+         "%s %s | %s %s" % (k, b.get("Location"), ke, be.get("Location")))
     ek, tk = iste(g, "/kartlar/")[2].decode("utf-8"), iste(T, "/kartlar/")[2].decode("utf-8")
     dene("giriş kartları: eski kapıda porta, tek kapıda yola bağlanır",
          all('href="http://%s:%d/"' % (H, p_) in ek and 'href="/%s/"' % m in tk and 'href="http://%s:%d/"' % (H, p_) not in tk

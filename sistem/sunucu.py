@@ -92,6 +92,7 @@ BEKCI_SN = 60
 # AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
 ALTSTORE_KAYNAK = "https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
 GIRIS_PORT = 4180
+ILK_EKRAN_KABUK = True  # kok (/) yeni kabuga gider (sadelesme: yeni kabuk ilk ekran); eski giris ve kontrol paneli /kartlar/'da
 TEK_KAPI = False        # tekkapi.kur() True yapar: Gun sayfasi modulleri port yerine yoldan (/ays/) acar
 HKM_PORT = 4200
 
@@ -2027,6 +2028,14 @@ class Giris(SimpleHTTPRequestHandler):
         # Ana sayfa (2026-11-09, depo sahibi: «ilk giriste bizi karsilayacak yer orasi»): hesabina girmis
         # kisi kokte Ana sayfaya (/gun/) gider; girmemis kisi giris sayfasini gorur (hesap orada acilir).
         # Eski kart secimi /kartlar/'da durur: guncelleme kutusu ve Merkez dugmesi orada.
+        if yol in ("/", "/index.html") and ILK_EKRAN_KABUK:
+            # Yeni kabuk ilk ekran (2026-11-14, plan: yeni kabuk kurulur, eskisi en son kapanir). Eski giris sayfasi,
+            # guncelleme kutusu ve kart secimi /kartlar/'da; Ana sayfa /gun/'da durur. 302: bayrak donerse ezberlenmesin.
+            self.send_response(302)
+            self.send_header("Location", "/kabuk/")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return None
         if yol == "/" and "lifeos_hesap=" in (self.headers.get("Cookie") or ""):
             self.send_response(302)
             self.send_header("Location", "/gun/")
