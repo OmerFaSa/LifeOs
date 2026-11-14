@@ -1,42 +1,37 @@
 # Senin adımların · sadeleşmenin son kısmı
 
-> 14 Kasım 2026. Sistem tarafında yapılabilecek her şey yapıldı; senin adımların dörde indi.
+> 14 Kasım 2026. Sistem tarafında yapılabilecek her şey yapıldı; sana iki adım kaldı.
 > Ölçüm ve etiketleme (Onaylar › «Ölçüm için etiketle») plandan çıkarıldı; istersen yaparsın, gerekmiyor.
 > Aynı liste LifeOS'ta Onaylar ekranının altında «Senin adımın» başlığıyla da duruyor.
 
-**Senin yerine yapılanlar:** LifeOS güncellendi (6f8319a2) ve açık. Eski notların, kayıtların ve
-beden bilgilerin yeni ekranlara getirildi (masaüstü uygulamanda, 14 Kasım sabahı).
+**Senin yerine yapılanlar (14 Kasım):**
 
-## 1. Telefondan gönder
+- LifeOS güncellendi.
+- Eski notların, kayıtların ve beden bilgilerin yeni ekranlara getirildi.
+- Telefonda kayıt olmadığını söyledin; bilgisayarın paketleri uygulamadan alındı.
+- **Tek kapı açıldı** (16:21). LifeOS artık tek adreste: http://127.0.0.1:4180. Modüller `/ays/`, `/spi/`, `/esp/` altında; eski kayıtların oraya geçti.
+- Geçişten önce tam yedek alındı: `%LOCALAPPDATA%\LifeOS\yedek\tek-kapi-20261114-162108`.
+  Geri dönmek gerekirse LifeOS-Sistem klasöründe `python sistem/tek_kapi_ac.py --geri`.
 
-Telefonda LifeOS'a girdiğin, kaybetmek istemediğin kayıt yoksa bu adımı atla.
-
-1. Telefonda LifeOS'u aç (evde ev ağı adresiyle ya da Tailscale ile, her zamanki gibi).
-2. **Ayarlar › Hesap**'tan kendi hesabınla gir.
-3. **Hesap › Verin** bölümünde **Bilgisayara gönder**'e bas.
-4. Bunu dört yerde birer kez yap: **AYS**, **SPİ**, **ESP** ve **Gün** sayfası.
-5. Tablet varsa aynısını onda da yap.
-
-## 2. Claude'a haber ver
-
-Claude'a **«gönderdim»** ya da **«telefonda kayıt yok»** yaz. Gerisini Claude yapar:
-
-- bilgisayarın kendi paketlerini alır (uygulamaya bağlanarak, senin bir şeye basmana gerek kalmadan),
-- bütün veriyi yedekler ve yedeği doğrular,
-- tek kapıyı `python sistem/tek_kapi_ac.py --ac` ile açar; bir şey ters giderse kendiliğinden eski hâline döner,
-- eski modülleri, eski kapıları ve HKM yüzünü siler (kod; verin taşınmış ve yedekli),
-- testlerden geçirip gönderir ve LifeOS'u günceller.
-
-Bu iş sırasında LifeOS birkaç dakika kapanıp yeniden açılır.
-
-## 3. Dersleri onayla
+## 1. Dersleri onayla
 
 **Onaylar › bir alan › Aşamanın hepsini onayla.** On alanda yirmi aşama var.
 Okuduğunu onayla; emin olmadığını ünite ya da ders ders onayla. Onaylanmayan ders taslak kalır ve tekrara girmez.
 Her onay geri alınabilir. Bunu yalnız sen yapabilirsin: içeriği sistem kendisi onaylamaz.
 
-## 4. King ve disk
+## 2. King ve disk
 
 - **King:** Claude'u bir kez tamamen kapatıp aç. King bundan sonra Claude'un içinde görünür; LifeOS'u yalnız okur.
 - **Disk şifreleme:** Windows Ayarlar'da «Cihaz şifreleme» diye ara ve aç. Bu bilgisayarda Windows 11 Home var; Home'da BitLocker'ın yerine «Cihaz şifreleme» geçer.
   Bilgisayar kaybolursa kayıtların okunamaz. Kurtarma anahtarını sakla.
+
+## İstersen: telefondan bakmak
+
+Telefondan LifeOS'a bakmak istersen LifeOS-Sistem klasöründe bir kez şunu yaz:
+
+```
+python sistem/uzak.py --ac
+```
+
+Tailscale yolunu eski kapılardan tek kapıya bağlar (yalnız senin özel ağın; internete açılmaz).
+Bu bir ağ ayarı olduğu için Claude yapmadı.

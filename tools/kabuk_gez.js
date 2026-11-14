@@ -947,7 +947,7 @@ async function goruntu(p, ad, sec = {}) {
     dene('onay: on alan, alan ve aşama başına taslak/onaylı sayısı «ölçüldü»', (await op.locator('a.b-satir[href^="#/onay/"]').count()) === 10
       && /Aşama 1: \d+ taslak, \d+ onaylı · Aşama 2: \d+ taslak, \d+ onaylı · ölçüldü/.test(await op.textContent('a.b-satir[href="#/onay/felsefe"]'))
       && (await op.getAttribute('.b-sayi', 'aria-label')) === 'Onay bekleyen: ' + bekleyen.toLocaleString('tr-TR') + ' ders, ölçüldü', await op.getAttribute('.b-sayi', 'aria-label'));
-    dene('onay: «Senin adımın» dört adım; onay yokken dosya düğmesi kapalı, «hepsini onayla» yok', (await op.locator('[aria-label="Senin adımın"] li').count()) === 4
+    dene('onay: «Senin adımın» üç satır; onay yokken dosya düğmesi kapalı, «hepsini onayla» yok', (await op.locator('[aria-label="Senin adımın"] li').count()) === 3
       && (await op.getAttribute('[data-onay-ac="disari"]', 'aria-disabled')) === 'true' && (await op.locator('button, a, [data-onay-ac]').filter({ hasText: /hepsini onayla/i }).count()) === 0);
     await op.waitForSelector('[data-etiket-govde] .b-sayilar');
     dene('etiket: set boşken iki sayı «0, ölçüldü» ve ne yapılacağını söyleyen boş durum', (await op.$$eval('[data-etiket-govde] .b-sayi', l => l.map(x => x.getAttribute('aria-label')).join(' | ')))
