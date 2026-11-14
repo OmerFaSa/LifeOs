@@ -39,31 +39,28 @@ satırını buraya yazar:
 
 <!-- SAYILAR:baslangic -->
 
-_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son satırını buraya yazar. Son koşum: 2026-11-01._
+_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --tam --yaz` takımları koşturur ve her takımın kendi son satırını buraya yazar. Son koşum: 2026-11-14._
 
-| Araç | AYS | SPI | ESP |
-|---|---|---|---|
-| `runtests.js` | 3147/3147 gecti | 2903/2903 gecti | 2609/2609 gecti |
-| `smoke.js` | Duman testi temiz — 2 hedefte 54 ekran, 10 sekme gezildi. | Duman testi temiz — 2 hedefte 38 ekran, 0 sekme gezildi. | Duman testi temiz — 2 hedefte 38 ekran, 0 sekme gezildi. |
-| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
-| `palettecheck.js` | 110 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 146 kontrast olcumu AA gecti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 164 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today |
-| `layoutcheck.js` | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 64 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 90 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 38 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 15.5 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı analytics 17.4 ms (bütçe 140). | Bütün ekranlar bütçede — en ağırı lang 19.8 ms (bütçe 80). |
-| `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
-| `designcheck.js` | — | 1 düzen temiz — 116 ekran/genişlik kombinasyonu bakıldı | — |
-| `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
-| `loadcheck.js` | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) |
-
-| Depo denetimi | Sonuç |
+| Takım | Son satır |
 |---|---|
-| `HKM tests` | 992/992 test gecti |
-| `HKM perf` | Bütün sorgular bütçede. |
-| `HKM yuz` | HKM yüzü temiz — 52 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
-| `marka.py` | marka adlandirma ve yol muhafizi temiz (25 durum) |
-| `marka kunyesi` | Medya kunyesi taze (43 gorsel, 4 aile). |
-| `seviye.py` | Seviye sistemi: uc arayuzde de kaynakla ayni. |
-| `ortak.py` | Ortak kaynak: kopyalar kaynakla ayni (183 dosya, 549 kopya). |
-| `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
+| Kabuk | 68 geçti, 0 kaldı |
+| Bileşenler | 21 geçti, 0 kaldı |
+| Onay | 15 geçti, 0 kaldı |
+| Kayıt deposu | 19 test geçti |
+| Tanışma | 25 geçti, 0 kaldı |
+| Deneme | 6 geçti, 0 kaldı |
+| Yol | 24/24 test geçti |
+| Tekrar | ✓ 21/21 test geçti |
+| Not | ✓ 28/28 test geçti |
+| Soru | ✓ 33/33 test geçti |
+| Kayıt | ✓ 30/30 test geçti |
+| Plan | ✓ 27/27 test geçti |
+| Tek kapı | 115/115 yeşil |
+| King | TEMİZ · 0 kırmızı |
+| Ölçüm bütçesi | Bütçe tamam: 28 bütçe, aşım yok. |
+| Ortak çekirdek (tarayıcı) | 269 geçti, 0 kaldı, 23 eski modül vakası atlandı |
+| Kabuk gezisi (tarayıcı) | hepsi geçti |
+| Eşitleme gezisi (tarayıcı) | hepsi geçti |
 <!-- SAYILAR:bitis -->
 
 ### Komutlar

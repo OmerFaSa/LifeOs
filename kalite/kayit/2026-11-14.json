@@ -19,7 +19,7 @@
    "ayrinti": {
     "dosya": "alan/akademik/asama-1.json"
    },
-   "deger": 2283941,
+   "deger": 2224187,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "alan_paketi_en_buyuk",
@@ -49,7 +49,7 @@
    "etiket": "ölçüldü",
    "id": "blok",
    "katman": "sistem",
-   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi)"
+   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi); sayfa'ya kabuk da girer: harita yerleri + alan alt sayfa türleri"
   },
   "cihaz_yolu": {
    "ad": "Cihaz yolu (ağ yolu)",
@@ -87,11 +87,11 @@
     "etiketli": 0,
     "gecersiz_satir": 0,
     "gercek_mesaj": {
-     "bekleyen": 0,
+     "bekleyen": 62,
      "isabet": null,
      "king": "bugünkü king/niyet.py (o anki King'in niyeti kaydedilmemiş)",
      "sahip_etiketli": 0,
-     "satir": 0,
+     "satir": 62,
      "set": "kalite/veri/yerel/anlama-aday.jsonl"
     },
     "gereken": "sahibinin etiketlediği gerçek mesajlar; her satırda King'in o an seçtiği niyet (king). «Yanlış anladın» işareti seti doldurur ama yalnız işaretli satırla isabet hep 0 çıkar: değer için işaretlenmemiş (King'in doğru anladığı) örneklem de gerekir",
@@ -112,7 +112,9 @@
    "ad": "Sistem · Anlaşılabilirlik",
    "ayrinti": {
     "en_cok": 2,
-    "eski_modul_kat": {},
+    "eski_modul_kat": {
+     "kabuk": 3
+    },
     "eski_yer": 1,
     "kabuk_en_cok": 2,
     "kabuk_ortalama": 1.78,
@@ -163,14 +165,14 @@
    "ad": "Arama",
    "ayrinti": {
     "adayli": {
-     "arama": 0,
+     "arama": 12,
      "bam": 0
     },
-    "bekleyen": 0,
+    "bekleyen": 29,
     "bozuk_dosya": 0,
     "gereken": "sahibin etiketi (POST /api/kalite/etiket, set=arama); BAM kapısı için en az 30 arama sorusu ve canlı web koşusu (king/arama_olc.py shortcut); hafızaya eklenenin isabeti ölçülmüyor",
     "kosul": "adaylar çevrimdışı: ağ ve model yok; BAM'in tek kaynağı web olduğundan çevrimdışı boş döner",
-    "neden_degersiz": "sahibin etiketlediği arama sorusu yok",
+    "neden_degersiz": "sahip etiketi bekleniyor",
     "sahip": {
      "arama": {
       "ilgisiz_gosterim": 0,
@@ -186,8 +188,28 @@
      "soru": 0
     },
     "sahip_etiketli": 0,
-    "satir": 0,
-    "set": "kalite/veri/yerel/arama-aday.jsonl"
+    "satir": 29,
+    "set": "kalite/veri/yerel/arama-aday.jsonl",
+    "vekil": {
+     "ad": "vekil: model etiketi, gerçek sorular",
+     "arama": {
+      "ilgisiz_gosterim": 3,
+      "isabet": 2,
+      "oran": 0.2
+     },
+     "arama_degil": 19,
+     "bam": {
+      "ilgisiz_gosterim": 0,
+      "isabet": 0,
+      "oran": 0.0
+     },
+     "birim": "oran",
+     "deger": 0.2,
+     "etiket": "tahmin",
+     "neden_tahmin": "etiketleri model (Claude) taslak olarak yazdı; sahibin etiketi değil",
+     "satir": 29,
+     "soru": 10
+    }
    },
    "birim": "oran",
    "deger": null,
@@ -285,6 +307,7 @@
      "bam": 5,
      "esp.prefs": 1,
      "gun_kopya": 2,
+     "kabuk": 8,
      "kisi_bilgisi": 5,
      "kullanim": 169,
      "meta": 7,
@@ -399,20 +422,20 @@
      "gereken": "kaydırma/geçiş sırasında kare süresi izi (CDP); tools/akicilik.js süre değil stil hesabı sayar"
     },
     "motor_kabukta": {
-     "bayt": 203513,
+     "bayt": 200543,
      "dosya": 6,
      "satir": 2970
     },
     "uygulama": {
      "kabuk": {
-      "bayt": 608042,
+      "bayt": 644795,
       "dosya": 21,
-      "satir": 7593
+      "satir": 8048
      }
     }
    },
    "birim": "bayt (dağıtılan kod)",
-   "deger": 608042,
+   "deger": 644795,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "egri_optimizasyon",
@@ -565,20 +588,22 @@
   },
   "ic_icelik": {
    "ad": "İç içelik (kat)",
-   "ayrinti": {},
-   "deger": 0,
+   "ayrinti": {
+    "kabuk": 3
+   },
+   "deger": 3,
    "durum": "ölçüldü",
    "etiket": "hesaplandı",
    "id": "ic_icelik",
    "katman": "sistem",
-   "yol": "modül başına var olan katlar: çekmece › disiplin (ek:{disc}) › sekme (TABS/SayfaBolumleri) › açılır araç (K.Entry); en derini"
+   "yol": "modül başına var olan katlar: çekmece › disiplin (ek:{disc}) › sekme (TABS/SayfaBolumleri) › açılır araç (K.Entry); kabukta alt sayfa › yan gezinme › açılır bölüm; en derini"
   },
   "kabuk_acilis_yuku": {
    "ad": "Kabuk açılış yükü (bayt)",
    "ayrinti": {
     "dosya": 21
    },
-   "deger": 608042,
+   "deger": 644795,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kabuk_acilis_yuku",
@@ -716,10 +741,10 @@
   "kod_hacmi": {
    "ad": "Kod hacmi (satır)",
    "ayrinti": {
-    "bayt": 5393254,
-    "dosya": 224
+    "bayt": 5354958,
+    "dosya": 223
    },
-   "deger": 96829,
+   "deger": 96071,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kod_hacmi",
@@ -739,7 +764,7 @@
    "etiket": "ölçüldü",
    "id": "komut",
    "katman": "sistem",
-   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi)"
+   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi); sayfa'ya kabuk da girer: harita yerleri + alan alt sayfa türleri"
   },
   "kopya_dosya": {
    "ad": "Üçe kopyalanan dosya",
@@ -792,14 +817,15 @@
     "AYS": 0,
     "ESP": 0,
     "SPI": 0,
-    "brand/ortak": 11
+    "brand/ortak": 11,
+    "kabuk": 31
    },
-   "deger": 11,
+   "deger": 42,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "sayfa",
    "katman": "sistem",
-   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi)"
+   "yol": "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi); sayfa'ya kabuk da girer: harita yerleri + alan alt sayfa türleri"
   },
   "tekrar_zamanlayici": {
    "ad": "Tekrar zamanlayıcısı",

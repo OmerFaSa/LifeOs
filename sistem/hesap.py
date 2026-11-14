@@ -2461,16 +2461,24 @@ def depo():
 def _kopru_ac(d):
     """Tek depo kurulduysa (Faz 1 P6 sonrasi: hesap klasorunun yanindaki veri/lifeos.db) sahibin, yani ilk
     admin hesabinin kabul edilen yazimlari oraya da gider. Depo yoksa ya da acilamazsa None: esitleme aynen surer."""
+    # Depo varken kopru kurulamazsa nedeni saklanir ve gunluge yazilir (2026-11-14: canli sunucu acilista kopruyu
+    # sessizce kuramadi, nedeni kanitlanamadi; uc artik yeniden dener, neden de 404 iletisinde gorunur).
+    onceki, d.kopru_neden = getattr(d, "kopru_neden", ""), ""
     if not os.path.exists(os.path.join(os.path.dirname(os.path.abspath(klasor())), "veri", "lifeos.db")):
         return None
     try:
         import veri
         with d._islem() as c:
             r = c.execute("SELECT min(id) AS id FROM kullanici WHERE rol='admin'").fetchone()
-        return veri.kopru_ac(klasor(), r["id"])
+        k = veri.kopru_ac(klasor(), r["id"])
+        if k is None:
+            d.kopru_neden = "sahip (yönetici hesabı) yok"
     except Exception as e:
-        sys.stderr.write("Tek depo köprüsü açılamadı: %s\n" % e)
-        return None
+        k, d.kopru_neden = None, "%s: %s" % (type(e).__name__, e)
+    if k is None and d.kopru_neden != onceki:   # uç her istekte yeniden dener; aynı neden günlüğü doldurmasın
+        sys.stderr.write("Tek depo köprüsü açılamadı: %s\n" % d.kopru_neden)
+        sys.stderr.flush()
+    return k
 
 
 def depo_kur(d):
@@ -2762,7 +2770,7 @@ def isle(h):
                     if d.kopru is None:
                         d.kopru = _kopru_ac(d)
             if d.kopru is None:
-                raise Hata(404, "Tek depo yok.")
+                raise Hata(404, "Tek depo yok." + (" Köprü kurulamadı: " + d.kopru_neden if getattr(d, "kopru_neden", "") else ""))
             yerel = _yerel_mi(h) and _yerel_host(h)
             if not yerel:
                 k = d.oturum(_jeton(h), ip)

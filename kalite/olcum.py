@@ -219,8 +219,11 @@ def parcalar(kok):
                    for m in MODULLER}
         # shortcut: taban yöntemi brand/ortak'ı test dosyalarıyla sayıyordu (12 sayfanın 11'i testte); aynen korundu.
         kirilim["brand/ortak"] = sum(say(oku(kok, y), desen) for y in bul(kok, "brand/ortak/**/*.js"))
+        if tur == "sayfa":
+            kirilim["kabuk"] = kabuk_sayfa(kok)
         sonuc[tur], ayr[tur] = sum(kirilim.values()), kirilim
-    yol = "grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi)"
+    yol = ("grep \\b(P|PARCA)\\.<tür>\\( : modül src/js (core hariç) + brand/ortak (testler dahil, taban yöntemi); "
+           "sayfa'ya kabuk da girer: harita yerleri + alan alt sayfa türleri")
     return [olcut(t, {"sayfa": "Sayfa", "blok": "Blok", "komut": "Komut"}[t], sonuc[t], "ölçüldü", yol,
                   ayrinti=ayr[t]) for t in ("sayfa", "blok", "komut")]
 
@@ -261,6 +264,13 @@ def ekranlar(kok):
                   "ls <modül>/src/js/screens/*.js", ayrinti=kirilim)]
 
 
+def kabuk_sayfa(kok):
+    """Kabuğun sayfaları: kabuk/harita.js YERLER kaydındaki her yer + rota'nın alan alt sayfa türleri (ders|kapi|asama|yer)."""
+    harita, kabuk = oku(kok, "kabuk/harita.js"), oku(kok, "kabuk/kabuk.js")
+    alt = re.search(r"/\^\(([a-z|]+)\)\\/", kabuk)
+    return say(harita, r"\{\s*id:\s*'[a-z-]+',\s*ad:\s*'[^']*',\s*katman:") + (len(alt.group(1).split("|")) if alt else 0)
+
+
 def ic_icelik(kok):
     kirilim = {}
     for m in MODULLER:
@@ -273,9 +283,12 @@ def ic_icelik(kok):
                   re.search(r"\bTABS\s*=|SayfaBolumleri\(\{", hepsi) is not None,  # ekran içi sekme
                   re.search(r"\bK2?\.Entry\(", hepsi) is not None]    # açılır araç
         kirilim[m] = sum(katlar)
+    kabuk = "\n".join(oku(kok, y) for y in bul(kok, "kabuk/*.js") if not testmi(y))
+    if kabuk:  # kabuğun katları: alt sayfa (ders/kapı) › yan gezinme (B.yanli) › açılır bölüm (B.acilir)
+        kirilim["kabuk"] = sum(["sayfaDers(" in kabuk, "B.yanli(" in kabuk, "B.acilir(" in kabuk])
     return [olcut("ic_icelik", "İç içelik (kat)", max(kirilim.values()) if kirilim else 0, "hesaplandı",
                   "modül başına var olan katlar: çekmece › disiplin (ek:{disc}) › sekme (TABS/SayfaBolumleri) › "
-                  "açılır araç (K.Entry); en derini", ayrinti=kirilim)]
+                  "açılır araç (K.Entry); kabukta alt sayfa › yan gezinme › açılır bölüm; en derini", ayrinti=kirilim)]
 
 
 # Envanterde elle bulunmuş yapıların imzası (dosya, desen). Silinen yapı sayıdan düşer;

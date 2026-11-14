@@ -900,7 +900,7 @@
       await h.merkezAc('cihazlar');
       const metin = document.querySelector('[data-hesap-merkez]').textContent;
       expect(metin).toContain('192.168.0.10');
-      expect(metin).toContain('https://192.168.0.10:5183');
+      expect(metin).toContain('https://192.168.0.10:443');
     }));
 
     it('jeton yerel depoya ve panele yazılmaz; çerez kapıya bağlı değil', () => sahneyle(async () => {
@@ -931,13 +931,13 @@
       expect(h.kapiAcikMi()).toBe(true);
       document.querySelector('[data-hesap-kapi] [data-gorunum="giris"]').click();       // ana menüden forma
       expect(document.querySelector('[data-hesap-kapi]').textContent).toContain('Bilgisayarın adresi');
-      expect(h.adresDuzelt('192.168.0.10')).toBe('https://192.168.0.10:5183');
+      expect(h.adresDuzelt('192.168.0.10')).toBe('https://192.168.0.10:443');
       expect(h.adresDuzelt('https://pc.local:5173/x?y')).toBe('https://pc.local:5173');
       expect(h.adresDuzelt('')).toBeNull();
       await h.girisYap('omer', 'parola-123', '192.168.0.10');
-      expect(srv.istekler.some(x => x.url === 'https://192.168.0.10:5183/api/hesap/giris')).toBe(true);
+      expect(srv.istekler.some(x => x.url === 'https://192.168.0.10:443/api/hesap/giris')).toBe(true);
       await h.esitle();
-      expect(esitleIstekleri(srv)[0].url).toBe('https://192.168.0.10:5183/api/hesap/esitle');
+      expect(esitleIstekleri(srv)[0].url).toBe('https://192.168.0.10:443/api/hesap/esitle');
     }));
   });
 
@@ -1336,11 +1336,11 @@
       const f0 = h._ortam.fetch;
       h._ortam.fetch = async () => ({ ok:false, status:502, json:async () => { throw new Error('boş'); } });
       let hata = null;
-      try{ await h._istek('https://pc.ts.net:5183', '/api/hesap/durum'); }catch(e){ hata = e; }
+      try{ await h._istek('https://pc.ts.net:443', '/api/hesap/durum'); }catch(e){ hata = e; }
       expect(hata.kod).toBe(0);
       h._ortam.fetch = async () => ({ ok:false, status:503, json:async () => ({ hata:'Bu sunucuda yok.' }) });
       hata = null;
-      try{ await h._istek('https://pc.ts.net:5183', '/api/hesap/durum'); }catch(e){ hata = e; }
+      try{ await h._istek('https://pc.ts.net:443', '/api/hesap/durum'); }catch(e){ hata = e; }
       expect([hata.kod, hata.message]).toEqual([503, 'Bu sunucuda yok.']);    // kendi cevabımız kalır
       h._ortam.fetch = f0;
     }));
@@ -1439,10 +1439,10 @@
       expect(a.token).toBe('');
       /* Söz 30: cihaz kendi anahtarını alır, Merkez'e hesap sunucusunun yolundan gider. */
       const yol = '/api/hesap/hkm', konum0 = h._ortam.konum;
-      h._ortam.konum = () => Object.assign({}, konum0(), { origin:'https://192.168.1.5:5183' });  // tarayıcıda hep var
-      srv.merkez = { url:'https://pc.ts.net:5183' + yol, yol, token:'cihaz-1', adres:'https://pc.ts.net:5183' };
+      h._ortam.konum = () => Object.assign({}, konum0(), { origin:'https://192.168.1.5:443' });  // tarayıcıda hep var
+      srv.merkez = { url:'https://pc.ts.net:443' + yol, yol, token:'cihaz-1', adres:'https://pc.ts.net:443' };
       expect(await h._merkezBagla()).toBe(true);
-      expect(a.url).toBe('https://192.168.1.5:5183' + yol);                 // sayfanın kendi kökeni
+      expect(a.url).toBe('https://192.168.1.5:443' + yol);                 // sayfanın kendi kökeni
       expect([a.token, a.enabled, a.lastStatus]).toEqual(['cihaz-1', true, null]);
       srv.merkez = { url:'https://baska' + yol, yol, token:'y' };
       expect(await h._merkezBagla()).toBe(false);          // bağ varsa yeniden istemez
@@ -1451,7 +1451,7 @@
       expect(a.token).toBe('y');
       /* Eski cihaz: ortak jetonu tutuyor; hesapla girmişse bir kez kendi anahtarına geçer. */
       Object.assign(a, { url:'https://pc.ts.net', token:'ortak', lastStatus:null });
-      srv.merkez = { url:'https://pc.ts.net:5183' + yol, yol, token:'cihaz-2' };
+      srv.merkez = { url:'https://pc.ts.net:443' + yol, yol, token:'cihaz-2' };
       expect(await h._merkezBagla()).toBe(true);
       expect([a.token, a.url.endsWith(yol)]).toEqual(['cihaz-2', true]);
       /* Özel ağ adresi: hesaplı cihaz da kendi anahtarını alır; hesapsız cihaz Tailscale kimliğiyle,
@@ -1459,10 +1459,10 @@
       const b = { url:'', token:'' };
       h.kur({ modul:'spi', depo:c.depo, hkm:() => ({ settings:() => b, save:async v => Object.assign(b, v) }) });
       const fetch0 = h._ortam.fetch, istenen = [];
-      h._ortam.konum = () => ({ protocol:'https:', hostname:'pc.ts.net', origin:'https://pc.ts.net:5183' });
+      h._ortam.konum = () => ({ protocol:'https:', hostname:'pc.ts.net', origin:'https://pc.ts.net:443' });
       let izin = false;
       h._ortam.fetch = async (u, s) => { if(u === '/api/uzak/merkez'){ istenen.push(s.headers['X-LifeOS']); return { ok:izin, json:async () => ({ url:'https://pc.ts.net', token:'j' }) }; } return fetch0(u, s); };
-      srv.merkez = { url:'https://pc.ts.net:5183' + yol, yol, token:'cihaz-3' };
+      srv.merkez = { url:'https://pc.ts.net:443' + yol, yol, token:'cihaz-3' };
       expect(await h._merkezBagla()).toBe(true);
       expect([b.token, b.url.endsWith(yol), istenen]).toEqual(['cihaz-3', true, []]);
       await h.cikisYap();
@@ -1940,7 +1940,7 @@
     }));
 
     [[['pc.tail1.ts.net', '192.168.0.10'], 'http://192.168.0.10:5180/?bagla=482913', 'sertifikası kurulunca'],
-     [['pc.tail1.ts.net'], 'https://pc.tail1.ts.net:5183/?bagla=482913', 'Tailscale açık olsun']].forEach(([evAgi, beklenen, metin]) => {
+     [['pc.tail1.ts.net'], 'https://pc.tail1.ts.net:443/?bagla=482913', 'Tailscale açık olsun']].forEach(([evAgi, beklenen, metin]) => {
       it('QR yeni cihazın ulaşabileceği adrese gider: ' + evAgi.join(' + '), () => sahneyle(async () => {
         const qrAdres = [], eski = window.LIFEOS.QR;
         window.LIFEOS.QR = { svg:a => { qrAdres.push(a); return '<svg></svg>'; } };
@@ -2019,12 +2019,12 @@
       tikla('[data-hesap="takvim-ac"]');
       await hazir();
       const m = merkez().textContent;
-      expect(m).toContain('https://192.168.0.10:5183/api/hesap/takvim/jeton1');
+      expect(m).toContain('https://192.168.0.10:443/api/hesap/takvim/jeton1');
       expect(m).toContain('http://127.0.0.1:4180/api/hesap/takvim/jeton1');
       expect(m).toContain('Google');
       tikla('[data-hesap="kopyala"]');
       await hazir();
-      expect(kopya[0]).toContain('https://192.168.0.10:5183/api/hesap/takvim/jeton1');
+      expect(kopya[0]).toContain('https://192.168.0.10:443/api/hesap/takvim/jeton1');
       tikla('[data-hesap="takvim-yenile-sor"]');
       expect(srv.takvimSira).toBe(1);                                           // onaysız yenilenmez
       tikla('[data-hesap="takvim-yenile"]');
@@ -2053,7 +2053,7 @@
       const m = merkez().textContent;
       expect(m).toContain('«iPhone Kısayollar» hazır');
       expect(m).toContain('Bearer lifeos_gIzLiAnAhTaR1');                        // tarif anahtarla dolu
-      expect(m).toContain('https://192.168.0.10:5183/api/hesap/gelen');
+      expect(m).toContain('https://192.168.0.10:443/api/hesap/gelen');
       expect((JSON.stringify(c.jar) + JSON.stringify(c.ls)).indexOf('gIzLiAnAhTaR') < 0).toBe(true);
       tikla('[data-hesap="geri"]');
       tikla('[data-sayfa="anahtarlar"]');

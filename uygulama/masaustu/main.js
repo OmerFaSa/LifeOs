@@ -48,7 +48,7 @@ const SPLASH = 'data:text/html;charset=utf-8,' + encodeURIComponent(`<!doctype h
 <style>html,body{height:100%;margin:0;background:#120d08;color:#f3e3c4;font:15px/1.5 "Segoe UI",system-ui,sans-serif;display:grid;place-items:center}
 .b{text-align:center}.s{width:34px;height:34px;border:3px solid rgba(243,227,196,.18);border-top-color:#e8a64a;border-radius:50%;margin:18px auto 0;animation:r .9s linear infinite}
 @keyframes r{to{transform:rotate(360deg)}}small{display:block;opacity:.65;margin-top:6px}</style>
-<div class="b"><div style="font-size:26px;font-weight:600;letter-spacing:.14em">LIFEOS</div><small id="m">AYS · SPİ · ESP · HKM başlatılıyor…</small><div class="s"></div></div></html>`);
+<div class="b"><div style="font-size:26px;font-weight:600;letter-spacing:.14em">LIFEOS</div><small id="m">Başlatılıyor…</small><div class="s"></div></div></html>`);
 
 async function boot() {
   if (!fs.existsSync(path.join(REPO, 'sistem', 'baslat.py'))) {

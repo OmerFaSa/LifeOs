@@ -227,6 +227,11 @@ jobs:
         working-directory: tools
         run: npm ci && npx playwright install --with-deps chromium
 
+      # ORTAK CEKIRDEK (2026-11-14). brand/ortak/*.test.js eski modullerin tarayici ici kosucusu icin yazilmisti; moduller
+      # kalkinca hicbir yerde kosmuyordu. Simdi gercek tarayicida kosar; silinen modul ortamini isteyen vakalar acik listede.
+      - name: Ortak çekirdek testleri (brand/ortak, gerçek tarayıcı)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ortak çekirdek testleri" node tools/ortak_test.js
+
       - name: Kabuk gezisi (tek kapı + Felsefe pilotu, gerçek tarayıcı)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk gezisi" node tools/kabuk_gez.js
 

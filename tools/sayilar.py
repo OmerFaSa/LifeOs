@@ -2,23 +2,23 @@
 # -*- coding: utf-8 -*-
 """Sayıları TEK KAYNAKTAN üretir.
 
-   README ve NOTLAR'da elle yazılan test sayıları sessizce eskiyordu:
-   belgede 939 yazarken kod 1019 testle koşuyordu. Elle yazılan bir sayı,
-   yazıldığı gün doğru olan bir sayıdır.
+   Belgelerde elle yazılan test sayıları sessizce eskiyordu: belgede 939
+   yazarken kod 1019 testle koşuyordu. Elle yazılan bir sayı, yazıldığı gün
+   doğru olan bir sayıdır.
 
-   Bu betik denetim araçlarını ÇALIŞTIRIR ve her aracın KENDİ son satırını
-   belgelere yazar. Yorum katmaz, yuvarlamaz, özetlemez: araç ne yazdıysa
-   o gider. Böylece belgedeki sayı, koşan koda bağlı kalır.
+   Bu betik tek sistemin (kabuk, motorlar, ortak çekirdek, King, kalite,
+   tek kapı) test takımlarını ÇALIŞTIRIR ve her takımın KENDİ son satırını
+   belgeye yazar. Yorum katmaz, yuvarlamaz, özetlemez.
 
    Kullanım:
-     python3 tools/sayilar.py            # yalnız birim testleri (hızlı)
-     python3 tools/sayilar.py --tam      # duman, palet, düzen, başarım da
-     python3 tools/sayilar.py --tam --yaz  # ölçer VE belgeleri günceller
+     python3 tools/sayilar.py              # birim takımları (hızlı)
+     python3 tools/sayilar.py --tam        # gerçek tarayıcı gezileri de
+     python3 tools/sayilar.py --tam --yaz  # ölçer VE belgeyi günceller
 
-   `--yaz`, `--tam` olmadan çalışmaz: hızlı koşum yalnız birim testlerini
-   ölçer ve onunla yazmak, ölçülmemiş satırları belgeden **silerdi**.
+   `--yaz`, `--tam` olmadan çalışmaz: hızlı koşum gezileri ölçmez ve onunla
+   yazmak, ölçülmemiş satırları belgeden **silerdi**.
 
-   Belgelerde şu iki işaret arasındaki bölge değiştirilir:
+   Belgede şu iki işaret arasındaki bölge değiştirilir:
      <!-- SAYILAR:baslangic -->  …  <!-- SAYILAR:bitis -->
 """
 
@@ -29,27 +29,26 @@ import sys
 from datetime import date
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SISTEMLER = [('AYS', 'Akademik Yol Sistemi'),
-             ('SPI', 'Sağlık Performans İzleyicisi'),
-             ('ESP', 'Entelektüel Seviye Planlayıcı')]
-
-HIZLI = ['runtests.js']
-# `loadcheck.js` bu listede: aracin var olmasi yetmez, RUTINE girmesi
-# gerekir. Uc sistemde de vardi ama hicbirinin rutin kosumunda yoktu —
-# yazildigi gun kosan, sonra unutulan bir denetim, yazilmamis bir
-# denetimle ayni sonucu verir. Agirdir (bes yillik veri uretir) ve bu
-# yuzden yalniz `--tam` kosumundadir; her PR'da degil, haftada bir CI
-# isinde de ayrica kosar (bkz. .github/workflows/ci.yml, `yuk`).
-TAM = ['runtests.js', 'smoke.js', 'a11ycheck.js', 'palettecheck.js',
-       'layoutcheck.js', 'perfcheck.js', 'ledgercheck.js', 'designcheck.js',
-       'tasarimcheck.js', 'loadcheck.js']
-
 BASLANGIC = '<!-- SAYILAR:baslangic -->'
 BITIS = '<!-- SAYILAR:bitis -->'
+BELGELER = [os.path.join('belgeler', 'NOTLAR.md')]
 
 # Python araçları çalışan yorumlayıcıyla çağrılır: «python3» Windows'ta yok
 # olabilir (ya da Mağaza yönlendirmesidir).
 PYTHON = sys.executable or 'python3'
+
+# (ad, komut). Liste CI'daki tek sistem işinin (`.github/workflows/ci.yml`) takımlarıdır.
+HIZLI = [('Kabuk', ['node', 'kabuk/kabuk.test.js']), ('Bileşenler', ['node', 'kabuk/bilesen.test.js']),
+         ('Onay', ['node', 'kabuk/onay.test.js']), ('Kayıt deposu', ['node', 'kabuk/depo.test.js']),
+         ('Tanışma', ['node', 'kabuk/tanisma.test.js']), ('Deneme', ['node', 'kabuk/deneme.test.js']),
+         ('Yol', ['node', 'motor/yol.test.js']), ('Tekrar', ['node', 'motor/tekrar.test.js']),
+         ('Not', ['node', 'motor/not.test.js']), ('Soru', ['node', 'motor/soru.test.js']),
+         ('Kayıt', ['node', 'motor/kayit.test.js']), ('Plan', ['node', 'motor/plan.test.js']),
+         ('Tek kapı', [PYTHON, 'tools/tekkapi_test.py']), ('King', [PYTHON, 'king/mcp_test.py']),
+         ('Ölçüm bütçesi', [PYTHON, 'kalite/olcum.py', '--denetle'])]
+TAM = HIZLI + [('Ortak çekirdek (tarayıcı)', ['node', 'tools/ortak_test.js']),
+               ('Kabuk gezisi (tarayıcı)', ['node', 'tools/kabuk_gez.js']),
+               ('Eşitleme gezisi (tarayıcı)', ['node', 'tools/kabuk_esit_gez.js'])]
 
 
 def calistir(komut, cwd, timeout, yalniz_stdout=False):
@@ -65,93 +64,22 @@ def calistir(komut, cwd, timeout, yalniz_stdout=False):
     return p.returncode, [x.strip() for x in metin.splitlines() if x.strip()]
 
 
-def kosu(sistem, arac):
-    """Aracı çalıştırır; (durum, son satır) döner. Yoksa None."""
-    yol = os.path.join(KOK, sistem, 'tools', arac)
-    if not os.path.exists(yol):
-        return None
+def kosu(komut):
+    """(durum, son satır)."""
     try:
-        kod, satirlar = calistir(['node', 'tools/' + arac], os.path.join(KOK, sistem), 900)
+        kod, satirlar = calistir(komut, KOK, 900, yalniz_stdout=True)
     except subprocess.TimeoutExpired:
-        return ('zaman aşımı', '—')
-    son = satirlar[-1] if satirlar else '—'
-    return ('geçti' if kod == 0 else 'KALDI', son)
+        return ('KALDI', 'zaman aşımı')
+    except OSError as e:
+        return ('KALDI', str(e))
+    return ('geçti' if kod == 0 else 'KALDI', satirlar[-1] if satirlar else '—')
 
 
-def kok_araclar():
-    """Depo kokundeki denetimler — tek bir sistemin degil, ARALARININ."""
-    out = {}
-    for ad, komut in (("HKM tests", [PYTHON, "-m", "tests.run"]),
-                      ("HKM perf", [PYTHON, "tools/perf.py"]),
-                      ("HKM yuz", ["node", "tools/yuz.js"])):
-        try:
-            kod, satir = calistir(komut, os.path.join(KOK, "HKM"), 900, yalniz_stdout=True)
-        except Exception as e:
-            out[ad] = ("KALDI", str(e))
-            continue
-        out[ad] = ("gecti" if kod == 0 else "KALDI",
-                   satir[-1] if satir else "—")
-    # Marka adlandirmasi ve yol muhafizi. Bu arac bir teslimatta otuz
-    # dosyayi tek seferde isimlendirip yerlestiriyor; kurali bozan bir
-    # degisiklik sessizce yanlis yere yazabilir.
-    #
-    # KUNYE ve TEK KAYNAK DENETIMLERI de burada: ucu de saf Python,
-    # saniyeler suruyor ve ucu de SESSIZ bir bozulmayi yakaliyor —
-    # kopyanin kaynaktan ayrismasi, kunyenin tazeligini yitirmesi,
-    # adin kurali bozmasi. Hicbiri ekranda gorunmuyor; ancak bir denetim
-    # soylerse bilinir.
-    for ad, komut in (
-            ("marka.py", [PYTHON, "tools/marka.py", "--sina"]),
-            ("marka kunyesi", [PYTHON, "tools/marka.py", "--kunye", "--denetle"]),
-    ):
-        try:
-            kod, satir = calistir(komut, KOK, 120)
-            out[ad] = ("gecti" if kod == 0 else "KALDI",
-                       satir[-1] if satir else "—")
-        except Exception as e:
-            out[ad] = ("KALDI", str(e))
-
-    try:
-        kod, satir = calistir(["node", "tools/entegre.js"], KOK, 1800, yalniz_stdout=True)
-        out["entegre.js"] = ("gecti" if kod == 0 else "KALDI",
-                             satir[-1] if satir else "—")
-    except Exception as e:
-        out["entegre.js"] = ("KALDI", str(e))
-    return out
-
-
-def topla(araclar):
-    out = {}
-    for sistem, _ad in SISTEMLER:
-        out[sistem] = {}
-        for arac in araclar:
-            r = kosu(sistem, arac)
-            if r is None:
-                continue
-            out[sistem][arac] = r
-            print('%-4s %-16s %s — %s' % (sistem, arac, r[0], r[1]))
-    return out
-
-
-def tablo(sonuc, araclar):
-    kullanilan = [a for a in araclar
-                  if any(a in sonuc[s] for s, _ in SISTEMLER)]
-    satir = ['| Araç | ' + ' | '.join(s for s, _ in SISTEMLER) + ' |',
-             '|---|' + '---|' * len(SISTEMLER)]
-    for arac in kullanilan:
-        hucreler = []
-        for sistem, _ad in SISTEMLER:
-            r = sonuc[sistem].get(arac)
-            hucreler.append('—' if r is None else r[1].replace('|', '¦'))
-        satir.append('| `' + arac + '` | ' + ' | '.join(hucreler) + ' |')
-    return '\n'.join(satir)
-
-
-def govde(sonuc, araclar):
-    return ('\n_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` '
-            'araçları koşturur ve her aracın kendi son satırını buraya '
-            'yazar. Son koşum: ' + date.today().isoformat() + '._\n\n'
-            + tablo(sonuc, araclar) + '\n')
+def govde(sonuc):
+    return ('\n_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --tam --yaz` takımları koşturur ve '
+            'her takımın kendi son satırını buraya yazar. Son koşum: ' + date.today().isoformat() + '._\n\n'
+            '| Takım | Son satır |\n|---|---|\n'
+            + ''.join('| %s | %s |\n' % (ad, r[1].replace('|', '¦')) for ad, r in sonuc) )
 
 
 def yaz(dosya, metin):
@@ -162,7 +90,7 @@ def yaz(dosya, metin):
         print('atlandı (işaret yok): ' + dosya)
         return False
     yeni = re.sub(re.escape(BASLANGIC) + '.*?' + re.escape(BITIS),
-                  BASLANGIC + '\n' + metin + BITIS, s, flags=re.S)
+                  lambda _m: BASLANGIC + '\n' + metin + BITIS, s, flags=re.S)
     if yeni == s:
         return False
     with open(yol, 'w', encoding='utf-8') as f:
@@ -172,43 +100,33 @@ def yaz(dosya, metin):
 
 
 def main():
+    try:   # Windows konsolu (cp1254) «✓» basamaz
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
     tam = '--tam' in sys.argv
-    araclar = TAM if tam else HIZLI
-    sonuc = topla(araclar)
-    kok = kok_araclar() if tam else {}
-    for ad, r in kok.items():
-        print('%-4s %-16s %s — %s' % ('kök', ad, r[0], r[1]))
-    metin = govde(sonuc, araclar)
-    if kok:
-        metin += ('\n| Depo denetimi | Sonuç |\n|---|---|\n'
-                  + ''.join('| `%s` | %s |\n' % (a, r[1].replace('|', '¦'))
-                            for a, r in kok.items()))
-    kalan = [(s, a) for s in sonuc for a in sonuc[s] if sonuc[s][a][0] != 'geçti']
-    kalan += [('kök', a) for a, r in kok.items() if r[0] != 'gecti']
+    sonuc = []
+    for ad, komut in (TAM if tam else HIZLI):
+        r = kosu(komut)
+        sonuc.append((ad, r))
+        print('%-28s %s — %s' % (ad, r[0], r[1]))
+    metin = govde(sonuc)
+    kalan = [ad for ad, r in sonuc if r[0] != 'geçti']
     if '--yaz' in sys.argv:
-        # OLCULMEYEN SATIR SILINMEZ. Hizli kosum yalnizca birim testlerini
-        # olcer; onunla yazmak, olculmemis satirlari belgeden KALDIRIRDI ve
-        # belge daha az sey olcuyormus gibi gorunurdu. Olculmeyen bir sey
-        # icin bos satir yazmak da, «bu arac artik yok» demekti.
+        # OLCULMEYEN SATIR SILINMEZ: hizli kosum gezileri olcmez; onunla yazmak satirlari belgeden kaldirirdi.
         if not tam:
-            print('yazilmadi: --yaz icin --tam gerekir. Hizli kosum yalniz '
-                  'birim testlerini olcer; olculmeyen satirlari silmek, '
-                  'belgeyi daha az sey olcuyormus gibi gosterirdi.')
+            print('yazılmadı: --yaz için --tam gerekir; ölçülmeyen satırı silmek belgeyi daha az şey ölçüyormuş gibi gösterirdi.')
             return 2
-        # KALAN VARKEN YAZILMAZ. Kalan bir aracin son satiri bir hata
-        # mesajidir; onu tabloya yazmak, belgeye olculmus bir sayi gibi
-        # girer ve bir onceki DOGRU olcumu siler.
+        # KALAN VARKEN YAZILMAZ: kalan takimin son satiri bir hata iletisidir; tabloya girerse onceki DOGRU olcumu siler.
         if kalan:
-            print('yazilmadi: ' + ', '.join(s + '/' + a for s, a in kalan)
-                  + ' gecmedi; belgeler eski (dogru) olcumu korur.')
+            print('yazılmadı: ' + ', '.join(kalan) + ' geçmedi; belge eski (doğru) ölçümü korur.')
             return 1
-        for d in ['README.md', os.path.join('belgeler', 'NOTLAR.md')]:
+        for d in BELGELER:
             yaz(d, metin)
     else:
-        print()
-        print(metin)
+        print('\n' + metin)
     if kalan:
-        print('KALAN: ' + ', '.join(s + '/' + a for s, a in kalan))
+        print('KALAN: ' + ', '.join(kalan))
         return 1
     return 0
 

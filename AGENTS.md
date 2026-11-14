@@ -288,7 +288,7 @@ bir bulgudur. Emin değilsen **«göremedim»** yaz, «yok» yazma: bu depoda
    yüzeylerini listeler;
    orada adı geçen şey vardır.
 2. **Genel yazılım tavsiyesi.** «Test yazın, CI kurun, tip ekleyin» —
-   2 600+ test ve on denetim aracı var; sayılar `README.md`'de ve elle
-   yazılmaz, `tools/sayilar.py` üretir.
+   test takımları ve tarayıcı gezileri var; sayılar elle
+   yazılmaz, `tools/sayilar.py --tam --yaz` `belgeler/NOTLAR.md`'ye üretir.
 3. **On yıllık mimari.** Ufuk **dokuz aydır**: her gün kullanılacak bir
    sistem için ne kırılır, o konuşulur.
