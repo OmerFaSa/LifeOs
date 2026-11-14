@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LifeOS · Odak (öneri)</title>
+<!-- ÖNERİ v2 · «Odak»: tek sütun, tek öne çıkan iş, sakin tipografi. ?manzara=1 → «Manzara» yönü (piksel sahne başlıkta).
+     Uygulamaya bağlı değil; seçilirse kabuk/kabuk.css + bilesen.css jetonlarına taşınır. Sayılar örnek. -->
+<link rel="stylesheet" href="../../../../brand/ortak/piksel-yazi.css">
+<style>
+:root{
+  --bg:#faf8f5; --yuzey:#ffffff; --yuzey-2:#f4f1ec; --cizgi:#ebe6de; --cizgi-2:#ddd5c9;
+  --yazi:#1f1b16; --yazi-2:#4a433b; --soluk:#8a8177;
+  --ana:#b4461f; --ana-yumusak:#fbeee7; --koyu:#1f1b16;
+  --r:16px; --r-k:12px;
+  --golge:0 1px 2px rgba(31,27,22,.04), 0 4px 16px rgba(31,27,22,.06);
+  --metin:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  --baslik:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  --piksel:'Pixelify Sans',ui-monospace,monospace;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--yazi); font:15px/1.55 var(--metin); -webkit-font-smoothing:antialiased; }
+svg.i{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+a{ color:inherit; text-decoration:none; }
+
+.ust{ position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:16px; height:64px; padding:0 max(20px, calc(50% - 560px)); background:color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter:blur(10px); }
+.logo{ display:flex; align-items:center; gap:10px; font:600 16px var(--baslik); letter-spacing:-.01em; }
+.logo i{ display:grid; place-items:center; width:28px; height:28px; border-radius:8px; background:var(--koyu); color:#fff; font:600 15px var(--piksel); font-style:normal; }
+.ust nav{ display:flex; gap:4px; margin-left:16px; }
+.ust nav a{ padding:6px 12px; border-radius:8px; color:var(--soluk); font-weight:500; }
+.ust nav a.etkin{ color:var(--yazi); background:var(--yuzey-2); }
+.bos{ flex:1; }
+.ara{ display:flex; align-items:center; gap:8px; width:260px; height:36px; padding:0 12px; border-radius:10px; background:var(--yuzey-2); color:var(--soluk); font-size:14px; }
+.ara kbd{ margin-left:auto; font:12px var(--metin); color:var(--soluk); }
+.avatar{ display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:#e9dccd; color:#6b4a2f; font-weight:600; font-size:14px; }
+
+.icerik{ max-width:720px; margin:0 auto; padding:32px 20px 80px; }
+.tarih{ color:var(--soluk); font-size:14px; font-weight:500; }
+h1{ margin:6px 0 6px; font:650 40px/1.1 var(--baslik); letter-spacing:-.03em; }
+.ozet{ margin:0; color:var(--yazi-2); font-size:16px; }
+
+/* öne çıkan iş */
+.oncelik{ margin-top:28px; display:grid; grid-template-columns:1fr auto; gap:20px; align-items:center; padding:24px; border-radius:var(--r); background:var(--yuzey); border:1px solid var(--cizgi); box-shadow:var(--golge); }
+.etiket{ display:inline-flex; align-items:center; gap:8px; color:var(--ana); font-weight:600; font-size:13px; }
+.etiket svg.i{ width:16px; height:16px; }
+.oncelik h2{ margin:8px 0 4px; font:650 24px/1.2 var(--baslik); letter-spacing:-.02em; }
+.oncelik p{ margin:0; color:var(--soluk); }
+.oncelik .eylem{ display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+.dugme{ white-space:nowrap; display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border-radius:10px; border:1px solid transparent; font:600 14px var(--metin); cursor:pointer; }
+.dugme.ana{ background:var(--koyu); color:#fff; }
+.dugme.ikinci{ background:var(--yuzey); color:var(--yazi); border-color:var(--cizgi-2); }
+.dugme svg.i{ width:16px; height:16px; }
+.halka{ position:relative; width:96px; height:96px; }
+.halka svg{ width:96px; height:96px; transform:rotate(-90deg); }
+.halka circle{ fill:none; stroke-width:8; }
+.halka .iz{ stroke:var(--yuzey-2); }
+.halka .dolu{ stroke:var(--ana); stroke-linecap:round; }
+.halka span{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; font:650 20px/1 var(--baslik); }
+.halka small{ display:block; margin-top:4px; font:500 11px var(--metin); color:var(--soluk); }
+
+/* bölümler */
+.bolum{ margin-top:40px; }
+.bolum-ust{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px; }
+.bolum-ust h3{ margin:0; font:650 17px var(--baslik); letter-spacing:-.01em; }
+.bolum-ust a{ color:var(--soluk); font-size:14px; font-weight:500; }
+.kutu{ border-radius:var(--r); background:var(--yuzey); border:1px solid var(--cizgi); overflow:hidden; }
+.satir{ display:flex; align-items:center; gap:14px; padding:14px 18px; }
+.satir + .satir{ border-top:1px solid var(--cizgi); }
+.satir .ad{ font-weight:600; }
+.satir .alt{ color:var(--soluk); font-size:13px; }
+.satir .sag{ margin-left:auto; display:flex; align-items:center; gap:10px; color:var(--soluk); font-size:13px; white-space:nowrap; }
+.saat{ width:44px; color:var(--soluk); font-size:13px; font-variant-numeric:tabular-nums; }
+.tik{ display:grid; place-items:center; width:22px; height:22px; border-radius:50%; border:1.5px solid var(--cizgi-2); }
+.tik.bitti{ background:var(--ana); border-color:var(--ana); color:#fff; }
+.tik.bitti svg.i{ width:13px; height:13px; stroke-width:2.5; }
+.simge{ display:grid; place-items:center; width:36px; height:36px; border-radius:10px; }
+.bag, .satir .sag.bag{ color:var(--ana); font-weight:600; font-size:14px; }
+
+.alanlar{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.alan{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--r-k); background:var(--yuzey); border:1px solid var(--cizgi); }
+.alan .ad{ font-weight:600; }
+.alan .alt{ color:var(--soluk); font-size:13px; }
+.alan .yuzde{ margin-left:auto; font-size:13px; color:var(--soluk); font-variant-numeric:tabular-nums; }
+.c1{ background:#eef2ff; color:#4f46e5; } .c2{ background:#ecfdf5; color:#047857; } .c3{ background:#fff7ed; color:#c2410c; }
+.c4{ background:#fdf2f8; color:#be185d; } .c5{ background:#f0f9ff; color:#0369a1; } .c6{ background:#fefce8; color:#a16207; }
+.c7{ background:#f5f3ff; color:#6d28d9; } .c8{ background:#f0fdfa; color:#0f766e; }
+
+/* MANZARA yönü: piksel sahne üstte, öne çıkan iş sahnenin üstüne taşar */
+.sahne{ display:none; }
+html.manzara .sahne{ display:block; position:relative; height:300px; overflow:hidden; }
+html.manzara .sahne canvas{ width:100%; height:100%; image-rendering:pixelated; display:block; }
+html.manzara .sahne::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,14,30,.45) 0%, rgba(20,14,10,.1) 30%, rgba(20,14,10,.25) 55%, rgba(20,14,10,.7) 100%); }
+html.manzara .sahne .selam{ position:absolute; z-index:1; left:0; right:0; bottom:84px; max-width:720px; margin:0 auto; padding:0 20px; color:#fff; }
+html.manzara .sahne .tarih{ color:rgba(255,255,255,.85); }
+html.manzara .sahne h1{ text-shadow:0 2px 12px rgba(0,0,0,.25); }
+html.manzara .sahne .ozet{ color:rgba(255,255,255,.92); }
+html.manzara .icerik > .baslik-blok{ display:none; }
+html.manzara .icerik{ padding-top:0; }
+html.manzara .oncelik{ margin-top:-60px; position:relative; z-index:2; box-shadow:0 12px 40px rgba(31,27,22,.14); }
+html.manzara .ust{ position:absolute; left:0; right:0; background:none; backdrop-filter:none; color:#fff; }
+html.manzara .ust nav a{ color:rgba(255,255,255,.8); } html.manzara .ust nav a.etkin{ color:#fff; background:rgba(255,255,255,.18); }
+html.manzara .ara{ background:rgba(255,255,255,.18); color:rgba(255,255,255,.85); } html.manzara .ara kbd{ color:rgba(255,255,255,.7); }
+html.manzara .logo i{ background:#fff; color:var(--koyu); }
+
+/* PANO yönü (?pano=1): kenar çubuklu uygulama, koyu, iki sütun */
+.yan{ display:none; }
+html.pano{ --bg:#111012; --yuzey:#18171a; --yuzey-2:#212024; --cizgi:#2a292e; --cizgi-2:#3a3940; --yazi:#ededef; --yazi-2:#c9c8cd; --soluk:#8d8c94;
+  --ana:#f0a36b; --ana-yumusak:#2e2219; --koyu:#ededef; --golge:none; color-scheme:dark; }
+html.pano body{ display:grid; grid-template-columns:248px 1fr; }
+html.pano .yan{ display:flex; flex-direction:column; gap:2px; min-height:100vh; padding:18px 12px; border-right:1px solid var(--cizgi); background:#0c0b0d; }
+html.pano .yan .logo{ padding:4px 8px 18px; }
+html.pano .yan .logo i{ background:var(--ana); color:#1b120c; }
+html.pano .yan a{ display:flex; align-items:center; gap:10px; height:34px; padding:0 10px; border-radius:8px; color:var(--yazi-2); font-weight:500; font-size:14px; }
+html.pano .yan a svg.i{ width:18px; height:18px; color:var(--soluk); }
+html.pano .yan a.etkin{ background:var(--yuzey-2); color:var(--yazi); } html.pano .yan a.etkin svg.i{ color:var(--ana); }
+html.pano .yan .grup{ margin:18px 10px 6px; color:var(--soluk); font-size:12px; font-weight:600; }
+html.pano .yan .alt-bos{ flex:1; }
+html.pano .ust{ position:sticky; padding:0 32px; background:color-mix(in srgb, var(--bg) 85%, transparent); border-bottom:1px solid var(--cizgi); height:56px; }
+html.pano .ust .logo, html.pano .ust nav{ display:none; }
+html.pano .ust::before{ content:"Bugün"; font-weight:600; }
+html.pano .avatar{ background:#2a2520; color:var(--ana); }
+html.pano .icerik{ max-width:1120px; padding:28px 32px 64px; display:grid; grid-template-columns:1.35fr 1fr; gap:0 24px; align-items:start; }
+html.pano .baslik-blok, html.pano .oncelik{ grid-column:1 / -1; }
+html.pano .oncelik{ background:linear-gradient(135deg, #221a14, #18171a 60%); border-color:#3a2d22; }
+html.pano .dugme.ana{ background:var(--ana); color:#1b120c; }
+html.pano .dugme.ikinci{ background:transparent; }
+html.pano .bolum{ margin-top:28px; }
+html.pano .alanlar{ grid-template-columns:1fr; gap:6px; }
+html.pano .alan{ padding:10px 12px; }
+html.pano .c1,html.pano .c2,html.pano .c3,html.pano .c4,html.pano .c5,html.pano .c6,html.pano .c7,html.pano .c8{ background:var(--yuzey-2); }
+html.pano .c1{ color:#a5b4fc; } html.pano .c2{ color:#6ee7b7; } html.pano .c3{ color:#fdba74; } html.pano .c4{ color:#f9a8d4; }
+html.pano .c5{ color:#7dd3fc; } html.pano .c6{ color:#fde047; } html.pano .c7{ color:#c4b5fd; } html.pano .c8{ color:#5eead4; }
+html.pano .tik.bitti svg.i{ color:#1b120c; }
+html.pano .bolum.alan-bolum{ grid-column:2; grid-row:3 / span 3; }
+
+@media (max-width:720px){
+  .ust nav, .ara span, .ara kbd{ display:none; } .ara{ width:36px; padding:0; justify-content:center; }
+  h1{ font-size:32px; }
+  .oncelik{ grid-template-columns:1fr; } .halka{ display:none; }
+  .alanlar{ grid-template-columns:1fr; }
+  html.manzara .sahne{ height:260px; } html.manzara .sahne .selam{ bottom:76px; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ara" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="ok" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="sag" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="tik" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="saat" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="kitap" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="tekrar" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+  <symbol id="indir" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="onay" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="kisi" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+  <symbol id="mezun" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></symbol>
+  <symbol id="dil" viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c0 4 3 7 7 8M11 5c-1 4-4 7-7 9"/><path d="m13 21 4-9 4 9M14.5 18h5"/></symbol>
+  <symbol id="ampul" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="sutun" viewBox="0 0 24 24"><path d="M3 21h18M5 21V10M9.5 21V10M14.5 21V10M19 21V10M2 10l10-6 10 6z"/></symbol>
+  <symbol id="nota" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  <symbol id="elma" viewBox="0 0 24 24"><path d="M12 7c-2-2-7-1.5-7 3.5C5 15 8 21 12 20c4 1 7-5 7-9.5C19 5.5 14 5 12 7z"/><path d="M12 7c0-2 1-3.5 3-4"/></symbol>
+  <symbol id="nabiz" viewBox="0 0 24 24"><path d="M22 12h-4l-3 8L9 4l-3 8H2"/></symbol>
+  <symbol id="ay" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+  <symbol id="tup" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.6 18.7A1.5 1.5 0 0 0 5.9 21h12.2a1.5 1.5 0 0 0 1.3-2.3L14 9V3"/><path d="M7.5 15h9"/></symbol>
+</svg>
+
+<aside class="yan" aria-label="Gezinme">
+  <div class="logo"><i>L</i>LifeOS</div>
+  <a class="etkin" href="#"><svg class="i"><use href="#saat"/></svg>Bugün</a>
+  <a href="#"><svg class="i"><use href="#ara"/></svg>Ara</a>
+  <div class="grup">Araçlar</div>
+  <a href="#"><svg class="i"><use href="#tekrar"/></svg>Tekrar</a>
+  <a href="#"><svg class="i"><use href="#kitap"/></svg>Notlar</a>
+  <a href="#"><svg class="i"><use href="#onay"/></svg>Kayıt</a>
+  <a href="#"><svg class="i"><use href="#nabiz"/></svg>Plan</a>
+  <div class="grup">Alanlar</div>
+  <a href="#"><svg class="i"><use href="#ampul"/></svg>Felsefe</a>
+  <a href="#"><svg class="i"><use href="#mezun"/></svg>Akademik</a>
+  <a href="#"><svg class="i"><use href="#dil"/></svg>Dil</a>
+  <a href="#"><svg class="i"><use href="#sutun"/></svg>Tarih</a>
+  <span class="alt-bos"></span>
+  <a href="#"><svg class="i"><use href="#kisi"/></svg>Hesap ve ayarlar</a>
+</aside>
+<div class="ana-sutun">
+<div class="sahne"><canvas id="manzara" width="384" height="96" aria-hidden="true"></canvas>
+  <div class="selam"><div class="tarih">Cumartesi, 14 Kasım</div><h1>İyi akşamlar</h1><p class="ozet">Bugün bir ders, bir tekrar ve iki bekleyen işin var.</p></div></div>
+
+<header class="ust">
+  <div class="logo"><i>L</i>LifeOS</div>
+  <nav><a class="etkin" href="#">Bugün</a><a href="#">Alanlar</a><a href="#">Notlar</a><a href="#">Plan</a></nav>
+  <span class="bos"></span>
+  <div class="ara"><svg class="i"><use href="#ara"/></svg><span>Ara</span><kbd>Ctrl K</kbd></div>
+  <div class="avatar">Ö</div>
+</header>
+
+<main class="icerik">
+  <div class="baslik-blok">
+    <div class="tarih">Cumartesi, 14 Kasım</div>
+    <h1>İyi akşamlar</h1>
+    <p class="ozet">Bugün bir ders, bir tekrar ve iki bekleyen işin var.</p>
+  </div>
+
+  <section class="oncelik" aria-label="Sıradaki">
+    <div>
+      <span class="etiket"><svg class="i"><use href="#ampul"/></svg>Felsefe · Ünite 1</span>
+      <h2>Felsefe sözcüğü ve ilk filozof</h2>
+      <p>Ders 3 / 9 · yaklaşık 12 dakika</p>
+      <div class="eylem"><button class="dugme ana">Derse devam et<svg class="i"><use href="#ok"/></svg></button><button class="dugme ikinci">Başka bir şey seç</button></div>
+    </div>
+    <div class="halka" aria-label="Ünite ilerlemesi yüzde 22"><svg viewBox="0 0 96 96"><circle class="iz" cx="48" cy="48" r="40"/><circle class="dolu" cx="48" cy="48" r="40" stroke-dasharray="251.3" stroke-dashoffset="196"/></svg><span>%22<small>ünite</small></span></div>
+  </section>
+
+  <section class="bolum">
+    <div class="bolum-ust"><h3>Bugünün planı</h3><a href="#">Planı aç</a></div>
+    <div class="kutu">
+      <div class="satir"><span class="saat">18:30</span><span class="tik bitti"><svg class="i"><use href="#tik"/></svg></span><div><div class="ad">Okuma</div><div class="alt">20 sayfa</div></div><span class="sag">tamamlandı</span></div>
+      <div class="satir"><span class="saat">19:30</span><span class="tik"></span><div><div class="ad">Felsefe dersi</div><div class="alt">Felsefe sözcüğü ve ilk filozof</div></div><span class="sag"><svg class="i" style="width:16px;height:16px"><use href="#saat"/></svg>12 dk</span></div>
+      <div class="satir"><span class="saat">20:00</span><span class="tik"></span><div><div class="ad">Tekrar</div><div class="alt">1 kart</div></div><span class="sag"><svg class="i" style="width:16px;height:16px"><use href="#saat"/></svg>3 dk</span></div>
+    </div>
+  </section>
+
+  <section class="bolum">
+    <div class="bolum-ust"><h3>Bekleyenler</h3></div>
+    <div class="kutu">
+      <a class="satir" href="#"><span class="simge c3"><svg class="i"><use href="#indir"/></svg></span><div><div class="ad">Eski kayıtların hazır</div><div class="alt">69 plan ve 2 Yol ilerlemesi getirilebilir</div></div><span class="sag bag">Getir</span></a>
+      <a class="satir" href="#"><span class="simge c1"><svg class="i"><use href="#onay"/></svg></span><div><div class="ad">544 ders onayını bekliyor</div><div class="alt">Akademik, Felsefe, Dil, Tarih</div></div><span class="sag bag">İncele</span></a>
+    </div>
+  </section>
+
+  <section class="bolum alan-bolum">
+    <div class="bolum-ust"><h3>Alanlar</h3><a href="#">Tümü</a></div>
+    <div class="alanlar" id="alanlar"></div>
+  </section>
+</main>
+</div>
+<script src="../../../../brand/ortak/piksel-doga.js"></script>
+<script>
+  var q = new URLSearchParams(location.search);
+  if (q.get('pano')) document.documentElement.classList.add('pano');
+  if (q.get('manzara')) {
+    document.documentElement.classList.add('manzara');
+    try { var D = LIFEOS.PIKSEL_DOGA, c = document.getElementById('manzara');
+      if (innerWidth < 720) { c.width = 200; c.height = 134; }
+      D.binaCiz(c.getContext('2d'), D.yerlesim(c.width, c.height, D.vakit(+(q.get('saat') || new Date().getHours())), q.get('tur') || 'yayla')); } catch (e) { console.warn(e); }
+  }
+  var AL = [['Felsefe', 'ampul', 'c3', 'Ünite 1 · 3/9 ders', 22], ['Akademik', 'mezun', 'c1', '368 ders · onay bekliyor', 0], ['Dil', 'dil', 'c2', 'A1 · başlamadın', 0], ['Tarih', 'sutun', 'c4', '9 ders', 0],
+    ['Okuma', 'kitap', 'c6', 'Bu hafta 3 gün', 14], ['Hareket', 'nabiz', 'c8', 'Bu hafta 2 antrenman', 8], ['Müzik', 'nota', 'c7', 'Başlamadın', 0], ['Beslenme', 'elma', 'c2', 'Başlamadın', 0],
+    ['Uyku', 'ay', 'c5', 'Başlamadın', 0], ['Tahlil', 'tup', 'c4', 'Başlamadın', 0]];
+  document.getElementById('alanlar').innerHTML = AL.map(function (a) {
+    return '<a class="alan" href="#"><span class="simge ' + a[2] + '"><svg class="i"><use href="#' + a[1] + '"/></svg></span><div><div class="ad">' + a[0] + '</div><div class="alt">' + a[3] + '</div></div>' +
+      (a[4] ? '<span class="yuzde">%' + a[4] + '</span>' : '<svg class="i" style="margin-left:auto;color:var(--cizgi-2)"><use href="#sag"/></svg>') + '</a>';
+  }).join('');
+</script>
+</body>
+</html>
