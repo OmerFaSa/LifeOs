@@ -78,7 +78,7 @@ async function goruntu(p, ad) {
     dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
     dene('Felsefe: ikinci ünite kilitli', (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli, .b-satir--kilitli').count()) >= 3);
     dene('Felsefe: eski sayfa bağlantısı tek kapı yolunda', (await p.getAttribute('.b-eylemler .b-dugme--sade', 'href')) === '/esp/');
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'felsefe-masaustu-koyu.png'), fullPage: true });
+    await goruntu(p, 'felsefe');
 
     for (let i = 0; i < u1.dersler.length; i++) {
       const d = u1.dersler[i];
@@ -93,7 +93,7 @@ async function goruntu(p, ad) {
       }
       await soru.locator('[data-h="' + a.dogru + '"]').click();
       dene('ders ' + (i + 1) + ': doğru cevap «Doğru.» der', /Doğru/.test(await soru.locator('.b-soru__sonuc').textContent()));
-      if (GORUNTU && i === 0) await p.screenshot({ path: path.join(cikti, 'ders-masaustu-koyu.png'), fullPage: true });
+      if (i === 0) await goruntu(p, 'ders');
       await p.click('[data-ac="okudum"]');
       const beklenen = i < u1.dersler.length - 1 ? '#/alan/felsefe/ders/' + u1.dersler[i + 1].id : '#/alan/felsefe/kapi/' + u1.id;
       await p.waitForFunction(h => location.hash === h, beklenen).catch(() => {});
@@ -101,7 +101,7 @@ async function goruntu(p, ad) {
     }
 
     await p.waitForSelector('form.kapi');
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'kapi-masaustu-koyu.png'), fullPage: true });
+    await goruntu(p, 'kapi');
     await p.click('form.kapi button[type=submit]');
     await p.waitForSelector('[data-sonuc]');
     dene('kapı: boş deneme geçirmez', /olmadı/.test(await p.textContent('[data-sonuc]')) && /0\/4/.test(await p.textContent('[data-sonuc]')));
@@ -182,7 +182,7 @@ async function goruntu(p, ad) {
     await p.click('form.notform button[type=submit]');
     await p.waitForFunction(h => /^#\/motor\/not\/n\w+$/.test(location.hash) && location.hash !== h, erdem);
     dene('not: «Bu nottaki bağlar» Erdem notuna gider', (await p.getAttribute('[aria-label="Bu nottaki bağlar"] a', 'href')) === erdem);
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'not-masaustu-koyu.png'), fullPage: true });
+    await goruntu(p, 'not');
     await p.goto(T + '/kabuk/' + erdem);
     await p.waitForSelector('[aria-label="Bu nota bağlananlar"]');
     dene('not: «Bu nota bağlananlar» Sokrates notunu gösterir', /Sokrates/.test(await p.textContent('[aria-label="Bu nota bağlananlar"]')));
@@ -197,7 +197,7 @@ async function goruntu(p, ad) {
     await p.waitForSelector('#not-liste a.b-satir');
     dene('not: yenilemeden sonra iki not duruyor', (await p.locator('#not-liste a.b-satir').count()) === 2);
     // not ağı: iki düğüm, bir bağ; düğüm klavyeyle (Sekme + Enter) notu açar
-    dene('not ağı: iki düğüm ve Sokrates→Erdem bağı çizildi', (await p.locator('[data-not-ag] svg a').count()) === 2 && (await p.locator('[data-not-ag] line.notag__bag').count()) === 1);
+    dene('not ağı: iki düğüm ve Sokrates→Erdem bağı çizildi', (await p.locator('[data-not-ag] svg a').count()) === 2 && (await p.locator('[data-not-ag] line.b-ag__duz').count()) === 1);
     await p.focus('[data-not-ag] svg a[aria-label^="Erdem"]');
     await p.keyboard.press('Enter');
     await p.waitForFunction(h => location.hash === h, erdem);
@@ -265,15 +265,15 @@ async function goruntu(p, ad) {
     await p.fill('input[name=on]', 'Arkhe nedir?');
     await p.fill('textarea[name=arka]', 'Evrenin ilk maddesi.');
     await p.click('form.kartform button[type=submit]');
-    await p.waitForSelector('.kart');
-    dene('tekrar: kartın önü görünür, arkası gizli', /Arkhe/.test(await p.textContent('.kart__on')) && (await p.locator('.kart__arka').count()) === 0);
+    await p.waitForSelector('.b-kart');
+    dene('tekrar: kartın önü görünür, arkası gizli', /Arkhe/.test(await p.textContent('.b-kart__on')) && (await p.locator('.b-kart__arka').count()) === 0);
     await p.click('[data-arac-ac="kart-goster"]');
-    await p.waitForSelector('.kart__arka');
-    dene('tekrar: cevap ve dört not düğmesi aralıklarıyla', /ilk maddesi/.test(await p.textContent('.kart__arka')) && (await p.locator('.notlar .b-dugme').count()) === 4 && /şimdi/.test(await p.textContent('.notlar .b-dugme >> nth=0')) && /gün/.test(await p.textContent('.notlar .b-dugme >> nth=2')));
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'tekrar-masaustu-koyu.png'), fullPage: true });
+    await p.waitForSelector('.b-kart__arka');
+    dene('tekrar: cevap ve dört not düğmesi aralıklarıyla', /ilk maddesi/.test(await p.textContent('.b-kart__arka')) && (await p.locator('.b-kart__not').count()) === 4 && /şimdi/.test(await p.textContent('.b-kart__not >> nth=0')) && /gün/.test(await p.textContent('.b-kart__not >> nth=2')));
+    await goruntu(p, 'tekrar');
     await p.click('[data-arac-ac="kart-not"][data-not="1"]');
     await p.waitForSelector('[data-arac-ac="kart-goster"]');
-    dene('tekrar: «Yine» kartı aynı gün yeniden sorar', /Arkhe/.test(await p.textContent('.kart__on')));
+    dene('tekrar: «Yine» kartı aynı gün yeniden sorar', /Arkhe/.test(await p.textContent('.b-kart__on')));
     await p.click('[data-arac-ac="kart-goster"]');
     await p.click('[data-arac-ac="kart-not"][data-not="3"]');
     await p.waitForSelector('[data-sonuc="gecti"]');
@@ -325,7 +325,7 @@ async function goruntu(p, ad) {
       /Bazal metabolizma\s*1290 kcal/.test((await p.textContent('[data-kural]')).replace(/\s+/g, ' ')));
     await p.click('[data-arac-ac="kayit-sil"][aria-label^="Kaydı sil: Kilo"]');            // aşağıdaki iki kayıt akışı aynen sürsün
     await p.waitForFunction(() => document.querySelectorAll('[aria-label="Kayıtlar"] li').length === 2);
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'kayit-masaustu-koyu.png'), fullPage: true });
+    await goruntu(p, 'kayit');
     await p.reload();
     await p.waitForSelector('[aria-label="Kayıtlar"] li');
     dene('kayıt: yenilemeden sonra iki kayıt duruyor', (await p.locator('[aria-label="Kayıtlar"] li').count()) === 2);
@@ -346,8 +346,8 @@ async function goruntu(p, ad) {
     await p.waitForFunction(() => /Kaydedildi \(Dün\)/.test(document.querySelector('.kayitform .b-uyari').textContent));
     dene('kayıt: düne kayıt yazıldı, özeti dünün', /300 ml/.test(await p.textContent('[aria-label="Gün özeti"]')));
     await p.click('a[href="#/motor/kayit/hafta"]');
-    await p.waitForSelector('[data-kayit-hafta] .khafta__tablo');
-    const suSatir = await p.$$eval('.khafta__tablo tbody tr', tr => tr.map(r => [...r.children].map(c => c.textContent.trim())).find(r => /^Su/.test(r[0])));
+    await p.waitForSelector('[data-kayit-hafta] .b-tablo table');
+    const suSatir = await p.$$eval('[data-kayit-hafta] .b-tablo tbody tr', tr => tr.map(r => [...r.children].map(c => c.textContent.trim())).find(r => /^Su/.test(r[0])));
     dene('kayıt haftası: su satırında dün 300, bugün 500 (etiket ekran okuyucuya da), boş günler nokta (sıfır değil)', !!suSatir && suSatir[6] === '300 hesaplandı' && suSatir[7] === '500 hesaplandı' && suSatir.slice(1, 6).every(x => x === '·veri yok'), JSON.stringify(suSatir));
     dene('kayıt haftası: satır etiketi ve haftanın toplamı etiketli', /hesaplandı/.test(suSatir && suSatir[0]) && /400 ml · 2 günün ortalaması\s*hesaplandı/.test(await p.textContent('[aria-label="Haftanın toplamı"]')));
     dene('kayıt haftası: toparlanma ve yük motorun cümlesiyle (antrenman kaydı yok)', /Henüz antrenman kaydı yok/.test(await p.textContent('[data-yuk]')) && /Toparlanma puanı|toparlanma için kayıt yok/.test(await p.textContent('[data-yuk]')), await p.textContent('[data-yuk]'));
@@ -378,7 +378,7 @@ async function goruntu(p, ad) {
     const blokMetni = await p.textContent('[aria-label="Bugünün blokları"]');
     dene('plan: iş 09:00\'da, dersler ve mola ardından yerleşir', /09:00–09:30/.test(blokMetni) && /Rapor/.test(blokMetni) && /Mola/.test(blokMetni) && (await p.locator('[data-blok="ders"]').count()) >= 1, blokMetni.slice(0, 200));
     dene('plan: özet etiketli (hesaplandı)', /Planlanan \d+ dk \(hesaplandı\)/.test(await p.textContent('[data-arac="plan"]')));
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'plan-masaustu-koyu.png'), fullPage: true });
+    await goruntu(p, 'plan');
     await p.click('[data-blok="is"] [data-durum="atlandi"]');
     dene('plan: nedensiz atlama motorun cümlesiyle reddedilir', /neden yazılmalı/.test(await p.textContent('[data-arac="plan"] .b-uyari--hata')));
     await p.click('[data-blok="is"] [data-durum="yapildi"]');
@@ -440,7 +440,10 @@ async function goruntu(p, ad) {
     const soruMetni = async () => felsefeSorular[await p.textContent('.b-soru legend')];
     let sq = await soruMetni();
     await p.click('[data-arac-ac="soru-cevap"][data-h="' + sq.dogru + '"]');
-    dene('soru: doğru cevap «Doğru.» der, şıklar kilitlenir', /Doğru/.test(await p.textContent('.b-soru__sonuc')) && (await p.locator('.b-soru__sik[disabled]').count()) === sq.sec.length);
+    dene('soru: doğru cevap «Doğru.» der, şıklar kilitlenir', /Doğru/.test(await p.textContent('.b-soru__sonuc')) && (await p.locator('.b-soru__sik[aria-disabled="true"]').count()) === sq.sec.length);
+    await p.click('[data-arac-ac="soru-cevap"][data-h="' + 'ABCD'[('ABCD'.indexOf(sq.dogru) + 1) % sq.sec.length] + '"]', { force: true });
+    dene('soru: kilitli şıklar Sekme sırasında kalır, tıklamak cevabı değiştirmez', (await p.$$eval('.b-soru__sik', l => l.length > 1 && l.every(b => !b.disabled && b.tabIndex === 0)))
+      && /Doğru/.test(await p.textContent('.b-soru__sonuc')) && (await p.getAttribute('.b-soru__sik[aria-pressed="true"]', 'data-h')) === sq.dogru);
     await p.click('[data-arac-ac="soru-sonraki"]');
     await p.waitForSelector('.b-soru[data-sira="1"]');
     sq = await soruMetni();
@@ -453,7 +456,7 @@ async function goruntu(p, ad) {
     await p.reload();
     await p.waitForSelector('.b-soru[data-sira]');
     dene('soru: yenilemeden sonra test kaldığı yerden sürer', (await p.getAttribute('.b-soru[data-sira]', 'data-sira')) === '3');
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'soru-masaustu-koyu.png'), fullPage: true });
+    await goruntu(p, 'soru');
     await p.click('[data-arac-ac="soru-bitir"]');
     await p.waitForSelector('[data-sonuc="soru"]');
     const sonucMetni = await p.textContent('[data-sonuc="soru"]');
@@ -469,22 +472,22 @@ async function goruntu(p, ad) {
     dene('deneme: Felsefe\'de sınav provası yok', (await p.locator('[data-deneme="prova"]').count()) === 0);
     await goruntu(p, 'deneme-baslangic');
     await p.click('[data-deneme="basla"]');
-    await p.waitForSelector('[data-deneme-sayfa] .sayac[role="timer"]');
-    const sayac1 = await p.textContent('.sayac');
-    await p.waitForFunction(s => document.querySelector('.sayac').textContent !== s, sayac1, { timeout: 3000 }).catch(() => {});
-    dene('deneme: geri sayım görünür ve akar', /^\d\d:\d\d$/.test(sayac1) && (await p.textContent('.sayac')) !== sayac1, sayac1);
+    await p.waitForSelector('[data-deneme-sayfa] .b-serit__sayac[role="timer"]');
+    const sayac1 = await p.textContent('.b-serit__sayac');
+    await p.waitForFunction(s => document.querySelector('.b-serit__sayac').textContent !== s, sayac1, { timeout: 3000 }).catch(() => {});
+    dene('deneme: geri sayım görünür ve akar', /^\d\d:\d\d$/.test(sayac1) && (await p.textContent('.b-serit__sayac')) !== sayac1, sayac1);
     let dq = await soruMetni();
     await p.keyboard.press(dq.dogru.toLowerCase());
     dene('deneme: klavyeyle (harf) cevap seçilir, doğru/yanlış söylenmez', (await p.getAttribute('[data-deneme="cevap"][data-h="' + dq.dogru + '"]', 'aria-pressed')) === 'true' && !/Doğru|Yanlış/.test(await p.textContent('.b-soru')));
     await p.keyboard.press('ArrowRight');
-    await p.waitForSelector('.deneme__nobt[data-i="1"][aria-current]');
+    await p.waitForSelector('.b-adimlar__no[data-i="1"][aria-current]');
     dq = await soruMetni();
     await p.click('[data-deneme="cevap"][data-h="' + 'ABCD'[('ABCD'.indexOf(dq.dogru) + 1) % dq.sec.length] + '"]');
     await p.click('[data-deneme="cevap"][data-h="' + dq.dogru + '"]');
     dene('deneme: cevap bitirene kadar değişir', (await p.getAttribute('[data-deneme="cevap"][data-h="' + dq.dogru + '"]', 'aria-pressed')) === 'true' && (await p.locator('[data-deneme="cevap"][aria-pressed="true"]').count()) === 1);
     await p.reload();
-    await p.waitForSelector('.sayac');
-    dene('deneme: yenilemeden sonra kaldığı sorudan, cevaplarıyla sürer', (await p.getAttribute('.deneme__nobt[aria-current]', 'data-i')) === '1' && (await p.locator('.deneme__nobt--cevapli').count()) === 2);
+    await p.waitForSelector('.b-serit__sayac');
+    dene('deneme: yenilemeden sonra kaldığı sorudan, cevaplarıyla sürer', (await p.getAttribute('.b-adimlar__no[aria-current]', 'data-i')) === '1' && (await p.locator('.b-adimlar__no--dolu').count()) === 2);
     await goruntu(p, 'deneme-soru');
     await p.click('[data-deneme="bitir"]');
     await p.waitForSelector('[data-deneme-sayfa] [data-sonuc]');
@@ -506,7 +509,7 @@ async function goruntu(p, ad) {
     await p.waitForSelector('[data-deneme="basla"]');
     dene('deneme: «Son denemeler»de net etiketiyle', /Felsefe · .*2 net\s*hesaplandı/.test(await p.textContent('[data-deneme-sayfa] section')));
     await p.click('[data-deneme="basla"]');
-    await p.waitForSelector('.sayac');
+    await p.waitForSelector('.b-serit__sayac');
     await p.evaluate(() => { const v = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.soru.deneme')); v.oturum.bas -= (v.oturum.sure * 60 + 2) * 1000; LIFEOS.Kabuk.ic.depo.setItem('lifeos.soru.deneme', JSON.stringify(v)); });
     await p.waitForSelector('[data-deneme-sayfa] [data-sonuc]', { timeout: 4000 }).catch(() => {});
     dene('deneme: süre dolunca kendiliğinden biter, «süre doldu» yazar', /süre doldu/.test(await p.textContent('[data-deneme-sayfa]').catch(() => '')));
@@ -516,11 +519,11 @@ async function goruntu(p, ad) {
     await p.waitForSelector('[data-deneme="prova"]');
     dene('prova: Akademik\'te TYT provası açık, AYT kilitli üniteler yüzünden kapalı', (await p.locator('[data-deneme="prova"][data-sinav="TYT"]').count()) === 2 && /açık soru yetmiyor/.test(await p.textContent('section')));
     await p.click('[data-deneme="prova"][data-sinav="TYT"][data-boy="20"]');
-    await p.waitForSelector('.sayac');
-    dene('prova: 20 soru, süre 28 dakikadan geri sayar', (await p.locator('.deneme__nobt').count()) === 20 && /^2[78]:\d\d$/.test(await p.textContent('.sayac')), await p.textContent('.sayac'));
+    await p.waitForSelector('.b-serit__sayac');
+    dene('prova: 20 soru, süre 28 dakikadan geri sayar', (await p.locator('.b-adimlar__no').count()) === 20 && /^2[78]:\d\d$/.test(await p.textContent('.b-serit__sayac')), await p.textContent('.b-serit__sayac'));
     await p.click('[data-deneme="cevap"][data-h="A"]');
-    await p.waitForSelector('[data-deneme="cevap"][disabled]');
-    dene('prova: ilk cevap kilitlenir, doğru/yanlış söylenmez', (await p.locator('[data-deneme="cevap"][disabled]').count()) >= 2 && /kaydedildi/.test(await p.textContent('.b-soru')) && !/Doğru\.|Yanlış\./.test(await p.textContent('.b-soru')));
+    await p.waitForSelector('[data-deneme="cevap"][aria-disabled="true"]');
+    dene('prova: ilk cevap kilitlenir, doğru/yanlış söylenmez', (await p.locator('[data-deneme="cevap"][aria-disabled="true"]').count()) >= 2 && /kaydedildi/.test(await p.textContent('.b-soru')) && !/Doğru\.|Yanlış\./.test(await p.textContent('.b-soru')));
     await p.click('[data-deneme="bitir"]');
     await p.waitForSelector('[data-deneme-sayfa] [data-sonuc]');
     const pSonuc = (await p.textContent('[data-deneme-sayfa]')).replace(/\s+/g, ' ');
@@ -612,7 +615,7 @@ async function goruntu(p, ad) {
     await p.goto(T + '/kabuk/#/alan/felsefe/asama/2');
     await p.waitForSelector('.govde .b-bos');
     dene('aşama: kilitli aşama sayfası listeyi ve kilidi gösterir', /Bu aşama kilitli/.test(await p.textContent('.govde .b-bos')) && (await p.locator('.b-acilir').count()) === 0);
-    if (GORUNTU) await p.screenshot({ path: path.join(cikti, 'asama-kilitli-masaustu-koyu.png'), fullPage: true });
+    await goruntu(p, 'asama-kilitli');
     for (const sahip of y.uniteler.slice(1).concat([y])) {                   // ikinci ve üçüncü ünite kapısı, sonra aşama kapısı
       await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + sahip.id);
       await p.waitForSelector('form.kapi');
@@ -735,7 +738,18 @@ async function goruntu(p, ad) {
     // ---- Onaylar (faz6-onay-ekrani.md): onay kayda yazılır, yenilemede kalır, ders ekranında taslak uyarısı kalkar, geri alınır, dosyaya iner ----
     const oc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark', acceptDownloads: true }), op = await oc.newPage(), ohata = [];
     op.on('pageerror', e => ohata.push(e.message));
-    op.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$/.test(m.location().url || '')) ohata.push(m.text()); });
+    // Etiket API'si gerçek mesaj taşır (kalite/veri/yerel, sunucu.ETIKET_DIZIN depo içinde, ortam değişkeni yok): gezide hiçbir istek sunucuya
+    // gitmez, sahte cevap verilir; yazma tarafı (geçici klasör) tools/kalite_etiket_test.py'de.
+    let etiketKip = 'bos'; const etiketPost = [], ET_SATIR = { anlama: [{ id: 'g1', metin: 'Yarın sabah koşuya çıkmalı mıyım?', adaylar: [] }, { id: 'g2', metin: 'Bugün iki litre su içtim', adaylar: [] }],
+      arama: [{ id: 'q1', metin: 'Sokrates bilgi hakkında ne demişti?', adaylar: [{ no: 'a1', baslik: 'Sokrates', ozet: 'Bildiğim tek şey hiçbir şey bilmediğimdir.' }, { no: 'a2', baslik: 'Erdem', ozet: 'Erdem bilgidir.' }] }] };
+    await oc.route(/\/api\/kalite\/etiket/, r => {
+      if (etiketKip === 'kapali') return r.fulfill({ status: 403, contentType: 'application/json', body: '{"ok":false,"mesaj":"Yalnız bu bilgisayardan."}' });
+      if (r.request().method() === 'POST') { etiketPost.push(r.request().postDataJSON()); return r.fulfill({ contentType: 'application/json', body: '{"ok":true}' }); }
+      const set = new URL(r.request().url()).searchParams.get('set'), l = etiketKip === 'dolu' ? ET_SATIR[set].filter(x => !etiketPost.some(q => q.id === x.id)) : [];
+      return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, set, bekleyen: l.length, satirlar: l }) });
+    });
+    // etiketin 403'ü gezinin kendi sınaması (sahte cevap); tarayıcı onu konsola yazar
+    op.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/kalite\/etiket/.test(m.location().url || '')) ohata.push(m.text()); });
     if (!y2gercek) await op.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
     let bekleyen = 0; // dosyalardan sayılan taslak ders (haritadaki aşama sayısı kadar)
     require(kok + '/kabuk/harita.js').YERLER.filter(x => x.katman === 'alan' && x.asama).forEach(x => { for (let n = 1; n <= x.asama; n++) {
@@ -757,7 +771,39 @@ async function goruntu(p, ad) {
       && (await op.getAttribute('.b-sayi', 'aria-label')) === 'Onay bekleyen: ' + bekleyen.toLocaleString('tr-TR') + ' ders, ölçüldü', await op.getAttribute('.b-sayi', 'aria-label'));
     dene('onay: «Senin adımın» üç adım; onay yokken dosya düğmesi kapalı, «hepsini onayla» yok', (await op.locator('[aria-label="Senin adımın"] li').count()) === 3
       && (await op.getAttribute('[data-onay-ac="disari"]', 'aria-disabled')) === 'true' && (await op.locator('text=/hepsini onayla/i').count()) === 0);
+    await op.waitForSelector('[data-etiket-govde] .b-sayilar');
+    dene('etiket: set boşken iki sayı «0, ölçüldü» ve ne yapılacağını söyleyen boş durum', (await op.$$eval('[data-etiket-govde] .b-sayi', l => l.map(x => x.getAttribute('aria-label')).join(' | ')))
+      === 'Anlama · bekleyen: 0 mesaj, ölçüldü | Arama · bekleyen: 0 soru, ölçüldü' && /Etiketlenecek mesaj yok/.test(await op.textContent('[data-etiket-govde]')));
     await goruntu(op, 'onay');
+    etiketKip = 'dolu'; await op.reload(); await op.waitForSelector('[data-onay-ac="etiket-bas"][data-set="anlama"]:not([aria-disabled])');
+    await op.click('[data-onay-ac="etiket-bas"][data-set="anlama"]');
+    await op.waitForSelector('[data-etiket-soru]');
+    dene('etiket: Anlama bir mesaj, beş niyet düğmesi düz Türkçe açıklamalı, odak mesajda', (await op.textContent('[data-etiket-soru] legend')) === ET_SATIR.anlama[0].metin
+      && (await op.locator('[data-onay-ac="etiket-niyet"]').count()) === 5 && /Kayıt: bir şeyi yazdırmak/.test(await op.textContent('[data-etiket-soru]'))
+      && await op.evaluate(() => document.activeElement.matches('[data-etiket-soru]')));
+    await goruntu(op, 'onay-etiket');
+    await op.click('[data-onay-ac="etiket-niyet"][data-h="B"]');
+    await op.waitForFunction(() => /Bugün iki litre/.test(document.querySelector('[data-etiket-soru] legend').textContent));
+    dene('etiket: niyet aynı kökene JSON ile gider, sonraki mesaj gelir', JSON.stringify(etiketPost) === '[{"set":"anlama","id":"g1","etiket":"kayit"}]');
+    await op.click('[data-onay-ac="etiket-atla"]');
+    await op.waitForSelector('[data-etiket-govde] .b-uyari--tamam');
+    dene('etiket: «Atla» yazmadan geçer; tur bitince sayılar tazelenir', etiketPost.length === 1 && /1 etiket yazıldı/.test(await op.textContent('[data-etiket-govde]'))
+      && (await op.getAttribute('[data-etiket-govde] .b-sayi', 'aria-label')) === 'Anlama · bekleyen: 1 mesaj, ölçüldü');
+    await op.click('[data-onay-ac="etiket-bas"][data-set="arama"]');
+    await op.waitForSelector('[data-etiket-soru] input[name="etiket-aday"]');
+    await op.click('[data-onay-ac="etiket-secili"]');
+    dene('etiket: Arama adaylar onay kutusu, «hiçbiri» ve «arama değil» düğmeli; seçimsiz gönderilmez', (await op.locator('input[name="etiket-aday"]').count()) === 2
+      && (await op.locator('[data-onay-ac="etiket-hicbiri"], [data-onay-ac="etiket-degil"]').count()) === 2 && etiketPost.length === 1 && /Bir sonuç seç/.test(await op.textContent('[data-etiket-govde] .b-uyari--hata')));
+    await op.check('input[name="etiket-aday"][value="a2"]');
+    await goruntu(op, 'onay-etiket-arama');
+    await op.click('[data-onay-ac="etiket-secili"]');
+    await op.waitForSelector('[data-etiket-govde] .b-uyari--tamam');
+    dene('etiket: seçilen adaylar liste olarak yazılır; mesajlar tarayıcı deposuna girmez', JSON.stringify(etiketPost[1]) === '{"set":"arama","id":"q1","etiket":["a2"]}'
+      && !(await op.evaluate(() => /koşuya|Sokrates bilgi/.test(JSON.stringify(Object.assign({}, localStorage, sessionStorage))))));
+    etiketKip = 'kapali'; await op.reload(); await op.waitForSelector('[data-etiket-govde] .b-uyari--bilgi');
+    dene('etiket: sunucu 403 ya da yoksa yalnız tek sakin satır', (await op.textContent('[data-etiket-govde]')) === 'BilgiEtiketleme yalnız bu bilgisayarda açılır.'
+      && (await op.locator('[data-etiket-govde] button, [data-etiket-govde] .b-sayi').count()) === 0);
+    etiketKip = 'bos';
     await op.goto(T + '/kabuk/#/onay/felsefe/1/' + od.id);
     await op.waitForSelector('[data-onay-sayfa="ders"]');
     dene('onay: ders ekranı metni, açık kaynakları, «kaynaklar doğrulanmadı» notunu ve cevap anahtarını gösterir',

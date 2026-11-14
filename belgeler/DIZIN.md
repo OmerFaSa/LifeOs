@@ -22,6 +22,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 2 · Bileşen kataloğu](ekip/sadelesme/faz2-bilesen.md) — On iki yapı taşı (`kabuk/bilesen.*`), sabit ölçüler, yalnız kabuk jetonları; katalog sayfası sahibe gösterilecek örnek (2026-11-14).
 - [Faz 2 · Ekranların bileşenlere geçişi](ekip/sadelesme/faz2-bilesen-gecis.md) — Kabuk ekranları on dört yapı taşından kurulur; Tanışma'nın gömülü stili silindi, yazı boyu 20→11; Bugün'de geçici kayıt uyarısı, Ayarlar'da kalıcı depolama bilgisi; Plan ve Soru ekranları sırada (2026-11-14).
 - [Faz 2 · Bileşen geçişinin sonu](ekip/sadelesme/faz2-bilesen-son.md) — Plan ve Soru ekranları, form alanları ve soru parçaları bloklardan kurulur (16 taş: `soru`, `tercih` eklendi); «Gizle» artık kesinlik etiketlerini gizlemez (2026-11-14).
+- [Faz 2 · Kabuk cilası](ekip/sadelesme/faz2-cila.md) — Kalan elle kurulu parçalar bloklarda (22 taş: kart, tablo, şerit, adımlar, ayar, ağ), her yerin telefon/masaüstü açık/koyu görsel taraması, Onaylar'da sahibin ölçüm etiketlemesi (2026-11-14).
 - [Faz 3 · Yol motoru ve içerik](ekip/sadelesme/faz3-yol-icerik.md) — Yol motoru, içerik şeması (`alan/SEMA.md`), Felsefe'nin ilk aşaması ve şema denetimi (2026-11-13).
 - [Faz 3 · Tekrar motoru](ekip/sadelesme/faz3-tekrar.md) — Dokuz zamanlayıcının yerine tek FSRS: formüller, arayüz, on bir göç bağdaştırıcısı, testler (2026-11-13).
 - [Faz 3 · Not motoru](ekip/sadelesme/faz3-not.md) — On üç not yapısının yerine tek kayıt ve tek ağ: bağlar, King erişimi, arama, göç bağdaştırıcıları (2026-11-13).

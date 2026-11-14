@@ -214,7 +214,7 @@ t('ayar: sayı türü boş (null) ya da aralıkta; dışı ve metin reddedilir; 
   const b = A.tanim('lifeos.beden.boy'), dp = {}, depo = { getItem: k => (k in dp ? dp[k] : null), setItem: (k, v) => { dp[k] = String(v); }, removeItem: k => { delete dp[k]; } };
   esit([A.dogrula(b, null), A.dogrula(b, 175), A.dogrula(b, 99), A.dogrula(b, 231), A.dogrula(b, '175'), A.dogrula(b, NaN)], [true, true, false, false, false, false]);
   esit([A.yaz(depo, 'lifeos.beden.boy', 182.5), A.oku(depo, 'lifeos.beden.boy'), A.yaz(depo, 'lifeos.beden.boy', 500), A.oku(depo, 'lifeos.beden.boy')], [true, 182.5, false, 182.5]);
-  dogru(/type="number"/.test(A.ciz(b, 175)) && /value="175"/.test(A.ciz(b, 175)) && /value=""/.test(A.ciz(b, null)), 'sayı alanı çizilir');
+  dogru(/inputmode="decimal"/.test(A.ciz(b, 175)) && /value="175"/.test(A.ciz(b, 175)) && /value=""/.test(A.ciz(b, null)), 'sayı alanı çizilir');
 });
 t('kayıt kuralları: profil tamsa enerji hedefi ve bazal hesaplanır; eksikse adıyla söylenir; hedef bazalın altına inmez', () => {
   const Kayit = require('../motor/kayit.js'), gun = '2026-11-13';

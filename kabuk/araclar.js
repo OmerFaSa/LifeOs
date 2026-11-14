@@ -198,7 +198,7 @@
     if (r.ok) {
       sat.push({ ad: 'Toparlanma puanı', metin: r.puan.v + ' / 100 · ' + BANT[r.bant.id].toLocaleLowerCase('tr'), etiket: E[r.puan.k] });
       if (r.eksik.length) not.push('Toparlanma ' + r.parcalar.filter(function (p) { return p.puan != null; }).map(function (p) { return p.ad; }).join(', ') + ' kaydından; eksik: ' + r.eksik.join(', ') + '.' + (r.ince ? ' Ölçüm ince: yük artırılmaz.' : ''));
-    } else not.push('Bugün toparlanma için kayıt yok (uyku, HRV, istirahat nabzı ya da enerji); puan hesaplanmadı.');
+    } else not.push('Bugün toparlanma için kayıt yok (uyku, nabız değişkenliği (HRV), istirahat nabzı ya da enerji); toparlanma puanı hesaplanmadı.');
     if (r.bayrak) not.push(r.bayrak === 'ates' ? 'Ateş kaydı ' + sayiYaz(K.ATES_ESIK) + ' °C ya da üstünde: kural bugünü dinlenme günü sayar.' : 'Oksijen kaydı %' + K.SPO2_ESIK + ' altında: kural bugünü dinlenme günü sayar.');
     if (a.ok) sat.push({ ad: 'Son hafta / son ' + a.kronikGun + ' gün yükü', metin: sayiYaz(a.oran.v) + ' · ' + BOLGE[a.bolge], etiket: E[a.oran.k] });
     else not.push(a.neden);
@@ -223,7 +223,7 @@
       l.push({ ad: 'Bazal metabolizma', metin: sayiYaz(e.bmr.v) + ' kcal', etiket: E[e.bmr.k] });
     } else eksik = e.eksik;
     var g = K.gununEmri(kayitlar, gun), veriYok = g.gerekce.indexOf('veri-yok') >= 0;
-    if (!veriYok) l.push({ ad: 'Bugünkü antrenman', metin: EMIR[g.tur] + ' · çarpan ' + sayiYaz(g.carpan.v), etiket: E[g.carpan.k] });
+    if (!veriYok) l.push({ ad: 'Bugünkü antrenman', metin: EMIR[g.tur] + ' · yük oranı %' + Math.round(g.carpan.v * 100), etiket: E[g.carpan.k] });
     return { satirlar: l, eksik: eksik, emirVeriYok: veriYok };
   }
   // Bir kaydın tek satırlık okunuşu: «Su · 500 ml (ölçüldü)»
@@ -391,34 +391,26 @@
       pul: n.ozel ? 'özel' : n.sabit ? { metin: 'sabit', tur: 'altin' } : null };
   }
   function notListesi(notlar, sorgu) {
-    if (!notlar.length) return '<p class="soluk">Henüz not yok. «Yeni not» ile ilkini yaz.</p>';
+    if (!notlar.length) return B.bos({ baslik: 'Henüz not yok.', metin: '«Yeni not» ile ilkini yaz; bir satır yeter, sonra büyütürsün.' });
     if (!sorgu.trim()) return B.liste({ ad: 'Notlar', ogeler: notlar.slice().sort(notSira).map(function (n) { return notSatiri(n); }) });
     var harita = {}; notlar.forEach(function (n) { harita[n.id] = n; });
     var s = Not.ara(notlar, sorgu, { sinir: 50 });
-    return s.length ? B.liste({ ad: 'Arama sonuçları', ogeler: s.map(function (x) { return notSatiri(harita[x.id], x.parca); }) }) : '<p class="soluk">Bu aramaya uyan not yok.</p>';
+    return s.length ? B.liste({ ad: 'Arama sonuçları', ogeler: s.map(function (x) { return notSatiri(harita[x.id], x.parca); }) }) : B.bos({ baslik: 'Bu aramaya uyan not yok.', metin: 'Başka bir sözcük dene ya da aramayı silip bütün notlara dön.' });
   }
   // Not ağı: Not.ag verisi SVG'ye çizilir; düğüm bağlantıdır (Sekme ile gezilir, Enter notu açar). Renkler kabuk.css tokenlarından.
   var AG_EN = 640, AG_BOY = 400;
+  var AG_TUR = { bag: 'duz', etiket: 'kesik', celiski: 'kalin' };
   function notAgi(notlar) {
-    var k = ic().kac, ag = Not.ag(notlar), n = ag.dugum.length;
+    var ag = Not.ag(notlar), n = ag.dugum.length, yer = {};
     if (n < 2) return '';
-    var yer = {};
     agYerlesim(ag, AG_EN, AG_BOY).forEach(function (q) { yer[q.id] = q; });
-    var kisa = function (s) { return s.length > 22 ? s.slice(0, 21) + '…' : s; };
     var bagli = ag.dugum.filter(function (d) { return d.derece; }).length;
-    return '<section data-not-ag aria-labelledby="ag-baslik"><h2 id="ag-baslik">Not ağı</h2>' +
-      '<p class="soluk">' + n + ' not · ' + ag.kenar.length + ' bağ · ' + (n - bagli) + ' bağsız. Çizgi: bağ; kesik: aynı etiket; kalın kesik: çelişki.</p>' +
-      '<svg class="notag' + (n > 40 ? ' notag--kalabalik' : '') + '" viewBox="0 0 ' + AG_EN + ' ' + AG_BOY + '" role="group" aria-label="Not ağı: ' + n + ' not, ' + ag.kenar.length + ' bağ">' +
-      ag.kenar.map(function (e) {
-        var a = yer[e.a], b = yer[e.b];
-        return '<line class="notag__' + e.tur + '" x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '"/>';
-      }).join('') +
-      ag.dugum.map(function (d) {
-        var q = yer[d.id], sag = q.x < AG_EN - 140;
-        return '<a href="#/motor/not/' + k(d.id) + '" aria-label="' + k(d.ad) + (d.derece ? ', ' + d.derece + ' bağ' : ', bağsız') + '"><title>' + k(d.ad) + '</title>' +
-          '<circle cx="' + q.x + '" cy="' + q.y + '" r="' + Math.min(12, 6 + d.derece) + '"/>' +
-          '<text x="' + (q.x + (sag ? 14 : -14)) + '" y="' + (q.y + 4) + '"' + (sag ? '' : ' text-anchor="end"') + '>' + k(kisa(d.ad)) + '</text></a>';
-      }).join('') + '</svg></section>';
+    return B.bolum({ baslik: 'Not ağı', id: 'ag-baslik', veri: { 'not-ag': '' }, govde: B.ag({ ad: 'Not ağı: ' + n + ' not, ' + ag.kenar.length + ' bağ', en: AG_EN, boy: AG_BOY,
+      dugumler: ag.dugum.map(function (d) {
+        return { id: d.id, ad: d.ad, x: yer[d.id].x, y: yer[d.id].y, r: Math.min(12, 6 + d.derece), href: '#/motor/not/' + d.id, etiket: d.ad + (d.derece ? ', ' + d.derece + ' bağ' : ', bağsız') };
+      }),
+      kenarlar: ag.kenar.map(function (e) { return { a: e.a, b: e.b, tur: AG_TUR[e.tur] || 'duz' }; }),
+      ozet: n + ' not · ' + ag.kenar.length + ' bağ · ' + (n - bagli) + ' bağsız', aciklama: { duz: 'bağ', kesik: 'aynı etiket', kalin: 'çelişki' } }) });
   }
   /* ---- Araçlar ve sisteme not (Not.yeniArac, Not.kingAraclar) ---- */
   var ARAC_ANAHTAR = 'lifeos.not.araclar', aracDurum = null; // aracDurum: { id, metin, form? } son kaydın iletisi
@@ -440,10 +432,10 @@
       var metin = function (x) { return x ? '<p>' + k(x) + '</p>' : '<p class="soluk">Yazılmadı.</p>'; };
       return I.ust(geri(a.ad)) + '<div class="govde" data-arac="not" data-arac-sayfa>' + B.baslik({ metin: a.ad }) +
         B.panel({ baslik: 'Sisteme not', id: 'sn-baslik', tur: 'guclu', veri: { sistemnot: '' }, govde: ['<p>' + B.pul(kingPul(a)) + '</p>',
-          '<h3>King bundan ne anlamalı</h3>' + metin(sn.anlam) + '<h3>King bunu nasıl kullanmalı</h3>' + metin(sn.kullanim),
+          B.acilir({ baslik: 'King bundan ne anlamalı', duzey: 3, acik: true, govde: metin(sn.anlam) }), B.acilir({ baslik: 'King bunu nasıl kullanmalı', duzey: 3, acik: true, govde: metin(sn.kullanim) }),
           '<p class="soluk">' + (sn.kingOkur ? 'King bu aracın notlarını (özel olanlar hariç) ve bu notu okur.' : 'King bu aracın notlarını ve bu notu okumaz.') + '</p>'] }) +
         B.eylemler([{ metin: 'Bu araçta yeni not', tur: 'ana', href: '#/motor/not/yeni?arac=' + a.id }, { metin: 'Aracı düzenle', tur: 'sade', href: '#/motor/not/arac/' + a.id + '/duzenle' }]) +
-        (l.length ? B.liste({ ad: a.ad + ' notları', ogeler: l.slice().sort(notSira).map(function (n) { return notSatiri(n); }) }) : '<p class="soluk">Bu araçta henüz not yok. Notları «' + k(a.klasor) + '» klasöründe durur.</p>') +
+        (l.length ? B.liste({ ad: a.ad + ' notları', ogeler: l.slice().sort(notSira).map(function (n) { return notSatiri(n); }) }) : B.bos({ baslik: 'Bu araçta henüz not yok.', metin: 'Yukarıdaki «Bu araçta yeni not» ile ekle; notları «' + a.klasor + '» klasöründe durur.' })) +
         (a.gorunum === 'ag' ? notAgi(l) : '') + '</div>';
     }
     var dr = aracDurum && aracDurum.id === id ? aracDurum : null; aracDurum = null;
@@ -561,18 +553,17 @@
     // taslak içerikten gelen kapı kartları tekrara girmez (AGENTS 0.1): ayrı listede durur, açılınca doğru cevabı gösterir
     var simdi = Date.now(), hepsi = kartlar(), kapiT = hepsi.filter(function (x) { return x.kaynak === 'kapi' && x.icerik !== 'onayli'; });
     var l = hepsi.filter(function (x) { return kapiT.indexOf(x) < 0; }), s = sayac(simdi), q = kuyruk(Tekrar, l, simdi, s), kart = q.sira[0], govde;
-    if (!l.length) govde = '<p class="soluk">Henüz kart yok. Aşağıdan ilk kartını ekle; onaylanmış derslerin alıştırmaları da buraya kendiliğinden gelir.</p>';
+    if (!l.length) govde = B.bos({ baslik: 'Henüz kart yok.', metin: 'Aşağıdan ilk kartını ekle; onaylanmış derslerin alıştırmaları da buraya kendiliğinden gelir.' });
     else if (!kart) govde = B.panel({ tur: 'basari', durum: true, veri: { sonuc: 'gecti' }, govde: '<p><b>Bugünlük bitti.</b> ' + (s.yeni + s.tekrar) + ' cevap verdin.' +
       (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar ? ' <span class="soluk">Günlük tavan doldu; ' + (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar) + ' kart yarına kaldı.</span>' : '') + '</p>' });
     else {
       var acik = gosterilen === kart.id;
       govde = '<p class="soluk">Bugün ' + q.plan.tekrar.length + ' tekrar, ' + q.plan.yeni.length + ' yeni kart</p>' +
-        '<div class="kart" data-kart="' + k(kart.id) + '"><p class="kart__on">' + k(kart.on) + '</p>' +
-        (acik ? '<p class="kart__arka" tabindex="-1">' + k(kart.arka) + '</p><div class="notlar" role="group" aria-label="Ne kadar hatırladın?">' +
-          [[1, 'Yine'], [2, 'Zor'], [3, 'İyi'], [4, 'Kolay']].map(function (n) {
-            return B.dugme({ metin: n[1] + ' · ' + aralikAdi(Tekrar.cevapla(kart, n[0], simdi).gun), veri: { 'arac-ac': 'kart-not', not: n[0] } });
-          }).join('') + '</div>'
-          : B.eylemler([{ metin: 'Cevabı göster', tur: 'ana', veri: { 'arac-ac': 'kart-goster' } }])) + '</div>';
+        B.kart({ on: kart.on, arka: acik ? kart.arka : null, veri: { kart: kart.id }, eylem: acik ? null : { metin: 'Cevabı göster', tur: 'ana', veri: { 'arac-ac': 'kart-goster' } },
+          notlar: acik ? [[1, 'Yine'], [2, 'Zor'], [3, 'İyi'], [4, 'Kolay']].map(function (n) {
+            var a = aralikAdi(Tekrar.cevapla(kart, n[0], simdi).gun);
+            return { metin: n[1], sure: a === 'şimdi' ? a : a + ' sonra', veri: { 'arac-ac': 'kart-not', not: n[0] } };
+          }) : null });
     }
     var liste = l.length ? B.acilir({ baslik: 'Bütün kartlar (' + l.length + ')', govde: B.liste({ ad: 'Kartlar', ogeler: l.map(function (x) {
       var h = Tekrar.hatirlama(x, simdi), vade = x.sonraki == null ? 'yeni' : x.sonraki <= gunSonu(simdi) ? 'bugün' : tarih(x.sonraki);
@@ -653,7 +644,7 @@
       (Object.keys(t.sayilar || {}).length ? B.alan({ ad: 'Sayılar tahmin (ölçmedim)', isim: 'tahmin', tur: 'onay', deger: !!(il && il.tahmin) }) : '') +
       B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, { metin: 'Haftalık özet', tur: 'sade', href: '#/motor/kayit/hafta' }]) + '</form>' +
       B.bolum({ baslik: sAd, govde: ozet.length ? B.liste({ ad: 'Gün özeti', ogeler: ozet.map(ozetSatiri) })
-        : '<p class="soluk">' + k(sAd) + ' için kayıt yok. Veri olmayan satır gösterilmez; boş, sıfır demek değildir.</p>' }) +
+        : B.bos({ baslik: sAd + ' için kayıt yok.', metin: 'Yukarıdan ilk kaydı gir, özet burada görünür. Boş, sıfır demek değildir.' }) }) +
       B.bolum({ baslik: 'Kurallar', veri: { kural: '' }, govde: [kural.satirlar.length ? B.liste({ ad: 'Kurallar', ogeler: kural.satirlar.map(ozetSatiri) }) : '',
         kural.eksik ? '<p class="soluk">Enerji hedefi için eksik: ' + k(kural.eksik.join(', ')) + '. <a href="#/ayarlar">Ayarlar › Beden</a>; kilo, Kayıt › Kilo kaydından gelir.</p>' : '',
         kural.emirVeriYok ? '<p class="soluk">Antrenman kararı için toparlanma verisi yok: uyku, nabız ya da enerji kaydı girince hesaplanır.</p>' : ''] }) +
@@ -670,16 +661,11 @@
     var I = ic(), k = I.kac, bugun = gunAdi(Date.now()), l = oku(KAYIT_ANAHTAR, []), h = haftaOzeti(Kayit, l, bugun), y = yukOzeti(Kayit, l, bugun);
     var geri = '<a class="kirinti" href="#/motor/kayit"><span aria-hidden="true">‹ </span>Kayıt</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>Hafta</span>';
     var tarih_ = function (g, o) { return new Date(g + 'T12:00:00').toLocaleDateString('tr-TR', o); };
-    var tablo = !h.satirlar.length ? '<p class="soluk">Bu yedi günde kayıt yok.</p>'
-      : '<div class="khafta" role="region" aria-labelledby="kh-gunler" tabindex="0"><table class="khafta__tablo"><thead><tr><th scope="col">Tür</th>' +
-        h.gunler.map(function (g) { return '<th scope="col"' + (g === bugun ? ' aria-current="date"' : '') + '>' + k(tarih_(g, { weekday: 'short' })) + '<small>' + k(tarih_(g, { day: 'numeric', month: 'short' })) + '</small></th>'; }).join('') +
-        '</tr></thead><tbody>' + h.satirlar.map(function (r) {
-          return '<tr><th scope="row">' + k(r.ad) + (r.birim ? ' <small>' + k(r.birim) + '</small>' : '') + (r.etiket ? ' ' + B.pul(r.etiket) : '') + '</th>' +
-            r.hucreler.map(function (c) {
-              return c ? '<td>' + k(c.metin) + (r.etiket ? '<span class="gizli"> ' + k(c.etiket) + '</span>' : '<small>' + k(c.etiket) + '</small>') + '</td>'
-                : '<td class="khafta__yok"><span aria-hidden="true">·</span><span class="gizli">veri yok</span></td>';
-            }).join('') + '</tr>';
-        }).join('') + '</tbody></table></div>';
+    var tablo = !h.satirlar.length ? B.bos({ baslik: 'Bu yedi günde kayıt yok.', metin: 'Kayıt girdikçe her tür bir satır olur, günler sütunlarda.' })
+      : B.tablo({ etiket: 'kh-gunler', ilk: 'Tür', sutunlar: h.gunler.map(function (g) { return { metin: tarih_(g, { weekday: 'short' }), alt: tarih_(g, { day: 'numeric', month: 'short' }), bugun: g === bugun }; }),
+        satirlar: h.satirlar.map(function (r) {
+          return { ad: r.ad, alt: r.birim, pul: r.etiket || null, hucreler: r.hucreler.map(function (c) { return c && (r.etiket ? { metin: c.metin, okunur: c.etiket } : { metin: c.metin, alt: c.etiket }); }) };
+        }) });
     return I.ust(geri) + '<div class="govde" data-arac="kayit" data-kayit-hafta>' + B.baslik({ metin: 'Kayıt haftası', alt: tarih_(h.bas, { day: 'numeric', month: 'short' }) + ' – ' +
       tarih_(h.bitis, { day: 'numeric', month: 'short' }) + ' · 7 günün ' + h.veriGunu + ' gününde kayıt var. Nokta: o gün kayıt yok; sıfır değildir.' }) +
       B.bolum({ baslik: 'Günler', id: 'kh-gunler', govde: tablo }) +
@@ -754,7 +740,7 @@
           (h.ozet.araGunu ? ' · ' + h.ozet.araGunu + ' ara günü' : '') + '. Öngörüdür: planlanan blok yapılacak sayılır.</p>' +
           '<div class="hafta">' + h.gunler.map(function (p) { // yalnız yerleşim: günler ızgarada yan yana
             return B.bolum({ baslik: gunAd(p.gun) + (p.gun === bugun ? ' · bugün' : ''), id: 'hg-' + p.gun, veri: { gun: p.gun }, govde: [
-              p.bloklar.length ? B.liste({ ad: gunAd(p.gun) + ' blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, true); }) }) : '<p class="soluk">Blok yok.</p>',
+              p.bloklar.length ? B.liste({ ad: gunAd(p.gun) + ' blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, true); }) }) : '<p class="soluk">Bu günde blok yok.</p>',
               '<p class="soluk">' + (p.ozet.planlananDk.v ? p.ozet.planlananDk.v + ' dk (' + E[p.ozet.planlananDk.k] + ')' : 'Planlanan iş yok') + '</p>',
               p.sigmayan.length ? '<p class="soluk">Sığmayan: ' + I.kac(p.sigmayan.map(function (x) { return x.ad + ' (' + x.neden + ')'; }).join(', ')) + '</p>' : ''] });
           }).join('') + '</div>' +
@@ -778,7 +764,7 @@
     var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' };
     var planHtml = !dr.ayar.musait.length ? '<p class="soluk">Önce aşağıya bugün çalışabileceğin saat aralığını yaz; plan o boşluğa kurulur.</p>'
       : !p ? '<p class="soluk">Bugün için plan kurulmadı.</p>'
-      : (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b); }) }) : '<p class="soluk">Plana girecek iş yok: iş ekle ya da bir alanda derse başla.</p>') +
+      : (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
         '<p class="soluk">Planlanan ' + (p.ozet.planlananDk.v || 0) + ' dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan ' + p.ozet.bosDk.v + ' dk (' + E[p.ozet.bosDk.k] + ')' +
         (p.ozet.molaSayisi ? ' · ' + p.ozet.molaSayisi + ' mola' : '') + '</p>' +
         (p.sigmayan.length ? B.uyari({ tur: 'dikkat', metin: 'Sığmayanlar (' + p.sigmayan.length + '): ' + p.sigmayan.map(function (x) { return x.ad + ' · ' + x.dk + ' dk · ' + x.neden; }).join('; ') }) : '');
@@ -791,7 +777,7 @@
         '<form class="planform" data-plan="aralik" novalidate>' + saatAraligi() + B.eylemler([{ metin: 'Aralık ekle', tip: 'submit' }]) + '</form>'] }) +
       B.bolum({ baslik: 'İşler', govde: [dr.isler.length ? B.liste({ ad: 'İşler', ogeler: dr.isler.map(function (x) {
           return { ad: x.ad, not: x.dk + ' dk' + (x.son ? ' · son ' + x.son : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : ''), eylemler: silEylemi('İşi sil: ' + x.ad, { 'arac-ac': 'plan-is-sil', id: x.id }) };
-        }) }) : '<p class="soluk">İş yok. Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
+        }) }) : '<p class="soluk">Eklediğin iş yok. Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
         '<form class="planform" data-plan="is" novalidate>' + B.alan({ ad: 'İş', isim: 'ad', enCok: 120 }) +
         '<div class="ikili">' + B.alan({ ad: 'Süre (dk)', isim: 'dk', tur: 'sayi' }) + B.alan({ ad: 'Son tarih · isteğe bağlı', isim: 'son', tur: 'tarih' }) + '</div>' +
         B.eylemler([{ metin: 'İş ekle', tip: 'submit' }]) + '</form>'] }) + '</div>';
@@ -972,7 +958,7 @@
     s.value = ''; t.focus();
   });
   d.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-arac-ac]');
+    var b = e.target.closest('[data-arac-ac]:not([aria-disabled="true"])'); // kilitli soru şıkkı odakta kalır, tıklaması yok sayılır
     if (!b) return;
     var ne = b.getAttribute('data-arac-ac'), I = ic();
     if (ne === 'not-sil') {
@@ -1004,7 +990,7 @@
       yaz(KAYIT_ANAHTAR, oku(KAYIT_ANAHTAR, []).filter(function (r) { return r.id !== b.getAttribute('data-id'); }));
       return I.rota();
     }
-    if (ne === 'kart-goster') { gosterilen = b.closest('[data-kart]').getAttribute('data-kart'); I.rota(); var a = d.querySelector('.kart__arka'); if (a) a.focus({ preventScroll: true }); return; }
+    if (ne === 'kart-goster') { gosterilen = b.closest('[data-kart]').getAttribute('data-kart'); I.rota(); var a = d.querySelector('.b-kart__arka'); if (a) a.focus({ preventScroll: true }); return; }
     if (ne === 'kart-not') {
       var simdi = Date.now(), r = kartCevapla(Tekrar, oku(KART_ANAHTAR, []), b.closest('[data-kart]').getAttribute('data-kart'), +b.getAttribute('data-not'), simdi, sayac(simdi));
       if (r.ok) { yaz(KART_ANAHTAR, r.kartlar); yaz(SAYAC_ANAHTAR, r.sayac); }

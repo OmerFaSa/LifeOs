@@ -1,15 +1,15 @@
-/* KABUK BİLEŞENLERİ (A2) — kabuk/bilesen.js'in çizdiği on altı yapı taşı.
+/* KABUK BİLEŞENLERİ (A2) — kabuk/bilesen.js'in çizdiği yirmi iki yapı taşı.
    Kurallar: yalnız kabuk/kabuk.css jetonları (renk, yazı, gölge, süre, odak); yeni jeton, renk, yazı tipi, köşe yok.
    Her ölçü burada ve yalnız taşın kendi sınıfında: bağlam seçicisi yazılmaz (`.x .b-…` yok), bir taş her ekranda aynı boydadır.
    Ölçek: aralık 4 · 8 · 12 · 16 px; yazı .72 · .85 · 1 · 1.15 · 1.5 rem (kullanıcının yazı boyutu ayarıyla birlikte büyür);
    dokunma yüksekliği 44 px, ana düğme 52 px; çizgi 2 px, vurgulu çizgi 3 px. Satır yükseklikleri --satir ayarına bağlı hesaplanır. */
 
 /* 1 · düğme */
-.b-dugme{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:44px; padding:0 16px; max-width:100%; flex:none;
+.b-dugme{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 16px; max-width:100%; flex:none;
   border:0; cursor:pointer; font:inherit; font-family:var(--piksel); font-size:1rem; line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   color:var(--yazi); background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi); transition:box-shadow var(--sure) ease, transform var(--sure) ease; }
 .b-dugme:hover{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
-.b-dugme--ana{ height:52px; padding:0 24px; font-size:1.15rem; color:var(--vurgu-yazi); background:var(--vurgu); box-shadow:var(--golge); }
+.b-dugme--ana{ min-height:52px; padding:0 24px; font-size:1.15rem; color:var(--vurgu-yazi); background:var(--vurgu); box-shadow:var(--golge); }
 .b-dugme--ana:hover{ box-shadow:none; transform:translate(2px,2px); }
 .b-dugme--sade{ padding:0 12px; background:transparent; box-shadow:none; }
 .b-dugme--sade:hover{ background:var(--yuzey); box-shadow:none; }
@@ -118,9 +118,9 @@ a.b-ders:hover{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
 .b-panel--guclu{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
 .b-panel--basari{ box-shadow:inset 0 0 0 3px var(--altin); }
 
-/* 13 · eylem sırası: düğmeler 8 px aralıkla, dar ekranda alt satıra geçer */
-.b-eylemler{ display:flex; flex:none; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; }
-.b-eylemler__yazi{ font-size:.85rem; color:var(--soluk); }
+/* 13 · eylem sırası: düğmeler 8 px aralıkla, dar ekranda alt satıra geçer; aynı sıradaki düğmeler aynı boyda (ana varsa 52 px) */
+.b-eylemler{ display:flex; flex:none; flex-wrap:wrap; align-items:stretch; gap:8px; min-width:0; }
+.b-eylemler__yazi{ align-self:center; font-size:.85rem; color:var(--soluk); }
 
 /* 14 · açılır bölüm: üst sıra en az 44 px, işaret + başlık + not */
 .b-acilir{ display:flex; flex-direction:column; gap:8px; min-width:0; }
@@ -142,7 +142,7 @@ a.b-ders:hover{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
   color:var(--yazi); background:var(--bg); box-shadow:inset 0 0 0 2px var(--cizgi); }
 .b-soru__sik:hover{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
 .b-soru__sik[aria-pressed="true"], .b-soru__sik:has(input:checked){ box-shadow:inset 0 0 0 3px var(--vurgu); }
-.b-soru__sik[disabled]{ cursor:default; }
+.b-soru__sik[aria-disabled="true"]{ cursor:default; }
 .b-soru__sik input{ flex:none; width:20px; height:20px; margin:0; accent-color:var(--vurgu); }
 .b-soru__harf{ flex:none; min-width:1.2em; font-family:var(--piksel); }
 .b-soru__yazi{ flex:1; min-width:0; overflow-wrap:anywhere; }
@@ -160,9 +160,72 @@ a.b-ders:hover{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
 .b-tercih__sec:hover{ color:var(--yazi); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
 .b-tercih__sec[aria-checked="true"]{ color:var(--vurgu-yazi); background:var(--vurgu); box-shadow:none; }
 
+/* 17 · kart: ön yüz büyük, arka çizgiyle ayrılır; not düğmeleri eşit genişlikte, sığmazsa iki sütun */
+.b-kart{ display:flex; flex-direction:column; gap:16px; padding:16px; min-width:0; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.b-kart__on{ font-family:var(--piksel); font-size:1.15rem; overflow-wrap:anywhere; }
+.b-kart__arka{ padding-top:16px; box-shadow:inset 0 2px 0 var(--cizgi); white-space:pre-wrap; overflow-wrap:anywhere; }
+.b-kart__notlar{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,7rem),1fr)); gap:8px; }
+.b-kart__not{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:64px; padding:8px; border:0; cursor:pointer; font:inherit;
+  line-height:1.2; color:var(--yazi); background:var(--bg); box-shadow:inset 0 0 0 2px var(--cizgi); }
+.b-kart__not:hover{ box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.b-kart__notad{ font-family:var(--piksel); font-size:1rem; }
+.b-kart__sure{ font-size:.85rem; color:var(--soluk); }
+
+/* 18 · tablo: kendi kabında yatay kayar; sayılar hizalı, alt satır küçük ve soluk; bugün 3 px vurgu altı */
+.b-tablo{ position:relative; overflow-x:auto; min-width:0; } /* position: gizli etiketler (absolute) kabın dışına taşmasın */
+.b-tablo table{ border-collapse:collapse; width:100%; font-size:.85rem; font-variant-numeric:tabular-nums; }
+.b-tablo th, .b-tablo td{ padding:8px; text-align:center; vertical-align:middle; white-space:nowrap; box-shadow:inset 0 -2px 0 var(--cizgi); }
+.b-tablo thead th{ font-family:var(--piksel); font-weight:400; color:var(--yazi-2); }
+.b-tablo thead th[aria-current]{ color:var(--yazi); box-shadow:inset 0 -3px 0 var(--vurgu); }
+.b-tablo th:first-child{ text-align:left; }
+.b-tablo tbody th{ font-weight:400; white-space:normal; }
+.b-tablo small{ display:block; font-size:.72rem; color:var(--soluk); }
+.b-tablo tbody th small{ display:inline; }
+.b-tablo__yok{ color:var(--soluk); font-size:1.5rem; line-height:1; }
+
+/* 19 · şerit: üste yapışır; sayaç piksel 1.5 rem, son dakikada 3 px vurgu çerçeve */
+.b-serit{ position:sticky; top:0; z-index:2; display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:52px; padding:8px 16px;
+  background:var(--yuzey-2); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.b-serit__baslik{ display:flex; flex-direction:column; min-width:0; font-family:var(--piksel); overflow-wrap:anywhere; }
+.b-serit__alt{ font-family:var(--govde); font-size:.85rem; color:var(--soluk); }
+.b-serit__sayac{ flex:none; padding:0 8px; font-family:var(--piksel); font-size:1.5rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.b-serit__sayac--az{ color:var(--vurgu); box-shadow:inset 0 0 0 3px var(--vurgu); }
+
+/* 20 · adımlar: 44 px kare numaralar; yapılan yüzey + güçlü çizgi, şu anki 3 px vurgu */
+.b-adimlar{ display:flex; flex-wrap:wrap; gap:4px; }
+.b-adimlar__no{ min-width:44px; height:44px; padding:0 4px; border:0; cursor:pointer; font:inherit; font-family:var(--piksel); font-variant-numeric:tabular-nums;
+  color:var(--soluk); background:transparent; box-shadow:inset 0 0 0 2px var(--cizgi); }
+.b-adimlar__no--dolu{ color:var(--yazi); background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi-guclu); }
+.b-adimlar__no[aria-current]{ color:var(--yazi); box-shadow:inset 0 0 0 3px var(--vurgu); }
+
+/* 21 · ayar satırı: ad + açıklama solda, denetim sağda; sığmazsa denetim alta geçer */
+.b-ayar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 16px; padding:12px 16px; min-width:0;
+  background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi); }
+.b-ayar--isik{ box-shadow:inset 0 0 0 3px var(--vurgu); }
+.b-ayar__metin{ display:flex; flex-direction:column; flex:1 1 14rem; min-width:0; }
+.b-ayar__ad, .b-ayar__deger{ font-family:var(--piksel); }
+.b-ayar__not{ font-size:.85rem; color:var(--soluk); }
+.b-ayar__denetim{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px; min-width:0; }
+
+/* 22 · ağ çizimi: düğüm ve çizgi renkleri jetonlardan; altında özet ve örnek çizgili açıklama */
+.b-ag{ display:flex; flex-direction:column; gap:8px; margin:0; min-width:0; }
+.b-ag__cizim{ display:block; width:100%; height:auto; background:var(--yuzey); box-shadow:inset 0 0 0 2px var(--cizgi); }
+.b-ag__cizim line{ stroke:var(--cizgi-guclu); stroke-width:2; }
+.b-ag__cizim .b-ag__kesik{ stroke-dasharray:4 4; }
+.b-ag__cizim .b-ag__kalin{ stroke:var(--ana); stroke-dasharray:6 3; stroke-width:3; }
+.b-ag__cizim circle{ fill:var(--yuzey-2); stroke:var(--vurgu); stroke-width:2; }
+.b-ag__cizim text{ fill:var(--yazi); font-size:13px; pointer-events:none; }
+.b-ag__cizim a:hover circle, .b-ag__cizim a:focus-visible circle{ fill:var(--vurgu); stroke:var(--yazi); stroke-width:3; }
+@media (max-width:480px){ .b-ag__cizim text{ font-size:20px; } } /* SVG küçülünce yazı ~11 px kalsın */
+.b-ag__cizim--kalabalik text{ display:none; } .b-ag__cizim--kalabalik a:hover text, .b-ag__cizim--kalabalik a:focus-visible text{ display:inline; }
+.b-ag__alt, .b-ag__aciklama{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 16px; margin:0; padding:0; list-style:none; font-size:.85rem; color:var(--soluk); }
+.b-ag__im{ display:inline-block; width:24px; margin-right:8px; vertical-align:middle; border-top:2px solid var(--cizgi-guclu); }
+.b-ag__im--kesik{ border-top-style:dashed; } .b-ag__im--kalin{ border-top:3px dashed var(--ana); }
+
 /* zorunlu renk kipinde gölge çizgileri düşer: kenarlık olarak geri gelir */
 @media (forced-colors: active){
-  .b-dugme, .b-pul, .b-satir, .b-ders, .b-sayi, .b-uyari, .b-panel, .b-alan__giris, .b-ilerleme__cubuk, .b-soru, .b-soru__sik, .b-tercih__sec{ border:2px solid CanvasText; }
+  .b-dugme, .b-pul, .b-satir, .b-ders, .b-sayi, .b-uyari, .b-panel, .b-alan__giris, .b-ilerleme__cubuk, .b-soru, .b-soru__sik, .b-tercih__sec,
+    .b-kart, .b-kart__not, .b-serit, .b-adimlar__no, .b-ayar, .b-ag__cizim{ border:2px solid CanvasText; }
   .b-ilerleme__cubuk i.dolu{ background:Highlight; }
-  .b-tercih__sec[aria-checked="true"], .b-soru__sik[aria-pressed="true"], .b-soru__sik--dogru{ outline:3px solid Highlight; }
+  .b-tercih__sec[aria-checked="true"], .b-soru__sik[aria-pressed="true"], .b-soru__sik--dogru, .b-adimlar__no[aria-current]{ outline:3px solid Highlight; }
 }

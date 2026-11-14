@@ -40,7 +40,7 @@
     return '<div><span id="seg-' + ad + '">' + ad2 + '</span>' + B.tercih({ etiket: 'seg-' + ad, secenekler: secenekler, deger: secili, veri: { seg: ad } }) + '</div>';
   }
 
-  var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'On altı yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
+  var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'Yirmi iki yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
     '<div class="denetim">' + seg('tema', 'Tema', { sistem: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, 'sistem') +
     seg('en', 'Genişlik', { tam: 'Pencere', dar: '390 px', genis: '1280 px' }, 'tam') + '</div>';
 
@@ -142,6 +142,31 @@
   h += tas(16, 'Tercih düğmeleri', 'Kısa seçenekler yan yana, 44 px, 4 px aralık; seçili dolu vurgu. Tek sekme durağı, ok tuşları gezer (radyo grubu). Ayarlar satırları ve bu sayfanın tema düğmeleri.', ornekler([
     B.tercih({ ad: 'Yazı boyutu', secenekler: { kucuk: 'Küçük', normal: 'Normal', buyuk: 'Büyük', enbuyuk: 'En büyük' }, deger: 'normal' })
   ], 'tam'));
+
+  h += tas(17, 'Kart', 'Tekrar kartı: ön yüz 1,15 rem; arka yüz 2 px çizgiyle ayrılır, açılınca odak alır. Dört not düğmesi eşit genişlikte (en az 64 px yüksek), altında ne zaman yeniden sorulacağı; sığmazsa iki sütun.', ornekler([
+    B.kart({ on: 'Thales\'e göre her şeyin ilk maddesi nedir?', eylem: { metin: 'Cevabı göster', tur: 'ana' } }),
+    B.kart({ on: 'Thales\'e göre her şeyin ilk maddesi nedir?', arka: 'Su. Her şey sudan gelir ve suya döner.', notlar: [['Yine', 'şimdi'], ['Zor', '1 gün sonra'], ['İyi', '3 gün sonra'], ['Kolay', '1 hafta sonra']]
+      .map(function (n) { return { metin: n[0], sure: n[1] }; }) })
+  ], 'yigin'));
+  h += tas(18, 'Tablo', 'Yazı .85 rem, hücre 8 px; sütun başlığının altında küçük soluk satır, bugün 3 px vurgu altı. Veri yoksa «·» (okunur: veri yok), sıfır değil. Geniş tablo kendi kabında kayar, sayfa taşmaz.', B.tablo({ ad: 'Örnek hafta', ilk: 'Tür',
+    sutunlar: [{ metin: 'Pzt', alt: '9 Kas' }, { metin: 'Sal', alt: '10 Kas' }, { metin: 'Çar', alt: '11 Kas', bugun: true }],
+    satirlar: [{ ad: 'Su', alt: 'L', hucreler: [{ metin: '2,1', alt: 'ölçüldü' }, null, { metin: '1,5', alt: 'tahmin' }] }, { ad: 'Uyku', alt: 'saat', pul: 'ölçüldü', hucreler: [{ metin: '7,5' }, { metin: '6' }, null] }] }));
+  h += tas(19, 'Şerit', 'Ekranın üstüne yapışır: başlık ve altında kısa not, sağda sayaç (piksel 1,5 rem). Son dakikada 3 px vurgu çerçeve; yanıp sönmez.', ornekler([
+    B.serit({ baslik: 'Deneme 1', alt: 'Test 2/4 · Matematik', sayac: { metin: '42:10', ad: 'Kalan süre' } }),
+    B.serit({ baslik: 'TYT provası', sayac: { metin: '00:48', ad: 'Kalan süre', az: true } })
+  ], 'yigin'));
+  h += tas(20, 'Adımlar', '44 px kare numaralar, 4 px aralık; sığmayan alt satıra geçer. Yapılan: yüzey + güçlü çizgi; şu anki: 3 px vurgu (aria-current).', B.adimlar({ ad: 'Örnek sorular',
+    ogeler: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (n) { return { etiket: 'Soru ' + n, dolu: n < 5 || n === 7, secili: n === 5 }; }) }));
+  h += tas(21, 'Ayar satırı', 'Ad + bir cümle açıklama solda, denetim sağda (sığmazsa alta geçer); 12 px dolgu. Denetim bir taştır: tercih, alan; birden çok denetim bir grup olur.', ornekler([
+    B.ayar({ ad: 'Tema', not: 'Cihazına uyar ya da hep açık / koyu kalır.', id: 'ornek-ayar-1', govde: B.tercih({ etiket: 'ornek-ayar-1', secenekler: { sistem: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, deger: 'sistem' }) }),
+    B.ayar({ ad: 'Boy', not: 'Enerji hedefi için.', id: 'ornek-ayar-2', govde: B.alan({ ad: 'Boy', gizliAd: true, isim: 'ornek-boy', tur: 'sayi', deger: '175', ipucu: 'cm' }) }),
+    B.ayar({ ad: 'Sessiz saatler', not: 'Bu aralıkta bildirim gelmez.', id: 'ornek-ayar-3', govde: [B.alan({ ad: 'Açık', isim: 'ornek-acik', tur: 'onay', deger: true }),
+      B.alan({ ad: 'Başlangıç', isim: 'ornek-bas', tur: 'saat', deger: '23:00' }), B.alan({ ad: 'Bitiş', isim: 'ornek-bit', tur: 'saat', deger: '07:00' })] }),
+    B.ayar({ ad: 'Bu cihazdaki kayıtlar', not: 'Tarayıcı yer açmak için silebilir mi?', id: 'ornek-ayar-4', deger: 'Kalıcı' })
+  ], 'yigin'));
+  h += tas(22, 'Ağ çizimi', 'Düğüm bir bağlantıdır (Sekme ile gezilir); çizgi türleri düz, kesik, kalın kesik; altında özet ve örnek çizgili açıklama (renk tek başına değil). Telefonda ad ~11 px kalır; kırktan çok düğümde ad yalnız odakta.', B.ag({ ad: 'Örnek ağ: 4 not, 3 bağ', en: 640, boy: 240,
+    dugumler: [{ id: 'a', ad: 'Sokrates', x: 120, y: 60, href: '#/a' }, { id: 'b', ad: 'Erdem bilgidir', x: 320, y: 140, r: 10, href: '#/b' }, { id: 'c', ad: 'Sofistler', x: 540, y: 60, href: '#/c' }, { id: 'd', ad: 'Bağsız not', x: 560, y: 200, r: 6, href: '#/d' }],
+    kenarlar: [{ a: 'a', b: 'b', tur: 'duz' }, { a: 'b', b: 'c', tur: 'kesik' }, { a: 'a', b: 'c', tur: 'kalin' }], ozet: '4 not · 3 bağ · 1 bağsız', aciklama: { duz: 'bağ', kesik: 'aynı etiket', kalin: 'çelişki' } }));
 
   var kok = document.getElementById('katalog');
   kok.innerHTML = h;

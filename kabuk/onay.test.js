@@ -98,5 +98,17 @@ t('index.html: onay.js kabuk.js\'ten önce yüklenir', () => {
   dogru(i > 0 && i < h.indexOf('src="kabuk.js"'));
 });
 
+t('ölçüm etiketi: sistem/etiket.py gecerli kuralının aynısı; niyetler sunucuyla aynı', () => {
+  const py = fs.readFileSync(path.join(__dirname, '..', 'sistem', 'etiket.py'), 'utf8');
+  esit(O.NIYETLER, /NIYETLER = \(([^)]*)\)/.exec(py)[1].match(/"(\w+)"/g).map(x => x.slice(1, -1)), 'niyet listesi');
+  esit(O.ARAMA_DEGIL, /ARAMA_DEGIL = "([^"]+)"/.exec(py)[1], 'arama-degil');
+  const r = { adaylar: [{ no: 'a1' }, { no: 'a2' }, 'bozuk', null] };
+  esit(O.NIYETLER.map(n => O.etiketGecerli('anlama', {}, n)), [true, true, true, true, true]);
+  esit(['Sohbet', 'merhaba', '', null, ['sohbet'], 'arama-degil'].map(e => O.etiketGecerli('anlama', {}, e)), [false, false, false, false, false, false]);
+  esit([[], ['a1'], ['a2', 'a1'], 'arama-degil'].map(e => O.etiketGecerli('arama', r, e)), [true, true, true, true]);
+  esit([['a1', 'a1'], ['a3'], [1], 'a1', null, {}, 'sohbet'].map(e => O.etiketGecerli('arama', r, e)), [false, false, false, false, false, false, false]);
+  esit([O.etiketGecerli('arama', {}, []), O.etiketGecerli('arama', {}, ['a1']), O.etiketGecerli('kayit', r, []), O.etiketGecerli('anlama', r, ['a1'])], [true, false, false, false], 'adaysız satır, bilinmeyen set');
+});
+
 console.log(gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);

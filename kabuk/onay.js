@@ -63,8 +63,18 @@
   function tarihYaz(t) { return t.getFullYear() + '-' + iki(t.getMonth() + 1) + '-' + iki(t.getDate()); } // yerel gün (UTC değil)
   function oku(depo) { try { var v = JSON.parse(depo.getItem(ANAHTAR)); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch (e) { return {}; } }
 
+  // Ölçüm etiketi: sistem/etiket.py `gecerli` kuralının aynısı (onay.test.js iki listeyi karşılaştırır). anlama → beş niyetten biri;
+  // arama → o satırın aday numaralarından tekrarsız liste ([] = hiçbiri doğru değil) ya da «arama-degil».
+  var NIYETLER = ['sohbet', 'kayit', 'ogren', 'arastir', 'yonet'], ARAMA_DEGIL = 'arama-degil';
+  function etiketGecerli(set, satir, e) {
+    if (set === 'anlama') return NIYETLER.indexOf(e) >= 0;
+    if (set !== 'arama') return false;
+    var nolar = dizi(satir && satir.adaylar).filter(function (a) { return a && typeof a === 'object'; }).map(function (a) { return a.no; });
+    return e === ARAMA_DEGIL || (Array.isArray(e) && e.every(function (x, i) { return typeof x === 'string' && nolar.indexOf(x) >= 0 && e.indexOf(x) === i; }));
+  }
+
   var Onay = { ANAHTAR: ANAHTAR, anahtar: anahtar, gecerli: gecerli, uygula: uygula, kimlikler: kimlikler, onayla: onayla, geriAl: geriAl,
-    sayim: sayim, hepsiOnayli: hepsiOnayli, tarihYaz: tarihYaz, oku: oku };
+    sayim: sayim, hepsiOnayli: hepsiOnayli, tarihYaz: tarihYaz, oku: oku, NIYETLER: NIYETLER, ARAMA_DEGIL: ARAMA_DEGIL, etiketGecerli: etiketGecerli };
   Kabuk.Onay = Onay;
   if (typeof module !== 'undefined' && module.exports) module.exports = Onay;
   if (typeof document === 'undefined') return;
@@ -107,6 +117,78 @@
       bizde ? { metin: 'Geri al', tur: 'sade', veri: { 'onay-ac': 'geri-al' } } : null]);
   }
 
+  /* ---- Ölçüm için etiketle (sistem/etiket.py API'si, yalnız bu bilgisayardan; rapor faz2-cila.md). Gerçek mesajlar yalnız `et`
+   * değişkeninde durur: depoya, IndexedDB'ye, konsola ya da tarayıcı önbelleğine (no-store) yazılmaz. */
+  var NIYET_AD = { sohbet: 'Sohbet: konuşmak, fikir paylaşmak; bir iş istemiyor', kayit: 'Kayıt: bir şeyi yazdırmak ya da saydırmak istiyor (su, uyku, harcama…)',
+    ogren: 'Öğren: bir konuyu anlamak, ders almak istiyor', arastir: 'Araştır: bir bilgiyi bulmak, aramak istiyor',
+    yonet: 'Yönet: plan, ayar ya da sayfa gibi bir şeyi açmak, değiştirmek istiyor' };
+  var et = null; // { durum: yukleniyor | kapali | hazir, sayi, kuyruk, set, i, yazilan, hata, ileti, mesgul }
+  function etApi(govde, set) {
+    return fetch(govde ? '/api/kalite/etiket' : '/api/kalite/etiket/adaylar?set=' + set, govde
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(govde), cache: 'no-store' } : { cache: 'no-store' })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { durum: r.status, j: j || {} }; }); });
+  }
+  // dosyadan açılış, telefon (403), sunucu yok: hepsi aynı sakin satır
+  function etKapat() { et = { durum: 'kapali' }; etCiz(); }
+  function etYukle(odak) {
+    Promise.all(['anlama', 'arama'].map(function (s) { return etApi(null, s); })).then(function (l) {
+      if (l.some(function (x) { return x.durum !== 200 || !x.j.ok || !Array.isArray(x.j.satirlar); })) return etKapat();
+      et = Object.assign(et || {}, { durum: 'hazir', set: null, sayi: { anlama: l[0].j.bekleyen, arama: l[1].j.bekleyen }, kuyruk: { anlama: l[0].j.satirlar, arama: l[1].j.satirlar } });
+      etCiz(odak);
+    }, etKapat);
+  }
+  function etHtml() {
+    if (!et || et.durum === 'yukleniyor') return '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
+    if (et.durum === 'kapali') return B.uyari({ tur: 'bilgi', metin: 'Etiketleme yalnız bu bilgisayarda açılır.' });
+    var hata = et.hata ? B.uyari({ tur: 'hata', metin: et.hata }) : '', a = et.sayi.anlama, r = et.sayi.arama;
+    if (!et.set) return (et.ileti ? B.uyari({ tur: 'tamam', metin: et.ileti }) : '') +
+      '<p class="soluk">Gerçek mesajlarına doğru cevabı sen verirsin; Anlama ve Arama ölçümü bu etiketlerden yapılır. Mesajlar bu bilgisayardan çıkmaz.</p>' +
+      B.sayilar({ ad: 'Etiket bekleyen', ogeler: [{ ad: 'Anlama · bekleyen', deger: a, birim: 'mesaj', etiket: 'measured' }, { ad: 'Arama · bekleyen', deger: r, birim: 'soru', etiket: 'measured' }] }) +
+      (a + r ? B.eylemler([{ metin: 'Anlama etiketle', tur: a ? 'ana' : 'ikincil', kapali: !a, veri: { 'onay-ac': 'etiket-bas', set: 'anlama' } },
+        { metin: 'Arama etiketle', tur: a || !r ? 'ikincil' : 'ana', kapali: !r, veri: { 'onay-ac': 'etiket-bas', set: 'arama' } }])
+        : B.bos({ baslik: 'Etiketlenecek mesaj yok.', metin: 'Yeni mesajlar ölçüm setine girince burada sayılır.' }));
+    var s = et.set, x = et.kuyruk[s][et.i], ust = (s === 'anlama' ? 'Anlama' : 'Arama') + ' · ' + (et.i + 1) + ' / ' + et.kuyruk[s].length + ' · ' + et.sayi[s] + ' bekliyor · ';
+    var son = B.eylemler([{ metin: 'Atla', tur: 'sade', veri: { 'onay-ac': 'etiket-atla' } }, { metin: 'Bitir', tur: 'sade', veri: { 'onay-ac': 'etiket-bitir' } }]);
+    if (s === 'anlama') return B.soru({ soru: x.metin || '(boş mesaj)', ust: ust + 'bu mesaj ne istiyor?', secenekler: NIYETLER.map(function (n) { return NIYET_AD[n]; }),
+      sikVeri: { 'onay-ac': 'etiket-niyet' }, veri: { 'etiket-soru': '' } }) + hata + son;
+    var ad = {}; dizi(x.adaylar).forEach(function (c) { ad[c.no] = (c.baslik || 'Başlıksız') + (c.ozet ? ' — ' + c.ozet : ''); });
+    var var_ = Object.keys(ad).length;
+    return B.soru({ soru: x.metin || '(boş soru)', ust: ust + 'hangi sonuçlar bu soruyu cevaplıyor?', veri: { 'etiket-soru': '' }, govde: [
+      var_ ? B.alan({ ad: 'Doğru olan sonuçlar', isim: 'etiket-aday', tur: 'coklu', secenekler: ad }) : '<p class="soluk">Bu soruya aday sonuç gelmedi.</p>', hata,
+      B.eylemler([var_ ? { metin: 'Seçtiklerim doğru', tur: 'ana', veri: { 'onay-ac': 'etiket-secili' } } : null, { metin: 'Hiçbiri doğru değil', veri: { 'onay-ac': 'etiket-hicbiri' } },
+        { metin: 'Bu bir arama sorusu değil', veri: { 'onay-ac': 'etiket-degil' } }])] }) + son;
+  }
+  function etCiz(odak) {
+    var el = d.querySelector('[data-etiket-govde]'); if (!el) return;
+    el.innerHTML = etHtml();
+    var f = odak && el.querySelector(odak); if (f) f.focus();
+  }
+  function etBitir() { et.ileti = et.yazilan ? et.yazilan + ' etiket yazıldı.' : null; et.durum = 'yukleniyor'; etCiz(); etYukle('.b-uyari'); }
+  function etSonraki() { if (++et.i < et.kuyruk[et.set].length) return etCiz('[data-etiket-soru]'); etBitir(); }
+  function etEylem(ne, b) {
+    if (!et || et.durum !== 'hazir' || et.mesgul) return;
+    et.hata = null;
+    if (ne === 'etiket-bas') { Object.assign(et, { set: b.getAttribute('data-set'), i: 0, yazilan: 0, ileti: null }); return etCiz('[data-etiket-soru]'); }
+    if (ne === 'etiket-bitir') return etBitir();
+    if (ne === 'etiket-atla') return etSonraki();
+    var x = et.kuyruk[et.set][et.i], e;
+    if (ne === 'etiket-niyet') e = NIYETLER['ABCDE'.indexOf(b.getAttribute('data-h'))];
+    else if (ne === 'etiket-hicbiri') e = [];
+    else if (ne === 'etiket-degil') e = ARAMA_DEGIL;
+    else {
+      e = [].map.call(d.querySelectorAll('[data-etiket-govde] input[name="etiket-aday"]:checked'), function (c) { return c.value; });
+      if (!e.length) { et.hata = 'Bir sonuç seç ya da «Hiçbiri doğru değil»e bas.'; return etCiz('.b-uyari'); }
+    }
+    if (!etiketGecerli(et.set, x, e)) { et.hata = 'Bu etiket bu soruya uymuyor.'; return etCiz('.b-uyari'); }
+    et.mesgul = true;
+    etApi({ set: et.set, id: x.id, etiket: e }).then(function (r) {
+      et.mesgul = false;
+      if (r.durum === 200 && r.j.ok) { et.yazilan++; et.sayi[et.set]--; return etSonraki(); }
+      if (r.durum !== 400) return etKapat();
+      et.hata = 'Yazılamadı: ' + (r.j.mesaj || 'sunucu kabul etmedi') + '.'; etCiz('.b-uyari');
+    }, etKapat);
+  }
+
   function anaSayfa(I, yer) {
     var k = I.kac, toplam = { taslak: 0, onayli: 0 };
     var satirlar = I.tasinanlar().map(function (a) {
@@ -117,10 +199,12 @@
         not: ys.length ? say.map(function (s, j) { return 'Aşama ' + (j + 1) + ': ' + s.taslak + ' taslak, ' + s.onayli + ' onaylı'; }).join(' · ') + ' · ölçüldü' : 'İçerik bu açılışta yüklenemedi.' };
     });
     var kayit = Object.keys(oku(I.depo)).length;
+    if (!et || !et.set) setTimeout(etYukle, 0); // sayılar her açılışta tazelenir; süren etiketleme turu bozulmaz
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-onay-sayfa="ana">' +
       B.baslik({ metin: 'Onaylar', alt: 'Taslak dersleri oku; doğruysa onayla. Sen onaylamadan hiçbir ders onaylanmaz.' }) +
       B.sayilar({ ad: 'Dersler', ogeler: [{ ad: 'Onay bekleyen', deger: toplam.taslak, birim: 'ders', etiket: 'measured' }, { ad: 'Onaylı', deger: toplam.onayli, birim: 'ders', etiket: 'measured' }] }) +
       B.bolum({ baslik: 'Alanlar', govde: B.liste({ ad: 'Alanlar', ogeler: satirlar }) }) +
+      B.bolum({ baslik: 'Ölçüm için etiketle', veri: { etiket: '' }, govde: '<div data-etiket-govde>' + etHtml() + '</div>' }) +
       B.bolum({ baslik: 'Onayları sakla', govde: ['<p class="soluk">Onayların şimdilik bu cihazda durur. Dosyayı al ve bilgisayardaki LifeOS klasörüne ver; içerik dosyalarına oradan yazılır.</p>',
         B.eylemler([{ metin: 'Onayları dosya olarak al', veri: { 'onay-ac': 'disari' }, kapali: !kayit }, { yazi: kayit ? kayit + ' öğe onaylı (alıştırma ve kapı soruları dahil)' : 'Henüz onay yok.' }])] }) +
       B.bolum({ baslik: 'Senin adımın', govde: ['<p class="soluk">Bunları sistem yapamaz; yalnız sen yapabilirsin.</p>',
@@ -228,6 +312,7 @@
     if (!b || b.getAttribute('aria-disabled') === 'true') return;
     var I = ic(), ne = b.getAttribute('data-onay-ac'), k = konum(), y = k.alan && asamalar(I, k.alan)[k.n - 1];
     if (ne === 'disari') return disari();
+    if (ne.indexOf('etiket-') === 0) return etEylem(ne, b);
     if (!y || !y.oge[k.id]) return;
     var odak = null;
     if (ne === 'sor') { soruluyor = k.id; odak = '#onay-sor'; }

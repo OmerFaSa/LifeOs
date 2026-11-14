@@ -123,27 +123,16 @@
     return o;
   }
 
-  function kac(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   /* Ekran: bir satırın denetimi (HTML metni). Saf; olay bağlamayı kabuk.js yapar (data-ayar, data-deger). */
   function ciz(t, v) {
-    var id = 'ayar-' + t.anahtar.replace(/[^a-z0-9]/g, '-');
-    var bas = '<div class="ayar" data-ayar-satir="' + kac(t.anahtar) + '"><div class="ayar__metin"><span class="ayar__ad" id="' + id + '">' + kac(t.ad) +
-      '</span><span class="ayar__not">' + kac(t.aciklama) + '</span></div>';
-    var govde;
-    if (t.tur === 'secim') {
-      govde = (kok.LIFEOS.Kabuk.Bilesen || require('./bilesen.js')).tercih({ etiket: id, secenekler: t.secenekler, deger: v, veri: { ayar: t.anahtar } });
-    } else if (t.tur === 'bilgi') {
-      govde = '<span class="ayar__ad">' + kac(t.secenekler[String(v)]) + '</span>';
-    } else if (t.tur === 'sayi') {
-      govde = '<label class="sayiayar"><input type="number" inputmode="numeric" aria-labelledby="' + id + '" data-ayar="' + kac(t.anahtar) +
-        '" min="' + t.alt + '" max="' + t.ust + '" value="' + (v == null ? '' : kac(v)) + '">' + (t.birim ? '<span>' + kac(t.birim) + '</span>' : '') + '</label>';
-    } else {
-      govde = '<div class="aralik" role="group" aria-labelledby="' + id + '">' +
-        '<label class="anahtar"><input type="checkbox" data-ayar="' + kac(t.anahtar) + '" data-parca="acik"' + (v.acik ? ' checked' : '') + '><span>Açık</span></label>' +
-        '<label>Başlangıç <input type="time" data-ayar="' + kac(t.anahtar) + '" data-parca="bas" value="' + kac(v.bas) + '"></label>' +
-        '<label>Bitiş <input type="time" data-ayar="' + kac(t.anahtar) + '" data-parca="bit" value="' + kac(v.bit) + '"></label></div>';
-    }
-    return bas + govde + '</div>';
+    var B = kok.LIFEOS.Kabuk.Bilesen || require('./bilesen.js'), id = 'ayar-' + t.anahtar.replace(/[^a-z0-9]/g, '-'), govde = null, deger = null;
+    if (t.tur === 'secim') govde = B.tercih({ etiket: id, secenekler: t.secenekler, deger: v, veri: { ayar: t.anahtar } });
+    else if (t.tur === 'bilgi') deger = t.secenekler[String(v)];
+    else if (t.tur === 'sayi') govde = B.alan({ ad: t.ad, gizliAd: true, isim: id, tur: 'sayi', deger: v == null ? '' : v, ipucu: t.birim, veri: { ayar: t.anahtar } });
+    else govde = [B.alan({ ad: 'Açık', isim: id + '-acik', tur: 'onay', deger: !!v.acik, veri: { ayar: t.anahtar, parca: 'acik' } }),
+      B.alan({ ad: 'Başlangıç', isim: id + '-bas', tur: 'saat', deger: v.bas, veri: { ayar: t.anahtar, parca: 'bas' } }),
+      B.alan({ ad: 'Bitiş', isim: id + '-bit', tur: 'saat', deger: v.bit, veri: { ayar: t.anahtar, parca: 'bit' } })];
+    return B.ayar({ ad: t.ad, not: t.aciklama, id: id, govde: govde, deger: deger, veri: { 'ayar-satir': t.anahtar } });
   }
 
   var Ayar = { SEMA: SEMA, GRUPLAR: GRUPLAR, tanim: tanim, dogrula: dogrula, oku: oku, yaz: yaz, sifirla: sifirla,

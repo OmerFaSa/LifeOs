@@ -31,11 +31,18 @@ const ORNEK = {
   eylemler: () => B.eylemler([{ metin: K.slice(0, 40), veri: { ac: K } }, null, { yazi: K }]),
   acilir: () => B.acilir({ baslik: K, not: K, govde: B.pul('x'), veri: { a: K } }),
   soru: () => B.soru({ soru: K, ust: K, secenekler: [K, K], secili: 'A', dogru: 'B', sikVeri: { ac: K }, veri: { s: K }, sonuc: { baslik: K, metin: K, maddeler: [K], not: K } }),
-  tercih: () => B.tercih({ ad: K, secenekler: { a: K.slice(0, 40), b: 'B' }, deger: 'a', veri: { ayar: K } })
+  tercih: () => B.tercih({ ad: K, secenekler: { a: K.slice(0, 40), b: 'B' }, deger: 'a', veri: { ayar: K } }),
+  kart: () => B.kart({ on: K, arka: K, veri: { kart: K }, notlar: [{ metin: '<x-n>', sure: K, veri: { not: K } }] }),
+  tablo: () => B.tablo({ ad: K, ilk: K, sutunlar: [{ metin: K, alt: K }], satirlar: [{ ad: K, alt: K, pul: '<x-t>', hucreler: [{ metin: K, alt: K, okunur: K }] }] }),
+  serit: () => B.serit({ baslik: K, alt: K, sayac: { metin: K, ad: K }, veri: { s: K } }),
+  adimlar: () => B.adimlar({ ad: K, ogeler: [{ etiket: K, veri: { i: K } }] }),
+  ayar: () => B.ayar({ ad: K, not: K, id: 'ayar-x', deger: K, veri: { 'ayar-satir': K } }),
+  ag: () => B.ag({ ad: K, en: 100, boy: 50, dugumler: [{ id: 'a', ad: K, x: 1, y: 1, href: '#/a' }, { id: 'b', ad: K, etiket: K, x: 9, y: 9, href: '#/b' }], kenarlar: [{ a: 'a', b: 'b', tur: 'kesik' }],
+    ozet: K, aciklama: { kesik: K } })
 };
 
-t('katalog on altı taş sunar ve her biri test örneğine sahip', () => {
-  dogru(B.TASLAR.length === 16, 'taş sayısı ' + B.TASLAR.length);
+t('katalog yirmi iki taş sunar ve her biri test örneğine sahip', () => {
+  dogru(B.TASLAR.length === 22, 'taş sayısı ' + B.TASLAR.length);
   B.TASLAR.forEach(ad => dogru(typeof B[ad] === 'function' && ORNEK[ad], ad));
 });
 t('kaçış: hiçbir taş ham etiket ya da tırnak sızdırmaz', () => {
@@ -159,7 +166,7 @@ t('soru: şıklar, seçili, doğru/yanlış yazıyla, kilit, radyo, açık uçlu
   const s = B.soru({ soru: 'Arkhe?', ust: 'Soru 1 / 3', secenekler: ['Su', 'Hava', 'Ateş'], secili: 'A', dogru: 'B', kilitli: true, sikVeri: { 'arac-ac': 'soru-cevap' }, veri: { sira: 0 },
     sonuc: { baslik: 'Yanlış.', metin: 'Thales suyu söyler.' } });
   dogru(/^<fieldset class="b-soru" tabindex="-1" data-sira="0"><legend class="b-soru__metin">Arkhe\?<\/legend><p class="b-soru__ust">Soru 1 \/ 3<\/p>/.test(s), s);
-  dogru((s.match(/<button type="button" class="b-soru__sik[^"]*" data-arac-ac="soru-cevap" data-h="[ABC]" aria-pressed="(true|false)" disabled>/g) || []).length === 3, 'üç kapalı şık düğmesi');
+  dogru((s.match(/<button type="button" class="b-soru__sik[^"]*" data-arac-ac="soru-cevap" data-h="[ABC]" aria-pressed="(true|false)" aria-disabled="true">/g) || []).length === 3 && !/ disabled/.test(s), 'üç kilitli şık odakta kalır (aria-disabled, disabled değil)');
   dogru(/b-soru__sik b-soru__sik--yanlis" [^>]*data-h="A" aria-pressed="true"/.test(s) && /✕ senin cevabın/.test(s), 'seçilen yanlış kesik çizgi + yazı');
   dogru(/b-soru__sik b-soru__sik--dogru" [^>]*data-h="B" aria-pressed="false"/.test(s) && /✓ doğru/.test(s), 'doğru şık işaretli + yazı');
   dogru(/<div class="b-soru__sonuc" tabindex="-1" role="status"><b>Yanlış\.<\/b> Thales suyu söyler\.<\/div><\/fieldset>$/.test(s), 'sonuç satırı');
@@ -226,11 +233,62 @@ t('bilesen.css bağlam seçicisi yazmaz: her kural bir .b- taşıyla başlar', (
   dogru(kurallar.length > 40, 'kural sayısı ' + kurallar.length);
   kurallar.forEach(k => k.split(',').forEach(s => dogru(/^(a|textarea|select|input)?\.b-[a-z]/.test(s.trim()), 'bağlam seçicisi: ' + s.trim())));
 });
-t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; on altı taşı gösterir', () => {
+t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; yirmi iki taşı gösterir', () => {
   const h = fs.readFileSync(path.join(__dirname, 'bilesen.html'), 'utf8');
   const yuk = (h.match(/(?:href|src)="[^"#]+\.(?:css|js)"/g) || []).map(x => x.replace(/^(href|src)="|"$/g, ''));
   dogru(JSON.stringify(yuk) === JSON.stringify(['../brand/ortak/piksel-yazi.css', 'kabuk.css', 'bilesen.css', 'bilesen.js']), yuk.join(', '));
-  for (let n = 1; n <= 16; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
+  for (let n = 1; n <= 22; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
+});
+
+t('kart: ön yüz, arka odak alır, dört not düğmesi aralıklarıyla, kapalıyken tek eylem', () => {
+  const on = B.kart({ on: 'Arkhe?', veri: { kart: 'k1' }, eylem: { metin: 'Cevabı göster', tur: 'ana' } });
+  dogru(/^<div class="b-kart" data-kart="k1"><p class="b-kart__on">Arkhe\?<\/p><div class="b-eylemler"><button[^>]*b-dugme--ana">Cevabı göster/.test(on) && !/b-kart__arka|b-kart__not/.test(on), on);
+  const a = B.kart({ on: 'Arkhe?', arka: 'Su', notlar: ['Yine', 'Zor', 'İyi', 'Kolay'].map((m, i) => ({ metin: m, sure: i ? i + ' gün sonra' : 'şimdi', veri: { not: i + 1 } })) });
+  dogru(/<p class="b-kart__arka" tabindex="-1">Su<\/p><div class="b-kart__notlar" role="group" aria-label="Ne kadar hatırladın\?">/.test(a), 'arka odak alır, notlar grup');
+  dogru((a.match(/<button type="button" class="b-kart__not" data-not="\d"><span class="b-kart__notad">[^<]+<\/span><span class="gizli">, <\/span><span class="b-kart__sure">/g) || []).length === 4, 'dört not, ad + süre okunur');
+  atar(() => B.kart({ on: 'x', notlar: [{ metin: 'a', sure: 'b' }] }), /arka yüzle/, 'arkasız not');
+  atar(() => B.kart({ on: 'x', arka: 'y', notlar: [] }), /notlar/, 'boş not dizisi');
+  atar(() => B.kart({ arka: 'y' }), /on gerekli/, 'önsüz kart');
+});
+t('tablo: başlıklar kapsamlı, bugün işaretli, veri yok sıfır değil, kendi kabında kayar', () => {
+  const h = B.tablo({ etiket: 'kh-gunler', ilk: 'Tür', sutunlar: [{ metin: 'Pzt', alt: '9 Kas' }, { metin: 'Sal', alt: '10 Kas', bugun: true }],
+    satirlar: [{ ad: 'Su', alt: 'L', pul: 'ölçüldü', hucreler: [{ metin: '2', okunur: 'ölçüldü' }, null] }, { ad: 'Uyku', hucreler: [{ metin: '7', alt: 'tahmin' }, { metin: '8' }] }] });
+  dogru(/^<div class="b-tablo" role="region" tabindex="0" aria-labelledby="kh-gunler"><table><thead><tr><th scope="col">Tür<\/th><th scope="col">Pzt<small>9 Kas<\/small><\/th><th scope="col" aria-current="date">Sal/.test(h), h);
+  dogru(/<th scope="row">Su <small>L<\/small> <span class="b-pul b-pul--normal">ölçüldü<\/span><\/th><td>2<span class="gizli"> ölçüldü<\/span><\/td><td class="b-tablo__yok"><span aria-hidden="true">·<\/span><span class="gizli">veri yok<\/span><\/td>/.test(h), 'satır başlığı, gizli etiket, veri yok');
+  dogru(/<td>7<small>tahmin<\/small><\/td>/.test(h), 'görünür alt satır');
+  atar(() => B.tablo({ ad: 'T', ilk: 'Tür', sutunlar: [{ metin: 'a' }], satirlar: [{ ad: 'x', hucreler: [] }] }), /sütun sayısı/, 'eksik hücre');
+  atar(() => B.tablo({ ad: 'T', ilk: 'Tür', sutunlar: [{ metin: 'a' }], satirlar: [] }), /satirlar/, 'boş tablo');
+  atar(() => B.tablo({ etiket: 'Kötü kimlik', ilk: 'Tür', sutunlar: [{ metin: 'a' }], satirlar: [{ ad: 'x', hucreler: [null] }] }), /kimliği/, 'kötü etiket');
+});
+t('şerit ve adımlar: sayaç role=timer ve son dakika sınıfı; numaralar sırayla, şu anki ve yapılan işaretli', () => {
+  const s = B.serit({ baslik: 'TYT provası', alt: 'Test 1/3', sayac: { metin: '00:59', ad: 'Kalan süre', az: true } });
+  dogru(s === '<div class="b-serit"><p class="b-serit__baslik">TYT provası<span class="b-serit__alt">Test 1/3</span></p><span class="b-serit__sayac b-serit__sayac--az" role="timer" aria-label="Kalan süre">00:59</span></div>', s);
+  const a = B.adimlar({ ad: 'Sorular', ogeler: [{ etiket: 'Soru 1, cevaplandı', dolu: true, veri: { deneme: 'git', i: 0 } }, { etiket: 'Soru 2', secili: true, veri: { deneme: 'git', i: 1 } }] });
+  dogru(a === '<nav class="b-adimlar" aria-label="Sorular"><button type="button" class="b-adimlar__no b-adimlar__no--dolu" data-deneme="git" data-i="0" aria-label="Soru 1, cevaplandı">1</button>' +
+    '<button type="button" class="b-adimlar__no" data-deneme="git" data-i="1" aria-current="step" aria-label="Soru 2">2</button></nav>', a);
+  atar(() => B.adimlar({ ad: 'S', ogeler: [] }), /ogeler/, 'boş adımlar');
+  atar(() => B.serit({ baslik: 'x', sayac: { metin: '1' } }), /sayac.ad/, 'adsız sayaç');
+});
+t('ayar satırı: ad kimlikli, tek denetim ya da birden çoksa grup, salt değer; alanın gizli etiketi', () => {
+  const t1 = B.ayar({ ad: 'Tema', not: 'Açık ya da koyu.', id: 'ayar-tema', govde: B.tercih({ etiket: 'ayar-tema', secenekler: { a: 'A' }, deger: 'a' }), veri: { 'ayar-satir': 'lifeos.tema' } });
+  dogru(/^<div class="b-ayar" data-ayar-satir="lifeos.tema"><p class="b-ayar__metin"><span class="b-ayar__ad" id="ayar-tema">Tema<\/span><span class="b-ayar__not">Açık ya da koyu.<\/span><\/p><div class="b-ayar__denetim"><div class="b-tercih" role="radiogroup" aria-labelledby="ayar-tema">/.test(t1), t1);
+  dogru(/<div class="b-ayar__denetim" role="group" aria-labelledby="ayar-x">/.test(B.ayar({ ad: 'X', id: 'ayar-x', govde: [B.pul('a'), B.pul('b')] })), 'birden çok denetim grup olur');
+  dogru(/<span class="b-ayar__deger">Kalıcı<\/span>/.test(B.ayar({ ad: 'Depo', id: 'ayar-d', deger: 'Kalıcı', isik: true })) && /b-ayar b-ayar--isik/.test(B.ayar({ ad: 'D', id: 'ayar-d', deger: 'x', isik: true })), 'salt değer, ışık');
+  dogru(/<label class="b-alan__ad gizli" for="b-alan-boy">Boy<\/label>/.test(B.alan({ ad: 'Boy', isim: 'boy', tur: 'sayi', gizliAd: true })), 'gizli etiket yine label');
+  atar(() => B.ayar({ ad: 'X', id: 'Kötü', deger: 'x' }), /id/, 'kötü kimlik');
+});
+t('ağ: düğümler bağlantı, kenar türleri, açıklama örnek çizgili, kötü girdi reddedilir', () => {
+  const d = [{ id: 'a', ad: 'Sokrates ve sorgulama yöntemi üzerine', x: 10, y: 10, r: 7, href: '#/motor/not/a', etiket: 'Sokrates, 1 bağ' }, { id: 'b', ad: 'Erdem', x: 600, y: 300, href: '#/motor/not/b' }];
+  const h = B.ag({ ad: 'Not ağı: 2 not', en: 640, boy: 400, dugumler: d, kenarlar: [{ a: 'a', b: 'b', tur: 'duz' }], ozet: '2 not · 1 bağ', aciklama: { duz: 'bağ', kalin: 'çelişki' } });
+  dogru(/^<figure class="b-ag"><svg class="b-ag__cizim" viewBox="0 0 640 400" role="group" aria-label="Not ağı: 2 not"><line class="b-ag__duz" x1="10" y1="10" x2="600" y2="300"\/>/.test(h), h);
+  dogru(/<a href="#\/motor\/not\/a" aria-label="Sokrates, 1 bağ"><title>Sokrates ve sorgulama yöntemi üzerine<\/title><circle cx="10" cy="10" r="7"\/><text x="24" y="14">Sokrates ve sorgulama…<\/text><\/a>/.test(h), 'düğüm: bağlantı, tam ad title, kısaltılmış yazı');
+  dogru(/<text x="586" y="304" text-anchor="end">Erdem<\/text>/.test(h), 'sağ kenarda ad sola yazılır');
+  dogru(/<figcaption class="b-ag__alt"><span>2 not · 1 bağ<\/span><ul class="b-ag__aciklama"><li><span class="b-ag__im b-ag__im--duz" aria-hidden="true"><\/span>bağ<\/li><li><span class="b-ag__im b-ag__im--kalin"/.test(h), 'özet ve açıklama');
+  dogru(/b-ag__cizim--kalabalik/.test(B.ag({ ad: 'A', en: 10, boy: 10, dugumler: Array.from({ length: 41 }, (_, i) => ({ id: 'n' + i, ad: 'n', x: 1, y: 1, href: '#/n' })) })), 'kalabalıkta adlar odakta');
+  atar(() => B.ag({ ad: 'A', en: 1, boy: 1, dugumler: [d[0]] }), /en az 2/, 'tek düğüm');
+  atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: d, kenarlar: [{ a: 'a', b: 'z', tur: 'duz' }] }), /bilinmeyen/, 'kopuk kenar');
+  atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: d, kenarlar: [{ a: 'a', b: 'b', tur: 'mor' }] }), /kenar.tur/, 'bilinmeyen çizgi');
+  atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: [d[0], Object.assign({}, d[1], { href: 'javascript:alert(1)' })] }), /href/, 'javascript: bağlantısı');
 });
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');

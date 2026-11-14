@@ -207,17 +207,15 @@
   }
 
   function canliHtml(dr, sz, simdi) {
-    var k = ic().kac, l = duz(dr), i = Math.min(dr.i || 0, l.length - 1), x = l[i], q = sz[x.id], h = cevabi(dr, i), o = dr.oturum;
+    var l = duz(dr), i = Math.min(dr.i || 0, l.length - 1), x = l[i], q = sz[x.id], h = cevabi(dr, i), o = dr.oturum;
     var kal = kalan(Soru, dr, simdi), prova = dr.mod === 'prova', baslik = prova ? o.sinav + ' provası' : o.ad;
-    var testAd = prova ? '' : ' · Test ' + (x.t + 1) + '/' + o.testler.length + ' · ' + o.testler[x.t].ad;
+    var testAd = prova ? '' : 'Test ' + (x.t + 1) + '/' + o.testler.length + ' · ' + o.testler[x.t].ad;
     var cevapli = l.filter(function (_, j) { return cevabi(dr, j); }).length;
-    return '<div class="deneme__ust"><span class="deneme__baslik">' + k(baslik) + '<span class="soluk">' + k(testAd) + '</span></span>' +
-      '<span class="sayac' + (kal <= 60 ? ' sayac--az' : '') + '" role="timer" aria-label="Kalan süre">' + sureYaz(kal) + '</span></div>' +
+    return B.serit({ baslik: baslik, alt: testAd, sayac: { metin: sureYaz(kal), ad: 'Kalan süre', az: kal <= 60 } }) +
       '<p class="gizli" aria-live="polite" id="deneme-duyuru"></p>' +
-      '<nav class="deneme__no" aria-label="Sorular · ' + cevapli + ' / ' + l.length + ' cevaplandı">' + l.map(function (y, j) {
-        return '<button type="button" class="deneme__nobt' + (cevabi(dr, j) ? ' deneme__nobt--cevapli' : '') + '" data-deneme="git" data-i="' + j + '"' + (j === i ? ' aria-current="step"' : '') +
-          ' aria-label="Soru ' + (j + 1) + (cevabi(dr, j) ? ', cevaplandı' : '') + '">' + (j + 1) + '</button>';
-      }).join('') + '</nav>' +
+      B.adimlar({ ad: 'Sorular · ' + cevapli + ' / ' + l.length + ' cevaplandı', ogeler: l.map(function (y, j) {
+        return { etiket: 'Soru ' + (j + 1) + (cevabi(dr, j) ? ', cevaplandı' : ''), dolu: !!cevabi(dr, j), secili: j === i, veri: { deneme: 'git', i: j } };
+      }) }) +
       (!q ? B.bos({ baslik: 'Bu soru artık içerikte yok; boş sayılır.' })
         : B.soru({ soru: q.soru, ust: 'Soru ' + (i + 1) + ' / ' + l.length + ' · ' + q.konu, secenekler: q.sec, secili: h || null, kilitli: prova && !!h,
           sikVeri: { deneme: 'cevap' }, veri: { 'deneme-soru': x.id }, sonuc: prova && h ? { baslik: 'Cevabın kaydedildi;', metin: 'provada değişmez. Doğrusu sonda görünür.' } : null })) +
@@ -249,9 +247,10 @@
           return { ad: t.ad + ' · ' + virgul(t.net.deger) + ' net', pul: t.net.etiket, uzun: true, not: t.dogru.deger + ' doğru · ' + t.yanlis.deger + ' yanlış (' + t.dogru.etiket + ') · ' +
             (t.bos.deger == null ? 'boş: ' + t.bos.etiket : t.bos.deger + ' boş (' + t.bos.etiket + ')') + ' · ' + (t.dakika.deger == null ? 'süre: ' + t.dakika.etiket : t.dakika.deger + ' dk (' + t.dakika.etiket + ')') };
         }) }) }) +
-        B.acilir({ baslik: 'Cevap anahtarı (' + s.sorular.length + ' soru)', govde: '<ol class="deneme__anahtar">' + s.sorular.map(function (x) {
-          return '<li>' + (x.h ? 'Cevabın ' + x.h : 'Boş') + ' · doğrusu ' + k(x.dogru || '—') + (x.h ? (x.h === x.dogru ? ' · doğru' : ' · yanlış') : '') + '</li>';
-        }).join('') + '</ol>' });
+        B.acilir({ baslik: 'Cevap anahtarı (' + s.sorular.length + ' soru)', govde: B.tablo({ ad: 'Cevap anahtarı', ilk: 'Soru',
+          sutunlar: [{ metin: 'Cevabın' }, { metin: 'Doğrusu' }, { metin: 'Sonuç' }], satirlar: s.sorular.map(function (x, j) {
+            return { ad: String(j + 1), hucreler: [{ metin: x.h || 'boş' }, { metin: x.dogru || '—' }, { metin: !x.h ? 'boş' : x.h === x.dogru ? 'doğru' : 'yanlış' }] };
+          }) }) });
     }
     if (alanAkademik) {
       var ts = tahminSatirlari(Soru.puanTahmini(oku(BITEN, []).map(function (g) { return g.deneme; }), {})), sat = ts.filter(function (x) { return !x.not; });
@@ -273,12 +272,12 @@
   function saatKur() {
     clearInterval(saat);
     saat = setInterval(function () {
-      var el = d.querySelector('[data-deneme-sayfa] .sayac'), dr = el && durumOku();
+      var el = d.querySelector('[data-deneme-sayfa] .b-serit__sayac'), dr = el && durumOku();
       if (!dr) { clearInterval(saat); saat = null; return; }
       var kal = kalan(Soru, dr, Date.now());
       if (kal === 0) { clearInterval(saat); saat = null; ic().rota(); var ks = d.querySelector('[data-sonuc]'); if (ks) ks.focus(); return; } // sayfa çizilirken biter ve kaydolur
       el.textContent = sureYaz(kal);
-      el.classList.toggle('sayac--az', kal <= 60);
+      el.classList.toggle('b-serit__sayac--az', kal <= 60);
       [[300, '5 dakika kaldı.'], [60, '1 dakika kaldı.']].forEach(function (e) {
         if (kal <= e[0] && !duyurulan[e[0]]) { duyurulan[e[0]] = true; var du = d.getElementById('deneme-duyuru'); if (du && kal > e[0] - 5) du.textContent = e[1]; }
       });
@@ -315,13 +314,13 @@
   var onceki = Kabuk.ek && Kabuk.ek.soru;
   Kabuk.ek = Kabuk.ek || {};
   Kabuk.ek.soru = function (yer, alt) { return alt === 'deneme' ? sayfa(yer) : onceki(yer, alt); };
-  d.addEventListener('click', function (e) { var b = e.target.closest('[data-deneme]'); if (b && !b.disabled) eylem(b); });
+  d.addEventListener('click', function (e) { var b = e.target.closest('[data-deneme]'); if (b && b.getAttribute('aria-disabled') !== 'true') eylem(b); }); // kilitli şık (aria-disabled) odakta kalır, tıklaması yok sayılır
   d.addEventListener('keydown', function (e) {
-    if (e.ctrlKey || e.metaKey || e.altKey || !d.querySelector('[data-deneme-sayfa] .sayac')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || !d.querySelector('[data-deneme-sayfa] .b-serit__sayac')) return;
     var km = d.getElementById('komut'), hl = d.getElementById('halka'), t = e.target;
     if ((km && !km.hidden) || (hl && !hl.hidden) || (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
     var h = e.key.length === 1 ? e.key.toUpperCase() : '', b;
-    if (h && HARF.indexOf(h) >= 0) b = d.querySelector('[data-deneme="cevap"][data-h="' + h + '"]:not([disabled])');
+    if (h && HARF.indexOf(h) >= 0) b = d.querySelector('[data-deneme="cevap"][data-h="' + h + '"]:not([aria-disabled="true"])');
     else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') b = d.querySelector('[data-deneme="git"][data-yon="' + (e.key === 'ArrowRight' ? 1 : -1) + '"]');
     if (b) { e.preventDefault(); b.click(); }
   });
