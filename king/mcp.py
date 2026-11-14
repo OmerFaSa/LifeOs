@@ -251,7 +251,7 @@ def t_harita(_):
     a = anlik()
     sayim = collections.Counter(k["alan"] for k in acik(a))
     return {"yerler": h["yerler"], "dallar": h["dallar"],
-            "durumlar": "yeni = yeni kabukta, pilot = taşınıyor, eski = henüz eski modülde, plan = motoru yazılmadı",
+            "durumlar": "yeni = yeni kabukta, pilot = yeni kabukta, eski modülü de duruyor, eski = henüz eski modülde, plan = motoru yazılmadı",
             "veri": {"kaynak": a["kaynak"], "okunabilir_kayit": {k: hes(n) for k, n in sorted(sayim.items())},
                      "uyari": a["uyari"]}}
 
