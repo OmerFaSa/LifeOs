@@ -89,13 +89,13 @@
     if (o.form != null) { var f = nesne('satir', o.form); return '<form class="b-satir b-satir--form"' + veri('satir', f.veri) + ' novalidate>' + govde('satir', f.govde) + '</form>'; }
     var durum = sec('satir', 'durum', o.durum, ['acik', 'kilitli', 'secili']), ad = metin('satir', 'ad', o.ad, false), sinif = 'b-satir' + (o.uzun ? ' b-satir--uzun' : '');
     if (o.eylemler != null && o.href != null) hata('satir', 'bağlantı satırında eylem olmaz');
-    var ic = '<span class="b-satir__metin"><span class="b-satir__ad">' + kac(ad) + '</span>' +
+    var ic = (o.simge ? simge(o.simge, o.renk) : '') + '<span class="b-satir__metin"><span class="b-satir__ad">' + kac(ad) + '</span>' +
       (o.not != null && o.not !== '' ? '<span class="b-satir__not">' + kac(metin('satir', 'not', o.not)) + '</span>' : '') + '</span>' +
       (durum === 'kilitli' ? pul({ metin: 'kilitli' }) : o.pul != null ? pul(o.pul) : '') + (o.eylemler != null ? eylemler(o.eylemler) : '');
     if (durum === 'kilitli') return '<div class="' + sinif + ' b-satir--kilitli" aria-disabled="true">' + ic + '</div>';
     var cur = durum === 'secili' ? ' aria-current="true"' : '';
     if (o.href != null) return '<a class="' + sinif + '" href="' + kac(yol('satir', o.href)) + '"' + cur + veri('satir', o.veri) + '>' + ic +
-      '<span class="b-satir__ok" aria-hidden="true">›</span></a>';
+      '<svg class="b-satir__ok" aria-hidden="true"><use href="#i-sag"/></svg></a>';
     return '<div class="' + sinif + '"' + cur + veri('satir', o.veri) + '>' + ic + '</div>';
   }
   function liste(o) {

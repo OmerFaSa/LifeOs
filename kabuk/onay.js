@@ -200,7 +200,7 @@
       var ys = asamalar(I, a.id), say = ys.map(function (y) { return sayim(y.veri); });
       say.forEach(function (s) { toplam.taslak += s.taslak; toplam.onayli += s.onayli; });
       var bek = say.reduce(function (t, s) { return t + s.taslak; }, 0);
-      return { ad: a.ad, href: '#/onay/' + a.id, uzun: true, pul: bek ? { metin: bek + ' bekliyor' } : { metin: 'hepsi onaylı', tur: 'altin' },
+      return { ad: a.ad, href: '#/onay/' + a.id, uzun: true, simge: a.id, renk: (I.alanRenk || {})[a.id], pul: bek ? { metin: bek + ' bekliyor' } : { metin: 'hepsi onaylı', tur: 'altin' },
         not: ys.length ? say.map(function (s, j) { return 'Aşama ' + (j + 1) + ': ' + s.taslak + ' taslak, ' + s.onayli + ' onaylı'; }).join(' · ') + ' · ölçüldü' : 'İçerik bu açılışta yüklenemedi.' };
     });
     var kayit = Object.keys(oku(I.depo)).length;

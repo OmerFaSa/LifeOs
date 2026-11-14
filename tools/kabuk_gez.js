@@ -94,7 +94,7 @@ async function goruntu(p, ad, sec = {}) {
       && /^Bugün .* var\.$/.test(await p.textContent('.b-karsilama__ozet')) && (await p.textContent('.b-karsilama__ust')) === 'Felsefe · Ünite 1'
       && (await p.textContent('.b-karsilama__sira')) === u1.dersler[0].ad && (await p.textContent('.b-karsilama__adim')) === 'Ders 1 / ' + u1.dersler.length
       && (await p.locator('.b-karsilama__is .b-dugme--ana').count()) === 1, await p.textContent('.b-karsilama__is'));
-    dene('Bugün: üst çubukta logo, dört bölüm (Bugün seçili), arama komut çubuğunu açar', (await p.locator('.ust--sahne .ust__sekmeler a').count()) === 4
+    dene('Bugün: üst çubukta logo, beş bölüm (Bugün seçili), arama komut çubuğunu açar', (await p.locator('.ust--sahne .ust__sekmeler a').count()) === 5
       && (await p.getAttribute('.ust__sekmeler a[aria-current="page"]', 'href')) === '#/bugun' && (await p.getAttribute('.ust__ara', 'data-ac')) === 'komut');
     await goruntu(p, 'karsilama');
     // ---- Halka (taş 24): Ctrl . ile ortada açılır, menü/menuitem, ok tuşu gezer, Esc kapatır ve odak geri döner ----

@@ -71,7 +71,7 @@ t('rol ve etiket: düğme, satır, liste, ders', () => {
   dogru(/^<ul class="b-liste b-liste--satir" aria-label="Yerler"><li>/.test(l), l);
   dogru(/class="b-satir b-satir--kilitli" aria-disabled="true"/.test(l) && /kilitli<\/span>/.test(l), 'kilitli satır işaretli ve yazılı');
   dogru(/aria-current="true"/.test(l), 'seçili');
-  dogru(/<span class="b-satir__ok" aria-hidden="true">/.test(l), 'ok gizli');
+  dogru(/<svg class="b-satir__ok" aria-hidden="true"><use href="#i-sag"\/>/.test(l), 'ok gizli');
   const d = B.ders({ baslik: 'Bilgi', ozet: 'Ö', durum: 'kilitli' });
   dogru(/aria-disabled="true"/.test(d) && !/href/.test(d), 'kilitli ders bağlantı değil');
   dogru(/>taslak</.test(B.ders({ baslik: 'B', href: '#/d', taslak: true })), 'taslak etiketi');
