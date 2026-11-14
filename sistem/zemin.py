@@ -9,7 +9,7 @@ Moduller ayri kokenlerdir (4173/4183/4193): tarayici deposu paylasilmaz, bir
 modulde secilen gorsel otekinde gorunmezdi. Dosya bu yuzden PC'de bir kez
 durur ve her kapidan ayni adresle okunur:
 
-  GET    /api/zemin/<yuva>    dosyanin kendisi (yoksa 404)
+  GET    /api/zemin/<yuva>    dosyanin kendisi (yoksa 404); ?var: "1" ya da "0"
   POST   /api/zemin/<yuva>    govde = dosya, Content-Type = turu
   DELETE /api/zemin/<yuva>    siler
 
@@ -187,6 +187,9 @@ def isle(h):
         return _yanit(h, 403, "Arka plan yalnız LifeOS'un kendi sayfasından değişir.".encode("utf-8"))
     if h.command == "GET":
         yol, tur = bul(yuva)
+        if h.path.endswith("?var"):
+            # kabuk/acilis.js: dosya var mi (404'suz; tarayici konsoluna hata dusmez)
+            return _yanit(h, 200, b"1" if yol else b"0")
         if not yol:
             return _yanit(h, 404)
         return _akit(h, yol, tur)

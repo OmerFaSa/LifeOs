@@ -59,11 +59,11 @@ t('güncelleme özeti: güncel, yenilik, ayrışmış dal, zip, git yok, bozuk c
   dogru(/GitHub'a ulaşılamadı/.test(S.guncelOzet({ durum: 'ok', geride: 0, ag: false }).alt));
   esit(S.surumMetni({ tarih: '14.11.2026', kisa: 'e20f8b0' }), '14.11.2026 · e20f8b0'); dogru(/zip/.test(S.surumMetni(null)));
 });
-t('ekran: girişsiz cihaz eski panele gönderir, cihaz bölümü yok; kurulumsuzda «Hesap kur»', () => {
+t('ekran: girişsiz cihaz (giriş uzantısı yokken) giriş yapılmadı der, cihaz bölümü ve eski panel yok', () => {
   const h = S.ekran(bos(), B, SIMDI);
-  dogru(/Bu cihazda giriş yapılmadı/.test(h) && /href="\/kartlar\/"[^>]*>Giriş yap/.test(h) && !/hs-cihazlar/.test(h), h);
-  dogru(/Hesap kur/.test(S.ekran(Object.assign(bos(), { sunucu: { kurulum: true } }), B, SIMDI)));
-  dogru(/Güncellemeyi denetle/.test(h) && /Eski panelde kalanlar/.test(h));
+  dogru(/Bu cihazda giriş yapılmadı/.test(h) && !/kartlar/.test(h) && !/hs-cihazlar/.test(h), h);
+  dogru(/henüz hesap yok/.test(S.ekran(Object.assign(bos(), { sunucu: { kurulum: true } }), B, SIMDI)));
+  dogru(/Güncellemeyi denetle/.test(h));
 });
 t('ekran: oturumda ad, rol, bu cihaz, çıkış onayı; jeton ve oturumun başka alanı HTML\'e girmez', () => {
   const s = Object.assign(bos(), { oturum: { ad: 'sahip', gorunen_ad: 'Tolga', rol: 'admin', j: 'GIZLI-JETON-123', sunucu: '' }, cihazlar: CIHAZ });
@@ -91,7 +91,7 @@ t('ekran: güncelleme sonucu; güncelle düğmesi yalnız bu bilgisayarda', () =
 t('harita: Hesap Ayarlar dalında, yeni; eski panel yeri kalktı, panel Hesap ekranından açılır (kural 5)', () => {
   const y = H.bul('hesap');
   esit([y.dal, y.yol, y.durum, H.bul('eskisistem')], ['ayarlar', '#/hesap', 'yeni', null]);
-  dogru(/href="\/kartlar\/"/.test(S.ekran(bos(), B, SIMDI)), 'eski panel bağlantısı Hesap ekranında');
+  dogru(!/kartlar/.test(S.ekran(bos(), B, SIMDI)), 'eski panel bağlantısı kalktı');
   esit(H.denetle(), []);
 });
 

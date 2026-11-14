@@ -1,6 +1,6 @@
 /* LIFEOS.Kabuk.Hesap — Hesap ekranı (#/hesap; belgeler/ekip/sadelesme/faz7-hesap-kabuk.md).
  * İlk sürüm: oturum (kim, hangi cihaz, çıkış), cihazlar (liste, kodla + QR'la yeni cihaz bağlama, onaylı çıkarma), güncelleme
- * (kurulu sürüm, denetle, güncelle). Geri kalanı (giriş, iki adım, bağlantılar, yedek, yönetim) şimdilik /kartlar/ panelinde.
+ * (kurulu sürüm, denetle, güncelle). Giriş, iki adım, bağlantılar, yedek, yönetim ve açılış videosu uzantılarda (kabuk/hesap-*.js, acilis.js).
  * Jeton bu dosyaya hiç gelmez: hesap işleri kabuğun zaten yüklediği eski istemciden (brand/ortak/hesap.js, window.LIFEOS.HESAP)
  * geçer, jeton onun çerezinde kalır; burada yalnız jetonsuz uçlar doğrudan çağrılır (/api/hesap/durum, /api/guncelleme, /api/guncelle).
  * Depoya hiçbir şey yazılmaz (yeni lifeos.* anahtarı yok); ekran durumu bellekte, sayfaya her girişte tazelenir.
@@ -64,19 +64,16 @@
 
   /* Ekran gövdesi (saf: durum + Bilesen → HTML). s: { hesap, dosya, oturum, sunucu, cihazlar, hata, cikisSor, cikarSor, bag, bagHata, qr,
    * ileti, guncel, guncelHata, guncelIs }. Oturum nesnesinden yalnız ad, görünen ad ve rol okunur. */
-  // Hesap ekranının uzantıları (hesap-giris, hesap-baglanti, hesap-yonetim) gelince eski panelde yalnız bunlar kaldı (faz7-hesap-*.md «Açık kalanlar»)
-  var ESKI = 'Gelen kutusu, «Bu cihazdakileri tek depoya taşı» düğmesi ve açılış videosu şimdilik eski panelde.';
   var YUKLENIYOR = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
   function oturumHtml(s, B, bu) {
     var o = s.oturum;
     if (!s.hesap) return s.dosya ? B.bos({ baslik: 'Hesap bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; hesap LifeOS sunucusuyla açılınca görünür.' })
-      : s.hesapYok ? B.bos({ baslik: 'Hesap istemcisi yüklenemedi.', metin: 'Sayfayı yenile; olmazsa eski panelden gir.', eylem: { metin: 'Hesap ve sistem paneli', tur: 'sade', href: '/kartlar/' } }) : YUKLENIYOR;
-    if (!o) {
+      : s.hesapYok ? B.bos({ baslik: 'Hesap istemcisi yüklenemedi.', metin: 'Sayfayı yenile.' }) : YUKLENIYOR;
+    if (!o) { // giriş uzantısı (hesap-giris.js) yüklenmediyse
       var kur = s.sunucu && s.sunucu.kurulum;
       return B.uyari({ tur: 'bilgi', simge: 'kisi', metin: kur ? 'Bu bilgisayarda henüz hesap yok.' : 'Bu cihazda giriş yapılmadı.',
         alt: (s.sunucu && s.sunucu.yerel ? 'Bu bilgisayarda kayıtların girişsiz de bilgisayardaki depoya gider; giriş telefon ve öteki cihazlar için. ' : '') +
-          (kur ? 'Hesap kurmak' : 'Giriş') + ' şimdilik eski panelde.',
-        eylem: { metin: kur ? 'Hesap kur' : 'Giriş yap', tur: 'ana', href: '/kartlar/' } });
+          'Giriş ekranı yüklenemedi; sayfayı yenile.' });
     }
     var ad = String(o.gorunen_ad || o.ad), sat = [
       B.ayar({ id: 'hs-ad', ad: 'Hesap', deger: ad + (o.ad && o.ad !== ad ? ' · @' + o.ad : '') }),
@@ -134,10 +131,10 @@
     var bag = { oturum: s.oturum, sunucu: s.sunucu, dosya: s.dosya, simdi: simdi }, gir = s.hesap && !s.oturum && u.filter(function (x) { return x.giris; })[0];
     return B.baslik({ metin: 'Hesap', alt: 'Oturumun, bağlı cihazların ve sistemin güncelliği.' }) +
       B.bolum({ baslik: 'Oturum', id: 'hs-oturum', govde: gir ? gir.giris(bag, B) : oturumHtml(s, B, bu) }) +
-      (s.oturum ? cihazlarHtml(s, B, simdi) + u.filter(function (x) { return x.ciz; }).map(function (x) { return x.ciz(bag, B) || ''; }).join('') : '') +
+      (s.oturum ? cihazlarHtml(s, B, simdi) + u.filter(function (x) { return x.ciz && !x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join('') : '') +
       B.bolum({ baslik: 'Güncelleme', id: 'hs-guncel', govde: guncelHtml(s, B) }) +
-      B.bolum({ baslik: 'Eski panelde kalanlar', id: 'hs-eski', govde: ['<p class="soluk">' + ESKI + '</p>',
-        B.eylemler([{ metin: 'Hesap ve sistem paneli', tur: 'sade', href: '/kartlar/' }])] });
+      // hep: oturumdan bağımsız uzantılar (acilis.js: bilgisayarın kendi ayarı)
+      (s.dosya ? '' : u.filter(function (x) { return x.ciz && x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join(''));
   }
 
   var Hesap = { sonMetni: sonMetni, kalanMetni: kalanMetni, kodYaz: kodYaz, bagAdresi: bagAdresi, hataMetni: hataMetni, cihazSatiri: cihazSatiri,

@@ -139,6 +139,15 @@ t('iş sürerken gönder düğmeleri kapalı (çift gönderim yok); ileti doğru
   const yedekBolum = h.slice(h.indexOf('id="hy-yedek"'), h.indexOf('id="hy-kullanicilar"'));
   dogru(/Yedek alındı/.test(yedekBolum) && h.indexOf('Yedek alındı') === h.lastIndexOf('Yedek alındı'));
 });
+t('göç: admin Yedekler\'de «Bu cihazdakileri tek depoya taşı», gönderince makbuz; üye görmez', () => {
+  const a = Y.ekran(dolu(), ADMIN, B, SIMDI), u = Y.ekran(dolu(), UYE, B, SIMDI);
+  dogru(/Bu cihazdakileri tek depoya taşı/.test(a) && /data-hy-ac="goc"/.test(a) && /Bilgisayara gönder/.test(a), 'admin görür');
+  dogru(!/data-hy-ac="goc"/.test(u), 'üye görmez');
+  const m = { profil: 2, kayit: 1200, anahtar: 30, medya: 4, bekleyen: { spi: 3, ays: 1 } };
+  esit(Y.gocMakbuz(m), 'Gönderildi · 2 profil, 1.200 kayıt, 30 yan kayıt, 4 dosya · bekleyen 4');
+  const g = Y.ekran(dolu({ goc: m }), ADMIN, B, SIMDI);
+  dogru(/Yeniden gönder/.test(g) && /1\.200 kayıt/.test(g));
+});
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);

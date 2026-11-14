@@ -123,6 +123,22 @@
       p('Anahtar yalnız satır bırakır; verini okuyamaz, hesabına giremez. Kaybolursa sil, yenisini aç.');
   }
 
+  /* ---- gelen kutusu (eski panelin gelen sayfası): dışarıdan gelen satırlar ve onları alan sistemin ne yaptığı.
+   * Satırı yalnız gönderildiği sistem alır (sistem/hesap.py GELEN_MODULLER); burası yalnız gösterir. ---- */
+  var MODUL_AD = { ays: 'AYS', spi: 'SPİ', esp: 'ESP' };
+  function gelenSatiri(o, simdi) {
+    var mod = MODUL_AD[o.modul] || 'SPİ';
+    var ne = o.sonuc || (o.durum === 'anlasilmadi' ? 'Anlaşılmadı' : o.durum === 'onayda' ? mod + ' › Onaylar’da' : mod + ' açılınca işlenir');
+    return { ad: String(o.metin || ''), uzun: true, not: [o.kaynak, ne, o.zaman ? son(o.zaman, simdi) : ''].filter(Boolean).join(' · '),
+      pul: o.durum === 'anlasilmadi' ? { metin: 'anlaşılmadı', tur: 'vurgu' } : null };
+  }
+  function gelenHtml(s, B, simdi) {
+    var l = s.bag.gelen || [], bek = l.filter(function (o) { return !o.durum || o.durum === 'bekliyor'; }).length;
+    return B.acilir({ baslik: 'Gelen kutusu', duzey: 3, not: l.length ? l.length + ' satır' + (bek ? ' · ' + bek + ' bekliyor' : '') : 'boş', govde: l.length
+      ? B.liste({ ad: 'Gelen satırlar', ogeler: l.map(function (o) { return gelenSatiri(o, simdi); }) })
+      : B.bos({ baslik: 'Henüz bir satır gelmedi.', metin: 'Kısayol ya da otomasyon bir satır gönderince burada görünür.' }) });
+  }
+
   /* ---- her yerden erişim (sistem/uzak.py) ---- */
   var HAL_TUR = { bagli: 'tamam', 'merkez-kapali': 'dikkat', 'bilgisayar-kapali': 'dikkat' };
   function uzakHtml(s, B, bag) {
@@ -150,12 +166,12 @@
   function bolumler(s, B, bag, adr) {
     var g = s.bagHata ? B.uyari({ tur: 'hata', metin: s.bagHata, eylem: { metin: 'Yeniden dene', veri: { 'hb-ac': 'yenile' } } })
       : !s.bag ? YUKLENIYOR
-      : [ileti(s, 'bag', B), takvimHtml(s, B, adr, bag.simdi), anahtarHtml(s, B, adr, bag.simdi),
+      : [ileti(s, 'bag', B), takvimHtml(s, B, adr, bag.simdi), anahtarHtml(s, B, adr, bag.simdi), gelenHtml(s, B, bag.simdi),
         p('Hepsi bilgisayarındaki LifeOS’ta çalışır: şirket hesabı, ücret ya da internet gerekmez.')];
     return B.bolum({ baslik: 'Bağlantılar', id: 'hb-baglantilar', govde: g }) + uzakHtml(s, B, bag);
   }
 
-  var Baglanti = { adresler: adresler, tarifIstek: tarifIstek, anahtarSatiri: anahtarSatiri, bolumler: bolumler, YER_TUTUCU: YER_TUTUCU };
+  var Baglanti = { adresler: adresler, tarifIstek: tarifIstek, anahtarSatiri: anahtarSatiri, gelenSatiri: gelenSatiri, bolumler: bolumler, YER_TUTUCU: YER_TUTUCU };
   Kabuk.HesapBaglanti = Baglanti;
   if (typeof module !== 'undefined' && module.exports) module.exports = Baglanti;
   if (typeof document === 'undefined') return;

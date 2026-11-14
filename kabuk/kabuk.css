@@ -160,3 +160,24 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 
 /* sayfa girişi: içerik hafifçe yukarı süzülür (hareket ayarı «az» ya da sistem azaltınca --sure 0) */
 .govde{ animation:gir calc(var(--sure) * 2) ease-out both; }
+
+/* Açılış videosu (kabuk/acilis.js; eski paneldeki .avideo): siyah perde, video yavaşça belirir, sonunda kararır; atla düğmesi cam hap. */
+.avideo{ position:fixed; inset:0; z-index:2147483000; display:grid; place-items:center; background:#000; transition:opacity .85s cubic-bezier(.4,0,.2,1); }
+.avideo__v{ width:100%; height:100%; object-fit:cover; opacity:0; transform:scale(1.04);
+  transition:opacity 1.2s cubic-bezier(.2,.7,.2,1), transform 2.6s cubic-bezier(.16,.84,.24,1); }
+.avideo.is-oynuyor .avideo__v{ opacity:1; transform:none; }
+.avideo.is-bitiyor .avideo__v{ opacity:0; transform:scale(.99); transition-duration:.6s, .8s; }
+.avideo.is-gidiyor{ opacity:0; pointer-events:none; }
+.avideo__atla{ position:absolute; right:clamp(16px, 3vw, 32px); bottom:clamp(18px, 3.2vw, 34px); display:inline-flex; align-items:center; gap:8px;
+  min-height:36px; padding:0 14px 0 16px; border:0; border-radius:999px; background:rgba(255,255,255,.12); color:#fff; font:inherit; font-size:13px;
+  cursor:pointer; -webkit-backdrop-filter:blur(14px) saturate(1.4); backdrop-filter:blur(14px) saturate(1.4); box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+  opacity:0; transform:translateY(6px); transition:opacity .5s ease .9s, transform .5s ease .9s, background .2s ease; }
+.avideo.is-oynuyor .avideo__atla{ opacity:1; transform:none; }
+.avideo.is-bitiyor .avideo__atla{ opacity:0; transition-delay:0s; }
+.avideo__atla:hover{ background:rgba(255,255,255,.2); }
+.avideo__atla:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+.avideo__atla svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.avideo__cizgi{ position:absolute; left:0; bottom:0; width:100%; height:2px; background:rgba(255,255,255,.5); transform-origin:left; transform:scaleX(var(--ilerle, 0)); opacity:0; transition:opacity .5s ease .9s; }
+.avideo.is-oynuyor .avideo__cizgi{ opacity:1; }
+.avideo.is-bitiyor .avideo__cizgi{ opacity:0; transition-delay:0s; }
+@media (prefers-reduced-motion:reduce){ .avideo, .avideo__v, .avideo__atla, .avideo__cizgi{ transition-duration:.25s; transition-delay:0s; } .avideo__v{ transform:none; } }

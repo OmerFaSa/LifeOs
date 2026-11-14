@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """LifeOS — sunucunun cekirdegi (kapanis: tek kapi sistem/tekkapi.py bunu ice aktarir).
 
-   Burada isleyiciler durur: Giris (hesap ve sistem paneli /kartlar/, /api/...), kabuk dosyalari,
+   Burada isleyiciler durur: Giris (/api/..., /kartlar/ -> /kabuk/#/hesap), kabuk dosyalari,
    hesap/ayar/ice/muzik/zemin/planlama baglantilari. Kendi basina kapi acmaz: eski uc modul kapisi (4173/4183/4193),
    ayri HKM sureci (4200) ve ev agi kapilari (51xx, kendi CA) kapanista kalkti; tek yol tek kapi +
    Tailscale (sistem/uzak.py).
@@ -43,7 +43,6 @@ HOST = "127.0.0.1"
 # AltStore kaynagi (uygulama/ios/kaynak.py ile ayni); kurulum sayfasi tek dokunusla ekletir.
 GIRIS_PORT = 4180
 ETIKET_DIZIN = os.path.join(KOK, "kalite", "veri", "yerel")  # gercek setler (git disi); sistem/etiket.py
-ILK_EKRAN_KABUK = True  # kok (/) yeni kabuga gider (sadelesme: yeni kabuk ilk ekran); eski giris ve kontrol paneli /kartlar/'da
 
 
 # Medya yol muhafizi (eskiden brand/seviye/ortak_yol.py'den yayilirdi; kapanista yayma kalkti, kod burada).
@@ -1410,10 +1409,10 @@ class Giris(SimpleHTTPRequestHandler):
             return plan_isle(self)
         if yol in ("/hesap.js", "/gocpaket.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel-apartman.js", "/piksel-doga.js", "/piksel-figur.js", "/piksel-simge.js", "/piksel.css", "/piksel-yazi.css"):
             return self._hesap_dosyasi(yol[1:])
-        if yol in ("/", "/index.html") and ILK_EKRAN_KABUK:
-            # Yeni kabuk ilk ekran. Hesap, guncelleme ve sistem paneli /kartlar/'da (kabukta karsiligi yok, faz7-kapanis.md).
+        if yol in ("/", "/index.html", "/kartlar", "/kartlar/"):
+            # Yeni kabuk ilk ekran; eski hesap ve sistem paneli (/kartlar/) kabugun Hesap ekranina tasindi (faz7-hesap-*.md).
             self.send_response(302)
-            self.send_header("Location", "/kabuk/")
+            self.send_header("Location", "/kabuk/" if yol in ("/", "/index.html") else "/kabuk/#/hesap")
             self.send_header("Content-Length", "0")
             self.end_headers()
             return None
@@ -1425,13 +1424,8 @@ class Giris(SimpleHTTPRequestHandler):
             return self._json(200, {"hkm": ayakta, "hkm_eski": bool(ayakta and hkm_eski())})
         if yol.startswith("/marka/"):
             return self._marka(yol[len("/marka/"):])
-        govde = ayar.sayfaya_ekle(giris_html(tema=ayar.oku()["ayar"].get("lifeos.tema.secim"))).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(govde)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(govde)
+        # Eski panel bilgisayarda artik sunulmaz; giris_html yalniz iPhone derlemesinde (uygulama/ios/hazirla.py) kalir.
+        return self.send_error(404)
 
     def _marka(self, ad):
         """LifeOS markasi — brand/life/ altindaki sabit adli dosya.

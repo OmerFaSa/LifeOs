@@ -5,7 +5,7 @@
    Bugun: sunucu.py tek surecte dort kapi (4180 giris + Gun, 4173 AYS, 4183 SPI,
    4193 ESP) ve HKM ayri surec (4200). Burada hepsi TEK ADRES, TEK SUREC:
 
-     /                 yeni kabuga (/kabuk/) yonlenir; hesap ve sistem paneli /kartlar/ (sunucu.Giris)
+     /                 yeni kabuga (/kabuk/) yonlenir; /kartlar/ (eski panel) kabugun Hesap ekranina (/kabuk/#/hesap)
      /api/...          butun API'ler (hesap, ayar, ice, muzik, zemin, planlama, guncelle, durum; uzak/merkez 410)
      /api/hkm/<yol>    HKM cekirdegi AYNI SURECTE (HKM/daemon.Handler, /api/<yol> olarak)
      /kabuk/           yeni kabuk (Faz 2): kabuk/ + onun istedigi motor/, alan/ icerigi; kapali liste
@@ -110,7 +110,7 @@ class TekKapi(Giris):
         """Istegi kime devredecegine karar verir; kendi (Giris) islerse False."""
         yol = self.path.split("?", 1)[0].split("#", 1)[0]
         if yol in ("/", "/index.html"):
-            # Ilk ekran yeni kabuktur; hesap ve sistem paneli /kartlar/'da. Sorgu korunur (?bagla=… cihaz baglama QR'i).
+            # Ilk ekran yeni kabuktur. Sorgu korunur (?bagla=… cihaz baglama QR'i).
             q = self.path[len(yol):]
             return self._yonlendir("/kabuk/" + (q if q.startswith("?") else ""), 302) or True
         if yol == "/api/hkm" or yol == "/api/hkm/yeniden":

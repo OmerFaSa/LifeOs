@@ -693,12 +693,14 @@ async function goruntu(p, ad, sec = {}) {
       const k = JSON.parse(window.LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.akademik.1') || '{}');
       return !!(k.cevaplar && k.cevaplar[a0] && k.eski && Object.keys(k.kapilar || {}).every(id => !k.kapilar[id].gecti)); }, AK_A0.id));
 
-    // ---- Hesap ve sistem paneli (/kartlar/): kabuktan bir adım (Hesap ekranının «Eski panelde kalanlar»ı); modül kartı yok (kapanış) ----
-    await p.goto(T + '/kabuk/#/hesap');
-    await p.waitForSelector('a[href="/kartlar/"]');
-    dene('hesap ve sistem: kabuktan panele bağlantı', /Hesap ve sistem paneli/.test(await p.textContent('#sayfa')));
-    const kartlar = await p.request.get(T + '/kartlar/');
-    dene('hesap ve sistem: /kartlar/ açılır, modül kartı yok', kartlar.status() === 200 && !/href="\/(ays|spi|esp)\/"/.test(await kartlar.text()));
+    // ---- Eski panel (/kartlar/) kabuğun Hesap ekranına gider; açılış videosu ayarı orada (bilgisayarın kendisi, girişsiz) ----
+    await p.goto(T + '/kartlar/');
+    await p.waitForSelector('[aria-labelledby="ac-bolum"]');
+    dene('eski panel: /kartlar/ Hesap ekranına yönlenir, eski panel bağlantısı yok', (await p.evaluate(() => location.pathname + location.hash)) === '/kabuk/#/hesap'
+      && !(await p.locator('#sayfa a[href^="/kartlar"]').count()));
+    await p.waitForFunction(() => /Henüz video yok/.test(document.querySelector('[aria-labelledby="ac-bolum"]').textContent));
+    dene('açılış videosu: ayar ve video seçme Hesap ekranında, video yokken açılamaz', !!(await p.locator('[aria-labelledby="ac-bolum"] input[type=file][data-ac-dosya]').count())
+      && (await p.getAttribute('[data-ac-ac="ac"]', 'aria-disabled')) === 'true', await p.textContent('[aria-labelledby="ac-bolum"]'));
 
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');

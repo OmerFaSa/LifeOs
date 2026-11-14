@@ -165,15 +165,16 @@ def ayni(ad, a, b, govde=True):
 def sina(eski, tek, kokler=()):
     g, T = eski["giris"], tek
     print("\nGiris (4180 ↔ /)")
-    for yol in ("/kartlar/", "/hesap.js", "/piksel.css", "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
-        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/kartlar/"))
+    for yol in ("/hesap.js", "/piksel.css", "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
+        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol != "/api/guncelleme")
     dene("güncelleme durumu kurulu sürümü de söyler (kabuk Hesap ekranı)", "surum" in json.loads(iste(T, "/api/guncelleme")[2]))
     k, b = iste_yonsuz(T, "/")
     ke, be = iste_yonsuz(g, "/")
     dene("kök iki kapıda da yeni kabuğa gider (302 /kabuk/)", (k, b.get("Location")) == (302, "/kabuk/") == (ke, be.get("Location")),
          "%s %s | %s %s" % (k, b.get("Location"), ke, be.get("Location")))
-    tk = iste(T, "/kartlar/")[2].decode("utf-8")
-    dene("hesap ve sistem paneli: modül kartı yok, yeni kabuğa bağlanır", 'href="/kabuk/"' in tk and 'data-modul="ays"' not in tk)
+    for kap in (T, g):
+        k, b = iste_yonsuz(kap, "/kartlar/")
+        dene("eski panel /kartlar/ kabuğun Hesap ekranına gider (302 /kabuk/#/hesap)", (k, b.get("Location")) == (302, "/kabuk/#/hesap"), (k, b.get("Location")))
     ayni("GET /api/zemin/gunduz", iste(g, "/api/zemin/gunduz"), iste(T, "/api/zemin/gunduz"))
     ayni("GET /api/muzik", iste(g, "/api/muzik"), iste(T, "/api/muzik"))
     ayni("GET /api/ice", iste(g, "/api/ice"), iste(T, "/api/ice"))

@@ -2048,6 +2048,11 @@ window.LIFEOS.HESAP = (function(){
   }
   function kapiAc(g, ek){
     if(typeof document === 'undefined' || !document.body) return;
+    /* Kabukta kapı yok: giriş Hesap ekranındadır (kabuk/hesap-giris.js); oraya gider, oradaysa yeniden çizer. */
+    if(L.Kabuk && L.Kabuk.ic){
+      if(location.hash.split('?')[0] !== '#/hesap') location.hash = '#/hesap'; else L.Kabuk.ic.rota();
+      return;
+    }
     if(L.KABUK && L.KABUK.katmanAcik(PANEL)) L.KABUK.katmanKapat();
     merkezKapat();
     kapi = Object.assign(KAPI_BOS(), { gorunum:g || 'karsila' }, ek || {});
@@ -4302,7 +4307,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, bagKapat, uzakAc, uzakDurum, uzakKapat, uzakAcilis, sistemDurum, sistemGuncelle, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, defter, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, bagKapat, uzakAc, uzakDurum, uzakKapat, uzakAcilis, gocGonder, sistemDurum, sistemGuncelle, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, defter, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle, merkezHali, merkezHalMetni,
     _ortam:ortam, _sifirla, _istek:istek, _merkezBagla:() => { merkezDenenen = null; return merkezBagla(); }, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,

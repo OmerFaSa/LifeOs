@@ -118,6 +118,16 @@ t('Hesap ekranı: uzantı oturumda Cihazlar\'ın ardına girer, girişsizken yok
     dogru(!/hb-baglantilar/.test(S.ekran(Object.assign({}, durum, { oturum: null }), B, SIMDI)), 'girişsiz');
   } finally { L.hesapUzanti = eski; }
 });
+t('gelen kutusu: satırlar durumuyla, bekleyen sayılır; boşsa «Henüz bir satır gelmedi»', () => {
+  dogru(/Gelen kutusu/.test(ciz(bos())) && /Henüz bir satır gelmedi/.test(ciz(bos())), 'boş kutu');
+  const l = [{ id: 1, metin: 'su 250', kaynak: 'iPhone', modul: 'spi', durum: 'onayda', zaman: SIMDI - 60000 },
+    { id: 2, metin: '30 dk gitar', modul: 'esp', durum: 'bekliyor', zaman: SIMDI - 120000 },
+    { id: 3, metin: 'saçma', modul: 'spi', durum: 'anlasilmadi', zaman: SIMDI - 180000 }];
+  const h = ciz(bos({ bag: Object.assign({}, bos().bag, { gelen: l }) }));
+  dogru(/3 satır · 1 bekliyor/.test(h), h);
+  dogru(/su 250/.test(h) && /SPİ › Onaylar’da/.test(h) && /ESP açılınca işlenir/.test(h) && /anlaşılmadı/.test(h));
+  esit(G.gelenSatiri({ metin: 'x', modul: 'ays', durum: 'onayda', sonuc: 'Kaydedildi' }, SIMDI).not, 'Kaydedildi');
+});
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);

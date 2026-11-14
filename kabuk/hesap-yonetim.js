@@ -166,6 +166,9 @@
         { ad: 'İkinci yer', not: ikinciAlt, uzun: true, pul: ik.acik && ik.hata ? { metin: 'dikkat', tur: 'vurgu' } : null,
           eylemler: ik.acik && pc ? [{ metin: 'Kapat', tur: 'sade', etiket: 'İkinci yeri kapat', veri: ac('ikinci-kapat'), kapali: !!s.is }] : null }] }),
       ik.ayni_disk ? B.uyari({ tur: 'dikkat', metin: 'İkinci yer asıl yedekle aynı diskte: disk bozulursa ikisi birden gider.' }) : '',
+      B.liste({ ad: 'Tek depoya taşıma', ogeler: [{ ad: 'Bu cihazdakileri tek depoya taşı', uzun: true,
+        not: s.goc ? gocMakbuz(s.goc) : 'Fotoğraflar, açılmamış profiller ve bekleyen değişiklikler dahil. Hiçbir şey silinmez.',
+        eylemler: [{ metin: s.goc ? 'Yeniden gönder' : 'Bilgisayara gönder', tur: 'sade', veri: ac('goc'), kapali: !!s.is }] }] }),
       pc ? B.acilir({ baslik: ik.acik ? 'İkinci yeri değiştir' : 'İkinci yeri ayarla', duzey: 3, acik: !!s.acik.ikinci, veri: { 'hy-acilir': 'ikinci' }, govde: form('ikinci', [
         B.alan({ tur: 'metin', isim: 'hy-ikinci', ad: 'Klasör (örnek: E:\\LifeOS-yedek)', deger: taslak(s, 'hy-ikinci', ik.yol), enCok: 260, zorunlu: true,
           ipucu: 'Her yedek oraya da yazılır; son 7 kopya kalır. Bilgisayarın diski bozulursa geri dönüş buradan.' }),
@@ -180,6 +183,11 @@
       }) }) : '',
       '<p class="soluk">' + (pc ? 'Yedekler bu bilgisayarda: ' + kac(v.klasor || '') + '. Sunucu açılamazsa: python sistem/hesap.py --geri-yukle.'
         : 'İkinci yer, indirme ve geri yükleme yalnız bilgisayarın kendisinden yapılır.') + '</p>'];
+  }
+  // Göç paketinin makbuzu (eski panelin gocMakbuz'u): ne kadarı bilgisayara gitti.
+  function gocMakbuz(v) {
+    var bek = Object.keys(v.bekleyen || {}).reduce(function (n, k) { return n + (v.bekleyen[k] || 0); }, 0);
+    return 'Gönderildi · ' + say(v.profil) + ' profil, ' + say(v.kayit) + ' kayıt, ' + say(v.anahtar) + ' yan kayıt, ' + say(v.medya) + ' dosya · bekleyen ' + bek;
   }
   function kisiHtml(s, B, u, benId) {
     var planlar = (s.ben && s.ben.planlar) || [];
@@ -254,7 +262,7 @@
   }
 
   var Yonetim = { tarihSaat: tarihSaat, boyut: boyut, yanlisSayisi: yanlisSayisi, yedekHatasi: yedekHatasi, kontrol: kontrol, olaySatiri: olaySatiri,
-    sistemOzet: sistemOzet, sistemGorunur: sistemGorunur, ekran: ekran };
+    gocMakbuz: gocMakbuz, sistemOzet: sistemOzet, sistemGorunur: sistemGorunur, ekran: ekran };
   Kabuk.HesapYonetim = Yonetim;
   if (typeof module !== 'undefined' && module.exports) module.exports = Yonetim;
   if (typeof document === 'undefined') return;
@@ -337,9 +345,16 @@
   }
   function deger(f, ad) { var i = f.elements[ad]; return i ? i.value : ''; }
   function unut(l) { l.forEach(function (k) { delete s.taslak[k]; }); }
-  /* hesabiSil/geriYukle başarıda eski istemcinin giriş kapısını açar (kapiAc); kabukta onun CSS'i yok, giriş Hesap ekranında.
-   * Eski istemcinin kapiKapat(false)'ının yaptığı: kapı öğesi ve kök sınıfı kalkar. shortcut: istemciye «kabukta kapı açma» seçeneği gelince silinir */
-  function kapiKaldir() { var k = d.querySelector('[data-hesap-kapi]'); if (k) k.remove(); d.documentElement.classList.remove('hesap-kapi-acik'); }
+  // Göç paketini toplayan betik (brand/ortak/gocpaket.js) yalnız düğmeye basılınca yüklenir.
+  function gocBetik() {
+    if (L.GocPaket) return Promise.resolve();
+    return new Promise(function (tamam, red) {
+      var e = d.createElement('script'); e.src = '/gocpaket.js';
+      e.onload = function () { if (L.GocPaket) tamam(); else red(new Error('Göç paketi yüklenemedi.')); };
+      e.onerror = function () { red(new Error('Göç paketi yüklenemedi.')); };
+      d.head.appendChild(e);
+    });
+  }
 
   d.addEventListener('click', function (e) {
     var b = e.target.closest('[data-hy-ac]');
@@ -385,6 +400,7 @@
         });
       });
     }
+    if (ne === 'goc') return is('yedek', function () { return gocBetik().then(function () { return h.gocGonder(); }).then(function (v) { s.goc = v; return gocMakbuz(v) + '.'; }); });
     if (ne === 'disa') return is('veri', function () { return h.disaAktar().then(function (v) { return v.ad + ' hazır · ' + say(v.kayit) + ' kayıt.'; }); });
     if (ne === 'sil-sor') { s.silSor = true; s.ileti = null; ciz(); return odakla('#b-alan-hy-sil-sifre'); }
     if (ne === 'sistem-bak') { s.sistem = null; s.sistemHata = ''; ciz(); return sistemYukle(true); }
@@ -423,10 +439,10 @@
     } else if (ne === 'geri' && s.geriOnay) {
       var g = s.geriOnay, sg = deger(f, 'hy-geri-sifre');
       // Başarıda istemci bütün oturumları kapatır (bu cihazınki de): ekran giriş durumuna döner, bu durum bir sonraki girişte tazelenir.
-      p = ['yedek', function () { return h.geriYukle(g.ad, sg).then(function () { kapiKaldir(); s.ad = null; return ''; }); }];
+      p = ['yedek', function () { return h.geriYukle(g.ad, sg).then(function () { s.ad = null; return ''; }); }];
     } else if (ne === 'sil') {
       var ss = deger(f, 'hy-sil-sifre');
-      p = ['veri', function () { return h.hesabiSil(ss).then(function () { kapiKaldir(); s.ad = null; return ''; }); }];
+      p = ['veri', function () { return h.hesabiSil(ss).then(function () { s.ad = null; return ''; }); }];
     } else if (ne === 'sistem') {
       var sy = deger(f, 'hy-sistem-sifre');
       p = ['sistem', function () { return h.sistemGuncelle(sy).then(function () { s.sistem = Object.assign({}, s.sistem, { calisiyor: true, sonuc: null }); sistemIzle(); return ''; }); }];
