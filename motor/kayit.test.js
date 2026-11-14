@@ -11,7 +11,8 @@ const K = require('./kayit.js');
 const R = K.Kural;
 
 const KOK = path.join(__dirname, '..');
-const kaynak = f => fs.readFileSync(path.join(KOK, f), 'utf8');
+const ESKI = path.join(__dirname, 'eski');   // kapanis: esitlik icin donmus eski modul kaynaklari (belgeler/ekip/sadelesme/faz7-kapanis.md)
+const kaynak = f => fs.readFileSync(path.join(/^(AYS|SPI|ESP)\//.test(f) ? ESKI : KOK, f), 'utf8');
 
 /* Eski kaynakların tarayıcı küreselleri (yalnız yüklemek için; motor bunlara bakmaz). */
 globalThis.window = globalThis;
@@ -20,7 +21,7 @@ globalThis.LIFEOS = { PARCA:{ yazilar(){} } };
 require(path.join(KOK, 'brand/ortak/tarih.js'));
 require(path.join(KOK, 'brand/ortak/bicim.js'));
 ['core/utils.js', 'data/biomarkers.js', 'data/movement.js', 'data/nutrients.js', 'core/move.js', 'core/nutri.js',
-  'core/uyku.js', 'core/kotugun.js'].forEach(f => require(path.join(KOK, 'SPI/src/js', f)));
+  'core/uyku.js', 'core/kotugun.js'].forEach(f => require(path.join(ESKI, 'SPI/src/js', f)));
 const SP = globalThis.SP;
 
 let n = 0, kirmizi = 0;

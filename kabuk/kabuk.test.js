@@ -396,7 +396,7 @@ t('harita: on alanın onu da taşındı: pilot ve aşamalı, içerik dosyası ye
     dogru(!fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'asama-' + (y.asama + 1) + '.json')), y.id + ': asama-' + (y.asama + 1) + '.json var ama haritada asama ' + y.asama);
   });
   alanlar.filter(y => !y.asama).forEach(y => { esit(y.durum, 'eski', y.id); dogru(/\.html$/.test(y.eski), y.id + ' bağlantı'); });
-  alanlar.forEach(y => dogru(/\.html$/.test(y.eski), y.id + ' eski sayfa bağlantısı'));
+  alanlar.forEach(y => dogru(!y.eski, y.id + ': eski modül bağlantısı kalmadı (kapanış)'));
 });
 // ---- aşamalar: asama-N.json, aşama başına kayıt, eski birinci aşama kaydı ----
 const As = K.Asama;

@@ -445,23 +445,6 @@ def run():
         from unittest import mock
         import daemon
         icinde = lambda p, k: (os.path.abspath(p) + os.sep).startswith(os.path.join(k, ""))
-        isleyici = [(sunucu.Sunucu, sunucu.KOK)]
-        argv, sys.argv = sys.argv, sys.argv[:1]         # devserver portu argv'den okur
-        try:
-            for s in ("AYS", "SPI", "ESP"):
-                spec = importlib.util.spec_from_file_location("devserver_" + s, os.path.join(KOK, s, "devserver.py"))
-                m = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(m)
-                isleyici.append((m.NoCacheHandler, m.REPO))
-        finally:
-            sys.argv = argv
-        for sinif, repo in isleyici:
-            h = sinif.__new__(sinif)
-            h.directory = os.path.join(repo, "src")
-            for yol in ("/dist/E:/LifeOS-yedek/", "/dist/Z:x", "/dist/C:x", "/dist/a/E:/x", "/dist/../x"):
-                ok(icinde(h.translate_path(yol), os.path.join(repo, "dist")), (sinif.__module__, yol))
-            ok(icinde(h.translate_path("/img/seviye/D:foto.png"), KOK), sinif.__module__)
-            eq(h.translate_path("/dist/rota.html"), os.path.join(repo, "dist", "rota.html"))
         eq(daemon._ortak_seviye_yolu("/img/seviye/D:foto.png", KOK), None)
         h = daemon.Handler.__new__(daemon.Handler)
         h._send = lambda kod, veri: kod
@@ -469,14 +452,15 @@ def run():
         with mock.patch.object(daemon.os.path, "exists", side_effect=lambda p: gorulen.append(p) or False):
             eq(h._send_brand("D:logo.png"), 404)
         ok(all(icinde(p, os.path.join(daemon.ROOT, "brand")) for p in gorulen), gorulen)
-    test("yol muhafizi surucu harfiyle depo disina cikmaz (dist, img, HKM brand)", t_surucu_harfi)
+    test("yol muhafizi surucu harfiyle depo disina cikmaz (HKM brand, seviye)", t_surucu_harfi)
 
     def t_sayfa():
         """Giris sayfasi: dort sistemin KENDI logosu, surum, guncelleme kutusu."""
         h = sunucu.giris_html()
         # Gun plani F2: seridin ortasi Gun (kubbe); HKM «M · Merkez» ucu, logosuz.
-        for a in ("ays", "spi", "esp", "gun"):
-            ok('class="sekil sekil--%s"' % a in h, a)
+        ok('class="sekil sekil--gun"' in h and 'href="/kabuk/"' in h)   # ortadaki kart yeni kabuk
+        for a in ("ays", "spi", "esp"):
+            no('data-modul="%s"' % a in h, a)                                # modul kartlari kapanista kalkti
         ok('id="guncel"' in h and 'id="surum"' in h)
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             ok(y not in h)                              # yer tutucu kalmadi
@@ -492,13 +476,10 @@ def run():
         # 2026-10-29 (kullanicinin cizimi): ustte kavisli serit G · HKM · S; kutu G ile
         # acilir (bastan kapali); moduller ESP · SPI · AYS sirasiyla dikey kart.
         yay = h[h.index('<nav class="yay"'):h.index("</nav>", h.index('<nav class="yay"'))]
-        ok(yay.index('id="yay-g"') < yay.index('data-modul="gun"') < yay.index('id="surum"'))
+        ok(yay.index('id="yay-g"') < yay.index('data-modul="kabuk"') < yay.index('id="surum"'))
         ok('aria-controls="guncel"' in yay)
         ok('<section class="guncel" id="guncel"' in h and 'style="--sira:1" hidden>' in h)
-        izgara = h[h.index('<div class="izgara">'):]
-        ok(izgara.index('data-modul="esp"') < izgara.index('data-modul="spi"') < izgara.index('data-modul="ays"'))
-        no('data-modul="hkm"' in izgara[:izgara.index("</div>\n  <footer") if "</div>\n  <footer" in izgara else len(izgara)])
-    test("giris sayfasi dort logoyu, surumu ve guncelleme kutusunu tasir", t_sayfa)
+    test("giris sayfasi: yeni kabuk karti, surum ve guncelleme kutusu; modul karti yok", t_sayfa)
 
     # 2026-10-04: «Yedekle ve güncelle» metnindeki kesme isareti Python
     # kaynaginda yanlis kacislandi (GitHub'da) ve sayfanin TEK betigi
@@ -576,76 +557,6 @@ def run():
         sunucu._GUNCEL.update(zaman=0.0, veri=None)
     test("baska cihazdan guncelleme: arkada yurur, ikincisi baslamaz, yalniz gerekirse yeniden baslar", t_sistem_baslat)
 
-    def t_telefon_sayfa():
-        """Telefon uygulamasinin giris sayfasi (uygulama/ios, 2026-10-04): ayni
-        sayfa ve ayni kartlar; telefonda olmayan HKM, guncelleme ve bilgisayarin
-        API'leri yok. Kullanici: «normal modul secme kismi ile gelse».
-        """
-        h = sunucu.giris_html(telefon=True)
-        for a, port in (("ays", 4173), ("spi", 4183), ("esp", 4193)):
-            ok('class="sekil sekil--%s"' % a in h, a)
-            ok('href="http://127.0.0.1:%d/"' % port in h, a)
-        # Acilis videosu betigi (data-acilis, 2026-11-02) telefonda da kalir ve kendi
-        # /api/zemin/acilis adresini dener (yoksa 4 sn'de vazgecer); onun disinda /api/ yok.
-        a = h.index("<script data-acilis>")
-        govde = h[:a] + h[h.index("</script>", a):]
-        no(any(x in govde for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
-           "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
-        # Telefon sayfasinin yukledigi her dosya uygulamaya girer (hazirla.py). piksel-doga.js
-        # 2026-11'de sayfaya eklendi, uygulamaya eklenmedi; yalniz simulatorde gorulurdu.
-        import importlib.util as _iu
-        _s = _iu.spec_from_file_location("hazirla_ios", os.path.join(KOK, "uygulama", "ios", "hazirla.py"))
-        _h = _iu.module_from_spec(_s); _s.loader.exec_module(_h)
-        import re as _re
-        adresler = _re.findall(r'(?:src|href)="/([a-z-]+\.(?:js|css))"', h)
-        ok(adresler, "sayfada dosya adresi bulunamadi")
-        no(sorted(set(adresler) - set(_h.GIRIS_DOSYALARI)), "uygulamaya girmeyen dosya")
-        ok('<script src="/hesap.js" data-giris></script>' in h)
-        ok('<script src="/animasyon.js"></script>' in h)
-        ok('<script src="/qr.js"></script>' in h)         # hesap sayfasinin QR'i (2026-10-08)
-        for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
-            no(y in h)
-        bas = sunucu.giris_html()
-        stil = lambda s: s[s.index("<style>"):s.index("</style>")]
-        eq(stil(h), stil(bas))                          # tasarim tek kaynaktan
-        for _, kisa, ad, aciklama, _ in sunucu.KARTLAR[:3]:
-            ok(sunucu._kac(ad) in h and sunucu._kac(aciklama) in h, kisa)
-        ok("telefonda" in h)
-    test("telefon giris sayfasi: uc modul karti, HKM/guncelleme/betik yok, tasarim ayni", t_telefon_sayfa)
-
-    # 2026-10-06 (kullanici, telefondan): «hesap girme kismina gelmeden once
-    # milisaniyelik ilk o secim ekranini gosteriyor»; «secme kismi daha guzel,
-    # animasyonlu; o bolumle ilgili minik ozetler gecilsin».
-    def t_secim_sayfasi():
-        for h in (sunucu.giris_html(), sunucu.giris_html(telefon=True)):
-            ok("html:not(.giris-hazir) .sarmal{ visibility:hidden;" in h)      # karar gelene dek gizli
-            ok("@keyframes giris-yedek" in h)                                   # betik yoksa kendiliginden
-            ok("html.hesap-kapi-acik .sarmal{ visibility:hidden; }" in h)       # kapi belirirken kartlar arkadan gorunmez
-            ok("animation:giris-gel" in h)
-            for a in ("ays", "spi", "esp"):
-                ok('data-ozet="%s"' % a in h, a)                               # minik ozet yuvasi
-                ok('data-modul="%s"' % a in h, a)
-            no('data-ozet="hkm"' in h)
-        pc, tel = sunucu.giris_html(), sunucu.giris_html(telefon=True)
-        eq(tel.count('class="kart__ok"'), 3)                                    # telefonda «Ac» yerine ok
-        no('<span class="dugme">Aç</span>' in tel)
-        ok('<span class="dugme">Aç</span>' in pc and 'data-modul="gun"' in pc)   # PC'de dugme ve Gun
-    test("secim sayfasi: karar gelene dek gizli, belirme, ozet yuvalari, telefonda ok", t_secim_sayfasi)
-
-    # 2026-10-26 denetim: uc modul bu sayfayla AYNI surecte; no-cors yoklamasi
-    # her HTTP cevabinda (503 dahil) cozulur, yani «Calisiyor» hep yesildi.
-    # Durum yalniz ag hatasinda («Kapali») gorunur; HKM'nin durumu kalir.
-    def t_modul_durumu():
-        pc = sunucu.giris_html()
-        eq(pc.count('<span class="durum" data-hal="bekle" hidden>'), 3)
-        # Gun plani (2026-11-03): HKM karti once «M · Merkez» ucu oldu, sonra arayuzle
-        # birlikte kalkti; Merkez Ayarlar › Merkez'den baslatilir.
-        eq(pc.count('<span class="durum" data-hal="bekle">'), 0)
-        no('id="yay-m"' in pc)                                                  # Merkez ucu da kalkti; baslatma Ayarlar'da
-        no("then(function(){ yak(k, true); })" in pc)
-        ok(".catch(function(){ yak(k, false); })" in pc)
-    test("giris kartlari: modul durumu yalniz kapaliyken gorunur", t_modul_durumu)
-
     def t_kendiliginden_yeniden():
         """Hata (2026-10-29, sahada): guncelleme sunucu dosyasini degistirdi ama
         «Yeniden baslat»a basilmadi; sunucu yarim gun eski kodla calisti (kok hala
@@ -665,13 +576,6 @@ def run():
         sunucu.hkm_ac = lambda: cagri.append("hkm") or {"ok": True, "adres": "x"}
         sunucu.yeniden_baslat_zamanla = lambda: cagri.append("yeniden")
         try:
-            r = _ur.urlopen(kok_ + "/logo/ays.png", timeout=5)
-            eq(r.headers.get("Content-Type"), "image/png")
-            for kotu in ("/logo/../README.md", "/logo/x.png", "/logo/ays.svg"):
-                try:
-                    _ur.urlopen(kok_ + kotu, timeout=5); ok(False)
-                except _ue.HTTPError as e:
-                    eq(e.code, 404)
             for yol in ("/api/hkm", "/api/yeniden"):
                 try:
                     _ur.urlopen(_ur.Request(kok_ + yol, data=b"", method="POST"), timeout=5); ok(False)
@@ -687,7 +591,7 @@ def run():
         finally:
             srv.shutdown(); srv.server_close()
             sunucu.hkm_ac, sunucu.yeniden_baslat_zamanla = eski_hkm, eski_yeni
-    test("logo yalniz kapali listeden; HKM ve yeniden baslat izinsiz 403", t_uclar)
+    test("HKM ve yeniden baslat izinsiz 403", t_uclar)
 
     def t_yeniden_windows():
         """Windows'ta yeniden baslatici `start` ile acilir: sunucunun agacinda

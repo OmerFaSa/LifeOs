@@ -82,14 +82,6 @@ with tempfile.TemporaryDirectory() as d:
     import sunucu  # noqa: E402
     sunucu.ayar.birlestir({"lifeos.cam": "cok"})
 
-    class Yerel:
-        client_address = ("127.0.0.1", 5000)
-
-    class Ag:
-        client_address = ("192.168.1.20", 5000)
-    sayfa = b"<!doctype html><html><head><title>x</title></head></html>"
-    bekle("bu bilgisayardan acilan sayfaya ortak ayar konur", b"__LIFEOS_AYAR__" in sunucu.Sunucu._ayarli(Yerel(), sayfa))
-    bekle("ev agindan acilan sayfaya konmaz", sunucu.Sunucu._ayarli(Ag(), sayfa) == sayfa)
     # Giris sayfasi secilen temayi data-theme ile de soyler (hesap.css kutusu ona bakar).
     bekle("giris sayfasi koyu: data-theme ve koyu kurallar", 'data-theme="dark"' in sunucu.giris_html(tema="dark") and "@media all" in sunucu.giris_html(tema="dark"))
     bekle("giris sayfasi secimsiz: cihazin tercihi", "data-theme" not in sunucu.giris_html()[:300])

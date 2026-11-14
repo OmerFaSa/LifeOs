@@ -5,7 +5,7 @@
 // =onekler: yalniz adi bu oneklerle baslayan goruntuler, otekilere dokunulmaz; yer-1..7 iki gorunumlu: masaustu-koyu, telefon-acik)
 const kok = require('path').resolve(__dirname, '..'), GORUNTU = process.argv.includes('--goruntu');
 const SECILI = ((process.argv.find(a => a.indexOf('--goruntu=') === 0) || '').slice(10)).split(',').filter(Boolean);
-const { chromium } = require(kok + '/SPI/node_modules/playwright');
+const { chromium } = require(kok + '/tools/node_modules/playwright');
 const { spawn } = require('child_process');
 const fs = require('fs'), os = require('os'), path = require('path'), http = require('http');
 
@@ -131,7 +131,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.waitForSelector('.b-acilir');
     dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
     dene('Felsefe: ikinci ünite kilitli', (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli, .b-satir--kilitli').count()) >= 3);
-    dene('Felsefe: eski sayfa bağlantısı tek kapı yolunda', (await p.getAttribute('.b-eylemler .b-dugme--sade', 'href')) === '/esp/');
+    dene('Felsefe: eski modül bağlantısı yok (kapanış)', (await p.locator('a[href="/esp/"], a[href*="/dist/"]').count()) === 0);
     await goruntu(p, 'felsefe');
 
     for (let i = 0; i < u1.dersler.length; i++) {
@@ -688,12 +688,12 @@ async function goruntu(p, ad, sec = {}) {
       const k = JSON.parse(window.LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.akademik.1') || '{}');
       return !!(k.cevaplar && k.cevaplar[a0] && k.eski && Object.keys(k.kapilar || {}).every(id => !k.kapilar[id].gecti)); }, AK_A0.id));
 
-    // ---- Eski sistem: kontrol paneli ve üç modül yeni kabuktan bir adım ----
+    // ---- Hesap ve sistem paneli (/kartlar/): kabuktan bir adım; modül kartı yok (kapanış) ----
     await p.goto(T + '/kabuk/#/eski');
     await p.waitForSelector('a[href="/kartlar/"]');
-    dene('eski sistem: kabuktan eski kontrol paneline bağlantı', /Eski sistem/.test(await p.textContent('#sayfa')));
+    dene('hesap ve sistem: kabuktan panele bağlantı', /Hesap ve sistem/.test(await p.textContent('#sayfa')));
     const kartlar = await p.request.get(T + '/kartlar/');
-    dene('eski sistem: /kartlar/ eski giriş sayfasını verir, kartlar modül yoluna bağlı', kartlar.status() === 200 && /href="\/ays\/"/.test(await kartlar.text()));
+    dene('hesap ve sistem: /kartlar/ açılır, modül kartı yok', kartlar.status() === 200 && !/href="\/(ays|spi|esp)\/"/.test(await kartlar.text()));
 
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');

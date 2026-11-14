@@ -71,11 +71,11 @@ def run():
         test("vekilden gelen istek yerel sayilmaz", vekil)
 
         def kapida():
-            import sunucu
+            import tekkapi
             from http.server import ThreadingHTTPServer
             gorulen = []
 
-            class Isleyici(sunucu.Sunucu):
+            class Isleyici(tekkapi.TekKapi):
                 def do_GET(self):
                     gorulen.append(self.client_address[0])
                     self.send_response(204)
@@ -167,40 +167,6 @@ def run():
             eq(uzak.merkez_kimlikle({"Tailscale-User-Login": ""}, oku_sahip=lambda: "", oku_merkez=lambda: m), None)
         test("hesapsiz Merkez bagi yalniz bilgisayarin sahibine", kimlik)
 
-        def modul_kapisi():
-            # Telefon sayfasi modul kapisindan acilir; uc orada olmalidir (Giris'te kalmisti, telefon 405 aliyordu).
-            import sunucu
-            from http.server import ThreadingHTTPServer
-
-            class Isleyici(sunucu.Sunucu):
-                def log_message(self, *a):
-                    pass
-            eski = uzak.merkez_kimlikle
-            uzak.merkez_kimlikle = lambda b: {"url": "u", "token": "t"} if b.get("Tailscale-User-Login") == "ben@x.com" else None
-            with tempfile.TemporaryDirectory() as klasor:
-                srv = ThreadingHTTPServer(("127.0.0.1", 0), lambda *a: Isleyici(*a, directory=klasor))
-                threading.Thread(target=srv.serve_forever, daemon=True).start()
-
-                def post(**baslik):
-                    b = {"Host": AD + ":5183", "X-LifeOS": "hesap", "Origin": "https://%s:5183" % AD}
-                    b.update({k.replace("_", "-"): v for k, v in baslik.items()})
-                    b = {k: v for k, v in b.items() if v}
-                    istek = urllib.request.Request("http://127.0.0.1:%d/api/uzak/merkez" % srv.server_address[1], data=b"{}", headers=b, method="POST")
-                    try:
-                        with urllib.request.urlopen(istek, timeout=5) as y:
-                            return y.status, json.loads(y.read())
-                    except urllib.error.HTTPError as h:
-                        return h.code, None
-                try:
-                    eq(post(Tailscale_User_Login="ben@x.com"), (200, {"url": "u", "token": "t"}))
-                    eq(post(Tailscale_User_Login="baskasi@x.com")[0], 403)
-                    eq(post(Tailscale_User_Login="ben@x.com", X_LifeOS="")[0], 403)
-                    eq(post(Tailscale_User_Login="ben@x.com", Origin="https://kotu.example")[0], 403)
-                finally:
-                    uzak.merkez_kimlikle = eski
-                    srv.shutdown()
-                    srv.server_close()
-        test("telefonun Merkez bagi modul kapisindan alinir", modul_kapisi)
 
         def durumu():
             d = uzak.durum(_sahte(serve_web=_web())[0])
@@ -228,44 +194,6 @@ def run():
             no(uzak.durum(_sahte(serve_web=_web())[0])["funnel"], "olagani funnel degil")
         test("funnel elle acilsa bile erisim acik sayilmaz, jeton verilmez", funnel_acikken)
 
-        def vekil_yerel_uclari():
-            # Vekilden gelen hic bir «yalniz bu bilgisayar» ucundan gecemez (soz 2).
-            import sunucu
-            from http.server import ThreadingHTTPServer
-            acildi = []
-            eski_ac = sunucu.hkm_ac
-            sunucu.hkm_ac = lambda: acildi.append(1) or {"ok": True}
-
-            class Isleyici(sunucu.Sunucu):
-                def log_message(self, *a):
-                    pass
-            with tempfile.TemporaryDirectory() as klasor:
-                srv = ThreadingHTTPServer(("127.0.0.1", 0), lambda *a: Isleyici(*a, directory=klasor))
-                threading.Thread(target=srv.serve_forever, daemon=True).start()
-                try:
-                    def post(yol, **baslik):
-                        istek = urllib.request.Request("http://127.0.0.1:%d%s" % (srv.server_address[1], yol),
-                                                       data=b"{}", headers=baslik, method="POST")
-                        try:
-                            with urllib.request.urlopen(istek, timeout=5) as y:
-                                return y.status
-                        except urllib.error.HTTPError as h:
-                            return h.code
-                    disaridan = {"Host": AD + ":5183", "X-Forwarded-For": "100.1.2.3", "X-LifeOS": "merkez",
-                                 "Tailscale-User-Login": "ben@x.com"}
-                    eq(post("/api/merkez/ac", **disaridan), 403)
-                    eq(acildi, [], "disaridan Merkez baslatilamaz")
-                    eq(post("/api/merkez/ac", **{"X-LifeOS": "merkez"}), 200)
-                    eq(acildi, [1], "bilgisayarin kendisi baslatir")
-                    for yol, ek in (("/api/ayar", "ayar"), ("/api/planlama", "planlama"), ("/api/muzik", "muzik"),
-                                    ("/api/zemin/x", "zemin"), ("/api/ice", "ice")):
-                        kod = post(yol, **dict(disaridan, **{"X-LifeOS": ek}))
-                        ok(kod == 403, "%s disaridan %s" % (yol, kod))
-                finally:
-                    sunucu.hkm_ac = eski_ac
-                    srv.shutdown()
-                    srv.server_close()
-        test("vekilden gelen istek yerel uclardan gecemez, Merkez'i baslatamaz", vekil_yerel_uclari)
 
         def acilis():
             class Reg:

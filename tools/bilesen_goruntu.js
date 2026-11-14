@@ -2,7 +2,7 @@
 // belgeler/ekip/sadelesme/kabuk-onizleme/bilesen-{masaustu (1280), telefon (390)}-{acik, koyu}.png
 // Her görünümde yatay taşma ve konsol hatası denetlenir; sorun varsa çıkış 1. Kullanım: node tools/bilesen_goruntu.js
 const path = require('path'), kok = path.resolve(__dirname, '..');
-const { chromium } = require(kok + '/SPI/node_modules/playwright');
+const { chromium } = require(kok + '/tools/node_modules/playwright');
 const url = require('url').pathToFileURL(path.join(kok, 'kabuk/bilesen.html')).href;
 const cikti = path.join(kok, 'belgeler/ekip/sadelesme/kabuk-onizleme');
 

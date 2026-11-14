@@ -8,7 +8,8 @@ const assert = require('assert'), fs = require('fs'), path = require('path');
 const T = require('./tekrar.js');
 
 const KOK = path.join(__dirname, '..');
-const kaynak = f => fs.readFileSync(path.join(KOK, f), 'utf8');
+const ESKI = path.join(__dirname, 'eski');   // kapanis: esitlik icin donmus eski modul kaynaklari (belgeler/ekip/sadelesme/faz7-kapanis.md)
+const kaynak = f => fs.readFileSync(path.join(/^(AYS|SPI|ESP)\//.test(f) ? ESKI : KOK, f), 'utf8');
 const GUN = 864e5, T0 = Date.UTC(2026, 10, 13, 9);
 const gunStr = ms => new Date(ms).toISOString().slice(0, 10);
 const yakin = (a, b, e, m) => assert.ok(Math.abs(a - b) <= e, (m || '') + ' ' + a + ' ≉ ' + b);
@@ -21,7 +22,7 @@ require(path.join(KOK, 'brand/ortak/tarih.js'));
 require(path.join(KOK, 'brand/ortak/usta.js'));
 require(path.join(KOK, 'brand/ortak/ogret.js'));
 globalThis.ESP = { U:LIFEOS.TARIH, S:{ cards:[] } };
-require(path.join(KOK, 'ESP/src/js/core/srs.js'));
+require(path.join(ESKI, 'ESP/src/js/core/srs.js'));
 const USTA = LIFEOS.USTA, OGRET = LIFEOS.OGRET, SRS = ESP.SRS;
 
 let n = 0, kirmizi = 0;

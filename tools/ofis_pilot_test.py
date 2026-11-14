@@ -147,28 +147,24 @@ if "Açık kalan" not in P.bicim_metni(["Açık kalan"]) or "push" not in P.bici
 
 # ---------- Testci ----------
 ad = [(m_, a) for m_, a, _, _ in T.adimlar("py")]
-if ad[:3] != [("AYS", "derle"), ("SPI", "derle"), ("ESP", "derle")] or ad[-1] != ("kök", "entegre") or len(ad) != 3 + 3 * len(T.DENETIM) + 1:
+if ad != [("kök", "kabuk_gez")]:                      # kapanis: modul derleme/denetimi yok
     hata.append("testci adim sirasi: %r" % ad)
 ci = ("steps:\n  # python3 tools/yorum.py\n  - name: a\n    run: python3 tools/a_test.py\n  - name: b\n    run: python3 tools/b.py --denetle && python3 tools/c_test.py\n"
       "  - name: c\n    working-directory: HKM\n    run: python3 tools/perf.py\n  - name: d\n    run: |\n      python3 tools/a_test.py\n      python3 tools/d_test.py\n")
 esit("ci python komutlari", T.ci_python(ci), ["tools/a_test.py", "tools/b.py --denetle", "tools/c_test.py", "tools/d_test.py"])
 p_ad = T.adimlar("py", [], ["tools/a_test.py", "tools/b.py --denetle"])
 p_i = [a[:2] for a in p_ad].index(("kök", "python"))
-if p_i <= max(i for i, a in enumerate(p_ad) if a[1] == "derle") or p_ad[p_i][2][-1] != "tools/b.py --denetle":
-    hata.append("testci python adimi derlemeden sonra olmali: %r" % [a[:2] for a in p_ad][:6])
+if p_i >= len(p_ad) - 1 or p_ad[p_i][2][-1] != "tools/b.py --denetle":
+    hata.append("testci python adimi kabuk gezisinden once olmali: %r" % [a[:2] for a in p_ad][:6])
 k_ad = T.adimlar("py", ["tools/k_test.py", "AYS/x.test.js"])
 if k_ad[0][:2] != ("kök", "kabul") or k_ad[0][2][-1] != "tools/k_test.py" or "AYS/x.test.js" in k_ad[0][2] or len(k_ad) != len(ad) + 1:
     hata.append("testci kabul adimi once ve yalniz .py: %r" % (k_ad[0],))
-for den in ("runtests", "smoke", "a11ycheck", "layoutcheck", "palettecheck", "perfcheck"):
-    if not (KOK / "AYS" / "tools" / (den + ".js")).exists():
-        hata.append("AGENTS.md denetimi yok: " + den)
 ev = T.evreler(T.adimlar("py", ["tools/k_test.py"], ["tools/a_test.py"]))
 ev_ad = [[[x[:2] for x in z] for z in e] for e in ev]
-if (ev_ad[0] != [[("kök", "kabul")]] or ev_ad[-1] != [[("kök", "entegre")]] or [("kök", "python")] not in [e[0] for e in ev_ad]
-        or len(ev[-2]) != 3 or [z[0][0] for z in ev[-2]] != ["AYS", "SPI", "ESP"]
-        or any(len(z) != len(T.DENETIM) or {x[0] for x in z} != {z[0][0]} for z in ev[-2])
+if (ev_ad[0] != [[("kök", "kabul")]] or ev_ad[-1] != [[("kök", "kabuk_gez")]] or [("kök", "python")] not in [e[0] for e in ev_ad]
+        or any(x[0] != "kök" for e in ev for z in e for x in z)
         or sum(len(z) for e in ev for z in e) != len(T.adimlar("py", ["tools/k_test.py"], ["tools/a_test.py"]))):
-    hata.append("testci evreleri: once kabul/derle/python sirali, sonra uc modul zinciri paralel, en son entegre: %r" % ev_ad)
+    hata.append("testci evreleri: once kabul, python, en son kabuk gezisi (modul yok): %r" % ev_ad)
 esit("sonuc adi", [T.sonuc_adi(k) for k in (0, 1, 2, -1)], ["yeşil", "kırmızı", "koşulamadı", "kırmızı"])
 esit("son satirlar", T.son_satirlar("a\r\n\n b\nc\n", 2), [" b", "c"])
 tb = T.tablo({"no": "007", "dal": "ag/007-x", "commit": "c1", "main": "m1", "durum": "bitti", "baslangic": 1, "bitis": 121,

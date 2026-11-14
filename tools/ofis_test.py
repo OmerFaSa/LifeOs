@@ -5,7 +5,7 @@ Kullanici (2026-10-31): «Testci istenir ama sonucu Claude dogrular». Testci bi
 model degil, bu betiktir: ayri bir klasorde (LifeOs-ajan/ofis-test, ayrik) main
 ile dalin deneme birlesmesini kurar, uc modulu derler, her modulde runtests,
 smoke, a11ycheck, layoutcheck, palettecheck, perfcheck (uc modul paralel, evreler());
-sonra entegre kosar.
+sonra kabuk gezisi kosar.
 Her denetimin ham ciktisi ve cikis kodu LifeOs-ajan/test/<no>/'ya yazilir;
 Claude ajan ozetine degil bu ham ciktiya bakar (python tools/ajan.py testler <no>).
 
@@ -30,7 +30,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ajan as A  # noqa: E402
 
-MODUL = ("AYS", "SPI", "ESP")
+MODUL = ()             # kapanis: uc modul kalkti; denetim tek sistemin kabul/Python testleri ve kabuk gezisidir
 DENETIM = ("runtests", "smoke", "a11ycheck", "layoutcheck", "palettecheck", "perfcheck")
 ZAMAN_ASIMI = 20 * 60
 KILIT_OMUR = 3 * 3600
@@ -74,7 +74,7 @@ def adimlar(py="python", kabul=(), python_testleri=()):
     # derlemeden SONRA: dist_sun_test dist'in kaynakla ayni oldugunu ister (2026-11-01, 010'da sahte kirmizi)
     out += [("kök", "python", [py, "-c", HEPSI] + list(python_testleri), ".")] if python_testleri else []
     out += [(m, d, ["node", "tools/%s.js" % d], m) for m in MODUL for d in DENETIM]
-    return out + [("kök", "entegre", ["node", "tools/entegre.js"], ".")]
+    return out + [("kök", "kabuk_gez", ["node", "tools/kabuk_gez.js"], ".")]
 
 
 def evreler(adim):

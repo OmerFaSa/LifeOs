@@ -298,31 +298,6 @@ def t_jetonlar_ortak():
 
 
 
-AYS_BILESEN = KOK / "AYS" / "src" / "js" / "core" / "components.js"
-
-
-def t_sakin_hata():
-    """011 (K7c): bir parca yuklenemeyince kirmizi satir degil sakin kutu —
-    «Verin yerinde; hicbir kayit silinmedi.» uc arayuzun SakinHata'siyla
-    AYNI cumle; teknik ileti silinmez, «Teknik ayrinti»ya iner; tek eylem
-    «Yeniden dene»."""
-    m = _yuz()
-    eq(re.findall(r'<p class="danger">[^<\']*alınamadı', m), [])
-    ok("function sakinHata(" in m)
-    blok = m[m.index("function sakinHata("):]
-    blok = blok[:blok.index("\n  }\n")]
-    cumle = "Verin yerinde; hiçbir kayıt silinmedi."
-    ok(cumle in blok)
-    ok(cumle in AYS_BILESEN.read_text(encoding="utf-8"))
-    ok('data-oz="011"' in blok and "Teknik ayrıntı" in blok and "Yeniden dene" in blok)
-    ok("data-yenile" in m[m.index("addEventListener('click'"):] or "[data-yenile]" in m)
-    # HKM oturum ortasinda durursa fetch FIRLATIR; api() bunu status 0'a
-    # cevirmezse cagiran «!== 200» dalina hic varmaz ve bolum sonsuza dek
-    # «Yukleniyor…» kalirdi (K7c'de bulundu: sessiz cokme).
-    api = m[m.index("async function api("):]
-    api = api[:api.index("\n  }\n")]
-    ok("catch" in api and "status:0" in api)
-
 
 
 def t_v5_kabuk_ve_gun_cumlesi():
@@ -598,24 +573,6 @@ def _kenarda_kalan_tik(js, sayfa):
     return sorun
 
 
-def t_denetimler_kenardan_cikar():
-    """Hata (2026-10-03): `node tools/entegre.js` HKM yuzunde 30 sn zaman
-    asimina dusuyordu («<header class="ust"> intercepts pointer events»).
-    Masaustunde Merkez'in kenari dar camdir; fare USTUNDEYKEN 216 px acilir
-    ve icerigin USTUNDE durur (tasarim: icerik kaymaz). Denetim #ayar-bag'a
-    tiklayip fareyi kenarda birakiyordu; Ayarlar'in ilk sekmesi acik kenarin
-    altinda kaliyor, Playwright fareyi hic kenardan cikarmadigi icin her
-    denemede Onaylar baglantisina ya da basligin kendisine carpiyordu.
-    Kullanici gibi denetim de kenardan sonra fareyi icerige goturur
-    (`kenardanCik`); HKM/tools/yuz.js bunu 55a24945'te yapiyordu,
-    tools/entegre.js yapmiyordu."""
-    for yol, sayfa in ((KOK / "tools" / "entegre.js", "yuz"), (KOK / "HKM" / "tools" / "yuz.js", "page")):
-        js = yol.read_text(encoding="utf-8")
-        ok(re.search(r"\b" + sayfa + KENAR_TIK, js), yol.name + ": kenar tiklamasi bulunamadi")
-        eq(_kenarda_kalan_tik(js, sayfa), [], yol.name + ": fare kenarda kalirken tiklanan satirlar")
-        ok(re.search(r"kenardanCik\s*=\s*async[^\n]*\n[^\n]*mouse\.move", js), yol.name + ": kenardanCik fareyi tasimiyor")
-
-
 def _blok(m, bas):
     b = m[m.index(bas):]
     return b[:b.index("</style>")]
@@ -798,7 +755,6 @@ def run():
     test("para sayfası", t_para_sayfasi)
     test("yedi çekmece; bölümler; ayarlar dört bölüm (K7)", t_cekmeceler)
     test("jetonlar ortak değerlerde; vurgu Merkez moru (K7a)", t_jetonlar_ortak)
-    test("sakin hata: kırmızı satır yok, ortak cümle (011)", t_sakin_hata)
     test("v5 kabuk: kenar çubuğu, sistem geçişi, günün cümlesi", t_v5_kabuk_ve_gun_cumlesi)
     test("v5 düzen: sistemler paralel, konsey tam en", t_v5_duzen)
     test("sade yüz: başlık çekmecenin adı, açıklama bilgi kartında, grafit koyu", t_sade_yuz)
@@ -812,7 +768,6 @@ def run():
     test("zemin tek renk ailesi: mor ve ±30° komşular, sabit kum yok, yumuşak sönüm (2026-10-06)", t_zemin_tek_aile)
     test("dar kenar seçimden sonra çekilir, sekmeyi örtmez (W6, 2026-10-03)", t_kenar_secince_cekilir)
     test("cam kabuk: kenar açılınca çekmeceler yerinden kaymaz", t_kenar_acilinca_satirlar_kaymaz)
-    test("denetimler kenardaki bağlantıdan sonra fareyi kenardan çıkarır", t_denetimler_kenardan_cikar)
     test("telefon ve tablet kabuğu: alt bant, Menü, dar kenar, zemin her boyutta (2026-10-05)", t_telefon_ve_tablet_kabugu)
     test("Bugün sade: tek sistem kartı, üç satır + Tümü, King hapı, konsey satırı", t_bugun_sade)
     test("sistem seçici tıklayınca açılır; kenar yumuşak açılır (2026-10-05)", t_sistem_secici_ve_yumusak_acilis)

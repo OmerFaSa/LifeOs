@@ -33,8 +33,6 @@ from olcum import testmi  # noqa: E402  ölçümle aynı test dosyası kuralı
 
 # (dosya, kural, ayrıntı) → neden. Satır numarası yok: satır kayar, istisna kaymaz.
 ISTISNALAR = {
-    ("alan/akademik/donustur.js", "alan-kod", ""):
-        "AYS ders verisini alan şemasına bir kez çeviren betik; yeri tools/ (faz6-akademik-icerik.md)",
 }
 
 ALAN_VERI = {".json", ".md"}

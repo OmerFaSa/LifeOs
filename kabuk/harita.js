@@ -11,8 +11,6 @@
 (function (kok) {
   'use strict';
 
-  var AYS = '../AYS/dist/rota.html', ESP = '../ESP/dist/esp.html', SPI = '../SPI/dist/spi.html';
-
   var YERLER = [
     // kabuk
     { id: 'bugun', ad: 'Bugün', katman: 'kabuk', dal: 'ana', yol: '#/bugun', ikon: 'gunes', halka: 1, durum: 'yeni', aciklama: 'Şimdi ne yapacağın' },
@@ -23,19 +21,19 @@
     { id: 'onay', ad: 'Onaylar', katman: 'kabuk', dal: 'ana', yol: '#/onay', ikon: 'tik', durum: 'yeni', aciklama: 'Taslak dersleri oku ve onayla; senin yapacağın adımlar' },
     { id: 'tanisma', ad: 'Tanışma', katman: 'kabuk', dal: 'ana', yol: '#/tanisma', ikon: 'el', durum: 'yeni', aciklama: 'Kendini kendi sözlerinle anlat; başlangıcın buna göre önerilir' },
     { id: 'ayarlar', ad: 'Ayarlar', katman: 'kabuk', dal: 'ayarlar', yol: '#/ayarlar', ikon: 'ayar', durum: 'yeni', aciklama: 'Görünüm, erişilebilirlik, bildirim, hesap' },
-    { id: 'eskisistem', ad: 'Eski sistem', katman: 'kabuk', dal: 'ayarlar', yol: '#/eski', ikon: 'kutu', durum: 'eski', eski: '/kartlar/', aciklama: 'Kontrol paneli, güncelleme, AYS · SPİ · ESP' },
+    { id: 'eskisistem', ad: 'Hesap ve sistem', katman: 'kabuk', dal: 'ayarlar', yol: '#/eski', ikon: 'kutu', durum: 'eski', eski: '/kartlar/', aciklama: 'Hesap, cihazlar, güncelleme (kabukta karşılığı yazılana dek eski panelde)' },
     // alanlar (plan §3, on alan); Öğren dalı
-    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 2, eski: AYS, aciklama: 'Sınav hazırlığı' },
-    { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Diller ve diksiyon' },
-    { id: 'felsefe', ad: 'Felsefe', katman: 'alan', alan: 'felsefe', dal: 'ogren', yol: '#/alan/felsefe', ikon: 'soru', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Soru, kavram, tanım' },
-    { id: 'tarih', ad: 'Tarih', katman: 'alan', alan: 'tarih', dal: 'ogren', yol: '#/alan/tarih', ikon: 'kum', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Olaylar ve dönemler' },
-    { id: 'muzik', ad: 'Müzik', katman: 'alan', alan: 'muzik', dal: 'ogren', yol: '#/alan/muzik', ikon: 'nota', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Çalgı ve kulak' },
-    { id: 'okuma', ad: 'Okuma ve yazı', katman: 'alan', alan: 'okuma', dal: 'ogren', yol: '#/alan/okuma', ikon: 'sayfa', durum: 'pilot', asama: 2, eski: ESP, aciklama: 'Okumak ve yazmak' },
+    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 2, aciklama: 'Sınav hazırlığı' },
+    { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'pilot', asama: 2, aciklama: 'Diller ve diksiyon' },
+    { id: 'felsefe', ad: 'Felsefe', katman: 'alan', alan: 'felsefe', dal: 'ogren', yol: '#/alan/felsefe', ikon: 'soru', durum: 'pilot', asama: 2, aciklama: 'Soru, kavram, tanım' },
+    { id: 'tarih', ad: 'Tarih', katman: 'alan', alan: 'tarih', dal: 'ogren', yol: '#/alan/tarih', ikon: 'kum', durum: 'pilot', asama: 2, aciklama: 'Olaylar ve dönemler' },
+    { id: 'muzik', ad: 'Müzik', katman: 'alan', alan: 'muzik', dal: 'ogren', yol: '#/alan/muzik', ikon: 'nota', durum: 'pilot', asama: 2, aciklama: 'Çalgı ve kulak' },
+    { id: 'okuma', ad: 'Okuma ve yazı', katman: 'alan', alan: 'okuma', dal: 'ogren', yol: '#/alan/okuma', ikon: 'sayfa', durum: 'pilot', asama: 2, aciklama: 'Okumak ve yazmak' },
     // alanlar; Sağlık dalı
-    { id: 'beslenme', ad: 'Beslenme', katman: 'alan', alan: 'beslenme', dal: 'saglik', yol: '#/alan/beslenme', ikon: 'tabak', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Öğünler ve tabak' },
-    { id: 'hareket', ad: 'Hareket', katman: 'alan', alan: 'hareket', dal: 'saglik', yol: '#/alan/hareket', ikon: 'kos', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Spor ve yürüyüş' },
-    { id: 'uyku', ad: 'Uyku', katman: 'alan', alan: 'uyku', dal: 'saglik', yol: '#/alan/uyku', ikon: 'ay', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Uyku ve şekerleme' },
-    { id: 'tahlil', ad: 'Tahlil', katman: 'alan', alan: 'tahlil', dal: 'saglik', yol: '#/alan/tahlil', ikon: 'damla', durum: 'pilot', asama: 2, eski: SPI, aciklama: 'Tahlil sonuçları' },
+    { id: 'beslenme', ad: 'Beslenme', katman: 'alan', alan: 'beslenme', dal: 'saglik', yol: '#/alan/beslenme', ikon: 'tabak', durum: 'pilot', asama: 2, aciklama: 'Öğünler ve tabak' },
+    { id: 'hareket', ad: 'Hareket', katman: 'alan', alan: 'hareket', dal: 'saglik', yol: '#/alan/hareket', ikon: 'kos', durum: 'pilot', asama: 2, aciklama: 'Spor ve yürüyüş' },
+    { id: 'uyku', ad: 'Uyku', katman: 'alan', alan: 'uyku', dal: 'saglik', yol: '#/alan/uyku', ikon: 'ay', durum: 'pilot', asama: 2, aciklama: 'Uyku ve şekerleme' },
+    { id: 'tahlil', ad: 'Tahlil', katman: 'alan', alan: 'tahlil', dal: 'saglik', yol: '#/alan/tahlil', ikon: 'damla', durum: 'pilot', asama: 2, aciklama: 'Tahlil sonuçları' },
     // motorlar (plan §3); Araçlar dalı. Not halkada: her yerden çağrılan defter.
     { id: 'yol', ad: 'Yol haritası', katman: 'motor', dal: 'motorlar', yol: '#/motor/yol', ikon: 'yol', durum: 'yeni', aciklama: 'Aşama, ünite, ders ve kapı' },
     { id: 'tekrar', ad: 'Tekrar', katman: 'motor', dal: 'motorlar', yol: '#/motor/tekrar', ikon: 'dongu', durum: 'yeni', aciklama: 'Aralıklı tekrar kartları' },

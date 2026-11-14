@@ -76,49 +76,32 @@ NIYET_KAPILARI = {
 # Eski araç -> kapı. Her ad tam bir kez geçer (katalog_test). «yetki:» önekliler kural yolunun yetki kataloğudur.
 ESKI = {
     "kaydet": ("Kayıt yazan: kayıt motorunun tek yazma kapısına iner.",
-               "kayit_gir gun_kaydi_yaz gun_sen_yaz ays_enerji ays_mesgale_ekle spi_ilac spi_ilac_alim spi_gida "
-               "spi_barkod_ogun spi_kiler spi_ogun_sil spi_antrenman_sil spi_tahlil_sil esp_oturum esp_kitap_bitir "
-               "esp_ses_kaydi"),
+               "kayit_gir gun_kaydi_yaz gun_sen_yaz"),
     "kayit_oku": ("Kayıt okuyan: tek depodan kayit_ara/kayit_oku/bugun_ozeti ile okunur.",
-                  "istatistikler bugun_ozeti gun_kaydi gun_sen gun_karne merkez_raporu ays_gunler ays_enerji_durumu "
-                  "ays_mesgaleler spi_uyku spi_antrenmanlar spi_tahliller spi_gun_kaydi spi_butce spi_kiler_oku "
-                  "esp_gun esp_hafta"),
+               "istatistikler bugun_ozeti gun_kaydi gun_sen gun_karne merkez_raporu"),
     "plan": ("Plan motoru: gün/hafta planı, öncelik, odak, hedef, hatırlatma, karar.",
-             "oncelik_listesi yuk_durumu odak_baslat odak_durdur gun_kart_cek ays_durum_ozeti ays_haftalar "
-             "ays_gunun_akisi ays_takvim ays_telafi ays_mola ays_ara_ver ays_gecici_sure ays_gunluk_sure "
-             "ays_week_target ays_block_add ays_etkinlik ays_hafta_degerlendirme ays_decision_close spi_planlar "
-             "spi_hedefler spi_mutfak spi_market spi_karar_kapat esp_hatirlatma esp_hedef esp_karar_kapat"),
+               "oncelik_listesi yuk_durumu odak_baslat odak_durdur gun_kart_cek"),
     "tekrar": ("Tekrar motoru (FSRS): dokuz zamanlayıcı tek motora indi.",
-               "ays_kartlar ays_kart ays_card_from_error ays_cards_due_today esp_kartlar esp_kart_ekle esp_kart_sil "
                "ays_tekrarlarim spi_tekrarlarim esp_tekrarlarim"),
     "soru": ("Soru motoru: soru bankası, deneme, yanlış defteri, teşhis, kural motorunun tahmini.",
-             "soru_sor ays_denemeler ays_deneme ays_hatalar ays_yanlis ays_puan_tahmini ays_yanlis_teshis "
-             "spi_yanlis_teshis esp_yanlis_teshis"),
+               "soru_sor ays_yanlis_teshis spi_yanlis_teshis esp_yanlis_teshis"),
     "ogren": ("Yol motoru: konu/ünite durumu, merdiven, repertuvar.",
-              "ays_konular ays_konu_riski ays_konu_durumu ays_topic_review ays_hedef_ve_net_matrisi esp_merdiven "
-              "esp_repertuvar esp_eser"),
+               ""),
     "not": ("Not motoru: on üç not yapısı tek motorda; King okur, özel notu görmez.",
-            "not_ara not_ekle ays_video_notlari ays_video_notu esp_kitaplar esp_kitap esp_yazilar esp_taslak "
-            "esp_alinti_ekle esp_argumanlar esp_arguman esp_olaylar esp_olay esp_zincir esp_dosya esp_not_sil "
-            "eylem_kitap_ekle"),
-    "ara": ("Arama motoru: kaynak ve besin/barkod araması.", "spi_besin spi_barkod esp_kaynak"),
+               "not_ara not_ekle"),
+    "ara": ("Arama motoru: kaynak ve besin/barkod araması.",
+               ""),
     "ayar": ("Tek ayar şeması (kabuk): ayar, bölüm, profil, tema, sıfırdan başlat.",
-             "ayar_degistir king_ayari ays_bolum_ac_kapa spi_bolum_ac_kapa ays_profil spi_profil "
-             "yetki:tema yetki:animasyon yetki:sifirdan"),
+               "ayar_degistir king_ayari yetki:tema yetki:animasyon yetki:sifirdan"),
     "onay": ("Onay kuyruğu ve geri alma.",
-             "onaylari_listele oneri_onayla oneri_gec onerilerin_hepsi yetki:onay-liste yetki:onay-hepsi "
-             "yetki:onay-tek yetki:red-tek yetki:red-hepsi yetki:donus"),
+               "onaylari_listele oneri_onayla oneri_gec onerilerin_hepsi yetki:onay-liste yetki:onay-hepsi yetki:onay-tek yetki:red-tek yetki:red-hepsi yetki:donus"),
     "sistem": ("Kabuk ve kalite: harita, sayfa, modül sayıları, harcama, veri incelemesi.",
-               "sistem_haritasi sayfa_ac modul_bilgileri king_harcama eylem_inceleme"),
+               "sistem_haritasi sayfa_ac modul_bilgileri king_harcama"),
     "dis_dunya": ("Dış dünya eylemleri, her biri ayrı izinle (King 4.0 §E).",
-                  "pc_dosya_ac pc_uygulama_baslat pc_ekran_oku telefona_gonder dis_izin"),
+               "pc_dosya_ac pc_uygulama_baslat pc_ekran_oku telefona_gonder dis_izin"),
 }
 ARSIV = {
-    "eylem_toplanti": "AYS ofis toplantısı: ofis ajanları arşivde (AGENTS §0.1, §1.6).",
     "yetki:muzik": "Radyo ve müzik arşivde (AGENTS §0.1, §1.6).",
-    "spi_hane": "Hane üyesi ekleme: tek kişi, tek sistem (AGENTS §0.1 kural 1).",
-    "spi_hane_oku": "Hane profilleri: tek kişi (AGENTS §0.1 kural 1).",
-    "ays_profiller": "Cihazdaki aday profilleri listesi: tek kişi (AGENTS §0.1 kural 1); tek profil ayar'da.",
 }
 
 
@@ -142,8 +125,9 @@ def harita():
 def tara(kok=KOD):
     """İstemcideki eski King araçları: {ad: [kaynak dosyalar]}. Dosya yoksa (eski modül silindiyse) atlanır.
 
-    Kayıt kodla kurulur (brand/ortak/king-arac.js liste/disAraclar/gunAraclari, AYS okuma+yazma+elle,
-    ogret.js modül başına iki, yetki ekleri «eylem_<id>»); burada kaynaktaki ad kalıpları okunur."""
+    Kayıt kodla kurulur (brand/ortak/king-arac.js liste/disAraclar/gunAraclari, ogret.js modül başına iki,
+    yetki.js); burada kaynaktaki ad kalıpları okunur. Modül araçları (AYS/SPI/ESP kingarac.js, tools.js,
+    actions.js) kapanışta modüllerle kalktı."""
     bulunan = {}
 
     def ekle(ad, kaynak):
@@ -163,25 +147,6 @@ def tara(kok=KOD):
         for ad in re.findall(r"\bad:\s*'([a-z0-9_]+)'", s) + re.findall(r"\bdis\('([a-z0-9_]+)'", s):
             if ad != "eylem_":   # yetki eklerinden kurulur; aşağıda
                 ekle(ad, "brand/ortak/king-arac.js")
-    for m in ("ays", "spi", "esp"):
-        yol = "%s/src/js/core/kingarac.js" % m.upper()
-        s = dosya(yol)
-        for ad in re.findall(r"\bad:\s*'([a-z0-9_]+)'", s or ""):
-            if ad != m + "_":   # AYS okuma/yazma öneki; adları aşağıda
-                ekle(ad, yol)
-        s = dosya("%s/src/js/app.js" % m.upper())   # modül yetki ekleri modele «eylem_<id>» diye gider
-        for i in re.findall(r"\{\s*id:\s*'([a-z-]+)',\s*seviye:", s or ""):
-            ekle("eylem_" + re.sub(r"[^a-z0-9]+", "_", i), "%s/src/js/app.js" % m.upper())
-    s = dosya("AYS/src/js/core/tools.js")
-    for ad in re.findall(r"^\s*\{\s*name:\s*'([a-z0-9_]+)'", s or "", re.M):
-        ekle("ays_" + ad, "AYS/src/js/core/tools.js")
-    s = dosya("AYS/src/js/data/actions.js")
-    if s:
-        s = re.sub(r"/\*.*?\*/", "", s, flags=re.S)
-        for parca in s.split("id:'")[1:]:
-            i = parca.split("'", 1)[0]
-            if not re.search(r"\b(modelYok|olcum):\s*true", parca):   # kingarac.js yazma(): ikisi modele gitmez
-                ekle("ays_" + i.replace("-", "_"), "AYS/src/js/data/actions.js")
     s = dosya("brand/ortak/ogret.js")
     for ek in re.findall(r"ad:\s*o\.modul\s*\+\s*'(_[a-z_]+)'", s or ""):
         for m in ("ays", "spi", "esp"):

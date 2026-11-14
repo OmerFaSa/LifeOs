@@ -88,10 +88,6 @@ def sina(ad, sunucu):
     dogru("%s %d bekleyen baglantiyi reddetmez" % (ad, BEKLEYEN), n == BEKLEYEN, n)
 
 
-for sistem in ("AYS", "SPI", "ESP"):
-    devserver = yukle("devserver_" + sistem, KOK / sistem / "devserver.py")
-    sina("%s/devserver.py" % sistem, devserver.sunucu_kur(0))
-
 sunucu = yukle("sunucu", KOK / "sistem" / "sunucu.py")
 sina("sistem/tekkapi.py (tek kapi)", sunucu.KuyrukluSunucu((sunucu.HOST, 0), sunucu.Giris))
 

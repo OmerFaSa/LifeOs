@@ -838,6 +838,7 @@ def run():
     # -------------------------------------------------------------- HTTP
 
     import sunucu  # noqa: E402
+    import tekkapi  # noqa: E402  (tek kapi: hesap yollari burada)
 
     class _Srv:
         def __enter__(self):
@@ -846,7 +847,7 @@ def run():
             hesap.depo_kur(self.r.d)
             self.dosya = tempfile.mkdtemp(prefix="lifeos-hesap-src-")
             from functools import partial
-            self.s = sunucu.KuyrukluSunucu(("127.0.0.1", 0), partial(sunucu.Sunucu, directory=self.dosya))
+            self.s = sunucu.KuyrukluSunucu(("127.0.0.1", 0), partial(tekkapi.TekKapi, directory=self.dosya))
             threading.Thread(target=self.s.serve_forever, daemon=True).start()
             self.adres = "http://127.0.0.1:%d" % self.s.server_address[1]
             return self
@@ -1028,13 +1029,11 @@ def run():
 
     def t_http_dosya():
         with _Srv() as s:
-            with open(os.path.join(s.dosya, "index.html"), "w", encoding="utf-8") as f:
-                f.write("<p>sayfa</p>")
-            q = urllib.request.Request(s.adres + "/index.html")
+            q = urllib.request.Request(s.adres + "/index.html")        # tek kapi: kok yeni kabuga gider
             with urllib.request.urlopen(q, timeout=10) as c:
-                eq(c.read(), b"<p>sayfa</p>")
+                ok(b"kabuk.js" in c.read())
             eq(s.iste("/api/hesap/yok", {}, H)[0], 401)
-            eq(s.iste("/baska", {}, H)[0], 405)       # API disi POST dosya sunumuna girmez
+            eq(s.iste("/baska", {}, H)[0], 404)       # API disi POST dosya sunumuna girmez
     test("HTTP: dosya sunumu bozulmaz, API disi POST reddedilir", t_http_dosya)
 
     def t_http_baglantilar():

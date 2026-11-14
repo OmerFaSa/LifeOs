@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """LifeOS — sunucunun cekirdegi (kapanis: tek kapi sistem/tekkapi.py bunu ice aktarir).
 
-   Burada isleyiciler durur: Giris (kok sayfalar ve /api/...), Sunucu (dist), Gun, hesap/ayar/ice/
-   muzik/zemin/planlama baglantilari. Kendi basina kapi acmaz: eski uc modul kapisi (4173/4183/4193),
+   Burada isleyiciler durur: Giris (hesap ve sistem paneli /kartlar/, /api/...), kabuk dosyalari,
+   hesap/ayar/ice/muzik/zemin/planlama baglantilari. Kendi basina kapi acmaz: eski uc modul kapisi (4173/4183/4193),
    ayri HKM sureci (4200) ve ev agi kapilari (51xx, kendi CA) kapanista kalkti; tek yol tek kapi +
    Tailscale (sistem/uzak.py).
 
@@ -13,10 +13,7 @@
    2. YALNIZ YEREL. 127.0.0.1'e baglanir; disari yalniz Tailscale serve (vekil) ile gidilir.
 """
 
-import gzip
-import hashlib
 import html
-import importlib.util
 import json
 import os
 import re
@@ -26,7 +23,6 @@ import threading
 import time
 import urllib.request
 from urllib.parse import parse_qs
-from functools import lru_cache
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +35,6 @@ import zemin  # noqa: E402  (kullanicinin arka plan dosyasi, sistem/zemin.py)
 import muzik  # noqa: E402  (kullanicinin muzik dosyalari ve listeleri, sistem/muzik.py)
 import ice  # noqa: E402  (Google verisini hesap baglamadan getirmek, sistem/ice.py)
 import ayar  # noqa: E402  (sistem ayarlarinin tek kopyasi, sistem/ayar.py)
-import gun  # noqa: E402  (Gun bolumu, Gun plani F2: /gun/ yolu, yeni port yok)
 import uzak  # noqa: E402  (her yerden erisim, sistem/uzak.py)
 import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import etiket  # noqa: E402  (sahibin kalite etiketleri, sistem/etiket.py; yalniz bu bilgisayardan)
@@ -49,18 +44,6 @@ HOST = "127.0.0.1"
 GIRIS_PORT = 4180
 ETIKET_DIZIN = os.path.join(KOK, "kalite", "veri", "yerel")  # gercek setler (git disi); sistem/etiket.py
 ILK_EKRAN_KABUK = True  # kok (/) yeni kabuga gider (sadelesme: yeni kabuk ilk ekran); eski giris ve kontrol paneli /kartlar/'da
-TEK_KAPI = False        # tekkapi.kur() True yapar: Gun sayfasi modulleri port yerine yoldan (/ays/) acar
-HKM_PORT = 4200
-
-# (klasor, ad, port, dist dosyasi)
-SISTEMLER = [
-    ("AYS", "Akademik Yol Sistemi", 4173, "rota.html",
-     "sınav hazırlığı: plan, deneme, kalibrasyon"),
-    ("SPI", "SPİ — Sağlık Performans İzleyicisi", 4183, "spi.html",
-     "uyku, besin, hareket, toparlanma"),
-    ("ESP", "Entelektüel Seviye Planlayıcı", 4193, "esp.html",
-     "dil, felsefe, müzik: merdiven ve SRS"),
-]
 
 
 # SEVIYE:yol-bas
@@ -167,363 +150,8 @@ def _ortak_dist_yolu(clean, kok):
 # SEVIYE:yol-bit
 
 
-# Guncel tek dosya (2026-10-29, kullanici: «yuklenme gecikiyor»). Kapinin
-# kokunden src/index.html ~230 ayri istekti (tarayici bir kokene alti
-# baglanti acar: kabuk ~1,2-1,4 sn); dist uc istektir (~0,33 sn). build.py
-# dist'in yanina hangi kaynaklardan derlendigini yazar (dist/kaynak.json:
-# dosya basina sha256, satir sonu esitlenmis — Windows'ta git CRLF'e cevirir).
-# Kok dist'i YALNIZ listedeki her kaynak ayniysa sunar; degil ya da liste
-# yoksa/bozuksa src (kural 2: eski surum calismaz). Imza mtime+boyut
-# degismedikce yeniden hesaplanmaz. Test: tools/dist_sun_test.py
-_IMZA = {}
-
-
-def _dosya_imzasi(yol):
-    st = os.stat(yol)
-    anahtar = (st.st_mtime_ns, st.st_size)
-    eski = _IMZA.get(yol)
-    if eski and eski[0] == anahtar:
-        return eski[1]
-    with open(yol, encoding="utf-8", newline=None) as f:
-        imza = hashlib.sha256(f.read().encode("utf-8")).hexdigest()
-    _IMZA[yol] = (anahtar, imza)
-    return imza
-
-
-def _guncel_dist(repo):
-    """Kaynakla ayni derlenmis dist dosyasinin yolu; degilse None."""
-    try:
-        with open(os.path.join(repo, "dist", "kaynak.json"), encoding="utf-8") as f:
-            liste = json.load(f)
-        ad = _guvenli_medya_adi(str(liste["dosya"]), (".html",))
-        kaynak = liste["kaynak"]
-        if not ad or not isinstance(kaynak, dict) or not kaynak:
-            return None
-        src = os.path.join(repo, "src")
-        for rel, imza in kaynak.items():
-            if _dosya_imzasi(os.path.join(src, rel)) != imza:
-                return None
-        dist = os.path.join(repo, "dist", ad)
-        return dist if os.path.isfile(dist) else None
-    except (OSError, ValueError, KeyError, TypeError, AttributeError):
-        return None
-
-
-# Dist'in buyuk satir ici betigi ayri adresten (2026-10-29). Chromium satir
-# ici betigi ana is parcaciginda derler (AYS 6 MB: ~85 ms); ayri dosyayi
-# inerken arka planda derler, calistirma da hizlanir. Olculen (AYS): tekrar
-# acilista DOMContentLoaded ~440 -> ~330 ms, ilk acilis ~1450 -> ~780 ms.
-# Dist dosyasi degismez; yalniz sunulurken bolunur. Test: tools/dist_sun_test.py
-DIST_BETIK = "/dist-betik.js"
-# Ayni yol stil icin (2026-11-01, KING-4 Olcum 2c): kok sayfa no-store'dur; AYS'de
-# 1,41 MB'nin ~1,3 MB'i satir ici CSS'ti ve her acilista yeniden iniyor, yeniden
-# ayristiriliyordu. Surumlu adresteki stil saklanir; kucuk stil satir icinde kalir.
-DIST_STIL = "/dist-stil.css"
-STIL_ESIK = 20000
-_BOLUK = {}
-
-
-def _dist_bol(yol):
-    """Dist dosyasinin parcalari (_metni_bol); mtime+boyut degismedikce yeniden bolunmez."""
-    st = os.stat(yol)
-    anahtar = (st.st_mtime_ns, st.st_size)
-    eski = _BOLUK.get(yol)
-    if eski and eski[0] == anahtar:
-        return eski[1]
-    with open(yol, encoding="utf-8") as f:
-        sonuc = _metni_bol(f.read())
-    _BOLUK[yol] = (anahtar, sonuc)
-    return sonuc
-
-
-def _metni_bol(metin):
-    """(html, betik, surum, stil, stil_surum). En buyuk <script> govdesi betige,
-    en buyuk <style> (>= STIL_ESIK) stile tasinir; HTML'de ayni yerde <script src> ve
-    <link rel=stylesheet> kalir (sira, kaskad ve engelleme ayni); yoksa None.
-    Surum adreste durur: tutan istek onbellege girer, V8 derlemeyi de saklar."""
-    en = max(re.finditer(r"<script>(.*?)</script>", metin, re.S),
-             key=lambda m: len(m.group(1)), default=None)
-    stil = max(re.finditer(r"<style>(.*?)</style>", metin, re.S),
-               key=lambda m: len(m.group(1)), default=None)
-    if stil is not None and len(stil.group(1)) < STIL_ESIK:
-        stil = None
-    betik = surum = stil_govde = stil_surum = None
-    parcalar = []                                   # (bas, son, yerine) — sondan basa uygulanir
-    if en is not None:
-        betik = en.group(1).encode("utf-8")
-        surum = hashlib.sha256(betik).hexdigest()[:12]
-        parcalar.append((en.start(), en.end(), '<script src="%s?v=%s"></script>' % (DIST_BETIK, surum)))
-    if stil is not None:
-        stil_govde = stil.group(1).encode("utf-8")
-        stil_surum = hashlib.sha256(stil_govde).hexdigest()[:12]
-        parcalar.append((stil.start(), stil.end(), '<link rel="stylesheet" href="%s?v=%s">' % (DIST_STIL, stil_surum)))
-    for bas, son, yerine in sorted(parcalar, reverse=True):
-        metin = metin[:bas] + yerine + metin[son:]
-    return (metin.encode("utf-8"), betik, surum, stil_govde, stil_surum)
-
-
 # Kaynak degisip «Derlemeler» commit'i unutulunca kapi src'ye dusuyordu (2026-11-06, olculen:
-# telefonda SPI her acilista 251 istek). dist eskiyse ayni kaynaklardan bellekte derlenir; kural 2
-# korunur (imza tutmazsa yeniden derlenir), diske yazilmaz: calisan kopyanin agaci temiz kalir,
-# guncelleyici takilmaz. Derlenemezse None: src sunulur. Test: tools/dist_sun_test.py
-_CANLI = {}
-_CANLI_KILIT = threading.Lock()
 
-
-def _canli_bol(repo):
-    with _CANLI_KILIT:
-        yol = list(sys.path)   # build.py tools/'u ekler; uzun omurlu surecte stdlib adlarini golgelemesin
-        try:
-            eski = _CANLI.get(repo)
-            if eski and all(_dosya_imzasi(os.path.join(repo, "src", r)) == i for r, i in eski[0].items()):
-                return eski[1]
-            spec = importlib.util.spec_from_file_location("lifeos_derle", os.path.join(repo, "build.py"))
-            modul = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(modul)
-            metin, liste = modul.derle()
-            sonuc = _metni_bol(metin)
-            _CANLI[repo] = (json.loads(liste)["kaynak"], sonuc)
-            return sonuc
-        except (Exception, SystemExit):   # build.py eksik dosyada sys.exit yapar
-            return None
-        finally:
-            sys.path[:] = yol
-
-
-def _dist_parcalari(repo):
-    dist = _guncel_dist(repo)
-    return _dist_bol(dist) if dist else _canli_bol(repo)
-
-
-@lru_cache(maxsize=12)   # uc modul x uc parca; surum degisince eskisi duser
-def _sikistir(govde):
-    return gzip.compress(govde, 6, mtime=0)
-
-
-YEREL_IP = ("127.0.0.1", "::1")
-
-
-class Sunucu(SimpleHTTPRequestHandler):
-    """Bir sistemin src/ klasoru.
-
-    Iki adres kendi klasorunun disina cikar:
-      /dist/...        o sistemin derlenmis tek dosya surumu
-      /img/seviye/...  UCUNUN ORTAK seviye gorselleri (brand/seviye/)
-
-    Ikincisi bilincli bir istisnadir. Kademe videolari uc sistemin de
-    ayni dosyasidir; uc kez kopyalamak depoyu yuz megabayta tasirdi.
-    Sistemlerin birbirinden bagimsizligi bozulmaz: dosya yoksa kutlama
-    banner'a duser, arayuzde hicbir sey kirilmaz.
-    """
-
-    repo = KOK
-
-    def translate_path(self, path):
-        clean = path.split("?", 1)[0].split("#", 1)[0]
-        if clean in ("/", "/index.html"):
-            dist = _guncel_dist(self.repo)
-            if dist:
-                return dist
-        ortak = (_ortak_seviye_yolu(clean, KOK)
-                 or _ortak_marka_yolu(clean, KOK))
-        return ortak or _ortak_dist_yolu(clean, self.repo) or super().translate_path(path)
-
-    def guess_type(self, path):
-        # Kaynaklar UTF-8; charset bildirilmezse tarayici latin-1 varsayar
-        # ve Turkce karakterler bozulur.
-        ctype = super().guess_type(path)
-        base = ctype.split(";", 1)[0].strip()
-        if base in ("text/html", "text/css", "application/javascript",
-                    "text/javascript", "application/json", "text/plain"):
-            return base + "; charset=utf-8"
-        return ctype
-
-    # HESAP ve ESITLEME (sistem/hesap.py): her modul kapisinda ayni API.
-    # PC'de ayni koken (http 127.0.0.1), tablette ayni koken (ev agi
-    # https), telefon uygulamasindan capraz koken (yalniz uygulamanin
-    # kendi kokenleri). Dosya sunumu bundan etkilenmez.
-    def do_GET(self):
-        if self.path.startswith("/api/hesap/"):
-            return hesap.isle(self)
-        if self.path.split("?", 1)[0] == "/api/ayar":
-            return ayar.isle(self)
-        if self.path.startswith("/api/ice"):
-            return ice.isle(self)
-        if self.path.startswith("/api/muzik"):
-            return muzik.isle(self)
-        if self.path.startswith("/api/zemin/"):
-            return zemin.isle(self)
-        if self.path.startswith("/api/planlama"):
-            return plan_isle(self)
-        clean = self.path.split("?", 1)[0].split("#", 1)[0]
-        if clean in ("/", "/index.html", DIST_BETIK, DIST_STIL):
-            bolum = _dist_parcalari(self.repo)
-            if bolum:
-                sayfa, betik, surum, stil, stil_surum = bolum
-                parca = {DIST_BETIK: (betik, surum, "text/javascript"), DIST_STIL: (stil, stil_surum, "text/css")}.get(clean)
-                govde = parca[0] if parca else self._ayarli(sayfa)
-                if govde is not None:
-                    # Yalniz surumu tutan adres saklanir; yaris aninda eski
-                    # surum adresine yeni govde gittiyse saklanmaz.
-                    kalici = bool(parca) and self.path.endswith("?v=" + parca[1])
-                    return self._dist_gonder(govde, parca[2] if parca else "text/html", kalici)
-            elif clean not in (DIST_BETIK, DIST_STIL):
-                return self._src_sayfa()
-        return super().do_GET()
-
-    def _dist_gonder(self, govde, tur, kalici):
-        """Telefon ve tablet (bu bilgisayar degil): gzip, sayfa her acilista dogrulanir (304).
-        Bu bilgisayar eskisi gibi: ham ve no-store."""
-        uzak_mi = self.client_address[0] not in YEREL_IP
-        if kalici:
-            self._onbellek = "public, max-age=31536000, immutable"
-        etag = None
-        if uzak_mi and not kalici:
-            self._onbellek = "no-cache"   # kural 2 ayakta: her acilis sunucuya sorar, eski surum calismaz
-            etag = '"%s"' % hashlib.sha256(govde).hexdigest()[:20]
-            if etag in self.headers.get("If-None-Match", ""):
-                self.send_response(304)
-                self.send_header("ETag", etag)
-                self.end_headers()
-                return
-        self.send_response(200)
-        self.send_header("Content-Type", tur + "; charset=utf-8")
-        if uzak_mi:
-            self.send_header("Vary", "Accept-Encoding")
-            if etag:
-                self.send_header("ETag", etag)
-            if "gzip" in self.headers.get("Accept-Encoding", ""):
-                govde = _sikistir(govde)
-                self.send_header("Content-Encoding", "gzip")
-        self.send_header("Content-Length", str(len(govde)))
-        self.end_headers()
-        self.wfile.write(govde)
-
-    def send_head(self):
-        """Dosya sunumu. Telefon ve tablet gorselleri her acilista yeniden indirmez: tarayici
-        Last-Modified ile sorar, degismediyse 304 (no-store'da hepsi bastan iniyordu)."""
-        if self.client_address[0] not in YEREL_IP:
-            self._onbellek = "no-cache"
-        return super().send_head()
-
-    def parse_request(self):
-        """Vekil (tailscale serve) istegi 127.0.0.1'den getirir: burada isaretlenir ki
-        hesap, ayar, ice, muzik, planlama, zemin onu «bu bilgisayar» sanmasin (uzak.py soz 2)."""
-        tamam = super().parse_request()
-        if tamam and uzak.vekilden_mi(self.client_address[0], self.headers):
-            self.client_address = (uzak.VEKIL_IP, self.client_address[1])
-        return tamam
-
-    def _ayarli(self, govde):
-        """Ortak ayar yalniz bu bilgisayardan acilan sayfaya konur (sistem/ayar.py
-        soz 1). Ev agindan baglanan tablet ayni Sunucu sinifiyla sunulur; ona da
-        konunca kendi ayarlari her yenilemede bilgisayarinkiyle eziliyor, yazmasi
-        ise reddediliyordu (2026-10-31, hata analizi)."""
-        if self.client_address[0] in YEREL_IP:
-            return ayar.sayfaya_ekle(govde)
-        return govde
-
-    def _src_sayfa(self):
-        """Kaynak (src) sayfasi da ortak ayarlarla verilir (sistem/ayar.py)."""
-        yol = super().translate_path("/index.html")
-        if not os.path.isfile(yol):
-            return super().do_GET()
-        with open(yol, "rb") as f:
-            govde = self._ayarli(f.read())
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(govde)))
-        self.end_headers()
-        self.wfile.write(govde)
-
-    def do_POST(self):
-        if self.path.startswith("/api/hesap/"):
-            return hesap.isle(self)
-        if self.path.split("?", 1)[0] == "/api/ayar":
-            return ayar.isle(self)
-        if self.path.startswith("/api/ice"):
-            return ice.isle(self)
-        if self.path.startswith("/api/muzik"):
-            return muzik.isle(self)
-        if self.path.startswith("/api/zemin/"):
-            return zemin.isle(self)
-        if self.path.startswith("/api/planlama"):
-            return plan_isle(self)
-        if self.path.split("?", 1)[0] == "/api/merkez/ac":
-            # Gun plani (2026-11-03): HKM'nin arayuzu kalkti; Merkez modulun Ayarlar › Merkez'inden
-            # baslatilir. Yalniz bu kapinin kendi sayfasindan (ozel baslik + Origin).
-            izin = (self.client_address[0] in ("127.0.0.1", "::1")      # ev agi ve vekil baslatamaz
-                    and merkez_izinli(self.headers, self.server.server_address[1]))
-            return self._json(200 if izin else 403, hkm_ac() if izin else {"ok": False, "mesaj": "İzin yok."})
-        if self.path.split("?", 1)[0] == "/api/uzak/merkez":
-            # Ozel baslik tarayiciyi on-kontrole zorlar (izin yok); isaret yalniz serve'den gelene konur.
-            izin = (self.client_address[0] == uzak.VEKIL_IP and self.headers.get("X-LifeOS") == "hesap"
-                    and hesap._koken_izinli(self))
-            v = uzak.merkez_kimlikle(self.headers) if izin else None
-            return self._json(200 if v else 403, v or {"hata": "İzin yok."})
-        return self.send_error(405)
-
-    def _json(self, kod, veri):
-        govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
-        self.send_response(kod)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(govde)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(govde)
-
-    def do_DELETE(self):
-        if self.path.startswith("/api/ice"):
-            return ice.isle(self)
-        if self.path.startswith("/api/muzik"):
-            return muzik.isle(self)
-        if self.path.startswith("/api/zemin/"):
-            return zemin.isle(self)
-        return self.send_error(405)
-
-    def do_OPTIONS(self):
-        if self.path.startswith("/api/hesap/"):
-            return hesap.isle(self)
-        return self.send_error(405)
-
-    def end_headers(self):
-        kural = getattr(self, "_onbellek", None)
-        if kural:
-            self._onbellek = None   # keep-alive: ayni isleyici sonraki istege gecer
-            self.send_header("Cache-Control", kural)
-            return super().end_headers()
-        self.send_header("Cache-Control",
-                         "no-store, no-cache, must-revalidate, max-age=0")
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
-        super().end_headers()
-
-    def log_message(self, fmt, *args):
-        status = str(args[1]) if len(args) > 1 else ""
-        if status.startswith("2") or status.startswith("3"):
-            return
-        # Takvim abonelik adresi bir anahtardir: gunluge yazilmaz (hesap soz 17).
-        if args and isinstance(args[0], str):
-            args = (hesap.gunluk_maskele(args[0]),) + args[1:]
-        super().log_message(fmt, *args)
-
-
-# Giris sayfasinin gorselleri: HER SISTEMIN KENDI GUNCEL LOGOSU (uygulama
-# acilisinda gorunenle ayni dosya). Kapali bir liste: URL'den yol kurulmaz.
-LOGOLAR = {
-    "ays": ("AYS", "src", "img", "brand", "favicon.png"),
-    "spi": ("SPI", "src", "img", "brand", "favicon.png"),
-    "esp": ("ESP", "src", "img", "brand", "favicon.png"),
-    "hkm": ("HKM", "brand", "favicon.png"),
-}
-
-# (anahtar, kisa ad, tam ad, aciklama, port)
-KARTLAR = [
-    ("ays", "AYS", "Akademik Yol Sistemi", "Sınav hazırlığı: plan, deneme, kalibrasyon", 4173),
-    ("spi", "SPİ", "Sağlık Performans İzleyicisi", "Uyku, beslenme, hareket, toparlanma", 4183),
-    ("esp", "ESP", "Entelektüel Seviye Planlayıcı", "Dil, felsefe, müzik, diksiyon, okuma", 4193),
-    ("hkm", "HKM", "Hayat Kontrol Merkezi", "İsteğe bağlı merkez: günün özeti, çapraz bulgu", HKM_PORT),
-]
 
 # Sekme ikonu: kenar cubugundaki dort renkli isaretin aynisi (SVG, gomulu).
 _IKON = ("data:image/svg+xml,"
@@ -1410,7 +1038,6 @@ def _kac(t):
 
 
 # Telefonda kartin sagindaki ok («Ac» dugmesi yerine; kartin tamami baglantidir).
-_OK = ('<svg class="kart__ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6.5L15 12l-5.5 5.5"/></svg>')
 
 
 def giris_html(telefon=False, tema=None):
@@ -1418,41 +1045,10 @@ def giris_html(telefon=False, tema=None):
     (uygulama/ios/hazirla.py derlemede uretir) — ayni stil ve kartlar; HKM
     karti, guncelleme kutusu ve bilgisayarin API'lerine giden betik yok
     (telefonda ikisi de yok; moduller HKM'siz calisir, AGENTS §1.4)."""
-    kartlar = []
-    sira = 2
-    # Kullanicinin cizimi (2026-10-29): ESP · SPI · AYS yan yana dikey kartlar,
-    # HKM ustteki kavisli seridin ortasinda.
-    duzen = {"esp": 0, "spi": 1, "ays": 2, "hkm": 3}  # hkm karti cizilmez; M ucu var
-    for anahtar, kisa, ad, aciklama, port in sorted(KARTLAR, key=lambda k: duzen.get(k[0], 9)):
-        # Tek kapida (tekkapi.py) modul ayni kokenin yolundadir; eski duzende kendi kapisinda.
-        adres = "/%s/" % anahtar if TEK_KAPI and anahtar != "hkm" else "http://%s:%d/" % (HOST, port)
-        hkm = anahtar == "hkm"
-        if telefon and hkm:
-            continue
-        sira += 1
-        # Minik ozet yuvasi (hesap.js soz 16): HKM'nin kendi ozeti yok.
-        ozet = '' if hkm else '<div class="kart__ozet" data-ozet="%s" hidden></div>' % anahtar
-        bas = ('<a class="kart" href="%s" data-modul="%s" title="%s · %s" style="--renk:var(--%s);--renk-t:var(--%s-t);--sira:%d"%s>'
-               '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--%s"></i></span>'
-               '<div class="kart__metin"><div class="kart__ad">%s <small>%s</small></div>'
-               '<div class="kart__acik">%s</div></div>%s</div>'
-               % (adres, anahtar, _kac(kisa), port, anahtar, anahtar, sira,
-                  "" if telefon else (' data-hkm="1"' if hkm else ' data-yokla="%s"' % adres),
-                  anahtar, _kac(kisa), _kac(ad), _kac(aciklama),
-                  _OK if telefon else ""))
-        if telefon:
-            kartlar.append(bas + ozet + '</a>')
-            continue
-        kart = (bas + ozet
-                + '<div class="kart__alt"><span class="durum" data-hal="bekle"%s><i></i><span>Bakılıyor…</span></span>'
-                '<span class="dugme">%s</span></div></a>' % ("" if hkm else " hidden", "Başlat" if hkm else "Aç"))
-        if not hkm:
-            kartlar.append(kart)
-    # Gun plani (2026-11-03): seridin ortasi Gun bolumu (/gun/, ayni sunucu). HKM'nin
-    # arayuzu kalkti; Merkez'i baslatmak modulun Ayarlar › Merkez'inde (/api/merkez/ac).
-    gun_kart = ('<a class="kart kart--orta" href="/gun/" data-modul="gun" title="Gün · günü kur, gidişi gör" style="--renk:var(--hkm);--renk-t:var(--hkm-t);--sira:3">'
+    # Ortadaki kart yeni kabuga gider (modul kartlari kapanista kalkti).
+    gun_kart = ('<a class="kart kart--orta" href="/kabuk/" data-modul="kabuk" title="LifeOS · ana sayfa" style="--renk:var(--hkm);--renk-t:var(--hkm-t);--sira:3">'
                 '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--gun"></i></span>'
-                '<div class="kart__metin"><div class="kart__ad">Gün</div><div class="kart__acik">Günü kur, gidişi gör</div></div></div>'
+                '<div class="kart__metin"><div class="kart__ad">LifeOS</div><div class="kart__acik">Ana sayfa</div></div></div>'
                 '<div class="kart__alt"><span class="dugme">Aç</span></div></a>')
     s = guncelle.surum()
     surum = ("sürüm %s" % s["tarih"]) if s else "zip sürümü"
@@ -1477,7 +1073,7 @@ def giris_html(telefon=False, tema=None):
                  # hesap.css (giris ve hesap kutusu) temayi data-theme'den okur; etiket
                  # oznitelik sirasina bagli aranmaz (data-sahne/data-zemin eklenince eski arama bos kaliyordu)
                  .replace('<html ', '<html data-theme="%s" ' % tema, 1))
-    return (sayfa.replace("__KARTLAR__", "\n  ".join(kartlar)).replace("__YAY__", yay)
+    return (sayfa.replace("__KARTLAR__", "").replace("__YAY__", yay)
             .replace("__SURUM__", _kac(surum)).replace("__IKON__", _IKON))
 
 
@@ -1691,38 +1287,6 @@ hesap.SISTEM.update(durum=sistem_durum, baslat=sistem_baslat, uzak_ac=uzak_ac, u
                     uzak_durum=uzak_durum, uzak_acilis=uzak.acilis_ayarla)
 
 
-def merkez_izinli(basliklar, kapi):
-    """POST /api/merkez/ac yalniz modulun kendi sayfasindan: X-LifeOS: merkez basligi
-    tarayiciyi on-kontrole zorlar (bu sunucu izin vermez); Origin varsa ayni kapi olmali."""
-    if basliklar.get("X-LifeOS") != "merkez":
-        return False
-    koken = basliklar.get("Origin")
-    return koken in (None, "http://%s:%d" % (HOST, kapi), "http://localhost:%d" % kapi)
-
-
-def gun_cumlesi(govde, adres=None, jeton=None):
-    """Gun sayfasinin cumlesi (2026-11-03): satirlari Gun'un kodu verir, cumleyi HKM'deki model
-    kurar (/api/king/cumle, tur «gun»). Gun HKM'nin jetonunu bilmez; bu sunucu ayni bilgisayarda
-    HKM'nin yapilandirmasindan okur ve yalniz bu cagriyi iletir. HKM kapaliysa ok:false.
-    tur «bilinc» (2026-11-09): Ana sayfa › Bilinc haritasinda bir dusunce icin King'in gorusu."""
-    try:
-        tur = (govde or {}).get("tur") if (govde or {}).get("tur") in ("bilinc", "bilinc_harita") else "gun"
-        satirlar = [str(x)[:160] for x in (govde or {}).get("satirlar") or [] if str(x or "").strip()][:12 if tur == "gun" else 16]
-        if not satirlar:
-            return {"ok": False, "note": "satır yok"}
-        if jeton is None:   # tek kapi (tekkapi.py) HKM ayni surecteyse adresi ve jetonu kendi verir
-            with open(os.path.join(KOK, "HKM", "config.json"), encoding="utf-8") as f:
-                jeton = (json.load(f) or {}).get("local_token") or ""
-        istek = urllib.request.Request(adres or "http://%s:%d/api/king/cumle" % (HOST, HKM_PORT),
-                                       data=json.dumps({"tur": tur, "satirlar": satirlar}).encode("utf-8"),
-                                       headers={"Content-Type": "application/json", "Authorization": "Bearer " + jeton})
-        with urllib.request.urlopen(istek, timeout=25 if tur == "gun" else 45) as r:
-            v = json.loads(r.read().decode("utf-8") or "{}")
-        return {"ok": bool(v.get("ok")), "text": v.get("text"), "model": v.get("model"), "note": v.get("note")}
-    except Exception:
-        return {"ok": False, "note": "Merkez kapalı"}
-
-
 def guncelleme_izinli(basliklar):
     """POST /api/guncelle yalniz giris sayfasinin kendisinden gelir.
 
@@ -1831,17 +1395,6 @@ class Giris(SimpleHTTPRequestHandler):
                 return self._json(400, {"ok": False, "mesaj": "Gövde JSON nesnesi olmalı."})
             hata = etiket.etiketle(ETIKET_DIZIN, g.get("set"), g.get("id"), g.get("etiket"))
             return self._json(400 if hata else 200, {"ok": not hata, "mesaj": hata} if hata else {"ok": True})
-        if yol == "/api/gun/cumle":
-            # Yalniz Gun sayfasindan (X-LifeOS: gun, ayni koken); govde kucuk.
-            koken = self.headers.get("Origin")
-            if self.headers.get("X-LifeOS") != "gun" or koken not in (None, "http://%s:%d" % (HOST, GIRIS_PORT), "http://localhost:%d" % GIRIS_PORT):
-                return self._json(403, {"ok": False})
-            try:
-                n = min(int(self.headers.get("Content-Length") or 0), 16384)
-                govde = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
-            except (ValueError, UnicodeDecodeError):
-                govde = {}
-            return self._json(200, gun_cumlesi(govde))
         if yol not in ("/api/guncelle", "/api/hkm", "/api/hkm/yeniden", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):
@@ -1880,16 +1433,6 @@ class Giris(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return None
             return self._kabuk_sun(kabuk_dosyasi(yol))
-        # Kabuk eski alanlara /ays/ /spi/ /esp/ yoluyla gider. Tek kapida modul o yoldadir (tekkapi.py);
-        # bugunku duzende kendi kapisindadir, oraya yonlendirilir.
-        modul_port = {k.lower(): port for k, _ad, port, *_ in SISTEMLER}.get(yol.strip("/"))
-        if modul_port:
-            ev = (self.headers.get("Host") or "").split(":")[0]
-            self.send_response(302)
-            self.send_header("Location", "http://%s:%d/" % (ev if ev in (HOST, "localhost") else HOST, modul_port))
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return None
         if yol == "/api/kabuk/baslangic":
             # Tek depodan uretilen baslangic paketi (tools/kabuk_baslangic.py): eski notlar ve kayitlar yeni kabuga
             # buradan gecer. Paket kisisel icerik tasir ve oturum denetimi yoktur: YALNIZ bu bilgisayardan okunur.
@@ -1934,59 +1477,18 @@ class Giris(SimpleHTTPRequestHandler):
             return plan_isle(self)
         if yol in ("/hesap.js", "/gocpaket.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel-apartman.js", "/piksel-doga.js", "/piksel-figur.js", "/piksel-simge.js", "/piksel.css", "/piksel-yazi.css"):
             return self._hesap_dosyasi(yol[1:])
-        # Ana sayfa (2026-11-09, depo sahibi: «ilk giriste bizi karsilayacak yer orasi»): hesabina girmis
-        # kisi kokte Ana sayfaya (/gun/) gider; girmemis kisi giris sayfasini gorur (hesap orada acilir).
-        # Eski kart secimi /kartlar/'da durur: guncelleme kutusu ve Merkez dugmesi orada.
         if yol in ("/", "/index.html") and ILK_EKRAN_KABUK:
-            # Yeni kabuk ilk ekran (2026-11-14, plan: yeni kabuk kurulur, eskisi en son kapanir). Eski giris sayfasi,
-            # guncelleme kutusu ve kart secimi /kartlar/'da; Ana sayfa /gun/'da durur. 302: bayrak donerse ezberlenmesin.
+            # Yeni kabuk ilk ekran. Hesap, guncelleme ve sistem paneli /kartlar/'da (kabukta karsiligi yok, faz7-kapanis.md).
             self.send_response(302)
             self.send_header("Location", "/kabuk/")
             self.send_header("Content-Length", "0")
             self.end_headers()
-            return None
-        if yol == "/" and "lifeos_hesap=" in (self.headers.get("Cookie") or ""):
-            self.send_response(302)
-            self.send_header("Location", "/gun/")
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return None
-        if yol == "/gun":
-            self.send_response(301)
-            self.send_header("Location", "/gun/")
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return None
-        if yol.startswith("/gun/ortak/"):
-            ad = yol[len("/gun/ortak/"):]
-            tur = gun.ORTAK.get(ad)            # kapali liste: URL'den yol kurulmaz
-            if not tur:
-                return self.send_error(404)
-            with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
-                govde = f.read()
-            self.send_response(200)
-            self.send_header("Content-Type", tur)
-            self.send_header("Content-Length", str(len(govde)))
-            self.send_header("Cache-Control", "no-store")
-            self.end_headers()
-            self.wfile.write(govde)
-            return None
-        if yol == "/gun/":
-            govde = ayar.sayfaya_ekle(gun.gun_html(tema=ayar.oku()["ayar"].get("lifeos.tema.secim"), host=HOST, tek=TEK_KAPI)).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(govde)))
-            self.send_header("Cache-Control", "no-store")
-            self.end_headers()
-            self.wfile.write(govde)
             return None
         if yol == "/api/guncelleme":
             return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))
         if yol == "/api/durum":
             ayakta = hkm_ayakta()
             return self._json(200, {"hkm": ayakta, "hkm_eski": bool(ayakta and hkm_eski())})
-        if yol.startswith("/logo/"):
-            return self._logo(yol[len("/logo/"):])
         if yol.startswith("/marka/"):
             return self._marka(yol[len("/marka/"):])
         govde = ayar.sayfaya_ekle(giris_html(tema=ayar.oku()["ayar"].get("lifeos.tema.secim"))).encode("utf-8")
@@ -1994,21 +1496,6 @@ class Giris(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(govde)))
         self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(govde)
-
-    def _logo(self, ad):
-        """/logo/<sistem>.png — kapali listeden (LOGOLAR); URL'den yol kurulmaz."""
-        parca = LOGOLAR.get(ad[:-4]) if ad.endswith(".png") else None
-        tam = os.path.join(KOK, *parca) if parca else None
-        if not tam or not os.path.exists(tam):
-            return self.send_error(404)
-        with open(tam, "rb") as f:
-            govde = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", "image/png")
-        self.send_header("Content-Length", str(len(govde)))
-        self.send_header("Cache-Control", "max-age=3600")
         self.end_headers()
         self.wfile.write(govde)
 
@@ -2054,14 +1541,6 @@ class KuyrukluSunucu(ThreadingHTTPServer):
         if isinstance(_sys.exc_info()[1], (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
             return
         super().handle_error(request, client_address)
-
-
-def _dist_isit(kok):
-    """Ilk bolme ~100 ms; ilk acilis beklemesin diye sunucu kurulunca yapilir."""
-    try:
-        _dist_parcalari(kok)
-    except OSError:
-        pass
 
 
 def _cikti_utf8():

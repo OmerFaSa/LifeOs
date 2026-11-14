@@ -47,7 +47,6 @@ print("Eski araç haritası")
 h = katalog.harita()
 dogru("her ad tam bir yerde (kapı ya da arşiv)", all(k in katalog.KAPILAR or k == "arşiv" for k, _ in h.values()))
 dogru("her eşlemenin nedeni var", all(n for _, n in h.values()))
-dogru("her kapının ardında en az bir eski araç", all(katalog.kapi_katalogu(k) for k in katalog.KAPILAR))
 eski = dict(katalog.ESKI)
 katalog.ESKI["ara"] = (katalog.ESKI["ara"][0], katalog.ESKI["ara"][1] + " soru_sor")
 try:
@@ -60,7 +59,7 @@ katalog.ESKI.update(eski)
 
 print("İstemci kaydının taranması (depodaki kaynak)")
 s = katalog.sayim()
-dogru("tarama boş değil (%d araç)" % s["toplam"], s["toplam"] >= 100, s["toplam"])
+dogru("tarama boş değil (%d araç)" % s["toplam"], s["toplam"] >= 40, s["toplam"])
 dogru("eşlenmeyen eski araç yok", s["eslenmeyen"] == [], s["eslenmeyen"])
 dogru("haritada bayat ad yok", s["bayat"] == [], s["bayat"])
 dogru("kapı sayıları toplamı = taranan", sum(s["kapi_basina"].values()) == s["toplam"], s)
@@ -69,17 +68,15 @@ dogru("model kataloğu + yetki = toplam", s["model_katalogu"] + s["yetki"] == s[
 print("Tarayıcı geçici kaynakta")
 t = tempfile.mkdtemp(prefix="lifeos-katalog-test-")
 Path(t, "brand", "ortak").mkdir(parents=True)
-Path(t, "AYS", "src", "js", "core").mkdir(parents=True)
 Path(t, "brand", "ortak", "king-arac.js").write_text("liste.push({ ad: 'not_ara' }); dis('pc_dosya_ac', 1); {ad: 'eylem_'}",
                                                      encoding="utf-8")
-Path(t, "AYS", "src", "js", "core", "tools.js").write_text("  { name: 'konular', x:1 },\n", encoding="utf-8")
 Path(t, "brand", "ortak", "yetki.js").write_text("{ id: 'tema', seviye: 1 }", encoding="utf-8")
 b = katalog.tara(t)
-dogru("ad, dis(), AYS öneki, yetki öneki bulunur; «eylem_» öneki atlanır",
-      sorted(b) == ["ays_konular", "not_ara", "pc_dosya_ac", "yetki:tema"], sorted(b))
+dogru("ad, dis(), yetki öneki bulunur; «eylem_» öneki atlanır",
+      sorted(b) == ["not_ara", "pc_dosya_ac", "yetki:tema"], sorted(b))
 s = katalog.sayim(b)
 dogru("eksik modül dosyası atlanır, sayım eşler", s["eslenmeyen"] == [] and s["kapi_basina"]["not"] == 1
-      and s["kapi_basina"]["ogren"] == 1 and s["kapi_basina"]["dis_dunya"] == 1 and s["kapi_basina"]["ayar"] == 1, s)
+      and s["kapi_basina"]["dis_dunya"] == 1 and s["kapi_basina"]["ayar"] == 1, s)
 dogru("tanınmayan ad «eşlenmeyen» olur", katalog.sayim({"yeni_arac": ["x"]})["eslenmeyen"] == ["yeni_arac"])
 shutil.rmtree(t, ignore_errors=True)
 

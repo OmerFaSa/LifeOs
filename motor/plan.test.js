@@ -8,13 +8,14 @@ const assert = require('assert'), fs = require('fs'), path = require('path'), cp
 const P = require('./plan.js');
 
 const KOK = path.join(__dirname, '..');
-const kaynak = f => fs.readFileSync(path.join(KOK, f), 'utf8');
+const ESKI = path.join(__dirname, 'eski');   // kapanis: esitlik icin donmus eski modul kaynaklari (belgeler/ekip/sadelesme/faz7-kapanis.md)
+const kaynak = f => fs.readFileSync(path.join(/^(AYS|SPI|ESP)\//.test(f) ? ESKI : KOK, f), 'utf8');
 
 globalThis.window = globalThis;
 globalThis.yz = s => s;
 globalThis.LIFEOS = { PARCA:{ yazilar(){} } };
 globalThis.R = { U:{} };
-['data/curriculum.js', 'data/activities.js', 'core/istisna.js'].forEach(f => require(path.join(KOK, 'AYS/src/js', f)));
+['data/curriculum.js', 'data/activities.js', 'core/istisna.js'].forEach(f => require(path.join(ESKI, 'AYS/src/js', f)));
 const AYS = globalThis.R;
 
 let n = 0, kirmizi = 0;

@@ -5,10 +5,8 @@
    Bugun: sunucu.py tek surecte dort kapi (4180 giris + Gun, 4173 AYS, 4183 SPI,
    4193 ESP) ve HKM ayri surec (4200). Burada hepsi TEK ADRES, TEK SUREC:
 
-     /                 giris sayfasi (sunucu.Giris), /gun/ Ana sayfa (gun.py)
-     /ays/ /spi/ /esp/ uc modulun dist'i (sunucu.Sunucu, yolun oneki atilarak)
-     /api/...          4180'in butun API'leri (hesap, ayar, ice, muzik, zemin, planlama,
-                       gun/cumle, guncelle, durum) + modul kapisinin merkez/ac (uzak/merkez tek kapida 410)
+     /                 yeni kabuga (/kabuk/) yonlenir; hesap ve sistem paneli /kartlar/ (sunucu.Giris)
+     /api/...          butun API'ler (hesap, ayar, ice, muzik, zemin, planlama, guncelle, durum; uzak/merkez 410)
      /api/hkm/<yol>    HKM cekirdegi AYNI SURECTE (HKM/daemon.Handler, /api/<yol> olarak)
      /kabuk/           yeni kabuk (Faz 2): kabuk/ + onun istedigi motor/, alan/ icerigi; kapali liste
 
@@ -23,35 +21,26 @@
 import argparse
 import os
 import sys
-import threading
-from functools import partial
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
 sys.dont_write_bytecode = True
 sys.path.insert(0, SISTEM)
 import sunucu  # noqa: E402
-from sunucu import Giris, KOK, HOST, KuyrukluSunucu, Sunucu, KABUK_KOKLER, KABUK_TEK, kabuk_dosyasi  # noqa: E402
+from sunucu import Giris, KOK, HOST, KuyrukluSunucu, KABUK_KOKLER, KABUK_TEK, kabuk_dosyasi  # noqa: E402
 import uzak  # noqa: E402
 
 ETKIN = True           # kapanis: tek kapi devrede (sahibin anahtari main'de bu satirdir)
 ETKIN_PORT = 4180
 DENEME = False         # main: --port ile acilan deneme/sinama kapisi calisan sistemi guncellemez, yeniden baslatmaz
 
-MODULLER = {k.lower(): k for k, *_ in sunucu.SISTEMLER}     # ays -> AYS
-_SINIF = {}            # ays -> (Sunucu alt sinifi, src klasoru)
-for _ad, _klasor in MODULLER.items():
-    _src = os.path.join(KOK, _klasor, "src")
-    if os.path.isdir(_src):
-        _SINIF[_ad] = (type("Sunucu_" + _klasor, (Sunucu,), {"repo": os.path.join(KOK, _klasor)}), _src)
-
 # Giris'in kok sayfalari; kalan her bilinmeyen yol 404 (Giris her seye giris sayfasini veriyordu).
 KOK_SAYFALAR = ("/", "/index.html", "/kartlar", "/kartlar/")
 # 4180'in sabit dosyalari ve oneklari (Giris.do_GET'teki liste ve dallar).
 KOK_DOSYALAR = ("/hesap.js", "/gocpaket.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js",
                 "/piksel.js", "/piksel-apartman.js", "/piksel-doga.js", "/piksel-figur.js", "/piksel-simge.js",
-                "/piksel.css", "/piksel-yazi.css", "/gun", "/gun/", "/api/guncelleme", "/api/durum")
+                "/piksel.css", "/piksel-yazi.css", "/api/guncelleme", "/api/durum")
 KOK_ONEKLER = ("/api/hesap/", "/api/kabuk/", "/api/kalite/", "/api/ayar", "/api/ice", "/api/muzik", "/api/zemin/", "/api/planlama",
-               "/gun/ortak/", "/logo/", "/marka/")
+               "/marka/")
 _ISTEK = ("rfile", "wfile", "connection", "request", "client_address", "server", "headers", "command",
           "path", "request_version", "requestline", "raw_requestline", "close_connection")
 
@@ -82,8 +71,7 @@ def hkm_kur(config_yolu=None):
 
 
 def _hkm_ayni_surecte(port):
-    """Gun cumlesi ve cihazin Merkez yolu bu surecin HKM'sine, bu kapinin portundan gider."""
-    sunucu.gun_cumlesi = partial(sunucu.gun_cumlesi, adres="http://%s:%d/api/hkm/king/cumle" % (HOST, port), jeton=HKM["jeton"])
+    """Cihazin Merkez yolu (hesap.py soz 30) bu surecin HKM'sine, bu kapinin portundan gider."""
     # Cihazin Merkez yolu (hesap.py soz 30) da bu surecin HKM'sine gider, 4200'e degil.
     sunucu.hesap.hkm_hedef = lambda: ("http://%s:%d/api/hkm" % (HOST, port), HKM["jeton"])
 
@@ -121,17 +109,10 @@ class TekKapi(Giris):
     def _yonel(self):
         """Istegi kime devredecegine karar verir; kendi (Giris) islerse False."""
         yol = self.path.split("?", 1)[0].split("#", 1)[0]
-        parca = yol.split("/")
-        if len(parca) > 1 and parca[1] in _SINIF:
-            ad = parca[1]
-            if yol == "/" + ad:
-                return self._yonlendir("/%s/%s" % (ad, self.path[len(yol):])) or True
-            sinif, src = _SINIF[ad]
-            return self._devret(sinif, self.path[len(ad) + 1:], directory=src) or True
         if yol in ("/", "/index.html"):
-            # Tek kapida ilk ekran yeni kabuktur (plan: yeni kabuk kurulur, eskisi en son kapanir). Eski giris
-            # sayfasi ve kontrol paneli /kartlar/ adresinde durur.
-            return self._yonlendir("/kabuk/", 302) or True    # 302: bayrak geri alinirsa tarayici ezberlemesin
+            # Ilk ekran yeni kabuktur; hesap ve sistem paneli /kartlar/'da. Sorgu korunur (?bagla=… cihaz baglama QR'i).
+            q = self.path[len(yol):]
+            return self._yonlendir("/kabuk/" + (q if q.startswith("?") else ""), 302) or True
         if yol == "/api/hkm" or yol == "/api/hkm/yeniden":
             return False                                    # 4180'in eski anlami (guncelleme_izinli)
         if yol.startswith("/api/hkm/"):
@@ -142,31 +123,15 @@ class TekKapi(Giris):
             # A10 (faz7-cihaz-zemini.md acik soru 2): tek kapida hesapsiz Merkez yolu yok; ortak jeton cihaza
             # gitmez, cihaz hesabiyla girip kendi anahtarini /api/hesap/merkez'den alir. hesap.js 410'da sessizce vazgecer.
             return self._json(410, {"hata": "Bu yol kapandı: hesabınla gir, Merkez bağlantısı Hesap › Merkez'de."}) or True
-        if yol == "/api/merkez/ac" or yol in (sunucu.DIST_BETIK, sunucu.DIST_STIL) \
-                or yol.startswith(("/img/seviye/", "/img/marka/")):
-            sahip = self._dist_sahibi() if yol in (sunucu.DIST_BETIK, sunucu.DIST_STIL) else next(iter(_SINIF.values()))
-            if not sahip:                                   # surum hicbir modulun degil
-                return self.send_error(404) or True
-            return self._devret(sahip[0], self.path, directory=sahip[1]) or True
         if DENEME and yol in ("/api/guncelle", "/api/yeniden"):
             return self._json(403, {"durum": "engel", "mesaj": "Deneme kapısında kapalı."}) or True
         if yol == "/kabuk":
             return self._yonlendir("/kabuk/") or True
         if yol in KABUK_TEK or yol.split("/")[1] in KABUK_KOKLER:
             return self._kabuk_sun(kabuk_dosyasi(yol)) or True
-        if yol in KOK_SAYFALAR or yol in KOK_DOSYALAR or yol.startswith(KOK_ONEKLER) or yol == "/api/gun/cumle" \
-                or yol in ("/api/guncelle", "/api/yeniden"):
+        if yol in KOK_SAYFALAR or yol in KOK_DOSYALAR or yol.startswith(KOK_ONEKLER) or yol in ("/api/guncelle", "/api/yeniden"):
             return False
         return self.send_error(404) or True
-
-    def _dist_sahibi(self):
-        """/dist-betik.js?v=X: surum hangi modulun dist'iyse onun isleyicisi (ucunun adresi ayni)."""
-        v = self.path.partition("?v=")[2]
-        for sinif, src in _SINIF.values():
-            bolum = sunucu._dist_parcalari(sinif.repo) if v else None
-            if bolum and v in (bolum[2], bolum[4]):
-                return sinif, src
-        return None
 
     def do_GET(self):
         if not self._yonel():
@@ -193,12 +158,9 @@ def kur(port, hkm=True, hkm_config=None):
     """Tek kapi sunucusu (henuz serve_forever yok). hkm=False: HKM ayri surecte kalir, /api/hkm/ 503."""
     srv = KuyrukluSunucu((HOST, port), TekKapi)
     sunucu.GIRIS_PORT = srv.server_address[1]     # guncelleme/gun cumlesi Origin denetimi bu kapiya bakar
-    sunucu.TEK_KAPI = True                        # Gun sayfasi modulleri /ays/ /spi/ /esp/ yolundan acar
     os.environ["LIFEOS_TASIMA"] = "1"             # koken tasimasi (kabuk/tasima.js): yalniz tek kapi devredeyken
     if hkm and hkm_kur(hkm_config):
         _hkm_ayni_surecte(srv.server_address[1])
-    for sinif, _ in _SINIF.values():
-        threading.Thread(target=sunucu._dist_isit, args=(sinif.repo,), daemon=True).start()
     return srv
 
 

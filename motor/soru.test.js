@@ -12,7 +12,8 @@ const assert = require('assert'), fs = require('fs'), path = require('path');
 const S = require('./soru.js'), Yol = require('./yol.js'), Tekrar = require('./tekrar.js');
 
 const KOK = path.join(__dirname, '..');
-const kaynak = f => fs.readFileSync(path.join(KOK, f), 'utf8');
+const ESKI = path.join(__dirname, 'eski');   // kapanis: esitlik icin donmus eski modul kaynaklari (belgeler/ekip/sadelesme/faz7-kapanis.md)
+const kaynak = f => fs.readFileSync(path.join(/^(AYS|SPI|ESP)\//.test(f) ? ESKI : KOK, f), 'utf8');
 const T0 = Date.UTC(2026, 10, 13, 9), DK = 60000;
 const E = S.ETIKET;
 
@@ -39,7 +40,7 @@ R.Model = new Function(['examNet', 'testNet', 'blankCertainty'].map(a => fonk('A
 const depo = {};
 R.Store = { get:async k => (k in depo ? JSON.parse(depo[k]) : null), set:async (k, v) => { depo[k] = JSON.stringify(v); }, remove:async k => { delete depo[k]; } };
 ['data/scoring.js', 'data/reference.js', 'data/curriculum.js', 'data/subjects.js',
-  'core/calc.js', 'core/denemeanaliz.js', 'core/gelecek.js', 'core/examrun.js'].forEach(f => require(path.join(KOK, 'AYS/src/js', f)));
+  'core/calc.js', 'core/denemeanaliz.js', 'core/gelecek.js', 'core/examrun.js'].forEach(f => require(path.join(ESKI, 'AYS/src/js', f)));
 const C = R.Calc, DA = R.DenemeAnaliz, GL = R.Gelecek, X = R.ExamRun;
 
 /* Belirlenimci rastgele (mulberry32): fark testleri her koşuda aynı girdiyi üretir. */
@@ -372,7 +373,7 @@ it('soru modeli: seçmeli, iki seçenekli doğru/yanlış, açık uçlu; AYS iç
   assert.ok(/ölçüt/.test(S.soruDenetle({ tur:'acik', soru:'x', dogru:'y' })));
   assert.ok(/tür/.test(S.soruDenetle({ tur:'eslestirme', soru:'x' })));
   assert.ok(/anahtar/.test(S.soruDenetle({ soru:'x', sec:['a', 'b'], dogru:'C' })));
-  require(path.join(KOK, 'AYS/src/js/data/derin-af.js'));
+  require(path.join(ESKI, 'AYS/src/js/data/derin-af.js'));
   const konu = Object.keys(R.KONU_DERIN)[0], q = S.GOC.aysSoru(R.KONU_DERIN[konu].sorular[0], konu + '#0', konu, 'ayt-fizik');
   assert.strictEqual(S.soruDenetle(q), null);
   assert.strictEqual(q.durum, 'taslak');

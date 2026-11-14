@@ -28,22 +28,13 @@ SISTEM = os.path.join(KOK, "sistem")
 H = "127.0.0.1"
 YASAK = {4173, 4180, 4183, 4193, 4200} | set(range(5100, 5200))
 
-# Karsilastirma tabani: kapanistan once sunucu.main()'in kurdugu kapilarin aynisi (Giris + uc modul Sunucu'su),
-# ama sunucu.py artik kendi kapisini acmadigi icin burada elle kurulur. Zamanlayici yok.
+# Karsilastirma tabani: Giris'in kendisi (tek kapi onun alt sinifi), ayri surecte; zamanlayici yok.
 ESKI = r"""
-import os, sys, threading
-from functools import partial
+import os, sys
 sys.path.insert(0, %r)
 import sunucu
-g, a, s, e = map(int, os.environ["TK_PORTLAR"].split(","))
-sunucu.GIRIS_PORT = g
-sunucu.SISTEMLER = [(k, ad, p, d, t) for (k, ad, _, d, t), p in zip(sunucu.SISTEMLER, (a, s, e))]   # Giris /ays/ -> modul kapisi
-for (k, *_), p in zip(sunucu.SISTEMLER, (a, s, e)):
-    kok = os.path.join(sunucu.KOK, k)
-    sinif = type("Sunucu_" + k, (sunucu.Sunucu,), {"repo": kok})
-    m = sunucu.KuyrukluSunucu((sunucu.HOST, p), partial(sinif, directory=os.path.join(kok, "src")))
-    threading.Thread(target=sunucu.surekli_hizmet, args=(m,), daemon=True).start()
-sunucu.surekli_hizmet(sunucu.KuyrukluSunucu((sunucu.HOST, g), sunucu.Giris))
+sunucu.GIRIS_PORT = int(os.environ["TK_GIRIS"])
+sunucu.surekli_hizmet(sunucu.KuyrukluSunucu((sunucu.HOST, sunucu.GIRIS_PORT), sunucu.Giris))
 """ % SISTEM
 
 
@@ -129,10 +120,10 @@ class Topoloji:
 
 
 def eski_ac(kok):
-    """Bugunku topoloji: sunucu.py (4 kapi) + HKM daemon.py; ikisi de gecici port/veri."""
-    port = {"giris": bos_port(), "ays": bos_port(), "spi": bos_port(), "esp": bos_port(), "hkm": bos_port()}
+    """Karsilastirma: Giris + ayri HKM daemon.py; ikisi de gecici port/veri."""
+    port = {"giris": bos_port(), "hkm": bos_port()}
     o = ortam(kok, port["hkm"])
-    o["TK_PORTLAR"] = "%d,%d,%d,%d" % (port["giris"], port["ays"], port["spi"], port["esp"])
+    o["TK_GIRIS"] = str(port["giris"])
     t = Topoloji(kok)
     t.ac(["-c", ESKI], o)
     t.ac([os.path.join(KOK, "HKM", "daemon.py")], o)
@@ -173,50 +164,24 @@ def ayni(ad, a, b, govde=True):
 
 def sina(eski, tek, kokler=()):
     g, T = eski["giris"], tek
-    print("\nGiris ve Gun (4180 ↔ /)")
-    for yol in ("/kartlar/", "/gun/", "/hesap.js", "/piksel.css", "/gun/ortak/kabuk.js", "/logo/ays.png",
-                "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
-        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/gun/", "/kartlar/"))
+    print("\nGiris (4180 ↔ /)")
+    for yol in ("/kartlar/", "/hesap.js", "/piksel.css", "/marka/favicon.png", "/api/ayar", "/api/guncelleme", "/api/planlama"):
+        ayni("GET " + yol, iste(g, yol), iste(T, yol), govde=yol not in ("/api/guncelleme", "/kartlar/"))
     k, b = iste_yonsuz(T, "/")
     ke, be = iste_yonsuz(g, "/")
     dene("kök iki kapıda da yeni kabuğa gider (302 /kabuk/)", (k, b.get("Location")) == (302, "/kabuk/") == (ke, be.get("Location")),
          "%s %s | %s %s" % (k, b.get("Location"), ke, be.get("Location")))
-    ek, tk = iste(g, "/kartlar/")[2].decode("utf-8"), iste(T, "/kartlar/")[2].decode("utf-8")
-    dene("giriş kartları: eski kapıda porta, tek kapıda yola bağlanır",
-         all('href="http://%s:%d/"' % (H, p_) in ek and 'href="/%s/"' % m in tk and 'href="http://%s:%d/"' % (H, p_) not in tk
-             for m, p_ in (("ays", 4173), ("spi", 4183), ("esp", 4193))))     # kart adresleri KARTLAR'dan: sabit kapilar
-    eg, tg = iste(g, "/gun/")[2], iste(T, "/gun/")[2]
-    dene("Gün sayfası: eski kapıda modüller porttan, tek kapıda yoldan açılır; başka fark yok",
-         b"var TEK = false;" in eg and b"var TEK = true;" in tg and eg.replace(b"var TEK = false;", b"var TEK = true;") == tg)
+    tk = iste(T, "/kartlar/")[2].decode("utf-8")
+    dene("hesap ve sistem paneli: modül kartı yok, yeni kabuğa bağlanır", 'href="/kabuk/"' in tk and 'data-modul="ays"' not in tk)
     ayni("GET /api/zemin/gunduz", iste(g, "/api/zemin/gunduz"), iste(T, "/api/zemin/gunduz"))
     ayni("GET /api/muzik", iste(g, "/api/muzik"), iste(T, "/api/muzik"))
     ayni("GET /api/ice", iste(g, "/api/ice"), iste(T, "/api/ice"))
     k, b = iste_yonsuz(T, "/", {"Cookie": "lifeos_hesap=1"})
     dene("çerezle de / → 302 /kabuk/ (tek kapıda ilk ekran yeni kabuk)", k == 302 and b.get("Location") == "/kabuk/", (k, b.get("Location")))
-    dene("/gun → 301 /gun/", iste_yonsuz(T, "/gun")[0] == 301)
-
-    print("\nModüller (4173/4183/4193 ↔ /ays/ /spi/ /esp/)")
-    for ad in ("ays", "spi", "esp"):
-        a, b = iste(eski[ad], "/"), iste(T, "/%s/" % ad)
-        ayni("GET /%s/ (dist sayfası)" % ad, a, b)
-        v = re.search(rb'/dist-betik\.js\?v=([0-9a-f]+)', b[2])
-        dene("/%s/ dist betiği bölünmüş" % ad, v, "sayfada /dist-betik.js?v= yok (src yedeği?)")
-        if v:
-            yol = "/dist-betik.js?v=" + v.group(1).decode()
-            ayni("GET %s (%s)" % (yol[:30], ad), iste(eski[ad], yol), iste(T, yol))
-        s = re.search(rb'/dist-stil\.css\?v=([0-9a-f]+)', b[2])
-        if s:
-            yol = "/dist-stil.css?v=" + s.group(1).decode()
-            ayni("GET /dist-stil.css (%s)" % ad, iste(eski[ad], yol), iste(T, yol))
-        ayni("GET /%s/sw.js" % ad, iste(eski[ad], "/sw.js"), iste(T, "/%s/sw.js" % ad))
-        ayni("GET /%s/api/hesap/durum" % ad, iste(eski[ad], "/api/hesap/durum"), iste(T, "/%s/api/hesap/durum" % ad))
-        k, bb = iste_yonsuz(T, "/" + ad)
-        dene("/%s → 301 /%s/" % (ad, ad), k == 301 and bb.get("Location") == "/%s/" % ad, (k, bb.get("Location")))
-    ortak = sorted(os.listdir(os.path.join(KOK, "brand", "seviye", "medya")))[0]
-    ayni("GET /ays/img/seviye/" + ortak, iste(eski["ays"], "/img/seviye/" + ortak), iste(T, "/ays/img/seviye/" + ortak))
-    ayni("GET /img/seviye/ (kökte)", iste(eski["ays"], "/img/seviye/" + ortak), iste(T, "/img/seviye/" + ortak))
-    dene("bilinmeyen dist sürümü 404", iste(T, "/dist-betik.js?v=000000000000")[0] == 404)
-    dene("/ays/../HKM/config.json dışarı çıkmaz", iste(T, "/ays/%2e%2e/%2e%2e/HKM/config.example.json")[0] == 404)
+    k, b = iste_yonsuz(T, "/?bagla=ABC123")
+    dene("kök sorguyu korur (cihaz bağlama QR'i)", (k, b.get("Location")) == (302, "/kabuk/?bagla=ABC123"), (k, b.get("Location")))
+    for yol in ("/gun/", "/gun", "/logo/ays.png", "/ays/", "/spi/", "/esp/", "/ays", "/dist-betik.js?v=000000000000", "/img/seviye/x.png"):
+        dene("eski kapı yolu %s → 404 (kapanış)" % yol, iste(T, yol)[0] == 404, iste(T, yol)[0])
 
     print("\nHesap ve köken kuralları")
     ayni("GET /api/hesap/durum", iste(g, "/api/hesap/durum"), iste(T, "/api/hesap/durum"))
@@ -233,15 +198,10 @@ def sina(eski, tek, kokler=()):
     kendi = iste(T, "/api/hesap/durum", basliklar={"Origin": "http://%s:%d" % (H, T)})
     dene("aynı köken (tek kapının kendisi) geçer", kendi[0] == 200, kendi[0])
     vekil = {"X-Forwarded-For": "100.100.1.2"}
-    a, b = iste(eski["ays"], "/api/ayar", basliklar=vekil), iste(T, "/api/ayar", basliklar=vekil)
-    # modul kapisiyla (vekil isareti orada) kod+govde; onbellek basliklari 4180'inkidir (Pragma/Expires yok)
-    dene("vekil (Tailscale) isteği «bu bilgisayar» sayılmaz (/api/ayar, modül kapısıyla aynı)",
-         (a[0], a[2]) == (b[0], b[2]), (a[0], b[0], b[2][:120]))
+    b = iste(T, "/api/ayar", basliklar=vekil)
+    dene("vekil (Tailscale) isteği «bu bilgisayar» sayılmaz (/api/ayar 403)", b[0] == 403, (b[0], b[2][:120]))
     dene("vekil durum: yerel değil", json.loads(iste(T, "/api/hesap/durum", basliklar=vekil)[2]).get("yerel") is False)
-    ayni("POST /api/gun/cumle başlıksız 403", iste(g, "/api/gun/cumle", "POST", b"{}"), iste(T, "/api/gun/cumle", "POST", b"{}"))
     ayni("POST /api/hkm izinsiz 403", iste(g, "/api/hkm", "POST", b""), iste(T, "/api/hkm", "POST", b""))
-    ayni("POST /api/merkez/ac izinsiz 403", iste(eski["ays"], "/api/merkez/ac", "POST", b""), iste(T, "/api/merkez/ac", "POST", b""))
-    dene("eski kapı: POST /api/uzak/merkez yerelden 403", iste(eski["ays"], "/api/uzak/merkez", "POST", b"")[0] == 403)
     for bas in ({}, {"X-LifeOS": "hesap", "X-Forwarded-For": "100.64.0.9"}):
         k, _, gv = iste(T, "/api/uzak/merkez", "POST", b"", bas)
         dene("tek kapı: hesapsız Merkez yolu kapalı (410), ortak jeton yok%s" % (" (vekil)" if bas else ""),
@@ -330,9 +290,6 @@ def sina(eski, tek, kokler=()):
          iste(T, "/api/kalite/etiket/adaylar?set=x")[0])
     dene("etiket adayları vekilden (Tailscale) gelen isteğe verilmez", iste(T, "/api/kalite/etiket/adaylar?set=arama", basliklar=vekil)[0] == 403,
          iste(T, "/api/kalite/etiket/adaylar?set=arama", basliklar=vekil)[0])
-    for ad in ("ays", "spi", "esp"):
-        k, b = iste_yonsuz(g, "/%s/" % ad)
-        dene("eski 4180: /%s/ modülün kendi kapısına yönlenir" % ad, k == 302 and b.get("Location", "").endswith(":%d/" % eski[ad]), "%s %s" % (k, b.get("Location")))
 
     for yol in ("/kabuk/kabuk.test.js", "/alan/denetle.py", "/kabuk/%2e%2e/sistem/sunucu.py", "/motor/"):
         dene("eski 4180: %s 404" % yol, iste(g, yol)[0] == 404, iste(g, yol)[0])
