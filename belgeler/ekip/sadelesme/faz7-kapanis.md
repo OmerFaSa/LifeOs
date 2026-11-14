@@ -6,6 +6,7 @@ Dal `kapanis` (origin/main c293d421'den), birleştirilmedi, gönderilmedi. Her a
 1. **Tek kapı devrede, eski kapılar kalktı** — `ETKIN = True`; `sistem/baslat.py` yalnız `sistem/tekkapi.py`'yi açar (Merkez aynı süreçte); `sunucu.py`'nin kendi kapıları (`main`, `_sunucu_kur`), ayrı HKM sürecinin yardımcıları (4200'e bakan `hkm_ac/hkm_yeniden/hkm_eski`, bekçi) ve ev ağı kapıları (`TelefonSunucu`, kurulum sayfası 5180, `sistem/telefon.py` kendi CA'sı, `/api/hesap/ev-agi-ac`, `sertifika-tamam`) silindi. Tailscale yalnız 443 → 4180.
 2. **Eski modüller kalktı** — `AYS/`, `SPI/`, `ESP/` (src, dist, tests, tools; 1 571 dosya) silindi; motor eşitlik testlerinin okuduğu 27 dosya `motor/eski/` altına donduruldu. Eski Gün sayfası (`sistem/gun.py`), Giriş'in modül kartları, `/logo/`, modül dist sunucusu (`sunucu.Sunucu`, bölünmüş dist önbelleği) ve tek kapının `/ays/ /spi/ /esp/`, `/dist-*`, `/img/seviye/`, `/api/merkez/ac`, `/api/gun/cumle` yolları gitti (artık 404). Kabuk haritasında eski modül bağlantısı yok. Yalnız eski modülleri sınayan 57 araç ve test silindi.
 3. **HKM yüzü kalktı, BAM kalmadı** — `HKM/web/` (Merkez ve atölye sayfaları), `HKM/brand/`, `HKM/tools/yuz.js`, `HKM/tests/test_yuz.py` ve daemon'un `/`, `/atolye`, `/img/seviye/`, `/img/marka/`, `/brand/` uçları silindi. HKM çekirdeği (veritabanı, King, `/api/*`) tek kapının `/api/hkm/` altında ve King MCP'de aynen. **BAM silinmedi** (açık soru 2): `HKM/core/king.py` kayıt gövdesini, iş emrini ve izi `bam.kayit_getir/is_ac/iz_ekle` ile tutuyor (27 çağrı; `aktif.py`, `outbox.py` de); BAM'ı kaldırmak, faz5-arama kapısının 3. şartı olan arama dışı işlerin (kayıt sürümleri, Üretim, Planlama) başka motora taşınmasını ister. Ölçüm şartı kalktı ama bu yapısal şart duruyor.
+4. **Kopya dağıtımı kalktı** — `tools/ortak.py`, `tools/seviye.py`, `tools/parca.py` silindi; `brand/ortak/` 229 → 52 dosya (yalnız tek kapının, kabuğun, motor testlerinin ve kalan araçların yüklediği dosyalar). `sistem/sunucu.py`'deki üretilmiş SEVİYE bloğu sahiplenildi (yalnız `/marka/` muhafızı), `HKM/daemon.py`'deki kopyası silindi.
 yazılıyor (sonraki adımlar)
 
 ## Silinenler
@@ -30,6 +31,10 @@ yazılıyor (sonraki adımlar)
 | `HKM/web/index.html`, `HKM/web/merkez.html`, `HKM/brand/` (favicon, logo, intro.mp4), `HKM/tools/yuz.js`, `HKM/tests/test_yuz.py` | HKM yüzü (plan Faz 7: «HKM yüzü kalkar») | kabuk + `/kartlar/`; Merkez verisi `/api/hkm/` |
 | `HKM/daemon.py` `_send_page`, `_send_seviye`, `_send_brand` ve `/`, `/atolye`, `/img/seviye/`, `/img/marka/`, `/brand/` yolları | aynı | kökte 401/404; veri yalnız `/api/*` |
 | HKM testleri: `test_daemon` «yerel yüz jetonsuz» (yerine «yüz yok»), `test_meydan` yüz dosyası okuması, `test_guncelle` `_send_brand` muhafızı | sınadıkları kod yok | — |
+| `tools/ortak.py`, `tools/seviye.py`, `tools/parca.py` | kopya dağıtımı (plan Faz 7); hedef modüller yok | — |
+| `brand/ortak/` içinden 177 dosya (ör. king*.js/css dışı King istemcisi, defter, notum, pano, rehber, ogrenmotor, kavrat, gunveri, tekgun, gunukapat, zemin, minik, tanitim, patrontur, karsilama, ayarlar, giris, layout/base/temel css ve testleri; tam liste `git show --stat` bu commit) | yalnız eski modüllerin, Gün sayfasının ya da HKM yüzünün yüklediği kod | kabuk + motorlar |
+| `sistem/sunucu.py` `_ortak_marka_yolu`, `_ortak_seviye_yolu`, `_ortak_dist_yolu`; `HKM/daemon.py` SEVİYE bloğu | çağıranı kalmadı | `sunucu._guvenli_medya_adi` (`/marka/`) |
+| `tools/ajan.py` «ortak kopya» yasak kuralı, CI «Kopyalar…», «Ortak CSS…» adımları, `tools/sayilar.py` iki denetim satırı | kopya yok | — |
 yazılıyor (sonraki adımlar)
 
 ## Tutulanlar ve nedeni
@@ -45,11 +50,14 @@ yazılıyor (sonraki adımlar)
 - `sistem/sunucu.py` SEVİYE üretilmiş bloğu (`_ortak_*_yolu`): `tools/seviye.py` yayar; adım 4'te.
 - `HKM/core/bam.py` ve 50 dosyadaki BAM adı: King çekirdeğinin kayıt deposu (`bam_kayitlar`, iş emri, iz). Silmek King'in kayıt yolunu kırar (açık soru 2).
 - `HKM/baslat.py`, `HKM/BASLAT.*`, `HKM/baslat.sh`, `HKM/kur.py`, `daemon.main()`: Merkez'i ayrı süreç olarak elle açmanın ve `config.json`'u kurmanın yolu; tek kapı `daemon.hazirla`'yı ve `config.json`'u kullanır. Ayrı süreç yolunun da kalkması ayrı bir karar (açık soru 3).
+- `brand/ortak/` 52 dosya: `/kartlar/` paneli ve kabuğun yüklediği `hesap.js/.css`, `parca.js`, `animasyon.js`, `qr.js`, `muzik.js`, `gocpaket.js`, `piksel*.js/.css`, `piksel-yazi.css`; motor testlerinin yüklediği `tarih.js`, `bicim.js`, `usta.js`, `ogret.js`; `king/katalog.py`'nin taradığı `king-arac.js`, `yetki.js`; kalan araçların okuduğu `bilinc.js`, `kisi.js`, `merkezayar.js`, `medya.js` (künye, `marka.py`), `simge.js`, `vitrin.css` (`vitrin.py`), `sinematik.*` (`tools/sinematik`), `sw.js`, `urun.js` ve testleri. Bunların `*.test.js`'lerini artık hiçbir koşucu çalıştırmıyor (modüllerin `runtests.js`'i taşıyordu): açık soru 4.
+- `brand/seviye/` (seviye/rütbe medyası, `ortak_yol.py`, `perde.html`): `tools/marka.py --sina` `ortak_yol.py`'yi sınar; §0.1'e göre seviye arşive gider, ayrı karar (açık soru 5).
 yazılıyor (sonraki adımlar)
 
 ## Taşınanlar
 - `motor/eski/AYS|SPI|ESP/src/js/...` ← aynı yoldaki eski modül dosyaları (27); `motor/{kayit,plan,soru,tekrar}.test.js` `ESKI` köküne bakar.
 - `tools/package.json`, `tools/package-lock.json` ← `SPI/package*.json` (Playwright, yalnız denetim). `kabuk_gez.js`, `bilesen_goruntu.js` `tools/node_modules/playwright`'ı yükler; CI `cd tools && npm ci`.
+- `motor/eski/brand/ortak/king-devrim.js` ← `brand/ortak/king-devrim.js` (Tekrar göç testi eski King ders kaydının biçimini kaynağından okur).
 yazılıyor (sonraki adımlar)
 
 ## CI

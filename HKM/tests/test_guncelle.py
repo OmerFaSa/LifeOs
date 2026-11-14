@@ -437,13 +437,6 @@ def run():
             sunucu.guncelle.uygula = eski
     test("giris sayfasi: izinsiz POST 403, izinli POST guncellemeyi cagirir", t_http)
 
-    # 2026-10-26 denetim: Windows'ta «E:» parcasi os.path.join'i baska
-    # surucuye atlatir; /dist/E:/LifeOS-yedek/ telefon portundan depo
-    # disini (hesap yedegi dahil) listeliyordu. Dort sunucu ve HKM sinanir.
-    def t_surucu_harfi():
-        import daemon
-        eq(daemon._ortak_seviye_yolu("/img/seviye/D:foto.png", KOK), None)
-    test("yol muhafizi surucu harfiyle depo disina cikmaz (seviye)", t_surucu_harfi)
 
     def t_sayfa():
         """Giris sayfasi: dort sistemin KENDI logosu, surum, guncelleme kutusu."""

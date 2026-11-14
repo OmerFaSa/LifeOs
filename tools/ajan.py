@@ -492,12 +492,9 @@ YASAK_BOLGE = [
 def yasak_bolge(yollar):
     """[(yol, neden)] — ofisin dokunamayacagi yollar. Saf islev."""
     out = []
-    ortak = {p.name for p in (KOK / "brand" / "ortak").glob("*.js")}   # modullerdeki kopyalari ortak.py --yay yazar
     for y in yollar:
         y = re.sub(r"^(\./)+", "", str(y).replace("\\", "/"))
         neden = next((n for d, n in YASAK_BOLGE if d.search(y)), None)
-        if not neden and re.match(r"(AYS|SPI|ESP)/src/(js/core|tests)/", y) and y.rsplit("/", 1)[-1] in ortak:
-            neden = "ortak kopya (brand/ortak'tan yayılır; elle düzenlenmez)"
         if neden:
             out.append((y, neden))
     return out

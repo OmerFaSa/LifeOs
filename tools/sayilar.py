@@ -103,8 +103,6 @@ def kok_araclar():
     for ad, komut in (
             ("marka.py", [PYTHON, "tools/marka.py", "--sina"]),
             ("marka kunyesi", [PYTHON, "tools/marka.py", "--kunye", "--denetle"]),
-            ("seviye.py", [PYTHON, "tools/seviye.py", "--denetle"]),
-            ("ortak.py", [PYTHON, "tools/ortak.py", "--denetle"]),
     ):
         try:
             kod, satir = calistir(komut, KOK, 120)

@@ -272,7 +272,7 @@ it('göç 6 · Öğretme motoru (gerçek ogret.js isle): vade aynen, yanlış sa
 });
 
 it('göç 7 · King dersleri: vade aynen, bitti kapanır, sorulmamış yeni; hepsi taslak, tekrara girmez', () => {
-  const src = kaynak('brand/ortak/king-devrim.js');
+  const src = fs.readFileSync(path.join(ESKI, 'brand/ortak/king-devrim.js'), 'utf8');
   assert.ok(/KD_ARALIK = \[1, 3, 7\]/.test(src));
   assert.ok(/d\.tekrar\[i\] = \{ n, sonraki:gunIleri\(KD_ARALIK\[n\]\) \}/.test(src));
   const ders = { id:'kd1', sorular:[{ soru:'a' }, { soru:'b' }, { soru:'c' }, { soru:'d' }],

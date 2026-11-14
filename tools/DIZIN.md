@@ -5,7 +5,6 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 ## Denetim
 - `ci_hata.sh` — CI adımını koşar; kalırsa çıktının ilgili satırlarını tek bir açık okunur `::error` bildirimine yazar (iş kaydı yönetici yetkisi ister).
 - `ci_satir.sh` — Çok satırlı bir CI adımının (`run: |`) her satırını ayrı koşar ve kalan her satırı `ci_hata.sh` ile kendi bildirimine yazar; ofis adımının `shell:` koşucusudur.
-- `parca.py` — `brand/parcalar.txt`'ten sayfa bloklarını, sayfa kayıtlarından King rehberini üretir.
 - `piksel_rakam.py` — Sistemin kendi rakam yazı tipini (5×7, yalnız 0-9) üretip `piksel-yazi.css`e gömer; `--denetle`.
 - `piksel_bulut.py` — Modül geçişi perdesinin bulut resmini (PNG) üretip `piksel.css`e gömer; `--denetle`.
 - `piksel_gorsel.js` — Logo ve modül simgesi dosyalarını (PNG, ICO, SVG) piksel figürlerden üretir.
@@ -13,9 +12,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 
 ## Yayın
 - `marka.py` — Marka görsellerini servis edilebilir hâle getirir ve medya künyesini üretir, CI'da denetlenir.
-- `ortak.py` — Üç arayüzün ortak CSS ve çekirdek JS kodlarını tek kaynaktan yayar ve ayrışmayı denetler, CI'da koşulur.
 - `rutbe.py` — Rütbe ve kademe rozet görsellerini kayıpsız işleyerek servis edilebilir hâle getirir, gerektiğinde elle koşulur.
-- `seviye.py` — Seviye ve rütbe sistemini tek kaynaktan üç arayüze yayar ve kopyaların ayrışmadığını denetler, CI'da koşulur.
 - `vitrin.py` — Onaylanmış vitrin kartı biçimini sistem CSS'ine taşır ve güncelliğini denetler, CI'da koşulur.
 
 ## Ofis

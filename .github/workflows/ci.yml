@@ -139,18 +139,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      # Kademe adlari, renkleri ve XP esikleri TEK KAYNAKTAN (brand/seviye/)
-      # uc arayuze kopyalanir. Kopyanin elle duzenlenmesi sessiz bir
-      # ayrisma demektir: AYS'te "Altin" olan SPI'de baska bir sey olur ve
-      # bu ancak iki ekran yan yana konunca fark edilir. Denetim o sessiz
-      # hali gurultuluye cevirir.
-      - name: Kopyalar kaynakla aynı mı
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kopyalar kaynakla aynı mı" python3 tools/seviye.py --denetle
 
-      # Ortak CSS de ayni mekanizmayla yayiliyor (brand/ortak/ -> uc
-      # arayuz). Ayni gerekce: elle duzenlenen bir kopya bir gun ayrisir.
-      - name: Ortak CSS kaynakla aynı mı
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Ortak CSS kaynakla aynı mı" python3 tools/ortak.py --denetle
 
       - name: Parca kaydi ve blok adlari
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Parca kaydi ve blok adlari" python3 tools/parca_test.py
