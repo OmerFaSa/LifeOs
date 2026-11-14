@@ -134,6 +134,6 @@ Okuma: kapı, ev ağı, kopya, uygulama, kesinlik dili hedefte. «0» çıkan ba
 5. **`brand/seviye/`** (seviye/rütbe medyası, `ortak_yol.py`, `perde.html`) ve `tools/marka.py`, `tools/rutbe.py`, `tools/vitrin.py`, `tools/sinematik/`: §0.1'e göre arşiv; sahibin kararı.
 6. **iPhone kabuğu** (`uygulama/ios`, `ios.yml`): dist'leri paketleyip 4173/4183/4193'te açıyordu; modüller yok. Rota kaydı için kalacaksa tek kapıyı (Tailscale) açacak biçimde yeniden yazılmalı; `ios.yml` bu dalda kırmızı olur.
 7. **Kabuk için sayım yöntemi**: ekran, iç içelik, sekme, ayar yeri ölçütleri kabuğu saymıyor (`kalite/olcum.py`); plan hedefleri (sayfa ≤ 40, iç içelik ≤ 2) için yöntem yazılmalı.
-8. **`sistem/tek_kapi_ac.py`** (main'de, bu dalda yok): geçiş aracı; kapanıştan sonra `--geri` eski modülleri gerektirir. Birleşmede silinsin mi?
+8. ~~`sistem/tek_kapi_ac.py`~~ **Kapandı (14 Kasım):** geçiş 16:21'de yapıldı; dal sadelesme'nin üstüne alınınca araç ve testi ayrı commit'le kalktı. Kapanıştan sonra geri dönüş: `git checkout 7876fd14` + o sürümdeki `tek_kapi_ac.py --geri`.
 9. Brief'in «Kalkanlar ve işlerinin gittiği yer» bölümü plan.html'de ve sadelesme belgelerinde bulunamadı; o tablonun yerini bu belgedeki Silinenler ve Tutulanlar alır.
 10. `tools/sayilar.py` hâlâ AYS/SPI/ESP test sayılarını toplamaya çalışır (README'deki SAYILAR bloğu kalktı); yeniden yazılmalı ya da silinmeli. `tools/veri_*` içerik araçlarına dokunulmadı.

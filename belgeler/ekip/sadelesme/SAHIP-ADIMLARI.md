@@ -11,7 +11,8 @@
 - Telefonda kayıt olmadığını söyledin; bilgisayarın paketleri uygulamadan alındı.
 - **Tek kapı açıldı** (16:21). LifeOS artık tek adreste: http://127.0.0.1:4180. Modüller `/ays/`, `/spi/`, `/esp/` altında; eski kayıtların oraya geçti.
 - Geçişten önce tam yedek alındı: `%LOCALAPPDATA%\LifeOS\yedek\tek-kapi-20261114-162108`.
-  Geri dönmek gerekirse LifeOS-Sistem klasöründe `python sistem/tek_kapi_ac.py --geri`.
+  Kapanış (eski modüllerin kalkması) birleştikten sonra geri dönmek gerekirse LifeOS-Sistem klasöründe önce
+  `git checkout 7876fd14` (kapanıştan önceki sürüm), sonra `python sistem/tek_kapi_ac.py --geri`.
 
 ## 1. Dersleri onayla
 

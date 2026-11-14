@@ -405,14 +405,14 @@
     },
     "uygulama": {
      "kabuk": {
-      "bayt": 579942,
+      "bayt": 608042,
       "dosya": 21,
-      "satir": 7288
+      "satir": 7593
      }
     }
    },
    "birim": "bayt (dağıtılan kod)",
-   "deger": 579942,
+   "deger": 608042,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "egri_optimizasyon",
@@ -578,7 +578,7 @@
    "ayrinti": {
     "dosya": 21
    },
-   "deger": 579942,
+   "deger": 608042,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kabuk_acilis_yuku",
@@ -716,10 +716,10 @@
   "kod_hacmi": {
    "ad": "Kod hacmi (satır)",
    "ayrinti": {
-    "bayt": 5358997,
+    "bayt": 5393254,
     "dosya": 224
    },
-   "deger": 96492,
+   "deger": 96829,
    "durum": "ölçüldü",
    "etiket": "ölçüldü",
    "id": "kod_hacmi",
