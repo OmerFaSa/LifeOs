@@ -311,63 +311,58 @@
   if (typeof document === 'undefined') return;
 
   /* ---------------- tarayıcı ---------------- */
-  var d = document, ic = function () { return Kabuk.ic; }, B = Kabuk.Bilesen; // biçim kabuk.css «tanışma» bölümünde ve kataloğun taşlarında
+  var d = document, ic = function () { return Kabuk.ic; }, B = Kabuk.Bilesen; // ekran yalnız kataloğun taşlarından (sohbet, çipler, yanlı düzen, liste)
   var degistir = null, duzenlenen = null, odakla = null; // yeniden cevaplanan soru, düzeltilen satır, çizimden sonra odaklanacak seçici
 
-  function cevapYazisi(s, c, k) {
-    if (c.atlandi) return '<span class="soluk">Atladın</span>';
-    return (c.secim.length ? '<span>' + c.secim.map(function (x) { return k(etiket(s, x)); }).join(', ') + '</span>' : '') + (c.metin ? '<span>' + k(c.metin) + '</span>' : '');
+  function cevapYazisi(s, c) {
+    return c.atlandi ? null : (c.secim.length ? [c.secim.map(function (x) { return etiket(s, x); }).join(', ')] : []).concat(c.metin ? [c.metin] : []);
   }
-  function soruFormu(t, id, k) {
+  function soruFormu(t, id) {
     var s = soru(id, t), c = t.cevaplar[id], basili = c && !c.atlandi ? c.secim : (s.onerilen || []);
-    return '<form class="tn__simdi tn__yeni" data-tn-soru="' + k(id) + '" novalidate>' +
-      '<p class="tn__soru" id="tn-soru-metni" aria-live="polite">' + k(s.metin) + '</p>' +
-      '<fieldset class="tn__secim"><legend class="gizli">Hızlı seçenekler' + (s.coklu ? ', birden çok seçilebilir' : ', biri seçilir') + '</legend>' +
-      B.eylemler(s.secenek.map(function (x) { return { metin: x[1], basili: basili.indexOf(x[0]) >= 0, veri: { 'tn-cip': x[0] } }; })) + '</fieldset>' +
-      B.alan({ ad: 'Kendi sözlerinle cevap', isim: 'metin', tur: 'cok', deger: c && !c.atlandi ? c.metin : '', ipucu: s.ipucu, tarif: 'tn-soru-metni', enCok: 1000 }) +
+    return { form: { 'tn-soru': id }, soru: { metin: s.metin, id: 'tn-soru-metni', canli: true }, govde: [
+      B.cipler({ ad: 'Hızlı seçenekler' + (s.coklu ? ', birden çok seçilebilir' : ', biri seçilir'), ogeler: s.secenek.map(function (x) { return { metin: x[1], basili: basili.indexOf(x[0]) >= 0, veri: { 'tn-cip': x[0] } }; }) }),
+      B.alan({ ad: 'Kendi sözlerinle cevap', isim: 'metin', tur: 'cok', deger: c && !c.atlandi ? c.metin : '', ipucu: s.ipucu, tarif: 'tn-soru-metni', enCok: 1000 }),
       B.eylemler([{ metin: 'Gönder', tur: 'ana', tip: 'submit' }, { metin: 'Atla', tur: 'sade', veri: { 'tn-ac': 'atla' } },
-        degistir ? { metin: 'Vazgeç', tur: 'sade', veri: { 'tn-ac': 'vazgec-soru' } } : null, { yazi: 'Enter gönderir, Shift Enter yeni satır.' }]) + '</form>';
+        degistir ? { metin: 'Vazgeç', tur: 'sade', veri: { 'tn-ac': 'vazgec-soru' } } : null, { yazi: 'Enter gönderir, Shift Enter yeni satır.' }])] };
   }
-  function olguSatiri(o, k, onayli) {
-    var duz = !onayli && duzenlenen === o.id, ozet = o.konu + ', ' + o.metin;
-    return '<li class="tn__olgu' + (o.tur === 'not' ? ' tn__olgu--not' : '') + '"><span class="tn__konu">' + k(o.konu) + '</span>' +
-      (duz ? '<form class="tn__duzelt" data-tn-olgu="' + k(o.id) + '" novalidate>' + B.alan({ ad: 'Düzelt: ' + o.konu, isim: 'duzelt', tur: 'metin', deger: o.metin, enCok: 1000 }) +
-        B.eylemler([{ metin: 'Kaydet', tip: 'submit' }, { metin: 'Vazgeç', tur: 'sade', veri: { 'tn-ac': 'vazgec-duzelt' } }]) + '</form>'
-        // metin kısaltılmaz (King'in anladığı tam okunmalı), bu yüzden satır taşı değil
-        : '<span class="tn__metin">' + (o.tur === 'not' ? '«' + k(o.metin) + '»' : k(o.metin)) + '</span><span>' + B.pul(TUR_AD[o.tur]) + '</span>' +
-          '<span class="tn__dug">' + B.eylemler([onayli ? null : { metin: 'Düzelt', tur: 'sade', etiket: 'Düzelt: ' + ozet, veri: { 'tn-ac': 'duzelt', id: o.id } },
-            { metin: onayli ? 'Geri al' : 'Sil', tur: 'sade', etiket: (onayli ? 'Geri al: ' : 'Sil: ') + ozet, veri: { 'tn-ac': onayli ? 'geri-al' : 'sil', id: o.id } }]) + '</span>') + '</li>';
+  // King'in anladığı bir satır: metin kısaltılmaz (uzun satır; tam okunmalı), konu notta, tür rozette; düzeltilirken aynı kutuda form
+  function olguSatiri(o, onayli) {
+    var ozet = o.konu + ', ' + o.metin;
+    if (!onayli && duzenlenen === o.id) return { form: { veri: { 'tn-olgu': o.id }, govde: [B.alan({ ad: 'Düzelt: ' + o.konu, isim: 'duzelt', tur: 'metin', deger: o.metin, enCok: 1000 }),
+      B.eylemler([{ metin: 'Kaydet', tip: 'submit' }, { metin: 'Vazgeç', tur: 'sade', veri: { 'tn-ac': 'vazgec-duzelt' } }])] } };
+    return { ad: o.tur === 'not' ? '«' + o.metin + '»' : o.metin, not: o.konu, pul: TUR_AD[o.tur], uzun: true,
+      eylemler: [onayli ? null : { metin: 'Düzelt', tur: 'sade', etiket: 'Düzelt: ' + ozet, veri: { 'tn-ac': 'duzelt', id: o.id } },
+        { metin: onayli ? 'Geri al' : 'Sil', tur: 'sade', etiket: (onayli ? 'Geri al: ' : 'Sil: ') + ozet, veri: { 'tn-ac': onayli ? 'geri-al' : 'sil', id: o.id } }] };
   }
   function sayfa(yer) {
     var I = ic(), k = I.kac, t = taslakOku(I.depo), kayit = kayitOku(I.depo), sira = siradaki(t);
     var simdi = degistir && sorular(t).indexOf(degistir) >= 0 ? degistir : sira, temiz = kayit && kayit.zaman >= t.guncel && !simdi;
     var gecmis = sorular(t).filter(function (id) { return t.cevaplar[id] && id !== simdi; }).map(function (id) {
-      var s = soru(id, t);
-      return '<li class="tn__soru">' + k(s.metin) + '</li><li class="tn__ben">' + cevapYazisi(s, t.cevaplar[id], k) +
-        B.dugme({ metin: 'Değiştir', tur: 'sade', etiket: 'Cevabı değiştir: ' + s.metin, veri: { 'tn-ac': 'degistir', soru: id } }) + '</li>';
-    }).join('');
+      var s = soru(id, t), c = cevapYazisi(s, t.cevaplar[id]);
+      return { soru: s.metin, cevap: c, atlandi: !c, eylem: { metin: 'Değiştir', tur: 'sade', etiket: 'Cevabı değiştir: ' + s.metin, veri: { 'tn-ac': 'degistir', soru: id } } };
+    });
     var olgular = temiz ? kayit.olgular : anla(t), oner = temiz ? kayit.oneriler : oneriler(t), sag;
     var oneriHtml = oner.length ? B.bolum({ baslik: 'Başlangıç önerisi', govde: oner.map(function (o) {
       return B.panel({ tur: o.ilk ? 'basari' : 'normal', govde: ['<p><b>' + k(o.ad) + (o.ilk ? ' · önce bu' : '') + '</b></p>', '<p class="soluk">' + k(o.metin) + '</p>',
         temiz && o.baslangic !== 'eski' ? B.eylemler([{ metin: 'Buradan başla', tur: o.ilk ? 'ana' : 'ikincil', veri: { 'tn-ac': 'basla', alan: o.alan } }, o.onay ? { yazi: 'başladın' } : null]) : ''] });
     }) }) : '';
-    if (simdi) sag = soruFormu(t, simdi, k);
-    else if (temiz) sag = '<section class="tn__simdi tn__yeni" aria-labelledby="tn-bitti">' + B.panel({ tur: 'basari', durum: true, id: 'tn-bitti', govde: '<p><b>Kaydedildi.</b> ' +
-      kayit.olgular.length + ' satır. Listedeki her satırı tek tek geri alabilirsin.</p>' }) + oneriHtml +
+    if (simdi) sag = soruFormu(t, simdi);
+    else if (temiz) sag = { etiket: 'tn-bitti', govde: [B.panel({ tur: 'basari', durum: true, id: 'tn-bitti', govde: '<p><b>Kaydedildi.</b> ' +
+      kayit.olgular.length + ' satır. Listedeki her satırı tek tek geri alabilirsin.</p>' }), oneriHtml,
       B.eylemler([sira || t.bitir && siradaki(Object.assign({}, t, { bitir: false })) ? { metin: 'Kalan sorulara devam et', veri: { 'tn-ac': 'devam' } } : null,
-        { metin: 'Hepsini geri al', tur: 'sade', veri: { 'tn-ac': 'hepsini-geri-al' } }]) + '</section>';
-    else sag = '<section class="tn__simdi tn__yeni" aria-labelledby="tn-onay"><p class="tn__soru" id="tn-onay" tabindex="-1">' +
-      (olgular.length ? 'Anladıklarımı kaydedeyim mi? Kaydetmeden önce «King\'in anladığı» listesindeki her satırı düzeltebilir ya da silebilirsin.' : 'Kaydedilecek bir şey yok. İstersen bir cevabı değiştir.') + '</p>' + oneriHtml +
+        { metin: 'Hepsini geri al', tur: 'sade', veri: { 'tn-ac': 'hepsini-geri-al' } }])] };
+    else sag = { etiket: 'tn-onay', soru: { id: 'tn-onay', odak: true, metin: olgular.length ? 'Anladıklarımı kaydedeyim mi? Kaydetmeden önce «King\'in anladığı» listesindeki her satırı düzeltebilir ya da silebilirsin.'
+      : 'Kaydedilecek bir şey yok. İstersen bir cevabı değiştir.' }, govde: [oneriHtml,
       B.eylemler([olgular.length ? { metin: 'Onayla ve kaydet', tur: 'ana', veri: { 'tn-ac': 'onayla' } } : null,
-        siradaki(Object.assign({}, t, { bitir: false })) ? { metin: 'Sorulara devam et', tur: 'sade', veri: { 'tn-ac': 'devam' } } : null]) +
-      '<p class="soluk">Onaylamadan hiçbir şey kaydedilmez. Boy, doğum yılı ve cinsiyet Ayarlar › Beden\'e yazılır.</p></section>';
-    var panel = '<aside class="tn__panel">' + B.panel({ baslik: 'King\'in anladığı · ' + (temiz ? 'kaydedildi, geri alabilirsin' : 'düzeltebilirsin'), id: 'tn-panel', govde: [
-      olgular.length ? '<ul class="tn__olgular" aria-live="polite">' + olgular.map(function (o) { return olguSatiri(o, k, temiz); }).join('') + '</ul>'
+        siradaki(Object.assign({}, t, { bitir: false })) ? { metin: 'Sorulara devam et', tur: 'sade', veri: { 'tn-ac': 'devam' } } : null]),
+      '<p class="soluk">Onaylamadan hiçbir şey kaydedilmez. Boy, doğum yılı ve cinsiyet Ayarlar › Beden\'e yazılır.</p>'] };
+    var panel = B.panel({ baslik: 'King\'in anladığı · ' + (temiz ? 'kaydedildi, geri alabilirsin' : 'düzeltebilirsin'), id: 'tn-panel', govde: [
+      olgular.length ? B.liste({ ad: 'King\'in anladığı', canli: true, ogeler: olgular.map(function (o) { return olguSatiri(o, temiz); }) })
         : '<p class="soluk">Cevap verdikçe burada görünür. Yalnız seçtiklerin ve açıkça yazdığın sayılar anlaşılır; geri kalanı kendi sözün olarak aynen durur.</p>',
-      B.eylemler([!temiz && simdi && olgular.length ? { metin: 'Şimdilik bu kadar, kaydetmeye geç', tur: 'sade', veri: { 'tn-ac': 'bitir' } } : null])] }) + '</aside>';
+      B.eylemler([!temiz && simdi && olgular.length ? { metin: 'Şimdilik bu kadar, kaydetmeye geç', tur: 'sade', veri: { 'tn-ac': 'bitir' } } : null])] });
     return I.ust(I.kirinti(yer)) + '<div class="govde govde--genis" data-arac="tanisma">' +
       B.baslik({ metin: 'Tanışma', alt: 'Kendi sözlerinle anlat. Anladıklarım ayrı bir listede görünür; düzeltebilir, silebilirsin. Sen onaylamadan hiçbir şey kaydedilmez.' }) +
-      '<div class="tn__izgara"><section class="tn__sohbet" aria-label="Sohbet">' + (gecmis ? '<ol class="tn__akis">' + gecmis + '</ol>' : '') + sag + '</section>' + panel + '</div></div>';
+      B.yanli({ taraf: 'sag', tamamlayici: true, ana: B.sohbet({ ad: 'Sohbet', gecmis: gecmis, simdi: sag }), yan: panel }) + '</div>';
   }
   function ciz(secici) {
     ic().rota();

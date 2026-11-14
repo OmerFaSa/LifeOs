@@ -275,18 +275,16 @@
   function sayfaBugun() {
     var t = new Date(), ipucu = depo.getItem('lifeos.kabuk.ipucu') !== 'goruldu';
     var f = fDurum(), a = f && siradaki(f);
-    return ust('<span class="ust__tarih">' + tarih(t) + '</span>') +
-      '<div class="karsila"><h1 class="karsila__selam">' + kac(selam(t, hesapAdi())) + '</h1>' +
-      '<p class="karsila__sira"><span class="soluk">Sırada</span><br>' + kac(H.bul(etkinAlan).ad) + ' · ' + (f ? kac(f.asama.ad) : 'ilk aşama') + '</p>' +
-      (a ? '<p class="soluk">' + (a.tur === 'ders' ? 'Ders: ' : 'Kapı: ') + kac(a.ad) + '</p>' : '') +
-      B.dugme({ metin: f && f.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla', tur: 'ana', href: a ? adimYolu(a) : F() }) +
-      '<p class="karsila__sonra soluk">' + (Kabuk.bugunEk ? Kabuk.bugunEk() : '') + '</p>' +
-      // depo «bellek» kipinde (faz2-indexeddb.md, taşıma kuralı 4) bu oturumun yazdıkları yenilemede kalmaz
-      (depo.kip() === 'bellek' ? B.uyari({ tur: 'dikkat', metin: 'Kayıtlarına bu açılışta ulaşılamadı. Önceki kayıtların silinmedi, ama bu oturumda yaptıkların sayfa yenilenince kaybolur.' }) : '') +
-      (Kabuk.baslangicDavet ? Kabuk.baslangicDavet() : '') + // araclar.js: eski sistemdeki kayıtları getirme teklifi (göçten sonra)
-      (Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '') + // tanisma.js: kayıt yoksa tek satırlık davet
-      (Kabuk.onayBugun ? Kabuk.onayBugun() : '') + // onay.js: «Onay bekleyen N ders», yalnız N > 0 iken
-      (ipucu ? B.uyari({ tur: 'bilgi', metin: 'Bir yere gitmek için boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : '') + '</div>';
+    return ust('<span class="ust__tarih">' + tarih(t) + '</span>') + B.karsilama({ selam: selam(t, hesapAdi()),
+      sira: { ust: 'Sırada', metin: H.bul(etkinAlan).ad + ' · ' + (f ? f.asama.ad : 'ilk aşama') }, adim: a ? (a.tur === 'ders' ? 'Ders: ' : 'Kapı: ') + a.ad : null,
+      eylem: { metin: f && f.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla', href: a ? adimYolu(a) : F() },
+      baglanti: Kabuk.bugunEk ? Kabuk.bugunEk() : null, ekler: [ // araclar.js: planın sıradaki bloğu ya da plana davet
+        // depo «bellek» kipinde (faz2-indexeddb.md, taşıma kuralı 4) bu oturumun yazdıkları yenilemede kalmaz
+        depo.kip() === 'bellek' ? B.uyari({ tur: 'dikkat', metin: 'Kayıtlarına bu açılışta ulaşılamadı. Önceki kayıtların silinmedi, ama bu oturumda yaptıkların sayfa yenilenince kaybolur.' }) : '',
+        Kabuk.baslangicDavet ? Kabuk.baslangicDavet() : '', // araclar.js: eski sistemdeki kayıtları getirme teklifi (göçten sonra)
+        Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '', // tanisma.js: kayıt yoksa tek satırlık davet
+        Kabuk.onayBugun ? Kabuk.onayBugun() : '', // onay.js: «Onay bekleyen N ders», yalnız N > 0 iken
+        ipucu ? B.uyari({ tur: 'bilgi', metin: 'Bir yere gitmek için boş bir yerde basılı tut ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : ''] });
   }
   function sayfaDal(yer) {
     var ys = H.dalinYerleri(yer.dal);
@@ -308,14 +306,14 @@
     var gruplar = A.GRUPLAR.map(function (g) {
       return B.bolum({ baslik: g.ad, id: 'grup-' + g.id, govde: A.SEMA.filter(function (t) { return t.grup === g.id; }).map(function (t) { return A.ciz(t, A.oku(depo, t.anahtar)); }) });
     }).join('');
-    var nav = '<nav class="ayarnav" aria-label="Ayar grupları">' + A.GRUPLAR.map(function (g) { return '<a href="#/ayarlar?grup-' + g.id + '">' + kac(g.ad) + '</a>'; }).join('') + '</nav>';
     setTimeout(function () {
       if (!odak) return;
       var el = d.getElementById(odak) || $('[data-ayar-satir="' + odak + '"]');
       if (el) { el.scrollIntoView({ block: 'center' }); var f = $('[aria-checked="true"], input', el) || el; f.focus(); el.classList.add('b-ayar--isik'); }
     }, 0);
-    return ust(kirinti(yer)) + '<div class="govde govde--genis">' + B.baslik({ metin: 'Ayarlar' }) + '<div class="ayarlar">' + nav + '<div class="ayarlar__govde">' + gruplar +
-      B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }]) + '</div></div></div>';
+    return ust(kirinti(yer)) + '<div class="govde govde--genis">' + B.baslik({ metin: 'Ayarlar' }) + B.yanli({ taraf: 'sol',
+      yan: B.gezinme({ ad: 'Ayar grupları', ogeler: A.GRUPLAR.map(function (g) { return { metin: g.ad, href: '#/ayarlar?grup-' + g.id }; }) }),
+      ana: [gruplar, B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }])] }) + '</div>';
   }
   function yuzde(x) { return Math.round(x * 100); }
   var GECILDI = { metin: 'geçildi', tur: 'altin' };
@@ -505,13 +503,6 @@
 
   /* ---------------- halka ---------------- */
   var halkaEl, perdeEl, komutEl, oncekiOdak = null, secili = -1, basili = null;
-  function halkaKur() {
-    var ys = H.halka();
-    halkaEl.innerHTML = '<span class="halka__merkez" aria-hidden="true"></span>' + ys.map(function (y, i) {
-      var a = -90 + i * 360 / ys.length;
-      return '<button type="button" role="menuitem" class="halka__oge" data-yol="' + y.yol + '" style="--a:' + a + 'deg">' + kac(y.ad) + '</button>';
-    }).join('');
-  }
   function halkaAc(x, y) {
     oncekiOdak = d.activeElement;
     var w = innerWidth, hh = innerHeight, r = Math.max(84, Math.min(150, Math.min(w, hh) / 2 - 64));
@@ -520,19 +511,19 @@
     halkaEl.style.setProperty('--x', x + 'px'); halkaEl.style.setProperty('--y', y + 'px'); halkaEl.style.setProperty('--r', r + 'px');
     perdeEl.hidden = false; halkaEl.hidden = false; secili = -1;
     try { getSelection().removeAllRanges(); } catch (e) { /* yok */ }
-    requestAnimationFrame(function () { halkaEl.classList.add('acik'); perdeEl.classList.add('acik'); });
+    requestAnimationFrame(function () { halkaEl.classList.add('b-halka--acik'); perdeEl.classList.add('acik'); });
   }
   function halkaKapat(odakDon) {
     if (halkaEl.hidden) return;
-    halkaEl.classList.remove('acik'); perdeEl.classList.remove('acik'); halkaEl.hidden = true; perdeEl.hidden = true;
+    halkaEl.classList.remove('b-halka--acik'); perdeEl.classList.remove('acik'); halkaEl.hidden = true; perdeEl.hidden = true;
     halkaSec(-1);
     if (odakDon !== false && oncekiOdak && oncekiOdak.focus) oncekiOdak.focus();
   }
-  function halkaOgeleri() { return [].slice.call(halkaEl.querySelectorAll('.halka__oge')); }
-  function halkaSec(i) { secili = i; halkaOgeleri().forEach(function (b, j) { b.classList.toggle('secili', j === i); }); }
+  function halkaOgeleri() { return [].slice.call(halkaEl.querySelectorAll('.b-halka__oge')); }
+  function halkaSec(i) { secili = i; halkaOgeleri().forEach(function (b, j) { b.classList.toggle('b-halka__oge--secili', j === i); }); }
 
   // basılı tut: boş yerde, kıpırdamadan; sürükleyip bırakınca seçer
-  var ETKILESIMLI = 'a,button,input,select,textarea,label,summary,[contenteditable],[role="dialog"],.halka';
+  var ETKILESIMLI = 'a,button,input,select,textarea,label,summary,[contenteditable],[role="dialog"],.b-halka';
   function basBasla(e) {
     if (e.button !== 0 || !halkaEl.hidden || !komutEl.hidden || e.target.closest(ETKILESIMLI)) return;
     var sx = e.clientX, sy = e.clientY;
@@ -575,9 +566,7 @@
     sonuc = katla(q) ? komutSonucu(q, ogeler) : ogeler.filter(function (o) { var y = o.tur === 'yer' && H.bul(o.id); return y && (y.halka || y.id === 'ayarlar'); });
     etkin = 0;
     var liste = $('#komut-liste'), g = $('input', komutEl);
-    liste.innerHTML = sonuc.length ? sonuc.map(function (o, i) {
-      return '<li role="option" id="komut-' + i + '" aria-selected="' + (i === 0) + '" data-i="' + i + '"><span>' + kac(o.ad) + '</span><span class="soluk">' + kac(o.etiket) + '</span></li>';
-    }).join('') : '<li class="komut__bos" role="presentation">Sonuç yok</li>';
+    liste.innerHTML = B.komutListe({ id: 'komut', ogeler: sonuc });
     g.setAttribute('aria-expanded', String(sonuc.length > 0));
     if (sonuc.length) g.setAttribute('aria-activedescendant', 'komut-0'); else g.removeAttribute('aria-activedescendant');
     $('#komut-durum').textContent = sonuc.length ? sonuc.length + ' sonuç' : 'Sonuç yok';
@@ -660,7 +649,7 @@
       if (n === 'sifirla') { if (confirm('Bütün ayarlar varsayılana dönsün mü?')) { A.sifirla(depo); uygula(); rota(); } return; }
     }
     var cv = t.closest('.b-soru[data-soru] [data-h]:not([aria-disabled="true"])'); if (cv) return soruCevapla(cv.closest('.b-soru').getAttribute('data-soru'), cv.getAttribute('data-h'));
-    var hb = t.closest('.halka__oge'); if (hb) { var y = hb.getAttribute('data-yol'); halkaKapat(false); return git(y); }
+    var hb = t.closest('.b-halka__oge'); if (hb) { var y = hb.getAttribute('data-yol'); halkaKapat(false); return git(y); }
     var li = t.closest('#komut-liste [data-i]'); if (li) return calistir(sonuc[+li.getAttribute('data-i')]);
     if (t === perdeEl) { halkaKapat(); komutKapat(); return; }
     var sec = t.closest('[role="radio"][data-ayar]'); if (sec) return ayarSec(sec);
@@ -706,9 +695,11 @@
 
   function baslat() {
     uygula();
+    // açılır katmanlar (bilesen.js 24 halka, 25 komut çubuğu) gizli çizilir; perde index.html'de
+    d.body.insertAdjacentHTML('beforeend', B.halka({ id: 'halka', ad: 'Yerler', ogeler: H.halka().map(function (y) { return { ad: y.ad, yol: y.yol }; }) }) +
+      B.komut({ id: 'komut', ad: 'Ara', yerTutucu: 'Bir yer, ayar ya da eylem ara' }));
     sayfaEl = $('#sayfa'); halkaEl = $('#halka'); perdeEl = $('#perde'); komutEl = $('#komut');
     ogeler = komutOgeleri(H, A);
-    halkaKur();
     addEventListener('hashchange', function () { halkaKapat(false); komutKapat(false); rota(); sayfaEl.focus({ preventScroll: true }); scrollTo(0, 0); });
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);

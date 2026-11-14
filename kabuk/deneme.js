@@ -211,8 +211,7 @@
     var kal = kalan(Soru, dr, simdi), prova = dr.mod === 'prova', baslik = prova ? o.sinav + ' provası' : o.ad;
     var testAd = prova ? '' : 'Test ' + (x.t + 1) + '/' + o.testler.length + ' · ' + o.testler[x.t].ad;
     var cevapli = l.filter(function (_, j) { return cevabi(dr, j); }).length;
-    return B.serit({ baslik: baslik, alt: testAd, sayac: { metin: sureYaz(kal), ad: 'Kalan süre', az: kal <= 60 } }) +
-      '<p class="gizli" aria-live="polite" id="deneme-duyuru"></p>' +
+    return B.serit({ baslik: baslik, alt: testAd, sayac: { metin: sureYaz(kal), ad: 'Kalan süre', az: kal <= 60 }, duyuru: 'deneme-duyuru' }) +
       B.adimlar({ ad: 'Sorular · ' + cevapli + ' / ' + l.length + ' cevaplandı', ogeler: l.map(function (y, j) {
         return { etiket: 'Soru ' + (j + 1) + (cevabi(dr, j) ? ', cevaplandı' : ''), dolu: !!cevabi(dr, j), secili: j === i, veri: { deneme: 'git', i: j } };
       }) }) +

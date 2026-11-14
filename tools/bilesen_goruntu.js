@@ -18,7 +18,7 @@ const cikti = path.join(kok, 'belgeler/ekip/sadelesme/kabuk-onizleme');
       await p.goto(url); await p.evaluate(() => document.fonts.ready);
       const tasma = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       const bolum = await p.evaluate(() => document.querySelectorAll('#katalog > .b-bolum').length);
-      const ok = tasma <= 0 && bolum === 22;
+      const ok = tasma <= 0 && bolum === 28;
       if (!ok) kalan++;
       console.log((ok ? '✓ ' : '✕ ') + vad + '-' + tm + ': taşma ' + tasma + ' px, ' + bolum + ' taş');
       await p.screenshot({ path: path.join(cikti, 'bilesen-' + vad + '-' + tm + '.png'), fullPage: true });

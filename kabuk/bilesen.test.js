@@ -38,11 +38,18 @@ const ORNEK = {
   adimlar: () => B.adimlar({ ad: K, ogeler: [{ etiket: K, veri: { i: K } }] }),
   ayar: () => B.ayar({ ad: K, not: K, id: 'ayar-x', deger: K, veri: { 'ayar-satir': K } }),
   ag: () => B.ag({ ad: K, en: 100, boy: 50, dugumler: [{ id: 'a', ad: K, x: 1, y: 1, href: '#/a' }, { id: 'b', ad: K, etiket: K, x: 9, y: 9, href: '#/b' }], kenarlar: [{ a: 'a', b: 'b', tur: 'kesik' }],
-    ozet: K, aciklama: { kesik: K } })
+    ozet: K, aciklama: { kesik: K } }),
+  karsilama: () => B.karsilama({ selam: K, sira: { ust: K, metin: K }, adim: K, eylem: { metin: K.slice(0, 40), href: '#/a' }, baglanti: { metin: K, href: '#/b' } }),
+  halka: () => B.halka({ id: 'halka', ad: K, ogeler: [{ ad: '<x-h>&"', yol: '#/a' }, { ad: 'B', yol: '#/b' }] }),
+  komut: () => B.komut({ id: 'komut', ad: K, yerTutucu: K }) + B.komutListe({ id: 'komut', ogeler: [{ ad: K, etiket: K }] }),
+  sohbet: () => B.sohbet({ ad: K, gecmis: [{ soru: K, cevap: [K, K], eylem: { metin: 'Değiştir', etiket: K } }, { soru: K, atlandi: true }],
+    simdi: { form: { 'tn-soru': K }, soru: { metin: K, id: 'soru-x', canli: true }, govde: B.pul('x') } }),
+  cipler: () => B.cipler({ ad: K, ogeler: [{ metin: K.slice(0, 40), veri: { cip: K } }] }),
+  yanli: () => B.yanli({ taraf: 'sol', yan: B.gezinme({ ad: K, ogeler: [{ metin: K, href: '#/a' }] }), ana: B.pul('x') })
 };
 
-t('katalog yirmi iki taş sunar ve her biri test örneğine sahip', () => {
-  dogru(B.TASLAR.length === 22, 'taş sayısı ' + B.TASLAR.length);
+t('katalog yirmi sekiz taş sunar ve her biri test örneğine sahip', () => {
+  dogru(B.TASLAR.length === 28, 'taş sayısı ' + B.TASLAR.length);
   B.TASLAR.forEach(ad => dogru(typeof B[ad] === 'function' && ORNEK[ad], ad));
 });
 t('kaçış: hiçbir taş ham etiket ya da tırnak sızdırmaz', () => {
@@ -221,7 +228,10 @@ t('uzun satır ve odaklanan ileti', () => {
 const css = fs.readFileSync(path.join(__dirname, 'bilesen.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 const kabukCss = fs.readFileSync(path.join(__dirname, 'kabuk.css'), 'utf8');
 t('bilesen.css yalnız kabuk.css jetonlarını kullanır; yeni jeton ve renk yok', () => {
-  const jeton = new Set((kabukCss.match(/--[a-z0-9-]+(?=\s*:)/g) || []));
+  // halkanın konum değişkenleri jeton değildir: --a taşın kendisi düğmeye satır içi yazar, --x --y --r ekran açarken (kabuk.js halkaAc); tanımı hiçbir css'te yok
+  const jeton = new Set((kabukCss.match(/--[a-z0-9-]+(?=\s*:)/g) || []).concat(['--a', '--x', '--y', '--r']));
+  ['--a', '--x', '--y', '--r'].forEach(v => dogru(!new RegExp(v + '\\s*:').test(kabukCss), 'konum değişkeni kabuk.css\'te jeton olmuş: ' + v));
+  dogru(/style="--a:-90deg"/.test(B.halka({ id: 'h', ad: 'Y', ogeler: [{ ad: 'A', yol: '#/a' }, { ad: 'B', yol: '#/b' }] })), '--a taşın satır içi yazdığı açı');
   (css.match(/var\(--[a-z0-9-]+/g) || []).forEach(v => dogru(jeton.has(v.slice(4)), 'kabuk.css\'te yok: ' + v));
   dogru(!/(^|[;{\s])--[a-z0-9-]+\s*:/.test(css), 'yeni jeton tanımı var');
   dogru(!/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(css), 'elle renk var');
@@ -233,11 +243,11 @@ t('bilesen.css bağlam seçicisi yazmaz: her kural bir .b- taşıyla başlar', (
   dogru(kurallar.length > 40, 'kural sayısı ' + kurallar.length);
   kurallar.forEach(k => k.split(',').forEach(s => dogru(/^(a|textarea|select|input)?\.b-[a-z]/.test(s.trim()), 'bağlam seçicisi: ' + s.trim())));
 });
-t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; yirmi iki taşı gösterir', () => {
+t('katalog sayfası yalnız kabuk.css, bilesen.css, bilesen.js (ve gömülü yazı tipi) yükler; yirmi sekiz taşı gösterir', () => {
   const h = fs.readFileSync(path.join(__dirname, 'bilesen.html'), 'utf8');
   const yuk = (h.match(/(?:href|src)="[^"#]+\.(?:css|js)"/g) || []).map(x => x.replace(/^(href|src)="|"$/g, ''));
   dogru(JSON.stringify(yuk) === JSON.stringify(['../brand/ortak/piksel-yazi.css', 'kabuk.css', 'bilesen.css', 'bilesen.js']), yuk.join(', '));
-  for (let n = 1; n <= 22; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
+  for (let n = 1; n <= 28; n++) dogru(h.indexOf('tas(' + n + ',') > 0, 'taş ' + n + ' katalogda yok');
 });
 
 t('kart: ön yüz, arka odak alır, dört not düğmesi aralıklarıyla, kapalıyken tek eylem', () => {
@@ -289,6 +299,59 @@ t('ağ: düğümler bağlantı, kenar türleri, açıklama örnek çizgili, köt
   atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: d, kenarlar: [{ a: 'a', b: 'z', tur: 'duz' }] }), /bilinmeyen/, 'kopuk kenar');
   atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: d, kenarlar: [{ a: 'a', b: 'b', tur: 'mor' }] }), /kenar.tur/, 'bilinmeyen çizgi');
   atar(() => B.ag({ ad: 'A', en: 640, boy: 400, dugumler: [d[0], Object.assign({}, d[1], { href: 'javascript:alert(1)' })] }), /href/, 'javascript: bağlantısı');
+});
+t('karşılama: h1 selam, sırada, tek ana düğme, bağlantı ve bilgi satırları; boşsa kap çizilmez', () => {
+  const h = B.karsilama({ selam: 'Günaydın.', sira: { ust: 'Sırada', metin: 'Felsefe · Bilgi' }, adim: 'Ders: Sanı', eylem: { metin: 'Başla', href: '#/alan/felsefe/ders/x' },
+    baglanti: { metin: 'Günü planla', href: '#/motor/plan' }, ekler: ['', B.uyari({ tur: 'bilgi', metin: 'İpucu' })] });
+  dogru(h === '<div class="b-karsilama"><h1 class="b-karsilama__selam">Günaydın.</h1><p class="b-karsilama__sira"><span class="b-karsilama__ust">Sırada</span><br>Felsefe · Bilgi</p>' +
+    '<p class="b-karsilama__adim">Ders: Sanı</p><a class="b-dugme b-dugme--ana" href="#/alan/felsefe/ders/x">Başla</a><a class="b-karsilama__baglanti" href="#/motor/plan">Günü planla</a>' +
+    '<div class="b-karsilama__ek"><div class="b-uyari b-uyari--bilgi" role="note"><span class="b-uyari__tur">Bilgi</span><p class="b-uyari__metin">İpucu</p></div></div></div>', h);
+  dogru(!/b-karsilama__ek|b-karsilama__baglanti|b-karsilama__adim/.test(B.karsilama({ selam: 'Selam.', eylem: { metin: 'Başla', href: '#/a' }, ekler: ['', ''] })), 'boş ekler ve bağlantısız: kap yok');
+  atar(() => B.karsilama({ selam: 'S' }), /seçenek nesnesi/, 'düğmesiz karşılama');
+  atar(() => B.karsilama({ selam: 'S', eylem: { metin: 'B', href: '#/a' }, baglanti: { metin: 'x', href: 'javascript:alert(1)' } }), /href/, 'tehlikeli bağlantı');
+});
+t('halka ve komut çubuğu: menü/menuitem, dialog/combobox/listbox, gizli çizilir; sonuç öğeleri option, boşsa «Sonuç yok»', () => {
+  const h = B.halka({ id: 'halka', ad: 'Yerler', ogeler: ['Bugün', 'Öğren', 'Sağlık', 'Ayarlar'].map((ad, i) => ({ ad, yol: '#/y' + i })) });
+  dogru(/^<div id="halka" class="b-halka" role="menu" aria-label="Yerler" hidden><span class="b-halka__merkez" aria-hidden="true"><\/span><button type="button" role="menuitem" class="b-halka__oge" data-yol="#\/y0" style="--a:-90deg">Bugün<\/button>/.test(h), h);
+  dogru(/style="--a:0deg">Öğren/.test(h) && /style="--a:90deg">Sağlık/.test(h) && /style="--a:180deg">Ayarlar/.test(h), 'ilki tepede, saat yönünde eşit açı');
+  atar(() => B.halka({ id: 'halka', ad: 'Y', ogeler: [{ ad: 'A', yol: '#/a' }] }), /en az 2/, 'tek öğeli halka');
+  atar(() => B.halka({ id: 'halka', ad: 'Y', ogeler: [{ ad: 'A', yol: '#/a' }, { ad: 'B', yol: 'javascript:x' }] }), /href/, 'tehlikeli yol');
+  atar(() => B.halka({ id: 'Halka', ad: 'Y', ogeler: [{ ad: 'A', yol: '#/a' }, { ad: 'B', yol: '#/b' }] }), /id/, 'kötü kimlik');
+  const k = B.komut({ id: 'komut', ad: 'Ara', yerTutucu: 'Bir yer ara' });
+  ['role="dialog" aria-modal="true" aria-label="Ara" hidden', 'role="combobox" aria-expanded="false" aria-controls="komut-liste" aria-autocomplete="list" aria-label="Bir yer ara" placeholder="Bir yer ara"',
+    '<ul id="komut-liste" class="b-komut__liste" role="listbox" aria-label="Sonuçlar"></ul>', '<p id="komut-durum" class="gizli" aria-live="polite"></p>', '<kbd>Esc</kbd>'].forEach(x => dogru(k.indexOf(x) >= 0, x));
+  const l = B.komutListe({ id: 'komut', ogeler: [{ ad: 'Not', etiket: 'araç' }, { ad: 'Koyu temaya geç', etiket: 'eylem' }] });
+  dogru(l === '<li class="b-komut__oge" role="option" id="komut-0" aria-selected="true" data-i="0"><span>Not</span><span class="b-komut__etiket">araç</span></li>' +
+    '<li class="b-komut__oge" role="option" id="komut-1" aria-selected="false" data-i="1"><span>Koyu temaya geç</span><span class="b-komut__etiket">eylem</span></li>', l);
+  dogru(B.komutListe({ id: 'komut', ogeler: [] }) === '<li class="b-komut__bos" role="presentation">Sonuç yok</li>', 'boş sonuç');
+  atar(() => B.komutListe({ id: 'komut', ogeler: null }), /dizi/, 'dizisiz sonuç');
+});
+t('sohbet, çipler, yanlı düzen: geçmiş, şu anki form ya da bölüm, gizli legend, yan sütun ve gezinme; satır yerinde form, canlı liste; kart üst satırı; şerit duyurusu', () => {
+  const s = B.sohbet({ ad: 'Sohbet', gecmis: [{ soru: 'Adın?', cevap: ['Ece'], eylem: { metin: 'Değiştir', tur: 'sade', etiket: 'Cevabı değiştir: Adın?' } }, { soru: 'Yaşın?', atlandi: true }],
+    simdi: { form: { 'tn-soru': 'is' }, soru: { metin: 'Ne iş yaparsın?', id: 'tn-soru-metni', canli: true }, govde: '' } });
+  dogru(/^<section class="b-sohbet" aria-label="Sohbet"><ol class="b-sohbet__akis"><li class="b-sohbet__soru">Adın\?<\/li><li class="b-sohbet__ben"><span>Ece<\/span><button type="button" class="b-dugme b-dugme--sade" aria-label="Cevabı değiştir: Adın\?"/.test(s), s);
+  dogru(/<li class="b-sohbet__ben"><span class="b-sohbet__atla">Atladın<\/span><\/li>/.test(s), 'atlanan soru');
+  dogru(/<form class="b-sohbet__simdi" data-tn-soru="is" novalidate><p class="b-sohbet__soru b-sohbet__soru--simdi" id="tn-soru-metni" aria-live="polite">Ne iş yaparsın\?<\/p><\/form><\/section>$/.test(s), 'şu anki soru formda, canlı');
+  const b = B.sohbet({ ad: 'Sohbet', simdi: { etiket: 'tn-onay', soru: { metin: 'Kaydedeyim mi?', id: 'tn-onay', odak: true }, govde: [B.pul('x')] } });
+  dogru(b === '<section class="b-sohbet" aria-label="Sohbet"><section class="b-sohbet__simdi" aria-labelledby="tn-onay"><p class="b-sohbet__soru b-sohbet__soru--simdi" id="tn-onay" tabindex="-1">Kaydedeyim mi?</p>' +
+    '<span class="b-pul b-pul--normal">x</span></section></section>', b);
+  atar(() => B.sohbet({ ad: 'S', simdi: { govde: '' } }), /etiket/, 'formsuz ve başlıksız şu an');
+  atar(() => B.sohbet({ ad: 'S', gecmis: [{ soru: 'x' }], simdi: { form: {}, govde: '' } }), /cevap/, 'cevapsız geçmiş');
+  const c = B.cipler({ ad: 'Hızlı seçenekler, biri seçilir', ogeler: [{ metin: 'Öğrenci', basili: true, veri: { 'tn-cip': 'ogr' } }, { metin: 'Çalışıyorum', veri: { 'tn-cip': 'is' } }] });
+  dogru(/^<fieldset class="b-cipler"><legend class="gizli">Hızlı seçenekler, biri seçilir<\/legend><div class="b-eylemler"><button type="button" class="b-dugme b-dugme--ikincil" aria-pressed="true" data-tn-cip="ogr">Öğrenci/.test(c) && /aria-pressed="false" data-tn-cip="is"/.test(c), c);
+  atar(() => B.cipler({ ad: 'x', ogeler: [] }), /ogeler/, 'boş çipler');
+  const y = B.yanli({ taraf: 'sol', yan: B.gezinme({ ad: 'Ayar grupları', ogeler: [{ metin: 'Görünüm', href: '#/ayarlar?grup-gorunum' }] }), ana: ['<p>a</p>', '<p>b</p>'] });
+  dogru(y === '<div class="b-yanli b-yanli--sol"><div class="b-yanli__yan"><nav class="b-gezinme" aria-label="Ayar grupları"><a class="b-gezinme__oge" href="#/ayarlar?grup-gorunum">Görünüm</a></nav></div>' +
+    '<div class="b-yanli__ana"><p>a</p><p>b</p></div></div>', y);
+  dogru(/^<div class="b-yanli b-yanli--sag"><div class="b-yanli__ana">a<\/div><aside class="b-yanli__yan">y<\/aside><\/div>$/.test(B.yanli({ taraf: 'sag', tamamlayici: true, ana: 'a', yan: 'y' })), 'sağda tamamlayıcı yan');
+  atar(() => B.yanli({ taraf: 'ust', ana: '', yan: '' }), /taraf/, 'bilinmeyen taraf');
+  atar(() => B.gezinme({ ad: 'G', ogeler: [{ metin: 'x', href: 'javascript:1' }] }), /href/, 'tehlikeli gezinme');
+  const f = B.liste({ ad: 'King\'in anladığı', canli: true, ogeler: [{ form: { veri: { 'tn-olgu': 'o1' }, govde: B.alan({ ad: 'Düzelt', isim: 'duzelt' }) } }, { ad: 'Ece', not: 'Ad', pul: 'senin sözün', uzun: true, eylemler: [{ metin: 'Sil', tur: 'sade' }] }] });
+  dogru(/^<ul class="b-liste b-liste--satir" aria-label="King&#39;in anladığı" aria-live="polite"><li><form class="b-satir b-satir--form" data-tn-olgu="o1" novalidate><div class="b-alan">/.test(f), f);
+  dogru(/<div class="b-satir b-satir--uzun"><span class="b-satir__metin"><span class="b-satir__ad">Ece<\/span><span class="b-satir__not">Ad<\/span><\/span><span class="b-pul b-pul--normal">senin sözün<\/span><div class="b-eylemler">/.test(f), 'uzun satır eylemli');
+  dogru(/^<div class="b-kart"><p class="b-kart__ust">Bugün 2 tekrar, 1 yeni kart<\/p><p class="b-kart__on">Arkhe\?<\/p>/.test(B.kart({ ust: 'Bugün 2 tekrar, 1 yeni kart', on: 'Arkhe?' })), 'kart üst satırı');
+  dogru(/<\/span><p class="gizli" aria-live="polite" id="deneme-duyuru"><\/p><\/div>$/.test(B.serit({ baslik: 'D', sayac: { metin: '10:00', ad: 'Kalan süre' }, duyuru: 'deneme-duyuru' })), 'şerit duyurusu');
+  atar(() => B.serit({ baslik: 'D', duyuru: 'Kötü kimlik' }), /duyuru/, 'kötü duyuru kimliği');
 });
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');

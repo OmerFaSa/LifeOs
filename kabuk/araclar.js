@@ -547,9 +547,23 @@
     return (alan ? alan.ad : x.alan) + ' · ' + (x.unite ? (u ? u.ad : x.unite) + ' kapısı' : 'Aşama ' + String(x.asama).split('.')[1] + ' kapısı');
   }
   function sayac(simdi) { var s = oku(SAYAC_ANAHTAR, {}); return s.gun === gunAdi(simdi) ? s : { gun: gunAdi(simdi), yeni: 0, tekrar: 0 }; }
-  function sayfaTekrar(yer) {
+  // Tek kart (#/motor/tekrar/kart/<kimlik>; aramadan açılır): ön yüz, «Cevabı göster» ile arka yüz. Burada not verilmez: zamanlama yalnız
+  // bugünün sırasında değişir (Tekrar sayfası); kart sıradaysa oraya bağlantı var.
+  function sayfaKart(yer, id, hepsi, simdi) {
+    var I = ic(), x = hepsi.filter(function (z) { return z.id === id; })[0];
+    var geri = '<a class="kirinti" href="#/motor/tekrar"><span aria-hidden="true">‹ </span>Tekrar</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>Kart</span>';
+    if (!x) return I.ust(geri) + '<div class="govde" data-arac="tekrar">' + B.bos({ baslik: 'Bu kart bulunamadı.', metin: 'Silinmiş olabilir.', eylem: { metin: 'Tekrar\'a dön', tur: 'ana', href: '#/motor/tekrar' } }) + '</div>';
+    var taslak = x.kaynak === 'kapi' && x.icerik !== 'onayli', h = Tekrar.hatirlama(x, simdi), acik = gosterilen === x.id;
+    var vade = taslak ? 'taslak: onaylanınca tekrara girer' : x.sonraki == null ? 'yeni kart' : x.sonraki <= gunSonu(simdi) ? 'bugün sırada' : 'sıradaki tekrar ' + tarih(x.sonraki);
+    return I.ust(geri) + '<div class="govde" data-arac="tekrar" data-kart-sayfa>' + B.baslik({ metin: 'Kart', alt: (x.kaynak === 'kapi' ? kapiKaynak(x) : x.kaynak === 'yol' ? 'Ders alıştırmasından' : 'Elle eklediğin kart') +
+      ' · hatırlama ' + (h.deger == null ? '—' : '%' + Math.round(h.deger * 100)) + ' (' + h.etiket + ')' }) +
+      B.kart({ ust: vade, on: x.on, arka: acik ? x.arka : null, veri: { kart: x.id }, eylem: acik ? { metin: 'Tekrar\'a dön', href: '#/motor/tekrar' } : { metin: 'Cevabı göster', tur: 'ana', veri: { 'arac-ac': 'kart-goster' } } }) + '</div>';
+  }
+  function sayfaTekrar(yer, alt) {
     var I = ic(), k = I.kac;
     if (!Tekrar) return I.ust(I.kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: 'Tekrar' }) + eksik('Tekrar') + '</div>';
+    var tek = /^kart\/(.+)$/.exec(alt || '');
+    if (tek) { var idk; try { idk = decodeURIComponent(tek[1]); } catch (e) { idk = tek[1]; } return sayfaKart(yer, idk, kartlar(), Date.now()); }
     // taslak içerikten gelen kapı kartları tekrara girmez (AGENTS 0.1): ayrı listede durur, açılınca doğru cevabı gösterir
     var simdi = Date.now(), hepsi = kartlar(), kapiT = hepsi.filter(function (x) { return x.kaynak === 'kapi' && x.icerik !== 'onayli'; });
     var l = hepsi.filter(function (x) { return kapiT.indexOf(x) < 0; }), s = sayac(simdi), q = kuyruk(Tekrar, l, simdi, s), kart = q.sira[0], govde;
@@ -558,8 +572,7 @@
       (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar ? ' <span class="soluk">Günlük tavan doldu; ' + (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar) + ' kart yarına kaldı.</span>' : '') + '</p>' });
     else {
       var acik = gosterilen === kart.id;
-      govde = '<p class="soluk">Bugün ' + q.plan.tekrar.length + ' tekrar, ' + q.plan.yeni.length + ' yeni kart</p>' +
-        B.kart({ on: kart.on, arka: acik ? kart.arka : null, veri: { kart: kart.id }, eylem: acik ? null : { metin: 'Cevabı göster', tur: 'ana', veri: { 'arac-ac': 'kart-goster' } },
+      govde = B.kart({ ust: 'Bugün ' + q.plan.tekrar.length + ' tekrar, ' + q.plan.yeni.length + ' yeni kart', on: kart.on, arka: acik ? kart.arka : null, veri: { kart: kart.id }, eylem: acik ? null : { metin: 'Cevabı göster', tur: 'ana', veri: { 'arac-ac': 'kart-goster' } },
           notlar: acik ? [[1, 'Yine'], [2, 'Zor'], [3, 'İyi'], [4, 'Kolay']].map(function (n) {
             var a = aralikAdi(Tekrar.cevapla(kart, n[0], simdi).gun);
             return { metin: n[1], sure: a === 'şimdi' ? a : a + ' sonra', veri: { 'arac-ac': 'kart-not', not: n[0] } };
@@ -803,13 +816,12 @@
     var r = planEkle(Plan, dr, ne, veri, gunAdi(simdi));
     return r.ok ? planYaz(r.durum) : planHata(r.hatalar);
   }
-  // Bugün sayfasının alt satırı: plan varsa sıradaki blok, yoksa plana davet
+  // Bugün sayfasının alt bağlantısı (karşılama taşının baglanti'sı): plan varsa sıradaki blok, yoksa plana davet
   Kabuk.bugunEk = function () {
-    if (!Plan) return '';
-    var k = ic().kac, simdi = Date.now(), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan;
+    if (!Plan) return null;
+    var simdi = Date.now(), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan;
     var sira = p && p.bloklar.filter(function (b) { return b.durum === 'bekliyor' && b.tur !== 'mola' && b.tur !== 'sabit'; });
-    if (!p) return '<a class="karsila__plan" href="#/motor/plan">Günü planla</a>';
-    return '<a class="karsila__plan" href="#/motor/plan">' + (sira.length ? 'Planda sırada: ' + k(sira[0].bas) + ' ' + k(sira[0].ad) + (sira.length > 1 ? ' · ' + (sira.length - 1) + ' blok daha' : '') : 'Bugünün planı bitti') + '</a>';
+    return { href: '#/motor/plan', metin: !p ? 'Günü planla' : sira.length ? 'Planda sırada: ' + sira[0].bas + ' ' + sira[0].ad + (sira.length > 1 ? ' · ' + (sira.length - 1) + ' blok daha' : '') : 'Bugünün planı bitti' };
   };
 
   /* ---- Soru: karma test ---- */
@@ -902,7 +914,7 @@
       if (!v || v.lifeos_kabuk_baslangic !== 1 || !v.kimlik || !v.say || ic().depo.getItem(BASLANGIC_IZ) === v.kimlik) return;
       if (!(v.say.notlar + v.say.kayitlar + v.say.kartlar + Object.keys(v.beden || {}).length)) return;
       baslangic = v;
-      if (d.querySelector('.karsila')) ic().rota();
+      if (d.querySelector('.b-karsilama')) ic().rota();
     }).catch(function () { /* sunucu yok ya da paket yok: teklif çıkmaz */ });
   }
   Kabuk.baslangicDavet = function () {

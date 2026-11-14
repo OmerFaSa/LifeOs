@@ -1,4 +1,4 @@
-/* LIFEOS.Kabuk.Bilesen (global `Bilesen`) — A2 bileşen kataloğu: kabuğun yirmi iki yapı taşı.
+/* LIFEOS.Kabuk.Bilesen (global `Bilesen`) — A2 bileşen kataloğu: kabuğun yirmi sekiz yapı taşı.
  * Ekranlar yalnız bunlardan kurulur; her ölçü kabuk/bilesen.css'tedir ve bağlama göre değişmez.
  * Her işlev saf: bir seçenek nesnesi alır, HTML metni döndürür (kabuğun öteki dosyaları gibi). Bütün metin kaçışlıdır;
  * yanlış girdi TypeError atar (sessizce bozuk HTML çizilmez). İç içe parça HTML olarak değil, seçenek nesnesi olarak
@@ -82,9 +82,11 @@
   /* 3 · Liste satırı ve liste. Satır yüksekliği sabit (ad ve not birer satır, taşan kısaltılır).
    * durum: acik | kilitli | secili. Liste <ul aria-label>; tur: satir | ders.
    * eylemler: bağlantı olmayan satırın sağındaki düğmeler (Sil, Düzelt…); bağlantı satırında iç içe etkileşim olmaz.
-   * uzun: ad ve not kısaltılmaz, sarılır; satır en az standart boyda, gerekirse uzar (sayı + kesinlik etiketi taşıyan notlar, saatli plan blokları). */
+   * uzun: ad ve not kısaltılmaz, sarılır; satır en az standart boyda, gerekirse uzar (sayı + kesinlik etiketi taşıyan notlar, saatli plan blokları).
+   * form {veri, govde}: satır yerinde düzenlenirken aynı kutuda <form novalidate> (gövde başka taşlar; gönderme ekranın işi). liste canli: aria-live. */
   function satir(o) {
     nesne('satir', o);
+    if (o.form != null) { var f = nesne('satir', o.form); return '<form class="b-satir b-satir--form"' + veri('satir', f.veri) + ' novalidate>' + govde('satir', f.govde) + '</form>'; }
     var durum = sec('satir', 'durum', o.durum, ['acik', 'kilitli', 'secili']), ad = metin('satir', 'ad', o.ad, false), sinif = 'b-satir' + (o.uzun ? ' b-satir--uzun' : '');
     if (o.eylemler != null && o.href != null) hata('satir', 'bağlantı satırında eylem olmaz');
     var ic = '<span class="b-satir__metin"><span class="b-satir__ad">' + kac(ad) + '</span>' +
@@ -101,7 +103,7 @@
     var tur = sec('liste', 'tur', o.tur, ['satir', 'ders']), ad = metin('liste', 'ad', o.ad, false);
     if (!Array.isArray(o.ogeler) || !o.ogeler.length) hata('liste', 'ogeler boş olmayan dizi olmalı; boşsa Bilesen.bos kullan');
     var ciz = tur === 'ders' ? ders : satir;
-    return '<ul class="b-liste b-liste--' + tur + '" aria-label="' + kac(ad) + '">' + o.ogeler.map(function (x) { return '<li>' + ciz(x) + '</li>'; }).join('') + '</ul>';
+    return '<ul class="b-liste b-liste--' + tur + '" aria-label="' + kac(ad) + '"' + (o.canli ? ' aria-live="polite"' : '') + '>' + o.ogeler.map(function (x) { return '<li>' + ciz(x) + '</li>'; }).join('') + '</ul>';
   }
 
   /* 4 · Ders kartı. Sabit yükseklik: başlık 1 satır, özet en çok 2 satır, alt satır (durum, süre, taslak).
@@ -322,12 +324,13 @@
   }
 
   /* 17 · Kart (Tekrar). Ön yüz büyük; arka yüz çizgiyle ayrılır ve odak alır (açılınca ekran okuyucu okur). notlar (arkayla birlikte):
-   * eşit genişlikte not düğmeleri {metin, sure: ne zaman yeniden sorulur, veri}; sığmazsa iki sütun. eylem: arka kapalıyken tek düğme. */
+   * eşit genişlikte not düğmeleri {metin, sure: ne zaman yeniden sorulur, veri}; sığmazsa iki sütun. eylem: arka kapalıyken tek düğme.
+   * ust: ön yüzün üstünde kısa soluk satır (bugünün sırası: «Bugün 3 tekrar, 1 yeni kart»). */
   function kart(o) {
     nesne('kart', o);
     var n = o.notlar == null ? null : dizi('kart', 'notlar', o.notlar);
     if (n && o.arka == null) hata('kart', 'notlar arka yüzle birlikte verilir');
-    return '<div class="b-kart"' + veri('kart', o.veri) + '><p class="b-kart__on">' + kac(metin('kart', 'on', o.on)) + '</p>' +
+    return '<div class="b-kart"' + veri('kart', o.veri) + '>' + (o.ust ? '<p class="b-kart__ust">' + kac(metin('kart', 'ust', o.ust)) + '</p>' : '') + '<p class="b-kart__on">' + kac(metin('kart', 'on', o.on)) + '</p>' +
       (o.arka != null ? '<p class="b-kart__arka" tabindex="-1">' + kac(metin('kart', 'arka', o.arka)) + '</p>' : '') +
       (n ? '<div class="b-kart__notlar" role="group" aria-label="Ne kadar hatırladın?">' + n.map(function (x) {
         return '<button type="button" class="b-kart__not"' + veri('kart', nesne('kart', x).veri) + '><span class="b-kart__notad">' + kac(metin('kart', 'not', x.metin, false, 16)) +
@@ -353,13 +356,16 @@
   }
 
   /* 19 · Şerit. Ekranın üstüne yapışan tek sıra: başlık ve altında kısa not solda, sayaç sağda (role=timer). sayac {metin, ad, az}: az iken
-   * 3 px vurgu çerçeve (renk tek başına değil, yanıp sönmez). Saniyelik güncelleme ekranın işi (.b-serit__sayac, sınıf b-serit__sayac--az). */
+   * 3 px vurgu çerçeve (renk tek başına değil, yanıp sönmez). Saniyelik güncelleme ekranın işi (.b-serit__sayac, sınıf b-serit__sayac--az).
+   * duyuru: gizli canlı satırın kimliği («5 dakika kaldı» gibi sözleri ekran yazar; görünmez, ekran okuyucu söyler). */
   function serit(o) {
     nesne('serit', o);
     var s = o.sayac == null ? null : nesne('serit', o.sayac);
+    if (o.duyuru != null && (typeof o.duyuru !== 'string' || !AD.test(o.duyuru))) hata('serit', 'duyuru bir öğe kimliği olmalı');
     return '<div class="b-serit"' + veri('serit', o.veri) + '><p class="b-serit__baslik">' + kac(metin('serit', 'baslik', o.baslik)) +
       (o.alt ? '<span class="b-serit__alt">' + kac(metin('serit', 'alt', o.alt)) + '</span>' : '') + '</p>' + (s ? '<span class="b-serit__sayac' + (s.az ? ' b-serit__sayac--az' : '') +
-      '" role="timer" aria-label="' + kac(metin('serit', 'sayac.ad', s.ad)) + '">' + kac(metin('serit', 'sayac.metin', s.metin)) + '</span>' : '') + '</div>';
+      '" role="timer" aria-label="' + kac(metin('serit', 'sayac.ad', s.ad)) + '">' + kac(metin('serit', 'sayac.metin', s.metin)) + '</span>' : '') +
+      (o.duyuru ? '<p class="gizli" aria-live="polite" id="' + o.duyuru + '"></p>' : '') + '</div>';
   }
 
   /* 20 · Adımlar. Sıra numaralı 44 px kare düğmeler (deneme soruları); sığmayan alt satıra geçer. Öğe {etiket: tam ad, dolu: yapıldı (yüzey + güçlü
@@ -408,13 +414,115 @@
       (l ? '<ul class="b-ag__aciklama">' + l + '</ul>' : '') + '</figcaption>' : '') + '</figure>';
   }
 
+  /* 23 · Karşılama (Bugün; karşılama A: tek cümle, tek düğme). Ortada selam (h1, büyük piksel yazı), «sırada» satırı (sira {ust, metin}), sıradaki adım,
+   * tek ana düğme (eylem: dugme seçenekleri, tür varsayılan ana); altında isteğe bağlı tek bağlantı (baglanti {metin, href}) ve bilgi satırları
+   * (ekler: uyarı taşlarının çıktısı; hepsi aynı genişlikte, en çok 760 px). */
+  function karsilama(o) {
+    nesne('karsilama', o);
+    var s = o.sira == null ? null : nesne('karsilama', o.sira), b = o.baglanti == null ? null : nesne('karsilama', o.baglanti), ek = o.ekler == null ? '' : govde('karsilama', o.ekler);
+    return '<div class="b-karsilama"><h1 class="b-karsilama__selam">' + kac(metin('karsilama', 'selam', o.selam)) + '</h1>' +
+      (s ? '<p class="b-karsilama__sira"><span class="b-karsilama__ust">' + kac(metin('karsilama', 'sira.ust', s.ust)) + '</span><br>' + kac(metin('karsilama', 'sira.metin', s.metin)) + '</p>' : '') +
+      (o.adim ? '<p class="b-karsilama__adim">' + kac(metin('karsilama', 'adim', o.adim)) + '</p>' : '') +
+      dugme(Object.assign({ tur: 'ana' }, nesne('karsilama', o.eylem))) +
+      (b ? '<a class="b-karsilama__baglanti" href="' + kac(yol('karsilama', b.href)) + '">' + kac(metin('karsilama', 'baglanti.metin', b.metin)) + '</a>' : '') +
+      (ek ? '<div class="b-karsilama__ek">' + ek + '</div>' : '') + '</div>';
+  }
+
+  /* 24 · Halka (Yerler). Basılı tutunca ya da Ctrl . ile açılan dairesel menü: role=menu, öğeler menuitem düğmeleri (data-yol); ilki tepede, saat yönünde
+   * eşit açıyla (--a). Gizli çizilir; açma (b-halka--acik), konum (--x --y --r), seçim (b-halka__oge--secili) ve ok tuşları ekranın işi (kabuk.js).
+   * Zemin yuvarlak (sahibin kararı, faz2-kabuk.md); köşe değil, daire: radyal geçişle çizilir. */
+  function halka(o) {
+    nesne('halka', o);
+    if (typeof o.id !== 'string' || !AD.test(o.id)) hata('halka', 'id küçük harf ve tire olmalı');
+    var l = dizi('halka', 'ogeler', o.ogeler, 2);
+    return '<div id="' + o.id + '" class="b-halka" role="menu" aria-label="' + kac(metin('halka', 'ad', o.ad)) + '" hidden><span class="b-halka__merkez" aria-hidden="true"></span>' +
+      l.map(function (x, i) {
+        return '<button type="button" role="menuitem" class="b-halka__oge" data-yol="' + kac(yol('halka', nesne('halka', x).yol)) + '" style="--a:' + (-90 + i * 360 / l.length) + 'deg">' +
+          kac(metin('halka', 'ad', x.ad, false, 24)) + '</button>';
+      }).join('') + '</div>';
+  }
+
+  /* 25 · Komut çubuğu. Ortada açılan arama penceresi: role=dialog aria-modal; combobox girişi, listbox sonuçlar (<id>-liste), gizli canlı durum satırı
+   * (<id>-durum). Gizli çizilir; açma, süzme, ok tuşları ve seçim ekranın işi (kabuk.js). komutListe({id, ogeler: [{ad, etiket}]}): sonuç öğeleri
+   * role=option (<id>-0, -1, …; ilki seçili, data-i sırası); boşsa «Sonuç yok» (seçilemez). */
+  function komut(o) {
+    nesne('komut', o);
+    if (typeof o.id !== 'string' || !AD.test(o.id)) hata('komut', 'id küçük harf ve tire olmalı');
+    var yt = kac(metin('komut', 'yerTutucu', o.yerTutucu));
+    return '<div id="' + o.id + '" class="b-komut" role="dialog" aria-modal="true" aria-label="' + kac(metin('komut', 'ad', o.ad)) + '" hidden><div class="b-komut__giris">' +
+      '<input class="b-komut__alan" type="text" role="combobox" aria-expanded="false" aria-controls="' + o.id + '-liste" aria-autocomplete="list" aria-label="' + yt + '" placeholder="' + yt +
+      '" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div><ul id="' + o.id + '-liste" class="b-komut__liste" role="listbox" aria-label="Sonuçlar"></ul>' +
+      '<p id="' + o.id + '-durum" class="gizli" aria-live="polite"></p></div>';
+  }
+  function komutListe(o) {
+    nesne('komutListe', o);
+    if (typeof o.id !== 'string' || !AD.test(o.id)) hata('komutListe', 'id küçük harf ve tire olmalı');
+    if (!Array.isArray(o.ogeler)) hata('komutListe', 'ogeler dizi olmalı');
+    if (!o.ogeler.length) return '<li class="b-komut__bos" role="presentation">Sonuç yok</li>';
+    return o.ogeler.map(function (x, i) {
+      return '<li class="b-komut__oge" role="option" id="' + o.id + '-' + i + '" aria-selected="' + (i === 0) + '" data-i="' + i + '"><span>' + kac(metin('komutListe', 'ad', nesne('komutListe', x).ad)) +
+        '</span><span class="b-komut__etiket">' + kac(metin('komutListe', 'etiket', x.etiket, true)) + '</span></li>';
+    }).join('');
+  }
+
+  /* 26 · Sohbet (Tanışma). <section aria-label>; geçmiş [{soru, cevap: [metin…] | atlandi: true, eylem?}]: soru solda yüzeyde, cevabın sağda koyu
+   * yüzeyde (atlanan soru «Atladın»), yanında tek düğme (Değiştir). simdi {soru?: {metin, id?, canli?, odak?}, govde, form?: veri | etiket: başlık kimliği}:
+   * şu anki adım; soru vurgulu (canli: aria-live, odak: tabindex=-1), form verilirse <form novalidate> (gönderme ekranın işi), yoksa <section aria-labelledby>. */
+  function sohbet(o) {
+    nesne('sohbet', o);
+    var g = o.gecmis == null ? [] : o.gecmis, s = nesne('sohbet', o.simdi);
+    if (!Array.isArray(g)) hata('sohbet', 'gecmis dizi olmalı');
+    var akis = g.length ? '<ol class="b-sohbet__akis">' + g.map(function (x) {
+      nesne('sohbet', x);
+      if (!x.atlandi && !Array.isArray(x.cevap)) hata('sohbet', 'cevap metin dizisi olmalı (ya da atlandi)');
+      var c = x.atlandi ? '<span class="b-sohbet__atla">Atladın</span>' : x.cevap.map(function (m) { return '<span>' + kac(metin('sohbet', 'cevap', m)) + '</span>'; }).join('');
+      return '<li class="b-sohbet__soru">' + kac(metin('sohbet', 'soru', x.soru)) + '</li><li class="b-sohbet__ben">' + c + (x.eylem ? dugme(x.eylem) : '') + '</li>';
+    }).join('') + '</ol>' : '';
+    var q = s.soru == null ? null : nesne('sohbet', s.soru);
+    if (q && q.id != null && (typeof q.id !== 'string' || !AD.test(q.id))) hata('sohbet', 'soru.id küçük harf ve tire olmalı');
+    var soz = q ? '<p class="b-sohbet__soru b-sohbet__soru--simdi"' + (q.id ? ' id="' + q.id + '"' : '') + (q.canli ? ' aria-live="polite"' : '') + (q.odak ? ' tabindex="-1"' : '') + '>' +
+      kac(metin('sohbet', 'soru.metin', q.metin)) + '</p>' : '';
+    var ic = soz + govde('sohbet', s.govde), simdi;
+    if (s.form != null) simdi = '<form class="b-sohbet__simdi"' + veri('sohbet', s.form) + ' novalidate>' + ic + '</form>';
+    else {
+      if (typeof s.etiket !== 'string' || !AD.test(s.etiket)) hata('sohbet', 'form değilse simdi.etiket bir başlığın kimliği olmalı');
+      simdi = '<section class="b-sohbet__simdi" aria-labelledby="' + s.etiket + '">' + ic + '</section>';
+    }
+    return '<section class="b-sohbet" aria-label="' + kac(metin('sohbet', 'ad', o.ad)) + '">' + akis + simdi + '</section>';
+  }
+
+  /* 27 · Çipler. Hızlı seçenekler: <fieldset> + gizli legend (ad; kaç seçilebileceğini de söyler) içinde aç/kapa düğmeleri (aria-pressed).
+   * ogeler: düğme seçenekleri; basılı değilse false yazılır. Tek mi çok mu seçileceği ekranın işi. */
+  function cipler(o) {
+    nesne('cipler', o);
+    return '<fieldset class="b-cipler"><legend class="gizli">' + kac(metin('cipler', 'ad', o.ad)) + '</legend>' +
+      eylemler(dizi('cipler', 'ogeler', o.ogeler).map(function (x) { return Object.assign({}, nesne('cipler', x), { basili: !!x.basili }); })) + '</fieldset>';
+  }
+
+  /* 28 · Yanlı düzen. Ana sütun + yapışkan yan sütun; 820 px ve altında alt alta, yan yapışmaz. taraf: sol (yan önce; Ayarlar gezinmesi 12 rem) |
+   * sag (ana önce; Tanışma paneli, 3:2). tamamlayici: yan <aside>. gezinme({ad, ogeler: [{metin, href}]}): sayfa içi bağlantılar (<nav aria-label>),
+   * her biri en az 44 px; dar ekranda yan yana sarar. */
+  function yanli(o) {
+    nesne('yanli', o);
+    var t = sec('yanli', 'taraf', o.taraf, ['sol', 'sag']), e = o.tamamlayici ? 'aside' : 'div';
+    var yan = '<' + e + ' class="b-yanli__yan">' + govde('yanli', o.yan) + '</' + e + '>', ana = '<div class="b-yanli__ana">' + govde('yanli', o.ana) + '</div>';
+    return '<div class="b-yanli b-yanli--' + t + '">' + (t === 'sol' ? yan + ana : ana + yan) + '</div>';
+  }
+  function gezinme(o) {
+    nesne('gezinme', o);
+    return '<nav class="b-gezinme" aria-label="' + kac(metin('gezinme', 'ad', o.ad)) + '">' + dizi('gezinme', 'ogeler', o.ogeler).map(function (x) {
+      return '<a class="b-gezinme__oge" href="' + kac(yol('gezinme', nesne('gezinme', x).href)) + '">' + kac(metin('gezinme', 'metin', x.metin)) + '</a>';
+    }).join('') + '</nav>';
+  }
+
   var Bilesen = {
     TASLAR: ['dugme', 'pul', 'satir', 'ders', 'ilerleme', 'alan', 'bos', 'baslik', 'sayi', 'uyari', 'bolum', 'panel', 'eylemler', 'acilir', 'soru', 'tercih',
-      'kart', 'tablo', 'serit', 'adimlar', 'ayar', 'ag'],
+      'kart', 'tablo', 'serit', 'adimlar', 'ayar', 'ag', 'karsilama', 'halka', 'komut', 'sohbet', 'cipler', 'yanli'],
     ETIKET: ETIKET, kac: kac,
     dugme: dugme, pul: pul, satir: satir, liste: liste, ders: ders, ilerleme: ilerleme, alan: alan, bos: bos,
     baslik: baslik, sayi: sayi, sayilar: sayilar, uyari: uyari, bolum: bolum, panel: panel, eylemler: eylemler, acilir: acilir, soru: soru, tercih: tercih,
-    kart: kart, tablo: tablo, serit: serit, adimlar: adimlar, ayar: ayar, ag: ag
+    kart: kart, tablo: tablo, serit: serit, adimlar: adimlar, ayar: ayar, ag: ag,
+    karsilama: karsilama, halka: halka, komut: komut, komutListe: komutListe, sohbet: sohbet, cipler: cipler, yanli: yanli, gezinme: gezinme
   };
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Kabuk = kok.LIFEOS.Kabuk || {};

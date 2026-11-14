@@ -670,14 +670,43 @@ t('arama: hepsi birlikte; notlar Not motorunun aramasıyla (özel not da), yerle
     Not.yeni({ id: 'n2', baslik: 'Gizli düşünce', govde: 'platon ile tartıştım', ozel: true, olusturma: 2, guncelleme: 2 })];
   const og = K.komutOgeleri(H, A);
   const g = Ar.ara('platon', { dizin: arDizin, notlar, kayitlar: [], ogeler: og }, { Not });
-  esit(g.map(x => x.tur), ['ders', 'not', 'kayit', 'yer']);
+  esit(g.map(x => x.tur), ['ders', 'not', 'kart', 'plan', 'kayit', 'yer']);
   dogru(g[0].hazir && g[0].sonuclar.some(x => x.id === 'felsefe.1.1.3'), 'Platon dersi');
   esit(g[1].sonuclar.map(x => x.id).sort(), ['n1', 'n2'], 'özel not da aranır (sahibin ekranı)');
   esit(Ar.ara('tekrar', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not }).map(x => [x.tur, x.hazir, x.toplam > 0]).slice(0, 1), [['ders', false, false]], 'dizin yokken dersler hazır değil');
-  const y = Ar.ara('tekrar', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not })[3].sonuclar;
+  const y = Ar.ara('tekrar', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not })[5].sonuclar;
   esit(y[0].id, 'tekrar'); dogru(y.every(o => o.yol), 'yalnız açılabilen öğeler');
-  dogru(Ar.ara('koyu', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not })[3].sonuclar.every(o => o.tur !== 'eylem' || o.yol), 'yolsuz eylem sonuçta yok');
-  esit(Ar.ara('', { dizin: arDizin, notlar, kayitlar: [], ogeler: og }, { Not }).map(x => x.toplam), [0, 0, 0, 0]);
+  dogru(Ar.ara('koyu', { dizin: null, notlar: [], kayitlar: [], ogeler: og }, { Not })[5].sonuclar.every(o => o.tur !== 'eylem' || o.yol), 'yolsuz eylem sonuçta yok');
+  esit(Ar.ara('', { dizin: arDizin, notlar, kayitlar: [], ogeler: og }, { Not }).map(x => x.toplam), [0, 0, 0, 0, 0, 0]);
+});
+t('arama: Tekrar kartları ön ve arka yüzden; ön yüz önce, arkadaki eşleşme «Cevap:» parçası, kapı kartı taslak; bağlantı kartın kendisi', () => {
+  const Tekrar = require('../motor/tekrar.js');
+  const l = [Tekrar.yeniKart('k1', { on: 'Thales\'e göre ilk madde nedir?', arka: 'Su. Her şey sudan gelir.', kaynak: 'elle' }),
+    Tekrar.yeniKart('felsefe.1.1.3.a1', { on: 'Arkhe ne demektir?', arka: 'İlk ilke; Thales için su.', kaynak: 'yol', icerik: 'onayli' }),
+    Tekrar.yeniKart('dil.2.1.k1', { on: 'Fish live in the water: yüklem?', arka: 'live', kaynak: 'kapi', icerik: 'taslak' }), { bozuk: true }];
+  const r = Ar.kartAra(l, 'THALES', 10);
+  esit(r.sonuclar.map(x => x.id), ['k1', 'felsefe.1.1.3.a1'], 'ön yüzde geçen önce');
+  esit([r.sonuclar[0].parca, r.sonuclar[0].yol], ['', '#/motor/tekrar/kart/k1']);
+  dogru(/^Cevap: İlk ilke; Thales/.test(r.sonuclar[1].parca), 'arkadaki eşleşme parçası: ' + r.sonuclar[1].parca);
+  esit(Ar.kartAra(l, 'sudan gelir', 10).sonuclar.map(x => x.id), ['k1'], 'arka yüz de aranır, her kelime tutmalı');
+  esit(Ar.kartAra(l, 'yuklem', 10).sonuclar.map(x => [x.id, x.taslak]), [['dil.2.1.k1', true]], 'kapı kartı taslak; aksansız yazım');
+  esit(Ar.kartAra(l, 'arkhe zzqx', 10).toplam, 0);
+  esit(Ar.kartAra(null, 'su', 10).toplam, 0, 'kart yoksa boş');
+  const g = Ar.ara('thales', { dizin: null, notlar: [], kartlar: l, ogeler: [] }, { Not: require('../motor/not.js') });
+  esit([g[2].tur, g[2].toplam], ['kart', 2]);
+});
+t('arama: Plan bugünün blokları, işler ve sabit bloklar; eski günün planı aranmaz; blok ve iş günü, sabit blok haftayı açar', () => {
+  const plan = { ayar: { musait: [{ bas: '09:00', bit: '12:00' }] }, isler: [{ id: 'i1', ad: 'Rapor yazmak', dk: 30 }, { id: 'i2', ad: 'Rapor okumak', dk: 20, son: '2026-11-20' }],
+    gunPlan: { gun: '2026-11-14', plan: { bloklar: [{ id: 'b1', kaynakId: 'i1', tur: 'is', ad: 'Rapor yazmak', bas: '09:00', bit: '09:30' }, { id: 'm1', tur: 'mola', ad: 'Mola rapor', bas: '09:30', bit: '09:40' },
+      { id: 's1:4', tur: 'sabit', ad: 'Okul raporu', bas: '08:00', bit: '09:00' }] } } };
+  const sablon = { sabitler: [{ id: 's1', ad: 'Okul raporu', bas: '08:00', bit: '09:00', gunler: [0, 1, 2, 3, 4] }, { id: 's2', ad: 'Uyku', bas: '23:00', bit: '07:00', gunler: [0, 1, 2, 3, 4, 5, 6] }] };
+  const r = Ar.planAra(plan, sablon, '2026-11-14', 'RAPOR', 10).sonuclar;
+  esit(r.map(x => [x.id, x.yol]), [['b1', '#/motor/plan'], ['i2', '#/motor/plan'], ['s1', '#/motor/plan/hafta']], 'blok, bloğu olmayan iş, sabit; mola ve günün sabit kopyası yok');
+  esit([r[0].not, r[1].not, r[2].not], ['Bugünün planı · 09:00–09:30', 'İş · 20 dk · son 2026-11-20', 'Sabit blok · 08:00–09:00 · Pzt, Sal, Çar, Per, Cum']);
+  esit(Ar.planAra(plan, sablon, '2026-11-15', 'rapor yazmak', 10).sonuclar.map(x => [x.id, x.not]), [['i1', 'İş · 30 dk']], 'eski günün bloğu aranmaz, iş kalır');
+  esit(Ar.planAra(plan, sablon, '2026-11-14', 'uyku', 10).sonuclar[0].not, 'Sabit blok · 23:00–07:00 · her gün');
+  esit(Ar.planAra(null, null, '2026-11-14', 'rapor', 10).toplam, 0, 'plan yoksa boş');
+  esit(Ar.ara('rapor', { dizin: null, notlar: [], plan, sablon, bugun: '2026-11-14', ogeler: [] }, { Not: require('../motor/not.js') })[3].toplam, 3);
 });
 t('arama: komut çubuğu son öğe olarak «Her şeyde ara» önerir; adres sorguyu taşır', () => {
   const og = K.komutOgeleri(H, A), s = K.komutSonucu(' felsefe ', og), son = s[s.length - 1];

@@ -22,6 +22,8 @@
   .ornek{ display:flex; flex-direction:column; gap:4px; min-width:0; }
   .ornek > small{ font-size:.72rem; color:var(--soluk); }
   .kural{ font-size:.85rem; color:var(--soluk); max-width:72ch; }
+  /* açılır katman örnekleri: dönüşümlü kap, position:fixed taşı kabın içinde tutar */
+  .katman{ position:relative; height:420px; overflow:hidden; transform:translateZ(0); background:var(--bg); box-shadow:0 0 0 2px var(--cizgi); }
 </style>
 </head>
 <body class="cerceve">
@@ -40,7 +42,7 @@
     return '<div><span id="seg-' + ad + '">' + ad2 + '</span>' + B.tercih({ etiket: 'seg-' + ad, secenekler: secenekler, deger: secili, veri: { seg: ad } }) + '</div>';
   }
 
-  var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'Yirmi iki yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
+  var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'Yirmi sekiz yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
     '<div class="denetim">' + seg('tema', 'Tema', { sistem: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, 'sistem') +
     seg('en', 'Genişlik', { tam: 'Pencere', dar: '390 px', genis: '1280 px' }, 'tam') + '</div>';
 
@@ -167,6 +169,29 @@
   h += tas(22, 'Ağ çizimi', 'Düğüm bir bağlantıdır (Sekme ile gezilir); çizgi türleri düz, kesik, kalın kesik; altında özet ve örnek çizgili açıklama (renk tek başına değil). Telefonda ad ~11 px kalır; kırktan çok düğümde ad yalnız odakta.', B.ag({ ad: 'Örnek ağ: 4 not, 3 bağ', en: 640, boy: 240,
     dugumler: [{ id: 'a', ad: 'Sokrates', x: 120, y: 60, href: '#/a' }, { id: 'b', ad: 'Erdem bilgidir', x: 320, y: 140, r: 10, href: '#/b' }, { id: 'c', ad: 'Sofistler', x: 540, y: 60, href: '#/c' }, { id: 'd', ad: 'Bağsız not', x: 560, y: 200, r: 6, href: '#/d' }],
     kenarlar: [{ a: 'a', b: 'b', tur: 'duz' }, { a: 'b', b: 'c', tur: 'kesik' }, { a: 'a', b: 'c', tur: 'kalin' }], ozet: '4 not · 3 bağ · 1 bağsız', aciklama: { duz: 'bağ', kesik: 'aynı etiket', kalin: 'çelişki' } }));
+  h += tas(23, 'Karşılama', 'Bugün: ortada tek cümle selam (ölçeğin dışındaki tek yazı boyu, karşılama A), sırada satırı, tek ana düğme; altında tek bağlantı ve aynı genişlikte bilgi satırları (en çok 760 px).',
+    B.karsilama({ selam: 'Günaydın Ece.', sira: { ust: 'Sırada', metin: 'Felsefe · Bilgi felsefesi' }, adim: 'Ders: Sanı ve bilgi', eylem: { metin: 'Devam et', href: '#/a' },
+      baglanti: { metin: 'Planda sırada: 09:00 Felsefe · 2 blok daha', href: '#/motor/plan' },
+      ekler: [B.uyari({ tur: 'bilgi', metin: 'Seni biraz tanıyayım mı? Birkaç kısa soru.', eylem: [{ metin: 'Tanışalım', tur: 'sade', href: '#/tanisma' }, { metin: 'Sonra', tur: 'sade' }] })] }));
+  // halka ve komut çubuğu gizli çizilir; katalogda açık hâlleri dönüşümlü kabın içinde gösterilir
+  h += tas(24, 'Halka', 'Boş yerde basılı tutunca (ya da Ctrl .) basılan yerde açılır: yuvarlak zemin, ortada nokta, en çok altı yer; öğe en az 88 × 44 px, ilki tepede, saat yönünde. Seçili öğe dolu vurgu. Ok tuşları, Home/End, Esc.',
+    '<div class="katman">' + B.halka({ id: 'ornek-halka', ad: 'Yerler', ogeler: [{ ad: 'Bugün', yol: '#/bugun' }, { ad: 'Öğren', yol: '#/ogren' }, { ad: 'Sağlık', yol: '#/saglik' },
+      { ad: 'Araçlar', yol: '#/araclar' }, { ad: 'King', yol: '#/king' }, { ad: 'Harita', yol: '#/harita' }] }).replace(' hidden>', ' style="--r:110px">').replace('b-halka"', 'b-halka b-halka--acik"')
+      .replace('class="b-halka__oge" data-yol="#/ogren"', 'class="b-halka__oge b-halka__oge--secili" data-yol="#/ogren"') + '</div>');
+  h += tas(25, 'Komut çubuğu', 'Ctrl K ya da / ile üstte ortada açılır: giriş 52 px, sonuç satırı 44 px, seçili satır 4 px vurgu; ok tuşları gezer, Enter açar, Esc kapatır. Yazılı sorguda son öğe «Her şeyde ara».',
+    '<div class="katman">' + B.komut({ id: 'ornek-komut', ad: 'Ara', yerTutucu: 'Bir yer, ayar ya da eylem ara' }).replace(' hidden>', '>')
+      .replace('></ul>', '>' + B.komutListe({ id: 'ornek-komut', ogeler: [{ ad: 'Not', etiket: 'araç' }, { ad: 'Yeni not', etiket: 'eylem' }, { ad: 'Her şeyde ara: not', etiket: 'arama' }] }) + '</ul>') + '</div>');
+  h += tas(26, 'Sohbet', 'Tanışma: soru solda yüzeyde, cevabın sağda koyu yüzeyde (en çok %88), yanında «Değiştir». Şu anki soru tam genişlik, 1,15 rem, 4 px vurgu; altında çipler, alan, eylemler.',
+    B.sohbet({ ad: 'Örnek sohbet', gecmis: [{ soru: 'Sana nasıl hitap edeyim?', cevap: ['Ece'], eylem: { metin: 'Değiştir', tur: 'sade' } }, { soru: 'Kaç yaşındasın?', atlandi: true, eylem: { metin: 'Değiştir', tur: 'sade' } }],
+      simdi: { form: { ornek: '' }, soru: { metin: 'Bugünlerde ne yapıyorsun?', id: 'ornek-sohbet-soru' }, govde: [
+        B.cipler({ ad: 'Hızlı seçenekler, biri seçilir', ogeler: [{ metin: 'Öğrenciyim', basili: true }, { metin: 'Çalışıyorum' }, { metin: 'İkisi de' }] }),
+        B.alan({ ad: 'Kendi sözlerinle cevap', isim: 'ornek-sohbet', tur: 'cok' }), B.eylemler([{ metin: 'Gönder', tur: 'ana' }, { metin: 'Atla', tur: 'sade' }])] } }));
+  h += tas(27, 'Çipler', 'Hızlı seçenekler: aç/kapa düğmeleri (basılı 3 px vurgu), gizli başlık kaç seçilebileceğini söyler; tek mi çok mu seçileceğine ekran karar verir.',
+    B.cipler({ ad: 'Örnek çipler, birden çok seçilebilir', ogeler: [{ metin: 'Felsefe', basili: true }, { metin: 'Tarih', basili: true }, { metin: 'Müzik' }, { metin: 'Dil' }] }));
+  h += tas(28, 'Yanlı düzen + gezinme', 'Ana sütun ve yapışkan yan sütun, 16 px aralık; 820 px ve altında alt alta. Sol: 12 rem gezinme (Ayarlar); sağ: 3:2 panel (Tanışma). Gezinme bağlantısı en az 44 px, dar ekranda yan yana sarar.',
+    B.yanli({ taraf: 'sol', yan: B.gezinme({ ad: 'Örnek gruplar', ogeler: [{ metin: 'Görünüm', href: '#/g' }, { metin: 'Erişilebilirlik', href: '#/e' }, { metin: 'Beden', href: '#/b' }] }),
+      ana: [B.ayar({ ad: 'Tema', not: 'Cihazına uyar ya da hep açık / koyu kalır.', id: 'ornek-yanli-ayar', govde: B.tercih({ etiket: 'ornek-yanli-ayar', secenekler: { sistem: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, deger: 'sistem' }) }),
+        B.panel({ baslik: 'King\'in anladığı', id: 'ornek-yanli-panel', govde: B.liste({ ad: 'Örnek olgular', ogeler: [{ ad: 'Ece', not: 'Hitap', pul: 'senin sözün', uzun: true, eylemler: [{ metin: 'Sil', tur: 'sade' }] }] }) })] }));
 
   var kok = document.getElementById('katalog');
   kok.innerHTML = h;
