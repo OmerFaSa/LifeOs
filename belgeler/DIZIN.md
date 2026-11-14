@@ -17,7 +17,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [ESP sadelik](ekip/sadelik/esp.md) — ESP ekranlarının 6 Kasım sadelik dökümü; durumu: sadeleşme planına girdi (2026-11-12).
 - [Sadeleşme tabanı](ekip/sadelesme/taban-20261112.md) — Tek sisteme geçişin «önce» sayıları; her faz kapısı buna karşı ölçülür. Plan sayfası aynı klasörde `plan.html` (2026-11-12).
 - [Faz 1 P5 · Tek kapı](ekip/sadelesme/faz1-p5-tekkapi.md) — A4: tek süreç, tek adres; yollar tablosu, dokunulan dosyalar, boşta bellek ölçümü, devreye alma adımları (kapalı, P6 ile açılır) (2026-11-13).
-- [Senin adımların](ekip/sadelesme/SAHIP-ADIMLARI.md) — Sadeleşmenin son kısmı için sahibin yedi adımı: güncelle, getir, telefondan gönder, tek kapıyı aç, haber ver, onayla, King ve disk (2026-11-14).
+- [Senin adımların](ekip/sadelesme/SAHIP-ADIMLARI.md) — Sadeleşmenin son kısmı için sahibin dört adımı: telefondan gönder, Claude’a haber ver, dersleri onayla, King ve disk (2026-11-14).
 - [Faz 1 · Tek kapıyı açma komutu](ekip/sadelesme/faz1-tek-kapi-ac.md) — `python sistem/tek_kapi_ac.py`: denetle, aç (yedek, göç, karşılaştırma, bayrak, doğrulama, hata olursa geri), geri dön (2026-11-14).
 - [Faz 2 · Kabuk](ekip/sadelesme/faz2-kabuk.md) — A5: tam ekran çerçeve, halka ve komut çubuğu, sistem haritası, tek ayar şeması; ekran görüntüleri `kabuk-onizleme/` altında, sahibinin onayını bekler (2026-11-13).
 - [Faz 2 · Kayıt deposu IndexedDB](ekip/sadelesme/faz2-indexeddb.md) — Kabuğun kayıtları IndexedDB'de, ayarlar localStorage'da; tek seferlik, geri okumadan silmeyen taşıma, kalıcı depolama isteği (2026-11-14).

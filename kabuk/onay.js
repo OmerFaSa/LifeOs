@@ -90,13 +90,10 @@
 
   // Sahibin kendi yapması gereken, sistemin yapamadığı adımlar (düz Türkçe, durağan)
   var ADIMLAR = [
-    ['1. Güncelle', 'LifeOS’taki «Güncelle»ye bas (ya da LifeOS’u kapatıp yeniden aç). Yeni ekranlar ve düzeltmeler gelir; kayıtların değişmez.'],
-    ['2. Eski kayıtlarını getir', 'Bugün ekranındaki «Getir»e bas. Eski notların, kayıtların ve beden bilgilerin yeni ekranlara kopyalanır; eski yerlerinde de durur.'],
-    ['3. Telefondan ve tabletten gönder', 'Telefonda LifeOS’u aç, Ayarlar › Hesap’tan kendi hesabınla gir, Hesap › Verin’de «Bilgisayara gönder»e bas. Bunu AYS, SPİ, ESP ve Gün sayfasında birer kez yap. Tablet varsa onda da.'],
-    ['4. Bilgisayarda da gönder ve tek kapıyı aç', 'Bilgisayarda aynı «Bilgisayara gönder»i dört yerde yap. Sonra LifeOS penceresini kapat ve LifeOS-Sistem klasöründe python sistem/tek_kapi_ac.py yaz: «Hazır» derse python sistem/tek_kapi_ac.py --ac. Yedek alınır; bir şey ters giderse kendiliğinden eski hâline döner.'],
-    ['5. Bana haber ver', 'Tek kapı açıldıktan sonra Claude’a «tek kapı açıldı» yaz. Eski parçaların silinmesi hazır bekliyor; o zaman birleştirilir ve güncellemeler yeniden akar.'],
-    ['6. Dersleri onayla', 'Onaylar › bir alan › «Aşamanın hepsini onayla». On alanda yirmi aşama var; okuduğunu onayla, emin olmadığını ünite ya da ders ders onayla.'],
-    ['7. King ve disk', 'King için Claude’u bir kez tamamen kapatıp aç. Diski şifrelemek için Windows Ayarlar’da «Cihaz şifreleme» ya da «BitLocker» diye ara ve aç.']
+    ['1. Telefondan gönder', 'Telefonda LifeOS’u aç, Ayarlar › Hesap’tan kendi hesabınla gir, Hesap › Verin’de «Bilgisayara gönder»e bas: AYS, SPİ, ESP ve Gün sayfasında birer kez. Tablet varsa onda da. Telefonda kayıt yoksa bu adımı atla.'],
+    ['2. Claude’a haber ver', 'Claude’a «gönderdim» ya da «telefonda kayıt yok» yaz. Bilgisayarın paketlerini, yedeği, tek kapıya geçişi ve eski parçaların silinmesini Claude yapar.'],
+    ['3. Dersleri onayla', 'Onaylar › bir alan › «Aşamanın hepsini onayla». On alanda yirmi aşama var; okuduğunu onayla, emin olmadığını ünite ya da ders ders onayla. Her onay geri alınabilir.'],
+    ['4. King ve disk', 'King için Claude’u bir kez tamamen kapatıp aç. Diski şifrelemek için Windows Ayarlar’da «Cihaz şifreleme» diye ara ve aç.']
   ];
 
   function asamalar(I, alan) { return I.asamalar(alan) || []; }
