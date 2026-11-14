@@ -109,6 +109,9 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    kabuk derlenmiş tek dosyaları (`dist/`) içine alır ve telefonda yerel bir
    sunucuyla 4173/4183/4193'te açar. Derleme araçları (Xcode, XcodeGen)
    yalnız CI'da koşar. Ayrıntı: `belgeler/UYGULAMA.md`.
+   **Durdu (2026-11-14, kapanış):** paketlediği üç modül kalktı; cihaz yolu yalnız Tailscale (§0.1),
+   sahip «telefonda kayıt yok» dedi. Derleme (`ios.yml`) kaldırıldı; kod `uygulama/ios`'ta bekliyor.
+   Geri gelirse tek kapının kabuğunu açacak biçimde yeniden yazılır ve derleme yeniden eklenir.
    **Kabuk web kodunu indirebilir (2026-11-05, depo sahibinin isteği: «her güncellemede
    PC bağlamam lazım»):** kabuk içindeki `dist/` yedek olarak kalır; daha yeni web kodunu
    yalnız yeşil derlemeden, özet doğrulamasıyla kendisi indirir (`WebGuncelleme.swift`).

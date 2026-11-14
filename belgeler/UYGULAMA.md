@@ -1,5 +1,7 @@
 # LifeOS telefon uygulaması (iOS) ve Android
 
+> **14 Kasım 2026: durdu.** Paketlediği üç modül kapanışta kalktı; cihaz yolu yalnız Tailscale. Derleme (`ios.yml`) kaldırıldı, kod `uygulama/ios`'ta bekliyor. Aşağısı tarihçedir.
+
 **Neden.** Tarayıcı ekran kapalıyken konum vermez; koşuda telefon cepteyken
 SPİ'nin canlı rotası duraklar. Ana ekrana eklenen web uygulaması bunu aşamaz.
 Depo sahibinin kararı (2026-10-04): üç modül tek bir iPhone uygulamasında,
@@ -19,7 +21,7 @@ uygulama/ios/
   LifeOS/KaliciTampon.swift      sayfanın yazmadığı noktalar diskte
   LifeOS/BildirimKoprusu.swift   yerel bildirim (SPİ hatırlatmaları, ESP hatırlatıcıları)
   LifeOSTests/               simülatörde koşan testler
-.github/workflows/ios.yml    macOS'ta derle → sına → imzasız IPA → sürüm sayfası
+.github/workflows/ios.yml    (2026-11-14 kapanışta kaldırıldı; geçmişte duruyor) macOS'ta derle → sına → imzasız IPA
 ```
 
 - **Web kodu değişmez.** Uygulama üç modülün derlenmiş tek dosyasını

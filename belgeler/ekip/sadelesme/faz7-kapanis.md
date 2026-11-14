@@ -132,7 +132,7 @@ Okuma: kapı, ev ağı, kopya, uygulama, kesinlik dili hedefte. «0» çıkan ba
 3. **HKM'nin ayrı süreç yolu** (`HKM/baslat.py`, `BASLAT.*`, `daemon.main`) ve HKM içi eski kökenler (`LIFEOS_PORTS`): tek kapı kullanmıyor; kalksın mı?
 4. **`brand/ortak/*.test.js` (17) koşmuyor**: modüllerin `runtests.js` düzeneğini istiyorlar; tek koşucu yazılmalı ya da kalan dosyalar kabuğa/motora taşınmalı.
 5. **`brand/seviye/`** (seviye/rütbe medyası, `ortak_yol.py`, `perde.html`) ve `tools/marka.py`, `tools/rutbe.py`, `tools/vitrin.py`, `tools/sinematik/`: §0.1'e göre arşiv; sahibin kararı.
-6. **iPhone kabuğu** (`uygulama/ios`, `ios.yml`): dist'leri paketleyip 4173/4183/4193'te açıyordu; modüller yok. Rota kaydı için kalacaksa tek kapıyı (Tailscale) açacak biçimde yeniden yazılmalı; `ios.yml` bu dalda kırmızı olur.
+6. **iPhone kabuğu** (`uygulama/ios`, `ios.yml`): dist'leri paketleyip 4173/4183/4193'te açıyordu; modüller yok. **Kapandı (14 Kasım):** sahip «Evet, düzelt»; `ios.yml` kaldırıldı (kırmızıydı), kod `uygulama/ios`'ta bekliyor; geri gelirse tek kapıyı açacak biçimde yeniden yazılır (AGENTS kural 3).
 7. **Kabuk için sayım yöntemi**: ekran, iç içelik, sekme, ayar yeri ölçütleri kabuğu saymıyor (`kalite/olcum.py`); plan hedefleri (sayfa ≤ 40, iç içelik ≤ 2) için yöntem yazılmalı.
 8. ~~`sistem/tek_kapi_ac.py`~~ **Kapandı (14 Kasım):** geçiş 16:21'de yapıldı; dal sadelesme'nin üstüne alınınca araç ve testi ayrı commit'le kalktı. Kapanıştan sonra geri dönüş: `git checkout 7876fd14` + o sürümdeki `tek_kapi_ac.py --geri`.
 9. Brief'in «Kalkanlar ve işlerinin gittiği yer» bölümü plan.html'de ve sadelesme belgelerinde bulunamadı; o tablonun yerini bu belgedeki Silinenler ve Tutulanlar alır.
