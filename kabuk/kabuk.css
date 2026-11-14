@@ -76,6 +76,8 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .karsila__selam{ font-size:clamp(2rem,7vw,3.4rem); line-height:1.1; font-weight:600; }
 .karsila__sira{ font-size:1.15rem; color:var(--yazi-2); }
 .karsila__sonra{ max-width:34ch; font-size:.85rem; }
+/* Bugün'deki bilgi satırları aynı genişlikte ve metni esner: üç satır üç ayrı boyda durmasın */
+.karsila > .b-uyari{ width:100%; max-width:760px; gap:8px 16px; margin-top:-10px; } .karsila > .b-uyari .b-uyari__metin{ flex:1 1 260px; }
 
 /* sayfa gövdesi */
 .govde{ width:100%; max-width:720px; margin:0 auto; padding:28px 0; display:flex; flex-direction:column; gap:16px; }
