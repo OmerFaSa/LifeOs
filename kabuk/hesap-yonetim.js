@@ -82,7 +82,7 @@
   }
 
   /* ---------------- çizim (saf: durum + bağlam + Bilesen → HTML) ---------------- */
-  var YUK = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
+  var YUK = '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
   // iletinin hangi bölümde çıktığı (odak oraya gider)
   var BOLUM = { profil: 'hy-profil', guvenlik: 'hy-guvenlik', yedek: 'hy-yedek', kullanici: 'hy-kullanicilar', kisi: 'hy-kullanicilar', veri: 'hy-veri', sistem: 'hy-sistem' };
   function ac(ne, ek) { var v = { 'hy-ac': ne }; for (var k in ek || {}) v[k] = String(ek[k]); return v; }

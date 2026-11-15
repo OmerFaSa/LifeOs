@@ -236,7 +236,16 @@ t('bilesen.css yalnız kabuk.css jetonlarını kullanır; yeni jeton ve renk yok
   dogru(!/(^|[;{\s])--[a-z0-9-]+\s*:/.test(css), 'yeni jeton tanımı var');
   dogru(!/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(css), 'elle renk var');
   (css.match(/font-family:[^;}]+/g) || []).forEach(f => dogru(/font-family:var\(--(piksel|govde)\)/.test(f), f));
-  (css.match(/border-radius:[^;}]+/g) || []).forEach(k => dogru(/^border-radius:(0|var\(--kose(-k)?\))$/.test(k), 'köşe yalnız jetondan: ' + k));
+  (css.match(/border-radius:[^;}]+/g) || []).forEach(k => dogru(/^border-radius:(0|var\(--kose(-k|-tam)?\))$/.test(k), 'köşe yalnız jetondan: ' + k));
+});
+t('ölçü sistemi (Faz 8): yazı boyu ve boşluk yalnız ölçek jetonundan; gölge üç kat', () => {
+  // SVG çizim birimi (ağ çizimi yazısı) ölçeğin dışında: viewBox ile ölçeklenir
+  (css.replace(/\.b-ag__cizim text\{[^}]*\}/g, '').match(/font-size:[^;}]+/g) || []).forEach(f => dogru(/^font-size:(var\(--yz(-k|-h[123])?\)|calc\(var\(--yz-h1\) \* [\d.]+\))$/.test(f), 'yazı boyu ölçek dışı: ' + f));
+  (css.match(/(?:^|[;{\s])(?:padding|margin|gap|row-gap|column-gap)(?:-[a-z]+)?:[^;}]+/g) || []).forEach(v =>
+    (v.match(/-?\d*\.?\d+px/g) || []).forEach(p => { const n = Math.abs(parseFloat(p)); dogru(n <= 2 || (p[0] === '-' && [4, 8, 12, 16, 24, 32, 48].includes(n)), 'boşluk jetonsuz: ' + v.trim()); }));
+  ['--yz-k', '--yz', '--yz-h3', '--yz-h2', '--yz-h1', '--a1', '--a7', '--kose-tam', '--golge-yumusak', '--golge-orta', '--golge-buyuk', '--yuzey-ust']
+    .forEach(j => dogru(new RegExp(j + ':').test(kabukCss), 'kabuk.css\'te jeton yok: ' + j));
+  dogru(!/--golge:/.test(kabukCss), 'dördüncü gölge (piksel gölgesi) geri gelmiş');
 });
 t('bilesen.css bağlam seçicisi yazmaz: her kural bir .b- taşıyla başlar', () => {
   const kurallar = css.replace(/@media[^{]+\{/g, '').split('}').map(x => x.split('{')[0].trim()).filter(Boolean);

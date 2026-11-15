@@ -823,7 +823,7 @@
     if (alt === 'hafta') return sayfaPlanHafta();
     var simdi = Date.now(), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan, il = planIleti; planIleti = null;
     var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' };
-    var planHtml = !dr.ayar.musait.length ? '<p class="soluk">Önce aşağıya bugün çalışabileceğin saat aralığını yaz; plan o boşluğa kurulur.</p>'
+    var planHtml = !dr.ayar.musait.length ? B.bos({ baslik: 'Önce boş zamanını yaz.', metin: 'Plan o aralığa kurulur.' })
       : !p ? '<p class="soluk">Bugün için plan kurulmadı.</p>'
       : (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
         '<p class="soluk">Planlanan ' + (p.ozet.planlananDk.v || 0) + ' dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan ' + p.ozet.bosDk.v + ' dk (' + E[p.ozet.bosDk.k] + ')' +
@@ -831,14 +831,14 @@
         (p.sigmayan.length ? B.uyari({ tur: 'dikkat', metin: 'Sığmayanlar (' + p.sigmayan.length + '): ' + p.sigmayan.map(function (x) { return x.ad + ' · ' + x.dk + ' dk · ' + x.neden; }).join('; ') }) : '');
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan">' + B.baslik({ metin: 'Plan' }) + planIletisi(il) +
       B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([dr.ayar.musait.length ? { metin: p ? 'Yeniden kur' : 'Planı kur', tur: 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,
-        { metin: 'Hafta planı ve sabit bloklar', tur: 'sade', href: '#/motor/plan/hafta' }])] }) +
+        { metin: 'Hafta planı', href: '#/motor/plan/hafta' }])] }) +
       B.bolum({ baslik: 'Boş zamanım', govde: [dr.ayar.musait.length ? B.liste({ ad: 'Boş zaman aralıkları', ogeler: dr.ayar.musait.map(function (m, i) {
           return { ad: m.bas + '–' + m.bit, eylemler: silEylemi('Aralığı sil: ' + m.bas + '–' + m.bit, { 'arac-ac': 'plan-aralik-sil', i: i }) };
         }) }) : '',
         '<form class="planform" data-plan="aralik" novalidate>' + saatAraligi() + B.eylemler([{ metin: 'Aralık ekle', tip: 'submit' }]) + '</form>'] }) +
       B.bolum({ baslik: 'İşler', govde: [dr.isler.length ? B.liste({ ad: 'İşler', ogeler: dr.isler.map(function (x) {
           return { ad: x.ad, not: x.dk + ' dk' + (x.son ? ' · son ' + x.son : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : ''), eylemler: silEylemi('İşi sil: ' + x.ad, { 'arac-ac': 'plan-is-sil', id: x.id }) };
-        }) }) : '<p class="soluk">Eklediğin iş yok. Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
+        }) }) : '<p class="soluk">Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
         '<form class="planform" data-plan="is" novalidate>' + B.alan({ ad: 'İş', isim: 'ad', enCok: 120 }) +
         '<div class="ikili">' + B.alan({ ad: 'Süre (dk)', isim: 'dk', tur: 'sayi' }) + B.alan({ ad: 'Son tarih · isteğe bağlı', isim: 'son', tur: 'tarih' }) + '</div>' +
         B.eylemler([{ metin: 'İş ekle', tip: 'submit' }]) + '</form>'] }) + planEski() + '</div>';
@@ -929,7 +929,7 @@
     if (!b) {
       if (!I.al(I.etkin())) I.alanYukle(I.etkin()).then(function () { if (d.querySelector('[data-arac="soru"]')) I.rota(); });
       return bas + (I.al(I.etkin()) ? B.bos({ baslik: 'Sorular bu açılışta yüklenemedi.', metin: 'Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.' })
-        : '<p class="soluk" aria-busy="true">Yükleniyor…</p>') + '</div>';
+        : '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>') + '</div>';
     }
     var kayit = oku(SORU_ANAHTAR, {}), o = kayit.oturum && kayit.alan === b.alan.id ? kayit.oturum : null, gecmis = oku(SORU_GECMIS, []);
     if (!o) {

@@ -64,7 +64,7 @@
 
   /* Ekran gövdesi (saf: durum + Bilesen → HTML). s: { hesap, dosya, oturum, sunucu, cihazlar, hata, cikisSor, cikarSor, bag, bagHata, qr,
    * ileti, guncel, guncelHata, guncelIs }. Oturum nesnesinden yalnız ad, görünen ad ve rol okunur. */
-  var YUKLENIYOR = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
+  var YUKLENIYOR = '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
   function oturumHtml(s, B, bu) {
     var o = s.oturum;
     if (!s.hesap) return s.dosya ? B.bos({ baslik: 'Hesap bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; hesap LifeOS sunucusuyla açılınca görünür.' })
@@ -111,10 +111,10 @@
     if (s.dosya) return B.bos({ baslik: 'Güncelleme bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; güncelleme LifeOS sunucusuyla açılınca denetlenir.' });
     var g = s.guncel, is = s.guncelIs, ust = g ? B.ayar({ id: 'hs-surum', ad: 'Kurulu sürüm', deger: surumMetni(g.surum) }) : '';
     if (is && is.durum) return ust + B.uyari(is);
-    if (is) return ust + YUKLENIYOR.replace('Yükleniyor…', is === 'yeniden' ? 'Sistem yeniden başlatılıyor…' : 'İndiriliyor…');
+    if (is) return ust + '<p class="soluk" aria-busy="true">' + (is === 'yeniden' ? 'Sistem yeniden başlatılıyor…' : 'İndiriliyor…') + '</p>';
     if (s.guncelHata) return B.uyari({ tur: 'hata', metin: s.guncelHata, eylem: { metin: 'Yeniden dene', veri: { 'hs-ac': 'denetle' } } });
-    if (g === 'bekle') return YUKLENIYOR.replace('Yükleniyor…', 'Güncelleme denetleniyor…');
-    if (!g) return '<p class="soluk">Denetlemek GitHub\'a bakar; birkaç saniye sürer.</p>' + B.eylemler([{ metin: 'Güncellemeyi denetle', veri: { 'hs-ac': 'denetle' } }]);
+    if (g === 'bekle') return '<p class="soluk" aria-busy="true">Güncelleme denetleniyor…</p>';
+    if (!g) return B.eylemler([{ metin: 'Güncellemeyi denetle', veri: { 'hs-ac': 'denetle' } }]);
     var oz = guncelOzet(g), yer = s.sunucu && s.sunucu.yerel, yeni = Array.isArray(g.yeni) ? g.yeni.filter(Boolean).slice(0, 5) : [];
     var eylem = oz.eylem && yer ? { metin: oz.eylem === 'yedekle' ? 'Yedekle ve güncelle' : 'Güncelle', tur: 'ana', veri: { 'hs-ac': oz.eylem } } : null;
     return ust + B.uyari({ tur: oz.tur, metin: oz.metin, alt: oz.eylem && !yer ? oz.alt + ' Güncelleme bu bilgisayardan başlatılır.' : oz.alt || null, eylem: eylem }) +
@@ -154,7 +154,7 @@
     // hep: oturumdan bağımsız uzantılar (acilis.js: bilgisayarın kendi ayarı)
     var guncel = B.bolum({ baslik: 'Güncelleme', id: 'hs-guncel', govde: guncelHtml(s, B) }) +
       (s.dosya ? '' : u.filter(function (x) { return x.ciz && x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join(''));
-    if (!s.oturum) return B.baslik({ metin: 'Hesap', alt: 'Oturumun, bağlı cihazların ve sistemin güncelliği.' }) +
+    if (!s.oturum) return B.baslik({ metin: 'Hesap' }) +
       B.bolum({ baslik: 'Oturum', id: 'hs-oturum', govde: gir ? gir.giris(bag, B) : oturumHtml(s, B, bu) }) + guncel;
     var sekme = SEKME[s.sekme] ? s.sekme : 'genel';
     var renk = RENK[s.oturum.renk] ? 'var(--r-' + RENK[s.oturum.renk] + ')' : 'var(--yazi-2)';

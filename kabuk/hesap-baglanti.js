@@ -8,7 +8,7 @@
   'use strict';
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};
   var YER_TUTUCU = 'lifeos_…', KAPI = 443; // KAPI: Tailscale serve'in tek kapısı (sistem/uzak.py HESAP_KAPI)
-  var YUKLENIYOR = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
+  var YUKLENIYOR = '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
   function p(m) { return '<p class="soluk">' + Kabuk.Bilesen.kac(m) + '</p>'; }
   function son(ms, simdi) { return Kabuk.Hesap.sonMetni(ms, simdi); }
 

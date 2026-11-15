@@ -100,27 +100,29 @@
    * sohbet yok (AGENTS §0.1). Metin king/KURULUM.md'nin sahibe dönük kısmı; dış bağlantı yok. B: bileşen kataloğu (kabuk/bilesen.js). */
   function kingGovde(B) {
     var l = function (ad, ogeler) { return B.liste({ ad: ad, ogeler: ogeler.map(function (x) { return { ad: x[0], not: x[1], uzun: true }; }) }); };
-    return B.baslik({ metin: 'King', alt: 'Düşünce ortağın: açıklar, öğretir, araştırır. Sayıyı ve kaydı LifeOS tutar; King sayı uydurmaz.' }) +
-      B.bolum({ baslik: 'Nerede konuşursun', id: 'king-nerede', govde: '<p>King\'le Claude masaüstü uygulamasında konuşursun. LifeOS\'un içinde ayrıca bir sohbet yok.</p>' }) +
-      B.bolum({ baslik: 'Ne görür', id: 'king-gorur', govde: l('King ne görür', [
-        ['Nerede ne var', 'Sistem haritası: bütün yerler ve durumları'],
-        ['Bugünün özeti ve planı', 'Bugüne ait olmayan bir şeyi bugünmüş gibi sunmaz'],
-        ['Kayıtların', 'Her sayı kesinlik etiketiyle; olmayan veri için «veri yok» der'],
-        ['Notların', 'Özel işaretli olanlar hariç'],
-        ['Yol haritan ve tekrar kartların', 'Kapı soruları hariç'],
-        ['Araştırma', 'Notlarında, ders içeriğinde ve Vikipedi\'de kaynaklı cevap arar; internete yalnız konunun adı gider']]) }) +
-      B.bolum({ baslik: 'Ne yapmaz', id: 'king-yapmaz', govde: l('King ne yapmaz', [
-        ['Yalnız okur', 'Kayıt, not, onay ya da ayar yazmaz; kaydı LifeOS\'ta sen yaparsın'],
-        ['Özel notlarını görmez', 'Özel işaretli düşünceler de buna dahil'],
-        ['King\'e kapalı araçların notlarını görmez', 'Araçta «King okuyabilsin» kapalıysa o aracın notları ve sisteme notu ona gitmez'],
-        ['Sırları görmez', 'Parola, anahtar ve jeton adlı alanlar hiç verilmez'],
-        ['Bu tarayıcıdaki yeni kayıtları henüz görmez', 'Yeni sistemdeki notlar, kartlar ve yol ilerlemesi tek depoya geçişten sonra görünür']]) }) +
-      B.bolum({ baslik: 'Senin adımın', id: 'king-adim', govde: ['<p>Kurulum yapıldıktan sonra tek adım kalıyor:</p>', l('King için adımlar', [
-        ['Claude uygulamasını tamamen kapat', 'Görev çubuğundaki simgeden «Çık»; pencereyi kapatmak yetmez'],
-        ['Claude\'u yeniden aç', 'Sohbet kutusunun araç menüsünde «lifeos-king» görünür'],
-        ['Bir şey sor', '«Bugün ne var?» ya da «Felsefe yol haritamda neredeyim?»; Claude okumadan önce izin ister']]),
-        '<p class="soluk">Görünmüyorsa Claude\'da Ayarlar › Geliştirici bölümündeki günlüğe bak.</p>'] }) +
-      B.uyari({ tur: 'bilgi', metin: 'King\'in okuduğu her şey o sohbette Claude\'a, yani Anthropic\'in sunucusuna gider. Özel notların ve sırların gitmez; öbür kayıtlar sen sordukça gider.' });
+    // Sayfada tek öne çıkan şey sohbet (king-sohbet.js başlığın altına ekler); açıklamalar kapalı bölümlerde bekler (kural 10).
+    var k = function (baslik, not, govde) { return B.acilir({ baslik: baslik, not: not, govde: govde, duzey: 3 }); };
+    return B.baslik({ metin: 'King', alt: 'Düşünce ortağın. Sayıyı ve kaydı LifeOS tutar; King sayı uydurmaz.' }) +
+      B.bolum({ baslik: 'King hakkında', id: 'king-hakkinda', govde: [
+        k('Ne görür', '6', l('King ne görür', [
+          ['Nerede ne var', 'Sistem haritası: bütün yerler ve durumları'],
+          ['Bugünün özeti ve planı', 'Bugüne ait olmayan bir şeyi bugünmüş gibi sunmaz'],
+          ['Kayıtların', 'Her sayı kesinlik etiketiyle; olmayan veri için «veri yok» der'],
+          ['Notların', 'Özel işaretli olanlar hariç'],
+          ['Yol haritan ve tekrar kartların', 'Kapı soruları hariç'],
+          ['Araştırma', "Notlarında, ders içeriğinde ve Vikipedi'de kaynaklı cevap arar; internete yalnız konunun adı gider"]])),
+        k('Ne yapmaz', '5', l('King ne yapmaz', [
+          ['Yalnız okur', "Kayıt, not, onay ya da ayar yazmaz; kaydı LifeOS'ta sen yaparsın"],
+          ['Özel notlarını görmez', 'Özel işaretli düşünceler de buna dahil'],
+          ["King'e kapalı araçların notlarını görmez", 'Araçta «King okuyabilsin» kapalıysa o aracın notları ve sisteme notu ona gitmez'],
+          ['Sırları görmez', 'Parola, anahtar ve jeton adlı alanlar hiç verilmez'],
+          ['Bu tarayıcıdaki yeni kayıtları henüz görmez', 'Yeni sistemdeki notlar, kartlar ve yol ilerlemesi tek depoya geçişten sonra görünür']])),
+        k('Claude uygulamasında', '3 adım', ["<p class=\"soluk\">King'le Claude masaüstü uygulamasında da konuşursun.</p>", l('King için adımlar', [
+          ['Claude uygulamasını tamamen kapat', 'Görev çubuğundaki simgeden «Çık»; pencereyi kapatmak yetmez'],
+          ["Claude'u yeniden aç", 'Sohbet kutusunun araç menüsünde «lifeos-king» görünür'],
+          ['Bir şey sor', '«Bugün ne var?» ya da «Felsefe yol haritamda neredeyim?»; Claude okumadan önce izin ister']]),
+          "<p class=\"soluk\">Görünmüyorsa Claude'da Ayarlar › Geliştirici bölümündeki günlüğe bak.</p>"])] }) +
+      B.uyari({ tur: 'bilgi', metin: "King'in okuduğu her şey o sohbette Claude'a, yani Anthropic'in sunucusuna gider. Özel notların ve sırların gitmez; öbür kayıtlar sen sordukça gider." });
   }
   // Yerin durum rozeti: yalnız eski sayfaya giden ve henüz yazılmamış yerde. «pilot» (kabuğa taşınmış alan) ekranda rozet almaz:
   // iç göç durumu sahibe bir şey söylemez (faz3-arama-king-sayfa.md); taslak içeriği Onaylar ve ders kartındaki «taslak» söyler.
@@ -452,7 +454,7 @@
   var KILITLI_ASAMA = 'Bu aşama kilitli: önce önceki aşamanın kapısını geç.';
   function sayfaAlan(yer) {
     var f = al(), dr = fDurum(), ic, a = dr && siradaki(dr), sonraki = null, yeni = false;
-    if (!f) ic = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
+    if (!f) ic = '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
     else if (f.hata) ic = B.bos({ baslik: 'Yol haritası bu açılışta gösterilemiyor.', metin: f.hata === 'motor' ? 'Yol aracı yüklenemedi.' : 'Sayfa dosyadan açıldı; içerik LifeOS sunucusuyla açılınca yüklenir.' });
     else if (!dr.asama.acik) ic = asamalarHtml(f.n) + asamaBasligi('Aşama ' + f.n, dr.asama.ad) + B.bos({ baslik: KILITLI_ASAMA });
     else {
@@ -529,7 +531,7 @@
       (x.not && inceleme ? B.uyari({ tur: 'bilgi', metin: 'Kaynak notu: ' + x.not }) : '') + kaynaklar(y, x.kaynak, inceleme, inceleme ? '' : x.not);
   }
   function sayfaDers(id) {
-    if (!al()) return ust(altKirinti('Ders')) + '<div class="govde"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
+    if (!al()) return ust(altKirinti('Ders')) + '<div class="govde"><div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div></div>';
     var y = al().y, x = y && y.tur[id] === 'ders' && y.oge[id];
     if (!x) return yok(al().hata ? 'Ders içeriği bu açılışta yüklenemedi.' : 'Böyle bir ders yok.');
     var kayit = kayitOku();
@@ -552,7 +554,7 @@
   }
   var kapiSonuc = null; // son denemenin sonucu, yalnız hemen ardından gösterilir
   function sayfaKapi(id) {
-    if (!al()) return ust(altKirinti('Kapı')) + '<div class="govde"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
+    if (!al()) return ust(altKirinti('Kapı')) + '<div class="govde"><div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div></div>';
     var y = al().y, t = y && y.tur[id], o = y && (t === 'unite' || t === 'asama') && y.oge[id];
     if (!o) return yok(al().hata ? 'Kapı bu açılışta yüklenemedi.' : 'Böyle bir kapı yok.');
     var kayit = kayitOku(), dr = Yol.durum(y, kayit), ad = t === 'asama' ? 'Aşama kapısı' : o.ad + ' · kapı';
@@ -579,7 +581,7 @@
   // «Seviyemi bul» (icerik-hatti §4.3): alt «1», «2»… aşama sırası, «sonuc» son ekran. Kural Yol'da; burada çizim ve kayıt.
   function sayfaYerlestir(alt) {
     var ad = 'Seviyemi bul', f = al();
-    if (!f) return ust(altKirinti(ad)) + '<div class="govde"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
+    if (!f) return ust(altKirinti(ad)) + '<div class="govde"><div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div></div>';
     if (f.hata) return yok('İçerik bu açılışta yüklenemedi.');
     var ys = alanlar[etkinAlan].ys;
     if (alt === 'sonuc') {

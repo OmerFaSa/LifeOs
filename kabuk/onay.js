@@ -143,7 +143,7 @@
     }, etKapat);
   }
   function etHtml() {
-    if (!et || et.durum === 'yukleniyor') return '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
+    if (!et || et.durum === 'yukleniyor') return '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
     if (et.durum === 'kapali') return B.uyari({ tur: 'bilgi', metin: 'Etiketleme yalnız bu bilgisayarda açılır.' });
     var hata = et.hata ? B.uyari({ tur: 'hata', metin: et.hata }) : '', a = et.sayi.anlama, r = et.sayi.arama;
     if (!et.set) return (et.ileti ? B.uyari({ tur: 'tamam', metin: et.ileti }) : '') +
@@ -282,7 +282,7 @@
     var I = ic(), eksik = I.tasinanlar().filter(function (a) { return !I.al(a.id); });
     if (eksik.length) {
       Promise.all(eksik.map(function (a) { return I.alanYukle(a.id); })).then(function () { if (d.querySelector('[data-onay-sayfa="yukleniyor"]')) I.rota(); });
-      return I.ust(I.kirinti(yer)) + '<div class="govde" data-onay-sayfa="yukleniyor"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
+      return I.ust(I.kirinti(yer)) + '<div class="govde" data-onay-sayfa="yukleniyor"><div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div></div>';
     }
     var k = konum(), a = k.alan && I.tasinanlar().filter(function (x) { return x.id === k.alan; })[0];
     if (!k.alan) return anaSayfa(I, yer);
