@@ -285,6 +285,7 @@
     return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">L</span>LifeOS</a>' +
       '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + SEKME.map(function (s) { return '<a href="' + s[2] + '"' + (s[0] === se ? ' aria-current="page"' : '') + '>' +
         (s[0] === se ? '<span class="ust__isaret" aria-hidden="true"></span>' : '') + s[1] + '</a>'; }).join('') + '</nav>' +
+      '<button type="button" class="ust__gece" data-ac="gece" aria-pressed="' + (A.oku(depo, 'lifeos.ses.gece') === 'acik') + '" aria-label="Gece sesi" title="Gece sesi"><svg aria-hidden="true"><use href="#i-gece"/></svg></button>' +
       '<button type="button" class="ust__ara" data-ac="komut" aria-keyshortcuts="Control+K /" aria-label="Ara"><svg aria-hidden="true"><use href="#i-ara"/></svg><span aria-hidden="true">Ara</span><kbd>Ctrl K</kbd></button>' +
       '<a class="ust__hesap" href="#/ayarlar" aria-label="Ayarlar">' + (ad ? kac(ad.charAt(0).toLocaleUpperCase('tr')) : '<svg aria-hidden="true"><use href="#i-kisi"/></svg>') + '</a></header>';
   }
@@ -349,9 +350,20 @@
   var manzaraIstendi = false;
   // sahne çizimi önbellekte: aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
   var sahneOnbellek = {};
+  /* Arka planda her sayfada piksel manzara (sahibin isteği): ekranı kaplayan sabit tuval; sahne sayfanın kapağınınki (yoksa yayla),
+   * vakit saate göre (gece gecedir). Düşük çözünürlükte çizilir, büyütülürken pikseller korunur; sahne/saat/boyut değişmedikçe yeniden çizilmez. */
+  var zeminEl = null, zeminAd = '';
+  function zemin(D) {
+    if (!zeminEl) { zeminEl = d.createElement('canvas'); zeminEl.className = 'zemin-manzara'; zeminEl.setAttribute('aria-hidden', 'true'); d.body.insertBefore(zeminEl, d.body.firstChild); }
+    var k = sayfaEl.querySelector('.kapak__sahne'), tur = (k && k.getAttribute('data-sahne')) || 'yayla', saat = new Date().getHours();
+    var w = 320, h = Math.max(160, Math.min(560, Math.round(w * innerHeight / Math.max(1, innerWidth)))), ad = [tur, saat, w, h].join();
+    if (ad === zeminAd) return;
+    try { zeminEl.width = w; zeminEl.height = h; D.binaCiz(zeminEl.getContext('2d'), D.yerlesim(w, h, D.vakit(saat), tur)); zeminAd = ad; } catch (e) { /* süs */ }
+  }
   function manzara() {
     var c = sayfaEl.querySelector('.b-karsilama__manzara, .kapak__sahne'), D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA;
-    if (!c) return;
+    if (D) zemin(D);
+    if (!c && D) return;
     if (!D) {
       if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
       return;
@@ -817,6 +829,8 @@
       B.komut({ id: 'komut', ad: 'Ara', yerTutucu: 'Bir yer, ayar ya da eylem ara' }));
     sayfaEl = $('#sayfa'); halkaEl = $('#halka'); perdeEl = $('#perde'); komutEl = $('#komut');
     ogeler = komutOgeleri(H, A);
+    var boyutSaat = null; // pencere oranı değişince arka plan manzarası yeniden çizilir
+    addEventListener('resize', function () { clearTimeout(boyutSaat); boyutSaat = setTimeout(manzara, 250); });
     addEventListener('hashchange', function () { halkaKapat(false); komutKapat(false); rota(); sayfaEl.focus({ preventScroll: true }); scrollTo(0, 0); });
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);

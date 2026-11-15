@@ -153,7 +153,7 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay bindirmesi" node kabuk/onay.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay aracı" python3 tools/onay_uygula_test.py
       # Hesap ekrani (faz7-hesap-kabuk.md): oturum, cihazlar, guncelleme; jeton ekrana gelmez.
       - name: Kabuk hesap ekranı
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hesap ekranı" node kabuk/hesap.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap giriş ve güvenlik" node kabuk/hesap-giris.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap bağlantıları" node kabuk/hesap-baglanti.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap yönetimi" node kabuk/hesap-yonetim.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Açılış videosu" node kabuk/acilis.test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hesap ekranı" node kabuk/hesap.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap giriş ve güvenlik" node kabuk/hesap-giris.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap bağlantıları" node kabuk/hesap-baglanti.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap yönetimi" node kabuk/hesap-yonetim.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Açılış videosu" node kabuk/acilis.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Gece sesi" node kabuk/gece.test.js
 
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi

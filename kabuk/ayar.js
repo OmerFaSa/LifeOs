@@ -14,7 +14,7 @@
   var ENV = 'envanter-kabuk-sunucu.md';
   var GRUPLAR = [
     { id: 'gorunum', ad: 'Görünüm' }, { id: 'erisim', ad: 'Erişilebilirlik' },
-    { id: 'bildirim', ad: 'Bildirim' }, { id: 'beden', ad: 'Beden' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
+    { id: 'bildirim', ad: 'Bildirim' }, { id: 'ses', ad: 'Ses' }, { id: 'beden', ad: 'Beden' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
   ];
   var SPI = 'envanter-spi.md §2 Ayarlar › Profil (family.js) ve §5 profile (state.js:178-200)';
 
@@ -44,6 +44,8 @@
       secenekler: { acik: 'Göster', kapali: 'Gizle' }, aciklama: 'Bekleyen işleri gösteren küçük işaretler.', kaynak: ENV + ' §3b lifeos.rozet' },
     { anahtar: 'lifeos.sessiz', ad: 'Sessiz saatler', tur: 'saatAraligi', varsayilan: { acik: false, bas: '22:00', bit: '07:00' }, grup: 'bildirim', esitlenir: true,
       aciklama: 'Bu aralıkta sesler ve sesli okuma susar; gece yarısını geçebilir.', kaynak: ENV + ' §3c Ses ve müzik: sessiz saatler' },
+    { anahtar: 'lifeos.ses.gece', ad: 'Gece sesi', tur: 'secim', varsayilan: 'kapali', grup: 'ses', esitlenir: false,
+      secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Cırcır böcekleri, hafif rüzgâr, uzakta kurbağa: sakin bir gece. Tarayıcıda üretilir; üst çubuktaki ay düğmesi de açıp kapatır.', kaynak: ENV + ' §3c Ses: ses.gece (kabuk/gece.js, sahibin isteği 2026-11-15)' },
     { anahtar: 'lifeos.kilit.odeme', ad: 'Satın alma ve kart işlemleri', tur: 'secim', varsayilan: 'kapali', grup: 'hesap', esitlenir: false,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Kapalıyken King ödeme, sipariş ya da kart işine girmez.', kaynak: ENV + ' §3c Diğer: kilit.odeme' },
     // Salt bilgi: tarayıcı kalıcı depolamaya izin verdi mi (kabuk/depo.js kalici(): true/false/null)
