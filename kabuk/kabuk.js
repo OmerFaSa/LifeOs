@@ -403,13 +403,31 @@
       return B.bolum({ baslik: g.ad, id: 'grup-' + g.id, eylem: g.id === 'hesap' ? { metin: 'Hesap ve cihazlar', tur: 'sade', href: '#/hesap' } : null, govde: A.SEMA.filter(function (t) { return t.grup === g.id; }).map(function (t) { return A.ciz(t, A.oku(depo, t.anahtar)); }) });
     }).join('');
     setTimeout(function () {
+      ayarIzle();
       if (!odak) return;
       var el = d.getElementById(odak) || $('[data-ayar-satir="' + odak + '"]');
       if (el) { el.scrollIntoView({ block: 'center' }); var f = $('[aria-checked="true"], input', el) || el; f.focus(); el.classList.add('b-ayar--isik'); }
     }, 0);
-    return ust(kirinti(yer)) + '<div class="govde govde--genis">' + B.baslik({ metin: 'Ayarlar' }) + B.yanli({ taraf: 'sol',
-      yan: B.gezinme({ ad: 'Ayar grupları', ogeler: A.GRUPLAR.map(function (g) { return { metin: g.ad, href: '#/ayarlar?grup-' + g.id }; }) }),
+    // sol menü: her grubun simgesi; kaydırdıkça bulunduğun grup işaretlenir (ayarIzle)
+    var menu = '<nav class="b-gezinme ayar-menu" aria-label="Ayar grupları">' + A.GRUPLAR.map(function (g) {
+      return '<a class="b-gezinme__oge" href="#/ayarlar?grup-' + g.id + '" data-grup="' + g.id + '"><svg aria-hidden="true"><use href="#i-' + (AYAR_SIMGE[g.id] || 'ayar') + '"/></svg>' + kac(g.ad) + '</a>';
+    }).join('') + '</nav>';
+    return ust(kirinti(yer)) + '<div class="govde govde--genis ayarlar">' + B.baslik({ metin: 'Ayarlar', alt: 'Değişiklikler hemen uygulanır.' }) + B.yanli({ taraf: 'sol',
+      yan: menu,
       ana: [gruplar, B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }])] }) + '</div>';
+  }
+  var AYAR_SIMGE = { gorunum: 'gunes', erisim: 'kisi', bildirim: 'saat', ses: 'gece', beden: 'saglik', hesap: 'onay' };
+  var ayarGozcu = null;
+  function ayarIzle() {
+    if (ayarGozcu) { ayarGozcu.disconnect(); ayarGozcu = null; }
+    var menu = $('.ayar-menu'); if (!menu || !kok.IntersectionObserver) return;
+    var gorunen = {};
+    ayarGozcu = new IntersectionObserver(function (l) {
+      l.forEach(function (g) { gorunen[g.target.getAttribute('aria-labelledby')] = g.isIntersecting; });
+      var ilk = A.GRUPLAR.filter(function (g) { return gorunen['grup-' + g.id]; })[0];
+      if (ilk) [].forEach.call(menu.children, function (a) { if (a.getAttribute('data-grup') === ilk.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+    }, { rootMargin: '-80px 0px -55% 0px' });
+    A.GRUPLAR.forEach(function (g) { var s = d.getElementById('grup-' + g.id); if (s) ayarGozcu.observe(s.closest('section') || s); });
   }
   function yuzde(x) { return Math.round(x * 100); }
   var GECILDI = { metin: 'geçildi', tur: 'altin' };
@@ -621,13 +639,14 @@
     var sira = ++cizSira;
     function yaz() {
       if (sira !== cizSira) return; // geçişin bekleyen çizimi, ondan sonra gelen daha yeni çizimin üstüne yazmaz
+      var yukleniyordu = !yeniSayfa && !!sayfaEl.querySelector('[aria-busy="true"]'); // «Yükleniyor…»un yerine gelen asıl içerik bir kez süzülür
       sayfaEl.innerHTML = html;
       sayfaEl.setAttribute('data-ciz', yer.id);
       d.title = yer.ad + ' · LifeOS';
       manzara();
       // Yeni sayfa bir kez süzülür. Aynı sayfanın yeniden çizimi (veri geldi, tıklandı) süzülmeyi baştan oynatmaz: «tekrar yükleniyor» görüntüsü buydu.
       // İlk çizimden hemen sonra gelen (150 ms içinde) yeniden çizimde süzülme henüz görünmediği için sürer.
-      if (yeniSayfa) canlan(gecisli); else if (performance.now() - canlanZaman > 150) sayfaEl.classList.remove('canlan', 'canlan--gecis');
+      if (yeniSayfa || yukleniyordu) canlan(gecisli && yeniSayfa); else if (performance.now() - canlanZaman > 150) sayfaEl.classList.remove('canlan', 'canlan--gecis');
     }
     // Bölüm değişince görünüm geçişi (tarayıcı destekliyorsa ve hareket açıksa): içerik gidilen yöne kayarak söner, üst çubuk yerinde kalır,
     // seçili sekmenin işareti yenisine akar. Aynı sayfanın yeniden çizimi (tıklama, yazma) anında olur.
