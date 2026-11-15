@@ -506,7 +506,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.waitForSelector('.b-acilir');
     await p.goto(T + '/kabuk/#/motor/soru');
     await p.waitForSelector('[data-arac-ac="soru-basla"]');
-    dene('soru: başlangıçta alan ve havuz yazılı', /Felsefe alanının/.test(await p.textContent('[data-arac="soru"]')) && /Havuzda \d+ soru/.test(await p.textContent('[data-arac="soru"]')));
+    dene('soru: başlangıçta alan ve havuz yazılı', /Felsefe · karma test/.test(await p.textContent('[data-arac="soru"]')) && /havuzda \d+ soru/.test(await p.textContent('[data-arac="soru"]')));
     await p.click('[data-arac-ac="soru-basla"]');
     await p.waitForSelector('.b-soru[data-sira="0"]');
     const felsefeSorular = {};

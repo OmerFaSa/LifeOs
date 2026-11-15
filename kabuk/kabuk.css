@@ -626,3 +626,20 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
 :root .ders .b-soru{ border-radius:var(--kose); }
 :root .ders .b-soru__sik{ border-radius:var(--kose-k); transition:background var(--hizli) var(--akis); }
 :root .ders .b-soru__sik:not([aria-disabled="true"]):hover{ background:color-mix(in srgb, var(--vurgu) 8%, var(--bg)); }
+
+/* ===== El değmemiş ekranlar (2026-11-16, «estetiğini artır») =====
+   Odak halkası nötr (turuncu alanda hata gibi görünmesin; «Belirgin» odak vurgu renginde kalır); sayı kartları büyük ve sakin;
+   Soru seçenekleri tek kartta; Tanışma seçenekleri hap; tüm sorularda seçeneğe gelince ince ton; Araçlar'da tekrar eden yol yok. */
+:focus-visible{ outline-color:color-mix(in srgb, var(--yazi) 55%, transparent); }
+:root[data-odak="belirgin"] :focus-visible{ outline-color:var(--vurgu); }
+:root .b-sayi{ height:auto; padding:var(--a4) var(--a4) var(--a3); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+:root .b-sayi__deger{ font-weight:650; letter-spacing:-.02em; }
+:root .b-sayi .b-pul{ opacity:.75; }
+.soru-kart{ display:flex; flex-direction:column; gap:var(--a3); padding:var(--a5); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-orta); }
+.soru-kart__baslik{ margin:0; font-size:var(--yz-h3); }
+.soru-kart > .soluk{ margin:0; }
+.soru-kart__ayrac{ margin:var(--a1) 0 0; font-size:var(--yz-k); color:var(--soluk); }
+:root .b-cipler .b-dugme{ min-height:40px; padding:0 var(--a4); border-radius:999px; font-weight:500; background:var(--yuzey-2); box-shadow:none; }
+:root .b-cipler .b-dugme[aria-pressed="true"]{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 16%, var(--yuzey)); box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--vurgu) 45%, transparent); }
+:root .b-soru__sik:not([aria-disabled="true"]):hover{ background:color-mix(in srgb, var(--vurgu) 7%, var(--bg)); }
+#sayfa[data-ciz="motorlar"] > .konum{ display:none; }

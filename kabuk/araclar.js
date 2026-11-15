@@ -953,12 +953,14 @@
     var kayit = oku(SORU_ANAHTAR, {}), o = kayit.oturum && kayit.alan === b.alan.id ? kayit.oturum : null, gecmis = oku(SORU_GECMIS, []);
     if (!o) {
       var son = gecmis.slice(-5).reverse();
-      return bas + '<p class="soluk">' + I.kac(b.alan.ad) + ' alanının açık ünitelerinden karma test. Havuzda ' + b.havuz.length + ' soru var. Alanı değiştirmek için o alanın sayfasını aç.</p>' +
+      // test seçenekleri tek kartta: ne olduğu, kaç soru, iki yol (karma test, süreli deneme)
+      return bas + '<section class="soru-kart" aria-labelledby="soru-kart-baslik"><h2 class="soru-kart__baslik" id="soru-kart-baslik">' + I.kac(b.alan.ad) + ' · karma test</h2>' +
+        '<p class="soluk">Açık ünitelerden karışık sorular; havuzda ' + b.havuz.length + ' soru var. Başka alan için o alanın sayfasını aç.</p>' +
         (b.havuz.length < Soru.EN_AZ ? B.bos({ baslik: 'Test için en az ' + Soru.EN_AZ + ' soru gerekir.' })
           : B.eylemler(Soru.BOYLAR.filter(function (n, i) { return !i || b.havuz.length > Soru.BOYLAR[i - 1]; }).map(function (n, i) { // havuz küçükse aynı boyda iki düğme çıkmasın
             return { metin: Math.min(n, b.havuz.length) + ' soruluk test', tur: i ? 'ikincil' : 'ana', veri: { 'arac-ac': 'soru-basla', boy: n } };
           }))) +
-        B.eylemler([{ metin: 'Süreli deneme' + (oku('lifeos.soru.deneme', {}).oturum ? ' · sürüyor' : ''), href: '#/motor/soru/deneme' }]) +
+        '<p class="soru-kart__ayrac">ya da</p>' + B.eylemler([{ metin: 'Süreli deneme' + (oku('lifeos.soru.deneme', {}).oturum ? ' · sürüyor' : ''), href: '#/motor/soru/deneme' }, { yazi: 'Sınav gibi: her ünite bir test, süre işler' }]) + '</section>' +
         (son.length ? B.bolum({ baslik: 'Son testler', govde: B.liste({ ad: 'Son testler', ogeler: son.map(function (g) {
           var r = g.sayilar;
           return { ad: g.alanAd + ' · ' + tarih(g.bitti), not: r.dogru + ' doğru · ' + r.yanlis + ' yanlış · ' + (r.bos + r.bakildi) + ' boş', pul: 'ölçüldü', uzun: true };
