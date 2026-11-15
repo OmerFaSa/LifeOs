@@ -285,7 +285,7 @@
     return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">L</span>LifeOS</a>' +
       '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + SEKME.map(function (s) { return '<a href="' + s[2] + '"' + (s[0] === se ? ' aria-current="page"' : '') + '>' +
         (s[0] === se ? '<span class="ust__isaret" aria-hidden="true"></span>' : '') + s[1] + '</a>'; }).join('') + '</nav>' +
-      '<button type="button" class="ust__gece" data-ac="gece" aria-pressed="' + (A.oku(depo, 'lifeos.ses.gece') === 'acik') + '" aria-label="Gece sesi" title="Gece sesi"><svg aria-hidden="true"><use href="#i-gece"/></svg></button>' +
+      ambiyansDugme() +
       '<button type="button" class="ust__ara" data-ac="komut" aria-keyshortcuts="Control+K /" aria-label="Ara"><svg aria-hidden="true"><use href="#i-ara"/></svg><span aria-hidden="true">Ara</span><kbd>Ctrl K</kbd></button>' +
       '<a class="ust__hesap" href="#/ayarlar" aria-label="Ayarlar">' + (ad ? kac(ad.charAt(0).toLocaleUpperCase('tr')) : '<svg aria-hidden="true"><use href="#i-kisi"/></svg>') + '</a></header>';
   }
@@ -347,6 +347,12 @@
     });
   }
   // manzara: sahibin piksel sahnesi (brand/ortak/piksel-doga.js, sunucu /piksel-doga.js verir); süstür, çizilmezse gök rengi kalır
+  // Ambiyans düğmesi: gündüz güneş, gece ay (kabuk/gece.js çalışırken kendi kipini yazar)
+  function ambiyansDugme() {
+    var v = A.oku(depo, 'lifeos.ses.gece'), G = Kabuk.Gece, cal = G && G.calisiyorMu && G.calisiyorMu();
+    var gunduz = (cal && G.kip() ? G.kip() : G ? G.kipSec(v, new Date().getHours()) : 'gece') === 'gunduz', ad = 'Ambiyans sesi (' + (gunduz ? 'gündüz' : 'gece') + ')';
+    return '<button type="button" class="ust__gece' + (cal ? ' calisiyor' : '') + '" data-ac="gece" aria-pressed="' + (v !== 'kapali') + '" aria-label="' + ad + '" title="' + ad + '"><svg aria-hidden="true"><use href="#' + (gunduz ? 'i-gunes' : 'i-gece') + '"/></svg></button>';
+  }
   var manzaraIstendi = false;
   // sahne çizimi önbellekte: aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
   var sahneOnbellek = {};
@@ -362,9 +368,19 @@
     var saat = new Date().getHours(), tur = c.getAttribute('data-sahne') || 'yayla', ad = [tur, saat, c.width, c.height].join();
     try {
       var o = sahneOnbellek[ad];
-      if (!o) { o = d.createElement('canvas'); o.width = c.width; o.height = c.height; D.binaCiz(o.getContext('2d'), D.yerlesim(c.width, c.height, D.vakit(saat), tur)); sahneOnbellek[ad] = o; }
-      c.getContext('2d').drawImage(o, 0, 0);
+      if (!o) { o = d.createElement('canvas'); o.width = c.width; o.height = c.height; o.yer = D.yerlesim(c.width, c.height, D.vakit(saat), tur); D.binaCiz(o.getContext('2d'), o.yer); sahneOnbellek[ad] = o; }
+      o.yer.imza = ''; // yeni tuval: sakinler ilk karede çizilsin
+      canli = { c: c, g: c.getContext('2d'), arka: o, D: D };
+      canli.g.drawImage(o, 0, 0); D.kare(canli.g, o, o.yer, Date.now() / 1000);
+      if (!canliSaat) canliSaat = setInterval(canlandir, 125);
     } catch (e) { /* süs */ }
+  }
+  // Sahnenin sakinleri (süzülen bulut, kuş sürüsü, düşen yaprak, ördek, yıldız) kitaplığın kendi rutinleriyle yürür; kare değişmedikçe çizilmez.
+  var canli = null, canliSaat = null;
+  function canlandir() {
+    if (!canli || !canli.c.isConnected) { clearInterval(canliSaat); canliSaat = null; canli = null; return; }
+    if (d.hidden || !hareketVar()) return;
+    try { canli.D.kare(canli.g, canli.arka, canli.arka.yer, Date.now() / 1000); } catch (e) { clearInterval(canliSaat); canliSaat = null; }
   }
   function sayfaDal(yer) {
     var ys = H.dalinYerleri(yer.dal);
