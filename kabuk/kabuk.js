@@ -122,7 +122,7 @@
           ["Claude'u yeniden aç", 'Sohbet kutusunun araç menüsünde «lifeos-king» görünür'],
           ['Bir şey sor', '«Bugün ne var?» ya da «Felsefe yol haritamda neredeyim?»; Claude okumadan önce izin ister']]),
           "<p class=\"soluk\">Görünmüyorsa Claude'da Ayarlar › Geliştirici bölümündeki günlüğe bak.</p>"])] }) +
-      B.uyari({ tur: 'bilgi', metin: "King'in okuduğu her şey o sohbette Claude'a, yani Anthropic'in sunucusuna gider. Özel notların ve sırların gitmez; öbür kayıtlar sen sordukça gider." });
+      '<p class="king-dipnot">' + kac("King'in okuduğu her şey o sohbette Claude'a, yani Anthropic'in sunucusuna gider. Özel notların ve sırların gitmez; öbür kayıtlar sen sordukça gider.") + '</p>';
   }
   // Yerin durum rozeti: yalnız eski sayfaya giden ve henüz yazılmamış yerde. «pilot» (kabuğa taşınmış alan) ekranda rozet almaz:
   // iç göç durumu sahibe bir şey söylemez (faz3-arama-king-sayfa.md); taslak içeriği Onaylar ve ders kartındaki «taslak» söyler.
@@ -488,7 +488,7 @@
   // «Sıradaki» kartı: atılacak tek adım (ders ya da kapı), hangi ünitede olduğu ve tek ana düğme. Hiç başlanmamış alanda «Seviyemi bul» da burada.
   function siraKarti(f, a, yeni, okunan) {
     var kapi = a.tur === 'kapi', o = f.y.oge[a.id] || {}, u = kapi ? o : f.y.oge[f.y.ust[a.id]] || {}, ud = u.dersler || [];
-    var ust = kapi ? 'Sıradaki · ünite kapısı' : 'Sıradaki · ' + (u.ad || '') + (ud.length ? ' · ders ' + (ud.indexOf(a.id) + 1) + '/' + ud.length : '');
+    var ust = kapi ? 'Sıradaki · ünite kapısı' : 'Sıradaki · ' + (u.ad || '') + (ud.length ? ' · ders ' + (ud.map(function (x) { return x && x.id || x; }).indexOf(a.id) + 1) + '/' + ud.length : '');
     var baslik = kapi ? (o.ad || 'Ünite') + ' · kapı' : o.ad || '';
     var ozet = kapi ? 'Ünitenin derslerini bitirdin. Kısa bir sınavla sıradaki üniteyi açarsın.' : o.ozet || '';
     return '<section class="sira" aria-labelledby="' + (yeni ? 'yer-baslik' : 'sira-baslik') + '"><p class="sira__ust">' + kac(ust) + '</p>' +

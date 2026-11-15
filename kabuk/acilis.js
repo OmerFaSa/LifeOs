@@ -20,9 +20,9 @@
     var g = s.acik == null ? '<p class="soluk">Yükleniyor…</p>' : [
       B.ayar({ id: 'ac-video', ad: 'Açılış videosu', not: s.var ? 'LifeOS ilk açıldığında oynar; «Atla» ya da Esc ile geçilir.' : 'Henüz video yok: önce bir video seç (en çok 600 MB).',
         govde: B.dugme({ metin: s.acik ? 'Açık' : 'Kapalı', basili: !!s.acik, etiket: 'Açılış videosu', veri: { 'ac-ac': 'ac' }, kapali: !!s.is || (!s.acik && !s.var) }) }),
-      '<label class="b-dugme b-dugme--sade">' + (s.var ? 'Videoyu değiştir' : 'Video seç') +
+      '<div class="b-eylemler"><label class="b-dugme">' + (s.var ? 'Videoyu değiştir' : 'Video seç') + // satır başında, düğme gibi (ortada boşta kalmasın)
         '<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-ac-dosya hidden></label>' +
-        (s.var ? ' ' + B.dugme({ metin: 'Şimdi izle', tur: 'sade', veri: { 'ac-ac': 'izle' } }) : ''),
+        (s.var ? ' ' + B.dugme({ metin: 'Şimdi izle', tur: 'sade', veri: { 'ac-ac': 'izle' } }) : '') + '</div>',
       s.durum ? '<p class="soluk" role="status">' + kac(s.durum) + '</p>' : ''];
     return B.bolum({ baslik: 'Açılış videosu', id: 'ac-bolum', govde: g });
   }

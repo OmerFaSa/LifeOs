@@ -500,8 +500,8 @@ h1, .b-baslik h1, .sira__baslik{ letter-spacing:-.022em; }
 /* Sadelik (sahibin isteği 2026-11-15: «kenardaki çizgiyi beğenmedim; minimalist, kalabalıktan arınmış, dikkat çekmeyen»):
    yüzeyler kenar çizgisiyle değil tonla ve yumuşak gölgeyle ayrılır; renkli kenar şeritleri yok. Giriş kutuları çizgi yerine
    hafif dolguyla görünür; liste içindeki ince ayraçlar kalır. */
-.b-alan__giris, textarea.b-alan__giris, select.b-alan__giris, .ust--duz .ust__ara{ background:var(--yuzey-2); }
-.b-alan__giris:focus{ background:var(--yuzey); }
+:root .b-alan__giris, :root .ust--duz .ust__ara{ background:var(--yuzey-2); }
+:root .b-alan__giris:focus{ background:var(--yuzey); }
 .b-dugme:not(.b-dugme--ana):not(.b-dugme--sade){ background:var(--yuzey-2); }
 .b-dugme:not(.b-dugme--ana):not(.b-dugme--sade):hover{ background:color-mix(in srgb, var(--yazi) 8%, var(--yuzey-2)); box-shadow:none; }
 .sira{ box-shadow:var(--golge-orta); }
@@ -542,3 +542,40 @@ form[data-king-sohbet] textarea{ min-height:96px; }
   ::-webkit-scrollbar-thumb:hover{ background:color-mix(in srgb, var(--yazi) 32%, transparent) padding-box; border-width:3px; }
   ::-webkit-scrollbar-corner{ background:transparent; }
 }
+
+/* ===== Sadelik turu 2 (2026-11-15, «minimalistliği, profesyonelliği ve kullanışlılığı artır») =====
+   Renk yalnız anlam taşıdığı yerde: simgeler kendi renginde ama kutuları nötr; bölüm başlıkları sakin etiket;
+   üst sekmenin zaten gösterdiği sayfada sayfa yolu yok; tekrar eden rozet ve oklar yok; uyarılar yerine sakin satırlar. */
+.b-simge[class*="b-simge--"]{ background:var(--yuzey-2); }
+.kapak__simge{ padding:0; background:none; box-shadow:none; }
+.kapak__simge .b-simge{ width:56px; height:56px; background:var(--yuzey); box-shadow:var(--golge-orta); }
+.kapak__simge .b-simge svg{ width:26px; height:26px; }
+/* bölüm başlıkları: küçük, sakin etiket (içerik öne çıkar) */
+:root .b-bolum__ust h2, :root .b-karsilama__bolumust .b-karsilama__baslik{ font-size:var(--yz-k); font-weight:600; letter-spacing:.01em; color:var(--soluk); }
+:root .b-bolum__ust{ min-height:32px; }
+.hs-govde .b-bolum__ust h2, .ayarlar .b-bolum__ust h2{ font-size:var(--yz-k); }
+/* üst sekmenin gösterdiği sayfalarda «Bugün / Öğren» yolu tekrar; derin sayfalarda (alan, ders, Hesap) kalır */
+#sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="not"], [data-ciz="plan"], [data-ciz="king"], [data-ciz="ayarlar"], [data-ciz="harita"]) > .konum{ display:none; }
+#sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="not"], [data-ciz="plan"], [data-ciz="king"], [data-ciz="ayarlar"], [data-ciz="harita"]) > .kapak-alt + .konum + .govde{ padding-top:var(--a4); }
+/* Bugün: alan kartının tamamı tıklanır; ok gereksiz */
+.b-karsilama__alan .b-karsilama__ok{ display:none; }
+/* Sıradaki kartı: büyük harfli bağıran etiket yerine sakin satır */
+.sira__ust{ text-transform:none; letter-spacing:0; font-weight:500; }
+/* yol: durum numaradan ve tondan okunur; ders kartlarında rozet yok */
+.yol .b-ders__alt{ display:none; }
+/* ders: adım göstergesi sade metin; şimdiki adım koyu, geçilen ✓ */
+.ders-adim{ gap:var(--a4); margin:var(--a2) 0 var(--a3); }
+.ders-adim__oge{ padding:0; background:none; font-weight:500; color:var(--soluk); }
+.ders-adim__oge + .ders-adim__oge::before{ width:16px; height:1px; margin:0 var(--a2) 0 calc(-1 * var(--a2)); background:var(--cizgi-guclu); }
+.ders-adim__no{ width:20px; height:20px; background:var(--yuzey-2); box-shadow:none; font-weight:600; }
+.ders-adim__oge[data-adim="simdi"]{ background:none; color:var(--yazi); font-weight:650; }
+.ders-adim__oge[data-adim="bitti"] .ders-adim__no{ box-shadow:none; background:color-mix(in srgb, var(--vurgu) 14%, var(--yuzey-2)); }
+.ders__soru::before{ content:attr(data-no); text-transform:none; letter-spacing:0; font-weight:500; }
+article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat{ margin-bottom:var(--a4); }
+/* Not: arama tek satır kutu (etiket ekran okuyucuda) */
+[data-arac="not"] .b-alan:has([data-not-ara]) .b-alan__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+[data-arac="not"] .b-bos{ padding:var(--a5); }
+/* King: Anthropic notu kutu değil, sakin dipnot */
+.king-dipnot{ margin:var(--a5) 0 0; font-size:var(--yz-k); line-height:1.55; color:var(--soluk); max-width:62ch; }
+article.ders > .b-uyari--dikkat + .ders__ozet, article.ders > .b-baslik + .ders__ozet{ margin-top:0; }
+article.ders .ders__ozet{ color:var(--yazi-2); }
