@@ -232,6 +232,22 @@ def sina(eski, tek, kokler=()):
     k, _, gv = iste(T, "/api/hkm", "POST", b"", izin)
     dene("POST /api/hkm ikinci HKM açmaz", k == 200 and json.loads(gv).get("durum") == "ayni-surec", gv[:200])
 
+    print("\nKabuğun King sohbeti (/api/kabuk/king → Merkez /api/chat; jeton sunucuda eklenir)")
+    k, _, gv = iste(T, "/api/kabuk/king/kopru")
+    v = json.loads(gv or "{}")
+    dene("GET /api/kabuk/king/kopru jetonsuz 200, iki köprü", k == 200 and set(v.get("kopruler") or {}) == {"antigravity", "claude"}, gv[:200])
+    dene("köprü durumu sır taşımaz", b"csrf" not in gv.lower() and b"token" not in gv.lower())
+    j = {"Content-Type": "application/json"}
+    govde = json.dumps({"text": "merhaba", "agent": "king"}).encode("utf-8")
+    dene("POST /api/kabuk/king özel başlıksız 403", iste(T, "/api/kabuk/king", "POST", govde, j)[0] == 403)
+    dene("POST /api/kabuk/king yabancı kökenden 403",
+         iste(T, "/api/kabuk/king", "POST", govde, dict(j, **{"X-LifeOS": "king", "Origin": "http://kotu.example"}))[0] == 403)
+    dene("vekilden (uzak) gelen King isteği 403",
+         iste(T, "/api/kabuk/king/kopru", basliklar={"X-Forwarded-For": "100.100.1.2", "Tailscale-User-Login": "x@y"})[0] == 403)
+    k, _, gv = iste(T, "/api/kabuk/king", "POST", govde, dict(j, **{"X-LifeOS": "king"}))
+    v = json.loads(gv or "{}")
+    dene("POST /api/kabuk/king cevap verir (modelsiz: kural motoru)", k == 200 and v.get("agent") == "king" and v.get("text"), gv[:200])
+
     print("\nBilinmeyen ve ayrılmış yollar")
     for yol in ("/yok-boyle", "/favicon.ico", "/api/yok", "/AYS/", "/HKM/config.example.json"):
         dene("%s → 404" % yol, iste(T, yol)[0] == 404, iste(T, yol)[0])

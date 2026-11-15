@@ -45,6 +45,9 @@ KOK_ONEKLER = ("/api/hesap/", "/api/kabuk/", "/api/kalite/", "/api/ayar", "/api/
 _ISTEK = ("rfile", "wfile", "connection", "request", "client_address", "server", "headers", "command",
           "path", "request_version", "requestline", "raw_requestline", "close_connection")
 
+# Kabugun King sohbeti -> Merkez yolu (TekKapi._king). Baska Merkez yolu bu kapidan jetonsuz acilmaz.
+KING_YOLLARI = {"/api/kabuk/king": "/api/chat", "/api/kabuk/king/kopru": "/api/kopru"}
+
 HKM = sunucu.HKM     # ayni surecte HKM cekirdegi (hkm_kur); sunucu.hkm_ayakta/hkm_ac buna bakar
 
 
@@ -101,6 +104,29 @@ class TekKapi(Giris):
         finally:
             self.close_connection = h.close_connection
 
+    def _king(self, hedef):
+        """Kabuktaki King sohbeti (kabuk/king-sohbet.js) Merkez'e AYNI KOKENDEN gider; ortak jeton tarayiciya
+        hic girmez, burada eklenir. Yalniz bu bilgisayardan: uzaktan King'e Hesap › Merkez yolu (hesap.py soz 30,
+        admin oturumu) gider. POST ozel baslik ister (tarayici on-kontrole zorlanir, bu kapi izin vermez)."""
+        if not HKM["srv"]:
+            if self.command == "GET":       # hal sorusu: Merkez yoksa koprulerin hali de bilinmez (hata degil)
+                return self._json(200, {"kopruler": None, "merkez": False})
+            return self._json(503, {"ok": False, "mesaj": "Merkez bu süreçte açık değil."})
+        koken = self.headers.get("Origin")
+        port = sunucu.GIRIS_PORT
+        if self.client_address[0] not in ("127.0.0.1", "::1") or koken not in (
+                None, "http://%s:%d" % (HOST, port), "http://localhost:%d" % port):
+            return self._json(403, {"ok": False, "mesaj": "King sohbeti yalnız bu bilgisayarda; uzaktan Hesap › "
+                                                          "Merkez bağlantısıyla (sahibin oturumu) ulaşılır."})
+        if self.command == "POST" and self.headers.get("X-LifeOS") != "king":
+            return self._json(403, {"ok": False, "mesaj": "İstek LifeOS'tan gelmedi."})
+        if self.command not in ("GET", "POST"):
+            return self.send_error(405)
+        del self.headers["Authorization"]
+        self.headers["Authorization"] = "Bearer " + HKM["jeton"]
+        q = self.path.split("?", 1)
+        return self._devret(HKM["sinif"], hedef + ("?" + q[1] if len(q) > 1 else ""), server=HKM["srv"])
+
     def _yonlendir(self, yer, kod=301):
         self.send_response(kod)
         self.send_header("Location", yer)
@@ -116,6 +142,8 @@ class TekKapi(Giris):
             return self._yonlendir("/kabuk/" + (q if q.startswith("?") else ""), 302) or True
         if yol == "/api/hkm" or yol == "/api/hkm/yeniden":
             return False                                    # 4180'in eski anlami (guncelleme_izinli)
+        if yol in KING_YOLLARI:
+            return self._king(KING_YOLLARI[yol]) or True
         if yol.startswith("/api/hkm/"):
             if not HKM["srv"]:
                 return self._json(503, {"ok": False, "mesaj": "Merkez bu süreçte açık değil."}) or True

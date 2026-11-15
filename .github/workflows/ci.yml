@@ -156,6 +156,11 @@ jobs:
       # Onaylar (faz6-onay-ekrani.md): sahibin onayı içeriğe Yol'dan önce bindirilir; onay_uygula dosyaya biçimi bozmadan yazar.
       - name: Onay bindirmesi ve onay aracı
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay bindirmesi" node kabuk/onay.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Onay aracı" python3 tools/onay_uygula_test.py
+      # KING KOPRULERI (2026-11-15): kabuktaki King sohbeti; secim yalniz gecerliyse gider, kaynak satiri
+      # ve kopru olmadiysa notu gorunur. Merkez tarafi (kuyruk, sinir, geri dusme) HKM isinde ayri adim.
+      - name: King sohbeti (kabuk)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "King sohbeti (kabuk)" node kabuk/king-sohbet.test.js
+
       # Hesap ekrani (faz7-hesap-kabuk.md): oturum, cihazlar, guncelleme; jeton ekrana gelmez.
       - name: Kabuk hesap ekranı
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hesap ekranı" node kabuk/hesap.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap giriş ve güvenlik" node kabuk/hesap-giris.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap bağlantıları" node kabuk/hesap-baglanti.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap yönetimi" node kabuk/hesap-yonetim.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Açılış videosu" node kabuk/acilis.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Gece sesi" node kabuk/gece.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Etkileşim" node kabuk/etkilesim.test.js
@@ -276,6 +281,12 @@ jobs:
       - name: Testler
         working-directory: HKM
         run: bash ../tools/ci_hata.sh "HKM testleri" python3 -m tests.run
+
+      # Anahtarsiz kopruler (core/kopru.py): es zamanli sinir ve kuyruk, gecici hatada tek yeniden deneme,
+      # kapali uygulamada siradaki modele durust gecis. Hicbir test Antigravity'ye ya da claude'a gitmez.
+      - name: King köprüleri (Antigravity, Claude Code)
+        working-directory: HKM
+        run: bash ../tools/ci_hata.sh "King köprüleri" python3 -c "import sys; sys.path.insert(0, '.'); from tests import harness, test_kopru; test_kopru.run(); k = [r for r in harness.RESULTS if r[2]]; [print('  x', r[1], r[2]) for r in k]; print(len(harness.RESULTS) - len(k), '/', len(harness.RESULTS), 'gecti'); sys.exit(1 if k else 0)"
 
       - name: Sorgu bütçesi
         working-directory: HKM

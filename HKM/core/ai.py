@@ -38,6 +38,7 @@
 """
 
 import base64
+import contextvars
 import datetime
 import hashlib
 import json
@@ -47,7 +48,7 @@ import time
 import urllib.error
 import urllib.request
 
-from core import arac, butce, manager, models
+from core import arac, butce, kopru, manager, models
 
 ZAMAN_ASIMI = 60
 # Yerel model ILK CEVABI (soket suresi, cevap akarken dolmaz). Olcum, bu bilgisayarin
@@ -383,6 +384,16 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
 
     Doner: (metin, giris_jeton, cikis_jeton, kesildi_mi)."""
     ayar = ayar or {}
+    if kopru.kopru_mu(provider):
+        # Anahtarsiz kopru (core/kopru.py): kuyruk, sinir ve yeniden deneme orada.
+        # Cevap tek parca gelir; akan ekran icin tek parca + son isareti.
+        metin, gir, cik, kesildi, ek = kopru.cagir(provider, model, sistem, mesajlar,
+                                                    sure=max(int(ayar.get("sure") or 0), kopru.SAGLAYICI[provider]["sure"]),
+                                                    iptal=ayar.get("iptal"))
+        if callable(ayar.get("akis")):
+            ayar["akis"](metin)
+            ayar["akis"](None)
+        return metin, gir, cik, kesildi, dict(ek, usd=0.0)
     jeton = int(ayar.get("jeton") or EN_COK_JETON)
     timeout = ayar.get("sure") or (YEREL_ZAMAN_ASIMI if provider == "yerel" else timeout)
     tanim = models.PROVIDERS[provider]
@@ -659,7 +670,11 @@ def _temizle(cevap, baglam, genel=False):
 
 def hazir_mi(cfg, role, seviye=None):
     """Bu kademe cagri yapabilir mi — ve yapamazsa NEDEN. Paket seciliyse
-    merdivenin ilk basamagi (core/motor.py) sorulur."""
+    merdivenin ilk basamagi (core/motor.py) sorulur. Istekte kopru seciliyse o hazirdir:
+    kapaliysa bunu ask soyler ve merdiven devralir (sessiz gecis yok)."""
+    kb = kopru_basamagi(KOPRU.get(), role)
+    if kb:
+        return {"ok": True, "assignment": kb["atama"]}
     from core import motor
     m = motor.merdiven(None, cfg, role, seviye=seviye)
     if m.get("basamaklar") or m.get("paket"):
@@ -794,10 +809,15 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     from core import motor
     plan = motor.merdiven(con, cfg, role, seviye=seviye, adim=adim,
                           jeton=_jeton_tahmini(sistem, baglam, *[m.get("content") for m in mesajlar or []]))
-    if not plan["ok"]:
+    kb = kopru_basamagi(KOPRU.get(), role) if not (yalniz_arac or gorseller or medya) else None
+    if not plan["ok"] and not kb:
         return {"ok": False, "reason": plan.get("reason"), "text": None,
                 "note": plan.get("note")}
-    basamaklar = list(plan["basamaklar"])      # soguk baslangicta yeniden dizilir
+    if not plan["ok"]:
+        plan = dict(plan, basamaklar=[])
+    # Kopru secildiyse ilk basamaktir; kapali ya da hatadaysa merdiven (yerel/ucretsiz) devralir.
+    basamaklar = ([kb] if kb else []) + list(plan["basamaklar"])      # soguk baslangicta yeniden dizilir
+    kopru_notu = None
     anahtar = None
     if ONBELLEK_SN and transport is None and not (gorseller or medya or araclar):
         anahtar = _onbellek_anahtari(role, task, sistem, baglam, mesajlar, denetim, seviye, jeton, user,
@@ -814,8 +834,8 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     r = None
     neden = (plan.get("karar") or {}).get("neden")
     for i, b in enumerate(basamaklar):
-        # Yerel yedek ust basamak degildir: yalniz bulut olmayinca devralir.
-        ust_var = any(not x.get("yedek") for x in basamaklar[i + 1:])
+        # Yerel yedek ust basamak degildir: yalniz bulut olmayinca devralir. Kopru en ust sayilir.
+        ust_var = not b.get("kopru") and any(not x.get("yedek") for x in basamaklar[i + 1:])
         not_ek = ",".join(x for x in (
             "paket=%s" % plan["paket"] if plan.get("paket") and b["sinif"] else "",
             "sinif=%s" % b["sinif"] if b["sinif"] else "",
@@ -830,6 +850,22 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
                       "ekonomi": plan.get("ekonomi"), "kat": motor.kat(b), "kat_neden": neden}
         if r.get("sebep") == "iptal":
+            break
+        if b.get("kopru"):
+            ad = kopru.SAGLAYICI[b["atama"]["provider"]]["ad"]
+            if r.get("ok"):
+                kopru_notu = {"istenen": b["atama"]["provider"], "kullanildi": True, "not": "%s cevapladı." % ad}
+            else:
+                # Sessiz gecis yok: King hangi koprunun neden olmadigini ve kimin devraldigini soyler.
+                sebep = re.sub(r"^Model çağrısı başarısız: (?:\w+: )?", "", str(r.get("note") or r.get("reason") or ""))[:160]
+                kalan = basamaklar[i + 1:]
+                kopru_notu = {"istenen": b["atama"]["provider"], "kullanildi": False,
+                              "not": "%s olmadı (%s). %s" % (ad, sebep.rstrip("."),
+                                                            "Sıradaki model cevaplıyor." if kalan else
+                                                            "Yedek model atanmamış.")}
+                if kalan:
+                    neden = "düşüş: %s olmadı" % ad
+                    continue
             break
         if r.get("yerel_gec"):
             # Soguk baslangic: ikinci yerel model de bellege yuklenecekti;
@@ -865,9 +901,29 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         if not r["text"]:
             return dict(r, ok=False, reason="dropped", text=None,
                         note="Model yalnızca yükseltme istedi; üst basamak kalmadı.")
+    if kopru_notu:
+        r["kopru"] = kopru_notu
     if anahtar and r.get("ok") and r.get("text") and not r.get("cagrilar"):
         _onbellek_koy(anahtar, r)
     return r
+
+
+# Istek basina kopru secimi (daemon /api/chat koyar): "antigravity" | "claude" | "antigravity:pro" | "".
+# Yalniz o istegin is parcaciginda gecerlidir; baska kademelere (BAM, ofis) sizmaz.
+KOPRU = contextvars.ContextVar("kopru", default="")
+
+
+def kopru_basamagi(secim, role):
+    """Secim metninden merdivenin ilk basamagi; gecersizse None."""
+    ad, _, model = str(secim or "").partition(":")
+    if not kopru.kopru_mu(ad):
+        return None
+    tanim = models.PROVIDERS[ad]
+    model = model if model in tanim["models"] else tanim["models"][0]
+    return {"sinif": None, "kopru": True, "ayar": {}, "atama": {
+        "role": role, "from": None, "inherited": False, "provider": ad, "provider_label": tanim["label"],
+        "model": model, "efor": "", "key_id": "", "key_label": "", "key_user": models.VARSAYILAN_SAHIP,
+        "key_missing": False, "key_set": True, "chain": [role]}}
 
 
 def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben",
@@ -1231,11 +1287,11 @@ def tarife_of(provider, model):
 
 def fiyat_bilinir(provider, model):
     """Bu modelin TARIFESI elimizde mi."""
-    return provider == "yerel" or tarife_of(provider, model) is not None
+    return provider == "yerel" or kopru.kopru_mu(provider) or tarife_of(provider, model) is not None
 
 
 def _fiyat(provider, model, gir, cik):
-    if provider == "yerel":
-        return 0.0                  # kendi makinende kosan model bedava
+    if provider == "yerel" or kopru.kopru_mu(provider):
+        return 0.0                  # kendi makinende kosan model ya da kendi abonelik oturumun: cagri basina bedel yok
     g, c = tarife_of(provider, model) or BILINMEYEN_FIYAT
     return (gir / 1e6) * g + (cik / 1e6) * c

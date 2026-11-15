@@ -1292,7 +1292,10 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # Tam katalog gonderilmez: mesajla ortusmeyen araclar modele sunulmaz (arac.dar_katalog);
     # secilen cagri yine tam katalogla dogrulanir.
     sunulan = arac.dar_katalog(katalog, metin)
-    aracli = bool(sunulan) and not arac.aracsiz_mi((hazir.get("assignment") or {}).get("model"))
+    atanan = hazir.get("assignment") or {}
+    # Kopru (Antigravity, Claude Code) arac katalogu almaz: duz metin cevaplar (core/kopru.py).
+    aracli = bool(sunulan) and not arac.aracsiz_mi(atanan.get("model")) and \
+        not (models.PROVIDERS.get(atanan.get("provider")) or {}).get("kopru")
     if serbest:
         bg = _tarih_satiri(date)
     if sonuclar:
@@ -1441,7 +1444,7 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         return {"ok": True, "mode": "komut", "command": yedek["command"],
                 "text": govde, "agent": gorevli,
                 "ai": {"ok": False, "reason": r.get("reason"), "sebep": r.get("sebep"),
-                       "note": r.get("note")}}
+                       "note": r.get("note")}, "kopru": r.get("kopru")}
     # Hafiza adayi (core/memory.py): model yalniz ADAY birakir; etiket
     # kullaniciya gitmez, aday kullanici onaylayana dek baglama girmez.
     govde, oneriler = memory.aday_ayikla(r["text"])
@@ -1480,7 +1483,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             "context_lines": len(bg.splitlines()),
             # Hangi seviye, hangi sinif, neden; butce bandinda ekonomik
             # moddaysa onun notu. Yuz bunu kucuk bir satirda gosterir.
-            "motor": motor_bilgi, "arac_red": red}
+            "motor": motor_bilgi, "arac_red": red,
+            # Kaynak: cevabi hangi saglayici yazdi; kopru secildiyse olup olmadigi (core/ai.py ask).
+            "provider": r.get("provider"), "kopru": r.get("kopru")}
 
 def tani(con, cfg, date, gorevli="king", th=None, transport=None):
     """Sohbet zincirini BASTAN SONA dener ve nerede koptugunu soyler.
