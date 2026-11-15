@@ -30,6 +30,8 @@ import webbrowser
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
 KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
+sys.path.insert(0, SISTEM)
+import guncelle  # noqa: E402  (yeni surum acilmazsa geri_al)
 GIRIS = "http://127.0.0.1:4180"
 BEKLE_SANIYE = 15.0
 
@@ -208,6 +210,14 @@ def main():
         _yaz("ok", "Sistem sunucusu zaten çalışıyor", GIRIS)
     else:
         oldu, surec, gunluk = sistemler_baslat()
+        if not oldu:
+            # Guncellemeden sonra yeni surum acilmadiysa onceki surume don ve bir kez daha dene
+            # (telefondan yapilan guncelleme bilgisayari kapali birakmasin).
+            geri = guncelle.geri_al()
+            if geri:
+                _yaz("ok" if geri[0] else "hata", geri[1])
+                if geri[0]:
+                    oldu, surec, gunluk = sistemler_baslat()
         if oldu:
             _yaz("ok", "LifeOS açıldı", GIRIS)
         else:

@@ -48,6 +48,7 @@ ESKI_KOK = ("baslat.py", "sunucu.py", "guncelle.py", "baslat.sh",
 
 BAKIS_SN = 45       # «yenilik var mi?» sayfa acilisini bekletir: kisa
 INDIRME_SN = 900    # kurarken buyuk bir indirme yavas agda dakikalar surebilir
+GERI_REF = "refs/lifeos/onceki"   # son guncellemeden onceki surum; yeni surum acilinca silinir
 SARMA_SN = 600      # ileri sarma; yavas diskte 60 sn'de oldurulup yarim kalmamali
 
 
@@ -405,6 +406,8 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
     # HKM'nin kodu degistiyse calisan HKM sureci eski kodla kalir (sahada,
     # 2026-10-19: guncellendi ama HKM 40 dakika eski surumle cevap verdi).
     hkm = any(s.startswith("HKM/") and s.endswith(".py") for s in degisen)
+    # Donus noktasi: yeni surum acilmazsa baslat.py onceki surume doner (geri_al); acilinca silinir.
+    _git(["update-ref", GERI_REF, eski.strip()], kok, calistir)
     artiklari_temizle(kok)
     kabuk_tazele(kok)
     baslangic_tazele(kok)
@@ -415,6 +418,30 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
                          % (d["ileride"], yedek_dal) if yedek_dal else "")
                       + (" Sunucu dosyaları da değişti: sistemi yeniden "
                          "başlat." if yeniden else " Açık sayfaları yenile."))
+
+
+def geri_al(kok=KOK, calistir=subprocess.run):
+    """Guncellemeden sonra sistem acilmadiysa (baslat.py) onceki surume doner. Donus noktasi yoksa
+    ya da HEAD zaten oradaysa hicbir sey yapmaz (None). --keep: izlenmeyen dosyalar (veri) yerinde kalir;
+    elle degistirilmis izlenen dosya varsa git reddeder, dokunulmaz. Doner: (tamam, mesaj) ya da None."""
+    kod, onceki = _git(["rev-parse", "--verify", "--quiet", GERI_REF], kok, calistir)
+    if kod != 0 or not onceki.strip():
+        return None
+    _, bas = _git(["rev-parse", "HEAD"], kok, calistir)
+    if bas.strip() == onceki.strip():
+        donus_sil(kok, calistir)
+        return None
+    kod, cikti = _git(["reset", "--quiet", "--keep", onceki.strip()], kok, calistir, timeout=SARMA_SN)
+    if kod != 0:
+        return False, "Önceki sürüme dönülemedi: " + (cikti.splitlines() or ["?"])[-1]
+    donus_sil(kok, calistir)
+    kabuk_tazele(kok)
+    return True, "Yeni sürüm açılmadı; önceki sürüme dönüldü (%s)." % onceki.strip()[:8]
+
+
+def donus_sil(kok=KOK, calistir=subprocess.run):
+    """Sistem yeni surumle acildi: donus noktasi artik gerekmez."""
+    _git(["update-ref", "-d", GERI_REF], kok, calistir)
 
 
 def _yaz(isaret, metin):

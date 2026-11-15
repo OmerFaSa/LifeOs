@@ -96,6 +96,25 @@ def run():
             eq(guncelle.uygula(r.kul)["hkm_degisti"], True)
     test("yenilik varsa ileri sarar; .py degisirse yeniden baslat der", t_ileri_sarar)
 
+    def t_geri_al():
+        with _Depo() as r:
+            eq(guncelle.geri_al(r.kul), None)                     # donus noktasi yok: dokunmaz
+            _yaz(r.kul, "veri/kayit.json", "{}")                  # izlenmeyen kullanici verisi
+            r.yeni("OKU.md", "bozuk\n", "bozuk surum")
+            eq(guncelle.uygula(r.kul)["durum"], "guncellendi")
+            eq(_oku(r.kul, "OKU.md"), "bozuk\n")
+            tamam, mesaj = guncelle.geri_al(r.kul)                # yeni surum acilmadi
+            ok(tamam and "önceki sürüme" in mesaj)
+            eq(_oku(r.kul, "OKU.md"), "bir\n")
+            eq(_oku(r.kul, "veri/kayit.json"), "{}")              # veri yerinde
+            eq(guncelle.geri_al(r.kul), None)                     # tek sefer: nokta silindi
+            eq(guncelle.durum(r.kul)["geride"], 1)                # sonraki «Güncelle» yine dener
+            eq(guncelle.uygula(r.kul)["durum"], "guncellendi")
+            guncelle.donus_sil(r.kul)                             # yeni surum acildi
+            eq(guncelle.geri_al(r.kul), None)
+            eq(_oku(r.kul, "OKU.md"), "bozuk\n")
+    test("yeni surum acilmazsa onceki surume donulur; acilinca donus noktasi silinir", t_geri_al)
+
     def t_kirli():
         with _Depo() as r:
             r.yeni("OKU.md", "iki\n", "x")
