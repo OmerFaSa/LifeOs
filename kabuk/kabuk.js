@@ -961,9 +961,10 @@
     depo.dinle(function () { if (!/^(INPUT|TEXTAREA|SELECT)$/.test((d.activeElement || {}).tagName || '')) rota(); });
     rota();
     if (location.protocol !== 'file:' && !kok.LIFEOS.HESAP) {
-      // hesap.js yazılarını parça kaydına yazar: önce /parca.js, sonra /hesap.js (giriş sayfasındaki sıra)
-      var betik = function (yol, sonra) { var b = d.createElement('script'); b.src = yol; b.onload = sonra; d.head.appendChild(b); };
-      betik('/parca.js', function () { betik('/hesap.js', function () { if (sayfaEl.getAttribute('data-yer') === 'bugun' && hesapAdi()) rota(); }); });
+      // hesap.js yazılarını parça kaydına yazar: önce /parca.js, sonra /hesap.js (giriş sayfasındaki sıra). async=false: ikisi
+      // birlikte iner, eklenme sırasıyla çalışır (biri ötekini beklemez; telefonda bir gidiş-dönüş kazanılır)
+      var betik = function (yol, sonra) { var b = d.createElement('script'); b.src = yol; b.async = false; if (sonra) b.onload = sonra; d.head.appendChild(b); };
+      betik('/parca.js'); betik('/hesap.js', function () { if (sayfaEl.getAttribute('data-yer') === 'bugun' && hesapAdi()) rota(); });
     }
     if (Kabuk.Tasima && Kabuk.Tasima.calis) Kabuk.Tasima.calis(); // tek kapıya geçişte eski modüllerin deposu bu kökene geri yazılır
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') rota(); }); // Bugün'ün «sırada» satırı için
