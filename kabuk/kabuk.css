@@ -125,7 +125,7 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .ust__hesap{ display:grid; place-items:center; flex:none; width:36px; height:36px; margin-left:8px; border-radius:50%; background:var(--yuzey-2); color:var(--yazi); font-weight:650; transition:box-shadow var(--sure) ease; }
 .ust__hesap:hover{ box-shadow:0 0 0 3px color-mix(in srgb, var(--vurgu) 35%, transparent); }
 
-#sayfa[data-yer="bugun"]{ padding-top:0; }
+#sayfa[data-ciz="bugun"]{ padding-top:0; }
 .ust--sahne{ position:absolute; z-index:3; top:max(10px,env(safe-area-inset-top)); left:0; right:0; max-width:1200px; margin:0 auto; padding:0 max(16px,env(safe-area-inset-left)); color:var(--sahne-yazi); }
 .ust--sahne .ust__logo, .ust--sahne .ust__sekmeler a{ text-shadow:var(--sahne-golge); }
 .ust--sahne .ust__kare{ background:var(--sahne-yazi); color:#1f1b16; }
@@ -158,8 +158,6 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 @keyframes kapak-gir{ from{ opacity:0; transform:translateY(8px) scale(.94); } }
 @media (max-width:640px){ .kapak{ height:136px; } .kapak__simge .b-simge{ width:56px; height:56px; } }
 
-/* sayfa girişi: içerik hafifçe yukarı süzülür (hareket ayarı «az» ya da sistem azaltınca --sure 0) */
-.govde{ animation:gir calc(var(--sure) * 2) ease-out both; }
 
 /* Açılış videosu (kabuk/acilis.js; eski paneldeki .avideo): siyah perde, video yavaşça belirir, sonunda kararır; atla düğmesi cam hap. */
 .avideo{ position:fixed; inset:0; z-index:2147483000; display:grid; place-items:center; background:#000; transition:opacity .85s cubic-bezier(.4,0,.2,1); }
@@ -231,23 +229,60 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
   .hs-kimlik__ozet{ flex:1; margin:0; }
 }
 
-/* Hafif hareket (2026-11-15, sahibin isteği): yalnız opaklık ve küçük kayma/ölçek (GPU'da ucuz); süreler --sure'den,
-   Ayarlar › Hareket «az» ya da sistemin «hareketi azalt»ı onu 0 yapınca hepsi durur. Uzun listelerde yalnız ilk on öğe. */
-.b-liste > li:nth-child(-n+10), .b-sayilar > *:nth-child(-n+10), .b-karsilama__alanlar > *:nth-child(-n+10){
-  animation:gir calc(var(--sure) * 2) ease-out both; animation-delay:calc(var(--sure) * var(--s, 0) * .3); }
-:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(2){ --s:1; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(3){ --s:2; }
-:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(4){ --s:3; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(5){ --s:4; }
-:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(6){ --s:5; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(7){ --s:6; }
-:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(8){ --s:7; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(9){ --s:8; }
-:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(10){ --s:9; }
-/* açılır bölüm açılınca içi süzülür; uyarı yumuşak belirir */
-.b-acilir[open] > .b-acilir__govde{ animation:gir calc(var(--sure) * 1.5) ease-out both; }
+/* Hareket dili (2026-11-15, sahibin isteği: «akıp gitsin, tatlı, sade, göz yormasın»). Tek eğri (--akis: hızlı başlar, yumuşak oturur),
+   yalnız opaklık ve küçük kayma/ölçek (GPU'da ucuz). Süreler --sure'den: Ayarlar › Hareket «az» ya da sistemin «hareketi azalt»ı 0 yapar,
+   kabuk.js o zaman görünüm geçişini de hiç başlatmaz. */
+:root{ --akis:cubic-bezier(.22,1,.36,1); --yay:cubic-bezier(.34,1.4,.64,1); }
+
+/* Bölüm geçişi (görünüm geçişi, kabuk.js rota): üst çubuk yerinde kalır; içerik gidilen yöne 20 px kayarak söner, yenisi öbür yandan gelir;
+   seçili sekmenin işareti yenisine akar. */
+.ust{ view-transition-name:ust; }
+.ust__sekmeler a{ position:relative; isolation:isolate; }
+.ust__isaret{ position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--yuzey-2); view-transition-name:sekme-isaret; }
+.ust--duz .ust__sekmeler a[aria-current="page"]{ background:none; }
+.ust--sahne .ust__sekmeler a[aria-current="page"]{ background:none; }
+.ust--sahne .ust__isaret{ background:#ffffff2e; }
+::view-transition-group(*){ animation-duration:calc(var(--sure) * 2.6); animation-timing-function:var(--akis); }
+::view-transition-old(root){ animation:calc(var(--sure) * 1.6) var(--akis) both vt-cik; }
+::view-transition-new(root){ animation:calc(var(--sure) * 2.6) var(--akis) both vt-gir; }
+:root[data-gecis="geri"]::view-transition-old(root){ animation-name:vt-cik-geri; }
+:root[data-gecis="geri"]::view-transition-new(root){ animation-name:vt-gir-geri; }
+@keyframes vt-cik{ to{ opacity:0; transform:translateX(-20px); } }
+@keyframes vt-gir{ from{ opacity:0; transform:translateX(20px); } }
+@keyframes vt-cik-geri{ to{ opacity:0; transform:translateX(20px); } }
+@keyframes vt-gir-geri{ from{ opacity:0; transform:translateX(-20px); } }
+/* geçiş sürerken sayfanın kendi giriş süzülmesi ikilenmesin */
+:root[data-gecis] .govde{ animation:none; }
+
+/* Yeni sayfaya girişte (ve Hesap sekmesi değişince) listelerin ilk on öğesi sırayla süzülür; aynı sayfanın yeniden çizimi süzülmez. */
+.canlan :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(-n+10){
+  animation:gir calc(var(--sure) * 2.4) var(--akis) both; animation-delay:calc(var(--sure) * var(--s, 0) * .35); }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(2){ --s:1; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(3){ --s:2; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(4){ --s:3; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(5){ --s:4; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(6){ --s:5; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(7){ --s:6; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(8){ --s:7; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(9){ --s:8; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *, .hs-govde > .b-bolum):nth-child(10){ --s:9; }
+/* sayfanın kendi girişi de aynı eğriyle */
+.canlan .govde{ animation:gir calc(var(--sure) * 2.4) var(--akis) both; }
+
+/* Üzerine gelince: kartlar 1 px kalkar, gölge derinleşir; menü ve satırlar yumuşak renklenir. */
+a.b-satir, .b-karsilama__alan, a.b-ders{ transition:box-shadow calc(var(--sure) * 1.5) var(--akis), transform calc(var(--sure) * 1.5) var(--akis), background calc(var(--sure) * 1.5) var(--akis); }
+a.b-satir:not(.b-liste--satir a):hover, .b-karsilama__alan:hover{ transform:translateY(-1px); box-shadow:inset 0 0 0 1px var(--cizgi-guclu), var(--golge-yumusak); }
+.ust__sekmeler a, .b-tercih__sec, .b-soru__sik, .ust__ara, .ust__hesap, .b-acilir__ust::before{ transition-duration:calc(var(--sure) * 1.5); transition-timing-function:var(--akis); }
+.b-acilir__ust{ transition:color calc(var(--sure) * 1.5) var(--akis); }
+.b-acilir__ust:hover{ color:var(--yazi); }
+
+/* Tıklayınca: hafifçe çöker, bırakınca küçük bir yayla yerine döner. */
+.b-dugme{ transition:box-shadow calc(var(--sure) * 1.5) var(--akis), background calc(var(--sure) * 1.5) var(--akis), opacity calc(var(--sure) * 1.5) var(--akis), transform calc(var(--sure) * 2) var(--yay); }
+.b-tercih__sec, .b-soru__sik{ transition-property:background, color, box-shadow, transform; }
+.b-dugme:not([aria-disabled="true"]):active, .b-tercih__sec:active, .b-soru__sik:active, .ust__sekmeler a:active, a.b-satir:active, .b-karsilama__alan:active{
+  transform:scale(.97); transition-duration:calc(var(--sure) * .6); }
+
+/* Açılır bölüm açılınca içi süzülür; uyarı yumuşak belirir; tema değişince renkler yumuşak geçer. */
+.b-acilir[open] > .b-acilir__govde{ animation:gir calc(var(--sure) * 2) var(--akis) both; }
 @keyframes belir{ from{ opacity:0; } }
-.b-uyari{ animation:belir calc(var(--sure) * 1.5) ease-out both; }
-/* basınca hafif çökme */
-.b-tercih__sec, .b-soru__sik{ transition:background var(--sure) ease, color var(--sure) ease, box-shadow var(--sure) ease, transform var(--sure) ease; }
-.b-dugme:not([aria-disabled="true"]):active, .b-tercih__sec:active, .b-soru__sik:active, .ust__sekmeler a:active{ transform:scale(.97); }
-/* tema değişince renkler yumuşak geçer */
-body{ transition:background-color calc(var(--sure) * 2) ease, color calc(var(--sure) * 2) ease; }
+.canlan .b-uyari{ animation:belir calc(var(--sure) * 2) var(--akis) both; }
+body{ transition:background-color calc(var(--sure) * 2.5) var(--akis), color calc(var(--sure) * 2.5) var(--akis); }
+
 /* Hesap: baş harf yumuşakça yerine oturur */
-.hs-kimlik__harf{ animation:kapak-gir calc(var(--sure) * 3) ease-out both; }
+.canlan .hs-kimlik__harf{ animation:kapak-gir calc(var(--sure) * 3) var(--yay) both; }

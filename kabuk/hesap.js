@@ -273,6 +273,7 @@
   function sekmeSec(k, odakla) {
     if (!SEKME[k]) return;
     history.replaceState(null, '', '#/hesap' + (k === 'genel' ? '' : '?' + k)); ciz();
+    if (ic().canlan) ic().canlan(); // sekmenin bölümleri yeni sayfa gibi süzülür
     if (odakla) { var y = d.querySelector('[data-hs-sekme][data-deger="' + k + '"]'); if (y) y.focus(); }
   }
   d.addEventListener('click', function (e) { var t = e.target.closest('[data-hs-sekme]'); if (t && burada()) sekmeSec(t.getAttribute('data-deger')); });

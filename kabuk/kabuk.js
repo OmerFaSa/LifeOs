@@ -283,7 +283,8 @@
   function cubuk(sahne) {
     var ad = hesapAdi(), se = sekmeOf(simdiYer);
     return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">L</span>LifeOS</a>' +
-      '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + SEKME.map(function (s) { return '<a href="' + s[2] + '"' + (s[0] === se ? ' aria-current="page"' : '') + '>' + s[1] + '</a>'; }).join('') + '</nav>' +
+      '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + SEKME.map(function (s) { return '<a href="' + s[2] + '"' + (s[0] === se ? ' aria-current="page"' : '') + '>' +
+        (s[0] === se ? '<span class="ust__isaret" aria-hidden="true"></span>' : '') + s[1] + '</a>'; }).join('') + '</nav>' +
       '<button type="button" class="ust__ara" data-ac="komut" aria-keyshortcuts="Control+K /" aria-label="Ara"><svg aria-hidden="true"><use href="#i-ara"/></svg><span aria-hidden="true">Ara</span><kbd>Ctrl K</kbd></button>' +
       '<a class="ust__hesap" href="#/ayarlar" aria-label="Ayarlar">' + (ad ? kac(ad.charAt(0).toLocaleUpperCase('tr')) : '<svg aria-hidden="true"><use href="#i-kisi"/></svg>') + '</a></header>';
   }
@@ -574,11 +575,46 @@
     else if (tasindi) html = sayfaAlan(yer);
     else if (H.DAL_SAYFASI[yer.dal] === yer.id && yer.dal !== 'king') html = sayfaDal(yer);
     else html = sayfaYer(yer);
-    sayfaEl.innerHTML = html;
+    var once = sayfaEl.getAttribute('data-yer'), yeniSayfa = once !== yer.id;
+    // data-yer hemen yazılır (eşzamansız yüklemeler «hâlâ bu sayfa mı?» diye ona bakar); görünüm işareti data-ciz çizimle birlikte
     sayfaEl.setAttribute('data-yer', yer.id);
-    d.title = yer.ad + ' · LifeOS';
-    manzara();
+    var sira = ++cizSira;
+    function yaz() {
+      if (sira !== cizSira) return; // geçişin bekleyen çizimi, ondan sonra gelen daha yeni çizimin üstüne yazmaz
+      sayfaEl.innerHTML = html;
+      sayfaEl.setAttribute('data-ciz', yer.id);
+      d.title = yer.ad + ' · LifeOS';
+      manzara();
+      if (yeniSayfa) canlan();
+    }
+    // Bölüm değişince görünüm geçişi (tarayıcı destekliyorsa ve hareket açıksa): içerik gidilen yöne kayarak söner, üst çubuk yerinde kalır,
+    // seçili sekmenin işareti yenisine akar. Aynı sayfanın yeniden çizimi (tıklama, yazma) anında olur.
+    if (once && yeniSayfa && d.startViewTransition && !d.hidden && hareketVar()) { // gizli sekme çizmez: geçiş zaman aşımına düşerdi
+      d.documentElement.setAttribute('data-gecis', yon(once, yer));
+      var g = d.startViewTransition(yaz), u = bekleyenCizim = g.updateCallbackDone.catch(function () {});
+      u.then(function () { if (bekleyenCizim === u) bekleyenCizim = null; });
+      g.ready.catch(function () { /* üst üste gelen geçişte öncekinin atlanması olağan */ });
+      g.finished.then(gecisBitti, gecisBitti);
+    } else yaz();
     return yer;
+  }
+  var cizSira = 0, bekleyenCizim = null;
+  // Ekranlara verilen alan yüklemesi, bekleyen geçişin çizimi bitince çözülür: «sayfa hâlâ açık mı?» diye ekrana bakan
+  // eşzamansız yeniden çizimler (deneme, araçlar, onay) yeni sayfanın öğelerini görür.
+  function alanYukleCizimle(id) { return alanYukle(id).then(function (v) { return bekleyenCizim ? bekleyenCizim.then(function () { return v; }) : v; }); }
+  function gecisBitti() { d.documentElement.removeAttribute('data-gecis'); }
+  function hareketVar() { try { return getComputedStyle(d.documentElement).getPropertyValue('--sure').trim() !== '0s'; } catch (e) { return false; } }
+  // Yön: üst sekmelerde sağa giderken ileri, sola geri; sekme dışı yerlerde (ders, ayarlar…) derinleşme ileri, sekmeye dönüş geri
+  function yon(onceId, yer) {
+    var sira = SEKME.map(function (s) { return s[0]; }), a = sira.indexOf(sekmeOf(H.YERLER.filter(function (y) { return y.id === onceId; })[0])), b = sira.indexOf(sekmeOf(yer));
+    if (a >= 0 && b >= 0 && a !== b) return b > a ? 'ileri' : 'geri';
+    return sira.indexOf(yer.id) >= 0 ? 'geri' : 'ileri';
+  }
+  // Yeni sayfaya girişte listeler sırayla süzülür (kabuk.css .canlan); aynı sayfanın yeniden çizimi süzülmez.
+  var canlanSaat = null;
+  function canlan() {
+    clearTimeout(canlanSaat); sayfaEl.classList.add('canlan');
+    canlanSaat = setTimeout(function () { sayfaEl.classList.remove('canlan'); }, 900);
   }
   function git(yol) { if (location.hash === yol) rota(); else location.hash = yol; }
 
@@ -807,7 +843,7 @@
     if (Kabuk.Tasima && Kabuk.Tasima.calis) Kabuk.Tasima.calis(); // tek kapıya geçişte eski modüllerin deposu bu kökene geri yazılır
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') rota(); }); // Bugün'ün «sırada» satırı için
   }
-  Kabuk.ic = { kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukle, etkin: function () { return etkinAlan; },
+  Kabuk.ic = { canlan: canlan, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
     dersMetni: dersMetni, onayDegisti: function (id) { if (hamlar[id]) alanKur(id); },
     asamalar: function (id) { var a = alanlar[id]; return a && a.ys ? a.ys : null; },
     asamaY: function (id, asamaId) { var a = alanlar[id]; return a && a.ys ? a.ys.filter(function (y) { return y.id === asamaId; })[0] || null : null; },
