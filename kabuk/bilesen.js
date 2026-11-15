@@ -481,8 +481,10 @@
     var l = dizi('halka', 'ogeler', o.ogeler, 2);
     return '<div id="' + o.id + '" class="b-halka" role="menu" aria-label="' + kac(metin('halka', 'ad', o.ad)) + '" hidden><span class="b-halka__merkez" aria-hidden="true"></span>' +
       l.map(function (x, i) {
-        return '<button type="button" role="menuitem" class="b-halka__oge" data-yol="' + kac(yol('halka', nesne('halka', x).yol)) + '" style="--a:' + (-90 + i * 360 / l.length) + 'deg">' +
-          kac(metin('halka', 'ad', x.ad, false, 24)) + '</button>';
+        // simge (isteğe bağlı): sayfadaki <symbol id="i-…">; --i giriş sırası (taşlar sırayla açılır)
+        if (x.simge != null && !AD.test(x.simge)) hata('halka', 'simge küçük harf ve tire olmalı');
+        return '<button type="button" role="menuitem" class="b-halka__oge" data-yol="' + kac(yol('halka', nesne('halka', x).yol)) + '" style="--a:' + (-90 + i * 360 / l.length) + 'deg' + (x.simge ? ';--i:' + i : '') + '">' +
+          (x.simge ? '<svg aria-hidden="true"><use href="#i-' + x.simge + '"/></svg>' : '') + kac(metin('halka', 'ad', x.ad, false, 24)) + '</button>';
       }).join('') + '</div>';
   }
 

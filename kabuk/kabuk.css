@@ -332,3 +332,35 @@ body{ transition:background-color calc(var(--sure) * 2.5) var(--akis), color cal
 @keyframes yukle-sallan{ 0%, 100%{ transform:rotate(0); } 50%{ transform:rotate(-2deg); } }
 @keyframes yukle-nokta{ 0%{ opacity:1; } 33.33%{ opacity:.2; } }
 @media (prefers-reduced-motion:reduce){ .yukle, .yukle__fide, .yukle__k, .yukle__nokta i{ animation:none; opacity:1; } .yukle__k1, .yukle__k2{ opacity:0; } }
+
+/* Rıhtım (kabuk.js rihtim): fareyle ekranın en altına inince halkanın yerleri alttan çıkar; imlece yakın simge büyür (--b), bulunduğun yerin altında nokta. */
+.rihtim{ position:fixed; left:50%; bottom:14px; z-index:10; display:flex; align-items:flex-end; gap:6px; padding:8px 10px; border-radius:22px;
+  background:color-mix(in srgb, var(--yuzey) 80%, transparent); -webkit-backdrop-filter:blur(16px) saturate(1.3); backdrop-filter:blur(16px) saturate(1.3);
+  box-shadow:inset 0 0 0 1px var(--cizgi), 0 18px 40px -16px #00000066;
+  transform:translate(-50%, calc(100% + 24px)); opacity:0; transition:transform calc(var(--sure) * 2.6) var(--akis), opacity calc(var(--sure) * 1.5) var(--akis); }
+.rihtim--acik{ transform:translate(-50%, 0); opacity:1; }
+.rihtim__oge{ position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; width:56px; color:var(--yazi); text-decoration:none; }
+.rihtim__simge{ display:grid; place-items:center; width:44px; height:44px; border-radius:14px; background:var(--yuzey-2); box-shadow:inset 0 0 0 1px var(--cizgi);
+  transform:scale(var(--b, 1)); transform-origin:50% 100%; transition:transform calc(var(--sure) * 1.2) var(--akis), background var(--sure) ease; }
+.rihtim__simge svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.rihtim__oge:hover .rihtim__simge, .rihtim__oge:focus-visible .rihtim__simge{ background:color-mix(in srgb, var(--vurgu) 16%, var(--yuzey-2)); color:var(--vurgu); }
+.rihtim__ad{ font-size:.7rem; font-weight:600; color:var(--soluk); white-space:nowrap; opacity:0; transform:translateY(-2px); transition:opacity var(--sure) ease, transform var(--sure) ease; }
+.rihtim__oge:hover .rihtim__ad, .rihtim__oge:focus-visible .rihtim__ad, .rihtim__oge--burada .rihtim__ad{ opacity:1; transform:none; }
+.rihtim__oge--burada::after{ content:""; position:absolute; bottom:-6px; width:4px; height:4px; border-radius:50%; background:var(--vurgu); }
+.rihtim__oge:active .rihtim__simge{ transform:scale(calc(var(--b, 1) * .92)); }
+@media (hover:none), (pointer:coarse){ .rihtim{ display:none; } }
+@media print{ .rihtim{ display:none; } }
+/* Yerler halkası, kabuğun dokunuşu (bilesen.css taşının üstüne): buzlu cam disk, taşlar yaylanarak sırayla açılır (--i),
+   merkez seçilen yöne bakan oka döner (--sa), seçilen taş biraz dışarı çıkar. Sağ tıkla da açılır (kabuk.js sagTik). */
+#halka::before{ border-radius:50%; background:color-mix(in srgb, var(--yuzey-2) 78%, transparent); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3);
+  box-shadow:inset 0 0 0 1px var(--cizgi), 0 24px 60px -20px #00000059; transform:translate(-50%,-50%) scale(.6);
+  transition:transform calc(var(--sure) * 2.4) var(--yay), opacity calc(var(--sure) * 1.5) ease; }
+#halka.b-halka--acik::before{ transform:translate(-50%,-50%); opacity:1; }
+#halka .b-halka__merkez{ left:-7px; top:-7px; width:14px; height:14px; border-radius:50%; box-shadow:0 0 0 5px color-mix(in srgb, var(--vurgu) 18%, transparent);
+  transition:transform calc(var(--sure) * 1.5) var(--akis), border-radius calc(var(--sure) * 1.5) ease; }
+#halka.b-halka--secili .b-halka__merkez{ border-radius:50% 50% 50% 0; transform:rotate(calc(var(--sa, 0deg) + 135deg)); }
+#halka .b-halka__oge{ padding:0 14px; border-radius:999px;
+  transition:transform calc(var(--sure) * 2.6) var(--yay), opacity calc(var(--sure) * 1.5) ease, background var(--sure) ease, color var(--sure) ease;
+  transition-delay:calc(var(--sure) * var(--i, 0) * .25); }
+#halka .b-halka__oge svg{ width:18px; height:18px; margin-right:8px; vertical-align:-3px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+#halka.b-halka--acik .b-halka__oge--secili{ transform:translate(-50%,-50%) rotate(var(--a)) translateX(calc(var(--r,120px) + 6px)) rotate(calc(-1 * var(--a))) scale(1.08); transition-delay:0s; }
