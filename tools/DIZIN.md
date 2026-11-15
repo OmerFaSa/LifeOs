@@ -44,6 +44,7 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 - `onay_uygula.py` — Kabuktaki «Onayları dosya olarak al» ile inen sahip onaylarını `alan/<id>/asama-N.json` öğelerine (`durum`, `onaylayan`, `onayTarihi`) yazar; kimlik birebir eşleşir, bilinmeyen raporlanır; kuru koşu varsayılan, `--yaz` ile yazar, dosya biçimi korunur; elle koşulur.
 
 ## Ölçüm
+- `kopru_olcum.py` — King köprülerinin gecikme (medyan/p95), kuyruk ve hata sayaçlarını çalışan tek kapıdan salt okur tablo olarak yazar; `--json`, `--selftest`.
 - `king_olcum.py` — King dil modeli ölçümü: ilk söz, toplam süre, jeton ve ses başlama gecikmesi; canlı HKM'ye dokunmaz.
 - `hafiza_olcum.py` — HKM hafıza aramasını kök eşlemesi ve gömme ile karşılaştırıp süre ve doğruluk ölçer, optimizasyonda koşulur.
 - `hafiza_olcum_kume.json` — Hafıza arama ölçüm aracı için 24 adet Türkçe soru ve bilgi çifti içeren test kümesi verisidir.
