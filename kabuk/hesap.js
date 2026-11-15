@@ -137,12 +137,13 @@
   }
   // Kimlik kartı: profil rengiyle baş harf, ad, kullanıcı adı, rol / bu cihaz / bağlantı yeri; çıkış sağda (onayı kartın altında).
   function kimlikHtml(s, B, bu) {
-    var o = s.oturum, ad = String(o.gorunen_ad || o.ad), renk = RENK[o.renk] ? 'var(--r-' + RENK[o.renk] + ')' : 'var(--yazi-2)';
-    var pullar = [o.rol === 'admin' ? 'Admin' : 'Üye', bu ? String(bu.cihaz_ad || 'Cihaz') : '', s.sunucu && s.sunucu.yerel ? 'Bu bilgisayar' : 'Uzaktan bağlı'].filter(Boolean);
-    return '<div class="hs-kimlik" style="--hs-renk:' + renk + '"><span class="hs-kimlik__harf" aria-hidden="true">' + kac(ad.charAt(0).toLocaleUpperCase('tr')) + '</span>' +
-      '<div class="hs-kimlik__metin"><p class="hs-kimlik__ad">' + kac(ad) + '</p><p class="hs-kimlik__alt">@' + kac(o.ad) + '</p>' +
-      '<p class="hs-kimlik__pullar">' + pullar.map(function (x) { return B.pul({ metin: x }); }).join('') + '</p></div>' +
-      (s.cikisSor ? '' : B.dugme({ metin: 'Çıkış yap', tur: 'sade', veri: { 'hs-ac': 'cikis-sor' } })) + '</div>' +
+    var o = s.oturum, ad = String(o.gorunen_ad || o.ad);
+    var yer = [bu ? String(bu.cihaz_ad || 'Cihaz') : '', s.sunucu && s.sunucu.yerel ? 'bu bilgisayar' : 'uzaktan bağlı'].filter(Boolean).join(' · ');
+    var ozet = [['Rol', o.rol === 'admin' ? 'Admin' : 'Üye'], ['Cihaz', s.cihazlar ? String(s.cihazlar.length) : '…']];
+    return '<div class="hs-kimlik"><span class="hs-kimlik__harf" aria-hidden="true">' + kac(ad.charAt(0).toLocaleUpperCase('tr')) + '</span>' +
+      '<div class="hs-kimlik__metin"><p class="hs-kimlik__ad">' + kac(ad) + '</p><p class="hs-kimlik__alt">@' + kac(o.ad) + (yer ? ' · ' + kac(yer) : '') + '</p></div>' +
+      '<dl class="hs-kimlik__ozet">' + ozet.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + kac(x[1]) + '</dd></div>'; }).join('') + '</dl>' +
+      (s.cikisSor ? '' : B.dugme({ metin: 'Çıkış yap', tur: 'ikincil', veri: { 'hs-ac': 'cikis-sor' } })) + '</div>' +
       (s.cikisSor ? B.uyari({ tur: 'dikkat', metin: 'Bu cihazda oturum kapansın mı?', alt: 'Kayıtların bu cihazda kalır; eşitleme için yeniden giriş gerekir.',
         eylem: [{ metin: 'Çıkış yap', tur: 'ana', veri: { 'hs-ac': 'cikis' } }, { metin: 'Vazgeç', tur: 'sade', veri: { 'hs-ac': 'vazgec' } }] }) : '');
   }
@@ -156,10 +157,11 @@
     if (!s.oturum) return B.baslik({ metin: 'Hesap', alt: 'Oturumun, bağlı cihazların ve sistemin güncelliği.' }) +
       B.bolum({ baslik: 'Oturum', id: 'hs-oturum', govde: gir ? gir.giris(bag, B) : oturumHtml(s, B, bu) }) + guncel;
     var sekme = SEKME[s.sekme] ? s.sekme : 'genel';
-    return B.baslik({ metin: 'Hesap' }) + kimlikHtml(s, B, bu) +
-      '<div class="hs-sekmeler">' + B.tercih({ ad: 'Hesap bölümleri', secenekler: SEKME, deger: sekme, veri: { 'hs-sekme': '1' } }) + '</div>' +
+    var renk = RENK[s.oturum.renk] ? 'var(--r-' + RENK[s.oturum.renk] + ')' : 'var(--yazi-2)';
+    return '<div class="hs" style="--hs-renk:' + renk + '">' + B.baslik({ metin: 'Hesap' }) + kimlikHtml(s, B, bu) +
+      '<div class="hs-duzen"><div class="hs-sekmeler">' + B.tercih({ ad: 'Hesap bölümleri', secenekler: SEKME, deger: sekme, veri: { 'hs-sekme': '1' } }) + '</div>' +
       '<div class="hs-govde" data-sekme="' + sekme + '">' + grupla(cihazlarHtml(s, B, simdi) +
-        u.filter(function (x) { return x.ciz && !x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join('') + guncel) + '</div>';
+        u.filter(function (x) { return x.ciz && !x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join('') + guncel) + '</div></div></div>';
   }
 
   var Hesap = { sonMetni: sonMetni, kalanMetni: kalanMetni, kodYaz: kodYaz, bagAdresi: bagAdresi, hataMetni: hataMetni, cihazSatiri: cihazSatiri,
@@ -262,7 +264,7 @@
     }
     if (!s.yuk) yukle();
     s.sekme = sekmeOku(location.hash);
-    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="hesap">' + ekran(s, B, Date.now()) + '</div>';
+    return I.ust(I.kirinti(yer)) + '<div class="govde' + (s.oturum ? ' govde--genis' : '') + '" data-arac="hesap">' + ekran(s, B, Date.now()) + '</div>';
   }
   Kabuk.ek = Kabuk.ek || {};
   Kabuk.ek.hesap = sayfa;
