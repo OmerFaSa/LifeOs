@@ -309,18 +309,37 @@
 
   // Bugün: «Onay bekleyen N ders» tek satırı, yalnız N > 0 iken. Sayı bütün alanların içeriğinden sayılır; yüklenmemiş alan
   // varsa önce boş yer tutucu çizilir, içerik gelince yalnız o satır yerine konur (sayfa yeniden çizilmez).
-  function bugunSatiri(I) {
-    var n = bekleyenSayisi(I);
+  function bugunSatiri(I, n) {
+    if (n == null) n = bekleyenSayisi(I);
     return n ? B.uyari({ tur: 'bilgi', veri: { 'onay-bekleyen': String(n) }, simge: 'onay', renk: 'mavi', metin: 'Onay bekleyen ' + n + ' ders',
       alt: 'Taslak dersler onaylanınca tekrara girer.', eylem: { metin: 'İncele', tur: 'sade', href: '#/onay' } }) : '';
+  }
+  // Yüklenmemiş alanlar sunucunun özetinden sayılır (/api/kabuk/taslak: dosyada onaylı olmayan ders kimlikleri, yerel onay kaydı
+  // düşülür); satır için yirmi alan paketi (4,5 MB) indirilmez. Özet yoksa (file://, eski sunucu) bütün alanlar yüklenip sayılır.
+  var taslakOzet = null, taslakIstek = null;
+  function ozetSayisi(I, oz) {
+    var onay = oku(I.depo);
+    return I.tasinanlar().reduce(function (t, a) {
+      if (I.al(a.id)) return t + asamalar(I, a.id).reduce(function (s, y) { return s + sayim(y.veri).taslak; }, 0);
+      for (var n = 1; n <= (a.asama || 1) && Array.isArray(oz[a.id + '/' + n]); n++) {
+        t += oz[a.id + '/' + n].filter(function (id) { return !gecerli(onay[anahtar(a.id, n, id)]); }).length;
+      }
+      return t;
+    }, 0);
   }
   Kabuk.onayBugun = function () {
     var I = ic(); if (!I) return '';
     var eksik = I.tasinanlar().filter(function (a) { return !I.al(a.id); });
     if (!eksik.length) return bugunSatiri(I);
-    Promise.all(eksik.map(function (a) { return I.alanYukle(a.id); })).then(function () {
-      var el = d.querySelector('[data-onay-yer]'); if (el) el.outerHTML = bugunSatiri(I).replace('class="b-uyari ', 'class="b-uyari b-uyari--satir '); // Bugün'ün bekleyenler kartında satır biçimi (bilesen.js karsilama)
+    if (taslakOzet) return bugunSatiri(I, ozetSayisi(I, taslakOzet));
+    function yerlestir(n) {
+      var el = d.querySelector('[data-onay-yer]'); if (el) el.outerHTML = bugunSatiri(I, n).replace('class="b-uyari ', 'class="b-uyari b-uyari--satir '); // Bugün'ün bekleyenler kartında satır biçimi (bilesen.js karsilama)
       if (I.ozetYenile) I.ozetYenile(); // selamın altındaki cümle bekleyen işi de saysın
+    }
+    taslakIstek = taslakIstek || (location.protocol !== 'file:' && kok.fetch ? kok.fetch('/api/kabuk/taslak').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) : Promise.resolve(null));
+    taslakIstek.then(function (oz) {
+      if (oz && typeof oz === 'object' && !Array.isArray(oz)) { taslakOzet = oz; return yerlestir(ozetSayisi(I, oz)); }
+      return Promise.all(eksik.map(function (a) { return I.alanYukle(a.id); })).then(function () { yerlestir(bekleyenSayisi(I)); });
     });
     return '<div data-onay-yer hidden></div>';
   };
