@@ -200,6 +200,7 @@
 
 import base64
 import contextlib
+import errno
 import hashlib
 import hmac
 import json
@@ -3080,6 +3081,8 @@ def isle(h):
     except Hata as e:
         return _cevap(h, e.kod, {"hata": e.mesaj})
     except (sqlite3.Error, OSError) as e:
+        if "disk is full" in str(e) or getattr(e, "errno", None) == errno.ENOSPC:
+            return _cevap(h, 507, {"hata": "Diskte yer kalmadı; değişiklik kaydedilmedi, önceki kayıtlar yerinde. Yer açıp yeniden dene."})
         return _cevap(h, 503, {"hata": "Hesap deposu açılamadı: %s" % e})
 
 

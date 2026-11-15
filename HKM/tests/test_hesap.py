@@ -12,6 +12,7 @@ HTTP sunucusuyla, gecici klasorde.
 import json
 import os
 import shutil
+import sqlite3
 import sys
 import tempfile
 import threading
@@ -912,6 +913,20 @@ def run():
             eq(s.iste("/api/hesap/cikis", {}, yetki)[0], 200)
             eq(s.iste("/api/hesap/ben", baslik={"Authorization": "Bearer " + j})[0], 401)
     test("HTTP: kurulum, eslesme basligi, jetonla esitleme, cikis", t_http_akis)
+
+    def t_http_disk_dolu():
+        with _Srv() as s:
+            eski = s.r.d.kurulum_gerekli
+            def dolu():
+                raise sqlite3.OperationalError("database or disk is full")
+            s.r.d.kurulum_gerekli = dolu
+            try:
+                kod, _, v = s.iste("/api/hesap/durum")
+            finally:
+                s.r.d.kurulum_gerekli = eski
+            eq(kod, 507)
+            ok("yer kalmadı" in v["hata"] and "açılamadı" not in v["hata"])
+    test("HTTP: disk dolunca «yer kalmadı» der (507), «açılamadı» demez", t_http_disk_dolu)
 
     def t_http_kabuk():
         import veri

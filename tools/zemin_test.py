@@ -6,6 +6,7 @@
 Sinar: yalniz iki yuva ve bes tur; tur basligi dosyanin ilk baytlariyla
 uyusmali; yeni dosya eskisini (baska uzantida olsa da) siler; ev agindan
 okuma ve yazma 403; ozel baslik olmadan yazma 403."""
+import errno
 import importlib.util
 import io
 import sys
@@ -103,6 +104,18 @@ with tempfile.TemporaryDirectory() as d:
     h.headers["Content-Length"] = "5000"
     Z.isle(h)
     bekle("yarida kalan yukleme eskisini bozmaz", h.kod == 400 and Z.bul("gece", d)[1] == "video/quicktime")
+
+    class DiskDolu:                      # imza okunur, sonra yazarken disk dolar (ENOSPC): yarim dosya kalmaz
+        ilk = [MP4[:16]]
+        def read(self, n=-1):
+            if self.ilk:
+                return self.ilk.pop()
+            raise OSError(errno.ENOSPC, "No space left on device")
+    h = Sahte("POST", "/api/zemin/gece", govde=MP4, tur="video/mp4")
+    h.rfile = DiskDolu()
+    Z.isle(h)
+    bekle("disk dolunca 507, yarim dosya kalmaz, eski dosya kalir", h.kod == 507 and "yer kalmadı" in h.wfile.getvalue().decode("utf-8")
+          and not list(Path(d).glob("*.yaziliyor")) and Z.bul("gece", d)[1] == "video/quicktime")
     h = Sahte("POST", "/api/zemin/gece", govde=PNG, tur="image/png")
     Z.isle(h)
     h = Sahte("DELETE", "/api/zemin/gece")

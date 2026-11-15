@@ -168,18 +168,7 @@ def ekle(ad, tur, okuyucu, boy, kok=None, simdi=None):
     os.makedirs(kok, exist_ok=True)
     pid = uuid.uuid4().hex[:12]
     gecici = os.path.join(kok, pid + ".yaziliyor")
-    kalan = boy - len(bas)
-    with open(gecici, "wb") as f:
-        f.write(bas)
-        while kalan > 0:
-            p = okuyucu.read(min(zemin.PARCA, kalan))
-            if not p:
-                break
-            f.write(p)
-            kalan -= len(p)
-    if kalan > 0:
-        os.remove(gecici)
-        raise ValueError((400, "Yükleme yarıda kaldı; yeniden dene."))
+    zemin.diske_akit(gecici, bas, okuyucu, boy)
     os.replace(gecici, os.path.join(kok, pid + uzanti))
     ad = re.sub(r"\s+", " ", re.sub(r"\.[A-Za-z0-9]{2,4}$", "", ad or "")).strip()[:120] or "Adsız parça"
     d = oku(kok)
