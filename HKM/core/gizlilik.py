@@ -24,6 +24,8 @@ ADLAR = {
     "genel": "genel durum cümleleri",
     "ilkeler": "kendi ilkelerin (Hayat Mottosu)",
     "hafiza": "hatırlananlar",
+    "ders": "açık dersin metni (alan içeriği)",
+    "lifeos": "LifeOS özeti (King süzgecinden; özel notlar hariç)",
     "bam_istegi": "BAM isteği (konu metni, web kaynakları; kişisel veri yok)",
     "sinama": "bağlantı sınaması",
     "fis_gorseli": "fiş fotoğrafı (yalnız «fiş» diye gönderdiğin ya da yüklediğin)",

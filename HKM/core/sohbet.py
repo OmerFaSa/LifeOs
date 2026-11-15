@@ -24,6 +24,9 @@
 """
 
 import datetime
+import importlib.util
+import json
+import os
 import re
 
 from core import (ai, arac, arastir, butce, cross, dil, eylem, iliski, manager, memory, models, motto, patron, program,
@@ -849,6 +852,118 @@ LIFEOS_BILGI = (
 
 # Konusma tarzi (King ··· menusu): samimi varsayilandir, talimat eklemez.
 USLUPLAR = ("samimi", "resmi", "kisa")
+# KIPLER (kabuk King sohbeti, 2026-11-16, sahibin istegi: «King ogretmen gibi dersi anlatsin ya da filozof gibi
+# kendini anlatsin»). Sabit talimattir: degisen baglamin ONUNE girer (sistem_metni ek).
+KIP_TALIMAT = {
+    "ortak": "",
+    "ogretmen": ("\n\nKİP: ÖĞRETMEN. Açık dersi ya da konuyu iyi bir öğretmen gibi ADIM ADIM anlat: her mesajda "
+                 "tek adım (kısa bir paragraf ya da üç-beş maddelik liste), sonunda anlayıp anlamadığını yoklayan TEK "
+                 "kısa soru sor ve cevabını bekle. Kişi cevap verince ilk kelimen «Doğru», «Kısmen doğru» ya da "
+                 "«Yanlış» olsun; yanlışı nazikçe düzelt, sonra sıradaki adıma geç. Ders metni verildiyse ona dayan; "
+                 "metinde olmayanı kesinmiş gibi söyleme. Kişi «devam» derse sıradaki adıma geç."),
+    "filozof": ("\n\nKİP: FİLOZOF. Konunun düşünürü olarak (ders bir filozofu anlatıyorsa o, birden çok düşünür varsa "
+                "en çok anılanı; düşünür yoksa konunun kendisi) BİRİNCİ TEKİL ŞAHISLA konuş: kim olduğunu, hangi "
+                "soruyu sorduğunu, neden öyle düşündüğünü kendi ağzından, kısa paragraflarla anlat; kişiye "
+                "düşündürücü bir soru yönelt ve onunla tartış. Rolde kalırken dürüst ol: ders metninde ya da "
+                "bilinen kaynaklarda olmayan bir sözü «söyledim» diye uydurma; bilinmeyen yerde «bunu bilmiyoruz» de."),
+}
+
+
+def kip_of(v):
+    return v if v in KIP_TALIMAT else "ortak"
+
+
+DERS_KIMLIK = re.compile(r"^([a-z]+)\.(\d{1,2})(?:\.\d{1,3}){1,3}$")
+DERS_HARF = 4000            # ders metninin modele giden tavani (harf)
+LIFEOS_HARF = 4500          # LifeOS blogunun tavani (king/baglam.py butcesi zaten jetonla sinirli)
+KOK = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _kirp(metin, n):
+    metin = str(metin or "").strip()
+    return metin if len(metin) <= n else metin[:n].rsplit(" ", 1)[0] + " … (kısaltıldı)"
+
+
+def ders_blogu(bulgu, sinir=DERS_HARF):
+    """Acik dersin modele giden blogu: ad, yeri, ozet, metin. Alistirma cevaplari ve kapi sorulari GITMEZ
+    (ustalik kapisi olcumdur). `bulgu`: king/mcp.py t_yol({ders}) ciktisi. Saf; test edilir."""
+    d = (bulgu or {}).get("ders") or {}
+    if not d.get("ad"):
+        return ""
+    yer = " › ".join(str(x) for x in (bulgu.get("asama"), bulgu.get("unite")) if x)
+    bas = ["Açık ders (kişi şu an bunu çalışıyor; anlatırken bu metne dayan):", "Ders: %s" % d["ad"]]
+    if yer:
+        bas.append("Yeri: " + yer)
+    if str(d.get("durum") or "").startswith("taslak"):
+        bas.append("Durum: taslak (henüz onaylanmadı; kesin bilgi gibi sunma)")
+    if d.get("ozet"):
+        bas.append("Özet: " + str(d["ozet"]).strip())
+    govde = "\n".join(str(x).strip() for x in (d.get("metin") or []) if str(x).strip())
+    kalan = sinir - len("\n".join(bas))
+    if govde and kalan > 200:
+        bas.append("Metin:\n" + _kirp(govde, kalan))
+    return "\n".join(bas)
+
+
+def lifeos_blogu(derleme, sinir=LIFEOS_HARF):
+    """king/baglam.py derle() sonucundan modele giden kisa blok: dilim basina tek satir. Saf; test edilir.
+    Notlar oraya Not motorunun King suzgecinden ve ozelsiz() kilidinden gecerek gelir; burada bir kilit daha:
+    ozel:true tasiyan parca yine atilir."""
+    dilimler = [d for d in ((derleme or {}).get("dilimler") or []) if d.get("veri") not in (None, [], {})]
+    if not dilimler:
+        return ""
+    satir = ["LifeOS'tan okunanlar (kod üretti; sayıyı buradan al, burada yoksa «veri yok» de):"]
+    for d in dilimler:
+        satir.append("- %s: %s" % (d.get("ne") or d.get("ad"),
+                                   json.dumps(_ozelsiz(d["veri"]), ensure_ascii=False, separators=(",", ":"))))
+    return _kirp("\n".join(satir), sinir)
+
+
+def _ozelsiz(x):
+    if isinstance(x, dict):
+        return {k: _ozelsiz(v) for k, v in x.items() if not (isinstance(v, dict) and v.get("ozel") is True)}
+    if isinstance(x, list):
+        return [_ozelsiz(v) for v in x if not (isinstance(v, dict) and v.get("ozel") is True)]
+    return x
+
+
+_KING = {}
+
+
+def _king(ad):
+    """king/<ad>.py (King cekirdegi; motorlar kopyalanmaz, cagrilir). king/ kendi kardes modullerini duz adla
+    yukler (import mcp), o yuzden klasoru yola eklenir."""
+    if ad not in _KING:
+        klasor = os.path.join(KOK, "king")
+        if klasor not in __import__("sys").path:
+            __import__("sys").path.append(klasor)
+        spec = importlib.util.spec_from_file_location("king_" + ad, os.path.join(klasor, ad + ".py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        _KING[ad] = m
+    return _KING[ad]
+
+
+def ders_oku(baglam_):
+    """Kabugun gonderdigi {tur:'ders', alan, id} -> ders blogu ya da "". Icerik alan/ JSON'undan king/mcp.py t_yol ile
+    okunur (istemcinin metnine guvenilmez: istem enjeksiyonunun en kisa yolu)."""
+    b = baglam_ if isinstance(baglam_, dict) else {}
+    m = DERS_KIMLIK.match(str(b.get("id") or ""))
+    if b.get("tur") != "ders" or not m or b.get("alan", m.group(1)) != m.group(1):
+        return ""
+    try:
+        return ders_blogu(_king("mcp").t_yol({"alan": m.group(1), "ders": b["id"]}))
+    except Exception:                           # noqa: BLE001 — ders yoksa ya da okunamadiysa baglamsiz konusulur
+        return ""
+
+
+def lifeos_oku(metin):
+    try:
+        return lifeos_blogu(_king("baglam").derle(metin))
+    except Exception:                           # noqa: BLE001 — tek depo yoksa King yine konusur, uydurmaz
+        return ""
+
+
 USLUP_TALIMAT = {
     "resmi": "\n\nBu konuşmada resmi ve saygılı bir dil kullan; kullanıcıya «siz» diye hitap et.",
     "kisa": "\n\nBu konuşmada çok kısa ve öz cevap ver: bir iki cümle.",
@@ -1204,20 +1319,23 @@ def _k2_ek(con, metin, r, kanal, hedef, modul, gorevli):
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
           user="ben", transport=None, kayit=True, kanal="local", hedef=None,
           derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None, dongu=None,
-          iptal=None):
+          iptal=None, kip=None, ders="", lifeos=False):
     """Bir mesaja cevap (bkz. `_konus`); King'in cevabina söz ve soru
     cevabi notu eklenir (`_k2_ek`)."""
     r = _konus(con, cfg, metin, date, gorevli=gorevli, gecmis=gecmis, th=th, user=user, transport=transport,
                kayit=kayit, kanal=kanal, hedef=hedef, derinlik=derinlik, uslup=uslup, akis=akis,
-               araclar=araclar, arac_sonuclari=arac_sonuclari, modul=modul, dongu=dongu, iptal=iptal)
+               araclar=araclar, arac_sonuclari=arac_sonuclari, modul=modul, dongu=dongu, iptal=iptal,
+               kip=kip, ders=ders, lifeos=lifeos)
     return _k2_ek(con, metin, r, kanal, hedef, modul, gorevli)
 
 
 def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
            user="ben", transport=None, kayit=True, kanal="local", hedef=None,
            derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None,
-           dongu=None, iptal=None):
+           dongu=None, iptal=None, kip=None, ders="", lifeos=False):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
+    `kip`: ortak | ogretmen | filozof (KIP_TALIMAT). `ders`: acik dersin blogu (ders_oku). `lifeos`: King
+    cekirdeginin derledigi LifeOS blogu eklensin mi (yeni kabuk; king/baglam.py, ozel notlar suzgecte).
     `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
     `araclar`: istemcinin arac katalogu (core/arac.py); model bir arac
     secerse cevap mode=arac ve DOGRULANMIS `cagrilar` tasir, araci istemci
@@ -1307,6 +1425,14 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     if modul in BOLUM_AD:
         bg += ("\nKullanıcı şu an %s sayfasından yazıyor; belirsiz isteği bu bölümle ilgili anla, "
                "«hangi bölüm» diye sorma." % BOLUM_AD[modul])
+    if ders:
+        veri.add("ders")
+        bg += "\n" + ders
+    lb = lifeos_oku(metin) if lifeos else ""
+    if lb:
+        veri.add("lifeos")
+        bg += "\n" + lb
+    kip = kip_of(kip)
     # Hafiza (KING-4 B): ilgi gommeyle olculur, King'e ilgili «olanlar» da girer;
     # rol butcesinin beste biri asilmaz (core/ai.py butceye_sigdir sistemi kirpmaz).
     hbutce = ai.baglam_butcesi(rol) // 5
@@ -1325,7 +1451,7 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     denetim = "genel" if sonuclar is None and not sistem_konusu(metin) else "olcum"
     ek_sabit = ((HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
                 + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
-                + USLUP_TALIMAT.get(uslup_of(uslup), ""))
+                + USLUP_TALIMAT.get(uslup_of(uslup), "") + KIP_TALIMAT[kip])
     sistem = sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest, ek=ek_sabit + (
         arac.SONUC_TALIMATI + (arac.DONGU_TALIMATI if devam and aracli else "") if sonuclar
         else ARAC_TALIMATI if aracli and sonuclar is None else ""))
@@ -1342,7 +1468,7 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     if sonuclar is None and HIS_RE.search(str(metin or "")):
         ilk_tur = arac_turu = False
         sistem = aracsiz_sistem + HIS_TALIMAT
-    elif sonuclar is None and OGRETMEN_RE.search(str(metin or "")):
+    elif sonuclar is None and kip != "ogretmen" and OGRETMEN_RE.search(str(metin or "")):
         sistem = sistem + OGRETMEN_TALIMAT
         aracsiz_sistem = aracsiz_sistem + OGRETMEN_TALIMAT
     r = None

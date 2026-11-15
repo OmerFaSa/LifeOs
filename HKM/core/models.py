@@ -123,7 +123,8 @@ PROVIDERS = {
     "antigravity": {
         "label": "Antigravity (anahtarsız, uygulama açıkken)",
         "base": "", "probe": "", "key_header": "", "kopru": True,
-        "models": ["flash", "flash_lite", "pro"],
+        # Ilk model varsayilandir (core/kopru.py AG_VARSAYILAN); kimlik tam yazilir, takma ad flash'a gider.
+        "models": ["gemini-4-hydrogen-medium", "gemini-4-hydrogen-high", "gemini-4-hydrogen-low"],
     },
     "claude": {
         "label": "Claude Code (anahtarsız, claude -p)",

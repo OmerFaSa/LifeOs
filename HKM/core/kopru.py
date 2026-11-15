@@ -18,8 +18,17 @@
    kuyruk; kuyrukta bekleyen sure sinirini asarsa cagri «kuyruk dolu» der.
    Gecici hata bir kez yeniden denenir; kapali ve kota yeniden denenmez.
    Olcum: istek, basari, hata, kapali, zaman asimi, kuyruk; gecikme (ms).
+
+   Model (2026-11-16): Antigravity varsayilani gemini-4-hydrogen-medium. agentapi gecersiz kimligi SESSIZCE
+   flash'a dusurur; kimligin tutundugu get-conversation-metadata'daki planModel'den olculdu (flash M322,
+   hydrogen high/medium/low M525/M526/M527; belgeler/ekip/sadelesme/tur-20261116/king.md).
+
+   Sureklilik: daemon bir sohbet oturumu verirse (OTURUM) Antigravity ayni konusmaya send-message ile devam
+   eder; yalniz yeni mesaj gider. Claude'a gecmis her seferinde gider, butceli (gecmis_butcele).
 """
 
+import contextvars
+import hashlib
 import json
 import os
 import re
@@ -35,7 +44,7 @@ SESSIZ = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 SAGLAYICI = {
     # es: ayni anda en cok cagri; kuyruk: bekleyebilecek en cok cagri; sure: tek cagrinin tavani (sn).
     "antigravity": {"ad": "Antigravity", "es": 2, "kuyruk": 4, "sure": 180,
-                    "modeller": ["flash", "flash_lite", "pro"]},
+                    "modeller": ["gemini-4-hydrogen-medium", "gemini-4-hydrogen-high", "gemini-4-hydrogen-low"]},
     "claude": {"ad": "Claude (Claude Code)", "es": 2, "kuyruk": 4, "sure": 180,
                "modeller": ["sonnet", "haiku", "opus"]},
 }
@@ -43,6 +52,17 @@ DENEME = 2                  # ilk cagri + bir yeniden deneme (yalniz gecici hata
 BEKLE_SN = 1.0              # yeniden denemeden once
 HAL_SN = 30                 # «acik mi» sorusu bu kadar onbelleklenir
 EN_COK_ISTEM = 24000        # Windows komut satiri siniri 32k; istem bundan uzunsa bastan kirpilir
+AG_VARSAYILAN = "gemini-4-hydrogen-medium"
+# Eski takma adlar: «pro» ve «flash_lite» agentapi'de flash'a gidiyordu (pro==flash olcumu); artik hydrogen kademesi.
+# «flash» da hydrogen'e gider: sahibin istegi 2026-11-16 «Antigravity'de model olarak hydrogen» (Merkez atamasi eskiden flash idi).
+AG_ESKI = {"": AG_VARSAYILAN, "flash": AG_VARSAYILAN, "pro": "gemini-4-hydrogen-high", "flash_lite": "gemini-4-hydrogen-low"}
+TAM_TUR = 6                 # gecmiste sondan bu kadar mesaj tam gider; eskiler kisaltilir
+KISA_HARF = 280             # eski mesajin kisaltilmis uzunlugu
+GECMIS_BUTCE = 14000        # gecmisin toplam harf butcesi (istemin geri kalani sistem metnidir)
+AG_OTURUM_SN = 6 * 3600     # bu kadar dokunulmayan Antigravity konusmasi unutulur
+# Istek basina sohbet oturumu (daemon /api/chat koyar: kabugun «baslangic» + kip + ders). Bos: sureklilik yok.
+OTURUM = contextvars.ContextVar("kopru_oturum", default="")
+_AG_KONUSMA = {}            # oturum anahtari -> {kimlik, soru, t}; yalniz bellekte
 BEYIN = Path(os.environ.get("LIFEOS_AG_BEYIN", Path.home() / ".gemini/antigravity/brain"))
 
 
@@ -146,20 +166,43 @@ def hal(ad, tazele=False):
 
 # ------------------------------------------------------------ istem
 
+def _kisalt(metin, n):
+    metin = " ".join(str(metin or "").split())
+    return metin if len(metin) <= n else metin[:n].rsplit(" ", 1)[0] + " …"
+
+
+def gecmis_butcele(mesajlar, tam=TAM_TUR, kisa=KISA_HARF, butce=GECMIS_BUTCE):
+    """Uzun gecmiste baglam butcesi. Saf; test edilir.
+
+    Son `tam` mesaj (son kullanici mesaji dahil) oldugu gibi; daha eskiler `kisa` harfe kisaltilir. Toplam `butce`yi
+    asarsa en eskiden atilir; son mesaj hic atilmaz (tek basina butceyi asarsa istem() bastan kirpar).
+    Doner: (mesajlar, kisaltilan, atilan)."""
+    l = [dict(m) for m in (mesajlar or []) if str(m.get("content") or "").strip()]
+    kisaltilan = 0
+    for i, m in enumerate(l[:-tam] if tam else l):
+        k = _kisalt(m["content"], kisa)
+        if k != str(m["content"]).strip():
+            kisaltilan += 1
+        l[i] = dict(m, content=k)
+    atilan = 0
+    while len(l) > 1 and sum(len(str(m["content"])) for m in l) > butce:
+        l.pop(0)
+        atilan += 1
+    return l, kisaltilan, atilan
+
+
 def istem(sistem, mesajlar, aracsiz=False):
-    """Sistem metni ve gecmis tek metne. Son mesaj kullanicinindir."""
+    """Sistem metni ve gecmis tek metne. Son mesaj kullanicinindir; gecmis butcelidir (gecmis_butcele)."""
     parca = []
     if aracsiz:
         parca.append("Hiçbir araç kullanma: dosya okuma, yazma, komut çalıştırma, web araması yok. "
                      "Yalnız düz metinle cevap ver.")
     if sistem:
         parca.append(str(sistem).strip())
-    gecmis = []
-    for m in mesajlar or []:
-        kim = "Kullanıcı" if m.get("role") == "user" else "King"
-        gecmis.append("%s: %s" % (kim, str(m.get("content") or "").strip()))
+    l, kisaltilan, atilan = gecmis_butcele(mesajlar)
+    gecmis = ["%s: %s" % ("Kullanıcı" if m.get("role") == "user" else "King", str(m["content"]).strip()) for m in l]
     if gecmis:
-        parca.append("Konuşma:\n" + "\n\n".join(gecmis))
+        parca.append("Konuşma%s:\n" % (" (eski turlar kısaltıldı)" if kisaltilan or atilan else "") + "\n\n".join(gecmis))
     parca.append("Son kullanıcı mesajına King olarak cevap ver; yalnız cevabı yaz.")
     metin = "\n\n".join(parca)
     return metin[-EN_COK_ISTEM:] if len(metin) > EN_COK_ISTEM else metin
@@ -250,26 +293,72 @@ def _dokum(kimlik):
     return out
 
 
+def ag_model(model):
+    """Antigravity model kimligi: bos ve eski takma adlar hydrogen'e (AG_ESKI), digerleri oldugu gibi. Saf."""
+    return AG_ESKI.get(str(model or ""), str(model))
+
+
+def ag_oturum_anahtari(oturum, model):
+    """Bellekteki konusma anahtari: kabugun oturumu + model (model degisirse yeni konusma). Saf."""
+    return hashlib.sha1(("%s|%s" % (oturum, ag_model(model))).encode("utf-8")).hexdigest()[:16] if oturum else ""
+
+
+def ag_devam_mi(kayit, mesajlar, simdi=None):
+    """Kayitli Antigravity konusmasina devam edilebilir mi. Saf; test edilir.
+
+    Kosul: kayit taze ve gecmisin sondan ucuncu mesaji (son King cevabindan onceki kullanici mesaji) o konusmaya
+    en son gonderdigimiz soru. Arada baska bir saglayici cevap verdiyse ya da gecmis sifirlandiysa tutmaz: yeni
+    konusma tam (butceli) gecmisle acilir; boylece Antigravity'nin hafizasi ambardaki gecmisten sapmaz."""
+    if not kayit or (simdi if simdi is not None else time.monotonic()) - kayit.get("t", 0) > AG_OTURUM_SN:
+        return False
+    l = [m for m in (mesajlar or []) if str(m.get("content") or "").strip()]
+    return (len(l) >= 3 and l[-1].get("role") == "user" and l[-2].get("role") == "assistant"
+            and l[-3].get("role") == "user" and str(l[-3]["content"]).strip() == kayit.get("soru"))
+
+
+DEVAM_ONEK = "(Araç kullanma; King olarak yalnız düz metinle cevap ver.)\n\n"
+
+
 def _antigravity(model, sistem, mesajlar, sure, iptal=None):
     s = _ag_sunucu()
     if not s:
         raise Kapali("Antigravity açık değil; arka planda açık olması yeter.")
     son_an = time.monotonic() + sure
-    y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + (model or "flash"), "--title=LifeOS King",
-                               istem(sistem, mesajlar, aracsiz=True)], min(60, sure))
-    kimlik = ((y.get("response") or {}).get("newConversation") or {}).get("conversationId")
+    anahtar = ag_oturum_anahtari(OTURUM.get(), model)
+    kayit = _AG_KONUSMA.get(anahtar) if anahtar else None
+    soru = str((mesajlar or [{}])[-1].get("content") or "").strip()
+    kimlik, bas, y = None, 0, {}
+    if ag_devam_mi(kayit, mesajlar):
+        # Ayni konusmaya devam: yalniz yeni mesaj gider; cevap dokumun bu noktadan sonrasinda aranir
+        # (oncekinin bitmis cevabi yeni cevap sanilmasin).
+        bas = len(_dokum(kayit["kimlik"]))
+        y = _agentapi(s[0], s[1], ["send-message", kayit["kimlik"], DEVAM_ONEK + soru], min(60, sure))
+        if (y.get("response") or {}).get("sendMessage"):
+            kimlik = kayit["kimlik"]
+    if not kimlik:
+        bas = 0
+        y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + ag_model(model), "--title=LifeOS King",
+                                   istem(sistem, mesajlar, aracsiz=True)], min(60, sure))
+        kimlik = ((y.get("response") or {}).get("newConversation") or {}).get("conversationId")
     if not kimlik:
         _ag_sunucu(tazele=True)         # sunucu kapanmis ya da port degismis olabilir
         raise Gecici("Antigravity konuşma açmadı: %s" % str(y.get("error") or "kimlik dönmedi")[:120])
+    if anahtar:
+        _AG_KONUSMA.pop(anahtar, None)  # cevap gelmeden ikinci istek gelirse yarim konusmaya devam edilmez
     while time.monotonic() < son_an:
         if callable(iptal) and iptal():
             raise TimeoutError("istemci gitti")
-        bitti, metin, hata = ag_cevap(_dokum(kimlik))
+        bitti, metin, hata = ag_cevap(_dokum(kimlik)[bas:])
         if bitti:
             if hata:
                 if KOTA_RE.search(hata):
                     raise RuntimeError("HTTP 429 — Antigravity kotası: %s" % hata[:160])
                 raise Gecici("Antigravity: %s" % hata)
+            if anahtar:
+                simdi = time.monotonic()
+                for k in [k for k, v in _AG_KONUSMA.items() if simdi - v["t"] > AG_OTURUM_SN]:
+                    del _AG_KONUSMA[k]
+                _AG_KONUSMA[anahtar] = {"kimlik": kimlik, "soru": soru, "t": simdi}
             return metin, None, None, False
         time.sleep(0.5)
     raise TimeoutError("Antigravity %d sn içinde cevap vermedi" % sure)

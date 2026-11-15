@@ -1740,6 +1740,16 @@ class Handler(BaseHTTPRequestHandler):
                 ek["arac_sonuclari"] = govde["arac_sonuclari"]
             if isinstance((govde or {}).get("dongu"), dict):
                 ek["dongu"] = govde["dongu"]
+            # Kabugun King sohbeti (kabuk/king-sohbet.js): kip, acik dersin baglami (icerigi sunucu okur) ve LifeOS
+            # blogu. Antigravity ayni sohbet oturumunda ayni konusmaya devam eder (core/kopru.py OTURUM).
+            if "kip" in (govde or {}):
+                ek["kip"] = sohbet.kip_of(govde.get("kip"))
+                ek["ders"] = sohbet.ders_oku(govde.get("baglam"))
+                ek["lifeos"] = True
+            bas = (govde or {}).get("baslangic")
+            kopru.OTURUM.set("%s|%s|%s" % (bas, ek.get("kip"), ((govde or {}).get("baglam") or {}).get("id", ""))
+                             if isinstance(bas, str) and _BASLANGIC_RE.match(bas)
+                             and isinstance((govde or {}).get("baglam") or {}, dict) else "")
             # Anahtarsiz kopru secimi (core/kopru.py) yalniz bu bilgisayardan gelen istekte: uzaktan gelen
             # istek buraya hesap.py soz 30 yoluyla (admin oturumu, 127.0.0.1'den iletilir) ulasir.
             secim = str((govde or {}).get("saglayici") or "")[:40]
@@ -2051,9 +2061,11 @@ def _sohbet_gecmisi(con, gorevli, baslangic=None):
     sohbet actiysa `baslangic` (yerel ISO zaman) verir: ondan onceki satirlar
     gitmez (kullanici, 2026-10-19: «yeni sohbet gercekten sifirlansin»).
     Kalici hafiza (onaylanan bilgiler) bundan etkilenmez; o ayri gider."""
-    onceki = patron.history(con, limit=40 if baslangic else 12, agent=gorevli)
+    # Uzun konusma (2026-11-16): yeni sohbette son 24 satir; eski turlari kopru kisaltir (kopru.gecmis_butcele),
+    # obur saglayicilarda ai.butceye_sigdir.
+    onceki = patron.history(con, limit=60 if baslangic else 12, agent=gorevli)
     if isinstance(baslangic, str) and _BASLANGIC_RE.match(baslangic):
-        onceki = [m for m in onceki if str(m.get("created_at") or "") >= baslangic[:19]][-12:]
+        onceki = [m for m in onceki if str(m.get("created_at") or "") >= baslangic[:19]][-24:]
     return [{"role": ("user" if m["role"] == "user" else "assistant"), "content": m["text"]}
             for m in onceki if m["role"] in ("user", "manager")]
 
