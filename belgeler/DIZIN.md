@@ -55,6 +55,8 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Faz 7 · Hesap: yönetim, yedek, profil](ekip/sadelesme/faz7-hesap-yonetim.md) — Kabukta profil, kullanıcılar, yedekler, dışa aktarma ve hesabı silme (2026-11-15).
 - [Faz 8 · Taze, sade, profesyonel](ekip/sadelesme/faz8-taze-plan.md) — Üç paralel paket: görsel dil (P1), hareket (P2), optimizasyon (P3); ayrık dosya sahipliği, kapılar ve birleştirme sırası (2026-11-15).
 - [Faz 8 · Hız raporu (P3)](ekip/sadelesme/faz8-hiz-rapor.md) — Açılış ölçümü önce/sonra (`kalite/hiz_olcum.js`), üretim paketi, onay özeti, köprü ölçümü, CI hız bütçesi ve P1/P2'ye öneriler (2026-11-15).
+- [Faz 8 · Görsel dil raporu (P1)](ekip/sadelesme/faz8-gorsel-rapor.md) — Ölçü sistemi (yazı, boşluk, köşe, gölge jetonları), durum dili, iskelet yükleniyor, kontrast tablosu, sayfa cilası (2026-11-15).
+- [Faz 8 · Hareket raporu (P2)](ekip/sadelesme/faz8-hareket-rapor.md) — Hareket sözlüğü, paylaşılan öğe geçişi, mikro etkileşimler, hareket gezisi ve kare ölçümü önce/sonra (2026-11-15).
 - [Faz 3 · Süreli deneme ve aşamalar](ekip/sadelesme/faz3-deneme-asama.md) — Kabukta süreli deneme ve prova, net ve sonuç ekranı; aşama farkındalığı (eski 1. aşama kaydı bayt bayt korunur) (2026-11-13).
 - [Faz 7 · Tanışma ekranı](ekip/sadelesme/faz7-tanisma.md) — Kabukta dil modelsiz tanışma görüşmesi: kural tablosundan sorular, desenle anlaşılanlar, onaysız yazım yok, başlangıç önerisi (2026-11-13).
 - [Faz 1 · AYS konu durumu](ekip/sadelesme/faz1-yol-konu-durumu.md) — Göçten önceki son sahipsiz kayıt: AYS konu durumu Yol motorunda; taşınanlar, taşınamayanlar (2026-11-13).

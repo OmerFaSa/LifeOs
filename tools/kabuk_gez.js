@@ -423,7 +423,7 @@ async function goruntu(p, ad, sec = {}) {
     // ---- Plan ----
     await p.goto(T + '/kabuk/#/motor/plan');
     await p.waitForSelector('[data-arac="plan"]');
-    dene('plan: boş zaman yokken önce onu ister', /Önce aşağıya/.test(await p.textContent('[data-arac="plan"]')) && (await p.locator('[data-arac-ac="plan-kur"]').count()) === 0);
+    dene('plan: boş zaman yokken önce onu ister', /Önce boş zamanını yaz/.test(await p.textContent('[data-arac="plan"]')) && (await p.locator('[data-arac-ac="plan-kur"]').count()) === 0);
     await p.fill('form[data-plan="aralik"] input[name=bas]', '12:00');
     await p.fill('form[data-plan="aralik"] input[name=bit]', '09:00');
     await p.click('form[data-plan="aralik"] button[type=submit]');
