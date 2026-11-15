@@ -414,10 +414,27 @@
     var menu = '<nav class="b-gezinme ayar-menu" aria-label="Ayar grupları">' + A.GRUPLAR.map(function (g) {
       return '<a class="b-gezinme__oge" href="#/ayarlar?grup-' + g.id + '" data-grup="' + g.id + '"><svg aria-hidden="true"><use href="#i-' + (AYAR_SIMGE[g.id] || 'ayar') + '"/></svg>' + kac(g.ad) + '</a>';
     }).join('') + '</nav>';
-    return ust(kirinti(yer)) + '<div class="govde govde--genis ayarlar">' + B.baslik({ metin: 'Ayarlar', alt: 'Değişiklikler hemen uygulanır.' }) + B.yanli({ taraf: 'sol',
+    var ara = '<div class="ayar-ara">' + B.alan({ ad: 'Ayarlarda ara', isim: 'ayarAra', tur: 'arama', yerTutucu: 'Ayar ara: tema, yazı boyu, ses, beden…', veri: { 'ayar-ara': '' } }) +
+      '<p class="soluk ayar-ara__yok" hidden>Bu sözcükle bir ayar yok.</p></div>';
+    return ust(kirinti(yer)) + '<div class="govde govde--genis ayarlar">' + B.baslik({ metin: 'Ayarlar', alt: 'Değişiklikler hemen uygulanır.' }) + ara + B.yanli({ taraf: 'sol',
       yan: menu,
       ana: [gruplar, B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }])] }) + '</div>';
   }
+  // Ayarlarda ara: satırın adı ve açıklamasında geçen sözcüğe göre süzer; eşleşmesi olmayan grup gizlenir (Türkçe küçük harf)
+  function ayarSuz(q) {
+    q = String(q || '').trim().toLocaleLowerCase('tr');
+    var bulunan = 0;
+    [].forEach.call(d.querySelectorAll('.ayarlar .b-bolum'), function (s) {
+      var gor = 0;
+      [].forEach.call(s.querySelectorAll('[data-ayar-satir]'), function (r) {
+        var e = !q || r.textContent.toLocaleLowerCase('tr').indexOf(q) >= 0;
+        r.hidden = !e; if (e) gor++;
+      });
+      s.hidden = !gor; bulunan += gor;
+    });
+    var y = d.querySelector('.ayar-ara__yok'); if (y) y.hidden = bulunan > 0;
+  }
+  d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('[data-ayar-ara]')) ayarSuz(e.target.value); });
   var AYAR_SIMGE = { gorunum: 'gunes', erisim: 'kisi', bildirim: 'saat', ses: 'gece', beden: 'saglik', hesap: 'onay' };
   var ayarGozcu = null;
   function ayarIzle() {
@@ -494,7 +511,7 @@
     return '<section class="sira" aria-labelledby="' + (yeni ? 'yer-baslik' : 'sira-baslik') + '"><p class="sira__ust">' + kac(ust) + '</p>' +
       '<h2 class="sira__baslik" id="' + (yeni ? 'yer-baslik' : 'sira-baslik') + '">' + kac(baslik) + '</h2>' + (ozet ? '<p class="sira__ozet">' + kac(ozet) + '</p>' : '') +
       B.eylemler([{ metin: yeni ? 'Baştan başla' : okunan ? 'Devam et' : 'Başla', tur: 'ana', href: adimYolu(a) }, yeni ? { metin: 'Seviyemi bul', href: F() + '/yer/1' } : null]) +
-      (yeni ? '<p class="sira__not">Konuyu biliyorsan «Seviyemi bul»: aşama başına 5–8 soru, bildiğin aşamalar atlanır.</p>' : '') + '</section>';
+      (yeni ? '<p class="sira__not">Konuyu biliyorsan «Seviyemi bul»: birkaç soruyla bildiğin aşamalar atlanır.</p>' : '') + '</section>';
   }
   function altKirinti(ad) {
     return '<a class="kirinti" href="' + F() + '"><span aria-hidden="true">‹ </span>' + kac(H.bul(etkinAlan).ad) + '</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>' + kac(ad) + '</span>';
@@ -541,7 +558,7 @@
     var adim = okundu ? 3 : n && cevap >= n ? 2 : n && cevap ? 1 : 0; // 0 oku, 1 alıştır, 2 bitir, 3 bitti
     return ust(altKirinti(x.ad)) + '<article class="govde ders">' + dersAdimlari(adim, n) + dersMetni(y, x) +
       (n ? B.bolum({ baslik: 'Kendini dene', id: 'ders-alistir',
-        govde: ['<p class="soluk ders__sayac">' + cevap + ' / ' + n + ' cevaplandı</p>'].concat(x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; })) }) : '') +
+        govde: ['<p class="soluk ders__sayac">Okuduğunu ' + n + ' soruyla dene · ' + cevap + ' / ' + n + ' cevaplandı</p>'].concat(x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; })) }) : '') +
       '<div class="ders__bitir">' + B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id } }, { metin: 'Yol haritası', tur: 'sade', href: F() }]) + '</div></article>';
   }
   // Dersin üç adımı: oku, alıştır, bitir. Şimdiki adım vurgulu, geçilenler ✓ (renk tek başına değil).

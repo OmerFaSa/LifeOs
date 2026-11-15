@@ -48,7 +48,7 @@
   function html(B) {
     var gecmis = d.gecmis.map(function (x) { return { soru: x.soru, cevap: x.cevap }; });
     // ilk açılışta örnek sorular: kutuya ne yazılacağı belli olsun (tıklayınca sorulur)
-    var oneri = !d.gecmis.length && !d.bekliyor ? '<div class="king-oneri" aria-label="Örnek sorular">' + ONERI.map(function (q) {
+    var oneri = !d.gecmis.length && !d.bekliyor ? '<p class="king-giris">Aklındakini sor ya da şunlardan biriyle başla:</p><div class="king-oneri" aria-label="Örnek sorular">' + ONERI.map(function (q) {
       return '<button type="button" class="king-oneri__oge" data-king-oneri="' + q.replace(/"/g, '&quot;') + '">' + q + '</button>'; }).join('') + '</div>' : '';
     return B.bolum({ baslik: 'Burada konuş', id: 'king-sohbet', veri: { 'king-bolum': '' }, govde: [oneri,
       B.sohbet({ ad: 'King sohbeti', gecmis: gecmis, simdi: { form: { 'king-sohbet': '' },
