@@ -12,5 +12,12 @@ t('eğim: ortada düz, sağ alt köşede sağa ve öne, dışarıda sınırda ka
   esit(E.egim(900, -50, 200, 100, 4), { rx: 4, ry: 4 });
   esit(E.egim(0, 0, 0, 0, 4).ry, -4);
 });
+t('ilerleme: yalnız artan dilimler, ilk görülüşte ve azalınca hiçbiri', () => {
+  esit(E.artanlar(1, 3), [1, 2]);
+  esit(E.artanlar(undefined, 3), []);
+  esit(E.artanlar(3, 3), []);
+  esit(E.artanlar(4, 2), []);
+  esit(E.artanlar(0, 1), [0]);
+});
 console.log(kalan ? kalan + ' kaldı' : 'hepsi geçti');
 process.exit(kalan ? 1 : 0);

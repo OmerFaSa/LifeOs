@@ -257,6 +257,11 @@ jobs:
       - name: Kabuk hız bütçesi (açılış istekleri, gerçek tarayıcı)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hız bütçesi" node kalite/hiz_olcum.js --tekrar 1 --denetle
 
+      # HAREKET DILI (Faz 8 P2, 2026-11-15). Yeni sayfa bir kez suzulur, gecis yonu, yeniden oynama yok, paylasilan oge,
+      # cevap/ilerleme/tercih yalniz goruntude; hareket «az» ve «hareketi azalt» her seyi kapatir. Kare olcumu burada yalniz bilgi.
+      - name: Hareket gezisi (geçiş, süzülme, mikro etkileşim, hareket az)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hareket gezisi" node tools/hareket_gez.js
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

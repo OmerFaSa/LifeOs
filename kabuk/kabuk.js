@@ -643,6 +643,7 @@
       if (sira !== cizSira) return; // geçişin bekleyen çizimi, ondan sonra gelen daha yeni çizimin üstüne yazmaz
       var yukleniyordu = !yeniSayfa && !!sayfaEl.querySelector('[aria-busy="true"]'); // «Yükleniyor…»un yerine gelen asıl içerik bir kez süzülür
       sayfaEl.innerHTML = html;
+      if (pay) { var ph = sayfaEl.querySelector(pay.hedef); if (ph) ph.style.viewTransitionName = 'paylasilan'; }
       sayfaEl.setAttribute('data-ciz', yer.id);
       d.title = yer.ad + ' · LifeOS';
       manzara();
@@ -653,7 +654,9 @@
     // Bölüm değişince görünüm geçişi (tarayıcı destekliyorsa ve hareket açıksa): içerik gidilen yöne kayarak söner, üst çubuk yerinde kalır,
     // seçili sekmenin işareti yenisine akar. Aynı sayfanın yeniden çizimi (tıklama, yazma) anında olur.
     var gecisli = !!(once && yeniSayfa && d.startViewTransition && !d.hidden && hareketVar()); // gizli sekme çizmez: geçiş zaman aşımına düşerdi
+    var pay = gecisli && paylas && paylas.el.isConnected && sayfaEl.contains(paylas.el) ? paylas : null; paylas = null;
     if (gecisli) {
+      if (pay) pay.el.style.viewTransitionName = 'paylasilan';
       d.documentElement.setAttribute('data-gecis', yon(once, yer));
       var g = d.startViewTransition(yaz), u = bekleyenCizim = g.updateCallbackDone.catch(function () {});
       u.then(function () { if (bekleyenCizim === u) bekleyenCizim = null; });
@@ -666,7 +669,19 @@
   // Ekranlara verilen alan yüklemesi, bekleyen geçişin çizimi bitince çözülür: «sayfa hâlâ açık mı?» diye ekrana bakan
   // eşzamansız yeniden çizimler (deneme, araçlar, onay) yeni sayfanın öğelerini görür.
   function alanYukleCizimle(id) { return alanYukle(id).then(function (v) { return bekleyenCizim ? bekleyenCizim.then(function () { return v; }) : v; }); }
-  function gecisBitti() { d.documentElement.removeAttribute('data-gecis'); }
+  function gecisBitti() {
+    d.documentElement.removeAttribute('data-gecis');
+    var p = sayfaEl.querySelector('[style*="view-transition-name"]'); if (p) p.style.viewTransitionName = '';
+  }
+  // Paylaşılan öğe: tıklanan kart açtığı sayfanın başına akar (kabuk.css ::view-transition-group(paylasilan)). Alan kartı ya da simgeli
+  // satır → kapak simgesi; «Sıradaki»nin ve Bugün karşılamasının ana düğmesi → açılan dersin (kapının) başlığı. Ad yalnız geçiş boyunca durur.
+  var paylas = null;
+  function paylasKaynak(a) {
+    var s = a.matches('.b-karsilama__alan, a.b-satir') && a.querySelector('.b-simge');
+    if (s) return { el: s, hedef: '.kapak__simge .b-simge' };
+    var k = a.classList.contains('b-dugme--ana') && a.closest('.sira, .b-karsilama'), b = k && k.querySelector('.sira__baslik, .b-karsilama__sira');
+    return b ? { el: b, hedef: '.govde h1' } : null;
+  }
   function hareketVar() { try { return getComputedStyle(d.documentElement).getPropertyValue('--sure').trim() !== '0s'; } catch (e) { return false; } }
   // Yön: üst sekmelerde sağa giderken ileri, sola geri; sekme dışı yerlerde (ders, ayarlar…) derinleşme ileri, sekmeye dönüş geri
   function yon(onceId, yer) {
@@ -679,7 +694,7 @@
   var canlanSaat = null, canlanZaman = 0;
   function canlan(gecisli) {
     clearTimeout(canlanSaat); canlanZaman = performance.now(); sayfaEl.classList.add('canlan'); sayfaEl.classList.toggle('canlan--gecis', !!gecisli);
-    canlanSaat = setTimeout(function () { sayfaEl.classList.remove('canlan', 'canlan--gecis'); }, 1400);
+    canlanSaat = setTimeout(function () { sayfaEl.classList.remove('canlan', 'canlan--gecis'); }, 1000);
   }
   function git(yol) { if (location.hash === yol) rota(); else location.hash = yol; }
 
@@ -943,6 +958,7 @@
     addEventListener('hashchange', function () { halkaKapat(false); komutKapat(false); rihtimAc(false); rota(); sayfaEl.focus({ preventScroll: true }); scrollTo(0, 0); });
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);
+    d.addEventListener('click', function (e) { var a = !e.defaultPrevented && e.target.closest && e.target.closest('#sayfa a[href^="#/"]'); paylas = a ? paylasKaynak(a) : null; }, true);
     d.addEventListener('submit', function (e) { var f = e.target.closest('form.kapi'); if (f) { e.preventDefault(); if (f.hasAttribute('data-yer')) yerBitir(f); else kapiBitir(f); } });
     d.addEventListener('change', function (e) {
       if (e.target.matches('[data-ayar][data-parca]')) aralikYaz(e.target);

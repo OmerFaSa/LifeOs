@@ -4,7 +4,10 @@
  *  - eğim: ızgara kartları imlece doğru en çok 4° eğilir (--rx/--ry)
  *  - dalga: düğmeye ve seçeneklere basılan noktadan halka yayılır
  *  - derinlik: sayfa başındaki piksel manzara imlece göre hafifçe kayar (--px/--py)
- * Hareket «az»sa (--sure 0) ya da dokunmatik ekransa hiçbiri çalışmaz (dalga dokunmatikte de çalışır). Node'da yalnız saf hesap (egim). */
+ *  - cevap: yeni verilen cevapta yanlış şık sarsılır, doğrunun işareti çizilir (.yeni-cevap)
+ *  - ilerleme: değer artınca yeni dilimler dolar, sayı kayar (.yeni); aria-valuenow çizimle birlikte zaten yeni
+ *  - tercih: ayar değişince seçili gösterge eski yerinden yenisine kayar (.tercih-kayan)
+ * Hareket «az»sa (--sure 0) hiçbiri çalışmaz; ışık, eğim ve derinlik yalnız ince imleçte. Node'da yalnız saf hesap (egim, artanlar). */
 (function (kok) {
   'use strict';
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};
@@ -14,12 +17,14 @@
     var nx = Math.max(-1, Math.min(1, (x / Math.max(1, w)) * 2 - 1)), ny = Math.max(-1, Math.min(1, (y / Math.max(1, h)) * 2 - 1));
     return { rx: +(-ny * en).toFixed(2), ry: +(nx * en).toFixed(2) };
   }
-  var E = { egim: egim };
+  // Saf: önceki ve yeni ilerleme değerlerinden yeni dolan dilimlerin sırası; önceki yoksa (ilk görülüş) ya da artmadıysa boş
+  function artanlar(once, simdi) { var l = []; if (once == null || !(simdi > once)) return l; for (var i = once; i < simdi; i++) l.push(i); return l; }
+  var E = { egim: egim, artanlar: artanlar };
   Kabuk.Etkilesim = E;
   if (typeof module !== 'undefined' && module.exports) module.exports = E;
   if (typeof document === 'undefined') return;
 
-  var d = document, KART = '.b-karsilama__alan, a.b-satir, a.b-ders, .b-sayi, .hs-kimlik, .b-dugme', EGIK = '.b-karsilama__alan, a.b-ders, .b-sayi';
+  var d = document, KART = '.b-karsilama__alan, a.b-satir, a.b-ders', EGIK = '.b-karsilama__alan, a.b-ders'; // yalnız tıklanan kartlar; düğme ve sayı kutusu sakin
   var SAHNE = '.kapak, .b-karsilama__sahne', DALGA = '.b-dugme, .b-tercih__sec, .b-soru__sik, .ust__sekmeler a';
   var ince = kok.matchMedia && kok.matchMedia('(hover: hover) and (pointer: fine)');
   function acik() { try { return getComputedStyle(d.documentElement).getPropertyValue('--sure').trim() !== '0s'; } catch (e) { return false; } }
@@ -67,4 +72,53 @@
     if (!a || a.tagName !== 'DETAILS' || a.open) return;
     a.classList.add('acildi'); setTimeout(function () { a.classList.remove('acildi'); }, 800);
   });
+
+  // ---- mikro etkileşimler: yakalama evresinde tıklanandan önceki durum alınır, kabuk.js yeniden çizer, sonraki karede süs eklenir ----
+  function sonraki(f) { requestAnimationFrame(function () { if (acik()) f(); }); }
+  function ms(k) { return (parseFloat(getComputedStyle(d.documentElement).getPropertyValue('--sure')) || 0) * k * 1000; }
+  d.addEventListener('click', function (e) {
+    var t = e.target, sik = t.closest && t.closest('.b-soru[data-soru] [data-h]:not([aria-disabled="true"])');
+    if (sik) {
+      var id = sik.closest('.b-soru').getAttribute('data-soru');
+      return sonraki(function () { var f = d.querySelector('.b-soru[data-soru="' + CSS.escape(id) + '"]'); if (f && f.querySelector('.b-soru__sik--dogru')) f.classList.add('yeni-cevap'); });
+    }
+    var sec = t.closest && t.closest('[role="radio"][data-ayar]');
+    if (sec && sec.getAttribute('aria-checked') !== 'true') {
+      var a = sec.getAttribute('data-ayar'), v = sec.getAttribute('data-deger'), eski = sec.parentElement.querySelector('[aria-checked="true"]');
+      if (!eski) return;
+      var er = eski.getBoundingClientRect();
+      sonraki(function () { var y = d.querySelector('[data-ayar-satir="' + CSS.escape(a) + '"] [role="radio"][data-deger="' + CSS.escape(v) + '"][aria-checked="true"]'); if (y) kaydir(er, y); });
+    }
+  }, true);
+  // seçili göstergenin kopyası eski yerden yenisine kayar; o sırada asıl düğmenin zemini gizli, bitince geri gelir (geçişsiz)
+  function kaydir(er, y) {
+    var g = y.parentElement, gr = g.getBoundingClientRect(), r = y.getBoundingClientRect(), cs = getComputedStyle(y), k = d.createElement('span');
+    if (!r.width || !er.width) return;
+    k.className = 'tercih-kayan'; k.setAttribute('aria-hidden', 'true');
+    k.style.cssText = 'left:' + (r.left - gr.left - g.clientLeft) + 'px;top:' + (r.top - gr.top - g.clientTop) + 'px;width:' + r.width + 'px;height:' + r.height + 'px;background:' +
+      cs.backgroundColor + ';box-shadow:' + cs.boxShadow + ';border-radius:' + cs.borderRadius;
+    g.insertBefore(k, g.firstChild); y.classList.add('kayiyor');
+    var an = k.animate([{ transform: 'translate(' + (er.left - r.left) + 'px,' + (er.top - r.top) + 'px) scale(' + (er.width / r.width) + ',' + (er.height / r.height) + ')' }, { transform: 'none' }],
+      { duration: ms(2.25), easing: getComputedStyle(d.documentElement).getPropertyValue('--akis').trim() || 'ease-out' });
+    function bitir() { y.style.transition = 'none'; y.classList.remove('kayiyor'); void y.offsetWidth; y.style.transition = ''; k.remove(); }
+    an.onfinish = an.oncancel = bitir;
+  }
+  // ilerleme: her çizimde çubukların değeri sayfa + ad anahtarıyla hatırlanır; artmışsa yeni dilimler (ya da sürekli çubuk) dolar
+  var ilerlemeDeger = {};
+  function ilerleme(sayfa) {
+    var yer = sayfa.getAttribute('data-yer'), oyna = acik();
+    [].forEach.call(sayfa.querySelectorAll('.b-ilerleme [role="progressbar"]'), function (c) {
+      var key = yer + '|' + c.getAttribute('aria-label'), simdi = +c.getAttribute('aria-valuenow'), once = ilerlemeDeger[key], l = artanlar(once, simdi);
+      ilerlemeDeger[key] = simdi;
+      if (!oyna || !l.length) return;
+      var dilim = c.children, s = c.parentElement.querySelector('.b-ilerleme__sayi');
+      if (c.classList.contains('b-ilerleme__cubuk--surekli')) { if (dilim[0]) { dilim[0].style.setProperty('--once', (once / simdi).toFixed(3)); dilim[0].classList.add('yeni'); } }
+      else l.forEach(function (i, j) { if (dilim[i]) { dilim[i].style.setProperty('--i', j); dilim[i].classList.add('yeni'); } });
+      if (s) s.classList.add('yeni');
+    });
+  }
+  E.ilerleme = ilerleme;
+  // #sayfa her yeniden çizildiğinde (kabuk.js rota innerHTML) çubuklara bakılır; gözlemci boyamadan önce çalışır
+  function izle() { var s = d.getElementById('sayfa'); if (s) new MutationObserver(function () { ilerleme(s); }).observe(s, { childList: true }); }
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', izle); else izle();
 })(typeof window !== 'undefined' ? window : globalThis);
