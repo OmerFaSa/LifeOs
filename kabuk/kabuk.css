@@ -287,12 +287,7 @@ body{ transition:background-color calc(var(--sure) * 2.5) var(--akis), color cal
 /* Hesap: baş harf yumuşakça yerine oturur */
 .canlan .hs-kimlik__harf{ animation:kapak-gir calc(var(--sure) * 3) var(--yay) both; }
 
-/* Arka plan: her sayfada piksel manzara (kabuk.js zemin). Sabit, tam ekran, pikseller keskin; Bugün dışındaki sayfalarda içerik,
-   manzaranın üstünde yarı saydam bir yüzeyde (okunurluk); üst çubuk zaten buzlu. Gece sesi düğmesi üst çubukta (kabuk/gece.js). */
-.zemin-manzara{ position:fixed; inset:0; z-index:-1; width:100vw; height:100vh; height:100dvh; object-fit:cover; image-rendering:pixelated; pointer-events:none; }
-#sayfa:not([data-ciz="bugun"]) > .govde{ margin-top:20px; margin-bottom:40px; padding:28px clamp(18px, 4vw, 40px) 36px; border-radius:28px;
-  background:color-mix(in srgb, var(--bg) 93%, transparent); box-shadow:0 1px 0 #ffffff10 inset, var(--golge-buyuk); }
-#sayfa:not([data-ciz="bugun"]) > .konum, #sayfa:not([data-ciz="bugun"]) > .kirinti{ text-shadow:none; }
+/* Gece sesi düğmesi (üst çubuk, kabuk/gece.js) */
 .ust__gece{ display:grid; place-items:center; flex:none; width:36px; height:36px; margin-left:8px; padding:0; border:0; border-radius:50%; cursor:pointer;
   color:inherit; background:transparent; transition:background calc(var(--sure) * 1.5) var(--akis), color calc(var(--sure) * 1.5) var(--akis), transform calc(var(--sure) * 2) var(--yay); }
 .ust__gece svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linejoin:round; }
@@ -303,11 +298,3 @@ body{ transition:background-color calc(var(--sure) * 2.5) var(--akis), color cal
 @keyframes gece-nefes{ 50%{ opacity:.65; } }
 :root[data-hareket="az"] .ust__gece.calisiyor{ animation:none; }
 .ust__gece:active{ transform:scale(.92); }
-/* arka plan manzarası her sayfadayken sayfa içi manzaralar (kapak şeridi, Bugün'ün sahnesi) ikilenmesin: tuvalleri gizli, üstteki karartma kalır */
-#sayfa .kapak, #sayfa .b-karsilama__sahne{ background:none; }
-.kapak__sahne, .b-karsilama__manzara{ visibility:hidden; }
-/* manzaranın doğrudan üstündeki yazılar (konum satırı, Bugün'ün bölüm başlıkları) açık renk ve hafif gölgeli */
-#sayfa > .konum, #sayfa > .konum *{ color:#fffffff2; text-shadow:0 1px 6px #000000b3; }
-#sayfa[data-ciz="bugun"] :is(.b-bolum__ust h2, .b-karsilama__baslik, .b-karsilama__bolumust a){ color:#fff; text-shadow:0 1px 8px #000000bf; }
-#sayfa .b-karsilama__sahne::after{ background:linear-gradient(180deg, #140e1e59 0%, #140e1e00 70%); }
-.b-karsilama__tarih, .b-karsilama__ic p{ text-shadow:var(--sahne-golge); }

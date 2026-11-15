@@ -350,20 +350,9 @@
   var manzaraIstendi = false;
   // sahne çizimi önbellekte: aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
   var sahneOnbellek = {};
-  /* Arka planda her sayfada piksel manzara (sahibin isteği): ekranı kaplayan sabit tuval; sahne sayfanın kapağınınki (yoksa yayla),
-   * vakit saate göre (gece gecedir). Düşük çözünürlükte çizilir, büyütülürken pikseller korunur; sahne/saat/boyut değişmedikçe yeniden çizilmez. */
-  var zeminEl = null, zeminAd = '';
-  function zemin(D) {
-    if (!zeminEl) { zeminEl = d.createElement('canvas'); zeminEl.className = 'zemin-manzara'; zeminEl.setAttribute('aria-hidden', 'true'); d.body.insertBefore(zeminEl, d.body.firstChild); }
-    var k = sayfaEl.querySelector('.kapak__sahne'), tur = (k && k.getAttribute('data-sahne')) || 'yayla', saat = new Date().getHours();
-    var w = 320, h = Math.max(160, Math.min(560, Math.round(w * innerHeight / Math.max(1, innerWidth)))), ad = [tur, saat, w, h].join();
-    if (ad === zeminAd) return;
-    try { zeminEl.width = w; zeminEl.height = h; D.binaCiz(zeminEl.getContext('2d'), D.yerlesim(w, h, D.vakit(saat), tur)); zeminAd = ad; } catch (e) { /* süs */ }
-  }
   function manzara() {
     var c = sayfaEl.querySelector('.b-karsilama__manzara, .kapak__sahne'), D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA;
-    if (D) zemin(D);
-    if (!c && D) return;
+    if (!c) return;
     if (!D) {
       if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
       return;
@@ -829,8 +818,6 @@
       B.komut({ id: 'komut', ad: 'Ara', yerTutucu: 'Bir yer, ayar ya da eylem ara' }));
     sayfaEl = $('#sayfa'); halkaEl = $('#halka'); perdeEl = $('#perde'); komutEl = $('#komut');
     ogeler = komutOgeleri(H, A);
-    var boyutSaat = null; // pencere oranı değişince arka plan manzarası yeniden çizilir
-    addEventListener('resize', function () { clearTimeout(boyutSaat); boyutSaat = setTimeout(manzara, 250); });
     addEventListener('hashchange', function () { halkaKapat(false); komutKapat(false); rota(); sayfaEl.focus({ preventScroll: true }); scrollTo(0, 0); });
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);
