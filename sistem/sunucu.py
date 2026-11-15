@@ -13,6 +13,8 @@
    2. YALNIZ YEREL. 127.0.0.1'e baglanir; disari yalniz Tailscale serve (vekil) ile gidilir.
 """
 
+import email.utils
+import gzip
 import html
 import json
 import os
@@ -1256,6 +1258,27 @@ def kabuk_dosyasi(yol):
     return tam if os.path.isfile(tam) else None
 
 
+_STATIK = {}                 # tam yol -> (mtime_ns, boy, govde, gzip ya da None, etag, son); kod dosyalari, kucuk ve sinirli
+_STATIK_KILIT = threading.Lock()
+
+
+def _statik_oku(tam):
+    """(govde, gzip|None, etag, Last-Modified). Dosya degisince (mtime/boy) yeniden okunur ve sikistirilir."""
+    st = os.stat(tam)
+    with _STATIK_KILIT:
+        k = _STATIK.get(tam)
+    if k and k[0] == st.st_mtime_ns and k[1] == st.st_size:
+        return k[2:]
+    with open(tam, "rb") as f:
+        govde = f.read()
+    gz = gzip.compress(govde, 6, mtime=0) if len(govde) > 1024 else None
+    k = (st.st_mtime_ns, st.st_size, govde, gz, '"%x-%x"' % (st.st_mtime_ns, len(govde)),
+         email.utils.formatdate(st.st_mtime, usegmt=True))
+    with _STATIK_KILIT:
+        _STATIK[tam] = k
+    return k[2:]
+
+
 class Giris(SimpleHTTPRequestHandler):
     def _json(self, kod, veri):
         govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
@@ -1289,14 +1312,7 @@ class Giris(SimpleHTTPRequestHandler):
                "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8",
                "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-doga.js": "text/javascript; charset=utf-8", "piksel-apartman.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8",
                "piksel.css": "text/css; charset=utf-8", "piksel-yazi.css": "text/css; charset=utf-8"}[ad]
-        with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
-            govde = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", tur)
-        self.send_header("Content-Length", str(len(govde)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(govde)
+        return self._statik(os.path.join(KOK, "brand", "ortak", ad), tur)
 
     def do_POST(self):
         yol = self.path.split("?", 1)[0]
@@ -1344,16 +1360,38 @@ class Giris(SimpleHTTPRequestHandler):
     def _kabuk_sun(self, tam):
         if not tam or self.command not in ("GET", "HEAD"):
             return self.send_error(404 if not tam else 405)
-        with open(tam, "rb") as f:
-            govde = f.read()
+        return self._statik(tam, _KABUK_TUR[os.path.splitext(tam)[1]])
+
+    def _statik(self, tam, tur):
+        """Kodun sabit dosyasi: no-cache + ETag (tarayici her acilista sorar, degismediyse 304, govde gitmez)
+        ve gzip (telefon Tailscale'den gelir; alan JSON'lari MB'larca). Guncelleme dosyayi degistirince ETag degisir."""
+        govde, gz, etag, son = _statik_oku(tam)
+        sikistir = gz is not None and "gzip" in (self.headers.get("Accept-Encoding") or "")
+        inm = self.headers.get("If-None-Match")
+        if (etag in [e.strip() for e in inm.split(",")]) if inm else self.headers.get("If-Modified-Since") == son:
+            self.send_response(304)
+            self.send_header("ETag", etag)
+            self.send_header("Last-Modified", son)
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Vary", "Accept-Encoding")
+            self.end_headers()
+            return None
+        if sikistir:
+            govde = gz
         self.send_response(200)
-        self.send_header("Content-Type", _KABUK_TUR[os.path.splitext(tam)[1]])
+        self.send_header("Content-Type", tur)
         self.send_header("Content-Length", str(len(govde)))
         self.send_header("Cache-Control", "no-cache")
+        self.send_header("ETag", etag)
+        self.send_header("Last-Modified", son)      # Chromium fetch() yalniz ETag'le kosullu sormuyor; bununla soruyor (olculdu)
+        self.send_header("Vary", "Accept-Encoding")
+        if sikistir:
+            self.send_header("Content-Encoding", "gzip")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.end_headers()
         if self.command == "GET":
             self.wfile.write(govde)
+        return None
 
     def do_GET(self):
         yol = self.path.split("?", 1)[0]
