@@ -1388,6 +1388,9 @@ class Giris(SimpleHTTPRequestHandler):
         if sikistir:
             self.send_header("Content-Encoding", "gzip")
         self.send_header("X-Content-Type-Options", "nosniff")
+        # Baska bir site kabugu gorunmez cercevede acip tiklatamasin (guncelle, sil): cerceve yasak.
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
         self.end_headers()
         if self.command == "GET":
             self.wfile.write(govde)

@@ -302,10 +302,12 @@ def sina(eski, tek, kokler=()):
     dene("POST /kabuk/ 405", iste(T, "/kabuk/", "POST", b"")[0] == 405)
     # Onbellek ve sikistirma (altyapi 2026-11-15): her acilis 4,2 MB'i yeniden indiriyordu. Degismeyen dosya 304, gzip
     # isteyene gzip, dosya degisince yeni ETag; Chromium fetch() yalniz ETag'le sormuyor, Last-Modified ile soruyor.
-    for yol in ("/kabuk/kabuk.js", "/alan/felsefe/asama-1.json", "/hesap.js"):
+    for yol in ("/kabuk/", "/kabuk/kabuk.js", "/alan/felsefe/asama-1.json", "/hesap.js"):
         k, b, gv = iste(T, yol)
         et, lm = b.get("ETag"), b.get("Last-Modified")
         dene("%s ETag + Last-Modified + no-cache" % yol, k == 200 and et and lm and b.get("Cache-Control") == "no-cache", dict(b))
+        dene("%s çerçevede açılmaz (X-Frame-Options DENY)" % yol, b.get("X-Frame-Options") == "DENY"
+             and "frame-ancestors 'none'" in (b.get("Content-Security-Policy") or ""), dict(b))
         k2, b2, gv2 = iste(T, yol, basliklar={"If-None-Match": et})
         dene("%s aynı ETag → 304 gövdesiz" % yol, k2 == 304 and gv2 == b"", k2)
         dene("%s aynı Last-Modified → 304" % yol, iste(T, yol, basliklar={"If-Modified-Since": lm})[0] == 304)
