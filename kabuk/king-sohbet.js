@@ -10,6 +10,7 @@
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};
   var SECIM = { oto: 'Otomatik (Merkez ayarı)', antigravity: 'Antigravity', claude: 'Claude Code' };
   var ANAHTAR = 'lifeos.king.saglayici', EN_COK = 20;
+  var ONERI = ['Bugün ne var?', 'Felsefe yol haritamda neredeyim?', 'Bu hafta nasıl gitti?'];
 
   /* ---------------- saf ---------------- */
   function secimGecerli(s) { return Object.prototype.hasOwnProperty.call(SECIM, s) ? s : 'oto'; }
@@ -46,24 +47,31 @@
 
   function html(B) {
     var gecmis = d.gecmis.map(function (x) { return { soru: x.soru, cevap: x.cevap }; });
-    return B.bolum({ baslik: 'Burada konuş', id: 'king-sohbet', veri: { 'king-bolum': '' }, govde: [
-      '<p class="soluk">Antigravity ya da Claude Code açıksa onlar cevaplar; kapalıysa sıradaki model devralır.</p>',
+    // ilk açılışta örnek sorular: kutuya ne yazılacağı belli olsun (tıklayınca sorulur)
+    var oneri = !d.gecmis.length && !d.bekliyor ? '<div class="king-oneri" aria-label="Örnek sorular">' + ONERI.map(function (q) {
+      return '<button type="button" class="king-oneri__oge" data-king-oneri="' + q.replace(/"/g, '&quot;') + '">' + q + '</button>'; }).join('') + '</div>' : '';
+    return B.bolum({ baslik: 'Burada konuş', id: 'king-sohbet', veri: { 'king-bolum': '' }, govde: [oneri,
       B.sohbet({ ad: 'King sohbeti', gecmis: gecmis, simdi: { form: { 'king-sohbet': '' },
         soru: d.bekliyor ? { metin: 'King cevaplıyor…', canli: true } : null,
-        govde: [B.alan({ ad: 'Kim cevaplasın', isim: 'saglayici', tur: 'secim', secenekler: secenekler(d.kopruler), deger: d.secim }),
-          B.alan({ ad: 'Mesajın', isim: 'metin', tur: 'cok', enCok: 2000, deger: '' }),
-          B.eylemler([{ metin: d.bekliyor ? 'Bekleniyor' : 'Gönder', tur: 'ana', tip: 'submit', kapali: d.bekliyor }])] } })] });
+        govde: [B.alan({ ad: 'Mesajın', isim: 'metin', tur: 'cok', enCok: 2000, deger: '', yerTutucu: 'King\'e sor… Enter gönderir, Shift + Enter yeni satır.' }),
+          '<div class="king-alt">' + B.alan({ ad: 'Cevaplayan', isim: 'saglayici', tur: 'secim', secenekler: secenekler(d.kopruler), deger: d.secim }) +
+          B.eylemler([{ metin: d.bekliyor ? 'Bekleniyor' : 'Gönder', tur: 'ana', tip: 'submit', kapali: d.bekliyor }]) + '</div>'] } })] });
   }
   function bolumEl() { return kok.document.querySelector('[data-king-bolum]'); }
   function ciz(odak) {
     var g = kok.document.querySelector('.govde[data-sayfa="king"]'), B = Kabuk.Bilesen;
     if (!g || !B) return;
     var eski = bolumEl(), yeni = kok.document.createElement('div');
+    // yeniden çizim (köprü hâli geldi) yazılmakta olanı silmesin: metin, imleç ve odak korunur
+    var em = eski && eski.querySelector('[name="metin"]'), yazilan = em && !odak ? em.value : '', odakta = em && kok.document.activeElement === em;
+    var imlec = odakta ? [em.selectionStart, em.selectionEnd] : null;
     yeni.innerHTML = html(B);
     var el = yeni.firstChild;
     if (eski) eski.replaceWith(el);
     else { var bas = g.firstElementChild; if (bas && bas.nextSibling) g.insertBefore(el, bas.nextSibling); else g.appendChild(el); }
-    if (odak) { var m = el.querySelector('[name="metin"]'); if (m) m.focus(); }
+    var m = el.querySelector('[name="metin"]');
+    if (m && yazilan) m.value = yazilan;
+    if (m && (odak || odakta)) { m.focus(); if (imlec) m.setSelectionRange(imlec[0], imlec[1]); }
   }
   function durumAl() {
     return kok.fetch('/api/kabuk/king/kopru', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
@@ -74,7 +82,7 @@
     d.secim = secimGecerli(form.saglayici.value);
     depoYaz(d.secim);
     if (!metin || d.bekliyor) return;
-    d.bekliyor = true; ciz();
+    d.bekliyor = true; form.metin.value = ''; ciz(); // gönderilen kutuda kalmasın
     var kod = 0;
     kok.fetch('/api/kabuk/king', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-LifeOS': 'king' },
       body: JSON.stringify(istekGovdesi(metin, d.secim)) })
@@ -92,6 +100,17 @@
     new kok.MutationObserver(function () {
       if (kok.document.querySelector('.govde[data-sayfa="king"]') && !bolumEl()) { ciz(); durumAl(); }
     }).observe(sayfa, { childList: true, subtree: true });
+    // Enter gönderir (Shift + Enter yeni satır); örnek soru tıklanınca sorulur
+    kok.document.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if (e.key !== 'Enter' || e.shiftKey || e.isComposing || !t.matches || !t.matches('form[data-king-sohbet] [name="metin"]')) return;
+      e.preventDefault(); t.form.requestSubmit();
+    });
+    kok.document.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-king-oneri]'), f = kok.document.querySelector('form[data-king-sohbet]');
+      if (!b || !f) return;
+      f.metin.value = b.getAttribute('data-king-oneri'); f.requestSubmit();
+    });
     kok.document.addEventListener('submit', function (e) {
       if (!e.target.matches || !e.target.matches('form[data-king-sohbet]')) return;
       e.preventDefault(); gonder(e.target);

@@ -435,7 +435,7 @@
       pul: n.ozel ? 'özel' : n.sabit ? { metin: 'sabit', tur: 'altin' } : null };
   }
   function notListesi(notlar, sorgu) {
-    if (!notlar.length) return B.bos({ baslik: 'Henüz not yok.', metin: '«Yeni not» ile ilkini yaz; bir satır yeter, sonra büyütürsün.' });
+    if (!notlar.length) return B.bos({ baslik: 'Henüz not yok.', metin: 'Yukarıdaki kutuya bir satır yazman yeter.' });
     if (!sorgu.trim()) return B.liste({ ad: 'Notlar', ogeler: notlar.slice().sort(notSira).map(function (n) { return notSatiri(n); }) });
     var harita = {}; notlar.forEach(function (n) { harita[n.id] = n; });
     var s = Not.ara(notlar, sorgu, { sinir: 50 });
@@ -516,8 +516,13 @@
     var notlar = oku(NOT_ANAHTAR, []);
     if (!alt) {
       var araclar = oku(ARAC_ANAHTAR, []);
-      return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not', eylem: { metin: 'Yeni not', tur: 'ana', href: '#/motor/not/yeni' } }) +
-        B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: '#etiket de olur', veri: { 'not-ara': '' } }) +
+      var hd = hizliDurum; hizliDurum = null;
+      return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not', eylem: { metin: 'Ayrıntılı not', tur: 'sade', href: '#/motor/not/yeni' } }) +
+        // hızlı yazma: aç, yaz, Ctrl+Enter; ilk satır notun adı olur (Not.ad)
+        '<form class="nothizli" novalidate>' + B.alan({ ad: 'Hızlı not', isim: 'hizli', tur: 'cok', enCok: 20000, deger: hd && hd.metin || '',
+          yerTutucu: 'Aklındakini yaz. İlk satır notun adı olur; #etiket ve [[başka not]] kullanabilirsin.' }) +
+        B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, { yazi: hd && hd.tamam ? 'Kaydedildi.' : hd && hd.hata ? hd.hata : 'Ctrl + Enter da kaydeder' }]) + '</form>' +
+        B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: 'Kelime ya da #etiket', veri: { 'not-ara': '' } }) +
         '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div>' +
         (notlar.length ? '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' : '') +
         B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', govde: ['<p class="soluk">Bir araç, notlarını kendi klasöründe toplar.</p>',
@@ -543,7 +548,8 @@
       '<form class="notform" data-not="' + k(alt) + '" novalidate>' +
       (durum ? B.uyari({ tur: durum.tamam ? 'tamam' : 'hata', metin: durum.metin }) : '') +
       (aracA ? '<input type="hidden" name="klasor" value="' + k(aracA.klasor) + '"><p class="soluk">Araç: ' + k(aracA.ad) + ' · ' + (aracA.sistemNotu.kingOkur ? 'King okur' : 'King okumaz') + '</p>' : '') +
-      B.alan({ ad: 'Başlık', isim: 'baslik', deger: f.baslik, enCok: 120 }) + B.alan({ ad: 'Not', isim: 'govde', tur: 'cok', uzun: true, deger: f.govde }) +
+      B.alan({ ad: 'Başlık', isim: 'baslik', deger: f.baslik, enCok: 120, yerTutucu: 'Kısa bir ad; boş kalırsa ilk satır kullanılır' }) +
+      B.alan({ ad: 'Not', isim: 'govde', tur: 'cok', uzun: true, deger: f.govde, yerTutucu: 'Yaz… #etiket ekleyebilir, [[başka not]] ile bağlantı kurabilirsin.' }) +
       (oteki.length ? B.alan({ ad: 'Başka bir nota bağ ekle', isim: 'bagEkle', tur: 'secim', veri: { 'bag-ekle': '' },
         secenekler: oteki.reduce(function (o, x) { o[x.id] = Not.ad(x) || 'Adsız not'; return o; }, { '': 'Not seç…' }) }) : '') +
       B.alan({ ad: 'Özel (King görmez)', isim: 'ozel', tur: 'onay', deger: !!f.ozel }) + B.alan({ ad: 'Üstte tut', isim: 'sabit', tur: 'onay', deger: !!f.sabit }) +
@@ -551,6 +557,18 @@
       (giden.length ? B.bolum({ baslik: 'Bu nottaki bağlar', govde: B.liste({ ad: 'Bu nottaki bağlar', ogeler: giden.map(bagSatiri) }) }) : '') +
       (gelen.length ? B.bolum({ baslik: 'Bu nota bağlananlar', govde: B.liste({ ad: 'Bu nota bağlananlar', ogeler: gelen.map(bagSatiri) }) }) : '') +
       (n ? '<p class="soluk">Son değişiklik ' + tarih(n.guncelleme) + '</p>' : '') + '</div>';
+  }
+  // Hızlı not: tek kutudan kaydeder, listede kalır (adres değişmez); boşsa yalnız kutuya döner
+  var hizliDurum = null;
+  function hizliKaydet(form) {
+    var metin = form.elements.hizli.value, simdi = Date.now();
+    if (!metin.trim()) { form.elements.hizli.focus(); return; }
+    try {
+      var r = notKaydet(Not, oku(NOT_ANAHTAR, []), 'yeni', { baslik: '', govde: metin.trim(), ozel: false, sabit: false, klasor: '' }, simdi, kimlik('n', simdi, Math.random()));
+      yaz(NOT_ANAHTAR, r.notlar); hizliDurum = { tamam: true };
+    } catch (e) { hizliDurum = { hata: e.message, metin: metin }; } // yazılan kaybolmasın
+    ic().rota();
+    setTimeout(function () { var k = d.querySelector('.nothizli textarea'); if (k) k.focus(); }, 0);
   }
   function notFormKaydet(form) {
     var id = form.getAttribute('data-not'), simdi = Date.now();
@@ -632,7 +650,8 @@
       .concat(kapiT.map(function (x) { return B.acilir({ baslik: x.on, duzey: 3, govde: '<p>' + k(x.arka) + '</p><p class="soluk">' + k(kapiKaynak(x)) + ' · taslak</p>' }); })) }) : '';
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="tekrar">' + B.baslik({ metin: 'Tekrar' }) + govde +
       '<form class="kartform" novalidate>' + B.baslik({ metin: 'Kart ekle', duzey: 2 }) +
-      B.alan({ ad: 'Ön yüz (soru)', isim: 'on', enCok: 300 }) + B.alan({ ad: 'Arka yüz (cevap)', isim: 'arka', tur: 'cok', enCok: 2000 }) +
+      B.alan({ ad: 'Soru (kartın ön yüzü)', isim: 'on', enCok: 300, yerTutucu: 'Örn. Sokrates neden hiçbir şey yazmadı?' }) +
+      B.alan({ ad: 'Cevap (kartın arka yüzü)', isim: 'arka', tur: 'cok', enCok: 2000, yerTutucu: 'Kendi cümlelerinle kısa cevap' }) +
       B.eylemler([{ metin: 'Kartı ekle', tip: 'submit' }]) + '</form>' + liste + '</div>';
   }
   function kartEkle(form) {
@@ -814,7 +833,7 @@
           var gunler = s.gunler.length === 7 ? 'her gün' : s.gunler.map(function (g) { return GUN_KISA[g]; }).join(', ');
           return { ad: s.ad + ' · ' + s.bas + '–' + s.bit, not: gunler + (s.bit < s.bas ? ' · gece yarısını geçer' : ''), eylemler: silEylemi('Sabit bloğu sil: ' + s.ad, { 'arac-ac': 'plan-sabit-sil', id: s.id }) };
         }) }) : '',
-        '<form class="planform" data-plan="sabit" novalidate>' + B.alan({ ad: 'Ad', isim: 'ad', enCok: 60 }) + saatAraligi() +
+        '<form class="planform" data-plan="sabit" novalidate>' + B.alan({ ad: 'Ad', isim: 'ad', enCok: 60, yerTutucu: 'Örn. Okul, iş, spor' }) + saatAraligi() +
         B.alan({ ad: 'Günler', isim: 'gun', tur: 'coklu', secenekler: Object.assign({}, GUN_KISA), deger: [0, 1, 2, 3, 4] }) + B.eylemler([{ metin: 'Sabit blok ekle', tip: 'submit' }]) + '</form>'] }) + '</div>';
   }
   function sayfaPlan(yer, alt) {
@@ -839,8 +858,8 @@
       B.bolum({ baslik: 'İşler', govde: [dr.isler.length ? B.liste({ ad: 'İşler', ogeler: dr.isler.map(function (x) {
           return { ad: x.ad, not: x.dk + ' dk' + (x.son ? ' · son ' + x.son : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : ''), eylemler: silEylemi('İşi sil: ' + x.ad, { 'arac-ac': 'plan-is-sil', id: x.id }) };
         }) }) : '<p class="soluk">Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
-        '<form class="planform" data-plan="is" novalidate>' + B.alan({ ad: 'İş', isim: 'ad', enCok: 120 }) +
-        '<div class="ikili">' + B.alan({ ad: 'Süre (dk)', isim: 'dk', tur: 'sayi' }) + B.alan({ ad: 'Son tarih · isteğe bağlı', isim: 'son', tur: 'tarih' }) + '</div>' +
+        '<form class="planform" data-plan="is" novalidate>' + B.alan({ ad: 'İş', isim: 'ad', enCok: 120, yerTutucu: 'Örn. Felsefe ünite 1 tekrarı' }) +
+        '<div class="ikili">' + B.alan({ ad: 'Süre (dakika)', isim: 'dk', tur: 'sayi', yerTutucu: '30' }) + B.alan({ ad: 'Son tarih · isteğe bağlı', isim: 'son', tur: 'tarih' }) + '</div>' +
         B.eylemler([{ metin: 'İş ekle', tip: 'submit' }]) + '</form>'] }) + planEski() + '</div>';
   }
   // Başlangıç paketiyle gelen eski planlar (lifeos.plan.eski; Plan.GOC çıktısı): salt okunur, «eski kayıt»
@@ -1054,9 +1073,13 @@
   Kabuk.ek.not = sayfaNot; Kabuk.ek.tekrar = sayfaTekrar; Kabuk.ek.yol = sayfaYol;
 
   /* ---- olaylar (yalnız bu dosyanın çizdiği öğeler) ---- */
+  d.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.matches && e.target.matches('.nothizli textarea')) { e.preventDefault(); e.target.form.requestSubmit(); }
+  });
   d.addEventListener('submit', function (e) {
     var f = e.target;
     if (f.matches('form.notform')) { e.preventDefault(); notFormKaydet(f); }
+    else if (f.matches('form.nothizli')) { e.preventDefault(); hizliKaydet(f); }
     else if (f.matches('form.aracform')) { e.preventDefault(); aracFormKaydet(f); }
     else if (f.matches('form.kartform')) { e.preventDefault(); kartEkle(f); }
     else if (f.matches('form.kayitform')) { e.preventDefault(); kayitGonder(f); }

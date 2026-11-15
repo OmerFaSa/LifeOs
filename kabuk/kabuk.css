@@ -515,3 +515,30 @@ h1, .b-baslik h1, .sira__baslik{ letter-spacing:-.022em; }
 article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat{ display:block; margin:calc(-1 * var(--a2)) 0 var(--a3); padding:0; background:none; box-shadow:none; outline:0; }
 article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat .b-uyari__tur{ display:none; }
 article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat .b-uyari__metin{ font-size:var(--yz-k); color:var(--soluk); }
+
+/* İşlevli sadelik (2026-11-15, «kutucukta ne yapacağım belli olsun»): Not'ta üstte hızlı yazma kutusu, King'de mesajlaşma gibi
+   yazma alanı ve örnek sorular; kaydırma çubuğu ince, yuvarlak, yalnız gerekince belirgin. */
+.nothizli{ display:flex; flex-direction:column; gap:var(--a2); margin-bottom:var(--a5); padding:var(--a3); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+.nothizli .b-alan__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.nothizli textarea{ min-height:88px; background:transparent; resize:vertical; }
+.nothizli textarea:focus{ background:transparent; }
+.nothizli .b-eylemler{ justify-content:space-between; flex-direction:row-reverse; }
+.king-oneri{ display:flex; flex-wrap:wrap; gap:var(--a2); margin-bottom:var(--a3); }
+.king-oneri__oge{ min-height:36px; padding:0 var(--a4); border:0; border-radius:999px; font:inherit; font-size:var(--yz-k); color:var(--yazi-2); background:var(--yuzey-2); cursor:pointer;
+  transition:background var(--hizli) var(--akis), color var(--hizli) var(--akis); }
+.king-oneri__oge:hover{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 12%, var(--yuzey-2)); }
+form[data-king-sohbet] .b-alan:has(textarea) .b-alan__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+form[data-king-sohbet] textarea{ min-height:96px; }
+.king-alt{ display:flex; align-items:flex-end; justify-content:space-between; gap:var(--a3); flex-wrap:wrap; }
+.king-alt .b-alan{ flex:0 1 260px; }
+.king-alt .b-alan__ad{ font-size:var(--yz-k); color:var(--soluk); }
+@media (pointer:coarse){ .king-oneri__oge{ min-height:44px; } }
+/* kaydırma çubuğu: Chromium'da ince, yuvarlak, kenardan boşluklu; üstüne gelince koyulaşır. Firefox standart ince çubuk. */
+@supports selector(::-webkit-scrollbar){
+  html{ scrollbar-width:auto; scrollbar-color:auto; }
+  ::-webkit-scrollbar{ width:12px; height:12px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  ::-webkit-scrollbar-thumb{ border:4px solid transparent; border-radius:999px; background:color-mix(in srgb, var(--yazi) 16%, transparent) padding-box; }
+  ::-webkit-scrollbar-thumb:hover{ background:color-mix(in srgb, var(--yazi) 32%, transparent) padding-box; border-width:3px; }
+  ::-webkit-scrollbar-corner{ background:transparent; }
+}

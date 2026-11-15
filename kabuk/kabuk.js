@@ -516,7 +516,7 @@
   function soruHtml(a, kayit) {
     var c = kayit.cevaplar[a.id], son = c && c[c.length - 1];
     if (a.tur !== 'secmeli') {
-      return B.soru({ soru: a.soru, veri: { soru: a.id }, govde: [B.alan({ ad: 'Cevabın', isim: 'cevap-' + a.id.replace(/[^\w-]/g, '-'), tur: 'cok', deger: son ? son.cevap : '' }),
+      return B.soru({ soru: a.soru, veri: { soru: a.id }, govde: [B.alan({ ad: 'Cevabın', isim: 'cevap-' + a.id.replace(/[^\w-]/g, '-'), tur: 'cok', deger: son ? son.cevap : '', yerTutucu: 'Kendi cümlelerinle birkaç satır yaz' }),
         B.eylemler([{ metin: 'Kaydet', veri: { ac: 'acik-kaydet' } }, { yazi: 'Puanlanmaz; kendin değerlendirirsin.' }])],
         sonuc: son ? { baslik: 'Kaydedildi.', maddeler: a.olcut, not: a.dogru ? 'Örnek cevap: ' + a.dogru : '' } : null });
     }

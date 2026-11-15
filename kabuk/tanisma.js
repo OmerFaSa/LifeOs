@@ -400,7 +400,7 @@
     }
   });
   d.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'b-alan-metin') { e.preventDefault(); gonder(e.target.form); }
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'b-alan-metin' && e.target.form && e.target.form.matches('form[data-tn-soru]')) { e.preventDefault(); gonder(e.target.form); } // yalnız Tanışma'nın kutusu (King'in kutusu da «metin» adlı)
   });
   d.addEventListener('click', function (e) {
     var cip = e.target.closest('[data-tn-cip]');

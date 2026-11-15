@@ -223,6 +223,12 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/motor/not');
     await p.waitForSelector('[data-arac="not"]');
     dene('not: boş defter öyle der', /Henüz not yok/.test(await p.textContent('#not-liste')));
+    // hızlı not: üstteki kutuya yaz, Ctrl+Enter; ilk satır ad olur, kutu boşalır (sonra silinir: aşağıdaki sayımlar boş defterden)
+    await p.fill('.nothizli textarea', 'Hızlı deneme\nikinci satır');
+    await p.press('.nothizli textarea', 'Control+Enter');
+    await p.waitForFunction(() => /Hızlı deneme/.test(document.getElementById('not-liste').textContent));
+    dene('not: hızlı kutu Ctrl+Enter ile kaydeder, ilk satır ad olur, kutu boşalır', (await p.inputValue('.nothizli textarea')) === '' && /Kaydedildi/.test(await p.textContent('.nothizli')));
+    await p.evaluate(() => LIFEOS.Kabuk.ic.depo.setItem('lifeos.not.kayit', '[]')); await p.reload(); await p.waitForSelector('#not-liste');
     await p.click('a[href="#/motor/not/yeni"]');
     await p.waitForSelector('form.notform');
     await p.click('form.notform button[type=submit]');
@@ -814,6 +820,16 @@ async function goruntu(p, ad, sec = {}) {
     const kingForm = await p.evaluate(() => { const f = document.querySelector('[data-sayfa="king"] form[data-king-sohbet]');
       return { tek: document.querySelectorAll('[data-king-bolum]').length, secenek: [...f.saglayici.options].map(o => o.value).join(','), metin: !!f.metin }; });
     dene('King: tek sohbet bölümü; Otomatik, Antigravity ve Claude Code seçilir', kingForm.tek === 1 && kingForm.secenek === 'oto,antigravity,claude' && kingForm.metin, JSON.stringify(kingForm));
+    // yazma kutusu: örnek sorular; Enter gönderir (Tanışma'nın Enter kısayolu King'in kutusunu yakalamaz); hâl gelince yazılan silinmez
+    dene('King: ilk açılışta üç örnek soru', (await p.locator('[data-king-oneri]').count()) === 3);
+    // bu yalıtılmış ortamda Merkez yok: gönderilen soruya sahte bir cevap (cevabın akışta göründüğü de sınanır)
+    await p.route('**/api/kabuk/king', r => r.request().method() === 'POST'
+      ? r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'Merhaba, buradayım.', mode: 'model', provider: 'deneme', seconds: 0.4 }) }) : r.continue());
+    await p.fill('form[data-king-sohbet] textarea', 'Merhaba King');
+    await p.press('form[data-king-sohbet] textarea', 'Enter');
+    await p.waitForFunction(() => /Merhaba King/.test((document.querySelector('.b-sohbet__akis') || {}).textContent || ''), null, { timeout: 20000 }).catch(() => {});
+    dene('King: Enter soruyu gönderir, cevap akışa düşer, örnekler kalkar', /Merhaba King/.test(await p.textContent('[data-king-bolum]')) && /Merhaba, buradayım/.test(await p.textContent('[data-king-bolum]')) && (await p.locator('[data-king-oneri]').count()) === 0);
+    await p.unroute('**/api/kabuk/king');
     await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP && document.querySelector('.b-karsilama__selam')); // bölüm geçişinin çizimi bir kare sonra
