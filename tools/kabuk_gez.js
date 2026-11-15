@@ -196,8 +196,8 @@ async function goruntu(p, ad, sec = {}) {
       await p.waitForFunction(a => document.getElementById('sayfa').getAttribute('data-ciz') === a && !document.documentElement.hasAttribute('data-gecis'), alan);
       await p.waitForSelector('.b-acilir');
       dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
-      dene(alan + ': ' + (v.uniteler.length > 4 ? 'yalnız ilk ünite açık gelir' : 'bütün üniteler açık gelir'),
-        (await p.locator('details.b-acilir[open]').count()) === (v.uniteler.length > 4 ? 1 : v.uniteler.length));
+      // kilitli üniteler kapalı gelir (2026-11-16 sadelik): yeni alanda yalnız üzerinde çalışılan ilk ünite açık
+      dene(alan + ': yalnız ilk ünite açık gelir', (await p.locator('details.b-acilir[open]').count()) === 1);
       dene(alan + ': «Başla» ilk derse götürür', (await p.getAttribute('.b-eylemler .b-dugme--ana', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
       await p.click('.b-eylemler .b-dugme--ana');
       await p.waitForSelector('article.ders h1');
@@ -831,9 +831,13 @@ async function goruntu(p, ad, sec = {}) {
       ? r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'Merhaba, buradayım.', mode: 'model', provider: 'deneme', seconds: 0.4 }) }) : r.continue());
     await p.fill('form[data-king-sohbet] textarea', 'Merhaba King');
     await p.press('form[data-king-sohbet] textarea', 'Enter');
-    await p.waitForFunction(() => /Merhaba King/.test((document.querySelector('.b-sohbet__akis') || {}).textContent || ''), null, { timeout: 20000 }).catch(() => {});
-    dene('King: Enter soruyu gönderir, cevap akışa düşer, örnekler kalkar', /Merhaba King/.test(await p.textContent('[data-king-bolum]')) && /Merhaba, buradayım/.test(await p.textContent('[data-king-bolum]')) && (await p.locator('[data-king-oneri]').count()) === 0);
+    await p.waitForSelector('.king-akis .king-msj--king', { timeout: 20000 }).catch(() => {});
+    dene('King: Enter soruyu gönderir, cevap akışa düşer, örnekler kalkar', /Merhaba King/.test(await p.textContent('.king-msj--ben')) && /Merhaba, buradayım/.test(await p.textContent('.king-msj--king')) && (await p.locator('[data-king-oneri]').count()) === 0);
     await p.unroute('**/api/kabuk/king');
+    // 2026-11-16: konuşma yenilemede kalır (lifeos.king.sohbet), «Yeni konuşma» temizler; ayrıntılı tur: belgeler/ekip/sadelesme/tur-20261116/king.md
+    await p.reload(); await p.waitForSelector('.king-msj--king');
+    await p.click('[data-king-yeni]');
+    dene('King: konuşma yenilemede kalır, «Yeni konuşma» temizler', (await p.locator('.king-msj').count()) === 0 && (await p.locator('[data-king-oneri]').count()) === 3);
     await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP && document.querySelector('.b-karsilama__selam')); // bölüm geçişinin çizimi bir kare sonra

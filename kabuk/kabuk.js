@@ -100,29 +100,29 @@
    * sohbet yok (AGENTS §0.1). Metin king/KURULUM.md'nin sahibe dönük kısmı; dış bağlantı yok. B: bileşen kataloğu (kabuk/bilesen.js). */
   function kingGovde(B) {
     var l = function (ad, ogeler) { return B.liste({ ad: ad, ogeler: ogeler.map(function (x) { return { ad: x[0], not: x[1], uzun: true }; }) }); };
-    // Sayfada tek öne çıkan şey sohbet (king-sohbet.js başlığın altına ekler); açıklamalar kapalı bölümlerde bekler (kural 10).
-    var k = function (baslik, not, govde) { return B.acilir({ baslik: baslik, not: not, govde: govde, duzey: 3 }); };
-    return B.baslik({ metin: 'King', alt: 'Düşünce ortağın. Sayıyı ve kaydı LifeOS tutar; King sayı uydurmaz.' }) +
-      B.bolum({ baslik: 'King hakkında', id: 'king-hakkinda', govde: [
-        k('Ne görür', '6', l('King ne görür', [
+    // Sayfanın tek işi sohbet (king-sohbet.js başlığın altına ekler); açıklamalar sohbetin altında tek kapalı bölümde (2026-11-16, sahip: «ekranda daha az şey»).
+    var k = function (baslik, govde) { return '<p class="king-hakkinda__ara">' + kac(baslik) + '</p>' + govde; };
+    return B.baslik({ metin: 'King' }) +
+      B.acilir({ baslik: 'King hakkında', veri: { 'king-hakkinda': '' }, govde: [
+        k('Ne görür', l('King ne görür', [
           ['Nerede ne var', 'Sistem haritası: bütün yerler ve durumları'],
           ['Bugünün özeti ve planı', 'Bugüne ait olmayan bir şeyi bugünmüş gibi sunmaz'],
           ['Kayıtların', 'Her sayı kesinlik etiketiyle; olmayan veri için «veri yok» der'],
           ['Notların', 'Özel işaretli olanlar hariç'],
           ['Yol haritan ve tekrar kartların', 'Kapı soruları hariç'],
           ['Araştırma', "Notlarında, ders içeriğinde ve Vikipedi'de kaynaklı cevap arar; internete yalnız konunun adı gider"]])),
-        k('Ne yapmaz', '5', l('King ne yapmaz', [
+        k('Ne yapmaz', l('King ne yapmaz', [
           ['Yalnız okur', "Kayıt, not, onay ya da ayar yazmaz; kaydı LifeOS'ta sen yaparsın"],
           ['Özel notlarını görmez', 'Özel işaretli düşünceler de buna dahil'],
           ["King'e kapalı araçların notlarını görmez", 'Araçta «King okuyabilsin» kapalıysa o aracın notları ve sisteme notu ona gitmez'],
           ['Sırları görmez', 'Parola, anahtar ve jeton adlı alanlar hiç verilmez'],
           ['Bu tarayıcıdaki yeni kayıtları henüz görmez', 'Yeni sistemdeki notlar, kartlar ve yol ilerlemesi tek depoya geçişten sonra görünür']])),
-        k('Claude uygulamasında', '3 adım', ["<p class=\"soluk\">King'le Claude masaüstü uygulamasında da konuşursun.</p>", l('King için adımlar', [
+        k('Claude uygulamasında', "<p class=\"soluk\">King'le Claude masaüstü uygulamasında da konuşursun.</p>" + l('King için adımlar', [
           ['Claude uygulamasını tamamen kapat', 'Görev çubuğundaki simgeden «Çık»; pencereyi kapatmak yetmez'],
           ["Claude'u yeniden aç", 'Sohbet kutusunun araç menüsünde «lifeos-king» görünür'],
-          ['Bir şey sor', '«Bugün ne var?» ya da «Felsefe yol haritamda neredeyim?»; Claude okumadan önce izin ister']]),
-          "<p class=\"soluk\">Görünmüyorsa Claude'da Ayarlar › Geliştirici bölümündeki günlüğe bak.</p>"])] }) +
-      '<p class="king-dipnot">' + kac("King'in okuduğu her şey o sohbette Claude'a, yani Anthropic'in sunucusuna gider. Özel notların ve sırların gitmez; öbür kayıtlar sen sordukça gider.") + '</p>';
+          ['Bir şey sor', '«Bugün ne var?» ya da «Felsefe yol haritamda neredeyim?»; Claude okumadan önce izin ister']]) +
+          "<p class=\"soluk\">Görünmüyorsa Claude'da Ayarlar › Geliştirici bölümündeki günlüğe bak.</p>"),
+        '<p class="king-dipnot">' + kac("Yazdığın ve King'in okuduğu her şey cevaplayan modelin sunucusuna gider: Antigravity'de Google'a, Claude'da Anthropic'e. Özel notların ve sırların gitmez; öbür kayıtlar sen sordukça gider.") + '</p>'] });
   }
   // Yerin durum rozeti: yalnız eski sayfaya giden ve henüz yazılmamış yerde. «pilot» (kabuğa taşınmış alan) ekranda rozet almaz:
   // iç göç durumu sahibe bir şey söylemez (faz3-arama-king-sayfa.md); taslak içeriği Onaylar ve ders kartındaki «taslak» söyler.
@@ -331,7 +331,7 @@
     sonOzet = { a: a, tekrar: v.tekrar };
     return cubuk(true) + B.karsilama({ tarih: tarih(t), selam: selam(t, hesapAdi()),
       ozet: ozetCumle(a, v.tekrar, ekler.filter(function (s) { return BEKLEYEN_RE.test(s); }).length),
-      ilerleme: od && od.toplam ? { deger: od.deger, toplam: od.toplam } : null, alanlar: alanKartlari(f, od, a),
+      ilerleme: od && od.toplam && od.deger ? { deger: od.deger, toplam: od.toplam } : null, alanlar: alanKartlari(f, od, a), // %0 halkası bilgi vermez, gizli
       sira: { simge: etkinAlan, ust: alan.ad + (a && a.unite ? ' · Ünite ' + a.unite : ''), metin: !f ? alan.ad : !a ? f.asama.ad + ' tamamlandı' : a.tur === 'kapi' ? a.ad + ' · kapı' : a.ad },
       adim: !a ? null : a.tur === 'ders' ? 'Ders ' + a.sira + ' / ' + a.toplam : a.unite ? 'Ünitenin dersleri bitti; kapıdan geçince sonraki ünite açılır' : 'Aşamanın son kapısı',
       eylem: { metin: !a ? 'Aç' : a.tur === 'kapi' ? 'Kapıya git' : od.deger ? 'Derse devam et' : 'Derse başla', href: a ? adimYolu(a) : F() },
@@ -372,7 +372,8 @@
     try {
       var o = sahneOnbellek[ad];
       // önbellekte yoksa çizim (yavaş makinede 100–300 ms) geçişin ortasında yapılmaz: boşta çizilir, tuval o ana dek gök renginde
-      if (!o) { bostaCiz(D, tur, saat, c.width, c.height, function () { if (c.isConnected) manzara(); }); return; }
+      // geri çağrı o anki tuvali yeniden bulur: bekleyen çizim sırasında sayfa yeniden çizilirse (veri geldi) eski tuvale bağlı kalıp kayboluyordu
+      if (!o) { bostaCiz(D, tur, saat, c.width, c.height, manzara); return; }
       o.yer.imza = ''; // yeni tuval: sakinler ilk karede çizilsin
       canli = { c: c, g: c.getContext('2d'), arka: o, D: D };
       canli.g.drawImage(o, 0, 0); D.kare(canli.g, o, o.yer, Date.now() / 1000);
@@ -510,10 +511,11 @@
           var okunan = u.dersler.filter(function (x) { return x.okundu; }).length;
           var adim = u.gecti ? 'bitti' : u.id === simdiki ? 'simdi' : u.atlandi ? 'atlandi' : u.acik ? 'acik' : 'kilitli';
           // kalabalık alanda (Akademik: 30 ünite) yalnız üzerinde çalışılan ünite açık gelir
-          return B.acilir({ baslik: u.ad, acik: hepsiAcik || u.id === simdiki, veri: { adim: adim, no: String(ui + 1) },
+          // kilitli üniteler kapalı gelir: ekranda yalnız şimdi işe yarayan dersler görünür (sahibin isteği 2026-11-16: daha az şey)
+          return B.acilir({ baslik: u.ad, acik: u.id === simdiki || (hepsiAcik && u.acik && !u.gecti), veri: { adim: adim, no: String(ui + 1) },
             not: u.gecti ? 'geçildi' : u.atlandi ? 'atlandı' + (yer_.etiket ? ' (' + yer_.etiket + ')' : '') + ' · ' + okunan + '/' + u.dersler.length + ' ders' : u.acik ? okunan + '/' + u.dersler.length + ' ders' : 'kilitli',
             govde: [u.dersler.length ? B.liste({ ad: u.ad + ' dersleri', tur: 'ders', ogeler: u.dersler.map(function (x, i) {
-              var oz = (f.y.oge[x.id] || {}).ozet;
+              var oz = a && a.id === x.id ? undefined : (f.y.oge[x.id] || {}).ozet; // sıradaki dersin özeti üstteki kartta zaten yazıyor
               return x.acik ? { no: i + 1, baslik: x.ad, ozet: oz, durum: x.okundu ? 'okundu' : 'yeni', taslak: x.etiket === 'taslak', href: F() + '/ders/' + x.id } : { no: i + 1, baslik: x.ad, ozet: oz, durum: 'kilitli' };
             }) }) : '', B.liste({ ad: u.ad + ' kapısı', ogeler: [kapiSatiri(u.id, 'Ünite kapısı', u.acik, u.kapi)] })] });
         }).join('') +
@@ -534,7 +536,7 @@
     return '<section class="sira" aria-labelledby="' + (yeni ? 'yer-baslik' : 'sira-baslik') + '"><p class="sira__ust">' + kac(ust) + '</p>' +
       '<h2 class="sira__baslik" id="' + (yeni ? 'yer-baslik' : 'sira-baslik') + '">' + kac(baslik) + '</h2>' + (ozet ? '<p class="sira__ozet">' + kac(ozet) + '</p>' : '') +
       B.eylemler([{ metin: yeni ? 'Baştan başla' : okunan ? 'Devam et' : 'Başla', tur: 'ana', href: adimYolu(a) }, yeni ? { metin: 'Seviyemi bul', href: F() + '/yer/1' } : null]) +
-      (yeni ? '<p class="sira__not">Konuyu biliyorsan «Seviyemi bul»: birkaç soruyla bildiğin aşamalar atlanır.</p>' : '') + '</section>';
+      '</section>';
   }
   function altKirinti(ad) {
     return '<a class="kirinti" href="' + F() + '"><span aria-hidden="true">‹ </span>' + kac(H.bul(etkinAlan).ad) + '</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>' + kac(ad) + '</span>';
@@ -582,7 +584,7 @@
     return ust(altKirinti(x.ad)) + '<article class="govde ders">' + dersAdimlari(adim, n) + dersMetni(y, x) +
       (n ? B.bolum({ baslik: 'Kendini dene', id: 'ders-alistir',
         govde: ['<p class="soluk ders__sayac">Okuduğunu ' + n + ' soruyla dene · ' + cevap + ' / ' + n + ' cevaplandı</p>'].concat(x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; })) }) : '') +
-      '<div class="ders__bitir">' + B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id } }, { metin: 'Yol haritası', tur: 'sade', href: F() }]) + '</div></article>';
+      '<div class="ders__bitir">' + B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id } }, { metin: 'Yol haritası', tur: 'sade', href: F() }, { metin: "King'le çalış", tur: 'sade', href: '#/king', veri: { 'king-calis': id } }]) + '</div></article>'; // king-sohbet.js: ders bağlamıyla açar
   }
   // Dersin üç adımı: oku, alıştır, bitir. Şimdiki adım vurgulu, geçilenler ✓ (renk tek başına değil).
   function dersAdimlari(adim, n) {
@@ -683,14 +685,15 @@
     function yaz() {
       if (sira !== cizSira) return; // geçişin bekleyen çizimi, ondan sonra gelen daha yeni çizimin üstüne yazmaz
       var yukleniyordu = !yeniSayfa && !!sayfaEl.querySelector('[aria-busy="true"]'); // «Yükleniyor…»un yerine gelen asıl içerik bir kez süzülür
+      var gecen = !yeniSayfa && !yukleniyordu && sayfaEl.classList.contains('canlan') ? canlanAni() : null;
       sayfaEl.innerHTML = html;
       if (pay) { var ph = sayfaEl.querySelector(pay.hedef); if (ph) ph.style.viewTransitionName = 'paylasilan'; }
       sayfaEl.setAttribute('data-ciz', yer.id);
       d.title = yer.ad + ' · LifeOS';
       manzara();
-      // Yeni sayfa bir kez süzülür. Aynı sayfanın yeniden çizimi (veri geldi, tıklandı) süzülmeyi baştan oynatmaz: «tekrar yükleniyor» görüntüsü buydu.
-      // İlk çizimden hemen sonra gelen (150 ms içinde) yeniden çizimde süzülme henüz görünmediği için sürer.
-      if (yeniSayfa || yukleniyordu) canlan(gecisli && yeniSayfa); else if (performance.now() - canlanZaman > 150) sayfaEl.classList.remove('canlan', 'canlan--gecis');
+      // Yeni sayfa bir kez süzülür. Aynı sayfanın yeniden çizimi (veri geldi, hesap yüklendi, tıklandı) süzülmeyi baştan oynatmaz:
+      // yeni öğelerin hareketleri kaldığı ana sarılır (innerHTML öğeleri yeniler, CSS hareketi sıfırdan başlardı: «animasyon tekrarlıyor»).
+      if (yeniSayfa || yukleniyordu) canlan(gecisli && yeniSayfa); else if (gecen != null) surdur(gecen);
     }
     // Bölüm değişince görünüm geçişi (tarayıcı destekliyorsa ve hareket açıksa): içerik gidilen yöne kayarak söner, üst çubuk yerinde kalır,
     // seçili sekmenin işareti yenisine akar. Aynı sayfanın yeniden çizimi (tıklama, yazma) anında olur.
@@ -740,25 +743,40 @@
   }
   // Yeni sayfaya girişte listeler sırayla süzülür (kabuk.css .canlan); aynı sayfanın yeniden çizimi süzülmez.
   // Görünüm geçişiyle gelindiyse sayfanın kendisi zaten kayarak geldi; yalnız listeler süzülür (canlan--gecis), sayfa ikinci kez belirmez.
-  var canlanSaat = null, canlanZaman = 0;
+  var canlanSaat = null;
+  function sonlu(a) { var t = a.effect && a.effect.getComputedTiming && a.effect.getComputedTiming(); return !!t && t.iterations !== Infinity; } // gece nefesi gibi sürekli hareketler hariç
+  // Süzülmenin şimdiki anı: eski öğelerin hareketlerinden okunur (hepsi canlan sınıfıyla aynı anda başladı). Saat farkı değil, çünkü
+  // görünüm geçişi ya da gizli sekme hareketin başlamasını geciktirir; okunamazsa (eski tarayıcı) -1: hiç oynatmamak, baştan oynatmaktan iyi.
+  function canlanAni() {
+    if (!sayfaEl.getAnimations) return -1;
+    return sayfaEl.getAnimations({ subtree: true }).filter(sonlu).reduce(function (m, a) { return Math.max(m, a.currentTime || 0); }, 0);
+  }
+  function surdur(gecen) {
+    if (gecen < 0) return sayfaEl.classList.remove('canlan', 'canlan--gecis');
+    sayfaEl.getAnimations({ subtree: true }).filter(sonlu).forEach(function (a) { if (a.currentTime != null && a.currentTime < gecen) a.currentTime = gecen; });
+  }
   function canlan(gecisli) {
-    clearTimeout(canlanSaat); canlanZaman = performance.now(); sayfaEl.classList.add('canlan'); sayfaEl.classList.toggle('canlan--gecis', !!gecisli);
+    clearTimeout(canlanSaat); sayfaEl.classList.add('canlan'); sayfaEl.classList.toggle('canlan--gecis', !!gecisli);
     canlanSaat = setTimeout(function () { sayfaEl.classList.remove('canlan', 'canlan--gecis'); }, 1000);
   }
   function git(yol) { if (location.hash === yol) rota(); else location.hash = yol; }
+  function sesCal(tur) { if (Kabuk.Ses && Kabuk.Ses.cal) try { Kabuk.Ses.cal(tur); } catch (e) { /* ses yoksa sessiz */ } }
 
   /* ---------------- halka ---------------- */
   var HALKA_SIMGE = { bugun: 'gunes', ogren: 'ogren', saglik: 'saglik', not: 'not', king: 'king', harita: 'harita', plan: 'plan', ayarlar: 'kisi' };
   var halkaEl, perdeEl, komutEl, oncekiOdak = null, secili = -1, basili = null;
   function halkaAc(x, y) {
     oncekiOdak = d.activeElement;
-    var w = innerWidth, hh = innerHeight, r = Math.max(84, Math.min(150, Math.min(w, hh) / 2 - 64));
-    x = x == null ? w / 2 : Math.min(Math.max(x, r + 56), w - r - 56);
-    y = y == null ? hh / 2 : Math.min(Math.max(y, r + 40), hh - r - 40);
-    halkaEl.style.setProperty('--x', x + 'px'); halkaEl.style.setProperty('--y', y + 'px'); halkaEl.style.setProperty('--r', r + 'px');
+    // dikey yarıçap r, yatay rx (hap düğmeler geniş: yatayda daha açık durur); ikisi de ekrana sığar, hap yarı genişliği ~70 px
+    var w = innerWidth, hh = innerHeight, r = Math.max(80, Math.min(140, hh / 2 - 60)), rx = Math.max(90, Math.min(r * 1.35, w / 2 - 80));
+    x = x == null ? w / 2 : Math.min(Math.max(x, rx + 74), w - rx - 74);
+    y = y == null ? hh / 2 : Math.min(Math.max(y, r + 34), hh - r - 34);
+    if (w < 2 * rx + 148) x = w / 2;
+    halkaEl.style.setProperty('--x', x + 'px'); halkaEl.style.setProperty('--y', y + 'px'); halkaEl.style.setProperty('--r', r + 'px'); halkaEl.style.setProperty('--rx', rx + 'px');
     perdeEl.hidden = false; halkaEl.hidden = false; secili = -1;
     try { getSelection().removeAllRanges(); } catch (e) { /* yok */ }
     requestAnimationFrame(function () { halkaEl.classList.add('b-halka--acik'); perdeEl.classList.add('acik'); });
+    sesCal('ac');
   }
   function halkaKapat(odakDon) {
     if (halkaEl.hidden) return;
@@ -824,6 +842,9 @@
   var ETKILESIMLI = 'a,button,input,select,textarea,label,summary,[contenteditable],[role="dialog"],.b-halka';
   function basBasla(e) {
     if (e.button !== 0 || !halkaEl.hidden || !komutEl.hidden || e.target.closest(ETKILESIMLI)) return;
+    // kaydırma çubuğuna basmak «boş yere basılı tutmak» değildir (çubuğu sürüklerken pointermove gelmez, halka açılıyordu)
+    var t = e.target, de = d.documentElement;
+    if (e.clientX >= de.clientWidth || e.clientY >= de.clientHeight || (t.clientWidth && (e.offsetX > t.clientWidth || e.offsetY > t.clientHeight))) return;
     var sx = e.clientX, sy = e.clientY;
     basili = { x: sx, y: sy, acildi: false, zaman: setTimeout(function () { basili.acildi = true; halkaAc(sx, sy); }, e.pointerType === 'mouse' ? 380 : 480) };
   }
@@ -841,7 +862,7 @@
     if (!basili) return;
     clearTimeout(basili.zaman);
     var acildi = basili.acildi; basili = null;
-    if (acildi && secili >= 0) { var yol = halkaOgeleri()[secili].getAttribute('data-yol'); halkaKapat(false); git(yol); }
+    if (acildi && secili >= 0) { var yol = halkaOgeleri()[secili].getAttribute('data-yol'); halkaKapat(false); sesCal('tik'); git(yol); }
     else if (acildi) { var b = halkaOgeleri()[0]; if (b) b.focus(); }
   }
 
@@ -968,7 +989,7 @@
     var s = $('.b-soru[data-soru="' + id + '"] .b-soru__sonuc'); if (s) s.focus({ preventScroll: true });
   }
   function dersBitir(id) {
-    try { kayitYaz(Yol.dersOku(al().y, kayitOku(), id, Date.now())); } catch (e) { /* kilitli */ }
+    try { kayitYaz(Yol.dersOku(al().y, kayitOku(), id, Date.now())); sesCal('tamam'); } catch (e) { /* kilitli */ }
     var a = siradaki(fDurum());
     git(a ? adimYolu(a) : F());
   }
@@ -980,7 +1001,7 @@
   function kapiBitir(form) {
     var id = form.getAttribute('data-kapi'), cevaplar = formCevaplari(form), y = al().y, z = Date.now();
     try {
-      var r = Yol.kapiDene(y, kayitOku(), id, cevaplar, z); kayitYaz(r.kayit);
+      var r = Yol.kapiDene(y, kayitOku(), id, cevaplar, z); kayitYaz(r.kayit); if (r.sonuc.gecti) sesCal('tamam');
       if (r.sonuc.gecti && y.tur[id] === 'unite') Kabuk.Asama.tahminSil(Yol, depo, etkinAlan, asamaSayisi(etkinAlan), z);
       kapiSonuc = { id: id, sonuc: r.sonuc, tekrar: Kabuk.kapiTekrar ? Kabuk.kapiTekrar(y, id, cevaplar) : 0 };
     } catch (e) { /* kilitli */ }
@@ -1009,6 +1030,7 @@
     addEventListener('hashchange', function () { halkaKapat(false); komutKapat(false); rihtimAc(false); rota(); sayfaEl.focus({ preventScroll: true }); scrollTo(0, 0); });
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);
+    d.addEventListener('click', function (e) { if (e.isTrusted && e.target.closest && e.target.closest('a[href^="#/"], [data-yol]')) sesCal('tik'); }, true);
     d.addEventListener('click', function (e) { var a = !e.defaultPrevented && e.target.closest && e.target.closest('#sayfa a[href^="#/"]'); paylas = a ? paylasKaynak(a) : null; }, true);
     d.addEventListener('submit', function (e) { var f = e.target.closest('form.kapi'); if (f) { e.preventDefault(); if (f.hasAttribute('data-yer')) yerBitir(f); else kapiBitir(f); } });
     d.addEventListener('change', function (e) {
@@ -1018,7 +1040,9 @@
     d.addEventListener('pointerdown', basBasla);
     d.addEventListener('pointermove', basHareket);
     d.addEventListener('pointerup', basBitir);
+    var basVazgec = function () { if (basili && !basili.acildi) { clearTimeout(basili.zaman); basili = null; } };
     d.addEventListener('pointercancel', function () { if (basili) { clearTimeout(basili.zaman); basili = null; } });
+    addEventListener('scroll', basVazgec, { capture: true, passive: true }); // sayfa ya da bir kutu kayıyorsa basılı tutma değil
     d.addEventListener('contextmenu', sagTik);
     rihtimEl = $('#rihtim');
     d.addEventListener('pointermove', halkaYon);

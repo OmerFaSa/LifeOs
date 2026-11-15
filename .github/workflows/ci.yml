@@ -163,7 +163,7 @@ jobs:
 
       # Hesap ekrani (faz7-hesap-kabuk.md): oturum, cihazlar, guncelleme; jeton ekrana gelmez.
       - name: Kabuk hesap ekranı
-        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hesap ekranı" node kabuk/hesap.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap giriş ve güvenlik" node kabuk/hesap-giris.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap bağlantıları" node kabuk/hesap-baglanti.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap yönetimi" node kabuk/hesap-yonetim.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Açılış videosu" node kabuk/acilis.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Gece sesi" node kabuk/gece.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Etkileşim" node kabuk/etkilesim.test.js
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hesap ekranı" node kabuk/hesap.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap giriş ve güvenlik" node kabuk/hesap-giris.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap bağlantıları" node kabuk/hesap-baglanti.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Hesap yönetimi" node kabuk/hesap-yonetim.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Açılış videosu" node kabuk/acilis.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Gece sesi" node kabuk/gece.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Arayüz sesleri" node kabuk/ses.test.js && bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Etkileşim" node kabuk/etkilesim.test.js
 
       # Telefonun bilgisayarsiz indirdigi web paketi (uygulama/ios/web_paket.py).
       - name: Web paketi üreticisi

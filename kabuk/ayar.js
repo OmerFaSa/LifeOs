@@ -44,6 +44,8 @@
       secenekler: { acik: 'Göster', kapali: 'Gizle' }, aciklama: 'Bekleyen işleri gösteren küçük işaretler.', kaynak: ENV + ' §3b lifeos.rozet' },
     { anahtar: 'lifeos.sessiz', ad: 'Sessiz saatler', tur: 'saatAraligi', varsayilan: { acik: false, bas: '22:00', bit: '07:00' }, grup: 'bildirim', esitlenir: true,
       aciklama: 'Bu aralıkta sesler ve sesli okuma susar; gece yarısını geçebilir.', kaynak: ENV + ' §3c Ses ve müzik: sessiz saatler' },
+    { anahtar: 'lifeos.ses.arayuz', ad: 'Arayüz sesleri', tur: 'secim', varsayilan: 'acik', grup: 'ses', esitlenir: false,
+      secenekler: { acik: 'Açık', kapali: 'Kapalı' }, aciklama: 'Sayfa değişince hafif bir tık, Yerler halkası açılınca yumuşak bir ses, ders bitince küçük bir çan. Sessiz saatlerde susar.', kaynak: ENV + ' §3c Ses: ses.arayuz (kabuk/ses.js, sahibin isteği 2026-11-16)' },
     { anahtar: 'lifeos.ses.gece', ad: 'Ambiyans sesi', tur: 'secim', varsayilan: 'kapali', grup: 'ses', esitlenir: false,
       secenekler: { kapali: 'Kapalı', acik: 'Saate göre', gunduz: 'Hep gündüz', gece: 'Hep gece' }, aciklama: 'Gündüz kuşlar, dere ve esinti; gece cırcır böcekleri, rüzgâr ve uzakta kurbağa. Tarayıcıda üretilir; üst çubuktaki düğme de açıp kapatır.', kaynak: ENV + ' §3c Ses: ses.gece (kabuk/gece.js, sahibin isteği 2026-11-15)' },
     { anahtar: 'lifeos.kilit.odeme', ad: 'Satın alma ve kart işlemleri', tur: 'secim', varsayilan: 'kapali', grup: 'hesap', esitlenir: false,

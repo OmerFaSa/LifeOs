@@ -522,7 +522,7 @@
         '<form class="nothizli" novalidate>' + B.alan({ ad: 'Hızlı not', isim: 'hizli', tur: 'cok', enCok: 20000, deger: hd && hd.metin || '',
           yerTutucu: 'Aklındakini yaz. İlk satır notun adı olur; #etiket ve [[başka not]] kullanabilirsin.' }) +
         B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, { yazi: hd && hd.tamam ? 'Kaydedildi.' : hd && hd.hata ? hd.hata : 'Ctrl + Enter da kaydeder' }]) + '</form>' +
-        B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: 'Kelime ya da #etiket', veri: { 'not-ara': '' } }) +
+        (notlar.length ? B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: 'Kelime ya da #etiket', veri: { 'not-ara': '' } }) : '') + // aranacak not yokken arama kutusu yalnız kalabalık
         '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div>' +
         (notlar.length ? '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' : '') +
         B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', govde: ['<p class="soluk">Bir araç, notlarını kendi klasöründe toplar.</p>',

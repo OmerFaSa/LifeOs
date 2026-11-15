@@ -95,7 +95,7 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 
 /* perde: halka ve komut çubuğunun (bilesen.css 24, 25) arkasındaki örtü */
 .perde{ position:fixed; inset:0; background:var(--perde); opacity:0; transition:opacity var(--sure) ease; z-index:10; }
-.perde.acik{ opacity:1; }
+.perde.acik{ opacity:1; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); } /* arkadaki sayfa bulanır: halkanın yazıları sayfa yazısına karışmaz */
 [hidden]{ display:none !important; }
 
 /* ---------------- ders ve kapı (Felsefe pilotu) ---------------- */
@@ -368,20 +368,15 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 .rihtim__oge:active .rihtim__simge{ transform:scale(calc(var(--b, 1) * .92)); }
 @media (hover:none), (pointer:coarse){ .rihtim{ display:none; } }
 @media print{ .rihtim{ display:none; } }
-/* Yerler halkası, kabuğun dokunuşu (bilesen.css taşının üstüne): buzlu cam disk, taşlar yaylanarak sırayla açılır (--i),
-   merkez seçilen yöne bakan oka döner (--sa), seçilen taş biraz dışarı çıkar. Sağ tıkla da açılır (kabuk.js sagTik). */
-#halka::before{ border-radius:50%; background:color-mix(in srgb, var(--yuzey-2) 78%, transparent); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3);
-  box-shadow:var(--golge-buyuk); transform:translate(-50%,-50%) scale(.6);
-  transition:transform var(--orta) var(--yay), opacity var(--hizli) ease; }
-#halka.b-halka--acik::before{ transform:translate(-50%,-50%); opacity:1; }
-#halka .b-halka__merkez{ left:-7px; top:-7px; width:14px; height:14px; border-radius:50%; box-shadow:0 0 0 5px color-mix(in srgb, var(--vurgu) 18%, transparent);
-  transition:transform var(--hizli) var(--akis), border-radius var(--hizli) ease; }
-#halka.b-halka--secili .b-halka__merkez{ border-radius:50% 50% 50% 0; transform:rotate(calc(var(--sa, 0deg) + 135deg)); }
-#halka .b-halka__oge{ padding:0 14px; border-radius:999px;
+/* Yerler halkası, kabuğun dokunuşu (bilesen.css taşının üstüne): disk yok, örtünün üstünde yalnız hap düğmeler ve ortada küçük nokta.
+   Yatay yarıçap --rx (kabuk.js halkaAc ekrana sığdırır); taşlar yaylanarak sırayla açılır (--i), seçilen taş hafifçe büyür. Sağ tıkla da açılır. */
+#halka .b-halka__merkez{ border-radius:50%; box-shadow:0 0 0 6px color-mix(in srgb, var(--vurgu) 20%, transparent); }
+#halka .b-halka__oge{ display:inline-flex; align-items:center; gap:8px; padding:0 16px 0 12px; border-radius:999px;
   transition:transform var(--orta) var(--yay), opacity var(--hizli) ease, background var(--hizli) ease, color var(--hizli) ease;
   transition-delay:calc(var(--hizli) * var(--i, 0) * .2); }
-#halka .b-halka__oge svg{ width:18px; height:18px; margin-right:8px; vertical-align:-3px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-#halka.b-halka--acik .b-halka__oge--secili{ transform:translate(-50%,-50%) rotate(var(--a)) translateX(calc(var(--r,120px) + 6px)) rotate(calc(-1 * var(--a))) scale(1.08); transition-delay:0s; }
+#halka.b-halka--acik .b-halka__oge{ transform:translate(calc(-50% + cos(var(--a)) * var(--rx, 160px)), calc(-50% + sin(var(--a)) * var(--r, 120px))); }
+#halka .b-halka__oge svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+#halka.b-halka--acik .b-halka__oge--secili{ transform:translate(calc(-50% + cos(var(--a)) * var(--rx, 160px)), calc(-50% + sin(var(--a)) * var(--r, 120px))) scale(1.06); transition-delay:0s; }
 
 /* Paylaşılan öğe (kabuk.js rota paylas): tıklanan kartın simgesi açılan sayfanın kapak simgesine, «Sıradaki»nin başlığı dersin başlığına akar.
    Ad yalnız geçiş süresince ve yalnız o iki öğede durur; desteklemeyen tarayıcıda düz geçiş. */
@@ -527,11 +522,6 @@ article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat .b-uyari__metin{ font-siz
 .king-oneri__oge{ min-height:36px; padding:0 var(--a4); border:0; border-radius:999px; font:inherit; font-size:var(--yz-k); color:var(--yazi-2); background:var(--yuzey-2); cursor:pointer;
   transition:background var(--hizli) var(--akis), color var(--hizli) var(--akis); }
 .king-oneri__oge:hover{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 12%, var(--yuzey-2)); }
-form[data-king-sohbet] .b-alan:has(textarea) .b-alan__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
-form[data-king-sohbet] textarea{ min-height:96px; }
-.king-alt{ display:flex; align-items:flex-end; justify-content:space-between; gap:var(--a3); flex-wrap:wrap; }
-.king-alt .b-alan{ flex:0 1 260px; }
-.king-alt .b-alan__ad{ font-size:var(--yz-k); color:var(--soluk); }
 @media (pointer:coarse){ .king-oneri__oge{ min-height:44px; } }
 /* kaydırma çubuğu: Chromium'da ince, yuvarlak, kenardan boşluklu; üstüne gelince koyulaşır. Firefox standart ince çubuk. */
 @supports selector(::-webkit-scrollbar){
@@ -575,7 +565,7 @@ article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat{ margin-bottom:var(--a4);
 /* Not: arama tek satır kutu (etiket ekran okuyucuda) */
 [data-arac="not"] .b-alan:has([data-not-ara]) .b-alan__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 [data-arac="not"] .b-bos{ padding:var(--a5); }
-/* King: Anthropic notu kutu değil, sakin dipnot */
+/* King: model notu kutu değil, sakin dipnot (King hakkında bölümünün sonunda) */
 .king-dipnot{ margin:var(--a5) 0 0; font-size:var(--yz-k); line-height:1.55; color:var(--soluk); max-width:62ch; }
 article.ders > .b-uyari--dikkat + .ders__ozet, article.ders > .b-baslik + .ders__ozet{ margin-top:0; }
 article.ders .ders__ozet{ color:var(--yazi-2); }
@@ -597,23 +587,66 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
 /* ===== Anlaşılır ve hitap eden (2026-11-15) =====
    King: gerçek sohbet görünümü (senin mesajın sağda, King solda), yazma alanı tek kart; Ayarlar: arama; öğrenme: özet kartı ve kısa açıklamalar. */
 .king-giris{ margin:0 0 var(--a2); font-size:var(--yz-k); color:var(--soluk); }
-:root [data-king-bolum] .b-sohbet__akis{ gap:var(--a3); margin-bottom:var(--a5); }
-:root [data-king-bolum] .b-sohbet__soru{ align-self:flex-end; max-width:78%; padding:var(--a2) var(--a4); border-radius:18px 18px 6px 18px;
-  color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 13%, var(--yuzey)); }
-:root [data-king-bolum] .b-sohbet__ben{ align-self:flex-start; align-items:stretch; max-width:86%; padding:var(--a3) var(--a4); text-align:left;
-  border-radius:18px 18px 18px 6px; background:var(--yuzey); box-shadow:var(--golge-yumusak); line-height:1.6; }
-:root [data-king-bolum] .b-sohbet__ben > span + span{ font-size:var(--yz-k); color:var(--soluk); }
-:root [data-king-bolum] .b-sohbet__soru--simdi{ align-self:flex-start; max-width:86%; font-size:var(--yz); color:var(--soluk); background:var(--yuzey);
-  border-radius:18px 18px 18px 6px; box-shadow:var(--golge-yumusak); }
-:root form[data-king-sohbet]{ gap:var(--a2); padding:var(--a3); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-orta);
-  transition:box-shadow var(--hizli) var(--akis); }
-:root form[data-king-sohbet]:focus-within{ box-shadow:var(--golge-orta), 0 0 0 2px color-mix(in srgb, var(--yazi) 14%, transparent); }
-:root form[data-king-sohbet] textarea{ min-height:64px; padding:var(--a2); background:transparent; resize:none; outline:0; box-shadow:none; }
-:root form[data-king-sohbet] textarea:focus{ background:transparent; outline:0; box-shadow:none; }
-:root .king-alt{ align-items:center; padding-top:var(--a2); box-shadow:inset 0 1px 0 color-mix(in srgb, var(--yazi) 7%, transparent); }
-:root .king-alt .b-alan{ flex-direction:row; align-items:center; gap:var(--a2); flex:0 1 auto; }
-:root .king-alt .b-alan__ad{ white-space:nowrap; }
-:root .king-alt select{ height:36px; width:auto; font-size:var(--yz-k); }
+/* King sohbeti (2026-11-16, sahip: «uzun uzun konuşacağım»): mesajlaşma düzeni, sen sağda King solda, en yeni altta; akış kendi içinde
+   kayar, yazma alanı hep altında. Kip seçici ve Cevaplayan ikincil ve küçük. */
+.king-sohbet{ display:flex; flex-direction:column; gap:var(--a3); }
+.king-ust{ display:flex; align-items:center; flex-wrap:wrap; gap:var(--a2); }
+.king-kip{ display:inline-flex; gap:2px; padding:2px; border-radius:var(--kose-tam); background:var(--yuzey-2); }
+.king-kip__oge, .king-yeni{ min-height:32px; padding:0 var(--a3); border:0; border-radius:var(--kose-tam); font:inherit; font-size:var(--yz-k); color:var(--soluk);
+  background:transparent; cursor:pointer; transition:background var(--hizli) var(--akis), color var(--hizli) var(--akis); }
+.king-kip__oge:hover, .king-yeni:hover{ color:var(--yazi); }
+.king-yeni{ margin-left:auto; background:var(--yuzey-2); } /* sahne üstünde de okunur (geniş ekranda başlık manzaranın içinde) */
+.king-kip__oge[aria-pressed="true"]{ color:var(--yazi); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+.king-baglam{ display:inline-flex; align-items:center; gap:var(--a1); max-width:100%; min-height:32px; margin:0; padding:0 2px 0 var(--a3); border-radius:var(--kose-tam);
+  font-size:var(--yz-k); color:var(--yazi-2); background:color-mix(in srgb, var(--vurgu) 10%, var(--yuzey)); }
+.king-baglam__ad{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king-baglam__kaldir{ width:28px; height:28px; border:0; border-radius:50%; font:inherit; color:var(--soluk); background:transparent; cursor:pointer; }
+.king-baglam__kaldir:hover{ color:var(--yazi); background:var(--yuzey-2); }
+.king-bos{ padding:var(--a5) 0 var(--a2); }
+.king-akis{ display:flex; flex-direction:column; gap:var(--a3); min-height:200px; max-height:calc(100dvh - 300px); margin:0; padding:var(--a1) var(--a1) var(--a2);
+  list-style:none; overflow-y:auto; overscroll-behavior:contain; }
+@media (hover:hover) and (pointer:fine){ .king-akis{ max-height:calc(100dvh - 380px); } } /* masaüstünde rıhtım payı */
+.king-msj{ display:flex; flex-direction:column; align-self:flex-start; max-width:min(88%, 70ch); }
+.king-msj--ben{ align-self:flex-end; align-items:flex-end; max-width:min(80%, 60ch); }
+.king-balon{ padding:var(--a2) var(--a4); line-height:1.6; overflow-wrap:anywhere; border-radius:18px 18px 18px 6px; background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+.king-msj--ben .king-balon{ border-radius:18px 18px 6px 18px; background:color-mix(in srgb, var(--vurgu) 13%, var(--yuzey)); box-shadow:none; }
+.king-balon p, .king-balon ul, .king-balon ol{ margin:0; }
+.king-balon > * + *{ margin-top:var(--a2); }
+.king-balon ul, .king-balon ol{ padding-left:1.3em; }
+.king-balon li + li{ margin-top:var(--a1); }
+.king-balon code{ padding:0 4px; border-radius:6px; font-size:.92em; background:var(--yuzey-2); }
+.king-md-tablo{ overflow-x:auto; }
+.king-md-tablo table{ border-collapse:collapse; font-size:var(--yz-k); }
+.king-md-tablo th, .king-md-tablo td{ padding:var(--a1) var(--a2); text-align:left; box-shadow:inset 0 -1px 0 var(--cizgi); }
+.king-msj__alt{ margin:var(--a1) var(--a2) 0; font-size:var(--yz-k); color:var(--soluk); }
+/* kaynak satırı yalnız son cevapta durur; eskilerde fareyle üstüne gelince görünür (uzun konuşmada her balonun altı dolmasın) */
+@media (hover:hover){ .king-msj--king:not(:last-child) .king-msj__alt{ opacity:0; transition:opacity var(--hizli) ease; }
+  .king-msj--king:not(:last-child):is(:hover, :focus-within) .king-msj__alt{ opacity:1; } }
+.king-yaziyor{ display:flex; gap:5px; align-self:flex-start; padding:var(--a3) var(--a4); border-radius:18px 18px 18px 6px; background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+.king-yaziyor i{ width:6px; height:6px; border-radius:50%; background:var(--soluk); opacity:.3; animation:king-nokta 1.4s ease-in-out infinite; }
+.king-yaziyor i:nth-of-type(2){ animation-delay:.2s; }
+.king-yaziyor i:nth-of-type(3){ animation-delay:.4s; }
+@keyframes king-nokta{ 0%, 80%, 100%{ opacity:.25; } 40%{ opacity:.85; } }
+@media (prefers-reduced-motion:reduce){ .king-yaziyor i{ animation:none; opacity:.5; } }
+:root .king-yaz{ position:sticky; bottom:max(var(--a3), env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:var(--a1);
+  padding:var(--a2) var(--a2) var(--a1) var(--a4); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-orta); transition:box-shadow var(--hizli) var(--akis); }
+:root .king-yaz:focus-within{ box-shadow:var(--golge-orta), 0 0 0 2px color-mix(in srgb, var(--yazi) 14%, transparent); }
+.king-yaz__satir{ display:flex; align-items:flex-end; gap:var(--a2); }
+:root .king-yaz textarea{ flex:1; min-width:0; min-height:44px; max-height:240px; padding:10px 0; border:0; font:inherit; line-height:1.5; color:var(--yazi);
+  background:transparent; resize:none; outline:0; box-shadow:none; }
+.king-gonder{ display:grid; flex:none; place-items:center; width:40px; height:40px; margin-bottom:2px; border:0; border-radius:50%; color:var(--vurgu-yazi);
+  background:var(--vurgu); cursor:pointer; transition:opacity var(--hizli) var(--akis); }
+.king-gonder svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transform:rotate(-90deg); }
+.king-gonder:disabled{ opacity:.4; cursor:default; }
+.king-yaz__alt{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--a3); font-size:var(--yz-k); color:var(--soluk); }
+:root .king-yaz__alt .b-alan{ flex-direction:row; align-items:center; gap:var(--a1); margin-left:auto; }
+:root .king-yaz__alt .b-alan__ad{ font-size:var(--yz-k); color:var(--soluk); white-space:nowrap; }
+:root .king-yaz__alt select{ width:auto; height:28px; padding:0 var(--a2); border:0; font-size:var(--yz-k); color:var(--soluk); background:transparent; box-shadow:none; }
+@media (pointer:coarse){ .king-kip__oge, .king-yeni{ min-height:40px; } }
+@media (pointer:coarse), (max-width:520px){ #king-ipucu{ display:none; } }
+@media (max-width:420px){ .king-kip__oge, .king-yeni{ padding:0 10px; } }
+[data-king-hakkinda]{ margin-top:var(--a6); }
+.king-hakkinda__ara{ margin:var(--a4) 0 var(--a1); font-weight:600; }
 /* Ayarlar: arama kutusu başlığın altında, etiketi ekran okuyucuda */
 .ayar-ara{ max-width:520px; margin:calc(-1 * var(--a2)) 0 var(--a2); }
 .ayar-ara .b-alan__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
