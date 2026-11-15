@@ -10,6 +10,7 @@ klasoru (LOCALAPPDATA/APPDATA dahil) gecici klasore yonlendirilir.
   python tools/tekkapi_test.py            sinama
   python tools/tekkapi_test.py --bellek   + bostaki bellek (RSS), eski vs tek, uc tur, ortanca
 """
+import gzip
 import json
 import os
 import re
@@ -299,6 +300,33 @@ def sina(eski, tek, kokler=()):
     k, b, gv = iste(T, "/kabuk/kabuk.js", "HEAD")
     dene("HEAD /kabuk/kabuk.js gövdesiz 200", k == 200 and gv == b"" and int(b.get("Content-Length", 0)) > 0, k)
     dene("POST /kabuk/ 405", iste(T, "/kabuk/", "POST", b"")[0] == 405)
+    # Onbellek ve sikistirma (altyapi 2026-11-15): her acilis 4,2 MB'i yeniden indiriyordu. Degismeyen dosya 304, gzip
+    # isteyene gzip, dosya degisince yeni ETag; Chromium fetch() yalniz ETag'le sormuyor, Last-Modified ile soruyor.
+    for yol in ("/kabuk/", "/kabuk/kabuk.js", "/alan/felsefe/asama-1.json", "/hesap.js"):
+        k, b, gv = iste(T, yol)
+        et, lm = b.get("ETag"), b.get("Last-Modified")
+        dene("%s ETag + Last-Modified + no-cache" % yol, k == 200 and et and lm and b.get("Cache-Control") == "no-cache", dict(b))
+        dene("%s çerçevede açılmaz (X-Frame-Options DENY)" % yol, b.get("X-Frame-Options") == "DENY"
+             and "frame-ancestors 'none'" in (b.get("Content-Security-Policy") or ""), dict(b))
+        k2, b2, gv2 = iste(T, yol, basliklar={"If-None-Match": et})
+        dene("%s aynı ETag → 304 gövdesiz" % yol, k2 == 304 and gv2 == b"", k2)
+        dene("%s aynı Last-Modified → 304" % yol, iste(T, yol, basliklar={"If-Modified-Since": lm})[0] == 304)
+        dene("%s eski ETag → 200 tam gövde" % yol, iste(T, yol, basliklar={"If-None-Match": '"eski"'})[2] == gv)
+        k3, b3, gz = iste(T, yol, basliklar={"Accept-Encoding": "gzip"})
+        dene("%s gzip isteyene gzip, açılınca aynı" % yol, b3.get("Content-Encoding") == "gzip" and gzip.decompress(gz) == gv
+             and len(gz) < len(gv), (b3.get("Content-Encoding"), len(gz), len(gv)))
+    sys.path.insert(0, SISTEM)
+    import sunucu as _s  # ayni surecte: dosya degisince ETag degisir (onbellek eski govdeyi vermez)
+    gec = os.path.join(tempfile.mkdtemp(prefix="statik-"), "statik.js")
+    with open(gec, "w") as f_:
+        f_.write("a" * 2000)
+    e1 = _s._statik_oku(gec)[2]
+    with open(gec, "w") as f_:
+        f_.write("b" * 2000)
+    os.utime(gec, ns=(os.stat(gec).st_mtime_ns + 10 ** 9,) * 2)   # ayni boy; yalniz zaman degisti
+    v2 = _s._statik_oku(gec)
+    dene("dosya değişince yeni ETag ve yeni gövde", v2[2] != e1 and v2[0] == b"b" * 2000, (e1, v2[2]))
+    shutil.rmtree(os.path.dirname(gec), ignore_errors=True)
 
     dene("kökte HEAD dosya vermez", iste(T, "/sistem/tekkapi.py", "HEAD")[0] in (404, 405))
     # --port'suz tek kapi 4180'de acilir (ETKIN): sinama onu hic calistirmaz.

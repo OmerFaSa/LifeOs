@@ -27,6 +27,8 @@ Yuvalar: gunduz, gece, acilis (giris sayfasinin acilis videosu, 2026-11-02). Soz
      guncelleme ona dokunmaz.
 """
 
+import contextlib
+import errno
 import io
 import os
 import re
@@ -108,20 +110,33 @@ def yaz_akis(yuva, tur, okuyucu, boy, kok=None):
     kok = kok or klasor()
     os.makedirs(kok, exist_ok=True)
     gecici = os.path.join(kok, yuva + ".yaziliyor")
+    diske_akit(gecici, bas, okuyucu, boy)
+    sil(yuva, kok)
+    os.replace(gecici, os.path.join(kok, yuva + TURLER[tur]))
+
+
+def diske_akit(gecici, bas, okuyucu, boy):
+    """bas + okuyucudan kalan (boy - len(bas)) bayti gecici dosyaya yazar. Yarida kalirsa, disk dolarsa ya da
+    baglanti koparsa gecici silinir (disk dolarken yarim dosya diski daha da doldurmasin). Hata: (kod, cumle)."""
     kalan = boy - len(bas)
-    with open(gecici, "wb") as f:
-        f.write(bas)
-        while kalan > 0:
-            p = okuyucu.read(min(PARCA, kalan))
-            if not p:
-                break
-            f.write(p)
-            kalan -= len(p)
+    try:
+        with open(gecici, "wb") as f:
+            f.write(bas)
+            while kalan > 0:
+                p = okuyucu.read(min(PARCA, kalan))
+                if not p:
+                    break
+                f.write(p)
+                kalan -= len(p)
+    except OSError as e:
+        with contextlib.suppress(OSError):
+            os.remove(gecici)
+        if e.errno == errno.ENOSPC:
+            raise ValueError((507, "Diskte yer kalmadı; dosya kaydedilmedi. Yer açıp yeniden dene."))
+        raise ValueError((400, "Yükleme yarıda kaldı; yeniden dene."))
     if kalan > 0:
         os.remove(gecici)
         raise ValueError((400, "Yükleme yarıda kaldı; yeniden dene."))
-    sil(yuva, kok)
-    os.replace(gecici, os.path.join(kok, yuva + TURLER[tur]))
 
 
 def _akit(h, yol, tur):

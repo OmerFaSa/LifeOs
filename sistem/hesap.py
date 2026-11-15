@@ -200,6 +200,7 @@
 
 import base64
 import contextlib
+import errno
 import hashlib
 import hmac
 import json
@@ -797,9 +798,7 @@ class Depo:
     def soru_ayarla(self, kullanici, parola, soru, cevap, jeton=None, ip=""):
         soru = self._soru_dogrula(soru, cevap)
         with self._islem() as c:
-            r = c.execute("SELECT tuz, ozet, tur FROM kullanici WHERE id=?", (kullanici["id"],)).fetchone()
-            if r is None or not hmac.compare_digest(self._ozet(parola or "", r["tuz"], r["tur"]), r["ozet"]):
-                raise Hata(401, "Şifre yanlış.")
+            self._parola_bak(c, kullanici["id"], parola)
             self._soru_yaz(c, kullanici["id"], soru, cevap)
             self._olay(c, kullanici["id"], "soru", self._oturum_cihaz(c, jeton), ip)
 
@@ -904,9 +903,7 @@ class Depo:
     def parola_degistir(self, kullanici, jeton, eski, yeni, ip=""):
         self._parola_dogrula(yeni)
         with self._islem() as c:
-            r = c.execute("SELECT tuz, ozet, tur FROM kullanici WHERE id=?", (kullanici["id"],)).fetchone()
-            if r is None or not hmac.compare_digest(self._ozet(eski or "", r["tuz"], r["tur"]), r["ozet"]):
-                raise Hata(401, "Şimdiki şifre yanlış.")
+            self._parola_bak(c, kullanici["id"], eski, "Şimdiki şifre yanlış.")
             tuz = secrets.token_bytes(16)
             c.execute("UPDATE kullanici SET tuz=?, ozet=?, tur=? WHERE id=?",
                       (tuz, self._ozet(yeni, tuz, self.tur), self.tur, kullanici["id"]))
@@ -1268,9 +1265,8 @@ class Depo:
         """Hesabi siler (soz 13): sifre sorulur; son admin, baska kullanici
         varken kendini silemez (sistem adminsiz kalmaz)."""
         with self._islem() as c:
-            r = c.execute("SELECT rol, tuz, ozet, tur FROM kullanici WHERE id=?", (kullanici["id"],)).fetchone()
-            if r is None or not hmac.compare_digest(self._ozet(parola or "", r["tuz"], r["tur"]), r["ozet"]):
-                raise Hata(401, "Şifre yanlış.")
+            self._parola_bak(c, kullanici["id"], parola)
+            r = c.execute("SELECT rol FROM kullanici WHERE id=?", (kullanici["id"],)).fetchone()
             if r["rol"] == "admin":
                 adminler = c.execute("SELECT COUNT(*) FROM kullanici WHERE rol='admin'").fetchone()[0]
                 digerleri = c.execute("SELECT COUNT(*) FROM kullanici WHERE id<>?", (kullanici["id"],)).fetchone()[0]
@@ -1291,10 +1287,16 @@ class Depo:
     # --------------------------------------------- iki adimli dogrulama (soz 14)
 
     def _parola_bak(self, c, kid, parola, mesaj="Şifre yanlış."):
+        """Oturum acikken sorulan sifre (silme, sifre degistirme, iki adim, yonetim). Girisle ayni bekletme:
+        calinan bir oturum jetonu sifreyi sinirsiz deneyemesin (altyapi 2026-11-15)."""
+        anahtarlar = [("parola", kid)]
+        self._deneme_bak(anahtarlar)
         r = c.execute("SELECT tuz, ozet, tur FROM kullanici WHERE id=?", (kid,)).fetchone()
         p = parola if isinstance(parola, str) else ""
         if r is None or not hmac.compare_digest(self._ozet(p, r["tuz"], r["tur"]), r["ozet"]):
+            self._deneme_yanlis(anahtarlar)
             raise Hata(401, mesaj)
+        self._deneme.pop(anahtarlar[0], None)
 
     @staticmethod
     def _iki_adim_acik(c, kid):
@@ -3079,6 +3081,8 @@ def isle(h):
     except Hata as e:
         return _cevap(h, e.kod, {"hata": e.mesaj})
     except (sqlite3.Error, OSError) as e:
+        if "disk is full" in str(e) or getattr(e, "errno", None) == errno.ENOSPC:
+            return _cevap(h, 507, {"hata": "Diskte yer kalmadı; değişiklik kaydedilmedi, önceki kayıtlar yerinde. Yer açıp yeniden dene."})
         return _cevap(h, 503, {"hata": "Hesap deposu açılamadı: %s" % e})
 
 

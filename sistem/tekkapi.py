@@ -21,6 +21,7 @@
 import argparse
 import os
 import sys
+import threading
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
 sys.dont_write_bytecode = True
@@ -177,6 +178,8 @@ def main(argv=None):
           "aynı süreçte" if HKM["srv"] else "kapalı"), flush=True)
     if a.port is None:
         sunucu.plan_zamanlayici().baslat()           # eski sunucu kapandiginda zamanlanmis isler burada
+        # Yeni surum dinlemeye basladi: guncellemenin donus noktasi artik gerekmez (sistem/baslat.py geri_al).
+        threading.Thread(target=sunucu.guncelle.donus_sil, daemon=True).start()
     try:
         sunucu.surekli_hizmet(srv)
     except KeyboardInterrupt:

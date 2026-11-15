@@ -12,6 +12,7 @@ HTTP sunucusuyla, gecici klasorde.
 import json
 import os
 import shutil
+import sqlite3
 import sys
 import tempfile
 import threading
@@ -147,6 +148,19 @@ def run():
             _hata(lambda: r.d.giris("omer", "parola-123", B), 401)
             ok(r.d.giris("omer", "yeni-parola-1", B)["jeton"])
     test("parola degisince oteki cihazlarin oturumu kapanir", t_parola_degistir)
+
+    def t_oturumda_sifre_bekletme():
+        # Calinan oturum jetonu sifreyi sinirsiz deneyemez: silme ve sifre degistirme ayni sayaci paylasir.
+        with _Depo() as r:
+            k, j = _admin(r)
+            for i in range(hesap.DENEME_ESIK):
+                _hata([lambda: r.d.sil(k, "yanlis"), lambda: r.d.parola_degistir(k, j, "yanlis", "yeni-parola-1")][i % 2], 401)
+            _hata(lambda: r.d.sil(k, "parola-123"), 429)          # dogru sifre de bekler
+            ok(r.d.oturum(j))                                     # hesap silinmedi
+            r.saat.t += 31
+            r.d.parola_degistir(k, j, "parola-123", "yeni-parola-1")
+            ok(r.d.giris("omer", "yeni-parola-1", B)["jeton"])
+    test("oturumdayken sorulan sifre de art arda yanlista bekletilir", t_oturumda_sifre_bekletme)
 
     def t_esitle_temel():
         with _Depo() as r:
@@ -899,6 +913,20 @@ def run():
             eq(s.iste("/api/hesap/cikis", {}, yetki)[0], 200)
             eq(s.iste("/api/hesap/ben", baslik={"Authorization": "Bearer " + j})[0], 401)
     test("HTTP: kurulum, eslesme basligi, jetonla esitleme, cikis", t_http_akis)
+
+    def t_http_disk_dolu():
+        with _Srv() as s:
+            eski = s.r.d.kurulum_gerekli
+            def dolu():
+                raise sqlite3.OperationalError("database or disk is full")
+            s.r.d.kurulum_gerekli = dolu
+            try:
+                kod, _, v = s.iste("/api/hesap/durum")
+            finally:
+                s.r.d.kurulum_gerekli = eski
+            eq(kod, 507)
+            ok("yer kalmadı" in v["hata"] and "açılamadı" not in v["hata"])
+    test("HTTP: disk dolunca «yer kalmadı» der (507), «açılamadı» demez", t_http_disk_dolu)
 
     def t_http_kabuk():
         import veri
