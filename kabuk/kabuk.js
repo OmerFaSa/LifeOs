@@ -586,11 +586,14 @@
       sayfaEl.setAttribute('data-ciz', yer.id);
       d.title = yer.ad + ' · LifeOS';
       manzara();
-      if (yeniSayfa) canlan();
+      // Yeni sayfa bir kez süzülür. Aynı sayfanın yeniden çizimi (veri geldi, tıklandı) süzülmeyi baştan oynatmaz: «tekrar yükleniyor» görüntüsü buydu.
+      // İlk çizimden hemen sonra gelen (150 ms içinde) yeniden çizimde süzülme henüz görünmediği için sürer.
+      if (yeniSayfa) canlan(gecisli); else if (performance.now() - canlanZaman > 150) sayfaEl.classList.remove('canlan', 'canlan--gecis');
     }
     // Bölüm değişince görünüm geçişi (tarayıcı destekliyorsa ve hareket açıksa): içerik gidilen yöne kayarak söner, üst çubuk yerinde kalır,
     // seçili sekmenin işareti yenisine akar. Aynı sayfanın yeniden çizimi (tıklama, yazma) anında olur.
-    if (once && yeniSayfa && d.startViewTransition && !d.hidden && hareketVar()) { // gizli sekme çizmez: geçiş zaman aşımına düşerdi
+    var gecisli = !!(once && yeniSayfa && d.startViewTransition && !d.hidden && hareketVar()); // gizli sekme çizmez: geçiş zaman aşımına düşerdi
+    if (gecisli) {
       d.documentElement.setAttribute('data-gecis', yon(once, yer));
       var g = d.startViewTransition(yaz), u = bekleyenCizim = g.updateCallbackDone.catch(function () {});
       u.then(function () { if (bekleyenCizim === u) bekleyenCizim = null; });
@@ -612,10 +615,11 @@
     return sira.indexOf(yer.id) >= 0 ? 'geri' : 'ileri';
   }
   // Yeni sayfaya girişte listeler sırayla süzülür (kabuk.css .canlan); aynı sayfanın yeniden çizimi süzülmez.
-  var canlanSaat = null;
-  function canlan() {
-    clearTimeout(canlanSaat); sayfaEl.classList.add('canlan');
-    canlanSaat = setTimeout(function () { sayfaEl.classList.remove('canlan'); }, 900);
+  // Görünüm geçişiyle gelindiyse sayfanın kendisi zaten kayarak geldi; yalnız listeler süzülür (canlan--gecis), sayfa ikinci kez belirmez.
+  var canlanSaat = null, canlanZaman = 0;
+  function canlan(gecisli) {
+    clearTimeout(canlanSaat); canlanZaman = performance.now(); sayfaEl.classList.add('canlan'); sayfaEl.classList.toggle('canlan--gecis', !!gecisli);
+    canlanSaat = setTimeout(function () { sayfaEl.classList.remove('canlan', 'canlan--gecis'); }, 1400);
   }
   function git(yol) { if (location.hash === yol) rota(); else location.hash = yol; }
 
