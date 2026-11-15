@@ -47,7 +47,7 @@
   function html(B) {
     var gecmis = d.gecmis.map(function (x) { return { soru: x.soru, cevap: x.cevap }; });
     return B.bolum({ baslik: 'Burada konuş', id: 'king-sohbet', veri: { 'king-bolum': '' }, govde: [
-      '<p class="soluk">Antigravity ya da Claude Code bu bilgisayarda açıkken King onlarla cevaplar; kapalıysa bunu söyler ve sıradaki model devralır. Sayıyı yine LifeOS tutar.</p>',
+      '<p class="soluk">Antigravity ya da Claude Code açıksa onlar cevaplar; kapalıysa sıradaki model devralır.</p>',
       B.sohbet({ ad: 'King sohbeti', gecmis: gecmis, simdi: { form: { 'king-sohbet': '' },
         soru: d.bekliyor ? { metin: 'King cevaplıyor…', canli: true } : null,
         govde: [B.alan({ ad: 'Kim cevaplasın', isim: 'saglayici', tur: 'secim', secenekler: secenekler(d.kopruler), deger: d.secim }),

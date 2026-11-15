@@ -111,7 +111,7 @@
 
   /* Güvenlik (oturumda). g: { ben (/api/hesap/ben: soru_var, iki_adim {acik, yedek_kalan}), benHata, acik (açık form: parola | soru-ayarla |
    * iki-ac | yedek | iki-kapat), kurulum {sir, uri}, qr (SVG), tel, yedekler [kod], kopya, taslak, hata, ileti, is, rol }. */
-  var YUKLENIYOR = '<p class="soluk" aria-busy="true">Yükleniyor…</p>';
+  var YUKLENIYOR = '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
   function dugme(metin, ac, ne, tur) { return { metin: metin, tur: tur || 'sade', veri: ne ? { 'hg-ac': ac, 'hg-ne': ne } : { 'hg-ac': ac } }; }
   function vazgec(ac) { return dugme('Vazgeç', ac || 'kapat'); }
   function acikHtml(g, B) {
