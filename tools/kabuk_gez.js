@@ -812,7 +812,7 @@ async function goruntu(p, ad, sec = {}) {
     dene('King: sohbet kutusu yok', (await p.locator('[data-sayfa="king"] input, [data-sayfa="king"] textarea, [data-sayfa="king"] form').count()) === 0);
     await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
-    await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP);
+    await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP && document.querySelector('.b-karsilama__selam')); // bölüm geçişinin çizimi bir kare sonra
     dene('Hesap yüklendi; oturum yokken selam adsız', await p.evaluate(() => LIFEOS.HESAP.durum().oturum === null && /^(Günaydın|İyi günler|İyi akşamlar|İyi geceler)\.$/.test(document.querySelector('.b-karsilama__selam').textContent)), await p.textContent('.b-karsilama__selam'));
 
     // ---- Aşamalar: Felsefe'nin ikinci aşaması (eski birinci aşama kaydı yerinde kalır) ----
