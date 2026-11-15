@@ -15,9 +15,11 @@
 
 import email.utils
 import gzip
+import hashlib
 import html
 import json
 import os
+import posixpath
 import re
 import subprocess
 import sys
@@ -1279,6 +1281,81 @@ def _statik_oku(tam):
     return k[2:]
 
 
+# URETIM PAKETI (Faz 8 P3, olcum kalite/hiz_olcum.js): kabuk/index.html'in <script src> betikleri (25 dosya) tek istekte
+# /kabuk/paket.js olarak verilir; HTTP/1.0'da her betik ayri baglanti ve telefonda ayri gidis-donustu. Kaynak ayri
+# kalir (gelistirme, file://, telefon paketi, node testleri); /kabuk/?ayri ayri dosyalari verir. Her parca kendi
+# try'inda: bir betigin hatasi oteki betikleri durdurmaz (ayri dosyadaki gibi). Paket hic calismazsa (sozdizimi
+# hatasi) sayfa kendini bir kez ?ayri ile yeniden acar.
+KABUK_GIRIS = os.path.join(KOK, "kabuk", "index.html")
+_BETIK_ETIKET = re.compile(r'<script src="([^"]+)"></script>')
+_PAKET_KORUMA = ('<script>if (!(window.LIFEOS && LIFEOS.Kabuk && LIFEOS.Kabuk.ic) && !/[?&]ayri\\b/.test(location.search)) '
+                 'location.replace(location.pathname + (location.search ? location.search + "&" : "?") + "ayri" + location.hash);</script>')
+_PAKET = {}
+
+
+def kabuk_paketi():
+    """((index govde, gzip, etag, son), (paket.js ...)) _statik_oku bicimiyle; betikten biri yoksa None (ayri dosyalar)."""
+    html_, _, h_etag, h_son = _statik_oku(KABUK_GIRIS)
+    metin = html_.decode("utf-8")
+    srcler = _BETIK_ETIKET.findall(metin)
+    parcalar = [kabuk_dosyasi(posixpath.normpath("/kabuk/" + s)) for s in srcler]
+    if not srcler or None in parcalar:
+        return None
+    okunan = [_statik_oku(p) for p in parcalar]
+    anahtar = h_etag + "".join(o[2] for o in okunan)
+    with _STATIK_KILIT:
+        k = _PAKET.get("kabuk")
+    if k and k[0] == anahtar:
+        return k[1]
+    ilk = []
+    sayfa = _BETIK_ETIKET.sub(lambda m: "" if ilk else ilk.append(1) or '<script src="paket.js"></script>' + _PAKET_KORUMA, metin).encode("utf-8")
+    js = "".join("/* %s */\ntry {\n%s\n} catch (e) { setTimeout(function () { throw e; }); }\n" % (s, o[0].decode("utf-8"))
+                 for s, o in zip(srcler, okunan)).encode("utf-8")
+    son = email.utils.formatdate(max(os.stat(p).st_mtime for p in parcalar), usegmt=True)
+    sonuc = ((sayfa, gzip.compress(sayfa, 6, mtime=0), h_etag[:-1] + '-p"', h_son),
+             (js, gzip.compress(js, 6, mtime=0), '"p%s"' % hashlib.sha1(anahtar.encode()).hexdigest()[:16], son))
+    with _STATIK_KILIT:
+        _PAKET["kabuk"] = (anahtar, sonuc)
+    return sonuc
+
+
+def kabuk_taslak():
+    """Bugun'un «Onay bekleyen N ders» satiri icin ozet: {"<alan>/<n>": [dosyada onayli olmayan ders kimlikleri]}. Kabuk bunu
+    yerel onay kaydiyla duser; satir icin yirmi alan paketini (4,5 MB) indirip kurmasi gerekmez. _statik_oku bicimi.
+    shortcut: asama, kabuktaki gibi ilk eksik ya da kimligi uymayan dosyada durur; Yol.yukle'nin oteki denetimleri burada yok
+    (bozuk icerik CI'da alan/denetle.py'de yakalanir); acik alan sayfasi zaten tam icerikten sayar."""
+    dosyalar = []
+    for alan in sorted(os.listdir(os.path.join(KOK, "alan"))):
+        n = 1
+        while os.path.isfile(os.path.join(KOK, "alan", alan, "asama-%d.json" % n)):
+            dosyalar.append((alan, n, os.path.join(KOK, "alan", alan, "asama-%d.json" % n)))
+            n += 1
+    anahtar = tuple((t, os.stat(t).st_mtime_ns, os.stat(t).st_size) for _, _, t in dosyalar)
+    with _STATIK_KILIT:
+        k = _PAKET.get("taslak")
+    if k and k[0] == anahtar:
+        return k[1]
+    ozet, dur = {}, set()
+    for alan, n, tam in dosyalar:
+        if alan in dur:
+            continue
+        try:
+            with open(tam, encoding="utf-8") as f:
+                v = json.load(f)
+        except (OSError, ValueError):
+            v = None
+        if not isinstance(v, dict) or v.get("id") != "%s.%d" % (alan, n):
+            dur.add(alan)
+            continue
+        ozet["%s/%d" % (alan, n)] = [d.get("id") for u in v.get("uniteler") or [] for d in u.get("dersler") or [] if d.get("durum") != "onayli"]
+    govde = json.dumps(ozet, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    sonuc = (govde, gzip.compress(govde, 6, mtime=0), '"t%s"' % hashlib.sha1(govde).hexdigest()[:16],
+             email.utils.formatdate(max([m for _, m, _ in anahtar] or [0]) / 1e9, usegmt=True))
+    with _STATIK_KILIT:
+        _PAKET["taslak"] = (anahtar, sonuc)
+    return sonuc
+
+
 class Giris(SimpleHTTPRequestHandler):
     def _json(self, kod, veri):
         govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
@@ -1358,14 +1435,23 @@ class Giris(SimpleHTTPRequestHandler):
         return self._json(200, guncelle_kur(yedekle="yedekle=1" in self.path))
 
     def _kabuk_sun(self, tam):
-        if not tam or self.command not in ("GET", "HEAD"):
-            return self.send_error(404 if not tam else 405)
+        yol, _, sorgu = self.path.partition("?")
+        paket = yol == "/kabuk/paket.js"
+        if not (tam or paket) or self.command not in ("GET", "HEAD"):
+            return self.send_error(404 if not (tam or paket) else 405)
+        if paket or (tam == KABUK_GIRIS and "ayri" not in parse_qs(sorgu, keep_blank_values=True)):
+            p = kabuk_paketi()
+            if p:
+                return self._statik(None, _KABUK_TUR[".js" if paket else ".html"], p[1 if paket else 0])
+            if paket:
+                return self.send_error(404)
         return self._statik(tam, _KABUK_TUR[os.path.splitext(tam)[1]])
 
-    def _statik(self, tam, tur):
+    def _statik(self, tam, tur, hazir=None):
         """Kodun sabit dosyasi: no-cache + ETag (tarayici her acilista sorar, degismediyse 304, govde gitmez)
-        ve gzip (telefon Tailscale'den gelir; alan JSON'lari MB'larca). Guncelleme dosyayi degistirince ETag degisir."""
-        govde, gz, etag, son = _statik_oku(tam)
+        ve gzip (telefon Tailscale'den gelir; alan JSON'lari MB'larca). Guncelleme dosyayi degistirince ETag degisir.
+        hazir: dosya yerine _statik_oku biciminde hazir govde (uretim paketi)."""
+        govde, gz, etag, son = hazir or _statik_oku(tam)
         sikistir = gz is not None and "gzip" in (self.headers.get("Accept-Encoding") or "")
         inm = self.headers.get("If-None-Match")
         if (etag in [e.strip() for e in inm.split(",")]) if inm else self.headers.get("If-Modified-Since") == son:
@@ -1406,6 +1492,9 @@ class Giris(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return None
             return self._kabuk_sun(kabuk_dosyasi(yol))
+        if yol == "/api/kabuk/taslak":
+            # alan icerigi zaten herkese acik kabuk dosyasi (/alan/): kisisel veri yok, telefon da alir
+            return self._statik(None, _KABUK_TUR[".json"], kabuk_taslak())
         if yol == "/api/kabuk/baslangic":
             # Tek depodan uretilen baslangic paketi (tools/kabuk_baslangic.py): eski notlar ve kayitlar yeni kabuga
             # buradan gecer. Paket kisisel icerik tasir ve oturum denetimi yoktur: YALNIZ bu bilgisayardan okunur.

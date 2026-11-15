@@ -253,6 +253,27 @@ def sina(eski, tek, kokler=()):
         dene("%s → 404" % yol, iste(T, yol)[0] == 404, iste(T, yol)[0])
     k, b, gv = iste(T, "/kabuk/")
     dene("/kabuk/ yeni kabuğu verir", k == 200 and "text/html" in b.get("Content-Type", "") and b"kabuk.js" in gv, k)
+    # Uretim paketi (Faz 8 P3): index'in 25 betigi tek /kabuk/paket.js; ?ayri kaynak index'i aynen verir.
+    with open(os.path.join(KOK, "kabuk", "index.html"), "rb") as f_:
+        kaynak_ = f_.read()
+    srcler_ = re.findall(rb'<script src="([^"]+)"></script>', kaynak_)
+    dene("/kabuk/ tek betik ister (paket.js + açılmazsa ?ayri koruması)", gv.count(b"<script src=") == 1 and b'<script src="paket.js">' in gv
+         and b"ayri" in gv and len(srcler_) > 20, gv.count(b"<script src="))
+    k, b, pv = iste(T, "/kabuk/paket.js")
+    sira_ = [pv.find(b"/* " + s + b" */") for s in srcler_]
+    dene("/kabuk/paket.js index'teki betikleri aynı sırayla, her biri kendi try'ında taşır", k == 200 and "javascript" in b.get("Content-Type", "")
+         and -1 not in sira_ and sira_ == sorted(sira_) and pv.count(b"} catch (e) { setTimeout(function () { throw e; }); }") == len(srcler_), (k, sira_[:3]))
+    with open(os.path.join(KOK, "kabuk", "kabuk.js"), "rb") as f_:
+        dene("paket kaynak dosyanın kendisini taşır (kabuk.js birebir)", f_.read() in pv)
+    dene("/kabuk/?ayri kaynak index.html'i aynen verir", iste(T, "/kabuk/?ayri")[2] == kaynak_)
+    dene("paketli ve ayrı index'in ETag'i ayrı", iste(T, "/kabuk/")[1].get("ETag") != iste(T, "/kabuk/?ayri")[1].get("ETag"))
+    # Onay ozeti: Bugun'un satiri yirmi alan paketini indirmeden sayar
+    k, b, tv = iste(T, "/api/kabuk/taslak")
+    oz_ = json.loads(tv) if k == 200 else {}
+    with open(os.path.join(KOK, "alan", "felsefe", "asama-1.json"), encoding="utf-8") as f_:
+        fv_ = json.load(f_)
+    dene("/api/kabuk/taslak dosyada onaylı olmayan dersleri alan/aşama başına verir", k == 200 and oz_.get("felsefe/1") ==
+         [d["id"] for u in fv_["uniteler"] for d in u["dersler"] if d.get("durum") != "onayli"] and len(tv) < 200000, (k, len(tv)))
     dene("/kabuk → 301 /kabuk/", iste_yonsuz(T, "/kabuk")[0] == 301)
     for yol, tur in (("/kabuk/kabuk.js", "javascript"), ("/kabuk/kabuk.css", "text/css"), ("/motor/yol.js", "javascript"),
                      ("/alan/felsefe/asama-1.json", "application/json"), ("/brand/ortak/piksel-yazi.css", "text/css"),
@@ -318,7 +339,7 @@ def sina(eski, tek, kokler=()):
     dene("POST /kabuk/ 405", iste(T, "/kabuk/", "POST", b"")[0] == 405)
     # Onbellek ve sikistirma (altyapi 2026-11-15): her acilis 4,2 MB'i yeniden indiriyordu. Degismeyen dosya 304, gzip
     # isteyene gzip, dosya degisince yeni ETag; Chromium fetch() yalniz ETag'le sormuyor, Last-Modified ile soruyor.
-    for yol in ("/kabuk/", "/kabuk/kabuk.js", "/alan/felsefe/asama-1.json", "/hesap.js"):
+    for yol in ("/kabuk/", "/kabuk/kabuk.js", "/kabuk/paket.js", "/api/kabuk/taslak", "/alan/felsefe/asama-1.json", "/hesap.js"):
         k, b, gv = iste(T, yol)
         et, lm = b.get("ETag"), b.get("Last-Modified")
         dene("%s ETag + Last-Modified + no-cache" % yol, k == 200 and et and lm and b.get("Cache-Control") == "no-cache", dict(b))
