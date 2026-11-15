@@ -43,6 +43,11 @@ jobs:
       # yüklemez (2026-10-03: paralel denetimlerde açılışların yarısından
       # fazlası). Linux taşanı reddetmez; burada test kuyruk boyunu, yani
       # listen()'e giden sayıyı sınar.
+      # YEREL TEK KOMUT (2026-11-15). tools/ci_yerel.py bu dosyayi okur; ayristirici bozulursa yerel denetim
+      # sessizce eksik adim kosar. Selftest gercek ci.yml'den adim sayisini ve bilinen adimlari dogrular.
+      - name: Yerel denetim aracı CI listesini okur
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Yerel denetim aracı CI listesini okur" python3 tools/ci_yerel.py --selftest
+
       - name: Sunucular bekleyen bağlantıyı reddetmez
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Sunucular bekleyen bağlantıyı reddetmez" python3 tools/kuyruk_test.py
 

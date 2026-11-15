@@ -7,6 +7,7 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 ## Denetim
 - `ci_hata.sh` — CI adımını koşar; kalırsa çıktının ilgili satırlarını tek bir açık okunur `::error` bildirimine yazar (iş kaydı yönetici yetkisi ister).
 - `ci_satir.sh` — Çok satırlı bir CI adımının (`run: |`) her satırını ayrı koşar ve kalan her satırı `ci_hata.sh` ile kendi bildirimine yazar; ofis adımının `shell:` koşucusudur.
+- `ci_yerel.py` — CI'nin denetimlerini yerelde tek komutla koşar: adımları `ci.yml`'den okur (ikinci liste yok), tarayıcısızları paralel, tarayıcılıları sonra sırayla; `--liste`, `-k`, `--sira`, `--selftest`.
 - `piksel_rakam.py` — Sistemin kendi rakam yazı tipini (5×7, yalnız 0-9) üretip `piksel-yazi.css`e gömer; `--denetle`.
 - `piksel_bulut.py` — Modül geçişi perdesinin bulut resmini (PNG) üretip `piksel.css`e gömer; `--denetle`.
 - `piksel_gorsel.js` — Logo ve modül simgesi dosyalarını (PNG, ICO, SVG) piksel figürlerden üretir.
