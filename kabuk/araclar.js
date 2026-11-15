@@ -519,8 +519,8 @@
       return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not', eylem: { metin: 'Yeni not', tur: 'ana', href: '#/motor/not/yeni' } }) +
         B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: '#etiket de olur', veri: { 'not-ara': '' } }) +
         '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div>' +
-        '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' +
-        B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', govde: ['<p class="soluk">Bir araç notlarını kendi klasöründe toplar ve King\'e bıraktığın notu taşır.</p>',
+        (notlar.length ? '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' : '') +
+        B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', govde: ['<p class="soluk">Bir araç, notlarını kendi klasöründe toplar.</p>',
           araclar.length ? B.liste({ ad: 'Araçlar', ogeler: araclar.map(function (a) { return aracSatiri(a, notlar); }) }) : '',
           B.eylemler([{ metin: 'Yeni araç', href: '#/motor/not/arac/yeni' }])] }) + notAgi(notlar) + '</div>';
     }

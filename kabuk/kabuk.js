@@ -394,7 +394,7 @@
       var ys = H.YERLER.filter(function (y) { return y.dal === dl.id; });
       // katman yazıyla da söylenir (eskiden yalnız sol çizginin rengiydi)
       return B.panel({ baslik: dl.ad + ' · ' + ys.length, govde: ys.length ? B.liste({ ad: dl.ad, ogeler: ys.map(function (y) {
-        return { ad: y.ad, not: KATMAN_AD[y.katman] + (y.halka ? ' · halkada' : ''), pul: durumPul(y), href: y.yol };
+        return { ad: y.ad, not: y.halka ? 'halkada' : undefined, pul: durumPul(y), href: y.yol }; // tür yazısı her satırda tekrar ediyordu (kural 10); dal başlığı yeterli
       }) }) : '' });
     }).join('');
     return ust(kirinti(yer)) + '<div class="govde govde--genis">' + B.baslik({ metin: 'Sistem haritası', alt: H.YERLER.length + ' yer; her biri halkadan ya da aramadan en çok iki adımda.' }) +

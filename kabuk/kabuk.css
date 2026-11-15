@@ -156,12 +156,12 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 /* kapak (kabuk.js KAPAK): ana sayfaların başında kendi piksel sahnesinden ince şerit; üst çubuk üstüne biner, renkli simge alt kenarına oturur */
 .kapak{ position:relative; height:176px; margin:calc(-1 * max(var(--a3),env(safe-area-inset-top))) calc(50% - 50vw) 0; background:var(--gok); overflow:hidden; }
 .kapak__sahne{ display:block; width:100%; height:100%; image-rendering:pixelated; }
-.kapak__sahne, .b-karsilama__manzara{ transform:translate(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -5px)) scale(1.05); transition:transform calc(var(--sure) * 6) var(--akis); }
+.kapak__sahne, .b-karsilama__manzara{ transform:translate(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -5px)) scale(1.05); transition:transform calc(var(--yavas) * 1.6) var(--akis); }
 .kapak::after{ content:""; position:absolute; inset:0; background:var(--kapak-ortu); pointer-events:none; }
 .kapak-alt{ position:relative; z-index:2; width:100%; max-width:720px; margin:-32px auto 0; }
 .kapak-alt:has(~ .govde--genis){ max-width:1040px; }
 .kapak__simge{ display:inline-grid; padding:var(--a1); border-radius:calc(var(--kose) + var(--a1)); background:var(--bg); box-shadow:var(--golge-yumusak); }
-.canlan .kapak__simge{ animation:kapak-gir calc(var(--sure) * 4) var(--yay) both; }
+.canlan .kapak__simge{ animation:kapak-gir var(--yavas) var(--yay) both; }
 .kapak__simge .b-simge{ width:64px; height:64px; border-radius:var(--kose); background:color-mix(in srgb, currentColor 14%, var(--yuzey)); }
 .kapak__simge .b-simge svg{ width:30px; height:30px; stroke-width:1.6; }
 .kapak-alt + .konum{ margin-top:var(--a4); }
@@ -258,7 +258,7 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 .ust__isaret{ position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--yuzey-2); view-transition-name:sekme-isaret; }
 .ust--duz .ust__sekmeler a[aria-current="page"]{ background:none; }
 .ust--sahne .ust__sekmeler a[aria-current="page"]{ background:none; }
-.ust--sahne .ust__isaret{ background:#ffffff2e; }
+.ust--sahne .ust__isaret{ background:var(--cam); }
 ::view-transition-group(*){ animation-duration:var(--orta); animation-timing-function:var(--akis); }
 ::view-transition-old(root){ animation:var(--hizli) var(--akis) both vt-cik; }
 ::view-transition-new(root){ animation:var(--orta) var(--akis) both vt-gir; }
@@ -287,7 +287,7 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 a.b-satir, .b-karsilama__alan, a.b-ders{ transform:perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0px)) scale(var(--sc, 1));
   transition:box-shadow var(--hizli) var(--akis), transform var(--orta) var(--akis), background var(--hizli) var(--akis); }
 a.b-satir:not(.b-liste--satir a):hover, .b-karsilama__alan:hover, a.b-ders:hover{ --ty:-2px; transform:perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty)) scale(var(--sc, 1));
-  box-shadow:inset 0 0 0 1px var(--cizgi-guclu), 0 10px 28px -12px #0000004d, var(--golge-yumusak); }
+  box-shadow:inset 0 0 0 1px var(--cizgi-guclu), var(--golge-orta); }
 /* ışık: imleci izleyen yumuşak parıltı (etkilesim.js) */
 .b-karsilama__alan, a.b-satir, a.b-ders, .b-sayi, .hs-kimlik, .b-dugme{ position:relative; }
 :is(.b-karsilama__alan, a.b-satir, a.b-ders)::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0;
@@ -327,7 +327,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
   color:inherit; background:transparent; transition:background var(--hizli) var(--akis), color var(--hizli) var(--akis), transform var(--orta) var(--yay); }
 .ust__gece svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linejoin:round; }
 .ust__gece:hover{ background:var(--yuzey-2); }
-.ust--sahne .ust__gece:hover{ background:#ffffff2e; }
+.ust--sahne .ust__gece:hover{ background:var(--cam); }
 .ust__gece[aria-pressed="true"] svg{ fill:currentColor; }
 .ust__gece.calisiyor{ animation:gece-nefes 4s ease-in-out infinite; }
 @keyframes gece-nefes{ 50%{ opacity:.65; } }
@@ -354,7 +354,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 /* Rıhtım (kabuk.js rihtim): fareyle ekranın en altına inince halkanın yerleri alttan çıkar; imlece yakın simge büyür (--b), bulunduğun yerin altında nokta. */
 .rihtim{ position:fixed; left:50%; bottom:14px; z-index:10; display:flex; align-items:flex-end; gap:6px; padding:8px 10px; border-radius:22px;
   background:color-mix(in srgb, var(--yuzey) 80%, transparent); -webkit-backdrop-filter:blur(16px) saturate(1.3); backdrop-filter:blur(16px) saturate(1.3);
-  box-shadow:inset 0 0 0 1px var(--cizgi), 0 18px 40px -16px #00000066;
+  box-shadow:inset 0 0 0 1px var(--cizgi), var(--golge-buyuk);
   transform:translate(-50%, calc(100% + 24px)); opacity:0; transition:transform var(--orta) var(--akis), opacity var(--hizli) var(--akis); }
 .rihtim--acik{ transform:translate(-50%, 0); opacity:1; }
 .rihtim__oge{ position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; width:56px; color:var(--yazi); text-decoration:none; }
@@ -371,7 +371,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 /* Yerler halkası, kabuğun dokunuşu (bilesen.css taşının üstüne): buzlu cam disk, taşlar yaylanarak sırayla açılır (--i),
    merkez seçilen yöne bakan oka döner (--sa), seçilen taş biraz dışarı çıkar. Sağ tıkla da açılır (kabuk.js sagTik). */
 #halka::before{ border-radius:50%; background:color-mix(in srgb, var(--yuzey-2) 78%, transparent); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3);
-  box-shadow:inset 0 0 0 1px var(--cizgi), 0 24px 60px -20px #00000059; transform:translate(-50%,-50%) scale(.6);
+  box-shadow:inset 0 0 0 1px var(--cizgi), var(--golge-buyuk); transform:translate(-50%,-50%) scale(.6);
   transition:transform var(--orta) var(--yay), opacity var(--hizli) ease; }
 #halka.b-halka--acik::before{ transform:translate(-50%,-50%); opacity:1; }
 #halka .b-halka__merkez{ left:-7px; top:-7px; width:14px; height:14px; border-radius:50%; box-shadow:0 0 0 5px color-mix(in srgb, var(--vurgu) 18%, transparent);
@@ -462,7 +462,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 
 /* Ayarlar (kabuk.js sayfaAyarlar): sol menüde simgeli gruplar, kaydırdıkça bulunduğun grup vurgulu; vurgu rengi seçenekleri kendi renk noktasıyla. */
 .ayar-menu{ gap:2px; }
-.ayar-menu .b-gezinme__oge{ gap:var(--a3); min-height:40px; border-radius:var(--kose-k); font-size:var(--yz-k); transition:background calc(var(--sure) * 1.5) var(--akis), color calc(var(--sure) * 1.5) var(--akis); }
+.ayar-menu .b-gezinme__oge{ gap:var(--a3); min-height:40px; border-radius:var(--kose-k); font-size:var(--yz-k); transition:background var(--hizli) var(--akis), color var(--hizli) var(--akis); }
 .ayar-menu .b-gezinme__oge svg{ flex:none; width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:.75; }
 .ayar-menu .b-gezinme__oge[aria-current] svg{ opacity:1; color:var(--vurgu); }
 .ayarlar .b-yanli--sol{ gap:var(--a7); }
@@ -494,4 +494,5 @@ h1, .b-baslik h1, .sira__baslik{ letter-spacing:-.022em; }
   .ust__sekmeler a{ min-height:44px; }
   .kirinti{ display:inline-flex; align-items:center; min-height:44px; margin-block:-12px; }
   .ayar-menu .b-gezinme__oge{ min-height:44px; }
-}
+}/* dokunmatikte ayar satırındaki onay kutusu (Sessiz saatler) 44 px dokunma alanında */
+@media (pointer:coarse){ .b-ayar label:has(> input[type="checkbox"]){ display:inline-flex; align-items:center; gap:var(--a2); min-height:44px; } .b-ayar input[type="checkbox"]{ width:22px; height:22px; } }
