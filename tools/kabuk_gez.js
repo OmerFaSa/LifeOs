@@ -188,6 +188,8 @@ async function goruntu(p, ad, sec = {}) {
     for (const alan of ['tarih', 'dil', 'muzik', 'okuma', 'beslenme', 'hareket', 'uyku', 'tahlil', 'akademik']) {
       const v = JSON.parse(fs.readFileSync(path.join(kok, 'alan', alan, 'asama-1.json'), 'utf8')), d1 = v.uniteler[0].dersler[0];
       await p.goto(T + '/kabuk/#/alan/' + alan);
+      // görünüm geçişi bitene kadar ekranda önceki sayfa da durur: yeni sayfa çizilmiş ve geçiş bitmiş olmalı
+      await p.waitForFunction(a => document.getElementById('sayfa').getAttribute('data-ciz') === a && !document.documentElement.hasAttribute('data-gecis'), alan);
       await p.waitForSelector('.b-acilir');
       dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
       dene(alan + ': ' + (v.uniteler.length > 4 ? 'yalnız ilk ünite açık gelir' : 'bütün üniteler açık gelir'),
