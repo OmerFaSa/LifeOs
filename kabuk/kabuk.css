@@ -101,13 +101,13 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 /* ---------------- ders ve kapı (Felsefe pilotu) ---------------- */
 .ders p, .ders ul:not([class]){ margin:0; max-width:64ch; } .ders ul:not([class]){ padding-left:var(--a4); overflow-wrap:anywhere; } /* kaynak yolu boşluksuz uzun: telefonda taşmasın */
 .ders p, .ders li{ font-size:var(--yz); line-height:1.75; }
-.ders__ozet{ font-size:var(--yz-h3); line-height:1.6; letter-spacing:-.005em; color:var(--yazi); padding:var(--a1) 0 var(--a1) var(--a4); box-shadow:inset 3px 0 0 var(--vurgu); }
+.ders__ozet{ font-size:var(--yz-h3); line-height:1.6; letter-spacing:-.005em; color:var(--yazi); padding:var(--a1) 0; }
 .kapi{ display:flex; flex-direction:column; gap:var(--a3); }
 
 /* ---------------- araç ekranları (kabuk/araclar.js): yalnız yerleşim; parçalar bilesen.css'te ---------------- */
 .notform, .kartform, .aracform, .kayitform, .planform{ display:flex; flex-direction:column; gap:var(--a3); }
 /* formlar sakin bir kartta: alanlar zeminden bir ton koyu, kart yüzeyde */
-.kartform, .kayitform, .planform, .aracform{ padding:var(--a5); border-radius:var(--kose); background:var(--yuzey); box-shadow:inset 0 0 0 1px var(--cizgi); }
+.kartform, .kayitform, .planform, .aracform{ padding:var(--a5); border-radius:var(--kose); background:var(--yuzey); box-shadow:none; }
 :is(.kartform, .kayitform, .planform, .aracform) .b-alan__giris{ background:var(--bg); }
 :is(.kartform, .kayitform, .planform, .aracform) .b-alan__giris:focus{ background:var(--yuzey); }
 .ikili{ display:grid; grid-template-columns:1fr 1fr; gap:var(--a3); }
@@ -147,8 +147,8 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 .ust--duz .ust__sekmeler a{ color:var(--soluk); }
 .ust--duz .ust__sekmeler a:hover{ color:var(--yazi); background:var(--yuzey-2); }
 .ust--duz .ust__sekmeler a[aria-current="page"]{ color:var(--yazi); background:var(--yuzey-2); }
-.ust--duz .ust__ara{ color:var(--soluk); background:var(--yuzey); box-shadow:inset 0 0 0 1px var(--cizgi); }
-.ust--duz .ust__ara:hover{ box-shadow:inset 0 0 0 1px var(--cizgi-guclu); }
+.ust--duz .ust__ara{ color:var(--soluk); background:var(--yuzey); box-shadow:none; }
+.ust--duz .ust__ara:hover{ box-shadow:var(--golge-orta); }
 @media (max-width:860px){ .ust__ara{ width:36px; padding:0; justify-content:center; } .ust__ara span, .ust__ara kbd{ display:none; } }
 
 @media (max-width:640px){ .ust__sekmeler{ display:none; } .ust__ara{ margin-left:auto; } }
@@ -287,7 +287,7 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 a.b-satir, .b-karsilama__alan, a.b-ders{ transform:perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0px)) scale(var(--sc, 1));
   transition:box-shadow var(--hizli) var(--akis), transform var(--orta) var(--akis), background var(--hizli) var(--akis); }
 a.b-satir:not(.b-liste--satir a):hover, .b-karsilama__alan:hover, a.b-ders:hover{ --ty:-2px; transform:perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty)) scale(var(--sc, 1));
-  box-shadow:inset 0 0 0 1px var(--cizgi-guclu), var(--golge-orta); }
+  box-shadow:var(--golge-orta); }
 /* ışık: imleci izleyen yumuşak parıltı (etkilesim.js) */
 .b-karsilama__alan, a.b-satir, a.b-ders, .b-sayi, .hs-kimlik, .b-dugme{ position:relative; }
 :is(.b-karsilama__alan, a.b-satir, a.b-ders)::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0;
@@ -354,11 +354,11 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 /* Rıhtım (kabuk.js rihtim): fareyle ekranın en altına inince halkanın yerleri alttan çıkar; imlece yakın simge büyür (--b), bulunduğun yerin altında nokta. */
 .rihtim{ position:fixed; left:50%; bottom:14px; z-index:10; display:flex; align-items:flex-end; gap:6px; padding:8px 10px; border-radius:22px;
   background:color-mix(in srgb, var(--yuzey) 80%, transparent); -webkit-backdrop-filter:blur(16px) saturate(1.3); backdrop-filter:blur(16px) saturate(1.3);
-  box-shadow:inset 0 0 0 1px var(--cizgi), var(--golge-buyuk);
+  box-shadow:var(--golge-buyuk);
   transform:translate(-50%, calc(100% + 24px)); opacity:0; transition:transform var(--orta) var(--akis), opacity var(--hizli) var(--akis); }
 .rihtim--acik{ transform:translate(-50%, 0); opacity:1; }
 .rihtim__oge{ position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; width:56px; color:var(--yazi); text-decoration:none; }
-.rihtim__simge{ display:grid; place-items:center; width:44px; height:44px; border-radius:14px; background:var(--yuzey-2); box-shadow:inset 0 0 0 1px var(--cizgi);
+.rihtim__simge{ display:grid; place-items:center; width:44px; height:44px; border-radius:14px; background:var(--yuzey-2); box-shadow:none;
   transform:scale(var(--b, 1)); transform-origin:50% 100%; transition:transform var(--hizli) var(--akis), background var(--hizli) ease; }
 .rihtim__simge svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .rihtim__oge:hover .rihtim__simge, .rihtim__oge:focus-visible .rihtim__simge{ background:color-mix(in srgb, var(--vurgu) 16%, var(--yuzey-2)); color:var(--vurgu); }
@@ -371,7 +371,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 /* Yerler halkası, kabuğun dokunuşu (bilesen.css taşının üstüne): buzlu cam disk, taşlar yaylanarak sırayla açılır (--i),
    merkez seçilen yöne bakan oka döner (--sa), seçilen taş biraz dışarı çıkar. Sağ tıkla da açılır (kabuk.js sagTik). */
 #halka::before{ border-radius:50%; background:color-mix(in srgb, var(--yuzey-2) 78%, transparent); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3);
-  box-shadow:inset 0 0 0 1px var(--cizgi), var(--golge-buyuk); transform:translate(-50%,-50%) scale(.6);
+  box-shadow:var(--golge-buyuk); transform:translate(-50%,-50%) scale(.6);
   transition:transform var(--orta) var(--yay), opacity var(--hizli) ease; }
 #halka.b-halka--acik::before{ transform:translate(-50%,-50%); opacity:1; }
 #halka .b-halka__merkez{ left:-7px; top:-7px; width:14px; height:14px; border-radius:50%; box-shadow:0 0 0 5px color-mix(in srgb, var(--vurgu) 18%, transparent);
@@ -410,7 +410,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 /* Öğrenme ekranları (2026-11-15, «adım adım anlaşılır»): alan sayfasında tek «Sıradaki» kartı, aşama özeti, numaralı dikey yol;
    ders sayfasında Oku → Alıştır → Bitir. Durum hem renkle hem işaretle (✓, nokta, kilit metni). */
 .sira{ display:flex; flex-direction:column; gap:var(--a2); margin:var(--a1) 0 var(--a6); padding:var(--a5) var(--a5); border-radius:var(--kose); background:var(--yuzey);
-  box-shadow:inset 0 0 0 1px var(--cizgi), var(--golge-yumusak); border-left:4px solid var(--vurgu); }
+  box-shadow:var(--golge-yumusak); }
 .sira__ust{ margin:0; font-size:var(--yz-k); font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:var(--vurgu); }
 .sira__baslik{ margin:0; font-size:var(--yz-h2); letter-spacing:-.015em; line-height:1.25; }
 .sira__ozet{ margin:2px 0 var(--a2); color:var(--yazi-2); max-width:62ch; }
@@ -442,7 +442,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 .ders-adim{ display:flex; gap:var(--a2); margin:0 0 var(--a4); padding:0; list-style:none; counter-reset:none; }
 .ders-adim__oge{ display:flex; align-items:center; gap:var(--a2); padding:var(--a2) var(--a3) var(--a2) var(--a2); border-radius:var(--kose-tam); font-size:var(--yz-k); font-weight:600; color:var(--soluk); background:var(--yuzey-2); }
 .ders-adim__oge + .ders-adim__oge::before{ content:""; width:14px; height:2px; margin-left:-12px; margin-right:2px; background:var(--cizgi); }
-.ders-adim__no{ display:grid; place-items:center; width:22px; height:22px; border-radius:50%; font-size:var(--yz-k); background:var(--bg); box-shadow:inset 0 0 0 1px var(--cizgi); }
+.ders-adim__no{ display:grid; place-items:center; width:22px; height:22px; border-radius:50%; font-size:var(--yz-k); background:var(--bg); box-shadow:none; }
 .ders-adim__oge[data-adim="simdi"]{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 12%, var(--yuzey)); }
 .ders-adim__oge[data-adim="simdi"] .ders-adim__no{ color:var(--vurgu-yazi); background:var(--vurgu); box-shadow:none; }
 .ders-adim__oge[data-adim="bitti"] .ders-adim__no{ color:var(--vurgu); box-shadow:inset 0 0 0 1px var(--vurgu); }
@@ -458,7 +458,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 .yol .b-ders--yeni .b-ders__alt:not(:has(.b-pul--kesik, .b-pul--altin, .b-pul--vurgu)){ display:none; }
 .yol .b-liste--ders:has(.b-ders--kilitli){ gap:2px; }
 .ders-adim{ margin-top:var(--a2); }
-.yol > [data-adim="kilitli"] .b-liste--satir, .yol__son[data-adim="kilitli"] .b-liste--satir{ background:none; box-shadow:inset 0 0 0 1px var(--cizgi); opacity:.75; }
+.yol > [data-adim="kilitli"] .b-liste--satir, .yol__son[data-adim="kilitli"] .b-liste--satir{ background:none; box-shadow:none; opacity:.75; }
 
 /* Ayarlar (kabuk.js sayfaAyarlar): sol menüde simgeli gruplar, kaydırdıkça bulunduğun grup vurgulu; vurgu rengi seçenekleri kendi renk noktasıyla. */
 .ayar-menu{ gap:2px; }
@@ -496,3 +496,22 @@ h1, .b-baslik h1, .sira__baslik{ letter-spacing:-.022em; }
   .ayar-menu .b-gezinme__oge{ min-height:44px; }
 }/* dokunmatikte ayar satırındaki onay kutusu (Sessiz saatler) 44 px dokunma alanında */
 @media (pointer:coarse){ .b-ayar label:has(> input[type="checkbox"]){ display:inline-flex; align-items:center; gap:var(--a2); min-height:44px; } .b-ayar input[type="checkbox"]{ width:22px; height:22px; } }
+
+/* Sadelik (sahibin isteği 2026-11-15: «kenardaki çizgiyi beğenmedim; minimalist, kalabalıktan arınmış, dikkat çekmeyen»):
+   yüzeyler kenar çizgisiyle değil tonla ve yumuşak gölgeyle ayrılır; renkli kenar şeritleri yok. Giriş kutuları çizgi yerine
+   hafif dolguyla görünür; liste içindeki ince ayraçlar kalır. */
+.b-alan__giris, textarea.b-alan__giris, select.b-alan__giris, .ust--duz .ust__ara{ background:var(--yuzey-2); }
+.b-alan__giris:focus{ background:var(--yuzey); }
+.b-dugme:not(.b-dugme--ana):not(.b-dugme--sade){ background:var(--yuzey-2); }
+.b-dugme:not(.b-dugme--ana):not(.b-dugme--sade):hover{ background:color-mix(in srgb, var(--yazi) 8%, var(--yuzey-2)); box-shadow:none; }
+.sira{ box-shadow:var(--golge-orta); }
+.sira__ust{ color:var(--soluk); }
+.sira__not{ display:none; }
+.yol > [data-adim="simdi"]::before{ box-shadow:none; }
+/* Yüksek kontrast (Ayarlar › Erişilebilirlik) açıkken yüzeylerin kenarı geri gelir: ayrım yalnız tona bırakılmaz */
+:root[data-kontrast="yuksek"] :is(.b-satir, .b-liste--satir, .b-ders, .b-panel, .b-kart, .b-soru, .b-soru__sik, .b-karsilama__alan, .b-karsilama__is, .b-sayi, .b-alan__giris, .b-dugme:not(.b-dugme--ana):not(.b-dugme--sade), .b-tercih__sec[aria-checked="true"], .sira, .b-acilir, .b-uyari){ outline:1px solid var(--cizgi-guclu); outline-offset:-1px; }
+/* ders sayfasında taslak notu kutu değil, başlığın altında sakin tek satır (derslerin çoğu taslak; her sayfada dikkat çekmesin).
+   Onaylar ekranında (inceleme) kutu olarak kalır. */
+article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat{ display:block; margin:calc(-1 * var(--a2)) 0 var(--a3); padding:0; background:none; box-shadow:none; outline:0; }
+article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat .b-uyari__tur{ display:none; }
+article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat .b-uyari__metin{ font-size:var(--yz-k); color:var(--soluk); }
