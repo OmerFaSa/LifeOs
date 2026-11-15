@@ -393,6 +393,66 @@
         expect(bos).toBe(0);
       }));
     });
+    it('insanlar: her sahnede gündüz 1-4 kişi, gece daha az; pozlar düzgün dikdörtgen, harfler palette', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, insan = new RegExp('^(' + D.INSAN.join('|') + ')');
+      const say = (t, v) => D.yerlesim(480, 100, v, t).sakin.filter(r => r.seg.some(q => insan.test(q.poz))).length;
+      D.TUR_LISTE.forEach(t => {
+        const g = say(t, 'ogle'), n = say(t, 'gece');
+        expect(g >= 1 && g <= 4).toBe(true);
+        expect(n <= g && n <= 1).toBe(true);
+      });
+      Object.keys(D.POZ).filter(a => insan.test(a)).forEach(a => D.POZ[a].k.forEach(k => {
+        expect(k.every(r => r.length === k[0].length)).toBe(true);
+        expect(k.join('').split('').every(c => c === '.' || !!D.P_SABIT[c])).toBe(true);
+      }));
+    });
+    it('insanlar zamana bağlı: yeniden kurulan sahne aynı anda aynı kareyi verir, kimse sıçramaz', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, insan = new RegExp('^(' + D.INSAN.join('|') + ')');
+      D.TUR_LISTE.forEach(t => ['ogle', 'gece'].forEach(v => {
+        const a = D.yerlesim(480, 100, v, t), b = D.yerlesim(480, 100, v, t);   // sayfaya dönüş: sahne baştan kurulur
+        a.sakin.forEach((r, i) => {
+          if(!r.seg.some(q => insan.test(q.poz))) return;
+          expect(JSON.stringify(D.kareAl(r, 1234.5))).toBe(JSON.stringify(D.kareAl(b.sakin[i], 1234.5)));
+          /* bir tur boyunca dörtte bir saniyelik adımlarda ayak en çok 3 piksel yer değiştirir (gizlenip görünme hariç) */
+          const ayak = k => k && [k.x, k.y + D.POZ[k.poz].k[k.i].length];
+          for(let z = 0; z < r.T; z += 0.25){
+            const p = ayak(D.kareAl(r, z)), q = ayak(D.kareAl(r, z + 0.25));
+            if(p && q) expect(Math.abs(p[0] - q[0]) <= 3 && Math.abs(p[1] - q[1]) <= 3).toBe(true);
+          }
+        });
+      }));
+    });
+    it('hareket azken sahne durur: her an ilk pozdaki aynı kare, ikinci çağrı yeniden çizmez', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, k = document.documentElement, once = k.getAttribute('data-hareket');
+      const o = D.yerlesim(480, 100, 'ogle', 'tarla'), arka = document.createElement('canvas'), c = document.createElement('canvas');
+      arka.width = c.width = 480; arka.height = c.height = 100; D.binaCiz(arka.getContext('2d'), o);
+      k.setAttribute('data-hareket', 'az');
+      try{
+        expect(D.durgun()).toBe(true);
+        expect(D.kare(c.getContext('2d'), arka, o, 50)).toBe(1);
+        const imza = o.imza;
+        expect(D.kare(c.getContext('2d'), arka, o, 977.3)).toBe(0);
+        o.imza = ''; D.kare(c.getContext('2d'), arka, o, 0);
+        expect(o.imza).toBe(imza);
+        k.setAttribute('data-hareket', 'tam');
+        expect(D.durgun()).toBe(false);
+        expect(D.kare(c.getContext('2d'), arka, o, 977.3)).toBe(1);
+      }finally{ if(once) k.setAttribute('data-hareket', once); else k.removeAttribute('data-hareket'); }
+    });
+    it('kıyı çizgisi sahneyi uçtan uca biçmez (mağara: başlığın üstünden geçen turkuaz çizgi hatası)', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA;
+      ['magara', 'dag', 'gol'].forEach(t => {
+        const o = D.yerlesim(480, 100, 'ogle', t), c = document.createElement('canvas'); c.width = 480; c.height = 100;
+        D.binaCiz(c.getContext('2d'), o);
+        const p = c.getContext('2d').getImageData(0, 0, 480, 100).data;
+        /* göğün altında hiçbir satır uçtan uca tek açık renk olamaz */
+        for(let y = 30; y < 100; y++){
+          let ayni = 0; const r0 = p[y * 1920], g0 = p[y * 1920 + 1], b0 = p[y * 1920 + 2];
+          for(let x = 0; x < 480; x++){ const i = (y * 480 + x) * 4; if(p[i] === r0 && p[i + 1] === g0 && p[i + 2] === b0) ayni++; }
+          expect(ayni === 480 && r0 + g0 + b0 > 500).toBe(false);
+        }
+      });
+    });
     it('yüklenme: manzara tuvali perdeye bir kez konur, kaldırılınca durur', () => {
       const P = window.LIFEOS.PIKSEL, el = document.createElement('div');
       document.body.appendChild(el);
