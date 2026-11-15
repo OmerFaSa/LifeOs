@@ -230,3 +230,24 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
   .hs-kimlik__metin{ flex-basis:calc(100% - 80px); }
   .hs-kimlik__ozet{ flex:1; margin:0; }
 }
+
+/* Hafif hareket (2026-11-15, sahibin isteği): yalnız opaklık ve küçük kayma/ölçek (GPU'da ucuz); süreler --sure'den,
+   Ayarlar › Hareket «az» ya da sistemin «hareketi azalt»ı onu 0 yapınca hepsi durur. Uzun listelerde yalnız ilk on öğe. */
+.b-liste > li:nth-child(-n+10), .b-sayilar > *:nth-child(-n+10), .b-karsilama__alanlar > *:nth-child(-n+10){
+  animation:gir calc(var(--sure) * 2) ease-out both; animation-delay:calc(var(--sure) * var(--s, 0) * .3); }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(2){ --s:1; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(3){ --s:2; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(4){ --s:3; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(5){ --s:4; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(6){ --s:5; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(7){ --s:6; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(8){ --s:7; } :is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(9){ --s:8; }
+:is(.b-liste > li, .b-sayilar > *, .b-karsilama__alanlar > *):nth-child(10){ --s:9; }
+/* açılır bölüm açılınca içi süzülür; uyarı yumuşak belirir */
+.b-acilir[open] > .b-acilir__govde{ animation:gir calc(var(--sure) * 1.5) ease-out both; }
+@keyframes belir{ from{ opacity:0; } }
+.b-uyari{ animation:belir calc(var(--sure) * 1.5) ease-out both; }
+/* basınca hafif çökme */
+.b-tercih__sec, .b-soru__sik{ transition:background var(--sure) ease, color var(--sure) ease, box-shadow var(--sure) ease, transform var(--sure) ease; }
+.b-dugme:not([aria-disabled="true"]):active, .b-tercih__sec:active, .b-soru__sik:active, .ust__sekmeler a:active{ transform:scale(.97); }
+/* tema değişince renkler yumuşak geçer */
+body{ transition:background-color calc(var(--sure) * 2) ease, color calc(var(--sure) * 2) ease; }
+/* Hesap: baş harf yumuşakça yerine oturur */
+.hs-kimlik__harf{ animation:kapak-gir calc(var(--sure) * 3) ease-out both; }
