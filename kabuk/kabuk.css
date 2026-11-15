@@ -706,3 +706,18 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
 :root[data-kontrast="yuksek"] .b-liste--satir .b-satir{ outline:0; }
 :root[data-kontrast="yuksek"] #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir{ outline:0; }
 @media (min-width:641px){ :root[data-kontrast="yuksek"] #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-satir{ outline:1px solid var(--cizgi-guclu); outline-offset:-1px; } }
+
+/* ===== Akıcı geçiş (2026-11-16, sahibin isteği: «bu animasyonu sevmedim, bazı yerlerde takılıyor; buna yoğunlaş») =====
+   Tek, sakin dil: eski sayfa kısa sürede söner, yenisi hafifçe yükselerek belirir. Yana kayma ve ölçek yok (büyük görüntüyü
+   kaydırmak yavaş makinede takılıyordu). Tür yalnız mesafeyi ve süreyi değiştirir: bölüm içi en kısa, bölüm değişimi biraz daha,
+   derse başlama en belirgin. Geçiş sürerken listeler ayrıca süzülmez (iki hareket üst üste binmez). */
+:root{ --vt-cik:140ms; --vt-gir:260ms; --vt-yol:6px; --vt-gec:30ms; }
+:root[data-gecis-tur="buyuk"]{ --vt-gir:320ms; --vt-yol:10px; --vt-gec:50ms; }
+:root[data-gecis-tur="ders"]{ --vt-gir:380ms; --vt-yol:18px; --vt-gec:60ms; }
+:root[data-gecis]::view-transition-old(root), :root[data-gecis][data-gecis-tur]::view-transition-old(root){ animation:var(--vt-cik) cubic-bezier(.4,0,1,1) both vt-son; }
+:root[data-gecis]::view-transition-new(root), :root[data-gecis][data-gecis-tur]::view-transition-new(root){ animation:var(--vt-gir) cubic-bezier(.16,1,.3,1) var(--vt-gec) both vt-bel; }
+@keyframes vt-son{ to{ opacity:0; } }
+@keyframes vt-bel{ from{ opacity:0; transform:translateY(var(--vt-yol)); } }
+::view-transition-group(ust){ animation:none; }
+::view-transition-group(sekme-isaret){ animation-duration:260ms; animation-timing-function:cubic-bezier(.16,1,.3,1); }
+.canlan--gecis [data-sira], .canlan--gecis .kapak__simge, .canlan--gecis .b-uyari{ animation:none !important; }

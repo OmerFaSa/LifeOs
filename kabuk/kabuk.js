@@ -371,18 +371,40 @@
     var saat = new Date().getHours(), tur = c.getAttribute('data-sahne') || 'yayla', ad = [tur, saat, c.width, c.height].join();
     try {
       var o = sahneOnbellek[ad];
-      if (!o) { o = d.createElement('canvas'); o.width = c.width; o.height = c.height; o.yer = D.yerlesim(c.width, c.height, D.vakit(saat), tur); D.binaCiz(o.getContext('2d'), o.yer); sahneOnbellek[ad] = o; }
+      // önbellekte yoksa çizim (yavaş makinede 100–300 ms) geçişin ortasında yapılmaz: boşta çizilir, tuval o ana dek gök renginde
+      if (!o) { bostaCiz(D, tur, saat, c.width, c.height, function () { if (c.isConnected) manzara(); }); return; }
       o.yer.imza = ''; // yeni tuval: sakinler ilk karede çizilsin
       canli = { c: c, g: c.getContext('2d'), arka: o, D: D };
       canli.g.drawImage(o, 0, 0); D.kare(canli.g, o, o.yer, Date.now() / 1000);
       if (!canliSaat) canliSaat = setInterval(canlandir, 125);
+      setTimeout(function () { sahneleriHazirla(D); }, 1500);
     } catch (e) { /* süs */ }
+  }
+  // Sahneyi önbelleğe çizer; boşta (requestIdleCallback), yoksa kısa bir gecikmeyle. Aynı sahne iki kez sıraya girmez.
+  var cizilecek = {};
+  function sahneYap(D, tur, saat, w, h) {
+    var ad = [tur, saat, w, h].join(); if (sahneOnbellek[ad]) return;
+    var o = d.createElement('canvas'); o.width = w; o.height = h; o.yer = D.yerlesim(w, h, D.vakit(saat), tur); D.binaCiz(o.getContext('2d'), o.yer); sahneOnbellek[ad] = o;
+  }
+  function bostaCiz(D, tur, saat, w, h, sonra) {
+    var ad = [tur, saat, w, h].join(); if (cizilecek[ad]) return; cizilecek[ad] = 1;
+    var is = function () { try { sahneYap(D, tur, saat, w, h); } catch (e) { /* süs */ } delete cizilecek[ad]; if (sonra) sonra(); };
+    if (kok.requestIdleCallback) requestIdleCallback(is, { timeout: 400 }); else setTimeout(is, 60);
+  }
+  // Açılıştan sonra bütün kapak sahneleri (ve Bugün'ün sahnesi) boşta önceden çizilir: bir bölüme ilk girişte çizim beklenmez
+  var onCizildi = false;
+  function sahneleriHazirla(D) {
+    if (onCizildi || !D) return; onCizildi = true;
+    var olc = innerWidth < 640 ? 2 : 3, w = Math.max(120, Math.round(innerWidth / olc)), saat = new Date().getHours();
+    var kh = Math.max(40, Math.round((innerWidth < 641 ? 144 : 300) / olc)), turler = {};
+    Object.keys(KAPAK).forEach(function (k) { turler[KAPAK[k][0]] = 1; });
+    Object.keys(turler).forEach(function (t) { bostaCiz(D, t, saat, w, kh); });
   }
   // Sahnenin sakinleri (süzülen bulut, kuş sürüsü, düşen yaprak, ördek, yıldız) kitaplığın kendi rutinleriyle yürür; kare değişmedikçe çizilmez.
   var canli = null, canliSaat = null;
   function canlandir() {
     if (!canli || !canli.c.isConnected) { clearInterval(canliSaat); canliSaat = null; canli = null; return; }
-    if (d.hidden || !hareketVar()) return;
+    if (d.hidden || !hareketVar() || d.documentElement.hasAttribute('data-gecis')) return; // geçiş sürerken sahne kıpırdamaz (kare bütçesi)
     try { canli.D.kare(canli.g, canli.arka, canli.arka.yer, Date.now() / 1000); } catch (e) { clearInterval(canliSaat); canliSaat = null; }
   }
   function sayfaDal(yer) {
@@ -673,7 +695,7 @@
     // Bölüm değişince görünüm geçişi (tarayıcı destekliyorsa ve hareket açıksa): içerik gidilen yöne kayarak söner, üst çubuk yerinde kalır,
     // seçili sekmenin işareti yenisine akar. Aynı sayfanın yeniden çizimi (tıklama, yazma) anında olur.
     var gecisli = !!(once && yeniSayfa && d.startViewTransition && !d.hidden && hareketVar()); // gizli sekme çizmez: geçiş zaman aşımına düşerdi
-    var pay = gecisli && paylas && paylas.el.isConnected && sayfaEl.contains(paylas.el) ? paylas : null; paylas = null;
+    var pay = null; paylas = null; // paylaşılan öğe (uçan simge) kapalı: sahibin isteği 2026-11-16, geçiş tek ve sakin; ikinci hareket yavaş makinede takılıyordu
     if (gecisli) {
       if (pay) pay.el.style.viewTransitionName = 'paylasilan';
       d.documentElement.setAttribute('data-gecis', once === yer.id ? (parca[0].split('/').length >= String(onceYol).split('/').length ? 'ileri' : 'geri') : yon(once, yer));

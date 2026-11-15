@@ -116,8 +116,7 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
             await new Promise(r => requestAnimationFrame(r));
           } return 0; });
         await bekleGecis(p); await p.waitForTimeout(300);
-        if (kapali) dene(ad + ': paylaşılan öğe geçişi yok', pay === 0, pay);
-        else dene(ad + ': alan kartı kapak simgesine akar (' + hedef + ')', pay > 0, pay);
+        dene(ad + ': uçan simge yok, geçiş tek hareket (' + hedef + ')', pay === 0, pay); // sahibin isteği 2026-11-16: geçiş tek ve sakin
         dene(ad + ': geçişten sonra geçici ad kalmaz', await p.evaluate(() => ![].some.call(document.querySelectorAll('#sayfa *'), e => e.style.viewTransitionName)));
       } else dene(ad + ': Bugün\'de alan kartı var', false);
 
