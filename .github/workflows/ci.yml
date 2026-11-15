@@ -252,6 +252,11 @@ jobs:
       - name: Kabuk eşitleme gezisi (iki cihaz, tek depo, gerçek tarayıcı)
         run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk eşitleme gezisi" node tools/kabuk_esit_gez.js
 
+      # HIZ BUTCESI (Faz 8 P3, 2026-11-15). Kabugun acilisi sayilir, sure degil: istek, aktarilan bayt, Bugun'de alan
+      # paketi ve betik istegi (uretim paketi /kabuk/paket.js). Sureler tabloda yalniz bilgi icin yazilir.
+      - name: Kabuk hız bütçesi (açılış istekleri, gerçek tarayıcı)
+        run: bash "$GITHUB_WORKSPACE/tools/ci_hata.sh" "Kabuk hız bütçesi" node kalite/hiz_olcum.js --tekrar 1 --denetle
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç
