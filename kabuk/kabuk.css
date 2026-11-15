@@ -579,3 +579,17 @@ article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat{ margin-bottom:var(--a4);
 .king-dipnot{ margin:var(--a5) 0 0; font-size:var(--yz-k); line-height:1.55; color:var(--soluk); max-width:62ch; }
 article.ders > .b-uyari--dikkat + .ders__ozet, article.ders > .b-baslik + .ders__ozet{ margin-top:0; }
 article.ders .ders__ozet{ color:var(--yazi-2); }
+
+/* ===== Estetik sadelik (2026-11-15, «estetik minimalist görünsün») =====
+   Az öğe, çok nefes: bölümler arası daha geniş, başlıklar zarif, satır yazısı yumuşak, okuma metni rahat; manzara biraz daha yüksek. */
+:root .govde{ gap:var(--a5); padding-bottom:var(--a7); }
+:root .govde > .b-bolum + .b-bolum{ margin-top:var(--a6); }
+:root .b-baslik__metin h1, :root .b-baslik h1{ font-weight:680; letter-spacing:-.028em; }
+:root .b-baslik__alt{ margin-top:var(--a1); line-height:1.5; }
+:root .b-satir__ad{ font-weight:560; letter-spacing:-.005em; }
+:root .b-liste--satir .b-satir{ padding-top:var(--a3); padding-bottom:var(--a3); }
+:root .b-karsilama__alan{ min-height:68px; }
+.kapak{ height:196px; }
+@media (max-width:640px){ .kapak{ height:144px; } }
+.ders p, .ders li{ line-height:1.8; }
+.ders p + p{ margin-top:var(--a1); }
