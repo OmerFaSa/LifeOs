@@ -203,6 +203,10 @@ def run():
         Her saglayicinin, kimlik dogrulayan ve para harcamayan bir GET
         ucu olmali."""
         for ad, tanim in models.PROVIDERS.items():
+            if tanim.get("kopru"):
+                # Anahtarsiz kopru HTTP ucu tasimaz; sinamasi uygulamanin acik olmasidir (core/kopru.hal).
+                ok(models.probe({"local_token": "x"}, ad).get("note"), ad)
+                continue
             ok(tanim.get("probe"), ad)
             ok(str(tanim["probe"]).startswith("http"), ad)
         # Sohbet ucu ile sinama ucu AYNI sey degildir.

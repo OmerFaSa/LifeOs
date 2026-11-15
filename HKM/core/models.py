@@ -118,6 +118,18 @@ PROVIDERS = {
         "key_header": "Authorization",
         "models": [],
     },
+    # ANAHTARSIZ KOPRULER (core/kopru.py): kullanicinin kendi oturumu, uygulama arka
+    # planda acikken. Anahtar alani yoktur; bedel aboneliktedir (defterde 0 USD).
+    "antigravity": {
+        "label": "Antigravity (anahtarsız, uygulama açıkken)",
+        "base": "", "probe": "", "key_header": "", "kopru": True,
+        "models": ["flash", "flash_lite", "pro"],
+    },
+    "claude": {
+        "label": "Claude Code (anahtarsız, claude -p)",
+        "base": "", "probe": "", "key_header": "", "kopru": True,
+        "models": ["sonnet", "haiku", "opus"],
+    },
 }
 
 # ------------------------------------------------------------------ kademeler
@@ -500,7 +512,7 @@ def resolve(cfg, role):
                 "key_label": secili["label"] if secili else "",
                 "key_user": (secili or {}).get("user") or "",
                 "key_missing": eksik,
-                "key_set": bool(secili and secili["key"]),
+                "key_set": bool(secili and secili["key"]) or bool((PROVIDERS.get(saglayici) or {}).get("kopru")),
                 "chain": zincir,
             }
         imlec = ROLES[imlec]["parent"]
@@ -786,6 +798,11 @@ def probe(cfg, provider, transport=None, timeout=10, key_id=None):
                 "note": "Bilinmeyen sağlayıcı."}
     # Hangi anahtar sinaniyorsa O sinanir: «saglayici calisiyor» demek,
     # ikinci anahtarin da calistigini gostermez.
+    if tanim.get("kopru"):
+        from core import kopru
+        h = kopru.hal(provider, tazele=True)
+        return {"ok": h["acik"], "models": tanim["models"], "note": h["not"],
+                "reason": "" if h["acik"] else "kapali"}
     anahtar = key_value(cfg, provider, key_id)
     if not anahtar and provider != "yerel":
         return {"ok": False, "reason": "no-key",

@@ -131,11 +131,11 @@ from urllib.parse import parse_qs, quote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import arastir, kutu, motor, tarife  # noqa: E402
+from core import arastir, kopru, kutu, motor, tarife  # noqa: E402
 from core import beceri, disdunya, eylem, kendiliginden, kodlama, soz  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, gorev, hedefag, impact,
-                  intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
+                  intents, kanal, king, manager, media, memory, merkez, models, motto, ollama, outbox, patron,
                   ses, dinle,
                   profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
@@ -191,6 +191,11 @@ LOCAL_ORIGIN = re.compile(
 # Bunlardan biri varsa istek bir vekilden/tunelden gecmistir: yerel degildir.
 VEKIL_BASLIKLARI = ("X-Forwarded-For", "X-Forwarded-Host", "Forwarded",
                     "Cf-Connecting-Ip", "X-Real-Ip")
+
+
+def _yerel_ip(ip):
+    """Istek bu bilgisayardan mi (vekil/Tailscale istegi tekkapi'de VEKIL_IP'ye cevrilir)."""
+    return str(ip) in ("127.0.0.1", "::1", "::ffff:127.0.0.1")
 
 
 def _koken_portu(koken):
@@ -754,6 +759,7 @@ class Handler(BaseHTTPRequestHandler):
         self._korumali(self._post)
 
     def _korumali(self, is_):
+        ai.KOPRU.set("")            # ayni baglantinin onceki isteginden kopru secimi kalmasin
         self._yanitlandi = False
         self._govde_okundu = False
         try:
@@ -1004,10 +1010,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(404, {"error": "bilinmeyen modul"})
             return self._send(200, dict(king.bildirimler(
                 self.con, mod, hepsi=(q.get("hepsi") or ["0"])[0] == "1"), modul=mod))
-        # Modul ofisinin modeli (core/ofismodel.py): hazir mi, hangisi.
-        if u.path == "/api/ofis/durum":
-            return self._send(200, ofismodel.durum(self.server.config, (q.get("modul") or [""])[0],
-                                                   (q.get("yetenek") or ["sohbet"])[0]))
         # Patronlar arasi kanal (core/kanal.py): YALNIZ OKUR.
         if u.path.startswith("/api/kanal/"):
             r = kanal.modul_icin(self.con, u.path.rsplit("/", 1)[-1], date)
@@ -1146,6 +1148,10 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 n = 50
             return self._send(200, {"eylemler": eylem.listele(self.con, n)})
+        if u.path == "/api/kopru":
+            # Anahtarsiz kopruler (core/kopru.py): acik mi, sinir, kuyruk, gecikme. Sir icermez.
+            return self._send(200, {"kopruler": kopru.durum(tazele=(q.get("tazele") or [""])[0] == "1"),
+                                    "yerel_istek": _yerel_ip(self.client_address[0])})
         if u.path == "/api/ai_olcum":
             # «King bugün ne harcadı»: her model cagrisinin suresi ve jetonu (KING-4).
             return self._send(200, butce.ai_olcum(self.con, date))
@@ -1393,17 +1399,6 @@ class Handler(BaseHTTPRequestHandler):
                           hedef_modul=body.get("hedef_modul") or None,
                           efor=body.get("efor") or None)
             return self._send(200 if r.get("ok") else 422, r)
-        # Modul ofisinin cumlesi HKM'nin modeliyle (core/ofismodel.py). Rol
-        # sunucuda sabittir; HKM hicbir module yazmaz.
-        if u.path == "/api/ofis/cevap":
-            ham, hata = self._read_body()
-            if hata:
-                return self._send(413, {"error": hata})
-            try:
-                body = _nesne(ham)
-            except ValueError:
-                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
-            return self._send(200, ofismodel.cevap(self.con, self.server.config, body))
         # Web aramasini King adina DENER: Ayarlar ekranindaki «dene» dugmesi.
         # Rol sunucuda sabittir; istemci rol secemez.
         if u.path == "/api/web/dene":
@@ -1745,6 +1740,10 @@ class Handler(BaseHTTPRequestHandler):
                 ek["arac_sonuclari"] = govde["arac_sonuclari"]
             if isinstance((govde or {}).get("dongu"), dict):
                 ek["dongu"] = govde["dongu"]
+            # Anahtarsiz kopru secimi (core/kopru.py) yalniz bu bilgisayardan gelen istekte: uzaktan gelen
+            # istek buraya hesap.py soz 30 yoluyla (admin oturumu, 127.0.0.1'den iletilir) ulasir.
+            secim = str((govde or {}).get("saglayici") or "")[:40]
+            ai.KOPRU.set(secim if _yerel_ip(self.client_address[0]) else "")
             if u.path == "/api/chat/akis":
                 # Akan cevap: NDJSON satirlari; once denetlenmis cumleler, sonda tam cevap.
                 self._akis_baslat()

@@ -806,12 +806,14 @@ async function goruntu(p, ad, sec = {}) {
     console.log('  ölçüldü (soğuk açılış): dizin yükleme dahil ' + olcum2.dizinMs + ' ms, ilk sorgu ' + olcum2.sorguMs + ' ms');
     dene('arama: doğrudan açılışta dizin kurulur ve dersler gelir', olcum2.ders === olcum1.ders && (await ap.locator('[data-arama-grup="ders"] a.b-satir').count()) > 0, JSON.stringify(olcum2));
     await ap.close();
-    // ---- King: açıklama sayfası, sohbet taklidi yok ----
+    // ---- King: açıklama sayfası + LifeOS içinden konuşma (kabuk/king-sohbet.js, 2026-11-15 sahibin isteği) ----
     await p.goto(T + '/kabuk/#/king');
-    await p.waitForSelector('[data-sayfa="king"]');
+    await p.waitForSelector('[data-sayfa="king"] form[data-king-sohbet]');
     const kingMetin = await p.textContent('#sayfa');
     dene('King: nerede konuşulacağını, neyi gördüğünü ve sahibin adımını söyler', /Claude masaüstü uygulamasında/.test(kingMetin) && /Özel notlarını görmez/.test(kingMetin) && /tamamen kapat/.test(kingMetin) && !/hazırlanıyor/.test(kingMetin));
-    dene('King: sohbet kutusu yok', (await p.locator('[data-sayfa="king"] input, [data-sayfa="king"] textarea, [data-sayfa="king"] form').count()) === 0);
+    const kingForm = await p.evaluate(() => { const f = document.querySelector('[data-sayfa="king"] form[data-king-sohbet]');
+      return { tek: document.querySelectorAll('[data-king-bolum]').length, secenek: [...f.saglayici.options].map(o => o.value).join(','), metin: !!f.metin }; });
+    dene('King: tek sohbet bölümü; Otomatik, Antigravity ve Claude Code seçilir', kingForm.tek === 1 && kingForm.secenek === 'oto,antigravity,claude' && kingForm.metin, JSON.stringify(kingForm));
     await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP && document.querySelector('.b-karsilama__selam')); // bölüm geçişinin çizimi bir kare sonra

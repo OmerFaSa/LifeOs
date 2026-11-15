@@ -16,6 +16,26 @@
 | Hesap ve eşitleme | `sistem/hesap.py`, `brand/ortak/hesap.js` | `ev_agi` yalnız Tailscale adı; QR doğrudan Tailscale adresine. |
 | Merkez çekirdeği | `HKM/core`, `HKM/daemon.py` | yüz (`HKM/web`) yok; BAM kayıt deposu olarak duruyor (`faz7-kapanis.md` açık soru 2). |
 | Eski modül kaynağı | `motor/eski/` | yalnız motor eşitlik testleri okur; sunulmaz. |
+| King köprüleri | `HKM/core/kopru.py`, `kabuk/king-sohbet.js` | aşağıda «Anahtarsız köprüler». |
+
+### Anahtarsız köprüler: Antigravity ve Claude Code (2026-11-15)
+
+King, API anahtarı olmadan iki sağlayıcıyla konuşur; ikisi de sahibin kendi oturumudur ve uygulama yalnız arka planda açıkken çalışır.
+
+| Sağlayıcı | Nasıl | Ne zaman «kapalı» |
+|---|---|---|
+| `antigravity` | Antigravity'nin yerel dil sunucusu (`language_server.exe agentapi`); adres ve CSRF anahtarı çalışan sürecin komut satırından okunur, yalnız bellekte ve alt sürecin ortamında durur. İstem «araç kullanma» der; her soru `LifeOS King` başlıklı yeni bir konuşma açar. | dil sunucusu yok |
+| `claude` | resmi Claude Code CLI'nin başsız kipi: `claude -p --output-format json --tools "" --strict-mcp-config --no-session-persistence --setting-sources=` (araçsız, MCP'siz, kullanıcı kancaları yüklenmez) | `claude` komutu yok ya da oturum kapalı |
+
+Claude masaüstü uygulaması ya da claude.ai ekran/arayüz otomasyonuyla sürülmez; bu kullanım koşullarına aykırıdır, yalnız resmi CLI çağrılır.
+
+- **Seçim.** Kabukta King sayfası › «Burada konuş» › «Kim cevaplasın»: Otomatik (Merkez ayarı), Antigravity, Claude Code. Seçim isteğe gider (`saglayici`); yalnız bu bilgisayardan gelen istekte geçerlidir. Köprü, Ayarlar › Yapay zekâ'da bir kademeye de atanabilir (anahtar istemez).
+- **Kapalıysa.** Köprü merdivenin ilk basamağıdır; kapalı, hatalı ya da zaman aşımındaysa King bunu söyler («Antigravity olmadı (…). Sıradaki model cevaplıyor.») ve sıradaki model (yerel/ücretsiz) cevaplar. Sıradaki yoksa cevap boş kalır, kural motoru konuşur; uydurma yok.
+- **Paralellik.** Sağlayıcı başına aynı anda en çok 2 çağrı, kuyrukta en çok 4; fazlası hemen «kuyruk dolu» der. Tek çağrının tavanı 180 sn (kuyruk beklemesi dahil). Geçici hata bir kez yeniden denenir; kapalı ve kota (429) yeniden denenmez, kota merdivenin kota penceresine girer.
+- **Etiket.** Cevap King'in olağan denetiminden geçer (dayanaksız sayı ve buyurgan kip düşer); her cevapta kaynak satırı (sağlayıcı, model, süre) görünür. Her çağrı deftere yazılır; bedel 0 USD (abonelikte), süre ölçülür.
+- **Ölçüm.** `GET /api/hkm/kopru` (kabukta `/api/kabuk/king/kopru`): açık mı, sınır, çalışan, bekleyen, sayaçlar (istek, başarı, hata, kapalı, zaman aşımı, kuyruk dolu, yeniden, kota), başarı oranı, gecikme medyanı ve p95 (son 50 çağrı, süreç açıldığından beri; boşsa «veri yok»).
+- **Güvenlik.** Kabuk Merkez'e aynı kökenden `/api/kabuk/king` ile gider; ortak jeton tarayıcıya girmez, tek kapı ekler. Uç yalnız 127.0.0.1'den, yerel kökenden ve `X-LifeOS: king` başlığıyla açılır; vekilden (Tailscale) gelen istek 403. Telefon King'e yalnız Hesap › Merkez yolundan (admin oturumu, `sistem/hesap.py` söz 30) ulaşır. CSRF anahtarı, jeton ve parola günlüğe, adrese ve tarayıcı deposuna yazılmaz; depoda yalnız seçim (`lifeos.king.saglayici`) durur.
+- **Ölçülen (2026-11-15, bu bilgisayar).** Claude Code tek soru 4–6 sn (`--setting-sources=` öncesi 8,5 sn); üç paralel soru 10,7 sn. Antigravity tek soru 18–29 sn. Kabuk yolundan dört paralel istek (2+2) 28,8 sn, başarı %100. Antigravity kapalıyken anlaşılması 0,6 sn, Claude Code devraldı.
 
 Aşağıdaki bölümler kapanıştan önceki üç modüllü düzeni anlatır; tarihçedir. Kod `c293d421`'de.
 
