@@ -364,3 +364,53 @@ body{ transition:background-color calc(var(--sure) * 2.5) var(--akis), color cal
   transition-delay:calc(var(--sure) * var(--i, 0) * .25); }
 #halka .b-halka__oge svg{ width:18px; height:18px; margin-right:8px; vertical-align:-3px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 #halka.b-halka--acik .b-halka__oge--secili{ transform:translate(-50%,-50%) rotate(var(--a)) translateX(calc(var(--r,120px) + 6px)) rotate(calc(-1 * var(--a))) scale(1.08); transition-delay:0s; }
+
+/* Öğrenme ekranları (2026-11-15, «adım adım anlaşılır»): alan sayfasında tek «Sıradaki» kartı, aşama özeti, numaralı dikey yol;
+   ders sayfasında Oku → Alıştır → Bitir. Durum hem renkle hem işaretle (✓, nokta, kilit metni). */
+.sira{ display:flex; flex-direction:column; gap:6px; margin:4px 0 28px; padding:22px 24px; border-radius:20px; background:var(--yuzey);
+  box-shadow:inset 0 0 0 1px var(--cizgi), var(--golge-yumusak); border-left:4px solid var(--vurgu); }
+.sira__ust{ margin:0; font-size:.78rem; font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:var(--vurgu); }
+.sira__baslik{ margin:0; font-size:1.35rem; letter-spacing:-.015em; line-height:1.25; }
+.sira__ozet{ margin:2px 0 8px; color:var(--yazi-2); max-width:62ch; }
+.sira__not{ margin:4px 0 0; font-size:.85rem; color:var(--soluk); }
+.sira .b-eylemler{ margin-top:6px; }
+.yol-ozet{ display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+.yol-ozet #asama-ad{ margin:0; }
+.yol-ozet__cubuklar{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px 24px; }
+/* numaralı yol: her ünite bir adım; sol rayda numara (bitti ✓, şimdi dolu, kilitli soluk) */
+.yol{ position:relative; display:flex; flex-direction:column; gap:4px; padding-left:44px; counter-reset:yol; }
+.yol::before{ content:""; position:absolute; left:15px; top:18px; bottom:24px; width:2px; border-radius:2px; background:var(--cizgi); }
+.yol > .b-acilir, .yol__son{ position:relative; }
+.yol > .b-acilir::before, .yol__son::before{ content:attr(data-no); position:absolute; left:-44px; top:10px; display:grid; place-items:center; width:32px; height:32px; border-radius:50%;
+  font-size:.85rem; font-weight:700; font-variant-numeric:tabular-nums; color:var(--soluk); background:var(--bg); box-shadow:inset 0 0 0 2px var(--cizgi); }
+.yol__son::before{ content:"★"; font-size:.8rem; top:14px; }
+.yol > [data-adim="simdi"]::before{ color:var(--vurgu-yazi); background:var(--vurgu); box-shadow:0 0 0 5px color-mix(in srgb, var(--vurgu) 18%, transparent); }
+.yol > [data-adim="bitti"]::before, .yol__son[data-adim="bitti"]::before{ content:"✓"; color:var(--vurgu); box-shadow:inset 0 0 0 2px var(--vurgu); }
+.yol > [data-adim="atlandi"]::before{ content:"»"; }
+.yol > [data-adim="kilitli"] > .b-acilir__ust{ opacity:.6; }
+.yol > [data-adim="simdi"] > .b-acilir__ust .b-acilir__baslik{ color:var(--vurgu); }
+/* yolun içinde dersler tek sütun ve kısa: kilitli ve okunmuş dersin özeti gizli, şimdiki dersin özeti görünür */
+.yol .b-liste--ders{ grid-template-columns:minmax(0, 1fr); gap:6px; }
+.yol > .b-acilir, .yol__son{ min-width:0; }
+.yol .b-ders{ height:auto; min-height:0; padding:12px 14px; }
+.yol .b-ders--kilitli .b-ders__ozet, .yol .b-ders--okundu .b-ders__ozet{ display:none; }
+.yol .b-ders--kilitli{ opacity:.7; }
+.yol + .b-bolum{ margin-top:32px; }
+/* ders sayfası: adım göstergesi */
+.ders-adim{ display:flex; gap:6px; margin:0 0 18px; padding:0; list-style:none; counter-reset:none; }
+.ders-adim__oge{ display:flex; align-items:center; gap:8px; padding:6px 12px 6px 6px; border-radius:999px; font-size:.85rem; font-weight:600; color:var(--soluk); background:var(--yuzey-2); }
+.ders-adim__oge + .ders-adim__oge::before{ content:""; width:14px; height:2px; margin-left:-12px; margin-right:2px; background:var(--cizgi); }
+.ders-adim__no{ display:grid; place-items:center; width:22px; height:22px; border-radius:50%; font-size:.75rem; background:var(--bg); box-shadow:inset 0 0 0 1px var(--cizgi); }
+.ders-adim__oge[data-adim="simdi"]{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 12%, var(--yuzey)); }
+.ders-adim__oge[data-adim="simdi"] .ders-adim__no{ color:var(--vurgu-yazi); background:var(--vurgu); box-shadow:none; }
+.ders-adim__oge[data-adim="bitti"] .ders-adim__no{ color:var(--vurgu); box-shadow:inset 0 0 0 1px var(--vurgu); }
+.ders__soru{ position:relative; }
+.ders__soru::before{ content:"Soru " attr(data-no); display:block; margin:0 0 6px 2px; font-size:.75rem; font-weight:650; letter-spacing:.05em; text-transform:uppercase; color:var(--soluk); }
+.ders__bitir{ margin-top:28px; padding-top:20px; box-shadow:inset 0 1px 0 var(--cizgi); }
+@media (max-width:640px){ .yol{ padding-left:38px; } .yol::before{ left:12px; } .yol > .b-acilir::before, .yol__son::before{ left:-38px; width:26px; height:26px; } .sira{ padding:18px; } }
+/* kilitli ünitenin dersleri kart değil, sade satır: başlık görünür (ne geleceği bilinsin), kalabalık etmez */
+.yol > [data-adim="kilitli"] .b-ders{ padding:6px 4px; background:none; box-shadow:none; }
+.yol > [data-adim="kilitli"] .b-ders__alt{ display:none; }
+.yol > [data-adim="kilitli"] .b-liste--ders{ gap:0; }
+.ders-adim{ margin-top:6px; }
+.yol > [data-adim="kilitli"] .b-liste--satir, .yol__son[data-adim="kilitli"] .b-liste--satir{ background:none; box-shadow:inset 0 0 0 1px var(--cizgi); opacity:.75; }

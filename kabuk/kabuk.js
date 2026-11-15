@@ -441,28 +441,40 @@
       var il = dr.ilerleme, hepsiAcik = dr.uniteler.length <= 4, simdiki = a && (a.tur === 'kapi' ? a.id : f.y.ust[a.id]), yer_ = dr.asama.yerlestirme;
       if (dr.asama.gecti) sonraki = asamaListe(etkinAlan).filter(function (x) { return x.n === f.n + 1 && x.acik; })[0] || null;
       yeni = a && alanYeni(etkinAlan);
-      ic = (yeni ? B.panel({ baslik: 'Nereden başlayalım?', id: 'yer-baslik', govde: ['<p>Konuyu biliyorsan «Seviyemi bul»: aşama başına 5–8 soru, bildiğin aşamalar atlanır.</p>',
-          B.eylemler([{ metin: 'Baştan başla', tur: 'ana', href: adimYolu(a) }, { metin: 'Seviyemi bul', href: F() + '/yer/1' }])] }) : '') +
-        asamalarHtml(f.n) + asamaBasligi('Aşama ' + f.n, dr.asama.ad) + ilerle('Okunan ders', il.okunanDers) + ilerle('Geçilen ünite kapısı', il.gecilenUnite) +
+      // Sayfa üç katman (sahibin isteği 2026-11-15: «adım adım anlaşılır»): üstte tek «Sıradaki» kartı, altında aşamanın özeti, sonra numaralı yol.
+      ic = (a ? siraKarti(f, a, yeni, il.okunanDers.deger) : '') +
+        '<div class="yol-ozet">' + asamaBasligi('Aşama ' + f.n, dr.asama.ad) + '<div class="yol-ozet__cubuklar">' + ilerle('Okunan ders', il.okunanDers) + ilerle('Geçilen ünite kapısı', il.gecilenUnite) + '</div></div>' +
         (il.atlananUnite ? '<p class="soluk">' + il.atlananUnite.deger + ' ünite atlandı (' + il.atlananUnite.etiket + ')</p>' : '') +
         (yer_ && yer_.uretim === 'bekliyor' ? B.uyari({ tur: 'dikkat', metin: 'Yerleştirme tahmini; üretim görevi bekliyor.' }) : '') +
-        dr.uniteler.map(function (u) {
+        '<div class="yol">' + dr.uniteler.map(function (u, ui) {
           var okunan = u.dersler.filter(function (x) { return x.okundu; }).length;
+          var adim = u.gecti ? 'bitti' : u.id === simdiki ? 'simdi' : u.atlandi ? 'atlandi' : u.acik ? 'acik' : 'kilitli';
           // kalabalık alanda (Akademik: 30 ünite) yalnız üzerinde çalışılan ünite açık gelir
-          return B.acilir({ baslik: u.ad, acik: hepsiAcik || u.id === simdiki,
+          return B.acilir({ baslik: u.ad, acik: hepsiAcik || u.id === simdiki, veri: { adim: adim, no: String(ui + 1) },
             not: u.gecti ? 'geçildi' : u.atlandi ? 'atlandı' + (yer_.etiket ? ' (' + yer_.etiket + ')' : '') + ' · ' + okunan + '/' + u.dersler.length + ' ders' : u.acik ? okunan + '/' + u.dersler.length + ' ders' : 'kilitli',
             govde: [u.dersler.length ? B.liste({ ad: u.ad + ' dersleri', tur: 'ders', ogeler: u.dersler.map(function (x, i) {
               var oz = (f.y.oge[x.id] || {}).ozet;
               return x.acik ? { no: i + 1, baslik: x.ad, ozet: oz, durum: x.okundu ? 'okundu' : 'yeni', taslak: x.etiket === 'taslak', href: F() + '/ders/' + x.id } : { no: i + 1, baslik: x.ad, ozet: oz, durum: 'kilitli' };
             }) }) : '', B.liste({ ad: u.ad + ' kapısı', ogeler: [kapiSatiri(u.id, 'Ünite kapısı', u.acik, u.kapi)] })] });
         }).join('') +
-        B.bolum({ baslik: 'Aşama kapısı', govde: B.liste({ ad: 'Aşama kapısı', ogeler: [kapiSatiri(dr.asama.id, 'Aşama kapısı', dr.uniteler.every(function (u) { return u.gecti; }), dr.asama.kapi)] }) });
+        '<div class="yol__son" data-adim="' + (dr.asama.gecti ? 'bitti' : 'kilitli') + '">' + B.bolum({ baslik: 'Aşama kapısı', govde: B.liste({ ad: 'Aşama kapısı', ogeler: [kapiSatiri(dr.asama.id, 'Aşama kapısı', dr.uniteler.every(function (u) { return u.gecti; }), dr.asama.kapi)] }) }) + '</div></div>' +
+        asamalarHtml(f.n);
     }
     var bitti = !yeni && !a && dr && dr.asama.gecti;
     return ust(kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: yer.ad, alt: yer.aciklama }) + ic + (bitti ? B.uyari({ tur: 'tamam', metin: 'Aşama tamamlandı.' }) : '') +
-      B.eylemler([!yeni && a ? { metin: dr.ilerleme.okunanDers.deger ? 'Devam et' : 'Başla', tur: 'ana', href: adimYolu(a) } : null,
-        bitti && sonraki ? { metin: 'Sonraki aşama', tur: 'ana', href: asamaYolu(sonraki.n) } : null,
+      B.eylemler([bitti && sonraki ? { metin: 'Sonraki aşama', tur: 'ana', href: asamaYolu(sonraki.n) } : null,
         yer.eski ? { metin: 'Eski ' + yer.ad + ' sayfası', tur: 'sade', href: eskiYol(yer.eski) } : null]) + '</div>';
+  }
+  // «Sıradaki» kartı: atılacak tek adım (ders ya da kapı), hangi ünitede olduğu ve tek ana düğme. Hiç başlanmamış alanda «Seviyemi bul» da burada.
+  function siraKarti(f, a, yeni, okunan) {
+    var kapi = a.tur === 'kapi', o = f.y.oge[a.id] || {}, u = kapi ? o : f.y.oge[f.y.ust[a.id]] || {}, ud = u.dersler || [];
+    var ust = kapi ? 'Sıradaki · ünite kapısı' : 'Sıradaki · ' + (u.ad || '') + (ud.length ? ' · ders ' + (ud.indexOf(a.id) + 1) + '/' + ud.length : '');
+    var baslik = kapi ? (o.ad || 'Ünite') + ' · kapı' : o.ad || '';
+    var ozet = kapi ? 'Ünitenin derslerini bitirdin. Kısa bir sınavla sıradaki üniteyi açarsın.' : o.ozet || '';
+    return '<section class="sira" aria-labelledby="' + (yeni ? 'yer-baslik' : 'sira-baslik') + '"><p class="sira__ust">' + kac(ust) + '</p>' +
+      '<h2 class="sira__baslik" id="' + (yeni ? 'yer-baslik' : 'sira-baslik') + '">' + kac(baslik) + '</h2>' + (ozet ? '<p class="sira__ozet">' + kac(ozet) + '</p>' : '') +
+      B.eylemler([{ metin: yeni ? 'Baştan başla' : okunan ? 'Devam et' : 'Başla', tur: 'ana', href: adimYolu(a) }, yeni ? { metin: 'Seviyemi bul', href: F() + '/yer/1' } : null]) +
+      (yeni ? '<p class="sira__not">Konuyu biliyorsan «Seviyemi bul»: aşama başına 5–8 soru, bildiğin aşamalar atlanır.</p>' : '') + '</section>';
   }
   function altKirinti(ad) {
     return '<a class="kirinti" href="' + F() + '"><span aria-hidden="true">‹ </span>' + kac(H.bul(etkinAlan).ad) + '</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>' + kac(ad) + '</span>';
@@ -471,12 +483,12 @@
     return ust(altKirinti('Bulunamadı')) + '<div class="govde">' + B.bos({ baslik: metin, eylem: { metin: H.bul(etkinAlan).ad + ' sayfasına dön', tur: 'ana', href: F() } }) + '</div>';
   }
   // inceleme (Onaylar ekranı): kaynaklar açık, yolu ve satırıyla; doğrulanmamış kaynak varsa «kaynaklar doğrulanmadı» notu
-  function kaynaklar(y, idler, inceleme) {
+  function kaynaklar(y, idler, inceleme, not) {
     var ad = {}; (y.veri.kaynaklar || []).forEach(function (k) { ad[k.id] = k; });
     var l = (idler || []).filter(function (i) { return ad[i]; }), dg = l.filter(function (i) { return ad[i].dogrulama === 'dogrulanmamis'; }).length;
     // künye kısaltılmasın diye düz liste (satır taşı tek satıra keser)
     return (inceleme && dg ? B.uyari({ tur: 'dikkat', metin: 'Kaynaklar doğrulanmadı: ' + l.length + ' kaynaktan ' + dg + ' tanesi henüz kontrol edilmedi.' }) : '') +
-      (l.length ? B.acilir({ baslik: 'Kaynaklar (' + l.length + ')', acik: !!inceleme, govde: '<ul>' + l.map(function (i) {
+      (l.length || not ? B.acilir({ baslik: l.length ? 'Kaynaklar (' + l.length + ')' : 'Kaynak notu', acik: !!inceleme, govde: (not ? '<p class="soluk">' + kac(not) + '</p>' : '') + '<ul>' + l.map(function (i) {
         var k = ad[i], yer = inceleme ? [k.yol, k.bolum, k.satir ? 'satır ' + k.satir : ''].filter(Boolean).join(' · ') : '';
         return '<li>' + kac(k.ad) + (k.dogrulama === 'dogrulanmamis' ? ' <span class="soluk">· doğrulanmamış</span>' : '') + (yer ? '<br><span class="soluk">' + kac(yer) + '</span>' : '') + '</li>';
       }).join('') + '</ul>' }) : '');
@@ -496,7 +508,7 @@
     return B.baslik({ metin: x.ad }) +
       (Yol.etiket(x) === 'taslak' ? B.uyari({ tur: 'dikkat', metin: 'Taslak: bu ders henüz onaylanmadı; tekrara girmez.' }) : '') +
       '<p class="ders__ozet">' + kac(x.ozet) + '</p>' + (x.metin || []).map(function (m) { return '<p>' + kac(m) + '</p>'; }).join('') +
-      (x.not ? B.uyari({ tur: 'bilgi', metin: 'Kaynak notu: ' + x.not }) : '') + kaynaklar(y, x.kaynak, inceleme);
+      (x.not && inceleme ? B.uyari({ tur: 'bilgi', metin: 'Kaynak notu: ' + x.not }) : '') + kaynaklar(y, x.kaynak, inceleme, inceleme ? '' : x.not);
   }
   function sayfaDers(id) {
     if (!al()) return ust(altKirinti('Ders')) + '<div class="govde"><p class="soluk" aria-busy="true">Yükleniyor…</p></div>';
@@ -504,10 +516,21 @@
     if (!x) return yok(al().hata ? 'Ders içeriği bu açılışta yüklenemedi.' : 'Böyle bir ders yok.');
     var kayit = kayitOku();
     if (!Yol.acikMi(y, kayit, id)) return yok(Yol.acikMi(y, kayit, y.id) ? 'Bu ders kilitli: önce önceki dersi oku ya da ünite kapısını geç.' : KILITLI_ASAMA);
-    var okundu = !!kayit.dersler[id];
-    return ust(altKirinti(x.ad)) + '<article class="govde ders">' + dersMetni(y, x) +
-      B.bolum({ baslik: 'Alıştırmalar', govde: x.alistirmalar.map(function (a) { return soruHtml(a, kayit); }) }) +
-      B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Okudum, sıradaki', tur: 'ana', veri: { ac: 'okudum', ders: id } }, { metin: 'Yol haritası', tur: 'sade', href: F() }]) + '</article>';
+    var okundu = !!kayit.dersler[id], n = x.alistirmalar.length;
+    var cevap = x.alistirmalar.filter(function (a) { var c = kayit.cevaplar[a.id]; return c && c.length; }).length;
+    var adim = okundu ? 3 : n && cevap >= n ? 2 : n && cevap ? 1 : 0; // 0 oku, 1 alıştır, 2 bitir, 3 bitti
+    return ust(altKirinti(x.ad)) + '<article class="govde ders">' + dersAdimlari(adim, n) + dersMetni(y, x) +
+      (n ? B.bolum({ baslik: 'Kendini dene', id: 'ders-alistir',
+        govde: ['<p class="soluk ders__sayac">' + cevap + ' / ' + n + ' cevaplandı</p>'].concat(x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; })) }) : '') +
+      '<div class="ders__bitir">' + B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id } }, { metin: 'Yol haritası', tur: 'sade', href: F() }]) + '</div></article>';
+  }
+  // Dersin üç adımı: oku, alıştır, bitir. Şimdiki adım vurgulu, geçilenler ✓ (renk tek başına değil).
+  function dersAdimlari(adim, n) {
+    var l = n ? ['Oku', 'Alıştır', 'Bitir'] : ['Oku', 'Bitir'], k = n ? adim : Math.min(adim, 1) + (adim === 3 ? 1 : 0);
+    return '<ol class="ders-adim" aria-label="Dersin adımları">' + l.map(function (ad, i) {
+      var d = i < k ? 'bitti' : i === k ? 'simdi' : 'sonra';
+      return '<li class="ders-adim__oge" data-adim="' + d + '"' + (d === 'simdi' ? ' aria-current="step"' : '') + '><span class="ders-adim__no" aria-hidden="true">' + (d === 'bitti' ? '✓' : i + 1) + '</span>' + ad + (d === 'bitti' ? '<span class="gizli"> (tamam)</span>' : '') + '</li>';
+    }).join('') + '</ol>';
   }
   var kapiSonuc = null; // son denemenin sonucu, yalnız hemen ardından gösterilir
   function sayfaKapi(id) {
