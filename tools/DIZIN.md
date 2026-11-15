@@ -94,6 +94,7 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 - `kabuk_gez.js` — Yeni kabuğu (`kabuk/`) tek kapıdan yalıtılmış ortamda açar, Felsefe pilotunun ilk ünitesini, Not ve Tekrar ekranlarını gerçek tarayıcıda yürür (ders, alıştırma, ünite kapısı, not ve bağ, kart ve cevap, kayıt); `--goruntu` önizleme görüntülerini yeniler; CI'da koşulur.
 - `ortak_test.js` — `brand/ortak/*.test.js`'yi ortak modüllerle gerçek tarayıcıda koşar (eski modüllerin koşucusunun yerine); silinen modül ortamını isteyen vakalar açık listede atlanır ve sayılır; CI'da koşulur.
 - `kabuk_esit_gez.js` — Kabuk kayıtlarının tek depoya eşitlenmesini gerçek tarayıcıda iki cihazla yürür (yazı dosyadan okunan tek depoda, öbür cihazda görünür, çakışmada ezilen değer saklanır, silme yayılır, günlük yedek); yalıtılmış ortam, CI'da koşulur.
+- `hareket_gez.js` — Kabuğun hareket dilini gerçek tarayıcıda üç bağlamda yürür (hareket açık, «az», «hareketi azalt»): geçiş yönü, yeniden oynama yok, paylaşılan öğe, mikro etkileşimler; kare ölçümü bilgi (`--kati` ile kapı)
 - `bilesen_goruntu.js` — Bileşen kataloğunu (`kabuk/bilesen.html`) Chromium'da file:// ile açar, 390/1280 genişlikte açık ve koyu dört önizleme görüntüsü çeker (`belgeler/ekip/sadelesme/kabuk-onizleme/bilesen-*.png`); elle koşulur.
 - `veri_denetle_test.py` — tools/veri_denetle.py birim testleri; kenar durumları sınar, CI'da koşulur.
 - `veri_dogrula_test.py` — tools/veri_dogrula.py saf işlevlerinin birim testleri, CI'da koşulur.
