@@ -125,20 +125,45 @@
    * yerine çizilir (ilk giris'i olan kazanır). ciz(baglam, B): oturum varken Cihazlar'ın ardına, sira'ya göre bir ya da birkaç B.bolum.
    * baglam salt okunur: { oturum, sunucu (/api/hesap/durum), dosya, simdi }. Her uzantı kendi durumunu ve tıklamalarını
    * (data-<önek>-ac) kendisi tutar, yeniden çizim için Kabuk.ic.rota() çağırır; jeton ona da gelmez (LIFEOS.HESAP üzerinden). */
+  /* Sekmeler: bölümler konuya göre beş sekmede; bölüm kimliği → sekme (bilinmeyen Genel'e). Seçili sekme adreste (#/hesap?guvenlik). */
+  var SEKME = { genel: 'Genel', guvenlik: 'Güvenlik', baglanti: 'Bağlantılar', veri: 'Veri', sistem: 'Sistem' };
+  var GRUP = { 'hy-profil': 'genel', 'hs-cihazlar': 'genel', 'hg-guvenlik': 'guvenlik', 'hy-guvenlik': 'guvenlik', 'hb-baglantilar': 'baglanti',
+    'hb-uzak-bolum': 'baglanti', 'hy-yedek': 'veri', 'hy-kullanicilar': 'veri', 'hy-veri': 'veri', 'hs-guncel': 'sistem', 'hy-sistem': 'sistem', 'ac-bolum': 'sistem' };
+  var RENK = { mavi: 'mavi', turkuaz: 'deniz', turuncu: 'turuncu', mor: 'mor', pembe: 'pembe', yesil: 'yesil' };
+  function kac(x) { return String(x).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
+  function sekmeOku(hash) { var q = String(hash || '').split('?')[1]; return SEKME[q] ? q : 'genel'; }
+  function grupla(html) {
+    return html.replace(/<section class="b-bolum" aria-labelledby="([\w-]+)"/g, function (m, id) { return m + ' data-hs-grup="' + (GRUP[id] || 'genel') + '"'; });
+  }
+  // Kimlik kartı: profil rengiyle baş harf, ad, kullanıcı adı, rol / bu cihaz / bağlantı yeri; çıkış sağda (onayı kartın altında).
+  function kimlikHtml(s, B, bu) {
+    var o = s.oturum, ad = String(o.gorunen_ad || o.ad), renk = RENK[o.renk] ? 'var(--r-' + RENK[o.renk] + ')' : 'var(--yazi-2)';
+    var pullar = [o.rol === 'admin' ? 'Admin' : 'Üye', bu ? String(bu.cihaz_ad || 'Cihaz') : '', s.sunucu && s.sunucu.yerel ? 'Bu bilgisayar' : 'Uzaktan bağlı'].filter(Boolean);
+    return '<div class="hs-kimlik" style="--hs-renk:' + renk + '"><span class="hs-kimlik__harf" aria-hidden="true">' + kac(ad.charAt(0).toLocaleUpperCase('tr')) + '</span>' +
+      '<div class="hs-kimlik__metin"><p class="hs-kimlik__ad">' + kac(ad) + '</p><p class="hs-kimlik__alt">@' + kac(o.ad) + '</p>' +
+      '<p class="hs-kimlik__pullar">' + pullar.map(function (x) { return B.pul({ metin: x }); }).join('') + '</p></div>' +
+      (s.cikisSor ? '' : B.dugme({ metin: 'Çıkış yap', tur: 'sade', veri: { 'hs-ac': 'cikis-sor' } })) + '</div>' +
+      (s.cikisSor ? B.uyari({ tur: 'dikkat', metin: 'Bu cihazda oturum kapansın mı?', alt: 'Kayıtların bu cihazda kalır; eşitleme için yeniden giriş gerekir.',
+        eylem: [{ metin: 'Çıkış yap', tur: 'ana', veri: { 'hs-ac': 'cikis' } }, { metin: 'Vazgeç', tur: 'sade', veri: { 'hs-ac': 'vazgec' } }] }) : '');
+  }
   function uzantilar() { return (Kabuk.hesapUzanti || []).slice().sort(function (a, b) { return (a.sira || 0) - (b.sira || 0); }); }
   function ekran(s, B, simdi) {
     var bu = (s.cihazlar || []).filter(function (c) { return c.bu; })[0] || null, u = uzantilar();
     var bag = { oturum: s.oturum, sunucu: s.sunucu, dosya: s.dosya, simdi: simdi }, gir = s.hesap && !s.oturum && u.filter(function (x) { return x.giris; })[0];
-    return B.baslik({ metin: 'Hesap', alt: 'Oturumun, bağlı cihazların ve sistemin güncelliği.' }) +
-      B.bolum({ baslik: 'Oturum', id: 'hs-oturum', govde: gir ? gir.giris(bag, B) : oturumHtml(s, B, bu) }) +
-      (s.oturum ? cihazlarHtml(s, B, simdi) + u.filter(function (x) { return x.ciz && !x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join('') : '') +
-      B.bolum({ baslik: 'Güncelleme', id: 'hs-guncel', govde: guncelHtml(s, B) }) +
-      // hep: oturumdan bağımsız uzantılar (acilis.js: bilgisayarın kendi ayarı)
+    // hep: oturumdan bağımsız uzantılar (acilis.js: bilgisayarın kendi ayarı)
+    var guncel = B.bolum({ baslik: 'Güncelleme', id: 'hs-guncel', govde: guncelHtml(s, B) }) +
       (s.dosya ? '' : u.filter(function (x) { return x.ciz && x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join(''));
+    if (!s.oturum) return B.baslik({ metin: 'Hesap', alt: 'Oturumun, bağlı cihazların ve sistemin güncelliği.' }) +
+      B.bolum({ baslik: 'Oturum', id: 'hs-oturum', govde: gir ? gir.giris(bag, B) : oturumHtml(s, B, bu) }) + guncel;
+    var sekme = SEKME[s.sekme] ? s.sekme : 'genel';
+    return B.baslik({ metin: 'Hesap' }) + kimlikHtml(s, B, bu) +
+      '<div class="hs-sekmeler">' + B.tercih({ ad: 'Hesap bölümleri', secenekler: SEKME, deger: sekme, veri: { 'hs-sekme': '1' } }) + '</div>' +
+      '<div class="hs-govde" data-sekme="' + sekme + '">' + grupla(cihazlarHtml(s, B, simdi) +
+        u.filter(function (x) { return x.ciz && !x.hep; }).map(function (x) { return x.ciz(bag, B) || ''; }).join('') + guncel) + '</div>';
   }
 
   var Hesap = { sonMetni: sonMetni, kalanMetni: kalanMetni, kodYaz: kodYaz, bagAdresi: bagAdresi, hataMetni: hataMetni, cihazSatiri: cihazSatiri,
-    surumMetni: surumMetni, guncelOzet: guncelOzet, ekran: ekran };
+    surumMetni: surumMetni, guncelOzet: guncelOzet, sekmeOku: sekmeOku, ekran: ekran };
   Kabuk.Hesap = Hesap;
   if (typeof module !== 'undefined' && module.exports) module.exports = Hesap;
   if (typeof document === 'undefined') return;
@@ -151,7 +176,7 @@
   function H() { return L.HESAP || null; }
   function burada() { return location.hash.split('?')[0] === '#/hesap'; }
   function ciz() { if (burada()) ic().rota(); }
-  function oturum() { try { var o = H().durum().oturum; return o ? { ad: o.ad, gorunen_ad: o.gorunen_ad, rol: o.rol, sunucu: o.sunucu } : null; } catch (e) { return null; } }
+  function oturum() { try { var o = H().durum().oturum; return o ? { ad: o.ad, gorunen_ad: o.gorunen_ad, rol: o.rol, sunucu: o.sunucu, renk: o.renk } : null; } catch (e) { return null; } }
   function cihazYukle() {
     if (!s.oturum) return;
     H().cihazlar().then(function (l) { s.cihazlar = l; s.hata = ''; ciz(); }, function (e) { s.hata = hataMetni(e); if (e && e.kod === 401) s.oturum = oturum(); ciz(); });
@@ -230,17 +255,31 @@
     var I = ic(), el = d.getElementById('sayfa');
     if (!el || el.getAttribute('data-yer') !== 'hesap') { bagDur(); s = yeni(); } // sayfaya her girişte taze
     s.hesap = !!H();
-    if (s.hesap) { var o = oturum(); if (!o !== !s.oturum || (o && s.oturum && o.ad !== s.oturum.ad)) { s.oturum = o; s.cihazlar = null; s.hata = ''; if (s.yuk) cihazYukle(); } }
+    if (s.hesap) { var o = oturum(); if (!o !== !s.oturum || (o && s.oturum && o.ad !== s.oturum.ad)) { s.oturum = o; s.cihazlar = null; s.hata = ''; if (s.yuk) cihazYukle(); } else if (o) { s.oturum.gorunen_ad = o.gorunen_ad; s.oturum.renk = o.renk; } } // profil değişince kart tazelenir
     else if (!s.dosya && !hesapBekle) { // hesap.js kabuğun açılışında arkadan yüklenir (kabuk.js baslat)
       var son = Date.now() + 10000;
       hesapBekle = setInterval(function () { if (H() || Date.now() > son) { clearInterval(hesapBekle); hesapBekle = null; s.hesapYok = !H(); ciz(); } }, 150);
     }
     if (!s.yuk) yukle();
+    s.sekme = sekmeOku(location.hash);
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="hesap">' + ekran(s, B, Date.now()) + '</div>';
   }
   Kabuk.ek = Kabuk.ek || {};
   Kabuk.ek.hesap = sayfa;
 
+  // Sekme: adres yerinde değişir (geçmişe girmez), ekran yeniden çizilir; oklar sekmeler arasında gezer (radiogroup).
+  function sekmeSec(k, odakla) {
+    if (!SEKME[k]) return;
+    history.replaceState(null, '', '#/hesap' + (k === 'genel' ? '' : '?' + k)); ciz();
+    if (odakla) { var y = d.querySelector('[data-hs-sekme][data-deger="' + k + '"]'); if (y) y.focus(); }
+  }
+  d.addEventListener('click', function (e) { var t = e.target.closest('[data-hs-sekme]'); if (t && burada()) sekmeSec(t.getAttribute('data-deger')); });
+  d.addEventListener('keydown', function (e) {
+    var t = e.target.closest && e.target.closest('[data-hs-sekme]'), l = Object.keys(SEKME), i;
+    if (!t || !burada() || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+    e.preventDefault(); i = l.indexOf(t.getAttribute('data-deger'));
+    sekmeSec(l[(i + (e.key === 'ArrowRight' ? 1 : l.length - 1)) % l.length], true);
+  });
   d.addEventListener('click', function (e) {
     var b = e.target.closest('[data-hs-ac]');
     if (!b || b.getAttribute('aria-disabled') === 'true' || !burada()) return;

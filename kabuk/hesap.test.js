@@ -68,7 +68,7 @@ t('ekran: girişsiz cihaz (giriş uzantısı yokken) giriş yapılmadı der, cih
 t('ekran: oturumda ad, rol, bu cihaz, çıkış onayı; jeton ve oturumun başka alanı HTML\'e girmez', () => {
   const s = Object.assign(bos(), { oturum: { ad: 'sahip', gorunen_ad: 'Tolga', rol: 'admin', j: 'GIZLI-JETON-123', sunucu: '' }, cihazlar: CIHAZ });
   const h = S.ekran(s, B, SIMDI);
-  dogru(/Tolga · @sahip/.test(h) && />Admin</.test(h) && />Windows PC</.test(h), h);
+  dogru(/hs-kimlik__ad">Tolga</.test(h) && /@sahip/.test(h) && />Admin</.test(h) && />Windows PC</.test(h), h);
   dogru(!/GIZLI-JETON/.test(h), 'jeton ekrana çizildi');
   dogru(/data-hs-ac="cikis-sor"/.test(h) && !/data-hs-ac="cikis"/.test(h), 'çıkış tek dokunuşla olmamalı');
   dogru(/data-hs-ac="cikis"/.test(S.ekran(Object.assign(s, { cikisSor: true }), B, SIMDI)), 'onay adımı');
@@ -93,6 +93,13 @@ t('harita: Hesap Ayarlar dalında, yeni; eski panel yeri kalktı, panel Hesap ek
   esit([y.dal, y.yol, y.durum, H.bul('eskisistem')], ['ayarlar', '#/hesap', 'yeni', null]);
   dogru(!/kartlar/.test(S.ekran(bos(), B, SIMDI)), 'eski panel bağlantısı kalktı');
   esit(H.denetle(), []);
+});
+t('sekme: adresten okunur, bilinmeyen Genel; bölümler sekmesine etiketlenir; girişsizken sekme yok', () => {
+  dogru(S.sekmeOku('#/hesap?veri') === 'veri' && S.sekmeOku('#/hesap') === 'genel' && S.sekmeOku('#/hesap?x') === 'genel');
+  const h = S.ekran(Object.assign(bos(), { oturum: { ad: 'a', rol: 'uye' }, cihazlar: CIHAZ, sekme: 'sistem' }), B, SIMDI);
+  dogru(/data-sekme="sistem"/.test(h) && /aria-labelledby="hs-guncel" data-hs-grup="sistem"/.test(h) && /aria-labelledby="hs-cihazlar" data-hs-grup="genel"/.test(h), h);
+  dogru(/aria-checked="true"[^>]*data-deger="sistem"/.test(h), 'seçili sekme');
+  dogru(!/hs-sekmeler/.test(S.ekran(bos(), B, SIMDI)), 'girişsiz');
 });
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');

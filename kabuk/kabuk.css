@@ -181,3 +181,21 @@ kbd{ font-size:.72rem; color:var(--soluk); border:2px solid var(--cizgi); paddin
 .avideo.is-oynuyor .avideo__cizgi{ opacity:1; }
 .avideo.is-bitiyor .avideo__cizgi{ opacity:0; transition-delay:0s; }
 @media (prefers-reduced-motion:reduce){ .avideo, .avideo__v, .avideo__atla, .avideo__cizgi{ transition-duration:.25s; transition-delay:0s; } .avideo__v{ transform:none; } }
+
+/* Hesap ekranı (kabuk/hesap.js): kimlik kartı ve konu sekmeleri; sekmede yalnız kendi bölümleri görünür. */
+.hs-kimlik{ display:flex; align-items:center; gap:16px; padding:20px; background:var(--yuzey); border-radius:var(--kose); box-shadow:inset 0 0 0 1px var(--cizgi), var(--golge-yumusak); }
+.hs-kimlik__harf{ flex:none; display:grid; place-items:center; width:60px; height:60px; border-radius:50%; font-size:1.6rem; font-weight:650; color:var(--hs-renk);
+  background:color-mix(in srgb, var(--hs-renk) 14%, transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--hs-renk) 32%, transparent); }
+.hs-kimlik__metin{ flex:1; min-width:0; }
+.hs-kimlik__ad{ margin:0; font-size:1.3rem; font-weight:650; letter-spacing:-.015em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hs-kimlik__alt{ margin:2px 0 10px; font-size:.9rem; color:var(--soluk); }
+.hs-kimlik__pullar{ display:flex; flex-wrap:wrap; gap:6px; margin:0; }
+.hs-sekmeler{ display:flex; max-width:100%; overflow-x:auto; scrollbar-width:none; }
+.hs-sekmeler .b-tercih{ flex-wrap:nowrap; }
+.hs-govde{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+.hs-govde > .b-bolum{ margin-top:0; }
+.hs-govde > [aria-labelledby="hy-profil"]{ order:-1; }
+.hs-govde[data-sekme="genel"] > .b-bolum:not([data-hs-grup="genel"]), .hs-govde[data-sekme="guvenlik"] > .b-bolum:not([data-hs-grup="guvenlik"]),
+.hs-govde[data-sekme="baglanti"] > .b-bolum:not([data-hs-grup="baglanti"]), .hs-govde[data-sekme="veri"] > .b-bolum:not([data-hs-grup="veri"]),
+.hs-govde[data-sekme="sistem"] > .b-bolum:not([data-hs-grup="sistem"]){ display:none; }
+@media (max-width:560px){ .hs-kimlik{ flex-wrap:wrap; padding:16px; } .hs-kimlik__harf{ width:52px; height:52px; font-size:1.35rem; } }

@@ -119,7 +119,7 @@
       (y ? B.uyari({ tur: 'tamam', metin: '«' + y.ad + '» hazır.', alt: 'Şimdi kopyala; bir daha gösterilmez.' }) + kopyaAlani(B, 'Yeni anahtar', 'hb-yeni-anahtar', y.anahtar) : '') +
       (l.length ? B.liste({ ad: 'Erişim anahtarları', canli: true, ogeler: l.map(function (x) { return anahtarSatiri(x, simdi, s.silSor); }) })
         : y ? '' : B.bos({ baslik: 'Telefonundan tek satır', metin: 'iPhone Kısayollar, Android ya da Home Assistant tek satır gönderir: SPİ’ye «su 250», AYS’ye «paragraf 20», ESP’ye «30 dk gitar». O sistem satırı Onaylar’a bırakır, sen onaylayınca yazılır.' })) +
-      form + tariflerHtml(B, tarifIstek(adr, y)) +
+      form + B.acilir({ baslik: 'Kurulum tarifleri', not: 'iPhone, Siri, Android, Home Assistant', govde: tariflerHtml(B, tarifIstek(adr, y)) }) +
       p('Anahtar yalnız satır bırakır; verini okuyamaz, hesabına giremez. Kaybolursa sil, yenisini aç.');
   }
 

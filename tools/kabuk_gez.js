@@ -1147,6 +1147,9 @@ async function goruntu(p, ad, sec = {}) {
     await hp.waitForFunction(() => document.querySelectorAll('[aria-label="Bağlı cihazlar"] > li').length === 2, null, { timeout: 5000 }).catch(() => {});
     dene('hesap: kod kullanılınca ekran «bağlandı» der, cihaz listeye girer', bag.ok() && baglandi && (await cihazSay()) === 2);
     await hp.route('**/api/guncelleme**', r => r.fulfill({ json: { durum: 'ok', geride: 2, ileride: 0, yeni: ['Yeni Hesap ekranı', 'Düzeltme'], ag: true, surum: { tarih: '14.11.2026', kisa: 'abc1234' } } }));
+    await hp.click('[data-hs-sekme][data-deger="sistem"]');
+    dene('hesap: Sistem sekmesi adreste, yalnız sistem bölümleri görünür', (await hp.evaluate(() => location.hash)) === '#/hesap?sistem'
+      && (await hp.locator('.hs-govde > .b-bolum:visible:not([data-hs-grup="sistem"])').count()) === 0);
     await hp.click('[data-hs-ac="denetle"]');
     await hp.waitForSelector('[data-hs-ac="guncelle"]');
     const gm = await hp.textContent('[aria-labelledby="hs-guncel"]');
