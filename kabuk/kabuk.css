@@ -675,3 +675,34 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
   #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-simge svg{ width:24px; height:24px; }
   #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-satir__ad{ font-size:var(--yz-h3); }
 }
+
+/* ===== Geçiş türleri (2026-11-16, «küçük geçişte farklı, büyük geçişte çok farklı, derse başlarken farklı; profesyonel») =====
+   kucuk: aynı bölümde derine inme/dönüş — hızlı, kısa kayma. buyuk: ana bölüm değişimi — eski sayfa geri çekilip söner, yenisi yandan
+   gelir. ders: derse başlama — eski sayfa geri çekilir, ders aşağıdan yükselip öne açılır. Yön (ileri/geri) aynalar. Hareket azsa hiçbiri. */
+:root[data-gecis-tur="kucuk"]::view-transition-old(root){ animation:var(--hizli) var(--akis) both vt-k-cik; }
+:root[data-gecis-tur="kucuk"]::view-transition-new(root){ animation:var(--orta) var(--akis) both vt-k-gir; }
+:root[data-gecis-tur="kucuk"][data-gecis="geri"]::view-transition-old(root){ animation-name:vt-k-cik-geri; }
+:root[data-gecis-tur="kucuk"][data-gecis="geri"]::view-transition-new(root){ animation-name:vt-k-gir-geri; }
+@keyframes vt-k-cik{ to{ opacity:0; transform:translateX(-14px); } }
+@keyframes vt-k-gir{ from{ opacity:0; transform:translateX(18px); } }
+@keyframes vt-k-cik-geri{ to{ opacity:0; transform:translateX(14px); } }
+@keyframes vt-k-gir-geri{ from{ opacity:0; transform:translateX(-18px); } }
+
+:root[data-gecis-tur="buyuk"]::view-transition-old(root){ animation:var(--orta) cubic-bezier(.4,0,.2,1) both vt-b-cik; }
+:root[data-gecis-tur="buyuk"]::view-transition-new(root){ animation:calc(var(--yavas) * 1.15) var(--akis) both vt-b-gir; }
+:root[data-gecis-tur="buyuk"][data-gecis="geri"]::view-transition-old(root){ animation-name:vt-b-cik-geri; }
+:root[data-gecis-tur="buyuk"][data-gecis="geri"]::view-transition-new(root){ animation-name:vt-b-gir-geri; }
+@keyframes vt-b-cik{ to{ opacity:0; transform:translateX(-5%) scale(.93); } }
+@keyframes vt-b-gir{ from{ opacity:0; transform:translateX(7%) scale(1.03); } }
+@keyframes vt-b-cik-geri{ to{ opacity:0; transform:translateX(5%) scale(.93); } }
+@keyframes vt-b-gir-geri{ from{ opacity:0; transform:translateX(-7%) scale(1.03); } }
+
+:root[data-gecis-tur="ders"]::view-transition-old(root){ animation:var(--orta) cubic-bezier(.4,0,.2,1) both vt-d-cik; }
+:root[data-gecis-tur="ders"]::view-transition-new(root){ animation:calc(var(--yavas) * 1.25) var(--akis) both vt-d-gir; }
+@keyframes vt-d-cik{ to{ opacity:0; transform:scale(.9); } }
+@keyframes vt-d-gir{ 0%{ opacity:0; transform:translateY(64px) scale(.96); } 45%{ opacity:1; } 100%{ opacity:1; transform:none; } }
+
+/* Yüksek kontrastta kart ızgarasının dışında çerçeve yok (yalnız kartlar); listede satırlar değil liste çerçevelenir */
+:root[data-kontrast="yuksek"] .b-liste--satir .b-satir{ outline:0; }
+:root[data-kontrast="yuksek"] #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir{ outline:0; }
+@media (min-width:641px){ :root[data-kontrast="yuksek"] #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-satir{ outline:1px solid var(--cizgi-guclu); outline-offset:-1px; } }

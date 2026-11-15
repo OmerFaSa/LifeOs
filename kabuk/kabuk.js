@@ -365,8 +365,9 @@
       if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
       return;
     }
-    var kapak = c.classList.contains('kapak__sahne');
-    if (innerWidth < 640) { c.width = kapak ? 220 : 200; c.height = kapak ? 72 : 134; }
+    // tuval görünen kutunun oranında çizilir (eskiden 480×72 tuval 300 px yüksekliğe gerilip pikseller dikine uzuyordu): her piksel kare, 3 (telefonda 2) ekran pikseli
+    var kutu = c.getBoundingClientRect(), olc = innerWidth < 640 ? 2 : 3;
+    if (kutu.width > 0 && kutu.height > 0) { c.width = Math.max(120, Math.round(kutu.width / olc)); c.height = Math.max(40, Math.round(kutu.height / olc)); }
     var saat = new Date().getHours(), tur = c.getAttribute('data-sahne') || 'yayla', ad = [tur, saat, c.width, c.height].join();
     try {
       var o = sahneOnbellek[ad];
@@ -652,9 +653,10 @@
     else if (tasindi) html = sayfaAlan(yer);
     else if (H.DAL_SAYFASI[yer.dal] === yer.id && yer.dal !== 'king') html = sayfaDal(yer);
     else html = sayfaYer(yer);
-    var once = sayfaEl.getAttribute('data-yer'), yeniSayfa = once !== yer.id;
-    // data-yer hemen yazılır (eşzamansız yüklemeler «hâlâ bu sayfa mı?» diye ona bakar); görünüm işareti data-ciz çizimle birlikte
-    sayfaEl.setAttribute('data-yer', yer.id);
+    var once = sayfaEl.getAttribute('data-yer'), onceYol = sayfaEl.getAttribute('data-yol'), yeniSayfa = once !== yer.id || onceYol !== parca[0];
+    // data-yer hemen yazılır (eşzamansız yüklemeler «hâlâ bu sayfa mı?» diye ona bakar); görünüm işareti data-ciz çizimle birlikte.
+    // data-yol: sayfanın adresi (sorgusuz); aynı yerde başka sayfaya geçmek (alan → ders) de yeni sayfadır.
+    sayfaEl.setAttribute('data-yer', yer.id); sayfaEl.setAttribute('data-yol', parca[0]);
     var sira = ++cizSira;
     function yaz() {
       if (sira !== cizSira) return; // geçişin bekleyen çizimi, ondan sonra gelen daha yeni çizimin üstüne yazmaz
@@ -674,7 +676,8 @@
     var pay = gecisli && paylas && paylas.el.isConnected && sayfaEl.contains(paylas.el) ? paylas : null; paylas = null;
     if (gecisli) {
       if (pay) pay.el.style.viewTransitionName = 'paylasilan';
-      d.documentElement.setAttribute('data-gecis', yon(once, yer));
+      d.documentElement.setAttribute('data-gecis', once === yer.id ? (parca[0].split('/').length >= String(onceYol).split('/').length ? 'ileri' : 'geri') : yon(once, yer));
+      d.documentElement.setAttribute('data-gecis-tur', gecisTuru(once, onceYol, yer, parca[0]));
       var g = d.startViewTransition(yaz), u = bekleyenCizim = g.updateCallbackDone.catch(function () {});
       u.then(function () { if (bekleyenCizim === u) bekleyenCizim = null; });
       g.ready.catch(function () { /* üst üste gelen geçişte öncekinin atlanması olağan */ });
@@ -686,8 +689,15 @@
   // Ekranlara verilen alan yüklemesi, bekleyen geçişin çizimi bitince çözülür: «sayfa hâlâ açık mı?» diye ekrana bakan
   // eşzamansız yeniden çizimler (deneme, araçlar, onay) yeni sayfanın öğelerini görür.
   function alanYukleCizimle(id) { return alanYukle(id).then(function (v) { return bekleyenCizim ? bekleyenCizim.then(function () { return v; }) : v; }); }
+  // Geçişin türü: derse başlamak («ders»: sayfa öne açılır), ana bölüm değişimi («buyuk»), bölüm içinde derinleşme/dönüş («kucuk»)
+  function gecisTuru(onceId, onceYol, yer, yol) {
+    var dersYeni = /\/ders\//.test(yol), dersOnce = /\/ders\//.test(String(onceYol || ''));
+    if (dersYeni && !dersOnce) return 'ders';
+    var a = sekmeOf(H.YERLER.filter(function (y) { return y.id === onceId; })[0]), b = sekmeOf(yer);
+    return onceId !== yer.id && a !== b ? 'buyuk' : 'kucuk';
+  }
   function gecisBitti() {
-    d.documentElement.removeAttribute('data-gecis');
+    d.documentElement.removeAttribute('data-gecis'); d.documentElement.removeAttribute('data-gecis-tur');
     var p = sayfaEl.querySelector('[style*="view-transition-name"]'); if (p) p.style.viewTransitionName = '';
   }
   // Paylaşılan öğe: tıklanan kart açtığı sayfanın başına akar (kabuk.css ::view-transition-group(paylasilan)). Alan kartı ya da simgeli
@@ -972,6 +982,8 @@
       B.komut({ id: 'komut', ad: 'Ara', yerTutucu: 'Bir yer, ayar ya da eylem ara' }));
     sayfaEl = $('#sayfa'); halkaEl = $('#halka'); perdeEl = $('#perde'); komutEl = $('#komut');
     ogeler = komutOgeleri(H, A);
+    var boyutSaat = null; // pencere boyu değişince manzara yeni oranda çizilir (önbellek boyuta göre)
+    addEventListener('resize', function () { clearTimeout(boyutSaat); boyutSaat = setTimeout(manzara, 200); });
     addEventListener('hashchange', function () { halkaKapat(false); komutKapat(false); rihtimAc(false); rota(); sayfaEl.focus({ preventScroll: true }); scrollTo(0, 0); });
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);

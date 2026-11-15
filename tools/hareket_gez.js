@@ -80,6 +80,20 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
       if (kapali) dene(ad + ': görünüm geçişi başlamaz', !g.iz.length && (await p.evaluate(() => window.__vt)) === 0, JSON.stringify(g));
       else dene(ad + ': geçiş yönü sekme sırasına uyar, bitince iz kalmaz, sekme işareti yerinde', JSON.stringify(g.iz) === JSON.stringify(g.bek) && g.son === null && g.isaret, JSON.stringify(g));
 
+      // 2b · geçiş türü: ana bölümler arası «buyuk», derse başlamak «ders», dersten alana dönüş «kucuk» (geri)
+      if (!kapali) {
+        const tur = await p.evaluate(async () => {
+          const iz = [], mo = new MutationObserver(() => { const t = document.documentElement.getAttribute('data-gecis-tur'); if (t) iz.push(t + ':' + document.documentElement.getAttribute('data-gecis')); });
+          mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-gecis-tur'] });
+          const git = async h => { location.hash = h; await new Promise(r => setTimeout(r, 1100)); };
+          await git('#/saglik'); await git('#/alan/felsefe'); await git('#/alan/felsefe/ders/felsefe.1.1.1'); await git('#/alan/felsefe');
+          mo.disconnect(); return iz;
+        });
+        dene(ad + ': geçiş türü bölüm değişiminde büyük, derse başlarken ders, dersten dönüşte küçük ve geri',
+          JSON.stringify(tur) === JSON.stringify(['buyuk:ileri', 'buyuk:geri', 'ders:ileri', 'kucuk:geri']), JSON.stringify(tur));
+        await p.goto(T + '/kabuk/#/ogren'); await p.waitForTimeout(1500);
+      }
+
       // 3 · aynı sayfanın yeniden çizimi süzülmeyi yeniden oynatmaz
       await p.waitForTimeout(1300);
       const tekrar = await p.evaluate(async () => {

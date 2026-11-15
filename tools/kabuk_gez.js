@@ -69,6 +69,10 @@ async function goruntu(p, ad, sec = {}) {
   const u1 = y.uniteler[0], harf = 'ABCD';
   await bekle();
   const b = await chromium.launch();
+  // Bu gezi işlevi sınar; hareket (görünüm geçişi, süzülme) tools/hareket_gez.js'in işi. Geçiş sürerken ekranda bir an eski sayfa durur:
+  // her bağlam «hareket az» açılır ki adım, geçişin ortasında eski sayfayı okumasın.
+  const yeniBaglam = b.newContext.bind(b);
+  b.newContext = async o => { const c = await yeniBaglam(o); await c.addInitScript(() => { try { if (!localStorage.getItem('lifeos.hareket')) localStorage.setItem('lifeos.hareket', 'az'); } catch (e) {} }); return c; };
   try {
     const c = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' });
     const p = await c.newPage(); const hata = [];
