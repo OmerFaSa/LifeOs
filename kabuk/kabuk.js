@@ -327,7 +327,7 @@
       Kabuk.baslangicDavet ? Kabuk.baslangicDavet() : '', // araclar.js: eski sistemdeki kayıtları getirme teklifi (göçten sonra)
       Kabuk.tanismaDavet ? Kabuk.tanismaDavet() : '', // tanisma.js: kayıt yoksa tek satırlık davet
       Kabuk.onayBugun ? Kabuk.onayBugun() : '', // onay.js: «N ders onayını bekliyor», yalnız N > 0 iken
-      ipucu ? B.uyari({ tur: 'bilgi', simge: 'ipucu', renk: 'sari', metin: 'Her yere iki adımda', alt: 'Boş bir yere sağ tıkla ya da basılı tut; fareyi ekranın en altına indir ya da Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : ''];
+      ipucu ? B.uyari({ tur: 'bilgi', simge: 'ipucu', renk: 'sari', metin: 'Her yere iki adımda', alt: 'Boş yere sağ tıkla ya da basılı tut; Ctrl K ile ara.', eylem: { metin: 'Anladım', tur: 'sade', veri: { ac: 'ipucu' } } }) : ''];
     sonOzet = { a: a, tekrar: v.tekrar };
     return cubuk(true) + B.karsilama({ tarih: tarih(t), selam: selam(t, hesapAdi()),
       ozet: ozetCumle(a, v.tekrar, ekler.filter(function (s) { return BEKLEYEN_RE.test(s); }).length),
