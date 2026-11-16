@@ -431,6 +431,32 @@
         expect(k.join('').split('').every(c => c === '.' || !!D.P_SABIT[c])).toBe(true);
       }));
     });
+    it('King divanı: iki tuğ, gündüz tündük tozu, gece mangal ateşi (masaüstünde iki kat)', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, g = D.yerlesim(480, 100, 'ogle', 'taht'), n = D.yerlesim(480, 100, 'gece', 'taht');
+      expect(g.sakin.filter(s => s.tur === 'tug').length).toBe(2);
+      expect(g.sakin.some(s => s.tur === 'toz') && !g.sakin.some(s => s.tur === 'alev')).toBe(true);
+      expect(n.sakin.find(s => s.tur === 'alev').z).toBe(2);
+      expect(D.yerlesim(480, 100, 'gece', 'ates').sakin.find(s => s.tur === 'alev').z).toBe(2);   // Müzik: ozan ve ateş yakın planda
+    });
+    it('telefonda sahne genişler, asıl öğe sağ üstteki düğmelerin altından ortaya gelir; masaüstünde kayma yok', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, eski = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+      if(innerWidth >= 640) expect(D.yerlesim(480, 100, 'ogle', 'taht').dx).toBe(0);
+      Object.defineProperty(window, 'innerWidth', { value:390, configurable:true });
+      try{
+        D.TUR_LISTE.forEach(t => ['ogle', 'gece'].forEach(v => {
+          const o = D.yerlesim(195, 68, v, t), c = document.createElement('canvas'), k = document.createElement('canvas');
+          c.width = k.width = 195; c.height = k.height = 68;
+          expect(o.dx > 0 && o.W === 195 + o.dx).toBe(true);
+          expect(o.gy[0] - o.dx > 0 && o.gy[0] - o.dx < 195).toBe(true);
+          D.binaCiz(c.getContext('2d'), o); k.getContext('2d').drawImage(c, 0, 0); D.kare(k.getContext('2d'), c, o, 30);
+          const p = k.getContext('2d').getImageData(0, 0, 195, 68).data;
+          let bos = 0; for(let i = 3; i < p.length; i += 4) if(p[i] !== 255) bos++;
+          expect(bos).toBe(0);
+        }));
+        const o = D.yerlesim(195, 68, 'ogle', 'taht'), x = (o.p.tx - o.dx) / 195;
+        expect(x > 0.4 && x < 0.65).toBe(true);
+      }finally{ if(eski) Object.defineProperty(window, 'innerWidth', eski); else delete window.innerWidth; }
+    });
     it('hareket azken sahne durur: her an ilk pozdaki aynı kare, ikinci çağrı yeniden çizmez', () => {
       const D = window.LIFEOS.PIKSEL_DOGA, k = document.documentElement, once = k.getAttribute('data-hareket');
       const o = D.yerlesim(480, 100, 'ogle', 'otuken'), arka = document.createElement('canvas'), c = document.createElement('canvas');

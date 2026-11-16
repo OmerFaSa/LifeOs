@@ -32,7 +32,7 @@ t('istek gövdesi: kip, başlangıç ve ders bağlamı (yalnız kimlik; ad ve me
 });
 t('depodaki konuşma: bozuksa boş konuşma; yabancı mesaj ve alan atılır, uzunluk sınırlı', () => {
   const T = new Date(2026, 10, 16, 9, 0, 0).getTime();
-  a.deepStrictEqual(K.sohbetOku('{bozuk', T), { baslangic: '2026-11-16T09:00:00', kip: 'ortak', baglam: null, mesajlar: [] });
+  a.deepStrictEqual(K.sohbetOku('{bozuk', T), { baslangic: '2026-11-16T09:00:00', kip: 'ortak', hukumdar: null, baglam: null, mesajlar: [] });
   const s = K.sohbetOku(JSON.stringify({ baslangic: '2026-11-15T20:00:00', kip: 'filozof', baglam: { tur: 'ders', id: 'felsefe.1.1.2', ad: 'Arkhe' },
     mesajlar: [{ kim: 'ben', metin: 'selam' }, { kim: 'sistem', metin: 'x' }, { kim: 'king', metin: 'y'.repeat(30000), alt: ['Kaynak: claude', 5], html: '<b>' }] }), T);
   a.strictEqual(s.baslangic, '2026-11-15T20:00:00'); a.strictEqual(s.kip, 'filozof'); a.strictEqual(s.baglam.id, 'felsefe.1.1.2');
@@ -47,6 +47,34 @@ t('biçim: paragraf, satır sonu, madde, numaralı liste, kalın, kod ve tablo; 
   const k = K.bicimle('<img src=x onerror=alert(1)> **<script>** [a](javascript:x) "q"');
   a.ok(!/<img|<script|href=/.test(k) && /&lt;img/.test(k) && /<strong>&lt;script&gt;<\/strong>/.test(k) && /&quot;q&quot;/.test(k), k);
   a.strictEqual(K.bicimle(null), '');
+});
+
+t('Divan: izinli beş hükümdar (Atatürk yok), her birine örnek sorular; hükümdar sunucuya gider, izinsizse kip ortak olur', () => {
+  a.deepStrictEqual(Object.keys(K.HUKUMDAR), ['mete', 'attila', 'bilge', 'alparslan', 'fatih']);
+  a.ok(!/Atatürk|Mustafa Kemal/.test(JSON.stringify(K.HUKUMDAR)));
+  Object.keys(K.HUKUMDAR).forEach(h => a.strictEqual(K.ONERI[h].length, 3, h));
+  a.strictEqual(K.kipGecerli('divan'), 'divan');
+  a.strictEqual(K.hukumdarGecerli('attila'), 'attila');
+  ['ataturk', 'toString', '__proto__', '', null, 5].forEach(h => a.strictEqual(K.hukumdarGecerli(h), null, String(h)));
+  a.deepStrictEqual(K.istekGovdesi('kendini anlat', 'oto', { kip: 'divan', hukumdar: 'mete', baslangic: '2026-11-17T10:00:00' }),
+    { text: 'kendini anlat', agent: 'king', kip: 'divan', hukumdar: 'mete', baslangic: '2026-11-17T10:00:00' });
+  a.deepStrictEqual(K.istekGovdesi('x', 'oto', { kip: 'divan', hukumdar: 'ataturk' }), { text: 'x', agent: 'king', kip: 'ortak' });
+  a.deepStrictEqual(K.istekGovdesi('x', 'oto', { kip: 'filozof', hukumdar: 'mete' }), { text: 'x', agent: 'king', kip: 'filozof' });
+  const s = K.sohbetOku(JSON.stringify({ kip: 'divan', hukumdar: 'fatih', mesajlar: [] }), 0);
+  a.strictEqual(s.kip, 'divan'); a.strictEqual(s.hukumdar, 'fatih');
+  a.strictEqual(K.sohbetOku(JSON.stringify({ kip: 'divan', hukumdar: 'kotu', mesajlar: [] }), 0).hukumdar, null);
+});
+t('konu bağlamı: alan [a-z]+, ad tek satır ≤120 harf; sunucuya alan + ad gider; aynı konu aynı konuşma', () => {
+  a.deepStrictEqual(K.baglamGecerli({ tur: 'konu', alan: 'felsefe', ad: '  Stoacılık\n  ve bilgelik ' }), { tur: 'konu', alan: 'felsefe', ad: 'Stoacılık ve bilgelik' });
+  a.strictEqual(K.baglamGecerli({ tur: 'konu', alan: 'felsefe', ad: 'x'.repeat(300) }).ad.length, 120);
+  [{ tur: 'konu', alan: '../x', ad: 'a' }, { tur: 'konu', alan: 'Felsefe', ad: 'a' }, { tur: 'konu', alan: 'felsefe', ad: '  ' }, { tur: 'konu', ad: 'a' }]
+    .forEach(b => a.strictEqual(K.baglamGecerli(b), null, JSON.stringify(b)));
+  a.deepStrictEqual(K.istekGovdesi('başla', 'oto', { kip: 'ogretmen', baglam: { tur: 'konu', alan: 'tarih', ad: 'Malazgirt', id: 'x' } }),
+    { text: 'başla', agent: 'king', kip: 'ogretmen', baglam: { tur: 'konu', alan: 'tarih', ad: 'Malazgirt' } });
+  const k = { tur: 'konu', alan: 'tarih', ad: 'Malazgirt' };
+  a.ok(K.ayniBaglam(k, Object.assign({}, k)) && !K.ayniBaglam(k, { tur: 'konu', alan: 'tarih', ad: 'Orhon' }) && !K.ayniBaglam(null, k));
+  a.ok(K.ayniBaglam({ tur: 'ders', alan: 'felsefe', id: 'felsefe.1.1.1' }, { tur: 'ders', alan: 'felsefe', id: 'felsefe.1.1.1', ad: 'x' }));
+  a.strictEqual(K.sohbetOku(JSON.stringify({ baglam: k, mesajlar: [] }), 0).baglam.ad, 'Malazgirt');
 });
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');

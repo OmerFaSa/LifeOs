@@ -866,11 +866,50 @@ KIP_TALIMAT = {
                 "soruyu sorduğunu, neden öyle düşündüğünü kendi ağzından, kısa paragraflarla anlat; kişiye "
                 "düşündürücü bir soru yönelt ve onunla tartış. Rolde kalırken dürüst ol: ders metninde ya da "
                 "bilinen kaynaklarda olmayan bir sözü «söyledim» diye uydurma; bilinmeyen yerde «bunu bilmiyoruz» de."),
+    # 2026-11-17 (sahip: «taht, Mete Han, Attila gibi şeyler eklenebilir»): hükümdarın ağzından tarih canlandırması.
+    # Yalnız HUKUMDAR listesi; Atatürk bilerek yok (5816 sayılı yasa ve saygı gereği canlandırılmaz).
+    "divan": ("\n\nKİP: DİVAN. Bu bir tarih canlandırmasıdır: %(ad)s olarak (%(cag)s) BİRİNCİ TEKİL ŞAHISLA, ağırbaşlı ve "
+              "sade konuş; çağını, karşılaştığın durumları, verdiğin kararları ve nedenlerini kısa paragraflarla anlat, "
+              "sonunda kişiye tek düşündürücü soru sor. YALNIZ tarihçe kanıtlı bilgiye dayan (başlıca kaynak: %(kaynak)s); "
+              "söz, rakam, ad ya da olay uydurma. Kaynakların ayrıldığı yerde «kaynaklar burada ayrılır» de ve görüşleri "
+              "kısaca ver; bilinmeyen yerde «bunu bilmiyoruz» de. Günümüz siyasetine, partilere, bugünkü liderlere ve "
+              "sınır tartışmalarına girme; böyle bir soruda nazikçe kendi çağına dön. Savaşı ve şiddeti yüceltme: "
+              "savaşları bedeliyle ve sonuçlarıyla anlat, destan değil tarih anlat. Kimse için hakaret ya da aşağılama yok.%(ilk)s"),
+}
+DIVAN_ILK = ("\nBu konuşmadaki ilk cevabın: ilk satırın TEK cümle olsun: «Bu bir canlandırmadır; %(in)s "
+             "ağzından, tarihî kaynaklara dayanarak konuşuyorum.» Sonra rolüne geç.")
+HUKUMDAR = {
+    "mete": {"ad": "Mete Han", "in": "Mete Han'ın", "cag": "Asya Hun hükümdarı, MÖ 209-174",
+             "kaynak": "Çin kaynakları, özellikle Sima Qian'ın Shiji'si"},
+    "attila": {"ad": "Attila", "in": "Attila'nın", "cag": "Avrupa Hun hükümdarı, 434-453",
+               "kaynak": "Priskos'un elçilik anlatısı, Jordanes ve öteki Roma kaynakları"},
+    "bilge": {"ad": "Bilge Kağan", "in": "Bilge Kağan'ın", "cag": "II. Göktürk Kağanlığı'nın kağanı, 716-734",
+              "kaynak": "Orhon yazıtları (Kül Tigin, Bilge Kağan, Tonyukuk) ve Çin kaynakları"},
+    "alparslan": {"ad": "Alp Arslan", "in": "Alp Arslan'ın", "cag": "Büyük Selçuklu sultanı, 1063-1072",
+                  "kaynak": "İslam ve Bizans kronikleri (İbnü'l-Esir, Attaleiates)"},
+    "fatih": {"ad": "Fatih Sultan Mehmet", "in": "Fatih Sultan Mehmet'in", "cag": "Osmanlı padişahı, 1444-1446 ve 1451-1481",
+              "kaynak": "Osmanlı kronikleri (Tursun Bey, Aşıkpaşazade), Bizans ve Venedik kaynakları"},
 }
 
 
-def kip_of(v):
-    return v if v in KIP_TALIMAT else "ortak"
+def kip_of(v, hukumdar=None):
+    """Gecerli kip ya da «ortak». Divan yalniz izinli hukumdarla: «divan:<kimlik>» (talimat ve Antigravity oturum anahtari
+    hukumdari tasir); liste disi hukumdar reddedilir, kip «ortak»a duser."""
+    v = str(v or "")
+    if v.startswith("divan:"):
+        v, hukumdar = "divan", v[6:]
+    if v == "divan":
+        return "divan:" + hukumdar if isinstance(hukumdar, str) and hukumdar in HUKUMDAR else "ortak"
+    return v if v in KIP_TALIMAT and v != "divan" else "ortak"
+
+
+def kip_talimati(kip, ilk=False):
+    """Sistem metnine giren kip talimati. `ilk`: konusmada henuz King cevabi yok (Divan'da canlandirma uyarisi o zaman)."""
+    kip = kip_of(kip)
+    if not kip.startswith("divan:"):
+        return KIP_TALIMAT[kip]
+    h = HUKUMDAR[kip[6:]]
+    return KIP_TALIMAT["divan"] % dict(h, ilk=DIVAN_ILK % h if ilk else "")
 
 
 DERS_KIMLIK = re.compile(r"^([a-z]+)\.(\d{1,2})(?:\.\d{1,3}){1,3}$")
@@ -944,10 +983,23 @@ def _king(ad):
     return _KING[ad]
 
 
+def konu_blogu(b):
+    """Dersi henuz yazilmamis konu ({tur:'konu', alan, ad}; alan sayfasindaki «King'le çalış») -> Ogretmen'e baştan anlat
+    talimati ya da "". Ad istemciden gelir: tek satir, 120 harf, tirnak icinde; alan alan/ altinda olmali. Saf; test edilir."""
+    alan, ad = str(b.get("alan") or ""), " ".join(str(b.get("ad") or "").split())[:120].replace("«", "").replace("»", "")
+    if not ad or not re.fullmatch(r"[a-z]+", alan) or not os.path.isdir(os.path.join(KOK, "alan", alan)):
+        return ""
+    return ("Açık konu (kişi bunu şimdi baştan öğrenmek istiyor; bu konunun ders metni henüz yazılmadı): «%s» (alan: %s).\n"
+            "Bu konuyu baştan, adım adım anlat: önce ne olduğu ve neden önemli olduğu, sonra temel kavramlar sırayla. "
+            "Ders metni olmadığı için yalnız iyi bilinen bilgiye dayan; emin olmadığını kesin gibi söyleme." % (ad, alan))
+
+
 def ders_oku(baglam_):
     """Kabugun gonderdigi {tur:'ders', alan, id} -> ders blogu ya da "". Icerik alan/ JSON'undan king/mcp.py t_yol ile
-    okunur (istemcinin metnine guvenilmez: istem enjeksiyonunun en kisa yolu)."""
+    okunur (istemcinin metnine guvenilmez: istem enjeksiyonunun en kisa yolu). {tur:'konu'} -> konu_blogu."""
     b = baglam_ if isinstance(baglam_, dict) else {}
+    if b.get("tur") == "konu":
+        return konu_blogu(b)
     m = DERS_KIMLIK.match(str(b.get("id") or ""))
     if b.get("tur") != "ders" or not m or b.get("alan", m.group(1)) != m.group(1):
         return ""
@@ -1451,7 +1503,8 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     denetim = "genel" if sonuclar is None and not sistem_konusu(metin) else "olcum"
     ek_sabit = ((HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
                 + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
-                + USLUP_TALIMAT.get(uslup_of(uslup), "") + KIP_TALIMAT[kip])
+                + USLUP_TALIMAT.get(uslup_of(uslup), "")
+                + kip_talimati(kip, ilk=not any(m.get("role") == "assistant" for m in gecmis or [])))
     sistem = sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest, ek=ek_sabit + (
         arac.SONUC_TALIMATI + (arac.DONGU_TALIMATI if devam and aracli else "") if sonuclar
         else ARAC_TALIMATI if aracli and sonuclar is None else ""))

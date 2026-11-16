@@ -1743,7 +1743,7 @@ class Handler(BaseHTTPRequestHandler):
             # Kabugun King sohbeti (kabuk/king-sohbet.js): kip, acik dersin baglami (icerigi sunucu okur) ve Başbuğ
             # blogu. Antigravity ayni sohbet oturumunda ayni konusmaya devam eder (core/kopru.py OTURUM).
             if "kip" in (govde or {}):
-                ek["kip"] = sohbet.kip_of(govde.get("kip"))
+                ek["kip"] = sohbet.kip_of(govde.get("kip"), govde.get("hukumdar"))   # divan: yalniz izinli hukumdar
                 ek["ders"] = sohbet.ders_oku(govde.get("baglam"))
                 ek["lifeos"] = True
             bas = (govde or {}).get("baslangic")

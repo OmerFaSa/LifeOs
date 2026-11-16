@@ -14,22 +14,39 @@
   'use strict';
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};
   var SECIM = { oto: 'Otomatik (Merkez ayarı)', antigravity: 'Antigravity', claude: 'Claude Code' };
-  var KIP = { ortak: 'Düşünce ortağı', ogretmen: 'Öğretmen', filozof: 'Filozof' };
+  var KIP = { ortak: 'Düşünce ortağı', ogretmen: 'Öğretmen', filozof: 'Filozof', divan: 'Divan' };
+  // Divan (2026-11-17, sahip: «taht, Mete Han, Attila gibi şeyler»): hükümdarın ağzından canlandırma. Sunucu da aynı listeyi doğrular
+  // (HKM/core/sohbet.py HUKUMDAR); Atatürk bilerek yok (5816 sayılı yasa ve saygı gereği canlandırılmaz).
+  var HUKUMDAR = { mete: 'Mete Han', attila: 'Attila', bilge: 'Bilge Kağan', alparslan: 'Alp Arslan', fatih: 'Fatih Sultan Mehmet' };
   var ANAHTAR = 'lifeos.king.saglayici', SOHBET = 'lifeos.king.sohbet', TASLAK = 'lifeos.king.taslak', EN_COK = 80, EN_UZUN = 20000;
   var ONERI = {
     ortak: ['Bugün ne var?', 'Felsefe yol haritamda neredeyim?', 'Bu hafta nasıl gitti?'],
     ogretmen: ['Bu dersi adım adım anlat', 'Beni bu konudan sına', 'En önemli üç fikir ne?'],
-    filozof: ['Kendini anlat', 'Bana bir soru sor', 'Bugün yaşasaydın neyi sorardın?']
+    konu: ['Bu konuyu baştan anlat', 'Önce temel kavramlar neler?', 'Beni bu konudan sına'],
+    filozof: ['Kendini anlat', 'Bana bir soru sor', 'Bugün yaşasaydın neyi sorardın?'],
+    mete: ['Kendini anlat', 'Onlu ordu düzenini neden kurdun?', 'Çin ile ilişkin nasıldı?'],
+    attila: ['Kendini anlat', 'Roma ile neden antlaşmalar yaptın?', 'Kaynaklar seni nasıl anlatıyor?'],
+    bilge: ['Kendini anlat', 'Orhon yazıtlarını neden diktirdin?', 'Tonyukuk ile nasıl çalıştın?'],
+    alparslan: ['Kendini anlat', 'Malazgirt\'e giden yol neydi?', 'Nizamülmülk ile devleti nasıl yönettiniz?'],
+    fatih: ['Kendini anlat', 'İstanbul\'u neden almak istedin?', 'Fetihten sonra şehri nasıl kurdun?']
   };
 
   /* ---------------- saf ---------------- */
-  function secimGecerli(s) { return Object.prototype.hasOwnProperty.call(SECIM, s) ? s : 'oto'; }
-  function kipGecerli(k) { return Object.prototype.hasOwnProperty.call(KIP, k) ? k : 'ortak'; }
+  function var_(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function secimGecerli(s) { return var_(SECIM, s) ? s : 'oto'; }
+  function kipGecerli(k) { return var_(KIP, k) ? k : 'ortak'; }
+  function hukumdarGecerli(h) { return typeof h === 'string' && var_(HUKUMDAR, h) ? h : null; }
   // Ders bağlamı yalnız kimlik taşır (sunucu metni içerikten okur); kimlik «alan.n.u.d» biçiminde olmalı.
+  // Konu bağlamı (dersi yazılmamış konu, alan sayfasındaki «King'le çalış»): alan + ad (tek satır, ≤120 harf); sunucu alanı yeniden doğrular.
   function baglamGecerli(b) {
+    if (b && b.tur === 'konu') {
+      var ad = String(b.ad || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+      return ad && /^[a-z]+$/.test(String(b.alan || '')) ? { tur: 'konu', alan: b.alan, ad: ad } : null;
+    }
     var m = b && b.tur === 'ders' && /^([a-z]+)\.\d{1,2}(\.\d{1,3}){1,3}$/.exec(String(b.id || ''));
     return m ? { tur: 'ders', alan: m[1], id: String(b.id), ad: String(b.ad || '').slice(0, 120) } : null;
   }
+  function ayniBaglam(a, b) { return !!a && !!b && a.tur === b.tur && a.alan === b.alan && (a.tur === 'ders' ? a.id === b.id : a.ad === b.ad); }
   // Yerel ISO zaman (sunucu ambarı created_at ile aynı biçim): «yeni konuşma» sunucuda da buradan başlar.
   function yerelIso(t) {
     var d = new Date(t), p = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -40,9 +57,11 @@
     if (secimGecerli(secim) !== 'oto') g.saglayici = secim;
     if (o) {
       g.kip = kipGecerli(o.kip);
+      var h = hukumdarGecerli(o.hukumdar);
+      if (g.kip === 'divan') { if (h) g.hukumdar = h; else g.kip = 'ortak'; } // hükümdarsız Divan yok
       if (o.baslangic) g.baslangic = o.baslangic;
       var b = baglamGecerli(o.baglam);
-      if (b) g.baglam = { tur: b.tur, alan: b.alan, id: b.id };
+      if (b) g.baglam = b.tur === 'konu' ? b : { tur: b.tur, alan: b.alan, id: b.id };
     }
     return g;
   }
@@ -58,11 +77,11 @@
   function sohbetOku(ham, simdi) {
     var v = null;
     try { v = JSON.parse(ham); } catch (e) { v = null; }
-    var bos = { baslangic: yerelIso(simdi), kip: 'ortak', baglam: null, mesajlar: [] };
+    var bos = { baslangic: yerelIso(simdi), kip: 'ortak', hukumdar: null, baglam: null, mesajlar: [] };
     if (!v || typeof v !== 'object' || !Array.isArray(v.mesajlar)) return bos;
     return {
       baslangic: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(v.baslangic) ? v.baslangic : bos.baslangic,
-      kip: kipGecerli(v.kip), baglam: baglamGecerli(v.baglam),
+      kip: kipGecerli(v.kip), hukumdar: hukumdarGecerli(v.hukumdar), baglam: baglamGecerli(v.baglam),
       mesajlar: v.mesajlar.filter(function (m) { return m && (m.kim === 'ben' || m.kim === 'king') && typeof m.metin === 'string'; })
         .map(function (m) { return { kim: m.kim, metin: m.metin.slice(0, EN_UZUN), alt: Array.isArray(m.alt) ? m.alt.filter(function (x) { return typeof x === 'string' && !/^Kaynak: /.test(x); }).slice(0, 3) : [] }; })
         .slice(-EN_COK)
@@ -111,8 +130,8 @@
   function depoOku(k) { try { return kok.localStorage.getItem(k); } catch (e) { return null; } }
   function depoYaz(k, v) { try { if (v) kok.localStorage.setItem(k, v); else kok.localStorage.removeItem(k); } catch (e) { /* depo kapalı ya da dolu: bu sekmede kalır */ } }
   function kaydet() { depoYaz(SOHBET, JSON.stringify(d.s)); }
-  function yeniKonusma(kip, baglam) {
-    d.s = { baslangic: yerelIso(Date.now()), kip: kipGecerli(kip), baglam: baglamGecerli(baglam), mesajlar: [] };
+  function yeniKonusma(kip, baglam, hukumdar) {
+    d.s = { baslangic: yerelIso(Date.now()), kip: kipGecerli(kip), hukumdar: hukumdarGecerli(hukumdar), baglam: baglamGecerli(baglam), mesajlar: [] };
     kaydet();
   }
 
@@ -125,13 +144,23 @@
     var s = d.s, bos = !s.mesajlar.length && !d.bekliyor;
     var kip = '<div class="king-kip" role="group" aria-label="Kip">' + Object.keys(KIP).map(function (k) {
       return '<button type="button" class="king-kip__oge" data-king-kip="' + k + '" aria-pressed="' + (k === s.kip) + '">' + KIP[k] + '</button>'; }).join('') + '</div>';
-    var baglam = s.baglam ? '<p class="king-baglam"><span class="king-baglam__ad">Ders: ' + kac(s.baglam.ad || s.baglam.id) + '</span>' +
-      '<button type="button" class="king-baglam__kaldir" data-king-baglam-kaldir aria-label="Ders bağlamını kaldır" title="Ders bağlamını kaldır">×</button></p>' : '';
+    var konu = s.baglam && s.baglam.tur === 'konu', bt = konu ? 'Konu' : 'Ders';
+    var baglam = s.baglam ? '<p class="king-baglam"><span class="king-baglam__ad">' + bt + ': ' + kac(s.baglam.ad || s.baglam.id) + '</span>' +
+      '<button type="button" class="king-baglam__kaldir" data-king-baglam-kaldir aria-label="' + bt + ' bağlamını kaldır" title="' + bt + ' bağlamını kaldır">×</button></p>' : '';
     var ust = '<div class="king-ust">' + kip + baglam + (s.mesajlar.length ? '<button type="button" class="king-yeni" data-king-yeni>Yeni konuşma</button>' : '') + '</div>';
+    // Divan: hükümdar seçimi (ev bileşeni çipler); seçilmeden örnek soru yok
+    var divan = s.kip === 'divan', h = divan && s.hukumdar;
+    var secim = divan ? B.cipler({ ad: 'Hükümdar, biri seçilir', ogeler: Object.keys(HUKUMDAR).map(function (k) {
+      return { metin: HUKUMDAR[k], tur: 'ikincil', basili: k === s.hukumdar, veri: { 'king-hukumdar': k } }; }) }) : '';
+    var giris = divan ? (h ? 'Bu bir canlandırma: King, ' + HUKUMDAR[h] + ' olarak tarihî kaynaklara dayanarak konuşur; bilinmeyeni uydurmaz.' : 'Kiminle konuşmak istersin?')
+      : konu ? 'Bu konuyu King\'le baştan çalış. Şunlardan biriyle başla ya da aklındakini yaz:'
+      : s.baglam ? 'Bu dersi King\'le çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : 'Aklındakini yaz ya da şunlardan biriyle başla:';
+    var sorular = divan ? (h ? ONERI[h] : []) : konu && s.kip === 'ogretmen' ? ONERI.konu : ONERI[s.kip];
     // ilk açılışta örnek sorular: kutuya ne yazılacağı belli olsun (tıklayınca sorulur)
-    var oneri = bos ? '<div class="king-bos"><p class="king-giris">' + (s.baglam ? 'Bu dersi King\'le çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : 'Aklındakini yaz ya da şunlardan biriyle başla:') + '</p>' +
-      '<div class="king-oneri" aria-label="Örnek sorular">' + ONERI[s.kip].map(function (q) {
-        return '<button type="button" class="king-oneri__oge" data-king-oneri="' + kac(q) + '">' + kac(q) + '</button>'; }).join('') + '</div></div>' : '';
+    var oneri = bos ? '<div class="king-bos"><p class="king-giris">' + kac(giris) + '</p>' +
+      (sorular.length ? '<div class="king-oneri" aria-label="Örnek sorular">' + sorular.map(function (q) {
+        return '<button type="button" class="king-oneri__oge" data-king-oneri="' + kac(q) + '">' + kac(q) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '';
+    ust += secim;
     var akis = bos ? '' : '<ol class="king-akis" aria-label="Konuşma" aria-live="polite">' + s.mesajlar.map(mesajHtml).join('') +
       (d.bekliyor ? '<li class="king-yaziyor" role="status"><span class="gizli">King yazıyor…</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></li>' : '') + '</ol>';
     var hata = d.hata ? B.uyari({ tur: 'hata', metin: d.hata, alt: 'Yazdığın kutuda duruyor.', eylem: { metin: 'Tekrar dene', tur: 'sade', veri: { 'king-tekrar': '' } } }) : '';
@@ -187,8 +216,17 @@
   function dersleCalis(id) {
     var h = kok.document.querySelector('article.ders h1'), b = baglamGecerli({ tur: 'ders', id: id, ad: h ? h.textContent.trim() : '' });
     if (!b) return;
-    if (!d.s.baglam || d.s.baglam.id !== b.id) yeniKonusma('ogretmen', b);
+    if (!ayniBaglam(d.s.baglam, b)) yeniKonusma('ogretmen', b);
     kok.location.hash = '#/king';
+  }
+  // Alan sayfasında dersi yazılmamış konunun «King'le çalış» bağlantısı (kabuk.js çizer; href="#/king" gezinmeyi kendisi yapar):
+  // o konu bağlamıyla Öğretmen kipinde; başka konudan geliyorsa yeni konuşma.
+  function konuylaCalis(a) {
+    var b = baglamGecerli({ tur: 'konu', alan: a.getAttribute('data-alan'), ad: a.getAttribute('data-king-konu') });
+    if (!b) return;
+    if (!ayniBaglam(d.s.baglam, b)) yeniKonusma('ogretmen', b);
+    else if (d.s.kip !== 'ogretmen') { d.s.kip = 'ogretmen'; kaydet(); }
+    if (bolumEl()) ciz();
   }
   function kur() {
     d.s = sohbetOku(depoOku(SOHBET), Date.now());
@@ -208,12 +246,19 @@
       var t = e.target.closest ? e.target : null, f = kok.document.querySelector('form[data-king-sohbet]'), b;
       if (!t) return;
       if ((b = t.closest('[data-king-calis]'))) { e.preventDefault(); return dersleCalis(b.getAttribute('data-king-calis')); }
+      if ((b = t.closest('[data-king-konu]'))) return konuylaCalis(b);
       if (!f) return;
+      if ((b = t.closest('[data-king-hukumdar]'))) { // başka hükümdar = başka konuşma (geçmiş karışmasın)
+        var h = hukumdarGecerli(b.getAttribute('data-king-hukumdar'));
+        if (!h || d.bekliyor) return;
+        if (d.s.mesajlar.length && h !== d.s.hukumdar) yeniKonusma('divan', null, h); else { d.s.hukumdar = h; kaydet(); }
+        ciz(); var o = kok.document.querySelector('[data-king-hukumdar="' + h + '"]'); return o && o.focus();
+      }
       if (t.closest('[data-king-tekrar]')) return f.requestSubmit();
       if ((b = t.closest('[data-king-oneri]'))) { f.metin.value = b.getAttribute('data-king-oneri'); return f.requestSubmit(); }
       if ((b = t.closest('[data-king-kip]'))) { d.s.kip = kipGecerli(b.getAttribute('data-king-kip')); kaydet(); ciz(); return kok.document.querySelector('[data-king-kip="' + d.s.kip + '"]').focus(); } // yeniden çizimde odak seçili kipte kalır
       if (t.closest('[data-king-baglam-kaldir]')) { d.s.baglam = null; kaydet(); return ciz(true); }
-      if (t.closest('[data-king-yeni]') && !d.bekliyor) { yeniKonusma(d.s.kip, d.s.baglam); return ciz(true); }
+      if (t.closest('[data-king-yeni]') && !d.bekliyor) { yeniKonusma(d.s.kip, d.s.baglam, d.s.hukumdar); return ciz(true); }
     });
     kok.document.addEventListener('submit', function (e) {
       if (!e.target.matches || !e.target.matches('form[data-king-sohbet]')) return;
@@ -222,7 +267,8 @@
     if (kok.document.querySelector('.govde[data-sayfa="king"]')) ciz();
   }
 
-  var KingSohbet = { SECIM: SECIM, KIP: KIP, secimGecerli: secimGecerli, kipGecerli: kipGecerli, baglamGecerli: baglamGecerli, yerelIso: yerelIso,
+  var KingSohbet = { SECIM: SECIM, KIP: KIP, HUKUMDAR: HUKUMDAR, ONERI: ONERI, secimGecerli: secimGecerli, kipGecerli: kipGecerli, hukumdarGecerli: hukumdarGecerli,
+    baglamGecerli: baglamGecerli, ayniBaglam: ayniBaglam, yerelIso: yerelIso,
     istekGovdesi: istekGovdesi, cevapSatirlari: cevapSatirlari, hataMetni: hataMetni, sohbetOku: sohbetOku, bicimle: bicimle };
   Kabuk.KingSohbet = KingSohbet;
   if (typeof module !== 'undefined' && module.exports) module.exports = KingSohbet;

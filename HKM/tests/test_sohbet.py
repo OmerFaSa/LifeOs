@@ -971,3 +971,52 @@ def run():
         no(r["truncated"])
     test("kesilme isareti vermeyen tasiyici calisir",
          t_transport_without_truncation_flag_still_works)
+
+    def t_divan_kipi():
+        """Divan (2026-11-17): yalniz izinli hukumdar; liste disi (Atatürk dahil) ortak'a duser."""
+        eq([sohbet.kip_of(x) for x in ("divan", "divan:mete", "divan:ataturk", "divan:", "ogretmen", None)],
+           ["ortak", "divan:mete", "ortak", "ortak", "ogretmen", "ortak"])
+        eq([sohbet.kip_of("divan", h) for h in ("attila", "bilge", "alparslan", "fatih", "ataturk", "Mete", None, 5)],
+           ["divan:attila", "divan:bilge", "divan:alparslan", "divan:fatih", "ortak", "ortak", "ortak", "ortak"])
+        eq(sohbet.kip_of("ogretmen", "mete"), "ogretmen")       # hukumdar yalniz Divan'da anlam tasir
+        no("ataturk" in sohbet.HUKUMDAR or any("Atatürk" in h["ad"] for h in sohbet.HUKUMDAR.values()))
+        ok(len(sohbet.HUKUMDAR) <= 6)
+        t = sohbet.kip_talimati("divan:mete", ilk=True)
+        for parca in ("KİP: DİVAN", "Mete Han", "canlandırma", "kaynaklar burada ayrılır", "bunu bilmiyoruz",
+                      "Günümüz siyasetine", "şiddeti yüceltme", "Mete Han'ın"):
+            ok(parca in t, parca)
+        no("Bu konuşmadaki ilk cevabın" in sohbet.kip_talimati("divan:mete"), "uyarı yalnız ilk cevapta")
+        eq(sohbet.kip_talimati("divan:ataturk"), "")                # reddedilen hukumdar: kipsiz
+        eq(sohbet.kip_talimati("filozof"), sohbet.KIP_TALIMAT["filozof"])
+    test("divan: izinli hukumdar, talimat metni, izinsiz hukumdar reddi", t_divan_kipi)
+
+    def t_divan_sisteme_girer():
+        olcu = []
+
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            olcu.append(sistem)
+            return "Tamam.", 10, 3
+        con = _con()
+        sohbet.konus(con, _cfg(), "kendini anlat", BUGUN, transport=tas, kayit=False, kip="divan:fatih")
+        ok("KİP: DİVAN" in olcu[-1] and "Fatih Sultan Mehmet" in olcu[-1] and "ilk cevabın" in olcu[-1], olcu[-1][-500:])
+        sohbet.konus(con, _cfg(), "peki sonra?", BUGUN, transport=tas, kayit=False, kip="divan:fatih",
+                     gecmis=[{"role": "user", "content": "kendini anlat"}, {"role": "assistant", "content": "Ben Mehmet."}])
+        ok("KİP: DİVAN" in olcu[-1] and "ilk cevabın" not in olcu[-1])
+        sohbet.konus(con, _cfg(), "kendini anlat", BUGUN, transport=tas, kayit=False, kip="divan:ataturk")
+        no("KİP:" in olcu[-1], "izinsiz hukumdar sisteme girmez")
+    test("divan sistem metnine girer; uyari ilk cevapta; izinsiz hukumdar girmez", t_divan_sisteme_girer)
+
+    def t_konu_baglami():
+        b = sohbet.ders_oku({"tur": "konu", "alan": "felsefe", "ad": "  Stoacılık\n«ve» bilgelik  "})
+        ok(b.startswith("Açık konu") and "«Stoacılık ve bilgelik»" in b and "baştan, adım adım" in b, b)
+        ok(len(sohbet.ders_oku({"tur": "konu", "alan": "felsefe", "ad": "x" * 500})) < 600)
+        eq([sohbet.ders_oku(x) for x in ({"tur": "konu", "alan": "felsefe", "ad": ""}, {"tur": "konu", "alan": "../x", "ad": "a"},
+                                         {"tur": "konu", "alan": "yokalan", "ad": "a"}, {"tur": "konu", "alan": "Felsefe", "ad": "a"})], [""] * 4)
+        olcu = {}
+
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            olcu["sistem"] = sistem
+            return "Tamam.", 10, 3
+        sohbet.konus(_con(), _cfg(), "başlayalım", BUGUN, transport=tas, kayit=False, kip="ogretmen", ders=b)
+        ok("KİP: ÖĞRETMEN" in olcu["sistem"] and "Stoacılık ve bilgelik" in olcu["sistem"])
+    test("konu baglami: ad tek satir ve sinirli, alan dogrulanir, Ogretmen'e baştan anlat girer", t_konu_baglami)

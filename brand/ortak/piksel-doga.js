@@ -111,7 +111,7 @@ window.LIFEOS = window.LIFEOS || {};
     }
   }
   function otlar(b, o, y0, n, c, s){ const r = tohum(s); for(let i = 0; i < n; i++){ const x = Math.floor(r() * b.W), y = Math.floor(y0 + r() * (b.H - y0)); if(x < b.W * 0.52 && y < b.H * 0.86) continue; px(b, x, y, c); px(b, x - 1, y - 1, c); px(b, x + 1, y - 1, c); } }
-  function spr(b, x, y, k, pal, ters){ const w = k[0].length; for(let j = 0; j < k.length; j++) for(let i = 0; i < w; i++){ const ch = k[j][ters ? w - 1 - i : i]; if(ch !== '.') px(b, x + i, y + j, pal[ch] || P_SABIT[ch]); } }
+  function spr(b, x, y, k, pal, ters, z){ z = z || 1; const w = k[0].length; for(let j = 0; j < k.length; j++) for(let i = 0; i < w; i++){ const ch = k[j][ters ? w - 1 - i : i]; if(ch !== '.') R(b, x + i * z, y + j * z, z, z, pal[ch] || P_SABIT[ch]); } }
   /* sivri kemer: x sol, y alt, w genişlik, h boy */
   function kemer(b, x, y, w, h, c){ const hw = w / 2; for(let j = 0; j < h; j++){ const t = j / h, k = t < 0.6 ? 1 : Math.sqrt(1 - Math.pow((t - 0.6) / 0.4, 2)), ww = Math.max(1, Math.round(w * k)); R(b, x + Math.round(hw - ww / 2), y - j, ww, 1, c); } }
 
@@ -134,7 +134,7 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* kara çadır (Yörük): uzun, alçak, direkli */
   function karaCadir(b, o, x, y, w, h){
-    for(let i = 0; i < w; i++){ const t = i / (w - 1), hh = Math.round(h * (t < 0.08 || t > 0.92 ? 0.55 : Math.abs(Math.sin(t * Math.PI * 2)) * 0.25 + 0.75)); R(b, x + i, y - hh, 1, hh, i % 4 === 0 ? '#463b40' : '#382f35'); px(b, x + i, y - hh, '#56494c'); }
+    for(let i = 0; i < w; i++){ const t = i / (w - 1), hh = Math.round(h * (t < 0.08 || t > 0.92 ? 0.55 : Math.abs(Math.sin(t * Math.PI * 2)) * 0.25 + 0.75)); R(b, x + i, y - hh, 1, hh, i % 4 === 0 ? '#463b40' : '#382f35'); px(b, x + i, y - hh, '!#6c6a8a'); if(t > 0.5) px(b, x + i, y - hh + 1, '!#4a4866'); }
     const kx = x + Math.round(w * 0.58), kw = Math.max(2, Math.round(w * 0.16)), kh = Math.round(h * 0.62);
     R(b, kx, y - kh, kw, kh, o.gece ? '!#e0a258' : '#6b584c'); if(o.gece) R(b, kx, y - kh, kw, 1, '!#f2c47a');
     R(b, x - 2, y, w + 4, 1, '#2a2629');
@@ -178,10 +178,13 @@ window.LIFEOS = window.LIFEOS || {};
     alev:{ k:[['..r..', '.rr..', '.ror.', 'royor', 'oyyyo', 'oyyyo'], ['.r...', '..rr.', '.ror.', 'royor', 'oyyyo', 'oyyyo'], ['...r.', '.rr..', '.orr.', 'royor', 'oyyyo', 'oyyyo']] },
   };
   const INSAN = ['ozan', 'atli'];
+  /* tahtta oturan hakan (King divanı): güçlü siluet, börk, altın kuşak; yalnız arka planda, hareketsiz */
+  const HAKAN = ['......w......', '.....kkk.....', '.....kkk.....', '....kkkkk....', '....wwwww....', '.....mmm.....', '.....mmm.....', '...kkkmkkk...', '..kkkkkkkkk..', '.kkkkkwkkkkk.',
+    '.kkkkkwkkkkk.', '.kk.kkwkk.kk.', '.kk.kkwkk.kk.', '.mm.kkwkk.mm.', '..kkkkwkkkk..', '.kkkkkkkkkkk.', '.kkkkkkkkkkk.', '..kkk...kkk..', '..kkk...kkk..'];
 
   /* ---------- HAREKET: al(s, t) saf saatten küçük bir durum verir; ciz yalnız o durumu çizer ---------- */
   const nk = (g, x, y, c, w, h) => { g.fillStyle = ton(c); g.fillRect(x, y, w || 1, h || 1); };
-  function sprG(g, x, y, k, pal, ters){ const w = k[0].length; for(let j = 0; j < k.length; j++) for(let i = 0; i < w; i++){ const ch = k[j][ters ? w - 1 - i : i]; if(ch !== '.') nk(g, x + i, y + j, (pal && pal[ch]) || P_SABIT[ch]); } }
+  function sprG(g, x, y, k, pal, ters, z){ z = z || 1; const w = k[0].length; for(let j = 0; j < k.length; j++) for(let i = 0; i < w; i++){ const ch = k[j][ters ? w - 1 - i : i]; if(ch !== '.') nk(g, x + i * z, y + j * z, (pal && pal[ch]) || P_SABIT[ch], z, z); } }
   const kesir = v => v - Math.floor(v);
   const dongu = (t, T) => (((t % T) + T) % T) / T;
   const HAREKET = {
@@ -201,7 +204,7 @@ window.LIFEOS = window.LIFEOS || {};
     kus:{ al:(s, t) => { const p = dongu(t, s.T); if(p > s.yol) return '-'; const f = p / s.yol; return Math.round(s.x0 + (s.x1 - s.x0) * f) + ',' + Math.round(s.y + Math.sin(f * 7) * 1.2) + ',' + (Math.floor(t * 3) % 2); },
       ciz(g, s, k){ if(k === '-') return; const q = k.split(','); [[0, 0], [5, -2], [9, 1]].slice(0, s.n).forEach((d, i) => sprG(g, +q[0] + d[0], +q[1] + d[1], POZ.kus.k[(+q[2] + i) % 2], { k:s.c })); } },
     at:{ al:(s, t) => (hash(Math.floor(t / 7), s.s) > 0.4 ? 1 : 0), ciz(g, s, k){ sprG(g, s.x, s.y, POZ.at.k[k], s.pal, s.ters); } },
-    alev:{ al:(s, t) => Math.floor(t * 6) % 3, ciz(g, s, k){ sprG(g, s.x, s.y, POZ.alev.k[k]); } },
+    alev:{ al:(s, t) => Math.floor(t * 6) % 3, ciz(g, s, k){ sprG(g, s.x, s.y, POZ.alev.k[k], null, false, s.z); } },
     kivilcim:{ al:(s, t) => Math.floor(t * 4), ciz(g, s, k){ for(let i = 0; i < 3; i++){ const p = kesir(k / 4 / 2.6 + i / 3); if(p < 0.85) nk(g, s.x + Math.round(Math.sin(p * 7 + i * 2) * 1.5), s.y - Math.round(p * s.L), p < 0.5 ? '!#ffc677' : '!#c6683a'); } } },
     su:{ al:(s, t) => Math.floor(t * 6) % 3, ciz(g, s, k){ for(let j = 0; j < s.L; j++) nk(g, s.x, s.y + j, (j + k) % 3 === 0 ? s.c[1] : s.c[0]); nk(g, s.x - 1 + (k % 2) * 2, s.y + s.L - 1, s.c[1]); } },
     parilti:{ al:(s, t) => Math.floor(t * 1.2), ciz(g, s, k){ for(let i = 0; i < s.n; i++) nk(g, s.x + Math.floor(hash(k * 7 + i, s.s) * s.w), s.y + Math.floor(hash(k * 13 + i, s.s + 1) * s.h), s.c, 2, 1); } },
@@ -444,6 +447,12 @@ window.LIFEOS = window.LIFEOS || {};
         for(let i = 1; i < dw - 1; i += 2) if(i !== dw >> 1) px(b, dx + i, p.mt - 2, '#9a9080');
         for(let i = 0; i < 6; i++) px(b, dx + dw + 2 + i, p.mt - 2 - (i >> 1), i < 4 ? '#3a3230' : '#d8c8a0');
         R(b, Math.round(W * 0.58), p.mt - 3, 6, 3, '#4a5a6e'); R(b, Math.round(W * 0.58), p.mt - 4, 6, 1, '#7a3a33');
+        /* duvar kilimi: pencerenin sağında, sınırlı palet (kırmızı, lacivert, krem) */
+        const kx0 = p.wx1 + Math.round(W * 0.03), kw = Math.max(9, Math.round(H * 0.16)), ky0 = p.wy0 - 2, kh = Math.round(H * 0.34);
+        R(b, kx0, ky0, kw, kh, '#8a3a2e'); R(b, kx0 + 1, ky0 + 1, kw - 2, kh - 2, '#a24a36');
+        for(let j = 3; j < kh - 3; j += 6){ const m = kx0 + (kw >> 1); for(let d = 0; d < 3; d++){ px(b, m - d, ky0 + j + d, '#2c4570'); px(b, m + d, ky0 + j + d, '#2c4570'); px(b, m - d, ky0 + j + 5 - d, '#2c4570'); px(b, m + d, ky0 + j + 5 - d, '#2c4570'); } px(b, m, ky0 + j + 2, '#e8dcc4'); px(b, m, ky0 + j + 3, '#e8dcc4'); }
+        for(let i = 0; i < kw; i += 2) px(b, kx0 + i, ky0 + kh, '#e8dcc4');
+        R(b, kx0 - 1, ky0 - 1, kw + 2, 1, '#5c4434');
         const cx = Math.round(W * 0.84); R(b, cx - 2, p.mt - 1, 5, 1, '#a07a3c'); R(b, cx, p.mt - 5, 1, 4, '#ece6d6');
         if(gc) isik(b, cx, p.mt - 7, Math.round(H * 0.32), '!#f2bd66', 0.32);
       } },
@@ -484,11 +493,12 @@ window.LIFEOS = window.LIFEOS || {};
     /* Müzik: bozkırda ateş başı — kopuzlu ozan, kıvılcım, duman */
     ates:{ gok:'aksam', ufuk:0.62, gyy:0.42,
       yer(o){
-        const { W, H } = o, z = o.ufuk, fx = Math.round(W * 0.7), fy = z + Math.round((H - z) * 0.45);
-        o.p = { fx, fy };
-        o.sakin.push({ tur:'alev', x:fx - 2, y:fy - 6 });
-        o.sakin.push({ tur:'kivilcim', x:fx, y:fy - 7, L:Math.round(H * 0.14) });
-        dumanEkle(o, fx, fy - 8 - Math.round(H * 0.05), Math.round(H * 0.18), 9);
+        /* ozan ve ateş yakın planda: masaüstünde iki kat (2026-11-17; eskiden 12×11 px ozan uzakta kayboluyordu) */
+        const { W, H } = o, z = o.ufuk, k = H >= 90 ? 2 : 1, fx = Math.round(W * 0.7), fy = z + Math.round((H - z) * 0.62);
+        o.p = { fx, fy, k };
+        o.sakin.push({ tur:'alev', x:fx - 2 * k, y:fy - 6 * k, z:k });
+        o.sakin.push({ tur:'kivilcim', x:fx, y:fy - 6 * k - 1, L:Math.round(H * 0.16) });
+        dumanEkle(o, fx, fy - 7 * k - Math.round(H * 0.05), Math.round(H * 0.18), 9);
         atEkle(o, fx + Math.round(W * 0.1), z + (H - z) * 0.4, 2, true);
         if(o.gece) yildizEkle(o);
       },
@@ -498,11 +508,12 @@ window.LIFEOS = window.LIFEOS || {};
         zemin(b, z + 1, ['#7a6658', '#6a5a50', '#5b4f49', '#4c4442'], 72);
         otlar(b, o, z + (H - z) * 0.4, Math.round(W / 10), '#4a3f3a', 73);
         otag(b, o, Math.round(W * 0.88), z + 5, Math.max(3, Math.round(H * 0.06)), 0.2);
-        isik(b, p.fx, p.fy - 2, Math.round(H * (o.gece ? 0.22 : 0.15)), '!#e58c50', o.gece ? 0.4 : 0.25);
-        [[-4, 0], [-3, 1], [-1, 1], [1, 1], [3, 1], [4, 0]].forEach(d => px(b, p.fx + d[0], p.fy + d[1], '#8a8078'));
-        R(b, p.fx - 3, p.fy, 7, 1, '#3a2a22'); R(b, p.fx - 2, p.fy - 1, 5, 1, '#5a3a26');
-        spr(b, p.fx - 18, p.fy - 10, POZ.ozan.k[0], {}, false);
-        if(o.gece) [[-8, -5], [-7, -6], [-8, -2], [-9, -1]].forEach(d => px(b, p.fx + d[0], p.fy + d[1], '!#e09a5a'));
+        const k = p.k;
+        isik(b, p.fx, p.fy - 2 * k, Math.round(H * (o.gece ? 0.26 : 0.17)), '!#e58c50', o.gece ? 0.4 : 0.25);
+        [[-4, 0], [-3, 1], [-1, 1], [1, 1], [3, 1], [4, 0]].forEach(d => R(b, p.fx + d[0] * k, p.fy + d[1] * k, k, k, '#8a8078'));
+        R(b, p.fx - 3 * k, p.fy, 7 * k, k, '#3a2a22'); R(b, p.fx - 2 * k, p.fy - k, 5 * k, k, '#5a3a26');
+        spr(b, p.fx - 17 * k, p.fy - 10 * k, POZ.ozan.k[0], {}, false, k);
+        if(o.gece) [[-6, -5], [-5, -6], [-6, -2], [-7, -1]].forEach(d => R(b, p.fx + d[0] * k, p.fy + d[1] * k, k, k, '!#e09a5a'));
       } },
 
     /* Hareket, Sağlık: dağ yaylası — karlı doruklar, yayla evleri, patika, sürü, kartal */
@@ -531,7 +542,7 @@ window.LIFEOS = window.LIFEOS || {};
     /* Beslenme: su başı — çeşme, çınar, bostan */
     pinar:{ gok:'gun', ufuk:0.6, gyy:0.32, gx:0.62,
       yer(o){
-        const { W, H } = o, z = o.ufuk, cx = Math.round(W * 0.68), cy = z + Math.round((H - z) * 0.5), cw = Math.max(8, Math.round(H * 0.15)), ch = Math.max(9, Math.round(H * 0.22));
+        const { W, H } = o, z = o.ufuk, cx = Math.round(W * 0.68), cy = z + Math.round((H - z) * 0.5), cw = Math.max(10, Math.round(H * 0.2)), ch = Math.max(12, Math.round(H * 0.32));
         o.p = { cx, cy, cw, ch };
         o.sakin.push({ tur:'su', x:cx, y:cy - Math.round(ch * 0.42), L:Math.round(ch * 0.42) - 1, c:['#8ab8c6', '#e6f2f2'] });
         o.sakin.push({ tur:'parilti', x:cx - (cw >> 1) - 1, y:cy + 1, w:cw + 2, h:1, n:2, s:91, c:'#e8f4f4' });
@@ -558,6 +569,7 @@ window.LIFEOS = window.LIFEOS || {};
         kemer(b, x0 + 2, p.cy - 1, p.cw - 4, Math.round(p.ch * 0.66), '#bdb4a0');
         R(b, p.cx - 1, p.cy - Math.round(p.ch * 0.42) - 1, 2, 1, '#a07a40');
         R(b, x0 - 2, p.cy, p.cw + 4, 3, '#c9c1ae'); R(b, x0 - 1, p.cy, p.cw + 2, 1, '#7fb0bf'); R(b, x0 - 2, p.cy + 3, p.cw + 4, 1, '#8e8878');
+        const tx0 = x0 - 5; R(b, tx0, p.cy - 3, 3, 4, '#b0603e'); R(b, tx0 + 1, p.cy - 5, 1, 2, '#b0603e'); R(b, tx0 + 2, p.cy - 3, 1, 4, '#8a4a30'); px(b, tx0 + 3, p.cy - 4, '#8a4a30');   // testi
         if(o.gece){ const fx = p.cx + (p.cw >> 1) + 3; R(b, fx, y0 - 1, 1, 3, '#4a3a2a'); R(b, fx - 1, y0 + 2, 3, 3, '!#f0b65e'); isik(b, fx, y0 + 3, Math.round(H * 0.14), '!#e8a852', 0.22); }
       } },
 
@@ -565,7 +577,7 @@ window.LIFEOS = window.LIFEOS || {};
     cadir:{ gok:'alaca', ufuk:0.62, gyy:0.36, yog:60, yildizGunduz:true,
       yer(o){
         const { W, H } = o, z = o.ufuk, cx = Math.round(W * 0.64), cy = z + Math.round((H - z) * 0.42);
-        o.p = { cx, cy, cw:Math.max(18, Math.round(W * 0.15)), ch:Math.max(7, Math.round(H * 0.15)) };
+        o.p = { cx, cy, cw:Math.max(22, Math.round(W * 0.17)), ch:Math.max(9, Math.round(H * 0.2)) };
         o.sakin.push({ tur:'mum', x:cx - 5, y:cy - 1, s:13 });
         dumanEkle(o, cx - 5, cy - 3, Math.round(H * 0.12), 10);
         atEkle(o, cx + o.p.cw + 4, cy, 2, true);
@@ -615,36 +627,68 @@ window.LIFEOS = window.LIFEOS || {};
         if(o.gece) isik(b, p.kx, z - 2, Math.round(H * 0.16), '!#d89a52', 0.22);
       } },
 
-    /* King: otağ içi — kerege, uyk direkleri, taht, iki tuğ; gündüz tündükten ışık, gece mangal */
+    /* King: otağda divan (2026-11-17, sahip: «taht eklenebilir, Mete Han, Attila gibi»): tahtta oturan hakan silueti, iki yanda tuğ ve
+       sancak, tahta uzanan halı, sağda mangal; gündüz tündükten inen ışık, gece mangal ateşi. Üst-sol ve arama kutusu bölgesi düz keçe. */
     taht:{ ic:true,
       yer(o){
-        const { W, H } = o, tx = Math.round(W * 0.72), yz = Math.round(H * 0.8), th = Math.round(H * 0.42), L = Math.max(4, Math.round(H * 0.1));
-        o.p = { tx, yz, dy:Math.round(H * 0.36), tug:th };
-        [tx - Math.round(H * 0.3), tx + Math.round(H * 0.3)].forEach((x, i) => o.sakin.push({ tur:'tug', x, y:yz - th + 2, L, faz:i * 0.7, c:['#efe8da', '#b8b0a2'] }));
-        if(o.gece){ o.sakin.push({ tur:'alev', x:Math.round(W * 0.56) - 1, y:yz - 6 }); o.sakin.push({ tur:'kivilcim', x:Math.round(W * 0.56), y:yz - 7, L:Math.round(H * 0.12) }); }
-        else o.sakin.push({ tur:'toz', x:tx - Math.round(H * 0.12), y:Math.round(H * 0.1), w:Math.round(H * 0.2), h:yz - Math.round(H * 0.2), kay:-Math.round(H * 0.1), n:5, T:18, s:121, c:'!#f6e2b0' });
+        const { W, H } = o, tx = Math.round(W * 0.72), yz = Math.round(H * 0.8), z = H >= 90 ? 2 : 1, u = H / 100;
+        o.p = { tx, yz, z, dy:Math.round(H * 0.3), dt:yz - 4 * z, tug:Math.round(H * 0.6), san:Math.round(H * 0.54), mx:tx + Math.round(44 * u), my:yz + Math.round(9 * u) };
+        [-1, 1].forEach((y, i) => o.sakin.push({ tur:'tug', x:tx + y * Math.round(36 * u), y:yz - o.p.tug + 3, L:Math.max(5, Math.round(17 * u)), faz:i * 0.7, c:['#e8dcc4', '#b8ac96'] }));
+        if(o.gece){ o.sakin.push({ tur:'alev', x:o.p.mx - 2 * z - 1, y:o.p.my - 6 * z - 1, z }); o.sakin.push({ tur:'kivilcim', x:o.p.mx, y:o.p.my - 6 * z, L:Math.round(H * 0.16) }); }
+        else o.sakin.push({ tur:'toz', x:tx - Math.round(2 * u), y:Math.round(H * 0.24), w:Math.round(12 * u), h:o.p.dt - Math.round(H * 0.32), kay:-Math.round(8 * u), n:5, T:18, s:121, c:'!#f6e2b0' });
       },
       ciz(b, o){
-        const { W, H } = o, p = o.p, gc = o.gece;
-        for(let y = 0; y < p.dy; y++) for(let x = 0; x < W; x++) px(b, x, y, bay(x, y) < y / p.dy * 0.6 ? '#7a352c' : '#5e2924');
-        const ux = p.tx + Math.round(W * 0.04), uy = -Math.round(H * 0.5);
-        for(let i = -14; i <= 14; i++){ const ex = ux + i * W * 0.06; for(let y = 0; y < p.dy; y++){ const x = Math.round(ux + (ex - ux) * (y - uy) / (p.dy - uy)); if(x >= 0 && x < W) px(b, x, y, x < W * 0.45 ? '#7e4a30' : '#a0683a'); } }
-        R(b, 0, p.dy, W, 2, '#c69a48'); R(b, 0, p.dy + 2, W, 1, '#7a3a2a');
-        for(let y = p.dy + 3; y < p.yz; y++) for(let x = 0; x < W; x++) px(b, x, y, ((x + y) % 6 === 0 || (x - y + 600) % 6 === 0) ? '#86503a' : '#6c3229');
-        const hx0 = p.tx - Math.round(H * 0.22), hx1 = p.tx + Math.round(H * 0.22), hy0 = p.dy + 4;
-        R(b, hx0, hy0, hx1 - hx0, p.yz - hy0, '#2c4570'); R(b, hx0, hy0, hx1 - hx0, 1, '#c69a48'); R(b, hx0, hy0, 1, p.yz - hy0, '#c69a48'); R(b, hx1 - 1, hy0, 1, p.yz - hy0, '#c69a48');
-        for(let y = hy0 + 4; y < p.yz - 4; y += 6) for(let x = hx0 + 4; x < hx1 - 4; x += 6){ px(b, x, y, '#c69a48'); px(b, x + 1, y + 1, '#c69a48'); px(b, x - 1, y + 1, '#c69a48'); px(b, x, y + 2, '#c69a48'); }
-        R(b, 0, p.yz, W, H - p.yz, '#7e2a26');
-        for(let x = 0; x < W; x += 4){ px(b, x, p.yz + 2, '#c69a48'); px(b, x + 1, p.yz + 3, '#c69a48'); }
-        R(b, 0, p.yz, W, 1, '#4e1c1a');
-        const sw = Math.round(H * 0.34), sx = p.tx - (sw >> 1), sy = p.yz - Math.round(H * 0.05), oh = Math.round(H * 0.07);
-        R(b, sx - 3, sy, sw + 6, p.yz - sy, '#8a5a34'); R(b, sx - 3, sy, sw + 6, 1, '#c69a48');
-        R(b, sx, sy - oh, sw, oh, '#b8873e'); R(b, sx, sy - oh, Math.round(sw * 0.2), oh, '#8a6430');
-        R(b, sx + 2, sy - Math.round(H * 0.18), sw - 4, Math.round(H * 0.11), '#c69a48'); R(b, sx + 3, sy - Math.round(H * 0.17), sw - 6, Math.round(H * 0.09), '#2c4570');
-        R(b, sx + 2, sy - Math.round(H * 0.09), sw - 4, 2, '#3c5c8c');
-        [p.tx - Math.round(H * 0.3), p.tx + Math.round(H * 0.3)].forEach(x => { R(b, x, p.yz - p.tug, 1, p.tug, '#5a3c26'); R(b, x - 1, p.yz - p.tug - 2, 3, 2, '#d8b456'); px(b, x, p.yz - p.tug - 3, '#efd27a'); R(b, x - 2, p.yz - p.tug + 1, 5, 1, '#c69a48'); });
-        if(!gc) for(let y = 0; y < p.yz; y++){ const cx = p.tx + Math.round(W * 0.06) - y * 0.32, w = 3 + y * 0.12; for(let x = Math.round(cx - w); x < cx + w; x++) if(bay(x, y) < 0.5) ortu(b, x, y, '!#ffe2a8', 0.2); }
-        if(gc){ const mx = Math.round(W * 0.56); R(b, mx - 3, p.yz - 2, 7, 2, '#5a4a3a'); R(b, mx - 2, p.yz, 1, 2, '#4a3a2a'); R(b, mx + 2, p.yz, 1, 2, '#4a3a2a'); isik(b, mx, p.yz - 4, Math.round(H * 0.34), '!#f0a050', 0.34); }
+        const { W, H } = o, p = o.p, gc = o.gece, z = p.z, u = H / 100, ALTIN = '#c69a48', TEK = '#1e1412';
+        /* tavan keçesi; uyk direkleri yalnız sağ yarıda ve sönük (başlık ve arama kutusu sakin) */
+        R(b, 0, 0, W, p.dy, '#3c221e');
+        for(let i = -9; i <= 9; i++) for(let y = 0; y < p.dy; y++){ const x = Math.round(p.tx + i * W * 0.05 * (y + H) / (p.dy + H)); if(x > W * 0.46 && bay(x, y) < kis((x / W - 0.46) / 0.12, 0, 1)) px(b, x, y, '#4c2e23'); }
+        R(b, 0, p.dy, W, 1, TEK); R(b, 0, p.dy + 1, W, 1, ALTIN);
+        /* kerege duvarı: kafes sağa doğru belirir */
+        for(let y = p.dy + 2; y < p.yz; y++) for(let x = 0; x < W; x++){ const k = (x + y) % 6 === 0 || (x - y + 600) % 6 === 0; px(b, x, y, k && bay(x, y) < kis((x / W - 0.36) / 0.16, 0, 1) ? '#63342a' : '#552a24'); }
+        /* tahtın ardındaki perde: lacivert, altın kenar, seyrek altın baklava */
+        const pw = Math.round(28 * u), px0 = p.tx - pw, px1 = p.tx + pw, py0 = p.dy + 3;
+        R(b, px0, py0, px1 - px0, p.yz - py0, '#2c4570'); R(b, px0, py0, px1 - px0, 1, ALTIN); R(b, px0, py0, 1, p.yz - py0, ALTIN); R(b, px1 - 1, py0, 1, p.yz - py0, ALTIN);
+        for(let y = py0 + 5; y < p.yz - 3; y += 7) for(let x = px0 + 4 + ((y / 7) & 1) * 3; x < px1 - 3; x += 7){ px(b, x, y, '#3c5c8c'); px(b, x - 1, y + 1, '#3c5c8c'); px(b, x + 1, y + 1, '#3c5c8c'); px(b, x, y + 2, '#3c5c8c'); }
+        /* zemin ve halı: tahta uzanan kırmızı yol, altın kenar */
+        R(b, 0, p.yz, W, H - p.yz, '#3c221e'); R(b, 0, p.yz, W, 1, TEK);
+        for(let y = p.yz + 1; y < H; y++){
+          const hw = Math.round(16.5 * z + (y - p.yz) * 1.6), x0 = p.tx - hw, x1 = p.tx + hw;
+          R(b, x0, y, x1 - x0 + 1, 1, '#7e2a26'); px(b, x0 + 1, y, ALTIN); px(b, x1 - 1, y, ALTIN);
+          if((y - p.yz) % 4 === 2) for(let x = p.tx - 2; x <= p.tx + 2; x += 2) px(b, x, y, ALTIN);
+        }
+        /* iki yanda tuğ (kuyruğu sakin çizer) ve dışta sancak */
+        [-1, 1].forEach(yon => {
+          const x = p.tx + yon * Math.round(36 * u), t = p.yz - p.tug;
+          R(b, x, t + 2, 1, p.tug - 2, '#5a3c26'); R(b, x - 1, t, 3, 2, ALTIN); px(b, x, t - 1, '#e8c872'); px(b, x, t - 2, '#e8c872');
+          const sx = p.tx + yon * Math.round(52 * u), st = p.yz - p.san, bw = Math.max(4, Math.round(8 * u)), bh = Math.round(24 * u), b0 = sx - (yon < 0 ? bw : 0) + (yon < 0 ? 0 : 1);
+          R(b, sx, st, 1, p.san, '#5a3c26'); px(b, sx, st - 1, '#e8c872');
+          R(b, b0 - (yon < 0 ? 1 : 0), st + 2, bw + 1, 1, ALTIN);
+          for(let j = 0; j < bh; j++){ const kes = j > bh - 3 ? j - (bh - 3) : 0; for(let i = 0; i < bw; i++){ if(kes && Math.abs(i - (bw - 1) / 2) < kes) continue; px(b, b0 + i, st + 3 + j, i === 0 || i === bw - 1 ? '#7e2a26' : '#9a2e28'); } }
+          const ex = b0 + (bw >> 1), ey = st + 3 + Math.round(bh * 0.38); px(b, ex, ey - 1, ALTIN); px(b, ex - 1, ey, ALTIN); px(b, ex + 1, ey, ALTIN); px(b, ex, ey + 1, ALTIN);
+        });
+        /* divan: iki basamak, taht arkalığı, kolçaklar, oturan hakan */
+        R(b, p.tx - Math.round(16.5 * z), p.yz - 2 * z, 33 * z + 1, 2 * z, '#5a3c26'); R(b, p.tx - Math.round(16.5 * z), p.yz - 2 * z, 33 * z + 1, 1, ALTIN);
+        R(b, p.tx - Math.round(13.5 * z), p.dt, 27 * z + 1, 2 * z, '#5a3c26'); R(b, p.tx - Math.round(13.5 * z), p.dt, 27 * z + 1, 1, ALTIN);
+        const hx = p.tx - Math.floor(6.5 * z), hy = p.dt - 19 * z, aw = 19 * z, ax0 = p.tx - Math.floor(aw / 2), at = hy - 4 * z;
+        R(b, ax0, at, aw + 1, p.dt - at, '#5a3c26'); R(b, ax0 + z, at + z, aw + 1 - 2 * z, p.dt - at - z, '#9a2e28');
+        R(b, ax0, at, aw + 1, 1, ALTIN); R(b, ax0, at, 1, p.dt - at, ALTIN); R(b, ax0 + aw, at, 1, p.dt - at, ALTIN);
+        kemer(b, p.tx - 3 * z, at, 6 * z + 1, 4 * z, ALTIN); px(b, p.tx, at - 4 * z - 1, '#e8c872');
+        [-1, 1].forEach(yon => { const kx = yon < 0 ? ax0 - z : ax0 + aw - 2 * z + 1; R(b, kx, hy + 10 * z, 3 * z, p.dt - hy - 10 * z, '#5a3c26'); R(b, kx, hy + 10 * z, 3 * z, 1, ALTIN); });
+        R(b, ax0 + z, hy + 14 * z, aw - z, z, ALTIN);
+        spr(b, hx, hy, HAKAN, { k:TEK, w:ALTIN, m:'#4c2e23' }, false, z);
+        HAKAN.forEach((sat, j) => { const i = sat.lastIndexOf('k'); if(i > 6) R(b, hx + (i + 1) * z - 1, hy + j * z, 1, z, gc ? '!#a0582e' : '#6a4a30'); });   // sağdan (mangal, tündük) ince ışık kenarı
+        /* mangal: sağda, pirinç tas ve üç ayak; köz hep yanar */
+        const mw = Math.max(5, Math.round(9 * u)) | 1, m0 = p.mx - (mw >> 1);
+        R(b, m0, p.my - 3 * z, mw, 3 * z, '#5a3c26'); R(b, m0 - 1, p.my - 3 * z, mw + 2, 1, ALTIN);
+        [0, mw >> 1, mw - 1].forEach(i => R(b, m0 + i, p.my, 1, 2 * z, '#5a3c26'));
+        for(let i = 1; i < mw - 1; i++) px(b, m0 + i, p.my - 3 * z - 1, i % 2 ? '!#e0703a' : '!#ffb050');
+        if(gc) isik(b, p.mx, p.my - 4 * z, Math.round(H * 0.3), '!#f0a050', 0.26);
+        else {
+          isik(b, p.mx, p.my - 3 * z, Math.round(H * 0.1), '!#f0a050', 0.16);
+          /* tündükten inen ışık: sağ üstten tahta, titreşimli ve hafif */
+          const y0 = Math.round(H * 0.22);   // arama kutusunun (üst çubuk) altında başlar, yavaşça belirir
+          for(let y = y0; y < at; y++){ const cx = p.tx + Math.round(16 * u) - y * 0.2, w = 5 * u + y * 0.08, f = Math.min(1, (y - y0) / 10); for(let x = Math.round(cx - w); x < cx + w; x++){ const q = Math.abs(x - cx) / w; if(bay(x, y) < (q < 0.6 ? 0.5 : 0.25) * f) ortu(b, x, y, '!#ffe2a8', 0.2); } }
+        }
       } },
   };
   /* eski sahne adları (kabuk Bugün'e 'yayla' der; piksel.js ve sinematik.js eski adları kullanır) */
@@ -653,13 +697,18 @@ window.LIFEOS = window.LIFEOS || {};
 
   function yerlesim(W, H, v, tur){
     const ad = SAHNE[tur] ? tur : ESKI[tur] || 'otuken', S = SAHNE[ad], gc = v === 'gece';
-    const o = { tur:ad, W, H, vakit:gc ? 'gece' : 'gunduz', gece:gc, sakin:[], imza:'' };
+    const tel = typeof innerWidth === 'number' ? innerWidth < 640 : W < 220, Wg = W, ax = S.ax || 0.7;
+    /* telefonda sağ üstte yuvarlak arama/hesap düğmeleri var: sahne (W + dx) genişliğinde kurulur, soldaki dx kesilir;
+       asıl öğe (masaüstünde x ≈ ax) dar ekranda ortaya gelir. Boyutlar H'den, yalnız aralıklar açılır. */
+    const dx = tel ? Math.round(W * kis((ax - 0.5) / (1 - ax), 0, 1)) : 0;
+    W += dx;
+    const o = { tur:ad, W, H, dx, vakit:gc ? 'gece' : 'gunduz', gece:gc, sakin:[], imza:'' };
     o.Gd = GOK[S.gok || 'gun']; o.G = gc ? GOK.gece : o.Gd; o.hz = o.Gd.g[o.Gd.g.length - 1];
     o.ufuk = Math.round(H * (S.ufuk || 0.62));
     o.gr = kis(Math.round(H * 0.045), 3, 5);
     /* gök cismi üst çubuğun altında: çubuk ~56 px; telefonda tuval 2×, masaüstünde 3× büyür (kabuk.js manzara) */
-    const tel = typeof innerWidth === 'number' ? innerWidth < 640 : W < 220, ust = Math.round(56 / (tel ? 2 : 3)) + o.gr + 3;
-    o.gy = [Math.round(W * (tel ? S.gxt || 0.6 : S.gx || 0.8)), Math.min(o.ufuk - 2, Math.max(ust, Math.round(H * (S.gyy || 0.34))))];
+    const ust = Math.round(56 / (tel ? 2 : 3)) + o.gr + 3;
+    o.gy = [Math.round(Wg * (tel ? S.gxt || 0.6 : S.gx || 0.8)) + dx, Math.min(o.ufuk - 2, Math.max(ust, Math.round(H * (S.gyy || 0.34))))];
     o.yildizlar = [];
     if(gc || S.yildizGunduz){
       const r = tohum(adTohum(ad) + W * 13 + H), n = Math.round(W * o.ufuk / (S.yog || 95));
@@ -680,7 +729,7 @@ window.LIFEOS = window.LIFEOS || {};
       o.bulutlar.forEach(q => bulut(b, q[0], q[1], q[2], o.G.bulut.map(c => '!' + c)));
     }
     S.ciz(b, o);
-    g.putImageData(new ImageData(new Uint8ClampedArray(b.d.buffer), o.W, o.H), 0, 0);
+    g.putImageData(new ImageData(new Uint8ClampedArray(b.d.buffer), o.W, o.H), -(o.dx || 0), 0);
   }
   /* Hareket azsa (uygulama ayarı ya da işletim sistemi) sahne t = 0'da durur: her çağrıda aynı kare */
   function durgun(){
@@ -699,7 +748,9 @@ window.LIFEOS = window.LIFEOS || {};
     o.imza = imza;
     gece = o.gece;
     g.drawImage(arka, 0, 0);
+    if(o.dx){ g.save(); g.translate(-o.dx, 0); }
     o.sakin.forEach((s, i) => HAREKET[s.tur].ciz(g, s, k[i], o));
+    if(o.dx) g.restore();
     return 1;
   }
   L.PIKSEL_DOGA = Object.freeze({ vakit, yerlesim, binaCiz, kare, kareAl, durgun, POZ, PALET:GOK, P_SABIT, TUR_LISTE, ESKI, INSAN:Object.freeze(INSAN.slice()) });
