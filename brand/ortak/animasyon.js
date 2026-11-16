@@ -1,4 +1,4 @@
-/* ANİMASYONLAR — LifeOS'un kendi hareket ayarı: Tam · Az · Sistem.
+/* ANİMASYONLAR — Başbuğ'un kendi hareket ayarı: Tam · Az · Sistem.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/animasyon.js`; `python3 tools/ortak.py --yay` ile üç
@@ -13,7 +13,7 @@
    `prefers-reduced-motion: reduce` diye bildirir; base.css o durumda
    bütün geçişleri sıfırlar ve kenar 64→208 px ANINDA açılır. Kullanıcı
    aynı gün üç kez animasyon istedi. İşletim sisteminin ayarı bütün
-   bilgisayarındır; LifeOS'ta ne göreceği LifeOS'un ayarı olmalı.
+   bilgisayarındır; Başbuğ'da ne göreceği Başbuğ'un ayarı olmalı.
 
    KİPLER (tercih `localStorage` 'lifeos.hareket')
 
@@ -47,7 +47,7 @@
    Modüller ayrı kapılarda açılır (4173/4183/4193) ve tarayıcı deposu
    kökene, yani KAPIYA bağlıdır: AYS'nin `localStorage`'ı SPİ'de görünmez
    (sistem/sunucu.py başındaki not). «Üç modülde ortak» tercih bu yüzden
-   LifeOS'un kendi modül geçişinde taşınır: kabuk.js `gecis()` adresin
+   Başbuğ'un kendi modül geçişinde taşınır: kabuk.js `gecis()` adresin
    sonuna `#lifeos=…` ekler, varılan sayfada bu dosya (ilk betik) onu
    okur, kendi deposuna yazar ve adresten siler (zemin.js bu dosyadan
    SONRA yüklenir, taşınanı okur). Yalnız `TASINAN`

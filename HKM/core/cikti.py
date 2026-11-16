@@ -496,7 +496,7 @@ def html_belge(b):
             '%s<footer>%s</footer></main></body></html>') % (
         _e(b["baslik"]), CSS, _e(b["tur_ad"]), _e(b["dogruluk"]), _e(et), _e(b["baslik"]),
         '<p class="alt">%s</p>' % _e(b["alt"]) if b.get("alt") else "", "".join(govde),
-        " · ".join(_e(x) for x in ("LifeOS · HKM", dayanak(b), b.get("tarih"), uyari) if x))
+        " · ".join(_e(x) for x in ("Başbuğ · HKM", dayanak(b), b.get("tarih"), uyari) if x))
 
 
 def dayanak(b):

@@ -143,7 +143,7 @@
     it('sunucu yoksa uydurmaz: panel ve ayar bunu söyler', () => {
       M()._ortam({ sunucu:() => false });
       try{
-        expect(M().panelHtml()).toContain('bu bilgisayarda LifeOS açıkken');
+        expect(M().panelHtml()).toContain('bu bilgisayarda Başbuğ açıkken');
         expect(M().ayarHtml()).toContain('telefonda ve tek dosya sürümünde yoktur');
       }finally{ M()._ortam(); }
     });

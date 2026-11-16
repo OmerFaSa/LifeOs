@@ -204,7 +204,7 @@ def isle(h, kok=None):
         return _json(h, 403, {"hata": "Müzik yalnız bu bilgisayardan."})
     yol = h.path.split("?", 1)[0].rstrip("/")
     if h.command in ("POST", "DELETE") and h.headers.get("X-LifeOS") != "muzik":
-        return _json(h, 403, {"hata": "Müzik yalnız LifeOS'un kendi sayfasından değişir."})
+        return _json(h, 403, {"hata": "Müzik yalnız Başbuğ'un kendi sayfasından değişir."})
     m = re.match(r"^/api/muzik/parca/([a-f0-9]{12})$", yol)
     if h.command == "GET" and yol == "/api/muzik":
         return _json(h, 200, oku(kok))

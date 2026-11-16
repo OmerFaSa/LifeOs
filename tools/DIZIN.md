@@ -1,6 +1,6 @@
 # `tools/` Dizin Rehberi
 
-LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlarında kullanılan araçların fihristidir. Araç yolları CI boru hatlarında ve ofis süreçlerinde sabit olduğundan dosyalar taşınmaz; bu dizin hangi betiğin ne amaçla ve ne zaman çalıştırıldığını açıklar.
+Başbuğ geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlarında kullanılan araçların fihristidir. Araç yolları CI boru hatlarında ve ofis süreçlerinde sabit olduğundan dosyalar taşınmaz; bu dizin hangi betiğin ne amaçla ve ne zaman çalıştırıldığını açıklar.
 
 Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını sınayan araçlar kalktı (liste: `belgeler/ekip/sadelesme/faz7-kapanis.md`); Playwright yalnız `tools/package.json`'dadır.
 
@@ -94,6 +94,8 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 - `kabuk_gez.js` — Yeni kabuğu (`kabuk/`) tek kapıdan yalıtılmış ortamda açar, Felsefe pilotunun ilk ünitesini, Not ve Tekrar ekranlarını gerçek tarayıcıda yürür (ders, alıştırma, ünite kapısı, not ve bağ, kart ve cevap, kayıt); `--goruntu` önizleme görüntülerini yeniler; CI'da koşulur.
 - `ortak_test.js` — `brand/ortak/*.test.js`'yi ortak modüllerle gerçek tarayıcıda koşar (eski modüllerin koşucusunun yerine); silinen modül ortamını isteyen vakalar açık listede atlanır ve sayılır; CI'da koşulur.
 - `kabuk_esit_gez.js` — Kabuk kayıtlarının tek depoya eşitlenmesini gerçek tarayıcıda iki cihazla yürür (yazı dosyadan okunan tek depoda, öbür cihazda görünür, çakışmada ezilen değer saklanır, silme yayılır, günlük yedek); yalıtılmış ortam, CI'da koşulur.
+- `gez_sunucu.js` — Gezi/ölçüm betiklerinin ortak sunucu açıcısı: boş port seçer (`GEZ_PORT=NNNN` ile sabitlenir, doluysa açık hatayla durur), sunucu çıktısını biriktirir, açılmazsa o çıktıyı gösterir. Kullanım: `const S = await sunucuAc({ kok, env, ad }); await S.hazir(); … S.kapat()` (`S.T`, `S.port`, `S.srv`, `S.cikti()`).
+- `bekci_test.js` — Masaüstü kabuğunun sunucu bekçisini (`uygulama/masaustu/sunucu-bekci.js`) sınar: ölünce yeniden başlatır, geri çekilir, sınırda vazgeçer.
 - `hareket_gez.js` — Kabuğun hareket dilini gerçek tarayıcıda üç bağlamda yürür (hareket açık, «az», «hareketi azalt»): geçiş yönü, yeniden oynama yok, paylaşılan öğe, mikro etkileşimler; kare ölçümü bilgi (`--kati` ile kapı)
 - `bilesen_goruntu.js` — Bileşen kataloğunu (`kabuk/bilesen.html`) Chromium'da file:// ile açar, 390/1280 genişlikte açık ve koyu dört önizleme görüntüsü çeker (`belgeler/ekip/sadelesme/kabuk-onizleme/bilesen-*.png`); elle koşulur.
 - `veri_denetle_test.py` — tools/veri_denetle.py birim testleri; kenar durumları sınar, CI'da koşulur.

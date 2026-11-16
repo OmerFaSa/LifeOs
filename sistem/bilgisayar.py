@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""LifeOS — BİLGİSAYAR PLATFORM KATMANI (KING-4 §E).
+"""Başbuğ — BİLGİSAYAR PLATFORM KATMANI (KING-4 §E).
 
 King'in bilgisayarda dosya ve klasör açabilmesi, uygulama başlatabilmesi,
 süreç kapatabilmesi ve ekrandaki metni okuyabilmesi için Windows platform

@@ -199,7 +199,7 @@ def isle(h):
     # Yazma ve silme ozel baslik ister (giris sayfasinin X-LifeOS'u gibi): baska
     # bir site bu basligi on-ucus izni olmadan gonderemez.
     if h.command in ("POST", "DELETE") and h.headers.get("X-LifeOS") != "zemin":
-        return _yanit(h, 403, "Arka plan yalnız LifeOS'un kendi sayfasından değişir.".encode("utf-8"))
+        return _yanit(h, 403, "Arka plan yalnız Başbuğ'un kendi sayfasından değişir.".encode("utf-8"))
     if h.command == "GET":
         yol, tur = bul(yuva)
         if h.path.endswith("?var"):

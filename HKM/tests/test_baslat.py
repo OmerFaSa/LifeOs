@@ -204,7 +204,7 @@ def run():
 
     def t_altserver():
         """iPhone uygulamasi 7 gunde bir AltServer'la yenilenir; kapaliysa
-        uygulama acilmaz. Kuruluysa ve kapaliysa LifeOS acar, aciksa ikilemez,
+        uygulama acilmaz. Kuruluysa ve kapaliysa Başbuğ acar, aciksa ikilemez,
         kurulu degilse hicbir sey yapmaz."""
         m = _kok()
 
@@ -225,7 +225,7 @@ def run():
                                   calistir=lambda a, **k: Sonuc("INFO: No tasks are running"))[0], "acildi")
             eq(acilan, [exe])
             eq(m.altserver_baslat(ortam=ortam, ac=acilan.append, isletim="posix")[0], "yok")
-    test("AltServer kuruluysa ve kapaliysa LifeOS onu da acar", t_altserver)
+    test("AltServer kuruluysa ve kapaliysa Başbuğ onu da acar", t_altserver)
 
     def t_stop_by_name_posix_real():
         """POSIX'te gercek bir surecle: adiyla bulunur ve kapanir; adi

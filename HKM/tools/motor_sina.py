@@ -81,7 +81,7 @@ def sina(adres, model=None, jeton=None, get=_get, post=_post, saat=time.monotoni
     metin = (((y.get("choices") or [{}])[0].get("message") or {}).get("content") or "").strip()
     satir.append("✓ Sohbet (%s): %d ms · «%s»" % (secilen, round((saat() - t0) * 1000),
                                                    metin[:40] or "boş cevap"))
-    satir.append("Motor hazır. LifeOS'ta Ayarlar → Nerede çalışsın → Motor adresi: " + kok)
+    satir.append("Motor hazır. Başbuğ'da Ayarlar → Nerede çalışsın → Motor adresi: " + kok)
     return True, satir
 
 

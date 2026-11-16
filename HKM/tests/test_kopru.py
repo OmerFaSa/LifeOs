@@ -125,6 +125,17 @@ def run():
         ok(len(kopru.istem("", [{"role": "user", "content": "x" * 50000}])) <= kopru.EN_COK_ISTEM)
     test("istem tek metin, sinirli uzunluk", t_istem)
 
+    def t_istem_kimlik_kirpilmaz():
+        uzun = [{"role": "user" if i % 2 == 0 else "assistant", "content": "tur%d " % i + "y" * 2000} for i in range(40)]
+        uzun.append({"role": "user", "content": "SON-SORU"})
+        s = kopru.istem("KING-KIMLIGI-VE-KIP-TALIMATI", uzun, aracsiz=True)
+        ok(len(s) <= kopru.EN_COK_ISTEM and s.startswith("Hiçbir araç") and "KING-KIMLIGI-VE-KIP-TALIMATI" in s
+           and "SON-SORU" in s and s.endswith("yalnız cevabı yaz."), "baş ve son korunur")
+        dev = "BAS-KIMLIK " + "k" * 40000 + " SON-KURAL"          # şişkin sistem metni: yalnız ortası kesilir
+        s = kopru.istem(dev, [{"role": "user", "content": "SON-SORU"}])
+        ok(len(s) <= kopru.EN_COK_ISTEM and s.startswith("BAS-KIMLIK") and "SON-KURAL" in s and "SON-SORU" in s)
+    test("istem uzunsa baştaki kimlik/talimat düşmez, geçmişin eskisi düşer", t_istem_kimlik_kirpilmaz)
+
     def t_kapaliyken_merdiven_devralir():
         gidilen = []
 
@@ -277,7 +288,7 @@ def run():
                                               {"ad": "bos", "ne": "boş", "veri": []}]})
         ok("Açık" in l and "Sır" not in l and "boş" not in l, l)
         eq(sohbet.lifeos_blogu({"dilimler": []}), "")
-    test("kip talimati, ders blogu (cevapsiz, sinirli) ve LifeOS blogu (ozelsiz)", t_kip_ve_ders)
+    test("kip talimati, ders blogu (cevapsiz, sinirli) ve Başbuğ blogu (ozelsiz)", t_kip_ve_ders)
 
     def t_kip_sisteme_girer():
         from core import sohbet

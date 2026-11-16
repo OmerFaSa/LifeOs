@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — HER YERDEN ERISIM (Tailscale).
+"""Başbuğ — HER YERDEN ERISIM (Tailscale).
 
    Telefon ve tablet evden uzaktayken de bu bilgisayardaki modullere ve
    Merkez'e (yerel model, API anahtari yok) ulasir. Sozler:
@@ -228,7 +228,7 @@ def acilis_ayarla(acik, reg=None):
     except OSError as e:
         return {"ok": False, "acilis": acilis_acik(reg), "mesaj": "Ayar yazılamadı: %s" % e}
     return {"ok": True, "acilis": bool(acik),
-            "mesaj": "Bilgisayar açılınca LifeOS da başlayacak." if acik else "LifeOS açılışta başlamayacak."}
+            "mesaj": "Bilgisayar açılınca Başbuğ da başlayacak." if acik else "Başbuğ açılışta başlamayacak."}
 
 
 if __name__ == "__main__":

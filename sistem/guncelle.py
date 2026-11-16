@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — GUNCELLEME (main dalindan).
+"""Başbuğ — GUNCELLEME (main dalindan).
 
      python3 sistem/guncelle.py       # varsa guncellemeyi indirir
      python3 sistem/guncelle.py --kontrol # yalniz bakar, hicbir seyi degistirmez
@@ -455,7 +455,7 @@ def main(argv=None):
             getattr(sys, ad).reconfigure(errors="replace")
         except (AttributeError, ValueError, OSError):
             pass
-    print("\nLifeOS güncelleme\n")
+    print("\nBaşbuğ güncelleme\n")
     if "--kontrol" in argv:
         d = durum()
         if d["durum"] != "ok":

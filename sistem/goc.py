@@ -658,7 +658,7 @@ def gercek(hedef, yedek, hesap, hkm, paket, pc, bekleyen_pakette=False):
         d.c.close()
     s.append("veri.karsilastir (sahip %s): %d fark%s" % (sahip, len(fark), "" if not fark else
              "; ilk 10: " + ", ".join("%s (%s)" % x for x in fark[:10])))
-    s += ["", "Sonraki adımlar: LifeOS'u yeniden başlat (köprü açılır), `veri.esle` ile anlık kopyadan sonra gelenleri"
+    s += ["", "Sonraki adımlar: Başbuğ'u yeniden başlat (köprü açılır), `veri.esle` ile anlık kopyadan sonra gelenleri"
           " geçir, fark 0 olunca `veri.OKU` ve `tekkapi.ETKIN` açılır (kod değişikliği, ayrı commit).",
           "Geri dönüş: python sistem/goc.py --geri-al %s --hedef \"%s\"" % (g["goc_id"], hedef)]
     if sorun:
@@ -712,7 +712,7 @@ def varsayilan():
 
 def main(argv=None):
     v = varsayilan()
-    ap = argparse.ArgumentParser(description="LifeOS göç aracı (Faz 1).")
+    ap = argparse.ArgumentParser(description="Başbuğ göç aracı (Faz 1).")
     kip = ap.add_mutually_exclusive_group(required=True)
     kip.add_argument("--kuru", action="store_true", help="geçici hedefe göç et, say, raporla")
     kip.add_argument("--gercek", action="store_true", help="P6: dönüş noktası, iki kuru koşu, gerçek hedef, geri dönüş denemesi")

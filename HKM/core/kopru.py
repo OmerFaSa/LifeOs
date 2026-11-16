@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Anahtarsiz model kopruleri: Antigravity ve Claude Code.
 
-   Ikisi de kullanicinin KENDI oturumudur; LifeOS anahtar tutmaz.
+   Ikisi de kullanicinin KENDI oturumudur; Başbuğ anahtar tutmaz.
 
      antigravity  Antigravity'nin yerel dil sunucusu (language_server.exe agentapi).
                   Adres ve CSRF anahtari calisan surecin komut satirindan okunur,
@@ -51,7 +51,7 @@ SAGLAYICI = {
 DENEME = 2                  # ilk cagri + bir yeniden deneme (yalniz gecici hatada)
 BEKLE_SN = 1.0              # yeniden denemeden once
 HAL_SN = 30                 # «acik mi» sorusu bu kadar onbelleklenir
-EN_COK_ISTEM = 24000        # Windows komut satiri siniri 32k; istem bundan uzunsa bastan kirpilir
+EN_COK_ISTEM = 24000        # Windows komut satiri siniri 32k; istem bundan uzunsa gecmisin ortasi kirpilir (baş ve son mesaj kalir)
 AG_VARSAYILAN = "gemini-4-hydrogen-medium"
 # Eski takma adlar: «pro» ve «flash_lite» agentapi'de flash'a gidiyordu (pro==flash olcumu); artik hydrogen kademesi.
 # «flash» da hydrogen'e gider: sahibin istegi 2026-11-16 «Antigravity'de model olarak hydrogen» (Merkez atamasi eskiden flash idi).
@@ -175,7 +175,7 @@ def gecmis_butcele(mesajlar, tam=TAM_TUR, kisa=KISA_HARF, butce=GECMIS_BUTCE):
     """Uzun gecmiste baglam butcesi. Saf; test edilir.
 
     Son `tam` mesaj (son kullanici mesaji dahil) oldugu gibi; daha eskiler `kisa` harfe kisaltilir. Toplam `butce`yi
-    asarsa en eskiden atilir; son mesaj hic atilmaz (tek basina butceyi asarsa istem() bastan kirpar).
+    asarsa en eskiden atilir; son mesaj hic atilmaz (tek basina butceyi asarsa istem() gecmisin basini kirpar, sistem talimati kalir).
     Doner: (mesajlar, kisaltilan, atilan)."""
     l = [dict(m) for m in (mesajlar or []) if str(m.get("content") or "").strip()]
     kisaltilan = 0
@@ -201,11 +201,17 @@ def istem(sistem, mesajlar, aracsiz=False):
         parca.append(str(sistem).strip())
     l, kisaltilan, atilan = gecmis_butcele(mesajlar)
     gecmis = ["%s: %s" % ("Kullanıcı" if m.get("role") == "user" else "King", str(m["content"]).strip()) for m in l]
+    son = "Son kullanıcı mesajına King olarak cevap ver; yalnız cevabı yaz."
+    bas = "\n\n".join(parca)       # araç yasağı + King'in kimliği ve kip talimatı: istemin BAŞI, asla düşmez
+    govde = ""
     if gecmis:
-        parca.append("Konuşma%s:\n" % (" (eski turlar kısaltıldı)" if kisaltilan or atilan else "") + "\n\n".join(gecmis))
-    parca.append("Son kullanıcı mesajına King olarak cevap ver; yalnız cevabı yaz.")
-    metin = "\n\n".join(parca)
-    return metin[-EN_COK_ISTEM:] if len(metin) > EN_COK_ISTEM else metin
+        govde = "Konuşma%s:\n" % (" (eski turlar kısaltıldı)" if kisaltilan or atilan else "") + "\n\n".join(gecmis)
+    pay = EN_COK_ISTEM - len(son) - 4
+    if len(bas) > pay // 2:          # başın kendisi şişkinse yalnız ORTASI kesilir; baş ve son satırlar kalır
+        kes = max(pay // 2, pay - len(govde) - 4)
+        bas = bas[:kes // 2] + "\n[...]\n" + bas[-(kes - kes // 2):]
+    govde = govde[max(0, len(govde) - max(0, pay - len(bas) - 4)):] if govde else ""   # geçmişin EN ESKİ kısmı gider
+    return "\n\n".join(x for x in (bas, govde, son) if x)
 
 
 # ------------------------------------------------------------ claude -p
@@ -337,7 +343,7 @@ def _antigravity(model, sistem, mesajlar, sure, iptal=None):
             kimlik = kayit["kimlik"]
     if not kimlik:
         bas = 0
-        y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + ag_model(model), "--title=LifeOS King",
+        y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + ag_model(model), "--title=Başbuğ King",
                                    istem(sistem, mesajlar, aracsiz=True)], min(60, sure))
         kimlik = ((y.get("response") or {}).get("newConversation") or {}).get("conversationId")
     if not kimlik:

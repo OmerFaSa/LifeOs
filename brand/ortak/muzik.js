@@ -24,7 +24,7 @@
 
    KURALLAR
 
-   · Dosyalar ve listeler PC'deki LifeOS sunucusundadır (üç modül aynı
+   · Dosyalar ve listeler PC'deki Başbuğ sunucusundadır (üç modül aynı
      listeyi görür). Sunucu yoksa (telefon, tek dosya) bölüm bunu söyler;
      hiçbir ekran bozulmaz.
    · Radyo ile müzik aynı anda çalmaz: biri başlayınca öteki durur.
@@ -45,7 +45,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.muzik.parca-calinamadi':'Parça çalınamadı',
   'ortak.muzik.calmak-icin-bir-yere-dokun':'Çalmak için bir yere dokun',
   'ortak.muzik.bu-listede-parca-yok':'Bu listede parça yok',
-  'ortak.muzik.muzik-bu-bilgisayarda-lifeos':'Müzik bu bilgisayarda LifeOS açıkken çalar.',
+  'ortak.muzik.muzik-bu-bilgisayarda-lifeos':'Müzik bu bilgisayarda Başbuğ açıkken çalar.',
   'ortak.muzik.henuz-parca-yok-ayarlar':'Henüz parça yok: Ayarlar › Ses › Müzik.',
   'ortak.muzik.acilis':'Açılış: ',
   'ortak.muzik.muzik-durdu':'Müzik durdu',
@@ -60,7 +60,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.muzik.calisma-sayaci-baslayinca-ca':'Çalışma sayacı başlayınca çalar, bitince susar.',
   'ortak.muzik.spor-oturumu-baslayinca-cala':'Spor oturumu başlayınca çalar.',
   'ortak.muzik.acilistan-sonra-kisik-sesle':'Açılıştan sonra kısık sesle çalar (Arka plan müziği açıksa).',
-  'ortak.muzik.muzik-dosyalari-bu-bilgisaya':'Müzik dosyaları bu bilgisayardaki LifeOS sunucusunda durur; telefonda ve tek dosya sürümünde yoktur.',
+  'ortak.muzik.muzik-dosyalari-bu-bilgisaya':'Müzik dosyaları bu bilgisayardaki Başbuğ sunucusunda durur; telefonda ve tek dosya sürümünde yoktur.',
   'ortak.muzik.muzik-ekle':'Müzik ekle',
   'ortak.muzik.henuz-parca-yok':'Henüz parça yok',
   'ortak.muzik.mp3-m4a-ogg-wav-ya':'MP3, M4A, OGG, WAV ya da FLAC; dosyalar bu bilgisayarda kalır.',
@@ -89,10 +89,10 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.muzik.muzik-kitapligi':'Müzik kitaplığı',
   'ortak.muzik.parcalarin-ve-hangi-listede':'Parçaların ve hangi listede oldukları',
   'ortak.muzik.acilis-muzigi':'Açılış müziği',
-  'ortak.muzik.lifeos-acilinca-bir-parcanin':'LifeOS açılınca bir parçanın seçtiğin kesiti',
+  'ortak.muzik.lifeos-acilinca-bir-parcanin':'Başbuğ açılınca bir parçanın seçtiğin kesiti',
   'ortak.muzik.acilistan-sonra-kisik-sesle-2':'Açılıştan sonra kısık sesle',
   'ortak.muzik.ekleniyor':'Ekleniyor: ',
-  'ortak.muzik.yuklenemedi-lifeos-sunucusu':'Yüklenemedi: LifeOS sunucusu yanıt vermedi.',
+  'ortak.muzik.yuklenemedi-lifeos-sunucusu':'Yüklenemedi: Başbuğ sunucusu yanıt vermedi.',
 });
 
 

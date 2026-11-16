@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LifeOS Devasa ve Dogrulanmis Veri Toplayici
+"""Başbuğ Devasa ve Dogrulanmis Veri Toplayici
 Sistem doktrinine tam uyumlu:
 - Sifir calisma zamani bagimliligi (yalnizca Python standart kutuphanesi).
 - Olculmus / dogrulanmis kaynaklar (WHO, MEB, TDK, Tatoeba, Compendium, TURKOMP/USDA).
@@ -682,7 +682,7 @@ def topla_tatoeba_cokdilli(hedef_diller=["eng", "deu", "fra", "spa", "rus"], sin
 
 def main():
     print("=" * 70)
-    print("LifeOS Devasa Veri Toplayıcı Başlatılıyor")
+    print("Başbuğ Devasa Veri Toplayıcı Başlatılıyor")
     print("Kurallar: Sifir bagimlilik, kod degisikligi yok, tam dogruluk.")
     print("=" * 70)
     

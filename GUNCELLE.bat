@@ -1,5 +1,5 @@
 @echo off
-rem LifeOS - cift tikla: main dalindan gunceller ve sistemi yeniden baslatir.
+rem Başbuğ - cift tikla: main dalindan gunceller ve sistemi yeniden baslatir.
 rem Veriye dokunmaz; elle degistirilmis dosya varsa guncellemez, soyler.
 cd /d "%~dp0"
 where py >nul 2>nul && (py sistem\guncelle.py --yeniden & goto son)

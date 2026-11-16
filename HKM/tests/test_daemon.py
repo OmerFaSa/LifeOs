@@ -310,7 +310,7 @@ def _run():
                     "Content-Type": "application/json",
                     "Origin": "http://127.0.0.1:%d" % port})
                 return kod, json.loads(r or "{}")
-            # LifeOS kapilari pencere istemez (asagida); pencere kurali
+            # Başbuğ kapilari pencere istemez (asagida); pencere kurali
             # baska yerel portlarda sinanir.
             for port in (5173, 5183, 5193):
                 kod, r = al(port)
@@ -327,7 +327,7 @@ def _run():
 
         def t_pair_lifeos_ports_need_no_window():
             """Merkez de bir moduldur, anahtar sorulmaz (2026-10-20):
-            LifeOS'un kendi kapilari jetonu pencere acilmadan ve her
+            Başbuğ'un kendi kapilari jetonu pencere acilmadan ve her
             seferinde alir. Baska yerel port ve yerel olmayan koken almaz."""
             S.srv.rate = {}
             S.srv.pair = {"until": 0.0, "taken": set()}   # onceki testin penceresi kapanir
@@ -345,7 +345,7 @@ def _run():
             eq(al("http://127.0.0.1:5999")[0], 403)
             eq(al("http://evil.example.com:4200")[0], 403)
             eq(al("https://4200.example.com")[0], 403)
-        test("LifeOS kapilari jetonu penceresiz alir", t_pair_lifeos_ports_need_no_window)
+        test("Başbuğ kapilari jetonu penceresiz alir", t_pair_lifeos_ports_need_no_window)
 
         def t_pair_forged_origin_needs_local_host():
             """Origin'i tarayici disi istemci uydurur. Tunel (cloudflared,

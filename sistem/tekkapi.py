@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — TEK KAPI, TEK SUREC (sadelesme Faz 1 P5, plan A4).
+"""Başbuğ — TEK KAPI, TEK SUREC (sadelesme Faz 1 P5, plan A4).
 
    Bugun: sunucu.py tek surecte dort kapi (4180 giris + Gun, 4173 AYS, 4183 SPI,
    4193 ESP) ve HKM ayri surec (4200). Burada hepsi TEK ADRES, TEK SUREC:
@@ -19,9 +19,11 @@
 """
 
 import argparse
+import json
 import os
 import sys
 import threading
+import time
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
 sys.dont_write_bytecode = True
@@ -47,6 +49,38 @@ _ISTEK = ("rfile", "wfile", "connection", "request", "client_address", "server",
 
 # Kabugun King sohbeti -> Merkez yolu (TekKapi._king). Baska Merkez yolu bu kapidan jetonsuz acilmaz.
 KING_YOLLARI = {"/api/kabuk/king": "/api/chat", "/api/kabuk/king/kopru": "/api/kopru"}
+
+# --- Kabuk ekran hatalari (/api/kabuk/hata): istemci window.onerror ile gonderir, sunucu dosyaya yazar ---------
+HATA_EN_COK = 4096           # govde siniri (bayt); fazlasi 413
+HATA_DAKIKADA = 20           # hiz siniri: pencere basina istek; fazlasi 429 (dongu halindeki bir hata diski doldurmaz)
+HATA_DOSYA_SINIRI = 200_000  # gunluk bu boyu gecince .1'e doner (en cok iki dosya)
+_hata_zamanlari = []
+_hata_kilit = threading.Lock()
+
+
+def hata_gunlugu():
+    return os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "LifeOS", "kabuk-hata.log")
+
+
+def hata_yaz(veri, yol=None, simdi=None):
+    """Tek satir yazar (JSON, satir sonu yok edilir); donen gunluk. True: yazildi, False: hiz siniri."""
+    simdi = simdi or time.time()
+    with _hata_kilit:
+        _hata_zamanlari[:] = [z for z in _hata_zamanlari if simdi - z < 60]
+        if len(_hata_zamanlari) >= HATA_DAKIKADA:
+            return False
+        _hata_zamanlari.append(simdi)
+        yol = yol or hata_gunlugu()
+        os.makedirs(os.path.dirname(yol), exist_ok=True)
+        try:
+            if os.path.getsize(yol) > HATA_DOSYA_SINIRI:
+                os.replace(yol, yol + ".1")
+        except OSError:
+            pass
+        kayit = {k: str(veri.get(k, ""))[:n] for k, n in (("ileti", 500), ("yigin", 1500), ("sayfa", 200), ("tur", 40))}
+        with open(yol, "a", encoding="utf-8") as f:
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + json.dumps(kayit, ensure_ascii=False) + chr(10))
+    return True
 
 HKM = sunucu.HKM     # ayni surecte HKM cekirdegi (hkm_kur); sunucu.hkm_ayakta/hkm_ac buna bakar
 
@@ -119,13 +153,37 @@ class TekKapi(Giris):
             return self._json(403, {"ok": False, "mesaj": "King sohbeti yalnız bu bilgisayarda; uzaktan Hesap › "
                                                           "Merkez bağlantısıyla (sahibin oturumu) ulaşılır."})
         if self.command == "POST" and self.headers.get("X-LifeOS") != "king":
-            return self._json(403, {"ok": False, "mesaj": "İstek LifeOS'tan gelmedi."})
+            return self._json(403, {"ok": False, "mesaj": "İstek Başbuğ'dan gelmedi."})
         if self.command not in ("GET", "POST"):
             return self.send_error(405)
         del self.headers["Authorization"]
         self.headers["Authorization"] = "Bearer " + HKM["jeton"]
         q = self.path.split("?", 1)
         return self._devret(HKM["sinif"], hedef + ("?" + q[1] if len(q) > 1 else ""), server=HKM["srv"])
+
+    def _hata(self):
+        """Yalniz bu bilgisayardan (127.0.0.1, vekil degil), kendi kokeninden, X-LifeOS: kabuk-hata ile."""
+        port = sunucu.GIRIS_PORT
+        koken = self.headers.get("Origin")
+        if (self.command != "POST" or self.client_address[0] not in ("127.0.0.1", "::1")
+                or self.headers.get("Host") not in ("%s:%d" % (HOST, port), "localhost:%d" % port)
+                or koken not in (None, "http://%s:%d" % (HOST, port), "http://localhost:%d" % port)
+                or self.headers.get("X-LifeOS") != "kabuk-hata"):
+            return self._json(403, {"ok": False})
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            n = -1
+        if n < 0 or n > HATA_EN_COK:
+            self.close_connection = True      # govde okunmadi: baglanti kapanir
+            return self._json(413, {"ok": False})
+        try:
+            veri = json.loads(self.rfile.read(n) or b"{}")
+        except ValueError:
+            return self._json(400, {"ok": False})
+        if not isinstance(veri, dict):
+            return self._json(400, {"ok": False})
+        return self._json(200 if hata_yaz(veri) else 429, {"ok": True})
 
     def _yonlendir(self, yer, kod=301):
         self.send_response(kod)
@@ -142,6 +200,8 @@ class TekKapi(Giris):
             return self._yonlendir("/kabuk/" + (q if q.startswith("?") else ""), 302) or True
         if yol == "/api/hkm" or yol == "/api/hkm/yeniden":
             return False                                    # 4180'in eski anlami (guncelleme_izinli)
+        if yol == "/api/kabuk/hata":
+            return self._hata() or True
         if yol in KING_YOLLARI:
             return self._king(KING_YOLLARI[yol]) or True
         if yol.startswith("/api/hkm/"):
@@ -195,14 +255,14 @@ def kur(port, hkm=True, hkm_config=None):
 
 def main(argv=None):
     sunucu._cikti_utf8()
-    p = argparse.ArgumentParser(description="LifeOS tek kapı: tek adres, tek süreç (4180).")
+    p = argparse.ArgumentParser(description="Başbuğ tek kapı: tek adres, tek süreç (4180).")
     p.add_argument("--port", type=int, help="deneme kapısı (boş bir yüksek port)")
     p.add_argument("--hkm-ayri", action="store_true", help="HKM'yi bu sürece alma")
     a = p.parse_args(argv)
     global DENEME
     DENEME = a.port is not None
     srv = kur(a.port or ETKIN_PORT, hkm=not a.hkm_ayri)
-    print("LifeOS tek kapı: http://%s:%d  (Merkez %s)" % (HOST, srv.server_address[1],
+    print("Başbuğ tek kapı: http://%s:%d  (Merkez %s)" % (HOST, srv.server_address[1],
           "aynı süreçte" if HKM["srv"] else "kapalı"), flush=True)
     if a.port is None:
         sunucu.plan_zamanlayici().baslat()           # eski sunucu kapandiginda zamanlanmis isler burada

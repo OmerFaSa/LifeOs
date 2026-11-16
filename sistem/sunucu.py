@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — sunucunun cekirdegi (kapanis: tek kapi sistem/tekkapi.py bunu ice aktarir).
+"""Başbuğ — sunucunun cekirdegi (kapanis: tek kapi sistem/tekkapi.py bunu ice aktarir).
 
    Burada isleyiciler durur: Giris (/api/..., /kartlar/ -> /kabuk/#/hesap), kabuk dosyalari,
    hesap/ayar/ice/muzik/zemin/planlama baglantilari. Kendi basina kapi acmaz: eski uc modul kapisi (4173/4183/4193),
@@ -100,7 +100,7 @@ _IKON = ("data:image/svg+xml,"
 GIRIS_SAYFASI = """<!doctype html>
 <html data-sahne="doga" lang="tr" data-zemin="piksel"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LifeOS — Kontrol paneli</title>
+<title>Başbuğ — Kontrol paneli</title>
 <link rel="icon" href="__IKON__"/>
 <link rel="stylesheet" href="/hesap.css"/>
 <link rel="stylesheet" href="/piksel-yazi.css"/>
@@ -201,7 +201,7 @@ button{ font:inherit; }
 .logo{ flex:none; width:48px; height:48px; border-radius:14px; background:var(--renk-t); display:grid; place-items:center; }
 .logo img{ width:40px; height:40px; object-fit:contain; }
 /* SADE (kullanıcı, 2026-10-05: «görseller profesyonel gözükmüyor; daha
-   sade»): parlak 3B logo yerine LifeOS işaretinin şekli, modülün renginde
+   sade»): parlak 3B logo yerine Başbuğ işaretinin şekli, modülün renginde
    — AYS kare, SPİ daire, ESP karo, Merkez altıgen (renk körlüğünde de
    ayrılır). */
 .sekil{ display:block; width:20px; height:20px; background:var(--renk); }
@@ -267,7 +267,7 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
   animation:giris-yazi .5s cubic-bezier(.32,.72,0,1) both; animation-delay:calc(var(--sira, 0) * 70ms + 140ms); }
 @keyframes giris-gel{ from{ opacity:0; transform:translateY(16px) scale(.985); } to{ opacity:1; transform:none; } }
 @keyframes giris-yazi{ from{ opacity:0; filter:blur(3px); } to{ opacity:1; filter:none; } }
-/* Azaltilmis harekette (LifeOS'un kendi ayari, animasyon.js) gecis yok;
+/* Azaltilmis harekette (Başbuğ'un kendi ayari, animasyon.js) gecis yok;
    kendiliginden gorunme (yedek) kalir. */
 @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } :not(.sarmal){ animation:none !important; } }
 /* SICAK ISIK (kullanici, 2026-10-27; modullerdeki cam.css ile ayni dil):
@@ -326,7 +326,7 @@ body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
    dikey cam kart, ortadaki biraz asagida; uzerine gelinen one cikar,
    otekiler hafifce geri cekilir. Guncelleme kutusu G'ye basinca acilir. */
 .sarmal{ max-width:min(1320px, 92vw); padding-top:0; }
-/* (2026-10-29, ikinci bakis: «guncelleme baska yere gelsin; LifeOS sag kisimda
+/* (2026-10-29, ikinci bakis: «guncelleme baska yere gelsin; Başbuğ sag kisimda
    olsun, yukarida degil; HKM'nin oldugu yarim sey yukariya yapisik olsun»):
    marka sag ustte, serit ekranin ust kenarindan sarkar, guncelleme kutusu
    sol ustte yuzen kart (sayfayi itmez). */
@@ -434,7 +434,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
    kalabalik oldu; oran-orantiyi ve minimalistligi sagla»). Kartlar ayni
    hizada ve ayni boyda (ortadaki kayma yok); kartta logo, ad ve tek satir;
    tam ad ve «Ac» yazisi yok (kartin tamami baglanti); durum yalniz kosede
-   bir nokta (yazisi ekran okuyucuda). Ust serit ince, marka yalniz LifeOS,
+   bir nokta (yazisi ekran okuyucuda). Ust serit ince, marka yalniz Başbuğ,
    alt yazi yok. */
 .izgara{ align-items:stretch; gap:clamp(14px, 1.8vw, 28px); }
 .izgara .kart{ position:relative; flex:0 1 clamp(210px, 18vw, 290px); min-height:clamp(240px, 34vh, 360px);
@@ -619,7 +619,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 <main class="sarmal">
   <header class="ust" style="--sira:0">
     <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
-    <h1>LifeOS<span>Kontrol paneli</span></h1>
+    <h1>Başbuğ<span>Kontrol paneli</span></h1>
     <button type="button" class="hesap-cip" data-hesap-cip hidden></button>
     <button type="button" class="ust__ayar" id="ayar-ac" aria-label="Giriş ayarları" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   </header>
@@ -740,7 +740,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
       + '<p class="gayar__not">Tema, arka plan ve müzik sistem ayarıdır: AYS, SPİ ve ESP’de de aynı. Öbür her şey modüllerin Ayarlar’ında.</p>'
       + '<div class="gayar__bolum"><b>Tema</b>' + seg('Tema', [['system', 'Sistem'], ['light', 'Açık'], ['dark', 'Koyu']], tema, 'data-g-tema') + '</div>'
       + '<div class="gayar__bolum"><b>Açılınca</b>' + seg('Açılınca', [['sec', 'Bu sayfa'], ['son', 'Son açtığım modül']], al('lifeos.giris.ac') || 'sec', 'data-g-acilis')
-      + '<small>' + (AD[son] ? 'Son açtığın: ' + AD[son] + '. ' : '') + 'Son modül seçiliyse LifeOS açılınca iki saniye içinde ona geçer; «Vazgeç» ile burada kalırsın.</small></div>'
+      + '<small>' + (AD[son] ? 'Son açtığın: ' + AD[son] + '. ' : '') + 'Son modül seçiliyse Başbuğ açılınca iki saniye içinde ona geçer; «Vazgeç» ile burada kalırsın.</small></div>'
       + '<div class="gayar__bolum"><b>Açılış müziği</b>'
       + (parcalar.length ? seg('Açılış müziği', [['kapali', 'Kapalı'], ['her', 'Her açılışta'], ['gunde', 'Günde bir']], m.acilis.ne, 'data-g-ne')
           + '<select data-g-parca aria-label="Açılış parçası"><option value="">Parça seç</option>' + parcalar.map(function(p){ return '<option value="' + kac(p.id) + '"' + (m.acilis.id === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>'; }).join('') + '</select>'
@@ -752,7 +752,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
         : '<small>Henüz parça yok. Bir modülde Ayarlar › Ses ve müzik › Müzik ekle.</small>') + '</div>'
       + (parcalar.length ? '<div class="gayar__bolum"><b>Arka plan müziği</b>' + seg('Arka plan müziği', [['false', 'Kapalı'], ['true', 'Açık']], String(!!m.arka.acik), 'data-g-arka') + '</div>' : '')
       + '<div class="gayar__bolum"><b>Açılış videosu</b>' + seg('Açılış videosu', [['0', 'Kapalı'], ['1', 'Açık']], A['lifeos.acilis.video'] === '1' ? '1' : '0', 'data-g-video')
-      + '<small>' + (videoVar ? 'LifeOS ilk açıldığında kartlardan önce oynar; «Atla» ya da Esc ile geçilir.' : 'Henüz video yok: önce bir video seç (en çok 600 MB).') + '</small>'
+      + '<small>' + (videoVar ? 'Başbuğ ilk açıldığında kartlardan önce oynar; «Atla» ya da Esc ile geçilir.' : 'Henüz video yok: önce bir video seç (en çok 600 MB).') + '</small>'
       + '<div class="gayar__satir"><label class="gayar__dugme">' + (videoVar ? 'Videoyu değiştir' : 'Video seç') + '<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-g-dosya="acilis" hidden></label>'
       + (videoVar ? '<button type="button" class="gayar__dugme" data-g="video-izle">Şimdi izle</button>' : '') + '</div></div>'
       + '<div class="gayar__bolum"><b>Arka plan</b><small>Fotoğraf ya da video (en çok 600 MB). Gündüz açık temada, gece koyu temada görünür.</small>'
@@ -982,9 +982,9 @@ def giris_html(telefon=False, tema=None):
     karti, guncelleme kutusu ve bilgisayarin API'lerine giden betik yok
     (telefonda ikisi de yok; moduller HKM'siz calisir, AGENTS §1.4)."""
     # Ortadaki kart yeni kabuga gider (modul kartlari kapanista kalkti).
-    gun_kart = ('<a class="kart kart--orta" href="/kabuk/" data-modul="kabuk" title="LifeOS · ana sayfa" style="--renk:var(--hkm);--renk-t:var(--hkm-t);--sira:3">'
+    gun_kart = ('<a class="kart kart--orta" href="/kabuk/" data-modul="kabuk" title="Başbuğ · ana sayfa" style="--renk:var(--hkm);--renk-t:var(--hkm-t);--sira:3">'
                 '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--gun"></i></span>'
-                '<div class="kart__metin"><div class="kart__ad">LifeOS</div><div class="kart__acik">Ana sayfa</div></div></div>'
+                '<div class="kart__metin"><div class="kart__ad">Başbuğ</div><div class="kart__acik">Ana sayfa</div></div></div>'
                 '<div class="kart__alt"><span class="dugme">Aç</span></div></a>')
     s = guncelle.surum()
     surum = ("sürüm %s" % s["tarih"]) if s else "zip sürümü"
@@ -1025,7 +1025,7 @@ def _telefon_iskeleti(sayfa):
     i = sayfa.index('<footer class="dip">')
     j = sayfa.index("</footer>", i) + len("</footer>")
     dip = ('<footer class="dip"><span>Hesabınla girince bu telefondaki veri bilgisayarındaki '
-           'LifeOS ile eşitlenir; beta girişinde yalnız bu telefonda kalır.</span>'
+           'Başbuğ ile eşitlenir; beta girişinde yalnız bu telefonda kalır.</span>'
            '<span>Merkez (HKM) bilgisayarda çalışır.</span></footer>')
     return sayfa[:i] + dip + sayfa[j:]
 
@@ -1319,43 +1319,6 @@ def kabuk_paketi():
     return sonuc
 
 
-def kabuk_taslak():
-    """Bugun'un «Onay bekleyen N ders» satiri icin ozet: {"<alan>/<n>": [dosyada onayli olmayan ders kimlikleri]}. Kabuk bunu
-    yerel onay kaydiyla duser; satir icin yirmi alan paketini (4,5 MB) indirip kurmasi gerekmez. _statik_oku bicimi.
-    shortcut: asama, kabuktaki gibi ilk eksik ya da kimligi uymayan dosyada durur; Yol.yukle'nin oteki denetimleri burada yok
-    (bozuk icerik CI'da alan/denetle.py'de yakalanir); acik alan sayfasi zaten tam icerikten sayar."""
-    dosyalar = []
-    for alan in sorted(os.listdir(os.path.join(KOK, "alan"))):
-        n = 1
-        while os.path.isfile(os.path.join(KOK, "alan", alan, "asama-%d.json" % n)):
-            dosyalar.append((alan, n, os.path.join(KOK, "alan", alan, "asama-%d.json" % n)))
-            n += 1
-    anahtar = tuple((t, os.stat(t).st_mtime_ns, os.stat(t).st_size) for _, _, t in dosyalar)
-    with _STATIK_KILIT:
-        k = _PAKET.get("taslak")
-    if k and k[0] == anahtar:
-        return k[1]
-    ozet, dur = {}, set()
-    for alan, n, tam in dosyalar:
-        if alan in dur:
-            continue
-        try:
-            with open(tam, encoding="utf-8") as f:
-                v = json.load(f)
-        except (OSError, ValueError):
-            v = None
-        if not isinstance(v, dict) or v.get("id") != "%s.%d" % (alan, n):
-            dur.add(alan)
-            continue
-        ozet["%s/%d" % (alan, n)] = [d.get("id") for u in v.get("uniteler") or [] for d in u.get("dersler") or [] if d.get("durum") != "onayli"]
-    govde = json.dumps(ozet, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    sonuc = (govde, gzip.compress(govde, 6, mtime=0), '"t%s"' % hashlib.sha1(govde).hexdigest()[:16],
-             email.utils.formatdate(max([m for _, m, _ in anahtar] or [0]) / 1e9, usegmt=True))
-    with _STATIK_KILIT:
-        _PAKET["taslak"] = (anahtar, sonuc)
-    return sonuc
-
-
 class Giris(SimpleHTTPRequestHandler):
     def _json(self, kod, veri):
         govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
@@ -1492,9 +1455,6 @@ class Giris(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return None
             return self._kabuk_sun(kabuk_dosyasi(yol))
-        if yol == "/api/kabuk/taslak":
-            # alan icerigi zaten herkese acik kabuk dosyasi (/alan/): kisisel veri yok, telefon da alir
-            return self._statik(None, _KABUK_TUR[".json"], kabuk_taslak())
         if yol == "/api/kabuk/baslangic":
             # Tek depodan uretilen baslangic paketi (tools/kabuk_baslangic.py): eski notlar ve kayitlar yeni kabuga
             # buradan gecer. Paket kisisel icerik tasir ve oturum denetimi yoktur: YALNIZ bu bilgisayardan okunur.
@@ -1558,7 +1518,7 @@ class Giris(SimpleHTTPRequestHandler):
         return self.send_error(404)
 
     def _marka(self, ad):
-        """LifeOS markasi — brand/life/ altindaki sabit adli dosya.
+        """Başbuğ markasi — brand/life/ altindaki sabit adli dosya.
 
         Ad muhafizi seviye gorselleriyle AYNI: tek yerde yazilmis, tek
         yerden yayilmis (bkz. SEVIYE:yol blogu)."""

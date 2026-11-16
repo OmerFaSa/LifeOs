@@ -12,7 +12,7 @@ Sozler:
      yazma X-LifeOS: planlama basligi ister (zemin.py ile ayni koruma).
   2. ISLER KAPALI BASLAR. Hicbir is kullanici acmadan calismaz. Acilan is,
      acildigi andan ONCEKI bir vadeyi «kacti» saymaz.
-  3. KACAN IS: «hemen» ise LifeOS acilinca yapilir; «onay» ise Bekleyen'e
+  3. KACAN IS: «hemen» ise Başbuğ acilinca yapilir; «onay» ise Bekleyen'e
      duser, kullanici «Yap» ya da «Atla» der.
   4. HICBIR IS VERIYI DEGISTIRMEZ. Veri denetimi yalniz okur ve rapor eder;
      yedek yalniz kopya ekler; guncelleme yalniz «kur» seciliyse kurar.
@@ -235,7 +235,7 @@ def acilis_gorevi(acilis, bat, isletim=None, calistir=subprocess.run):
     """Windows Gorev Zamanlayici'ya acilis gorevlerini yazar ya da siler (soz 5, 7).
     Her farkli saat bir gorevdir; eskiler once silinir (en cok 7)."""
     if (isletim or os.name) != "nt":
-        return False, "Kendiliğinden açılış yalnız Windows'ta; bu bilgisayarda LifeOS'u elle aç."
+        return False, "Kendiliğinden açılış yalnız Windows'ta; bu bilgisayarda Başbuğ'u elle aç."
     silinen = [calistir(["schtasks", "/Delete", "/F", "/TN", gorev_adi(n)], capture_output=True, text=True).returncode == 0
                for n in range(1, 8)]
     if not acilis["acik"]:
@@ -347,7 +347,7 @@ def isle(h, zamanlayici, bat):
     if h.command != "POST":
         return _yanit(h, 405, {"hata": "Desteklenmiyor."})
     if h.headers.get("X-LifeOS") != "planlama":
-        return _yanit(h, 403, {"hata": "Plan yalnız LifeOS'un kendi sayfasından değişir."})
+        return _yanit(h, 403, {"hata": "Plan yalnız Başbuğ'un kendi sayfasından değişir."})
     if yol == "/api/planlama":
         try:
             boy = min(int(h.headers.get("Content-Length") or 0), 64 * 1024)

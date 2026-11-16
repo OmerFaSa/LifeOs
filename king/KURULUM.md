@@ -1,6 +1,6 @@
 # King'i Claude uygulamasına bağlamak (salt okur)
 
-King, Claude masaüstü uygulamasında bir MCP sunucusu olarak açılır: Claude sohbetinde LifeOS verini okur, hiçbir
+King, Claude masaüstü uygulamasında bir MCP sunucusu olarak açılır: Claude sohbetinde Başbuğ verini okur, hiçbir
 şey yazmaz. Sunucu `king/mcp.py`'dir; yalnız Python ve Node ister (ikisi de bu bilgisayarda kurulu).
 
 ## 1. Ekle
@@ -60,7 +60,7 @@ Her sayı kesinlik etiketiyle gelir (ölçüldü, tahmin, hesaplandı, veri yok,
 birebir» ya da «tahmin»); olmayan veri «veri yok» der.
 
 **Yapmaz:** kayıt, not, onay, ayar yazmaz (yazma, tek süreç kurulduktan sonra gelir; `kayit_cozumle` yalnız
-LifeOS'un kaydedeceği biçimi gösterir, kaydı LifeOS'ta sen yaparsın). Özel notları (Bilinç'te özel
+Başbuğ'un kaydedeceği biçimi gösterir, kaydı Başbuğ'da sen yaparsın). Özel notları (Bilinç'te özel
 işaretli düşünceler; Bilinç haritasının izni kapalıysa hepsi) ve sır adlı alanları (anahtar, jeton, parola) hiç
 vermez. Canlı veri dosyasını açmaz: her çağrıda kopyasını okur ve siler. Yeni kabuğun bu tarayıcıdaki notlarını,
 kartlarını ve yol ilerlemesini henüz göremez (tek depoya göçten sonra görür).

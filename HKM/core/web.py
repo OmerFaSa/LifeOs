@@ -67,7 +67,7 @@ DEFAULTS = {"acik": True, "saglayicilar": ["wikipedia"], "anahtarlar": {},
             "google_cx": "", "searxng_url": "", "gunluk_sinir": 200, "dil": "tr",
             "guncellik_gun": 7}
 GIZLI = ("anahtarlar",)
-AJAN = "LifeOS-HKM/1.0 (yerel kisisel asistan; +https://github.com/OmerFaSa/LifeOs)"
+AJAN = "Başbuğ-HKM/1.0 (yerel kisisel asistan; +https://github.com/OmerFaSa/LifeOs)"
 
 MAX_BAYT = 2 * 1024 * 1024
 ZAMAN = 12

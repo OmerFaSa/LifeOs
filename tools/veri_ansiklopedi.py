@@ -5,7 +5,7 @@ Her kayit:
 - 'alinti' (extract ile ayni, birebir dogrulanmis)
 - 'kaynak' (sayfa URL'si)
 - 'lisans' ('CC BY-SA 4.0 (Vikipedi)')
-- 'etiket' ('kaynakli-ikincil' - LifeOS doktrini)
+- 'etiket' ('kaynakli-ikincil' - Başbuğ doktrini)
 - 'duzey' ('ikincil')
 - 'alinma' (tarih)
 """
@@ -71,7 +71,7 @@ def ara_ve_ozet_al(baslik, en_mi=False):
 
 def main():
     print("=" * 70)
-    print("LifeOS Ansiklopedik Bilgi Derleyici (745 Konu Başlığı)")
+    print("Başbuğ Ansiklopedik Bilgi Derleyici (745 Konu Başlığı)")
     print("=" * 70)
 
     data = json.loads(KONULAR_JSON.read_text(encoding="utf-8"))

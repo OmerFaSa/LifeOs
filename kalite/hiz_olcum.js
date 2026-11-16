@@ -1,5 +1,5 @@
 // KABUK HIZ OLCUMU (Faz 8 P3): kabugun soguk ve sicak acilisini yalitilmis ortamda (gecici LOCALAPPDATA, HKM'siz,
-// deneme portu 4398) gercek Chromium'la olcer. Tekrar edilebilir: ayni komut ayni kosullari kurar, medyan verir.
+// bos deneme portu) gercek Chromium'la olcer. Tekrar edilebilir: ayni komut ayni kosullari kurar, medyan verir.
 //   soguk = yeni tarayici baglami (bos onbellek, bos depo); sicak = ayni baglamda yeniden yukleme (onbellek + depo dolu).
 //   Olculen: ilk boyama (FP), ilk anlamli cizim (FCP; ilk sayfa cizilince LCP), etkilesime hazir (#sayfa ilk kez
 //   data-yer alir: kabuk.js baslat dinleyicileri bagladi ve ilk rotayi cizdi), uzun gorevler (>50 ms), JS yigini,
@@ -19,15 +19,12 @@ const fs = require('fs'), os = require('os'), path = require('path'), http = req
 
 const arg = (ad, vars) => { const i = process.argv.indexOf(ad); return i < 0 ? vars : process.argv[i + 1]; };
 const TEKRAR = +arg('--tekrar', 5), YAVAS = +arg('--yavas', 1), GECIKME = +arg('--gecikme', 0), IZ = process.argv.includes('--iz'), CSS = process.argv.includes('--css'), DENETLE = process.argv.includes('--denetle'), JSON_CIKTI = arg('--json', null);
-const PORT = 4398, T = 'http://127.0.0.1:' + PORT, ADRES = T + '/kabuk/#/bugun';
+let ADRES;
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'kabuk-hiz-'));
 const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici,
   LIFEOS_HESAP_KLASOR: path.join(gecici, 'LifeOS', 'hesap') });
-const srv = spawn(process.platform === 'win32' ? 'python' : 'python3', [path.join(kok, 'sistem/tekkapi.py'), '--port', String(PORT), '--hkm-ayri'], { env, stdio: 'ignore' });
-const bekle = () => new Promise((res, rej) => {
-  const son = Date.now() + 40000;
-  (function dene() { http.get(T + '/kabuk/', r => { r.resume(); res(); }).on('error', () => Date.now() > son ? rej(new Error('sunucu açılmadı')) : setTimeout(dene, 300)); })();
-});
+let srv, T, PORT;   // tools/gez_sunucu.js: boş port, çıktı hata anında gösterilir
+const { sunucuAc } = require(kok + '/tools/gez_sunucu.js');
 
 // Sayfa acilmadan once: uzun gorev ve boyama gozcusu, ilk data-yer ani, IndexedDB islem sayaci.
 const ONCE = () => {
@@ -137,7 +134,7 @@ const ALAN = ['fp', 'fcp', 'lcp', 'hazir', 'dcl', 'yuk', 'sonIstek', 'uzunSayi',
 const ozet = kos => { const o = {}; ALAN.forEach(a => { o[a] = medyan(kos.map(k => k[a])); }); o.ist = kos[0].ist; o.alan = kos[0].alan; o.idb = kos[0].idb; o.baslangic = kos[0].baslangic; return o; };
 
 (async () => {
-  await bekle();
+  const SA = await sunucuAc({ kok, env, ad: 'hiz-olcum' }); srv = SA.srv; T = SA.T; PORT = SA.port; ADRES = T + '/kabuk/#/bugun'; await SA.hazir();
   const b = await chromium.launch();
   const sonuc = { tarih: new Date().toISOString(), tekrar: TEKRAR, yavas: YAVAS, gecikme: GECIKME, soguk: [], sicak: [] };
   try {

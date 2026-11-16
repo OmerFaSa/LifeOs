@@ -417,7 +417,7 @@ def isle(h, kok=None, getir=None):
     if h.command != "POST":
         return _json(h, 405, {"hata": "Desteklenmiyor."})
     if h.headers.get("X-LifeOS") != "ice":
-        return _json(h, 403, {"hata": "Yalnız LifeOS'un kendi sayfasından."})
+        return _json(h, 403, {"hata": "Yalnız Başbuğ'un kendi sayfasından."})
     try:
         boy = min(int(h.headers.get("Content-Length") or 0), 512 * 1024)
         gelen = json.loads(h.rfile.read(boy).decode("utf-8") or "{}")

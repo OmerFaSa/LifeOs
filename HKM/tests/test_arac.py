@@ -194,7 +194,7 @@ def run():
         hata = urllib.error.HTTPError("http://x", 400, "Bad", {}, io.BytesIO(
             b'{"error":{"message":"registry.ollama.ai/library/eski:1b does not support tools"}}'))
         cfg = _cfg("yerel", "eski:1b")
-        t = _tasiyici((hata, []), ("LifeOS'ta üç modül var.", []))
+        t = _tasiyici((hata, []), ("Başbuğ'da üç modül var.", []))
         r = sohbet.konus(_con(), cfg, "bu sistemde neler var", BUGUN, transport=t, araclar=KATALOG)
         eq(r["mode"], "model")
         eq(len(t.gorulen), 2)

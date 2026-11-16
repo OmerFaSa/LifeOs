@@ -2,7 +2,7 @@
 
 > «Üçünü tek sesle özetlemek.»
 
-LifeOS'un dördüncü katmanı. AYS, SPİ ve ESP kendi alanlarında egemen, sıfır
+Başbuğ'un dördüncü katmanı. AYS, SPİ ve ESP kendi alanlarında egemen, sıfır
 bağımlılıklı, tarayıcıda koşan üç ayrı sistemdir. HKM onların **üstünde
 değil, yanında** duran isteğe bağlı bir servistir.
 

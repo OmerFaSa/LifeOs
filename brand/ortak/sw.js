@@ -13,7 +13,7 @@
    YALNIZ ağ yokken görünür.
 
    AĞ YOK ÜÇ BİÇİMDE GELİR (her yerden erişim, 2026-11-06). Reddedilir; vekil
-   LifeOS kapalıyken boş 502 döner (ölçüldü); bilgisayar kapalıyken özel ağ
+   Başbuğ kapalıyken boş 502 döner (ölçüldü); bilgisayar kapalıyken özel ağ
    hiç cevap vermez, tarayıcı dakikalarca bekler. İkisinde de kopya açılır,
    AG_BEKLE'den uzun beklenmez; geç gelen cevap arkada saklanır (§1.4). Bir
    dosya geciktiyse sonrakiler AG_DINLEN boyunca hiç beklemez: açılış toplam

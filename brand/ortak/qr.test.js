@@ -130,7 +130,7 @@
     });
 
     it('gidiş-dönüş: bağımsız okuyucu metni aynen geri okur', () => {
-      const metinler = ['LifeOS', 'https://192.168.0.10:5183/?bagla=482913',
+      const metinler = ['Başbuğ', 'https://192.168.0.10:5183/?bagla=482913',
         'otpauth://totp/LifeOS:%C3%96mer?secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP&issuer=LifeOS&algorithm=SHA1&digits=6&period=30',
         'Şifre değil: ığüşöç ĞÜŞİÖÇ', 'x'.repeat(150), 'y'.repeat(213)];
       const surumler = new Set();
@@ -143,8 +143,8 @@
         surumler.add(q.surum);
       });
       expect(surumler.has(10) && surumler.has(1)).toBe(true);           // sürüm 7+ (sürüm bitli) da sınandı
-      const L = Q().matris('LifeOS düzey L', { duzey:'L' });
-      expect(oku(L.modul)).toEqual({ duzey:'L', maske:L.maske, surum:L.surum, metin:'LifeOS düzey L' });
+      const L = Q().matris('Başbuğ düzey L', { duzey:'L' });
+      expect(oku(L.modul)).toEqual({ duzey:'L', maske:L.maske, surum:L.surum, metin:'Başbuğ düzey L' });
     });
 
     it('sekiz maskenin her biri okunur; seçilen maske en düşük cezalıdır', () => {
@@ -158,7 +158,7 @@
     });
 
     it('bulucu desenleri, zamanlama ve her zaman koyu modül yerinde', () => {
-      const m = Q().matris('LifeOS').modul, n = m.length;
+      const m = Q().matris('Başbuğ').modul, n = m.length;
       [[0, 0], [0, n - 7], [n - 7, 0]].forEach(([r, c]) => {
         for(let i = 0; i < 7; i++){
           expect(m[r][c + i] && m[r + 6][c + i] && m[r + i][c] && m[r + i][c + 6]).toBe(true);
@@ -173,7 +173,7 @@
     it('sığmayan metin null; SVG açık zeminde koyu, sessiz kenarlı', () => {
       expect(Q().matris('z'.repeat(214))).toBeNull();
       expect(Q().svg('z'.repeat(214))).toBe('');
-      const s = Q().svg('LifeOS', { etiket:'Kod <test>' });
+      const s = Q().svg('Başbuğ', { etiket:'Kod <test>' });
       expect(s.indexOf('viewBox="0 0 29 29"') > 0).toBe(true);           // 21 + 2×4
       expect(s.indexOf('fill="#fff"') > 0 && s.indexOf('fill="#000"') > 0).toBe(true);
       expect(s.indexOf('aria-label="Kod &lt;test&gt;"') > 0).toBe(true);

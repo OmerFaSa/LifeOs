@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LifeOS Mega Veri Uretici ve Derleyici (Sabah Kontrol Paketi)
+"""Başbuğ Mega Veri Uretici ve Derleyici (Sabah Kontrol Paketi)
 Tamamen kullanici talebi dogrultusunda:
 - Mevcut sistem dosyalarina DOKUNMAZ.
 - Tum verileri 'veri/yeni_veri/' altina AYS, SPI, ESP, HKM klasorlerine yazar.
@@ -331,7 +331,7 @@ def uret_esp_armoni_cemberi():
 
 def main():
     print("=" * 70)
-    print("LifeOS Mega Veri Üretim Motoru Başlatılıyor...")
+    print("Başbuğ Mega Veri Üretim Motoru Başlatılıyor...")
     print("=" * 70)
 
     stats = {}

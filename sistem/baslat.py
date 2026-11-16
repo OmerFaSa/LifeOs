@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — TEK KOMUT, TEK KAPI.
+"""Başbuğ — TEK KOMUT, TEK KAPI.
 
      python3 sistem/baslat.py            # tek kapi (sistem/tekkapi.py, 4180) + tarayici
      python3 sistem/baslat.py --dur      # tek kapiyi (ve kapanistan once acilmis eski sunuculari) durdurur
@@ -69,6 +69,11 @@ def sistemler_baslat():
     # Gunluk kok klasorde durmaz: her acilista biriken bir dosya klasoru
     # kalabaliklastiriyordu. Yolu acilamazsa ekrana yazilir.
     gunluk_yolu = os.path.join(tempfile.gettempdir(), "lifeos-sunucu.log")
+    try:                                # gunluk 1 MB'i gecince .1'e doner (en cok iki dosya)
+        if os.path.getsize(gunluk_yolu) > 1_000_000:
+            os.replace(gunluk_yolu, gunluk_yolu + ".1")
+    except OSError:
+        pass
     gunluk = open(gunluk_yolu, "a", encoding="utf-8")
     kwargs = {"cwd": KOK, "stdout": gunluk, "stderr": subprocess.STDOUT,
               "env": cocuk_ortami()}
@@ -87,9 +92,9 @@ def sistemler_baslat():
 
 
 def altserver_baslat(ortam=None, calistir=subprocess.run, ac=None, isletim=None):
-    """iPhone'daki LifeOS (AltStore, ucretsiz kimlik) 7 gunde bir yeniden imzalanir
+    """iPhone'daki Başbuğ (AltStore, ucretsiz kimlik) 7 gunde bir yeniden imzalanir
     ve bunu bu bilgisayardaki AltServer yapar; AltServer kapaliysa yenileme olmaz,
-    uygulama acilmaz (veri silinmez). Kuruluysa ve kapaliysa LifeOS onu da acar.
+    uygulama acilmaz (veri silinmez). Kuruluysa ve kapaliysa Başbuğ onu da acar.
     Doner: (durum, not) — durum "acildi" | "acik" | "yok"."""
     if (isletim or os.name) != "nt":
         return "yok", ""
@@ -103,7 +108,7 @@ def altserver_baslat(ortam=None, calistir=subprocess.run, ac=None, isletim=None)
                      capture_output=True, text=True, timeout=10)
         if "altserver.exe" in (r.stdout or "").lower():
             return "acik", ""
-        (ac or os.startfile)(exe)       # ayri surec: LifeOS kapaninca da acik kalir
+        (ac or os.startfile)(exe)       # ayri surec: Başbuğ kapaninca da acik kalir
     except Exception as e:
         return "yok", str(e)
     return "acildi", ""
@@ -203,7 +208,7 @@ def main():
         while _cevap_veriyor(GIRIS, timeout=0.5) and time.time() < son:
             time.sleep(0.3)
 
-    print("\nLifeOS başlatılıyor\n")
+    print("\nBaşbuğ başlatılıyor\n")
 
     # 1 — tek kapi (Merkez ayni surecte: tekkapi.hkm_kur).
     if _cevap_veriyor(GIRIS):
@@ -219,7 +224,7 @@ def main():
                 if geri[0]:
                     oldu, surec, gunluk = sistemler_baslat()
         if oldu:
-            _yaz("ok", "LifeOS açıldı", GIRIS)
+            _yaz("ok", "Başbuğ açıldı", GIRIS)
         else:
             _yaz("hata", "Sistem sunucusu açılamadı", "günlük: " + gunluk)
             print("\n  Ne olduğunu görmek için:  python3 sistem/tekkapi.py\n")
@@ -242,7 +247,7 @@ def main():
             _yaz("yok", "Tarayıcı açılamadı", "elle aç: " + GIRIS)
 
     print("""
-  LifeOS:  %s
+  Başbuğ:  %s
 
   Sunucu ARKA PLANDA çalışır; bu pencereyi kapatmak onu durdurmaz.
   Durdurmak için:

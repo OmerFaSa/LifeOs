@@ -561,7 +561,7 @@ def _alt_bilgi(d, b):
     for i, s in enumerate(d.sayfalar):
         d.s = s
         d.cizgi(KENAR, s.h - KENAR - 14, s.w - KENAR, s.h - KENAR - 14, RENK["cizgi"], 0.6)
-        sol = " · ".join(x for x in ("LifeOS · HKM", b.get("dayanak") or
+        sol = " · ".join(x for x in ("Başbuğ · HKM", b.get("dayanak") or
                                      "BAM kayıt #%s" % b.get("kimlik"), b.get("tarih"), et) if x)
         d.yazi(KENAR, s.h - KENAR, sol, 7.5, RENK["ikincil"])
         d.yazi(s.w - KENAR, s.h - KENAR, "sayfa %d/%d" % (i + 1, n), 7.5, RENK["ikincil"],
@@ -696,7 +696,7 @@ def yaz(d, baslik=""):
     nes[0] = b"<< /Type /Catalog /Pages 2 0 R >>"
     nes[1] = ("<< /Type /Pages /Kids [%s] /Count %d >>" % (
         " ".join("%d 0 R" % n for n in sayfa_no), len(sayfa_no))).encode()
-    bilgi_ = "<< /Producer (LifeOS HKM) /Title <FEFF%s> >>" % baslik.encode("utf-16-be").hex().upper()
+    bilgi_ = "<< /Producer (Başbuğ HKM) /Title <FEFF%s> >>" % baslik.encode("utf-16-be").hex().upper()
     nes.append(bilgi_.encode())
     out = bytearray(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n")
     konum = []

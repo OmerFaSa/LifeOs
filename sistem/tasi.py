@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — YENI BILGISAYARA TASIMA (tek dosya, sifreli).
+"""Başbuğ — YENI BILGISAYARA TASIMA (tek dosya, sifreli).
 
      python sistem/tasi.py --paket [dosya]   # eski bilgisayarda
      python sistem/tasi.py --ac <dosya>      # yeni bilgisayarda (kur.ps1 de sorar)
@@ -221,7 +221,7 @@ def paket_yap(hedef, parola, kok=KOK, profil=None, hesap_db=None):
                         try:
                             z.write(tam, ic, compress_type=tur)
                         except OSError as e:
-                            raise Hata("Okunamadı: %s (%s). LifeOS kapalı mı?" % (tam, e))
+                            raise Hata("Okunamadı: %s (%s). Başbuğ kapalı mı?" % (tam, e))
                         adet += 1
             y.bitir()
     os.replace(gecici, hedef)
@@ -235,7 +235,7 @@ def _coz(yol, parola, cikti):
         raise Hata(BOZUK)
     with open(yol, "rb") as f:
         if f.read(len(BASLIK)) != BASLIK:
-            raise Hata("Bu bir LifeOS taşıma paketi değil.")
+            raise Hata("Bu bir Başbuğ taşıma paketi değil.")
         tuz, kontrol = f.read(16), f.read(32)
         sifre, mac_k, kontrol_k = _anahtarlar(parola, tuz)
         if not hmac.compare_digest(hmac.new(kontrol_k, BASLIK, hashlib.sha256).digest(), kontrol):
@@ -343,26 +343,26 @@ def main(argv=None):
             getattr(sys, ad).reconfigure(encoding="utf-8", errors="replace")
         except (AttributeError, ValueError, OSError):
             pass
-    print("\nLifeOS taşıma\n")
+    print("\nBaşbuğ taşıma\n")
     if not argv or argv[0] not in ("--paket", "--ac") or (argv[0] == "--ac" and len(argv) < 2):
         print(__doc__)
         return 2
     acikti = calisiyor()
     if acikti and not kapat():
-        print("  ✕ LifeOS kapanmadı. Elle kapat: python sistem/baslat.py --dur")
+        print("  ✕ Başbuğ kapanmadı. Elle kapat: python sistem/baslat.py --dur")
         return 1
     try:
         return _is(argv)
     finally:
         if acikti:
             ac()
-            print("  LifeOS yeniden açıldı.")
+            print("  Başbuğ yeniden açıldı.")
 
 
 def kapat(calistir=subprocess.call, acik_mi=calisiyor, bekle=time.sleep, sure=15):
     """Soz 4: acik dosya kopyayi yarim birakir. Elle kapatma adimi olmasin diye
-    LifeOS'u kendisi kapatir (baslat.py --dur) ve kapandigini bekler."""
-    print("  LifeOS kapatılıyor (paket bitince yeniden açılır)…")
+    Başbuğ'u kendisi kapatir (baslat.py --dur) ve kapandigini bekler."""
+    print("  Başbuğ kapatılıyor (paket bitince yeniden açılır)…")
     calistir([sys.executable, os.path.join(SISTEM, "baslat.py"), "--dur"],
              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for _ in range(int(sure * 2)):

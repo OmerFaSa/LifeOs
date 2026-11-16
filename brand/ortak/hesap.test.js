@@ -1331,7 +1331,7 @@
       return { srv, c, h };
     }
 
-    it('LifeOS kapalıyken vekilin 502’si «ulaşılamadı»dır, sunucu hatası değil', () => sahneyle(async () => {
+    it('Başbuğ kapalıyken vekilin 502’si «ulaşılamadı»dır, sunucu hatası değil', () => sahneyle(async () => {
       const { h } = await girisli();
       const f0 = h._ortam.fetch;
       h._ortam.fetch = async () => ({ ok:false, status:502, json:async () => { throw new Error('boş'); } });
@@ -1364,7 +1364,7 @@
       /* 502: tarayıcı CORS'tan reddeder; no-cors ulaşırsa bilgisayar açıktır. */
       kur(async (u, s) => { if(!s.mode) throw new TypeError('cors'); return { type:'opaque' }; });
       expect((await h.merkezHali(true)).hal).toBe('merkez-kapali');
-      expect(h.merkezHalMetni({ hal:'merkez-kapali' })).toContain('Merkez kapalı');
+      expect(h.merkezHalMetni({ hal:'merkez-kapali' })).toContain('Başbuğ bu bilgisayarda çalışmıyor');
       /* Ağ reddediyor: internet yok ya da özel ağ kapalı. */
       kur(async () => { throw new TypeError('ag'); });
       expect((await h.merkezHali(true)).hal).toBe('bilgisayar-kapali');
@@ -1405,7 +1405,7 @@
       expect(m).toContain('Yeniden dene');
       /* Testin sunucusu bu cihazı yerel sayar: bilgisayar görünümü. */
       expect(m).toContain('Her yerden erişimi kapat');
-      expect(m).toContain('Bilgisayar açılınca LifeOS başlasın');
+      expect(m).toContain('Bilgisayar açılınca Başbuğ başlasın');
       expect(m).toContain('Kapalı');
       merkez().querySelector('[data-hesap="uzak-acilis"]').click();
       await hazir();
@@ -1596,7 +1596,7 @@
       srv.sistem = null;
       await h.merkezAc('yonetim');
       await hazir();
-      expect(merkez().textContent.includes('Bilgisayardaki LifeOS')).toBe(false);
+      expect(merkez().textContent.includes('Bilgisayardaki Başbuğ')).toBe(false);
       expect(merkez().querySelector('.hesap-uyari')).toBeNull();
     }));
 

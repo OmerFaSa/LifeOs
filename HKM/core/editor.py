@@ -144,7 +144,7 @@ def olc(govde, istek, kaynaklar=None, dayanak_metni="", editor_sayimi=None):
         notlar.append("Kaynak bulgularında geçmeyen sayılar: %s — resmî kaynaktan doğrula."
                       % ", ".join(out["kaynaksiz_sayilar"]))
     if editor_sayimi and editor_sayimi.get("doz"):
-        notlar.append("İlaç dozu içeren %d cümle çıkarıldı: LifeOS doz önermez."
+        notlar.append("İlaç dozu içeren %d cümle çıkarıldı: Başbuğ doz önermez."
                       % editor_sayimi["doz"])
     out["notlar"] = notlar
     return out

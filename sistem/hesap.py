@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LifeOS — HESAP ve ESITLEME (PC sunucusu).
+"""Başbuğ — HESAP ve ESITLEME (PC sunucusu).
 
    NEDEN
    Depo sahibinin karari (2026-10-04): PC, telefon ve tablet AYNI hesapla
@@ -173,7 +173,7 @@
       deger; sunucu her alani denetler, sayi uydurmaz. Adi bilerek `/bugun`,
       `/gun`, `/gunluk` ile bitmez: o sonekleri ozet, tek gun ve gunluk toplar.
   28. SISTEMI BASKA CIHAZDAN GUNCELLEME (2026-11-05: «guncellemeyi daha kolay»).
-      Admin, sifresiyle, telefondan ya da tabletten bilgisayardaki LifeOS'u
+      Admin, sifresiyle, telefondan ya da tabletten bilgisayardaki Başbuğ'u
       gunceller (`/sistem`, `/sistem-guncelle`). guncelle.py'nin sozleri aynen
       gecerli: yalniz ileri sarar, veriye dokunmaz, elle degistirilmis dosyanin
       ustune yazmaz. Isin kendisi sunucu.py'dedir (SISTEM kancasi). Ev agi kapisi
@@ -515,9 +515,9 @@ def totp(sir, adim, hane=KOD_HANE):
 
 def otpauth(ad, sir):
     """Dogrulayici uygulamanin okudugu adres (Key Uri Format)."""
-    etiket = urllib.parse.quote("LifeOS:" + ad, safe=":")
-    return "otpauth://totp/%s?secret=%s&issuer=LifeOS&algorithm=SHA1&digits=%d&period=%d" % (
-        etiket, sir, KOD_HANE, KOD_ADIM)
+    etiket = urllib.parse.quote("Başbuğ:" + ad, safe=":")
+    return "otpauth://totp/%s?secret=%s&issuer=%s&algorithm=SHA1&digits=%d&period=%d" % (
+        etiket, sir, urllib.parse.quote("Başbuğ"), KOD_HANE, KOD_ADIM)
 
 
 def _kod_normal(kod):
@@ -1623,7 +1623,7 @@ class Depo:
         if modul not in GELEN_MODULLER:
             raise Hata(400, "Bu modül gelen kutusu kabul etmiyor (ays, spi ya da esp).")
         kaynak_modul = str(kaynak_modul or "").strip().lower()
-        kaynak = "King · " + MODUL_AD.get(kaynak_modul, "LifeOS")
+        kaynak = "King · " + MODUL_AD.get(kaynak_modul, "Başbuğ")
         simdi = self.saat()
         with self._islem() as c:
             if c.execute("SELECT COUNT(*) FROM gelen WHERE kullanici=? AND anahtar IS NULL AND zaman>?",
@@ -2049,7 +2049,7 @@ class Depo:
                 raise Hata(422, "Yedek dosyası bozuk.")
             tablolar = {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
             if not set(KOPYA_TABLOLAR) <= tablolar:
-                raise Hata(422, "Bu dosya bir LifeOS hesap yedeği değil.")
+                raise Hata(422, "Bu dosya bir Başbuğ hesap yedeği değil.")
             return {"kullanici": c.execute("SELECT COUNT(*) FROM kullanici").fetchone()[0],
                     "kayit": c.execute("SELECT COUNT(*) FROM kayit WHERE deger IS NOT NULL").fetchone()[0]}
         except sqlite3.Error:
@@ -2436,7 +2436,7 @@ def ics_birlestir(icerikler):
                     olaylar.append("\r\n".join(ic))
                     ic = None
     bas = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//LifeOS//Hesap//TR", "CALSCALE:GREGORIAN",
-           "METHOD:PUBLISH", "X-WR-CALNAME:LifeOS", "REFRESH-INTERVAL;VALUE=DURATION:PT1H",
+           "METHOD:PUBLISH", "X-WR-CALNAME:Başbuğ", "REFRESH-INTERVAL;VALUE=DURATION:PT1H",
            "X-PUBLISHED-TTL:PT1H"]
     return "\r\n".join(bas + olaylar + ["END:VCALENDAR"]) + "\r\n"
 

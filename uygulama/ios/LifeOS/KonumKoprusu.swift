@@ -174,7 +174,7 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
             izinIstendi = true
             yonetici.requestWhenInUseAuthorization()       // devami: locationManagerDidChangeAuthorization
         case .denied, .restricted:
-            hata(1, "Konum izni verilmedi. Ayarlar › LifeOS › Konum › «Uygulamayı Kullanırken».")
+            hata(1, "Konum izni verilmedi. Ayarlar › Başbuğ › Konum › «Uygulamayı Kullanırken».")
         default:
             yonetici.allowsBackgroundLocationUpdates = !izleyenler.isEmpty || sahipsiz
             yonetici.showsBackgroundLocationIndicator = true
@@ -193,7 +193,7 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
         guard !izleyenler.isEmpty || !tekler.isEmpty || sahipsiz else { return }
         switch m.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways: basla()
-        case .denied, .restricted: hata(1, "Konum izni verilmedi. Ayarlar › LifeOS › Konum.")
+        case .denied, .restricted: hata(1, "Konum izni verilmedi. Ayarlar › Başbuğ › Konum.")
         default: break
         }
         durumBildir()

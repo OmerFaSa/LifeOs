@@ -143,7 +143,7 @@ LIFEOS.MUHURLER = [
 LIFEOS.ONUR = {
   id:'usta', ad:'Sistem Ustası',
   slogan:'Daha iyi bir sen, mümkün.',
-  ozet:'LifeOS’un bütün alanlarında istikrarlı ilerleme',
+  ozet:'Başbuğ’un bütün alanlarında istikrarlı ilerleme',
 };
 
 /* Dosya adı — TEK kural. `tools/rutbe.py` de aynı adı üretir; ikisi

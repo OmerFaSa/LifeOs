@@ -42,13 +42,13 @@ def kaynak(bilgi, ipa_boyutu, tarih, aciklama="", entitlements=()):
         "minOSVersion": bilgi.get("MinimumOSVersion", "15.0"),
     }
     return {
-        "name": "LifeOS",
+        "name": "Başbuğ",
         "identifier": "com.omerfasa.lifeos.kaynak",
         "subtitle": "AYS · SPİ · ESP — telefon uygulaması",
         "website": "https://github.com/OmerFaSa/LifeOs",
         "iconURL": SIMGE,
         "apps": [{
-            "name": bilgi.get("CFBundleDisplayName", "LifeOS"),
+            "name": bilgi.get("CFBundleDisplayName", "Başbuğ"),
             "bundleIdentifier": bilgi["CFBundleIdentifier"],
             "developerName": "OmerFaSa",
             "subtitle": "Sınav, sağlık, gelişim — veri telefonda kalır.",

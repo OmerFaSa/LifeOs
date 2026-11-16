@@ -614,7 +614,7 @@ def _gorev_govde(wt, dal, dosya, p, efor, ek):
 
 
 def gorev_istemi(wt, dal, dosya, p, efor="orta", ek=""):
-    return ("Sen LifeOS ofisinin Uygulayıcısısın; Claude Code sana görev verir ve işini izler.\n"
+    return ("Sen Başbuğ ofisinin Uygulayıcısısın; Claude Code sana görev verir ve işini izler.\n"
             "Çalışma klasörün: %s — yalnız bu klasörde çalış. C:\\Users\\ASUS\\LifeOs, "
             "C:\\Users\\ASUS\\LifeOs-ag ve C:\\Users\\ASUS\\LifeOS-Sistem açılmaz, değiştirilmez.\n" % wt
             + KABUK % wt + ARACLAR
@@ -629,7 +629,7 @@ def gorev_devam_istemi(wt, dal, dosya, p, efor="orta", ek=""):
 
 
 def soru_istemi(wt, soru):
-    return ("Sen LifeOS ofisinin Araştırmacısısın. Claude Code sana sorular gönderir; her soru ayrı mesajla gelir.\n"
+    return ("Sen Başbuğ ofisinin Araştırmacısısın. Claude Code sana sorular gönderir; her soru ayrı mesajla gelir.\n"
             "Klasör: %s (main'in salt okunur kopyası; her sorudan önce main'e güncellenir).\n" % wt
             + KABUK % wt + ARACLAR
             + "Dosya değiştirme, commit etme, sunucu açma; oku, ara, komutla incele. Cevabın kısa ve kanıtlı olsun "
@@ -670,7 +670,7 @@ def deneme_var(metin):
 
 
 def denetim_istemi(wt, hedef, dal, dosya):
-    return ("Sen LifeOS ofisinin Denetçisisin: Uygulayıcıların dallarını Claude Code'dan önce incelersin; dosya "
+    return ("Sen Başbuğ ofisinin Denetçisisin: Uygulayıcıların dallarını Claude Code'dan önce incelersin; dosya "
             "değiştirmez, commit etmezsin. Önce %s\\AGENTS.md'yi oku (§1 sözleşme, §4 bulgu biçimi).\n" % wt
             + KABUK % wt + ARACLAR + denetim_govde(wt, hedef, dal, dosya))
 
@@ -1047,7 +1047,7 @@ def birlestir(no, ders=None, push=False, zorla=False):
         " · main Testçi'den sonra ilerledi: §2'yi main'de koş" if ileri else ""))
 
 
-ADAY_ISTEMI = ("LifeOS ofisi için görev adayları çıkar (salt okunur; dosya değiştirme). En çok %d aday. Uygun iş: tanımı net, "
+ADAY_ISTEMI = ("Başbuğ ofisi için görev adayları çıkar (salt okunur; dosya değiştirme). En çok %d aday. Uygun iş: tanımı net, "
                "50 satırdan büyük mantık işi; ölçütü bir testle yazılabilir (Python; modül JS'i tools/kabul_js.py ile Node'da "
                "sınanır). ÖNCELİK SIRASI (üsttekini bulamazsan alta in): 1) kullanıcının göreceği açık hata, kodda kanıtıyla "
                "(AYS/SPI/ESP src/js/core ve screens mantığı, sistem/ özellik modülleri, HKM/motor); 2) belgeler/ekip/*PLAN*.md ve "

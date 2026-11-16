@@ -1,4 +1,4 @@
-/* SİNEMATİK — hesaba ilk girişte LifeOS'u anlatan bir dakikalık piksel film.
+/* SİNEMATİK — hesaba ilk girişte Başbuğ'u anlatan bir dakikalık piksel film.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/sinematik.js`; `python3 tools/ortak.py --yay` ile üç
@@ -6,7 +6,7 @@
    testi `sinematik.test.js`.
    ==================================================================
 
-   Kullanıcı (2026-11-05): «hesaba ilk kez girildiğinde LifeOS'u ve misyonunu
+   Kullanıcı (2026-11-05): «hesaba ilk kez girildiğinde Başbuğ'u ve misyonunu
    anlatan mini piksel sanat sinematiği»; «video şeklinde, güzel geçişler,
    güzel sözler, anlatan güzel bir ses»; ikinci tur: «gün doğsun gün batsın,
    AYS, SPİ, ESP'den bahsederken oraları göstersin, editör gibi, bir dakika».
@@ -32,7 +32,7 @@
      6. HER AN ÇIKILIR. «Geç» ve Esc her sahnede; metin ekran okuyucuya
         gider, tuval gizlidir. Sekme arkadayken film durur. */
 window.LIFEOS.PARCA.yazilar({
-  'ortak.sinematik.ad':'LifeOS tanıtımı',
+  'ortak.sinematik.ad':'Başbuğ tanıtımı',
   'ortak.sinematik.menu':'Tanıtım filmi',
   'ortak.sinematik.izle':'İzle',
   'ortak.sinematik.gec':'Geç',
@@ -46,7 +46,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.sinematik.etiket.spi':'Sağlık',
   'ortak.sinematik.etiket.esp':'Kişisel gelişim',
   'ortak.sinematik.s0':'Her sabah, yeni bir sayfa açılır.',
-  'ortak.sinematik.s1':'LifeOS, o sayfayı seninle birlikte yazar.',
+  'ortak.sinematik.s1':'Başbuğ, o sayfayı seninle birlikte yazar.',
   'ortak.sinematik.s2':'Üç sistem; tek bir hayat.',
   'ortak.sinematik.s3':'AYS, sınav yolunu gün gün planlar.',
   'ortak.sinematik.s4':'Konuyu öğretir, denemeni çözümler, tekrarını hatırlatır.',
@@ -283,7 +283,7 @@ window.LIFEOS.SINEMATIK = (function(L){
         kareCiz(g, '#1f1a2e', 0, 0, W, H, 0.38);
         const k = ekranKat(Math.min(W, H) / 64, 2), gel = ara(yt, 0.1, 1.0);
         figurCiz(g, 'logo', W / 2 - 8 * k, H * 0.2 - 8 * k * (0.9 + 0.1 * gel) + (1 - gel) * 6, k, gel);
-        yaziCiz(g, 'LifeOS', W / 2, H * 0.2 + 12 * k, Math.max(12, Math.round(Math.min(W, H) / 9)), '#fff8ea', ara(yt, 0.4, 1.3));
+        yaziCiz(g, 'Başbuğ', W / 2, H * 0.2 + 12 * k, Math.max(12, Math.round(Math.min(W, H) / 9)), '#fff8ea', ara(yt, 0.4, 1.3));
         const fk = ekranKat(k * 0.7, 1), aralik = Math.min(W * 0.26, 34 * fk);
         ['ays', 'spi', 'esp'].forEach((ad, i) => {
           const a = ara(yt, 0.6 + i * 0.45, 1.2 + i * 0.45), x = W / 2 + (i - 1) * aralik - 8 * fk, yy = H * 0.56 + (1 - a) * 5;
@@ -406,7 +406,7 @@ window.LIFEOS.SINEMATIK = (function(L){
         }
         const gel = ara(yt, 4.0, 5.2), k = ekranKat(Math.min(W, H) / 70, 2);
         figurCiz(g, 'logo', W / 2 - 8 * k, H * 0.14 - 8 * k + Math.sin(yt * 1.7) * 1.4 * oyna() + (1 - gel) * 4, k, gel);
-        yaziCiz(g, 'LifeOS', W / 2, H * 0.14 + 13 * k, Math.max(11, Math.round(Math.min(W, H) / 11)), '#fff8ea', ara(yt, 4.4, 5.6));
+        yaziCiz(g, 'Başbuğ', W / 2, H * 0.14 + 13 * k, Math.max(11, Math.round(Math.min(W, H) / 11)), '#fff8ea', ara(yt, 4.4, 5.6));
       },
     },
   };

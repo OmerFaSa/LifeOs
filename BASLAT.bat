@@ -1,5 +1,5 @@
 @echo off
-rem LifeOS - cift tikla calisir. Uc sistem + HKM + giris sayfasi.
+rem Başbuğ - cift tikla calisir. Uc sistem + HKM + giris sayfasi.
 cd /d "%~dp0"
 where py >nul 2>nul && (py sistem\baslat.py & goto son)
 where python >nul 2>nul && (python sistem\baslat.py & goto son)

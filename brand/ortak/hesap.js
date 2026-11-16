@@ -8,7 +8,7 @@
    ==================================================================
 
    Depo sahibinin kararı (2026-10-04): PC, telefon ve tablet aynı hesapla
-   girer; verinin kopyası PC'deki LifeOS sunucusunda durur. Cihaz
+   girer; verinin kopyası PC'deki Başbuğ sunucusunda durur. Cihaz
    çevrimdışıyken değişiklik sıraya girer, sunucuya ulaşınca oraya akar.
 
    Sözler:
@@ -83,7 +83,7 @@
       taşır, kartta «ne zamanın» özeti olduğu yazar; yedi günden eskisi
       gösterilmez. Eksik sayı yazılmaz (sıfır değildir). Örnek profil
       yazmaz (modül vermez). Çerez bu cihazdan yalnız kullanıcının kendi
-      LifeOS sunucusuna gider.
+      Başbuğ sunucusuna gider.
 
    BAĞLANTILAR (depo sahibi, 2026-10-08: «hesap özelliğini çok daha
    profesyonel yap; bazı uygulamaları ücretsiz bağlayabilelim»; sunucu
@@ -160,7 +160,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.kazandi':'kazandı',
   'ortak.hesap.bilgisayara-ulasilamiyor':'Bilgisayara ulaşılamıyor',
   'ortak.hesap.giris-yapilmadi':'Giriş yapılmadı',
-  'ortak.hesap.bu-sayfa-lifeos-sunucusundan':'Bu sayfa LifeOS sunucusundan açılmadı; hesap kullanılamıyor.',
+  'ortak.hesap.bu-sayfa-lifeos-sunucusundan':'Bu sayfa Başbuğ sunucusundan açılmadı; hesap kullanılamıyor.',
   'ortak.hesap.beta-yalniz-bu-cihazda':'Beta · yalnız bu cihazda',
   'ortak.hesap.ornek-profil':'Örnek profil',
   'ortak.hesap.esitleme-durdu':'Eşitleme durdu',
@@ -173,7 +173,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.tablette-tarayicida':'. Tablette tarayıcıda',
   'ortak.hesap.acilir':'açılır.',
   'ortak.hesap.bilgisayarin-adresi':'Bilgisayarın adresi',
-  'ortak.hesap.bilgisayara-ulasilamadi-life':'Bilgisayara ulaşılamadı; LifeOS açık mı?',
+  'ortak.hesap.bilgisayara-ulasilamadi-life':'Bilgisayara ulaşılamadı; Başbuğ açık mı?',
   'ortak.hesap.bilgisayara-ulasilamiyor-bet':'Bilgisayara ulaşılamıyor. Beta girişiyle bu cihazda devam edebilirsin.',
   'ortak.hesap.i-lk-hesap-admin-olur':'İlk hesap admin olur.',
   'ortak.hesap.i-lk-hesap-bilgisayarin-kend':'İlk hesap bilgisayarın kendisinde açılır.',
@@ -184,7 +184,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.pc-telefon-ve-tablet-ayni':'PC, telefon ve tablet aynı hesapla',
   'ortak.hesap.verin-hicbir-sirketin-sunucu':'Verin hiçbir şirketin sunucusuna gitmez',
   'ortak.hesap.bilgisayar-kapaliyken-de-cal':'Bilgisayar kapalıyken de çalışır',
-  'ortak.hesap.lifeos':'LifeOS',
+  'ortak.hesap.lifeos':'Başbuğ',
   'ortak.hesap.sinav-saglik-ve-gelisim-tek':'Sınav, sağlık ve gelişim tek yerde.',
   'ortak.hesap.baska-hesapla-giris-yap':'Başka hesapla giriş yap',
   'ortak.hesap.giris-yap':'Giriş yap',
@@ -286,7 +286,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.kisisel-bilgiler-istege-bagl':'Kişisel bilgiler · isteğe bağlı',
   'ortak.hesap.king-sana-nasil-seslensin':'King sana nasıl seslensin',
   'ortak.hesap.dogum-gunu':'Doğum günü',
-  'ortak.hesap.hicbiri-bir-yere-gonderilmez':'Hiçbiri bir yere gönderilmez; yalnız bilgisayarındaki LifeOS’ta durur.',
+  'ortak.hesap.hicbiri-bir-yere-gonderilmez':'Hiçbiri bir yere gönderilmez; yalnız bilgisayarındaki Başbuğ’da durur.',
   'ortak.hesap.gorunen-ad':'Görünen ad',
   'ortak.hesap.renk':'Renk',
   'ortak.hesap.kaydet':'Kaydet',
@@ -345,7 +345,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.python-sistem-hesap-py-iki-a':'python sistem/hesap.py --iki-adim-kapat',
   'ortak.hesap.takvim':'Takvim',
   'ortak.hesap.giris':'Giriş',
-  'ortak.hesap.hepsi-bilgisayarindaki-lifeo':'Hepsi bilgisayarındaki LifeOS’ta çalışır: şirket hesabı, ücret ya da internet gerekmez.',
+  'ortak.hesap.hepsi-bilgisayarindaki-lifeo':'Hepsi bilgisayarındaki Başbuğ’da çalışır: şirket hesabı, ücret ya da internet gerekmez.',
   'ortak.hesap.i-cinde':'İçinde',
   'ortak.hesap.ays':'AYS',
   'ortak.hesap.sinav-gunleri-istisnalar-hed':'Sınav günleri, istisnalar, hedef son günleri',
@@ -377,7 +377,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.her-tarif-bu-tek-istegi':'Her tarif bu tek isteği gönderir.',
   'ortak.hesap.bu-bilgisayardaki-bir-uygula':'Bu bilgisayardaki bir uygulama için adres:',
   'ortak.hesap.kisayollar-da-yeni-kisayol-g':'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
-  'ortak.hesap.adini-lifeos-a-yaz-koy-siri':'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.',
+  'ortak.hesap.adini-lifeos-a-yaz-koy-siri':'Adını «Başbuğ’a yaz» koy. Siri’ye «Başbuğ’a yaz» deyip «su 250» söyle.',
   'ortak.hesap.siri-bugun-ne-var-2':'Siri: «Bugün ne var?»',
   'ortak.hesap.anahtari-gunun-ozetini-de-ok':'Anahtarı «Günün özetini de okuyabilsin» seçerek oluştur.',
   'ortak.hesap.kisayollar-da-yeni-kisayol-u':'Kısayollar’da yeni kısayol › «URL’nin İçeriğini Al»: adres',
@@ -416,7 +416,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.icerik':', içerik',
   'ortak.hesap.metin-i-soran-bir-degisken':'; «metin»i soran bir değişken ekle.',
   'ortak.hesap.home-assistant':'Home Assistant',
-  'ortak.hesap.home-assistant-lifeos-kok-se':'Home Assistant LifeOS kök sertifikasını tanımazsa sertifikayı ona ekle.',
+  'ortak.hesap.home-assistant-lifeos-kok-se':'Home Assistant Başbuğ kök sertifikasını tanımazsa sertifikayı ona ekle.',
   'ortak.hesap.anahtar-yalniz-satir-birakir':'Anahtar yalnız satır bırakır; verini okuyamaz, hesabına giremez. Kaybolursa sil, yenisini aç.',
   'ortak.hesap.henuz-bir-satir-gelmedi':'Henüz bir satır gelmedi',
   'ortak.hesap.kisayol-ya-da-otomasyon-bir':'Kısayol ya da otomasyon bir satır gönderince burada görünür.',
@@ -428,7 +428,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.guvenlik-icin-kod-5-dakika':'Güvenlik için kod 5 dakika geçerli.',
   'ortak.hesap.yeni-kod':'Yeni kod',
   'ortak.hesap.baglama-kodu-2':'Bağlama kodu ',
-  'ortak.hesap.yeni-cihazda-lifeos-u-ac':'Yeni cihazda LifeOS’u aç',
+  'ortak.hesap.yeni-cihazda-lifeos-u-ac':'Yeni cihazda Başbuğ’u aç',
   'ortak.hesap.tablette-kamerayla-qr-i-okut':'Tablette kamerayla QR’ı okutmak da olur.',
   'ortak.hesap.kod-tek-kullanimlik-baglanan':'Kod tek kullanımlık; bağlanan cihaz Cihazlar’da görünür, oradan çıkarılabilir.',
   'ortak.hesap.simdi-esitle':'Şimdi eşitle',
@@ -490,7 +490,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.dosyadan-yukle':'Dosyadan yükle',
   'ortak.hesap.yedek-dosyasi-db':'Yedek dosyası (.db)',
   'ortak.hesap.yukle':'Yükle',
-  'ortak.hesap.dosya-once-denetlenir-bozuks':'Dosya önce denetlenir; bozuksa ya da LifeOS yedeği değilse alınmaz. Yüklenen yedek listeye',
+  'ortak.hesap.dosya-once-denetlenir-bozuks':'Dosya önce denetlenir; bozuksa ya da Başbuğ yedeği değilse alınmaz. Yüklenen yedek listeye',
   'ortak.hesap.girer-geri-yuklemek-icin-yan':'girer; geri yüklemek için yanındaki «Geri yükle…».',
   'ortak.hesap.geri-yukle-2':'Geri yükle…',
   'ortak.hesap.yedekler-bu-bilgisayarda':'Yedekler bu bilgisayarda: ',
@@ -502,7 +502,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.kod-acilamadi':'Kod açılamadı.',
   'ortak.hesap.i-slem-yapilamadi':'İşlem yapılamadı.',
   'ortak.hesap.beta-girisindesin-kayitlar-y':'Beta girişindesin: kayıtlar yalnız bu cihazda.',
-  'ortak.hesap.hesap-bilgisayardaki-lifeos':'Hesap, bilgisayardaki LifeOS üzerinden çalışır. Bu sayfayı LifeOS uygulamasından',
+  'ortak.hesap.hesap-bilgisayardaki-lifeos':'Hesap, bilgisayardaki Başbuğ üzerinden çalışır. Bu sayfayı Başbuğ uygulamasından',
   'ortak.hesap.ya-da-ev-agindaki-https':'(ya da ev ağındaki https adresinden) aç.',
   'ortak.hesap.hesap-ayarlari':'Hesap ayarları — ',
   'ortak.hesap.hesap':'Hesap',
@@ -521,7 +521,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.oteki-cihaz-yoktu':'Öteki cihaz yoktu.',
   'ortak.hesap.yeni-hesap-acma-acik':'Yeni hesap açma açık.',
   'ortak.hesap.yeni-hesap-acma-kapali':'Yeni hesap açma kapalı.',
-  'ortak.hesap.lifeos-yedek-kodlari':'LifeOS yedek kodları (',
+  'ortak.hesap.lifeos-yedek-kodlari':'Başbuğ yedek kodları (',
   'ortak.hesap.yedek-alindi':'Yedek alındı',
   'ortak.hesap.goc-baslik':'Bu cihazdakileri tek depoya taşı',
   'ortak.hesap.goc-aciklama':'Fotoğraflar, açılmamış profiller ve bekleyen değişiklikler dahil. Hiçbir şey silinmez.',
@@ -538,7 +538,7 @@ window.LIFEOS.PARCA.yazilar({
 });
 
 window.LIFEOS.PARCA.yazilar({
-  'ortak.hesap.bilgisayardaki-lifeos':'Bilgisayardaki LifeOS',
+  'ortak.hesap.bilgisayardaki-lifeos':'Bilgisayardaki Başbuğ',
   'ortak.hesap.sistem-guncel':'Güncel',
   'ortak.hesap.sistem-guncelleniyor':'Güncelleniyor; bilgisayar gerekirse kendini yeniden başlatır…',
   'ortak.hesap.sistem-bakilamadi':'Yenilik olup olmadığına bakılamadı; bilgisayarın internet bağlantısını denetle.',
@@ -552,16 +552,16 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.hesap.her-yerden':'Her yerden erişim',
   'ortak.hesap.her-yerden-alt':'Bilgisayarındaki King’e bağlantı',
   'ortak.hesap.her-yerden-kapat':'Her yerden erişimi kapat',
-  'ortak.hesap.her-yerden-kosul':'LifeOS ve bilgisayar açık kalmalı. Kapalıyken modüller ve kurallar çalışır, model cevap vermez.',
-  'ortak.hesap.acilista':'Bilgisayar açılınca LifeOS başlasın',
+  'ortak.hesap.her-yerden-kosul':'Başbuğ ve bilgisayar açık kalmalı. Kapalıyken modüller ve kurallar çalışır, model cevap vermez.',
+  'ortak.hesap.acilista':'Bilgisayar açılınca Başbuğ başlasın',
   'ortak.hesap.acilista-not':'Pencere açılmaz, oturum açınca arkada başlar. Uyku ve güç ayarına dokunulmaz; bilgisayar uyursa telefon erişemez.',
   'ortak.hesap.yeniden-dene':'Yeniden dene',
   'ortak.hesap.hal-bagli':'Bağlı. King bilgisayarındaki modelle konuşuyor.',
   'ortak.hesap.hal-model-mesgul':'Bağlı ama model şu an meşgul: cevaplar geç gelebilir.',
   'ortak.hesap.hal-model-kapali':'Bağlı ama model kapalı: King şimdilik kurallarla çalışıyor.',
-  'ortak.hesap.hal-merkez-kapali':'Bilgisayar açık ama Merkez kapalı: King şimdilik kurallarla çalışıyor. Bilgisayarda LifeOS’u aç.',
+  'ortak.hesap.hal-merkez-kapali':'Bilgisayar açık ama Başbuğ bu bilgisayarda çalışmıyor: King şimdilik kurallarla yanıt veriyor. Bilgisayarda Başbuğ’u aç.',
   'ortak.hesap.hal-bilgisayar-kapali':'Bilgisayara ulaşılamıyor: kapalı, uykuda ya da internet yok. Modüller ve kayıtlar çalışır; değişiklikler bağlanınca gider.',
-  'ortak.hesap.hal-yok':'Bu cihaz henüz Merkez’e bağlı değil.',
+  'ortak.hesap.hal-yok':'Bu cihaz henüz bilgisayarındaki Başbuğ’a bağlı değil.',
   'ortak.hesap.ts-yok':'Bu bilgisayarda Tailscale kurulu değil.',
   'ortak.hesap.ts-giris':'Tailscale kurulu ama giriş yapılmamış.',
   'ortak.hesap.ts-funnel':'Bu bilgisayarda funnel açık, yani internete açık bir kapı var. Önce kapat: tailscale funnel reset',
@@ -656,7 +656,7 @@ window.LIFEOS.HESAP = (function(){
     },
     zamanla:(fn, ms) => setTimeout(fn, ms),
     iptal:id => clearTimeout(id),
-    /* Hareket azaltılmış mı (animasyon.js matchMedia'yı LifeOS ayarına göre
+    /* Hareket azaltılmış mı (animasyon.js matchMedia'yı Başbuğ ayarına göre
        sarar; seçim sayfasında da yüklüdür). */
     azalt:() => { try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return true; } },
     /* Dosya ver: uygulamada paylaşım sayfası (indirme yok), tarayıcıda indirme. */
@@ -787,7 +787,7 @@ window.LIFEOS.HESAP = (function(){
   }
 
   /* Sunucu nerede? Uygulamada (telefon) kullanıcının yazdığı adres;
-     tarayıcıda sayfanın kendi kökeni (LifeOS sunucusu her modül kapısında
+     tarayıcıda sayfanın kendi kökeni (Başbuğ sunucusu her modül kapısında
      /api/hesap/ sunar). null = bilinmiyor. */
   function sunucuAdresi(){
     const o = oturum();
@@ -860,7 +860,7 @@ window.LIFEOS.HESAP = (function(){
       });
       let v = null;
       try{ v = await r.json(); }catch(e){ v = null; }
-      /* Vekil (tailscale serve) LifeOS kapalıyken boş 502 döner: bu «ulaşılamadı»dır, hata değil. */
+      /* Vekil (tailscale serve) Başbuğ kapalıyken boş 502 döner: bu «ulaşılamadı»dır, hata değil. */
       if(!v && r.status >= 502 && r.status <= 504) throw new Error('vekil');
       if(!r.ok){
         const h = new Error((v && v.hata) || ('Sunucu cevap vermedi (' + r.status + ').'));
@@ -1693,8 +1693,8 @@ window.LIFEOS.HESAP = (function(){
 
   function baglantiHatasi(){
     return ortam.yerelUygulama()
-      ? 'Bilgisayara ulaşılamadı. Aynı Wi-Fi\'da mısınız, LifeOS açık mı, adres doğru mu? '
-        + 'iPhone\'da LifeOS kök sertifikası kurulu ve «tam güven» açık olmalı.'
+      ? 'Bilgisayara ulaşılamadı. Aynı Wi-Fi\'da mısınız, Başbuğ açık mı, adres doğru mu? '
+        + 'iPhone\'da Başbuğ kök sertifikası kurulu ve «tam güven» açık olmalı.'
       : yz('ortak.hesap.bilgisayara-ulasilamadi-life');
   }
 
@@ -1736,14 +1736,14 @@ window.LIFEOS.HESAP = (function(){
   function kapiNotu(){
     if(!sunucu){
       return ortam.yerelUygulama()
-        ? 'Telefon ve bilgisayar aynı Wi-Fi\'da olmalı. Adres, bilgisayardaki LifeOS\'ta Hesap › Cihazlar\'da yazar.'
+        ? 'Telefon ve bilgisayar aynı Wi-Fi\'da olmalı. Adres, bilgisayardaki Başbuğ\'da Hesap › Cihazlar\'da yazar.'
         : yz('ortak.hesap.bilgisayara-ulasilamiyor-bet');
     }
     if(sunucu.kurulum) return sunucu.yerel ? yz('ortak.hesap.i-lk-hesap-admin-olur') : yz('ortak.hesap.i-lk-hesap-bilgisayarin-kend');
     return '';
   }
 
-  /* LifeOS işareti: dört sistemin rengi. Her şekil kendi grubunda; ilk
+  /* Başbuğ işareti: dört sistemin rengi. Her şekil kendi grubunda; ilk
      açılışta sırayla belirir (grup oynar, şeklin kendi dönüşü bozulmaz). */
   function isaret(ilk){
     const P = window.LIFEOS.PIKSEL, ic = P && P.figurSvg ? P.figurSvg('logo') : '';
@@ -1763,7 +1763,7 @@ window.LIFEOS.HESAP = (function(){
   const SOZLER = [yz('ortak.hesap.pc-telefon-ve-tablet-ayni'), yz('ortak.hesap.verin-hicbir-sirketin-sunucu'),
     yz('ortak.hesap.bilgisayar-kapaliyken-de-cal')];
   function tanitimHtml(){
-    return '<section class="hesap-kapi__tanitim" aria-label="LifeOS">' + isaret(true)
+    return '<section class="hesap-kapi__tanitim" aria-label="Başbuğ">' + isaret(true)
       + ('<p class="hesap-kapi__ad">' + yz('ortak.hesap.lifeos') + '</p>')
       + ('<p class="hesap-kapi__slogan">' + yz('ortak.hesap.sinav-saglik-ve-gelisim-tek') + '</p>')
       + '<ul class="hesap-kapi__sistemler">' + SISTEMLER.map(([ad, acik, sekil, renk], i) =>
@@ -2212,7 +2212,7 @@ window.LIFEOS.HESAP = (function(){
         v = r.ok ? await r.json() : null;
       }else v = await api('/api/hesap/merkez', {});
     }catch(e){
-      /* Ulaşılamadı: LifeOS açılınca sayfa yenilenmeden bağlansın (dakikalık turda yeniden). */
+      /* Ulaşılamadı: Başbuğ açılınca sayfa yenilenmeden bağlansın (dakikalık turda yeniden). */
       if(!e || !e.kod) merkezDenenen = null;
       return false;
     }
@@ -3200,7 +3200,7 @@ window.LIFEOS.HESAP = (function(){
               + '<span class="hesap-oge__metin"><b>' + kac(c.cihaz_ad) + '</b><small>' + (c.bu ? yz('ortak.hesap.bu-cihaz-2') : 'Cihaz') + '</small></span>'
               + '<span class="hesap-satir__detay">' + (c.esitleme ? kac(sonMetni(c.esitleme)) : 'henüz yok') + '</span></li>').join('')
             + '</ul>' : '')
-        + ('<p class="hesap__not">' + yz('ortak.hesap.bu-cihaz-3') + ' ') + kac(cihazAdi()) + '. Kayıtlar bilgisayardaki LifeOS ile eşitlenir; '
+        + ('<p class="hesap__not">' + yz('ortak.hesap.bu-cihaz-3') + ' ') + kac(cihazAdi()) + '. Kayıtlar bilgisayardaki Başbuğ ile eşitlenir; '
         + 'fotoğraflar çekildiği cihazda kalır.' + (modulde ? '' : ' Eşitleme her sistemin içinde kendiliğinden olur.') + '</p>';
     },
 

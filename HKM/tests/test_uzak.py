@@ -230,7 +230,7 @@ def run():
             ok(uzak.acilis_acik(r))
             komut = r.deger["LifeOS"]
             ok('baslat.py" --tarayicisiz' in komut, komut)
-            no("funnel" in komut or "serve" in komut, "erisimi acmaz, yalniz LifeOS'u baslatir")
+            no("funnel" in komut or "serve" in komut, "erisimi acmaz, yalniz Başbuğ'u baslatir")
             uzak.acilis_ayarla(False, r)
             no(uzak.acilis_acik(r))
             eq(r.deger, {}, "kapatinca iz kalmaz")

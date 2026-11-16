@@ -361,7 +361,7 @@ LIFEOS.Depo = Object.freeze({ kur(o){
     if(!obj || typeof obj !== 'object') return { ok:false, error:yz('ortak.depo.dosya-okunamadi') };
     if(obj.__meta && obj.data){
       /* UYGULAMA KIMLIGI once denetlenir. Yalniz sema surumune bakan bir
-         okuma, baska bir LifeOS uygulamasinin yedegini kabul ediyordu:
+         okuma, baska bir Başbuğ uygulamasinin yedegini kabul ediyordu:
          dosya secicide yanlis dosyayi secmek, profil verisinin baska bir
          uygulamanin verisiyle degismesi demekti. */
       if(obj.__meta.app && obj.__meta.app !== APP_ID){

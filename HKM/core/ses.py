@@ -561,7 +561,7 @@ _BIRIM = {"dk": "dakika", "dak": "dakika", "sn": "saniye", "sa": "saat", "kg": "
           "gr": "gram", "g": "gram", "ml": "mililitre", "lt": "litre", "cm": "santimetre", "kcal": "kalori",
           "TL": "lira", "tl": "lira"}
 _KISA = {"AYS": "ays", "SPİ": "spi", "SPI": "spi", "ESP": "esp", "TYT": "te ye te", "AYT": "a ye te",
-         "YKS": "ye ka se", "HKM": "he ka me", "LifeOS": "layf o es", "HRV": "he re ve", "TL": "lira"}
+         "YKS": "ye ka se", "HKM": "he ka me", "HRV": "he re ve", "TL": "lira"}
 
 
 def _sayi_yaz(n):

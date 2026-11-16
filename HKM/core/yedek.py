@@ -113,7 +113,7 @@ def kaydet(klasor_kok, modul, ham, bugun=None):
         return {"ok": False, "note": "Yedek okunamadı: geçerli bir JSON değil."}
     meta = govde.get("__meta") if isinstance(govde, dict) else None
     if not isinstance(meta, dict) or not isinstance(govde.get("data"), dict):
-        return {"ok": False, "note": "Bu bir LifeOS yedeği değil."}
+        return {"ok": False, "note": "Bu bir Başbuğ yedeği değil."}
     if meta.get("app") != MODULLER[modul]:
         return {"ok": False, "note": "Bu dosya %s yedeği değil; saklanmadı." % MODUL_AD[modul]}
     tarih = bugun or datetime.date.today().isoformat()
@@ -243,7 +243,7 @@ def zip_paketi(con, klasor_kok, bugun):
     import zipfile
     from core import db
     tampon = io.BytesIO()
-    satir = ["LifeOS — tek dosya dışa aktarma (%s)" % bugun, "",
+    satir = ["Başbuğ — tek dosya dışa aktarma (%s)" % bugun, "",
              "İçindekiler:",
              "  hkm/hkm-ambar.json   HKM'nin bütün kaydı (sohbet, kararlar, iş emirleri, ölçümler)"]
     with zipfile.ZipFile(tampon, "w", zipfile.ZIP_DEFLATED) as z:

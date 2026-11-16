@@ -1,4 +1,4 @@
-# LifeOS · HKM — gemma3:4b, yalniz metin (goruntu parcasi yok), 4 GB RAM icin.
+# Başbuğ · HKM — gemma3:4b, yalniz metin (goruntu parcasi yok), 4 GB RAM icin.
 # Kurulum (HKM/KURULUM.md §5.1): bu dosya ile gemma-3-4b-it-Q4_K_M.gguf ayni klasorde:
 #   ollama create gemma3-4b-metin -f gemma3-4b-metin.Modelfile
 # Olculen bellek: ~3.2 GB (Q4_K_M, baglam 4096). Resmi gemma3:4b goruntu

@@ -4,7 +4,7 @@
    Kanitladigi sozler:
      1. Yazilan dosya, gelen baytlarin KENDISIDIR; bayt sayisi ve SHA-256
         geri okunarak dogrulanir.
-     2. Baska modulun yedegi, LifeOS olmayan bir govde ve bozuk JSON
+     2. Baska modulun yedegi, Başbuğ olmayan bir govde ve bozuk JSON
         reddedilir; hicbir dosya yazilmaz.
      3. Dondurme: son 14 gun + son 6 ayin her birinden ayin son yedegi.
         Silinmis bir tarayicinin iki haftalik bos yedegi iyi yedekleri
@@ -68,7 +68,7 @@ def run():
             eq(yedek.liste(kok)["moduller"], {"ays": [], "spi": [], "esp": []})
         finally:
             shutil.rmtree(kok)
-    test("baska modulun, LifeOS olmayan ve bozuk govde reddedilir", t_red)
+    test("baska modulun, Başbuğ olmayan ve bozuk govde reddedilir", t_red)
 
     def t_eszamanli():
         """HATALAR D-4: iki sekme ayni modulun yedegini ayni anda yollarsa

@@ -151,7 +151,7 @@ CONFIG_PATH = os.environ.get("HKM_CONFIG") or os.path.join(ROOT, "config.json")
 PAIR_SECONDS = 120
 PAIR_MIN_SECONDS = 15        # pencere bundan kisa da olamaz, uzun da
 PAIR_MAX_ORIGINS = 4         # yuz + AYS + SPI + ESP; fazlasina verilmez
-# LifeOS'un kendi kapilari (brand/ortak/kabuk.js adres(), yuzdeki KAPI):
+# Başbuğ'un kendi kapilari (brand/ortak/kabuk.js adres(), yuzdeki KAPI):
 # Merkez de bir moduldur, anahtar sorulmaz (2026-10-20, kullanici: «merkeze
 # anahtar ile girilmesin, her turlu girilebilsin»). Bu kapilardan gelen
 # YEREL koken jetonu pencere beklemeden alir; baska bir yerel port
@@ -1740,7 +1740,7 @@ class Handler(BaseHTTPRequestHandler):
                 ek["arac_sonuclari"] = govde["arac_sonuclari"]
             if isinstance((govde or {}).get("dongu"), dict):
                 ek["dongu"] = govde["dongu"]
-            # Kabugun King sohbeti (kabuk/king-sohbet.js): kip, acik dersin baglami (icerigi sunucu okur) ve LifeOS
+            # Kabugun King sohbeti (kabuk/king-sohbet.js): kip, acik dersin baglami (icerigi sunucu okur) ve Başbuğ
             # blogu. Antigravity ayni sohbet oturumunda ayni konusmaya devam eder (core/kopru.py OTURUM).
             if "kip" in (govde or {}):
                 ek["kip"] = sohbet.kip_of(govde.get("kip"))

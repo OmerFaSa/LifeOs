@@ -1,4 +1,4 @@
-/* LifeOS seviye sistemi — ALTI KADEME; BEŞİ NOKTALI, ALTINCISI SONSUZ.
+/* Başbuğ seviye sistemi — ALTI KADEME; BEŞİ NOKTALI, ALTINCISI SONSUZ.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
 

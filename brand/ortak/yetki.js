@@ -50,7 +50,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.yetki.butun-kayitlar-silinecek':'Bütün kayıtlar silinecek.',
   'ortak.yetki.once-donus-noktasi-alinir-do':'Önce dönüş noktası alınır; «Dönüş noktasına dön» dersen her şey geri gelir.',
   'ortak.yetki.bu-cihazdaki-fotograflar-don':'Bu cihazdaki fotoğraflar dönüş noktasına girmez.',
-  'ortak.yetki.hesabin-oteki-moduller-ve-li':'Hesabın, öteki modüller ve LifeOS ayarların değişmez.',
+  'ortak.yetki.hesabin-oteki-moduller-ve-li':'Hesabın, öteki modüller ve Başbuğ ayarların değişmez.',
   'ortak.yetki.o-andan-sonra-girilen-kayitl':'O andan sonra girilen kayıtlar bu dönüşle silinir.',
   'ortak.yetki.modulun-ice-aktarmasi-kendi':'Modülün içe aktarması kendi geri alma yuvasını bırakır.',
 });

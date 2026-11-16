@@ -610,8 +610,8 @@
        yazmıyor». Windows'ta animasyon kapalı: tarayıcı «azalt» der. Tek dosya
        sürümünde (LifeOS.exe, dist) betikler sayfanın sonundadır; perdenin
        satır içi betiği animasyon.js'ten ÖNCE çalışıp tarayıcının cevabını
-       görüyor ve perdeyi kaldırıyordu. Karar LifeOS'un kendi ayarıdır. */
-    it('perde LifeOS animasyon ayarına uyar: tarayıcı «azalt» derken Tam ise kalır, Az ise kalkar', async () => {
+       görüyor ve perdeyi kaldırıyordu. Karar Başbuğ'un kendi ayarıdır. */
+    it('perde Başbuğ animasyon ayarına uyar: tarayıcı «azalt» derken Tam ise kalır, Az ise kalkar', async () => {
       const r = await fetch('../index.html');
       const h = await r.text();
       const bas = h.indexOf('<div id="marka-perde"'), son = h.indexOf('<!-- SEVIYE:perde-bit -->');

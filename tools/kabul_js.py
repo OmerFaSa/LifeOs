@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """KABUL_JS — Python kabul testinin modul JS mantigini tarayicisiz kosmasi (Node vm).
 
-Ofisin kabul testleri Python'dur (Testci .py kosar); LifeOS'un mantigi ise modul
+Ofisin kabul testleri Python'dur (Testci .py kosar); Başbuğ'un mantigi ise modul
 JS'inde (`window.SP = …; SP.X = (function(){…})()`). Bu yardimci verilen dosyalari
 tek bir vm baglamina sirayla yukler (window = self = globalThis = baglam, bellekte
 localStorage) ve bir ifadeyi degerlendirip sonucunu JSON olarak dondurur. Promise

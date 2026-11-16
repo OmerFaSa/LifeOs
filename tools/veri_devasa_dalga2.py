@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LifeOS Devasa Veri Toplayici - 2. Dalga (Derinlik ve Genisletme)
+"""Başbuğ Devasa Veri Toplayici - 2. Dalga (Derinlik ve Genisletme)
 Sistem doktrinine tam uyumlu:
 - Sifir calisma zamani bagimliligi (yalnizca Python standart kutuphanesi).
 - Saglik Bakanligi (TUBER 2022), MEB Talim Terbiye, TDK, AASM, Stanford Felsefe ve Tatoeba.
@@ -458,7 +458,7 @@ def topla_tatoeba_dalga2(hedef_diller=["ita", "por", "nld", "ara"], sinir_dil=12
 
 def main():
     print("=" * 70)
-    print("LifeOS Devasa Veri Toplayıcı - 2. Dalga Başlatılıyor")
+    print("Başbuğ Devasa Veri Toplayıcı - 2. Dalga Başlatılıyor")
     print("=" * 70)
 
     ensure_dirs()

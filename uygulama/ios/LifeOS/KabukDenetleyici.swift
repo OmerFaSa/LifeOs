@@ -151,7 +151,7 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
     var yazdirmaPaneli = true
 
     func yazdir(baslik: String?) {
-        let ad = (baslik?.isEmpty == false) ? baslik! : "LifeOS"
+        let ad = (baslik?.isEmpty == false) ? baslik! : "Başbuğ"
         sonYazdirma = ad
         guard yazdirmaPaneli, view.window != nil else { return bitti() }
         let bilgi = UIPrintInfo(dictionary: nil)
@@ -422,7 +422,7 @@ final class HataDenetleyici: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         let l = UILabel()
-        l.text = "LifeOS açılamadı.\n\n" + metin + "\n\nUygulamayı kapatıp yeniden aç."
+        l.text = "Başbuğ açılamadı.\n\n" + metin + "\n\nUygulamayı kapatıp yeniden aç."
         l.numberOfLines = 0
         l.textAlignment = .center
         l.translatesAutoresizingMaskIntoConstraints = false

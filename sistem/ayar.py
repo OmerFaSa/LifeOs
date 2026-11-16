@@ -266,7 +266,7 @@ def isle(h, kok=None, uzak_izin=None):
         if h.command != "POST":
             return _json(h, 405, {"hata": "Desteklenmiyor."})
         if h.headers.get("X-LifeOS") != "ayar":
-            return _json(h, 403, {"hata": "Yalnız LifeOS'un kendi sayfasından."})
+            return _json(h, 403, {"hata": "Yalnız Başbuğ'un kendi sayfasından."})
         try:
             boy = min(int(h.headers.get("Content-Length") or 0), 512 * 1024)
             ham = h.rfile.read(boy).decode("utf-8") if boy > 0 else "{}"
@@ -299,7 +299,7 @@ def isle(h, kok=None, uzak_izin=None):
         if h.command != "POST":
             return _json(h, 405, {"hata": "Desteklenmiyor."})
         if h.headers.get("X-LifeOS") != "ayar":
-            return _json(h, 403, {"hata": "Yalnız LifeOS'un kendi sayfasından."})
+            return _json(h, 403, {"hata": "Yalnız Başbuğ'un kendi sayfasından."})
         try:
             boy = min(int(h.headers.get("Content-Length") or 0), 512 * 1024)
             ham = h.rfile.read(boy).decode("utf-8") if boy > 0 else "{}"

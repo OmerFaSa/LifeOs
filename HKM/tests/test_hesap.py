@@ -564,8 +564,8 @@ def run():
         s = hesap.sir_uret()
         ok(hesap.SIR_RE.match(s) and len(s) == 32)
         u = hesap.otpauth("Ömer Can", s)
-        ok(u.startswith("otpauth://totp/LifeOS:%C3%96mer%20Can?secret=" + s))
-        ok("issuer=LifeOS" in u and "digits=6" in u and "period=30" in u)
+        ok(u.startswith("otpauth://totp/Ba%C5%9Fbu%C4%9F:%C3%96mer%20Can?secret=" + s))
+        ok("issuer=Ba%C5%9Fbu%C4%9F" in u and "digits=6" in u and "period=30" in u)
     test("iki adim: TOTP RFC 6238 vektorleri, sir ve otpauth adresi", t_totp_rfc)
 
     def t_iki_adim_kurulum():
@@ -819,7 +819,7 @@ def run():
             ok(cal.startswith("BEGIN:VCALENDAR\r\n") and cal.endswith("END:VCALENDAR\r\n"))
             eq(cal.count("BEGIN:VEVENT"), 1)
             ok("SUMMARY:TYT sınav günü" in cal and "\r\n devamı\r\n" in cal)   # katlanmis satir korunur
-            ok("X-WR-CALNAME:LifeOS" in cal and "X-WR-CALNAME:AYS" not in cal)
+            ok("X-WR-CALNAME:Başbuğ" in cal and "X-WR-CALNAME:AYS" not in cal)
             ok(r.d.takvim(k)["son"])
             eq(r.d.takvim_ac(k)["yol"], t["yol"])                         # acikken ayni adres
             t2 = r.d.takvim_ac(k, yenile=True)
@@ -1098,7 +1098,7 @@ def run():
         try:
             with urllib.request.urlopen(adres + "/hesap.js", timeout=10) as c:
                 ok(b"LIFEOS.HESAP" in c.read() and "javascript" in c.headers.get("Content-Type"))
-            # Secim sayfasi LifeOS'un kendi «Animasyonlar» ayarini izler (2026-10-06).
+            # Secim sayfasi Başbuğ'un kendi «Animasyonlar» ayarini izler (2026-10-06).
             with urllib.request.urlopen(adres + "/animasyon.js", timeout=10) as c:
                 ok(b"L.ANIMASYON = Object.freeze" in c.read() and "javascript" in c.headers.get("Content-Type"))
             # QR (hesap sayfasi: iki adim kurulumu, kodla cihaz baglama; 2026-10-08).
@@ -1135,7 +1135,7 @@ def run():
             kod, _, v = s.iste("/api/hesap/iki-adim/baslat", {"parola": "parola-123"}, y)
             eq(kod, 200)
             sir = v["sir"]
-            ok(v["uri"].startswith("otpauth://totp/LifeOS:omer?secret=" + sir))
+            ok(v["uri"].startswith("otpauth://totp/Ba%C5%9Fbu%C4%9F:omer?secret=" + sir))
             kod, _, v = s.iste("/api/hesap/iki-adim/onayla", {"kod": _kod(s.r, sir)}, y)
             eq((kod, len(v["yedek"])), (200, hesap.YEDEK_ADET))
             kod, _, v = s.iste("/api/hesap/ben", baslik=y)

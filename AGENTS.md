@@ -5,6 +5,12 @@
 > çalışırken birbirinin işini bozmasın ve depo doktrini her turda yeniden
 > anlatılmak zorunda kalmasın.
 
+> **Ad (2026-11-16):** Uygulamanın adı **Başbuğ**dur; kullanıcının gördüğü her yerde böyle yazılır. İç kimlikler
+> bilerek `lifeos` / `LifeOS` kaldı, çünkü değişirse veri kaybolur ya da kısayol, depo, bağlantı kırılır:
+> `lifeos.*` depo anahtarları, `LIFEOS_*` ortam değişkenleri, `%LOCALAPPDATA%\LifeOS` ve `LifeOS-Sistem` klasörleri,
+> veritabanı ve dosya adları, `X-LifeOS` başlığı, API yolları, `LifeOS.exe`, MCP kimliği `lifeos-king`, kasa
+> anahtarı, görev adı `LifeOS\Acilis` ve git deposu. Yeni kodda bunları değiştirme; yalnız görünen metni değiştir.
+
 ## 0. Otuz saniyede depo
 
 Tek sistem (kapanış, Faz 7): bir uygulama, bir adres, bir süreç. `sistem/tekkapi.py` 4180'de
@@ -128,7 +134,7 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    modülüdür; beşinci bir sistem değildir.
    **Hesap ve eşitleme (2026-10-04, depo sahibinin kararı):** PC, telefon
    ve tablet aynı hesapla girer; kayıtların kopyası kullanıcının KENDİ
-   PC'sindeki LifeOS sunucusunda durur (`sistem/hesap.py`, her modül
+   PC'sindeki Başbuğ sunucusunda durur (`sistem/hesap.py`, her modül
    kapısında `/api/hesap/`; istemci `brand/ortak/hesap.js`). Aynı kural
    geçerlidir: sunucu kapalıyken modül bozulmaz, yavaşlamaz; değişiklik
    cihazda sıraya girer, bağlanınca akar. Veri hiçbir şirketin sunucusuna
@@ -151,7 +157,7 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    onaysız yazılmaz. Takvimi modül üretir (AYS, ESP), sunucu yalnız
    birleştirip sunar. Hesap deposu her gün yedeklenir; geri yükleme büyük
    aksiyondur ve cihazların sonraki değişikliğini ezmez (sunucu sözü 20).
-   Admin, şifresiyle, bilgisayardaki LifeOS'u telefondan ya da tabletten
+   Admin, şifresiyle, bilgisayardaki Başbuğ'u telefondan ya da tabletten
    güncelleyebilir (sunucu sözü 28): güncelleyicinin sözleri aynıdır, veriye
    dokunmaz. Ev ağını açmak yine yalnız bilgisayarın kendisinden.
    Siri «Bugün ne var?»: her modül günün cümlesini KENDİ kuralıyla yazıp

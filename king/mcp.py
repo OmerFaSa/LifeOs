@@ -6,7 +6,7 @@ Rapor: belgeler/ekip/sadelesme/faz5-mcp.md · Kurulum: king/KURULUM.md · Test: 
     python king/mcp.py --denetle   gercek veriyle her araci bir kez cagirir, YALNIZ sayilari basar
 
 Sozler:
-1. Yalniz okur. Yazan arac yok; kayit, not ve onay LifeOS'un kendi ekranlarindadir (AGENTS §0.1: yazma tek
+1. Yalniz okur. Yazan arac yok; kayit, not ve onay Başbuğ'un kendi ekranlarindadir (AGENTS §0.1: yazma tek
    surecten sonra; model hafizaya yazmaz, onerir).
 2. Canli dosya acilmaz. Tek depo (lifeos.db) varsa o, yoksa hesap.db; dosya yanindaki -wal/-journal ile gecici
    klasore KOPYALANIR, kopya acilir, cagri bitince silinir (faz1.md: salt okur acilis bile canli dosyanin yanina
@@ -168,7 +168,7 @@ def anlik():
     a = {"kaynak": {"tek": "tek depo (lifeos.db) kopyası", "hesap": "hesap sunucusu deposu (hesap.db) kopyası",
                     None: "yok"}[tur], "kayitlar": [], "yayin": {}, "uyari": []}
     if not tur:
-        a["uyari"].append("Veri deposu bulunamadı: LifeOS bu bilgisayarda hiç açılmamış olabilir.")
+        a["uyari"].append("Veri deposu bulunamadı: Başbuğ bu bilgisayarda hiç açılmamış olabilir.")
         return a
     with tempfile.TemporaryDirectory(prefix="lifeos-king-") as gecici:
         c = kopya_ac(tek if tur == "tek" else hesap, gecici)
@@ -483,7 +483,7 @@ def t_olcum(arg):
 # Cekirdek modulleri bu dosyadan katla/t_* alir: dongusel ice aktarma olmasin diye cagri aninda yuklenir.
 
 YAZMA_YOK = ("Yazılmadı: bu bir öneri. King hafızaya ve depoya yazmaz. Kayıt, tek süreç (tek sunucu, tek depo) "
-             "kurulduktan sonra kural motorunun kaydet kapısından ve senin onayınla yazılır; bugün LifeOS'ta kendin kaydet.")
+             "kurulduktan sonra kural motorunun kaydet kapısından ve senin onayınla yazılır; bugün Başbuğ'da kendin kaydet.")
 
 
 def vk(x):
@@ -580,7 +580,7 @@ METIN = lambda aciklama, n=200: {"type": "string", "maxLength": n, "description"
 OKUR = {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False}
 ARACLAR = [
     ("sistem_haritasi", "Sistem haritası", t_harita, nesne(),
-     "LifeOS'taki bütün yerler (kabuk, on alan, motorlar, King) ve durumları, ayrıca King'in okuyabildiği veri "
+     "Başbuğ'daki bütün yerler (kabuk, on alan, motorlar, King) ve durumları, ayrıca King'in okuyabildiği veri "
      "deposu ile alan başına kayıt sayısı. «Nerede ne var, sen neyi görüyorsun» sorusunun kapısı (Kabuk)."),
     ("kayit_ara", "Kayıt ara", t_kayit_ara,
      nesne(alan=METIN("Modül ya da profil öneki: «spi», «ays/main».", 60),
@@ -621,7 +621,7 @@ ARACLAR = [
     ("kayit_cozumle", "Kayıt önerisi", t_kayit_cozumle,
      dict(nesne(metin=METIN("Kayıt cümlesi: «Bugün 20 dakika yürüdüm».", 300)), required=["metin"]),
      "Kayıt cümlesini tipli kayıt ÖNERİSİNE çevirir (tür, gün, alanlar; her sayı kesinlik etiketiyle). Hiçbir şey "
-     "yazmaz: kayıt tek süreçten sonra kaydet kapısından ve sahibin onayıyla gelir; bugün LifeOS'ta kaydedilir."),
+     "yazmaz: kayıt tek süreçten sonra kaydet kapısından ve sahibin onayıyla gelir; bugün Başbuğ'da kaydedilir."),
     ("arastir", "Araştır", t_arastir,
      dict(nesne(soru=METIN("Araştırılacak soru ya da konu; «notlarımda …» yalnız notlara bakar.", 200)),
           required=["soru"]),
@@ -630,8 +630,8 @@ ARACLAR = [
 ]
 ARAC = {ad: (fn, sema) for ad, _, fn, sema, _ in ARACLAR}
 ACIK_DUNYA = {"arastir"}   # web'e cikan tek arac
-TALIMAT = ("LifeOS King'in salt okur kapıları. Sayıyı uydurma: her sayı kesinlik etiketiyle gelir; «veri yok» "
-           "diyorsa öyle söyle. Yazma yok: kayit_cozumle yalnız öneri gösterir; kayıt, not ve onay için LifeOS'u "
+TALIMAT = ("Başbuğ King'in salt okur kapıları. Sayıyı uydurma: her sayı kesinlik etiketiyle gelir; «veri yok» "
+           "diyorsa öyle söyle. Yazma yok: kayit_cozumle yalnız öneri gösterir; kayıt, not ve onay için Başbuğ'u "
            "açmasını söyle. arastir'in iddialarını kaynağıyla aktar. Özel notlar gelmez.")
 
 
@@ -677,7 +677,7 @@ def cagir(p):
 
 
 def sunucu_bilgisi():
-    return {"name": "lifeos-king", "title": "LifeOS King (salt okur)", "version": SURUM}
+    return {"name": "lifeos-king", "title": "Başbuğ King (salt okur)", "version": SURUM}
 
 
 def yanitla(m):

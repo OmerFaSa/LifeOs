@@ -322,9 +322,9 @@ def run():
         """Sahada (2026-10-19): «çok uzun bir metin yaz» dendi; kucuk modelin
         «en fazla 3 cümle» kurali yuzunden King reddetti. Kod uzun istegi
         tanir: talimat cumle sinirini kaldirir, cevap payi ve bekleme buyur;
-        LifeOS sorulursa kendi tanimi baglama girer (adresler denetimden gecer)."""
+        Başbuğ sorulursa kendi tanimi baglama girer (adresler denetimden gecer)."""
         for m in ("Bana çok uzun bir metin yazar mısın?", "Tamam odaklanmadan yüzeysel uzun bir metin yaz.",
-                  "LifeOS'u ayrıntılı anlat", "kapsamlı bir rapor hazırla"):
+                  "Başbuğ'u ayrıntılı anlat", "kapsamlı bir rapor hazırla"):
             ok(sohbet.uzun_istek(m), m)
         for m in ("uzun süre uyudum", "bugün hava güzel", "yaz tatili ne zaman", "uzun vadeli hedefim var"):
             no(sohbet.uzun_istek(m), m)
@@ -341,7 +341,7 @@ def run():
             ok("cümle sınırı" in gorulen["sistem"] and "4173" in gorulen["baglam"], gorulen["sistem"][-300:])
             sohbet.konus(_con(), _cfg(), "bugün hava güzel", BUGUN)
             eq((gorulen["jeton"], gorulen["sure"]), (None, None))
-            no("cümle sınırı" in gorulen["sistem"] or "LifeOS hakkında" in gorulen["baglam"], "kisa istek")
+            no("cümle sınırı" in gorulen["sistem"] or "Başbuğ hakkında" in gorulen["baglam"], "kisa istek")
         finally:
             ai.ask = eski
         # ai._genis genisletir, daraltmaz.
@@ -350,7 +350,7 @@ def run():
         eq(ai._genis({"a": 1}, None, None), {"a": 1})
         # Kisa sistem metni tirnakli «bu ölçülmedi» ifadesini tasimaz (model aynen tekrarliyordu).
         no("«bu ölçülmedi»" in sohbet.sistem_metni("king", "-", kisa=True), "tirnakli ifade")
-    test("uzun istek: cümle sınırı kalkar, pay ve bekleme büyür; LifeOS tanımı bağlamda", t_uzun_istek)
+    test("uzun istek: cümle sınırı kalkar, pay ve bekleme büyür; Başbuğ tanımı bağlamda", t_uzun_istek)
 
     def t_samimi_sohbet():
         """Sahada (2026-10-19): «Nasılsın kanka?»ya hep ««bu ölçülmedi».» geldi.
@@ -384,7 +384,7 @@ def run():
         eq(sohbet.kalipsiz("Bu ölçülmedi."), "")
         t3 = _cevap("«bu ölçülmedi». Video yaratmak eğlenceli bir fikir!")
         g3 = [{"role": "user", "content": "selam"},
-              {"role": "assistant", "content": "«bu ölçülmedi». Bugün LifeOS olarak sistemin sağlığına odaklanıyorum. Senin günün nasıl?"}]
+              {"role": "assistant", "content": "«bu ölçülmedi». Bugün Başbuğ olarak sistemin sağlığına odaklanıyorum. Senin günün nasıl?"}]
         r3 = sohbet.konus(_db.connect(":memory:"), cfg, "Hayatın nasıl gidiyor", BUGUN, transport=t3, gecmis=g3)
         eq(r3["text"], "Video yaratmak eğlenceli bir fikir!")
         no(any("ölçülmedi" in m["content"] for m in t3.gorulen["mesajlar"]), t3.gorulen["mesajlar"])

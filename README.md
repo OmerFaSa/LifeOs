@@ -1,13 +1,13 @@
-<h1 align="center">LifeOS</h1>
+<h1 align="center">Başbuğ</h1>
 
 <p align="center">
   Tek kişi, tek sistem, tek veri: öğrenme, sağlık ve gündelik kayıt bir uygulamada.<br/>
   Tarayıcıda ve telefonda çalışır; hesabın ve verin senin bilgisayarında durur.
 </p>
 
-## LifeOS nedir?
+## Başbuğ nedir?
 
-LifeOS, tek bir kişinin gündelik hayatını yöneten tek bir uygulamadır
+Başbuğ, tek bir kişinin gündelik hayatını yöneten tek bir uygulamadır
 (2026-11-12 kararı, `belgeler/ekip/sadelesme/plan.html`). Katmanları:
 
 - **Kabuk** (`kabuk/`): tam ekran çerçeve, gezinme (basılı tut halkası, komut çubuğu),

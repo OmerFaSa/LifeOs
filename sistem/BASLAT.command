@@ -1,5 +1,5 @@
 #!/bin/sh
-# LifeOS — cift tikla calisir. Uc sistem + HKM + giris sayfasi.
+# Başbuğ — cift tikla calisir. Uc sistem + HKM + giris sayfasi.
 cd "$(dirname "$0")/.." || exit 1   # sistem/ -> deponun koku
 if command -v python3 >/dev/null 2>&1; then
   python3 sistem/baslat.py

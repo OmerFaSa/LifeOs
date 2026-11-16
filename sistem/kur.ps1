@@ -1,8 +1,8 @@
-# LifeOS - tek komutla kurulum (Windows). Yeni bilgisayarda PowerShell'e yapistir:
+# Başbuğ - tek komutla kurulum (Windows). Yeni bilgisayarda PowerShell'e yapistir:
 #
 #   irm https://raw.githubusercontent.com/OmerFaSa/LifeOs/main/sistem/kur.ps1 | iex
 #
-# Yapar: Python ve Git yoksa kurar (winget), LifeOS'u %USERPROFILE%\LifeOS-Sistem'e indirir,
+# Yapar: Python ve Git yoksa kurar (winget), Başbuğ'u %USERPROFILE%\LifeOS-Sistem'e indirir,
 # masaustu uygulamasini kurar, kisayol koyar, tasima paketi bulursa sorar, uygulamayi acar.
 # Yeniden calistirmak guvenlidir: var olani gunceller, kayitlara dokunmaz.
 # Dosya BOM'suz UTF-8 kalmali: BOM 'irm | iex' yolunu bozar (ilk satir komut sanilir).
@@ -46,7 +46,7 @@ function Winget-Kur($kimlik, $ad) {
     Yol-Tazele
 }
 
-Write-Host "`nLifeOS kurulumu`n"
+Write-Host "`nBaşbuğ kurulumu`n"
 
 # 1. Python ve Git
 $python = Python-Bul
@@ -68,18 +68,18 @@ function Python-Kos {
     return $LASTEXITCODE
 }
 
-# 2. LifeOS'un kendisi. Gecmis indirilmez: yuzlerce megabayt daha az.
+# 2. Başbuğ'un kendisi. Gecmis indirilmez: yuzlerce megabayt daha az.
 $env:PYTHONUTF8 = '1'
 if (Test-Path (Join-Path $Hedef '.git')) {
-    Yaz 'LifeOS zaten var; güncelleniyor...'
+    Yaz 'Başbuğ zaten var; güncelleniyor...'
     $kod = Python-Kos (Join-Path $Hedef 'sistem\guncelle.py')
     if ($kod -ne 0) { Yaz 'Güncelleme yapılamadı (yukarıdaki nedenle); kuruluma devam ediliyor.' }
 } elseif (Test-Path $Hedef) {
-    throw "$Hedef var ama LifeOS deposu değil. Klasörü kenara alıp yeniden dene."
+    throw "$Hedef var ama Başbuğ deposu değil. Klasörü kenara alıp yeniden dene."
 } else {
-    Yaz 'LifeOS indiriliyor (birkaç dakika sürer)...'
+    Yaz 'Başbuğ indiriliyor (birkaç dakika sürer)...'
     git clone --depth 1 --branch main $Depo $Hedef
-    if ($LASTEXITCODE -ne 0) { throw 'LifeOS indirilemedi; internet bağlantısını denetleyip yeniden dene.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Başbuğ indirilemedi; internet bağlantısını denetleyip yeniden dene.' }
 }
 
 # 3. Masaustu uygulamasi: Electron'un resmi paketi + depodaki kabuk (uygulama/masaustu).
@@ -139,5 +139,5 @@ if (-not $env:LIFEOS_KUR_SORMA) {
     }
 }
 
-Write-Host "`n  LifeOS kuruldu. Masaüstündeki kısayoldan açılır.`n"
+Write-Host "`n  Başbuğ kuruldu. Masaüstündeki kısayoldan açılır.`n"
 if (-not $env:LIFEOS_KUR_ACMA) { Start-Process $Exe }

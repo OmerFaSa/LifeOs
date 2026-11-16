@@ -9,15 +9,11 @@ const { chromium } = require(kok + '/tools/node_modules/playwright');
 const { spawn } = require('child_process');
 const fs = require('fs'), os = require('os'), path = require('path'), http = require('http');
 
-const PORT = 4394, T = 'http://127.0.0.1:' + PORT;
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'hareket-gez-'));
 const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici,
   LIFEOS_HESAP_KLASOR: path.join(gecici, 'LifeOS', 'hesap') });
-const srv = spawn(process.platform === 'win32' ? 'python' : 'python3', [path.join(kok, 'sistem/tekkapi.py'), '--port', String(PORT), '--hkm-ayri'], { env, stdio: 'ignore' });
-const bekle = () => new Promise((res, rej) => {
-  const son = Date.now() + 40000;
-  (function dene() { http.get(T + '/kabuk/', r => { r.resume(); res(); }).on('error', () => Date.now() > son ? rej(new Error('sunucu açılmadı')) : setTimeout(dene, 300)); })();
-});
+let srv, T, PORT;   // tools/gez_sunucu.js: boş port, çıktı hata anında gösterilir
+const { sunucuAc } = require(kok + '/tools/gez_sunucu.js');
 let kalan = 0;
 const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓ ' : '✕ ') + ad + (kosul || ek == null ? '' : '  → ' + ek)); };
 
@@ -37,7 +33,7 @@ async function kareOlc(p, isFn, arg) {
 const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAttribute('data-gecis'), null, { timeout: 5000 }).catch(() => {});
 
 (async () => {
-  await bekle();
+  const S = await sunucuAc({ kok, env, ad: 'hareket-gez' }); srv = S.srv; T = S.T; PORT = S.port; await S.hazir();
   const b = await chromium.launch();
   const y = JSON.parse(fs.readFileSync(path.join(kok, 'alan/felsefe/asama-1.json'), 'utf8'));
   const d1 = y.uniteler[0].dersler[0], a1 = d1.alistirmalar.filter(a => a.tur === 'secmeli' || a.sec)[0], harf = 'ABCDEFGH';

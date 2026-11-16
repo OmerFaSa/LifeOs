@@ -1,14 +1,15 @@
-// LifeOS · desktop app (Electron). It runs the LifeOS repository exactly as it is: the same Python launcher
+// Başbuğ · desktop app (Electron). It runs the Başbuğ repository exactly as it is: the same Python launcher
 // (sistem/baslat.py) starts AYS, SPİ, ESP and HKM in the background, and the app shows the control panel
 // (http://127.0.0.1:4180) in its own window. Nothing inside the repository is changed.
 const { app, BrowserWindow, Menu, shell, dialog, session, desktopCapturer } = require('electron');
 const path = require('path');
+const { bekci } = require('./sunucu-bekci.js');
 const http = require('http');
 const fs = require('fs');
 const { spawn, spawnSync } = require('child_process');
 
 // Not under AppData: a folder created there from inside a packaged (MSIX) app, such as the Claude app that ran the
-// installer, is redirected into that app's private cache and is invisible to the LifeOS started from the desktop.
+// installer, is redirected into that app's private cache and is invisible to the Başbuğ started from the desktop.
 const REPO = process.env.LIFEOS_DIR || path.join(process.env.USERPROFILE || '', 'LifeOS-Sistem');
 const GIRIS = 'http://127.0.0.1:4180';
 const LOCAL = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/|$)/i;
@@ -48,36 +49,27 @@ const SPLASH = 'data:text/html;charset=utf-8,' + encodeURIComponent(`<!doctype h
 <style>html,body{height:100%;margin:0;background:#120d08;color:#f3e3c4;font:15px/1.5 "Segoe UI",system-ui,sans-serif;display:grid;place-items:center}
 .b{text-align:center}.s{width:34px;height:34px;border:3px solid rgba(243,227,196,.18);border-top-color:#e8a64a;border-radius:50%;margin:18px auto 0;animation:r .9s linear infinite}
 @keyframes r{to{transform:rotate(360deg)}}small{display:block;opacity:.65;margin-top:6px}</style>
-<div class="b"><div style="font-size:26px;font-weight:600;letter-spacing:.14em">LIFEOS</div><small id="m">Başlatılıyor…</small><div class="s"></div></div></html>`);
+<div class="b"><div style="font-size:26px;font-weight:600;letter-spacing:.14em">BAŞBUĞ</div><small id="m">Başlatılıyor…</small><div class="s"></div></div></html>`);
 
 async function boot() {
   if (!fs.existsSync(path.join(REPO, 'sistem', 'baslat.py'))) {
-    dialog.showErrorBox('LifeOS bulunamadı', 'LifeOS klasörü bulunamadı:\n' + REPO + '\n\nUygulamayı yeniden kurmak için kurulum betiğini çalıştır.');
+    dialog.showErrorBox('Başbuğ bulunamadı', 'Başbuğ klasörü bulunamadı:\n' + REPO + '\n\nUygulamayı yeniden kurmak için kurulum betiğini çalıştır.');
     app.quit(); return;
   }
   if (!(await ping(GIRIS))) {
     python = findPython();
     if (!python) {
       // No parent: the splash window is not shown yet at this point. cancelId: closing the box (X, Esc) means «Kapat».
-      const r = await dialog.showMessageBox({ type: 'error', title: 'Python gerekli', message: 'LifeOS Python 3 ile çalışır.', detail: 'python.org üzerinden Python 3 kurup uygulamayı yeniden aç.', buttons: ['python.org’u aç', 'Kapat'], defaultId: 0, cancelId: 1, noLink: true });
+      const r = await dialog.showMessageBox({ type: 'error', title: 'Python gerekli', message: 'Başbuğ Python 3 ile çalışır.', detail: 'python.org üzerinden Python 3 kurup uygulamayı yeniden aç.', buttons: ['python.org’u aç', 'Kapat'], defaultId: 0, cancelId: 1, noLink: true });
       if (r.response === 0) shell.openExternal('https://www.python.org/downloads/');
       app.quit(); return;
     }
     startedHere = true;
-    const launcher = runLauncher(['--tarayicisiz'], false);  // opens the systems, then HKM; we do not wait for HKM
-    // The panel reads HKM's state once, when it loads, and HKM comes up ~6 s after the panel. When the launcher is
-    // done, a panel still showing HKM as closed («Başlat») while HKM answers is reloaded so it shows the real state.
-    launcher.on('exit', async () => {
-      if (!win || win.isDestroyed() || !win.webContents.getURL().startsWith(GIRIS)) return;
-      if (!(await ping('http://127.0.0.1:4200/api/health'))) return;
-      const stale = await win.webContents.executeJavaScript(
-        "(document.querySelector('.kart[data-hkm] .dugme') || {}).textContent === 'Başlat'").catch(() => false);
-      if (stale) win.webContents.reload();
-    });
+    runLauncher(['--tarayicisiz'], false);  // opens the single server (sistem/tekkapi.py, 4180) and everything behind it
     const end = Date.now() + 45000;
     while (!(await ping(GIRIS)) && Date.now() < end) await sleep(400);
     if (!(await ping(GIRIS))) {
-      dialog.showErrorBox('LifeOS açılamadı', 'Sistem sunucusu 45 saniyede cevap vermedi.\nGünlük: %TEMP%\\lifeos-sunucu.log');
+      dialog.showErrorBox('Başbuğ açılamadı', 'Sistem sunucusu 45 saniyede cevap vermedi.\nGünlük: %TEMP%\\lifeos-sunucu.log');
       app.quit(); return;
     }
   }
@@ -88,13 +80,31 @@ async function boot() {
   await win.webContents.executeJavaScript("document.body.style.transition='opacity .4s ease';document.body.style.opacity='0'").catch(() => {});
   await sleep(420);
   if (!win.isDestroyed()) win.loadURL(GIRIS);
+  watchdog();
+}
+// Server watchdog: the server is looked at every ~30 s; if it died, it is restarted silently (see sunucu-bekci.js).
+let bekciNesne = null;
+function watchdog() {
+  if (bekciNesne) return;
+  bekciNesne = bekci({
+    yokla: () => ping(GIRIS),
+    baslat: async () => {
+      python = python || findPython();
+      if (!python || quitting) return;
+      startedHere = true;      // restarted by the app: the app also stops it on quit
+      runLauncher(['--tarayicisiz'], false);
+    },
+    bekle: async () => { for (let i = 0; i < 40; i++) { if (await ping(GIRIS)) return true; await sleep(500); } return false; },
+    vazgec: () => { if (win && !win.isDestroyed()) dialog.showMessageBox(win, { type: 'warning', title: 'Başbuğ', message: 'Sunucu kapandı ve yeniden açılamadı.', detail: 'Günlük: %TEMP%\\lifeos-sunucu.log. Uygulamayı kapatıp yeniden aç.' }); }
+  });
+  bekciNesne.basla();
 }
 const ACILIS = Date.now();
 
 function appWindow(opts = {}) {
   const w = new BrowserWindow({
     width: 1440, height: 900, minWidth: 900, minHeight: 600,
-    title: 'LifeOS', icon: path.join(__dirname, 'icon.ico'), backgroundColor: '#120d08',
+    title: 'Başbuğ', icon: path.join(__dirname, 'icon.ico'), backgroundColor: '#120d08',
     autoHideMenuBar: true, show: false,
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false },
     ...opts
@@ -129,10 +139,10 @@ function wire(wc, w) {
 app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
-  // Only what LifeOS pages may ask for: microphone (voice), notifications, clipboard. Everything else is refused.
+  // Only what Başbuğ pages may ask for: microphone (voice), notifications, clipboard. Everything else is refused.
   session.defaultSession.setPermissionRequestHandler((wc, perm, cb, d) => cb(LOCAL.test(d.requestingUrl || '') && ['media', 'display-capture', 'notifications', 'clipboard-sanitized-write', 'clipboard-read'].includes(perm)));
   // King's «Ekran» mode (getDisplayMedia). Electron refuses it with «Not supported» unless the app answers the
-  // request itself (2026-10-21). Only LifeOS pages get it, and they get the whole primary screen, never audio.
+  // request itself (2026-10-21). Only Başbuğ pages get it, and they get the whole primary screen, never audio.
   session.defaultSession.setDisplayMediaRequestHandler((req, cb) => {
     const kaynak = (req.frame && req.frame.url) || req.securityOrigin || '';
     if (!LOCAL.test(kaynak)) { cb({}); return; }
@@ -147,6 +157,7 @@ app.whenReady().then(() => {
 });
 // Closing the app stops what the app started (the three systems and HKM), like «python sistem/baslat.py --dur».
 app.on('before-quit', e => {
+  if (bekciNesne) bekciNesne.dur();
   if (quitting || !startedHere || !python) return;
   quitting = true; e.preventDefault();
   for (const w of BrowserWindow.getAllWindows()) w.hide();
