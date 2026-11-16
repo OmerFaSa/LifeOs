@@ -225,7 +225,7 @@ a.b-ders:hover{ box-shadow:var(--golge-yumusak); transform:translateY(-1px); }
 .b-ayar--isik{ box-shadow:inset 0 0 0 3px var(--vurgu); }
 /* art arda ayar satırları tek kartta birleşir (bölümün 12 px aralığı geri alınır) */
 .b-ayar:has(+ .b-ayar){ border-bottom-left-radius:0; border-bottom-right-radius:0; }
-.b-ayar + .b-ayar{ margin-top:-12px; border-top-left-radius:0; border-top-right-radius:0; box-shadow:inset 1px 0 0 var(--cizgi), inset -1px 0 0 var(--cizgi), inset 0 -1px 0 var(--cizgi); }
+.b-ayar + .b-ayar{ margin-top:-12px; border-top-left-radius:0; border-top-right-radius:0; box-shadow:inset 0 1px 0 var(--cizgi); } /* satırlar arası ince ayraç (liste satırlarıyla aynı); yarım kenar gölgesi kalktı */
 .b-ayar + .b-ayar.b-ayar--isik{ box-shadow:inset 0 0 0 3px var(--vurgu); }
 .b-ayar__metin{ display:flex; flex-direction:column; flex:1 1 14rem; min-width:0; }
 .b-ayar__ad, .b-ayar__deger{ font-family:var(--govde); font-weight:600; }
@@ -248,14 +248,14 @@ a.b-ders:hover{ box-shadow:var(--golge-yumusak); transform:translateY(-1px); }
 .b-ag__im--kesik{ border-top-style:dashed; } .b-ag__im--kalin{ border-top:3px dashed var(--ana); }
 
 /* 23 · karşılama: ortada tek cümle selam, sırada satırı, tek ana düğme; bilgi satırları aynı genişlikte.
-   Selam ölçeğin dışındaki tek yazı boyu: karşılama A'nın büyük cümlesi (h1 de kabuk.css'te clamp). */
+   Selam da tek h1 ölçeğinde (2026-11-16b: bütün h1 aynı boy, --yz-h1). */
 .b-karsilama{ display:flex; flex-direction:column; width:100%; max-width:720px; margin:0 auto; padding:0 0 var(--a7); min-width:0; }
 .b-karsilama__sahne{ position:relative; height:300px; margin-inline:calc(50% - 50vw); background:var(--gok); overflow:hidden; }
 .b-karsilama__manzara{ display:block; width:100%; height:100%; image-rendering:pixelated; }
 .b-karsilama__sahne::after{ content:""; position:absolute; inset:0; background:var(--sahne-ortu); pointer-events:none; }
 .b-karsilama__ic{ position:absolute; z-index:1; left:0; right:0; bottom:84px; max-width:720px; margin:0 auto; padding:0 var(--a4); color:var(--sahne-yazi); }
 .b-karsilama__tarih{ font-size:var(--yz-k); font-weight:500; opacity:.9; }
-.b-karsilama__selam{ margin:var(--a1) 0 0; font-family:var(--govde); font-size:calc(var(--yz-h1) * 1.25); font-weight:650; letter-spacing:-.03em; line-height:1.1; text-wrap:balance; text-shadow:var(--sahne-golge); }
+.b-karsilama__selam{ margin:var(--a1) 0 0; font-family:var(--govde); font-size:var(--yz-h1); font-weight:650; letter-spacing:-.03em; line-height:1.1; text-wrap:balance; text-shadow:var(--sahne-golge); }
 .b-karsilama__is{ position:relative; z-index:2; display:flex; align-items:center; gap:var(--a5); margin-top:-48px; padding:var(--a5); min-width:0;
   background:var(--yuzey); border-radius:var(--kose); box-shadow:var(--golge-buyuk); }
 .b-karsilama__govde{ flex:1; display:flex; flex-direction:column; gap:var(--a2); min-width:0; }
@@ -395,7 +395,7 @@ a.b-ders:hover{ box-shadow:var(--golge-yumusak); transform:translateY(-1px); }
 .b-dugme:disabled, .b-tercih__sec:disabled, .b-tercih__sec[aria-disabled="true"], .b-alan__giris:disabled, .b-soru__sik:disabled, .b-kart__not:disabled,
   .b-adimlar__no:disabled, .b-satir[aria-disabled="true"]{ opacity:.45; cursor:not-allowed; }
 .b-dugme[aria-pressed="true"], .b-satir[aria-current], .b-soru__sik[aria-pressed="true"], .b-adimlar__no[aria-current]{ background:color-mix(in srgb, var(--vurgu) 8%, var(--yuzey)); }
-.b-gezinme__oge[aria-current]{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 10%, var(--yuzey)); box-shadow:inset 3px 0 0 var(--vurgu); border-radius:var(--kose-k); }
+.b-gezinme__oge[aria-current]{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 10%, var(--yuzey)); font-weight:650; border-radius:var(--kose-k); } /* renkli kenar şeridi yok (2026-11-16b): seçili olan ton ve kalın yazıyla ayrılır */
 .b-gezinme__oge{ border-radius:var(--kose-k); }
 /* dokunmatik ekranda her hedef en az 44 px */
 @media (pointer:coarse), (max-width:640px){ .b-tercih__sec{ height:44px; } }

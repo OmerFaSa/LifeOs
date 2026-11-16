@@ -6,9 +6,11 @@
 const kok = require('path').resolve(__dirname, '..');
 const { chromium } = require(kok + '/tools/node_modules/playwright');
 const { spawn, spawnSync } = require('child_process');
-const fs = require('fs'), os = require('os'), path = require('path'), http = require('http');
+const fs = require('fs'), os = require('os'), path = require('path');
 
-const PORT = 4392, T = 'http://127.0.0.1:' + PORT, PY = process.platform === 'win32' ? 'python' : 'python3';
+// sunucu tools/gez_sunucu.js ile boş portta açılır (GEZ_PORT=NNNN sabitler); T ve srv açılınca dolar
+const { sunucuAc } = require('./gez_sunucu.js');
+let T = '', srv = { kill() {} }, PY = process.platform === 'win32' ? 'python' : 'python3';
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'kabuk-esit-'));
 const hesapK = path.join(gecici, 'LifeOS', 'hesap'), veriK = path.join(gecici, 'LifeOS', 'veri');
 const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici,
@@ -20,11 +22,6 @@ const kur = spawnSync(PY, ['-c', [
   'd = hesap.Depo()', 'd.kur("sahip", "gezi-parolasi-1", True, "cihazGEZ00001")',
   'veri.Depo(sys.argv[2]).kapat()', 'print("kuruldu")'].join('\n'), path.join(kok, 'sistem'), veriK], { env, encoding: 'utf8' });
 if (!/kuruldu/.test(kur.stdout || '')) { console.error('kurulum olmadı: ' + (kur.stderr || '').split('\n').slice(-3).join(' ')); process.exit(1); }
-const srv = spawn(PY, [path.join(kok, 'sistem/tekkapi.py'), '--port', String(PORT), '--hkm-ayri'], { env, stdio: 'ignore' });
-const bekle = () => new Promise((res, rej) => {
-  const son = Date.now() + 40000;
-  (function dene() { http.get(T + '/kabuk/', r => { r.resume(); res(); }).on('error', () => Date.now() > son ? rej(new Error('sunucu açılmadı')) : setTimeout(dene, 300)); })();
-});
 // Tek depodaki kabuk kaydini dosyadan okur (sunucudan bagimsiz kanit)
 const depoda = anahtar => {
   const r = spawnSync(PY, ['-c', 'import sqlite3, sys, json\nc = sqlite3.connect(sys.argv[1])\nr = c.execute("SELECT govde, silindi FROM kayit WHERE alan=? AND yol=?", ("kabuk", sys.argv[2])).fetchone()\nprint(json.dumps(None if r is None or r[1] else json.loads(r[0])))',
@@ -36,7 +33,7 @@ let kalan = 0;
 const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓ ' : '✕ ') + ad + (kosul || ek == null ? '' : '  → ' + ek)); };
 
 (async () => {
-  await bekle();
+  const S = await sunucuAc({ kok, env, ad: 'kabuk-esit-gez' }); srv = S.srv; T = S.T; await S.hazir();
   const b = await chromium.launch();
   try {
     const hata = [];

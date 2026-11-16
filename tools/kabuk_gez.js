@@ -6,10 +6,11 @@
 const kok = require('path').resolve(__dirname, '..'), GORUNTU = process.argv.includes('--goruntu');
 const SECILI = ((process.argv.find(a => a.indexOf('--goruntu=') === 0) || '').slice(10)).split(',').filter(Boolean);
 const { chromium } = require(kok + '/tools/node_modules/playwright');
-const { spawn } = require('child_process');
-const fs = require('fs'), os = require('os'), path = require('path'), http = require('http');
+const fs = require('fs'), os = require('os'), path = require('path');
 
-const PORT = 4397, T = 'http://127.0.0.1:' + PORT;
+// sunucu tools/gez_sunucu.js ile boş portta açılır (GEZ_PORT=NNNN sabitler); T ve srv açılınca dolar
+const { sunucuAc } = require('./gez_sunucu.js');
+let T = '', srv = { kill() {} };
 const gecici = fs.mkdtempSync(path.join(os.tmpdir(), 'kabuk-gez-'));
 const env = Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', LOCALAPPDATA: gecici, APPDATA: gecici, LIFEOS_TASIMA: '1',
   LIFEOS_HESAP_KLASOR: path.join(gecici, 'LifeOS', 'hesap') }); // hesap klasörü Linux'ta LOCALAPPDATA'ya bakmaz: göç paketleri onun yanındaki goc/paket'ten okunur // köken taşıması ucu: gerçekte yalnız tek kapı devredeyken açık
@@ -37,19 +38,17 @@ fs.writeFileSync(path.join(gecici, 'LifeOS', 'veri', 'kabuk-baslangic.json'), JS
 fs.mkdirSync(path.join(gecici, 'LifeOS', 'goc', 'paket'), { recursive: true });
 fs.writeFileSync(path.join(gecici, 'LifeOS', 'goc', 'paket', 'ays-cGEZ-20261114-000000-abcdef.json'), JSON.stringify({ lifeos_goc: 1, kaynak: 'ays', cihaz: 'cGEZ', parca: 1,
   profiller: { main: { data: { gezi: { isaret: 'eski-kokenden' } } } }, anahtarlar: { 'lifeos.king.bas.ays': { x: 1 }, 'lifeos.gezi.metin': 'duz metin' }, bekleyen: {}, atlanan: { sir: 0, ornek: 0 }, medya: [] }));
-const srv = spawn(process.platform === 'win32' ? 'python' : 'python3', [path.join(kok, 'sistem/tekkapi.py'), '--port', String(PORT), '--hkm-ayri'], { env, stdio: 'ignore' });
-const bekle = () => new Promise((res, rej) => {
-  const son = Date.now() + 40000;
-  (function dene() {
-    http.get(T + '/kabuk/', r => { r.resume(); res(); }).on('error', () => Date.now() > son ? rej(new Error('sunucu açılmadı')) : setTimeout(dene, 300));
-  })();
-});
 const cikti = path.join(kok, 'belgeler/ekip/sadelesme/kabuk-onizleme');
 const YER = ['masaustu-koyu', 'telefon-acik']; // yer-1..7 önizlemeleri (faz3-yer-ve-not-agi.md) bu iki görünümle çekilmişti
 let kalan = 0;
 const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓ ' : '✕ ') + ad + (kosul || ek == null ? '' : '  → ' + ek)); };
 // alan sayfasının ilerleme çubukları «değer/toplam · …» (okunan ders, geçilen ünite kapısı)
+// 2026-11-16b: alan genel bakışında tek ince çizgi (okunan ders); geçilen ünite yolun ✓ numaralarında
 const ilerleme = s => s.$$eval('.govde [role=progressbar]', l => l.map(x => x.getAttribute('aria-valuenow') + '/' + x.getAttribute('aria-valuemax')).join(' · '));
+// Ders «Bitir»: cevaplanmamış alıştırma varsa önce yumuşak onay çıkar; «Yine de bitir» geçer (onay da ayrıca sınanır)
+const bitir = async s => { await s.click('[data-ac="okudum"]'); const y = s.locator('[data-ac="okudum"][data-yine]'); if (await y.count().catch(() => 0)) await y.click(); };
+// Kapı/yerleştirme: boş soru varsa ilk basış «Yine de gönder?» der (.kapi__bos), ikinci basış gönderir
+const gonder = async (s, f = 'form.kapi') => { await s.click(f + ' button[type=submit]'); if (await s.locator(f + ' .kapi__bos').count().catch(() => 0)) await s.click(f + ' button[type=submit]'); };
 // dört görünüm (1280/390 × açık/koyu) aynı sayfada; telefonda yatay taşma her koşuda denetlenir, görüntü yalnız --goruntu ile.
 // sec.yalniz: yalnız bu görünümler (ör. ['masaustu-koyu', 'telefon-acik']); sec.hazirla: her görünümde çekimden önce (açılır katmanı o boyda yeniden açmak gibi).
 // Giriş animasyonları çekimde bitmiş sayılır (animations: 'disabled').
@@ -67,7 +66,7 @@ async function goruntu(p, ad, sec = {}) {
 (async () => {
   const y = JSON.parse(fs.readFileSync(path.join(kok, 'alan/felsefe/asama-1.json'), 'utf8'));
   const u1 = y.uniteler[0], harf = 'ABCD';
-  await bekle();
+  const S = await sunucuAc({ kok, env, ad: 'kabuk-gez' }); srv = S.srv; T = S.T; await S.hazir();
   const b = await chromium.launch();
   // Bu gezi işlevi sınar; hareket (görünüm geçişi, süzülme) tools/hareket_gez.js'in işi. Geçiş sürerken ekranda bir an eski sayfa durur:
   // her bağlam «hareket az» açılır ki adım, geçişin ortasında eski sayfayı okumasın.
@@ -135,8 +134,42 @@ async function goruntu(p, ad, sec = {}) {
     await p.keyboard.press('Escape');
     dene('komut çubuğu: Esc kapatır', (await p.isHidden('#komut')) && (await p.isHidden('#perde')));
 
+    // ---- Gezinme sadeliği (2026-11-16b): ad Başbuğ, bilinmeyen adres, rıhtım ve basılı tut yok, kaydırınca üst çubuk gizlenir ----
+    dene('ad: başlık «… · Başbuğ», logo «Başbuğ», ay (ambiyans) düğmesi ve «iki adımda» ipucu yok', (await p.title()) === 'Bugün · Başbuğ' && /Başbuğ/.test(await p.textContent('.ust__logo'))
+      && (await p.locator('.ust__gece, [data-ac="gece"], #rihtim').count()) === 0 && !/iki adımda/.test(await p.textContent('#sayfa')));
+    dene('üst çubuk: sekmeler halkanın yerleri (Sistem haritası hariç), aynı adla; seçili olmayan sekmenin adı yalnız ekran okuyucuda',
+      JSON.stringify(await p.$$eval('.ust__sekmeler a', l => l.map(a => a.textContent))) === JSON.stringify(await p.$$eval('#halka .b-halka__oge', l => l.map(b => b.textContent.trim()).filter(t => t !== 'Sistem haritası')))
+      && (await p.$$eval('.ust__sekmeler a:not([aria-current]) .ust__sekme-ad', l => l.every(x => x.getBoundingClientRect().width <= 1))));
+    await p.goto(T + '/kabuk/#/boyle-bir-yer-yok');
+    await p.waitForFunction(() => document.getElementById('sayfa').getAttribute('data-ciz') === 'yok');
+    dene('bilinmeyen adres Bugün\'e düşmez: «Bu sayfa yok» ve Bugün\'e dönüş', /Bu sayfa yok/.test(await p.textContent('.b-bos')) && (await p.getAttribute('.b-bos a.b-dugme', 'href')) === '#/bugun'
+      && (await p.title()) === 'Bu sayfa yok · Başbuğ');
+    await p.goto(T + '/kabuk/#/ayarlar');
+    await p.waitForSelector('.ayarlar');
+    await p.mouse.move(640, 500);
+    await p.mouse.down(); await p.waitForTimeout(700); await p.mouse.up();
+    dene('basılı tutmak halkayı açmaz (masaüstünde yalnız sağ tık ve Ctrl .)', !(await halkaAcik()));
+    await p.evaluate(() => scrollTo(0, 900)); await p.waitForTimeout(150);
+    const gizli = await p.evaluate(() => document.documentElement.classList.contains('ust-gizli'));
+    await p.evaluate(() => scrollTo(0, 800)); await p.waitForTimeout(150);
+    const dondu = await p.evaluate(() => !document.documentElement.classList.contains('ust-gizli'));
+    await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(150);
+    dene('üst çubuk: aşağı kaydırınca gizlenir, yukarı kaydırınca döner, başta görünür', gizli && dondu && !(await p.evaluate(() => document.documentElement.classList.contains('ust-gizli'))), [gizli, dondu]);
+    {
+      const tc = await b.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', hasTouch: true, isMobile: true }), tp = await tc.newPage();
+      await tp.goto(T + '/kabuk/#/alan/tarih');
+      await tp.waitForSelector('.sira');
+      const alt = await tp.$$eval('#alt-cubuk a', l => l.map(a => [a.textContent, a.getAttribute('aria-current'), Math.round(a.getBoundingClientRect().height)]));
+      dene('telefon: kalıcı alt çubuk 5 yer, Tarih\'te «Öğren» seçili, dokunma hedefi ≥ 44 px; üst sekmeler gizli', alt.length === 5 && alt[1][1] === 'page' && alt.every(x => x[2] >= 44)
+        && (await tp.isVisible('#alt-cubuk')) && !(await tp.isVisible('.ust__sekmeler')), JSON.stringify(alt));
+      dene('telefon: alan genel bakışı tek ana düğme, sorular kendiliğinden açılmaz', (await tp.locator('.sira .b-dugme--ana').count()) === 1 && (await tp.locator('form.kapi').count()) === 0);
+      await tc.close();
+    }
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.b-acilir');
+    dene('Felsefe: genel bakış: nerede olduğun tek kartta (konum, ders adı, tek ilerleme çizgisi, tek ana düğme), aşamanın konuları altında',
+      (await p.locator('.sira [role=progressbar]').count()) === 1 && (await p.locator('.govde [role=progressbar]').count()) === 1 && (await p.locator('.sira .b-dugme--ana').count()) === 1
+      && (await p.textContent('.sira__baslik')) === u1.dersler[0].ad && /Aşama 1/.test(await p.textContent('#asama-ad')));
     dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
     dene('Felsefe: ikinci ünite kilitli', (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli, .b-satir--kilitli').count()) >= 3);
     dene('Felsefe: eski modül bağlantısı yok (kapanış)', (await p.locator('a[href="/esp/"], a[href*="/dist/"]').count()) === 0);
@@ -150,13 +183,21 @@ async function goruntu(p, ad, sec = {}) {
       const a = d.alistirmalar[0], yanlis = harf[(harf.indexOf(a.dogru) + 1) % a.sec.length];
       const soru = p.locator('.b-soru[data-soru="' + a.id + '"]');
       if (i === 0) {
+        // hiç cevaplamadan «Bitir»: yumuşak onay çıkar, adres değişmez; «Alıştırmalara dön» dersi geri çizer (2026-11-16b)
+        await p.click('[data-ac="okudum"]');
+        await p.waitForSelector('.ders__sor');
+        dene('ders 1: alıştırmalar cevaplanmadan «Bitir» önce sorar, geçmez', /henüz cevaplanmadı/.test(await p.textContent('.ders__sor')) && (await p.evaluate(() => location.hash)) === '#/alan/felsefe/ders/' + d.id
+          && (await p.locator('[data-ac="okudum"][data-yine]').count()) === 1);
+        await p.click('[data-ac="alistirmaya"]');
+        await p.waitForSelector('[data-ac="okudum"]:not([data-yine])');
+        dene('ders 1: konum satırı Alan › Ünite › Ders n/N', /^Felsefe\s*\/\s*.+\/\s*Ders 1 \/ \d+$/.test((await p.textContent('.konum')).replace(/‹\s*/, '').trim()), await p.textContent('.konum'));
         await soru.locator('[data-h="' + yanlis + '"]').click();
         dene('ders 1: yanlış cevap «Yanlış.» der ve doğruyu işaretler', /Yanlış/.test(await soru.locator('.b-soru__sonuc').textContent()) && (await soru.locator('.b-soru__sik--dogru').getAttribute('data-h')) === a.dogru);
       }
       await soru.locator('[data-h="' + a.dogru + '"]').click();
       dene('ders ' + (i + 1) + ': doğru cevap «Doğru.» der', /Doğru/.test(await soru.locator('.b-soru__sonuc').textContent()));
       if (i === 0) await goruntu(p, 'ders');
-      await p.click('[data-ac="okudum"]');
+      await bitir(p);
       const beklenen = i < u1.dersler.length - 1 ? '#/alan/felsefe/ders/' + u1.dersler[i + 1].id : '#/alan/felsefe/kapi/' + u1.id;
       await p.waitForFunction(h => location.hash === h, beklenen).catch(() => {});
       dene('ders ' + (i + 1) + ': «Okudum» sıradaki adıma götürür', (await p.evaluate(() => location.hash)) === beklenen, await p.evaluate(() => location.hash));
@@ -164,6 +205,10 @@ async function goruntu(p, ad, sec = {}) {
 
     await p.waitForSelector('form.kapi');
     await goruntu(p, 'kapi');
+    await p.click('form.kapi button[type=submit]');
+    await p.waitForSelector('form.kapi .kapi__bos');
+    dene('kapı: boş soruyla gönderirken önce sorar («4 soru boş», düğme «Yine de gönder»), sonuç yazılmaz', /4 soru boş/.test(await p.textContent('.kapi__bos'))
+      && (await p.textContent('form.kapi button[type=submit]')) === 'Yine de gönder' && (await p.locator('[data-sonuc]').count()) === 0);
     await p.click('form.kapi button[type=submit]');
     await p.waitForSelector('[data-sonuc]');
     dene('kapı: boş deneme geçirmez', /olmadı/.test(await p.textContent('[data-sonuc]')) && /0\/4/.test(await p.textContent('[data-sonuc]')));
@@ -180,7 +225,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.reload();
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.b-acilir');
-    dene('kayıt yenilemeden sonra duruyor: 3/9 ders, 1/3 kapı', (await ilerleme(p)) === '3/9 · 1/3');
+    dene('kayıt yenilemeden sonra duruyor: 3/9 ders', (await ilerleme(p)) === '3/9');
     dene('ikinci ünite açıldı: ilk dersi ve kapısı bağlantı, sonraki iki ders kilitli', (await p.locator('.b-acilir').nth(1).locator('a.b-ders, a.b-satir').count()) === 2 && (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli').count()) === 2);
     await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + y.id);
     await p.waitForSelector('.b-bos');
@@ -207,13 +252,13 @@ async function goruntu(p, ad, sec = {}) {
         await p.click('.b-soru[data-soru="' + a.id + '"] [data-h="' + a.dogru + '"]');
         dene(alan + ': alıştırma doğru cevabı tanır', /Doğru/.test(await p.textContent('.b-soru[data-soru="' + a.id + '"] .b-soru__sonuc')));
       }
-      await p.click('[data-ac="okudum"]');
+      await bitir(p);
       await p.waitForFunction(h => location.hash !== h, '#/alan/' + alan + '/ders/' + d1.id);
       if (GORUNTU && alan === 'akademik') { await p.goto(T + '/kabuk/#/alan/akademik'); await p.waitForSelector('.b-acilir'); await p.screenshot({ path: path.join(cikti, 'akademik-masaustu-koyu.png') }); }
     }
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.b-acilir');
-    dene('alanların kaydı ayrı: Felsefe hâlâ 3/9 ders, 1/3 kapı', (await ilerleme(p)) === '3/9 · 1/3');
+    dene('alanların kaydı ayrı: Felsefe hâlâ 3/9 ders', (await ilerleme(p)) === '3/9');
     await p.goto(T + '/kabuk/#/alan/akademik');
     await p.waitForSelector('.b-acilir');
     await p.goto(T + '/kabuk/#/bugun');
@@ -323,7 +368,8 @@ async function goruntu(p, ad, sec = {}) {
     // ---- Tekrar ----
     await p.goto(T + '/kabuk/#/motor/tekrar');
     await p.waitForSelector('form.kartform');
-    dene('tekrar: kartsız açılış öyle der', /Henüz kart yok/.test(await p.textContent('[data-arac="tekrar"]')));
+    // kapıda kalınan taslak sorular varken boş sıra «kart yok» demez, onları gösterir (araclar.js, 2026-11-16b içerik paketi)
+    dene('tekrar: kartsız açılış öyle der (sıra boş; kapıda kalınan sorular aşağıda)', /Bugün tekrar sırası boş/.test(await p.textContent('[data-arac="tekrar"]')));
     // kapıda kalınan dört soru: taslak olduğu için kuyruğa girmez, kendi listesinde kaynağıyla; açılınca doğru cevap
     const kk = u1.kapi.sorular[0];
     dene('kapıda kalınca: Tekrar\'da 4 kart, kaynağı «Felsefe · ' + u1.ad + ' kapısı», tekilleşmiş', (await p.locator('[data-kapi-kartlari] .b-acilir').count()) === 4
@@ -352,7 +398,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.click('[data-arac="tekrar"] .b-acilir summary');
     dene('tekrar: kart listesinde hatırlama tahmin etiketli', /\(tahmin\)/.test(await p.textContent('[aria-label="Kartlar"]')));
     await p.click('[data-arac-ac="kart-sil"]');
-    await p.waitForFunction(() => /Henüz kart yok/.test(document.querySelector('[data-arac="tekrar"]').textContent));
+    await p.waitForFunction(() => /Bugün tekrar sırası boş/.test(document.querySelector('[data-arac="tekrar"]').textContent));
     dene('tekrar: kart silinir', true);
 
     // ---- Kayıt ----
@@ -478,7 +524,10 @@ async function goruntu(p, ad, sec = {}) {
     await p.waitForSelector('[data-hafta] [data-gun]');
     dene('hafta: bugünden yedi gün çizildi, ilki «bugün»', (await p.locator('[data-gun]').count()) === 7 && /bugün/.test(await p.textContent('[data-gun] >> nth=0')));
     await p.waitForSelector('.hafta [data-blok="ders"]');
-    dene('hafta: sıradaki ders öngörüde; bugün yapılan «Rapor» girmez; özet etiketli', !/Rapor/.test(await p.textContent('.hafta')) && /planlanan \d+ dk \(hesaplandı\)/.test(await p.textContent('[data-hafta]')));
+    // bugünün sütunu Gün sayfasındaki planın kendisi (araclar.js bugunPlani, içerik paketi 2026-11-16): «Rapor» yalnız bugünde, öbür günlere girmez
+    const haftaGun = await p.locator('[data-gun]').allTextContents();
+    dene('hafta: bugünün sütunu Gün planı («Rapor» orada), öbür günlere girmez; sıradaki ders öngörüde; özet etiketli', /Rapor/.test(haftaGun[0]) && haftaGun.slice(1).every(x => !/Rapor/.test(x))
+      && /planlanan \d+ dk \(hesaplandı\)/.test(await p.textContent('[data-hafta]')), haftaGun.map(x => x.slice(0, 50)).join(' | '));
     await p.fill('form[data-plan="sabit"] input[name=bas]', '10:00');
     await p.fill('form[data-plan="sabit"] input[name=bit]', '11:00');
     await p.click('form[data-plan="sabit"] button[type=submit]');
@@ -495,7 +544,10 @@ async function goruntu(p, ad, sec = {}) {
     await p.click('form[data-plan="sabit"] button[type=submit]');
     await p.waitForFunction(() => document.querySelectorAll('[data-arac-ac="plan-sabit-sil"]').length === 2);
     const gunMetni = await p.locator('[data-gun]').allTextContents();
-    dene('hafta: okul yalnız hafta içi beş güne, uyku her güne girdi', gunMetni.filter(x => /Okul/.test(x)).length === 5 && gunMetni.every(x => /23:00–24:00\s*Uyku/.test(x) && /00:00–07:00\s*Uyku/.test(x)), gunMetni.map(x => x.slice(0, 60)).join(' | '));
+    // bugünkü sütun önceden kurulmuş Gün planıdır (şablon onu değiştirmez); öbür altı günde okul yalnız hafta içine, uyku her güne girer
+    const haftaIci = x => !/Cumartesi|Pazar(?!tesi)/.test(x); // «Cuma» «Cumartesi»nin içinde de geçer
+    const gunTamam = x => /Okul/.test(x) === haftaIci(x) && /23:00–24:00\s*Uyku/.test(x) && /00:00–07:00\s*Uyku/.test(x);
+    dene('hafta: okul yalnız hafta içi günlere, uyku her güne girdi (bugün hariç: kurulu plan)', gunMetni.slice(1).every(gunTamam), gunMetni.slice(1).filter(x => !gunTamam(x)).join(' | '));
     dene('hafta: gece yarısını geçen blok listede işaretli', /gece yarısını geçer/.test(await p.textContent('[data-hafta] [aria-label="Sabit bloklar"]')));
     await p.reload();
     await p.waitForSelector('[data-arac-ac="plan-sabit-sil"]');
@@ -510,7 +562,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.waitForSelector('.b-acilir');
     await p.goto(T + '/kabuk/#/motor/soru');
     await p.waitForSelector('[data-arac-ac="soru-basla"]');
-    dene('soru: başlangıçta alan ve havuz yazılı', /Felsefe · karma test/.test(await p.textContent('[data-arac="soru"]')) && /havuzda \d+ soru/.test(await p.textContent('[data-arac="soru"]')));
+    dene('soru: başlangıçta alan ve havuz yazılı', /Felsefe · karma test/.test(await p.textContent('[data-arac="soru"]')) && /karışık \d+ soru/.test(await p.textContent('[data-arac="soru"]')));
     await p.click('[data-arac-ac="soru-basla"]');
     await p.waitForSelector('.b-soru[data-sira="0"]');
     const felsefeSorular = {};
@@ -733,6 +785,11 @@ async function goruntu(p, ad, sec = {}) {
       await p.waitForFunction(x => document.getElementById('sayfa').getAttribute('data-yer') === x && document.querySelector('#sayfa a.b-satir'), h.split('/').pop() === 'yol' ? 'yol' : h.slice(2));
       dene(ad + ': «taşınıyor» rozeti yok', !/taşınıyor/.test(await p.textContent('#sayfa')));
     }
+    // Öğren'e tıklayınca hemen öğren (sahip, 2026-11-16b): en üstte etkin alanın sıradaki adımı tek ana düğmeyle
+    await p.goto(T + '/kabuk/#/ogren');
+    await p.waitForSelector('#sayfa .sira .b-dugme--ana');
+    dene('Öğren: en üstte kaldığın adım tek ana düğmeyle (derse/kapıya gider)', /\/(ders|kapi)\//.test(await p.getAttribute('#sayfa .sira .b-dugme--ana', 'href'))
+      && (await p.locator('#sayfa .sira .b-dugme--ana').count()) === 1, await p.textContent('#sayfa .sira'));
     // ---- Her şeyde arama: komut çubuğunun son öğesi; bilinen bir ders ve bilinen bir not bulunur ve açılır ----
     await p.keyboard.press('Control+k');
     await p.fill('#komut input', 'sokrates');
@@ -822,8 +879,10 @@ async function goruntu(p, ad, sec = {}) {
     const kingMetin = await p.textContent('#sayfa');
     dene('King: nerede konuşulacağını, neyi gördüğünü ve sahibin adımını söyler', /Claude masaüstü uygulamasında/.test(kingMetin) && /Özel notlarını görmez/.test(kingMetin) && /tamamen kapat/.test(kingMetin) && !/hazırlanıyor/.test(kingMetin));
     const kingForm = await p.evaluate(() => { const f = document.querySelector('[data-sayfa="king"] form[data-king-sohbet]');
-      return { tek: document.querySelectorAll('[data-king-bolum]').length, secenek: [...f.saglayici.options].map(o => o.value).join(','), metin: !!f.metin }; });
-    dene('King: tek sohbet bölümü; Otomatik, Antigravity ve Claude Code seçilir', kingForm.tek === 1 && kingForm.secenek === 'oto,antigravity,claude' && kingForm.metin, JSON.stringify(kingForm));
+      return { tek: document.querySelectorAll('[data-king-bolum]').length, secenek: f.saglayici ? [...f.saglayici.options].map(o => o.value).join(',') : 'seçici yok', metin: !!f.metin }; });
+    // cevaplayan seçimi sohbetten Ayarlar › King'e taşındı (2026-11-16b içerik paketi): sohbette seçici yok, ayar şemada üç seçenekle
+    const kingAyar = await p.evaluate(() => { const t = LIFEOS.Kabuk.Ayar.tanim('lifeos.king.saglayici'); return t ? Object.keys(t.secenekler || {}).join(',') : ''; });
+    dene('King: tek sohbet bölümü, sohbette seçici yok; Otomatik, Antigravity ve Claude Code Ayarlar › King’te', kingForm.tek === 1 && kingForm.secenek === 'seçici yok' && kingForm.metin && kingAyar === 'oto,antigravity,claude', JSON.stringify(kingForm) + ' ' + kingAyar);
     // yazma kutusu: örnek sorular; Enter gönderir (Tanışma'nın Enter kısayolu King'in kutusunu yakalamaz); hâl gelince yazılan silinmez
     dene('King: ilk açılışta üç örnek soru', (await p.locator('[data-king-oneri]').count()) === 3);
     // bu yalıtılmış ortamda Merkez yok: gönderilen soruya sahte bir cevap (cevabın akışta göründüğü de sınanır)
@@ -848,7 +907,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.waitForSelector('ul[aria-label="Aşamalar"]');
     const kayit1 = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'));
     dene('aşama: alan sayfası iki aşamayı listeler, ikincisi kilitli ve nedenini söyler', (await p.locator('ul[aria-label="Aşamalar"] .b-satir').count()) === 2 && (await p.locator('ul[aria-label="Aşamalar"] .b-satir--kilitli').count()) === 1 && /önce Aşama 1 kapısı/.test(await p.textContent('ul[aria-label="Aşamalar"]')), y2gercek ? 'gerçek asama-2.json' : 'yapay ikinci aşama');
-    dene('aşama: birinci aşamanın eski anahtarlı kaydı aynen okunuyor (3/9 ders, 1/3 kapı)', (await ilerleme(p)) === '3/9 · 1/3' && !!kayit1 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'))) === null);
+    dene('aşama: birinci aşamanın eski anahtarlı kaydı aynen okunuyor (3/9 ders)', (await ilerleme(p)) === '3/9' && !!kayit1 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'))) === null);
     await p.goto(T + '/kabuk/#/alan/felsefe/ders/' + y2.uniteler[0].dersler[0].id);
     await p.waitForSelector('.b-bos');
     dene('aşama: kilitli aşamanın dersi açılmaz, neden aşama kilidi', /Bu aşama kilitli/.test(await p.textContent('.b-bos')));
@@ -860,7 +919,7 @@ async function goruntu(p, ad, sec = {}) {
       await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + sahip.id);
       await p.waitForSelector('form.kapi');
       for (const q of sahip.kapi.sorular) await p.check('input[name="' + q.id + '"][value="' + q.dogru + '"]');
-      await p.click('form.kapi button[type=submit]');
+      await gonder(p);
       await p.waitForSelector('[data-sonuc="gecti"]');
     }
     dene('aşama: aşama kapısı geçilince «Sonraki aşama» ikinci aşamaya götürür', (await p.getAttribute('[data-sonuc] .b-dugme--ana', 'href')) === '#/alan/felsefe/asama/2' && /Sonraki aşama/.test(await p.textContent('[data-sonuc] .b-dugme--ana')));
@@ -872,7 +931,7 @@ async function goruntu(p, ad, sec = {}) {
     const kayit1b = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'));
     await p.click('.b-eylemler .b-dugme--ana');
     await p.waitForSelector('article.ders h1');
-    await p.click('[data-ac="okudum"]');
+    await bitir(p);
     await p.waitForFunction(() => !!LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2'));
     const k2 = await p.evaluate(() => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.2')));
     dene('aşama: ikinci aşamanın kaydı kendi anahtarında; birincinin kaydı değişmedi', Object.keys(k2.dersler).length === 1 && Object.keys(k2.asamalar).length === 0 && (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.yol.felsefe.1'))) === kayit1b);
@@ -904,12 +963,12 @@ async function goruntu(p, ad, sec = {}) {
     await mp.evaluate(k => { localStorage.setItem('lifeos.yol.felsefe.1', k); localStorage.setItem('lifeos.tema.secim', 'light'); }, kayit1);
     await mp.goto(T + '/kabuk/#/alan/felsefe');
     await mp.waitForSelector('ul[aria-label="Aşamalar"]');
-    dene('taşıma: eski localStorage kaydı ilk açılışta okunur (3/9 ders, 1/3 kapı)', (await ilerleme(mp)) === '3/9 · 1/3');
+    dene('taşıma: eski localStorage kaydı ilk açılışta okunur (3/9 ders)', (await ilerleme(mp)) === '3/9');
     dene('taşıma: kayıt IndexedDB içinde aynen, localStorage içinden silindi; ayar yerinde ve uygulandı', (await idbOku(mp, 'lifeos.yol.felsefe.1')) === kayit1 && (await yerelKayit(mp)).length === 0
       && (await mp.evaluate(() => localStorage.getItem('lifeos.tema.secim') + ' ' + document.documentElement.getAttribute('data-theme'))) === 'light light');
     await mp.reload();
     await mp.waitForSelector('ul[aria-label="Aşamalar"]');
-    dene('taşıma: yenilemeden sonra kayıt IndexedDB içinden okunur', (await ilerleme(mp)) === '3/9 · 1/3');
+    dene('taşıma: yenilemeden sonra kayıt IndexedDB içinden okunur', (await ilerleme(mp)) === '3/9');
     dene('taşıma: konsolda hata yok', mhata.length === 0, mhata.join(' | '));
     await mc.close();
 
@@ -923,14 +982,16 @@ async function goruntu(p, ad, sec = {}) {
       for (const ad of await yp.$$eval('form.kapi[data-yer] input[type=radio]', l => [...new Set(l.map(x => x.name))])) {
         await yp.check('input[name="' + ad + '"][value="' + (dogru ? dogruHarf[ad] : (dogruHarf[ad] === 'A' ? 'B' : 'A')) + '"]');
       }
-      await yp.click('form.kapi[data-yer] button[type=submit]');
+      await gonder(yp, 'form.kapi[data-yer]');
     };
     await yp.goto(T + '/kabuk/#/alan/dil');
-    await yp.waitForSelector('#yer-baslik');
+    await yp.waitForSelector('[data-yer-bul]');
     await goruntu(yp, 'yer-1-alan-secim', { yalniz: YER });
-    dene('yerleştirme: boş alanda iki seçenek', (await yp.textContent('[aria-labelledby="yer-baslik"] .b-dugme--ana')) === 'Baştan başla' && (await yp.getAttribute('[aria-labelledby="yer-baslik"] a.b-dugme >> nth=1', 'href')) === '#/alan/dil/yer/1'
-      && (await yp.getAttribute('[aria-labelledby="yer-baslik"] .b-dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id);
-    await yp.click('[aria-labelledby="yer-baslik"] a.b-dugme >> nth=1');
+    // genel bakış: tek ana düğme «Başla»; «Seviyemi bul» düğme değil küçük bağlantı ve kendiliğinden açılmaz (2026-11-16b)
+    dene('yerleştirme: boş alanda tek ana düğme ve küçük «seviyemi bul» bağlantısı; sorular kendiliğinden açılmaz', (await yp.textContent('.sira .b-dugme--ana')) === 'Başla' && (await yp.locator('.sira .b-dugme').count()) === 1
+      && (await yp.getAttribute('[data-yer-bul]', 'href')) === '#/alan/dil/yer/1' && (await yp.evaluate(() => location.hash)) === '#/alan/dil' && (await yp.locator('form.kapi').count()) === 0
+      && (await yp.getAttribute('.sira .b-dugme--ana', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id);
+    await yp.click('[data-yer-bul]');
     await yp.waitForSelector('form.kapi[data-yer="1"]');
     const n1 = await yp.locator('form.kapi[data-yer="1"] fieldset').count();
     dene('yerleştirme: aşama 1, 5–8 soru, yalnız ünite kapılarından, doğru cevap yok', n1 >= 5 && n1 <= 8 && (await yp.locator('.b-soru__sik--dogru').count()) === 0
@@ -955,7 +1016,7 @@ async function goruntu(p, ad, sec = {}) {
     await yp.goto(T + '/kabuk/#/alan/dil/asama/1');
     await yp.waitForSelector('.b-acilir');
     dene('yerleştirme: birinci aşama listede «atlandı · tahmin», üniteleri atlandı ve açık', /atlandı · tahmin/.test(await yp.textContent('ul[aria-label="Aşamalar"] .b-satir >> nth=0'))
-      && (await yp.locator('.b-acilir summary', { hasText: 'atlandı (tahmin)' }).count()) === dil[0].uniteler.length && (await yp.locator('#yer-baslik').count()) === 0
+      && (await yp.locator('.b-acilir summary', { hasText: 'atlandı (tahmin)' }).count()) === dil[0].uniteler.length && (await yp.locator('[data-yer-bul]').count()) === 0
       && (await yp.locator('.b-acilir >> nth=2').locator('a.b-ders, a.b-satir').count()) >= 1);
     await goruntu(yp, 'yer-4-atlanan-asama', { yalniz: YER });
     await yp.goto(T + '/kabuk/#/alan/dil/yer/1');
@@ -965,7 +1026,7 @@ async function goruntu(p, ad, sec = {}) {
     await yp.goto(T + '/kabuk/#/alan/dil/kapi/' + du.id);
     await yp.waitForSelector('form.kapi');
     // önce boş gönderilir: kalınır, sorular Tekrar'ın «kapıda kalınan» bölümüne düşer (yer-5, yer-6 görüntüleri)
-    await yp.click('form.kapi button[type=submit]');
+    await gonder(yp);
     await yp.waitForSelector('[data-sonuc="kaldi"]');
     dene('yerleştirme sonrası: boş kapı kalır, sorular Tekrar\'a düştü', new RegExp(du.kapi.sorular.length + ' soru Tekrar').test(await yp.textContent('[data-sonuc="kaldi"]')), await yp.textContent('[data-sonuc="kaldi"]'));
     await goruntu(yp, 'yer-5-kapi-kalinca', { yalniz: YER });
@@ -1016,22 +1077,24 @@ async function goruntu(p, ad, sec = {}) {
     const taslakUyari = () => op.locator('.b-uyari', { hasText: 'Taslak: bu ders henüz onaylanmadı' }).count();
     const od = u1.dersler[0], odIds = [od.id].concat(od.alistirmalar.map(a => a.id));
     await op.goto(T + '/kabuk/#/bugun');
-    await op.waitForSelector('[data-onay-bekleyen]', { timeout: 20000 }).catch(() => {});
-    dene('onay: Bugün\'de «Onay bekleyen N ders» satırı #/onay\'a götürür', (await op.getAttribute('[data-onay-bekleyen]', 'data-onay-bekleyen').catch(() => null)) === String(bekleyen)
-      && /Onay bekleyen \d+ ders/.test(await op.textContent('[data-onay-bekleyen]')) && (await op.getAttribute('[data-onay-bekleyen] a', 'href')) === '#/onay', bekleyen);
-    await goruntu(op, 'onay-bugun');
+    // Yönetim (2026-11-16b içerik paketi): Bugün'deki «Onay bekleyen N ders» satırı kalktı; bekleyen sayısı yalnız Yönetim'de, düz cümle
+    await op.waitForSelector('.b-karsilama');
+    dene('onay: Bugün\'de onay satırı yok (sayı Yönetim\'de)', (await op.locator('[data-onay-bekleyen]').count()) === 0);
     await op.goto(T + '/kabuk/#/onay');
     await op.waitForSelector('[data-onay-sayfa="ana"]', { timeout: 20000 });
-    dene('onay: on alan, alan ve aşama başına taslak/onaylı sayısı «ölçüldü»', (await op.locator('a.b-satir[href^="#/onay/"]').count()) === 10
-      && /Aşama 1: \d+ taslak, \d+ onaylı · Aşama 2: \d+ taslak, \d+ onaylı · ölçüldü/.test(await op.textContent('a.b-satir[href="#/onay/felsefe"]'))
-      && (await op.getAttribute('.b-sayi', 'aria-label')) === 'Onay bekleyen: ' + bekleyen.toLocaleString('tr-TR') + ' ders, ölçüldü', await op.getAttribute('.b-sayi', 'aria-label'));
-    dene('onay: «Senin adımın» üç satır; onay yokken dosya düğmesi kapalı, «hepsini onayla» yok', (await op.locator('[aria-label="Senin adımın"] li').count()) === 3
+    const yonetimMetin = (await op.textContent('[data-onay-sayfa="ana"]')).replace(/\s+/g, ' ');
+    dene('onay: on alan, aşama başına onaylı/toplam; bekleyen ders sayısı düz cümle', (await op.locator('a.b-satir[href^="#/onay/"]').count()) === 10
+      && /Aşama 1: \d+\/\d+ onaylı · Aşama 2: \d+\/\d+ onaylı/.test(await op.textContent('a.b-satir[href="#/onay/felsefe"]'))
+      && yonetimMetin.indexOf(bekleyen.toLocaleString('tr-TR') + ' ders onayını bekliyor') >= 0, yonetimMetin.slice(0, 200));
+    dene('onay: «Senin adımların» üç satır; onay yokken dosya düğmesi kapalı, «hepsini onayla» yok', (await op.locator('[aria-label="Senin adımların"] li').count()) === 3
       && (await op.getAttribute('[data-onay-ac="disari"]', 'aria-disabled')) === 'true' && (await op.locator('button, a, [data-onay-ac]').filter({ hasText: /hepsini onayla/i }).count()) === 0);
-    await op.waitForSelector('[data-etiket-govde] .b-sayilar');
-    dene('etiket: set boşken iki sayı «0, ölçüldü» ve ne yapılacağını söyleyen boş durum', (await op.$$eval('[data-etiket-govde] .b-sayi', l => l.map(x => x.getAttribute('aria-label')).join(' | ')))
-      === 'Anlama · bekleyen: 0 mesaj, ölçüldü | Arama · bekleyen: 0 soru, ölçüldü' && /Etiketlenecek mesaj yok/.test(await op.textContent('[data-etiket-govde]')));
+    // etiketleme kapalı bölümde: önce açılır
+    await op.click('[data-etiket] summary');
+    await op.waitForSelector('[data-etiket-govde] .b-bos');
+    dene('etiket: set boşken ne yapılacağını söyleyen tek boş durum, düğme yok', /İşaretlenecek mesaj yok/.test(await op.textContent('[data-etiket-govde]'))
+      && (await op.locator('[data-etiket-govde] button').count()) === 0);
     await goruntu(op, 'onay');
-    etiketKip = 'dolu'; await op.reload(); await op.waitForSelector('[data-onay-ac="etiket-bas"][data-set="anlama"]:not([aria-disabled])');
+    etiketKip = 'dolu'; await op.reload(); await op.click('[data-etiket] summary'); await op.waitForSelector('[data-onay-ac="etiket-bas"][data-set="anlama"]:not([aria-disabled])');
     await op.click('[data-onay-ac="etiket-bas"][data-set="anlama"]');
     await op.waitForSelector('[data-etiket-soru]');
     dene('etiket: Anlama bir mesaj, beş niyet düğmesi düz Türkçe açıklamalı, odak mesajda', (await op.textContent('[data-etiket-soru] legend')) === ET_SATIR.anlama[0].metin
@@ -1043,8 +1106,8 @@ async function goruntu(p, ad, sec = {}) {
     dene('etiket: niyet aynı kökene JSON ile gider, sonraki mesaj gelir', JSON.stringify(etiketPost) === '[{"set":"anlama","id":"g1","etiket":"kayit"}]');
     await op.click('[data-onay-ac="etiket-atla"]');
     await op.waitForSelector('[data-etiket-govde] .b-uyari--tamam');
-    dene('etiket: «Atla» yazmadan geçer; tur bitince sayılar tazelenir', etiketPost.length === 1 && /1 etiket yazıldı/.test(await op.textContent('[data-etiket-govde]'))
-      && (await op.getAttribute('[data-etiket-govde] .b-sayi', 'aria-label')) === 'Anlama · bekleyen: 1 mesaj, ölçüldü');
+    dene('etiket: «Atla» yazmadan geçer; tur bitince sayı tazelenir', etiketPost.length === 1 && /1 işaret kaydedildi/.test(await op.textContent('[data-etiket-govde]'))
+      && /1 mesaj ve \d+ arama sorusu bekliyor/.test(await op.textContent('[data-etiket-govde]')), await op.textContent('[data-etiket-govde]'));
     await op.click('[data-onay-ac="etiket-bas"][data-set="arama"]');
     await op.waitForSelector('[data-etiket-soru] input[name="etiket-aday"]');
     await op.click('[data-onay-ac="etiket-secili"]');
@@ -1056,8 +1119,8 @@ async function goruntu(p, ad, sec = {}) {
     await op.waitForSelector('[data-etiket-govde] .b-uyari--tamam');
     dene('etiket: seçilen adaylar liste olarak yazılır; mesajlar tarayıcı deposuna girmez', JSON.stringify(etiketPost[1]) === '{"set":"arama","id":"q1","etiket":["a2"]}'
       && !(await op.evaluate(() => /koşuya|Sokrates bilgi/.test(JSON.stringify(Object.assign({}, localStorage, sessionStorage))))));
-    etiketKip = 'kapali'; await op.reload(); await op.waitForSelector('[data-etiket-govde] .b-uyari--bilgi');
-    dene('etiket: sunucu 403 ya da yoksa yalnız tek sakin satır', (await op.textContent('[data-etiket-govde]')) === 'BilgiEtiketleme yalnız bu bilgisayarda açılır.'
+    etiketKip = 'kapali'; await op.reload(); await op.click('[data-etiket] summary'); await op.waitForSelector('[data-etiket-govde] .b-uyari--bilgi');
+    dene('etiket: sunucu 403 ya da yoksa yalnız tek sakin satır', (await op.textContent('[data-etiket-govde]')) === 'BilgiBu iş yalnız bilgisayarın kendisinde açılır.'
       && (await op.locator('[data-etiket-govde] button, [data-etiket-govde] .b-sayi').count()) === 0);
     etiketKip = 'bos';
     await op.goto(T + '/kabuk/#/onay/felsefe/1/' + od.id);
@@ -1079,9 +1142,9 @@ async function goruntu(p, ad, sec = {}) {
     await op.goto(T + '/kabuk/#/alan/felsefe/ders/' + od.id);
     await op.waitForSelector('article.ders h1');
     dene('onay: öğrenenin ders ekranında taslak uyarısı yok', (await taslakUyari()) === 0);
-    await op.goto(T + '/kabuk/#/bugun');
-    await op.waitForSelector('[data-onay-bekleyen]');
-    dene('onay: Bugün\'deki sayı bir azaldı', (await op.getAttribute('[data-onay-bekleyen]', 'data-onay-bekleyen')) === String(bekleyen - 1));
+    await op.goto(T + '/kabuk/#/onay');
+    await op.waitForSelector('[data-onay-sayfa="ana"]');
+    dene('onay: Yönetim\'deki bekleyen sayı bir azaldı', (await op.textContent('[data-onay-sayfa="ana"]')).indexOf((bekleyen - 1).toLocaleString('tr-TR') + ' ders onayını bekliyor') >= 0);
     await op.goto(T + '/kabuk/#/onay/felsefe/1/' + od.id);
     await op.click('[data-onay-ac="geri-al"]');
     await op.waitForSelector('[data-onay-ac="onayla"]');
@@ -1106,6 +1169,7 @@ async function goruntu(p, ad, sec = {}) {
       && (await op.locator('[data-onay-sayfa="unite"] .b-pul--altin').count()) === u1.dersler.length + 1);
     await op.goto(T + '/kabuk/#/onay');
     await op.waitForSelector('[data-onay-sayfa="ana"]');
+    await op.click('[data-onay-sayfa="ana"] summary:has-text("Onayları sakla")'); // dosya düğmesi kapalı bölümde (onay.js, içerik paketi)
     const [indi] = await Promise.all([op.waitForEvent('download'), op.click('[data-onay-ac="disari"]')]);
     const indiYol = path.join(gecici, 'onay-indi.json');
     await indi.saveAs(indiYol);
@@ -1188,6 +1252,17 @@ async function goruntu(p, ad, sec = {}) {
     dene('hesap: çıkış onaylanınca oturum kapanır, cihaz bölümü gider', (await hp.locator('#hs-cihazlar').count()) === 0 && !(await hp.evaluate(() => /lifeos_hesap=[^;]/.test(document.cookie))));
     dene('hesap: konsolda hata yok', hhata.length === 0, hhata.join(' | '));
     await hc.close();
+
+    // ---- Ekran hatası tek kapının günlüğüne gider (kabuk.js → /api/kabuk/hata; yalnız yerel, sessiz) ----
+    const ec = await b.newContext(), ep = await ec.newPage();
+    await ep.goto(T + '/kabuk/#/bugun');
+    await ep.waitForSelector('.b-karsilama');
+    await ep.evaluate(() => setTimeout(() => { throw new Error('gezi deneme hatası'); }));
+    const gunluk = path.join(gecici, 'LifeOS', 'kabuk-hata.log');
+    let gm2 = '';
+    for (let i = 0; i < 20 && !/gezi deneme hatası/.test(gm2); i++) { await ep.waitForTimeout(150); try { gm2 = fs.readFileSync(gunluk, 'utf8'); } catch (e) { /* henüz yok */ } }
+    dene('hata ucu: ekran hatası iletisi, yığını ve sayfası günlüğe yazılır', /gezi deneme hatası/.test(gm2) && /"sayfa": "#\/bugun"/.test(gm2) && /"yigin": "Error/.test(gm2), gm2.slice(-300));
+    await ec.close();
   } finally {
     await b.close(); srv.kill();
     try { fs.rmSync(gecici, { recursive: true, force: true }); } catch (e) { /* geçici klasör kalabilir */ }
