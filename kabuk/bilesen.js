@@ -9,6 +9,10 @@
 
   var KAC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   function kac(s) { return String(s).replace(/[&<>"']/g, function (c) { return KAC[c]; }); }
+  // Ders metninin hafif işaretlemesi (alan/akademik: **kalın**, x^{2}, H_{2}O): önce kaçışlanır, sonra yalnız b/sup/sub etiketleri üretilir
+  function zengin(s) {
+    return kac(s).replace(/\*\*([^*\n]+?)\*\*/g, '<b>$1</b>').replace(/\^\{([^{}\n]{1,40})\}/g, '<sup>$1</sup>').replace(/_\{([^{}\n]{1,40})\}/g, '<sub>$1</sub>');
+  }
   function hata(tas, neden) { throw new TypeError('Bilesen.' + tas + ': ' + neden); }
   function nesne(tas, o) { if (!o || typeof o !== 'object' || Array.isArray(o)) hata(tas, 'seçenek nesnesi gerekli'); return o; }
   // zorunlu ya da isteğe bağlı metin; sayı da metin sayılır, öteki türler reddedilir
@@ -293,7 +297,7 @@
       var isim = kip === 'radyo' ? kac(metin('soru', 'isim', o.isim)) : '';
       ic = '<div class="b-soru__siklar">' + s.map(function (m, i) {
         var h = harf[i], im = o.dogru == null ? '' : h === o.dogru ? 'dogru' : h === o.secili ? 'yanlis' : '';
-        var yazi = '<b class="b-soru__harf">' + h + '</b><span class="b-soru__yazi">' + kac(metin('soru', 'secenek', m)) + '</span>' +
+        var yazi = '<b class="b-soru__harf">' + h + '</b><span class="b-soru__yazi">' + zengin(metin('soru', 'secenek', m)) + '</span>' +
           (im ? '<span class="b-soru__im">' + (im === 'dogru' ? '✓ doğru' : '✕ senin cevabın') + '</span>' : '');
         var sinif = 'b-soru__sik' + (im ? ' b-soru__sik--' + im : ''), kapali = o.kilitli ? ' aria-disabled="true"' : '';
         if (kip === 'radyo') return '<label class="' + sinif + '"><input type="radio" name="' + isim + '" value="' + h + '"' + (h === o.secili ? ' checked' : '') + kapali + '>' + yazi + '</label>';
@@ -303,10 +307,10 @@
     else hata('soru', 'secenekler ya da govde gerekli');
     var r = o.sonuc == null ? null : nesne('soru', o.sonuc);
     if (r && r.maddeler != null && !Array.isArray(r.maddeler)) hata('soru', 'sonuc.maddeler dizi olmalı');
-    var sonuc = !r ? '' : '<b>' + kac(metin('soru', 'sonuc.baslik', r.baslik)) + '</b>' + (r.metin ? ' ' + kac(metin('soru', 'sonuc.metin', r.metin)) : '') +
-      (r.maddeler && r.maddeler.length ? '<ul>' + r.maddeler.map(function (x) { return '<li>' + kac(metin('soru', 'madde', x)) + '</li>'; }).join('') + '</ul>' : '') +
+    var sonuc = !r ? '' : '<b>' + kac(metin('soru', 'sonuc.baslik', r.baslik)) + '</b>' + (r.metin ? ' ' + zengin(metin('soru', 'sonuc.metin', r.metin)) : '') +
+      (r.maddeler && r.maddeler.length ? '<ul>' + r.maddeler.map(function (x) { return '<li>' + zengin(metin('soru', 'madde', x)) + '</li>'; }).join('') + '</ul>' : '') +
       (r.not ? '<p class="b-soru__not">' + kac(metin('soru', 'sonuc.not', r.not)) + '</p>' : '');
-    return '<fieldset class="b-soru" tabindex="-1"' + veri('soru', o.veri) + '><legend class="b-soru__metin">' + kac(metin('soru', 'soru', o.soru)) + '</legend>' +
+    return '<fieldset class="b-soru" tabindex="-1"' + veri('soru', o.veri) + '><legend class="b-soru__metin">' + zengin(metin('soru', 'soru', o.soru)) + '</legend>' +
       (o.ust ? '<p class="b-soru__ust">' + kac(metin('soru', 'ust', o.ust)) + '</p>' : '') + ic + '<div class="b-soru__sonuc" tabindex="-1" role="status">' + sonuc + '</div></fieldset>';
   }
 
@@ -564,7 +568,7 @@
   var Bilesen = {
     TASLAR: ['dugme', 'pul', 'satir', 'ders', 'ilerleme', 'alan', 'bos', 'baslik', 'sayi', 'uyari', 'bolum', 'panel', 'eylemler', 'acilir', 'soru', 'tercih',
       'kart', 'tablo', 'serit', 'adimlar', 'ayar', 'ag', 'karsilama', 'halka', 'komut', 'sohbet', 'cipler', 'yanli'],
-    ETIKET: ETIKET, kac: kac,
+    ETIKET: ETIKET, kac: kac, zengin: zengin,
     dugme: dugme, pul: pul, satir: satir, liste: liste, ders: ders, ilerleme: ilerleme, alan: alan, bos: bos,
     baslik: baslik, sayi: sayi, sayilar: sayilar, uyari: uyari, bolum: bolum, panel: panel, eylemler: eylemler, acilir: acilir, soru: soru, tercih: tercih,
     kart: kart, tablo: tablo, serit: serit, adimlar: adimlar, ayar: ayar, ag: ag,

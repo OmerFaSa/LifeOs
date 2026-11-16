@@ -52,6 +52,14 @@ t('katalog yirmi sekiz taş sunar ve her biri test örneğine sahip', () => {
   dogru(B.TASLAR.length === 28, 'taş sayısı ' + B.TASLAR.length);
   B.TASLAR.forEach(ad => dogru(typeof B[ad] === 'function' && ORNEK[ad], ad));
 });
+t('zengin: ders işaretlemesi kalın/üs/alt simge olur, kaçış önce yapılır (ham etiket sızmaz)', () => {
+  const e = (a, b) => dogru(a === b, JSON.stringify(a) + ' ≠ ' + JSON.stringify(b));
+  e(B.zengin('**Anlam:** x^{2} + H_{2}O'), '<b>Anlam:</b> x<sup>2</sup> + H<sub>2</sub>O');
+  e(B.zengin('**<img src=x onerror=1>**'), '<b>&lt;img src=x onerror=1&gt;</b>');
+  e(B.zengin('a*b ve 2^3, x_1'), 'a*b ve 2^3, x_1');
+  const s = B.soru({ soru: '**Kök** nedir?', secenekler: ['x^{2}', 'y'] });
+  dogru(/<b>Kök<\/b>/.test(s) && /x<sup>2<\/sup>/.test(s), s);
+});
 t('kaçış: hiçbir taş ham etiket ya da tırnak sızdırmaz', () => {
   B.TASLAR.forEach(ad => {
     const h = ORNEK[ad]();

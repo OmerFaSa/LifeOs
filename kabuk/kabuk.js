@@ -739,7 +739,7 @@
   function dersMetni(y, x, inceleme) {
     return B.baslik({ metin: x.ad }) +
       (Yol.etiket(x) === 'taslak' ? B.uyari({ tur: 'dikkat', metin: 'Taslak: bu ders henüz onaylanmadı; tekrara girmez.' }) : '') +
-      '<p class="ders__ozet">' + kac(x.ozet) + '</p>' + (x.metin || []).map(function (m) { return '<p>' + kac(m) + '</p>'; }).join('') +
+      '<p class="ders__ozet">' + B.zengin(x.ozet) + '</p>' + (x.metin || []).map(function (m) { return '<p>' + B.zengin(m) + '</p>'; }).join('') +
       (x.not && inceleme ? B.uyari({ tur: 'bilgi', metin: 'Kaynak notu: ' + x.not }) : '') + kaynaklar(y, x.kaynak, inceleme, inceleme ? '' : x.not);
   }
   function sayfaDers(id) {
