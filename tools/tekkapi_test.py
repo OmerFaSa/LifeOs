@@ -269,7 +269,8 @@ def sina(eski, tek, kokler=()):
     dene("paketli ve ayrı index'in ETag'i ayrı", iste(T, "/kabuk/")[1].get("ETag") != iste(T, "/kabuk/?ayri")[1].get("ETag"))
     dene("/kabuk → 301 /kabuk/", iste_yonsuz(T, "/kabuk")[0] == 301)
     for yol, tur in (("/kabuk/kabuk.js", "javascript"), ("/kabuk/kabuk.css", "text/css"), ("/motor/yol.js", "javascript"),
-                     ("/alan/felsefe/asama-1.json", "application/json"), ("/brand/ortak/piksel-yazi.css", "text/css"),
+                     ("/alan/felsefe/asama-1.json", "application/json"), ("/alan/tarih/harita.json", "application/json"),
+                     ("/brand/ortak/piksel-yazi.css", "text/css"),
                      ("/brand/life/favicon.png", "image/png")):
         k, b, gv = iste(T, yol)
         dene("%s 200 (%s)" % (yol, tur), k == 200 and tur in b.get("Content-Type", "") and len(gv) > 0, k)

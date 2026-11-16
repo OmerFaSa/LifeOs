@@ -1,0 +1,445 @@
+{
+ "sema": 1,
+ "alan": "felsefe",
+ "dallar": [
+  {
+   "id": "giris",
+   "ad": "Felsefeye giriş",
+   "ozet": "Felsefenin ne sorduğu, kavram ve tanımla nasıl çalıştığı.",
+   "bolumler": [
+    {
+     "ad": "Felsefe ne sorar?",
+     "konular": [
+      {
+       "ad": "Felsefe sözcüğü ve ilk filozof",
+       "ders": "felsefe.1.1.1"
+      },
+      {
+       "ad": "Sorarak düşünmek: Sokrates",
+       "ders": "felsefe.1.1.2"
+      },
+      {
+       "ad": "Görünüş ve gerçek: Platon'un mağarası",
+       "ders": "felsefe.1.1.3"
+      },
+      {
+       "ad": "Felsefe, bilim, din ve sanat"
+      }
+     ]
+    },
+    {
+     "ad": "Felsefi düşüncenin özellikleri",
+     "konular": [
+      {
+       "ad": "Merak ve hayret"
+      },
+      {
+       "ad": "Sorgulayıcı ve eleştirel düşünme"
+      },
+      {
+       "ad": "Tutarlılık ve gerekçelendirme"
+      },
+      {
+       "ad": "Refleksif, evrensel ve birikimli olma"
+      }
+     ]
+    },
+    {
+     "ad": "Kavram ve tanım",
+     "konular": [
+      {
+       "ad": "Kavram ve önerme",
+       "ders": "felsefe.1.2.1"
+      },
+      {
+       "ad": "Beş tümel: cins, tür, ayrım, özgü, ilinti",
+       "ders": "felsefe.1.2.2"
+      },
+      {
+       "ad": "İyi bir tanım nasıl kurulur?",
+       "ders": "felsefe.1.2.3"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mantik",
+   "ad": "Mantık",
+   "ozet": "Önermeden kıyasa, geçerli akıl yürütmeden safsatalara.",
+   "bolumler": [
+    {
+     "ad": "Önermeler",
+     "konular": [
+      {
+       "ad": "Dört önerme: A, E, I, O",
+       "ders": "felsefe.2.1.1"
+      },
+      {
+       "ad": "Karşı olum karesi",
+       "ders": "felsefe.2.1.2"
+      },
+      {
+       "ad": "Kıyas: iki öncülden bir sonuç",
+       "ders": "felsefe.2.1.3"
+      }
+     ]
+    },
+    {
+     "ad": "Akıl yürütme",
+     "konular": [
+      {
+       "ad": "Tümdengelim, tümevarım, analoji",
+       "ders": "felsefe.2.2.1"
+      },
+      {
+       "ad": "Geçerlilik, doğruluk, sağlamlık",
+       "ders": "felsefe.2.2.2"
+      },
+      {
+       "ad": "Biçim hataları: dört geçersiz kalıp",
+       "ders": "felsefe.2.2.3"
+      }
+     ]
+    },
+    {
+     "ad": "Safsatalar ve tartışma",
+     "konular": [
+      {
+       "ad": "Kişiye, konuya ve kalabalığa yönelen safsatalar",
+       "ders": "felsefe.2.3.1"
+      },
+      {
+       "ad": "Neden, genelleme ve ikilem hataları",
+       "ders": "felsefe.2.3.2"
+      },
+      {
+       "ad": "Argüman kurmak ve itiraz etmek",
+       "ders": "felsefe.2.3.3"
+      }
+     ]
+    },
+    {
+     "ad": "Sembolik mantık",
+     "konular": [
+      {
+       "ad": "Önerme mantığı ve bağlaçlar"
+      },
+      {
+       "ad": "Doğruluk tabloları"
+      },
+      {
+       "ad": "Niceleme mantığı"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "alanlar",
+   "ad": "Felsefenin alanları",
+   "ozet": "Bilgi, varlık, ahlak, siyaset, sanat, bilim ve din felsefesinin temel soruları.",
+   "bolumler": [
+    {
+     "ad": "Bilgi felsefesi",
+     "konular": [
+      {
+       "ad": "Bilgi nereden gelir?",
+       "ders": "felsefe.1.3.1"
+      },
+      {
+       "ad": "Akılcılık"
+      },
+      {
+       "ad": "Deneycilik"
+      },
+      {
+       "ad": "Kuşkuculuk"
+      },
+      {
+       "ad": "Eleştirel felsefe: Kant"
+      },
+      {
+       "ad": "Doğruluk kuramları"
+      }
+     ]
+    },
+    {
+     "ad": "Varlık felsefesi",
+     "konular": [
+      {
+       "ad": "Gerçekte ne var?",
+       "ders": "felsefe.1.3.2"
+      },
+      {
+       "ad": "İdealizm"
+      },
+      {
+       "ad": "Materyalizm"
+      },
+      {
+       "ad": "Düalizm"
+      },
+      {
+       "ad": "Değişim ve oluş"
+      }
+     ]
+    },
+    {
+     "ad": "Ahlak felsefesi",
+     "konular": [
+      {
+       "ad": "Ne yapmalıyım?",
+       "ders": "felsefe.1.3.3"
+      },
+      {
+       "ad": "Erdem etiği: Aristoteles"
+      },
+      {
+       "ad": "Ödev etiği: Kant"
+      },
+      {
+       "ad": "Faydacılık: Bentham ve Mill"
+      },
+      {
+       "ad": "Özgürlük ve sorumluluk"
+      }
+     ]
+    },
+    {
+     "ad": "Siyaset felsefesi",
+     "konular": [
+      {
+       "ad": "Devletin kaynağı: toplum sözleşmesi"
+      },
+      {
+       "ad": "Adalet"
+      },
+      {
+       "ad": "İktidar ve meşruiyet"
+      },
+      {
+       "ad": "İdeal düzen: Platon'un Devlet'i, Farabi'nin Erdemli Şehri"
+      }
+     ]
+    },
+    {
+     "ad": "Sanat felsefesi",
+     "konular": [
+      {
+       "ad": "Estetik ve güzellik"
+      },
+      {
+       "ad": "Taklit kuramı"
+      },
+      {
+       "ad": "Sanat ve yaratıcılık"
+      }
+     ]
+    },
+    {
+     "ad": "Bilim felsefesi",
+     "konular": [
+      {
+       "ad": "Bilimsel yöntem"
+      },
+      {
+       "ad": "Yanlışlanabilirlik: Popper"
+      },
+      {
+       "ad": "Paradigma: Kuhn"
+      },
+      {
+       "ad": "Viyana Çevresi"
+      }
+     ]
+    },
+    {
+     "ad": "Din felsefesi",
+     "konular": [
+      {
+       "ad": "Tanrı'nın varlığına dair kanıtlar"
+      },
+      {
+       "ad": "Kötülük problemi"
+      },
+      {
+       "ad": "İnanç ve akıl"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarihi",
+   "ad": "Felsefe tarihi",
+   "ozet": "İlk Çağ'dan çağdaş felsefeye filozoflar ve akımlar.",
+   "bolumler": [
+    {
+     "ad": "İlk Çağ felsefesi",
+     "konular": [
+      {
+       "ad": "Thales ve Miletos okulu",
+       "ders": "felsefe.1.1.1"
+      },
+      {
+       "ad": "Pythagoras"
+      },
+      {
+       "ad": "Herakleitos ve Parmenides"
+      },
+      {
+       "ad": "Sofistler"
+      },
+      {
+       "ad": "Sokrates",
+       "ders": "felsefe.1.1.2"
+      },
+      {
+       "ad": "Platon",
+       "ders": "felsefe.1.1.3"
+      },
+      {
+       "ad": "Aristoteles"
+      },
+      {
+       "ad": "Helenistik okullar: Stoa, Epikürcülük, Kuşkuculuk"
+      }
+     ]
+    },
+    {
+     "ad": "Orta Çağ İslam felsefesi",
+     "konular": [
+      {
+       "ad": "Kelam"
+      },
+      {
+       "ad": "Kindî"
+      },
+      {
+       "ad": "Farabi"
+      },
+      {
+       "ad": "İbn Sina"
+      },
+      {
+       "ad": "Gazali"
+      },
+      {
+       "ad": "İbn Rüşd"
+      }
+     ]
+    },
+    {
+     "ad": "Orta Çağ Hristiyan felsefesi",
+     "konular": [
+      {
+       "ad": "Augustinus"
+      },
+      {
+       "ad": "Anselmus"
+      },
+      {
+       "ad": "Tümeller tartışması"
+      },
+      {
+       "ad": "Thomas Aquinas"
+      },
+      {
+       "ad": "Ockham"
+      }
+     ]
+    },
+    {
+     "ad": "15.–17. yüzyıl felsefesi",
+     "konular": [
+      {
+       "ad": "Rönesans hümanizmi"
+      },
+      {
+       "ad": "Francis Bacon"
+      },
+      {
+       "ad": "Descartes"
+      },
+      {
+       "ad": "Hobbes"
+      },
+      {
+       "ad": "Spinoza"
+      },
+      {
+       "ad": "Leibniz"
+      },
+      {
+       "ad": "Locke"
+      }
+     ]
+    },
+    {
+     "ad": "18. yüzyıl: Aydınlanma",
+     "konular": [
+      {
+       "ad": "Berkeley"
+      },
+      {
+       "ad": "Hume"
+      },
+      {
+       "ad": "Rousseau"
+      },
+      {
+       "ad": "Kant"
+      }
+     ]
+    },
+    {
+     "ad": "19. yüzyıl felsefesi",
+     "konular": [
+      {
+       "ad": "Hegel"
+      },
+      {
+       "ad": "Marx"
+      },
+      {
+       "ad": "Comte ve pozitivizm"
+      },
+      {
+       "ad": "Mill"
+      },
+      {
+       "ad": "Kierkegaard"
+      },
+      {
+       "ad": "Nietzsche"
+      }
+     ]
+    },
+    {
+     "ad": "20. yüzyıl felsefesi",
+     "konular": [
+      {
+       "ad": "Pragmatizm: James ve Dewey"
+      },
+      {
+       "ad": "Fenomenoloji: Husserl"
+      },
+      {
+       "ad": "Varoluşçuluk: Heidegger ve Sartre"
+      },
+      {
+       "ad": "Analitik felsefe: Russell ve Wittgenstein"
+      },
+      {
+       "ad": "Frankfurt Okulu"
+      },
+      {
+       "ad": "Postmodernizm"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1693 @@
+{
+ "sema": 1,
+ "alan": "tarih",
+ "dallar": [
+  {
+   "id": "giris",
+   "ad": "Tarihe giriş: yöntem ve zaman",
+   "ozet": "Tarihin kanıtla nasıl bilindiği, zamanın nasıl ölçüldüğü ve dönemlere nasıl bölündüğü.",
+   "bolumler": [
+    {
+     "ad": "Tarih bilimi",
+     "konular": [
+      {
+       "ad": "Tarih ezber değil, kanıt işidir",
+       "ders": "tarih.1.1.1"
+      },
+      {
+       "ad": "Geçmişi kendi çağında okumak: anakronizm",
+       "ders": "tarih.1.1.2"
+      },
+      {
+       "ad": "Çok nedenli düşünmek ve zaman katmanları",
+       "ders": "tarih.1.1.3"
+      },
+      {
+       "ad": "Kaynak türleri: birinci ve ikinci el kaynaklar"
+      },
+      {
+       "ad": "Tarihe yardımcı bilimler: arkeoloji, epigrafi, nümismatik, paleografi"
+      }
+     ]
+    },
+    {
+     "ad": "Zamanı ölçmek",
+     "konular": [
+      {
+       "ad": "Takvimler: güneş yılı, ay yılı",
+       "ders": "tarih.2.1.1"
+      },
+      {
+       "ad": "MÖ, MS ve yüzyıl hesabı",
+       "ders": "tarih.2.1.2"
+      },
+      {
+       "ad": "Olay tarihi, belge tarihi, yaklaşık tarih",
+       "ders": "tarih.2.1.3"
+      },
+      {
+       "ad": "On İki Hayvanlı Türk Takvimi"
+      },
+      {
+       "ad": "Hicri, Rumi ve Miladi takvimler"
+      }
+     ]
+    },
+    {
+     "ad": "Çağlar ve dönemler",
+     "konular": [
+      {
+       "ad": "Tarih öncesi: taş ve maden çağları",
+       "ders": "tarih.2.2.1"
+      },
+      {
+       "ad": "Altı dönem: İlk Çağ'dan Çağdaş'a",
+       "ders": "tarih.2.2.2"
+      },
+      {
+       "ad": "Dönem sınırları birer karardır",
+       "ders": "tarih.2.2.3"
+      }
+     ]
+    },
+    {
+     "ad": "Zaman şeridi",
+     "konular": [
+      {
+       "ad": "Yazıdan Charlemagne'a: İlk Çağ ve erken Orta Çağ",
+       "ders": "tarih.2.3.1"
+      },
+      {
+       "ad": "Malazgirt'ten Karlofça'ya: Orta Çağ ve Yeni Çağ",
+       "ders": "tarih.2.3.2"
+      },
+      {
+       "ad": "Devrimlerden bugüne: Yakın Çağ ve çağdaş dönem",
+       "ders": "tarih.2.3.3"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "turk",
+   "ad": "Türk tarihi",
+   "ozet": "İslamiyet öncesi Türk devletlerinden Türk-İslam devletlerine ve Anadolu beyliklerine.",
+   "bolumler": [
+    {
+     "ad": "İlk Türk devletleri",
+     "konular": [
+      {
+       "ad": "Asya Hun Devleti ve Mete Han"
+      },
+      {
+       "ad": "Kavimler Göçü (375)"
+      },
+      {
+       "ad": "Avrupa Hun Devleti ve Attila"
+      },
+      {
+       "ad": "Akhunlar (Eftalitler)"
+      },
+      {
+       "ad": "Göktürkler: I. ve II. Kağanlık"
+      },
+      {
+       "ad": "Uygurlar"
+      },
+      {
+       "ad": "Avarlar"
+      },
+      {
+       "ad": "Hazarlar"
+      }
+     ]
+    },
+    {
+     "ad": "Öteki Türk toplulukları",
+     "konular": [
+      {
+       "ad": "Bulgarlar: Tuna ve İtil Bulgarları"
+      },
+      {
+       "ad": "Türgişler"
+      },
+      {
+       "ad": "Karluklar"
+      },
+      {
+       "ad": "Kırgızlar"
+      },
+      {
+       "ad": "Oğuzlar"
+      },
+      {
+       "ad": "Peçenekler"
+      },
+      {
+       "ad": "Kıpçaklar (Kumanlar)"
+      }
+     ]
+    },
+    {
+     "ad": "İslamiyet öncesi Türk kültürü",
+     "konular": [
+      {
+       "ad": "Orhun Yazıtları: Tonyukuk, Kül Tigin, Bilge Kağan"
+      },
+      {
+       "ad": "Kut anlayışı ve kurultay"
+      },
+      {
+       "ad": "Töre"
+      },
+      {
+       "ad": "Gök Tanrı inancı"
+      },
+      {
+       "ad": "Onlu ordu sistemi"
+      },
+      {
+       "ad": "Bozkır hayatı ve göçebe ekonomi"
+      },
+      {
+       "ad": "Uygurlarda yerleşik hayat ve Uygur alfabesi"
+      }
+     ]
+    },
+    {
+     "ad": "Türklerin İslamiyet'e geçişi",
+     "konular": [
+      {
+       "ad": "Talas Savaşı (751)"
+      },
+      {
+       "ad": "Abbasi ordusunda Türkler ve Samarra"
+      },
+      {
+       "ad": "Tolunoğulları"
+      },
+      {
+       "ad": "İhşidiler"
+      },
+      {
+       "ad": "Türklerin İslamiyet'i kabulü"
+      }
+     ]
+    },
+    {
+     "ad": "İlk Türk-İslam devletleri",
+     "konular": [
+      {
+       "ad": "Karahanlılar ve Satuk Buğra Han"
+      },
+      {
+       "ad": "Karahanlı eserleri: Kutadgu Bilig, Divânu Lügâti't-Türk, Atabetü'l-Hakayık"
+      },
+      {
+       "ad": "Gazneliler ve Gazneli Mahmud"
+      },
+      {
+       "ad": "Harzemşahlar ve Moğol istilası"
+      },
+      {
+       "ad": "Memlükler ve Ayn Câlût Savaşı (1260)"
+      }
+     ]
+    },
+    {
+     "ad": "Büyük Selçuklu Devleti",
+     "konular": [
+      {
+       "ad": "Tuğrul ve Çağrı beyler: kuruluş"
+      },
+      {
+       "ad": "Dandanakan Savaşı (1040)"
+      },
+      {
+       "ad": "Pasinler Savaşı (1048)"
+      },
+      {
+       "ad": "Bağdat seferi ve halifelik (1055)"
+      },
+      {
+       "ad": "Alp Arslan ve Malazgirt Savaşı (1071)",
+       "ders": "tarih.2.3.2"
+      },
+      {
+       "ad": "Melikşah, Nizâmülmülk ve Nizamiye medreseleri"
+      },
+      {
+       "ad": "Sultan Sencer ve Katvan Savaşı (1141)"
+      }
+     ]
+    },
+    {
+     "ad": "Türkiye (Anadolu) Selçuklu Devleti",
+     "konular": [
+      {
+       "ad": "Süleyman Şah ve kuruluş (1075)"
+      },
+      {
+       "ad": "I. Kılıç Arslan ve I. Haçlı Seferi"
+      },
+      {
+       "ad": "Miryokefalon Savaşı (1176)"
+      },
+      {
+       "ad": "I. Alâeddin Keykubad ve altın çağ"
+      },
+      {
+       "ad": "Kervansaraylar ve ticaret yolları"
+      },
+      {
+       "ad": "Ahilik teşkilatı"
+      },
+      {
+       "ad": "Babai İsyanı (1240)"
+      },
+      {
+       "ad": "Kösedağ Savaşı (1243)"
+      }
+     ]
+    },
+    {
+     "ad": "Anadolu beylikleri",
+     "konular": [
+      {
+       "ad": "Birinci dönem: Danişmentliler, Saltuklular, Mengücekliler, Artuklular"
+      },
+      {
+       "ad": "Çaka Bey ve ilk Türk donanması"
+      },
+      {
+       "ad": "Karamanoğulları ve Türkçe fermanı"
+      },
+      {
+       "ad": "Germiyanoğulları"
+      },
+      {
+       "ad": "Candaroğulları"
+      },
+      {
+       "ad": "Aydınoğulları, Menteşeoğulları, Karesioğulları"
+      },
+      {
+       "ad": "Ramazanoğulları ve Dulkadiroğulları"
+      },
+      {
+       "ad": "Osmanlı Beyliği"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "osmanli",
+   "ad": "Osmanlı tarihi",
+   "ozet": "Beylikten cihan devletine, oradan dağılmaya: 1299–1922.",
+   "bolumler": [
+    {
+     "ad": "Kuruluş (1299–1453)",
+     "konular": [
+      {
+       "ad": "Osman Bey ve beyliğin kuruluşu"
+      },
+      {
+       "ad": "Koyunhisar (Bafeus) Savaşı (1302)"
+      },
+      {
+       "ad": "Orhan Bey: Bursa, İznik ve Rumeli'ye geçiş"
+      },
+      {
+       "ad": "I. Murad: Edirne ve I. Kosova Savaşı (1389)"
+      },
+      {
+       "ad": "Yıldırım Bayezid: Niğbolu (1396) ve Ankara Savaşı (1402)"
+      },
+      {
+       "ad": "Fetret Devri (1402–1413)"
+      },
+      {
+       "ad": "II. Murad: Varna (1444) ve II. Kosova (1448)"
+      }
+     ]
+    },
+    {
+     "ad": "Yükselme (1453–1579)",
+     "konular": [
+      {
+       "ad": "İstanbul'un fethi (1453)"
+      },
+      {
+       "ad": "Fatih'in fetihleri ve Otlukbeli Savaşı (1473)"
+      },
+      {
+       "ad": "II. Bayezid ve Cem Sultan olayı"
+      },
+      {
+       "ad": "Yavuz Sultan Selim: Çaldıran (1514), Mercidabık (1516), Ridaniye (1517)"
+      },
+      {
+       "ad": "Halifeliğin Osmanlı'ya geçişi (1517)"
+      },
+      {
+       "ad": "Kanuni: Mohaç (1526) ve Viyana Kuşatması (1529)"
+      },
+      {
+       "ad": "Preveze Deniz Savaşı (1538)"
+      },
+      {
+       "ad": "Sokullu Mehmed Paşa ve kanal projeleri"
+      }
+     ]
+    },
+    {
+     "ad": "Devlet ve toplum düzeni",
+     "konular": [
+      {
+       "ad": "Divan-ı Hümayun"
+      },
+      {
+       "ad": "Tımar sistemi"
+      },
+      {
+       "ad": "Devşirme ve Kapıkulu ocakları"
+      },
+      {
+       "ad": "Millet sistemi"
+      },
+      {
+       "ad": "Vakıflar ve loncalar"
+      },
+      {
+       "ad": "Medrese ve ilmiye"
+      },
+      {
+       "ad": "Mimar Sinan ve klasik mimari"
+      }
+     ]
+    },
+    {
+     "ad": "Duraklama (1579–1699)",
+     "konular": [
+      {
+       "ad": "Dönem adları neden tartışılır?",
+       "ders": "tarih.2.2.3"
+      },
+      {
+       "ad": "Celali isyanları"
+      },
+      {
+       "ad": "Zitvatorok Antlaşması (1606)"
+      },
+      {
+       "ad": "Genç Osman ve IV. Murad"
+      },
+      {
+       "ad": "Kasr-ı Şirin Antlaşması (1639)"
+      },
+      {
+       "ad": "Köprülüler dönemi"
+      },
+      {
+       "ad": "II. Viyana Kuşatması (1683)"
+      },
+      {
+       "ad": "Karlofça Antlaşması (1699)",
+       "ders": "tarih.2.3.2"
+      }
+     ]
+    },
+    {
+     "ad": "Gerileme (1699–1792)",
+     "konular": [
+      {
+       "ad": "Prut Savaşı (1711)"
+      },
+      {
+       "ad": "Pasarofça Antlaşması ve Lale Devri (1718–1730)"
+      },
+      {
+       "ad": "Patrona Halil İsyanı (1730)"
+      },
+      {
+       "ad": "Belgrad Antlaşması (1739)"
+      },
+      {
+       "ad": "Küçük Kaynarca Antlaşması (1774)"
+      },
+      {
+       "ad": "Kırım'ın kaybı (1783)"
+      },
+      {
+       "ad": "Yaş Antlaşması (1792)"
+      }
+     ]
+    },
+    {
+     "ad": "Dağılma (1792–1908)",
+     "konular": [
+      {
+       "ad": "III. Selim ve Nizam-ı Cedid"
+      },
+      {
+       "ad": "Sened-i İttifak (1808)"
+      },
+      {
+       "ad": "II. Mahmud ve Yeniçeri Ocağı'nın kaldırılması (1826)"
+      },
+      {
+       "ad": "Yunan isyanı ve Mısır meselesi"
+      },
+      {
+       "ad": "Tanzimat (1839) ve Islahat (1856) fermanları"
+      },
+      {
+       "ad": "Kırım Savaşı ve Paris Antlaşması (1856)"
+      },
+      {
+       "ad": "I. Meşrutiyet (1876) ve 93 Harbi (1877–1878)"
+      },
+      {
+       "ad": "Berlin Antlaşması (1878)"
+      }
+     ]
+    },
+    {
+     "ad": "Son dönem (1908–1922)",
+     "konular": [
+      {
+       "ad": "II. Meşrutiyet (1908)"
+      },
+      {
+       "ad": "31 Mart Vakası (1909)"
+      },
+      {
+       "ad": "Fikir akımları: Osmanlıcılık, İslamcılık, Türkçülük, Batıcılık"
+      },
+      {
+       "ad": "Trablusgarp Savaşı (1911–1912)"
+      },
+      {
+       "ad": "Balkan Savaşları (1912–1913)"
+      },
+      {
+       "ad": "I. Dünya Savaşı'nda Osmanlı cepheleri"
+      },
+      {
+       "ad": "Çanakkale Cephesi (1915)"
+      },
+      {
+       "ad": "Mondros Ateşkes Antlaşması (1918)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cumhuriyet",
+   "ad": "Türkiye Cumhuriyeti tarihi",
+   "ozet": "Millî Mücadele'den Cumhuriyet'in kuruluşuna, inkılaplardan bugüne.",
+   "bolumler": [
+    {
+     "ad": "Millî Mücadele'ye hazırlık (1918–1920)",
+     "konular": [
+      {
+       "ad": "Mondros sonrası işgaller"
+      },
+      {
+       "ad": "Yararlı ve zararlı cemiyetler"
+      },
+      {
+       "ad": "Kuvâ-yı Millîye"
+      },
+      {
+       "ad": "Mustafa Kemal'in Samsun'a çıkışı (19 Mayıs 1919)"
+      },
+      {
+       "ad": "Amasya Genelgesi (1919)"
+      },
+      {
+       "ad": "Erzurum ve Sivas kongreleri (1919)"
+      },
+      {
+       "ad": "Misak-ı Millî (1920)"
+      },
+      {
+       "ad": "İstanbul'un resmen işgali (16 Mart 1920)"
+      }
+     ]
+    },
+    {
+     "ad": "TBMM ve cepheler (1920–1922)",
+     "konular": [
+      {
+       "ad": "TBMM'nin açılışı (23 Nisan 1920)"
+      },
+      {
+       "ad": "TBMM'ye karşı ayaklanmalar"
+      },
+      {
+       "ad": "Sevr Antlaşması (1920)"
+      },
+      {
+       "ad": "Doğu ve Güney cepheleri: Gümrü ve Ankara antlaşmaları"
+      },
+      {
+       "ad": "I. ve II. İnönü Savaşları (1921)"
+      },
+      {
+       "ad": "Sakarya Meydan Muharebesi ve Tekâlif-i Millîye (1921)"
+      },
+      {
+       "ad": "Büyük Taarruz ve Mudanya Ateşkesi (1922)"
+      }
+     ]
+    },
+    {
+     "ad": "Lozan ve Cumhuriyet'in kuruluşu",
+     "konular": [
+      {
+       "ad": "Saltanatın kaldırılması (1922)"
+      },
+      {
+       "ad": "Lozan Barış Antlaşması (1923)"
+      },
+      {
+       "ad": "Ankara'nın başkent oluşu (1923)"
+      },
+      {
+       "ad": "Cumhuriyet'in ilanı (29 Ekim 1923)"
+      },
+      {
+       "ad": "Halifeliğin kaldırılması (1924)"
+      },
+      {
+       "ad": "1924 Anayasası"
+      }
+     ]
+    },
+    {
+     "ad": "İnkılaplar",
+     "konular": [
+      {
+       "ad": "Tevhid-i Tedrisat Kanunu (1924)"
+      },
+      {
+       "ad": "Şapka Kanunu (1925)"
+      },
+      {
+       "ad": "Tekke ve zaviyelerin kapatılması (1925)"
+      },
+      {
+       "ad": "Türk Medeni Kanunu (1926)"
+      },
+      {
+       "ad": "Harf İnkılabı (1928)"
+      },
+      {
+       "ad": "Kadınlara seçme ve seçilme hakkı (1930–1934)"
+      },
+      {
+       "ad": "Türk Tarih Kurumu ve Türk Dil Kurumu"
+      },
+      {
+       "ad": "Soyadı Kanunu (1934)"
+      }
+     ]
+    },
+    {
+     "ad": "Atatürk ilkeleri",
+     "konular": [
+      {
+       "ad": "Cumhuriyetçilik"
+      },
+      {
+       "ad": "Milliyetçilik"
+      },
+      {
+       "ad": "Halkçılık"
+      },
+      {
+       "ad": "Devletçilik"
+      },
+      {
+       "ad": "Laiklik"
+      },
+      {
+       "ad": "İnkılapçılık"
+      }
+     ]
+    },
+    {
+     "ad": "İç ve dış politika (1923–1939)",
+     "konular": [
+      {
+       "ad": "İzmir İktisat Kongresi (1923)"
+      },
+      {
+       "ad": "Nüfus mübadelesi"
+      },
+      {
+       "ad": "Çok partili hayat denemeleri: Terakkiperver ve Serbest Cumhuriyet fırkaları"
+      },
+      {
+       "ad": "Şeyh Said İsyanı (1925)"
+      },
+      {
+       "ad": "Musul meselesi"
+      },
+      {
+       "ad": "Balkan Antantı (1934) ve Sadabat Paktı (1937)"
+      },
+      {
+       "ad": "Montrö Boğazlar Sözleşmesi (1936)"
+      },
+      {
+       "ad": "Hatay'ın Türkiye'ye katılması (1939)"
+      }
+     ]
+    },
+    {
+     "ad": "1938'den günümüze",
+     "konular": [
+      {
+       "ad": "Atatürk'ün ölümü ve İsmet İnönü dönemi"
+      },
+      {
+       "ad": "II. Dünya Savaşı'nda Türkiye"
+      },
+      {
+       "ad": "Çok partili hayata geçiş (1946) ve 1950 seçimleri"
+      },
+      {
+       "ad": "Kore Savaşı ve NATO üyeliği (1952)"
+      },
+      {
+       "ad": "27 Mayıs 1960 ve 1961 Anayasası"
+      },
+      {
+       "ad": "12 Mart 1971 muhtırası"
+      },
+      {
+       "ad": "Kıbrıs Barış Harekâtı (1974)"
+      },
+      {
+       "ad": "12 Eylül 1980 ve 1982 Anayasası"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "islam",
+   "ad": "İslam tarihi",
+   "ozet": "Cahiliye Arabistan'ından Abbasilere, Endülüs'ten İslam bilimine.",
+   "bolumler": [
+    {
+     "ad": "İslamiyet öncesi Arabistan",
+     "konular": [
+      {
+       "ad": "Cahiliye dönemi Arap toplumu"
+      },
+      {
+       "ad": "Mekke ve Kâbe"
+      },
+      {
+       "ad": "Panayırlar ve ticaret yolları"
+      },
+      {
+       "ad": "Yemen, Gassaniler ve Hireliler"
+      }
+     ]
+    },
+    {
+     "ad": "Hz. Muhammed dönemi (610–632)",
+     "konular": [
+      {
+       "ad": "Peygamberliğin başlangıcı (610)"
+      },
+      {
+       "ad": "Mekke dönemi ve Habeşistan'a hicret"
+      },
+      {
+       "ad": "Hicret (622) ve Medine"
+      },
+      {
+       "ad": "Bedir (624), Uhud (625) ve Hendek (627)"
+      },
+      {
+       "ad": "Hudeybiye Antlaşması (628)"
+      },
+      {
+       "ad": "Mekke'nin fethi (630)"
+      },
+      {
+       "ad": "Veda Haccı ve vefat (632)"
+      }
+     ]
+    },
+    {
+     "ad": "Dört Halife dönemi (632–661)",
+     "konular": [
+      {
+       "ad": "Hz. Ebubekir"
+      },
+      {
+       "ad": "Hz. Ömer ve fetihler"
+      },
+      {
+       "ad": "Hz. Osman ve Kur'an'ın çoğaltılması"
+      },
+      {
+       "ad": "Hz. Ali: Cemel ve Sıffin"
+      },
+      {
+       "ad": "Hakem olayı ve Haricîler"
+      }
+     ]
+    },
+    {
+     "ad": "Emeviler (661–750)",
+     "konular": [
+      {
+       "ad": "Muaviye ve saltanatın başlaması"
+      },
+      {
+       "ad": "Kerbela (680)"
+      },
+      {
+       "ad": "Arapçanın resmî dil olması"
+      },
+      {
+       "ad": "İstanbul kuşatmaları"
+      },
+      {
+       "ad": "Endülüs'ün fethi (711)"
+      },
+      {
+       "ad": "Mevali politikası"
+      }
+     ]
+    },
+    {
+     "ad": "Abbasiler (750–1258)",
+     "konular": [
+      {
+       "ad": "Abbasi ihtilali (750)"
+      },
+      {
+       "ad": "Bağdat'ın kuruluşu"
+      },
+      {
+       "ad": "Beytü'l-Hikme ve çeviri hareketi"
+      },
+      {
+       "ad": "Türklerin orduya girişi ve Samarra"
+      },
+      {
+       "ad": "Moğolların Bağdat'ı alışı (1258)"
+      }
+     ]
+    },
+    {
+     "ad": "Endülüs ve öteki İslam devletleri",
+     "konular": [
+      {
+       "ad": "Endülüs Emevileri ve Kurtuba"
+      },
+      {
+       "ad": "Fatımiler"
+      },
+      {
+       "ad": "Eyyubiler ve Selahaddin Eyyubi"
+      },
+      {
+       "ad": "Hıttin Savaşı ve Kudüs (1187)"
+      },
+      {
+       "ad": "Gırnata'nın düşüşü (1492)"
+      }
+     ]
+    },
+    {
+     "ad": "İslam bilim ve düşüncesi",
+     "konular": [
+      {
+       "ad": "Harezmî ve cebir"
+      },
+      {
+       "ad": "Farabi"
+      },
+      {
+       "ad": "İbn Sina"
+      },
+      {
+       "ad": "Biruni"
+      },
+      {
+       "ad": "İbn Heysem ve optik"
+      },
+      {
+       "ad": "Gazali"
+      },
+      {
+       "ad": "İbn Rüşd"
+      },
+      {
+       "ad": "İbn Haldun"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "eskicag",
+   "ad": "Eski Çağ uygarlıkları",
+   "ozet": "Tarih öncesi Anadolu'dan Mezopotamya, Mısır, İran, Hint ve Çin'e.",
+   "bolumler": [
+    {
+     "ad": "Tarih öncesi Anadolu",
+     "konular": [
+      {
+       "ad": "Karain Mağarası"
+      },
+      {
+       "ad": "Göbeklitepe: önce tapınak mı, önce tarla mı?",
+       "ders": "tarih.1.2.1"
+      },
+      {
+       "ad": "Çatalhöyük: sokaksız bir köy-kent",
+       "ders": "tarih.1.2.2"
+      },
+      {
+       "ad": "Çayönü"
+      },
+      {
+       "ad": "Hacılar"
+      }
+     ]
+    },
+    {
+     "ad": "Mezopotamya",
+     "konular": [
+      {
+       "ad": "Sümerler ve yazının icadı",
+       "ders": "tarih.1.2.3"
+      },
+      {
+       "ad": "Akadlar"
+      },
+      {
+       "ad": "Babil ve Hammurabi Kanunları"
+      },
+      {
+       "ad": "Asurlular ve Ninova kütüphanesi"
+      },
+      {
+       "ad": "Yeni Babil ve Pers fethi"
+      }
+     ]
+    },
+    {
+     "ad": "Mısır",
+     "konular": [
+      {
+       "ad": "Nil ve birleşik krallık"
+      },
+      {
+       "ad": "Eski Krallık ve piramitler"
+      },
+      {
+       "ad": "Hiyeroglif ve papirüs"
+      },
+      {
+       "ad": "Yeni Krallık ve firavunlar"
+      },
+      {
+       "ad": "Kadeş Savaşı ve Kadeş Antlaşması"
+      },
+      {
+       "ad": "Mısır'da din ve ölüm sonrası inancı"
+      }
+     ]
+    },
+    {
+     "ad": "Anadolu uygarlıkları",
+     "konular": [
+      {
+       "ad": "Asur Ticaret Kolonileri ve Kaniş (Kültepe)"
+      },
+      {
+       "ad": "Hattiler"
+      },
+      {
+       "ad": "Hititler: meclis, kraliçe ve antlaşma",
+       "ders": "tarih.1.3.1"
+      },
+      {
+       "ad": "Frigler",
+       "ders": "tarih.1.3.2"
+      },
+      {
+       "ad": "Lidyalılar ve ilk sikke",
+       "ders": "tarih.1.3.2"
+      },
+      {
+       "ad": "Urartular",
+       "ders": "tarih.1.3.3"
+      },
+      {
+       "ad": "İyonlar ve Ege kentleri"
+      },
+      {
+       "ad": "Likyalılar, Karyalılar ve öteki yerel uygarlıklar"
+      }
+     ]
+    },
+    {
+     "ad": "Doğu Akdeniz ve İran",
+     "konular": [
+      {
+       "ad": "Fenikeliler ve alfabe"
+      },
+      {
+       "ad": "İbraniler"
+      },
+      {
+       "ad": "Persler (Ahameniş İmparatorluğu)"
+      },
+      {
+       "ad": "Kral Yolu"
+      },
+      {
+       "ad": "Zerdüştlük"
+      }
+     ]
+    },
+    {
+     "ad": "Hint ve Çin",
+     "konular": [
+      {
+       "ad": "İndus Vadisi uygarlığı"
+      },
+      {
+       "ad": "Vedalar ve kast düzeni"
+      },
+      {
+       "ad": "Budizm'in doğuşu"
+      },
+      {
+       "ad": "Çin'de ilk hanedanlar"
+      },
+      {
+       "ad": "Qin birliği ve Çin Seddi"
+      },
+      {
+       "ad": "İpek Yolu"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yunan",
+   "ad": "Antik Yunan",
+   "ozet": "Girit ve Mikenlerden polislere, Atina'dan Büyük İskender'e.",
+   "bolumler": [
+    {
+     "ad": "Ege'nin ilk uygarlıkları",
+     "konular": [
+      {
+       "ad": "Minos uygarlığı (Girit)"
+      },
+      {
+       "ad": "Miken uygarlığı"
+      },
+      {
+       "ad": "Truva ve Homeros destanları"
+      },
+      {
+       "ad": "Karanlık Çağ ve Yunan alfabesi"
+      }
+     ]
+    },
+    {
+     "ad": "Polis dünyası",
+     "konular": [
+      {
+       "ad": "Polis: kent devleti"
+      },
+      {
+       "ad": "Atina ve demokrasinin doğuşu: Solon ve Kleisthenes"
+      },
+      {
+       "ad": "Sparta"
+      },
+      {
+       "ad": "Kolonizasyon hareketleri"
+      },
+      {
+       "ad": "Olimpiyat oyunları"
+      }
+     ]
+    },
+    {
+     "ad": "Savaşlar ve altın çağ",
+     "konular": [
+      {
+       "ad": "Pers Savaşları: Maraton ve Salamis"
+      },
+      {
+       "ad": "Delos Birliği ve Perikles Atinası"
+      },
+      {
+       "ad": "Peloponez Savaşı"
+      }
+     ]
+    },
+    {
+     "ad": "Düşünce ve sanat",
+     "konular": [
+      {
+       "ad": "İyonya doğa filozofları"
+      },
+      {
+       "ad": "Sokrates, Platon ve Aristoteles"
+      },
+      {
+       "ad": "Herodotos ve Thukydides"
+      },
+      {
+       "ad": "Tiyatro: tragedya ve komedya"
+      },
+      {
+       "ad": "Tapınaklar ve heykel"
+      }
+     ]
+    },
+    {
+     "ad": "Helenistik dünya",
+     "konular": [
+      {
+       "ad": "Makedonya'nın yükselişi: II. Filip"
+      },
+      {
+       "ad": "Büyük İskender'in seferleri"
+      },
+      {
+       "ad": "Helenistik krallıklar: Ptolemaioslar ve Seleukoslar"
+      },
+      {
+       "ad": "İskenderiye Kütüphanesi ve bilim"
+      },
+      {
+       "ad": "Bergama Krallığı"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "roma",
+   "ad": "Roma tarihi",
+   "ozet": "Krallıktan Cumhuriyet'e, İmparatorluk'tan Doğu Roma'nın (Bizans) sonuna.",
+   "bolumler": [
+    {
+     "ad": "Krallık dönemi",
+     "konular": [
+      {
+       "ad": "Kuruluş efsanesi: Romulus ve Remus"
+      },
+      {
+       "ad": "Etrüskler"
+      },
+      {
+       "ad": "Yedi kral"
+      },
+      {
+       "ad": "Krallığın sonu ve Cumhuriyet'in kuruluşu"
+      }
+     ]
+    },
+    {
+     "ad": "Cumhuriyet: kurumlar",
+     "konular": [
+      {
+       "ad": "Konsüller, senato ve halk meclisleri"
+      },
+      {
+       "ad": "Patrici–pleb mücadelesi ve tribunlar"
+      },
+      {
+       "ad": "On İki Levha Kanunları"
+      },
+      {
+       "ad": "İtalya'nın birleştirilmesi"
+      }
+     ]
+    },
+    {
+     "ad": "Cumhuriyet: Akdeniz'e yayılma",
+     "konular": [
+      {
+       "ad": "Pön Savaşları ve Hannibal"
+      },
+      {
+       "ad": "Kartaca'nın yıkılışı (MÖ 146)"
+      },
+      {
+       "ad": "Makedonya ve Yunanistan'ın alınması"
+      },
+      {
+       "ad": "Bergama'nın Roma'ya bırakılması (MÖ 133)"
+      }
+     ]
+    },
+    {
+     "ad": "Cumhuriyet'in krizi",
+     "konular": [
+      {
+       "ad": "Gracchus kardeşler"
+      },
+      {
+       "ad": "Marius'un ordu reformu ve Sulla"
+      },
+      {
+       "ad": "Spartacus ayaklanması"
+      },
+      {
+       "ad": "Birinci Triumvirlik"
+      },
+      {
+       "ad": "Julius Caesar ve Rubicon"
+      },
+      {
+       "ad": "Caesar'ın öldürülmesi (MÖ 44)"
+      },
+      {
+       "ad": "Aktium Savaşı (MÖ 31)"
+      }
+     ]
+    },
+    {
+     "ad": "İmparatorluk",
+     "konular": [
+      {
+       "ad": "Augustus ve Principatus"
+      },
+      {
+       "ad": "Pax Romana"
+      },
+      {
+       "ad": "Julius-Claudius hanedanı"
+      },
+      {
+       "ad": "Beş iyi imparator"
+      },
+      {
+       "ad": "Roma hukuku"
+      },
+      {
+       "ad": "Hristiyanlığın yayılması"
+      },
+      {
+       "ad": "Lejyonlar ve limes"
+      }
+     ]
+    },
+    {
+     "ad": "Geç Roma",
+     "konular": [
+      {
+       "ad": "III. yüzyıl krizi"
+      },
+      {
+       "ad": "Diocletianus ve tetrarşi"
+      },
+      {
+       "ad": "Konstantin: Milano Fermanı (313) ve Konstantinopolis (330)"
+      },
+      {
+       "ad": "Kavimler Göçü ve Roma"
+      },
+      {
+       "ad": "Theodosius ve imparatorluğun bölünmesi (395)"
+      },
+      {
+       "ad": "Batı Roma'nın yıkılışı (476)"
+      }
+     ]
+    },
+    {
+     "ad": "Doğu Roma (Bizans)",
+     "konular": [
+      {
+       "ad": "Justinianus: kanunlar ve Ayasofya"
+      },
+      {
+       "ad": "Nika Ayaklanması (532)"
+      },
+      {
+       "ad": "Sasani ve Arap savaşları"
+      },
+      {
+       "ad": "İkonoklazma (tasvir kırıcılık)"
+      },
+      {
+       "ad": "Doğu–Batı kilise ayrılığı (1054)"
+      },
+      {
+       "ad": "Latin işgali (1204–1261)"
+      },
+      {
+       "ad": "İstanbul'un fethi (1453)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ortacag",
+   "ad": "Orta Çağ Avrupası",
+   "ozet": "Germen krallıklarından feodaliteye, kiliseden Haçlı Seferleri'ne.",
+   "bolumler": [
+    {
+     "ad": "Erken Orta Çağ",
+     "konular": [
+      {
+       "ad": "Germen krallıkları"
+      },
+      {
+       "ad": "Frank Krallığı ve Hlodwig"
+      },
+      {
+       "ad": "Charlemagne'ın taç giymesi (800)",
+       "ders": "tarih.2.3.1"
+      },
+      {
+       "ad": "Verdun Antlaşması (843)"
+      },
+      {
+       "ad": "Vikingler"
+      }
+     ]
+    },
+    {
+     "ad": "Feodalite",
+     "konular": [
+      {
+       "ad": "Senyör ve vasal"
+      },
+      {
+       "ad": "Malikâne ve serflik"
+      },
+      {
+       "ad": "Şövalyelik"
+      },
+      {
+       "ad": "Şatolar ve kaleler"
+      }
+     ]
+    },
+    {
+     "ad": "Kilise ve papalık",
+     "konular": [
+      {
+       "ad": "Papalığın güçlenmesi"
+      },
+      {
+       "ad": "Manastırlar"
+      },
+      {
+       "ad": "Yatırım kavgası ve Canossa (1077)"
+      },
+      {
+       "ad": "Doğu–Batı kilise ayrılığı (1054)"
+      },
+      {
+       "ad": "Engizisyon"
+      }
+     ]
+    },
+    {
+     "ad": "Haçlı Seferleri",
+     "konular": [
+      {
+       "ad": "I. Haçlı Seferi (1096–1099)"
+      },
+      {
+       "ad": "Haçlı devletleri ve Kudüs Krallığı"
+      },
+      {
+       "ad": "Hıttin (1187) ve III. Haçlı Seferi"
+      },
+      {
+       "ad": "IV. Haçlı Seferi ve İstanbul'un yağması (1204)"
+      },
+      {
+       "ad": "Haçlı Seferleri'nin sonuçları"
+      }
+     ]
+    },
+    {
+     "ad": "Geç Orta Çağ",
+     "konular": [
+      {
+       "ad": "Kentlerin yükselişi ve burjuvazi"
+      },
+      {
+       "ad": "Üniversitelerin kuruluşu"
+      },
+      {
+       "ad": "Magna Carta (1215)"
+      },
+      {
+       "ad": "Yüz Yıl Savaşları (1337–1453)"
+      },
+      {
+       "ad": "Jeanne d'Arc"
+      },
+      {
+       "ad": "Kara Ölüm (1347–1351)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yenicag",
+   "ad": "Yeni ve Yakın Çağ",
+   "ozet": "Rönesans ve Reform'dan Coğrafi Keşifler'e, Fransız İhtilali'nden Sanayi Devrimi'ne.",
+   "bolumler": [
+    {
+     "ad": "Rönesans",
+     "konular": [
+      {
+       "ad": "İtalya'da doğuşu ve Medici'ler"
+      },
+      {
+       "ad": "Hümanizm"
+      },
+      {
+       "ad": "Matbaa: Gutenberg"
+      },
+      {
+       "ad": "Rönesans sanatçıları: Leonardo, Michelangelo, Raffaello"
+      },
+      {
+       "ad": "Machiavelli ve Prens"
+      }
+     ]
+    },
+    {
+     "ad": "Reform",
+     "konular": [
+      {
+       "ad": "Luther ve 95 Tez (1517)"
+      },
+      {
+       "ad": "Kalvenizm"
+      },
+      {
+       "ad": "Anglikan Kilisesi"
+      },
+      {
+       "ad": "Karşı Reform ve Cizvitler"
+      },
+      {
+       "ad": "Otuz Yıl Savaşları ve Vestfalya Barışı (1648)"
+      }
+     ]
+    },
+    {
+     "ad": "Coğrafi Keşifler",
+     "konular": [
+      {
+       "ad": "Keşiflerin nedenleri ve araçları: pusula, karavela"
+      },
+      {
+       "ad": "Ümit Burnu ve Vasco da Gama (1498)"
+      },
+      {
+       "ad": "Kolomb ve Amerika (1492)"
+      },
+      {
+       "ad": "Macellan'ın dünya turu (1519–1522)"
+      },
+      {
+       "ad": "Aztek ve İnka devletlerinin yıkılışı"
+      },
+      {
+       "ad": "Sömürgecilik ve Atlantik köle ticareti"
+      }
+     ]
+    },
+    {
+     "ad": "Bilimsel Devrim ve Aydınlanma",
+     "konular": [
+      {
+       "ad": "Kopernik, Galileo, Newton"
+      },
+      {
+       "ad": "Mutlak monarşi: XIV. Louis"
+      },
+      {
+       "ad": "İngiliz İç Savaşı ve Şanlı Devrim (1688)"
+      },
+      {
+       "ad": "Aydınlanma düşünürleri: Locke, Montesquieu, Voltaire, Rousseau"
+      },
+      {
+       "ad": "Amerikan Bağımsızlık Bildirgesi (1776)"
+      }
+     ]
+    },
+    {
+     "ad": "Fransız İhtilali",
+     "konular": [
+      {
+       "ad": "Nedenleri: Eski Rejim ve üç zümre"
+      },
+      {
+       "ad": "Bastille'in alınması (1789)"
+      },
+      {
+       "ad": "İnsan ve Yurttaş Hakları Bildirgesi (1789)"
+      },
+      {
+       "ad": "Terör dönemi"
+      },
+      {
+       "ad": "Napolyon dönemi"
+      },
+      {
+       "ad": "Viyana Kongresi (1815)"
+      },
+      {
+       "ad": "1848 devrimleri"
+      }
+     ]
+    },
+    {
+     "ad": "Sanayi Devrimi",
+     "konular": [
+      {
+       "ad": "İngiltere'de başlaması"
+      },
+      {
+       "ad": "Buhar makinesi ve fabrika"
+      },
+      {
+       "ad": "Demiryolu ve buharlı gemi"
+      },
+      {
+       "ad": "Kentleşme ve işçi sınıfı"
+      },
+      {
+       "ad": "Sosyalizm ve sendikalar"
+      },
+      {
+       "ad": "İkinci Sanayi Devrimi: elektrik ve çelik"
+      }
+     ]
+    },
+    {
+     "ad": "19. yüzyıl: ulus devletler ve emperyalizm",
+     "konular": [
+      {
+       "ad": "İtalyan birliği"
+      },
+      {
+       "ad": "Alman birliği (1871)"
+      },
+      {
+       "ad": "Amerikan İç Savaşı (1861–1865)"
+      },
+      {
+       "ad": "Meiji Restorasyonu (1868)"
+      },
+      {
+       "ad": "Emperyalizm ve Afrika'nın paylaşılması"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yirminci",
+   "ad": "20. yüzyıl dünyası",
+   "ozet": "İki dünya savaşından Soğuk Savaş'a ve sonrasına.",
+   "bolumler": [
+    {
+     "ad": "I. Dünya Savaşı (1914–1918)",
+     "konular": [
+      {
+       "ad": "Nedenleri ve bloklar: İttifak ve İtilaf"
+      },
+      {
+       "ad": "Saraybosna suikastı (1914)"
+      },
+      {
+       "ad": "Cepheler ve siper savaşı"
+      },
+      {
+       "ad": "Rus Devrimi (1917)"
+      },
+      {
+       "ad": "ABD'nin savaşa girişi (1917)"
+      },
+      {
+       "ad": "Paris Barış Konferansı ve Versay Antlaşması (1919)"
+      },
+      {
+       "ad": "Milletler Cemiyeti"
+      }
+     ]
+    },
+    {
+     "ad": "İki savaş arası",
+     "konular": [
+      {
+       "ad": "1929 Dünya Ekonomik Buhranı"
+      },
+      {
+       "ad": "İtalya'da faşizm: Mussolini"
+      },
+      {
+       "ad": "Almanya'da Nazizm: Hitler"
+      },
+      {
+       "ad": "Sovyetler Birliği'nde Stalin dönemi"
+      },
+      {
+       "ad": "Japon yayılmacılığı"
+      },
+      {
+       "ad": "İspanya İç Savaşı (1936–1939)"
+      }
+     ]
+    },
+    {
+     "ad": "II. Dünya Savaşı (1939–1945)",
+     "konular": [
+      {
+       "ad": "Polonya'nın işgali (1939)"
+      },
+      {
+       "ad": "Fransa'nın düşüşü (1940)"
+      },
+      {
+       "ad": "Barbarossa Harekâtı (1941)"
+      },
+      {
+       "ad": "Pearl Harbor (1941)"
+      },
+      {
+       "ad": "Stalingrad Muharebesi (1942–1943)"
+      },
+      {
+       "ad": "Normandiya Çıkarması (1944)"
+      },
+      {
+       "ad": "Holokost"
+      },
+      {
+       "ad": "Hiroşima ve Nagazaki (1945)"
+      }
+     ]
+    },
+    {
+     "ad": "Soğuk Savaş",
+     "konular": [
+      {
+       "ad": "Birleşmiş Milletler (1945)"
+      },
+      {
+       "ad": "Truman Doktrini ve Marshall Planı"
+      },
+      {
+       "ad": "NATO (1949) ve Varşova Paktı (1955)"
+      },
+      {
+       "ad": "Kore Savaşı (1950–1953)"
+      },
+      {
+       "ad": "Berlin Duvarı (1961–1989)"
+      },
+      {
+       "ad": "Küba Füze Krizi (1962)"
+      },
+      {
+       "ad": "Vietnam Savaşı"
+      },
+      {
+       "ad": "Uzay yarışı"
+      }
+     ]
+    },
+    {
+     "ad": "Sömürgelerin bağımsızlığı",
+     "konular": [
+      {
+       "ad": "Hindistan'ın bağımsızlığı (1947)"
+      },
+      {
+       "ad": "Çin Devrimi (1949)"
+      },
+      {
+       "ad": "Afrika'da bağımsızlık hareketleri"
+      },
+      {
+       "ad": "Bağlantısızlar Hareketi"
+      },
+      {
+       "ad": "Arap-İsrail savaşları"
+      }
+     ]
+    },
+    {
+     "ad": "Soğuk Savaş sonrası",
+     "konular": [
+      {
+       "ad": "Sovyetler Birliği'nin dağılması (1991)"
+      },
+      {
+       "ad": "Avrupa Birliği ve Maastricht (1992)"
+      },
+      {
+       "ad": "Yugoslavya'nın dağılması"
+      },
+      {
+       "ad": "11 Eylül saldırıları (2001)"
+      },
+      {
+       "ad": "Küreselleşme ve internet"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

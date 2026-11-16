@@ -36,11 +36,27 @@ TEMEL = {
 }
 
 
-def calistir(veri):
+def calistir(veri, harita=None):
     with tempfile.TemporaryDirectory() as d:
         with open(os.path.join(d, "asama-1.json"), "w", encoding="utf-8") as f:
             json.dump(veri, f, ensure_ascii=False)
+        if harita is not None:
+            with open(os.path.join(d, "harita.json"), "w", encoding="utf-8") as f:
+                json.dump(harita, f, ensure_ascii=False)
         return denetle.denetle_klasor(d)[0]
+
+
+# Konu haritasi (SEMA.md «Konu haritası»): baglar TEMEL'deki gercek kimliklere
+HARITA = {"sema": 1, "alan": "t", "dallar": [
+    {"id": "a", "ad": "A dalı", "ozet": "o", "bolumler": [
+        {"ad": "B", "konular": [{"ad": "K1", "ders": "t.1.1.1"}, {"ad": "K2", "unite": "t.1.1"}, {"ad": "K3"}]}]},
+    {"id": "b", "ad": "B dalı", "ozet": "o", "bolumler": [{"ad": "C", "konular": [{"ad": "K4"}]}]}]}
+
+
+def hbozuk(fn):
+    h = copy.deepcopy(HARITA)
+    fn(h)
+    return h
 
 
 def bozuk(fn):
@@ -72,7 +88,36 @@ DURUMLAR = [
     ("geçersiz eşik", bozuk(lambda v: v["uniteler"][0]["kapi"].update(esik=1.5)), "esik"),
 ]
 
+HDURUMLAR = [
+    ("temiz harita hata vermez", HARITA, None),
+    ("harita aşama sayılmaz (zorunlu alan uyarısı yok)", HARITA, "!zorunlu alan eksik: hedef"),
+    ("var olmayan ders bağı", hbozuk(lambda h: h["dallar"][0]["bolumler"][0]["konular"][0].update(ders="t.1.1.9")),
+     "var olmayan ders bağı: 't.1.1.9'"),
+    ("ünite kimliği ders diye bağlanamaz", hbozuk(lambda h: h["dallar"][0]["bolumler"][0]["konular"][0].update(ders="t.1.1")),
+     "var olmayan ders bağı"),
+    ("var olmayan ünite bağı", hbozuk(lambda h: h["dallar"][0]["bolumler"][0]["konular"][1].update(unite="t.1.9")),
+     "var olmayan ünite bağı"),
+    ("yinelenen dal kimliği", hbozuk(lambda h: h["dallar"][1].update(id="a")), "yinelenen dal kimliği"),
+    ("boş bölüm", hbozuk(lambda h: h["dallar"][1]["bolumler"][0].update(konular=[])), "boş bölüm"),
+    ("bölümsüz dal", hbozuk(lambda h: h["dallar"][1].update(bolumler=[])), "bölümler listesi boş"),
+    ("dalda eksik özet", hbozuk(lambda h: h["dallar"][0].pop("ozet")), "zorunlu alan eksik: ozet"),
+    ("adsız konu", hbozuk(lambda h: h["dallar"][0]["bolumler"][0]["konular"][2].update(ad=" ")), "konu adı boş"),
+    ("başka alanın haritası", hbozuk(lambda h: h.update(alan="x")), "alan aşamalarla uyuşmuyor"),
+    ("boş dal listesi", hbozuk(lambda h: h.update(dallar=[])), "dallar listesi boş"),
+]
+
 hatali = 0
+for ad, h, beklenen in HDURUMLAR:
+    hatalar = calistir(TEMEL, h)
+    if beklenen is None:
+        tamam = not hatalar
+    elif beklenen.startswith("!"):
+        tamam = not any(beklenen[1:] in x for x in hatalar)
+    else:
+        tamam = any(beklenen in x for x in hatalar)
+    hatali += not tamam
+    print(("✓ " if tamam else "✕ ") + ad + ("" if tamam else f" — gelen: {hatalar}"))
+
 for ad, veri, beklenen in DURUMLAR:
     hatalar = calistir(veri)
     if beklenen is None:
@@ -83,11 +128,11 @@ for ad, veri, beklenen in DURUMLAR:
     print(("✓ " if tamam else "✕ ") + ad + ("" if tamam else f" — gelen: {hatalar}"))
 
 # Gercek icerik ve komut satiri cikis kodu
-felsefe = os.path.join(BURASI, "felsefe")
-r = subprocess.run([sys.executable, os.path.join(BURASI, "denetle.py"), felsefe], capture_output=True)
-tamam = r.returncode == 0
-hatali += not tamam
-print(("✓ " if tamam else "✕ ") + "alan/felsefe temiz (çıkış 0)")
+for gercek in ("felsefe", "tarih"):  # ikisinde de harita.json var
+    r = subprocess.run([sys.executable, os.path.join(BURASI, "denetle.py"), os.path.join(BURASI, gercek)], capture_output=True)
+    tamam = r.returncode == 0 and "harita:" in r.stdout.decode("utf-8")
+    hatali += not tamam
+    print(("✓ " if tamam else "✕ ") + f"alan/{gercek} temiz, haritası denetlendi (çıkış 0)")
 with tempfile.TemporaryDirectory() as d:
     with open(os.path.join(d, "asama-1.json"), "w", encoding="utf-8") as f:
         json.dump(bozuk(lambda v: v.pop("uniteler")), f)
@@ -96,6 +141,6 @@ tamam = r.returncode == 1 and "zorunlu alan eksik: uniteler" in r.stdout.decode(
 hatali += not tamam
 print(("✓ " if tamam else "✕ ") + "bozuk klasörde çıkış 1 ve Türkçe hata satırı")
 
-toplam = len(DURUMLAR) + 2
+toplam = len(HDURUMLAR) + len(DURUMLAR) + 3
 print(f"{toplam - hatali}/{toplam} test geçti")
 sys.exit(1 if hatali else 0)

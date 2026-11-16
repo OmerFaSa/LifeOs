@@ -136,6 +136,8 @@ def alan_kaynaklari(konu, terimler, kok=None):
     kok = kok or KOD
     out = []
     for yol in sorted(glob.glob(os.path.join(kok, "alan", "**", "*.json"), recursive=True)):
+        if os.path.basename(yol) == "harita.json":
+            continue        # konu haritasi yalniz baslik iskeletidir, ders metni degil: kaynak sayilmaz
         try:
             with open(yol, encoding="utf-8") as f:
                 d = json.load(f)

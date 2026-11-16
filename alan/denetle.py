@@ -7,6 +7,7 @@ import json
 import os
 import sys
 
+HARITA = "harita.json"  # konu haritasi; asama dosyasi degil
 DURUM = {"taslak", "onayli"}
 YAZAN = {"model", "insan"}
 KAYNAK_TUR = {"gemini", "kurum", "kitap", "url", "depo"}
@@ -23,7 +24,9 @@ class Denetci:
         self.hatalar = []
         self.kimlikler = {}  # id -> dosya
         self.onkosul = {}    # id -> [id]
-        self.sayi = {"dosya": 0, "asama": 0, "unite": 0, "ders": 0, "alistirma": 0, "kaynak": 0}
+        self.sayi = {"dosya": 0, "asama": 0, "unite": 0, "ders": 0, "alistirma": 0, "kaynak": 0, "dal": 0, "konu": 0}
+        self.baglar = {"unite": set(), "ders": set()}  # konu haritasinin baglanabilecegi kimlikler
+        self.alan_adlari = set()
 
     def hata(self, yer, mesaj):
         self.hatalar.append(f"{yer}: {mesaj}")
@@ -136,6 +139,7 @@ class Denetci:
             return
         if v["sema"] != 1:
             self.hata(ad, f"bilinmeyen şema sürümü: {v['sema']!r}")
+        self.alan_adlari.add(v["alan"])
         aid = self.kimlik(ad, v, v["alan"])
         self.onkosul_al(f"{ad} {aid}", aid, v)
         kaynak_idler = set()
@@ -162,6 +166,7 @@ class Denetci:
             if not self.zorunlu(uyer, u, ["id", "ad", "onKosul", "kapi", "dersler"]):
                 continue
             uid = self.kimlik(ad, u, aid)
+            self.baglar["unite"].add(uid)
             self.onkosul_al(uyer, uid, u)
             self.kapi(ad, uid, u["kapi"], kaynak_idler)
             if not isinstance(u["dersler"], list) or not u["dersler"]:
@@ -172,6 +177,7 @@ class Denetci:
                 dyer = f"{ad} {d.get('id', '?')}"
                 self.zorunlu(dyer, d, ["id", "ad", "onKosul", "durum", "yazan", "kaynak", "ozet", "metin", "alistirmalar"])
                 did = self.kimlik(ad, d, uid)
+                self.baglar["ders"].add(did)
                 self.onkosul_al(dyer, did, d)
                 self.icerik_durumu(dyer, d, kaynak_idler, kaynak_sart=True)
                 m = d.get("metin")
@@ -179,6 +185,64 @@ class Denetci:
                     self.hata(dyer, "metin boş olmayan paragraf listesi olmalı")
                 for a in d.get("alistirmalar") or []:
                     self.alistirma(ad, a, did, kaynak_idler)
+
+    def harita(self, yol):
+        """Konu haritasi (SEMA.md «Konu haritası»): dal -> bolum -> konu; ders/unite bagi gercek kimlige."""
+        ad = HARITA
+        self.sayi["dosya"] += 1
+        try:
+            with open(yol, encoding="utf-8") as f:
+                v = json.load(f)
+        except (OSError, ValueError) as e:
+            self.hata(ad, f"JSON okunamadı: {e}")
+            return
+        if not isinstance(v, dict) or not self.zorunlu(ad, v, ["sema", "alan", "dallar"]):
+            if not isinstance(v, dict):
+                self.hata(ad, "kök bir nesne olmalı")
+            return
+        if v["sema"] != 1:
+            self.hata(ad, f"bilinmeyen şema sürümü: {v['sema']!r}")
+        if self.alan_adlari and v["alan"] not in self.alan_adlari:
+            self.hata(ad, f"alan aşamalarla uyuşmuyor: {v['alan']!r}")
+        dallar = v["dallar"]
+        if not isinstance(dallar, list) or not dallar:
+            self.hata(ad, "dallar listesi boş")
+            return
+        dal_idler = set()
+        for dal in dallar:
+            if not isinstance(dal, dict):
+                self.hata(ad, "dal bir nesne olmalı")
+                continue
+            self.sayi["dal"] += 1
+            yer = f"{ad} {dal.get('id', '?')}"
+            self.zorunlu(yer, dal, ["id", "ad", "ozet", "bolumler"])
+            for a in ("id", "ad", "ozet"):
+                if a in dal and _bos_metin(dal[a]):
+                    self.hata(yer, f"{a} boş")
+            if dal.get("id") in dal_idler:
+                self.hata(yer, "yinelenen dal kimliği")
+            dal_idler.add(dal.get("id"))
+            bolumler = dal.get("bolumler")
+            if not isinstance(bolumler, list) or not bolumler:
+                self.hata(yer, "bölümler listesi boş")
+                continue
+            for b in bolumler:
+                byer = f"{yer} / {b.get('ad', '?') if isinstance(b, dict) else '?'}"
+                if not isinstance(b, dict) or _bos_metin(b.get("ad")):
+                    self.hata(byer, "bölüm adı boş")
+                    continue
+                konular = b.get("konular")
+                if not isinstance(konular, list) or not konular:
+                    self.hata(byer, "boş bölüm (konular listesi boş)")
+                    continue
+                for k in konular:
+                    self.sayi["konu"] += 1
+                    if not isinstance(k, dict) or _bos_metin(k.get("ad")):
+                        self.hata(byer, "konu adı boş")
+                        continue
+                    for tur, adi in (("ders", "ders"), ("unite", "ünite")):
+                        if tur in k and k[tur] not in self.baglar[tur]:
+                            self.hata(f"{byer} / {k['ad']}", f"var olmayan {adi} bağı: {k[tur]!r}")
 
     def bag_denetimi(self):
         for i, ok in self.onkosul.items():
@@ -219,11 +283,13 @@ def denetle_klasor(klasor):
     if not os.path.isdir(klasor):
         d.hata(klasor, "klasör yok")
         return d.hatalar, d.sayi
-    dosyalar = sorted(f for f in os.listdir(klasor) if f.endswith(".json"))
+    dosyalar = sorted(f for f in os.listdir(klasor) if f.endswith(".json") and f != HARITA)
     if not dosyalar:
         d.hata(klasor, "hiç .json aşama dosyası yok")
     for f in dosyalar:
         d.dosya(os.path.join(klasor, f))
+    if os.path.isfile(os.path.join(klasor, HARITA)):
+        d.harita(os.path.join(klasor, HARITA))
     d.bag_denetimi()
     return d.hatalar, d.sayi
 
@@ -238,7 +304,8 @@ def main(argv):
     for h in hatalar:
         print("✕ " + h)
     ozet = (f"{s['dosya']} dosya, {s['asama']} aşama, {s['unite']} ünite, {s['ders']} ders, "
-            f"{s['alistirma']} alıştırma, {s['kaynak']} kaynak")
+            f"{s['alistirma']} alıştırma, {s['kaynak']} kaynak"
+            + (f" · harita: {s['dal']} dal, {s['konu']} konu" if s["dal"] else ""))
     if hatalar:
         print(f"{len(hatalar)} hata · {ozet}")
         return 1

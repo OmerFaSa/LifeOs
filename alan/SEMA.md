@@ -101,3 +101,28 @@ Kural: ünite yalnız kapısı eşiği tuttuğunda **geçer**; ders okumak ve al
 
 `taslak` → `onayli` yalnız sahibin kararıyla olur: `durum: "onayli"`, `onaylayan`, `onayTarihi`
 (ISO tarih) birlikte yazılır. Model hiçbir zaman `onayli` yazmaz.
+
+## Konu haritası (`alan/<alan>/harita.json`, isteğe bağlı)
+
+Alanın konu iskeleti: **Dal → Bölüm → Konu** (ör. Tarih → Türk tarihi → İlk Türk devletleri →
+Göktürkler). Aşama dosyası değildir, ders metni değildir; yalnız başlıktır, bu yüzden onay ve
+kaynak istemez, ama doğru olmalıdır (yanlış ad ya da tarih yazılmaz; emin olunmayan tarih yazılmaz).
+Kabuk `../alan/<alan>/harita.json` ile çeker; dosya yoksa alan haritasız açılır.
+
+| Öğe | Alan | Tür | Zorunlu | Not |
+|---|---|---|---|---|
+| kök | `sema` | sayı | evet | `1` |
+| kök | `alan` | metin | evet | aşama dosyalarındaki `alan` ile aynı |
+| kök | `dallar` | Dal[] | evet, en az 1 | sıra gösterim sırasıdır |
+| Dal | `id` | metin | evet | dosyada tekil (`turk`, `roma`) |
+| Dal | `ad`, `ozet` | metin | evet | `ozet` tek cümle |
+| Dal | `bolumler` | Bölüm[] | evet, en az 1 | okunurluk için 3–8 |
+| Bölüm | `ad` | metin | evet | |
+| Bölüm | `konular` | Konu[] | evet, en az 1 | okunurluk için 3–8; boş bölüm hatadır |
+| Konu | `ad` | metin | evet | |
+| Konu | `ders` | ders kimliği | hayır | yalnız bu alanda var olan bir derse |
+| Konu | `unite` | ünite kimliği | hayır | yalnız bu alanda var olan bir üniteye |
+
+Bağsız konu kabukta «henüz ders yok · King'le çalış» olarak görünür. Bir ders birden çok konuya
+bağlanabilir. Denetim aynı komutla (`python alan/denetle.py alan/<alan>`): tekil dal kimliği,
+boş bölüm ve var olmayan ders/ünite bağı hatadır.
