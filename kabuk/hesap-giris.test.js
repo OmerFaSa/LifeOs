@@ -59,7 +59,7 @@ t('giriş: alan hatası alanın altında (aria-invalid), sunucu hatası formun b
 t('ilk hesap: kurulumda yalnız «Hesap kur» (şifre gücü ipucu, tekrar, kendi sorusu); bilgisayar dışında form yok', () => {
   const h = G.girisHtml(S(), BAG({ sunucu: { kurulum: true, yerel: true } }), B);
   esit(formlar(h), ['kur']);
-  dogru(/henüz hesap yok/.test(h) && /İlk hesap admin olur/.test(h) && /type="submit"[^>]*>Hesap kur</.test(h), h);
+  dogru(/henüz hesap yok/.test(h) && /İlk hesap yönetici olur/.test(h) && /type="submit"[^>]*>Hesap kur</.test(h), h);
   dogru(/type="password"[^>]*name="hg-yeni" data-hg-guc="1" aria-describedby="b-alan-hg-yeni-ipucu"[^>]*autocomplete="new-password"/.test(h), 'güç ipucu bağlı');
   dogru(/id="b-alan-hg-yeni-ipucu">En az 8 karakter\./.test(h) && /name="hg-tekrar"/.test(h) && /name="hg-soru"/.test(h) && /name="hg-cevap"[^>]*value=""/.test(h));
   dogru(!/Şifremi unuttum|Kodla bağlan/.test(h), 'hesap yokken giriş yolları yok');
@@ -89,7 +89,7 @@ t('dosyadan açılınca giriş yok', () => {
 });
 t('güvenlik: yüklenirken bekler, hata yeniden denenir; satırlar şifre, kurtarma sorusu, iki adım', () => {
   dogru(/aria-busy/.test(G.guvenlikHtml(Gv({ ben: null }), BAG({ oturum: OT }), B)));
-  dogru(/data-hg-ac="ben-yenile"/.test(G.guvenlikHtml(Gv({ ben: null, benHata: 'Bilgisayara ulaşılamadı; LifeOS açık mı?' }), BAG({ oturum: OT }), B)));
+  dogru(/data-hg-ac="ben-yenile"/.test(G.guvenlikHtml(Gv({ ben: null, benHata: 'Bilgisayara ulaşılamadı; Başbuğ açık mı?' }), BAG({ oturum: OT }), B)));
   const h = G.guvenlikHtml(Gv(), BAG({ oturum: OT }), B);
   dogru(/aria-labelledby="hg-guvenlik"/.test(h) && /Kapalı: girişte yalnız şifre/.test(h) && /data-hg-ne="iki-ac"/.test(h) && /data-hg-ne="parola"/.test(h), h);
   esit(formlar(h), [], 'formlar kapalıyken çizilmez');
@@ -106,8 +106,8 @@ t('güvenlik: bir form açıkken tek form, öteki düğmeler gizli; Vazgeç var'
 t('iki adım açık: kalan yedek kod, az kalınca uyarı; kapatma ve yenileme onaylı (şifre + kod, «hemen geçersiz»)', () => {
   const ben = { soru_var: true, iki_adim: { acik: true, yedek_kalan: 2 } };
   const h = G.guvenlikHtml(Gv({ ben }), BAG({ oturum: OT }), B);
-  dogru(/Açık · 2 yedek kod kaldı · yenilerini al/.test(h) && /data-hg-ne="yedek"/.test(h) && /data-hg-ne="iki-kapat"/.test(h) && /--iki-adim-kapat sahip/.test(h), h);
-  dogru(/admin Yönetim/.test(G.guvenlikHtml(Gv({ ben, rol: 'uye' }), BAG({ oturum: OT }), B)));
+  dogru(/Açık · 2 yedek kod kaldı · yenilerini al/.test(h) && /data-hg-ne="yedek"/.test(h) && /data-hg-ne="iki-kapat"/.test(h) && /bilgisayarın kendisinden kurtarılır/.test(h) && !/python/.test(h), h);
+  dogru(/yönetici Hesap › Kullanıcılar/.test(G.guvenlikHtml(Gv({ ben, rol: 'uye' }), BAG({ oturum: OT }), B)));
   const k = G.guvenlikHtml(Gv({ ben, acik: 'iki-kapat' }), BAG({ oturum: OT }), B);
   esit(formlar(k), ['iki-kapat']); dogru(/name="hg-parola"/.test(k) && /name="hg-kodya"/.test(k) && /yalnız şifre sorulur/.test(k), k);
   const y = G.guvenlikHtml(Gv({ ben, acik: 'yedek' }), BAG({ oturum: OT }), B);
@@ -128,7 +128,7 @@ t('yedek kodlar: bir kez gösterilir notu, kodlar listede, «Kaydettim»; o sır
   esit(formlar(h), []); dogru(!/data-hg-ac="ac"/.test(h));
 });
 t('hata cümlesi: ulaşılamıyor (uygulamada Wi-Fi), yoksa sunucunun cümlesi (401 de: yanlış şifre oturum bitti değildir)', () => {
-  esit(G.hataMetni({ kod: 0 }), 'Bilgisayara ulaşılamadı; LifeOS açık mı?');
+  esit(G.hataMetni({ kod: 0 }), 'Bilgisayara ulaşılamadı; Başbuğ açık mı?');
   dogru(/Wi-Fi/.test(G.hataMetni({ kod: 0 }, true)));
   esit(G.hataMetni({ kod: 401, message: 'Kullanıcı adı ya da şifre yanlış.' }), 'Kullanıcı adı ya da şifre yanlış.');
   esit(G.hataMetni(null), 'İstek yapılamadı.');

@@ -68,7 +68,7 @@ t('ekran: girişsiz cihaz (giriş uzantısı yokken) giriş yapılmadı der, cih
 t('ekran: oturumda ad, rol, bu cihaz, çıkış onayı; jeton ve oturumun başka alanı HTML\'e girmez', () => {
   const s = Object.assign(bos(), { oturum: { ad: 'sahip', gorunen_ad: 'Tolga', rol: 'admin', j: 'GIZLI-JETON-123', sunucu: '' }, cihazlar: CIHAZ });
   const h = S.ekran(s, B, SIMDI);
-  dogru(/hs-kimlik__ad">Tolga</.test(h) && /@sahip/.test(h) && />Admin</.test(h) && />Windows PC</.test(h), h);
+  dogru(/hs-kimlik__ad">Tolga</.test(h) && /@sahip/.test(h) && />Yönetici</.test(h) && />Windows PC</.test(h), h);
   dogru(!/GIZLI-JETON/.test(h), 'jeton ekrana çizildi');
   dogru(/data-hs-ac="cikis-sor"/.test(h) && !/data-hs-ac="cikis"/.test(h), 'çıkış tek dokunuşla olmamalı');
   dogru(/data-hs-ac="cikis"/.test(S.ekran(Object.assign(s, { cikisSor: true }), B, SIMDI)), 'onay adımı');

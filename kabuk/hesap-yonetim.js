@@ -22,12 +22,12 @@
   function kac(x) { return String(x).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
   function adresAd(ip) { return !ip ? '' : ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' ? 'Bu bilgisayar' : ip; }
   var RENK_AD = { mavi: 'Mavi', turkuaz: 'Turkuaz', turuncu: 'Turuncu', mor: 'Mor', pembe: 'Pembe', yesil: 'Yeşil', grafit: 'Grafit' };
-  function rolAd(r) { return r === 'admin' ? 'Admin' : 'Üye'; }
+  function rolAd(r) { return r === 'admin' ? 'Yönetici' : 'Üye'; }
   var UYARI_TUR = { giris: 'Yeni giriş', bag: 'Kodla bağlanan cihaz', kurtar: 'Şifre kurtarıldı', yanlis: 'Yanlış şifre denemesi',
     'kurtar-yanlis': 'Yanlış kurtarma cevabı', 'kod-yanlis': 'Yanlış doğrulama kodu', parola: 'Şifre değişti', 'iki-adim-kapat': 'İki adımlı doğrulama kapandı' };
   var OLAY = { giris: 'Giriş', yanlis: 'Yanlış şifre', kayit: 'Hesap açıldı', kurtar: 'Şifre soruyla yenilendi', 'kurtar-yanlis': 'Kurtarma cevabı yanlış',
     parola: 'Şifre değişti', soru: 'Kurtarma sorusu değişti', cikis: 'Çıkış', cihaz: 'Cihazdan çıkıldı', otekiler: 'Öteki cihazlardan çıkıldı',
-    yonetim: 'Admin değişikliği', 'iki-adim': 'İki adımlı doğrulama açıldı', 'iki-adim-kapat': 'İki adımlı doğrulama kapandı', yedek: 'Yedek kodlar yenilendi',
+    yonetim: 'Yönetici değişikliği', 'iki-adim': 'İki adımlı doğrulama açıldı', 'iki-adim-kapat': 'İki adımlı doğrulama kapandı', yedek: 'Yedek kodlar yenilendi',
     'kod-yanlis': 'Yanlış doğrulama kodu', bag: 'Kodla cihaz bağlandı', anahtar: 'Erişim anahtarı açıldı', 'anahtar-sil': 'Erişim anahtarı silindi',
     takvim: 'Takvim aboneliği', 'takvim-kapat': 'Takvim aboneliği kapandı', 'geri-yukle': 'Depo yedekten geri yüklendi', sistem: 'Sistem güncellendi',
     'yedek-indir': 'Yedek dosya olarak indirildi', 'yedek-yukle': 'Yedek dosyadan yüklendi' };
@@ -113,7 +113,7 @@
         B.alan({ tur: 'metin', isim: 'hy-hitap', ad: 'King sana nasıl seslensin', deger: taslak(s, 'hy-hitap', k.hitap), yerTutucu: k.gorunen_ad || null, enCok: 30 }),
         B.alan({ tur: 'tarih', isim: 'hy-dogum', ad: 'Doğum günü', deger: taslak(s, 'hy-dogum', k.dogum) }),
         B.alan({ tur: 'metin', isim: 'hy-eposta', ad: 'E-posta', deger: taslak(s, 'hy-eposta', k.eposta), enCok: 200 }).replace('type="text"', 'type="email"').replace('autocomplete="off"', 'autocomplete="email"'),
-        '<p class="soluk">Hiçbiri bir yere gönderilmez; yalnız bilgisayarındaki LifeOS’ta durur.</p>'] }),
+        '<p class="soluk">Hiçbiri bir yere gönderilmez; yalnız bilgisayarındaki Başbuğ’da durur.</p>'] }),
       gonder(B, s, 'Kaydet')]);
   }
   function guvenlikHtml(s, B, simdi) {
@@ -170,18 +170,18 @@
         not: s.goc ? gocMakbuz(s.goc) : 'Fotoğraflar, açılmamış profiller ve bekleyen değişiklikler dahil. Hiçbir şey silinmez.',
         eylemler: [{ metin: s.goc ? 'Yeniden gönder' : 'Bilgisayara gönder', tur: 'sade', veri: ac('goc'), kapali: !!s.is }] }] }),
       pc ? B.acilir({ baslik: ik.acik ? 'İkinci yeri değiştir' : 'İkinci yeri ayarla', duzey: 3, acik: !!s.acik.ikinci, veri: { 'hy-acilir': 'ikinci' }, govde: form('ikinci', [
-        B.alan({ tur: 'metin', isim: 'hy-ikinci', ad: 'Klasör (örnek: E:\\LifeOS-yedek)', deger: taslak(s, 'hy-ikinci', ik.yol), enCok: 260, zorunlu: true,
+        B.alan({ tur: 'metin', isim: 'hy-ikinci', ad: 'Klasör (örnek: E:\\Basbug-yedek)', deger: taslak(s, 'hy-ikinci', ik.yol), enCok: 260, zorunlu: true,
           ipucu: 'Her yedek oraya da yazılır; son 7 kopya kalır. Bilgisayarın diski bozulursa geri dönüş buradan.' }),
         gonder(B, s, 'Kaydet ve kopyala')]) }) : '',
       pc ? B.acilir({ baslik: 'Dosyadan yükle', duzey: 3, acik: !!s.acik.yukle, veri: { 'hy-acilir': 'yukle' }, govde: form('yukle', [
-        dosya(B, 'hy-dosya', 'Yedek dosyası (.db)', 'Dosya önce denetlenir; bozuksa ya da LifeOS yedeği değilse alınmaz. Yüklenen yedek listeye girer; geri yüklemek için yanındaki «Geri yükle…».'),
+        dosya(B, 'hy-dosya', 'Yedek dosyası (.db)', 'Dosya önce denetlenir; bozuksa ya da Başbuğ yedeği değilse alınmaz. Yüklenen yedek listeye girer; geri yüklemek için yanındaki «Geri yükle…».'),
         gonder(B, s, 'Yükle')]) }) : '',
       l.length ? B.liste({ ad: 'Yedekler', ogeler: l.map(function (x) {
         return { ad: tarihSaat(x.zaman), uzun: true, not: (YEDEK_TUR[x.tur] || x.tur) + ' · ' + boyut(x.bayt), eylemler: pc ? [
           { metin: 'İndir', tur: 'sade', etiket: tarihSaat(x.zaman) + ' yedeğini indir', veri: ac('indir-sor', { ad: x.ad }) },
           { metin: 'Geri yükle…', tur: 'sade', etiket: tarihSaat(x.zaman) + ' yedeğini geri yükle', veri: ac('geri-sor', { ad: x.ad }), kapali: !!s.is }] : null };
       }) }) : '',
-      '<p class="soluk">' + (pc ? 'Yedekler bu bilgisayarda: ' + kac(v.klasor || '') + '. Sunucu açılamazsa: python sistem/hesap.py --geri-yukle.'
+      '<p class="soluk">' + (pc ? 'Yedekler bu bilgisayarda: ' + kac(v.klasor || '') + '.'
         : 'İkinci yer, indirme ve geri yükleme yalnız bilgisayarın kendisinden yapılır.') + '</p>'];
   }
   // Göç paketinin makbuzu (eski panelin gocMakbuz'u): ne kadarı bilgisayara gitti.
@@ -194,7 +194,7 @@
     var sec = function (alan, l, simdiki) { return B.eylemler(l.map(function (p) {
       return { metin: p[1], tur: 'sade', basili: p[0] === simdiki, veri: ac('yonet', { id: u.id, alan: alan, deger: p[0] }) }; })); };
     return B.panel({ tur: 'guclu', baslik: (u.gorunen_ad || u.ad) + ' · @' + u.ad, govde: [ileti(s, 'kisi', B),
-      B.ayar({ id: 'hy-kisi-rol', ad: 'Rol', govde: sec('rol', [['uye', 'Üye'], ['admin', 'Admin']], u.rol) }),
+      B.ayar({ id: 'hy-kisi-rol', ad: 'Rol', govde: sec('rol', [['uye', 'Üye'], ['admin', 'Yönetici']], u.rol) }),
       planlar.length ? B.ayar({ id: 'hy-kisi-plan', ad: 'Plan', govde: sec('plan', planlar.map(function (p) { return [p.id, p.ad]; }), u.plan) }) : '',
       u.iki_adim && u.id !== benId ? B.ayar({ id: 'hy-kisi-iki', ad: 'İki adımlı doğrulama açık', not: 'Telefonunu kaybettiyse kapat; sonra yeniden kurar.',
         govde: B.dugme({ metin: 'Kapat', tur: 'sade', etiket: u.ad + ' için iki adımlı doğrulamayı kapat', veri: ac('iki-kapat', { id: u.id }) }) }) : '',

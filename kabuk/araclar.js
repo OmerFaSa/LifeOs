@@ -229,9 +229,17 @@
   // Bir kaydın tek satırlık okunuşu: «Su · 500 ml (ölçüldü)»
   function kayitMetni(Kayit, r) {
     var t = Kayit.TURLER[r.tur], p = [];
+    if (r.tur === 'tahlil') return tahlilMetni(Kayit, r);
     Object.keys(r.deger || {}).forEach(function (a) { var f = t.sayilar[a]; p.push(sayiYaz(r.deger[a].v) + (f.birim && f.birim !== '1-5' ? ' ' + f.birim : '') + ' (' + Kayit.ETIKET[r.deger[a].k] + ')'); });
     Object.keys(r.ek || {}).forEach(function (a) { p.push(r.ek[a]); });
     return t.ad + ' · ' + p.join(' · ');
+  }
+
+  // Tahlil kaydı: «Ferritin · 35 ng/mL (ölçüldü) · aralık 15–150»
+  function tahlilMetni(Kayit, r) {
+    var d = Kayit.deger(r, 'deger'), a = Kayit.deger(r, 'refAlt').v, u = Kayit.deger(r, 'refUst').v, e = r.ek || {};
+    return (e.belirtec || 'Tahlil') + ' · ' + sayiYaz(d.v) + (e.birim ? ' ' + e.birim : '') + ' (' + Kayit.ETIKET[d.k] + ')' +
+      (a != null || u != null ? ' · aralık ' + (a != null ? sayiYaz(a) : '…') + '–' + (u != null ? sayiYaz(u) : '…') : '');
   }
 
   /* ---- Plan (motor/plan.js) ---- */
@@ -407,7 +415,7 @@
     return l.length > 1 ? l.slice(0, -1).join(', ') + ' ve ' + l[l.length - 1] : l.join('');
   }
 
-  var Arac = { kimlik: kimlik, baslangicBirlestir: baslangicBirlestir, baslangicYol: baslangicYol, baslangicYerleri: baslangicYerleri, baslangicBeden: baslangicBeden, baslangicMetni: baslangicMetni, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
+  var Arac = { kimlik: kimlik, tahlilMetni: tahlilMetni, baslangicBirlestir: baslangicBirlestir, baslangicYol: baslangicYol, baslangicYerleri: baslangicYerleri, baslangicBeden: baslangicBeden, baslangicMetni: baslangicMetni, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -424,7 +432,25 @@
   }
   function yaz(anahtar, v) { ic().depo.setItem(anahtar, JSON.stringify(v)); }
   function tarih(ms) { return new Date(ms).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }); }
-  function eksik(ad) { return B.bos({ baslik: ad + ' aracı yüklenemedi.', metin: 'Sayfayı yenile; sürerse LifeOS sunucusundan aç.' }); }
+  /* Taslaklar (2026-11-16, sahip: «yazılanlar kaybolmasın»): data-taslak="<ad>" taşıyan formun yazı alanları her tuşta lifeos.taslak'a
+   * (bu cihazın ayar deposu; tek depoya eşitlenmez) yazılır; sayfa değişince, geri tuşunda ve yenilemede çizim oradan doldurur.
+   * Kaydedilince silinir. Değer: { <ad>: { <alan adı>: metin } }. */
+  var TASLAK = 'lifeos.taslak';
+  function taslak(ad) { var t = oku(TASLAK, {})[ad]; return t && typeof t === 'object' ? t : null; }
+  function taslakYaz(ad, v) {
+    var t = oku(TASLAK, {});
+    if (v) t[ad] = v; else delete t[ad];
+    if (Object.keys(t).length) yaz(TASLAK, t); else ic().depo.removeItem(TASLAK);
+  }
+  function formTaslagi(f) { // yalnız yazı alanları (seçim, onay kutusu ve gizli alan çizimden gelir); hepsi boşsa null
+    var o = {}, dolu = false;
+    [].forEach.call(f.elements, function (e) {
+      if (!e.name || !(e.tagName === 'TEXTAREA' || /^(text|number|search|time|date)$/.test(e.type))) return;
+      o[e.name] = e.value; if (e.value.trim()) dolu = true;
+    });
+    return dolu ? o : null;
+  }
+  function eksik(ad) { return B.bos({ baslik: ad + ' aracı yüklenemedi.', metin: 'Sayfayı yenile; sürerse Başbuğ’u kapatıp yeniden aç.' }); }
 
   /* ---- Not ---- */
   var notDurum = null; // { id, metin, hata? }: son kaydın iletisi, yalnız hemen ardından gösterilir
@@ -519,7 +545,7 @@
       var hd = hizliDurum; hizliDurum = null;
       return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not', eylem: { metin: 'Ayrıntılı not', tur: 'sade', href: '#/motor/not/yeni' } }) +
         // hızlı yazma: aç, yaz, Ctrl+Enter; ilk satır notun adı olur (Not.ad)
-        '<form class="nothizli" novalidate>' + B.alan({ ad: 'Hızlı not', isim: 'hizli', tur: 'cok', enCok: 20000, deger: hd && hd.metin || '',
+        '<form class="nothizli" data-taslak="not-hizli" novalidate>' + B.alan({ ad: 'Hızlı not', isim: 'hizli', tur: 'cok', enCok: 20000, deger: hd && hd.metin || (taslak('not-hizli') || {}).hizli || '',
           yerTutucu: 'Aklındakini yaz. İlk satır notun adı olur; #etiket ve [[başka not]] kullanabilirsin.' }) +
         B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, { yazi: hd && hd.tamam ? 'Kaydedildi.' : hd && hd.hata ? hd.hata : 'Ctrl + Enter da kaydeder' }]) + '</form>' +
         (notlar.length ? B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: 'Kelime ya da #etiket', veri: { 'not-ara': '' } }) : '') + // aranacak not yokken arama kutusu yalnız kalabalık
@@ -536,7 +562,7 @@
       return I.ust(geri) + '<div class="govde">' + B.bos({ baslik: 'Bu not bulunamadı.', metin: 'Silinmiş ya da başka bir cihazda yazılmış olabilir.', eylem: { metin: 'Notlara dön', tur: 'ana', href: '#/motor/not' } }) + '</div>';
     }
     var durum = notDurum && notDurum.id === alt ? notDurum : null; notDurum = null;
-    var f = durum && durum.form || n || { baslik: '', govde: '', ozel: false, sabit: false };
+    var tf = taslak('not:' + alt), f = durum && durum.form || (tf ? Object.assign({}, n || { ozel: false, sabit: false }, tf) : n) || { baslik: '', govde: '', ozel: false, sabit: false };
     var oteki = notlar.filter(function (x) { return !n || x.id !== n.id; }).sort(notSira);
     var adlar = {}; notlar.forEach(function (x) { adlar[x.id] = Not.ad(x); });
     var giden = n ? Not.baglar(n.govde) : [], gelen = n ? Not.geriBaglar(notlar, n.id) : [];
@@ -545,7 +571,7 @@
       return adlar[b.id] != null ? { ad: b.ad || adlar[b.id] || 'Adsız not', href: '#/motor/not/' + b.id, pul: pul } : { ad: (b.ad || 'silinmiş not') + ' (silinmiş)', pul: pul };
     };
     return I.ust(geri) + '<div class="govde" data-arac="not">' + B.baslik({ metin: n ? 'Notu düzenle' : 'Yeni not' }) +
-      '<form class="notform" data-not="' + k(alt) + '" novalidate>' +
+      '<form class="notform" data-not="' + k(alt) + '" data-taslak="not:' + k(alt) + '" novalidate>' + (tf && !durum ? '<p class="soluk">Kaydedilmemiş yazın geri geldi.</p>' : '') +
       (durum ? B.uyari({ tur: durum.tamam ? 'tamam' : 'hata', metin: durum.metin }) : '') +
       (aracA ? '<input type="hidden" name="klasor" value="' + k(aracA.klasor) + '"><p class="soluk">Araç: ' + k(aracA.ad) + ' · ' + (aracA.sistemNotu.kingOkur ? 'King okur' : 'King okumaz') + '</p>' : '') +
       B.alan({ ad: 'Başlık', isim: 'baslik', deger: f.baslik, enCok: 120, yerTutucu: 'Kısa bir ad; boş kalırsa ilk satır kullanılır' }) +
@@ -565,7 +591,7 @@
     if (!metin.trim()) { form.elements.hizli.focus(); return; }
     try {
       var r = notKaydet(Not, oku(NOT_ANAHTAR, []), 'yeni', { baslik: '', govde: metin.trim(), ozel: false, sabit: false, klasor: '' }, simdi, kimlik('n', simdi, Math.random()));
-      yaz(NOT_ANAHTAR, r.notlar); hizliDurum = { tamam: true };
+      yaz(NOT_ANAHTAR, r.notlar); hizliDurum = { tamam: true }; taslakYaz('not-hizli', null);
     } catch (e) { hizliDurum = { hata: e.message, metin: metin }; } // yazılan kaybolmasın
     ic().rota();
     setTimeout(function () { var k = d.querySelector('.nothizli textarea'); if (k) k.focus(); }, 0);
@@ -576,7 +602,7 @@
       klasor: form.elements.klasor ? form.elements.klasor.value : '' };
     try {
       var r = notKaydet(Not, oku(NOT_ANAHTAR, []), id, veri, simdi, kimlik('n', simdi, Math.random()));
-      yaz(NOT_ANAHTAR, r.notlar);
+      yaz(NOT_ANAHTAR, r.notlar); taslakYaz('not:' + id, null);
       notDurum = { id: r.id, metin: 'Kaydedildi.', tamam: true };
       ic().git('#/motor/not/' + r.id);
     } catch (e) {
@@ -629,7 +655,9 @@
     // taslak içerikten gelen kapı kartları tekrara girmez (AGENTS 0.1): ayrı listede durur, açılınca doğru cevabı gösterir
     var simdi = Date.now(), hepsi = kartlar(), kapiT = hepsi.filter(function (x) { return x.kaynak === 'kapi' && x.icerik !== 'onayli'; });
     var l = hepsi.filter(function (x) { return kapiT.indexOf(x) < 0; }), s = sayac(simdi), q = kuyruk(Tekrar, l, simdi, s), kart = q.sira[0], govde;
-    if (!l.length) govde = B.bos({ baslik: 'Henüz kart yok.', metin: 'Aşağıdan ilk kartını ekle; onaylanmış derslerin alıştırmaları da buraya kendiliğinden gelir.' });
+    // kapıda kalınan sorular taslaksa sıraya girmez ama aşağıda durur: «kart yok» denmez (kapı «N soru Tekrar'a düştü» der)
+    if (!l.length) govde = kapiT.length ? B.bos({ baslik: 'Bugün tekrar sırası boş.', metin: 'Kapıda kalınan ' + kapiT.length + ' soru aşağıda; cevaplarını oradan görürsün. Ders onaylanınca bu sorular da tekrara girer.' })
+      : B.bos({ baslik: 'Henüz kart yok.', metin: 'Aşağıdan ilk kartını ekle; onaylanmış derslerin alıştırmaları da buraya kendiliğinden gelir.' });
     else if (!kart) govde = B.panel({ tur: 'basari', durum: true, veri: { sonuc: 'gecti' }, govde: '<p><b>Bugünlük bitti.</b> ' + (s.yeni + s.tekrar) + ' cevap verdin.' +
       (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar ? ' <span class="soluk">Günlük tavan doldu; ' + (q.plan.bekleyen.yeni + q.plan.bekleyen.tekrar) + ' kart yarına kaldı.</span>' : '') + '</p>' });
     else {
@@ -669,7 +697,7 @@
     var I = ic(), k = I.kac, alanlar = I.tasinanlar(), eksik_ = alanlar.filter(function (a) { return !I.al(a.id); });
     // ilerleme içerik yüklenince hesaplanır; eksik olanlar istenir, gelince sayfa bir kez daha çizilir
     if (eksik_.length) Promise.all(eksik_.map(function (a) { return I.alanYukle(a.id); })).then(function () { if (d.querySelector('[data-arac="yol"]')) I.rota(); });
-    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="yol">' + B.baslik({ metin: 'Yol haritası', alt: 'Her alanın aşama, ünite, ders ve kapıları. ' + alanlar.length + ' alan taşındı.' }) +
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="yol">' + B.baslik({ metin: 'Yol haritası', alt: 'Her alanın aşamaları, üniteleri ve dersleri.' }) +
       B.liste({ ad: 'Alanlar', ogeler: alanlar.map(function (a) {
         var dr = I.fDurum(a.id), il = dr && dr.ilerleme, eski = Object.keys(I.kayitOku(a.id, 1).eski || {}).length; // başlangıç paketinden (Yol.GOC.aysKonu)
         return { ad: a.ad, href: a.yol,
@@ -686,15 +714,16 @@
     if (Kayit.yardimci.gunFarki(g, bugun) === 1) return 'Dün';
     return new Date(g + 'T12:00:00').toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' });
   }
+  // Türün alanları; sıra türün `sira`sından (yoksa sayılar, sonra metinler). Tahlil belirtecine sık belirteç önerisi (datalist: serbest yazı da olur).
   function kayitAlanlari(t, f) {
-    return Object.keys(t.sayilar || {}).map(function (a) {
-      var x = t.sayilar[a], birim = x.birim && x.birim !== '1-5' ? ' (' + x.birim + ')' : '';
-      return B.alan({ ad: x.ad + birim + (x.zorunlu ? '' : ' · isteğe bağlı'), isim: a, tur: 'sayi', deger: f[a] || '',
-        yerTutucu: String(x.min).replace('.', ',') + ' – ' + String(x.max).replace('.', ',') });
-    }).join('') + Object.keys(t.metinler || {}).map(function (a) {
-      var x = t.metinler[a], ad = x.ad + (x.zorunlu ? '' : ' · isteğe bağlı');
+    var sayi = t.sayilar || {}, met = t.metinler || {}, sira = t.sira || Object.keys(sayi).concat(Object.keys(met));
+    return sira.map(function (a) {
+      var x = sayi[a] || met[a], ad = x.ad + (sayi[a] && x.birim && x.birim !== '1-5' ? ' (' + x.birim + ')' : '') + (x.zorunlu ? '' : ' · isteğe bağlı');
+      if (sayi[a]) return B.alan({ ad: ad, isim: a, tur: 'sayi', deger: f[a] || '', yerTutucu: x.yerTutucu || String(x.min).replace('.', ',') + ' – ' + String(x.max).replace('.', ',') });
       if (x.secim) return B.alan({ ad: ad, isim: a, tur: 'secim', deger: f[a] || '', secenekler: x.secim.reduce(function (o, v) { o[v] = v; return o; }, { '': 'Seç…' }) });
-      return B.alan({ ad: ad, isim: a, deger: f[a] || '', yerTutucu: x.desenMetni ? '12:30' : '' });
+      var h = B.alan({ ad: ad, isim: a, deger: f[a] || '', yerTutucu: x.yerTutucu || (x.desenMetni ? '12:30' : '') });
+      return t === Kayit.TURLER.tahlil && a === 'belirtec' ? h.replace('name="belirtec"', 'name="belirtec" list="tahlil-sik" autocomplete="off"') +
+        '<datalist id="tahlil-sik">' + Kayit.TAHLIL_SIK.map(function (s) { return '<option value="' + ic().kac(s[0]) + '">'; }).join('') + '</datalist>' : h;
     }).join('');
   }
   function sayfaKayit(yer, alt) {
@@ -702,12 +731,13 @@
     if (!Kayit) return I.ust(I.kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: 'Kayıt' }) + eksik('Kayıt') + '</div>';
     if (alt === 'hafta') return sayfaKayitHafta();
     var ag = /^gun\/(\d{4}-\d{2}-\d{2})$/.exec(alt || ''); if (ag) kayitGun = ag[1]; // Her şeyde arama bir kaydın gününü açar
+    var at = /^tur\/(\w+)$/.exec(alt || ''); if (at && Kayit.TURLER[at[1]]) kayitTur = at[1]; // Sağlık panosunun «Kaydet»i türü seçili açar
     var simdi = Date.now(), gun = gunAdi(simdi), l = oku(KAYIT_ANAHTAR, []), T = Kayit.TURLER, t = T[kayitTur] || T.su;
     var gunler = kayitGunleri(Kayit, gun);
     if (kayitGun && kayitGun < gun && gunler.indexOf(kayitGun) < 0) gunler.push(kayitGun); // pencereden eski gün okunur; yazmayı motor reddeder
     var secili = gunler.indexOf(kayitGun) > 0 ? kayitGun : gun, sAd = gunYazi(secili, gun);
     var il = kayitIleti; kayitIleti = null;
-    var f = il && il.form || {}, gruplar = {};
+    var f = il && il.form || taslak('kayit:' + kayitTur) || {}, gruplar = {};
     Object.keys(T).forEach(function (id) { var a = T[id].alan === '*' ? 'Genel' : T[id].alan; (gruplar[a] = gruplar[a] || []).push(id); });
     var ozet = gunOzeti(Kayit, l, secili), bugun = l.filter(function (r) { return r.gun === secili; }).reverse();
     var Ay = L.Kabuk && L.Kabuk.Ayar, ay = function (a) { return Ay ? Ay.oku(I.depo, a) : null; };
@@ -715,7 +745,7 @@
     var kural = kuralOzeti(Kayit, l, gun, { cinsiyet: cins === 'belirtilmedi' ? null : cins, boy: ay('lifeos.beden.boy'),
       dogumYili: ay('lifeos.beden.dogumYili'), hedef: ay('lifeos.beden.hedef') }, new Date(simdi).getFullYear());
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="kayit">' + B.baslik({ metin: 'Kayıt' }) +
-      '<form class="kayitform" novalidate>' +
+      '<form class="kayitform" data-taslak="kayit:' + kayitTur + '" novalidate>' +
       (il && (il.hatalar || il.tamam) ? B.uyari({ tur: il.hatalar ? 'hata' : 'tamam', metin: il.hatalar ? il.hatalar.join(' ') : il.tamam }) : '') +
       B.alan({ ad: 'Hangi gün?', isim: 'gun', tur: 'secim', deger: secili, veri: { 'kayit-gun': '' }, secenekler: gunler.reduce(function (o, g) { o[g] = gunYazi(g, gun); return o; }, {}) }) +
       B.alan({ ad: 'Ne kaydediyorsun?', isim: 'kayitTur', tur: 'secim', deger: T[kayitTur] ? kayitTur : 'su', veri: { 'kayit-tur': '' }, secenekler: Object.keys(gruplar).reduce(function (o, g) {
@@ -759,7 +789,7 @@
     [].forEach.call(form.elements, function (e) { if (e.name && e.name !== 'tahmin' && e.name !== 'gun' && e.name !== 'kayitTur') veri[e.name] = e.value; });
     var tahmin = !!(form.elements.tahmin && form.elements.tahmin.checked), bugun = gunAdi(simdi), gun = form.elements.gun.value || bugun;
     var r = kayitEkle(Kayit, oku(KAYIT_ANAHTAR, []), kayitTur, veri, tahmin, gun, simdi, bugun); // pencereye motor karar verir
-    if (r.ok) { yaz(KAYIT_ANAHTAR, r.kayitlar); kayitIleti = { tamam: 'Kaydedildi' + (gun === bugun ? '' : ' (' + gunYazi(gun, bugun) + ')') + ': ' + kayitMetni(Kayit, r.kayit) }; }
+    if (r.ok) { yaz(KAYIT_ANAHTAR, r.kayitlar); taslakYaz('kayit:' + kayitTur, null); kayitIleti = { tamam: 'Kaydedildi' + (gun === bugun ? '' : ' (' + gunYazi(gun, bugun) + ')') + ': ' + kayitMetni(Kayit, r.kayit) }; }
     else kayitIleti = { hatalar: r.hatalar, form: veri, tahmin: tahmin }; // yazılan kaybolmasın
     ic().rota();
     var ileti = d.querySelector('.kayitform .b-uyari'); if (ileti) ileti.focus();
@@ -783,6 +813,14 @@
       if (adim && adim.tur === 'ders') dersler.push({ id: adim.id, ad: a.ad + ': ' + adim.ad, dk: DERS_DK, alan: a.id });
     });
     return { dersler: dersler, tekrar: Tekrar ? kuyruk(Tekrar, kartlar(), simdi, sayac(simdi)).plan : null, sablon: planSablon() };
+  }
+  /* Bugünün planı tek kaynaktan: Gün ve Hafta sayfası aynısını gösterir (2026-11-16: Gün «kurulmadı» derken Hafta planı kurulu gösteriyordu).
+   * Kurulmuşsa o; kurulmamışsa motorun aynı girdilerle önerisi (depoya yazılmaz, «Planı kur» yazar). Boş zaman yoksa null. */
+  function bugunPlani(dr, simdi) {
+    if (dr.gunPlan && dr.gunPlan.gun === gunAdi(simdi)) return { plan: dr.gunPlan.plan, kurulu: true };
+    if (!dr.ayar.musait.length) return null;
+    var r = planKur(Plan, dr, gunAdi(simdi), planEk(simdi));
+    return r.ok ? { plan: r.plan, kurulu: false } : { hatalar: r.hatalar };
   }
   function planSablon() { // bozuk satır atlanır; şablon yoksa boş
     var v = oku(PLAN_SABLON, { sabitler: [] });
@@ -814,7 +852,11 @@
     var govde;
     if (!dr.ayar.musait.length) govde = B.bos({ baslik: 'Hafta, Plan sayfasındaki boş zamanına kurulur.', eylem: { metin: 'Önce boş zamanını yaz', href: '#/motor/plan' } });
     else {
-      var r = haftaKur(Plan, dr, sab, bugun, planEk(simdi)), h = r.ok && r.hafta;
+      var r = haftaKur(Plan, dr, sab, bugun, planEk(simdi)), h = r.ok && r.hafta, bp = r.ok && bugunPlani(dr, simdi);
+      if (bp && bp.plan) { // bugünün sütunu Gün sayfasındaki planın kendisi; haftanın toplamı ona göre
+        h.gunler[0] = Object.assign({}, h.gunler[0], { bloklar: bp.plan.bloklar, ozet: bp.plan.ozet, sigmayan: bp.plan.sigmayan });
+        h.ozet = Object.assign({}, h.ozet, { planlananDk: { v: h.gunler.reduce(function (t, g) { return t + (g.ozet.planlananDk.v || 0); }, 0), k: h.ozet.planlananDk.k } });
+      }
       govde = !r.ok ? B.uyari({ tur: 'dikkat', metin: r.hatalar.join(' ') })
         : '<p class="soluk">' + I.kac(gunAd(h.bas)) + ' – ' + I.kac(gunAd(h.bitis)) + ' · ' + (h.ozet.planlananDk.v ? 'planlanan ' + h.ozet.planlananDk.v + ' dk (' + E[h.ozet.planlananDk.k] + ')' : 'plana girecek iş yok') +
           (h.ozet.araGunu ? ' · ' + h.ozet.araGunu + ' ara günü' : '') + '. Öngörüdür: planlanan blok yapılacak sayılır.</p>' +
@@ -840,16 +882,17 @@
     var I = ic();
     if (!Plan) return I.ust(I.kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: 'Plan' }) + eksik('Plan') + '</div>';
     if (alt === 'hafta') return sayfaPlanHafta();
-    var simdi = Date.now(), dr = planDurum(simdi), p = dr.gunPlan && dr.gunPlan.plan, il = planIleti; planIleti = null;
+    var simdi = Date.now(), dr = planDurum(simdi), bp = bugunPlani(dr, simdi), p = bp && bp.plan, kurulu = !!(bp && bp.kurulu), il = planIleti; planIleti = null;
     var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' };
     var planHtml = !dr.ayar.musait.length ? B.bos({ baslik: 'Önce boş zamanını yaz.', metin: 'Plan o aralığa kurulur.' })
-      : !p ? '<p class="soluk">Bugün için plan kurulmadı.</p>'
-      : (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
+      : !p ? B.uyari({ tur: 'dikkat', metin: bp.hatalar.join(' ') })
+      : (kurulu ? '' : '<p class="soluk">Önerilen plan; «Planı kur» deyince bugünün planı olur ve blokları işaretleyebilirsin.</p>') +
+        (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, !kurulu); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
         '<p class="soluk">Planlanan ' + (p.ozet.planlananDk.v || 0) + ' dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan ' + p.ozet.bosDk.v + ' dk (' + E[p.ozet.bosDk.k] + ')' +
         (p.ozet.molaSayisi ? ' · ' + p.ozet.molaSayisi + ' mola' : '') + '</p>' +
         (p.sigmayan.length ? B.uyari({ tur: 'dikkat', metin: 'Sığmayanlar (' + p.sigmayan.length + '): ' + p.sigmayan.map(function (x) { return x.ad + ' · ' + x.dk + ' dk · ' + x.neden; }).join('; ') }) : '');
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan">' + B.baslik({ metin: 'Plan' }) + planIletisi(il) +
-      B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([dr.ayar.musait.length ? { metin: p ? 'Yeniden kur' : 'Planı kur', tur: 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,
+      B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([dr.ayar.musait.length ? { metin: kurulu ? 'Yeniden kur' : 'Planı kur', tur: 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,
         { metin: 'Hafta planı', href: '#/motor/plan/hafta' }])] }) +
       B.bolum({ baslik: 'Boş zamanım', govde: [dr.ayar.musait.length ? B.liste({ ad: 'Boş zaman aralıkları', ogeler: dr.ayar.musait.map(function (m, i) {
           return { ad: m.bas + '–' + m.bit, eylemler: silEylemi('Aralığı sil: ' + m.bas + '–' + m.bit, { 'arac-ac': 'plan-aralik-sil', i: i }) };
@@ -869,7 +912,7 @@
     var gunAd = function (x) { return new Date(x + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }); };
     var KAYNAK = { 'goc:ays:hafta': 'hafta sözleşmesi', 'goc:ays:program': 'program', 'goc:ays:istisna': 'istisna' };
     var acil = function (baslik, ad, l) { return l.length ? B.acilir({ baslik: baslik + ' (' + l.length + ')', duzey: 3, govde: B.liste({ ad: ad, ogeler: l }) }) : ''; };
-    return B.bolum({ baslik: 'Eski sistemden', id: 'plan-eski', veri: { 'plan-eski': '' }, govde: ['<p class="soluk">AYS ve SPİ\'den gelen planlar. Değişmez, «eski kayıt» olarak durur.</p>',
+    return B.bolum({ baslik: 'Eski sistemden', id: 'plan-eski', veri: { 'plan-eski': '' }, govde: ['<p class="soluk">Önceki uygulamadan gelen planlar. Değişmez, «eski kayıt» olarak durur.</p>',
       acil('Gün planları', 'Eski gün planları', g.slice().sort(function (a, b) { return a.gun < b.gun ? 1 : -1; }).map(function (p) {
         var yap = p.bloklar.filter(function (b) { return b.durum === 'yapildi'; }).length, dk = p.bloklar.reduce(function (a, b) { return a + (Number(b.dk) || 0); }, 0);
         return { ad: gunAd(p.gun) + (p.ara ? ' · ara günü' : ''), pul: ESKI_PUL,
@@ -924,7 +967,7 @@
     var acil = function (baslik, ad, l) { return l.length ? B.acilir({ baslik: baslik + ' (' + l.length + ')', duzey: 3, govde: B.liste({ ad: ad, ogeler: l }) }) : ''; };
     var top = function (l, a) { var n = l.filter(function (x) { return x[a] != null; }); return n.length ? n.reduce(function (s, x) { return s + x[a]; }, 0) : null; };
     var tur = {}; h.forEach(function (x) { var k = x.tur || 'etiketsiz'; tur[k] = (tur[k] || 0) + 1; });
-    return B.bolum({ baslik: 'Eski sistemden', id: 'soru-eski', veri: { 'soru-eski': '' }, govde: ['<p class="soluk">AYS\'den gelen denemeler ve soru sayıları. Değişmez, «eski kayıt» olarak durur.</p>',
+    return B.bolum({ baslik: 'Eski sistemden', id: 'soru-eski', veri: { 'soru-eski': '' }, govde: ['<p class="soluk">Önceki uygulamadan gelen denemeler ve soru sayıları. Değişmez, «eski kayıt» olarak durur.</p>',
       acil('Denemeler', 'Eski denemeler', e.slice().sort(function (a, b) { return a.tarih < b.tarih ? 1 : -1; }).map(function (x) {
         var an = Soru.denemeAnalizi(x);
         return { ad: (x.ad || x.aile || 'Deneme') + ' · ' + gunAd(x.tarih), not: String(an.net.deger).replace('.', ',') + ' net (' + an.net.etiket + ') · ' + x.testler.length + ' test', pul: ESKI_PUL, uzun: true };
@@ -947,7 +990,7 @@
     var b = soruBaglam(), bas = I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="soru">' + B.baslik({ metin: 'Soru' });
     if (!b) {
       if (!I.al(I.etkin())) I.alanYukle(I.etkin()).then(function () { if (d.querySelector('[data-arac="soru"]')) I.rota(); });
-      return bas + (I.al(I.etkin()) ? B.bos({ baslik: 'Sorular bu açılışta yüklenemedi.', metin: 'Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.' })
+      return bas + (I.al(I.etkin()) ? B.bos({ baslik: 'Sorular bu açılışta yüklenemedi.', metin: 'Sayfayı yenile; sürerse Başbuğ’u kapatıp yeniden aç.' })
         : '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>') + '</div>';
     }
     var kayit = oku(SORU_ANAHTAR, {}), o = kayit.oturum && kayit.alan === b.alan.id ? kayit.oturum : null, gecmis = oku(SORU_GECMIS, []);
@@ -955,7 +998,7 @@
       var son = gecmis.slice(-5).reverse();
       // test seçenekleri tek kartta: ne olduğu, kaç soru, iki yol (karma test, süreli deneme)
       return bas + '<section class="soru-kart" aria-labelledby="soru-kart-baslik"><h2 class="soru-kart__baslik" id="soru-kart-baslik">' + I.kac(b.alan.ad) + ' · karma test</h2>' +
-        '<p class="soluk">Açık ünitelerden karışık sorular; havuzda ' + b.havuz.length + ' soru var. Başka alan için o alanın sayfasını aç.</p>' +
+        '<p class="soluk">Açtığın ünitelerden karışık ' + b.havuz.length + ' soru. Başka alan için o alanın sayfasını aç.</p>' +
         (b.havuz.length < Soru.EN_AZ ? B.bos({ baslik: 'Test için en az ' + Soru.EN_AZ + ' soru gerekir.' })
           : B.eylemler(Soru.BOYLAR.filter(function (n, i) { return !i || b.havuz.length > Soru.BOYLAR[i - 1]; }).map(function (n, i) { // havuz küçükse aynı boyda iki düğme çıkmasın
             return { metin: Math.min(n, b.havuz.length) + ' soruluk test', tur: i ? 'ikincil' : 'ana', veri: { 'arac-ac': 'soru-basla', boy: n } };
@@ -1088,6 +1131,8 @@
     else if (f.matches('form.planform')) { e.preventDefault(); planFormu(f); }
   });
   d.addEventListener('input', function (e) {
+    var tf = e.target.form, ta = tf && tf.getAttribute('data-taslak');
+    if (ta) taslakYaz(ta, formTaslagi(tf));
     if (e.target.matches('[data-not-ara]')) d.getElementById('not-liste').innerHTML = notListesi(oku(NOT_ANAHTAR, []), e.target.value);
   });
   d.addEventListener('change', function (e) {
@@ -1096,7 +1141,7 @@
       var fv = {}; [].forEach.call(s.form.elements, function (e) { if (e.name && e.name !== 'tahmin' && e.name !== 'gun' && e.name !== 'kayitTur') fv[e.name] = e.value; });
       kayitIleti = { form: fv, tahmin: !!(s.form.elements.tahmin && s.form.elements.tahmin.checked) };
       kayitGun = s.value; ic().rota(); var yg = d.querySelector('select[data-kayit-gun]'); if (yg) yg.focus(); return; }
-    if (s.matches('select[data-kayit-tur]')) { kayitTur = s.value; ic().rota(); var ys = d.querySelector('select[data-kayit-tur]'); if (ys) ys.focus(); return; }
+    if (s.matches('select[data-kayit-tur]')) { kayitTur = s.value; if (/^#\/motor\/kayit\/tur\//.test(location.hash)) history.replaceState(null, '', '#/motor/kayit'); ic().rota(); var ys = d.querySelector('select[data-kayit-tur]'); if (ys) ys.focus(); return; }
     if (!s.matches('select[data-bag-ekle]') || !s.value) return;
     var n = oku(NOT_ANAHTAR, []).filter(function (x) { return x.id === s.value; })[0], t = s.form.elements.govde;
     if (n) { var bag = Not.bagYaz(n.id, Not.ad(n)), i = t.selectionStart == null ? t.value.length : t.selectionStart; t.value = t.value.slice(0, i) + bag + t.value.slice(t.selectionEnd == null ? i : t.selectionEnd); }
@@ -1108,7 +1153,7 @@
     var ne = b.getAttribute('data-arac-ac'), I = ic();
     if (ne === 'not-sil') {
       if (!confirm('Bu not silinsin mi? Geri alınamaz.')) return;
-      yaz(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== b.getAttribute('data-id'); }));
+      yaz(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== b.getAttribute('data-id'); })); taslakYaz('not:' + b.getAttribute('data-id'), null);
       return I.git('#/motor/not');
     }
     if (ne === 'baslangic-getir') return baslangicGetir();

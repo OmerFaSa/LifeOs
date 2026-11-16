@@ -18,10 +18,10 @@
     { id: 'saglik', ad: 'Sağlık', katman: 'kabuk', dal: 'saglik', yol: '#/saglik', ikon: 'kalp', halka: 3, durum: 'yeni', aciklama: 'Beslenme, hareket, uyku, tahlil' },
     { id: 'motorlar', ad: 'Araçlar', katman: 'kabuk', dal: 'motorlar', yol: '#/motorlar', ikon: 'cark', durum: 'yeni', aciklama: 'Her alanın ortak araçları' },
     { id: 'harita', ad: 'Sistem haritası', katman: 'kabuk', dal: 'ana', yol: '#/harita', ikon: 'harita', halka: 6, durum: 'yeni', aciklama: 'Bütün yerler tek sayfada' },
-    { id: 'onay', ad: 'Onaylar', katman: 'kabuk', dal: 'ana', yol: '#/onay', ikon: 'tik', durum: 'yeni', aciklama: 'Taslak dersleri oku ve onayla; senin yapacağın adımlar' },
+    { id: 'onay', ad: 'Yönetim', katman: 'kabuk', dal: 'ana', yol: '#/onay', ikon: 'tik', durum: 'yeni', aciklama: 'Ders onayları ve sistemin senden beklediği birkaç iş' },
     { id: 'tanisma', ad: 'Tanışma', katman: 'kabuk', dal: 'ana', yol: '#/tanisma', ikon: 'el', durum: 'yeni', aciklama: 'Kendini kendi sözlerinle anlat; başlangıcın buna göre önerilir' },
     { id: 'ayarlar', ad: 'Ayarlar', katman: 'kabuk', dal: 'ayarlar', yol: '#/ayarlar', ikon: 'ayar', durum: 'yeni', aciklama: 'Görünüm, erişilebilirlik, bildirim, hesap' },
-    { id: 'hesap', ad: 'Hesap', katman: 'kabuk', dal: 'ayarlar', yol: '#/hesap', ikon: 'kisi', durum: 'yeni', aciklama: 'Oturum, bağlı cihazlar, güncelleme; geri kalanı eski panelde (/kartlar/)' },
+    { id: 'hesap', ad: 'Hesap', katman: 'kabuk', dal: 'ayarlar', yol: '#/hesap', ikon: 'kisi', durum: 'yeni', aciklama: 'Oturum, cihazlar, güvenlik ve güncelleme' },
     // alanlar (plan §3, on alan); Öğren dalı
     { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 2, aciklama: 'Sınav hazırlığı' },
     { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'pilot', asama: 2, aciklama: 'Diller ve diksiyon' },
@@ -38,9 +38,9 @@
     { id: 'yol', ad: 'Yol haritası', katman: 'motor', dal: 'motorlar', yol: '#/motor/yol', ikon: 'yol', durum: 'yeni', aciklama: 'Aşama, ünite, ders ve kapı' },
     { id: 'tekrar', ad: 'Tekrar', katman: 'motor', dal: 'motorlar', yol: '#/motor/tekrar', ikon: 'dongu', durum: 'yeni', aciklama: 'Aralıklı tekrar kartları' },
     { id: 'soru', ad: 'Soru', katman: 'motor', dal: 'motorlar', yol: '#/motor/soru', ikon: 'soru', durum: 'yeni', aciklama: 'Deneme ve soru çözme' },
-    { id: 'kayit', ad: 'Kayıt', katman: 'motor', dal: 'motorlar', yol: '#/motor/kayit', ikon: 'liste', durum: 'yeni', aciklama: 'Ölçülen her şeyin kaydı' },
+    { id: 'kayit', ad: 'Kayıt', katman: 'motor', dal: 'motorlar', yol: '#/motor/kayit', ikon: 'liste', durum: 'yeni', aciklama: 'Su, öğün, uyku, hareket, tahlil' },
     { id: 'plan', ad: 'Plan', katman: 'motor', dal: 'motorlar', yol: '#/motor/plan', ikon: 'takvim', durum: 'yeni', aciklama: 'Günün ve haftanın planı' },
-    { id: 'not', ad: 'Not', katman: 'motor', dal: 'motorlar', yol: '#/motor/not', ikon: 'not', halka: 4, durum: 'yeni', aciklama: 'Her yerden açılan tek defter' },
+    { id: 'not', ad: 'Not', katman: 'motor', dal: 'motorlar', yol: '#/motor/not', ikon: 'not', halka: 4, durum: 'yeni', aciklama: 'Her yerden açılan defter' },
     { id: 'arama', ad: 'Arama', katman: 'motor', dal: 'motorlar', yol: '#/motor/arama', ikon: 'buyutec', durum: 'yeni', aciklama: 'Her şeyde arama' },
     // King
     { id: 'king', ad: 'King', katman: 'king', dal: 'king', yol: '#/king', ikon: 'tac', halka: 5, durum: 'yeni', aciklama: 'Düşünce ortağı' }

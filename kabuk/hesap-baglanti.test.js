@@ -45,7 +45,7 @@ t('yükleniyor ve hata: bağlantılar gelmeden «Yükleniyor», hata yeniden den
 });
 t('takvim kapalı: anlatım ve «Aboneliği aç»; adres yok', () => {
   const h = ciz(bos());
-  dogru(/Sınav günlerin takviminde/.test(h) && /data-hb-ac="takvim-ac"/.test(h) && !/jeton/.test(h) && /AYS’yi bir kez aç/.test(h), h);
+  dogru(/Sınav günlerin takviminde/.test(h) && /data-hb-ac="takvim-ac"/.test(h) && !/jeton/.test(h) && !/AYS|SPİ|ESP/.test(h), h);
 });
 t('takvim açık: ev ağı ve bilgisayar adresi kopyalanır, son bakış; yenile ve kapat onay ister', () => {
   const h = ciz(bos({ bag: { anahtarlar: [], takvim: ACIK } }));
@@ -89,13 +89,13 @@ const uz = (s, b) => { const h = ciz(bos(s), b); return h.slice(h.indexOf('id="h
 t('her yerden: Merkez hâli herkese salt okunur, yeniden dene', () => {
   const h = uz({ merkezHal: 'bagli', merkezMetin: 'Bağlı. King bilgisayarındaki modelle konuşuyor.' }, bag({ sunucu: { yerel: false }, oturum: { ad: 'a', rol: 'uye' } }));
   dogru(/b-uyari--tamam/.test(h) && /Bağlı\. King/.test(h) && /data-hb-ac="uzak-bak"/.test(h), h);
-  dogru(!/data-hb-ac="uzak-ac"/.test(h) && !/data-hb-ac="acilis"/.test(h) && /bilgisayarın kendisinden, admin hesabıyla/.test(h), 'telefonda yönetim yok');
+  dogru(!/data-hb-ac="uzak-ac"/.test(h) && !/data-hb-ac="acilis"/.test(h) && /bilgisayarın kendisinden, yönetici hesabıyla/.test(h), 'telefonda yönetim yok');
   const and = uz({ merkezHal: 'bilgisayar-kapali', merkezMetin: 'Bilgisayara ulaşılamıyor.', android: true }, bag({ sunucu: { yerel: false } }));
   dogru(/b-uyari--dikkat/.test(and) && /Özel DNS/.test(and), and);
   dogru(/Yükleniyor/.test(uz({ merkezMetin: '' })), 'hâl gelmeden yükleniyor');
 });
 t('her yerden: bilgisayarda üye yönetemez; admin için kurulu değil, giriş yok, funnel, kapalı, açık', () => {
-  dogru(/sahibi \(admin\)/.test(uz({ uzak: UZ }, bag({ oturum: { ad: 'u', rol: 'uye' } }))) && !/data-hb-ac="uzak-ac"/.test(uz({ uzak: UZ }, bag({ oturum: { ad: 'u', rol: 'uye' } }))));
+  dogru(/sahibi \(yönetici\)/.test(uz({ uzak: UZ }, bag({ oturum: { ad: 'u', rol: 'uye' } }))) && !/data-hb-ac="uzak-ac"/.test(uz({ uzak: UZ }, bag({ oturum: { ad: 'u', rol: 'uye' } }))));
   dogru(/Yükleniyor/.test(uz({ uzak: null })), 'durum gelmeden');
   dogru(/İstek yapılamadı/.test(uz({ uzakHata: 'İstek yapılamadı.' })));
   dogru(/Tailscale kurulu değil/.test(uz({ uzak: Object.assign({}, UZ, { kurulu: false }) })));
@@ -125,7 +125,7 @@ t('gelen kutusu: satırlar durumuyla, bekleyen sayılır; boşsa «Henüz bir sa
     { id: 3, metin: 'saçma', modul: 'spi', durum: 'anlasilmadi', zaman: SIMDI - 180000 }];
   const h = ciz(bos({ bag: Object.assign({}, bos().bag, { gelen: l }) }));
   dogru(/3 satır · 1 bekliyor/.test(h), h);
-  dogru(/su 250/.test(h) && /SPİ › Onaylar’da/.test(h) && /ESP açılınca işlenir/.test(h) && /anlaşılmadı/.test(h));
+  dogru(/su 250/.test(h) && /Onay bekliyor/.test(h) && /Sırada/.test(h) && !/AYS|SPİ|ESP/.test(h) && /anlaşılmadı/.test(h));
   esit(G.gelenSatiri({ metin: 'x', modul: 'ays', durum: 'onayda', sonuc: 'Kaydedildi' }, SIMDI).not, 'Kaydedildi');
 });
 

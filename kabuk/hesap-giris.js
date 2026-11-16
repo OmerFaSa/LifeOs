@@ -74,11 +74,11 @@
    * kuruldu (bu açılışta ilk hesap kuruldu: sunucunun eski «kurulum» bilgisi geçersiz), uygulama (telefon uygulaması: adres sorulur) }. */
   function girisHtml(s, bag, B) {
     var sv = bag.sunucu || {}, adres = s.uygulama ? alan(B, s, 'adres', { ad: 'Bilgisayarın adresi', yerTutucu: '192.168.0.10',
-      ipucu: 'Bilgisayardaki LifeOS\'ta Hesap › Cihazlar\'da yazar. Boş bırakırsan son kullanılan adres.' }) : '';
-    if (bag.dosya && !s.uygulama) return B.bos({ baslik: 'Hesap bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; giriş LifeOS sunucusuyla açılınca yapılır.' });
+      ipucu: 'Bilgisayardaki Başbuğ’da Hesap › Cihazlar’da yazar. Boş bırakırsan son kullanılan adres.' }) : '';
+    if (bag.dosya && !s.uygulama) return B.bos({ baslik: 'Hesap bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; giriş Başbuğ’la açılınca yapılır.' });
     if (sv.kurulum && !s.kuruldu) {
-      if (!sv.yerel) return B.uyari({ tur: 'bilgi', simge: 'kisi', metin: 'Bu bilgisayarda henüz hesap yok.', alt: 'İlk hesap (admin) bilgisayarın kendisinde açılır: LifeOS\'u bilgisayarda aç, Hesap ekranından kur.' });
-      return soluk(B, 'Bu bilgisayarda henüz hesap yok. İlk hesap admin olur: güncelleme ve yönetim onda. Kayıtların girişsiz de bilgisayardaki depoya gider; hesap telefon ve öteki cihazlar için.') +
+      if (!sv.yerel) return B.uyari({ tur: 'bilgi', simge: 'kisi', metin: 'Bu bilgisayarda henüz hesap yok.', alt: 'İlk hesap (yönetici) bilgisayarın kendisinde açılır: Başbuğ’u bilgisayarda aç, Hesap ekranından kur.' });
+      return soluk(B, 'Bu bilgisayarda henüz hesap yok. İlk hesap yönetici olur: güncelleme ve yönetim onda. Kayıtların girişsiz de bilgisayardaki depoya gider; hesap telefon ve öteki cihazlar için.') +
         form('kur', [ileti(B, s), alan(B, s, 'ad', { ad: 'Kullanıcı adı' }), yeniAlan(B, s, 'yeni', 'Şifre'), alan(B, s, 'tekrar', { ad: 'Şifre tekrar' }),
           soluk(B, 'Şifreni unutursan kendine soracağın bir soru ve cevabı:'),
           alan(B, s, 'soru', { ad: 'Kurtarma sorusu', yerTutucu: 'Örn. İlk öğretmenimin adı?', enCok: 120 }), alan(B, s, 'cevap', { ad: 'Cevabın', enCok: 120 }),
@@ -135,7 +135,7 @@
       : (g.qr ? '<div>' + g.qr + '</div>' : '') + soluk(B, g.qr ? 'Okutamıyorsan anahtarı elle yaz:' : 'Uygulamada «anahtarı elle gir» ile bunu yaz:');
     return B.panel({ tur: 'guclu', baslik: 'İki adımlı doğrulamayı aç', id: 'hg-kurulum', govde: [
       soluk(B, '1. Doğrulayıcı uygulamayı aç: Google Authenticator, Microsoft Authenticator ya da iPhone\'da Ayarlar › Şifreler. Hepsi ücretsiz.'),
-      soluk(B, g.tel ? '2. LifeOS\'u uygulamaya ekle.' : '2. QR kodunu uygulamayla okut.'), okut,
+      soluk(B, g.tel ? '2. Başbuğ’u uygulamaya ekle.' : '2. QR kodunu uygulamayla okut.'), okut,
       '<p><code data-hg-sir>' + B.kac(sirYaz(k.sir)) + '</code></p>', B.eylemler([g.kopya === 'sir' ? { yazi: 'Kopyalandı.' } : dugme('Anahtarı kopyala', 'kopyala', 'sir')]),
       soluk(B, '3. Uygulamadaki kodu yaz.'),
       form('iki-onay', [ileti(B, g), alan(B, g, 'kod', { ad: 'Kod', yerTutucu: '000 000', enCok: 7 }), B.eylemler([gonderDugme(g, 'Doğrula ve aç'), vazgec('kur-vazgec')])])] });
@@ -160,12 +160,12 @@
           govde: dg(acik ? [dugme('Yeni yedek kodlar', 'ac', 'yedek'), dugme('Kapat', 'ac', 'iki-kapat')] : [dugme('Aç', 'ac', 'iki-ac', 'ana')]) }),
         g.ileti && bos ? ileti(B, g) : '',
         g.yedekler ? yedekHtml(g, B) : g.kurulum ? kurulumHtml(g, B) : acikHtml(g, B),
-        acik && bos ? soluk(B, 'Telefonunu ve yedek kodlarını birlikte kaybedersen: ' + (g.rol === 'admin' ? 'bilgisayarda «python sistem/hesap.py --iki-adim-kapat ' + bag.oturum.ad + '».' : 'admin Yönetim\'den kapatır.')) : ''];
+        acik && bos ? soluk(B, 'Telefonunu ve yedek kodlarını birlikte kaybedersen ' + (g.rol === 'admin' ? 'hesabın bilgisayarın kendisinden kurtarılır. Yedek kodlarını güvenli bir yerde sakla.' : 'yönetici Hesap › Kullanıcılar’dan kapatır.')) : ''];
     }
     return B.bolum({ baslik: 'Güvenlik', id: 'hg-guvenlik', govde: govde });
   }
   function hataMetni(e, uygulama) {
-    if (e && e.kod === 0) return uygulama ? 'Bilgisayara ulaşılamadı. Aynı Wi-Fi\'da mısınız, LifeOS açık mı, adres doğru mu?' : 'Bilgisayara ulaşılamadı; LifeOS açık mı?';
+    if (e && e.kod === 0) return uygulama ? 'Bilgisayara ulaşılamadı. Aynı Wi-Fi’da mısınız, Başbuğ açık mı, adres doğru mu?' : 'Bilgisayara ulaşılamadı; Başbuğ açık mı?';
     return (e && e.message) || 'İstek yapılamadı.';
   }
 

@@ -11,23 +11,16 @@ t('istek gövdesi: seçim yalnız geçerliyse gider, otomatik seçimde alan yok'
   a.deepStrictEqual(K.istekGovdesi('x', 'kotu'), { text: 'x', agent: 'king' });
   a.deepStrictEqual(K.istekGovdesi('x', 'oto'), { text: 'x', agent: 'king' });
 });
-t('seçenek adı köprünün hâlini söyler; hâl bilinmiyorsa yalnız ad', () => {
-  const s = K.secenekler({ antigravity: { acik: false }, claude: { acik: true } });
-  a.strictEqual(s.antigravity, 'Antigravity · kapalı');
-  a.strictEqual(s.claude, 'Claude Code · hazır');
-  a.strictEqual(K.secenekler(null).claude, 'Claude Code');
-});
-t('cevap: metin, kaynak satırı ve köprü olmadıysa notu', () => {
+t('cevap: yalnız metin; sağlayıcı, model, süre ve köprü notu ekrana yazılmaz', () => {
   a.deepStrictEqual(K.cevapSatirlari({ mode: 'model', text: 'Merhaba', provider: 'google', model: 'g', seconds: 2.34,
-    kopru: { kullanildi: false, not: 'Antigravity olmadı (kapalı). Sıradaki model cevaplıyor.' } }, 200),
-  ['Merhaba', 'Kaynak: google · g · 2,3 sn', 'Antigravity olmadı (kapalı). Sıradaki model cevaplıyor.']);
-  a.deepStrictEqual(K.cevapSatirlari({ mode: 'model', text: 'Tamam', provider: 'claude', kopru: { kullanildi: true, not: 'x' } }, 200),
-    ['Tamam', 'Kaynak: claude']);
+    kopru: { kullanildi: false, not: 'Antigravity olmadı (kapalı). Sıradaki model cevaplıyor.' } }, 200), ['Merhaba']);
 });
-t('model konuşamadıysa kaynak kural motorudur; hata kodunda sunucunun cümlesi', () => {
-  a.strictEqual(K.cevapSatirlari({ mode: 'komut', text: 'Bugün iki iş var.' }, 200)[1], 'Kaynak: kural motoru (model cevap vermedi)');
-  a.deepStrictEqual(K.cevapSatirlari({ mesaj: 'yalnız bu bilgisayarda' }, 403), ['yalnız bu bilgisayarda']);
-  a.deepStrictEqual(K.cevapSatirlari(null, 0), ['Merkez cevap vermedi.']);
+t('model konuşamadıysa tek kısa not; hata null döner (yazılan kutuya geri), metni sunucunun cümlesi', () => {
+  a.deepStrictEqual(K.cevapSatirlari({ mode: 'komut', text: 'Bugün iki iş var.' }, 200), ['Bugün iki iş var.', 'Şu an yalnız kısa cevap verebiliyorum.']);
+  a.strictEqual(K.cevapSatirlari({ mesaj: 'yalnız bu bilgisayarda' }, 403), null);
+  a.strictEqual(K.cevapSatirlari(null, 0), null);
+  a.strictEqual(K.hataMetni({ mesaj: 'yalnız bu bilgisayarda' }), 'yalnız bu bilgisayarda');
+  a.strictEqual(K.hataMetni(null), 'King şu an cevap veremedi.');
 });
 
 t('istek gövdesi: kip, başlangıç ve ders bağlamı (yalnız kimlik; ad ve metin gitmez)', () => {
@@ -44,7 +37,7 @@ t('depodaki konuşma: bozuksa boş konuşma; yabancı mesaj ve alan atılır, uz
     mesajlar: [{ kim: 'ben', metin: 'selam' }, { kim: 'sistem', metin: 'x' }, { kim: 'king', metin: 'y'.repeat(30000), alt: ['Kaynak: claude', 5], html: '<b>' }] }), T);
   a.strictEqual(s.baslangic, '2026-11-15T20:00:00'); a.strictEqual(s.kip, 'filozof'); a.strictEqual(s.baglam.id, 'felsefe.1.1.2');
   a.deepStrictEqual(s.mesajlar.map(m => m.kim), ['ben', 'king']);
-  a.strictEqual(s.mesajlar[1].metin.length, 20000); a.deepStrictEqual(s.mesajlar[1].alt, ['Kaynak: claude']); a.ok(!('html' in s.mesajlar[1]));
+  a.strictEqual(s.mesajlar[1].metin.length, 20000); a.deepStrictEqual(s.mesajlar[1].alt, [], 'eski kaynak satırı yazılmaz'); a.ok(!('html' in s.mesajlar[1]));
 });
 t('biçim: paragraf, satır sonu, madde, numaralı liste, kalın, kod ve tablo; HTML kaçırılır', () => {
   a.strictEqual(K.bicimle('Bir\niki\n\nÜç'), '<p>Bir<br>iki</p><p>Üç</p>');

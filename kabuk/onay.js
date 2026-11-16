@@ -90,15 +90,12 @@
 
   // Sahibin kendi yapması gereken, sistemin yapamadığı adımlar (düz Türkçe, durağan)
   var ADIMLAR = [
-    ['1. Dersleri onayla', 'Onaylar › bir alan › «Aşamanın hepsini onayla». On alanda yirmi aşama var; okuduğunu onayla, emin olmadığını ünite ya da ders ders onayla. Her onay geri alınabilir.'],
-    ['2. King ve disk', 'King için Claude’u bir kez tamamen kapatıp aç. Diski şifrelemek için Windows Ayarlar’da «Cihaz şifreleme» diye ara ve aç.'],
-    ['İstersen: telefondan bakmak', 'LifeOS’a telefondan da bakmak istersen LifeOS-Sistem klasöründe bir kez python sistem/uzak.py --ac yaz. Telefon yolunu tek kapıya bağlar.']
+    ['1. Dersleri onayla', 'Yukarıdan bir alan › «Aşamanın hepsini onayla». On alanda yirmi aşama var; okuduğunu onayla, emin olmadığını ünite ya da ders ders onayla. Her onay geri alınabilir.'],
+    ['2. Diski şifrele', 'Windows Ayarlar’da «Cihaz şifreleme» diye ara ve aç. Kayıtların bu bilgisayarda durur.'],
+    ['İstersen: telefondan bakmak', 'Hesap › Her yerden erişim › «Aç». Telefonun da aynı Tailscale ağında olmalı.']
   ];
 
   function asamalar(I, alan) { return I.asamalar(alan) || []; }
-  function bekleyenSayisi(I) {
-    return I.tasinanlar().reduce(function (t, a) { return t + asamalar(I, a.id).reduce(function (s, y) { return s + sayim(y.veri).taslak; }, 0); }, 0);
-  }
   function kirinti(I, href, ust, ad) {
     var k = I.kac;
     return '<a class="kirinti" href="' + href + '"><span aria-hidden="true">‹ </span>' + k(ust) + '</a><span class="kirinti__ayrac" aria-hidden="true">/</span><span>' + k(ad) + '</span>';
@@ -144,14 +141,14 @@
   }
   function etHtml() {
     if (!et || et.durum === 'yukleniyor') return '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
-    if (et.durum === 'kapali') return B.uyari({ tur: 'bilgi', metin: 'Etiketleme yalnız bu bilgisayarda açılır.' });
+    if (et.durum === 'kapali') return B.uyari({ tur: 'bilgi', metin: 'Bu iş yalnız bilgisayarın kendisinde açılır.' });
     var hata = et.hata ? B.uyari({ tur: 'hata', metin: et.hata }) : '', a = et.sayi.anlama, r = et.sayi.arama;
     if (!et.set) return (et.ileti ? B.uyari({ tur: 'tamam', metin: et.ileti }) : '') +
-      '<p class="soluk">Gerçek mesajlarına doğru cevabı sen verirsin; Anlama ve Arama ölçümü bu etiketlerden yapılır. Mesajlar bu bilgisayardan çıkmaz.</p>' +
-      B.sayilar({ ad: 'Etiket bekleyen', ogeler: [{ ad: 'Anlama · bekleyen', deger: a, birim: 'mesaj', etiket: 'measured' }, { ad: 'Arama · bekleyen', deger: r, birim: 'soru', etiket: 'measured' }] }) +
-      (a + r ? B.eylemler([{ metin: 'Anlama etiketle', tur: a ? 'ana' : 'ikincil', kapali: !a, veri: { 'onay-ac': 'etiket-bas', set: 'anlama' } },
-        { metin: 'Arama etiketle', tur: a || !r ? 'ikincil' : 'ana', kapali: !r, veri: { 'onay-ac': 'etiket-bas', set: 'arama' } }])
-        : B.bos({ baslik: 'Etiketlenecek mesaj yok.', metin: 'Yeni mesajlar ölçüm setine girince burada sayılır.' }));
+      '<p class="soluk">King’e yazdığın birkaç mesajın ne istediğini işaretle; King seni böyle daha iyi anlar. Mesajlar bu bilgisayardan çıkmaz.</p>' +
+      '<p>' + (a + r ? a + ' mesaj ve ' + r + ' arama sorusu bekliyor.' : '') + '</p>' +
+      (a + r ? B.eylemler([{ metin: 'Mesajları işaretle', tur: a ? 'ana' : 'ikincil', kapali: !a, veri: { 'onay-ac': 'etiket-bas', set: 'anlama' } },
+        { metin: 'Aramaları işaretle', tur: a || !r ? 'ikincil' : 'ana', kapali: !r, veri: { 'onay-ac': 'etiket-bas', set: 'arama' } }])
+        : B.bos({ baslik: 'İşaretlenecek mesaj yok.', metin: 'Yeni mesajlar geldikçe burada görünür.' }));
     var s = et.set, x = et.kuyruk[s][et.i], ust = (s === 'anlama' ? 'Anlama' : 'Arama') + ' · ' + (et.i + 1) + ' / ' + et.kuyruk[s].length + ' · ' + et.sayi[s] + ' bekliyor · ';
     var son = B.eylemler([{ metin: 'Atla', tur: 'sade', veri: { 'onay-ac': 'etiket-atla' } }, { metin: 'Bitir', tur: 'sade', veri: { 'onay-ac': 'etiket-bitir' } }]);
     if (s === 'anlama') return B.soru({ soru: x.metin || '(boş mesaj)', ust: ust + 'bu mesaj ne istiyor?', secenekler: NIYETLER.map(function (n) { return NIYET_AD[n]; }),
@@ -168,7 +165,7 @@
     el.innerHTML = etHtml();
     var f = odak && el.querySelector(odak); if (f) f.focus();
   }
-  function etBitir() { et.ileti = et.yazilan ? et.yazilan + ' etiket yazıldı.' : null; et.durum = 'yukleniyor'; etCiz(); etYukle('.b-uyari'); }
+  function etBitir() { et.ileti = et.yazilan ? et.yazilan + ' işaret kaydedildi.' : null; et.durum = 'yukleniyor'; etCiz(); etYukle('.b-uyari'); }
   function etSonraki() { if (++et.i < et.kuyruk[et.set].length) return etCiz('[data-etiket-soru]'); etBitir(); }
   function etEylem(ne, b) {
     if (!et || et.durum !== 'hazir' || et.mesgul) return;
@@ -201,28 +198,29 @@
       say.forEach(function (s) { toplam.taslak += s.taslak; toplam.onayli += s.onayli; });
       var bek = say.reduce(function (t, s) { return t + s.taslak; }, 0);
       return { ad: a.ad, href: '#/onay/' + a.id, uzun: true, simge: a.id, renk: (I.alanRenk || {})[a.id], pul: bek ? { metin: bek + ' bekliyor' } : { metin: 'hepsi onaylı', tur: 'altin' },
-        not: ys.length ? say.map(function (s, j) { return 'Aşama ' + (j + 1) + ': ' + s.taslak + ' taslak, ' + s.onayli + ' onaylı'; }).join(' · ') + ' · ölçüldü' : 'İçerik bu açılışta yüklenemedi.' };
+        not: ys.length ? say.map(function (s, j) { return 'Aşama ' + (j + 1) + ': ' + s.onayli + '/' + (s.taslak + s.onayli) + ' onaylı'; }).join(' · ') : 'İçerik bu açılışta yüklenemedi.' };
     });
     var kayit = Object.keys(oku(I.depo)).length;
     if (!et || !et.set) setTimeout(etYukle, 0); // sayılar her açılışta tazelenir; süren etiketleme turu bozulmaz
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-onay-sayfa="ana">' +
-      B.baslik({ metin: 'Onaylar', alt: 'Taslak dersleri oku; doğruysa onayla. Sen onaylamadan hiçbir ders onaylanmaz.' }) +
-      B.sayilar({ ad: 'Dersler', ogeler: [{ ad: 'Onay bekleyen', deger: toplam.taslak, birim: 'ders', etiket: 'measured' }, { ad: 'Onaylı', deger: toplam.onayli, birim: 'ders', etiket: 'measured' }] }) +
-      B.bolum({ baslik: 'Alanlar', govde: B.liste({ ad: 'Alanlar', ogeler: satirlar }) }) +
-      B.bolum({ baslik: 'Ölçüm için etiketle', veri: { etiket: '' }, govde: '<div data-etiket-govde>' + etHtml() + '</div>' }) +
-      B.bolum({ baslik: 'Onayları sakla', govde: ['<p class="soluk">Onayların şimdilik bu cihazda durur. Dosyayı al ve bilgisayardaki LifeOS klasörüne ver; içerik dosyalarına oradan yazılır.</p>',
+      B.baslik({ metin: 'Yönetim', alt: 'Sistemin senden beklediği işler. Acelesi yok.' }) +
+      // Ders onayı: içerik sayısı kişinin ölçümü değil; kesinlik rozeti yerine düz cümle (AGENTS §1.2 kişinin sayıları için)
+      B.bolum({ baslik: 'Ders onayları', govde: ['<p>' + (toplam.taslak ? toplam.taslak.toLocaleString('tr-TR') + ' ders onayını bekliyor, ' + toplam.onayli.toLocaleString('tr-TR') + ' ders onaylı.' : 'Bütün dersler onaylı.') +
+        ' Taslak dersi okuyabilirsin; onaylayınca tekrara girer.</p>', B.liste({ ad: 'Alanlar', ogeler: satirlar })] }) +
+      B.acilir({ baslik: 'Senin adımların', govde: ['<p class="soluk">Bunları yalnız sen yapabilirsin.</p>',
+        B.liste({ ad: 'Senin adımların', ogeler: ADIMLAR.map(function (x) { return { ad: x[0], not: x[1], uzun: true }; }) })] }) +
+      B.acilir({ baslik: 'Onayları sakla', govde: ['<p class="soluk">Onayların bu cihazda durur. Dosyayı al ve bilgisayardaki Başbuğ klasörüne ver; içerik dosyalarına oradan yazılır.</p>',
         B.eylemler([{ metin: 'Onayları dosya olarak al', veri: { 'onay-ac': 'disari' }, kapali: !kayit }, { yazi: kayit ? kayit + ' öğe onaylı (alıştırma ve kapı soruları dahil)' : 'Henüz onay yok.' }])] }) +
-      B.bolum({ baslik: 'Senin adımın', govde: ['<p class="soluk">Bunları sistem yapamaz; yalnız sen yapabilirsin.</p>',
-        B.liste({ ad: 'Senin adımın', ogeler: ADIMLAR.map(function (x) { return { ad: x[0], not: x[1], uzun: true }; }) })] }) + '</div>';
+      B.acilir({ baslik: 'King’in anlamasını iyileştir', veri: { etiket: '' }, govde: '<div data-etiket-govde>' + etHtml() + '</div>' }) + '</div>';
   }
   function alanSayfasi(I, a) {
     var ys = asamalar(I, a.id);
-    return I.ust(kirinti(I, '#/onay', 'Onaylar', a.ad)) + '<div class="govde" data-onay-sayfa="alan">' + B.baslik({ metin: a.ad, alt: 'Bir üniteyi aç, derslerini oku ve onayla.' }) +
+    return I.ust(kirinti(I, '#/onay', 'Yönetim', a.ad)) + '<div class="govde" data-onay-sayfa="alan">' + B.baslik({ metin: a.ad, alt: 'Bir üniteyi aç, derslerini oku ve onayla.' }) +
       (ys.length ? ys.map(function (y, j) {
         var n = j + 1, kok_ = '#/onay/' + a.id + '/' + n + '/';
         return B.bolum({ baslik: 'Aşama ' + n + ' · ' + y.veri.ad, govde: B.liste({ ad: 'Aşama ' + n + ' üniteleri', ogeler: y.veri.uniteler.map(function (u) {
           var s = sayim({ uniteler: [u] }), tamam = hepsiOnayli(y, kimlikler(y, u.id));
-          return { ad: u.ad, href: kok_ + u.id, not: s.onayli + '/' + (s.taslak + s.onayli) + ' ders onaylı · ölçüldü', pul: durumPul(tamam) };
+          return { ad: u.ad, href: kok_ + u.id, not: s.onayli + '/' + (s.taslak + s.onayli) + ' ders onaylı', pul: durumPul(tamam) };
         }).concat([{ ad: 'Aşama kapısı', href: kok_ + y.id + '/kapi', not: y.veri.kapi.sorular.length + ' soru', pul: durumPul(hepsiOnayli(y, kimlikler(y, y.id, true))) }]) }) +
           asamaEylemi(I, a, y, n) });
       }).join('') : B.bos({ baslik: 'Bu alanın içeriği bu açılışta yüklenemedi.' })) + '</div>';
@@ -286,7 +284,7 @@
     }
     var k = konum(), a = k.alan && I.tasinanlar().filter(function (x) { return x.id === k.alan; })[0];
     if (!k.alan) return anaSayfa(I, yer);
-    var yok = function (m) { return I.ust(kirinti(I, '#/onay', 'Onaylar', 'Bulunamadı')) + '<div class="govde">' + B.bos({ baslik: m, eylem: { metin: 'Onaylar', tur: 'ana', href: '#/onay' } }) + '</div>'; };
+    var yok = function (m) { return I.ust(kirinti(I, '#/onay', 'Yönetim', 'Yok')) + '<div class="govde">' + B.bos({ baslik: m, eylem: { metin: 'Yönetim’e dön', tur: 'ana', href: '#/onay' } }) + '</div>'; };
     if (!a) return yok('Böyle bir alan yok.');
     if (!k.id) return alanSayfasi(I, a);
     var y = asamalar(I, a.id)[k.n - 1], o = y && y.oge[k.id], t = o && y.tur[k.id];
@@ -307,42 +305,8 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
 
-  // Bugün: «Onay bekleyen N ders» tek satırı, yalnız N > 0 iken. Sayı bütün alanların içeriğinden sayılır; yüklenmemiş alan
-  // varsa önce boş yer tutucu çizilir, içerik gelince yalnız o satır yerine konur (sayfa yeniden çizilmez).
-  function bugunSatiri(I, n) {
-    if (n == null) n = bekleyenSayisi(I);
-    return n ? B.uyari({ tur: 'bilgi', veri: { 'onay-bekleyen': String(n) }, simge: 'onay', renk: 'mavi', metin: 'Onay bekleyen ' + n + ' ders',
-      alt: 'Taslak dersler onaylanınca tekrara girer.', eylem: { metin: 'İncele', tur: 'sade', href: '#/onay' } }) : '';
-  }
-  // Yüklenmemiş alanlar sunucunun özetinden sayılır (/api/kabuk/taslak: dosyada onaylı olmayan ders kimlikleri, yerel onay kaydı
-  // düşülür); satır için yirmi alan paketi (4,5 MB) indirilmez. Özet yoksa (file://, eski sunucu) bütün alanlar yüklenip sayılır.
-  var taslakOzet = null, taslakIstek = null;
-  function ozetSayisi(I, oz) {
-    var onay = oku(I.depo);
-    return I.tasinanlar().reduce(function (t, a) {
-      if (I.al(a.id)) return t + asamalar(I, a.id).reduce(function (s, y) { return s + sayim(y.veri).taslak; }, 0);
-      for (var n = 1; n <= (a.asama || 1) && Array.isArray(oz[a.id + '/' + n]); n++) {
-        t += oz[a.id + '/' + n].filter(function (id) { return !gecerli(onay[anahtar(a.id, n, id)]); }).length;
-      }
-      return t;
-    }, 0);
-  }
-  Kabuk.onayBugun = function () {
-    var I = ic(); if (!I) return '';
-    var eksik = I.tasinanlar().filter(function (a) { return !I.al(a.id); });
-    if (!eksik.length) return bugunSatiri(I);
-    if (taslakOzet) return bugunSatiri(I, ozetSayisi(I, taslakOzet));
-    function yerlestir(n) {
-      var el = d.querySelector('[data-onay-yer]'); if (el) el.outerHTML = bugunSatiri(I, n).replace('class="b-uyari ', 'class="b-uyari b-uyari--satir '); // Bugün'ün bekleyenler kartında satır biçimi (bilesen.js karsilama)
-      if (I.ozetYenile) I.ozetYenile(); // selamın altındaki cümle bekleyen işi de saysın
-    }
-    taslakIstek = taslakIstek || (location.protocol !== 'file:' && kok.fetch ? kok.fetch('/api/kabuk/taslak').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) : Promise.resolve(null));
-    taslakIstek.then(function (oz) {
-      if (oz && typeof oz === 'object' && !Array.isArray(oz)) { taslakOzet = oz; return yerlestir(ozetSayisi(I, oz)); }
-      return Promise.all(eksik.map(function (a) { return I.alanYukle(a.id); })).then(function () { yerlestir(bekleyenSayisi(I)); });
-    });
-    return '<div data-onay-yer hidden></div>';
-  };
+  // Bugün'de onay satırı yok (2026-11-16, sahip: «544 ders her gün Bugün'de duruyor»): onay acil değildir, Yönetim'de bekler.
+  // Kabuk.onayBugun tanımlı değil; kabuk.js boş satır çizer.
   Kabuk.ek = Kabuk.ek || {};
   Kabuk.ek.onay = sayfa;
 

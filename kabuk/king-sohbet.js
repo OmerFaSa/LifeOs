@@ -6,14 +6,16 @@
  * kabuk.js'e dokunmaz: King sayfası çizilince bölümü başlığın altına ekler.
  * İstek aynı kökenden /api/kabuk/king'e gider (sistem/tekkapi.py): Merkez jetonu tarayıcıya hiç girmez. Geçmiş modele SUNUCUDAN
  * gider (HKM ambarı, «baslangic»tan bu yana); buradaki kopya yalnız ekran içindir. Ders metnini sunucu içerikten okur.
- * Depo (localStorage, ayar; tek depoya eşitlenmez): lifeos.king.saglayici (seçim) ve lifeos.king.sohbet (bu cihazdaki konuşma).
+ * Depo (localStorage, ayar; tek depoya eşitlenmez): lifeos.king.saglayici (seçim; Ayarlar › King yazar), lifeos.king.sohbet (bu cihazdaki konuşma)
+ * ve lifeos.king.taslak (yazılıp gönderilmemiş metin: sekme değişince, yenilemede geri gelir; gönderilince silinir, hata alınca geri döner).
+ * 2026-11-16 (sahip: «geliştirici dili»): ekranda yalnız kip kalır; cevaplayan seçimi Ayarlar'da, kaynak/model/süre satırı yazılmaz.
  * Jeton ya da parola depoya yazılmaz. Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.KingSohbet, Node'da module.exports (saf kısım). */
 (function (kok) {
   'use strict';
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};
   var SECIM = { oto: 'Otomatik (Merkez ayarı)', antigravity: 'Antigravity', claude: 'Claude Code' };
   var KIP = { ortak: 'Düşünce ortağı', ogretmen: 'Öğretmen', filozof: 'Filozof' };
-  var ANAHTAR = 'lifeos.king.saglayici', SOHBET = 'lifeos.king.sohbet', EN_COK = 80, EN_UZUN = 20000;
+  var ANAHTAR = 'lifeos.king.saglayici', SOHBET = 'lifeos.king.sohbet', TASLAK = 'lifeos.king.taslak', EN_COK = 80, EN_UZUN = 20000;
   var ONERI = {
     ortak: ['Bugün ne var?', 'Felsefe yol haritamda neredeyim?', 'Bu hafta nasıl gitti?'],
     ogretmen: ['Bu dersi adım adım anlat', 'Beni bu konudan sına', 'En önemli üç fikir ne?'],
@@ -44,26 +46,14 @@
     }
     return g;
   }
-  // Seçenek adları köprünün hâliyle: «Antigravity · kapalı». Hâl bilinmiyorsa yalnız ad (uydurma yok).
-  function secenekler(kopruler) {
-    var o = {};
-    Object.keys(SECIM).forEach(function (k) {
-      var h = kopruler && kopruler[k];
-      o[k] = SECIM[k] + (h ? (h.acik ? ' · hazır' : ' · kapalı') : '');
-    });
-    return o;
-  }
-  function sn(v) { return typeof v === 'number' ? String(Math.round(v * 10) / 10).replace('.', ',') + ' sn' : null; }
-  // Cevabın satırları: metin + kaynak satırı (hangi sağlayıcı, model, süre) + köprü notu (kapalıysa kim devraldı).
+  // Cevabın satırları: metin + model konuşamadıysa tek kısa not. Hata (sunucu ya da ağ) null döner: çağıran yazılanı kutuya geri koyar.
   function cevapSatirlari(r, kod) {
-    if (!r || kod >= 400) return [(r && (r.mesaj || r.error)) || 'Merkez cevap vermedi.'];
+    if (!r || kod >= 400) return null;
     var l = [r.text || (r.ai && r.ai.note) || 'Cevap yok.'];
-    var kaynak = r.mode === 'model' ? ['Kaynak: ' + (r.provider || 'model'), r.model, sn(r.seconds)].filter(Boolean).join(' · ')
-      : 'Kaynak: kural motoru (model cevap vermedi)';
-    l.push(kaynak);
-    if (r.kopru && r.kopru.not && !r.kopru.kullanildi) l.push(r.kopru.not);
+    if (r.mode !== 'model') l.push('Şu an yalnız kısa cevap verebiliyorum.');
     return l;
   }
+  function hataMetni(r) { return (r && (r.mesaj || r.error)) || 'King şu an cevap veremedi.'; }
   // Depodaki konuşma: bozuksa ya da biçimi tutmuyorsa boş konuşma (geçmiş kaybı, sahte geçmiş değil).
   function sohbetOku(ham, simdi) {
     var v = null;
@@ -74,7 +64,7 @@
       baslangic: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(v.baslangic) ? v.baslangic : bos.baslangic,
       kip: kipGecerli(v.kip), baglam: baglamGecerli(v.baglam),
       mesajlar: v.mesajlar.filter(function (m) { return m && (m.kim === 'ben' || m.kim === 'king') && typeof m.metin === 'string'; })
-        .map(function (m) { return { kim: m.kim, metin: m.metin.slice(0, EN_UZUN), alt: Array.isArray(m.alt) ? m.alt.filter(function (x) { return typeof x === 'string'; }).slice(0, 3) : [] }; })
+        .map(function (m) { return { kim: m.kim, metin: m.metin.slice(0, EN_UZUN), alt: Array.isArray(m.alt) ? m.alt.filter(function (x) { return typeof x === 'string' && !/^Kaynak: /.test(x); }).slice(0, 3) : [] }; })
         .slice(-EN_COK)
     };
   }
@@ -117,9 +107,9 @@
   }
 
   /* ---------------- tarayıcı ---------------- */
-  var d = { s: null, bekliyor: false, kopruler: null, secim: 'oto' };
+  var d = { s: null, bekliyor: false, hata: null };
   function depoOku(k) { try { return kok.localStorage.getItem(k); } catch (e) { return null; } }
-  function depoYaz(k, v) { try { kok.localStorage.setItem(k, v); } catch (e) { /* depo kapalı ya da dolu: bu sekmede kalır */ } }
+  function depoYaz(k, v) { try { if (v) kok.localStorage.setItem(k, v); else kok.localStorage.removeItem(k); } catch (e) { /* depo kapalı ya da dolu: bu sekmede kalır */ } }
   function kaydet() { depoYaz(SOHBET, JSON.stringify(d.s)); }
   function yeniKonusma(kip, baglam) {
     d.s = { baslangic: yerelIso(Date.now()), kip: kipGecerli(kip), baglam: baglamGecerli(baglam), mesajlar: [] };
@@ -144,13 +134,13 @@
         return '<button type="button" class="king-oneri__oge" data-king-oneri="' + kac(q) + '">' + kac(q) + '</button>'; }).join('') + '</div></div>' : '';
     var akis = bos ? '' : '<ol class="king-akis" aria-label="Konuşma" aria-live="polite">' + s.mesajlar.map(mesajHtml).join('') +
       (d.bekliyor ? '<li class="king-yaziyor" role="status"><span class="gizli">King yazıyor…</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></li>' : '') + '</ol>';
+    var hata = d.hata ? B.uyari({ tur: 'hata', metin: d.hata, alt: 'Yazdığın kutuda duruyor.', eylem: { metin: 'Tekrar dene', tur: 'sade', veri: { 'king-tekrar': '' } } }) : '';
     var form = '<form class="king-yaz" data-king-sohbet novalidate>' +
       '<div class="king-yaz__satir"><label class="gizli" for="king-metin">Mesajın</label>' +
       '<textarea id="king-metin" name="metin" rows="1" maxlength="8000" placeholder="King\'e yaz…" aria-describedby="king-ipucu"></textarea>' +
       '<button type="submit" class="king-gonder" aria-label="Gönder"' + (d.bekliyor ? ' disabled' : '') + '><svg aria-hidden="true"><use href="#i-ok"/></svg></button></div>' +
-      '<div class="king-yaz__alt"><span id="king-ipucu">Enter gönderir · Shift + Enter yeni satır</span>' +
-      B.alan({ ad: 'Cevaplayan', isim: 'saglayici', tur: 'secim', secenekler: secenekler(d.kopruler), deger: d.secim }) + '</div></form>';
-    return '<section class="king-sohbet" data-king-bolum aria-label="King sohbeti">' + ust + oneri + akis + form + '</section>';
+      '<div class="king-yaz__alt"><span id="king-ipucu">Enter gönderir · Shift + Enter yeni satır</span></div></form>';
+    return '<section class="king-sohbet" data-king-bolum aria-label="King sohbeti">' + ust + oneri + akis + hata + form + '</section>';
   }
   function bolumEl() { return kok.document.querySelector('[data-king-bolum]'); }
   function boyutla(m) { if (!m) return; m.style.height = 'auto'; m.style.height = Math.min(m.scrollHeight + 2, 240) + 'px'; }
@@ -166,31 +156,31 @@
     if (eski) eski.replaceWith(el);
     else { var bas = g.firstElementChild; if (bas && bas.nextSibling) g.insertBefore(el, bas.nextSibling); else g.appendChild(el); }
     var m = el.querySelector('[name="metin"]');
-    if (m && yazilan) m.value = yazilan;
+    if (m) m.value = eski ? yazilan : depoOku(TASLAK) || ''; // ilk çizimde gönderilmemiş taslak geri gelir
     boyutla(m);
     var a = el.querySelector('.king-akis');
     if (a) a.scrollTop = a.scrollHeight; // en yeni altta
     if (m && (odak || odakta)) { m.focus({ preventScroll: true }); if (imlec) m.setSelectionRange(imlec[0], imlec[1]); }
   }
-  function durumAl() {
-    return kok.fetch('/api/kabuk/king/kopru', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (v) { d.kopruler = v && v.kopruler || null; ciz(); }, function () { /* Merkez kapalı: hâl bilinmiyor */ });
-  }
   function gonder(form) {
     var metin = form.metin.value.trim();
-    d.secim = secimGecerli(form.saglayici.value);
-    depoYaz(ANAHTAR, d.secim);
     if (!metin || d.bekliyor) return;
-    var s = d.s, kod = 0;
-    s.mesajlar.push({ kim: 'ben', metin: metin.slice(0, EN_UZUN), alt: [] });
-    d.bekliyor = true; form.metin.value = ''; kaydet(); ciz(true); // gönderilen kutuda kalmasın
+    var s = d.s, kod = 0, ben = { kim: 'ben', metin: metin.slice(0, EN_UZUN), alt: [] };
+    s.mesajlar.push(ben);
+    d.bekliyor = true; d.hata = null; form.metin.value = ''; depoYaz(TASLAK, ''); kaydet(); ciz(true); // gönderilen kutuda kalmasın
     kok.fetch('/api/kabuk/king', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-LifeOS': 'king' },
-      body: JSON.stringify(istekGovdesi(metin, d.secim, s)) })
+      body: JSON.stringify(istekGovdesi(metin, secimGecerli(depoOku(ANAHTAR)), s)) })
       .then(function (r) { kod = r.status; return r.json().catch(function () { return null; }); })
-      .then(function (r) { return cevapSatirlari(r, kod); }, function () { return ['Merkez\'e ulaşılamadı.']; })
-      .then(function (c) {
-        if (d.s === s) { s.mesajlar.push({ kim: 'king', metin: String(c[0]).slice(0, EN_UZUN), alt: c.slice(1) }); s.mesajlar = s.mesajlar.slice(-EN_COK); kaydet(); }
-        d.bekliyor = false; ciz(true); durumAl();
+      .then(function (r) { return { c: cevapSatirlari(r, kod), r: r }; }, function () { return { c: null, r: { mesaj: 'King’e ulaşılamadı. Bilgisayar açık mı?' } }; })
+      .then(function (x) {
+        d.bekliyor = false;
+        if (d.s !== s) return ciz();
+        if (!x.c) { // hata: mesaj konuşmadan çıkar, yazılan kutuya ve taslağa geri döner
+          s.mesajlar = s.mesajlar.filter(function (m) { return m !== ben; }); d.hata = hataMetni(x.r); depoYaz(TASLAK, metin); kaydet(); ciz(true);
+          var m = kok.document.querySelector('form[data-king-sohbet] [name="metin"]'); if (m) { m.value = metin; boyutla(m); }
+          return;
+        }
+        s.mesajlar.push({ kim: 'king', metin: String(x.c[0]).slice(0, EN_UZUN), alt: x.c.slice(1) }); s.mesajlar = s.mesajlar.slice(-EN_COK); kaydet(); ciz(true);
       });
   }
   // Ders sayfasındaki «King'le çalış» (kabuk.js sayfaDers): o dersin bağlamıyla Öğretmen kipinde açılır; başka bir dersten geliyorsa yeni konuşma.
@@ -201,12 +191,11 @@
     kok.location.hash = '#/king';
   }
   function kur() {
-    d.secim = secimGecerli(depoOku(ANAHTAR));
     d.s = sohbetOku(depoOku(SOHBET), Date.now());
     var sayfa = kok.document.getElementById('sayfa');
     if (!sayfa) return;
     new kok.MutationObserver(function () {
-      if (kok.document.querySelector('.govde[data-sayfa="king"]') && !bolumEl()) { ciz(); durumAl(); }
+      if (kok.document.querySelector('.govde[data-sayfa="king"]') && !bolumEl()) ciz();
     }).observe(sayfa, { childList: true, subtree: true });
     // Enter gönderir (Shift + Enter yeni satır); örnek soru tıklanınca sorulur
     kok.document.addEventListener('keydown', function (e) {
@@ -214,12 +203,13 @@
       if (e.key !== 'Enter' || e.shiftKey || e.isComposing || !t.matches || !t.matches('form[data-king-sohbet] [name="metin"]')) return;
       e.preventDefault(); t.form.requestSubmit();
     });
-    kok.document.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('form[data-king-sohbet] [name="metin"]')) boyutla(e.target); });
+    kok.document.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('form[data-king-sohbet] [name="metin"]')) { boyutla(e.target); depoYaz(TASLAK, e.target.value.trim() ? e.target.value : ''); } });
     kok.document.addEventListener('click', function (e) {
       var t = e.target.closest ? e.target : null, f = kok.document.querySelector('form[data-king-sohbet]'), b;
       if (!t) return;
       if ((b = t.closest('[data-king-calis]'))) { e.preventDefault(); return dersleCalis(b.getAttribute('data-king-calis')); }
       if (!f) return;
+      if (t.closest('[data-king-tekrar]')) return f.requestSubmit();
       if ((b = t.closest('[data-king-oneri]'))) { f.metin.value = b.getAttribute('data-king-oneri'); return f.requestSubmit(); }
       if ((b = t.closest('[data-king-kip]'))) { d.s.kip = kipGecerli(b.getAttribute('data-king-kip')); kaydet(); ciz(); return kok.document.querySelector('[data-king-kip="' + d.s.kip + '"]').focus(); } // yeniden çizimde odak seçili kipte kalır
       if (t.closest('[data-king-baglam-kaldir]')) { d.s.baglam = null; kaydet(); return ciz(true); }
@@ -229,11 +219,11 @@
       if (!e.target.matches || !e.target.matches('form[data-king-sohbet]')) return;
       e.preventDefault(); gonder(e.target);
     });
-    if (kok.document.querySelector('.govde[data-sayfa="king"]')) { ciz(); durumAl(); }
+    if (kok.document.querySelector('.govde[data-sayfa="king"]')) ciz();
   }
 
   var KingSohbet = { SECIM: SECIM, KIP: KIP, secimGecerli: secimGecerli, kipGecerli: kipGecerli, baglamGecerli: baglamGecerli, yerelIso: yerelIso,
-    istekGovdesi: istekGovdesi, secenekler: secenekler, cevapSatirlari: cevapSatirlari, sohbetOku: sohbetOku, bicimle: bicimle };
+    istekGovdesi: istekGovdesi, cevapSatirlari: cevapSatirlari, hataMetni: hataMetni, sohbetOku: sohbetOku, bicimle: bicimle };
   Kabuk.KingSohbet = KingSohbet;
   if (typeof module !== 'undefined' && module.exports) module.exports = KingSohbet;
   else if (kok.document) { if (kok.document.readyState === 'loading') kok.document.addEventListener('DOMContentLoaded', kur); else kur(); }

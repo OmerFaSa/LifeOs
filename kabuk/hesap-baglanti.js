@@ -44,9 +44,9 @@
   function takvimHtml(s, B, adr, simdi) {
     var t = s.bag.takvim || {}, ays = (t.yayinlar || []).filter(function (y) { return y.ad === 'ays/takvim'; })[0];
     var ust = B.ayar({ id: 'hb-takvim', ad: 'Takvim aboneliği', deger: t.acik ? 'Açık' : 'Kapalı',
-      not: 'iPhone Takvim, Outlook, Thunderbird. İçinde AYS: sınav günleri, istisnalar, hedef son günleri' +
-        (ays ? (ays.adet == null ? '.' : ' · ' + ays.adet + ' etkinlik.') : ' · AYS’yi bir kez aç.') });
-    if (!t.acik) return ust + p('Sınav günlerin takviminde: takvim uygulaman bu adrese abone olur; AYS’de bir tarih değişince takvimin de kendiliğinden güncellenir.') +
+      not: 'iPhone Takvim, Outlook, Thunderbird. İçinde sınav günleri, istisnalar, hedef son günleri' +
+        (ays && ays.adet != null ? ' · ' + ays.adet + ' etkinlik.' : '.') });
+    if (!t.acik) return ust + p('Sınav günlerin takviminde: takvim uygulaman bu adrese abone olur; bir tarih değişince takvimin de kendiliğinden güncellenir.') +
       B.eylemler([{ metin: 'Aboneliği aç', tur: 'ana', veri: { 'hb-ac': 'takvim-ac' } }]);
     var sor = s.takvimSor === 'yenile' ? { metin: 'Adres yenilensin mi?', alt: 'Eski adres hemen çalışmaz; takvim uygulamalarına yenisini eklemen gerekir.', dugme: 'Adresi yenile', ac: 'takvim-yenile' }
       : s.takvimSor === 'kapat' ? { metin: 'Abonelik kapansın mı?', alt: 'Adres artık çalışmaz; yeniden açınca yeni bir adres gelir.', dugme: 'Aboneliği kapat', ac: 'takvim-kapat' } : null;
@@ -75,60 +75,53 @@
       t.a === YER_TUTUCU ? p('Anahtar oluşturunca burada görünür.') : '',
       kopyaAlani(B, 'Adres', 'hb-istek-adres', t.url, 'Yöntem POST. Önce dene: aynı adrese aynı başlıkla gövdesiz GET «Bağlantı tamam» döner, satır bırakmaz.'),
       kopyaAlani(B, 'Başlık: Authorization', 'hb-istek-baslik', bearer),
-      B.ayar({ id: 'hb-istek-govde', ad: 'Gövde (JSON)', not: 'AYS ya da ESP için "modul": "ays" ya da "esp" ekle; yazılmazsa SPİ.', deger: '{"metin": "su 250"}' }),
+      B.ayar({ id: 'hb-istek-govde', ad: 'Gövde (JSON)', deger: '{"metin": "su 250"}' }),
       t.pc ? B.ayar({ id: 'hb-istek-pc', ad: 'Bu bilgisayardaki bir uygulama için adres', deger: t.pc }) : ''] }) +
       B.acilir({ baslik: 'iPhone Kısayollar', duzey: 3, govde: adimlar(B, 'iPhone Kısayollar adımları', [
         'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
         '«URL’nin İçeriğini Al» (Get Contents of URL) ekle; adres, POST, başlık ve gövde yukarıdaki «İstek»teki gibi; «metin» alanına «Sağlanan Girdi»yi koy.',
-        'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.']) }) +
+        'Adını «Başbuğ’a yaz» koy. Siri’ye «Başbuğ’a yaz» deyip «su 250» söyle.']) }) +
       B.acilir({ baslik: 'Siri: «Bugün ne var?»', duzey: 3, govde: [adimlar(B, 'Siri adımları', [
         'Anahtarı «Günün özetini de okuyabilsin» seçerek oluştur.',
         'Kısayollar’da yeni kısayol › «URL’nin İçeriğini Al»: adres ' + ozet + ', yöntem GET, başlık Authorization = ' + bearer + '.',
         '«Metni Konuş» (Speak Text) ekle; girdi önceki adımın sonucu.',
         'Adını «Bugün ne var» koy. Siri’ye «Bugün ne var» de.']),
-        p('Özeti her sistem kendi kuralıyla yazar. Bugün hiç açılmamış bir sistemin dünkü sayısı bugünmüş gibi okunmaz: «bugün henüz açılmadı» denir.')] }) +
-      B.acilir({ baslik: 'AYS ve ESP’ye', duzey: 3, govde: [adimlar(B, 'AYS ve ESP adımları', [
-        'Aynı istek; gövdeye "modul" ekle: {"metin": "paragraf 20", "modul": "ays"}.',
-        'AYS anlar: soru 40 matematik, 2 saat fizik, paragraf 20, uyku 7.',
-        'ESP anlar: 30 dk gitar, 45 dakika felsefe okudum, 20 dk diksiyon.',
-        'Kısayollar’da her sistem için ayrı kısayol aç: «AYS’ye yaz», «ESP’ye yaz».']),
-        p('Her satırı yalnız kendi sistemi alır; o gün o dersin bloğu yoksa ya da süre yazılmadıysa satır «anlaşılmadı» diye nedeniyle döner, uydurulmaz.')] }) +
+        p('Özeti kural yazar; dünün sayısı bugünmüş gibi okunmaz.')] }) +
       B.acilir({ baslik: 'Apple Sağlık’tan her sabah', duzey: 3, govde: [adimlar(B, 'Apple Sağlık adımları', [
         'Kısayollar › Otomasyon › Günün Saati (ör. 08:00) › Hemen Çalıştır.',
         '«Sağlık Örneklerini Bul» (Find Health Samples): Kilo, son 1 gün, en yeni 1 örnek.',
         '«Metin»: kilo ve bulunan değer; sonra «URL’nin İçeriğini Al» ile gönder.',
-        'Uyku için «Uyku Analizi»nin süresi toplanır; SPİ uyku 7,2 gibi saat bekler.']),
-        p('Gelenler SPİ › Onaylar’da bekler; tek dokunuşla kaydedersin. Ölçüm onaysız yazılmaz.')] }) +
+        'Uyku için «Uyku Analizi»nin süresi toplanır; uyku 7,2 gibi saat olarak yazılır.']),
+        p('Gelenler Gelen kutusunda bekler; ölçüm onaysız yazılmaz.')] }) +
       B.acilir({ baslik: 'Android: HTTP Shortcuts', duzey: 3, govde: adimlar(B, 'Android adımları', [
         'Ücretsiz «HTTP Shortcuts» uygulamasında yeni kısayol › Normal.',
         'Yöntem POST, adres yukarıdaki; Başlıklar’a Authorization = ' + bearer + '.',
         'Gövde: Özel metin, tür application/json, içerik {"metin": "{metin}"}; «metin»i soran bir değişken ekle.']) }) +
       B.acilir({ baslik: 'Home Assistant', duzey: 3, govde: [kopyaAlani(B, 'configuration.yaml', 'hb-tarif-ha', 'rest_command:\n  lifeos_yaz:\n    url: "' + t.url +
         '"\n    method: POST\n    headers:\n      Authorization: "' + bearer + '"\n    content_type: "application/json"\n    payload: \'{"metin": "{{ metin }}"}\'\n', '', true),
-        p('Home Assistant LifeOS kök sertifikasını tanımazsa sertifikayı ona ekle.')] });
+        p('Home Assistant bilgisayarının sertifikasını tanımazsa sertifikayı ona ekle.')] });
   }
   function anahtarHtml(s, B, adr, simdi) {
     var l = s.bag.anahtarlar || [], y = s.yeni;
     var form = s.form ? B.satir({ form: { veri: { 'hb-form': 'anahtar' }, govde: [
       B.alan({ ad: 'Ad', isim: 'hb-ad', deger: s.formAd, zorunlu: true, enCok: 40, yerTutucu: 'iPhone Kısayollar' }),
-      B.alan({ ad: 'Günün özetini de okuyabilsin', isim: 'hb-oku', tur: 'onay', deger: !!s.formOku, ipucu: 'Siri: «Bugün ne var?» — AYS, SPİ ve ESP’nin bugün cümlesi' }),
+      B.alan({ ad: 'Günün özetini de okuyabilsin', isim: 'hb-oku', tur: 'onay', deger: !!s.formOku, ipucu: 'Siri: «Bugün ne var?» — günün kısa özeti' }),
       parolaAlani(B, 'hb-parola'), s.formHata ? B.uyari({ tur: 'hata', metin: s.formHata }) : '',
       B.eylemler([{ metin: 'Oluştur', tur: 'ana', tip: 'submit' }, { metin: 'Vazgeç', tur: 'sade', veri: { 'hb-ac': 'form-kapat' } }])] } })
       : B.eylemler([{ metin: 'Anahtar oluştur', veri: { 'hb-ac': 'form' } }]);
     return B.ayar({ id: 'hb-anahtar', ad: 'Erişim anahtarları', not: 'iPhone Kısayollar, Apple Sağlık, Home Assistant', deger: l.length ? String(l.length) : 'yok' }) +
       (y ? B.uyari({ tur: 'tamam', metin: '«' + y.ad + '» hazır.', alt: 'Şimdi kopyala; bir daha gösterilmez.' }) + kopyaAlani(B, 'Yeni anahtar', 'hb-yeni-anahtar', y.anahtar) : '') +
       (l.length ? B.liste({ ad: 'Erişim anahtarları', canli: true, ogeler: l.map(function (x) { return anahtarSatiri(x, simdi, s.silSor); }) })
-        : y ? '' : B.bos({ baslik: 'Telefonundan tek satır', metin: 'iPhone Kısayollar, Android ya da Home Assistant tek satır gönderir: SPİ’ye «su 250», AYS’ye «paragraf 20», ESP’ye «30 dk gitar». O sistem satırı Onaylar’a bırakır, sen onaylayınca yazılır.' })) +
+        : y ? '' : B.bos({ baslik: 'Telefonundan tek satır', metin: 'iPhone Kısayollar, Android ya da Home Assistant tek satır gönderir, örneğin «su 250». Satır Gelen kutusunda bekler, sen onaylayınca yazılır.' })) +
       form + B.acilir({ baslik: 'Kurulum tarifleri', not: 'iPhone, Siri, Android, Home Assistant', govde: tariflerHtml(B, tarifIstek(adr, y)) }) +
       p('Anahtar yalnız satır bırakır; verini okuyamaz, hesabına giremez. Kaybolursa sil, yenisini aç.');
   }
 
   /* ---- gelen kutusu (eski panelin gelen sayfası): dışarıdan gelen satırlar ve onları alan sistemin ne yaptığı.
    * Satırı yalnız gönderildiği sistem alır (sistem/hesap.py GELEN_MODULLER); burası yalnız gösterir. ---- */
-  var MODUL_AD = { ays: 'AYS', spi: 'SPİ', esp: 'ESP' };
+  // Eski modül adları (AYS, SPİ, ESP) ekranda yazılmaz: kullanıcı yalnız satırın hâlini görür
   function gelenSatiri(o, simdi) {
-    var mod = MODUL_AD[o.modul] || 'SPİ';
-    var ne = o.sonuc || (o.durum === 'anlasilmadi' ? 'Anlaşılmadı' : o.durum === 'onayda' ? mod + ' › Onaylar’da' : mod + ' açılınca işlenir');
+    var ne = o.sonuc || (o.durum === 'anlasilmadi' ? 'Anlaşılmadı' : o.durum === 'onayda' ? 'Onay bekliyor' : 'Sırada');
     return { ad: String(o.metin || ''), uzun: true, not: [o.kaynak, ne, o.zaman ? son(o.zaman, simdi) : ''].filter(Boolean).join(' · '),
       pul: o.durum === 'anlasilmadi' ? { metin: 'anlaşılmadı', tur: 'vurgu' } : null };
   }
@@ -146,17 +139,17 @@
     var hal = s.merkezMetin ? B.uyari({ tur: HAL_TUR[s.merkezHal] || 'bilgi', metin: s.merkezMetin,
       alt: s.merkezHal === 'bilgisayar-kapali' && s.android ? 'Bilgisayar açıksa bu cihazda Tailscale açık olsun, Özel DNS «Otomatik» ya da «Kapalı» olsun, Tailscale pil kısıtlamasından çıkarılsın.' : null,
       eylem: { metin: 'Yeniden dene', tur: 'sade', veri: { 'hb-ac': 'uzak-bak' } } }) : YUKLENIYOR;
-    if (!yerel) yonet = p('Her yerden erişim bilgisayarın kendisinden, admin hesabıyla açılıp kapatılır.');
-    else if (!admin) yonet = p('Her yerden erişimi bu bilgisayarın sahibi (admin) açıp kapatır.');
+    if (!yerel) yonet = p('Her yerden erişim bilgisayarın kendisinden, yönetici hesabıyla açılıp kapatılır.');
+    else if (!admin) yonet = p('Her yerden erişimi bu bilgisayarın sahibi (yönetici) açıp kapatır.');
     else if (s.uzakHata && !pc) yonet = B.uyari({ tur: 'hata', metin: s.uzakHata, eylem: { metin: 'Yeniden dene', tur: 'sade', veri: { 'hb-ac': 'uzak-bak' } } });
     else if (!pc) yonet = YUKLENIYOR;
     else yonet = (!pc.kurulu ? B.uyari({ tur: 'dikkat', metin: 'Bu bilgisayarda Tailscale kurulu değil.' })
       : !pc.bagli ? B.uyari({ tur: 'dikkat', metin: 'Tailscale kurulu ama giriş yapılmamış.' })
       : pc.funnel ? B.uyari({ tur: 'dikkat', metin: 'Bu bilgisayarda funnel açık, yani internete açık bir kapı var.', alt: 'Önce kapat: tailscale funnel reset' })
       : B.ayar({ id: 'hb-uzak', ad: 'Her yerden erişim · ' + (pc.acik ? 'açık' : 'kapalı'),
-        not: (pc.acik && pc.ad ? pc.ad + '. ' : '') + 'LifeOS ve bilgisayar açık kalmalı. Kapalıyken modüller ve kurallar çalışır, model cevap vermez.',
+        not: (pc.acik && pc.ad ? pc.ad + '. ' : '') + 'Başbuğ ve bilgisayar açık kalmalı; kapalıyken telefondan ulaşılmaz.',
         govde: B.dugme({ metin: pc.acik ? 'Kapat' : 'Aç', tur: pc.acik ? 'ikincil' : 'ana', etiket: pc.acik ? 'Her yerden erişimi kapat' : 'Her yerden erişimi aç', veri: { 'hb-ac': pc.acik ? 'uzak-kapat' : 'uzak-ac' } }) })) +
-      B.ayar({ id: 'hb-acilis', ad: 'Bilgisayar açılınca LifeOS başlasın', not: 'Pencere açılmaz, oturum açınca arkada başlar. Uyku ve güç ayarına dokunulmaz; bilgisayar uyursa telefon erişemez.',
+      B.ayar({ id: 'hb-acilis', ad: 'Bilgisayar açılınca Başbuğ başlasın', not: 'Pencere açılmaz, oturum açınca arkada başlar. Uyku ve güç ayarına dokunulmaz; bilgisayar uyursa telefon erişemez.',
         govde: B.dugme({ metin: 'Açılışta başlat', basili: !!pc.acilis, veri: { 'hb-ac': 'acilis' } }) });
     return B.bolum({ baslik: 'Her yerden erişim', id: 'hb-uzak-bolum', govde: [ileti(s, 'uzak', B), hal, yonet] });
   }
@@ -167,7 +160,7 @@
     var g = s.bagHata ? B.uyari({ tur: 'hata', metin: s.bagHata, eylem: { metin: 'Yeniden dene', veri: { 'hb-ac': 'yenile' } } })
       : !s.bag ? YUKLENIYOR
       : [ileti(s, 'bag', B), takvimHtml(s, B, adr, bag.simdi), anahtarHtml(s, B, adr, bag.simdi), gelenHtml(s, B, bag.simdi),
-        p('Hepsi bilgisayarındaki LifeOS’ta çalışır: şirket hesabı, ücret ya da internet gerekmez.')];
+        p('Hepsi bilgisayarındaki Başbuğ’da çalışır: şirket hesabı, ücret ya da internet gerekmez.')];
     return B.bolum({ baslik: 'Bağlantılar', id: 'hb-baglantilar', govde: g }) + uzakHtml(s, B, bag);
   }
 

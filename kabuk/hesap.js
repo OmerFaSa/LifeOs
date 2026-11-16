@@ -67,7 +67,7 @@
   var YUKLENIYOR = '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
   function oturumHtml(s, B, bu) {
     var o = s.oturum;
-    if (!s.hesap) return s.dosya ? B.bos({ baslik: 'Hesap bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; hesap LifeOS sunucusuyla açılınca görünür.' })
+    if (!s.hesap) return s.dosya ? B.bos({ baslik: 'Hesap bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; hesap Başbuğ’la açılınca görünür.' })
       : s.hesapYok ? B.bos({ baslik: 'Hesap istemcisi yüklenemedi.', metin: 'Sayfayı yenile.' }) : YUKLENIYOR;
     if (!o) { // giriş uzantısı (hesap-giris.js) yüklenmediyse
       var kur = s.sunucu && s.sunucu.kurulum;
@@ -77,7 +77,7 @@
     }
     var ad = String(o.gorunen_ad || o.ad), sat = [
       B.ayar({ id: 'hs-ad', ad: 'Hesap', deger: ad + (o.ad && o.ad !== ad ? ' · @' + o.ad : '') }),
-      B.ayar({ id: 'hs-rol', ad: 'Rol', not: o.rol === 'admin' ? 'Bu bilgisayarın sahibi: güncelleme ve yönetim onda.' : '', deger: o.rol === 'admin' ? 'Admin' : 'Üye' }),
+      B.ayar({ id: 'hs-rol', ad: 'Rol', not: o.rol === 'admin' ? 'Bu bilgisayarın sahibi: güncelleme ve yönetim onda.' : '', deger: o.rol === 'admin' ? 'Yönetici' : 'Üye' }),
       B.ayar({ id: 'hs-cihaz', ad: 'Bu cihaz', deger: bu ? String(bu.cihaz_ad || 'Cihaz') : s.cihazlar ? 'listede yok' : '…' })];
     return sat.join('') + (s.cikisSor
       ? B.uyari({ tur: 'dikkat', metin: 'Bu cihazda oturum kapansın mı?', alt: 'Kayıtların bu cihazda kalır; eşitleme için yeniden giriş gerekir.',
@@ -93,7 +93,7 @@
     if (b.durum === 'bitti') return B.uyari({ tur: 'dikkat', metin: 'Kodun süresi doldu.', alt: 'Güvenlik için kod beş dakika geçerli.',
       eylem: [{ metin: 'Yeni kod', tur: 'ana', veri: { 'hs-ac': 'bag' } }, { metin: 'Kapat', tur: 'sade', veri: { 'hs-ac': 'bag-kapat' } }] });
     return B.panel({ tur: 'guclu', baslik: 'Yeni cihaz bağla', id: 'hs-bag', govde: [
-      B.ayar({ id: 'hs-kod', ad: 'Bağlama kodu', not: 'Yeni cihazda LifeOS\'u aç, «Kodla bağlan»a dokun ve bu kodu yaz. Kod tek kullanımlık.', deger: kodYaz(b.kod), veri: { 'hs-kod': b.kod } }),
+      B.ayar({ id: 'hs-kod', ad: 'Bağlama kodu', not: 'Yeni cihazda Başbuğ’u aç, «Kodla bağlan»a dokun ve bu kodu yaz. Kod tek kullanımlık.', deger: kodYaz(b.kod), veri: { 'hs-kod': b.kod } }),
       '<p class="soluk" data-hs-sure aria-live="off">' + kalanMetni(b.bitis, simdi) + '</p>',
       s.qr ? '<div>' + s.qr + '</div><p class="soluk">Tailscale açıksa QR\'ı yeni cihazın kamerasıyla okutmak da olur.</p>' : '',
       s.qr ? '' : '<p class="soluk">QR için telefonun bu bilgisayara her yerden erişimle (Tailscale) ulaşması gerekir; açmak aşağıdaki «Her yerden erişim» bölümünde.</p>',
@@ -108,7 +108,7 @@
       govde: [s.ileti ? B.uyari({ tur: 'tamam', metin: s.ileti }) : '', bagHtml(s, B, simdi), liste] });
   }
   function guncelHtml(s, B) {
-    if (s.dosya) return B.bos({ baslik: 'Güncelleme bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; güncelleme LifeOS sunucusuyla açılınca denetlenir.' });
+    if (s.dosya) return B.bos({ baslik: 'Güncelleme bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; güncelleme Başbuğ’la açılınca denetlenir.' });
     var g = s.guncel, is = s.guncelIs, ust = g ? B.ayar({ id: 'hs-surum', ad: 'Kurulu sürüm', deger: surumMetni(g.surum) }) : '';
     if (is && is.durum) return ust + B.uyari(is);
     if (is) return ust + '<p class="soluk" aria-busy="true">' + (is === 'yeniden' ? 'Sistem yeniden başlatılıyor…' : 'İndiriliyor…') + '</p>';
@@ -139,7 +139,7 @@
   function kimlikHtml(s, B, bu) {
     var o = s.oturum, ad = String(o.gorunen_ad || o.ad);
     var yer = [bu ? String(bu.cihaz_ad || 'Cihaz') : '', s.sunucu && s.sunucu.yerel ? 'bu bilgisayar' : 'uzaktan bağlı'].filter(Boolean).join(' · ');
-    var ozet = [['Rol', o.rol === 'admin' ? 'Admin' : 'Üye'], ['Cihaz', s.cihazlar ? String(s.cihazlar.length) : '…']];
+    var ozet = [['Rol', o.rol === 'admin' ? 'Yönetici' : 'Üye'], ['Cihaz', s.cihazlar ? String(s.cihazlar.length) : '…']];
     return '<div class="hs-kimlik"><span class="hs-kimlik__harf" aria-hidden="true">' + kac(ad.charAt(0).toLocaleUpperCase('tr')) + '</span>' +
       '<div class="hs-kimlik__metin"><p class="hs-kimlik__ad">' + kac(ad) + '</p><p class="hs-kimlik__alt">@' + kac(o.ad) + (yer ? ' · ' + kac(yer) : '') + '</p></div>' +
       '<dl class="hs-kimlik__ozet">' + ozet.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + kac(x[1]) + '</dd></div>'; }).join('') + '</dl>' +

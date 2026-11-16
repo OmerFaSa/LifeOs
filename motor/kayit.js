@@ -50,6 +50,12 @@
     tansiyon:{ ad:'Tansiyon', alan:'Tahlil', sayilar:{ buyuk:S('Büyük tansiyon', 'mmHg', 60, 250, ZT), kucuk:S('Küçük tansiyon', 'mmHg', 30, 160, { tam:true }) } },
     spo2:    { ad:'Oksijen', alan:'Tahlil', sayilar:{ yuzde:S('Oksijen', '%', 70, 100, Z) } },
     ates:    { ad:'Ateş', alan:'Tahlil', sayilar:{ derece:S('Ateş', '°C', 33, 43, Z) } },
+    /* Tahlil sonucu (2026-11-16, sahibin isteği): belirteç serbest ya da sık olanlardan (TAHLIL_SIK), birim serbest; referans aralığı
+       isteğe bağlı ve yalnız laboratuvarın kâğıdındakidir: kod onu karşılaştırır, yorumlamaz (AGENTS §1.5). sira: formdaki alan sırası. */
+    tahlil:  { ad:'Tahlil sonucu', alan:'Tahlil', sira:['belirtec', 'deger', 'birim', 'refAlt', 'refUst'],
+               sayilar:{ deger:S('Değer', '', -100000, 100000, { zorunlu:true, yerTutucu:'Örn. 13,5' }),
+                 refAlt:S('Referans alt sınırı', '', -100000, 100000, { yerTutucu:'Kâğıttaki aralık' }), refUst:S('Referans üst sınırı', '', -100000, 100000, { yerTutucu:'Kâğıttaki aralık' }) },
+               metinler:{ belirtec:{ ad:'Belirteç', zorunlu:true, yerTutucu:'Örn. Ferritin' }, birim:{ ad:'Birim', yerTutucu:'Örn. ng/mL' } } },
     /* SPİ «ağrı ve enerji» (move.js:90-92, 1 çok yorgun … 5 zinde) ile AYS ruh hâli enerjisi
        (AYS state.js:929, 1-5) aynı beyandır: tek tür. */
     enerji:  { ad:'Enerji ve ruh hâli', alan:'Uyku', sayilar:{ puan:S('Enerji', '1-5', 1, 5, ZT) }, metinler:{ not:{ ad:'Not' } } },
@@ -57,6 +63,25 @@
                metinler:{ alan:{ ad:'Alan', zorunlu:true }, konu:{ ad:'Konu' } } },
     mola:    { ad:'Mola', alan:'*', sayilar:{ dk:S('Mola', 'dakika', 1, 120, ZT) } },
   });
+
+  /* Sık tahlil belirteçleri: ad ve olağan birimi. Yazılan ad bunlardan biriyse (büyük-küçük harf farkı olmadan) bu yazımla saklanır,
+     birim boşsa bu birim yazılır; listede olmayan belirteç olduğu gibi kalır. */
+  const TAHLIL_SIK = Object.freeze([['Hemoglobin', 'g/dL'], ['Glukoz (açlık)', 'mg/dL'], ['HbA1c', '%'], ['Ferritin', 'ng/mL'], ['B12 vitamini', 'pg/mL'],
+    ['D vitamini', 'ng/mL'], ['TSH', 'mIU/L'], ['Total kolesterol', 'mg/dL'], ['LDL kolesterol', 'mg/dL'], ['HDL kolesterol', 'mg/dL'], ['Trigliserit', 'mg/dL'],
+    ['Kreatinin', 'mg/dL'], ['ALT', 'U/L'], ['Demir', 'µg/dL'], ['CRP', 'mg/L']]);
+  const kucuk = x => String(x).replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr');
+  // Türün ek denetimi (kur sonunda): ek'i düzeltebilir, hata cümlesi ya da null döner
+  const DENETLE = {
+    tahlil(deger, ek){
+      const ad = ek.belirtec.replace(/\s+/g, ' ').trim(), sik = TAHLIL_SIK.find(x => kucuk(x[0]) === kucuk(ad));
+      if(ad.length > 60) return 'Belirteç en çok 60 harf olur.';
+      if(ek.birim && ek.birim.length > 20) return 'Birim en çok 20 harf olur.';
+      ek.belirtec = sik ? sik[0] : ad;
+      if(!ek.birim && sik) ek.birim = sik[1];
+      if(deger.refAlt && deger.refUst && deger.refAlt.v > deger.refUst.v) return 'Referans aralığının alt sınırı üst sınırından büyük olamaz.';
+      return null;
+    },
+  };
 
   /* ------------------------------------------------------------- yardımcılar */
   const GUN = 864e5;
@@ -119,6 +144,7 @@
     if(t.gunTavani && (b.mevcut || []).filter(r => r.tur === tur && r.gun === b.gun).length >= t.gunTavani){
       hatalar.push('Bir günde en çok ' + t.gunTavani + ' ' + t.ad.toLocaleLowerCase('tr') + ' yazılır.');   // SPI core/uyku.js:51
     }
+    if(!hatalar.length && DENETLE[tur]){ const h = DENETLE[tur](deger, ek); if(h) hatalar.push(h); }
     if(hatalar.length) return { ok:false, hatalar };
     const kayit = { id:b.id || tur + ':' + b.gun + ':' + (b.zaman == null ? 0 : b.zaman), tur, gun:b.gun,
       zaman:b.zaman == null ? null : b.zaman, kaynak:b.kaynak || 'kullanici', deger, ek };
@@ -179,6 +205,22 @@
       mola:topla(turde(kayitlar, 'mola', gun), 'dk'),
       olcum,
     };
+  }
+
+  /* Tahliller: belirteç başına (harf farkı gözetmeden) bütün değerler, eskiden yeniye; en son yapılan belirteç önce.
+     konum: değer kaydın kendi referans aralığına göre 'alt' | 'ic' | 'ust'; aralık yazılmadıysa null (yorum yok, yalnız karşılaştırma). */
+  function tahliller(kayitlar){
+    const g = {};
+    turde(kayitlar, 'tahlil').forEach(r => {
+      const d = deger(r, 'deger'); if(d.v == null || !r.ek || !r.ek.belirtec) return;
+      const k = kucuk(r.ek.belirtec), alt = deger(r, 'refAlt').v, ust = deger(r, 'refUst').v;
+      const x = g[k] = g[k] || { belirtec:r.ek.belirtec, degerler:[] };
+      x.degerler.push({ id:r.id, gun:r.gun, zaman:r.zaman, deger:d, birim:r.ek.birim || '',
+        ref:alt == null && ust == null ? null : { alt, ust },
+        konum:alt != null && d.v < alt ? 'alt' : ust != null && d.v > ust ? 'ust' : alt == null && ust == null ? null : 'ic' });
+    });
+    return Object.keys(g).map(k => Object.assign(g[k], { son:g[k].degerler[g[k].degerler.length - 1] }))
+      .sort((a, b) => (a.son.gun < b.son.gun ? 1 : a.son.gun > b.son.gun ? -1 : 0) || (a.belirtec < b.belirtec ? -1 : 1));
   }
 
   /* Ortalama yalnız verisi olan günlerden (eksik gün sıfır değil; AYS core/calc.js:330-339). */
@@ -514,7 +556,7 @@
     espGun:['kalite aralığı: göremedim (0-10 kabul edildi)', 'günün ve seansın notu (note, sessions[].note): Not motoru (Not.goc.gunNotu)'],
   });
 
-  const Kayit = Object.freeze({ ETIKET, TURLER, GERI_GUN, kaydet, deger, birlesik, gunluk, haftalik, Kural, GOC, EKSIK,
+  const Kayit = Object.freeze({ ETIKET, TURLER, GERI_GUN, TAHLIL_SIK, kaydet, deger, birlesik, gunluk, haftalik, tahliller, Kural, GOC, EKSIK,
     yardimci:Object.freeze({ gunEkle, gunFarki, turde }) });
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Motor = kok.LIFEOS.Motor || {};

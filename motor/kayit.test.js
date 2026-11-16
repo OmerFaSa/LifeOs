@@ -417,6 +417,33 @@ it('geriye yazma penceresi: bugün verilirse gelecek ve 7 günden eskisi reddedi
   assert.strictEqual(K.GERI_GUN, 7);
 });
 
+it('tahlil: belirteç ve değer zorunlu; sık belirteç kendi yazımı ve birimiyle, serbest belirteç olduğu gibi; referans isteğe bağlı', () => {
+  assert.deepStrictEqual(K.kaydet('tahlil', { deger:'13,5' }, { gun:G0 }).hatalar, ['Belirteç yazılmalı.']);
+  assert.deepStrictEqual(K.kaydet('tahlil', { belirtec:'ferritin' }, { gun:G0 }).hatalar, ['Değer yazılmalı.']);
+  const f = kay('tahlil', { belirtec:'  ferritin ', deger:'35' });
+  assert.deepStrictEqual([f.ek.belirtec, f.ek.birim, f.deger.deger], ['Ferritin', 'ng/mL', { v:35, k:'measured' }]);
+  const s = kay('tahlil', { belirtec:'Homosistein', deger:'11,2', birim:'µmol/L', refAlt:'5', refUst:'15' }, G0, { zaman:5 });
+  assert.deepStrictEqual([s.ek.belirtec, s.ek.birim, s.deger.refAlt.v, s.deger.refUst.v], ['Homosistein', 'µmol/L', 5, 15]);
+  assert.strictEqual(kay('tahlil', { belirtec:'Ferritin', deger:'40', birim:'µg/L' }).ek.birim, 'µg/L', 'yazılan birim korunur');
+  assert.deepStrictEqual(K.kaydet('tahlil', { belirtec:'TSH', deger:'2', refAlt:'4', refUst:'0,4' }, { gun:G0 }).hatalar,
+    ['Referans aralığının alt sınırı üst sınırından büyük olamaz.']);
+  assert.ok(!K.kaydet('tahlil', { belirtec:'x'.repeat(61), deger:'1' }, { gun:G0 }).ok, 'uzun belirteç');
+  assert.strictEqual(K.kaydet('tahlil', { belirtec:'TSH', deger:{ v:'2', k:'estimated' } }, { gun:G0 }).kayit.deger.deger.k, 'estimated');
+});
+
+it('tahliller: belirteç başına zaman sırasıyla değerler, en son yapılan önce; aralığa göre konum, aralık yoksa konum yok', () => {
+  const l = [kay('tahlil', { belirtec:'Ferritin', deger:'12', refAlt:'15', refUst:'150' }, '2026-03-01'),
+    kay('tahlil', { belirtec:'ferritin', deger:'35', refAlt:'15', refUst:'150' }, '2026-09-01'),
+    kay('tahlil', { belirtec:'TSH', deger:'5,1', refUst:'4,2' }, '2026-06-01'),
+    kay('tahlil', { belirtec:'Homosistein', deger:'9' }, '2026-10-01'), kay('su', { ml:'200' }, '2026-10-02')];
+  const t = K.tahliller(l);
+  assert.deepStrictEqual(t.map(x => x.belirtec), ['Homosistein', 'Ferritin', 'TSH']);
+  assert.deepStrictEqual(t[1].degerler.map(x => [x.gun, x.deger.v, x.konum]), [['2026-03-01', 12, 'alt'], ['2026-09-01', 35, 'ic']]);
+  assert.deepStrictEqual([t[1].son.deger.v, t[1].son.birim, t[2].son.konum, t[0].son.konum, t[0].son.ref], [35, 'ng/mL', 'ust', null, null]);
+  assert.deepStrictEqual(K.tahliller([]), []);
+  assert.ok(!K.gunluk(l, '2026-09-01').olcum.tahlil, 'günlük ölçüm özetine girmez (bir günde çok belirteç)');
+});
+
 it('saflık: motor saat okumaz (Date.now / new Date() yok)', () => {
   const src = kaynak('motor/kayit.js');
   assert.ok(!/Date\.now\(|new Date\(\)/.test(src));

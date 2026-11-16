@@ -163,12 +163,12 @@
   }
   function sayfa(yer) {
     var I = ic(), k = I.kac, bas = I.ust(kirinti()) + '<div class="govde" data-deneme-sayfa>';
-    if (!Soru) return bas + B.baslik({ metin: 'Süreli deneme' }) + B.bos({ baslik: 'Soru aracı yüklenemedi.', metin: 'Sayfayı yenile; sürerse LifeOS sunucusundan aç.' }) + '</div>';
+    if (!Soru) return bas + B.baslik({ metin: 'Süreli deneme' }) + B.bos({ baslik: 'Soru aracı yüklenemedi.', metin: 'Sayfayı yenile; sürerse Başbuğ’u kapatıp yeniden aç.' }) + '</div>';
     if (son) { var h = sonucHtml(son); son = null; return bas + h + '</div>'; }
     var dr = durumOku();
     if (dr) {
       var y = asamaY(dr.alan, dr.asama);
-      if (!y) return bas + B.baslik({ metin: 'Süreli deneme' }) + (I.al(dr.alan) ? B.bos({ baslik: 'Bu denemenin soruları bu açılışta yüklenemedi.', metin: 'LifeOS sunucusundan aç.' }) : '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>') + '</div>';
+      if (!y) return bas + B.baslik({ metin: 'Süreli deneme' }) + (I.al(dr.alan) ? B.bos({ baslik: 'Bu denemenin soruları bu açılışta yüklenemedi.', metin: 'Sayfayı yenile; sürerse Başbuğ’u kapatıp yeniden aç.' }) : '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>') + '</div>';
       var sz = sozluk(y), simdi = Date.now();
       if (kalan(Soru, dr, simdi) === 0) { sonlandir(dr, y, simdi); var h2 = sonucHtml(son); son = null; return bas + h2 + '</div>'; }
       saatKur();
@@ -181,7 +181,7 @@
     var I = ic(), k = I.kac, id = I.etkin(), f = I.al(id), yer = I.tasinanlar().filter(function (a) { return a.id === id; })[0];
     var h = B.baslik({ metin: 'Süreli deneme' });
     if (!f) { I.alanYukle(id).then(function () { if (d.querySelector('[data-deneme-sayfa]')) I.rota(); }); return h + '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>'; }
-    if (!f.y) return h + B.bos({ baslik: 'Sorular bu açılışta yüklenemedi.', metin: 'Sayfa dosyadan açıldıysa LifeOS sunucusundan aç.' });
+    if (!f.y) return h + B.bos({ baslik: 'Sorular bu açılışta yüklenemedi.', metin: 'Sayfayı yenile; sürerse Başbuğ’u kapatıp yeniden aç.' });
     var y = f.y, kayit = I.kayitOku(id), simdi = Date.now(), r = denemeKur(Soru, I.Yol, y, kayit, yer.ad, simdi, Math.random);
     h += '<p class="soluk">' + k(yer.ad) + ' · ' + k(y.veri.ad) + '. Açık ünitelerden süreli bir deneme: her ünite bir test, süre sınav ölçeğinde. ' +
       'Cevaplar bitirene kadar değişebilir; doğrular sonda görünür. Alanı değiştirmek için o alanın sayfasını aç.</p>';
