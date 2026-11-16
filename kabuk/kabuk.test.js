@@ -52,6 +52,20 @@ t('konu listeleri: Akademik üniteleri « · » öncesine göre ardışık grupl
   esit(K.uniteGruplari([{ ad: 'TYT · a' }, { ad: 'TYT · b' }]), null, 'tek grup');
   esit(K.uniteGruplari([{ ad: 'TYT · a' }, { ad: 'düz' }]), null, 'karışık');
 });
+t('dal seçimi: öğrenme kaydı (lifeos.yol.<alan>.dal, eşitlenir), JSON metni; eski cihaz anahtarı taşınır; kaldırılabilir', () => {
+  const v = {}, D = { getItem: k => k in v ? v[k] : null, setItem: (k, x) => { v[k] = String(x); }, removeItem: k => { delete v[k]; } };
+  const Dp = require('./depo.js');
+  dogru(Dp.kayitMi('lifeos.yol.tarih.dal') && !Dp.kayitMi('lifeos.alan.tarih.dal'), 'yeni anahtar kayıt (tek depoya gider), eskisi değil');
+  esit(K.dalOku(D, 'tarih'), null, 'seçim yok');
+  v['lifeos.alan.tarih.dal'] = 'turk';
+  esit([K.dalOku(D, 'tarih'), v], ['turk', { 'lifeos.yol.tarih.dal': '"turk"' }], 'eski anahtar taşındı ve silindi');
+  K.dalYaz(D, 'tarih', 'osmanli');
+  esit([K.dalOku(D, 'tarih'), v['lifeos.yol.tarih.dal']], ['osmanli', '"osmanli"']);
+  K.dalYaz(D, 'tarih', null);
+  esit([K.dalOku(D, 'tarih'), Object.keys(v)], [null, []], 'kaldırma kaydı siler (silme de eşitlenir)');
+  v['lifeos.yol.felsefe.dal'] = 'bozuk{'; esit(K.dalOku(D, 'felsefe'), 'bozuk{', 'JSON olmayan değer metin sayılır');
+  v['lifeos.yol.felsefe.dal'] = '3'; esit(K.dalOku(D, 'felsefe'), null, 'metin olmayan değer seçim değil');
+});
 t('konu haritası: dosya süzülür; bozuk dal, bölüm, konu ve yabancı kimlik atılır; geçerli dal yoksa null', () => {
   const h = K.haritaSuz({ sema: 1, alan: 'tarih', dallar: [
     { id: 'turk', ad: 'Türk tarihi', ozet: 'kısa', bolumler: [{ ad: 'İlk devletler', konular: [{ ad: 'Hunlar', ders: 'tarih.1.3.2' }, { ad: 'Göktürkler' }, { ad: '' }, { ad: 'X', ders: 'felsefe.1.1.1' }, { ad: 'Y', unite: 'tarih.1.2' }] }, { ad: 'Boş', konular: [] }] },
@@ -420,6 +434,7 @@ t('harita: on alanın onu da taşındı: pilot ve aşamalı, içerik dosyası ye
     esit(y.durum, 'pilot', y.id);
     dogru(Number.isInteger(y.asama) && y.asama >= 1, y.id + ' aşama numarası');
     dogru(fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'asama-1.json')), y.id + ' içeriği yok');
+    esit(!!y.harita, fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'harita.json')), y.id + ' «harita» bayrağı dosyayla uyuşmalı (yoksa 404 ya da harita görünmez)');
     esit(require('../alan/' + y.id + '/asama-1.json').id, y.id + '.1', y.id + ' aşama kimliği (kayıt anahtarı buna dayanır)');
     // haritadaki sayıdan sonraki aşama dosyası yazıldıysa kabuk onu istemez: sayı artırılmalı
     dogru(!fs.existsSync(path.join(__dirname, '..', 'alan', y.id, 'asama-' + (y.asama + 1) + '.json')), y.id + ': asama-' + (y.asama + 1) + '.json var ama haritada asama ' + y.asama);

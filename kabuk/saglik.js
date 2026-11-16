@@ -62,10 +62,12 @@
     if (!Kayit || !A) return bas + B.bos({ baslik: 'Kayıtlar bu açılışta okunamadı.', metin: 'Sayfayı yenile.' }) + dersler + '</div>';
     var l; try { l = JSON.parse(I.depo.getItem('lifeos.kayit.kayitlar')); } catch (e) { l = null; }
     var p = pano(Kayit, Array.isArray(l) ? l : [], A.gunAdi(Date.now()));
+    // tek ana eylem: kaydı olmayan ilk satırın «Kaydet»i; öbürleri sade (eskiden dört eşit «Kaydet» + ana düğme «Tahlil ekle»)
+    var ilkBos = p.bugun.filter(function (x) { return !x.metin; })[0];
     var bugunH = B.liste({ ad: 'Bugün', ogeler: p.bugun.map(function (x) {
       return x.metin ? { ad: x.ad, not: x.metin + (x.gun && x.gun !== A.gunAdi(Date.now()) ? ' · ' + gunYaz(x.gun) : ''), pul: E[x.d.k], uzun: true,
         eylemler: [{ metin: 'Ekle', tur: 'sade', etiket: x.ad + ' kaydı ekle', href: kayitYolu(x.tur) }] }
-        : { ad: x.ad, not: 'Henüz kayıt yok', eylemler: [{ metin: 'Kaydet', tur: 'ikincil', etiket: x.ad + ' kaydet', href: kayitYolu(x.tur) }] };
+        : { ad: x.ad, not: 'Henüz kayıt yok', eylemler: [{ metin: 'Kaydet', tur: x === ilkBos ? 'ana' : 'sade', etiket: x.ad + ' kaydet', href: kayitYolu(x.tur) }] };
     }) });
     var egilimH = p.egilim.length ? B.bolum({ baslik: 'Son 7 gün', govde: [B.liste({ ad: 'Son 7 gün', ogeler: p.egilim.map(function (x) {
       return { ad: x.ad, not: x.cubuk + '  ' + x.ozet.metin + ' · ' + x.gun + '/7 gün kayıtlı', pul: E[x.ozet.k], uzun: true };
@@ -76,7 +78,7 @@
         return B.acilir({ baslik: t.belirtec, duzey: 3, not: sat(s) + ' · ' + gunYaz(s.gun), govde: B.liste({ ad: t.belirtec + ' değerleri', ogeler: t.degerler.slice().reverse().map(function (x) {
           return { ad: gunYaz(x.gun), not: sat(x) + (x.ref ? ' (aralık ' + (x.ref.alt != null ? String(x.ref.alt).replace('.', ',') : '…') + '–' + (x.ref.ust != null ? String(x.ref.ust).replace('.', ',') : '…') + ')' : ''), pul: E[x.deger.k], uzun: true };
         }) }) });
-      }).join('') : B.bos({ baslik: 'Henüz tahlil kaydı yok.', metin: 'Sonuç kâğıdındaki değeri belirteciyle yaz; zamanla değişimini burada görürsün.', eylem: { metin: 'Tahlil ekle', tur: 'ana', href: kayitYolu('tahlil') } }) });
+      }).join('') : B.bos({ baslik: 'Henüz tahlil kaydı yok.', metin: 'Sonuç kâğıdındaki değeri belirteciyle yaz; zamanla değişimini burada görürsün.', eylem: { metin: 'Tahlil ekle', tur: ilkBos ? 'ikincil' : 'ana', href: kayitYolu('tahlil') } }) });
     return bas + B.bolum({ baslik: 'Bugün', govde: bugunH }) + egilimH + tahlilH + dersler + '</div>';
   }
   Kabuk.ek = Kabuk.ek || {};

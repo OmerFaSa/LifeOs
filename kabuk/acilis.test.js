@@ -17,11 +17,11 @@ t('oynasın mı: ayar açık, önceki sayfa yok, bu sekmede oynamadıysa; «?vid
   dogru(!A.oynasinMi({ ayar: '1', onceki: '', arama: '', oynadi: true }), 'bu sekmede oynadı');
   dogru(A.oynasinMi({ ayar: null, onceki: 'x', arama: '?video', oynadi: true }) && A.oynasinMi({ arama: '?a=1&video' }), '?video zorlar');
 });
-t('bölüm: yalnız bilgisayarın kendisinde; video yokken açma düğmesi kapalı, varken «Şimdi izle»', () => {
+t('bölüm: yalnız bilgisayarın kendisinde; video yokken açma düğmesi yerine tek cümle, varken «Açılışta oynat» ve «Şimdi izle»', () => {
   dogru(A.bolum({ acik: false, var: false }, B, TEL) === '', 'telefonda yok');
   const yok = A.bolum({ acik: false, var: false }, B, PC), var_ = A.bolum({ acik: true, var: true }, B, PC);
-  dogru(/Henüz video yok/.test(yok) && /aria-disabled="true"/.test(yok) && /Video seç/.test(yok) && !/Şimdi izle/.test(yok), yok);
-  dogru(/aria-pressed="true"/.test(var_) && /Videoyu değiştir/.test(var_) && /Şimdi izle/.test(var_), var_);
+  dogru(/Henüz video yok/.test(yok) && !/data-ac-ac="ac"/.test(yok) && /Video seç/.test(yok) && !/Şimdi izle/.test(yok), yok);
+  dogru(/aria-pressed="true"/.test(var_) && /Açılışta oynat/.test(var_) && /Videoyu değiştir/.test(var_) && /Şimdi izle/.test(var_), var_);
   dogru(/Yükleniyor/.test(A.bolum({ acik: null }, B, PC)));
   dogru(/&#60;x&#62;/.test(A.bolum({ acik: false, var: true, durum: '<x>' }, B, PC)), 'durum kaçışlı');
 });

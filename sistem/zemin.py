@@ -32,6 +32,7 @@ import errno
 import io
 import os
 import re
+import time
 
 YUVALAR = ("gunduz", "gece", "acilis")
 TURLER = {
@@ -71,22 +72,41 @@ def imza_uyar(tur, bas):
     return False
 
 
+def _dosyalar(yuva, kok):
+    """Yuvanin dosyalari [(mtime, yol, tur)]: «gunduz.mp4» ya da surumlu «gunduz.<n>.mp4».
+    Surum neden: Windows'ta tarayici videoyu okurken (uzun Range yaniti) dosya silinemez ve ustune yazilamaz;
+    yeni dosya yeni adla yazilir, en yenisi okunur, eskisi silinebildigi ilk anda silinir."""
+    out = []
+    try:
+        adlar = os.listdir(kok)
+    except OSError:
+        return out
+    for ad in adlar:
+        m = re.match(r"^%s(?:\.(\d+))?(\.[a-z0-9]+)$" % re.escape(yuva), ad)
+        tur = m and next((t for t, u in TURLER.items() if u == m.group(2)), None)
+        yol = os.path.join(kok, ad)
+        if tur and os.path.isfile(yol):      # esit zamanda surum numarasi buyuk olan yenidir
+            out.append((os.path.getmtime(yol), int(m.group(1) or 0), yol, tur))
+    return [(z, y, t) for z, _, y, t in sorted(out)]
+
+
 def bul(yuva, kok=None):
-    """Yuvadaki dosyanin yolu ve turu; yoksa (None, None)."""
-    kok = kok or klasor()
-    for tur, uzanti in TURLER.items():
-        yol = os.path.join(kok, yuva + uzanti)
-        if os.path.isfile(yol):
-            return yol, tur
-    return None, None
+    """Yuvadaki en yeni dosyanin yolu ve turu; yoksa (None, None)."""
+    l = _dosyalar(yuva, kok or klasor())
+    return (l[-1][1], l[-1][2]) if l else (None, None)
 
 
-def sil(yuva, kok=None):
-    kok = kok or klasor()
-    for uzanti in TURLER.values():
-        yol = os.path.join(kok, yuva + uzanti)
-        if os.path.isfile(yol):
+def sil(yuva, kok=None, tut=None):
+    """Yuvanin dosyalarini siler (`tut` haric). Okunmakta olan (kilitli) dosya kalir. Doner: silinemeyen sayisi."""
+    kalan = 0
+    for _, yol, _ in _dosyalar(yuva, kok or klasor()):
+        if yol == tut:
+            continue
+        try:
             os.remove(yol)
+        except PermissionError:
+            kalan += 1
+    return kalan
 
 
 def yaz(yuva, tur, veri, kok=None):
@@ -112,7 +132,11 @@ def yaz_akis(yuva, tur, okuyucu, boy, kok=None):
     gecici = os.path.join(kok, yuva + ".yaziliyor")
     diske_akit(gecici, bas, okuyucu, boy)
     sil(yuva, kok)
-    os.replace(gecici, os.path.join(kok, yuva + TURLER[tur]))
+    hedef = os.path.join(kok, yuva + TURLER[tur])
+    if os.path.exists(hedef):      # eski dosya okunuyor (kilitli): yeni surum adiyla yazilir, bul() en yenisini verir
+        hedef = os.path.join(kok, "%s.%d%s" % (yuva, time.time_ns(), TURLER[tur]))
+    os.replace(gecici, hedef)
+    sil(yuva, kok, tut=hedef)
 
 
 def diske_akit(gecici, bas, okuyucu, boy):
@@ -209,7 +233,8 @@ def isle(h):
             return _yanit(h, 404)
         return _akit(h, yol, tur)
     if h.command == "DELETE":
-        sil(yuva)
+        if sil(yuva):
+            return _yanit(h, 409, "Dosya şu an oynatılıyor; birkaç saniye sonra yeniden dene.".encode("utf-8"))
         return _yanit(h, 204)
     if h.command == "POST":
         try:

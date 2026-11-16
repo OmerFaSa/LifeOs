@@ -673,8 +673,10 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
    derse başlama en belirgin. Geçiş sürerken listeler ayrıca süzülmez (iki hareket üst üste binmez). */
 /* 2026-11-16b: bütün geçiş ~250 ms (çıkış 110, giriş 220 + 20 gecikme); tür yalnız yolu değiştirir */
 :root{ --vt-cik:110ms; --vt-gir:220ms; --vt-yol:6px; --vt-gec:20ms; }
-:root[data-gecis-tur="buyuk"]{ --vt-yol:10px; }
-:root[data-gecis-tur="ders"]{ --vt-gir:230ms; --vt-yol:14px; }
+/* türün değerleri yalnız geçişin sözde öğesinde: kökte değişen özel özellik bütün sayfaya miras gider, her geçişin başında ve sonunda
+   bütün stil yeniden hesaplanıyordu (2026-11-17b ölçümü: 386 öğe, 4× yavaş CPU'da 57 ms) */
+:root[data-gecis-tur="buyuk"]::view-transition-new(root){ --vt-yol:10px; }
+:root[data-gecis-tur="ders"]::view-transition-new(root){ --vt-gir:230ms; --vt-yol:14px; }
 :root[data-gecis]::view-transition-old(root), :root[data-gecis][data-gecis-tur]::view-transition-old(root){ animation:var(--vt-cik) cubic-bezier(.4,0,1,1) both vt-son; }
 :root[data-gecis]::view-transition-new(root), :root[data-gecis][data-gecis-tur]::view-transition-new(root){ animation:var(--vt-gir) cubic-bezier(.16,1,.3,1) var(--vt-gec) both vt-bel; }
 @keyframes vt-son{ to{ opacity:0; } }

@@ -217,11 +217,19 @@ async function goruntu(p, ad, sec = {}) {
       await hp.click('[data-ac="dal-sec"][data-dal="' + turk.id + '"]');
       await hp.waitForSelector('.dallar > [data-dal="' + turk.id + '"][data-secili]');
       dene('dal seçimi: kaydedilir, seçili dal en üstte açık «Çalıştığın dal», başlığın altında adı',
-        (await hp.evaluate(() => localStorage.getItem('lifeos.alan.tarih.dal'))) === turk.id && (await hp.getAttribute('.dallar > .b-acilir:first-child', 'data-dal')) === turk.id
+        (await hp.evaluate(() => LIFEOS.Kabuk.Depo.getItem('lifeos.yol.tarih.dal'))) === JSON.stringify(turk.id) && (await hp.evaluate(() => localStorage.getItem('lifeos.yol.tarih.dal'))) === null && (await hp.getAttribute('.dallar > .b-acilir:first-child', 'data-dal')) === turk.id
         && (await hp.locator('.dallar > .b-acilir:first-child[open]').count()) === 1 && /Çalıştığın dal/.test(await hp.textContent('.dallar > .b-acilir:first-child summary'))
         && (await hp.textContent('.govde .b-baslik')).indexOf(turk.ad) >= 0);
       await hp.reload(); await hp.waitForSelector('.dallar > [data-secili]');
       dene('dal seçimi: yenilemede kalır', (await hp.getAttribute('.dallar > .b-acilir:first-child', 'data-dal')) === turk.id && (await hp.locator('.dallar > details[open]').count()) === 1);
+      // seçim kayıttır (IndexedDB + tek depo, cihazlar arası eşitlenir); seçili dalda «Dal seçimini kaldır» var, kaldırınca sayfa seçimsiz döner
+      await hp.click('.dallar > [data-secili] [data-ac="dal-birak"]');
+      await hp.waitForSelector('.dallar > .b-acilir:not([data-secili]):first-child');
+      dene('dal seçimi: kaldırılabilir (kayıt silinir, dallar kapalı, alt başlıkta dal yok)', (await hp.evaluate(() => LIFEOS.Kabuk.Depo.getItem('lifeos.yol.tarih.dal'))) === null
+        && (await hp.locator('.dallar > [data-secili]').count()) === 0 && (await hp.locator('.dallar > details[open]').count()) === 0 && !/Çalıştığın dal/.test(await hp.textContent('.govde .b-baslik')));
+      await hp.click('[data-dal="' + turk.id + '"] > summary');
+      await hp.click('[data-ac="dal-sec"][data-dal="' + turk.id + '"]');
+      await hp.waitForSelector('.dallar > [data-dal="' + turk.id + '"][data-secili]');
       await hp.goto(T + '/kabuk/#/bugun');
       await hp.waitForFunction(ad => ((document.querySelector('a[href="#/alan/tarih"]') || {}).textContent || '').indexOf(ad) >= 0, turk.ad, { timeout: 5000 }).catch(() => {});
       dene('dal seçimi: Bugün\'deki Tarih kartının alt başlığı dalın adı', (await hp.textContent('a[href="#/alan/tarih"]')).indexOf(turk.ad) >= 0, await hp.textContent('a[href="#/alan/tarih"]'));
@@ -232,6 +240,14 @@ async function goruntu(p, ad, sec = {}) {
         gr.length === 8 && gr[0][0] === 'TYT Türkçe' && gr[0][1] === 3 && gr[1][0] === 'TYT Temel Matematik' && gr[1][1] === 5 && gr.reduce((n, g) => n + g[1], 0) === 30 && gr.every(g => g[2])
         && (await hp.textContent('.konu-gruplari .yol > .b-acilir summary .b-acilir__baslik')) === 'Anlam' && (await hp.locator('.yol > details[open]').count()) === 1
         && (await hp.locator('.konu-gruplari > [data-grup="simdi"]').count()) === 1, JSON.stringify(gr));
+      // pencere daraltılınca/genişletilince grupların varsayılanı yeniden uygulanır (2026-11-17b: çizim anındaki hâlde kalıyordu)
+      await hp.setViewportSize({ width: 600, height: 800 });
+      await hp.waitForFunction(() => document.querySelectorAll('.konu-gruplari > details[open]').length === 1, null, { timeout: 3000 }).catch(() => {});
+      const darAcik = await hp.locator('.konu-gruplari > details[open]').count(), darSimdi = await hp.locator('.konu-gruplari > details[open][data-grup="simdi"]').count();
+      await hp.setViewportSize({ width: 1280, height: 800 });
+      await hp.waitForFunction(() => document.querySelectorAll('.konu-gruplari > details:not([open])').length === 0, null, { timeout: 3000 }).catch(() => {});
+      dene('Akademik: daraltınca yalnız şu anki grup açık, genişletince hepsi yeniden açık', darAcik === 1 && darSimdi === 1
+        && (await hp.locator('.konu-gruplari > details:not([open])').count()) === 0, darAcik + '/' + darSimdi);
       await hc.close();
       const tc = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }), tp = await tc.newPage();
       await tp.goto(T + '/kabuk/#/alan/akademik');
@@ -838,8 +854,8 @@ async function goruntu(p, ad, sec = {}) {
     dene('eski panel: /kartlar/ Hesap ekranına yönlenir, eski panel bağlantısı yok', (await p.evaluate(() => location.pathname + location.hash)) === '/kabuk/#/hesap'
       && !(await p.locator('#sayfa a[href^="/kartlar"]').count()));
     await p.waitForFunction(() => /Henüz video yok/.test(document.querySelector('[aria-labelledby="ac-bolum"]').textContent));
-    dene('açılış videosu: ayar ve video seçme Hesap ekranında, video yokken açılamaz', !!(await p.locator('[aria-labelledby="ac-bolum"] input[type=file][data-ac-dosya]').count())
-      && (await p.getAttribute('[data-ac-ac="ac"]', 'aria-disabled')) === 'true', await p.textContent('[aria-labelledby="ac-bolum"]'));
+    dene('açılış videosu: ayar ve video seçme Hesap ekranında, video yokken açma anahtarı yok (tek cümle)', !!(await p.locator('[aria-labelledby="ac-bolum"] input[type=file][data-ac-dosya]').count())
+      && !(await p.locator('[data-ac-ac="ac"]').count()), await p.textContent('[aria-labelledby="ac-bolum"]'));
 
     // ---- Yol haritası listesi, komut çubuğu, Hesap ----
     await p.goto(T + '/kabuk/#/motor/yol');
@@ -1337,6 +1353,10 @@ async function goruntu(p, ad, sec = {}) {
     let gm2 = '';
     for (let i = 0; i < 20 && !/gezi deneme hatası/.test(gm2); i++) { await ep.waitForTimeout(150); try { gm2 = fs.readFileSync(gunluk, 'utf8'); } catch (e) { /* henüz yok */ } }
     dene('hata ucu: ekran hatası iletisi, yığını ve sayfası günlüğe yazılır', /gezi deneme hatası/.test(gm2) && /"sayfa": "#\/bugun"/.test(gm2) && /"yigin": "Error/.test(gm2), gm2.slice(-300));
+    // yakalanmamış söz reddi de gider (tur «soz»), aynı sayaçla
+    await ep.evaluate(() => { Promise.reject(new Error('gezi söz reddi')); });
+    for (let i = 0; i < 20 && !/gezi söz reddi/.test(gm2); i++) { await ep.waitForTimeout(150); try { gm2 = fs.readFileSync(gunluk, 'utf8'); } catch (e) { /* henüz yok */ } }
+    dene('hata ucu: yakalanmamış söz reddi «soz» türüyle günlüğe yazılır', gm2.split(/\r?\n/).some(l => /gezi söz reddi/.test(l) && /"tur": "soz"/.test(l)), gm2.slice(-300));
     await ec.close();
   } finally {
     await b.close(); srv.kill();

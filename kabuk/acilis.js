@@ -18,8 +18,10 @@
   function bolum(s, B, bag) {
     if (!bag.sunucu || !bag.sunucu.yerel) return '';
     var g = s.acik == null ? '<p class="soluk">Yükleniyor…</p>' : [
-      B.ayar({ id: 'ac-video', ad: 'Açılış videosu', not: s.var ? 'Başbuğ ilk açıldığında oynar; «Atla» ya da Esc ile geçilir.' : 'Henüz video yok: önce bir video seç (en çok 600 MB).',
-        govde: B.dugme({ metin: s.acik ? 'Açık' : 'Kapalı', basili: !!s.acik, etiket: 'Açılış videosu', veri: { 'ac-ac': 'ac' }, kapali: !!s.is || (!s.acik && !s.var) }) }),
+      // video yokken açılamayan anahtar ve bölüm adını yineleyen satır yerine tek cümle (2026-11-17b)
+      s.var || s.acik ? B.ayar({ id: 'ac-video', ad: 'Açılışta oynat', not: 'Başbuğ ilk açıldığında oynar; «Atla» ya da Esc ile geçilir.',
+        govde: B.dugme({ metin: s.acik ? 'Açık' : 'Kapalı', basili: !!s.acik, etiket: 'Açılışta oynat', veri: { 'ac-ac': 'ac' }, kapali: !!s.is || (!s.acik && !s.var) }) })
+        : '<p class="soluk">Henüz video yok. Bir video seçersen Başbuğ ilk açıldığında oynar (en çok 600 MB).</p>',
       '<div class="b-eylemler"><label class="b-dugme">' + (s.var ? 'Videoyu değiştir' : 'Video seç') + // satır başında, düğme gibi (ortada boşta kalmasın)
         '<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-ac-dosya hidden></label>' +
         (s.var ? ' ' + B.dugme({ metin: 'Şimdi izle', tur: 'sade', veri: { 'ac-ac': 'izle' } }) : '') + '</div>',

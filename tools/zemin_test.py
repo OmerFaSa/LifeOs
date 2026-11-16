@@ -122,6 +122,33 @@ with tempfile.TemporaryDirectory() as d:
     Z.isle(h)
     bekle("silinir", h.kod == 204 and Z.bul("gece", d)[0] is None)
 
+# Windows'ta oynatilan video kilitlidir (silinemez, ustune yazilamaz): sunucu gunlugunde 2026-11 PermissionError.
+# Kilit, os.remove'un o dosya icin PermissionError vermesiyle taklit edilir (Linux CI'da gercek kilit yok).
+with tempfile.TemporaryDirectory() as d:
+    Z.klasor = lambda: d
+    Z.yaz("gunduz", "video/mp4", MP4, d)
+    kilitli = Z.bul("gunduz", d)[0]
+    asil_remove = Z.os.remove
+    def kilitli_remove(yol, _a=asil_remove):
+        if yol == kilitli:
+            raise PermissionError(32, "kullanimda", yol)
+        return _a(yol)
+    Z.os.remove = kilitli_remove
+    try:
+        yeni = MP4 + b"yeni"
+        Z.yaz("gunduz", "video/mp4", yeni, d)
+        yol, tur = Z.bul("gunduz", d)
+        bekle("oynatilan video varken yenisi yazilir ve okunan odur", tur == "video/mp4" and yol != kilitli
+              and Path(yol).read_bytes() == yeni and not list(Path(d).glob("*.yaziliyor")))
+        h = Sahte("DELETE", "/api/zemin/gunduz")
+        Z.isle(h)
+        bekle("kilitli dosya silinemezse 409, okunabilen surum silinir", h.kod == 409 and Z.bul("gunduz", d)[0] == kilitli)
+    finally:
+        Z.os.remove = asil_remove
+    Z.yaz("gunduz", "image/png", PNG, d)
+    bekle("kilit kalkinca eski surumler temizlenir, tek dosya kalir",
+          Z.bul("gunduz", d)[1] == "image/png" and len([p for p in Path(d).iterdir() if p.name.startswith("gunduz")]) == 1)
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)

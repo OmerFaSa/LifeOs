@@ -13,8 +13,18 @@
   function notSira(a, b) { return (b.sabit - a.sabit) || (b.guncelleme - a.guncelleme) || (a.id < b.id ? -1 : 1); }
 
   // Formdan kayıt: yeni not ya da var olanın güncellenmişi. Geçersizse motorun Türkçe cümlesiyle hata fırlatır; liste değişmez.
+  // [[Notun adı]] → [[not:kimlik|Notun adı]] yalnız tek not o adı taşıyorsa (büyük/küçük harf ayrılmaz); yoksa ya da birden çoksa metin aynen kalır.
+  // [[!Ad]] çelişki bağıdır (Not motoru). Kimlikli bağa ve ![[medya:…]] gömmesine dokunulmaz.
+  function adBagla(Not, notlar, govde, kendi) {
+    var a = function (x) { return Not.kucuk(String(x || '')).replace(/\s+/g, ' ').trim(); };
+    return String(govde || '').replace(/\[\[(!?)([^\[\]|\n]{1,120})\]\]/g, function (tam, c, ad, i, t) {
+      if (/^(not|medya):/i.test(ad) || t.charAt(i - 1) === '!' && !c) return tam;
+      var l = notlar.filter(function (n) { return n.id !== kendi && a(Not.ad(n)) === a(ad); });
+      return l.length === 1 ? Not.bagYaz(l[0].id, ad.trim(), c === '!') : tam;
+    });
+  }
   function notKaydet(Not, notlar, id, form, simdi, yeniId) {
-    var baslik = String(form.baslik || '').trim(), govde = String(form.govde || '');
+    var baslik = String(form.baslik || '').trim(), govde = adBagla(Not, notlar, form.govde, id);
     var eski = notlar.filter(function (n) { return n.id === id; })[0];
     if (!eski) {
       return { id: yeniId, notlar: notlar.concat([Not.yeni({ id: yeniId, baslik: baslik, govde: govde, ozel: !!form.ozel, sabit: !!form.sabit, klasor: form.klasor || '', olusturma: simdi })]) };
@@ -230,7 +240,11 @@
   function kayitMetni(Kayit, r) {
     var t = Kayit.TURLER[r.tur], p = [];
     if (r.tur === 'tahlil') return tahlilMetni(Kayit, r);
-    Object.keys(r.deger || {}).forEach(function (a) { var f = t.sayilar[a]; p.push(sayiYaz(r.deger[a].v) + (f.birim && f.birim !== '1-5' ? ' ' + f.birim : '') + ' (' + Kayit.ETIKET[r.deger[a].k] + ')'); });
+    // birimsiz sayı adıyla okunur («Zorluk (RPE) 6»), ölçekli olan ölçeğiyle («3/5»); eskiden yalnız «6 (ölçüldü)» yazıyordu
+    Object.keys(r.deger || {}).forEach(function (a) {
+      var f = t.sayilar[a], v = sayiYaz(r.deger[a].v), o = /^1-(\d+)$/.exec(f.birim || '');
+      p.push((o ? v + '/' + o[1] : f.birim ? v + ' ' + f.birim : f.ad + ' ' + v) + ' (' + Kayit.ETIKET[r.deger[a].k] + ')');
+    });
     Object.keys(r.ek || {}).forEach(function (a) { p.push(r.ek[a]); });
     return t.ad + ' · ' + p.join(' · ');
   }
@@ -415,7 +429,7 @@
     return l.length > 1 ? l.slice(0, -1).join(', ') + ' ve ' + l[l.length - 1] : l.join('');
   }
 
-  var Arac = { kimlik: kimlik, tahlilMetni: tahlilMetni, baslangicBirlestir: baslangicBirlestir, baslangicYol: baslangicYol, baslangicYerleri: baslangicYerleri, baslangicBeden: baslangicBeden, baslangicMetni: baslangicMetni, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
+  var Arac = { kimlik: kimlik, adBagla: adBagla, tahlilMetni: tahlilMetni, baslangicBirlestir: baslangicBirlestir, baslangicYol: baslangicYol, baslangicYerleri: baslangicYerleri, baslangicBeden: baslangicBeden, baslangicMetni: baslangicMetni, soruHavuzu: soruHavuzu, soruSirasi: soruSirasi, planBos: planBos, planKur: planKur, planGunDevri: planGunDevri, planEkle: planEkle, sabitlerGunu: sabitlerGunu, sabitEkle: sabitEkle, haftaKur: haftaKur, kayitEkle: kayitEkle, gunOzeti: gunOzeti, kayitGunleri: kayitGunleri, haftaOzeti: haftaOzeti, yukOzeti: yukOzeti, kuralOzeti: kuralOzeti, kayitMetni: kayitMetni, notSira: notSira, notKaydet: notKaydet, aracKaydet: aracKaydet, aracNotlari: aracNotlari, kartlariEsitle: kartlariEsitle, agYerlesim: agYerlesim, gunSonu: gunSonu, gunAdi: gunAdi,
     kuyruk: kuyruk, kartCevapla: kartCevapla, aralikAdi: aralikAdi };
   Kabuk.Arac = Arac;
   if (typeof module !== 'undefined' && module.exports) module.exports = Arac;
@@ -450,6 +464,16 @@
     });
     return dolu ? o : null;
   }
+  /* Silme geri alınabilir (AGENTS §1 kural 9: küçük aksiyon sormadan uygulanır, ekranda «Geri al» kalır; 2026-11-17b, eskiden confirm()
+   * penceresi «Geri alınamaz» diyordu, Plan'da hiç sormadan ve iz bırakmadan siliyordu). Silmeden önceki değer bellekte durur; aynı sayfanın
+   * sonraki çiziminde tek satır ileti «Geri al» düğmesiyle görünür. Başka bir eylem ya da sayfadan çıkış iletiyi kaldırır. */
+  var geriAl = null; // { anahtar, eski: depodaki metin ya da null, metin, yer: adres öneki, tamam? }
+  function silGeriAlinir(anahtar, yeni, metin, yer) { var e = ic().depo.getItem(anahtar); yaz(anahtar, yeni); geriAl = { anahtar: anahtar, eski: e, metin: metin, yer: yer }; }
+  function geriAlHtml() {
+    if (!geriAl) return '';
+    if (location.hash.indexOf(geriAl.yer) !== 0) { geriAl = null; return ''; }
+    return B.uyari({ tur: geriAl.tamam ? 'tamam' : 'bilgi', metin: geriAl.metin, veri: { 'geri-al': '' }, eylem: geriAl.tamam ? null : { metin: 'Geri al', veri: { 'arac-ac': 'geri-al' } } });
+  }
   function eksik(ad) { return B.bos({ baslik: ad + ' aracı yüklenemedi.', metin: 'Sayfayı yenile; sürerse Başbuğ’u kapatıp yeniden aç.' }); }
 
   /* ---- Not ---- */
@@ -473,9 +497,12 @@
   function notAgi(notlar) {
     var ag = Not.ag(notlar), n = ag.dugum.length, yer = {};
     if (n < 2) return '';
-    agYerlesim(ag, AG_EN, AG_BOY).forEach(function (q) { yer[q.id] = q; });
+    // bağ yokken ağ boş bir kutudur: yerine nasıl bağ kurulacağını söyleyen tek satır
+    if (!ag.kenar.length) return '<p class="soluk" data-not-ag-bos>Notlar arasında henüz bağ yok. Bir notta [[başka notun adı]] yaz ya da aynı #etiketi kullan; ağ burada çizilir.</p>';
+    var boy = n <= 6 ? 240 : AG_BOY; // az notta 400 px yükseklik çoğunlukla boş kalıyordu
+    agYerlesim(ag, AG_EN, boy).forEach(function (q) { yer[q.id] = q; });
     var bagli = ag.dugum.filter(function (d) { return d.derece; }).length;
-    return B.bolum({ baslik: 'Not ağı', id: 'ag-baslik', veri: { 'not-ag': '' }, govde: B.ag({ ad: 'Not ağı: ' + n + ' not, ' + ag.kenar.length + ' bağ', en: AG_EN, boy: AG_BOY,
+    return B.bolum({ baslik: 'Not ağı', id: 'ag-baslik', veri: { 'not-ag': '' }, govde: B.ag({ ad: 'Not ağı: ' + n + ' not, ' + ag.kenar.length + ' bağ', en: AG_EN, boy: boy,
       dugumler: ag.dugum.map(function (d) {
         return { id: d.id, ad: d.ad, x: yer[d.id].x, y: yer[d.id].y, r: Math.min(12, 6 + d.derece), href: '#/motor/not/' + d.id, etiket: d.ad + (d.derece ? ', ' + d.derece + ' bağ' : ', bağsız') };
       }),
@@ -543,11 +570,12 @@
     if (!alt) {
       var araclar = oku(ARAC_ANAHTAR, []);
       var hd = hizliDurum; hizliDurum = null;
-      return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not', eylem: { metin: 'Ayrıntılı not', tur: 'sade', href: '#/motor/not/yeni' } }) +
+      return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not' }) + geriAlHtml() + // başlık eylemi yok: geniş ekranda başlık manzaranın içinde, düğme sahnenin üstüne biniyordu
         // hızlı yazma: aç, yaz, Ctrl+Enter; ilk satır notun adı olur (Not.ad)
         '<form class="nothizli" data-taslak="not-hizli" novalidate>' + B.alan({ ad: 'Hızlı not', isim: 'hizli', tur: 'cok', enCok: 20000, deger: hd && hd.metin || (taslak('not-hizli') || {}).hizli || '',
-          yerTutucu: 'Aklındakini yaz. İlk satır notun adı olur; #etiket ve [[başka not]] kullanabilirsin.' }) +
-        B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, { yazi: hd && hd.tamam ? 'Kaydedildi.' : hd && hd.hata ? hd.hata : 'Ctrl + Enter da kaydeder' }]) + '</form>' +
+          yerTutucu: 'Aklındakini yaz. İlk satır notun adı olur; #etiket ve [[başka notun adı]] kullanabilirsin. Ctrl + Enter kaydeder.' }) +
+        // satır ters dizilir (kabuk.css .nothizli): solda Ayrıntılı not, sağda Kaydet; kayıt iletisi aralarında
+        B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, hd ? { yazi: hd.tamam ? 'Kaydedildi.' : hd.hata } : null, { metin: 'Ayrıntılı not', tur: 'sade', href: '#/motor/not/yeni' }]) + '</form>' +
         (notlar.length ? B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: 'Kelime ya da #etiket', veri: { 'not-ara': '' } }) : '') + // aranacak not yokken arama kutusu yalnız kalabalık
         '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div>' +
         (notlar.length ? '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' : '') +
@@ -575,7 +603,7 @@
       (durum ? B.uyari({ tur: durum.tamam ? 'tamam' : 'hata', metin: durum.metin }) : '') +
       (aracA ? '<input type="hidden" name="klasor" value="' + k(aracA.klasor) + '"><p class="soluk">Araç: ' + k(aracA.ad) + ' · ' + (aracA.sistemNotu.kingOkur ? 'King okur' : 'King okumaz') + '</p>' : '') +
       B.alan({ ad: 'Başlık', isim: 'baslik', deger: f.baslik, enCok: 120, yerTutucu: 'Kısa bir ad; boş kalırsa ilk satır kullanılır' }) +
-      B.alan({ ad: 'Not', isim: 'govde', tur: 'cok', uzun: true, deger: f.govde, yerTutucu: 'Yaz… #etiket ekleyebilir, [[başka not]] ile bağlantı kurabilirsin.' }) +
+      B.alan({ ad: 'Not', isim: 'govde', tur: 'cok', uzun: true, deger: f.govde, yerTutucu: 'Yaz… #etiket ekleyebilir, [[başka notun adı]] ile bağlantı kurabilirsin.' }) +
       (oteki.length ? B.alan({ ad: 'Başka bir nota bağ ekle', isim: 'bagEkle', tur: 'secim', veri: { 'bag-ekle': '' },
         secenekler: oteki.reduce(function (o, x) { o[x.id] = Not.ad(x) || 'Adsız not'; return o; }, { '': 'Not seç…' }) }) : '') +
       B.alan({ ad: 'Özel (King görmez)', isim: 'ozel', tur: 'onay', deger: !!f.ozel }) + B.alan({ ad: 'Üstte tut', isim: 'sabit', tur: 'onay', deger: !!f.sabit }) +
@@ -676,11 +704,11 @@
     // kapı kartı açılınca doğru cevap; kaynak gövdede (üst sırada uzun not dar ekranı taşırırdı)
     liste += kapiT.length ? B.bolum({ baslik: 'Kapıda kalınan sorular (' + kapiT.length + ')', veri: { 'kapi-kartlari': '' }, govde: ['<p class="soluk">Sorular taslak: onaylanınca tekrara girer. Açınca doğru cevap görünür.</p>']
       .concat(kapiT.map(function (x) { return B.acilir({ baslik: x.on, duzey: 3, govde: '<p>' + k(x.arka) + '</p><p class="soluk">' + k(kapiKaynak(x)) + ' · taslak</p>' }); })) }) : '';
-    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="tekrar">' + B.baslik({ metin: 'Tekrar' }) + govde +
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="tekrar">' + B.baslik({ metin: 'Tekrar' }) + geriAlHtml() + govde +
       '<form class="kartform" novalidate>' + B.baslik({ metin: 'Kart ekle', duzey: 2 }) +
       B.alan({ ad: 'Soru (kartın ön yüzü)', isim: 'on', enCok: 300, yerTutucu: 'Örn. Sokrates neden hiçbir şey yazmadı?' }) +
       B.alan({ ad: 'Cevap (kartın arka yüzü)', isim: 'arka', tur: 'cok', enCok: 2000, yerTutucu: 'Kendi cümlelerinle kısa cevap' }) +
-      B.eylemler([{ metin: 'Kartı ekle', tip: 'submit' }]) + '</form>' + liste + '</div>';
+      B.eylemler([{ metin: 'Kartı ekle', tur: kart ? 'ikincil' : 'ana', tip: 'submit' }]) + '</form>' + liste + '</div>';
   }
   function kartEkle(form) {
     var on = form.elements.on.value.trim(), arka = form.elements.arka.value.trim(), simdi = Date.now();
@@ -744,7 +772,7 @@
     var cins = ay('lifeos.beden.cinsiyet');
     var kural = kuralOzeti(Kayit, l, gun, { cinsiyet: cins === 'belirtilmedi' ? null : cins, boy: ay('lifeos.beden.boy'),
       dogumYili: ay('lifeos.beden.dogumYili'), hedef: ay('lifeos.beden.hedef') }, new Date(simdi).getFullYear());
-    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="kayit">' + B.baslik({ metin: 'Kayıt' }) +
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="kayit">' + B.baslik({ metin: 'Kayıt' }) + geriAlHtml() +
       '<form class="kayitform" data-taslak="kayit:' + kayitTur + '" novalidate>' +
       (il && (il.hatalar || il.tamam) ? B.uyari({ tur: il.hatalar ? 'hata' : 'tamam', metin: il.hatalar ? il.hatalar.join(' ') : il.tamam }) : '') +
       B.alan({ ad: 'Hangi gün?', isim: 'gun', tur: 'secim', deger: secili, veri: { 'kayit-gun': '' }, secenekler: gunler.reduce(function (o, g) { o[g] = gunYazi(g, gun); return o; }, {}) }) +
@@ -827,10 +855,11 @@
     return { sabitler: (Array.isArray(v.sabitler) ? v.sabitler : []).filter(function (s) { return s && s.id && Array.isArray(s.gunler); }) };
   }
   // plan bloğu (B.liste öğesi): saat ve ad bir satırda, süre ve etiketler notta; uzun satır (metin kısaltılmaz)
-  function blokSatiri(b, salt) {
-    var eylem = null, pul = null, dg = function (metin, durum) { return { metin: metin, tur: 'sade', veri: { 'arac-ac': 'plan-durum', id: b.id, durum: durum } }; };
+  // sira: kurulu planda sıradaki (ilk bekleyen) blok; onun «Yapıldı»sı sayfanın tek ana eylemidir
+  function blokSatiri(b, salt, sira) {
+    var eylem = null, pul = null, dg = function (metin, durum, tur) { return { metin: metin, tur: tur || 'sade', veri: { 'arac-ac': 'plan-durum', id: b.id, durum: durum } }; };
     if (!salt && b.tur !== 'mola' && b.tur !== 'sabit') {
-      if (b.durum === 'bekliyor') eylem = [dg('Yapıldı', 'yapildi'), dg('Atla', 'atlandi')];
+      if (b.durum === 'bekliyor') eylem = [dg('Yapıldı', 'yapildi', sira ? 'ana' : 'sade'), dg('Atla', 'atlandi')];
       else { pul = b.durum === 'yapildi' ? { metin: 'yapıldı', tur: 'altin' } : b.durum === 'atlandi' ? 'atlandı' : 'kısmen'; eylem = [dg('Geri al', 'bekliyor')]; }
     }
     var sabit = b.tur === 'sabit'; // sabit blok: süre yazılmaz; gece bölünen bloğun 23:59'u 24:00 okunur
@@ -850,12 +879,14 @@
     var gunAd = function (g) { return new Date(g + 'T12:00:00').toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }); };
     var isListe = function (ad, l) { return B.liste({ ad: ad, ogeler: l.map(function (x) { return { ad: x.ad, not: x.dk + ' dk' + (x.devir ? ' · ' + x.devir + ' kez devretti' : '') }; }) }); };
     var govde;
-    if (!dr.ayar.musait.length) govde = B.bos({ baslik: 'Hafta, Plan sayfasındaki boş zamanına kurulur.', eylem: { metin: 'Önce boş zamanını yaz', href: '#/motor/plan' } });
+    if (!dr.ayar.musait.length) govde = B.bos({ baslik: 'Hafta, Plan sayfasındaki boş zamanına kurulur.', eylem: { metin: 'Önce boş zamanını yaz', tur: 'ana', href: '#/motor/plan' } });
     else {
       var r = haftaKur(Plan, dr, sab, bugun, planEk(simdi)), h = r.ok && r.hafta, bp = r.ok && bugunPlani(dr, simdi);
       if (bp && bp.plan) { // bugünün sütunu Gün sayfasındaki planın kendisi; haftanın toplamı ona göre
         h.gunler[0] = Object.assign({}, h.gunler[0], { bloklar: bp.plan.bloklar, ozet: bp.plan.ozet, sigmayan: bp.plan.sigmayan });
-        h.ozet = Object.assign({}, h.ozet, { planlananDk: { v: h.gunler.reduce(function (t, g) { return t + (g.ozet.planlananDk.v || 0); }, 0), k: h.ozet.planlananDk.k } });
+        // toplamın etiketi günlerinkinden: bir gün tahminse toplam da tahmindir (eskiden başlık «hesaplandı», bugün «tahmin» diyordu)
+        h.ozet = Object.assign({}, h.ozet, { planlananDk: { v: h.gunler.reduce(function (t, g) { return t + (g.ozet.planlananDk.v || 0); }, 0),
+          k: h.gunler.some(function (g) { return g.ozet.planlananDk.k === 'estimated'; }) ? 'estimated' : h.ozet.planlananDk.k } });
       }
       govde = !r.ok ? B.uyari({ tur: 'dikkat', metin: r.hatalar.join(' ') })
         : '<p class="soluk">' + I.kac(gunAd(h.bas)) + ' – ' + I.kac(gunAd(h.bitis)) + ' · ' + (h.ozet.planlananDk.v ? 'planlanan ' + h.ozet.planlananDk.v + ' dk (' + E[h.ozet.planlananDk.k] + ')' : 'plana girecek iş yok') +
@@ -863,41 +894,44 @@
           '<div class="hafta">' + h.gunler.map(function (p) { // yalnız yerleşim: günler ızgarada yan yana
             return B.bolum({ baslik: gunAd(p.gun) + (p.gun === bugun ? ' · bugün' : ''), id: 'hg-' + p.gun, veri: { gun: p.gun }, govde: [
               p.bloklar.length ? B.liste({ ad: gunAd(p.gun) + ' blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, true); }) }) : '<p class="soluk">Bu günde blok yok.</p>',
-              '<p class="soluk">' + (p.ozet.planlananDk.v ? p.ozet.planlananDk.v + ' dk (' + E[p.ozet.planlananDk.k] + ')' : 'Planlanan iş yok') + '</p>',
+              p.bloklar.length ? '<p class="soluk">' + (p.ozet.planlananDk.v ? p.ozet.planlananDk.v + ' dk (' + E[p.ozet.planlananDk.k] + ')' : 'Planlanan iş yok') + '</p>' : '',
               p.sigmayan.length ? '<p class="soluk">Sığmayan: ' + I.kac(p.sigmayan.map(function (x) { return x.ad + ' (' + x.neden + ')'; }).join(', ')) + '</p>' : ''] });
           }).join('') + '</div>' +
           (h.devir.length ? B.bolum({ baslik: 'Gelecek haftaya devreder (' + h.devir.length + ')', govde: isListe('Gelecek haftaya devreder', h.devir) }) : '') +
           (h.bekleyen.length ? B.bolum({ baslik: 'Bekleyen (' + h.bekleyen.length + ')', govde: ['<p class="soluk">Haftaya sığmadı; devirden sonra sıradadır, kaybolmaz.</p>', isListe('Bekleyen', h.bekleyen)] }) : '');
     }
-    return I.ust(geri) + '<div class="govde" data-arac="plan" data-hafta>' + B.baslik({ metin: 'Hafta planı' }) + planIletisi(il) + govde +
+    return I.ust(geri) + '<div class="govde" data-arac="plan" data-hafta>' + B.baslik({ metin: 'Hafta planı' }) + planIletisi(il) + geriAlHtml() + govde +
       B.bolum({ baslik: 'Sabit bloklar', id: 'sabit-baslik', govde: ['<p class="soluk">Uyku, okul, iş, antrenman: bir kez yaz, her hafta seçtiğin günlere girer. Plan bunların dışına kurulur.</p>',
         sab.sabitler.length ? B.liste({ ad: 'Sabit bloklar', ogeler: sab.sabitler.map(function (s) {
           var gunler = s.gunler.length === 7 ? 'her gün' : s.gunler.map(function (g) { return GUN_KISA[g]; }).join(', ');
           return { ad: s.ad + ' · ' + s.bas + '–' + s.bit, not: gunler + (s.bit < s.bas ? ' · gece yarısını geçer' : ''), eylemler: silEylemi('Sabit bloğu sil: ' + s.ad, { 'arac-ac': 'plan-sabit-sil', id: s.id }) };
         }) }) : '',
         '<form class="planform" data-plan="sabit" novalidate>' + B.alan({ ad: 'Ad', isim: 'ad', enCok: 60, yerTutucu: 'Örn. Okul, iş, spor' }) + saatAraligi() +
-        B.alan({ ad: 'Günler', isim: 'gun', tur: 'coklu', secenekler: Object.assign({}, GUN_KISA), deger: [0, 1, 2, 3, 4] }) + B.eylemler([{ metin: 'Sabit blok ekle', tip: 'submit' }]) + '</form>'] }) + '</div>';
+        B.alan({ ad: 'Günler', isim: 'gun', tur: 'coklu', secenekler: Object.assign({}, GUN_KISA), deger: [0, 1, 2, 3, 4] }) + B.eylemler([{ metin: 'Sabit blok ekle', tur: dr.ayar.musait.length ? 'ana' : 'ikincil', tip: 'submit' }]) + '</form>'] }) + '</div>';
   }
   function sayfaPlan(yer, alt) {
     var I = ic();
     if (!Plan) return I.ust(I.kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: 'Plan' }) + eksik('Plan') + '</div>';
     if (alt === 'hafta') return sayfaPlanHafta();
     var simdi = Date.now(), dr = planDurum(simdi), bp = bugunPlani(dr, simdi), p = bp && bp.plan, kurulu = !!(bp && bp.kurulu), il = planIleti; planIleti = null;
-    var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' };
+    var E = { computed: 'hesaplandı', estimated: 'tahmin', missing: 'veri yok' }, musait = dr.ayar.musait.length;
+    var siradaki = kurulu && p.bloklar.filter(function (b) { return b.tur !== 'mola' && b.tur !== 'sabit' && b.durum === 'bekliyor'; })[0];
+    // tek ana eylem (AGENTS §0.1 kural 2): boş zaman yoksa «Aralık ekle», plan önerideyse «Planı kur», kuruluysa sıradaki bloğun «Yapıldı»sı
+    var aralikForm = '<form class="planform" data-plan="aralik" novalidate>' + saatAraligi() + B.eylemler([{ metin: 'Aralık ekle', tur: musait ? 'ikincil' : 'ana', tip: 'submit' }]) + '</form>';
     var planHtml = !dr.ayar.musait.length ? B.bos({ baslik: 'Önce boş zamanını yaz.', metin: 'Plan o aralığa kurulur.' })
       : !p ? B.uyari({ tur: 'dikkat', metin: bp.hatalar.join(' ') })
       : (kurulu ? '' : '<p class="soluk">Önerilen plan; «Planı kur» deyince bugünün planı olur ve blokları işaretleyebilirsin.</p>') +
-        (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, !kurulu); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
+        (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, !kurulu, b === siradaki); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
         '<p class="soluk">Planlanan ' + (p.ozet.planlananDk.v || 0) + ' dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan ' + p.ozet.bosDk.v + ' dk (' + E[p.ozet.bosDk.k] + ')' +
         (p.ozet.molaSayisi ? ' · ' + p.ozet.molaSayisi + ' mola' : '') + '</p>' +
         (p.sigmayan.length ? B.uyari({ tur: 'dikkat', metin: 'Sığmayanlar (' + p.sigmayan.length + '): ' + p.sigmayan.map(function (x) { return x.ad + ' · ' + x.dk + ' dk · ' + x.neden; }).join('; ') }) : '');
-    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan">' + B.baslik({ metin: 'Plan' }) + planIletisi(il) +
-      B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([dr.ayar.musait.length ? { metin: kurulu ? 'Yeniden kur' : 'Planı kur', tur: 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,
-        { metin: 'Hafta planı', href: '#/motor/plan/hafta' }])] }) +
+    return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan">' + B.baslik({ metin: 'Plan' }) + planIletisi(il) + geriAlHtml() +
+      B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([musait ? { metin: kurulu ? 'Yeniden kur' : 'Planı kur', tur: kurulu ? 'sade' : 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,
+        { metin: 'Hafta planı', tur: 'sade', href: '#/motor/plan/hafta' }])] }) +
       B.bolum({ baslik: 'Boş zamanım', govde: [dr.ayar.musait.length ? B.liste({ ad: 'Boş zaman aralıkları', ogeler: dr.ayar.musait.map(function (m, i) {
           return { ad: m.bas + '–' + m.bit, eylemler: silEylemi('Aralığı sil: ' + m.bas + '–' + m.bit, { 'arac-ac': 'plan-aralik-sil', i: i }) };
         }) }) : '',
-        '<form class="planform" data-plan="aralik" novalidate>' + saatAraligi() + B.eylemler([{ metin: 'Aralık ekle', tip: 'submit' }]) + '</form>'] }) +
+        musait ? B.acilir({ baslik: 'Başka aralık ekle', duzey: 3, govde: aralikForm }) : aralikForm] }) +
       B.bolum({ baslik: 'İşler', govde: [dr.isler.length ? B.liste({ ad: 'İşler', ogeler: dr.isler.map(function (x) {
           return { ad: x.ad, not: x.dk + ' dk' + (x.son ? ' · son ' + x.son : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : ''), eylemler: silEylemi('İşi sil: ' + x.ad, { 'arac-ac': 'plan-is-sil', id: x.id }) };
         }) }) : '<p class="soluk">Dersler ve tekrar kartları plana kendiliğinden girer.</p>',
@@ -1123,6 +1157,7 @@
   });
   d.addEventListener('submit', function (e) {
     var f = e.target;
+    if (f.matches('[data-arac] form, form.nothizli, form.notform, form.aracform, form.kartform, form.kayitform, form.planform')) geriAl = null;
     if (f.matches('form.notform')) { e.preventDefault(); notFormKaydet(f); }
     else if (f.matches('form.nothizli')) { e.preventDefault(); hizliKaydet(f); }
     else if (f.matches('form.aracform')) { e.preventDefault(); aracFormKaydet(f); }
@@ -1150,10 +1185,18 @@
   d.addEventListener('click', function (e) {
     var b = e.target.closest('[data-arac-ac]:not([aria-disabled="true"])'); // kilitli soru şıkkı odakta kalır, tıklaması yok sayılır
     if (!b) return;
-    var ne = b.getAttribute('data-arac-ac'), I = ic();
+    var ne = b.getAttribute('data-arac-ac'), I = ic(), id = b.getAttribute('data-id');
+    if (ne === 'geri-al') {
+      if (!geriAl || geriAl.tamam) return;
+      if (geriAl.eski == null) I.depo.removeItem(geriAl.anahtar); else I.depo.setItem(geriAl.anahtar, geriAl.eski);
+      geriAl = { metin: 'Geri alındı.', yer: geriAl.yer, tamam: true }; I.rota();
+      var gi = d.querySelector('[data-geri-al]'); if (gi) gi.focus(); return;
+    }
+    geriAl = null;
     if (ne === 'not-sil') {
-      if (!confirm('Bu not silinsin mi? Geri alınamaz.')) return;
-      yaz(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== b.getAttribute('data-id'); })); taslakYaz('not:' + b.getAttribute('data-id'), null);
+      var sn = oku(NOT_ANAHTAR, []).filter(function (n) { return n.id === id; })[0];
+      silGeriAlinir(NOT_ANAHTAR, oku(NOT_ANAHTAR, []).filter(function (n) { return n.id !== id; }), '«' + ((sn && Not.ad(sn)) || 'Adsız not') + '» silindi.', '#/motor/not');
+      taslakYaz('not:' + id, null);
       return I.git('#/motor/not');
     }
     if (ne === 'baslangic-getir') return baslangicGetir();
@@ -1171,13 +1214,27 @@
         var rd = Plan.durumYaz(dr.gunPlan.plan, b.getAttribute('data-id'), veriD);
         return rd.ok ? planYaz({ ayar: dr.ayar, isler: dr.isler, gunPlan: { gun: dr.gunPlan.gun, plan: rd.plan } }) : planHata([rd.neden]);
       }
-      if (ne === 'plan-aralik-sil') return planYaz({ ayar: Object.assign({}, dr.ayar, { musait: dr.ayar.musait.filter(function (_, i) { return i !== +b.getAttribute('data-i'); }) }), isler: dr.isler, gunPlan: dr.gunPlan });
-      if (ne === 'plan-sabit-sil') { yaz(PLAN_SABLON, { sabitler: planSablon().sabitler.filter(function (s) { return s.id !== b.getAttribute('data-id'); }) }); return I.rota(); }
-      if (ne === 'plan-is-sil') return planYaz({ ayar: dr.ayar, gunPlan: dr.gunPlan, isler: dr.isler.filter(function (x) { return x.id !== b.getAttribute('data-id'); }) });
+      var yerP = location.hash.indexOf('#/motor/plan/hafta') === 0 ? '#/motor/plan/hafta' : '#/motor/plan';
+      if (ne === 'plan-aralik-sil') {
+        var ai = +b.getAttribute('data-i'), am = dr.ayar.musait[ai];
+        silGeriAlinir(PLAN_ANAHTAR, { ayar: Object.assign({}, dr.ayar, { musait: dr.ayar.musait.filter(function (_, i) { return i !== ai; }) }), isler: dr.isler, gunPlan: dr.gunPlan },
+          (am ? am.bas + '–' + am.bit + ' aralığı' : 'Aralık') + ' silindi.', yerP);
+        return I.rota();
+      }
+      if (ne === 'plan-sabit-sil') {
+        var ss = planSablon().sabitler.filter(function (s) { return s.id === id; })[0];
+        silGeriAlinir(PLAN_SABLON, { sabitler: planSablon().sabitler.filter(function (s) { return s.id !== id; }) }, '«' + (ss ? ss.ad : 'Sabit blok') + '» sabit bloğu silindi.', yerP);
+        return I.rota();
+      }
+      if (ne === 'plan-is-sil') {
+        var si = dr.isler.filter(function (x) { return x.id === id; })[0];
+        silGeriAlinir(PLAN_ANAHTAR, { ayar: dr.ayar, gunPlan: dr.gunPlan, isler: dr.isler.filter(function (x) { return x.id !== id; }) }, '«' + (si ? si.ad : 'İş') + '» işi silindi.', yerP);
+        return I.rota();
+      }
     }
     if (ne === 'kayit-sil') {
-      if (!confirm('Bu kayıt silinsin mi?')) return;
-      yaz(KAYIT_ANAHTAR, oku(KAYIT_ANAHTAR, []).filter(function (r) { return r.id !== b.getAttribute('data-id'); }));
+      var sk = oku(KAYIT_ANAHTAR, []).filter(function (r) { return r.id === id; })[0];
+      silGeriAlinir(KAYIT_ANAHTAR, oku(KAYIT_ANAHTAR, []).filter(function (r) { return r.id !== id; }), (sk && Kayit.TURLER[sk.tur] ? Kayit.TURLER[sk.tur].ad + ' kaydı' : 'Kayıt') + ' silindi.', '#/motor/kayit');
       return I.rota();
     }
     if (ne === 'kart-goster') { gosterilen = b.closest('[data-kart]').getAttribute('data-kart'); I.rota(); var a = d.querySelector('.b-kart__arka'); if (a) a.focus({ preventScroll: true }); return; }
@@ -1187,8 +1244,8 @@
       gosterilen = null; return I.rota();
     }
     if (ne === 'kart-sil') {
-      if (!confirm('Bu kart silinsin mi? Tekrar geçmişi de gider.')) return;
-      yaz(KART_ANAHTAR, oku(KART_ANAHTAR, []).filter(function (x) { return x.id !== b.getAttribute('data-id'); }));
+      var sc = oku(KART_ANAHTAR, []).filter(function (x) { return x.id === id; })[0];
+      silGeriAlinir(KART_ANAHTAR, oku(KART_ANAHTAR, []).filter(function (x) { return x.id !== id; }), '«' + (sc ? sc.on : 'Kart') + '» kartı silindi.', '#/motor/tekrar');
       return I.rota();
     }
   });

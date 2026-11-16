@@ -57,9 +57,17 @@ const dene = (ad, kosul, ek) => { if (!kosul) kalan++; console.log((kosul ? '✓
     const d1 = await esit(A);
     dene('A: eşitleme durumu açık, hatasız, bekleyen yok', d1.acik && !d1.hata && d1.bekleyen === 0, JSON.stringify(d1));
     dene('A: ayar tek depoya gitmedi (yalnız kayıt gider)', depoda('lifeos.tema.secim') === null && depoda('lifeos.yol.son') === null);
+    // dal seçimi öğrenme kaydıdır (2026-11-17b): tek depoya gider, ikinci cihazda seçili gelir
+    await A.goto(T + '/kabuk/#/alan/tarih');
+    await A.waitForSelector('.dallar [data-dal="turk"] > summary');
+    await A.click('.dallar [data-dal="turk"] > summary');
+    await A.click('[data-ac="dal-sec"][data-dal="turk"]');
+    dene('A: dal seçimi tek depoya gitti', await bekleKi(() => depoda('lifeos.yol.tarih.dal') === '"turk"'), String(depoda('lifeos.yol.tarih.dal')));
 
     // ---- cihaz B: boş açılır, A'nın notunu çeker ----
     const B = await cihaz('B');
+    await B.goto(T + '/kabuk/#/alan/tarih');
+    dene('B: A’nın seçtiği dal ikinci cihazda seçili', await bekleKi(async () => (await B.locator('.dallar > [data-dal="turk"][data-secili]').count()) === 1));
     await B.goto(T + '/kabuk/#/motor/not');
     await B.waitForSelector('[data-arac="not"]');
     dene('B: ikinci cihaz A\'nın notunu gösterir', await bekleKi(async () => /Erdem/.test(await B.textContent('#not-liste'))), await B.textContent('#not-liste'));
