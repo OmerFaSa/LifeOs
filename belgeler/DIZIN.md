@@ -58,6 +58,10 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Tur 2026-11-16 · King raporu](ekip/sadelesme/tur-20261116/king.md) — Uzun konuşmaya uygun sohbet, Öğretmen/Filozof kipleri, ders bağlamı, Antigravity'de hydrogen kanıtı (planModel) ve bağlam bütçesi.
 - [Tur 2026-11-16 · Piksel raporu](ekip/sadelesme/tur-20261116/piksel.md) — Sahnelerde yaşayan minik insanlar, kalite düzeltmeleri, önce/sonra görüntüleri ve hız ölçümü.
 - [Tur 2026-11-16b · İçerik, dil ve eksikler](ekip/sadelesme/tur-20261116b/icerik.md) — Başbuğ adı, geliştirici dilinin temizliği, Yönetim ayrımı, yazılan taslakları, tek plan kaynağı, Sağlık panosu ve tahlil kaydı.
+- [Tur 2026-11-16b · Kabuk gezinme ve ders yapısı](ekip/sadelesme/tur-20261116b/kabuk.md) — rıhtım kalktı, telefonda alt sekme çubuğu, gizlenen üst çubuk, alan genel bakışı (konu başlıkları), ekran hataları günlüğe.
+- [Tur 2026-11-16b · Piksel sahneler](ekip/sadelesme/tur-20261116b/piksel.md) — eski sahneler silindi, 14 yeni Başbuğ sahnesi; yer → sahne listesi, ölçümler, görüntüler.
+- [Tur 2026-11-16b · Sesler](ekip/sadelesme/tur-20261116b/ses.md) — arayüz sesleri baştan, düzey ayarı, dikişsiz rüzgâr ambiyansı.
+- [Tur 2026-11-16b · Ad ve altyapı](ekip/sadelesme/tur-20261116b/ad-altyapi.md) — LifeOS → Başbuğ (iç kimlikler kalır), King istemi kırpma, masaüstü sunucu bekçisi, hata ucu, boş port.
 - [Faz 8 · Görsel dil raporu (P1)](ekip/sadelesme/faz8-gorsel-rapor.md) — Ölçü sistemi (yazı, boşluk, köşe, gölge jetonları), durum dili, iskelet yükleniyor, kontrast tablosu, sayfa cilası (2026-11-15).
 - [Faz 8 · Hareket raporu (P2)](ekip/sadelesme/faz8-hareket-rapor.md) — Hareket sözlüğü, paylaşılan öğe geçişi, mikro etkileşimler, hareket gezisi ve kare ölçümü önce/sonra (2026-11-15).
 - [Faz 3 · Süreli deneme ve aşamalar](ekip/sadelesme/faz3-deneme-asama.md) — Kabukta süreli deneme ve prova, net ve sonuç ekranı; aşama farkındalığı (eski 1. aşama kaydı bayt bayt korunur) (2026-11-13).
