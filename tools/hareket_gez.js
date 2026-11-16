@@ -136,7 +136,8 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
       else dene(ad + ': doğruda onay işareti çizilir', dg.anim.indexOf('ciz') >= 0, JSON.stringify(dg.anim));
 
       // 6 · ders bitince ilerleme çubuğu dolar; aria-valuenow anında yeni değerde
-      await p.click('[data-ac="okudum"]'); await p.waitForFunction(h => location.hash !== h, '#/alan/felsefe/ders/' + d1.id); await bekleGecis(p); await p.waitForTimeout(600);
+      await p.click('[data-ac="okudum"]'); if (await p.locator('[data-ac="okudum"][data-yine]').count()) await p.click('[data-ac="okudum"][data-yine]'); // cevaplanmamış alıştırma: yumuşak onay
+      await p.waitForFunction(h => location.hash !== h, '#/alan/felsefe/ders/' + d1.id); await bekleGecis(p); await p.waitForTimeout(600);
       await p.evaluate(() => { location.hash = '#/alan/felsefe'; }); await p.waitForSelector('.govde [role=progressbar]');
       const il = await p.evaluate(() => new Promise(r => requestAnimationFrame(() => r({
         deger: [].map.call(document.querySelectorAll('.govde [role=progressbar]'), x => x.getAttribute('aria-valuenow')).join(','),
