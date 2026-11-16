@@ -1,7 +1,10 @@
 /* kabuk/gece.js — Ambiyans sesi: tarayıcıda üretilen gündüz ve gece ambiyansı (sahibin isteği 2026-11-15: önce «sakin bir gece»,
  * sonra «gece ve gündüz ambiyans sesini daha güzel, daha profesyonel»). Ses dosyası ve dış kaynak yok: Web Audio ile sentez.
- *  Gece: hafif rüzgâr, birkaç cırcır böceği (her biri kendi ritminde, sağda solda), uzakta kurbağa, çok seyrek baykuş.
- *  Gündüz: esinti, uzakta akan dere, ötüşen kuşlar (cıvıltı, ışıl ışıl ötüş), arada uzaktan guguk.
+ *  Rüzgâr katmanlı ve bozkır havasında (2026-11-16 «daha doğal»): alçak gövde, orta esinti, ot hışırtısı, çok hafif bozkır ıslığı;
+ *  hepsi aynı yavaş, birbirine oranı düzensiz üç dalgalanmayla kabarır (rüzgâr bir bütün gibi eser). Döngü gürültüleri 8–14 sn,
+ *  uçları üst üste bindirilmiş (dikiş tıkı yok), uzunlukları ortak katı olmayan sürelerde: desen kulakta tekrar etmez.
+ *  Gece: rüzgâr, birkaç cırcır böceği (her biri kendi ritminde, 2–4 nabız, arada susar; biri uzakta, boğuk), uzakta kurbağa, çok seyrek baykuş.
+ *  Gündüz: bozkır rüzgârı, uzakta akan dere (kısık), ötüşen kuşlar (cıvıltı, tarla kuşu gibi ötüş), arada uzaktan guguk.
  *  Uzaktaki sesler ortak bir yankıdan geçer (aynı açık havada duyulur); sıkıştırıcı ani tepeleri yumuşatır.
  * Ayar: lifeos.ses.gece (bu cihazın, kabuk/ayar.js): kapalı | açık (saate göre: 06–20 gündüz) | hep gece | hep gündüz.
  * Üst çubuktaki düğme açar/kapatır. Tarayıcı sesi ancak bir dokunuştan sonra başlatır: ayar açıksa ilk tıklamada/tuşta başlar.
@@ -41,26 +44,46 @@
     return { olaylar: olay, durum: y };
   }
 
-  var Gece = { plan: plan, kipSec: kipSec, ANAHTAR: ANAHTAR };
+  // Dikişsiz döngü: n+x örneklik h'den n örnek; son x örnek başa eş güçle bindirilir, böylece v[n-1] → v[0] geçişi h[n-1] → h[n] gibi akar.
+  function dikis(h, n, x) {
+    var v = new Float32Array(n);
+    for (var i = 0; i < n; i++) v[i] = i < x ? h[i] * Math.sin(i / x * Math.PI / 2) + h[n + i] * Math.cos(i / x * Math.PI / 2) : h[i];
+    return v;
+  }
+
+  var Gece = { plan: plan, kipSec: kipSec, dikis: dikis, ANAHTAR: ANAHTAR };
   Kabuk.Gece = Gece;
   if (typeof module !== 'undefined' && module.exports) module.exports = Gece;
   if (typeof document === 'undefined') return;
 
   /* ---------------- tarayıcı ---------------- */
   var d = document, ctx = null, ana = null, yanki = null, katman = {}, saat = null, durum = null, calisiyor = false, kip = null;
-  var CIR_SES = [{ f: 4400, pan: -0.55 }, { f: 4750, pan: 0.45 }, { f: 4100, pan: 0.1 }];
+  var CIR_SES = [{ f: 4400, pan: -0.55 }, { f: 4750, pan: 0.45 }, { f: 4100, pan: 0.1, uzak: true }];
+  var ANA = 0.4; // ana düzey: ambiyans arka planda kalır (ölçüm: belgeler/ekip/sadelesme/tur-20261116b/ses.md)
   var KUS = [{ pan: -0.6, f: 3600 }, { pan: 0.55, f: 4300 }, { pan: 0.05, f: 3000 }];
   function deger() { var A = Kabuk.Ayar, I = Kabuk.ic; try { return A && I ? A.oku(I.depo, ANAHTAR) : 'kapali'; } catch (e) { return 'kapali'; } }
   function acikMi() { var v = deger(); return !!v && v !== 'kapali'; }
   function simdikiKip() { return kipSec(deger(), new Date().getHours()); }
 
-  function gurultu(sn, kahve) { // döngü stereo gürültü: kahverengi (rüzgâr) ya da yumuşatılmış (dere)
-    var n = Math.round(ctx.sampleRate * sn), b = ctx.createBuffer(2, n, ctx.sampleRate);
+  // Döngü stereo gürültü: kahverengi (rüzgâr), yumuşatılmış (dere) ya da beyaz (ot hışırtısı). Son 0,6 sn başa eş güçle bindirilir:
+  // döngü noktasında sıçrama (tık) olmaz.
+  function gurultu(sn, tip) {
+    var sr = ctx.sampleRate, n = Math.round(sr * sn), x = Math.round(sr * 0.6), b = ctx.createBuffer(2, n, sr), h = new Float32Array(n + x);
     for (var k = 0; k < 2; k++) {
-      var v = b.getChannelData(k), son = 0;
-      for (var i = 0; i < n; i++) { var w = Math.random() * 2 - 1; son = kahve ? (son + 0.02 * w) / 1.02 : son * 0.86 + w * 0.14; v[i] = son * (kahve ? 3.5 : 1.6); }
+      var v = b.getChannelData(k), son = 0, i;
+      for (i = 0; i < n + x; i++) {
+        var w = Math.random() * 2 - 1;
+        son = tip === 'kahve' ? (son + 0.02 * w) / 1.02 : tip === 'yumusak' ? son * 0.86 + w * 0.14 : w;
+        h[i] = son * (tip === 'kahve' ? 3.5 : tip === 'yumusak' ? 1.6 : 0.5);
+      }
+      v.set(dikis(h, n, x));
     }
     return b;
+  }
+  function lfo(l) { // yavaş dalgalanmaların toplamı: [hız Hz, pay]; hızların oranı düzensiz, desen tekrar etmez
+    var t = ctx.createGain();
+    l.forEach(function (x) { var o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = x[0]; g.gain.value = x[1]; o.connect(g); g.connect(t); o.start(); });
+    return t;
   }
   function yankiKur() { // 2,4 sn sönen stereo yankı
     var n = Math.round(ctx.sampleRate * 2.4), b = ctx.createBuffer(2, n, ctx.sampleRate);
@@ -69,28 +92,36 @@
     var g = ctx.createGain(); g.gain.value = 0.32; c.connect(g); g.connect(ana);
     return c;
   }
-  // Sürekli katman: döngü gürültü → süzgeç → yavaş dalgalanan kazanç → kip kazancı (kipe göre 4 sn'de açılır/kapanır) → ana.
-  function surekli(buf, tur, f, q, taban, derinlik, hiz) {
-    var k = ctx.createBufferSource(); k.buffer = buf; k.loop = true; k.playbackRate.value = 0.9 + Math.random() * 0.2;
+  // Sürekli katman: döngü gürültü (rastgele yerden, hafif farklı hızda) → süzgeç → dalgalanan kazanç → kip kazancı (4 sn'de açılır/kapanır) → ana.
+  // mod: ortak rüzgâr dalgası (katmanlar birlikte kabarır); fmod: süzgeç frekansını gezdiren dalga (ıslık).
+  function surekli(buf, tur, f, q, taban, derinlik, mod, fmod) {
+    var k = ctx.createBufferSource(); k.buffer = buf; k.loop = true; k.playbackRate.value = 0.92 + Math.random() * 0.16;
     var s = ctx.createBiquadFilter(); s.type = tur; s.frequency.value = f; s.Q.value = q;
     var g = ctx.createGain(); g.gain.value = taban;
-    var dalga = ctx.createOscillator(), der = ctx.createGain(); dalga.frequency.value = hiz; der.gain.value = derinlik;
-    dalga.connect(der); der.connect(g.gain);
+    var der = ctx.createGain(); der.gain.value = derinlik; mod.connect(der); der.connect(g.gain);
+    if (fmod) { var fd = ctx.createGain(); fd.gain.value = f * 0.12; fmod.connect(fd); fd.connect(s.frequency); }
     var kg = ctx.createGain(); kg.gain.value = 0;
-    k.connect(s); s.connect(g); g.connect(kg); kg.connect(ana); k.start(); dalga.start();
+    k.connect(s); s.connect(g); g.connect(kg); kg.connect(ana); k.start(0, Math.random() * buf.duration);
     return kg;
   }
-  function kur() {
-    ctx = new (kok.AudioContext || kok.webkitAudioContext)();
+  function kur() { ctx = new (kok.AudioContext || kok.webkitAudioContext)(); kurIc(); }
+  function kurIc() {
     ana = ctx.createGain(); ana.gain.value = 0;
     var sik = ctx.createDynamicsCompressor(); sik.threshold.value = -18; sik.ratio.value = 3;
     ana.connect(sik); sik.connect(ctx.destination);
     yanki = yankiKur();
-    var kahve = gurultu(6, true), yumusak = gurultu(5, false);
-    katman.gece = [surekli(kahve, 'lowpass', 420, 0.7, 0.16, 0.07, 0.07)];
-    katman.gunduz = [surekli(kahve, 'lowpass', 900, 0.5, 0.07, 0.04, 0.05), // esinti
-      surekli(yumusak, 'bandpass', 2300, 0.6, 0.05, 0.015, 0.31), // dere: küçük hızlı kabarmalar
-      surekli(yumusak, 'lowpass', 520, 0.8, 0.05, 0.012, 0.11)]; // derenin gövdesi
+    var kahve = gurultu(11.3, 'kahve'), yumusak = gurultu(13.7, 'yumusak'), beyaz = gurultu(7.9, 'beyaz');
+    var esinti = lfo([[0.043, 0.55], [0.117, 0.3], [0.0071, 0.45]]), gezin = lfo([[0.029, 0.7], [0.083, 0.3]]); // pay toplamı ≤ 1,3
+    katman.gece = [surekli(kahve, 'lowpass', 260, 0.7, 0.13, 0.06, esinti), // gövde
+      surekli(kahve, 'bandpass', 600, 0.8, 0.05, 0.03, esinti), // esinti
+      surekli(beyaz, 'bandpass', 5200, 0.6, 0.012, 0.008, esinti), // ot hışırtısı
+      surekli(kahve, 'bandpass', 480, 9, 0.05, 0.03, esinti, gezin)]; // bozkır ıslığı: dar bant, frekansı gezinir
+    katman.gunduz = [surekli(kahve, 'lowpass', 340, 0.7, 0.09, 0.05, esinti),
+      surekli(kahve, 'bandpass', 800, 0.7, 0.06, 0.035, esinti),
+      surekli(beyaz, 'bandpass', 4500, 0.6, 0.018, 0.012, esinti),
+      surekli(kahve, 'bandpass', 640, 9, 0.045, 0.03, esinti, gezin),
+      surekli(yumusak, 'bandpass', 2300, 0.6, 0.025, 0.008, lfo([[0.31, 1]])), // dere (uzakta): küçük hızlı kabarmalar
+      surekli(yumusak, 'lowpass', 520, 0.8, 0.03, 0.008, lfo([[0.11, 1]]))]; // derenin gövdesi
   }
   function kipUygula(yeni) {
     if (yeni === kip) return;
@@ -113,12 +144,19 @@
     o.connect(g); g.connect(p); o.start(b); o.stop(b + sure + 0.02);
   }
 
-  function cir(t, i) { // üç kısa nabız: cırcırın «cri-cri-cri»si
-    var c = CIR_SES[i % CIR_SES.length], o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = c.f + (Math.random() * 60 - 30); g.gain.value = 0;
-    var tepe = 0.018 + Math.random() * 0.008;
-    for (var n = 0; n < 3; n++) { var b = t + n * 0.045; g.gain.setValueAtTime(0, b); g.gain.linearRampToValueAtTime(tepe, b + 0.006); g.gain.linearRampToValueAtTime(0, b + 0.028); }
-    o.connect(g); g.connect(cikis(c.pan, false)); o.start(t); o.stop(t + 0.2);
+  function cir(t, i) { // 2–4 kısa nabız, her nabızda hafif inen perde; arada susar (makine gibi düzenli değil); uzaktaki boğuk ve yankılı
+    if (Math.random() < 0.18) return;
+    var c = CIR_SES[i % CIR_SES.length], o = ctx.createOscillator(), g = ctx.createGain(), f = c.f + (Math.random() * 80 - 40);
+    var n = 2 + Math.floor(Math.random() * 3), tepe = (c.uzak ? 0.006 : 0.011) + Math.random() * 0.004, ara = 0.04 + Math.random() * 0.008;
+    o.type = 'sine'; g.gain.value = 0;
+    for (var j = 0; j < n; j++) {
+      var b = t + j * ara;
+      o.frequency.setValueAtTime(f * 1.012, b); o.frequency.exponentialRampToValueAtTime(f, b + 0.02);
+      g.gain.setValueAtTime(0, b); g.gain.linearRampToValueAtTime(tepe * (j === n - 1 ? 0.7 : 1), b + 0.005); g.gain.linearRampToValueAtTime(0, b + 0.026);
+    }
+    var p = cikis(c.pan, !!c.uzak);
+    if (c.uzak) { var s = ctx.createBiquadFilter(); s.type = 'lowpass'; s.frequency.value = 4300; o.connect(g); g.connect(s); s.connect(p); } else { o.connect(g); g.connect(p); }
+    o.start(t); o.stop(t + n * ara + 0.05);
   }
   function kurbaga(t) { // uzakta iki boğuk vırak
     var p = cikis(0.65, true);
@@ -134,8 +172,8 @@
     var p = cikis(-0.7, true);
     ton(p, t, 0.32, 410, 385, 0.03); ton(p, t + 0.55, 0.7, 400, 360, 0.03);
   }
-  function kus(t, i) { // her kuşun kendi şarkısı: üçüncüsü ötüş, ötekiler cıvıltı
-    var k = KUS[i % KUS.length], p = cikis(k.pan + (Math.random() * 0.2 - 0.1), true), tepe = 0.012 + Math.random() * 0.008, f = k.f * (0.94 + Math.random() * 0.12);
+  function kus(t, i) { // her kuşun kendi şarkısı: üçüncüsü ötüş (tarla kuşu gibi), ötekiler cıvıltı
+    var k = KUS[i % KUS.length], p = cikis(k.pan + (Math.random() * 0.2 - 0.1), true), tepe = 0.009 + Math.random() * 0.007, f = k.f * (0.94 + Math.random() * 0.12);
     if (i % 3 === 2) {
       var n = 7 + Math.floor(Math.random() * 6);
       for (var j = 0; j < n; j++) ton(p, t + j * 0.065, 0.05, f * 1.15, f * 0.95, tepe * 0.8);
@@ -167,7 +205,7 @@
     try { if (!ctx) kur(); } catch (e) { return; } // ses yok (eski tarayıcı)
     calisiyor = true; durum = null;
     ctx.resume();
-    ana.gain.cancelScheduledValues(ctx.currentTime); ana.gain.setValueAtTime(ana.gain.value, ctx.currentTime); ana.gain.linearRampToValueAtTime(0.85, ctx.currentTime + 3);
+    ana.gain.cancelScheduledValues(ctx.currentTime); ana.gain.setValueAtTime(ana.gain.value, ctx.currentTime); ana.gain.linearRampToValueAtTime(ANA, ctx.currentTime + 3);
     dongu(); saat = setInterval(dongu, 1000);
     dugmeYaz();
   }
@@ -187,6 +225,16 @@
     b.setAttribute('aria-label', ad); b.title = ad;
     var u = b.querySelector('use'); if (u) u.setAttribute('href', gunduz ? '#i-gunes' : '#i-gece');
   }
+  // Ölçüm için: bir kipi sn saniye çevrimdışı işler (Promise<AudioBuffer>); canlı bağlama dokunmaz
+  Gece.cevrimdisi = function (k, sn) {
+    var es = [ctx, ana, yanki, katman], oc = new kok.OfflineAudioContext(2, Math.round(44100 * sn), 44100);
+    ctx = oc; katman = {};
+    try {
+      kurIc(); ana.gain.value = ANA; katman[k].forEach(function (g) { g.gain.value = 1; });
+      plan(null, 0, sn, Math.random, k).olaylar.forEach(function (o) { CAL[o.tur](o.t, o.i); });
+    } finally { ctx = es[0]; ana = es[1]; yanki = es[2]; katman = es[3]; }
+    return oc.startRendering();
+  };
   Gece.esitle = esitle; Gece.calisiyorMu = function () { return calisiyor; }; Gece.kip = function () { return kip; }; Gece.dugmeYaz = dugmeYaz;
 
   // Üst çubuk düğmesi açar/kapatır (açınca saate göre); her tıklama/tuş (tarayıcının «kullanıcı dokundu» izni) ayara göre başlatır ya da durdurur.

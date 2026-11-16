@@ -14,7 +14,7 @@
   var ENV = 'envanter-kabuk-sunucu.md';
   var GRUPLAR = [
     { id: 'gorunum', ad: 'Görünüm' }, { id: 'erisim', ad: 'Erişilebilirlik' },
-    { id: 'bildirim', ad: 'Bildirim' }, { id: 'ses', ad: 'Ses' }, { id: 'beden', ad: 'Beden' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
+    { id: 'bildirim', ad: 'Bildirim' }, { id: 'ses', ad: 'Ses' }, { id: 'beden', ad: 'Beden' }, { id: 'king', ad: 'King' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
   ];
   var SPI = 'envanter-spi.md §2 Ayarlar › Profil (family.js) ve §5 profile (state.js:178-200)';
 
@@ -24,7 +24,7 @@
     { anahtar: 'lifeos.tema.oto', ad: 'Saate göre tema', tur: 'secim', varsayilan: 'kapali', grup: 'gorunum', esitlenir: true,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Akşam koyu, sabah açık tema.', kaynak: ENV + ' §3c Tema, yazı: tema.oto' },
     { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'sistem', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
-      secenekler: { piksel: 'Piksel', sistem: 'Cihazın yazısı' }, aciklama: 'Başlıklar her zaman piksel kalır.', kaynak: ENV + ' §3c Tema, yazı: yazi' },
+      secenekler: { piksel: 'Piksel', sistem: 'Cihazın yazısı' }, aciklama: 'Uygulamadaki yazıların tipi.', kaynak: ENV + ' §3c Tema, yazı: yazi' },
     { anahtar: 'lifeos.vurgu', ad: 'Vurgu rengi', tur: 'secim', varsayilan: 'modul', grup: 'gorunum', kok: 'data-vurgu', esitlenir: true,
       secenekler: { modul: 'Alanın rengi', mavi: 'Mavi', yesil: 'Yeşil', mor: 'Mor', turuncu: 'Turuncu', pembe: 'Pembe', grafit: 'Grafit' },
       aciklama: 'Seçili düğme ve sekmenin rengi; ölçü renkleri değişmez.', kaynak: ENV + ' §3b lifeos.vurgu' },
@@ -45,9 +45,14 @@
     { anahtar: 'lifeos.sessiz', ad: 'Sessiz saatler', tur: 'saatAraligi', varsayilan: { acik: false, bas: '22:00', bit: '07:00' }, grup: 'bildirim', esitlenir: true,
       aciklama: 'Bu aralıkta sesler ve sesli okuma susar; gece yarısını geçebilir.', kaynak: ENV + ' §3c Ses ve müzik: sessiz saatler' },
     { anahtar: 'lifeos.ses.arayuz', ad: 'Arayüz sesleri', tur: 'secim', varsayilan: 'acik', grup: 'ses', esitlenir: false,
-      secenekler: { acik: 'Açık', kapali: 'Kapalı' }, aciklama: 'Sayfa değişince hafif bir tık, Yerler halkası açılınca yumuşak bir ses, ders bitince küçük bir çan. Sessiz saatlerde susar.', kaynak: ENV + ' §3c Ses: ses.arayuz (kabuk/ses.js, sahibin isteği 2026-11-16)' },
+      secenekler: { acik: 'Açık', kapali: 'Kapalı' }, aciklama: 'Tek akortta kısa, yumuşak sesler: sayfa geçişi, seçim, aç/kapa, kaydedildi, doğru/yanlış cevap, ders ve kapı bitişi, King cevabı. Yalnız senin eylemine çalar; sessiz saatlerde susar.', kaynak: ENV + ' §3c Ses: ses.arayuz (kabuk/ses.js, sahibin isteği 2026-11-16)' },
+    { anahtar: 'lifeos.ses.duzey', ad: 'Arayüz ses düzeyi', tur: 'secim', varsayilan: 'orta', grup: 'ses', esitlenir: false,
+      secenekler: { kisik: 'Kısık', orta: 'Orta', yuksek: 'Yüksek' }, aciklama: 'Arayüz seslerinin yüksekliği (ambiyans ayrı).', kaynak: ENV + ' §3c Ses: ses.duzey (kabuk/ses.js, sahibin isteği 2026-11-16)' },
     { anahtar: 'lifeos.ses.gece', ad: 'Ambiyans sesi', tur: 'secim', varsayilan: 'kapali', grup: 'ses', esitlenir: false,
-      secenekler: { kapali: 'Kapalı', acik: 'Saate göre', gunduz: 'Hep gündüz', gece: 'Hep gece' }, aciklama: 'Gündüz kuşlar, dere ve esinti; gece cırcır böcekleri, rüzgâr ve uzakta kurbağa. Tarayıcıda üretilir; üst çubuktaki düğme de açıp kapatır.', kaynak: ENV + ' §3c Ses: ses.gece (kabuk/gece.js, sahibin isteği 2026-11-15)' },
+      secenekler: { kapali: 'Kapalı', acik: 'Saate göre', gunduz: 'Hep gündüz', gece: 'Hep gece' }, aciklama: 'Gündüz kuşlar, dere ve esinti; gece cırcır böcekleri, rüzgâr ve uzakta kurbağa. Tarayıcıda üretilir.', kaynak: ENV + ' §3c Ses: ses.gece (kabuk/gece.js, sahibin isteği 2026-11-15)' },
+    // King'i cevaplayan: King ekranından buraya taşındı (2026-11-16, sahip: «ekranda yalnız kip kalsın»); kabuk/king-sohbet.js okur
+    { anahtar: 'lifeos.king.saglayici', ad: 'King’i kim cevaplasın', tur: 'secim', varsayilan: 'oto', grup: 'king', esitlenir: false,
+      secenekler: { oto: 'Otomatik', antigravity: 'Antigravity', claude: 'Claude' }, aciklama: 'Otomatik çoğu zaman yeter; biri cevap vermezse öteki devralır.', kaynak: ENV + ' §3c King: king.saglayici (kabuk/king-sohbet.js; King ekranından taşındı, 2026-11-16)' },
     { anahtar: 'lifeos.kilit.odeme', ad: 'Satın alma ve kart işlemleri', tur: 'secim', varsayilan: 'kapali', grup: 'hesap', esitlenir: false,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Kapalıyken King ödeme, sipariş ya da kart işine girmez.', kaynak: ENV + ' §3c Diğer: kilit.odeme' },
     // Salt bilgi: tarayıcı kalıcı depolamaya izin verdi mi (kabuk/depo.js kalici(): true/false/null)

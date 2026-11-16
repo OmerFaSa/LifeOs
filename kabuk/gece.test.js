@@ -40,6 +40,16 @@ t('cırcırlar ayrı ayrı: her birinin ardışık sesi 0,9–1,7 sn arayla', ()
   [0, 1, 2].forEach(i => { const z = l.filter(o => o.tur === 'cir' && o.i === i).map(o => o.t);
     dogru(z.length > 50 && z.every((x, j) => !j || (x - z[j - 1] >= 0.9 - 1e-9 && x - z[j - 1] <= 1.7 + 1e-9)), 'cırcır ' + i); });
 });
+t('döngü dikişsiz: kahverengi gürültüde döngü noktasındaki sıçrama sıradan bir örnek adımından büyük değil', () => {
+  const r = rnd(9), n = 20000, x = 2000, h = new Float32Array(n + x); let s = 0;
+  for (let i = 0; i < n + x; i++) { s = (s + 0.02 * (r() * 2 - 1)) / 1.02; h[i] = s * 3.5; }
+  const v = G.dikis(h, n, x), adim = [];
+  for (let i = x + 1; i < n; i++) adim.push(Math.abs(v[i] - v[i - 1]));
+  const enCok = Math.max(...adim), dikis = Math.abs(v[0] - v[n - 1]), ham = Math.abs(h[0] - h[n - 1]);
+  dogru(v.length === n && dikis <= enCok, 'dikiş ' + dikis + ' > ' + enCok);
+  dogru(ham > enCok * 3, 'sınama anlamlı olsun: ham döngü sıçrar ' + ham);
+  dogru(v.slice(x).every((y, i) => y === h[x + i]), 'bindirme dışı aynı');
+});
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);
