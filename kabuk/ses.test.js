@@ -19,21 +19,26 @@ t('tek akort: bütün tonlar Re majör pentatonikte, akort dışı nota hata ver
   dogru(hata === 2, 'C ve G akort dışı');
   BEKLENEN.forEach(k => S.katmanlar(k).filter(n => n.tip === 'ton').forEach(n => { S.hz(n.nota); if (n.nota2) S.hz(n.nota2); }));
 });
-t('zarf: atak çok kısa (≤ 15 ms, yalnız hava/kabarma sesleri ≤ 150 ms), sönüm atakla bitmez, kazanç kısık', () => {
+t('zarf ve tını: atak çok kısa (≤ 15 ms, yalnız hava/kabarma sesleri ≤ 150 ms), sönüm atakla bitmez, kazanç kısık', () => {
   BEKLENEN.forEach(k => S.katmanlar(k).forEach(n => {
     const j = k + ' ' + JSON.stringify(n);
     dogru(['ton', 'hisirti'].includes(n.tip), j);
     dogru(n.atak > 0 && n.sure > n.atak * 2 && n.t >= 0 && n.g > 0 && n.g <= (n.tip === 'ton' ? 0.3 : 0.8), j); // gürültü dar bantta süzülür: kazancı yüksek görünür
     dogru(n.atak <= (k === 'ac' || n.tip === 'hisirti' && n.sure >= 0.2 ? 0.15 : 0.015), 'atak ' + j);
     if (n.yanki) dogru(n.yanki > 0 && n.yanki <= 0.6, 'yankı ' + j);
-    if (n.fm) dogru(n.fm.indeks <= 2 && n.fm.sure < n.sure, 'fm ' + j);
+    if (n.tini) dogru(S.TINI[n.tini], 'tını ' + j);
+    if (n.ayri) dogru(n.ayri > 0 && n.ayri <= 3, 'aralık küçük (titreşim duyulmaz) ' + j);
   }));
+  BEKLENEN.forEach(k => dogru(Math.abs(S.SESLER[k].db) <= 12, 'ses düzeyi ' + k));
 });
 t('kısa: dokunuş sesleri ≤ 120 ms, durum sesleri ≤ 700 ms, yalnız ders/kapı uzun (≤ 1,5 sn)', () => {
   ['tik', 'sec', 'bas'].forEach(k => dogru(S.sure(k) <= 0.12, k + ' ' + S.sure(k)));
   ['ac', 'acik', 'kapali', 'kayit', 'dogru', 'yanlis', 'uyari', 'king', 'bildirim'].forEach(k => dogru(S.sure(k) <= 0.7, k + ' ' + S.sure(k)));
   ['ders', 'kapi'].forEach(k => dogru(S.sure(k) <= 1.5, k + ' ' + S.sure(k)));
   dogru(S.sure('kapi') > S.sure('ders') && S.katmanlar('kapi').length > S.katmanlar('ders').length, 'kapı dersten görkemli');
+});
+t('tını: her kısmi sesin payı ≤ temel, üst kısmiler daha çabuk söner', () => {
+  Object.keys(S.TINI).forEach(ad => S.TINI[ad].forEach((k, i) => dogru(i ? k[0] > 1 && k[1] < 1 && k[2] < 1 : k.join() === '1,1,1', ad + ' ' + k)));
 });
 t('aç ve kapa aynı iki nota, ters yönde', () => {
   const a = S.katmanlar('acik').filter(n => n.tip === 'ton').map(n => n.nota), k = S.katmanlar('kapali').filter(n => n.tip === 'ton').map(n => n.nota);
