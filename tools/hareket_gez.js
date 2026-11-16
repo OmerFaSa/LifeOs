@@ -76,6 +76,23 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
       if (kapali) dene(ad + ': görünüm geçişi başlamaz', !g.iz.length && (await p.evaluate(() => window.__vt)) === 0, JSON.stringify(g));
       else dene(ad + ': geçiş yönü sekme sırasına uyar, bitince iz kalmaz, sekme işareti yerinde', JSON.stringify(g.iz) === JSON.stringify(g.bek) && g.son === null && g.isaret, JSON.stringify(g));
 
+      // 2a · üstte parlama ve çakışma yok (2026-11-17c): eski ve yeni sayfa aynı zamanlamada (opaklık toplamı 1, krem zemin görünmez),
+      // üst çubuğun eski görüntüsü çizilmez (sekme adları üst üste binmiyordu)
+      if (!kapali) {
+        const z = await p.evaluate(async () => {
+          document.querySelector('.ust__sekmeler a[href="#/saglik"]').click();
+          let an = [];   // geçişin hareketleri güncelleme bitince başlar: kısa süre beklenir
+          for (let i = 0; i < 40 && !an.some(a => a.effect.pseudoElement === '::view-transition-new(root)'); i++) { await new Promise(r => setTimeout(r, 10)); an = document.getAnimations().filter(a => a.effect && a.effect.pseudoElement); }
+          const t = s => an.filter(a => a.effect.pseudoElement === s).map(a => a.effect.getComputedTiming());
+          const ustEski = document.documentElement.hasAttribute('data-gecis') ? getComputedStyle(document.documentElement, '::view-transition-old(ust)').display : 'yok';
+          const o = t('::view-transition-old(root)')[0], n = t('::view-transition-new(root)')[0];
+          return { o: o && [o.duration, o.delay, o.easing], n: n && [n.duration, n.delay, n.easing], ustEski, ustAnim: t('::view-transition-old(ust)').length + t('::view-transition-new(ust)').length };
+        });
+        await bekleGecis(p);
+        await p.click('.ust__sekmeler a[href="#/ogren"]'); await bekleGecis(p);   // 2b Öğren'den başlar
+        dene(ad + ': geçişte eski ve yeni sayfa aynı zamanlamada, üst çubuk çapraz sönmez', !!z.o && JSON.stringify(z.o) === JSON.stringify(z.n) && z.ustEski === 'none' && z.ustAnim === 0, JSON.stringify(z));
+      }
+
       // 2b · geçiş türü: ana bölümler arası «buyuk», derse başlamak «ders», dersten alana dönüş «kucuk» (geri)
       if (!kapali) {
         const tur = await p.evaluate(async () => {

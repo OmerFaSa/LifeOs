@@ -672,16 +672,24 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
    kaydırmak yavaş makinede takılıyordu). Tür yalnız mesafeyi ve süreyi değiştirir: bölüm içi en kısa, bölüm değişimi biraz daha,
    derse başlama en belirgin. Geçiş sürerken listeler ayrıca süzülmez (iki hareket üst üste binmez). */
 /* 2026-11-16b: bütün geçiş ~250 ms (çıkış 110, giriş 220 + 20 gecikme); tür yalnız yolu değiştirir */
-:root{ --vt-cik:110ms; --vt-gir:220ms; --vt-yol:6px; --vt-gec:20ms; }
+:root{ --vt-gir:220ms; --vt-yol:6px; --vt-gec:20ms; }
 /* türün değerleri yalnız geçişin sözde öğesinde: kökte değişen özel özellik bütün sayfaya miras gider, her geçişin başında ve sonunda
    bütün stil yeniden hesaplanıyordu (2026-11-17b ölçümü: 386 öğe, 4× yavaş CPU'da 57 ms) */
 :root[data-gecis-tur="buyuk"]::view-transition-new(root){ --vt-yol:10px; }
-:root[data-gecis-tur="ders"]::view-transition-new(root){ --vt-gir:230ms; --vt-yol:14px; }
-:root[data-gecis]::view-transition-old(root), :root[data-gecis][data-gecis-tur]::view-transition-old(root){ animation:var(--vt-cik) cubic-bezier(.4,0,1,1) both vt-son; }
+:root[data-gecis-tur="ders"]::view-transition-old(root), :root[data-gecis-tur="ders"]::view-transition-new(root){ --vt-gir:230ms; --vt-yol:14px; }
+/* eski sayfa yenisiyle AYNI zamanlamada söner: iki görüntü plus-lighter ile toplanır, opaklıklar toplamı her an 1 kalır. Eskiden eski 110 ms'de
+   sönüp yeni 220 ms'de geliyordu; arada toplam < 1, gece sahnesinin olduğu üst bölge krem zemine açılıp parlıyordu (2026-11-17c, telefonda belirgin) */
+:root[data-gecis]::view-transition-old(root), :root[data-gecis][data-gecis-tur]::view-transition-old(root){ animation:var(--vt-gir) cubic-bezier(.16,1,.3,1) var(--vt-gec) both vt-son; }
 :root[data-gecis]::view-transition-new(root), :root[data-gecis][data-gecis-tur]::view-transition-new(root){ animation:var(--vt-gir) cubic-bezier(.16,1,.3,1) var(--vt-gec) both vt-bel; }
 @keyframes vt-son{ to{ opacity:0; } }
 @keyframes vt-bel{ from{ opacity:0; transform:translateY(var(--vt-yol)); } }
 ::view-transition-group(ust){ animation:none; }
+/* üst çubuk çapraz sönmez: eski ve yeni sekme adları (seçili sekme adını gösterir, genişliği değişir) üst üste biniyordu («BugünÖğren»,
+   2026-11-17c). Yeni hâl hemen gelir; hareket yalnız seçili sekmenin işaretinde */
+::view-transition-old(ust){ display:none; }
+::view-transition-new(ust){ animation:none; }
+/* kaydırınca gizlenmiş çubukta işaret geçişe katılmaz: yoksa ekranın üstünden yeni sekmeye uçuyordu */
+:root.ust-gizli .ust__isaret{ view-transition-name:none; }
 ::view-transition-group(sekme-isaret){ animation-duration:220ms; animation-timing-function:cubic-bezier(.16,1,.3,1); }
 .canlan--gecis [data-sira], .canlan--gecis .kapak__simge, .canlan--gecis .b-uyari{ animation:none !important; }
 
