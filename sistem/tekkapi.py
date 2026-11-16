@@ -183,7 +183,8 @@ class TekKapi(Giris):
             return self._json(400, {"ok": False})
         if not isinstance(veri, dict):
             return self._json(400, {"ok": False})
-        return self._json(200 if hata_yaz(veri) else 429, {"ok": True})
+        yazildi = hata_yaz(veri)
+        return self._json(200 if yazildi else 429, {"ok": yazildi})
 
     def _yonlendir(self, yer, kod=301):
         self.send_response(kod)

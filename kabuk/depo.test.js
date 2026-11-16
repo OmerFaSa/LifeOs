@@ -66,8 +66,9 @@ const KAYITLAR = ['lifeos.yol.felsefe.1', 'lifeos.yol.dil.2', 'lifeos.not.kayit'
   'lifeos.kayit.kayitlar', 'lifeos.plan.durum', 'lifeos.plan.sablon', 'lifeos.soru.oturum', 'lifeos.soru.gecmis', 'lifeos.soru.deneme',
   'lifeos.soru.denemeler', 'lifeos.tanisma.kayit', 'lifeos.tanisma.taslak', 'lifeos.beden.boy', 'lifeos.beden.cinsiyet',
   'lifeos.beden.dogumYili', 'lifeos.beden.hedef', 'lifeos.onay', 'lifeos.plan.eski', 'lifeos.soru.eski'];
+// lifeos.alan.<alan>.dal: konu haritasında seçilen dal (kabuk.js dalAnahtari; tercih, kayıt değil)
 // lifeos.kabuk.baslangic: getirilen başlangıç paketinin kimliği; lifeos.tasima: köken taşımasında işlenen paket adları (ikisi de iz, kayıt değil)
-const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.kabuk.esitle','lifeos.tanisma.davet', 'lifeos.kullanim', 'lifeos.kabuk.baslangic', 'lifeos.tasima', 'lifeos.ses.gece', 'lifeos.ses.arayuz', 'lifeos.ses.duzey', 'lifeos.king.saglayici', 'lifeos.king.sohbet', 'lifeos.king.taslak', 'lifeos.taslak']
+const AYARLAR = ['lifeos.yol.son', 'lifeos.kabuk.ipucu', 'lifeos.kabuk.depo', 'lifeos.kabuk.esitle','lifeos.tanisma.davet', 'lifeos.kullanim', 'lifeos.kabuk.baslangic', 'lifeos.tasima', 'lifeos.ses.gece', 'lifeos.ses.arayuz', 'lifeos.ses.duzey', 'lifeos.king.saglayici', 'lifeos.king.sohbet', 'lifeos.king.taslak', 'lifeos.taslak', 'lifeos.alan.tarih.dal']
   .concat(A.SEMA.filter(s => s.grup !== 'beden').map(s => s.anahtar));
 const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit': '[{"id":"n1"}]', 'lifeos.beden.boy': '170',
   'lifeos.tema.secim': 'dark', 'lifeos.yol.son': 'dil', 'lifeos.tanisma.davet': 'kapali' };

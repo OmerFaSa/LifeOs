@@ -46,7 +46,7 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
       p.on('pageerror', e => hata.push(ad + ': ' + e.message));
       // tek deposu ve başlangıç paketi olmayan bu ortamda eşitleme ve başlangıç uçlarının 404'ü, yazılmamış aşamanın 404'ü beklenir; başka her hata sayılır
       p.on('console', m => { if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) hata.push(ad + ': ' + m.text()); });
-      p.on('response', r => { if (r.status() >= 400 && !/\/api\/hesap\/kabuk|\/api\/kabuk\/baslangic|\/alan\/[a-z]+\/asama-\d+\.json$/.test(r.url())) hata.push(ad + ': ' + r.status() + ' ' + r.url()); });
+      p.on('response', r => { if (r.status() >= 400 && !/\/api\/hesap\/kabuk|\/api\/kabuk\/baslangic|\/alan\/[a-z]+\/(asama-\d+|harita)\.json$/.test(r.url())) hata.push(ad + ': ' + r.status() + ' ' + r.url()); });
       await p.addInitScript(h => { try { localStorage.setItem('lifeos.hareket', h); } catch (e) { /* yok */ } }, hareket);
       // görünüm geçişlerini say (hareket kapalıyken hiç başlamamalı)
       await p.addInitScript(() => { window.__vt = 0; const o = document.startViewTransition; if (o) document.startViewTransition = function (f) { window.__vt++; return o.call(document, f); }; });

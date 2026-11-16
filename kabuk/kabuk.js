@@ -95,6 +95,44 @@
     }
     return dr.asama.gecti ? null : { tur: 'kapi', id: dr.asama.id, ad: dr.asama.ad };
   }
+  // Ünite grupları (2026-11-17, sahip: «Akademik'te konu listelerini göremiyorum»): «TYT Türkçe · Anlam» (ya da « — ») gibi adlar ayraç
+  // öncesine göre ardışık gruplara ayrılır (veri değişmez). Her ünite böyle adlanmamışsa ya da tek grup çıkıyorsa null: düz liste kalır.
+  var GRUP_AYRAC = / [·—] /;
+  function uniteGruplari(uniteler) {
+    if (!uniteler.length || !uniteler.every(function (u) { return GRUP_AYRAC.test(String(u.ad)); })) return null;
+    var l = [];
+    uniteler.forEach(function (u, i) {
+      var m = GRUP_AYRAC.exec(u.ad), ad = u.ad.slice(0, m.index), son = l[l.length - 1];
+      if (!son || son.ad !== ad) l.push(son = { ad: ad, uniteler: [] });
+      son.uniteler.push({ u: u, i: i, kisa: u.ad.slice(m.index + m[0].length) });
+    });
+    return l.length > 1 ? l : null;
+  }
+  // Konu haritası (alan/<alan>/harita.json, biçim alan/SEMA.md «Konu haritası»): dosyadan gelir, güvenilmez; bozuk dal/bölüm/konu atılır,
+  // geçerli dal kalmazsa null (sayfa yalnız üniteleri gösterir). ders/unite yalnız o alanın kimliği biçimindeyse tutulur.
+  function haritaSuz(h, alan) {
+    var yazi = function (x, n) { return typeof x === 'string' && x.trim() ? x.trim().slice(0, n) : null; };
+    var kim = new RegExp('^' + alan + '\\.\\d+(\\.\\d+)+$');
+    if (!h || h.sema !== 1 || !Array.isArray(h.dallar)) return null;
+    var gor = {}, dallar = h.dallar.map(function (d) {
+      if (!d || !/^[a-z0-9-]{1,40}$/.test(d.id) || gor[d.id] || !yazi(d.ad, 120) || !Array.isArray(d.bolumler)) return null;
+      var bolumler = d.bolumler.map(function (b) {
+        if (!b || !yazi(b.ad, 120) || !Array.isArray(b.konular)) return null;
+        var konular = b.konular.map(function (k) {
+          if (!k || !yazi(k.ad, 160)) return null;
+          var o = { ad: yazi(k.ad, 160) };
+          if (typeof k.ders === 'string' && kim.test(k.ders)) o.ders = k.ders; else if (typeof k.unite === 'string' && kim.test(k.unite)) o.unite = k.unite;
+          return o;
+        }).filter(Boolean);
+        return konular.length ? { ad: yazi(b.ad, 120), konular: konular } : null;
+      }).filter(Boolean);
+      if (!bolumler.length) return null;
+      gor[d.id] = 1;
+      return { id: d.id, ad: yazi(d.ad, 120), ozet: yazi(d.ozet, 300) || '', bolumler: bolumler };
+    }).filter(Boolean);
+    return dallar.length ? { alan: alan, dallar: dallar } : null;
+  }
+  function dalAnahtari(alan) { return 'lifeos.alan.' + alan + '.dal'; }
   var HARF = 'ABCDEFGH';
   /* King sayfasının gövdesi (#/king). King Claude masaüstü uygulamasında konuşur, LifeOS'u salt okur; LifeOS'ta dil modeli ve
    * sohbet yok (AGENTS §0.1). Metin king/KURULUM.md'nin sahibe dönük kısmı; dış bağlantı yok. B: bileşen kataloğu (kabuk/bilesen.js). */
@@ -181,7 +219,7 @@
   }
 
   var Kabuk = kok.LIFEOS && kok.LIFEOS.Kabuk || {};
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde;
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz;
   Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
     yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
@@ -267,6 +305,17 @@
     }
     return (bekleyen[id] = Promise.all(istek).then(function (vs) { hamlar[id] = vs; return alanKur(id); }));
   }
+  // Konu haritası: aşama dosyalarıyla aynı yoldan, yalnız alan sayfası (ya da dalı seçilmiş alanın Bugün kartı) isteyince; 404 = harita yok
+  var haritalar = {}, haritaBekleyen = {};
+  function haritaYukle(id) {
+    if (id in haritalar) return Promise.resolve(haritalar[id]);
+    if (location.protocol === 'file:') return Promise.resolve(haritalar[id] = null);
+    return haritaBekleyen[id] || (haritaBekleyen[id] = fetch('../alan/' + id + '/harita.json').then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; }).then(function (h) { return (haritalar[id] = haritaSuz(h, id)); }));
+  }
+  // harita gelince yalnız aynı adres hâlâ açıksa yeniden çizilir (ders sayfasındaki yazılmış cevaplar silinmesin)
+  function haritaIste(id) { var h = location.hash; haritaYukle(id).then(function () { if (location.hash === h) rota(); }); }
+  function seciliDal(id) { var h = haritalar[id], k = depo.getItem(dalAnahtari(id)); return h && k ? h.dallar.filter(function (d) { return d.id === k; })[0] || null : null; }
   // Sahibin onay kaydı (kabuk/onay.js) dosya içeriğinin üstüne Yol.yukle'den ÖNCE bindirilir; onay değişince ham içerikten yeniden kurulur
   var hamlar = {};
   function alanKur(id) {
@@ -358,8 +407,10 @@
     yol: 'mavi', tekrar: 'mor', soru: 'turuncu', kayit: 'deniz', plan: 'yesil', not: 'sari', arama: 'gok' }; // index.html sprite'ında #i-<id> olanlar
   function alanKartlari(f, od, a) {
     return H.YERLER.filter(function (y) { return y.katman === 'alan' && y.asama; }).map(function (y) {
-      var bu = y.id === etkinAlan && od && od.toplam;
-      return { ad: y.ad, not: bu && a && a.tur === 'ders' ? 'Ünite ' + a.unite + ' · ' + a.okunan + '/' + a.toplam + ' ders' : y.aciklama, href: y.yol, simge: y.id, renk: ALAN_RENK[y.id],
+      var bu = y.id === etkinAlan && od && od.toplam, dal = null;
+      if (depo.getItem(dalAnahtari(y.id))) { if (y.id in haritalar) dal = seciliDal(y.id); else haritaIste(y.id); } // dalı seçilmiş alanın kartında dalın adı
+      var ilerleme_ = bu && a && a.tur === 'ders' ? 'Ünite ' + a.unite + ' · ' + a.okunan + '/' + a.toplam + ' ders' : '';
+      return { ad: y.ad, not: dal ? dal.ad + (ilerleme_ ? ' · ' + ilerleme_ : '') : ilerleme_ || y.aciklama, href: y.yol, simge: y.id, renk: ALAN_RENK[y.id],
         yuzde: bu && od.deger ? Math.round(100 * od.deger / od.toplam) : null };
     });
   }
@@ -520,38 +571,90 @@
   function asamaBasligi(ust, ad) { return B.baslik({ metin: ust + ' · ' + ad, duzey: 2, id: 'asama-ad' }); }
   var KILITLI_ASAMA = 'Bu aşama kilitli: önce önceki aşamanın kapısını geç.';
   // Alanın genel bakışı (2026-11-16b, sahip: «bir alana tıklayınca önce neler var, ne yapıyorum göreyim; çok minimalist»).
-  // Tek düzen, üç bölüm: (1) nerede olduğun: konum satırı, sıradaki ders, tek ince ilerleme çizgisi, tek ana düğme; «Seviyemi bul» yalnız küçük
-  // ikincil bağlantı, kendiliğinden açılmaz. (2) Konular: aşamanın tek cümlesi ve üniteleri (ünite başlığı + ders adları). (3) Aşamalar (birden çoksa).
+  // 2026-11-17 (sahip: «nerede olduğumu ve konu listelerini göremiyorum; minimalistlik uğruna ihmal etme»): dört bölüm:
+  // (1) nerede olduğun: sıradaki ders, tek ince ilerleme çizgisi, tek ana düğme. (2) Konu haritası (alan/<alan>/harita.json varsa):
+  // dallar açılır-kapanır, seçili dal en üstte açık; konular derse bağlıysa bağlantı, değilse «henüz ders yok» + «King'le çalış».
+  // (3) Aşamanın üniteleri: adlar « · » ile gruplanmışsa (Akademik: TYT Türkçe …) grup → ünite → dersler; telefonda yalnız şu anki grup açık.
+  // (4) Aşamalar (birden çoksa).
+  function dar() { return !!(kok.matchMedia && kok.matchMedia('(max-width:640px)').matches); }
+  function uniteAcilir(u, ui, ad, simdiki, hepsiAcik, yer_) {
+    var okunan = u.dersler.filter(function (x) { return x.okundu; }).length;
+    var adim = u.gecti ? 'bitti' : u.id === simdiki ? 'simdi' : u.atlandi ? 'atlandi' : u.acik ? 'acik' : 'kilitli';
+    // kilitli üniteler kapalı gelir: ekranda yalnız şimdi işe yarayan dersler görünür (sahibin isteği 2026-11-16: daha az şey)
+    return B.acilir({ baslik: ad, acik: u.id === simdiki || (hepsiAcik && u.acik && !u.gecti), veri: { adim: adim, no: String(ui + 1) },
+      not: u.gecti ? 'geçildi' : u.atlandi ? 'atlandı' + (yer_ && yer_.etiket ? ' (' + yer_.etiket + ')' : '') + ' · ' + okunan + '/' + u.dersler.length + ' ders' : u.acik ? okunan + '/' + u.dersler.length + ' ders' : 'kilitli',
+      // konu başlığı ve ders adları: kısa, özetsiz (özet dersin kendi sayfasında); bir sonraki ders sıradaki kartında
+      govde: [u.dersler.length ? B.liste({ ad: u.ad + ' dersleri', tur: 'ders', ogeler: u.dersler.map(function (x, i) {
+        return x.acik ? { no: i + 1, baslik: x.ad, durum: x.okundu ? 'okundu' : 'yeni', taslak: x.etiket === 'taslak', href: F() + '/ders/' + x.id } : { no: i + 1, baslik: x.ad, durum: 'kilitli' };
+      }) }) : '', B.liste({ ad: u.ad + ' kapısı', ogeler: [kapiSatiri(u.id, 'Ünite kapısı', u.acik, u.kapi)] })] });
+  }
+  function unitelerHtml(dr, simdiki, yer_) {
+    var hepsiAcik = dr.uniteler.length <= 4, gr = uniteGruplari(dr.uniteler), telefon = dar();
+    var son = '<div class="yol__son" data-adim="' + (dr.asama.gecti ? 'bitti' : 'kilitli') + '">' + B.bolum({ baslik: 'Aşama kapısı', govde: B.liste({ ad: 'Aşama kapısı', ogeler: [kapiSatiri(dr.asama.id, 'Aşama kapısı', dr.uniteler.every(function (u) { return u.gecti; }), dr.asama.kapi)] }) }) + '</div>';
+    if (!gr) return '<div class="yol">' + dr.uniteler.map(function (u, ui) { return uniteAcilir(u, ui, u.ad, simdiki, hepsiAcik, yer_); }).join('') + son + '</div>';
+    return '<div class="konu-gruplari">' + gr.map(function (g) {
+      var us = g.uniteler.map(function (x) { return x.u; }), simdi = us.some(function (u) { return u.id === simdiki; });
+      var ok = 0, top = 0; us.forEach(function (u) { top += u.dersler.length; ok += u.dersler.filter(function (x) { return x.okundu; }).length; });
+      var gecti = us.every(function (u) { return u.gecti; });
+      // masaüstünde gruplar açık (ünite adları görünür, üniteler kapalı); telefonda yalnız şu anki grup açık
+      return B.acilir({ baslik: g.ad, duzey: 3, acik: simdi || !telefon, veri: { grup: gecti ? 'bitti' : simdi ? 'simdi' : 'acik' },
+        not: (gecti ? 'geçildi · ' : '') + us.length + ' ünite · ' + ok + '/' + top + ' ders',
+        govde: '<div class="yol">' + g.uniteler.map(function (x) { return uniteAcilir(x.u, x.i, x.kisa, simdiki, false, yer_); }).join('') + '</div>' });
+    }).join('') + '</div><div class="yol">' + son + '</div>';
+  }
+  // Ders kimliği → durum (bütün aşamalarda): konu haritasındaki bağlı konular için
+  function dersDurumlari(id) {
+    var m = {}, a = alanlar[id];
+    if (!a || !a.ys) return m;
+    a.ys.forEach(function (y, j) {
+      Yol.durum(y, kayitOku(id, j + 1)).uniteler.forEach(function (u) { m[u.id] = { unite: true, acik: u.acik, gecti: u.gecti, n: j + 1 }; u.dersler.forEach(function (x) { m[x.id] = x; }); });
+    });
+    return m;
+  }
+  function konuSatiri(k, dm, siradakiId) {
+    var x = k.ders ? dm[k.ders] : k.unite ? dm[k.unite] : null, ad = '<span class="konu__ad">' + kac(k.ad) + '</span>';
+    if (x && x.unite) return x.acik ? '<li><a class="konu konu--bagli" href="' + asamaYolu(x.n) + '">' + ad + '<span class="konu__not">' + (x.gecti ? 'ünite geçildi' : 'ünite') + '</span></a></li>'
+      : '<li class="konu konu--kilitli">' + ad + '<span class="konu__not">kilitli ünite</span></li>';
+    if (x) return x.acik ? '<li><a class="konu konu--bagli' + (x.okundu ? ' konu--okundu' : '') + '" href="' + F() + '/ders/' + kac(x.id) + '"' + (x.id === siradakiId ? ' aria-current="step"' : '') + '>' + ad +
+      '<span class="konu__not">' + (x.okundu ? 'okundu' : x.id === siradakiId ? 'sıradaki ders' : 'ders') + '</span></a></li>'
+      : '<li class="konu konu--kilitli">' + ad + '<span class="konu__not">kilitli ders</span></li>';
+    return '<li class="konu">' + ad + '<span class="konu__not">henüz ders yok · <a href="#/king" data-king-konu="' + kac(k.ad) + '" data-alan="' + kac(etkinAlan) + '">King’le çalış</a></span></li>';
+  }
+  function dallarHtml(h, a) {
+    var sec = depo.getItem(dalAnahtari(etkinAlan)), dm = dersDurumlari(etkinAlan), sid = a && a.tur === 'ders' ? a.id : null;
+    var l = h.dallar.slice().sort(function (x, y) { return (y.id === sec) - (x.id === sec); });
+    return B.bolum({ baslik: 'Konu haritası', id: 'dallar-baslik', govde: '<div class="dallar">' + l.map(function (d) {
+      var say = 0, bagli = 0;
+      d.bolumler.forEach(function (b) { say += b.konular.length; bagli += b.konular.filter(function (k) { return k.ders || k.unite; }).length; });
+      var bu = d.id === sec;
+      return B.acilir({ baslik: d.ad, duzey: 3, acik: bu, veri: bu ? { dal: d.id, secili: 'evet' } : { dal: d.id },
+        not: (bu ? 'Çalıştığın dal · ' : '') + say + ' konu' + (bagli ? ' · ' + bagli + ' ders' : ''),
+        govde: '<div class="dal__ust">' + (d.ozet ? '<p class="dal__ozet">' + kac(d.ozet) + '</p>' : '') +
+          (bu ? '' : '<button type="button" class="b-dugme dal__sec" data-ac="dal-sec" data-dal="' + kac(d.id) + '">Bu dalı çalış</button>') + '</div>' +
+          d.bolumler.map(function (b) { return '<section class="dal__bolum"><h4 class="dal__bolum-ad">' + kac(b.ad) + '</h4><ul class="dal__konular">' + b.konular.map(function (k) { return konuSatiri(k, dm, sid); }).join('') + '</ul></section>'; }).join('') });
+    }).join('') + '</div>' });
+  }
   function sayfaAlan(yer) {
     var f = al(), dr = fDurum(), ic, a = dr && siradaki(dr), sonraki = null, yeni = false;
+    if (!(etkinAlan in haritalar)) haritaIste(etkinAlan);
+    var hr = haritalar[etkinAlan] || null;
     if (!f) ic = '<div class="b-iskelet" aria-busy="true"><span class="gizli">Yükleniyor…</span><i></i><i></i><i></i></div>';
     else if (f.hata) ic = B.bos({ baslik: 'Yol haritası bu açılışta gösterilemiyor.', metin: f.hata === 'motor' ? 'Yol aracı yüklenemedi.' : 'Sayfa dosyadan açıldı; içerik Başbuğ sunucusuyla açılınca yüklenir.' });
-    else if (!dr.asama.acik) ic = asamaBasligi('Aşama ' + f.n, dr.asama.ad) + B.bos({ baslik: KILITLI_ASAMA }) + asamalarHtml(f.n);
+    else if (!dr.asama.acik) ic = asamaBasligi('Aşama ' + f.n, dr.asama.ad) + B.bos({ baslik: KILITLI_ASAMA }) + (hr ? dallarHtml(hr, null) : '') + asamalarHtml(f.n);
     else {
-      var il = dr.ilerleme, hepsiAcik = dr.uniteler.length <= 4, simdiki = a && (a.tur === 'kapi' ? a.id : f.y.ust[a.id]), yer_ = dr.asama.yerlestirme;
+      var il = dr.ilerleme, simdiki = a && (a.tur === 'kapi' ? a.id : f.y.ust[a.id]), yer_ = dr.asama.yerlestirme;
       if (dr.asama.gecti) sonraki = asamaListe(etkinAlan).filter(function (x) { return x.n === f.n + 1 && x.acik; })[0] || null;
       yeni = a && alanYeni(etkinAlan);
-      ic = siraKarti(f, dr, a, { yeni: yeni, sonraki: sonraki }) +
-        B.bolum({ baslik: 'Aşama ' + f.n + ' · ' + dr.asama.ad, id: 'asama-ad', govde: [
+      ic = siraKarti(f, dr, a, { yeni: yeni, sonraki: sonraki }) + (hr ? dallarHtml(hr, a) : '') +
+        B.bolum({ baslik: (hr ? 'Dersler · ' : '') + 'Aşama ' + f.n + ' · ' + dr.asama.ad, id: 'asama-ad', govde: [
           f.y.veri.hedef ? '<p class="konular__hedef">' + kac(f.y.veri.hedef) + '</p>' : '',
           il.atlananUnite ? '<p class="soluk">' + il.atlananUnite.deger + ' ünite atlandı (' + il.atlananUnite.etiket + ')</p>' : '',
           yer_ && yer_.uretim === 'bekliyor' ? B.uyari({ tur: 'dikkat', metin: 'Yerleştirme tahmini; üretim görevi bekliyor.' }) : '',
-        '<div class="yol">' + dr.uniteler.map(function (u, ui) {
-          var okunan = u.dersler.filter(function (x) { return x.okundu; }).length;
-          var adim = u.gecti ? 'bitti' : u.id === simdiki ? 'simdi' : u.atlandi ? 'atlandi' : u.acik ? 'acik' : 'kilitli';
-          // kalabalık alanda (Akademik: 30 ünite) yalnız üzerinde çalışılan ünite açık gelir
-          // kilitli üniteler kapalı gelir: ekranda yalnız şimdi işe yarayan dersler görünür (sahibin isteği 2026-11-16: daha az şey)
-          return B.acilir({ baslik: u.ad, acik: u.id === simdiki || (hepsiAcik && u.acik && !u.gecti), veri: { adim: adim, no: String(ui + 1) },
-            not: u.gecti ? 'geçildi' : u.atlandi ? 'atlandı' + (yer_.etiket ? ' (' + yer_.etiket + ')' : '') + ' · ' + okunan + '/' + u.dersler.length + ' ders' : u.acik ? okunan + '/' + u.dersler.length + ' ders' : 'kilitli',
-            // konu başlığı ve ders adları: kısa, özetsiz (özet dersin kendi sayfasında); bir sonraki ders sıradaki kartında
-            govde: [u.dersler.length ? B.liste({ ad: u.ad + ' dersleri', tur: 'ders', ogeler: u.dersler.map(function (x, i) {
-              return x.acik ? { no: i + 1, baslik: x.ad, durum: x.okundu ? 'okundu' : 'yeni', taslak: x.etiket === 'taslak', href: F() + '/ders/' + x.id } : { no: i + 1, baslik: x.ad, durum: 'kilitli' };
-            }) }) : '', B.liste({ ad: u.ad + ' kapısı', ogeler: [kapiSatiri(u.id, 'Ünite kapısı', u.acik, u.kapi)] })] });
-        }).join('') +
-        '<div class="yol__son" data-adim="' + (dr.asama.gecti ? 'bitti' : 'kilitli') + '">' + B.bolum({ baslik: 'Aşama kapısı', govde: B.liste({ ad: 'Aşama kapısı', ogeler: [kapiSatiri(dr.asama.id, 'Aşama kapısı', dr.uniteler.every(function (u) { return u.gecti; }), dr.asama.kapi)] }) }) + '</div></div>'] }) +
+          unitelerHtml(dr, simdiki, yer_)] }) +
         asamalarHtml(f.n);
     }
-    return ust(kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: yer.ad, alt: yer.aciklama }) + ic +
+    var dal = seciliDal(etkinAlan);
+    return ust(kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: yer.ad, alt: dal ? 'Çalıştığın dal: ' + dal.ad : yer.aciklama }) + ic +
       B.eylemler([yer.eski ? { metin: 'Eski ' + yer.ad + ' sayfası', tur: 'sade', href: eskiYol(yer.eski) } : null]) + '</div>';
   }
   // Nerede olduğun: konum satırı (ünite, ders n/N), sıradaki dersin adı, tek ince ilerleme çizgisi ve tek ana düğme.
@@ -967,6 +1070,7 @@
     if (ac) {
       var n = ac.getAttribute('data-ac');
       if (n === 'komut') return komutAc();
+      if (n === 'dal-sec') { depo.setItem(dalAnahtari(etkinAlan), ac.getAttribute('data-dal')); rota(); return; }
       if (n === 'halka') return halkaAcOdakli();
       if (n === 'okudum') return +ac.getAttribute('data-bos') && !ac.hasAttribute('data-yine') ? bitirSor(ac) : dersBitir(ac.getAttribute('data-ders'));
       if (n === 'alistirmaya') { rota(); var al_ = $('#ders-alistir'); if (al_) al_.scrollIntoView({ block: 'start' }); return; }

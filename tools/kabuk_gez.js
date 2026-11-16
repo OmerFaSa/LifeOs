@@ -77,7 +77,7 @@ async function goruntu(p, ad, sec = {}) {
     const p = await c.newPage(); const hata = [];
     p.on('pageerror', e => { hata.push(e.message); console.log('  sayfa hatası: ' + e.message); });
     // dosyası henüz yazılmamış aşamanın 404u ve tek deposu olmayan bu ortamda eşitleme ucunun 404ü beklenir (kabuk eşitlemeyi kapatır; gerçek yol tools/kabuk_esit_gez.js); başka her hata sayılır
-    p.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) hata.push(m.text()); });
+    p.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/(asama-\d+|harita)\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) hata.push(m.text()); });
     // Felsefe'nin ikinci aşaması: gerçek dosya varsa o, yoksa birinciden türetilmiş yapay aşama (yalnız bu tarayıcıya verilir)
     const y2yol = path.join(kok, 'alan/felsefe/asama-2.json'), y2gercek = fs.existsSync(y2yol);
     const y2 = y2gercek ? JSON.parse(fs.readFileSync(y2yol, 'utf8')) : Object.assign(JSON.parse(JSON.stringify(y).replace(/"felsefe\.1/g, '"felsefe.2')), { sira: 2, onKosul: ['felsefe.1'] });
@@ -165,13 +165,88 @@ async function goruntu(p, ad, sec = {}) {
       dene('telefon: alan genel bakışı tek ana düğme, sorular kendiliğinden açılmaz', (await tp.locator('.sira .b-dugme--ana').count()) === 1 && (await tp.locator('form.kapi').count()) === 0);
       await tc.close();
     }
+    // ---- Çubuk kesişmesi (2026-11-17, sahip: «dar ekranda seçili sekme arama düğmesinin altına giriyor»): üst ve alt çubukta görünen
+    // hiçbir öğe ötekiyle kesişmez, metni kutusundan taşmaz, çubuk ekrandan taşmaz; on genişlik × (varsayılan | piksel yazı + en büyük boy) ----
+    {
+      const kesisim = () => {
+        const gor = e => { const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 1 && r.height > 1 && s.visibility !== 'hidden' && s.display !== 'none' && +s.opacity > 0.05; };
+        const l = [];
+        for (const kap of document.querySelectorAll('.ust, .alt-cubuk')) {
+          if (!gor(kap)) continue;
+          const o = [...kap.querySelectorAll(':scope > :not(.ust__sekmeler), .ust__sekmeler > a, .alt-cubuk > a')].filter(gor);
+          for (let i = 0; i < o.length; i++) for (let j = i + 1; j < o.length; j++) {
+            const a = o[i].getBoundingClientRect(), b = o[j].getBoundingClientRect();
+            if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) l.push(o[i].className + ' ⨯ ' + o[j].className);
+          }
+          for (const e of o.concat([...kap.querySelectorAll('.ust__sekme-ad, .alt-cubuk__oge-ad')].filter(gor))) if (e.scrollWidth > e.clientWidth + 1 && e.clientWidth > 1) l.push('taşma ' + e.className);
+          if (kap.getBoundingClientRect().right > innerWidth + 0.5) l.push('ekrandan taşıyor ' + kap.className);
+        }
+        const at = document.querySelector('.atla').getBoundingClientRect(); if (at.bottom > 0 && document.activeElement !== document.querySelector('.atla')) l.push('«İçeriğe geç» görünüyor');
+        return l;
+      };
+      const bulgu = [];
+      for (const [ad, ayar] of [['varsayılan', {}], ['piksel + en büyük', { 'lifeos.yazi': 'piksel', 'lifeos.boyut': 'enbuyuk' }]]) {
+        const kc = await b.newContext({ viewport: { width: 1280, height: 800 } });
+        await kc.addInitScript(a => { for (const k in a) localStorage.setItem(k, a[k]); }, ayar);
+        const kp = await kc.newPage();
+        for (const yer of ['bugun', 'ogren', 'alan/tarih']) for (const w of [320, 360, 390, 430, 600, 641, 700, 768, 900, 1024, 1280, 1440]) { // 641 ve 700: eski hatanın göründüğü genişlikler
+          await kp.setViewportSize({ width: w, height: 800 }); await kp.goto(T + '/kabuk/#/' + yer + '?w' + w); await kp.waitForSelector('#sayfa[data-ciz] .ust');
+          (await kp.evaluate(kesisim)).forEach(x => bulgu.push(ad + ' ' + yer + ' ' + w + ': ' + x));
+        }
+        await kc.close();
+      }
+      dene('çubuklar: 320…1440 px, varsayılan ve piksel + en büyük yazıda üst/alt çubukta kesişme, taşma yok', bulgu.length === 0, bulgu.slice(0, 6).join(' | '));
+    }
+    // ---- Konu listeleri (2026-11-17): konu haritası dalları, dal seçimi, Akademik grupları; ayrı bağlamda (seçim öbür adımlara sızmasın) ----
+    {
+      const TH = JSON.parse(fs.readFileSync(path.join(kok, 'alan/tarih/harita.json'), 'utf8'));
+      const hc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'light' }), hp = await hc.newPage();
+      hp.on('pageerror', e => hata.push('konu: ' + e.message));
+      await hp.goto(T + '/kabuk/#/alan/tarih');
+      await hp.waitForSelector('.dallar > .b-acilir');
+      const dallar = await hp.$$eval('.dallar > .b-acilir', l => l.map(d => [d.getAttribute('data-dal'), d.open]));
+      dene('konu haritası: Tarih\'in dalları dosyadaki sırayla, hepsi kapalı başlar', JSON.stringify(dallar.map(x => x[0])) === JSON.stringify(TH.dallar.map(d => d.id)) && dallar.every(x => !x[1]), JSON.stringify(dallar));
+      const ilkBag = TH.dallar[0].bolumler[0].konular.find(k => k.ders), bagsiz = TH.dallar[0].bolumler[0].konular.find(k => !k.ders && !k.unite);
+      await hp.click('[data-dal="' + TH.dallar[0].id + '"] > summary');
+      dene('konu haritası: derse bağlı konu dersin bağlantısı, bağsız konu «henüz ders yok» + King bağlantısı (konu adı, alan)',
+        (await hp.locator('[data-dal="' + TH.dallar[0].id + '"] a.konu[href="#/alan/tarih/ders/' + ilkBag.ders + '"]').count()) === 1
+        && (await hp.locator('[data-dal="' + TH.dallar[0].id + '"] a[href="#/king"][data-king-konu="' + bagsiz.ad + '"][data-alan="tarih"]').count()) === 1
+        && /henüz ders yok/.test(await hp.locator('[data-king-konu="' + bagsiz.ad + '"]').locator('xpath=ancestor::li').textContent()));
+      const turk = TH.dallar.find(d => d.id === 'turk') || TH.dallar[1];
+      await hp.click('[data-dal="' + turk.id + '"] > summary');
+      await hp.click('[data-ac="dal-sec"][data-dal="' + turk.id + '"]');
+      await hp.waitForSelector('.dallar > [data-dal="' + turk.id + '"][data-secili]');
+      dene('dal seçimi: kaydedilir, seçili dal en üstte açık «Çalıştığın dal», başlığın altında adı',
+        (await hp.evaluate(() => localStorage.getItem('lifeos.alan.tarih.dal'))) === turk.id && (await hp.getAttribute('.dallar > .b-acilir:first-child', 'data-dal')) === turk.id
+        && (await hp.locator('.dallar > .b-acilir:first-child[open]').count()) === 1 && /Çalıştığın dal/.test(await hp.textContent('.dallar > .b-acilir:first-child summary'))
+        && (await hp.textContent('.govde .b-baslik')).indexOf(turk.ad) >= 0);
+      await hp.reload(); await hp.waitForSelector('.dallar > [data-secili]');
+      dene('dal seçimi: yenilemede kalır', (await hp.getAttribute('.dallar > .b-acilir:first-child', 'data-dal')) === turk.id && (await hp.locator('.dallar > details[open]').count()) === 1);
+      await hp.goto(T + '/kabuk/#/bugun');
+      await hp.waitForFunction(ad => ((document.querySelector('a[href="#/alan/tarih"]') || {}).textContent || '').indexOf(ad) >= 0, turk.ad, { timeout: 5000 }).catch(() => {});
+      dene('dal seçimi: Bugün\'deki Tarih kartının alt başlığı dalın adı', (await hp.textContent('a[href="#/alan/tarih"]')).indexOf(turk.ad) >= 0, await hp.textContent('a[href="#/alan/tarih"]'));
+      await hp.goto(T + '/kabuk/#/alan/akademik');
+      await hp.waitForSelector('.konu-gruplari');
+      const gr = await hp.$$eval('.konu-gruplari > .b-acilir', l => l.map(g => [g.querySelector('summary .b-acilir__baslik').textContent, g.querySelectorAll(':scope .yol > .b-acilir').length, g.open]));
+      dene('Akademik: 30 ünite derse göre gruplu (TYT Türkçe 3, TYT Temel Matematik 5 …), ünite adı kısa, masaüstünde gruplar açık, yalnız şu anki ünite açık',
+        gr.length === 8 && gr[0][0] === 'TYT Türkçe' && gr[0][1] === 3 && gr[1][0] === 'TYT Temel Matematik' && gr[1][1] === 5 && gr.reduce((n, g) => n + g[1], 0) === 30 && gr.every(g => g[2])
+        && (await hp.textContent('.konu-gruplari .yol > .b-acilir summary .b-acilir__baslik')) === 'Anlam' && (await hp.locator('.yol > details[open]').count()) === 1
+        && (await hp.locator('.konu-gruplari > [data-grup="simdi"]').count()) === 1, JSON.stringify(gr));
+      await hc.close();
+      const tc = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }), tp = await tc.newPage();
+      await tp.goto(T + '/kabuk/#/alan/akademik');
+      await tp.waitForSelector('.konu-gruplari');
+      dene('telefon: Akademik\'te yalnız şu anki grup açık',(await tp.locator('.konu-gruplari > details[open]').count()) === 1
+        && (await tp.locator('.konu-gruplari > details[open][data-grup="simdi"]').count()) === 1);
+      await tc.close();
+    }
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.b-acilir');
     dene('Felsefe: genel bakış: nerede olduğun tek kartta (konum, ders adı, tek ilerleme çizgisi, tek ana düğme), aşamanın konuları altında',
       (await p.locator('.sira [role=progressbar]').count()) === 1 && (await p.locator('.govde [role=progressbar]').count()) === 1 && (await p.locator('.sira .b-dugme--ana').count()) === 1
       && (await p.textContent('.sira__baslik')) === u1.dersler[0].ad && /Aşama 1/.test(await p.textContent('#asama-ad')));
-    dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
-    dene('Felsefe: ikinci ünite kilitli', (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli, .b-satir--kilitli').count()) >= 3);
+    dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.yol > .b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
+    dene('Felsefe: ikinci ünite kilitli', (await p.locator('.yol > .b-acilir').nth(1).locator('.b-ders--kilitli, .b-satir--kilitli').count()) >= 3);
     dene('Felsefe: eski modül bağlantısı yok (kapanış)', (await p.locator('a[href="/esp/"], a[href*="/dist/"]').count()) === 0);
     await goruntu(p, 'felsefe');
 
@@ -226,7 +301,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.b-acilir');
     dene('kayıt yenilemeden sonra duruyor: 3/9 ders', (await ilerleme(p)) === '3/9');
-    dene('ikinci ünite açıldı: ilk dersi ve kapısı bağlantı, sonraki iki ders kilitli', (await p.locator('.b-acilir').nth(1).locator('a.b-ders, a.b-satir').count()) === 2 && (await p.locator('.b-acilir').nth(1).locator('.b-ders--kilitli').count()) === 2);
+    dene('ikinci ünite açıldı: ilk dersi ve kapısı bağlantı, sonraki iki ders kilitli', (await p.locator('.yol > .b-acilir').nth(1).locator('a.b-ders, a.b-satir').count()) === 2 && (await p.locator('.yol > .b-acilir').nth(1).locator('.b-ders--kilitli').count()) === 2);
     await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + y.id);
     await p.waitForSelector('.b-bos');
     dene('aşama kapısı üniteler bitmeden kilitli', /bütün ünite kapıları/.test(await p.textContent('.b-bos')));
@@ -240,9 +315,9 @@ async function goruntu(p, ad, sec = {}) {
       // görünüm geçişi bitene kadar ekranda önceki sayfa da durur: yeni sayfa çizilmiş ve geçiş bitmiş olmalı
       await p.waitForFunction(a => document.getElementById('sayfa').getAttribute('data-ciz') === a && !document.documentElement.hasAttribute('data-gecis'), alan);
       await p.waitForSelector('.b-acilir');
-      dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
+      dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.yol > .b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
       // kilitli üniteler kapalı gelir (2026-11-16 sadelik): yeni alanda yalnız üzerinde çalışılan ilk ünite açık
-      dene(alan + ': yalnız ilk ünite açık gelir', (await p.locator('details.b-acilir[open]').count()) === 1);
+      dene(alan + ': yalnız ilk ünite açık gelir', (await p.locator('.yol > details.b-acilir[open]').count()) === 1);
       dene(alan + ': «Başla» ilk derse götürür', (await p.getAttribute('.b-eylemler .b-dugme--ana', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
       await p.click('.b-eylemler .b-dugme--ana');
       await p.waitForSelector('article.ders h1');
@@ -913,7 +988,7 @@ async function goruntu(p, ad, sec = {}) {
     dene('aşama: kilitli aşamanın dersi açılmaz, neden aşama kilidi', /Bu aşama kilitli/.test(await p.textContent('.b-bos')));
     await p.goto(T + '/kabuk/#/alan/felsefe/asama/2');
     await p.waitForSelector('.govde .b-bos');
-    dene('aşama: kilitli aşama sayfası listeyi ve kilidi gösterir', /Bu aşama kilitli/.test(await p.textContent('.govde .b-bos')) && (await p.locator('.b-acilir').count()) === 0);
+    dene('aşama: kilitli aşama sayfası listeyi ve kilidi gösterir', /Bu aşama kilitli/.test(await p.textContent('.govde .b-bos')) && (await p.locator('.yol > .b-acilir').count()) === 0);
     await goruntu(p, 'asama-kilitli');
     for (const sahip of y.uniteler.slice(1).concat([y])) {                   // ikinci ve üçüncü ünite kapısı, sonra aşama kapısı
       await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + sahip.id);
@@ -957,7 +1032,7 @@ async function goruntu(p, ad, sec = {}) {
     // ---- Taşıma: eski localStorage kaydı ilk açılışta IndexedDB'ye geçer, ekran onu okur, localStorage'dan silinir ----
     const mc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), mp = await mc.newPage(), mhata = [];
     mp.on('pageerror', e => mhata.push(e.message));
-    mp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) mhata.push(m.text()); });
+    mp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/(asama-\d+|harita)\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) mhata.push(m.text()); });
     if (!y2gercek) await mp.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
     await mp.goto(T + '/kabuk/harita.js'); // aynı köken, kabuk henüz açılmadı
     await mp.evaluate(k => { localStorage.setItem('lifeos.yol.felsefe.1', k); localStorage.setItem('lifeos.tema.secim', 'light'); }, kayit1);
@@ -975,7 +1050,7 @@ async function goruntu(p, ad, sec = {}) {
     // ---- Seviyemi bul (icerik-hatti §4.3): boş kayıtlı Dil, iki aşama; birinci bilinir, ikincide kalınır ----
     const yc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), yp = await yc.newPage(), yhata = [];
     yp.on('pageerror', e => yhata.push(e.message));
-    yp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) yhata.push(m.text()); });
+    yp.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/(asama-\d+|harita)\.json$|\/api\/hesap\/kabuk/.test(m.location().url || '')) yhata.push(m.text()); });
     const dil = [1, 2].map(n => JSON.parse(fs.readFileSync(path.join(kok, 'alan/dil/asama-' + n + '.json'), 'utf8'))), dogruHarf = {};
     dil.forEach(v => v.uniteler.forEach(u => u.kapi.sorular.forEach(q => { dogruHarf[q.id] = q.dogru; })));
     const yerCevapla = async dogru => {
@@ -1066,7 +1141,7 @@ async function goruntu(p, ad, sec = {}) {
       return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, set, bekleyen: l.length, satirlar: l }) });
     });
     // etiketin 403'ü gezinin kendi sınaması (sahte cevap); tarayıcı onu konsola yazar
-    op.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/asama-\d+\.json$|\/api\/kalite\/etiket|\/api\/hesap\/kabuk/.test(m.location().url || '')) ohata.push(m.text()); });
+    op.on('console', m => { if (m.type() === 'error' && !/\/alan\/[a-z]+\/(asama-\d+|harita)\.json$|\/api\/kalite\/etiket|\/api\/hesap\/kabuk/.test(m.location().url || '')) ohata.push(m.text()); });
     if (!y2gercek) await op.route('**/alan/felsefe/asama-2.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(y2) }));
     let bekleyen = 0; // dosyalardan sayılan taslak ders (haritadaki aşama sayısı kadar)
     require(kok + '/kabuk/harita.js').YERLER.filter(x => x.katman === 'alan' && x.asama).forEach(x => { for (let n = 1; n <= x.asama; n++) {

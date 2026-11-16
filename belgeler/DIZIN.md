@@ -59,6 +59,9 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Tur 2026-11-16 · Piksel raporu](ekip/sadelesme/tur-20261116/piksel.md) — Sahnelerde yaşayan minik insanlar, kalite düzeltmeleri, önce/sonra görüntüleri ve hız ölçümü.
 - [Tur 2026-11-16b · İçerik, dil ve eksikler](ekip/sadelesme/tur-20261116b/icerik.md) — Başbuğ adı, geliştirici dilinin temizliği, Yönetim ayrımı, yazılan taslakları, tek plan kaynağı, Sağlık panosu ve tahlil kaydı.
 - [Tur 2026-11-16b · Kabuk gezinme ve ders yapısı](ekip/sadelesme/tur-20261116b/kabuk.md) — rıhtım kalktı, telefonda alt sekme çubuğu, gizlenen üst çubuk, alan genel bakışı (konu başlıkları), ekran hataları günlüğe.
+- [Tur 2026-11-17 · Konu haritası](ekip/sadelesme/tur-20261117/icerik.md) — alan/<alan>/harita.json (dal → bölüm → konu): şema, denetim, Tarih 11 dal 414 konu, Felsefe 4 dal 95 konu, kabuk yükleme yolu.
+- [Tur 2026-11-17 · King divanı ve piksel](ekip/sadelesme/tur-20261117/king-piksel.md) — King'e Divan kipi (beş hükümdar canlandırması, Atatürk yok), konu bağlamı (King'le çalış), tahtlı otağ sahnesi, telefonda asıl öğe ortada, dört sahne cilası.
+- [Tur 2026-11-17 · Kabuk: çubuk hatası ve konu listeleri](ekip/sadelesme/tur-20261117/kabuk.md) — üst çubuk binme hatasının kökü, Akademik ders grupları, Tarih/Felsefe dalları ve dal seçimi, kalıcı binme testi.
 - [Tur 2026-11-16b · Piksel sahneler](ekip/sadelesme/tur-20261116b/piksel.md) — eski sahneler silindi, 14 yeni Başbuğ sahnesi; yer → sahne listesi, ölçümler, görüntüler.
 - [Tur 2026-11-16b · Sesler](ekip/sadelesme/tur-20261116b/ses.md) — arayüz sesleri baştan, düzey ayarı, dikişsiz rüzgâr ambiyansı.
 - [Tur 2026-11-16b · Ad ve altyapı](ekip/sadelesme/tur-20261116b/ad-altyapi.md) — LifeOS → Başbuğ (iç kimlikler kalır), King istemi kırpma, masaüstü sunucu bekçisi, hata ucu, boş port.

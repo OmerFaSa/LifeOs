@@ -43,6 +43,27 @@ t('yol: sıradaki adım ders → kapı → sonraki ünite → aşama kapısı �
   esit(adim(), null);
 });
 
+t('konu listeleri: Akademik üniteleri « · » öncesine göre ardışık gruplanır; ayraçsız ya da tek gruplu liste düz kalır', () => {
+  const g = K.uniteGruplari(require('../alan/akademik/asama-1.json').uniteler);
+  esit(g.map(x => x.ad + ':' + x.uniteler.length), ['TYT Türkçe:3', 'TYT Temel Matematik:5', 'TYT Fen Bilimleri:3', 'TYT Sosyal Bilimler:4', 'AYT Matematik:4', 'AYT Fizik:4', 'AYT Kimya:3', 'AYT Biyoloji:4']);
+  esit([g[0].uniteler[0].kisa, g[0].uniteler[0].i, g[7].uniteler[3].i], ['Anlam', 0, 29]);
+  esit(K.uniteGruplari([{ ad: 'A — x' }, { ad: 'B — y' }]).map(x => x.ad), ['A', 'B'], 'uzun tire de ayraç');
+  esit(K.uniteGruplari(require('../alan/felsefe/asama-1.json').uniteler), null);
+  esit(K.uniteGruplari([{ ad: 'TYT · a' }, { ad: 'TYT · b' }]), null, 'tek grup');
+  esit(K.uniteGruplari([{ ad: 'TYT · a' }, { ad: 'düz' }]), null, 'karışık');
+});
+t('konu haritası: dosya süzülür; bozuk dal, bölüm, konu ve yabancı kimlik atılır; geçerli dal yoksa null', () => {
+  const h = K.haritaSuz({ sema: 1, alan: 'tarih', dallar: [
+    { id: 'turk', ad: 'Türk tarihi', ozet: 'kısa', bolumler: [{ ad: 'İlk devletler', konular: [{ ad: 'Hunlar', ders: 'tarih.1.3.2' }, { ad: 'Göktürkler' }, { ad: '' }, { ad: 'X', ders: 'felsefe.1.1.1' }, { ad: 'Y', unite: 'tarih.1.2' }] }, { ad: 'Boş', konular: [] }] },
+    { id: 'turk', ad: 'Aynı kimlik', bolumler: [{ ad: 'a', konular: [{ ad: 'b' }] }] }, { id: 'Kötü Kimlik', ad: 'x', bolumler: [] }, null, { id: 'bos', ad: 'Boş dal', bolumler: [] }] }, 'tarih');
+  esit(h.dallar.length, 1);
+  esit(h.dallar[0].bolumler, [{ ad: 'İlk devletler', konular: [{ ad: 'Hunlar', ders: 'tarih.1.3.2' }, { ad: 'Göktürkler' }, { ad: 'X' }, { ad: 'Y', unite: 'tarih.1.2' }] }]);
+  esit([K.haritaSuz(null, 'tarih'), K.haritaSuz({ sema: 2, dallar: [] }, 'tarih'), K.haritaSuz({ sema: 1, dallar: [{ id: 'a', ad: 'b', bolumler: [] }] }, 'tarih')], [null, null, null]);
+  ['tarih', 'felsefe'].forEach(a => {
+    const ham = require('../alan/' + a + '/harita.json'), s = K.haritaSuz(ham, a), say = d => d.reduce((n, x) => n + x.bolumler.reduce((m, b) => m + b.konular.length, 0), 0);
+    esit([s.dallar.length, say(s.dallar)], [ham.dallar.length, say(ham.dallar)], a + ': gerçek dosyada hiçbir şey atılmaz');
+  });
+});
 t('Bugün özet cümlesi: yalnız bilinen sayılar, son öğe iyelik alır, hiçbiri yoksa sakin cümle', () => {
   esit(K.ozetCumle({ tur: 'ders' }, 1, 2), 'Bugün bir ders, bir tekrar ve 2 bekleyen işin var.');
   esit(K.ozetCumle({ tur: 'ders' }, 0, 0), 'Bugün bir dersin var.');
