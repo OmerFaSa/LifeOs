@@ -65,6 +65,10 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Tur 2026-11-17b · Araç ekranları](ekip/sadelesme/tur-20261117b/araclar.md) — Plan tek ana eylem, Not başlık düğmesi, adla not bağı, geri alınabilir silme, Kayıt/Tekrar/Sağlık/Hesap hamları; önce/sonra görüntüleri.
 - [Tur 2026-11-17b · Gerçek veri gezisi](ekip/sadelesme/tur-20261117b/gercek-gezi.md) — sahibin verisinin kopyasıyla uçtan uca gezi: bulunan hatalar (genel anlatım, kişisel veri yok), düzeltilenler, başkasına iletilenler.
 - [Tur 2026-11-17b · Kabuk çekirdek](ekip/sadelesme/tur-20261117b/kabuk.md) — ilk geçiş uzun karesi, söz reddi bildirimi, Akademik grupları daraltınca, dal seçimi eşitleme, çekirdek ekranların ham yerleri.
+- [Tur 2026-11-17c · Piksel](ekip/sadelesme/tur-20261117c/piksel.md) — ay ışıklı gece, gündüz iç mekân ışığı ve kuşaklar, kervansaray, kara çadır, atmosfer perspektifi; önce/sonra ölçümleri.
+- [Tur 2026-11-17c · Ses](ekip/sadelesme/tur-20261117c/ses.md) — arayüz sesleri ve ambiyans ölçülerek yeniden: düzey, tını, yankı, rüzgâr ve gece katmanları; önce/sonra tabloları.
+- [Tur 2026-11-17c · İçerik: Tarih ve Felsefe](ekip/sadelesme/tur-20261117c/icerik-tarih-felsefe.md) — ilk aşamaların 18 dersi yeniden, öğretici çözümler, eklenen kaynaklar, sahibe notlar.
+- [Tur 2026-11-17c · İçerik: Akademik](ekip/sadelesme/tur-20261117c/icerik-akademik.md) — 109 sınav düzeyi derse ÖSYM tarzı soru, cevap anahtarı denetimi, işaretleme bulgusu, açık kalanlar.
 - [Tur 2026-11-16b · Piksel sahneler](ekip/sadelesme/tur-20261116b/piksel.md) — eski sahneler silindi, 14 yeni Başbuğ sahnesi; yer → sahne listesi, ölçümler, görüntüler.
 - [Tur 2026-11-16b · Sesler](ekip/sadelesme/tur-20261116b/ses.md) — arayüz sesleri baştan, düzey ayarı, dikişsiz rüzgâr ambiyansı.
 - [Tur 2026-11-16b · Ad ve altyapı](ekip/sadelesme/tur-20261116b/ad-altyapi.md) — LifeOS → Başbuğ (iç kimlikler kalır), King istemi kırpma, masaüstü sunucu bekçisi, hata ucu, boş port.
