@@ -7,7 +7,7 @@ Sahibi: sahne ajanı. Dosyalar: brand/ortak/piksel-doga.js, piksel.js, piksel.cs
 - [x] 2 Paralaks + atmosferik solma
 - [x] 3 Alan amblemleri `PIKSEL_DOGA.amblem(alan)`
 - [x] 4 Anlar (kabuk/an.js)
-- [ ] 5 Ölçüm
+- [x] 5 Ölçüm
 - [ ] Testler, görseller
 
 ## Sayfalar ajanına istek
@@ -22,4 +22,18 @@ Sahibi: sahne ajanı. Dosyalar: brand/ortak/piksel-doga.js, piksel.js, piksel.cs
 Ajan hesap sınırında kesildi, raporu doldurulmadı; kod tamdı: gerçek saate göre gök (`PIKSEL_DOGA.an`, `AN_SAAT`, `saatAl`), kaydırınca paralaks,
 alan amblemleri (`PIKSEL_DOGA.amblem`, başlığın yanında), anlar (`kabuk/an.js`: ders, kapı, günün ilk kaydı; hareket azsa yok).
 Devralan oturum: `an.js` açılış yükünde değil, sayfa yüklenince ilk boşlukta gelir (kabuk.js; açılış bütçesi LF ile 1 008 142 → 998 463 bayt, tavan 1 000 000),
-`an.test.js` CI'da «Anlar» adımı. Kapılar: ortak_test 280/0, kabuk_gez ve hareket_gez hepsi geçti, kabuk/bilesen testleri yeşil. Ölçüm (adım 5) yapılmadı.
+`an.test.js` CI'da «Anlar» adımı. Kapılar: ortak_test 280/0, kabuk_gez ve hareket_gez hepsi geçti, kabuk/bilesen testleri yeşil. Ölçüm aşağıda (2026-11-18).
+
+## Ölçüm: geçiş kareleri (2026-11-18, devralan oturum)
+Yalıtılmış sunucu, 1440×900, CPU 4× yavaş, yedi yer arasında 21 geçiş (her yer önce bir kez ısıtıldı), rAF aralıkları; iki koşu.
+Tur öncesi b88e0826 ile tur sonrası c6e3ef3d aynı betikle (scratchpad `hiz/gecis_olc.js`):
+
+| | önce (b88e0826) | sonra (c6e3ef3d) |
+|---|---|---|
+| en uzun kare | 80 · 68 ms | 68 · 75 ms |
+| ortanca en uzun kare | 51 · 51 ms | 51 · 52 ms |
+| 50 ms'yi aşan kare (21 geçişte) | 15 · 15 | 16 · 20 |
+| en çok bir uzun kareli geçiş | 21/21 · 21/21 | 20/21 · 19/21 |
+
+Ölçüt (yon.md: en uzun kare kötüleşmez) tutuyor. 50 ms'yi aşan kare sayısı biraz arttı; fark en çok Öğren ve Bugün'e geçişte (60-70 ms'lik ikinci kare).
+Açık: bu ikinci karenin kaynağı (serif yazı tipinin ilk çizimi, alan tonlu zemin geçişi ya da gök) ayrıca ölçülmedi.
