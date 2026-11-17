@@ -474,6 +474,66 @@
         expect(D.kare(c.getContext('2d'), arka, o, 977.3)).toBe(1);
       }finally{ if(once) k.setAttribute('data-hareket', once); else k.removeAttribute('data-hareket'); }
     });
+    it('gerçek saate göre gök: beş an saatten, adlar ve eski adlar aynı ana, gündüz/gece sınırı gece.js ile aynı', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA;
+      expect([4, 7, 12, 15.5, 18.5, 22].map(D.an).join()).toBe('gece,safak,ogle,ikindi,gunbatimi,gece');
+      Object.keys(D.AN_SAAT).forEach(a => expect(D.yerlesim(480, 100, a, 'kale').an).toBe(a));
+      expect(D.yerlesim(480, 100, 'dogum', 'kale').an).toBe('safak');
+      expect(D.yerlesim(480, 100, 'batim', 'kale').an).toBe('gunbatimi');
+      expect(D.yerlesim(480, 100, 19.9, 'kale').vakit).toBe('gunduz');
+      expect(D.yerlesim(480, 100, 20, 'kale').vakit).toBe('gece');
+      /* kabuğun 'gunduz' · 'gece'si: saat o vakitteyse gerçek saat (10 dk adım), değilse temsilî saat */
+      const s = new Date(), gun = s.getHours() >= 6 && s.getHours() < 20;
+      expect(Math.abs(D.saatAl(gun ? 'gunduz' : 'gece') - (s.getHours() + s.getMinutes() / 60)) < 0.2).toBe(true);
+      expect(D.saatAl(gun ? 'gece' : 'gunduz')).toBe(gun ? 23 : 12.5);
+    });
+    it('her sahne her saatte kurulur, boşluksuz, sınırlı renkli; an değişince gök değişir, saat ilerledikçe yumuşak geçer', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, W = 480, H = 100, ciz = (t, v) => { const o = D.yerlesim(W, H, v, t), c = document.createElement('canvas'); c.width = W; c.height = H; D.binaCiz(c.getContext('2d'), o); return { o, p:c.getContext('2d').getImageData(0, 0, W, H).data }; };
+      D.TUR_LISTE.forEach(t => [0.5, 5.5, 6.2, 7, 9.5, 12.5, 15.5, 17.4, 18.3, 19.6, 20.3, 23].forEach(v => {
+        const { o, p } = ciz(t, v), hep = new Set(), sol = new Set();
+        let bos = 0;
+        for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){ const i = (y * W + x) * 4, k = p[i] << 16 | p[i + 1] << 8 | p[i + 2]; if(p[i + 3] !== 255) bos++; hep.add(k); if(x < W * 0.4 && y < H * 0.35) sol.add(k); }
+        if(bos || hep.size > 72 || sol.size > 8 || (innerWidth >= 640 && o.gy[1] - o.gr < 19)) throw new Error(t + ' ' + v + ': boş ' + bos + ', renk ' + hep.size + ', üst-sol ' + sol.size + ', gök cismi ' + (o.gy[1] - o.gr));
+      }));
+      /* gök (sağ üstte 8. satır ve solda ufkun biraz üstü) anlar arasında belirgin farklı; 10 dakikada (gün/gece sınırında bile) sıçramaz */
+      const gok = (t, v) => { const { o, p } = ciz(t, v), i = (8 * W + 360) * 4, j = (Math.round(o.ufuk * 0.6) * W + 8) * 4; return [p[i], p[i + 1], p[i + 2], p[j], p[j + 1], p[j + 2]]; }, fark = (a, b) => Math.max(...a.map((v, i) => Math.abs(v - b[i])));
+      ['otuken', 'kale', 'pinar'].forEach(t => {
+        const l = ['safak', 'ogle', 'ikindi', 'gunbatimi', 'gece'].map(a => gok(t, a));
+        l.forEach((a, i) => l.forEach((b, j) => { if(i < j && !(fark(a, b) > 12)) throw new Error(t + ': ' + i + '~' + j + ' ' + a + ' / ' + b); }));
+        [[19.9, 20.05], [5.95, 6.05], [12.4, 12.55], [17, 17.15]].forEach(([a, b]) => { const f = fark(gok(t, a), gok(t, b)); if(f > 16) throw new Error(t + ' ' + a + '→' + b + ' sıçrama ' + f); });
+      });
+    });
+    it('paralaks: açık hava sahnesi üç katman, kayınca boşluksuz, ön plan yerinde; hareket azsa ve iç mekânda kayma yok', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, k = document.documentElement, once = k.getAttribute('data-hareket'), IC = ['kitaplik', 'hattat', 'yazi', 'taht'];
+      k.setAttribute('data-hareket', 'tam');
+      try{
+        D.TUR_LISTE.forEach(t => {
+          const o = D.yerlesim(480, 100, 'ogle', t), arka = document.createElement('canvas'), c = document.createElement('canvas');
+          arka.width = c.width = 480; arka.height = c.height = 100; D.binaCiz(arka.getContext('2d'), o);
+          if(IC.includes(t)){ expect(o.katman).toBe(null); return; }
+          expect(o.katman.length).toBe(3);
+          D.kare(c.getContext('2d'), arka, o, 30); const duz = o.imza;
+          o.kay = 80; expect(D.kare(c.getContext('2d'), arka, o, 30)).toBe(1); expect(o.imza === duz).toBe(false);
+          const p = c.getContext('2d').getImageData(0, 0, 480, 100).data; let bos = 0; for(let i = 3; i < p.length; i += 4) if(p[i] !== 255) bos++;
+          expect(bos).toBe(0);
+          const a = arka.getContext('2d').getImageData(470, 98, 1, 1).data, b = c.getContext('2d').getImageData(470, 98, 1, 1).data;   // ön plan (sağ alt köşe) yerinde
+          if(![0, 1, 2].every(i => a[i] === b[i])) throw new Error(t + ': ön plan kaydı');
+          k.setAttribute('data-hareket', 'az'); o.imza = ''; D.kare(c.getContext('2d'), arka, o, 30); expect(o.imza.indexOf('#')).toBe(-1); k.setAttribute('data-hareket', 'tam');
+        });
+      }finally{ if(once) k.setAttribute('data-hareket', once); else k.removeAttribute('data-hareket'); }
+    });
+    it('alan amblemleri: 16×16, harfler palette, her alan için PNG; takma adlar ve bilinmeyen alan', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA;
+      ['tarih', 'felsefe', 'akademik', 'dil', 'muzik', 'okuma', 'saglik', 'uyku', 'king', 'beslenme', 'hareket', 'tahlil'].forEach(a => {
+        const k = D.AMBLEM[a];
+        expect(k.length).toBe(16); expect(k.every(r => r.length === 16)).toBe(true);
+        expect(k.join('').split('').every(c => c === '.' || !!D.AMB_P[c])).toBe(true);
+        expect(k.join('').replace(/\./g, '').length > 40).toBe(true);
+        expect(/^data:image\/png;base64,/.test(D.amblem(a))).toBe(true);
+      });
+      expect(D.amblem('ogren')).toBe(D.amblem('okuma'));
+      expect(D.amblem('yok')).toBe(null);
+    });
     it('hiçbir açık hava sahnesinde göğün altındaki bir satır uçtan uca tek açık renk değildir (başlığı biçen çizgi)', () => {
       const D = window.LIFEOS.PIKSEL_DOGA;
       D.TUR_LISTE.filter(t => !['kitaplik', 'hattat', 'yazi', 'taht'].includes(t)).forEach(t => {   // iç mekânın düz duvarı sayılmaz
