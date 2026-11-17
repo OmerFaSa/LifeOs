@@ -1,0 +1,2452 @@
+{
+ "sema": 1,
+ "alan": "akademik",
+ "dallar": [
+  {
+   "id": "tyt-turkce",
+   "ad": "TYT Türkçe",
+   "ozet": "Sözcükten paragrafa anlam, ses ve yazım, sözcük türleri ve cümle bilgisi.",
+   "bolumler": [
+    {
+     "ad": "Sözcük ve cümlede anlam",
+     "konular": [
+      {
+       "ad": "Sözcükte anlam",
+       "ders": "akademik.1.1.1"
+      },
+      {
+       "ad": "Söz yorumu",
+       "ders": "akademik.1.1.3"
+      },
+      {
+       "ad": "Deyimler ve atasözleri",
+       "ders": "akademik.1.1.3"
+      },
+      {
+       "ad": "Cümlede anlam",
+       "ders": "akademik.1.1.5"
+      },
+      {
+       "ad": "Cümle yorumu",
+       "ders": "akademik.1.1.7"
+      }
+     ]
+    },
+    {
+     "ad": "Paragraf",
+     "konular": [
+      {
+       "ad": "Paragrafta konu ve ana düşünce",
+       "ders": "akademik.1.2.1"
+      },
+      {
+       "ad": "Paragrafta yardımcı düşünce",
+       "ders": "akademik.1.2.3"
+      },
+      {
+       "ad": "Paragrafta yapı ve akış",
+       "ders": "akademik.1.2.5"
+      },
+      {
+       "ad": "Anlatım biçimleri",
+       "ders": "akademik.1.2.7"
+      },
+      {
+       "ad": "Düşünceyi geliştirme yolları",
+       "ders": "akademik.1.2.7"
+      },
+      {
+       "ad": "Paragrafta çıkarım ve yorum",
+       "ders": "akademik.1.2.9"
+      }
+     ]
+    },
+    {
+     "ad": "Ses bilgisi, yazım ve noktalama",
+     "konular": [
+      {
+       "ad": "Ses bilgisi ve ses olayları",
+       "ders": "akademik.1.3.1"
+      },
+      {
+       "ad": "Yazım kuralları",
+       "ders": "akademik.1.3.3"
+      },
+      {
+       "ad": "Noktalama işaretleri",
+       "ders": "akademik.1.3.5"
+      }
+     ]
+    },
+    {
+     "ad": "Sözcük yapısı ve türleri",
+     "konular": [
+      {
+       "ad": "Sözcükte yapı: kök ve ekler",
+       "ders": "akademik.1.3.7"
+      },
+      {
+       "ad": "İsimler",
+       "ders": "akademik.1.3.9"
+      },
+      {
+       "ad": "Sıfatlar",
+       "ders": "akademik.1.3.9"
+      },
+      {
+       "ad": "Zamirler",
+       "ders": "akademik.1.3.9"
+      },
+      {
+       "ad": "Zarflar",
+       "ders": "akademik.1.3.11"
+      },
+      {
+       "ad": "Edat, bağlaç ve ünlem",
+       "ders": "akademik.1.3.11"
+      }
+     ]
+    },
+    {
+     "ad": "Fiiller",
+     "konular": [
+      {
+       "ad": "Fiilde kip ve kişi",
+       "ders": "akademik.1.3.13"
+      },
+      {
+       "ad": "Fiilde yapı: basit, türemiş, birleşik",
+       "ders": "akademik.1.3.13"
+      },
+      {
+       "ad": "Ek fiil",
+       "ders": "akademik.1.3.13"
+      },
+      {
+       "ad": "Fiilimsiler",
+       "ders": "akademik.1.3.15"
+      },
+      {
+       "ad": "Fiilde çatı",
+       "ders": "akademik.1.3.17"
+      }
+     ]
+    },
+    {
+     "ad": "Cümle bilgisi",
+     "konular": [
+      {
+       "ad": "Cümlenin ögeleri",
+       "ders": "akademik.1.3.19"
+      },
+      {
+       "ad": "Cümle türleri",
+       "ders": "akademik.1.3.21"
+      },
+      {
+       "ad": "Anlatım bozuklukları",
+       "ders": "akademik.1.3.23"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-mat",
+   "ad": "TYT Matematik",
+   "ozet": "Sayılar, cebirsel ifadeler, problemler, kümeler, fonksiyonlar, sayma ve veri.",
+   "bolumler": [
+    {
+     "ad": "Sayılar",
+     "konular": [
+      {
+       "ad": "Temel kavramlar ve sayı kümeleri",
+       "ders": "akademik.1.4.1"
+      },
+      {
+       "ad": "Sayı basamakları",
+       "ders": "akademik.1.4.3"
+      },
+      {
+       "ad": "Bölme ve bölünebilme",
+       "ders": "akademik.1.4.5"
+      },
+      {
+       "ad": "Asal çarpanlara ayırma",
+       "ders": "akademik.1.4.7"
+      },
+      {
+       "ad": "EBOB ve EKOK",
+       "ders": "akademik.1.4.7"
+      },
+      {
+       "ad": "Rasyonel sayılar",
+       "ders": "akademik.1.4.9"
+      },
+      {
+       "ad": "Ondalık sayılar",
+       "ders": "akademik.1.4.9"
+      }
+     ]
+    },
+    {
+     "ad": "Cebirsel ifadeler",
+     "konular": [
+      {
+       "ad": "Basit eşitsizlikler",
+       "ders": "akademik.1.5.1"
+      },
+      {
+       "ad": "Mutlak değer",
+       "ders": "akademik.1.5.3"
+      },
+      {
+       "ad": "Üslü sayılar",
+       "ders": "akademik.1.5.5"
+      },
+      {
+       "ad": "Köklü sayılar",
+       "ders": "akademik.1.5.7"
+      },
+      {
+       "ad": "Çarpanlara ayırma",
+       "ders": "akademik.1.5.9"
+      },
+      {
+       "ad": "Oran ve orantı",
+       "ders": "akademik.1.5.11"
+      },
+      {
+       "ad": "Birinci dereceden denklemler",
+       "ders": "akademik.1.5.13"
+      }
+     ]
+    },
+    {
+     "ad": "Problemler: sayı, yaş ve yüzde",
+     "konular": [
+      {
+       "ad": "Sayı problemleri",
+       "ders": "akademik.1.6.1"
+      },
+      {
+       "ad": "Kesir problemleri",
+       "ders": "akademik.1.6.1"
+      },
+      {
+       "ad": "Yaş problemleri",
+       "ders": "akademik.1.6.3"
+      },
+      {
+       "ad": "Yüzde problemleri",
+       "ders": "akademik.1.6.5"
+      },
+      {
+       "ad": "Kâr ve zarar problemleri",
+       "ders": "akademik.1.6.5"
+      },
+      {
+       "ad": "Karışım problemleri",
+       "ders": "akademik.1.6.7"
+      }
+     ]
+    },
+    {
+     "ad": "Problemler: iş, hareket ve grafik",
+     "konular": [
+      {
+       "ad": "İşçi ve havuz problemleri",
+       "ders": "akademik.1.6.9"
+      },
+      {
+       "ad": "Hareket problemleri",
+       "ders": "akademik.1.6.11"
+      },
+      {
+       "ad": "Grafik ve tablo problemleri",
+       "ders": "akademik.1.6.13"
+      },
+      {
+       "ad": "Rutin olmayan problemler",
+       "ders": "akademik.1.6.15"
+      }
+     ]
+    },
+    {
+     "ad": "Kümeler, mantık ve fonksiyonlar",
+     "konular": [
+      {
+       "ad": "Mantık",
+       "ders": "akademik.1.7.3"
+      },
+      {
+       "ad": "Kümeler",
+       "ders": "akademik.1.7.1"
+      },
+      {
+       "ad": "Kartezyen çarpım"
+      },
+      {
+       "ad": "Fonksiyonlar",
+       "ders": "akademik.1.7.5"
+      },
+      {
+       "ad": "Polinomlar",
+       "ders": "akademik.1.7.7"
+      },
+      {
+       "ad": "İkinci dereceden denklemler",
+       "ders": "akademik.1.7.9"
+      }
+     ]
+    },
+    {
+     "ad": "Sayma, olasılık ve veri",
+     "konular": [
+      {
+       "ad": "Permütasyon",
+       "ders": "akademik.1.7.11"
+      },
+      {
+       "ad": "Kombinasyon",
+       "ders": "akademik.1.7.11"
+      },
+      {
+       "ad": "Olasılık",
+       "ders": "akademik.1.7.11"
+      },
+      {
+       "ad": "Veri ve istatistik",
+       "ders": "akademik.1.7.13"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-geo",
+   "ad": "TYT Geometri",
+   "ozet": "Açılar ve üçgenler, çokgenler ve dörtgenler, çember, analitik geometri ve katı cisimler.",
+   "bolumler": [
+    {
+     "ad": "Açılar ve üçgenler",
+     "konular": [
+      {
+       "ad": "Doğruda ve üçgende açılar",
+       "ders": "akademik.1.8.1"
+      },
+      {
+       "ad": "Dik üçgen ve Pisagor bağıntısı",
+       "ders": "akademik.1.8.3"
+      },
+      {
+       "ad": "Özel üçgenler",
+       "ders": "akademik.1.8.3"
+      },
+      {
+       "ad": "Açıortay",
+       "ders": "akademik.1.8.5"
+      },
+      {
+       "ad": "Kenarortay",
+       "ders": "akademik.1.8.5"
+      },
+      {
+       "ad": "Üçgende alan",
+       "ders": "akademik.1.8.5"
+      },
+      {
+       "ad": "Üçgende benzerlik",
+       "ders": "akademik.1.8.7"
+      },
+      {
+       "ad": "Üçgende açı–kenar bağıntıları"
+      }
+     ]
+    },
+    {
+     "ad": "Çokgenler ve dörtgenler",
+     "konular": [
+      {
+       "ad": "Çokgenler",
+       "ders": "akademik.1.8.9"
+      },
+      {
+       "ad": "Dörtgenler",
+       "ders": "akademik.1.8.9"
+      },
+      {
+       "ad": "Yamuk",
+       "ders": "akademik.1.8.9"
+      },
+      {
+       "ad": "Paralelkenar ve eşkenar dörtgen",
+       "ders": "akademik.1.8.9"
+      },
+      {
+       "ad": "Dikdörtgen ve kare",
+       "ders": "akademik.1.8.9"
+      },
+      {
+       "ad": "Deltoid",
+       "ders": "akademik.1.8.9"
+      }
+     ]
+    },
+    {
+     "ad": "Çember ve daire",
+     "konular": [
+      {
+       "ad": "Çemberde açı",
+       "ders": "akademik.1.8.11"
+      },
+      {
+       "ad": "Çemberde uzunluk",
+       "ders": "akademik.1.8.11"
+      },
+      {
+       "ad": "Dairede çevre ve alan",
+       "ders": "akademik.1.8.11"
+      }
+     ]
+    },
+    {
+     "ad": "Analitik geometri ve katı cisimler",
+     "konular": [
+      {
+       "ad": "Noktanın analitik incelenmesi",
+       "ders": "akademik.1.8.13"
+      },
+      {
+       "ad": "Doğrunun analitik incelenmesi",
+       "ders": "akademik.1.8.13"
+      },
+      {
+       "ad": "Prizmalar",
+       "ders": "akademik.1.8.15"
+      },
+      {
+       "ad": "Piramitler",
+       "ders": "akademik.1.8.15"
+      },
+      {
+       "ad": "Silindir, koni ve küre",
+       "ders": "akademik.1.8.15"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-fizik",
+   "ad": "TYT Fizik",
+   "ozet": "9. ve 10. sınıf fiziği: madde, basınç, ısı, hareket, enerji, elektrik, dalgalar ve optik.",
+   "bolumler": [
+    {
+     "ad": "Fizik ve madde",
+     "konular": [
+      {
+       "ad": "Fizik bilimine giriş",
+       "ders": "akademik.1.11.1"
+      },
+      {
+       "ad": "Madde ve özellikleri: kütle, hacim, özkütle",
+       "ders": "akademik.1.11.3"
+      },
+      {
+       "ad": "Dayanıklılık, adezyon ve kohezyon",
+       "ders": "akademik.1.11.3"
+      }
+     ]
+    },
+    {
+     "ad": "Basınç ve kaldırma kuvveti",
+     "konular": [
+      {
+       "ad": "Katı basıncı",
+       "ders": "akademik.1.11.5"
+      },
+      {
+       "ad": "Sıvı basıncı",
+       "ders": "akademik.1.11.5"
+      },
+      {
+       "ad": "Gaz basıncı",
+       "ders": "akademik.1.11.5"
+      },
+      {
+       "ad": "Kaldırma kuvveti",
+       "ders": "akademik.1.11.7"
+      }
+     ]
+    },
+    {
+     "ad": "Isı ve sıcaklık",
+     "konular": [
+      {
+       "ad": "Isı ve sıcaklık",
+       "ders": "akademik.1.11.9"
+      },
+      {
+       "ad": "Hal değişimi"
+      },
+      {
+       "ad": "Isıl denge",
+       "ders": "akademik.1.11.9"
+      },
+      {
+       "ad": "Enerji iletim yolları",
+       "ders": "akademik.1.11.9"
+      },
+      {
+       "ad": "Genleşme",
+       "ders": "akademik.1.11.9"
+      }
+     ]
+    },
+    {
+     "ad": "Hareket, kuvvet ve enerji",
+     "konular": [
+      {
+       "ad": "Hareket: konum, hız, ivme",
+       "ders": "akademik.1.11.11"
+      },
+      {
+       "ad": "Kuvvet",
+       "ders": "akademik.1.11.11"
+      },
+      {
+       "ad": "Newton'un hareket yasaları",
+       "ders": "akademik.1.11.13"
+      },
+      {
+       "ad": "Sürtünme kuvveti",
+       "ders": "akademik.1.11.13"
+      },
+      {
+       "ad": "İş, güç ve enerji",
+       "ders": "akademik.1.11.15"
+      },
+      {
+       "ad": "Enerjinin korunumu ve verim",
+       "ders": "akademik.1.11.15"
+      }
+     ]
+    },
+    {
+     "ad": "Elektrik ve manyetizma",
+     "konular": [
+      {
+       "ad": "Elektrostatik",
+       "ders": "akademik.1.11.17"
+      },
+      {
+       "ad": "Elektrik akımı, potansiyel fark ve direnç",
+       "ders": "akademik.1.11.17"
+      },
+      {
+       "ad": "Elektrik devreleri",
+       "ders": "akademik.1.11.17"
+      },
+      {
+       "ad": "Mıknatıs ve manyetik alan",
+       "ders": "akademik.1.11.19"
+      },
+      {
+       "ad": "Akım ve manyetik alan",
+       "ders": "akademik.1.11.19"
+      }
+     ]
+    },
+    {
+     "ad": "Dalgalar",
+     "konular": [
+      {
+       "ad": "Dalgaların temel kavramları",
+       "ders": "akademik.1.11.21"
+      },
+      {
+       "ad": "Yay dalgası",
+       "ders": "akademik.1.11.21"
+      },
+      {
+       "ad": "Su dalgası",
+       "ders": "akademik.1.11.21"
+      },
+      {
+       "ad": "Ses dalgası",
+       "ders": "akademik.1.11.21"
+      },
+      {
+       "ad": "Deprem dalgası",
+       "ders": "akademik.1.11.21"
+      }
+     ]
+    },
+    {
+     "ad": "Optik",
+     "konular": [
+      {
+       "ad": "Aydınlanma ve gölge",
+       "ders": "akademik.1.11.23"
+      },
+      {
+       "ad": "Yansıma ve düzlem ayna",
+       "ders": "akademik.1.11.23"
+      },
+      {
+       "ad": "Küresel aynalar",
+       "ders": "akademik.1.11.23"
+      },
+      {
+       "ad": "Kırılma",
+       "ders": "akademik.1.11.23"
+      },
+      {
+       "ad": "Mercekler",
+       "ders": "akademik.1.11.23"
+      },
+      {
+       "ad": "Prizmalar ve renk",
+       "ders": "akademik.1.11.23"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-kimya",
+   "ad": "TYT Kimya",
+   "ozet": "9. ve 10. sınıf kimyası: atom, etkileşimler, maddenin halleri, kanunlar, karışımlar ve asit–baz.",
+   "bolumler": [
+    {
+     "ad": "Kimya bilimi ve atom",
+     "konular": [
+      {
+       "ad": "Kimya bilimi",
+       "ders": "akademik.1.10.1"
+      },
+      {
+       "ad": "Atom modelleri",
+       "ders": "akademik.1.10.3"
+      },
+      {
+       "ad": "Atomun yapısı",
+       "ders": "akademik.1.10.3"
+      },
+      {
+       "ad": "Periyodik sistem",
+       "ders": "akademik.1.10.3"
+      }
+     ]
+    },
+    {
+     "ad": "Etkileşimler ve maddenin halleri",
+     "konular": [
+      {
+       "ad": "Güçlü etkileşimler: iyonik, kovalent, metalik bağ",
+       "ders": "akademik.1.10.5"
+      },
+      {
+       "ad": "Zayıf etkileşimler",
+       "ders": "akademik.1.10.5"
+      },
+      {
+       "ad": "Fiziksel ve kimyasal değişimler",
+       "ders": "akademik.1.10.5"
+      },
+      {
+       "ad": "Maddenin halleri",
+       "ders": "akademik.1.10.7"
+      },
+      {
+       "ad": "Doğa ve kimya: su, hava, toprak"
+      }
+     ]
+    },
+    {
+     "ad": "Kanunlar ve hesaplamalar",
+     "konular": [
+      {
+       "ad": "Kimyanın temel kanunları",
+       "ders": "akademik.1.10.9"
+      },
+      {
+       "ad": "Mol kavramı",
+       "ders": "akademik.1.10.9"
+      },
+      {
+       "ad": "Kimyasal tepkimeler ve denklemler",
+       "ders": "akademik.1.10.9"
+      },
+      {
+       "ad": "Kimyasal hesaplamalar",
+       "ders": "akademik.1.10.9"
+      }
+     ]
+    },
+    {
+     "ad": "Karışımlar, asitler ve bazlar",
+     "konular": [
+      {
+       "ad": "Karışımlar",
+       "ders": "akademik.1.10.11"
+      },
+      {
+       "ad": "Ayırma ve saflaştırma teknikleri",
+       "ders": "akademik.1.10.11"
+      },
+      {
+       "ad": "Asitler ve bazlar",
+       "ders": "akademik.1.10.13"
+      },
+      {
+       "ad": "Tuzlar",
+       "ders": "akademik.1.10.13"
+      },
+      {
+       "ad": "Kimya her yerde",
+       "ders": "akademik.1.10.15"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-biyo",
+   "ad": "TYT Biyoloji",
+   "ozet": "9. ve 10. sınıf biyolojisi: yaşamın bileşenleri, hücre, canlılar dünyası, bölünme, kalıtım ve ekoloji.",
+   "bolumler": [
+    {
+     "ad": "Yaşam ve temel bileşenler",
+     "konular": [
+      {
+       "ad": "Canlıların ortak özellikleri",
+       "ders": "akademik.1.9.1"
+      },
+      {
+       "ad": "İnorganik bileşikler: su, mineraller, asit–baz",
+       "ders": "akademik.1.9.3"
+      },
+      {
+       "ad": "Karbonhidratlar ve lipitler",
+       "ders": "akademik.1.9.3"
+      },
+      {
+       "ad": "Proteinler ve enzimler",
+       "ders": "akademik.1.9.3"
+      },
+      {
+       "ad": "Vitaminler, nükleik asitler ve ATP",
+       "ders": "akademik.1.9.3"
+      }
+     ]
+    },
+    {
+     "ad": "Hücre",
+     "konular": [
+      {
+       "ad": "Hücre teorisi ve hücrenin yapısı",
+       "ders": "akademik.1.9.5"
+      },
+      {
+       "ad": "Organeller",
+       "ders": "akademik.1.9.5"
+      },
+      {
+       "ad": "Hücre zarından madde geçişi",
+       "ders": "akademik.1.9.5"
+      }
+     ]
+    },
+    {
+     "ad": "Canlılar dünyası",
+     "konular": [
+      {
+       "ad": "Sınıflandırma ilkeleri"
+      },
+      {
+       "ad": "Bakteriler ve arkeler"
+      },
+      {
+       "ad": "Protistler ve mantarlar"
+      },
+      {
+       "ad": "Bitkiler ve hayvanlar"
+      },
+      {
+       "ad": "Virüsler"
+      }
+     ]
+    },
+    {
+     "ad": "Hücre bölünmesi ve üreme",
+     "konular": [
+      {
+       "ad": "Mitoz",
+       "ders": "akademik.1.9.7"
+      },
+      {
+       "ad": "Eşeysiz üreme",
+       "ders": "akademik.1.9.7"
+      },
+      {
+       "ad": "Mayoz",
+       "ders": "akademik.1.9.7"
+      },
+      {
+       "ad": "Eşeyli üreme",
+       "ders": "akademik.1.9.7"
+      }
+     ]
+    },
+    {
+     "ad": "Kalıtım",
+     "konular": [
+      {
+       "ad": "Mendel ilkeleri ve çaprazlamalar",
+       "ders": "akademik.1.9.9"
+      },
+      {
+       "ad": "Eş baskınlık, çok alellilik ve kan grupları",
+       "ders": "akademik.1.9.9"
+      },
+      {
+       "ad": "Eşeye bağlı kalıtım ve soyağacı",
+       "ders": "akademik.1.9.9"
+      },
+      {
+       "ad": "Genetik varyasyon"
+      }
+     ]
+    },
+    {
+     "ad": "Ekosistem ekolojisi",
+     "konular": [
+      {
+       "ad": "Ekosistem ve bileşenleri",
+       "ders": "akademik.1.9.11"
+      },
+      {
+       "ad": "Besin zinciri ve enerji akışı",
+       "ders": "akademik.1.9.11"
+      },
+      {
+       "ad": "Madde döngüleri",
+       "ders": "akademik.1.9.11"
+      },
+      {
+       "ad": "Güncel çevre sorunları",
+       "ders": "akademik.1.9.11"
+      },
+      {
+       "ad": "Biyoçeşitlilik ve doğal kaynaklar",
+       "ders": "akademik.1.9.11"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-tarih",
+   "ad": "TYT Tarih",
+   "ozet": "Tarih ve zamandan Atatürkçülüğe: ilk uygarlıklar, Türk ve İslam tarihi, Osmanlı ve Millî Mücadele.",
+   "bolumler": [
+    {
+     "ad": "Tarih ve ilk uygarlıklar",
+     "konular": [
+      {
+       "ad": "Tarih ve zaman",
+       "ders": "akademik.1.15.1"
+      },
+      {
+       "ad": "İnsanlığın ilk dönemleri",
+       "ders": "akademik.1.15.1"
+      },
+      {
+       "ad": "Orta Çağ'da dünya"
+      }
+     ]
+    },
+    {
+     "ad": "Türk ve İslam tarihi",
+     "konular": [
+      {
+       "ad": "İlk ve Orta Çağlarda Türk dünyası",
+       "ders": "akademik.1.15.3"
+      },
+      {
+       "ad": "İslam medeniyetinin doğuşu",
+       "ders": "akademik.1.15.5"
+      },
+      {
+       "ad": "Türklerin İslamiyet'i kabulü ve ilk Türk-İslam devletleri",
+       "ders": "akademik.1.15.5"
+      },
+      {
+       "ad": "Yerleşme ve devletleşme sürecinde Selçuklu Türkiyesi"
+      }
+     ]
+    },
+    {
+     "ad": "Osmanlı'nın kuruluş ve yükselişi",
+     "konular": [
+      {
+       "ad": "Beylikten devlete Osmanlı siyaseti (1302–1453)",
+       "ders": "akademik.1.15.7"
+      },
+      {
+       "ad": "Devletleşme sürecinde savaşçılar ve askerler",
+       "ders": "akademik.1.15.7"
+      },
+      {
+       "ad": "Beylikten devlete Osmanlı medeniyeti",
+       "ders": "akademik.1.15.7"
+      },
+      {
+       "ad": "Dünya gücü Osmanlı (1453–1595)",
+       "ders": "akademik.1.15.9"
+      },
+      {
+       "ad": "Sultan ve Osmanlı merkez teşkilatı"
+      },
+      {
+       "ad": "Klasik çağda Osmanlı toplum düzeni"
+      }
+     ]
+    },
+    {
+     "ad": "XX. yüzyıl ve Türkiye Cumhuriyeti",
+     "konular": [
+      {
+       "ad": "XX. yüzyıl başlarında Osmanlı Devleti ve dünya",
+       "ders": "akademik.1.15.11"
+      },
+      {
+       "ad": "Millî Mücadele",
+       "ders": "akademik.1.15.13"
+      },
+      {
+       "ad": "Atatürkçülük ve Türk inkılabı",
+       "ders": "akademik.1.15.15"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-cog",
+   "ad": "TYT Coğrafya",
+   "ozet": "9. ve 10. sınıf coğrafyası: harita ve konum, iklim, yer şekilleri, nüfus, ekonomi ve afetler.",
+   "bolumler": [
+    {
+     "ad": "Doğa, konum ve harita",
+     "konular": [
+      {
+       "ad": "Doğa ve insan etkileşimi",
+       "ders": "akademik.1.13.1"
+      },
+      {
+       "ad": "Dünya'nın şekli ve hareketleri",
+       "ders": "akademik.1.13.7"
+      },
+      {
+       "ad": "Coğrafi konum: mutlak ve göreceli konum",
+       "ders": "akademik.1.13.5"
+      },
+      {
+       "ad": "Harita bilgisi: ölçek, izohips, projeksiyon",
+       "ders": "akademik.1.13.3"
+      }
+     ]
+    },
+    {
+     "ad": "İklim",
+     "konular": [
+      {
+       "ad": "Atmosfer ve sıcaklık",
+       "ders": "akademik.1.13.9"
+      },
+      {
+       "ad": "Basınç ve rüzgârlar",
+       "ders": "akademik.1.13.9"
+      },
+      {
+       "ad": "Nem, yağış ve buharlaşma",
+       "ders": "akademik.1.13.9"
+      },
+      {
+       "ad": "İklim tipleri",
+       "ders": "akademik.1.13.9"
+      },
+      {
+       "ad": "Türkiye'nin iklimi",
+       "ders": "akademik.1.13.9"
+      }
+     ]
+    },
+    {
+     "ad": "Yerin yapısı ve yer şekilleri",
+     "konular": [
+      {
+       "ad": "Yerin yapısı ve oluşum süreci",
+       "ders": "akademik.1.13.11"
+      },
+      {
+       "ad": "İç kuvvetler: levha hareketleri, volkanizma, deprem",
+       "ders": "akademik.1.13.11"
+      },
+      {
+       "ad": "Dış kuvvetler ve oluşan yer şekilleri",
+       "ders": "akademik.1.13.11"
+      },
+      {
+       "ad": "Türkiye'nin yer şekilleri",
+       "ders": "akademik.1.13.11"
+      },
+      {
+       "ad": "Su kaynakları"
+      },
+      {
+       "ad": "Topraklar"
+      },
+      {
+       "ad": "Bitki örtüsü"
+      }
+     ]
+    },
+    {
+     "ad": "Beşerî sistemler",
+     "konular": [
+      {
+       "ad": "Nüfusun gelişimi, dağılışı ve yapısı",
+       "ders": "akademik.1.13.13"
+      },
+      {
+       "ad": "Göç",
+       "ders": "akademik.1.13.13"
+      },
+      {
+       "ad": "Yerleşmelerin özellikleri",
+       "ders": "akademik.1.13.13"
+      },
+      {
+       "ad": "Ekonomik faaliyetler",
+       "ders": "akademik.1.13.15"
+      }
+     ]
+    },
+    {
+     "ad": "Bölgeler, ulaşım ve çevre",
+     "konular": [
+      {
+       "ad": "Bölge türleri"
+      },
+      {
+       "ad": "Uluslararası ulaşım hatları"
+      },
+      {
+       "ad": "Doğal afetler",
+       "ders": "akademik.1.13.17"
+      },
+      {
+       "ad": "Çevre sorunları",
+       "ders": "akademik.1.13.17"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-felsefe",
+   "ad": "TYT Felsefe",
+   "ozet": "10. sınıf felsefesi: felsefeyi tanımak ve bilgi, varlık, ahlak, sanat, din, siyaset, bilim felsefeleri.",
+   "bolumler": [
+    {
+     "ad": "Felsefeye giriş",
+     "konular": [
+      {
+       "ad": "Felsefeyi tanıma",
+       "ders": "akademik.1.14.1"
+      },
+      {
+       "ad": "Felsefe ile düşünme: kavram ve argüman"
+      }
+     ]
+    },
+    {
+     "ad": "Bilgi ve varlık",
+     "konular": [
+      {
+       "ad": "Bilgi felsefesi",
+       "ders": "akademik.1.14.3"
+      },
+      {
+       "ad": "Varlık felsefesi",
+       "ders": "akademik.1.14.5"
+      },
+      {
+       "ad": "Bilim felsefesi",
+       "ders": "akademik.1.14.9"
+      }
+     ]
+    },
+    {
+     "ad": "Değer alanları",
+     "konular": [
+      {
+       "ad": "Ahlak felsefesi",
+       "ders": "akademik.1.14.7"
+      },
+      {
+       "ad": "Sanat felsefesi",
+       "ders": "akademik.1.14.7"
+      },
+      {
+       "ad": "Din felsefesi",
+       "ders": "akademik.1.14.9"
+      },
+      {
+       "ad": "Siyaset felsefesi",
+       "ders": "akademik.1.14.9"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tyt-din",
+   "ad": "TYT Din Kültürü ve Ahlak Bilgisi",
+   "ozet": "İnanç, ibadet, ahlak, Hz. Muhammed ve İslam düşüncesinin temel konuları.",
+   "bolumler": [
+    {
+     "ad": "İnanç",
+     "konular": [
+      {
+       "ad": "Bilgi ve inanç",
+       "ders": "akademik.1.12.1"
+      },
+      {
+       "ad": "İslam'ın inanç esasları"
+      },
+      {
+       "ad": "Allah–insan ilişkisi"
+      }
+     ]
+    },
+    {
+     "ad": "İbadet ve ahlak",
+     "konular": [
+      {
+       "ad": "İslam ve ibadetler",
+       "ders": "akademik.1.12.3"
+      },
+      {
+       "ad": "Ahlak ve değerler",
+       "ders": "akademik.1.12.5"
+      }
+     ]
+    },
+    {
+     "ad": "Peygamber, kültür ve düşünce",
+     "konular": [
+      {
+       "ad": "Hz. Muhammed'in hayatı ve örnekliği",
+       "ders": "akademik.1.12.7"
+      },
+      {
+       "ad": "Din, kültür ve medeniyet",
+       "ders": "akademik.1.12.9"
+      },
+      {
+       "ad": "İslam düşüncesinde yorumlar ve mezhepler"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-mat",
+   "ad": "AYT Matematik",
+   "ozet": "Fonksiyonlardan integrale: polinomlar, denklemler, trigonometri, logaritma, diziler, sayma, limit, türev, integral.",
+   "bolumler": [
+    {
+     "ad": "Fonksiyonlar, polinomlar ve denklemler",
+     "konular": [
+      {
+       "ad": "Fonksiyonlar",
+       "ders": "akademik.1.16.1"
+      },
+      {
+       "ad": "Polinomlar",
+       "ders": "akademik.1.16.3"
+      },
+      {
+       "ad": "İkinci dereceden denklemler",
+       "ders": "akademik.1.16.5"
+      },
+      {
+       "ad": "Karmaşık sayılar",
+       "ders": "akademik.1.18.5"
+      },
+      {
+       "ad": "İkinci dereceden eşitsizlikler",
+       "ders": "akademik.1.16.7"
+      },
+      {
+       "ad": "Parabol",
+       "ders": "akademik.1.16.9"
+      }
+     ]
+    },
+    {
+     "ad": "Trigonometri",
+     "konular": [
+      {
+       "ad": "Birim çember ve trigonometrik fonksiyonlar",
+       "ders": "akademik.1.16.11"
+      },
+      {
+       "ad": "Sinüs ve kosinüs teoremleri",
+       "ders": "akademik.1.16.11"
+      },
+      {
+       "ad": "Toplam–fark ve iki kat açı formülleri"
+      },
+      {
+       "ad": "Trigonometrik fonksiyonların grafikleri",
+       "ders": "akademik.1.16.13"
+      },
+      {
+       "ad": "Ters trigonometrik fonksiyonlar",
+       "ders": "akademik.1.16.13"
+      },
+      {
+       "ad": "Trigonometrik denklemler",
+       "ders": "akademik.1.16.13"
+      }
+     ]
+    },
+    {
+     "ad": "Üstel, logaritma ve diziler",
+     "konular": [
+      {
+       "ad": "Üstel fonksiyon",
+       "ders": "akademik.1.16.15"
+      },
+      {
+       "ad": "Logaritma fonksiyonu",
+       "ders": "akademik.1.16.15"
+      },
+      {
+       "ad": "Üstel ve logaritmik denklemler ve eşitsizlikler",
+       "ders": "akademik.1.16.15"
+      },
+      {
+       "ad": "Diziler: aritmetik ve geometrik dizi",
+       "ders": "akademik.1.16.17"
+      }
+     ]
+    },
+    {
+     "ad": "Sayma ve olasılık",
+     "konular": [
+      {
+       "ad": "Permütasyon",
+       "ders": "akademik.1.18.1"
+      },
+      {
+       "ad": "Kombinasyon",
+       "ders": "akademik.1.18.1"
+      },
+      {
+       "ad": "Binom açılımı",
+       "ders": "akademik.1.18.1"
+      },
+      {
+       "ad": "Olasılık",
+       "ders": "akademik.1.18.3"
+      }
+     ]
+    },
+    {
+     "ad": "Limit ve türev",
+     "konular": [
+      {
+       "ad": "Limit",
+       "ders": "akademik.1.17.1"
+      },
+      {
+       "ad": "Süreklilik",
+       "ders": "akademik.1.17.1"
+      },
+      {
+       "ad": "Türev ve türev kuralları",
+       "ders": "akademik.1.17.3"
+      },
+      {
+       "ad": "Türevin geometrik yorumu: teğet",
+       "ders": "akademik.1.17.3"
+      },
+      {
+       "ad": "Artan–azalan fonksiyonlar ve ekstremum",
+       "ders": "akademik.1.17.5"
+      },
+      {
+       "ad": "Maksimum–minimum problemleri",
+       "ders": "akademik.1.17.5"
+      }
+     ]
+    },
+    {
+     "ad": "İntegral",
+     "konular": [
+      {
+       "ad": "Belirsiz integral",
+       "ders": "akademik.1.17.7"
+      },
+      {
+       "ad": "Belirli integral",
+       "ders": "akademik.1.17.7"
+      },
+      {
+       "ad": "Belirli integralle alan hesabı",
+       "ders": "akademik.1.17.9"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-geo",
+   "ad": "AYT Geometri",
+   "ozet": "TYT geometrisinin üzerine analitik geometri, çember, dönüşümler ve katı cisimler.",
+   "bolumler": [
+    {
+     "ad": "Analitik geometri",
+     "konular": [
+      {
+       "ad": "Noktanın analitik incelenmesi",
+       "ders": "akademik.1.19.1"
+      },
+      {
+       "ad": "Doğrunun analitik incelenmesi",
+       "ders": "akademik.1.19.1"
+      },
+      {
+       "ad": "Çemberin analitik incelenmesi",
+       "ders": "akademik.1.19.3"
+      }
+     ]
+    },
+    {
+     "ad": "Çember ve daire",
+     "konular": [
+      {
+       "ad": "Çemberin temel elemanları",
+       "ders": "akademik.1.19.5"
+      },
+      {
+       "ad": "Çemberde açılar",
+       "ders": "akademik.1.19.5"
+      },
+      {
+       "ad": "Çemberde teğet ve uzunluk",
+       "ders": "akademik.1.19.5"
+      },
+      {
+       "ad": "Dairenin çevresi ve alanı"
+      }
+     ]
+    },
+    {
+     "ad": "Dönüşüm geometrisi",
+     "konular": [
+      {
+       "ad": "Öteleme",
+       "ders": "akademik.1.19.7"
+      },
+      {
+       "ad": "Yansıma",
+       "ders": "akademik.1.19.7"
+      },
+      {
+       "ad": "Dönme",
+       "ders": "akademik.1.19.7"
+      }
+     ]
+    },
+    {
+     "ad": "Katı cisimler",
+     "konular": [
+      {
+       "ad": "Prizmalar",
+       "ders": "akademik.1.19.9"
+      },
+      {
+       "ad": "Piramitler",
+       "ders": "akademik.1.19.9"
+      },
+      {
+       "ad": "Silindir ve koni",
+       "ders": "akademik.1.19.9"
+      },
+      {
+       "ad": "Küre",
+       "ders": "akademik.1.19.9"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-fizik",
+   "ad": "AYT Fizik",
+   "ozet": "11. ve 12. sınıf fiziği: kuvvet ve hareket, elektrik ve manyetizma, çembersel hareket, dalga ve modern fizik.",
+   "bolumler": [
+    {
+     "ad": "Kuvvet ve hareket",
+     "konular": [
+      {
+       "ad": "Vektörler",
+       "ders": "akademik.1.20.1"
+      },
+      {
+       "ad": "Bağıl hareket",
+       "ders": "akademik.1.20.3"
+      },
+      {
+       "ad": "Newton'un hareket yasaları",
+       "ders": "akademik.1.20.5"
+      },
+      {
+       "ad": "Bir boyutta sabit ivmeli hareket",
+       "ders": "akademik.1.20.7"
+      },
+      {
+       "ad": "İki boyutta hareket: atışlar",
+       "ders": "akademik.1.20.9"
+      }
+     ]
+    },
+    {
+     "ad": "Enerji, momentum ve denge",
+     "konular": [
+      {
+       "ad": "Enerji ve hareket",
+       "ders": "akademik.1.20.11"
+      },
+      {
+       "ad": "İtme ve çizgisel momentum",
+       "ders": "akademik.1.20.13"
+      },
+      {
+       "ad": "Tork",
+       "ders": "akademik.1.20.15"
+      },
+      {
+       "ad": "Denge ve denge şartları",
+       "ders": "akademik.1.20.15"
+      },
+      {
+       "ad": "Basit makineler",
+       "ders": "akademik.1.20.15"
+      }
+     ]
+    },
+    {
+     "ad": "Elektrik ve manyetizma",
+     "konular": [
+      {
+       "ad": "Elektriksel kuvvet ve elektrik alan",
+       "ders": "akademik.1.21.1"
+      },
+      {
+       "ad": "Elektriksel potansiyel",
+       "ders": "akademik.1.21.1"
+      },
+      {
+       "ad": "Düzgün elektrik alan ve sığa",
+       "ders": "akademik.1.21.3"
+      },
+      {
+       "ad": "Manyetizma ve manyetik kuvvet",
+       "ders": "akademik.1.21.5"
+      },
+      {
+       "ad": "Elektromanyetik indüksiyon",
+       "ders": "akademik.1.21.7"
+      },
+      {
+       "ad": "Alternatif akım",
+       "ders": "akademik.1.21.9"
+      },
+      {
+       "ad": "Transformatörler",
+       "ders": "akademik.1.21.9"
+      }
+     ]
+    },
+    {
+     "ad": "Çembersel ve harmonik hareket",
+     "konular": [
+      {
+       "ad": "Düzgün çembersel hareket",
+       "ders": "akademik.1.22.1"
+      },
+      {
+       "ad": "Dönerek öteleme ve açısal momentum",
+       "ders": "akademik.1.22.1"
+      },
+      {
+       "ad": "Kütle çekim ve Kepler yasaları",
+       "ders": "akademik.1.22.1"
+      },
+      {
+       "ad": "Basit harmonik hareket",
+       "ders": "akademik.1.22.3"
+      }
+     ]
+    },
+    {
+     "ad": "Dalga mekaniği",
+     "konular": [
+      {
+       "ad": "Dalgalarda kırınım ve girişim",
+       "ders": "akademik.1.22.5"
+      },
+      {
+       "ad": "Doppler olayı",
+       "ders": "akademik.1.22.5"
+      },
+      {
+       "ad": "Elektromanyetik dalgalar"
+      }
+     ]
+    },
+    {
+     "ad": "Atom ve modern fizik",
+     "konular": [
+      {
+       "ad": "Atom fiziğine giriş",
+       "ders": "akademik.1.23.1"
+      },
+      {
+       "ad": "Radyoaktivite",
+       "ders": "akademik.1.23.1"
+      },
+      {
+       "ad": "Büyük patlama ve atom altı parçacıklar"
+      },
+      {
+       "ad": "Özel görelilik",
+       "ders": "akademik.1.23.3"
+      },
+      {
+       "ad": "Kuantum fiziğine giriş ve fotoelektrik olay",
+       "ders": "akademik.1.23.3"
+      },
+      {
+       "ad": "Compton saçılması ve de Broglie dalga boyu",
+       "ders": "akademik.1.23.3"
+      },
+      {
+       "ad": "Modern fiziğin teknolojideki uygulamaları",
+       "ders": "akademik.1.23.3"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-kimya",
+   "ad": "AYT Kimya",
+   "ozet": "11. ve 12. sınıf kimyası: modern atom, gazlar, çözeltiler, enerji, hız, denge, elektrokimya ve organik kimya.",
+   "bolumler": [
+    {
+     "ad": "Atom ve hesaplamalar",
+     "konular": [
+      {
+       "ad": "Modern atom teorisi: kuantum sayıları ve orbitaller",
+       "ders": "akademik.1.24.1"
+      },
+      {
+       "ad": "Elektron dizilimi ve periyodik özellikler",
+       "ders": "akademik.1.24.1"
+      },
+      {
+       "ad": "Mol kavramı",
+       "ders": "akademik.1.24.3"
+      },
+      {
+       "ad": "Kimyasal tepkimeler ve hesaplamalar",
+       "ders": "akademik.1.24.3"
+      }
+     ]
+    },
+    {
+     "ad": "Gazlar ve çözeltiler",
+     "konular": [
+      {
+       "ad": "Gazların özellikleri ve gaz yasaları",
+       "ders": "akademik.1.24.5"
+      },
+      {
+       "ad": "İdeal gaz denklemi ve kinetik teori",
+       "ders": "akademik.1.24.5"
+      },
+      {
+       "ad": "Gaz karışımları ve kısmi basınç",
+       "ders": "akademik.1.24.5"
+      },
+      {
+       "ad": "Gerçek gazlar",
+       "ders": "akademik.1.24.5"
+      },
+      {
+       "ad": "Çözeltiler ve derişim birimleri",
+       "ders": "akademik.1.24.7"
+      },
+      {
+       "ad": "Koligatif özellikler",
+       "ders": "akademik.1.24.7"
+      },
+      {
+       "ad": "Çözünürlük",
+       "ders": "akademik.1.24.7"
+      }
+     ]
+    },
+    {
+     "ad": "Tepkimelerde enerji ve hız",
+     "konular": [
+      {
+       "ad": "Tepkimelerde ısı değişimi: entalpi",
+       "ders": "akademik.1.25.1"
+      },
+      {
+       "ad": "Hess yasası ve bağ enerjileri",
+       "ders": "akademik.1.25.1"
+      },
+      {
+       "ad": "Tepkime hızı",
+       "ders": "akademik.1.25.3"
+      },
+      {
+       "ad": "Hıza etki eden etmenler",
+       "ders": "akademik.1.25.3"
+      }
+     ]
+    },
+    {
+     "ad": "Kimyasal denge",
+     "konular": [
+      {
+       "ad": "Kimyasal denge ve denge sabiti",
+       "ders": "akademik.1.25.5"
+      },
+      {
+       "ad": "Dengeyi etkileyen etmenler: Le Chatelier",
+       "ders": "akademik.1.25.5"
+      },
+      {
+       "ad": "Asit–baz dengesi: pH ve pOH",
+       "ders": "akademik.1.25.7"
+      },
+      {
+       "ad": "Tampon çözeltiler ve tuz çözeltileri",
+       "ders": "akademik.1.25.7"
+      },
+      {
+       "ad": "Titrasyon"
+      },
+      {
+       "ad": "Çözünürlük dengesi",
+       "ders": "akademik.1.25.9"
+      }
+     ]
+    },
+    {
+     "ad": "Kimya ve elektrik",
+     "konular": [
+      {
+       "ad": "İndirgenme–yükseltgenme tepkimeleri",
+       "ders": "akademik.1.25.11"
+      },
+      {
+       "ad": "Elektrot potansiyelleri",
+       "ders": "akademik.1.25.11"
+      },
+      {
+       "ad": "Kimyasal piller",
+       "ders": "akademik.1.25.11"
+      },
+      {
+       "ad": "Elektroliz ve korozyon",
+       "ders": "akademik.1.25.11"
+      }
+     ]
+    },
+    {
+     "ad": "Organik kimya",
+     "konular": [
+      {
+       "ad": "Karbon kimyasına giriş: hibritleşme ve molekül geometrisi",
+       "ders": "akademik.1.26.1"
+      },
+      {
+       "ad": "Hidrokarbonlar: alkanlar, alkenler, alkinler, aromatikler",
+       "ders": "akademik.1.26.3"
+      },
+      {
+       "ad": "Alkoller ve eterler",
+       "ders": "akademik.1.26.3"
+      },
+      {
+       "ad": "Aldehitler, ketonlar, karboksilik asitler ve esterler",
+       "ders": "akademik.1.26.3"
+      },
+      {
+       "ad": "Enerji kaynakları ve bilimsel gelişmeler",
+       "ders": "akademik.1.26.5"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-biyo",
+   "ad": "AYT Biyoloji",
+   "ozet": "Bölünme ve kalıtım, genden proteine, insan fizyolojisi, enerji dönüşümleri, bitki biyolojisi ve ekoloji.",
+   "bolumler": [
+    {
+     "ad": "Hücre bölünmesi ve kalıtım",
+     "konular": [
+      {
+       "ad": "Mitoz ve eşeysiz üreme",
+       "ders": "akademik.1.27.1"
+      },
+      {
+       "ad": "Mayoz ve eşeyli üreme",
+       "ders": "akademik.1.27.1"
+      },
+      {
+       "ad": "Kalıtımın genel ilkeleri",
+       "ders": "akademik.1.27.3"
+      },
+      {
+       "ad": "Eşeye bağlı kalıtım ve soyağacı",
+       "ders": "akademik.1.27.5"
+      }
+     ]
+    },
+    {
+     "ad": "Genden proteine",
+     "konular": [
+      {
+       "ad": "Nükleik asitler: DNA ve RNA",
+       "ders": "akademik.1.27.7"
+      },
+      {
+       "ad": "DNA'nın kendini eşlemesi",
+       "ders": "akademik.1.27.7"
+      },
+      {
+       "ad": "Genetik şifre ve protein sentezi",
+       "ders": "akademik.1.27.7"
+      },
+      {
+       "ad": "Biyoteknoloji ve genetik mühendisliği",
+       "ders": "akademik.1.27.9"
+      }
+     ]
+    },
+    {
+     "ad": "Düzenleyici sistemler ve duyular",
+     "konular": [
+      {
+       "ad": "Sinir sistemi",
+       "ders": "akademik.1.28.1"
+      },
+      {
+       "ad": "Endokrin sistem ve hormonlar",
+       "ders": "akademik.1.28.3"
+      },
+      {
+       "ad": "Duyu organları",
+       "ders": "akademik.1.28.5"
+      },
+      {
+       "ad": "Destek ve hareket sistemi",
+       "ders": "akademik.1.28.7"
+      }
+     ]
+    },
+    {
+     "ad": "Sindirim, dolaşım, solunum ve boşaltım",
+     "konular": [
+      {
+       "ad": "Sindirim sistemi",
+       "ders": "akademik.1.28.9"
+      },
+      {
+       "ad": "Dolaşım sistemi",
+       "ders": "akademik.1.28.11"
+      },
+      {
+       "ad": "Bağışıklık sistemi",
+       "ders": "akademik.1.28.11"
+      },
+      {
+       "ad": "Solunum sistemi",
+       "ders": "akademik.1.28.13"
+      },
+      {
+       "ad": "Üriner sistem",
+       "ders": "akademik.1.28.15"
+      },
+      {
+       "ad": "Üreme sistemi ve embriyonik gelişim",
+       "ders": "akademik.1.28.17"
+      }
+     ]
+    },
+    {
+     "ad": "Canlılarda enerji dönüşümleri",
+     "konular": [
+      {
+       "ad": "Fotosentez",
+       "ders": "akademik.1.29.1"
+      },
+      {
+       "ad": "Kemosentez",
+       "ders": "akademik.1.29.3"
+      },
+      {
+       "ad": "Oksijenli solunum",
+       "ders": "akademik.1.29.3"
+      },
+      {
+       "ad": "Fermantasyon",
+       "ders": "akademik.1.29.3"
+      }
+     ]
+    },
+    {
+     "ad": "Bitki biyolojisi ve ekoloji",
+     "konular": [
+      {
+       "ad": "Bitkilerin yapısı",
+       "ders": "akademik.1.30.1"
+      },
+      {
+       "ad": "Bitkilerde madde taşınması",
+       "ders": "akademik.1.30.1"
+      },
+      {
+       "ad": "Bitkilerde eşeyli üreme",
+       "ders": "akademik.1.30.1"
+      },
+      {
+       "ad": "Komünite ekolojisi",
+       "ders": "akademik.1.30.3"
+      },
+      {
+       "ad": "Popülasyon ekolojisi",
+       "ders": "akademik.1.30.3"
+      },
+      {
+       "ad": "Canlılar ve çevre",
+       "ders": "akademik.1.30.5"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-edebiyat",
+   "ad": "AYT Türk Dili ve Edebiyatı",
+   "ozet": "Şiir bilgisi ve türlerden İslamiyet öncesinden Cumhuriyet dönemine Türk edebiyatı ve Batı akımları.",
+   "bolumler": [
+    {
+     "ad": "Edebiyat ve şiir bilgisi",
+     "konular": [
+      {
+       "ad": "Güzel sanatlar ve edebiyat"
+      },
+      {
+       "ad": "Metinlerin sınıflandırılması"
+      },
+      {
+       "ad": "Şiirde nazım birimi ve ölçü: hece, aruz, serbest"
+      },
+      {
+       "ad": "Kafiye ve redif"
+      },
+      {
+       "ad": "Söz sanatları"
+      }
+     ]
+    },
+    {
+     "ad": "Düzyazı türleri",
+     "konular": [
+      {
+       "ad": "Hikâye"
+      },
+      {
+       "ad": "Roman"
+      },
+      {
+       "ad": "Tiyatro"
+      },
+      {
+       "ad": "Masal ve fabl"
+      },
+      {
+       "ad": "Makale, deneme, fıkra, eleştiri"
+      },
+      {
+       "ad": "Sohbet ve söyleşi"
+      },
+      {
+       "ad": "Anı, gezi yazısı, mektup, günlük"
+      },
+      {
+       "ad": "Biyografi ve otobiyografi"
+      }
+     ]
+    },
+    {
+     "ad": "İslamiyet öncesi, geçiş ve halk edebiyatı",
+     "konular": [
+      {
+       "ad": "İslamiyet öncesi Türk edebiyatı: sözlü ürünler ve yazıtlar"
+      },
+      {
+       "ad": "Geçiş dönemi eserleri"
+      },
+      {
+       "ad": "Anonim halk edebiyatı"
+      },
+      {
+       "ad": "Âşık edebiyatı"
+      },
+      {
+       "ad": "Dinî-tasavvufi halk edebiyatı"
+      },
+      {
+       "ad": "Destan ve efsane"
+      }
+     ]
+    },
+    {
+     "ad": "Divan edebiyatı",
+     "konular": [
+      {
+       "ad": "Divan edebiyatının genel özellikleri"
+      },
+      {
+       "ad": "Divan nazım biçimleri: gazel, kaside, mesnevi, rubai"
+      },
+      {
+       "ad": "Bentlerle kurulan nazım biçimleri: murabba, terkib-i bent, terci-i bent"
+      },
+      {
+       "ad": "Divan nesri"
+      }
+     ]
+    },
+    {
+     "ad": "Yenileşme dönemi",
+     "konular": [
+      {
+       "ad": "Tanzimat edebiyatı: birinci ve ikinci kuşak"
+      },
+      {
+       "ad": "Servet-i Fünun edebiyatı"
+      },
+      {
+       "ad": "Fecr-i Âti"
+      },
+      {
+       "ad": "Millî Edebiyat dönemi"
+      }
+     ]
+    },
+    {
+     "ad": "Cumhuriyet dönemi",
+     "konular": [
+      {
+       "ad": "Cumhuriyet dönemi şiiri: 1923–1940"
+      },
+      {
+       "ad": "Garip ve İkinci Yeni"
+      },
+      {
+       "ad": "Toplumcu gerçekçi şiir"
+      },
+      {
+       "ad": "Cumhuriyet dönemi hikâye ve romanı"
+      },
+      {
+       "ad": "Cumhuriyet dönemi tiyatrosu"
+      }
+     ]
+    },
+    {
+     "ad": "Batı edebiyatı akımları",
+     "konular": [
+      {
+       "ad": "Klasisizm ve romantizm"
+      },
+      {
+       "ad": "Realizm ve natüralizm"
+      },
+      {
+       "ad": "Parnasizm ve sembolizm"
+      },
+      {
+       "ad": "Empresyonizm, ekspresyonizm, sürrealizm"
+      },
+      {
+       "ad": "Varoluşçuluk"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-tarih1",
+   "ad": "AYT Tarih-1",
+   "ozet": "Edebiyat-Sosyal Bilimler-1 testi: TYT Tarih konularının hepsi, ek olarak 1595–1914 Osmanlı ve Avrupa.",
+   "bolumler": [
+    {
+     "ad": "Osmanlı ve değişen dünya (1595–1774)",
+     "konular": [
+      {
+       "ad": "Değişen dünya dengeleri karşısında Osmanlı siyaseti (1595–1774)",
+       "ders": "akademik.1.15.9"
+      },
+      {
+       "ad": "Değişim çağında Avrupa ve Osmanlı"
+      }
+     ]
+    },
+    {
+     "ad": "En uzun yüzyıl (1774–1914)",
+     "konular": [
+      {
+       "ad": "Uluslararası ilişkilerde denge stratejisi (1774–1914)",
+       "ders": "akademik.1.15.11"
+      },
+      {
+       "ad": "Devrimler çağında değişen devlet–toplum ilişkileri"
+      },
+      {
+       "ad": "Sermaye ve emek"
+      },
+      {
+       "ad": "XIX. ve XX. yüzyılda değişen gündelik hayat"
+      }
+     ]
+    },
+    {
+     "ad": "XX. yüzyıl ve Türkiye Cumhuriyeti",
+     "konular": [
+      {
+       "ad": "XX. yüzyıl başlarında Osmanlı Devleti ve dünya",
+       "ders": "akademik.1.15.11"
+      },
+      {
+       "ad": "Millî Mücadele",
+       "ders": "akademik.1.15.13"
+      },
+      {
+       "ad": "Atatürkçülük ve Türk inkılabı",
+       "ders": "akademik.1.15.15"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-tarih2",
+   "ad": "AYT Tarih-2",
+   "ozet": "Sosyal Bilimler-2 testi: Tarih-1'in bütün konuları, ek olarak iki savaş arasından günümüze çağdaş tarih.",
+   "bolumler": [
+    {
+     "ad": "Çağdaş Türk ve dünya tarihi",
+     "konular": [
+      {
+       "ad": "İki savaş arasındaki dönemde Türkiye ve dünya"
+      },
+      {
+       "ad": "II. Dünya Savaşı sürecinde Türkiye ve dünya"
+      },
+      {
+       "ad": "II. Dünya Savaşı sonrasında Türkiye ve dünya: Soğuk Savaş"
+      },
+      {
+       "ad": "Yumuşama dönemi ve sonrası"
+      },
+      {
+       "ad": "Küreselleşen dünya ve XXI. yüzyılın eşiğinde Türkiye"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-cog1",
+   "ad": "AYT Coğrafya-1",
+   "ozet": "Edebiyat-Sosyal Bilimler-1 testi: TYT coğrafyası, ek olarak ekosistemler, nüfus politikaları, Türkiye ekonomisi ve kültür bölgeleri.",
+   "bolumler": [
+    {
+     "ad": "Biyoçeşitlilik ve ekosistem",
+     "konular": [
+      {
+       "ad": "Biyoçeşitlilik"
+      },
+      {
+       "ad": "Ekosistemin unsurları ve işleyişi"
+      },
+      {
+       "ad": "Enerji akışı ve madde döngüleri"
+      },
+      {
+       "ad": "Su ekosistemleri"
+      }
+     ]
+    },
+    {
+     "ad": "Nüfus ve yerleşme",
+     "konular": [
+      {
+       "ad": "Nüfus politikaları"
+      },
+      {
+       "ad": "Türkiye'de nüfus ve yerleşme"
+      },
+      {
+       "ad": "Şehirlerin fonksiyonları ve etki alanları"
+      }
+     ]
+    },
+    {
+     "ad": "Ekonomik faaliyetler ve Türkiye ekonomisi",
+     "konular": [
+      {
+       "ad": "Ekonomik faaliyetler ve doğal kaynaklar"
+      },
+      {
+       "ad": "Türkiye'de tarım"
+      },
+      {
+       "ad": "Türkiye'de hayvancılık"
+      },
+      {
+       "ad": "Türkiye'de madenler ve enerji kaynakları"
+      },
+      {
+       "ad": "Türkiye'de sanayi"
+      }
+     ]
+    },
+    {
+     "ad": "Kültür ve örgütler",
+     "konular": [
+      {
+       "ad": "İlk kültür merkezleri"
+      },
+      {
+       "ad": "Kültür bölgeleri ve Türk kültürü"
+      },
+      {
+       "ad": "Küresel ve bölgesel örgütler"
+      }
+     ]
+    },
+    {
+     "ad": "Çevre ve toplum",
+     "konular": [
+      {
+       "ad": "Doğal kaynakların kullanımının çevreye etkileri"
+      },
+      {
+       "ad": "Doğal kaynakların sürdürülebilir kullanımı"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-cog2",
+   "ad": "AYT Coğrafya-2",
+   "ozet": "Sosyal Bilimler-2 testi: Coğrafya-1'in bütün konuları, ek olarak doğa olayları, hizmet sektörü ve küresel ortam.",
+   "bolumler": [
+    {
+     "ad": "Doğal sistemler",
+     "konular": [
+      {
+       "ad": "Ekstrem doğa olayları"
+      },
+      {
+       "ad": "Küresel iklim değişimi"
+      }
+     ]
+    },
+    {
+     "ad": "Türkiye'de bölgeler ve hizmetler",
+     "konular": [
+      {
+       "ad": "Türkiye'nin işlevsel bölgeleri ve kalkınma projeleri"
+      },
+      {
+       "ad": "Hizmet sektörü: ulaşım ve ticaret"
+      },
+      {
+       "ad": "Türkiye'de turizm"
+      },
+      {
+       "ad": "Küresel ticaret ve Türkiye'nin dış ticareti"
+      }
+     ]
+    },
+    {
+     "ad": "Küresel ortam",
+     "konular": [
+      {
+       "ad": "Jeopolitik konum"
+      },
+      {
+       "ad": "Ülkeler arası etkileşim"
+      },
+      {
+       "ad": "Çatışma bölgeleri"
+      }
+     ]
+    },
+    {
+     "ad": "Çevre ve toplum",
+     "konular": [
+      {
+       "ad": "Çevre sorunları ve çevre politikaları"
+      },
+      {
+       "ad": "Uluslararası çevre anlaşmaları ve örgütleri"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-felsefe",
+   "ad": "AYT Felsefe Grubu",
+   "ozet": "Sosyal Bilimler-2 testi: felsefe tarihi, psikoloji, sosyoloji ve mantık.",
+   "bolumler": [
+    {
+     "ad": "Felsefe tarihi",
+     "konular": [
+      {
+       "ad": "MÖ 6. yüzyıl – MS 2. yüzyıl felsefesi"
+      },
+      {
+       "ad": "MS 2. yüzyıl – 15. yüzyıl felsefesi"
+      },
+      {
+       "ad": "15. – 17. yüzyıl felsefesi"
+      },
+      {
+       "ad": "18. – 19. yüzyıl felsefesi"
+      },
+      {
+       "ad": "20. yüzyıl felsefesi"
+      }
+     ]
+    },
+    {
+     "ad": "Psikoloji",
+     "konular": [
+      {
+       "ad": "Psikoloji bilimini tanıma",
+       "ders": "akademik.1.14.11"
+      },
+      {
+       "ad": "Psikolojinin temel süreçleri",
+       "ders": "akademik.1.14.11"
+      },
+      {
+       "ad": "Öğrenme, bellek ve düşünme",
+       "ders": "akademik.1.14.11"
+      },
+      {
+       "ad": "Ruh sağlığının temelleri",
+       "ders": "akademik.1.14.11"
+      }
+     ]
+    },
+    {
+     "ad": "Sosyoloji",
+     "konular": [
+      {
+       "ad": "Birey ve toplum",
+       "ders": "akademik.1.14.13"
+      },
+      {
+       "ad": "Toplumsal yapı",
+       "ders": "akademik.1.14.13"
+      },
+      {
+       "ad": "Toplumsal değişme ve gelişme",
+       "ders": "akademik.1.14.13"
+      },
+      {
+       "ad": "Toplum ve kültür",
+       "ders": "akademik.1.14.13"
+      },
+      {
+       "ad": "Toplumsal kurumlar",
+       "ders": "akademik.1.14.13"
+      }
+     ]
+    },
+    {
+     "ad": "Mantık",
+     "konular": [
+      {
+       "ad": "Mantığa giriş",
+       "ders": "akademik.1.14.15"
+      },
+      {
+       "ad": "Klasik mantık: kavram, terim ve tanım",
+       "ders": "akademik.1.14.15"
+      },
+      {
+       "ad": "Klasik mantık: önerme ve kıyas",
+       "ders": "akademik.1.14.15"
+      },
+      {
+       "ad": "Mantık ve dil",
+       "ders": "akademik.1.14.15"
+      },
+      {
+       "ad": "Sembolik mantık",
+       "ders": "akademik.1.14.15"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ayt-din",
+   "ad": "AYT Din Kültürü ve Ahlak Bilgisi",
+   "ozet": "Sosyal Bilimler-2 testi (isteyen yerine ek felsefe sorularını çözer): 11. ve 12. sınıf din kültürü.",
+   "bolumler": [
+    {
+     "ad": "İnanç ve Kur'an",
+     "konular": [
+      {
+       "ad": "Dünya ve ahiret"
+      },
+      {
+       "ad": "Kur'an'a göre Hz. Muhammed"
+      },
+      {
+       "ad": "Kur'an'da bazı kavramlar"
+      },
+      {
+       "ad": "İnançla ilgili meseleler"
+      }
+     ]
+    },
+    {
+     "ad": "Dinler ve İslam düşüncesi",
+     "konular": [
+      {
+       "ad": "Yahudilik ve Hristiyanlık"
+      },
+      {
+       "ad": "Hint ve Çin dinleri"
+      },
+      {
+       "ad": "İslam düşüncesinde tasavvufi yorumlar"
+      }
+     ]
+    },
+    {
+     "ad": "İslam, bilim ve toplum",
+     "konular": [
+      {
+       "ad": "İslam ve bilim"
+      },
+      {
+       "ad": "Anadolu'da İslam"
+      },
+      {
+       "ad": "Güncel dinî meseleler"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "deneme",
+   "ad": "Deneme ve soru tekniği",
+   "ozet": "Sınav konusu değil, sınav becerisi: denemeyi okumak, soru kökü, eleme ve sık soru kalıpları.",
+   "bolumler": [
+    {
+     "ad": "Denemeyi okumak",
+     "konular": [
+      {
+       "ad": "Net ve süre: denemenin kaydı",
+       "ders": "akademik.2.1.1"
+      },
+      {
+       "ad": "Yedi adımlı analiz",
+       "ders": "akademik.2.1.2"
+      },
+      {
+       "ad": "Hata etiketleri ve yanlış defteri",
+       "ders": "akademik.2.1.3"
+      }
+     ]
+    },
+    {
+     "ad": "Soru kökü ve eleme",
+     "konular": [
+      {
+       "ad": "Kökü okumak: ne isteniyor, hangi şartla",
+       "ders": "akademik.2.2.1"
+      },
+      {
+       "ad": "Kesinlikle doğru mu, olabilir mi: karşıt örnek",
+       "ders": "akademik.2.2.2"
+      },
+      {
+       "ad": "Seçeneklerden eleme ve işlem tuzakları",
+       "ders": "akademik.2.2.3"
+      }
+     ]
+    },
+    {
+     "ad": "AYT Sayısal soru kalıpları",
+     "konular": [
+      {
+       "ad": "Diziler: genel terim, indeks toplamı ve indirgeme",
+       "ders": "akademik.2.3.1"
+      },
+      {
+       "ad": "Kimyasal denge: Q, Kp ve Le Chatelier",
+       "ders": "akademik.2.3.2"
+      },
+      {
+       "ad": "Genden proteine: kodon ve sayım kalıpları",
+       "ders": "akademik.2.3.3"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

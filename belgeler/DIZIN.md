@@ -69,6 +69,11 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Tur 2026-11-17c · Ses](ekip/sadelesme/tur-20261117c/ses.md) — arayüz sesleri ve ambiyans ölçülerek yeniden: düzey, tını, yankı, rüzgâr ve gece katmanları; önce/sonra tabloları.
 - [Tur 2026-11-17c · İçerik: Tarih ve Felsefe](ekip/sadelesme/tur-20261117c/icerik-tarih-felsefe.md) — ilk aşamaların 18 dersi yeniden, öğretici çözümler, eklenen kaynaklar, sahibe notlar.
 - [Tur 2026-11-17c · İçerik: Akademik](ekip/sadelesme/tur-20261117c/icerik-akademik.md) — 109 sınav düzeyi derse ÖSYM tarzı soru, cevap anahtarı denetimi, işaretleme bulgusu, açık kalanlar.
+- [Tur 2026-11-17d · Not ve Sağlık Bugün](ekip/sadelesme/tur-20261117d/not-saglik.md) — Not yazma/arama alanı ve not listesi sadeleşti, Sağlık Bugün dört ölçü kutucuğu; önce/sonra görüntüleri, testler.
+- [Tur 2026-11-17d · Akademik konu haritası](ekip/sadelesme/tur-20261117d/akademik-harita.md) — YKS konuları TYT ve AYT altında bölümlü liste, ders adlarında TYT/AYT tekrarı yok.
+- [Tur 2026-11-17d · Akademik cevap anahtarı denetimi](ekip/sadelesme/tur-20261117d/akademik-denetim.md) — 1727 eski soru okundu; kesin bulgu yok, 3 olası düzeltme uygulandı (akademik-denetim.json).
+- [Tur 2026-11-17d · Akademik alıştırmalar](ekip/sadelesme/tur-20261117d/icerik-akademik-alistirma.md) — alıştırmasız 70 sınav düzeyi derse 140 ÖSYM tarzı soru, adım adım çözüm.
+- [Tur 2026-11-17d · Tarih 2 ve Felsefe 2](ekip/sadelesme/tur-20261117d/icerik-tarih-felsefe-2.md) — 18 ders aşama 1 düzeyinde; ezber soruları anlama sorusuna, bütün sorulara çözüm, olgu düzeltmeleri, sahibe notlar.
 - [Tur 2026-11-16b · Piksel sahneler](ekip/sadelesme/tur-20261116b/piksel.md) — eski sahneler silindi, 14 yeni Başbuğ sahnesi; yer → sahne listesi, ölçümler, görüntüler.
 - [Tur 2026-11-16b · Sesler](ekip/sadelesme/tur-20261116b/ses.md) — arayüz sesleri baştan, düzey ayarı, dikişsiz rüzgâr ambiyansı.
 - [Tur 2026-11-16b · Ad ve altyapı](ekip/sadelesme/tur-20261116b/ad-altyapi.md) — LifeOS → Başbuğ (iç kimlikler kalır), King istemi kırpma, masaüstü sunucu bekçisi, hata ucu, boş port.

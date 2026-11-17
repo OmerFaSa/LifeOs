@@ -60,6 +60,15 @@ t('zengin: ders işaretlemesi kalın/üs/alt simge olur, kaçış önce yapılı
   const s = B.soru({ soru: '**Kök** nedir?', secenekler: ['x^{2}', 'y'] });
   dogru(/<b>Kök<\/b>/.test(s) && /x<sup>2<\/sup>/.test(s), s);
 });
+t('tablo: «Tablo — başlık: a | b ; 1 | 2» ders ve soruda tablo olur; «undefined» başlık düşer, hücreler kaçışlanır', () => {
+  const p = B.paragraf('Tablo — Ölçek: Özellik | 1:250.000 ; Alan | 6,25 km^{2}');
+  dogru(/<caption>Ölçek<\/caption>/.test(p) && /<th scope="col">1:250.000<\/th>/.test(p) && /<th scope="row">Alan<\/th><td>6,25 km<sup>2<\/sup><\/td>/.test(p) && !/<p>/.test(p), p);
+  const q = B.paragraf('Önce metin.\nTablo — undefined: X | Y ; <i>1</i> | 2');
+  dogru(/^<p>Önce metin\.\n?<\/p>/.test(q) && !/caption/.test(q) && /&lt;i&gt;1&lt;\/i&gt;/.test(q) && !/undefined/.test(q), q);
+  dogru(B.paragraf('Tablodaki veriler düz metin kalır.') === '<p>Tablodaki veriler düz metin kalır.</p>', 'tablosuz paragraf');
+  const s = B.soru({ soru: 'Ortalama kaçtır?\nTablo — undefined: Kitap | Öğrenci ; 1 | 4 ; 2 | 6', secenekler: ['2', '3'] });
+  dogru(/<legend class="b-soru__metin">Ortalama kaçtır\?<\/legend><div class="b-tablo ders-tablo"/.test(s) && !/Tablo —/.test(s), s);
+});
 t('kaçış: hiçbir taş ham etiket ya da tırnak sızdırmaz', () => {
   B.TASLAR.forEach(ad => {
     const h = ORNEK[ad]();
@@ -332,7 +341,9 @@ t('karşılama (Manzara): manzara şeridi + h1 selam, iş kartında sırada/adı
   dogru(h.includes('b-simge--turuncu') && h.includes('<use href="#i-felsefe"/>') && h.includes('%25</span>') && /b-simge--turuncu[\s\S]*Dil/.test(h) && h.includes('#i-sag'), 'alanlar: renk, simge, yüzde, bilinmeyen renk turuncuya düşer');
   dogru((h.match(/<h1/g) || []).length === 1 && (h.match(/b-dugme--ana/g) || []).length === 1, 'tek h1, tek ana düğme');
   dogru(!/b-karsilama__ek|b-karsilama__baglanti|b-karsilama__adim|b-karsilama__halka|b-karsilama__alanlar|b-karsilama__plan|b-karsilama__ozet/.test(B.karsilama({ selam: 'Selam.', eylem: { metin: 'Başla', href: '#/a' }, ekler: ['', ''], plan: { href: '#/p', satirlar: [] } })), 'boş ekler, bağlantısız, ilerlemesiz, alansız: kap yok');
-  atar(() => B.karsilama({ selam: 'S' }), /seçenek nesnesi/, 'düğmesiz karşılama');
+  // 2026-11-17d: iş bölümü isteğe bağlı (sahip: Bugün'de büyük «sıradaki» kartı olmasın); düğmesiz karşılama bölümsüz çizilir
+  const yalin = B.karsilama({ selam: 'S' });
+  dogru(!/b-karsilama__is|b-dugme--ana/.test(yalin) && (yalin.match(/<h1/g) || []).length === 1, 'düğmesiz karşılama: iş bölümü yok, tek h1');
   atar(() => B.karsilama({ selam: 'S', eylem: { metin: 'B', href: '#/a' }, baglanti: { metin: 'x', href: 'javascript:alert(1)' } }), /href/, 'tehlikeli bağlantı');
   atar(() => B.karsilama({ selam: 'S', eylem: { metin: 'B', href: '#/a' }, alanlar: [{ ad: 'x', href: 'javascript:alert(1)' }] }), /href/, 'tehlikeli alan bağlantısı');
 });

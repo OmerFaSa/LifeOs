@@ -23,7 +23,7 @@
     { id: 'ayarlar', ad: 'Ayarlar', katman: 'kabuk', dal: 'ayarlar', yol: '#/ayarlar', ikon: 'ayar', durum: 'yeni', aciklama: 'Görünüm, erişilebilirlik, bildirim, hesap' },
     { id: 'hesap', ad: 'Hesap', katman: 'kabuk', dal: 'ayarlar', yol: '#/hesap', ikon: 'kisi', durum: 'yeni', aciklama: 'Oturum, cihazlar, güvenlik ve güncelleme' },
     // alanlar (plan §3, on alan); Öğren dalı
-    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 2, aciklama: 'Sınav hazırlığı' },
+    { id: 'akademik', ad: 'Akademik', katman: 'alan', alan: 'akademik', dal: 'ogren', yol: '#/alan/akademik', ikon: 'kalem', durum: 'pilot', asama: 2, harita: true, aciklama: 'Sınav hazırlığı' },
     { id: 'dil', ad: 'Dil', katman: 'alan', alan: 'dil', dal: 'ogren', yol: '#/alan/dil', ikon: 'balon', durum: 'pilot', asama: 2, aciklama: 'Diller ve diksiyon' },
     { id: 'felsefe', ad: 'Felsefe', katman: 'alan', alan: 'felsefe', dal: 'ogren', yol: '#/alan/felsefe', ikon: 'soru', durum: 'pilot', asama: 2, harita: true, aciklama: 'Soru, kavram, tanım' },
     { id: 'tarih', ad: 'Tarih', katman: 'alan', alan: 'tarih', dal: 'ogren', yol: '#/alan/tarih', ikon: 'kum', durum: 'pilot', asama: 2, harita: true, aciklama: 'Olaylar ve dönemler' },

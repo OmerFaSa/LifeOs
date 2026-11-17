@@ -101,6 +101,12 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 /* ---------------- ders ve kapı (Felsefe pilotu) ---------------- */
 .ders p, .ders ul:not([class]){ margin:0; max-width:64ch; } .ders ul:not([class]){ padding-left:var(--a4); overflow-wrap:anywhere; } /* kaynak yolu boşluksuz uzun: telefonda taşmasın */
 .ders p, .ders li{ font-size:var(--yz); line-height:1.75; }
+/* İçerikteki «Tablo — başlık: …» satırı (bilesen.js tabloAyir): ders ve soru içinde sakin tablo; dar ekranda kendi içinde kayar */
+.ders-tablo{ margin:var(--a2) 0 var(--a3); max-width:64ch; }
+.ders-tablo caption{ caption-side:top; text-align:left; padding:0 0 var(--a2); font-size:var(--yz-k); font-weight:600; color:var(--yazi-2); }
+.ders-tablo tbody tr:last-child > *{ box-shadow:none; }
+.ders-tablo thead th{ white-space:normal; vertical-align:bottom; }
+@media (max-width:560px){ .ders-tablo th, .ders-tablo td{ padding:var(--a2) var(--a1); } }
 .ders__ozet{ font-size:var(--yz-h3); line-height:1.6; letter-spacing:-.005em; color:var(--yazi); padding:var(--a1) 0; }
 .kapi{ display:flex; flex-direction:column; gap:var(--a3); }
 
@@ -827,3 +833,62 @@ a.konu:hover{ background:var(--yuzey-2); }
 .konu[aria-current] .konu__ad, .konu[aria-current] .konu__not{ color:var(--vurgu); }
 .konu--kilitli{ opacity:.65; }
 @media (pointer:coarse){ .konu__not a{ min-height:44px; margin-block:-10px; } } /* dokunma alanı 44 px, satır yüksekliği büyümez */
+
+/* ===== Tur 2026-11-17d (sahip: alan sayfası «daha minimalist, sade ve bölümlenebilir»; aşamalar «çok daha güzel»; Bugün'de büyük kart olmasın,
+   alanlar «ilerleme gibi bir bölümde») ===== */
+/* bölüm sekmeleri: tek parça seçici, seçili olan yüzey rengiyle kalkar */
+.alan-bolum{ display:inline-flex; justify-self:start; width:max-content; max-width:100%; gap:2px; padding:3px; margin:0 0 var(--a4); border-radius:var(--kose-tam); background:var(--yuzey-2); }
+.alan-bolum a{ padding:var(--a1) var(--a4); border-radius:var(--kose-tam); color:var(--yazi-2); font-size:var(--yz-k); font-weight:600; text-decoration:none;
+  transition:background var(--hizli) var(--akis), color var(--hizli) ease, box-shadow var(--hizli) ease; }
+.alan-bolum a:hover{ color:var(--yazi); }
+.alan-bolum a[aria-current="page"]{ color:var(--yazi); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+/* aşamanın özeti: küçük üst etiket, ad, hedef, tek ilerleme */
+.asama-ozet{ display:grid; gap:var(--a2); margin:0 0 var(--a6); }
+.asama-ozet__ust{ display:flex; align-items:flex-end; justify-content:space-between; gap:var(--a3); flex-wrap:wrap; }
+.asama-ozet__ad{ margin:0; font-size:var(--yz-h3); line-height:1.25; }
+.asama-ozet__ad span{ display:block; margin-bottom:2px; font-size:var(--yz-k); font-weight:600; letter-spacing:.04em; color:var(--soluk); }
+.asama-ozet__hedef{ margin:0; max-width:60ch; color:var(--yazi-2); }
+.asama-ozet__ikincil{ font-size:var(--yz-k); color:var(--yazi-2); }
+/* sınav bölümleri (TYT, AYT) ve ders kartları */
+.ders-bolum + .ders-bolum{ margin-top:var(--a6); }
+.ders-bolum__ad{ margin:0 0 var(--a3); font-size:var(--yz-k); font-weight:700; letter-spacing:.12em; color:var(--soluk); }
+.ders-kartlar{ display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap:var(--a3); }
+.ders-kart{ min-width:0; border-radius:var(--kose); background:var(--yuzey); transition:box-shadow var(--hizli) ease; }
+.ders-kart:hover, .ders-kart[open]{ box-shadow:var(--golge-yumusak); }
+.ders-kart[open]{ grid-column:1 / -1; }
+.ders-kart > summary{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:var(--a1) var(--a3); padding:var(--a4); cursor:pointer; list-style:none; border-radius:inherit; }
+.ders-kart > summary::-webkit-details-marker{ display:none; }
+.ders-kart > summary::after{ content:""; grid-column:2; grid-row:1; width:8px; height:8px; margin:0 4px; border:solid var(--soluk); border-width:0 2px 2px 0; transform:rotate(45deg) translateY(-2px);
+  transition:transform var(--hizli) var(--akis); }
+.ders-kart[open] > summary::after{ transform:rotate(-135deg) translateY(-2px); }
+.ders-kart__ad{ grid-column:1; font-weight:600; }
+.ders-kart__not{ grid-column:1 / -1; font-size:var(--yz-k); color:var(--soluk); }
+.ders-kart__cizgi{ grid-column:1 / -1; display:block; height:4px; border-radius:var(--kose-tam); background:var(--yuzey-2); overflow:hidden; }
+.ders-kart__cizgi i{ display:block; height:100%; min-width:0; border-radius:inherit; background:var(--vurgu); }
+.ders-kart[data-grup="simdi"] .ders-kart__ad::before{ content:""; display:inline-block; width:7px; height:7px; margin:0 var(--a2) 2px 0; border-radius:50%; background:var(--vurgu); vertical-align:middle; }
+.ders-kart[data-grup="kilitli"] .ders-kart__ad{ color:var(--yazi-2); }
+.ders-kart > .yol{ margin:0 var(--a4) var(--a4); padding-top:var(--a2); }
+/* sıradaki ders listede belli */
+.b-ders--sira{ background:color-mix(in srgb, var(--vurgu) 9%, var(--yuzey)); }
+.b-ders__sira{ margin-left:var(--a2); padding:1px var(--a2); border-radius:var(--kose-tam); font-size:var(--yz-k); font-weight:600; color:var(--vurgu); background:color-mix(in srgb, var(--vurgu) 12%, transparent); }
+/* aşama kartları */
+.asama-kartlar{ display:grid; gap:var(--a3); margin:0; padding:0; list-style:none; }
+.asama-kart{ display:flex; align-items:flex-start; gap:var(--a4); padding:var(--a4) var(--a5); border-radius:var(--kose); background:var(--yuzey); color:var(--yazi); text-decoration:none;
+  transition:box-shadow var(--hizli) ease; }
+a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
+.asama-kart__no{ display:grid; place-items:center; flex:none; width:40px; height:40px; border-radius:50%; font-weight:700; color:var(--yazi-2); background:var(--yuzey-2); }
+.asama-kart--simdi .asama-kart__no{ color:var(--vurgu-yazi); background:var(--vurgu); }
+.asama-kart--bitti .asama-kart__no{ color:var(--vurgu); background:color-mix(in srgb, var(--vurgu) 14%, transparent); }
+.asama-kart--kilitli{ color:var(--soluk); background:transparent; box-shadow:inset 0 0 0 1px var(--cizgi); }
+.asama-kart__metin{ display:grid; gap:var(--a1); min-width:0; flex:1; }
+.asama-kart__ust{ font-size:var(--yz-k); font-weight:600; color:var(--soluk); }
+.asama-kart__ad{ font-size:var(--yz-h3); font-weight:600; line-height:1.25; }
+.asama-kart__hedef{ max-width:62ch; color:var(--yazi-2); }
+.asama-kart--kilitli :is(.asama-kart__ad, .asama-kart__hedef){ color:var(--soluk); }
+.asama-kart__sayi{ display:flex; align-items:center; gap:var(--a3); margin-top:var(--a1); font-size:var(--yz-k); color:var(--yazi-2); }
+.asama-kart__sayi .ders-kart__cizgi{ width:min(220px, 50%); }
+/* Bugün › İlerleme: kartın notunun altında ince çizgi */
+.b-karsilama__cizgi{ display:block; width:min(180px, 100%); height:3px; margin-top:var(--a1); border-radius:var(--kose-tam); background:var(--yuzey-2); overflow:hidden; }
+.b-karsilama__cizgi i{ display:block; height:100%; border-radius:inherit; background:var(--vurgu); }
+:root[data-kontrast="yuksek"] :is(.ders-kart, .asama-kart, .alan-bolum){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; }
+.dallar + .dallar__sinav{ margin-top:var(--a6); }

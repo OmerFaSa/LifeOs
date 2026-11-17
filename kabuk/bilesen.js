@@ -9,6 +9,19 @@
 
   var KAC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   function kac(s) { return String(s).replace(/[&<>"']/g, function (c) { return KAC[c]; }); }
+  // İçerikte satır içi tablo: «…\nTablo — başlık: b1 | b2 ; h1 | h2 ; …» (alan/akademik). Metin ve tablo ayrılır; tablo .b-tablo görünümüyle çizilir.
+  // Başlık yoksa ya da eski dönüştürücünün bıraktığı «undefined» ise başlıksız.
+  function tabloAyir(s) {
+    var m = /(?:^|\n)Tablo\s*[—-]\s*([^:\n]*):\s*([^\n]+)$/.exec(String(s == null ? '' : s));
+    if (!m) return { metin: String(s == null ? '' : s), tablo: '' };
+    var sat = m[2].split(/\s;\s/).map(function (r) { return r.split('|').map(function (h) { return zengin(h.trim()); }); });
+    var bas = m[1].trim() && m[1].trim() !== 'undefined' ? '<caption>' + zengin(m[1].trim()) + '</caption>' : '';
+    var tablo = '<div class="b-tablo ders-tablo" role="region" tabindex="0"><table>' + bas + '<thead><tr>' + sat[0].map(function (h) { return '<th scope="col">' + h + '</th>'; }).join('') +
+      '</tr></thead><tbody>' + sat.slice(1).map(function (r) { return '<tr>' + r.map(function (h, i) { return i ? '<td>' + h + '</td>' : '<th scope="row">' + h + '</th>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+    return { metin: String(s).slice(0, m.index), tablo: tablo };
+  }
+  // Ders paragrafı: metin <p> içinde, varsa tablo ardından (tablo <p> içine konamaz)
+  function paragraf(s) { var t = tabloAyir(s); return (t.metin.trim() ? '<p>' + zengin(t.metin) + '</p>' : '') + t.tablo; }
   // Ders metninin hafif işaretlemesi (alan/akademik: **kalın**, x^{2}, H_{2}O): önce kaçışlanır, sonra yalnız b/sup/sub etiketleri üretilir
   function zengin(s) {
     return kac(s).replace(/\*\*([^*\n]+?)\*\*/g, '<b>$1</b>').replace(/\^\{([^{}\n]{1,40})\}/g, '<sup>$1</sup>').replace(/_\{([^{}\n]{1,40})\}/g, '<sub>$1</sub>');
@@ -118,13 +131,13 @@
     var durum = sec('ders', 'durum', o.durum, ['yeni', 'okundu', 'kilitli']);
     var sure = o.sure == null ? '' : (typeof o.sure === 'number' && o.sure > 0 && isFinite(o.sure) ? o.sure : hata('ders', 'sure pozitif dakika olmalı'));
     var no = o.no == null ? '' : '<span class="b-ders__no" aria-hidden="true">' + (durum === 'okundu' ? '<svg><use href="#i-tik"/></svg>' : (+o.no || '')) + '</span>';
-    var ic = '<span class="b-ders__baslik">' + no + kac(metin('ders', 'baslik', o.baslik)) + '</span>' +
+    var ic = '<span class="b-ders__baslik">' + no + kac(metin('ders', 'baslik', o.baslik)) + (o.sira && durum !== 'kilitli' ? '<span class="b-ders__sira">sıradaki</span>' : '') + '</span>' +
       '<span class="b-ders__ozet">' + kac(metin('ders', 'ozet', o.ozet, true)) + '</span>' +
       '<span class="b-ders__alt">' + pul(DERS_DURUM[durum]) + (o.taslak ? pul({ metin: 'taslak', tur: 'kesik' }) : '') +
       (sure ? '<span>' + sayiYaz(sure) + ' dk</span>' : '') + '</span>';
     if (durum === 'kilitli') return '<div class="b-ders b-ders--kilitli" aria-disabled="true">' + ic + '</div>';
     if (o.href == null) hata('ders', 'açık ders için href gerekli');
-    return '<a class="b-ders b-ders--' + durum + '" href="' + kac(yol('ders', o.href)) + '">' + ic + '</a>';
+    return '<a class="b-ders b-ders--' + durum + (o.sira ? ' b-ders--sira" aria-current="step' : '') + '" href="' + kac(yol('ders', o.href)) + '">' + ic + '</a>';
   }
 
   /* 5 · İlerleme çubuğu. Yalnız hedefi olan tam sayı (AGENTS kural 10: hedef yoksa çubuk yok).
@@ -310,7 +323,7 @@
     var sonuc = !r ? '' : '<b>' + kac(metin('soru', 'sonuc.baslik', r.baslik)) + '</b>' + (r.metin ? ' ' + zengin(metin('soru', 'sonuc.metin', r.metin)) : '') +
       (r.maddeler && r.maddeler.length ? '<ul>' + r.maddeler.map(function (x) { return '<li>' + zengin(metin('soru', 'madde', x)) + '</li>'; }).join('') + '</ul>' : '') +
       (r.not ? '<p class="b-soru__not">' + kac(metin('soru', 'sonuc.not', r.not)) + '</p>' : '');
-    return '<fieldset class="b-soru" tabindex="-1"' + veri('soru', o.veri) + '><legend class="b-soru__metin">' + zengin(metin('soru', 'soru', o.soru)) + '</legend>' +
+    return '<fieldset class="b-soru" tabindex="-1"' + veri('soru', o.veri) + '><legend class="b-soru__metin">' + zengin(tabloAyir(metin('soru', 'soru', o.soru)).metin) + '</legend>' + tabloAyir(o.soru).tablo +
       (o.ust ? '<p class="b-soru__ust">' + kac(metin('soru', 'ust', o.ust)) + '</p>' : '') + ic + '<div class="b-soru__sonuc" tabindex="-1" role="status">' + sonuc + '</div></fieldset>';
   }
 
@@ -458,22 +471,24 @@
       nesne('karsilama', a);
       return '<a class="b-karsilama__alan" href="' + kac(yol('karsilama', a.href)) + '">' + simge(a.simge, a.renk) +
         '<span class="b-karsilama__alanmetin"><span class="b-karsilama__alanad">' + kac(metin('karsilama', 'alanlar.ad', a.ad)) + '</span>' +
-        (a.not ? '<span class="b-karsilama__alannot">' + kac(metin('karsilama', 'alanlar.not', a.not)) + '</span>' : '') + '</span>' +
+        (a.not ? '<span class="b-karsilama__alannot">' + kac(metin('karsilama', 'alanlar.not', a.not)) + '</span>' : '') +
+        (a.yuzde != null ? '<span class="b-karsilama__cizgi" aria-hidden="true"><i style="width:' + Math.max(2, Math.min(100, Math.round(+a.yuzde))) + '%"></i></span>' : '') + '</span>' +
         (a.yuzde != null ? '<span class="b-karsilama__yuzde">%' + Math.round(+a.yuzde) + '</span>' : '<svg class="b-karsilama__ok" aria-hidden="true"><use href="#i-sag"/></svg>') + '</a>';
     }).join('');
     return '<div class="b-karsilama"><div class="b-karsilama__sahne"><canvas class="b-karsilama__manzara" width="384" height="96" aria-hidden="true"></canvas>' +
       '<div class="b-karsilama__ic">' + (o.tarih ? '<p class="b-karsilama__tarih">' + kac(metin('karsilama', 'tarih', o.tarih)) + '</p>' : '') +
       '<h1 class="b-karsilama__selam">' + kac(metin('karsilama', 'selam', o.selam)) + '</h1>' +
       (o.ozet ? '<p class="b-karsilama__ozet">' + kac(metin('karsilama', 'ozet', o.ozet)) + '</p>' : '') + '</div></div>' +
-      '<section class="b-karsilama__is" aria-label="Sıradaki"><div class="b-karsilama__govde">' +
+      // iş bölümü isteğe bağlı (2026-11-17d, sahip: Bugün'de büyük «sıradaki» kartı olmasın; ilerleme alanların bölümünde)
+      (s || o.eylem ? '<section class="b-karsilama__is" aria-label="Sıradaki"><div class="b-karsilama__govde">' +
       (s ? '<p class="b-karsilama__ust">' + (s.simge ? '<svg aria-hidden="true"><use href="#i-' + kac(String(s.simge)) + '"/></svg>' : '') + kac(metin('karsilama', 'sira.ust', s.ust)) + '</p>' +
         '<h2 class="b-karsilama__sira">' + kac(metin('karsilama', 'sira.metin', s.metin)) + '</h2>' : '') +
       (o.adim ? '<p class="b-karsilama__adim">' + kac(metin('karsilama', 'adim', o.adim)) + '</p>' : '') +
       '<div class="b-karsilama__eylem">' + dugme(Object.assign({ tur: 'ana' }, nesne('karsilama', o.eylem))).replace(/<\/(a|button)>$/, '<svg class="b-karsilama__ileri" aria-hidden="true"><use href="#i-ok"/></svg></$1>') +
-      (b ? '<a class="b-karsilama__baglanti" href="' + kac(yol('karsilama', b.href)) + '">' + kac(metin('karsilama', 'baglanti.metin', b.metin)) + '</a>' : '') + '</div></div>' + halka + '</section>' +
+      (b ? '<a class="b-karsilama__baglanti" href="' + kac(yol('karsilama', b.href)) + '">' + kac(metin('karsilama', 'baglanti.metin', b.metin)) + '</a>' : '') + '</div></div>' + halka + '</section>' : '') +
       (plan ? kBolum('plan', 'Bugünün planı', pl.href ? { href: pl.href, metin: 'Planı aç' } : null, '<ol class="b-karsilama__plan">' + plan + '</ol>') : '') +
       (ek ? kBolum('bekleyen', 'Bekleyenler', null, '<div class="b-karsilama__ek">' + ek.replace(/class="b-uyari /g, 'class="b-uyari b-uyari--satir ') + '</div>') : '') +
-      (al ? kBolum('alanlar', 'Alanlar', null, '<nav class="b-karsilama__alanlar" aria-labelledby="b-k-alanlar">' + al + '</nav>') : '') + '</div>';
+      (al ? kBolum('alanlar', o.alanlarBaslik ? kac(metin('karsilama', 'alanlarBaslik', o.alanlarBaslik)) : 'Alanlar', null, '<nav class="b-karsilama__alanlar" aria-labelledby="b-k-alanlar">' + al + '</nav>') : '') + '</div>';
   }
 
   /* 24 · Halka (Yerler). Basılı tutunca ya da Ctrl . ile açılan dairesel menü: role=menu, öğeler menuitem düğmeleri (data-yol); ilki tepede, saat yönünde
@@ -568,7 +583,7 @@
   var Bilesen = {
     TASLAR: ['dugme', 'pul', 'satir', 'ders', 'ilerleme', 'alan', 'bos', 'baslik', 'sayi', 'uyari', 'bolum', 'panel', 'eylemler', 'acilir', 'soru', 'tercih',
       'kart', 'tablo', 'serit', 'adimlar', 'ayar', 'ag', 'karsilama', 'halka', 'komut', 'sohbet', 'cipler', 'yanli'],
-    ETIKET: ETIKET, kac: kac, zengin: zengin,
+    ETIKET: ETIKET, kac: kac, zengin: zengin, paragraf: paragraf,
     dugme: dugme, pul: pul, satir: satir, liste: liste, ders: ders, ilerleme: ilerleme, alan: alan, bos: bos,
     baslik: baslik, sayi: sayi, sayilar: sayilar, uyari: uyari, bolum: bolum, panel: panel, eylemler: eylemler, acilir: acilir, soru: soru, tercih: tercih,
     kart: kart, tablo: tablo, serit: serit, adimlar: adimlar, ayar: ayar, ag: ag,
