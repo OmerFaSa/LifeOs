@@ -252,7 +252,10 @@ t('bilesen.css yalnız kabuk.css jetonlarını kullanır; yeni jeton ve renk yok
   (css.match(/var\(--[a-z0-9-]+/g) || []).forEach(v => dogru(jeton.has(v.slice(4)), 'kabuk.css\'te yok: ' + v));
   dogru(!/(^|[;{\s])--[a-z0-9-]+\s*:/.test(css), 'yeni jeton tanımı var');
   dogru(!/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(css), 'elle renk var');
-  (css.match(/font-family:[^;}]+/g) || []).forEach(f => dogru(/font-family:var\(--(piksel|govde)\)/.test(f), f));
+  // yazı yalnız dört jetondan: arayüz sans (--govde), piksel, başlık serifi, okuma serifi (tur 2026-11-17e)
+  (css.match(/font-family:[^;}]+/g) || []).forEach(f => dogru(/font-family:var\(--(piksel|govde|baslik-serif|okuma)\)/.test(f), f));
+  ['--baslik-serif', '--okuma', '--alan-ton', '--alan-isik'].forEach(j => dogru(new RegExp(j + ':').test(kabukCss), 'kabuk.css\'te jeton yok: ' + j));
+  dogru(/:root\[data-yazi="piksel"\]\{[^}]*--okuma:var\(--piksel\)[^}]*--baslik-serif:var\(--piksel\)/.test(kabukCss), 'Piksel yazı tipi serifleri de piksele çevirir');
   (css.match(/border-radius:[^;}]+/g) || []).forEach(k => dogru(/^border-radius:(0|var\(--kose(-k|-tam)?\))$/.test(k), 'köşe yalnız jetondan: ' + k));
 });
 t('ölçü sistemi (Faz 8): yazı boyu ve boşluk yalnız ölçek jetonundan; gölge üç kat', () => {

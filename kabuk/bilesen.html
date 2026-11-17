@@ -23,6 +23,13 @@
   .ornek > small{ font-size:.72rem; color:var(--soluk); }
   .kural{ font-size:.85rem; color:var(--soluk); max-width:72ch; }
   /* açılır katman örnekleri: dönüşümlü kap, position:fixed taşı kabın içinde tutar */
+  /* dil örneği (tur 2026-11-17e): başlık serifi, okuma serifi, alan tonları */
+  .dil{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); align-items:start; gap:16px; }
+  .dil__okuma{ font-family:var(--okuma); font-size:1.0625rem; line-height:1.75; max-width:62ch; }
+  .dil__tonlar{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+  .dil__ton{ height:72px; border-radius:var(--kose-k); padding:8px; font-size:var(--yz-k); color:var(--yazi-2);
+    background:linear-gradient(180deg, var(--alan-isik), transparent) var(--bg); box-shadow:inset 0 0 0 1px var(--cizgi); }
+  .dil__ton::before{ content:""; display:block; width:12px; height:12px; margin-bottom:4px; border-radius:50%; background:var(--alan-ton); }
   .katman{ position:relative; height:420px; overflow:hidden; transform:translateZ(0); background:var(--bg); box-shadow:0 0 0 2px var(--cizgi); }
 </style>
 </head>
@@ -44,7 +51,15 @@
 
   var h = B.baslik({ metin: 'Bileşen kataloğu', alt: 'Yirmi sekiz yapı taşı (karar A2). Ekranlar yalnız bunlardan kurulur; her ölçü taşın kendisindedir, tema yalnız jetonlara dokunur. Bu sayfa «önce örnek göster» kuralının örneğidir.' }) +
     '<div class="denetim">' + seg('tema', 'Tema', { sistem: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, 'sistem') +
-    seg('en', 'Genişlik', { tam: 'Pencere', dar: '390 px', genis: '1280 px' }, 'tam') + '</div>';
+    seg('en', 'Genişlik', { tam: 'Pencere', dar: '390 px', genis: '1280 px' }, 'tam') +
+    seg('yazi', 'Yazı', { sistem: 'Cihazın yazısı', piksel: 'Piksel' }, 'sistem') + '</div>';
+
+  // dil: yazı ölçeği ve alan tonları (kabuk.css jetonları; ayrıntı belgeler/ekip/sadelesme/tur-20261117e/dil.md)
+  h += '<div>' + B.bolum({ baslik: 'Dil · yazı ve ışık', id: 'dil', govde: ['<p class="kural">Başlık serif (--baslik-serif), okuma metni serif (--okuma), arayüz sans (--govde) ve tabular rakam. Alan tonu bir kaba data-ton ile verilir; --alan-isik zemine süzülen ışıktır.</p>',
+    '<div class="dil"><div class="b-panel"><h1>Felsefe ne sorar?</h1><h2>Bölüm başlığı sakin kalır</h2>' +
+    '<p class="dil__okuma">«Felsefe» bilgelik sevgisi demektir: bilgeliğe sahip olmak değil, onu aramak. Thales’le başladığı kabul edilen yenilik, dünyayı mitlerle değil tartışılabilir gerekçelerle açıklama çabasıdır.</p>' +
+    '<p class="soluk">Arayüz yazısı · 12 / 36 ders · %33</p></div>' +
+    '<div class="dil__tonlar">' + ['turuncu', 'mavi', 'pembe', 'yesil', 'mor', 'sari', 'gok', 'deniz'].map(function (t) { return '<div class="dil__ton" data-ton="' + t + '">' + t + '</div>'; }).join('') + '</div></div>'] }) + '</div>'; // kapta: taş sayımı (#katalog > .b-bolum) yalnız yirmi sekiz taşı sayar
 
   h += tas(1, 'Düğme', 'Yükseklik 44 px (ana 52 px), yazı 1 rem (ana 1,15 rem), tek satır, en çok 40 karakter. Kapalıyken odakta kalır, «kapalı» okunur.', ornekler([
     ornek('ana', B.dugme({ metin: 'Başla', tur: 'ana' })),
@@ -212,6 +227,7 @@
     b.focus();
     var v = b.getAttribute('data-deger');
     if (b.getAttribute('data-seg') === 'tema') { if (v === 'sistem') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', v); }
+    else if (b.getAttribute('data-seg') === 'yazi') { if (v === 'sistem') document.documentElement.removeAttribute('data-yazi'); else document.documentElement.setAttribute('data-yazi', v); }
     else document.body.setAttribute('data-en', v);
   }
 })();

@@ -104,6 +104,10 @@ def main():
     # qr.js: hesap sayfasinin QR'i (iki adim, kodla baglama).
     for ad in GIRIS_DOSYALARI:
         shutil.copy2(KOK / "brand" / "ortak" / ad, giris / ad)
+    # piksel-yazi.css'in bağladığı yazı tipleri (2026-11-17: base64'ten ayrı dosyaya çıktı)
+    (giris / "yazi").mkdir(exist_ok=True)
+    for ad in sunucu.YAZI_DOSYALARI:
+        shutil.copy2(KOK / "brand" / "ortak" / "yazi" / ad, giris / "yazi" / ad)
 
     # Telefon yalniz bundan farkli dosyalari indirir (web_paket.py, WebGuncelleme.swift).
     sys.path.insert(0, str(BURASI))

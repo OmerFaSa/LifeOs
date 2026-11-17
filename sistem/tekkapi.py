@@ -41,7 +41,7 @@ KOK_SAYFALAR = ("/", "/index.html", "/kartlar", "/kartlar/")
 # 4180'in sabit dosyalari ve oneklari (Giris.do_GET'teki liste ve dallar).
 KOK_DOSYALAR = ("/hesap.js", "/gocpaket.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js",
                 "/piksel.js", "/piksel-apartman.js", "/piksel-doga.js", "/piksel-figur.js", "/piksel-simge.js",
-                "/piksel.css", "/piksel-yazi.css", "/api/guncelleme", "/api/durum")
+                "/piksel.css", "/piksel-yazi.css", "/api/guncelleme", "/api/durum") + tuple("/yazi/" + a for a in sunucu.YAZI_DOSYALARI)
 KOK_ONEKLER = ("/api/hesap/", "/api/kabuk/", "/api/kalite/", "/api/ayar", "/api/ice", "/api/muzik", "/api/zemin/", "/api/planlama",
                "/marka/")
 _ISTEK = ("rfile", "wfile", "connection", "request", "client_address", "server", "headers", "command",

@@ -1240,9 +1240,10 @@ def guncelleme_izinli(basliklar):
 # marka dosyasi). Kapali liste: klasor -> izinli uzantilar; test dosyasi, .py, .md ve ust klasor verilmez.
 # Eski sayfalarin yaninda durur (4180/kabuk/); tek kapi (tekkapi.py) ayni isleyiciyi kullanir, koken degismez.
 KABUK_KOKLER = {"kabuk": (".html", ".js", ".css"), "motor": (".js",), "alan": (".json",)}
-KABUK_TEK = ("/brand/ortak/piksel-yazi.css", "/brand/life/favicon.png")
+YAZI_DOSYALARI = ("pixelify-sans-latin.woff2", "pixelify-sans-latin-ext.woff2")   # brand/ortak/yazi/ (piksel-yazi.css bağlar)
+KABUK_TEK = ("/brand/ortak/piksel-yazi.css", "/brand/life/favicon.png") + tuple("/brand/ortak/yazi/" + a for a in YAZI_DOSYALARI)
 _KABUK_TUR = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
-              ".json": "application/json; charset=utf-8", ".png": "image/png"}
+              ".json": "application/json; charset=utf-8", ".png": "image/png", ".woff2": "font/woff2"}
 
 
 def kabuk_dosyasi(yol):
@@ -1499,6 +1500,8 @@ class Giris(SimpleHTTPRequestHandler):
             return plan_isle(self)
         if yol in ("/hesap.js", "/gocpaket.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel-apartman.js", "/piksel-doga.js", "/piksel-figur.js", "/piksel-simge.js", "/piksel.css", "/piksel-yazi.css"):
             return self._hesap_dosyasi(yol[1:])
+        if yol.startswith("/yazi/") and yol[6:] in YAZI_DOSYALARI:      # kökteki /piksel-yazi.css'in göreli yazı tipi adresi
+            return self._statik(os.path.join(KOK, "brand", "ortak", "yazi", yol[6:]), "font/woff2")
         if yol in ("/", "/index.html", "/kartlar", "/kartlar/"):
             # Yeni kabuk ilk ekran; eski hesap ve sistem paneli (/kartlar/) kabugun Hesap ekranina tasindi (faz7-hesap-*.md).
             self.send_response(302)

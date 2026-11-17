@@ -271,11 +271,14 @@ def sina(eski, tek, kokler=()):
     for yol, tur in (("/kabuk/kabuk.js", "javascript"), ("/kabuk/kabuk.css", "text/css"), ("/motor/yol.js", "javascript"),
                      ("/alan/felsefe/asama-1.json", "application/json"), ("/alan/tarih/harita.json", "application/json"),
                      ("/brand/ortak/piksel-yazi.css", "text/css"),
+                     ("/brand/ortak/yazi/pixelify-sans-latin.woff2", "font/woff2"),      # piksel-yazi.css'in göreli adresi
+                     ("/yazi/pixelify-sans-latin-ext.woff2", "font/woff2"),              # kökteki /piksel-yazi.css için
                      ("/brand/life/favicon.png", "image/png")):
         k, b, gv = iste(T, yol)
         dene("%s 200 (%s)" % (yol, tur), k == 200 and tur in b.get("Content-Type", "") and len(gv) > 0, k)
     for yol in ("/kabuk/kabuk.test.js", "/motor/yol.test.js", "/alan/SEMA.md", "/alan/denetle.py", "/kabuk/%2e%2e/sistem/tekkapi.py",
-                "/alan/..%2fHKM/config.example.json", "/brand/ortak/hesap.js", "/motor/", "/kabuk/yok.js"):
+                "/alan/..%2fHKM/config.example.json", "/brand/ortak/hesap.js", "/motor/", "/kabuk/yok.js",
+                "/brand/ortak/yazi/yok.woff2", "/yazi/yok.woff2"):
         dene("%s kabuk yolundan çıkmaz (404)" % yol, iste(T, yol)[0] == 404, iste(T, yol)[0])
     for yol in ("/kabuk/", "/kabuk/araclar.js", "/motor/not.js", "/alan/felsefe/asama-1.json", "/brand/ortak/piksel-yazi.css"):
         ayni("GET %s (eski 4180 de verir)" % yol, iste(g, yol), iste(T, yol))
