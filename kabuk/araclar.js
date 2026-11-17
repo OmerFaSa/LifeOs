@@ -478,18 +478,38 @@
 
   /* ---- Not ---- */
   var notDurum = null; // { id, metin, hata? }: son kaydın iletisi, yalnız hemen ardından gösterilir
-  // not satırı (B.liste öğesi): ad, tarih ve etiketler ya da arama parçası; özel/sabit rozeti
-  function notSatiri(n, parca) {
-    var et = Not.etiketleri(n);
-    return { ad: Not.ad(n) || 'Adsız not', href: '#/motor/not/' + n.id, not: parca || tarih(n.guncelleme) + (et.length ? ' · ' + et.map(function (e) { return '#' + e; }).join(' ') : ''),
-      pul: n.ozel ? 'özel' : n.sabit ? { metin: 'sabit', tur: 'altin' } : null };
+  /* Not satırı (2026-11-17d, sahip: «daha profesyonel, daha sade»): ad, altında metnin ilk satırı (arama varken eşleşen parça) ve etiket
+   * çipleri; sağda kısa tarih ve özel/sabit işareti. a.b-satir taşının görünümü ve davranışı korunur; ek düzen kabuk/araclar.css .notsatir. */
+  function kisaTarih(ms) {
+    var t = new Date(ms), b = new Date();
+    if (t.toDateString() === b.toDateString()) return 'Bugün';
+    return t.toLocaleDateString('tr-TR', t.getFullYear() === b.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
   }
+  // gövdenin ad dışında kalan ilk anlamlı satırı: bağ sözdizimi adına, etiketler çipe gider
+  function notOzet(n) {
+    var ad = Not.ad(n), l = String(n.govde || '').split('\n').map(function (x) {
+      return x.replace(/!?\[\[!?(?:not:[^|\]]*\|)?([^\]]*)\]\]/g, '$1').replace(/(^|\s)#[^\s#]+/g, '$1').replace(/^[>*\-\s]+/, '').replace(/\s+/g, ' ').trim();
+    }).filter(Boolean);
+    if (!String(n.baslik || '').trim() || l[0] === ad) l.shift(); // başlıksız notun adı zaten ilk satırdır
+    return l[0] || '';
+  }
+  function notSatiri(n, parca) {
+    var k = ic().kac, et = Not.etiketleri(n), ozet = parca || notOzet(n);
+    return '<a class="b-satir b-satir--uzun notsatir" href="#/motor/not/' + k(n.id) + '"><span class="b-satir__metin">' +
+      '<span class="b-satir__ad">' + k(Not.ad(n) || 'Adsız not') + '</span>' + (ozet ? '<span class="b-satir__not">' + k(ozet) + '</span>' : '') +
+      (et.length ? '<span class="notsatir__cipler">' + et.slice(0, 4).map(function (e) { return '<span class="notsatir__cip">#' + k(e) + '</span>'; }).join('') +
+        (et.length > 4 ? '<span class="notsatir__cip">+' + (et.length - 4) + '</span>' : '') + '</span>' : '') + '</span>' +
+      '<span class="notsatir__yan">' + (n.sabit ? B.pul({ metin: 'sabit', tur: 'altin' }) : '') + (n.ozel ? B.pul('özel') : '') +
+      '<time class="notsatir__tarih" datetime="' + new Date(n.guncelleme).toISOString() + '">' + k(kisaTarih(n.guncelleme)) + '</time></span>' +
+      '<svg class="b-satir__ok" aria-hidden="true"><use href="#i-sag"/></svg></a>';
+  }
+  function satirlar(ad, l) { return '<ul class="b-liste b-liste--satir notlar__liste" aria-label="' + ad + '">' + l.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>'; }
   function notListesi(notlar, sorgu) {
     if (!notlar.length) return B.bos({ baslik: 'Henüz not yok.', metin: 'Yukarıdaki kutuya bir satır yazman yeter.' });
-    if (!sorgu.trim()) return B.liste({ ad: 'Notlar', ogeler: notlar.slice().sort(notSira).map(function (n) { return notSatiri(n); }) });
+    if (!sorgu.trim()) return satirlar('Notlar', notlar.slice().sort(notSira).map(function (n) { return notSatiri(n); }));
     var harita = {}; notlar.forEach(function (n) { harita[n.id] = n; });
     var s = Not.ara(notlar, sorgu, { sinir: 50 });
-    return s.length ? B.liste({ ad: 'Arama sonuçları', ogeler: s.map(function (x) { return notSatiri(harita[x.id], x.parca); }) }) : B.bos({ baslik: 'Bu aramaya uyan not yok.', metin: 'Başka bir sözcük dene ya da aramayı silip bütün notlara dön.' });
+    return s.length ? satirlar('Arama sonuçları', s.map(function (x) { return notSatiri(harita[x.id], x.parca); })) : B.bos({ baslik: 'Bu aramaya uyan not yok.', metin: 'Başka bir sözcük dene ya da aramayı silip bütün notlara dön.' });
   }
   // Not ağı: Not.ag verisi SVG'ye çizilir; düğüm bağlantıdır (Sekme ile gezilir, Enter notu açar). Renkler kabuk.css tokenlarından.
   var AG_EN = 640, AG_BOY = 400;
@@ -532,7 +552,7 @@
           B.acilir({ baslik: 'King bundan ne anlamalı', duzey: 3, acik: true, govde: metin(sn.anlam) }), B.acilir({ baslik: 'King bunu nasıl kullanmalı', duzey: 3, acik: true, govde: metin(sn.kullanim) }),
           '<p class="soluk">' + (sn.kingOkur ? 'King bu aracın notlarını (özel olanlar hariç) ve bu notu okur.' : 'King bu aracın notlarını ve bu notu okumaz.') + '</p>'] }) +
         B.eylemler([{ metin: 'Bu araçta yeni not', tur: 'ana', href: '#/motor/not/yeni?arac=' + a.id }, { metin: 'Aracı düzenle', tur: 'sade', href: '#/motor/not/arac/' + a.id + '/duzenle' }]) +
-        (l.length ? B.liste({ ad: a.ad + ' notları', ogeler: l.slice().sort(notSira).map(function (n) { return notSatiri(n); }) }) : B.bos({ baslik: 'Bu araçta henüz not yok.', metin: 'Yukarıdaki «Bu araçta yeni not» ile ekle; notları «' + a.klasor + '» klasöründe durur.' })) +
+        (l.length ? satirlar(k(a.ad) + ' notları', l.slice().sort(notSira).map(function (n) { return notSatiri(n); })) : B.bos({ baslik: 'Bu araçta henüz not yok.', metin: 'Yukarıdaki «Bu araçta yeni not» ile ekle; notları «' + a.klasor + '» klasöründe durur.' })) +
         (a.gorunum === 'ag' ? notAgi(l) : '') + '</div>';
     }
     var dr = aracDurum && aracDurum.id === id ? aracDurum : null; aracDurum = null;
@@ -571,17 +591,22 @@
       var araclar = oku(ARAC_ANAHTAR, []);
       var hd = hizliDurum; hizliDurum = null;
       return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="not">' + B.baslik({ metin: 'Not' }) + geriAlHtml() + // başlık eylemi yok: geniş ekranda başlık manzaranın içinde, düğme sahnenin üstüne biniyordu
-        // hızlı yazma: aç, yaz, Ctrl+Enter; ilk satır notun adı olur (Not.ad)
-        '<form class="nothizli" data-taslak="not-hizli" novalidate>' + B.alan({ ad: 'Hızlı not', isim: 'hizli', tur: 'cok', enCok: 20000, deger: hd && hd.metin || (taslak('not-hizli') || {}).hizli || '',
-          yerTutucu: 'Aklındakini yaz. İlk satır notun adı olur; #etiket ve [[başka notun adı]] kullanabilirsin. Ctrl + Enter kaydeder.' }) +
-        // satır ters dizilir (kabuk.css .nothizli): solda Ayrıntılı not, sağda Kaydet; kayıt iletisi aralarında
-        B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, hd ? { yazi: hd.tamam ? 'Kaydedildi.' : hd.hata } : null, { metin: 'Ayrıntılı not', tur: 'sade', href: '#/motor/not/yeni' }]) + '</form>' +
-        (notlar.length ? B.alan({ ad: 'Notlarda ara', isim: 'notAra', tur: 'arama', yerTutucu: 'Kelime ya da #etiket', veri: { 'not-ara': '' } }) : '') + // aranacak not yokken arama kutusu yalnız kalabalık
-        '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div>' +
-        (notlar.length ? '<p class="soluk">' + notlar.length + ' not · bu cihazda durur</p>' : '') +
-        B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', govde: ['<p class="soluk">Bir araç, notlarını kendi klasöründe toplar.</p>',
-          araclar.length ? B.liste({ ad: 'Araçlar', ogeler: araclar.map(function (a) { return aracSatiri(a, notlar); }) }) : '',
-          B.eylemler([{ metin: 'Yeni araç', href: '#/motor/not/arac/yeni' }])] }) + notAgi(notlar) + '</div>';
+        /* Hızlı yazma (2026-11-17d): tek satırlık sade kutu, odaklanınca ya da yazı varken büyür ve ipucu görünür (kabuk/araclar.css .nothizli).
+         * Ctrl+Enter kaydeder; ilk satır notun adı olur (Not.ad). */
+        '<form class="nothizli" data-taslak="not-hizli" novalidate><svg class="nothizli__simge" aria-hidden="true"><use href="#i-not"/></svg>' +
+        B.alan({ ad: 'Hızlı not', isim: 'hizli', tur: 'cok', enCok: 20000, deger: hd && hd.metin || (taslak('not-hizli') || {}).hizli || '', yerTutucu: 'Yeni not yaz…',
+          ipucu: 'İlk satır adı olur · #etiket · [[not adı]] ile bağ · Ctrl + Enter kaydeder' }) +
+        B.eylemler([hd ? { yazi: hd.tamam ? 'Kaydedildi.' : hd.hata } : null, { metin: 'Kaydet', tur: 'ana', tip: 'submit', kisayol: 'Control+Enter' }]) + '</form>' +
+        // Notlar: başlıkta sayı, arama ve «Ayrıntılı not» (eskiden ayrı satırlarda büyük arama kutusu ve kutunun altında bağlantı)
+        '<section class="b-bolum notlar" aria-labelledby="notlar-baslik"><div class="b-bolum__ust notlar__ust"><h2 id="notlar-baslik">Notlar' +
+          (notlar.length ? ' <span class="notlar__sayi">' + notlar.length + '</span>' : '') + '</h2><div class="notlar__arac">' +
+          (notlar.length ? '<div class="notlar__ara"><svg aria-hidden="true"><use href="#i-ara"/></svg>' +
+            B.alan({ ad: 'Notlarda ara', gizliAd: true, isim: 'notAra', tur: 'arama', yerTutucu: 'Ara: kelime ya da #etiket', veri: { 'not-ara': '' } }) + '</div>' : '') + // aranacak not yokken arama kutusu yalnız kalabalık
+          B.dugme({ metin: 'Ayrıntılı not', tur: 'sade', href: '#/motor/not/yeni' }) + '</div></div>' +
+        '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div></section>' +
+        B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', eylem: { metin: 'Yeni araç', tur: 'sade', href: '#/motor/not/arac/yeni' },
+          govde: araclar.length ? B.liste({ ad: 'Araçlar', ogeler: araclar.map(function (a) { return aracSatiri(a, notlar); }) }) : '<p class="soluk">Bir araç, notlarını kendi klasöründe toplar.</p>' }) +
+        notAgi(notlar) + (notlar.length ? '<p class="notlar__dip">Notların bu cihazda durur.</p>' : '') + '</div>';
     }
     var aracY = alt === 'yeni' && (/[?&]arac=([\w-]+)/.exec(location.hash) || [])[1], aracA = aracY && oku(ARAC_ANAHTAR, []).filter(function (x) { return x.id === aracY; })[0];
     var n = alt === 'yeni' ? null : notlar.filter(function (x) { return x.id === alt; })[0];

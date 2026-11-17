@@ -1,0 +1,86 @@
+/* kabuk/araclar.css — Not (#/motor/not) ve Sağlık (#/saglik) ekranlarının stilleri (2026-11-17d, sahip: «daha profesyonel, daha sade»).
+ * index.html'de kabuk.css ve bilesen.css'ten SONRA yüklenir; yalnız kabuk.css jetonlarını kullanır. Kartlarda kenar yok (ton + yumuşak gölge);
+ * yüksek kontrast kipinde kenar geri gelir. Çizen: kabuk/araclar.js (Not) ve kabuk/saglik.js (Bugün kutucukları). */
+
+/* ---------- Not · hızlı yazma: tek satır; odaklanınca ya da yazı varken büyür, ipucu görünür ---------- */
+.nothizli{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; grid-template-areas:"simge yaz eylem"; align-items:center; column-gap:var(--a2); row-gap:var(--a2);
+  margin-bottom:var(--a5); padding:var(--a2) var(--a2) var(--a2) var(--a4); flex-direction:unset; border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak);
+  transition:box-shadow var(--sure) ease; }
+.nothizli .b-alan{ display:contents; }
+.nothizli__simge{ grid-area:simge; align-self:start; width:20px; height:20px; margin-top:12px; fill:none; stroke:var(--soluk); stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
+.nothizli textarea{ grid-area:yaz; height:44px; min-height:44px; padding:10px var(--a1); resize:none; overflow:hidden; line-height:1.5; background:transparent; box-shadow:none; }
+:root .nothizli textarea, :root .nothizli textarea:focus{ background:transparent; box-shadow:none; outline:0; } /* odak halkası kutunun kendisinde (:focus-within) */
+.nothizli .b-alan__ipucu{ grid-area:ipucu; display:none; margin:0; font-size:var(--yz-k); color:var(--soluk); }
+.nothizli .b-eylemler{ grid-area:eylem; flex-direction:row; flex-wrap:nowrap; justify-content:flex-end; align-items:center; align-self:end; gap:var(--a3); margin:0; }
+.nothizli .b-eylemler__yazi{ font-size:var(--yz-k); color:var(--soluk); }
+.nothizli:focus-within{ box-shadow:0 0 0 2px color-mix(in srgb, var(--vurgu) 55%, transparent), var(--golge-orta); }
+.nothizli:is(:focus-within, :has(textarea:not(:placeholder-shown))){ grid-template-areas:"simge yaz yaz" ". ipucu eylem"; }
+.nothizli:is(:focus-within, :has(textarea:not(:placeholder-shown))) textarea{ height:128px; resize:vertical; overflow:auto; }
+.nothizli:is(:focus-within, :has(textarea:not(:placeholder-shown))) .b-alan__ipucu{ display:block; align-self:center; }
+
+/* ---------- Not · liste: başlıkta sayı, arama ve «Ayrıntılı not» ---------- */
+.notlar__sayi{ margin-left:var(--a1); font-weight:500; font-variant-numeric:tabular-nums; }
+.notlar__arac{ display:flex; align-items:center; gap:var(--a2); min-width:0; }
+.notlar__ara{ position:relative; width:260px; }
+.notlar__ara > svg{ position:absolute; left:var(--a3); top:50%; z-index:1; width:16px; height:16px; transform:translateY(-50%); fill:none; stroke:var(--soluk); stroke-width:1.75; stroke-linecap:round; pointer-events:none; }
+.notlar__ara .b-alan{ margin:0; gap:0; }
+.notlar__ara .b-alan__giris{ height:40px; padding-left:36px; border-radius:var(--kose-tam); font-size:var(--yz-k); background:var(--yuzey-2); box-shadow:none; }
+.notlar__ust .b-dugme{ min-height:40px; }
+.notlar__liste > li + li{ position:relative; box-shadow:none; }
+.notlar__liste > li + li::before{ content:""; position:absolute; top:0; left:var(--a4); right:var(--a4); height:1px; background:var(--cizgi); }
+.notsatir{ align-items:center; gap:var(--a3); }
+.notsatir .b-satir__not{ white-space:nowrap; overflow-wrap:normal; }
+.notsatir__cipler{ display:flex; flex-wrap:wrap; gap:var(--a1); margin-top:var(--a1); }
+.notsatir__cip{ padding:0 var(--a2); border-radius:var(--kose-tam); font-size:var(--yz-k); line-height:1.6; color:var(--yazi-2); background:var(--yuzey-2); }
+.notsatir__yan{ display:flex; align-items:center; gap:var(--a2); flex:none; }
+.notsatir__tarih{ font-size:var(--yz-k); color:var(--soluk); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.notlar__dip{ margin-top:var(--a6); font-size:var(--yz-k); color:var(--soluk); }
+
+@media (max-width:640px){
+  .nothizli:is(:focus-within, :has(textarea:not(:placeholder-shown))){ grid-template-areas:"simge yaz yaz" ". ipucu ipucu" ". eylem eylem"; }
+  .notlar__ust{ grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"baslik dugme" "ara ara"; row-gap:var(--a2); }
+  .notlar__ust h2{ grid-area:baslik; }
+  .notlar__arac{ display:contents; }
+  .notlar__ust .b-dugme{ grid-area:dugme; }
+  .notlar__ara{ grid-area:ara; width:auto; }
+  .notsatir__yan .b-pul{ display:none; } /* dar ekranda yalnız tarih; özel/sabit notun içinde yazılı */
+}
+
+/* ---------- Sağlık · Bugün: dört ölçü kutucuğu (kutunun tamamı Kayıt'ın o türüne bağlantı) ---------- */
+.sg-aciklama{ margin:var(--a2) 0 0; font-size:var(--yz-k); } /* grafiğin okuma notu: öbür ikincil yazılarla aynı boyda */
+.sg-olcu{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:var(--a3); }
+.sg-olcu > li{ display:flex; min-width:0; }
+.sg-olcu__kutu{ display:flex; flex-direction:column; flex:1; min-width:0; min-height:168px; padding:var(--a4); border-radius:var(--kose); color:var(--yazi); text-decoration:none;
+  background:var(--yuzey); box-shadow:var(--golge-yumusak); transition:box-shadow var(--sure) ease, transform var(--sure) ease, background var(--sure) ease; }
+.sg-olcu__kutu:hover{ box-shadow:var(--golge-orta); transform:translateY(-2px); }
+.sg-olcu__ust{ display:flex; align-items:center; gap:var(--a2); min-width:0; }
+.sg-olcu__ust .b-simge{ width:32px; height:32px; }
+.sg-olcu__ust .b-simge svg{ width:18px; height:18px; }
+.sg-olcu__ad{ font-size:var(--yz-k); font-weight:600; color:var(--yazi-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sg-olcu__deger{ margin-top:var(--a4); font-size:var(--yz-h2); font-weight:650; line-height:1.15; letter-spacing:-.015em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.sg-olcu__ayrinti{ margin-top:var(--a1); font-size:var(--yz-k); color:var(--soluk); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.sg-olcu__alt{ display:flex; align-items:center; justify-content:space-between; gap:var(--a2); margin-top:auto; padding-top:var(--a3); }
+.sg-olcu__etiket{ font-size:var(--yz-k); color:var(--soluk); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.sg-olcu__eylem{ display:inline-flex; align-items:center; gap:var(--a1); flex:none; min-height:32px; padding:0 var(--a3); border-radius:var(--kose-tam); font-size:var(--yz-k); font-weight:600;
+  color:var(--yazi-2); background:var(--yuzey-2); transition:background var(--sure) ease, color var(--sure) ease; }
+.sg-olcu__eylem svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.sg-olcu__kutu:hover .sg-olcu__eylem{ color:var(--yazi); }
+/* kayıtsız kutu: sönük ton, gölge yok; değer yerine «—» */
+.sg-olcu__kutu--bos{ background:color-mix(in srgb, var(--yuzey) 50%, transparent); box-shadow:none; }
+.sg-olcu__kutu--bos .sg-olcu__deger{ color:var(--soluk); font-weight:500; }
+.sg-olcu__kutu--bos:hover{ background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+/* tek ana eylem: ilk kayıtsız kutunun «Kaydet»i ana düğme renginde */
+.sg-olcu__kutu--ana .sg-olcu__eylem, .sg-olcu__kutu--ana:hover .sg-olcu__eylem{ color:var(--dugme-ana-yazi); background:var(--dugme-ana); }
+:root[data-hareket="az"] .sg-olcu__kutu:hover{ transform:none; }
+
+@media (max-width:640px){
+  .sg-olcu{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--a2); }
+  .sg-olcu__kutu{ min-height:152px; padding:var(--a3) var(--a3) var(--a3) var(--a4); }
+  .sg-olcu__deger{ margin-top:var(--a3); font-size:var(--yz-h3); }
+  .sg-olcu__etiket{ display:none; } /* dar kutuda kesinlik etiketi ekran okuyucu adında kalır */
+}
+
+/* ---------- yüksek kontrast: ayrım yalnız tona bırakılmaz ---------- */
+:root[data-kontrast="yuksek"] :is(.nothizli, .sg-olcu__kutu, .notlar__ara .b-alan__giris, .notsatir__cip, .sg-olcu__eylem):not(:focus-visible){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; }
+:root[data-kontrast="yuksek"] .nothizli textarea{ outline:0; }
+:root[data-kontrast="yuksek"] .sg-olcu__kutu--bos{ background:var(--yuzey); }
