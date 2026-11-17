@@ -11198,7 +11198,54 @@
       "• Yabancı kökenli sözcüklerde ünlü uyumu aramak.",
       "• Kaynaştırma ünsüzünü (y, ş, s, n) ünsüz türemesi sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.2.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki sözcüklerin hangisinde ünlü düşmesi vardır?",
+       "sec": [
+        "kitapçı",
+        "ağzı",
+        "suyu",
+        "hakkı",
+        "gideceğim"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Ünlü düşmesi: ikinci hecesinde dar ünlü bulunan sözcük ünlüyle başlayan ek alınca o ünlü düşer.",
+        "ağız + ı → ağzı: ikinci hecedeki «ı» düşmüştür.",
+        "A’da sertleşme (kitap + cı), C’de kaynaştırma ünsüzü (su + y + u), D’de ünsüz türemesi (hak → hakkı), E’de yumuşama vardır. D’yi seçen, sözcükteki değişikliği görüp türünü ayırmamıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21"
+       ]
+      },
+      {
+       "id": "akademik.1.3.2.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki sözcüklerin hangisinde ünsüz yumuşaması iki kez görülür?",
+       "sec": [
+        "kitabı",
+        "yapacağım",
+        "ağacı",
+        "dergiye",
+        "gideceğim"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Her eki ayrı ayrı ekle ve her birleşmede sesin değişip değişmediğine bak.",
+        "git + ecek + im → gideceğim: «t → d» (git- → gid-) ve «k → ğ» (-cek → -ceğ): iki yumuşama.",
+        "A ve C’de yalnız sözcük sonundaki ünsüz, B’de yalnız -acak ekinin «k»sı yumuşar. D’deki «y» kaynaştırma ünsüzüdür; onu ses olayı sanıp sayan yanılır. B en güçlü çeldiricidir: «yap-» kökü değişmez."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.3",
@@ -11357,7 +11404,54 @@
       "• Belirli bir tarih bildirmeyen gün ve ay adlarını büyük harfle başlatmak: «salı günü», ama «29 Ekim 1923 Pazartesi».",
       "• Yapım eki alan özel adı kesmeyle ayırmak: «Ankara’lı» değil, «Ankaralı»."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.4.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde yazım yanlışı vardır?",
+       "sec": [
+        "Hiçbir şey söylemeden çıktı.",
+        "Birkaç gün sonra döneceğim.",
+        "Herşeyi zamanında yapmalısın.",
+        "TBMM’ye yeni bir yasa önerisi sunuldu.",
+        "Toplantı salı günü yapılacak."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Sınavın en sık sorulan birleşik sözcük tuzağı: «hiçbir» ve «birkaç» bitişik, «her şey» ve «bir şey» ayrı yazılır.",
+        "C’de «Herşeyi» yanlıştır; doğrusu «Her şeyi».",
+        "D’de ek kısaltmanın okunuşuna (te-be-me-me) uyar. E’de belirli bir tarih yoktur; «salı» küçük harfle doğrudur. E’yi seçen, gün adlarının her zaman büyük harfle başladığını sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k23"
+       ]
+      },
+      {
+       "id": "akademik.1.3.4.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki kısaltmaların hangisine getirilen ek yanlış yazılmıştır?",
+       "sec": [
+        "TBMM’ye",
+        "cm’yi",
+        "kg’dan",
+        "TDK’nın",
+        "THY’ye"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Büyük harfli kısaltmalara ek, kısaltmanın okunuşuna göre gelir; ölçü kısaltmalarına ise açılımına göre.",
+        "TDK «te-de-ke» diye okunur; son hece «ke» ince ünlülüdür: doğrusu «TDK’nin». Yanlış olan D’dir.",
+        "B ve C açılıma göre doğrudur (santimetreyi, kilogramdan). A (me) ve E (ye) okunuşa uyar. B’yi seçen, ölçü kısaltmalarına da okunuş kuralını uygulamıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k23"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.5",
@@ -11511,7 +11605,54 @@
       "• Özneden sonra virgülü unutmak; sıfat–isim karışıklığına yol açmak.",
       "• İçinde soru sözcüğü bulunan ama soru sormayan cümleye soru işareti koymak: «Ne zaman geleceğini bilmiyorum.»"
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.6.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde virgül, öznenin kendinden sonraki sözcüğün sıfatı sanılmasını önlemek için kullanılmıştır?",
+       "sec": [
+        "Yaşlı, adamı uzun uzun süzdü.",
+        "Pazardan elma, armut, ayva aldık.",
+        "Evet, yarın erkenden geleceğim.",
+        "Akşam oldu, sokak lambaları yandı.",
+        "Ali, buraya biraz gelir misin?"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Virgülü kaldır ve anlamın değişip değişmediğine bak.",
+        "«Yaşlı adamı süzdü» denirse «yaşlı» sıfat olur ve süzen belirsizleşir; virgül, süzenin «yaşlı» olduğunu gösterir: A.",
+        "B’de eş görevli sözcükleri, C’de cevap sözünü, D’de sıralı cümleleri, E’de hitabı ayırır. D’yi seçen, cümle başındaki her virgülü özne virgülü sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k25"
+       ]
+      },
+      {
+       "id": "akademik.1.3.6.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinin sonuna soru işareti konmaz?",
+       "sec": [
+        "Bu kitabı kim yazdı",
+        "Yarın bize gelir misin",
+        "Ne zaman döneceğini kimse bilmiyor",
+        "Sınav saat kaçta başlayacak",
+        "Hangi yoldan gittiniz"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Soru işareti için cümlede soru sözcüğü bulunması yetmez; cümlenin bir soru sorması gerekir.",
+        "C’de «ne zaman» vardır ama cümle bir bilgisizliği bildirir, soru sormaz: sonuna nokta konur.",
+        "A, B, D ve E gerçekten cevap bekler. «Ne zaman» sözcüğünü görüp C’yi soru sanmak en sık yapılan hatadır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k25"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.7",
@@ -11669,7 +11810,54 @@
       "• Fiil kökünü isim kökü sanmak: «yazı»nın kökü yaz- fiilidir.",
       "• Kök ile gövdeyi karıştırmak: gövde, yapım eki almış hâldir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.8.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki sözcüklerden hangisi yapıca türemiştir?",
+       "sec": [
+        "evlerimizden",
+        "kitaplar",
+        "masada",
+        "yolumuzu",
+        "gözlük"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Sözcüğü kökünden başlayarak eklerine ayır; yapım eki varsa türemiş, yalnız çekim eki varsa basittir.",
+        "göz + -lük (isimden isim yapım eki) → gözlük: türemiş.",
+        "A, B, C ve D’deki ekler (-ler, -imiz, -den, -da, -umuz, -u) çekim ekidir; sözcüğün anlamını değiştirmez. A’yı seçen, ek sayısının çokluğunu türemişlik sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k27"
+       ]
+      },
+      {
+       "id": "akademik.1.3.8.a2",
+       "tur": "secmeli",
+       "soru": "«gözlem» sözcüğünün oluşumu aşağıdakilerin hangisinde doğru verilmiştir?",
+       "sec": [
+        "göz (isim) + -lem (isimden isim yapım eki)",
+        "göz (isim) + -le (isimden fiil yapım eki) + -m (fiilden isim yapım eki)",
+        "gözle- (kök) + -m (çekim eki)",
+        "göz (isim) + -lem (isimden fiil yapım eki)",
+        "göz (isim) + -le (fiilden fiil yapım eki) + -m (isimden isim yapım eki)"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Önce gövdeyi bul: göz + -le → gözle- (bir eylem olmuştur: isimden fiil).",
+        "Sonra gözle- + -m → gözlem (yeniden isim olmuştur: fiilden isim). Doğru: B.",
+        "A ve D iki eki tek ek sanır. C kökü yanlış alır: «gözle-» kök değil gövdedir. E’de ek türleri ters yazılmıştır; kökün türünden (isim) başlamayan yanılır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k27"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.9",
@@ -11834,7 +12022,54 @@
       "• Sıfat tamlamasını isim tamlaması sanmak: «kırmızı elma» sıfat tamlaması, «elma ağacı» isim tamlamasıdır.",
       "• İyelik eki almış ismi zamir sanmak: «kitabım»da zamir yoktur, iyelik eki vardır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.10.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde cümlenin ilk sözcüğü zamir olarak kullanılmıştır?",
+       "sec": [
+        "Bazıları sınavı erken bitirdi.",
+        "Bazı günler erken kalkarım.",
+        "Birkaç kitap aldım.",
+        "Hangi kalemi istiyorsun?",
+        "Bu ev çok eski."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Sınama: sözcük bir ismin önünde onu belirtiyorsa sıfat, tek başına ismin yerini tutuyorsa zamirdir.",
+        "A’da «bazıları» kimlerin bitirdiğini söyleyen ismin yerini tutar: belgisiz zamir.",
+        "B (günler), C (kitap), D (kalemi) ve E’de (ev) sözcük bir ismi belirtir: sıfat. B’yi seçen, «bazı»nın sözlükteki türüne bakmıştır; tür cümledeki göreve göre belirlenir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k29"
+       ]
+      },
+      {
+       "id": "akademik.1.3.10.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerin hangisinde zincirleme isim tamlaması vardır?",
+       "sec": [
+        "kırmızı elma",
+        "elma ağacı",
+        "evin kapısı",
+        "okulun bahçe kapısı",
+        "eski bir ev"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Zincirleme tamlama: bir isim tamlamasının yeniden bir isimle tamlanmasıdır.",
+        "«bahçe kapısı» belirtisiz isim tamlamasıdır; «okulun» bu tamlamanın tamlayanı olur: zincirleme (D).",
+        "A ve E sıfat tamlaması, B belirtisiz, C belirtili isim tamlamasıdır. C’yi seçen, ilgi eki (-in) görünce zincirleme sanmıştır; ilgi eki tek başına yetmez."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k29"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.11",
@@ -11990,7 +12225,54 @@
       "• Bağlaç olan «de»yi hâl ekiyle karıştırmak: «sen de» bağlaç, «evde» hâl ekidir.",
       "• «gibi, kadar» edatlarını sıfat sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.12.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde «ancak» sözcüğü edat olarak kullanılmıştır?",
+       "sec": [
+        "Çok çalıştı ancak kazanamadı.",
+        "Bu soruyu ancak sen çözebilirsin.",
+        "Gelmek istedi ancak hastalandı.",
+        "Yağmur yağdı ancak hava serinlemedi.",
+        "Biletini almıştı ancak trene yetişemedi."
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Sınama: «ancak» yerine «yalnız, sadece» koy; anlam bozulmuyorsa edattır. «ama» koyabiliyorsan bağlaçtır.",
+        "B’de «ancak sen» = «yalnız sen»: edat.",
+        "A, C, D ve E’de «ancak» iki cümleyi karşıtlık ilişkisiyle bağlar: bağlaç. Bu seçeneklerden birini seçen, sözcüğün yerine değil görevine bakılması gerektiğini atlamıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k31"
+       ]
+      },
+      {
+       "id": "akademik.1.3.12.a2",
+       "tur": "secmeli",
+       "soru": "«Çok güzel konuştu.» cümlesindeki «güzel» sözcüğüyle aynı türde bir sözcük aşağıdakilerin hangisinde vardır?",
+       "sec": [
+        "Güzel bir ev aldılar.",
+        "Hızlı tren istasyona girdi.",
+        "Sen de bizimle gel.",
+        "Senin gibi biri yok.",
+        "Çocuk yavaş yürüdü."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "«güzel» burada fiili niteler (nasıl konuştu?): durum zarfı.",
+        "E’de «yavaş», «yürüdü» fiilini niteler (nasıl yürüdü?): durum zarfı.",
+        "A ve B’de sözcükler ismi niteler (ev, tren): sıfat; A’yı seçen, aynı sözcüğün her yerde aynı türde olduğunu sanmıştır. C’de «de» bağlaç, D’de «gibi» edattır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k31"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.13",
@@ -12144,7 +12426,54 @@
       "• Bir kip ekini görünce anlamı denetlememek: «Yarın gidiyoruz.»da şimdiki zaman gelecek anlamı taşır.",
       "• Yardımcı fiille kurulan birleşik fiili iki ayrı sözcük gibi çözümlemek."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.14.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde kipte anlam kayması vardır?",
+       "sec": [
+        "Şu an kitap okuyorum.",
+        "Dün akşam sinemaya gittik.",
+        "Yarın sınava giriyorum.",
+        "Haftaya tatile çıkacağız.",
+        "Bahçede çocuklar oynuyor."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Fiilin ekinin bildirdiği zamanla cümlenin gerçek zamanını karşılaştır.",
+        "C’de fiil şimdiki zaman ekini (-yor) almıştır ama «yarın» eylemin gelecekte olacağını gösterir: anlam kayması.",
+        "A ve E’de -yor gerçekten şimdiyi, B’de -di geçmişi, D’de -acak geleceği bildirir. A’yı seçen, yalnız eke bakıp zaman sözcüğünü denetlememiştir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k33"
+       ]
+      },
+      {
+       "id": "akademik.1.3.14.a2",
+       "tur": "secmeli",
+       "soru": "«okumuştum» fiilinin çekimi aşağıdakilerin hangisinde doğru verilmiştir?",
+       "sec": [
+        "Öğrenilen geçmiş zamanın hikâyesi, 1. tekil kişi",
+        "Görülen geçmiş zamanın rivayeti, 1. tekil kişi",
+        "Öğrenilen geçmiş zamanın rivayeti, 3. tekil kişi",
+        "Şimdiki zamanın hikâyesi, 1. tekil kişi",
+        "Geniş zamanın hikâyesi, 1. çoğul kişi"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Ekleri sırayla ayır: oku- + -muş + -tu + -m.",
+        "-muş kip ekidir (öğrenilen geçmiş), -tu ek fiilin hikâyesidir (-di), -m 1. tekil kişidir: A.",
+        "B kip ekiyle ek fiili ters okur: -muş’u rivayet, -tu’yu kip sanmıştır. C kişi ekini atlar. D ve E’de sözcükte bulunmayan ekler vardır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k33"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.15",
@@ -12298,7 +12627,54 @@
       "• -mak ile biten her sözcüğü isim-fiil saymak: «çakmak, kaymak» kalıcı isimdir.",
       "• Sıfat-fiilin adlaşmış kullanımını gözden kaçırmak: «Gelenler oturdu.»daki «gelenler» de sıfat-fiildir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.16.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde sıfat-fiil vardır?",
+       "sec": [
+        "Gülerek içeri girdi.",
+        "Kitap okumak ona huzur verir.",
+        "Eve gelince beni ara.",
+        "Koşan çocuk birden düştü.",
+        "Akşam dondurma yedik."
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Sıfat-fiil bir ismi niteler ve -an, -ası, -mez, -ar, -dik, -ecek, -miş eklerinden birini alır.",
+        "D’de «koşan», «çocuk»u niteler: sıfat-fiil.",
+        "A’da «gülerek» ve C’de «gelince» zarf-fiil, B’de «okumak» isim-fiildir. E’de «dondurma» kalıcı isimdir, fiilimsi değildir; E’yi seçen, -ma ekini her yerde isim-fiil sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k35"
+       ]
+      },
+      {
+       "id": "akademik.1.3.16.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde fiilimsi yoktur?",
+       "sec": [
+        "Çakmağı masada unutmuş.",
+        "Yüzmek sağlığa yararlıdır.",
+        "Gelenler salona oturdu.",
+        "Koşarak otobüse yetişti.",
+        "Okunacak kitapları ayırdı."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Fiilimsi, eylem anlamını koruyarak isim, sıfat ya da zarf görevi üstlenen sözcüktür; kip ve kişi eki almaz.",
+        "A’da «çakmak» bir nesnenin adı olmuş kalıcı isimdir; «unutmuş» çekimli fiildir. Fiilimsi yoktur.",
+        "B’de isim-fiil (yüzmek), C’de adlaşmış sıfat-fiil (gelenler), D’de zarf-fiil (koşarak), E’de sıfat-fiil (okunacak) vardır. C’yi seçen, adlaşmış sıfat-fiili gözden kaçırmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k35"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.17",
@@ -12447,7 +12823,54 @@
       "• Oldurgan ile ettirgeni karıştırmak: oldurgan geçişsiz fiilden, ettirgen geçişli fiilden türer.",
       "• Özne cümlede yazılı değilse (gizli özne) fiili edilgen sanmak: «Okula gittik.» etkendir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.18.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde yüklem dönüşlü çatıdadır?",
+       "sec": [
+        "Çocuk aynanın karşısında taranıyor.",
+        "Kapı rüzgârla açıldı.",
+        "Mektuplar dün gönderildi.",
+        "Arkadaşlar yarın görüşecek.",
+        "Annesi onu çok güldürdü."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Dönüşlü çatıda işi yapan ile işten etkilenen aynı varlıktır: «kendini … -mak».",
+        "A’da çocuk kendini tarar: dönüşlü.",
+        "B ve C’de -n/-l eki edilgenlik yapar; kapı ve mektuplar işi kendileri yapmaz (sözde özne). B’yi seçen, -n ekini gören her fiili dönüşlü saymıştır. D işteş, E oldurgandır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k37"
+       ]
+      },
+      {
+       "id": "akademik.1.3.18.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde yüklem oldurgan çatıdadır?",
+       "sec": [
+        "Çocuğa yemeğini yedirdi.",
+        "Mektubunu bir arkadaşına yazdırdı.",
+        "Kitabı iki günde okudu.",
+        "Bahçede saatlerce koştu.",
+        "Palyaço çocukları güldürdü."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Oldurgan: geçişsiz bir fiilin ettirgenlik ekiyle geçişli olmasıdır; ettirgen ise zaten geçişli olan fiilden türer.",
+        "gül- geçişsizdir (neyi gülmek? denmez); güldür- geçişlidir: oldurgan (E).",
+        "A (ye- → yedir-) ve B (yaz- → yazdır-) geçişli fiilden türediği için ettirgendir; A’yı seçen, oldurgan ile ettirgeni karıştırmıştır. C geçişli, D geçişsiz yalın fiildir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k37"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.19",
@@ -12599,7 +13022,54 @@
       "• -den eki alan her öbeği dolaylı tümleç saymak: «Akşamdan beri bekliyor.»da «akşamdan beri» zarf tümlecidir.",
       "• Belirtisiz nesneyi özneyle karıştırmak: «Yemek yedi.»de «yemek» özne değil, belirtisiz nesnedir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.20.a1",
+       "tur": "secmeli",
+       "soru": "«Erkenden kalkan dedem, bahçedeki ağaçları her sabah sular.» cümlesinin ögelerinin dizilişi aşağıdakilerin hangisinde doğru verilmiştir?",
+       "sec": [
+        "Zarf tümleci – özne – belirtili nesne – zarf tümleci – yüklem",
+        "Özne – dolaylı tümleç – zarf tümleci – yüklem",
+        "Özne – belirtisiz nesne – zarf tümleci – yüklem",
+        "Özne – belirtili nesne – zarf tümleci – yüklem",
+        "Özne – belirtili nesne – yüklem"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Önce yüklemi bul: sular. Kim sular? «Erkenden kalkan dedem» (sıfat-fiil grubu, bölünmez): özne.",
+        "Neyi sular? «bahçedeki ağaçları» (-ı eki): belirtili nesne. Ne zaman? «her sabah»: zarf tümleci. Diziliş D’dir.",
+        "A özne grubunu böler («erkenden»i ayrı alır). B, «bahçedeki»nin -de ekine bakıp dolaylı tümleç sanır; -ki ile sıfat olmuş ve nesnenin parçasıdır. E «her sabah»ı atlar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k39"
+       ]
+      },
+      {
+       "id": "akademik.1.3.20.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde belirtisiz nesne vardır?",
+       "sec": [
+        "Kitabı masaya bıraktı.",
+        "Annem akşam yemek yaptı.",
+        "Çocuklar bahçede oynuyor.",
+        "Mektubu postaya verdi.",
+        "Okula erkenden geldi."
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Nesne yüklemdeki işten etkilenen ögedir; «ne?» sorusunun cevabıysa belirtisiz, «neyi?» sorusunun cevabıysa belirtilidir.",
+        "B’de «ne yaptı?» → «yemek»: belirtisiz nesne.",
+        "A ve D’de nesne -ı ekiyle belirtilidir. C ve E’de yüklem geçişsizdir; nesne yoktur. B’de «yemek»i özne sanan yanılır: yapan «annem»dir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k39"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.21",
@@ -12753,7 +13223,54 @@
       "• «ve» ile bağlanan her cümleyi bağlı saymak: «ve» yalnız sözcükleri bağlıyorsa cümle bağlı olmaz.",
       "• Soru eki taşıyan her cümleyi soru cümlesi saymak: «Eve geldi mi hemen yatar.» soru değildir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.22.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisi biçimce olumsuz, anlamca olumludur?",
+       "sec": [
+        "Sınavı ilk denemede kazandı.",
+        "Bu filmi henüz izlemedim.",
+        "Yarın okula gelmeyecek.",
+        "Akşama kadar hiç kimse aramadı.",
+        "Onu sevmemiş değilim."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Önce biçime bak (olumsuzluk eki ya da «değil» var mı?), sonra cümlenin söylediği yargıya.",
+        "E’de «sevmemiş» ve «değilim» iki olumsuzluktur; birbirini götürür: «seviyorum» anlamı. Biçimce olumsuz, anlamca olumlu.",
+        "B, C ve D hem biçimce hem anlamca olumsuzdur; D’deki «hiç kimse» olumsuzluğu güçlendirir, çevirmez. A biçimce de olumludur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k41"
+       ]
+      },
+      {
+       "id": "akademik.1.3.22.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerden hangisi yapısına göre birleşik cümledir?",
+       "sec": [
+        "Hava soğudu, kar yağdı.",
+        "Ders bitti ve öğrenciler çıktı.",
+        "Eve geldiğimde herkes uyuyordu.",
+        "Çocuklar bahçede top oynadı.",
+        "Ali kitap okudu, Ayşe resim yaptı."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Birleşik cümle, temel cümleye bağlı bir yan cümle (çoğunlukla fiilimsi grubu) taşır.",
+        "C’de «Eve geldiğimde» (-dik sıfat-fiili + -de) yüklemin zamanını bildiren yan cümledir: birleşik.",
+        "B «ve» ile bağlı, E virgülle sıralı cümledir; yan cümle yoktur. D basittir. A da virgülle ayrılmış iki bağımsız yargıdır: sıralı cümle. A’yı seçen, birden çok yargıyı birleşiklik sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k41"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.3.23",
@@ -12928,7 +13445,54 @@
       "• Ortak kullanılan ögenin her yükleme uyup uymadığını denetlememek.",
       "• Devrik cümleyi anlatım bozukluğu saymak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.3.24.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde gereksiz sözcük kullanımından doğan bir anlatım bozukluğu vardır?",
+       "sec": [
+        "Toplantıya elli kişi katıldı.",
+        "Sınavdan sonra arkadaşlarıyla buluştu.",
+        "Kitabı bir haftada bitirdi.",
+        "Toplantıya yaklaşık elli kişi kadar katıldı.",
+        "Her sabah parkta yürüyüş yapıyor."
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Aynı anlamı taşıyan iki sözü bul: biri atılınca anlam değişmiyorsa öteki gereksizdir.",
+        "D’de «yaklaşık» ve «kadar» ikisi de yaklaşıklık bildirir; biri fazladır.",
+        "A, D’nin düzeltilmiş biçimidir. B, C ve E’de her sözcük anlama katkı yapar. Uzun cümleyi bozuk sanıp E’yi seçen, uzunluğun bozukluk olmadığını unutmuştur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k43"
+       ]
+      },
+      {
+       "id": "akademik.1.3.24.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki cümlelerin hangisinde ortak kullanılan ögenin uyumsuzluğundan doğan bir anlatım bozukluğu vardır?",
+       "sec": [
+        "Hem okulda hem evde düzenli çalışıyor.",
+        "Ders bitince herkes evine döndü.",
+        "Ben ona, o da bana çok kızıyor.",
+        "Ali ile Veli dün sinemaya gittiler.",
+        "Sınavı kazanmak için çok çalıştı."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Ortak yüklemi her özneyle ayrı ayrı oku.",
+        "C’de «o kızıyor» doğrudur ama «ben kızıyor» olmaz: birinci cümlenin yüklemi eksiktir. Doğrusu: «Ben ona kızıyorum, o da bana kızıyor.»",
+        "A’da «çalışıyor» iki tümlece de uyar; D’de çoğul yüklem iki özneyle uyumludur. D’yi seçen, «gittiler»deki çoğulu fazlalık sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k43"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -17761,7 +18325,7 @@
      {
       "id": "akademik.1.6.k23",
       "tur": "secmeli",
-      "soru": "Tabloda üç şekerli su karışımının kütleleri ve şeker oranları verilmiştir. Bu üç karışım birleştirilirse yeni karışımın şeker oranı yüzde kaç olur?\nTablo — undefined: Karışım | Kütle (g) | Şeker oranı ; I | 100 | %10 ; II | 200 | %25 ; III | 100 | %40",
+      "soru": "Tabloda üç şekerli su karışımının kütleleri ve şeker oranları verilmiştir. Bu üç karışım birleştirilirse yeni karışımın şeker oranı yüzde kaç olur?\nTablo — Şekerli su karışımları: Karışım | Kütle (g) | Şeker oranı ; I | 100 | %10 ; II | 200 | %25 ; III | 100 | %40",
       "sec": [
        "20",
        "22,5",
@@ -20863,7 +21427,7 @@
      {
       "id": "akademik.1.7.k38",
       "tur": "secmeli",
-      "soru": "Tabloda bir sınıftaki öğrencilerin bir ayda okudukları kitap sayıları verilmiştir. Öğrenci başına okunan kitap sayısının aritmetik ortalaması kaçtır?\nTablo — undefined: Okunan kitap | Öğrenci sayısı ; 1 | 4 ; 2 | 6 ; 3 | 7 ; 4 | 3",
+      "soru": "Tabloda bir sınıftaki öğrencilerin bir ayda okudukları kitap sayıları verilmiştir. Öğrenci başına okunan kitap sayısının aritmetik ortalaması kaçtır?\nTablo — Bir ayda okunan kitaplar: Okunan kitap | Öğrenci sayısı ; 1 | 4 ; 2 | 6 ; 3 | 7 ; 4 | 3",
       "sec": [
        "2,25",
        "2,35",
@@ -35449,8 +36013,7 @@
       ],
       "dogru": "C",
       "cozum": [
-       "Büyük ölçek, uzunlukların haritada daha büyük gösterilmesidir; aynı kâğıt boyutunda daha küçük bir alan daha ayrıntılı gösterilebilir.",
-       "Bu soru projeksiyona bağlı bozulmayı bir ölçek özelliği olarak kullanmaz."
+       "Büyük ölçek, uzunlukların haritada daha büyük gösterilmesidir; aynı kâğıt boyutunda daha küçük bir alan daha ayrıntılı gösterilebilir."
       ],
       "ipucu": "Paydası küçük ölçek: dar alan, çok ayrıntı.",
       "seviye": "orta",
@@ -36620,7 +37183,54 @@
       "• Hidrosferi yalnız denizler sanmak; akarsular, göller, yer altı suları ve buzullar da hidrosferdir.",
       "• Biyosferi yalnız bitkiler sanmak; bütün canlılar biyosferdir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.2.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi doğal ortamın insan yaşamını etkilemesine örnektir?",
+       "sec": [
+        "Akarsu üzerine baraj yapılması",
+        "Bataklıkların kurutulup tarıma açılması",
+        "Karadeniz kıyılarında evlerin çatılarının dik yapılması",
+        "Ormanların kesilerek tarla açılması",
+        "Dağlara tünel açılarak yol yapılması"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Etkileyen tarafı bul: değişikliği doğa mı zorunlu kılıyor, yoksa insan doğayı mı değiştiriyor?",
+        "C’de bol yağış ve kar, çatıların dik yapılmasını gerektirir: insan doğaya uyum sağlar, etkileyen doğadır.",
+        "A, B, D ve E’de insan doğal ortamı değiştirir. Bu seçeneklerden birini seçen, «doğa–insan etkileşimi» sözünü görüp yönü denetlememiştir; dersin sık hatası bunun tersidir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k177"
+       ]
+      },
+      {
+       "id": "akademik.1.13.2.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi coğrafyanın beşerî ve ekonomik bölümünün inceleme alanına girer?",
+       "sec": [
+        "Akarsuların rejimi",
+        "Toprak türlerinin dağılışı",
+        "Rüzgârların oluşumu",
+        "Bitki örtüsünün dağılışı",
+        "Göç ve kentleşme"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Fiziki coğrafya doğal unsurları (yer şekli, iklim, su, toprak, bitki), beşerî coğrafya insanı ve etkinliklerini inceler.",
+        "Göç ve kentleşme insanın yer değiştirmesi ve yerleşmesidir: beşerî coğrafya (E).",
+        "A, B, C ve D doğal unsurlardır. D’yi seçen, bitki örtüsünün insanla ilgisini (tarım) düşünüp onu beşerî saymıştır; bitki örtüsü doğal bir unsurdur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k177"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.3",
@@ -36780,7 +37390,54 @@
       "• Alan hesabında ölçek oranının karesini almayı unutmak.",
       "• cm–km dönüşümünde sıfır kaydırmak: 1 km = 100 000 cm."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.4.a1",
+       "tur": "secmeli",
+       "soru": "1/250 000 ölçekli bir haritada 4 cm² olan bir alan gerçekte kaç km²’dir?",
+       "sec": [
+        "6,25",
+        "10",
+        "20",
+        "25",
+        "2500"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Önce uzunluk: haritada 1 cm, gerçekte 250 000 cm = 2,5 km’dir (1 km = 100 000 cm).",
+        "Alan oranı uzunluk oranının karesidir: 1 cm² → 2,5 · 2,5 = 6,25 km². 4 cm² → 4 · 6,25 = 25 km².",
+        "10 km², kare almadan 4 · 2,5 yapılınca; 20 km², kare yerine iki kenarı toplayınca (2,5 + 2,5 = 5, 4 · 5); 6,25 km², 4 ile çarpmayı unutunca; 2500 km², cm’yi km’ye çevirirken 100 000 yerine 10 000’e bölünce çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k179"
+       ]
+      },
+      {
+       "id": "akademik.1.13.4.a2",
+       "tur": "secmeli",
+       "soru": "1/25 000 ölçekli bir eş yükselti haritasında 250 m eğrisi üzerindeki A noktası ile 450 m eğrisi üzerindeki B noktası arasındaki uzaklık 8 cm’dir. A ile B arasındaki ortalama eğim yüzde kaçtır?",
+       "sec": [
+        "%0,1",
+        "%10",
+        "%12,5",
+        "%22,5",
+        "%100"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Yükselti farkı: 450 − 250 = 200 m. Gerçek yatay uzaklık: 8 · 25 000 = 200 000 cm = 2000 m.",
+        "Eğim = yükselti farkı / yatay uzaklık · 100 = 200 / 2000 · 100 = %10.",
+        "%0,1, 200 000’i cm’den metreye çevirmeyince; %100, uzaklığı km (2) alıp yükseltiyi m bırakınca; %22,5, fark yerine B’nin yükseltisini (450) kullanınca; %12,5, A’nın yükseltisini (250) kullanınca çıkar. Birimler aynı olmalıdır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k179"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.5",
@@ -36936,7 +37593,54 @@
       "• Bakı etkisini karıştırmak: Kuzey Yarım Küre’de güneye bakan yamaçlar daha sıcaktır.",
       "• Yerel saat farkını ulusal saatle karıştırmak: Türkiye’nin her yerinde ulusal saat aynıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.6.a1",
+       "tur": "secmeli",
+       "soru": "30° doğu boylamındaki A kentinde yerel saat 10.00 iken 45° doğu boylamındaki B kentinde yerel saat kaçtır?",
+       "sec": [
+        "07.00",
+        "09.00",
+        "10.15",
+        "11.00",
+        "13.00"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Boylam farkı: 45 − 30 = 15°. Her boylam 4 dakikalık fark yaratır: 15 · 4 = 60 dakika.",
+        "B doğudadır; Güneş doğudan doğduğu için doğudaki yerin saati ileridir: 10.00 + 1 saat = 11.00.",
+        "09.00, doğu–batı yönünü ters alınca; 10.15, boylam başına 1 dakika sayınca; 13.00, fark yerine B’nin boylamını (45 · 4 = 180 dk) ekleyince; 07.00 hem bunu hem yönü ters yapınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k181"
+       ]
+      },
+      {
+       "id": "akademik.1.13.6.a2",
+       "tur": "secmeli",
+       "soru": "Kuzey Yarım Küre’de Yengeç Dönencesi’nden Kuzey Kutbu’na doğru gidildikçe aşağıdakilerden hangisi azalır?",
+       "sec": [
+        "Dünya’nın günlük hareketine bağlı çizgisel hız",
+        "Öğle vakti cisimlerin gölge boyu",
+        "Yaz ile kış arasındaki gündüz süresi farkı",
+        "Ardışık iki meridyen arasındaki yerel saat farkı",
+        "Yıl içinde 24 saat gece yaşanan gün sayısı"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Dünya her noktada 24 saatte bir tur atar; kutuplara gidildikçe paraleller kısalır.",
+        "Aynı sürede daha kısa yol alındığı için çizgisel hız azalır; kutupta sıfırdır (A).",
+        "B ve C artar: ışınlar eğikleşir, gündüz süreleri arasındaki fark büyür. E kutup dairesinin ötesinde artar. D her enlemde 4 dakikadır; D’yi seçen, meridyenler arası uzaklığın azalmasını saat farkının azalması sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k181"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.7",
@@ -37090,7 +37794,54 @@
       "• Yerel saat farkını yıllık hareketin sonucu sanmak; günlük hareketin sonucudur.",
       "• Güney Yarım Küre’deki mevsimleri Kuzey’le aynı sanmak; mevsimler terstir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.8.a1",
+       "tur": "secmeli",
+       "soru": "21 Haziran tarihinde aşağıdakilerden hangisi yaşanır?",
+       "sec": [
+        "Güneş ışınları öğle vakti Oğlak Dönencesi’ne dik gelir.",
+        "Kuzey Yarım Küre’de yılın en uzun gecesi yaşanır.",
+        "Bütün dünyada gece ile gündüz eşit olur.",
+        "Türkiye’de öğle vakti gölge boyu yılın en uzun değerine ulaşır.",
+        "Güney Kutup Dairesi’nden Güney Kutbu’na kadar 24 saat gece yaşanır."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "21 Haziran’da ışınlar öğle vakti Yengeç Dönencesi’ne dik gelir; Kuzey Yarım Küre Güneş’e doğru eğiktir.",
+        "Güney Yarım Küre bu tarihte en uzun gecesini yaşar; Güney Kutup Dairesi’nin içinde Güneş hiç doğmaz (E).",
+        "A ve B 21 Aralık’a, C ekinokslara (21 Mart, 23 Eylül) aittir. D tersidir: Türkiye’de gölge boyu yılın en kısa değerindedir. B’yi seçen, yarım küreleri karıştırmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k183"
+       ]
+      },
+      {
+       "id": "akademik.1.13.8.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi Dünya’nın yıllık hareketinin ve eksen eğikliğinin sonucudur?",
+       "sec": [
+        "Gece ile gündüzün birbirini izlemesi",
+        "İki boylam arasında yerel saat farkı olması",
+        "Mevsimlerin oluşması",
+        "Rüzgârların ve okyanus akıntılarının sapması",
+        "Gün içinde sıcaklığın değişmesi"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Olayın günde bir mi, yılda bir mi tekrarlandığına bak.",
+        "Mevsimler yılda bir döngü tamamlar; eksen eğikliği yüzünden ışınların geliş açısı ve gündüz süresi yıl boyunca değişir: C.",
+        "A, B, D ve E günlük hareketin (kendi ekseni çevresinde dönme) sonuçlarıdır. B’yi seçen, dersin sık hatasını yapmıştır: yerel saat farkı yıllık değil günlük hareketten doğar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k183"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.9",
@@ -37245,7 +37996,54 @@
       "• Bağıl nem ile mutlak nemi karıştırmak.",
       "• Rüzgârın alçak basınçtan yüksek basınca estiğini sanmak; rüzgâr yüksek basınçtan alçak basınca eser."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.10.a1",
+       "tur": "secmeli",
+       "soru": "Mutlak nemi 10 g/m³ olan bir hava kütlesinin o sıcaklıktaki maksimum nemi 25 g/m³tür. Hava kütlesi ısınır ve maksimum nem 40 g/m³e çıkar; mutlak nem değişmez. Bağıl nem nasıl değişir?",
+       "sec": [
+        "Değişmez, %40’ta kalır.",
+        "%40’tan %25’e düşer.",
+        "%25’ten %40’a çıkar.",
+        "%40’tan %62,5’e çıkar.",
+        "%60’tan %75’e çıkar."
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Bağıl nem = mutlak nem / maksimum nem · 100.",
+        "Önce: 10 / 25 · 100 = %40. Sonra: 10 / 40 · 100 = %25. Isınan havanın taşıyabileceği nem arttığı için bağıl nem düşer (B).",
+        "A, mutlak nem sabit diye bağıl nemi de sabit sanır. C oranı ters kurar; D 25 / 40 yazar; E «eksik nem»i (100 − 40, 100 − 25) hesaplar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k185"
+       ]
+      },
+      {
+       "id": "akademik.1.13.10.a2",
+       "tur": "secmeli",
+       "soru": "Gece kıyı kesimlerinde esen yerel rüzgârla ilgili aşağıdakilerden hangisi doğrudur?",
+       "sec": [
+        "Karadan denize eser; gece kara denizden çabuk soğur ve karada yüksek basınç oluşur.",
+        "Denizden karaya eser; deniz gece karadan çabuk soğur.",
+        "Denizden karaya eser; gece karada yüksek basınç oluşur.",
+        "Karadan denize eser; gece karada alçak basınç oluşur.",
+        "Rüzgâr esmez; gece kara ile deniz arasında basınç farkı kalmaz."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Kara çabuk ısınır, çabuk soğur; su yavaş ısınır, yavaş soğur.",
+        "Gece kara daha soğuk olur: karada yüksek, denizde alçak basınç oluşur. Rüzgâr yüksek basınçtan alçak basınca, yani karadan denize eser: kara meltemi (A).",
+        "B ısınma–soğuma özelliğini ters alır. C basıncı doğru kurar ama rüzgârın yönünü alçaktan yükseğe sanır. D yönü doğru verir ama basıncı ters kurar. E basınç farkının gece de sürdüğünü unutur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k185"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.11",
@@ -37400,7 +38198,54 @@
       "• Travertenleri akarsu biriktirmesi sanmak; karstik biriktirme şeklidir.",
       "• Mermeri tortul kayaç sanmak; kalkerin başkalaşmasıyla oluşan başkalaşım kayacıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.12.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi karstik bir biriktirme şeklidir?",
+       "sec": [
+        "Traverten",
+        "Dolin",
+        "Delta",
+        "Peribacası",
+        "Lapya"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Karstik şekiller kalker gibi kolay çözünen kayaçlarda oluşur: su kayacı eritirse aşındırma, eriyik yeniden çökelirse biriktirme şekli doğar.",
+        "Traverten, kalsiyum bikarbonatlı suyun yüzeye çıkıp çökelmesiyle oluşan basamaklardır: karstik biriktirme (A; Pamukkale).",
+        "B ve E karstik aşındırma şeklidir. C akarsu biriktirme şeklidir; D yağmur ve sel sularının aşındırmasıyla oluşur. C’yi seçen, «biriktirme» sözcüğünü görüp dış kuvveti denetlememiştir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k187"
+       ]
+      },
+      {
+       "id": "akademik.1.13.12.a2",
+       "tur": "secmeli",
+       "soru": "Bir akarsuyun ağzında delta oluşması için aşağıdakilerden hangisi gerekli değildir?",
+       "sec": [
+        "Akarsuyun bol alüvyon taşıması",
+        "Kıyıda gel-git genliğinin az olması",
+        "Kıyının sığ olması",
+        "Kıyı akıntılarının alüvyonu dağıtamaması",
+        "Akarsuyun denize yakın kesimde yatak eğiminin fazla olması"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Delta, akarsuyun taşıdığı alüvyonun ağızda birikmesiyle oluşur; birikme için akarsuyun yavaşlaması gerekir.",
+        "Yatak eğimi fazla olsa akarsu hızlı akar ve yükünü bırakmaz; delta için ağza yakın kesimde eğim azdır. Gerekli olmayan E’dir.",
+        "A, B, C ve D deltanın koşullarıdır. B’yi seçen, gel-gitin alüvyonu açık denize taşıyarak deltayı engellediğini bilmiyordur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k187"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.13",
@@ -37550,7 +38395,54 @@
       "• Tarımsal yoğunlukta toplam nüfusu kullanmak; yalnız tarımla geçinen nüfus alınır.",
       "• Mevsimlik tarım işçiliğini kalıcı göç sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.14.a1",
+       "tur": "secmeli",
+       "soru": "Alanı 8000 km², tarım alanı 2000 km², nüfusu 600 000 ve tarımla geçinen nüfusu 200 000 olan bir ilin fizyolojik nüfus yoğunluğu kaç kişi/km²’dir?",
+       "sec": [
+        "25",
+        "75",
+        "100",
+        "300",
+        "3000"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Fizyolojik yoğunluk = toplam nüfus / tarım alanı.",
+        "600 000 / 2000 = 300 kişi/km² (D).",
+        "75 aritmetik yoğunluktur (600 000 / 8000); 100 tarımsal yoğunluktur (200 000 / 2000); 25, tarımla geçinen nüfusu toplam alana bölünce çıkar; 3000 bir sıfır kaydırmadır. En sık hata fizyolojik ile tarımsal yoğunluğu karıştırmaktır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k189"
+       ]
+      },
+      {
+       "id": "akademik.1.13.14.a2",
+       "tur": "secmeli",
+       "soru": "Tabanı geniş, yukarıya doğru hızla daralan üçgen biçimli bir nüfus piramidine sahip ülke için aşağıdakilerden hangisi söylenemez?",
+       "sec": [
+        "Doğum oranı yüksektir.",
+        "Genç nüfusun oranı fazladır.",
+        "Yaşlı nüfusun oranı yüksektir.",
+        "Ortalama yaşam süresi kısadır.",
+        "Nüfus artış hızı yüksektir."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Piramidin tabanı 0–4 yaş grubunu, tepesi yaşlıları gösterir.",
+        "Geniş taban yüksek doğum oranı ve genç nüfus, hızla daralan tepe kısa yaşam süresi ve az yaşlı demektir. Yaşlı oranının yüksek olduğu söylenemez (C).",
+        "A, B, D ve E bu piramitten çıkar. D’yi seçen, «daralan tepe»yi yaşam süresinin uzunluğu sanmıştır; tepe dar ise yaşlılığa ulaşan az kişi vardır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k189"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.15",
@@ -37711,7 +38603,54 @@
       "• Turizmi ve ulaşımı ikincil faaliyet sanmak; hizmet sektörüdür (üçüncül).",
       "• Her ürünün her bölgede yetişebileceğini sanmak; iklim istekleri ürünün dağılışını belirler."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.16.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi üçüncül (hizmet) ekonomik faaliyettir?",
+       "sec": [
+        "Madencilik",
+        "Şeker üretimi",
+        "Balıkçılık",
+        "Otomobil fabrikasında üretim",
+        "Turizm"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Birincil: doğadan doğrudan yararlanma; ikincil: hammaddeyi işleme (sanayi); üçüncül: hizmet.",
+        "Turizm bir mal üretmez, hizmet sunar: üçüncül (E).",
+        "A ve C birincil, B ve D ikincil faaliyettir. B’yi seçen, tarım ürünüyle (pancar) ilgili olduğu için şeker üretimini birincil sanmıştır; fabrikada işleme sanayidir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k191"
+       ]
+      },
+      {
+       "id": "akademik.1.13.16.a2",
+       "tur": "secmeli",
+       "soru": "Türkiye’de taşkömürünün en çok çıkarıldığı yer aşağıdakilerden hangisidir?",
+       "sec": [
+        "Afşin–Elbistan",
+        "Zonguldak",
+        "Divriği",
+        "Seydişehir",
+        "Murgul"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Türkiye’nin taşkömürü yatakları Batı Karadeniz’dedir: Zonguldak havzası (B).",
+        "A linyit (en büyük yatak), C demir, D boksit (alüminyum), E bakır yataklarıyla bilinir.",
+        "A en güçlü çeldiricidir: linyit de bir kömür türü olduğu için taşkömürüyle karıştırılır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k191"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.13.17",
@@ -37863,7 +38802,54 @@
       "• Heyelanı yalnız depremle ilişkilendirmek; eğim, yağış ve yanlış arazi kullanımı en önemli nedenlerdir.",
       "• Küresel ısınmayı ozon tabakasının incelmesiyle karıştırmak; biri sera gazlarıyla, öbürü ozonu incelten gazlarla ilgilidir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.13.18.a1",
+       "tur": "secmeli",
+       "soru": "Bir doğal olayın doğal afet sayılmasında belirleyici olan aşağıdakilerden hangisidir?",
+       "sec": [
+        "Can ve mal kaybına yol açıp toplumun baş etme gücünü aşması",
+        "Büyüklüğünün tek başına çok fazla olması",
+        "İç kuvvetlerden kaynaklanması",
+        "Çok kısa sürede gerçekleşmesi",
+        "Her yıl aynı mevsimde tekrarlanması"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Deprem, sel, heyelan birer doğal olaydır; afet olup olmadıkları insana etkisine bağlıdır.",
+        "Olay can ve mal kaybı doğurup toplumun kendi imkânlarıyla baş edemeyeceği bir zarara yol açarsa afettir (A).",
+        "B yanlıştır: ıssız bir alandaki büyük bir deprem afet sayılmaz. C, D ve E afetin ölçütü değildir; sel ve kuraklık iç kuvvetlerden doğmaz ama afet olabilir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k193"
+       ]
+      },
+      {
+       "id": "akademik.1.13.18.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi küresel ısınmanın doğrudan nedenidir?",
+       "sec": [
+        "Ozon tabakasının incelmesi",
+        "Asit yağmurları",
+        "Toprak erozyonu",
+        "Atmosferde karbon dioksit ve metan gibi sera gazlarının artması",
+        "Deprem sayısının artması"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Sera gazları yerden yayılan ısının bir kısmını tutar; miktarları artınca atmosfer ısınır.",
+        "Fosil yakıt ve ormansızlaşmayla artan CO₂ ve CH₄ küresel ısınmanın doğrudan nedenidir (D).",
+        "A dersin uyardığı karışıklıktır: ozon incelmesi ozonu bozan gazlarla (kloroflorokarbonlar) ilgilidir ve morötesi ışınlarla ilgili ayrı bir sorundur. B ve C ayrı çevre sorunlarıdır; E iç kuvvetlerle ilgilidir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k193"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -39154,7 +40140,54 @@
       "• Felsefenin dogmatik olduğunu sanmak; felsefe sorgulayıcıdır, dogma kabul etmez.",
       "• Her soruyu felsefi saymak; deney ya da ölçümle cevaplanabilen soru bilimseldir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.2.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki sorulardan hangisi felsefi bir sorudur?",
+       "sec": [
+        "Suyun deniz seviyesindeki kaynama noktası kaçtır?",
+        "İnsan özgür müdür?",
+        "Dünya’nın Güneş’e ortalama uzaklığı nedir?",
+        "Bir ülkenin nüfusu kaç kişidir?",
+        "Hangi gaz yanmayı sağlar?"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Sınama: soru deney, gözlem ya da ölçümle kesin olarak cevaplanabiliyorsa bilimseldir; akıl yürütmeyle tartışılıyor ve filozoflar farklı cevaplar veriyorsa felsefidir.",
+        "«İnsan özgür müdür?» sorusunun tek ve kesin bir cevabı yoktur; determinizm ile özgürlük görüşleri tartışmayı sürdürür: felsefi (B).",
+        "A, C, D ve E ölçüm ya da deneyle cevaplanır. Bu seçeneklerden birini seçen, «soru sormak»la «felsefi soru sormak»ı karıştırmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k195"
+       ]
+      },
+      {
+       "id": "akademik.1.14.2.a2",
+       "tur": "secmeli",
+       "soru": "Felsefenin «refleksif» (dönüşlü) bir etkinlik olması aşağıdakilerden hangisiyle açıklanır?",
+       "sec": [
+        "Kesin ve değişmez sonuçlara ulaşması",
+        "Deney ve gözleme dayanması",
+        "Kabul görmüş inançları sorgusuz benimsemesi",
+        "Düşüncenin kendi kavramlarını ve yöntemini de sorgulaması",
+        "Yalnızca doğa olaylarını incelemesi"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Refleksif, «kendine dönen» demektir: felsefe düşünce üzerine düşünür.",
+        "«Bilmek nedir?», «Doğru düşünmenin ölçütü nedir?» gibi sorularla felsefe kendi kavram ve yöntemini de sorgular (D).",
+        "A ve B bilimin özellikleridir; felsefede tartışma sürer. C dogmatizmdir, felsefe dogma kabul etmez. E felsefeyi doğa felsefesine indirger; Sokrates’ten beri insan ve ahlak da konusudur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k195"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.14.3",
@@ -39307,7 +40340,54 @@
       "• Kant’ı yalnız empirist ya da yalnız rasyonalist saymak; ikisini birleştiren kritisizmin kurucusudur.",
       "• Süje ile objeyi karıştırmak: süje bilen, obje bilinendir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.4.a1",
+       "tur": "secmeli",
+       "soru": "«Zihin doğuşta boş bir levhadır; bütün bilgilerimiz deneyden gelir.» görüşü aşağıdaki akımlardan hangisine aittir?",
+       "sec": [
+        "Rasyonalizm",
+        "Kritisizm",
+        "Sezgicilik",
+        "Pragmatizm",
+        "Empirizm"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Ayırt edici sözcükler: «boş levha» ve «deney». Bilginin kaynağını deneyde gören akım empirizmdir (Locke, Hume): E.",
+        "Rasyonalizm doğuştan ilkeleri ve aklı kaynak sayar; boş levha düşüncesinin tam karşıtıdır.",
+        "Kritisizmi (Kant) seçen, «bilgi deneyle başlar» sözünü hatırlamıştır; ama Kant bilginin aklın kategorileriyle düzenlendiğini de söyler, «bütün bilgi deneyden gelir» demez."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k197"
+       ]
+      },
+      {
+       "id": "akademik.1.14.4.a2",
+       "tur": "secmeli",
+       "soru": "Descartes’ın bilgi anlayışıyla ilgili aşağıdakilerden hangisi doğrudur?",
+       "sec": [
+        "Şüpheyi yöntem olarak kullanır ve akılla kesin bilgiye ulaşılabileceğini savunur.",
+        "Kesin bilginin imkânsız olduğunu savunan bir şüphecidir.",
+        "Bilginin tek kaynağının deney olduğunu savunur.",
+        "«İnsan her şeyin ölçüsüdür.» diyerek bilginin göreceli olduğunu savunur.",
+        "Bilginin deneyle başlayıp aklın kategorileriyle düzenlendiğini savunur."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Descartes her şeyden şüphe eder; ama şüphe ettiği sırada düşünen bir varlık olduğundan şüphe edemez: «Düşünüyorum, öyleyse varım.»",
+        "Bu, aklın ulaştığı ilk kesin bilgidir; Descartes rasyonalisttir (A).",
+        "B dersin sık hatasıdır: Descartes şüpheyi amaç değil yöntem olarak kullanır. C empirizm, D Protagoras (sofistler), E Kant’tır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k197"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.14.5",
@@ -39460,7 +40540,54 @@
       "• Herakleitos’un ateşini yalnız bir madde sanmak; ateş, değişimin ve oluşun simgesidir.",
       "• Nihilizmi yalnız ahlaki bir tutum sanmak; Gorgias varlık felsefesinde varlığın var olmadığını savunur."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.6.a1",
+       "tur": "secmeli",
+       "soru": "Varlığın ana maddesinin (arkhe) su olduğunu savunan filozof aşağıdakilerden hangisidir?",
+       "sec": [
+        "Anaksimenes",
+        "Herakleitos",
+        "Pythagoras",
+        "Demokritos",
+        "Thales"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "İlk filozoflar her şeyin kendisinden çıktığı ilk maddeyi (arkhe) aradı.",
+        "Thales arkheyi su olarak gördü (E).",
+        "Anaksimenes hava, Herakleitos ateş, Pythagoras sayı, Demokritos atom der. A’yı seçen, Miletli filozofları (Thales, Anaksimandros, Anaksimenes) birbirine karıştırmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k199"
+       ]
+      },
+      {
+       "id": "akademik.1.14.6.a2",
+       "tur": "secmeli",
+       "soru": "«Aynı ırmakta iki kez yıkanılmaz.» sözü aşağıdaki görüşlerden hangisini yansıtır?",
+       "sec": [
+        "Varlık sürekli değişim ve oluş hâlindedir.",
+        "Gerçek varlık değişmez ve tektir; değişme duyuların yanılsamasıdır.",
+        "Varlık bölünemeyen atomlardan oluşur.",
+        "Varlık düşünen ve yer kaplayan iki ayrı tözden oluşur.",
+        "Hiçbir şey yoktur; olsa da bilinemez."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Söz Herakleitos’undur: ırmağın suyu akıp gittiği için ikinci kez girilen ırmak artık aynı değildir.",
+        "Söz, varlığın durağan değil sürekli değişen bir oluş olduğunu anlatır (A).",
+        "B, Herakleitos’un karşıtı Parmenides’in görüşüdür; ikisini karıştıran B’yi seçer. C Demokritos, D Descartes (düalizm), E Gorgias’tır (nihilizm)."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k199"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.14.7",
@@ -39610,7 +40737,54 @@
       "• Kant’ın ahlakında sonucun önemli olduğunu sanmak; önemli olan niyet ve ödevdir.",
       "• Estetiği yalnız güzellik bilgisi sanmak; estetik, sanatı ve güzeli inceleyen felsefe dalıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.8.a1",
+       "tur": "secmeli",
+       "soru": "Kant’a göre bir eylemin ahlaki değeri aşağıdakilerden hangisine bağlıdır?",
+       "sec": [
+        "Doğurduğu sonuçların yararlı olmasına",
+        "Bireye haz vermesine",
+        "En çok kişiye mutluluk getirmesine",
+        "Toplumun geleneklerine uymasına",
+        "İyi niyetle ve ödev bilinciyle yapılmasına"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Kant’ın ödev ahlakında ölçüt sonuç değil niyettir: «Öyle davran ki eyleminin ilkesi evrensel bir yasa olabilsin.»",
+        "Doğru davranış çıkar ya da korkuyla yapılırsa ahlaki değer taşımaz; değer, iyi niyet ve ödev bilincinden gelir (E).",
+        "A ve C sonuca bakan (faydacı), B hazcı görüşlerdir. A’yı seçen, dersin uyardığı hatayı yapmıştır: Kant’ta sonuç belirleyici değildir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k201"
+       ]
+      },
+      {
+       "id": "akademik.1.14.8.a2",
+       "tur": "secmeli",
+       "soru": "«En çok sayıda insanın en büyük mutluluğu» ilkesini ahlaki ölçüt kabul eden görüş aşağıdakilerden hangisidir?",
+       "sec": [
+        "Hazcılık",
+        "Ödev ahlakı",
+        "Faydacılık",
+        "Bencillik (egoizm)",
+        "Erdem etiği"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "İlkenin anahtar sözü: «en çok sayıda insan». Ölçüt bireyin değil toplumun mutluluğudur.",
+        "Bu, faydacılığın (Bentham, Mill) ilkesidir (C).",
+        "A’yı seçen, haz ile faydayı karıştırmıştır: hazcılık bireyin hazzını ölçüt alır. B niyete, D yalnız kişinin çıkarına, E (Aristoteles) erdemli karaktere ve altın ortaya bakar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k201"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.14.9",
@@ -39765,7 +40939,54 @@
       "• Agnostisizmi ateizm sanmak: agnostik, Tanrı’nın varlığının ya da yokluğunun bilinemeyeceğini söyler.",
       "• Hobbes ile Locke’u karıştırmak: Hobbes mutlak egemeni, Locke doğal hakları savunur."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.10.a1",
+       "tur": "secmeli",
+       "soru": "Tanrı’nın evreni yarattığını ama ona müdahale etmediğini savunan ve vahyi kabul etmeyen görüş aşağıdakilerden hangisidir?",
+       "sec": [
+        "Teizm",
+        "Panteizm",
+        "Deizm",
+        "Ateizm",
+        "Agnostisizm"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Üç ayırt edici: Tanrı vardır, evreni yaratmıştır, ama müdahale etmez ve vahiy göndermez.",
+        "Bu tanım deizmdir (C).",
+        "A müdahaleyi ve vahyi kabul eder; B Tanrı ile evreni bir sayar. D’yi seçen deizm ile ateizmi karıştırmıştır: ateist Tanrı’nın varlığını reddeder, deist kabul eder. E bilinemeyeceğini söyler."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k203"
+       ]
+      },
+      {
+       "id": "akademik.1.14.10.a2",
+       "tur": "secmeli",
+       "soru": "Doğa durumunda «insanın insanın kurdu» olduğunu, güvenlik için yetkilerin mutlak bir egemene devredilmesi gerektiğini savunan düşünür aşağıdakilerden hangisidir?",
+       "sec": [
+        "Locke",
+        "Rousseau",
+        "Popper",
+        "Kuhn",
+        "Hobbes"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Toplum sözleşmesi düşünürlerini doğa durumu görüşlerinden ayırt et.",
+        "Hobbes doğa durumunu herkesin herkese karşı savaşı olarak görür ve mutlak egemeni savunur (E).",
+        "A’yı seçen, dersin sık hatasını yapmıştır: Locke doğal hakları (yaşam, özgürlük, mülkiyet) ve sınırlı devleti savunur. B egemenliği halka verir (genel irade). C ve D bilim felsefecileridir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k203"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.14.11",
@@ -39916,7 +41137,54 @@
       "• Olumsuz pekiştirmeyi ceza sanmak; olumsuz pekiştirme, hoş olmayan bir uyarıcıyı ortadan kaldırarak davranışı artırır.",
       "• Psikolojiyi yalnız ruhsal hastalıklarla ilgilenen bir alan sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.12.a1",
+       "tur": "secmeli",
+       "soru": "Ödevini zamanında getirdiği için öğretmeni tarafından övülen bir öğrencinin ödevlerini daha düzenli yapmaya başlaması aşağıdaki öğrenme türlerinden hangisine örnektir?",
+       "sec": [
+        "Klasik koşullanma",
+        "Edimsel koşullanma",
+        "Kavrayış (içgörü) yoluyla öğrenme",
+        "Geriye ket vurma",
+        "İleriye ket vurma"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Davranış önce gelir (ödevi getirmek), ardından bir sonuç (övgü) gelir ve davranışın tekrarlanma olasılığı artar.",
+        "Davranışın sonucunun davranışı biçimlendirmesi edimsel koşullanmadır (Skinner): B.",
+        "A’yı seçen, iki türü karıştırmıştır: klasik koşullanmada iki uyarıcı eşleşir (zil ve yiyecek) ve tepki istemsizdir. C ani çözüm bulmadır; D ve E unutma kavramlarıdır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k205"
+       ]
+      },
+      {
+       "id": "akademik.1.14.12.a2",
+       "tur": "secmeli",
+       "soru": "Yeni telefon numarasını öğrenen birinin eski numarasını hatırlamakta güçlük çekmesi aşağıdakilerden hangisiyle açıklanır?",
+       "sec": [
+        "Geriye ket vurma",
+        "İleriye ket vurma",
+        "Olumsuz pekiştirme",
+        "Kısa süreli belleğin sınırlı kapasitesi",
+        "Klasik koşullanma"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Hangi bilgi hangisini engelliyor, bak: yeni öğrenilen bilgi eskisinin hatırlanmasını zorlaştırıyor.",
+        "Yeninin eskiyi engellemesi geriye ket vurmadır (A).",
+        "B tersidir: eski bilginin yenisini engellemesi (değişen şifre yerine eskisini yazmak). Yönü karıştıran B’yi seçer. C bir öğrenme ilkesidir; D tekrar edilmeyen bilginin saniyeler içinde kaybolmasıyla ilgilidir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k205"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.14.13",
@@ -40065,7 +41333,54 @@
       "• Her toplumsal değişmeyi ilerleme saymak.",
       "• Değer ile normu karıştırmak: değer neyin iyi olduğuna dair genel ölçüt, norm somut davranış kuralıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.14.a1",
+       "tur": "secmeli",
+       "soru": "Bir öğretmenin aynı görevle başka bir şehirdeki okula atanması aşağıdaki kavramlardan hangisine örnektir?",
+       "sec": [
+        "Dikey toplumsal hareketlilik",
+        "Yatay toplumsal hareketlilik",
+        "Verilmiş statü",
+        "Toplumsal kontrol",
+        "Rol çatışması"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Bireyin toplumsal konumu değişti mi, yoksa yalnız yeri mi?",
+        "Öğretmen aynı statüdedir; yalnız yer değiştirmiştir: yatay hareketlilik (B).",
+        "A’yı seçen, her değişikliği konum değişikliği sanmıştır; dikey hareketlilikte statü yükselir ya da alçalır (öğretmenin müdür olması). C doğuştan gelen konumdur; D ve E konuyla ilgisizdir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k207"
+       ]
+      },
+      {
+       "id": "akademik.1.14.14.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi kazanılmış bir statüdür?",
+       "sec": [
+        "Kadın olmak",
+        "Yaşlı olmak",
+        "Ablalık",
+        "Doktorluk",
+        "Bir ailenin torunu olmak"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Verilmiş statü doğuştan ya da kendiliğinden gelir; kazanılmış statü bireyin çabasıyla elde edilir.",
+        "Doktorluk uzun bir eğitim ve çabayla kazanılır (D).",
+        "A, B, C ve E kişinin seçimi ve çabası olmadan gelen verilmiş statülerdir. C’yi seçen, ablalığın getirdiği sorumlulukları (rol) statünün kazanılması sanmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k207"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.14.15",
@@ -40215,7 +41530,54 @@
       "• Geçerli bir akıl yürütmenin sonucunun her zaman doğru olduğunu sanmak; öncül yanlışsa sonuç yanlış olabilir.",
       "• Analojiyi tümevarım sanmak: analoji tikelden tikele, tümevarım tikelden tümele gider."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.14.16.a1",
+       "tur": "secmeli",
+       "soru": "«Hiçbir metal sıvı değildir.» önermesinin çelişiği aşağıdakilerden hangisidir?",
+       "sec": [
+        "Bütün metaller sıvıdır.",
+        "Bazı metaller sıvı değildir.",
+        "Hiçbir sıvı metal değildir.",
+        "Bazı metaller sıvıdır.",
+        "Bütün sıvılar metaldir."
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Önerme tümel olumsuzdur. Çelişik önerme hem niceliği hem niteliği değiştirir: tikel olumlu (I).",
+        "Çelişiği: «Bazı metaller sıvıdır.» (D). Cıva oda sıcaklığında sıvı olduğu için çelişik doğru, verilen önerme yanlıştır: biri doğruysa öbürü yanlıştır.",
+        "A’yı seçen, çelişik ile karşıtı karıştırmıştır (tümel olumlu ile tümel olumsuz karşıttır). B altıktır (yalnız nitelik değil nicelik de değişmeli); C ve E terimlerin yerini değiştirir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k209"
+       ]
+      },
+      {
+       "id": "akademik.1.14.16.a2",
+       "tur": "secmeli",
+       "soru": "«Dünya’da su, atmosfer ve uygun sıcaklık vardır ve Dünya’da yaşam vardır. Mars’ta da su izleri ve ince bir atmosfer bulunmuştur. O hâlde Mars’ta da yaşam olabilir.» akıl yürütmesinin türü aşağıdakilerden hangisidir?",
+       "sec": [
+        "Tümdengelim",
+        "Tümevarım",
+        "Analoji",
+        "Tanım",
+        "Totoloji"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Akıl yürütmenin yönüne bak: tümelden tikele mi, tikelden tümele mi, tikelden tikele mi?",
+        "Bir tikel durumdan (Dünya) benzerliğe dayanarak başka bir tikel duruma (Mars) varılır: analoji (C). Sonucu olasıdır, kesin değildir.",
+        "B’yi seçen, dersin sık hatasını yapmıştır: tümevarım birçok tikelden genel bir yargıya gider. A genelden özele gider; D ve E akıl yürütme türü değildir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k209"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -40253,7 +41615,7 @@
      {
       "id": "akademik.1.15.k2",
       "tur": "secmeli",
-      "soru": "Batı Anadolu kıyılarındaki şehir devletlerinde felsefe ve bilimin geliştiği, Thales ve Herodot gibi düşünürlerin yetiştiği uygarlık aşağıdakilerden hangisidir?",
+      "soru": "Batı Anadolu kıyılarındaki şehir devletlerinde felsefe ve bilimin geliştiği, Thales ve Anaksimandros gibi düşünürlerin yetiştiği uygarlık aşağıdakilerden hangisidir?",
       "sec": [
        "Frigler",
        "Urartular",
@@ -40263,7 +41625,7 @@
       ],
       "dogru": "C",
       "cozum": [
-       "İyonlar Ege kıyısındaki şehir devletlerinde (Milet, Efes, İzmir) felsefe ve bilimi geliştirdi; Thales, Anaksimandros ve Herodot buradan yetişti.",
+       "İyonlar Ege kıyısındaki şehir devletlerinde (Milet, Efes, İzmir) felsefe ve bilimi geliştirdi; Thales ve Anaksimandros buradan yetişti.",
        "Lidyalılar parayla, Urartular kale ve su kanallarıyla, Hititler yazılı antlaşma ve kanunlarla tanınır."
       ],
       "ipucu": "Milet ve Efes bu uygarlığın şehirlerindendir.",
@@ -41508,7 +42870,54 @@
       "• Hicri takvimi güneş yılına dayalı sanmak.",
       "• Tarım ve yerleşik hayatın başladığı çağı Kaba Taş Çağı sanmak; Cilalı Taş (Neolitik) Çağı’dır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.2.a1",
+       "tur": "secmeli",
+       "soru": "Anadolu’da tarih çağlarının başlamasını sağlayan gelişme aşağıdakilerden hangisidir?",
+       "sec": [
+        "Sümerlerin çivi yazısını bulması",
+        "Asurlu tüccarların çivi yazısını Anadolu’ya getirmesi",
+        "Hititlerin Kadeş Antlaşması’nı imzalaması",
+        "Lidyalıların parayı kullanması",
+        "Frigyalıların Gordion’u başkent yapması"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Bir bölgede tarih çağları, o bölgede yazılı belgelerin ortaya çıkmasıyla başlar.",
+        "MÖ 2000’lerde Kültepe–Kaniş’te ticaret kolonisi kuran Asurlu tüccarlar çivi yazısını Anadolu’ya getirdi; Kültepe tabletleri Anadolu’nun ilk yazılı belgeleridir (B).",
+        "A’yı seçen, dersin uyardığı karışıklığa düşmüştür: Sümerler yazıyı Mezopotamya’da buldu, Anadolu’ya getiren Asurlulardır. C, D ve E tarih çağları başladıktan sonraki gelişmelerdir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k211"
+       ]
+      },
+      {
+       "id": "akademik.1.15.2.a2",
+       "tur": "secmeli",
+       "soru": "Hicri takvimle ilgili aşağıdakilerden hangisi doğrudur?",
+       "sec": [
+        "Güneş yılına dayanır.",
+        "Hz. İsa’nın doğumunu başlangıç alır.",
+        "Ay yılına dayanır ve 622’deki hicreti başlangıç alır.",
+        "Bir yılı 365 gündür.",
+        "Ayları her yıl aynı mevsime denk gelir."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Hicri takvim ay yılına dayanır (yaklaşık 354 gün) ve Hz. Muhammed’in Mekke’den Medine’ye göçünü (622) başlangıç alır: C.",
+        "Ay yılı güneş yılından yaklaşık 11 gün kısa olduğu için Hicri aylar her yıl öne kayar; bu yüzden E yanlıştır.",
+        "A, B ve D Miladi takvimin özellikleridir. A’yı seçen, iki takvimin dayandığı yılı karıştırmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k211"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.15.3",
@@ -41659,7 +43068,54 @@
       "• Kavimler Göçü’nü yalnız Türkleri etkileyen bir olay sanmak; Avrupa’nın etnik yapısını değiştirmiştir.",
       "• Kut ile töreyi karıştırmak: kut yönetme yetkisi, töre yazısız hukuk kurallarıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.4.a1",
+       "tur": "secmeli",
+       "soru": "«Türk» adını devlet adı olarak resmî olarak ilk kullanan Türk devleti aşağıdakilerden hangisidir?",
+       "sec": [
+        "Asya Hun Devleti",
+        "Karahanlılar",
+        "Uygurlar",
+        "Avarlar",
+        "Göktürkler"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "«Türk» adını resmî devlet adı olarak ilk kullanan I. Göktürk Devleti’dir (552); Orhun Yazıtları da «Türk» adını taşıyan ilk yazılı Türkçe belgeler arasındadır (E).",
+        "C’yi seçen, dersin sık hatasını yapmıştır: Uygurlar yerleşik hayata geçen ilk Türk devletidir, «Türk» adını ilk kullanan değildir.",
+        "A ilk Türk devleti sayılır ama adı Hun’dur. B ilk Müslüman Türk devletlerindendir; D Avrupa’da kurulmuştur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k213"
+       ]
+      },
+      {
+       "id": "akademik.1.15.4.a2",
+       "tur": "secmeli",
+       "soru": "Eski Türklerde hükümdara yönetme yetkisinin Tanrı tarafından verildiğine inanılan kavram aşağıdakilerden hangisidir?",
+       "sec": [
+        "Kut",
+        "Töre",
+        "Kurultay",
+        "Ülüş",
+        "Balbal"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Hükümdarlık yetkisinin kaynağını anlatan kavram kuttur: kut Tanrı’dan gelir, hükümdar onu yitirirse yönetme hakkını da yitirir (A).",
+        "B’yi seçen, dersin uyardığı karışıklığa düşmüştür: töre yazısız hukuk kurallarıdır.",
+        "C devlet işlerinin görüşüldüğü meclis, D ülkenin hanedan üyeleri arasında paylaşılması, E mezara dikilen ve öldürülen düşmanı simgeleyen taştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k213"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.15.5",
@@ -41811,7 +43267,54 @@
       "• Dandanakan ile Malazgirt’i karıştırmak: Dandanakan (1040) Gaznelilere karşıdır ve Selçuklu’yu kurar; Malazgirt (1071) Bizans’a karşıdır ve Anadolu’yu açar.",
       "• Kutadgu Bilig ile Divanü Lügati’t-Türk’ün yazarlarını karıştırmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.6.a1",
+       "tur": "secmeli",
+       "soru": "Büyük Selçuklu Devleti’nin kuruluşunu sağlayan ve Gaznelilere karşı kazanılan savaş aşağıdakilerden hangisidir?",
+       "sec": [
+        "Talas Savaşı (751)",
+        "Dandanakan Savaşı (1040)",
+        "Malazgirt Savaşı (1071)",
+        "Miryokefalon Savaşı (1176)",
+        "Kösedağ Savaşı (1243)"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Savaşı karşı tarafıyla eşleştir: Gazneliler → Dandanakan.",
+        "Dandanakan’da (1040) Gaznelileri yenen Selçuklular devletlerini kurdu (B).",
+        "C’yi seçen, dersin uyardığı karışıklığa düşmüştür: Malazgirt Bizans’a karşıdır ve Anadolu’yu açar. A Abbasiler ile Çin arasındadır; D Türkiye Selçukluları ile Bizans arasında, E Moğollara karşıdır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k215"
+       ]
+      },
+      {
+       "id": "akademik.1.15.6.a2",
+       "tur": "secmeli",
+       "soru": "Kutadgu Bilig adlı eserin yazarı aşağıdakilerden hangisidir?",
+       "sec": [
+        "Kaşgarlı Mahmut",
+        "Edip Ahmet",
+        "Ahmet Yesevi",
+        "Yusuf Has Hacip",
+        "Nizamülmülk"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Kutadgu Bilig, Karahanlılar döneminde devlet yönetimini anlatan eserdir; yazarı Yusuf Has Hacip’tir (D).",
+        "A’yı seçen, dersin sık hatasını yapmıştır: Kaşgarlı Mahmut Divanü Lügati’t-Türk’ü yazmıştır.",
+        "B Atabetü’l-Hakayık’ı, C Divan-ı Hikmet’i, E Siyasetname’yi yazmıştır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k215"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.15.7",
@@ -41960,7 +43463,54 @@
       "• Ankara Savaşı’nı Osmanlı’nın kazandığı bir savaş sanmak.",
       "• Yeniçeri Ocağı’nın Orhan Bey döneminde kurulduğunu sanmak; I. Murad döneminde kurulmuştur."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.8.a1",
+       "tur": "secmeli",
+       "soru": "Osmanlı Devleti’nde Fetret Devri’ni başlatan olay aşağıdakilerden hangisidir?",
+       "sec": [
+        "Ankara Savaşı’nda Yıldırım Bayezid’in Timur’a yenilmesi",
+        "Bursa’nın fethedilmesi",
+        "I. Kosova Savaşı",
+        "Niğbolu Savaşı",
+        "İstanbul’un fethi"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Fetret, «kargaşa, boşluk» demektir: devletin başsız kaldığı dönemi arıyoruz.",
+        "1402 Ankara Savaşı’nda Yıldırım Bayezid Timur’a yenilip esir düştü; oğulları arasında taht kavgası başladı ve 1413’e kadar sürdü (A).",
+        "B, C ve D Osmanlı’nın kazandığı ve büyümesini sağlayan olaylardır; E Fetret’ten sonradır. D’yi seçen, Niğbolu’yu (1396) Yıldırım’ın yenilgisi sanmıştır; orada Haçlıları yenmiştir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k217"
+       ]
+      },
+      {
+       "id": "akademik.1.15.8.a2",
+       "tur": "secmeli",
+       "soru": "Tımar sisteminin Osmanlı Devleti’ne sağladığı yararlardan biri aşağıdakilerden hangisidir?",
+       "sec": [
+        "Yeniçeri Ocağı’nın kurulması",
+        "Toprağın özel mülk olarak alınıp satılabilmesi",
+        "Hazineden para çıkmadan büyük bir atlı ordunun beslenmesi",
+        "Vergilerin tamamen kaldırılması",
+        "Devşirme yoluyla asker toplanması"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Tımar: devlete ait toprağın vergi gelirinin, hizmet karşılığında sipahilere bırakılmasıdır.",
+        "Sipahi bu gelirle atlı asker (cebelü) yetiştirir; devlet hazineden maaş ödemeden büyük bir ordu besler (C).",
+        "A ve E kapıkulu (devşirme) sistemine aittir; tımarla karıştıran bunları seçer. B yanlıştır: toprak devletindir (miri). D yanlıştır: vergi toplanır ama hazine yerine sipahiye bırakılır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k217"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.15.9",
@@ -42109,7 +43659,54 @@
       "• Matbaanın II. Mahmud döneminde geldiğini sanmak; Lale Devri’nde (1727) kurulmuştur.",
       "• İnebahtı (1571) yenilgisini Kanuni dönemine yerleştirmek; II. Selim dönemindedir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.10.a1",
+       "tur": "secmeli",
+       "soru": "Osmanlı Devleti’nin ilk büyük toprak kaybına uğradığı antlaşma aşağıdakilerden hangisidir?",
+       "sec": [
+        "Zitvatorok Antlaşması (1606)",
+        "Karlofça Antlaşması (1699)",
+        "Pasarofça Antlaşması (1718)",
+        "Küçük Kaynarca Antlaşması (1774)",
+        "Yaş Antlaşması (1792)"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "II. Viyana Kuşatması (1683) yenilgisinden sonraki savaşlar Karlofça’yla bitti: Macaristan ve başka topraklar kaybedildi. İlk büyük toprak kaybı budur (B).",
+        "A’yı seçen, Zitvatorok’un önemini toprak kaybı sanmıştır; Zitvatorok’ta toprak kaybı yoktur, Avusturya arşidükü padişaha eşit sayılmıştır.",
+        "D’yi seçen dersin uyardığı karışıklığa düşmüştür: Küçük Kaynarca Kırım’ı bağımsız yapar; sonradır. C ve E de Karlofça’dan sonradır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k219"
+       ]
+      },
+      {
+       "id": "akademik.1.15.10.a2",
+       "tur": "secmeli",
+       "soru": "İlk Türk matbaası hangi dönemde kurulmuştur?",
+       "sec": [
+        "Kanuni dönemi",
+        "II. Mahmud dönemi",
+        "Tanzimat dönemi",
+        "Fatih dönemi",
+        "Lale Devri"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "İlk Türk matbaası 1727’de İbrahim Müteferrika tarafından, Pasarofça’dan sonraki barış döneminde kuruldu: Lale Devri (1718–1730), E.",
+        "B’yi seçen, dersin uyardığı hatayı yapmıştır: II. Mahmud dönemi ilk resmî gazete (Takvim-i Vekayi) ile bilinir, matbaa daha önce kurulmuştur.",
+        "A, C ve D bu gelişmeyle eşleşmez; Tanzimat (1839) çok sonradır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k219"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.15.11",
@@ -42262,7 +43859,54 @@
       "• Çanakkale Cephesi’ni Osmanlı’nın taarruz cephesi sanmak; savunma cephesidir. Taarruz cepheleri Kafkas ve Kanal’dır.",
       "• Islahat Fermanı’nı yalnız iç gelişmelerin sonucu sanmak; Avrupa baskısı belirleyicidir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.12.a1",
+       "tur": "secmeli",
+       "soru": "Gayrimüslimlere Müslümanlarla eşit haklar tanıyan ve hazırlanmasında Avrupa devletlerinin baskısı belirleyici olan belge aşağıdakilerden hangisidir?",
+       "sec": [
+        "Sened-i İttifak (1808)",
+        "Tanzimat Fermanı (1839)",
+        "Islahat Fermanı (1856)",
+        "Kanun-i Esasi (1876)",
+        "Mondros Ateşkes Antlaşması (1918)"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "İki ipucu: gayrimüslimlere eşit haklar ve Avrupa baskısı.",
+        "Islahat Fermanı, Paris Konferansı öncesinde Avrupa’nın iç işlerine karışmasını önlemek için ilan edildi ve daha çok gayrimüslimlere yönelikti (C).",
+        "B en güçlü çeldiricidir: Tanzimat herkesin can, mal ve namus güvenliğini ve kanun üstünlüğünü getirdi; eşitliği gayrimüslimlere yönelik olarak genişleten Islahat’tır. A ayanla, D anayasal düzenle ilgilidir; E bir ateşkestir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k221"
+       ]
+      },
+      {
+       "id": "akademik.1.15.12.a2",
+       "tur": "secmeli",
+       "soru": "Mondros Ateşkes Antlaşması’nın 24. maddesinin amacı aşağıdakilerden hangisidir?",
+       "sec": [
+        "Boğazların İtilaf Devletlerine açılması",
+        "Doğudaki altı ilde bir Ermeni devleti kurulmasına zemin hazırlamak",
+        "Osmanlı ordusunun terhis edilmesi",
+        "İtilaf Devletlerine her stratejik yeri işgal etme hakkı vermek",
+        "Kapitülasyonların kaldırılması"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "24. madde: «Altı doğu ilinde (Vilayat-ı Sitte) karışıklık çıkarsa buralar işgal edilebilecek.»",
+        "Bu madde, bölgede bir Ermeni devleti kurulmasının yolunu açmayı amaçlıyordu (B).",
+        "D’yi seçen, 7. madde ile 24. maddeyi karıştırmıştır: her stratejik yerin işgalini 7. madde mümkün kılar. A ve C de Mondros’ta vardır ama başka maddelerdir; E Lozan’la gerçekleşmiştir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k221"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.15.13",
@@ -42436,7 +44080,54 @@
       "• Misak-ı Millî’nin TBMM’de kabul edildiğini sanmak; son Osmanlı Mebusan Meclisi’nde kabul edilmiştir.",
       "• Mudanya’yı barış antlaşması sanmak; ateşkes antlaşmasıdır, barış Lozan’dır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.14.a1",
+       "tur": "secmeli",
+       "soru": "Misak-ı Millî aşağıdakilerin hangisinde kabul edilmiştir?",
+       "sec": [
+        "TBMM",
+        "Erzurum Kongresi",
+        "Sivas Kongresi",
+        "Son Osmanlı Mebusan Meclisi",
+        "Amasya Görüşmeleri"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Misak-ı Millî 28 Ocak 1920’de kabul edildi; TBMM o tarihte henüz açılmamıştı (23 Nisan 1920).",
+        "Belgeyi İstanbul’da toplanan son Osmanlı Mebusan Meclisi kabul etti (D).",
+        "A’yı seçen, dersin uyardığı hatayı yapmıştır. B ve C kongrelerinin kararları Misak-ı Millî’ye temel oluşturdu ama belge orada kabul edilmedi; E’de meclisin açılması kararlaştırıldı."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k223"
+       ]
+      },
+      {
+       "id": "akademik.1.15.14.a2",
+       "tur": "secmeli",
+       "soru": "Toplanış bakımından bölgesel, aldığı kararlar bakımından ulusal olan kongre aşağıdakilerden hangisidir?",
+       "sec": [
+        "Sivas Kongresi",
+        "Balıkesir Kongresi",
+        "Alaşehir Kongresi",
+        "Pozantı Kongresi",
+        "Erzurum Kongresi"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Erzurum Kongresi’ne yalnız doğu illerinden delegeler katıldı (bölgesel); ama «vatan bir bütündür, parçalanamaz» gibi bütün ülkeyi ilgilendiren kararlar aldı (ulusal): E.",
+        "A’yı seçen, iki kongreyi karıştırmıştır: Sivas hem toplanış hem karar bakımından ulusaldır.",
+        "B, C ve D Batı ve Güney cephelerinde toplanan, hem toplanış hem karar bakımından bölgesel kongrelerdir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k223"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.15.15",
@@ -42616,7 +44307,54 @@
       "• Laikliği dinsizlik sanmak; laiklik devlet işleri ile din işlerinin ayrılmasıdır.",
       "• Medeni Kanun’u Cumhuriyet’in ilanından önce sanmak; 1926’da kabul edildi."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.15.16.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi Cumhuriyet’in ilanından (29 Ekim 1923) önce gerçekleşmiştir?",
+       "sec": [
+        "Saltanatın kaldırılması",
+        "Halifeliğin kaldırılması",
+        "Türk Medeni Kanunu’nun kabulü",
+        "Kadınlara milletvekili seçme ve seçilme hakkı tanınması",
+        "Harf İnkılabı"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Tarihleri sırala: saltanatın kaldırılması 1 Kasım 1922, halifeliğin kaldırılması 3 Mart 1924, Medeni Kanun 1926, Harf İnkılabı 1928, kadınlara milletvekilliği hakkı 1934.",
+        "Cumhuriyet’ten önce olan yalnız saltanatın kaldırılmasıdır (A).",
+        "B’yi seçen, dersin uyardığı karışıklığa düşmüştür: saltanat ile halifelik ayrı tarihlerde (1922 ve 1924) kaldırıldı."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k225"
+       ]
+      },
+      {
+       "id": "akademik.1.15.16.a2",
+       "tur": "secmeli",
+       "soru": "Özel girişimin sanayileşmede yetersiz kalması ve 1929 Dünya Ekonomik Bunalımı üzerine benimsenen Atatürk ilkesi aşağıdakilerden hangisidir?",
+       "sec": [
+        "Laiklik",
+        "Halkçılık",
+        "İnkılapçılık",
+        "Devletçilik",
+        "Milliyetçilik"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Konu ekonomidir: devletin, özel sektörün yetersiz kaldığı alanlarda ekonomiye doğrudan girmesi.",
+        "Bu, devletçilik ilkesidir; Birinci Beş Yıllık Sanayi Planı (1934) bunun uygulamasıdır (D).",
+        "B’yi seçen, halkçılığın «halk için» vurgusunu ekonomiyle ilişkilendirmiştir; halkçılık sınıf ayrıcalığını reddeder, ekonomi politikası değildir. A din ile devlet işlerinin ayrılmasıdır; C ve E ekonomiye özgü değildir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k225"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -47504,7 +49242,7 @@
      {
       "id": "akademik.1.18.k10",
       "tur": "secmeli",
-      "soru": "Tabloda bir okuldaki 200 öğrencinin cinsiyete göre gözlük kullanma durumu verilmiştir. Rastgele seçilen bir öğrencinin gözlüklü olduğu bilindiğine göre kız olma olasılığı kaçtır?\nTablo — undefined: Cinsiyet | Gözlüklü | Gözlüksüz ; Kız | 30 | 70 ; Erkek | 20 | 80",
+      "soru": "Tabloda bir okuldaki 200 öğrencinin cinsiyete göre gözlük kullanma durumu verilmiştir. Rastgele seçilen bir öğrencinin gözlüklü olduğu bilindiğine göre kız olma olasılığı kaçtır?\nTablo — Gözlük kullanımı: Cinsiyet | Gözlüklü | Gözlüksüz ; Kız | 30 | 70 ; Erkek | 20 | 80",
       "sec": [
        "3/10",
        "3/20",
@@ -53207,7 +54945,54 @@
       "• Zıt işaretli yüklerde alanın sıfır noktasını yüklerin arasında aramak.",
       "• E ∝ 1/d^{2} ile V ∝ 1/d’yi karıştırmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.21.2.a1",
+       "tur": "secmeli",
+       "soru": "Noktasal +q yükünden d uzaklıktaki bir noktada elektrik alanın büyüklüğü E, potansiyel V’dir. Uzaklık 2d olursa alan ve potansiyel ne olur?",
+       "sec": [
+        "E/2 ve V/2",
+        "E/4 ve V/4",
+        "E/4 ve V/2",
+        "E/2 ve V/4",
+        "E ve V/2"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Alan E = kq/d², potansiyel V = kq/d’dir.",
+        "d → 2d: alan 1/2² = 1/4 katına iner (E/4), potansiyel 1/2 katına iner (V/2). Doğru: C.",
+        "A alanı 1/d ile, B potansiyeli 1/d² ile orantılı sanır; D ikisini ters çevirir. Dersin uyardığı hata budur: E ∝ 1/d², V ∝ 1/d. E alanın uzaklıktan bağımsız olduğunu sanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k287"
+       ]
+      },
+      {
+       "id": "akademik.1.21.2.a2",
+       "tur": "secmeli",
+       "soru": "+3 μC’luk bir yük, potansiyeli 50 V olan noktadan potansiyeli 20 V olan noktaya götürülüyor. Bu sırada elektrik alanın yaptığı iş kaç μJ’dür?",
+       "sec": [
+        "−90",
+        "10",
+        "60",
+        "90",
+        "210"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Alanın yaptığı iş: W = q · (V_{ilk} − V_{son}).",
+        "W = 3 · (50 − 20) = 3 · 30 = 90 μJ. Pozitif yük yüksek potansiyelden alçağa kendiliğinden gider; iş pozitiftir (D).",
+        "−90, farkı ters (V_{son} − V_{ilk}) alınca; 60, yalnız son potansiyeli (3 · 20) kullanınca; 210, potansiyelleri toplayınca (3 · 70); 10, farkı yüke bölünce çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k287"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.21.3",
@@ -53362,7 +55147,54 @@
       "• Üreteçten ayrılmış kondansatörde V’yi sabit sanmak; sabit kalan Q’dur.",
       "• Sığanın yüke ya da gerilime bağlı olduğunu sanmak; yalnız geometriye ve ortama bağlıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.21.4.a1",
+       "tur": "secmeli",
+       "soru": "Üretece bağlı bir paralel levhalı kondansatörün levhaları arasındaki uzaklık iki katına çıkarılıyor. Levhalardaki yük (Q) ve levhalar arasındaki elektrik alan (E) nasıl değişir?",
+       "sec": [
+        "Q yarıya iner, E yarıya iner.",
+        "Q yarıya iner, E değişmez.",
+        "Q değişmez, E değişmez.",
+        "Q iki katına çıkar, E iki katına çıkar.",
+        "Q değişmez, E yarıya iner."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Üretece bağlıyken gerilim V sabittir. C = ε · A / d olduğundan d iki katına çıkınca C yarıya iner.",
+        "Q = C · V ⇒ Q yarıya iner. E = V / d ⇒ E de yarıya iner (A).",
+        "C, üreteçten ayrılmış kondansatörün sonucudur (o zaman Q sabit, E değişmez); dersin uyardığı karışıklık budur. D uzaklığın etkisini ters alır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k289"
+       ]
+      },
+      {
+       "id": "akademik.1.21.4.a2",
+       "tur": "secmeli",
+       "soru": "Sığaları 3 μF ve 6 μF olan iki kondansatör seri bağlanmış, bu ikiliye 4 μF’lık bir kondansatör paralel bağlanmıştır. Eşdeğer sığa kaç μF’dir?",
+       "sec": [
+        "4/3",
+        "2",
+        "6",
+        "9",
+        "13"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Seri kısım: 1/C = 1/3 + 1/6 = 1/2 ⇒ C = 2 μF.",
+        "Bu 2 μF ile 4 μF paraleldir; paralelde sığalar toplanır: 2 + 4 = 6 μF (C).",
+        "4/3, üçünü de seri alınca; 2, paralel kondansatörü eklemeyi unutunca; 9, seriyi doğrudan toplayıp (3 + 6) 4’ü unutunca; 13, hepsini toplayınca çıkar. Seride 1/C’ler toplanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k289"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.21.5",
@@ -53511,7 +55343,54 @@
       "• Negatif yükte sağ el kuralının sonucunu ters çevirmeyi unutmak.",
       "• Manyetik kuvvetin parçacığın hızını büyüttüğünü sanmak; kuvvet hıza dik, yalnız yönü değiştirir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.21.6.a1",
+       "tur": "secmeli",
+       "soru": "Büyüklüğü 0,4 T olan düzgün manyetik alana dik yerleştirilmiş 0,25 m uzunluğundaki telden 6 A akım geçiyor. Tele etkiyen manyetik kuvvet kaç N’dur?",
+       "sec": [
+        "0",
+        "0,6",
+        "1,5",
+        "2,4",
+        "9,6"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Alana dik telde F = B · I · L.",
+        "F = 0,4 · 6 · 0,25 = 0,6 N (B).",
+        "0, tel alana paralelmiş gibi düşününce; 1,5, B’yi unutunca (I · L); 2,4, L’yi unutunca (B · I); 9,6, L ile çarpmak yerine bölünce çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k291"
+       ]
+      },
+      {
+       "id": "akademik.1.21.6.a2",
+       "tur": "secmeli",
+       "soru": "Düzgün manyetik alana dik giren yüklü bir parçacık çembersel yörüngede dolanıyor. Parçacığın kinetik enerjisi 4 katına çıkarılırsa yörünge yarıçapı (r) ve dolanma periyodu (T) nasıl değişir?",
+       "sec": [
+        "r 4 katına, T 4 katına çıkar.",
+        "r 4 katına çıkar, T değişmez.",
+        "r 2 katına, T 2 katına çıkar.",
+        "r değişmez, T yarıya iner.",
+        "r 2 katına çıkar, T değişmez."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Önce hız: KE = mv²/2 ⇒ KE 4 katı ise v 2 katıdır.",
+        "r = mv/(qB) ⇒ r 2 katı. T = 2πr/v = 2πm/(qB) ⇒ hızdan bağımsız, değişmez (E).",
+        "A ve B enerjiyi hız gibi doğrudan r’ye taşır (kök almayı unutur). C periyodu da yarıçapla büyür sanır; oysa yol ve hız aynı oranda arttığı için süre değişmez."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k291"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.21.7",
@@ -53663,7 +55542,54 @@
       "• Lenz yasasında akımın değişimi desteklediğini sanmak; değişime karşı koyar.",
       "• Sarım sayısını (N) Faraday yasasında unutmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.21.8.a1",
+       "tur": "secmeli",
+       "soru": "50 sarımlı, kesit alanı 0,04 m² olan bir bobin manyetik alana dik duruyor. Alan 0,2 saniyede 0,6 T’den 0,1 T’ye düzgün olarak iniyor. Bobinde oluşan ortalama emk kaç V’tur?",
+       "sec": [
+        "0,1",
+        "1",
+        "5",
+        "6",
+        "7"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Bir sarımdaki akı değişimi: ΔΦ = ΔB · A = (0,6 − 0,1) · 0,04 = 0,02 Wb.",
+        "Faraday: ε = N · ΔΦ / Δt = 50 · 0,02 / 0,2 = 5 V (C).",
+        "0,1, sarım sayısını unutunca; 1, süreye bölmeyi unutunca; 6, değişim yerine ilk alanı (0,6 T) alınca; 7, alanları toplayınca (0,7 T) çıkar. Emk’yi alan değil alanın değişimi doğurur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k293"
+       ]
+      },
+      {
+       "id": "akademik.1.21.8.a2",
+       "tur": "secmeli",
+       "soru": "Bir çubuk mıknatısın N kutbu, iletken bir halkadan uzaklaştırılıyor. Halkada oluşan akım, halkanın mıknatısa bakan yüzünü hangi kutup yapar ve halka mıknatısa nasıl bir kuvvet uygular?",
+       "sec": [
+        "N kutbu yapar, mıknatısı iter.",
+        "S kutbu yapar, mıknatısı iter.",
+        "N kutbu yapar, mıknatısı çeker.",
+        "S kutbu yapar, mıknatısı çeker.",
+        "Akım oluşmaz, kuvvet uygulanmaz."
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Lenz yasası: oluşan akım akıdaki değişime karşı koyar.",
+        "N kutbu uzaklaşınca halkadan geçen akı azalır; halka bu azalmaya karşı koymak için mıknatısı tutmaya çalışır: bakan yüzü S olur ve mıknatısı çeker (D).",
+        "A yaklaşma durumunun sonucudur; hareketin yönünü atlayan A’yı seçer. E, hareket varken akının değiştiğini görmez. B ve C kutup ile kuvveti uyumsuz eşleştirir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k293"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.21.9",
@@ -53815,7 +55741,54 @@
       "• Transformatörün doğru akımla çalıştığını sanmak.",
       "• Etkin değeri tepe değer gibi kullanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.21.10.a1",
+       "tur": "secmeli",
+       "soru": "Primer sarım sayısı 200, sekonder sarım sayısı 800 olan ideal bir transformatörün primerine 50 V uygulanıyor ve primerden 4 A akım çekiliyor. Sekonderdeki gerilim ve akım nedir?",
+       "sec": [
+        "200 V ve 1 A",
+        "200 V ve 16 A",
+        "12,5 V ve 16 A",
+        "12,5 V ve 1 A",
+        "50 V ve 4 A"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Gerilim sarım sayısıyla doğru orantılıdır: V_{s} = 50 · 800 / 200 = 200 V.",
+        "İdeal transformatörde güç korunur: 50 · 4 = 200 · I_{s} ⇒ I_{s} = 1 A (A).",
+        "B, akımın da gerilimle aynı oranda arttığını sanar; dersin sık hatası budur. C ve D sarım oranını ters kurar. E transformatörün hiçbir şeyi değiştirmediğini varsayar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k295"
+       ]
+      },
+      {
+       "id": "akademik.1.21.10.a2",
+       "tur": "secmeli",
+       "soru": "Bir enerji hattında iletilen güç ve hattın direnci aynı kalmak üzere iletim gerilimi 5 katına çıkarılıyor. Hattaki ısı kaybı nasıl değişir?",
+       "sec": [
+        "5 katına çıkar.",
+        "Değişmez.",
+        "1/125’ine iner.",
+        "1/5’ine iner.",
+        "1/25’ine iner."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Güç sabitken P = V · I ⇒ gerilim 5 katı olunca akım 1/5’ine iner.",
+        "Isı kaybı P_{kayıp} = I² · R ⇒ (1/5)² = 1/25’ine iner (E).",
+        "D akımdaki azalmayı kayba doğrudan taşır (karesini almaz). A kaybı V²/R ile hesaplar; ama o formüldeki V hattaki gerilim düşmesidir, iletim gerilimi değil. C üssü üç sanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k295"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -54344,7 +56317,54 @@
       "• Düzgün çembersel harekette ivmenin sıfır olduğunu sanmak.",
       "• Kütle çekiminde F ∝ 1/d yazmak; doğrusu 1/d^{2}."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.22.2.a1",
+       "tur": "secmeli",
+       "soru": "Yarıçapı 80 m olan yatay bir virajda lastik ile yol arasındaki sürtünme katsayısı 0,5’tir. Araç kaymadan en çok kaç m/s hızla dönebilir? (g = 10 m/s²)",
+       "sec": [
+        "2√10 (≈ 6,3)",
+        "20",
+        "20√2 (≈ 28,3)",
+        "40",
+        "400"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Yatay virajda merkezcil kuvveti sürtünme sağlar: μ · m · g = m · v² / r.",
+        "v² = μ · g · r = 0,5 · 10 · 80 = 400 ⇒ v = 20 m/s (B).",
+        "2√10, g’yi unutunca (v² = μ · r); 20√2, μ’yü unutunca (v² = g · r); 40, μ’yü paydaya yazınca (v² = g · r / μ); 400, karekök almayı unutunca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k297"
+       ]
+      },
+      {
+       "id": "akademik.1.22.2.a2",
+       "tur": "secmeli",
+       "soru": "Bir uydunun gezegeni çevresindeki yörünge yarıçapı 9 katına çıkarsa dolanma periyodu kaç katına çıkar?",
+       "sec": [
+        "3",
+        "9",
+        "13,5",
+        "27",
+        "81"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Kepler’in 3. yasası: T² ∝ r³ ⇒ T ∝ r^{3/2}.",
+        "9^{3/2} = (√9)³ = 3³ = 27 (D).",
+        "3, yalnız karekök alınca; 9, periyodu yarıçapla doğru orantılı sanınca; 13,5, 3/2 üssünü çarpan sanınca (9 · 1,5); 81, T ∝ r² yazınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k297"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.22.3",
@@ -54496,7 +56516,54 @@
       "• Basit sarkaçta periyodun kütleye bağlı olduğunu sanmak.",
       "• Denge noktasında ivmenin en büyük olduğunu sanmak; ivme uçlarda en büyüktür."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.22.4.a1",
+       "tur": "secmeli",
+       "soru": "Yaya bağlı bir cismin basit harmonik hareketinin periyodu T’dir. Cismin kütlesi 4 katına, yay sabiti 9 katına çıkarılırsa yeni periyot kaç T olur?",
+       "sec": [
+        "4/9",
+        "2/3",
+        "1",
+        "3/2",
+        "9/4"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Yaylı sarkaçta T = 2π√(m/k).",
+        "Yeni periyot: √(4/9) = 2/3 ⇒ (2/3)T (B).",
+        "4/9, karekökü unutunca; 3/2 ve 9/4 oranı ters kurunca (k’yi pay sanınca); 1, iki artışın birbirini götürdüğünü sanınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k299"
+       ]
+      },
+      {
+       "id": "akademik.1.22.4.a2",
+       "tur": "secmeli",
+       "soru": "Genliği 0,2 m, periyodu 3 s olan basit harmonik hareket yapan bir cismin uç noktalardaki ivmesinin büyüklüğü kaç m/s²’dir? (π = 3)",
+       "sec": [
+        "0,4",
+        "0,6",
+        "0,8",
+        "1,2",
+        "7,2"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Açısal frekans: ω = 2π / T = 2 · 3 / 3 = 2 rad/s.",
+        "İvme uç noktalarda en büyüktür: a = A · ω² = 0,2 · 4 = 0,8 m/s² (C).",
+        "0,4, en büyük hızı (A · ω) bulur; 0,6, genliği periyotla çarpar; 1,2 ve 7,2, ω yerine 2π kullanınca (0,2 · 6 ve 0,2 · 36) çıkar. Dersin uyardığı gibi ivme dengede değil uçlarda en büyüktür."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k299"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.22.5",
@@ -54652,7 +56719,54 @@
       "• Saçak genişliğinde d ile L’yi karıştırmak: Δx = λ · L / d.",
       "• Doppler olayında kaynağın sesinin gerçekten değiştiğini sanmak; değişen algılanan frekanstır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.22.6.a1",
+       "tur": "secmeli",
+       "soru": "Su dalgaları derin bölgeden sığ bölgeye geçerken hızları azalıyor. Dalgaların frekansı ve dalga boyu nasıl değişir?",
+       "sec": [
+        "Frekans değişmez, dalga boyu azalır.",
+        "Frekans azalır, dalga boyu değişmez.",
+        "Frekans değişmez, dalga boyu artar.",
+        "Frekans artar, dalga boyu azalır.",
+        "İkisi de değişmez."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Frekansı kaynak belirler; dalga ortam değiştirince frekans değişmez.",
+        "v = λ · f ⇒ f sabitken v azalırsa λ da azalır (A).",
+        "B dersin sık hatasıdır: ortam değişince frekansın değiştiğini sanmak. C orantıyı ters kurar; E hız değiştiği hâlde λ’nın sabit kalabileceğini sanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k301"
+       ]
+      },
+      {
+       "id": "akademik.1.22.6.a2",
+       "tur": "secmeli",
+       "soru": "Çift yarık deneyinde dalga boyu 600 nm olan ışık kullanılıyor. Yarıklar arası uzaklık 0,3 mm, yarıklarla perde arası uzaklık 1,5 m’dir. Merkezî aydınlık saçaktan 2. aydınlık saçağa uzaklık kaç mm’dir?",
+       "sec": [
+        "1,5",
+        "3",
+        "4,5",
+        "6",
+        "9"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Saçak aralığı: Δx = λ · L / d = 600 · 10^{−9} · 1,5 / (0,3 · 10^{−3}) = 3 · 10^{−3} m = 3 mm.",
+        "n. aydınlık saçak merkezden n · Δx uzaktadır: 2 · 3 = 6 mm (D).",
+        "3, saçak sırasını unutunca; 4,5, 2. karanlık saçağı (1,5 Δx) bulunca; 9, sırayı bir fazla sayınca; 1,5, saçak aralığını ikiye bölünce çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k301"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -55040,7 +57154,54 @@
       "• Yarılanmada miktarın doğrusal azaldığını sanmak; her yarılanmada yarıya iner.",
       "• Gama ışımasında çekirdeğin değiştiğini sanmak; yalnız enerji yayılır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.23.2.a1",
+       "tur": "secmeli",
+       "soru": "^{232}_{90}Th çekirdeği bir dizi bozunmayla ^{208}_{82}Pb çekirdeğine dönüşüyor. Bu sırada kaç α ve kaç β^{−} bozunması olmuştur?",
+       "sec": [
+        "4 α ve 6 β^{−}",
+        "6 α ve 4 β^{−}",
+        "6 α ve 8 β^{−}",
+        "6 α ve 12 β^{−}",
+        "12 α ve 4 β^{−}"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Kütle numarasını yalnız α değiştirir: 232 − 208 = 24 ⇒ 24 / 4 = 6 α.",
+        "6 α atom numarasını 6 · 2 = 12 azaltır: 90 − 12 = 78. 82’ye çıkmak için 4 β^{−} gerekir (her biri atom numarasını 1 artırır): B.",
+        "A sayıları ters yazar. C atom numarası farkını (90 − 82 = 8) doğrudan β sayısı sanır; D α’ların azalttığı 12’yi β sayısı sanır. E kütle farkını 2’ye böler; α’nın kütle numarası 4’tür."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k303"
+       ]
+      },
+      {
+       "id": "akademik.1.23.2.a2",
+       "tur": "secmeli",
+       "soru": "Yarılanma süresi 5 gün olan radyoaktif bir maddenin 64 g’lık örneğinden 20 gün sonunda kaç gramı bozunmuş olur?",
+       "sec": [
+        "4",
+        "16",
+        "32",
+        "48",
+        "60"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "20 gün = 20 / 5 = 4 yarılanma süresi.",
+        "Kalan: 64 / 2⁴ = 4 g. Bozunan: 64 − 4 = 60 g (E).",
+        "4 kalan miktardır, soru bozunanı sorar. 16, 64’ü yarılanma sayısına (4) bölünce; 32 ve 48, bir ve iki yarılanmada bozunanı bulunca çıkar. Dersin uyardığı gibi azalma doğrusal değildir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k303"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.23.3",
@@ -55197,7 +57358,54 @@
       "• Eşik frekansının altındaki ışıkta şiddet artırılınca elektron koptuğunu sanmak.",
       "• de Broglie dalga boyunun hızla doğru orantılı olduğunu sanmak; ters orantılıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.23.4.a1",
+       "tur": "secmeli",
+       "soru": "Eşik enerjisi 3 eV olan bir metale enerjisi 5 eV olan fotonlar düşürülüyor. Kopan elektronların en büyük kinetik enerjisi ve durdurma gerilimi nedir?",
+       "sec": [
+        "8 eV ve 8 V",
+        "5 eV ve 5 V",
+        "2 eV ve 2 V",
+        "3 eV ve 3 V",
+        "Elektron kopmaz."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Fotoelektrik denklemi: E_{foton} = eşik enerjisi + KE_{en büyük}.",
+        "KE_{en büyük} = 5 − 3 = 2 eV. Durdurma gerilimi bu enerjiyi sıfırlamalıdır: e · V = 2 eV ⇒ V = 2 V (C).",
+        "A enerjileri toplar; B fotonun bütün enerjisinin elektrona geçtiğini sanır; D eşik enerjisini kinetik enerji sanır. E yanlıştır: foton enerjisi eşikten büyüktür."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k305"
+       ]
+      },
+      {
+       "id": "akademik.1.23.4.a2",
+       "tur": "secmeli",
+       "soru": "Bir metale eşik frekansından küçük frekanslı ışık düşürülüyor ve elektron kopmuyor. Işığın frekansı değiştirilmeden şiddeti 3 katına çıkarılırsa ne olur?",
+       "sec": [
+        "Kopan elektron sayısı 3 katına çıkar.",
+        "Elektronların kinetik enerjisi 3 katına çıkar.",
+        "Elektronlar kopar ama kinetik enerjileri değişmez.",
+        "Metalin eşik enerjisi azalır.",
+        "Yine hiç elektron kopmaz."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Bir elektronu tek bir foton koparır; elektronun kopup kopmayacağını foton enerjisi (frekans) belirler.",
+        "Şiddet yalnız foton sayısını artırır; her fotonun enerjisi yine eşiğin altındadır: elektron kopmaz (E).",
+        "A, eşik üstündeki durumda doğrudur; koşulu atlayan A’yı seçer. B ve C dersin uyardığı hatadır: şiddetin enerjiyi artırdığını sanmak. D yanlıştır: eşik enerjisi metale özgüdür."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k305"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -57453,7 +59661,54 @@
       "• Elementlerin standart oluşum entalpisinin sıfır olduğunu unutmak.",
       "• Bağ enerjisi hesabında «kırılan − oluşan» sırasını ters almak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.25.2.a1",
+       "tur": "secmeli",
+       "soru": "Standart oluşum entalpileri CH_{4}(g) için −75 kJ/mol, CO_{2}(g) için −394 kJ/mol, H_{2}O(s) için −286 kJ/mol’dür. CH_{4} + 2O_{2} → CO_{2} + 2H_{2}O tepkimesinin ΔH değeri kaç kJ’dir?",
+       "sec": [
+        "+891",
+        "−605",
+        "−891",
+        "−966",
+        "−1041"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "ΔH = Σ(ürünlerin oluşum entalpisi × katsayı) − Σ(girenlerin oluşum entalpisi × katsayı). O_{2} element olduğu için oluşum entalpisi sıfırdır.",
+        "Ürünler: −394 + 2 · (−286) = −966. Girenler: −75. ΔH = −966 − (−75) = −891 kJ (C).",
+        "−605, suyun katsayısını (2) unutunca; −1041, CH_{4}’ü çıkarmak yerine ekleyince; −966, girenleri hiç hesaba katmayınca; +891, «girenler − ürünler» sırasıyla hesaplayınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k315"
+       ]
+      },
+      {
+       "id": "akademik.1.25.2.a2",
+       "tur": "secmeli",
+       "soru": "N_{2} + O_{2} → 2NO ΔH = +180 kJ ve 2NO + O_{2} → 2NO_{2} ΔH = −114 kJ olduğuna göre ½N_{2} + O_{2} → NO_{2} tepkimesinin ΔH değeri kaç kJ’dir?",
+       "sec": [
+        "−33",
+        "+33",
+        "+66",
+        "+147",
+        "+294"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "İki tepkime toplanınca 2NO iki yanda sadeleşir: N_{2} + 2O_{2} → 2NO_{2}, ΔH = +180 + (−114) = +66 kJ.",
+        "İstenen tepkime bunun yarısıdır; ΔH de yarıya iner: +66 / 2 = +33 kJ (B).",
+        "+66, katsayıları yarıya indirmeyi unutunca; −33, işareti ters çevirince; +294 ve +147, ikinci tepkimenin işaretini değiştirip (180 + 114) sırasıyla bölmeden ve bölerek kullanınca çıkar. Tepkime ters çevrilmedikçe ΔH’nin işareti değişmez."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k315"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.25.3",
@@ -57605,7 +59860,54 @@
       "• Katalizörün ΔH’yi ya da dengeyi değiştirdiğini sanmak; yalnız aktifleşme enerjisini düşürür.",
       "• Katı ve saf sıvıları hız denklemine yazmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.25.4.a1",
+       "tur": "secmeli",
+       "soru": "Gaz fazında gerçekleşen bir tepkimenin hız denklemi r = k[X]^{2}[Y]’dir. Sıcaklık sabitken kabın hacmi yarıya indirilirse tepkime hızı kaç katına çıkar?",
+       "sec": [
+        "1/8",
+        "2",
+        "4",
+        "8",
+        "16"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Hacim yarıya inince bütün gazların derişimi 2 katına çıkar.",
+        "Yeni hız: k · (2[X])^{2} · (2[Y]) = 4 · 2 · k[X]^{2}[Y] = 8r (D).",
+        "2, yalnız Y’nin derişimini artırınca; 4, yalnız X’in karesini alıp Y’yi unutunca; 16, Y’nin üssünü de 2 sanınca; 1/8, hacimdeki azalmayı derişime ters yansıtınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k317"
+       ]
+      },
+      {
+       "id": "akademik.1.25.4.a2",
+       "tur": "secmeli",
+       "soru": "Bir tepkimeye katalizör eklendiğinde aşağıdakilerden hangisi değişir?",
+       "sec": [
+        "Tepkimenin ΔH değeri",
+        "Denge sabiti (Kc)",
+        "Dengede oluşan ürün miktarı",
+        "İleri ve geri tepkimelerin aktifleşme enerjileri",
+        "Girenlerin ve ürünlerin potansiyel enerjileri"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Katalizör tepkimeye daha düşük enerjili yeni bir yol (mekanizma) sunar; ileri ve geri tepkimenin aktifleşme enerjisi aynı miktar düşer (D).",
+        "Girenlerin ve ürünlerin enerjisi değişmediği için ΔH değişmez; ileri ve geri hız aynı oranda arttığından denge sabiti ve dengedeki ürün miktarı da değişmez, denge yalnız daha çabuk kurulur.",
+        "A, B ve C dersin uyardığı hatadır: katalizörün ΔH’yi ya da dengeyi değiştirdiğini sanmak. E, potansiyel enerji diyagramında tepe noktasının alçalmasını girenlerin alçalması sanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k317"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.25.5",
@@ -57759,7 +60061,54 @@
       "• Basınç değişiminin, iki yanda gaz mol sayıları eşit olan dengeyi kaydırdığını sanmak.",
       "• Derişim değişiminin ya da katalizörün K değerini değiştirdiğini sanmak; K yalnız sıcaklıkla değişir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.25.6.a1",
+       "tur": "secmeli",
+       "soru": "N_{2}O_{4}(g) ⇌ 2NO_{2}(g) ΔH > 0 dengesi için aşağıdaki işlemlerden hangisi denge sabitinin (Kc) değerini artırır?",
+       "sec": [
+        "Sıcaklığı artırmak",
+        "Kabın hacmini küçültmek",
+        "Kaba NO_{2} eklemek",
+        "Kaba katalizör eklemek",
+        "Kaba N_{2}O_{4} eklemek"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Denge sabiti yalnız sıcaklıkla değişir. Tepkime endotermik olduğu için sıcaklık artınca denge ürünlere kayar ve Kc büyür (A).",
+        "Hacim değişimi ve madde ekleme dengeyi kaydırabilir ama yeni dengede derişimler oranı yine aynı Kc’yi verir; katalizör dengeyi hiç kaydırmaz.",
+        "B, C ve E dersin uyardığı hatadır: dengenin kaymasını K’nin değişmesi sanmak. D, katalizörün dengeyi etkilediğini sanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k319"
+       ]
+      },
+      {
+       "id": "akademik.1.25.6.a2",
+       "tur": "secmeli",
+       "soru": "1 L’lik bir kaba 1’er mol A_{2} ve B_{2} gazı konuyor. A_{2}(g) + B_{2}(g) ⇌ 2AB(g) tepkimesinin bu sıcaklıktaki denge sabiti Kc = 4’tür. Dengede kaç mol AB bulunur?",
+       "sec": [
+        "0,5",
+        "2/3",
+        "1",
+        "4/3",
+        "2"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "x mol A_{2} harcansın: dengede A_{2} ve B_{2} (1 − x), AB 2x mol. Kc = (2x)^{2} / (1 − x)^{2} = 4.",
+        "İki yanın karekökü: 2x / (1 − x) = 2 ⇒ 2x = 2 − 2x ⇒ x = 0,5. AB = 2x = 1 mol (C).",
+        "0,5, x’i bulup AB’nin katsayısını (2) unutunca; 4/3, karekökü almadan 2x / (1 − x) = 4 yazınca; 2/3, AB’yi x alıp x / (1 − x) = 2 yazınca; 2, tepkimenin tamamen ürünlere döndüğünü sanınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k319"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.25.7",
@@ -57936,7 +60285,54 @@
       "• Zayıf asidin tamamen iyonlaştığını kabul etmek.",
       "• Eşlenik baz yazarken H^{+} yerine OH^{−} ya da H atomu çıkarmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.25.8.a1",
+       "tur": "secmeli",
+       "soru": "25 °C’de 0,005 M’lık Ba(OH)_{2} çözeltisinin pH değeri kaçtır? (Ba(OH)_{2} suda tamamen iyonlaşır; log 5 = 0,7)",
+       "sec": [
+        "2",
+        "2,3",
+        "11,7",
+        "12",
+        "12,3"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Ba(OH)_{2} → Ba^{2+} + 2OH^{−}: [OH^{−}] = 2 · 0,005 = 0,01 M.",
+        "pOH = −log 0,01 = 2; 25 °C’de pH = 14 − 2 = 12 (D).",
+        "11,7, iki OH^{−}’yi unutup [OH^{−}] = 0,005 alınca; 2 ve 2,3, pOH’yi pH sanınca; 12,3, OH^{−} derişimini bir kez daha 2 ile çarpınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k321"
+       ]
+      },
+      {
+       "id": "akademik.1.25.8.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki tuzlardan hangisinin sulu çözeltisi bazik özellik gösterir?",
+       "sec": [
+        "NaCl",
+        "NH_{4}Cl",
+        "KNO_{3}",
+        "NH_{4}NO_{3}",
+        "CH_{3}COONa"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Tuzun özelliğini, hangi asit ve bazdan oluştuğu belirler: kuvvetli baz + zayıf asit tuzu baziktir.",
+        "CH_{3}COONa, kuvvetli baz NaOH ile zayıf asit CH_{3}COOH’tan oluşur; CH_{3}COO^{−} sudan H^{+} alıp OH^{−} oluşturur (E).",
+        "NaCl ve KNO_{3} kuvvetli asit ile kuvvetli bazdan oluşur, nötrdür. NH_{4}Cl ve NH_{4}NO_{3} zayıf baz NH_{3} ile kuvvetli asitten oluşur, asidiktir; «amonyak baziktir» diye bunları seçmek sık hatadır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k321"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.25.9",
@@ -58088,7 +60484,54 @@
       "• Farklı türdeki tuzların çözünürlüklerini yalnız Kçç değerlerine bakarak sıralamak.",
       "• Ortak iyonun çözünürlüğü artırdığını sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.25.10.a1",
+       "tur": "secmeli",
+       "soru": "Ag_{2}CrO_{4} katısının belli bir sıcaklıkta çözünürlük çarpımı Kçç = 3,2 · 10^{−11}’dir. Bu sıcaklıkta Ag_{2}CrO_{4}’ün saf sudaki çözünürlüğü kaç mol/L’dir?",
+       "sec": [
+        "8 · 10^{−12}",
+        "5,7 · 10^{−6}",
+        "2 · 10^{−4}",
+        "3,2 · 10^{−4}",
+        "4 · 10^{−4}"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Ag_{2}CrO_{4} → 2Ag^{+} + CrO_{4}^{2−}: çözünürlük s ise [Ag^{+}] = 2s, [CrO_{4}^{2−}] = s. Kçç = (2s)^{2} · s = 4s^{3}.",
+        "4s^{3} = 3,2 · 10^{−11} ⇒ s^{3} = 8 · 10^{−12} ⇒ s = 2 · 10^{−4} mol/L (C).",
+        "4 · 10^{−4}, Ag^{+} derişimini (2s) çözünürlük sanınca; 5,7 · 10^{−6}, Kçç = s^{2} yazınca; 3,2 · 10^{−4}, 4 katsayısını unutup s^{3} = Kçç alınca; 8 · 10^{−12}, küpkök almayı unutunca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k323"
+       ]
+      },
+      {
+       "id": "akademik.1.25.10.a2",
+       "tur": "secmeli",
+       "soru": "AgCl katısının aşağıdaki ortamlardan hangisindeki çözünürlüğü en küçüktür? (Tuzların hepsi suda tamamen iyonlaşır; sıcaklık aynıdır.)",
+       "sec": [
+        "Saf su",
+        "0,1 M CaCl_{2}",
+        "0,1 M NaCl",
+        "0,1 M AgNO_{3}",
+        "0,1 M NaNO_{3}"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Ortak iyon çözünürlüğü azaltır; ortak iyonun derişimi ne kadar büyükse çözünürlük o kadar küçüktür.",
+        "Ortak iyon derişimleri: CaCl_{2} → [Cl^{−}] = 0,2 M; NaCl → [Cl^{−}] = 0,1 M; AgNO_{3} → [Ag^{+}] = 0,1 M; saf su ve NaNO_{3}’te ortak iyon yoktur. En büyük ortak iyon 0,2 M Cl^{−}: CaCl_{2} (B).",
+        "CaCl_{2}’nin iki Cl^{−} verdiğini atlayan, onu C ve D ile eşit sanır ve seçemez; çözüm bu sayımdadır. E, ortak iyon taşımayan tuzun da çözünürlüğü azalttığını sanır; dersin uyardığı öteki hata, ortak iyonun çözünürlüğü artırdığını sanmaktır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k323"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.25.11",
@@ -58262,7 +60705,54 @@
       "• Yarı tepkime bir katsayıyla çarpılınca E° değerini de çarpmak; E° değişmez.",
       "• Galvanik hücrede anodu pozitif kutup sanmak; anot negatif kutuptur."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.25.12.a1",
+       "tur": "secmeli",
+       "soru": "E°(Zn^{2+}/Zn) = −0,76 V ve E°(Cu^{2+}/Cu) = +0,34 V’tur. Standart Zn–Cu pilinin potansiyeli ve dış devredeki elektron akışı için hangisi doğrudur?",
+       "sec": [
+        "1,10 V; elektronlar Zn’den Cu’ya akar.",
+        "0,42 V; elektronlar Zn’den Cu’ya akar.",
+        "1,10 V; elektronlar Cu’dan Zn’ye akar.",
+        "−1,10 V; elektronlar Zn’den Cu’ya akar.",
+        "0,42 V; elektronlar Cu’dan Zn’ye akar."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "İndirgenme potansiyeli büyük olan Cu katot, Zn anottur. E°_{pil} = E°_{katot} − E°_{anot} = 0,34 − (−0,76) = 1,10 V.",
+        "Anotta Zn yükseltgenir (Zn → Zn^{2+} + 2e^{−}); elektronlar dış devrede anottan katoda, Zn’den Cu’ya akar (A).",
+        "B ve E, işaretleri gözetmeden 0,76 − 0,34 alır; D sırayı ters kurar (anot − katot) ve kendiliğinden işleyen pile eksi gerilim verir; C ve E elektron yönünü ters alır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k325"
+       ]
+      },
+      {
+       "id": "akademik.1.25.12.a2",
+       "tur": "secmeli",
+       "soru": "Erimiş AlCl_{3}’ten 0,6 F (faraday) yük geçirildiğinde katotta kaç gram Al birikir? (Al: 27)",
+       "sec": [
+        "0,2",
+        "5,4",
+        "8,1",
+        "16,2",
+        "48,6"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Katot yarı tepkimesi: Al^{3+} + 3e^{−} → Al. 1 mol Al için 3 F yük gerekir.",
+        "0,6 F / 3 = 0,2 mol Al ⇒ 0,2 · 27 = 5,4 g (B).",
+        "0,2, mol sayısını gram sanınca; 16,2, elektron sayısını unutup 0,6 mol alınca; 8,1, Al’nin iki elektron aldığını sanınca; 48,6, 3’e bölmek yerine 3 ile çarpınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k325"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -58794,7 +61284,54 @@
       "• C–H bağlarını σ sayısına katmayı unutmak.",
       "• Grafitin de elmas gibi sert ve yalıtkan olduğunu sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.26.2.a1",
+       "tur": "secmeli",
+       "soru": "Propin (CH≡C–CH_{3}) molekülünde kaç σ bağı vardır ve kaç karbon atomu sp hibritleşmesi yapmıştır?",
+       "sec": [
+        "2 σ; 2 karbon sp",
+        "5 σ; 2 karbon sp",
+        "6 σ; 3 karbon sp",
+        "6 σ; 2 karbon sp",
+        "6 σ; 1 karbon sp"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Bağlar: C≡C üçlü bağı 1 σ + 2 π; C–C tekli bağı 1 σ; 4 C–H bağı 4 σ. Toplam 6 σ, 2 π.",
+        "Üçlü bağdaki iki karbon sp, CH_{3} karbonu sp^{3} hibritleşmesi yapar: 2 karbon sp (D).",
+        "5 σ, üçlü bağı üç π sayıp σ’sını atlayınca; 2 σ, C–H bağlarını saymayınca çıkar (dersin uyardığı iki hata). 3 karbon sp, CH_{3} karbonunu da sp sanır; 1 karbon sp, üçlü bağın iki ucunu tek karbon sayar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k327"
+       ]
+      },
+      {
+       "id": "akademik.1.26.2.a2",
+       "tur": "secmeli",
+       "soru": "Karbonun allotropu olan grafit için aşağıdakilerden hangisi doğrudur?",
+       "sec": [
+        "Elektriği iletir.",
+        "Karbon atomları sp^{3} hibritleşmesi yapmıştır.",
+        "Katmanlar arasında güçlü kovalent bağlar vardır.",
+        "Bilinen en sert doğal maddedir.",
+        "Her karbon atomu dört karbon atomuna bağlıdır."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Grafitte her karbon sp^{2} hibritleşmesiyle aynı katmandaki üç karbona bağlanır; dördüncü elektron katman boyunca hareketli (delokalize) π elektronu olur.",
+        "Bu hareketli elektronlar sayesinde grafit elektriği iletir (A). Katmanlar birbirine zayıf etkileşimlerle bağlıdır; bu yüzden grafit yumuşaktır ve kayganlaştırıcı olarak kullanılır.",
+        "B, D ve E elmasın özellikleridir; iki allotropu karıştıran bunları seçer. C yanlıştır: katmanlar arasında kovalent bağ yoktur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k327"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.26.3",
@@ -58975,7 +61512,54 @@
       "• C_{n}H_{2n} formülünün yalnız alkenlere ait olduğunu sanmak; halkalı alkanlar da bu formüldedir.",
       "• Alkollerin suda bazik özellik gösterdiğini sanmak; –OH grubu iyonlaşmaz."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.26.4.a1",
+       "tur": "secmeli",
+       "soru": "CH_{3}–CO–CH_{2}–CH_{3} bileşiğinin sınıfı ve adı hangisidir?",
+       "sec": [
+        "Aldehit; bütanal",
+        "Keton; bütanon",
+        "Keton; propanon",
+        "Ester; etil asetat",
+        "Karboksilik asit; bütanoik asit"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Karbonil grubu (C=O) zincirin içindeki 2. karbondadır; iki yanında karbon vardır: bileşik ketondur.",
+        "Zincirde 4 karbon vardır: bütan + -on ⇒ bütanon (B).",
+        "A, dersin uyardığı karışıklıktır: aldehitte –CHO zincirin ucundadır. C karbonları eksik sayar (propanon 3 karbonludur); D ve E molekülde bulunmayan –COO– ve –COOH gruplarını varsayar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k329"
+       ]
+      },
+      {
+       "id": "akademik.1.26.4.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki tepkimelerden hangisi bir katılma tepkimesidir?",
+       "sec": [
+        "CH_{4} + Cl_{2} → CH_{3}Cl + HCl",
+        "CH_{4} + 2O_{2} → CO_{2} + 2H_{2}O",
+        "CH_{3}COOH + C_{2}H_{5}OH → CH_{3}COOC_{2}H_{5} + H_{2}O",
+        "C_{2}H_{5}OH → CH_{2}=CH_{2} + H_{2}O",
+        "CH_{2}=CH_{2} + H_{2} → CH_{3}–CH_{3}"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Katılma tepkimesinde çift ya da üçlü bağ açılır ve atomlar bu bağa eklenir; tek bir ürün oluşur.",
+        "Eten (C=C) H_{2} alarak etana dönüşür: çift bağa katılma (E).",
+        "A alkanlarda yer değiştirme (halojenleme), B yanma, C esterleşme, D ayrılma (su çıkışı) tepkimesidir. D’de çift bağ oluştuğu için katılma sanılabilir; oysa çift bağ açılmamış, oluşmuştur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k329"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.26.5",
@@ -59127,7 +61711,54 @@
       "• Doğal gazın yenilenebilir olduğunu sanmak.",
       "• Yakıt pilinin enerjiyi depoladığını sanmak; kimyasal enerjiyi sürekli elektriğe çevirir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.26.6.a1",
+       "tur": "secmeli",
+       "soru": "Asit yağmurlarının oluşumuna yol açan başlıca gazlar hangileridir?",
+       "sec": [
+        "CO_{2} ve CH_{4}",
+        "CFC ve O_{3}",
+        "SO_{2} ve NO_{x}",
+        "CO ve H_{2}",
+        "N_{2} ve Ar"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Kükürtlü kömür ve yakıtların yanması SO_{2}, yüksek sıcaklıktaki motorlar ve santraller NO_{x} açığa çıkarır.",
+        "Bu gazlar havadaki suyla H_{2}SO_{4} ve HNO_{3} oluşturur ve yağışla yere iner (C).",
+        "A sera etkisine yol açan gazlardır; CO_{2}’yi asit yağmurunun ana nedeni sanmak dersin uyardığı hatadır. B ozon tabakasının incelmesiyle ilgilidir. D ve E asit yağmuru oluşturmaz."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k331"
+       ]
+      },
+      {
+       "id": "akademik.1.26.6.a2",
+       "tur": "secmeli",
+       "soru": "Propanın tam yanma denklemi C_{3}H_{8} + 5O_{2} → 3CO_{2} + 4H_{2}O’dur. 0,4 mol propan tamamen yandığında kaç mol CO_{2} oluşur ve kaç mol O_{2} harcanır?",
+       "sec": [
+        "0,4 mol CO_{2}; 2 mol O_{2}",
+        "1,2 mol CO_{2}; 5 mol O_{2}",
+        "1,6 mol CO_{2}; 2 mol O_{2}",
+        "1,2 mol CO_{2}; 2 mol O_{2}",
+        "1,2 mol CO_{2}; 0,4 mol O_{2}"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Mol oranları denklemin katsayılarıdır: 1 mol C_{3}H_{8} → 3 mol CO_{2}, 5 mol O_{2} harcar.",
+        "0,4 mol için CO_{2}: 0,4 · 3 = 1,2 mol; O_{2}: 0,4 · 5 = 2 mol (D).",
+        "A, CO_{2}’nin katsayısını unutur; B, O_{2}’de verilen miktarı değil denklemi okur; C, CO_{2} yerine suyun katsayısını (4) kullanır; E, O_{2}’nin katsayısını unutup propanla aynı mol sayısını alır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k331"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -62067,7 +64698,54 @@
       "• Eşik altı uyarının zayıf bir impuls oluşturduğunu sanmak; «ya hep ya hiç».",
       "• Omurilik reflekslerinin beyinde değerlendirildiğini sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.2.a1",
+       "tur": "secmeli",
+       "soru": "Omuriliği bel bölgesinden zarar görmüş bir kişide bacakların refleks merkezi sağlam, ancak omurilik ile beyin arasındaki bağlantı kopmuştur. Bu kişinin ayağına iğne batarsa ne olması beklenir?",
+       "sec": [
+        "Ayağını çekemez ama acıyı hisseder.",
+        "Ayağını çekemez ve acıyı hissetmez.",
+        "Ayağını ancak beyin emir verdikten sonra çeker.",
+        "Ayağını refleksle çeker ve acıyı hemen hisseder.",
+        "Ayağını refleksle çeker ama acıyı hissetmez."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Refleks yayı: reseptör → duyu nöronu → omurilikteki ara nöron → motor nöron → kas. Yanıt beyne uğramadan omurilikte oluşur.",
+        "Refleks merkezi sağlam olduğu için ayak çekilir; ama acının algılanması beyinde olur ve uyarı beyne ulaşamaz: acı hissedilmez (E).",
+        "A ve B refleksin beyinde oluştuğunu sanır; C de aynı yanılgıdan gelir. D, bağlantı koptuğu hâlde uyarının beyne ulaştığını varsayar; sağlam bir insanda doğru olan durumu bu kişiye taşır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k343"
+       ]
+      },
+      {
+       "id": "akademik.1.28.2.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi bir nöronda impuls iletim hızını artırır?",
+       "sec": [
+        "Aksonun miyelin kılıfla sarılı olması",
+        "Akson çapının küçülmesi",
+        "Uyarı şiddetinin eşik değerin çok üstüne çıkarılması",
+        "İmpulsun geçtiği sinaps sayısının artması",
+        "Vücut sıcaklığının normalin altına düşmesi"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Miyelin yalıtkandır; impuls Ranvier boğumları arasında atlayarak ilerler ve iletim çok hızlanır (A).",
+        "Kalın akson da hızı artırır; ince akson ise yavaşlatır. Sinapslarda kimyasal iletim zaman aldığından sinaps sayısı arttıkça iletim yavaşlar; düşük sıcaklık da iletimi yavaşlatır.",
+        "C, «ya hep ya hiç» kuralını bilmeyenin seçeneğidir: eşiği aşan uyarı impulsu başlatır, şiddeti artırmak impulsun hızını ve büyüklüğünü değiştirmez. B, D ve E hızı azaltır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k343"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.3",
@@ -62217,7 +64895,54 @@
       "• İnsülinin kan şekerini artırdığını sanmak.",
       "• Hormonların bütün hücreleri etkilediğini sanmak; yalnız reseptörü olan hedef hücreleri etkiler."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.4.a1",
+       "tur": "secmeli",
+       "soru": "Uzun süre ilaç olarak dışarıdan tiroksin alan bir kişide aşağıdakilerden hangisi beklenir?",
+       "sec": [
+        "Hipotalamustan TRH, hipofizden TSH salgısı artar.",
+        "Hipofizden TSH salgısı azalır.",
+        "Tiroit bezi büyür (guatr oluşur).",
+        "Metabolizma hızı düşer.",
+        "Hipofizden ADH salgısı durur."
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Kandaki tiroksin yükselince hipotalamus–hipofiz ekseni negatif geri bildirimle baskılanır.",
+        "Hipotalamus daha az TRH, hipofiz daha az TSH salgılar (B); uyarılmayan tiroit bezi kendi üretimini azaltır.",
+        "A, tiroksin düşükken olanı anlatır; geri bildirimin yönünü ters alan bunu seçer. C, iyot eksikliğinde TSH’nin sürekli uyarmasıyla olur. D yanlıştır: tiroksin metabolizmayı hızlandırır. E, tiroksinle ilgisi olmayan bir hormonu karıştırır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k345"
+       ]
+      },
+      {
+       "id": "akademik.1.28.4.a2",
+       "tur": "secmeli",
+       "soru": "Bir kişide çok miktarda seyreltik idrar ve sürekli susama görülüyor; idrarında glikoz bulunmuyor. Bu kişide hangi hormonun eksik olması beklenir?",
+       "sec": [
+        "İnsülin",
+        "Glukagon",
+        "Kalsitonin",
+        "ADH",
+        "Tiroksin"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "ADH (antidiüretik hormon) böbreğin toplama kanallarından suyun geri emilimini artırır.",
+        "ADH eksikse su geri emilemez: idrar çok ve seyreltik olur, kişi sürekli susar (diyabet insipitus). İdrarda glikoz yoktur (D).",
+        "A dersin uyardığı karışıklıktır: insülin eksikliğinde (şeker hastalığı) de çok idrar ve susama görülür, ama idrarda glikoz bulunur; soru bu ayrımı veriyor. B, C ve E su dengesini doğrudan düzenlemez."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k345"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.5",
@@ -62368,7 +65093,54 @@
       "• Kör noktada çok sayıda reseptör bulunduğunu sanmak; hiç reseptör yoktur.",
       "• Dengenin salyangozda sağlandığını sanmak; yarım daire kanalları ve dehliz sağlar."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.6.a1",
+       "tur": "secmeli",
+       "soru": "Hipermetrop bir gözde görüntü nerede oluşur ve bu kusur hangi mercekle düzeltilir?",
+       "sec": [
+        "Retinanın önünde; kalın kenarlı (ıraksak) mercekle",
+        "Retinanın arkasında; kalın kenarlı (ıraksak) mercekle",
+        "Retinanın önünde; ince kenarlı (yakınsak) mercekle",
+        "Kör noktada; silindirik mercekle",
+        "Retinanın arkasında; ince kenarlı (yakınsak) mercekle"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Hipermetropta göz küresi kısa ya da mercek yeterince kırıcı değildir; ışınlar retinaya ulaştığında henüz odaklanmamıştır, görüntü retinanın arkasına düşer.",
+        "Işığı toplayan ince kenarlı (yakınsak) mercek odağı öne çeker ve görüntüyü retinaya taşır (E).",
+        "A miyopun tarifidir; iki kusuru karıştıran bunu seçer. B görüntü yerini doğru, merceği yanlış eşler; C tersini yapar. D’deki silindirik mercek astigmatlık içindir; kör noktada görüntü algılanmaz."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k347"
+       ]
+      },
+      {
+       "id": "akademik.1.28.6.a2",
+       "tur": "secmeli",
+       "soru": "Ses titreşimlerinin sinir uyarısına dönüştürüldüğü yapı aşağıdakilerden hangisidir?",
+       "sec": [
+        "Kulak zarı",
+        "Üzengi kemiği",
+        "Corti organı",
+        "Östaki borusu",
+        "Yarım daire kanalları"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Sesin yolu: kulak kepçesi → kulak yolu → kulak zarı → çekiç, örs, üzengi → oval pencere → salyangoz.",
+        "Salyangozdaki Corti organının tüylü reseptör hücreleri titreşimi sinir uyarısına çevirir; uyarı işitme siniriyle beyne gider (C).",
+        "A ve B titreşimi yalnız iletir ve güçlendirir; ilk karşılaşılan yapıyı reseptör sanan bunları seçer. D orta kulakta basıncı dengeler. E iç kulakta olsa da işitme değil denge organıdır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k347"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.7",
@@ -62517,7 +65289,54 @@
       "• A bandının kasılmada kısaldığını sanmak.",
       "• Kalp kasının istemli çalıştığını sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.8.a1",
+       "tur": "secmeli",
+       "soru": "İskelet kasının kasılması sırasında sarkomerdeki aşağıdaki uzunluklardan hangisi değişmez?",
+       "sec": [
+        "H bandı",
+        "I bandı",
+        "Sarkomer boyu",
+        "A bandı",
+        "İki Z çizgisi arasındaki uzaklık"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Kasılmada aktin iplikleri miyozinin üzerinde kayar; ipliklerin kendi boyu kısalmaz.",
+        "A bandı miyozinin boyuna eşittir; bu yüzden değişmez (D). H ve I bantları kısalır, Z çizgileri birbirine yaklaşır, sarkomer kısalır.",
+        "C ve E aynı uzunluğun iki adıdır ve kısalır. A ve B, kasılmayı ipliklerin kısalması sanan için zor görünür; kayan iplikler kuramında yalnız iplikler arası örtüşme değişir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k349"
+       ]
+      },
+      {
+       "id": "akademik.1.28.8.a2",
+       "tur": "secmeli",
+       "soru": "Kas kasılmasında Ca^{2+} iyonlarının görevi aşağıdakilerden hangisidir?",
+       "sec": [
+        "Aktin üzerindeki miyozin bağlanma bölgelerini açmak",
+        "Miyozin başlarına doğrudan enerji sağlamak",
+        "Aktin ve miyozin ipliklerini kısaltmak",
+        "Kasılma bittiğinde kası gevşetmek",
+        "Kasta biriken laktik asidi parçalamak"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Sinir uyarısı gelince Ca^{2+} sarkoplazmik retikulumdan salınır.",
+        "Ca^{2+} aktin üzerindeki bağlanma bölgelerini açar; miyozin başları aktine tutunup onu çekebilir (A).",
+        "B, ATP’nin görevidir; iki rolü karıştıran bunu seçer. C yanlıştır: iplikler kısalmaz, kayar. D tersidir: gevşeme Ca^{2+}’nin geri pompalanmasıyla olur. E, laktik asidin karaciğerde işlendiğini atlar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k349"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.9",
@@ -62668,7 +65487,54 @@
       "• Proteinlerin ağızda sindirilmeye başladığını sanmak.",
       "• Yağ sindirim ürünlerinin doğrudan kana geçtiğini sanmak; çoğu lenfe geçer."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.10.a1",
+       "tur": "secmeli",
+       "soru": "Safra ile ilgili aşağıdakilerden hangisi doğrudur?",
+       "sec": [
+        "Pankreasta üretilir.",
+        "Yağları kimyasal olarak sindiren bir enzimdir.",
+        "Enzim içermez; yağları küçük damlacıklara ayırır.",
+        "Safra kesesinde üretilir.",
+        "Proteinlerin sindirimini başlatır."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Safra karaciğerde üretilir, safra kesesinde depolanır ve ince bağırsağa verilir.",
+        "Enzim içermez; yağları emülsiyon hâline getirerek (küçük damlacıklara ayırarak) lipazın etki yüzeyini büyütür (C).",
+        "B, emülsiyonu kimyasal sindirim sanır; asıl sindirimi lipaz yapar. D, depolandığı yeri üretildiği yer sanır; A da üretim yerini karıştırır. E, protein sindiriminin midede pepsinle başladığını atlar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k351"
+       ]
+      },
+      {
+       "id": "akademik.1.28.10.a2",
+       "tur": "secmeli",
+       "soru": "Proteinlerin kimyasal sindirimi nerede başlar ve nerede tamamlanır?",
+       "sec": [
+        "Ağızda başlar, midede tamamlanır.",
+        "Midede başlar, ince bağırsakta tamamlanır.",
+        "İnce bağırsakta başlar ve orada tamamlanır.",
+        "Midede başlar ve midede tamamlanır.",
+        "Ağızda başlar, ince bağırsakta tamamlanır."
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Protein sindirimi midede pepsinle başlar; büyük moleküller daha küçük peptitlere ayrılır.",
+        "İnce bağırsakta pankreas ve bağırsak enzimleri peptitleri amino asitlere kadar parçalar: sindirim ince bağırsakta tamamlanır (B).",
+        "E nişastanın yoludur; C yağın yoludur. Üç besinin sindirim yerlerini karıştıran bunları seçer. D, midede amino asitlere kadar parçalanma olduğunu sanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k351"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.11",
@@ -62825,7 +65691,54 @@
       "• Aşı ile serumu karıştırmak: aşı aktif, serum pasif bağışıklıktır.",
       "• Kan naklinde alıcının antikorları ile vericinin antijenlerinin karşılaştırıldığını unutmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.12.a1",
+       "tur": "secmeli",
+       "soru": "B Rh^{+} kan grubuna sahip bir kişi, aşağıdaki gruplardan hangilerinden kan alabilir?",
+       "sec": [
+        "Yalnız B Rh^{+}",
+        "B Rh^{+} ve B Rh^{−}",
+        "B Rh^{+} ve AB Rh^{+}",
+        "Bütün kan gruplarından",
+        "B Rh^{+}, B Rh^{−}, 0 Rh^{+} ve 0 Rh^{−}"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Alıcının plazmasında anti-A vardır; A antijeni taşıyan kan (A ve AB) verilemez. Alıcı Rh^{+} olduğu için Rh^{+} ve Rh^{−} kan alabilir.",
+        "A antijeni taşımayan gruplar B ve 0’dır; her ikisinin Rh^{+} ve Rh^{−} türleri uygundur (E).",
+        "B, 0 grubunun genel verici olduğunu unutur; A ise Rh^{−} kanın da uygun olduğunu atlar. C, AB’nin A antijeni taşıdığını görmez. D genel alıcı AB Rh^{+}’nın durumudur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k353"
+       ]
+      },
+      {
+       "id": "akademik.1.28.12.a2",
+       "tur": "secmeli",
+       "soru": "Sağ karıncıktan çıkan kanın izlediği yol aşağıdakilerden hangisidir?",
+       "sec": [
+        "Akciğer atardamarı → akciğer kılcalları → akciğer toplardamarı → sol kulakçık",
+        "Aort → vücut dokuları → ana toplardamarlar → sağ kulakçık",
+        "Akciğer toplardamarı → akciğer kılcalları → akciğer atardamarı → sol kulakçık",
+        "Akciğer atardamarı → akciğer kılcalları → akciğer toplardamarı → sağ kulakçık",
+        "Aort → akciğer kılcalları → ana toplardamarlar → sol kulakçık"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Sağ karıncık küçük (akciğer) dolaşımını başlatır: kirli kanı akciğer atardamarıyla akciğerlere gönderir.",
+        "Akciğerde temizlenen kan akciğer toplardamarlarıyla sol kulakçığa döner (A).",
+        "B büyük dolaşımdır; sol karıncıktan başlar. C atardamar ile toplardamarı ters yazar: atardamar kalpten çıkan damardır. D temiz kanın sağ kulakçığa döndüğünü sanır. E iki dolaşımı karıştırır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k353"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.13",
@@ -62973,7 +65886,54 @@
       "• Oksijenin kanda çoğunlukla plazmada çözünmüş taşındığını sanmak; hemoglobinle taşınır.",
       "• Solunum merkezinin en çok O_{2} azalmasına duyarlı olduğunu sanmak; CO_{2} artışına duyarlıdır."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.14.a1",
+       "tur": "secmeli",
+       "soru": "Soluk verme sırasında aşağıdakilerden hangisi gerçekleşir?",
+       "sec": [
+        "Diyafram kasılarak düzleşir.",
+        "Göğüs boşluğunun hacmi artar.",
+        "Akciğer içi basınç atmosfer basıncının üstüne çıkar.",
+        "Dış kaburgalar arası kaslar kasılır.",
+        "Kaburgalar yukarı ve dışa doğru kalkar."
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Soluk vermede diyafram gevşeyip kubbeleşir, dış kaburgalar arası kaslar gevşer ve kaburgalar iner.",
+        "Göğüs boşluğu daralır; akciğer içi basınç atmosfer basıncının üstüne çıkar ve hava dışarı akar (C).",
+        "A, B, D ve E soluk almanın olaylarıdır; iki evreyi karıştıran bunları seçer. Havanın akış yönünü basınç farkı belirler: hava yüksek basınçtan alçağa gider."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k355"
+       ]
+      },
+      {
+       "id": "akademik.1.28.14.a2",
+       "tur": "secmeli",
+       "soru": "Dokulardan akciğerlere taşınan CO_{2}’nin büyük kısmı kanda hangi biçimde taşınır?",
+       "sec": [
+        "Plazmada çözünmüş CO_{2} olarak",
+        "Hemoglobine bağlı olarak",
+        "Karbonmonoksit (CO) olarak",
+        "Karbonik anhidraz enzimine bağlı olarak",
+        "Plazmada bikarbonat iyonu (HCO_{3}^{−}) olarak"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Alyuvarlardaki karbonik anhidraz tepkimeyi hızlandırır: CO_{2} + H_{2}O ⇌ H_{2}CO_{3} ⇌ H^{+} + HCO_{3}^{−}.",
+        "Oluşan HCO_{3}^{−} plazmaya geçer; CO_{2}’nin büyük kısmı bu biçimde taşınır (E).",
+        "A ve B de CO_{2} taşır ama küçük paylarla; «hemoglobin her gazı taşır» diye B seçilir. D, enzimi taşıyıcı sanır; enzim tepkimeyi hızlandırır, CO_{2}’yi bağlayıp taşımaz. C başka bir gazdır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k355"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.15",
@@ -63122,7 +66082,54 @@
       "• ADH artınca idrarın arttığını sanmak; azalır.",
       "• Ürenin tamamen geri emildiğini sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.16.a1",
+       "tur": "secmeli",
+       "soru": "Sağlıklı bir insanda aşağıdakilerden hangisi glomerulustan Bowman kapsülüne süzülmez?",
+       "sec": [
+        "Glikoz",
+        "Üre",
+        "Su",
+        "Amino asit",
+        "Alyuvar"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Süzülme basınç farkıyla olur; küçük moleküller süzülür, kan hücreleri ve büyük plazma proteinleri süzülmez.",
+        "Alyuvar bir kan hücresidir; süzülmez (E). İdrarda alyuvar görülmesi süzme zarının zarar gördüğünü gösterir.",
+        "A ve D, idrarda bulunmadıkları için süzülmedikleri sanılarak seçilir; oysa süzülür, sonra tübüllerde geri emilirler. B ve C süzülür."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k357"
+       ]
+      },
+      {
+       "id": "akademik.1.28.16.a2",
+       "tur": "secmeli",
+       "soru": "Kanda aldosteron düzeyi artınca aşağıdakilerden hangisi beklenir?",
+       "sec": [
+        "Na^{+} geri emilimi artar, idrar miktarı azalır.",
+        "Na^{+} geri emilimi azalır, idrar miktarı artar.",
+        "K^{+} kanda birikir.",
+        "İdrarda glikoz görülür.",
+        "Kan hacmi ve basıncı azalır."
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Aldosteron böbrek tübüllerinde Na^{+} geri emilimini ve K^{+} salgılanmasını artırır.",
+        "Su geri emilen tuzu izler: idrar miktarı azalır, kan hacmi ve basıncı artar (A).",
+        "B etkiyi ters alır. C yanlıştır: K^{+} idrara salgılanır, kanda azalır. D şeker hastalığının belirtisidir. E, kan hacmindeki değişimin yönünü ters alır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k357"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.28.17",
@@ -63275,7 +66282,54 @@
       "• Progesteronun yumurtlamayı tetiklediğini sanmak; LH tetikler.",
       "• Plasentada anne ve bebek kanının karıştığını sanmak; madde alışverişi ince bir zar üzerinden olur."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.28.18.a1",
+       "tur": "secmeli",
+       "soru": "Döllenme olmayan bir menstrual döngüde korpus luteum gerileyince aşağıdakilerden hangisi gerçekleşir?",
+       "sec": [
+        "LH düzeyi ani bir artış gösterir.",
+        "Kandaki progesteron düzeyi düşer.",
+        "Hemen yeni bir yumurtlama olur.",
+        "Rahim iç duvarı kalınlaşmaya devam eder.",
+        "Kandaki östrojen düzeyi ani yükselir."
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Yumurtlamadan sonra folikül korpus luteuma dönüşür ve progesteron salgılar; progesteron rahim iç duvarını korur.",
+        "Döllenme olmazsa korpus luteum geriler; progesteron düzeyi düşer (B) ve rahim iç duvarı yıkılarak adet kanaması başlar.",
+        "A, döngünün ortasındaki yumurtlama öncesi olayıdır; olayların sırasını karıştıran bunu seçer. C yanlıştır: yeni yumurtlama için yeni bir folikül gelişmelidir. D, progesteron yüksekken olanı anlatır. E, yumurtlama öncesi östrojen artışıyla karıştırır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k359"
+       ]
+      },
+      {
+       "id": "akademik.1.28.18.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki yapılardan hangisi embriyonun ektoderm tabakasından gelişir?",
+       "sec": [
+        "Kalp",
+        "Karaciğer",
+        "İskelet kasları",
+        "Akciğerlerin iç yüzeyi",
+        "Sinir sistemi"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Ektoderm: sinir sistemi, deri epiteli ve duyu organları. Mezoderm: kas, iskelet, dolaşım ve boşaltım sistemi. Endoderm: sindirim ve solunum kanalının iç yüzeyi, karaciğer, pankreas.",
+        "Sinir sistemi ektodermden gelişir (E).",
+        "A ve C mezodermden, B ve D endodermden gelişir. «Dışta olan dıştan gelişir» diye düşünüp yalnız deriyi ektoderme yazan sinir sistemini atlayabilir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k359"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -63677,7 +66731,54 @@
       "• Calvin döngüsünün karanlıkta uzun süre çalışabileceğini sanmak; ATP ve NADPH ışık tepkimelerinden gelir.",
       "• Yeşil ışığın fotosentezde en etkili olduğunu sanmak; en az etkilidir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.29.2.a1",
+       "tur": "secmeli",
+       "soru": "Fotosentez yapan bir bitkiye ^{18}O ile işaretli CO_{2} veriliyor. İşaretli oksijenin aşağıdakilerden hangisinde görülmesi beklenir?",
+       "sec": [
+        "Açığa çıkan O_{2} gazında",
+        "Üretilen glikozda",
+        "Işığa bağımlı tepkimelerde üretilen ATP’de",
+        "NADPH’de",
+        "Klorofil molekülünde"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Açığa çıkan O_{2}, ışığa bağımlı tepkimelerde suyun ayrışmasından (fotoliz) gelir; CO_{2}’nin oksijeninden gelmez.",
+        "CO_{2} Calvin döngüsünde organik maddeye bağlanır: işaretli oksijen üretilen glikozda görülür (B).",
+        "A dersteki işaretli su deneyinin sonucudur; CO_{2} ile suyu karıştıran bunu seçer. C ve D ışığa bağımlı tepkimelerin ürünleridir; CO_{2} bu evreye katılmaz. E, klorofilin ışık soğuran pigment olduğunu atlar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k361"
+       ]
+      },
+      {
+       "id": "akademik.1.29.2.a2",
+       "tur": "secmeli",
+       "soru": "Bir bitkide ışık şiddeti artırıldıkça fotosentez hızı bir noktaya kadar artıyor, sonra sabit kalıyor. Sıcaklık uygun olduğuna göre aşağıdakilerden hangisi fotosentez hızını yeniden artırabilir?",
+       "sec": [
+        "Işık şiddetini daha da artırmak",
+        "Ortamdaki O_{2} miktarını artırmak",
+        "Bitkiyi kısa süre karanlığa almak",
+        "Sıcaklığı 60 °C’ye çıkarmak",
+        "Ortamdaki CO_{2} miktarını artırmak"
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Hız sabitlendiğine göre ışık artık sınırlayıcı değildir; hız başka bir etmenle sınırlanır.",
+        "Sıcaklık uygun verildiği için sınırlayıcı etmen CO_{2}’dir; CO_{2} artırılırsa hız yeniden artar (E).",
+        "A, sınırlayıcı etmen kavramını atlar. B yanlıştır: O_{2} fotosentezin ürünüdür, artışı hızı yükseltmez. D, enzimlerin yüksek sıcaklıkta bozulacağını unutur. C fotosentezi durdurur."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k361"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.29.3",
@@ -63826,7 +66927,54 @@
       "• Fermantasyonda O_{2} kullanıldığını sanmak.",
       "• CO_{2}’nin ETS’de oluştuğunu sanmak; pirüvat oksidasyonu ve Krebs döngüsünde oluşur."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.29.4.a1",
+       "tur": "secmeli",
+       "soru": "Oksijenli solunumda elektron taşıma sisteminin son elektron alıcısı nedir ve bu sistem hücrenin neresinde bulunur?",
+       "sec": [
+        "NAD^{+}; sitoplazmada",
+        "CO_{2}; mitokondri matriksinde",
+        "FAD; mitokondri dış zarında",
+        "O_{2}; mitokondri iç zarında",
+        "Pirüvat; sitoplazmada"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Glikoliz sitoplazmada, Krebs döngüsü mitokondri matriksinde, elektron taşıma sistemi mitokondri iç zarında gerçekleşir.",
+        "Elektronlar sistemin sonunda O_{2}’ye aktarılır ve su oluşur: son alıcı O_{2}, yeri iç zar (D).",
+        "A ve C, elektronu sisteme getiren taşıyıcıları son alıcı sanır. B, Krebs döngüsünün yan ürününü karıştırır. E, laktik asit fermantasyonunda elektronları alan molekülle karıştırır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k363"
+       ]
+      },
+      {
+       "id": "akademik.1.29.4.a2",
+       "tur": "secmeli",
+       "soru": "Maya hücrelerinde bir molekül glikozun etil alkol fermantasyonuyla yıkımında net ATP kazancı ve ürünler hangisidir?",
+       "sec": [
+        "Net 2 ATP; etil alkol ve CO_{2}",
+        "Net 2 ATP; laktik asit",
+        "Net 36 ATP; CO_{2} ve su",
+        "Net 4 ATP; etil alkol ve CO_{2}",
+        "ATP üretilmez; etil alkol ve O_{2}"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Fermantasyonda ATP yalnız glikolizde üretilir: 4 ATP üretilir, 2 ATP harcanır, net 2 ATP.",
+        "Pirüvat CO_{2} vererek etil alkole dönüşür: glikoz → 2 etil alkol + 2 CO_{2} + net 2 ATP (A).",
+        "B kas hücresindeki laktik asit fermantasyonudur. C oksijenli solunumdur. D brüt kazancı (4) net sanır. E, fermantasyonda ATP üretilmediğini ve O_{2} çıktığını sanır; oysa O_{2} ne kullanılır ne üretilir."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k363"
+       ]
+      }
+     ]
     }
    ]
   },
@@ -64348,7 +67496,54 @@
       "• Ksilemin canlı hücrelerden oluştuğunu sanmak.",
       "• Oksinin ışık alan tarafta biriktiğini sanmak; gölge tarafta birikir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.30.2.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki değişikliklerden hangisi bir bitkide terleme hızını azaltır?",
+       "sec": [
+        "Ortam sıcaklığının artması",
+        "Rüzgârın artması",
+        "Havadaki nemin artması",
+        "Işık şiddetinin artması",
+        "Havadaki nemin azalması"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Terleme, yaprak içi ile hava arasındaki su buharı farkına bağlıdır; fark büyüdükçe terleme artar.",
+        "Hava nemliyse bu fark küçülür, terleme yavaşlar (C).",
+        "A, B, D ve E terlemeyi artırır: sıcaklık buharlaşmayı, rüzgâr yaprak çevresindeki nemli havayı uzaklaştırmayı, ışık stomaların açılmasını artırır; kuru hava da farkı büyütür. Nemin etkisini ters alan E’yi seçer."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k365"
+       ]
+      },
+      {
+       "id": "akademik.1.30.2.a2",
+       "tur": "secmeli",
+       "soru": "Bitkilerdeki ksilem dokusu için aşağıdakilerden hangisi doğrudur?",
+       "sec": [
+        "Canlı hücrelerden oluşur.",
+        "Organik besinleri iki yönlü taşır.",
+        "Taşımayı arkadaş hücreleri yönetir.",
+        "Yalnız yapraklarda bulunur.",
+        "Su ve mineralleri kökten yukarı taşır."
+       ],
+       "dogru": "E",
+       "cozum": [
+        "Ksilem ölü hücrelerden (trake, trakeit) oluşan borulardır; su ve mineralleri kökten gövdeye ve yapraklara tek yönde taşır (E).",
+        "Floem ise canlı kalbur borusu hücrelerinden oluşur, arkadaş hücreleri vardır ve organik besinleri iki yönlü taşır.",
+        "A, B ve C floemin özellikleridir; iki iletim dokusunu karıştıran bunları seçer. D yanlıştır: ksilem kökten yaprağa kadar bütün bitki boyunca uzanır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k365"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.30.3",
@@ -64499,7 +67694,54 @@
       "• İkincil süksesyonun çıplak kayada başladığını sanmak.",
       "• Taşıma kapasitesinin sabit olduğunu sanmak; çevre koşullarıyla değişir."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.30.4.a1",
+       "tur": "secmeli",
+       "soru": "500 bireylik bir popülasyonda bir yıl içinde 80 doğum, 50 ölüm, 20 göçle gelme ve 40 göçle gitme oluyor. Yıl sonunda popülasyon kaç bireydir?",
+       "sec": [
+        "450",
+        "510",
+        "530",
+        "550",
+        "590"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Artıranlar: doğum ve göçle gelme (80 + 20 = 100). Azaltanlar: ölüm ve göçle gitme (50 + 40 = 90).",
+        "Net değişim: 100 − 90 = +10 ⇒ 500 + 10 = 510 birey (B).",
+        "530, göçleri hesaba katmayınca; 550, göç yönlerini ters alınca; 590, gidenleri de ekleyince; 450, doğum ile ölümü ters alınca çıkar."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k367"
+       ]
+      },
+      {
+       "id": "akademik.1.30.4.a2",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi birincil süksesyona örnektir?",
+       "sec": [
+        "Yanan bir ormanın yeniden yeşermesi",
+        "Terk edilen bir tarlanın zamanla çayıra dönüşmesi",
+        "Yeni soğumuş volkanik kayaya önce likenlerin yerleşmesi",
+        "Selden sonra bir çayırın yeniden otlanması",
+        "Kesilen bir ormanda fidanların büyümesi"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Birincil süksesyon, daha önce hiç toprak ve canlı bulunmamış bir yerde başlar; öncü canlılar (likenler) kayayı parçalayarak toprak oluşturur.",
+        "Yeni soğumuş lav kayası böyle bir yerdir (C).",
+        "A, B, D ve E’de toprak, tohum ve kökler kalmıştır: hepsi ikincil süksesyondur. Bozulmanın büyüklüğüne bakıp yangını birincil sanmak sık hatadır; ölçüt toprağın olup olmamasıdır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k367"
+       ]
+      }
+     ]
     },
     {
      "id": "akademik.1.30.5",
@@ -64647,7 +67889,54 @@
       "• Biyolojik birikimin besin zincirinin altında en yüksek olduğunu sanmak.",
       "• Ozon incelmesini küresel ısınmayla aynı olay sanmak."
      ],
-     "alistirmalar": []
+     "alistirmalar": [
+      {
+       "id": "akademik.1.30.6.a1",
+       "tur": "secmeli",
+       "soru": "Atmosferdeki N_{2} gazını bitkilerin kullanabileceği azotlu bileşiklere çeviren (azot bağlayan) canlılar aşağıdakilerden hangisidir?",
+       "sec": [
+        "Rhizobium bakterileri ve siyanobakteriler",
+        "Nitrit bakterileri",
+        "Denitrifikasyon bakterileri",
+        "Ayrıştırıcı mantarlar",
+        "Bitkilerin kök hücreleri"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Azot bağlama: Rhizobium (baklagil köklerinde) ve siyanobakteriler N_{2}’yi amonyağa çevirir (A).",
+        "Ayrıştırıcılar organik azotu amonyağa çevirir (amonifikasyon); nitrifikasyon bakterileri amonyağı nitrit ve nitrata; denitrifikasyon bakterileri nitratı yeniden N_{2}’ye çevirir.",
+        "B ve C döngünün başka basamaklarındaki canlılardır; basamakları karıştıran bunları seçer. D amonifikasyon yapar. E yanlıştır: bitkiler N_{2}’yi doğrudan kullanamaz."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k369"
+       ]
+      },
+      {
+       "id": "akademik.1.30.6.a2",
+       "tur": "secmeli",
+       "soru": "Bir gölde besin zinciri su yosunu → zooplankton → küçük balık → balık yiyen kuş biçimindedir. Göle karışan DDT’nin en yüksek derişimde hangisinde bulunması beklenir?",
+       "sec": [
+        "Su yosunlarında",
+        "Zooplanktonlarda",
+        "Küçük balıklarda",
+        "Balık yiyen kuşlarda",
+        "Hepsinde eşit derişimde"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "DDT vücutta parçalanmaz ve atılmaz, yağ dokusunda birikir.",
+        "Her basamaktaki canlı alt basamaktan çok sayıda canlı tükettiği için derişim basamak basamak artar: en yüksek derişim zincirin son halkası balık yiyen kuşlardadır (D). Buna biyolojik birikim denir.",
+        "A, DDT’nin ilk bulaştığı canlıda en çok olacağını sanır. E, maddenin vücuttan atıldığını varsayar. B ve C ara basamaklardır."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k369"
+       ]
+      }
+     ]
     }
    ]
   }

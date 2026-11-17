@@ -1,0 +1,37 @@
+[
+ {
+  "id": "akademik.1.13.k7",
+  "alan": "cozum",
+  "eski": [
+   "Büyük ölçek, uzunlukların haritada daha büyük gösterilmesidir; aynı kâğıt boyutunda daha küçük bir alan daha ayrıntılı gösterilebilir.",
+   "Bu soru projeksiyona bağlı bozulmayı bir ölçek özelliği olarak kullanmaz."
+  ],
+  "yeni": [
+   "Büyük ölçek, uzunlukların haritada daha büyük gösterilmesidir; aynı kâğıt boyutunda daha küçük bir alan daha ayrıntılı gösterilebilir."
+  ],
+  "neden": "Çözümün ikinci cümlesi («Bu soru projeksiyona bağlı bozulmayı bir ölçek özelliği olarak kullanmaz.») soruyla ilgisiz, üretimden kalmış bir iç not; öğrenciye anlamsız görünür. Cevap (C) doğru, yalnız bu cümle çıkarılmalı.",
+  "kesinlik": "olasi"
+ },
+ {
+  "id": "akademik.1.15.k2",
+  "alan": "soru",
+  "eski": "Batı Anadolu kıyılarındaki şehir devletlerinde felsefe ve bilimin geliştiği, Thales ve Herodot gibi düşünürlerin yetiştiği uygarlık aşağıdakilerden hangisidir?",
+  "yeni": "Batı Anadolu kıyılarındaki şehir devletlerinde felsefe ve bilimin geliştiği, Thales ve Anaksimandros gibi düşünürlerin yetiştiği uygarlık aşağıdakilerden hangisidir?",
+  "neden": "Herodot Halikarnas’ta (Karya, Dor kökenli kent) doğmuştur; İyon kenti değildir. MEB ders kitapları onu İyonya kültür çevresine bağlasa da kesin olgu olarak Thales ile Anaksimandros (ikisi de Miletli) daha güvenli. Cevap (C İyonlar) değişmez.",
+  "kesinlik": "olasi"
+ },
+ {
+  "id": "akademik.1.15.k2",
+  "alan": "cozum",
+  "eski": [
+   "İyonlar Ege kıyısındaki şehir devletlerinde (Milet, Efes, İzmir) felsefe ve bilimi geliştirdi; Thales, Anaksimandros ve Herodot buradan yetişti.",
+   "Lidyalılar parayla, Urartular kale ve su kanallarıyla, Hititler yazılı antlaşma ve kanunlarla tanınır."
+  ],
+  "yeni": [
+   "İyonlar Ege kıyısındaki şehir devletlerinde (Milet, Efes, İzmir) felsefe ve bilimi geliştirdi; Thales ve Anaksimandros buradan yetişti.",
+   "Lidyalılar parayla, Urartular kale ve su kanallarıyla, Hititler yazılı antlaşma ve kanunlarla tanınır."
+  ],
+  "neden": "Yukarıdaki soru düzeltmesiyle tutarlılık için (Herodot Halikarnaslıdır).",
+  "kesinlik": "olasi"
+ }
+]
