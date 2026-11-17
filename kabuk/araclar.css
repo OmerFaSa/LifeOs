@@ -1,4 +1,5 @@
-/* kabuk/araclar.css — Not (#/motor/not) ve Sağlık (#/saglik) ekranlarının stilleri (2026-11-17d, sahip: «daha profesyonel, daha sade»).
+/* kabuk/araclar.css — ikincil ekranların stilleri: Not ve Sağlık (2026-11-17d, sahip: «daha profesyonel, daha sade»); 2026-11-17e görsel sıçramada
+ * Plan, Kayıt, Tekrar, Yönetim, Hesap, Tanışma, Deneme ve King sohbeti de (yön: belgeler/ekip/sadelesme/tur-20261117e/yon.md: okuma metni --okuma, başlık --baslik-serif, arayüz sans, sayı tabular).
  * index.html'de kabuk.css ve bilesen.css'ten SONRA yüklenir; yalnız kabuk.css jetonlarını kullanır. Kartlarda kenar yok (ton + yumuşak gölge);
  * yüksek kontrast kipinde kenar geri gelir. Çizen: kabuk/araclar.js (Not) ve kabuk/saglik.js (Bugün kutucukları). */
 
@@ -80,7 +81,88 @@
   .sg-olcu__etiket{ display:none; } /* dar kutuda kesinlik etiketi ekran okuyucu adında kalır */
 }
 
+/* ==================== 2026-11-17e · görsel sıçrama: ikincil ekranlar ==================== */
+/* ortak: boş durum serif başlıklı; sayılar tabular */
+:is([data-arac], #sayfa[data-yer="saglik"]) .b-bos__baslik{ font-family:var(--baslik-serif); font-size:var(--yz-h3); font-weight:600; }
+:is([data-arac], #sayfa[data-yer="saglik"]) .b-bos__metin{ max-width:44ch; margin-inline:auto; line-height:1.6; }
+:is([data-arac="plan"], [data-arac="kayit"], [data-arac="tekrar"], [data-deneme-sayfa], #sayfa[data-yer="onay"]) :is(.b-satir__ad, .b-satir__not, .b-pul, .soluk, p){ font-variant-numeric:tabular-nums; }
+
+/* Not: yazı okuma serifinde; düzenleme sayfası kâğıt yaprağı */
+.nothizli textarea{ font-family:var(--okuma); font-size:var(--yz); }
+.notsatir .b-satir__ad{ font-family:var(--baslik-serif); font-size:var(--yz-h3); font-weight:600; letter-spacing:-.005em; }
+.notsatir .b-satir__not{ font-family:var(--okuma); color:var(--yazi-2); }
+:root form.notform input[name=baslik]{ height:auto; padding:var(--a2) 0; font-family:var(--baslik-serif); font-size:var(--yz-h2); font-weight:600; letter-spacing:-.01em;
+  background:transparent; box-shadow:none; border-radius:0; }
+:root form.notform input[name=baslik]:focus{ box-shadow:0 2px 0 color-mix(in srgb, var(--vurgu) 55%, transparent); outline:0; }
+:root form.notform textarea[name=govde]{ min-height:340px; padding:var(--a5) var(--a6); font-family:var(--okuma); font-size:var(--yz-h3); line-height:1.75;
+  background:var(--yuzey); box-shadow:var(--golge-yumusak); border-radius:var(--kose); }
+:root form.notform textarea[name=govde]:focus{ box-shadow:0 0 0 2px color-mix(in srgb, var(--vurgu) 55%, transparent), var(--golge-orta); outline:0; }
+
+/* Plan: mola sakin, sıradaki blok ılık ton, özet sayıları büyük */
+[data-arac="plan"] .b-satir[data-blok="mola"]{ min-height:0; padding-block:var(--a2); background:transparent; }
+[data-arac="plan"] .b-satir[data-blok="mola"] :is(.b-satir__ad, .b-satir__not){ font-size:var(--yz-k); font-weight:400; color:var(--soluk); }
+[data-arac="plan"] .b-satir[data-blok="mola"] .b-satir__not{ display:none; } /* süre saat aralığında yazılı */
+[data-arac="plan"] .b-satir[data-blok]:has(.b-dugme--ana){ background:color-mix(in srgb, var(--ana) 7%, var(--yuzey)); }
+[data-arac="plan"] .b-satir[data-blok-durum="yapildi"] .b-satir__ad{ color:var(--soluk); text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--soluk) 60%, transparent); }
+.plan-ozet b{ font-family:var(--baslik-serif); font-size:var(--yz-h2); font-weight:600; color:var(--yazi); letter-spacing:-.01em; font-variant-numeric:lining-nums tabular-nums; }
+
+/* Kayıt: gün özetinde değer büyük ve serif */
+[data-arac="kayit"] [aria-label="Gün özeti"] .b-satir__metin{ display:flex; flex-direction:column; }
+[data-arac="kayit"] [aria-label="Gün özeti"] .b-satir__ad{ font-size:var(--yz-k); font-weight:600; color:var(--yazi-2); }
+[data-arac="kayit"] [aria-label="Gün özeti"] .b-satir__not{ margin-top:var(--a1); font-family:var(--baslik-serif); font-size:var(--yz-h3); font-weight:600; color:var(--yazi); font-variant-numeric:lining-nums tabular-nums; }
+
+/* Tekrar: önü serif soru, arkası okuma metni */
+[data-arac="tekrar"] .b-kart__on{ font-family:var(--baslik-serif); font-size:var(--yz-h2); font-weight:600; line-height:1.25; letter-spacing:-.01em; font-variant-numeric:lining-nums; }
+[data-arac="tekrar"] .b-kart__arka{ font-family:var(--okuma); font-size:var(--yz-h3); line-height:1.65; }
+[data-arac="tekrar"] :is(.b-kart__ust, .b-kart__sure){ font-variant-numeric:tabular-nums; }
+
+/* Sağlık: değer serif, birim küçük */
+.sg-olcu__deger{ font-family:var(--baslik-serif); font-size:calc(var(--yz-h1) * .8); font-weight:600; letter-spacing:-.02em; font-variant-numeric:lining-nums tabular-nums; } /* serifin eski usul rakamı değil: hizalı rakam */
+.sg-olcu__birim{ margin-left:var(--a1); font-family:var(--govde); font-size:var(--yz-k); font-weight:600; letter-spacing:0; color:var(--soluk); }
+.sg-olcu__kutu--bos .sg-olcu__deger{ font-weight:400; }
+
+#sayfa[data-yer="onay"] .b-liste .b-satir__ad{ font-family:var(--baslik-serif); font-size:var(--yz-h3); font-weight:600; }
+
+/* Yönetim, Hesap, Tanışma: ilk izlenim (serif, nefes, dar sütun) */
+[data-arac="hesap"] .b-bolum:has(> form[data-hg-form]) > p.soluk:first-of-type{ max-width:48ch; margin-bottom:var(--a5); font-family:var(--okuma); font-size:var(--yz-h3); line-height:1.6; color:var(--yazi-2); }
+[data-arac="hesap"] form[data-hg-form]{ max-width:28rem; }
+.hs-kimlik{ box-shadow:var(--golge-orta); } /* kart kenar çizgisi yok: ince iç çerçeve yerine gölge */
+.hs-kimlik__ad{ font-family:var(--baslik-serif); font-weight:600; letter-spacing:-.01em; }
+.hs-kimlik__ozet dd{ font-variant-numeric:lining-nums tabular-nums; }
+[data-arac="hesap"] form[data-hg-form] p.soluk{ margin-top:var(--a4); font-family:var(--okuma); }
+:root [data-arac="tanisma"] .b-sohbet__soru--simdi{ padding:0; margin:0 0 var(--a4); font-family:var(--baslik-serif); font-size:var(--yz-h2); font-weight:600; line-height:1.3; letter-spacing:-.01em;
+  background:transparent; box-shadow:none; }
+[data-arac="tanisma"] .b-sohbet__soru:not(.b-sohbet__soru--simdi), [data-arac="tanisma"] .b-sohbet__ben{ font-family:var(--okuma); }
+[data-arac="tanisma"] .b-sohbet__simdi textarea{ font-family:var(--okuma); font-size:var(--yz); }
+
+/* Deneme: süre büyük, soru okuma serifinde */
+[data-deneme-sayfa] .b-serit__sayac{ font-family:var(--baslik-serif); font-size:var(--yz-h2); font-weight:600; font-variant-numeric:lining-nums tabular-nums; letter-spacing:.01em; }
+[data-deneme-sayfa] .b-soru__metin{ font-family:var(--okuma); font-size:var(--yz-h3); line-height:1.55; font-weight:500; }
+
+/* King: kullanıcı balonu sakin; cevap balonsuz kitap paragrafı; Divan'da hükümdar adı süslü */
+.king-akis{ gap:var(--a5); }
+.king-msj--ben .king-balon{ background:var(--yuzey-2); box-shadow:none; }
+.king-msj--king{ max-width:66ch; }
+.king-msj--king .king-balon{ padding:0 var(--a1); font-family:var(--okuma); font-size:var(--yz-h3); line-height:1.72; color:color-mix(in srgb, var(--yazi) 88%, var(--bg)); background:transparent; box-shadow:none; border-radius:0; } /* koyuda serif parlamasın */
+.king-msj--king .king-balon > * + *{ margin-top:var(--a3); }
+.king-yaziyor{ padding-inline:var(--a1); background:transparent; box-shadow:none; }
+.king-divan{ display:flex; align-items:center; gap:var(--a3); margin:var(--a2) 0 0; font-family:var(--baslik-serif); font-size:var(--yz-h2); font-weight:600; letter-spacing:-.005em; color:var(--yazi); }
+.king-divan::before, .king-divan::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--altin) 70%, transparent)); }
+.king-divan::after{ transform:scaleX(-1); }
+:root .king-yaz textarea{ font-family:var(--okuma); font-size:var(--yz); }
+.king-gonder{ color:var(--dugme-ana-yazi); background:var(--dugme-ana); }
+
+@media (max-width:640px){
+  :root form.notform textarea[name=govde]{ min-height:260px; padding:var(--a4); font-size:var(--yz); }
+  .sg-olcu__deger{ font-size:var(--yz-h2); }
+  .plan-ozet b{ font-size:var(--yz-h3); }
+  .king-msj--king .king-balon{ font-size:var(--yz); }
+  .king-divan{ font-size:var(--yz-h3); }
+}
+
 /* ---------- yüksek kontrast: ayrım yalnız tona bırakılmaz ---------- */
 :root[data-kontrast="yuksek"] :is(.nothizli, .sg-olcu__kutu, .notlar__ara .b-alan__giris, .notsatir__cip, .sg-olcu__eylem):not(:focus-visible){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; }
 :root[data-kontrast="yuksek"] .nothizli textarea{ outline:0; }
 :root[data-kontrast="yuksek"] .sg-olcu__kutu--bos{ background:var(--yuzey); }
+:root[data-kontrast="yuksek"] :is(form.notform textarea[name=govde], .king-msj--ben .king-balon, .hs-kimlik):not(:focus-visible){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; }
+:root[data-kontrast="yuksek"] form.notform input[name=baslik]{ box-shadow:0 1px 0 color-mix(in srgb, var(--yazi) 40%, transparent); }

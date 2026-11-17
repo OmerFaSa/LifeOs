@@ -947,8 +947,8 @@
       : !p ? B.uyari({ tur: 'dikkat', metin: bp.hatalar.join(' ') })
       : (kurulu ? '' : '<p class="soluk">Önerilen plan; «Planı kur» deyince bugünün planı olur ve blokları işaretleyebilirsin.</p>') +
         (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, !kurulu, b === siradaki); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
-        '<p class="soluk">Planlanan ' + (p.ozet.planlananDk.v || 0) + ' dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan ' + p.ozet.bosDk.v + ' dk (' + E[p.ozet.bosDk.k] + ')' +
-        (p.ozet.molaSayisi ? ' · ' + p.ozet.molaSayisi + ' mola' : '') + '</p>' +
+        '<p class="soluk plan-ozet">Planlanan <b>' + (p.ozet.planlananDk.v || 0) + '</b> dk (' + E[p.ozet.planlananDk.k] + ') · boş kalan <b>' + p.ozet.bosDk.v + '</b> dk (' + E[p.ozet.bosDk.k] + ')' +
+        (p.ozet.molaSayisi ? ' · <b>' + p.ozet.molaSayisi + '</b> mola' : '') + '</p>' + // sayılar araclar.css'te büyük, tabular
         (p.sigmayan.length ? B.uyari({ tur: 'dikkat', metin: 'Sığmayanlar (' + p.sigmayan.length + '): ' + p.sigmayan.map(function (x) { return x.ad + ' · ' + x.dk + ' dk · ' + x.neden; }).join('; ') }) : '');
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan">' + B.baslik({ metin: 'Plan' }) + planIletisi(il) + geriAlHtml() +
       B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([musait ? { metin: kurulu ? 'Yeniden kur' : 'Planı kur', tur: kurulu ? 'sade' : 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,

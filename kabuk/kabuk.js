@@ -72,6 +72,30 @@
     ad = String(ad || '').trim();
     return soz + (ad ? ' ' + ad : '') + '.';
   }
+  // Günün yayı (Bugün, tur 2026-11-17e): güneş gündüz doğumdan batıma, ay gece batımdan doğuma yay üstünde yürür.
+  // shortcut: Türkiye ortası (39° K, 35° D, UTC+3) için yaklaşık doğum/batım (± 15 dk); konum bilinirse enlem/boylam ondan alınmalı
+  function gunYayi(t) {
+    var r = Math.PI / 180, N = Math.round((new Date(t.getFullYear(), t.getMonth(), t.getDate()) - new Date(t.getFullYear(), 0, 0)) / 864e5);
+    var dek = -23.44 * r * Math.cos(2 * Math.PI * (N + 10) / 365), B = 2 * Math.PI * (N - 81) / 364;
+    var zd = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B); // zaman denklemi, dakika
+    var yarim = Math.acos(-Math.tan(39 * r) * Math.tan(dek)) / r / 15, oglen = 12 + (45 - 35) * 4 / 60 - zd / 60;
+    var dog = oglen - yarim, bat = oglen + yarim, s = t.getHours() + t.getMinutes() / 60;
+    if (s >= dog && s < bat) return { gunduz: true, oran: (s - dog) / (bat - dog), kalan: bat - s, dogus: dog, batis: bat };
+    var gece = 24 - (bat - dog), g = s >= bat ? s - bat : s + 24 - bat;
+    return { gunduz: false, oran: g / gece, kalan: gece - g, dogus: dog, batis: bat };
+  }
+  function gunYayiHtml(t) {
+    var g = gunYayi(t), a = Math.PI * (1 - g.oran), x = (60 + 54 * Math.cos(a)).toFixed(1), y = (34 - 26 * Math.sin(a)).toFixed(1);
+    var sa = Math.floor(g.kalan), dk = Math.round((g.kalan - sa) * 60), ne = (sa ? sa + ' saat ' : '') + dk + ' dakika';
+    var ad = (g.gunduz ? 'Güneş batana dek ' : 'Gün doğana dek ') + ne;
+    return '<svg class="gun-yayi" viewBox="0 0 120 38" role="img" aria-label="' + ad + '" data-gunduz="' + g.gunduz + '"><title>' + ad + '</title>' +
+      '<path class="gun-yayi__iz" d="M6 34 A54 26 0 0 1 114 34"/><path class="gun-yayi__dolu" d="M6 34 A54 26 0 0 1 114 34" pathLength="100" stroke-dasharray="' + (g.oran * 100).toFixed(1) + ' 100"/>' +
+      '<path class="gun-yayi__ufuk" d="M0 34 H120"/>' +
+      (g.gunduz ? '<circle class="gun-yayi__hale" cx="' + x + '" cy="' + y + '" r="12"/><circle class="gun-yayi__isik" cx="' + x + '" cy="' + y + '" r="6.5"/>'
+        : '<path class="gun-yayi__isik" d="M' + (+x + 2.5) + ' ' + (y - 7) + 'a7.2 7.2 0 1 0 0 14a5.6 5.6 0 1 1 0-14z"/>') + '</svg>';
+  }
+  // Ders paragrafı: «Özetle» ile başlayan paragraf ayrı sakin ton bloğu (ders__ozetle); öbürleri bileşenin paragrafı aynen
+  function dersParagraf(B, p) { var h = B.paragraf(p); return /^\s*Özetle\b/.test(p) ? h.replace(/^<p>/, '<p class="ders__ozetle">') : h; }
   // Selamın altındaki cümle: yalnız bilinen sayılar; son öğe iyelik alır («bir ders, 3 tekrar ve 2 bekleyen işin var»)
   function ozetCumle(a, tekrar, bekleyen) {
     var l = [];
@@ -229,7 +253,7 @@
   }
 
   var Kabuk = kok.LIFEOS && kok.LIFEOS.Kabuk || {};
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz;
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.gunYayi = gunYayi; Kabuk.gunYayiHtml = gunYayiHtml; Kabuk.dersParagraf = dersParagraf; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz;
   Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
     yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
@@ -240,6 +264,12 @@
   var H = Kabuk.Harita, A = Kabuk.Ayar, d = document, kokEl = d.documentElement;
   // Ekran hataları bu bilgisayardaki tek kapının günlüğüne (sistem/tekkapi.py /api/kabuk/hata, gövde ≤ 4 KB): yalnız yerelde,
   // açılış başına en çok 5, sessiz başarısızlık (hata bildirimi kendisi hata üretmesin).
+  // Anlar (kabuk/an.js: ders bitince, kapı geçilince, günün ilk kaydında küçük hareket) açılış yükünde değil: sayfa yüklenince ilk boşlukta gelir.
+  // An ancak etkileşimden sonra gerekir; açılış bütçesi kalite/olcum.py (kabuk_acilis_yuku) yalnız index.html'in bağladıklarını sayar.
+  if (kok.addEventListener && d.createElement) kok.addEventListener('load', function () {
+    var yukle = function () { var s = d.createElement('script'); s.src = 'an.js'; d.head.appendChild(s); };
+    if (kok.requestIdleCallback) requestIdleCallback(yukle, { timeout: 3000 }); else setTimeout(yukle, 1500);
+  });
   var hataSay = 0;
   function hataGonder(tur, ileti, yigin) {
     if (hataSay++ >= 5) return;
@@ -383,9 +413,15 @@
   var kapakYer = null; // rota çizerken: bu sayfa kapaklı mı
   function ust(sol) {
     var k = kapakYer && KAPAK[kapakYer.id];
-    return cubuk(!!k) + (k ? '<div class="kapak" aria-hidden="true"><canvas class="kapak__sahne" width="480" height="72" data-sahne="' + k[0] + '"></canvas></div>' +
-      '<div class="kapak-alt" aria-hidden="true"><span class="kapak__simge"><span class="b-simge b-simge--' + k[1] + '"><svg><use href="#i-' + kapakYer.id + '"/></svg></span></span></div>' : '') +
+    return cubuk(!!k) + (k ? '<div class="kapak" aria-hidden="true"><canvas class="kapak__sahne" width="480" height="72" data-sahne="' + k[0] + '"></canvas></div>' : '') +
       '<nav class="konum" aria-label="Konum">' + sol + '</nav>';
+  }
+  // Alanın küçük amblemi sayfa başlığının yanında (tur 2026-11-17e; eskiden kapağın altında ayrı kutu): rota ilk h1'in başına koyar
+  // Piksel amblem (piksel-doga.js amblem: 16×16 PNG) kitaplık yüklüyse; yoksa simge, kitaplık gelince manzara() değiştirir
+  function amblemResmi(id) { var D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA, u = null; try { u = D && D.amblem ? D.amblem(id) : null; } catch (e) { /* süs */ } return u ? '<img src="' + u + '" alt="">' : ''; }
+  function amblem(yer) {
+    var k = KAPAK[yer.id];
+    return '<span class="kapak__simge" aria-hidden="true"><span class="b-simge b-simge--' + k[1] + '">' + (amblemResmi(yer.id) || '<svg><use href="#i-' + yer.id + '"/></svg>') + '</span></span>';
   }
   function kirinti(yer) {
     var ustYer = H.bul(H.DAL_SAYFASI[yer.dal]);
@@ -412,12 +448,13 @@
       Kabuk.onayBugun ? Kabuk.onayBugun() : '']; // onay.js: «N ders onayını bekliyor», yalnız N > 0 iken
     // «Her yere iki adımda» ipucu kalktı (2026-11-16b): gezinme artık görünür çubukta; sağ tık, Ctrl . ve Ctrl K ek yollardır, öğretilmesi gerekmez
     sonOzet = { a: a, tekrar: v.tekrar };
+    // günün yayı karşılamanın sahnesinde, tarihin üstünde (bileşenin iç bloğunun başına; öğe sayısı: tarih satırının süsü)
     return cubuk(true) + B.karsilama({ tarih: tarih(t), selam: selam(t, hesapAdi()),
       ozet: ozetCumle(a, v.tekrar, ekler.filter(function (s) { return BEKLEYEN_RE.test(s); }).length),
       // 2026-11-17d (sahip: büyük «sıradaki» kartı Bugün'de olmasın; alanlar ilerleme gibi bir bölümde): iş kartı yok, alanlar «İlerleme»de,
       // çalışılan alan en başta ilerleme çizgisi ve sıradaki adımıyla
       alanlarBaslik: 'İlerleme', alanlar: alanKartlari(f, od, a),
-      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler });
+      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler }).replace('<div class="b-karsilama__ic">', '<div class="b-karsilama__ic">' + gunYayiHtml(t));
   }
   // Bugün'ün alan ızgarası: haritadaki taşınmış alanlar; simge index.html'deki #i-<alan>, ilerleme yalnız açık alan için bilinir
   var ALAN_RENK = { felsefe: 'turuncu', akademik: 'mavi', dil: 'yesil', tarih: 'pembe', okuma: 'sari', hareket: 'deniz', muzik: 'mor', beslenme: 'yesil', uyku: 'gok', tahlil: 'pembe',
@@ -454,6 +491,8 @@
       if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
       return;
     }
+    var ks = sayfaEl.querySelector('h1 > .kapak__simge .b-simge'), ar = ks && !ks.querySelector('img') && amblemResmi(sayfaEl.getAttribute('data-yer'));
+    if (ar) ks.innerHTML = ar; // kitaplık bu sayfa çizildikten sonra geldi: simge piksel amblemle değişir
     // tuval görünen kutunun oranında çizilir (eskiden 480×72 tuval 300 px yüksekliğe gerilip pikseller dikine uzuyordu): her piksel kare, 3 (telefonda 2) ekran pikseli
     var kutu = c.getBoundingClientRect(), olc = innerWidth < 640 ? 2 : 3;
     if (kutu.width > 0 && kutu.height > 0) { c.width = Math.max(120, Math.round(kutu.width / olc)); c.height = Math.max(40, Math.round(kutu.height / olc)); }
@@ -770,7 +809,7 @@
   function dersMetni(y, x, inceleme) {
     return B.baslik({ metin: x.ad }) +
       (Yol.etiket(x) === 'taslak' ? B.uyari({ tur: 'dikkat', metin: 'Taslak: bu ders henüz onaylanmadı; tekrara girmez.' }) : '') +
-      '<p class="ders__ozet">' + B.zengin(x.ozet) + '</p>' + (x.metin || []).map(B.paragraf).join('') +
+      '<p class="ders__ozet">' + B.zengin(x.ozet) + '</p>' + (x.metin || []).map(function (p) { return dersParagraf(B, p); }).join('') +
       (x.not && inceleme ? B.uyari({ tur: 'bilgi', metin: 'Kaynak notu: ' + x.not }) : '') + kaynaklar(y, x.kaynak, inceleme, inceleme ? '' : x.not);
   }
   function sayfaDers(id) {
@@ -782,7 +821,8 @@
     var okundu = !!kayit.dersler[id], n = x.alistirmalar.length;
     var cevap = x.alistirmalar.filter(function (a) { var c = kayit.cevaplar[a.id]; return c && c.length; }).length;
     var adim = okundu ? 3 : n && cevap >= n ? 2 : n && cevap ? 1 : 0; // 0 oku, 1 alıştır, 2 bitir, 3 bitti
-    return ust(dersKirinti(y, id)) + '<article class="govde ders">' + dersAdimlari(adim, n) + dersMetni(y, x) +
+    // ders-ilerleme: üstte kaydırınca dolan ince çizgi (kaydir yazar), süs; okuma oranı ekran okuyucuya ayrıca söylenmez
+    return ust(dersKirinti(y, id)) + '<article class="govde ders"><div class="ders-ilerleme" aria-hidden="true"><i></i></div>' + dersAdimlari(adim, n) + dersMetni(y, x) +
       (n ? B.bolum({ baslik: 'Kendini dene', id: 'ders-alistir',
         govde: ['<p class="soluk ders__sayac">Okuduğunu ' + n + ' soruyla dene · ' + cevap + ' / ' + n + ' cevaplandı</p>'].concat(x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; })) }) : '') +
       // bos: cevaplanmamış alıştırma sayısı; Bitir önce yumuşakça sorar (tik › okudum). Konum satırı alana döner: ayrı «Yol haritası» düğmesi yok.
@@ -882,6 +922,7 @@
     else if (tasindi) html = sayfaAlan(yer);
     else if (H.DAL_SAYFASI[yer.dal] === yer.id && yer.dal !== 'king') html = sayfaDal(yer);
     else html = sayfaYer(yer);
+    if (kapakYer) html = html.replace(/<h1\b[^>]*>/, function (h) { return h + amblem(kapakYer); });
     var once = sayfaEl.getAttribute('data-yer'), onceYol = sayfaEl.getAttribute('data-yol'), yeniSayfa = once !== yer.id || onceYol !== parca[0];
     // data-yer hemen yazılır (eşzamansız yüklemeler «hâlâ bu sayfa mı?» diye ona bakar); görünüm işareti data-ciz çizimle birlikte.
     // data-yol: sayfanın adresi (sorgusuz); aynı yerde başka sayfaya geçmek (alan → ders) de yeni sayfadır.
@@ -898,6 +939,8 @@
       sayfaEl.innerHTML = html;
       if (pay) { var ph = sayfaEl.querySelector(pay.hedef); if (ph) ph.style.viewTransitionName = 'paylasilan'; }
       sayfaEl.setAttribute('data-ciz', yer.id);
+      // alanın tonu sayfaya (kabuk.css --alan-ton/--alan-isik): kapak ışıması, ders ve kart vurguları; tonsuz sayfa sıcak ana renkte
+      if (KAPAK[yer.id]) sayfaEl.setAttribute('data-ton', KAPAK[yer.id][1]); else sayfaEl.removeAttribute('data-ton');
       d.title = yer.ad + ' · Başbuğ';
       altCubukYaz(yer);
       kapakPay(); manzara();
@@ -1033,7 +1076,8 @@
   // Eşik 6 px: yavaş kaydırmada titremesin. Hareket azsa geçiş süresi 0 (CSS --sure), çubuk anında gider gelir.
   var kayY = 0;
   function kaydir() {
-    var y = scrollY, k = kokEl.classList;
+    var y = scrollY, k = kokEl.classList, oi = sayfaEl.querySelector('.ders-ilerleme i');
+    if (oi) { var m = d.documentElement.scrollHeight - innerHeight; oi.style.transform = 'scaleX(' + (m > 0 ? Math.min(1, y / m).toFixed(3) : 1) + ')'; }
     k.toggle('ust-kaydi', y > 8);
     if (y < 64) { k.remove('ust-gizli'); kayY = y; return; }
     if (Math.abs(y - kayY) < 6) return;

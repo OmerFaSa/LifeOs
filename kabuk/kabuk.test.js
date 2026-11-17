@@ -22,6 +22,25 @@ t('karar: selam adı ekler, adsızsa yalın, saat dilimleri', () => {
   esit(s(8, 'Altay'), 'Günaydın Altay.'); esit(s(8, '  '), 'Günaydın.'); esit(s(8, null), 'Günaydın.');
 });
 t('karar: hareket varsayılanı cihaza uyar', () => esit(A.tanim('lifeos.hareket').varsayilan, 'sistem'));
+// tur 2026-11-17e: Bugün'ün günün yayı ve dersin «Özetle» paragrafı
+t('günün yayı: gündüz güneş doğumdan batıma, gece ay; mevsimle gün uzar, saatler makul', () => {
+  const g = (ay, gun, sa, dk) => K.gunYayi(new Date(2026, ay, gun, sa, dk || 0));
+  const k = g(10, 17, 13), y = g(5, 21, 13), gece = g(10, 17, 23), sabah = g(10, 17, 5);
+  dogru(k.gunduz && k.oran > .4 && k.oran < .7, 'kasım öğlesi gündüz ve yayın ortasında: ' + JSON.stringify(k));
+  dogru(k.dogus > 7 && k.dogus < 8.2 && k.batis > 16.8 && k.batis < 17.8, 'kasım doğum/batım (Türkiye, UTC+3): ' + k.dogus + ' ' + k.batis);
+  dogru(y.batis - y.dogus > 14.5 && k.batis - k.dogus < 10.5, 'haziranda gün kasımdan uzun');
+  dogru(!gece.gunduz && !sabah.gunduz && sabah.oran > gece.oran && gece.oran > 0 && sabah.oran < 1, 'gece ay batımdan doğuma ilerler');
+  dogru(Math.abs(k.kalan - (k.batis - 13)) < 1e-9, 'kalan süre batıma kadar');
+  const h = K.gunYayiHtml(new Date(2026, 10, 17, 13));
+  dogru(/role="img" aria-label="Güneş batana dek \d+ saat \d+ dakika"/.test(h) && /data-gunduz="true"/.test(h), h.slice(0, 160));
+  dogru(/aria-label="Gün doğana dek/.test(K.gunYayiHtml(new Date(2026, 10, 17, 23))), 'gece metni');
+});
+t('ders: «Özetle» ile başlayan paragraf ayrı ton bloğu; öbürleri ve tablo aynen', () => {
+  const B = require('./bilesen.js');
+  esit(K.dersParagraf(B, 'Özetle: kanıt önce gelir.'), '<p class="ders__ozetle">Özetle: kanıt önce gelir.</p>');
+  esit(K.dersParagraf(B, 'Kısaca özetle diyelim.'), B.paragraf('Kısaca özetle diyelim.'));
+  esit(K.dersParagraf(B, 'Özetlemek zordur.'), B.paragraf('Özetlemek zordur.'));
+});
 
 // ---- Felsefe pilotu: sıradaki adım, gerçek içerik ve gerçek Yol motoruyla ----
 t('yol: sıradaki adım ders → kapı → sonraki ünite → aşama kapısı → bitti; okumak üniteyi geçirmez', () => {

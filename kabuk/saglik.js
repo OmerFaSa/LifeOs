@@ -67,7 +67,7 @@
         ' aria-label="' + kac(x.ad + ': ' + (x.metin ? x.metin + (x.gun && x.gun !== bugun ? ', ' + gunYaz(x.gun) : '') + ', ' + E[x.d.k] : 'bugün kayıt yok') + '. ' + eylem) + '">' +
         '<span class="sg-olcu__ust"><span class="b-simge b-simge--' + (ren[sim] || 'mor') + '" aria-hidden="true"><svg><use href="#i-' + sim + '"/></svg></span>' +
         '<span class="sg-olcu__ad">' + kac(x.ad) + '</span></span>' +
-        '<span class="sg-olcu__deger">' + (x.metin ? kac(p[0]) : '—') + '</span>' +
+        '<span class="sg-olcu__deger">' + (x.metin ? kac(p[0]).replace(/^([\d.,]+) (.+)$/, '$1<small class="sg-olcu__birim">$2</small>') : '—') + '</span>' + // birim küçük
         '<span class="sg-olcu__ayrinti">' + (x.metin ? kac(ay || E[x.d.k]) : 'Bugün kayıt yok') + '</span>' +
         '<span class="sg-olcu__alt">' + (x.metin && ay ? '<span class="sg-olcu__etiket">' + kac(E[x.d.k]) + '</span>' : '<span></span>') +
         '<span class="sg-olcu__eylem">' + (x.metin ? '+ ' + eylem : eylem + '<svg aria-hidden="true"><use href="#i-sag"/></svg>') + '</span></span></a></li>';

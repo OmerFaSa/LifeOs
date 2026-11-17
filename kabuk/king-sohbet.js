@@ -151,7 +151,8 @@
     // Divan: hükümdar seçimi (ev bileşeni çipler); seçilmeden örnek soru yok
     var divan = s.kip === 'divan', h = divan && s.hukumdar;
     var secim = divan ? B.cipler({ ad: 'Hükümdar, biri seçilir', ogeler: Object.keys(HUKUMDAR).map(function (k) {
-      return { metin: HUKUMDAR[k], tur: 'ikincil', basili: k === s.hukumdar, veri: { 'king-hukumdar': k } }; }) }) : '';
+      return { metin: HUKUMDAR[k], tur: 'ikincil', basili: k === s.hukumdar, veri: { 'king-hukumdar': k } }; }) }) +
+      (h ? '<p class="king-divan" aria-hidden="true">' + kac(HUKUMDAR[h]) + '</p>' : '') : ''; // seçili hükümdarın adı: serif, süs çizgili (okuyucu çipten duyar)
     var giris = divan ? (h ? 'Bu bir canlandırma: King, ' + HUKUMDAR[h] + ' olarak tarihî kaynaklara dayanarak konuşur; bilinmeyeni uydurmaz.' : 'Kiminle konuşmak istersin?')
       : konu ? 'Bu konuyu King\'le baştan çalış. Şunlardan biriyle başla ya da aklındakini yaz:'
       : s.baglam ? 'Bu dersi King\'le çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : 'Aklındakini yaz ya da şunlardan biriyle başla:';

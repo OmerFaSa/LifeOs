@@ -74,6 +74,11 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Tur 2026-11-17d · Akademik cevap anahtarı denetimi](ekip/sadelesme/tur-20261117d/akademik-denetim.md) — 1727 eski soru okundu; kesin bulgu yok, 3 olası düzeltme uygulandı (akademik-denetim.json).
 - [Tur 2026-11-17d · Akademik alıştırmalar](ekip/sadelesme/tur-20261117d/icerik-akademik-alistirma.md) — alıştırmasız 70 sınav düzeyi derse 140 ÖSYM tarzı soru, adım adım çözüm.
 - [Tur 2026-11-17d · Tarih 2 ve Felsefe 2](ekip/sadelesme/tur-20261117d/icerik-tarih-felsefe-2.md) — 18 ders aşama 1 düzeyinde; ezber soruları anlama sorusuna, bütün sorulara çözüm, olgu düzeltmeleri, sahibe notlar.
+- [Tur 2026-11-17e · Tasarım dili](ekip/sadelesme/tur-20261117e/dil.md) — yazı kimliği (serif başlık ve okuma jetonu), açık/koyu palet ve iki katmanlı gölge, alan tonu (--alan-ton, --alan-isik), bileşen cilası, WCAG AA ölçümü, sözleşme; önce/sonra görselleri.
+- [Tur 2026-11-17e · Sayfalar](ekip/sadelesme/tur-20261117e/sayfalar.md) — görsel sıçrama, sayfa tarafı: kapak erimesi ve alan ışıması, Bugün ilk ekran, Öğren/konu haritası, ders kitap sayfası, King/Divan, Ayarlar; önce/sonra görselleri.
+- [Tur 2026-11-17e · İkincil ekranlar](ekip/sadelesme/tur-20261117e/ikincil.md) — Not, Plan, Kayıt, Tekrar, Sağlık, Yönetim, Hesap, Tanışma, Deneme, King sohbet yeni yazı ve ışık diliyle; önce/sonra görüntüleri, testler.
+- [Tur 2026-11-17e · Yön](ekip/sadelesme/tur-20261117e/yon.md) — görsel sıçrama turunun ortak tasarım yönü: ruh, beş büyük adım, ölçüt.
+- [Tur 2026-11-17e · Sahne ve anlar](ekip/sadelesme/tur-20261117e/sahne.md) — saate göre gök, paralaks, alan amblemleri, anlar (an.js); kapanış notu.
 - [Tur 2026-11-16b · Piksel sahneler](ekip/sadelesme/tur-20261116b/piksel.md) — eski sahneler silindi, 14 yeni Başbuğ sahnesi; yer → sahne listesi, ölçümler, görüntüler.
 - [Tur 2026-11-16b · Sesler](ekip/sadelesme/tur-20261116b/ses.md) — arayüz sesleri baştan, düzey ayarı, dikişsiz rüzgâr ambiyansı.
 - [Tur 2026-11-16b · Ad ve altyapı](ekip/sadelesme/tur-20261116b/ad-altyapi.md) — LifeOS → Başbuğ (iç kimlikler kalır), King istemi kırpma, masaüstü sunucu bekçisi, hata ucu, boş port.
