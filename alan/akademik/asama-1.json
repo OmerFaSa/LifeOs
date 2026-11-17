@@ -4867,11 +4867,11 @@
        "sec": [
         "Gözden düşmek",
         "Ateş pahası",
-        "Sakla samanı, gelir zamanı.",
+        "Kulak misafiri olmak",
         "Burnu havada",
-        "Kulak misafiri olmak"
+        "Sakla samanı, gelir zamanı."
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Ötekiler yargı bildirmeyen deyimlerdir.",
         "«Sakla samanı, gelir zamanı.» öğüt veren, kalıplaşmış bir yargıdır: atasözü."
@@ -4909,12 +4909,12 @@
        "soru": "«Üzüm üzüme baka baka kararır.» atasözüyle anlatılmak istenen aşağıdakilerden hangisidir?",
        "sec": [
         "Sabırlı olan sonunda kazanır.",
-        "İnsan, birlikte olduğu kişilerin davranışlarından etkilenir.",
+        "Kötü arkadaşlar zamanla yalnız kalır.",
         "Her işin bir zamanı vardır.",
         "Az olsun, öz olsun.",
-        "Kötü arkadaşlar zamanla yalnız kalır."
+        "İnsan, birlikte olduğu kişilerin davranışlarından etkilenir."
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Üzümler birbirinin rengini alır; insan da çevresindekilerden etkilenir."
        ],
@@ -5269,12 +5269,12 @@
        "soru": "«Yazar, karakterlerini o kadar canlı çizmiş ki …» cümlesi aşağıdakilerden hangisiyle tamamlanırsa anlamca uygun olur?",
        "sec": [
         "roman çok kalın olmuş.",
-        "okur onları yıllardır tanıdığı insanlar gibi görüyor.",
+        "yazar bu romanı on yılda yazdı.",
         "eleştirmenler kitabı beğenmedi.",
         "kitabın kapağı da çok güzel.",
-        "yazar bu romanı on yılda yazdı."
+        "okur onları yıllardır tanıdığı insanlar gibi görüyor."
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "«o kadar … ki» yapısı önceki yargının sonucunu ister.",
         "Karakterlerin canlı çizilmesinin sonucu, okurun onları gerçek insanlar gibi görmesidir."
@@ -6616,12 +6616,12 @@
        "soru": "Dişlerimizi fırçalarken musluğu açık bırakmak birkaç dakikada litrelerce temiz suyun boşa akması demektir. Bulaşık makinesini yarı dolu çalıştırmak, bahçeyi öğle sıcağında sulamak da aynı sonucu doğurur. Su kaynakları sanıldığı kadar sınırsız değildir; kuraklık yaşanan yıllarda barajların boşaldığını hepimiz görüyoruz. Küçük alışkanlıklarımızı değiştirerek her gün büyük miktarda suyu koruyabiliriz.\nBu parçada yazarın amacı aşağıdakilerden hangisidir?",
        "sec": [
         "Barajların nasıl yapıldığını anlatmak",
-        "Okuru günlük alışkanlıklarını değiştirerek su tasarrufu yapmaya yönlendirmek",
+        "Bahçe bakımında dikkat edilecekleri sıralamak",
         "Bulaşık makinelerinin çalışma ilkesini açıklamak",
         "Kuraklığın nedenlerini bilimsel olarak incelemek",
-        "Bahçe bakımında dikkat edilecekleri sıralamak"
+        "Okuru günlük alışkanlıklarını değiştirerek su tasarrufu yapmaya yönlendirmek"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Yazar israfa yol açan alışkanlıkları sıralayıp son cümlede okuru bunları değiştirmeye çağırıyor.",
         "Barajlar, makineler ve bahçe bakımı bu çağrının örnekleridir."
@@ -7065,12 +7065,12 @@
        "soru": "Safranbolu’nun eski evleri genellikle iki ya da üç katlıdır. Evlerin alt katı taştan, üst katları ahşaptandır. Sokağa doğru taşan cumbalar hem odaları genişletir hem de sokağı her iki yönden görmeyi sağlar. Evler yamaçlara, birbirinin manzarasını ve güneşini kesmeyecek biçimde yerleştirilmiştir. Bu özgün doku nedeniyle şehir, Dünya Mirası Listesi’ne alınmıştır.\nBu parçada Safranbolu evleriyle ilgili aşağıdakilerden hangisine değinilmemiştir?",
        "sec": [
         "Kat sayılarına",
-        "İç süslemelerinde kullanılan renklere",
+        "Yerleşim düzenine",
         "Yapımında kullanılan malzemelere",
         "Cumbaların işlevine",
-        "Yerleşim düzenine"
+        "İç süslemelerinde kullanılan renklere"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Kat sayısı, taş ve ahşap malzeme, cumbaların işlevi ve evlerin yerleşimi anlatılmıştır.",
         "İç süslemelerin renklerinden söz edilmemiştir."
@@ -7162,11 +7162,11 @@
        "sec": [
         "Saat kulesi ne zamandan beri meydanda duruyor?",
         "Kule hangi olay vesilesiyle yaptırılmış?",
-        "Kuleyi yaptıran hayırseverin adı nedir?",
+        "Bozulan mekanizma nasıl onarılmış?",
         "Köylüler eskiden çanın sesinden neyi anlarmış?",
-        "Bozulan mekanizma nasıl onarılmış?"
+        "Kuleyi yaptıran hayırseverin adı nedir?"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Kulenin yaşı (yüz yılı aşkın), yapılış vesilesi (okulun açılışı), çanın işlevi ve onarımın nasıl yapıldığı söylenmiştir.",
         "Hayırseverin adı verilmemiştir."
@@ -7377,12 +7377,12 @@
        "soru": "Deniz kaplumbağaları, yumurtlamak için çoğunlukla doğdukları kumsala geri döner. Dişiler gece karaya çıkar, kuma çukur kazıp yumurtalarını bırakır ve üstünü örterek denize döner. Yaklaşık iki ay sonra yumurtadan çıkan yavrular, denizin üzerindeki parıltıya yönelerek suya ulaşır. Kumsaldaki yapay ışıklar bu yüzden yavruların yönünü şaşırtıp karaya doğru gitmelerine yol açabilir.\nBu parçaya göre aşağıdakilerden hangisi söylenebilir?",
        "sec": [
         "Yavrular gün ışığında denize ulaşır.",
-        "Kumsallardaki yapay aydınlatma yavrular için tehlike oluşturabilir.",
+        "Yumurtalar bir hafta içinde açılır.",
         "Dişiler yumurtaların başında yavrular çıkana kadar bekler.",
         "Kaplumbağalar her yıl farklı bir kumsalda yumurtlar.",
-        "Yumurtalar bir hafta içinde açılır."
+        "Kumsallardaki yapay aydınlatma yavrular için tehlike oluşturabilir."
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Yapay ışıklar yavruların yönünü şaşırtıp karaya gitmelerine yol açabilir: tehlike oluşturur.",
         "Dişiler yumurtaları bırakıp denize döner; yumurtalar yaklaşık iki ayda açılır; çoğunlukla doğdukları kumsala dönerler."
@@ -8096,12 +8096,12 @@
        "soru": "Ünlü bilim insanı Einstein, «Hayal gücü bilgiden daha önemlidir.» der. Gerçekten de büyük buluşların çoğu, önce birinin aklında bir hayal olarak başlamıştır.\nBu parçada düşünceyi geliştirme yollarından hangisi kullanılmıştır?",
        "sec": [
         "Tanımlama",
-        "Tanık gösterme",
+        "Benzetme",
         "Sayısal verilerden yararlanma",
         "Karşılaştırma",
-        "Benzetme"
+        "Tanık gösterme"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Yazar düşüncesini bir bilim insanının sözüyle desteklemiş.",
         "Birinin sözüne başvurmak tanık göstermedir."
@@ -8386,11 +8386,11 @@
        "sec": [
         "Bir olay zaman sırasıyla anlatılmıştır.",
         "Bir varlığın görünüşü ayrıntılı olarak çizilmiştir.",
-        "Karşıt bir görüşe yer verilip bu görüş çürütülmeye çalışılmıştır.",
+        "Bir terimin tanımı yapılmıştır.",
         "Sayısal verilerle bilgi aktarılmıştır.",
-        "Bir terimin tanımı yapılmıştır."
+        "Karşıt bir görüşe yer verilip bu görüş çürütülmeye çalışılmıştır."
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Yazar formaya karşı olanların görüşünü verip «oysa» ile bu görüşü çürütmeye ve kendi düşüncesini savunmaya çalışıyor: tartışmacı anlatım.",
         "Olay, betimleme, sayısal veri ya da tanım yoktur."
@@ -8433,12 +8433,12 @@
        "soru": "Basılı kitap ile elektronik kitabın her birinin kendine göre üstünlükleri vardır. Elektronik kitap yüzlerce eseri cebimizde taşımamızı sağlar ve karanlıkta da okunabilir. Basılı kitap ise gözü daha az yorar, sayfalarına not alınabilir ve pil gerektirmez. Okur, ihtiyacına göre ikisinden birini seçebilir.\nBu parçada düşünceyi geliştirmek için ağırlıklı olarak aşağıdakilerden hangisine başvurulmuştur?",
        "sec": [
         "Tanımlama",
-        "Karşılaştırma",
+        "Sayısal verilerden yararlanma",
         "Tanık gösterme",
         "Benzetme",
-        "Sayısal verilerden yararlanma"
+        "Karşılaştırma"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Basılı ve elektronik kitabın üstünlükleri yan yana konmuş: karşılaştırma.",
         "Tanım, alıntı, benzetme ya da sayı kullanılmamıştır."
@@ -8735,12 +8735,12 @@
        "soru": "Kütüphaneye her gün uğrayan genç, raftan bir kitabı almadan önce arka kapağını okur, birkaç sayfasını rastgele açıp bakardı. Bazen beğendiği kitabı geri bırakır, ertesi gün yine gelip aynı kitabı alırdı. Görevli bir gün ona neden böyle yaptığını sordu. Genç gülümsedi: «Bir kitabı hemen almak, onu hak etmemek gibi geliyor bana.»\nBu parçadan aşağıdakilerden hangisi çıkarılabilir?",
        "sec": [
         "Genç, kitap okumayı sevmez.",
-        "Genç, kitap seçerken aceleci davranmaz.",
+        "Kütüphanede yeterince kitap yoktur.",
         "Görevli gençten hoşlanmaz.",
         "Genç, her gün başka bir kitap okur.",
-        "Kütüphanede yeterince kitap yoktur."
+        "Genç, kitap seçerken aceleci davranmaz."
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Arka kapağı okuması, sayfalara bakması ve kitabı ertesi güne bırakması acele etmediğini gösterir.",
         "Öteki seçenekler paragrafta dayanağı olmayan yargılardır."
@@ -9073,11 +9073,11 @@
        "sec": [
         "Elmalarını pazarda satmaktadır.",
         "Komşularıyla arası iyi değildir.",
-        "Zararlılarla mücadelede doğal yöntemleri tercih etmektedir.",
+        "Bahçesinde yalnızca elma ağacı vardır.",
         "Ağaçlarından her yıl çok ürün almaktadır.",
-        "Bahçesinde yalnızca elma ağacı vardır."
+        "Zararlılarla mücadelede doğal yöntemleri tercih etmektedir."
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "İlaç sıkmayıp böcekleri kuşlara yediriyor: zararlılarla doğal yoldan mücadele ediyor.",
         "Satış, komşuluk ilişkisi, ürün miktarı ve bahçedeki başka ağaçlar parçada geçmez."
@@ -9120,12 +9120,12 @@
        "soru": "Araştırmacılar kuraklığa dayanıklı yeni bir buğday çeşidi geliştirdi. Bu çeşit, deneme tarlalarında normal buğdayın yarısı kadar suyla benzer verim sağladı. Araştırmacılar yeni çeşidin önümüzdeki yıllarda çiftçilere sunulmasını planlıyor.\nBu parçadan aşağıdakilerden hangisi çıkarılamaz?",
        "sec": [
         "Yeni çeşit su tasarrufu sağlayabilir.",
-        "Yeni çeşit şu anda çiftçiler tarafından yaygın olarak ekilmektedir.",
+        "Yeni çeşit kuraklık görülen bölgelerde yararlı olabilir.",
         "Yeni çeşit deneme tarlalarında sınanmıştır.",
         "Araştırmacılar yeni çeşidin yaygınlaşmasını hedeflemektedir.",
-        "Yeni çeşit kuraklık görülen bölgelerde yararlı olabilir."
+        "Yeni çeşit şu anda çiftçiler tarafından yaygın olarak ekilmektedir."
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Yeni çeşidin çiftçilere sunulması önümüzdeki yıllar için planlanıyor; şu anda yaygın ekildiği çıkarılamaz.",
         "Öteki seçenekler deneme sonuçlarından ve plandan çıkarılabilir."
@@ -12335,12 +12335,12 @@
        "soru": "«gelmişti» fiili hangi birleşik zamanla çekimlenmiştir?",
        "sec": [
         "Görülen geçmiş zaman",
-        "Öğrenilen geçmiş zamanın hikâyesi",
+        "Geniş zamanın şartı",
         "Şimdiki zamanın hikâyesi",
         "Gelecek zamanın rivayeti",
-        "Geniş zamanın şartı"
+        "Öğrenilen geçmiş zamanın hikâyesi"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "gel-miş (öğrenilen geçmiş) + ti (hikâye).",
         "Öğrenilen geçmiş zamanın hikâyesi."
@@ -12778,11 +12778,11 @@
        "sec": [
         "Geçişsiz",
         "Oldurgan",
-        "Ettirgen",
+        "İşteş",
         "Edilgen",
-        "İşteş"
+        "Ettirgen"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "«yaz-» zaten geçişlidir; -dır eki işi başkasına yaptırma anlamı katmıştır: ettirgen."
        ],
@@ -13355,12 +13355,12 @@
        "soru": "«Bu konuya çok önem veriyor ve sürekli araştırıyor.» cümlesindeki anlatım bozukluğunun nedeni aşağıdakilerden hangisidir?",
        "sec": [
         "Özne eksikliği",
-        "Nesne eksikliği",
+        "Çatı uyuşmazlığı",
         "Yüklem eksikliği",
         "Gereksiz sözcük",
-        "Çatı uyuşmazlığı"
+        "Nesne eksikliği"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "«bu konuya» yalnız «önem veriyor»a uyar (dolaylı tümleç).",
         "«araştırıyor» yüklemi «neyi?» sorusuna cevap ister: «bu konuyu» nesnesi eksiktir."
@@ -13399,11 +13399,11 @@
        "sec": [
         "Kitabı okudu ve arkadaşına verdi.",
         "Ders bitti ve öğrenciler çıktı.",
-        "Toplantıda konu görüşüldü ve karara bağladı.",
+        "Kapıyı açtı ve içeri girdi.",
         "Yemek pişti, sofra kuruldu.",
-        "Kapıyı açtı ve içeri girdi."
+        "Toplantıda konu görüşüldü ve karara bağladı."
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "«görüşüldü» edilgen, «bağladı» etkendir; ortak özneyle kullanılamazlar.",
         "Doğrusu: «Konu görüşüldü ve karara bağlandı.»"
@@ -16834,12 +16834,12 @@
        "soru": "a = 2^{40}, b = 3^{30} ve c = 5^{20} sayılarının küçükten büyüğe sıralaması hangisidir?",
        "sec": [
         "a < b < c",
-        "a < c < b",
+        "c < b < a",
         "c < a < b",
         "b < c < a",
-        "c < b < a"
+        "a < c < b"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Üsleri 10’a indir: a = 16^{10}, b = 27^{10}, c = 25^{10}.",
         "16 < 25 < 27 olduğundan a < c < b."
@@ -21752,12 +21752,12 @@
        "soru": "(p ⇒ q)′ önermesinin denki aşağıdakilerden hangisidir?",
        "sec": [
         "p′ ∧ q",
-        "p ∧ q′",
+        "p′ ⇒ q′",
         "p′ ∨ q",
         "p ∨ q′",
-        "p′ ⇒ q′"
+        "p ∧ q′"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "p ⇒ q ≡ p′ ∨ q.",
         "(p′ ∨ q)′ ≡ p ∧ q′."
@@ -26787,12 +26787,12 @@
        "soru": "Aşağıdaki yapılardan hangisi hem prokaryot hem ökaryot hücrelerde bulunur?",
        "sec": [
         "Mitokondri",
-        "Ribozom",
+        "Kloroplast",
         "Golgi cisimciği",
         "Lizozom",
-        "Kloroplast"
+        "Ribozom"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Ribozom zarsız bir organeldir ve protein sentezi için bütün hücrelerde bulunur.",
         "Ötekiler zarlı organeldir; prokaryotlarda yoktur."
@@ -26810,11 +26810,11 @@
        "sec": [
         "Su alarak patlar.",
         "Turgor basıncı artar.",
-        "Su kaybeder ve sitoplazması büzülür (plazmoliz).",
+        "Hücre çeperi erir.",
         "Hiçbir değişiklik olmaz.",
-        "Hücre çeperi erir."
+        "Su kaybeder ve sitoplazması büzülür (plazmoliz)."
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Su, derişimin düşük olduğu hücre içinden derişimin yüksek olduğu dışarıya geçer.",
         "Su kaybeden hücrenin sitoplazması çeperden ayrılır: plazmoliz."
@@ -28870,11 +28870,11 @@
        "sec": [
         "Dalton",
         "Thomson",
-        "Rutherford",
+        "Modern atom modeli",
         "Bohr",
-        "Modern atom modeli"
+        "Rutherford"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Alfa taneciklerinin çoğu ince altın levhadan sapmadan geçti, çok azı geri döndü.",
         "Rutherford buradan küçük, yoğun bir çekirdek ve geniş bir boşluk sonucuna vardı."
@@ -29074,12 +29074,12 @@
        "soru": "Aşağıdaki maddelerin hangisinin molekülleri arasında hidrojen bağı bulunur?",
        "sec": [
         "CH_{4}",
-        "H_{2}O",
+        "N_{2}",
         "CO_{2}",
         "O_{2}",
-        "N_{2}"
+        "H_{2}O"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Suda H atomu O’ya bağlıdır; moleküller arasında hidrojen bağı kurulur.",
         "CH_{4}’te H, karbona bağlıdır: hidrojen bağı yoktur."
@@ -29259,12 +29259,12 @@
        "soru": "Deniz seviyesinden yükseklere çıkıldıkça suyun kaynama sıcaklığı nasıl değişir?",
        "sec": [
         "Artar",
-        "Azalır",
+        "Sıfıra iner",
         "Değişmez",
         "Önce artar sonra azalır",
-        "Sıfıra iner"
+        "Azalır"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Yükseldikçe açık hava basıncı azalır.",
         "Buhar basıncı daha düşük sıcaklıkta dış basınca eşitlenir: kaynama noktası düşer."
@@ -29720,11 +29720,11 @@
        "sec": [
         "Süzme",
         "Mıknatısla ayırma",
-        "Ayırma hunisi",
+        "Eleme",
         "Kristallendirme",
-        "Eleme"
+        "Ayırma hunisi"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "İki sıvı birbirinde çözünmez ve yoğunlukları farklıdır.",
         "Ayırma hunisinde yoğun olan su alttan alınır."
@@ -29902,12 +29902,12 @@
        "soru": "HCl + NaOH → X + H_{2}O tepkimesinde X maddesi aşağıdakilerden hangisidir?",
        "sec": [
         "NaH",
-        "NaCl",
+        "HNa",
         "Cl_{2}",
         "NaO",
-        "HNa"
+        "NaCl"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Nötrleşmede asit + baz → tuz + su.",
         "H^{+} ile OH^{−} suyu, Na^{+} ile Cl^{−} tuzu (NaCl) oluşturur."
@@ -30199,11 +30199,11 @@
        "sec": [
         "O₂",
         "CO₂",
-        "Cl₂",
+        "N₂",
         "H₂",
-        "N₂"
+        "Cl₂"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Çamaşır suyundaki hipoklorit, tuz ruhundaki HCl ile tepkimeye girer.",
         "Ürünlerden biri zehirli klor gazıdır (Cl₂); bu iki ürün asla karıştırılmaz."
@@ -31776,12 +31776,12 @@
        "soru": "Ayna ve merceklerle ilgili çalışmalar fiziğin hangi alt dalında yapılır?",
        "sec": [
         "Mekanik",
-        "Optik",
+        "Katı hâl fiziği",
         "Termodinamik",
         "Nükleer fizik",
-        "Katı hâl fiziği"
+        "Optik"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Işık, ayna ve mercekler optiğin konusudur."
        ],
@@ -33784,11 +33784,11 @@
        "sec": [
         "Mekanik dalgadır.",
         "Boyuna dalgadır.",
-        "Boşlukta yayılabilir.",
+        "Engelden yansıyınca yankı oluşur.",
         "Katılarda gazlardan hızlı yayılır.",
-        "Engelden yansıyınca yankı oluşur."
+        "Boşlukta yayılabilir."
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Ses yayılmak için maddesel bir ortama ihtiyaç duyar; boşlukta yayılmaz."
        ],
@@ -33804,12 +33804,12 @@
        "soru": "Bir sesin ince ya da kalın olması (sesin yüksekliği) aşağıdakilerden hangisine bağlıdır?",
        "sec": [
         "Genliğine",
-        "Frekansına",
+        "Ortamın nemine",
         "Şiddetine",
         "Kaynağa olan uzaklığa",
-        "Ortamın nemine"
+        "Frekansına"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Frekansı büyük ses ince, küçük ses kalındır.",
         "Genlik ve şiddet sesin yüksekliğini değil, gürlüğünü belirler."
@@ -34940,12 +34940,12 @@
        "soru": "Peygamberlere vahiy getirmekle görevli melek aşağıdakilerden hangisidir?",
        "sec": [
         "Mikail",
-        "Cebrail",
+        "Kirâmen kâtibîn",
         "İsrafil",
         "Azrail",
-        "Kirâmen kâtibîn"
+        "Cebrail"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Vahiy meleği Cebrail’dir."
        ],
@@ -35117,11 +35117,11 @@
        "sec": [
         "Onda bir",
         "Yirmide bir",
-        "Kırkta bir",
+        "Yüzde bir",
         "Beşte bir",
-        "Yüzde bir"
+        "Kırkta bir"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Para ve ticaret malında zekât kırkta birdir (%2,5)."
        ],
@@ -35489,12 +35489,12 @@
        "soru": "Hz. Muhammed’e ilk vahiy nerede gelmiştir?",
        "sec": [
         "Sevr Mağarası",
-        "Hira Mağarası",
+        "Taif",
         "Kâbe",
         "Medine",
-        "Taif"
+        "Hira Mağarası"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "İlk vahiy 610’da Hira Mağarası’nda gelmiştir.",
         "Sevr, hicret sırasında saklanılan mağaradır."
@@ -37315,12 +37315,12 @@
        "soru": "Eş yükselti eğrileri haritasında eğrilerin birbirine çok yaklaştığı yerler için aşağıdakilerden hangisi söylenebilir?",
        "sec": [
         "Eğim azdır.",
-        "Eğim fazladır.",
+        "Akarsu yoktur.",
         "Yükselti sıfırdır.",
         "Arazi düzdür.",
-        "Akarsu yoktur."
+        "Eğim fazladır."
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Kısa yatay mesafede çok yükselti değişiyorsa eğim fazladır."
        ],
@@ -37704,11 +37704,11 @@
        "sec": [
         "Mevsimlerin oluşması",
         "Gece ve gündüz sürelerinin yıl boyunca değişmesi",
-        "Gece ile gündüzün birbirini izlemesi",
+        "Işınların dik geldiği yerin yıl içinde değişmesi",
         "Dönencelerin oluşması",
-        "Işınların dik geldiği yerin yıl içinde değişmesi"
+        "Gece ile gündüzün birbirini izlemesi"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Dünya kendi ekseninde döndükçe her yer sırayla aydınlanır ve kararır.",
         "Ötekiler yıllık hareket ve eksen eğikliğinin sonuçlarıdır."
@@ -38516,11 +38516,11 @@
        "sec": [
         "Otomobil üretimi",
         "Bankacılık",
-        "Balıkçılık",
+        "Yazılım geliştirme",
         "Turizm",
-        "Yazılım geliştirme"
+        "Balıkçılık"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Balıkçılık doğadan doğrudan yararlanmadır: birincil faaliyet."
        ],
@@ -38692,12 +38692,12 @@
        "soru": "Türkiye’de heyelanın en sık görüldüğü bölge aşağıdakilerden hangisidir?",
        "sec": [
         "İç Anadolu",
-        "Karadeniz",
+        "Marmara",
         "Güneydoğu Anadolu",
         "Ege",
-        "Marmara"
+        "Karadeniz"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Eğimli arazi, killi toprak ve bol yağış Karadeniz’de bir aradadır."
        ],
@@ -40253,11 +40253,11 @@
        "sec": [
         "Septisizm",
         "Pozitivizm",
-        "Kritisizm",
+        "Dogmatizm",
         "Empirizm",
-        "Dogmatizm"
+        "Kritisizm"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Kant akılcılık ile deneyciliği birleştiren kritisizmi kurmuştur."
        ],
@@ -40431,12 +40431,12 @@
        "soru": "«Aynı ırmakta iki kez yıkanılmaz.» sözüyle varlığın sürekli değiştiğini vurgulayan filozof kimdir?",
        "sec": [
         "Parmenides",
-        "Herakleitos",
+        "Platon",
         "Thales",
         "Demokritos",
-        "Platon"
+        "Herakleitos"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Herakleitos her şeyin akış ve değişim içinde olduğunu savunur."
        ],
@@ -40830,12 +40830,12 @@
        "soru": "Tanrı’nın evreni yarattığını ama yarattıktan sonra ona müdahale etmediğini savunan görüş aşağıdakilerden hangisidir?",
        "sec": [
         "Teizm",
-        "Deizm",
+        "Agnostisizm",
         "Panteizm",
         "Ateizm",
-        "Agnostisizm"
+        "Deizm"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Yaratan ama müdahale etmeyen Tanrı anlayışı deizmdir."
        ],
@@ -40852,11 +40852,11 @@
        "sec": [
         "Hobbes",
         "Platon",
-        "Montesquieu",
+        "Farabi",
         "Marx",
-        "Farabi"
+        "Montesquieu"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Kuvvetler ayrılığı ilkesi Montesquieu’nün «Kanunların Ruhu» eseriyle öne çıkmıştır."
        ],
@@ -41224,12 +41224,12 @@
        "soru": "Aşağıdakilerden hangisi doğuştan kazanılan (verilmiş) bir statüdür?",
        "sec": [
         "Doktorluk",
-        "Cinsiyet",
+        "Mühendislik",
         "Öğretmenlik",
         "Milletvekilliği",
-        "Mühendislik"
+        "Cinsiyet"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Cinsiyet doğuştan gelir; ötekiler eğitim ve çabayla sonradan kazanılır."
        ],
@@ -41422,11 +41422,11 @@
        "sec": [
         "Tümevarım",
         "Analoji",
-        "Tümdengelim",
+        "Diyalektik",
         "Sezgi",
-        "Diyalektik"
+        "Tümdengelim"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Genel bir öncülden özel bir sonuca varılmıştır: tümdengelim (kıyas)."
        ],
@@ -42824,12 +42824,12 @@
        "soru": "Tarım ve yerleşik hayatın başladığı dönem aşağıdakilerden hangisidir?",
        "sec": [
         "Yontma Taş (Paleolitik) Çağı",
-        "Cilalı Taş (Neolitik) Çağı",
+        "Demir Çağı",
         "Orta Taş (Mezolitik) Çağı",
         "Tunç Çağı",
-        "Demir Çağı"
+        "Cilalı Taş (Neolitik) Çağı"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Cilalı Taş Çağı’nda insanlar tarıma ve yerleşik hayata geçmiştir."
        ],
@@ -43179,12 +43179,12 @@
        "soru": "Kutadgu Bilig adlı eserin yazarı kimdir?",
        "sec": [
         "Kaşgarlı Mahmud",
-        "Yusuf Has Hacib",
+        "Nizamülmülk",
         "Edip Ahmet Yükneki",
         "Hoca Ahmet Yesevi",
-        "Nizamülmülk"
+        "Yusuf Has Hacib"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Kutadgu Bilig Yusuf Has Hacib’in eseridir."
        ],
@@ -43551,11 +43551,11 @@
        "sec": [
         "Zitvatorok",
         "Kasr-ı Şirin",
-        "Karlofça",
+        "Yaş",
         "Küçük Kaynarca",
-        "Yaş"
+        "Karlofça"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "1699 Karlofça Antlaşması ile Osmanlı ilk kez büyük topraklar kaybetti."
        ],
@@ -43771,12 +43771,12 @@
        "soru": "Mustafa Kemal’in «Anafartalar Kahramanı» olarak tanındığı cephe aşağıdakilerden hangisidir?",
        "sec": [
         "Kafkas",
-        "Çanakkale",
+        "Suriye-Filistin",
         "Kanal",
         "Irak",
-        "Suriye-Filistin"
+        "Çanakkale"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Mustafa Kemal Çanakkale Cephesi’nde Conkbayırı ve Anafartalar’da başarı kazandı."
        ],
@@ -44240,12 +44240,12 @@
        "soru": "Devlet işleri ile din işlerinin birbirinden ayrılmasını ifade eden Atatürk ilkesi aşağıdakilerden hangisidir?",
        "sec": [
         "Halkçılık",
-        "Laiklik",
+        "İnkılapçılık",
         "Devletçilik",
         "Milliyetçilik",
-        "İnkılapçılık"
+        "Laiklik"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Din ve devlet işlerinin ayrılması laiklik ilkesidir."
        ],
@@ -48457,12 +48457,12 @@
        "soru": "f(x) = x^{2} − 4x + 1 fonksiyonunun azalan olduğu en geniş aralık aşağıdakilerden hangisidir?",
        "sec": [
         "x > 2",
-        "x < 2",
+        "Her yerde",
         "x > 4",
         "x < 1",
-        "Her yerde"
+        "x < 2"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "f′(x) = 2x − 4 < 0 → x < 2.",
         "x < 1 de azalan bir aralıktır ama x < 2’nin içinde kalır; en geniş aralık x < 2."
@@ -56630,11 +56630,11 @@
        "sec": [
         "Dalganın hızı",
         "Dalga boyu",
-        "Frekans",
+        "Dalganın yayılma doğrultusu (eğik gelişte)",
         "Dalga tepeleri arası uzaklık",
-        "Dalganın yayılma doğrultusu (eğik gelişte)"
+        "Frekans"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Frekansı kaynak belirler; ortam değişse de aynı kalır.",
         "Hız ve dalga boyu sığ bölgede azalır."
@@ -59551,11 +59551,11 @@
        "sec": [
         "Doğalgazın yanması",
         "Suyun donması",
-        "Buzun erimesi",
+        "Su buharının yoğuşması",
         "Asit ile bazın nötrleşmesi",
-        "Su buharının yoğuşması"
+        "Buzun erimesi"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Erime ısı alan bir hâl değişimidir.",
         "Ötekiler ısı verir."
@@ -60438,12 +60438,12 @@
        "soru": "Az çözünen bir tuzun çözeltisine ortak iyon eklenmesi tuzun çözünürlüğünü nasıl etkiler?",
        "sec": [
         "Artırır.",
-        "Azaltır.",
+        "Kçç değerini azaltır.",
         "Değiştirmez.",
         "Kçç değerini artırır.",
-        "Kçç değerini azaltır."
+        "Azaltır."
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Denge sola kayar; çözünürlük azalır, Kçç sabit kalır."
        ],
@@ -61217,11 +61217,11 @@
        "sec": [
         "Elmas",
         "Karbon monoksit",
-        "Grafit",
+        "Metan",
         "Kireç taşı",
-        "Metan"
+        "Grafit"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Grafitte katmanlar arasında hareket edebilen elektronlar iletkenlik sağlar.",
         "Elmas iletmez; öteki seçenekler bileşiktir."
@@ -61665,12 +61665,12 @@
        "soru": "Fosil yakıtların eksik yanması sonucunda oluşan zehirli gaz aşağıdakilerden hangisidir?",
        "sec": [
         "Oksijen",
-        "Karbon monoksit",
+        "Su buharı",
         "Azot",
         "Helyum",
-        "Su buharı"
+        "Karbon monoksit"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "Yeterli oksijen olmadığında karbon tam yanamaz ve karbon monoksit (CO) oluşur."
        ],
@@ -63073,12 +63073,12 @@
        "soru": "Protein sentezinde mRNA üzerinde bir amino asidi belirleyen üç bazlık birime ne ad verilir?",
        "sec": [
         "Antikodon",
-        "Kodon",
+        "Kromozom",
         "Gen",
         "Nükleotid",
-        "Kromozom"
+        "Kodon"
        ],
-       "dogru": "B",
+       "dogru": "E",
        "cozum": [
         "mRNA’daki üçlü baz dizisi kodondur; tRNA’daki tamamlayıcısı antikodondur."
        ],
@@ -64611,11 +64611,11 @@
        "sec": [
         "Beyincik",
         "Talamus",
-        "Omurilik soğanı",
+        "Hipofiz",
         "Uç beyin",
-        "Hipofiz"
+        "Omurilik soğanı"
        ],
-       "dogru": "C",
+       "dogru": "E",
        "cozum": [
         "Hayati refleksler omurilik soğanında düzenlenir."
        ],
