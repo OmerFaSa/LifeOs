@@ -943,7 +943,8 @@
     var siradaki = kurulu && p.bloklar.filter(function (b) { return b.tur !== 'mola' && b.tur !== 'sabit' && b.durum === 'bekliyor'; })[0];
     // tek ana eylem (AGENTS §0.1 kural 2): boş zaman yoksa «Aralık ekle», plan önerideyse «Planı kur», kuruluysa sıradaki bloğun «Yapıldı»sı
     var aralikForm = '<form class="planform" data-plan="aralik" novalidate>' + saatAraligi() + B.eylemler([{ metin: 'Aralık ekle', tur: musait ? 'ikincil' : 'ana', tip: 'submit' }]) + '</form>';
-    var planHtml = !dr.ayar.musait.length ? B.bos({ baslik: 'Önce boş zamanını yaz.', metin: 'Plan o aralığa kurulur.' })
+    // boş zaman yokken tek kart: kısa başlık + aralık formu (2026-11-18: eskiden boş durum kartı ve ayrı «Boş zamanım» formu alt alta)
+    var planHtml = !musait ? '<div class="hg-kart plan-bas"><p class="hg-kart__baslik">Önce boş zamanını yaz.</p><p class="soluk">Plan bugün bu aralığa kurulur; dersler ve tekrar kartları kendiliğinden girer.</p>' + aralikForm + '</div>'
       : !p ? B.uyari({ tur: 'dikkat', metin: bp.hatalar.join(' ') })
       : (kurulu ? '' : '<p class="soluk">Önerilen plan; «Planı kur» deyince bugünün planı olur ve blokları işaretleyebilirsin.</p>') +
         (p.bloklar.length ? B.liste({ ad: 'Bugünün blokları', ogeler: p.bloklar.map(function (b) { return blokSatiri(b, !kurulu, b === siradaki); }) }) : B.bos({ baslik: 'Plana girecek iş yok.', metin: 'Aşağıdan bir iş ekle ya da bir alanda derse başla; dersler ve tekrar kartları plana kendiliğinden girer.' })) +
@@ -951,12 +952,11 @@
         (p.ozet.molaSayisi ? ' · <b>' + p.ozet.molaSayisi + '</b> mola' : '') + '</p>' + // sayılar araclar.css'te büyük, tabular
         (p.sigmayan.length ? B.uyari({ tur: 'dikkat', metin: 'Sığmayanlar (' + p.sigmayan.length + '): ' + p.sigmayan.map(function (x) { return x.ad + ' · ' + x.dk + ' dk · ' + x.neden; }).join('; ') }) : '');
     return I.ust(I.kirinti(yer)) + '<div class="govde" data-arac="plan">' + B.baslik({ metin: 'Plan' }) + planIletisi(il) + geriAlHtml() +
-      B.bolum({ baslik: 'Bugünün planı', govde: [planHtml, B.eylemler([musait ? { metin: kurulu ? 'Yeniden kur' : 'Planı kur', tur: kurulu ? 'sade' : 'ana', veri: { 'arac-ac': 'plan-kur' } } : null,
-        { metin: 'Hafta planı', tur: 'sade', href: '#/motor/plan/hafta' }])] }) +
-      B.bolum({ baslik: 'Boş zamanım', govde: [dr.ayar.musait.length ? B.liste({ ad: 'Boş zaman aralıkları', ogeler: dr.ayar.musait.map(function (m, i) {
+      B.bolum({ baslik: 'Bugünün planı', eylem: { metin: 'Hafta planı', tur: 'sade', href: '#/motor/plan/hafta' },
+        govde: [planHtml, musait ? B.eylemler([{ metin: kurulu ? 'Yeniden kur' : 'Planı kur', tur: kurulu ? 'sade' : 'ana', veri: { 'arac-ac': 'plan-kur' } }]) : ''] }) +
+      (!musait ? '' : B.bolum({ baslik: 'Boş zamanım', govde: [B.liste({ ad: 'Boş zaman aralıkları', ogeler: dr.ayar.musait.map(function (m, i) {
           return { ad: m.bas + '–' + m.bit, eylemler: silEylemi('Aralığı sil: ' + m.bas + '–' + m.bit, { 'arac-ac': 'plan-aralik-sil', i: i }) };
-        }) }) : '',
-        musait ? B.acilir({ baslik: 'Başka aralık ekle', duzey: 3, govde: aralikForm }) : aralikForm] }) +
+        }) }), B.acilir({ baslik: 'Başka aralık ekle', duzey: 3, govde: aralikForm })] })) +
       B.bolum({ baslik: 'İşler', govde: [dr.isler.length ? B.liste({ ad: 'İşler', ogeler: dr.isler.map(function (x) {
           return { ad: x.ad, not: x.dk + ' dk' + (x.son ? ' · son ' + x.son : '') + (x.devir ? ' · ' + x.devir + ' kez devretti' : ''), eylemler: silEylemi('İşi sil: ' + x.ad, { 'arac-ac': 'plan-is-sil', id: x.id }) };
         }) }) : '<p class="soluk">Dersler ve tekrar kartları plana kendiliğinden girer.</p>',

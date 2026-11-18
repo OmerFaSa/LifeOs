@@ -66,7 +66,9 @@
   function yeniAlan(B, st, k, ad) { return alan(B, st, k, { ad: ad, ipucu: GUC[0], veri: { 'hg-guc': '1' } }); }
   function form(ad, ic) { return '<form class="kapi" data-hg-form="' + ad + '" novalidate>' + ic.join('') + '</form>'; }
   function ileti(B, st) { return st.ileti ? B.uyari({ tur: st.ileti.tur, metin: st.ileti.metin, veri: { 'hg-ileti': '1' } }) : ''; }
-  function soluk(B, m) { return '<p class="soluk">' + B.kac(m) + '</p>'; }
+  function soluk(B, m, ek) { return '<p class="soluk' + (ek ? ' ' + ek : '') + '">' + B.kac(m) + '</p>'; }
+  // oturum yokken her görünüm bir karşılama kartı: simgeli kısa başlık, arayüz yazısıyla açıklama, form (stil araclar.css .hg-kart)
+  function kart(B, baslik, m, ic) { return '<div class="hg-kart">' + (baslik ? '<p class="hg-kart__baslik"><span class="b-simge" aria-hidden="true"><svg><use href="#i-kisi"/></svg></span>' + B.kac(baslik) + '</p>' : '') + (m ? soluk(B, m) : '') + ic + '</div>'; }
   function gonderDugme(st, metin) { return st.is ? { metin: 'Bekle…', tur: 'ana', kapali: true } : { metin: metin, tur: 'ana', tip: 'submit' }; }
   function geri(metin, ne) { return { metin: metin || 'Girişe dön', tur: 'sade', veri: { 'hg-ac': 'gorunum', 'hg-ne': ne || 'giris' } }; }
 
@@ -78,35 +80,35 @@
     if (bag.dosya && !s.uygulama) return B.bos({ baslik: 'Hesap bu açılışta yok.', metin: 'Sayfa dosyadan açıldı; giriş Başbuğ’la açılınca yapılır.' });
     if (sv.kurulum && !s.kuruldu) {
       if (!sv.yerel) return B.uyari({ tur: 'bilgi', simge: 'kisi', metin: 'Bu bilgisayarda henüz hesap yok.', alt: 'İlk hesap (yönetici) bilgisayarın kendisinde açılır: Başbuğ’u bilgisayarda aç, Hesap ekranından kur.' });
-      return soluk(B, 'Bu bilgisayarda henüz hesap yok. İlk hesap yönetici olur: güncelleme ve yönetim onda. Kayıtların girişsiz de bilgisayardaki depoya gider; hesap telefon ve öteki cihazlar için.') +
+      return kart(B, 'Bu bilgisayarda henüz hesap yok.', 'İlk hesap yönetici olur: güncelleme ve yönetim onda. Kayıtların girişsiz de bilgisayardaki depoya gider; hesap telefon ve öteki cihazlar için.',
         form('kur', [ileti(B, s), alan(B, s, 'ad', { ad: 'Kullanıcı adı' }), yeniAlan(B, s, 'yeni', 'Şifre'), alan(B, s, 'tekrar', { ad: 'Şifre tekrar' }),
-          soluk(B, 'Şifreni unutursan kendine soracağın bir soru ve cevabı:'),
+          soluk(B, 'Şifreni unutursan kendine soracağın bir soru ve cevabı:', 'hg-ara'),
           alan(B, s, 'soru', { ad: 'Kurtarma sorusu', yerTutucu: 'Örn. İlk öğretmenimin adı?', enCok: 120 }), alan(B, s, 'cevap', { ad: 'Cevabın', enCok: 120 }),
-          B.eylemler([gonderDugme(s, 'Hesap kur')])]);
+          B.eylemler([gonderDugme(s, 'Hesap kur')])]));
     }
     if (s.gorunum === 'kod') {
-      return soluk(B, s.yedekKip ? 'Kaydettiğin yedek kodlardan birini yaz; her biri bir kez geçer.' : 'İki adımlı doğrulama açık. Doğrulayıcı uygulamandaki 6 haneli kodu yaz.') +
+      return kart(B, null, s.yedekKip ? 'Kaydettiğin yedek kodlardan birini yaz; her biri bir kez geçer.' : 'İki adımlı doğrulama açık. Doğrulayıcı uygulamandaki 6 haneli kodu yaz.',
         form(s.yedekKip ? 'yedekkod' : 'kod', [ileti(B, s), s.yedekKip ? alan(B, s, 'yedekkod', { ad: 'Yedek kod', yerTutucu: 'XXXX-XXXX', enCok: 9 })
           : alan(B, s, 'kod', { ad: 'Kod', yerTutucu: '000 000', enCok: 7 }),
-          B.eylemler([gonderDugme(s, 'Doğrula'), { metin: s.yedekKip ? 'Uygulamadaki kodu kullan' : 'Yedek kod kullan', tur: 'sade', veri: { 'hg-ac': 'yedek-kip' } }, geri()])]);
+          B.eylemler([gonderDugme(s, 'Doğrula'), { metin: s.yedekKip ? 'Uygulamadaki kodu kullan' : 'Yedek kod kullan', tur: 'sade', veri: { 'hg-ac': 'yedek-kip' } }, geri()])]));
     }
     if (s.gorunum === 'unuttum' && !s.soru) {
-      return soluk(B, 'Şifreni yenile: kullanıcı adını yaz, sonra kendi kurtarma sorunu cevapla.') +
-        form('soru', [ileti(B, s), adres, alan(B, s, 'ad', { ad: 'Kullanıcı adı' }), B.eylemler([gonderDugme(s, 'Devam'), geri()])]);
+      return kart(B, null, 'Şifreni yenile: kullanıcı adını yaz, sonra kendi kurtarma sorunu cevapla.',
+        form('soru', [ileti(B, s), adres, alan(B, s, 'ad', { ad: 'Kullanıcı adı' }), B.eylemler([gonderDugme(s, 'Devam'), geri()])]));
     }
     if (s.gorunum === 'unuttum') {
-      return B.ayar({ id: 'hg-soru-metin', ad: 'Kendi sorun', deger: s.soru }) +
+      return kart(B, null, null, B.ayar({ id: 'hg-soru-metin', ad: 'Kendi sorun', deger: s.soru }) +
         form('kurtar', [ileti(B, s), alan(B, s, 'cevap', { ad: 'Cevabın', enCok: 120 }), yeniAlan(B, s, 'yeni', 'Yeni şifre'), alan(B, s, 'tekrar', { ad: 'Yeni şifre tekrar' }),
-          B.eylemler([gonderDugme(s, 'Şifreyi yenile'), geri()])]);
+          B.eylemler([gonderDugme(s, 'Şifreyi yenile'), geri()])]));
     }
     if (s.gorunum === 'bagla') {
-      return soluk(B, 'Girişli cihazında Hesap › Cihazlar › Yeni cihaz bağla\'ya dokun; çıkan altı haneli kodu buraya yaz. Şifre gerekmez.') +
+      return kart(B, null, 'Girişli cihazında Hesap › Cihazlar › Yeni cihaz bağla\'ya dokun; çıkan altı haneli kodu buraya yaz. Şifre gerekmez.',
         form('bagla', [ileti(B, s), adres, alan(B, s, 'kod', { ad: 'Bağlama kodu', yerTutucu: '000 000', enCok: 7, ipucu: 'Kod 5 dakika geçerli ve tek kullanımlık.' }),
-          B.eylemler([gonderDugme(s, 'Bağlan'), geri()])]);
+          B.eylemler([gonderDugme(s, 'Bağlan'), geri()])]));
     }
-    return soluk(B, 'Bu cihazda giriş yapılmadı.' + (sv.yerel ? ' Bu bilgisayarda kayıtların girişsiz de bilgisayardaki depoya gider; giriş telefon ve öteki cihazlar için.' : '')) +
+    return kart(B, 'Bu cihazda giriş yapılmadı.', sv.yerel ? 'Bu bilgisayarda kayıtların girişsiz de bilgisayardaki depoya gider; giriş telefon ve öteki cihazlar için.' : null,
       form('giris', [ileti(B, s), adres, alan(B, s, 'ad', { ad: 'Kullanıcı adı' }), alan(B, s, 'parola', { ad: 'Şifre' }),
-        B.eylemler([gonderDugme(s, 'Giriş yap'), geri('Şifremi unuttum', 'unuttum'), geri('Kodla bağlan', 'bagla')])]);
+        B.eylemler([gonderDugme(s, 'Giriş yap'), geri('Şifremi unuttum', 'unuttum'), geri('Kodla bağlan', 'bagla')])]));
   }
 
   /* Güvenlik (oturumda). g: { ben (/api/hesap/ben: soru_var, iki_adim {acik, yedek_kalan}), benHata, acik (açık form: parola | soru-ayarla |

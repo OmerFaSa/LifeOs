@@ -54,23 +54,22 @@
   var KONUM = { alt: 'aralığın altında', ic: 'aralıkta', ust: 'aralığın üstünde' };
   function gunYaz(g) { return new Date(g + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }); }
   function kayitYolu(tur) { return '#/motor/kayit/tur/' + tur; }
-  /* Bugün: dört ölçü kutucuğu (2026-11-17d, sahip: «daha güzel, profesyonel»; eskiden çizgili dört satır + dört düğme). Kutunun tamamı
-   * Kayıt'ın o türüne giden tek bağlantıdır: simge ve ad, büyük değer ya da «—», altında ayrıntı (son öğün, seans, eski kilonun günü)
-   * ve kesinlik etiketi. Kayıtsız kutu sönük durur; ilk kayıtsız kutunun eylemi tek ana eylemdir. Stil kabuk/araclar.css .sg-olcu. */
+  /* Bugün: dört ölçü kutucuğu (2026-11-17d; 2026-11-18 sahip: dört kutuda aynı «— · Bugün kayıt yok · Kaydet» tekrarı). Kutunun tamamı
+   * Kayıt'ın o türüne giden tek bağlantıdır: simge, ad ve köşede «+»; doluysa büyük değer, altında ayrıntı ve kesinlik etiketi;
+   * boşsa sönük «—» ve türe özgü kısa soru. Tek ana çağrı bölüm başlığında (hiç kayıt yokken). Stil kabuk/araclar.css .sg-olcu. */
   var OLCU_SIMGE = { ogun: 'beslenme', hareket: 'hareket', uyku: 'uyku', kilo: 'saglik' };
-  function olcuKutulari(l, ilkBos, bugun, E, kac, ren) {
+  var OLCU_SORU = { ogun: 'Ne yedin?', hareket: 'Kaç dakika hareket?', uyku: 'Kaç saat uyudun?', kilo: 'Tartıldın mı?' };
+  function olcuKutulari(l, bugun, E, kac, ren) {
     return '<ul class="sg-olcu" aria-label="Bugün">' + l.map(function (x) {
       var p = x.metin ? x.metin.split(' · ') : [], ay = p.slice(1).join(' · '), sim = OLCU_SIMGE[x.id];
       if (x.gun && x.gun !== bugun) ay = (ay ? ay + ' · ' : '') + gunYaz(x.gun);
       var eylem = x.metin ? 'Ekle' : 'Kaydet';
-      return '<li><a class="sg-olcu__kutu' + (x.metin ? '' : ' sg-olcu__kutu--bos') + (x === ilkBos ? ' sg-olcu__kutu--ana' : '') + '" href="' + kayitYolu(x.tur) + '"' +
+      return '<li><a class="sg-olcu__kutu' + (x.metin ? '' : ' sg-olcu__kutu--bos') + '" href="' + kayitYolu(x.tur) + '"' +
         ' aria-label="' + kac(x.ad + ': ' + (x.metin ? x.metin + (x.gun && x.gun !== bugun ? ', ' + gunYaz(x.gun) : '') + ', ' + E[x.d.k] : 'bugün kayıt yok') + '. ' + eylem) + '">' +
         '<span class="sg-olcu__ust"><span class="b-simge b-simge--' + (ren[sim] || 'mor') + '" aria-hidden="true"><svg><use href="#i-' + sim + '"/></svg></span>' +
-        '<span class="sg-olcu__ad">' + kac(x.ad) + '</span></span>' +
+        '<span class="sg-olcu__ad">' + kac(x.ad) + '</span><span class="sg-olcu__arti" aria-hidden="true">+</span></span>' +
         '<span class="sg-olcu__deger">' + (x.metin ? kac(p[0]).replace(/^([\d.,]+) (.+)$/, '$1<small class="sg-olcu__birim">$2</small>') : '—') + '</span>' + // birim küçük
-        '<span class="sg-olcu__ayrinti">' + (x.metin ? kac(ay || E[x.d.k]) : 'Bugün kayıt yok') + '</span>' +
-        '<span class="sg-olcu__alt">' + (x.metin && ay ? '<span class="sg-olcu__etiket">' + kac(E[x.d.k]) + '</span>' : '<span></span>') +
-        '<span class="sg-olcu__eylem">' + (x.metin ? '+ ' + eylem : eylem + '<svg aria-hidden="true"><use href="#i-sag"/></svg>') + '</span></span></a></li>';
+        '<span class="sg-olcu__ayrinti">' + kac(x.metin ? (ay ? ay + ' · ' : '') + E[x.d.k] : OLCU_SORU[x.id]) + '</span></a></li>';
     }).join('') + '</ul>';
   }
   function sayfa(yer) {
@@ -81,9 +80,9 @@
     if (!Kayit || !A) return bas + B.bos({ baslik: 'Kayıtlar bu açılışta okunamadı.', metin: 'Sayfayı yenile.' }) + dersler + '</div>';
     var l; try { l = JSON.parse(I.depo.getItem('lifeos.kayit.kayitlar')); } catch (e) { l = null; }
     var p = pano(Kayit, Array.isArray(l) ? l : [], A.gunAdi(Date.now()));
-    // tek ana eylem: kaydı olmayan ilk kutunun «Kaydet»i; öbürleri sade (eskiden dört eşit «Kaydet» + ana düğme «Tahlil ekle»)
-    var ilkBos = p.bugun.filter(function (x) { return !x.metin; })[0];
-    var bugunH = olcuKutulari(p.bugun, ilkBos, A.gunAdi(Date.now()), E, B.kac, ren);
+    // tek ana eylem: bugün hiç kayıt yokken Bugün başlığındaki «Kayıt ekle»; kayıt varken ana eylem Tahliller'e geçer
+    var hicYok = !p.bugun.some(function (x) { return x.metin; });
+    var bugunH = olcuKutulari(p.bugun, A.gunAdi(Date.now()), E, B.kac, ren);
     var egilimH = p.egilim.length ? B.bolum({ baslik: 'Son 7 gün', govde: [B.liste({ ad: 'Son 7 gün', ogeler: p.egilim.map(function (x) {
       return { ad: x.ad, not: x.cubuk + '  ' + x.ozet.metin + ' · ' + x.gun + '/7 gün kayıtlı', pul: E[x.ozet.k], uzun: true };
     }) }), '<p class="soluk sg-aciklama">Soldan sağa ' + gunYaz(p.bas) + ' – bugün. Nokta: o gün kayıt yok; sıfır değildir.</p>'] }) : '';
@@ -93,8 +92,8 @@
         return B.acilir({ baslik: t.belirtec, duzey: 3, not: sat(s) + ' · ' + gunYaz(s.gun), govde: B.liste({ ad: t.belirtec + ' değerleri', ogeler: t.degerler.slice().reverse().map(function (x) {
           return { ad: gunYaz(x.gun), not: sat(x) + (x.ref ? ' (aralık ' + (x.ref.alt != null ? String(x.ref.alt).replace('.', ',') : '…') + '–' + (x.ref.ust != null ? String(x.ref.ust).replace('.', ',') : '…') + ')' : ''), pul: E[x.deger.k], uzun: true };
         }) }) });
-      }).join('') : B.bos({ baslik: 'Henüz tahlil kaydı yok.', metin: 'Sonuç kâğıdındaki değeri belirteciyle yaz; zamanla değişimini burada görürsün.', eylem: { metin: 'Tahlil ekle', tur: ilkBos ? 'ikincil' : 'ana', href: kayitYolu('tahlil') } }) });
-    return bas + B.bolum({ baslik: 'Bugün', govde: bugunH }) + egilimH + tahlilH + dersler + '</div>';
+      }).join('') : B.bos({ baslik: 'Henüz tahlil kaydı yok.', metin: 'Sonuç kâğıdındaki değeri belirteciyle yaz; zamanla değişimini burada görürsün.', eylem: { metin: 'Tahlil ekle', tur: hicYok ? 'ikincil' : 'ana', href: kayitYolu('tahlil') } }) });
+    return bas + B.bolum({ baslik: 'Bugün', eylem: hicYok ? { metin: 'Kayıt ekle', tur: 'ana', href: '#/motor/kayit' } : null, govde: bugunH }) + egilimH + tahlilH + dersler + '</div>';
   }
   Kabuk.ek = Kabuk.ek || {};
   Kabuk.ek.saglik = sayfa;

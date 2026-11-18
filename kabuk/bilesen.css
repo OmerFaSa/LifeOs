@@ -178,9 +178,9 @@ a.b-ders:hover{ box-shadow:var(--golge-orta); }
 .b-soru__sonuc ul{ margin:var(--a2) 0 0; padding-left:var(--a4); }
 .b-soru__not{ margin-top:var(--a2); color:var(--soluk); }
 
-/* 16 · tercih düğmeleri: seçili dolu vurgu, öteki çizgili; 44 px */
-.b-tercih{ display:inline-flex; flex-wrap:wrap; gap:2px; padding:var(--a1); background:color-mix(in srgb, var(--yazi) 6%, transparent); border-radius:var(--kose-tam); }
-.b-tercih__sec{ height:38px; padding:0 var(--a3); border:0; cursor:pointer; font:inherit; font-size:var(--yz-k); font-weight:500; white-space:nowrap;
+/* 16 · tercih: bölmeli seçim. Köşe düğmeyle eş merkezli (hap değil: sarınca yumağa dönüyordu, 2026-11-18); sarınca satırlar dolar; telefonda tam genişlik */
+.b-tercih{ display:inline-flex; flex-wrap:wrap; gap:2px; max-width:100%; padding:var(--a1); background:color-mix(in srgb, var(--yazi) 6%, transparent); border-radius:var(--kose); }
+.b-tercih__sec{ flex:1 0 auto; height:38px; padding:0 var(--a3); border:0; cursor:pointer; font:inherit; font-size:var(--yz-k); font-weight:500; white-space:nowrap;
   color:var(--yazi-2); background:transparent; box-shadow:none; transition:background var(--sure) ease, color var(--sure) ease, box-shadow var(--sure) ease, transform var(--sure) ease; }
 .b-tercih__sec:hover{ color:var(--yazi); background:color-mix(in srgb, var(--yuzey) 55%, transparent); }
 .b-tercih__sec[aria-checked="true"]{ color:var(--yazi); font-weight:650; background:var(--yuzey); box-shadow:var(--golge-yumusak); }
@@ -225,18 +225,19 @@ a.b-ders:hover{ box-shadow:var(--golge-orta); }
 .b-adimlar__no--dolu{ color:var(--yazi); background:var(--yuzey); box-shadow:none; }
 .b-adimlar__no[aria-current]{ color:var(--yazi); box-shadow:inset 0 0 0 3px var(--vurgu); }
 
-/* 21 · ayar satırı: ad + açıklama solda, denetim sağda; sığmazsa denetim alta geçer */
-.b-ayar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--a3) var(--a4); padding:var(--a3) var(--a4); min-width:0;
+/* 21 · ayar satırı: ad + açıklama solda, denetim sağda; sığmazsa denetim alta geçer (telefonda tam genişlik) */
+.b-ayar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--a3) var(--a5); padding:var(--a4) var(--a5); min-width:0; min-height:68px;
   background:var(--yuzey); box-shadow:none; }
 .b-ayar--isik{ box-shadow:inset 0 0 0 3px var(--vurgu); }
 /* art arda ayar satırları tek kartta birleşir (bölümün 12 px aralığı geri alınır) */
 .b-ayar:has(+ .b-ayar){ border-bottom-left-radius:0; border-bottom-right-radius:0; }
-.b-ayar + .b-ayar{ margin-top:-12px; border-top-left-radius:0; border-top-right-radius:0; box-shadow:inset 0 1px 0 var(--cizgi); } /* satırlar arası ince ayraç (liste satırlarıyla aynı); yarım kenar gölgesi kalktı */
+.b-ayar + .b-ayar{ margin-top:-12px; border-top-left-radius:0; border-top-right-radius:0; background:linear-gradient(var(--cizgi),var(--cizgi)) var(--a5) 0/calc(100% - 2 * var(--a5)) 1px no-repeat var(--yuzey); } /* satırlar arası iç boşluktan başlayan ince ayraç */
 .b-ayar + .b-ayar.b-ayar--isik{ box-shadow:inset 0 0 0 3px var(--vurgu); }
 .b-ayar__metin{ display:flex; flex-direction:column; flex:1 1 14rem; min-width:0; }
 .b-ayar__ad, .b-ayar__deger{ font-family:var(--govde); font-weight:600; }
-.b-ayar__not{ font-size:var(--yz-k); color:var(--soluk); }
+.b-ayar__not{ margin-top:2px; font-size:var(--yz-k); line-height:1.45; color:var(--soluk); }
 .b-ayar__denetim{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:var(--a3); min-width:0; }
+@media (max-width:640px){ .b-ayar{ padding:var(--a4); } .b-ayar + .b-ayar{ background-position:var(--a4) 0; background-size:calc(100% - 2 * var(--a4)) 1px; } .b-ayar__denetim{ flex:1 1 100%; } .b-ayar .b-tercih{ flex:1; } .b-ayar .b-tercih__sec{ flex-basis:0; min-width:max-content; padding:0 var(--a2); } }
 
 /* 22 · ağ çizimi: düğüm ve çizgi renkleri jetonlardan; altında özet ve örnek çizgili açıklama */
 .b-ag{ display:flex; flex-direction:column; gap:var(--a2); margin:0; min-width:0; }

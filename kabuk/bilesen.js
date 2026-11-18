@@ -473,7 +473,7 @@
         '<span class="b-karsilama__alanmetin"><span class="b-karsilama__alanad">' + kac(metin('karsilama', 'alanlar.ad', a.ad)) + '</span>' +
         (a.not ? '<span class="b-karsilama__alannot">' + kac(metin('karsilama', 'alanlar.not', a.not)) + '</span>' : '') +
         (a.yuzde != null ? '<span class="b-karsilama__cizgi" aria-hidden="true"><i style="width:' + Math.max(2, Math.min(100, Math.round(+a.yuzde))) + '%"></i></span>' : '') + '</span>' +
-        (a.yuzde != null ? '<span class="b-karsilama__yuzde">%' + Math.round(+a.yuzde) + '</span>' : '<svg class="b-karsilama__ok" aria-hidden="true"><use href="#i-sag"/></svg>') + '</a>';
+        (a.yuzde != null ? (+a.yuzde > 0 ? '<span class="b-karsilama__yuzde">%' + Math.round(+a.yuzde) + '</span>' : '') : '<svg class="b-karsilama__ok" aria-hidden="true"><use href="#i-sag"/></svg>') + '</a>';
     }).join('');
     return '<div class="b-karsilama"><div class="b-karsilama__sahne"><canvas class="b-karsilama__manzara" width="384" height="96" aria-hidden="true"></canvas>' +
       '<div class="b-karsilama__ic">' + (o.tarih ? '<p class="b-karsilama__tarih">' + kac(metin('karsilama', 'tarih', o.tarih)) + '</p>' : '') +
