@@ -222,7 +222,7 @@ async function goruntu(p, ad, sec = {}) {
       dene('konu haritası: Tarih\'in dalları dosyadaki sırayla, hepsi kapalı başlar', JSON.stringify(dallar.map(x => x[0])) === JSON.stringify(TH.dallar.map(d => d.id)) && dallar.every(x => !x[1]), JSON.stringify(dallar));
       const ilkBag = TH.dallar[0].bolumler[0].konular.find(k => k.ders), bagsiz = TH.dallar[0].bolumler[0].konular.find(k => !k.ders && !k.unite);
       await hp.click('[data-dal="' + TH.dallar[0].id + '"] > summary');
-      dene('konu haritası: derse bağlı konu dersin bağlantısı, bağsız konu «henüz ders yok» + King bağlantısı (konu adı, alan)',
+      dene('konu haritası: derse bağlı konu dersin bağlantısı, bağsız konu «henüz ders yok» + Başbuğ bağlantısı (konu adı, alan)',
         (await hp.locator('[data-dal="' + TH.dallar[0].id + '"] a.konu[href="#/alan/tarih/ders/' + ilkBag.ders + '"]').count()) === 1
         && (await hp.locator('[data-dal="' + TH.dallar[0].id + '"] a[href="#/king"][data-king-konu="' + bagsiz.ad + '"][data-alan="tarih"]').count()) === 1
         && /henüz ders yok/.test(await hp.locator('[data-king-konu="' + bagsiz.ad + '"]').locator('xpath=ancestor::li').textContent()));
@@ -443,10 +443,10 @@ async function goruntu(p, ad, sec = {}) {
     await goruntu(p, 'not-agi');
     await goruntu(p, 'yer-7-not-agi', { yalniz: YER });
 
-    // ---- Sisteme not: «Yeni araç», King okuma izni varsayılan kapalı; kapalı aracın notu King süzgecinden geçmez ----
+    // ---- Sisteme not: «Yeni araç», Başbuğ okuma izni varsayılan kapalı; kapalı aracın notu Başbuğ süzgecinden geçmez ----
     await p.click('a[href="#/motor/not/arac/yeni"]');
     await p.waitForSelector('form.aracform');
-    dene('sisteme not: «King okuyabilsin» varsayılan kapalı', !(await p.isChecked('form.aracform input[name=kingOkur]')));
+    dene('sisteme not: «Başbuğ okuyabilsin» varsayılan kapalı', !(await p.isChecked('form.aracform input[name=kingOkur]')));
     await p.click('form.aracform button[type=submit]');
     await p.waitForFunction(() => /adı yazılmalı/.test(document.querySelector('.aracform .b-uyari').textContent));
     dene('sisteme not: adsız araç motorun cümlesiyle reddedilir', true);
@@ -458,10 +458,10 @@ async function goruntu(p, ad, sec = {}) {
     await p.click('form.aracform button[type=submit]');
     await p.waitForSelector('[data-arac-sayfa] [data-sistemnot]');
     const aracHash = await p.evaluate(() => location.hash);
-    dene('sisteme not: araç sayfası notu ve «King okumaz» gösterir', /King okumaz/.test(await p.textContent('[data-sistemnot]')) && /hakkımda çıkarım yapma/.test(await p.textContent('[data-sistemnot]')), await p.textContent('[data-sistemnot]'));
+    dene('sisteme not: araç sayfası notu ve «Başbuğ okumaz» gösterir', /Başbuğ okumaz/.test(await p.textContent('[data-sistemnot]')) && /hakkımda çıkarım yapma/.test(await p.textContent('[data-sistemnot]')), await p.textContent('[data-sistemnot]'));
     await p.click('a[href^="#/motor/not/yeni?arac="]');
     await p.waitForSelector('form.notform input[name=klasor]', { state: 'attached' });
-    dene('sisteme not: araçta yeni not aracın adını ve iznini söyler', /Araç: Düşünce defteri · King okumaz/.test(await p.textContent('form.notform')));
+    dene('sisteme not: araçta yeni not aracın adını ve iznini söyler', /Araç: Düşünce defteri · Başbuğ okumaz/.test(await p.textContent('form.notform')));
     await p.fill('input[name=baslik]', 'Kader');
     await p.fill('textarea[name=govde]', 'Kader ve çaba üzerine bir fikir.');
     await p.click('form.notform button[type=submit]');
@@ -469,7 +469,7 @@ async function goruntu(p, ad, sec = {}) {
     const kral = () => p.evaluate(() => { const N = LIFEOS.Motor.Not, l = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.not.kayit')), a = JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.not.araclar'));
       return { klasor: l.find(n => n.baslik === 'Kader').klasor, okur: N.kingOkur(l, { araclar: a }).map(n => n.baslik), sistem: N.kingAraclar(a).length }; });
     let kr = await kral();
-    dene('sisteme not: not aracın klasöründe; King süzgeci onu ve sistem notunu dışarıda bırakır', kr.klasor === 'Düşünce defteri' && kr.okur.indexOf('Kader') < 0 && kr.okur.indexOf('Erdem') >= 0 && kr.sistem === 0, JSON.stringify(kr));
+    dene('sisteme not: not aracın klasöründe; Başbuğ süzgeci onu ve sistem notunu dışarıda bırakır', kr.klasor === 'Düşünce defteri' && kr.okur.indexOf('Kader') < 0 && kr.okur.indexOf('Erdem') >= 0 && kr.sistem === 0, JSON.stringify(kr));
     await p.goto(T + '/kabuk/' + aracHash);
     await p.waitForSelector('[data-arac-sayfa] .b-liste a.b-satir');
     dene('sisteme not: araç sayfasında notu listelenir', /Kader/.test(await p.textContent('[data-arac-sayfa] .b-liste')));
@@ -479,12 +479,12 @@ async function goruntu(p, ad, sec = {}) {
     dene('sisteme not: düzenlerken klasör değişmez (salt okunur)', (await p.getAttribute('form.aracform input[name=klasor]', 'readonly')) !== null);
     await p.check('form.aracform input[name=kingOkur]');
     await p.click('form.aracform button[type=submit]');
-    await p.waitForFunction(() => /King okur/.test((document.querySelector('[data-sistemnot]') || {}).textContent || ''));
+    await p.waitForFunction(() => /Başbuğ okur/.test((document.querySelector('[data-sistemnot]') || {}).textContent || ''));
     kr = await kral();
-    dene('sisteme not: izin açılınca King notu ve sistem notunu okur', kr.okur.indexOf('Kader') >= 0 && kr.sistem === 1, JSON.stringify(kr));
+    dene('sisteme not: izin açılınca Başbuğ notu ve sistem notunu okur', kr.okur.indexOf('Kader') >= 0 && kr.sistem === 1, JSON.stringify(kr));
     await p.goto(T + '/kabuk/#/motor/not');
     await p.waitForSelector('[aria-labelledby="araclar-baslik"] a.b-satir');
-    dene('sisteme not: Not sayfasında araç, not sayısı ve King izniyle listelenir', /Düşünce defteri.*1 not.*King okur/.test((await p.textContent('[aria-labelledby="araclar-baslik"]')).replace(/\s+/g, ' ')));
+    dene('sisteme not: Not sayfasında araç, not sayısı ve Başbuğ izniyle listelenir', /Düşünce defteri.*1 not.*Başbuğ okur/.test((await p.textContent('[aria-labelledby="araclar-baslik"]')).replace(/\s+/g, ' ')));
 
     // ---- Tekrar ----
     await p.goto(T + '/kabuk/#/motor/tekrar');
@@ -1012,31 +1012,31 @@ async function goruntu(p, ad, sec = {}) {
     console.log('  ölçüldü (soğuk açılış): dizin yükleme dahil ' + olcum2.dizinMs + ' ms, ilk sorgu ' + olcum2.sorguMs + ' ms');
     dene('arama: doğrudan açılışta dizin kurulur ve dersler gelir', olcum2.ders === olcum1.ders && (await ap.locator('[data-arama-grup="ders"] a.b-satir').count()) > 0, JSON.stringify(olcum2));
     await ap.close();
-    // ---- King: açıklama sayfası + LifeOS içinden konuşma (kabuk/king-sohbet.js, 2026-11-15 sahibin isteği) ----
+    // ---- Başbuğ: açıklama sayfası + LifeOS içinden konuşma (kabuk/king-sohbet.js, 2026-11-15 sahibin isteği) ----
     await p.goto(T + '/kabuk/#/king');
     await p.waitForSelector('[data-sayfa="king"] form[data-king-sohbet]');
     const kingMetin = await p.textContent('#sayfa');
-    dene('King: nerede konuşulacağını, neyi gördüğünü ve sahibin adımını söyler', /Claude masaüstü uygulamasında/.test(kingMetin) && /Özel notlarını görmez/.test(kingMetin) && /tamamen kapat/.test(kingMetin) && !/hazırlanıyor/.test(kingMetin));
+    dene('Başbuğ: nerede konuşulacağını, neyi gördüğünü ve sahibin adımını söyler', /Claude masaüstü uygulamasında/.test(kingMetin) && /Özel notlarını görmez/.test(kingMetin) && /tamamen kapat/.test(kingMetin) && !/hazırlanıyor/.test(kingMetin));
     const kingForm = await p.evaluate(() => { const f = document.querySelector('[data-sayfa="king"] form[data-king-sohbet]');
       return { tek: document.querySelectorAll('[data-king-bolum]').length, secenek: f.saglayici ? [...f.saglayici.options].map(o => o.value).join(',') : 'seçici yok', metin: !!f.metin }; });
-    // cevaplayan seçimi sohbetten Ayarlar › King'e taşındı (2026-11-16b içerik paketi): sohbette seçici yok, ayar şemada üç seçenekle
+    // cevaplayan seçimi sohbetten Ayarlar › Başbuğ'a taşındı (2026-11-16b içerik paketi): sohbette seçici yok, ayar şemada üç seçenekle
     const kingAyar = await p.evaluate(() => { const t = LIFEOS.Kabuk.Ayar.tanim('lifeos.king.saglayici'); return t ? Object.keys(t.secenekler || {}).join(',') : ''; });
-    dene('King: tek sohbet bölümü, sohbette seçici yok; Otomatik, Antigravity ve Claude Code Ayarlar › King’te', kingForm.tek === 1 && kingForm.secenek === 'seçici yok' && kingForm.metin && kingAyar === 'oto,antigravity,claude', JSON.stringify(kingForm) + ' ' + kingAyar);
-    // yazma kutusu: örnek sorular; Enter gönderir (Tanışma'nın Enter kısayolu King'in kutusunu yakalamaz); hâl gelince yazılan silinmez
-    dene('King: ilk açılışta karşılama cümlesi ve üç örnek soru', (await p.locator('[data-king-oneri]').count()) === 3 && /Hoş geldin/.test(await p.textContent('.king-selam')));
+    dene('Başbuğ: tek sohbet bölümü, sohbette seçici yok; Otomatik, Antigravity ve Claude Code Ayarlar › Başbuğ’te', kingForm.tek === 1 && kingForm.secenek === 'seçici yok' && kingForm.metin && kingAyar === 'oto,antigravity,claude', JSON.stringify(kingForm) + ' ' + kingAyar);
+    // yazma kutusu: örnek sorular; Enter gönderir (Tanışma'nın Enter kısayolu Başbuğ'un kutusunu yakalamaz); hâl gelince yazılan silinmez
+    dene('Başbuğ: ilk açılışta karşılama cümlesi ve üç örnek soru', (await p.locator('[data-king-oneri]').count()) === 3 && /Hoş geldin/.test(await p.textContent('.king-selam')));
     // bu yalıtılmış ortamda Merkez yok: gönderilen soruya sahte bir cevap (cevabın akışta göründüğü de sınanır)
     await p.route('**/api/kabuk/king', r => r.request().method() === 'POST'
       ? r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'Merhaba, buradayım.', mode: 'model', provider: 'deneme', seconds: 0.4 }) }) : r.continue());
-    await p.fill('form[data-king-sohbet] textarea', 'Merhaba King');
+    await p.fill('form[data-king-sohbet] textarea', 'Merhaba Başbuğ');
     await p.press('form[data-king-sohbet] textarea', 'Enter');
     await p.waitForSelector('.king-akis .king-msj--king', { timeout: 20000 }).catch(() => {});
-    dene('King: Enter soruyu gönderir, cevap akışa düşer, örnekler kalkar', /Merhaba King/.test(await p.textContent('.king-msj--ben')) && /Merhaba, buradayım/.test(await p.textContent('.king-msj--king')) && (await p.locator('[data-king-oneri]').count()) === 0
-      && (await p.textContent('.king-msj--king .king-kim')) === 'King');
+    dene('Başbuğ: Enter soruyu gönderir, cevap akışa düşer, örnekler kalkar', /Merhaba Başbuğ/.test(await p.textContent('.king-msj--ben')) && /Merhaba, buradayım/.test(await p.textContent('.king-msj--king')) && (await p.locator('[data-king-oneri]').count()) === 0
+      && (await p.textContent('.king-msj--king .king-kim')) === 'Başbuğ');
     await p.unroute('**/api/kabuk/king');
     // 2026-11-16: konuşma yenilemede kalır (lifeos.king.sohbet), «Yeni konuşma» temizler; ayrıntılı tur: belgeler/ekip/sadelesme/tur-20261116/king.md
     await p.reload(); await p.waitForSelector('.king-msj--king');
     await p.click('[data-king-yeni]');
-    dene('King: konuşma yenilemede kalır, «Yeni konuşma» temizler', (await p.locator('.king-msj').count()) === 0 && (await p.locator('[data-king-oneri]').count()) === 3);
+    dene('Başbuğ: konuşma yenilemede kalır, «Yeni konuşma» temizler', (await p.locator('.king-msj').count()) === 0 && (await p.locator('[data-king-oneri]').count()) === 3);
     await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP && document.querySelector('.b-karsilama__selam')); // bölüm geçişinin çizimi bir kare sonra

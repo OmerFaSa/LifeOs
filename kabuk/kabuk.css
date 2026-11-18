@@ -179,7 +179,7 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 /* kapak (kabuk.js KAPAK): ana sayfaların başında kendi piksel sahnesinden ince şerit; üst çubuk üstüne biner, renkli simge alt kenarına oturur */
 .kapak{ position:relative; height:144px; margin:calc(-1 * max(var(--a3),env(safe-area-inset-top))) calc(50% - 50vw) 0; background:var(--gok); overflow:hidden; }
 .kapak__sahne{ display:block; width:100%; height:100%; image-rendering:pixelated; }
-.kapak__sahne, .b-karsilama__manzara{ transform:translate(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -5px)) scale(1.05); transition:transform calc(var(--yavas) * 1.6) var(--akis); }
+.kapak__sahne, .b-karsilama__manzara{ position:absolute; left:-12px; top:-6px; transform:translate(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -5px)); transition:transform calc(var(--yavas) * 1.6) var(--akis); }
 .kapak::after{ content:""; position:absolute; inset:0; background:var(--kapak-ortu); pointer-events:none; }
 .canlan .kapak__simge{ animation:kapak-gir var(--yavas) var(--yay) both; }
 @keyframes kapak-gir{ from{ opacity:0; transform:translateY(8px) scale(.94); } }

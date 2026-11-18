@@ -110,7 +110,7 @@
       B.alan({ tur: 'metin', isim: 'hy-gorunen', ad: 'Görünen ad', deger: taslak(s, 'hy-gorunen', k.gorunen_ad), enCok: 40 }),
       renkler.length ? B.alan({ tur: 'radyo', isim: 'hy-renk', ad: 'Renk', secenekler: sec, deger: sec[renk] ? renk : '' }) : '',
       B.acilir({ baslik: 'Kişisel bilgiler', not: 'isteğe bağlı', duzey: 3, acik: !!s.acik.kisisel, veri: { 'hy-acilir': 'kisisel' }, govde: [
-        B.alan({ tur: 'metin', isim: 'hy-hitap', ad: 'King sana nasıl seslensin', deger: taslak(s, 'hy-hitap', k.hitap), yerTutucu: k.gorunen_ad || null, enCok: 30 }),
+        B.alan({ tur: 'metin', isim: 'hy-hitap', ad: 'Başbuğ sana nasıl seslensin', deger: taslak(s, 'hy-hitap', k.hitap), yerTutucu: k.gorunen_ad || null, enCok: 30 }),
         B.alan({ tur: 'tarih', isim: 'hy-dogum', ad: 'Doğum günü', deger: taslak(s, 'hy-dogum', k.dogum) }),
         B.alan({ tur: 'metin', isim: 'hy-eposta', ad: 'E-posta', deger: taslak(s, 'hy-eposta', k.eposta), enCok: 200 }).replace('type="text"', 'type="email"').replace('autocomplete="off"', 'autocomplete="email"'),
         '<p class="soluk">Hiçbiri bir yere gönderilmez; yalnız bilgisayarındaki Başbuğ’da durur.</p>'] }),

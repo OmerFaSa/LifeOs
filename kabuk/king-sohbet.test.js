@@ -1,4 +1,4 @@
-// King sohbeti (kabuk/king-sohbet.js) saf kısım: node kabuk/king-sohbet.test.js  (✓/✕, çıkış 0/1)
+// Başbuğ sohbeti (kabuk/king-sohbet.js) saf kısım: node kabuk/king-sohbet.test.js  (✓/✕, çıkış 0/1)
 'use strict';
 const K = require('./king-sohbet.js');
 const a = require('assert');
@@ -20,7 +20,7 @@ t('model konuşamadıysa tek kısa not; hata null döner (yazılan kutuya geri),
   a.strictEqual(K.cevapSatirlari({ mesaj: 'yalnız bu bilgisayarda' }, 403), null);
   a.strictEqual(K.cevapSatirlari(null, 0), null);
   a.strictEqual(K.hataMetni({ mesaj: 'yalnız bu bilgisayarda' }), 'yalnız bu bilgisayarda');
-  a.strictEqual(K.hataMetni(null), 'King şu an cevap veremedi.');
+  a.strictEqual(K.hataMetni(null), 'Başbuğ şu an cevap veremedi.');
 });
 
 t('istek gövdesi: kip, başlangıç ve ders bağlamı (yalnız kimlik; ad ve metin gitmez)', () => {

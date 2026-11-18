@@ -200,8 +200,8 @@ def istem(sistem, mesajlar, aracsiz=False):
     if sistem:
         parca.append(str(sistem).strip())
     l, kisaltilan, atilan = gecmis_butcele(mesajlar)
-    gecmis = ["%s: %s" % ("Kullanıcı" if m.get("role") == "user" else "King", str(m["content"]).strip()) for m in l]
-    son = "Son kullanıcı mesajına King olarak cevap ver; yalnız cevabı yaz."
+    gecmis = ["%s: %s" % ("Kullanıcı" if m.get("role") == "user" else "Başbuğ", str(m["content"]).strip()) for m in l]
+    son = "Son kullanıcı mesajına Başbuğ olarak cevap ver; yalnız cevabı yaz."
     bas = "\n\n".join(parca)       # araç yasağı + King'in kimliği ve kip talimatı: istemin BAŞI, asla düşmez
     govde = ""
     if gecmis:
@@ -322,7 +322,7 @@ def ag_devam_mi(kayit, mesajlar, simdi=None):
             and l[-3].get("role") == "user" and str(l[-3]["content"]).strip() == kayit.get("soru"))
 
 
-DEVAM_ONEK = "(Araç kullanma; King olarak yalnız düz metinle cevap ver.)\n\n"
+DEVAM_ONEK = "(Araç kullanma; Başbuğ olarak yalnız düz metinle cevap ver.)\n\n"
 
 
 def _antigravity(model, sistem, mesajlar, sure, iptal=None):
@@ -343,7 +343,7 @@ def _antigravity(model, sistem, mesajlar, sure, iptal=None):
             kimlik = kayit["kimlik"]
     if not kimlik:
         bas = 0
-        y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + ag_model(model), "--title=Başbuğ King",
+        y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + ag_model(model), "--title=Başbuğ",
                                    istem(sistem, mesajlar, aracsiz=True)], min(60, sure))
         kimlik = ((y.get("response") or {}).get("newConversation") or {}).get("conversationId")
     if not kimlik:

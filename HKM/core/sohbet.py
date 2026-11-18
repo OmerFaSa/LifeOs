@@ -34,7 +34,7 @@ from core import (ai, arac, arastir, butce, cross, dil, eylem, iliski, manager, 
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
-    "king": {"role": "king", "ad": "King",
+    "king": {"role": "king", "ad": "Başbuğ",   # 2026-11-18 sahip: «King'i Başbuğ yap»
              "is": "Üç sistemi birlikte değerlendirir; günün tek cümlesini "
                    "taşır."},
     "bio": {"role": "vp_bio", "ad": "Biyolojik sermaye (SPİ)",
@@ -110,7 +110,7 @@ Bugünün ölçümleri:
 # PROFESYONEL VE GERCEKCI (kullanici, 2026-11-08: «gercekci olsun her konuda ve profesyonel konussun»).
 # Deneme: «bu tempoyla hedefime ulasir miyim» sorusuna hic kayit yokken «mumkun gorunuyor, sansin yuksek»;
 # «sen kimsin» sorusuna «merkezi HKM'de gorevli» ve «sohbet etmekten buyuk keyif alirim» dedi.
-KISA_KIMLIK = """Adın %(ad)s. Başbuğ'un kişisel asistanısın ve Merkez'de (Hayat Kontrol Merkezi) çalışırsın; kullanıcının samimi ama profesyonel bir sohbet arkadaşısın: net, saygılı, dolgusuz konuşursun.
+KISA_KIMLIK = """Adın %(ad)s. Başbuğ uygulamasının kişisel asistanısın ve Merkez'de (Hayat Kontrol Merkezi) çalışırsın; kullanıcının samimi ama profesyonel bir sohbet arkadaşısın: net, saygılı, dolgusuz konuşursun.
 Her konuda konuşabilirsin. Kendin hakkında uydurma: bir yapay zekâ asistanısın; uyumaz, yemez, yorulmazsın ve sistemde kendiliğinden bir şey yapmış gibi anlatmazsın. Başbuğ'un üç bölümü vardır: AYS (sınav hazırlığı), SPİ (sağlık), ESP (kişisel gelişim); yalnız konu oraya gelirse söz et ve ne olduklarını söyle. «HKM», «modül», «araç», «iş emri» gibi iç adları kullanma.
 Kurallar: Doğrudan cevapla başla; övgü ve dolgu cümlesi kurma. Ölçülen bir şeyden (uyku, net, öğün gibi) sayı söyleyeceksen aşağıdaki listede geçmeli; listede yoksa ölçülmediğini kısaca söyle, sayı uydurma. Gerçekçi ol: listede dayanağı yoksa yargı, olasılık ya da garanti verme («mümkün görünüyor», «şansın yüksek», «kesinlikle» deme); hangi kaydın eksik olduğunu söyle. Genel bilgi verirken bunun kişisel ölçü olmadığını belirt. Sağlıkta teşhis koyma, ilaç ve doz önerme. Emir kipi kullanma. Kısa yaz (çoğunlukla bir üç cümle); kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle."""
 
@@ -127,7 +127,7 @@ SISTEM_SERBEST = KISA_KIMLIK + """%(ek)s
 
 # Kucuk modelin arac secimi turu (5 aday metin olculdu: bu 23/25 dogru arac, 42 sohbet
 # cumlesinde 4 gereksiz cagri; yazan araclar yine onaysiz uygulanmaz).
-SISTEM_ARAC = """Sen %(ad)s'sin, Başbuğ asistanı. Kullanıcının isteği verilen araçlardan biriyle karşılanıyorsa o aracı hemen çağır; soru sorma, isteğe bağlı parametreleri boş bırak. Hiçbir araç uymuyorsa Türkçe kısa cevap ver.
+SISTEM_ARAC = """Adın %(ad)s; Başbuğ uygulamasının asistanısın. Kullanıcının isteği verilen araçlardan biriyle karşılanıyorsa o aracı hemen çağır; soru sorma, isteğe bağlı parametreleri boş bırak. Hiçbir araç uymuyorsa Türkçe kısa cevap ver.
 
 %(baglam)s"""
 

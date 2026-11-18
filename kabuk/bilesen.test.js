@@ -386,8 +386,8 @@ t('sohbet, çipler, yanlı düzen: geçmiş, şu anki form ya da bölüm, gizli 
   dogru(/^<div class="b-yanli b-yanli--sag"><div class="b-yanli__ana">a<\/div><aside class="b-yanli__yan">y<\/aside><\/div>$/.test(B.yanli({ taraf: 'sag', tamamlayici: true, ana: 'a', yan: 'y' })), 'sağda tamamlayıcı yan');
   atar(() => B.yanli({ taraf: 'ust', ana: '', yan: '' }), /taraf/, 'bilinmeyen taraf');
   atar(() => B.gezinme({ ad: 'G', ogeler: [{ metin: 'x', href: 'javascript:1' }] }), /href/, 'tehlikeli gezinme');
-  const f = B.liste({ ad: 'King\'in anladığı', canli: true, ogeler: [{ form: { veri: { 'tn-olgu': 'o1' }, govde: B.alan({ ad: 'Düzelt', isim: 'duzelt' }) } }, { ad: 'Ece', not: 'Ad', pul: 'senin sözün', uzun: true, eylemler: [{ metin: 'Sil', tur: 'sade' }] }] });
-  dogru(/^<ul class="b-liste b-liste--satir" aria-label="King&#39;in anladığı" aria-live="polite"><li><form class="b-satir b-satir--form" data-tn-olgu="o1" novalidate><div class="b-alan">/.test(f), f);
+  const f = B.liste({ ad: 'Başbuğ\'un anladığı', canli: true, ogeler: [{ form: { veri: { 'tn-olgu': 'o1' }, govde: B.alan({ ad: 'Düzelt', isim: 'duzelt' }) } }, { ad: 'Ece', not: 'Ad', pul: 'senin sözün', uzun: true, eylemler: [{ metin: 'Sil', tur: 'sade' }] }] });
+  dogru(/^<ul class="b-liste b-liste--satir" aria-label="Başbuğ&#39;un anladığı" aria-live="polite"><li><form class="b-satir b-satir--form" data-tn-olgu="o1" novalidate><div class="b-alan">/.test(f), f);
   dogru(/<div class="b-satir b-satir--uzun"><span class="b-satir__metin"><span class="b-satir__ad">Ece<\/span><span class="b-satir__not">Ad<\/span><\/span><span class="b-pul b-pul--normal">senin sözün<\/span><div class="b-eylemler">/.test(f), 'uzun satır eylemli');
   dogru(/^<div class="b-kart"><p class="b-kart__ust">Bugün 2 tekrar, 1 yeni kart<\/p><p class="b-kart__on">Arkhe\?<\/p>/.test(B.kart({ ust: 'Bugün 2 tekrar, 1 yeni kart', on: 'Arkhe?' })), 'kart üst satırı');
   dogru(/<\/span><p class="gizli" aria-live="polite" id="deneme-duyuru"><\/p><\/div>$/.test(B.serit({ baslik: 'D', sayac: { metin: '10:00', ad: 'Kalan süre' }, duyuru: 'deneme-duyuru' })), 'şerit duyurusu');

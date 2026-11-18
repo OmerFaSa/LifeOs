@@ -45,7 +45,7 @@
     var q = String(sorgu || '').trim(), s = ara(q, ogeler, 8);
     return katla(q) ? s.concat([{ tur: 'arama', id: 'her-sey', ad: 'Her şeyde ara: ' + q, etiket: 'arama', yol: '#/motor/arama?' + encodeURIComponent(q) }]) : s;
   }
-  var KATMAN_AD = { kabuk: 'sayfa', alan: 'alan', motor: 'araç', king: 'King' };
+  var KATMAN_AD = { kabuk: 'sayfa', alan: 'alan', motor: 'araç', king: 'Başbuğ' };
   // komut çubuğunun bütün öğeleri haritadan ve şemadan türetilir; elle liste yok
   function komutOgeleri(H, A) {
     var dalAd = {}; H.DALLAR.forEach(function (d) { dalAd[d.id] = d.ad; });
@@ -168,27 +168,27 @@
   }
   function dalYaz(depo, alan, dal) { if (dal) depo.setItem(dalAnahtari(alan), JSON.stringify(dal)); else depo.removeItem(dalAnahtari(alan)); }
   var HARF = 'ABCDEFGH';
-  /* King sayfasının gövdesi (#/king). King Claude masaüstü uygulamasında konuşur, LifeOS'u salt okur; LifeOS'ta dil modeli ve
+  /* Başbuğ sayfasının gövdesi (#/king). Başbuğ Claude masaüstü uygulamasında konuşur, LifeOS'u salt okur; LifeOS'ta dil modeli ve
    * sohbet yok (AGENTS §0.1). Metin king/KURULUM.md'nin sahibe dönük kısmı; dış bağlantı yok. B: bileşen kataloğu (kabuk/bilesen.js). */
   function kingGovde(B) {
     var l = function (ad, ogeler) { return B.liste({ ad: ad, ogeler: ogeler.map(function (x) { return { ad: x[0], not: x[1], uzun: true }; }) }); };
     // Sayfanın tek işi sohbet (king-sohbet.js başlığın altına ekler); açıklamalar sohbetin altında tek kapalı bölümde (2026-11-16, sahip: «ekranda daha az şey»).
     var k = function (baslik, govde) { return '<p class="king-hakkinda__ara">' + kac(baslik) + '</p>' + govde; };
-    return B.baslik({ metin: 'King' }) +
-      B.acilir({ baslik: 'King hakkında', veri: { 'king-hakkinda': '' }, govde: [
-        k('Ne görür', l('King ne görür', [
+    return B.baslik({ metin: 'Başbuğ' }) +
+      B.acilir({ baslik: 'Başbuğ hakkında', veri: { 'king-hakkinda': '' }, govde: [
+        k('Ne görür', l('Başbuğ ne görür', [
           ['Bugün, plan ve sistem haritası', 'Bugüne ait olmayanı bugünmüş gibi sunmaz'],
           ['Kayıtların, notların, yol haritan', 'Her sayı kesinlik etiketiyle; olmayan veri için «veri yok» der'],
           ['Araştırma', "Notlarında, ders içeriğinde ve Vikipedi'de kaynaklı cevap arar"]])),
-        k('Ne yapmaz', l('King ne yapmaz', [
+        k('Ne yapmaz', l('Başbuğ ne yapmaz', [
           ['Yalnız okur', "Kayıt, not, onay ya da ayar yazmaz; kaydı Başbuğ'da sen yaparsın"],
           ['Özel notlarını görmez', 'Parola, anahtar ve jeton da hiç verilmez'],
-          ["King'e kapalı araçların notlarını görmez", 'Araçta «King okuyabilsin» kapalıysa']])),
-        k('Claude uygulamasında', "<p class=\"soluk\">King'le Claude masaüstü uygulamasında da konuşursun.</p>" + l('King için adımlar', [
+          ["Başbuğ'a kapalı araçların notlarını görmez", 'Araçta «Başbuğ okuyabilsin» kapalıysa']])),
+        k('Claude uygulamasında', "<p class=\"soluk\">Başbuğ'la Claude masaüstü uygulamasında da konuşursun.</p>" + l('Başbuğ için adımlar', [
           ['Claude uygulamasını tamamen kapat', 'Görev çubuğundaki simgeden «Çık»'],
           ["Claude'u yeniden aç", 'Araç menüsünde «lifeos-king» görünür'],
           ['Bir şey sor', '«Bugün ne var?»; Claude okumadan önce izin ister']])),
-        '<p class="king-dipnot">' + kac("Yazdığın ve King'in okuduğu şeyler cevaplayan modelin sunucusuna gider (Antigravity'de Google, Claude'da Anthropic). Özel notların ve sırların gitmez.") + '</p>'] });
+        '<p class="king-dipnot">' + kac("Yazdığın ve Başbuğ'un okuduğu şeyler cevaplayan modelin sunucusuna gider (Antigravity'de Google, Claude'da Anthropic). Özel notların ve sırların gitmez.") + '</p>'] });
   }
   // Yerin durum rozeti: yalnız eski sayfaya giden ve henüz yazılmamış yerde. «pilot» (kabuğa taşınmış alan) ekranda rozet almaz:
   // iç göç durumu sahibe bir şey söylemez (faz3-arama-king-sayfa.md); taslak içeriği Onaylar ve ders kartındaki «taslak» söyler.
@@ -677,9 +677,14 @@
       return;
     }
     amblemKoy();
-    // tuval görünen kutunun oranında çizilir (eskiden 480×72 tuval 300 px yüksekliğe gerilip pikseller dikine uzuyordu): her piksel kare, 3 (telefonda 2) ekran pikseli
-    var kutu = c.getBoundingClientRect(), olc = innerWidth < 640 ? 2 : 3;
-    if (kutu.width > 0 && kutu.height > 0) { c.width = Math.max(120, Math.round(kutu.width / olc)); c.height = Math.max(40, Math.round(kutu.height / olc)); }
+    // Keskin piksel (2026-11-18, sahip: «arka plandaki pixelartları kaliteli yap»): sahnenin her pikseli TAM SAYIDA cihaz noktası (yaklaşık 3, telefonda 2
+    // CSS pikseli); tuval CSS'te tam o ölçüde, gerilmez. Eskiden %100'e gerilip üstüne scale(1.05) ve 1,25/1,5 ekran ölçeği binince pikseller 3-5 nokta arası
+    // eşitsiz çıkıyordu (bulanık, pürüzlü). İmleç kayması için tuval kutudan her yanda 12/6 px taşar (kabuk.css), büyütme yok.
+    var kutu = c.parentNode.getBoundingClientRect(), dpr = kok.devicePixelRatio || 1, olc = Math.max(2, Math.round((innerWidth < 640 ? 2 : 3) * dpr)) / dpr;
+    if (kutu.width > 0 && kutu.height > 0) {
+      c.width = Math.max(120, Math.ceil((kutu.width + 24) / olc)); c.height = Math.max(40, Math.ceil((kutu.height + 12) / olc));
+      c.style.width = c.width * olc + 'px'; c.style.height = c.height * olc + 'px';
+    }
     var saat = new Date().getHours(), tur = c.getAttribute('data-sahne') || 'yayla', ad = [tur, saat, c.width, c.height].join();
     try {
       var o = sahneOnbellek[ad];
@@ -783,7 +788,7 @@
   }
   d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('[data-ayar-ara]')) ayarSuz(e.target.value); });
   d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('.gokturk__gir')) { var c = e.target.closest('details').querySelector('.gokturk__cik'); if (c) c.textContent = gokturk(e.target.value); } });
-  // ayar grubu simgeleri (index.html sprite): ses nota (ay tema sanılıyordu), hesap kişi, erişilebilirlik bilgi, King taç
+  // ayar grubu simgeleri (index.html sprite): ses nota (ay tema sanılıyordu), hesap kişi, erişilebilirlik bilgi, Başbuğ taç
   var AYAR_SIMGE = { gorunum: 'gunes', erisim: 'ipucu', bildirim: 'saat', ses: 'muzik', beden: 'saglik', king: 'king', hesap: 'kisi' };
   var ayarGozcu = null;
   function ayarIzle() {
@@ -877,7 +882,7 @@
     if (x) return x.acik ? '<li><a class="konu konu--bagli' + (x.okundu ? ' konu--okundu' : '') + '" href="' + F() + '/ders/' + kac(x.id) + '"' + (x.id === siradakiId ? ' aria-current="step"' : '') + '>' + ad +
       '<span class="konu__not">' + (x.okundu ? 'okundu' : x.id === siradakiId ? 'sıradaki ders' : 'ders') + '</span></a></li>'
       : '<li class="konu konu--kilitli">' + ad + '<span class="konu__not">kilitli ders</span></li>';
-    return '<li class="konu">' + ad + '<span class="konu__not">henüz ders yok · <a href="#/king" data-king-konu="' + kac(k.ad) + '" data-alan="' + kac(etkinAlan) + '">King’le çalış</a></span></li>';
+    return '<li class="konu">' + ad + '<span class="konu__not">henüz ders yok · <a href="#/king" data-king-konu="' + kac(k.ad) + '" data-alan="' + kac(etkinAlan) + '">Başbuğ’la çalış</a></span></li>';
   }
   function dallarHtml(h, a) {
     var sec = dalOku(depo, etkinAlan), dm = dersDurumlari(etkinAlan), sid = a && a.tur === 'ders' ? a.id : null;
@@ -1034,7 +1039,7 @@
     return cubuk_ + '<article class="govde ders"><div class="ders-ilerleme" aria-hidden="true"><i></i></div>' + sahne + dersAdimlari(adim, n) + dersMetni(y, x) +
       '<div class="ders__bitir">' + dersSonu(y, kayit, x, id, okundu) +
       (n ? '<a class="ders__dene" href="' + yol + '?dene"><span><b>Kendini dene</b>' + n + ' kısa soru' + (cevap ? ' · ' + cevap + ' cevaplandı' : ', isteğe bağlı') + '</span><svg aria-hidden="true"><use href="#i-sag"/></svg></a>' : '') +
-      B.eylemler([bitir(0), { metin: "King'le çalış", tur: 'sade', href: '#/king', veri: { 'king-calis': id } }]) + '</div></article>'; // king-sohbet.js: ders bağlamıyla açar
+      B.eylemler([bitir(0), { metin: "Başbuğ'la çalış", tur: 'sade', href: '#/king', veri: { 'king-calis': id } }]) + '</div></article>'; // king-sohbet.js: ders bağlamıyla açar
   }
   // Ders sonu: özet (okundu, alıştırma k/m doğru) ve sıradakinin adı; bitmemiş derste sıradaki «okundu say» kopyasından (Yol.dersOku saf)
   function dersSonu(y, kayit, x, id, okundu) {
@@ -1163,70 +1168,27 @@
       if (sira !== cizSira) return; // geçişin bekleyen çizimi, ondan sonra gelen daha yeni çizimin üstüne yazmaz
       var yukleniyordu = !yeniSayfa && !!sayfaEl.querySelector('[aria-busy="true"]'); // «Yükleniyor…»un yerine gelen asıl içerik bir kez süzülür
       var gecen = !yeniSayfa && !yukleniyordu && sayfaEl.classList.contains('canlan') ? canlanAni() : null;
-      // geçişle gelen yeni sayfa: süzülme sınıfı içerik yazılmadan önce konur, böylece stil bir kez hesaplanır (sonradan konunca
-      // bütün sayfa ikinci kez hesaplanıyordu: 4× yavaş CPU'da ~45 ms). Bu kipte kapak ve başlık bloğu hareket etmez, kapakPay ölçüsü bozulmaz.
-      var erken = gecisli && yeniSayfa;
-      if (erken) canlan(true);
       sayfaEl.innerHTML = html;
-      if (pay) { var ph = sayfaEl.querySelector(pay.hedef); if (ph) ph.style.viewTransitionName = 'paylasilan'; }
       sayfaEl.setAttribute('data-ciz', yer.id);
       // alanın tonu sayfaya (kabuk.css --alan-ton/--alan-isik): kapak ışıması, ders ve kart vurguları; tonsuz sayfa sıcak ana renkte
       if (KAPAK[yer.id]) sayfaEl.setAttribute('data-ton', KAPAK[yer.id][1]); else sayfaEl.removeAttribute('data-ton');
-      d.title = yer.ad + ' · Başbuğ';
+      d.title = yer.ad === 'Başbuğ' ? 'Başbuğ' : yer.ad + ' · Başbuğ';
       altCubukYaz(yer);
       kapakPay(); manzara();
-      // Yeni sayfa bir kez süzülür. Aynı sayfanın yeniden çizimi (veri geldi, hesap yüklendi, tıklandı) süzülmeyi baştan oynatmaz:
+      // 2026-11-18 (sahip: «geçiş animasyonunu kaldır, direkt yüklensin»): yeni sayfa süzülmeden, doğrudan çizilir. Aynı sayfanın yeniden çizimi (veri geldi, hesap yüklendi, tıklandı) süzülmeyi baştan oynatmaz:
       // yeni öğelerin hareketleri kaldığı ana sarılır (innerHTML öğeleri yeniler, CSS hareketi sıfırdan başlardı: «animasyon tekrarlıyor»).
-      if (yeniSayfa || yukleniyordu) { if (!erken) canlan(gecisli && yeniSayfa); } else if (gecen != null) surdur(gecen);
+      if (!yeniSayfa && !yukleniyordu && gecen != null) surdur(gecen);
     }
-    // Bölüm değişince görünüm geçişi (tarayıcı destekliyorsa ve hareket açıksa): içerik gidilen yöne kayarak söner, üst çubuk yerinde kalır,
-    // seçili sekmenin işareti yenisine akar. Aynı sayfanın yeniden çizimi (tıklama, yazma) anında olur.
-    var gecisli = !!(once && yeniSayfa && d.startViewTransition && !d.hidden && hareketVar()); // gizli sekme çizmez: geçiş zaman aşımına düşerdi
-    var pay = null; paylas = null; // paylaşılan öğe (uçan simge) kapalı: sahibin isteği 2026-11-16, geçiş tek ve sakin; ikinci hareket yavaş makinede takılıyordu
-    if (gecisli) {
-      if (pay) pay.el.style.viewTransitionName = 'paylasilan';
-      d.documentElement.setAttribute('data-gecis', once === yer.id ? (parca[0].split('/').length >= String(onceYol).split('/').length ? 'ileri' : 'geri') : yon(once, yer));
-      d.documentElement.setAttribute('data-gecis-tur', gecisTuru(once, onceYol, yer, parca[0]));
-      var g = d.startViewTransition(yaz), u = bekleyenCizim = g.updateCallbackDone.catch(function () {});
-      u.then(function () { if (bekleyenCizim === u) bekleyenCizim = null; });
-      g.ready.catch(function () { /* üst üste gelen geçişte öncekinin atlanması olağan */ });
-      g.finished.then(gecisBitti, gecisBitti);
-    } else yaz();
+    yaz(); // görünüm geçişi yok (2026-11-18, sahip: «geçiş kötü oldu, direkt yüklensin»)
     return yer;
   }
   var cizSira = 0, bekleyenCizim = null;
   // Ekranlara verilen alan yüklemesi, bekleyen geçişin çizimi bitince çözülür: «sayfa hâlâ açık mı?» diye ekrana bakan
   // eşzamansız yeniden çizimler (deneme, araçlar, onay) yeni sayfanın öğelerini görür.
   function alanYukleCizimle(id) { return alanYukle(id).then(function (v) { return bekleyenCizim ? bekleyenCizim.then(function () { return v; }) : v; }); }
-  // Geçişin türü: derse başlamak («ders»: sayfa öne açılır), ana bölüm değişimi («buyuk»), bölüm içinde derinleşme/dönüş («kucuk»)
-  function gecisTuru(onceId, onceYol, yer, yol) {
-    var dersYeni = /\/ders\//.test(yol), dersOnce = /\/ders\//.test(String(onceYol || ''));
-    if (dersYeni && !dersOnce) return 'ders';
-    var a = sekmeOf(H.YERLER.filter(function (y) { return y.id === onceId; })[0]), b = sekmeOf(yer);
-    return onceId !== yer.id && a !== b ? 'buyuk' : 'kucuk';
-  }
-  function gecisBitti() {
-    d.documentElement.removeAttribute('data-gecis'); d.documentElement.removeAttribute('data-gecis-tur');
-    var p = sayfaEl.querySelector('[style*="view-transition-name"]'); if (p) p.style.viewTransitionName = '';
-  }
-  // Paylaşılan öğe: tıklanan kart açtığı sayfanın başına akar (kabuk.css ::view-transition-group(paylasilan)). Alan kartı ya da simgeli
-  // satır → kapak simgesi; «Sıradaki»nin ve Bugün karşılamasının ana düğmesi → açılan dersin (kapının) başlığı. Ad yalnız geçiş boyunca durur.
-  var paylas = null;
-  function paylasKaynak(a) {
-    var s = a.matches('.b-karsilama__alan, a.b-satir') && a.querySelector('.b-simge');
-    if (s) return { el: s, hedef: '.kapak__simge .b-simge' };
-    var k = a.classList.contains('b-dugme--ana') && a.closest('.sira, .b-karsilama'), b = k && k.querySelector('.sira__baslik, .b-karsilama__sira');
-    return b ? { el: b, hedef: '.govde h1' } : null;
-  }
   // kabuk.css'teki --sure kuralının aynısı (data-hareket az; sistem + «hareketi azalt»). getComputedStyle değil: her geçişte ve sahnenin
   // her karesinde (125 ms) bütün stili zorla yeniden hesaplatıyordu (2026-11-17b ölçümü)
   function hareketVar() { var h = kokEl.getAttribute('data-hareket'); return h !== 'az' && !(h === 'sistem' && !!kok.matchMedia && kok.matchMedia('(prefers-reduced-motion: reduce)').matches); }
-  // Yön: üst sekmelerde sağa giderken ileri, sola geri; sekme dışı yerlerde (ders, ayarlar…) derinleşme ileri, sekmeye dönüş geri
-  function yon(onceId, yer) {
-    var sira = sekmeler().map(function (y) { return y.id; }), a = sira.indexOf(sekmeOf(H.YERLER.filter(function (y) { return y.id === onceId; })[0])), b = sira.indexOf(sekmeOf(yer));
-    if (a >= 0 && b >= 0 && a !== b) return b > a ? 'ileri' : 'geri';
-    return sira.indexOf(yer.id) >= 0 ? 'geri' : 'ileri';
-  }
   // Yeni sayfaya girişte listeler sırayla süzülür (kabuk.css .canlan); aynı sayfanın yeniden çizimi süzülmez.
   // Görünüm geçişiyle gelindiyse sayfanın kendisi zaten kayarak geldi; yalnız listeler süzülür (canlan--gecis), sayfa ikinci kez belirmez.
   var canlanSaat = null;
@@ -1503,7 +1465,6 @@
     d.addEventListener('keydown', tus);
     d.addEventListener('click', tik);
     d.addEventListener('click', function (e) { if (e.isTrusted && e.target.closest && e.target.closest('a[href^="#/"], [data-yol]:not(#sayfa)')) sesCal('tik'); }, true); // #sayfa da data-yol taşır: sayfadaki her tık ses istemesin
-    d.addEventListener('click', function (e) { var a = !e.defaultPrevented && e.target.closest && e.target.closest('#sayfa a[href^="#/"]'); paylas = a ? paylasKaynak(a) : null; }, true);
     d.addEventListener('submit', function (e) { var f = e.target.closest('form.kapi'); if (f) { e.preventDefault(); if (bosSor(f)) return; if (f.hasAttribute('data-yer')) yerBitir(f); else kapiBitir(f); } });
     d.addEventListener('change', function (e) {
       if (e.target.matches('[data-ayar][data-parca]')) aralikYaz(e.target);

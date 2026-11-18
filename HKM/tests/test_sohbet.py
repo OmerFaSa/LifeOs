@@ -111,7 +111,7 @@ def run():
             r = sohbet.konus(_db.connect(":memory:"), cfg, m, "2026-09-27", transport=tas, kayit=False)
             eq(r["command"], "selam", m)
             ok(r["text"].startswith(ilk), (m, r["text"]))
-            ok("King" in r["text"] and "«durum»" in r["text"], r["text"])
+            ok("Başbuğ" in r["text"] and "«durum»" in r["text"], r["text"])
         eq(cagri, [])                                   # hicbiri modele gitmedi
         for m in ("merhaba, uykum nasıl", "selam naber", "günaydın bugün ne çalışayım"):
             r = sohbet.konus(_db.connect(":memory:"), cfg, m, "2026-09-27", transport=tas, kayit=False)
@@ -131,7 +131,7 @@ def run():
         görevlisisin» ile basliyordu; 1B model «sen kimsin» sorusuna
         «Benim adım Sen HKM.» diyordu ve modulleri bilmiyordu."""
         s = sohbet.sistem_metni("king", "- (liste)", kisa=True)
-        ok(s.startswith("Adın King."), s[:60])
+        ok(s.startswith("Adın Başbuğ."), s[:60])
         for parca in ("AYS", "SPİ", "ESP", "Hayat Kontrol Merkezi", "sayı uydurma", "- (liste)"):
             ok(parca in s, parca)
     test("kisa sistem metni kimligi ve modulleri tasir", t_short_prompt_carries_identity)
@@ -310,7 +310,7 @@ def run():
         r = sohbet.konus(con, cfg, "bugün hava güzel", BUGUN, transport=t, derinlik="derin")
         eq((r["mode"], r["motor"]["seviye"]), ("model", "ust"))
         no("brifing" in t.gorulen["sistem"] or "metriğe dayanıyor" in t.gorulen["sistem"], t.gorulen["sistem"][:600])
-        ok("Adın King." in t.gorulen["sistem"], t.gorulen["sistem"][:200])     # kisa sistem metni
+        ok("Adın Başbuğ." in t.gorulen["sistem"], t.gorulen["sistem"][:200])     # kisa sistem metni
         ok("Bu cevap DERİN" in t.gorulen["sistem"])
         # Bulut modeli (google) TAM baglami gorur: degismedi.
         t2 = _cevap("Tamam.")

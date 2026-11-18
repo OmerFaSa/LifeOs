@@ -76,7 +76,7 @@ t('profil: görünen ad, yalnız bilinen renkler, kişisel bilgiler; yazılan ta
   const h = Y.ekran(dolu({ taslak: { 'hy-gorunen': 'Yeni ad' } }), ADMIN, B, SIMDI);
   dogru(/data-hy-form="profil"/.test(h) && /value="Yeni ad"/.test(h), 'taslak');
   dogru(/value="mor" checked/.test(h) && !/bilinmez/.test(h), 'renk');
-  dogru(/type="email"/.test(h) && /type="date"/.test(h) && /King sana nasıl seslensin/.test(h));
+  dogru(/type="email"/.test(h) && /type="date"/.test(h) && /Başbuğ sana nasıl seslensin/.test(h));
 });
 t('şifre alanları: type=password, değer hiç taşınmaz; dosya alanı .db', () => {
   const h = Y.ekran(dolu({ silSor: true, taslak: { 'hy-sil-sifre': 'gizli' } }), ADMIN, B, SIMDI);

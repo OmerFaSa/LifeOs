@@ -71,7 +71,7 @@
     uyari: { ne: 'Kayıt olmadı ya da girilen değer geçersiz: iki alçak, kısa vuruş', oncelik: 4, db: 4.6, katman: [
       { tip: 'ton', nota: 'A4', t: 0, atak: 0.004, sure: 0.12, g: 0.0868, tini: 'tahta' },
       { tip: 'ton', nota: 'A4', t: 0.14, atak: 0.004, sure: 0.18, g: 0.0744, tini: 'tahta', yanki: 0.15 }] },
-    king: { ne: 'King\'in cevabı gelince (çok hafif)', oncelik: 2, db: 6.6, katman: [
+    king: { ne: 'Başbuğ\'un cevabı gelince (çok hafif)', oncelik: 2, db: 6.6, katman: [
       { tip: 'ton', nota: 'B5', t: 0, atak: 0.004, sure: 0.26, g: 0.048, tini: 'cam', yanki: 0.4 },
       { tip: 'ton', nota: 'F#6', t: 0.06, atak: 0.004, sure: 0.32, g: 0.0288, yanki: 0.5 }] },
     bildirim: { ne: 'Bildirim (basbug-ses olayıyla; kullanıcı eylemi beklemez)', oncelik: 3, db: 3.6, katman: [
@@ -94,7 +94,7 @@
     if (!SESLER[tur]) return false;
     return !son || simdi - son.t >= ARA_MS || SESLER[tur].oncelik > SESLER[son.tur].oncelik;
   }
-  var DUZEY = { kisik: 0.3, orta: 0.6, yuksek: 1 }, ARTI = 2; // ARTI: katalog kazançlarını ölçülen düzeye taşır (tur-20261116b/ses.md)
+  var DUZEY = { kisik: 0.3, orta: 0.6, yuksek: 1 }, ARTI = 2.6; // tok ses aynı genlikte daha kısık duyulur: 2 → 2,6 // ARTI: katalog kazançlarını ölçülen düzeye taşır (tur-20261116b/ses.md)
   function duzeyKazanci(d) { return DUZEY[d] || DUZEY.orta; }
 
   // Sessiz saatler: {acik, bas:'22:00', bit:'07:00'}; aralık gece yarısını geçebilir
@@ -108,8 +108,8 @@
   /* Ses çizgesi (canlı bağlam da çevrimdışı ölçüm de aynısını kullanır): kaynaklar → yol (kuru) + yankı gönderi → alçak kesici → sıcaklık rafı → sınırlayıcı → çıkış. */
   function zincir(c, kazanc) {
     var yol = c.createGain(); yol.gain.value = kazanc * ARTI;
-    var alt = c.createBiquadFilter(); alt.type = 'highpass'; alt.frequency.value = 90; alt.Q.value = 0.6; // dizüstü hoparlörün çıkaramadığı uğultu ve DC
-    var raf = c.createBiquadFilter(); raf.type = 'highshelf'; raf.frequency.value = 5000; raf.gain.value = -5; // tiz kenar: kulağı yormaz
+    var alt = c.createBiquadFilter(); alt.type = 'highpass'; alt.frequency.value = 70; alt.Q.value = 0.6; // dizüstü hoparlörün çıkaramadığı uğultu ve DC
+    var raf = c.createBiquadFilter(); raf.type = 'highshelf'; raf.frequency.value = 1800; raf.gain.value = -10; // tiz kesilir: ses tok ve sıcak kalır
     var sin = c.createDynamicsCompressor(); sin.threshold.value = -8; sin.knee.value = 4; sin.ratio.value = 12; sin.attack.value = 0.001; sin.release.value = 0.12;
     var sr = c.sampleRate, n = Math.round(sr * 1.0), b = c.createBuffer(2, n, sr), on = Math.round(sr * 0.008), T60 = 0.85;
     for (var k = 0; k < 2; k++) { // küçük oda: 8 ms ön gecikme, 4 ms yumuşak giriş, üstel sönüm; kuyruk zamanla koyulaşır (havanın tizi yutması); iki kanal ayrı
@@ -127,6 +127,10 @@
     for (var j = 0; j < gv.length; j++) gv[j] = Math.random() * 2 - 1;
     return { c: c, yol: yol, yanki: yanki, gurultu: g };
   }
+  // Tok ses (2026-11-18, sahip: «sesler çok tiz, tok ve güzel olsun»): katalog aynı kalır, çalarken her nota iki oktav iner
+  // (perde düzeni bozulmaz), 140 Hz'in altına inen nota bir oktav yukarıda kalır (dizüstü hoparlör çıkaramaz); dokunuş gürültüsü koyulaşır, sesler biraz uzar.
+  var TOK_EN_AZ = 140, TOK_GURULTU = 0.35, TOK_SURE = 1.35;
+  function tok(f) { var g = f / 4; while (g < TOK_EN_AZ) g *= 2; return g; }
   function zarf(p, tepe, atak, sure, b) { // kısa doğrusal atak (sıfırdan: tık yok), doğal üstel sönüm; sürenin sonunda tepenin ~1/1000'i
     p.setValueAtTime(0, b); p.linearRampToValueAtTime(tepe, b + atak); p.setTargetAtTime(0, b + atak, Math.max(0.002, (sure - atak) / 7));
   }
@@ -135,18 +139,18 @@
     hepsi.gain.value = Math.pow(10, (ses.db || 0) / 20); hepsi.connect(z.yol);
     var yankiGir = c.createGain(); yankiGir.connect(z.yanki); yankiGir.gain.value = hepsi.gain.value;
     katmanlar(tur).forEach(function (k) {
-      var b = bas + k.t, g = c.createGain(), son = b + k.sure + 0.02;
+      var b = bas + k.t, g = c.createGain(), son = b + k.sure * TOK_SURE + 0.02;
       g.gain.value = 1; g.connect(hepsi);
       if (k.yanki) { var y = c.createGain(); y.gain.value = k.yanki; g.connect(y); y.connect(yankiGir); }
       if (k.tip === 'hisirti') {
         var src = c.createBufferSource(), s = c.createBiquadFilter(), e = c.createGain();
-        src.buffer = z.gurultu; s.type = 'bandpass'; s.Q.value = k.q; s.frequency.setValueAtTime(k.f, b);
-        if (k.f2) s.frequency.exponentialRampToValueAtTime(k.f2, b + k.sure);
+        src.buffer = z.gurultu; s.type = 'bandpass'; s.Q.value = k.q; s.frequency.setValueAtTime(k.f * TOK_GURULTU, b);
+        if (k.f2) s.frequency.exponentialRampToValueAtTime(k.f2 * TOK_GURULTU, b + k.sure);
         zarf(e.gain, k.g, k.atak, k.sure, b);
         src.connect(s); s.connect(e); e.connect(g); src.start(b, Math.random() * 0.4); src.stop(son);
         return;
       }
-      var f = hz(k.nota), f2 = k.nota2 ? hz(k.nota2) : 0;
+      var f = tok(hz(k.nota)), f2 = k.nota2 ? tok(hz(k.nota2)) : 0, ksure = k.sure * TOK_SURE;
       // ayri: iki ses hafif aralıklı ve sağa-sola açık (genişlik; çok küçük aralık: titreşim duyulmaz); yoksa tek ses ortada
       var sesler = k.ayri ? [[-k.ayri / 2, -0.35], [k.ayri / 2, 0.35]] : [[0, 0]];
       sesler.forEach(function (sv) {
@@ -157,9 +161,9 @@
           o.detune.value = sv[0];
           o.frequency.setValueAtTime(k.egim ? fo * Math.pow(2, k.egim / 1200) : fo, b);
           if (k.egim) o.frequency.exponentialRampToValueAtTime(fo, b + 0.03);
-          if (f2) o.frequency.exponentialRampToValueAtTime(f2 * ks[0], b + k.sure * 0.6);
+          if (f2) o.frequency.exponentialRampToValueAtTime(f2 * ks[0], b + ksure * 0.6);
           // kısminin payı perde yükseldikçe azalır (tiz notalarda üst kısmi kulağı tırmalamasın); atak da üst kısmide biraz daha kısa
-          zarf(og.gain, k.g * ks[1] * (i ? Math.min(1, 700 / f) : 1) / sesler.length, i ? Math.max(0.001, k.atak * 0.7) : k.atak, k.sure * ks[2], b);
+          zarf(og.gain, k.g * ks[1] * (i ? Math.min(1, 700 / f) : 1) / sesler.length, i ? Math.max(0.001, k.atak * 0.7) : k.atak, ksure * ks[2], b);
           o.connect(og); og.connect(p); o.start(b); o.stop(son);
         });
       });
@@ -239,7 +243,7 @@
     if (t.matches('input[type="radio"], select')) return cal('sec');
     if (t.matches('input[data-ayar]')) sonra(function () { cal(t.getAttribute('aria-invalid') === 'true' ? 'uyari' : 'kayit'); });
   });
-  // Gönderme: kapı formunda kabuk.js'in 'tamam'ı kapı sesi olur, geçilemezse yumuşak 'yanlis'; King'de cevap gelince 'king';
+  // Gönderme: kapı formunda kabuk.js'in 'tamam'ı kapı sesi olur, geçilemezse yumuşak 'yanlis'; Başbuğ'da cevap gelince 'king';
   // öteki formlarda ekranda yeni bir hata çıkarsa 'uyari', «kaydedildi» çıkarsa 'kayit'.
   d.addEventListener('submit', function (e) {
     var f = e.target, k = f.closest && f.closest('[data-king-bolum]');

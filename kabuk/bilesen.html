@@ -194,7 +194,7 @@
   // halka ve komut çubuğu gizli çizilir; katalogda açık hâlleri dönüşümlü kabın içinde gösterilir
   h += tas(24, 'Halka', 'Boş yerde basılı tutunca (ya da Ctrl .) basılan yerde açılır: yuvarlak zemin, ortada nokta, en çok altı yer; öğe en az 88 × 44 px, ilki tepede, saat yönünde. Seçili öğe dolu vurgu. Ok tuşları, Home/End, Esc.',
     '<div class="katman">' + B.halka({ id: 'ornek-halka', ad: 'Yerler', ogeler: [{ ad: 'Bugün', yol: '#/bugun' }, { ad: 'Öğren', yol: '#/ogren' }, { ad: 'Sağlık', yol: '#/saglik' },
-      { ad: 'Araçlar', yol: '#/araclar' }, { ad: 'King', yol: '#/king' }, { ad: 'Harita', yol: '#/harita' }] }).replace(' hidden>', ' style="--r:110px">').replace('b-halka"', 'b-halka b-halka--acik"')
+      { ad: 'Araçlar', yol: '#/araclar' }, { ad: 'Başbuğ', yol: '#/king' }, { ad: 'Harita', yol: '#/harita' }] }).replace(' hidden>', ' style="--r:110px">').replace('b-halka"', 'b-halka b-halka--acik"')
       .replace('class="b-halka__oge" data-yol="#/ogren"', 'class="b-halka__oge b-halka__oge--secili" data-yol="#/ogren"') + '</div>');
   h += tas(25, 'Komut çubuğu', 'Ctrl K ya da / ile üstte ortada açılır: giriş 52 px, sonuç satırı 44 px, seçili satır 4 px vurgu; ok tuşları gezer, Enter açar, Esc kapatır. Yazılı sorguda son öğe «Her şeyde ara».',
     '<div class="katman">' + B.komut({ id: 'ornek-komut', ad: 'Ara', yerTutucu: 'Bir yer, ayar ya da eylem ara' }).replace(' hidden>', '>')
@@ -209,7 +209,7 @@
   h += tas(28, 'Yanlı düzen + gezinme', 'Ana sütun ve yapışkan yan sütun, 16 px aralık; 820 px ve altında alt alta. Sol: 12 rem gezinme (Ayarlar); sağ: 3:2 panel (Tanışma). Gezinme bağlantısı en az 44 px, dar ekranda yan yana sarar.',
     B.yanli({ taraf: 'sol', yan: B.gezinme({ ad: 'Örnek gruplar', ogeler: [{ metin: 'Görünüm', href: '#/g' }, { metin: 'Erişilebilirlik', href: '#/e' }, { metin: 'Beden', href: '#/b' }] }),
       ana: [B.ayar({ ad: 'Tema', not: 'Cihazına uyar ya da hep açık / koyu kalır.', id: 'ornek-yanli-ayar', govde: B.tercih({ etiket: 'ornek-yanli-ayar', secenekler: { sistem: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, deger: 'sistem' }) }),
-        B.panel({ baslik: 'King\'in anladığı', id: 'ornek-yanli-panel', govde: B.liste({ ad: 'Örnek olgular', ogeler: [{ ad: 'Ece', not: 'Hitap', pul: 'senin sözün', uzun: true, eylemler: [{ metin: 'Sil', tur: 'sade' }] }] }) })] }));
+        B.panel({ baslik: 'Başbuğ\'un anladığı', id: 'ornek-yanli-panel', govde: B.liste({ ad: 'Örnek olgular', ogeler: [{ ad: 'Ece', not: 'Hitap', pul: 'senin sözün', uzun: true, eylemler: [{ metin: 'Sil', tur: 'sade' }] }] }) })] }));
 
   var kok = document.getElementById('katalog');
   kok.innerHTML = h;

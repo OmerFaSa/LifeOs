@@ -2,7 +2,7 @@
  * alıştırma soruları), notlar (Not motorunun kendi araması), Tekrar kartları (ön ve arka yüz), Plan (bugünün blokları,
  * işler, sabit bloklar), metin alanı olan kayıtlar ve komut çubuğunun bildiği yerler ve ayarlar. Yerel ve ağsız; katlama kabuğunkidir (Kabuk.katla: ç ğ ı İ ö ş ü).
  * Ders dizini ilk aramada bir kez kurulur; onay değişip bir aşama yeniden kurulursa yalnız o zaman yenilenir.
- * Özel notlar da aranır (sahibin kendi ekranı); bu sayfa hiçbir şeyi King'e ya da ağa vermez.
+ * Özel notlar da aranır (sahibin kendi ekranı); bu sayfa hiçbir şeyi Başbuğ'a ya da ağa vermez.
  * Saf kısım Node'da test edilir (kabuk/kabuk.test.js); sayfa yalnız tarayıcıda. Açılışta değil: kabuk.js (SONRA) #/motor/arama'ya ilk girişte yükler. */
 (function (kok) {
   'use strict';

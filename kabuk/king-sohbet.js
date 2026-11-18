@@ -1,12 +1,12 @@
-/* LIFEOS.Kabuk.KingSohbet — King sayfasında (#/king) LifeOS içinden konuşma (2026-11-15, sahibin isteği:
+/* LIFEOS.Kabuk.KingSohbet — Başbuğ sayfasında (#/king) LifeOS içinden konuşma (2026-11-15, sahibin isteği:
  * «sistemin içinde de o arayüze istek atıp konuşabilmek istiyorum, arkada açık olması yeterli olsun»).
- * 2026-11-16 (sahibin isteği: «uzun uzun konuşacağım», «King öğretmen gibi dersi anlatsın ya da filozof gibi kendini anlatsın»):
- * mesajlaşma düzeni (sen sağda, King solda, en yeni altta, yazma alanı altta), büyüyen yazma alanı, yenilemede kalan geçmiş,
- * «Yeni konuşma», üç kip (Düşünce ortağı · Öğretmen · Filozof) ve ders bağlamı (ders sayfasındaki «King'le çalış»).
- * kabuk.js'e dokunmaz: King sayfası çizilince bölümü başlığın altına ekler.
+ * 2026-11-16 (sahibin isteği: «uzun uzun konuşacağım», «Başbuğ öğretmen gibi dersi anlatsın ya da filozof gibi kendini anlatsın»):
+ * mesajlaşma düzeni (sen sağda, Başbuğ solda, en yeni altta, yazma alanı altta), büyüyen yazma alanı, yenilemede kalan geçmiş,
+ * «Yeni konuşma», üç kip (Düşünce ortağı · Öğretmen · Filozof) ve ders bağlamı (ders sayfasındaki «Başbuğ'la çalış»).
+ * kabuk.js'e dokunmaz: Başbuğ sayfası çizilince bölümü başlığın altına ekler.
  * İstek aynı kökenden /api/kabuk/king'e gider (sistem/tekkapi.py): Merkez jetonu tarayıcıya hiç girmez. Geçmiş modele SUNUCUDAN
  * gider (HKM ambarı, «baslangic»tan bu yana); buradaki kopya yalnız ekran içindir. Ders metnini sunucu içerikten okur.
- * Depo (localStorage, ayar; tek depoya eşitlenmez): lifeos.king.saglayici (seçim; Ayarlar › King yazar), lifeos.king.sohbet (bu cihazdaki konuşma)
+ * Depo (localStorage, ayar; tek depoya eşitlenmez): lifeos.king.saglayici (seçim; Ayarlar › Başbuğ yazar), lifeos.king.sohbet (bu cihazdaki konuşma)
  * ve lifeos.king.taslak (yazılıp gönderilmemiş metin: sekme değişince, yenilemede geri gelir; gönderilince silinir, hata alınca geri döner).
  * 2026-11-16 (sahip: «geliştirici dili»): ekranda yalnız kip kalır; cevaplayan seçimi Ayarlar'da, kaynak/model/süre satırı yazılmaz.
  * Jeton ya da parola depoya yazılmaz. Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.KingSohbet, Node'da module.exports (saf kısım). */
@@ -24,7 +24,7 @@
     alparslan: 'Büyük Selçuklu sultanı · 1064–1072', fatih: 'Osmanlı padişahı · 1451–1481',
     osman: 'Osmanlı Beyliği’nin kurucusu · y. 1299–1324', yavuz: 'Osmanlı padişahı · 1512–1520', kanuni: 'Osmanlı padişahı · 1520–1566', babur: 'Babür Devleti’nin kurucusu · 1526–1530',
     timur: 'Timur Devleti’nin kurucusu · 1370–1405', enver: 'İttihat ve Terakki · Başkumandan Vekili · 1914–1918' };
-  // boş sohbette King'in sabit karşılaması (kipe göre)
+  // boş sohbette Başbuğ'un sabit karşılaması (kipe göre)
   var SELAM = { ortak: 'Hoş geldin. Bugün neyi birlikte düşünelim? Aklındakini yaz ya da şunlardan biriyle başla.',
     ogretmen: 'Hangi konuyu açalım? Adım adım anlatır, sonra seni sınarım. Şunlardan biriyle başlayabilirsin.',
     filozof: 'Bir filozofun sesiyle konuşurum: kendimi anlatır, sana da soru sorarım. Nereden başlayalım?' };
@@ -53,7 +53,7 @@
   function kipGecerli(k) { return var_(KIP, k) ? k : 'ortak'; }
   function hukumdarGecerli(h) { return typeof h === 'string' && var_(HUKUMDAR, h) ? h : null; }
   // Ders bağlamı yalnız kimlik taşır (sunucu metni içerikten okur); kimlik «alan.n.u.d» biçiminde olmalı.
-  // Konu bağlamı (dersi yazılmamış konu, alan sayfasındaki «King'le çalış»): alan + ad (tek satır, ≤120 harf); sunucu alanı yeniden doğrular.
+  // Konu bağlamı (dersi yazılmamış konu, alan sayfasındaki «Başbuğ'la çalış»): alan + ad (tek satır, ≤120 harf); sunucu alanı yeniden doğrular.
   function baglamGecerli(b) {
     if (b && b.tur === 'konu') {
       var ad = String(b.ad || '').replace(/\s+/g, ' ').trim().slice(0, 120);
@@ -88,7 +88,7 @@
     if (r.mode !== 'model') l.push('Şu an yalnız kısa cevap verebiliyorum.');
     return l;
   }
-  function hataMetni(r) { return (r && (r.mesaj || r.error)) || 'King şu an cevap veremedi.'; }
+  function hataMetni(r) { return (r && (r.mesaj || r.error)) || 'Başbuğ şu an cevap veremedi.'; }
   // Depodaki konuşma: bozuksa ya da biçimi tutmuyorsa boş konuşma (geçmiş kaybı, sahte geçmiş değil).
   function sohbetOku(ham, simdi) {
     var v = null;
@@ -151,7 +151,7 @@
     kaydet();
   }
 
-  // King'in sözü adla başlar (Divan'da hükümdarın)
+  // Başbuğ'un sözü adla başlar (Divan'da hükümdarın)
   function kimHtml(ad) { return '<p class="king-kim"><svg aria-hidden="true"><use href="#i-king"/></svg>' + kac(ad) + '</p>'; }
   function mesajHtml(m, ad) {
     if (m.kim === 'ben') return '<li class="king-msj king-msj--ben"><div class="king-balon">' + bicimle(m.metin) + '</div></li>';
@@ -171,10 +171,10 @@
     var secim = divan ? B.cipler({ ad: 'Hükümdar, biri seçilir', ogeler: Object.keys(HUKUMDAR).map(function (k) {
       return { metin: HUKUMDAR[k], tur: 'ikincil', basili: k === s.hukumdar, veri: { 'king-hukumdar': k } }; }) }) +
       (h ? '<div class="king-divan"><p class="king-divan__ad" aria-hidden="true">' + kac(HUKUMDAR[h]) + '</p><p class="king-divan__cag">' + kac(CAG[h]) + '</p></div>' : '') : ''; // ad süslü (okuyucu çipten duyar), altında çağı
-    var giris = divan ? (h ? 'Bu bir canlandırma: King, ' + HUKUMDAR[h] + ' olarak tarihî kaynaklara dayanarak konuşur; bilinmeyeni uydurmaz.' : 'Kiminle konuşmak istersin?')
-      : konu ? 'Bu konuyu King\'le baştan çalış. Şunlardan biriyle başla ya da aklındakini yaz:'
-      : s.baglam ? 'Bu dersi King\'le çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : SELAM[s.kip];
-    var ad = h ? HUKUMDAR[h] : 'King';
+    var giris = divan ? (h ? 'Bu bir canlandırma: Başbuğ, ' + HUKUMDAR[h] + ' olarak tarihî kaynaklara dayanarak konuşur; bilinmeyeni uydurmaz.' : 'Kiminle konuşmak istersin?')
+      : konu ? 'Bu konuyu Başbuğ\'la baştan çalış. Şunlardan biriyle başla ya da aklındakini yaz:'
+      : s.baglam ? 'Bu dersi Başbuğ\'la çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : SELAM[s.kip];
+    var ad = h ? HUKUMDAR[h] : 'Başbuğ';
     var sorular = divan ? (h ? ONERI[h] : []) : konu && s.kip === 'ogretmen' ? ONERI.konu : ONERI[s.kip];
     // ilk açılışta örnek sorular: kutuya ne yazılacağı belli olsun (tıklayınca sorulur)
     var oneri = bos ? '<div class="king-bos"><div class="king-selam">' + (divan ? '' : kimHtml(ad)) + '<p class="king-giris">' + kac(giris) + '</p></div>' +
@@ -182,14 +182,14 @@
         return '<button type="button" class="king-oneri__oge" data-king-oneri="' + kac(q) + '">' + kac(q) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '';
     ust += secim;
     var akis = bos ? '' : '<ol class="king-akis" aria-label="Konuşma" aria-live="polite">' + s.mesajlar.map(function (m) { return mesajHtml(m, ad); }).join('') +
-      (d.bekliyor ? '<li class="king-yaziyor" role="status"><span class="gizli">King yazıyor…</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></li>' : '') + '</ol>';
+      (d.bekliyor ? '<li class="king-yaziyor" role="status"><span class="gizli">Başbuğ yazıyor…</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></li>' : '') + '</ol>';
     var hata = d.hata ? B.uyari({ tur: 'hata', metin: d.hata, alt: 'Yazdığın kutuda duruyor.', eylem: { metin: 'Tekrar dene', tur: 'sade', veri: { 'king-tekrar': '' } } }) : '';
     var form = '<form class="king-yaz" data-king-sohbet novalidate>' +
       '<div class="king-yaz__satir"><label class="gizli" for="king-metin">Mesajın</label>' +
-      '<textarea id="king-metin" name="metin" rows="1" maxlength="8000" placeholder="King\'e yaz…" aria-describedby="king-ipucu"></textarea>' +
+      '<textarea id="king-metin" name="metin" rows="1" maxlength="8000" placeholder="Başbuğ\'a yaz…" aria-describedby="king-ipucu"></textarea>' +
       '<button type="submit" class="king-gonder" aria-label="Gönder"' + (d.bekliyor ? ' disabled' : '') + '><svg aria-hidden="true"><use href="#i-ok"/></svg></button></div>' +
       '<div class="king-yaz__alt"><span id="king-ipucu">Enter gönderir · Shift + Enter yeni satır</span></div></form>';
-    return '<section class="king-sohbet" data-king-bolum aria-label="King sohbeti">' + ust + oneri + akis + hata + form + '</section>';
+    return '<section class="king-sohbet" data-king-bolum aria-label="Başbuğ sohbeti">' + ust + oneri + akis + hata + form + '</section>';
   }
   function bolumEl() { return kok.document.querySelector('[data-king-bolum]'); }
   function boyutla(m) { if (!m) return; m.style.height = 'auto'; m.style.height = Math.min(m.scrollHeight + 2, 240) + 'px'; }
@@ -220,7 +220,7 @@
     kok.fetch('/api/kabuk/king', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-LifeOS': 'king' },
       body: JSON.stringify(istekGovdesi(metin, secimGecerli(depoOku(ANAHTAR)), s)) })
       .then(function (r) { kod = r.status; return r.json().catch(function () { return null; }); })
-      .then(function (r) { return { c: cevapSatirlari(r, kod), r: r }; }, function () { return { c: null, r: { mesaj: 'King’e ulaşılamadı. Bilgisayar açık mı?' } }; })
+      .then(function (r) { return { c: cevapSatirlari(r, kod), r: r }; }, function () { return { c: null, r: { mesaj: 'Başbuğ’a ulaşılamadı. Bilgisayar açık mı?' } }; })
       .then(function (x) {
         d.bekliyor = false;
         if (d.s !== s) return ciz();
@@ -232,14 +232,14 @@
         s.mesajlar.push({ kim: 'king', metin: String(x.c[0]).slice(0, EN_UZUN), alt: x.c.slice(1) }); s.mesajlar = s.mesajlar.slice(-EN_COK); kaydet(); ciz(true);
       });
   }
-  // Ders sayfasındaki «King'le çalış» (kabuk.js sayfaDers): o dersin bağlamıyla Öğretmen kipinde açılır; başka bir dersten geliyorsa yeni konuşma.
+  // Ders sayfasındaki «Başbuğ'la çalış» (kabuk.js sayfaDers): o dersin bağlamıyla Öğretmen kipinde açılır; başka bir dersten geliyorsa yeni konuşma.
   function dersleCalis(id) {
     var h = kok.document.querySelector('article.ders h1'), b = baglamGecerli({ tur: 'ders', id: id, ad: h ? h.textContent.trim() : '' });
     if (!b) return;
     if (!ayniBaglam(d.s.baglam, b)) yeniKonusma('ogretmen', b);
     kok.location.hash = '#/king';
   }
-  // Alan sayfasında dersi yazılmamış konunun «King'le çalış» bağlantısı (kabuk.js çizer; href="#/king" gezinmeyi kendisi yapar):
+  // Alan sayfasında dersi yazılmamış konunun «Başbuğ'la çalış» bağlantısı (kabuk.js çizer; href="#/king" gezinmeyi kendisi yapar):
   // o konu bağlamıyla Öğretmen kipinde; başka konudan geliyorsa yeni konuşma.
   function konuylaCalis(a) {
     var b = baglamGecerli({ tur: 'konu', alan: a.getAttribute('data-alan'), ad: a.getAttribute('data-king-konu') });

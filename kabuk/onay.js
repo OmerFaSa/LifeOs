@@ -144,7 +144,7 @@
     if (et.durum === 'kapali') return B.uyari({ tur: 'bilgi', metin: 'Bu iş yalnız bilgisayarın kendisinde açılır.' });
     var hata = et.hata ? B.uyari({ tur: 'hata', metin: et.hata }) : '', a = et.sayi.anlama, r = et.sayi.arama;
     if (!et.set) return (et.ileti ? B.uyari({ tur: 'tamam', metin: et.ileti }) : '') +
-      '<p class="soluk">King’e yazdığın birkaç mesajın ne istediğini işaretle; King seni böyle daha iyi anlar. Mesajlar bu bilgisayardan çıkmaz.</p>' +
+      '<p class="soluk">Başbuğ’a yazdığın birkaç mesajın ne istediğini işaretle; Başbuğ seni böyle daha iyi anlar. Mesajlar bu bilgisayardan çıkmaz.</p>' +
       '<p>' + (a + r ? a + ' mesaj ve ' + r + ' arama sorusu bekliyor.' : '') + '</p>' +
       (a + r ? B.eylemler([{ metin: 'Mesajları işaretle', tur: a ? 'ana' : 'ikincil', kapali: !a, veri: { 'onay-ac': 'etiket-bas', set: 'anlama' } },
         { metin: 'Aramaları işaretle', tur: a || !r ? 'ikincil' : 'ana', kapali: !r, veri: { 'onay-ac': 'etiket-bas', set: 'arama' } }])
@@ -211,7 +211,7 @@
         B.liste({ ad: 'Senin adımların', ogeler: ADIMLAR.map(function (x) { return { ad: x[0], not: x[1], uzun: true }; }) })] }) +
       B.acilir({ baslik: 'Onayları sakla', govde: ['<p class="soluk">Onayların bu cihazda durur. Dosyayı al ve bilgisayardaki Başbuğ klasörüne ver; içerik dosyalarına oradan yazılır.</p>',
         B.eylemler([{ metin: 'Onayları dosya olarak al', veri: { 'onay-ac': 'disari' }, kapali: !kayit }, { yazi: kayit ? kayit + ' öğe onaylı (alıştırma ve kapı soruları dahil)' : 'Henüz onay yok.' }])] }) +
-      B.acilir({ baslik: 'King’in anlamasını iyileştir', veri: { etiket: '' }, govde: '<div data-etiket-govde>' + etHtml() + '</div>' }) + '</div>';
+      B.acilir({ baslik: 'Başbuğ’un anlamasını iyileştir', veri: { etiket: '' }, govde: '<div data-etiket-govde>' + etHtml() + '</div>' }) + '</div>';
   }
   function alanSayfasi(I, a) {
     var ys = asamalar(I, a.id);

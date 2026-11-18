@@ -344,7 +344,7 @@ t('kayıt haftası: toparlanma ve yük motorun döndürdüğü gibi; veri yoksa 
   const yasak = /(^|[^a-zçğıöşü])(teşhis|tanı|hastalık|doz|ilaç|tedavi|reçete)/i;   // kelime başı: «haftanın» içindeki «tanı» sayılmaz
   dogru(!yasak.test(metin), 'teşhis/doz dili: ' + metin.match(yasak));
 });
-t('sisteme not: yeni araç King okumaz (varsayılan); kapalı aracın ve özel notun King yolundan geçmediği motorun süzgeciyle; klasör sonradan değişmez', () => {
+t('sisteme not: yeni araç Başbuğ okumaz (varsayılan); kapalı aracın ve özel notun Başbuğ yolundan geçmediği motorun süzgeciyle; klasör sonradan değişmez', () => {
   const T0 = 1700000000000;
   let r = R.aracKaydet(Not, [], 'yeni', { ad: 'Düşünce defteri', klasor: '', gorunum: 'ag', anlam: ' Fikirlerim. ', kullanim: 'Yalnız bağla.' }, T0, 'a1');
   const a1 = r.araclar[0];
@@ -361,9 +361,9 @@ t('sisteme not: yeni araç King okumaz (varsayılan); kapalı aracın ve özel n
     ['p', { baslik: 'Özel', govde: 'x', klasor: 'Okuma', ozel: true }]].forEach(([id, f]) => { notlar = R.notKaydet(Not, notlar, 'yeni', f, T0, id).notlar; });
   esit(R.aracNotlari(Not, notlar, r.araclar[1]).map(n => n.id), ['o', 'p']);
   const king = Not.kingOkur(notlar, { araclar: r.araclar });
-  esit(king.map(n => n.id), ['o'], 'King yalnız açık aracın özel olmayan notunu okur');
+  esit(king.map(n => n.id), ['o'], 'Başbuğ yalnız açık aracın özel olmayan notunu okur');
   dogru(!/Gizli|Özel/.test(JSON.stringify(king)), 'kapalı ve özel notun adı bağ yoluyla da sızmaz');
-  esit(Not.kingAraclar(r.araclar).map(a => a.id), ['a2'], 'King yalnız izinli aracın sistem notunu okur');
+  esit(Not.kingAraclar(r.araclar).map(a => a.id), ['a2'], 'Başbuğ yalnız izinli aracın sistem notunu okur');
 });
 
 t('başlangıç paketi: kimlikle eklenir, var olana dokunmaz, geçersizi almaz; ikinci kez getirmek bir şey eklemez', () => {
@@ -448,7 +448,7 @@ t('harita: plandaki on alan var', () => {
   const alanlar = H.YERLER.filter(y => y.katman === 'alan').map(y => y.ad);
   esit(alanlar, ['Akademik', 'Dil', 'Felsefe', 'Tarih', 'Müzik', 'Okuma ve yazı', 'Beslenme', 'Hareket', 'Uyku', 'Tahlil']);
 });
-t('harita: yedi motor ve King var', () => {
+t('harita: yedi motor ve Başbuğ var', () => {
   esit(H.YERLER.filter(y => y.katman === 'motor').map(y => y.id), ['yol', 'tekrar', 'soru', 'kayit', 'plan', 'not', 'arama']);
   esit(H.YERLER.filter(y => y.katman === 'king').length, 1);
 });
@@ -817,10 +817,10 @@ t('arama: komut çubuğu son öğe olarak «Her şeyde ara» önerir; adres sorg
   esit(H.bul('arama').durum, 'yeni');
 });
 
-// ---- King sayfası (#/king): yalnız açıklama; sohbet kutusu, form ya da bağlantı yok ----
-t('king: sayfa King\'in Claude uygulamasında olduğunu, neyi gördüğünü ve sahibin tek adımını söyler; sohbet taklidi yok', () => {
+// ---- Başbuğ sayfası (#/king): yalnız açıklama; sohbet kutusu, form ya da bağlantı yok ----
+t('king: sayfa Başbuğ\'un Claude uygulamasında olduğunu, neyi gördüğünü ve sahibin tek adımını söyler; sohbet taklidi yok', () => {
   const B = require('./bilesen.js'), h = K.kingGovde(B), duz = h.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'");
-  ['Claude masaüstü uygulamasında', 'Yalnız okur', 'Özel notlarını görmez', 'King\'e kapalı araçların notlarını görmez', 'tamamen kapat', 'yeniden aç', 'Anthropic']
+  ['Claude masaüstü uygulamasında', 'Yalnız okur', 'Özel notlarını görmez', 'Başbuğ\'a kapalı araçların notlarını görmez', 'tamamen kapat', 'yeniden aç', 'Anthropic']
     .forEach(m => dogru(duz.indexOf(m) >= 0, '«' + m + '» yok'));
   dogru(!/<(input|textarea|form|button)\b/.test(h), 'sohbet kutusu ya da düğme olmamalı');
   dogru(!/href=/.test(h), 'bağlantı olmamalı');

@@ -87,8 +87,8 @@ t('ileti ve hata kendi bölümünde', () => {
 const UZ = { kurulu: true, bagli: true, acik: false, ad: 'pc.tail1.ts.net', funnel: false, acilis: false };
 const uz = (s, b) => { const h = ciz(bos(s), b); return h.slice(h.indexOf('id="hb-uzak-bolum"')); };
 t('her yerden: Merkez hâli herkese salt okunur, yeniden dene', () => {
-  const h = uz({ merkezHal: 'bagli', merkezMetin: 'Bağlı. King bilgisayarındaki modelle konuşuyor.' }, bag({ sunucu: { yerel: false }, oturum: { ad: 'a', rol: 'uye' } }));
-  dogru(/b-uyari--tamam/.test(h) && /Bağlı\. King/.test(h) && /data-hb-ac="uzak-bak"/.test(h), h);
+  const h = uz({ merkezHal: 'bagli', merkezMetin: 'Bağlı. Başbuğ bilgisayarındaki modelle konuşuyor.' }, bag({ sunucu: { yerel: false }, oturum: { ad: 'a', rol: 'uye' } }));
+  dogru(/b-uyari--tamam/.test(h) && /Bağlı\. Başbuğ/.test(h) && /data-hb-ac="uzak-bak"/.test(h), h);
   dogru(!/data-hb-ac="uzak-ac"/.test(h) && !/data-hb-ac="acilis"/.test(h) && /bilgisayarın kendisinden, yönetici hesabıyla/.test(h), 'telefonda yönetim yok');
   const and = uz({ merkezHal: 'bilgisayar-kapali', merkezMetin: 'Bilgisayara ulaşılamıyor.', android: true }, bag({ sunucu: { yerel: false } }));
   dogru(/b-uyari--dikkat/.test(and) && /Özel DNS/.test(and), and);

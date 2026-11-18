@@ -42,7 +42,7 @@
   }
 
   // «Yeni araç» ve sisteme not (Not.yeniArac): yeni araç ya da var olanın güncellenmişi. Geçersizse motorun cümlesiyle hata fırlatır.
-  // Klasör yalnız oluştururken seçilir: King'e kapalı bir aracın klasörü sonradan değişseydi eski klasördeki notlar King'e açılırdı.
+  // Klasör yalnız oluştururken seçilir: Başbuğ'a kapalı bir aracın klasörü sonradan değişseydi eski klasördeki notlar Başbuğ'a açılırdı.
   function aracKaydet(Not, araclar, id, form, simdi, yeniId) {
     var eski = araclar.filter(function (a) { return a.id === id; })[0];
     var sn = { kingOkur: !!form.kingOkur, anlam: String(form.anlam || ''), kullanim: String(form.kullanim || '') };
@@ -533,7 +533,7 @@
   }
   /* ---- Araçlar ve sisteme not (Not.yeniArac, Not.kingAraclar) ---- */
   var ARAC_ANAHTAR = 'lifeos.not.araclar', aracDurum = null; // aracDurum: { id, metin, form? } son kaydın iletisi
-  function kingPul(a) { return a.sistemNotu.kingOkur ? { metin: 'King okur', tur: 'altin' } : 'King okumaz'; }
+  function kingPul(a) { return a.sistemNotu.kingOkur ? { metin: 'Başbuğ okur', tur: 'altin' } : 'Başbuğ okumaz'; }
   function aracSatiri(a, notlar) {
     return { ad: a.ad, href: '#/motor/not/arac/' + a.id, not: a.klasor + ' · ' + aracNotlari(Not, notlar, a).length + ' not · ' + (a.gorunum === 'ag' ? 'ağ' : 'liste'), pul: kingPul(a) };
   }
@@ -551,24 +551,24 @@
       var metin = function (x) { return x ? '<p>' + k(x) + '</p>' : '<p class="soluk">Yazılmadı.</p>'; };
       return I.ust(geri(a.ad)) + '<div class="govde" data-arac="not" data-arac-sayfa>' + B.baslik({ metin: a.ad }) +
         B.panel({ baslik: 'Sisteme not', id: 'sn-baslik', tur: 'guclu', veri: { sistemnot: '' }, govde: ['<p>' + B.pul(kingPul(a)) + '</p>',
-          B.acilir({ baslik: 'King bundan ne anlamalı', duzey: 3, acik: true, govde: metin(sn.anlam) }), B.acilir({ baslik: 'King bunu nasıl kullanmalı', duzey: 3, acik: true, govde: metin(sn.kullanim) }),
-          '<p class="soluk">' + (sn.kingOkur ? 'King bu aracın notlarını (özel olanlar hariç) ve bu notu okur.' : 'King bu aracın notlarını ve bu notu okumaz.') + '</p>'] }) +
+          B.acilir({ baslik: 'Başbuğ bundan ne anlamalı', duzey: 3, acik: true, govde: metin(sn.anlam) }), B.acilir({ baslik: 'Başbuğ bunu nasıl kullanmalı', duzey: 3, acik: true, govde: metin(sn.kullanim) }),
+          '<p class="soluk">' + (sn.kingOkur ? 'Başbuğ bu aracın notlarını (özel olanlar hariç) ve bu notu okur.' : 'Başbuğ bu aracın notlarını ve bu notu okumaz.') + '</p>'] }) +
         B.eylemler([{ metin: 'Bu araçta yeni not', tur: 'ana', href: '#/motor/not/yeni?arac=' + a.id }, { metin: 'Aracı düzenle', tur: 'sade', href: '#/motor/not/arac/' + a.id + '/duzenle' }]) +
         (l.length ? satirlar(k(a.ad) + ' notları', l.slice().sort(notSira).map(function (n) { return notSatiri(n); })) : B.bos({ baslik: 'Bu araçta henüz not yok.', metin: 'Yukarıdaki «Bu araçta yeni not» ile ekle; notları «' + a.klasor + '» klasöründe durur.' })) +
         (a.gorunum === 'ag' ? notAgi(l) : '') + '</div>';
     }
     var dr = aracDurum && aracDurum.id === id ? aracDurum : null; aracDurum = null;
     var f = dr && dr.form || (a ? { ad: a.ad, klasor: a.klasor, gorunum: a.gorunum, kingOkur: a.sistemNotu.kingOkur, anlam: a.sistemNotu.anlam, kullanim: a.sistemNotu.kullanim }
-      : { ad: '', klasor: '', gorunum: 'liste', kingOkur: false, anlam: '', kullanim: '' }); // King okuma izni varsayılan kapalı (Not.yeniArac)
+      : { ad: '', klasor: '', gorunum: 'liste', kingOkur: false, anlam: '', kullanim: '' }); // Başbuğ okuma izni varsayılan kapalı (Not.yeniArac)
     return I.ust(geri(a ? 'Düzenle' : 'Yeni araç')) + '<div class="govde" data-arac="not">' + B.baslik({ metin: a ? 'Aracı düzenle' : 'Yeni araç' }) +
       '<form class="aracform" data-arac-id="' + k(id) + '" novalidate>' + (dr ? B.uyari({ tur: 'hata', metin: dr.metin }) : '') +
       B.alan({ ad: 'Ad', isim: 'ad', deger: f.ad, enCok: 60 }) +
       B.alan({ ad: 'Klasör' + (a ? ' · oluştururken seçilir, değişmez' : ' · boş bırakırsan adı'), isim: 'klasor', deger: f.klasor, enCok: 120, salt: !!a }) +
       B.alan({ ad: 'Görünüm', isim: 'gorunum', tur: 'radyo', secenekler: { liste: 'Liste', ag: 'Ağ' }, deger: f.gorunum === 'ag' ? 'ag' : 'liste' }) +
-      B.panel({ baslik: 'Sisteme not', id: 'sn-form', tur: 'guclu', govde: ['<p class="soluk">King\'e bu araç hakkında bıraktığın not. King yalnız izin verirsen okur; özel notlar her durumda kapalı kalır.</p>',
-        B.alan({ ad: 'King okuyabilsin', isim: 'kingOkur', tur: 'onay', deger: !!f.kingOkur }),
-        B.alan({ ad: 'King bundan ne anlamalı?', isim: 'anlam', tur: 'cok', enCok: 1000, deger: f.anlam, yerTutucu: 'Aklıma gelen fikirleri buraya atıyorum.' }),
-        B.alan({ ad: 'King bunu nasıl kullanmalı?', isim: 'kullanim', tur: 'cok', enCok: 1000, deger: f.kullanim, yerTutucu: 'Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.' })] }) +
+      B.panel({ baslik: 'Sisteme not', id: 'sn-form', tur: 'guclu', govde: ['<p class="soluk">Başbuğ\'a bu araç hakkında bıraktığın not. Başbuğ yalnız izin verirsen okur; özel notlar her durumda kapalı kalır.</p>',
+        B.alan({ ad: 'Başbuğ okuyabilsin', isim: 'kingOkur', tur: 'onay', deger: !!f.kingOkur }),
+        B.alan({ ad: 'Başbuğ bundan ne anlamalı?', isim: 'anlam', tur: 'cok', enCok: 1000, deger: f.anlam, yerTutucu: 'Aklıma gelen fikirleri buraya atıyorum.' }),
+        B.alan({ ad: 'Başbuğ bunu nasıl kullanmalı?', isim: 'kullanim', tur: 'cok', enCok: 1000, deger: f.kullanim, yerTutucu: 'Yalnız birbirine bağlamak için oku, hakkımda çıkarım yapma.' })] }) +
       B.eylemler([{ metin: a ? 'Kaydet' : 'Oluştur', tur: 'ana', tip: 'submit' }, { metin: 'Vazgeç', tur: 'sade', href: a ? '#/motor/not/arac/' + a.id : '#/motor/not' }]) + '</form></div>';
   }
   function aracFormKaydet(form) {
@@ -630,12 +630,12 @@
     return I.ust(geri) + '<div class="govde" data-arac="not">' + B.baslik({ metin: n ? 'Notu düzenle' : 'Yeni not' }) +
       '<form class="notform" data-not="' + k(alt) + '" data-taslak="not:' + k(alt) + '" novalidate>' + (tf && !durum ? '<p class="soluk">Kaydedilmemiş yazın geri geldi.</p>' : '') +
       (durum ? B.uyari({ tur: durum.tamam ? 'tamam' : 'hata', metin: durum.metin }) : '') +
-      (aracA ? '<input type="hidden" name="klasor" value="' + k(aracA.klasor) + '"><p class="soluk">Araç: ' + k(aracA.ad) + ' · ' + (aracA.sistemNotu.kingOkur ? 'King okur' : 'King okumaz') + '</p>' : '') +
+      (aracA ? '<input type="hidden" name="klasor" value="' + k(aracA.klasor) + '"><p class="soluk">Araç: ' + k(aracA.ad) + ' · ' + (aracA.sistemNotu.kingOkur ? 'Başbuğ okur' : 'Başbuğ okumaz') + '</p>' : '') +
       B.alan({ ad: 'Başlık', isim: 'baslik', deger: f.baslik, enCok: 120, yerTutucu: 'Kısa bir ad; boş kalırsa ilk satır kullanılır' }) +
       B.alan({ ad: 'Not', isim: 'govde', tur: 'cok', uzun: true, deger: f.govde, yerTutucu: 'Yaz… #etiket ekleyebilir, [[başka notun adı]] ile bağlantı kurabilirsin.' }) +
       (oteki.length ? B.alan({ ad: 'Başka bir nota bağ ekle', isim: 'bagEkle', tur: 'secim', veri: { 'bag-ekle': '' },
         secenekler: oteki.reduce(function (o, x) { o[x.id] = Not.ad(x) || 'Adsız not'; return o; }, { '': 'Not seç…' }) }) : '') +
-      B.alan({ ad: 'Özel (King görmez)', isim: 'ozel', tur: 'onay', deger: !!f.ozel }) + B.alan({ ad: 'Üstte tut', isim: 'sabit', tur: 'onay', deger: !!f.sabit }) +
+      B.alan({ ad: 'Özel (Başbuğ görmez)', isim: 'ozel', tur: 'onay', deger: !!f.ozel }) + B.alan({ ad: 'Üstte tut', isim: 'sabit', tur: 'onay', deger: !!f.sabit }) +
       B.eylemler([{ metin: 'Kaydet', tur: 'ana', tip: 'submit' }, n ? { metin: 'Sil', tur: 'sade', veri: { 'arac-ac': 'not-sil', id: n.id } } : null, { metin: 'Notlara dön', tur: 'sade', href: '#/motor/not' }]) + '</form>' +
       (giden.length ? B.bolum({ baslik: 'Bu nottaki bağlar', govde: B.liste({ ad: 'Bu nottaki bağlar', ogeler: giden.map(bagSatiri) }) }) : '') +
       (gelen.length ? B.bolum({ baslik: 'Bu nota bağlananlar', govde: B.liste({ ad: 'Bu nota bağlananlar', ogeler: gelen.map(bagSatiri) }) }) : '') +

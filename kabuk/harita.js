@@ -1,7 +1,7 @@
 /* LIFEOS.Kabuk.Harita — sistem haritası kaydı. Kabuktaki her yer burada bir satırdır;
  * halka, komut çubuğu, sistem haritası sayfası ve dal sayfaları bu tek listeden türetilir.
  * Satır: { id, ad, katman: kabuk|alan|motor|king, dal, alan?, yol, ikon?, durum?, eski?, aciklama }
- *   dal    : haritanın beş dalından biri (plan §7: Ana sayfa, Öğren, Sağlık, Motorlar, Ayarlar) + King
+ *   dal    : haritanın beş dalından biri (plan §7: Ana sayfa, Öğren, Sağlık, Motorlar, Ayarlar) + Başbuğ
  *   durum  : "yeni" (kabukta), "pilot" (taşınıyor), "eski" (henüz eski modülde, `eski` bağlantısı var),
  *            "plan" (motor henüz yazılmadı)
  *   halka  : halkadaki sırası (yoksa halkada değil)
@@ -42,13 +42,13 @@
     { id: 'plan', ad: 'Plan', katman: 'motor', dal: 'motorlar', yol: '#/motor/plan', ikon: 'takvim', durum: 'yeni', aciklama: 'Günün ve haftanın planı' },
     { id: 'not', ad: 'Not', katman: 'motor', dal: 'motorlar', yol: '#/motor/not', ikon: 'not', halka: 4, durum: 'yeni', aciklama: 'Her yerden açılan defter' },
     { id: 'arama', ad: 'Arama', katman: 'motor', dal: 'motorlar', yol: '#/motor/arama', ikon: 'buyutec', durum: 'yeni', aciklama: 'Her şeyde arama' },
-    // King
-    { id: 'king', ad: 'King', katman: 'king', dal: 'king', yol: '#/king', ikon: 'tac', halka: 5, durum: 'yeni', aciklama: 'Düşünce ortağı' }
+    // Başbuğ
+    { id: 'king', ad: 'Başbuğ', katman: 'king', dal: 'king', yol: '#/king', ikon: 'tac', halka: 5, durum: 'yeni', aciklama: 'Düşünce ortağı' }
   ];
 
   var DALLAR = [
     { id: 'ana', ad: 'Ana sayfa' }, { id: 'ogren', ad: 'Öğren' }, { id: 'saglik', ad: 'Sağlık' },
-    { id: 'motorlar', ad: 'Araçlar' }, { id: 'king', ad: 'King' }, { id: 'ayarlar', ad: 'Ayarlar' }
+    { id: 'motorlar', ad: 'Araçlar' }, { id: 'king', ad: 'Başbuğ' }, { id: 'ayarlar', ad: 'Ayarlar' }
   ];
   // dal sayfası: o dalın çocuklarını listeleyen yer (halkadan bir adım, çocuğuna iki adım)
   var DAL_SAYFASI = { ana: 'harita', ogren: 'ogren', saglik: 'saglik', motorlar: 'motorlar', king: 'king', ayarlar: 'ayarlar' };

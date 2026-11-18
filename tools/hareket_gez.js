@@ -51,16 +51,16 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
       // görünüm geçişlerini say (hareket kapalıyken hiç başlamamalı)
       await p.addInitScript(() => { window.__vt = 0; const o = document.startViewTransition; if (o) document.startViewTransition = function (f) { window.__vt++; return o.call(document, f); }; });
 
-      // 1 · giriş: Öğren listesi bir kez süzülür
+      // 1 · giriş: sayfa doğrudan çizilir, liste süzülmez (2026-11-18, sahip: «geçiş animasyonunu kaldır, direkt yüklensin»)
       await p.goto(T + '/kabuk/#/ogren');
       await p.waitForSelector('.b-liste > li:nth-child(3)');
       const giris = await p.evaluate(() => ({ sure: getComputedStyle(document.documentElement).getPropertyValue('--sure').trim(),
         anim: getComputedStyle(document.querySelector('.b-liste > li:nth-child(3)')).animationName }));
       if (kapali) dene(ad + ': --sure 0', giris.sure === '0s', JSON.stringify(giris));
-      else dene(ad + ': yeni sayfada liste süzülür', /suzul/.test(giris.anim) && giris.sure !== '0s', JSON.stringify(giris));
+      else dene(ad + ': yeni sayfada liste süzülmez, doğrudan çizilir', !/suzul/.test(giris.anim), JSON.stringify(giris));
       await p.waitForTimeout(1500);
 
-      // 2 · geçiş yönü: sekme sırasına göre ileri/geri, bitince iz kalmaz
+      // 2 · bölüm değişiminde görünüm geçişi yok (her hareket ayarında)
       const g = await p.evaluate(async () => {
         const sekme = [].map.call(document.querySelectorAll('.ust__sekmeler a'), a => a.getAttribute('href'));
         const iz = [], bek = [], mo = new MutationObserver(() => { const v = document.documentElement.getAttribute('data-gecis'); if (v) iz.push(v); });
@@ -73,39 +73,7 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
         mo.disconnect();
         return { iz, bek, son: document.documentElement.getAttribute('data-gecis'), isaret: !!document.querySelector('.ust__sekmeler a[aria-current] .ust__isaret') };
       });
-      if (kapali) dene(ad + ': görünüm geçişi başlamaz', !g.iz.length && (await p.evaluate(() => window.__vt)) === 0, JSON.stringify(g));
-      else dene(ad + ': geçiş yönü sekme sırasına uyar, bitince iz kalmaz, sekme işareti yerinde', JSON.stringify(g.iz) === JSON.stringify(g.bek) && g.son === null && g.isaret, JSON.stringify(g));
-
-      // 2a · üstte parlama ve çakışma yok (2026-11-17c): eski ve yeni sayfa aynı zamanlamada (opaklık toplamı 1, krem zemin görünmez),
-      // üst çubuğun eski görüntüsü çizilmez (sekme adları üst üste binmiyordu)
-      if (!kapali) {
-        const z = await p.evaluate(async () => {
-          document.querySelector('.ust__sekmeler a[href="#/saglik"]').click();
-          let an = [];   // geçişin hareketleri güncelleme bitince başlar: kısa süre beklenir
-          for (let i = 0; i < 40 && !an.some(a => a.effect.pseudoElement === '::view-transition-new(root)'); i++) { await new Promise(r => setTimeout(r, 10)); an = document.getAnimations().filter(a => a.effect && a.effect.pseudoElement); }
-          const t = s => an.filter(a => a.effect.pseudoElement === s).map(a => a.effect.getComputedTiming());
-          const ustEski = document.documentElement.hasAttribute('data-gecis') ? getComputedStyle(document.documentElement, '::view-transition-old(ust)').display : 'yok';
-          const o = t('::view-transition-old(root)')[0], n = t('::view-transition-new(root)')[0];
-          return { o: o && [o.duration, o.delay, o.easing], n: n && [n.duration, n.delay, n.easing], ustEski, ustAnim: t('::view-transition-old(ust)').length + t('::view-transition-new(ust)').length };
-        });
-        await bekleGecis(p);
-        await p.click('.ust__sekmeler a[href="#/ogren"]'); await bekleGecis(p);   // 2b Öğren'den başlar
-        dene(ad + ': geçişte eski ve yeni sayfa aynı zamanlamada, üst çubuk çapraz sönmez', !!z.o && JSON.stringify(z.o) === JSON.stringify(z.n) && z.ustEski === 'none' && z.ustAnim === 0, JSON.stringify(z));
-      }
-
-      // 2b · geçiş türü: ana bölümler arası «buyuk», derse başlamak «ders», dersten alana dönüş «kucuk» (geri)
-      if (!kapali) {
-        const tur = await p.evaluate(async () => {
-          const iz = [], mo = new MutationObserver(() => { const t = document.documentElement.getAttribute('data-gecis-tur'); if (t) iz.push(t + ':' + document.documentElement.getAttribute('data-gecis')); });
-          mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-gecis-tur'] });
-          const git = async h => { location.hash = h; await new Promise(r => setTimeout(r, 1100)); };
-          await git('#/saglik'); await git('#/alan/felsefe'); await git('#/alan/felsefe/ders/felsefe.1.1.1'); await git('#/alan/felsefe');
-          mo.disconnect(); return iz;
-        });
-        dene(ad + ': geçiş türü bölüm değişiminde büyük, derse başlarken ders, dersten dönüşte küçük ve geri',
-          JSON.stringify(tur) === JSON.stringify(['buyuk:ileri', 'buyuk:geri', 'ders:ileri', 'kucuk:geri']), JSON.stringify(tur));
-        await p.goto(T + '/kabuk/#/ogren'); await p.waitForTimeout(1500);
-      }
+      dene(ad + ': görünüm geçişi başlamaz, sekme işareti yerinde', !g.iz.length && (await p.evaluate(() => window.__vt)) === 0 && g.isaret, JSON.stringify(g));
 
       // 3 · aynı sayfanın yeniden çizimi süzülmeyi yeniden oynatmaz
       await p.waitForTimeout(1300);

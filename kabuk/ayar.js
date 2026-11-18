@@ -14,7 +14,7 @@
   var ENV = 'envanter-kabuk-sunucu.md';
   var GRUPLAR = [
     { id: 'gorunum', ad: 'Görünüm' }, { id: 'erisim', ad: 'Erişilebilirlik' },
-    { id: 'bildirim', ad: 'Bildirim' }, { id: 'ses', ad: 'Ses' }, { id: 'beden', ad: 'Beden' }, { id: 'king', ad: 'King' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
+    { id: 'bildirim', ad: 'Bildirim' }, { id: 'ses', ad: 'Ses' }, { id: 'beden', ad: 'Beden' }, { id: 'king', ad: 'Başbuğ' }, { id: 'hesap', ad: 'Hesap ve güvenlik' }
   ];
   var SPI = 'envanter-spi.md §2 Ayarlar › Profil (family.js) ve §5 profile (state.js:178-200)';
 
@@ -45,16 +45,16 @@
     { anahtar: 'lifeos.sessiz', ad: 'Sessiz saatler', tur: 'saatAraligi', varsayilan: { acik: false, bas: '22:00', bit: '07:00' }, grup: 'bildirim', esitlenir: true,
       aciklama: 'Bu aralıkta sesler ve sesli okuma susar; gece yarısını geçebilir.', kaynak: ENV + ' §3c Ses ve müzik: sessiz saatler' },
     { anahtar: 'lifeos.ses.arayuz', ad: 'Arayüz sesleri', tur: 'secim', varsayilan: 'acik', grup: 'ses', esitlenir: false,
-      secenekler: { acik: 'Açık', kapali: 'Kapalı' }, aciklama: 'Tek akortta kısa, yumuşak sesler: sayfa geçişi, seçim, aç/kapa, kaydedildi, doğru/yanlış cevap, ders ve kapı bitişi, King cevabı. Yalnız senin eylemine çalar; sessiz saatlerde susar.', kaynak: ENV + ' §3c Ses: ses.arayuz (kabuk/ses.js, sahibin isteği 2026-11-16)' },
+      secenekler: { acik: 'Açık', kapali: 'Kapalı' }, aciklama: 'Tek akortta kısa, yumuşak sesler: sayfa geçişi, seçim, aç/kapa, kaydedildi, doğru/yanlış cevap, ders ve kapı bitişi, Başbuğ cevabı. Yalnız senin eylemine çalar; sessiz saatlerde susar.', kaynak: ENV + ' §3c Ses: ses.arayuz (kabuk/ses.js, sahibin isteği 2026-11-16)' },
     { anahtar: 'lifeos.ses.duzey', ad: 'Arayüz ses düzeyi', tur: 'secim', varsayilan: 'orta', grup: 'ses', esitlenir: false,
       secenekler: { kisik: 'Kısık', orta: 'Orta', yuksek: 'Yüksek' }, aciklama: 'Arayüz seslerinin yüksekliği (ambiyans ayrı).', kaynak: ENV + ' §3c Ses: ses.duzey (kabuk/ses.js, sahibin isteği 2026-11-16)' },
     { anahtar: 'lifeos.ses.gece', ad: 'Ambiyans sesi', tur: 'secim', varsayilan: 'kapali', grup: 'ses', esitlenir: false,
       secenekler: { kapali: 'Kapalı', acik: 'Saate göre', gunduz: 'Hep gündüz', gece: 'Hep gece' }, aciklama: 'Gündüz kuşlar, dere ve esinti; gece cırcır böcekleri, rüzgâr ve uzakta kurbağa. Tarayıcıda üretilir.', kaynak: ENV + ' §3c Ses: ses.gece (kabuk/gece.js, sahibin isteği 2026-11-15)' },
-    // King'i cevaplayan: King ekranından buraya taşındı (2026-11-16, sahip: «ekranda yalnız kip kalsın»); kabuk/king-sohbet.js okur
-    { anahtar: 'lifeos.king.saglayici', ad: 'King’i kim cevaplasın', tur: 'secim', varsayilan: 'oto', grup: 'king', esitlenir: false,
-      secenekler: { oto: 'Otomatik', antigravity: 'Antigravity', claude: 'Claude' }, aciklama: 'Otomatik çoğu zaman yeter; biri cevap vermezse öteki devralır.', kaynak: ENV + ' §3c King: king.saglayici (kabuk/king-sohbet.js; King ekranından taşındı, 2026-11-16)' },
+    // Başbuğ'u cevaplayan: Başbuğ ekranından buraya taşındı (2026-11-16, sahip: «ekranda yalnız kip kalsın»); kabuk/king-sohbet.js okur
+    { anahtar: 'lifeos.king.saglayici', ad: 'Başbuğ’u kim cevaplasın', tur: 'secim', varsayilan: 'oto', grup: 'king', esitlenir: false,
+      secenekler: { oto: 'Otomatik', antigravity: 'Antigravity', claude: 'Claude' }, aciklama: 'Otomatik çoğu zaman yeter; biri cevap vermezse öteki devralır.', kaynak: ENV + ' §3c Başbuğ: king.saglayici (kabuk/king-sohbet.js; Başbuğ ekranından taşındı, 2026-11-16)' },
     { anahtar: 'lifeos.kilit.odeme', ad: 'Satın alma ve kart işlemleri', tur: 'secim', varsayilan: 'kapali', grup: 'hesap', esitlenir: false,
-      secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Kapalıyken King ödeme, sipariş ya da kart işine girmez.', kaynak: ENV + ' §3c Diğer: kilit.odeme' },
+      secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Kapalıyken Başbuğ ödeme, sipariş ya da kart işine girmez.', kaynak: ENV + ' §3c Diğer: kilit.odeme' },
     // Salt bilgi: tarayıcı kalıcı depolamaya izin verdi mi (kabuk/depo.js kalici(): true/false/null)
     { anahtar: 'depo.kalici', ad: 'Bu cihazdaki kayıtlar', tur: 'bilgi', varsayilan: null, grup: 'hesap', esitlenir: false,
       oku: function () { var D = kok.LIFEOS && kok.LIFEOS.Kabuk && kok.LIFEOS.Kabuk.Depo; return D && D.kalici ? D.kalici() : null; },
@@ -67,7 +67,7 @@
         return !e || !e.acik ? null : !e.hata;
       },
       secenekler: { 'true': 'Eşit: kayıtların orada da duruyor ve yedekleniyor', 'false': 'Şu an ulaşılamıyor; kayıtların bu cihazda, sonra gönderilir', 'null': 'Bağlı değil' },
-      aciklama: 'Yazdığın her kayıt bilgisayardaki tek depoya da gider; King oradan okur, telefon oradan alır. Yalnız bilgi.', kaynak: 'faz2-indexeddb.md §Tek depo eşitlemesi (sistem/veri.py kabuk_yaz)' },
+      aciklama: 'Yazdığın her kayıt bilgisayardaki tek depoya da gider; Başbuğ oradan okur, telefon oradan alır. Yalnız bilgi.', kaynak: 'faz2-indexeddb.md §Tek depo eşitlemesi (sistem/veri.py kabuk_yaz)' },
     // Beden: Kayıt motorunun enerji hedefi (bazal metabolizma) bunları ister; kilo son tartıdan gelir.
     { anahtar: 'lifeos.beden.cinsiyet', ad: 'Cinsiyet', tur: 'secim', varsayilan: 'belirtilmedi', grup: 'beden', esitlenir: true,
       secenekler: { belirtilmedi: 'Belirtilmedi', kadin: 'Kadın', erkek: 'Erkek' }, aciklama: 'Yalnız bazal metabolizma hesabı için. Belirtilmezse enerji hedefi hesaplanmaz.', kaynak: SPI + ': sex' },

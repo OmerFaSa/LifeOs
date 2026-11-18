@@ -121,7 +121,7 @@ def run():
     def t_istem():
         s = kopru.istem("Kural.", [{"role": "user", "content": "a"}, {"role": "assistant", "content": "b"},
                                    {"role": "user", "content": "c"}], aracsiz=True)
-        ok(s.startswith("Hiçbir araç") and "Kullanıcı: a" in s and "King: b" in s and s.index("c") > s.index("b"))
+        ok(s.startswith("Hiçbir araç") and "Kullanıcı: a" in s and "Başbuğ: b" in s and s.index("c") > s.index("b"))
         ok(len(kopru.istem("", [{"role": "user", "content": "x" * 50000}])) <= kopru.EN_COK_ISTEM)
     test("istem tek metin, sinirli uzunluk", t_istem)
 

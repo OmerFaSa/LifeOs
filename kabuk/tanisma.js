@@ -325,7 +325,7 @@
       B.eylemler([{ metin: 'Gönder', tur: 'ana', tip: 'submit' }, { metin: 'Atla', tur: 'sade', veri: { 'tn-ac': 'atla' } },
         degistir ? { metin: 'Vazgeç', tur: 'sade', veri: { 'tn-ac': 'vazgec-soru' } } : null, { yazi: 'Enter gönderir, Shift Enter yeni satır.' }])] };
   }
-  // King'in anladığı bir satır: metin kısaltılmaz (uzun satır; tam okunmalı), konu notta, tür rozette; düzeltilirken aynı kutuda form
+  // Başbuğ'un anladığı bir satır: metin kısaltılmaz (uzun satır; tam okunmalı), konu notta, tür rozette; düzeltilirken aynı kutuda form
   function olguSatiri(o, onayli) {
     var ozet = o.konu + ', ' + o.metin;
     if (!onayli && duzenlenen === o.id) return { form: { veri: { 'tn-olgu': o.id }, govde: [B.alan({ ad: 'Düzelt: ' + o.konu, isim: 'duzelt', tur: 'metin', deger: o.metin, enCok: 1000 }),
@@ -351,13 +351,13 @@
       kayit.olgular.length + ' satır. Listedeki her satırı tek tek geri alabilirsin.</p>' }), oneriHtml,
       B.eylemler([sira || t.bitir && siradaki(Object.assign({}, t, { bitir: false })) ? { metin: 'Kalan sorulara devam et', veri: { 'tn-ac': 'devam' } } : null,
         { metin: 'Hepsini geri al', tur: 'sade', veri: { 'tn-ac': 'hepsini-geri-al' } }])] };
-    else sag = { etiket: 'tn-onay', soru: { id: 'tn-onay', odak: true, metin: olgular.length ? 'Anladıklarımı kaydedeyim mi? Kaydetmeden önce «King\'in anladığı» listesindeki her satırı düzeltebilir ya da silebilirsin.'
+    else sag = { etiket: 'tn-onay', soru: { id: 'tn-onay', odak: true, metin: olgular.length ? 'Anladıklarımı kaydedeyim mi? Kaydetmeden önce «Başbuğ\'un anladığı» listesindeki her satırı düzeltebilir ya da silebilirsin.'
       : 'Kaydedilecek bir şey yok. İstersen bir cevabı değiştir.' }, govde: [oneriHtml,
       B.eylemler([olgular.length ? { metin: 'Onayla ve kaydet', tur: 'ana', veri: { 'tn-ac': 'onayla' } } : null,
         siradaki(Object.assign({}, t, { bitir: false })) ? { metin: 'Sorulara devam et', tur: 'sade', veri: { 'tn-ac': 'devam' } } : null]),
       '<p class="soluk">Onaylamadan hiçbir şey kaydedilmez. Boy, doğum yılı ve cinsiyet Ayarlar › Beden\'e yazılır.</p>'] };
-    var panel = B.panel({ baslik: 'King\'in anladığı · ' + (temiz ? 'kaydedildi, geri alabilirsin' : 'düzeltebilirsin'), id: 'tn-panel', govde: [
-      olgular.length ? B.liste({ ad: 'King\'in anladığı', canli: true, ogeler: olgular.map(function (o) { return olguSatiri(o, temiz); }) })
+    var panel = B.panel({ baslik: 'Başbuğ\'un anladığı · ' + (temiz ? 'kaydedildi, geri alabilirsin' : 'düzeltebilirsin'), id: 'tn-panel', govde: [
+      olgular.length ? B.liste({ ad: 'Başbuğ\'un anladığı', canli: true, ogeler: olgular.map(function (o) { return olguSatiri(o, temiz); }) })
         : '<p class="soluk">Cevap verdikçe burada görünür. Yalnız seçtiklerin ve açıkça yazdığın sayılar anlaşılır; geri kalanı kendi sözün olarak aynen durur.</p>',
       B.eylemler([!temiz && simdi && olgular.length ? { metin: 'Şimdilik bu kadar, kaydetmeye geç', tur: 'sade', veri: { 'tn-ac': 'bitir' } } : null])] });
     return I.ust(I.kirinti(yer)) + '<div class="govde govde--genis" data-arac="tanisma">' +
@@ -400,7 +400,7 @@
     }
   });
   d.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'b-alan-metin' && e.target.form && e.target.form.matches('form[data-tn-soru]')) { e.preventDefault(); gonder(e.target.form); } // yalnız Tanışma'nın kutusu (King'in kutusu da «metin» adlı)
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'b-alan-metin' && e.target.form && e.target.form.matches('form[data-tn-soru]')) { e.preventDefault(); gonder(e.target.form); } // yalnız Tanışma'nın kutusu (Başbuğ'un kutusu da «metin» adlı)
   });
   d.addEventListener('click', function (e) {
     var cip = e.target.closest('[data-tn-cip]');
