@@ -102,6 +102,10 @@ async function goruntu(p, ad, sec = {}) {
     dene('Bugün: tarih satırında Türk takvimi yılı, günün sözü kaynağıyla ve Göktürk harfleriyle', /· \S+ yılı$/.test((await p.textContent('.b-karsilama__tarih')).trim())
       && (await p.textContent('.soz .soz__runik')) === '\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}' && (await p.textContent('.soz__metin')).length > 5 && (await p.textContent('.soz__kaynak')).length > 3,
       await p.textContent('.b-karsilama__tarih'));
+    // 2026-11-18g: tarihî gün değilse en yakın gelen gün ve kalan gün («N gün sonra · 22 Kasım · …»); logoda al bayrak
+    { const yk = (await p.locator('.soz__yakin').count()) ? await p.textContent('.soz__yakin') : '', ml = await p.locator('.soz__milli').count();
+      dene('Bugün: söz üstünde bugünün tarihî günü ya da yaklaşan gün sayacı; logoda al bayrak', (ml === 1 || /^\d+ gün sonra · \d+ \S+ · .+/.test(yk))
+        && (await p.locator('.ust__logo .ust__bayrak').count()) === 1, yk); }
     dene('Bugün: üst çubukta logo, beş bölüm (Bugün seçili), arama komut çubuğunu açar', (await p.locator('.ust--sahne .ust__sekmeler a').count()) === 5
       && (await p.getAttribute('.ust__sekmeler a[aria-current="page"]', 'href')) === '#/bugun' && (await p.getAttribute('.ust__ara', 'data-ac')) === 'komut');
     await goruntu(p, 'karsilama');

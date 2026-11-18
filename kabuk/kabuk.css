@@ -1086,4 +1086,6 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 .soz__metin{ margin:var(--a3) auto 0; max-width:56ch; font:italic var(--yz-h3)/1.55 var(--okuma); color:var(--yazi); }
 .soz__kaynak{ margin-top:var(--a2); font-size:var(--yz-k); color:var(--soluk); }
 .soz__kaynak::before{ content:"— "; }
+.soz__yakin{ margin:0 0 var(--a3); font-size:var(--yz-k); color:var(--soluk); }
+.ust__bayrak{ flex:none; width:21px; height:14px; border-radius:2px; box-shadow:0 1px 2px rgb(0 0 0 / .25); }
 @media (max-width:640px){ .soz{ padding:var(--a4); } }

@@ -350,16 +350,47 @@
     ['Bilmemek ayıp değil, öğrenmemek ayıptır.', 'Türk atasözü'], ['Ağaç yaşken eğilir.', 'Türk atasözü'], ['Bin bilsen de bir bilene danış.', 'Türk atasözü'],
     ['Emek olmadan yemek olmaz.', 'Türk atasözü'], ['Az olsun, öz olsun.', 'Türk atasözü'], ['Akıl akıldan üstündür.', 'Türk atasözü'],
     ['Bir elin nesi var, iki elin sesi var.', 'Türk atasözü'], ['At ölür meydan kalır, yiğit ölür şan kalır.', 'Türk atasözü'],
-    ['Yiğit düştüğü yerden kalkar.', 'Türk atasözü'], ['Sabrın sonu selamettir.', 'Türk atasözü']];
+    ['Yiğit düştüğü yerden kalkar.', 'Türk atasözü'], ['Sabrın sonu selamettir.', 'Türk atasözü'],
+    ['Ey Türk milleti, titre ve kendine dön!', 'Kül Tigin Yazıtı'], ['Türk milleti için gece uyumadım, gündüz oturmadım.', 'Kül Tigin Yazıtı'],
+    ['Muhtaç olduğun kudret, damarlarındaki asil kanda mevcuttur.', 'Atatürk, Gençliğe Hitabe, 1927'],
+    ['Ordular! İlk hedefiniz Akdeniz\'dir. İleri!', 'Atatürk, 1 Eylül 1922'],
+    ['Hattı müdafaa yoktur, sathı müdafaa vardır. O satıh bütün vatandır.', 'Atatürk, Sakarya Meydan Muharebesi, 1921'],
+    ['Ben size taarruzu emretmiyorum, ölmeyi emrediyorum.', 'Mustafa Kemal, Çanakkale, 1915'],
+    ['Türk milletinin karakteri yüksektir, Türk milleti çalışkandır, Türk milleti zekidir.', 'Atatürk, Onuncu Yıl Nutku, 1933'],
+    ['Bu millet istiklâlsiz yaşamamıştır, yaşayamaz ve yaşamayacaktır.', 'Atatürk'],
+    ['Ülkesini, yüksek istiklâlini korumasını bilen Türk milleti, dilini de yabancı diller boyunduruğundan kurtarmalıdır.', 'Atatürk, 1930'],
+    ['Korkma, sönmez bu şafaklarda yüzen al sancak.', 'Mehmet Âkif Ersoy, İstiklâl Marşı'], ['Hakkıdır, Hakk\'a tapan milletimin istiklâl!', 'Mehmet Âkif Ersoy, İstiklâl Marşı'],
+    ['Vatan ne Türkiye\'dir Türklere, ne Türkistan; vatan büyük ve müebbet bir ülkedir: Turan!', 'Ziya Gökalp, Turan'],
+    ['Halk içinde muteber bir nesne yok devlet gibi.', 'Muhibbî (Kanuni Sultan Süleyman)']];
   // ay-gün → millî gün (olayın yılı)
   var MILLI = { '3-12': 'İstiklâl Marşı\'nın kabulü (1921)', '3-18': 'Çanakkale Zaferi ve Şehitleri Anma Günü (1915)', '4-23': 'Ulusal Egemenlik ve Çocuk Bayramı (1920)',
     '5-19': 'Atatürk\'ü Anma, Gençlik ve Spor Bayramı (1919)', '5-29': 'İstanbul\'un Fethi (1453)', '7-15': 'Demokrasi ve Millî Birlik Günü (2016)', '7-24': 'Lozan Antlaşması (1923)',
     '8-26': 'Malazgirt Zaferi (1071) ve Büyük Taarruz (1922)', '8-30': 'Zafer Bayramı (1922)', '9-9': 'İzmir\'in Kurtuluşu (1922)', '10-29': 'Cumhuriyet Bayramı (1923)',
-    '11-10': 'Atatürk\'ü Anma Günü (1938)' };
+    '11-10': 'Atatürk\'ü Anma Günü (1938) · saat 09.05\'te saygı duruşu',
+    // Türk tarihinden günler (2026-11-18g, sahip: «Türkçü birinin çok hoşuna gidecek ortam»): yalnız tarihi kesin olanlar; aynı güne ikinci olay « · » ile
+    '1-20': 'Teşkilât-ı Esasiye Kanunu (1921)', '1-22': 'Ridaniye Zaferi (1517)', '2-17': 'Türk Medenî Kanunu\'nun kabulü (1926)', '2-26': 'Hocalı şehitlerini anıyoruz (1992)',
+    '3-3': 'Tevhid-i Tedrisat Kanunu (1924)', '3-21': 'Nevruz, Ergenekon\'dan çıkış', '4-29': 'Kûtülamâre Zaferi (1916)', '5-23': 'Dandanakan Zaferi, Büyük Selçuklu\'nun doğuşu (1040)',
+    '6-22': 'Amasya Genelgesi (1919)', '7-12': 'Türk Dil Kurumu\'nun kuruluşu (1932)', '7-20': 'Kıbrıs Barış Harekâtı (1974)', '7-23': 'Erzurum Kongresi (1919)',
+    '8-4': 'Enver Paşa\'nın Türkistan\'da şehit düşüşü (1922)', '8-29': 'Mohaç Zaferi (1526)', '8-31': 'Kırgızistan\'ın bağımsızlığı (1991)',
+    '9-1': 'Özbekistan\'ın bağımsızlığı (1991)', '9-4': 'Sivas Kongresi (1919)', '9-13': 'Sakarya Meydan Muharebesi\'nin zaferi (1921)', '9-17': 'Miryokefalon Zaferi (1176)',
+    '9-19': 'Mustafa Kemal\'e Gazi unvanı ve Mareşal rütbesi (1921)', '9-25': 'Niğbolu Zaferi (1396)', '9-26': 'Türk Dil Bayramı (1932)', '9-28': 'Preveze Deniz Zaferi (1538)',
+    '10-3': 'Türk Keneşi\'nin kuruluşu, Nahçıvan Anlaşması (2009)', '10-6': 'İstanbul\'un kurtuluşu (1923)', '10-13': 'Ankara\'nın başkent oluşu (1923)',
+    '10-18': 'Azerbaycan\'ın bağımsızlığı (1991)', '10-27': 'Türkmenistan\'ın bağımsızlığı (1991)', '11-1': 'Saltanatın kaldırılması (1922) · Türk harflerinin kabulü (1928)',
+    '11-8': 'Şuşa\'nın kurtuluşu, Azerbaycan Zafer Günü (2020)', '11-12': 'Türk Devletleri Teşkilatı (2021)', '11-15': 'Kuzey Kıbrıs Türk Cumhuriyeti\'nin kuruluşu (1983)',
+    '11-22': 'Enver Paşa\'nın doğumu (1881)', '11-24': 'Öğretmenler Günü · Atatürk soyadının verilişi (1934)', '12-5': 'Türk kadınına seçme ve seçilme hakkı (1934)',
+    '12-16': 'Kazakistan\'ın bağımsızlığı (1991)', '12-22': 'Sarıkamış şehitlerini anıyoruz (1914)', '12-27': 'Mustafa Kemal\'in Ankara\'ya gelişi (1919)' };
+  function gunAnahtar(t) { return (t.getMonth() + 1) + '-' + t.getDate(); }
+  // tek yılı olan olaya yıl dönümü eklenir («… (1923) · 103. yıl dönümü»); iki olaylı ya da yılsız günde eklenmez
+  function yilDonumu(m, yil) { var y = m.match(/\((\d{3,4})\)/g); return y && y.length === 1 ? m + ' · ' + (yil - +y[0].slice(1, -1)) + '. yıl dönümü' : m; }
+  // bugün tarihî bir gün değilse en yakın gelen gün ve kaç gün kaldığı
+  function yaklasan(t) {
+    for (var i = 1; i <= 366; i++) { var g = new Date(t.getFullYear(), t.getMonth(), t.getDate() + i), m = MILLI[gunAnahtar(g)]; if (m) return [i, g, yilDonumu(m, g.getFullYear())]; }
+  }
   // Bugün'de günün sözü: gün sırasıyla döner (aynı gün aynı söz); millî günde üstünde o günün adı. Başında Göktürk harfleriyle «Türük» (sağdan sola).
   function gununSozu(t) {
-    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[(t.getMonth() + 1) + '-' + t.getDate()];
-    return '<figure class="soz">' + (m ? '<p class="soz__milli">Bugün ' + kac(m) + '</p>' : '') +
+    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[gunAnahtar(t)], y = m ? null : yaklasan(t);
+    return '<figure class="soz">' + (m ? '<p class="soz__milli">Bugün ' + kac(yilDonumu(m, t.getFullYear())) + '</p>' :
+      y ? '<p class="soz__yakin">' + y[0] + ' gün sonra · ' + y[1].getDate() + ' ' + AY[y[1].getMonth()] + ' · ' + kac(y[2]) + '</p>' : '') +
       '<span class="soz__runik" lang="otk" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</span>' +
       '<blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption></figure>';
   }
@@ -451,9 +482,12 @@
         '<svg aria-hidden="true"><use href="#i-' + (HALKA_SIMGE[y.id] || 'harita') + '"/></svg><span class="' + sinif + '-ad">' + kac(y.ad) + '</span></a>';
     }).join('');
   }
+  // al bayrak, 2893 sayılı kanunun oranlarıyla (1,5 : 1); renkleri kanunla sabit, temayla değişmez
+  var BAYRAK = '<svg class="ust__bayrak" viewBox="0 0 1200 800" aria-hidden="true"><rect width="1200" height="800" fill="#e30a17"/><circle cx="425" cy="400" r="200" fill="#fff"/>' +
+    '<circle cx="475" cy="400" r="160" fill="#e30a17"/><polygon fill="#fff" points="583.334,400 764.235,458.779 652.431,304.894 652.431,495.106 764.235,341.221"/></svg>';
   function cubuk(sahne) {
     var ad = hesapAdi(), se = sekmeOf(simdiYer);
-    return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">B</span>Başbuğ</a>' +
+    return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">B</span>Başbuğ' + BAYRAK + '</a>' +
       '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + sekmeHtml('ust__sekme', se) + '</nav>' +
       '<button type="button" class="ust__ara" data-ac="komut" aria-keyshortcuts="Control+K /" aria-label="Ara"><svg aria-hidden="true"><use href="#i-ara"/></svg><span aria-hidden="true">Ara</span><kbd>Ctrl K</kbd></button>' +
       '<a class="ust__hesap" href="#/ayarlar" aria-label="Ayarlar">' + (ad ? kac(ad.charAt(0).toLocaleUpperCase('tr')) : '<svg aria-hidden="true"><use href="#i-kisi"/></svg>') + '</a></header>';
