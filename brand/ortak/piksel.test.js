@@ -489,7 +489,8 @@
       expect(D.saatAl(gun ? 'gece' : 'gunduz')).toBe(gun ? 23 : 12.5);
     });
     it('her sahne her saatte kurulur, boşluksuz, sınırlı renkli; an değişince gök değişir, saat ilerledikçe yumuşak geçer', () => {
-      const D = window.LIFEOS.PIKSEL_DOGA, W = 480, H = 100, ciz = (t, v) => { const o = D.yerlesim(W, H, v, t), c = document.createElement('canvas'); c.width = W; c.height = H; D.binaCiz(c.getContext('2d'), o); return { o, p:c.getContext('2d').getImageData(0, 0, W, H).data }; };
+      /* açık bir gün (bulut, sis, yağış gökteki ölçü noktasını değiştirmesin; testler hangi gün koşarsa koşsun aynı) */
+      const D = window.LIFEOS.PIKSEL_DOGA, W = 480, H = 100, gun = new Date(2026, 5, 1), ciz = (t, v) => { const o = D.yerlesim(W, H, v, t, gun), c = document.createElement('canvas'); c.width = W; c.height = H; D.binaCiz(c.getContext('2d'), o); return { o, p:c.getContext('2d').getImageData(0, 0, W, H).data }; };
       D.TUR_LISTE.forEach(t => [0.5, 5.5, 6.2, 7, 9.5, 12.5, 15.5, 17.4, 18.3, 19.6, 20.3, 23].forEach(v => {
         const { o, p } = ciz(t, v), hep = new Set(), sol = new Set();
         let bos = 0;
@@ -502,6 +503,24 @@
         const l = ['safak', 'ogle', 'ikindi', 'gunbatimi', 'gece'].map(a => gok(t, a));
         l.forEach((a, i) => l.forEach((b, j) => { if(i < j && !(fark(a, b) > 12)) throw new Error(t + ': ' + i + '~' + j + ' ' + a + ' / ' + b); }));
         [[19.9, 20.05], [5.95, 6.05], [12.4, 12.55], [17, 17.15]].forEach(([a, b]) => { const f = fark(gok(t, a), gok(t, b)); if(f > 16) throw new Error(t + ' ' + a + '→' + b + ' sıçrama ' + f); });
+      });
+    });
+    it('günün hâli: aynı gün aynı sahne, gün değişince değişir; her mevsim ve havada sınırlı renk, sakin üst-sol, boşluksuz', () => {
+      const D = window.LIFEOS.PIKSEL_DOGA, W = 480, H = 100, gunler = {};
+      expect(D.gunHali(new Date(2026, 0, 10)).mev).toBe('kis'); expect(D.gunHali(new Date(2026, 6, 10)).mev).toBe('yaz');
+      for(let i = 0; i < 800; i++){ const g = new Date(2026, 0, 1 + i), h = D.gunHali(g); gunler[h.mev + '/' + h.hava] = gunler[h.mev + '/' + h.hava] || g; }
+      ['acik', 'bulutlu', 'sis', 'yagmur', 'kar'].forEach(h => expect(Object.keys(gunler).some(k => k.endsWith('/' + h))).toBe(true));
+      const piksel = (t, v, g) => { const o = D.yerlesim(W, H, v, t, g), c = document.createElement('canvas'); c.width = W; c.height = H; D.binaCiz(c.getContext('2d'), o); return c.getContext('2d').getImageData(0, 0, W, H).data; };
+      Object.keys(gunler).forEach(k => D.TUR_LISTE.forEach(t => [7, 12.5, 23].forEach(v => {
+        const p = piksel(t, v, gunler[k]), hep = new Set(), sol = new Set(); let bos = 0;
+        for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){ const i = (y * W + x) * 4, c = p[i] << 16 | p[i + 1] << 8 | p[i + 2]; if(p[i + 3] !== 255) bos++; hep.add(c); if(x < W * 0.4 && y < H * 0.35) sol.add(c); }
+        if(bos || hep.size > 72 || sol.size > 8) throw new Error(k + ' ' + t + ' ' + v + ': boş ' + bos + ', renk ' + hep.size + ', üst-sol ' + sol.size);
+      })));
+      /* gün içinde sabit (gece yarısına dek), günden güne farklı */
+      const ayni = (a, b) => a.every((v, i) => v === b[i]);
+      D.TUR_LISTE.forEach(t => {
+        expect(ayni(piksel(t, 12.5, new Date(2026, 10, 18, 8)), piksel(t, 12.5, new Date(2026, 10, 18, 23, 50)))).toBe(true);
+        if([1, 2, 3, 4, 5].every(d => ayni(piksel(t, 12.5, new Date(2026, 10, 18)), piksel(t, 12.5, new Date(2026, 10, 18 + d))))) throw new Error(t + ': beş gün aynı');
       });
     });
     it('paralaks: açık hava sahnesi üç katman, kayınca boşluksuz, ön plan yerinde; hareket azsa ve iç mekânda kayma yok', () => {
