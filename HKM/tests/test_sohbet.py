@@ -980,8 +980,9 @@ def run():
            ["divan:attila", "divan:bilge", "divan:alparslan", "divan:fatih", "ortak", "ortak", "ortak", "ortak"])
         eq(sohbet.kip_of("ogretmen", "mete"), "ogretmen")       # hukumdar yalniz Divan'da anlam tasir
         no("ataturk" in sohbet.HUKUMDAR or any("Atatürk" in h["ad"] for h in sohbet.HUKUMDAR.values()))
-        ok(len(sohbet.HUKUMDAR) <= 9)  # 2026-11-18: dokuz hükümdar (sahibin isteği)
+        ok(len(sohbet.HUKUMDAR) <= 11)  # 2026-11-18: dokuz hükümdar, sonra Timur ve Enver Paşa (sahibin isteği)
         eq([sohbet.kip_of("divan", h) for h in ("osman", "yavuz", "kanuni", "babur")], ["divan:osman", "divan:yavuz", "divan:kanuni", "divan:babur"])
+        eq([sohbet.kip_of("divan", h) for h in ("timur", "enver")], ["divan:timur", "divan:enver"])
         t = sohbet.kip_talimati("divan:mete", ilk=True)
         for parca in ("KİP: DİVAN", "Mete Han", "canlandırma", "kaynaklar burada ayrılır", "bunu bilmiyoruz",
                       "Günümüz siyasetine", "şiddeti yüceltme", "Mete Han'ın"):

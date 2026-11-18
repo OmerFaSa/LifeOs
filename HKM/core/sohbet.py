@@ -898,6 +898,11 @@ HUKUMDAR = {
                "kaynak": "Osmanlı kronikleri (Celalzade Mustafa, Peçevi), Venedik elçi raporları ve Busbecq'in mektupları"},
     "babur": {"ad": "Babür Şah", "in": "Babür Şah'ın", "cag": "Babür Devleti'nin kurucusu, 1526-1530 (Fergana'da 1494'ten)",
               "kaynak": "kendi Çağatay Türkçesiyle yazdığı hatıratı Babürname"},
+    # 2026-11-18 (sahip: «Mete, Attila, Timur, Osmanlı, İttihatçı Türklük sistemin teması»): Timur ve Enver Paşa
+    "timur": {"ad": "Emir Timur", "in": "Emir Timur'un", "cag": "Timur Devleti'nin kurucusu, 1370-1405",
+              "kaynak": "Nizameddin Şami ve Şerefeddin Ali Yezdi'nin Zafernameleri, İbn Arapşah ve Kastilya elçisi Clavijo"},
+    "enver": {"ad": "Enver Paşa", "in": "Enver Paşa'nın", "cag": "İttihat ve Terakki önderi, Harbiye Nazırı ve Başkumandan Vekili, 1914-1918; ölümü 1922 Türkistan",
+              "kaynak": "Osmanlı arşiv belgeleri, Genelkurmay ATASE yayınları, kendi mektupları ve Şevket Süreyya Aydemir'in biyografisi"},
 }
 
 

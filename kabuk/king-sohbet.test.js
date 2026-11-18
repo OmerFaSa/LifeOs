@@ -50,7 +50,7 @@ t('biçim: paragraf, satır sonu, madde, numaralı liste, kalın, kod ve tablo; 
 });
 
 t('Divan: izinli beş hükümdar (Atatürk yok), her birine örnek sorular; hükümdar sunucuya gider, izinsizse kip ortak olur', () => {
-  a.deepStrictEqual(Object.keys(K.HUKUMDAR), ['mete', 'attila', 'bilge', 'alparslan', 'fatih', 'osman', 'yavuz', 'kanuni', 'babur']);
+  a.deepStrictEqual(Object.keys(K.HUKUMDAR), ['mete', 'attila', 'bilge', 'alparslan', 'fatih', 'osman', 'yavuz', 'kanuni', 'babur', 'timur', 'enver']);
   a.ok(!/Atatürk|Mustafa Kemal/.test(JSON.stringify(K.HUKUMDAR)));
   Object.keys(K.HUKUMDAR).forEach(h => a.strictEqual(K.ONERI[h].length, 3, h));
   Object.keys(K.HUKUMDAR).forEach(h => a.ok(/·/.test(K.CAG[h]), 'Divan çağ satırı: ' + h)); // adın altında «unvan · yıllar»

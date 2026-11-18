@@ -18,11 +18,12 @@
   // Divan (2026-11-17, sahip: «taht, Mete Han, Attila gibi şeyler»): hükümdarın ağzından canlandırma. Sunucu da aynı listeyi doğrular
   // (HKM/core/sohbet.py HUKUMDAR); Atatürk bilerek yok (5816 sayılı yasa ve saygı gereği canlandırılmaz).
   var HUKUMDAR = { mete: 'Mete Han', attila: 'Attila', bilge: 'Bilge Kağan', alparslan: 'Alp Arslan', fatih: 'Fatih Sultan Mehmet',
-    osman: 'Osman Gazi', yavuz: 'Yavuz Sultan Selim', kanuni: 'Kanuni Sultan Süleyman', babur: 'Babür Şah' }; // 2026-11-18: dört hükümdar daha (sahibin isteği)
+    osman: 'Osman Gazi', yavuz: 'Yavuz Sultan Selim', kanuni: 'Kanuni Sultan Süleyman', babur: 'Babür Şah', timur: 'Emir Timur', enver: 'Enver Paşa' }; // 2026-11-18: dört hükümdar daha (sahibin isteği)
   // Divan: adın altında çağ (hükümdarlık yılları)
   var CAG = { mete: 'Asya Hun hakanı · MÖ 209–174', attila: 'Avrupa Hun hükümdarı · 434–453', bilge: 'Göktürk kağanı · 716–734',
     alparslan: 'Büyük Selçuklu sultanı · 1064–1072', fatih: 'Osmanlı padişahı · 1451–1481',
-    osman: 'Osmanlı Beyliği’nin kurucusu · y. 1299–1324', yavuz: 'Osmanlı padişahı · 1512–1520', kanuni: 'Osmanlı padişahı · 1520–1566', babur: 'Babür Devleti’nin kurucusu · 1526–1530' };
+    osman: 'Osmanlı Beyliği’nin kurucusu · y. 1299–1324', yavuz: 'Osmanlı padişahı · 1512–1520', kanuni: 'Osmanlı padişahı · 1520–1566', babur: 'Babür Devleti’nin kurucusu · 1526–1530',
+    timur: 'Timur Devleti’nin kurucusu · 1370–1405', enver: 'İttihat ve Terakki · Başkumandan Vekili · 1914–1918' };
   // boş sohbette King'in sabit karşılaması (kipe göre)
   var SELAM = { ortak: 'Hoş geldin. Bugün neyi birlikte düşünelim? Aklındakini yaz ya da şunlardan biriyle başla.',
     ogretmen: 'Hangi konuyu açalım? Adım adım anlatır, sonra seni sınarım. Şunlardan biriyle başlayabilirsin.',
@@ -41,7 +42,9 @@
     osman: ['Kendini anlat', 'Söğüt\'ten bir beylik nasıl büyüdü?', 'Komşu beylerle ve Bizans ile ilişkin nasıldı?'],
     yavuz: ['Kendini anlat', 'Çaldıran\'a neden yürüdün?', 'Mısır seferi devleti nasıl değiştirdi?'],
     kanuni: ['Kendini anlat', 'Kanunnameler neden önemliydi?', 'Mimar Sinan ile neler yaptınız?'],
-    babur: ['Kendini anlat', 'Babürname\'yi neden Türkçe yazdın?', 'Fergana\'dan Hindistan\'a yolun nasıl geçti?']
+    babur: ['Kendini anlat', 'Babürname\'yi neden Türkçe yazdın?', 'Fergana\'dan Hindistan\'a yolun nasıl geçti?'],
+    timur: ['Kendini anlat', 'Semerkant\'ı nasıl bir başkent yaptın?', 'Kaynaklar seni nasıl anlatıyor?'],
+    enver: ['Kendini anlat', 'Edirne\'yi nasıl geri aldınız?', 'Neden Türkistan\'a gittin?']
   };
 
   /* ---------------- saf ---------------- */

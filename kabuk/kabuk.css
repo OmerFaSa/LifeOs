@@ -1087,5 +1087,34 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 .soz__kaynak{ margin-top:var(--a2); font-size:var(--yz-k); color:var(--soluk); }
 .soz__kaynak::before{ content:"— "; }
 .soz__yakin{ margin:0 0 var(--a3); font-size:var(--yz-k); color:var(--soluk); }
+/* Türk izleri 3 (2026-11-18h): millî günde bayrak, söz kartının açılırları, Göktürk yazısı, on altı yıldız, ders sonu atasözü */
+.soz__bayrak{ display:block; width:72px; height:48px; margin:0 auto var(--a3); border-radius:3px; box-shadow:0 2px 8px rgb(0 0 0 / .25); }
+.soz__ek{ display:flex; flex-wrap:wrap; justify-content:center; gap:var(--a2) var(--a4); margin-top:var(--a4); text-align:left; }
+.soz__acil{ flex:1 1 100%; max-width:56ch; }
+.soz__acil > summary{ width:max-content; margin:0 auto; padding:var(--a1) var(--a3); border-radius:var(--kose-k); cursor:pointer; font-size:var(--yz-k); font-weight:600; color:var(--altin); }
+.soz__acil > summary:hover{ background:var(--yuzey-ust); }
+.soz-gun{ max-height:320px; overflow:auto; margin:var(--a3) 0 0; padding:0; list-style:none; font-size:var(--yz-k); }
+.soz-gun li{ display:flex; gap:var(--a3); padding:var(--a1) var(--a2); border-radius:var(--kose-k); }
+.soz-gun li[aria-current]{ background:var(--yuzey-ust); font-weight:650; }
+.soz-gun__tarih{ flex:none; width:6.5em; color:var(--soluk); }
+.gokturk{ display:grid; gap:var(--a1); margin-top:var(--a3); font-size:var(--yz-k); color:var(--soluk); }
+.gokturk__gir{ font:inherit; font-size:var(--yz); padding:var(--a2) var(--a3); border:0; border-radius:var(--kose-k); background:var(--yuzey-ust); color:var(--yazi); }
+.gokturk__cik{ min-height:1.4em; margin:var(--a3) 0 0; text-align:center; font:2rem/1.4 "Segoe UI Historic","Noto Sans Old Turkic",sans-serif; letter-spacing:.2em; color:var(--altin); overflow-wrap:anywhere; }
+.gokturk__not{ margin:var(--a1) 0 0; text-align:center; font-size:var(--yz-k); color:var(--soluk); }
+.gokturk__harf{ display:grid; grid-template-columns:repeat(auto-fill, minmax(76px, 1fr)); gap:var(--a1); margin:var(--a3) 0 0; padding:0; list-style:none; font-size:var(--yz-k); color:var(--soluk); }
+.gokturk__harf li{ display:flex; align-items:center; gap:var(--a2); }
+.gokturk__harf b{ font:1.3rem/1 "Segoe UI Historic","Noto Sans Old Turkic",sans-serif; color:var(--yazi); }
+.selam-runik{ margin:var(--a1) 0 0; font:1.25rem/1 "Segoe UI Historic","Noto Sans Old Turkic",sans-serif; letter-spacing:.25em; color:var(--sahne-yazi, var(--altin)); opacity:.85; text-align:left; }
+.tdev{ margin-top:var(--a4); text-align:center; }
+.tdev__sira{ display:flex; flex-wrap:wrap; justify-content:center; gap:var(--a1); margin:0; padding:0; list-style:none; }
+.tdev__sira li{ display:grid; place-items:center; width:22px; height:22px; color:var(--altin); opacity:.55; }
+.tdev__sira svg{ width:16px; height:16px; fill:currentColor; }
+.tdev__sira li[aria-current]{ opacity:1; color:var(--ana); transform:scale(1.35); }
+.tdev__bugun{ margin:var(--a2) 0 0; font-size:var(--yz-k); color:var(--yazi); }
+.tdev__bugun > span:first-child{ margin-right:var(--a2); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ana); }
+.tdev__yil, .tdev__han{ margin-left:var(--a2); color:var(--soluk); }
+.tdev__han::before{ content:"· "; }
+.ders__atasozu{ margin:var(--a3) 0 0; font:italic var(--yz)/1.5 var(--okuma); color:var(--yazi); }
+.ders__atasozu span{ font-style:normal; font-size:var(--yz-k); color:var(--soluk); }
 .ust__bayrak{ flex:none; width:21px; height:14px; border-radius:2px; box-shadow:0 1px 2px rgb(0 0 0 / .25); }
 @media (max-width:640px){ .soz{ padding:var(--a4); } }

@@ -253,7 +253,23 @@
   }
 
   var Kabuk = kok.LIFEOS && kok.LIFEOS.Kabuk || {};
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.gunYayi = gunYayi; Kabuk.gunYayiHtml = gunYayiHtml; Kabuk.dersParagraf = dersParagraf; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz;
+  // Göktürk (Orhun) harfleri: Türkçe metni harf harf çevirir; ünsüzler kelimenin ünlüsüne göre kalın ya da ince. Yazı sağdan sola, kelimeler «⁚» ile ayrılır.
+  // shortcut: yazıtlardaki ünlü düşmesi ve bitişik harfler (nt, nç, ok…) uygulanmaz; okunurluk için her ünlü yazılır
+  var GT = { a: 0x10C00, e: 0x10C00, 'ı': 0x10C03, i: 0x10C03, o: 0x10C06, u: 0x10C06, 'ö': 0x10C07, 'ü': 0x10C07, m: 0x10C22, p: 0x10C2F, f: 0x10C2F, 'ç': 0x10C32, c: 0x10C32, z: 0x10C14,
+    b: [0x10C09, 0x10C0B], v: [0x10C09, 0x10C0B], d: [0x10C11, 0x10C13], g: [0x10C0D, 0x10C0F], 'ğ': [0x10C0D, 0x10C0F], k: [0x10C34, 0x10C1A], h: [0x10C34, 0x10C1A],
+    l: [0x10C1E, 0x10C20], n: [0x10C23, 0x10C24], r: [0x10C3A, 0x10C3C], s: [0x10C3D, 0x10C3E], 'ş': 0x10C41, j: 0x10C41, t: [0x10C43, 0x10C45], y: [0x10C16, 0x10C18] };
+  function gokturk(metin) {
+    return String(metin || '').toLocaleLowerCase('tr').split(/[^a-zçğıöşüâîû]+/).filter(Boolean).map(function (k) {
+      k = k.replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u');
+      var ince = !/[aıou]/.test(k);
+      return Array.from(k).map(function (h, i) {
+        var c = GT[h]; if (c == null) return '';
+        if (h === 'k' && !ince) { var s = k[i + 1] || k[i - 1] || ''; c = /[ou]/.test(s) ? [0x10C38] : s === 'ı' ? [0x10C36] : c; } // ok/uk, ık
+        return String.fromCodePoint(Array.isArray(c) ? c[ince && c.length > 1 ? 1 : 0] : c);
+      }).join('');
+    }).join('⁚');
+  }
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.gokturk = gokturk; Kabuk.gunYayi = gunYayi; Kabuk.gunYayiHtml = gunYayiHtml; Kabuk.dersParagraf = dersParagraf; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz;
   Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
     yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
@@ -361,7 +377,8 @@
     ['Ülkesini, yüksek istiklâlini korumasını bilen Türk milleti, dilini de yabancı diller boyunduruğundan kurtarmalıdır.', 'Atatürk, 1930'],
     ['Korkma, sönmez bu şafaklarda yüzen al sancak.', 'Mehmet Âkif Ersoy, İstiklâl Marşı'], ['Hakkıdır, Hakk\'a tapan milletimin istiklâl!', 'Mehmet Âkif Ersoy, İstiklâl Marşı'],
     ['Vatan ne Türkiye\'dir Türklere, ne Türkistan; vatan büyük ve müebbet bir ülkedir: Turan!', 'Ziya Gökalp, Turan'],
-    ['Halk içinde muteber bir nesne yok devlet gibi.', 'Muhibbî (Kanuni Sultan Süleyman)']];
+    ['Halk içinde muteber bir nesne yok devlet gibi.', 'Muhibbî (Kanuni Sultan Süleyman)'],
+    ['Toprak, devletin temelidir; onu nasıl verebilirim?', 'Mete Han, Sima Qian\'ın Shiji\'sine göre']];
   // ay-gün → millî gün (olayın yılı)
   var MILLI = { '3-12': 'İstiklâl Marşı\'nın kabulü (1921)', '3-18': 'Çanakkale Zaferi ve Şehitleri Anma Günü (1915)', '4-23': 'Ulusal Egemenlik ve Çocuk Bayramı (1920)',
     '5-19': 'Atatürk\'ü Anma, Gençlik ve Spor Bayramı (1919)', '5-29': 'İstanbul\'un Fethi (1453)', '7-15': 'Demokrasi ve Millî Birlik Günü (2016)', '7-24': 'Lozan Antlaşması (1923)',
@@ -370,7 +387,8 @@
     // Türk tarihinden günler (2026-11-18g, sahip: «Türkçü birinin çok hoşuna gidecek ortam»): yalnız tarihi kesin olanlar; aynı güne ikinci olay « · » ile
     '1-20': 'Teşkilât-ı Esasiye Kanunu (1921)', '1-22': 'Ridaniye Zaferi (1517)', '2-17': 'Türk Medenî Kanunu\'nun kabulü (1926)', '2-26': 'Hocalı şehitlerini anıyoruz (1992)',
     '3-3': 'Tevhid-i Tedrisat Kanunu (1924)', '3-21': 'Nevruz, Ergenekon\'dan çıkış', '4-29': 'Kûtülamâre Zaferi (1916)', '5-23': 'Dandanakan Zaferi, Büyük Selçuklu\'nun doğuşu (1040)',
-    '6-22': 'Amasya Genelgesi (1919)', '7-12': 'Türk Dil Kurumu\'nun kuruluşu (1932)', '7-20': 'Kıbrıs Barış Harekâtı (1974)', '7-23': 'Erzurum Kongresi (1919)',
+    '6-22': 'Amasya Genelgesi (1919)', '7-12': 'Türk Dil Kurumu\'nun kuruluşu (1932)', '7-20': 'Kıbrıs Barış Harekâtı (1974)', '7-23': 'Erzurum Kongresi (1919) · İkinci Meşrutiyet\'in ilanı (1908)', '7-22': 'Edirne\'nin geri alınışı, Enver Bey\'in öncülüğünde (1913)',
+    '9-15': 'Bakü\'nün kurtuluşu, Kafkas İslâm Ordusu (1918)', '4-21': 'Panipat Zaferi, Babür Devleti\'nin kuruluşu (1526)',
     '8-4': 'Enver Paşa\'nın Türkistan\'da şehit düşüşü (1922)', '8-29': 'Mohaç Zaferi (1526)', '8-31': 'Kırgızistan\'ın bağımsızlığı (1991)',
     '9-1': 'Özbekistan\'ın bağımsızlığı (1991)', '9-4': 'Sivas Kongresi (1919)', '9-13': 'Sakarya Meydan Muharebesi\'nin zaferi (1921)', '9-17': 'Miryokefalon Zaferi (1176)',
     '9-19': 'Mustafa Kemal\'e Gazi unvanı ve Mareşal rütbesi (1921)', '9-25': 'Niğbolu Zaferi (1396)', '9-26': 'Türk Dil Bayramı (1932)', '9-28': 'Preveze Deniz Zaferi (1538)',
@@ -387,14 +405,48 @@
     for (var i = 1; i <= 366; i++) { var g = new Date(t.getFullYear(), t.getMonth(), t.getDate() + i), m = MILLI[gunAnahtar(g)]; if (m) return [i, g, yilDonumu(m, g.getFullYear())]; }
   }
   // Bugün'de günün sözü: gün sırasıyla döner (aynı gün aynı söz); millî günde üstünde o günün adı. Başında Göktürk harfleriyle «Türük» (sağdan sola).
+  // resmî millî günlerde söz kartının başında al bayrak
+  var RESMI = ['3-12', '3-18', '4-23', '5-19', '5-29', '7-15', '7-24', '8-26', '8-30', '9-9', '10-29', '11-10'];
+  // On altı büyük Türk devleti (Cumhurbaşkanlığı forsundaki on altı yıldız): ad, kuruluş yılı, tanınmış hükümdarı. Her gün biri öne çıkar.
+  var DEVLET = [['Büyük Hun İmparatorluğu', 'MÖ 204', 'Mete Han'], ['Batı Hun İmparatorluğu', '48', ''], ['Avrupa Hun İmparatorluğu', '375', 'Attila'],
+    ['Ak Hun İmparatorluğu', '420', ''], ['Göktürk İmparatorluğu', '552', 'Bumin Kağan, Bilge Kağan'], ['Avar İmparatorluğu', '565', 'Bayan Kağan'],
+    ['Hazar İmparatorluğu', '651', ''], ['Uygur Devleti', '744', 'Kutluk Bilge Kül Kağan'], ['Karahanlı Devleti', '932', 'Satuk Buğra Han'],
+    ['Gazneli Devleti', '962', 'Gazneli Mahmud'], ['Büyük Selçuklu İmparatorluğu', '1040', 'Tuğrul Bey, Alp Arslan'], ['Harzemşahlar Devleti', '1077', 'Celâleddin Harzemşah'],
+    ['Altın Orda Devleti', '1224', 'Batu Han'], ['Büyük Timur İmparatorluğu', '1369', 'Timur'], ['Babür İmparatorluğu', '1526', 'Babür Şah'],
+    ['Osmanlı İmparatorluğu', '1299', 'Osman Gazi, Fatih Sultan Mehmet']];
+  var YILDIZ = '<svg viewBox="0 0 20 20" aria-hidden="true"><polygon points="' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (i) {
+    var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 3.8 : 9.5; return (10 + r * Math.cos(a)).toFixed(2) + ',' + (10.6 + r * Math.sin(a)).toFixed(2); }).join(' ') + '"/></svg>';
+  function onAltiYildiz(t) {
+    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5) % 16, d = DEVLET[no];
+    return '<section class="tdev" aria-label="On altı büyük Türk devleti"><ol class="tdev__sira">' + DEVLET.map(function (x, i) {
+      return '<li title="' + kac(x[0] + ' · ' + x[1]) + '"' + (i === no ? ' aria-current="true"' : '') + '>' + YILDIZ + '<span class="gizli">' + kac(x[0] + ', ' + x[1]) + '</span></li>';
+    }).join('') + '</ol><p class="tdev__bugun"><span>Bugünün devleti</span> ' + kac(d[0]) + ' <span class="tdev__yil">' + kac(d[1]) + '</span>' +
+      (d[2] ? '<span class="tdev__han">' + kac(d[2]) + '</span>' : '') + '</p></section>';
+  }
+  var HARF = [[0x10C00, 'a, e'], [0x10C03, 'ı, i'], [0x10C06, 'o, u'], [0x10C07, 'ö, ü'], [0x10C09, 'b'], [0x10C0B, 'b ince'], [0x10C11, 'd'], [0x10C13, 'd ince'],
+    [0x10C0D, 'g, ğ'], [0x10C0F, 'g, ğ ince'], [0x10C34, 'k'], [0x10C1A, 'k ince'], [0x10C38, 'ok, uk'], [0x10C36, 'ık'], [0x10C1E, 'l'], [0x10C20, 'l ince'], [0x10C22, 'm'],
+    [0x10C23, 'n'], [0x10C24, 'n ince'], [0x10C2D, 'ng'], [0x10C2F, 'p'], [0x10C32, 'ç'], [0x10C3A, 'r'], [0x10C3C, 'r ince'], [0x10C3D, 's'], [0x10C3E, 's ince'],
+    [0x10C41, 'ş'], [0x10C43, 't'], [0x10C45, 't ince'], [0x10C16, 'y'], [0x10C18, 'y ince'], [0x10C14, 'z']];
+  function sozEk(t) {
+    var bu = gunAnahtar(t), gunler = Object.keys(MILLI).sort(function (a, b) { var x = a.split('-'), y = b.split('-'); return x[0] - y[0] || x[1] - y[1]; });
+    return '<div class="soz__ek"><details class="soz__acil"><summary>Yılın tarihî günleri</summary><ol class="soz-gun">' + gunler.map(function (k) {
+      var x = k.split('-');
+      return '<li' + (k === bu ? ' aria-current="date"' : '') + '><span class="soz-gun__tarih">' + x[1] + ' ' + AY[x[0] - 1] + '</span>' + kac(MILLI[k]) + '</li>';
+    }).join('') + '</ol></details><details class="soz__acil"><summary>Göktürk yazısı</summary><label class="gokturk"><span>Bir şey yaz, Göktürk harfleriyle görün</span>' +
+      '<input class="gokturk__gir" type="text" maxlength="60" value="Türk" autocomplete="off" spellcheck="false"></label>' +
+      '<p class="gokturk__cik" lang="otk" dir="rtl" aria-live="polite">' + gokturk('Türk') + '</p><p class="gokturk__not">Harf harf, yaklaşık: yazıtlarda bazı ünlüler yazılmaz, sağdan sola okunur.</p>' +
+      '<ul class="gokturk__harf">' + HARF.map(function (h) { return '<li><b lang="otk">' + String.fromCodePoint(h[0]) + '</b>' + h[1] + '</li>'; }).join('') + '</ul></details></div>';
+  }
   function gununSozu(t) {
     var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[gunAnahtar(t)], y = m ? null : yaklasan(t);
-    return '<figure class="soz">' + (m ? '<p class="soz__milli">Bugün ' + kac(yilDonumu(m, t.getFullYear())) + '</p>' :
+    return '<figure class="soz' + (RESMI.indexOf(gunAnahtar(t)) >= 0 ? ' soz--bayrak">' + BAYRAK.replace('ust__bayrak', 'soz__bayrak') : '">') + (m ? '<p class="soz__milli">Bugün ' + kac(yilDonumu(m, t.getFullYear())) + '</p>' :
       y ? '<p class="soz__yakin">' + y[0] + ' gün sonra · ' + y[1].getDate() + ' ' + AY[y[1].getMonth()] + ' · ' + kac(y[2]) + '</p>' : '') +
       '<span class="soz__runik" lang="otk" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</span>' +
-      '<blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption></figure>';
+      '<blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption>' + sozEk(t) + '</figure>' + onAltiYildiz(t);
   }
   // ad Hesap oturumundan (hitap, yoksa görünen ad); Hesap yüklü değilse ya da oturum yoksa adsız selam
+  // selamın altında adın Göktürk harfleriyle yazılışı (ad yoksa yok)
+  function adRunik() { var a = gokturk(hesapAdi()); return a ? '<p class="selam-runik" lang="otk" dir="rtl" title="Adın Göktürk harfleriyle">' + a + '</p>' : ''; }
   function hesapAdi() {
     try { var o = kok.LIFEOS.HESAP.durum().oturum; return o ? (o.hitap || o.gorunen_ad || '') : ''; } catch (e) { return ''; }
   }
@@ -549,7 +601,7 @@
       // 2026-11-17d (sahip: büyük «sıradaki» kartı Bugün'de olmasın; alanlar ilerleme gibi bir bölümde): iş kartı yok, alanlar «İlerleme»de,
       // çalışılan alan en başta ilerleme çizgisi ve sıradaki adımıyla
       alanlarBaslik: 'İlerleme', alanlar: alanKartlari(f, od, a),
-      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler }).replace('<div class="b-karsilama__ic">', '<div class="b-karsilama__ic">' + gunYayiHtml(t)) + '<div class="soz-kap">' + gununSozu(t) + '</div>'; // söz İlerleme'nin altında
+      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler }).replace('<div class="b-karsilama__ic">', '<div class="b-karsilama__ic">' + gunYayiHtml(t)).replace('</h1>', '</h1>' + adRunik()) + '<div class="soz-kap">' + gununSozu(t) + '</div>'; // söz İlerleme'nin altında
   }
   // Bugün'ün alan ızgarası: haritadaki taşınmış alanlar; simge index.html'deki #i-<alan>, ilerleme yalnız açık alan için bilinir
   var ALAN_RENK = { felsefe: 'turuncu', akademik: 'mavi', dil: 'yesil', tarih: 'pembe', okuma: 'sari', hareket: 'deniz', muzik: 'mor', beslenme: 'yesil', uyku: 'gok', tahlil: 'pembe',
@@ -692,6 +744,7 @@
     var y = d.querySelector('.ayar-ara__yok'); if (y) y.hidden = bulunan > 0;
   }
   d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('[data-ayar-ara]')) ayarSuz(e.target.value); });
+  d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('.gokturk__gir')) { var c = e.target.closest('details').querySelector('.gokturk__cik'); if (c) c.textContent = gokturk(e.target.value); } });
   // ayar grubu simgeleri (index.html sprite): ses nota (ay tema sanılıyordu), hesap kişi, erişilebilirlik bilgi, King taç
   var AYAR_SIMGE = { gorunum: 'gunes', erisim: 'ipucu', bildirim: 'saat', ses: 'muzik', beden: 'saglik', king: 'king', hesap: 'kisi' };
   var ayarGozcu = null;
@@ -953,7 +1006,13 @@
     if (okundu) l.push('<span class="ders__son-tik"><svg aria-hidden="true"><use href="#i-tik"/></svg>Okundu</span>');
     if (cevap) l.push(sec ? 'Alıştırma ' + dogru + ' / ' + sec + ' doğru' : cevap + ' / ' + x.alistirmalar.length + ' cevaplandı');
     return (l.length ? '<p class="ders__son">' + l.join(' · ') + '</p>' : '') +
-      (a ? '<p class="ders__sonraki"><span>Sıradaki</span> ' + kac(a.tur === 'ders' ? a.ad : 'Kapı sınavı · ' + (a.ad || '')) + '</p>' : '');
+      (a ? '<p class="ders__sonraki"><span>Sıradaki</span> ' + kac(a.tur === 'ders' ? a.ad : 'Kapı sınavı · ' + (a.ad || '')) + '</p>' : '') + dersAtasozu(id);
+  }
+  // ders sonunda, derse göre sabit bir Türk atasözü
+  function dersAtasozu(id) {
+    var l = SOZ.filter(function (s) { return s[1] === 'Türk atasözü'; }), h = 0;
+    String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 9973; });
+    return '<p class="ders__atasozu">«' + kac(l[h % l.length][0]) + '» <span>Türk atasözü</span></p>';
   }
   // Dersin üç adımı: oku, alıştır, bitir. Şimdiki adım vurgulu, geçilenler ✓ (renk tek başına değil).
   function dersAdimlari(adim, n) {

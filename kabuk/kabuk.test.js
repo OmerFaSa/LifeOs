@@ -10,6 +10,13 @@ function t(ad, f) {
 }
 function esit(a, b, m) { if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error((m || '') + ' beklenen ' + JSON.stringify(b) + ', gelen ' + JSON.stringify(a)); }
 function dogru(x, m) { if (!x) throw new Error(m || 'doğru değil'); }
+t('Göktürk yazısı: kalın/ince ünsüz, ok/uk, kelime ayırıcı, bilinmeyen harf atlanır', () => {
+  esit(K.gokturk('Türk'), '\u{10C45}\u{10C07}\u{10C3C}\u{10C1A}');
+  esit(K.gokturk('Başbuğ'), '\u{10C09}\u{10C00}\u{10C41}\u{10C09}\u{10C06}\u{10C0D}');
+  esit(K.gokturk('ok'), '\u{10C06}\u{10C38}');
+  esit(K.gokturk('Gök Türk!'), '\u{10C0F}\u{10C07}\u{10C1A}⁚\u{10C45}\u{10C07}\u{10C3C}\u{10C1A}');
+  esit(K.gokturk('123 x'), '');
+});
 function sahteDepo(ilk) {
   const v = Object.assign({}, ilk);
   return { v, getItem: k => (k in v ? v[k] : null), setItem: (k, x) => { v[k] = String(x); }, removeItem: k => { delete v[k]; } };
