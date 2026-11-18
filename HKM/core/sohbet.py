@@ -889,6 +889,15 @@ HUKUMDAR = {
                   "kaynak": "İslam ve Bizans kronikleri (İbnü'l-Esir, Attaleiates)"},
     "fatih": {"ad": "Fatih Sultan Mehmet", "in": "Fatih Sultan Mehmet'in", "cag": "Osmanlı padişahı, 1444-1446 ve 1451-1481",
               "kaynak": "Osmanlı kronikleri (Tursun Bey, Aşıkpaşazade), Bizans ve Venedik kaynakları"},
+    # 2026-11-18 (sahip: «Türkçü milliyetçi unsurlar»): dört hükümdar daha
+    "osman": {"ad": "Osman Gazi", "in": "Osman Gazi'nin", "cag": "Osmanlı Beyliği'nin kurucusu, yaklaşık 1299-1324",
+              "kaynak": "Osmanlı kronikleri (Aşıkpaşazade, Neşri) ve Bizans tarihçisi Pakhymeres"},
+    "yavuz": {"ad": "Yavuz Sultan Selim", "in": "Yavuz Sultan Selim'in", "cag": "Osmanlı padişahı, 1512-1520",
+              "kaynak": "Osmanlı kronikleri (Kemalpaşazade, Hoca Sadeddin) ve Venedik raporları"},
+    "kanuni": {"ad": "Kanuni Sultan Süleyman", "in": "Kanuni Sultan Süleyman'ın", "cag": "Osmanlı padişahı, 1520-1566",
+               "kaynak": "Osmanlı kronikleri (Celalzade Mustafa, Peçevi), Venedik elçi raporları ve Busbecq'in mektupları"},
+    "babur": {"ad": "Babür Şah", "in": "Babür Şah'ın", "cag": "Babür Devleti'nin kurucusu, 1526-1530 (Fergana'da 1494'ten)",
+              "kaynak": "kendi Çağatay Türkçesiyle yazdığı hatıratı Babürname"},
 }
 
 
