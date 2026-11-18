@@ -39,7 +39,7 @@
   color-scheme:dark;
   }
   :root:not([data-theme="light"])[data-vurgu="mavi"]{ --vurgu:#8db0ff; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="yesil"]{ --vurgu:#5fd0a0; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="mor"]{ --vurgu:#b9a4ff; --vurgu-yazi:#0e1117; }
-  :root:not([data-theme="light"])[data-vurgu="turuncu"]{ --vurgu:#f5a35a; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="pembe"]{ --vurgu:#f49ac0; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="grafit"]{ --vurgu:#c3c8d2; --vurgu-yazi:#0e1117; }
+  :root:not([data-theme="light"])[data-vurgu="turuncu"]{ --vurgu:#f5a35a; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="pembe"]{ --vurgu:#f49ac0; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="grafit"]{ --vurgu:#c3c8d2; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="al"]{ --vurgu:#ff7a7a; --vurgu-yazi:#0e1117; } :root:not([data-theme="light"])[data-vurgu="turkuaz"]{ --vurgu:#4fd1c5; --vurgu-yazi:#0e1117; }
 }
 :root[data-theme="dark"]{
   --bg:#0e1117; --yuzey:#161a22; --yuzey-2:#1e232d; --cizgi:#283040; --cizgi-guclu:#434c60;
@@ -51,7 +51,7 @@
   color-scheme:dark;
 }
 :root[data-theme="dark"][data-vurgu="mavi"]{ --vurgu:#8db0ff; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="yesil"]{ --vurgu:#5fd0a0; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="mor"]{ --vurgu:#b9a4ff; --vurgu-yazi:#0e1117; }
-  :root[data-theme="dark"][data-vurgu="turuncu"]{ --vurgu:#f5a35a; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="pembe"]{ --vurgu:#f49ac0; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="grafit"]{ --vurgu:#c3c8d2; --vurgu-yazi:#0e1117; }
+  :root[data-theme="dark"][data-vurgu="turuncu"]{ --vurgu:#f5a35a; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="pembe"]{ --vurgu:#f49ac0; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="grafit"]{ --vurgu:#c3c8d2; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="al"]{ --vurgu:#ff7a7a; --vurgu-yazi:#0e1117; } :root[data-theme="dark"][data-vurgu="turkuaz"]{ --vurgu:#4fd1c5; --vurgu-yazi:#0e1117; }
 /* alan tonu: kaba data-ton="<r-* adı>"; --alan-isik o tonun zemine süzülen ışığı */
 [data-ton="mavi"]{ --alan-ton:var(--r-mavi); } [data-ton="yesil"]{ --alan-ton:var(--r-yesil); } [data-ton="turuncu"]{ --alan-ton:var(--r-turuncu); } [data-ton="pembe"]{ --alan-ton:var(--r-pembe); }
 [data-ton="gok"]{ --alan-ton:var(--r-gok); } [data-ton="sari"]{ --alan-ton:var(--r-sari); } [data-ton="mor"]{ --alan-ton:var(--r-mor); } [data-ton="deniz"]{ --alan-ton:var(--r-deniz); }
@@ -60,6 +60,8 @@
 :root[data-vurgu="mavi"]{ --vurgu:#2f5fd0; --vurgu-yazi:#fff; } :root[data-vurgu="yesil"]{ --vurgu:#186f4c; --vurgu-yazi:#fff; }
 :root[data-vurgu="mor"]{ --vurgu:#6a4bd8; --vurgu-yazi:#fff; } :root[data-vurgu="turuncu"]{ --vurgu:#954a0d; --vurgu-yazi:#fff; }
 :root[data-vurgu="pembe"]{ --vurgu:#a73565; --vurgu-yazi:#fff; } :root[data-vurgu="grafit"]{ --vurgu:#4a4f5a; --vurgu-yazi:#fff; }
+/* 2026-11-18 (sahip: Türk unsurları): al bayrak kırmızısı ve Selçuklu çinisi turkuazı */
+:root[data-vurgu="al"]{ --vurgu:#c8102e; --vurgu-yazi:#fff; } :root[data-vurgu="turkuaz"]{ --vurgu:#0b7480; --vurgu-yazi:#fff; }
 :root[data-boyut="kucuk"]{ --boy:14px; } :root[data-boyut="buyuk"]{ --boy:18px; } :root[data-boyut="enbuyuk"]{ --boy:21px; }
 :root[data-satir="genis"]{ --satir:1.85; }
 :root[data-kontrast="yuksek"]{ --soluk:var(--yazi-2); --cizgi:var(--cizgi-guclu); }
@@ -440,7 +442,7 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 [data-ayar-satir="lifeos.vurgu"] [data-deger="modul"]{ --sw:conic-gradient(var(--r-mavi), var(--r-yesil), var(--r-turuncu), var(--r-pembe), var(--r-mor), var(--r-mavi)); }
 [data-ayar-satir="lifeos.vurgu"] [data-deger="mavi"]{ --sw:var(--r-mavi); } [data-ayar-satir="lifeos.vurgu"] [data-deger="yesil"]{ --sw:var(--r-yesil); }
 [data-ayar-satir="lifeos.vurgu"] [data-deger="mor"]{ --sw:var(--r-mor); } [data-ayar-satir="lifeos.vurgu"] [data-deger="turuncu"]{ --sw:var(--r-turuncu); }
-[data-ayar-satir="lifeos.vurgu"] [data-deger="pembe"]{ --sw:var(--r-pembe); } [data-ayar-satir="lifeos.vurgu"] [data-deger="grafit"]{ --sw:var(--yazi-2); }
+[data-ayar-satir="lifeos.vurgu"] [data-deger="pembe"]{ --sw:var(--r-pembe); } [data-ayar-satir="lifeos.vurgu"] [data-deger="grafit"]{ --sw:var(--yazi-2); } [data-ayar-satir="lifeos.vurgu"] [data-deger="al"]{ --sw:#c8102e; } [data-ayar-satir="lifeos.vurgu"] [data-deger="turkuaz"]{ --sw:#0b7480; }
 /* genel küçük dokunuşlar: seçim rengi vurgudan, ince kaydırma çubuğu */
 ::selection{ background:color-mix(in srgb, var(--vurgu) 26%, transparent); }
 html{ scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--yazi) 22%, transparent) transparent; }

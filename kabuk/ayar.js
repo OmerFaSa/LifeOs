@@ -26,7 +26,7 @@
     { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'sistem', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
       secenekler: { piksel: 'Piksel', sistem: 'Cihazın yazısı' }, aciklama: 'Uygulamadaki yazıların tipi.', kaynak: ENV + ' §3c Tema, yazı: yazi' },
     { anahtar: 'lifeos.vurgu', ad: 'Vurgu rengi', tur: 'secim', varsayilan: 'modul', grup: 'gorunum', kok: 'data-vurgu', esitlenir: true,
-      secenekler: { modul: 'Alanın rengi', mavi: 'Mavi', yesil: 'Yeşil', mor: 'Mor', turuncu: 'Turuncu', pembe: 'Pembe', grafit: 'Grafit' },
+      secenekler: { modul: 'Alanın rengi', al: 'Al', turkuaz: 'Turkuaz', mavi: 'Mavi', yesil: 'Yeşil', mor: 'Mor', turuncu: 'Turuncu', pembe: 'Pembe', grafit: 'Grafit' },
       aciklama: 'Seçili düğme ve sekmenin rengi; ölçü renkleri değişmez.', kaynak: ENV + ' §3b lifeos.vurgu' },
     { anahtar: 'lifeos.boyut', ad: 'Yazı boyutu', tur: 'secim', varsayilan: 'normal', grup: 'erisim', kok: 'data-boyut', esitlenir: true,
       secenekler: { kucuk: 'Küçük', normal: 'Normal', buyuk: 'Büyük', enbuyuk: 'En büyük' }, aciklama: 'Bütün arayüz birlikte büyür.', kaynak: ENV + ' §3b lifeos.boyut' },
