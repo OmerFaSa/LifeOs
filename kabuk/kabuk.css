@@ -1068,3 +1068,7 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 :root:has(#sayfa > .ust--ogren) .alt-cubuk{ display:none; } /* telefonda da yalnız ders: alt çubuk yok, çıkış konum satırındaki ‹ alan */
 /* Formlar geniş sütunda okunur genişlikte kalır (2026-11-18d) */
 :root :is(.kayitform, .planform, .kartform, .aracform, .govde[data-arac="hesap"]:not(.govde--genis) > *){ width:100%; max-width:var(--form); }
+/* öğrenme ekranı: kâğıdın başında alanın piksel sahnesi, kâğıdın kenarlarına taşar; altta kapaktaki gibi ince ışıklı ufuk çizgisi (bulanık bant yok) */
+.ders-sahne{ position:relative; height:204px; margin:calc(-1 * var(--a7)) calc(-1 * var(--a7)) var(--a5); border-radius:var(--kose) var(--kose) 0 0; overflow:hidden; background:var(--gok); }
+.ders-sahne::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--sahne-yazi) 55%, transparent) 30%, color-mix(in srgb, var(--sahne-yazi) 55%, transparent) 70%, transparent); opacity:.6; }
+@media (max-width:640px){ .ders-sahne{ height:144px; margin:calc(-1 * var(--a5)) calc(-1 * var(--a4)) var(--a4); } }
