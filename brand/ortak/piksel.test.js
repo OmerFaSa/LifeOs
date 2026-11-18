@@ -403,7 +403,7 @@
         const p = c.getContext('2d').getImageData(0, 0, W, H).data, hep = new Set(), sol = new Set();
         for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){ const i = (y * W + x) * 4, k = p[i] << 16 | p[i + 1] << 8 | p[i + 2]; hep.add(k); if(x < W * 0.4 && y < H * 0.35) sol.add(k); }
         /* taban palet + ışık karışımları; gürültü olsa yüzlerce renk çıkar */
-        expect(hep.size <= 72).toBe(true);
+        expect(hep.size <= 96).toBe(true);
         expect(sol.size <= 8).toBe(true);
         /* masaüstü: tuval 3× büyür, üst çubuk 56 px → gök cismi diski 19. satırın altında */
         if(innerWidth >= 640) expect(o.gy[1] - o.gr >= 19).toBe(true);
@@ -495,7 +495,7 @@
         const { o, p } = ciz(t, v), hep = new Set(), sol = new Set();
         let bos = 0;
         for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){ const i = (y * W + x) * 4, k = p[i] << 16 | p[i + 1] << 8 | p[i + 2]; if(p[i + 3] !== 255) bos++; hep.add(k); if(x < W * 0.4 && y < H * 0.35) sol.add(k); }
-        if(bos || hep.size > 72 || sol.size > 8 || (innerWidth >= 640 && o.gy[1] - o.gr < 19)) throw new Error(t + ' ' + v + ': boş ' + bos + ', renk ' + hep.size + ', üst-sol ' + sol.size + ', gök cismi ' + (o.gy[1] - o.gr));
+        if(bos || hep.size > 96 || sol.size > 8 || (innerWidth >= 640 && o.gy[1] - o.gr < 19)) throw new Error(t + ' ' + v + ': boş ' + bos + ', renk ' + hep.size + ', üst-sol ' + sol.size + ', gök cismi ' + (o.gy[1] - o.gr));
       }));
       /* gök (sağ üstte 8. satır ve solda ufkun biraz üstü) anlar arasında belirgin farklı; 10 dakikada (gün/gece sınırında bile) sıçramaz */
       const gok = (t, v) => { const { o, p } = ciz(t, v), i = (8 * W + 360) * 4, j = (Math.round(o.ufuk * 0.6) * W + 8) * 4; return [p[i], p[i + 1], p[i + 2], p[j], p[j + 1], p[j + 2]]; }, fark = (a, b) => Math.max(...a.map((v, i) => Math.abs(v - b[i])));
@@ -514,7 +514,7 @@
       Object.keys(gunler).forEach(k => D.TUR_LISTE.forEach(t => [7, 12.5, 23].forEach(v => {
         const p = piksel(t, v, gunler[k]), hep = new Set(), sol = new Set(); let bos = 0;
         for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){ const i = (y * W + x) * 4, c = p[i] << 16 | p[i + 1] << 8 | p[i + 2]; if(p[i + 3] !== 255) bos++; hep.add(c); if(x < W * 0.4 && y < H * 0.35) sol.add(c); }
-        if(bos || hep.size > 72 || sol.size > 8) throw new Error(k + ' ' + t + ' ' + v + ': boş ' + bos + ', renk ' + hep.size + ', üst-sol ' + sol.size);
+        if(bos || hep.size > 96 || sol.size > 8) throw new Error(k + ' ' + t + ' ' + v + ': boş ' + bos + ', renk ' + hep.size + ', üst-sol ' + sol.size);
       })));
       /* gün içinde sabit (gece yarısına dek), günden güne farklı */
       const ayni = (a, b) => a.every((v, i) => v === b[i]);

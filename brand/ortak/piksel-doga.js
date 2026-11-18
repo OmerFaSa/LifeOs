@@ -49,6 +49,8 @@ window.LIFEOS = window.LIFEOS || {};
   const tampon = (W, H) => ({ W, H, d:new Uint32Array(W * H), k:new Uint8Array(W * H), kat:0 });
   const px = (b, x, y, c) => { x = Math.round(x); y = Math.round(y); if(x >= 0 && y >= 0 && x < b.W && y < b.H){ const i = y * b.W + x; b.d[i] = renk(c); b.k[i] = b.kat; } };
   function R(b, x, y, w, h, c){ const v = renk(c), x0 = Math.max(0, Math.round(x)), y0 = Math.max(0, Math.round(y)), x1 = Math.min(b.W, Math.round(x + w)), y1 = Math.min(b.H, Math.round(y + h)); if(x1 <= x0) return; for(let j = y0; j < y1; j++){ b.d.fill(v, j * b.W + x0, j * b.W + x1); b.k.fill(b.kat, j * b.W + x0, j * b.W + x1); } }
+  /* dikey şerit (sırt sütunu): R'nin satır başına iki fill çağrısı tek piksellik sütunda pahalıydı */
+  function sutun(b, x, y0, y1, c){ const v = renk(c), W = b.W; y0 = Math.max(0, Math.round(y0)); y1 = Math.min(b.H, Math.round(y1)); if(x < 0 || x >= W) return; for(let i = y0 * W + x, j = y0; j < y1; j++, i += W){ b.d[i] = v; b.k[i] = b.kat; } }
   /* katman sınırı: o ana dek çizilen her şey alttaki katmandır (1: gök + uzak sırt bitti, 2: orta plan bitti) */
   function kat(b, n){ if(b.kat >= n) return; if(n === 2 && b.o && b.o.hava === 'sis') sis(b, b.o); if(n === 1) b.s1 = b.d.slice(); else { if(!b.s1) b.s1 = b.d.slice(); b.s2 = b.d.slice(); b.k2 = b.k.slice(); } b.kat = n; }
   /* yarı saydam örtü: yalnız ışık havuzu */
@@ -118,10 +120,12 @@ window.LIFEOS = window.LIFEOS || {};
   const YILDIZ = ['!#68718f', '!#b9c0d6', '!#f1efe4'];
   function gok(b, o, boy){
     const dur = o.G.g, n = dur.length - 1;
+    /* 2026-11-18e: titreşim şeridi yerine düz bant (piksel-dürüst); başlığın altindan ufka dek iki durak arasına bir ara ton girer,
+       ufka yaklaşan geçiş yumuşar; üstte iki durak tam ortada keskin değişir (üst-sol az renkli kalır) */
     for(let y = 0; y < boy; y++){
-      const f = y / Math.max(1, boy - 1) * n, i = Math.min(n - 1, Math.floor(f)), k = kis((f - i - 0.3) / 0.4, 0, 1);
-      const A = renk('!' + dur[i]), B = renk('!' + dur[i + 1]);
-      for(let x = 0; x < b.W; x++) b.d[y * b.W + x] = k > bay(x, y) ? B : A;
+      const f = y / Math.max(1, boy - 1) * n, i = Math.min(n - 1, Math.floor(f)), q = f - i;
+      const c = y < b.H * 0.36 ? dur[q < 0.5 ? i : i + 1] : q < 0.25 ? dur[i] : q < 0.75 ? karis(dur[i], dur[i + 1], 0.5) : dur[i + 1];
+      b.d.fill(renk('!' + c), y * b.W, (y + 1) * b.W);
     }
   }
   function gokCismi(b, o, x, y, r){
@@ -129,8 +133,9 @@ window.LIFEOS = window.LIFEOS || {};
     for(let j = -r * 4; j <= r * 4; j++) for(let i = -r * 4; i <= r * 4; i++){
       const d = Math.hypot(i, j); if(d <= r || d > r * 4) continue;
       /* hale: sabit yoğunluklu halkalar (kenarda dama, sonra çeyrek, sonra seyrek); sürekli azalan yoğunluk kumlu görünüyordu */
-      const yog = d <= r + 1.5 ? 0.5 : d <= r * 2.2 ? hale * 0.46 : d <= r * 3.2 ? hale * 0.17 : 0;
-      if(bay(x + i, y + j) < yog) px(b, x + i, y + j, '!' + G.hale);
+      /* 2026-11-18e: dağınık nokta (kumlu) yerine iki dolu halka: içte hale, dışta haleyle göğün yarısı; gece yalnız iç halka */
+      if(d <= r + 1.5) px(b, x + i, y + j, '!' + G.hale);
+      else if(!o.gece && d <= r * 2.3 && d - r * 2.3 < -0.5) px(b, x + i, y + j, '!' + karis(G.hale, G.g[Math.min(G.g.length - 1, 3)], 0.55));
     }
     for(let j = -r; j <= r; j++) for(let i = -r; i <= r; i++){
       if(Math.hypot(i, j) > r + 0.35) continue;
@@ -143,7 +148,7 @@ window.LIFEOS = window.LIFEOS || {};
   function ufukHale(b, o){
     const a = kis(o.alcak || 0, 0, 1), c = '!' + karis(o.hz, karis('#f7d4a0', ISIK ? ISIK.i : '#f7d4a0', 0.5), 0.4 + a * 0.2), cx = o.gy[0], rx = b.W * (0.3 + a * 0.12), ry = o.ufuk * (0.2 + a * 0.14);   // alçak güneşte daha geniş ve sıcak
     for(let y = Math.round(o.ufuk - ry); y < o.ufuk + 2; y++) for(let x = Math.max(0, Math.round(cx - rx)); x < Math.min(b.W, cx + rx); x++){
-      const d = Math.hypot((x - cx) / rx, (o.ufuk - y) / ry), yog = d < 0.6 ? 1 : d < 0.8 ? 0.5 : d < 1 ? 0.2 : 0;
+      const d = Math.hypot((x - cx) / rx, (o.ufuk - y) / ry), yog = d < 0.82 ? 1 : 0;   // dolu kuşak (eski seyrek noktalar kumluydu)
       if(bay(x, y) < yog) b.d[y * b.W + x] = renk(c);
     }
   }
@@ -169,12 +174,14 @@ window.LIFEOS = window.LIFEOS || {};
   /* bulut (2026-11-18c, güne göre): ince katman ya da kümülüs (düz taban, iki üç tümsek, alt satır gölge); iki renk */
   function bulut(b, x, y, w, c, kume){
     if(kume){
-      const h = kis(Math.round(w / 6), 2, 7), n = w > 26 ? 3 : 2, L = [];
+      const h = kis(Math.round(w / 5), 3, 8), n = w > 26 ? 3 : 2, L = [];
       for(let i = 0; i < n; i++) L.push([x + w * (n === 2 ? 0.32 + i * 0.36 : 0.22 + i * 0.28) + (hash(i, x) - 0.5) * w * 0.1, h * (i === 1 || n === 2 ? 1 : 0.62 + hash(i, y) * 0.25)]);
+      /* 2026-11-18e: hacim — her tümseğin güneşe (sağ üst) bakan kubbesi aydınlık, sol alt hilali ara ton, taban gölge; tümsek iç içe geçer */
+      const orta = '!' + karis(c[0], c[1], 0.5), isk = (X, j) => L.some(([cx, rr]) => { const a = rr * 1.5 - 1.6, e = rr - 1.6; if(a < 1 || e < 1) return false; const dx = (X - cx - 1) / a, dy = (j - 2) / e; return dy >= -0.5 && dx * dx + Math.max(0, dy) * Math.max(0, dy) < 1; });
       for(let i = 0; i < w; i++){
         let t = Math.min(i, w - 1 - i, 2);
         L.forEach(([cx, rr]) => { const d = (x + i - cx) / (rr * 1.5); if(d * d < 1) t = Math.max(t, Math.round(rr * Math.sqrt(1 - d * d))); });
-        for(let j = 0; j < t; j++) px(b, x + i, y - j, j === 0 || (j === 1 && bay(x + i, y) < 0.5) ? c[1] : c[0]);
+        for(let j = 0; j < t; j++) px(b, x + i, y - j, j === 0 ? c[1] : isk(x + i, j) ? c[0] : j === 1 && bay(x + i, y) < 0.5 ? c[1] : orta);
       }
       return;
     }
@@ -197,7 +204,7 @@ window.LIFEOS = window.LIFEOS || {};
   /* pencereden görünen gök (iç sahneler): aynı paletin küçük kopyası */
   function pencereGok(b, o, x0, y0, x1, y1){
     const dur = o.G.g, n = dur.length - 1, h = y1 - y0;
-    for(let y = y0; y < y1; y++){ const f = (y - y0) / Math.max(1, h - 1) * n, i = Math.min(n - 1, Math.floor(f)), k = kis((f - i - 0.3) / 0.4, 0, 1); for(let x = x0; x < x1; x++) px(b, x, y, '!' + (k > bay(x, y) ? dur[i + 1] : dur[i])); }
+    for(let y = y0; y < y1; y++){ const f = (y - y0) / Math.max(1, h - 1) * n, i = Math.min(n - 1, Math.floor(f)); R(b, x0, y, x1 - x0, 1, '!' + dur[f - i < 0.5 ? i : i + 1]); }
   }
 
   /* ---------- ARAZİ ---------- */
@@ -207,9 +214,13 @@ window.LIFEOS = window.LIFEOS || {};
     /* kenar ışığı vaktin ışığını alır: alçak güneşte uzun ve sıcak (şafak, gün batımı), öğlede kısa */
     if(MEV === 'kis' && !a.kar && !a.karli) a = Object.assign({}, a, a.i ? { kar:[karis(a.i, '#f6f8f8', 0.7), karis(a.c, '#e8eef0', 0.45), 0.6] } : { c:karis(a.c, '#e8eef0', 0.6) });   // kışın uzak sırtta kar başlığı, yakında kar örtüsü
     const u = !gece && ISIK ? ISIK.u : 1, ic = a.i && !gece && ISIK && ISIK.if ? karis(a.i, ISIK.i, ISIK.if) : a.i;
+    /* 2026-11-18e atmosfer perspektifi: ard → arkada daha yüksek, ufka karışmış soluk bir sırt; uzak sırtın eteğinde vadi pusu (dalgalı, tek ton) */
+    if(a.ard && b.o) sirt(b, { y:a.y - 1, amp:a.amp * 1.45, f:a.f * 0.62, s:a.s + 50, sivri:a.sivri, alt:Math.round(a.y) + 1, c:karis(a.c, b.o.hz, 0.55) });   // alt: öndeki sırt örter, sütun orada biter
+    const pus = (a.ard || a.vadi) && b.o ? karis(a.c, b.o.hz, 0.4) : null;   // yalnız uzak sırt (yakın çayır pusla yıkanmasın)
     for(let x = 0; x < b.W; x++){
       const h = yuk(a, x), y0 = Math.round(h), e = yuk(a, x + 1.5) - yuk(a, x - 1.5);
-      R(b, x, y0, 1, b.H - y0, a.c);
+      sutun(b, x, y0, a.alt || b.H, a.c);
+      if(pus){ const yp = Math.max(y0 + 2, Math.round(a.y - a.amp * (0.12 + 0.22 * g1(x * 0.05, a.s + 8)))); sutun(b, x, yp, Math.round(a.y) + 4, pus); }
       if(a.i && e > 0.25){ const d = Math.min(Math.round((a.dd || 5) * u), Math.round(1 + e * 2.5 * u)); for(let j = 0; j < d; j++) if(bay(x, y0 + j) > j / d * 0.9) px(b, x, y0 + j, ic); }
       if(a.kar){ const sinir = a.y - a.amp * a.kar[2] + (g1(x * 0.4, a.s + 3) - 0.5) * 3 + Math.pow(g1(x * 0.22, a.s + 5), 2) * a.amp * 0.16 + (g1(x * 1.3, a.s + 6) > 0.7 ? 1 : 0); /* derelere inen geniş kar dilleri, kırık alt kenar */ for(let y = y0; y < sinir; y++) px(b, x, y, e > -0.15 ? a.kar[0] : a.kar[1]); }
     }
@@ -229,6 +240,18 @@ window.LIFEOS = window.LIFEOS || {};
         if(yb > y){ R(b, x, y, 1, yb - y, rk[i]); if(i && bay(x, y) < 0.5) px(b, x, y, rk[i - 1]); y = yb; }
       }
     }
+    /* 2026-11-18e doku: yeni renk açmadan alttaki (koyu) bandın rengiyle kısa çizgiler, üstüne bir satır üstteki (açık) bandın rengi:
+       ışık alan öbek ve toprak kırığı; ufukta seyrek ve kısa, önde sık ve uzun; başlığın altinda (sol) yarı yoğun; en öndeki band bir koyu ton alır */
+    if(MEV !== 'kis'){
+      const r = tohum(s * 3 + 1), N = b.W * (b.H - y0) / 7, kd = karis(rk[n - 1], '#2a2016', 0.22);
+      for(let q = 0; q < N; q++){
+        const x = Math.floor(r() * b.W), y = Math.floor(y0 + 2 + r() * (b.H - y0 - 2)), f = (y - y0) / (b.H - y0), L = 1 + Math.floor(r() * (1 + f * 4));
+        if(r() > 0.2 + f * 0.8 || (x < b.W * 0.4 && r() < 0.5)) continue;
+        const k = Math.min(n - 1, Math.floor(Math.pow(f, 1 / 1.3) * n));
+        R(b, x, y, L, 1, k < n - 1 ? rk[k + 1] : kd);
+        if(k && r() < 0.6) R(b, x + (L > 2 ? 1 : 0), y - 1, Math.max(1, L - 2), 1, rk[k - 1]);
+      }
+    }
     /* kar yüzeyi düz beyaz kalmasın: rüzgârın bıraktığı kısa gölge çizgileri (alttaki bandın rengi) */
     if(MEV === 'kis'){ const r = tohum(s); for(let i = 0; i < b.W * (b.H - y0) / 50; i++){ const y = Math.floor(y0 + 1 + r() * (b.H - y0)), k = Math.min(n - 1, Math.floor(Math.pow((y - y0) / (b.H - y0), 1 / 1.3) * n) + 1); R(b, Math.floor(r() * b.W), y, 2 + Math.floor(r() * 4), 1, rk[k]); } }
   }
@@ -237,6 +260,33 @@ window.LIFEOS = window.LIFEOS || {};
   function spr(b, x, y, k, pal, ters, z){ z = z || 1; const w = k[0].length; for(let j = 0; j < k.length; j++) for(let i = 0; i < w; i++){ const ch = k[j][ters ? w - 1 - i : i]; if(ch !== '.') R(b, x + i * z, y + j * z, z, z, pal[ch] || P_SABIT[ch]); } }
   /* sivri kemer: x sol, y alt, w genişlik, h boy */
   function kemer(b, x, y, w, h, c){ const hw = w / 2; for(let j = 0; j < h; j++){ const t = j / h, k = t < 0.6 ? 1 : Math.sqrt(1 - Math.pow((t - 0.6) / 0.4, 2)), ww = Math.max(1, Math.round(w * k)); R(b, x + Math.round(hw - ww / 2), y - j, ww, 1, c); } }
+  /* mukarnas (2026-11-18e): sivri kemerin başında basamaklı hücre sıraları (üstü ışık, altı gölge), kemer içinin sağ kenarı gölgede
+     (güneş sağda, iç duvar gölge alır). cx orta, y kemerin alt satırı, w, h kemerin boyu; c: [ışık, orta, gölge] */
+  function mukarnas(b, cx, y, w, h, c){
+    const yar = j => { const t = j / h, k = t < 0.6 ? 1 : Math.sqrt(Math.max(0, 1 - Math.pow((t - 0.6) / 0.4, 2))); return Math.round(w * k / 2); };
+    for(let j = Math.round(h * 0.62), n = 0; j < h - 1; j += 2, n++){ const hw = yar(j) - 1; for(let i = -hw + (n % 2); i < hw; i += 3){ px(b, cx + i, y - j, c[0]); px(b, cx + i, y - j + 1, c[1]); px(b, cx + i + 1, y - j + 1, c[2]); } }
+    for(let j = 2; j < Math.round(h * 0.62); j++) R(b, cx + yar(j) - 3, y - j, 2, 1, c[2]);
+  }
+
+  /* TÜRK ÖĞELERİ (2026-11-18e, sahibin isteği) */
+  /* Selçuklu sekiz köşeli yıldızı: 5×5 kare ile yarıçapı 3 baklavanın birleşimi, göbeği ayrı renk */
+  function yildiz8(b, cx, cy, c, ic){ for(let j = -3; j <= 3; j++) for(let i = -3; i <= 3; i++) if((Math.abs(i) <= 2 && Math.abs(j) <= 2) || Math.abs(i) + Math.abs(j) <= 3) px(b, cx + i, cy + j, Math.abs(i) + Math.abs(j) <= 1 ? ic : c); }
+  /* çini kitabe şeridi: lacivert zemin, firuze kenar, beyaz yazı izlenimi */
+  function kitabe(b, x0, x1, y, h){ R(b, x0, y, x1 - x0, h, '#1e3a62'); R(b, x0, y, x1 - x0, 1, '#3ea0a8'); R(b, x0, y + h - 1, x1 - x0, 1, '#3ea0a8'); for(let x = x0 + 1; x < x1 - 1; x++) if(h > 2 && (hash(x, 7) > 0.5 || x % 3 === 0)) px(b, x, y + 1 + (h > 3 && hash(x, 8) > 0.6 ? 1 : 0), '#e8dcc0'); }
+  const KURT = ['..y.y', '.yyyy', 'yyyyy', '...yy'];   // altin kurt başı (sola bakar)
+  /* Göktürk sancağı: direğin tepesinde altin kurt başı, altında gök mavisi alem */
+  function gokSancak(b, x, y, h){
+    R(b, x, y - h, 1, h, '#4a3c30');
+    spr(b, x - 3, y - h - 4, KURT, { y:'#d8b456' });
+    for(let j = 0; j < Math.round(h * 0.4); j++){ const w = Math.max(1, 6 - (j > h * 0.3 ? j - Math.round(h * 0.3) : 0)); R(b, x - w, y - h + 1 + j, w, 1, j === 0 ? '#d8b456' : '#2c6aa8'); }
+  }
+  /* Orhun tarzı dikili taş (kitabe): sütun sütun çentikler, Göktürk harfi izlenimi (gerçek yazı değil); balbal: insan biçimli küçük taş */
+  function dikiliTas(b, x, y, h){
+    R(b, x + 1, y - h - 1, 3, 1, '#9a968a'); R(b, x, y - h, 5, h, '#9a968a'); R(b, x, y - h, 1, h, '#77736a'); R(b, x + 4, y - h, 1, h, '#bdb8aa');
+    for(const c of [1, 3]) for(let j = y - h + 2; j < y - 2; j += 2){ const q = hash(j * 3 + c, 5); if(q > 0.25) px(b, x + c, j, '#4e4a44'); if(q > 0.7) px(b, x + c + (q > 0.85 ? 0 : -1), j + 1, '#4e4a44'); }
+    R(b, x - 1, y, 7, 1, '#6a665c');
+  }
+  const balbal = (b, x, y) => spr(b, x, y - 5, ['.t.', 'tkt', 'ttt', 'ttt', 'ttt'], { t:'#8a867a', k:'#5a564e' });
 
   /* ---------- YAPILAR ---------- */
   /* otağ (keçe ev): x orta, y yer, s duvar boyu, f uzaklık (ufka karışma) */
@@ -251,9 +301,18 @@ window.LIFEOS = window.LIFEOS || {};
       for(let i = -w; i <= w; i++) px(b, x + i, yy, j === 0 ? u('#8f7d63') : i < -w * 0.35 ? u('#b8a587') : (s > 6 && i % Math.max(3, Math.round(w / 3)) === 0 && j < rh - 1) ? u('#c4b293') : u('#d9c9aa'));
     }
     R(b, x - 1, top - rh, 3, 1, u('#5a4636'));
+    /* 2026-11-18e yakın otağ: saçak gölgesi, yere oturduğu yerde koyuluk, güneş yanında ışık kenarı, yere sola düşen gölge, kapı kanatları */
+    if(!f && s > 5){
+      R(b, x - hw, top, hw * 2 + 1, 1, '#b8a587'); R(b, x - hw, top, Math.round(hw * 0.65), 1, '#a8957a');
+      R(b, x - hw, y - 1, hw * 2 + 1, 1, '#c8b898'); R(b, x - hw, y - 1, Math.round(hw * 0.65), 1, '#a8957a');
+      if(!o.gece) R(b, x + hw, top + 1, 1, s - 2, '#f4ead4');
+      if(!o.gece) for(let j = 1; j <= 2; j++) R(b, x - hw - Math.round(s * (j === 1 ? 1.1 : 0.6)), y + j, hw + Math.round(s * (j === 1 ? 1.1 : 0.6)), 1, '#7d6c4c');
+      for(let i = -hw + 2; i < hw; i += 4) px(b, x + i, top - 1, u('#8f7d63'));
+    }
     const dw = Math.max(1, Math.round(s * 0.42)), dh = Math.max(2, Math.round(s * 0.68)), dx = x + Math.round(hw * 0.15) - Math.floor(dw / 2);
     if(s > 3) R(b, dx - 1, y - dh - 1, dw + 2, dh + 1, u('#c08c3c'));
     R(b, dx, y - dh, dw, dh, o.lamba ? '!#efb15c' : u(K[2]));
+    if(!f && dw > 2 && !o.lamba){ R(b, dx + (dw >> 1), y - dh, 1, dh, karis(K[2], '#1a1210', 0.35)); px(b, dx + (dw >> 1) - 1, y - (dh >> 1), K[1]); px(b, dx + (dw >> 1) + 1, y - (dh >> 1), K[1]); }   // iki kanat, iki tokmak
     if(!o.lamba || f) return;
     /* yakın otağ gece: kapıdan yere sıcak ışık, tündükten sızan ışık, ay tarafında (sağ) ince ay ışığı kenarı */
     isik(b, dx + dw / 2, y, Math.round(s * 1.6), '!#f0a858', 0.52, true);
@@ -279,6 +338,7 @@ window.LIFEOS = window.LIFEOS || {};
       for(let yy = t + 1; yy < y; yy++){ const k = yy - t; px(b, x + i, yy, k % 4 === 0 ? (uc ? '#3c343a' : '#2c262a') : (i * 3 + yy * 5) % 11 === 0 ? '#40363c' : uc ? '#463d44' : '#382f35'); }
       px(b, x + i, t, '!#6c6a8a'); if(i > w * 0.5) px(b, x + i, t + 1, '!#4a4866');
     }
+    for(let i = 1; i < w - 1; i++){ const t = Math.round(y - hh(i)), yy = t + Math.round(hh(i) * 0.38); px(b, x + i, yy, (i >> 1) % 2 ? '#8a3a2e' : '#2c4570'); if(i % 4 === 0) px(b, x + i, yy + 1, '#c98e44'); }   // dokuma kuşak (kırmızı-lacivert)
     d.forEach(i => { const t = y - Math.round(hh(i)); R(b, x + i, t - 2, 1, 2, '#6a5444'); });
     const kx = x + Math.round(w * 0.56), kw = Math.max(3, Math.round(w * 0.18)), kh = Math.round(hh(kx - x) * 0.66), ky = y - kh;
     R(b, kx, ky, kw, kh, o.lamba ? '!#e0a258' : '#1e181c'); if(o.lamba){ R(b, kx, ky, kw, 1, '!#f2c47a'); isik(b, kx + kw / 2, y, Math.round(kw * 1.4), '!#e0a258', 0.34, true); }
@@ -297,7 +357,7 @@ window.LIFEOS = window.LIFEOS || {};
   function duvar(b, o, y1, ac, koyu, isikX){
     for(let y = 0; y < y1; y++) for(let x = 0; x < b.W; x++){
       /* düz duvar; yalnız tavan gölgesi (üst çubuğun altinda kalır) — başlığın arkasında kumlanma yok */
-      px(b, x, y, y < b.H * 0.1 || (y < b.H * 0.14 && bay(x, y) < 0.5) ? koyu : ac);
+      px(b, x, y, y < b.H * 0.1 ? koyu : y < b.H * 0.14 ? karis(koyu, ac, 0.5) : ac);   // 2026-11-18e: tavan gölgesi dama yerine ara ton bandı
     }
   }
   /* gündüz pencereden duvara düşen güneş: pencerenin sola-aşağı kaymış eğik kopyası, kayıtlar gölge, kenar titreşimli;
@@ -314,6 +374,14 @@ window.LIFEOS = window.LIFEOS || {};
       if(kx === (w >> 1) || ky === ((y1 - y0) >> 1) || (kenar === 0 && bay(x, y) < 0.5)) continue;
       px(b, x, y, c);
     } }
+  }
+  /* pencereden inen huzme (2026-11-18e; eskiden dama titreşimiydi): havada tek soluk ton, yere vurduğu yerde ikinci ton, içinde durağan toz zerreleri;
+     y0..y1 satırları, x0 − k0·d … x1 − k1·d (d = y − y0), yz zemin; başlığın bölgesine (sol üst) girmez */
+  function huzme(b, o, x0, x1, y0, y1, k0, k1, yz){
+    if(o.lamba) return;
+    const c = '!#fff0c8';
+    for(let y = y0; y < y1; y++){ const d = y - y0, a = Math.round(x0 - d * k0), z = Math.round(x1 - d * k1); for(let x = a; x < z; x++){ if(x < b.W * 0.4 && y < b.H * 0.36) continue; ortu(b, x, y, c, y >= yz ? 0.2 : 0.1); } }
+    for(let i = 0; i < 9; i++){ const y = Math.round(y0 + hash(i, 61) * (Math.min(y1, yz) - y0)), d = y - y0, x = Math.round(x0 - d * k0 + hash(i, 62) * (x1 - x0 + d * (k0 - k1))); px(b, x, y, '!#fff6e0'); }
   }
   /* duvarın dibinde kuşak: ahşap lambri ya da (hattat) çini; pervazı ışık alır, alti gölge */
   function lambri(b, y1, h, cini){
@@ -340,7 +408,14 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* kitap sırası: rafın üstünde, türlü boy ve sırt rengi */
   const KITAP = ['#7a3a33', '#3c566a', '#6a683a', '#8b6a3c', '#4a3e58', '#b8a882'];
-  function kitaplar(b, x0, x1, y, h, s){ const r = tohum(s); let x = x0; while(x < x1 - 1){ const w = 1 + (r() < 0.35 ? 1 : 0), hh = Math.max(2, Math.round(h * (0.6 + r() * 0.4))), c = KITAP[Math.floor(r() * KITAP.length)]; if(r() < 0.08){ x += 2; continue; } R(b, x, y - hh, w, hh, c); if(hh > 3) px(b, x, y - hh + 1, '#d8c8a0'); x += w; } }
+  function kitaplar(b, x0, x1, y, h, s){ const r = tohum(s); let x = x0; while(x < x1 - 1){ const w = 1 + (r() < 0.35 ? 1 : 0), hh = Math.max(2, Math.round(h * (0.6 + r() * 0.4))), c = KITAP[Math.floor(r() * KITAP.length)]; if(r() < 0.08){ x += 2; continue; } R(b, x, y - hh, w, hh, c); if(hh > 3) px(b, x, y - hh + 1, '#d8c8a0'); if(hh > 5 && r() < 0.45) R(b, x, y - hh + 3, w, 1, '#c69a48'); x += w; } }   // sırtta yaldız şerit
+  /* yer kilimi (2026-11-18e): öne doğru açılan yamuk, günün dokuması; kenar şeridi, ortada baklava dizisi, önde saçak */
+  function kilim(b, o, x0, x1, y0, y1){
+    const K = o.kece, h = y1 - y0, m = y0 + (h >> 1);
+    for(let y = y0; y < y1; y++){ const e = Math.round((y - y0) * 0.5), a = x0 - e, z = x1 + e; R(b, a, y, z - a, 1, K[0]); px(b, a, y, K[2]); px(b, z - 1, y, K[2]); if(y === y0 + 1 || y === y1 - 2) R(b, a + 2, y, z - a - 4, 1, K[2]); }
+    for(let x = x0 + 4; x < x1 - 3; x += 7){ const e = m - y0 >> 1; px(b, x - e, m - 2, K[1]); px(b, x - e - 1, m - 1, K[1]); px(b, x - e + 1, m - 1, K[1]); px(b, x - e - 2, m, K[1]); px(b, x - e + 2, m, K[1]); px(b, x - e - 1, m + 1, K[1]); px(b, x - e + 1, m + 1, K[1]); px(b, x - e, m + 2, K[1]); px(b, x - e, m, K[2]); }
+    for(let x = x0 - (h >> 1); x < x1 + (h >> 1); x += 2) px(b, x, y1, '#e8dcc4');
+  }
   /* ağaç: gövde, ışığı sağdan alan küme küme taç (Pınar'ın çınarı; Ufuk'ta yalnız karaağaç) */
   function agac(b, tx, ty, th, sd, gv){
     R(b, tx - 1, ty - th * 0.7, 3, th * 0.7, gv[0]); R(b, tx - 1, ty - th * 0.7, 1, th * 0.7, gv[1]); for(let j = 4; j < th * 0.7; j += 5) px(b, tx, ty - j, gv[1]);
@@ -355,16 +430,18 @@ window.LIFEOS = window.LIFEOS || {};
   function kandil(b, o, x, y){ R(b, x - 1, y, 3, 1, '#a07a3c'); px(b, x, y + 1, '#7d5d2e'); if(o.gece) isik(b, x, y - 2, 9, '!#f1b860', 0.3); }
 
   /* ---------- SPRİTLER (kare çizer; harf → renk P_SABIT ya da sahnenin paleti) ---------- */
-  const P_SABIT = { a:'#7a4e32', m:'#3a2618', k:'#2f2a2a', h:'#7a2f2a', s:'#c99a78', c:'#3c4a68', w:'#a8743c', y:'!#ffe7a0', o:'!#f39a44', r:'!#c4482c' };
+  const P_SABIT = { a:'#7a4e32', m:'#3a2618', k:'#2f2a2a', h:'#7a2f2a', s:'#c99a78', c:'#3c4a68', C:'#2a3550', w:'#a8743c', y:'!#ffe7a0', o:'!#f39a44', r:'!#c4482c' };
   const POZ = {
     at:{ k:[
       ['........m.', '.......maa', 'm.....am..', 'maaaaaaa..', '.aaaaaaa..', '.a.a..a.a.', '.a.a..a.a.'],
       ['..........', '..........', 'm.........', 'maaaaaam..', '.aaaaaaaa.', '.a.a..a.aa', '.a.a..a..a']] },
-    atli:{ k:[['..k....', '..k..k.', 'kkkkkk.', '.kkkk..', '.k..k..'], ['..k....', '..k..k.', 'kkkkkk.', '.kkkk..', 'k....k.']] },
+    /* 2026-11-18e: atlı bir boy büyük, börk kırmızı (ufukta okunur); kervana önde yürüyen kervancı */
+    atli:{ k:[['...h.....', '...k...k.', '..kk..kkk', 'kkkkkkkk.', '.kkkkkk..', '.k.k..k.k'], ['...h.....', '...k...k.', '..kk..kkk', 'kkkkkkkk.', '.kkkkkk..', 'k..k...kk']] },
+    yaya:{ k:[['.h.', '.s.', 'kkk', '.k.', '.k.', 'k.k'], ['.h.', '.s.', 'kkk', '.k.', '.k.', '.k.']] },
     deve:{ k:[
-      ['kk.......', '.k...kk..', '.kk.kkkk.', '..kkkkkkk', '..k.k.k.k', '..k.k.k.k'],
-      ['kk.......', '.k...kk..', '.kk.kkkk.', '..kkkkkkk', '...kk..kk', '...kk..kk']] },
-    ozan:{ k:[['....hhh.....', '...hhhhh....', '....sss.....', '....sss...m.', '...cccc..m..', '..cccccsm...', '..ccccwm....', '..cccwww....', '..ccwwwws...', '.ccccwww....', 'cccccccccc..']] },
+      ['kk.......', '.k...hh..', '.kk.hwhk.', '..kkkkkkk', '..k.k.k.k', '..k.k.k.k'],
+      ['kk.......', '.k...hh..', '.kk.hwhk.', '..kkkkkkk', '...kk..kk', '...kk..kk']] },   // hörgücün üstünde kırmızı çul ve yük
+    ozan:{ k:[['....hhh.....', '...hhhhh....', '....sss.....', '....sms...m.', '...cccc..m..', '..cCcccsm...', '..cCccwm....', '..cCcwww....', '..chhwwws...', '.cCccwww....', 'mCccccccccm.']] },
     kartal:{ k:[['k...k', '.kkk.'], ['kk.kk', '..k..']] },
     kus:{ k:[['k.k', '.k.'], ['kkk', '...']] },
     alev:{ k:[['..r..', '.rr..', '.ror.', 'royor', 'oyyyo', 'oyyyo'], ['.r...', '..rr.', '.ror.', 'royor', 'oyyyo', 'oyyyo'], ['...r.', '.rr..', '.orr.', 'royor', 'oyyyo', 'oyyyo']] },
@@ -381,7 +458,7 @@ window.LIFEOS = window.LIFEOS || {};
   const dongu = (t, T) => (((t % T) + T) % T) / T;
   const HAREKET = {
     duman:{ al:(s, t) => Math.floor(t * 2), ciz(g, s, k){ for(let i = 0; i < 5; i++){ const p = kesir(k / 2 / s.T + i / 5), y = s.y - Math.round(p * s.L), x = s.x + Math.round(p * p * s.L * 0.7 + Math.sin(p * 9 + i * 2) * 0.6); g.globalAlpha = Math.ceil((1 - p) * 3) / 4; nk(g, x, y, s.c, p > 0.35 ? 2 : 1, 1); } g.globalAlpha = 1; } },
-    bayrak:{ al:(s, t) => Math.floor(t * 3) % 4, ciz(g, s, k){ for(let i = 0; i < s.w; i++){ const f = i * 1.2 - k * Math.PI / 2, d = Math.round(Math.sin(f) * (i / s.w) * 1.2); nk(g, s.x + i, s.y + d, Math.cos(f) < -0.3 ? s.c[1] : s.c[0], 1, s.h); } if(s.ay) nk(g, s.x + 2, s.y + Math.round(Math.sin(2.4 - k * Math.PI / 2) * 0.5) + (s.h >> 1), '#f4ece0'); } },
+    bayrak:{ al:(s, t) => Math.floor(t * 3) % 4, ciz(g, s, k){ for(let i = 0; i < s.w; i++){ const f = i * 1.2 - k * Math.PI / 2, d = Math.round(Math.sin(f) * (i / s.w) * 1.2); nk(g, s.x + i, s.y + d, Math.cos(f) < -0.3 ? s.c[1] : s.c[0], 1, s.h); } if(s.ay) [[3, -2], [2, -1], [2, 0], [2, 1], [3, 2], [5, 0]].forEach(([i, j]) => { if(i < s.w) nk(g, s.x + i, s.y + Math.round(Math.sin(i * 1.2 - k * Math.PI / 2) * (i / s.w) * 1.2) + (s.h >> 1) + j, '#f4ece0'); }); } },   // al bayrak: ay (açığı uca bakar) ve yıldız
     tug:{ al:(s, t) => Math.floor(t * 2) % 4, ciz(g, s, k){ const d = [0, 1, 0, -1][k]; for(let j = 0; j < s.L; j++) nk(g, s.x + Math.round(d * j / s.L) - (j > s.L * 0.3 ? 1 : 0), s.y + j, s.c[j % 3 === 2 ? 1 : 0], j > s.L * 0.3 ? 3 : 1, 1); } },
     yildiz:{ al:(s, t) => { const k = Math.floor(t / 0.9); return s.l.map((_, i) => (hash(i + 1, (k % 997) + s.s) > 0.75 ? 1 : 0)).join(''); },
       ciz(g, s, k){ s.l.forEach((q, i) => nk(g, q[0], q[1], k[i] === '1' ? YILDIZ[0] : YILDIZ[2])); } },
@@ -390,7 +467,7 @@ window.LIFEOS = window.LIFEOS || {};
     atli:{ al:(s, t) => { const p = dongu(t, s.T); if(p > s.yol) return '-'; return Math.round(s.x0 + (s.x1 - s.x0) * p / s.yol) + ',' + (Math.floor(t * 4) % 2); },
       ciz(g, s, k){ if(k === '-') return; const q = k.split(','); sprG(g, +q[0], s.y, POZ.atli.k[+q[1]], { k:s.c }, s.x1 < s.x0); } },
     kervan:{ al:(s, t) => Math.round(s.x0 + (s.x1 - s.x0) * dongu(t, s.T)) + ',' + (Math.floor(t * 2.5) % 2),
-      ciz(g, s, k){ const q = k.split(','), x = +q[0]; for(let i = 0; i < s.n; i++){ const xx = x + i * 11; if(xx > s.dur - 2 && xx < s.x0 + 2) sprG(g, xx, s.y, POZ.deve.k[(+q[1] + i) % 2], { k:s.c }, false); } } },
+      ciz(g, s, k){ const q = k.split(','), x = +q[0]; for(let i = 0; i < s.n; i++){ const xx = x + i * 11; if(xx > s.dur - 2 && xx < s.x0 + 2) sprG(g, xx, s.y, POZ.deve.k[(+q[1] + i) % 2], { k:s.c }, false); } if(x - 5 > s.dur - 2 && x - 5 < s.x0 + 2) sprG(g, x - 5, s.y, POZ.yaya.k[+q[1]], { k:s.c }); } },
     kartal:{ al:(s, t) => { const a = t / s.T * Math.PI * 2; return Math.round(s.x + Math.cos(a) * s.r) + ',' + Math.round(s.y + Math.sin(a) * s.r * 0.32) + ',' + (Math.floor(t * 1.5) % 6 === 0 ? 0 : 1); },
       ciz(g, s, k){ const q = k.split(','); sprG(g, +q[0] - 2, +q[1], POZ.kartal.k[+q[2]], { k:s.c }); } },
     kus:{ al:(s, t) => { const p = dongu(t, s.T); if(p > s.yol) return '-'; const f = p / s.yol; return Math.round(s.x0 + (s.x1 - s.x0) * f) + ',' + Math.round(s.y + Math.sin(f * 7) * 1.2) + ',' + (Math.floor(t * 3) % 2); },
@@ -432,7 +509,7 @@ window.LIFEOS = window.LIFEOS || {};
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { y:z, amp:H * 0.15, f:0.016, s:3, c:karis('#5f5f84', hz, 0.5), i:karis('#a28fa2', hz, 0.42) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.15, f:0.016, s:3, c:karis('#5f5f84', hz, 0.5), i:karis('#a28fa2', hz, 0.42) }); kat(b, 1);
         sirt(b, { y:z + 1, amp:H * 0.06, f:0.03, s:9, c:karis('#857a5e', hz, 0.3) });
         kat(b, 2); zemin(b, z + Math.round(H * 0.02), ['#ab966a', '#9c885f', '#8b7954', '#786a4a'], 4);
         otlar(b, o, z + (H - z) * 0.4, Math.round(W / 9), '#675b3f', 2);
@@ -442,6 +519,8 @@ window.LIFEOS = window.LIFEOS || {};
         if(p.suru) suru(b, W * p.suru[0], W * (p.suru[0] + 0.1), z + (H - z) * p.suru[1], z + (H - z) * (p.suru[1] + 0.14), 8, tohum(o.gun));
         otag(b, o, p.ox, p.oy, p.s, 0);
         direk(b, p.tug[0], p.tug[1], p.tug[2], '#4a3c30');
+        const kx = Math.round(W * 0.55), ky = p.oy + 3; dikiliTas(b, kx, ky, Math.round(p.s * 1.7)); [8, 12, 16].forEach(d => balbal(b, kx - d, ky + 1));   // kitabe ve balbal dizisi
+        gokSancak(b, p.tug[0] + 9, p.oy, Math.round(p.s * 3));
         if(p.ates) ocak(b, p.ates[0], p.ates[1], Math.round(H * 0.13));
       } },
 
@@ -453,10 +532,12 @@ window.LIFEOS = window.LIFEOS || {};
         o.sakin.push({ tur:'kus', x0:W + 4, x1:Math.round(W * 0.55), y:Math.round(H * (0.24 + o.r() * 0.1)), n:2 + Math.floor(o.r() * 2), T:70, yol:0.6, faz:25, c:o.gece ? '#1e2236' : '#4c4a52' });
         if(o.r() < 0.5) o.sakin.push({ tur:'atli', x0:W + 6, x1:Math.round(W * 0.5), y:o.ufuk - 4, T:90, yol:(W * 0.5 + 6) / 3 / 90, faz:Math.round(o.r() * 90), c:karis('#3a3433', o.hz, 0.3) });
         if(o.gece){ yildizEkle(o); o.sakin.push({ tur:'kayan', x:Math.round(W * 0.9), y:Math.round(H * 0.12), T:41, faz:20 }); }
+        const bx = Math.round(W * 0.82), by = o.ufuk + Math.round((H - o.ufuk) * 0.45), bh = Math.round(H * 0.3); o.p.bay = [bx, by, bh];
+        o.sakin.push({ tur:'bayrak', x:bx + 1, y:by - bh, w:Math.max(7, Math.round(H * 0.1)), h:Math.max(5, Math.round(H * 0.06)), ay:true, c:['#c8302c', '#962622'] });
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { y:z, amp:H * 0.05, f:0.02, s:21, c:karis('#6c7889', hz, 0.58) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.05, f:0.02, s:21, c:karis('#6c7889', hz, 0.58) }); kat(b, 1);
         kat(b, 2); zemin(b, z + 1, ['#a4a57a', '#93976f', '#828763', '#707656'], 22);
         for(let y = z + 1; y < H; y++){
           const f = (y - z) / (H - z), cx = p.vx + (p.bx - p.vx) * f, hw = 0.4 + f * p.bw;
@@ -465,6 +546,7 @@ window.LIFEOS = window.LIFEOS || {};
         [0.12, 0.3, 0.55, 0.88].forEach(f => { const y = Math.round(z + (H - z) * f), x = Math.round(p.vx + (p.bx - p.vx) * f + 0.4 + f * p.bw + 2 + f * 6), h = Math.max(1, Math.round(1 + f * 7)), w = Math.max(1, Math.round(1 + f * 3)); R(b, x, y - h, w, h, '#a39a86'); R(b, x + Math.ceil(w / 2), y - h, Math.floor(w / 2), h, '#d2c9b4'); if(w > 2) R(b, x + 1, y - h - 1, w - 2, 1, '#c2b9a4'); });
         otag(b, o, p.vx + Math.round(W * 0.035), z + 1, Math.max(2, Math.round(H * 0.035)), 0.4);   // yolun ucunda konak: gece kapısı yanar
         agac(b, Math.round(W * 0.9), Math.round(z + (H - z) * 0.32), Math.round(H * 0.2), 24, ['#6a5644', '#4d3e33']);   // yalnız karaağaç (eskiden lolipop gibi yuvarlaktı)
+        direk(b, p.bay[0], p.bay[1], p.bay[2]); R(b, p.bay[0] - 1, p.bay[1], 3, 1, '#6a5644');
       } },
 
     /* Tarih: sırtta kale — burçlar, bayrak, süzülen kartal */
@@ -474,14 +556,14 @@ window.LIFEOS = window.LIFEOS || {};
         const tepe = x => o.ufuk - H * 0.26 * sm(kis((x - xa) / (W * 0.3), 0, 1)) + (g1(x * 0.08, 41) - 0.5) * H * 0.04;
         const kx = Math.round(W * 0.64), kh = Math.round(H * 0.22), ky = Math.round(tepe(kx)) - kh, bh = Math.max(4, Math.round(H * 0.1));
         o.p = { xa, tepe, kule:[[kx, kh], [Math.round(W * 0.8), Math.round(H * 0.13)], [Math.round(W * 0.95), Math.round(H * 0.15)]], direk:[kx + 2, ky, bh] };
-        o.sakin.push({ tur:'bayrak', x:kx + 3, y:ky - bh, w:Math.max(5, Math.round(H * 0.07)), h:Math.max(3, Math.round(H * 0.045)), ay:H > 70, c:['#b8352f', '#8e2925'] });
+        o.sakin.push({ tur:'bayrak', x:kx + 3, y:ky - bh, w:Math.max(7, Math.round(H * 0.1)), h:Math.max(5, Math.round(H * 0.06)), ay:true, c:['#c8302c', '#962622'] });
         o.sakin.push({ tur:'kartal', x:Math.round(W * 0.78), y:Math.round(H * 0.26), r:Math.round(W * 0.05), T:26, c:o.gece ? '#1b2033' : '#3b3634' });
         if(o.lamba){ const [x, h] = o.p.kule[1]; o.p.isaret = [x, Math.round(tepe(x)) - h - 3]; o.sakin.push({ tur:'mum', x, y:o.p.isaret[1], s:41 }); }   // burçta nöbet ateşi
         if(o.gece) yildizEkle(o);
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { y:z, amp:H * 0.12, f:0.014, s:31, c:karis('#6b7a8d', hz, 0.62), i:karis('#94a1b0', hz, 0.56) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.12, f:0.014, s:31, c:karis('#6b7a8d', hz, 0.62), i:karis('#94a1b0', hz, 0.56) }); kat(b, 1);
         sirt(b, { y:z + 2, amp:H * 0.05, f:0.03, s:33, c:karis('#6f7b62', hz, 0.3) });
         kat(b, 2); zemin(b, z + Math.round(H * 0.04), ['#8d9670', '#7f8966', '#717c5c', '#626e51'], 34);
         for(let x = 0; x < W * 0.5; x++){ const y = Math.round(z + H * 0.1 + Math.sin(x * 0.05) * 2 + x * 0.08); px(b, x, y, o.gece ? (hash(x, 45) > 0.86 ? '!#c8d0e4' : '!#6f7ca6') : '#a9b9bb'); px(b, x, y + 1, '#5f6b4e'); }   // gece ırmakta ay
@@ -493,13 +575,21 @@ window.LIFEOS = window.LIFEOS || {};
             px(b, x, y, y - h < 2 && e < -0.2 ? '#a99d84' : y > z + H * 0.1 ? (MEV === 'kis' ? '#c4cac8' : '#6f7356') : ust && yar > 0.35 ? '#a3967c' : !ust && q - kat * 4 < 2 && yar > 0.35 ? '#776d5c' : '#8b806b');
           }
         }
+        if(MEV !== 'kis'){ const r = tohum(46); for(let i = 0; i < W * 0.6; i++){ const x = Math.round(p.xa + r() * (W - p.xa)), y = Math.round(z + H * 0.1 + 2 + r() * (H - z - H * 0.1 - 2)); R(b, x, y, 1 + Math.floor(r() * 3), 1, '#626e51'); if(r() < 0.5) px(b, x + 1, y - 1, '#7f8966'); } }   // eteğin yeşil yamacında öbek
         const wh = Math.max(3, Math.round(H * 0.07)), xa = Math.round(W * 0.62);
-        for(let x = xa; x < W; x++){ const t = Math.round(p.tepe(x)) - wh + 1; R(b, x, t, 1, wh + 1, x % 7 < 5 ? '#c0ae8a' : '#b19f7c'); if((x - xa) % 3 === 2) px(b, x, t, '#8d7d62'); px(b, x, t + 2, '#a8977a'); }
+        /* sur: kesme taş sıraları (yatay derz, şaşırtmalı dikey derz), dendan, yürüme yolunun gölgesi, kayaya oturduğu yerde koyuluk */
+        for(let x = xa; x < W; x++){ const t = Math.round(p.tepe(x)) - wh + 1; R(b, x, t, 1, wh + 1, '#c0ae8a'); for(let y = t + 4, n = 0; y < t + wh; y += 2, n++) if(n % 2 === 0 || (x + n * 2) % 5 === 0) px(b, x, y, '#b19f7c'); if((x - xa) % 3 === 2) px(b, x, t, '#8d7d62'); px(b, x, t + 2, '#a8977a'); px(b, x, t + wh, '#8f8066'); }
         p.kule.forEach(([x, h], i) => {
           const tw = Math.max(5, Math.round(H * (i === 0 ? 0.09 : 0.07))), x0 = x - (tw >> 1), y0 = Math.round(p.tepe(x)) - h;
           R(b, x0, y0, tw, h + 2, '#c8b792'); R(b, x0, y0, Math.round(tw * 0.38), h + 2, '#9e8e72');
           for(let i2 = -1; i2 <= tw; i2 += 2) R(b, x0 + i2, y0 - 2, 1, 2, i2 < tw * 0.38 ? '#9e8e72' : '#c8b792');
           R(b, x0 - 1, y0, tw + 2, 1, '#8f8066');
+          /* 2026-11-18e burç: taş sıraları ışıkta ve gölgede ayrı tonla, dendan altında konsollar, güneş yanında ışık kenarı, eteğinde şev */
+          const gx = x0 + Math.round(tw * 0.38);
+          for(let y = y0 + 3, n = 0; y < y0 + h + 1; y += 3, n++){ R(b, x0, y, tw, 1, '#b5a37e'); R(b, x0, y, gx - x0, 1, '#8c7d63'); for(let xx = x0 + (n % 2 ? 1 : 3); xx < x0 + tw; xx += 4) px(b, xx, y + 1, xx < gx ? '#8c7d63' : '#b5a37e'); }
+          for(let xx = x0; xx < x0 + tw; xx += 2) px(b, xx, y0 + 1, '#8f8066');
+          if(!o.gece) R(b, x0 + tw - 1, y0 + 2, 1, h - 1, '#dccba4');
+          R(b, x0 - 1, y0 + h - 1, tw + 2, 3, '#b5a37e'); R(b, x0 - 1, y0 + h - 1, gx - x0 + 1, 3, '#8c7d63');
           for(let j = y0 + 3; j < y0 + h - 2; j += Math.max(4, Math.round(h / 3))) { if(o.lamba) isik(b, x0 + (tw >> 1), j + 1, 4, '!#e9a95a', 0.24); R(b, x0 + (tw >> 1), j, 1, 2, o.lamba ? '!#e9a95a' : '#3c3430'); }
         });
         direk(b, p.direk[0], p.direk[1], p.direk[2]);
@@ -519,11 +609,13 @@ window.LIFEOS = window.LIFEOS || {};
         for(let x = 0; x < W; x++){ const h = Math.round(z - H * 0.12 - g1(x * 0.2, 51) * H * 0.05 * (x % 9 < 6 ? 1 : 0.4)); R(b, x, h, 1, z - h, karis('#b9a888', hz, 0.55)); } kat(b, 1);
         for(let i = 0; i < 6; i++){ const x = Math.round(W * (0.06 + r() * 0.42)), h = Math.round(H * (0.14 + r() * 0.08)); for(let j = 0; j < h; j++) R(b, x - (j > 1 && j < h - 2 ? 1 : 0), z - H * 0.1 - j, j > 1 && j < h - 2 ? 3 : 1, 1, karis('#6c7a5a', hz, 0.45)); }
         kat(b, 2); R(b, 0, z, W, H - z, '#cdb995');
-        for(let y = z + 2; y < H; y += 3) R(b, 0, y, W, 1, '#bba782');
+        for(let y = z + 2, n = 0; y < H; y += 3, n++){ R(b, 0, y, W, 1, '#bba782'); const a = 4 + n * 2; if(n) for(let x = (n * 5) % a; x < W; x += a) if(x > W * 0.4) px(b, x, y - 1, '#bba782'); }   // döşeme taşı: öne doğru büyüyen şaşırtmalı derz (sol sakin)
         const kanat = (xa, xb, kh) => {
           R(b, xa, z - kh, xb - xa, kh, '#c4a274'); R(b, xa, z - kh, xb - xa, 1, '#3a8f98'); R(b, xa, z - kh + 1, xb - xa, 1, '#2c5585');
+          for(let y = z - kh + 4, n = 0; y < z; y += 2, n++) for(let x = xa + (n % 2) * 2; x < xb; x += 4) px(b, x, y, '#b8956a');   // tuğla örgüsü (şaşırtmalı derz)
+          R(b, xa, z - kh + 2, xb - xa, 1, '#9c7c56');   // saçak gölgesi
           const aw = Math.max(3, Math.round(kh * 0.22)), ah = Math.round(kh * 0.36);
-          for(let x = xa + 2; x < xb - aw; x += aw + 2) for(const yb of [z - 2, z - ah - 4]){ const yak = o.lamba && hash(x, yb) > 0.45; kemer(b, x, yb, aw, ah, yak ? '!#e6b05a' : '#5a4632'); if(yak && yb === z - 2) isik(b, x + aw / 2, z, aw + 2, '!#e6b05a', 0.3, true); if(!yak) R(b, x, yb - Math.round(ah * 0.5), aw, 1, '#6d5740'); }
+          for(let x = xa + 2; x < xb - aw; x += aw + 2) for(const yb of [z - 2, z - ah - 4]){ const yak = o.lamba && hash(x, yb) > 0.45; R(b, x - 1, yb - ah, aw + 2, ah + 1, '#ad8a5e'); kemer(b, x, yb, aw, ah, yak ? '!#e6b05a' : '#5a4632'); if(!yak) R(b, x + aw - 1, yb - Math.round(ah * 0.55), 1, Math.round(ah * 0.55) + 1, '#46362a'); if(yak && yb === z - 2) isik(b, x + aw / 2, z, aw + 2, '!#e6b05a', 0.3, true); if(!yak) R(b, x, yb - Math.round(ah * 0.5), aw, 1, '#6d5740'); }
         };
         const x0 = p.x - (p.w >> 1), x1 = x0 + p.w, kh = Math.round(p.h * 0.52);
         kanat(Math.round(W * 0.47), x0, kh); kanat(x1, Math.min(W, x1 + Math.round(p.w * 0.9)), kh);
@@ -531,6 +623,7 @@ window.LIFEOS = window.LIFEOS || {};
         R(b, dx - dr + 2, dy, dr * 2 - 3, Math.round(p.h * 0.2), '#2f6f86'); R(b, dx - dr + 2, dy + 1, dr * 2 - 3, 1, '#c4a274');
         for(let j = 0; j < Math.round(dr * 1.15); j++){ const t = j / (dr * 1.15), w = Math.round(dr * Math.sqrt(1 - t * t) * (1 + 0.12 * Math.sin(t * 3))); for(let i = -w; i <= w; i++) px(b, dx + i, dy - 1 - j, (i + 99) % 3 === 0 ? '#2b7a8a' : i > w * 0.25 ? '#74c3c0' : i < -w * 0.4 ? '#2f7d8c' : '#3ea0a8'); }
         R(b, dx, dy - Math.round(dr * 1.15) - 2, 1, 3, '#d8b456');
+        if(p.h * 0.2 >= 8) [-0.45, 0.45].forEach(f => yildiz8(b, dx + Math.round(dr * f), dy + Math.round(p.h * 0.1) + 1, '#1e3a62', '#e8dcc0'));   // kasnakta Selçuklu yıldızı
         R(b, x0, z - p.h, p.w, p.h, '#c9a776'); R(b, x0, z - p.h, Math.round(p.w * 0.18), p.h, '#a8875c');
         R(b, x0 + 1, z - p.h + 1, p.w - 2, 1, '#2c5585'); R(b, x0 + 1, z - p.h + 1, 1, p.h - 1, '#2c5585'); R(b, x1 - 2, z - p.h + 1, 1, p.h - 1, '#2c5585');
         for(let y = z - p.h + 3; y < z; y += 2){ px(b, x0 + 2, y, '#3ea0a8'); px(b, x1 - 3, y, '#3ea0a8'); }
@@ -538,11 +631,20 @@ window.LIFEOS = window.LIFEOS || {};
         const aw = Math.round(p.w * 0.56), ah = Math.round(p.h * 0.78), ax = p.x - (aw >> 1);
         R(b, ax - 1, z - ah - 2, aw + 2, ah + 2, '#2c5585');
         kemer(b, ax, z - 1, aw, ah, '#22324c'); kemer(b, ax + 2, z - Math.round(ah * 0.45), aw - 4, Math.round(ah * 0.5), '#2f4565');
-        for(let j = 0; j < 4; j++) for(let i = 0; i < aw - 6; i += 2) if((i + j) % 4 === 0) px(b, ax + 3 + i, z - ah + Math.round(ah * 0.3) + j * 2, '#3e5b80');
+        /* 2026-11-18e: köşeliklerde (kemerle çerçeve arası) firuze-lacivert çini örgüsü; üstte beyaz yazılı kitabe kuşağı;
+           kemerin başında mukarnas (basamaklı küçük hücreler, üstü ışık altı gölge); kemer içi sağdan gölgeli (güneş sağda, iç duvar gölgede) */
+        for(let y = z - p.h + 4; y < z - ah - 2; y++) for(let x = x0 + 4; x < x1 - 4; x++) if((x + y) % 4 === 0 || (x - y + 400) % 4 === 0) px(b, x, y, (x + y) % 8 === 0 ? '#3ea0a8' : '#2c5585');
+        const kb = z - p.h + 3, kh3 = Math.max(3, Math.round(p.h * 0.08)); R(b, x0 + 3, kb, p.w - 6, kh3, '#1e3a62'); for(let x = x0 + 5; x < x1 - 5; x++) if(hash(x, 7) > 0.45 || x % 3 === 0) px(b, x, kb + 1 + (hash(x, 8) > 0.6 ? 1 : 0), '#e8dcc0');
+        mukarnas(b, ax + aw / 2, z - 1, aw, ah, ['#5a7aa0', '#3e5b80', '#1a263a']);
         const kw = Math.max(2, Math.round(aw * 0.36)), kh2 = Math.round(ah * 0.36);
         kemer(b, p.x - (kw >> 1), z - 1, kw, kh2, o.lamba ? '!#efc06a' : '#16202f');
+        if(!o.lamba){ R(b, p.x, z - kh2 + 2, 1, kh2 - 2, '#2a3a52'); px(b, p.x - 2, z - (kh2 >> 1), '#c69a48'); px(b, p.x + 2, z - (kh2 >> 1), '#c69a48'); }   // ahşap kapı: iki kanat, pirinç tokmak
+        R(b, x0 - 1, z, p.w + 2, 1, '#a89470'); R(b, Math.round(W * 0.47), z, x0 - Math.round(W * 0.47), 1, '#b8a47e');   // binanın yere oturduğu çizgi
         if(o.lamba){ isik(b, p.x, z - 2, Math.round(p.w * 0.55), '!#e2a352', 0.32); isik(b, p.x, z, Math.round(p.w * 0.6), '!#efc06a', 0.36, true); }
-        const minare = (x, h) => { const mw = Math.max(3, Math.round(p.w * 0.12)); R(b, x, z - h, mw, h, '#cfae7c'); R(b, x, z - h, 1, h, '#a8875c'); for(let y = z - h + 2; y < z - 2; y += 5) R(b, x, y, mw, 1, '#3ea0a8'); R(b, x - 1, z - h - 1, mw + 2, 2, '#2c5585'); R(b, x, z - h - 3, mw, 2, '#3ea0a8'); };
+        const minare = (x, h) => { const mw = Math.max(3, Math.round(p.w * 0.12)), se = z - Math.round(h * 0.82); R(b, x, z - h, mw, h, '#cfae7c'); R(b, x, z - h, 1, h, '#a8875c'); R(b, x + mw - 1, z - h, 1, h, '#e2c494');
+          for(let y = z - h + 2; y < z - 2; y += 5){ R(b, x, y, mw, 1, '#3ea0a8'); if(y + 1 < z - 2) for(let i = (y >> 1) % 2; i < mw; i += 2) px(b, x + i, y + 1, '#2c5585'); }
+          R(b, x - 1, se, mw + 2, 2, '#2c5585'); R(b, x - 1, se, mw + 2, 1, '#3ea0a8'); R(b, x, se + 2, mw, 1, '#8a6a46');   // şerefe ve altındaki gölge
+          R(b, x - 1, z - h - 1, mw + 2, 2, '#2c5585'); R(b, x, z - h - 3, mw, 2, '#3ea0a8'); px(b, x + (mw >> 1), z - h - 4, '#d8b456'); };
         minare(x0 - Math.max(4, Math.round(p.w * 0.14)), Math.round(p.h * 1.05)); minare(x1 + 1, Math.round(p.h * 1.05));
       } },
 
@@ -561,14 +663,18 @@ window.LIFEOS = window.LIFEOS || {};
         R(b, 0, Math.round(H * 0.06), W, 1, '#8c7556');
         R(b, 0, p.yz, W, H - p.yz, '#6b4a34'); for(let y = p.yz + 2; y < H; y += 3) R(b, 0, y, W, 1, '#5d4030');
         R(b, 0, p.yz - 1, W, 1, '#4a3426');
+        kilim(b, o, Math.round(W * 0.5), Math.round(W * 0.76), p.yz + 3, H - 2);
         R(b, p.wx0 - 2, p.wy0 - 2, p.wx1 - p.wx0 + 4, p.wy1 - p.wy0 + 4, '#5a4130');
         pencere(b, o, p.wx0, p.wy0, p.wx1, p.wy1, { uzak:'#7a8a96', minare:'#8a8a9a', cisim:true });
         R(b, Math.round((p.wx0 + p.wx1) / 2), p.wy0, 1, p.wy1 - p.wy0, '#5a4130'); R(b, p.wx0, Math.round((p.wy0 + p.wy1) / 2), p.wx1 - p.wx0, 1, '#5a4130');
         R(b, p.wx0 - 3, p.wy1 + 2, p.wx1 - p.wx0 + 6, 1, '#7a5a40');
-        if(!o.lamba) for(let y = p.wy1 + 3; y < H; y++){ const k = y - p.wy1, x0 = p.wx0 - k * 0.6, x1 = p.wx1 - k * 0.45; for(let x = Math.round(x0); x < x1; x++) if(bay(x, y) < 0.45) ortu(b, x, y, '!#fff0c8', 0.22); }
+        huzme(b, o, p.wx0, p.wx1, p.wy1 + 3, H, 0.6, 0.45, p.yz);
+        { const x0 = Math.round(W * 0.752), x1 = Math.round(W * 0.788), y0 = Math.round(H * 0.3), y1 = Math.round(H * 0.44); R(b, x0 - 1, y0 - 1, x1 - x0 + 2, y1 - y0 + 2, '#c69a48'); R(b, x0, y0, x1 - x0, y1 - y0, gc ? '#a89878' : '#e8dcc0');
+          const hy = y1 - 3; R(b, x0 + 2, hy, x1 - x0 - 4, 1, '#2a2420'); [0.35, 0.6].forEach(f => R(b, x0 + Math.round((x1 - x0) * f), y0 + 3, 1, hy - y0 - 3, '#2a2420')); px(b, x0 + 3, y0 + 4, '#2a2420'); }   // küçük hat levhası
         const rx = Math.round(W * 0.8), rw = W - rx, rt = Math.round(H * 0.1), raf = Math.max(6, Math.round(H * 0.16));
         R(b, rx, rt, rw, p.yz - rt, '#4e3627'); R(b, rx, rt, 2, p.yz - rt, '#6d4c36');
-        for(let y = rt + raf; y <= p.yz; y += raf){ kitaplar(b, rx + 3, W - 1, y - 1, raf - 2, y + o.gun); R(b, rx + 2, y - 1, rw - 2, 1, '#7a5a40'); }
+        for(let y = rt + raf; y <= p.yz; y += raf){ R(b, rx + 2, y - raf, rw - 2, 1, '#3a281c'); kitaplar(b, rx + 3, W - 1, y - 1, raf - 2, y + o.gun); R(b, rx + 2, y - 1, rw - 2, 1, '#7a5a40'); }   // her gözün tepesinde rafın gölgesi
+        R(b, rx - 1, rt - 2, rw + 1, 2, '#6d4c36'); R(b, rx - 1, rt - 2, rw + 1, 1, '#7a5a40'); R(b, rx - 2, rt, 1, p.yz - rt, '#3a281c');   // korniş, dolabın duvara düşen gölgesi
         const mt = p.yz - Math.round(H * 0.14), mx0 = Math.round(W * 0.52), mx1 = Math.round(W * 0.77);
         R(b, mx0, mt, mx1 - mx0, 2, '#7d583c'); R(b, mx0, mt, mx1 - mx0, 1, '#9a7250'); R(b, mx0 + 2, mt + 2, 2, p.yz - mt - 2, '#5a3e2c'); R(b, mx1 - 4, mt + 2, 2, p.yz - mt - 2, '#5a3e2c');
         R(b, Math.round(W * 0.58), mt - 2, 8, 2, '#e8dfc8'); R(b, Math.round(W * 0.58) + 4, mt - 2, 1, 2, '#b8a888');
@@ -601,7 +707,7 @@ window.LIFEOS = window.LIFEOS || {};
         for(let y = p.wy0; y < p.wy1; y++) for(let x = p.wx0; x < p.wx1; x++){ const t = (p.wy1 - y) / wh, k = t < 0.6 ? 1 : Math.sqrt(Math.max(0, 1 - Math.pow((t - 0.6) / 0.4, 2))); if(Math.abs(x - p.wx0 + 0.5 - ww / 2) > ww * k / 2) b.d[y * W + x] = ust[y * W + x]; }
         R(b, Math.round((p.wx0 + p.wx1) / 2), p.wy0 + 2, 1, wh - 2, '#5a4232'); R(b, p.wx0, p.wy0 + Math.round(wh * 0.55), ww, 1, '#5a4232');
         R(b, p.wx0 - 3, p.wy1 + 2, ww + 6, 2, '#8a6a48');
-        if(!o.lamba) for(let y = p.wy1 + 4; y < H; y++){ const k = y - p.wy1; for(let x = Math.round(p.wx0 - k * 0.9); x < p.wx1 - k * 0.6; x++) if(bay(x, y) < 0.42) ortu(b, x, y, '!#fff0c8', 0.2); }
+        huzme(b, o, p.wx0, p.wx1, p.wy1 + 4, H, 0.9, 0.6, p.yz);
         /* duvarda hat levhası: altin pervaz, kâğıt, iki satır yazı */
         const lx0 = Math.round(W * 0.5), lx1 = Math.round(W * 0.64), ly0 = Math.round(H * 0.24), ly1 = Math.round(H * 0.5);
         R(b, lx0 - 2, ly0 - 2, lx1 - lx0 + 4, ly1 - ly0 + 4, '#5a4232'); R(b, lx0 - 1, ly0 - 1, lx1 - lx0 + 2, ly1 - ly0 + 2, '#c69a48');
@@ -630,6 +736,7 @@ window.LIFEOS = window.LIFEOS || {};
         R(b, sx + sw - 6, sy - 3, 3, 3, '#2a2624'); px(b, sx + sw - 5, sy - 3, '#4a5a7a');
         for(let i = 0; i < 5; i++) px(b, sx + sw - 8 + i, sy - 2 - (i >> 1), '#c8a050');
         if(o.lamba) isik(b, sx + 2, sy - 8, Math.round(H * (gc ? 0.28 : 0.22)), '!#f1b860', 0.36);
+        { const x = Math.round(W * 0.69); R(b, x, Math.round(H * 0.1), 1, Math.round(H * 0.2), '#7d5d2e'); kandil(b, o, x, Math.round(H * 0.3)); }   // asma kandil
         R(b, Math.round(W * 0.47), p.yz - 3, 9, 3, o.kece[2]); R(b, Math.round(W * 0.47), p.yz - 3, 9, 1, o.kece[0]); R(b, Math.round(W * 0.47) + 1, p.yz - 5, 7, 2, '#7a3a33');   // minder: günün dokuması
       } },
 
@@ -644,7 +751,8 @@ window.LIFEOS = window.LIFEOS || {};
         const { W, H } = o, p = o.p, gc = o.gece;
         duvar(b, o, p.yz, gc ? '#9a8a74' : '#c7b89c', gc ? '#82725c' : '#ae9f84', gc ? W * 0.84 : (p.wx0 + p.wx1) / 2);
         gunIsigi(b, o, p, gc ? '#9a8a74' : '#c7b89c'); lambri(b, p.yz, Math.max(5, Math.round(H * 0.1)));
-        R(b, 0, p.yz, W, H - p.yz, '#5e4434'); R(b, 0, p.yz, W, 1, '#4a3428');
+        R(b, 0, p.yz, W, H - p.yz, '#5e4434'); R(b, 0, p.yz, W, 1, '#4a3428'); for(let y = p.yz + 3; y < H; y += 3) R(b, 0, y, W, 1, '#553c2e');   // tahta döşeme
+        kilim(b, o, Math.round(W * 0.6), Math.round(W * 0.86), p.yz + 3, H - 2);
         R(b, p.wx0 - 2, p.wy0 - 2, p.wx1 - p.wx0 + 4, p.wy1 - p.wy0 + 4, '#5c4434');
         pencere(b, o, p.wx0, p.wy0, p.wx1, p.wy1, { uzak:'#6f8070', cisim:true });
         for(let i = 1; i < 3; i++) R(b, p.wx0 + Math.round((p.wx1 - p.wx0) * i / 3), p.wy0, 1, p.wy1 - p.wy0, '#5c4434');
@@ -653,7 +761,7 @@ window.LIFEOS = window.LIFEOS || {};
         const sx = p.wx1 - 6; R(b, sx, p.wy1 - 1, 4, 3, '#9a5a3c'); R(b, sx + 1, p.wy1 - 4, 1, 3, '#5d7a46'); R(b, sx + 2, p.wy1 - 5, 1, 4, '#6f8c52'); px(b, sx, p.wy1 - 3, '#5d7a46');
         const mx0 = Math.round(W * 0.54), mx1 = Math.round(W * 0.92);
         R(b, mx0, p.mt, mx1 - mx0, 3, '#7a5236'); R(b, mx0, p.mt, mx1 - mx0, 1, '#9c7048'); R(b, mx0 + 2, p.mt + 3, 2, p.yz - p.mt - 3, '#553a28'); R(b, mx1 - 4, p.mt + 3, 2, p.yz - p.mt - 3, '#553a28');
-        if(!o.lamba) for(let y = p.wy1 + 3; y < p.mt; y++) for(let x = p.wx0 - (y - p.wy1); x < p.wx1; x++) if(bay(x, y) < 0.35) ortu(b, x, y, '!#fff2cc', 0.18);
+        huzme(b, o, p.wx0, p.wx1, p.wy1 + 3, p.mt, 1, 0, p.mt);
         const dx = Math.round(W * 0.66), dw = Math.max(10, Math.round(W * 0.06));
         R(b, dx, p.mt - 2, dw, 2, '#efe7d4'); R(b, dx + (dw >> 1), p.mt - 2, 1, 2, '#bcae90');
         for(let i = 1; i < dw - 1; i += 2) if(i !== dw >> 1) px(b, dx + i, p.mt - 2, '#9a9080');
@@ -666,6 +774,7 @@ window.LIFEOS = window.LIFEOS || {};
         for(let j = 3; j < kh - 3; j += 6){ const m = kx0 + (kw >> 1); for(let d = 0; d < 3; d++){ px(b, m - d, ky0 + j + d, ks); px(b, m + d, ky0 + j + d, ks); px(b, m - d, ky0 + j + 5 - d, ks); px(b, m + d, ky0 + j + 5 - d, ks); } px(b, m, ky0 + j + 2, '#e8dcc4'); px(b, m, ky0 + j + 3, '#e8dcc4'); }
         for(let i = 0; i < kw; i += 2) px(b, kx0 + i, ky0 + kh, '#e8dcc4');
         R(b, kx0 - 1, ky0 - 1, kw + 2, 1, '#5c4434');
+        { const x = Math.round(W * 0.57); R(b, x, Math.round(H * 0.1), 1, Math.round(H * 0.18), '#7d5d2e'); kandil(b, o, x, Math.round(H * 0.28)); }   // asma kandil
         const cx = Math.round(W * 0.84); R(b, cx - 2, p.mt - 1, 5, 1, '#a07a3c'); R(b, cx, p.mt - 5, 1, 4, '#ece6d6');
         if(o.lamba) isik(b, cx, p.mt - 7, Math.round(H * (gc ? 0.34 : 0.24)), '!#f2bd66', 0.38);
       } },
@@ -684,7 +793,7 @@ window.LIFEOS = window.LIFEOS || {};
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { y:z, amp:H * 0.2, f:0.02, s:61, sivri:1.4, c:karis('#7a8094', hz, 0.56), i:karis('#a8acb8', hz, 0.5) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.2, f:0.02, s:61, sivri:1.4, c:karis('#7a8094', hz, 0.56), i:karis('#a8acb8', hz, 0.5) }); kat(b, 1);
         sirt(b, { y:z + 2, amp:H * 0.05, f:0.04, s:62, c:karis('#a89070', hz, 0.3) });
         kat(b, 2); zemin(b, z + Math.round(H * 0.03), ['#c2aa7e', '#b29b72', '#a08b66', '#8d7a59'], 63);
         otlar(b, o, z + (H - z) * 0.5, Math.round(W / 10), '#8a7a52', 64);
@@ -704,13 +813,15 @@ window.LIFEOS = window.LIFEOS || {};
         /* taç kapı süsü: iki renkli örgü (zencerek) çerçeve, kemerin üstünde kitabe kuşağı, kapının sağa düşen gölgesi */
         for(let y = p.bt - kh + 1; y < p.bt; y++) for(const x of [k0 + 1, k0 + kw - 2]) px(b, x, y, (y + x) % 2 ? '#8c7658' : '#e6d4ae');
         for(let x = k0 + 1; x < k0 + kw - 1; x++) px(b, x, p.bt - kh + 1, x % 2 ? '#8c7658' : '#e6d4ae');
-        R(b, k0 + 3, p.bt - kh + 3, kw - 6, 2, '#7a6448'); for(let x = k0 + 4; x < k0 + kw - 4; x += 2) px(b, x, p.bt - kh + 3 + (x >> 1) % 2, '#e0cca4');
+        kitabe(b, k0 + 2, k0 + kw - 2, p.bt - kh + 2, 4);
+        if(p.wh >= 12) [k0 - 7, k0 + kw + 6].forEach(x => yildiz8(b, x, p.bt - Math.round(p.wh * 0.6), '#2c5585', '#3ea0a8'));   // taç kapının iki yanında Selçuklu yıldızı
         for(let y = p.bt - p.wh; y < p.bt; y++) for(let i = 0; i < 3; i++) if(bay(k0 + kw + i, y) < 0.6 - i * 0.2) px(b, k0 + kw + i, y, '#a8946f');
         const aw = kw - 6, ah = kh - 5;
         kemer(b, k0 + 3, p.bt - 1, aw, ah, '#8c7658');
-        for(let j = 0; j < 3; j++) for(let i = 0; i < aw - 2; i += 2) px(b, k0 + 4 + i + (j % 2), p.bt - ah + 2 + j * 2, '#a89070');
+        mukarnas(b, k0 + 3 + aw / 2, p.bt - 1, aw, ah, ['#c8b48c', '#a89070', '#6e5a42']);
         const dw = Math.max(3, Math.round(aw * 0.5)), dh = Math.round(ah * 0.5);
         kemer(b, p.kx - (dw >> 1), p.bt - 1, dw, dh, o.lamba ? '!#eab062' : '#3a3028');
+        if(!o.lamba && dw > 3){ R(b, p.kx - (dw >> 1) + 1, p.bt - dh + 2, dw - 2, dh - 2, '#5a4430'); R(b, p.kx, p.bt - dh + 2, 1, dh - 2, '#3a3028'); for(let y = p.bt - dh + 3; y < p.bt - 1; y += 2){ px(b, p.kx - 2, y, '#a8875c'); px(b, p.kx + 2, y, '#a8875c'); } }   // ahşap kanatlar, demir çiviler
         if(o.lamba) isik(b, p.kx, p.bt, Math.round(H * 0.16), '!#e8a858', 0.36, true);
         p.mesale.forEach(([x, y]) => { isik(b, x, y - 1, Math.round(H * 0.07), '!#f0a050', 0.3); px(b, x, y, '#3a3028'); px(b, x, y + 1, '#3a3028'); });
       } },
@@ -725,11 +836,13 @@ window.LIFEOS = window.LIFEOS || {};
         o.sakin.push({ tur:'kivilcim', x:fx, y:fy - 6 * k - 1, L:Math.round(H * 0.16) });
         dumanEkle(o, fx, fy - 7 * k - Math.round(H * 0.05), Math.round(H * 0.18), 9);
         atEkle(o, fx + Math.round(W * 0.1), z + (H - z) * 0.4, Math.floor(o.r() * 4), true);
+        o.sakin.push({ tur:'atli', x0:W + 6, x1:Math.round(W * 0.5), y:z - 4, T:85, yol:(W * 0.5 + 6) / 3 / 85, faz:Math.round(o.r() * 85), c:karis('#3a3433', o.hz, 0.25) });
+        if(!o.gece) o.sakin.push({ tur:'kartal', x:Math.round(W * 0.8), y:Math.round(H * 0.24), r:Math.round(W * 0.04), T:28, c:'#3b3634' });
         if(o.gece) yildizEkle(o);
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { y:z, amp:H * 0.09, f:0.018, s:71, c:karis('#5a5276', hz, 0.42), i:karis('#8a7088', hz, 0.4) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.09, f:0.018, s:71, c:karis('#5a5276', hz, 0.42), i:karis('#8a7088', hz, 0.4) }); kat(b, 1);
         kat(b, 2); zemin(b, z + 1, ['#7a6658', '#6a5a50', '#5b4f49', '#4c4442'], 72);
         otlar(b, o, z + (H - z) * 0.4, Math.round(W / 10), '#4a3f3a', 73);
         otag(b, o, Math.round(W * 0.88), z + 5, Math.max(3, Math.round(H * 0.06)), 0.2);
@@ -753,7 +866,7 @@ window.LIFEOS = window.LIFEOS || {};
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { ...p.dag, c:karis('#64748e', hz, 0.5), i:karis('#9aa8bc', hz, 0.44), kar:o.gece ? ['!#8d99bb', '!#5f6a90', 0.58] : ['#eef1f0', '#b8c4d2', 0.58], dd:4 });   // ay ışığında kar parlak kalır kat(b, 1);
+        sirt(b, { ...p.dag, vadi:1, c:karis('#64748e', hz, 0.5), i:karis('#9aa8bc', hz, 0.44), kar:o.gece ? ['!#8d99bb', '!#5f6a90', 0.58] : ['#eef1f0', '#b8c4d2', 0.58], dd:4 });   // ay ışığında kar parlak kalır kat(b, 1);
         const kk = MEV === 'kis', ky = kk ? ['#d8dee0', '#eef2f4'] : ['#5f7c4e', '#7f9a5e'];   // kışın yayla çayırı karla örtülü
         sirt(b, Object.assign({ c:karis(ky[0], hz, 0.22), i:karis(ky[1], hz, 0.2), karli:kk }, p.orta));
         const r = tohum(83 + o.gun), sx = W * (0.56 + r() * 0.2);
@@ -764,6 +877,7 @@ window.LIFEOS = window.LIFEOS || {};
         for(let i = 0; i < (MEV === 'kis' ? 0 : W / (MEV === 'ilkbahar' ? 7 : 14)); i++){ const x = Math.round(W * 0.55 + r() * W * 0.45), y = Math.round(H * 0.84 + r() * H * 0.14); px(b, x, y, i % 3 ? '#e8d27a' : '#d9a0b0'); }
         const hh = Math.max(3, Math.round(H * 0.06));
         b.kat = 1;   // evler orta sırtın üstünde: ortayla kayar
+        { const x = Math.round(W * 0.64); otag(b, o, x, Math.round(yuk(p.orta, x)) + 4, Math.max(3, Math.round(H * 0.045)), 0.12); }   // yaylada keçe otağ
         p.evler.forEach(([x, y], i) => { const w = hh + 3; R(b, x - 1, y - 1, w + 2, 2, '#8e8576'); R(b, x, y - hh, w, hh - 1, '#7a5a3e'); R(b, x, y - hh, 1, hh - 1, '#5e4430'); for(let j = 0; j < 3; j++) R(b, x - 1 + j, y - hh - 1 - j, w + 2 - j * 2, 1, j ? '#55494a' : '#6f6260'); if(o.lamba && i !== 2) isik(b, x + (w >> 1), y - hh + 1, 4, '!#efb45c', 0.26); px(b, x + (w >> 1), y - hh + 1, o.lamba && i !== 2 ? '!#efb45c' : '#3a2c22'); if(i === 1) R(b, x + 2, y - hh - 4, 1, 2, '#5a4e4a'); }); b.kat = 2;
       } },
 
@@ -779,7 +893,7 @@ window.LIFEOS = window.LIFEOS || {};
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { y:z, amp:H * 0.12, f:0.018, s:92, c:karis('#6c8070', hz, 0.56), i:karis('#94a890', hz, 0.5) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.12, f:0.018, s:92, c:karis('#6c8070', hz, 0.56), i:karis('#94a890', hz, 0.5) }); kat(b, 1);
         kat(b, 2); zemin(b, z + 1, ['#9aa872', '#8a9a68', '#7a8c5e', '#6a7d54'], 93);
         for(let k = 0; k < 4; k++){ const y = Math.round(z + (H - z) * (0.25 + k * 0.16)), x0 = Math.round(W * (0.4 - k * 0.04)), x1 = Math.round(W * 0.58); R(b, x0, y, x1 - x0, 1, '#7e6c4c'); if(MEV !== 'kis') for(let x = x0 + (k % 2); x < x1; x += 2) px(b, x, y - 1, MEV === 'sonbahar' ? (k % 2 ? '#9a7a3a' : '#b08a42') : k % 2 ? '#5e7e3c' : '#6e8e46'); }
         agac(b, Math.round(W * 0.86), z + Math.round((H - z) * 0.36), Math.round(H * 0.4), 94, ['#cdbfa4', '#a2957c']);
@@ -787,7 +901,11 @@ window.LIFEOS = window.LIFEOS || {};
         R(b, x0, y0, p.cw, p.ch, '#dad3c3'); R(b, x0, y0, Math.round(p.cw * 0.22), p.ch, '#b5ad9b');
         R(b, x0 - 2, y0 - 2, p.cw + 4, 2, '#8a6c52'); R(b, x0 - 2, y0 - 2, p.cw + 4, 1, '#a4866a');
         R(b, x0 + 2, y0 + 1, p.cw - 4, 2, '#8c8a80'); for(let i = x0 + 3; i < x0 + p.cw - 3; i += 2) px(b, i, y0 + 1, '#e6e0d2');
+        for(let y = y0 + 4, n = 0; y < p.cy; y += 3, n++){ R(b, x0 + Math.round(p.cw * 0.22), y, p.cw - Math.round(p.cw * 0.22), 1, '#cbc3b1'); R(b, x0, y, Math.round(p.cw * 0.22), 1, '#a59d8b'); }   // kesme taş sıraları
+        kemer(b, x0 + 1, p.cy - 1, p.cw - 2, Math.round(p.ch * 0.66) + 1, '#a59d8b');   // niş çerçevesi
         kemer(b, x0 + 2, p.cy - 1, p.cw - 4, Math.round(p.ch * 0.66), '#bdb4a0');
+        mukarnas(b, p.cx, p.cy - 1, p.cw - 4, Math.round(p.ch * 0.66), ['#d4ccba', '#bdb4a0', '#9a9282']);
+        R(b, p.cx - 2, p.cy - Math.round(p.ch * 0.42) - 4, 4, 2, '#8c8a80');   // ayna taşı (kitabe)
         R(b, p.cx - 1, p.cy - Math.round(p.ch * 0.42) - 1, 2, 1, '#a07a40');
         R(b, x0 - 2, p.cy, p.cw + 4, 3, '#c9c1ae'); R(b, x0 - 1, p.cy, p.cw + 2, 1, '#7fb0bf'); R(b, x0 - 2, p.cy + 3, p.cw + 4, 1, '#8e8878');
         const tx0 = x0 - 5; R(b, tx0, p.cy - 3, 3, 4, '#b0603e'); R(b, tx0 + 1, p.cy - 5, 1, 2, '#b0603e'); R(b, tx0 + 2, p.cy - 3, 1, 4, '#8a4a30'); px(b, tx0 + 3, p.cy - 4, '#8a4a30');   // testi
@@ -808,7 +926,7 @@ window.LIFEOS = window.LIFEOS || {};
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
         if(!o.kapali) for(let i = 0; i < W * z / 18; i++){ const f = hash(i, 101), x = Math.round(W * (0.52 + f * 0.48)), y = Math.round(z * (0.9 - f * 0.85) + (hash(i, 102) - 0.5) * H * 0.18); if(y > 0 && y < z - 3 && bay(x, y) < 0.5) px(b, x, y, o.gece ? '!#3a4670' : '!#7a7ea4'); }
-        sirt(b, { y:z, amp:H * 0.1, f:0.02, s:103, c:karis('#3a3f5c', hz, 0.3), i:karis('#4c5272', hz, 0.3) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.1, f:0.02, s:103, c:karis('#3a3f5c', hz, 0.3), i:karis('#4c5272', hz, 0.3) }); kat(b, 1);
         kat(b, 2); zemin(b, z + 1, ['#47495a', '#3f414f', '#373946', '#30323d'], 104);
         karaCadir(b, o, p.cx, p.cy, p.cw, p.ch);
         R(b, p.cx - 7, p.cy, 5, 1, '#5a4a42'); if(o.lamba) isik(b, p.cx - 5, p.cy - 1, Math.round(H * 0.12), '!#d8803e', 0.34);
@@ -824,7 +942,7 @@ window.LIFEOS = window.LIFEOS || {};
       },
       ciz(b, o){
         const { W, H } = o, z = o.ufuk, p = o.p, hz = o.pus;
-        sirt(b, { y:z, amp:H * 0.1, f:0.016, s:112, c:karis('#76808e', hz, 0.62), i:karis('#9ea6b0', hz, 0.56) }); kat(b, 1);
+        sirt(b, { ard:1, y:z, amp:H * 0.1, f:0.016, s:112, c:karis('#76808e', hz, 0.62), i:karis('#9ea6b0', hz, 0.56) }); kat(b, 1);
         kat(b, 2); zemin(b, z, ['#a9a682', '#9a9876', '#8b8a6a', '#7c7c5e'], 113);
         R(b, p.xa, z - p.bh, p.xb - p.xa, p.bh + 1, '#cbbb9c'); R(b, p.xa, z - p.bh, Math.round((p.xb - p.xa) * 0.08), p.bh + 1, '#a5967a'); R(b, p.xa - 1, z - p.bh - 1, p.xb - p.xa + 2, 1, '#998a6e');
         for(let y = z - p.bh + 3; y < z; y += 3) R(b, p.xa, y, p.xb - p.xa, 1, '#bfae8e');
@@ -839,13 +957,16 @@ window.LIFEOS = window.LIFEOS || {};
         for(let x = t0 + 1; x < t0 + tw - 1; x += 2) px(b, x, z - th + 1, '#9e8e70');
         const aw = tw - 6, ah = th - 5;
         kemer(b, t0 + 3, z - 1, aw, ah, '#8f7f64');
-        for(let j = 0; j < 4; j++) for(let i = 0; i < aw - 2; i += 2) px(b, t0 + 4 + i + (j % 2), z - ah + 2 + j * 2, '#ab9b7c');
+        kitabe(b, t0 + 2, t0 + tw - 2, z - th + 2, 3);
+        if(p.bh >= 18) [t0 - 6, t0 + tw + 5].forEach(x => yildiz8(b, x, z - p.bh + 5, '#2c5585', '#3ea0a8'));
+        mukarnas(b, t0 + 3 + aw / 2, z - 1, aw, ah, ['#e2d4b6', '#ab9b7c', '#6e6050']);
         kemer(b, p.kx - Math.round(aw * 0.25), z - 1, Math.max(2, Math.round(aw * 0.5)), Math.round(ah * 0.45), o.lamba ? '!#ecb464' : '#3a3028');
         const servi = (x, h) => { for(let j = 0; j < h; j++){ const w = Math.round(Math.sin(Math.min(1, j / h * 1.25) * Math.PI) * 2.2 + 0.5); R(b, x - w, z - j, w * 2 + 1, 1, '#3d5840'); R(b, x + 1, z - j, Math.max(0, w), 1, '#557256'); } px(b, x, z, '#4a3a2a'); };
         servi(Math.round(W * 0.53), Math.round(H * 0.4)); servi(Math.round(W * 0.555), Math.round(H * 0.3));
         const hw = Math.max(2, Math.round(H * 0.05));
         R(b, Math.round(W * 0.59), p.hy - 1, Math.round(W * 0.26), hw + 2, '#d8ccb0');
-        R(b, Math.round(W * 0.6), p.hy, Math.round(W * 0.24), hw, '#86aebb');
+        R(b, Math.round(W * 0.6), p.hy, Math.round(W * 0.24), hw, '#86aebb'); R(b, Math.round(W * 0.6), p.hy, Math.round(W * 0.24), 1, '#6e98a8');   // kenarın suya düşen gölgesi
+        for(let i = 0; i < 6; i++) R(b, Math.round(W * (0.62 + hash(i, 114) * 0.2)), p.hy + 1 + (i % Math.max(1, hw - 1)), 3 + (i % 3), 1, '#a6c8d0');
         p.yans.forEach(x => { if(x > W * 0.6 && x < W * 0.84) R(b, x - 1, p.hy + 1, 3, 1, '!#b8844c'); });   // havuzda yanan pencerelerin yansıması
         if(o.lamba){ isik(b, p.kx, z - 2, Math.round(H * 0.16), '!#d89a52', 0.26); isik(b, p.kx, z, Math.round(H * 0.14), '!#ecb464', 0.34, true); }
       } },
@@ -871,13 +992,13 @@ window.LIFEOS = window.LIFEOS || {};
         /* tahtın ardındaki perde: lacivert, altin kenar, seyrek altin baklava */
         const pw = Math.round(28 * u), px0 = p.tx - pw, px1 = p.tx + pw, py0 = p.dy + 3;
         R(b, px0, py0, px1 - px0, p.yz - py0, '#2c4570'); R(b, px0, py0, px1 - px0, 1, ALTIN); R(b, px0, py0, 1, p.yz - py0, ALTIN); R(b, px1 - 1, py0, 1, p.yz - py0, ALTIN);
-        for(let y = py0 + 5; y < p.yz - 3; y += 7) for(let x = px0 + 4 + ((y / 7) & 1) * 3; x < px1 - 3; x += 7){ px(b, x, y, '#3c5c8c'); px(b, x - 1, y + 1, '#3c5c8c'); px(b, x + 1, y + 1, '#3c5c8c'); px(b, x, y + 2, '#3c5c8c'); }
+        for(let y = py0 + 5; y < p.yz - 3; y += 7) for(let x = px0 + 4 + ((y / 7) & 1) * 3; x < px1 - 3; x += 7){ const c = karis(o.kece[0], '#2c4570', 0.45); px(b, x, y, c); px(b, x - 1, y + 1, c); px(b, x + 1, y + 1, c); px(b, x, y + 2, c); }   // perdede günün dokumasından baklava
         /* zemin ve halı: tahta uzanan kırmızı yol, altin kenar */
         R(b, 0, p.yz, W, H - p.yz, '#3c221e'); R(b, 0, p.yz, W, 1, TEK);
         for(let y = p.yz + 1; y < H; y++){
           const hw = Math.round(16.5 * z + (y - p.yz) * 1.6), x0 = p.tx - hw, x1 = p.tx + hw;
           R(b, x0, y, x1 - x0 + 1, 1, '#7e2a26'); px(b, x0 + 1, y, ALTIN); px(b, x1 - 1, y, ALTIN);
-          if((y - p.yz) % 4 === 2) for(let x = p.tx - 2; x <= p.tx + 2; x += 2) px(b, x, y, ALTIN);
+          const m = (y - p.yz) % 6; if(m >= 2 && m <= 4) ['xx.xx', 'x.x.x', '..x..'][m - 2].split('').forEach((c, i) => { if(c === 'x') px(b, p.tx - 2 + i, y, ALTIN); });   // koç boynuzu motifi
         }
         /* iki yanda tuğ (kuyruğu sakin çizer) ve dışta sancak */
         [-1, 1].forEach(yon => {
@@ -886,8 +1007,10 @@ window.LIFEOS = window.LIFEOS || {};
           const sx = p.tx + yon * Math.round(52 * u), st = p.yz - p.san, bw = Math.max(4, Math.round(8 * u)), bh = Math.round(24 * u), b0 = sx - (yon < 0 ? bw : 0) + (yon < 0 ? 0 : 1);
           R(b, sx, st, 1, p.san, '#5a3c26'); px(b, sx, st - 1, '#e8c872');
           R(b, b0 - (yon < 0 ? 1 : 0), st + 2, bw + 1, 1, ALTIN);
-          for(let j = 0; j < bh; j++){ const kes = j > bh - 3 ? j - (bh - 3) : 0; for(let i = 0; i < bw; i++){ if(kes && Math.abs(i - (bw - 1) / 2) < kes) continue; px(b, b0 + i, st + 3 + j, i === 0 || i === bw - 1 ? o.kece[2] : o.kece[0]); } }
-          const ex = b0 + (bw >> 1), ey = st + 3 + Math.round(bh * 0.38); px(b, ex, ey - 1, ALTIN); px(b, ex - 1, ey, ALTIN); px(b, ex + 1, ey, ALTIN); px(b, ex, ey + 1, ALTIN);
+          for(let j = 0; j < bh; j++){ const kes = j > bh - 3 ? j - (bh - 3) : 0; for(let i = 0; i < bw; i++){ if(kes && Math.abs(i - (bw - 1) / 2) < kes) continue; px(b, b0 + i, st + 3 + j, i === 0 || i === bw - 1 ? (yon < 0 ? '#8e2925' : '#1e3a62') : yon < 0 ? '#b8352f' : '#2c5585'); } }
+          const ex = b0 + (bw >> 1), ey = st + 3 + Math.round(bh * 0.38);
+          if(yon < 0) [[-1, -1], [-2, 0], [-1, 1], [1, 0]].forEach(([i, j]) => px(b, ex + i, ey + j, '#f4ece0'));   // al sancak: ay yıldız
+          else spr(b, ex - 2, ey - 2, KURT, { y:ALTIN });   // gök sancak: altin kurt başı
         });
         /* divan: iki basamak, taht arkalığı, kolçaklar, oturan hakan */
         R(b, p.tx - Math.round(16.5 * z), p.yz - 2 * z, 33 * z + 1, 2 * z, '#5a3c26'); R(b, p.tx - Math.round(16.5 * z), p.yz - 2 * z, 33 * z + 1, 1, ALTIN);
@@ -910,7 +1033,7 @@ window.LIFEOS = window.LIFEOS || {};
           isik(b, p.mx, p.my - 3 * z, Math.round(H * 0.1), '!#f0a050', 0.16);
           /* tündükten inen ışık: sağ üstten tahta, titreşimli ve hafif */
           const y0 = Math.round(H * 0.22);   // arama kutusunun (üst çubuk) altinda başlar, yavaşça belirir
-          for(let y = y0; y < at; y++){ const cx = p.tx + Math.round(16 * u) - y * 0.2, w = 5 * u + y * 0.08, f = Math.min(1, (y - y0) / 10); for(let x = Math.round(cx - w); x < cx + w; x++){ const q = Math.abs(x - cx) / w; if(bay(x, y) < (q < 0.6 ? 0.5 : 0.25) * f) ortu(b, x, y, '!#ffe2a8', 0.2); } }
+          for(let y = y0; y < at; y++){ const cx = p.tx + Math.round(16 * u) - y * 0.2, w = 5 * u + y * 0.08, f = Math.min(1, (y - y0) / 10); for(let x = Math.round(cx - w); x < cx + w; x++){ const q = Math.abs(x - cx) / w; if(f >= 1 || bay(x, y) < f) ortu(b, x, y, '!#ffe2a8', q < 0.55 ? 0.2 : 0.11); } }   // 2026-11-18e: dolu iki tonlu huzme (eskiden dama)
         }
       } },
   };
