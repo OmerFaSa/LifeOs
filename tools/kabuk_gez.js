@@ -205,11 +205,11 @@ async function goruntu(p, ad, sec = {}) {
       const hc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'light' }), hp = await hc.newPage();
       hp.on('pageerror', e => hata.push('konu: ' + e.message));
       await hp.goto(T + '/kabuk/#/alan/tarih');
-      await hp.waitForSelector('.alan-bolum a[href="#/alan/tarih?b=konular"]');
-      dene('alan sayfası: bölüm sekmeleri Dersler, Konular, Aşamalar; Dersler seçili', JSON.stringify(await hp.$$eval('.alan-bolum a', l => l.map(a => [a.textContent, a.getAttribute('aria-current')])))
-        === JSON.stringify([['Dersler', 'page'], ['Konular', null], ['Aşamalar', null]]) && (await hp.locator('.dallar').count()) === 0);
-      await hp.click('.alan-bolum a[href="#/alan/tarih?b=konular"]');
       await hp.waitForSelector('.dallar > .b-acilir');
+      // 2026-11-18c (sahip: «tek sayfa»): sekme yok; sırayla neredesin kartı, Dersler, Aşamalar, Konu haritası
+      dene('alan sayfası tek sayfa: sekme yok; neredesin kartı, Dersler, Aşamalar, Konu haritası sırayla', (await hp.locator('.alan-bolum').count()) === 0
+        && JSON.stringify(await hp.$$eval('.govde > .asama-ozet, .govde > .b-bolum > .b-bolum__ust h2', l => l.map(e => e.matches('.asama-ozet') ? 'kart' : e.textContent)))
+        === JSON.stringify(['kart', 'Dersler', 'Aşamalar', 'Konu haritası']), JSON.stringify(await hp.$$eval('.govde > .asama-ozet, .govde > .b-bolum > .b-bolum__ust h2', l => l.map(e => e.textContent.slice(0, 20)))));
       const dallar = await hp.$$eval('.dallar > .b-acilir', l => l.map(d => [d.getAttribute('data-dal'), d.open]));
       dene('konu haritası: Tarih\'in dalları dosyadaki sırayla, hepsi kapalı başlar', JSON.stringify(dallar.map(x => x[0])) === JSON.stringify(TH.dallar.map(d => d.id)) && dallar.every(x => !x[1]), JSON.stringify(dallar));
       const ilkBag = TH.dallar[0].bolumler[0].konular.find(k => k.ders), bagsiz = TH.dallar[0].bolumler[0].konular.find(k => !k.ders && !k.unite);
@@ -261,7 +261,9 @@ async function goruntu(p, ad, sec = {}) {
     dene('Felsefe: genel bakış: sıradaki kartı yok; aşamanın özeti tek ilerleme çizgisiyle, sıradaki ders listede işaretli, aşamanın üniteleri altında',
       (await p.locator('.sira').count()) === 0 && (await p.locator('.govde [role=progressbar]').count()) === 1 && (await p.locator('.asama-ozet [role=progressbar]').count()) === 1
       && (await p.textContent('a.b-ders--sira .b-ders__baslik')).indexOf(u1.dersler[0].ad) >= 0 && /Aşama 1/.test(await p.textContent('#asama-ad')));
-    dene('Felsefe: üç ünite + aşama kapısı çizildi', (await p.locator('.yol > .b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
+    // 2026-11-18c: kapılar (sınav) dersler bitmeden görünmez
+    dene('Felsefe: üç ünite çizildi; ünite ve aşama kapısı dersler bitmeden görünmez', (await p.locator('.yol > .b-acilir').count()) === y.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 0
+      && (await p.locator('.yol a[href^="#/alan/felsefe/kapi/"]').count()) === 0);
     dene('Felsefe: ikinci ünite kilitli', (await p.locator('.yol > .b-acilir').nth(1).locator('.b-ders--kilitli, .b-satir--kilitli').count()) >= 3);
     dene('Felsefe: eski modül bağlantısı yok (kapanış)', (await p.locator('a[href="/esp/"], a[href*="/dist/"]').count()) === 0);
     await goruntu(p, 'felsefe');
@@ -273,11 +275,16 @@ async function goruntu(p, ad, sec = {}) {
       dene('ders ' + (i + 1) + ': başlık ve ' + d.metin.length + ' paragraf', (await p.textContent('article.ders h1')) === d.ad && (await p.locator('article.ders > p').count()) >= d.metin.length + 1);
       const a = d.alistirmalar[0], yanlis = harf[(harf.indexOf(a.dogru) + 1) % a.sec.length];
       const soru = p.locator('.b-soru[data-soru="' + a.id + '"]');
+      // öğrenme ekranı (2026-11-18c): girişte soru yok, uygulama çubuğu yok; sorular sondaki «Kendini dene» adımında (?dene)
+      if (i === 0) dene('ders 1: öğrenme ekranı: soru yok, uygulama sekmeleri yok, sonda «Kendini dene» bağlantısı', (await p.locator('.b-soru').count()) === 0 && (await p.locator('.ust__sekmeler').count()) === 0
+        && (await p.getAttribute('a.ders__dene', 'href')) === '#/alan/felsefe/ders/' + d.id + '?dene');
+      await p.click('a.ders__dene');
+      await p.waitForSelector('.b-soru[data-soru="' + a.id + '"]');
       if (i === 0) {
-        // hiç cevaplamadan «Bitir»: yumuşak onay çıkar, adres değişmez; «Alıştırmalara dön» dersi geri çizer (2026-11-16b)
+        // soru adımında hiç cevaplamadan «Bitir»: yumuşak onay çıkar, adres değişmez; «Alıştırmalara dön» soruları geri çizer (2026-11-16b)
         await p.click('[data-ac="okudum"]');
         await p.waitForSelector('.ders__sor');
-        dene('ders 1: alıştırmalar cevaplanmadan «Bitir» önce sorar, geçmez', /henüz cevaplanmadı/.test(await p.textContent('.ders__sor')) && (await p.evaluate(() => location.hash)) === '#/alan/felsefe/ders/' + d.id
+        dene('ders 1: soru adımında cevaplanmadan «Bitir» önce sorar, geçmez', /henüz cevaplanmadı/.test(await p.textContent('.ders__sor')) && (await p.evaluate(() => location.hash)) === '#/alan/felsefe/ders/' + d.id + '?dene'
           && (await p.locator('[data-ac="okudum"][data-yine]').count()) === 1);
         await p.click('[data-ac="alistirmaya"]');
         await p.waitForSelector('[data-ac="okudum"]:not([data-yine])');
@@ -320,7 +327,11 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/alan/felsefe');
     await p.waitForSelector('.b-acilir');
     dene('kayıt yenilemeden sonra duruyor: 3/9 ders', (await ilerleme(p)) === '3/9');
-    dene('ikinci ünite açıldı: ilk dersi ve kapısı bağlantı, sonraki iki ders kilitli', (await p.locator('.yol > .b-acilir').nth(1).locator('a.b-ders, a.b-satir').count()) === 2 && (await p.locator('.yol > .b-acilir').nth(1).locator('.b-ders--kilitli').count()) === 2);
+    dene('ikinci ünite açıldı: ilk dersi bağlantı (kapısı dersler bitince), sonraki iki ders kilitli', (await p.locator('.yol > .b-acilir').nth(1).locator('a.b-ders, a.b-satir').count()) === 1 && (await p.locator('.yol > .b-acilir').nth(1).locator('.b-ders--kilitli').count()) === 2);
+    // «Son çalıştıkların» (2026-11-18c): okunan dersler en yeni üstte, «bugün okundu» ve alıştırma sonucu
+    dene('alan sayfası: «Son çalıştıkların» okunan üç dersi en yeni üstte listeler', (await p.locator('section[aria-labelledby="son-baslik"] li').count()) === 3
+      && (await p.textContent('section[aria-labelledby="son-baslik"] li:first-child')).indexOf(u1.dersler[u1.dersler.length - 1].ad) >= 0 && /bugün okundu · alıştırma \d\/\d doğru/.test(await p.textContent('section[aria-labelledby="son-baslik"]')),
+      await p.textContent('section[aria-labelledby="son-baslik"]').catch(() => 'yok'));
     await p.goto(T + '/kabuk/#/alan/felsefe/kapi/' + y.id);
     await p.waitForSelector('.b-bos');
     dene('aşama kapısı üniteler bitmeden kilitli', /bütün ünite kapıları/.test(await p.textContent('.b-bos')));
@@ -334,7 +345,7 @@ async function goruntu(p, ad, sec = {}) {
       // görünüm geçişi bitene kadar ekranda önceki sayfa da durur: yeni sayfa çizilmiş ve geçiş bitmiş olmalı
       await p.waitForFunction(a => document.getElementById('sayfa').getAttribute('data-ciz') === a && !document.documentElement.hasAttribute('data-gecis'), alan);
       await p.waitForSelector('.b-acilir');
-      dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite + aşama kapısı', (await p.locator('.yol > .b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 1);
+      dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite, aşama kapısı henüz görünmez', (await p.locator('.yol > .b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 0);
       // kilitli üniteler kapalı gelir (2026-11-16 sadelik): yeni alanda yalnız üzerinde çalışılan ilk ünite açık
       dene(alan + ': yalnız ilk ünite açık gelir', (await p.locator('.yol > details.b-acilir[open]').count()) === 1);
       dene(alan + ': ilk ders listede «sıradaki», ona götürür', (await p.getAttribute('a.b-ders--sira', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
@@ -343,6 +354,7 @@ async function goruntu(p, ad, sec = {}) {
       dene(alan + ': ilk ders açılır', (await p.textContent('article.ders h1')) === d1.ad);
       const a = d1.alistirmalar.find(x => x.tur === 'secmeli');
       if (a) {
+        await p.click('a.ders__dene'); await p.waitForSelector('.b-soru[data-soru="' + a.id + '"]');
         await p.click('.b-soru[data-soru="' + a.id + '"] [data-h="' + a.dogru + '"]');
         dene(alan + ': alıştırma doğru cevabı tanır', /Doğru/.test(await p.textContent('.b-soru[data-soru="' + a.id + '"] .b-soru__sonuc')));
       }
@@ -1113,8 +1125,9 @@ async function goruntu(p, ad, sec = {}) {
     await yp.goto(T + '/kabuk/#/alan/dil');
     await yp.waitForSelector('[data-yer-bul]');
     await goruntu(yp, 'yer-1-alan-secim', { yalniz: YER });
-    // genel bakış: tek ana düğme «Başla»; «Seviyemi bul» düğme değil küçük bağlantı ve kendiliğinden açılmaz (2026-11-16b)
-    dene('yerleştirme: boş alanda ilk ders «sıradaki» ve küçük «seviyemi bul» bağlantısı; sorular kendiliğinden açılmaz', (await yp.locator('.asama-ozet .b-dugme').count()) === 0
+    // genel bakış: tek ana düğme «Öğrenmeye başla» ilk derse; «Seviyemi bul» düğme değil küçük bağlantı ve kendiliğinden açılmaz (2026-11-16b, 2026-11-18c)
+    dene('yerleştirme: boş alanda ilk ders «sıradaki», tek düğme «Öğrenmeye başla», küçük «seviyemi bul» bağlantısı; sorular kendiliğinden açılmaz', (await yp.locator('.asama-ozet .b-dugme').count()) === 1
+      && (await yp.getAttribute('.asama-ozet .b-dugme', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id && /Öğrenmeye başla/.test(await yp.textContent('.asama-ozet .b-dugme'))
       && (await yp.getAttribute('[data-yer-bul]', 'href')) === '#/alan/dil/yer/1' && (await yp.evaluate(() => location.hash)) === '#/alan/dil' && (await yp.locator('form.kapi').count()) === 0
       && (await yp.getAttribute('a.b-ders--sira', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id);
     await yp.click('[data-yer-bul]');

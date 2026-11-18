@@ -840,12 +840,10 @@ a.konu:hover{ background:var(--yuzey-2); }
 
 /* ===== Tur 2026-11-17d (sahip: alan sayfası «daha minimalist, sade ve bölümlenebilir»; aşamalar «çok daha güzel»; Bugün'de büyük kart olmasın,
    alanlar «ilerleme gibi bir bölümde») ===== */
-/* bölüm sekmeleri: tek parça seçici, seçili olan yüzey rengiyle kalkar */
-.alan-bolum{ display:inline-flex; justify-self:start; width:max-content; max-width:100%; gap:2px; padding:3px; margin:0 0 var(--a4); border-radius:var(--kose-tam); background:var(--yuzey-2); }
-.alan-bolum a{ display:inline-flex; align-items:center; min-height:36px; padding:0 var(--a4); border-radius:var(--kose-tam); color:var(--yazi-2); font-size:.9375rem; font-weight:600; text-decoration:none;
-  transition:background var(--hizli) var(--akis), color var(--hizli) ease, box-shadow var(--hizli) ease; }
-.alan-bolum a:hover{ color:var(--yazi); }
-.alan-bolum a[aria-current="page"]{ color:var(--alan-ton); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+/* tek sayfa (2026-11-18c): bölümler alt alta, aralarında nefes */
+.govde:has(> .asama-ozet) > .b-bolum{ margin-top:var(--a5); }
+.govde:has(> .asama-ozet) > .asama-ozet{ margin-bottom:0; }
+:root .govde:has(> .asama-ozet) > .b-bolum > .b-bolum__ust h2{ font:600 var(--yz-h3) var(--baslik-serif); letter-spacing:-.005em; color:var(--yazi); }
 /* aşamanın özeti: küçük üst etiket, ad, hedef, tek ilerleme */
 .asama-ozet{ display:grid; gap:var(--a2); margin:0 0 var(--a6); padding:var(--a5); border-radius:var(--kose); box-shadow:var(--golge-yumusak);
   background:linear-gradient(110deg, color-mix(in srgb, var(--alan-ton) 9%, var(--yuzey)), var(--yuzey) 70%); }
@@ -854,6 +852,11 @@ a.konu:hover{ background:var(--yuzey-2); }
 .asama-ozet__ad span{ display:block; margin-bottom:2px; font-size:var(--yz-k); font-weight:600; letter-spacing:.04em; color:var(--soluk); }
 .asama-ozet__hedef{ margin:0; max-width:60ch; color:var(--yazi-2); }
 .asama-ozet__ikincil{ font-size:var(--yz-k); color:var(--yazi-2); }
+/* şu anki bölüm (ünite · ders k/m) ve sıradaki ders: iki küçük etiketli satır, kartın içinde ince ayrımla */
+.asama-ozet__bolum{ display:flex; flex-wrap:wrap; gap:var(--a2) var(--a6); margin-top:var(--a2); padding-top:var(--a3); border-top:1px solid color-mix(in srgb, var(--yazi) 8%, transparent); }
+.asama-ozet__bolum p{ margin:0; font-weight:600; color:var(--yazi); }
+.asama-ozet__bolum span{ display:block; font-size:.75rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--soluk); }
+.asama-ozet .b-eylemler{ margin-top:var(--a3); }
 /* sınav bölümleri (TYT, AYT) ve ders kartları */
 .ders-bolum + .ders-bolum{ margin-top:var(--a6); }
 .ders-bolum__ad{ margin:0 0 var(--a3); font-size:var(--yz-k); font-weight:700; letter-spacing:.12em; color:var(--soluk); }
@@ -896,7 +899,7 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 /* Bugün › İlerleme: kartın notunun altında ince çizgi */
 .b-karsilama__cizgi{ display:block; width:min(320px, 100%); height:3px; margin-top:var(--a2); border-radius:var(--kose-tam); background:color-mix(in srgb, var(--alan-ton) 16%, var(--yuzey-2)); overflow:hidden; }
 .b-karsilama__cizgi i{ display:block; height:100%; border-radius:inherit; background:var(--alan-ton); }
-:root[data-kontrast="yuksek"] :is(.ders-kart, .asama-kart, .alan-bolum){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; }
+:root[data-kontrast="yuksek"] :is(.ders-kart, .asama-kart){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; }
 .dallar + .dallar__sinav{ margin-top:var(--a6); }
 
 /* ===== Tur 2026-11-17e · sayfalar (belgeler/ekip/sadelesme/tur-20261117e/sayfalar.md; sahibin isteği: «çok büyük, çok güzel, minimalistliği bozmadan») =====
@@ -1049,3 +1052,18 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 /* koyuda amblemin koyu dış çizgisi koyu kutuda kaybolmasın: çevresinde ince açık hale (kutu zeminlerine dokunmaz) */
 :root[data-theme="dark"] .b-simge > img{ filter:drop-shadow(0 0 1px color-mix(in srgb, var(--yazi) 55%, transparent)); }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .b-simge > img{ filter:drop-shadow(0 0 1px color-mix(in srgb, var(--yazi) 55%, transparent)); } }
+/* Öğrenme ekranı (2026-11-18c, sahip: «derse tıklayınca bambaşka bir ekran»): uygulama çubuğu yok (yalnız konum), alan tonlu sakin zemin, ders ortada kâğıt sayfa.
+   Sorular «Kendini dene» adımında (?dene), aynı kâğıtta. */
+.ust--ogren{ min-height:52px; }
+:root .ust--ogren > .konum{ margin:0 auto; max-width:760px; }
+:root:has(#sayfa > .ust--ogren), :root:has(#sayfa > .ust--ogren) body, #sayfa:has(> .ust--ogren){ background:color-mix(in srgb, var(--alan-ton) 7%, var(--bg)); }
+#sayfa:has(> .ust--ogren) > .ust--duz{ background:color-mix(in srgb, var(--alan-ton) 7%, var(--bg)); }
+:root article.ders:not([data-onay-sayfa]){ max-width:760px; margin:var(--a4) auto var(--a7); padding:var(--a7) var(--a7) var(--a6); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-orta); }
+@media (max-width:640px){ :root article.ders:not([data-onay-sayfa]){ margin:var(--a2) 0 var(--a6); padding:var(--a5) var(--a4); } }
+.ders__dene{ display:flex; align-items:center; justify-content:space-between; gap:var(--a3); width:min(100%, 420px); padding:var(--a3) var(--a4); border-radius:var(--kose); text-align:left; text-decoration:none;
+  font-size:var(--yz-k); color:var(--yazi-2); background:color-mix(in srgb, var(--alan-ton) 9%, var(--yuzey-2)); transition:box-shadow var(--hizli) var(--akis); }
+.ders__dene b{ display:block; font-size:var(--yz); color:var(--yazi); }
+.ders__dene svg{ width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2; }
+.ders__dene:hover{ box-shadow:var(--golge-yumusak); }
+.ders--dene .ders__soru + .ders__soru{ margin-top:var(--a3); }
+:root:has(#sayfa > .ust--ogren) .alt-cubuk{ display:none; } /* telefonda da yalnız ders: alt çubuk yok, çıkış konum satırındaki ‹ alan */

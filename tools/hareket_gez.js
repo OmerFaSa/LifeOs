@@ -136,7 +136,7 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
       // 5 · cevap: metin anında doğru; yanlışta sarsma, doğruda işaret çizilir (yalnız görüntü)
       await p.goto(T + '/kabuk/#/alan/felsefe'); await p.waitForSelector('.govde [role=progressbar]'); await p.waitForTimeout(1200);
       const ilkDeger = await p.$$eval('.govde [role=progressbar]', l => l.map(x => x.getAttribute('aria-valuenow')).join(','));
-      await p.evaluate(h => { location.hash = h; }, '#/alan/felsefe/ders/' + d1.id); await p.waitForSelector('article.ders h1'); await bekleGecis(p); await p.waitForTimeout(1200);
+      await p.evaluate(h => { location.hash = h; }, '#/alan/felsefe/ders/' + d1.id + '?dene'); await p.waitForSelector('article.ders .b-soru'); await bekleGecis(p); await p.waitForTimeout(1200);
       const soru = '.b-soru[data-soru="' + a1.id + '"]', yanlis = harf[(harf.indexOf(a1.dogru) + 1) % a1.sec.length];
       const yn = await p.evaluate(([s, h]) => { document.querySelector(s + ' [data-h="' + h + '"]').click();
         const metin = document.querySelector(s + ' .b-soru__sonuc').textContent;
@@ -154,7 +154,7 @@ const bekleGecis = p => p.waitForFunction(() => !document.documentElement.hasAtt
 
       // 6 · ders bitince ilerleme çubuğu dolar; aria-valuenow anında yeni değerde
       await p.click('[data-ac="okudum"]'); if (await p.locator('[data-ac="okudum"][data-yine]').count()) await p.click('[data-ac="okudum"][data-yine]'); // cevaplanmamış alıştırma: yumuşak onay
-      await p.waitForFunction(h => location.hash !== h, '#/alan/felsefe/ders/' + d1.id); await bekleGecis(p); await p.waitForTimeout(600);
+      await p.waitForFunction(h => location.hash !== h, '#/alan/felsefe/ders/' + d1.id + '?dene'); await bekleGecis(p); await p.waitForTimeout(600);
       await p.evaluate(() => { location.hash = '#/alan/felsefe'; }); await p.waitForSelector('.govde [role=progressbar]');
       const il = await p.evaluate(() => new Promise(r => requestAnimationFrame(() => r({
         deger: [].map.call(document.querySelectorAll('.govde [role=progressbar]'), x => x.getAttribute('aria-valuenow')).join(','),
