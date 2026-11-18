@@ -3,7 +3,7 @@
  * işler, sabit bloklar), metin alanı olan kayıtlar ve komut çubuğunun bildiği yerler ve ayarlar. Yerel ve ağsız; katlama kabuğunkidir (Kabuk.katla: ç ğ ı İ ö ş ü).
  * Ders dizini ilk aramada bir kez kurulur; onay değişip bir aşama yeniden kurulursa yalnız o zaman yenilenir.
  * Özel notlar da aranır (sahibin kendi ekranı); bu sayfa hiçbir şeyi King'e ya da ağa vermez.
- * Saf kısım Node'da test edilir (kabuk/kabuk.test.js); sayfa yalnız tarayıcıda. kabuk.js'ten ÖNCE yüklenir. */
+ * Saf kısım Node'da test edilir (kabuk/kabuk.test.js); sayfa yalnız tarayıcıda. Açılışta değil: kabuk.js (SONRA) #/motor/arama'ya ilk girişte yükler. */
 (function (kok) {
   'use strict';
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};

@@ -270,6 +270,31 @@
     var yukle = function () { var s = d.createElement('script'); s.src = 'an.js'; d.head.appendChild(s); };
     if (kok.requestIdleCallback) requestIdleCallback(yukle, { timeout: 3000 }); else setTimeout(yukle, 1500);
   });
+  // Açılışta gerekmeyen ekranlar da açılış yükünde değil (tur-20261118/yuk.md): yer (ya da «yer/alt») → sırayla yüklenecek betikler.
+  // rota() modülü yüklü değilse iskelet çizer, yükler, adres hâlâ aynıysa yeniden çizer. Açılıştan ~4 sn sonra boşta önceden çekilir:
+  // açılışın alan paketiyle ve an.js'le yarışmaz, ilk ziyarette bekleme olmaz. Veri tasarrufu açıksa önceden çekilmez.
+  var SONRA = { hesap: ['hesap.js', 'hesap-giris.js', 'hesap-baglanti.js', 'hesap-yonetim.js'], arama: ['arama.js'], 'soru/deneme': ['deneme.js'] };
+  var sonraIs = {}, yuklu = {}, sonraHata = {};
+  function sonraHazir(ad) { return SONRA[ad].every(function (y) { return yuklu[y]; }); }
+  function sonraYukle(ad) { // biri ötekinin ardından (hesap-*.js yüklenirken Kabuk.Hesap'ı ister); yüklenen yeniden yüklenmez
+    return sonraIs[ad] || (sonraIs[ad] = SONRA[ad].reduce(function (p, y) {
+      return p.then(function () {
+        return yuklu[y] || new Promise(function (tamam, hata) {
+          var s = d.createElement('script'); s.src = y;
+          s.onload = function () { yuklu[y] = 1; tamam(); };
+          s.onerror = function () { s.remove(); hata(new Error(y)); };
+          d.head.appendChild(s);
+        });
+      });
+    }, Promise.resolve()).catch(function (e) { delete sonraIs[ad]; throw e; }));
+  }
+  if (kok.addEventListener && d.createElement) kok.addEventListener('load', function () {
+    if (navigator.connection && navigator.connection.saveData) return;
+    setTimeout(function () {
+      var cek = function () { Object.keys(SONRA).forEach(function (ad) { sonraYukle(ad).catch(function () { /* ziyarette yeniden denenir */ }); }); };
+      if (kok.requestIdleCallback) requestIdleCallback(cek, { timeout: 3000 }); else cek();
+    }, 4000);
+  });
   var hataSay = 0;
   function hataGonder(tur, ileti, yigin) {
     if (hataSay++ >= 5) return;
@@ -466,7 +491,7 @@
       // çalışılan alanın kartı sıradaki adımı söyler (eski büyük kartın işi); öbürleri kısa açıklamasını
       var ilerleme_ = bu && a ? 'Sıradaki: ' + (a.tur === 'kapi' ? (a.unite ? 'ünite kapısı' : 'aşama kapısı') : a.ad) : '';
       return { ad: y.ad, not: dal ? dal.ad + (ilerleme_ ? ' · ' + ilerleme_ : '') : ilerleme_ || y.aciklama, href: y.yol, simge: y.id, renk: ALAN_RENK[y.id],
-        yuzde: bu && od.deger ? Math.round(100 * od.deger / od.toplam) : null, _bu: !!bu };
+        yuzde: bu ? Math.round(100 * (od.deger || 0) / od.toplam) : null, _bu: !!bu }; // %0'da da: kabuk.css bu kartı öne çıkarır
     }).sort(function (x, y) { return y._bu - x._bu; }).map(function (x) { delete x._bu; return x; });
   }
   // manzara: sahibin piksel sahnesi (brand/ortak/piksel-doga.js, sunucu /piksel-doga.js verir); süstür, çizilmezse gök rengi kalır.
@@ -478,7 +503,7 @@
     if (!k || !s) return;
     s.style.marginTop = '';
     if (innerWidth < 641) return;
-    var fark = k.getBoundingClientRect().bottom + 8 - s.getBoundingClientRect().top;
+    var fark = k.getBoundingClientRect().bottom + 24 - s.getBoundingClientRect().top;
     if (fark > 0) s.style.marginTop = Math.round(parseFloat(getComputedStyle(s).marginTop) + fark) + 'px';
   }
   var manzaraIstendi = false;
@@ -608,7 +633,7 @@
     ayarGozcu = new IntersectionObserver(function (l) {
       l.forEach(function (g) { gorunen[g.target.getAttribute('aria-labelledby')] = g.isIntersecting; });
       var ilk = A.GRUPLAR.filter(function (g) { return gorunen['grup-' + g.id]; })[0];
-      if (ilk) [].forEach.call(menu.children, function (a) { if (a.getAttribute('data-grup') === ilk.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+      if (ilk) [].forEach.call(menu.children, function (a) { if (a.getAttribute('data-grup') === ilk.id) { a.setAttribute('aria-current', 'true'); if (menu.scrollWidth > menu.clientWidth) menu.scrollTo({ left: a.offsetLeft - menu.clientWidth / 2 + a.offsetWidth / 2, behavior: 'smooth' }); } else a.removeAttribute('aria-current'); }); // telefonda yatay şeritte seçili grup ortada
     }, { rootMargin: '-80px 0px -55% 0px' });
     A.GRUPLAR.forEach(function (g) { var s = d.getElementById('grup-' + g.id); if (s) ayarGozcu.observe(s.closest('section') || s); });
   }
@@ -766,7 +791,7 @@
     var konum = !a ? alanAd + 'Aşama ' + f.n : kapi ? alanAd + (u.ad || 'Ünite') + ' · ünite kapısı' : alanAd + (u.ad || '') + (ud.length ? ' · ders ' + (ud.indexOf(a.id) + 1) + '/' + ud.length : '');
     var baslik = !a ? (dr.asama.gecti ? 'Aşama tamamlandı' : dr.asama.ad) : kapi ? 'Ünitenin kapı sınavı' : og.ad || '';
     var eylem = a ? { metin: il && il.deger ? 'Devam et' : 'Başla', tur: 'ana', href: adimYolu(a) } : o.sonraki ? { metin: 'Sonraki aşama', tur: 'ana', href: asamaYolu(o.sonraki.n) } : null;
-    return '<section class="sira" aria-labelledby="alan-sira"><p class="sira__ust">' + kac(konum) + '</p>' +
+    return '<section class="sira"' + (o.alan && ALAN_RENK[etkinAlan] ? ' data-ton="' + ALAN_RENK[etkinAlan] + '"' : '') + ' aria-labelledby="alan-sira"><p class="sira__ust">' + kac(konum) + '</p>' +
       '<h2 class="sira__baslik" id="alan-sira">' + kac(baslik) + '</h2>' +
       (il && il.toplam ? '<div class="sira__cizgi">' + B.ilerleme({ ad: 'Okunan ders', deger: il.deger, toplam: il.toplam }) + '</div>' : '') +
       '<div class="sira__eylem">' + B.eylemler([eylem]) + (o.yeni ? '<a class="sira__ikincil" href="' + F() + '/yer/1" data-yer-bul="">Biliyorsan: seviyemi bul</a>' : '') + '</div></section>';
@@ -910,10 +935,17 @@
     if (tasindi) { etkinYap(yer.id); if (!al()) alanYukle(yer.id).then(function () { if (sayfaEl.getAttribute('data-yer') === yer.id) rota(); }); }
     // aşama: «asama/2» ya da ders/kapı kimliğinin ikinci parçası (felsefe.2.1.3 → 2)
     if (fa) { var an = +(fa[1] === 'asama' ? fa[2] : fa[2].split('.')[1]); if (an >= 1) seciliAsama[yer.id] = an; }
+    // ilk kullanımda yüklenen ekran (SONRA): yüklenene dek iskelet; yükleme düşerse bir kez sade hata, sonraki çizim yeniden dener
+    var sk = alt && SONRA[yer.id + '/' + alt[2]] ? yer.id + '/' + alt[2] : SONRA[yer.id] ? yer.id : null, skHata = sk && sonraHata[sk], skBekle = sk && !skHata && !sonraHazir(sk);
+    if (skHata) delete sonraHata[sk];
+    if (skBekle) sonraYukle(sk).then(function () { if (sayfaEl.getAttribute('data-yol') === parca[0]) rota(); },
+      function () { sonraHata[sk] = 1; if (sayfaEl.getAttribute('data-yol') === parca[0]) rota(); });
     if (yok_) html = cubuk(false) + '<div class="govde govde--yok">' + B.bos({ baslik: 'Bu sayfa yok', metin: 'Adres değişmiş ya da yanlış yazılmış olabilir.', eylem: { metin: 'Bugün\'e dön', tur: 'ana', href: '#/bugun' } }) + '</div>';
     else if (fa && fa[1] === 'asama') html = sayfaAlan(yer);
     else if (fa && fa[1] === 'yer') html = sayfaYerlestir(fa[2]);
     else if (fa) html = fa[1] === 'ders' ? sayfaDers(fa[2]) : sayfaKapi(fa[2]);
+    else if (skHata) html = ust(kirinti(yer)) + '<div class="govde">' + B.bos({ baslik: 'Bu bölüm yüklenemedi', metin: 'Bağlantı kesilmiş olabilir. Bölüme yeniden girince tekrar denenir.', eylem: { metin: 'Bugün\'e dön', tur: 'ana', href: '#/bugun' } }) + '</div>';
+    else if (skBekle) html = ust(kirinti(yer)) + '<div class="govde">' + ISKELET + '</div>';
     else if (ek) html = ek(yer, alt ? alt[2] : '');
     else if (yer.id === 'bugun') html = sayfaBugun();
     else if (yer.id === 'harita') html = sayfaHarita(yer);

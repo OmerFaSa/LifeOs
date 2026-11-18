@@ -5,7 +5,7 @@
  *   puan ve sıra  : puanTahmini (yalnız Akademik; her sayı motorun etiketiyle, tahmin hep tahmin)
  * Kayıt (karma testle aynı yol): lifeos.soru.deneme (süren), lifeos.soru.denemeler (biten denemeler, motorun Deneme biçimi),
  * prova sonucu lifeos.soru.gecmis'e karma testle aynı biçimde. Süre duvar saatinden (sahibin 2026-11-01 kararı): sekme kapalıyken de akar.
- * araclar.js'ten SONRA, kabuk.js'ten ÖNCE yüklenir. Sıfır bağımlılık; Node'da module.exports (yalnız saf kısım). */
+ * Açılışta değil: kabuk.js (SONRA) ilk denemede yükler (araclar.js çoktan yüklüdür). Sıfır bağımlılık; Node'da module.exports (yalnız saf kısım). */
 (function (kok) {
   'use strict';
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};

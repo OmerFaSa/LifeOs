@@ -822,5 +822,18 @@ t('king: sayfa King\'in Claude uygulamasında olduğunu, neyi gördüğünü ve 
   esit(H.YERLER.filter(y => y.durum === 'plan').map(y => y.id), [], 'motoru yazılmamış yer kalmadı');
 });
 
+// ---- İlk kullanımda yüklenen ekranlar (tur-20261118/yuk.md): açılış yükünde değiller, kabuk.js'teki SONRA tablosu onları bilir ----
+t('açılış yükü: SONRA tablosundaki betikler index.html\'de yok, diskte var; tablonun yerleri haritada', () => {
+  const fs = require('fs'), path = require('path'), kaynak = fs.readFileSync(path.join(__dirname, 'kabuk.js'), 'utf8');
+  const m = /var SONRA = (\{[^\n]*\});/.exec(kaynak); dogru(m, 'SONRA tablosu bulunamadı');
+  const S = Function('return ' + m[1])(), html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  esit(Object.keys(S).sort(), ['arama', 'hesap', 'soru/deneme']);
+  Object.keys(S).forEach(ad => {
+    dogru(H.bul(ad.split('/')[0]), ad + ' haritada yok');
+    S[ad].forEach(y => { dogru(fs.existsSync(path.join(__dirname, y)), y + ' yok'); dogru(html.indexOf('src="' + y + '"') < 0, y + ' açılışta yükleniyor'); });
+  });
+  dogru(html.indexOf('src="acilis.js"') >= 0, 'acilis.js açılış videosu için açılışta kalır');
+});
+
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);

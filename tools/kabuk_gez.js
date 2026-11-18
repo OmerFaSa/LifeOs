@@ -532,6 +532,20 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/ayarlar');
     await p.waitForSelector('nav.b-gezinme');
     await goruntu(p, 'ayarlar');
+    { // 2026-11-18 (tur-20261118/ekranlar.md): telefonda tercih seçici sarınca hap biçimli yumağa dönüyor, «Yazı tipi» kesiliyordu
+      const bulgu = [];
+      for (const w of [320, 390]) {
+        await p.setViewportSize({ width: w, height: 800 });
+        bulgu.push(...await p.evaluate(w => [...document.querySelectorAll('.b-ayar .b-tercih')].flatMap(t => {
+          const k = t.getBoundingClientRect(), a = t.closest('.b-ayar').getBoundingClientRect(), sec = [...t.children], ad = w + ' ' + t.getAttribute('aria-labelledby');
+          const satir = new Set(sec.map(s => Math.round(s.getBoundingClientRect().top))).size;
+          return [k.left < a.left - .5 || k.right > a.right + .5 ? ad + ' kutudan taşar' : '', satir > 1 && parseFloat(getComputedStyle(t).borderTopLeftRadius) > 24 ? ad + ' çok satırlı hap' : '']
+            .concat(sec.map(s => { const q = s.getBoundingClientRect(); return q.left < k.left - .5 || q.right > k.right + .5 || s.scrollWidth > s.clientWidth + 1 ? ad + ' «' + s.textContent + '» kesik' : ''; })).filter(Boolean);
+        }), w));
+      }
+      dene('ayarlar: 320/390 px\'te hiçbir tercih seçicisi kutusundan taşmaz, seçenek kesilmez, sarınca hap olmaz', bulgu.length === 0, bulgu.slice(0, 5).join(' | '));
+      await p.setViewportSize({ width: 1280, height: 800 });
+    }
     await p.goto(T + '/kabuk/#/motor/kayit');
     await p.waitForSelector('select[data-kayit-tur]');
     await p.selectOption('select[data-kayit-tur]', 'kilo');
@@ -1309,6 +1323,39 @@ async function goruntu(p, ad, sec = {}) {
     dene('onay: konsolda hata yok', ohata.length === 0, ohata.join(' | '));
     await oc.close();
 
+    // ---- İlk kullanımda yüklenen ekranlar (tur-20261118/yuk.md): açılışta yoklar; derin bağlantı, geri tuşu ve yenileme onları yükler ----
+    const dc = await b.newContext({ viewport: { width: 1280, height: 800 } }), dhata = [];
+    const dsayfa = async yol => { const x = await dc.newPage(); x.on('pageerror', e => dhata.push(e.message)); await x.goto(T + '/kabuk/' + yol); return x; };
+    const betikler = x => x.evaluate(() => [...document.scripts].map(s => s.src).filter(s => /\/kabuk\/(hesap|hesap-giris|hesap-baglanti|hesap-yonetim|arama|deneme)\.js$/.test(s)).map(s => s.replace(/^.*\//, '')));
+    const dp = await dsayfa('#/bugun');
+    await dp.waitForSelector('#sayfa[data-ciz="bugun"]');
+    dene('ilk kullanım: Bugün açılışında hesap, arama ve deneme betiği yüklenmez', (await betikler(dp)).length === 0, (await betikler(dp)).join(','));
+    await dp.waitForFunction(() => [...document.scripts].some(s => /\/kabuk\/hesap-yonetim\.js$/.test(s.src)) && !!LIFEOS.Kabuk.HesapYonetim, null, { timeout: 15000 });
+    dene('ilk kullanım: açılıştan sonra boşta önceden çekilir (hesap dörtlüsü, arama, deneme)', (await betikler(dp)).length === 6 && !!(await dp.evaluate(() => LIFEOS.Kabuk.Arama && LIFEOS.Kabuk.Deneme)), (await betikler(dp)).join(','));
+    await dp.close();
+    const dh = await dsayfa('#/hesap');
+    await dh.waitForSelector('[data-arac="hesap"]');
+    dene('derin bağlantı: #/hesap doğrudan açılınca Hesap ekranı (giriş uzantısıyla) çizilir', (await dh.locator('[data-arac="hesap"] form[data-hg-form], #hs-oturum').count()) >= 1 && (await dh.title()).indexOf('Hesap') === 0);
+    await dh.click('.ust__sekmeler a[href="#/bugun"]'); await dh.waitForSelector('#sayfa[data-ciz="bugun"]');
+    await dh.goBack(); await dh.waitForSelector('[data-arac="hesap"]');
+    dene('geri tuşu: Bugün\'den geri dönünce Hesap yeniden çizilir', (await dh.evaluate(() => location.hash)) === '#/hesap');
+    await dh.close();
+    const da = await dsayfa('#/motor/arama?' + encodeURIComponent('sokrates'));
+    await da.waitForSelector('[data-arama-grup="ders"]', { timeout: 20000 });
+    dene('derin bağlantı: #/motor/arama?sokrates doğrudan açılınca sorgu alanda, ders sonuçları gelir', (await da.inputValue('[data-her-ara]')) === 'sokrates');
+    await da.close();
+    const dd = await dsayfa('#/motor/soru/deneme');
+    await dd.waitForSelector('[data-deneme-sayfa]');
+    await dd.reload(); await dd.waitForSelector('[data-deneme-sayfa]');
+    dene('derin bağlantı ve yenileme: #/motor/soru/deneme deneme ekranını çizer (Soru sayfasına düşmez)', (await dd.locator('[data-deneme-sayfa]').count()) === 1);
+    await dd.close();
+    const dy = await dc.newPage(); dy.on('pageerror', e => dhata.push(e.message));
+    await dy.route('**/kabuk/arama.js', r => r.abort());
+    await dy.goto(T + '/kabuk/#/motor/arama'); await dy.waitForSelector('.b-bos');
+    dene('yükleme düşerse sade hata («Bu bölüm yüklenemedi»), iskelet takılı kalmaz', /yüklenemedi/.test(await dy.textContent('#sayfa')) && (await dy.locator('#sayfa [aria-busy="true"]').count()) === 0);
+    await dy.close();
+    dene('ilk kullanım: sayfa hatası yok', dhata.length === 0, dhata.join(' | '));
+    await dc.close();
     // ---- Hesap (#/hesap, faz7-hesap-kabuk.md): girişsiz, uydurma sahip hesabıyla oturum, cihaz çıkarma, kodla bağlama, güncelleme, çıkış.
     // En sonda: hesap kurulunca öteki adımların ortamı değişmesin. Güncelleme yanıtı taklit edilir (ağ yok); «Güncelle»ye basılmaz.
     const hc = await b.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: 'dark' }), hp = await hc.newPage(), hhata = [];

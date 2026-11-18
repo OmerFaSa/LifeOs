@@ -4,7 +4,7 @@
  * Jeton bu dosyaya hiç gelmez: hesap işleri kabuğun zaten yüklediği eski istemciden (brand/ortak/hesap.js, window.LIFEOS.HESAP)
  * geçer, jeton onun çerezinde kalır; burada yalnız jetonsuz uçlar doğrudan çağrılır (/api/hesap/durum, /api/guncelleme, /api/guncelle).
  * Depoya hiçbir şey yazılmaz (yeni lifeos.* anahtarı yok); ekran durumu bellekte, sayfaya her girişte tazelenir.
- * Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.Hesap, Node'da module.exports (yalnız saf kısım). kabuk.js'ten ÖNCE yüklenir. */
+ * Sıfır bağımlılık; tarayıcıda window.LIFEOS.Kabuk.Hesap, Node'da module.exports (yalnız saf kısım). Açılışta değil: kabuk.js (SONRA) #/hesap'a ilk girişte yükler. */
 (function (kok) {
   'use strict';
   var L = kok.LIFEOS = kok.LIFEOS || {}, Kabuk = L.Kabuk = L.Kabuk || {};
