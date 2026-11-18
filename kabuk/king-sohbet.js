@@ -18,6 +18,13 @@
   // Divan (2026-11-17, sahip: «taht, Mete Han, Attila gibi şeyler»): hükümdarın ağzından canlandırma. Sunucu da aynı listeyi doğrular
   // (HKM/core/sohbet.py HUKUMDAR); Atatürk bilerek yok (5816 sayılı yasa ve saygı gereği canlandırılmaz).
   var HUKUMDAR = { mete: 'Mete Han', attila: 'Attila', bilge: 'Bilge Kağan', alparslan: 'Alp Arslan', fatih: 'Fatih Sultan Mehmet' };
+  // Divan: adın altında çağ (hükümdarlık yılları)
+  var CAG = { mete: 'Asya Hun hakanı · MÖ 209–174', attila: 'Avrupa Hun hükümdarı · 434–453', bilge: 'Göktürk kağanı · 716–734',
+    alparslan: 'Büyük Selçuklu sultanı · 1064–1072', fatih: 'Osmanlı padişahı · 1451–1481' };
+  // boş sohbette King'in sabit karşılaması (kipe göre)
+  var SELAM = { ortak: 'Hoş geldin. Bugün neyi birlikte düşünelim? Aklındakini yaz ya da şunlardan biriyle başla.',
+    ogretmen: 'Hangi konuyu açalım? Adım adım anlatır, sonra seni sınarım. Şunlardan biriyle başlayabilirsin.',
+    filozof: 'Bir filozofun sesiyle konuşurum: kendimi anlatır, sana da soru sorarım. Nereden başlayalım?' };
   var ANAHTAR = 'lifeos.king.saglayici', SOHBET = 'lifeos.king.sohbet', TASLAK = 'lifeos.king.taslak', EN_COK = 80, EN_UZUN = 20000;
   var ONERI = {
     ortak: ['Bugün ne var?', 'Felsefe yol haritamda neredeyim?', 'Bu hafta nasıl gitti?'],
@@ -135,9 +142,11 @@
     kaydet();
   }
 
-  function mesajHtml(m) {
+  // King'in sözü adla başlar (Divan'da hükümdarın)
+  function kimHtml(ad) { return '<p class="king-kim"><svg aria-hidden="true"><use href="#i-king"/></svg>' + kac(ad) + '</p>'; }
+  function mesajHtml(m, ad) {
     if (m.kim === 'ben') return '<li class="king-msj king-msj--ben"><div class="king-balon">' + bicimle(m.metin) + '</div></li>';
-    return '<li class="king-msj king-msj--king"><div class="king-balon">' + bicimle(m.metin) + '</div>' +
+    return '<li class="king-msj king-msj--king">' + kimHtml(ad) + '<div class="king-balon">' + bicimle(m.metin) + '</div>' +
       (m.alt.length ? '<p class="king-msj__alt">' + m.alt.map(kac).join(' · ') + '</p>' : '') + '</li>';
   }
   function html(B) {
@@ -152,17 +161,18 @@
     var divan = s.kip === 'divan', h = divan && s.hukumdar;
     var secim = divan ? B.cipler({ ad: 'Hükümdar, biri seçilir', ogeler: Object.keys(HUKUMDAR).map(function (k) {
       return { metin: HUKUMDAR[k], tur: 'ikincil', basili: k === s.hukumdar, veri: { 'king-hukumdar': k } }; }) }) +
-      (h ? '<p class="king-divan" aria-hidden="true">' + kac(HUKUMDAR[h]) + '</p>' : '') : ''; // seçili hükümdarın adı: serif, süs çizgili (okuyucu çipten duyar)
+      (h ? '<div class="king-divan"><p class="king-divan__ad" aria-hidden="true">' + kac(HUKUMDAR[h]) + '</p><p class="king-divan__cag">' + kac(CAG[h]) + '</p></div>' : '') : ''; // ad süslü (okuyucu çipten duyar), altında çağı
     var giris = divan ? (h ? 'Bu bir canlandırma: King, ' + HUKUMDAR[h] + ' olarak tarihî kaynaklara dayanarak konuşur; bilinmeyeni uydurmaz.' : 'Kiminle konuşmak istersin?')
       : konu ? 'Bu konuyu King\'le baştan çalış. Şunlardan biriyle başla ya da aklındakini yaz:'
-      : s.baglam ? 'Bu dersi King\'le çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : 'Aklındakini yaz ya da şunlardan biriyle başla:';
+      : s.baglam ? 'Bu dersi King\'le çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : SELAM[s.kip];
+    var ad = h ? HUKUMDAR[h] : 'King';
     var sorular = divan ? (h ? ONERI[h] : []) : konu && s.kip === 'ogretmen' ? ONERI.konu : ONERI[s.kip];
     // ilk açılışta örnek sorular: kutuya ne yazılacağı belli olsun (tıklayınca sorulur)
-    var oneri = bos ? '<div class="king-bos"><p class="king-giris">' + kac(giris) + '</p>' +
+    var oneri = bos ? '<div class="king-bos"><div class="king-selam">' + (divan ? '' : kimHtml(ad)) + '<p class="king-giris">' + kac(giris) + '</p></div>' +
       (sorular.length ? '<div class="king-oneri" aria-label="Örnek sorular">' + sorular.map(function (q) {
         return '<button type="button" class="king-oneri__oge" data-king-oneri="' + kac(q) + '">' + kac(q) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '';
     ust += secim;
-    var akis = bos ? '' : '<ol class="king-akis" aria-label="Konuşma" aria-live="polite">' + s.mesajlar.map(mesajHtml).join('') +
+    var akis = bos ? '' : '<ol class="king-akis" aria-label="Konuşma" aria-live="polite">' + s.mesajlar.map(function (m) { return mesajHtml(m, ad); }).join('') +
       (d.bekliyor ? '<li class="king-yaziyor" role="status"><span class="gizli">King yazıyor…</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></li>' : '') + '</ol>';
     var hata = d.hata ? B.uyari({ tur: 'hata', metin: d.hata, alt: 'Yazdığın kutuda duruyor.', eylem: { metin: 'Tekrar dene', tur: 'sade', veri: { 'king-tekrar': '' } } }) : '';
     var form = '<form class="king-yaz" data-king-sohbet novalidate>' +
@@ -268,7 +278,7 @@
     if (kok.document.querySelector('.govde[data-sayfa="king"]')) ciz();
   }
 
-  var KingSohbet = { SECIM: SECIM, KIP: KIP, HUKUMDAR: HUKUMDAR, ONERI: ONERI, secimGecerli: secimGecerli, kipGecerli: kipGecerli, hukumdarGecerli: hukumdarGecerli,
+  var KingSohbet = { SECIM: SECIM, KIP: KIP, HUKUMDAR: HUKUMDAR, CAG: CAG, ONERI: ONERI, secimGecerli: secimGecerli, kipGecerli: kipGecerli, hukumdarGecerli: hukumdarGecerli,
     baglamGecerli: baglamGecerli, ayniBaglam: ayniBaglam, yerelIso: yerelIso,
     istekGovdesi: istekGovdesi, cevapSatirlari: cevapSatirlari, hataMetni: hataMetni, sohbetOku: sohbetOku, bicimle: bicimle };
   Kabuk.KingSohbet = KingSohbet;

@@ -442,11 +442,18 @@
       '<nav class="konum" aria-label="Konum">' + sol + '</nav>';
   }
   // Alanın küçük amblemi sayfa başlığının yanında (tur 2026-11-17e; eskiden kapağın altında ayrı kutu): rota ilk h1'in başına koyar
-  // Piksel amblem (piksel-doga.js amblem: 16×16 PNG) kitaplık yüklüyse; yoksa simge, kitaplık gelince manzara() değiştirir
+  // Piksel amblem (piksel-doga.js amblem: 16×16 PNG): çizgi simge olarak yazılır, amblemKoy değiştirir
   function amblemResmi(id) { var D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA, u = null; try { u = D && D.amblem ? D.amblem(id) : null; } catch (e) { /* süs */ } return u ? '<img src="' + u + '" alt="">' : ''; }
   function amblem(yer) {
-    var k = KAPAK[yer.id];
-    return '<span class="kapak__simge" aria-hidden="true"><span class="b-simge b-simge--' + k[1] + '">' + (amblemResmi(yer.id) || '<svg><use href="#i-' + yer.id + '"/></svg>') + '</span></span>';
+    return '<span class="kapak__simge" aria-hidden="true"><span class="b-simge b-simge--' + KAPAK[yer.id][1] + '"><svg><use href="#i-' + yer.id + '"/></svg></span></span>';
+  }
+  // Tek yer (tur 2026-11-18b): alanı temsil eden her çizgi simge (#i-<alan>: başlık, İlerleme, Öğren/Sağlık kartları, Sıradaki) piksel amblemle değişir.
+  // manzara() çizimden hemen sonra çağırır; kitaplık sonra gelirse onload'da yeniden. Kitaplık yoksa (file://) çizgi simge kalır.
+  function amblemKoy() {
+    sayfaEl.querySelectorAll('.b-simge > svg > use[href^="#i-"]').forEach(function (u) {
+      var s = u.parentNode, id = u.getAttribute('href').slice(3), y = H.bul(id), ar = (s.closest('h1') || y && y.katman === 'alan') && amblemResmi(id);
+      if (ar) s.outerHTML = ar;
+    });
   }
   function kirinti(yer) {
     var ustYer = H.bul(H.DAL_SAYFASI[yer.dal]);
@@ -516,8 +523,7 @@
       if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
       return;
     }
-    var ks = sayfaEl.querySelector('h1 > .kapak__simge .b-simge'), ar = ks && !ks.querySelector('img') && amblemResmi(sayfaEl.getAttribute('data-yer'));
-    if (ar) ks.innerHTML = ar; // kitaplık bu sayfa çizildikten sonra geldi: simge piksel amblemle değişir
+    amblemKoy();
     // tuval görünen kutunun oranında çizilir (eskiden 480×72 tuval 300 px yüksekliğe gerilip pikseller dikine uzuyordu): her piksel kare, 3 (telefonda 2) ekran pikseli
     var kutu = c.getBoundingClientRect(), olc = innerWidth < 640 ? 2 : 3;
     if (kutu.width > 0 && kutu.height > 0) { c.width = Math.max(120, Math.round(kutu.width / olc)); c.height = Math.max(40, Math.round(kutu.height / olc)); }
@@ -791,7 +797,9 @@
     var konum = !a ? alanAd + 'Aşama ' + f.n : kapi ? alanAd + (u.ad || 'Ünite') + ' · ünite kapısı' : alanAd + (u.ad || '') + (ud.length ? ' · ders ' + (ud.indexOf(a.id) + 1) + '/' + ud.length : '');
     var baslik = !a ? (dr.asama.gecti ? 'Aşama tamamlandı' : dr.asama.ad) : kapi ? 'Ünitenin kapı sınavı' : og.ad || '';
     var eylem = a ? { metin: il && il.deger ? 'Devam et' : 'Başla', tur: 'ana', href: adimYolu(a) } : o.sonraki ? { metin: 'Sonraki aşama', tur: 'ana', href: asamaYolu(o.sonraki.n) } : null;
-    return '<section class="sira"' + (o.alan && ALAN_RENK[etkinAlan] ? ' data-ton="' + ALAN_RENK[etkinAlan] + '"' : '') + ' aria-labelledby="alan-sira"><p class="sira__ust">' + kac(konum) + '</p>' +
+    var ton = o.alan && ALAN_RENK[etkinAlan]; // Öğren: alanın tonu ve amblemi (amblemKoy çizgi simgeyi değiştirir)
+    return '<section class="sira"' + (ton ? ' data-ton="' + ton + '"' : '') + ' aria-labelledby="alan-sira">' +
+      (ton ? '<span class="b-simge b-simge--' + ton + ' sira__simge" aria-hidden="true"><svg><use href="#i-' + etkinAlan + '"/></svg></span>' : '') + '<p class="sira__ust">' + kac(konum) + '</p>' +
       '<h2 class="sira__baslik" id="alan-sira">' + kac(baslik) + '</h2>' +
       (il && il.toplam ? '<div class="sira__cizgi">' + B.ilerleme({ ad: 'Okunan ders', deger: il.deger, toplam: il.toplam }) + '</div>' : '') +
       '<div class="sira__eylem">' + B.eylemler([eylem]) + (o.yeni ? '<a class="sira__ikincil" href="' + F() + '/yer/1" data-yer-bul="">Biliyorsan: seviyemi bul</a>' : '') + '</div></section>';
@@ -851,7 +859,17 @@
       (n ? B.bolum({ baslik: 'Kendini dene', id: 'ders-alistir',
         govde: ['<p class="soluk ders__sayac">Okuduğunu ' + n + ' soruyla dene · ' + cevap + ' / ' + n + ' cevaplandı</p>'].concat(x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; })) }) : '') +
       // bos: cevaplanmamış alıştırma sayısı; Bitir önce yumuşakça sorar (tik › okudum). Konum satırı alana döner: ayrı «Yol haritası» düğmesi yok.
-      '<div class="ders__bitir">' + B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id, bos: okundu ? '0' : String(n - cevap) } }, { metin: "King'le çalış", tur: 'sade', href: '#/king', veri: { 'king-calis': id } }]) + '</div></article>'; // king-sohbet.js: ders bağlamıyla açar
+      '<div class="ders__bitir">' + dersSonu(y, kayit, x, id, okundu) + B.eylemler([{ metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id, bos: okundu ? '0' : String(n - cevap) } }, { metin: "King'le çalış", tur: 'sade', href: '#/king', veri: { 'king-calis': id } }]) + '</div></article>'; // king-sohbet.js: ders bağlamıyla açar
+  }
+  // Ders sonu: özet (okundu, alıştırma k/m doğru) ve sıradakinin adı; bitmemiş derste sıradaki «okundu say» kopyasından (Yol.dersOku saf)
+  function dersSonu(y, kayit, x, id, okundu) {
+    var sec = 0, dogru = 0, cevap = 0, l = [], a = null;
+    x.alistirmalar.forEach(function (s) { var c = kayit.cevaplar[s.id], son = c && c[c.length - 1]; if (son) cevap++; if (s.tur === 'secmeli') { sec++; if (son && son.dogru) dogru++; } });
+    try { a = siradaki(Yol.durum(y, okundu ? kayit : Yol.dersOku(y, kayit, id, Date.now()))); } catch (e) { /* kilitli */ }
+    if (okundu) l.push('<span class="ders__son-tik"><svg aria-hidden="true"><use href="#i-tik"/></svg>Okundu</span>');
+    if (cevap) l.push(sec ? 'Alıştırma ' + dogru + ' / ' + sec + ' doğru' : cevap + ' / ' + x.alistirmalar.length + ' cevaplandı');
+    return (l.length ? '<p class="ders__son">' + l.join(' · ') + '</p>' : '') +
+      (a ? '<p class="ders__sonraki"><span>Sıradaki</span> ' + kac(a.tur === 'ders' ? a.ad : 'Kapı sınavı · ' + (a.ad || '')) + '</p>' : '');
   }
   // Dersin üç adımı: oku, alıştır, bitir. Şimdiki adım vurgulu, geçilenler ✓ (renk tek başına değil).
   function dersAdimlari(adim, n) {

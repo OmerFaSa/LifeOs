@@ -53,6 +53,7 @@ t('Divan: izinli beş hükümdar (Atatürk yok), her birine örnek sorular; hük
   a.deepStrictEqual(Object.keys(K.HUKUMDAR), ['mete', 'attila', 'bilge', 'alparslan', 'fatih']);
   a.ok(!/Atatürk|Mustafa Kemal/.test(JSON.stringify(K.HUKUMDAR)));
   Object.keys(K.HUKUMDAR).forEach(h => a.strictEqual(K.ONERI[h].length, 3, h));
+  Object.keys(K.HUKUMDAR).forEach(h => a.ok(/·/.test(K.CAG[h]), 'Divan çağ satırı: ' + h)); // adın altında «unvan · yıllar»
   a.strictEqual(K.kipGecerli('divan'), 'divan');
   a.strictEqual(K.hukumdarGecerli('attila'), 'attila');
   ['ataturk', 'toString', '__proto__', '', null, 5].forEach(h => a.strictEqual(K.hukumdarGecerli(h), null, String(h)));

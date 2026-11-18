@@ -484,16 +484,15 @@ article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat .b-uyari__metin{ font-siz
 
 /* İşlevli sadelik (2026-11-15, «kutucukta ne yapacağım belli olsun»): Not'ta üstte hızlı yazma kutusu, King'de mesajlaşma gibi
    yazma alanı ve örnek sorular; kaydırma çubuğu ince, yuvarlak, yalnız gerekince belirgin. */
-.nothizli{ display:flex; flex-direction:column; gap:var(--a2); margin-bottom:var(--a5); padding:var(--a3); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
 .nothizli .b-alan__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
-.nothizli textarea{ min-height:88px; background:transparent; resize:vertical; }
-.nothizli textarea:focus{ background:transparent; }
-.nothizli .b-eylemler{ justify-content:space-between; flex-direction:row-reverse; }
-.king-oneri{ display:flex; flex-wrap:wrap; gap:var(--a2); margin-bottom:var(--a3); }
-.king-oneri__oge{ min-height:36px; padding:0 var(--a4); border:0; border-radius:999px; font:inherit; font-size:var(--yz-k); color:var(--yazi-2); background:var(--yuzey-2); cursor:pointer;
-  transition:background var(--hizli) var(--akis), color var(--hizli) var(--akis); }
-.king-oneri__oge:hover{ color:var(--yazi); background:color-mix(in srgb, var(--vurgu) 12%, var(--yuzey-2)); }
-@media (pointer:coarse){ .king-oneri__oge{ min-height:44px; } }
+/* King örnek soruları: okunur kâğıt kartçıklar */
+.king-oneri{ display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:var(--a3); margin-top:var(--a5); }
+.king-oneri__oge{ display:flex; justify-content:space-between; align-items:flex-end; gap:var(--a2); min-height:84px; padding:var(--a3) var(--a4); border:0; border-radius:var(--kose);
+  font:1rem/1.4 var(--okuma); text-align:left; color:var(--yazi); background:var(--yuzey); box-shadow:var(--golge-yumusak); cursor:pointer; transition:box-shadow var(--hizli); }
+.king-oneri__oge::after{ content:"→"; color:var(--soluk); }
+.king-oneri__oge:hover{ box-shadow:var(--golge-orta); }
+.king-oneri__oge:hover::after{ color:var(--ana); }
+@media (max-width:640px){ .king-oneri{ grid-template-columns:1fr; gap:var(--a2); } .king-oneri__oge{ min-height:56px; align-items:center; } }
 /* kaydırma çubuğu: Chromium'da ince, yuvarlak, kenardan boşluklu; üstüne gelince koyulaşır. Firefox standart ince çubuk. */
 @supports selector(::-webkit-scrollbar){
   html{ scrollbar-width:auto; scrollbar-color:auto; }
@@ -551,7 +550,10 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
 
 /* ===== Anlaşılır ve hitap eden (2026-11-15) =====
    King: gerçek sohbet görünümü (senin mesajın sağda, King solda), yazma alanı tek kart; Ayarlar: arama; öğrenme: özet kartı ve kısa açıklamalar. */
-.king-giris{ margin:0 0 var(--a2); font-size:var(--yz-k); color:var(--soluk); }
+.king-giris{ margin:0; max-width:56ch; font-family:var(--okuma); font-size:var(--yz-h3); line-height:1.6; color:var(--yazi-2); }
+/* konuşanın adı (taç + ad, altın) */
+.king-kim{ display:flex; align-items:center; gap:6px; margin:0 var(--a1) var(--a1); font-size:var(--yz-k); font-weight:600; color:var(--altin); }
+.king-kim svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.8; }
 /* King sohbeti (2026-11-16, sahip: «uzun uzun konuşacağım»): mesajlaşma düzeni, sen sağda King solda, en yeni altta; akış kendi içinde
    kayar, yazma alanı hep altında. Kip seçici ve Cevaplayan ikincil ve küçük. */
 .king-sohbet{ display:flex; flex-direction:column; gap:var(--a3); }
@@ -567,8 +569,11 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
 .king-baglam__ad{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .king-baglam__kaldir{ width:28px; height:28px; border:0; border-radius:50%; font:inherit; color:var(--soluk); background:transparent; cursor:pointer; }
 .king-baglam__kaldir:hover{ color:var(--yazi); background:var(--yuzey-2); }
-.king-bos{ padding:var(--a5) 0 var(--a2); }
-.king-akis{ display:flex; flex-direction:column; gap:var(--a3); min-height:200px; max-height:calc(100dvh - 300px); margin:0; padding:var(--a1) var(--a1) var(--a2);
+.king-bos{ padding:var(--a6) 0 var(--a4); }
+.king-sohbet:has(.king-bos) .king-yaz{ box-shadow:var(--golge-buyuk); }
+.king-sohbet:has(.king-bos) .king-yaz textarea{ min-height:68px; }
+.king-akis{ display:flex; flex-direction:column; gap:var(--a3); min-height:200px; max-height:calc(100dvh - 440px); margin:0; padding:var(--a5) var(--a1) var(--a2); /* son cevap yazma alanının altında kalmasın */
+  mask-image:linear-gradient(transparent, #000 var(--a5));
   list-style:none; overflow-y:auto; overscroll-behavior:contain; }
 .king-msj{ display:flex; flex-direction:column; align-self:flex-start; max-width:min(88%, 70ch); }
 .king-msj--ben{ align-self:flex-end; align-items:flex-end; max-width:min(80%, 60ch); }
@@ -659,8 +664,8 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
     background:none; box-shadow:none; overflow:visible; border-radius:0; }
   #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir > li + li{ box-shadow:none; }
   #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-satir{ height:auto; min-height:92px; padding:var(--a4) var(--a5);
-    gap:var(--a4); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
-  #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir a.b-satir:hover{ background:var(--yuzey); box-shadow:var(--golge-orta); }
+    gap:var(--a4); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak); transition:box-shadow var(--hizli) var(--akis), transform var(--orta) var(--akis), background var(--hizli) var(--akis); }
+  #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir a.b-satir:hover{ --ty:-2px; background:var(--yuzey); box-shadow:var(--golge-orta); }
   #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-simge{ width:48px; height:48px; border-radius:14px; }
   #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-simge svg{ width:24px; height:24px; }
   #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="motorlar"]) .govde > .b-liste--satir .b-satir__ad{ font-size:var(--yz-h3); }
@@ -993,6 +998,14 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 :root .ders__bitir{ position:relative; display:flex; justify-content:center; margin-top:var(--a7); padding-top:var(--a6); }
 :root .ders__bitir::before{ content:""; position:absolute; top:0; left:50%; width:56px; height:3px; margin-left:-28px; border-radius:var(--kose-tam); background:var(--alan-ton); opacity:.55; }
 :root .ders__bitir .b-eylemler{ justify-content:center; }
+/* ders sonu: özet satırı, sıradakinin adı serif, düğmeler altta */
+:root .ders__bitir{ flex-direction:column; align-items:center; gap:var(--a2); text-align:center; }
+:root .ders__bitir > .b-eylemler{ margin-top:var(--a3); }
+.ders__son{ margin:0; font-size:var(--yz-k); color:var(--soluk); }
+.ders__son-tik{ font-weight:600; color:var(--altin); }
+.ders__son-tik svg{ width:15px; height:15px; margin-right:4px; vertical-align:-2px; fill:none; stroke:currentColor; stroke-width:2.4; }
+.ders__sonraki{ margin:0; font:italic var(--yz-h3)/1.4 var(--okuma); color:var(--yazi); }
+.ders__sonraki > span{ display:block; font:600 .75rem var(--govde); letter-spacing:.08em; text-transform:uppercase; color:var(--soluk); }
 :root .ders__bitir .b-dugme--ana{ min-height:52px; padding:0 var(--a6); border-radius:var(--kose-tam); font-size:1.0625rem; }
 @media (max-width:640px){
   :root article.ders > p{ font-size:1.125rem; line-height:1.68; }
@@ -1011,7 +1024,28 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 
 /* 7 · Ayarlar: bölüm başlıkları serif (kitabın bölümleri gibi), menü sakin; düzen aynen */
 :root .ayarlar .b-bolum__ust h2{ font-family:var(--baslik-serif); font-size:var(--yz-h3); font-weight:600; letter-spacing:-.01em; color:var(--yazi); }
-/* piksel amblem (piksel-doga.js amblem, 16×16): tam sayı ölçekte keskin; geniş ekranda 3×, telefonda 2× */
+/* piksel amblem (16×16, kabuk.js amblemKoy): tam sayı ölçekte keskin, 2× ya da öne çıkanda (başlık, çalışılan alan, Sıradaki) geniş ekranda 3× */
+.b-simge > img{ display:block; width:32px; height:32px; image-rendering:pixelated; transition:transform var(--hizli) var(--akis); }
+:root .b-simge:has(> img){ width:40px; height:40px; }
 :root h1 > .kapak__simge .b-simge:has(> img){ width:56px; height:56px; }
-:root h1 > .kapak__simge img{ display:block; width:48px; height:48px; image-rendering:pixelated; }
-@media (max-width:640px){ :root h1 > .kapak__simge .b-simge:has(> img){ width:40px; height:40px; border-radius:var(--kose-k); } :root h1 > .kapak__simge img{ width:32px; height:32px; } }
+:root .b-karsilama__alan:has(.b-karsilama__cizgi) .b-simge:has(> img), :root .sira > .sira__simge{ width:64px; height:64px; border-radius:18px;
+  background:color-mix(in srgb, var(--alan-ton) 10%, var(--yuzey)); box-shadow:var(--golge-yumusak); }
+:root :is(h1 > .kapak__simge, .b-karsilama__alan:has(.b-karsilama__cizgi)) .b-simge > img, :root .sira__simge > img{ width:48px; height:48px; }
+@media (max-width:640px){ :root h1 > .kapak__simge .b-simge:has(> img){ width:40px; height:40px; border-radius:var(--kose-k); }
+  :root .b-karsilama__alan:has(.b-karsilama__cizgi) .b-simge:has(> img), :root .sira > .sira__simge{ width:48px; height:48px; border-radius:var(--kose-k); }
+  :root :is(h1 > .kapak__simge, .b-karsilama__alan:has(.b-karsilama__cizgi)) .b-simge > img, :root .sira__simge > img{ width:32px; height:32px; } }
+/* Öğren «Sıradaki» (siraKarti o.alan): amblem solda; telefonda üst iki satırın yanında */
+:root .sira > .sira__simge{ grid-column:1; grid-row:1 / span 3; align-self:center; }
+@media (min-width:641px){ :root .sira:has(> .sira__simge){ grid-template-columns:auto minmax(0, 1fr) auto; column-gap:var(--a5); }
+  :root .sira:has(> .sira__simge) > :not(.sira__simge){ grid-column:2; } :root .sira:has(> .sira__simge) > .sira__eylem{ grid-column:3; padding-left:var(--a3); } }
+@media (max-width:640px){ :root .sira:has(> .sira__simge){ display:grid; grid-template-columns:auto minmax(0, 1fr); column-gap:var(--a3); }
+  :root .sira:has(> .sira__simge) > :not(.sira__simge){ grid-column:1 / -1; } :root .sira:has(> .sira__simge) > :is(.sira__ust, .sira__baslik){ grid-column:2; } :root .sira > .sira__simge{ grid-row:1 / span 2; } }
+/* kart üzerine gelince amblem 1 px kalkar (hareket azsa yok); odak halkası alanın tonunda, listede içeride (liste taşanı keser) */
+:is(.b-karsilama__alan, a.b-satir):hover .b-simge > img{ transform:translateY(-1px); }
+:is(.b-karsilama__alan, a.b-satir):active .b-simge > img, :root[data-hareket="az"] :is(.b-karsilama__alan, a.b-satir) .b-simge > img{ transform:none; }
+@media (prefers-reduced-motion:reduce){ :root[data-hareket="sistem"] :is(.b-karsilama__alan, a.b-satir) .b-simge > img{ transform:none; } }
+:is(.b-karsilama__alan, a.b-satir):focus-visible{ outline-color:color-mix(in srgb, var(--alan-ton, var(--yazi)) 60%, var(--yazi)); outline-offset:3px; }
+.b-liste--satir a.b-satir:focus-visible{ outline-offset:-3px; }
+/* koyuda amblemin koyu dış çizgisi koyu kutuda kaybolmasın: çevresinde ince açık hale (kutu zeminlerine dokunmaz) */
+:root[data-theme="dark"] .b-simge > img{ filter:drop-shadow(0 0 1px color-mix(in srgb, var(--yazi) 55%, transparent)); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .b-simge > img{ filter:drop-shadow(0 0 1px color-mix(in srgb, var(--yazi) 55%, transparent)); } }

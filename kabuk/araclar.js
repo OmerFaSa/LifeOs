@@ -505,7 +505,9 @@
   }
   function satirlar(ad, l) { return '<ul class="b-liste b-liste--satir notlar__liste" aria-label="' + ad + '">' + l.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>'; }
   function notListesi(notlar, sorgu) {
-    if (!notlar.length) return B.bos({ baslik: 'Henüz not yok.', metin: 'Yukarıdaki kutuya bir satır yazman yeter.' });
+    // boş defter: kısa cümle + örnek not kâğıdı (#etiket, [[bağ]])
+    if (!notlar.length) return '<div class="not-bos" role="note"><p class="not-bos__baslik">Henüz not yok.</p><p>Yukarıdaki kutuya bir satır yazman yeter; ilk satır notun adı olur.</p>' +
+      '<div class="not-bos__ornek"><span class="not-bos__pul">örnek</span><b>Thales ve su</b><span>Her şeyin ilkesi su mu? Bkz. [[Anaksimandros]]</span><span class="notsatir__cip">#felsefe</span></div></div>';
     if (!sorgu.trim()) return satirlar('Notlar', notlar.slice().sort(notSira).map(function (n) { return notSatiri(n); }));
     var harita = {}; notlar.forEach(function (n) { harita[n.id] = n; });
     var s = Not.ara(notlar, sorgu, { sinir: 50 });
@@ -604,8 +606,10 @@
             B.alan({ ad: 'Notlarda ara', gizliAd: true, isim: 'notAra', tur: 'arama', yerTutucu: 'Ara: kelime ya da #etiket', veri: { 'not-ara': '' } }) + '</div>' : '') + // aranacak not yokken arama kutusu yalnız kalabalık
           B.dugme({ metin: 'Ayrıntılı not', tur: 'sade', href: '#/motor/not/yeni' }) + '</div></div>' +
         '<div id="not-liste" aria-live="polite">' + notListesi(notlar, '') + '</div></section>' +
+        // araç yokken bölüm yerine tek sakin satır
+        (!araclar.length ? '<a class="arac-ekle" href="#/motor/not/arac/yeni"><span class="arac-ekle__arti" aria-hidden="true">+</span><span><b>Yeni araç</b> · Bir araç, notlarını kendi klasöründe toplar.</span></a>' :
         B.bolum({ baslik: 'Araçlar', id: 'araclar-baslik', eylem: { metin: 'Yeni araç', tur: 'sade', href: '#/motor/not/arac/yeni' },
-          govde: araclar.length ? B.liste({ ad: 'Araçlar', ogeler: araclar.map(function (a) { return aracSatiri(a, notlar); }) }) : '<p class="soluk">Bir araç, notlarını kendi klasöründe toplar.</p>' }) +
+          govde: B.liste({ ad: 'Araçlar', ogeler: araclar.map(function (a) { return aracSatiri(a, notlar); }) }) })) +
         notAgi(notlar) + (notlar.length ? '<p class="notlar__dip">Notların bu cihazda durur.</p>' : '') + '</div>';
     }
     var aracY = alt === 'yeni' && (/[?&]arac=([\w-]+)/.exec(location.hash) || [])[1], aracA = aracY && oku(ARAC_ANAHTAR, []).filter(function (x) { return x.id === aracY; })[0];

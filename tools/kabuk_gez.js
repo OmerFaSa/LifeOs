@@ -288,6 +288,9 @@ async function goruntu(p, ad, sec = {}) {
       await soru.locator('[data-h="' + a.dogru + '"]').click();
       dene('ders ' + (i + 1) + ': doğru cevap «Doğru.» der', /Doğru/.test(await soru.locator('.b-soru__sonuc').textContent()));
       if (i === 0) await goruntu(p, 'ders');
+      // ders sonu (2026-11-18b): düğmenin üstünde özet (alıştırma k/m doğru) ve sıradaki adımın adı
+      if (i === 0 && u1.dersler[1]) dene('ders 1: sonda özet ve sıradaki dersin adı', /Alıştırma 1 \/ \d+ doğru/.test(await p.textContent('.ders__son')) && (await p.textContent('.ders__sonraki')).indexOf(u1.dersler[1].ad) >= 0,
+        await p.textContent('.ders__bitir'));
       await bitir(p);
       const beklenen = i < u1.dersler.length - 1 ? '#/alan/felsefe/ders/' + u1.dersler[i + 1].id : '#/alan/felsefe/kapi/' + u1.id;
       await p.waitForFunction(h => location.hash === h, beklenen).catch(() => {});
@@ -363,6 +366,8 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/motor/not');
     await p.waitForSelector('[data-arac="not"]');
     dene('not: boş defter öyle der', /Henüz not yok/.test(await p.textContent('#not-liste')));
+    dene('not: boş defterde #etiket ve [[bağ]] gösteren örnek not, araç yokken tek sakin «Yeni araç» satırı', /#felsefe/.test(await p.textContent('.not-bos__ornek')) && /\[\[/.test(await p.textContent('.not-bos__ornek'))
+      && (await p.locator('#not-liste a').count()) === 0 && (await p.locator('a.arac-ekle[href="#/motor/not/arac/yeni"]').count()) === 1 && (await p.locator('#araclar-baslik').count()) === 0);
     // hızlı not: üstteki kutuya yaz, Ctrl+Enter; ilk satır ad olur, kutu boşalır (sonra silinir: aşağıdaki sayımlar boş defterden)
     await p.fill('.nothizli textarea', 'Hızlı deneme\nikinci satır');
     await p.press('.nothizli textarea', 'Control+Enter');
@@ -997,14 +1002,15 @@ async function goruntu(p, ad, sec = {}) {
     const kingAyar = await p.evaluate(() => { const t = LIFEOS.Kabuk.Ayar.tanim('lifeos.king.saglayici'); return t ? Object.keys(t.secenekler || {}).join(',') : ''; });
     dene('King: tek sohbet bölümü, sohbette seçici yok; Otomatik, Antigravity ve Claude Code Ayarlar › King’te', kingForm.tek === 1 && kingForm.secenek === 'seçici yok' && kingForm.metin && kingAyar === 'oto,antigravity,claude', JSON.stringify(kingForm) + ' ' + kingAyar);
     // yazma kutusu: örnek sorular; Enter gönderir (Tanışma'nın Enter kısayolu King'in kutusunu yakalamaz); hâl gelince yazılan silinmez
-    dene('King: ilk açılışta üç örnek soru', (await p.locator('[data-king-oneri]').count()) === 3);
+    dene('King: ilk açılışta karşılama cümlesi ve üç örnek soru', (await p.locator('[data-king-oneri]').count()) === 3 && /Hoş geldin/.test(await p.textContent('.king-selam')));
     // bu yalıtılmış ortamda Merkez yok: gönderilen soruya sahte bir cevap (cevabın akışta göründüğü de sınanır)
     await p.route('**/api/kabuk/king', r => r.request().method() === 'POST'
       ? r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'Merhaba, buradayım.', mode: 'model', provider: 'deneme', seconds: 0.4 }) }) : r.continue());
     await p.fill('form[data-king-sohbet] textarea', 'Merhaba King');
     await p.press('form[data-king-sohbet] textarea', 'Enter');
     await p.waitForSelector('.king-akis .king-msj--king', { timeout: 20000 }).catch(() => {});
-    dene('King: Enter soruyu gönderir, cevap akışa düşer, örnekler kalkar', /Merhaba King/.test(await p.textContent('.king-msj--ben')) && /Merhaba, buradayım/.test(await p.textContent('.king-msj--king')) && (await p.locator('[data-king-oneri]').count()) === 0);
+    dene('King: Enter soruyu gönderir, cevap akışa düşer, örnekler kalkar', /Merhaba King/.test(await p.textContent('.king-msj--ben')) && /Merhaba, buradayım/.test(await p.textContent('.king-msj--king')) && (await p.locator('[data-king-oneri]').count()) === 0
+      && (await p.textContent('.king-msj--king .king-kim')) === 'King');
     await p.unroute('**/api/kabuk/king');
     // 2026-11-16: konuşma yenilemede kalır (lifeos.king.sohbet), «Yeni konuşma» temizler; ayrıntılı tur: belgeler/ekip/sadelesme/tur-20261116/king.md
     await p.reload(); await p.waitForSelector('.king-msj--king');

@@ -477,7 +477,8 @@
     it('gerçek saate göre gök: beş an saatten, adlar ve eski adlar aynı ana, gündüz/gece sınırı gece.js ile aynı', () => {
       const D = window.LIFEOS.PIKSEL_DOGA;
       expect([4, 7, 12, 15.5, 18.5, 22].map(D.an).join()).toBe('gece,safak,ogle,ikindi,gunbatimi,gece');
-      Object.keys(D.AN_SAAT).forEach(a => expect(D.yerlesim(480, 100, a, 'kale').an).toBe(a));
+      /* 'gece' adı gece saatindeyken gerçek saati alır (05:30–06:00 şafak gökü): saatten bağımsız olsun diye temsilî gece saati */
+      Object.keys(D.AN_SAAT).forEach(a => expect(D.yerlesim(480, 100, a === 'gece' ? D.AN_SAAT.gece : a, 'kale').an).toBe(a));
       expect(D.yerlesim(480, 100, 'dogum', 'kale').an).toBe('safak');
       expect(D.yerlesim(480, 100, 'batim', 'kale').an).toBe('gunbatimi');
       expect(D.yerlesim(480, 100, 19.9, 'kale').vakit).toBe('gunduz');

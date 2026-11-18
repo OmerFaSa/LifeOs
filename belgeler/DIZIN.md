@@ -79,6 +79,9 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Tur 2026-11-17e · Tasarım dili](ekip/sadelesme/tur-20261117e/dil.md) — yazı kimliği (serif başlık ve okuma jetonu), açık/koyu palet ve iki katmanlı gölge, alan tonu (--alan-ton, --alan-isik), bileşen cilası, WCAG AA ölçümü, sözleşme; önce/sonra görselleri.
 - [Tur 2026-11-17e · Sayfalar](ekip/sadelesme/tur-20261117e/sayfalar.md) — görsel sıçrama, sayfa tarafı: kapak erimesi ve alan ışıması, Bugün ilk ekran, Öğren/konu haritası, ders kitap sayfası, King/Divan, Ayarlar; önce/sonra görselleri.
 - [Tur 2026-11-17e · İkincil ekranlar](ekip/sadelesme/tur-20261117e/ikincil.md) — Not, Plan, Kayıt, Tekrar, Sağlık, Yönetim, Hesap, Tanışma, Deneme, King sohbet yeni yazı ve ışık diliyle; önce/sonra görüntüleri, testler.
+- [Tur 2026-11-18b · King, Not, ders sonu](ekip/sadelesme/tur-20261118b/king-not.md) — King boş hâli (karşılama, örnek soru kartçıkları, belirgin yazma alanı, Divan hükümdar adı), Not boş durumu, ders bitiş özeti; önce/sonra panoları, bayt farkı.
+- [Tur 2026-11-18b · Amblemler](ekip/sadelesme/tur-20261118b/amblem.md) — alan piksel amblemleri başlık dışında da (Bugün İlerleme, Öğren alan kartları, Sıradaki), kart üzerine gelme/basma ve odak; önce/sonra panoları, bayt farkı.
+- [Tur 2026-11-18b · Gece sahneleri](ekip/sadelesme/tur-20261118b/gece.md) — on dört sahnenin gece/şafak/akşam hâlleri: yanan pencereler, ocak ateşi, gök derinliği, ay kenar ışığı; önce/sonra panoları, ölçüm.
 - [Tur 2026-11-18 · Açılış yükü](ekip/sadelesme/tur-20261118/yuk.md) — hesap, arama, deneme modülleri ilk kullanımda yüklenir; açılış yükü ve hız önce/sonra.
 - [Tur 2026-11-17e · Yön](ekip/sadelesme/tur-20261117e/yon.md) — görsel sıçrama turunun ortak tasarım yönü: ruh, beş büyük adım, ölçüt.
 - [Tur 2026-11-17e · Sahne ve anlar](ekip/sadelesme/tur-20261117e/sahne.md) — saate göre gök, paralaks, alan amblemleri, anlar (an.js); kapanış notu.
