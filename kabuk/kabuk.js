@@ -434,7 +434,7 @@
   var KAPAK = { felsefe: ['medrese', 'turuncu'], akademik: ['kitaplik', 'mavi'], dil: ['kervansaray', 'yesil'], tarih: ['kale', 'pembe'], muzik: ['ates', 'mor'],
     okuma: ['hattat', 'sari'], beslenme: ['pinar', 'yesil'], hareket: ['yaylak', 'deniz'], uyku: ['cadir', 'gok'], tahlil: ['sifahane', 'pembe'],
     ogren: ['medrese', 'mavi'], saglik: ['yaylak', 'yesil'], motorlar: ['ufuk', 'deniz'], yol: ['kervansaray', 'mavi'], tekrar: ['kitaplik', 'mor'], soru: ['kale', 'turuncu'],
-    kayit: ['pinar', 'deniz'], plan: ['ufuk', 'yesil'], not: ['yazi', 'sari'], arama: ['ufuk', 'gok'], onay: ['kale', 'mavi'], king: ['taht', 'sari'], harita: ['otuken', 'mavi'] };
+    kayit: ['pinar', 'deniz'], plan: ['ufuk', 'yesil'], not: ['yazi', 'sari'], arama: ['ufuk', 'gok'], onay: ['kale', 'mavi'], king: ['taht', 'sari'], harita: ['otuken', 'mavi'], ayarlar: ['yazi', 'gok'], hesap: ['ufuk', 'mavi'] };
   var kapakYer = null; // rota çizerken: bu sayfa kapaklı mı
   function ust(sol) {
     var k = kapakYer && KAPAK[kapakYer.id];

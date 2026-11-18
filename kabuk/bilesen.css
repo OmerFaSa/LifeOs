@@ -100,7 +100,7 @@ a.b-ders:hover{ box-shadow:var(--golge-orta); }
 .b-alan__onay input{ width:20px; height:20px; margin:0; flex:none; accent-color:var(--vurgu); }
 
 /* 7 · boş durum */
-.b-bos{ display:flex; flex-direction:column; align-items:center; gap:var(--a2); padding:var(--a7) var(--a5); text-align:center; color:var(--soluk); background:var(--yuzey-2); border-radius:var(--kose); }
+.b-bos{ display:flex; flex-direction:column; align-items:center; gap:var(--a2); padding:var(--a6) var(--a5); text-align:center; color:var(--soluk); background:radial-gradient(ellipse 55% 80% at 50% 45%, color-mix(in srgb, var(--alan-ton) 7%, transparent), transparent); border-radius:var(--kose); }
 .b-bos__baslik{ font-family:var(--baslik-serif); font-weight:600; font-size:var(--yz-h3); letter-spacing:-.01em; color:var(--yazi); }
 .b-bos__metin{ font-size:var(--yz-k); max-width:48ch; }
 
@@ -256,11 +256,11 @@ a.b-ders:hover{ box-shadow:var(--golge-orta); }
 
 /* 23 · karşılama: ortada tek cümle selam, sırada satırı, tek ana düğme; bilgi satırları aynı genişlikte.
    Selam da tek h1 ölçeğinde (2026-11-16b: bütün h1 aynı boy, --yz-h1). */
-.b-karsilama{ display:flex; flex-direction:column; width:100%; max-width:720px; margin:0 auto; padding:0 0 var(--a7); min-width:0; }
+.b-karsilama{ display:flex; flex-direction:column; width:100%; max-width:var(--sayfa); margin:0 auto; padding:0 0 var(--a7); min-width:0; }
 .b-karsilama__sahne{ position:relative; height:300px; margin-inline:calc(50% - 50vw); background:var(--gok); overflow:hidden; }
 .b-karsilama__manzara{ display:block; width:100%; height:100%; image-rendering:pixelated; }
 .b-karsilama__sahne::after{ content:""; position:absolute; inset:0; background:var(--sahne-ortu); pointer-events:none; }
-.b-karsilama__ic{ position:absolute; z-index:1; left:0; right:0; bottom:84px; max-width:720px; margin:0 auto; padding:0 var(--a4); color:var(--sahne-yazi); }
+.b-karsilama__ic{ position:absolute; z-index:1; left:0; right:0; bottom:84px; max-width:var(--sayfa); margin:0 auto; padding:0 var(--a4); color:var(--sahne-yazi); }
 .b-karsilama__tarih{ font-size:var(--yz-k); font-weight:500; opacity:.9; }
 .b-karsilama__selam{ margin:var(--a1) 0 0; font-family:var(--baslik-serif); font-size:var(--yz-h1); font-weight:600; letter-spacing:-.025em; line-height:1.05; text-wrap:balance; text-shadow:var(--sahne-golge); }
 .b-karsilama__is{ position:relative; z-index:2; display:flex; align-items:center; gap:var(--a5); margin-top:-48px; padding:var(--a5); min-width:0;

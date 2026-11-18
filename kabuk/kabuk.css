@@ -7,9 +7,10 @@
   --golge-yumusak:0 1px 2px #2b1d0c0f, 0 8px 24px -10px #2b1d0c29; --golge-buyuk:0 4px 10px #2b1d0c14, 0 28px 64px -20px #2b1d0c59;
   /* Ölçü sistemi (Faz 8): yazı 5 adım (küçük, gövde, h3, h2, h1), boşluk 4-48, köşe 3, gölge 3 kat (yumuşak, orta, büyük).
      Kabuk ve taşlar yalnız bunları kullanır; 1-2 px optik ayarlar ve SVG çizim birimleri dışında elle değer yazılmaz. */
-  --yz-k:.8125rem; --yz:1rem; --yz-h3:1.15rem; --yz-h2:1.5rem; --yz-h1:clamp(2rem,2.4vw + 1rem,2.875rem);
+  --yz-k:.875rem; /* 2026-11-18d: 13 → 14 px, küçük yazı da okunur */ --yz:1rem; --yz-h3:1.15rem; --yz-h2:1.5rem; --yz-h1:clamp(2rem,2.4vw + 1rem,2.875rem);
   --a1:4px; --a2:8px; --a3:12px; --a4:16px; --a5:24px; --a6:32px; --a7:48px;
   --kose:16px; --kose-k:10px; --kose-tam:999px;
+  --sayfa:960px; --form:640px; /* 2026-11-18d: masaüstü içerik sütunu (eskiden 720) ve form genişliği */
   --golge-orta:0 2px 4px #2b1d0c12, 0 16px 36px -14px #2b1d0c47;
   --yuzey-ust:#fffcf7; --murekkep:#1e1912; --cam:#ffffff2e; --cam-guclu:#ffffff40; --cam-cizgi:#ffffff33; --golge-cizgi:#00000026; --sinema:#000;
   --kapak-ortu:linear-gradient(180deg, #0c0a148c 0%, #0c0a1400 34%, #0c0a1426 68%, #0c0a141f 100%);
@@ -91,7 +92,7 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
 .cerceve p,.cerceve h1,.cerceve li span{ -webkit-user-select:text; user-select:text; }
 /* konum: başlığın üstünde küçük kırıntı satırı (kabuk.js ust) */
-.konum{ display:flex; align-items:center; gap:var(--a2); width:100%; max-width:720px; margin:var(--a5) auto 0; min-width:0; overflow:hidden; white-space:nowrap;
+.konum{ display:flex; align-items:center; gap:var(--a2); width:100%; max-width:var(--sayfa); margin:var(--a5) auto 0; min-width:0; overflow:hidden; white-space:nowrap;
   font-size:var(--yz-k); font-weight:500; color:var(--soluk); }
 .konum:has(+ .govde--genis){ max-width:1040px; }
 .konum > span:last-child{ overflow:hidden; text-overflow:ellipsis; }
@@ -102,7 +103,7 @@ kbd{ font-size:var(--yz-k); color:var(--soluk); border:2px solid var(--cizgi); p
 .kirinti__ayrac{ color:var(--cizgi-guclu); }
 
 /* sayfa gövdesi */
-.govde{ width:100%; max-width:720px; margin:0 auto; padding:var(--a6) 0; display:flex; flex-direction:column; gap:var(--a4); }
+.govde{ width:100%; max-width:var(--sayfa); margin:0 auto; padding:var(--a6) 0; display:flex; flex-direction:column; gap:var(--a4); }
 .govde--genis{ max-width:1040px; }
 
 /* sistem haritası: kayıttan türetilir */
@@ -508,9 +509,8 @@ article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat .b-uyari__metin{ font-siz
    üst sekmenin zaten gösterdiği sayfada sayfa yolu yok; tekrar eden rozet ve oklar yok; uyarılar yerine sakin satırlar. */
 .b-simge[class*="b-simge--"]{ background:var(--yuzey-2); }
 /* bölüm başlıkları: küçük, sakin etiket (içerik öne çıkar) */
-:root .b-bolum__ust h2{ font-size:var(--yz-k); font-weight:600; letter-spacing:.01em; color:var(--soluk); }
+:root .b-bolum__ust h2{ font:600 var(--yz-h3)/1.3 var(--baslik-serif); letter-spacing:-.005em; color:var(--yazi); } /* 2026-11-18d: her sayfada aynı bölüm başlığı */
 :root .b-bolum__ust{ min-height:32px; }
-.hs-govde .b-bolum__ust h2, .ayarlar .b-bolum__ust h2{ font-size:var(--yz-k); }
 /* üst sekmenin gösterdiği sayfalarda «Bugün / Öğren» yolu tekrar; derin sayfalarda (alan, ders, Hesap) kalır */
 #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="not"], [data-ciz="plan"], [data-ciz="king"], [data-ciz="ayarlar"], [data-ciz="harita"]) > .konum{ display:none; }
 #sayfa:is([data-ciz="ogren"], [data-ciz="saglik"], [data-ciz="not"], [data-ciz="plan"], [data-ciz="king"], [data-ciz="ayarlar"], [data-ciz="harita"]) > .kapak + .konum + .govde{ padding-top:var(--a4); }
@@ -755,8 +755,9 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
 @media print{ .alt-cubuk{ display:none; } }
 
 /* giriş kutusu zeminden ayrılır (açık temada eskiden zeminle neredeyse aynı tondaydı): bir ton koyu dolgu, odakta yüzey + yumuşak gölge */
-:root .b-alan__giris, :root :is(.kartform, .kayitform, .planform, .aracform) .b-alan__giris{ background:color-mix(in srgb, var(--yazi) 7%, var(--yuzey)); }
-:root .b-alan__giris:focus, :root :is(.kartform, .kayitform, .planform, .aracform) .b-alan__giris:focus{ background:var(--yuzey); box-shadow:var(--golge-orta); }
+:root .b-alan__giris, :root :is(.kartform, .kayitform, .planform, .aracform) .b-alan__giris{ background:color-mix(in srgb, var(--yazi) 4%, var(--yuzey)); box-shadow:inset 0 1px 2px color-mix(in srgb, var(--yazi) 10%, transparent); }
+:root .b-alan__giris:hover{ background:color-mix(in srgb, var(--yazi) 6%, var(--yuzey)); }
+:root .b-alan__giris:focus, :root :is(.kartform, .kayitform, .planform, .aracform) .b-alan__giris:focus{ background:var(--yuzey); box-shadow:0 0 0 4px color-mix(in srgb, var(--vurgu) 16%, transparent), var(--golge-yumusak); }
 
 /* Alan genel bakışı (kabuk.js sayfaAlan/siraKarti): nerede olduğun tek sakin kartta, ince ilerleme çizgisi, tek ana düğme;
    konular (ünite + ders adları) düz satır, kart değil; aşama kapısının yinelenen bölüm adı yalnız ekran okuyucuda. */
@@ -843,7 +844,6 @@ a.konu:hover{ background:var(--yuzey-2); }
 /* tek sayfa (2026-11-18c): bölümler alt alta, aralarında nefes */
 .govde:has(> .asama-ozet) > .b-bolum{ margin-top:var(--a5); }
 .govde:has(> .asama-ozet) > .asama-ozet{ margin-bottom:0; }
-:root .govde:has(> .asama-ozet) > .b-bolum > .b-bolum__ust h2{ font:600 var(--yz-h3) var(--baslik-serif); letter-spacing:-.005em; color:var(--yazi); }
 /* aşamanın özeti: küçük üst etiket, ad, hedef, tek ilerleme */
 .asama-ozet{ display:grid; gap:var(--a2); margin:0 0 var(--a6); padding:var(--a5); border-radius:var(--kose); box-shadow:var(--golge-yumusak);
   background:linear-gradient(110deg, color-mix(in srgb, var(--alan-ton) 9%, var(--yuzey)), var(--yuzey) 70%); }
@@ -946,7 +946,7 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 :root .b-karsilama__bolum{ margin-top:calc(var(--a7) + var(--a2)); gap:var(--a4); }
 :root .b-karsilama__baslik{ font-family:var(--baslik-serif); font-size:1.3rem; font-weight:600; letter-spacing:-.01em; color:var(--yazi); }
 /* İlerleme: çalışılan alan (yüzdesi olan tek kart) tam genişlik, tonlu, sıradaki adım ve ince ilerleme; öbürleri sakin küçük kutular */
-:root .b-karsilama__alanlar{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap:var(--a2); }
+:root .b-karsilama__alanlar{ grid-template-columns:repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap:var(--a3); } /* 960 px sütunda üç sütun, dokuz alan üç tam satır */
 :root .b-karsilama__alan{ min-height:60px; padding:var(--a3); box-shadow:none; background:color-mix(in srgb, var(--yuzey) 55%, transparent); }
 :root .b-karsilama__alan:hover{ background:var(--yuzey); box-shadow:var(--golge-yumusak); }
 :root .b-karsilama__alan .b-simge{ width:36px; height:36px; background:color-mix(in srgb, var(--alan-ton) 15%, var(--yuzey)); }
@@ -1026,7 +1026,6 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
   background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--altin) 55%, transparent) 18% 44%, transparent 44% 56%, color-mix(in srgb, var(--altin) 55%, transparent) 56% 82%, transparent) center / 100% 1px no-repeat; }
 
 /* 7 · Ayarlar: bölüm başlıkları serif (kitabın bölümleri gibi), menü sakin; düzen aynen */
-:root .ayarlar .b-bolum__ust h2{ font-family:var(--baslik-serif); font-size:var(--yz-h3); font-weight:600; letter-spacing:-.01em; color:var(--yazi); }
 /* piksel amblem (16×16, kabuk.js amblemKoy): tam sayı ölçekte keskin, 2× ya da öne çıkanda (başlık, çalışılan alan, Sıradaki) geniş ekranda 3× */
 .b-simge > img{ display:block; width:32px; height:32px; image-rendering:pixelated; transition:transform var(--hizli) var(--akis); }
 :root .b-simge:has(> img){ width:40px; height:40px; }
@@ -1067,3 +1066,5 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 .ders__dene:hover{ box-shadow:var(--golge-yumusak); }
 .ders--dene .ders__soru + .ders__soru{ margin-top:var(--a3); }
 :root:has(#sayfa > .ust--ogren) .alt-cubuk{ display:none; } /* telefonda da yalnız ders: alt çubuk yok, çıkış konum satırındaki ‹ alan */
+/* Formlar geniş sütunda okunur genişlikte kalır (2026-11-18d) */
+:root :is(.kayitform, .planform, .kartform, .aracform, .govde[data-arac="hesap"]:not(.govde--genis) > *){ width:100%; max-width:var(--form); }
