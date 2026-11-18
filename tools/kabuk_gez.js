@@ -355,7 +355,8 @@ async function goruntu(p, ad, sec = {}) {
       await p.waitForSelector('.b-acilir');
       dene(alan + ': yol haritası ' + v.uniteler.length + ' ünite, aşama kapısı henüz görünmez', (await p.locator('.yol > .b-acilir').count()) === v.uniteler.length && (await p.locator('#b-asama-kapisi').count()) === 0);
       // kilitli üniteler kapalı gelir (2026-11-16 sadelik): yeni alanda yalnız üzerinde çalışılan ilk ünite açık
-      dene(alan + ': yalnız ilk ünite açık gelir', (await p.locator('.yol > details.b-acilir[open]').count()) === 1);
+      // Dil'de Göktürk yazısı ünitesi (dil.1.4, 2026-11-18i) önkoşulsuz: ilk üniteyle birlikte o da açık gelir
+      dene(alan + ': yalnız ilk ünite (Dil’de bir de Göktürk yazısı) açık gelir', (await p.locator('.yol > details.b-acilir[open]').count()) === (alan === 'dil' ? 2 : 1));
       dene(alan + ': ilk ders listede «sıradaki», ona götürür', (await p.getAttribute('a.b-ders--sira', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
       await p.click('a.b-ders--sira');
       await p.waitForSelector('article.ders h1');

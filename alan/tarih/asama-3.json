@@ -1,0 +1,3410 @@
+{
+ "sema": 1,
+ "alan": "tarih",
+ "id": "tarih.3",
+ "sira": 3,
+ "ad": "İslamiyet öncesi Türk tarihi: bozkırın devletleri",
+ "hedef": "Bozkırdan doğan Hun, Göktürk, Uygur ve öteki Türk devletlerinin kuruluşunu, kurumlarını, inancını ve kültürünü kaynaklara dayanarak öğrenmek; tartışmalı yerleri tartışmalı olarak tanımak ve Orhon yazıtlarını kendi sözüyle okuyabilmek.",
+ "onKosul": [],
+ "kanitIsi": "Orhon yazıtlarından (Kül Tigin, Bilge Kağan ya da Tonyukuk) bir bölüm seç; Talat Tekin'in ya da Muharrem Ergin'in çevirisinden kaynağını, yazıtını ve yüzünü belirterek aktar, sonra yarım sayfada bugünün diliyle yorumla: kim kime sesleniyor, hangi olayı ya da tehlikeyi anlatıyor, bugün bu öğüdün karşılığı ne olabilir. Kaynakta olmayanı yazma; emin olmadığın yeri «yaklaşık» ya da «kaynaklar ayrılır» diye işaretle. Sahip değerlendirir, puanlanmaz.",
+ "kaynaklar": [
+  {
+   "id": "k1",
+   "ad": "Kut, ikili teşkilat, kurultay ve töre",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-010]-[TAR-012], [TAR-018]",
+   "satir": "47-81",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k2",
+   "ad": "Orhun Abideleri",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-019] Orhun Abideleri (720-735)",
+   "satir": "83-85",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k3",
+   "ad": "Uygurların yerleşik hayata geçişi",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-020] Uygurların Yerleşik Hayata Geçişi (Maniheizm)",
+   "satir": "87-89",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k4",
+   "ad": "İslamiyet öncesi Türk devletleri teşkilat sözlüğü",
+   "tur": "gemini",
+   "yol": "AYS/ayt/ayt_tarih_ve_inkilap_tarihi_kronolojik_sebep_sonuc_antlasmalar_ve_kongreler_tam_atlasi.md",
+   "bolum": "İslamiyet Öncesi Türk Devletleri ve Teşkilat Kavramları Sözlüğü",
+   "satir": "12-36",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k5",
+   "ad": "Mete Han'ın tahta çıkışı",
+   "tur": "gemini",
+   "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md",
+   "bolum": "2. Dünya ve Türk Tarihinin En Kritik 50 Kırılma Noktası (6)",
+   "satir": "57",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k6",
+   "ad": "Kavimler Göçü ve Göktürk Devleti'nin kuruluşu",
+   "tur": "gemini",
+   "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md",
+   "bolum": "2. Dünya ve Türk Tarihinin En Kritik 50 Kırılma Noktası (9, 10)",
+   "satir": "60-61",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k7",
+   "ad": "Talas Savaşı ve Uygurların Maniheizm'e geçişi",
+   "tur": "gemini",
+   "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md",
+   "bolum": "2. Dünya ve Türk Tarihinin En Kritik 50 Kırılma Noktası (12, 14)",
+   "satir": "63-65",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k8",
+   "ad": "Türk mitolojisi: panteon, semboller, destanlar",
+   "tur": "gemini",
+   "yol": "ESP/edebiyat_kitap/mitoloji_atlasi_turk_yunan_mezopotamya_iskandinav_misir_ve_karsilastirmali_arketip_sozlugu.md",
+   "bolum": "1.2 Panteon ve Kutsal Ruhlar · 1.3 Kutsal Semboller · 1.4 Büyük Türk Destanları",
+   "satir": "21-50",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k9",
+   "ad": "Türk mitolojisi ve on kurucu destan",
+   "tur": "gemini",
+   "yol": "ESP/edebiyat_kitap/mitoloji_arketipler_dunya_destanlari_ve_sembolizm_atlasi.md",
+   "bolum": "1.1 Kutsal Semboller ve Kozmik Düzen · 1.2 On Kurucu Türk Destanı",
+   "satir": "13-35",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k10",
+   "ad": "Dîvânu Lugâti't-Türk ve Alp Er Tunga sagusu",
+   "tur": "gemini",
+   "yol": "ESP/dil_ogrenimi/turkcenin_tarihsel_etimolojisi_divanu_lugatit_turk_orhun_ve_anadolu_agizlari_sozlugu.md",
+   "bolum": "3. Dîvânu Lugâti't-Türk (1074) ve Kaşgarlı Mahmud'un Leksikografik Dehası",
+   "satir": "67-83",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k11",
+   "ad": "Eski Türkçe ve Orhun Abideleri",
+   "tur": "gemini",
+   "yol": "ESP/dil_ogrenimi/kokenbilim_etimoloji_turkcenin_tarihsel_katmanlari_ve_dunya_dilleri_morfoloji_atlasi.md",
+   "bolum": "1. Eski Türkçe ve Orhun Abideleri (MS 720-735)",
+   "satir": "86-91",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k12",
+   "ad": "Eski Türkçe dönemi ve Orhun kelimeleri",
+   "tur": "gemini",
+   "yol": "ESP/dil_ogrenimi/turkcenin_tarihsel_etimolojisi_divanu_lugatit_turk_orhun_ve_anadolu_agizlari_sozlugu.md",
+   "bolum": "1. Türkçenin 1300 Yıllık Tarihsel Dönemleri · 4. 100 Temel Kelime",
+   "satir": "11-18",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k13",
+   "ad": "Türk tarihinde devletler soyağacı ve teşkilatlanma mantığı",
+   "tur": "gemini",
+   "yol": "MEDYA/ESP/esp_tarih_ve_cografya_jeopolitik_haritalar_ve_svg_zaman_cizelgeleri.md",
+   "bolum": "2. Türk Tarihinde Devletler, Göçler ve Teşkilatlanma Soyağacı",
+   "satir": "143-226",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k14",
+   "ad": "İlk Türk devletlerinde kut ve töre",
+   "tur": "gemini",
+   "yol": "AYS/tyt/tyt_sosyal_bilimler_tarih_cografya_felsefe_ve_din_kulturu_20_soruda_20_net_kavram_ve_harita_atlasi.md",
+   "bolum": "İlk Türk Devletlerinde Kut Anlayışı ve İkili Teşkilat",
+   "satir": "19-21",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k15",
+   "ad": "Uygurların ayırt edici özellikleri",
+   "tur": "gemini",
+   "yol": "AYS/hafiza_ve_kodlama/bilimsel_mnemonik_bellek_sarayi_ve_kodlama_atlasi.md",
+   "bolum": "2. 80 Yapılandırılmış Hafıza Kodlaması (TAR_MNEM_09)",
+   "satir": "117",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k20",
+   "ad": "Orhon Yazıtları (metin, çeviri, açıklama)",
+   "tur": "kitap",
+   "yol": "Talat Tekin, Orhon Yazıtları, Türk Dil Kurumu Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k21",
+   "ad": "Orhun Abideleri",
+   "tur": "kitap",
+   "yol": "Muharrem Ergin, Orhun Abideleri, Boğaziçi Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k22",
+   "ad": "Türk Kültür Tarihine Giriş",
+   "tur": "kitap",
+   "yol": "Bahaeddin Ögel, Türk Kültür Tarihine Giriş, Kültür Bakanlığı Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k23",
+   "ad": "Büyük Hun İmparatorluğu Tarihi",
+   "tur": "kitap",
+   "yol": "Bahaeddin Ögel, Büyük Hun İmparatorluğu Tarihi, Kültür Bakanlığı Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k24",
+   "ad": "Türk Mitolojisi",
+   "tur": "kitap",
+   "yol": "Bahaeddin Ögel, Türk Mitolojisi, Türk Tarih Kurumu Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k25",
+   "ad": "Türk Millî Kültürü",
+   "tur": "kitap",
+   "yol": "İbrahim Kafesoğlu, Türk Millî Kültürü, Ötüken Neşriyat",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k26",
+   "ad": "Gök-Türkler",
+   "tur": "kitap",
+   "yol": "Ahmet Taşağıl, Gök-Türkler, Türk Tarih Kurumu Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k27",
+   "ad": "Türk halkları tarihine giriş",
+   "tur": "kitap",
+   "yol": "Peter B. Golden, An Introduction to the History of the Turkic Peoples, Otto Harrassowitz",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k28",
+   "ad": "Erken İç Asya tarihi",
+   "tur": "kitap",
+   "yol": "Denis Sinor (ed.), The Cambridge History of Early Inner Asia, Cambridge University Press",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k29",
+   "ad": "Hunların dünyası",
+   "tur": "kitap",
+   "yol": "Otto J. Maenchen-Helfen, The World of the Huns, University of California Press",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k30",
+   "ad": "Karadeniz kuzeyindeki Türk kavimleri",
+   "tur": "kitap",
+   "yol": "Akdes Nimet Kurat, IV-XVIII. Yüzyıllarda Karadeniz Kuzeyindeki Türk Kavimleri ve Devletleri, Murat Kitabevi",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k31",
+   "ad": "Tang kaynaklarına göre Uygur Kağanlığı",
+   "tur": "kitap",
+   "yol": "Colin Mackerras, The Uighur Empire according to the T'ang Dynastic Histories, Australian National University Press",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k32",
+   "ad": "Pazırık kurganları",
+   "tur": "kitap",
+   "yol": "Sergei I. Rudenko, Frozen Tombs of Siberia: The Pazyryk Burials of Iron Age Horsemen, University of California Press",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k33",
+   "ad": "İslamiyet'ten önceki Türk kültür tarihi",
+   "tur": "kitap",
+   "yol": "Emel Esin, İslamiyet'ten Önceki Türk Kültür Tarihi ve İslama Giriş, İstanbul Üniversitesi Edebiyat Fakültesi Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k34",
+   "ad": "Dîvânu Lugâti't-Türk",
+   "tur": "kitap",
+   "yol": "Kaşgarlı Mahmud, Divanü Lûgat-it-Türk Tercümesi, çev. Besim Atalay, Türk Dil Kurumu Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k35",
+   "ad": "Herodot, Tarih (IV. kitap, İskitler)",
+   "tur": "kitap",
+   "yol": "Herodot, Tarih, çev. Müntekim Ökmen, Türkiye İş Bankası Kültür Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k36",
+   "ad": "At, tekerlek ve dil",
+   "tur": "kitap",
+   "yol": "David W. Anthony, The Horse, the Wheel, and Language, Princeton University Press",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k37",
+   "ad": "Hint-İranlıların kökeni (Andronovo)",
+   "tur": "kitap",
+   "yol": "Elena E. Kuz'mina, The Origin of the Indo-Iranians, Brill",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k38",
+   "ad": "Ortaöğretim Tarih 9 (İlk ve Orta Çağlarda Türk Dünyası)",
+   "tur": "kitap",
+   "yol": "MEB, Ortaöğretim Tarih 9 Ders Kitabı, MEB Yayınları",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k39",
+   "ad": "Menandros'un Tarihi (Türk-Bizans elçilikleri)",
+   "tur": "kitap",
+   "yol": "R. C. Blockley, The History of Menander the Guardsman, Francis Cairns",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k40",
+   "ad": "İbn Fadlan Seyahatnamesi",
+   "tur": "kitap",
+   "yol": "İbn Fadlan, İbn Fadlan Seyahatnamesi, çev. Ramazan Şeşen, Yeditepe Yayınevi",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k41",
+   "ad": "Sima Qian, Shiji, Hunlar bölümü (110)",
+   "tur": "kitap",
+   "yol": "Sima Qian, Records of the Grand Historian: Han Dynasty II, çev. Burton Watson, Columbia University Press",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k42",
+   "ad": "Jordanes, Getica",
+   "tur": "kitap",
+   "yol": "Jordanes, The Gothic History, çev. Charles C. Mierow, Princeton University Press",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k43",
+   "ad": "Şehname (Afrasiyab)",
+   "tur": "kitap",
+   "yol": "Firdevsî, Şehnâme, çev. Necati Lugal, Millî Eğitim Bakanlığı Yayınları",
+   "dogrulama": "kaynakli"
+  }
+ ],
+ "kapi": {
+  "esik": 0.8,
+  "sorular": [
+   {
+    "id": "tarih.3.k1",
+    "tur": "secmeli",
+    "soru": "Aşağıdaki olaylardan hangisi kronolojik sırada üçüncü gelir: Katalaunum Savaşı, Göktürk Devleti'nin kuruluşu, Mete'nin tahta çıkışı, Uygur Kağanlığı'nın yıkılışı?",
+    "sec": [
+     "Mete'nin tahta çıkışı",
+     "Katalaunum Savaşı",
+     "Göktürk Devleti'nin kuruluşu",
+     "Uygur Kağanlığı'nın yıkılışı"
+    ],
+    "dogru": "C",
+    "cozum": [
+     "Sıra: Mete MÖ 209, Katalaunum MS 451, Göktürk kuruluşu 552, Uygur yıkılışı 840.",
+     "Üçüncü sırada 552'deki Göktürk kuruluşu gelir."
+    ],
+    "kaynak": [
+     "k5",
+     "k6",
+     "k3"
+    ],
+    "durum": "taslak",
+    "yazan": "model"
+   },
+   {
+    "id": "tarih.3.k2",
+    "tur": "secmeli",
+    "soru": "Bir bozkır devletinde hükümdar öldükten sonra kardeşleri ve oğulları ayrı ayrı kağanlık iddia ediyor, devlet ikiye ayrılıyor. Bu tablo en çok hangi anlayışla açıklanır?",
+    "sec": [
+     "Kutun hanedanın bütün erkek üyelerine geçtiği inancı",
+     "Kurultayın kağanı seçme yetkisini kaybetmesi",
+     "Töre'nin yazılı hale getirilmesi",
+     "Ordunun onlu sisteme göre örgütlenmesi"
+    ],
+    "dogru": "A",
+    "cozum": [
+     "Kut kan yoluyla bütün hanedana geçtiğine inanıldığından tahtta her erkek üyenin hakkı vardı; ülke hanedanın ortak malı sayılıyordu.",
+     "Bu, taht kavgalarının ve bölünmelerin başlıca kurumsal nedenidir."
+    ],
+    "kaynak": [
+     "k1",
+     "k14"
+    ],
+    "durum": "taslak",
+    "yazan": "model"
+   },
+   {
+    "id": "tarih.3.k3",
+    "tur": "secmeli",
+    "soru": "Uygurları Hun ve Göktürklerden ayıran en belirgin değişiklik hangisidir?",
+    "sec": [
+     "Onlu askeri teşkilatı ilk kez kurmaları",
+     "Maniheizmi devlet dini olarak benimseyip şehirli, yerleşik bir kültür geliştirmeleri",
+     "Türk adını ilk kez devlet adı olarak kullanmaları",
+     "Çin'e karşı ilk kez sur yaptırmaları"
+    ],
+    "dogru": "B",
+    "cozum": [
+     "Bögü Kağan döneminde benimsenen Maniheizm ve Karabalgasun gibi şehirler Uygurları yerleşik hayata yöneltti.",
+     "Onlu sistem Hunlara, Türk adının devlet adı oluşu Göktürklere aittir."
+    ],
+    "kaynak": [
+     "k3",
+     "k15"
+    ],
+    "durum": "taslak",
+    "yazan": "model"
+   },
+   {
+    "id": "tarih.3.k4",
+    "tur": "secmeli",
+    "soru": "Bir tarihçi Saka-İskit halklarının hepsinin kesin olarak Türk olduğunu, Andronovo kültürünün de tamamen Türk kültürü olduğunu kesin dille yazıyor. Tarih bilimi açısından en doğru eleştiri hangisidir?",
+    "sec": [
+     "Bu konuda kaynaklar ayrılır; dil kanıtı sınırlıdır, iddia kesin değil tartışmalı olarak sunulmalıdır",
+     "Sakalar yalnız Herodot'ta geçtiği için hiç var olmamıştır",
+     "Arkeoloji dili doğrudan gösterdiği için iddia kanıtlanmıştır",
+     "Andronovo kültürü Orta Çağ'a aittir, Sakalarla ilgisi yoktur"
+    ],
+    "dogru": "A",
+    "cozum": [
+     "Kurganlar ve eşyalar bir kültürü gösterir ama konuşulan dili doğrudan göstermez; bu yüzden Saka ve Andronovo'nun dili tartışmalıdır.",
+     "Türk tarihçilerinin bir bölümü Türk unsurunu güçlü görür, Batılı araştırmacıların çoğu Hint-İran dilli halklara bağlar: doğru tutum bunu açıkça söylemektir."
+    ],
+    "kaynak": [
+     "k25",
+     "k37"
+    ],
+    "durum": "taslak",
+    "yazan": "model"
+   },
+   {
+    "id": "tarih.3.k5",
+    "tur": "secmeli",
+    "soru": "Bizans'ın 568'de Göktürklerle ittifak kurmasının arkasındaki ortak çıkar hangisidir?",
+    "sec": [
+     "Hazarlara karşı Karadeniz'i paylaşmak",
+     "Sasanilere karşı ipek ticaretini Pers aracılığı olmadan sürdürmek",
+     "Arap fetihlerini birlikte durdurmak",
+     "Avrupa Hunlarını yurtlarına geri göndermek"
+    ],
+    "dogru": "B",
+    "cozum": [
+     "Sasaniler ipek yolunu kesince Göktürkler ipeği doğrudan Bizans'a satmak istedi; Bizans da Sasanilere karşı doğuda bir müttefik arıyordu.",
+     "Arap fetihleri 7. yüzyılın ikinci çeyreğinde başlar; Hazarlar bu sırada henüz bağımsız bir güç değildir."
+    ],
+    "kaynak": [
+     "k39",
+     "k26"
+    ],
+    "durum": "taslak",
+    "yazan": "model"
+   },
+   {
+    "id": "tarih.3.k6",
+    "tur": "secmeli",
+    "soru": "Orhon yazıtlarında Bilge Kağan'ın halka seslenip Çin'in tatlı sözüne ve yumuşak ipeğine kanmamayı öğütlemesi, tarih yazımı açısından en çok neyi gösterir?",
+    "sec": [
+     "Yazıtların yalnız mezar taşı olduğunu, siyasi mesaj taşımadığını",
+     "Türklerin Çin ile hiç ticaret yapmadığını",
+     "Yazıtların, geçmiş felaketten ders çıkaran bilinçli bir siyasi vasiyet olduğunu",
+     "Yazıtların Çince yazıldığını"
+    ],
+    "dogru": "C",
+    "cozum": [
+     "Yazıtlar 630-682 arasındaki Çin hakimiyetini hatırlatıp bir daha düşmemek için öğüt verir: bu, hafızayı siyasete dönüştüren bir vasiyettir.",
+     "Ana metin Türkçedir; Kül Tigin yazıtının bir yüzündeki Çince bölüm imparatorun yazdırdığı ayrı bir metindir."
+    ],
+    "kaynak": [
+     "k2",
+     "k20"
+    ],
+    "durum": "taslak",
+    "yazan": "model"
+   }
+  ]
+ },
+ "uniteler": [
+  {
+   "id": "tarih.3.1",
+   "ad": "Türklerin anayurdu ve ilk izler",
+   "onKosul": [],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.3.1.k1",
+      "tur": "secmeli",
+      "soru": "Kurak, karasal bozkır ikliminin en doğrudan sonucu hangisidir?",
+      "sec": [
+       "Geniş sulu tarım ve büyük taş şehirler",
+       "Hayvancılığa dayalı, mevsime göre göç eden konar-göçer hayat",
+       "Deniz ticaretine dayalı bir ekonomi",
+       "Ormancılığın başlıca geçim kaynağı olması"
+      ],
+      "dogru": "B",
+      "cozum": [
+       "Az yağış ve geniş otlaklar hayvancılığı ve otlağa bağlı düzenli göçü zorunlu kıldı.",
+       "Tarım ancak ırmak boylarında ve vahalarda mümkündü."
+      ],
+      "kaynak": [
+       "k22",
+       "k38"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.1.k2",
+      "tur": "secmeli",
+      "soru": "Tuva'da bulunan ve bozkırın bilinen en eski büyük beylik mezarlarından sayılan kurgan hangisidir?",
+      "sec": [
+       "Pazırık",
+       "Esik",
+       "Koşo Tsaidam",
+       "Arjan"
+      ],
+      "dogru": "D",
+      "cozum": [
+       "Arjan kurganı yaklaşık MÖ 9.-8. yüzyıla tarihlenir.",
+       "Koşo Tsaidam bir kurgan değil, Kül Tigin ve Bilge Kağan anıtlarının bulunduğu yerdir."
+      ],
+      "kaynak": [
+       "k25",
+       "k32"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.1.k3",
+      "tur": "secmeli",
+      "soru": "Alp Er Tunga için hangi ifade tarih bilimine en uygundur?",
+      "sec": [
+       "Çağdaş yazıtlarla yılı kesin olarak bilinen bir hükümdardır",
+       "Göktürk kağanlarından biridir",
+       "Türk geleneğinde Saka çağına bağlanan, destan ve sonraki kayıtlarla bilinen bir kahramandır; tarihîliği tartışmalıdır",
+       "Yalnız Çin kaynaklarında geçer"
+      ],
+      "dogru": "C",
+      "cozum": [
+       "Alp Er Tunga'yı Kaşgarlı ve Şehnâme gibi sonraki kaynaklar anlatır; çağdaş belge yoktur.",
+       "Bu yüzden yaşadığı yüzyıl ve tarihîliği konusunda kaynaklar ayrılır."
+      ],
+      "kaynak": [
+       "k34",
+       "k25"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.1.k4",
+      "tur": "secmeli",
+      "soru": "Hunların 375 civarında İdil ve Don'u geçip Alanları ve Ostrogotları yenmesi hangi büyük hareketi başlattı?",
+      "sec": [
+       "Kavimler Göçü",
+       "Haçlı Seferleri",
+       "Coğrafi Keşifler",
+       "Moğol istilası"
+      ],
+      "dogru": "A",
+      "cozum": [
+       "375 civarındaki Hun ilerleyişi Cermen kavimlerini batıya iterek Kavimler Göçü'nü başlattı.",
+       "Bu hareket Batı Roma'nın 476'da yıkılışına giden süreci hızlandırdı."
+      ],
+      "kaynak": [
+       "k6"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.3.1.1",
+     "ad": "Anayurt neresi? Görüşler ve bozkırın coğrafyası",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k25",
+      "k22",
+      "k27",
+      "k38",
+      "k20"
+     ],
+     "ozet": "Türklerin anayurdu genellikle Orta Asya bozkırları, özellikle Altay-Sayan ve Moğolistan çevresi olarak gösterilir; ancak sınırları ve merkezi konusunda kaynaklar ayrılır. Bozkırın kurak, karasal iklimi hayvancılığa ve atlı, hareketli bir hayata yol açtı.",
+     "metin": [
+      "Bir milletin tarihi bir yerden başlar, ama o yeri bulmak her zaman kolay değildir. Türklerin ilk yurdu için kesin bir sınır çizen tek bir belge yoktur; tarihçiler dil, arkeoloji ve Çin, İran, Bizans kaynaklarındaki kayıtları birleştirerek bir alan tarif eder. Bu yüzden «anayurt» bir nokta değil, geniş bir bölgedir.",
+      "Türkiye'deki ders kitaplarında ve İbrahim Kafesoğlu gibi tarihçilerde anayurt kabaca şöyle çizilir: doğuda Kingan dağları, batıda Hazar Denizi ve Ural dağları, kuzeyde Altay-Sayan dağları ve Sibirya ormanları, güneyde Tanrı Dağları ile Hindukuş-Karakurum sıraları. Bu alanın içinde Moğolistan yaylası, Cungarya, Kazak bozkırı ve Doğu Türkistan vardır.",
+      "Anayurdun merkezi konusunda görüşler ayrılır. Bir grup araştırmacı Altay-Sayan dağları çevresini çekirdek sayar; bir başka görüş Moğolistan'ın kuzeyini ve Baykal gölü güneyini öne çıkarır. Peter Golden gibi dil tarihçileri, Türkçenin en eski evresinin doğu bozkırlarında, Moğolistan ile Güney Sibirya arasında bir yerde konuşulduğunu düşünür; ama tam yer konusunda kesin bir söz söylenemez.",
+      "Eskiden yaygın olan bir görüş Türkçeyi Moğolca, Mançuca, hatta Fince ve Macarcayla tek bir «Ural-Altay» ailesine koyuyordu. Bugün dilbilimcilerin çoğu bu geniş aileyi kanıtlanmış saymaz; benzerliklerin bir kısmını uzun komşuluğa ve ödünçlemeye bağlar. Yani dil akrabalığından anayurt çıkarmak da tartışmalı bir yoldur. (modelin bağlantı notu)",
+      "Bozkır kelimesi uçsuz bucaksız bir çayırı anlatır. İklim karasaldır: yazlar kısa ve sıcak, kışlar uzun ve serttir; yağış azdır, ağaç seyrektir. Böyle bir yerde tarım ancak ırmak boylarında ve vahalarda mümkündür, geniş otlaklar ise sürüleri besler.",
+      "Bu coğrafya hayat biçimini belirledi. Koyun, at, sığır, deve ve keçi sürüleri otlak tükendikçe yer değiştirmek zorundaydı; bu yüzden boylar yazın serin yaylaklara, kışın korunaklı kışlaklara göçtü. Bu düzene konar-göçerlik denir: başıboş bir dolaşma değil, mevsime bağlı, bilinen yollar üzerinde düzenli bir hareket.",
+      "Konar-göçer hayat taşınabilir bir maddi kültür doğurdu. Keçe çadır (sonraki kaynaklarda otağ ya da yurt), deri kaplar, keçe halılar, ağaçtan katlanabilir eşyalar ve at arabaları bu kültürün parçasıdır. Kalıcı taş yapı azdır, ama bu kültürün «ilkel» olduğu anlamına gelmez; hareketliliğe uymuş, son derece işlevsel bir çözümdür.",
+      "Bozkırın bir başka sonucu askerîdir. Atı küçük yaşta binmeyi, yay çekmeyi ve av sürmeyi öğrenen her yetişkin erkek aynı zamanda bir atlı okçuydu. Bu, bozkır topluluklarına yerleşik komşularına karşı hız ve hareket üstünlüğü verdi; Çin'in yüzyıllar boyunca kuzey sınırını sur ve kalelerle korumaya uğraşmasının bir nedeni budur.",
+      "Bozkır kapalı bir dünya da değildi. Kuzey-güney ve doğu-batı yönünde uzanan ticaret yolları, sonradan İpek Yolu denen ağın parçaları, bozkırı Çin'e, İran'a ve Karadeniz'e bağladı. Hayvan, deri, at ve kürk gibi bozkır ürünleri ipek, tahıl ve madenî eşya ile değiş tokuş edildi.",
+      "Göktürk yazıtları bu bölgenin bir yerini özellikle kutsal sayar: Ötüken. Ötüken, bugünkü Moğolistan'da Orhon ve Selenga ırmaklarının kaynak bölgesindeki Hangay dağları çevresidir. Talat Tekin'in çevirisine göre Kül Tigin yazıtı, Türk kağanı Ötüken ormanında oturursa ebedî bir devlet tutacağını söyler; anayurt kavramı burada siyasi bir merkeze dönüşür.",
+      "Özetle: anayurdun genel yeri, Orta Asya bozkırları, büyük ölçüde kabul görür; merkezi ve sınırları ise tartışmalıdır. Tarihçi bu tartışmayı saklamaz, hangi kanıtın neyi gösterdiğini söyler. Bu ünitedeki derslerde de aynı kural geçerlidir: kesin olan kesin, tartışmalı olan tartışmalı diye anlatılır."
+     ],
+     "alistirmalar": [
+      {
+       "id": "tarih.3.1.1.a1",
+       "tur": "secmeli",
+       "soru": "Konar-göçerliği en doğru anlatan ifade hangisidir?",
+       "sec": [
+        "Hiçbir düzeni olmadan rastgele dolaşmak",
+        "Mevsime göre bilinen yaylak ve kışlaklar arasında düzenli göç etmek",
+        "Yalnız savaş zamanında yer değiştirmek",
+        "Tarım için ormanları açarak yeni köyler kurmak"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Konar-göçer boylar yazın yaylağa, kışın kışlağa, bilinen yollarla göçerdi.",
+        "Bu hareket otlakların tükenmesine karşı geliştirilmiş düzenli bir çözümdür."
+       ],
+       "kaynak": [
+        "k22",
+        "k38"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.1.a2",
+       "tur": "secmeli",
+       "soru": "Göktürk yazıtlarında kutsal siyasi merkez sayılan Ötüken bugün hangi bölgededir?",
+       "sec": [
+        "Kazakistan'da Sir Derya kıyısında",
+        "Doğu Türkistan'da Turfan çukurunda",
+        "Moğolistan'da Orhon-Selenga kaynakları çevresindeki Hangay dağlarında",
+        "Hazar Denizi'nin kuzeyinde İtil boyunda"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Ötüken, Orhon ve Selenga ırmaklarının kaynak bölgesindeki Hangay dağları çevresidir.",
+        "Orhon yazıtları da bu bölgede, Orhon vadisinde bulunmuştur."
+       ],
+       "kaynak": [
+        "k20",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.1.a3",
+       "tur": "secmeli",
+       "soru": "Türklerin anayurdu konusunda tarih bilimine en uygun ifade hangisidir?",
+       "sec": [
+        "Genel yer olarak Orta Asya bozkırları kabul görür, merkezi ve sınırları konusunda kaynaklar ayrılır",
+        "Anayurdun tam sınırları tek bir belgeyle kesin olarak bilinir",
+        "Türklerin anayurdu Anadolu'dur",
+        "Anayurt meselesi yalnız dil benzerlikleriyle kesin olarak çözülmüştür"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Orta Asya bozkırları genel olarak kabul edilir; Altay-Sayan mı, Moğolistan mı gibi sorular tartışmalıdır.",
+        "Ural-Altay dil ailesi görüşü de bugün çoğu dilbilimci tarafından kanıtlanmış sayılmaz."
+       ],
+       "kaynak": [
+        "k25",
+        "k27"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.1.2",
+     "ad": "At, kurgan ve bozkır kültürünün ilk izleri",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k25",
+      "k36",
+      "k37",
+      "k22",
+      "k32",
+      "k4"
+     ],
+     "ozet": "Atın evcilleştirilmesi ve binicilik bozkır hayatını değiştirdi. Afanasyevo ve Andronovo gibi Tunç Çağı kültürlerinin hangi dili konuşan halklara ait olduğu tartışmalıdır; kurganlar ise bozkırın en önemli arkeolojik kanıtıdır.",
+     "metin": [
+      "Bozkırın tarihini atsız düşünmek imkânsızdır. At hem yük taşıdı, hem süt ve et verdi, hem de insanı hızlı bir savaşçıya dönüştürdü. Bu yüzden «at kültürü» bir hayvanın değil, bütün bir hayat tarzının adıdır.",
+      "Atın nerede ve ne zaman evcilleştirildiği uzun süre tartışıldı. Kazakistan'daki Botay yerleşiminde, yaklaşık MÖ 3500'lere tarihlenen kemikler ve kaplardaki at sütü izleri bulundu. Ancak David Anthony gibi araştırmacıların da tartıştığı bu buluntular, yakın zamandaki genetik incelemelerle yeniden yorumlandı: bugünkü evcil atların atasının Karadeniz ile Hazar arasındaki bozkırlarda, daha geç bir tarihte yayıldığı düşünülüyor. (modelin bağlantı notu)",
+      "Kesin olan şudur: MÖ 2. binyıldan itibaren Avrasya bozkırında savaş arabası, MÖ 1. binyılda da atlı okçuluk yaygınlaştı. Atlı okçu, yerleşik ordular için önüne geçilmesi zor bir rakipti. Türk tarihinin sonraki bütün bozkır devletleri bu askeri geleneğin üzerine kuruldu.",
+      "Arkeologlar bozkırda birbirini izleyen kültürler tanımlar. Altay ve Minusinsk havzasında yaklaşık MÖ 3300-2500 arasına tarihlenen Afanasyevo kültürü, bölgenin en eski çobanlık kültürlerindendir. Bu kültürün taşıyıcıları çoğu araştırmacıya göre batıdan gelmiş ve Hint-Avrupa dilli olabilecek topluluklardır.",
+      "Daha sonra, yaklaşık MÖ 2000-900 arasında Kazakistan'dan Güney Sibirya'ya uzanan geniş alanda Andronovo kültürü görülür: tunç işçiliği, at, savaş arabası, kurgan mezarlar. Elena Kuz'mina başta olmak üzere birçok araştırmacı Andronovo'yu Hint-İran dilli halklarla ilişkilendirir. İbrahim Kafesoğlu ise Andronovo'yu ve ardından gelen Karasuk kültürünü Türk kültürünün ilk evresi olarak yorumlar.",
+      "Burada kaynaklar ayrılır ve nedeni önemlidir. Bir kurgan, bir çömlek ya da bir tunç bıçak bize bir kültürü gösterir ama o insanların hangi dili konuştuğunu doğrudan göstermez. Yazının olmadığı bir çağda dil ancak dolaylı yoldan tahmin edilir; bu yüzden «Andronovo Türktü» ya da «Andronovo Türk değildi» cümlelerinin ikisi de kesinlik iddia edemez.",
+      "Bozkırın en kalıcı izi kurganlardır. Kurgan, mezar odasının üzerine toprak ve taş yığılarak yapılan büyük tümsektir. Kaynaklara göre ölü çoğu zaman atı, silahı ve günlük eşyasıyla gömülürdü; bu, ölümden sonra hayatın sürdüğüne inanıldığını gösterir.",
+      "Tuva'daki Arjan kurganı, yaklaşık MÖ 9.-8. yüzyıla tarihlenir ve bozkırın bilinen en eski büyük beylik mezarlarındandır. Altay'daki Pazırık kurganları (yaklaşık MÖ 4.-3. yüzyıl) donmuş toprakta keçe, halı, ahşap ve deriyi bugüne taşıdı. Kazakistan'daki Esik kurganında 1969-1970'te altın süslü giysili bir beyin mezarı bulundu ve «Altın Elbiseli Adam» adıyla tanındı. (modelin bağlantı notu)",
+      "Esik'te bulunan gümüş bir kâsenin üzerindeki kısa yazı da tartışmalıdır. Bazı Türk araştırmacılar onu eski bir Türkçe metin olarak okumayı denemiştir; başka araştırmacılar yazının çözülmediğini ya da İran dilli olduğunu savunur. Bu yüzden bu yazı tek başına bir kanıt olarak kullanılmaz. (modelin bağlantı notu)",
+      "Kurgan geleneği sonraki Türk çağlarına uzandı. Göktürk döneminde mezar yanına dikilen balbal taşları ve yazıtlı anıtlar, aynı ölüm ve hatıra anlayışının devamı sayılır. Yani bozkırın ilk izleri ile Göktürk anıtları arasında bir süreklilik vardır, ama bu süreklilik bir kültür geleneğidir, kesin bir soy zinciri değildir.",
+      "Bu derste öğrenilecek temel beceri şudur: arkeolojik buluntu bir hayat tarzını güçlü biçimde gösterir, kimliği ise ihtiyatla gösterir. Gurur duyulacak çok şey vardır: atlı kültür, maden işçiliği, Pazırık'ın sanatı. Ama gururu kanıtın söylediğinden fazlasını söyleyerek değil, kanıtı doğru okuyarak kurmak gerekir."
+     ],
+     "not": "Kaynaklarda Botay ve Esik yazısı geçmiyor; ikisi de modelin bağlantı notuyla eklendi. Esik kurganının tarihi araştırmacılara göre MÖ 5. ile 3. yüzyıl arasında değişir; derste «yaklaşık» vermek yerine ad ve buluş yılıyla yetinildi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.1.2.a1",
+       "tur": "secmeli",
+       "soru": "Andronovo kültürünün hangi dili konuşan halka ait olduğu neden kesin olarak söylenemez?",
+       "sec": [
+        "Andronovo buluntuları hiç incelenmediği için",
+        "Yazısız bir çağın maddi kalıntıları kültürü gösterir ama dili doğrudan göstermediği için",
+        "Andronovo kültürü Orta Çağ'a ait olduğu için",
+        "Bütün Andronovo yazıtları kaybolduğu için"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Çömlek, mezar ve tunç eşya bir hayat tarzını gösterir; konuşulan dili ise ancak dolaylı yoldan tahmin ettirir.",
+        "Bu yüzden Kafesoğlu'nun Türk kültürü yorumu ile Kuz'mina'nın Hint-İran yorumu karşı karşıya durur: kaynaklar ayrılır."
+       ],
+       "kaynak": [
+        "k25",
+        "k37"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.2.a2",
+       "tur": "secmeli",
+       "soru": "Kurganlara ölünün atı, silahı ve eşyasıyla gömülmesi en çok neyi gösterir?",
+       "sec": [
+        "Ölümden sonra hayatın sürdüğüne inanıldığını",
+        "Bozkırda madencilik yapılmadığını",
+        "Ölülerin hep yakıldığını",
+        "Atın kutsal sayılmadığını"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Ölünün yanına konan eşyalar ahiret hayatında kullanılacağı inancını gösterir.",
+        "Kaynaklar kurganları ahiret inancının kanıtı olarak sayar."
+       ],
+       "kaynak": [
+        "k4"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.2.a3",
+       "tur": "secmeli",
+       "soru": "Donmuş toprak sayesinde keçe, halı ve ahşap eşyanın bugüne kadar korunduğu kurganlar hangisidir?",
+       "sec": [
+        "Esik kurganı",
+        "Arjan kurganı",
+        "Pazırık kurganları",
+        "Botay yerleşimi"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Altay'daki Pazırık kurganlarında mezar odalarına sızan su donmuş, organik malzemeyi korumuştur.",
+        "Esik altın süslü giysisiyle, Arjan erken tarihiyle tanınır; Botay bir yerleşimdir."
+       ],
+       "kaynak": [
+        "k32"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.2.a4",
+       "tur": "acik",
+       "soru": "Bir arkadaşın «Kurganlar Türklere aittir, bu kesin» diyor. Ona tarih bilimine uygun, kırıcı olmayan iki cümlelik bir cevap yaz.",
+       "dogru": "Kurganlar bozkırda yaşayan atlı halkların ortak geleneğidir ve Türk kültürüyle süreklilik gösterir; ama yazısız dönemlerde hangi kurganı hangi dili konuşanın yaptığını kesin bilemeyiz, bu yüzden her biri için kaynaklar ayrılır. Göktürk dönemindeki balbal ve yazıtlı anıtlar ise kesin olarak Türklere aittir.",
+       "olcut": [
+        "Kurganların ortak bozkır geleneği olduğunu söylüyor",
+        "Dilin ve kimliğin kesin bilinemediğini belirtiyor",
+        "Kesin Türk olan bir örnek veriyor ya da süreklilikten söz ediyor"
+       ],
+       "kaynak": [
+        "k25",
+        "k4"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.1.3",
+     "ad": "Sakalar (İskitler) ve Alp Er Tunga meselesi",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k35",
+      "k25",
+      "k10",
+      "k34",
+      "k43",
+      "k8",
+      "k9"
+     ],
+     "ozet": "Sakalar (Grek kaynaklarında İskitler) MÖ 1. binyılda Karadeniz'in kuzeyinden Altay'a kadar yayılmış atlı halklardır; dillerinin büyük bölümünün İran dilli olduğu kabul edilir, Türk unsurunun payı tartışmalıdır. Alp Er Tunga Türk geleneğinde Saka çağına bağlanan büyük bir hükümdardır ve Kaşgarlı'nın aktardığı sagusuyla yaşar.",
+     "metin": [
+      "MÖ 1. binyılda Karadeniz'in kuzeyinden Altay'a kadar uzanan bozkırda atlı, savaşçı halklar yaşıyordu. Grekler bunlara İskit, Persler Saka dedi. Bu adlar tek bir milleti değil, benzer hayat tarzını paylaşan birçok topluluğu anlatır.",
+      "Sakalar hakkındaki en ayrıntılı eski kaynak Herodot'tur. Herodot Tarih'inin IV. kitabında İskitlerin at sırtında yaşadığını, ok attığını, kurganlara gömüldüğünü ve düşmana karşı geri çekilip toprağı yakarak savaştığını anlatır. Pers kralı I. Dareios'un İskitlere karşı seferinde (yaklaşık MÖ 513) İskitlerin meydan savaşına girmeyip Pers ordusunu bozkırda yıprattığını yazar.",
+      "Herodot'un I. kitabı bir başka bozkır halkından, Massagetlerden de söz eder. Ona göre Pers kralı Kiros, Massaget kraliçesi Tomris'e karşı savaşta öldü (MÖ 530). Türk geleneğinde Tomris sıkça bir Türk kraliçesi olarak anılır; ancak Massagetlerin dili bilinmez, bu yüzden bu konuda kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Sakaların dili meselesi tartışmalıdır. Ellerdeki kişi adları ve kelimelerin çoğu İran dillerine benzer; bu yüzden dünyadaki araştırmacıların büyük bölümü Sakaları İran dilli halklar sayar. İbrahim Kafesoğlu ve başka Türk tarihçileri ise Saka topluluklarının içinde Türk unsurunun bulunduğunu, bozkır kültürünün ortak olduğunu ve Türk-Saka ilişkisinin güçlü olduğunu savunur.",
+      "Bu iki görüş birbirini tam olarak dışlamaz. Bozkır halkları karışıktı; bir konfederasyonun içinde farklı dilleri konuşan boylar bulunabilirdi. Doğru tutum, «Sakalar Türktü» ya da «Sakaların Türklerle ilgisi yoktu» demek yerine, ortak bozkır kültürünü ve tartışmalı dil kanıtını birlikte söylemektir.",
+      "Alp Er Tunga Türk geleneğinin en eski kahramanlarından biridir. Kaşgarlı Mahmud Dîvânu Lugâti't-Türk'te (1070'lerde yazıldı, 1074'te tamamlandığı kabul edilir) onu Türklerin büyük hükümdarı olarak anar ve İranlıların ona Afrasiyab dediğini söyler. Firdevsî'nin Şehnâme'sinde Afrasiyab, İran'ın düşmanı Turan'ın kudretli hükümdarıdır. (modelin bağlantı notu)",
+      "Kaşgarlı, Alp Er Tunga'nın ölümü üzerine söylenmiş bir ağıtın (sagu) dörtlüklerini kaydetmiştir. Gemini kaynağındaki aktarıma göre ilk dörtlük şöyledir: «Alp Er Tunga öldi mü / Issız ajun kaldı mu / Ödlek öçin aldı mu / Emdi yürek yırtılur.» Bugünkü dille: Alp Er Tunga öldü mü, kötü dünya kaldı mı, zaman öcünü aldı mı, şimdi yürek yırtılır.",
+      "Alp Er Tunga'nın hangi yüzyılda yaşadığı kesin değildir. Türk tarihçilerinin bir bölümü onu MÖ 7. yüzyıl civarındaki Saka çağına bağlar; ama bunu gösteren çağdaş bir belge yoktur, bilgi destan ve sonraki çağların kayıtlarından gelir. Bu yüzden Alp Er Tunga «tarihî bir kişilik mi, destan kahramanı mı» sorusunda kaynaklar ayrılır.",
+      "Bu belirsizlik Alp Er Tunga'nın değerini azaltmaz. Bir milletin yüzyıllar boyunca bir kahramanı hatırlaması ve ağıtını yazıya geçirmesi, kendi geçmişini nasıl anladığını gösterir. Tarihçi destanı bir belge olarak okur: neyi anlattığını değil, kimin neden anlattığını da sorar.",
+      "Saka sanatı ise kesin bir mirastır. Altın ve tunç eşyalar üzerinde geyik, kartal, kaplan ve at gibi hayvanların kıvrılarak birbirine geçtiği «hayvan üslubu» Saka sanatının imzasıdır. Bu üslup sonraki bozkır sanatında, Hun ve Göktürk dönemlerinde de görülür; beşinci ünitede ayrıca işlenecek."
+     ],
+     "not": "Kaynaklar (k8, k9) Alp Er Tunga'yı «Sakalar (İskitler)» destanı olarak tek cümleyle veriyor; bu derste kaynakların ayrıldığı belirtildi. Tomris ve Dareios seferi Herodot'tan (k35), modelin bilgisiyle eklendi; Dareios seferinin yılı yaklaşıktır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.1.3.a1",
+       "tur": "secmeli",
+       "soru": "İskitlerin I. Dareios'un ordusuna karşı meydan savaşına girmeyip geri çekilerek onu bozkırda yıprattığını anlatan kaynak hangisidir?",
+       "sec": [
+        "Orhon yazıtları",
+        "Herodot'un Tarih'i",
+        "Dîvânu Lugâti't-Türk",
+        "Şehnâme"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Herodot IV. kitapta Dareios'un İskit seferini ve İskitlerin geri çekilme taktiğini anlatır.",
+        "Orhon yazıtları 8. yüzyıla, Dîvânu Lugâti't-Türk 11. yüzyıla aittir; Şehnâme destanî bir eserdir."
+       ],
+       "kaynak": [
+        "k35"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.3.a2",
+       "tur": "secmeli",
+       "soru": "Kaşgarlı Mahmud'a göre İranlılar Alp Er Tunga'ya hangi adı verir?",
+       "sec": [
+        "Keyhüsrev",
+        "Rüstem",
+        "Afrasiyab",
+        "Tomris"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Kaşgarlı, Alp Er Tunga'nın İranlılarca Afrasiyab diye anıldığını yazar.",
+        "Şehnâme'de Afrasiyab Turan'ın hükümdarıdır."
+       ],
+       "kaynak": [
+        "k34",
+        "k10"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.3.a3",
+       "tur": "secmeli",
+       "soru": "Sakaların dili konusunda en doğru ifade hangisidir?",
+       "sec": [
+        "Hepsinin yalnız Türkçe konuştuğu yazıtlarla kanıtlanmıştır",
+        "Sakaların hiçbir dil konuşmadığı bilinir",
+        "Sakalar Çince konuşurdu",
+        "Elde kalan adların çoğu İran dillerine benzer; Türk unsurunun payı konusunda kaynaklar ayrılır"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Kişi adlarının ve kelimelerin çoğu İran dillerine benzer; Türk tarihçilerinin bir bölümü Türk unsurunun varlığını savunur.",
+        "Konfederasyonlar karışık olabilir; doğru tutum tartışmayı açıkça söylemektir."
+       ],
+       "kaynak": [
+        "k25"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.1.4",
+     "ad": "Göçler: neden yola çıkıldı, neler değişti?",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k38",
+      "k22",
+      "k27",
+      "k25",
+      "k6"
+     ],
+     "ozet": "Türk göçlerinin arkasında kuraklık ve otlak darlığı, nüfus artışı, boylar arası savaşlar ve komşu devletlerin baskısı gibi birden çok neden vardır. Göçler Türk kültürünü Avrasya'ya yaydı, yeni devletler doğurdu ve başka halklarla kalıcı bir etkileşim başlattı.",
+     "metin": [
+      "Bozkır halkları mevsimlik göçü her yıl yapardı; ama tarihte «büyük göç» dendiğinde, bir topluluğun yurdunu kalıcı olarak bırakıp yüzlerce, binlerce kilometre uzağa gitmesi kastedilir. Bu göçler bir günde olmadı, kuşaklar boyunca dalga dalga yaşandı. Tek bir nedeni de yoktu.",
+      "Ders kitaplarının saydığı ilk neden iklimdir. Kuraklık ve sert kışlar (sonraki kaynaklarda «yut» diye anılan, hayvanların toplu öldüğü kışlar) otlakları ve sürüleri azalttı. Sürüsü ölen bir topluluk ya yeni otlak bulmak ya da dağılmak zorundaydı. (modelin bağlantı notu)",
+      "İkinci neden nüfus ve otlak dengesidir. Sürüler ve insanlar çoğaldıkça aynı otlak herkesi beslemez oldu. Bozkırda toprak sınırlı değil gibi görünür, ama suyu ve otu iyi olan yerler sınırlıdır ve onlar için rekabet sertti.",
+      "Üçüncü neden siyasidir. Boylar arasındaki savaşlar, yenilen tarafı yurdunu bırakmaya zorladı. Çin hanedanlarının kuzeye yaptığı seferler, Hunların bölünmesi, sonraki çağlarda Göktürk ve Uygur devletlerinin yıkılışı, kaybeden toplulukları batıya ya da güneye itti.",
+      "Bazı kaynaklar salgın hastalıkları ve bağımsız yaşama isteğini de sayar. Bir hükümdara boyun eğmek istemeyen boylar uzaklaşmayı tercih edebiliyordu. Bütün bu nedenler çoğu zaman birlikte çalıştı: kuraklık bir boyu zayıflattı, zayıflayan boy komşusuna yenildi, yenilen boy göç etti.",
+      "Göçlerin üç ana yönü vardır. Doğuya ve güneydoğuya gidenler Çin'in kuzeyinde devletler kurdu ya da Çin içinde eridi. Batıya gidenler Hazar ve Karadeniz'in kuzeyinden Avrupa'ya ulaştı. Güneye gidenler Maveraünnehir, Horasan, İran, Hindistan ve sonunda Anadolu'ya yöneldi.",
+      "Batıya yönelen en ünlü dalga, MS 4. yüzyılda Hunların Karadeniz kuzeyine gelmesiyle başladı. Hunların 375 civarında İdil (Volga) ve Don'u geçip Alanları ve Ostrogotları yenmesi Avrupa'da Kavimler Göçü denen büyük hareketi başlattı. Bu olay ikinci ünitede ayrıntılı işlenecek.",
+      "Göçlerin sonuçları büyüktü. Türk dili ve bozkır kültürü Avrasya'nın büyük bölümüne yayıldı; bugün Türk dilleri Balkanlardan Sibirya'ya, Saha (Yakut) bölgesine kadar konuşulur. Göçen boylar yeni yurtlarda Avrupa Hun, Avar, Bulgar, Hazar ve sonra Selçuklu gibi devletler kurdu.",
+      "Göç tek yönlü bir etki de değildi. Türkler gittikleri yerlerde yerli halklardan dil, din, mimari ve yönetim alanında çok şey aldı; onlara da at kültürü, askerlik ve devlet geleneği kattı. Bazı topluluklar dilini korudu, bazıları zamanla yerli halkın içinde eridi; Tuna Bulgarları bunun bilinen bir örneğidir.",
+      "Göçlerin bir de insan bedeli vardır. Göç eden topluluk yollarda kayıp verdi, gittiği yerde savaştı, bazen başkalarını yurdundan etti. Tarih bu hareketi ne bir felaket ne de bir zafer şarkısı olarak, nedenleri ve sonuçlarıyla birlikte anlatır."
+     ],
+     "not": "«Yut» kelimesi kaynaklarda geçmiyor; bozkırda hayvan kıran kışların adı olarak modelin bağlantı notuyla eklendi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.1.4.a1",
+       "tur": "secmeli",
+       "soru": "Aşağıdakilerden hangisi Türk göçlerinin nedenleri arasında sayılmaz?",
+       "sec": [
+        "Kuraklık ve otlak darlığı",
+        "Nüfus artışı",
+        "Boylar arası savaşlar ve komşu devletlerin baskısı",
+        "Okyanus aşırı ticaret yollarının açılması"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Kuraklık, nüfus, boylar arası savaş ve Çin baskısı ders kitaplarında sayılan nedenlerdir.",
+        "Okyanus aşırı ticaret yolları çok sonraki bir çağın, Coğrafi Keşiflerin konusudur."
+       ],
+       "kaynak": [
+        "k38"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.4.a2",
+       "tur": "secmeli",
+       "soru": "Tuna Bulgarlarının zamanla Slav halkı içinde dil bakımından erimesi, göçlerin hangi sonucuna örnektir?",
+       "sec": [
+        "Türk dilinin her yerde aynı biçimde korunduğuna",
+        "Göç eden bazı toplulukların yerli halk içinde zamanla eridiğine",
+        "Göçlerin hiçbir kültürel etkileşim doğurmadığına",
+        "Bulgarların hiç devlet kurmadığına"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Tuna Bulgarları devlet kurdu ama zamanla Slav çoğunluğun dilini benimsedi.",
+        "Bu, göçün iki yönlü bir etkileşim olduğunu gösterir."
+       ],
+       "kaynak": [
+        "k27",
+        "k38"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.1.4.a3",
+       "tur": "acik",
+       "soru": "Bir Türk boyunun yurdunu bırakmasına yol açan nedenler zincirini üç halkalı bir sebep-sonuç cümlesiyle yaz.",
+       "dogru": "Sert bir kış sürülerin çoğunu öldürdü; zayıflayan boy otlak için komşusuyla savaşı kaybetti; yenilen boy yeni otlak bulmak için batıya göç etti.",
+       "olcut": [
+        "En az bir doğal neden içeriyor",
+        "En az bir siyasi ya da askerî neden içeriyor",
+        "Halkaları sebep-sonuç bağıyla birbirine bağlıyor"
+       ],
+       "kaynak": [
+        "k38"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.3.2",
+   "ad": "Hunlar: Asya'dan Avrupa'ya",
+   "onKosul": [
+    "tarih.3.1"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.3.2.k1",
+      "tur": "secmeli",
+      "soru": "Asya Hun devletinde doğu kanadını yöneten ve genellikle veliahta verilen yönetici Sima Qian'da nasıl geçer?",
+      "sec": [
+       "Sağ bilge kral",
+       "Sol bilge kral",
+       "Yabgu",
+       "Aygucı"
+      ],
+      "dogru": "B",
+      "cozum": [
+       "Sima Qian sol (doğu) ve sağ (batı) bilge kralları anar; sol kanat daha üstündür ve veliahta verilir.",
+       "Yabgu unvanı Göktürklerde batı kanadı için kullanılır."
+      ],
+      "kaynak": [
+       "k41"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.2.k2",
+      "tur": "secmeli",
+      "soru": "Hunları Çin ile ilişkide çoğu zaman barış ya da akın arasında seçim yapmaya iten temel etken hangisidir?",
+      "sec": [
+       "Ticaretin açık ya da kapalı olması",
+       "Deniz yollarının kontrolü",
+       "Dinî farklılıklar",
+       "Çin'in Hunlara yazı öğretmesi"
+      ],
+      "dogru": "A",
+      "cozum": [
+       "Hunlar ipek, tahıl ve madenî eşyaya ihtiyaç duyuyordu; ticaret açıksa barış, kapanınca akın dönemi başlıyordu.",
+       "Heqin ödemeleri de bu dengenin bir parçasıdır."
+      ],
+      "kaynak": [
+       "k41",
+       "k28"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.2.k3",
+      "tur": "secmeli",
+      "soru": "Kavimler Göçü'nün başlangıcında Hunların ilk yendiği topluluklar hangileridir?",
+      "sec": [
+       "Vandallar ve Franklar",
+       "Persler ve Araplar",
+       "Alanlar ve Ostrogotlar",
+       "Bulgarlar ve Hazarlar"
+      ],
+      "dogru": "C",
+      "cozum": [
+       "Hunlar önce İdil-Don arasındaki Alanları, sonra Karadeniz kuzeyindeki Ostrogotları yendi.",
+       "Bu, Vizigotları Roma sınırına itti."
+      ],
+      "kaynak": [
+       "k6",
+       "k29"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.2.k4",
+      "tur": "secmeli",
+      "soru": "Attila'nın 452'de İtalya'dan çekilmesinin nedenleri arasında kaynakların saydığı hangisidir?",
+      "sec": [
+       "Katalaunum'da ordunun tamamen yok olması",
+       "Ak Hunların Pannonia'yı ele geçirmesi",
+       "Çin'den gelen bir elçilik",
+       "Ordudaki kıtlık ve salgın ile Doğu Roma'nın Tuna ötesindeki Hun topraklarına saldırısı"
+      ],
+      "dogru": "D",
+      "cozum": [
+       "Kaynaklar kıtlığı, salgını ve Doğu Roma'nın Tuna ötesine saldırısını birlikte sayar.",
+       "Hun ordusu Katalaunum'da yok olmamıştı."
+      ],
+      "kaynak": [
+       "k29"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.3.2.1",
+     "ad": "Asya Hunları: Teoman ve Mete Han",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k41",
+      "k23",
+      "k5",
+      "k13",
+      "k28"
+     ],
+     "ozet": "Çin kaynaklarında adı geçen ilk Hun hükümdarı Teoman'dır; oğlu Mete MÖ 209'da tahta çıkıp dağınık boyları disiplinli bir devlette birleştirdi. Mete doğuda Donghuları, batıda Yuezhileri yenerek bozkırın ilk büyük imparatorluğunu kurdu.",
+     "metin": [
+      "Bozkırın ilk büyük devletini kendi kaynaklarından değil, komşusunun kayıtlarından tanırız. Çinli tarihçi Sima Qian, MÖ 1. yüzyılın başında tamamladığı Shiji'nin (Tarih Kayıtları) 110. bölümünü Xiongnu dediği halka ayırdı. Türk tarihçiliği bu halkı Hunlar ya da Asya Hunları olarak anar.",
+      "Hunların hangi dili konuştuğu tartışmalıdır. Bahaeddin Ögel ve İbrahim Kafesoğlu Asya Hunlarını Türklerin kurduğu ilk büyük devlet sayar ve unvanlardaki, kurumlardaki benzerliklere dikkat çeker. Batılı araştırmacıların bir bölümü ise Hun konfederasyonunun yönetici dilinin Türkçe, Yenisey dilli ya da karışık olabileceğini tartışır; elde çok az Hun kelimesi kaldığı için kaynaklar ayrılır.",
+      "Çin kaynaklarında adı geçen ilk Hun hükümdarı Teoman'dır (Çince Touman). Teoman'ın dönemi Çin'in Qin hanedanı altında birleştiği yıllara denk gelir. Qin generali Meng Tian, yaklaşık MÖ 215'te Hunları Sarı Irmak kıvrımındaki Ordos bölgesinden kuzeye sürdü. (modelin bağlantı notu)",
+      "Sima Qian'a göre Teoman, büyük oğlu Mete yerine küçük oğlunu tahta geçirmek istedi. Mete'yi rehin olarak Yuezhilere gönderdi, ardından Yuezhilere saldırdı; böylece Mete'nin öldürülmesini bekledi. Mete bir at çalıp kaçtı ve geri döndü; babası onun cesaretini görüp emrine on bin atlı verdi.",
+      "Kaynağın en çok bilinen anlatısı ıslıklı oktur. Mete, uçarken ses çıkaran bir ok yaptırdı ve askerlerine bu okun gittiği yere ok atmayı emretti; atmayanı cezalandırdı. Önce kendi atını, sonra eşini hedef gösterdi, en sonunda babasının atını; herkes ateş ettiğinde ordunun ona tam bağlı olduğunu anladı.",
+      "MÖ 209'da bir av sırasında ıslıklı oku babası Teoman'a yöneltti; askerleri de ok attı ve Teoman öldü. Mete üvey annesini, kardeşini ve itaat etmeyen beyleri de öldürterek tahta çıktı. Bu anlatı sertliği gizlemez: Hun tahtı kan ve korkuyla el değiştirdi; tarihçi Mete'nin dehası ile bedelini birlikte görmelidir.",
+      "Mete'nin ilk sınavı doğudaki Donghu (Doğu Hu) birliğiydi. Sima Qian'a göre Donghu önce Mete'nin değerli atını, sonra eşlerinden birini istedi; Mete barışı korumak için ikisini de verdi. Ardından iki halk arasındaki boş bir toprak parçasını istediler; beylerinden bazıları «verilebilir» deyince Mete, toprağın devletin temeli olduğunu söyleyerek bunu reddetti.",
+      "Mete hemen sefere çıktı ve hazırlıksız yakalanan Donghuları dağıttı. Bu anlatı Türk tarihçiliğinde «vatan toprağı verilmez» ilkesinin en eski örneği olarak yorumlanır. Kaynak Çinli bir tarihçinin aktarımıdır, sözlerin kelimesi kelimesine doğruluğu bilinemez; ama aktardığı anlayış Hun devletinin toprağa ve otlağa verdiği değeri gösterir.",
+      "Mete daha sonra batıdaki Yuezhileri yendi ve Kansu koridorundan çekilmeye zorladı. Kuzeydeki boyları ve güneyde Ordos'u yeniden aldı. Sima Qian'ın kaydettiği, yaklaşık MÖ 176'da Han imparatoruna gönderilen bir mektupta Hun hükümdarı Loulan, Wusun ve çevredeki yirmi altı ülkenin Hunlara katıldığını bildirir.",
+      "Böylece Mançurya'dan Doğu Türkistan'a, Baykal'dan Çin seddine uzanan bir bozkır imparatorluğu doğdu. Gemini kaynağı bunu «boylar gevşekliğinden merkezi disiplinli ilk organize Türk bozkır devletine» geçiş olarak özetler. Mete yaklaşık MÖ 174'te öldü; yerine oğlu geçti.",
+      "Mete'nin adı bugün Türk ordusunun kuruluş tarihine de bağlanır: Türk Kara Kuvvetleri MÖ 209'u kuruluş yılı olarak kabul eder. Bu bir gelenek ve semboldür; tarihî bağ ise doğrudan bir kurum sürekliliği değil, onlu ordu düzeni gibi bozkır geleneklerinin devamıdır. (modelin bağlantı notu)"
+     ],
+     "not": "Kaynak (k13) Asya Hun kökünü «M.Ö. 220» diye veriyor; bu Teoman dönemi için yaklaşık bir tarihtir, derste yıl verilmedi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.2.1.a1",
+       "tur": "secmeli",
+       "soru": "Asya Hunları hakkındaki en ayrıntılı eski bilgi hangi kaynaktan gelir?",
+       "sec": [
+        "Orhon yazıtları",
+        "Herodot'un Tarih'i",
+        "Sima Qian'ın Shiji'si",
+        "Kaşgarlı Mahmud'un Dîvânu Lugâti't-Türk'ü"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Shiji'nin 110. bölümü Hunlara ayrılmıştır ve Teoman ile Mete'yi anlatır.",
+        "Hunların kendi yazılı kaynağı kalmamıştır; bu yüzden komşu Çin'in kayıtları temel kaynaktır."
+       ],
+       "kaynak": [
+        "k41"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.1.a2",
+       "tur": "secmeli",
+       "soru": "Mete'nin ıslıklı ok uygulamasıyla ulaşmak istediği temel amaç hangisidir?",
+       "sec": [
+        "Avcılığı yasaklamak",
+        "Askerlerin emrine kayıtsız şartsız bağlılığını sağlamak",
+        "Çin ile ticareti artırmak",
+        "Yeni bir yazı icat etmek"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Islıklı okun gösterdiği her hedefe ok atılmasını isteyerek ordunun tam itaatini sınadı.",
+        "Kaynak bunu disiplin ve itaatin kuruluşu olarak anlatır."
+       ],
+       "kaynak": [
+        "k41",
+        "k5"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.1.a3",
+       "tur": "secmeli",
+       "soru": "Donghuların toprak istemesi üzerine Mete'nin tavrını anlatan ifade hangisidir?",
+       "sec": [
+        "Toprağın devletin temeli olduğunu söyleyip reddetti ve sefere çıktı",
+        "Toprağı da verip barışı sürdürdü",
+        "Kararı Çin imparatoruna bıraktı",
+        "Toprağı paraya çevirdi"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "At ve eş isteğini kabul eden Mete toprak isteğini reddetti; toprağın devletin temeli olduğunu söyledi.",
+        "Ardından Donghuları yendi."
+       ],
+       "kaynak": [
+        "k41",
+        "k23"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.1.a4",
+       "tur": "acik",
+       "soru": "Mete'nin tahta çıkışını hem başarısı hem bedeli ile anlatan iki cümle yaz.",
+       "dogru": "Mete ıslıklı okla kayıtsız bağlı bir ordu kurup dağınık Hun boylarını disiplinli bir devlette birleştirdi. Ama bunu babasını, kardeşini ve itaat etmeyen beyleri öldürterek yaptı; Hun tahtı kan ve korkuyla el değiştirdi.",
+       "olcut": [
+        "Başarıyı (ordu, birlik) somut söylüyor",
+        "Bedeli (öldürülenler) gizlemiyor",
+        "Destan dili yerine ölçülü bir dil kullanıyor"
+       ],
+       "kaynak": [
+        "k41",
+        "k23",
+        "k5",
+        "k13",
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.2.2",
+     "ad": "Onlu ordu, devlet düzeni ve Çin ile ilişkiler",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k41",
+      "k23",
+      "k5",
+      "k13",
+      "k1",
+      "k28"
+     ],
+     "ozet": "Mete orduyu onlu sisteme göre örgütledi ve devleti hükümdar, sol ve sağ bilge krallar ve boy beyleri arasında paylaştırdı. MÖ 200'deki Baideng kuşatmasından sonra Han hanedanı Hunlara ipek, tahıl ve prenses vermeyi kabul etti; Çin seddi ise bozkır baskısına karşı uzun bir savunma çabasının parçasıdır.",
+     "metin": [
+      "Mete'nin en kalıcı mirası örgütlenmedir. Sima Qian'a göre Hun devletinde yirmi dört büyük komutan vardı ve her birine «on bin atlı» komutanı deniyordu. Onların altında binlik, yüzlük ve onluk komutanları bulunuyordu.",
+      "Bu düzene onlu sistem denir: ordu onluk, yüzlük, binlik ve on binlik (tümen) birliklere ayrılır. Sistem aynı zamanda halkın da örgütlenmesiydi, çünkü bozkırda asker ile çoban aynı kişiydi. Gemini kaynağı onlu teşkilatı Mete'ye bağlar; bu düzen daha sonra Göktürk, Selçuklu ve Moğol ordularında da görülür.",
+      "Devlet yönetimi de ikiye ayrılmıştı. Hükümdarın (Çin kaynaklarında «shanyu») altında doğu ve batı kanatları vardı; Sima Qian bunları sol (doğu) ve sağ (batı) bilge krallar diye anar ve Hunların «bilge» kelimesini kendi dillerinde söylediğini kaydeder. Sol kanat daha üstündü ve genellikle veliahta verilirdi.",
+      "Bu düzen, sonraki Türk devletlerinde görülen ikili teşkilatın erken bir biçimi sayılır. Gemini kaynağı ikili teşkilatı doğunun kutsallığıyla açıklar: güneş doğudan doğduğu için doğu her zaman üstündü. Aynı düzen kardeşler arasında güç paylaşımı sağlarken, merkezin zayıfladığı anlarda bölünmeyi de kolaylaştırıyordu.",
+      "Sima Qian Hunların yılda birkaç kez toplandığını yazar: yılın ilk ayında beyler hükümdarın ordugâhında, beşinci ayda atalara, göğe, yere ve ruhlara kurban sunmak için büyük bir toplantıda, sonbaharda da insanları ve hayvanları saymak için bir araya gelirlerdi. Bu toplantılar sonraki kaynaklarda kurultay ya da toy denen meclisin erken izleri olarak yorumlanır. (modelin bağlantı notu)",
+      "Hunlar ile Çin arasındaki ilişkiyi bozkır ile tarlanın ihtiyaç farkı belirledi. Hunların ipeğe, tahıla, madenî eşyaya ihtiyacı vardı; Çin ise kuzey sınırının güvenliğini istiyordu. Ticaret açık olduğunda barış, kapandığında akın dönemi başlıyordu.",
+      "MÖ 200'de Han hanedanının kurucusu İmparator Gaozu büyük bir orduyla Hunların üzerine yürüdü. Mete onu bugünkü Datong yakınındaki Baideng'de yedi gün kuşattı. Sima Qian'a göre imparator ancak Mete'nin eşine gizlice hediye göndererek kuşatmadan kurtulabildi.",
+      "Bu yenilgiden sonra Han sarayı yeni bir siyaset benimsedi: Çince heqin, «akrabalık yoluyla barış». MÖ 198 civarında yapılan anlaşmayla Han sarayı Hun hükümdarına bir prenses ve her yıl ipek, şarap ve tahıl göndermeyi kabul etti. Gemini kaynağı bunu «Çin'i vergiye bağlama» diye özetler; Çinli kaynaklar ise aynı ödemeyi hediye olarak adlandırır.",
+      "Çin seddi bu ilişkinin taştaki izidir. Kuzey sınırındaki surlar Savaşan Beylikler döneminde (MÖ 5.-3. yüzyıl) parça parça yapılmıştı; Qin hükümdarı Shi Huangdi, Çin'i birleştirdikten sonra (MÖ 221) Meng Tian'a bu surları birleştirip uzattırdı. Bugün görülen tuğla surların büyük bölümü ise çok sonra, Ming döneminde (14.-17. yüzyıl) yapıldı. (modelin bağlantı notu)",
+      "Bu yüzden «Çin seddi yalnız Hunlara karşı yapıldı» demek basitleştirmedir. Doğru olan şudur: sur, Çin'in kuzeydeki bütün atlı halklara karşı yüzyıllar süren savunma çabasının ürünüdür ve Hunlar bu halkların ilk büyük devletidir. Sur kesin bir engel de olmadı; ticaret ve akınlar sur boyundaki geçitlerden sürdü.",
+      "Bu derste görülen düzen, ileriki ünitelerde tekrar karşımıza çıkacak: onlu ordu, ikili teşkilat, kurultay ve Çin ile ticaret-savaş dengesi. Bozkır devleti dağınık görünse de, kendi koşullarına uygun güçlü bir kurum düzenine sahipti."
+     ],
+     "not": "Gemini kaynağı (k13) onlu teşkilatın «günümüz modern ordularının temeli» olduğunu söylüyor; bu abartılı bir genellemedir, derste yalnız sonraki bozkır ordularındaki süreklilik verildi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.2.2.a1",
+       "tur": "secmeli",
+       "soru": "Onlu sistemde «tümen» hangi birliğin adıdır?",
+       "sec": [
+        "On kişilik birlik",
+        "Yüz kişilik birlik",
+        "Bin kişilik birlik",
+        "On bin kişilik birlik"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Onlu sistemde ordu onluk, yüzlük, binlik ve on binlik birliklere ayrılır; on binlik birliğe tümen denir.",
+        "Sima Qian'daki yirmi dört «on bin atlı komutanı» bu düzenin en üst basamağıdır."
+       ],
+       "kaynak": [
+        "k41",
+        "k23"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.2.a2",
+       "tur": "secmeli",
+       "soru": "MÖ 200'deki Baideng kuşatmasının sonucunda Han sarayının benimsediği siyaset hangisidir?",
+       "sec": [
+        "Hunlara karşı tüm ticareti kesmek",
+        "Hunlara prenses ve her yıl ipek, şarap ve tahıl göndererek barışı korumak",
+        "Hun topraklarına yerleşim kurmak",
+        "Hun hükümdarını imparator ilan etmek"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Baideng'den sonra heqin siyaseti başladı: prenses ve yıllık ipek, şarap, tahıl gönderildi.",
+        "Bu ödemeye Türk kaynakları vergi, Çin kaynakları hediye der."
+       ],
+       "kaynak": [
+        "k41",
+        "k5"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.2.a3",
+       "tur": "secmeli",
+       "soru": "Çin seddi hakkında hangi ifade doğrudur?",
+       "sec": [
+        "Tamamı Mete döneminde tek seferde yapılmıştır",
+        "Hunların kendi kurduğu bir sınırdır",
+        "Kuzeydeki atlı halklara karşı yüzyıllar boyunca yapılmış surların birleşimidir; bugünkü tuğla bölümler büyük ölçüde Ming dönemindendir",
+        "Hiçbir zaman askerî amaçla kullanılmamıştır"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Surlar Savaşan Beylikler döneminde başladı, Qin döneminde birleştirildi, Ming döneminde yeniden yapıldı.",
+        "Hunlar bu surların karşısındaki ilk büyük bozkır devletidir."
+       ],
+       "kaynak": [
+        "k41",
+        "k23",
+        "k5",
+        "k13",
+        "k1",
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.2.3",
+     "ad": "Bölünme, dağılış ve Hun mirasının sürmesi",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k41",
+      "k23",
+      "k28",
+      "k27"
+     ],
+     "ozet": "Han imparatoru Wudi'nin seferleri, iç taht kavgaları ve doğal felaketler Asya Hunlarını zayıflattı; devlet MÖ 1. yüzyılda ikiye, MS 48'de Kuzey ve Güney olarak bir kez daha bölündü. Kuzey Hunlar 1. yüzyılın sonunda yenilip dağıldı; Güney Hunlar Çin içinde 4. yüzyılda yeni bir devlet kurdu.",
+     "metin": [
+      "Mete'den sonraki yarım yüzyıl, Hunların altın çağıdır: heqin ödemeleri sürdü, Çin kuzey sınırında savunmada kaldı. Bu denge, MÖ 141'de tahta çıkan Han imparatoru Wudi ile bozuldu. Wudi barış siyasetini bırakıp Hunlara karşı büyük bir savaş başlattı.",
+      "MÖ 133'te Mayi'de Hun hükümdarına kurulan pusu başarısız oldu, ama savaş başlamıştı. Generaller Wei Qing ve Huo Qubing, MÖ 120'li yıllarda bozkırın derinlerine seferler yaptı. MÖ 121'de Hunlar Kansu (Hexi) koridorunu kaybetti; bu, batıdaki ticaret yolunun Çin'e geçmesi demekti. (modelin bağlantı notu)",
+      "Wudi'nin elçisi Zhang Qian, Hunlara karşı müttefik bulmak için batıya, Yuezhilere gönderildi (yaklaşık MÖ 138-126). Yolda Hunlara esir düşüp yıllarca aralarında yaşadı. Getirdiği bilgiler Çin'in batıya, sonradan İpek Yolu denen ağa açılmasında önemli oldu. (modelin bağlantı notu)",
+      "Savaşların bedeli iki taraf için de ağırdı. Sima Qian, Çin ordularının da büyük kayıplar verdiğini ve hazinenin tükendiğini yazar. Hunlar ise otlaklarını ve hayvanlarını kaybetti; bozkırda kayıp sürü, kayıp nüfus demekti.",
+      "En büyük darbe içeriden geldi. MÖ 1. yüzyılın ortalarında taht kavgası öyle büyüdü ki aynı anda beş kişi hükümdarlık iddia etti. Kardeşler Huhanye ve Zhizhi karşı karşıya kaldı: Huhanye MÖ 51 civarında Han sarayına bağlılığını bildirdi, Zhizhi ise batıya, Talas ve Çu ırmakları bölgesine çekildi.",
+      "Zhizhi MÖ 36'da Talas yakınlarındaki kalesinde bir Han ordusu tarafından kuşatılıp öldürüldü. Bu, bir Hun hükümdarının Çin ordusuyla Orta Asya'nın batısında karşılaştığı ilk büyük olaydır. Bu dönemde kardeşlerin birbirine düşmesi, ileride Türk devletlerinde sık görülecek bir tehlikenin ilk büyük örneğidir.",
+      "Toparlanma geçici oldu. MS 48'de Hunlar bir kez daha bölündü: Güney Hunlar Çin'e bağlanıp sınır boyuna yerleşti, Kuzey Hunlar bozkırda kaldı. Kuzey Hunları Han ordusu ve Güney Hunlarla birlikte 89'da Moğolistan'da ağır bir yenilgiye uğrattı, 91'de Altay'da son direnişleri de kırıldı.",
+      "Bu zaferi anlatan Çince bir kaya yazıtı (Yanran yazıtı) 2017'de Moğolistan'da bulundu ve okundu; Çin kaynaklarındaki anlatıyı doğrulayan nadir bir çağdaş belgedir. Kuzey Hunların bir bölümü batıya çekildi, geride kalan büyük bir kitle ise doğudan gelen Xianbei (Sienpi) birliğine katıldı. (modelin bağlantı notu)",
+      "Güney Hunlar Çin içinde varlığını sürdürdü. 304'te Güney Hun soyundan Liu Yuan kuzey Çin'de bir devlet kurdu; bu devletin ordusu 311'de Han sonrası Jin hanedanının başkenti Luoyang'ı aldı. Böylece Hunlar, Çin'i dışarıdan zorlayan bir güç olmaktan çıkıp içeride hanedan kuran bir güce dönüştü. (modelin bağlantı notu)",
+      "Batıya çekilen Kuzey Hunlar ile 4. yüzyılda Avrupa'ya gelen Hunlar arasında doğrudan bir bağ olup olmadığı tartışmalıdır. Aradaki iki yüzyıla yakın sürede bu toplulukların izi kaynaklarda kaybolur; adların benzerliği ve bozkır kültürünün ortaklığı bir bağı akla yakın kılar, ama kesin kanıt yoktur. Burada kaynaklar ayrılır.",
+      "Asya Hunlarının yıkılışından çıkan ders, sonraki bütün bozkır devletleri için geçerlidir: dışarıdaki güçlü düşman tek başına bir bozkır devletini yıkamaz, ama içerideki taht kavgası ile birleşince yıkar. Bu ders, Göktürk yazıtlarında da açıkça dile gelecektir."
+     ],
+     "alistirmalar": [
+      {
+       "id": "tarih.3.2.3.a1",
+       "tur": "secmeli",
+       "soru": "Han imparatoru Wudi'nin Hunlara karşı izlediği siyaset hangisidir?",
+       "sec": [
+        "Barışı bırakıp bozkırın derinlerine büyük seferler düzenlemek",
+        "Heqin barış siyasetini sürdürmek",
+        "Hunlarla birlikte Avrupa'ya sefer yapmak",
+        "Çin seddini tamamen yıkmak"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Wudi heqin siyasetini bırakıp Wei Qing ve Huo Qubing komutasında seferler düzenledi.",
+        "Hunlar MÖ 121'de Kansu koridorunu kaybetti."
+       ],
+       "kaynak": [
+        "k41",
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.3.a2",
+       "tur": "secmeli",
+       "soru": "MS 48'deki bölünmeden sonra Güney Hunların durumu hangisidir?",
+       "sec": [
+        "Avrupa'ya göç ettiler",
+        "Göktürk Devleti'ni kurdular",
+        "Hint Okyanusu'na ulaştılar",
+        "Çin'e bağlanıp sınır boyuna yerleştiler ve 304'te Çin içinde devlet kurdular"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Güney Hunlar Çin'e bağlanıp sınıra yerleşti; 304'te Liu Yuan kuzey Çin'de devlet kurdu.",
+        "Bozkırda kalan Kuzey Hunlardı ve 89-91'de yenildiler."
+       ],
+       "kaynak": [
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.3.a3",
+       "tur": "secmeli",
+       "soru": "Asya Hunları ile Avrupa Hunları arasındaki bağ için en doğru ifade hangisidir?",
+       "sec": [
+        "Aynı hükümdar ailesinin kesintisiz yönettiği belgelerle kanıtlanmıştır",
+        "Hiçbir benzerlik yoktur",
+        "Ad ve kültür benzerliği bağı akla yakın kılar, ama aradaki dönem karanlıktır; kaynaklar ayrılır",
+        "Avrupa Hunları Çin'den gelen bir ordudur"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Kuzey Hunların batıya çekilişi ile 4. yüzyıldaki Avrupa Hunları arasında yaklaşık iki yüzyıllık bir boşluk vardır.",
+        "Benzerlikler bağı düşündürür ama kesin belge yoktur."
+       ],
+       "kaynak": [
+        "k27",
+        "k29"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.2.4",
+     "ad": "Kavimler Göçü ve Avrupa Hunları: Balamir'den Rua'ya",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k6",
+      "k29",
+      "k42",
+      "k30",
+      "k27"
+     ],
+     "ozet": "Hunların 375 civarında Alanları ve Ostrogotları yenmesi Got kavimlerini Roma sınırına itti ve Kavimler Göçü'nü başlattı. Uldız ve Rua döneminde Avrupa Hunları Roma'nın hem tehdidi hem paralı müttefiki oldu; Rua Doğu Roma'yı yıllık altın ödemeye bağladı.",
+     "metin": [
+      "MS 4. yüzyılın ortalarında İdil (Volga) ırmağının doğusunda yeni bir güç göründü. Romalı tarihçi Ammianus Marcellinus bu atlıları Hunni adıyla anar ve onları korkuyla tarif eder; bu tarifin bir bölümü önyargı ve abartı taşır. Türk tarihçiliği bu topluluğu Avrupa Hunları olarak adlandırır. (modelin bağlantı notu)",
+      "Hunlar önce İdil ile Don arasındaki Alanları yendi ve bir kısmını kendi saflarına kattı. Ardından Karadeniz'in kuzeyindeki Ostrogot krallığına saldırdılar; yaşlı Got kralı Ermanarik yenilgi karşısında öldü (Ammianus intihar ettiğini yazar). Gemini kaynağı bu ilerlemeyi 375-476 arasındaki Kavimler Göçü'nün başlangıcı sayar.",
+      "Jordanes'in Getica'sı Ostrogotları yenen Hun hükümdarının adını Balamber verir; Türk kaynaklarında bu ad Balamir olarak geçer. Ancak çağdaş tanık Ammianus bu adı hiç anmaz ve Jordanes 6. yüzyılda, olaydan iki yüzyıl sonra yazmıştır. Bu yüzden Balamir'in tarihî bir kişi mi, sonraki geleneğin bir adı mı olduğu konusunda kaynaklar ayrılır.",
+      "Hun baskısından kaçan Vizigotlar 376'da Tuna'yı geçip Roma topraklarına sığınmak istedi. Roma onları kabul etti ama kötü yönetti; aç bırakılan Gotlar ayaklandı. 378'de Edirne (Hadrianopolis) yakınında Roma ordusu yenildi ve İmparator Valens savaşta öldü.",
+      "Bu zincir Kavimler Göçü'nün özüdür: Hunlar Gotları, Gotlar Roma'yı itti. Sonraki on yıllarda Vandallar, Süevler, Burgundlar ve öteki Cermen toplulukları da batıya ve güneye kaydı. Batı Roma İmparatorluğu bu baskının altında 476'da yıkıldı; ama yıkılışın kendi iç nedenleri de vardı, Hunlar tek neden değildir.",
+      "400 yılı civarında Tuna'nın kuzeyindeki Hunların başında Uldız (Latin kaynaklarında Uldin) görülür. Uldız 400'de Doğu Roma'ya isyan eden Got komutanı Gainas'ı yendi ve başını İstanbul'a (Konstantinopolis) gönderdi. 406'da Batı Roma'ya Got akıncısı Radagaisus'a karşı yardım etti.",
+      "Bu olaylar Hunların Roma ile ilişkisinin tek yönlü olmadığını gösterir: aynı Hunlar bir yıl müttefik, bir yıl düşman olabiliyordu. 408'de Uldız Trakya'ya akın etti; kilise tarihçisi Sozomenos, onun güneşi gösterip ışığının düştüğü her yeri fethedebileceğini söylediğini aktarır. Ama adamlarının bir kısmı Roma'ya geçince Uldız geri çekilmek zorunda kaldı. (modelin bağlantı notu)",
+      "420'li yıllarda Hunların merkezi Macar ovasına (Pannonia çevresi) kaydı. Bu dönemin hükümdarı Rua'dır (Latin kaynaklarında Rugila ya da Ruga); kardeşi Oktar ile birlikte yönetiyordu. Oktar yaklaşık 430'da Burgundlara karşı bir sefer sırasında öldü.",
+      "Rua, Doğu Roma'yı yıllık 350 libre altın ödemeye bağladı; bu bilgi Bizanslı elçi ve tarihçi Priskos'tan gelir. Rua aynı zamanda Batı Roma'nın güçlü komutanı Aetius ile dosttu; Aetius gençliğinde Hunlar arasında rehin olarak yaşamıştı ve Hun paralı askerlerini Batı'daki savaşlarında kullandı. (modelin bağlantı notu)",
+      "Rua 434'te Doğu Roma'ya yeni bir sefer hazırlığı sırasında öldü. Yerine yeğenleri, Muncuk'un oğulları Bleda ve Attila birlikte geçti. Rua'nın kurduğu düzen, Roma'yı altınla bağlayan ve Cermen kavimlerini Hun egemenliğinde tutan bir bozkır imparatorluğuydu; Attila bu temel üzerinde yükseldi.",
+      "Kavimler Göçü'nün bedeli ağırdı. Yerinden edilen topluluklar, yağmalanan şehirler, açlık ve salgınlar bu yüzyılın gerçeğidir. Avrupa tarih yazımı Hunları çoğu zaman yalnız yıkıcı olarak anlatır; Türk tarih yazımı ise onları Avrupa'nın siyasi haritasını değiştiren güç olarak görür. İkisi de olayın bir yüzünü gösterir."
+     ],
+     "alistirmalar": [
+      {
+       "id": "tarih.3.2.4.a1",
+       "tur": "secmeli",
+       "soru": "Hunların Ostrogotları yenmesinden sonra 378'de Edirne yakınında hangi olay yaşandı?",
+       "sec": [
+        "Attila Roma'yı aldı",
+        "Hunlar İstanbul'u fethetti",
+        "Vizigotlar Roma ordusunu yendi ve İmparator Valens öldü",
+        "Batı Roma yıkıldı"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Hunlardan kaçıp Tuna'yı geçen Vizigotlar ayaklandı ve 378'de Edirne'de Roma'yı yendi.",
+        "Batı Roma'nın yıkılışı 476'dadır; Attila Roma'yı almamıştır."
+       ],
+       "kaynak": [
+        "k29"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.4.a2",
+       "tur": "secmeli",
+       "soru": "Balamir için tarih bilimine en uygun ifade hangisidir?",
+       "sec": [
+        "Ammianus'un adını verdiği, tarihi kesin bir hükümdardır",
+        "Adını Jordanes'in verdiği, çağdaş kaynakta geçmeyen ve tarihîliği tartışmalı bir hükümdardır",
+        "Asya Hunlarının kurucusudur",
+        "Göktürk kağanıdır"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Balamber/Balamir adı 6. yüzyılda yazan Jordanes'te geçer; çağdaş Ammianus adını anmaz.",
+        "Bu yüzden kaynaklar ayrılır."
+       ],
+       "kaynak": [
+        "k42",
+        "k29"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.4.a3",
+       "tur": "secmeli",
+       "soru": "Doğu Roma'yı yıllık 350 libre altın ödemeye bağlayan Hun hükümdarı kimdir?",
+       "sec": [
+        "Uldız",
+        "Bleda",
+        "Attila",
+        "Rua"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Priskos'a göre Rua, Doğu Roma'yı yıllık 350 libre altına bağladı.",
+        "Attila ile Bleda bu miktarı Margus'ta ikiye katladı."
+       ],
+       "kaynak": [
+        "k29"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.2.5",
+     "ad": "Attila: Margus'tan Katalaunum'a, İtalya'dan ölüme; Ak Hunlar",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k29",
+      "k42",
+      "k30",
+      "k23",
+      "k27",
+      "k28",
+      "k26"
+     ],
+     "ozet": "Attila ve Bleda 435'te Margus'ta Doğu Roma'ya ağır şartlar kabul ettirdi; Attila tek başına hükümdar olunca Balkanları vurdu, Anatolius barışlarıyla altın vergiyi artırdı. 451'de Katalaunum'da kesin sonuç alamadı, 452'de İtalya'ya girdi, 453'te öldü; ardından imparatorluk hızla dağıldı. Aynı çağda doğuda Ak Hunlar Sasanilerle savaşıyordu.",
+     "metin": [
+      "Attila ile kardeşi Bleda 434'te Rua'nın yerine birlikte geçti. Aynı yıl ya da ertesi yıl Tuna kıyısındaki Margus'ta (bugünkü Sırbistan'da, Morava ağzı yakınında) Doğu Roma elçileriyle at üstünde görüştüler. Priskos'a göre Margus Antlaşması'yla yıllık altın 700 libreye çıkarıldı, Hunlara sığınan kaçakların iadesi ve Hun tüccarları için güvenli pazarlar kabul edildi. Antlaşmanın yılı kaynaklarda genellikle 435 verilir, bazı araştırmacılar 434 ya da 439 der.",
+      "Roma ödemeleri aksatınca Hunlar 441-442'de Balkanlara girdi: Viminacium, Singidunum (Belgrad) ve Naissus (Niş) gibi şehirler düştü. Bu seferin ardından imzalanan ve Bizanslı elçi Anatolius'un adıyla anılan barışla Doğu Roma birikmiş borç olarak 6.000 libre altın ödemeyi ve yıllık vergiyi 2.100 libreye çıkarmayı kabul etti. Bu barışın yılı genellikle 443 olarak verilir.",
+      "Bleda yaklaşık 445'te öldü; Romalı kaynaklar Attila'nın onu öldürttüğünü yazar, ama olayın ayrıntısı bilinmez. Attila artık tek hükümdardı. 447'de daha büyük bir Balkan seferi yaptı, Utus ırmağı kıyısında Roma ordusunu yendi ve Trakya'yı Çanakkale'ye kadar vurdu.",
+      "Bu seferden sonra yapılan ikinci Anatolius barışıyla (447 ya da 448) Roma, Tuna'nın güneyinde beş günlük yol genişliğinde bir şeridi boşaltmayı kabul etti. Bu, Hunların sınırı Roma'nın içine taşıması demekti. Priskos'un anlattığı yıkılmış Naissus görüntüsü, bu seferlerin halk için bedelini gösterir.",
+      "Attila'yı en yakından tanıtan kaynak Priskos'tur: 449'da Doğu Roma elçiliğiyle Attila'nın ordugâhına gitmiştir. Ona göre konuklar altın ve gümüş kaplarla ağırlanırken Attila tahta bir kadehten içiyor, sade giyiniyordu; ordugâhta Grekçe, Latince, Gotça ve Hunca konuşuluyordu. Bu tanıklık, Attila'yı yalnız bir yıkıcı olarak gösteren sonraki Avrupa anlatılarından çok daha dengelidir.",
+      "Attila'nın adının kökeni de tartışmalıdır. Bir görüşe göre Gotça «babacık» anlamında bir lakaptır; Türk araştırmacıların bir kısmı ise adı İdil ırmağının eski adı Atil/Etil ile ilişkilendirir. Kesin bir sonuç yoktur; kaynaklar ayrılır.",
+      "450'de yeni Doğu Roma imparatoru Marcianus vergiyi ödemeyi reddetti. Aynı sıralarda Batı Roma imparatorunun kız kardeşi Honoria'nın Attila'ya yüzüğünü gönderip yardım istediği anlatılır; Attila bunu evlilik teklifi sayıp drahoma olarak Batı Roma topraklarının yarısını istedi. Attila böylece Batı'ya yöneldi.",
+      "451'de Hun ordusu ve Gepit, Ostrogot gibi bağlı kavimler Galya'ya girdi; Metz düştü, Orléans kuşatıldı. Haziran 451'de Katalaunum ovasında Aetius komutasındaki Romalılar, Vizigotlar ve Alanlarla büyük bir savaş yapıldı. Vizigot kralı I. Theodorik öldü; savaş kesin bir zaferle bitmedi, ama Attila Galya'dan çekildi.",
+      "Jordanes savaşta 165.000 kişinin öldüğünü yazar; bu sayı tarihçilerin çoğuna göre büyük ölçüde abartılıdır. Katalaunum çoğu Avrupa kitabında «Avrupa'yı kurtaran savaş» diye anlatılır; Hun gücü ise yıkılmadı ve ertesi yıl yeniden saldırdı. Sonuç: taktik olarak belirsiz, stratejik olarak Hunların Galya'daki ilerlemesini durduran bir savaş. (modelin bağlantı notu)",
+      "452'de Attila İtalya'ya girdi. Uzun bir kuşatmadan sonra Aquileia alındı ve yıkıldı; Milano ve Pavia düştü. Mincio ırmağı yakınında Papa I. Leo başkanlığındaki bir Roma heyetiyle görüştü ve geri döndü. Kaynaklar çekilişin nedenlerini birlikte sayar: orduda kıtlık ve salgın, Doğu Roma'nın Tuna'nın ötesindeki Hun topraklarına saldırısı.",
+      "Attila 453'te İldiko adlı bir kadınla evlendiği gecenin sabahı ölü bulundu; Priskos'tan aktaran Jordanes'e göre ölüm nedeni burun kanamasıdır. Jordanes'in anlattığı cenazede atlılar çadırın çevresinde dönerek ağıt söyledi ve yas tutanlar yüzlerini yaraladı. Türk tarihçiler bu töreni Göktürklerde görülen yuğ törenine benzetir. (modelin bağlantı notu)",
+      "Attila'nın ölümünden sonra oğulları İlek (Ellac), Dengizik ve İrnik ülkeyi paylaşamadı. Bağlı kavimler Gepit kralı Ardarik önderliğinde ayaklandı; 454'te Nedao savaşında İlek öldü. Dengizik 469'da Doğu Roma'ya karşı savaşta öldürüldü, İrnik ise Karadeniz'in kuzeyine çekildi; Tuna Bulgarlarının han listesindeki İrnik adının onunla aynı kişi olup olmadığı tartışmalıdır.",
+      "Aynı yüzyılda doğuda bir başka Hun adı yükseliyordu: Ak Hunlar (Bizans kaynaklarında Eftalitler). Ak Hunlar 5. yüzyılda bugünkü Afganistan ve Tacikistan'ı (Toharistan) ele geçirdi, Sasani hükümdarı Firuz'u 484'te savaşta öldürdü ve bir süre Sasanileri vergiye bağladı. Kökenleri ve dilleri tartışmalıdır: Türk tarihçiler Türk unsurunu öne çıkarır, başka araştırmacılar belgelerinde kullandıkları Baktriya dilinden yola çıkarak İran dilli bir yönetici sınıf düşünür.",
+      "Ak Hunların sonu Göktürklerle geldi. 560'lı yıllarda Göktürk yabgusu İstemi ile Sasani hükümdarı I. Hüsrev Anuşirvan Ak Hunlara karşı birleşti ve onları yıktı; toprakları iki güç arasında paylaşıldı. Bu ittifakın kısa sürede Göktürk-Sasani rekabetine dönüşmesi üçüncü ünitenin konusudur."
+     ],
+     "not": "Margus Antlaşması'nın yılı araştırmalarda 434, 435 ve 439 arasında değişiyor; derste yaygın kabul 435 verildi. Anatolius barışlarının yılları da (443; 447 ya da 448) yaklaşıktır. Jordanes'in Katalaunum ölü sayısı abartılı sayıldığı için derste kaynağa atıfla verildi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.2.5.a1",
+       "tur": "secmeli",
+       "soru": "435'te Bleda ve Attila ile Doğu Roma arasında imzalanan, yıllık altını 700 libreye çıkaran antlaşma hangisidir?",
+       "sec": [
+        "Anatolius Barışı",
+        "Edirne Antlaşması",
+        "Nedao Antlaşması",
+        "Margus Antlaşması"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Margus Antlaşması yıllık altını 700 libreye çıkardı, kaçakların iadesini ve güvenli pazarları kabul ettirdi.",
+        "Anatolius barışları 443 ve 447-448'de, Balkan seferlerinden sonra yapıldı."
+       ],
+       "kaynak": [
+        "k29"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.5.a2",
+       "tur": "secmeli",
+       "soru": "Katalaunum Savaşı'nın (451) sonucu için en doğru ifade hangisidir?",
+       "sec": [
+        "Hun ordusu tamamen yok edildi",
+        "Attila Roma'yı ele geçirdi",
+        "Kesin bir zaferle bitmedi, ama Attila Galya'dan çekildi; ertesi yıl İtalya'ya girdi",
+        "Hunlar ile Vizigotlar Roma'ya karşı birleşti"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Savaşta Vizigot kralı I. Theodorik öldü, sonuç belirsiz kaldı; Attila çekildi.",
+        "452'de İtalya seferi Hun gücünün yıkılmadığını gösterir."
+       ],
+       "kaynak": [
+        "k29",
+        "k42"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.5.a3",
+       "tur": "secmeli",
+       "soru": "Attila'nın ölümünden sonra Avrupa Hun Devleti'nin hızla dağılmasının temel nedeni hangisidir?",
+       "sec": [
+        "Oğullarının ülkeyi paylaşamaması ve bağlı kavimlerin ayaklanması",
+        "Çin'in Avrupa'ya sefer düzenlemesi",
+        "Hunların Hristiyanlığı kabul etmesi",
+        "Ak Hunların Avrupa'ya gelmesi"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "İlek, Dengizik ve İrnik arasındaki bölünme ve Ardarik önderliğindeki ayaklanma devleti dağıttı; 454'te Nedao'da İlek öldü.",
+        "Kut anlayışıyla tahtın bütün hanedana açık olması bu tür bölünmeleri kolaylaştırıyordu."
+       ],
+       "kaynak": [
+        "k29",
+        "k1"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.2.5.a4",
+       "tur": "acik",
+       "soru": "Priskos'un 449'daki tanıklığı Attila hakkındaki yaygın «yalnız yıkıcı barbar» imajını nasıl düzeltir? İki cümle yaz.",
+       "dogru": "Priskos Attila'nın sade giyindiğini, tahta kadehten içtiğini ve ordugâhında birçok dilin konuşulduğu düzenli bir sarayı yönettiğini anlatır. Bu, onun yıkıcı seferleriyle birlikte diplomasi yapan, örgütlü bir imparatorluğun hükümdarı olduğunu gösterir.",
+       "olcut": [
+        "Priskos'tan somut bir ayrıntı veriyor",
+        "Attila'nın yalnız yıkıcı olmadığını, düzen ve diplomasiyle de anlatıyor",
+        "Seferlerin bedelini inkâr etmiyor"
+       ],
+       "kaynak": [
+        "k29",
+        "k42",
+        "k30",
+        "k23",
+        "k27",
+        "k28",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.3.3",
+   "ad": "Göktürkler: Türk adıyla kurulan devlet",
+   "onKosul": [
+    "tarih.3.2"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.3.3.k1",
+      "tur": "secmeli",
+      "soru": "Göktürklerin Avarlara (Juan-juan) karşı ayaklanmadan önce Avarlar için yaptığı iş, kaynaklarda nasıl geçer?",
+      "sec": [
+       "Gemicilik",
+       "İpek dokumacılığı",
+       "Demircilik",
+       "Kâtiplik"
+      ],
+      "dogru": "C",
+      "cozum": [
+       "Çin kaynaklarına göre Türkler Altay'da Avarlara demir işçiliği yapıyordu; Avarlar onları «demirci kölelerimiz» diye küçümsedi.",
+       "Demircilik sonraki Türk destanlarında da (Ergenekon) kutsal bir zanaattır."
+      ],
+      "kaynak": [
+       "k26"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.3.k2",
+      "tur": "secmeli",
+      "soru": "Göktürklerle ilgili olayların doğru sırası hangisidir?",
+      "sec": [
+       "Maniakh elçiliği - Kuruluş - Kür Şad - Bölünme",
+       "Kuruluş - Maniakh elçiliği - Bölünme - Kür Şad",
+       "Bölünme - Kuruluş - Kür Şad - Maniakh elçiliği",
+       "Kür Şad - Bölünme - Kuruluş - Maniakh elçiliği"
+      ],
+      "dogru": "B",
+      "cozum": [
+       "Sıra: kuruluş 552, Maniakh elçiliği 568, bölünme 582, Kür Şad ayaklanması 639.",
+       "Bu sıra bir yükselişin taht kavgasıyla nasıl çözüldüğünü de gösterir."
+      ],
+      "kaynak": [
+       "k26",
+       "k39"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.3.k3",
+      "tur": "secmeli",
+      "soru": "Orhon yazıtlarında Bilge Kağan'ın Türklere Ötüken'de kalmalarını öğütlemesinin temel nedeni hangisidir?",
+      "sec": [
+       "Çin'e yaklaşmanın, tatlı söz ve ipekle aldanıp bağımsızlığı kaybetmek anlamına gelmesi",
+       "Ötüken'de altın madenleri bulunması",
+       "Ötüken'in deniz kıyısında olması",
+       "Çin imparatorunun Ötüken'i Türklere hediye etmesi"
+      ],
+      "dogru": "A",
+      "cozum": [
+       "Yazıt, Çin'e yaklaşan Türklerin tatlı söz ve ipekle kandırıldığını, Ötüken'de kalan devletin ebedî olacağını söyler.",
+       "Bu öğüt 630-682 arasındaki Çin egemenliği hatırasından doğar."
+      ],
+      "kaynak": [
+       "k20"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.3.k4",
+      "tur": "secmeli",
+      "soru": "744'te Göktürk Kağanlığı'nı yıkan ittifakın üyeleri hangileridir?",
+      "sec": [
+       "Hazarlar, Bulgarlar, Avarlar",
+       "Kırgızlar, Kitanlar, Çinliler",
+       "Türgişler, Peçenekler, Kumanlar",
+       "Uygurlar, Basmıllar, Karluklar"
+      ],
+      "dogru": "D",
+      "cozum": [
+       "742'de kurulan Uygur-Basmıl-Karluk ittifakı 744'te son Göktürk kağanını öldürdü.",
+       "Ötüken'in yeni sahibi Uygurlar oldu."
+      ],
+      "kaynak": [
+       "k26",
+       "k27"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.3.3.1",
+     "ad": "Bumin ve İstemi: Göktürk Kağanlığı'nın doğuşu (552)",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k6",
+      "k26",
+      "k27",
+      "k28",
+      "k13",
+      "k38"
+     ],
+     "ozet": "Altay çevresinde demircilikle tanınan Türk (Göktürk) boyu, efendisi Avarlara (Juan-juan) 552'de baş kaldırdı ve Bumin İl Kağan unvanını aldı. Doğuyu Bumin'in soyu, batıyı kardeşi İstemi Yabgu yönetti; devlet kısa sürede Mançurya'dan Karadeniz'e uzandı.",
+     "metin": [
+      "«Türk» adı tarihte ilk kez bir devletin adı olarak 6. yüzyılda göründü. Çin kaynakları bu halkı Tujue diye yazar; Türk tarihçiliği devleti Göktürk ya da Kök Türk Kağanlığı olarak anar. Gemini kaynağı 552'yi «Türk adının resmî ve uluslararası bir siyasi kimlik olarak tescillendiği» an diye özetler.",
+      "Çin kaynaklarına göre Türklerin yönetici ailesi Aşina'ydı ve soyu bir dişi kurttan türeyen bir atadan getiriyordu. Türkler 6. yüzyılın başında Altay dağlarının güney yamaçlarında yaşıyor ve bozkırın hâkimi Avarlara (Çince Juan-juan ya da Rouran) demir işçiliği yapıyordu. Avarlar onları küçümseyerek «demirci kölelerimiz» diye anıyordu.",
+      "Türk tarihçiliği bu Asya Avarlarını Türk kökenli ya da Türklerle akraba bir topluluk olarak görür; dilleri ise tartışmalıdır ve Moğolca ile ilişkilendiren araştırmacılar da vardır. Juan-juan ile sonradan Avrupa'ya giden Avarların aynı topluluk olup olmadığı da kesin değildir; burada kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Türklerin beyi Bumin, 546'da Avarlara saldırmaya hazırlanan Tölesleri yenerek Avar hükümdarına büyük bir hizmet yaptı. Karşılığında bir Avar prensesiyle evlenmek istedi. Avar hükümdarı Anagui bu isteği hakaretle reddetti; Bumin de Avarların düşmanı olan Batı Wei hanedanından bir prensesle evlenerek ittifak kurdu.",
+      "552'de Bumin Avarlara karşı ayaklandı ve onları ağır bir yenilgiye uğrattı; Avar hükümdarı intihar etti. Bumin «İl Kağan» unvanını aldı. Ama aynı yıl öldü; Göktürk Devleti'ni kuran adam, kurduğu devletin ilk yılını görebildi.",
+      "Bumin'in ölümünden sonra oğulları tahta geçti. Kısa süren Kara Kağan'dan sonra Mukan Kağan (553-572) dönemi geldi; Mukan Avar kalıntılarını dağıttı, Kitanları ve Kırgızları kendine bağladı. Çin kaynakları onu cesur, sert ve savaşta usta bir hükümdar olarak tarif eder.",
+      "Devletin batısı, Bumin'in kardeşi İstemi'ye verildi. İstemi «yabgu» unvanıyla batı kanadını yönetiyordu ve büyük kağana bağlıydı. Bu, Hunlarda gördüğümüz doğu-batı düzeninin Göktürklerdeki biçimidir: doğu (sol) asıl kağanın, batı (sağ) yabgunun.",
+      "İstemi'nin ilk büyük işi Ak Hunlarla (Eftalitler) ilgiliydi. Sasani hükümdarı I. Hüsrev Anuşirvan ile anlaşan İstemi, 560'lı yıllarda Ak Hunları iki yandan sıkıştırıp yıktı. Ceyhun (Amu Derya) kabaca sınır oldu: kuzeyi Göktürklere, güneyi Sasanilere kaldı.",
+      "Bu zaferle Göktürkler Soğd şehirlerini, yani Semerkant ve Buhara çevresini ve İpek Yolu'nun orta bölümünü ele geçirdi. Soğdlu tüccarlar Göktürk kağanlarının danışmanı, tercümanı ve elçisi oldu. Bozkırın atlı gücü ile Soğd'un ticaret ağı birleşti.",
+      "Böylece Göktürk Kağanlığı, 6. yüzyılın ikinci yarısında doğuda Mançurya'dan batıda Karadeniz'in kuzeyine kadar uzanan, tarihte o güne kadar görülmüş en geniş bozkır devletlerinden biri oldu. Bu genişlik, aynı zamanda yönetimi zorlaştıran bir yüktü; ileride göreceğimiz bölünmenin tohumu buradadır."
+     ],
+     "alistirmalar": [
+      {
+       "id": "tarih.3.3.1.a1",
+       "tur": "secmeli",
+       "soru": "Göktürklerin Avarlara (Juan-juan) baş kaldırıp devletlerini kurduğu yıl hangisidir?",
+       "sec": [
+        "375",
+        "552",
+        "630",
+        "744"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Bumin 552'de Avarları yenip İl Kağan unvanını aldı.",
+        "375 Kavimler Göçü'nün başlangıcı, 630 Çin hakimiyetinin, 744 Göktürk yıkılışının yılıdır."
+       ],
+       "kaynak": [
+        "k6",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.1.a2",
+       "tur": "secmeli",
+       "soru": "Göktürk Devleti'nin batı kanadını «yabgu» unvanıyla yöneten kimdir?",
+       "sec": [
+        "İstemi",
+        "Mukan Kağan",
+        "Bumin Kağan",
+        "Tardu"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Bumin'in kardeşi İstemi batı kanadını yabgu unvanıyla yönetti.",
+        "Tardu İstemi'nin oğludur ve 582'den sonra batıda bağımsız kağan oldu."
+       ],
+       "kaynak": [
+        "k26",
+        "k13"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.1.a3",
+       "tur": "secmeli",
+       "soru": "Göktürk-Sasani işbirliğinin 560'lı yıllardaki sonucu hangisidir?",
+       "sec": [
+        "Bizans'ın yıkılması",
+        "Avrupa Hunlarının yeniden kurulması",
+        "Uygurların Maniheizm'e geçmesi",
+        "Ak Hunların (Eftalitler) yıkılıp topraklarının paylaşılması"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "İstemi ile I. Hüsrev Ak Hunları yıktı; Ceyhun kabaca sınır oldu.",
+        "Bu ittifak kısa süre sonra ipek ticareti yüzünden rekabete dönüştü."
+       ],
+       "kaynak": [
+        "k26",
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.3.2",
+     "ad": "İpek ve diplomasi: Bizans, Sasaniler ve Maniakh elçiliği",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k39",
+      "k26",
+      "k28",
+      "k27",
+      "k6"
+     ],
+     "ozet": "Sasaniler Göktürk ipeğinin İran üzerinden geçmesini engelleyince Soğdlu Maniakh başkanlığındaki bir Göktürk elçiliği 568'de İstanbul'a gitti ve Bizans ile Sasanilere karşı bir ittifak kuruldu. Bu ittifak bir süre sürdü, sonra karşılıklı güvensizlikle bozuldu.",
+     "metin": [
+      "Göktürklerin Soğd'u alması onları dünyanın en değerli ticaret mallarından birinin, ipeğin, sahibi yaptı. Çin'den vergi ve ticaretle gelen ipek, batıya satılmalıydı. En büyük alıcı Bizans'tı; ama yol Sasani İran'ından geçiyordu.",
+      "Göktürkler önce Sasanilere başvurdu. Bizanslı tarihçi Menandros'a göre Soğdlu Maniakh'ın da katıldığı ilk elçilik, Sasani hükümdarı I. Hüsrev tarafından kabul edilmedi: ipek satın alınıp elçilerin gözü önünde yakıldı. İkinci elçilikte bazı elçilerin zehirlenerek öldüğü anlatılır; bu, iki eski müttefikin açık düşmanlığa geçmesi demekti.",
+      "Bunun üzerine İstemi, Maniakh başkanlığında Bizans'a bir elçilik gönderdi. Elçilik Kafkasya üzerinden yolculuk edip 568'de İstanbul'a ulaştı ve İmparator II. Justinos tarafından kabul edildi. Menandros elçilerin Soğd yazısıyla yazılmış bir mektup getirdiğini anlatır.",
+      "Görüşmenin sonucu bir ittifaktı: iki güç de Sasanilerin düşmanıydı ve ipek ticaretini Sasani aracılığı olmadan yürütmek istiyordu. Gemini kaynağı bu süreci «İpek Yolu egemenliği için Sasani ve Bizans ile diplomatik ittifaklar» diye özetler. Bu, bozkırdan doğan bir devletin, Akdeniz'in en büyük imparatorluğuyla eşit bir taraf olarak anlaştığı ilk örneklerdendir.",
+      "Bizans 569'da karşılık olarak Zemarkhos başkanlığında bir elçilik gönderdi. Menandros'un aktarımına göre Zemarkhos, İstemi'yi (Bizans kaynaklarında Sizabulos) Ektag denen dağlardaki ordugâhında, altın süslü bir çadırda, iki tekerlekli altın bir taht üzerinde gördü. Elçiler, kağanın Sasanilere karşı yaptığı bir sefere de katıldı.",
+      "Bu kayıtlar Göktürk sarayının görkemini dışarıdan gösteren nadir tanıklıklardır. Menandros elçilerin ateşten geçirilerek arındırıldığını da anlatır; bu, bozkır inancında ateşin temizleyici gücüne verilen önemle uyuşur. (modelin bağlantı notu)",
+      "İttifak uzun sürmedi. Bizans, Sasanilerle barış yapmaya yönelince Göktürkler kendilerini aldatılmış hissetti. 576'da Valentinus başkanlığında gelen Bizans elçiliği, İstemi'nin ölümünden hemen sonra, yeni yabgu Türk-şad'ın öfkesiyle karşılaştı: Menandros'a göre Türk-şad, Bizanslıları sözünde durmamakla ve Türklerin düşmanı Avarları kabul etmekle suçladı.",
+      "Aynı yıl Göktürk ordusu Kırım'daki Bizans şehri Bosporus'u (bugünkü Kerç) kuşatıp aldı. Böylece Göktürk-Bizans ilişkisi, ittifaktan çatışmaya döndü. Bu dönüşümün arkasında Avarlar meselesi vardı: Göktürklerden kaçıp Avrupa'ya ulaşan Avarlar, Bizans'ın hem müttefiki hem tehdidi olmuştu. (modelin bağlantı notu)",
+      "Sasanilerle mücadele de sürdü. 588-589'da Sasani komutanı Behram Çubin, Horasan'da büyük bir Türk ordusunu yendi; İran kaynakları bu savaşta ölen Türk hükümdarını Şaba ya da Savah adıyla anar. Bu hükümdarın hangi Göktürk yöneticisi olduğu tartışmalıdır; kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Bu dersin büyük resmi şudur: Göktürkler bozkırın askeri gücünü İpek Yolu'nun ekonomisine ve Soğd'un diplomasi bilgisine bağladı. Çin, İran ve Bizans arasında denge kuran bir dünya gücü oldular. Ama bu denge, uzak başkentlerdeki kararlara ve tek bir malın, ipeğin, akışına bağlıydı."
+     ],
+     "not": "Menandros'un eseri yalnız parçalar hâlinde kalmıştır; elçilik ayrıntıları bu parçalardan gelir. «Şaba/Savah» kimliği tartışmalı olduğu için derste ad olarak verildi, kişiyle eşleştirilmedi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.3.2.a1",
+       "tur": "secmeli",
+       "soru": "568'de İstanbul'a giden Göktürk elçiliğinin başkanı kimdir?",
+       "sec": [
+        "Zemarkhos",
+        "Valentinus",
+        "Maniakh",
+        "Menandros"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Soğdlu Maniakh, İstemi'nin gönderdiği elçiliğin başkanıydı.",
+        "Zemarkhos ve Valentinus Bizans elçileri, Menandros ise bu olayları yazan tarihçidir."
+       ],
+       "kaynak": [
+        "k39"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.2.a2",
+       "tur": "secmeli",
+       "soru": "Göktürklerin Bizans ile ittifak aramasının en önemli nedeni hangisidir?",
+       "sec": [
+        "Bizans'ın Hristiyanlığı yaymak istemesi",
+        "Göktürklerin denizcilik öğrenmek istemesi",
+        "Çin'in Bizans'a savaş açması",
+        "Sasanilerin Göktürk ipeğinin İran üzerinden satılmasını engellemesi"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "I. Hüsrev Göktürk ipeğini yaktırınca Göktürkler Sasanileri atlayarak doğrudan Bizans'a ulaşmak istedi.",
+        "İki güç de Sasanilerin rakibiydi."
+       ],
+       "kaynak": [
+        "k39",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.2.a3",
+       "tur": "secmeli",
+       "soru": "Göktürk-Bizans ittifakının 576'da bozulmasında hangi mesele öne çıkar?",
+       "sec": [
+        "Göktürklerin Hristiyan olması",
+        "Bizans'ın Göktürklerin düşmanı Avarları kabul etmesi ve Sasanilerle barışa yönelmesi",
+        "İpek ticaretinin tamamen bitmesi",
+        "Çin'in Bizans'ı işgal etmesi"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Türk-şad Bizanslıları sözünde durmamak ve Avarlarla ilişki kurmakla suçladı.",
+        "Aynı yıl Göktürkler Kırım'daki Bosporus'u aldı."
+       ],
+       "kaynak": [
+        "k39"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.3.3",
+     "ad": "Bölünme (582), Çin hakimiyeti ve Kür Şad ayaklanması (639)",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k26",
+      "k20",
+      "k27",
+      "k28",
+      "k1",
+      "k38"
+     ],
+     "ozet": "Taspar Kağan'dan sonraki taht kavgası ve Çin'in Sui hanedanının «böl ve yönet» siyaseti, Göktürkleri 582'de Doğu ve Batı olarak ayırdı. Doğu Göktürkler 630'da Tang hanedanına yenilip yaklaşık elli yıl Çin egemenliğinde kaldı; 639'da Kür Şad'ın kırk yiğitle yaptığı ayaklanma başarısız oldu ama bağımsızlık hafızasını canlı tuttu.",
+     "metin": [
+      "Göktürkler en geniş sınırlarına ulaştığında, en büyük tehlikeleri dışarıdan değil içeriden geldi. Kut anlayışına göre hükümdarlık hanedanın bütün erkek üyelerine açıktı. Taspar Kağan'ın 581'deki ölümünden sonra Aşina ailesinin birkaç kolu aynı anda tahtta hak iddia etti.",
+      "Bu sırada Çin, Sui hanedanı altında yeniden birleşmişti. Sui sarayının Türk işlerinde uzman diplomatı Zhangsun Sheng, Göktürk beylerini birbirine karşı kışkırtmayı, uzaktakiyle dost olup yakındakine baskı yapmayı önerdi. Bu siyaset hedefine ulaştı. (modelin bağlantı notu)",
+      "582'de Göktürkler fiilen ikiye ayrıldı. Doğuda Işbara Kağan, batıda İstemi'nin oğlu Tardu ayrı birer kağan oldu. Bölünme kesin bir tarihten çok bir süreçtir; ama 582, Doğu ve Batı Göktürk kağanlıklarının ayrı yollara girdiği yıl olarak kabul edilir.",
+      "Batı Göktürkler 7. yüzyılın başında Tong Yabgu Kağan (yaklaşık 618-630) döneminde güçlendi. Bizans imparatoru Herakleios'un Sasanilere karşı seferi sırasında Batı Göktürkler ve onlara bağlı Hazarlar 627'de Kafkasya'da Bizans'la birlikte savaştı ve Tiflis kuşatmasına katıldı. Tong Yabgu 630'da bir iç kavga sonucunda öldürüldü; Batı Göktürkler 659'da Tang ordusuna yenilip dağıldı. (modelin bağlantı notu)",
+      "Doğu Göktürkler için felaket daha erken geldi. Tang hanedanının ikinci imparatoru Taizong, iç kavgalar, kıtlık ve isyanlarla zayıflamış Doğu Göktürk'e saldırdı. 630'da İl Kağan (Çince Xieli) yenilip esir düşürüldü ve Çin başkentine götürüldü.",
+      "Bundan sonraki yaklaşık elli yıl (630-682) Türkler Çin egemenliğinde yaşadı. Göktürk beyleri Çin unvanları aldı, Türk ordusu Tang'ın seferlerinde savaştı. Kül Tigin yazıtı bu dönemi acı bir dille anar: Talat Tekin'in çevirisine göre Türk beyleri Türk unvanlarını bırakıp Çin unvanlarını aldı ve Çin kağanına elli yıl iş güç verdiler.",
+      "Bu egemenliğe karşı en çok bilinen direniş Kür Şad'ın ayaklanmasıdır. İl Kağan'ın yeğeni olan Kür Şad, Tang sarayında muhafız olarak bulunuyordu. 639'da kırk yiğit arkadaşıyla imparator Taizong'un konakladığı yazlık sarayı bastı; amaç imparatoru ele geçirip Türklerin bağımsızlığını yeniden kurmaktı. (modelin bağlantı notu)",
+      "Baskın başarısız oldu. Kür Şad ve arkadaşları sarayın muhafızlarıyla çarpıştı, sonunda yakalanıp öldürüldü. Tang sarayı bunun üzerine bir kısım Türkü Sarı Irmak'ın kuzeyine yerleştirerek denetimi artırdı.",
+      "Kür Şad'ın askerî sonucu yenilgidir; ama tarihî anlamı büyüktür. Türk tarih yazımında bu ayaklanma, Çin egemenliği altında da bağımsızlık fikrinin ölmediğinin işareti sayılır. Bu fikir 682'de Kutluk'un ayaklanmasıyla gerçeğe dönüşecektir.",
+      "Bu dersin sebep-sonuç zinciri açıktır: kut anlayışının doğurduğu taht kavgası, Çin'in bu kavgayı kullanan diplomasisi, bölünme, yenilgi ve egemenlik. Orhon yazıtlarının en sert öğütleri tam bu zincirin hatırasından doğar."
+     ],
+     "not": "Kür Şad'ın yanındaki kişi sayısı Türk ve Çin kaynaklarına dayanarak kırk olarak verilir; olayın günü ve ayrıntıları Çin hanedan tarihlerinden gelir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.3.3.a1",
+       "tur": "secmeli",
+       "soru": "Göktürklerin 582'de Doğu ve Batı olarak ayrılmasında hangi iki etken birlikte rol oynadı?",
+       "sec": [
+        "Arap fetihleri ve Bizans baskısı",
+        "Kuraklık ve Maniheizm",
+        "Taht kavgaları ve Çin'in böl-yönet siyaseti",
+        "Uygur isyanı ve Kırgız saldırısı"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Taspar'dan sonra hanedanın birkaç kolu tahtta hak iddia etti; Sui diplomasisi bu kavgayı derinleştirdi.",
+        "Kut anlayışı tahtı bütün hanedana açtığı için bu tür kavgalar sık görülüyordu."
+       ],
+       "kaynak": [
+        "k26",
+        "k1"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.3.a2",
+       "tur": "secmeli",
+       "soru": "Doğu Göktürklerin Çin egemenliğinde kaldığı dönem hangisidir?",
+       "sec": [
+        "552-582",
+        "630-682",
+        "682-744",
+        "744-840"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "630'da İl Kağan'ın yenilip esir düşmesiyle başlayan egemenlik 682'de Kutluk'un ayaklanmasına kadar sürdü.",
+        "682-744 İkinci Göktürk, 744-840 Uygur dönemidir."
+       ],
+       "kaynak": [
+        "k26",
+        "k20"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.3.a3",
+       "tur": "secmeli",
+       "soru": "639'daki Kür Şad ayaklanmasının amacı neydi?",
+       "sec": [
+        "Batı Göktürklerle birleşip Bizans'a saldırmak",
+        "Maniheizmi yaymak",
+        "Çin seddini yıkmak",
+        "Tang imparatorunu ele geçirip Türklerin bağımsızlığını yeniden kurmak"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Kür Şad kırk yiğitle Taizong'un sarayını bastı; amaç imparatoru ele geçirip bağımsızlığı yeniden kurmaktı.",
+        "Baskın başarısız oldu, ama bağımsızlık fikri 682'de Kutluk'la yeniden doğdu."
+       ],
+       "kaynak": [
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.3.4",
+     "ad": "İkinci Göktürk Kağanlığı: Kutluk, Kapgan, Bilge Kağan, Kül Tigin ve Tonyukuk",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k20",
+      "k21",
+      "k26",
+      "k2",
+      "k27"
+     ],
+     "ozet": "682'de Kutluk (İlteriş Kağan) küçük bir toplulukla başlattığı ayaklanmayla Göktürk Devleti'ni yeniden kurdu; veziri Tonyukuk'tu. Kardeşi Kapgan devleti genişletti; Kutluk'un oğulları Bilge Kağan ve Kül Tigin 716'dan sonra devleti yönetti, Tonyukuk'un öğütleriyle Ötüken'de tuttu.",
+     "metin": [
+      "Elli yıllık egemenlikten sonra kurtuluş küçük bir toplulukla başladı. Kül Tigin yazıtına göre Bilge Kağan'ın babası, Talat Tekin'in çevirisiyle «on yedi erle» dışarı çıkmış, sayıları yetmişe, sonra yedi yüze ulaşmıştı. Yazıtın verdiği bu sayılar, büyük bir devletin bir avuç insanla yeniden doğduğunu anlatmak içindir.",
+      "Bu önderin adı Kutluk'tur; kağan olunca İlteriş (devleti derleyen) unvanını aldı. Ayaklanmanın yılı genellikle 682 olarak verilir. Kutluk Çin'e karşı birçok sefer yaptı; yazıta göre kırk yedi kez sefere çıkmış, yirmi kez savaşmıştı.",
+      "Kutluk'un yanında devletin en uzun ömürlü aklı vardı: Tonyukuk. Tonyukuk Çin'de yetişmiş, Çin'i iyi tanıyan bir Türk beyiydi; Kutluk'un ve ondan sonraki iki kağanın veziri ve başkomutanı oldu. Kendi adına diktirdiği yazıtta Türk milletinin yeniden toparlanmasını ve Ötüken'e yerleşilmesini kendi rolüyle anlatır.",
+      "Kutluk yaklaşık 691-692'de öldü; oğulları küçük olduğu için yerine kardeşi Kapgan geçti. Kapgan Kağan (692-716) devleti en geniş sınırlarına ulaştırdı: Kırgızları (yaklaşık 710) ve Türgişleri (yaklaşık 711) yendi, ordularını Soğd'a ve Çin içlerine kadar gönderdi. Tonyukuk yazıtı Kırgız seferini, karlı dağlardan geçişle birlikte anlatır. (modelin bağlantı notu)",
+      "Kapgan'ın uzun seferleri bağlı boyları yordu. 716'da Bayırku boyuna karşı bir seferden dönerken pusuya düşürülüp öldürüldü. Taht, kut anlayışına göre Kapgan'ın oğluna geçmeliydi; ama Kutluk'un küçük oğlu Kül Tigin, Kapgan'ın oğlunu ve yandaşlarını ortadan kaldırarak ağabeyi Bilge'yi tahta çıkardı.",
+      "Bu olay yine sertliğini gizlemez: devlet, hanedan içinde bir darbeyle el değiştirdi. Ama sonuçta Türk tahtına, devleti kuran Kutluk'un soyu geçti. Bilge Kağan (716-734) tahta çıkınca Kül Tigin'i ordunun başına koydu ve yaşlı Tonyukuk'u yeniden danışman yaptı.",
+      "Bilge Kağan döneminin ilk yılları isyanlarla geçti: Oğuzlar, Karluklar ve öteki boylar ayaklandı. Bilge Kağan ve Kül Tigin bu isyanları bastırdı; yazıtlar bir yılda birçok savaş yapıldığını anlatır. 720 civarında Tang, Basmıl ve Kitanların Göktürklere karşı kurduğu ittifak Tonyukuk'un stratejisiyle dağıtıldı. (modelin bağlantı notu)",
+      "Çin kaynaklarına göre Bilge Kağan bir ara surlu bir şehir kurmayı ve Budist ve Taocu tapınaklar yaptırmayı düşündü. Tonyukuk buna karşı çıktı: Türklerin gücünün sayıca az olmalarına rağmen hareketli olmalarından geldiğini, bir şehre kapanırlarsa Çin'e yenileceklerini söyledi. Bilge Kağan bu öğüdü kabul etti. (modelin bağlantı notu)",
+      "Kül Tigin 731'de öldü. Bilge Kağan kardeşi için büyük bir anıt yaptırdı; Tang imparatoru da cenazeye elçiler ve ustalar gönderdi. Bilge Kağan 734'te öldü; Çin kaynakları onu bir buyruk beyinin zehirlediğini yazar.",
+      "Kutluk, Kapgan, Bilge Kağan, Kül Tigin ve Tonyukuk Türk tarihinin en çok anılan kadrolarından birini oluşturur. Onları tanıdığımız en önemli belge, kendi ağızlarından yazılmış metinlerdir. Bu da Türk tarihinde bir ilktir: bir Türk devleti kendi tarihini kendi dilinde taşa yazdı."
+     ],
+     "not": "Kutluk'un ölüm yılı kaynaklarda 691 ya da 692 olarak geçer; Kapgan'ın Kırgız ve Türgiş seferlerinin yılları da yaklaşıktır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.3.4.a1",
+       "tur": "secmeli",
+       "soru": "İkinci Göktürk Kağanlığı'nı 682'de kuran ve İlteriş unvanını alan hükümdar kimdir?",
+       "sec": [
+        "Kutluk",
+        "Kapgan",
+        "Bilge Kağan",
+        "Tonyukuk"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Kutluk ayaklanmayı başlattı ve İlteriş (devleti derleyen) unvanını aldı.",
+        "Tonyukuk onun veziriydi; Kapgan kardeşi, Bilge Kağan oğludur."
+       ],
+       "kaynak": [
+        "k20",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.4.a2",
+       "tur": "secmeli",
+       "soru": "Tonyukuk'un Bilge Kağan'ı surlu şehir kurmaktan vazgeçirirken öne sürdüğü gerekçe hangisidir?",
+       "sec": [
+        "Şehir kurmanın dinen yasak olması",
+        "Türklerin gücünün hareketlilikten geldiği, şehre kapanırlarsa Çin'e yenilecekleri",
+        "Taş bulunmaması",
+        "Kurultayın şehir kurmayı yasaklaması"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Çin kaynaklarına göre Tonyukuk, az sayıdaki Türklerin hareketli kaldıkça güçlü olduğunu söyledi.",
+        "Bu, yerleşik Çin ile göçebe bozkır arasındaki güç dengesini gösteren bir öğüttür."
+       ],
+       "kaynak": [
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.4.a3",
+       "tur": "secmeli",
+       "soru": "716'da Bilge Kağan'ı tahta çıkaran olay hangisidir?",
+       "sec": [
+        "Kurultayın oy birliğiyle seçmesi",
+        "Çin imparatorunun atama yapması",
+        "Uygurların desteği",
+        "Kapgan'ın ölümünden sonra Kül Tigin'in Kapgan'ın oğlunu ve yandaşlarını ortadan kaldırması"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Kapgan 716'da Bayırkulara karşı öldü; Kül Tigin bir darbeyle ağabeyi Bilge'yi tahta çıkardı.",
+        "Bu, kut anlayışının tahtı açık bıraktığı bir hanedan içi mücadeledir."
+       ],
+       "kaynak": [
+        "k26",
+        "k20"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.4.a4",
+       "tur": "acik",
+       "soru": "Tonyukuk'un şehir kurmaya karşı öğüdünü bugünün diliyle bir cümlede özetle ve bu öğüdün hangi koşula bağlı olduğunu bir cümlede yaz.",
+       "dogru": "Tonyukuk, «Biz azız; gücümüz hızımızdan gelir, surların ardına kapanırsak sayıca üstün olan Çin bizi yener» demek istedi. Bu öğüt bozkırın göçebe ordusu ile yerleşik bir imparatorluk arasındaki o günkü güç dengesine bağlıydı; Uygurlar daha sonra başka koşullarda şehir kurdu.",
+       "olcut": [
+        "Öğüdü sadık ve anlaşılır özetliyor",
+        "Öğüdün o günkü koşula, güç dengesine bağlı olduğunu söylüyor"
+       ],
+       "kaynak": [
+        "k20",
+        "k21",
+        "k26",
+        "k2",
+        "k27"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.3.5",
+     "ad": "Orhon yazıtları: taşa yazılmış vasiyet ve devletin sonu (744)",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k11",
+      "k12",
+      "k20",
+      "k21",
+      "k26"
+     ],
+     "ozet": "Tonyukuk (yaklaşık 720'ler), Kül Tigin (732) ve Bilge Kağan (735) yazıtları Türk dilinin tarihi kesin bilinen ilk büyük metinleridir; Göktürk alfabesiyle yazılmış, Bilge Kağan'ın milletine sesleniş ve öğütlerini taşır. Bu metinlerden kısa süre sonra, 744'te, Göktürk Kağanlığı Uygur, Basmıl ve Karluk ittifakıyla yıkıldı.",
+     "metin": [
+      "Orhon yazıtları bugünkü Moğolistan'da, Orhon ırmağı vadisinde bulunan anıt taşlardır. En önemli üçü Tonyukuk, Kül Tigin ve Bilge Kağan adına dikilmiştir. Gemini kaynakları bunları «Türk tarihinin ilk Türkçe yazılı belgeleri» diye anar; daha eski kısa Türkçe yazıtlar da bulunduğu için doğru ifade, tarihi kesin bilinen ilk büyük Türkçe metinler olmalarıdır. (modelin bağlantı notu)",
+      "Tonyukuk yazıtı Tonyukuk'un kendisi tarafından, kabaca 720'lerde (genellikle 720-725 arası) diktirildi; tarihi kesin değildir. Kül Tigin yazıtı 732'de, Bilge Kağan yazıtı 735'te dikildi; ikisi de Koşo Tsaidam bölgesindedir. Kül Tigin ve Bilge Kağan yazıtlarını yazan, Bilge Kağan'ın yeğeni Yollug Tigin'dir.",
+      "Yazıtlar Göktürk alfabesiyle yazılmıştır. Bu alfabe, görünüşü İskandinav runlarına benzediği için Batı'da «runik» diye anılır, ama onlarla ilgisi yoktur. Yaklaşık 38 işaretten oluşur, sağdan sola yazılır ve Türkçenin ünlü uyumuna göre kalın ve ince ünsüzler için ayrı işaretler kullanır.",
+      "Kül Tigin yazıtının bir yüzünde Tang imparatoru Xuanzong'un yazdırdığı Çince bir metin de vardır. Ama asıl metin Türkçedir ve Türk okuyucuya seslenir. Bu, yazıtın bir iç propaganda değil, bir halka hitap olduğunu gösterir.",
+      "Yazıtların bulunuşu ve okunuşu ayrı bir hikâyedir. Rus araştırmacı Nikolay Yadrintsev 1889'da Kül Tigin ve Bilge Kağan anıtlarını buldu. Danimarkalı dilbilimci Vilhelm Thomsen 1893'te alfabeyi çözdü; ilk okuduğu kelimeler arasında teñri (Tanrı) ve türk vardı. Ardından Wilhelm Radloff metni yayımladı. (modelin bağlantı notu)",
+      "Metnin büyük bölümü Bilge Kağan'ın ağzından yazılmıştır. Kağan Türk beylerine ve milletine seslenir, geçmişi anlatır, ders çıkarır. Gemini kaynağındaki aktarıma göre bir yerde şöyle der: «Türk Oğuz beyleri, milleti, işitin: Üstte gök basmasa, altta yer delinmese, Türk milleti, ilini töreni kim bozabilir?»",
+      "Bu cümle yazıtların ana fikrini taşır: Türk devletini yıkan dış düşmandan çok iç bölünmeydi. Yazıt, beylerin ve milletin birbirine düşmesinin, kağana sadakatten ayrılmanın Türkleri Çin egemenliğine düşürdüğünü söyler. Bu, tarihsel bir özeleştiridir.",
+      "Yazıtların en çok bilinen uyarısı Çin'e karşıdır. Talat Tekin'in çevirisine göre Bilge Kağan, Çin halkının sözünün tatlı, ipek kumaşının yumuşak olduğunu, bu tatlı söz ve yumuşak ipekle uzaktaki milletleri kandırıp yaklaştırdığını söyler. Ötüken'de oturulursa devletin ebedî olacağını, Çin'e yaklaşılırsa milletin öleceğini öğütler.",
+      "Yazıtlar bir hükümdarın görevini de tarif eder. Tekin'in çevirisinde Bilge Kağan aç milleti doyurduğunu, çıplak milleti giydirdiğini, fakir milleti zengin, az milleti çok kıldığını söyler. Gemini kaynağı bunu sosyal devlet anlayışı olarak yorumlar; bu yorum, kağanın meşruiyetinin halkın refahına bağlandığını göstermesi bakımından yerindedir.",
+      "Bir kural da unutulmamalı: yazıtlar resmî metinlerdir. Bilge Kağan'ı ve soyunu öven, onun kararlarını haklı gösteren bir bakışla yazılmıştır. Tarihçi bu metinleri bir başyapıt olarak okurken bir propaganda metni olarak da sorgular; ikisi birbirini dışlamaz.",
+      "Öğütler devleti kurtaramadı. Bilge Kağan'ın 734'teki ölümünden sonra tahta geçen oğulları kısa sürede öldü ya da öldürüldü; iç kavga yeniden başladı. 742'de Uygur, Basmıl ve Karluklar ittifak kurdu.",
+      "744'te son Göktürk kağanı Ozmış öldürüldü ve Göktürk Kağanlığı yıkıldı; son direniş 745'te bastırıldı. Ötüken'in yeni sahibi Uygurlar oldu. Ama Göktürkler arkalarında taşa yazılmış bir tarih bıraktı; Türk dilinin ve Türk siyasi düşüncesinin en eski büyük belgesi bugün hâlâ okunuyor. (modelin bağlantı notu)"
+     ],
+     "not": "Gemini kaynakları (k2, k11) Tonyukuk yazıtına kesin «720» tarihi veriyor; bu tarih yaklaşıktır, derste «yaklaşık 720'ler» kullanıldı. Kaynağın «ilk Türkçe yazılı belgeler» ifadesi de, daha eski kısa yazıtlar bulunduğu için «tarihi kesin ilk büyük metinler» diye inceltildi. Bir başka gemini kaynağı (edebiyat indeksi) Yollug Tigin'i üç yazıtın da yazarı gibi gösteriyor; Tonyukuk yazıtı Yollug Tigin'in değildir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.3.5.a1",
+       "tur": "secmeli",
+       "soru": "Kül Tigin ve Bilge Kağan yazıtlarını yazan kimdir?",
+       "sec": [
+        "Tonyukuk",
+        "Vilhelm Thomsen",
+        "Kaşgarlı Mahmud",
+        "Yollug Tigin"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "İki yazıtın yazarı Bilge Kağan'ın yeğeni Yollug Tigin'dir.",
+        "Tonyukuk kendi yazıtını kendisi diktirdi; Thomsen alfabeyi 1893'te çözdü."
+       ],
+       "kaynak": [
+        "k20",
+        "k21"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.5.a2",
+       "tur": "secmeli",
+       "soru": "Göktürk alfabesi hakkında hangisi doğrudur?",
+       "sec": [
+        "Sağdan sola yazılır; ünlü uyumuna göre kalın ve ince ünsüzler için ayrı işaretleri vardır",
+        "Soldan sağa yazılır ve İskandinav runlarından türemiştir",
+        "Arap harflerinin bir türüdür",
+        "Hiç çözülememiştir"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Göktürk alfabesi yaklaşık 38 işaretlidir, sağdan sola yazılır, kalın-ince ünsüzleri ayırır.",
+        "Runlara görünüşte benzer ama onlarla ilgisi yoktur; Thomsen 1893'te çözmüştür."
+       ],
+       "kaynak": [
+        "k20"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.5.a3",
+       "tur": "secmeli",
+       "soru": "Orhon yazıtlarındaki «Üstte gök basmasa, altta yer delinmese, Türk milleti, ilini töreni kim bozabilir?» cümlesinin ana fikri hangisidir?",
+       "sec": [
+        "Türk devletini yıkan asıl şeyin dış düşmandan çok iç bölünme olduğu",
+        "Türklerin göğe tapmayı bıraktığı",
+        "Depremlerin devleti yıktığı",
+        "Türklerin Çin'e taşınması gerektiği"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Cümle, gök çökmedikçe ve yer delinmedikçe Türk devletini dışarıdan kimsenin yıkamayacağını söyler; öyleyse yıkılış iç bölünmedendir.",
+        "Yazıt bunu beylerin ve milletin birbirine düşmesiyle açıklar."
+       ],
+       "kaynak": [
+        "k11",
+        "k20"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.3.5.a4",
+       "tur": "acik",
+       "soru": "Yazıtlardaki «aç milleti doyurdum, çıplak milleti giydirdim» sözünü hem bir değer hem bir propaganda cümlesi olarak birer cümleyle değerlendir.",
+       "dogru": "Değer olarak: kağanın meşruiyetini halkın karnının doyması ve refahıyla ölçen bir yönetim anlayışını gösterir. Propaganda olarak: Bilge Kağan'ın kendi başarısını öven resmî bir metindir; gerçek durumu başka kaynaklarla karşılaştırmak gerekir.",
+       "olcut": [
+        "Halkın refahına bağlı meşruiyet fikrini görüyor",
+        "Metnin resmî ve övücü niteliğini fark ediyor",
+        "Karşılaştırma ya da sorgulama öneriyor"
+       ],
+       "kaynak": [
+        "k2",
+        "k11",
+        "k12",
+        "k20",
+        "k21",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.3.4",
+   "ad": "Uygurlar ve öteki Türk toplulukları",
+   "onKosul": [
+    "tarih.3.3"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.3.4.k1",
+      "tur": "secmeli",
+      "soru": "Uygurların 744'te Ötüken'i merkez yapması en çok neyi gösterir?",
+      "sec": [
+       "Çin'e bağlanma isteğini",
+       "Göktürk mirasının ve kutsal merkezin sahibi olma iddiasını",
+       "Avrupa'ya göç hazırlığını",
+       "Maniheizmden vazgeçtiklerini"
+      ],
+      "dogru": "B",
+      "cozum": [
+       "Ötüken Göktürk yazıtlarında kutsal siyasi merkezdir; Uygurlar onu merkez yaparak bu mirası üstlendi.",
+       "Unvanlar ve yazıt geleneği de Göktürklerden devralındı."
+      ],
+      "kaynak": [
+       "k31",
+       "k20"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.4.k2",
+      "tur": "secmeli",
+      "soru": "Aşağıdakilerden hangisi bir Türk topluluğunun devlet adını koruyup dil bakımından çoğunluk halk içinde eridiği örnektir?",
+      "sec": [
+       "İtil Bulgarları",
+       "Koço Uygurları",
+       "Tuna Bulgarları",
+       "Karluklar"
+      ],
+      "dogru": "C",
+      "cozum": [
+       "Tuna Bulgarları Slav çoğunluğun dilini benimsedi, ama Bulgar adını taşıyan bir millet doğdu.",
+       "Koço Uygurları dillerini ve yazılarını korudu."
+      ],
+      "kaynak": [
+       "k30",
+       "k27"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.4.k3",
+      "tur": "secmeli",
+      "soru": "Hazarlar ile Peçenekler arasındaki en belirgin fark hangisidir?",
+      "sec": [
+       "Hazarlar Avrupa'ya hiç gelmedi",
+       "Peçenekler Musevi oldu",
+       "Peçenekler Araplarla savaştı, Hazarlar savaşmadı",
+       "Hazarlar kağanlı merkezî bir devletti; Peçenekler sekiz boydan oluşan bir boylar birliğiydi"
+      ],
+      "dogru": "D",
+      "cozum": [
+       "Hazarlar kağan ve bek ile yönetilen bir devlet kurdu; Konstantinos'a göre Peçenekler sekiz boylu bir birlikti.",
+       "Museviliği benimseyen Hazar yönetici çevresiydi."
+      ],
+      "kaynak": [
+       "k30"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.4.k4",
+      "tur": "secmeli",
+      "soru": "Uygur alfabesinin kökeni ve sonraki yolculuğu için doğru ifade hangisidir?",
+      "sec": [
+       "Çin yazısından türedi, Araplara geçti",
+       "Soğd yazısından türedi, Moğollara ve onlar aracılığıyla Mançulara geçti",
+       "Göktürk alfabesinin aynısıdır",
+       "Latin alfabesinden türedi"
+      ],
+      "dogru": "B",
+      "cozum": [
+       "Uygur alfabesi Soğd yazısından türedi; Moğol ve Mançu yazıları onun devamıdır.",
+       "Göktürk alfabesi ayrı bir yazıdır; Uygurlar ilk dönemde onu da kullandı."
+      ],
+      "kaynak": [
+       "k31",
+       "k33"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.3.4.1",
+     "ad": "Uygur Kağanlığı (744-840): Ötüken'in yeni sahipleri",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k31",
+      "k27",
+      "k28",
+      "k7",
+      "k3"
+     ],
+     "ozet": "Uygurlar 744'te Göktürklerin yerine Ötüken'de kağanlık kurdu. Tang hanedanını An Lushan isyanında kurtaran Uygur süvarileri, at karşılığı büyük miktarda ipek alarak zenginleşti ve Orhon vadisinde Karabalgasun (Ordu-Balık) gibi surlu bir başkent kurdu.",
+     "metin": [
+      "Uygurlar Göktürk yazıtlarında Dokuz Oğuz (Tokuz Oğuz) boyları arasında anılan, Selenga ve Orhon çevresinde yaşayan bir topluluktur. 742'de Basmıl ve Karluklarla kurdukları ittifak, 744'te Göktürk Kağanlığı'nı yıktı. Ardından Uygurlar ittifaktaki ortaklarını da devre dışı bıraktı: Basmılları dağıttılar, Karlukları batıya çekilmeye zorladılar.",
+      "Devletin kurucusu Kutluk Bilge Kül Kağan'dır (744-747). Ötüken'i, yani Göktürklerin kutsal merkezini, devletin merkezi yaptı; bu, Uygurların kendilerini Göktürk mirasının sahibi saydığını gösterir. Yönetim düzeni, kağan, yabgu ve şad unvanları büyük ölçüde Göktürklerden devralındı.",
+      "İkinci kağan Moyun Çor (Bayan Çor, 747-759) devleti sağlamlaştırdı. Adına dikilen Şine Usu yazıtı, Göktürk alfabesiyle Türkçe yazılmıştır ve onun seferlerini, bir şehir kurdurduğunu anlatır. Bu yazıt, Orhon yazıtları geleneğinin Uygurlarda sürdüğünün kanıtıdır. (modelin bağlantı notu)",
+      "Uygurları büyük güce taşıyan olay Çin'deki bir iç savaştır. 755'te Tang generali An Lushan ayaklandı ve iki başkenti, Chang'an'ı ve Luoyang'ı aldı. Tang sarayı Uygurlardan yardım istedi; Uygur süvarileri 757'de başkentlerin geri alınmasında belirleyici rol oynadı.",
+      "Yardımın bir bedeli vardı. Uygur ordusu geri alınan şehirlerde yağma yaptı; bu, Çin kaynaklarında acı bir hatıra olarak kaldı. Tang sarayı Uygur kağanlarına prensesler gönderdi ve her yıl at karşılığı çok büyük miktarlarda ipek ödemeyi kabul etti.",
+      "Bu at-ipek ticareti iki taraf için de bir siyasetti. Uygurlar bozkır atlarını yüksek fiyatla Tang'a sattı, karşılığında aldıkları ipeği Soğdlu ortaklarıyla batıya sattı. Colin Mackerras'ın incelediği Tang hanedan tarihleri, Çin sarayının bu ticareti ağır bir yük olarak gördüğünü ama Uygur dostluğunu kaybetmemek için sürdürdüğünü gösterir.",
+      "Zenginlik yeni bir hayat biçimi getirdi. Orhon vadisinde, Göktürk anıtlarına yakın bir yerde, Uygur başkenti Ordu-Balık kuruldu; bugün harabelerine Karabalgasun denir. Surları, kaleleri ve sarayı olan bu şehir, bozkırın ortasında bir merkezdi. (modelin bağlantı notu)",
+      "9. yüzyılın başında Uygur başkentini ziyaret eden Arap seyyahı Temim bin Bahr, büyük demir kapıları olan, kalabalık, çevresi tarlalarla ve köylerle çevrili bir şehir anlatır. Bu tanıklık, Uygurların yalnız göçebe olmadığını, bozkırda yerleşik bir hayat da kurduğunu gösterir. (modelin bağlantı notu)",
+      "Karabalgasun'da bulunan ve 9. yüzyılın başına tarihlenen Karabalgasun yazıtı üç dillidir: Türkçe, Soğdca ve Çince. Yazıt Uygur kağanlarının başarılarını ve Mani dininin devlet tarafından benimsenmesini anlatır. Üç dil, Uygur devletinin çok kültürlü yapısının taştaki aynasıdır.",
+      "Uygur Kağanlığı yaklaşık bir asır Moğolistan bozkırının hâkimi oldu. Bu sürede Göktürklerin askerî geleneğini korudu, ama ona ticaret, şehir ve yeni bir din ekledi. Bu yeni dinin, Maniheizmin, hikâyesi bir sonraki dersin konusudur."
+     ],
+     "alistirmalar": [
+      {
+       "id": "tarih.3.4.1.a1",
+       "tur": "secmeli",
+       "soru": "Uygurların Tang hanedanıyla ilişkisini güçlendiren olay hangisidir?",
+       "sec": [
+        "Talas Savaşı",
+        "Kür Şad ayaklanması",
+        "An Lushan isyanında Tang'a askerî yardım",
+        "Kavimler Göçü"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "755'te başlayan An Lushan isyanında Uygur süvarileri 757'de Chang'an ve Luoyang'ın geri alınmasına yardım etti.",
+        "Karşılığında prensesler ve at karşılığı yüklü ipek ödemesi geldi."
+       ],
+       "kaynak": [
+        "k31",
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.1.a2",
+       "tur": "secmeli",
+       "soru": "Orhon vadisindeki Uygur başkenti Ordu-Balık'ın harabelerine bugün ne ad verilir?",
+       "sec": [
+        "Karabalgasun",
+        "Koşo Tsaidam",
+        "Bain Tsokto",
+        "Beşbalık"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Ordu-Balık'ın harabeleri Karabalgasun adıyla bilinir.",
+        "Koşo Tsaidam Kül Tigin ve Bilge Kağan anıtlarının, Bain Tsokto Tonyukuk yazıtının yeridir; Beşbalık Doğu Türkistan'dadır."
+       ],
+       "kaynak": [
+        "k7",
+        "k31"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.1.a3",
+       "tur": "secmeli",
+       "soru": "Karabalgasun yazıtının üç dilli (Türkçe, Soğdca, Çince) olması en çok neyi gösterir?",
+       "sec": [
+        "Uygurların yazı bilmediğini",
+        "Uygur devletinin çok kültürlü yapısını ve Soğd ile Çin'le ilişkisini",
+        "Yazıtın Çin'de yazıldığını",
+        "Türkçenin yasaklandığını"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Üç dil, devletin Türk, Soğdlu ve Çinli unsurlarla iç içe olduğunu gösterir.",
+        "Soğdlular Uygurların tüccarı, din adamı ve kâtibiydi."
+       ],
+       "kaynak": [
+        "k31"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.4.2",
+     "ad": "Mani dini, yerleşik hayat ve 840: Kırgızlar ve Uygurların yeni yurtları",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k3",
+      "k15",
+      "k7",
+      "k31",
+      "k27",
+      "k33"
+     ],
+     "ozet": "Bögü Kağan 762-763'te Mani dinini benimsedi; Uygurlar şehirler, tapınaklar, yazı ve sanatla yerleşik bir kültüre yöneldi. 840'ta Yenisey Kırgızları Karabalgasun'u yıktı; Uygurlar Turfan-Koço ve Kansu'ya göçerek orada yüzyıllar sürecek yeni devletler kurdu.",
+     "metin": [
+      "Uygur tarihinin dönüm noktası Bögü Kağan'dır (759-779). 762'de Tang'a karşı bir isyanı bastırmak için Çin'e giren Bögü Kağan, Luoyang'da Mani din adamlarıyla tanıştı. 763'te dört Mani rahibiyle birlikte döndü ve Mani dinini devlet dini yaptı.",
+      "Mani dini 3. yüzyılda İran'da Mani'nin kurduğu bir dindir. Evreni ışık ile karanlık, iyilik ile kötülük arasında bir mücadele olarak görür. Dindarları seçilmişler ve dinleyenler diye ikiye ayırır; et yememe ve şiddetten uzak durma gibi sert kurallar en çok seçilmişler için geçerliydi.",
+      "Gemini kaynakları Maniheizmin «et yemeyi ve savaşmayı yasaklamasıyla» Uygurların savaşçılığının zayıfladığını söyler. Bu, ders kitaplarında yaygın bir açıklamadır; ancak en sert kuralların halkın tamamını değil seçilmiş din adamlarını bağladığı, Uygurların Mani döneminde de savaşmayı sürdürdüğü unutulmamalıdır. Savaşçılığın zayıflaması tek nedenli değil, yerleşikleşmenin bütününe bağlı bir süreçtir. (modelin bağlantı notu)",
+      "Yeni dinin iç siyasette bir bedeli oldu. 779'da Bögü Kağan, Çin'e yeni bir sefer planladığı sırada amcası Tun Baga Tarkan tarafından öldürüldü; onun döneminde Mani din adamları ve Soğdlular da kovuşturuldu. Ama Maniheizm bir süre sonra yeniden güçlendi ve Uygurların resmî dini olarak kaldı. (modelin bağlantı notu)",
+      "Mani dini Uygurlara yazılı bir kültür getirdi. Soğd yazısından türeyen Uygur alfabesi yaygınlaştı; kitaplar, dualar, ilahiler yazıldı. Bu alfabe daha sonra Moğollara ve onlar aracılığıyla Mançulara geçti.",
+      "Gemini kaynağı Uygurları şehirler, tapınak mimarisi, kütüphane, minyatür ve fresk, matbaa ve hareketli harfle anar. Bu özelliklerin önemli bir bölümü, özellikle Bezeklik mağaralarının duvar resimleri ve Dunhuang'da bulunan ahşap hareketli Uygur harfleri, 840'tan sonraki Koço (Turfan) Uygurları dönemine aittir. Yani «yerleşik Uygur» tablosu bir asırlık kağanlıkla değil, sonraki yüzyıllarla tamamlanır. (modelin bağlantı notu)",
+      "Kuzeyde, Yenisey ırmağı boyunda Kırgızlar yaşıyordu. Kırgızlar da Göktürk alfabesiyle yazıtlar bıraktı; Yenisey yazıtları denen bu kısa mezar taşları Eski Türkçenin önemli belgeleridir. Kapgan ve Bilge Kağan dönemlerinde Göktürklerle savaşmış, sonra Uygurlarla uzun bir mücadeleye girmişlerdi.",
+      "830'ların sonunda Uygur Kağanlığı taht kavgaları, kıtlık, salgın ve ağır bir kışla zayıfladı. 840'ta Kırgız ordusu, bir Uygur komutanının da desteğiyle Karabalgasun'u ele geçirip yaktı; kağan öldürüldü. Gemini kaynağının verdiği 762-840 dönemi böylece kapandı.",
+      "Uygurlar dağıldı ama yok olmadı. Bir kol Kansu'ya göçüp orada Sarı Uygurlar adıyla bilinen bir devlet kurdu; bu devlet 11. yüzyılda Tangutlara yenildi. Asıl büyük kol Doğu Türkistan'da Turfan, Koço ve Beşbalık çevresine yerleşti ve Koço Uygur Devleti'ni kurdu; bu devlet 1209'da kendi isteğiyle Cengiz Han'a bağlanana kadar yaşadı. (modelin bağlantı notu)",
+      "Koço Uygurları Budizm, Maniheizm ve Hristiyanlığın yan yana yaşadığı, okuryazarlığın yüksek olduğu bir kültür kurdu. Altun Yaruk gibi Budist metinlerin çevirileri bu dönemden kalmadır. Moğol İmparatorluğu'nun kâtipleri ve bürokratları büyük ölçüde Uygurlar arasından çıktı.",
+      "Kırgızlar ise 840'tan sonra yaklaşık seksen yıl Moğolistan'da kaldı, sonra Kitanların baskısıyla yeniden Yenisey'e çekildi. Türk dünyasının en uzun destanı sayılan Manas, Kırgızların bu ve sonraki çağlardan taşıdığı hafızanın ürünüdür; beşinci ünitede ayrıca işlenecek."
+     ],
+     "not": "Gemini kaynakları (k3, k15) Maniheizmin et yemeyi ve savaşmayı «yasakladığını» genel bir kural gibi veriyor; bu kurallar en sert biçimiyle seçilmiş din adamları içindir, derste inceltildi. k15'teki «matbaa/hareketli harf» ve fresk Koço dönemine aittir; ayrıca k15'teki «Hunlar veya Göktürklerde kalıcı mimari yoktur» ifadesi abartılıdır (Göktürk anıt külliyeleri, Hun dönemi Ivolga yerleşimi bilinir).",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.4.2.a1",
+       "tur": "secmeli",
+       "soru": "Uygurlarda Mani dinini devlet dini yapan hükümdar kimdir?",
+       "sec": [
+        "Kutluk Bilge Kül Kağan",
+        "Moyun Çor",
+        "Bögü Kağan",
+        "Tun Baga Tarkan"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Bögü Kağan 762-763'te Luoyang'da tanıştığı Mani rahiplerini getirip Maniheizmi devlet dini yaptı.",
+        "Tun Baga Tarkan 779'da Bögü Kağan'ı öldüren amcasıdır."
+       ],
+       "kaynak": [
+        "k3",
+        "k7"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.2.a2",
+       "tur": "secmeli",
+       "soru": "Uygur Kağanlığı'nı 840'ta yıkan topluluk hangisidir?",
+       "sec": [
+        "Karluklar",
+        "Kitanlar",
+        "Hazarlar",
+        "Kırgızlar"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Yenisey Kırgızları 840'ta Karabalgasun'u alıp yaktı.",
+        "Kitanlar Kırgızları yaklaşık seksen yıl sonra Moğolistan'dan çıkardı."
+       ],
+       "kaynak": [
+        "k31",
+        "k27"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.2.a3",
+       "tur": "secmeli",
+       "soru": "Gemini kaynağının Uygurlara bağladığı fresk ve hareketli harf gibi buluntular hakkında en doğru ifade hangisidir?",
+       "sec": [
+        "Hepsi 744-840 arasındaki Kağanlık dönemine aittir",
+        "Önemli bir bölümü 840'tan sonraki Koço (Turfan) Uygurları dönemine aittir",
+        "Hepsi Göktürk dönemine aittir",
+        "Hiçbiri Uygurlarla ilgili değildir"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Bezeklik freskleri ve Dunhuang'daki ahşap hareketli Uygur harfleri, Koço Uygurları dönemindendir.",
+        "Yerleşik Uygur kültürü Kağanlıkta başladı, Koço'da olgunlaştı."
+       ],
+       "kaynak": [
+        "k15",
+        "k33"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.4.3",
+     "ad": "Batıya giden kollar: Avarlar, Bulgarlar ve Macarlar meselesi",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k30",
+      "k27",
+      "k39",
+      "k40",
+      "k28"
+     ],
+     "ozet": "Avarlar 6. yüzyılda Macar ovasında Bizans'ı ve Frankları zorlayan bir kağanlık kurdu ve 626'da İstanbul'u kuşattı. Bulgarlar Kubrat'ın Büyük Bulgaristan'ından sonra ikiye ayrıldı: Tuna Bulgarları 681'de Bizans'a kendini tanıttırdı, İtil Bulgarları 922'de İslam'ı resmen kabul etti. Macarların Türklerle ilişkisi güçlüdür ama kökenleri konusunda kaynaklar ayrılır.",
+     "metin": [
+      "Göktürklerin yükselişi, bozkırdaki öteki toplulukları batıya itti. Bunlardan biri, Bizans kaynaklarında Avar adıyla anılan topluluktu. 558'de Avar elçileri İstanbul'a geldi ve İmparator Justinianos'tan toprak ve yıllık para istedi.",
+      "Avarların kökeni tartışmalıdır. Bir görüş onları Göktürklerin yıktığı Juan-juan'ın kaçan kalıntısı sayar; Bizanslı tarihçi Theophylaktos ise onları «sahte Avarlar», yani bu ünlü adı benimsemiş başka bir topluluk olarak anlatır. Göktürklerin Bizans'tan Avarları kabul etmemesini istemesi, iki topluluk arasındaki düşmanlığı gösterir; ama kimlik meselesinde kaynaklar ayrılır.",
+      "Bayan Kağan döneminde Avarlar 567-568'de Longobardlarla birlikte Gepitleri yıktı; Longobardlar İtalya'ya geçince Macar ovası Avarlara kaldı. 582'de Bizans'ın önemli şehri Sirmium'u aldılar. Avar ordusunun Avrupa'ya üzengiyi getirdiği düşünülür. (modelin bağlantı notu)",
+      "Avarların en büyük girişimi 626 İstanbul kuşatmasıdır. İmparator Herakleios doğuda Sasanilerle savaşırken Avarlar ve onlara bağlı Slavlar Avrupa yakasından, Sasani ordusu da Asya yakasından şehri kuşattı. Kuşatma başarısız oldu; Avar gücü bundan sonra zayıfladı ve 8. yüzyılın sonunda (791-796) Frank kralı Şarlman'ın seferleriyle sona erdi. (modelin bağlantı notu)",
+      "Bulgarlar Oğur dilli Türk boylarındandır; Çuvaşça bugün bu kolun yaşayan tek dili sayılır. 7. yüzyılda Kubrat Han, Azak Denizi'nin kuzeyinde Bizans'ın Büyük Bulgaristan dediği bir devlet kurdu. Kubrat'ın ölümünden sonra Hazar baskısı altında oğulları dağıldı.",
+      "Kubrat'ın oğlu Asparuh, halkının bir bölümüyle Tuna'ya geldi. 680'de Bizans ordusunu yendi ve 681'de Bizans, Tuna'nın güneyindeki bu yeni devleti tanıyıp ona yıllık ödeme yapmayı kabul etti. Tuna Bulgar Devleti böylece doğdu; 811'de Han Krum, Bizans imparatoru I. Nikephoros'u savaşta yenip öldürdü. (modelin bağlantı notu)",
+      "Tuna Bulgarları 864'te Han Boris döneminde Hristiyanlığı kabul etti. Zamanla çoğunluktaki Slav halkın dilini benimsediler; bugünkü Bulgar milleti bu karışımdan doğdu ve Türk kökenli adı taşıdı. Bu, göç eden bir Türk topluluğunun devlet adı ve kurumlarıyla yaşayıp dil bakımından eridiği bir örnektir.",
+      "Öteki kol kuzeye, İdil (Volga) ile Kama ırmaklarının birleştiği yere gitti. İtil Bulgarları ticaretle zenginleşti: kürk, bal ve köle ticareti İdil yolundan Bağdat'a kadar uzandı. 921-922'de Abbasi halifesinin gönderdiği elçilikle gelen İbn Fadlan, Bulgar hükümdarı Almış'ın İslam'ı resmen kabul edişini yerinde anlattı.",
+      "İtil Bulgarları 1236'da Moğollar tarafından yıkıldı. Bugünkü Kazan Tatarları ve Çuvaşlar onların mirasını farklı biçimlerde taşır. İbn Fadlan'ın seyahatnamesi, aynı yolculukta gördüğü Oğuzlar ve Hazarlar hakkında da ilk elden bilgi veren eşsiz bir belgedir.",
+      "Macarlar meselesi daha da karmaşıktır. Macarca bir Fin-Ugor dilidir; ama Türkçeden çok eski dönemlerde alınmış yüzlerce kelime içerir ve Macarların adı (Hungarian) Onogur adıyla ilişkilendirilir. Bizans imparatoru VII. Konstantinos 10. yüzyılda Macarları «Türkler» diye anar; Hazarlardan ayrılıp Macarlara katılan Kabar boyları da Türk kökenliydi.",
+      "Macarlar 895-896'da Peçenek baskısıyla Karadeniz'in kuzeyinden Macar ovasına geçti ve bugünkü Macaristan'ı kurdu. Orta Çağ Macar kronikleri soylarını Attila'ya bağlar; bu, tarihî bir soy kaydından çok bir gelenektir. Macarların Türklerle derin bir kültür bağı vardır, ama «Macarlar Türktür» ya da «hiç ilgileri yoktur» cümlelerinin ikisi de basitleştirmedir; kaynaklar ayrılır."
+     ],
+     "alistirmalar": [
+      {
+       "id": "tarih.3.4.3.a1",
+       "tur": "secmeli",
+       "soru": "626'da Sasanilerle birlikte İstanbul'u kuşatan topluluk hangisidir?",
+       "sec": [
+        "Bulgarlar",
+        "Peçenekler",
+        "Hazarlar",
+        "Avarlar"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "626'da Herakleios doğudayken Avarlar Avrupa yakasından, Sasaniler Asya yakasından şehri kuşattı.",
+        "Kuşatma başarısız oldu; Hazarlar ise aynı yıllarda Bizans'ın müttefikiydi."
+       ],
+       "kaynak": [
+        "k30",
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.3.a2",
+       "tur": "secmeli",
+       "soru": "Tuna Bulgar Devleti'ni kuran ve 681'de Bizans'a kendini tanıttıran hükümdar kimdir?",
+       "sec": [
+        "Kubrat",
+        "Asparuh",
+        "Krum",
+        "Almış"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Asparuh 680'de Bizans'ı yendi, 681'de devleti tanındı.",
+        "Kubrat babasıdır; Krum 9. yüzyıl hükümdarı, Almış İtil Bulgar hükümdarıdır."
+       ],
+       "kaynak": [
+        "k30",
+        "k27"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.3.a3",
+       "tur": "secmeli",
+       "soru": "İtil Bulgar hükümdarı Almış'ın İslam'ı resmen kabul edişini yerinde gören ve anlatan kimdir?",
+       "sec": [
+        "İbn Fadlan",
+        "Menandros",
+        "Priskos",
+        "Temim bin Bahr"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "İbn Fadlan 921-922'de Abbasi elçiliğiyle Bulgar ülkesine gitti ve bunu anlattı.",
+        "Menandros ve Priskos Bizanslı tarihçilerdir, Temim bin Bahr Uygur başkentini anlatmıştır."
+       ],
+       "kaynak": [
+        "k40"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.4.4",
+     "ad": "Hazarlar, Peçenekler ve Kumanlar-Kıpçaklar: Karadeniz kuzeyinin atlıları",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k30",
+      "k27",
+      "k28",
+      "k40"
+     ],
+     "ozet": "Hazarlar 7.-10. yüzyıllarda İdil ve Kafkasya arasında güçlü bir kağanlık kurdu, Arapları Kafkasya'da durdurdu, Bizans'la ittifak yaptı; yönetici çevresi Museviliği benimsedi. Peçenekler 9.-11. yüzyıllarda Bizans, Rus ve Macarlar arasında denge gücü oldu ve 1091'de yıkıldı; Kumanlar-Kıpçaklar Karadeniz kuzeyini 'Deşt-i Kıpçak' yaptı.",
+     "metin": [
+      "Batı Göktürklerin dağılmasından sonra Kafkasya'nın kuzeyinde Hazarlar yükseldi. Hazar yönetici ailesi büyük olasılıkla Göktürk Aşina soyuyla bağlantılıydı ve hükümdar kağan unvanı taşıyordu. Başkentleri sonunda İdil (Volga) deltasındaki İtil şehri oldu.",
+      "Hazarlar 7. ve 8. yüzyılda Kafkasya'da Araplarla uzun savaşlar yaptı. Bu savaşlar Arap ilerleyişinin Kafkas dağlarının kuzeyine geçmesini büyük ölçüde engelledi. Bu yüzden bazı tarihçiler Hazarları, Doğu Avrupa'yı kuzeyden koruyan bir set olarak görür. (modelin bağlantı notu)",
+      "Bizans ile ilişki genellikle dostçaydı. 627'de Hazarlar Herakleios'un yanında Sasanilere karşı savaştı; Bizans imparatoru V. Konstantinos 8. yüzyılda bir Hazar prensesiyle evlendi ve oğlu IV. Leon «Hazar Leon» diye anıldı. Bizans saray giyiminde «tzitzakion» denen bir elbisenin adı bu prensesin adından gelir. (modelin bağlantı notu)",
+      "Hazarların en ünlü özelliği dinle ilgilidir. 8. yüzyılın ortası ile 9. yüzyıl başı arasında bir tarihte, Hazar hükümdarı ve yönetici çevre Museviliği benimsedi; kesin tarih ve süreç konusunda kaynaklar ayrılır. Halkın büyük bölümü ise Müslüman, Hristiyan ya da eski inançlara bağlı kaldı.",
+      "Arap tarihçi Mesudi, Hazar başkentinde ikisi Müslüman, ikisi Musevi, ikisi Hristiyan ve biri öteki inançlardan olmak üzere yedi yargıç bulunduğunu yazar. Her topluluk kendi hukukuyla yargılanıyordu. Bu, bozkır devletlerinin farklı inançlardan halkları bir arada yönetme geleneğinin parlak bir örneğidir. (modelin bağlantı notu)",
+      "Hazarlarda bir tür ikili hükümdarlık da vardı: kutsal sayılan kağan halktan uzak yaşar, devlet işlerini ve orduyu bek ya da işad unvanlı bir yönetici yürütürdü. Hazar Kağanlığı 960'larda Kiev prensi Svyatoslav'ın seferleriyle yıkıldı; Sarkel ve İtil düştü.",
+      "Peçenekler 9. yüzyılda Oğuz ve Hazar baskısıyla batıya kaydı. 895-896'da Macarları Karadeniz'in kuzeyinden çıkarıp Dinyeper-Tuna arasına yerleştiler. Bizans imparatoru VII. Konstantinos, Peçeneklerin sekiz boydan oluştuğunu ve Bizans'ın onları Ruslara ve Macarlara karşı bir denge gücü olarak kullandığını yazar.",
+      "972'de Peçenekler Dinyeper şelalelerinde Kiev prensi Svyatoslav'ı pusuya düşürüp öldürdü. 11. yüzyılda Tuna'yı geçip Balkanlara yayıldılar ve Bizans için büyük bir tehdit oldular. 1091'de Levunion'da Bizans imparatoru I. Aleksios ile Kumanların ortak ordusu Peçenekleri ağır bir yenilgiye uğrattı; bu bir katliamla sonuçlandı ve Peçenekler tarih sahnesinden büyük ölçüde çekildi. (modelin bağlantı notu)",
+      "Peçeneklerden boşalan bozkıra 11. yüzyıl ortasında Kumanlar-Kıpçaklar yerleşti. Rus kaynakları onlara Polovets, Bizans kaynakları Kuman, Müslüman kaynakları Kıpçak der. İdil'den Tuna'ya uzanan bozkır, Müslüman coğrafyacıların dilinde Deşt-i Kıpçak (Kıpçak bozkırı) adını aldı.",
+      "Kıpçaklar tek bir merkezî devlet kurmadı; boylar hâlinde yaşadılar, Rus knezlikleriyle bazen savaştı, bazen evlilik yoluyla akraba oldular. 1223'te Kalka'da Ruslarla birlikte Moğollara yenildiler. 1239'da Köten Han halkının bir bölümüyle Macaristan'a sığındı.",
+      "Kıpçakların izi çok yere dağıldı. Mısır'daki Memlük Devleti'nin yönetici sınıfının büyük bölümü Kıpçak kökenliydi; Sultan Baybars bunlardandır. Kırım'da 14. yüzyılın başında derlenen Codex Cumanicus, Latin harfleriyle yazılmış bir Kıpçakça sözlük ve metinler derlemesidir; Kıpçakça Altın Orda'nın ortak dili hâline geldi. (modelin bağlantı notu)",
+      "Bu dersteki üç topluluk aynı coğrafyada birbirini izledi: Hazarlar devlet, Peçenekler boylar birliği, Kıpçaklar geniş bir bozkır halkı. Hepsi Bizans, Rus ve Müslüman dünyası arasında yaşadı ve bugünkü Doğu Avrupa'nın oluşumunda iz bıraktı."
+     ],
+     "not": "Hazarların Museviliği kabul tarihi (8. yüzyıl ortası-9. yüzyıl başı) ve süreci tartışmalıdır; Hazar Kağanlığı'nın yıkılış yılı da 965 ile 969 arasında değişen tarihlerle verilir, derste «960'lar» kullanıldı.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.4.4.a1",
+       "tur": "secmeli",
+       "soru": "Hazarlar hakkında hangisi doğrudur?",
+       "sec": [
+        "Halkın tamamı Museviliği kabul etti",
+        "Hiç Araplarla savaşmadılar",
+        "Bizans'ın sürekli düşmanıydılar",
+        "Yönetici çevre Museviliği benimsedi; başkentte farklı dinlere ait yargıçlar vardı"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Hükümdar ve yönetici çevre Museviliği benimsedi; Mesudi başkentte yedi farklı inançtan yargıç bulunduğunu yazar.",
+        "Hazarlar Araplarla uzun savaşlar yaptı, Bizans'la çoğunlukla müttefikti."
+       ],
+       "kaynak": [
+        "k30",
+        "k27"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.4.a2",
+       "tur": "secmeli",
+       "soru": "1091'de Levunion'da Peçenekleri yenen ortak ordu hangisidir?",
+       "sec": [
+        "Bizans ve Kumanlar",
+        "Hazarlar ve Uygurlar",
+        "Ruslar ve Macarlar",
+        "Araplar ve Bulgarlar"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "I. Aleksios ile Kumanların ortak ordusu Peçenekleri Levunion'da ağır bir yenilgiye uğrattı.",
+        "Bundan sonra Kumanlar-Kıpçaklar Karadeniz kuzeyinin hâkimi oldu."
+       ],
+       "kaynak": [
+        "k30"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.4.a3",
+       "tur": "secmeli",
+       "soru": "Müslüman coğrafyacıların İdil'den Tuna'ya uzanan bozkıra verdiği ad hangisidir?",
+       "sec": [
+        "Ötüken",
+        "Etelköz",
+        "Deşt-i Kıpçak",
+        "Maveraünnehir"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Bu bozkır Kıpçakların adıyla Deşt-i Kıpçak (Kıpçak bozkırı) diye anıldı.",
+        "Maveraünnehir Ceyhun ile Seyhun arasıdır; Ötüken Moğolistan'dadır."
+       ],
+       "kaynak": [
+        "k30"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.4.5",
+     "ad": "Göktürk mirasçıları Orta Asya'da: Türgişler, Karluklar ve Oğuzlar",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k7",
+      "k27",
+      "k28",
+      "k20",
+      "k40",
+      "k26"
+     ],
+     "ozet": "Batı Göktürklerin On Ok boylarından Türgişler, 8. yüzyılın başında Maveraünnehir'de Arap ilerleyişine karşı direndi. Karluklar 751 Talas Savaşı'nda Abbasilerin yanında yer alıp Çin'in batıya ilerleyişinin durmasında rol oynadı. Oğuzlar Sir Derya boylarında yabguluk kurdu; Selçuklular onların içinden çıktı.",
+     "metin": [
+      "Batı Göktürk Kağanlığı'nın halkı On Ok (On Ok budun) diye anılan on boydu. Batı Göktürkler 659'da Tang'a yenildikten sonra bu boylar arasında yeni önderler çıktı. Bunların en güçlüsü Türgişlerdir.",
+      "Türgiş önderi Uç Elig, 7. yüzyılın sonunda Suyab'ı (bugünkü Kırgızistan'da) merkez yaptı. Oğlu Soğa döneminde Türgişler Kapgan Kağan'ın Göktürk ordusuyla çatıştı ve yaklaşık 711'de yenildi; Tonyukuk yazıtı bu seferi anlatır. Türgişler kısa sürede yeniden toparlandı. (modelin bağlantı notu)",
+      "Türgişlerin en ünlü hükümdarı Sulu Kağan'dır (yaklaşık 716-738). Bu dönemde Emevi orduları Maveraünnehir'e, Semerkant ve Buhara'ya ilerliyordu. Sulu, Soğdlu beylerle birlikte Araplara karşı yıllarca savaştı; Arap kaynakları ona «toslayan, iten» anlamında Ebu Müzahim lakabını verdi. (modelin bağlantı notu)",
+      "Sulu Kağan 737'de Toharistan'da bir yenilgiye uğradı ve 738'de kendi beylerinden biri tarafından öldürüldü. Türgişler bundan sonra iç kavgalarla zayıfladı; 766'da Karluklar Suyab'ı aldı. Türgişlerin direnişi, Arap fethini Maveraünnehir'de birkaç on yıl geciktirdi.",
+      "Karluklar Altay'ın batısında yaşayan bir boylar birliğiydi. 742-744'te Uygur ve Basmıllarla birlikte Göktürkleri yıkan ittifaktaydılar; ama Uygurlar onları batıya, Yedisu'ya (Yedi Irmak) çekilmeye zorladı. Bu bölge, Çin'in Tang hanedanı ile Abbasi Halifeliği'nin nüfuz alanlarının karşılaştığı yerdi.",
+      "751'de Talas ırmağı kıyısında Tang ordusu ile Abbasi ordusu karşılaştı. Savaş sırasında Karluklar Abbasilerin yanına geçti ve Tang ordusu ağır bir yenilgiye uğradı. Gemini kaynağına göre bu, Çin'in batıya ilerleyişini durdurdu ve Türk-İslam ilişkisinin önemli bir başlangıcı oldu.",
+      "Talas'la ilgili yaygın bir anlatı, esir düşen Çinli ustaların Semerkant'ta kâğıt yapımını öğrettiğidir. Bu anlatı bazı Arap kaynaklarına dayanır; kâğıdın Orta Asya'da daha önce de bilindiğini gösteren kanıtlar bulunduğu için tarihçiler onu «yayılmayı hızlandıran bir olay» olarak ihtiyatla anar. (modelin bağlantı notu)",
+      "Karluklar 766'da Suyab'ı alıp Yedisu'nun hâkimi oldu. Bu bölgede 9. yüzyılın ortasında kurulan Karahanlı Devleti'nin kuruluşunda Karlukların, Çiğillerin ve Yağmaların payı tartışmalıdır; kaynaklar ayrılır. Ama Karahanlıların ilk Müslüman Türk devletlerinden biri olduğu kesindir ve bu, sonraki aşamanın konusudur.",
+      "Oğuzlar Türk tarihinin en kalabalık topluluklarından biridir. Orhon yazıtlarında Dokuz Oğuz (Tokuz Oğuz) adı sık geçer; Kül Tigin yazıtında Bilge Kağan Dokuz Oğuzları kendi milleti olarak anar, ama onlarla savaştığını da anlatır. Dokuz Oğuz ile sonraki Oğuzların ilişkisi araştırmacılar arasında tartışılır. (modelin bağlantı notu)",
+      "8. ve 9. yüzyılda Oğuz boyları batıya, Sir Derya'nın aşağı boylarına ve Aral gölü çevresine yerleşti. Burada başında yabgu unvanlı bir hükümdarın bulunduğu bir devlet kurdular; merkezleri Yenikent'ti. İbn Fadlan 922'de bu Oğuzların arasından geçti ve onların yaşayışını, inançlarını ve yönetimini ayrıntılı anlattı.",
+      "Oğuzlar arasında İslam 10. yüzyılda hızla yayıldı ve Müslüman olan Oğuzlara Türkmen denmeye başlandı. Oğuz boylarından Kınık boyuna mensup Selçuk Bey ve torunları, 11. yüzyılda Büyük Selçuklu Devleti'ni kurdu. Böylece Göktürk yazıtlarında adı geçen bir boylar birliği, Anadolu'nun Türkleşmesine giden yolun da sahibi oldu.",
+      "Bu ünitenin dersi şudur: büyük kağanlıklar yıkıldığında Türk tarihi bitmedi, kollara ayrılarak sürdü. Uygurlar Doğu Türkistan'a, Kırgızlar Yenisey'e, Bulgarlar Tuna ve İdil'e, Hazarlar ve Kıpçaklar Karadeniz kuzeyine, Oğuzlar Sir Derya'ya ve oradan İran'a, Anadolu'ya taşıdı."
+     ],
+     "not": "Türgiş hükümdarlarının hükümdarlık yılları yaklaşıktır. Talas-kâğıt anlatısı kaynaklarda kesin olay gibi geçebilir; derste ihtiyatla verildi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.4.5.a1",
+       "tur": "secmeli",
+       "soru": "Maveraünnehir'de Arap ilerleyişine karşı direnen ve Araplarca «Ebu Müzahim» diye anılan Türk hükümdarı kimdir?",
+       "sec": [
+        "Bögü Kağan",
+        "Tardu",
+        "Sulu Kağan",
+        "Kubrat"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Türgiş hükümdarı Sulu Kağan 8. yüzyılın başında Araplara karşı uzun süre savaştı.",
+        "Bögü Kağan Uygur, Tardu Batı Göktürk, Kubrat Bulgar hükümdarıdır."
+       ],
+       "kaynak": [
+        "k27",
+        "k28"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.5.a2",
+       "tur": "secmeli",
+       "soru": "751 Talas Savaşı'nda Karlukların tutumu ve sonucu hangisidir?",
+       "sec": [
+        "Tang'ın yanında savaştılar ve Abbasiler yenildi",
+        "Abbasilerin yanına geçtiler; Tang ağır yenildi ve Çin'in batıya ilerleyişi durdu",
+        "Tarafsız kaldılar",
+        "Bizans'la birleştiler"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Karluklar savaş sırasında Abbasilerin yanına geçti; Tang yenildi.",
+        "Gemini kaynağı bunu Türk-İslam ilişkisinin önemli bir başlangıcı sayar."
+       ],
+       "kaynak": [
+        "k7"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.5.a3",
+       "tur": "secmeli",
+       "soru": "Büyük Selçuklu Devleti'ni kuran hanedan hangi topluluktan çıktı?",
+       "sec": [
+        "Kıpçaklar",
+        "Karluklar",
+        "Uygurlar",
+        "Oğuzlar (Kınık boyu)"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Selçuklu hanedanı Oğuzların Kınık boyundandır.",
+        "Sir Derya boylarında yaşayan Müslüman Oğuzlara Türkmen denmeye başlandı."
+       ],
+       "kaynak": [
+        "k27"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.4.5.a4",
+       "tur": "acik",
+       "soru": "Göktürklerden sonra Türk tarihinin «bitmediğini, kollara ayrıldığını» üç topluluk ve gittikleri yerlerle gösteren bir paragraf yaz.",
+       "dogru": "Göktürk Kağanlığı 744'te yıkıldı ama Türk tarihi sürdü: Uygurlar önce Ötüken'de, 840'tan sonra Turfan ve Koço'da yerleşik bir kültür kurdu; Bulgarlar Tuna'da ve İdil'de devletler kurdu; Oğuzlar Sir Derya boylarından çıkıp Selçuklular eliyle İran ve Anadolu'ya ulaştı.",
+       "olcut": [
+        "En az üç topluluğu doğru adlandırıyor",
+        "Her birinin gittiği yeri doğru veriyor",
+        "Süreklilik fikrini açıkça kuruyor"
+       ],
+       "kaynak": [
+        "k7",
+        "k27",
+        "k28",
+        "k20",
+        "k40",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.3.5",
+   "ad": "İslamiyet öncesi Türk kültürü: devlet, inanç, sanat, destan",
+   "onKosul": [
+    "tarih.3.4"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.3.5.k1",
+      "tur": "secmeli",
+      "soru": "Kurultay için hangisi söylenemez?",
+      "sec": [
+       "Hanedan üyeleri ve boy beylerinden oluşurdu",
+       "Savaş ve barış gibi önemli kararlar görüşülürdü",
+       "Hatun da katılabilirdi",
+       "Kağanı tamamen yetkisiz bırakan, bugünkü anlamda bir parlamentoydu"
+      ],
+      "dogru": "D",
+      "cozum": [
+       "Kurultay danışma ve karar meclisiydi; kağanın gücünü dengeledi ama bugünkü anlamda bir parlamento değildi.",
+       "Hanedan, boy beyleri ve hatun kurultayda yer alırdı."
+      ],
+      "kaynak": [
+       "k1",
+       "k4"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.5.k2",
+      "tur": "secmeli",
+      "soru": "Göktürk alfabesiyle kâğıda yazılmış ve Dunhuang'da bulunmuş fal kitabı hangisidir?",
+      "sec": [
+       "Irk Bitig",
+       "Altun Yaruk",
+       "Kutadgu Bilig",
+       "Dîvânu Lugâti't-Türk"
+      ],
+      "dogru": "A",
+      "cozum": [
+       "Irk Bitig Göktürk harfleriyle yazılmış bir fal kitabıdır.",
+       "Altun Yaruk Uygur harfli Budist bir metindir; Kutadgu Bilig ve Dîvânu Lugâti't-Türk Karahanlı dönemine aittir."
+      ],
+      "kaynak": [
+       "k12",
+       "k20"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.5.k3",
+      "tur": "secmeli",
+      "soru": "Göktürk cenaze töreninde akrabaların çadırın çevresinde atla dönmesi ve yüzlerini çizmesi hangi kavramla ilgilidir?",
+      "sec": [
+       "Ülüş",
+       "Ongun",
+       "Yuğ",
+       "Toy"
+      ],
+      "dogru": "C",
+      "cozum": [
+       "Ölüm törenine yuğ denirdi; Çin kaynakları atla dönmeyi ve yüz çizmeyi anlatır.",
+       "Ülüş pay, ongun kutsal boy hayvanı, toy kurultaydır."
+      ],
+      "kaynak": [
+       "k4",
+       "k8"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     },
+     {
+      "id": "tarih.3.5.k4",
+      "tur": "secmeli",
+      "soru": "Bozkurt sembolünün Türk destanlarındaki ortak anlamı hangisidir?",
+      "sec": [
+       "Kötülüğün ve yer altının efendisi",
+       "Felaketten sonra soyu kurtaran ve yol gösteren ata",
+       "Bereketi ve doğumu koruyan ana",
+       "Ticaretin ve zenginliğin koruyucusu"
+      ],
+      "dogru": "B",
+      "cozum": [
+       "Bozkurt Bozkurt Destanı'nda soyu besler, Ergenekon'da yol gösterir, Oğuz Kağan'da orduya yol açar.",
+       "Yer altının efendisi Erlik, doğumu koruyan Umay'dır."
+      ],
+      "kaynak": [
+       "k8",
+       "k9"
+      ],
+      "durum": "taslak",
+      "yazan": "model"
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.3.5.1",
+     "ad": "Devlet anlayışı: kut, töre, kurultay ve ikili teşkilat",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k1",
+      "k4",
+      "k14",
+      "k13",
+      "k25",
+      "k20"
+     ],
+     "ozet": "Eski Türklerde hükümdarlık yetkisi (kut) Gök Tanrı'nın verdiği bir lütuf sayılırdı; ama kağan da töreye bağlıydı ve önemli kararlar kurultayda görüşülürdü. Devlet doğu ve batı olarak ikiye bölünerek yönetilirdi; bu düzen hem gücü paylaştırır hem bölünmeyi kolaylaştırırdı.",
+     "metin": [
+      "Bozkır devletinin kurumlarını anlamak için önce bir kelimeyi anlamak gerekir: kut. Gemini kaynaklarına göre kut, yönetme yetkisinin Gök Tanrı (Tengri) tarafından hükümdara verildiği inancıdır. Orhon yazıtlarında Bilge Kağan, Tanrı'nın lütfuyla ve kendi kutuyla kağan olduğunu söyler.",
+      "Kut kalıcı bir mülk değildi. Kağan başarısız olur, halkı aç kalır, savaş kaybedilirse kutun ondan çekildiğine inanılabilirdi. Bu yüzden kut bir yetki olduğu kadar bir sorumluluktu: yazıtlardaki «aç milleti doyurdum» cümlesi, kutun halkın refahıyla sınandığını gösterir.",
+      "Kutun bir sonucu da veraset düzenidir. Kut kan yoluyla hanedanın bütün erkek üyelerine geçtiğine inanıldığı için, kaynakların ifadesiyle «ülke hanedanın ortak malı» sayılırdı. Bu da her hükümdar değişiminde taht kavgası ve bölünme tehlikesi doğurdu; önceki ünitelerde Hun, Göktürk ve Uygurlarda bunun örneklerini gördük.",
+      "Kağanın gücünü sınırlayan şey töreydi. Töre, halkın örf ve âdetlerinden doğan, kuşaktan kuşağa aktarılan yazısız hukuk kurallarıdır. Kaynaklara göre kağan da töreye uymak zorundaydı; bu, hükümdarın keyfine göre değil, kurala göre yönettiği bir düzen fikrini taşır.",
+      "İbrahim Kafesoğlu töreyi dört temel ilkeyle açıklar: adalet (könilik), eşitlik (tüzlük), iyilik (uzluk) ve insanlık (kişilik). Bu dörtlü sınıflama Kafesoğlu'nun yorumudur, yazıtlarda bu biçimde sayılmaz; ama yazıtlarda töre kelimesi sık geçer ve «ilini töreni kim bozabilir» gibi cümlelerde devletle birlikte korunacak bir değer olarak anılır. (modelin bağlantı notu)",
+      "Devlet işleri kurultayda (toy ya da kengeş) görüşülürdü. Kurultay hanedan üyelerinden, boy beylerinden ve devletin büyüklerinden oluşurdu; hatun da katılırdı. Gemini kaynağına göre kağan yokken kurultaya aygucı başkanlık ederdi.",
+      "Kurultayın görevleri arasında savaş ve barış kararı, yeni kağanın tanınması ve töreye ilişkin önemli meseleler vardı. Kurultay bugünkü anlamda bir parlamento değildi; ama kağanın tek başına mutlak bir despot olmadığını, büyüklerle danışarak yönettiğini gösterir.",
+      "Hatunun konumu da dikkat çekicidir. Çin kaynaklarına göre bazı elçilikler kağan ile hatun birlikte kabul ederdi; yazıtlar Bilge Kağan'ın annesi İl Bilge Hatun'u saygıyla anar. Hatunun siyasi rolü, bozkır toplumunda kadının yerleşik komşulara göre daha görünür olduğu fikrini destekler. (modelin bağlantı notu)",
+      "Devletin ülkesi de ikiye ayrılırdı. Doğu (sol) kanadı asıl kağan, batı (sağ) kanadı ona bağlı bir yabgu yönetirdi; gemini kaynağına göre güneşin doğudan doğması doğuyu kutsal ve üstün kılıyordu. Bu düzen Hunlardaki sol ve sağ bilge krallarda başlar, Göktürklerde Bumin ile İstemi arasında açıkça görülür.",
+      "İkili teşkilatın faydası, geniş bir ülkeyi tek merkezden yönetmenin zorluğunu çözmesiydi. Zararı ise merkez zayıfladığında iki kanadın ayrı devletlere dönüşebilmesiydi; 582'deki Göktürk bölünmesi bunun en açık örneğidir. Gemini kaynağı da bu federal yapının çöküşü hızlandırdığını söyler.",
+      "Yönetimin öteki unvanları da bu düzeni tamamlar: tigin (kağanın oğulları), şad (boyların ve kanatların başındaki hanedan üyeleri), tudun (taşrada vergi ve denetimden sorumlu yönetici), tarkan ve buyruk (komutan ve devlet görevlileri). Kağan çocuklarını eğitmekle görevli atamanlar da vardı; bu kurum Selçuklu'da atabey, Osmanlı'da lala adıyla sürdü."
+     ],
+     "not": "Gemini kaynakları (k1, k4) töre ilkelerini «değiştirilemez 4 ilke» olarak kesin bir kural gibi veriyor; bu, Kafesoğlu'nun yorumudur, derste öyle belirtildi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.5.1.a1",
+       "tur": "secmeli",
+       "soru": "Eski Türklerde «ülke hanedanın ortak malıdır» anlayışının doğrudan sonucu hangisidir?",
+       "sec": [
+        "Töre'nin yazıya geçirilmesi",
+        "Taht kavgaları ve bölünmeler",
+        "Kurultayın kaldırılması",
+        "Hatunların yönetimden çıkarılması"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Kut bütün erkek hanedan üyelerine geçtiği için her biri tahtta hak iddia edebiliyordu.",
+        "Bu da taht kavgalarına ve devletlerin kısa sürede bölünmesine yol açtı."
+       ],
+       "kaynak": [
+        "k1",
+        "k14"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.1.a2",
+       "tur": "secmeli",
+       "soru": "Kağanın da töreye uymak zorunda olması hangi anlayışın erken izidir?",
+       "sec": [
+        "Mutlak monarşi",
+        "Teokrasi",
+        "Hukukun üstünlüğü",
+        "Feodalizm"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Hükümdar dahil herkesin kurala bağlı olması hukukun üstünlüğü fikrinin erken bir izidir.",
+        "Kaynaklar bunu «hukuk devleti nüvesi» olarak yorumlar."
+       ],
+       "kaynak": [
+        "k4",
+        "k14"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.1.a3",
+       "tur": "secmeli",
+       "soru": "Töre'nin könilik, tüzlük, uzluk ve kişilik diye dört ilkeyle açıklanması için hangisi doğrudur?",
+       "sec": [
+        "Orhon yazıtlarında bu dört kelime bir liste hâlinde geçer",
+        "Çin kaynaklarından alınmıştır",
+        "Uygurların kanun kitabıdır",
+        "Bu sınıflama İbrahim Kafesoğlu'nun yorumudur; yazıtlarda liste olarak geçmez"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Dörtlü sınıflama Kafesoğlu'nun Türk Millî Kültürü'ndeki yorumudur.",
+        "Yazıtlarda töre kelimesi geçer ama bu dört ilke liste olarak sayılmaz."
+       ],
+       "kaynak": [
+        "k25",
+        "k1"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.5.2",
+     "ad": "Ordu ve ekonomik hayat: atlı okçudan İpek Yolu'na",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k22",
+      "k25",
+      "k5",
+      "k26",
+      "k4",
+      "k38"
+     ],
+     "ozet": "Eski Türk ordusu onlu sisteme göre örgütlenmiş, hızlı ve hareketli atlı okçulardan oluşurdu; sahte geri çekilip düşmanı pusuya çekmek en bilinen taktiğiydi. Ekonominin temeli hayvancılıktı, ama demircilik, ticaret ve vahalarda tarım da önemliydi; kağan zenginliği ülüş anlayışıyla halka paylaştırırdı.",
+     "metin": [
+      "Bozkır devletinde ordu ile millet birbirinden ayrı değildi. Ata binip ok atabilen her erkek, gerektiğinde asker olurdu. Bu yüzden Türk tarihçileri bu düzeni «ordu-millet» diye adlandırır.",
+      "Ordunun iskeleti, Mete'den beri bilinen onlu sistemdi: onluk, yüzlük, binlik ve tümen. Bu sistem askeri birlikleri boylara ve obalara bağlayarak hızlı toplanmayı sağlıyordu. Her birlik kendi atını, yayını ve yiyeceğini taşıyordu.",
+      "Ordunun asıl gücü atlı okçuydu. Bileşik yay denen, ağaç, boynuz ve sinirden yapılmış kısa ama güçlü yay, at üstünde her yöne ok atmaya elverişliydi. Her atlının yanında yedek atlar bulunurdu; bu, uzun mesafeleri hızla aşmayı mümkün kıldı. (modelin bağlantı notu)",
+      "En bilinen taktik sahte geri çekilmedir; Türk tarihçiliğinde Turan taktiği diye anılır. Atlılar yenilmiş gibi kaçar, peşlerine düşen düşmanı yanlardan kuşatan birliklerin arasına çekerdi. Bu taktiği Herodot İskitler için, Bizanslı yazarlar Avarlar ve Türkler için anlatır. (modelin bağlantı notu)",
+      "Göktürk ordusunun bir başka gücü demirdi. Türkler Altay'da Avarlara demir işleyen bir topluluktu; devlet kurunca bu bilgi zırh, kılıç ve ok uçlarına dönüştü. Demirin destanlarda kutsal bir maden olarak görülmesi bu tarihî gerçeğin hafızasıdır.",
+      "Sürek avları da askerî bir okuldu. Büyük avlarda birlikler geniş bir halka kurup hayvanları ortaya sürerdi; bu, savaşta kuşatma hareketinin provasıydı. Avın düzeni, ordunun düzenini gösteriyordu. (modelin bağlantı notu)",
+      "Ekonominin temeli hayvancılıktı: koyun, at, sığır, deve ve keçi. Koyun et, süt ve yün; at hem ulaşım hem süt (kımız) verirdi. Bir ailenin ve boyun zenginliği sürüsünün büyüklüğüyle ölçülürdü.",
+      "Bozkırda tarım da vardı. Irmak boylarında ve vahalarda darı ve buğday ekildi; Uygur döneminde tarım büyük ölçüde gelişti. Çin ve Soğd'dan tahıl, ipek ve el sanatı ürünleri alınırken, bozkır at, deri, yün ve kürk satardı.",
+      "Ticaret bozkır devletlerinin can damarıydı. Göktürklerin Soğd'u alması onları İpek Yolu'nun orta bölümüne sahip yaptı; Uygurlar at karşılığı aldıkları ipeği batıya sattı. Soğdlu tüccarlar bu ağın kâtipleri, tercümanları ve diplomatlarıydı.",
+      "Zenginliğin paylaşımına ülüş (pay) denirdi. Gemini kaynağına göre ülüş, Tanrı'nın Türk yurduna verdiği bolluğun hakan tarafından halka adilce paylaştırılmasıdır. Savaş ganimetinin ve vergi gelirlerinin dağıtılması, kağanın kutunu ve bağlılığı korumanın yoluydu.",
+      "Bu ekonomik düzenin zayıf yanı da vardı: kuraklık, sert kış ya da salgın sürüleri bir yılda yok edebilirdi. Ticaret kesildiğinde bozkır devleti tahıla ve ipeğe ulaşamaz, bu da akınlara ve iç huzursuzluğa yol açardı. Bozkırın siyasi tarihi bu ekonomik kırılganlıktan ayrı düşünülemez."
+     ],
+     "alistirmalar": [
+      {
+       "id": "tarih.3.5.2.a1",
+       "tur": "secmeli",
+       "soru": "Düşmanı yenilmiş gibi kaçarak pusuya ve kuşatmaya çekme taktiğine Türk tarihçiliğinde ne ad verilir?",
+       "sec": [
+        "Hilal taktiği",
+        "Falanks",
+        "Kale savaşı",
+        "Turan taktiği"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Sahte geri çekilme Türk tarihçiliğinde Turan taktiği diye anılır.",
+        "Kuşatmada kanatların hilal biçiminde açılması bu taktiğin bir parçası olarak da anlatılır."
+       ],
+       "kaynak": [
+        "k22",
+        "k25"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.2.a2",
+       "tur": "secmeli",
+       "soru": "«Ülüş» kavramı neyi anlatır?",
+       "sec": [
+        "Kağanın halka bolluğu ve geliri adilce paylaştırmasını",
+        "Ordunun onlu birliklere ayrılmasını",
+        "Ölü için yapılan cenaze törenini",
+        "Kağanın Çin'e verdiği vergiyi"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Ülüş pay, hisse demektir; kağanın bolluğu halka adilce dağıtmasını anlatır.",
+        "Kaynaklar bunu sosyal devlet ilkesine benzetir."
+       ],
+       "kaynak": [
+        "k4"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.2.a3",
+       "tur": "secmeli",
+       "soru": "Bozkır ekonomisinin en kırılgan yanı hangisidir?",
+       "sec": [
+        "Hiç ticaret yapılmaması",
+        "Atın hiç kullanılmaması",
+        "Kuraklık, sert kış ve salgının sürüleri kısa sürede yok edebilmesi",
+        "Madenciliğin bilinmemesi"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Zenginlik sürüye bağlı olduğundan doğal felaketler bir yılda büyük kayıplara yol açabiliyordu.",
+        "Bu kırılganlık göçlerin ve iç huzursuzlukların da nedenlerindendir."
+       ],
+       "kaynak": [
+        "k22",
+        "k38"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.5.3",
+     "ad": "İnanç: Gök Tanrı, atalar, yuğ ve balbal",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k8",
+      "k9",
+      "k4",
+      "k24",
+      "k25",
+      "k20"
+     ],
+     "ozet": "Eski Türk inancının merkezinde Gök Tanrı (Tengri) vardı; yanında yer-su ruhları, Umay ve ata ruhları saygı görürdü. Ölüm törenine yuğ denirdi; mezarın yanına dikilen balbal taşları ve kurganlar, ölümden sonra hayatın sürdüğüne inanıldığını gösterir.",
+     "metin": [
+      "Orhon yazıtları Türk inancına dair en eski Türkçe belgedir ve hemen hemen her bölümde Tanrı'yı anar. Yazıta göre Türk milletini Tanrı yaratmış, kağanı Tanrı tahta oturtmuş, Türklerin yenilgisi de onların kendi hatalarından doğmuştur. Tanrı'nın adı yazıtlarda teñri olarak geçer.",
+      "Gemini kaynakları Gök Tanrı'yı (Kök Tengri) eşi ve benzeri olmayan, kağanlara kut veren aşkın bir ilah olarak tarif eder. Türk tarihçilerinin bir bölümü bu yüzden eski Türk inancını tek tanrılı bir «Gök Tanrı dini» olarak görür. Başka araştırmacılar ise Tanrı'nın yanında başka kutsal varlıklara da saygı gösterildiğini öne çıkarır; inancın yapısı konusunda kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Yazıtlarda Tanrı'nın yanında başka kutsal varlıklar da anılır. Yer-su (yir sub), vatanın kutsal ruhları olarak geçer. Umay, doğumu ve çocukları koruyan bir varlıktır; Kül Tigin yazıtında Bilge Kağan annesini Umay'a benzetir. (modelin bağlantı notu)",
+      "Sonraki çağlardan, özellikle Altay Türklerinden derlenen anlatılarda evren üç katlıdır: gök, yer ve yer altı. Gemini kaynağına göre yer altı Erlik Han'ın yeridir. Bu Altay anlatıları 19. yüzyılda derlenmiştir; hangi bölümlerinin Göktürk çağına uzandığı kesin değildir. (modelin bağlantı notu)",
+      "Atalara saygı inancın önemli bir parçasıydı. Çin kaynaklarına göre Göktürk kağanları her yıl atalarının çıktığına inanılan mağarada kurban sunardı. Ölmüş büyüklerin ruhlarının soyu koruduğuna inanılırdı. (modelin bağlantı notu)",
+      "Ongun, bir boyun kutsal saydığı ve koruyucusu kabul ettiği hayvandır. Gemini kaynağı örnek olarak Oğuzların Kayı boyunun ongunu akdoğanı verir. Ongun, boyun kimliğini ve birliğini simgeliyordu.",
+      "Toplumda kam denen din adamları da vardı; kam hastalığı iyileştirmek, ruhlarla iletişim kurmak ve geleceği söylemekle uğraşırdı. Eski Türk inancının ne kadarının «Şamanizm» olarak adlandırılabileceği tartışmalıdır: Kafesoğlu Gök Tanrı inancını Şamanizmden ayırır, başka araştırmacılar kam geleneğini bu inancın bir parçası sayar. Kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Ölüm törenine yuğ denirdi. Çin kaynakları Göktürk cenazelerini şöyle anlatır: ölü çadıra konur, akrabaları çadırın çevresinde atla döner, yas tutanlar bıçakla yüzlerini çizerdi. Gemini kaynağına göre yuğda yemek verilir (yuğ aşı) ve ağıtlar (sagu) söylenirdi. (modelin bağlantı notu)",
+      "Kurganlar, birinci ünitede gördüğümüz gibi, ölünün atı ve eşyasıyla gömüldüğü mezar tümsekleridir. Gemini kaynağı bunu ahiret inancının kanıtı sayar. Göktürk döneminde büyük beyler için mezarın yanında anıt külliyeleri yapıldı: taş heykeller, kaplumbağa kaideli yazıtlar ve tapınak kalıntıları.",
+      "Balbal, mezarın yanına dikilen kaba yontulmuş taşlardır. Gemini kaynağı ve Çin kaynakları balbalın ölünün hayatında öldürdüğü düşman sayısınca dikildiğini anlatır. Orhon yazıtları da bir düşman hükümdarının balbal olarak dikildiğini söyler; bu, öldürülen düşmanın öbür dünyada ölüye hizmet edeceği inancıyla açıklanır.",
+      "Bu inanç dünyası İslam'ı kabulden sonra da tamamen kaybolmadı. Tanrı kelimesi, yas törenlerindeki bazı gelenekler, atalara saygı ve kurt, doğan gibi sembollere bağlılık sonraki yüzyıllara taşındı. Tarihçi bu sürekliliği, kanıtın gösterdiği kadarıyla anlatır."
+     ],
+     "not": "Gemini kaynağı (k8) Erlik Han ve üç âlemi genel Türk mitolojisi olarak veriyor; bunlar büyük ölçüde 19. yüzyılda Altay Türklerinden derlenen anlatılardır, Göktürk çağına uzanıp uzanmadığı kesin değildir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.5.3.a1",
+       "tur": "secmeli",
+       "soru": "Orhon yazıtlarında Türklerin yaratıcısı ve kağanı tahta oturtan güç olarak anılan varlık hangisidir?",
+       "sec": [
+        "Tanrı (teñri)",
+        "Erlik",
+        "Umay",
+        "Yer-su"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Yazıtlarda Türk milletini yaratan ve kağanı tahta oturtan Tanrı'dır (teñri).",
+        "Umay ve yer-su da yazıtlarda anılır ama bu rolde değil; Erlik Orhon yazıtlarında geçmez."
+       ],
+       "kaynak": [
+        "k20",
+        "k8"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.3.a2",
+       "tur": "secmeli",
+       "soru": "Mezarın yanına dikilen ve ölünün öldürdüğü düşman sayısınca konduğuna inanılan taşlara ne denir?",
+       "sec": [
+        "Kurgan",
+        "Ongun",
+        "Tuğ",
+        "Balbal"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Balbal, ölünün öldürdüğü düşmanları temsil eden taşlardır.",
+        "Kurgan mezar tümseği, ongun kutsal boy hayvanı, tuğ sancaktır."
+       ],
+       "kaynak": [
+        "k4"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.3.a3",
+       "tur": "secmeli",
+       "soru": "Eski Türk inancının «Şamanizm» olarak adlandırılması konusunda en doğru ifade hangisidir?",
+       "sec": [
+        "Bütün araştırmacılar aynı fikirdedir",
+        "Tartışmalıdır: bazı araştırmacılar Gök Tanrı inancını Şamanizmden ayırır, bazıları kam geleneğini onun parçası sayar",
+        "Eski Türklerde hiç din adamı yoktu",
+        "Şamanizm Orhon yazıtlarında resmî din olarak ilan edilmiştir"
+       ],
+       "dogru": "B",
+       "cozum": [
+        "Kafesoğlu Gök Tanrı inancını Şamanizmden ayırır; başka araştırmacılar kam geleneğini inancın parçası sayar.",
+        "Bu yüzden kaynaklar ayrılır."
+       ],
+       "kaynak": [
+        "k25",
+        "k24"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.5.4",
+     "ad": "Sanat ve yazı: hayvan üslubu, Pazırık halısı, Göktürk ve Uygur alfabeleri",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k32",
+      "k33",
+      "k20",
+      "k12",
+      "k31",
+      "k22"
+     ],
+     "ozet": "Bozkır sanatının imzası, hayvanların kıvrılarak iç içe geçtiği hayvan üslubudur; Altay'daki Pazırık kurganında bulunan halı bilinen en eski düğümlü halıdır. Türkler Göktürk alfabesiyle kendi dillerini taşa yazdı, Uygurlar Soğd kökenli bir alfabeyle kitap kültürü kurdu.",
+     "metin": [
+      "Göçebe bir toplumun sanatı taşınabilir olmak zorundadır. Bu yüzden bozkır sanatı daha çok kemerlerde, at koşumlarında, silahlarda, giysilerde, keçe ve halılarda görülür. Malzemesi altın, tunç, ahşap, deri ve yündür.",
+      "Bu sanatın en tanınmış özelliği hayvan üslubudur. Geyik, kartal, kaplan, kurt ve at gibi hayvanlar kıvrılmış, birbirine dolanmış ya da mücadele hâlinde tasvir edilir. Saka çağında doğan bu üslup Hun ve Göktürk dönemlerinde de sürdü.",
+      "Emel Esin ve Bahaeddin Ögel bu sanatı Türk kültür tarihinin bir parçası olarak inceler. Saka sanatının yaratıcılarının dili tartışmalı olsa da, bu üslubun bozkırın ortak sanat dili olduğu ve sonraki Türk sanatına aktarıldığı açıktır. (modelin bağlantı notu)",
+      "Altay dağlarındaki Pazırık kurganları, Sovyet arkeolog Sergei Rudenko'nun 1940'lar ve 1950'lerdeki kazılarıyla dünyaya tanıtıldı. Mezar odalarına sızan su donup buz olduğu için keçe, deri, ahşap ve kumaş çürümeden kaldı. Kurganlar yaklaşık MÖ 4.-3. yüzyıla tarihlenir. (modelin bağlantı notu)",
+      "Pazırık'ın en ünlü buluntusu, 5 numaralı kurganda bulunan halıdır. Bilinen en eski düğümlü halıdır; ortasında kareler içinde yıldız biçimli motifler, çevresinde geyik ve atlı sıraları vardır. Bugün St. Petersburg'daki Ermitaj Müzesi'ndedir. (modelin bağlantı notu)",
+      "Halının kimler tarafından ve nerede dokunduğu tartışmalıdır. Türk araştırmacılar onu Türk halı geleneğinin en eski örneği olarak görür ve kullanılan simetrik düğüme (Türk ya da Gördes düğümü denir) dikkat çeker; başka araştırmacılar motiflerdeki Ahameniş İran etkisini öne çıkarır. Kaynaklar ayrılır; kesin olan, halının bozkırın bir beyinin mezarında, bozkır kültürünün içinde bulunduğudur. (modelin bağlantı notu)",
+      "Türk tarihinde yazının en büyük sıçraması Göktürk alfabesidir. Yaklaşık 38 işaretten oluşan bu alfabe sağdan sola yazılır ve Türkçenin ses yapısına uygun biçimde, kalın ve ince ünlülerle kullanılan ünsüzler için ayrı işaretler taşır. Alfabenin kökeni, yani Soğd ya da Aramî yazısından mı, boy damgalarından mı geliştiği tartışmalıdır; kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Gemini kaynağına göre Eski Türkçe döneminin (6.-10. yüzyıl) başlıca eserleri Orhon yazıtları, Irk Bitig, Altun Yaruk ve Sekiz Yükmek'tir. Irk Bitig, Göktürk harfleriyle kâğıda yazılmış bir fal kitabıdır ve Dunhuang'da bulunmuştur. Bu, Göktürk alfabesinin yalnız taşta değil kâğıtta da kullanıldığını gösterir. (modelin bağlantı notu)",
+      "Uygurlar ilk dönemde Göktürk alfabesini kullandı; Şine Usu yazıtı buna örnektir. Ama Mani ve Budist din adamlarıyla birlikte Soğd yazısından türeyen Uygur alfabesi yaygınlaştı. Bu alfabeyle dinî metinler, hukuk belgeleri, mektuplar ve sözlükler yazıldı.",
+      "Uygur alfabesi Türk kültürünü uzun bir yolculuğa çıkardı. Cengiz Han'ın Moğol devleti yazısını Uygurlardan aldı; Mançu yazısı da Moğol yazısından türedi. Karahanlı döneminin Kutadgu Bilig'inin bir nüshası da Uygur harfleriyledir. (modelin bağlantı notu)",
+      "Gemini kaynağındaki bir ses kuralı bu dönemin dilini tanımaya yardım eder: Eski Türkçede söz başındaki t-, k-, b- sesleri korunur. Örneğin tengri, temür (demir), bar (var) gibi. Orhon yazıtlarını okurken bu değişiklikleri bilmek, metinle bugünün Türkçesi arasında köprü kurar."
+     ],
+     "not": "Pazırık kurganlarının tarihi araştırmalara göre MÖ 5. ile 3. yüzyıl arasında değişir; derste «yaklaşık MÖ 4.-3. yüzyıl» kullanıldı. Göktürk alfabesindeki işaret sayısı da kaynaklara göre 38-40 arasında değişir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.5.4.a1",
+       "tur": "secmeli",
+       "soru": "Bilinen en eski düğümlü halı nerede bulunmuştur?",
+       "sec": [
+        "Pazırık kurganlarında",
+        "Esik kurganında",
+        "Karabalgasun'da",
+        "Koşo Tsaidam'da"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Pazırık'ın 5 numaralı kurganında bulunan halı bilinen en eski düğümlü halıdır.",
+        "Buzla korunan mezar odası organik malzemeyi bugüne taşıdı."
+       ],
+       "kaynak": [
+        "k32"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.4.a2",
+       "tur": "secmeli",
+       "soru": "Hayvanların kıvrılarak birbirine dolandığı ya da mücadele hâlinde tasvir edildiği bozkır sanatına ne ad verilir?",
+       "sec": [
+        "Minyatür",
+        "Arabesk",
+        "Hayvan üslubu",
+        "Fresk"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Bozkır sanatının imzası hayvan üslubudur; Saka çağında doğup Hun ve Göktürk dönemlerinde sürdü.",
+        "Minyatür ve fresk Uygurlarda, arabesk İslam sanatında görülür."
+       ],
+       "kaynak": [
+        "k33",
+        "k22"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.4.a3",
+       "tur": "secmeli",
+       "soru": "Uygur alfabesinin hangi yazıdan türediği doğru verilmiştir?",
+       "sec": [
+        "Soğd yazısı",
+        "Çin yazısı",
+        "Göktürk alfabesi",
+        "Arap yazısı"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Uygur alfabesi Soğd yazısından türedi.",
+        "Uygurlar ilk dönemde Göktürk alfabesini de kullanmıştı (Şine Usu yazıtı)."
+       ],
+       "kaynak": [
+        "k31",
+        "k33"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    },
+    {
+     "id": "tarih.3.5.5",
+     "ad": "Destanlar ve semboller: Oğuz Kağan'dan Manas'a; bozkurt, kağan, tuğ",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k8",
+      "k9",
+      "k24",
+      "k10",
+      "k34",
+      "k25",
+      "k26"
+     ],
+     "ozet": "Türk destanları (Alp Er Tunga, Oğuz Kağan, Bozkurt, Türeyiş, Ergenekon, Göç, Manas) bir milletin kendi kökenini ve felaketlerini nasıl hatırladığını gösterir; çoğu sonraki çağlarda yazıya geçirilmiş ve tarihlendirmeleri tartışmalıdır. Bozkurt, kağan, tuğ, demir ve gök gibi semboller bu hafızanın taşıyıcılarıdır.",
+     "metin": [
+      "Destan, bir topluluğun kendi geçmişini kahramanlar ve olağanüstü olaylarla anlattığı uzun anlatıdır. Destanlar tarihî belge değildir, ama tarih için değerli belgelerdir: bir milletin neyi hatırladığını, neyi kutsal saydığını ve felaketlerini nasıl yorumladığını gösterir. Türk destanlarının çoğu sözlü olarak yaşamış, yüzyıllar sonra komşu halkların ya da Türklerin kendi kâtiplerinin eliyle yazıya geçmiştir.",
+      "Alp Er Tunga Destanı'nı birinci ünitede gördük: Kaşgarlı Mahmud'un kaydettiği sagu ve Şehnâme'deki Afrasiyab. Bu destan, kahramanın ölümüne yakılan ağıtla Türk edebiyatının en eski yas şiirlerinden birini taşır.",
+      "Oğuz Kağan Destanı'nın iki ana biçimi vardır: Uygur harfleriyle yazılmış bir nüsha ve 14. yüzyılda Reşidüddin'in kaydettiği İslamî biçim. Destanda Oğuz olağanüstü bir çocuk olarak doğar, halkı korkutan bir canavarı öldürür, gök yeleli bir erkek kurdun rehberliğinde dünyayı fetheder ve ülkeyi oğulları arasında paylaştırır. (modelin bağlantı notu)",
+      "Oğuz'un altı oğlu Gün, Ay, Yıldız, Gök, Dağ ve Deniz'dir. İlk üçü Bozoklar, son üçü Üçoklar diye anılır; bu ikilik, devletin ikiye ayrılıp yönetildiği ikili teşkilatı hatırlatır. Gemini kaynakları destanı Hunlara ve Mete Han'a bağlar; bu, Bahaeddin Ögel gibi araştırmacıların savunduğu bir eşleştirmedir, kesin değildir, kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Bozkurt Destanı Göktürklerin kökenini anlatır ve Çin kaynaklarında kaydedilmiştir. Düşmanların bütün soyu yok ettiği bir savaşta yaralı tek bir çocuk kalır; onu dişi bir kurt besler ve kurttan doğan on oğuldan biri Aşina soyunun atası olur. Gemini kaynakları kurda Asena der; Çin kaynağında Aşina, kurdun değil soyun adıdır. (modelin bağlantı notu)",
+      "Türeyiş Destanı Uygurlara bağlanır. Gemini kaynağına göre bir hükümdar iki güzel kızını Tanrı'ya layık görüp ıssız bir yere, yüksek bir kuleye bırakır; bir kurt gelip küçük kızla evlenir ve soy onlardan türer. Bu anlatı Çin kaynaklarında Uygurların ataları sayılan Kao-ch'e boyları için kaydedilmiştir ve hükümdar orada bir Hun hükümdarı olarak geçer. (modelin bağlantı notu)",
+      "Ergenekon Destanı, düşmana yenilen Türklerin dört yanı dağlarla çevrili verimli bir vadiye sığınıp orada dört yüz yıl çoğaldığını, sonra demir dağı eritip yol açarak ve bir bozkurdun rehberliğinde dışarı çıktığını anlatır. Destan 14. yüzyılda Reşidüddin'in Moğol tarihi içinde, 17. yüzyılda da Ebulgazi Bahadır Han'ın eserinde kaydedilmiştir. Gemini kaynakları onu Göktürklere bağlar; Ögel bu bağı kurgular, ama destanın Moğol ve Türk geleneklerinden hangisine ne kadar ait olduğu konusunda kaynaklar ayrılır. (modelin bağlantı notu)",
+      "Göç Destanı Uygurların Ötüken'den güneye göçünü anlatır. 13. yüzyılda Cüveynî'nin kaydettiği biçimde Uygurlar kutlu bir dağı (Kutlu Dağ) Çinlilere verir; bunun üzerine bütün canlılar yas tutar, uğursuzluk başlar ve Uygurlar yurtlarını bırakır. Bu destan, kutsal yurdu kaybetmenin felaket getirdiği inancını, Orhon yazıtlarındaki Ötüken öğüdüyle aynı çizgide taşır. (modelin bağlantı notu)",
+      "Manas Destanı Kırgızların büyük destanıdır: Manas'ın, oğlu Semetey'in ve torunu Seytek'in Kırgız birliği için mücadelesini anlatır. Gemini kaynakları onu 500.000'i aşkın dizeyle dünyanın en uzun destanı sayar; destanın uzunluğu anlatıcıya ve derlemeye göre çok değişir, en uzun derlemeler yarım milyon dizeye yaklaşır. Manas 19. ve 20. yüzyılda manasçı denen anlatıcılardan derlenmiştir. (modelin bağlantı notu)",
+      "Bu destanlarda bazı semboller tekrar tekrar karşımıza çıkar. Bozkurt rehberdir ve atadır: Bozkurt Destanı'nda soyu kurtarır, Ergenekon'da yolu gösterir, Oğuz Kağan'da orduya yol açar. Gemini kaynakları onu bağımsızlığın ve zor zamanlarda yol göstermenin sembolü sayar.",
+      "Kağan, gök ile yer arasındaki düzenin bekçisidir: Tanrı'dan aldığı kutla milleti doyurur, korur ve töreye göre yönetir. Tuğ, at kuyruğu ya da kılından yapılan sancaktır ve egemenliğin işaretidir; Çin kaynaklarına göre Göktürklerin sancağının tepesinde altın bir kurt başı bulunurdu. (modelin bağlantı notu)",
+      "Demir ve gök de iki büyük semboldür. Demir, Ergenekon'da dağı eriten ve Altay'da Türklerin tarih sahnesine çıkışını sağlayan madendir. Gök (kök) hem Tanrı'nın yeri hem mavi rengin adıdır; Göktürk adındaki «gök» kelimesinin anlamı (gök renkli, kutsal ya da doğu) da tartışmalıdır.",
+      "Destanları okurken iki hatadan kaçınmak gerekir. Birincisi, onları kelimesi kelimesine tarih saymaktır; ikincisi, onları değersiz masallar diye bir kenara atmaktır. Doğru okuma, destanı kimin, ne zaman, neden kaydettiğini sorarak onun bir milletin hafızası olduğunu görmektir."
+     ],
+     "not": "Gemini kaynaklarında görülen sorunlar: (1) k8 ve k9 Bozkurt Destanı'ndaki kurdu «Asena» diye adlandırıyor; Çin kaynağında Aşina soyun adıdır. (2) k8 Türeyiş'te «Uygur hakanının kızları» diyor; Çin kaynağında hükümdar Hun hükümdarı olarak geçer. (3) k9 Göç Destanı'nda «Yada taşı» diyor, k8 «Kutlu Dağ»; Cüveynî'nin anlatısında Kutlu Dağ'dır, Yada taşı ayrı bir motiftir. (4) Manas'ın «500.000'i aşkın dize» uzunluğu derlemeye göre değişir. (5) Oğuz Kağan'ın Mete ile eşleştirilmesi bir görüştür, kesin bilgi değildir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.3.5.5.a1",
+       "tur": "secmeli",
+       "soru": "Oğuz Kağan'ın oğullarından Gün, Ay ve Yıldız'ın oluşturduğu kola ne ad verilir?",
+       "sec": [
+        "Üçoklar",
+        "Dokuz Oğuzlar",
+        "On Oklar",
+        "Bozoklar"
+       ],
+       "dogru": "D",
+       "cozum": [
+        "Gün, Ay ve Yıldız Bozokları; Gök, Dağ ve Deniz Üçokları oluşturur.",
+        "Dokuz Oğuz ve On Ok tarihî boy birlikleridir."
+       ],
+       "kaynak": [
+        "k8",
+        "k9"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.5.a2",
+       "tur": "secmeli",
+       "soru": "Ergenekon Destanı'nın kaydedildiği kaynaklarla ilgili hangisi doğrudur?",
+       "sec": [
+        "Orhon yazıtlarında tam metin olarak geçer",
+        "Yalnız Herodot'ta geçer",
+        "Reşidüddin'in 14. yüzyıl Moğol tarihinde ve Ebulgazi Bahadır Han'ın 17. yüzyıl eserinde kaydedilmiştir",
+        "Uygur harfli Oğuz Kağan nüshasının bir bölümüdür"
+       ],
+       "dogru": "C",
+       "cozum": [
+        "Ergenekon Reşidüddin ve Ebulgazi Bahadır Han'da kaydedilmiştir.",
+        "Göktürklere bağlanması bir yorumdur; Moğol ve Türk geleneği payı konusunda kaynaklar ayrılır."
+       ],
+       "kaynak": [
+        "k24",
+        "k9"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.5.a3",
+       "tur": "secmeli",
+       "soru": "Çin kaynaklarına göre Göktürklerin sancağının tepesinde ne bulunurdu?",
+       "sec": [
+        "Altın bir kurt başı",
+        "Ay yıldız",
+        "Kartal kanadı",
+        "Gümüş bir at başı"
+       ],
+       "dogru": "A",
+       "cozum": [
+        "Çin kaynakları Göktürk sancağının tepesinde altın bir kurt başı olduğunu yazar.",
+        "Bu, Bozkurt Destanı'ndaki kurt atanın siyasi sembole dönüşmesidir."
+       ],
+       "kaynak": [
+        "k26",
+        "k24"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      },
+      {
+       "id": "tarih.3.5.5.a4",
+       "tur": "acik",
+       "soru": "Bir destanı «tarih belgesi gibi» ve «hafıza belgesi olarak» okumak arasındaki farkı, Göç Destanı üzerinden iki cümleyle açıkla.",
+       "dogru": "Göç Destanı'nı tarih belgesi gibi okursak bir dağın Çinlilere verildiğini ve canlıların yas tuttuğunu olmuş bir olay sanırız. Hafıza belgesi olarak okursak, Uygurların yurt kaybını kutsal bir düzenin bozulmasına bağladığını ve bu inancın Orhon yazıtlarındaki Ötüken öğüdüyle aynı çizgide olduğunu görürüz.",
+       "olcut": [
+        "Destandaki olağanüstü olayı kelimesi kelimesine almamak gerektiğini söylüyor",
+        "Destanın bir inancı ya da hafızayı taşıdığını gösteriyor",
+        "Somut olarak Göç Destanı'ndan örnek veriyor"
+       ],
+       "kaynak": [
+        "k8",
+        "k9",
+        "k24",
+        "k10",
+        "k34",
+        "k25",
+        "k26"
+       ],
+       "durum": "taslak",
+       "yazan": "model"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

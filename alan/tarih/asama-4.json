@@ -1,0 +1,3351 @@
+{
+ "sema": 1,
+ "alan": "tarih",
+ "id": "tarih.4",
+ "sira": 4,
+ "ad": "Türk-İslam devletleri: Talas'tan Babür'e",
+ "hedef": "Türklerin İslamiyet'e geçişinden Babür İmparatorluğu'na uzanan yedi yüzyılda Türk-İslam devletlerini, savaşlarını, kurumlarını ve eserlerini neden-sonuç bağıyla tanımak.",
+ "onKosul": [],
+ "kanitIsi": "Malazgirt Savaşı'nın (1071) Anadolu tarihindeki yerini yarım sayfada yorumla. En az iki kaynağa dayan: biri Müslüman ya da Türk tarafından (ör. İbnü'l-Esir), biri Bizans tarafından (ör. savaşta imparatorun yanında bulunan Attaleiates) olsun. İki kaynağın savaşı neden farklı anlattığını söyle, sonra Malazgirt'i tek günlük bir zafer olarak değil, Türkmen göçü, ilk beylikler ve Miryokefalon'la süren bir yurt oluş sürecinin başlangıcı olarak yerleştir. Emin olmadığın sayı ve sözleri «kaynaklara göre» diye işaretle. Sahip değerlendirir; puanlanmaz.",
+ "kaynaklar": [
+  {
+   "id": "k1",
+   "ad": "Talas Savaşı (751)",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-001] Talas Savaşı (751)",
+   "satir": "11-13",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k2",
+   "ad": "Dandanakan, Pasinler, Malazgirt ve Katvan savaşları",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-002]-[TAR-005]",
+   "satir": "15-29",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k3",
+   "ad": "Miryokefalon, Yassıçemen, Kösedağ, Ayn Calut ve Elbistan",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-006]-[TAR-009]",
+   "satir": "31-45",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k4",
+   "ad": "İkta, gulam, atabeylik, divan ve ahilik",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-013]-[TAR-017]",
+   "satir": "59-77",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k5",
+   "ad": "Karahanlılar ve Büyük Selçuklu kurumları",
+   "tur": "gemini",
+   "yol": "AYS/ayt/ayt_tarih_ve_inkilap_tarihi_kronolojik_sebep_sonuc_antlasmalar_ve_kongreler_tam_atlasi.md",
+   "bolum": "İlk Türk-İslam Devletleri: Karahanlılar vs Büyük Selçuklu Kurumları",
+   "satir": "38-50",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k6",
+   "ad": "Anadolu'nun tapu senedi sayılan savaşlar: Pasinler, Malazgirt, Miryokefalon",
+   "tur": "gemini",
+   "yol": "AYS/ayt/ayt_tarih_ve_cografya_harita_antlasma_kongre_ve_inkilap_kronolojik_karsilastirma_atlasi.md",
+   "bolum": "Anadolu'nun Tapu Senedi Olan 4 Büyük Savaş Üçlemesi",
+   "satir": "12-24",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k7",
+   "ad": "Kırılma noktaları 12 ve 16: Talas ve Malazgirt",
+   "tur": "gemini",
+   "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md",
+   "bolum": "2. En Kritik 50 Kırılma Noktası",
+   "satir": "63-67",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k8",
+   "ad": "Kırılma noktaları 20 ve 23: Kösedağ, Ankara ve Fetret",
+   "tur": "gemini",
+   "yol": "ESP/tarih/dunya_ve_turk_tarihi_kirilmalar.md",
+   "bolum": "2. En Kritik 50 Kırılma Noktası",
+   "satir": "71-74",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k9",
+   "ad": "Selçuklu medeniyet mimarisi: Nizamiye, ahilik, kervansaray",
+   "tur": "gemini",
+   "yol": "ESP/tarih/anadolu_uygarliklari_osmanli_iktisadi_ve_kurumsal_donusum_atlasi.md",
+   "bolum": "1.3 Selçuklu Medeniyet Mimarisi",
+   "satir": "36-43",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k10",
+   "ad": "Selçuklu ve Osmanlı kervansaray lojistiği",
+   "tur": "gemini",
+   "yol": "ESP/tarih/kuresel_kesifler_ticaret_yollari_ve_cografi_medeniyet_aktarimi_atlasi.md",
+   "bolum": "Selçuklu ve Osmanlı Kervansaray (Sultan Hanları) Lojistik Mimarisi",
+   "satir": "24-29",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k11",
+   "ad": "Kaşgarlı Mahmud, Yusuf Has Hacib ve Ali Şir Nevai",
+   "tur": "gemini",
+   "yol": "ESP/dil_ogrenimi/kokenbilim_etimoloji_turkcenin_tarihsel_katmanlari_ve_dunya_dilleri_morfoloji_atlasi.md",
+   "bolum": "2-4. Divanü Lugati't-Türk, Kutadgu Bilig, Muhakemetü'l-Lugateyn",
+   "satir": "93-105",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k12",
+   "ad": "Dîvânu Lugâti't-Türk'ün yapısı",
+   "tur": "gemini",
+   "yol": "ESP/dil_ogrenimi/turkcenin_tarihsel_etimolojisi_divanu_lugatit_turk_orhun_ve_anadolu_agizlari_sozlugu.md",
+   "bolum": "3. Dîvânu Lugâti't-Türk (1074) ve Kaşgarlı Mahmud'un Leksikografik Dehası",
+   "satir": "67-79",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k13",
+   "ad": "Kutadgu Bilig, Atabetü'l-Hakayık, Divanü Lugati't-Türk eser kartları",
+   "tur": "gemini",
+   "yol": "AYS/ayt/edebiyat_500_kilit_eser_yazar_kahraman_ve_ilkler_ansiklopedik_indeksi.md",
+   "bolum": "[ESR-001]-[ESR-003]",
+   "satir": "69-79",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k14",
+   "ad": "Zîc-i Uluğ Bey ve Uluğ Bey'in bilgin biyografisi",
+   "tur": "gemini",
+   "yol": "ESP/tarih/bilim_ve_teknoloji_tarihi_100_kurucu_kesif_icat_ve_paradigma_devrimi_atlasi.md",
+   "bolum": "Kurucu keşifler tablosu, satır 25",
+   "satir": "39",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k15",
+   "ad": "Buhara-Semerkant, Memlük Kahire'si, Selçuklu Konya'sı",
+   "tur": "gemini",
+   "yol": "ESP/tarih/uygarlik_ve_kent_tarihi_antik_metropollerden_modern_sehircilige.md",
+   "bolum": "Kentler tablosu 9-11",
+   "satir": "85-87",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k16",
+   "ad": "Yunus Emre ve Mevlânâ",
+   "tur": "gemini",
+   "yol": "AYS/ayt/ayt_edebiyat_divan_halk_tanzimat_servetifunun_milli_ve_cumhuriyet_100_sair_yazar_yuzyil_ve_eser_sifresi.md",
+   "bolum": "Yunus Emre; Mevlânâ Celâleddîn-i Rûmî",
+   "satir": "14-17, 55-57",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k17",
+   "ad": "Hamse ve Ali Şir Nevai",
+   "tur": "gemini",
+   "yol": "AYS/ayt/ayt_edebiyat_divan_halk_ve_tanzimat_nazim_sekilleri_ve_sanatlari_tam_atlasi.md",
+   "bolum": "Hamse",
+   "satir": "72",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k18",
+   "ad": "Bîrûnî",
+   "tur": "gemini",
+   "yol": "AYS/ayt/ayt_sosyal_2_felsefe_grubu_psikoloji_sosyoloji_mantik_ve_din_kulturu_tam_atlasi.md",
+   "bolum": "İslam bilginleri",
+   "satir": "162",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k19",
+   "ad": "Ankara Savaşı (1402) ve Otlukbeli Savaşı (1473)",
+   "tur": "gemini",
+   "yol": "AYS/ayt/tarih_100_kritik_antlasma_savas_ferman_ve_inkilap_karsilastirmali_atlasi.md",
+   "bolum": "[TAR-025], [TAR-028]",
+   "satir": "109-123",
+   "dogrulama": "dogrulanmamis"
+  },
+  {
+   "id": "k20",
+   "ad": "MEB, Ortaöğretim Tarih 9 ve 10 ders kitapları",
+   "tur": "kitap",
+   "yol": "MEB, Ortaöğretim Tarih 9 ve Tarih 10 ders kitapları, MEB Yayınları",
+   "bolum": "Türklerin İslamiyet'i kabulü; ilk Türk-İslam devletleri; Türkiye Selçukluları ve beylikler",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k21",
+   "ad": "Osman Turan, Selçuklular Tarihi ve Türk-İslam Medeniyeti",
+   "tur": "kitap",
+   "yol": "Osman Turan, Selçuklular Tarihi ve Türk-İslam Medeniyeti, Ötüken",
+   "bolum": "Karahanlılar, Gazneliler, Büyük Selçuklu; Malazgirt; kurumlar",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k22",
+   "ad": "Osman Turan, Selçuklular Zamanında Türkiye",
+   "tur": "kitap",
+   "yol": "Osman Turan, Selçuklular Zamanında Türkiye, Ötüken",
+   "bolum": "Süleyman Şah'tan Kösedağ'a ve Selçuklu'nun sonuna",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k23",
+   "ad": "Claude Cahen, Osmanlılardan Önce Anadolu",
+   "tur": "kitap",
+   "yol": "Claude Cahen, Osmanlılardan Önce Anadolu, Tarih Vakfı Yurt Yayınları",
+   "bolum": "Türkmen yerleşmesi, ilk beylikler, Moğol dönemi",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k24",
+   "ad": "W. Barthold, Moğol İstilasına Kadar Türkistan",
+   "tur": "kitap",
+   "yol": "W. Barthold, Moğol İstilasına Kadar Türkistan, Türk Tarih Kurumu",
+   "bolum": "Arap fetihleri, Samanoğulları, Karahanlılar, Harezmşahlar ve Moğol istilası",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k25",
+   "ad": "İbrahim Kafesoğlu, Harezmşahlar Devleti Tarihi",
+   "tur": "kitap",
+   "yol": "İbrahim Kafesoğlu, Harezmşahlar Devleti Tarihi, Türk Tarih Kurumu",
+   "bolum": "Anuştegin'den Celaleddin'e",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k26",
+   "ad": "C. E. Bosworth, The Ghaznavids",
+   "tur": "kitap",
+   "yol": "C. E. Bosworth, The Ghaznavids: Their Empire in Afghanistan and Eastern Iran 994-1040, Edinburgh University Press",
+   "bolum": "Sebüktegin, Mahmud, Mesud; Dandanakan",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k27",
+   "ad": "Jonathan M. Bloom, Paper Before Print",
+   "tur": "kitap",
+   "yol": "Jonathan M. Bloom, Paper Before Print, Yale University Press",
+   "bolum": "Kâğıdın Orta Asya'dan İslam dünyasına geçişi; Talas anlatısı",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k28",
+   "ad": "Yusuf Has Hacib, Kutadgu Bilig (çev. Reşid Rahmeti Arat)",
+   "tur": "kitap",
+   "yol": "Yusuf Has Hacib, Kutadgu Bilig, çev. Reşid Rahmeti Arat, Türk Tarih Kurumu",
+   "bolum": "Giriş ve metin",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k29",
+   "ad": "Kaşgarlı Mahmud, Divanü Lugati't-Türk (çev. Besim Atalay)",
+   "tur": "kitap",
+   "yol": "Kaşgarlı Mahmud, Divanü Lugati't-Türk Tercümesi, çev. Besim Atalay, Türk Dil Kurumu",
+   "bolum": "Önsöz ve giriş",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k30",
+   "ad": "Carole Hillenbrand, Turkish Myth and Muslim Symbol: The Battle of Manzikert",
+   "tur": "kitap",
+   "yol": "Carole Hillenbrand, Turkish Myth and Muslim Symbol: The Battle of Manzikert, Edinburgh University Press",
+   "bolum": "Müslüman ve Bizans kaynaklarında Malazgirt; anlatının sonraki yüzyıllarda büyümesi",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k31",
+   "ad": "Mikhail Attaleiates, Tarih (Historia)",
+   "tur": "kitap",
+   "yol": "Michael Attaleiates, The History, çev. Anthony Kaldellis ve Dimitris Krallis, Harvard University Press (Dumbarton Oaks Medieval Library)",
+   "bolum": "Romanos Diogenes'in seferleri ve Malazgirt; yazar savaşta imparatorun yanındaydı",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k32",
+   "ad": "İbnü'l-Esir, el-Kâmil fi't-Tarih",
+   "tur": "kitap",
+   "yol": "İbnü'l-Esîr, El-Kâmil fi't-Târih Tercümesi, Bahar Yayınları",
+   "bolum": "Hicri 349 (960) Türklerin İslam'a girişi; hicri 463 (1071) Malazgirt",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k33",
+   "ad": "René Grousset, Bozkır İmparatorluğu",
+   "tur": "kitap",
+   "yol": "René Grousset, Bozkır İmparatorluğu: Attila, Cengiz Han, Timur, çev. Reşat Uzmen, Ötüken",
+   "bolum": "Altın Orda, Çağatay ulusu, Timur",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k34",
+   "ad": "Beatrice Forbes Manz, The Rise and Rule of Tamerlane",
+   "tur": "kitap",
+   "yol": "Beatrice Forbes Manz, The Rise and Rule of Tamerlane, Cambridge University Press",
+   "bolum": "Timur'un yükselişi, Çağatay ulusu ve meşruiyet",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k35",
+   "ad": "Zahirüddin Muhammed Babür, Babürname (çev. Reşid Rahmeti Arat)",
+   "tur": "kitap",
+   "yol": "Gazi Zahirüddin Muhammed Babür, Vekayi: Babür'ün Hatıratı, çev. Reşid Rahmeti Arat, Türk Tarih Kurumu",
+   "bolum": "Fergana, Semerkant, Kabil ve Hindistan bölümleri",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k36",
+   "ad": "Reuven Amitai-Preiss, Mongols and Mamluks",
+   "tur": "kitap",
+   "yol": "Reuven Amitai-Preiss, Mongols and Mamluks: The Mamluk-Ilkhanid War 1260-1281, Cambridge University Press",
+   "bolum": "Ayn Calut ve Elbistan",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k37",
+   "ad": "Ahmet Yaşar Ocak, Babaîler İsyanı",
+   "tur": "kitap",
+   "yol": "Ahmet Yaşar Ocak, Babaîler İsyanı, Dergâh Yayınları",
+   "bolum": "1240 isyanı ve Kösedağ öncesi Anadolu",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k38",
+   "ad": "Ebba Koch, The Complete Taj Mahal",
+   "tur": "kitap",
+   "yol": "Ebba Koch, The Complete Taj Mahal and the Riverfront Gardens of Agra, Thames & Hudson",
+   "bolum": "Yapının tarihi ve Şah Cihan",
+   "dogrulama": "kaynakli"
+  },
+  {
+   "id": "k39",
+   "ad": "Ali Şir Nevai, Muhakemetü'l-Lugateyn",
+   "tur": "kitap",
+   "yol": "Ali Şir Nevai, Muhakemetü'l-Lugateyn, Türk Dil Kurumu",
+   "bolum": "Türkçe ile Farsçanın karşılaştırılması",
+   "dogrulama": "kaynakli"
+  }
+ ],
+ "kapi": {
+  "esik": 0.8,
+  "sorular": [
+   {
+    "id": "tarih.4.k1",
+    "tur": "secmeli",
+    "soru": "Aşağıdakilerden hangisi kronolojik sıradadır?",
+    "sec": [
+     "Talas, Malazgirt, Dandanakan, Miryokefalon",
+     "Dandanakan, Malazgirt, Talas, Yassıçemen",
+     "Dandanakan, Talas, Malazgirt, Kösedağ",
+     "Talas, Dandanakan, Malazgirt, Kösedağ"
+    ],
+    "dogru": "D",
+    "durum": "taslak",
+    "yazan": "model",
+    "kaynak": [
+     "k1",
+     "k2",
+     "k3"
+    ],
+    "cozum": [
+     "Talas 751, Dandanakan 1040, Malazgirt 1071, Kösedağ 1243.",
+     "Öteki seçeneklerde Talas ya da Dandanakan yanlış yerdedir; Talas bu aşamanın en eski olayıdır."
+    ]
+   },
+   {
+    "id": "tarih.4.k2",
+    "tur": "secmeli",
+    "soru": "Karahanlılar, Büyük Selçuklu ve Türkiye Selçukluları üç ayrı yüzyılda üç büyük eser bıraktı. Hangi eşleştirme doğrudur?",
+    "sec": [
+     "Kutadgu Bilig: Türkiye Selçukluları; Siyasetname: Karahanlılar; Mesnevi: Büyük Selçuklu",
+     "Kutadgu Bilig: Büyük Selçuklu; Siyasetname: Türkiye Selçukluları; Mesnevi: Karahanlılar",
+     "Kutadgu Bilig: Karahanlılar; Siyasetname: Türkiye Selçukluları; Mesnevi: Büyük Selçuklu",
+     "Kutadgu Bilig: Karahanlılar; Siyasetname: Büyük Selçuklu; Mesnevi: Türkiye Selçukluları"
+    ],
+    "dogru": "D",
+    "durum": "taslak",
+    "yazan": "model",
+    "kaynak": [
+     "k5",
+     "k13",
+     "k16",
+     "k21"
+    ],
+    "cozum": [
+     "Kutadgu Bilig 1069-70'te Kaşgar'da Karahanlı hükümdarına, Siyasetname Melikşah'a sunuldu; Mevlânâ Mesnevi'yi 13. yüzyılda Selçuklu Konya'sında yazdı.",
+     "Kutadgu Bilig Türkçe, Siyasetname ve Mesnevi Farsça yazıldı; dil seçimi eserin hangi saraya ve okura seslendiğini gösterir."
+    ]
+   },
+   {
+    "id": "tarih.4.k3",
+    "tur": "secmeli",
+    "soru": "Katvan (1141) ile Kösedağ (1243) yenilgilerinin ortak sonucu hangisidir?",
+    "sec": [
+     "İki devlet de hemen ortadan kalktı.",
+     "Yenilen devlet merkezî gücünü yitirdi, parçalanma ve yerel hanedanların yükselişi hızlandı.",
+     "İki savaşta da Bizans kazançlı çıktı.",
+     "İki savaştan sonra da başkent Bağdat'a taşındı."
+    ],
+    "dogru": "B",
+    "durum": "taslak",
+    "yazan": "model",
+    "kaynak": [
+     "k2",
+     "k3",
+     "k8"
+    ],
+    "cozum": [
+     "Katvan'dan sonra Büyük Selçuklu Maveraünnehir'i yitirdi ve 1157'de dağıldı; Kösedağ'dan sonra Türkiye Selçukluları Moğol vergisi verdi ve beylikler güçlendi.",
+     "A yanlıştır: iki devlet de savaştan sonra yıllarca yaşadı; çöküş bir süreçti."
+    ]
+   },
+   {
+    "id": "tarih.4.k4",
+    "tur": "secmeli",
+    "soru": "Gazneliler, Memlükler ve Abbasi ordusundaki Türk komutanların ortak noktası hangisidir?",
+    "sec": [
+     "Hepsi Orta Asya'dan gelen bir boyun göçüyle kuruldu.",
+     "Hepsi Moğollara karşı kuruldu.",
+     "Hepsinin kökü, sarayda yetiştirilen asker-kölelere (gulam, memlûk) dayanır.",
+     "Hepsi Türkçeyi tek resmî dil yaptı."
+    ],
+    "dogru": "C",
+    "durum": "taslak",
+    "yazan": "model",
+    "kaynak": [
+     "k4",
+     "k3",
+     "k20"
+    ],
+    "cozum": [
+     "Alptegin bir Samani gulamıydı, Memlükler satın alınmış Kıpçak ve Çerkez askerlerdi, Samarra'daki Türk komutanlar da halifenin asker-köleleriydi.",
+     "Bu yol, boy göçüyle kurulan Selçuklu ve Karahanlı devletlerinden farklıdır."
+    ]
+   },
+   {
+    "id": "tarih.4.k5",
+    "tur": "secmeli",
+    "soru": "Babür'ün Panipat'ta (1526) ve Timur'un Ankara'da (1402) karşısındakiler sırasıyla kimdir?",
+    "sec": [
+     "İbrahim Lodi ve Yıldırım Bayezid",
+     "Rana Sanga ve Sultan Murad",
+     "Şeybani Han ve Toktamış",
+     "Humayun ve Uzun Hasan"
+    ],
+    "dogru": "A",
+    "durum": "taslak",
+    "yazan": "model",
+    "kaynak": [
+     "k19",
+     "k35"
+    ],
+    "cozum": [
+     "Babür Delhi Sultanı İbrahim Lodi'yi Panipat'ta, Timur Osmanlı Sultanı Yıldırım Bayezid'i Çubuk Ovası'nda yendi.",
+     "Rana Sanga'yı Babür bir yıl sonra Hanva'da yendi; Toktamış Timur'un Altın Orda'daki rakibiydi."
+    ]
+   },
+   {
+    "id": "tarih.4.k6",
+    "tur": "secmeli",
+    "soru": "Bir öğrenci «Malazgirt'ten hemen sonra bütün Anadolu Türk oldu» diyor. Bu aşamada öğrendiklerine göre en doğru düzeltme hangisidir?",
+    "sec": [
+     "Doğru; Bizans bir daha Anadolu'da savaşmadı.",
+     "Malazgirt kapıyı açtı; yurt oluş Türkmen göçü, beylikler ve Miryokefalon'a uzanan bir yüzyıllık süreçtir.",
+     "Anadolu ancak Osmanlılarla Türk yurdu oldu; Malazgirt önemsizdir.",
+     "Anadolu'yu Malazgirt'ten önce Gazneliler fethetmişti."
+    ],
+    "dogru": "B",
+    "durum": "taslak",
+    "yazan": "model",
+    "kaynak": [
+     "k6",
+     "k7",
+     "k22",
+     "k23"
+    ],
+    "cozum": [
+     "Malazgirt Bizans sınır savunmasını çökertti; ama Haçlılar İznik'i 1097'de aldı, Bizans 1176'ya dek geri alma umudu taşıdı. Yurt oluş yerleşme ve savaşlarla süren bir süreçtir.",
+     "C de aşırıdır: Osmanlılar zaten Selçuklu Anadolu'sunun içinden çıktı."
+    ]
+   }
+  ]
+ },
+ "uniteler": [
+  {
+   "id": "tarih.4.1",
+   "ad": "Türklerin İslamiyet'e geçişi",
+   "onKosul": [],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.4.1.k1",
+      "tur": "secmeli",
+      "soru": "Talas Savaşı'nda Abbasi ordusunun karşısındaki güç hangisidir?",
+      "sec": [
+       "Bizans",
+       "Sasaniler",
+       "Tang Çini",
+       "Hazarlar"
+      ],
+      "dogru": "C",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k1"
+      ],
+      "cozum": [
+       "Talas'ta Abbasiler Tang Çini'nin ordusunu Karlukların yardımıyla yendi.",
+       "Sasaniler 7. yüzyılda Araplarca yıkılmıştı; Bizans ve Hazarlar Talas'ta yoktu."
+      ]
+     },
+     {
+      "id": "tarih.4.1.k2",
+      "tur": "secmeli",
+      "soru": "Abbasi tarihinde «Samarra anarşisi» denen dönemin ana özelliği hangisidir?",
+      "sec": [
+       "Halifelerin Türk komutanların elinde atanıp indirilmesi",
+       "Moğolların Bağdat'ı yağmalaması",
+       "Halifeliğin Mısır'a taşınması",
+       "Haçlıların Irak'a girmesi"
+      ],
+      "dogru": "A",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k20",
+       "k4"
+      ],
+      "cozum": [
+       "861'de Mütevekkil'in öldürülmesinden sonra Türk komutanlar halife seçimini belirler oldu.",
+       "Moğol yağması 1258'de, halifeliğin Kahire'ye taşınması 1261'de olur."
+      ]
+     },
+     {
+      "id": "tarih.4.1.k3",
+      "tur": "secmeli",
+      "soru": "Halife tarafından Muhammed bin Tuğç'a verilen ve hanedanın adı olan «İhşid» unvanı nereden gelir?",
+      "sec": [
+       "Karahanlı hakan unvanından",
+       "Moğol unvanından",
+       "Bizans saray unvanından",
+       "Eski Fergana hükümdarlarının unvanından"
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k20"
+      ],
+      "cozum": [
+       "İhşid, Fergana'nın eski hükümdarlarının unvanıydı; Muhammed bin Tuğç da Ferganalı bir aileden geliyordu.",
+       "Moğollar bu olaydan üç yüzyıl sonra ortaya çıkar."
+      ]
+     },
+     {
+      "id": "tarih.4.1.k4",
+      "tur": "secmeli",
+      "soru": "Aşağıdaki olaylardan hangisi ötekilerden sonra olmuştur?",
+      "sec": [
+       "Talas Savaşı",
+       "Samarra'nın kuruluşu",
+       "Tolunoğulları'nın Mısır'da yönetimi alması",
+       "İbnü'l-Esir'in kaydettiği toplu İslamlaşma"
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k1",
+       "k20",
+       "k32"
+      ],
+      "cozum": [
+       "Sıra: Talas 751, Samarra 836, Ahmed bin Tolun 868, toplu İslamlaşma kaydı 960.",
+       "Türklerin toplu geçişi, asker olarak İslam dünyasına girmelerinden sonra geldi."
+      ]
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.4.1.1",
+     "ad": "İlk temaslar ve Talas Savaşı (751)",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k1",
+      "k7",
+      "k24",
+      "k27",
+      "k20"
+     ],
+     "ozet": "Türklerle Müslüman Araplar 8. yüzyılda Maveraünnehir'de önce savaşarak tanıştı. 751'de Talas'ta Abbasiler Çin ordusunu Karlukların yardımıyla yendi; bu savaş Türk-İslam yakınlaşmasının simgesi oldu.",
+     "metin": [
+      "Bugün Kazakistan ile Kırgızistan sınırına yakın Talas Irmağı kıyısında 751 yazında iki dünya karşılaştı: batıdan yeni kurulmuş Abbasi Halifeliğinin ordusu, doğudan Çin'in Tang hanedanının ordusu. Arada ise bu toprakların asıl sahibi olan Türk boyları vardı. Savaşı belirleyen de onlardan biri, Karluklar oldu.",
+      "Bu karşılaşmanın arka planı yarım yüzyıl önce başladı. Emevi komutanı Kuteybe bin Müslim 705-715 yılları arasında Maveraünnehir'e, yani Ceyhun (Amuderya) ile Seyhun (Siriderya) arasındaki ülkeye girdi; Buhara ve Semerkant bu yıllarda Arap denetimine geçti (modelin bağlantı notu). Bölgenin Soğd şehirleri ile onları koruyan Türk beyleri bu ilerlemeye uzun süre direndi.",
+      "Direnişin en güçlü adı Türgiş hükümdarı Sulu Kağan'dı. Sulu, 720'li ve 730'lu yıllarda Arap ordularını birçok kez yenerek Maveraünnehir'deki ilerlemeyi durdurdu; 738 dolaylarında bir iç çatışmada öldürülünce Türgiş gücü dağıldı (modelin bağlantı notu). Yani Türklerle İslam'ın ilk teması bir dostluk değil, çetin bir savaş dönemiydi.",
+      "750'de Emevi hanedanı yıkıldı, yerine Abbasiler geçti. Abbasi devriminin merkezi Horasan'dı ve yeni yönetim doğu sınırında bir başka güçle yüz yüze geldi: Tang Çini, Tarım havzası üzerinden batıya, Fergana'ya doğru nüfuzunu genişletiyordu. Fergana ile Taşkent (Şaş) hükümdarları arasındaki bir çekişme iki büyük gücü doğrudan karşı karşıya getirdi.",
+      "Savaşta Abbasi ordusunu Ziyad bin Salih, Tang ordusunu Kore kökenli general Kao Hsien-chih (Gao Xianzhi) yönetiyordu (modelin bağlantı notu). Kaynağımız tarafları «Abbasiler + Karluk Türkleri» ve «Çin (Tang Hanedanı)» diye özetler. Çin kaynaklarına göre savaşın ortasında Karluk birlikleri Çin saflarından ayrılıp Abbasi tarafına geçti ve Tang ordusu ağır bir yenilgi aldı.",
+      "Sonuç neydi? Kaynağımız, Orta Asya'nın Çinlileşmesinin engellendiğini ve Türk-İslam tarihinin bu savaşla başladığını yazar. Ölçülü bir okuma şunu ekler: Tang'ın batıya ilerleyişini asıl kesen, dört yıl sonra Çin'in içinde patlayan An Lu-şan isyanıdır (755); Talas tek başına değil, bu iç çöküşle birlikte belirleyici oldu (modelin bağlantı notu).",
+      "Talas'ın ikinci ünlü sonucu kâğıttır. Yaygın anlatıya göre savaşta esir düşen Çinli ustalar Semerkant'ta kâğıt yapımını öğretti ve kâğıt oradan Bağdat'a, sonra Avrupa'ya yayıldı. Kâğıt tarihçisi Jonathan Bloom bu anlatının çok sonraki bir yazara dayandığını, kâğıdın Orta Asya'da 751'den önce de bilindiğini gösterir; savaş kâğıdın yayılışının sebebi değil, akılda kalan bir simgesidir.",
+      "Kırılma noktaları kaynağımız bu savaştan bir ders çıkarır: geçici bir askeri yakınlaşma, uzun vadede bir bilgi ve medeniyet havzasını belirleyebilir. Gerçekten de bundan sonra Türkler ile Müslümanlar arasında savaş kadar ticaret, elçilik ve evlilik ilişkileri gelişti; Abbasiler doğu sınırında Türklerle iyi geçinmeye özen gösterdi.",
+      "Dikkat edilecek yanılgı: Karlukların Talas'ta Abbasi tarafına geçmesi onların o gün Müslüman olduğu anlamına gelmez. Karluklar arasında İslam yavaş yayıldı; Türklerin toplu olarak Müslüman olması iki yüzyıl sonra, 10. yüzyılda Karahanlılarla gerçekleşti.",
+      "Özetle: Talas, bir yanda Arap-Türk savaşlarının, öte yanda Tang Çini'nin batıya ilerleyişinin kesiştiği yerdir. Savaşın Türk tarihi için anlamı, bozkırın geleceğini Çin değil İslam dünyasıyla kurulan ilişkinin belirlemeye başlamasıdır."
+     ],
+     "not": "Kaynak k1, Karlukların İslamiyet'i kabulünü Talas'a bağlar; Karluklar savaşta taraf değiştirdi, ama toplu İslamlaşma 10. yüzyıldadır. Kaynak k1'in «kağıt Çin dışında ilk kez Semerkant'ta üretildi» ifadesi Bloom'un (k27) bulgularıyla çelişir; derste anlatı olarak verildi. Kuteybe, Sulu Kağan ve An Lu-şan bilgileri model bilgisidir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.1.1.a1",
+       "tur": "secmeli",
+       "soru": "Talas Savaşı'nda Abbasilerin kazanmasında belirleyici olan Türk boyu hangisidir?",
+       "sec": [
+        "Kırgızlar",
+        "Peçenekler",
+        "Oğuzlar",
+        "Karluklar"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k1",
+        "k7"
+       ],
+       "cozum": [
+        "Çin kaynaklarına göre Karluk birlikleri savaş sırasında Çin saflarından ayrılıp Abbasilere katıldı.",
+        "Oğuzlar o sırada daha batıda, Kırgızlar kuzeydoğuda yaşıyordu; Talas'ta belirleyici rolleri yoktur."
+       ]
+      },
+      {
+       "id": "tarih.4.1.1.a2",
+       "tur": "secmeli",
+       "soru": "«Talas'ta esir düşen Çinliler kâğıdı Semerkant'a getirdi» anlatısına en doğru tarihçi tutumu hangisidir?",
+       "sec": [
+        "Kesin bir bilgi olarak ezberlemek",
+        "Tümden uydurma deyip Talas'ı önemsiz saymak",
+        "Anlatının geç bir kaynağa dayandığını, kâğıdın bölgede daha önce de bilindiğini not edip savaşı bir simge olarak görmek",
+        "Kâğıdın Avrupa'da icat edildiğini söylemek"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k27",
+        "k1"
+       ],
+       "cozum": [
+        "Bloom'a göre kâğıt Orta Asya'da 751'den önce biliniyordu; anlatı çok sonra yazılmıştır. Bu, savaşın önemini değil, kâğıtla ilişkisini sınırlar.",
+        "B aşırıdır: Talas'ın siyasi önemi kâğıt anlatısından bağımsızdır."
+       ]
+      },
+      {
+       "id": "tarih.4.1.1.a3",
+       "tur": "secmeli",
+       "soru": "Maveraünnehir'de Arap ilerleyişine 720-730'larda en güçlü direnişi gösteren Türk hükümdarı kimdir?",
+       "sec": [
+        "Bilge Kağan",
+        "Satuk Buğra Han",
+        "Sulu Kağan",
+        "Alptegin"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k24",
+        "k20"
+       ],
+       "cozum": [
+        "Türgiş hükümdarı Sulu Kağan Arap ordularını birçok kez yenerek bölgedeki ilerlemeyi durdurdu.",
+        "Bilge Kağan aynı yıllarda Moğolistan'da Göktürk hükümdarıydı; Satuk Buğra Han ve Alptegin 10. yüzyıla aittir."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.1.2",
+     "ad": "Abbasi ordusunda Türkler ve Samarra",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k4",
+      "k20",
+      "k24",
+      "k21"
+     ],
+     "ozet": "9. yüzyılda Abbasi halifeleri ordunun çekirdeğini Türk askerlerle kurdu ve onlar için Samarra şehrini yaptırdı. Türk komutanlar zamanla halifeleri atayıp indirecek kadar güçlendi.",
+     "metin": [
+      "9. yüzyılın başında Abbasi halifeleri bir sorunla yüz yüzeydi: ordudaki Arap kabileleri ve Horasanlı birlikler kendi çıkarlarına göre taraf tutuyor, iç savaşlarda saf değiştiriyordu. Halifeler kendilerine doğrudan bağlı, sadık ve savaşta yetenekli bir muhafız kuvveti aradı. Aradıklarını Orta Asya'nın Türk süvarilerinde buldular.",
+      "Halife Me'mun (813-833) döneminde Türk askerlerin sayısı artmaya başladı; kardeşi Mu'tasım (833-842) ise orduyu büyük ölçüde Türk birlikler üzerine kurdu (modelin bağlantı notu). Bu askerlerin bir bölümü Maveraünnehir'den satın alınan ya da savaşta esir düşen gençlerdi, bir bölümü de kendi beyleriyle hizmete giren hür savaşçılardı.",
+      "Bu düzenin adı gulam sistemidir. Kaynağımız onu şöyle tanımlar: savaş esirleri ve satın alınan gençler sarayda eğitilir, hükümdarın muhafız ordusu ve devlet görevlisi yapılır. Gulamlar ata binme, ok atma ve okuma yazma öğrenir, rütbe rütbe yükselirdi. Aynı düzen daha sonra Gazneliler ve Selçuklularda sürdü; Osmanlı devşirmesinin de uzak bir atası sayılır.",
+      "Türk birlikleri Bağdat halkıyla sık sık sürtüşüyordu: kalabalık çarşılarda dört nala giden süvariler, dil ve âdet farkı gerginlik yarattı. Mu'tasım bunun üzerine 836'da Dicle kıyısında, Bağdat'ın kuzeyinde yeni bir başkent kurdu: Samarra. Türk birliklerine şehirde ayrı mahalleler verildi (modelin bağlantı notu).",
+      "Samarra yarım yüzyıldan fazla Abbasi başkenti kaldı. Büyük Cami'nin sarmal minaresi (Malviye) bugün de ayaktadır. Şehir, bozkırdan gelen askerlerin bir İslam başkentinin günlük hayatına, yönetimine ve mimarisine nasıl girdiğinin en somut tanığıdır (modelin bağlantı notu).",
+      "Türk komutanların adları kaynaklarda sık geçer: Eşnas, Boğa, Vasıf, Itah bunların tanınmışlarıdır. Kendilerine eyalet valilikleri verildi; Mısır gibi zengin bir eyaletin geliri bir Türk komutana bağlanabiliyordu. Sonraki dersin Tolunoğulları bu düzenin içinden çıktı (modelin bağlantı notu).",
+      "Bu dönemin ünlü Arap yazarı Câhız, Türklerin üstün yanlarını anlatan bir risale yazdı. Câhız Türklerin binicilikteki ustalığını, yurt sevgisini ve dayanıklılığını över; bu, bir Arap yazarın Türkleri ayrıntılı biçimde tanıttığı ilk metinlerdendir (modelin bağlantı notu).",
+      "Gücün bir de bedeli vardı. 861'de Halife Mütevekkil, Türk komutanların da katıldığı bir saray darbesinde öldürüldü. Bunu izleyen yıllarda halifeler komutanların elinde atanıp indirildi; tarihçiler bu dönemi «Samarra anarşisi» diye anar. 892'de başkent yeniden Bağdat'a taşındı (modelin bağlantı notu).",
+      "Neden-sonuç: Türk askerler halifeye güvenli bir güç verdi, ama halifenin tek dayanağı haline gelince onu kendilerine bağımlı kıldı. Bu, askeri gücün siyasi güce dönüşmesinin klasik bir örneğidir ve aynı desen Gazneliler ile Memlüklerde tekrar görülecektir.",
+      "Özetle: Abbasi ordusundaki Türkler İslam dünyasına bir halk olarak değil, önce asker ve komutan olarak girdi. Bu yolla Türk adı Bağdat'tan Mısır'a kadar tanındı ve ilk Türk kökenli hanedanların kapısı açıldı."
+     ],
+     "not": "Me'mun-Mu'tasım dönemi, Samarra (836, 892), Malviye minaresi, komutan adları, Câhız risalesi ve 861 olayı model bilgisidir; gemini kaynakları yalnız gulam sistemini tanımlar. Kaynak k4 gulam sistemini Karahanlı-Gazneli-Selçuklu modeli olarak verir; ama düzen Abbasilerde daha önce vardı.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.1.2.a1",
+       "tur": "secmeli",
+       "soru": "Halife Mu'tasım'ın 836'da kurduğu ve Türk birliklerinin yerleştiği başkent hangisidir?",
+       "sec": [
+        "Basra",
+        "Rakka",
+        "Kûfe",
+        "Samarra"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k24"
+       ],
+       "cozum": [
+        "Mu'tasım Türk birlikleri ile Bağdat halkı arasındaki gerginlik üzerine Dicle kıyısında Samarra'yı kurdu.",
+        "Kûfe ve Basra daha eski Irak şehirleridir; Rakka Harun Reşid'in bir süre kaldığı Fırat kıyısı şehridir."
+       ]
+      },
+      {
+       "id": "tarih.4.1.2.a2",
+       "tur": "secmeli",
+       "soru": "Gulam sistemi için hangisi doğrudur?",
+       "sec": [
+        "Boy beylerinin seçtiği bir meclistir.",
+        "Esir ya da satın alınmış gençlerin sarayda eğitilip asker ve görevli yapılmasıdır.",
+        "Toprak gelirinin komutanlara bağlanmasıdır.",
+        "Esnafın usta-çırak düzenidir."
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k4"
+       ],
+       "cozum": [
+        "Kaynağa göre gulamlar sarayda eğitilir, hükümdarın muhafız ordusu ve bürokratı olurdu.",
+        "A kurultayı, C iktayı, D ahiliği anlatır."
+       ]
+      },
+      {
+       "id": "tarih.4.1.2.a3",
+       "tur": "acik",
+       "soru": "Abbasi halifelerinin Türk askerlere dayanmasının halifeye hem kazanç hem kayıp getirdiğini iki cümleyle açıkla.",
+       "dogru": "Kazanç: kabile çıkarlarına bağlı olmayan, savaşta güçlü ve doğrudan halifeye bağlı bir ordu. Kayıp: halife bu orduya bağımlı kaldı; 861'den sonra Türk komutanlar halifeleri atayıp indirdi.",
+       "olcut": [
+        "Bir kazanç ve bir kayıp ayrı ayrı yazılmış.",
+        "Samarra anarşisi ya da 861 olayı gibi somut bir örnek verilmiş."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k4",
+        "k20"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.1.3",
+     "ad": "Mısır'da ilk Türk hanedanları: Tolunoğulları ve İhşidiler",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k20",
+      "k15",
+      "k21"
+     ],
+     "ozet": "Abbasi hizmetindeki Türk komutanlardan Ahmed bin Tolun 868'den sonra Mısır'da kendi hanedanını kurdu; ardından İhşidiler aynı ülkeyi yönetti. Bunlar İslam dünyasında Türk kökenli ilk hanedanlardandır, ama Türk bir halka dayanmıyordu.",
+     "metin": [
+      "Kahire'nin eski mahallelerinden birinde, tuğla ayakları ve geniş avlusuyla tanınan bir cami durur: Ahmed bin Tolun Camii. 9. yüzyılın sonunda yapılan bu cami, Mısır'ı yöneten ilk Türk kökenli hükümdarın bugüne kalan imzasıdır (modelin bağlantı notu).",
+      "Ahmed bin Tolun'un babası Tolun, Abbasi sarayına gönderilmiş bir Türk gulamıydı. Ahmed Samarra'da yetişti, askerlik yanında din ve edebiyat eğitimi aldı. 868'de Mısır valisinin vekili olarak Fustat'a gönderildi (modelin bağlantı notu).",
+      "Ahmed kısa sürede Mısır'ın maliyesini ve ordusunu kendi eline aldı. Samarra'daki karışıklık halifeliği zayıflatmıştı; Ahmed vergiyi Bağdat'a göndermek yerine Mısır'da tuttu, kendi ordusunu kurdu ve 870'lerin sonunda Suriye'yi de denetimine aldı. Halifeyi tanımaya devam etti; bu yüzden onun yönetimi tam bağımsızlık değil, fiilî bir özerkliktir (modelin bağlantı notu).",
+      "Ahmed bin Tolun Fustat'ın yanında yeni bir yönetim şehri, el-Katâi'yi kurdurdu; cami bu şehrin merkezindeydi. Nil kanallarını onardı, tarımı canlandırdı, bir hastane yaptırdı. Hanedanı oğlu Humâreveyh ile sürdü, ama iç karışıklıklar ve borçlar sonunda 905'te Abbasilerin Mısır'ı geri almasına yol açtı (modelin bağlantı notu).",
+      "Otuz yıl sonra Mısır'da ikinci bir Türk kökenli hanedan çıktı: İhşidiler. Kurucusu Muhammed bin Tuğç (Tugaç), Ferganalı bir Türk ailesindendi. Halife ona eski Fergana hükümdarlarının unvanı olan «İhşid»i verdi. İhşidiler 935'ten 969'a kadar Mısır'ı ve Suriye'nin bir bölümünü yönetti (modelin bağlantı notu).",
+      "İhşidilerin son yıllarında yönetim, hanedanın vasisi olan Kâfur'un elindeydi. 969'da Kuzey Afrika'dan gelen Şii Fatımi ordusu Mısır'ı aldı ve Kahire'yi kurdu. Böylece Mısır'daki ilk Türk hanedanları dönemi kapandı (modelin bağlantı notu).",
+      "Bu iki hanedan neden önemlidir? Birincisi, Abbasi hizmetindeki Türklerin yalnız asker kalmayıp devlet kurabileceğini gösterdiler. İkincisi, Mısır'da Türk yönetim geleneğinin ilk halkasıdır; 13. yüzyılda Memlükler aynı topraklarda çok daha uzun ömürlü bir Türk devleti kuracaktır.",
+      "Bir ayrıma dikkat: Tolunoğulları ve İhşidilerde yönetici aile ve ordunun bir bölümü Türk kökenliydi, ama halk Mısırlıydı ve yönetim dili Arapçaydı. Bu yüzden ders kitapları onları «Türk kökenli hanedanlar» diye anar; halkı, dili ve yurdu Türk olan ilk Müslüman Türk devleti olarak ise Karahanlıları gösterir.",
+      "Kaynaklar burada ayrılır: bazı tarihçiler «ilk Türk-İslam devleti» sıfatını Tolunoğullarına, çoğu ise Karahanlılara verir. Fark tanımdadır: hanedanın kökenine mi, yoksa devletin halkına ve diline mi bakıyoruz? Tartışmayı bilmek, soruya hangi ölçütle cevap verildiğini görmektir.",
+      "Özetle: Mısır'da 868-905 Tolunoğulları, 935-969 İhşidiler hüküm sürdü. Bunlar Abbasi ordusundaki Türk komutanlardan doğan, özerk ama halifeyi tanıyan hanedanlardır."
+     ],
+     "not": "Gemini kaynaklarında Tolunoğulları ve İhşidiler geçmiyor; bu dersteki bütün tarih ve adlar model bilgisidir ve MEB Tarih 10 ile Osman Turan'ın genel çerçevesine dayanır. Kahire'de Ahmed bin Tolun Camii bilgisi k15'te yok.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.1.3.a1",
+       "tur": "secmeli",
+       "soru": "Tolunoğulları ve İhşidiler hangi ülkede hüküm sürdü?",
+       "sec": [
+        "Endülüs",
+        "Azerbaycan",
+        "Horasan",
+        "Mısır"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20"
+       ],
+       "cozum": [
+        "İki hanedan da Mısır'da kuruldu ve Suriye'nin bir bölümünü de yönetti.",
+        "Horasan ve Azerbaycan doğudaki, Endülüs batıdaki İslam ülkeleridir."
+       ]
+      },
+      {
+       "id": "tarih.4.1.3.a2",
+       "tur": "secmeli",
+       "soru": "Ders kitaplarının Tolunoğullarını değil de Karahanlıları «halkı, dili ve yurdu Türk olan ilk Müslüman Türk devleti» saymasının gerekçesi hangisidir?",
+       "sec": [
+        "Tolunoğulları Müslüman değildi.",
+        "Tolunoğullarının halkı Mısırlıydı ve yönetim dili Arapçaydı; Karahanlılarda halk ve dil de Türktü.",
+        "Karahanlılar Tolunoğullarından önce kuruldu.",
+        "Tolunoğulları halifeyi tanımadı."
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k5"
+       ],
+       "cozum": [
+        "Ölçüt devletin halkı ve dilidir: Tolunoğullarında yalnız hanedan ve ordunun bir kısmı Türk kökenliydi.",
+        "A ve D yanlıştır: Tolunoğulları Müslümandı ve halifeyi tanıdı. C tartışmalıdır; Karahanlıların kuruluş tarihi kesin değildir."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.1.4",
+     "ad": "Toplu geçiş: Karluklar, Oğuzlar ve 10. yüzyıl",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k5",
+      "k20",
+      "k24",
+      "k32",
+      "k21"
+     ],
+     "ozet": "Türkler İslam'ı 10. yüzyılda ticaret, sınır şehirleri, dervişler ve hükümdarların kararlarıyla topluca benimsedi. Karahanlıların ve Oğuzların Müslüman olması Türk tarihinin yönünü değiştirdi.",
+     "metin": [
+      "Bir boyun dinini değiştirmesi bir günde olmaz. Türklerin İslam'a geçişi de tek bir savaşla değil, iki yüzyıla yayılan ticaret, komşuluk ve inanç ilişkileriyle gerçekleşti. 10. yüzyılda ise bu yavaş akış birden bir sele dönüştü.",
+      "Bu dönemde Maveraünnehir'i Buhara merkezli Samanoğulları yönetiyordu. Samanoğulları Türk bozkırına komşu sınır şehirlerinde ribatlar kurdu: hem asker barındıran hem de ilim ve tasavvuf ehlinin bulunduğu kale-tekkeler. Sınırın öte yanındaki Türkler, bu şehirlerin çarşılarına mal satmak ve almak için sürekli geliyordu (modelin bağlantı notu).",
+      "Tüccarların ve dervişlerin rolü büyüktür. Bozkırda dolaşan Müslüman dervişler İslam'ı Türklerin anlayacağı bir dille, menkıbeler ve şiirlerle anlattı. Türk hükümdarları için İslam, aynı zamanda güçlü ve zengin bir medeniyet dünyasına katılmak, onun ticaret ve yazı düzenine girmek anlamına geliyordu.",
+      "İlk büyük adımı Karahanlılar attı. Hanedan üyelerinden Satuk Buğra Han 10. yüzyılın ilk yarısında Müslüman oldu ve Abdülkerim adını aldı (bunu bir sonraki ünitede ayrıntılı göreceksin). Onun soyundan gelen hükümdarlar zamanında İslam Karahanlı ülkesinde resmî din haline geldi.",
+      "Arap tarihçi İbnü'l-Esir, hicri 349 (miladi 960) yılının olayları arasında «iki yüz bin çadır Türk»ün Müslüman olduğunu kaydeder. Bu rakamı tam bir sayım gibi okumamak gerekir; ortaçağ yazarları büyük sayıları «çok kalabalık» anlamında kullanırdı. Ama kayıt, bu yıllarda topluca ve görünür bir geçiş yaşandığını gösterir.",
+      "Oğuzlar da aynı yüzyılda İslam'la tanıştı. Seyhun'un aşağı kıyısında, Cend şehri çevresinde yaşayan Oğuzlar arasından çıkan Selçuk Bey, 10. yüzyılın sonlarına doğru boyuyla birlikte Müslüman oldu. Kaynaklarda Müslüman olan Oğuzlara «Türkmen» denildiği görülür; bu ad, sonraki yüzyıllarda Anadolu'ya gelenlerin de adı oldu (modelin bağlantı notu).",
+      "Ders kitapları geçişi kolaylaştıran sebepleri sayarken Türklerin eski inancındaki tek ve yüce Gök Tanrı anlayışının, ahiret inancının ve cihat ile eski «cihan hâkimiyeti» düşüncesinin İslam'la uyuşur görülmesini de anar. Bu açıklamalar yorumdur; tarihçiler hangi sebebin ne kadar ağır bastığı konusunda ayrılır.",
+      "Her Türk topluluğu aynı yolu seçmedi. Uygurların bir bölümü Maniheizm ve Budizm'de kaldı, Hazar hanedanı Musevîliği benimsemişti, Karadeniz'in kuzeyindeki bazı Türk toplulukları Hristiyanlığa geçti. İslam, Türk dünyasının en yaygın dini oldu, ama tek dini olmadı (modelin bağlantı notu).",
+      "Sonuçlar büyüktür. Türkler bundan sonra İslam dünyasının koruyucusu ve yöneticisi oldu: Gazneliler, Selçuklular ve onların ardılları bu yeni kimlikle kuruldu. Türkçe Arap harfleriyle yazılmaya başladı; Kutadgu Bilig ve Divanü Lugati't-Türk gibi eserler bu buluşmanın ürünüdür.",
+      "Bedeli de vardı: bazı eski gelenekler ve yazı türleri (Göktürk yazısı gibi) zamanla unutuldu, Türk boyları arasında Müslüman olanlarla olmayanlar arasında yeni savaşlar çıktı. Tarih bir kazanç-kayıp hesabıdır; büyük dönüşümler ikisini birlikte getirir.",
+      "Özetle: Türklerin İslam'a geçişi 8. yüzyıldaki savaşlarla başlayıp 10. yüzyılda Karahanlılar ve Oğuzlarla toplu bir dönüşüme varan uzun bir süreçtir."
+     ],
+     "not": "960 kaydı İbnü'l-Esir'e dayanır (k32); rakam yaklaşıktır. Selçuk Bey'in Müslüman oluşunun kesin yılı bilinmiyor; «10. yüzyılın sonlarına doğru» denmesi bu yüzden. «Türkmen» adının kökeni tartışmalıdır. Kaynak k5 ribatı Karahanlılara bağlar; Samani ribatları model bilgisidir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.1.4.a1",
+       "tur": "secmeli",
+       "soru": "İbnü'l-Esir'in 960 yılı için kaydettiği «iki yüz bin çadır Türk» ifadesi en doğru nasıl okunur?",
+       "sec": [
+        "Kesin bir nüfus sayımı olarak",
+        "Tamamen uydurma bir bilgi olarak",
+        "Toplu ve görünür bir geçişin kanıtı, ama rakamı yaklaşık bir büyüklük olarak",
+        "Yalnız Oğuzları anlatan bir kayıt olarak"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k32"
+       ],
+       "cozum": [
+        "Ortaçağ yazarları büyük sayıları çoğu zaman «çok kalabalık» anlamında kullanırdı; kayıt olayın büyüklüğünü gösterir, tam sayısını değil.",
+        "B aşırıdır: kayıt başka gelişmelerle de uyumludur."
+       ]
+      },
+      {
+       "id": "tarih.4.1.4.a2",
+       "tur": "secmeli",
+       "soru": "Selçuk Bey ve boyu İslam'ı hangi şehrin çevresinde kabul etti?",
+       "sec": [
+        "Cend",
+        "Kaşgar",
+        "Gazne",
+        "Samarra"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21",
+        "k20"
+       ],
+       "cozum": [
+        "Selçuk Bey Seyhun'un aşağı kıyısındaki Cend çevresinde Müslüman oldu.",
+        "Kaşgar Karahanlıların, Gazne Gaznelilerin merkezidir; Samarra Abbasi başkentidir."
+       ]
+      },
+      {
+       "id": "tarih.4.1.4.a3",
+       "tur": "secmeli",
+       "soru": "Samanoğullarının sınırda kurduğu ve hem asker hem ilim ehlini barındıran kale-tekkelere ne ad verilir?",
+       "sec": [
+        "Bimarhane",
+        "Darülhadis",
+        "Kümbet",
+        "Ribat"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k5",
+        "k24"
+       ],
+       "cozum": [
+        "Ribat, sınırda kurulan ve asker ile dervişleri birlikte barındıran yapıdır; kaynağa göre Karahanlılarda ribatlar sonra kervansaraya dönüştü.",
+        "Kümbet türbe, bimarhane hastane, darülhadis hadis okulu demektir."
+       ]
+      },
+      {
+       "id": "tarih.4.1.4.a4",
+       "tur": "acik",
+       "soru": "Türklerin İslam'a geçişini sağlayan üç sebebi birer cümleyle yaz ve hangisini en etkili bulduğunu gerekçelendir.",
+       "dogru": "Ticaret: sınır şehirlerinin çarşıları Türkleri Müslümanlarla her gün buluşturdu. Dervişler: İslam'ı Türkçe menkıbe ve şiirlerle anlattılar. Hükümdarların kararı: Satuk Buğra Han ve Selçuk Bey gibi liderler Müslüman olunca boyları da onları izledi. En etkili: hükümdar kararı, çünkü toplu geçişi o başlattı (başka bir gerekçeli seçim de kabul).",
+       "olcut": [
+        "Üç ayrı sebep yazılmış.",
+        "Bir sebep seçilip gerekçelendirilmiş.",
+        "Somut bir ad ya da yer anılmış."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k21"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.4.2",
+   "ad": "İlk Türk-İslam devletleri: Karahanlılar, Gazneliler, Harezmşahlar",
+   "onKosul": [
+    "tarih.4.1"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.4.2.k1",
+      "tur": "secmeli",
+      "soru": "Aşağıdaki eser-yazar eşleştirmelerinden hangisi doğrudur?",
+      "sec": [
+       "Divanü Lugati't-Türk: Yusuf Has Hacib",
+       "Kutadgu Bilig: Kaşgarlı Mahmud",
+       "Divan-ı Hikmet: Ahmed Yesevi",
+       "Atabetü'l-Hakayık: Bîrûnî"
+      ],
+      "dogru": "C",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k5",
+       "k13"
+      ],
+      "cozum": [
+       "Divan-ı Hikmet Ahmed Yesevi'nin hikmetlerinden oluşur.",
+       "Kutadgu Bilig Yusuf Has Hacib'in, Divanü Lugati't-Türk Kaşgarlı Mahmud'un, Atabetü'l-Hakayık Edib Ahmed'in eseridir."
+      ]
+     },
+     {
+      "id": "tarih.4.2.k2",
+      "tur": "secmeli",
+      "soru": "Karahanlılar ile Gazneliler arasındaki temel fark hangisidir?",
+      "sec": [
+       "Karahanlılar Müslüman değildi.",
+       "Karahanlılar Türk boylarının kurduğu, Türkçeyi kullanan bir devletti; Gazneliler bir gulamın kurduğu, Farsça yönetilen bir devletti.",
+       "Gazneliler Orta Asya'da, Karahanlılar Hindistan'da kuruldu.",
+       "İkisi de Moğollarca yıkıldı."
+      ],
+      "dogru": "B",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k5",
+       "k20"
+      ],
+      "cozum": [
+       "Karahanlılarda halk ve hanedan Türk boylarındandır; Gaznelileri Samani gulamları kurdu ve yönetim dili Farsçaydı.",
+       "C coğrafyayı ters çevirir; D yanlıştır: Gazneliler Gurlularca yıkıldı."
+      ]
+     },
+     {
+      "id": "tarih.4.2.k3",
+      "tur": "secmeli",
+      "soru": "Pervan'da (1221) bir Moğol ordusunu yenen, Yassıçemen'de (1230) ise Selçuklulara yenilen hükümdar kimdir?",
+      "sec": [
+       "Sultan Sencer",
+       "Gazneli Mesud",
+       "Alaeddin Muhammed",
+       "Celaleddin Harezmşah"
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k3",
+       "k25"
+      ],
+      "cozum": [
+       "Celaleddin Mengüberti Moğollara karşı direnişi sürdürdü; Pervan'da kazandı, Yassıçemen'de Keykubad'a yenildi.",
+       "Babası Alaeddin Muhammed 1220'de ölmüştü."
+      ]
+     },
+     {
+      "id": "tarih.4.2.k4",
+      "tur": "secmeli",
+      "soru": "Karahanlılar ve Harezmşahların sonunu birlikte düşündüğünde hangisi doğrudur?",
+      "sec": [
+       "Harezmşahlara Karahanlılar son verdi.",
+       "İkisi de Selçuklularca yıkıldı.",
+       "İkisi de Gaznelilerce yıkıldı.",
+       "Batı Karahanlılarına 1212'de Harezmşahlar son verdi; Harezmşahları ise Moğollar yıktı."
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k20",
+       "k25"
+      ],
+      "cozum": [
+       "Harezmşah Muhammed 1212'de Batı Karahanlılarına son verdi; birkaç yıl sonra kendi devleti Moğol istilasıyla çöktü.",
+       "Bu zincir, Orta Asya'da 13. yüzyılın başındaki hızlı güç değişimini gösterir."
+      ]
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.4.2.1",
+     "ad": "Karahanlılar: ilk Müslüman Türk devleti",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k5",
+      "k20",
+      "k24",
+      "k21"
+     ],
+     "ozet": "Karahanlılar Yedisu ve Kaşgar çevresinde kuruldu; Satuk Buğra Han'ın Müslüman olmasıyla İslam'ı resmî din yaptılar. 1042'de doğu ve batı diye ikiye ayrıldılar ve 13. yüzyılın başında yıkıldılar.",
+     "metin": [
+      "Bugün Kırgızistan'daki Burana Kulesi, Balasagun şehrinin yerinde yükselir. Balasagun, Kaşgar ve sonra Semerkant: bu üç şehir, halkı, dili ve yönetici ailesi Türk olan ilk Müslüman devletin, Karahanlıların merkezleriydi.",
+      "Karahanlıların kuruluşu karanlıktır. Ders kitapları devleti 840'ta Uygur Kağanlığı'nın yıkılmasından sonra Karluk, Çiğil ve Yağma boylarının birleşmesine bağlar ve kurucu olarak Bilge Kül Kadir Han'ı anar. Kaynaklar burada ayrılır: Barthold gibi tarihçiler kuruluşu daha geç tarihlere koyar ve hanedanın hangi boydan çıktığı da tartışmalıdır.",
+      "Kaynağımız Karahanlıları «yöneticisi, halkı ve coğrafyası tamamen Türk olan ilk Müslüman Türk devleti» diye tanımlar ve resmî dilin Türkçe olduğunu vurgular. Önceki ünitede gördüğün Tolunoğullarından farkı budur: Karahanlılarda Türkler yalnız saray ve ordu değil, devletin ta kendisiydi.",
+      "İslam'a geçişin dönüm noktası Satuk Buğra Han'dır. Geleneksel anlatıya göre Satuk, Kaşgar'da bulunan Müslüman tüccar ve âlimlerle tanışarak gençliğinde Müslüman oldu, Abdülkerim adını aldı ve amcasına karşı mücadele ederek tahta çıktı. 955 dolaylarında öldüğü kabul edilir; mezarı Kaşgar yakınındaki Artuş'ta ziyaret yeridir (modelin bağlantı notu).",
+      "Satuk'tan sonra oğlu Musa (Baytaş) Arslan Han döneminde İslam devletin resmî dini oldu; ders kitapları bunu 960 yılıyla bağlar. Bu yıl, önceki derste gördüğün İbnü'l-Esir'in «iki yüz bin çadır» kaydıyla aynıdır (modelin bağlantı notu).",
+      "Karahanlılar Türk devlet geleneğini İslam'la birleştirdi. Hükümdarlar «han», «hakan», «buğra», «arslan» gibi Türk unvanlarını kullandı. Eski ikili teşkilat sürdü: büyük kağan doğuda, küçük kağan batıda hüküm sürüyordu. Kaynak, Karahanlıların kurduğu ribatları ilk kervansaray örnekleri, bimarhaneleri de ilk teşkilatlı hastaneler arasında sayar.",
+      "999'da Karahanlılar Buhara'ya girdi ve Samanoğulları devletine son verdi. Ceyhun ırmağı Karahanlılar ile güneydeki Gazneliler arasında sınır oldu. Böylece Maveraünnehir'de bir Türk hanedanı ilk kez kendi adıyla hüküm sürmeye başladı (modelin bağlantı notu).",
+      "Hanedan üyeleri arasındaki çekişmeler, 1042'de devletin ikiye bölünmesiyle sonuçlandı. Doğu Karahanlıları Balasagun ve Kaşgar'dan, Batı Karahanlıları Semerkant ve Buhara'dan yönetildi. Kut anlayışına göre ülke hanedanın ortak malı sayıldığı için bu tür bölünmeler Türk devletlerinde sık görülür (modelin bağlantı notu).",
+      "Batı Karahanlıları 1089'da Melikşah'a, Doğu Karahanlıları da kısa süre sonra Selçuklu üstünlüğüne bağlandı. 1141 Katvan'dan sonra iki kol da Karahıtayların vergi ödeyen tâbisi oldu. Doğu kolu 1211'de Nayman hükümdarı Küçlük'ün, Batı kolu 1212'de Harezmşah Muhammed'in eline geçerek sona erdi (modelin bağlantı notu).",
+      "Karahanlıların siyasi ömrü dalgalı geçti, ama kültürel mirası büyüktür: Türkçenin Arap harfleriyle yazılan ilk büyük edebî ve ilmî eserleri bu ülkede doğdu. Bunları sonraki iki derste göreceksin.",
+      "Özetle: Karahanlılar Türk boylarının İslam'ı kendi devletleriyle, kendi dilleriyle ve kendi unvanlarıyla benimsediği ilk örnektir. Türk-İslam sentezinin yurdu Kaşgar ile Balasagun'dur."
+     ],
+     "not": "Kuruluş tarihi 840 ders kitabı kabulüdür; Barthold ve başkaları farklı tarihler önerir. Satuk Buğra Han'ın hayatı büyük ölçüde sonraki menkıbelerden (Tezkire-i Buğra Han) bilinir. 999, 1042, 1089, 1211, 1212 ve Artuş türbesi model bilgisidir. Kaynak k5'in Karahanlıları gulam sistemini ilk başlatan devlet sayması yanlıştır; derse alınmadı.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.2.1.a1",
+       "tur": "secmeli",
+       "soru": "Karahanlılarda İslam'ı ilk kabul eden ve Abdülkerim adını alan hükümdar kimdir?",
+       "sec": [
+        "Bilge Kül Kadir Han",
+        "Musa Arslan Han",
+        "Satuk Buğra Han",
+        "Tabgaç Buğra Han"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k21"
+       ],
+       "cozum": [
+        "Satuk Buğra Han Müslüman olup Abdülkerim adını aldı.",
+        "Musa Arslan Han döneminde İslam resmî din oldu; Bilge Kül Kadir Han geleneğe göre kurucudur."
+       ]
+      },
+      {
+       "id": "tarih.4.2.1.a2",
+       "tur": "secmeli",
+       "soru": "Karahanlıların 1042'de ikiye ayrılmasının Türk devlet geleneğindeki kökü hangisidir?",
+       "sec": [
+        "Ülkenin hanedanın ortak malı sayılması ve ikili teşkilat",
+        "Halifenin emri",
+        "Moğol istilası",
+        "Haçlı seferleri"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k5",
+        "k20"
+       ],
+       "cozum": [
+        "Kut anlayışında ülke hanedan üyelerinin ortak malıdır; ikili teşkilat da doğu-batı bölünmesini kolaylaştırdı.",
+        "Moğol istilası ve Haçlılar bu tarihten sonradır."
+       ]
+      },
+      {
+       "id": "tarih.4.2.1.a3",
+       "tur": "secmeli",
+       "soru": "Samanoğulları devletine 999'da son veren Türk devleti hangisidir?",
+       "sec": [
+        "Gazneliler",
+        "Selçuklular",
+        "Harezmşahlar",
+        "Karahanlılar"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k24"
+       ],
+       "cozum": [
+        "Karahanlılar 999'da Buhara'ya girerek Samanoğullarına son verdi.",
+        "Gazneliler aynı yıllarda Samani topraklarının güneyini aldı, ama Buhara'yı Karahanlılar ele geçirdi."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.2.2",
+     "ad": "Kutadgu Bilig ve Atabetü'l-Hakayık",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k11",
+      "k13",
+      "k5",
+      "k28"
+     ],
+     "ozet": "Yusuf Has Hacib'in 1069-70'te yazdığı Kutadgu Bilig, devleti adalet, kut, akıl ve akıbet kavramlarıyla anlatan Türkçe bir siyasetnamedir. Edib Ahmed'in Atabetü'l-Hakayık'ı ise bilginin ve ahlakın değerini öğütler.",
+     "metin": [
+      "Kaşgar, 1069-70. Balasagunlu bir şair, on sekiz ayda bitirdiği uzun bir şiiri hükümdarına sunar. Eserin adı «kutlu olmayı, mutluluğa ulaşmayı sağlayan bilgi» demektir: Kutadgu Bilig. Hükümdar Tabgaç Buğra Han şaire «Has Hacib», yani saray teşrifatının başı unvanını verir (modelin bağlantı notu).",
+      "Kaynaklarımız Kutadgu Bilig'i Türk-İslam edebiyatının ilk mesnevisi ve ilk siyasetnamesi olarak tanımlar. Eser aruz ölçüsüyle ve beyitler halinde yazıldı; Reşid Rahmeti Arat'ın yayınında altı bini aşkın beyit vardır. Arapça ya da Farsça değil, Karahanlı Türkçesiyle yazılması bilinçli bir seçimdir.",
+      "Eser dört kişinin konuşmalarıyla ilerler. Her biri bir kavramı temsil eder: Kün Togdı (hükümdar) adaleti, Ay Toldı (vezir) kutu, yani talihi ve devleti, Ögdülmiş (vezirin oğlu) aklı, Odgurmış (dünyadan el etek çekmiş derviş) akıbeti ve kanaati.",
+      "Kurgunun öğrettiği şudur: devlet adaletle kurulur, ama yalnız adalet yetmez. Talih (kut) gelip geçicidir, kalıcı olan akıldır; akıl da kendini öteki dünyayı düşünmekten ayırmamalıdır. Kaynağın özetiyle: dört kurucu erdem olmadan mutluluk olmaz.",
+      "Kutadgu Bilig yalnız bir ahlak kitabı değil, aynı zamanda bir devlet el kitabıdır. Vezirin, komutanın, elçinin, kâtibin, hazinedarın nasıl biri olması gerektiğini sayar; sofra edebinden söz söyleme sanatına kadar saray hayatının kurallarını verir. Halkla ilişkiler bölümünde köylüye, tüccara, zanaatkâra nasıl davranılacağı anlatılır.",
+      "Eserdeki fikirler eski Türk devlet geleneğiyle İslam ahlakını birleştirir. Hükümdarın yetkisini Tanrı'dan aldığı kut anlayışı İslam öncesinden gelir; adalet, hesap günü ve dünyanın geçiciliği vurgusu ise İslam'dandır. Bu yüzden eser, Türk-İslam sentezinin ilk büyük belgesi sayılır.",
+      "Aynı edebî dünyanın bir başka eseri Atabetü'l-Hakayık'tır, yani «Hakikatlerin Eşiği». Yazarı Edib Ahmed Yükneki'dir; eser büyük olasılıkla 12. yüzyılda yazıldı ve Dad Sipehsalar Muhammed Bey adlı bir beye sunuldu. Kesin tarihi bilinmez (modelin bağlantı notu).",
+      "Atabetü'l-Hakayık bilginin faziletini, dili tutmanın, cömertliğin ve alçakgönüllülüğün değerini öğütler; kibrin ve hırsın zararını anlatır. Kaynak eserin dörtlükler ve beyitlerle yazıldığını belirtir. Kutadgu Bilig'e göre çok daha kısa, ama dili daha dinî ve öğretici bir eserdir.",
+      "Aynı yüzyıllarda Türkistan'da Hoca Ahmed Yesevi, hece ölçüsüyle ve sade bir Türkçeyle tasavvufi şiirler, «hikmetler» söyledi; bunlar Divan-ı Hikmet adıyla toplandı. Kaynak bu eseri de dönemin dört büyük eseri arasında sayar. Yesevi'nin şiirlerinin bugünkü metinleri sonraki yüzyıllarda derlendiği için hangi dizelerin ona ait olduğu tartışmalıdır (modelin bağlantı notu).",
+      "Bu eserlerin ortak yanı: Türkçenin artık yalnız bozkırın konuşma dili değil, devlet, ahlak ve inanç üzerine düşünülen bir yazı dili olmasıdır. Orhun yazıtlarından sonra Türkçe ikinci büyük sıçramasını Karahanlı ülkesinde yaptı.",
+      "Özetle: Kutadgu Bilig (Yusuf Has Hacib, 1069-70) devlet felsefesidir, Atabetü'l-Hakayık (Edib Ahmed) ahlak öğüdüdür, Divan-ı Hikmet (Ahmed Yesevi) tasavvuf şiiridir. Üçü de Türkçe yazılmıştır."
+     ],
+     "not": "Kaynaklar Ay Toldı'yı farklı karşılar: k11 «kut ve saadet», k13 «baht/devlet», k5 yok. Derste «kut, yani talih ve devlet» diye birleştirildi. Atabetü'l-Hakayık'ın 12. yüzyıla tarihlenmesi ve Yesevi şiirlerinin sahihlik tartışması model bilgisidir; Divan-ı Hikmet'in Karahanlı ülkesinde değil Türkistan'da (Yesi) yazıldığına dikkat.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.2.2.a1",
+       "tur": "secmeli",
+       "soru": "Kutadgu Bilig'de aklı temsil eden kişi hangisidir?",
+       "sec": [
+        "Kün Togdı",
+        "Ay Toldı",
+        "Ögdülmiş",
+        "Odgurmış"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k11",
+        "k13"
+       ],
+       "cozum": [
+        "Vezirin oğlu Ögdülmiş aklı temsil eder.",
+        "Kün Togdı adaleti, Ay Toldı kutu (talihi, devleti), Odgurmış akıbeti temsil eder."
+       ]
+      },
+      {
+       "id": "tarih.4.2.2.a2",
+       "tur": "secmeli",
+       "soru": "Kutadgu Bilig için hangisi yanlıştır?",
+       "sec": [
+        "Karahanlı Türkçesiyle yazılmıştır.",
+        "Aruz ölçüsüyle ve mesnevi biçiminde yazılmıştır.",
+        "Bir siyasetname niteliği taşır.",
+        "Farsça yazılıp sonra Türkçeye çevrilmiştir."
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k11",
+        "k13",
+        "k28"
+       ],
+       "cozum": [
+        "Eser doğrudan Türkçe yazıldı; bu, onun en önemli özelliklerinden biridir.",
+        "Öteki üç seçenek kaynaklarda açıkça geçer."
+       ]
+      },
+      {
+       "id": "tarih.4.2.2.a3",
+       "tur": "secmeli",
+       "soru": "«Hakikatlerin Eşiği» anlamına gelen eser ve yazarı hangisidir?",
+       "sec": [
+        "Atabetü'l-Hakayık, Edib Ahmed Yükneki",
+        "Divan-ı Hikmet, Ahmed Yesevi",
+        "Kutadgu Bilig, Yusuf Has Hacib",
+        "Siyasetname, Nizamülmülk"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k13"
+       ],
+       "cozum": [
+        "Atabetü'l-Hakayık «Hakikatlerin Eşiği» demektir; yazarı Edib Ahmed Yükneki'dir.",
+        "Siyasetname Büyük Selçuklu veziri Nizamülmülk'ün Farsça eseridir."
+       ]
+      },
+      {
+       "id": "tarih.4.2.2.a4",
+       "tur": "acik",
+       "soru": "Kutadgu Bilig'in dört kişisinin bir devletin nasıl yönetilmesi gerektiğine dair birlikte ne söylediğini üç cümleyle anlat.",
+       "dogru": "Devletin temeli adalettir (Kün Togdı). Ama talih (Ay Toldı) geçicidir, onu ancak akıl (Ögdülmiş) korur. Akıl da dünyanın geçiciliğini ve hesap gününü unutmamalıdır (Odgurmış); iyi yönetim dördünün dengesidir.",
+       "olcut": [
+        "Dört kişi ve kavramları doğru eşlenmiş.",
+        "Kavramların birbirine bağlandığı bir sonuç cümlesi var."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k11",
+        "k13"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.2.3",
+     "ad": "Kaşgarlı Mahmud ve Divanü Lugati't-Türk",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k11",
+      "k12",
+      "k13",
+      "k29"
+     ],
+     "ozet": "Kaşgarlı Mahmud 1072-1074'te Bağdat'ta Araplara Türkçeyi öğretmek için bir sözlük yazdı. Divanü Lugati't-Türk, 11. yüzyıl Türk dünyasının dilini, boylarını, şiirini ve haritasını bugüne taşıyan eşsiz bir kaynaktır.",
+     "metin": [
+      "11. yüzyılın ikinci yarısında Bağdat'ta Selçuklu sultanları hüküm sürüyordu ve Araplar Türkçeyi öğrenmek istiyordu: yöneticilerin, komutanların, askerlerin dili Türkçeydi. Kaşgarlı Mahmud bu ihtiyaca bir sözlükle cevap verdi. Kaynaklara göre eserini 1072-1074 yıllarında yazdı ve Abbasi Halifesi el-Muktedî'ye sundu.",
+      "Kaşgarlı Mahmud kendi anlatımına göre Türk boylarının yaşadığı bölgeleri yıllarca gezdi, şehirleri ve bozkırları dolaştı, her boyun konuşmasını kulağıyla dinleyip kaydetti. Babasının Barsgan'dan olduğunu yazar; Karahanlı hanedanına bağlı bir aileden geldiği düşünülür (modelin bağlantı notu).",
+      "Eser Arapça açıklamalı bir Türkçe sözlüktür, ama bir sözlükten çok daha fazlasıdır. Kaynağımızın özetiyle içinde bir kuramsal giriş, Halil bin Ahmed'in Arapça sözlük yönteminden alınmış bir düzen, Oğuz, Kıpçak, Çiğil, Karluk, Yağma gibi boyların ağız farkları, örnek olarak atasözleri ve şiirler, bir de dünya haritası vardır.",
+      "Kaşgarlı her kelimenin nasıl kullanıldığını göstermek için tanık olarak savlar (atasözleri), koşuklar (şiirler) ve sagular (ağıtlar) verir. Bunlar arasında Alp Er Tunga'nın ölümüne yakılan sagu da vardır: «Alp Er Tunga öldü mü» diye başlayan bu ağıt, İslam öncesi Türk destan geleneğinin en eski yazılı izlerindendir.",
+      "Eserdeki harita Balasagun'u merkeze alan yuvarlak bir dünya haritasıdır. Türk boylarının yurtlarını, komşu ülkeleri, dağları ve ırmakları gösterir. Kaynaklarımız onu ilk Türk dünyası haritası olarak anar.",
+      "Kaşgarlı'nın amacı yalnız dil öğretmek değildi. Kaynağımıza göre Türkçenin Arapçayla «at başı» gittiğini, yani onun kadar zengin bir dil olduğunu göstermek istiyordu. Fiil çekimlerinin, doğa ve hayvan adlarının inceliğini örneklerle ortaya koyar.",
+      "Eserin girişinde Kaşgarlı, Hz. Peygamber'e atfedilen ve Türk dilini öğrenmeyi öğütleyen bir söz nakleder. Bu sözün sahih bir hadis olmadığı hadis âlimlerince belirtilir; tarihçi için önemi, 11. yüzyılda Türklerin İslam dünyasındaki yükselişinin nasıl algılandığını göstermesidir (modelin bağlantı notu).",
+      "Divanü Lugati't-Türk'ün bugüne tek bir yazma nüshası kaldı; bu nüsha 13. yüzyılda istinsah edilmiştir. 20. yüzyılın başında İstanbul'da Ali Emiri Efendi tarafından bulundu, Kilisli Rifat Bilge tarafından basıldı, Besim Atalay da Türkiye Türkçesine çevirip Türk Dil Kurumu yayını olarak yayımladı (modelin bağlantı notu).",
+      "Neden bu kadar önemlidir? Divanü Lugati't-Türk 11. yüzyıl Türk dünyasının etnografyasını, coğrafyasını ve folklorunu tek bir kitapta toplar. Boyların adları, yurtları, gelenekleri, giyimleri, yiyecekleri hakkında başka hiçbir yerde bulunmayan bilgiler verir.",
+      "Kutadgu Bilig ile Divanü Lugati't-Türk aynı yıllarda yazıldı: biri Kaşgar'da Türk hükümdarına, öteki Bağdat'ta Arap halifesine sunuldu. Biri Türkçeyi devlet felsefesinin dili yaptı, öteki Türkçeyi İslam dünyasının bilim diline tanıttı.",
+      "Özetle: Divanü Lugati't-Türk ilk büyük Türkçe sözlük, ilk Türk dili grameri ve ilk Türk dünyası haritasıdır; 11. yüzyıl Türk dünyasının ansiklopedisidir."
+     ],
+     "not": "Kaynak k11'deki «Türk dilini öğreniniz…» sözü sahih bir hadis değildir; derste bu not edildi. Yazım yılları: k11 ve k12 1072-1074 verir; bazı araştırmacılar son düzenlemeyi 1077'ye kadar uzatır. Tek nüsha, Ali Emiri, Kilisli Rifat ve Barsgan bilgileri model bilgisidir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.2.3.a1",
+       "tur": "secmeli",
+       "soru": "Kaşgarlı Mahmud Divanü Lugati't-Türk'ü kime sundu?",
+       "sec": [
+        "Sultan Alp Arslan'a",
+        "Gazneli Mahmud'a",
+        "Karahanlı Hakanı Tabgaç Buğra Han'a",
+        "Abbasi Halifesi el-Muktedî'ye"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k11",
+        "k12"
+       ],
+       "cozum": [
+        "Eser Bağdat'ta Abbasi Halifesi el-Muktedî'ye sunuldu.",
+        "Kutadgu Bilig Tabgaç Buğra Han'a sunulmuştu; ikisini karıştırma."
+       ]
+      },
+      {
+       "id": "tarih.4.2.3.a2",
+       "tur": "secmeli",
+       "soru": "Divanü Lugati't-Türk'teki haritanın merkezinde hangi şehir vardır?",
+       "sec": [
+        "Bağdat",
+        "Kaşgar",
+        "Balasagun",
+        "Semerkant"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k12"
+       ],
+       "cozum": [
+        "Kaynağa göre harita Balasagun merkezlidir.",
+        "Kaşgar eserin yazarına adını veren şehirdir, ama haritanın merkezi değildir."
+       ]
+      },
+      {
+       "id": "tarih.4.2.3.a3",
+       "tur": "secmeli",
+       "soru": "Divanü Lugati't-Türk'te kelimelere tanık olarak gösterilen türlerden biri hangisidir?",
+       "sec": [
+        "Sagu",
+        "Kaside",
+        "Rubai",
+        "Gazel"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k12",
+        "k13"
+       ],
+       "cozum": [
+        "Kaşgarlı tanık olarak savlar, koşuklar ve sagular verir; Alp Er Tunga sagusu bunlardandır.",
+        "Gazel, kaside ve rubai Arap-Fars şiirinden gelen türlerdir."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.2.4",
+     "ad": "Gazneliler: Alptegin'den Dandanakan'a",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k18",
+      "k20",
+      "k26",
+      "k21"
+     ],
+     "ozet": "Gazneliler Samani komutanı Alptegin'in 962'de Gazne'ye yerleşmesiyle doğdu. Gazneli Mahmud Hindistan seferleriyle devleti zirveye taşıdı; oğlu Mesud 1040'ta Dandanakan'da Selçuklulara yenildi.",
+     "metin": [
+      "Bugünkü Afganistan'da, Kabil'in güneyinde Gazne şehri vardır. 10. yüzyılın ortasında bu küçük şehre, Samanoğulları ordusundan ayrılmış bir Türk komutan yerleşti. Onun ve gulamlarının kurduğu devlet bir yüzyıl içinde Hindistan'dan Hazar kıyısına uzanacaktı.",
+      "Alptegin, Samanoğulları sarayında yetişmiş bir Türk gulamıydı ve Horasan ordusunun komutanlığına kadar yükselmişti. Samani sarayındaki bir taht çekişmesinde kaybeden tarafı tutunca 962'de güneye, Gazne'ye çekildi ve orada yarı bağımsız bir yönetim kurdu (modelin bağlantı notu).",
+      "Devleti asıl kuran Sebüktegin'dir. O da Alptegin'in gulamlarındandı ve 977'de Gazne'nin başına geçti. Sebüktegin Hindistan sınırındaki Hindu Şahi hükümdarlarına karşı seferler yaptı ve Samanoğullarının çöküşü sırasında Horasan'da güç kazandı (modelin bağlantı notu).",
+      "Oğlu Mahmud (998-1030) devletin en parlak dönemini açtı. Abbasi Halifesi Kâdir Billah ona «Yemînü'd-Devle» unvanını verdi. Mahmud, kaynaklarda «sultan» unvanıyla anılan ilk büyük Türk hükümdarlarındandır (modelin bağlantı notu).",
+      "Mahmud'un adı Hindistan seferleriyle anılır. Gelenek bu seferlerin sayısını on yedi olarak verir; kesin sayı tartışmalıdır. 1025-26'daki Somnath seferi en ünlüsüdür. Seferler Gazne'ye büyük zenginlik getirdi ve İslam'ın Hindistan'ın kuzeybatısına, Pencap'a yerleşmesinin yolunu açtı; ama yağmalanan şehirler, yıkılan tapınaklar ve esir alınan insanlar bu başarının bedelidir (modelin bağlantı notu).",
+      "Gazne bir kültür merkezi oldu. Bilgin Bîrûnî Mahmud'un seferlerine katıldı ve Hindistan'ın dinlerini, bilimini, takvimini anlatan büyük eserini yazdı; kaynak onu dünyanın yarıçapını trigonometriyle hesaplayan ve karşılaştırmalı dinler tarihini kuran bilgin olarak tanıtır. İranlı şair Firdevsî de Şehnâme'yi Mahmud'a sundu (modelin bağlantı notu).",
+      "Gaznelilerde devletin dili Farsça, ordunun çekirdeği Türk gulamlardı. Saray, Hint filleri, Arap ve Türk süvarileri, Hintli piyadelerden oluşan karma bir orduya dayanıyordu. Bu yapı fetihte güçlüydü, ama hızlı hareket eden bozkır süvarilerine karşı ağırdı.",
+      "Mahmud kuzeydeki Oğuzlara da müdahale etti. Selçuk Bey'in oğlu Arslan Yabgu'yu 1025 dolaylarında görüşmeye çağırıp tutuklattı ve Hindistan'daki bir kaleye hapsettirdi; onun boyunu da Horasan'a yerleştirdi. Bu hamle, kısa sürede Gazneli ülkesini sarsacak bir Türkmen kitlesini Horasan'a getirdi (modelin bağlantı notu).",
+      "Mahmud'un oğlu Mesud, Tuğrul ve Çağrı beylerin önderliğindeki Selçuklularla savaşmak zorunda kaldı. 1040'ta Merv yakınındaki Dandanakan'da Gazneli ordusu ağır bir yenilgi aldı. Kaynağımıza göre Gazneli devleti yıkılış sürecine girdi, Büyük Selçuklu Devleti resmen kuruldu.",
+      "Gazneliler Dandanakan'dan sonra hemen yok olmadı: Horasan'ı yitirdiler, ama Gazne ve Lahor'da bir buçuk yüzyıl daha yaşadılar. 1186'da Gurlular son Gazneli hükümdarını Lahor'da ortadan kaldırdı (modelin bağlantı notu).",
+      "Özetle: Gazneliler bir gulamın kurduğu, Farsça yönetilen, Türk ordusuna dayanan bir devlettir. Mahmud'un seferleri İslam'ı Hindistan'a taşıdı; Dandanakan ise İslam dünyasının liderliğini Selçuklulara devretti."
+     ],
+     "not": "Gemini kaynakları Gaznelileri yalnız Dandanakan (k2) ve Bîrûnî (k18) üzerinden anar; Alptegin, Sebüktegin, Mahmud, Somnath, Arslan Yabgu ve 1186 bilgileri model bilgisidir (Bosworth k26 ve MEB çerçevesi). Kaynak k18'deki Mahmud'a atfedilen «Sarayımın en değerli hazinesi» sözü doğrulanamadığı için alınmadı. On yedi sefer sayısı gelenektir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.2.4.a1",
+       "tur": "secmeli",
+       "soru": "Gazneli Devleti'nin kurucusu sayılan ve 977'de Gazne'nin başına geçen hükümdar kimdir?",
+       "sec": [
+        "Mahmud",
+        "Mesud",
+        "Alptegin",
+        "Sebüktegin"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k26"
+       ],
+       "cozum": [
+        "Alptegin 962'de Gazne'ye yerleşti, ama devleti asıl kuran Sebüktegin'dir.",
+        "Mahmud ve Mesud onun oğlu ve torunudur."
+       ]
+      },
+      {
+       "id": "tarih.4.2.4.a2",
+       "tur": "secmeli",
+       "soru": "Dandanakan Savaşı'nın (1040) sonucu hangisidir?",
+       "sec": [
+        "Gazneliler Hindistan'ı kaybetti.",
+        "Büyük Selçuklu Devleti kuruldu, Gazneliler yıkılış sürecine girdi.",
+        "Karahanlılar ikiye ayrıldı.",
+        "Bizans Anadolu'dan çekildi."
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k2"
+       ],
+       "cozum": [
+        "Kaynağa göre Dandanakan'dan sonra Büyük Selçuklu resmen kuruldu ve Gazneliler yıkılış sürecine girdi.",
+        "A yanlıştır: Gazneliler tam tersine bundan sonra Hindistan'a, Lahor'a çekildi."
+       ]
+      },
+      {
+       "id": "tarih.4.2.4.a3",
+       "tur": "secmeli",
+       "soru": "Gazneli Mahmud'un seferlerine katılıp Hindistan üzerine büyük bir eser yazan bilgin kimdir?",
+       "sec": [
+        "İbn Sina",
+        "Firdevsî",
+        "Bîrûnî",
+        "Nizamülmülk"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k18",
+        "k26"
+       ],
+       "cozum": [
+        "Bîrûnî Hindistan'ın dinlerini, bilimini ve takvimini anlatan eserini Mahmud'un seferleri sırasında topladığı bilgilerle yazdı.",
+        "Firdevsî şairdir, Şehnâme'yi yazdı; Nizamülmülk Selçuklu veziridir."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.2.5",
+     "ad": "Harezmşahlar ve Moğol fırtınası",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k3",
+      "k20",
+      "k24",
+      "k25"
+     ],
+     "ozet": "Harezmşahlar Selçuklu valisi Anuştegin'in soyundan geldi ve 12. yüzyılın sonunda Orta Asya'nın en büyük gücü oldu. 1219'dan itibaren Moğollar devleti yıktı; Celaleddin Harezmşah ölene dek direndi.",
+     "metin": [
+      "Aral Gölü'nün güneyinde, Ceyhun'un denize döküldüğü verimli ülkenin adı Harezm'dir. Merkezi Gürgenç şehriydi. Bu ülkeyi 11. yüzyılın sonunda bir Türk gulam ailesi yönetmeye başladı ve onlar zamanla eski «Harezmşah» unvanını taşıdılar.",
+      "Aile Anuştegin'den gelir. Anuştegin Selçuklu sarayında yetişmiş bir gulamdı; Sultan Melikşah'ın sarayında yükseldi ve Harezm'in yönetimi ona bağlandı. Oğlu Kutbeddin Muhammed Harezmşah unvanıyla Selçuklu adına bölgeyi yönetti (modelin bağlantı notu).",
+      "Atsız (1127-1156) bağımsızlık için Sultan Sencer'le birçok kez savaştı, yenildi, yeniden ayaklandı. Katvan'dan sonra Selçuklu gücü sarsılınca Harezmşahlar Karahıtaylara vergi vererek ayakta kaldı (modelin bağlantı notu).",
+      "Tekiş (1172-1200) Harezmşahları büyük bir güce dönüştürdü. 1194'te Rey yakınında son Irak Selçuklu sultanı III. Tuğrul'u yenip öldürdü ve Selçuklu hanedanının İran'daki kolunu sona erdirdi. Bu, Büyük Selçuklu mirasının artık Harezmşahlara geçtiğini gösteriyordu (modelin bağlantı notu).",
+      "Oğlu Alaeddin Muhammed (1200-1220) zamanında devlet Hindukuş'tan Azerbaycan'a, Aral'dan Basra Körfezi'ne yayıldı. 1212'de Batı Karahanlılarına son verdi, Gurluları geriletti, Karahıtayları yendi. Ama bu hızlı büyüme, yeni alınan şehirlerde sağlam bir bağlılık kurmadan gerçekleşti (modelin bağlantı notu).",
+      "1218'de Otrar şehrinde Cengiz Han'ın gönderdiği bir ticaret kervanı, Harezmşah valisi tarafından casuslukla suçlanıp öldürüldü. Cengiz'in elçileri de öldürülünce savaş kaçınılmaz oldu. Tarihçiler Otrar olayını Moğol istilasının doğrudan sebebi sayar (modelin bağlantı notu).",
+      "1219-1221 yıllarında Moğollar Buhara, Semerkant, Gürgenç, Merv ve Nişabur gibi büyük şehirleri aldı. Şehirlerin çoğu yağmalandı, halkın büyük bölümü öldürüldü ya da sürüldü. Barthold'un ayrıntılı anlattığı bu yıkım, Orta Asya'nın şehir hayatını ve sulama düzenini derinden sarstı. Alaeddin Muhammed kaçarken Hazar Denizi'ndeki bir adada öldü (modelin bağlantı notu).",
+      "Oğlu Celaleddin Mengüberti direnişi sürdürdü. 1221'de Afganistan'daki Pervan'da bir Moğol ordusunu yendi; ama aynı yıl İndus (Sind) Irmağı kıyısında Cengiz Han'ın kendisine yenildi. Kaynaklara göre atıyla ırmağa atlayıp karşı kıyıya geçerek kurtuldu (modelin bağlantı notu).",
+      "Celaleddin sonra İran'a ve Azerbaycan'a döndü, Tebriz'i merkez yaptı. Ama Gürcüler, Eyyubiler ve Türkiye Selçukluları ile çatışınca Moğollara karşı bir birlik kuramadı. 1230'da Erzincan yakınındaki Yassıçemen'de Anadolu Selçuklu Sultanı I. Alaeddin Keykubad'a yenildi; 1231'de dağlarda bir köylü tarafından öldürüldü (modelin bağlantı notu).",
+      "Kaynağımız Yassıçemen'in acı sonucunu vurgular: Harezmşahların yıkılmasıyla Anadolu ile Moğollar arasındaki tampon kalktı ve Moğol istilasının yolu açıldı. Selçuklu açısından kazanılmış bir savaş, uzun vadede tehlikeli bir boşluk yarattı.",
+      "Özetle: Harezmşahlar Selçuklu mirasını devraldı, ama Moğol fırtınasına karşı tek başına kaldı. Celaleddin'in direnişi yiğitçeydi, fakat İslam dünyasının bölünmüşlüğü onun da sonunu getirdi."
+     ],
+     "not": "Gemini kaynakları Harezmşahları yalnız Yassıçemen (k3) üzerinden anar; öteki bütün bilgiler model bilgisidir ve Kafesoğlu (k25) ile Barthold'un (k24) çerçevesine dayanır. Moğol istilasındaki ölü sayıları için kaynaklar çok farklı rakamlar verir; derste rakam verilmedi. Celaleddin'in ırmağa atlaması kaynaklarda geçen ünlü bir anlatıdır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.2.5.a1",
+       "tur": "secmeli",
+       "soru": "Moğol istilasının doğrudan sebebi sayılan olay hangisidir?",
+       "sec": [
+        "Otrar'da Moğol kervanının ve elçilerinin öldürülmesi",
+        "Yassıçemen Savaşı",
+        "Bağdat'ın alınması",
+        "Katvan Savaşı"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k25"
+       ],
+       "cozum": [
+        "1218'de Otrar'da Cengiz Han'ın kervanı ve elçileri öldürülünce savaş başladı.",
+        "Yassıçemen 1230'da, Bağdat'ın Moğollarca alınması 1258'dedir."
+       ]
+      },
+      {
+       "id": "tarih.4.2.5.a2",
+       "tur": "secmeli",
+       "soru": "Yassıçemen Savaşı'nın (1230) Anadolu için uzun vadeli sonucu hangisidir?",
+       "sec": [
+        "Bizans Anadolu'dan tamamen çekildi.",
+        "Haçlı seferleri sona erdi.",
+        "Anadolu ile Moğollar arasındaki tampon kalktı.",
+        "Selçuklu başkenti İznik'e taşındı."
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k3"
+       ],
+       "cozum": [
+        "Kaynağa göre Harezmşahların yıkılmasıyla tampon bölge kalktı ve Moğol istilasına zemin hazırlandı.",
+        "Kösedağ (1243) bu boşluğun bedelidir."
+       ]
+      },
+      {
+       "id": "tarih.4.2.5.a3",
+       "tur": "secmeli",
+       "soru": "1194'te Irak Selçuklu hanedanına son veren Harezmşah hükümdarı kimdir?",
+       "sec": [
+        "Anuştegin",
+        "Atsız",
+        "Tekiş",
+        "Celaleddin"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k25",
+        "k20"
+       ],
+       "cozum": [
+        "Tekiş 1194'te Rey yakınında III. Tuğrul'u yenerek Irak Selçuklularına son verdi.",
+        "Atsız Sencer'le savaşmıştı; Celaleddin Moğollara karşı direnen son büyük Harezmşah'tır."
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.4.3",
+   "ad": "Büyük Selçuklu Devleti",
+   "onKosul": [
+    "tarih.4.2"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.4.3.k1",
+      "tur": "secmeli",
+      "soru": "Aşağıdaki olaylardan hangisi Tuğrul Bey döneminde olmamıştır?",
+      "sec": [
+       "Dandanakan Savaşı",
+       "Pasinler Savaşı",
+       "Bağdat'a giriş",
+       "Malazgirt Savaşı"
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k2",
+       "k20"
+      ],
+      "cozum": [
+       "Malazgirt 1071'de, Alp Arslan döneminde oldu; Tuğrul Bey 1063'te ölmüştü.",
+       "Dandanakan 1040, Pasinler 1048, Bağdat 1055 Tuğrul Bey dönemindedir."
+      ]
+     },
+     {
+      "id": "tarih.4.3.k2",
+      "tur": "secmeli",
+      "soru": "Nizamiye medreselerinin kuruluş amaçlarından biri hangisidir?",
+      "sec": [
+       "Türkçeyi resmî dil yapmak",
+       "Moğollarla barış yapmak",
+       "Haçlılara karşı donanma kurmak",
+       "Devlete görevli yetiştirmek ve Sünni düşünceyi Batıni propagandasına karşı savunmak"
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k5",
+       "k9"
+      ],
+      "cozum": [
+       "Kaynağa göre Nizamiyeler devlet bürokratı yetiştirdi ve Fatımi-Batıni propagandasına karşı Sünni inancı savundu.",
+       "Moğollar bu tarihten bir buçuk yüzyıl sonra gelir."
+      ]
+     },
+     {
+      "id": "tarih.4.3.k3",
+      "tur": "secmeli",
+      "soru": "Selçuklu meliklerinin yanına verilen atabeylerin devletin dağılışındaki rolü hangisidir?",
+      "sec": [
+       "Merkez zayıflayınca kendi hanedanlarını kurdular.",
+       "Halifeliği ortadan kaldırdılar.",
+       "Bizans'a katıldılar.",
+       "Hiçbir rolleri olmadı."
+      ],
+      "dogru": "A",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k4"
+      ],
+      "cozum": [
+       "Kaynağa göre merkezi otorite zayıflayınca atabeyler bağımsızlaştı: Zengiler, Böriler, İldenizliler, Salgurlular gibi.",
+       "Halifelik Selçuklulardan sonra da sürdü."
+      ]
+     },
+     {
+      "id": "tarih.4.3.k4",
+      "tur": "secmeli",
+      "soru": "Malazgirt'i «Anadolu'nun Türk yurdu oluşunun başlangıcı» diye anmanın en iyi gerekçesi hangisidir?",
+      "sec": [
+       "Savaştan sonra Bizans'ın doğu savunması çöktü ve Türkmen yerleşmesi ile ilk beylikler başladı.",
+       "Savaşla bütün Anadolu bir günde fethedildi.",
+       "Savaştan sonra Selçuklu başkenti Malazgirt oldu.",
+       "Savaş Haçlı seferlerini sona erdirdi."
+      ],
+      "dogru": "A",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k6",
+       "k7"
+      ],
+      "cozum": [
+       "Malazgirt kapıyı açtı: sınır savunması çöktü, Türkmenler yerleşti, ilk beylikler kuruldu.",
+       "D tersidir: kaynağa göre Malazgirt Haçlı seferlerini tetikledi."
+      ]
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.4.3.1",
+     "ad": "Selçuk Bey'den Dandanakan'a",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k20",
+      "k21",
+      "k26"
+     ],
+     "ozet": "Oğuzların Kınık boyundan Selçuk Bey'in torunları Tuğrul ve Çağrı, Horasan'da Gaznelilerle savaşarak güçlendi. 1040 Dandanakan zaferinden sonra toplanan kurultay Büyük Selçuklu Devleti'ni kurdu.",
+     "metin": [
+      "1040 baharında Merv ile Serahs arasındaki çölde, Dandanakan kalesinin önünde iki ordu karşılaştı. Bir yanda filleri, ağır zırhlı birlikleri ve uzun ikmal hatlarıyla Gazneli Sultanı Mesud; öte yanda hafif atlı, hızlı ve suyun yerini bilen Türkmen süvarileriyle Tuğrul ve Çağrı kardeşler. Bu savaş, İslam dünyasının liderliğinin el değiştirdiği gündür.",
+      "Hikâye bir kuşak önce başlar. Oğuzların Kınık boyundan Dukak, kaynaklarda «Temir Yalığ» (demir yaylı) lakabıyla anılan bir komutandı. Oğlu Selçuk Bey, Oğuz yabgusuyla anlaşmazlığa düşünce boyuyla birlikte Seyhun kıyısındaki Cend'e göçtü ve orada Müslüman oldu. Önceki ünitede gördüğün gibi bu, Selçukluların İslam'la buluşmasıdır (modelin bağlantı notu).",
+      "Selçuk Bey'in oğulları Mikail, Arslan (İsrail), Musa ve Yunus'tu. Mikail genç yaşta öldü; oğulları Tuğrul ve Çağrı'yı dedeleri yetiştirdi. Arslan Yabgu ise boyun büyük kısmının başında kaldı (modelin bağlantı notu).",
+      "Selçuklular 11. yüzyılın başında Karahanlılar, Samanoğulları ve Gazneliler arasındaki çekişmelerin içinde yer aldı. Gazneli Mahmud, Arslan Yabgu'yu tutuklatıp boyunu Horasan'a yerleştirince Selçuklular iki kola ayrıldı. Tuğrul ve Çağrı Maveraünnehir'de kaldı; sonra onlar da güneye, Horasan'a geçti (modelin bağlantı notu).",
+      "Bu yıllarda Çağrı Bey'in bir keşif akınıyla Doğu Anadolu'ya kadar uzandığı aktarılır. Osman Turan bu akını Selçukluların Anadolu'yu tanıması olarak yorumlar; ama akının tarihi ve kapsamı kaynaklarda farklı verilir. Bu yüzden ona kesin bir yıl vermiyoruz (modelin bağlantı notu).",
+      "Horasan'daki Türkmenlerin sayısı arttıkça Gazneli valileriyle çatışmalar sertleşti. 1035'te Nesa yakınında Gazneli ordusu yenildi ve Mesud Selçuklulara Nesa, Ferave ve Dihistan bölgelerini bırakmak zorunda kaldı. 1038'de Tuğrul Bey Nişabur'a girdi ve hutbe onun adına okundu (modelin bağlantı notu).",
+      "Mesud büyük bir orduyla bu yükselişi durdurmak istedi. Selçuklular açık meydan savaşından kaçınıp Gazneli ordusunu çölde yordu, su kaynaklarını kesti ve ikmal kollarına baskın yaptı. Sonunda yorgun ve susuz kalan Gazneli ordusu Dandanakan'da Mayıs 1040'ta bozguna uğradı (modelin bağlantı notu).",
+      "Kaynağımız savaşın taraflarını «Büyük Selçuklu Devleti (Tuğrul ve Çağrı Beyler) - Gazneliler (Sultan Mesud)» diye verir ve sonucunu şöyle özetler: Gazneli Devleti yıkılış sürecine girdi, Büyük Selçuklu Devleti resmen kuruldu ve İslam dünyasının liderliği Selçuklulara geçmeye başladı.",
+      "Savaştan hemen sonra savaş alanında bir kurultay toplandı. Türk geleneğine uygun olarak ülke hanedan üyeleri arasında paylaştırıldı: Tuğrul Bey batıya, Irak ve İran'a yönelecek sultan; Çağrı Bey Merv merkezli Horasan'ın yöneticisi oldu. Selçuklular Abbasi halifesine de bir mektup göndererek ona bağlılıklarını bildirdi (modelin bağlantı notu).",
+      "Bu düzen, eski Türk ikili teşkilatının yeni bir biçimidir: iki kardeş, iki merkez, tek hanedan. Çağrı Bey'in Horasan'da kalması doğudaki Gaznelileri ve Karahanlıları dengeledi; Tuğrul Bey ise batıda daha büyük işlere el atabildi.",
+      "Özetle: Selçuklular Cend'de Müslüman olmuş bir Oğuz ailesinden çıktı, Horasan'da Gaznelilerle mücadele ederek güçlendi ve 1040 Dandanakan'dan sonra kurultayla devlet oldu."
+     ],
+     "not": "Kaynak k2 yalnız Dandanakan'ın taraflarını ve sonucunu verir. Dukak, Cend, Nesa (1035), Nişabur (1038), savaşın yöntemi ve kurultay ayrıntıları model bilgisidir. Çağrı Bey'in Anadolu akınının tarihi tartışmalı olduğu için yıl verilmedi. Arslan Yabgu'nun tutuklanma yılı (1025) da yaklaşıktır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.3.1.a1",
+       "tur": "secmeli",
+       "soru": "Selçukluların mensup olduğu Oğuz boyu hangisidir?",
+       "sec": [
+        "Kınık",
+        "Bayındır",
+        "Avşar",
+        "Kayı"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21",
+        "k20"
+       ],
+       "cozum": [
+        "Selçuklu hanedanı Oğuzların Kınık boyundandır.",
+        "Kayı, Osmanlı hanedanının bağlandığı boydur; Bayındır Akkoyunlu hanedanının boyudur."
+       ]
+      },
+      {
+       "id": "tarih.4.3.1.a2",
+       "tur": "secmeli",
+       "soru": "Selçukluların Dandanakan'da kazanmasında kullandıkları yöntem hangisidir?",
+       "sec": [
+        "Kale kuşatması",
+        "Deniz savaşı",
+        "Açık meydan savaşından kaçınıp düşmanı çölde yıpratmak",
+        "Fillerle hücum"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21",
+        "k26"
+       ],
+       "cozum": [
+        "Selçuklular Gazneli ordusunu çölde yordu, suyunu ve ikmalini kesti; bozkır süvarisinin bilinen yöntemidir.",
+        "Fillerle hücum Gaznelilerin yöntemiydi."
+       ]
+      },
+      {
+       "id": "tarih.4.3.1.a3",
+       "tur": "secmeli",
+       "soru": "Dandanakan'dan sonra toplanan kurultayda Horasan'ın yönetimi kime verildi?",
+       "sec": [
+        "Arslan Yabgu",
+        "Kutalmış",
+        "Tuğrul Bey",
+        "Çağrı Bey"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21",
+        "k20"
+       ],
+       "cozum": [
+        "Çağrı Bey Merv merkezli Horasan'ı yönetti; Tuğrul Bey batıya yöneldi.",
+        "Arslan Yabgu o sırada Gazneli hapsindeydi ya da ölmüştü."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.3.2",
+     "ad": "Tuğrul Bey: Pasinler ve Bağdat",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k6",
+      "k20",
+      "k21"
+     ],
+     "ozet": "Tuğrul Bey 1048'de Pasinler'de Bizans ve Gürcülere karşı ilk büyük zaferi kazandı, 1055'te Bağdat'a girerek halifeyi Büveyhi baskısından kurtardı. Böylece Selçuklular İslam dünyasının siyasi önderi oldu.",
+     "metin": [
+      "1040'tan sonra Tuğrul Bey batıya yürüdü. Rey ve Hemedan alındı, İsfahan bir süre sonra başkent yapıldı. Bu ilerleyiş Selçukluları iki büyük güçle karşı karşıya getirdi: Doğu Anadolu'da Bizans ve Bağdat'ta halifeyi kendi baskısı altında tutan Şii Büveyhiler.",
+      "Horasan'dan batıya gelen Türkmen grupları Azerbaycan üzerinden Doğu Anadolu'ya akınlar yapıyordu. Bu akınlar hem otlak arayışıydı hem de gaza, yani sınırda İslam adına savaş. Tuğrul Bey bu Türkmenleri merkezden uzakta tutmak ve Bizans sınırına yönlendirmek istiyordu (modelin bağlantı notu).",
+      "1048'de Tuğrul'un kardeşi İbrahim Yınal ile kuzeni Kutalmış komutasındaki Selçuklu ordusu, Erzurum yakınındaki Pasinler Ovası'nda Bizans ve Gürcü birliklerinden oluşan bir orduyla karşılaştı. Kaynağımıza göre bu, Selçukluların Bizans'la yaptığı ilk büyük savaştır ve Gürcü komutanı Liparit esir alındı.",
+      "Ders kitapları Pasinler'i bir «keşif savaşı» olarak anar: Anadolu'nun yerleşmeye uygunluğu sınandı, Türkmenler bu topraklara daha güvenle akın etmeye başladı. Tuğrul Bey Liparit'i fidye almadan serbest bıraktı; bu, Bizans'la bir süre barış ilişkisi kurulmasını sağladı (modelin bağlantı notu).",
+      "Bağdat'ta durum farklıydı. Abbasi halifesi dinî önder olarak saygı görüyor, ama siyasi gücü Şii Büveyhi emirlerinin elindeydi. Halife el-Kâim, Sünni bir güç olan Selçukluları yardıma çağırdı (modelin bağlantı notu).",
+      "Tuğrul Bey 1055'te Bağdat'a girdi ve Büveyhi yönetimine son verdi. Hutbe artık halifenin yanında Tuğrul'un adına okunuyordu. Bu olay, Selçukluların İslam dünyasında yalnız bir askeri güç değil, halifeliğin koruyucusu olarak tanınmasıdır (modelin bağlantı notu).",
+      "1058'de Tuğrul Bey batıda bir isyanla uğraşırken Türk komutan Besasiri, Mısır'daki Şii Fatımi halifesi adına Bağdat'ı ele geçirdi ve halifeyi şehirden çıkardı. Tuğrul Bey geri dönerek Bağdat'ı geri aldı ve halifeyi yeniden yerine oturttu (modelin bağlantı notu).",
+      "Halife Tuğrul'a «Doğunun ve Batının Sultanı» anlamına gelen unvanı verdi. Bu unvan, Selçukluların siyasi yetkiyi, halifenin de dinî otoriteyi temsil ettiği yeni bir düzeni anlatır. Tarihçiler bu ayrımı İslam dünyasında sultanlık kurumunun yerleşmesi olarak görür (modelin bağlantı notu).",
+      "Tuğrul Bey 1063'te Rey yakınında öldü. Oğlu yoktu; tahta Çağrı Bey'in oğlu Alp Arslan, amca oğlu Kutalmış'ı yendikten sonra çıktı. Kutalmış'ın oğlu Süleyman Şah ise birkaç yıl sonra Anadolu'da Türkiye Selçuklu Devleti'ni kuracaktı (modelin bağlantı notu).",
+      "Neden-sonuç: Pasinler Anadolu'nun yolunu açtı, Bağdat ise Selçuklulara İslam dünyasında meşruiyet verdi. İkisi birlikte, Malazgirt'e giden yolu hem askeri hem siyasi olarak hazırladı.",
+      "Özetle: Tuğrul Bey Selçukluları bir bozkır gücünden halifeliğin koruyucusu olan bir sultanlığa dönüştürdü. Pasinler (1048) ve Bağdat (1055) bu dönüşümün iki kilometre taşıdır."
+     ],
+     "not": "Kaynak k2 ve k6 Pasinler'in tarafları, Liparit ve «keşif savaşı» yorumunu verir. Pasinler'in komutanları, Bağdat 1055, Besasiri 1058-59, unvan ve Tuğrul'un ölümü model bilgisidir. Unvanın tam biçimi kaynaklarda farklı geçer.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.3.2.a1",
+       "tur": "secmeli",
+       "soru": "Pasinler Savaşı'nda (1048) esir alınan Gürcü komutanı kimdir?",
+       "sec": [
+        "Liparit",
+        "Romen Diyojen",
+        "Besasiri",
+        "Manuel Komnenos"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k2"
+       ],
+       "cozum": [
+        "Kaynağa göre Pasinler'de Gürcü komutanı Liparit esir alındı.",
+        "Romen Diyojen Malazgirt'te esir düşen Bizans imparatorudur; Besasiri Bağdat'ı Fatımiler adına alan komutandır."
+       ]
+      },
+      {
+       "id": "tarih.4.3.2.a2",
+       "tur": "secmeli",
+       "soru": "Tuğrul Bey'in 1055'te Bağdat'a girmesiyle hangi hanedanın halife üzerindeki baskısı sona erdi?",
+       "sec": [
+        "Büveyhiler",
+        "Emeviler",
+        "Samanoğulları",
+        "Fatımiler"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k21"
+       ],
+       "cozum": [
+        "Şii Büveyhiler halifeyi siyasi baskı altında tutuyordu; Tuğrul Bey 1055'te onlara son verdi.",
+        "Fatımiler Mısır'daydı; 1058'de Besasiri onların adına Bağdat'ı kısa süre aldı."
+       ]
+      },
+      {
+       "id": "tarih.4.3.2.a3",
+       "tur": "secmeli",
+       "soru": "Ders kitaplarının Pasinler'i «keşif savaşı» diye anmasının sebebi hangisidir?",
+       "sec": [
+        "Selçukluların denize açılması",
+        "Halifenin Anadolu'ya taşınması",
+        "Bizans'ın tamamen yenilip Anadolu'dan çekilmesi",
+        "Anadolu'nun Türkmen yerleşmesine uygunluğunun sınanması"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k6"
+       ],
+       "cozum": [
+        "Pasinler'den sonra Türkmenler Anadolu'ya daha güvenle akın etti; savaş bu toprakların tanınmasıdır.",
+        "Bizans'ın sınır savunmasının çökmesi Malazgirt'le olur."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.3.3",
+     "ad": "Alp Arslan ve Malazgirt'e giden yol",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k20",
+      "k21",
+      "k31",
+      "k30"
+     ],
+     "ozet": "Alp Arslan 1064'te Ani'yi alarak Bizans sınırını zorladı. Bizans İmparatoru Romen Diyojen ise Türk akınlarını kesin olarak durdurmak için 1071'de büyük bir sefere çıktı ve iki ordu Malazgirt'te karşılaştı.",
+     "metin": [
+      "1064'te Arpaçay kıyısındaki Ani, kaynakların «bin bir kiliseli» dediği zengin Ermeni başkenti, Alp Arslan'ın kuşatmasından sonra Selçuklulara geçti. Bu, Bizans'ın doğu sınırının en sağlam kalelerinden birinin düşmesiydi (modelin bağlantı notu).",
+      "Alp Arslan 1063'te tahta çıkmıştı. Veziri Nizamülmülk'tü ve sultanın ilk yılları iç isyanları bastırmak, Kafkasya ile Azerbaycan'da sınırları sağlamlaştırmakla geçti. Asıl hedefi ise güneybatıdaydı: Mısır'daki Şii Fatımi halifeliği (modelin bağlantı notu).",
+      "Türkmen akınları bu arada sürüyordu. Türkmen beyleri Malatya, Sivas, hatta Kayseri ve Amorion'a (Emirdağ yakınları) kadar akınlar yaptı. Bizans için bu akınlar, Anadolu köylerinin vergi düzenini ve ordunun asker kaynağını tehdit ediyordu (modelin bağlantı notu).",
+      "Bizans'ta 1068'de tahta çıkan Romanos IV Diogenes, Türk kaynaklarındaki adıyla Romen Diyojen, bir asker imparatordu. 1068 ve 1069'da doğuya seferler yaptı, ama Türkmen akıncılarını kesin bir savaşa çekemedi. Bizans sarayı ise derin bir bölünme içindeydi: güçlü Dukas ailesi Romanos'u kendi iktidarlarına engel görüyordu (modelin bağlantı notu).",
+      "1071 baharında Alp Arslan Suriye'de, Halep'i kuşatıyordu. Romanos ise büyük bir orduyla doğuya yürüdü. Ordu yalnız Bizanslılardan değil, Ermeni, Gürcü, Frank (Norman) paralı askerlerden ve Uz, Peçenek gibi Türk kökenli birliklerden oluşuyordu. Kaynaklar ordunun sayısını çok farklı verir; kesin bir rakam bilinmez (modelin bağlantı notu).",
+      "Romanos'un amacı Malazgirt ve Ahlat kalelerini alarak Türkmen akınlarının geçit yollarını kapamaktı. Alp Arslan Bizans ordusunun yürüdüğünü öğrenince Halep kuşatmasını kaldırdı ve hızla kuzeye döndü. Yol boyunca ordusunu Türkmenler ve Kürt birlikleriyle güçlendirdi (modelin bağlantı notu).",
+      "Romanos ordusunu ikiye ayırdı. Bir kol, komutan Tarkhaneiotes ile Ahlat yönüne gönderildi; bu kol savaşa hiç katılmadı ve sonra geri çekildi. İmparator kalan orduyla Ağustos 1071'de Malazgirt kalesini aldı. Bu ayrılmanın neden olduğu ve gerçekte ne kadar büyük bir kuvvet olduğu kaynaklarda tartışmalıdır (modelin bağlantı notu).",
+      "Bizans kaynakları arasında en değerlisi Mikhail Attaleiates'in tarihidir: Attaleiates bir devlet görevlisi olarak seferde imparatorun yanındaydı. Onun anlatısı Romanos'a yakın, Dukas ailesine eleştireldir. Müslüman tarafta İbnü'l-Esir gibi daha geç yazarlar, olayı Alp Arslan'ın dindarlığı ve cesareti etrafında anlatır.",
+      "Carole Hillenbrand iki tarafın kaynaklarını karşılaştırır ve Müslüman anlatıların sonraki yüzyıllarda giderek büyüdüğünü, olayın bir simgeye dönüştüğünü gösterir. Bu, Malazgirt'in önemini azaltmaz; ama hangi ayrıntının çağdaş tanıktan, hangisinin sonradan gelen anlatıdan geldiğini ayırmayı öğretir.",
+      "Özetle: Malazgirt'e iki taraf da hazırlıksız gelmedi. Selçuklular Ani'den beri sınırı zorluyordu; Romanos ise bölünmüş bir saray ve karma bir orduyla kesin bir çözüm arıyordu. Bir sonraki derste savaşın kendisini ve sonuçlarını göreceksin."
+     ],
+     "not": "Gemini atlaslarında (anadolu_uygarliklari, satır 97) Ani'deki Menuçehr Camii «ilk Selçuklu camii» diye geçer; cami Şeddadi emiri Menuçehr'e bağlandığı için bu niteleme tartışmalıdır ve derse alınmadı. Sefer ve ordu ayrıntıları model bilgisidir; ordu sayıları bilinçli olarak verilmedi.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.3.3.a1",
+       "tur": "secmeli",
+       "soru": "1071 baharında Bizans ordusu doğuya yürürken Alp Arslan nerede bulunuyordu?",
+       "sec": [
+        "Halep'i kuşatıyordu",
+        "Merv'de",
+        "İsfahan'da tahta çıkıyordu",
+        "Bağdat'ta"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21",
+        "k20"
+       ],
+       "cozum": [
+        "Alp Arslan Suriye seferindeydi ve Halep'i kuşatıyordu; haberi alınca kuzeye döndü.",
+        "Bu, Malazgirt'in Selçuklular için planlı bir Anadolu seferi olmadığını, Bizans hareketine bir cevap olduğunu gösterir."
+       ]
+      },
+      {
+       "id": "tarih.4.3.3.a2",
+       "tur": "secmeli",
+       "soru": "Malazgirt'i Bizans tarafından anlatan ve seferde imparatorun yanında bulunan tarihçi kimdir?",
+       "sec": [
+        "İbnü'l-Esir",
+        "Anna Komnena",
+        "Mikhail Attaleiates",
+        "Niketas Khoniates"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k31"
+       ],
+       "cozum": [
+        "Attaleiates seferde Romanos'un yanındaydı; anlatısı bu yüzden çağdaş tanık değerindedir.",
+        "İbnü'l-Esir Müslüman ve daha geç bir yazardır; Anna Komnena ve Khoniates sonraki kuşaklardandır."
+       ]
+      },
+      {
+       "id": "tarih.4.3.3.a3",
+       "tur": "secmeli",
+       "soru": "Ani'nin fethiyle ilgili hangisi doğrudur?",
+       "sec": [
+        "Malazgirt'ten sonra alındı.",
+        "Haçlılardan alındı.",
+        "Melikşah döneminde alındı.",
+        "1064'te Alp Arslan tarafından alındı."
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21",
+        "k20"
+       ],
+       "cozum": [
+        "Ani 1064'te Alp Arslan'ın kuşatmasıyla alındı; Malazgirt'ten yedi yıl öncedir.",
+        "Haçlılar bölgeye 1096'dan sonra gelir."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.3.4",
+     "ad": "Malazgirt (1071): savaş ve sonuç",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k6",
+      "k7",
+      "k21",
+      "k30",
+      "k31",
+      "k32"
+     ],
+     "ozet": "26 Ağustos 1071'de Malazgirt Ovası'nda Selçuklu ordusu Bizans ordusunu yendi, İmparator Romen Diyojen esir düştü. Savaş Bizans'ın doğu savunmasını çökertti ve Anadolu'nun Türk yurdu oluşunun geri dönülmez başlangıcı oldu.",
+     "metin": [
+      "26 Ağustos 1071, bir Cuma günü. Bugünkü Muş ilindeki Malazgirt Ovası'nda iki ordu karşı karşıyaydı. Müslüman kaynaklarına göre Alp Arslan savaştan önce ordusuna seslendi, beyaz giysiler giydi ve Cuma namazının vaktini bekledi. Bu ayrıntılar daha çok sonraki Müslüman anlatılarında geçer; sahneyi tarih kadar bir simge olarak da okumak gerekir.",
+      "Savaşın öncesinde Bizans ordusundaki bazı Uz ve Peçenek birliklerinin Selçuklu tarafına geçtiği aktarılır. Kaynaklar bunun ne zaman ve ne ölçüde olduğunda ayrılır; ama dil ve yaşam tarzı ortak olan bu Türk boylarının Bizans saflarında güvenilmez hale gelmesi, imparatorun güvenini sarstı (modelin bağlantı notu).",
+      "Savaş boyunca Selçuklu süvarisi bozkırın bilinen yöntemini uyguladı: ok atarak saldırmak, sahte geri çekilmeyle düşmanı peşinden sürüklemek ve dağınık düşen birlikleri çevirmek. Bizans ordusu bütün gün Türkleri kesin bir çarpışmaya zorlayamadı (modelin bağlantı notu).",
+      "Akşama doğru Romanos ordugâha dönmek için geri çekilme emri verdi. Bu sırada artçıyı yöneten Andronikos Dukas, imparatorun yenildiği söylentisini yayarak birlikleriyle savaş alanından çekildi. Attaleiates bunu açık bir ihanet olarak anlatır. Geri çekilme bozguna döndü, Selçuklular imparatoru ve çevresindekileri kuşattı (modelin bağlantı notu).",
+      "Romanos yaralı olarak esir alındı. Bir Bizans imparatorunun bir Müslüman hükümdarın eline esir düşmesi ilk kez yaşanıyordu. Kaynaklar Alp Arslan'ın imparatora onurlu davrandığını, onu bir hafta kadar yanında konuk ettiğini ve bir antlaşmayla serbest bıraktığını yazar (modelin bağlantı notu).",
+      "Antlaşmanın maddeleri kaynaklarda farklı verilir. Çoğu anlatı fidye, yıllık bir ödeme, Türk esirlerin serbest bırakılması ve dostluk üzerinde birleşir; fidyenin miktarı ve toprak maddeleri ise kaynaktan kaynağa değişir. Bu yüzden burada rakam vermiyoruz (modelin bağlantı notu).",
+      "Antlaşma uygulanamadı. Romanos başkente dönerken Dukas ailesi VII. Mikhail'i tahta çıkarmıştı. Romanos ona karşı savaştı, yenildi, 1072'de gözlerine mil çekildi ve kısa süre sonra öldü. Alp Arslan antlaşmanın bozulduğunu kabul etti; Türkmen beyleri için Anadolu'nun kapısı artık tamamen açıktı (modelin bağlantı notu).",
+      "Kaynaklarımız sonucu açıkça yazar: Anadolu'nun kapıları Türklere kesin olarak açıldı, Bizans İmparatoru esir düştü, Anadolu'da Saltuklular, Danişmendliler, Mengücekliler, Artuklular ve Çaka Beyliği gibi ilk beylikler kuruldu ve Haçlı seferlerinin yolu hazırlandı. Ders kitapları Malazgirt'i bu yüzden «yurt açan savaş» diye anar.",
+      "Kırılma noktaları kaynağımız Malazgirt'i «Anadolu'nun Türk yurduna dönüşümünün geri dönülmez başlangıcı» sayar ve bir ders çıkarır: iç bölünmüşlük yaşayan imparatorluklar açık meydan savaşında çekirdek topraklarını hızla kaybedebilir. Bizans'ı asıl yenen, savaşın ardından on yıl süren taht kavgalarıydı; Türkmenler bu boşluğu doldurdu.",
+      "Önemli bir ölçü: «başlangıç» kelimesi bilerek seçilmiştir. Malazgirt bir günde Anadolu'yu Türk yapmadı. Türkmen boylarının göçü, köylerin ve şehirlerin el değiştirmesi, yeni beyliklerin kurulması onlarca yıl sürdü; Haçlılar 1097'de İznik'i yeniden Bizans'a verdi. Bu yurt oluş sürecinin ikinci dönüm noktası Miryokefalon'dur (1176).",
+      "Alp Arslan Malazgirt'ten bir yıl sonra, 1072'de Maveraünnehir seferinde esir alınmış bir kale komutanının saldırısıyla yaralandı ve öldü. Merv'e gömüldü (modelin bağlantı notu).",
+      "Özetle: Malazgirt, Selçuklu süvarisinin taktik üstünlüğü ile Bizans sarayının bölünmüşlüğünün buluştuğu bir savaştır. Sonucu, Anadolu'nun bir yüzyıl içinde Türkiye adıyla anılacak bir yurda dönüşmesinin başlangıcıdır."
+     ],
+     "not": "Gemini kaynakları (k2, k6, k7) yalnız taraflar, esaret ve sonuçları verir. Savaşın gün gün anlatısı Attaleiates (k31), İbnü'l-Esir (k32), Osman Turan (k21) ve Hillenbrand'ın (k30) karşılaştırmasına dayanan model özetidir. Beyaz giysi ve Cuma vurgusu Müslüman kaynaklarındadır; Hillenbrand bunların anlatıyı büyüttüğünü gösterir. Fidye ve ordu sayıları bilinçli olarak verilmedi. 26 Ağustos tarihi genel kabuldür.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.3.4.a1",
+       "tur": "secmeli",
+       "soru": "Malazgirt'te Bizans'ın bozguna dönmesinde kaynakların vurguladığı iç etken hangisidir?",
+       "sec": [
+        "Artçıyı yöneten Andronikos Dukas'ın savaş alanından çekilmesi",
+        "Haçlıların Bizans'a saldırması",
+        "Bizans donanmasının batması",
+        "İmparatorun savaştan önce ölmesi"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k31",
+        "k21"
+       ],
+       "cozum": [
+        "Attaleiates'e göre Andronikos Dukas imparatorun yenildiği söylentisini yayıp birliklerini çekti; geri çekilme bozguna döndü.",
+        "İmparator ölmedi, esir düştü."
+       ]
+      },
+      {
+       "id": "tarih.4.3.4.a2",
+       "tur": "secmeli",
+       "soru": "Malazgirt'ten hemen sonra Anadolu'da kurulan ilk beyliklerden biri olmayan hangisidir?",
+       "sec": [
+        "Danişmendliler",
+        "Saltuklular",
+        "Karamanoğulları",
+        "Artuklular"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k2",
+        "k6"
+       ],
+       "cozum": [
+        "Karamanoğulları 13. yüzyılın ikinci yarısında, Kösedağ'dan sonra öne çıkan ikinci dönem beyliklerindendir.",
+        "Danişmendliler, Saltuklular, Mengücekliler, Artuklular ve Çaka Beyliği Malazgirt sonrası ilk beyliklerdir."
+       ]
+      },
+      {
+       "id": "tarih.4.3.4.a3",
+       "tur": "secmeli",
+       "soru": "Malazgirt'ten sonra Alp Arslan ile Romen Diyojen arasındaki antlaşmanın uygulanamamasının sebebi hangisidir?",
+       "sec": [
+        "Halifenin antlaşmaya karşı çıkması",
+        "Haçlıların İstanbul'u alması",
+        "Alp Arslan'ın antlaşmayı bozması",
+        "Romanos'un tahtı kaybetmesi ve Dukas ailesinin VII. Mikhail'i imparator yapması"
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k21",
+        "k31"
+       ],
+       "cozum": [
+        "Romanos dönmeden tahtını kaybetti; yeni yönetim antlaşmayı tanımadı ve Türkmen beyleri için Anadolu'nun yolu açıldı.",
+        "Haçlılar İstanbul'u ancak 1204'te alacaktır."
+       ]
+      },
+      {
+       "id": "tarih.4.3.4.a4",
+       "tur": "acik",
+       "soru": "Malazgirt için «zafer» ile «yurt oluş süreci» kavramları arasındaki farkı iki örnekle açıkla.",
+       "dogru": "Zafer bir gündür: 26 Ağustos 1071'de Bizans ordusu yenildi, imparator esir düştü. Yurt oluş ise süreçtir: Türkmen göçü, ilk beyliklerin kurulması, Haçlıların 1097'de İznik'i Bizans'a geri vermesi ve Bizans'ın umudunun ancak 1176 Miryokefalon'la bitmesi.",
+       "olcut": [
+        "Zafer için tarihli somut bir olay verilmiş.",
+        "Süreç için en az iki sonraki gelişme verilmiş.",
+        "Abartılı bir «bir günde Türk oldu» ifadesi yok."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k6",
+        "k7",
+        "k21"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.3.5",
+     "ad": "Melikşah, Nizamülmülk ve dağılış",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k4",
+      "k5",
+      "k9",
+      "k20",
+      "k21"
+     ],
+     "ozet": "Melikşah ve veziri Nizamülmülk döneminde Büyük Selçuklu en geniş sınırlarına ulaştı; ikta, divan ve Nizamiye medreseleri devletin bel kemiği oldu. 1092'den sonra taht kavgaları, atabeylikler ve 1141 Katvan yenilgisi devleti dağıttı.",
+     "metin": [
+      "1072'de Alp Arslan öldüğünde oğlu Melikşah henüz on yedi-on sekiz yaşlarındaydı. Yanında babasının veziri Nizamülmülk vardı. Yirmi yıl sürecek bu ortaklık, Büyük Selçuklu Devleti'nin en geniş, en düzenli ve en parlak dönemidir.",
+      "Melikşah döneminde Selçuklu hâkimiyeti batıda Suriye ve Filistin'e, doğuda Maveraünnehir'e uzandı. Türkmen komutan Atsız bin Uvak 1070'lerde Kudüs'ü ve Şam'ı Fatımilerden aldı; Batı Karahanlıları 1089'da Selçuklu üstünlüğünü tanıdı. Melikşah'ın kardeşi Tutuş Suriye'de, Kutalmışoğlu Süleyman Şah Anadolu'da hanedanın kollarını kurdu (modelin bağlantı notu).",
+      "Devletin ordusu ikta sistemine dayanıyordu. Kaynağımız onu şöyle tanımlar: devlete ait toprakların gelirleri maaş karşılığı ordu komutanlarına verilir; toprağın mülkiyeti devlette kalır. Böylece hazineye yük olmadan büyük bir atlı ordu beslendi, üretim sürdü ve taşranın güvenliği sağlandı. Kaynağa göre Osmanlı tımarının atası budur.",
+      "Yönetimin merkezinde Divan-ı Saltanat vardı. Kaynak alt divanları sayar: yazışmalar için Divan-ı İnşa (Tuğra), maliye için Divan-ı İstifa, ordu işleri için Divan-ı Arz, denetim için Divan-ı İşraf. Sultanın çocukları, melikler, deneyim kazanmak için eyaletlere gönderilir, yanlarına atabey denen deneyimli devlet adamları verilirdi.",
+      "Nizamülmülk bu düzenin hem kurucusu hem de düşünürüdür. Melikşah için Farsça yazdığı Siyasetname, ya da asıl adıyla Siyerü'l-Mülûk, hükümdara adaleti, vergide ölçüyü, ordunun ve casusluk teşkilatının nasıl kurulacağını anlatır. Kaynaklar onu bir öğüt kitabı, yani siyasetname türünün en tanınmış örneklerinden sayar (modelin bağlantı notu).",
+      "Nizamülmülk'ün en kalıcı eseri medreselerdir. Bağdat'taki Nizamiye Medresesi 1067'de açıldı; benzerleri Nişabur, İsfahan, Herat gibi şehirlerde kuruldu. Kaynaklarımıza göre bu medreseler devlet tarafından finanse edildi, öğrencilerine yurt ve burs verdi, devlete bürokrat yetiştirdi ve Şii Fatımi ile Batıni propagandasına karşı Sünni düşünceyi savundu. İmam Gazali Bağdat Nizamiyesi'nde ders verdi.",
+      "Melikşah döneminde bilim de desteklendi. Şair ve matematikçi Ömer Hayyam'ın da aralarında bulunduğu bir heyet, İsfahan'da yeni bir güneş takvimi hazırladı; bu takvim sultanın lakabından ötürü Celâlî takvimi diye anılır (modelin bağlantı notu).",
+      "Parlak dönem 1092'de birden kapandı. Nizamülmülk Ekim 1092'de bir Batıni fedaisi tarafından öldürüldü; Hasan Sabbah'ın Alamut kalesindeki örgütünün işi olduğu kabul edilir, ama saraydaki rakiplerinin parmağı olduğunu düşünenler de vardır. Bir ay sonra Melikşah da Bağdat'ta öldü (modelin bağlantı notu).",
+      "Melikşah'tan sonra oğulları Berkyaruk, Muhammed Tapar ve Sencer arasında taht kavgaları başladı. Bu dönemde atabeyler, yanlarındaki genç meliklerin adına kendi hanedanlarını kurdu: Musul'da Zengiler, Şam'da Böriler, Azerbaycan'da İldenizliler, Fars'ta Salgurlular. Kaynağımız atabeylerin merkezi otorite zayıflayınca bağımsızlaştığını açıkça yazar.",
+      "Sultan Sencer (1118-1157) Horasan'dan devleti bir süre ayakta tuttu. Ama 1141'de Semerkant yakınındaki Katvan'da Karahıtaylara ağır bir yenilgi aldı; kaynağa göre Büyük Selçuklu bu yenilgiyle yıkılış sürecine girdi. 1153'te vergi anlaşmazlığı yüzünden ayaklanan Oğuz boyları Sencer'i esir aldı; Sencer kurtulduktan kısa süre sonra, 1157'de öldü ve Büyük Selçuklu Devleti dağıldı (modelin bağlantı notu).",
+      "Selçuklu mirası bitmedi: Irak Selçukluları 1194'e, Kirman Selçukluları 1187'ye kadar yaşadı; Anadolu'daki Türkiye Selçukluları ise bir yüzyıl daha sürecek ve Osmanlıların doğduğu toprakları hazırlayacaktı (modelin bağlantı notu).",
+      "Özetle: Selçuklu devleti ikta, divan, atabeylik ve medrese gibi kurumlarla bir düzen kurdu; bu kurumlar Osmanlıya kadar uzandı. Ama ülkenin hanedanın ortak malı sayılması ve güçlü atabeyler, Melikşah'tan sonra devletin dağılmasını hızlandırdı."
+     ],
+     "not": "Kaynak k2, Katvan'dan sonra «Maveraünnehir ve Horasan Moğol kontrolüne geçti» der: bu yanlıştır. Maveraünnehir Karahıtay üstünlüğüne girdi, Horasan Selçuklu elinde kaldı (1153 Oğuz isyanına dek). Karahıtaylar (Kitanlar) k2'de «Moğol» diye anılıyor; kökenleri Moğol dilli Kitanlara dayanır, ama 13. yüzyıl Moğol İmparatorluğu ile karıştırılmamalı. k9'un Nizamiye için «tarihin ilk organize üniversite kampüs ağı» nitelemesi abartılı bulundu, derse alınmadı. Atsız, Celâlî takvimi, Nizamülmülk'ün ölümü ve atabeylik adları model bilgisidir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.3.5.a1",
+       "tur": "secmeli",
+       "soru": "İkta sistemi için hangisi doğrudur?",
+       "sec": [
+        "Toprağın mülkiyeti devlette kalır, geliri hizmet karşılığı komutana verilir.",
+        "Yalnız din adamlarına verilir.",
+        "Esnaf birliklerinin düzenidir.",
+        "Toprağın mülkiyeti komutana geçer."
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k4",
+        "k5"
+       ],
+       "cozum": [
+        "Kaynağa göre ikta sahibine toprağın geliri verilir, mülkiyeti devlette kalır; karşılığında asker besler.",
+        "Bu düzen Osmanlı tımarının atası sayılır."
+       ]
+      },
+      {
+       "id": "tarih.4.3.5.a2",
+       "tur": "secmeli",
+       "soru": "Büyük Selçukluda ordu işlerine bakan divan hangisidir?",
+       "sec": [
+        "Divan-ı İstifa",
+        "Divan-ı İşraf",
+        "Divan-ı Arz",
+        "Divan-ı İnşa"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k4",
+        "k5"
+       ],
+       "cozum": [
+        "Divan-ı Arz ordu işleriyle ilgilenirdi.",
+        "İstifa maliye, İşraf denetim, İnşa (Tuğra) yazışma divanıdır."
+       ]
+      },
+      {
+       "id": "tarih.4.3.5.a3",
+       "tur": "secmeli",
+       "soru": "Katvan Savaşı'nda (1141) Sultan Sencer'i yenen güç hangisidir?",
+       "sec": [
+        "Karahıtaylar",
+        "Harezmşahlar",
+        "Gazneliler",
+        "Bizans"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k2"
+       ],
+       "cozum": [
+        "Sencer 1141'de Semerkant yakınında Karahıtaylara yenildi.",
+        "Harezmşahlar bu dönemde Selçuklulara bağlıydı ve sonra Karahıtaylara vergi verdi."
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.4.4",
+   "ad": "Türkiye Selçukluları ve Anadolu beylikleri",
+   "onKosul": [
+    "tarih.4.3"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.4.4.k1",
+      "tur": "secmeli",
+      "soru": "Aşağıdaki savaşlardan hangisi Türkiye Selçukluları ile Bizans arasında yapılmıştır?",
+      "sec": [
+       "Yassıçemen",
+       "Kösedağ",
+       "Miryokefalon",
+       "Katvan"
+      ],
+      "dogru": "C",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k3"
+      ],
+      "cozum": [
+       "Miryokefalon (1176) II. Kılıç Arslan ile Manuel Komnenos arasındadır.",
+       "Yassıçemen Harezmşahlarla, Kösedağ Moğollarla, Katvan Büyük Selçuklu ile Karahıtaylar arasındadır."
+      ]
+     },
+     {
+      "id": "tarih.4.4.k2",
+      "tur": "secmeli",
+      "soru": "Birinci ve İkinci Beylikler dönemlerini ayıran olaylar sırasıyla hangileridir?",
+      "sec": [
+       "Malazgirt ve Kösedağ",
+       "Dandanakan ve Malazgirt",
+       "Miryokefalon ve Ankara",
+       "Pasinler ve Yassıçemen"
+      ],
+      "dogru": "A",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k2",
+       "k3"
+      ],
+      "cozum": [
+       "Birinci Beylikler Malazgirt'ten (1071) sonra, İkinci Beylikler Kösedağ'dan (1243) sonra ortaya çıktı.",
+       "Ankara (1402) Osmanlı tarihinde Fetret'i başlatır."
+      ]
+     },
+     {
+      "id": "tarih.4.4.k3",
+      "tur": "secmeli",
+      "soru": "I. Alaeddin Keykubad dönemiyle ilgili hangisi yanlıştır?",
+      "sec": [
+       "Alaiye (Alanya) alındı.",
+       "Kırım'daki Suğdak'a sefer düzenlendi.",
+       "Yassıçemen'de Celaleddin yenildi.",
+       "Kösedağ'da Moğollara yenildi."
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k3",
+       "k22"
+      ],
+      "cozum": [
+       "Kösedağ 1243'te, Keykubad'ın ölümünden sonra II. Gıyaseddin Keyhüsrev döneminde oldu.",
+       "Öteki üçü Keykubad dönemindedir."
+      ]
+     },
+     {
+      "id": "tarih.4.4.k4",
+      "tur": "secmeli",
+      "soru": "Selçuklu Anadolu'sunda esnafın üretim kalitesini, fiyatını ve meslek ahlakını düzenleyen kurum hangisidir?",
+      "sec": [
+       "Atabeylik",
+       "Gulam sistemi",
+       "İkta",
+       "Ahilik"
+      ],
+      "dogru": "D",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k4",
+       "k9"
+      ],
+      "cozum": [
+       "Ahilik, kaynağa göre narh, usta-çırak eğitimi ve meslek ahlakını düzenleyen esnaf birliğidir.",
+       "İkta toprak-asker, atabeylik şehzade eğitimi, gulam sistemi asker-köle düzenidir."
+      ]
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.4.4.1",
+     "ad": "Süleyman Şah, İznik ve Haçlılar",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k20",
+      "k22",
+      "k23"
+     ],
+     "ozet": "Kutalmışoğlu Süleyman Şah 1070'lerde İznik'i merkez yaparak Türkiye Selçuklu Devleti'ni kurdu. Oğlu I. Kılıç Arslan, Birinci Haçlı Seferi'nde İznik'i yitirdi, ama Anadolu'yu Haçlılara karşı korudu.",
+     "metin": [
+      "İznik Gölü'nün kıyısındaki İznik, 325'te Hristiyanlığın ilk büyük konsilinin toplandığı, İstanbul'a iki üç günlük yoldaki eski bir Bizans şehriydi. 1070'lerin sonunda bu şehrin surlarının içinde bir Türk sultanı oturuyordu. Malazgirt'ten birkaç yıl sonra Türkmenler Marmara kıyısına ulaşmıştı.",
+      "Bu sultan Kutalmışoğlu Süleyman Şah'tı. Babası Kutalmış, Alp Arslan'la taht kavgasında ölmüştü; Süleyman ve kardeşleri Anadolu'daki Türkmenlerin arasına katıldı. Bizans'taki taht kavgalarında taraflara asker vererek güç kazandı ve İznik'e yerleşti (modelin bağlantı notu).",
+      "Türkiye Selçuklu Devleti'nin kuruluş tarihi kesin değildir. Ders kitapları 1075'i kabul eder; ama İznik'in alınışı için kaynaklarda 1075 ile 1081 arasında farklı tarihler geçer. Kesin olan, Süleyman Şah'ın 1080'lerin başında Batı ve Orta Anadolu'nun büyük kısmına hâkim olduğudur (modelin bağlantı notu).",
+      "Süleyman Şah 1084'te Antakya'yı aldı ve güneydoğuya, Suriye'ye yöneldi. Burada Melikşah'ın kardeşi, Suriye Selçuklu meliki Tutuş'la çatıştı ve 1086'da Halep yakınlarındaki savaşta öldü. Oğlu Kılıç Arslan Melikşah'ın sarayına götürüldü (modelin bağlantı notu).",
+      "Melikşah'ın ölümünden sonra, 1092'de I. Kılıç Arslan serbest kalıp İznik'e döndü. Bu yıllarda İzmir'de Çaka Bey bir donanma kurmuş, Ege adalarına akınlar yapıyor ve İstanbul'u denizden tehdit ediyordu. Kaynağımız Çaka Beyliği'ni Malazgirt sonrası ilk beylikler arasında sayar. Bizans prensesi Anna Komnena'nın anlatımına göre Kılıç Arslan, Bizans'ın kışkırtmasıyla Çaka Bey'i ortadan kaldırdı (modelin bağlantı notu).",
+      "1096'da Anadolu'ya Avrupa'dan beklenmedik bir kalabalık geldi: Papa II. Urbanus'un 1095'teki çağrısıyla yola çıkan Haçlılar. İlk gelenler, Pierre l'Ermite'in peşindeki düzensiz «Halk Haçlıları»ydı; Kılıç Arslan'ın birlikleri onları İznik yakınlarında bozguna uğrattı (modelin bağlantı notu).",
+      "1097'de ise asıl ordu, Avrupalı şövalyelerin düzenli birlikleri geldi. Haçlılar İznik'i kuşattı; şehir Haziran 1097'de Bizans'a teslim oldu. 1 Temmuz 1097'de Eskişehir yakınlarındaki Dorylaion'da Kılıç Arslan yenildi ve Haçlılar Anadolu'yu geçip Antakya ile Kudüs'e yürüdü (modelin bağlantı notu).",
+      "İznik'in kaybından sonra Türkiye Selçukluları merkezlerini İç Anadolu'ya, sonunda Konya'ya taşıdı. 1101'de Anadolu'dan geçmek isteyen yeni Haçlı orduları ise Kılıç Arslan ile Danişmendli Gümüştekin Ahmed Gazi'nin birleşik kuvvetlerine yenildi; bu kez Haçlılar Anadolu'yu geçemedi (modelin bağlantı notu).",
+      "Kılıç Arslan sonra doğuya, Musul'a yöneldi. 1107'de Habur Irmağı kıyısında Selçuklu komutanı Çavlı'ya karşı savaşırken ırmakta boğularak öldü. Ölümüyle devlet bir süre taht kavgalarıyla sarsıldı (modelin bağlantı notu).",
+      "Neden-sonuç: Birinci Haçlı Seferi Türkiye Selçuklularının Marmara'ya açılan ilk merkezini elinden aldı, ama Anadolu'daki Türk varlığını silemedi. Tersine, ortak düşman Türkmen beylerini bir süre birbirine yaklaştırdı ve devletin ağırlık merkezini İç Anadolu'ya, Türkmen yerleşmesinin yoğun olduğu yere taşıdı.",
+      "Özetle: Süleyman Şah Türkiye Selçuklu Devleti'ni İznik'te kurdu; I. Kılıç Arslan Haçlılara karşı İznik'i yitirdi ama devleti yaşattı, merkezi Konya'ya kaydı."
+     ],
+     "not": "Gemini kaynakları Türkiye Selçuklularının kuruluşunu ayrıntılı anlatmaz; Süleyman Şah, İznik, Antakya (1084), 1086, Çaka Bey, Haçlılar ve 1107 bilgileri model bilgisidir (Turan k22, Cahen k23, MEB). İznik'in alınış yılı kaynaklarda 1075-1081 arasında değişir. Çaka Bey'in sonu Anna Komnena'nın anlatımına dayanır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.4.1.a1",
+       "tur": "secmeli",
+       "soru": "Türkiye Selçuklu Devleti'nin ilk başkenti hangisidir?",
+       "sec": [
+        "İznik",
+        "Kayseri",
+        "Sivas",
+        "Konya"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k22"
+       ],
+       "cozum": [
+        "Süleyman Şah İznik'i merkez yaptı; Birinci Haçlı Seferi'nde İznik kaybedilince merkez İç Anadolu'ya, Konya'ya taşındı.",
+        "Kayseri ve Sivas Danişmendli ve sonra Selçuklu şehirleridir."
+       ]
+      },
+      {
+       "id": "tarih.4.4.1.a2",
+       "tur": "secmeli",
+       "soru": "1097'de İznik'in kaybedilmesinin sonucu hangisidir?",
+       "sec": [
+        "Haçlılar Anadolu'da bir krallık kurdu.",
+        "Bizans Malazgirt'i geri aldı.",
+        "Türkiye Selçukluları yıkıldı.",
+        "Selçuklu merkezi İç Anadolu'ya, Konya'ya kaydı."
+       ],
+       "dogru": "D",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k22",
+        "k20"
+       ],
+       "cozum": [
+        "İznik Bizans'a geçince Selçuklular ağırlık merkezini İç Anadolu'ya taşıdı.",
+        "Haçlılar Anadolu'yu geçip Antakya, Urfa ve Kudüs'te devletler kurdu; Anadolu'nun içinde krallık kurmadılar."
+       ]
+      },
+      {
+       "id": "tarih.4.4.1.a3",
+       "tur": "secmeli",
+       "soru": "İzmir'de donanma kurarak Ege adalarına akınlar yapan Türk beyi kimdir?",
+       "sec": [
+        "Danişmend Gazi",
+        "Artuk Bey",
+        "Çaka Bey",
+        "Saltuk Bey"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k2",
+        "k20"
+       ],
+       "cozum": [
+        "Çaka Bey İzmir'de bir donanma kurdu; Türk denizciliğinin ilk adımlarından sayılır.",
+        "Danişmend Gazi Sivas-Tokat, Artuk Bey Güneydoğu, Saltuk Bey Erzurum çevresiyle anılır."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.4.2",
+     "ad": "Anadolu'nun ilk Türk beylikleri",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k2",
+      "k6",
+      "k20",
+      "k22",
+      "k23"
+     ],
+     "ozet": "Malazgirt'ten sonra Anadolu'da Danişmendliler, Saltuklular, Mengücekliler, Artuklular ve Çaka Beyliği kuruldu. Bu beylikler Türkmen yerleşmesini kökleştirdi, şehirler kurdu ve kalıcı eserler bıraktı.",
+     "metin": [
+      "Malazgirt'ten sonra Anadolu'ya gelen Türkmenler tek bir devletin bayrağı altında değildi. Her bölgede bir bey, kendi aşiretleri ve aldığı şehirlerle bir yönetim kurdu. Kaynağımız bunları sayar: Saltuklular, Danişmendliler, Mengücekliler, Artuklular ve Çaka Beyliği. Bunlara Anadolu'nun ilk Türk beylikleri denir.",
+      "En güçlüleri Danişmendlilerdir. Kurucusu Danişmend Ahmed Gazi Sivas, Tokat, Niksar ve Amasya çevresine yerleşti. Danişmendli Gümüştekin Ahmed Gazi, kaynakların Melik Gazi diye andığı bey, 1100'de Malatya yakınında Antakya Haçlı prensi Bohemond'u esir aldı. Bu, Haçlılara karşı kazanılan ünlü başarılardan biridir (modelin bağlantı notu).",
+      "Danişmendliler ile Türkiye Selçukluları uzun süre Anadolu'nun önderliği için yarıştı. Danişmendlilerin adı Danişmendnâme destanında yaşadı: sınır gazilerinin kahramanlıklarını anlatan bu destan, sonraki yüzyıllarda yazıya geçirildi. Beylik 1178'de II. Kılıç Arslan tarafından Selçuklu topraklarına katıldı (modelin bağlantı notu).",
+      "Saltuklular Erzurum merkezliydi. Kurucusu Ebu'l-Kasım Saltuk'tur. Beylik doğuda Gürcülere karşı sınır bekçiliği yaptı ve 1202'de Türkiye Selçuklu sultanı II. Süleyman Şah tarafından ortadan kaldırıldı (modelin bağlantı notu).",
+      "Mengücekliler Erzincan, Kemah ve Divriği'de hüküm sürdü. Onların bugüne kalan en büyük eseri Divriği Ulu Camii ve Darüşşifası'dır: 1228-29'da Mengücekli Ahmed Şah ve eşi Turan Melek tarafından yaptırıldı, taş işçiliğiyle eşsizdir ve UNESCO Dünya Mirası listesindedir. Mengücekliler 13. yüzyılın ilk yarısında Selçuklu topraklarına katıldı (modelin bağlantı notu).",
+      "Artuklular Güneydoğu Anadolu'da Hasankeyf, Mardin, Diyarbakır ve Harput'ta kollar halinde yaşadı. Kurucuları Artuk Bey, Melikşah'ın komutanlarındandı. Mardin kolunun beyi İlgazi 1119'da Halep yakınında Antakya Haçlılarını ağır bir yenilgiye uğrattı; Haçlı kaynakları bu savaşı «Kanlı Ova» diye anar (modelin bağlantı notu).",
+      "Artuklular bilim ve mimaride iz bıraktı. Diyarbakır'daki Artuklu sarayında çalışan mühendis el-Cezerî, 1206'da otomatik makineleri, su saatlerini ve mekanizmaları anlatan büyük kitabını tamamladı. Silvan'daki Malabadi Köprüsü de Artuklu dönemi eseridir (modelin bağlantı notu).",
+      "Artukluların Mardin kolu, Anadolu beyliklerinin en uzun yaşayanlarındandır: 1409'da Karakoyunlular tarafından ortadan kaldırıldı (modelin bağlantı notu).",
+      "Bu beyliklerin ortak rolü nedir? Hepsi Türkmen yerleşmesini şehirlere ve kalelere bağladı, cami, medrese, köprü ve kümbet yaptırdı. Selçuklu sultanlarıyla zaman zaman savaştılar, zaman zaman birlikte Haçlılara karşı durdular. Sonunda çoğu Türkiye Selçuklu Devleti'ne katıldı ve Anadolu'nun siyasi birliği sağlandı.",
+      "Bir ayrıma dikkat: Malazgirt sonrası beyliklere «Birinci Beylikler Dönemi», Kösedağ'dan sonra çıkan Karamanoğulları, Germiyanoğulları ve Osmanoğulları gibi beyliklere «İkinci Beylikler Dönemi» denir. İkisini karıştırmak sık yapılan bir yanılgıdır.",
+      "Özetle: Danişmendliler Orta ve Kuzey Anadolu'da, Saltuklular Erzurum'da, Mengücekliler Erzincan ve Divriği'de, Artuklular Güneydoğu'da, Çaka Bey İzmir'de Türk varlığını kökleştirdi."
+     ],
+     "not": "Kaynak k2 ve k6 yalnız beylik adlarını sayar. Kurucular, şehirler, tarihler, Bohemond (1100), Kanlı Ova (1119), el-Cezerî (1206), Divriği (1228-29) ve beyliklerin sonu model bilgisidir. Danişmendlilerin ve Saltukluların kuruluş yılları kaynaklarda farklı verildiği için yazılmadı.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.4.2.a1",
+       "tur": "secmeli",
+       "soru": "Divriği Ulu Camii ve Darüşşifası hangi beyliğin eseridir?",
+       "sec": [
+        "Artuklular",
+        "Mengücekliler",
+        "Saltuklular",
+        "Danişmendliler"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k22"
+       ],
+       "cozum": [
+        "Divriği Ulu Camii ve Darüşşifası Mengücekli Ahmed Şah ve Turan Melek'in eseridir.",
+        "Artuklular Mardin, Hasankeyf ve Diyarbakır'da eser bıraktı."
+       ]
+      },
+      {
+       "id": "tarih.4.4.2.a2",
+       "tur": "secmeli",
+       "soru": "Antakya Haçlı prensi Bohemond'u 1100'de esir alan beylik hangisidir?",
+       "sec": [
+        "Danişmendliler",
+        "Çaka Beyliği",
+        "Mengücekliler",
+        "Saltuklular"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k22",
+        "k23"
+       ],
+       "cozum": [
+        "Danişmendli Gümüştekin Ahmed Gazi Bohemond'u Malatya yakınında esir aldı.",
+        "Çaka Bey Ege'de, Saltuklular Erzurum'da, Mengücekliler Erzincan'da hüküm sürüyordu."
+       ]
+      },
+      {
+       "id": "tarih.4.4.2.a3",
+       "tur": "secmeli",
+       "soru": "Otomatik makineleri anlatan kitabını 1206'da Artuklu sarayında tamamlayan bilgin kimdir?",
+       "sec": [
+        "Bîrûnî",
+        "Ali Kuşçu",
+        "el-Cezerî",
+        "Ömer Hayyam"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k22"
+       ],
+       "cozum": [
+        "El-Cezerî Diyarbakır'daki Artuklu sarayında çalıştı ve 1206'da kitabını bitirdi.",
+        "Bîrûnî Gazneli, Ali Kuşçu Timurlu ve Osmanlı, Ömer Hayyam Büyük Selçuklu dönemi bilginidir."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.4.3",
+     "ad": "Miryokefalon'dan Alaeddin Keykubad'a",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k3",
+      "k6",
+      "k10",
+      "k20",
+      "k22"
+     ],
+     "ozet": "II. Kılıç Arslan 1176'da Miryokefalon'da Bizans'ı yenerek Anadolu'nun Türk yurdu olduğunu kesinleştirdi. 13. yüzyılın başında Antalya, Sinop ve Alanya alındı; I. Alaeddin Keykubad döneminde devlet zirveye çıktı.",
+     "metin": [
+      "1176 Eylülünde, Eğirdir Gölü dolaylarındaki dar bir geçitte, Bizans İmparatoru Manuel Komnenos'un büyük ordusu Konya'ya doğru ilerliyordu. Geçidin iki yanındaki tepelerde Türkiye Selçuklu Sultanı II. Kılıç Arslan'ın askerleri bekliyordu. Savaşın yeri kaynaklarda Miryokefalon olarak geçer; tam olarak nerede olduğu tartışmalıdır (modelin bağlantı notu).",
+      "II. Kılıç Arslan (1155-1192) Danişmendlileri Selçuklu topraklarına katarak Anadolu'da tek güç olmaya yaklaşmıştı. Manuel ise Türkleri Anadolu'dan çıkarıp Konya'yı almayı hedefliyordu. Selçuklu süvarisi Bizans ordusunu geçitte sıkıştırdı ve ağır bir yenilgiye uğrattı (modelin bağlantı notu).",
+      "Kaynaklarımız sonucu şöyle verir: Bizans'ın Türkleri Anadolu'dan atma umudu tamamen sona erdi; bu yüzden Miryokefalon «yurt tutan» ya da «kesinleştiren savaş» diye anılır. Bizans tarihçisi Niketas Khoniates, Manuel'in bu yenilgiyi Romen Diyojen'in Malazgirt'teki felaketine benzettiğini yazar (modelin bağlantı notu).",
+      "Kaynaklarımız ayrıca bu savaştan sonra Avrupalıların Anadolu için «Turchia» (Türkiye) adını kullanmaya başladığını yazar. Bu adın Batı kaynaklarında ilk ne zaman geçtiği kesin değildir; 12. yüzyılın sonundaki Haçlı anlatılarında görülmeye başlar. Ama ad değişikliği, Avrupa'nın gözünde Anadolu'nun artık Türklerin ülkesi olduğunu gösterir.",
+      "1190'da Üçüncü Haçlı Seferi'nde Alman İmparatoru Friedrich Barbarossa Konya'ya girdi, ama kısa süre sonra Silifke yakınında Göksu Irmağı'nda boğularak öldü. II. Kılıç Arslan ise ülkesini on bir oğlu arasında paylaştırdı; ölümünden sonra taht kavgaları devleti bir süre sarstı (modelin bağlantı notu).",
+      "Kavgalardan galip çıkan I. Gıyaseddin Keyhüsrev 1207'de Antalya'yı aldı. I. İzzeddin Keykavus 1214'te Sinop'u aldı. Böylece Türkiye Selçukluları hem Akdeniz'e hem Karadeniz'e açıldı. Sivas'taki I. İzzeddin Keykavus Darüşşifası bu dönemin eseridir (modelin bağlantı notu).",
+      "I. Alaeddin Keykubad (1220-1237) dönemi devletin en parlak çağıdır. 1221'de Bizans elindeki Kalonoros kalesini alıp Alaiye (bugünkü Alanya) adını verdi, ünlü Kızılkule'yi yaptırdı. Kırım'daki Suğdak'a bir deniz seferi düzenledi; Kırım'da bir Selçuklu üssü kuruldu. Seferin yılı kaynaklarda farklı verilir (modelin bağlantı notu).",
+      "Keykubad ticaret yollarını güvenceye aldı ve kervansaray ağını genişletti. Aksaray yakınındaki Sultan Hanı (1229) onun döneminin en büyük hanlarındandır. Kaynağımız bu ağın, kervanların bir günde yürüyebileceği 30-40 kilometrelik aralıklarla kurulduğunu yazar.",
+      "Doğuda Harezmşah Celaleddin'le karşılaşma kaçınılmaz oldu. 1230'da Erzincan yakınındaki Yassıçemen'de Keykubad, Eyyubi müttefikleriyle birlikte Celaleddin'i yendi. Kaynağımız bunun bedelini de yazar: tampon bölge kalktı ve Moğol istilasına zemin hazırlandı. Keykubad Ahlat ve Erzurum'u da Selçuklu topraklarına kattı.",
+      "Keykubad 1237'de Kayseri'de öldü; zehirlendiği rivayet edilir. Beyşehir Gölü kıyısında yaptırdığı Kubadabad Sarayı'nın çinileri, bu dönemin saray sanatının en güzel örneklerindendir (modelin bağlantı notu).",
+      "Özetle: Miryokefalon (1176) Malazgirt'in açtığı kapıyı kalıcı kıldı. Antalya, Sinop ve Alaiye'nin alınmasıyla devlet iki denize açıldı; Alaeddin Keykubad döneminde Türkiye Selçukluları siyasi ve ekonomik zirvesine ulaştı."
+     ],
+     "not": "«Turchia» adının ilk kullanımı kaynaklarda (k3, k6) Miryokefalon'a bağlanır; ilk geçtiği yer ve yıl kesin değildir. Khoniates'in aktarımı, Barbarossa (1190), Antalya (1207), Sinop (1214), Alaiye (1221), Sultan Hanı (1229) ve Kubadabad bilgileri model bilgisidir. Suğdak seferinin yılı kaynaklarda farklıdır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.4.3.a1",
+       "tur": "secmeli",
+       "soru": "Miryokefalon Savaşı'nın (1176) Anadolu tarihi açısından anlamı hangisidir?",
+       "sec": [
+        "Anadolu'nun kapılarının Türklere açılması",
+        "Bizans'ın Türkleri Anadolu'dan atma umudunun sona ermesi",
+        "Moğol istilasının başlaması",
+        "Haçlı seferlerinin başlaması"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k3",
+        "k6"
+       ],
+       "cozum": [
+        "Kaynağa göre Miryokefalon'la Bizans'ın Türkleri Anadolu'dan atma umudu bitti; bu yüzden «yurt tutan savaş» denir.",
+        "Kapıları açan Malazgirt'tir (A)."
+       ]
+      },
+      {
+       "id": "tarih.4.4.3.a2",
+       "tur": "secmeli",
+       "soru": "Türkiye Selçuklularının Akdeniz ve Karadeniz'e açılmasını sağlayan fetihler hangi sıradadır?",
+       "sec": [
+        "Sinop, Antalya, Alaiye",
+        "Antalya, Sinop, Alaiye",
+        "Alaiye, Antalya, Sinop",
+        "Antalya, Alaiye, Sinop"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k22"
+       ],
+       "cozum": [
+        "Antalya 1207, Sinop 1214, Alaiye (Alanya) 1221.",
+        "Antalya ve Alaiye Akdeniz, Sinop Karadeniz kıyısındadır."
+       ]
+      },
+      {
+       "id": "tarih.4.4.3.a3",
+       "tur": "secmeli",
+       "soru": "I. Alaeddin Keykubad döneminde yapılan Sultan Hanı nerededir?",
+       "sec": [
+        "Sinop",
+        "Aksaray yakınında",
+        "Erzurum",
+        "İznik"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k10",
+        "k22"
+       ],
+       "cozum": [
+        "Aksaray yakınındaki Sultan Hanı 1229'da Keykubad döneminde yapıldı.",
+        "Kayseri yakınında da aynı adı taşıyan ikinci bir Sultan Hanı vardır."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.4.4",
+     "ad": "Kösedağ ve beylikler dönemi",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k3",
+      "k8",
+      "k20",
+      "k22",
+      "k23",
+      "k37"
+     ],
+     "ozet": "1240 Babai isyanı devleti sarstı, 1243'te Kösedağ'da Moğollara yenilen Türkiye Selçukluları Moğol tâbisi oldu. Merkez zayıfladıkça Karamanoğulları, Germiyanoğulları ve Osmanoğulları gibi yeni beylikler yükseldi.",
+     "metin": [
+      "Alaeddin Keykubad'ın ölümünden yalnız altı yıl sonra, 1243 yazında Sivas ile Erzincan arasındaki Kösedağ'da Selçuklu ordusu Moğollar karşısında dağıldı. Bir devletin zirveden çöküşe bu kadar hızlı inmesinin sebepleri bir savaşla değil, birkaç yıllık bir zincirle açıklanır.",
+      "Zincirin ilk halkası Babai isyanıdır. 1240'ta Baba İlyas ve müridi Baba İshak'ın önderliğinde Türkmenler, ağır vergiler ve yerleşik yönetimin baskısına karşı ayaklandı. Ahmet Yaşar Ocak'ın ayrıntılı incelediği bu isyan, ancak paralı Frank askerlerinin de katıldığı bir orduyla bastırılabildi ve devletin askeri gücünü yıprattı.",
+      "II. Gıyaseddin Keyhüsrev (1237-1246) tecrübesiz bir sultandı ve saray entrikalarıyla uğraşıyordu. Bu sırada Moğol komutanı Baycu Noyan Erzurum'u aldı ve batıya yürüdü. Kaynağımız Kösedağ'ı «sevk zaafıyla» dağılan bir ordunun yenilgisi olarak anlatır: panik ve kötü komuta, kalabalık bir orduyu bir günde dağıttı.",
+      "Kösedağ'dan sonra Türkiye Selçukluları Moğollara vergi veren bir tâbi devlet oldu. 1256'da Hülagü'nün kurduğu İlhanlı Devleti ile Anadolu doğrudan İlhanlı denetimine girdi; Selçuklu sultanları adları duran ama yetkisi kalmayan hükümdarlara dönüştü (modelin bağlantı notu).",
+      "Bu dönemin güçlü adamları vezirlerdi. Pervane Muineddin Süleyman Moğollarla Selçuklu sarayı arasında yıllarca denge kurdu. 1277'de Memlük Sultanı Baybars Elbistan'da İlhanlı ordusunu yenip Kayseri'ye girdi; ama kalıcı bir yardım veremedi ve Moğolların intikamı Anadolu'ya yeni yıkımlar getirdi (modelin bağlantı notu).",
+      "Aynı yıl, 1277'de Karamanoğlu Mehmed Bey Konya'ya girdi. Sonraki bir Karaman tarihine göre Mehmed Bey divanda, dergâhta ve mecliste Türkçeden başka dil kullanılmamasını buyurdu. Bu kayıt çok sonra yazıldığı için sözün kelimesi kelimesine doğruluğu tartışmalıdır; ama Türkçenin yazı ve yönetim dili olarak yükselişinin simgesi olmuştur (modelin bağlantı notu).",
+      "Türkiye Selçuklu Devleti 14. yüzyılın başında sona erdi; son sultan II. Mesud'un ölümü genellikle 1308 dolaylarına konur. Anadolu, kaynağımızın deyişiyle Türk siyasi birliğinin parçalandığı «İkinci Beylikler Dönemi»ne girdi.",
+      "Bu beyliklerin en güçlüsü Karamanoğullarıydı: Ermenek ve Larende'den (bugünkü Karaman) Konya'ya uzanan ülkeleriyle kendilerini Selçukluların mirasçısı saydılar. Germiyanoğulları Kütahya'da, Candaroğulları Kastamonu ve Sinop'ta, Aydınoğulları Birgi ve İzmir'de (Umur Bey'in donanmasıyla), Saruhanoğulları Manisa'da, Menteşeoğulları Milas'ta, Karesioğulları Balıkesir'de, Hamidoğulları Eğirdir'de, Eretna Beyliği Sivas ve Kayseri'de, Dulkadiroğulları Maraş ve Elbistan'da hüküm sürdü (modelin bağlantı notu).",
+      "Bizans sınırındaki Söğüt ve Domaniç çevresinde ise küçük bir beylik vardı: Osmanoğulları. Kırılma noktaları kaynağımız bu dönemi «Batı Anadolu'da Osmanlı dahil Türkmen beyliklerinin yükselişi» olarak özetler. Bu beyliğin bir dünya devletine dönüşmesi bu aşamanın değil, sonraki aşamanın konusudur.",
+      "Beylikler dönemi yalnız bölünme değildir. Merkezden uzak beylik saraylarında Türkçe eserler çoğaldı: Germiyan sarayında Ahmedî ve Şeyhî gibi şairler yetişti, Aydınoğulları ve Candaroğulları Farsça ve Arapça eserleri Türkçeye çevirtti. Türkçe Anadolu'nun yazı dili olarak kökleşti (modelin bağlantı notu).",
+      "Özetle: Babai isyanı (1240) ve Kösedağ (1243) Türkiye Selçuklu merkezini çökertti; Moğol vesayeti yarım yüzyıl sürdü ve Anadolu, Osmanlıların da aralarında olduğu yeni beyliklere bölündü."
+     ],
+     "not": "Kaynak k3 Kösedağ'ı «Moğol İlhanlılar» ile yapılmış gösterir; İlhanlı Devleti 1256'da kuruldu, 1243'te Baycu Noyan Büyük Moğol İmparatorluğu adına savaşıyordu. Karamanoğlu Mehmed Bey'in Türkçe buyruğu Şikârî'nin geç bir Karaman tarihine dayanır. Kösedağ'ın kesin günü kaynaklarda farklı verildiği için yalnız «1243 yazı» denildi. Beylik merkezleri ve Selçukluların 1308 sonu model bilgisidir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.4.4.a1",
+       "tur": "secmeli",
+       "soru": "Kösedağ Savaşı'nda (1243) Türkiye Selçuklularını yenen Moğol komutanı kimdir?",
+       "sec": [
+        "Hülagü",
+        "Baycu Noyan",
+        "Kitbuka",
+        "Batu Han"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k3",
+        "k8"
+       ],
+       "cozum": [
+        "Kaynağa göre Kösedağ'da Moğolları Baycu Noyan yönetiyordu.",
+        "Hülagü 1256'da İlhanlı Devleti'ni kurdu; Kitbuka Ayn Calut'ta yenilen komutandır."
+       ]
+      },
+      {
+       "id": "tarih.4.4.4.a2",
+       "tur": "secmeli",
+       "soru": "Kösedağ'dan önce Türkiye Selçuklu ordusunu yıpratan Türkmen ayaklanması hangisidir?",
+       "sec": [
+        "Babai isyanı",
+        "Celali isyanları",
+        "Şeyh Bedreddin isyanı",
+        "Oğuz isyanı"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k37"
+       ],
+       "cozum": [
+        "1240'ta Baba İlyas ve Baba İshak önderliğindeki Babai isyanı devleti zayıflattı.",
+        "Celali isyanları ve Şeyh Bedreddin Osmanlı dönemine, Oğuz isyanı (1153) Büyük Selçukluya aittir."
+       ]
+      },
+      {
+       "id": "tarih.4.4.4.a3",
+       "tur": "secmeli",
+       "soru": "Aşağıdaki beylik-merkez eşleştirmelerinden hangisi yanlıştır?",
+       "sec": [
+        "Germiyanoğulları: Kütahya",
+        "Candaroğulları: Kastamonu",
+        "Karamanoğulları: Manisa",
+        "Menteşeoğulları: Milas"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k23"
+       ],
+       "cozum": [
+        "Karamanoğullarının merkezi Ermenek, Larende (Karaman) ve Konya'dır; Manisa Saruhanoğullarının merkezidir.",
+        "Öteki eşleştirmeler doğrudur."
+       ]
+      },
+      {
+       "id": "tarih.4.4.4.a4",
+       "tur": "acik",
+       "soru": "Kösedağ'ı «tek bir günde kaybedilen savaş» olarak değil, bir sürecin sonucu olarak açıkla: en az iki önceki gelişmeyi ve bir sonucu yaz.",
+       "dogru": "Önceki gelişmeler: Yassıçemen'de (1230) Harezmşahların yıkılmasıyla tampon kalktı; Babai isyanı (1240) orduyu ve devleti yıprattı; II. Gıyaseddin Keyhüsrev tecrübesizdi. Sonuç: Selçuklular Moğol tâbisi oldu ve beylikler dönemi başladı.",
+       "olcut": [
+        "En az iki önceki gelişme tarihleriyle verilmiş.",
+        "En az bir sonuç yazılmış.",
+        "Neden-sonuç bağı kurulmuş."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k3",
+        "k8",
+        "k37"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.4.5",
+     "ad": "Selçuklu Anadolu'sunda toplum ve kültür",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k4",
+      "k9",
+      "k10",
+      "k15",
+      "k16",
+      "k20",
+      "k22"
+     ],
+     "ozet": "Türkiye Selçukluları kervansaraylar, medreseler, darüşşifalar ve vakıflarla Anadolu'yu şehirleştirdi. Ahilik esnafı örgütledi; Mevlânâ ve Yunus Emre Anadolu'nun düşünce ve dil dünyasını derinden etkiledi.",
+     "metin": [
+      "Konya'da Karatay Medresesi'nin kubbesine bakan biri, yıldızlarla dolu bir gök kubbe görür: firuze ve lacivert çinilerle döşenmiş, gece gökyüzünü andıran bir iç mekân. 13. yüzyıl Selçuklu Anadolu'su, siyasi çalkantılara rağmen taşta ve çinide kalıcı bir medeniyet bıraktı.",
+      "Ticaret bu medeniyetin damarlarıydı. Kaynaklarımız Selçuklu kervansaraylarının kervanların bir günde yürüyebileceği 30-40 kilometrelik aralıklarla yapıldığını, yolculara konaklama, yemek, hekim ve veteriner hizmetinin verildiğini yazar. Bu hizmetlerin ayrıntısı her hanın vakfiyesine göre değişirdi; kaynakların «her tüccara üç gün ücretsiz» genellemesi bazı vakfiyelere dayanır.",
+      "Kaynaklar ayrıca yolda soyulan tüccarın zararının devlet hazinesinden karşılandığını anlatır. Gerçekten de Selçuklu sultanlarının yabancı tüccarlarla yaptığı antlaşmalar ve Kırım seferinin tüccar şikâyetleriyle bağlantısı, devletin ticaret güvenliğini bir görev saydığını gösterir. Ama bunu «dünyanın ilk sigortası» diye adlandırmak abartılıdır (modelin bağlantı notu).",
+      "Şehirlerde esnaf ahilik teşkilatında örgütlendi. Kaynağımıza göre Ahi Evran'ın önderliğiyle anılan bu birlik üretimde kaliteyi, narhı, usta-çırak eğitimini ve meslek ahlakını düzenledi; Moğol istilası döneminde şehirlerin savunmasında da rol oynadı. Kadınların teşkilatına Bacıyan-ı Rum denir.",
+      "Ahilik bir fütüvvet, yani yiğitlik ve cömertlik ahlakına dayanıyordu. 1330'larda Anadolu'yu gezen Faslı seyyah İbn Battûta, neredeyse her şehirde ahilerin yolcuları zaviyelerinde konuk ettiğini ve onlara yemek verdiğini hayranlıkla anlatır (modelin bağlantı notu).",
+      "Selçuklu Anadolu'su hastaneleriyle de tanınır. Kayseri'deki Gevher Nesibe Darüşşifası (1206) hem hastane hem tıp okuluydu; Sivas'taki I. İzzeddin Keykavus Darüşşifası ve Divriği Darüşşifası onu izledi. Konya'daki Karatay ve İnce Minareli, Sivas'taki Gök Medrese ve Erzurum'daki Çifte Minareli medreseler de bu dönemin eserleridir (modelin bağlantı notu).",
+      "Düşünce dünyasının en büyük adı Mevlânâ Celâleddîn-i Rûmî'dir. 1207'de Belh'te doğdu, ailesi Moğol tehlikesi önünden batıya göçtü ve sonunda Konya'ya yerleşti. 1244'te Şems-i Tebrîzî ile tanışması hayatını değiştirdi; 1273'te Konya'da öldü (modelin bağlantı notu).",
+      "Kaynağımıza göre Mevlânâ eserlerini Farsça yazdı: Mesnevî (yaklaşık 25.700 beyit), Dîvân-ı Kebîr, Fîhi Mâ Fîh ve Mektûbât. Mesnevî'nin ney ile başlayan ilk beyitleri, kamışlıktan koparılan neyin ayrılık şikâyetiyle insanın kökünü arayışını anlatır. Mevlevîlik tarikatını onun ölümünden sonra oğlu Sultan Veled düzenledi.",
+      "Yunus Emre ise aynı tasavvuf düşüncesini sade bir Anadolu Türkçesiyle söyledi. 13. yüzyılın ortalarından 14. yüzyılın başına kadar yaşadığı kabul edilir; doğum ve ölüm yılları kesin değildir. Kaynağımız onu ilahi türünün kurucusu, hem hece hem aruz kullanan şair olarak tanıtır; eserleri Divan ve Risâletü'n-Nushiyye'dir.",
+      "Yunus'un şiirinin gücü, kolay görünen ama taklit edilemeyen sadeliğindedir. Onunla Türkçe, Anadolu'da yalnız konuşulan değil, en derin düşüncelerin söylendiği bir şiir dili oldu. Mevlânâ'nın Farsçası ile Yunus'un Türkçesi, Selçuklu Anadolu'sunun iki sesidir.",
+      "Bir uyarı: Mevlânâ'ya ve Yunus Emre'ye atfedilen bazı ünlü dizeler ve sözler onların sahih eserlerinde bulunmaz; sonradan onlara mal edilmiştir. Bir sözü alıntılarken hangi eserden olduğunu sormak, kaynak tenkidinin günlük hayattaki karşılığıdır.",
+      "Özetle: Selçuklu Anadolu'su kervansaray ve ahilikle ticareti, darüşşifa ve medreseyle şehri, Mevlânâ ve Yunus Emre'yle düşünceyi kurdu. Bu miras, sonraki beyliklerin ve Osmanlıların üzerinde yükseldiği temeldir."
+     ],
+     "not": "Kaynak k9 ve k10 kervansaraylar için «üç gün ücretsiz» ve «dünyanın ilk devlet sigortası» der; ilki bazı vakfiyelere dayanan bir genellemedir, ikincisi abartılıdır. Ahiliği «Ahi Evran tarafından kurulan» diye vermek (k4) basitleştirmedir; teşkilat daha eski fütüvvet geleneğine dayanır. Gemini kaynaklarında Mevlânâ'ya «Gel, ne olursan ol» (ESP/felsefe/dogu_ve_islam_felsefesi) ve Yunus Emre'ye «Yaratılanı severiz…» atfı geçer; bu iki sözün sahihliği tartışmalıdır, derse alınmadı. Darüşşifa, medrese, İbn Battûta ve hayat tarihleri model bilgisidir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.4.5.a1",
+       "tur": "secmeli",
+       "soru": "Ahilik teşkilatının kadınlar koluna ne ad verilir?",
+       "sec": [
+        "Bacıyan-ı Rum",
+        "Abdalan-ı Rum",
+        "Gaziyan-ı Rum",
+        "Fütüvvet"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k4"
+       ],
+       "cozum": [
+        "Kaynağa göre ahiliğin kadınlar koluna Bacıyan-ı Rum denir.",
+        "Fütüvvet ahiliğin dayandığı yiğitlik ve cömertlik ahlakıdır."
+       ]
+      },
+      {
+       "id": "tarih.4.4.5.a2",
+       "tur": "secmeli",
+       "soru": "Mevlânâ için hangisi doğrudur?",
+       "sec": [
+        "Eserlerini Türkçe yazmıştır.",
+        "Mesnevî'si Farsçadır.",
+        "Mevlevîliği Osmanlı döneminde kurmuştur.",
+        "Kutadgu Bilig'in yazarıdır."
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k16"
+       ],
+       "cozum": [
+        "Kaynağa göre Mevlânâ eserlerini Farsça yazdı; Mesnevî bunların en ünlüsüdür.",
+        "Mevlevîliği ölümünden sonra oğlu Sultan Veled düzenledi."
+       ]
+      },
+      {
+       "id": "tarih.4.4.5.a3",
+       "tur": "secmeli",
+       "soru": "Kayseri'de 1206'da kurulan ve hem hastane hem tıp okulu olan yapı hangisidir?",
+       "sec": [
+        "Karatay Medresesi",
+        "Gevher Nesibe Darüşşifası",
+        "Gök Medrese",
+        "Sultan Hanı"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20",
+        "k22"
+       ],
+       "cozum": [
+        "Gevher Nesibe Darüşşifası Anadolu Selçuklularının ilk büyük hastane ve tıp okuludur.",
+        "Karatay Konya'da, Gök Medrese Sivas'ta bir medresedir; Sultan Hanı kervansaraydır."
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tarih.4.5",
+   "ad": "Moğol sonrası büyük Türk devletleri",
+   "onKosul": [
+    "tarih.4.4"
+   ],
+   "kapi": {
+    "esik": 0.75,
+    "sorular": [
+     {
+      "id": "tarih.4.5.k1",
+      "tur": "secmeli",
+      "soru": "Aşağıdaki hükümdar-başkent eşleştirmelerinden hangisi doğrudur?",
+      "sec": [
+       "Timur: Herat",
+       "Batu Han: Saray",
+       "Uluğ Bey: Agra",
+       "Babür: Semerkant"
+      ],
+      "dogru": "B",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k33"
+      ],
+      "cozum": [
+       "Batu Han Altın Orda'nın merkezi olarak İdil kıyısında Saray'ı kurdu.",
+       "Timur'un başkenti Semerkant, Uluğ Bey'in yönettiği şehir Semerkant'tır; Babür Agra'da öldü."
+      ]
+     },
+     {
+      "id": "tarih.4.5.k2",
+      "tur": "secmeli",
+      "soru": "Ayn Calut Savaşı'nın (1260) en önemli sonucu hangisidir?",
+      "sec": [
+       "Moğolların batıya, Mısır'a ilerleyişinin durması",
+       "Bağdat'ın Moğollarca yıkılması",
+       "Haçlıların Kudüs'ü alması",
+       "Altın Orda'nın kurulması"
+      ],
+      "dogru": "A",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k3",
+       "k36"
+      ],
+      "cozum": [
+       "Kaynağa göre Ayn Calut'la Suriye ve Mısır Moğol istilasından kurtuldu.",
+       "Bağdat 1258'de, Ayn Calut'tan önce yıkılmıştı."
+      ]
+     },
+     {
+      "id": "tarih.4.5.k3",
+      "tur": "secmeli",
+      "soru": "Çağatay Türkçesiyle yazılmış eserlerden biri olmayan hangisidir?",
+      "sec": [
+       "Babürname",
+       "Muhakemetü'l-Lugateyn",
+       "Mesnevî",
+       "Mecâlisü'n-Nefâis"
+      ],
+      "dogru": "C",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k11",
+       "k16",
+       "k35"
+      ],
+      "cozum": [
+       "Mesnevî Mevlânâ'nın Farsça eseridir.",
+       "Babürname Babür'ün, Muhakemetü'l-Lugateyn ve Mecâlisü'n-Nefâis Nevai'nin Çağatay Türkçesiyle yazdığı eserlerdir."
+      ]
+     },
+     {
+      "id": "tarih.4.5.k4",
+      "tur": "secmeli",
+      "soru": "Karakoyunlu Devleti'ne son veren hükümdar kimdir?",
+      "sec": [
+       "Timur",
+       "Fatih Sultan Mehmed",
+       "Uzun Hasan",
+       "Şah İsmail"
+      ],
+      "dogru": "C",
+      "durum": "taslak",
+      "yazan": "model",
+      "kaynak": [
+       "k20"
+      ],
+      "cozum": [
+       "Akkoyunlu Uzun Hasan 1467'de Cihan Şah'ı yenerek Karakoyunlulara son verdi.",
+       "Fatih Akkoyunluları Otlukbeli'nde yendi; Şah İsmail son Akkoyunlu hükümdarlarını yendi."
+      ]
+     }
+    ]
+   },
+   "dersler": [
+    {
+     "id": "tarih.4.5.1",
+     "ad": "Altın Orda ve Çağatay: Moğol uluslarının Türkleşmesi",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k33",
+      "k24",
+      "k20"
+     ],
+     "ozet": "Cengiz Han'ın torunlarının kurduğu Altın Orda ve Çağatay ulusları, Kıpçak ve Türk halklarının arasında zamanla Türkleşti ve Müslüman oldu. Altın Orda'nın mirası Kazan, Kırım ve Astrahan hanlıklarına, Çağatay'ınki ise Çağatay Türkçesine kaldı.",
+     "metin": [
+      "Cengiz Han 1227'de öldüğünde ülkesi oğulları arasında uluslara bölündü. Ama Moğollar sayıca azdı; fethettikleri bozkırların halkı büyük ölçüde Türktü. Birkaç kuşak sonra yönetici aileler, yönettikleri halkın dilini, dinini ve geleneğini benimsedi. Bu derste bu dönüşümün iki büyük örneğini göreceksin.",
+      "Altın Orda, Cengiz'in büyük oğlu Cuci'nin ulusundan doğdu. Cuci'nin oğlu Batu Han 1236-1242 yıllarında büyük batı seferini yönetti: İdil (Volga) Bulgarları, Rus knezlikleri, Kiev (1240) düştü; Moğol orduları Polonya ve Macaristan'a kadar ilerledi. Batu Han dönüşte İdil kıyısında Saray şehrini merkez yaptı (modelin bağlantı notu).",
+      "Altın Orda'nın asıl halkı, Deşt-i Kıpçak denen geniş bozkırın Kıpçak Türkleriydi. Moğol yönetici sınıf kısa sürede Kıpçaklarla karıştı, Kıpçak Türkçesini konuştu. Bu dönemde Kırım'da yazılan, Latin harfli bir Kıpçakça-Latince-Farsça sözlük olan Codex Cumanicus, bölgenin dilinin Türkçe olduğunun belgesidir (modelin bağlantı notu).",
+      "Din de değişti. Berke Han (1257-1266) Müslüman olan ilk Altın Orda hükümdarıdır; İlhanlılara karşı Mısır'daki Memlüklerle ittifak kurdu. Özbek Han (1313-1341) döneminde İslam devletin resmî dini oldu. Yaygın görüşe göre bugün Orta Asya'daki Özbeklerin adı bu handan gelir (modelin bağlantı notu).",
+      "Altın Orda iki yüzyıl boyunca Rus knezliklerinden vergi aldı ve onları yarlıklarla, yani hanın verdiği yetki belgeleriyle yönetti. Rus tarihinde bu döneme «Tatar boyunduruğu» denir. Moskova knezleri bu düzende vergi toplayıcı olarak güçlendi ve sonunda hanlığa karşı çıktı (modelin bağlantı notu).",
+      "14. yüzyılın sonunda Toktamış Han Altın Orda'yı yeniden birleştirdi, ama eski koruyucusu Timur'la savaşa girdi. Timur 1391'de ve 1395'te Toktamış'ı yendi, Saray şehrini yaktı. Bu darbe Altın Orda'nın çözülüşünü hızlandırdı (modelin bağlantı notu).",
+      "15. yüzyılda Altın Orda'dan Kazan, Kırım, Astrahan ve Kasım hanlıkları ayrıldı; geride kalan «Büyük Orda» 1502'de Kırım Hanı Mengli Giray tarafından ortadan kaldırıldı. Kırım Hanlığı, Osmanlılarla yakın bağıyla 18. yüzyılın sonuna dek yaşadı (modelin bağlantı notu).",
+      "Çağatay ulusu Cengiz'in ikinci oğlu Çağatay'a verildi: Maveraünnehir, Yedisu ve Doğu Türkistan. Burada da Moğol yöneticiler Türk halkın arasında eridi. Hanlardan Tarmaşirin (1326-1334) Müslüman oldu; İslam bölgede yerleşik halkın dini olarak zaten güçlüydü (modelin bağlantı notu).",
+      "14. yüzyılın ortasında Çağatay ulusu ikiye ayrıldı: doğuda göçebe ağırlıklı Moğolistan (Doğu Çağatay), batıda Maveraünnehir. Maveraünnehir'de hanlar adı var kendisi yok hükümdarlara dönüştü; gerçek güç Barlas, Celayir gibi Türkleşmiş boyların beylerindeydi. Timur bu beyler arasından yükseldi (modelin bağlantı notu).",
+      "Çağatay adı bir dile de geçti. Orta Asya'da 15. yüzyılda gelişen Türk yazı diline Çağatay Türkçesi denir; Ali Şir Nevai ve Babür bu dille yazdı. Moğol bir hanın adı, Türk edebiyatının en parlak dönemlerinden birinin adı oldu.",
+      "Grousset'nin bozkır tarihinin gösterdiği desen şudur: bozkırda fetheden azınlık, fethedilen çoğunluğun kültürüne karışır. Altın Orda ve Çağatay'da bu çoğunluk Türktü; bu yüzden Moğol çağının sonunda Türk dünyası küçülmedi, yeni hanlıklarla ve yeni bir yazı diliyle yeniden şekillendi.",
+      "Özetle: Altın Orda (Batu Han, Saray) Kıpçaklar arasında, Çağatay ulusu Maveraünnehir'de Türkleşti ve Müslüman oldu. Birincisinin mirası Kazan ve Kırım hanlıklarıdır, ikincisininki Timur ve Çağatay Türkçesidir."
+     ],
+     "not": "Gemini kaynaklarında Altın Orda ve Çağatay ulusu yok; bu dersteki bütün bilgiler model bilgisidir ve Grousset (k33) ile Barthold (k24) çerçevesine dayanır. Han yılları yaklaşıktır; Codex Cumanicus'un yazılış yeri ve tarihi araştırmacılarca tartışılır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.5.1.a1",
+       "tur": "secmeli",
+       "soru": "Altın Orda'da İslam'ı ilk kabul eden ve Memlüklerle ittifak kuran han kimdir?",
+       "sec": [
+        "Batu Han",
+        "Berke Han",
+        "Özbek Han",
+        "Toktamış Han"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k33"
+       ],
+       "cozum": [
+        "Berke Han Müslüman olan ilk Altın Orda hükümdarıdır ve İlhanlılara karşı Memlüklerle anlaştı.",
+        "Özbek Han döneminde İslam resmî din oldu; Batu Han devletin kurucusudur."
+       ]
+      },
+      {
+       "id": "tarih.4.5.1.a2",
+       "tur": "secmeli",
+       "soru": "Altın Orda'nın Türkleşmesinin temel sebebi hangisidir?",
+       "sec": [
+        "Moğolların Türkçeyi resmî dil ilan etmesi",
+        "Halkın büyük çoğunluğunun Kıpçak Türklerinden oluşması ve yönetici azınlığın onlara karışması",
+        "Osmanlıların Altın Orda'yı fethetmesi",
+        "Rus knezliklerinin etkisi"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k33"
+       ],
+       "cozum": [
+        "Deşt-i Kıpçak'ın halkı Türktü; sayıca az Moğol yöneticiler zamanla onların dilini ve kültürünü benimsedi.",
+        "Osmanlılar Altın Orda'yı fethetmedi; Kırım Hanlığı Osmanlılara bağlandı."
+       ]
+      },
+      {
+       "id": "tarih.4.5.1.a3",
+       "tur": "secmeli",
+       "soru": "Altın Orda'nın merkezi olan Saray şehri hangi ırmağın kıyısındaydı?",
+       "sec": [
+        "Ceyhun",
+        "Tuna",
+        "İdil (Volga)",
+        "Dicle"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k33"
+       ],
+       "cozum": [
+        "Batu Han Saray'ı İdil (Volga) kıyısında kurdu.",
+        "Ceyhun Maveraünnehir'in, Dicle Irak'ın ırmağıdır."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.5.2",
+     "ad": "Timur: yükseliş, seferler ve bedeli",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k8",
+      "k19",
+      "k33",
+      "k34",
+      "k15"
+     ],
+     "ozet": "Barlas boyundan Timur 1370'te Maveraünnehir'de iktidarı aldı ve otuz beş yılda İran'dan Hindistan'a, Altın Orda'dan Anadolu'ya uzanan seferler yaptı. Semerkant'ı dünyanın en görkemli şehirlerinden biri yaptı; seferleri ise büyük yıkım getirdi.",
+     "metin": [
+      "Semerkant'taki Gur-i Emir türbesinin firuze kubbesinin altında, koyu yeşil bir nefrit taşın altında Timur yatar. 1336'da Keş (bugünkü Şehrisebz) yakınında doğan bu adam, Cengiz Han'dan sonra Avrasya'nın en büyük fatihi oldu. Onu anlamak için hem kurduğu şehirlere hem de yıktığı şehirlere bakmak gerekir.",
+      "Timur Çağatay ulusunun batısında, Türkleşmiş Moğol kökenli Barlas boyundandı. Gençliğinde aldığı bir yara yüzünden topal kaldı; Batı'daki «Tamerlane» adı Farsça «Timur-i Leng» (Aksak Timur) sözünden gelir. Beatrice Manz'ın gösterdiği gibi, iktidara bir hanedan mirasıyla değil, boy beyleri arasındaki ittifaklar ve yeteneğiyle yükseldi (modelin bağlantı notu).",
+      "1370'te Belh'te rakibi Emir Hüseyin'i ortadan kaldırarak Maveraünnehir'in tek hâkimi oldu. Cengiz soyundan olmadığı için «han» unvanını almadı; adına Cengiz soyundan kukla hanlar oturttu, kendisi «Emir» ve Cengiz soyundan bir prensesle evlendiği için «Güregen» (damat) unvanlarını kullandı (modelin bağlantı notu).",
+      "Seferleri otuz beş yıl sürdü. Harezm, Horasan ve İran'ı aldı; 1387'de İsfahan isyan edince şehir halkına büyük bir katliam yaptırdı. Altın Orda'da Toktamış'ı iki kez yendi. 1398'de Hindistan'a girip Delhi'yi yağmaladı. 1400-1401'de Suriye'de Halep ve Şam'ı, 1401'de Bağdat'ı aldı (modelin bağlantı notu).",
+      "Bu seferlerin insan bedeli büyüktür. Çağdaş kaynaklar katliamları, esir alınan zanaatkârları ve bazı şehirlerde kesik başlardan yapılan kuleleri anlatır. Kaynakların verdiği ölü sayıları güvenilir değildir; ama yıkımın büyüklüğü farklı tarafların tanıklığıyla doğrulanır. Timur'u övmek ya da yermek değil, iki yüzünü birlikte görmek tarihçinin işidir (modelin bağlantı notu).",
+      "1401'de Şam yakınında ünlü tarihçi İbn Haldun, Timur'la görüştü ve bu görüşmeyi kendi hayat hikâyesinde anlattı. İbn Haldun Timur'u zeki, bilgili ve tartışmayı seven bir hükümdar olarak tarif eder. Bu, Timur'u yakından gören bir çağdaşın nadir tanıklığıdır (modelin bağlantı notu).",
+      "Batıda Timur'un karşısına Osmanlı Sultanı Yıldırım Bayezid çıktı. Kaynağımız çatışmanın sebebini iki hükümdar arasındaki egemenlik mücadelesi ve beyliklerin kışkırtması olarak verir: Bayezid'in topraklarını aldığı Anadolu beyleri Timur'a, Timur'dan kaçan Karakoyunlu ve Celayirli hükümdarlar Bayezid'e sığınmıştı.",
+      "28 Temmuz 1402'de Ankara yakınındaki Çubuk Ovası'nda Osmanlı ordusu yenildi, Yıldırım Bayezid esir düştü ve bir yıl sonra öldü. Kaynağımıza göre Anadolu Türk siyasi birliği dağıldı, beylikler yeniden kuruldu, Osmanlılarda on bir yıl süren Fetret Devri başladı ve İstanbul'un fethi yarım yüzyıl gecikti. Kırılma noktaları kaynağımız bundan bir ders çıkarır: aynı havzadaki iki güç diplomasiyi reddedince karşılıklı yıkım doğar.",
+      "Timur Anadolu'da kalmadı; Semerkant'a döndü ve Çin seferine çıktı. Kastilya kralının elçisi Clavijo 1404'te Semerkant'ı ziyaret etti ve şehrin saraylarını, bahçelerini, kalabalık çarşılarını ayrıntılı anlattı. Timur Şubat 1405'te Otrar'da, sefer yolunda öldü (modelin bağlantı notu).",
+      "Semerkant Timur'un vitriniydi. Seferlerden getirilen ustalar Bibi Hanım Camii'ni, Şah-ı Zinde türbelerini ve Gur-i Emir'i yaptı. Kaynağımız Registan meydanını, mavi çinili medreseleri ve Gur-i Emir'i Buhara-Semerkant'ın simgeleri arasında sayar. Yıkılan şehirlerin ustaları, Timur'un başkentini kurdu.",
+      "Özetle: Timur bozkır askerliğini ve Türk-İslam şehir kültürünü birleştiren, ama bunu büyük bir yıkım pahasına yapan bir fatihtir. Ankara Savaşı (1402) onun Türk tarihine en derin dokunuşudur: Osmanlıyı yıktı sanıldı, ama devlet on bir yıl sonra yeniden toparlandı."
+     ],
+     "not": "Kaynak k8 ve k19 Ankara Savaşı'nın sebep ve sonuçlarını verir; k15 Semerkant'ın yapılarını sayar. Timur'un doğum yılı (1336), 1370, seferler, İbn Haldun (1401), Clavijo (1404) ve ölüm (1405) model bilgisidir (Manz k34, Grousset k33). Ölü sayıları bilinçli olarak verilmedi. k8'in «Balkanlar'daki adil düzen sayesinde Osmanlı'nın yok olmaktan kurtuluşu» yorumu derse alınmadı; sonraki aşamanın konusudur.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.5.2.a1",
+       "tur": "secmeli",
+       "soru": "Timur'un «han» unvanını kullanmamasının sebebi hangisidir?",
+       "sec": [
+        "Müslüman olmaması",
+        "Cengiz soyundan gelmemesi",
+        "Halifenin izin vermemesi",
+        "Osmanlılara bağlı olması"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k34",
+        "k33"
+       ],
+       "cozum": [
+        "Bozkır geleneğinde han unvanı Cengiz soyuna aitti; Timur bu yüzden Emir ve Güregen unvanlarıyla yetindi.",
+        "Timur Müslümandı; halifelik o sırada Kahire'de sembolikti."
+       ]
+      },
+      {
+       "id": "tarih.4.5.2.a2",
+       "tur": "secmeli",
+       "soru": "Ankara Savaşı'nın (1402) Osmanlılar için sonucu hangisidir?",
+       "sec": [
+        "İstanbul'un fethi",
+        "Fetret Devri'nin başlaması",
+        "Karamanoğullarının yıkılması",
+        "Balkanların kaybı"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k19",
+        "k8"
+       ],
+       "cozum": [
+        "Kaynağa göre Ankara'dan sonra Osmanlılarda 1402-1413 arasında Fetret Devri yaşandı.",
+        "İstanbul'un fethi tersine yarım yüzyıl gecikti; beylikler yeniden kuruldu."
+       ]
+      },
+      {
+       "id": "tarih.4.5.2.a3",
+       "tur": "secmeli",
+       "soru": "Timur'la Şam yakınında görüşüp bu görüşmeyi yazan ünlü tarihçi kimdir?",
+       "sec": [
+        "İbn Battûta",
+        "İbn Haldun",
+        "Bîrûnî",
+        "Clavijo"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k34",
+        "k33"
+       ],
+       "cozum": [
+        "İbn Haldun 1401'de Timur'la görüştü ve hayat hikâyesinde anlattı.",
+        "Clavijo Semerkant'a 1404'te gelen Kastilya elçisidir."
+       ]
+      },
+      {
+       "id": "tarih.4.5.2.a4",
+       "tur": "acik",
+       "soru": "Timur'u bir cümlede «büyük» kılan, bir cümlede onu eleştirmeyi gerektiren yanını yaz; üçüncü cümlede iki yanı birlikte nasıl değerlendirdiğini söyle.",
+       "dogru": "Büyük: dağılmış Çağatay ulusundan Avrasya'nın en büyük gücünü kurdu ve Semerkant'ı bir medeniyet merkezi yaptı. Eleştiri: İsfahan, Delhi ve Bağdat gibi şehirlerde büyük katliamlar yaptırdı. Değerlendirme: Semerkant'ın ihtişamı, yıkılan şehirlerden getirilen ustalarla kuruldu; ikisi aynı hikâyenin parçasıdır.",
+       "olcut": [
+        "Bir güçlü yan ve bir eleştiri somut örnekle verilmiş.",
+        "Değerlendirme iki yanı birbirine bağlıyor.",
+        "Abartılı övgü ya da hakaret yok."
+       ],
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k34",
+        "k15"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.5.3",
+     "ad": "Timurlular: Uluğ Bey, Nevai ve Herat",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k11",
+      "k14",
+      "k15",
+      "k17",
+      "k39",
+      "k34"
+     ],
+     "ozet": "Timur'un ardılları 15. yüzyılda Semerkant ve Herat'ı bilim ve sanatın merkezi yaptı. Uluğ Bey'in rasathanesi ve yıldız cetvelleri, Ali Şir Nevai'nin Türkçe eserleri bu çağın zirveleridir.",
+     "metin": [
+      "1908'de Semerkant'ın dışında, bir tepede kazı yapan Rus arkeolog Vyatkin toprağın altında dev bir yay buldu: yerin içine oyulmuş, mermer kaplı devasa bir ölçüm aletinin kalıntısı. Bu, 15. yüzyılın en büyük gözlemevlerinden biri olan Uluğ Bey Rasathanesi'ydi (modelin bağlantı notu).",
+      "Timur 1405'te ölünce ardılları arasında kavga çıktı. Sonunda oğlu Şahruh (1405-1447) üstün geldi ve başkenti Herat'a taşıdı; Semerkant'ı oğlu Uluğ Bey'e bıraktı. Şahruh ve eşi Gevherşad Hatun, Herat ve Meşhed'de camiler, medreseler ve kütüphaneler yaptırdı (modelin bağlantı notu).",
+      "Uluğ Bey (1394-1449) yarım yüzyıla yakın Semerkant'ı yönetti, ama asıl tutkusu gökbilimdi. Registan meydanında kendi adını taşıyan medreseyi yaptırdı ve orada matematik ve astronomi okuttu. Ardından kurduğu rasathanede Ali Kuşçu gibi bilginlerle birlikte gözlemler yaptı (modelin bağlantı notu).",
+      "Kaynağımıza göre bu çalışmanın ürünü Zîc-i Uluğ Bey'dir: teleskop öncesi dönemin en kusursuz yıldız kataloglarından biri ve hassas trigonometri tabloları. Kaynak katalogda 1018 yıldız bulunduğunu ve çalışmanın 1437'de tamamlandığını yazar. Bu cetveller sonraki yüzyıllarda Osmanlı ve Avrupa gökbilimcilerince de kullanıldı (modelin bağlantı notu).",
+      "Uluğ Bey'in sonu acıdır: 1449'da kendi oğlu Abdüllatif'in kışkırttığı bir isyanda yakalanıp öldürüldü. Rasathane kısa sürede terk edildi. Ali Kuşçu ise bir süre sonra batıya gitti, Akkoyunlu sarayından geçerek Fatih Sultan Mehmed'in davetiyle İstanbul'a yerleşti ve Timurlu bilim geleneğini Osmanlıya taşıdı (modelin bağlantı notu).",
+      "15. yüzyılın ikinci yarısında Timurlu kültürünün merkezi Herat'tı. Hüseyin Baykara (1469-1506) döneminde şehir şairlerin, ressamların, hattatların ve bilginlerin buluşma yeri oldu. Minyatür ressamı Bihzad bu sarayda yetişti; Farsça şiirin büyük ustası Molla Câmî de bu çevrede yaşadı (modelin bağlantı notu).",
+      "Bu çevrenin en büyük adı Ali Şir Nevai'dir (1441-1501). Hüseyin Baykara'nın çocukluk arkadaşı, sonra veziri ve yakın dostuydu. Servetini vakıflara, medreselere, hastanelere ve kervansaraylara harcadı. Kaynağımıza göre Türk edebiyatında beş mesneviden oluşan ilk hamseyi o yazdı (modelin bağlantı notu).",
+      "Nevai'nin en etkili eserlerinden biri Muhakemetü'l-Lugateyn'dir, yani «İki Dilin Muhakemesi» (1499). Kaynağımıza göre Nevai, dönemin aydınlarının Farsçayı Türkçeden üstün görmesine karşı çıkar ve Türkçenin fiil zenginliğini örneklerle gösterir: ağlamanın, inlemenin, sızlamanın her biri için ayrı fiiller sayar.",
+      "Nevai Çağatay Türkçesini bir edebiyat dili olarak zirveye taşıdı. Şairlerin hayatlarını anlatan Mecâlisü'n-Nefâis'i de yazdı. Onun şiiri Osmanlı'dan Hindistan'a kadar okundu; Babür Babürname'de ondan saygıyla söz eder (modelin bağlantı notu).",
+      "Timurlu dönemi siyasi olarak bölünmüş bir dönemdi: kardeşler ve kuzenler sürekli savaştı, toprak yavaş yavaş küçüldü. 1507'de Özbek hükümdarı Muhammed Şeybani Han Herat'ı aldı ve Horasan'daki Timurlu yönetimi sona erdi (modelin bağlantı notu).",
+      "Özetle: Timurlular siyasette zayıfladıkça kültürde parladı. Uluğ Bey'in gökbilimi, Bihzad'ın minyatürü ve Nevai'nin Türkçesi bu dönemin, «Timurlu Rönesansı» da denen ışığıdır."
+     ],
+     "not": "Kaynak k14 Zîc'i «teleskop öncesi dönemin en kusursuz» kataloğu diye niteler; bu güçlü bir övgüdür, katalog dönemi için çok hassastı ama karşılaştırma ölçütü belirtilmemiştir. 1437 tamamlanma tarihi kaynaktandır; bazı araştırmacılar çalışmanın sonraki yıllarda da sürdüğünü belirtir. Vyatkin (1908), Şahruh, Gevherşad, Uluğ Bey'in ölümü, Ali Kuşçu, Baykara, Bihzad, Nevai'nin hayatı ve Şeybani (1507) model bilgisidir.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.5.3.a1",
+       "tur": "secmeli",
+       "soru": "Kaynağa göre Uluğ Bey'in yıldız kataloğunda kaç yıldız vardır?",
+       "sec": [
+        "365",
+        "1018",
+        "1453",
+        "2000"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k14"
+       ],
+       "cozum": [
+        "Kaynak, Zîc-i Uluğ Bey'de 1018 yıldız bulunduğunu yazar.",
+        "1453 İstanbul'un fethidir; öteki sayılar dikkat dağıtıcıdır."
+       ]
+      },
+      {
+       "id": "tarih.4.5.3.a2",
+       "tur": "secmeli",
+       "soru": "Türkçeyi Farsçayla karşılaştırıp Türkçenin zenginliğini savunan Muhakemetü'l-Lugateyn'in yazarı kimdir?",
+       "sec": [
+        "Kaşgarlı Mahmud",
+        "Ali Şir Nevai",
+        "Babür",
+        "Molla Câmî"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k11",
+        "k39"
+       ],
+       "cozum": [
+        "Muhakemetü'l-Lugateyn 1499'da Ali Şir Nevai tarafından yazıldı.",
+        "Kaşgarlı Mahmud Türkçeyi Arapçayla karşılaştırmıştı; Molla Câmî Farsça yazan bir şairdir."
+       ]
+      },
+      {
+       "id": "tarih.4.5.3.a3",
+       "tur": "secmeli",
+       "soru": "Uluğ Bey'in öğrencisi olup sonra İstanbul'a gelerek Timurlu bilim geleneğini Osmanlıya taşıyan bilgin kimdir?",
+       "sec": [
+        "Ali Kuşçu",
+        "Takiyüddin",
+        "Bîrûnî",
+        "Nasirüddin Tusi"
+       ],
+       "dogru": "A",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k14",
+        "k34"
+       ],
+       "cozum": [
+        "Ali Kuşçu Semerkant rasathanesinde çalıştı, sonra Fatih'in davetiyle İstanbul'a geldi.",
+        "Takiyüddin 16. yüzyıl Osmanlı gökbilimcisidir; Tusi 13. yüzyılda Meraga'da çalıştı."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.5.4",
+     "ad": "Babür ve Hindistan'daki Türk-İslam İmparatorluğu",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k35",
+      "k38",
+      "k20",
+      "k33"
+     ],
+     "ozet": "Timur soyundan Babür, Orta Asya'dan çıkıp 1526 Panipat zaferiyle Hindistan'da büyük bir imparatorluk kurdu. Hatıratı Babürname Çağatay Türkçesinin başyapıtıdır; torunları Ekber ve Şah Cihan devleti zirveye taşıdı.",
+     "metin": [
+      "«Fergana vilayetinde, 899 yılı Ramazan ayında, on iki yaşında padişah oldum.» Babürname böyle başlar: bir hükümdarın kendi hayatını açıkça, zaferleri kadar yenilgileri ve pişmanlıklarıyla anlattığı bir hatırat. Yazarı Zahirüddin Muhammed Babür'dür ve yazdığı dil Türkçedir (modelin bağlantı notu).",
+      "Babür 1483'te Fergana vadisindeki Andican'da doğdu. Babası tarafından Timur'un, annesi tarafından Cengiz Han'ın soyundandı. On iki yaşında babasının yerine geçti; gençliği, Timur'un başkenti Semerkant'ı ele geçirme denemeleriyle geçti. Semerkant'ı üç kez aldı, üçünde de kaybetti (modelin bağlantı notu).",
+      "Onu Orta Asya'dan çıkaran Özbek hükümdarı Muhammed Şeybani Han'dı. Babür 1504'te Kabil'e yerleşti ve gözünü güneye, Hindistan'a çevirdi. Kabil'den Pencap'a birkaç keşif seferi yaptı (modelin bağlantı notu).",
+      "21 Nisan 1526'da Delhi'nin kuzeyindeki Panipat'ta Babür, Delhi Sultanı İbrahim Lodi'nin çok daha kalabalık ordusunu yendi. Babür ordusunun önüne zincirle birbirine bağlanmış arabalar dizdi, arkalarına top ve tüfekleri yerleştirdi, kanatlardan süvarisiyle düşmanı kuşattı. Babür kendisi bu düzeni «Rûmî», yani Osmanlı usulü diye anar; Çaldıran'da Osmanlıların kullandığı tabur düzenine benzer (modelin bağlantı notu).",
+      "Panipat'tan sonra Delhi ve Agra Babür'ün oldu. 1527'de Hanva'da Racput hükümdarı Rana Sanga'yı da yendi. Ama Babür'ün ömrü yetmedi: 1530'da Agra'da öldü; naaşı vasiyeti üzerine sonradan Kabil'deki bir bahçeye taşındı (modelin bağlantı notu).",
+      "Babürname bu kısa ve fırtınalı hayatın hem tarihi hem aynasıdır. Babür Fergana'nın kavunlarını, Kabil'in bahçelerini, Hindistan'ın hayvanlarını ve bitkilerini, savaş düzenlerini, dostlarının ve düşmanlarının karakterlerini anlatır. Reşid Rahmeti Arat'ın çevirisiyle Türkçe okunabilen eser, Çağatay Türkçesi düzyazısının başyapıtı sayılır (modelin bağlantı notu).",
+      "Oğlu Hümayun tahtı bir süre Afgan Şir Şah Sur'a kaptırdı ve İran'a sığındı; 1555'te geri döndü. Torunu Ekber (1556-1605) devleti asıl büyük imparatorluğa dönüştürdü. Ekber 1556'da ikinci Panipat Savaşı'nı kazandı, rütbe ve maaşa dayalı mansabdar düzenini kurdu ve farklı dinlerden halkları barış içinde yönetmeyi amaçlayan «sulh-i kül» (herkesle barış) siyasetini izledi (modelin bağlantı notu).",
+      "Babürlü saraylarında yönetim ve edebiyat dili büyük ölçüde Farsçaydı; hanedan kendini Timur'un soyuyla, «Gürkânî» adıyla tanımladı. Avrupalıların ve sonra genel kullanımın verdiği «Moğol» (Mughal) adı hanedanın Cengiz soyunu vurgular. Hanedanın kökü ise Türkçe konuşan Timurlu Orta Asya'sıdır (modelin bağlantı notu).",
+      "Babürlülerin en ünlü eseri Tac Mahal'dir. Şah Cihan, 1631'de ölen eşi Mümtaz Mahal için Agra'da Yamuna kıyısında bu mermer türbeyi yaptırdı; yapım yaklaşık yirmi yıl sürdü. Ebba Koch'un incelediği gibi yapı, Timurlu bahçe ve türbe geleneğinin Hint malzemesi ve ustalığıyla buluştuğu yerdir (modelin bağlantı notu).",
+      "Devlet 17. yüzyılın sonunda Evrengzib döneminde en geniş sınırlarına ulaştı, sonra yavaş yavaş zayıfladı. 1857 ayaklanmasından sonra İngilizler son Babürlü hükümdarı II. Bahadır Şah'ı sürgüne gönderdi ve hanedan sona erdi (modelin bağlantı notu).",
+      "Özetle: Babür, Timur'un torunu olarak Semerkant'ı kaybetti ama Hindistan'ı kazandı. Panipat (1526) üç yüzyıl sürecek bir imparatorluğu başlattı; Babürname ise bir Türk hükümdarının kalemiyle yazılmış en içten hatırattır."
+     ],
+     "not": "Gemini kaynaklarında Babür ve Babürlüler yok; bu dersteki bilgiler Babürname'ye (k35), Ebba Koch'a (k38) ve genel kaynaklara dayanan model bilgisidir. Babürname'nin açılış cümlesi Arat çevirisinden özetle aktarıldı, harfiyen değildir. Panipat'taki «Rûmî» düzeni Babür'ün kendi ifadesidir; topçuların Osmanlılardan gelip gelmediği tartışmalıdır.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.5.4.a1",
+       "tur": "secmeli",
+       "soru": "Babür'ün Hindistan'da imparatorluğu kurduğu savaş ve yılı hangisidir?",
+       "sec": [
+        "Hanva, 1527",
+        "Panipat, 1526",
+        "Çaldıran, 1514",
+        "Ankara, 1402"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k35",
+        "k20"
+       ],
+       "cozum": [
+        "Babür 1526'da Panipat'ta İbrahim Lodi'yi yenerek Delhi ve Agra'yı aldı.",
+        "Hanva (1527) Racputlara karşıdır; Çaldıran Osmanlı-Safevi savaşıdır."
+       ]
+      },
+      {
+       "id": "tarih.4.5.4.a2",
+       "tur": "secmeli",
+       "soru": "Babürname için hangisi doğrudur?",
+       "sec": [
+        "Farsça yazılmış bir şiir kitabıdır.",
+        "Babür'ün kendi hayatını anlattığı, Çağatay Türkçesiyle yazılmış hatıratıdır.",
+        "Ekber'in yazdırdığı bir kanunnamedir.",
+        "Tac Mahal'in yapım defteridir."
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k35"
+       ],
+       "cozum": [
+        "Babürname Babür'ün kendi kaleminden, Türkçe yazılmış hatıratıdır.",
+        "Babürlü sarayında Farsça yaygındı, ama Babür hatıratını Türkçe yazdı."
+       ]
+      },
+      {
+       "id": "tarih.4.5.4.a3",
+       "tur": "secmeli",
+       "soru": "Tac Mahal'i kim, kimin için yaptırdı?",
+       "sec": [
+        "Babür, annesi için",
+        "Ekber, oğlu için",
+        "Şah Cihan, eşi Mümtaz Mahal için",
+        "Hümayun, babası Babür için"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k38"
+       ],
+       "cozum": [
+        "Şah Cihan Tac Mahal'i 1631'de ölen eşi Mümtaz Mahal için yaptırdı.",
+        "Babür'ün mezarı Kabil'deki bir bahçededir; Hümayun'un türbesi Delhi'dedir."
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tarih.4.5.5",
+     "ad": "Memlükler, Karakoyunlular ve Akkoyunlular",
+     "onKosul": [],
+     "durum": "taslak",
+     "yazan": "model",
+     "kaynak": [
+      "k3",
+      "k15",
+      "k19",
+      "k20",
+      "k36"
+     ],
+     "ozet": "Kıpçak ve Çerkez asker-kölelerin kurduğu Memlükler 1260'ta Ayn Calut'ta Moğolları durdurdu ve Mısır'ı iki buçuk yüzyıl yönetti. Doğu Anadolu ve İran'da ise Karakoyunlu ve Akkoyunlu Türkmen devletleri, Timur'dan Osmanlı ve Safevilere uzanan dönemin güçleriydi.",
+     "metin": [
+      "3 Eylül 1260, Filistin'de Ayn Calut («Calut'un Pınarı»). İki yıl önce Bağdat'ı yıkan Moğol ordusunun bir kolu, Suriye'yi aldıktan sonra Mısır'a doğru bakıyordu. Karşısında, çoğu Kıpçak Türklerinden oluşan, çocukken köle olarak satın alınmış ve askerlik için yetiştirilmiş bir ordu vardı: Memlükler.",
+      "Memlük, Arapça «sahip olunan» demektir. Mısır'daki Eyyubi sultanları ordularını, Karadeniz'in kuzeyinden satın alınan Kıpçak gençlerinden kurmuştu. 1250'de son Eyyubi sultanı öldürülünce bu komutanlar yönetimi ele geçirdi ve Memlük Devleti doğdu (modelin bağlantı notu).",
+      "Ayn Calut'ta Memlük ordusunu Sultan Kutuz yönetiyordu; öncü birliklerin komutanı Baybars'tı. Moğol ordusunun başında Kitbuka Noyan vardı. Hülagü o sırada Mengü Kağan'ın ölümü üzerine ordusunun büyük kısmıyla doğuya çekilmişti. Memlükler sahte geri çekilmeyle Moğolları pusuya düşürdü; Kitbuka öldürüldü (modelin bağlantı notu).",
+      "Kaynağımız Ayn Calut'u Moğolları yenen ve durduran savaş olarak anar ve Suriye ile Mısır'ın Moğol istilasından kurtulduğunu yazar. Ölçülü bir okuma şunu ekler: Moğollar daha önce de yerel yenilgiler almıştı (Celaleddin'in Pervan zaferi gibi), ama Ayn Calut onların batıya ilerleyişini kalıcı olarak durduran ilk büyük meydan savaşıdır. Amitai-Preiss bu savaşı, yirmi yıl süren Memlük-İlhanlı savaşlarının başlangıcı olarak inceler.",
+      "Dönüş yolunda Baybars Kutuz'u öldürdü ve sultan oldu (1260-1277). Baybars, Bağdat'ın düşüşünden kaçan Abbasi ailesinden birini 1261'de Kahire'de halife ilan etti; böylece halifelik bir gölge kurum olarak Kahire'de sürdü. 1277'de Anadolu'ya girip Elbistan'da İlhanlı ordusunu yendi. Haçlıların son büyük kalesi Akka ise 1291'de Memlüklerce alındı (modelin bağlantı notu).",
+      "Memlük tarihi ikiye ayrılır: 1250-1382 arasında Kıpçak Türklerinin ağır bastığı Bahri (Türk) Memlükleri, 1382-1517 arasında Çerkezlerin ağır bastığı Burci (Çerkez) Memlükleri. Kıpçak döneminde Kahire'de Türkçe sözlükler ve gramerler yazıldı; Türkçe sarayın ve ordunun dilleri arasındaydı (modelin bağlantı notu).",
+      "Kaynağımız Memlük Kahire'sini Moğol sonrası İslam medeniyetinin sığınağı olarak anlatır: Sultan Hasan Külliyesi, el-Ezher Medresesi ve ileri bir hastane olan Kalavun Bimaristanı bu dönemin eserleridir; İbn Haldun ve Makrizi bu şehirde yazdı. Memlükler 1516 Mercidabık ve 1517 Ridaniye savaşlarında Osmanlılara yenilerek sona erdi.",
+      "Doğu Anadolu ve Azerbaycan'da ise iki Türkmen boy birliği yükseldi. Karakoyunlular Van Gölü çevresinden çıktı; Kara Yusuf Timur'a karşı savaştı, Yıldırım Bayezid'e sığındı ve Timur'un ölümünden sonra Tebriz'i merkez yaptı. Cihan Şah (1438-1467) döneminde Karakoyunlular İran'ın büyük kısmına hükmetti (modelin bağlantı notu).",
+      "Akkoyunlular Diyarbakır merkezliydi; Oğuzların Bayındır boyuna bağlanırlar. Kurucuları Kara Yülük Osman Bey Timur'un yanında savaşmıştı. En büyük hükümdarları Uzun Hasan 1467'de Cihan Şah'ı yenip Karakoyunlu devletine son verdi ve Tebriz'i aldı (modelin bağlantı notu).",
+      "Uzun Hasan doğuda büyüyünce Osmanlılarla karşı karşıya geldi. Kaynağımıza göre Venedik ve Karamanoğullarıyla ittifak kurdu; 1473'te Otlukbeli'nde Fatih Sultan Mehmed'e yenildi ve Akkoyunlu devleti yıkılış sürecine girdi. 1501'de Safevi Şah İsmail son Akkoyunlu hükümdarlarını yendi. Uzun Hasan'ın vergi kanunları ise Osmanlı yönetiminde doğu sancaklarında bir süre uygulanmaya devam etti (modelin bağlantı notu).",
+      "Özetle: Memlükler Kıpçak Türklerinden doğan, Moğolları durduran ve Mısır'ı iki buçuk yüzyıl yöneten bir asker devletidir. Karakoyunlu ve Akkoyunlular Timur'dan Osmanlı-Safevi çağına geçişin Türkmen devletleridir."
+     ],
+     "not": "Kaynak k3 Ayn Calut'ta Memlükleri «Sultan Baybars»ın yönettiğini ve onların Moğolları «ilk kez yenen» devlet olduğunu yazar: Ayn Calut'ta sultan Kutuz'du, Baybars komutandı; Moğollar daha önce de yerel yenilgiler almıştı. Memlük kuruluşu (1250), Bahri-Burci tarihleri, Baybars, Akka (1291), Karakoyunlu ve Akkoyunlu ayrıntıları model bilgisidir. Ayn Calut'un tarihi (3 Eylül 1260) genel kabuldür.",
+     "alistirmalar": [
+      {
+       "id": "tarih.4.5.5.a1",
+       "tur": "secmeli",
+       "soru": "Ayn Calut Savaşı'nda (1260) Memlük sultanı kimdi?",
+       "sec": [
+        "Baybars",
+        "Kutuz",
+        "Kalavun",
+        "Turanşah"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k36",
+        "k20"
+       ],
+       "cozum": [
+        "Ayn Calut'ta sultan Kutuz'du; Baybars öncü birliklerin komutanıydı ve dönüşte sultan oldu.",
+        "Kalavun sonraki bir sultandır; Turanşah 1250'de öldürülen son Eyyubi sultanıdır."
+       ]
+      },
+      {
+       "id": "tarih.4.5.5.a2",
+       "tur": "secmeli",
+       "soru": "Memlüklerin Bahri ve Burci dönemleri neye göre ayrılır?",
+       "sec": [
+        "Başkentin değişmesine",
+        "Yönetici asker sınıfında Kıpçakların ya da Çerkezlerin ağır basmasına",
+        "Halifeliğin kaldırılmasına",
+        "Moğollara vergi verip vermemelerine"
+       ],
+       "dogru": "B",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k20"
+       ],
+       "cozum": [
+        "Bahri döneminde Kıpçak Türkleri, Burci döneminde Çerkezler yönetici sınıfta ağır bastı.",
+        "Başkent iki dönemde de Kahire'ydi."
+       ]
+      },
+      {
+       "id": "tarih.4.5.5.a3",
+       "tur": "secmeli",
+       "soru": "Otlukbeli Savaşı'nda (1473) Fatih Sultan Mehmed'e yenilen hükümdar kimdir?",
+       "sec": [
+        "Cihan Şah",
+        "Kara Yusuf",
+        "Uzun Hasan",
+        "Şah İsmail"
+       ],
+       "dogru": "C",
+       "durum": "taslak",
+       "yazan": "model",
+       "kaynak": [
+        "k19"
+       ],
+       "cozum": [
+        "Kaynağa göre Akkoyunlu hükümdarı Uzun Hasan Otlukbeli'nde yenildi.",
+        "Cihan Şah Karakoyunlu hükümdarıydı ve Uzun Hasan'a yenilmişti."
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

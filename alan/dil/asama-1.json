@@ -22,7 +22,11 @@
     { "id": "k12", "ad": "Krashen'in beş dil edinimi hipotezi", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "2. Stephen Krashen'in 5 Temel Dil Edinimi Hipotezi", "satir": "36-63", "dogrulama": "dogrulanmamis" },
     { "id": "k13", "ad": "Swain: anlaşılabilir çıktı ve boşluğu fark etme", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "3. Merrill Swain", "satir": "67-71", "dogrulama": "dogrulanmamis" },
     { "id": "k14", "ad": "Nation: kelime sıklığı katmanları ve eşdizim", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "4. Paul Nation: Kelime Frekans Mühendisliği", "satir": "75-86", "dogrulama": "dogrulanmamis" },
-    { "id": "k15", "ad": "CEFR düzeyleri (A1 → C2)", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "6. CEFR Seviye Standartları", "satir": "112-116", "dogrulama": "dogrulanmamis" }
+    { "id": "k15", "ad": "CEFR düzeyleri (A1 → C2)", "tur": "gemini", "yol": "ESP/dil_ogrenimi/ikinci_yabanci_dil_edinimi_krashen_hipotezleri_cefr_c1_c2_ustalik_ve_poliglot_metodolojisi_atlasi.md", "bolum": "6. CEFR Seviye Standartları", "satir": "112-116", "dogrulama": "dogrulanmamis" },
+    { "id": "k16", "ad": "Türkçenin tarihsel dönemleri: Eski Türkçe ve Orhun yazıtları", "tur": "gemini", "yol": "ESP/dil_ogrenimi/turkcenin_tarihsel_etimolojisi_divanu_lugatit_turk_orhun_ve_anadolu_agizlari_sozlugu.md", "bolum": "Türkçenin tarihsel dönemleri", "satir": "14-20", "dogrulama": "dogrulanmamis" },
+    { "id": "k17", "ad": "Orhon Yazıtları (metin, çeviri, yazı sistemi)", "tur": "kitap", "yol": "Talat Tekin, Orhon Yazıtları, Türk Dil Kurumu Yayınları", "dogrulama": "kaynakli" },
+    { "id": "k18", "ad": "Orhun Abideleri", "tur": "kitap", "yol": "Muharrem Ergin, Orhun Abideleri, Boğaziçi Yayınları", "dogrulama": "kaynakli" },
+    { "id": "k19", "ad": "Unicode Old Turkic bloğu (U+10C00–U+10C4F)", "tur": "url", "yol": "https://www.unicode.org/charts/PDF/U10C00.pdf", "dogrulama": "kaynakli" }
   ],
   "kapi": {
     "esik": 0.8,
@@ -287,6 +291,413 @@
           "alistirmalar": [
             { "id": "dil.1.3.3.a1", "tur": "secmeli", "soru": "Kaynağa göre sözlüksüz akıcı okuma eşiği (%98) yaklaşık kaç kelime ailesidir?", "sec": ["1.000", "3.000", "9.000", "570"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] },
             { "id": "dil.1.3.3.a2", "tur": "secmeli", "soru": "Hangisi kaynaktaki doğru İngilizce eşdizimdir?", "sec": ["make a risk", "strong rain", "take a risk", "do a risk"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k14"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dil.1.4",
+      "ad": "Göktürk yazısı",
+      "onKosul": [],
+      "kazanim": [
+        "Orhun yazıtlarını ve yazının çözülüşünü tanır.",
+        "Göktürk harflerinin kalın-ince yapısını açıklar.",
+        "Kısa Göktürkçe sözcükleri okur ve kendi adını yazar."
+      ],
+      "kapi": {
+        "esik": 0.75,
+        "sorular": [
+          {
+            "id": "dil.1.4.k1",
+            "tur": "secmeli",
+            "soru": "Kül Tigin Yazıtı hangi yıl dikilmiştir?",
+            "sec": [
+              "720",
+              "732",
+              "735",
+              "751"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k16"
+            ],
+            "cozum": [
+              "Kül Tigin Yazıtı 732, Bilge Kağan Yazıtı 735 tarihlidir; Tonyukuk Yazıtı yaklaşık 720-725 yıllarına aittir."
+            ]
+          },
+          {
+            "id": "dil.1.4.k2",
+            "tur": "secmeli",
+            "soru": "𐰋 damgası hangi sesi gösterir?",
+            "sec": [
+              "Kalın b",
+              "İnce b",
+              "İnce d",
+              "m"
+            ],
+            "dogru": "B",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k3",
+              "k19"
+            ],
+            "cozum": [
+              "𐰋 ince ünlülerle (e, i, ö, ü) kullanılan b'dir; kalın b 𐰉 biçimindedir."
+            ]
+          },
+          {
+            "id": "dil.1.4.k3",
+            "tur": "secmeli",
+            "soru": "Göktürk yazısında sözcükler birbirinden nasıl ayrılır?",
+            "sec": [
+              "Boşlukla",
+              "Büyük harfle",
+              "İki noktaya benzeyen bir ayırıcıyla",
+              "Ayrılmaz, bitişik yazılır"
+            ],
+            "dogru": "C",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k17"
+            ],
+            "cozum": [
+              "Yazıtlarda sözcükler arasına üst üste iki noktaya benzeyen bir ayırıcı (⁚) konur."
+            ]
+          },
+          {
+            "id": "dil.1.4.k4",
+            "tur": "secmeli",
+            "soru": "𐰉𐰆𐰑𐰣 sözcüğü (sağdan sola: b, o, d, n) hangisidir?",
+            "sec": [
+              "budun → bodun (millet)",
+              "bayın",
+              "boyda",
+              "bodum"
+            ],
+            "dogru": "A",
+            "durum": "taslak",
+            "yazan": "model",
+            "kaynak": [
+              "k17",
+              "k18"
+            ],
+            "cozum": [
+              "Kalın b + o/u + kalın d + kalın n: bodun, «millet, halk». İkinci hecedeki u yazılmamıştır."
+            ]
+          }
+        ]
+      },
+      "dersler": [
+        {
+          "id": "dil.1.4.1",
+          "ad": "Taşa yazılan Türkçe: Orhun yazıtları",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k16",
+            "k17",
+            "k18",
+            "k19"
+          ],
+          "ozet": "Göktürk (Orhun) yazısı Türklerin kendi diline özgü en eski yazılarındandır; en ünlü örnekleri 8. yüzyılda Orhon vadisine dikilen anıt taşlardır.",
+          "metin": [
+            "Göktürk yazısı, Türklerin kendi dillerini yazmak için kullandığı bilinen en eski yazılardandır. Batı'da «Türk runik yazısı» da denir, çünkü keskin çizgili damgaları İskandinav runlarını andırır; ama aralarında bir köken bağı yoktur (modelin bağlantı notu).",
+            "En ünlü örnekleri bugünkü Moğolistan'da, Orhon Irmağı vadisindeki anıt taşlardır. Kaynağa göre üç büyük yazıt şunlardır: Tonyukuk Yazıtı (yaklaşık 720-725), Kül Tigin Yazıtı (732) ve Bilge Kağan Yazıtı (735).",
+            "Kül Tigin ve Bilge Kağan yazıtlarının metnini, Bilge Kağan'ın yeğeni Yollıg Tigin yazmıştır. Tonyukuk Yazıtı ise bilge vezir Tonyukuk'un kendi ağzından anlatılır (modelin bağlantı notu).",
+            "Yazıtlarda Türk adı «Türük» biçiminde geçer: 𐱅𐰇𐰼𐰜. Bu, Türk adının Türkçe yazılmış en eski örneklerindendir (modelin bağlantı notu).",
+            "Yazıtların sesi bir kağanın halkına seslenişidir. Bilge Kağan birlik, töre ve dirlik çağrısı yapar: «Türk milleti için gece uyumadım, gündüz oturmadım.» Kül Tigin Yazıtı'ndaki bu söz, devleti kuranların kendilerini nasıl gördüğünü anlatır.",
+            "Aynı yazının bir başka kolu Yenisey Irmağı çevresindeki mezar taşlarındadır (Yenisey yazıtları); bunlar daha kısa, çoğu kişisel yazıtlardır (modelin bağlantı notu).",
+            "Yazıtlar 1889'da Rus araştırmacı N. M. Yadrintsev'in gezisiyle bilim dünyasına tanıtıldı. Yazıyı Danimarkalı dilbilimci Vilhelm Thomsen çözdü ve 1893 Aralık'ında Danimarka Bilimler Akademisi'nde duyurdu; ilk okuduğu sözcükler «Tengri» (Tanrı) ve «Türk» oldu. Wilhelm Radloff ilk tam çeviriyi 1894'te yayımladı (modelin bağlantı notu).",
+            "Türkiye'de yazıtların bilinen okumaları Muharrem Ergin'in «Orhun Abideleri» ve Talat Tekin'in «Orhon Yazıtları» eserleriyle yaygınlaştı.",
+            "Göktürk harfleri 2009'da Unicode standardına (Old Turkic bloğu) eklendi; bugün bilgisayarda ve telefonda yazılabilir. Başbuğ'daki «Göktürk yazısı» çeviricisi bu harfleri kullanır (modelin bağlantı notu)."
+          ],
+          "alistirmalar": [
+            {
+              "id": "dil.1.4.1.a1",
+              "tur": "secmeli",
+              "soru": "Göktürk yazısını çözen bilim insanı kimdir?",
+              "sec": [
+                "Wilhelm Radloff",
+                "Vilhelm Thomsen",
+                "N. M. Yadrintsev",
+                "Muharrem Ergin"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ],
+              "cozum": [
+                "Thomsen yazıyı 1893'te çözdü; Radloff ilk tam çeviriyi yayımladı, Yadrintsev yazıtları tanıttı."
+              ]
+            },
+            {
+              "id": "dil.1.4.1.a2",
+              "tur": "secmeli",
+              "soru": "Üç büyük Orhun yazıtından hangisi en eskisidir?",
+              "sec": [
+                "Bilge Kağan Yazıtı",
+                "Kül Tigin Yazıtı",
+                "Tonyukuk Yazıtı",
+                "Üçü aynı yıl dikildi"
+              ],
+              "dogru": "C",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k16"
+              ],
+              "cozum": [
+                "Tonyukuk yaklaşık 720-725, Kül Tigin 732, Bilge Kağan 735."
+              ]
+            },
+            {
+              "id": "dil.1.4.1.a3",
+              "tur": "secmeli",
+              "soru": "Thomsen'in okuduğu ilk sözcükler hangileridir?",
+              "sec": [
+                "Kağan ve bodun",
+                "Tengri ve Türk",
+                "Ötüken ve töre",
+                "Bilge ve Kül"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dil.1.4.2",
+          "ad": "Harfler: dört ünlü, iki yüzlü ünsüzler",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k3",
+            "k17",
+            "k19"
+          ],
+          "ozet": "Kaynağa göre yazı 38 damgadır ve sağdan sola yazılır; dört ünlü damgası sekiz ünlüyü karşılar, ünsüzlerin çoğunun kalın ve ince iki biçimi vardır.",
+          "metin": [
+            "Kaynağa göre Orhun yazısı 38 damgadan oluşur ve sağdan sola yazılır.",
+            "Ünlüler için yalnız dört damga vardır ve her biri iki ünlüyü karşılar: 𐰀 a/e, 𐰃 ı/i, 𐰆 o/u, 𐰇 ö/ü.",
+            "Asıl inceliği ünsüzlerdedir. Temel ünsüzlerin çoğunun iki ayrı damgası vardır: biri kalın ünlülerle (a, ı, o, u), öbürü ince ünlülerle (e, i, ö, ü) kullanılır. Kaynağın deyişiyle yazı, Türkçenin büyük ünlü uyumunu doğrudan harflerin yapısına yansıtır.",
+            "Kalın / ince çiftleri: b 𐰉 / 𐰋 · d 𐰑 / 𐰓 · g, ğ 𐰍 / 𐰏 · k 𐰴 / 𐰚 · l 𐰞 / 𐰠 · n 𐰣 / 𐰤 · r 𐰺 / 𐰼 · s 𐰽 / 𐰾 · t 𐱃 / 𐱅 · y 𐰖 / 𐰘.",
+            "Tek biçimli ünsüzler: m 𐰢, p 𐰯, ç 𐰲, z 𐰔, ş 𐱁.",
+            "Bir de iki sesi birden gösteren damgalar vardır: 𐰸 ok/uk, 𐰶 ık, 𐰜 ök/ük, 𐰭 ng, 𐰨 nç, 𐰦 nt, 𐰡 lt (modelin bağlantı notu).",
+            "Bu düzenin faydası şudur: ünsüzün biçimi sözcüğün kalın mı ince mi olduğunu zaten söyler. Bu yüzden ünlülerin bir kısmı yazılmasa da okuyucu sözcüğü çıkarabilir.",
+            "Bugünkü Türkçeden bir fark: Eski Türkçede söz başındaki t-, k-, b- sesleri korunur. Bu yüzden «Tengri», «bodun» gibi yazılır ve okunur (kaynak k16'nın dönem tablosu)."
+          ],
+          "alistirmalar": [
+            {
+              "id": "dil.1.4.2.a1",
+              "tur": "secmeli",
+              "soru": "«Türk» ince bir sözcüktür. Baştaki t için hangi damga kullanılır?",
+              "sec": [
+                "𐱃",
+                "𐱅",
+                "𐰴",
+                "𐰑"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3",
+                "k19"
+              ],
+              "cozum": [
+                "𐱅 ince t'dir; 𐱃 kalın t'dir."
+              ]
+            },
+            {
+              "id": "dil.1.4.2.a2",
+              "tur": "secmeli",
+              "soru": "Orhun yazısında kaç ünlü damgası vardır?",
+              "sec": [
+                "Dört",
+                "Sekiz",
+                "İki",
+                "On"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ],
+              "cozum": [
+                "Dört damga sekiz ünlüyü karşılar: a/e, ı/i, o/u, ö/ü."
+              ]
+            },
+            {
+              "id": "dil.1.4.2.a3",
+              "tur": "secmeli",
+              "soru": "Ünsüzlerin iki biçimli olması Türkçenin hangi özelliğini yansıtır?",
+              "sec": [
+                "Vurgunun son hecede olmasını",
+                "Büyük ünlü uyumunu (kalınlık-incelik)",
+                "Sondan eklemeli yapıyı",
+                "Cinsiyet ekinin olmamasını"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dil.1.4.3",
+          "ad": "Okumak: yön, ayırıcı ve yazılmayan ünlüler",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k17",
+            "k18"
+          ],
+          "ozet": "Göktürkçe sağdan sola okunur, sözcükler iki noktalı bir ayırıcıyla ayrılır; a/e çoğu zaman yazılmaz, ilk hecedeki öteki ünlüler yazılır.",
+          "metin": [
+            "Okumaya sağdan başla: ilk harf en sağdadır.",
+            "Sözcükler arasında üst üste iki noktaya benzeyen bir ayırıcı (⁚) vardır; bugünkü boşluğun işini görür.",
+            "a ve e çoğu zaman yazılmaz; ünsüzün kalın ya da ince biçimi bu boşluğu doldurur. Sözcük ünlüyle bitiyorsa son ünlü yazılır. İlk hecedeki ı/i, o/u, ö/ü ise genellikle yazılır (modelin bağlantı notu: kural yazıttan yazıta değişebilir).",
+            "Örnek 1 · Türük: 𐱅𐰇𐰼𐰜. Sağdan sola: 𐱅 ince t, 𐰇 ü, 𐰼 ince r, 𐰜 «ük». Okunuşu: Türük.",
+            "Örnek 2 · Tengri: 𐱅𐰭𐰼𐰃. Sağdan sola: 𐱅 ince t, 𐰭 ng, 𐰼 ince r, 𐰃 i. Ortadaki e yazılmamıştır: «t(e)ngri».",
+            "Örnek 3 · Kağan: 𐰴𐰍𐰣. Kalın k, kalın ğ, kalın n; iki a da yazılmamıştır: «k(a)ğ(a)n».",
+            "Örnek 4 · Bodun: 𐰉𐰆𐰑𐰣. Kalın b, o, kalın d, kalın n: «bod(u)n», yani millet. «Türük bodun» Türk milleti demektir.",
+            "Okurken iki soru sor: ünsüzler kalın mı ince mi? Hangi ünlüler yazılmamış olabilir? Bu iki soru, kısa sözcüklerin çoğunu açar."
+          ],
+          "alistirmalar": [
+            {
+              "id": "dil.1.4.3.a1",
+              "tur": "secmeli",
+              "soru": "𐰴𐰍𐰣 hangi sözcüktür?",
+              "sec": [
+                "Kağan",
+                "Kağın",
+                "Kuğun",
+                "Gökün"
+              ],
+              "dogru": "A",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17",
+                "k18"
+              ],
+              "cozum": [
+                "Kalın k, kalın ğ, kalın n; a'lar yazılmaz: kağan."
+              ]
+            },
+            {
+              "id": "dil.1.4.3.a2",
+              "tur": "secmeli",
+              "soru": "𐱅𐰭𐰼𐰃 sözcüğünde yazılmayan ünlü hangisidir?",
+              "sec": [
+                "i",
+                "e",
+                "ü",
+                "a"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ],
+              "cozum": [
+                "Tengri: t-ng-r-i; e yazılmamıştır."
+              ]
+            },
+            {
+              "id": "dil.1.4.3.a3",
+              "tur": "secmeli",
+              "soru": "Göktürkçe bir satırda ilk harf nerededir?",
+              "sec": [
+                "En solda",
+                "En sağda",
+                "Ortada",
+                "Satırın altında"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dil.1.4.4",
+          "ad": "Kendi adını taşa yaz",
+          "onKosul": [],
+          "durum": "taslak",
+          "yazan": "model",
+          "kaynak": [
+            "k3",
+            "k19"
+          ],
+          "ozet": "Dört adımda bir sözcük Göktürk harfleriyle yazılır: kalın mı ince mi, doğru ünsüz biçimi, hangi ünlüler yazılır, sağdan sola diz.",
+          "metin": [
+            "Artık kendi adını yazabilirsin. Dört adım yeter.",
+            "Adım 1 · Sözcüğün kalın mı ince mi olduğuna bak: a, ı, o, u varsa kalın; e, i, ö, ü varsa ince. Karışıksa her heceye kendi ünlüsüne göre karar ver.",
+            "Adım 2 · Her ünsüz için doğru biçimi seç (ders 2'deki çiftler): kalın sözcükte 𐰉 𐰑 𐰍 𐰴 𐰞 𐰣 𐰺 𐰽 𐱃 𐰖, ince sözcükte 𐰋 𐰓 𐰏 𐰚 𐰠 𐰤 𐰼 𐰾 𐱅 𐰘.",
+            "Adım 3 · Ünlüleri yerleştir: ilk hecedeki ı/i, o/u, ö/ü yazılır; a/e çoğu zaman yazılmaz, sözcük sonundaysa yazılır.",
+            "Adım 4 · Harfleri sağdan sola diz; birden çok sözcük varsa aralarına ⁚ koy.",
+            "Bugün sayfasındaki «Göktürk yazısı» çeviricisi her ünlüyü yazar, yani yazıtlardan daha uzun ama okunması kolay bir yazım verir. Kendi elle yazdığın biçimi onunla karşılaştır: farklar çoğunlukla düşürdüğün a ve e'lerdir (modelin bağlantı notu).",
+            "Bir uyarı: f, v, h, c, j gibi sesler Eski Türkçede yoktur; yakın seslerle yazılır (f → p, v → b, h → k, c → ç). Bu yüzden her ad birebir yazılamaz; bu bir eksik değil, dilin o çağdaki ses düzenidir."
+          ],
+          "alistirmalar": [
+            {
+              "id": "dil.1.4.4.a1",
+              "tur": "secmeli",
+              "soru": "«Tengri» gibi ince bir sözcükte r için hangi damga seçilir?",
+              "sec": [
+                "𐰺",
+                "𐰼",
+                "𐰽",
+                "𐰞"
+              ],
+              "dogru": "B",
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3",
+                "k19"
+              ]
+            },
+            {
+              "id": "dil.1.4.4.a2",
+              "tur": "acik",
+              "soru": "Adını Göktürk harfleriyle yaz ve her harf için neden o biçimi seçtiğini (kalın/ince, yazılan ve düşen ünlüler) iki üç cümleyle açıkla.",
+              "dogru": "Örnek: «Bars» kalın bir sözcüktür: 𐰽𐰺𐰉 (sağdan sola b, r, s; a yazılmadı).",
+              "olcut": [
+                "Sözcüğün kalın mı ince mi olduğu doğru belirlendi",
+                "Her ünsüzün doğru biçimi seçildi",
+                "Harfler sağdan sola dizildi",
+                "Yazılmayan ünlüler gerekçelendirildi"
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k3",
+                "k19"
+              ]
+            }
           ]
         }
       ]
