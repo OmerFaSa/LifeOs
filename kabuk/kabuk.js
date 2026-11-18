@@ -333,7 +333,36 @@
 
   var GUN = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
   var AY = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-  function tarih(t) { return GUN[t.getDay()] + ' · ' + t.getDate() + ' ' + AY[t.getMonth()]; }
+  // Türk izleri (2026-11-18f, sahip: «içine Türklüğü işle»): on iki hayvanlı Türk takvimi, günün sözü, millî günler
+  // shortcut: hayvan yılı takvim yılıyla döner (geleneksel yılbaşı baharda); tam sınır gerekirse Nevruz'a bağlanır
+  var TURK_YIL = ['Sıçgan (fare)', 'Ud (sığır)', 'Bars', 'Tavışgan (tavşan)', 'Lu (ejder)', 'Yılan', 'Yunt (at)', 'Koy (koyun)', 'Biçin (maymun)', 'Takagu (tavuk)', 'İt (köpek)', 'Tonguz (domuz)'];
+  function turkYili(t) { var y = TURK_YIL[((t.getFullYear() - 4) % 12 + 12) % 12], m = /\((.+)\)$/.exec(y); return (m ? m[1] : y).replace(/^./, function (c) { return c.toLocaleUpperCase('tr'); }); }
+  function tarih(t) { return GUN[t.getDay()] + ' · ' + t.getDate() + ' ' + AY[t.getMonth()] + ' · ' + turkYili(t) + ' yılı'; }
+  var SOZ = [
+    ['Üstte mavi gök çökmedikçe, altta yağız yer delinmedikçe, Türk milleti, ilini ve töreni kim bozabilir?', 'Kül Tigin Yazıtı'],
+    ['Ne mutlu Türküm diyene!', 'Atatürk, Onuncu Yıl Nutku, 1933'],
+    ['Ey Türk gençliği! Birinci vazifen, Türk istiklâlini, Türk Cumhuriyetini ilelebet muhafaza ve müdafaa etmektir.', 'Atatürk, Gençliğe Hitabe, 1927'],
+    ['Hayatta en hakiki mürşit ilimdir.', 'Atatürk'],
+    ['Egemenlik kayıtsız şartsız milletindir.', 'Atatürk'],
+    ['Yurtta sulh, cihanda sulh.', 'Atatürk'],
+    ['İlim ilim bilmektir, ilim kendin bilmektir.', 'Yunus Emre'],
+    ['Birlikten kuvvet doğar.', 'Türk atasözü'], ['İşleyen demir ışıldar.', 'Türk atasözü'], ['Damlaya damlaya göl olur.', 'Türk atasözü'],
+    ['Bilmemek ayıp değil, öğrenmemek ayıptır.', 'Türk atasözü'], ['Ağaç yaşken eğilir.', 'Türk atasözü'], ['Bin bilsen de bir bilene danış.', 'Türk atasözü'],
+    ['Emek olmadan yemek olmaz.', 'Türk atasözü'], ['Az olsun, öz olsun.', 'Türk atasözü'], ['Akıl akıldan üstündür.', 'Türk atasözü'],
+    ['Bir elin nesi var, iki elin sesi var.', 'Türk atasözü'], ['At ölür meydan kalır, yiğit ölür şan kalır.', 'Türk atasözü'],
+    ['Yiğit düştüğü yerden kalkar.', 'Türk atasözü'], ['Sabrın sonu selamettir.', 'Türk atasözü']];
+  // ay-gün → millî gün (olayın yılı)
+  var MILLI = { '3-12': 'İstiklâl Marşı\'nın kabulü (1921)', '3-18': 'Çanakkale Zaferi ve Şehitleri Anma Günü (1915)', '4-23': 'Ulusal Egemenlik ve Çocuk Bayramı (1920)',
+    '5-19': 'Atatürk\'ü Anma, Gençlik ve Spor Bayramı (1919)', '5-29': 'İstanbul\'un Fethi (1453)', '7-15': 'Demokrasi ve Millî Birlik Günü (2016)', '7-24': 'Lozan Antlaşması (1923)',
+    '8-26': 'Malazgirt Zaferi (1071) ve Büyük Taarruz (1922)', '8-30': 'Zafer Bayramı (1922)', '9-9': 'İzmir\'in Kurtuluşu (1922)', '10-29': 'Cumhuriyet Bayramı (1923)',
+    '11-10': 'Atatürk\'ü Anma Günü (1938)' };
+  // Bugün'de günün sözü: gün sırasıyla döner (aynı gün aynı söz); millî günde üstünde o günün adı. Başında Göktürk harfleriyle «Türük» (sağdan sola).
+  function gununSozu(t) {
+    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[(t.getMonth() + 1) + '-' + t.getDate()];
+    return '<figure class="soz">' + (m ? '<p class="soz__milli">Bugün ' + kac(m) + '</p>' : '') +
+      '<span class="soz__runik" lang="otk" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</span>' +
+      '<blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption></figure>';
+  }
   // ad Hesap oturumundan (hitap, yoksa görünen ad); Hesap yüklü değilse ya da oturum yoksa adsız selam
   function hesapAdi() {
     try { var o = kok.LIFEOS.HESAP.durum().oturum; return o ? (o.hitap || o.gorunen_ad || '') : ''; } catch (e) { return ''; }
@@ -486,7 +515,7 @@
       // 2026-11-17d (sahip: büyük «sıradaki» kartı Bugün'de olmasın; alanlar ilerleme gibi bir bölümde): iş kartı yok, alanlar «İlerleme»de,
       // çalışılan alan en başta ilerleme çizgisi ve sıradaki adımıyla
       alanlarBaslik: 'İlerleme', alanlar: alanKartlari(f, od, a),
-      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler }).replace('<div class="b-karsilama__ic">', '<div class="b-karsilama__ic">' + gunYayiHtml(t));
+      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler }).replace('<div class="b-karsilama__ic">', '<div class="b-karsilama__ic">' + gunYayiHtml(t)) + '<div class="soz-kap">' + gununSozu(t) + '</div>'; // söz İlerleme'nin altında
   }
   // Bugün'ün alan ızgarası: haritadaki taşınmış alanlar; simge index.html'deki #i-<alan>, ilerleme yalnız açık alan için bilinir
   var ALAN_RENK = { felsefe: 'turuncu', akademik: 'mavi', dil: 'yesil', tarih: 'pembe', okuma: 'sari', hareket: 'deniz', muzik: 'mor', beslenme: 'yesil', uyku: 'gok', tahlil: 'pembe',

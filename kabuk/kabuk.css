@@ -1072,3 +1072,16 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 .ders-sahne{ position:relative; height:204px; margin:calc(-1 * var(--a7)) calc(-1 * var(--a7)) var(--a5); border-radius:var(--kose) var(--kose) 0 0; overflow:hidden; background:var(--gok); }
 .ders-sahne::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--sahne-yazi) 55%, transparent) 30%, color-mix(in srgb, var(--sahne-yazi) 55%, transparent) 70%, transparent); opacity:.6; }
 @media (max-width:640px){ .ders-sahne{ height:144px; margin:calc(-1 * var(--a5)) calc(-1 * var(--a4)) var(--a4); } }
+/* ===== Türk izleri (2026-11-18f, sahip: «içine Türklüğü işle»): Selçuklu sekiz köşeli yıldızı bölüm başlıklarında, Bugün'de günün sözü ===== */
+:root .b-bolum__ust h2::before{ content:""; display:inline-block; width:.8em; height:.8em; margin-right:.4em; vertical-align:-.06em; background:var(--altin);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10.0 0.0L12.4 4.3L17.1 2.9L15.7 7.6L20.0 10.0L15.7 12.4L17.1 17.1L12.4 15.7L10.0 20.0L7.6 15.7L2.9 17.1L4.3 12.4L0.0 10.0L4.3 7.6L2.9 2.9L7.6 4.3z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10.0 0.0L12.4 4.3L17.1 2.9L15.7 7.6L20.0 10.0L15.7 12.4L17.1 17.1L12.4 15.7L10.0 20.0L7.6 15.7L2.9 17.1L4.3 12.4L0.0 10.0L4.3 7.6L2.9 2.9L7.6 4.3z'/%3E%3C/svg%3E") center/contain no-repeat; }
+.soz-kap{ width:100%; max-width:var(--sayfa); margin:calc(-1 * var(--a4)) auto var(--a7); padding:0 var(--a4); box-sizing:border-box; }
+.soz{ position:relative; margin:0; padding:var(--a5) var(--a6); border-radius:var(--kose); text-align:center; overflow:hidden;
+  background:radial-gradient(ellipse 70% 90% at 50% 0%, color-mix(in srgb, var(--altin) 10%, transparent), transparent), var(--yuzey); box-shadow:var(--golge-yumusak); }
+.soz__milli{ margin:0 0 var(--a3); font-size:var(--yz-k); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ana); }
+.soz__runik{ display:block; font:1.75rem/1 "Segoe UI Historic","Noto Sans Old Turkic",sans-serif; letter-spacing:.3em; color:var(--altin); }
+.soz__metin{ margin:var(--a3) auto 0; max-width:56ch; font:italic var(--yz-h3)/1.55 var(--okuma); color:var(--yazi); }
+.soz__kaynak{ margin-top:var(--a2); font-size:var(--yz-k); color:var(--soluk); }
+.soz__kaynak::before{ content:"— "; }
+@media (max-width:640px){ .soz{ padding:var(--a4); } }

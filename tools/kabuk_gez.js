@@ -98,6 +98,10 @@ async function goruntu(p, ad, sec = {}) {
       && (await p.locator('.b-karsilama__is').count()) === 0 && (await p.textContent('#b-k-alanlar')) === 'İlerleme', JSON.stringify(ia));
     dene('Bugün: karşılama taşı tek h1 selam ve özet cümlesi', (await p.locator('#sayfa h1.b-karsilama__selam').count()) === 1 && (await p.locator('#sayfa h1').count()) === 1
       && /^Bugün .* var\.$/.test(await p.textContent('.b-karsilama__ozet')));
+    // Türk izleri (2026-11-18f): tarihte on iki hayvanlı Türk takviminin yılı, İlerleme'nin altında günün sözü (Göktürk harfleriyle «Türük», kaynak)
+    dene('Bugün: tarih satırında Türk takvimi yılı, günün sözü kaynağıyla ve Göktürk harfleriyle', /· \S+ yılı$/.test((await p.textContent('.b-karsilama__tarih')).trim())
+      && (await p.textContent('.soz .soz__runik')) === '\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}' && (await p.textContent('.soz__metin')).length > 5 && (await p.textContent('.soz__kaynak')).length > 3,
+      await p.textContent('.b-karsilama__tarih'));
     dene('Bugün: üst çubukta logo, beş bölüm (Bugün seçili), arama komut çubuğunu açar', (await p.locator('.ust--sahne .ust__sekmeler a').count()) === 5
       && (await p.getAttribute('.ust__sekmeler a[aria-current="page"]', 'href')) === '#/bugun' && (await p.getAttribute('.ust__ara', 'data-ac')) === 'komut');
     await goruntu(p, 'karsilama');
