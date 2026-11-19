@@ -39,7 +39,7 @@
 import datetime
 import json
 
-from core import adlar, bam, db, depo, eksik, hedefag, kendiliginden, king, manager, saat, weekly
+from core import adlar, db, depo, eksik, hedefag, kendiliginden, king, manager, saat, weekly
 
 VARSAYILAN = {"enabled": False, "aralik_dk": 30}
 ALANLAR = {"enabled": bool, "aralik_dk": int}
@@ -185,12 +185,19 @@ def bekleyenler(con, gun):
     }
 
 
-def _acik_mi(con, tur_, govde):
-    """Ayni King isi zaten acik mi? Anahtar King'inkiyle ayni kurulur."""
+def _emir_anahtar(tur_, govde):
+    """King isi icin kanonik anahtar; kurulamazsa None."""
     temiz, hata = king._govde_temizle(tur_, govde)
     if hata:
+        return None
+    return "hkm:%s:%s" % (tur_, king.ANAHTAR[tur_](temiz))
+
+
+def _acik_mi(con, tur_, govde):
+    """Ayni King isi zaten acik mi? Anahtar King'inkiyle ayni kurulur."""
+    anahtar = _emir_anahtar(tur_, govde)
+    if anahtar is None:
         return True                             # kurulamayan is listeye girmez
-    anahtar = "hkm:%s:%s" % (tur_, king.ANAHTAR[tur_](temiz))
     return bool(con.execute("SELECT 1 FROM is_emirleri WHERE anahtar=? AND durum IN (%s)"
                             % ",".join("?" * len(king.ACIK)), (anahtar,) + king.ACIK).fetchone())
 
@@ -212,11 +219,21 @@ def icerik(con, gun, at):
                         "metin": "%s · «%s» hedefinin son tarihi (%s) geçti; hedef hâlâ etkin."
                                  % (ad, h["ozet"], _gun_yaz(h["son_tarih"]))})
     tara = depo.tarayici(con, limit=200, now=at.isoformat(timespec="seconds"))
-    for k in tara["kayitlar"]:
+    eskiler = [k for k in tara["kayitlar"] if k["tazelik"]["durum"] in ESKI_DURUM]
+    govdeler = {}
+    if eskiler:
+        idler = [k["id"] for k in eskiler]
+        for r in con.execute("SELECT id, govde FROM bam_kayitlar WHERE id IN (%s)"
+                             % ",".join("?" * len(idler)), idler):
+            try:
+                v = json.loads(r["govde"] or "{}")
+            except (TypeError, ValueError):
+                v = {}
+            govdeler[r["id"]] = v if isinstance(v, dict) else {}
+    adaylar = []
+    for k in eskiler:
         t = k["tazelik"]
-        if t["durum"] not in ESKI_DURUM:
-            continue
-        g = (bam.kayit_getir(con, k["id"]) or {}).get("govde") or {}
+        g = govdeler.get(k["id"]) or {}
         if k["tur"] != "arastirma":
             if g.get("dayanak"):
                 continue                        # dayandigi arastirma ayrica listelenir
@@ -225,8 +242,20 @@ def icerik(con, gun, at):
             continue
         konu = str(g.get("konu") or "").strip()[:king.MAX_KONU]
         govde = {"arastirma": {"konu": konu}}
-        if len(konu) < 3 or _acik_mi(con, "bam.arastirma", govde):
+        anahtar = None if len(konu) < 3 else _emir_anahtar("bam.arastirma", govde)
+        if anahtar is not None:
+            adaylar.append((k, konu, govde, anahtar))
+    acik_anahtar = set()
+    anahtarlar = sorted({a for _, _, _, a in adaylar})
+    if anahtarlar and king.ACIK:
+        acik_anahtar = {r[0] for r in con.execute(
+            "SELECT anahtar FROM is_emirleri WHERE anahtar IN (%s) AND durum IN (%s)"
+            % (",".join("?" * len(anahtarlar)), ",".join("?" * len(king.ACIK))),
+            tuple(anahtarlar) + tuple(king.ACIK))}
+    for k, konu, govde, anahtar in adaylar:
+        if anahtar in acik_anahtar:
             continue
+        t = k["tazelik"]
         yap.append({"id": "arastirma:%d" % k["id"], "tur": "bam.arastirma",
                     "ad": king.TURLER["bam.arastirma"]["ad"], "konu": konu,
                     "kayit_id": k["id"], "model": True, "govde": govde,

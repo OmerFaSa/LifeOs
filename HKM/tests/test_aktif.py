@@ -224,6 +224,28 @@ def run():
         no(any(y.startswith("Geçen haftanın") for y in ikinci["yapilan"]), "haftada bir")
         eq(aktif.tur(con, ACIK, "elle", now=_an(gun="2026-09-28"))["haftalik"]["donem"], "2026-W40")
 
+    def t_icerik_toplu_sorgu():
+        from core import king
+        con = _con()
+        for i in range(80):
+            _arastirma(con, "Arastirma %02d" % i, 120)
+        for i in range(40):
+            _arastirma(con, "Materyal %02d" % i, 400, tur="materyal", govde={})
+        _arastirma(con, "Dayanakli materyal", 400, tur="materyal", govde={"dayanak": 1})
+        king.emir_ac(con, {}, "hkm", "bam.arastirma", {"arastirma": {"konu": "Arastirma 79"}},
+                     konu="Arastirma 79", neden="deneme", now=G + "T09:00:00")
+        sqls = []
+        con.set_trace_callback(sqls.append)
+        try:
+            out, yap = aktif.icerik(con, G, _an())
+        finally:
+            con.set_trace_callback(None)
+        eq(len(out), aktif.ICERIK_EN_COK)
+        no(any("Dayanakli materyal" in e["metin"] for e in out), "dayanakli materyal elenir")
+        eq(len(yap), aktif.YAPILABILIR_EN_COK)
+        no(any(y["konu"] == "Arastirma 79" for y in yap), "acik emirli arastirma elenir")
+        ok(len(sqls) <= 12, "N+1 yok: sabit sorgu (gelen=%d)" % len(sqls))
+
     test("varsayılan kapalı; ayar doğrulanır", t_kapali)
     test("tetik: başlangıç, yeni kayıt, nabız, yeni gün", t_tetik)
     test("nabız: ölçüldü ya da veri yok, sıfır yok", t_nabiz)
@@ -234,6 +256,7 @@ def run():
     test("eksik içerik: plansız ve süresi geçmiş hedef; tur plan açmaz", t_icerik_hedef)
     test("eskiyen araştırma yapılabilir: tur açmaz, dokununca King’e", t_yapilabilir)
     test("haftalık rapor haftada bir kez, sıfır yazmaz", t_haftalik)
+    test("eskiyen BAM taramasında N+1 sorgu yok, açık emir ve dayanak doğru süzülür", t_icerik_toplu_sorgu)
 
 
 def run_daemon():
