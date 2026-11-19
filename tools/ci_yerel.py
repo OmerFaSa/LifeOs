@@ -60,29 +60,34 @@ def _tarayici_mi(adim):
 def _degisen_yollar(taban):
     """Calisma agaci (HEAD) ya da TABAN...HEAD arasindaki degisen yollar; git okunamazsa None."""
     def _git(*args):
-        return subprocess.run(
-            ["git", "-c", "core.quotepath=false", *args],
-            cwd=KOK, capture_output=True, text=True, encoding="utf-8", errors="replace",
-        )
+        try:
+            return subprocess.run(
+                ["git", "-c", "core.quotepath=false", *args],
+                cwd=KOK, capture_output=True, text=True, encoding="utf-8", errors="replace",
+            )
+        except OSError:
+            return None
 
     yollar = set()
     if taban != "HEAD":
         r = _git("diff", "--name-only", "%s...HEAD" % taban)
-        if r.returncode != 0:
+        if r is None or r.returncode != 0:
             return None
         yollar.update(x.strip().replace("\\", "/") for x in r.stdout.splitlines() if x.strip())
     r_head = _git("diff", "--name-only", "HEAD")
     r_yeni = _git("ls-files", "--others", "--exclude-standard")
-    if r_head.returncode != 0 or r_yeni.returncode != 0:
+    if r_head is None or r_yeni is None or r_head.returncode != 0 or r_yeni.returncode != 0:
         return None
     yollar.update(x.strip().replace("\\", "/") for x in r_head.stdout.splitlines() if x.strip())
     yollar.update(x.strip().replace("\\", "/") for x in r_yeni.stdout.splitlines() if x.strip())
     if taban == "HEAD" and not yollar:
         for ref in ("origin/main", "main"):
-            if _git("rev-parse", "--verify", ref).returncode == 0:
+            r_v = _git("rev-parse", "--verify", ref)
+            if r_v is not None and r_v.returncode == 0:
                 r_ref = _git("diff", "--name-only", "%s...HEAD" % ref)
-                if r_ref.returncode == 0:
-                    yollar.update(x.strip().replace("\\", "/") for x in r_ref.stdout.splitlines() if x.strip())
+                if r_ref is None or r_ref.returncode != 0:
+                    return None
+                yollar.update(x.strip().replace("\\", "/") for x in r_ref.stdout.splitlines() if x.strip())
                 break
     return sorted(yollar)
 
@@ -91,19 +96,21 @@ def _adim_eslesir(adim, yol):
     k = " ".join(adim["komutlar"])
     is_ = adim["is"]
     if yol.startswith("belgeler/"):
-        return "belge_dizin_kabul_test" in k
+        return "belge_dizin_kabul_test" in k or "vitrin.py" in k
     if yol.startswith("HKM/"):
         return (is_ == "hkm" or "tekkapi_test" in k or "king/" in k or "olcum.py" in k
-                or "not-hkm.test.js" in k or "hafiza_" in k or "merdiven_" in k)
+                or "not-hkm.test.js" in k or "hafiza_" in k or "merdiven_" in k or "goc_test" in k)
     if yol.startswith("king/"):
         return ("king/" in k or "king-sohbet.test.js" in k or "tekkapi_test" in k
-                or "olcum.py" in k or "bilgisayar_kabul_test" in k or "kopru" in adim["ad"].lower())
+                or "olcum.py" in k or "bilgisayar_kabul_test" in k
+                or "katman" in k or "gercek_kosu" in k or "kopru" in adim["ad"].lower())
     if yol.startswith("motor/"):
         return ("motor/" in k or "king/" in k or "kabuk" in k or "ortak_test" in k
                 or "hiz_olcum" in k or "hareket_gez" in k or "gercek_kosu" in k
                 or "tekkapi_test" in k or "olcum.py" in k or "kalite/katman" in k)
     if yol.startswith("alan/"):
-        return ("alan/" in k or "king/" in k or "kabuk_gez" in k or "hareket_gez" in k
+        return ("alan/" in k or "king/" in k or "kabuk.test.js" in k or "kabuk_gez" in k
+                or "kabuk_baslangic" in k or "gercek_kosu" in k or "hareket_gez" in k
                 or "hiz_olcum" in k or "onay_uygula" in k or "veri_" in k
                 or "olcum.py" in k or "kalite/katman" in k)
     if yol.startswith(("kabuk/", "brand/")):
@@ -111,14 +118,15 @@ def _adim_eslesir(adim, yol):
                 or "hareket_gez" in k or "marka.py" in k or "vitrin.py" in k
                 or "tekkapi_test" in k or "gocpaket" in k or "web_paket" in k
                 or "kabul_js" in k or "kullanim" in k or "bilinc_kabul" in k
-                or "turk_tablo_kabul" in k or "portreonar_test" in k
+                or "turk_tablo_kabul" in k or "portreonar_test" in k or "ayar_test" in k
                 or "kalite/katman" in k or "olcum.py" in k or "king/" in k)
     if yol.startswith("sistem/"):
-        return any(t in k for t in (
+        return is_ == "hkm" or any(t in k for t in (
             "tekkapi_test", "kuyruk_test", "tasi_test", "goc_test", "tekdepo_test",
             "gocpaket_test", "zemin_test", "planlama_test", "muzik_test", "ice_test",
             "ayar_test", "kalite_etiket_test", "bilgisayar_kabul_test", "olcum.py",
             "kabuk_esit_gez", "kabuk_gez", "ayar_esit_kabul", "ice_suren_kabul",
+            "mcp_test", "gercek_kosu", "kabuk_baslangic", "anlama", "hiz_olcum", "hareket_gez",
         ))
     if yol.startswith("kalite/"):
         return any(t in k for t in (
@@ -130,6 +138,16 @@ def _adim_eslesir(adim, yol):
         ad = os.path.basename(yol)
         kok_ad = re.sub(r"(?:_kabul_test|_test|\.test)?\.(?:py|js)$", "", ad)
         if ad == "ema_isci.py" and is_ == "hkm":
+            return True
+        if ad == "ajan_kanca.py" and "ajan_test" in k:
+            return True
+        if ad in ("ajan.py", "ofis_test.py") and "ofis_pilot" in k:
+            return True
+        if ad == "gercek_kosu.js" and ("kabuk_baslangic" in k or "kabuk_gez" in k or "gercek_kosu" in k):
+            return True
+        if ad == "kabuk_baslangic.js" and ("kabuk_baslangic" in k or "kabuk_gez" in k):
+            return True
+        if ad.endswith(".json") and "olcum.py" in k:
             return True
         if "tools_dizin_kabul_test" in k:
             return True
@@ -306,20 +324,34 @@ if __name__ == "__main__":
         assert len(etkilenen_adimlar(gercek, [])[0]) == 0
         assert len(etkilenen_adimlar(gercek, None)[0]) == len(gercek)
         assert len(etkilenen_adimlar(gercek, [".github/workflows/ci.yml"])[0]) == len(gercek)
+        assert len(etkilenen_adimlar(gercek, ["tools/gez_sunucu.js"])[0]) == len(gercek)
         assert len(etkilenen_adimlar(gercek, ["bilinmeyen/x.txt"])[0]) == len(gercek)
         b_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["belgeler/DIZIN.md"])[0]]
         assert any("Ofis kabul" in ad for ad in b_adimlar) and len(b_adimlar) <= 2, b_adimlar
+        assert any("Vitrin" in s["ad"] for s in etkilenen_adimlar(gercek, ["belgeler/ekip/vitrin.html"])[0])
         a_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["king/arama.py"])[0]]
-        assert any("Arama motoru" in ad for ad in a_adimlar) and not any(_tarayici_mi(s) for s in etkilenen_adimlar(gercek, ["king/arama.py"])[0]), a_adimlar
+        assert any("Arama motoru" in ad for ad in a_adimlar) and any("Katman" in ad for ad in a_adimlar)
+        assert not any(_tarayici_mi(s) for s in etkilenen_adimlar(gercek, ["king/arama.py"])[0]), a_adimlar
         h_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["HKM/core/depo.py"])[0]]
-        assert "Testler" in h_adimlar and "Sorgu bütçesi" in h_adimlar, h_adimlar
+        assert "Testler" in h_adimlar and "Sorgu bütçesi" in h_adimlar and "Göç aracı kuru koşusu" in h_adimlar, h_adimlar
+        s_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["sistem/hesap.py"])[0]]
+        assert "Testler" in s_adimlar and "Tek kapı, tek süreç" in s_adimlar, s_adimlar
+        goc_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["sistem/goc.py"])[0]]
+        assert "King MCP ucu salt okur" in goc_adimlar and "Göç aracı kuru koşusu" in goc_adimlar, goc_adimlar
         k_adimlar = etkilenen_adimlar(gercek, ["kabuk/kabuk.css"])[0]
         assert any(_tarayici_mi(s) for s in k_adimlar) and any("Kabuk haritası" in s["ad"] for s in k_adimlar)
         assert len([s for s in k_adimlar if not _tarayici_mi(s)]) < len(k_adimlar)
         t_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["tools/pano_cek.js"])[0]]
-        assert any("Ofis kabul" in ad for ad in t_adimlar), t_adimlar
+        assert any("Ofis kabul" in ad for ad in t_adimlar) and any("Görsel pano aracı" in ad for ad in t_adimlar), t_adimlar
+        assert any("Karmaşıklık" in s["ad"] for s in etkilenen_adimlar(gercek, ["tools/king_sinav.json"])[0])
         hizli = [s for s in gercek if not _tarayici_mi(s)]
-        assert 0 < len(hizli) < len(gercek)
+        assert len(hizli) == len(gercek) - 5 and any("Görsel pano aracı" in s["ad"] for s in hizli)
+        eski_run = subprocess.run
+        subprocess.run = lambda *a, **kw: subprocess.CompletedProcess(a[0], 128, "", "fatal")
+        try:
+            assert _degisen_yollar("origin/main") is None
+        finally:
+            subprocess.run = eski_run
         if os.name == "nt":
             b = _bash()
             assert b.lower().endswith("bash.exe") and os.path.isfile(b), b

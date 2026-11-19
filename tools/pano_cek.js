@@ -109,12 +109,17 @@ function ayristirArg(argv) {
   if (komut === 'cek') {
     const f = bayraklariOku(args, new Set(['yer', 'boy', 'cikti', 'bekle']), new Set(['tam', 'kati']));
     if (!f.cikti || !String(f.cikti).trim()) throw new Error('cek için --cikti zorunludur.');
-    const yerler = f.yer ? f.yer.split(',').map(x => x.trim()).filter(Boolean).map(yerTemizle) : VARSAYILAN_YER.slice();
+    const yerler = f.yer !== undefined
+      ? f.yer.split(',').map(x => x.trim()).filter(Boolean).map(yerTemizle)
+      : VARSAYILAN_YER.slice();
     if (!yerler.length) throw new Error('--yer boş olamaz.');
-    const boylar = f.boy ? boyCoz(f.boy) : VARSAYILAN_BOY.map(b => Object.assign({}, b));
-    const bekle = f.bekle !== undefined ? Number(f.bekle) : 120;
-    if (!Number.isInteger(bekle) || bekle < 0 || bekle > 10000) {
-      throw new Error('--bekle 0..10000 tam sayı olmalı.');
+    const boylar = f.boy !== undefined ? boyCoz(f.boy) : VARSAYILAN_BOY.map(b => Object.assign({}, b));
+    let bekle = 120;
+    if (f.bekle !== undefined) {
+      const ham = String(f.bekle).trim();
+      if (!/^\d+$/.test(ham)) throw new Error('--bekle 0..10000 tam sayı olmalı.');
+      bekle = Number(ham);
+      if (bekle < 0 || bekle > 10000) throw new Error('--bekle 0..10000 tam sayı olmalı.');
     }
     return {
       komut: 'cek',
@@ -128,7 +133,7 @@ function ayristirArg(argv) {
   }
   if (komut === 'birlestir') {
     const f = bayraklariOku(args, new Set(['once', 'sonra', 'cikti', 'baslik']), new Set());
-    if (!f.once || !f.sonra || !f.cikti) {
+    if (!String(f.once || '').trim() || !String(f.sonra || '').trim() || !String(f.cikti || '').trim()) {
       throw new Error('birlestir için --once, --sonra ve --cikti zorunludur.');
     }
     return {
@@ -234,16 +239,21 @@ async function cek(ayar) {
     PYTHONIOENCODING: 'utf-8',
     PYTHONUTF8: '1',
     PYTHONDONTWRITEBYTECODE: '1',
+    HOME: gecici,
     LOCALAPPDATA: gecici,
     APPDATA: gecici,
     LIFEOS_TASIMA: '1',
-    LIFEOS_HESAP_KLASOR: path.join(gecici, 'LifeOS', 'hesap'),
+    LIFEOS_DIR: path.join(gecici, 'sistem'),
   });
+  for (const ad of ['HESAP', 'AYAR', 'ICE', 'MUZIK', 'PLAN', 'ZEMIN', 'TELEFON', 'KABUK']) {
+    env[`LIFEOS_${ad}_KLASOR`] = path.join(gecici, ad.toLowerCase());
+  }
 
-  const S = await sunucuAc({ kok: KOK, env, ad: 'pano-cek' });
+  let S = null;
   let tarayici = null;
   const sonuclar = [];
   try {
+    S = await sunucuAc({ kok: KOK, env, ad: 'pano-cek' });
     await S.hazir();
     tarayici = await chromium.launch();
     const adSayac = new Map();
@@ -260,6 +270,7 @@ async function cek(ayar) {
       for (const boy of ayar.boylar) {
         const ctx = await tarayici.newContext({
           viewport: { width: boy.w, height: boy.h },
+          hasTouch: boy.w <= 480,
           colorScheme: boy.tema === 'koyu' ? 'dark' : 'light',
         });
         await ctx.addInitScript(() => {
@@ -278,9 +289,9 @@ async function cek(ayar) {
         try {
           await p.goto(`${S.T}/kabuk/#/${yer}`, { waitUntil: 'load' });
           await p.waitForFunction(() => {
-            const g = document.querySelector('#govde') || document.body;
-            return g && g.innerText.trim().length > 0;
-          }, { timeout: 5000 }).catch(() => {});
+            const g = document.querySelector('#sayfa[data-ciz] .govde');
+            return Boolean(g && g.innerText.trim().length > 0 && !document.querySelector('#sayfa [aria-busy="true"]'));
+          }, { timeout: 6000 }).catch(() => {});
           await p.evaluate(() => (document.fonts ? document.fonts.ready : Promise.resolve()));
           await p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
           if (ayar.bekle > 0) await p.waitForTimeout(ayar.bekle);
@@ -290,7 +301,7 @@ async function cek(ayar) {
             const innerWidth = window.innerWidth;
             const kucukDokunma = [];
             if (w <= 480) {
-              const sec = 'button, [role="button"], [role="tab"], input:not([type="hidden"]), select, a.btn, nav a, .altbar__oge';
+              const sec = 'button, [role="button"], [role="tab"], input:not([type="hidden"]), select, summary, a.b-dugme, a.b-satir, a.b-ders, a.ust__hesap, a.asama-ozet__ikincil, .konu__not a, nav a, .alt-cubuk__oge';
               for (const el of document.querySelectorAll(sec)) {
                 const hedef = (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio') && el.closest('label')) || el;
                 const st = getComputedStyle(hedef);
@@ -337,8 +348,12 @@ async function cek(ayar) {
     return ayar.kati && !ozet.temiz ? 1 : 0;
   } finally {
     if (tarayici) await tarayici.close().catch(() => {});
-    S.kapat();
-    fs.rmSync(gecici, { recursive: true, force: true });
+    if (S) {
+      const bitis = S.srv && S.srv.exitCode === null ? new Promise(r => S.srv.once('exit', r)) : Promise.resolve();
+      S.kapat();
+      await Promise.race([bitis, new Promise(r => setTimeout(r, 300))]);
+    }
+    try { fs.rmSync(gecici, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); } catch (e) {}
   }
 }
 

@@ -47,12 +47,17 @@ dene('argüman ayrıştırma: yardım ve varsayılanlar', () => {
 
 dene('argüman ayrıştırma: geçersiz girdileri reddeder', () => {
   assert.throws(() => pano.ayristirArg(['cek']), /--cikti/);
+  assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--yer=']), /--yer/);
+  assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--boy=']), /--boy/);
+  assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--bekle=']), /--bekle/);
+  assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--bekle=   ']), /--bekle/);
   assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--yer=../gizli']), /Geçersiz --yer/);
   assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--boy=50x50:acik']), /200\.\.4000/);
   assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--boy=4500x800:koyu']), /200\.\.4000/);
   assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--boy=1280x800:mavi']), /Geçersiz --boy/);
   assert.throws(() => pano.ayristirArg(['cek', '--cikti=/tmp/a', '--bilinmeyen=1']), /Bilinmeyen bayrak/);
   assert.throws(() => pano.ayristirArg(['birlestir', '--once=/tmp/a']), /--sonra/);
+  assert.throws(() => pano.ayristirArg(['birlestir', '--once=   ', '--sonra=/tmp/b', '--cikti=/tmp/p']), /--once/);
   assert.throws(() => pano.ayristirArg(['bilinmeyen']), /Bilinmeyen komut/);
 });
 
