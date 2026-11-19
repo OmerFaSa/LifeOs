@@ -240,18 +240,30 @@ def run():
 
     def t_ag_surekli_cagri():
         # Gercek akis: ilk tur new-conversation (tam istem), ikinci tur send-message (yalniz yeni mesaj);
-        # cevap dokumun gonderimden SONRAKI kismindan okunur (oncekinin DONE cevabi yeni cevap sanilmaz).
-        dokum, cagri = [], []
+        # cevap gercek artimli bayt-ofset okumasindan (_dokum_oku) gelir.
+        import json
+        import shutil
+        import tempfile
+        from pathlib import Path
+        d = tempfile.mkdtemp(prefix="kopru-surekli-")
+        cagri = []
+
+        def yaz(kim, satirlar):
+            log = Path(d) / kim / ".system_generated" / "logs" / "transcript.jsonl"
+            log.parent.mkdir(parents=True, exist_ok=True)
+            with open(log, "a", encoding="utf-8") as f:
+                for s in satirlar:
+                    f.write(json.dumps(s, ensure_ascii=False) + "\n")
 
         def agentapi(exe, ortam, args, sure=60):
             cagri.append(args[0])
             if args[0] == "new-conversation":
-                dokum[:] = [{"type": "USER_INPUT"}, {"type": "PLANNER_RESPONSE", "status": "DONE", "content": "Bir."}]
+                yaz("c1", [{"type": "USER_INPUT"}, {"type": "PLANNER_RESPONSE", "status": "DONE", "content": "Bir."}])
                 return {"response": {"newConversation": {"conversationId": "c1"}}}
-            dokum.extend([{"type": "USER_INPUT"}, {"type": "PLANNER_RESPONSE", "status": "DONE", "content": "İki."}])
+            yaz(args[1], [{"type": "USER_INPUT"}, {"type": "PLANNER_RESPONSE", "status": "DONE", "content": "İki."}])
             return {"response": {"sendMessage": {"recipientId": args[1]}}}
-        eski = (kopru._agentapi, kopru._dokum, kopru._ag_sunucu)
-        kopru._agentapi, kopru._dokum, kopru._ag_sunucu = agentapi, lambda k: list(dokum), lambda tazele=False: ("exe", {})
+        eski = (kopru._agentapi, kopru._ag_sunucu, kopru.BEYIN)
+        kopru._agentapi, kopru._ag_sunucu, kopru.BEYIN = agentapi, lambda tazele=False: ("exe", {}), Path(d)
         jeton = kopru.OTURUM.set("2026-11-16T10:00|ortak|")
         try:
             kopru._AG_KONUSMA.clear()
@@ -265,8 +277,9 @@ def run():
             eq(cagri[-1], "new-conversation")      # oturumsuz istek (Telegram, eski yuz): eskisi gibi
         finally:
             kopru.OTURUM.reset(jeton)
-            kopru._agentapi, kopru._dokum, kopru._ag_sunucu = eski
+            kopru._agentapi, kopru._ag_sunucu, kopru.BEYIN = eski
             kopru._AG_KONUSMA.clear()
+            shutil.rmtree(d, ignore_errors=True)
     test("Antigravity ikinci turda send-message ile devam eder, cevap yeni dokumden", t_ag_surekli_cagri)
 
     def t_kip_ve_ders():

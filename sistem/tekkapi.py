@@ -114,83 +114,14 @@ def _hkm_ayni_surecte(port):
     sunucu.hesap.hkm_hedef = lambda: ("http://%s:%d/api/hkm" % (HOST, port), HKM["jeton"])
 
 
-class _SayacRfile:
-    """TekKapi'de govdeden okunan bayti sayar; okunmamis govdede Keep-Alive baglantisini kapatmak icin."""
-    def __init__(self, ham):
-        self._ham = ham
-        self.okunan = 0
-
-    def read(self, n=-1):
-        d = self._ham.read(n)
-        if d:
-            self.okunan += len(d)
-        return d
-
-    def read1(self, n=-1):
-        d = self._ham.read1(n)
-        if d:
-            self.okunan += len(d)
-        return d
-
-    def readline(self, limit=-1):
-        d = self._ham.readline(limit)
-        if d:
-            self.okunan += len(d)
-        return d
-
-    def __getattr__(self, ad):
-        return getattr(self._ham, ad)
-
-
 class TekKapi(Giris):
     """Giris'in kendisi + yol onekine gore mevcut isleyicilere devir."""
-    protocol_version = "HTTP/1.1"
-    timeout = 15
     disable_nagle_algorithm = True
-
-    def setup(self):
-        super().setup()
-        self.rfile = _SayacRfile(self.rfile)
-
-    def send_response(self, code, message=None):
-        self._son_kod = code
-        super().send_response(code, message)
-
-    def end_headers(self):
-        # Okunmamis govdeli isteklerde (hata ya da 200/302 yonlendirme) veya hata cevabinda baglantiyi kapat.
-        okunan = getattr(self.rfile, "okunan", 0)
-        istek_boy = getattr(self, "_istek_boy", 0)
-        govdesiz = istek_boy < 0 or (istek_boy > 0 and okunan < istek_boy)
-        if (self.close_connection or govdesiz or
-                (getattr(self, "_son_kod", 0) >= 400 and self.command not in ("GET", "HEAD"))):
-            self.close_connection = True
-            if b"connection:" not in b"".join(getattr(self, "_headers_buffer", ())).lower():
-                self.send_header("Connection", "close")
-        super().end_headers()
 
     def parse_request(self):
         # Sunucu.parse_request ile ayni: Tailscale serve P6'da BU kapiya gelecek; vekil
         # istegi «bu bilgisayar» sayilmasin (uzak.py soz 2). Giris'te yoktu, cunku serve 4180'e gelmiyordu.
-        self._son_kod = 0
-        self._istek_boy = 0
         tamam = super().parse_request()
-        if tamam:
-            if hasattr(self.rfile, "okunan"):
-                self.rfile.okunan = 0
-            if self.headers.get("Transfer-Encoding"):
-                self.close_connection = True
-                self.send_error(501, "Transfer-Encoding desteklenmiyor")
-                return False
-            cl_liste = self.headers.get_all("Content-Length") or []
-            if len(cl_liste) > 1:
-                self._istek_boy = -1
-            elif len(cl_liste) == 1:
-                try:
-                    self._istek_boy = int(cl_liste[0].strip())
-                    if self._istek_boy < 0:
-                        self._istek_boy = -1
-                except ValueError:
-                    self._istek_boy = -1
         if tamam and uzak.vekilden_mi(self.client_address[0], self.headers):
             self.client_address = (uzak.VEKIL_IP, self.client_address[1])
         return tamam
@@ -199,11 +130,6 @@ class TekKapi(Giris):
         h = sinif.__new__(sinif)
         for a in _ISTEK:
             setattr(h, a, getattr(self, a))
-        if self.command in ("GET", "HEAD") and getattr(self, "_istek_boy", 0) == 0:
-            h.protocol_version = self.protocol_version
-        else:
-            h.protocol_version = "HTTP/1.0"
-            h.close_connection = True
         h.path = yol
         for k, v in nitelik.items():
             setattr(h, k, v)

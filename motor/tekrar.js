@@ -131,10 +131,11 @@
        eşitlikte kimlik (belirlenimci). Yeni kartlar verildiği sırada kalır: sırayı Yol bilir. */
     const gecikme = k => k.kararlilik == null ? Infinity : (simdi - (k.sonraki == null ? simdi : k.sonraki)) / GUN / k.kararlilik;
     const ky = Math.max(0, a.yeniTavan - (yap.yeni || 0)), kt = Math.max(0, a.tekrarTavan - (yap.tekrar || 0));
-    const sirali = tekrar.map(k => ({ k, g:gecikme(k), id:String(k.id) }))
-      .sort((x, y) => (y.g === x.g ? 0 : y.g - x.g) || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0))
-      .slice(0, kt).map(x => x.k);
-    return { tekrar:sirali, yeni:yeni.slice(0, ky),
+    tekrar.sort((x, y) => {
+      const gx = gecikme(x), gy = gecikme(y);
+      return (gy === gx ? 0 : gy - gx) || (String(x.id) < String(y.id) ? -1 : String(x.id) > String(y.id) ? 1 : 0);
+    });
+    return { tekrar:tekrar.slice(0, kt), yeni:yeni.slice(0, ky),
       bekleyen:{ tekrar:Math.max(0, tekrar.length - kt), yeni:Math.max(0, yeni.length - ky) }, disarida };
   }
 

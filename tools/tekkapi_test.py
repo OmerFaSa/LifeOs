@@ -375,63 +375,6 @@ def sina(eski, tek, kokler=()):
     dene("dosya değişince yeni ETag ve yeni gövde", v2[2] != e1 and v2[0] == b"b" * 2000, (e1, v2[2]))
     shutil.rmtree(os.path.dirname(gec), ignore_errors=True)
 
-    # HTTP/1.1 Keep-Alive: 5 ardisik istek tek TCP soketini paylasmali; okunmamis govdeli POST hata cevabi baglantiyi kapatmali.
-    conn = http.client.HTTPConnection(H, T, timeout=5)
-    fds, durumlar, css_etag = [], [], None
-    try:
-        for kyol, khdr in (("/kabuk/", {}), ("/kabuk/paket.css", {}), ("/kabuk/paket.js", {}),
-                           ("/kabuk/paket.css", None), ("/api/hkm/health", {})):
-            if khdr is None:
-                khdr = {"If-None-Match": css_etag} if css_etag else {}
-            conn.request("GET", kyol, headers=khdr)
-            r = conn.getresponse()
-            r.read()
-            durumlar.append(r.status)
-            if kyol == "/kabuk/paket.css" and r.status == 200:
-                css_etag = r.getheader("ETag")
-            fds.append(conn.sock.fileno() if conn.sock is not None else None)
-    finally:
-        conn.close()
-    dene("HTTP/1.1 Keep-Alive 5 ardışık GET tek soket kullanır",
-         durumlar == [200, 200, 200, 304, 200] and len(fds) == 5 and all(f is not None and f == fds[0] for f in fds),
-         (durumlar, fds))
-    c2 = http.client.HTTPConnection(H, T, timeout=5)
-    try:
-        c2.request("POST", "/api/kabuk/hata", body=b'{"mesaj":"sinama"}', headers={"Content-Type": "application/json"})
-        r2 = c2.getresponse()
-        r2.read()
-        kapat = (r2.getheader("Connection") or "").lower() == "close"
-        k_err = r2.status
-    finally:
-        c2.close()
-    dene("okunmamış gövdeli POST 403 bağlantıyı kapatır, taze istek 200 döner",
-         k_err == 403 and kapat and iste(T, "/api/hkm/health")[0] == 200, (k_err, kapat))
-    c3 = http.client.HTTPConnection(H, T, timeout=5)
-    try:
-        c3.request("POST", "/", body=b'{"kullanilmayan":"govde"}', headers={"Content-Type": "application/json"})
-        r3 = c3.getresponse()
-        r3.read()
-        kapat302 = (r3.getheader("Connection") or "").lower() == "close"
-        k302 = r3.status
-    finally:
-        c3.close()
-    dene("okunmamış gövdeli POST 302 bağlantıyı kapatır, soket kaymaz",
-         k302 == 302 and kapat302 and iste(T, "/api/hkm/health")[0] == 200, (k302, kapat302))
-    c4 = http.client.HTTPConnection(H, T, timeout=5)
-    try:
-        c4.putrequest("POST", "/api/kabuk/hata")
-        c4.putheader("Transfer-Encoding", "chunked")
-        c4.putheader("X-LifeOS", "kabuk-hata")
-        c4.endheaders(b"2\r\n{}\r\n0\r\n\r\n")
-        r4 = c4.getresponse()
-        r4.read()
-        kapat501 = (r4.getheader("Connection") or "").lower() == "close"
-        k501 = r4.status
-    finally:
-        c4.close()
-    dene("Transfer-Encoding chunked 501 + Connection: close döner",
-         k501 == 501 and kapat501 and iste(T, "/api/hkm/health")[0] == 200, (k501, kapat501))
-
     dene("kökte HEAD dosya vermez", iste(T, "/sistem/tekkapi.py", "HEAD")[0] in (404, 405))
     # --port'suz tek kapi 4180'de acilir (ETKIN): sinama onu hic calistirmaz.
 

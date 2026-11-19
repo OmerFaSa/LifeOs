@@ -373,21 +373,7 @@ def _dokum_oku(kimlik, bayt_bas=0):
 
 
 def _dokum(kimlik):
-    yol = BEYIN / kimlik / ".system_generated" / "logs" / "transcript.jsonl"
-    out = []
-    try:
-        with open(yol, encoding="utf-8") as f:
-            for s in f:
-                try:
-                    out.append(json.loads(s))
-                except ValueError:          # yazilmakta olan son satir
-                    pass
-    except OSError:
-        pass
-    return out
-
-
-_dokum_varsayilan = _dokum
+    return _dokum_oku(kimlik, 0)[0]
 
 
 def ag_model(model):
@@ -426,20 +412,16 @@ def _antigravity(model, sistem, mesajlar, sure, iptal=None):
     with _KONUSMA_KILIT:
         kayit = dict(_AG_KONUSMA[anahtar]) if anahtar and anahtar in _AG_KONUSMA else None
     soru = str((mesajlar or [{}])[-1].get("content") or "").strip()
-    artimli = _dokum is _dokum_varsayilan
-    kimlik, bas, bayt_bas, y = None, 0, 0, {}
+    kimlik, bayt_bas, y = None, 0, {}
     if ag_devam_mi(kayit, mesajlar):
         # Ayni konusmaya devam: yalniz yeni mesaj gider; cevap dokumun bu noktadan sonrasinda aranir
         # (oncekinin bitmis cevabi yeni cevap sanilmasin).
-        if artimli:
-            _, bayt_bas = _dokum_oku(kayit["kimlik"], kayit.get("ofset", 0))
-        else:
-            bas = len(_dokum(kayit["kimlik"]))
+        _, bayt_bas = _dokum_oku(kayit["kimlik"], kayit.get("ofset", 0))
         y = _agentapi(s[0], s[1], ["send-message", kayit["kimlik"], DEVAM_ONEK + soru], min(60, sure))
         if (y.get("response") or {}).get("sendMessage"):
             kimlik = kayit["kimlik"]
     if not kimlik:
-        bas, bayt_bas = 0, 0
+        bayt_bas = 0
         y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + ag_model(model), "--title=Başbuğ",
                                    istem(sistem, mesajlar, aracsiz=True)], min(60, sure))
         kimlik = ((y.get("response") or {}).get("newConversation") or {}).get("conversationId")
@@ -453,13 +435,10 @@ def _antigravity(model, sistem, mesajlar, sure, iptal=None):
     while True:
         if callable(iptal) and iptal():
             raise TimeoutError("istemci gitti")
-        if artimli:
-            yeni, bayt_bas = _dokum_oku(kimlik, bayt_bas)
-            if yeni:
-                dokum_yeni.extend(yeni)
-            bitti, metin, hata = ag_cevap(dokum_yeni)
-        else:
-            bitti, metin, hata = ag_cevap(_dokum(kimlik)[bas:])
+        yeni, bayt_bas = _dokum_oku(kimlik, bayt_bas)
+        if yeni:
+            dokum_yeni.extend(yeni)
+        bitti, metin, hata = ag_cevap(dokum_yeni)
         if bitti:
             if hata:
                 if KOTA_RE.search(hata):
