@@ -430,12 +430,6 @@ body{ transition:background-color var(--orta) var(--akis), color var(--orta) var
 .yol > [data-adim="kilitli"] .b-liste--satir, .yol__son[data-adim="kilitli"] .b-liste--satir{ background:none; box-shadow:none; opacity:.75; }
 
 /* Ayarlar (kabuk.js sayfaAyarlar): sol menüde simgeli gruplar, kaydırdıkça bulunduğun grup vurgulu; vurgu rengi seçenekleri kendi renk noktasıyla. */
-.ayar-menu{ gap:2px; }
-.ayar-menu .b-gezinme__oge{ gap:var(--a3); min-height:40px; border-radius:var(--kose-k); font-size:var(--yz-k); transition:background var(--hizli) var(--akis), color var(--hizli) var(--akis); }
-.ayar-menu .b-gezinme__oge svg{ flex:none; width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:.75; }
-.ayar-menu .b-gezinme__oge[aria-current] svg{ opacity:1; color:var(--vurgu); }
-.ayarlar .b-yanli--sol{ gap:var(--a7); }
-.ayarlar .b-yanli__yan{ top:88px; }
 .ayarlar .b-bolum + .b-bolum{ margin-top:var(--a5); }
 [data-ayar-satir="lifeos.vurgu"] .b-tercih__sec[data-deger]::before{ content:""; display:inline-block; width:10px; height:10px; margin-right:var(--a2); border-radius:50%;
   vertical-align:-1px; background:var(--sw); box-shadow:inset 0 0 0 1px var(--golge-cizgi); }
@@ -462,10 +456,7 @@ h1, .b-baslik h1, .sira__baslik{ letter-spacing:-.022em; }
   .ust .ust__ara, .ust .ust__hesap{ width:44px; height:44px; }
   .ust__sekmeler a{ min-height:44px; }
   .kirinti{ display:inline-flex; align-items:center; min-height:44px; margin-block:-12px; }
-  .ayar-menu .b-gezinme__oge{ min-height:44px; }
 }
-/* telefonda ayar grupları tek satır, yatay kaydırılır (üç satır hap yerine; seçili grup görünür kalır, sağ kenar kaydırma ipucu verir) */
-@media (max-width:640px){ :root .ayar-menu{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-inline:calc(-1 * var(--a4)); padding-inline:var(--a4) calc(var(--a4) + 20px); scroll-padding-inline:var(--a4) calc(var(--a4) + 28px); -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%); mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%); } .ayar-menu .b-gezinme__oge{ flex:none; white-space:nowrap; } }/* dokunmatikte ayar satırındaki onay kutusu (Sessiz saatler) 44 px dokunma alanında */
 @media (pointer:coarse){ .b-ayar label:has(> input[type="checkbox"]){ display:inline-flex; align-items:center; gap:var(--a2); min-height:44px; } .b-ayar input[type="checkbox"]{ width:22px; height:22px; } }
 
 /* Sadelik (sahibin isteği 2026-11-15: «kenardaki çizgiyi beğenmedim; minimalist, kalabalıktan arınmış, dikkat çekmeyen»):

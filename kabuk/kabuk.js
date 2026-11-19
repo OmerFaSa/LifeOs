@@ -780,37 +780,24 @@
     return ust(kirinti(yer)) + '<div class="govde govde--genis">' + B.baslik({ metin: 'Sistem haritası', alt: 'Başbuğ\'daki ' + H.YERLER.length + ' yer, tek sayfada.' }) +
       '<div class="harita">' + dallar + '</div></div>';
   }
+  // Ayarlar tek sütun (2026-11-19 karargâh): sol grup menüsü kalktı; bölüm başlıkları görünür, «Ayar ara» her satırı bulur (iki gezinme yolu olmasın).
+  // odak: «?grup-<id>» o grubun başlığına, «?<ayar anahtarı>» o satıra kaydırır ve odaklar.
   function sayfaAyarlar(yer, odak) {
     var gruplar = A.GRUPLAR.map(function (g) {
       return B.bolum({ baslik: g.ad, id: 'grup-' + g.id, eylem: g.id === 'hesap' ? { metin: 'Hesap ve cihazlar', tur: 'sade', href: '#/hesap' } : null, govde: A.SEMA.filter(function (t) { return t.grup === g.id; }).map(function (t) { return A.ciz(t, A.oku(depo, t.anahtar)); }) });
     }).join('');
-    var tOdak = odak && A.tanim ? A.tanim(odak) : null;
-    var ilkGrup = (odak && odak.indexOf('grup-') === 0 && A.GRUPLAR.some(function (g) { return g.id === odak.slice(5); })) ? odak.slice(5)
-      : (tOdak && tOdak.grup) ? tOdak.grup : (A.GRUPLAR[0] ? A.GRUPLAR[0].id : '');
-    var odakGecerli = Boolean((odak && odak.indexOf('grup-') === 0 && ilkGrup === odak.slice(5)) || (tOdak && tOdak.grup));
-    setTimeout(function () {
-      if (odak) {
-        var el = d.getElementById(odak) || [].filter.call(d.querySelectorAll('[data-ayar-satir]'), function (x) { return x.getAttribute('data-ayar-satir') === odak; })[0];
-        if (el) {
-          el.scrollIntoView({ block: 'center' });
-          var f = $('[aria-checked="true"], input', el) || el;
-          f.focus();
-          el.classList.add('b-ayar--isik');
-        }
-      }
-      var menu = $('.ayar-menu'), secili = menu && menu.querySelector('[aria-current="true"]');
-      if (secili && menu.scrollWidth > menu.clientWidth) menu.scrollTo({ left: secili.offsetLeft - menu.clientWidth / 2 + secili.offsetWidth / 2, behavior: 'auto' });
-      ayarIzle(odakGecerli);
+    if (odak) setTimeout(function () {
+      var el = d.getElementById(odak) || [].filter.call(d.querySelectorAll('[data-ayar-satir]'), function (x) { return x.getAttribute('data-ayar-satir') === odak; })[0];
+      if (!el) return;
+      el.scrollIntoView({ block: 'center' });
+      var f = $('[aria-checked="true"], input', el) || el;
+      f.focus();
+      el.classList.add('b-ayar--isik');
     }, 0);
-    // sol menü: her grubun simgesi; kaydırdıkça bulunduğun grup işaretlenir (ayarIzle)
-    var menu = '<nav class="b-gezinme ayar-menu" aria-label="Ayar grupları">' + A.GRUPLAR.map(function (g) {
-      return '<a class="b-gezinme__oge" href="#/ayarlar?grup-' + g.id + '" data-grup="' + g.id + '"' + (g.id === ilkGrup ? ' aria-current="true"' : '') + '><svg aria-hidden="true"><use href="#i-' + (AYAR_SIMGE[g.id] || 'ayar') + '"/></svg>' + kac(g.ad) + '</a>';
-    }).join('') + '</nav>';
     var ara = '<div class="ayar-ara">' + B.alan({ ad: 'Ayarlarda ara', isim: 'ayarAra', tur: 'arama', yerTutucu: 'Ayar ara: tema, yazı boyu, ses, beden…', veri: { 'ayar-ara': '' } }) +
       '<p class="soluk ayar-ara__yok" hidden>Bu sözcükle bir ayar yok.</p></div>';
-    return ust(kirinti(yer)) + '<div class="govde govde--genis ayarlar">' + B.baslik({ metin: 'Ayarlar', alt: 'Değişiklikler hemen uygulanır.' }) + ara + B.yanli({ taraf: 'sol',
-      yan: menu,
-      ana: [gruplar, B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }])] }) + '</div>';
+    return ust(kirinti(yer)) + '<div class="govde ayarlar">' + B.baslik({ metin: 'Ayarlar' }) + ara + gruplar +
+      B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }]) + '</div>';
   }
   // Ayarlarda ara: satırın adı ve açıklamasında geçen sözcüğe göre süzer; eşleşmesi olmayan grup gizlenir (Türkçe küçük harf)
   function ayarSuz(q) {
@@ -828,21 +815,6 @@
   }
   d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('[data-ayar-ara]')) ayarSuz(e.target.value); });
   d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('.gokturk__gir')) { var c = e.target.closest('details').querySelector('.gokturk__cik'); if (c) c.textContent = gokturk(e.target.value); } });
-  // ayar grubu simgeleri (index.html sprite): ses nota (ay tema sanılıyordu), hesap kişi, erişilebilirlik bilgi, Başbuğ taç
-  var AYAR_SIMGE = { gorunum: 'gunes', erisim: 'ipucu', bildirim: 'saat', ses: 'muzik', beden: 'saglik', king: 'king', hesap: 'kisi' };
-  var ayarGozcu = null;
-  function ayarIzle(odakli) {
-    if (ayarGozcu) { ayarGozcu.disconnect(); ayarGozcu = null; }
-    var menu = $('.ayar-menu'); if (!menu || !kok.IntersectionObserver) return;
-    var gorunen = {}, kilitSon = odakli ? Date.now() + 450 : 0;
-    ayarGozcu = new IntersectionObserver(function (l) {
-      l.forEach(function (g) { gorunen[g.target.getAttribute('aria-labelledby')] = g.isIntersecting; });
-      if (Date.now() < kilitSon) return;
-      var ilk = A.GRUPLAR.filter(function (g) { return gorunen['grup-' + g.id]; })[0];
-      if (ilk) [].forEach.call(menu.children, function (a) { if (a.getAttribute('data-grup') === ilk.id) { a.setAttribute('aria-current', 'true'); if (menu.scrollWidth > menu.clientWidth) menu.scrollTo({ left: a.offsetLeft - menu.clientWidth / 2 + a.offsetWidth / 2, behavior: 'smooth' }); } else a.removeAttribute('aria-current'); }); // telefonda yatay şeritte seçili grup ortada
-    }, { rootMargin: '-80px 0px -55% 0px' });
-    A.GRUPLAR.forEach(function (g) { var s = d.getElementById('grup-' + g.id); if (s) ayarGozcu.observe(s.closest('section') || s); });
-  }
   function yuzde(x) { return Math.round(x * 100); }
   var GECILDI = { metin: 'geçildi', tur: 'altin' };
   // kapı satırı (liste öğesi): açıksa bağlantı ve son denemesi, kilitliyse rozet

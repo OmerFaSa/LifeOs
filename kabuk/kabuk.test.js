@@ -873,12 +873,11 @@ t('sozEk: kapalı details başlıklarıyla hafif DOM üretir, ağır iç listele
   dogru(!/<(li|input|ul|ol)\b/.test(html), 'ilk açılışta ağır alt etiket olmamalı');
 });
 
-t('görsel cila CSS kuralları: Başbuğ öneri kartı, alan özeti mobil düzeni, yüksek kontrast odak ve ayarlar solması', () => {
+t('görsel cila CSS kuralları: Başbuğ öneri kartı, alan özeti mobil düzeni, yüksek kontrast odak', () => {
   const fs = require('fs'), path = require('path');
   const css = fs.readFileSync(path.join(__dirname, 'kabuk.css'), 'utf8');
   dogru(/\.king-oneri__oge\{[^}]*align-items:center;[^}]*min-height:64px/.test(css), 'king-oneri__oge ortali ve dengeli yukseklikte olmali');
   dogru(/\.asama-ozet__ikincil\{[^}]*display:inline-flex/.test(css), 'asama-ozet__ikincil dokunma hedefi olmali');
-  dogru(/@media \(max-width:640px\)\{[^}]*\.ayar-menu\{[^}]*-webkit-mask-image:linear-gradient[^}]*(?:^|[;\s{])mask-image:linear-gradient/.test(css), 'ayar-menu 640 px altinda webkit ve standart mask-image tasimali');
   dogru(/:root\[data-kontrast="yuksek"\][^}]*\.asama-ozet__ikincil\):not\(:focus-visible\)/.test(css), 'yuksek kontrast focus-visible halkasini ezmemeli');
 });
 

@@ -21,7 +21,7 @@
   var SEMA = [
     { anahtar: 'lifeos.tema.secim', ad: 'Tema', tur: 'secim', varsayilan: 'system', grup: 'gorunum', kok: 'data-theme', esitlenir: true,
       secenekler: { system: 'Cihaza uy', light: 'Açık', dark: 'Koyu', klasik: 'Klasik', otag: 'Kızıl Otağ', ordu: 'Ordu', boru: 'Gök Börü', ergenekon: 'Ergenekon', akinci: 'Akıncı', seferberlik: 'Seferberlik' },
-      aciklama: 'Cihaza uy, Açık ve Koyu sade ve ciddi temadır. Klasik eski renkli piksel görünüm. Afiş temaları: Kızıl Otağ, Ordu, Gök Börü, Ergenekon, Akıncı (koyu) ve Seferberlik (açık).', kaynak: ENV + ' §3c Tema, yazı: tema.secim' },
+      aciklama: 'Klasik eski renkli görünüm; ondan sonrakiler afiş temaları.', kaynak: ENV + ' §3c Tema, yazı: tema.secim' },
     { anahtar: 'lifeos.tema.oto', ad: 'Saate göre tema', tur: 'secim', varsayilan: 'kapali', grup: 'gorunum', esitlenir: true,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Akşam koyu, sabah açık tema.', kaynak: ENV + ' §3c Tema, yazı: tema.oto' },
     { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'sistem', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
