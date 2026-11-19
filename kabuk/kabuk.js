@@ -624,8 +624,8 @@
   }
   // Tek yer (tur 2026-11-18b): alanı temsil eden her çizgi simge (#i-<alan>: başlık, İlerleme, Öğren/Sağlık kartları, Sıradaki) piksel amblemle değişir.
   // manzara() çizimden hemen sonra çağırır; kitaplık sonra gelirse onload'da yeniden. Kitaplık yoksa (file://) çizgi simge kalır.
-  function amblemKoy() {
-    sayfaEl.querySelectorAll('.b-simge > svg > use[href^="#i-"]').forEach(function (u) {
+  function amblemKoy(kokEl) {
+    (kokEl || sayfaEl).querySelectorAll('.b-simge > svg > use[href^="#i-"]').forEach(function (u) {
       var s = u.parentNode, id = u.getAttribute('href').slice(3), y = H.bul(id), ar = (s.closest('h1') || y && y.katman === 'alan') && amblemResmi(id);
       if (ar) s.outerHTML = ar;
     });
@@ -641,6 +641,19 @@
   function ozetYenile() {
     var el = sayfaEl.querySelector('.b-karsilama__ozet');
     if (el && sonOzet) el.textContent = ozetCumle(sonOzet.a, sonOzet.tekrar, sayfaEl.querySelectorAll(BEKLEYEN).length);
+  }
+  function bugunAlanGuncelle() {
+    if (sayfaEl.getAttribute('data-yer') !== 'bugun') return;
+    var nav = sayfaEl.querySelector('.b-karsilama__alanlar');
+    if (!nav) return rota();
+    var f = fDurum(), a = f && siradaki(f), od = f && f.ilerleme && f.ilerleme.okunanDers;
+    sonOzet = { a: a, tekrar: sonOzet ? sonOzet.tekrar : 0 };
+    ozetYenile();
+    var h = B.karsilama({ tarih: ' ', selam: ' ', ozet: ' ', alanlar: alanKartlari(f, od, a) });
+    var bas = h.indexOf('<nav class="b-karsilama__alanlar"'), icBas = bas < 0 ? -1 : h.indexOf('>', bas) + 1, icSon = h.lastIndexOf('</nav>');
+    if (icBas <= 0 || icSon <= icBas) return rota();
+    nav.innerHTML = h.slice(icBas, icSon);
+    amblemKoy(nav);
   }
 
   function sayfaBugun() {
@@ -1518,7 +1531,7 @@
       betik('/parca.js'); betik('/hesap.js', function () { if (sayfaEl.getAttribute('data-yer') === 'bugun' && hesapAdi()) rota(); });
     }
     if (Kabuk.Tasima && Kabuk.Tasima.calis) Kabuk.Tasima.calis(); // tek kapıya geçişte eski modüllerin deposu bu kökene geri yazılır
-    alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') rota(); }); // Bugün'ün «sırada» satırı için
+    alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') bugunAlanGuncelle(); }); // Bugün'ün «sırada» satırı için
   }
   Kabuk.ic = { miras: mirasKarti, canlan: canlan, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
     dersMetni: dersMetni, onayDegisti: function (id) { if (hamlar[id]) alanKur(id); },

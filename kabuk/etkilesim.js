@@ -27,7 +27,13 @@
   var d = document, KART = '.b-karsilama__alan, a.b-satir, a.b-ders', EGIK = '.b-karsilama__alan, a.b-ders'; // yalnız tıklanan kartlar; düğme ve sayı kutusu sakin
   var SAHNE = '.kapak, .b-karsilama__sahne', DALGA = '.b-dugme, .b-tercih__sec, .b-soru__sik, .ust__sekmeler a';
   var ince = kok.matchMedia && kok.matchMedia('(hover: hover) and (pointer: fine)');
-  function acik() { try { return getComputedStyle(d.documentElement).getPropertyValue('--sure').trim() !== '0s'; } catch (e) { return false; } }
+  function acik() {
+    try {
+      var r = d.documentElement, h = r.getAttribute('data-hareket');
+      if (h === 'az' || r.style.getPropertyValue('--sure').trim() === '0s') return false;
+      return !(h === 'sistem' && kok.matchMedia && kok.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (e) { return false; }
+  }
 
   var bekleyen = null, kare = 0, son = null, sahneSon = null;
   function uygula() {
@@ -106,8 +112,10 @@
   // ilerleme: her çizimde çubukların değeri sayfa + ad anahtarıyla hatırlanır; artmışsa yeni dilimler (ya da sürekli çubuk) dolar
   var ilerlemeDeger = {};
   function ilerleme(sayfa) {
+    var cubuklar = sayfa.querySelectorAll('.b-ilerleme [role="progressbar"]');
+    if (!cubuklar.length) return;
     var yer = sayfa.getAttribute('data-yer'), oyna = acik();
-    [].forEach.call(sayfa.querySelectorAll('.b-ilerleme [role="progressbar"]'), function (c) {
+    [].forEach.call(cubuklar, function (c) {
       var key = yer + '|' + c.getAttribute('aria-label'), simdi = +c.getAttribute('aria-valuenow'), once = ilerlemeDeger[key], l = artanlar(once, simdi);
       ilerlemeDeger[key] = simdi;
       if (!oyna || !l.length) return;

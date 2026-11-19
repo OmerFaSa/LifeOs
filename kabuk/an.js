@@ -33,9 +33,8 @@
   var d = document, son = null, KAYIT_GUN = 'lifeos.an.kayit';
   function hareketAz() {
     try {
-      var h = d.documentElement.getAttribute('data-hareket');
-      if (h === 'az') return true;
-      if (getComputedStyle(d.documentElement).getPropertyValue('--sure').trim() === '0s') return true;
+      var r = d.documentElement, h = r.getAttribute('data-hareket');
+      if (h === 'az' || r.style.getPropertyValue('--sure').trim() === '0s') return true;
       return h !== 'tam' && !!kok.matchMedia && kok.matchMedia('(prefers-reduced-motion: reduce)').matches;
     } catch (e) { return true; }
   }

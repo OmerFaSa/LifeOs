@@ -873,5 +873,13 @@ t('sozEk: kapalı details başlıklarıyla hafif DOM üretir, ağır iç listele
   dogru(!/<(li|input|ul|ol)\b/.test(html), 'ilk açılışta ağır alt etiket olmamalı');
 });
 
+t('açılış CSS kuralları: varsayılan açılışta piksel yazı tipi indirilmez; data-yazi="piksel" onu kullanır', () => {
+  const fs = require('fs'), path = require('path');
+  const css = fs.readFileSync(path.join(__dirname, 'kabuk.css'), 'utf8');
+  dogru(/\.yukle__ad\{[^}]*font-family:var\(--govde/.test(css), 'yukle__ad varsayilan govde olmali');
+  dogru(/\.ust__kare\{[^}]*var\(--baslik\)/.test(css), 'ust__kare baslik olmali');
+  dogru(/:root\[data-yazi="piksel"\][^}]*--govde:var\(--piksel\)/.test(css), 'piksel ayari hala calismali');
+});
+
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);
