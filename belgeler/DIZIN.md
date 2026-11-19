@@ -10,6 +10,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 
 ## Ekip ve planlar
 
+- [Kim ne yapıyor](ekip/kim-ne-yapiyor.md) — Aynı depoda çalışan ajanların anlık iş panosu (işe başlamadan üstündeyim satırı eklenir, bitince silinir).
 - [YARIM](ekip/YARIM.md) — Yarım kalan işler, bekleyen kararlar ve gerçek cihazda denenmeyenler; yeni oturum önce bunu okur; durumu: güncel (2026-11-06)
 - [Patron turu yarım](ekip/yarim/patron-tanitim.md) — Patron turunda birleştirmeden önce koşulacak denetimler ve açık kalan ses notu.
 - [SPİ sadelik](ekip/sadelik/spi.md) — SPİ ekranlarının önce/sonra sadelik dökümü, ortak gereken işler ve sorulacak silme önerileri; durumu: 2026-11-06.
