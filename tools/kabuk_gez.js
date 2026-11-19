@@ -430,7 +430,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/motor/not');
     await p.waitForSelector('[data-arac="not"]');
     dene('not: boş defter öyle der', /Henüz not yok/.test(await p.textContent('#not-liste')));
-    dene('not: boş defterde #etiket ve [[bağ]] gösteren örnek not, araç yokken tek sakin «Yeni araç» satırı', /#felsefe/.test(await p.textContent('.not-bos__ornek')) && /\[\[/.test(await p.textContent('.not-bos__ornek'))
+    dene('not: boş defterde süs yok (örnek kâğıt, tek başına «Hepsi» çipi), araç yokken tek sakin «Yeni araç» satırı', (await p.locator('.not-bos__ornek, .klasor-cip:not(.klasor-cip--ekle)').count()) === 0
       && (await p.locator('#not-liste a').count()) === 0 && (await p.locator('a.arac-ekle[href="#/motor/not/arac/yeni"]').count()) === 1 && (await p.locator('#araclar-baslik').count()) === 0);
     // hızlı not: üstteki kutuya yaz, Ctrl+Enter; ilk satır ad olur, kutu boşalır (sonra silinir: aşağıdaki sayımlar boş defterden)
     await p.fill('.nothizli textarea', 'Hızlı deneme\nikinci satır');
