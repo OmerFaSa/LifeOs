@@ -248,9 +248,17 @@ kırmızı değil); o bitince yeniden koşulur.
 |---|---|---|
 | Claude Code (bu oturum) | `main` | doğrudan commit + push |
 | Diğer ajanlar (Codex vb.) | `gpt/<konu>` dalı | **pull request** |
-| Antigravity | `C:\Users\ASUS\LifeOs-ag` klasöründe `ag/<görev>` dalı | dalı push eder; Claude Code gözden geçirip `main`'e alır |
+| Antigravity (yönetici) | `C:\Users\ASUS\LifeOs-ag` klasöründe `ag/<görev>` dalı | yerel CI 50/50 yeşil + inceleme temizse `main`'e ileri sarar ve push eder |
 
-**Antigravity görev düzeni (2026-10-31, depo sahibinin kararı):** Antigravity
+**Antigravity yönetici (2026-11-19, depo sahibinin kararı; aşağıdaki 2026-10-31 düzenini geçersiz kılar):**
+Antigravity Claude Code gibi yöneticidir: işi kendi seçer, planlar, alt ajanlarla yapar,
+denetletir ve birleştirir. Tasarım, `brand/ortak/`, `sistem/`, King dahil her yere dokunabilir;
+büyük tasarım yönü değişikliği, veritabanı şeması ve kullanıcı verisi için sahibine sorar;
+hesap/giriş/eşitleme yalnız önce yazılmış testle ve ayrı incelemeyle değişir. Kuralları:
+başlatıcı klasöründeki `GEMINI.md`. İki yönetici aynı depoda çalıştığı için işe başlamadan
+`belgeler/ekip/kim-ne-yapiyor.md`'ye «üstündeyim» satırı yazılır; başkasının tuttuğu dosyaya girilmez.
+
+**Eski Antigravity görev düzeni (2026-10-31; yalnız ofis kipi, `tools/ajan.py` için geçerli):** Antigravity
 yalnız `belgeler/ekip/gorevler/` kuyruğundaki görevleri yapar; akış, sınırlar ve
 şablon `belgeler/ekip/gorevler/README.md`'dedir. Asıl klasöre
 (`C:\Users\ASUS\LifeOs`) ve çalışan kopyaya dokunmaz; tasarım, `brand/ortak/`,
@@ -268,7 +276,8 @@ Depo sahibinin kararı (2026-10-31): görsel, animasyon ve asıl altyapı dış�
 tanımı yazılabilen işlerde **varsayılan ofistir** (token tasarrufu); yasak bölge
 `tools/ajan.py` `YASAK_BOLGE` listesinde kodla korunur (OFIS.md §3).
 
-- `main`'e doğrudan push **yalnız** depo sahibinin oturumundan yapılır.
+- `main`'e doğrudan push **yalnız** depo sahibinin oturumundan ve yönetici Antigravity'den
+  (yerel CI yeşilken ileri sarma) yapılır.
 - **Çalışan kopyada geliştirme yapılmaz.** Masaüstü uygulaması (LifeOS.exe)
   depoyu `%USERPROFILE%\LifeOS-Sistem` kopyasından çalıştırır; o kopya
   yalnız «Güncelle» ile ileri sarılır, orada commit yapılmaz. 2026-09-29'da
