@@ -446,41 +446,10 @@
     [0x10C0D, 'g, ğ'], [0x10C0F, 'g, ğ ince'], [0x10C34, 'k'], [0x10C1A, 'k ince'], [0x10C38, 'ok, uk'], [0x10C36, 'ık'], [0x10C1E, 'l'], [0x10C20, 'l ince'], [0x10C22, 'm'],
     [0x10C23, 'n'], [0x10C24, 'n ince'], [0x10C2D, 'ng'], [0x10C2F, 'p'], [0x10C32, 'ç'], [0x10C3A, 'r'], [0x10C3C, 'r ince'], [0x10C3D, 's'], [0x10C3E, 's ince'],
     [0x10C41, 'ş'], [0x10C43, 't'], [0x10C45, 't ince'], [0x10C16, 'y'], [0x10C18, 'y ince'], [0x10C14, 'z']];
-  // Alan sayfalarında Türk mirası (2026-11-18i, sahip: «YKS ve SPİ alanında da Türklük teması»): Akademik/Öğren'de günün Türk bilgini,
-  // Sağlık'ta ata sporu ve sağlık geleneği, Tarih'te on altı yıldız. Gün sırasıyla döner; yalnız kesin bilgiler.
-  var BILGIN = [['Uluğ Bey', '1394–1449', 'Matematik · Astronomi', 'Semerkant\'ta rasathane kurdu; adını taşıyan Zîc\'te binden fazla yıldızın konumu ölçüldü.'],
-    ['Ali Kuşçu', 'ö. 1474', 'Matematik · Astronomi', 'Uluğ Bey\'in öğrencisiydi; Fatih döneminde İstanbul\'a gelip medresede matematik ve astronomi okuttu.'],
-    ['Kaşgarlı Mahmud', '11. yüzyıl', 'Türkçe · Coğrafya', 'Divanü Lugati\'t-Türk\'ü yazdı; eserdeki dünya haritasında Türk yurtları gösterilir.'],
-    ['Yusuf Has Hacib', '11. yüzyıl', 'Edebiyat', 'Kutadgu Bilig\'i (1069–1070) yazdı: devleti ve iyi yaşamayı anlatan Türkçe bir öğüt kitabı.'],
-    ['Piri Reis', 'y. 1465–1553', 'Coğrafya', '1513 tarihli dünya haritasında Amerika kıyılarını gösterdi; Kitab-ı Bahriye\'de Akdeniz kıyılarını anlattı.'],
-    ['Takiyüddin', '1526–1585', 'Fizik · Astronomi', '1577\'de İstanbul Tophane\'de rasathane kurdu.'],
-    ['Mimar Sinan', 'y. 1490–1588', 'Geometri', 'Selimiye Camii\'ni (1569–1575) ustalık eseri saydı; üç yüzü aşkın yapı inşa etti.'],
-    ['Kâtip Çelebi', '1609–1657', 'Coğrafya · Tarih', 'Cihannüma ile dünya coğrafyasını, Keşfü\'z-Zunun ile binlerce kitabı tanıttı.'],
-    ['Cahit Arf', '1910–1997', 'Matematik', 'Arf değişmezi onun adını taşır; portresi 10 liralık banknotta yer aldı.'],
-    ['Feza Gürsey', '1921–1992', 'Fizik', 'Kuramsal fizikte simetri çalışmalarıyla 1986\'da Wigner Madalyası\'nı aldı.'],
-    ['Hulusi Behçet', '1889–1948', 'Biyoloji', '1937\'de tanımladığı hastalık dünyada «Behçet hastalığı» adıyla anılır.'],
-    ['Aziz Sancar', 'd. 1946', 'Kimya · Biyoloji', 'DNA onarımı çalışmalarıyla 2015 Nobel Kimya Ödülü\'nü aldı.']];
-  var GELENEK = [['Okçuluk', 'Ata sporu', 'Osmanlı okçuları İstanbul Okmeydanı\'nda yarışır, en uzun atışlar menzil taşlarına kazınırdı.'],
-    ['Yağlı güreş', 'Ata sporu', 'Edirne\'deki Kırkpınar, yüzyıllardır süren bir güreş geleneğidir.'],
-    ['Cirit', 'Ata sporu', 'Atlı cirit, Orta Asya\'dan Anadolu\'ya taşınan bir binicilik oyunudur; Erzurum\'da bugün de oynanır.'],
-    ['Binicilik', 'Bozkır', 'Bozkırda çocuklar ata erken yaşta binmeyi öğrenirdi; Hun ve Göktürk ordularının gücü atlı okçulardı.'],
-    ['Yoğurt ve kımız', 'Sofra', '«Yoğurt» sözcüğü dünya dillerine Türkçeden geçmiştir; kımız, bozkırın mayalanmış kısrak sütüdür.'],
-    ['Darüşşifa', 'Şifa', 'Selçuklu ve Osmanlı şifahanelerinde müzik ve su sesi de tedavinin parçasıydı; Edirne\'deki II. Bayezid Darüşşifası bilinen örnektir.'],
-    ['Sağlık varlıktan iyidir.', 'Atasözü', ''], ['Hastalık kantarla gelir, dirhemle gider.', 'Atasözü', '']];
-  var SAGLIK_YER = { saglik: 1, beslenme: 1, hareket: 1, uyku: 1, tahlil: 1 };
-  function gunNo(t) { return Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5); }
+  // Alan sayfalarında Türk mirası yalnız Tarih'te (2026-11-19 karargâh: Öğren/Akademik «Günün Türk bilgini» ve Sağlık «Türk geleneğinden» kartları
+  // araya giren süs olarak kalktı; sahip: «arayüzdeki tüm karışıklıkları kaldır»)
   function mirasKarti(id) {
-    var t = new Date(), n = gunNo(t), x;
-    if (id === 'akademik' || id === 'ogren') {
-      x = BILGIN[n % BILGIN.length];
-      return '<aside class="miras" aria-label="Günün Türk bilgini"><p class="miras__etiket">Günün Türk bilgini · ' + kac(x[2]) + '</p><p class="miras__ad">' + kac(x[0]) +
-        ' <span>' + kac(x[1]) + '</span></p><p class="miras__metin">' + kac(x[3]) + '</p></aside>';
-    }
-    if (SAGLIK_YER[id]) {
-      x = GELENEK[n % GELENEK.length];
-      return '<aside class="miras" aria-label="Türk geleneğinden"><p class="miras__etiket">Türk geleneğinden · ' + kac(x[1]) + '</p><p class="miras__ad">' + kac(x[0]) + '</p>' +
-        (x[2] ? '<p class="miras__metin">' + kac(x[2]) + '</p>' : '') + '</aside>';
-    }
+    var t = new Date();
     // Tarih: on altı yıldız ve günün haritası (kabuk/ata.js; sınırlar yaklaşık)
     if (id === 'tarih') {
       var At = Kabuk.Ata, hg = At && At.gununHaritasi(t);
@@ -1569,7 +1538,7 @@
     if (Kabuk.Tasima && Kabuk.Tasima.calis) Kabuk.Tasima.calis(); // tek kapıya geçişte eski modüllerin deposu bu kökene geri yazılır
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') bugunAlanGuncelle(); }); // Bugün'ün «sırada» satırı için
   }
-  Kabuk.ic = { miras: mirasKarti, canlan: canlan, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
+  Kabuk.ic = { canlan: canlan, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
     dersMetni: dersMetni, onayDegisti: function (id) { if (hamlar[id]) alanKur(id); },
     asamalar: function (id) { var a = alanlar[id]; return a && a.ys ? a.ys : null; },
     asamaY: function (id, asamaId) { var a = alanlar[id]; return a && a.ys ? a.ys.filter(function (y) { return y.id === asamaId; })[0] || null : null; },

@@ -74,7 +74,7 @@
   }
   function sayfa(yer) {
     var I = Kabuk.ic, B = Kabuk.Bilesen, Kayit = L.Motor && L.Motor.Kayit, A = Kabuk.Arac, H = Kabuk.Harita, E = Kayit && Kayit.ETIKET;
-    var bas = I.ust(I.kirinti(yer)) + '<div class="govde" data-saglik>' + B.baslik({ metin: 'Sağlık', alt: 'Bugün ve son yedi gün.' }) + (I.miras ? I.miras('saglik') : '');
+    var bas = I.ust(I.kirinti(yer)) + '<div class="govde" data-saglik>' + B.baslik({ metin: 'Sağlık', alt: 'Bugün ve son yedi gün.' });
     var alanlar = H.dalinYerleri('saglik'), ren = I.alanRenk || {};
     var dersler = B.bolum({ baslik: 'Dersler', govde: B.liste({ ad: 'Sağlık alanları', ogeler: alanlar.map(function (y) { return { ad: y.ad, not: y.aciklama, href: y.yol, simge: ren[y.id] ? y.id : null, renk: ren[y.id] }; }) }) });
     if (!Kayit || !A) return bas + B.bos({ baslik: 'Kayıtlar bu açılışta okunamadı.', metin: 'Sayfayı yenile.' }) + dersler + '</div>';
