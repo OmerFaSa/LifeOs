@@ -7,6 +7,7 @@ import io
 import json
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parent.parent
@@ -84,6 +85,24 @@ with tempfile.TemporaryDirectory() as d:
     h.headers["Range"] = "bytes=0-9"
     M.isle(h)
     bekle("parca Range ile okunur", h.kod == 206 and h.wfile.getvalue() == MP3[:10])
+
+    h = Sahte("POST", "/api/muzik/ayar", tur="application/json")
+    h.headers["Content-Length"] = "300000"
+    M.isle(h)
+    bekle("muzik ayar asiri govde 413 + baglanti kapanir", h.kod == 413 and getattr(h, "close_connection", False) is True)
+    errs = []
+    md = M.oku(d)
+    def _myaz():
+        try:
+            for _ in range(5):
+                M.yaz(md, d)
+        except Exception as e:
+            errs.append(e)
+    ts = [threading.Thread(target=_myaz) for _ in range(6)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    bekle("muzik eszamanli yazma temiz", not errs and not any(p.name.endswith(".yaziliyor") for p in Path(d).iterdir())
+          and len(M.oku(d)["parcalar"]) == 2)
 
     h = Sahte("DELETE", "/api/muzik/parca/" + p1["id"])
     M.isle(h)

@@ -1388,8 +1388,14 @@ class Giris(SimpleHTTPRequestHandler):
             if not hesap._yerel_mi(self) or koken not in (None, "http://%s:%d" % (HOST, GIRIS_PORT), "http://localhost:%d" % GIRIS_PORT):
                 return self._json(403, {"ok": False, "mesaj": "Yalnız bu bilgisayardan."})
             try:
-                n = min(int(self.headers.get("Content-Length") or 0), 16384)
-                g = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+                n = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                n = -1
+            if n < 0 or n > 16384:
+                self.close_connection = True
+                return self._json(413, {"ok": False, "mesaj": "İstek gövdesi çok büyük."})
+            try:
+                g = json.loads((self.rfile.read(n).decode("utf-8") if n > 0 else "") or "{}")
             except (ValueError, UnicodeDecodeError):
                 g = None
             if not isinstance(g, dict):

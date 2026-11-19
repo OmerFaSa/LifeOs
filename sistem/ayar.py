@@ -24,6 +24,7 @@ Sozler:
      son yazan kazanir, cakismalar gorunur kalir.
 """
 
+import contextlib
 import json
 import os
 import re
@@ -88,6 +89,18 @@ def gecerli(k, v):
     return isinstance(v, str) and len(v) <= (60000 if k == "lifeos.profiller" else 4000)
 
 
+def _atomik_yaz(hedef, veri):
+    gecici = "%s.%d.%d.yaziliyor" % (hedef, os.getpid(), threading.get_ident())
+    try:
+        with open(gecici, "w", encoding="utf-8") as f:
+            json.dump(veri, f, ensure_ascii=False)
+        os.replace(gecici, hedef)
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.remove(gecici)
+        raise
+
+
 def birlestir(degisen, kok=None, cihaz="pc", cihaz_ad="Bu bilgisayar", simdi=None):
     """Gecerli olanlari yazar; doner: (yeni durum, reddedilen anahtarlar)."""
     if simdi is None:
@@ -113,10 +126,7 @@ def birlestir(degisen, kok=None, cihaz="pc", cihaz_ad="Bu bilgisayar", simdi=Non
         d = {"ayar": a, "zaman": simdi, "iz": iz, "cakisma": ck}
         k2 = kok or klasor()
         os.makedirs(k2, exist_ok=True)
-        gecici = _yol(k2) + ".yaziliyor"
-        with open(gecici, "w", encoding="utf-8") as f:
-            json.dump(d, f, ensure_ascii=False)
-        os.replace(gecici, _yol(k2))
+        _atomik_yaz(_yol(k2), d)
     return d, red
 
 
@@ -208,10 +218,7 @@ def esitle(cihaz, cihaz_ad, son, gonder, kok=None, simdi=None):
         d = {"ayar": a, "zaman": simdi, "iz": iz, "cakisma": ck}
         k2 = kok or klasor()
         os.makedirs(k2, exist_ok=True)
-        gecici = _yol(k2) + ".yaziliyor"
-        with open(gecici, "w", encoding="utf-8") as f:
-            json.dump(d, f, ensure_ascii=False)
-        os.replace(gecici, _yol(k2))
+        _atomik_yaz(_yol(k2), d)
 
     return {
         "ayar": a,
@@ -246,8 +253,26 @@ def _json(h, kod, veri):
     h.send_header("Content-Type", "application/json; charset=utf-8")
     h.send_header("Content-Length", str(len(govde)))
     h.send_header("Cache-Control", "no-store")
+    if kod >= 400 and getattr(h, "command", "GET") not in ("GET", "HEAD"):
+        h.send_header("Connection", "close")
+        h.close_connection = True
     h.end_headers()
     h.wfile.write(govde)
+
+
+def _govde_oku(h, sinir=512 * 1024):
+    try:
+        boy = int(h.headers.get("Content-Length") or 0)
+    except ValueError:
+        return None, (400, {"hata": "Okunamadı."})
+    if boy < 0 or boy > sinir:
+        h.close_connection = True
+        return None, (413, {"hata": "İstek gövdesi çok büyük."})
+    try:
+        ham = h.rfile.read(boy).decode("utf-8") if boy > 0 else "{}"
+        return json.loads(ham or "{}"), None
+    except (ValueError, UnicodeDecodeError):
+        return None, (400, {"hata": "Okunamadı."})
 
 
 def isle(h, kok=None, uzak_izin=None):
@@ -267,12 +292,9 @@ def isle(h, kok=None, uzak_izin=None):
             return _json(h, 405, {"hata": "Desteklenmiyor."})
         if h.headers.get("X-LifeOS") != "ayar":
             return _json(h, 403, {"hata": "Yalnız Başbuğ'un kendi sayfasından."})
-        try:
-            boy = min(int(h.headers.get("Content-Length") or 0), 512 * 1024)
-            ham = h.rfile.read(boy).decode("utf-8") if boy > 0 else "{}"
-            gelen = json.loads(ham or "{}")
-        except (ValueError, UnicodeDecodeError):
-            return _json(h, 400, {"hata": "Okunamadı."})
+        gelen, err = _govde_oku(h)
+        if err:
+            return _json(h, err[0], err[1])
         if not isinstance(gelen, dict):
             return _json(h, 400, {"hata": "Geçersiz gövde."})
         try:
@@ -300,13 +322,10 @@ def isle(h, kok=None, uzak_izin=None):
             return _json(h, 405, {"hata": "Desteklenmiyor."})
         if h.headers.get("X-LifeOS") != "ayar":
             return _json(h, 403, {"hata": "Yalnız Başbuğ'un kendi sayfasından."})
-        try:
-            boy = min(int(h.headers.get("Content-Length") or 0), 512 * 1024)
-            ham = h.rfile.read(boy).decode("utf-8") if boy > 0 else "{}"
-            gelen = json.loads(ham or "{}")
-        except (ValueError, UnicodeDecodeError):
-            return _json(h, 400, {"hata": "Okunamadı."})
-        if not isinstance(gelen.get("ayar"), dict):
+        gelen, err = _govde_oku(h)
+        if err:
+            return _json(h, err[0], err[1])
+        if not isinstance(gelen, dict) or not isinstance(gelen.get("ayar"), dict):
             return _json(h, 400, {"hata": "ayar bekleniyor."})
         d, red = birlestir(gelen["ayar"], kok)
         return _json(h, 200, dict(d, reddedilen=red))

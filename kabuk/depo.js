@@ -72,8 +72,15 @@
    * Kurallar: bekleyen yerel yazı sunucudakinden yenidir (gönderilince sunucu üstüne yazılanı kabuk-cakisma'da saklar);
    * cihaz ilk katılışta sunucudaki değeri alır, kendi farklı değeri kaybolmasın diye sunucuya «sakla» olarak gider;
    * sunucuda hiç olmayan yerel kayıt gönderilir. Sunucu yoksa (404, file://) eşitleme bu açılışta kapanır, kabuk eskisi gibi çalışır. */
-  var ES = 'lifeos.kabuk.esitle', calisiyor = null, yine = false, erte = null, dinleyen = [];
+  var ES = 'lifeos.kabuk.esitle', calisiyor = null, yine = false, erte = null, yenidenZaman = null, hataSayisi = 0, dinleyen = [];
   var esDurum = { son: 0, hata: '', kapali: false };
+  function dinleBildir(degisen) {
+    if (degisen.length) dinleyen.forEach(function (f) { try { f(degisen); } catch (e) { /* bir dinleyici ötekini durdurmasın */ } });
+  }
+  function bekleyenGonder() {
+    var s = esOku();
+    if (erte || (s && Object.keys(s.bekleyen).length)) { clearTimeout(erte); erte = null; esitle(); }
+  }
   function ag() {
     if (esDurum.kapali) return null;
     if (Depo.ag) return Depo.ag;
@@ -133,7 +140,7 @@
         t.sakla = (t.sakla || []).concat(s.sakla); t.katil = false;
       }
       esYaz(t);
-      if (degisen.length) dinleyen.forEach(function (f) { try { f(degisen); } catch (e) { /* bir dinleyici ötekini durdurmasın */ } });
+      dinleBildir(degisen);
     });
   }
   function gonder() {
@@ -165,10 +172,21 @@
   // Çek, sonra gönder. Aynı anda bir eşitleme; sürerken istenen bir tane daha arkasından koşar. Hiç reddetmez.
   function esitle() {
     if (!ag()) return Promise.resolve(Depo.esitleme());
+    clearTimeout(erte); erte = null;
+    clearTimeout(yenidenZaman); yenidenZaman = null;
     if (calisiyor) { yine = true; return calisiyor; }
-    calisiyor = cek().then(gonder).then(function () { esDurum.son = Date.now(); esDurum.hata = ''; }, function (e) {
-      esDurum.hata = e && e.kod ? 'Sunucu ' + e.kod : 'Sunucuya ulaşılamadı';
-      if (e && e.kod === 404) esDurum.kapali = true; // tek depo ya da uç yok (eski sunucu): bu açılışta yeniden denenmez
+    calisiyor = cek().then(gonder).then(function () {
+      hataSayisi = 0; esDurum.son = Date.now(); esDurum.hata = '';
+    }, function (e) {
+      var kod = e && e.kod;
+      esDurum.hata = kod ? 'Sunucu ' + kod : 'Sunucuya ulaşılamadı';
+      if (kod === 404) { esDurum.kapali = true; return; } // tek depo ya da uç yok (eski sunucu): bu açılışta yeniden denenmez
+      if (!kod || kod === 429 || kod >= 500) {
+        var sure = Math.min(Depo.yenidenTavan, Depo.yenidenTaban * Math.pow(2, hataSayisi));
+        hataSayisi = Math.min(hataSayisi + 1, 10);
+        yenidenZaman = setTimeout(function () { yenidenZaman = null; if (ag()) esitle(); }, sure);
+        if (yenidenZaman && yenidenZaman.unref) yenidenZaman.unref();
+      }
     }).then(function () {
       calisiyor = null;
       if (yine) { yine = false; return esitle(); }
@@ -182,9 +200,13 @@
     ls = yerel;
     sor();
     var izli = ls.getItem(IZ) === 'idb', gecti = false, zaman;
-    if (kok.addEventListener && kok.document) { // cihaza dönünce ve ağ gelince öbür cihazın yazdıkları çekilsin
-      kok.addEventListener('online', function () { esitle(); });
-      kok.document.addEventListener('visibilitychange', function () { if (kok.document.visibilityState === 'visible') esitle(); });
+    if (kok.addEventListener && kok.document) { // cihaza dönünce ve ağ gelince çekilsin; gizlenirken bekleyenler hemen gönderilsin
+      kok.addEventListener('online', function () { hataSayisi = 0; esitle(); });
+      kok.addEventListener('pagehide', bekleyenGonder);
+      kok.document.addEventListener('visibilitychange', function () {
+        if (kok.document.visibilityState === 'visible') esitle();
+        else if (kok.document.visibilityState === 'hidden') bekleyenGonder();
+      });
     }
     var is = new Promise(function (ok, red) {
       var r = (idb || kok.indexedDB).open(AD, 1);
@@ -203,10 +225,18 @@
     var acildi = Promise.race([is, sinir]).then(function () {
       clearTimeout(zaman); kip = 'idb';
       try { if (!izli) ls.setItem(IZ, 'idb'); } catch (e) { /* iz yazılamazsa sonraki arızada yerel kipe düşer */ }
-      if (kok.BroadcastChannel) { // öteki sekmenin yazdığı bu sekmenin belleğine de düşsün (localStorage gibi taze okunsun)
-        kanal = new kok.BroadcastChannel(AD);
-        kanal.onmessage = function (e) { var k = e.data[0], v = e.data[1]; if (v == null) delete bellek[k]; else bellek[k] = v; };
-        if (kanal.unref) kanal.unref(); // Node testinde süreci açık tutmasın
+      if (kok.BroadcastChannel) { // öteki sekmenin yazdığı bu sekmenin belleğine düşsün ve dinleyen yenilesin
+        try {
+          kanal = new kok.BroadcastChannel(AD);
+          kanal.onmessage = function (e) {
+            if (!e || !Array.isArray(e.data)) return;
+            var k = e.data[0], v = e.data[1];
+            if (typeof k !== 'string') return;
+            if (v == null) delete bellek[k]; else bellek[k] = v;
+            dinleBildir([k]);
+          };
+          if (kanal.unref) kanal.unref(); // Node testinde süreci açık tutmasın
+        } catch (e) { kanal = null; }
       }
       return kip;
     }, function (e) {
@@ -238,6 +268,8 @@
     dinle: function (f) { dinleyen.push(f); }, // f(değişen anahtarlar): öbür cihazdan gelen kayıt belleğe yazıldı
     adres: '',
     bekle: 800,
+    yenidenTaban: 2000,
+    yenidenTavan: 60000,
     hepsi: function (onek) {
       return soz(function () {
         var o = {}, l = kip === 'yerel' ? yereldekiler().map(function (x) { return x[0]; }) : Object.keys(bellek);

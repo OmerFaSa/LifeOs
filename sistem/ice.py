@@ -20,15 +20,18 @@ Sozler:
      kullanicinin onayiyla gecer (§1.4).
 """
 
+import contextlib
 import datetime
 import json
 import os
 import re
+import threading
 import time
 import urllib.request
 
 TAZE_SN = 30 * 60
 UFUK_GUN = 14
+_KILIT = threading.RLock()
 
 
 def klasor():
@@ -56,10 +59,17 @@ def oku(kok=None):
 def yaz(v, kok=None):
     k = kok or klasor()
     os.makedirs(k, exist_ok=True)
-    gecici = _yol(k) + ".yaziliyor"
-    with open(gecici, "w", encoding="utf-8") as f:
-        json.dump(v, f, ensure_ascii=False)
-    os.replace(gecici, _yol(k))
+    hedef = _yol(k)
+    gecici = "%s.%d.%d.yaziliyor" % (hedef, os.getpid(), threading.get_ident())
+    with _KILIT:
+        try:
+            with open(gecici, "w", encoding="utf-8") as f:
+                json.dump(v, f, ensure_ascii=False)
+            os.replace(gecici, hedef)
+        except Exception:
+            with contextlib.suppress(OSError):
+                os.remove(gecici)
+            raise
 
 
 def _tarih(deger):
@@ -419,17 +429,24 @@ def isle(h, kok=None, getir=None):
     if h.headers.get("X-LifeOS") != "ice":
         return _json(h, 403, {"hata": "Yalnız Başbuğ'un kendi sayfasından."})
     try:
-        boy = min(int(h.headers.get("Content-Length") or 0), 512 * 1024)
-        gelen = json.loads(h.rfile.read(boy).decode("utf-8") or "{}")
+        boy = int(h.headers.get("Content-Length") or 0)
+    except ValueError:
+        return _json(h, 400, {"hata": "Okunamadı."})
+    if boy < 0 or boy > 512 * 1024:
+        h.close_connection = True
+        return _json(h, 413, {"hata": "İstek gövdesi çok büyük."})
+    try:
+        gelen = json.loads((h.rfile.read(boy).decode("utf-8") if boy > 0 else "") or "{}")
     except (ValueError, UnicodeDecodeError):
         return _json(h, 400, {"hata": "Okunamadı."})
-    v = oku(kok)
     if yol == "/api/ice/takvim":
         adres = str(gelen.get("adres") or "").strip()
         if adres and not re.match(r"^https://[^\s]+$", adres):
             return _json(h, 400, {"hata": "Adres https:// ile başlamalı (Google Takvim › Ayarlar › Gizli adres, iCal biçiminde)."})
-        v["takvim"] = {"adres": adres} if adres else {}
-        yaz(v, kok)
+        with _KILIT:
+            v = oku(kok)
+            v["takvim"] = {"adres": adres} if adres else {}
+            yaz(v, kok)
         return _json(h, 200, disari(takvim_tazele(v, getir=getir, kok=kok)))
     if yol == "/api/ice/veri":
         try:
@@ -437,7 +454,9 @@ def isle(h, kok=None, getir=None):
         except ValueError as e:
             kod, cumle = e.args[0]
             return _json(h, kod, {"hata": cumle})
-        v.setdefault("veri", {})[gelen["tur"]] = dict(ozet, aktarildi=int(time.time()))
-        yaz(v, kok)
+        with _KILIT:
+            v = oku(kok)
+            v.setdefault("veri", {})[gelen["tur"]] = dict(ozet, aktarildi=int(time.time()))
+            yaz(v, kok)
         return _json(h, 200, disari(v))
     return _json(h, 404, {"hata": "Böyle bir adres yok."})

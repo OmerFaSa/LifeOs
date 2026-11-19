@@ -108,6 +108,8 @@ try:
         dene("POST gövde %s → 400" % ad, k == 400 and oku("arama") == once, (k, g))
     k, g = iste("/api/kalite/etiket", {"set": "arama", "id": "s01", "etiket": ["a2"]}, {"Origin": "http://kotu.example"})
     dene("başka bir sayfanın (Origin) isteği 403, dosya değişmez", k == 403 and oku("arama") == once, k)
+    k, g = iste("/api/kalite/etiket", ham=b"{" + b" " * 17000 + b"}")
+    dene("büyük gövde 413, dosya değişmez", k == 413 and g.get("ok") is False and oku("arama") == once, (k, g))
 
     k, g = iste("/api/kalite/etiket", {"set": "arama", "id": "s01", "etiket": ["a2"]}, {"Origin": "http://127.0.0.1:%d" % sunucu.GIRIS_PORT})
     satir = [json.loads(x) for x in oku("arama").decode().splitlines()]

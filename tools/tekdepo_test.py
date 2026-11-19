@@ -337,6 +337,28 @@ try:
     cy.close()
     h_yeni.kopru = None
     dogru("günlük yedek: tek depo yoksa hiçbir şey yapmaz", h_yeni.tek_depo_gunluk() is None)
+
+    # Faz 4A: ic ice islem geri alma ve toplu kabuk_yaz surum tutarliligi
+    before_olay = kb.c.execute("SELECT count(*) FROM olay").fetchone()[0]
+    try:
+        with kb.islem():
+            veri.kabuk_yaz(kb, [{"k": "lifeos.beden.boy", "v": "180", "taban": 0}], "pc")
+            with kb.islem():
+                veri.kabuk_yaz(kb, [{"k": "lifeos.onay", "v": "{}", "taban": 0}], "pc")
+                raise RuntimeError("yapay-hata")
+    except RuntimeError:
+        pass
+    after_olay = kb.c.execute("SELECT count(*) FROM olay").fetchone()[0]
+    dogru("iç içe islem hatada tüm batch'i geri alır (atomik rollback)",
+          kb.oku(veri.KABUK, "lifeos.beden.boy") is None and kb.oku(veri.KABUK, "lifeos.onay") is None and after_olay == before_olay,
+          (before_olay, after_olay))
+    rb = veri.kabuk_yaz(kb, [{"k": "lifeos.beden.boy", "v": "180", "taban": 0},
+                             {"k": "lifeos.beden.kilo", "v": "75", "taban": 0}], "pc")
+    dogru("toplu kabuk_yaz her anahtar için gerçek surum döndürür",
+          rb["surumler"]["lifeos.beden.boy"] == kb.surum(veri.KABUK, "lifeos.beden.boy")
+          and rb["surumler"]["lifeos.beden.kilo"] == kb.surum(veri.KABUK, "lifeos.beden.kilo")
+          and rb["surumler"]["lifeos.beden.kilo"] > rb["surumler"]["lifeos.beden.boy"], rb)
+
     kb.kapat()
 finally:
     shutil.rmtree(t, ignore_errors=True)

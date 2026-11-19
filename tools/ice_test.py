@@ -8,6 +8,7 @@ import io
 import json
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parent.parent
@@ -338,6 +339,24 @@ with tempfile.TemporaryDirectory() as d:
     I.isle(h, d, lambda u: (_ for _ in ()).throw(OSError("ag yok")))
     v = h.json()
     bekle("ag hatasi eski olaylari silmez", len(v["takvim"]["olaylar"]) == 2 and "okunamadı" in v["takvim"]["hata"])
+
+    h = Sahte("POST", "/api/ice/veri")
+    h.headers["Content-Length"] = "600000"
+    h.rfile = io.BytesIO(b"")
+    I.isle(h, d, getir)
+    bekle("ice asiri govde 413 + baglanti kapanir", h.kod == 413 and getattr(h, "close_connection", False) is True)
+    errs = []
+    def _iyaz():
+        try:
+            for _ in range(5):
+                I.yaz(v, d)
+        except Exception as e:
+            errs.append(e)
+    ts = [threading.Thread(target=_iyaz) for _ in range(6)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    bekle("ice eszamanli yazma temiz", not errs and not any(p.name.endswith(".yaziliyor") for p in Path(d).iterdir())
+          and len(I.oku(d)["takvim"]["olaylar"]) == 2)
 
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")

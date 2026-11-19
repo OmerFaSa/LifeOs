@@ -311,6 +311,75 @@ const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit
     dogru(s.istekler.length && s.istekler.every(x => x[2].Authorization === 'Bearer jeton-123'));
   });
 
+  await t('eşitleme: 503/ağ hatasında üssel geri çekilmeyle yeniden dener; 403 hatasında yeniden denemez', async () => {
+    const s = sahteSunucu();
+    const D = taze(); D.ag = s.ag; D.bekle = 5; D.yenidenTaban = 15; D.yenidenTavan = 60;
+    await D.ac(sahteYerel(), sahteIdb());
+    s.kapat(503);
+    D.setItem('lifeos.onay', '{"deneme":1}');
+    await D.esitle();
+    esit(D.esitleme().bekleyen, 1);
+    await uyu(25); // ilk geri cekilme (~15 ms) 503 gorur, 2. geri cekilme (~30 ms) planlanir
+    s.kapat(0);
+    await uyu(60);
+    esit([D.esitleme().bekleyen, s.kayit.get('lifeos.onay').v], [0, '{"deneme":1}']);
+
+    s.kapat(403);
+    const oncekiIstek = s.istekler.length;
+    D.setItem('lifeos.onay', '{"deneme":2}');
+    await D.esitle();
+    await uyu(50);
+    esit([D.esitleme().bekleyen, s.istekler.length], [1, oncekiIstek + 1], '403 geri cekilme baslatmaz');
+  });
+
+  await t('eşitleme: sayfa gizlenince (visibilitychange hidden / pagehide) bekleyen yazıları hemen gönderir', async () => {
+    const s = sahteSunucu(), winDin = {}, docDin = {};
+    const eskiDoc = globalThis.document, eskiAdd = globalThis.addEventListener;
+    globalThis.addEventListener = (t_, f) => { winDin[t_] = f; };
+    globalThis.document = { visibilityState: 'visible', addEventListener: (t_, f) => { docDin[t_] = f; }, cookie: '' };
+    try {
+      const D = taze(); D.ag = s.ag; D.bekle = 5000;
+      await D.ac(sahteYerel(), sahteIdb()); await D.esitle();
+      D.setItem('lifeos.onay', '{"gizli":1}');
+      esit(D.esitleme().bekleyen, 1);
+      globalThis.document.visibilityState = 'hidden';
+      docDin.visibilitychange();
+      await uyu(15);
+      esit([D.esitleme().bekleyen, s.kayit.get('lifeos.onay').v], [0, '{"gizli":1}']);
+
+      D.setItem('lifeos.onay', '{"kapan":2}');
+      winDin.pagehide();
+      await uyu(15);
+      esit([D.esitleme().bekleyen, s.kayit.get('lifeos.onay').v], [0, '{"kapan":2}']);
+    } finally {
+      if (eskiDoc === undefined) delete globalThis.document; else globalThis.document = eskiDoc;
+      if (eskiAdd === undefined) delete globalThis.addEventListener; else globalThis.addEventListener = eskiAdd;
+    }
+  });
+
+  await t('BroadcastChannel: öteki sekmeden gelen güncellemeyi belleğe alır ve dinleyene bildirir; hata fırlatırsa düşmez', async () => {
+    const eskiBC = globalThis.BroadcastChannel;
+    let sonKanal = null;
+    globalThis.BroadcastChannel = class { constructor() { sonKanal = this; } postMessage() {} };
+    try {
+      const D = taze();
+      await D.ac(sahteYerel(), sahteIdb());
+      let gelen = [];
+      D.dinle(l => { gelen = gelen.concat(l); });
+      sonKanal.onmessage({ data: ['lifeos.onay', '{"sekme":1}'] });
+      esit([D.getItem('lifeos.onay'), gelen], ['{"sekme":1}', ['lifeos.onay']]);
+    } finally {
+      if (eskiBC === undefined) delete globalThis.BroadcastChannel; else globalThis.BroadcastChannel = eskiBC;
+    }
+    globalThis.BroadcastChannel = function () { throw new Error('yasak'); };
+    try {
+      const D2 = taze();
+      esit(await D2.ac(sahteYerel(), sahteIdb()), 'idb');
+    } finally {
+      if (eskiBC === undefined) delete globalThis.BroadcastChannel; else globalThis.BroadcastChannel = eskiBC;
+    }
+  });
+
   console.log(kalan ? '\n' + kalan + ' test kaldı, ' + gecen + ' geçti' : '\n' + gecen + ' test geçti');
   process.exit(kalan ? 1 : 0);
 })();

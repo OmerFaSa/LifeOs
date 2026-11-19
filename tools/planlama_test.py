@@ -9,6 +9,7 @@ import json
 import sqlite3
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -181,6 +182,23 @@ with tempfile.TemporaryDirectory() as d:
     bekle("anahtar: uc kabul eder, her gun 04:00 kurar",
           h.kod == 200 and g["acik"] and g["kur"] and g["gunler"] == list(range(7)) and g["saat"] == "04:00")
     bekle("anahtar: oteki islere dokunmaz", P.oku(d)["isler"]["yedek"]["acik"])
+
+    h = H("POST", "/api/planlama", govde=b"")
+    h.headers["Content-Length"] = "70000"
+    P.isle(h, z, "x")
+    bekle("planlama asiri govde 413 + baglanti kapanir", h.kod == 413 and getattr(h, "close_connection", False) is True)
+    errs = []
+    def _pyaz():
+        try:
+            for _ in range(5):
+                P.yaz(plan, d)
+        except Exception as e:
+            errs.append(e)
+    ts = [threading.Thread(target=_pyaz) for _ in range(6)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    bekle("planlama eszamanli yazma temiz", not errs and not any(p.name.endswith(".yaziliyor") for p in Path(d).iterdir())
+          and P.oku(d)["isler"]["yedek"]["acik"])
 
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")

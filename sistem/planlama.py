@@ -26,6 +26,7 @@ Sozler:
      Eski bicim (gunler + tek saat, isde tek gun) okunurken cevrilir.
 """
 
+import contextlib
 import datetime
 import json
 import os
@@ -34,6 +35,8 @@ import sqlite3
 import subprocess
 import threading
 import time
+
+_YAZ_KILIT = threading.Lock()
 
 GUN_KISA = ("Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz")
 SCHTASKS_GUN = ("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
@@ -91,10 +94,17 @@ def oku(kok=None):
 def yaz(plan, kok=None):
     k = kok or klasor()
     os.makedirs(k, exist_ok=True)
-    gecici = _yol(k) + ".yaziliyor"
-    with open(gecici, "w", encoding="utf-8") as f:
-        json.dump(plan, f, ensure_ascii=False, indent=1)
-    os.replace(gecici, _yol(k))
+    hedef = _yol(k)
+    gecici = "%s.%d.%d.yaziliyor" % (hedef, os.getpid(), threading.get_ident())
+    with _YAZ_KILIT:
+        try:
+            with open(gecici, "w", encoding="utf-8") as f:
+                json.dump(plan, f, ensure_ascii=False, indent=1)
+            os.replace(gecici, hedef)
+        except Exception:
+            with contextlib.suppress(OSError):
+                os.remove(gecici)
+            raise
 
 
 def _gunler(v):
@@ -350,10 +360,17 @@ def isle(h, zamanlayici, bat):
         return _yanit(h, 403, {"hata": "Plan yalnız Başbuğ'un kendi sayfasından değişir."})
     if yol == "/api/planlama":
         try:
-            boy = min(int(h.headers.get("Content-Length") or 0), 64 * 1024)
-            gelen = json.loads(h.rfile.read(boy).decode("utf-8") or "{}")
-            onceki = oku(zamanlayici.kok)
-            p = dogrula(gelen, onceki=onceki)
+            boy = int(h.headers.get("Content-Length") or 0)
+        except ValueError:
+            return _yanit(h, 400, {"hata": "Plan okunamadı."})
+        if boy < 0 or boy > 64 * 1024:
+            h.close_connection = True
+            return _yanit(h, 413, {"hata": "İstek gövdesi çok büyük."})
+        try:
+            gelen = json.loads((h.rfile.read(boy).decode("utf-8") if boy > 0 else "") or "{}")
+            with _YAZ_KILIT:
+                onceki = oku(zamanlayici.kok)
+                p = dogrula(gelen, onceki=onceki)
         except (ValueError, UnicodeDecodeError) as e:
             kod, cumle = e.args[0] if e.args and isinstance(e.args[0], tuple) else (400, "Plan okunamadı.")
             return _yanit(h, kod, {"hata": cumle})

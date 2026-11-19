@@ -53,6 +53,8 @@ class Depo:
         self.yol = os.path.join(klasor, "lifeos.db")
         self.cihaz, self.saat = cihaz, saat
         self._kilit = threading.RLock()          # sunucu cok is parcacikli; tek baglanti, tek sira
+        self._islem_derinlik = 0
+        self._son_sira = 0
         yeni = not os.path.exists(self.yol)
         # Gunluk modu varsayilan (DELETE), WAL degil: 2026-11'de hesap.db'nin verisi -wal ile birlikte kayboldu (faz1.md §0)
         self.c = sqlite3.connect(self.yol, timeout=30, check_same_thread=False)
@@ -71,6 +73,28 @@ class Depo:
 
     def kapat(self):
         self.c.close()
+
+    @contextlib.contextmanager
+    def islem(self):
+        """Yeniden girilebilir SQLite islemi; en distaki cikista commit, hatada rollback."""
+        with self._kilit:
+            ilk = self._islem_derinlik == 0
+            if ilk and not self.c.in_transaction:
+                self.c.execute("BEGIN")
+            self._islem_derinlik += 1
+            hata = False
+            try:
+                yield
+            except BaseException:
+                hata = True
+                raise
+            finally:
+                self._islem_derinlik -= 1
+                if ilk:
+                    if hata:
+                        self.c.rollback()
+                    else:
+                        self.c.commit()
 
     def _ilerlet(self, ms, sayac):
         """Depo saatini (ms, sayac)'a en az esitler; HLC'nin alma kurali."""
@@ -125,8 +149,9 @@ class Depo:
             self.c.execute("INSERT INTO kayit (id, tur, tur_surum, alan, yol, govde, etiket, hlc, cihaz, silindi, kaynak, "
                            "goc_id, saatler) VALUES (?,?,1,?,?,?,?,?,?,?,?,NULL,?)",
                            (kimlik, tur, alan, yol, metin, etiket, son, cihaz, silindi, kaynak, goc.kanon(saatler)))
-        self.c.execute("INSERT INTO olay(kayit_id, islem, hlc, cihaz, kaynak, goc_id) VALUES (?,?,?,?,?,NULL)",
-                       (kimlik, islem, hlc, cihaz, kaynak))
+        cur = self.c.execute("INSERT INTO olay(kayit_id, islem, hlc, cihaz, kaynak, goc_id) VALUES (?,?,?,?,?,NULL)",
+                             (kimlik, islem, hlc, cihaz, kaynak))
+        self._son_sira = cur.lastrowid
 
     @staticmethod
     def _tur(alan, yol, tur):
@@ -142,7 +167,7 @@ class Depo:
         if not isinstance(degisiklik, dict) or not degisiklik or TABAN in degisiklik or BUTUN in degisiklik:
             raise ValueError("Değişiklik boş olmayan bir sözlük olmalı, ayrılmış anahtar taşımamalı.")
         hlc = self.kirp(hlc)
-        with self._kilit, self.c:
+        with self.islem():
             var, govde, saatler = self._durum(alan + "|" + yol)
             if govde is not None and not isinstance(govde, dict):
                 raise ValueError("Tek parça kayda alan yazılmaz, degistir kullan: %s|%s" % (alan, yol))
@@ -164,7 +189,7 @@ class Depo:
         if yeni is None:
             raise ValueError("Silmek için sil kullan.")
         hlc = self.kirp(hlc)
-        with self._kilit, self.c:
+        with self.islem():
             var, govde, saatler = self._durum(alan + "|" + yol)
             if hlc <= saatler.get(TABAN, ""):
                 return False
@@ -189,7 +214,7 @@ class Depo:
     def sil(self, alan, yol, hlc, cihaz, tur=None, kaynak="cihaz"):
         """Mezar tasi: taban = silme saati, ondan eski anahtarlar duser. Doner: bir sey degisti mi."""
         hlc = self.kirp(hlc)
-        with self._kilit, self.c:
+        with self.islem():
             var, govde, saatler = self._durum(alan + "|" + yol)
             if hlc <= saatler.get(TABAN, ""):
                 return False
@@ -269,14 +294,15 @@ class Kopru:
         if kullanici != self.sahip:
             return 0
         n = 0
-        for yol, metin, z in yazimlar:
-            if goc.modul_turu(alan.split("/", 1)[0], yol)[0] is None:
-                continue                                # turetilmis / cihaza ait: tek depoya girmez (karar 10)
-            h = hlc_yap(z, 0, cihaz)
-            if metin is None:
-                n += self.depo.sil(alan, yol, h, cihaz, kaynak="hesap")
-            else:
-                n += self.depo.degistir(alan, yol, json.loads(metin), h, cihaz, kaynak="hesap")
+        with self.depo.islem():
+            for yol, metin, z in yazimlar:
+                if goc.modul_turu(alan.split("/", 1)[0], yol)[0] is None:
+                    continue                                # turetilmis / cihaza ait: tek depoya girmez (karar 10)
+                h = hlc_yap(z, 0, cihaz)
+                if metin is None:
+                    n += self.depo.sil(alan, yol, h, cihaz, kaynak="hesap")
+                else:
+                    n += self.depo.degistir(alan, yol, json.loads(metin), h, cihaz, kaynak="hesap")
         return n
 
 
@@ -303,7 +329,7 @@ def kabuk_yaz(depo, yazimlar, cihaz):
     istemci yazarken araya baska bir cihazin yazimi girdiyse (taban eski) ustune yazilan deger kaybolmaz:
     kabuk-cakisma alanina «<anahtar>|<surum>» olarak saklanir. Doner: {surumler: {k: surum}, cakisma: n}."""
     surumler, cakisma = {}, 0
-    with depo._kilit:                   # oku-karsilastir-yaz tek parca: iki istek ayni anahtarda karismasin
+    with depo.islem():                  # oku-karsilastir-yaz tek islemde: hem yaris olmaz hem tek commit
         for y in yazimlar:
             k, v, taban = y["k"], y["v"], y["taban"]
             simdi, sur = depo.oku(KABUK, k), depo.surum(KABUK, k)
@@ -321,10 +347,10 @@ def kabuk_yaz(depo, yazimlar, cihaz):
                               kaynak=KABUK)
                 cakisma += 1
             if v is None:
-                depo.sil(KABUK, k, depo.damga(), cihaz, tur=KABUK, kaynak=KABUK)
+                deg = depo.sil(KABUK, k, depo.damga(), cihaz, tur=KABUK, kaynak=KABUK)
             else:
-                depo.degistir(KABUK, k, v, depo.damga(), cihaz, tur=KABUK, kaynak=KABUK)
-            surumler[k] = depo.surum(KABUK, k)
+                deg = depo.degistir(KABUK, k, v, depo.damga(), cihaz, tur=KABUK, kaynak=KABUK)
+            surumler[k] = depo._son_sira if deg else sur
     return {"surumler": surumler, "cakisma": cakisma}
 
 
@@ -365,9 +391,10 @@ def esle(hesap_yol, depo, sahip):
     k, n = Kopru(depo, sahip), 0
     c = sqlite3.connect(hesap_yol)
     try:
-        for alan, yol, deger, zaman, cihaz in c.execute(
-                "SELECT alan, yol, deger, zaman, cihaz FROM kayit WHERE kullanici=? ORDER BY sira", (sahip,)):
-            n += k(sahip, alan, cihaz or "sunucu", [(yol, deger, zaman)])
+        with depo.islem():
+            for alan, yol, deger, zaman, cihaz in c.execute(
+                    "SELECT alan, yol, deger, zaman, cihaz FROM kayit WHERE kullanici=? ORDER BY sira", (sahip,)):
+                n += k(sahip, alan, cihaz or "sunucu", [(yol, deger, zaman)])
     finally:
         c.close()
     return n
@@ -384,8 +411,9 @@ def karsilastir(hesap_yol, depo, sahip):
             if goc.modul_turu(alan.split("/", 1)[0], yol)[0] is None:
                 continue
             beklenen = None if deger is None else json.loads(deger)
-            if depo.oku(alan, yol) != beklenen:
-                fark.append((alan + "|" + yol, "tek depoda yok" if depo.oku(alan, yol) is None else "farklı"))
+            mevcut = depo.oku(alan, yol)
+            if mevcut != beklenen:
+                fark.append((alan + "|" + yol, "tek depoda yok" if mevcut is None else "farklı"))
     finally:
         c.close()
     return fark

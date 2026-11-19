@@ -28,11 +28,15 @@ Sozler:
      acilis araligi 0-600 sn, bitis > baslangic).
 """
 
+import contextlib
 import json
 import os
 import re
+import threading
 import time
 import uuid
+
+_KILIT = threading.RLock()
 from urllib.parse import unquote
 
 import zemin
@@ -104,10 +108,17 @@ def oku(kok=None):
 def yaz(d, kok=None):
     k = kok or klasor()
     os.makedirs(k, exist_ok=True)
-    gecici = _yol(k) + ".yaziliyor"
-    with open(gecici, "w", encoding="utf-8") as f:
-        json.dump(d, f, ensure_ascii=False, indent=1)
-    os.replace(gecici, _yol(k))
+    hedef = _yol(k)
+    gecici = "%s.%d.%d.yaziliyor" % (hedef, os.getpid(), threading.get_ident())
+    with _KILIT:
+        try:
+            with open(gecici, "w", encoding="utf-8") as f:
+                json.dump(d, f, ensure_ascii=False, indent=1)
+            os.replace(gecici, hedef)
+        except Exception:
+            with contextlib.suppress(OSError):
+                os.remove(gecici)
+            raise
 
 
 def _sayi(v, alt, ust, vars_):
@@ -167,14 +178,20 @@ def ekle(ad, tur, okuyucu, boy, kok=None, simdi=None):
     kok = kok or klasor()
     os.makedirs(kok, exist_ok=True)
     pid = uuid.uuid4().hex[:12]
-    gecici = os.path.join(kok, pid + ".yaziliyor")
-    zemin.diske_akit(gecici, bas, okuyucu, boy)
-    os.replace(gecici, os.path.join(kok, pid + uzanti))
+    gecici = os.path.join(kok, "%s.%d.%d.yaziliyor" % (pid, os.getpid(), threading.get_ident()))
+    try:
+        zemin.diske_akit(gecici, bas, okuyucu, boy)
+        os.replace(gecici, os.path.join(kok, pid + uzanti))
+    except Exception:
+        with contextlib.suppress(OSError):
+            os.remove(gecici)
+        raise
     ad = re.sub(r"\s+", " ", re.sub(r"\.[A-Za-z0-9]{2,4}$", "", ad or "")).strip()[:120] or "Adsız parça"
-    d = oku(kok)
     parca = {"id": pid, "ad": ad, "tur": UZANTI_TUR[uzanti], "boy": boy, "eklendi": int(simdi if simdi is not None else time.time())}
-    d["parcalar"].append(parca)
-    yaz(d, kok)
+    with _KILIT:
+        d = oku(kok)
+        d["parcalar"].append(parca)
+        yaz(d, kok)
     return parca
 
 
@@ -183,9 +200,10 @@ def sil(pid, kok=None):
     yol, _ = dosya_yolu(pid, kok)
     if yol:
         os.remove(yol)
-    d = oku(kok)
-    d["parcalar"] = [p for p in d["parcalar"] if p["id"] != pid]
-    yaz(dogrula(d, d), kok)
+    with _KILIT:
+        d = oku(kok)
+        d["parcalar"] = [p for p in d["parcalar"] if p["id"] != pid]
+        yaz(dogrula(d, d), kok)
 
 
 def _json(h, kod, veri):
@@ -226,16 +244,25 @@ def isle(h, kok=None):
             parca = ekle(unquote(h.headers.get("X-Ad") or ""), tur, h.rfile, boy, kok)
         except ValueError as e:
             kod, cumle = e.args[0]
+            if kod == 413:
+                h.close_connection = True
             return _json(h, kod, {"hata": cumle})
         return _json(h, 200, {"parca": parca, "dizin": oku(kok)})
     if h.command == "POST" and yol == "/api/muzik/ayar":
         try:
-            boy = min(int(h.headers.get("Content-Length") or 0), 256 * 1024)
-            gelen = json.loads(h.rfile.read(boy).decode("utf-8") or "{}")
-            d = dogrula(gelen, oku(kok))
+            boy = int(h.headers.get("Content-Length") or 0)
+        except ValueError:
+            return _json(h, 400, {"hata": "Ayar okunamadı."})
+        if boy < 0 or boy > 256 * 1024:
+            h.close_connection = True
+            return _json(h, 413, {"hata": "İstek gövdesi çok büyük."})
+        try:
+            gelen = json.loads((h.rfile.read(boy).decode("utf-8") if boy > 0 else "") or "{}")
+            with _KILIT:
+                d = dogrula(gelen, oku(kok))
+                yaz(d, kok)
         except (ValueError, UnicodeDecodeError) as e:
             kod, cumle = e.args[0] if e.args and isinstance(e.args[0], tuple) else (400, "Ayar okunamadı.")
             return _json(h, kod, {"hata": cumle})
-        yaz(d, kok)
         return _json(h, 200, d)
     return _json(h, 404, {"hata": "Böyle bir müzik adresi yok."})

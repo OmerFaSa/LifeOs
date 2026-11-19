@@ -7,6 +7,7 @@ import io
 import json
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parent.parent
@@ -101,6 +102,28 @@ for k in ("lifeos.cam", "lifeos.zemin.a.b", "lifeos.buzlu.kart", "lifeos.muzik.y
     bekle("katalog kabul: " + k, A.gecerli(k, "1"))
 for k in ("lifeos.kilit.odeme", "lifeos.king", "lifeos.buzlu.a.b", "lifeos.yuzey.ays", "xlifeos.cam", "lifeos.cam2"):
     bekle("katalog red: " + k, not A.gecerli(k, "1"))
+
+# 413 buyuk govde ve eszamanli yazma yarisi
+with tempfile.TemporaryDirectory() as d:
+    for yol in ("/api/ayar", "/api/ayar/esitle"):
+        h = Sahte("POST")
+        h.path = yol
+        h.headers["Content-Length"] = "600000"
+        h.rfile = io.BytesIO(b"")
+        A.isle(h, d)
+        bekle("ayar %s asiri govde 413 + baglanti kapanir" % yol, h.kod == 413 and getattr(h, "close_connection", False) is True)
+    errs = []
+    def _yaz(ti):
+        try:
+            for j in range(5):
+                A.birlestir({"lifeos.king.ad": "T%d-%d" % (ti, j)}, d)
+        except Exception as e:
+            errs.append(e)
+    ts = [threading.Thread(target=_yaz, args=(i,)) for i in range(6)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    bekle("ayar eszamanli yazma temiz", not errs and not any(p.name.endswith(".yaziliyor") for p in Path(d).iterdir())
+          and A.oku(d)["ayar"]["lifeos.king.ad"].startswith("T"))
 
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
