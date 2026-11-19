@@ -417,6 +417,42 @@ def run():
         eq(cagri, ["kill", ("wait", 2), ("join", 1), "close:in", "close:out"], "kapatma sirasi")
         ok(sahte.stdin.closed and sahte.stdout.closed, "borular kapatilir")
 
+        # Canli kalmis okuyucu thread varken stdout.close() cagrilmaz
+        cagri.clear()
+        sahte_canli = _Sahte()
+        thread_canli = _SahteThread()
+        thread_canli.alive = True
+        ses._EMA.update(p=sahte_canli, q="q", t=thread_canli, cihaz="cpu")
+        try:
+            ses._ema_kapat()
+        finally:
+            ses._EMA.update(p=None, q=None, t=None, cihaz=None)
+        eq(cagri, ["kill", ("wait", 2), ("join", 1), "close:in"], "canli thread varken stdout kapanmaz")
+        ok(sahte_canli.stdin.closed and not sahte_canli.stdout.closed)
+
+        # baska thread kilidi tutarken atexit engelsiz=True bekleyip kilitlenmez
+        cagri.clear()
+        sahte_engelsiz = _Sahte()
+        ses._EMA.update(p=sahte_engelsiz, q="q", t=None, cihaz="cpu")
+        tutuldu = __import__("threading").Event()
+        birak = __import__("threading").Event()
+
+        def tutan():
+            with ses._EMA_KILIT:
+                tutuldu.set()
+                birak.wait(2)
+
+        t_kilit = __import__("threading").Thread(target=tutan, daemon=True)
+        t_kilit.start()
+        tutuldu.wait(1)
+        try:
+            ses._ema_kapat(engelsiz=True)
+        finally:
+            birak.set()
+            t_kilit.join(1)
+            ses._EMA.update(p=None, q=None, t=None, cihaz=None)
+        ok("kill" in cagri and sahte_engelsiz.stdin.closed, cagri)
+
         d = tempfile.mkdtemp(prefix="hkm-ema-kapat-")
         betik = os.path.join(d, "isci.py")
         with open(betik, "w", encoding="utf-8") as f:

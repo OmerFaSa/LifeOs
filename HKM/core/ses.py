@@ -409,10 +409,16 @@ def _ema_canli():
     return bool(p is not None and p.poll() is None)
 
 
-def _ema_kapat():
-    with _EMA_KILIT:
+def _ema_kapat(engelsiz=False):
+    alindi = _EMA_KILIT.acquire(blocking=not engelsiz)
+    if alindi:
+        try:
+            p, t = _EMA["p"], _EMA.get("t")
+            _EMA.update(p=None, q=None, t=None, cihaz=None)
+        finally:
+            _EMA_KILIT.release()
+    else:
         p, t = _EMA["p"], _EMA.get("t")
-        _EMA.update(p=None, q=None, t=None, cihaz=None)
     if p is not None:
         try:
             p.kill()
@@ -438,7 +444,7 @@ def _ema_kapat():
                 pass
 
 
-atexit.register(_ema_kapat)
+atexit.register(_ema_kapat, True)
 
 
 def _ema_satir(q, timeout):
@@ -461,7 +467,10 @@ def _ema_satir(q, timeout):
 
 def _ema_nobet(hedef_p=None):
     """Bos kalan isciyi kapatir (kural 9)."""
-    while _EMA["p"] is not None and (hedef_p is None or _EMA["p"] is hedef_p) and _EMA["p"].poll() is None:
+    while True:
+        p = _EMA["p"]
+        if p is None or (hedef_p is not None and p is not hedef_p) or p.poll() is not None:
+            return
         time.sleep(30)
         with _EMA_KILIT:
             if _ema_canli() and (hedef_p is None or _EMA["p"] is hedef_p) and time.monotonic() - _EMA["son"] > EMA_BOS:
@@ -474,6 +483,7 @@ def _ema_baslat(py, betik, timeout):
     p = subprocess.Popen([py, "-I", betik], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.DEVNULL, env=env,
                          creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    _EMA.update(p=p, py=py, son=time.monotonic())
     q = queue.Queue()
 
     def oku():
@@ -486,7 +496,7 @@ def _ema_baslat(py, betik, timeout):
             q.put(None)
     t = threading.Thread(target=oku, daemon=True)
     t.start()
-    _EMA.update(p=p, q=q, t=t, py=py, son=time.monotonic())
+    _EMA.update(q=q, t=t)
     ilk = _ema_satir(q, timeout)
     if not ilk.get("hazir"):
         _ema_kapat()
