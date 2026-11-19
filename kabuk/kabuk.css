@@ -1235,3 +1235,65 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 :root[data-afis] .soz__metin{ font-style:normal; font-weight:600; }
 :root[data-afis] .turk-muhur__soz{ font:700 var(--yz-h3)/1.3 var(--baslik-serif); font-stretch:condensed; letter-spacing:.06em; text-transform:uppercase; font-style:normal; }
 :root[data-afis] .turk-muhur__yildiz svg{ width:16px; height:16px; opacity:1; }
+:root[data-afis="boru"]{
+  --bg:#0b1220; --yuzey:#121b2e; --yuzey-2:#18233a; --yuzey-ust:#1a2640; --cizgi:#26334f; --cizgi-guclu:#3e4f70;
+  --yazi:#e8eef6; --yazi-2:#c9d4e2; --soluk:#97a6ba; --ana:#7cc3f0; --ana-yazi:#0b1220; --altin:#d9b860; --vurgu:#7cc3f0; --vurgu-yazi:#0b1220;
+  --dugme-ana:#2c6aa8; --dugme-ana-yazi:#ffffff; --gok:#0e1830; --afis-kart:#13284a; --afis-serit:#2c6aa8; --afis-filtre:url(#afis-boru);
+}
+:root[data-afis="ergenekon"]{
+  --bg:#0f0c0b; --yuzey:#191412; --yuzey-2:#211a17; --yuzey-ust:#231b17; --cizgi:#352820; --cizgi-guclu:#5a4232;
+  --yazi:#f1e6d6; --yazi-2:#dccbb4; --soluk:#ab9b8a; --ana:#ff8a4c; --ana-yazi:#0f0c0b; --altin:#e8b04e; --vurgu:#ff8a4c; --vurgu-yazi:#0f0c0b;
+  --dugme-ana:#b8420f; --dugme-ana-yazi:#ffffff; --gok:#1a0d07; --afis-kart:#3a1608; --afis-serit:#d9531e; --afis-filtre:url(#afis-ergenekon);
+}
+:root[data-afis="akinci"]{
+  --bg:#121416; --yuzey:#1b1e21; --yuzey-2:#23272b; --yuzey-ust:#24282c; --cizgi:#33383e; --cizgi-guclu:#545b63;
+  --yazi:#eef0f2; --yazi-2:#d2d6db; --soluk:#a3a9b0; --ana:#ff7676; --ana-yazi:#121416; --altin:#d5dae0; --vurgu:#ff7676; --vurgu-yazi:#121416;
+  --dugme-ana:#c8102e; --dugme-ana-yazi:#ffffff; --gok:#16191c; --afis-kart:#2a2e33; --afis-serit:#c8102e; --afis-filtre:url(#afis-akinci);
+}
+:root[data-afis="seferberlik"]{
+  --bg:#efe6d0; --yuzey:#f8f2e2; --yuzey-2:#ebe1c9; --yuzey-ust:#e6dcc2; --cizgi:#d8caa8; --cizgi-guclu:#b8a67e;
+  --yazi:#17120c; --yazi-2:#3a2f22; --soluk:#5e5140; --ana:#a8101c; --ana-yazi:#ffffff; --altin:#6e5010; --vurgu:#a8101c; --vurgu-yazi:#ffffff;
+  --dugme-ana:#a8101c; --dugme-ana-yazi:#ffffff; --gok:#d8c9a4; --afis-kart:#e8d9b8; --afis-serit:#a8101c; --afis-filtre:url(#afis-seferberlik);
+}
+/* askerî afiş dili: keskin köşe, kalın dar büyük harf düğmeler, sayfa başında simge bandı */
+:root[data-afis]{ --kose:6px; --kose-k:4px; }
+:root[data-afis] .b-dugme{ font-family:var(--baslik-serif); font-stretch:condensed; font-variation-settings:"wdth" 80; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.afis-bant .turk-bant{ margin:0; padding:6px 0; background:var(--afis-kart); box-shadow:inset 0 1px 0 var(--altin), inset 0 -1px 0 var(--altin); border-radius:2px; }
+
+/* Türk simgeleri, tarih tabloları, bütün haritalar (kabuk/ata.js) */
+.simge{ display:inline-block; width:32px; height:32px; image-rendering:pixelated; vertical-align:middle; }
+.turk-bant{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:6px 10px; margin:0 0 var(--a4); }
+.turk-bant__ara{ color:var(--altin); font-size:10px; }
+.tdev__portre{ width:80px; height:80px; margin:0 auto var(--a3); }
+.ata-haritalar{ margin:0 0 var(--a5); }
+.ata-haritalar > summary{ width:max-content; padding:var(--a1) var(--a3); border-radius:var(--kose-k); cursor:pointer; font-size:var(--yz-k); font-weight:600; color:var(--altin); }
+.ata-haritalar ul{ display:grid; grid-template-columns:repeat(auto-fill, minmax(328px, 1fr)); gap:var(--a4); margin:var(--a3) 0 0; padding:0; list-style:none; }
+.ata-haritalar li{ display:flex; flex-direction:column; gap:2px; font-size:var(--yz-k); color:var(--soluk); }
+.ata-haritalar li b{ color:var(--yazi); }
+.ata-haritalar img{ width:328px; height:160px; image-rendering:pixelated; margin-bottom:var(--a1); }
+.tablolar, .simgeler{ margin:var(--a6) 0 0; }
+:is(.tablolar, .simgeler) > p{ margin:0 0 var(--a3); font-size:var(--yz-k); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ana); }
+.tablolar__izgara{ display:flex; flex-direction:column; gap:var(--a6); }
+.tablo{ margin:0; }
+/* yaldız çerçeve: koyu kenar, altın, iç gölge (portre çerçevesiyle aynı renkler) */
+.tablo__cerceve{ display:block; width:max-content; max-width:100%; padding:3px; background:#e3bb55; box-shadow:0 0 0 2px #3a2810, inset 0 0 0 1px #a67824, 0 8px 22px rgb(0 0 0 / .35); }
+.tablo__resim{ display:block; width:840px; height:472px; max-width:none; image-rendering:pixelated; background:#22170a; box-shadow:0 0 0 2px #22170a; }
+.tablo figcaption{ display:flex; flex-direction:column; gap:2px; margin-top:var(--a3); max-width:62ch; }
+.tablo__ad{ font:600 var(--yz-h3)/1.3 var(--baslik-serif); color:var(--yazi); }
+.tablo__alt{ font-size:var(--yz-k); font-weight:700; color:var(--altin); }
+.tablo__metin{ font-size:var(--yz-k); color:var(--yazi-2); }
+.soz__tablo{ margin:0 auto var(--a4); text-align:left; }
+.soz__tablo .tablo__cerceve{ margin:0 auto; }
+.soz__tablo .tablo__resim{ width:420px; height:236px; }
+.simgeler__liste{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:var(--a3) var(--a5); margin:0; padding:0; list-style:none; }
+.simgeler__liste li{ display:flex; gap:var(--a3); align-items:flex-start; }
+.simgeler__liste li span{ display:flex; flex-direction:column; font-size:var(--yz-k); color:var(--yazi-2); }
+.simgeler__liste li b{ font-size:var(--yz); color:var(--yazi); }
+.simgeler__resim{ flex:none; width:48px; height:48px; }
+:root[data-afis] :is(.tablo__ad, .tablolar > p, .simgeler > p){ font-stretch:condensed; text-transform:uppercase; }
+@media (max-width:640px){
+  .tablo__resim, .soz__tablo .tablo__resim{ width:336px; height:189px; }
+  .ata-haritalar ul{ grid-template-columns:1fr; } .king-divan__portre{ width:80px; height:80px; }
+}
+/* Başbuğ logosu: bozkurt ve on altı yıldız (kabuk/ata.js logoHtml) */
+.ust__amblem{ flex:none; width:32px; height:32px; image-rendering:pixelated; filter:drop-shadow(0 1px 2px rgb(0 0 0 / .35)); }
