@@ -81,10 +81,29 @@ def _ortam(gecici):
     return o
 
 
+def _bash():
+    """Windows'ta PATH'te `bash` yoksa Git'in bash.exe'sini bulur; aksi halde `bash`."""
+    b = shutil.which("bash")
+    if b:
+        return b
+    if os.name == "nt":
+        adaylar = []
+        git = shutil.which("git")
+        if git:
+            ust = os.path.dirname(os.path.dirname(git))
+            adaylar.extend([os.path.join(ust, "bin", "bash.exe"), os.path.join(ust, "usr", "bin", "bash.exe")])
+        adaylar.extend([r"C:\Program Files\Git\bin\bash.exe", r"C:\Program Files\Git\usr\bin\bash.exe"])
+        for aday in adaylar:
+            if os.path.isfile(aday):
+                return aday
+    return "bash"
+
+
 def kos(adim, ortam):
     t0, cikti, kod = time.time(), [], 0
+    kabuk = _bash()
     for komut in adim["komutlar"]:
-        r = subprocess.run([shutil.which("bash") or "bash", "-c", komut], cwd=os.path.join(KOK, adim["dizin"]),
+        r = subprocess.run([kabuk, "-c", komut], cwd=os.path.join(KOK, adim["dizin"]),
                            env=ortam, capture_output=True, text=True, encoding="utf-8", errors="replace",
                            stdin=subprocess.DEVNULL)
         cikti.append(r.stdout + r.stderr)
@@ -146,6 +165,9 @@ if __name__ == "__main__":
             gercek = adimlar(f.read())
         assert len(gercek) > 30 and any("tekkapi_test" in " ".join(s["komutlar"]) for s in gercek)
         assert any(s["is"] == "hkm" and s["dizin"] == "HKM" for s in gercek)
+        if os.name == "nt":
+            b = _bash()
+            assert b.lower().endswith("bash.exe") and os.path.isfile(b), b
         print("ci_yerel selftest yeşil (%d adım)" % len(gercek))
         raise SystemExit(0)
     raise SystemExit(main())
