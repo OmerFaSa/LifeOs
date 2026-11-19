@@ -380,6 +380,54 @@ const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit
     }
   });
 
+  await t('eşitleme: acildi çözülmeden pagehide/visibilitychange hidden gelirse IDB kaydını null ile silmez', async () => {
+    const s = sahteSunucu(), winDin = {}, docDin = {};
+    const eskiDoc = globalThis.document, eskiAdd = globalThis.addEventListener;
+    globalThis.addEventListener = (t_, f) => { winDin[t_] = f; };
+    globalThis.document = { visibilityState: 'visible', addEventListener: (t_, f) => { docDin[t_] = f; }, cookie: '' };
+    const idbVerisi = { 'lifeos.onay': '{"korunan":true}' };
+    const yavasIdb = {
+      open() {
+        const req = { result: {
+          createObjectStore() {},
+          transaction() {
+            const tx = {
+              objectStore: () => ({
+                getAllKeys: () => ({ result: Object.keys(idbVerisi) }),
+                getAll: () => ({ result: Object.values(idbVerisi) }),
+                put(v, k) { idbVerisi[k] = v; }, delete(k) { delete idbVerisi[k]; },
+                get: k => ({ result: idbVerisi[k] }),
+              }),
+            };
+            queueMicrotask(() => { tx.oncomplete && tx.oncomplete(); });
+            return tx;
+          },
+        } };
+        setTimeout(() => req.onsuccess && req.onsuccess(), 25);
+        return req;
+      },
+    };
+    const yr = sahteYerel({
+      'lifeos.kabuk.depo': 'idb',
+      'lifeos.kabuk.esitle': JSON.stringify({ son: 0, taban: {}, bekleyen: { 'lifeos.onay': 1 }, sakla: [], katil: false }),
+    });
+    try {
+      const D = taze(); D.ag = s.ag;
+      const acSoz = D.ac(yr, yavasIdb);
+      globalThis.document.visibilityState = 'hidden';
+      docDin.visibilitychange();
+      winDin.pagehide();
+      await uyu(5);
+      esit(s.istekler.length, 0, 'acildi oncesi erken silme istegi atilmaz');
+      await acSoz;
+      await uyu(15);
+      esit(s.kayit.get('lifeos.onay').v, '{"korunan":true}', 'IDB acilinca gercek deger gonderilir');
+    } finally {
+      if (eskiDoc === undefined) delete globalThis.document; else globalThis.document = eskiDoc;
+      if (eskiAdd === undefined) delete globalThis.addEventListener; else globalThis.addEventListener = eskiAdd;
+    }
+  });
+
   console.log(kalan ? '\n' + kalan + ' test kaldı, ' + gecen + ' geçti' : '\n' + gecen + ' test geçti');
   process.exit(kalan ? 1 : 0);
 })();

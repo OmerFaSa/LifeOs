@@ -361,7 +361,8 @@ def _dokum_oku(kimlik, bayt_bas=0):
     tam_blok = ham[:son_nl + 1]
     yeni_ofset = bayt_bas + son_nl + 1
     out = []
-    for s in tam_blok.decode("utf-8", errors="replace").splitlines():
+    for s in tam_blok.decode("utf-8", errors="replace").split("\n"):
+        s = s.rstrip("\r")
         if not s:
             continue
         try:

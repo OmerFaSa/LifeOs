@@ -378,6 +378,9 @@ def isle(h, zamanlayici, bat):
         if p["acilis"] != onceki["acilis"]:
             _, mesaj = acilis_gorevi(p["acilis"], bat)
         with zamanlayici.kilit:
+            guncel = oku(zamanlayici.kok)
+            p["son"] = guncel["son"]
+            p["bekleyen"] = guncel["bekleyen"]
             yaz(p, zamanlayici.kok)
         return _yanit(h, 200, {"plan": p, "mesaj": mesaj})
     m = re.match(r"^/api/planlama/(yap|atla)/([a-z]+)$", yol)

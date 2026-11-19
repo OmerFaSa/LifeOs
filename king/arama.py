@@ -25,6 +25,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 
 KOD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,6 +39,7 @@ BUTCE = {"ag": 8, "kaynak": 10, "sure": 40, "iddia": 4}
 ONBELLEK_SN = 600
 ONBELLEK_SINIR = 128
 ONBELLEK = {}                          # (kaynak, konu) -> (zaman, sonuc); not ve alan taramasi
+_ONBELLEK_KILIT = threading.Lock()
 _ALAN_INDEKS = {}                      # abs_yol -> (mtime_ns, size, ad, taslak, [(yol, s, s_kucuk), ...])
 _MCP_MOD = None
 _KIMLIK_SADE_RE = re.compile(r"^[\w./-]+$")
@@ -180,9 +182,11 @@ def alan_kaynaklari(konu, terimler, kok=None):
         try:
             st = os.stat(yol)
         except OSError:
-            _ALAN_INDEKS.pop(abs_yol, None)
+            with _ONBELLEK_KILIT:
+                _ALAN_INDEKS.pop(abs_yol, None)
             continue
-        onb = _ALAN_INDEKS.get(abs_yol)
+        with _ONBELLEK_KILIT:
+            onb = _ALAN_INDEKS.get(abs_yol)
         if onb and onb[0] == st.st_mtime_ns and onb[1] == st.st_size:
             _, _, baslik, taslak, parca = onb
         else:
@@ -190,11 +194,13 @@ def alan_kaynaklari(konu, terimler, kok=None):
                 with open(yol, encoding="utf-8") as f:
                     d = json.load(f)
             except (OSError, ValueError):
-                _ALAN_INDEKS.pop(abs_yol, None)
+                with _ONBELLEK_KILIT:
+                    _ALAN_INDEKS.pop(abs_yol, None)
                 continue
             # Kapi sorulari ve cevaplari kaynak olmaz: ustalik kapisi olcumdur (mcp.py yol_haritasi da vermez)
             baslik, taslak, parca = _alan_ozet(d)
-            _ALAN_INDEKS[abs_yol] = (st.st_mtime_ns, st.st_size, baslik, taslak, parca)
+            with _ONBELLEK_KILIT:
+                _ALAN_INDEKS[abs_yol] = (st.st_mtime_ns, st.st_size, baslik, taslak, parca)
         uyan = [(y, s) for y, s, sk in parca if _uyar_kucuk(sk, terimler)]
         if not uyan:
             continue
@@ -203,23 +209,26 @@ def alan_kaynaklari(konu, terimler, kok=None):
                     "url": goreli, "alan": "alan/" + goreli.split("/")[1], "ozet": "",
                     "metin": "\n".join(s for _, s in uyan), "yerler": [y for y, _ in uyan][:10],
                     "taslak": taslak})
-    for sil in [k for k in _ALAN_INDEKS if k.startswith(alan_koku) and k not in aktif]:
-        del _ALAN_INDEKS[sil]
+    with _ONBELLEK_KILIT:
+        for sil in [k for k in _ALAN_INDEKS if k.startswith(alan_koku) and k not in aktif]:
+            del _ALAN_INDEKS[sil]
     return out
 
 
 def _onbellekli(onbellek, anahtar, fn):
     simdi = time.time()
-    for sil in [k for k, v in onbellek.items() if simdi - v[0] >= ONBELLEK_SN]:
-        del onbellek[sil]
-    var = onbellek.get(anahtar)
-    if var:
-        return [dict(k) for k in var[1]], True
+    with _ONBELLEK_KILIT:
+        for sil in [k for k, v in onbellek.items() if simdi - v[0] >= ONBELLEK_SN]:
+            del onbellek[sil]
+        var = onbellek.get(anahtar)
+        if var:
+            return [dict(k) for k in var[1]], True
     r = fn()
-    onbellek[anahtar] = (simdi, [dict(k) for k in r])
-    while len(onbellek) > ONBELLEK_SINIR:
-        eski = min(onbellek.items(), key=lambda kv: kv[1][0])[0]
-        del onbellek[eski]
+    with _ONBELLEK_KILIT:
+        onbellek[anahtar] = (simdi, [dict(k) for k in r])
+        while len(onbellek) > ONBELLEK_SINIR:
+            eski = min(onbellek.items(), key=lambda kv: kv[1][0])[0]
+            del onbellek[eski]
     return r, False
 
 

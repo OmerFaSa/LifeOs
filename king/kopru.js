@@ -11,7 +11,7 @@ const KOK = path.resolve(__dirname, '..');
 const _haritaMtime = Object.create(null);
 
 function harita(g) {
-  const yol = path.resolve(g.harita);
+  const yol = require.resolve(path.resolve(g.harita));
   const mt = fs.statSync(yol).mtimeMs;
   if (_haritaMtime[yol] !== undefined && _haritaMtime[yol] !== mt) delete require.cache[yol];
   _haritaMtime[yol] = mt;

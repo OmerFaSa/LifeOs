@@ -367,21 +367,29 @@ def ics_coz(metin, simdi, ufuk=UFUK_GUN):
 
 def takvim_tazele(v, simdi=None, getir=None, kok=None):
     """Adres varsa ve onbellek eskiyse ceker. Ag hatasi eskiyi silmez."""
-    t = v.get("takvim") or {}
-    if not t.get("adres"):
+    t = dict(v.get("takvim") or {})
+    adres = t.get("adres")
+    if not adres:
         return v
     if time.time() - (t.get("cekildi") or 0) < TAZE_SN and t.get("olaylar") is not None:
         return v
     getir = getir or (lambda u: urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "LifeOS"}), timeout=10).read(2 * 1024 * 1024).decode("utf-8", "replace"))
     try:
-        t["olaylar"] = ics_coz(getir(t["adres"]), simdi or datetime.datetime.now())
+        t["olaylar"] = ics_coz(getir(adres), simdi or datetime.datetime.now())
         t["hata"] = None
     except Exception as e:                         # ag yok, adres bozuk: eski olaylar kalir
         t["hata"] = "Takvim okunamadı: %s" % str(e)[:120]
     t["cekildi"] = time.time()
-    v["takvim"] = t
-    yaz(v, kok)
-    return v
+    with _KILIT:
+        if os.path.exists(_yol(kok)):
+            guncel = oku(kok)
+            if (guncel.get("takvim") or {}).get("adres") != adres:
+                return guncel
+        else:
+            guncel = dict(v)
+        guncel["takvim"] = t
+        yaz(guncel, kok)
+        return guncel
 
 
 def disari(v):

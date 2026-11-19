@@ -92,9 +92,15 @@ class Depo:
                 self._islem_derinlik -= 1
                 if ilk:
                     if hata:
-                        self.c.rollback()
+                        with contextlib.suppress(sqlite3.Error):
+                            self.c.rollback()
                     else:
-                        self.c.commit()
+                        try:
+                            self.c.commit()
+                        except BaseException:
+                            with contextlib.suppress(sqlite3.Error):
+                                self.c.rollback()
+                            raise
 
     def _ilerlet(self, ms, sayac):
         """Depo saatini (ms, sayac)'a en az esitler; HLC'nin alma kurali."""
@@ -115,7 +121,8 @@ class Depo:
         sinir = int(self.saat() * 1000) + ILERI_MS
         if ms > sinir:
             ms, sayac = sinir, 0
-        self._ilerlet(ms, sayac)
+        with self._kilit:
+            self._ilerlet(ms, sayac)
         return hlc_yap(ms, sayac, cihaz)
 
     def _durum(self, kimlik):
@@ -166,8 +173,8 @@ class Depo:
         """degisiklik: yalniz degisen ust anahtarlar {anahtar: deger}. Doner: uygulanan anahtarlar."""
         if not isinstance(degisiklik, dict) or not degisiklik or TABAN in degisiklik or BUTUN in degisiklik:
             raise ValueError("Değişiklik boş olmayan bir sözlük olmalı, ayrılmış anahtar taşımamalı.")
-        hlc = self.kirp(hlc)
         with self.islem():
+            hlc = self.kirp(hlc)
             var, govde, saatler = self._durum(alan + "|" + yol)
             if govde is not None and not isinstance(govde, dict):
                 raise ValueError("Tek parça kayda alan yazılmaz, degistir kullan: %s|%s" % (alan, yol))
@@ -188,8 +195,8 @@ class Depo:
         yazimi korunur. Sozluk olmayan govde tek parcadir (BUTUN). Doner: bir sey degisti mi."""
         if yeni is None:
             raise ValueError("Silmek için sil kullan.")
-        hlc = self.kirp(hlc)
         with self.islem():
+            hlc = self.kirp(hlc)
             var, govde, saatler = self._durum(alan + "|" + yol)
             if hlc <= saatler.get(TABAN, ""):
                 return False
@@ -213,8 +220,8 @@ class Depo:
 
     def sil(self, alan, yol, hlc, cihaz, tur=None, kaynak="cihaz"):
         """Mezar tasi: taban = silme saati, ondan eski anahtarlar duser. Doner: bir sey degisti mi."""
-        hlc = self.kirp(hlc)
         with self.islem():
+            hlc = self.kirp(hlc)
             var, govde, saatler = self._durum(alan + "|" + yol)
             if hlc <= saatler.get(TABAN, ""):
                 return False

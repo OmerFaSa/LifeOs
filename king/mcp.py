@@ -483,6 +483,7 @@ def t_notlar(arg):
 
 
 _ALAN_ASAMA = {}  # abs_yol -> (mtime_ns, size, veri, ders_indeks)
+_ALAN_ASAMA_KILIT = threading.Lock()
 _KALITE_OLCUM_MOD = None
 
 
@@ -498,7 +499,8 @@ def _yol_kapi(k):
 def _asama_yukle(yol):
     abs_yol = os.path.abspath(yol)
     st = os.stat(yol)
-    onb = _ALAN_ASAMA.get(abs_yol)
+    with _ALAN_ASAMA_KILIT:
+        onb = _ALAN_ASAMA.get(abs_yol)
     if onb and onb[0] == st.st_mtime_ns and onb[1] == st.st_size:
         return onb[2], onb[3]
     with open(yol, encoding="utf-8") as f:
@@ -511,7 +513,8 @@ def _asama_yukle(yol):
             did = d.get("id")
             if did:
                 dersler[did] = (s_ad, u_ad, d)
-    _ALAN_ASAMA[abs_yol] = (st.st_mtime_ns, st.st_size, s, dersler)
+    with _ALAN_ASAMA_KILIT:
+        _ALAN_ASAMA[abs_yol] = (st.st_mtime_ns, st.st_size, s, dersler)
     return s, dersler
 
 

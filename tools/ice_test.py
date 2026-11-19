@@ -357,6 +357,17 @@ with tempfile.TemporaryDirectory() as d:
     for t in ts: t.join()
     bekle("ice eszamanli yazma temiz", not errs and not any(p.name.endswith(".yaziliyor") for p in Path(d).iterdir())
           and len(I.oku(d)["takvim"]["olaylar"]) == 2)
+    # takvim_tazele ag cekimi sirasinda yazilan veri kaybolmaz
+    v_t = I.oku(d)
+    v_t["takvim"] = {"adres": "https://calendar.google.com/x/basic.ics", "cekildi": 0}
+    I.yaz(v_t, d)
+    def _cekerken_yaz(_u):
+        h_v = Sahte("POST", "/api/ice/veri", govde={"tur": "adim", "ozet": {"2026-10-31": 9999}})
+        I.isle(h_v, d, getir)
+        return ICS
+    son_v = I.takvim_tazele(I.oku(d), getir=_cekerken_yaz, kok=d)
+    bekle("takvim_tazele sirasinda yazilan veri ezilmez",
+          son_v["veri"]["adim"]["gunler"].get("2026-10-31") == 9999 and len(son_v["takvim"]["olaylar"]) == 2)
 
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")

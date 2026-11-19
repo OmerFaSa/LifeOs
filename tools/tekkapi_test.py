@@ -406,6 +406,31 @@ def sina(eski, tek, kokler=()):
         c2.close()
     dene("okunmamış gövdeli POST 403 bağlantıyı kapatır, taze istek 200 döner",
          k_err == 403 and kapat and iste(T, "/api/hkm/health")[0] == 200, (k_err, kapat))
+    c3 = http.client.HTTPConnection(H, T, timeout=5)
+    try:
+        c3.request("POST", "/", body=b'{"kullanilmayan":"govde"}', headers={"Content-Type": "application/json"})
+        r3 = c3.getresponse()
+        r3.read()
+        kapat302 = (r3.getheader("Connection") or "").lower() == "close"
+        k302 = r3.status
+    finally:
+        c3.close()
+    dene("okunmamış gövdeli POST 302 bağlantıyı kapatır, soket kaymaz",
+         k302 == 302 and kapat302 and iste(T, "/api/hkm/health")[0] == 200, (k302, kapat302))
+    c4 = http.client.HTTPConnection(H, T, timeout=5)
+    try:
+        c4.putrequest("POST", "/api/kabuk/hata")
+        c4.putheader("Transfer-Encoding", "chunked")
+        c4.putheader("X-LifeOS", "kabuk-hata")
+        c4.endheaders(b"2\r\n{}\r\n0\r\n\r\n")
+        r4 = c4.getresponse()
+        r4.read()
+        kapat501 = (r4.getheader("Connection") or "").lower() == "close"
+        k501 = r4.status
+    finally:
+        c4.close()
+    dene("Transfer-Encoding chunked 501 + Connection: close döner",
+         k501 == 501 and kapat501 and iste(T, "/api/hkm/health")[0] == 200, (k501, kapat501))
 
     dene("kökte HEAD dosya vermez", iste(T, "/sistem/tekkapi.py", "HEAD")[0] in (404, 405))
     # --port'suz tek kapi 4180'de acilir (ETKIN): sinama onu hic calistirmaz.

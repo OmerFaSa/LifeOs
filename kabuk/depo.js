@@ -72,12 +72,13 @@
    * Kurallar: bekleyen yerel yazı sunucudakinden yenidir (gönderilince sunucu üstüne yazılanı kabuk-cakisma'da saklar);
    * cihaz ilk katılışta sunucudaki değeri alır, kendi farklı değeri kaybolmasın diye sunucuya «sakla» olarak gider;
    * sunucuda hiç olmayan yerel kayıt gönderilir. Sunucu yoksa (404, file://) eşitleme bu açılışta kapanır, kabuk eskisi gibi çalışır. */
-  var ES = 'lifeos.kabuk.esitle', calisiyor = null, yine = false, erte = null, yenidenZaman = null, hataSayisi = 0, dinleyen = [];
+  var ES = 'lifeos.kabuk.esitle', calisiyor = null, yine = false, erte = null, yenidenZaman = null, hataSayisi = 0, hazir = false, hazirSoz = null, dinlendi = false, dinleyen = [];
   var esDurum = { son: 0, hata: '', kapali: false };
   function dinleBildir(degisen) {
     if (degisen.length) dinleyen.forEach(function (f) { try { f(degisen); } catch (e) { /* bir dinleyici ötekini durdurmasın */ } });
   }
   function bekleyenGonder() {
+    if (!hazir) return;
     var s = esOku();
     if (erte || (s && Object.keys(s.bekleyen).length)) { clearTimeout(erte); erte = null; esitle(); }
   }
@@ -171,6 +172,7 @@
   }
   // Çek, sonra gönder. Aynı anda bir eşitleme; sürerken istenen bir tane daha arkasından koşar. Hiç reddetmez.
   function esitle() {
+    if (!hazir) return hazirSoz ? hazirSoz.then(esitle) : Promise.resolve(Depo.esitleme());
     if (!ag()) return Promise.resolve(Depo.esitleme());
     clearTimeout(erte); erte = null;
     clearTimeout(yenidenZaman); yenidenZaman = null;
@@ -198,10 +200,12 @@
   // açılış: ayar deposunu bağlar (eşzamanlı), sonra IndexedDB'yi açıp kayıtları belleğe yükler ve taşır. Hiç reddetmez; kipi verir.
   function ac(yerel, idb) {
     ls = yerel;
+    hazir = false;
     sor();
     var izli = ls.getItem(IZ) === 'idb', gecti = false, zaman;
-    if (kok.addEventListener && kok.document) { // cihaza dönünce ve ağ gelince çekilsin; gizlenirken bekleyenler hemen gönderilsin
-      kok.addEventListener('online', function () { hataSayisi = 0; esitle(); });
+    if (!dinlendi && kok.addEventListener && kok.document) { // cihaza dönünce ve ağ gelince çekilsin; gizlenirken bekleyenler hemen gönderilsin
+      dinlendi = true;
+      kok.addEventListener('online', function () { if (hazir) { hataSayisi = 0; esitle(); } });
       kok.addEventListener('pagehide', bekleyenGonder);
       kok.document.addEventListener('visibilitychange', function () {
         if (kok.document.visibilityState === 'visible') esitle();
@@ -238,14 +242,17 @@
           if (kanal.unref) kanal.unref(); // Node testinde süreci açık tutmasın
         } catch (e) { kanal = null; }
       }
+      hazir = true;
       return kip;
     }, function (e) {
       clearTimeout(zaman); gecti = true;
       kip = izli ? 'bellek' : 'yerel';
       if (izli) yereldekiler().forEach(function (x) { bellek[x[0]] = x[1]; });
+      hazir = true;
       if (typeof console !== 'undefined') console.warn('LifeOS depo: IndexedDB kullanılamıyor, kip ' + kip, e);
       return kip;
     });
+    hazirSoz = acildi;
     acildi.then(function () { if (ag()) esitle(); }); // açılışı beklemez: sayfa yerel kayıtla çizilir, çekilen gelince dinleyen yeniler
     return acildi;
   }

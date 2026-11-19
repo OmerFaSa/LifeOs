@@ -359,6 +359,52 @@ try:
           and rb["surumler"]["lifeos.beden.kilo"] == kb.surum(veri.KABUK, "lifeos.beden.kilo")
           and rb["surumler"]["lifeos.beden.kilo"] > rb["surumler"]["lifeos.beden.boy"], rb)
 
+    # Faz 5: commit() hatasında açık işlem kalmamalı + eşzamanlı kirp()/damga() HLC monotonluğu
+    eski_c = kb.c
+    class _CommitHataConn:
+        def __init__(self, ham):
+            self._ham = ham
+            self.geri = 0
+        def __getattr__(self, k):
+            return getattr(self._ham, k)
+        def commit(self):
+            raise sqlite3.OperationalError("database is locked")
+        def rollback(self):
+            self.geri += 1
+            return self._ham.rollback()
+    hconn = _CommitHataConn(eski_c)
+    kb.c = hconn
+    try:
+        try:
+            veri.kabuk_yaz(kb, [{"k": "lifeos.onay", "v": '{"kilitli":1}', "taban": 0}], "pc")
+            dogru("commit hatası yükseltilir", False)
+        except sqlite3.OperationalError:
+            dogru("commit hatasında rollback çalışır ve in_transaction False kalır",
+                  hconn.geri == 1 and eski_c.in_transaction is False and kb.oku(veri.KABUK, "lifeos.onay") is None,
+                  (hconn.geri, eski_c.in_transaction))
+    finally:
+        kb.c = eski_c
+    kb.degistir(veri.KABUK, "lifeos.onay", '{"temiz":1}', kb.damga(), "pc", tur=veri.KABUK, kaynak=veri.KABUK)
+    dogru("commit hatasından sonra sonraki yazım temiz işler", kb.oku(veri.KABUK, "lifeos.onay") == '{"temiz":1}')
+
+    import threading as _th
+    eski_saat, kb.saat = kb.saat, (lambda: SIMDI + 10.0)
+    hlc_hatalari, son_damgalar = [], []
+    def _kirp_isci(idx):
+        try:
+            gelecek = veri.hlc_yap(int((SIMDI + 10.0) * 1000) + 1000 + idx, 0, "c%d" % idx)
+            for _ in range(25):
+                kb.kirp(gelecek)
+                son_damgalar.append(kb.damga())
+        except Exception as exc:
+            hlc_hatalari.append(exc)
+    threads = [_th.Thread(target=_kirp_isci, args=(i,)) for i in range(4)]
+    for t_ in threads: t_.start()
+    for t_ in threads: t_.join()
+    kb.saat = eski_saat
+    dogru("eşzamanlı kirp + damga hatasız ve tekrarsız HLC üretir",
+          not hlc_hatalari and len(son_damgalar) == len(set(son_damgalar)) == 100, (hlc_hatalari, len(son_damgalar)))
+
     kb.kapat()
 finally:
     shutil.rmtree(t, ignore_errors=True)

@@ -200,6 +200,28 @@ with tempfile.TemporaryDirectory() as d:
     bekle("planlama eszamanli yazma temiz", not errs and not any(p.name.endswith(".yaziliyor") for p in Path(d).iterdir())
           and P.oku(d)["isler"]["yedek"]["acik"])
 
+    # acilis_gorevi sirasinda arka planda yapilan/atlanan isin son/bekleyen kaydi ezilmemeli
+    eski_acilis_gorevi = P.acilis_gorevi
+    def _yavas_acilis(acilis, bat):
+        z.yap("denetim")
+        return True, "Tamam"
+    P.acilis_gorevi = _yavas_acilis
+    try:
+        eski_once = P.oku(d)
+        sil_once = dict(eski_once["son"])
+        sil_once.pop("denetim", None)
+        eski_once["son"] = sil_once
+        P.yaz(eski_once, d)
+        yeni_p = P.oku(d)
+        yeni_p["acilis"]["acik"] = not yeni_p["acilis"]["acik"]
+        h = H("POST", "/api/planlama", govde=json.dumps(yeni_p).encode("utf-8"))
+        P.isle(h, z, "x")
+        sonraki = P.oku(d)
+        bekle("acilis_gorevi sirasindaki son guncellemesi korunur",
+              h.kod == 200 and "denetim" in sonraki["son"] and sonraki["acilis"]["acik"] == yeni_p["acilis"]["acik"])
+    finally:
+        P.acilis_gorevi = eski_acilis_gorevi
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)

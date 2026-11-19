@@ -452,6 +452,11 @@ if node_bin:
         y_taze = json.loads(proc.stdout.readline().decode("utf-8"))["tamam"]
         dogru("kopru.js --surekli değişen harita.js dosyasını tazeler",
               y_taze["yerler"][0]["id"] == "a2" and y_taze["yerler"][0]["ad"] == "Yeni", y_taze)
+        proc.stdin.write((json.dumps({"is": "harita", "harita": harita_tmp[:-3]}) + "\n").encode("utf-8"))
+        proc.stdin.flush()
+        y_uz = json.loads(proc.stdout.readline().decode("utf-8"))["tamam"]
+        dogru("kopru.js --surekli .js uzantısız harita yolunda tazeler",
+              y_uz["yerler"][0]["id"] == "a2" and y_uz["yerler"][0]["ad"] == "Yeni", y_uz)
     finally:
         proc.kill()
         proc.wait(5)
@@ -481,6 +486,19 @@ yol_dosya.write_text(json.dumps(yeni_asama, ensure_ascii=False), encoding="utf-8
 st_y = os.stat(yol_dosya)
 os.utime(yol_dosya, ns=(st_y.st_atime_ns, st_y.st_mtime_ns + 2_000_000_000))
 dogru("t_yol değişen dosyayı anında yeniler", mcp.t_yol({"ders": "ders1"})["ders"]["metin"] == "TAZE-METIN")
+
+import threading as _th  # noqa: E402
+asama_err = []
+def _asama_isci():
+    try:
+        for _ in range(15):
+            mcp.t_yol({"ders": "ders1"})
+    except Exception as exc:
+        asama_err.append(exc)
+_ti = [_th.Thread(target=_asama_isci) for _ in range(4)]
+for _t in _ti: _t.start()
+for _t in _ti: _t.join()
+dogru("t_yol çoklu iş parçacığında önbellek yarışmaz", not asama_err, asama_err)
 
 kopya_say = [0]
 _eski_kopya_ac = mcp.kopya_ac

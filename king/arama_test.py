@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
 import unittest
 
 sys.dont_write_bytecode = True
@@ -184,6 +185,20 @@ class AramaTest(unittest.TestCase):
         for i in range(160):
             arama._onbellekli(ob, ("not", "sorgu-%d" % i), lambda i=i: [{"no": i}])
         self.assertLessEqual(len(ob), arama.ONBELLEK_SINIR)
+
+    def test_eszamanli_alan_ve_onbellek(self):
+        ob, errs = {}, []
+        def _calis(idx):
+            try:
+                for j in range(25):
+                    arama._onbellekli(ob, ("alan", "q-%d" % ((idx + j) % 15)), lambda i=idx: [{"n": i}])
+                    arama.alan_kaynaklari("zincir", ["zincir"], self.kok)
+            except Exception as exc:
+                errs.append(exc)
+        ts = [threading.Thread(target=_calis, args=(i,)) for i in range(6)]
+        for t in ts: t.start()
+        for t in ts: t.join()
+        self.assertEqual(errs, [])
 
 
 if __name__ == "__main__":

@@ -334,6 +334,10 @@ def run():
             log.write_text('{"type":"PLANNER_RESPONSE","status":"DONE","content":"Yeni."}\n', encoding="utf-8")
             s4, off4 = kopru._dokum_oku("k1", off3 + 500)
             eq((len(s4), s4[0]["content"], off4 > 0), (1, "Yeni.", True))
+            # Ham \u2028 / \u2029 satir ayiricilari tek JSON satirini bolmez
+            log.write_text('{"type":"PLANNER_RESPONSE","status":"DONE","content":"A\u2028B\u2029C"}\n', encoding="utf-8")
+            s5, _ = kopru._dokum_oku("k1", 0)
+            eq((len(s5), s5[0]["content"]), (1, "A\u2028B\u2029C"))
         finally:
             kopru.BEYIN = eski_beyin
             shutil.rmtree(d, ignore_errors=True)
